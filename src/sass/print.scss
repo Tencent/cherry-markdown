@@ -1,0 +1,13 @@
+@media print {
+  img, figure, pre, table {
+    page-break-inside: avoid;
+  }
+  .cherry-previewer {
+    width: 100%!important;
+    max-height: none;
+    border-left: none!important;
+  }
+  .cherry-toolbar, .cherry-sidebar, .cherry-editor, .cherry-drag {
+    display: none!important;
+  }
+}

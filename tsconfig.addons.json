@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    // "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "allowJs": true,
+    "checkJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": false,
+    "outDir": "dist/addons",
+    "target": "ES5",
+  },
+  // 按需引入addons，尽量不引入编辑器代码
+  "include": [
+    "src/addons/cherry-code-block-mermaid-plugin.js",
+  ],
+  "files": [
+    "types/codemirror.d.ts",
+    "types/global.d.ts"
+  ]
+}
