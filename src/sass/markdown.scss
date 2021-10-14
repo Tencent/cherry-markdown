@@ -1,0 +1,434 @@
+.cherry-markdown {
+  word-break: break-all;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .h1,
+  .h2,
+  .h3,
+  .h4,
+  .h5,
+  .h6 {
+    font-family: inherit;
+    font-weight: 700;
+    line-height: 1.1;
+    color: inherit;
+  }
+
+  h1 small,
+  h2 small,
+  h3 small,
+  h4 small,
+  h5 small,
+  h6 small,
+  .h1 small,
+  .h2 small,
+  .h3 small,
+  .h4 small,
+  .h5 small,
+  .h6 small,
+  h1 .small,
+  h2 .small,
+  h3 .small,
+  h4 .small,
+  h5 .small,
+  h6 .small,
+  .h1 .small,
+  .h2 .small,
+  .h3 .small,
+  .h4 .small,
+  .h5 .small,
+  .h6 .small {
+    font-weight: normal;
+    line-height: 1;
+    color: #999;
+  }
+
+  h1,
+  h2,
+  h3 {
+    margin-top: 30px;
+    margin-bottom: $elementGap;
+  }
+
+  h1 small,
+  h2 small,
+  h3 small,
+  h1 .small,
+  h2 .small,
+  h3 .small {
+    font-size: 65%;
+  }
+
+  h4,
+  h5,
+  h6 {
+    margin-top: $elementLittleGap;
+    margin-bottom: $elementLittleGap;
+  }
+
+  h4 small,
+  h5 small,
+  h6 small,
+  h4 .small,
+  h5 .small,
+  h6 .small {
+    font-size: 75%;
+  }
+
+  h1,
+  .h1 {
+    font-size: 30px;
+  }
+
+  h2,
+  .h2 {
+    font-size: 25px;
+  }
+
+  h3,
+  .h3 {
+    font-size: 20px;
+  }
+
+  h4,
+  .h4 {
+    font-size: 16px;
+  }
+
+  h5,
+  .h5 {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  h6,
+  .h6 {
+    font-size: 12px;
+    font-weight: normal;
+  }
+
+  b,
+  strong {
+    font-weight: bold;
+  }
+
+  ul,
+  ol {
+    padding-left: 24px;
+    margin-bottom: $elementGap;
+
+    ul,
+    ol {
+      margin-bottom: 0;
+    }
+
+    li {
+      list-style: inherit;
+    }
+  }
+
+  div {
+    ul,
+    ol {
+      margin-bottom: 0;
+    }
+  }
+
+  hr {
+    height: 0;
+    border: 0;
+    border-top: 1px solid $borderColor;
+    margin: $elementGap 0;
+    box-sizing: content-box;
+    overflow: visible;
+  }
+
+  table {
+    border-collapse: collapse;
+  }
+
+  a {
+    color: $linkColor;
+
+    &:hover {
+      color: $linkHoverColor;
+    }
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  sup {
+    vertical-align: super;
+  }
+
+  sub {
+    vertical-align: sub;
+  }
+
+  figure {
+    overflow-x: auto;
+  }
+
+  blockquote {
+    color: $quoteColor;
+    padding: 10px 15px;
+    border-left: 10px solid $quoteBorderColor;
+    background: $quoteBackground;
+  }
+
+  p,
+  pre,
+  blockquote,
+  table {
+    margin: 0 0 $elementGap;
+  }
+
+  // 适配历史文章样式
+  @import 'prettyprint/prettyprint.scss';
+
+  div[data-type='codeBlock'] {
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    overflow-x: auto;
+
+    & > pre {
+      margin: 0;
+      code[class*="language-"] {
+        &.wrap {
+          counter-reset: line;
+          white-space: pre-wrap;
+        }
+        & > span:before {
+          counter-increment: line;
+          content: counter(line);
+          margin-right: 1em;
+          position: absolute;
+          left: 0;
+        }
+        .code-line {
+          display: inline-block;
+          position: relative;
+          padding-left: 3em;
+          height: 1.3em;
+          line-height: 2em;
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+  }
+
+  /* Inline code */
+  :not(pre) > code {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+    color: #f85353;
+    background-color: #e5e5e5;
+
+    [data-inline-code-theme='black'] & {
+      color: #3f4a56;
+      background-color: #e5e5e5;
+    }
+  }
+
+  a.anchor:before {
+    content: '\a7'; // §
+    text-decoration: none;
+    width: 15px;
+    font-size: 0.5em;
+    vertical-align: middle;
+    display: inline-block;
+    text-align: center;
+    margin-left: -15px;
+  }
+
+  .toc {
+    margin-bottom: $elementGap;
+
+    .toc-title {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .toc-li {
+      border-bottom: 1px ridge $borderColor;
+      list-style: none;
+
+      a {
+        text-decoration: none;
+        color: $fontColor;
+
+        &:hover {
+          color: $linkHoverColor;
+        }
+      }
+    }
+  }
+
+  .check-list-item {
+    list-style: none;
+
+    .ch-icon {
+      margin: 0 6px 0 -20px;
+    }
+  }
+
+  .footnote:not(a) {
+    .footnote-title {
+      font-size: 20px;
+      margin-top: -38px;
+      background-color: $editorBg;
+      width: 60px;
+      margin-bottom: $elementGap;
+    }
+
+    padding-top: 20px;
+    border-top: 1px solid $borderColor;
+    margin-top: 50px;
+
+    .one-footnote {
+      color: $subTitle;
+      margin-bottom: $elementGap;
+      border-bottom: 1px dotted $borderColor;
+    }
+  }
+
+  .cherry-table-container {
+    max-width: 100%;
+    overflow-x: auto;
+    .cherry-table {
+      th,
+      td {
+        border: 1px solid $borderColor;
+        padding: 0.2em 0.4em;
+      }
+      th {
+        min-width: 100px;
+        white-space: nowrap;
+        background-color: #eee;
+      }
+      td {
+        min-width: 100px;
+      }
+    }
+  }
+
+  /* 数学表达式展示 */
+  mjx-assistive-mml {
+    position: absolute;
+    top: 0;
+    left: 0;
+    clip: rect(1px, 1px, 1px, 1px);
+    padding: 1px 0 0 0;
+    border: 0;
+  }
+
+  &.head-num {
+    // Auto Numbering for Headings
+    h1, h2, h3, h4, h5, h6 {
+      .anchor:before {
+        width: auto;
+        font-size: inherit;
+        vertical-align: inherit;
+        padding-right: 10px;
+      }
+    }
+
+    counter-reset: level1;
+
+    h1 {
+      counter-reset: level2
+    }
+
+    h2 {
+      counter-reset: level3
+    }
+
+    h3 {
+      counter-reset: level4
+    }
+
+    h4 {
+      counter-reset: level5
+    }
+
+    h5 {
+      counter-reset: level6
+    }
+
+    h1 .anchor:before {
+      counter-increment: level1;
+      content: counter(level1) ". "
+    }
+
+    h2 .anchor:before {
+      counter-increment: level2;
+      content: counter(level1) "." counter(level2) " "
+    }
+
+    h3 .anchor:before {
+      counter-increment: level3;
+      content: counter(level1) "." counter(level2) "." counter(level3) " "
+    }
+
+    h4 .anchor:before {
+      counter-increment: level4;
+      content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) " "
+    }
+
+    h5 .anchor:before{
+      counter-increment: level5;
+      content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) "." counter(level5) " "
+    }
+
+    h6 .anchor:before {
+      counter-increment: level6;
+      content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) "." counter(level5) "." counter(level6) " "
+    }
+
+  }
+}
+
+div[data-type='codeBlock'] {
+  @import 'prism/tomorrow-night';
+
+  [data-code-block-theme='default'] & {
+    @import 'prism/default';
+  }
+
+  [data-code-block-theme='dark'] & {
+    @import 'prism/dark';
+  }
+
+  [data-code-block-theme='funky'] & {
+    @import 'prism/funky';
+  }
+
+  [data-code-block-theme='okaidia'] & {
+    @import 'prism/okaidia';
+  }
+
+  [data-code-block-theme='twilight'] & {
+    @import 'prism/twilight';
+  }
+
+  [data-code-block-theme='coy'] & {
+    @import 'prism/coy';
+  }
+
+  [data-code-block-theme='solarized-light'] & {
+    @import 'prism/solarized-light';
+  }
+}

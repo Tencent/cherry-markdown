@@ -1,0 +1,83 @@
+//基础样式
+
+$fontFamily: "Helvetica Neue",
+Arial,
+"Hiragino Sans GB",
+"STHeiti",
+"Microsoft YaHei",
+"WenQuanYi Micro Hei",
+sans-serif;
+$monospaceFont: 'Menlo', 'Liberation Mono', 'Consolas', 'DejaVu Sans Mono', 'Ubuntu Mono', 'Courier New', 'andale mono', 'lucida console', monospace;
+$fontSize: 16px;
+$fontSizeLarge: 18px;
+$lineHeight: 27px;
+$editorBg: #f8fafb;
+$previewBg: #f8fafb;
+$fontColor: #3f4a56;
+$linkColor: #3582fb;
+$linkHoverColor: #056bad;
+$borderColor: #dfe6ee;
+$toolbarSplitColor: #dfe6ee;
+$toolbarFontSize: 14px;
+$toolbarHeight: 48px;
+$elementGap: 16px;
+$elementLittleGap: 12px;
+$borderRadius: 3px;
+
+$errorColor: #f85353;
+$warnColor: #ffaf21;
+
+$shadow: 0 0 10px rgba(128, 145, 165, 0.2);
+
+// 标题
+$subTitle: #6d6e6f;
+// 滚动条
+
+// 列表
+
+// 代码块
+$codeBackground: #e5e5e5;
+$codeColor: $errorColor;
+$codeBlockBg: #00212b;
+
+
+// 引用
+$quoteBorderColor: #D6DBDF;
+$quoteBackground: rgba(102, 128, 153, .05);
+$quoteColor: $subTitle;
+
+// 公式
+
+
+// 编辑器主题
+
+$editorHeaderColor: $fontColor;
+$editorCommentColor: $linkColor;
+$editorQuoteColor: $editorCommentColor;
+$editorStringColor: $fontColor;
+$editorLinkColor: $linkColor;
+$editorUrlBgColor: #d7e6fe;
+
+$editorV2Color: $fontColor;
+$editorV3Color: $fontColor;
+$editorKeywordColor: $fontColor;
+
+
+// 工具栏
+// 暗色
+$toolbarBgDark: #20304b;
+$toolbarShadowDark: $shadow;
+$toolbarBtnBgDark: transparent;
+$toolbarBtnColorDark: #d7e6fe;
+$toolbarBtnBgHoverDark: rgba(255, 255, 255, 0.1);
+$toolbarBtnHoverColorDark: #fff;
+$toolbarBtnDisabledDark: #ccc;
+
+// 亮色
+$toolbarBgLight: white;
+$toolbarShadowLight: $shadow;
+$toolbarBtnBgLight: transparent;
+$toolbarBtnColorLight: #3f4a56;
+$toolbarBtnBgHoverLight: #ebf3ff;
+$toolbarBtnHoverColorLight: #5d9bfc;
+$toolbarBtnDisabledLight: #ccc;
