@@ -8,8 +8,8 @@ Markdown 编辑器常量
 
 语法 Hook 类型常量列表
 
--   Type: `enum`
--   Value: `{ DEFAULT: 'sentence', SEN: 'sentence', PAR: 'paragraph', PAG: 'page' }`
+- Type: `enum`
+- Value: `{ DEFAULT: 'sentence', SEN: 'sentence', PAR: 'paragraph', PAG: 'page' }`
 
 ### Markdown.createSyntaxHook( HOOK_NAME, HOOK_TYPE, options )
 
@@ -37,10 +37,10 @@ Markdown 编辑器常量
 
 外部依赖配置
 
--   Type: `{ [packageName: string]: Object }`
--   Default: `{}`
--   Usage:
-    从全局对象引入
+- Type: `{ [packageName: string]: Object }`
+- Default: `{}`
+- Usage:
+  从全局对象引入
 
 ```Javascript
 new Markdown({
@@ -70,10 +70,10 @@ markdown 解析引擎配置
 
 编辑器内置语法配置
 
--   Type: `{ [HOOK_NAME: string]: { [option: string]: any } | boolean }`
--   Default: `{}`
--   Usage:
-    禁用特定语法
+- Type: `{ [HOOK_NAME: string]: { [option: string]: any } | boolean }`
+- Default: `{}`
+- Usage:
+  禁用特定语法
 
 ```Javascript
 new Markdown({
@@ -93,7 +93,7 @@ import EchartsTableEngine from '@addons/core-hooks-table-echarts-plugin';
 new Markdown({
     engine: {
         syntax: {
-            'table': { // 启用表格生成图表功能
+            'table': { // 启用表格生成图表功能（pro版本可用）
                 enableChart: true,
                 chartRenderEngine: EchartsTableEngine
             }
@@ -102,7 +102,7 @@ new Markdown({
 });
 ```
 
--   `HOOK_NAME`参考列表
+- `HOOK_NAME`参考列表
 
 | HOOK_NAME    | 描述                            | 语法符号                         |
 | ------------ | ------------------------------- | -------------------------------- |
@@ -115,10 +115,10 @@ new Markdown({
 
 自定义语法配置
 
--   Type: `{ [CUSTOM_HOOK_NAME: string]: Function<SyntaxBase> | { [option: string]: any } }`
--   Default: `{}`
--   Usage:
-    传入一个自定义的语法 Hook
+- Type: `{ [CUSTOM_HOOK_NAME: string]: Function<SyntaxBase> | { [option: string]: any } }`
+- Default: `{}`
+- Usage:
+  传入一个自定义的语法 Hook
 
 ```Javascript
 const CustomHook = Markdown.createSyntaxHook(

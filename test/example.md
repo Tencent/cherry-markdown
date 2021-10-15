@@ -1,7 +1,7 @@
 # 例子
 
 - [H5](h5.html)
-- [多实例](notfullscreen.html)
+- [多实例](multiple.html)
 - [无 toolbar](notoolbar.html)
 - [纯预览模式](preview_only.html)
 - [注入](xss.html)
@@ -68,19 +68,19 @@
 ```
 这是 [腾讯网](https://www.qq.com) 的链接。
 这是 [一个引用的][引用一个链接] 的链接。
-这是一个包含中文的链接<https://tapd.cn?param=中文>，中文
-直接识别成链接：https://tapd.cn?param=中文，中文 用空格结束
+这是一个包含中文的链接<https://www.qq.com?param=中文>，中文
+直接识别成链接：https://www.qq.com?param=中文，中文 用空格结束
 [引用一个链接]
-[引用一个链接]: https://tapd.cn
+[引用一个链接]: https://www.qq.com
 ```
 
 **效果**
 这是 [腾讯网](https://www.qq.com) 的链接。
 这是 [一个引用的][引用一个链接] 的链接。
-这是一个包含中文的链接<https://tapd.cn?param=中文>，中文
-直接识别成链接：https://tapd.cn?param=中文，中文 用空格结束
+这是一个包含中文的链接<https://www.qq.com?param=中文>，中文
+直接识别成链接：https://www.qq.com?param=中文，中文 用空格结束
 [引用一个链接]
-[引用一个链接]: https://tapd.cn
+[引用一个链接]: https://www.qq.com
 
 ---
 
