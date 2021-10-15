@@ -7,6 +7,7 @@
 - [注入](xss.html)
 - [API](api.html)
 - [图片所见即所得编辑尺寸](img.html)
+- [标题自动序号](head_num.html)
 
 # Cherry Markdown 简明手册
 
@@ -29,16 +30,18 @@
 **示例**
 
 ```
-[!!#ff0000 红色超链接!!](http://cherry.editor.com)
-[!!#ffffff !!!#000000 黑底白字超链接!!!!!](http://cherry.editor.com)
+[!!#ff0000 红色超链接!!](http://www.qq.com)
+[!!#ffffff !!!#000000 黑底白字超链接!!!!!](http://www.qq.com)
+[新窗口打开](http://www.qq.com){target=_blank}
 鞋子 !32 特大号!
 大头 ^`儿子`^ 和小头 ^^`爸爸`^^
 爱在~~西元前~~**当下**
 ```
 
 **效果**
-[!!#ff0000 红色超链接!!](http://cherry.editor.com)
-[!!#ffffff !!!#000000 黑底白字超链接!!!!!](http://cherry.editor.com)
+[!!#ff0000 红色超链接!!](http://www.qq.com)
+[!!#ffffff !!!#000000 黑底白字超链接!!!!!](http://www.qq.com)
+[新窗口打开](http://www.qq.com){target=\_blank}
 鞋子 !32 特大号!
 大头 ^`儿子`^ 和小头 ^^`爸爸`^^
 爱在~~西元前~~**当下**
@@ -112,19 +115,16 @@
 
 - 无序列表项 一`默认`
 - 无序列表项 二
-  第二行内容前输入一个空格，即可实现缩进
+ 第二行内容前输入一个空格，即可实现缩进
 - 无序列表项 三
-- 无序列表 3.1
-- 无序列表 3.2
+ - 无序列表3.1
+ - 无序列表3.2
 - 无序列表项 四
-
-* 无序列表 4.1`空心圆`
-* 无序列表 4.1
-
+ + 无序列表4.1`空心圆`
+ + 无序列表4.1
 - 无序列表五
-
-* 无序列表 5.1`实心方块`
-* 无序列表 5.2
+ * 无序列表5.1`实心方块`
+ * 无序列表5.2
 
 ---
 
@@ -158,19 +158,19 @@
 
 1. 有序列表项 一`阿拉伯数字`
 1. 有序列表项 二
-   第二行内容前输入一个空格，即可实现缩进
+ 第二行内容前输入一个空格，即可实现缩进
 1. 有序列表项 三
-   I. 有序列表项 3.1`罗马数字`
-   I. 有序列表项 3.2
-   I. 有序列表项 3.3
+ I. 有序列表项 3.1`罗马数字`
+ I. 有序列表项 3.2
+ I. 有序列表项 3.3
 1. 有序列表四
-   a. 有序列表 4.1`希腊字母`
-   a. 有序列表 4.2
-   a. 有序列表 4.3
+ a. 有序列表4.1`希腊字母`
+ a. 有序列表4.2
+ a. 有序列表4.3
 1. 有序列表五
-   一. 有序列表 5.1`中文数字`
-   一. 有序列表 5.2
-   一. 有序列表 5.3
+ 一. 有序列表5.1`中文数字`
+ 一. 有序列表5.2
+ 一. 有序列表5.3
 
 ---
 
@@ -235,33 +235,33 @@
 **示例**
 
 ```
-标准图片  ![一条dog#100px](img/demo-dog.png)
-设置图片大小(相对大小&绝对大小)  ![一条dog#10%#50px](img/demo-dog.png)
+标准图片  ![一条dog#100px](images/demo-dog.png)
+设置图片大小(相对大小&绝对大小)  ![一条dog#10%#50px](images/demo-dog.png)
 设置图片对齐方式：
 **左对齐**
-![一条dog#auto#100px#left](img/demo-dog.png)
+![一条dog#auto#100px#left](images/demo-dog.png)
 **居中**
-![一条dog#auto#100px#center](img/demo-dog.png)
+![一条dog#auto#100px#center](images/demo-dog.png)
 **右对齐**
-![一条dog#auto#100px#right](img/demo-dog.png)
+![一条dog#auto#100px#right](images/demo-dog.png)
 **浮动左对齐**
-![一条dog#auto#100px#float-left](img/demo-dog.png)
+![一条dog#auto#100px#float-left](images/demo-dog.png)
 开心也是一天，不开心也是一天
 这样就过了两天，汪
 ```
 
 **效果**
-标准图片 ![一条dog#100px](img/demo-dog.png)
-设置图片大小(相对大小&绝对大小) ![一条dog#10%#50px](img/demo-dog.png)
+标准图片 ![一条dog#100px](images/demo-dog.png)
+设置图片大小(相对大小&绝对大小) ![一条dog#10%#50px](images/demo-dog.png)
 设置图片对齐方式：
 **左对齐**
-![一条dog#auto#100px#left](img/demo-dog.png)
+![一条dog#auto#100px#left](images/demo-dog.png)
 **居中**
-![一条dog#auto#100px#center](img/demo-dog.png)
+![一条dog#auto#100px#center](images/demo-dog.png)
 **右对齐**
-![一条dog#auto#100px#right](img/demo-dog.png)
+![一条dog#auto#100px#right](images/demo-dog.png)
 **浮动左对齐**
-![一条dog#auto#100px#float-left](img/demo-dog.png)
+![一条dog#auto#100px#float-left](images/demo-dog.png)
 开心也是一天，不开心也是一天
 这样就过了两天，汪
 
@@ -400,62 +400,16 @@ $$
 **示例**
 
 ```
-这是个演示视频  !video[不带封面演示视频](img/demo.mp4)
+这是个演示视频  !video[不带封面演示视频](images/demo.mp4)
 这是个假音频!audio[描述](视频链接地址)
 ```
 **效果**
 
-这是个演示视频  !video[不带封面演示视频](img/demo.mp4)
+这是个演示视频  !video[不带封面演示视频](images/demo.mp4)
 这是个假音频!audio[描述](视频链接地址)
 
 
 -----
-
-
-## 简单表格[^专有语法提醒]
-**说明**
-- 使用两个竖线（||）生成简单表格
-- 在表格开始位置输入三个竖线（|||）生成自动合并单元格的表格
-
-
-**示例**
-```
-带标题：
-||~项目                       ||~价格(居中)~   ||数量（右对齐）~  ||
-|| 计算机 <br >(包括笔记本)  || $1600  ||   5    ||
-|| 手机                       || $12    ||   5    ||
-|| 管线                       || $1     ||   5    ||
-不带标题：
-|| 计算机 <br >(包括笔记本)  || $1600  ||   5    ||
-|| 手机                       || $12    ||   5    ||
-|| 管线                       || $1     ||   5    ||
-自动合并：
-|||~项目                      ||价格   ||数量  ||
-|| 计算机  || $3600（高配）  ||   20    ||
-|| 笔记本  || $2600（中配）  ||   30    ||
-|| 笔记本  || $1600（低配）  ||   40    ||
-|| 总计                       || $214000   ||   90    ||
-```
-**效果**
-带标题：
-||~项目                       ||~价格(居中)~   ||数量（右对齐）~  ||
-|| 计算机 <br >(包括笔记本)  || $1600  ||   5    ||
-|| 手机                       || $12    ||   5    ||
-|| 管线                       || $1     ||   5    ||
-不带标题：
-|| 计算机 <br >(包括笔记本)  || $1600  ||   5    ||
-|| 手机                       || $12    ||   5    ||
-|| 管线                       || $1     ||   5    ||
-自动合并：
-|||~项目                      ||价格   ||数量  ||
-|| 计算机  || $3600（高配）  ||   20    ||
-|| 笔记本  || $2600（中配）  ||   30    ||
-|| 笔记本  || $1600（低配）  ||   40    ||
-|| 总计                       || $214000   ||   90    ||
-
-
------
-
 
 ## 带对齐功能的表格
 **说明**
@@ -475,47 +429,7 @@ $$
 |计算机|￥1600|5|
 |手机机|￥12|50|
 
-
 -----
-
-
-## 带图表能力的表格
-**说明**
-- 支持自动生成柱状图、饼图
-
-
-**示例**
-```
-| :bar: {x,y} | 2019 | 2020 | 2021 |
-| :--- | ---: | ---: | ---: |
-| DAU | 100,100 | 200,200 | 300,300 |
-| UV | 1,000,000 | 2,000,000 | 3,000,000 |
-| PV | 10,000,000 | 20,000,000 | 30,000,000 |
-
-
-| :line: {x,y} | 2019 | 2020 | 2021 |
-| :--- | ---: | ---: | ---: |
-| DAU | 100,100 | 200,200 | 300,300 |
-| UV | 1,000,000 | 2,000,000 | 3,000,000 |
-| PV | 10,000,000 | 20,000,000 | 30,000,000 |
-```
-**效果**
-| :bar: {x,y} | 2019 | 2020 | 2021 |
-| :--- | ---: | ---: | ---: |
-| DAU | 100,100 | 200,200 | 300,300 |
-| UV | 1,000,000 | 2,000,000 | 3,000,000 |
-| PV | 10,000,000 | 20,000,000 | 30,000,000 |
-
-
-| :line: {x,y} | 2019 | 2020 | 2021 |
-| :--- | ---: | ---: | ---: |
-| DAU | 100,100 | 200,200 | 300,300 |
-| UV | 1,000,000 | 2,000,000 | 3,000,000 |
-| PV | 10,000,000 | 20,000,000 | 30,000,000 |
-
-
------
-
 
 ## 流程图[^不通用提醒]
 **说明**
@@ -712,7 +626,7 @@ title 饼图
 
 
 ## 通过快捷按钮修改字体样式
-![bubble menu](img/feature_font.png)
+![bubble menu](images/feature_font.png)
 
 
 -----
@@ -724,35 +638,41 @@ title 饼图
 - 可以拖拽调整预览区域的宽度
 
 
-![copy and paste](img/feature_copy.gif)
+![copy and paste](images/feature_copy.gif)
 
 
 -----
 
 
 ## 快捷键
-||~功能|| 按键||
-||1级标题||    `Ctrl + 1`||
-||2级标题||    `Ctrl + 2`||
-||3级标题||    `Ctrl + 3`||
-||4级标题||    `Ctrl + 4`||
-||5级标题||    `Ctrl + 5`||
-||6级标题||    `Ctrl + 6`||
-||加粗||    `Ctrl + b`||
-||斜体||    `Ctrl + i`	||
-||插入链接||    `Ctrl + l`	||
-||插入代码块||    `Ctrl + k`	||
-||插入图片||     `Ctrl + g`	||
-||插入公式||    `Ctrl + m`	||
+| 功能| 按键|
+|--|--|
+|1级标题|    `Ctrl + 1`|
+|2级标题|    `Ctrl + 2`|
+|3级标题|    `Ctrl + 3`|
+|4级标题|    `Ctrl + 4`|
+|5级标题|    `Ctrl + 5`|
+|6级标题|    `Ctrl + 6`|
+|加粗|    `Ctrl + b`|
+|斜体|    `Ctrl + i`	|
+|插入链接|    `Ctrl + l`	|
+|插入代码块|    `Ctrl + k`	|
+|插入图片|     `Ctrl + g`	|
+|插入公式|    `Ctrl + m`	|
 
 
 
 ## 协议
 ```
 /**
- * Copyright (C) 2021 THL A29 Limited, a Tencent company.
+ * Tencent is pleased to support the open source community by making CherryMarkdown available.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (C) 2021 THL A29 Limited, a Tencent company. All rights reserved.
+ * The below software in this distribution may have been modified by THL A29 Limited ("Tencent Modifications").
+ *
+ * All Tencent Modifications are Copyright (C) THL A29 Limited.
+ *
+ * CherryMarkdown is licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -771,6 +691,3 @@ title 饼图
 [^专有语法提醒]: 该语法是**CherryMarkdown专有语法**，可能无法在其他markdown平台上使用该语法
 
 [^不通用提醒]: 该语法不是markdown通用语法，无法保证在其他markdown平台上进行正确渲染
-
-
-$$

@@ -7,3 +7,4 @@ src/sass/**
 **/*.css
 src/libs/*.js
 example-applications/**
+examples/**
