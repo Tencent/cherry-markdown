@@ -42,7 +42,7 @@
 **效果**
 [!!#ff0000 红色超链接!!](http://www.qq.com)
 [!!#ffffff !!!#000000 黑底白字超链接!!!!!](http://www.qq.com)
-[新窗口打开](http://www.qq.com){target=\_blank}
+[新窗口打开](http://www.qq.com){target=_blank}
 鞋子 !32 特大号!
 大头 ^`儿子`^ 和小头 ^^`爸爸`^^
 爱在~~西元前~~**当下**
