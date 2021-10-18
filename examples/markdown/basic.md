@@ -1,4 +1,5 @@
 # 例子
+> [Github 地址](https://github.com/Tencent/cherry-markdown){target=_blank}
 
 - [H5](h5.html)
 - [多实例](multiple.html)
