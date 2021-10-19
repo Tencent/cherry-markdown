@@ -1,14 +1,15 @@
 # 例子
 > [Github 地址](https://github.com/Tencent/cherry-markdown){target=_blank}
 
-- [H5](h5.html)
-- [多实例](multiple.html)
-- [无 toolbar](notoolbar.html)
-- [纯预览模式](preview_only.html)
-- [注入](xss.html)
-- [API](api.html)
-- [图片所见即所得编辑尺寸](img.html)
-- [标题自动序号](head_num.html)
+- [basic](index.html){target=_blank}
+- [H5](h5.html){target=_blank}
+- [多实例](multiple.html){target=_blank}
+- [无 toolbar](notoolbar.html){target=_blank}
+- [纯预览模式](preview_only.html){target=_blank}
+- [注入](xss.html){target=_blank}
+- [API](api.html){target=_blank}
+- [图片所见即所得编辑尺寸](img.html){target=_blank}
+- [标题自动序号](head_num.html){target=_blank}
 
 # Cherry Markdown 简明手册
 
