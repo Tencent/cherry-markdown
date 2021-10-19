@@ -24,7 +24,7 @@ const callbacks = {
    */
   urlProcessor: (url, srcType) => url,
   fileUpload(file, callback) {
-    callback('img/demo-dog.png');
+    callback('images/demo-dog.png');
   },
   afterChange: (text, html) => {},
   afterInit: (text, html) => {},
