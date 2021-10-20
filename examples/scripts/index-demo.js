@@ -106,8 +106,8 @@ var onloadeddata = function() {
   var cherry = new Cherry(config);
 };
 
-if (objectNode) {
-  objectNode.onloadeddata = onloadeddata;
+if (!window.markdownLoaded && objectNode) {
+  objectNode.onload = onloadeddata;
 } else {
   onloadeddata();
 }
