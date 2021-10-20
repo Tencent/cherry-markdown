@@ -14,7 +14,7 @@ var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TY
   },
 });
 
-var cherry1 = new Cherry({
+var cherryConfig1 = {
   id: 'markdown1',
   externals: {
     echarts: window.echarts,
@@ -79,11 +79,9 @@ var cherry1 = new Cherry({
   },
   keydown: [],
   //extensions: [],
+};
 
-  value: getExampleValue(),
-});
-
-var cherry2 = new Cherry({
+var cherryConfig2 = {
   id: 'markdown2',
   externals: {
     echarts: window.echarts,
@@ -146,14 +144,22 @@ var cherry2 = new Cherry({
   },
   keydown: [],
   //extensions: [],
+};
 
-  value: getExampleValue(),
-});
+var objectNode = /** @type {HTMLObjectElement} */ (document.querySelector('object[name="demo-val"]'));
 
-function getExampleValue() {
-  var objectNode = document.querySelector('object[name="demo-val"]');
-  if (!objectNode) {
-    return '';
-  }
-  return objectNode.contentDocument.documentElement.textContent;
+var onloadeddata = function() {
+  var value = objectNode ? objectNode.contentDocument.documentElement.textContent : '';
+
+  var config1 = Object.assign({}, cherryConfig1, { value: value });
+  window.cherry1 = new Cherry(config1);
+
+  var config2 = Object.assign({}, cherryConfig2, { value: value });
+  window.cherry2 = new Cherry(config2);
+};
+
+if (!window.markdownLoaded && objectNode) {
+  objectNode.onload = onloadeddata;
+} else {
+  onloadeddata();
 }
