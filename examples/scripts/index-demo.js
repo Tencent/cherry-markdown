@@ -14,7 +14,7 @@ var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TY
   },
 });
 
-var cherry = new Cherry({
+var basicConfig = {
   id: 'markdown',
   externals: {
     echarts: window.echarts,
@@ -96,14 +96,18 @@ var cherry = new Cherry({
   },
   keydown: [],
   //extensions: [],
+};
 
-  value: getExampleValue(),
-});
+var objectNode = /** @type {HTMLObjectElement} */ (document.querySelector('object[name="demo-val"]'));
 
-function getExampleValue() {
-  var objectNode = document.querySelector('object[name="demo-val"]');
-  if (!objectNode) {
-    return '';
-  }
-  return objectNode.contentDocument.documentElement.textContent;
+var onloadeddata = function() {
+  var value = objectNode ? objectNode.contentDocument.documentElement.textContent : '';
+  var config = Object.assign({}, basicConfig, { value: value });
+  var cherry = new Cherry(config);
+};
+
+if (objectNode) {
+  objectNode.onloadeddata = onloadeddata;
+} else {
+  onloadeddata();
 }
