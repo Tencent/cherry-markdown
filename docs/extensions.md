@@ -1,15 +1,15 @@
-# 拓展
+# Extensions
 
-## Markdown 配置
+## Markdown Config
 
-可通过配置 engine 对象来配置 markdown 的解析规则，比如 table 是否可使用 chart（pro 版本可用）
+You can configure the markdown parsing rules by configuring the engine object, such as whether the chart available in table(available in the pro version)
 
 ```js
 engine: {
-    // 自定义语法
+    // Custom syntax
     customSyntax: {
         // 'SyntaxClass': SyntaxClass   
-        // 名字冲突时强制覆盖内置语法解析器
+        // Force overwrite the built-in syntax parser in case of name conflict
         // 'SyntaxClass': {             
         //    syntax: SyntaxClass,      
         //    force: true,              
@@ -21,39 +21,39 @@ engine: {
 ```
 
 - Key: `customSyntax`
-- Description: 自定义语法配置
+- Description: Custom syntax configuration
 - Type: ``{ [HOOK_NAME: string]: { [option: string]: any } | boolean }``
 - Default: `{}`
 - Options:
-  - SyntaxClass   `<[String]> hook 名字`
-    - syntax    `<[SyntaxBase]> hook 构造函数`
-    - force     `<[Boolean]> 是否强制覆盖同名 hook`
-    - before    `<[String]> hookName，在这个 hook 之前执行`
-    - after     `<[String]> hookName，在这个 hook 之后执行`
+  - SyntaxClass   `<[String]> hook name`
+    - syntax    `<[SyntaxBase]> hook constructor`
+    - force     `<[Boolean]> whether overwrite hook with the same name`
+    - before    `<[String]> hookName，execute before this hook`
+    - after     `<[String]> hookName，execute after this hook`
 
-## 自定义语法
+## Custom Syntax
 
 ### Markdown.createSyntaxHook( HOOK_NAME, HOOK_TYPE, OPTIONS )
 
-创建自定义的语法 Hook
+Create a custom syntax hook
 
-| 参数      | 类型                               | 描述                                                                     |
+| parameter      | type                              | description                                                                     |
 | --------- | ---------------------------------- | ------------------------------------------------------------------------ |
-| HOOK_NAME | string                             | 语法 Hook 标识名，唯一                                                   |
-| HOOK_TYPE | Markdown.constants.HOOKS_TYPE_LIST | 语法 Hook 类型，仅可选 SEN（行内语法）、PAR（段落语法）               |
-| OPTIONS   | { Function }                       | 可选操作                                                            |
+| HOOK_NAME | string                             | Syntax hook ID, unique                                                   |
+| HOOK_TYPE | Markdown.constants.HOOKS_TYPE_LIST | Syntax Hook type, only SEN (inline grammar) and PAR (paragraph grammar) can be selectedhook type, only Sen (inline syntax) and PAR (paragraph syntax) can be selected               |
+| OPTIONS   | { Function }                       | Optional operation                                                            |
 
-**options 配置**
+**options configuration**
 
-| 参数                                                                    | 类型     | 描述                                                        |
+| parameter      | type                              | description                                                                     |
 | ----------------------------------------------------------------------- | -------- | ----------------------------------------------------------- |
-| beforeMakeHtml (<br>str: string<br> ): string                           | Function | 生命周期，返回替换后的字符串                                |
-| makeHtml (<br>str: string,<br> sentenceMakeFunc: Function<br> ): string | Function | 生命周期，返回替换后的字符串                                |
-| afterMakeHtml (<br>str: string<br> ): string                            | Function | 生命周期，返回替换后的字符串                                |
-| rule ( ): { reg: RegExp }                                               | Function | 语法 Hook 匹配规则，返回含有类型为 RegExp 的 reg 成员的对象 |
-| test (<br>str: string<br>): boolean                                     | Function | 语法匹配操作方法，可自定义匹配方式                          |
+| beforeMakeHtml (<br>str: string<br> ): string                           | Function | Lifecycle, returns the replaced string                                |
+| makeHtml (<br>str: string,<br> sentenceMakeFunc: Function<br> ): string | Function | Lifecycle, returns the replaced string                                |
+| afterMakeHtml (<br>str: string<br> ): string                            | Function | Lifecycle, returns the replaced string                                |
+| rule ( ): { reg: RegExp }                                               | Function | Syntax hook matching rule, return an  reg member object containing regexp type |
+| test (<br>str: string<br>): boolean                                     | Function | Syntax matching operation method. You can customize the matching method                          |
 
-#### 基础使用
+#### Basic Example
 
 ```Javascript
 const CustomHook = Markdown.createSyntaxHook(
@@ -79,7 +79,7 @@ new Markdown({
 });
 ```
 
-#### 插入到指定Hook前或后面，只有一个参数会生效，before优先
+#### Insert before or after the specified hook, only one parameter will take effect, and before takes precedence
 
 ```Javascript
 new Markdown({
@@ -95,7 +95,7 @@ new Markdown({
 });
 ```
 
-#### 强制覆盖内置的语法Hook
+#### Force overwrite of built-in syntax hook
 
 ```Javascript
 new Markdown({
@@ -110,20 +110,20 @@ new Markdown({
 });
 ```
 
-## 自定义工具栏
+## Custom Toolbar
 
-创建自定义的菜单 Hook
+Create a custom menu hook
 
-| 参数      | 类型                               | 描述                                                                     |
+| parameter      | type                              | description                                                                     |
 | --------- | ---------------------------------- | ------------------------------------------------------------------------ |
-| HOOK_NAME | string                             | 语法 Hook 标识名，唯一                                                   |
-| OPTIONS   | { Object }                       | 自定义菜单配置                                                            |
+| HOOK_NAME | string                             | Syntax hook ID, unique                                                   |
+| OPTIONS   | { Object }                       | Custom menu configuration                                                       |
 
 **options 配置**
 
-| 参数                                                                    | 类型     | 描述                                                        |
+| parameter      | type                              | description                                                                     |
 | ----------------------------------------------------------------------- | -------- | ----------------------------------------------------------- |
-| iconName                           | String | 图标类名                               |
-| onClick (<br> selection: Function<br> ) | Function | 点击时的回调函数                                |
-| shortcutKeys   | Array | 快捷键集合, 用于注册键盘函数，当匹配的快捷键组合命中时，也会调用click函数   |
-| subMenuConfig (<br>name: String<br>iconName： String<Br>noIcon: Boolean<Br>onClick: Function ) | Function | 子菜单集合 |
+| iconName                           | String | Icon class name                               |
+| onClick (<br> selection: Function<br> ) | Function | Callback function when clicked                                |
+| shortcutKeys   | Array | Shortcut key collection is used to register keyboard functions. When the matching shortcut key combination hits, the click function will also be called   |
+| subMenuConfig (<br>name: String<br>iconName： String<Br>noIcon: Boolean<Br>onClick: Function ) | Function | Submenu collection |

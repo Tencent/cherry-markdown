@@ -2,98 +2,86 @@
 
 # Cherry Markdown Editor
 
-## 介绍
+English | [简体中文](./README.CN.md)
 
-Cherry Markdown Editor 是一款 Javascript Markdown 编辑器，具有开箱即用、轻量简洁、易于扩展等特点. 它可以运行在浏览器或服务端(NodeJs).
+## Introduction
 
-### **开箱即用**
+Cherry Markdown Editor is a Javascript Markdown editor. It has the advantages such as out-of-the-box, lightweight and easy to extend. It can run in browser or server(with NodeJs).
 
-开发者可以使用非常简单的方式调用并实例化Cherry Markdown编辑器，实例化的编辑器默认支持大部分常用的markdown语法（如标题、目录、流程图、公式等）。
+### **Out-of-the-box**
 
-### **易于拓展**
+Developer can call and instantiate Cherry Markdown Editor in a very simple way. The instantiated Cherry Markdown Editor supports most commonly used markdown syntax (such as title, TOC, flowchart, formula, etc.) by default.
 
-当 Cherry Markdown 编辑器支持的语法不满足开发者需求时，可以快速的进行二次开发或功能扩展。同时，CherryMarkdown编辑器应该由纯JavaScript实现，不应该依赖angular、vue、react等框架技术，框架只提供容器环境即可。
+### **Easy to extend**
+
+When the syntax that Cherry Markdown editor support can not meet your needs, secondary development or function extention can be carried out quickly. At the same time, Cherry Markdown editor should be implemented by pure JavaScript, and should not rely on framework technology such as angular, vue and react. Framework only provide a container environment.
 
 DEMO **Coming soon**
 
-## 特性
+## Feature
 
-### 语法特性
+### Syntax Feature
 
-1. 图片缩放、对齐、引用
-2. 根据表格内容生成图表
-3. 字体颜色、字体大小
-4. 字体背景颜色、上标、下标
-5. checklist
-6. 音视频
+1. Image zoom, alignment and reference
+2. Generate a chart based on the content of the table
+3. Adjust font color and size
+4. Font background color, superscript and subscript
+5. Insert checklist
+6. Insert audio or video
 
-### 多种模式
+### Multiple modes
 
-1. 双栏编辑预览模式（支持同步滚动）
-2. 纯预览模式
-3. H5兼容模式
-4. 无工具栏模式（极简编辑模式）
-5. 移动端预览模式
+1. Live preview with Scroll Sync
+2. Preview-only mode
+3. No toolbar mode (minimalist editing mode)
+4. Mobile preview mode
 
-### 功能特性
+### Functional Feature
 
-1. 复制Html粘贴成MD语法
-2. 经典换行&常规换行
-3. 多光标编辑
-4. 图片尺寸
-5. 导出长图、pdf
-6. float toolbar 在新行行首支持快速工具栏
-7. bubble toolbar 选中文字时联想出快速工具栏
+1. Copy from rich text and paste as markdown text
+2. Classic line feed & regular line feed
+3. Multi-cursor editing
+4. Image size editing
+5. Export as image or pdf
+6. Float toolbar: appears at the beginning of a new line
+7. Bubble toolbar: appears when text is selected
 
-### 性能特性
+### Performance Feature
 
-1. 局部渲染
-2. 局部更新
+1. partial rendering
+2. partial update
 
-### 安全
+### Security
 
-Cherry Markdown 有内置的安全 Hook，通过过滤白名单以及DomPurify进行扫描过滤.
+Cherry Markdown has a built-in security Hook, by filtering the whitelist and DomPurify to do scan filter.
 
-### 样式主题
+### Style theme
 
-Cherry Markdown 有多种样式主题选择
+Cherry Markdown has a variety of style themes to choose from.
+A demo is [avaliable here](./docs/features.md)
 
-### 特性展示
-这里可以看到特性的简短的演示 [screenshot](./docs/features.md)
+## Install
 
-### 在线体验
-- [basic](https://tencent.github.io/cherry-markdown/examples/index.html)
-- [H5](https://tencent.github.io/cherry-markdown/examples/h5.html)
-- [多实例](https://tencent.github.io/cherry-markdown/examples/multiple.html)
-- [无 toolbar](https://tencent.github.io/cherry-markdown/examples/notoolbar.html)
-- [纯预览模式](https://tencent.github.io/cherry-markdown/examples/preview_only.html)
-- [注入](https://tencent.github.io/cherry-markdown/examples/xss.html)（默认防注入，需要配置才允许注入）
-- [API](https://tencent.github.io/cherry-markdown/examples/api.html)
-- [图片所见即所得编辑尺寸](https://tencent.github.io/cherry-markdown/examples/img.html)
-- [标题自动序号](https://tencent.github.io/cherry-markdown/examples/head_num.html)
-
-## 安装
-
-通过 yarn
+Via yarn
 
 ```bash
 yarn add cherry-markdown
 ```
 
-通过 npm
+Via npm
 
 ```bash
 npm install cherry-markdown --save
 ```
 
-如果需要开启 `mermaid` 画图、表格自动转图表功能，需要同时添加`mermaid` 与`echarts`包。
+If you need to enable the functions of `mermaid` drawing and table-to-chart, you need to add `mermaid` and `echarts` packages at the same time.
 
-目前**Cherry**推荐的插件版本为`echarts@4.6.0`、`mermaid@8.11.1`
+Currently, the plug-in version **Cherry** recommend is `echarts@4.6.0` `mermaid@8.11.1`.
 
 ```bash
-# 安装mermaid依赖开启mermaid画图功能
+# Install mermaid, enable mermaid and drawing function
 yarn add mermaid@8.11.1
-# 安装echarts依赖开启表格自动转图表功能
+# Install echarts, turn on the table-to-chart function
 yarn add echarts@4.6.0
 ```
 
@@ -135,11 +123,11 @@ const cherryInstance = new Cherry({
 });
 ```
 
-## 使用轻量版本
+## Lite Version
 
-因 mermaid 库尺寸非常大，Cherry 构建产物中包含了不内置 mermaid 的核心构建包，可按以下方式引入核心构建。
+Because the size of the mermaid library is very large, the cherry build product contains a core build package without built-in Mermaid. The core build can be imported in the following ways.
 
-### 完整模式 (图形界面)
+### Full mode (With UI Interface)
 
 ```javascript
 import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
@@ -149,31 +137,31 @@ const cherryInstance = new Cherry({
 });
 ```
 
-### 引擎模式  (语法编译)
+### Engine Mode  (Just Syntax Compile)
 
 ```javascript
-// 引入Cherry引擎核心构建
-// 引擎配置项与Cherry通用，以下文档内容仅介绍Cherry核心包
+// Import Cherry engine core construction
+// Engine configuration items are the same as Cherry configuration items, the following document content only introduces the Cherry core package
 import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core';
 const cherryEngineInstance = new CherryEngine({
   value: '# welcome to cherry editor!',
 });
 ```
 
-### ⚠️ 关于 mermaid
+### ⚠️ About mermaid
 
-核心构建包不包含 mermaid 依赖，需要手动引入相关插件。
+The core build package does not contain mermaid dependency, should import related plug-ins manually.
 
 ```javascript
 import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
 import CherryMermaidPlugin from 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin';
 import mermaid from 'mermaid';
 
-// 插件注册必须在Cherry实例化之前完成
+// Plug-in registration must be done before Cherry is instantiated
 Cherry.usePlugin(CherryMermaidPlugin, {
-  mermaid, // 传入mermaid引用
-  // mermaidAPI: mermaid.mermaidAPI, // 也可以传入mermaid API
-  // 同时可以在这里配置mermaid的行为，可参考mermaid官方文档
+  mermaid, // pass in mermaid object
+  // mermaidAPI: mermaid.mermaidAPI, // Can also be passed in mermaid API
+  // At the same time, you can configure mermaid's behavior here, please refer to the official mermaid document
   // theme: 'neutral',
   // sequence: { useMaxWidth: false, showSequenceNumbers: true }
 });
@@ -184,9 +172,9 @@ const cherryInstance = new Cherry({
 });
 ```
 
-### 异步加载
+### Dynamic import
 
-**recommend** 使用异步引入，以下为 webpack 异步引入样例。
+**recommend**  Using Dynamic import, the following is an example of webpack Dynamic import.
 
 ```javascript
 import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
@@ -197,12 +185,12 @@ const registerPlugin = async () => {
     import('mermaid'),
   ]);
   Cherry.usePlugin(CherryMermaidPlugin, {
-    mermaid, // 传入mermaid引用
+    mermaid, // pass in mermaid object
   });
 };
 
 registerPlugin().then(() => {
-  // 插件注册必须在Cherry实例化之前完成
+  //  Plug-in registration must be done before Cherry is instantiated
   const cherryInstance = new Cherry({
     id: 'markdown-container',
     value: '# welcome to cherry editor!',
@@ -210,9 +198,9 @@ registerPlugin().then(() => {
 });
 ```
 
-## 配置
+## Configuration
 
-### 默认配置
+### Default configuration
 
 ```javascript
   {
@@ -244,24 +232,24 @@ registerPlugin().then(() => {
   }
 ```
 
-### 更多信息
+### More Information
 
-如果你想自定义配置信息，可以看这里 [Configuration](./docs/configuration.md)
+Click [here](./docs/configuration.md) for the full documentation of Cherry configuration.
 
-## 例子
+## Example
 
-点击查看 [examples](./examples/)
+Click [here](./examples/) for more examples.
 
-## 拓展
+## Extension
 
-### 自定义语法
+### Customize Syntax
 
 ```javascript
 /*
- * 生成一个屏蔽敏感词汇的hook
- * 名字叫blockSensitiveWords
- * 范围是整个页面
- * 匹配规则会挂载到实例的RULE属性上
+ * Generate a hook to block sensitive words
+ * named blockSensitiveWords
+ * The scope is the entire page
+ * The matching rules will be attached to the RULE attribute of the instance
  */
 let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', 'page', {
   makeHtml(str) {
@@ -269,7 +257,7 @@ let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', 'pa
   },
   rule(str) {
     return {
-      reg: /敏感词汇/g,
+      reg: /sensitive words/g,
     };
   },
 });
@@ -278,12 +266,12 @@ new Cherry({
   value: '# welcome to cherry editor!',
   engine: {
     customSyntax: {
-      // 注入编辑器的自定义语法中
+      // Inject into the editor's custom grammar
       BlockSensitiveWordsHook: {
       syntaxClass: BlockSensitiveWordsHook,
-      // 有同名hook则强制覆盖
+      // If there is a Hook with the same name and it will be Forcibly covered 
       force: true,
-      // 在处理图片的hook之前调用
+      // Called before the hook for processing the picture
       // before: 'image',
       },
     },
@@ -291,13 +279,13 @@ new Cherry({
 });
 ```
 
-### 自定义工具栏
+### Customize Toolbar
 
 ```javascript
 /*
-  * 生成一个添加前缀模板的hook
-  * 名字叫AddPrefixTemplate
-  * 图标类名icon-add-prefix
+  * generate a hook with prefix template
+  * named AddPrefixTemplate
+  * Icon css class icon-add-prefix
   */
 let AddPrefixTemplate = Cherry.createSyntaxHook('AddPrefixTemplate', 'icon-add-prefix', {
   onClick(selection) {
@@ -309,18 +297,18 @@ new Cherry({
   value: '# welcome to cherry editor!',
   toolbars: {
     customMenu: {
-      // 注入编辑器的菜单中
+      // Inject into the editor's menu
       AddPrefixTemplate,
     },
   },
 });
 ```
 
-如果你想看更多有关 cherry markdown 的拓展信息，可以看这里 [extensions](./docs/extensions.md).
+Click [extensions](./docs/extensions.md) if you want knoe more extension about cherry markdown.
 
 ## Contributing
 
-欢迎加入我们打造强大的 Markdown 编辑器。当然你也可以给我们提交特性需求的 issue。 在写特性功能之前，你需要了解 [extensions](./docs/extensions.md) 以及  [commit_convention](./docs/commit_convention.md).
+Welcome to join us to build a more powerful Markdown editor. Of course you can submit feature request to us. Please read[extensions](./docs/extensions.md) and [commit_convention](./docs/commit_convention.md) before you working on it.
 
 ## License
 
