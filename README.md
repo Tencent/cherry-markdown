@@ -58,7 +58,22 @@ Cherry Markdown has a built-in security Hook, by filtering the whitelist and Dom
 ### Style theme
 
 Cherry Markdown has a variety of style themes to choose from.
-A demo is [avaliable here](./docs/features.md)
+
+
+### Features show
+click [here](./docs/features.md) for more details
+
+### Demos
+- [basic](https://tencent.github.io/cherry-markdown/examples/index.html)
+- [mobile](https://tencent.github.io/cherry-markdown/examples/h5.html)
+- [multiple instances](https://tencent.github.io/cherry-markdown/examples/multiple.html)
+- [editor without toolbar](https://tencent.github.io/cherry-markdown/examples/notoolbar.html)
+- [pure preview](https://tencent.github.io/cherry-markdown/examples/preview_only.html)
+- [XSS](https://tencent.github.io/cherry-markdown/examples/xss.html)（Not allowed by default）
+- [API](https://tencent.github.io/cherry-markdown/examples/api.html)
+- [img wysiwyg](https://tencent.github.io/cherry-markdown/examples/img.html)
+- [headers with auto num](https://tencent.github.io/cherry-markdown/examples/head_num.html)
+
 
 ## Install
 
