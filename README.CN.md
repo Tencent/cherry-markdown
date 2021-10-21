@@ -57,7 +57,23 @@ Cherry Markdown 有内置的安全 Hook，通过过滤白名单以及DomPurify�
 
 Cherry Markdown 有多种样式主题选择
 
-这里可以看到特性的简短的演示 [screenshot](./docs/features.CN.md)
+### 特性展示
+
+这里可以看到特性的简短的演示 [screenshot](./docs/features.md)
+
+### 在线体验
+
+- [basic](https://tencent.github.io/cherry-markdown/examples/index.html)
+- [H5](https://tencent.github.io/cherry-markdown/examples/h5.html)
+- [多实例](https://tencent.github.io/cherry-markdown/examples/multiple.html)
+- [无 toolbar](https://tencent.github.io/cherry-markdown/examples/notoolbar.html)
+- [纯预览模式](https://tencent.github.io/cherry-markdown/examples/preview_only.html)
+- [注入](https://tencent.github.io/cherry-markdown/examples/xss.html)（默认防注入，需要配置才允许注入）
+- [API](https://tencent.github.io/cherry-markdown/examples/api.html)
+- [图片所见即所得编辑尺寸](https://tencent.github.io/cherry-markdown/examples/img.html)
+- [标题自动序号](https://tencent.github.io/cherry-markdown/examples/head_num.html)
+
+
 
 ## 安装
 
