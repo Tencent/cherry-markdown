@@ -1,6 +1,6 @@
 {
   "name": "cherry-markdown",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "version": "0.5.12",
   "description": "a new markdown editor",
   "main": "./dist/cherry-markdown.min.js",
