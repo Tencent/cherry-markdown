@@ -68,7 +68,7 @@ function encode6bit(b1) {
 
 function compress(s1, url) {
   const s = unescape(encodeURIComponent(s1));
-  return `${url}/img/${encode64(deflate(s, 9))}`;
+  return `${url}/svg/${encode64(deflate(s, 9))}`;
 }
 
 export default class PlantUMLCodeEngine {
@@ -88,7 +88,7 @@ export default class PlantUMLCodeEngine {
 
   constructor(plantUMLOptions = {}) {
     const defaultUrl = 'http://www.plantuml.com/plantuml';
-    this.baseUrl = plantUMLOptions.baseUrl ? plantUMLOptions.baseUrl : defaultUrl;
+    this.baseUrl = plantUMLOptions.baseUrl ?? defaultUrl;
   }
 
   render(src, sign) {
