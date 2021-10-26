@@ -118,7 +118,7 @@ export function createMenuHook(name, options) {
       if (filteredOptions.shortcutKeys) {
         return filteredOptions.shortcutKeys;
       }
-      return this.shortcutKeys;
+      return [];
     }
   };
 }
