@@ -91,7 +91,7 @@ var objectNode = /** @type {HTMLObjectElement} */ (document.querySelector('objec
 var onloadeddata = function() {
   var value = objectNode ? objectNode.contentDocument.documentElement.textContent : '';
   var config = Object.assign({}, cherryConfig, { value: value });
-  window.cherry = new Cherry(config);
+  window.cherryObj = new Cherry(config);
 };
 
 if (!window.markdownLoaded && objectNode) {
