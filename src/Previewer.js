@@ -24,6 +24,8 @@ import Event from './Event';
 import { addEvent, removeEvent } from './utils/event';
 import PreviewerBubble from './toolbars/PreviewerBubble';
 
+let onScroll = () => {}; // store in memory for remove event
+
 /**
  * 作用：
  *  dom更新
@@ -105,6 +107,11 @@ export default class Previewer {
       this.previewerBubble = new PreviewerBubble(this, editor);
     }
   }
+
+  domContainer = () =>
+    /** @type {HTMLDivElement} */ (this.isMobilePreview
+      ? document.querySelector('.cherry-mobile-previewer-content')
+      : this.options.previewerDom);
 
   getDom() {
     return this.options.previewerDom;
@@ -309,10 +316,8 @@ export default class Previewer {
   }
 
   bindScroll() {
-    const domContainer = /** @type {HTMLDivElement} */ (this.isMobilePreview
-      ? document.querySelector('.cherry-mobile-previewer-content')
-      : this.options.previewerDom);
-    const onScroll = () => {
+    const domContainer = this.domContainer();
+    onScroll = () => {
       if (this.applyingDomChanges) {
         Logger.log(new Date(), 'sync scroll locked');
         return;
@@ -382,15 +387,12 @@ export default class Previewer {
       // }
       // return this.editor.scrollToLineNum(lines - lineNum, 0, 0);
     };
-
     addEvent(domContainer, 'scroll', onScroll, false);
   }
 
   removeScroll() {
-    const domContainer = this.isMobilePreview
-      ? document.querySelector('.cherry-mobile-previewer-content')
-      : this.options.previewerDom;
-    removeEvent(domContainer, 'scroll');
+    const domContainer = this.domContainer();
+    removeEvent(domContainer, 'scroll', onScroll, false);
   }
 
   $html2H(dom) {
@@ -686,9 +688,7 @@ export default class Previewer {
   }
 
   scrollToLineNum(lineNum, linePercent) {
-    const domContainer = /** @type {HTMLDivElement}*/ (this.isMobilePreview
-      ? document.querySelector('.cherry-mobile-previewer-content')
-      : this.options.previewerDom);
+    const domContainer = this.domContainer();
     if (lineNum === null) {
       this.disableScrollListener = true;
       domContainer.scrollTo(0, domContainer.scrollHeight);
