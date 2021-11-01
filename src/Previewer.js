@@ -108,7 +108,7 @@ export default class Previewer {
     }
   }
 
-  domContainer = () =>
+  getDomContainer = () =>
     /** @type {HTMLDivElement} */ (this.isMobilePreview
       ? document.querySelector('.cherry-mobile-previewer-content')
       : this.options.previewerDom);
@@ -316,7 +316,7 @@ export default class Previewer {
   }
 
   bindScroll() {
-    const domContainer = this.domContainer();
+    const domContainer = this.getDomContainer();
     onScroll = () => {
       if (this.applyingDomChanges) {
         Logger.log(new Date(), 'sync scroll locked');
@@ -391,7 +391,7 @@ export default class Previewer {
   }
 
   removeScroll() {
-    const domContainer = this.domContainer();
+    const domContainer = this.getDomContainer();
     removeEvent(domContainer, 'scroll', onScroll, false);
   }
 
@@ -688,7 +688,7 @@ export default class Previewer {
   }
 
   scrollToLineNum(lineNum, linePercent) {
-    const domContainer = this.domContainer();
+    const domContainer = this.getDomContainer();
     if (lineNum === null) {
       this.disableScrollListener = true;
       domContainer.scrollTo(0, domContainer.scrollHeight);
