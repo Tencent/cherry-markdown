@@ -107,7 +107,7 @@ yarn add echarts@4.6.0
 #### UMD
 
 ```html
-<link href="cheery-editor.min.css" />
+<link href="cherry-editor.min.css" />
 <div id="markdown-container"></div>
 <script src="cherry-editor.min.js"></script>
 <script>
