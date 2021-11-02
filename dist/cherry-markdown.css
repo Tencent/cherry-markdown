@@ -276,24 +276,22 @@
     font-size: 75%; }
   .cherry-markdown h1,
   .cherry-markdown .h1 {
-    font-size: 30px; }
+    font-size: 2em; }
   .cherry-markdown h2,
   .cherry-markdown .h2 {
-    font-size: 25px; }
+    font-size: 1.5em; }
   .cherry-markdown h3,
   .cherry-markdown .h3 {
-    font-size: 20px; }
+    font-size: 1.25em; }
   .cherry-markdown h4,
   .cherry-markdown .h4 {
-    font-size: 16px; }
+    font-size: 1em; }
   .cherry-markdown h5,
   .cherry-markdown .h5 {
-    font-size: 14px;
-    font-weight: 500; }
+    font-size: .875em; }
   .cherry-markdown h6,
   .cherry-markdown .h6 {
-    font-size: 12px;
-    font-weight: normal; }
+    font-size: .85em; }
   .cherry-markdown b,
   .cherry-markdown strong {
     font-weight: bold; }
