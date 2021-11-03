@@ -23,6 +23,7 @@ import 'codemirror/addon/edit/closetag';
 import 'codemirror/addon/fold/xml-fold';
 import 'codemirror/addon/edit/matchtags';
 import 'codemirror/addon/search/searchcursor';
+import 'codemirror/addon/display/placeholder';
 // import 'codemirror/addon/selection/active-line';
 // import 'codemirror/addon/edit/matchbrackets';
 import htmlParser from '@/utils/htmlparser';
@@ -65,6 +66,7 @@ export default class Editor {
         autoCloseTags: true, // 输入html标签时自动补充闭合标签
         extraKeys: { Enter: 'newlineAndIndentContinueMarkdownList' }, // 增加markdown回车自动补全
         matchTags: { bothTags: true }, // 自动高亮选中的闭合html标签
+        placeholder: '',
       },
       toolbars: {},
       onKeydown() {},
