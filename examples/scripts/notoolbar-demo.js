@@ -68,6 +68,9 @@ var cherryConfig = {
   },
   editor: {
     defaultModel: 'edit&preview',
+    codemirror: {
+      placeholder: '请输入内容...',
+    },
   },
   previewer: {
     // 自定义markdown预览区域class
