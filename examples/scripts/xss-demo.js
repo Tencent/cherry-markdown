@@ -1,7 +1,5 @@
-var objectNode = /** @type {HTMLObjectElement} */ (document.querySelector('object[name="demo-val"]'));
-
-var onloadeddata = function() {
-  var value = objectNode ? objectNode.contentDocument.documentElement.textContent : '';
+fetch('./markdown/xss.md').then((response) => response.text()).then((value) => {
+  var config = Object.assign({}, cherryConfig, { value: value });
   window.cherry = new Cherry({
     id: 'markdown',
     engine: {
@@ -11,10 +9,4 @@ var onloadeddata = function() {
     },
     value: value,
   });
-};
-
-if (!window.markdownLoaded && objectNode) {
-  objectNode.onload = onloadeddata;
-} else {
-  onloadeddata();
-}
+});

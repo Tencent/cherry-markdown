@@ -94,16 +94,7 @@ var cherryConfig = {
   //extensions: [],
 };
 
-var objectNode = /** @type {HTMLObjectElement} */ (document.querySelector('object[name="demo-val"]'));
-
-var onloadeddata = function() {
-  var value = objectNode ? objectNode.contentDocument.documentElement.textContent : '';
-  var config = Object.assign({}, cherryConfig, { value: value });
+fetch('./markdown/basic.md').then((response) => response.text()).then((value) => {
+  var config = Object.assign({}, basicConfig, { value: value });
   window.cherry = new Cherry(config);
-};
-
-if (!window.markdownLoaded && objectNode) {
-  objectNode.onload = onloadeddata;
-} else {
-  onloadeddata();
-}
+});
