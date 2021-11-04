@@ -185,15 +185,18 @@ export default class CodeBlock extends ParagraphBase {
    * @param {number} lines
    */
   renderCodeBlock($code, $lang, sign, lines) {
-    let cacheCode = '';
+    let cacheCode = $code;
     let lang = $lang;
     if (this.customHighlighter) {
       // 平台自定义代码块样式
-      cacheCode = this.customHighlighter($code, lang);
+      cacheCode = this.customHighlighter(cacheCode, lang);
     } else {
       // 默认使用prism渲染代码块
       if (!lang || !Prism.languages[lang]) lang = 'javascript'; // 如果没有写语言，默认用js样式渲染
-      cacheCode = Prism.highlight($code, Prism.languages[lang], lang);
+      if (Prism.highlight('\\', Prism.languages[lang], lang).indexOf('span') > -1) { // 斜杠\被转化为标签时将\\还原为\
+        cacheCode = cacheCode.replace(/\\\\/g, '\\');
+      }
+      cacheCode = Prism.highlight(cacheCode, Prism.languages[lang], lang);
       cacheCode = this.renderLineNumber(cacheCode);
     }
     cacheCode = `<div data-sign="${sign}" data-type="codeBlock" data-lines="${lines}">
