@@ -193,7 +193,8 @@ export default class CodeBlock extends ParagraphBase {
     } else {
       // 默认使用prism渲染代码块
       if (!lang || !Prism.languages[lang]) lang = 'javascript'; // 如果没有写语言，默认用js样式渲染
-      if (Prism.highlight('\\', Prism.languages[lang], lang).indexOf('span') > -1) { // 斜杠\被转化为标签时将\\还原为\
+      if (Prism.highlight('\\', Prism.languages[lang], lang).indexOf('span') > -1) {
+        // 斜杠\被转化为标签时将\\还原为\
         cacheCode = cacheCode.replace(/\\\\/g, '\\');
       }
       cacheCode = Prism.highlight(cacheCode, Prism.languages[lang], lang);
