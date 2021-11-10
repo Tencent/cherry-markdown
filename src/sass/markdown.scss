@@ -202,16 +202,9 @@
     & > pre {
       margin: 0;
       code[class*="language-"] {
+        counter-reset: line;
         &.wrap {
-          counter-reset: line;
           white-space: pre-wrap;
-        }
-        & > span:before {
-          counter-increment: line;
-          content: counter(line);
-          margin-right: 1em;
-          position: absolute;
-          left: 0;
         }
         .code-line {
           display: inline-block;
@@ -219,6 +212,13 @@
           padding-left: 3em;
           height: 1.3em;
           line-height: 2em;
+          &:before {
+            counter-increment: line;
+            content: counter(line);
+            margin-right: 1em;
+            position: absolute;
+            left: 0;
+          }
           &:last-child {
             margin-bottom: 0;
           }
