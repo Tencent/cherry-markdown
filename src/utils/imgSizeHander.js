@@ -18,8 +18,22 @@
  */
 const imgSizeHander = {
   mouseResize: {},
-  initBubbleButtons() {
+  getImgPosition() {
     const position = this.img.getBoundingClientRect();
+    const editorPosition = this.previewerDom.parentNode.getBoundingClientRect();
+    return {
+      bottom: position.bottom - editorPosition.bottom,
+      top: position.top - editorPosition.top,
+      height: position.height,
+      width: position.width,
+      right: position.right - editorPosition.right,
+      left: position.left - editorPosition.left,
+      x: position.x - editorPosition.x,
+      y: position.y - editorPosition.y,
+    };
+  },
+  initBubbleButtons() {
+    const position = this.getImgPosition();
     return {
       points: {
         arr: [
@@ -157,7 +171,7 @@ const imgSizeHander = {
     return this.mouseResize.resize;
   },
   dealScroll(event) {
-    const position = this.img.getBoundingClientRect();
+    const position = this.getImgPosition();
     if (this.butsLayout.style.marginTop !== position.top - this.buts.position.top) {
       this.butsLayout.style.marginTop = `${position.top - this.buts.position.top}px`;
       this.buts.style.marginTop = `${position.top - this.buts.position.top}px`;

@@ -12,6 +12,12 @@
       height: 100%;
       overflow: hidden;
     }
+    #markdown {
+      margin-top: 5%;
+      width: 70%;
+      margin-left: auto;
+      margin-right: auto;
+    }
   </style>
   <link rel="stylesheet" type="text/css" href="../dist/cherry-markdown.css">
   <link rel="Shortcut Icon" href="./logo/favicon.ico">
@@ -87,6 +93,9 @@
       id: 'markdown',
       toolbars: {
         toolbar: ['bold', 'italic', 'strikethrough', '|', 'header', 'list', 'graph']
+      },
+      editor: {
+        height: '70%'
       },
       value: markdownSample,
     });
