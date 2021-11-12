@@ -71,7 +71,8 @@ const defaultConfig = {
       //
       // }
       list: {
-        listNested: true, // 同级列表类型转换后变为子级
+        listNested: false, // 同级列表类型转换后变为子级
+        intentSpace: 2, // 默认2个空格缩进
       },
       table: {
         enableChart: false,
