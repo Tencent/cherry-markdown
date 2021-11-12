@@ -39,6 +39,7 @@ export default class List extends ParagraphBase {
   constructor({ config }) {
     super({ needCache: true });
     this.config = config || {};
+    this.intentSpace = this.config.intentSpace > 0 ? this.config.intentSpace : 2;
   }
 
   $getListStyle(type, m2) {
@@ -70,8 +71,8 @@ export default class List extends ParagraphBase {
     const types = [null];
     const listStyles = [null];
     const starts = [0];
-    const indentRegex = /^(\t|[ ]{1,4})/;
-    const listRegex = /^(([ ]{0,3}([*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)([^\r]+?)($|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)))/;
+    const indentRegex = new RegExp(`^(\\t|[ ]{${this.intentSpace},${this.intentSpace + 3}})`);
+    const listRegex = /^((([*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)([^\r]+?)($|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)))/;
     let handledHtml = '';
     let lastIndent = -1;
     items.unshift('');
@@ -83,7 +84,7 @@ export default class List extends ParagraphBase {
       let start = 1;
       // 缩进处理
       while (indentRegex.test(items[i])) {
-        items[i] = items[i].replace(/^(\t|[ ]{1,4})/g, '');
+        items[i] = items[i].replace(indentRegex, '');
         lineIndent += 1;
       }
       // 标识符处理
@@ -176,8 +177,14 @@ export default class List extends ParagraphBase {
           blockAttrs['data-lines'] = '1';
           blockAttrs.class = `cherry-list__${listStyles[index]}`;
           // 更换列表类型，先闭合列表，列表出栈
-          handledHtml += `</li></${currentIndentListType}>`;
-          listStack.shift();
+          if (this.config.listNested) {
+            for (let i = index ; i < indents.length - 1 ; i++) {
+              indents[i] += 1;
+            }
+          } else {
+            handledHtml += `</li></${currentIndentListType}>`;
+            listStack.shift();
+          }
           if (types[index] === 'ol') {
             // 有序列表，需要赋值起始位置
             blockAttrs.start = `${starts[index]}`;
