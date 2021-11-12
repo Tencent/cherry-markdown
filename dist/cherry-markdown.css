@@ -418,23 +418,24 @@
     overflow-x: auto; }
     .cherry-markdown div[data-type='codeBlock'] > pre {
       margin: 0; }
-      .cherry-markdown div[data-type='codeBlock'] > pre code[class*="language-"].wrap {
-        counter-reset: line;
-        white-space: pre-wrap; }
-      .cherry-markdown div[data-type='codeBlock'] > pre code[class*="language-"] > span:before {
-        counter-increment: line;
-        content: counter(line);
-        margin-right: 1em;
-        position: absolute;
-        left: 0; }
-      .cherry-markdown div[data-type='codeBlock'] > pre code[class*="language-"] .code-line {
-        display: inline-block;
-        position: relative;
-        padding-left: 3em;
-        height: 1.3em;
-        line-height: 2em; }
-        .cherry-markdown div[data-type='codeBlock'] > pre code[class*="language-"] .code-line:last-child {
-          margin-bottom: 0; }
+      .cherry-markdown div[data-type='codeBlock'] > pre code[class*="language-"] {
+        counter-reset: line; }
+        .cherry-markdown div[data-type='codeBlock'] > pre code[class*="language-"].wrap {
+          white-space: pre-wrap; }
+        .cherry-markdown div[data-type='codeBlock'] > pre code[class*="language-"] .code-line {
+          display: inline-block;
+          position: relative;
+          padding-left: 3em;
+          height: 1.3em;
+          line-height: 2em; }
+          .cherry-markdown div[data-type='codeBlock'] > pre code[class*="language-"] .code-line:before {
+            counter-increment: line;
+            content: counter(line);
+            margin-right: 1em;
+            position: absolute;
+            left: 0; }
+          .cherry-markdown div[data-type='codeBlock'] > pre code[class*="language-"] .code-line:last-child {
+            margin-bottom: 0; }
   .cherry-markdown :not(pre) > code {
     padding: .1em;
     border-radius: .3em;
@@ -1546,7 +1547,8 @@ green     #859900
   align-content: flex-start;
   height: 100%;
   min-height: 400px;
-  position: relative; }
+  position: relative;
+  overflow: hidden; }
   .cherry .cherry-editor,
   .cherry .cherry-previewer {
     max-height: calc(100% - 48px);
