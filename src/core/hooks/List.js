@@ -61,34 +61,52 @@ export default class List extends ParagraphBase {
     return 'default';
   }
 
-  $wrapList(text, dataLines, sentenceMakeFunc, params) {
+  $wrapList(text, dataLines, sentenceMakeFunc) {
     const { sign: contentSign, html } = sentenceMakeFunc(text);
     const sign = this.signWithCache(html) || contentSign;
     const items = html.split('\n');
     // 列表结尾换行符个数
     const endLineFlagLength = html.match(/\n*$/g)[0].length;
-    const indents = [];
+    const indents = [-1];
+    const spaces = [-2];
     const types = [null];
     const listStyles = [null];
     const starts = [0];
-    const indentRegex = new RegExp(`^(\\t|[ ]{${this.intentSpace},${this.intentSpace + 3}})`);
+    const indentRegex = /^(\t|[ ])/;
     const listRegex = /^((([*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)([^\r]+?)($|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)))/;
     let handledHtml = '';
-    let lastIndent = -1;
     items.unshift('');
     // 预处理
     for (let i = 1; i < items.length - endLineFlagLength; i++) {
-      let lineIndent = 0;
-      let type = 'blank';
+      let type = '';
+      let space = 0;
       let listStyle = 'default';
       let start = 1;
       // 缩进处理
       while (indentRegex.test(items[i])) {
+        space += items[i][0] === '\t' ? 4 : 1;
         items[i] = items[i].replace(indentRegex, '');
-        lineIndent += 1;
       }
+      spaces.push(space);
+
+      if (!listRegex.test(items[i])) {
+        type = 'blank';
+        indents.push(indents[i - 1]);
+      } else {
+        let last = i - 1;
+        while (last > 0 && spaces[last] > spaces[i]) last -= 1;
+        if (spaces[i] < spaces[last] + this.intentSpace) {
+          indents.push(indents[last]);
+        } else if (spaces[i] < spaces[last] + this.intentSpace + 4) {
+          indents.push(indents[last] + 1);
+        } else {
+          type = 'blank';
+          indents.push(indents[i - 1]);
+        }
+      }
+
       // 标识符处理
-      if (listRegex.test(items[i])) {
+      if (listRegex.test(items[i]) && type !== 'blank') {
         items[i] = items[i].replace(listRegex, (wholeMatch, m1, m2, m3, m4) => {
           type = m2.search(/[*+-]/g) > -1 ? 'ul' : 'ol';
           listStyle = this.$getListStyle(type, m2);
@@ -96,20 +114,6 @@ export default class List extends ParagraphBase {
           return m4;
         });
       }
-      // tempIndent = lineIndent;
-      if (i === 1) {
-        // 支持任意缩进位置起步
-        lastIndent = lineIndent - 1;
-        indents.push(lastIndent);
-      }
-      if (lineIndent > lastIndent + 1) {
-        type = 'blank';
-      }
-      if (type === 'blank') {
-        lineIndent = lastIndent;
-      }
-      lastIndent = lineIndent;
-      indents.push(lineIndent);
       types.push(type);
       listStyles.push(listStyle);
       starts.push(start);
@@ -123,16 +127,15 @@ export default class List extends ParagraphBase {
     const checklistRegex = /<span class="ch-icon ch-icon-(square|check)"><\/span>/;
     // 内容处理
     const listStack = [null]; // 列表类型栈
-    // console.log(indents, types, starts, listStyles, items);
     items.forEach((item, index) => {
-      // console.log(listStack);
+      // 数组越界，跳过
+      if (index < 1) {
+        return;
+      }
+
       // 无类型列表单独处理，不入栈
       if (types[index] === 'blank') {
         handledHtml += `<br>${item}`;
-        return;
-      }
-      // 数组越界，跳过
-      if (index < 1) {
         return;
       }
 
@@ -178,7 +181,7 @@ export default class List extends ParagraphBase {
           blockAttrs.class = `cherry-list__${listStyles[index]}`;
           // 更换列表类型，先闭合列表，列表出栈
           if (this.config.listNested) {
-            for (let i = index ; i < indents.length - 1 ; i++) {
+            for (let i = index; i < indents.length - 1; i++) {
               indents[i] += 1;
             }
           } else {
