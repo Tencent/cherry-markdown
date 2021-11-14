@@ -98,16 +98,41 @@ export default class ParagraphBase extends SyntaxBase {
 
   /**
    *
-   * @param {*} str
-   * @return {string} cacheKey ~~C0I0$
+   * @param {string} md md内容
+   * @return {number} 行数
    */
-  pushCache(str, sign) {
+  getLineCount(md) {
+    let content = md;
+    let preLineCount = content.match(/^\n+/g)?.[0]?.length ?? 0; // 前置换行个数
+    preLineCount = preLineCount === 2 ? 1 : 0; // 前置换行超过2个就交给BR进行渲染
+    content = content.replace(/^\n+/g, '');
+
+    const regex = new RegExp(
+      `\n*~~C\\d+I(?:${ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX})?\\w+_L(\\d+)\\$`,
+      'g',
+    );
+    let cacheLineCount = 0;
+    content = content.replace(regex, (match, lineCount) => {
+      cacheLineCount += parseInt(lineCount);
+      return match.replace(/^\n+/g, '');
+    });
+    return preLineCount + cacheLineCount + (content.match(/\n/g) || []).length + 1; // 实际内容所占行数，至少为1行
+  }
+
+  /**
+   *
+   * @param {string} str 渲染后的内容
+   * @param {string} sign 签名
+   * @param {number} lineCount md原文的行数
+   * @return {string} cacheKey ~~C0I0_L1$
+   */
+  pushCache(str, sign = '', lineCount = 0) {
     if (!this.cacheState) {
       return;
     }
     const $sign = sign || this.$engine.md5(str);
     this.cache[$sign] = str;
-    return `${this.cacheKey}I${$sign}$`;
+    return `${this.cacheKey}I${$sign}_L${lineCount}$`;
   }
 
   popCache(sign) {
@@ -133,7 +158,7 @@ export default class ParagraphBase extends SyntaxBase {
       `${this.cacheKey}I((?:${ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX})?\\w+)\\$`,
       'g',
     );
-    const $html = html.replace(regex, (match, cacheSign) => this.popCache(cacheSign));
+    const $html = html.replace(regex, (match, cacheSign) => this.popCache(cacheSign.replace(/_L\d+/, '')));
     this.resetCache();
     return $html;
   }

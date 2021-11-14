@@ -129,13 +129,9 @@ export default class CodeBlock extends ParagraphBase {
    * @param {string} code
    */
   computeLines(match, leadingContent, code) {
-    const sign = this.$engine.md5(match);
-    const linesArr = code.match(/\n/g);
-    const leadingLines = leadingContent?.match(/\n/g)?.length ?? 0;
-    const leadingSpaces = leadingContent?.replace(/\n/g, '') ?? '';
-    // 只需要加上开头的换行，以及代码块边界的两行即可
-    const baseLines = leadingLines + 2;
-    const lines = linesArr ? linesArr.length + baseLines : baseLines;
+    const leadingSpaces = leadingContent;
+    const lines = this.getLineCount(match);
+    const sign = this.$engine.md5(match.replace(/^\n+/, '') + lines);
     return {
       sign,
       leadingSpaces,
@@ -216,7 +212,7 @@ export default class CodeBlock extends ParagraphBase {
         // 从缓存中获取html
         let cacheCode = this.$codeCache(sign);
         if (cacheCode && cacheCode !== '') {
-          return prependLineFeedForParagraph(match, leadingSpaces + this.pushCache(cacheCode, sign), true);
+          return leadingSpaces + this.pushCache(cacheCode, sign, lines);
         }
         $code = $code.replace(/~D/g, '$');
         $code = $code.replace(/~T/g, '~');
@@ -243,7 +239,8 @@ export default class CodeBlock extends ParagraphBase {
           cacheCode = this.parseCustomLanguage($lang, $code, { lines, sign });
           if (cacheCode && cacheCode !== '') {
             this.$codeCache(sign, cacheCode);
-            return prependLineFeedForParagraph(match, leadingSpaces + this.pushCache(cacheCode, sign), true);
+            return leadingSpaces + this.pushCache(cacheCode, sign, lines);
+            // return prependLineFeedForParagraph(match, leadingSpaces + this.pushCache(cacheCode, sign, lines), true);
           }
           // 渲染出错则按正常code进行渲染
         }
@@ -252,7 +249,8 @@ export default class CodeBlock extends ParagraphBase {
         $code = $code.replace(/\\/g, '\\\\');
         cacheCode = this.renderCodeBlock($code, $lang, sign, lines);
         cacheCode = this.$codeCache(sign, cacheCode);
-        return prependLineFeedForParagraph(match, leadingSpaces + this.pushCache(cacheCode, sign), true);
+        return leadingSpaces + this.pushCache(cacheCode, sign, lines);
+        // return prependLineFeedForParagraph(match, leadingSpaces + this.pushCache(cacheCode, sign, lines), true);
       });
     }
     // 为了避免InlineCode被HtmlBlock转义，需要在这里提前缓存
@@ -299,7 +297,7 @@ export default class CodeBlock extends ParagraphBase {
        * (\n*?)捕获区块前的所有换行
        * (?:[^\S\n]*)捕获```前置的空格字符
        */
-      begin: /(?:^|\n)(\n*?(?:[^\S\n]*))```(.*?)\n/,
+      begin: /((?:^|\n)\n*?(?:[^\S\n]*))```(.*?)\n/,
       content: /([\w\W]*?)/, // '([\\w\\W]*?)',
       end: /[^\S\n]*```[ \t]*(?=$|\n+)/, // '\\s*```[ \\t]*(?=$|\\n+)',
     };
