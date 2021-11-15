@@ -128,7 +128,7 @@ export default class Header extends ParagraphBase {
         if (text.trim() === '') {
           return match;
         }
-        return prependLineFeedForParagraph(match, this.pushCache(match));
+        return this.getCacheWithSpace(this.pushCache(match), match, true);
       });
     }
     // 按照目前的引擎，每个hook只会执行一次，所以需要并行执行替换
@@ -137,7 +137,7 @@ export default class Header extends ParagraphBase {
         if (text.trim() === '' || this.isContainsCache(text)) {
           return match;
         }
-        return prependLineFeedForParagraph(match, this.pushCache(match));
+        return this.getCacheWithSpace(this.pushCache(match), match, true);
       });
     }
     return $str;
@@ -154,7 +154,7 @@ export default class Header extends ParagraphBase {
         const $text = text.replace(/\s+#+\s*$/, ''); // close tag
         const { html: result, sign } = this.$wrapHeader($text, level.length, lineCount, sentenceMakeFunc);
         // 文章的开头不加换行
-        return prependLineFeedForParagraph(match, this.pushCache(result, sign, lineCount));
+        return this.getCacheWithSpace(this.pushCache(result, sign, lineCount), match, true);
       });
     }
     // 按照目前的引擎，每个hook只会执行一次，所以需要并行执行替换
@@ -168,7 +168,7 @@ export default class Header extends ParagraphBase {
         const headerLevel = level[0] === '-' ? 2 : 1; // =: H1, -: H2
         const { html: result, sign } = this.$wrapHeader(text, headerLevel, lineCount, sentenceMakeFunc);
         // 文章的开头不加换行
-        return prependLineFeedForParagraph(match, this.pushCache(result, sign, lineCount));
+        return this.getCacheWithSpace(this.pushCache(result, sign, lineCount), match, true);
       });
     }
     return $str;

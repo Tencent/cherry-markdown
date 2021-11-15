@@ -83,7 +83,6 @@ export default class Paragraph extends ParagraphBase {
       }
       // 判断当前内容里是否包含段落渲染引擎暂存缓存关键字
       const cacheMixedInMatches = this.isContainsCache(content);
-      console.log(match)
       const processor = (p) => {
         if (p.trim() === '') {
           return '';
@@ -97,11 +96,11 @@ export default class Paragraph extends ParagraphBase {
           domName = 'div';
         }
         // 计算行号
-        const lines = this.getLineCount(p);
-        return `<${domName} data-sign="${sign}" data-type="${domName}" data-lines="${lines}">${this.$cleanParagraph(html)}</${domName}>`;
+        const lines = this.getLineCount(p, p);
+        return `<${domName} data-sign="${sign}${lines}" data-type="${domName}" data-lines="${lines}">${this.$cleanParagraph(html)}</${domName}>`;
       };
       if (cacheMixedInMatches) {
-        return this.makeExcludingCached(content, processor);
+        return this.makeExcludingCached(`${preLines}${content}`, processor);
       }
       return processor(match);
     });
