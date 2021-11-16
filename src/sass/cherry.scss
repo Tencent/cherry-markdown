@@ -243,10 +243,10 @@
 
 .cherry-sidebar {
   min-height: 200px;
-  width: 48px;
+  width: 40px;
   position: absolute;
   top: 48px;
-  right: 0;
+  right: 7px;
   z-index: 999;
   .cherry-toolbar-button {
     height: 30px;
@@ -254,6 +254,35 @@
 
     &:hover {
       background: transparent;
+    }
+
+    .icon-loading {
+      &.loading {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+      }
+      &.loading:after {
+        content: " ";
+        display: block;
+        width: 8px;
+        height: 8px;
+        margin-left: 2px;
+        margin-top: -2px;
+        border-radius: 50%;
+        border: 2px solid #000;
+        border-color: #000 transparent #000 transparent;
+        animation: loading 1.2s linear infinite;
+      }
+    }
+    
+    @keyframes loading {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
     }
   }
 }
@@ -521,16 +550,14 @@
   min-height: auto;
   overflow-y: auto;
 
-  &.cherry-mobile-previewer {
-    .cherry-mobile-previewer-content {
-      width: 375px;
-      height: 100%;
-      margin: 0 auto;
-      padding: 25px 30px;
-      overflow-y: scroll;
-      box-shadow: 0 0 60px rgba(0, 0, 0, 0.1);
-      box-sizing: border-box;
-    }
+  .cherry-mobile-previewer-content {
+    width: 375px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 25px 30px;
+    overflow-y: scroll;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
   }
 
   &.cherry-previewer--hidden {
