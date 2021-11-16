@@ -1708,16 +1708,37 @@ green     #859900
 
 .cherry-sidebar {
   min-height: 200px;
-  width: 48px;
+  width: 40px;
   position: absolute;
   top: 48px;
-  right: 0;
+  right: 7px;
   z-index: 999; }
   .cherry-sidebar .cherry-toolbar-button {
     height: 30px;
     padding: 3px 12px 0 12px; }
     .cherry-sidebar .cherry-toolbar-button:hover {
       background: transparent; }
+    .cherry-sidebar .cherry-toolbar-button .icon-loading.loading {
+      display: inline-block;
+      width: 8px;
+      height: 8px; }
+    .cherry-sidebar .cherry-toolbar-button .icon-loading.loading:after {
+      content: " ";
+      display: block;
+      width: 8px;
+      height: 8px;
+      margin-left: 2px;
+      margin-top: -2px;
+      border-radius: 50%;
+      border: 2px solid #000;
+      border-color: #000 transparent #000 transparent;
+      animation: loading 1.2s linear infinite; }
+
+@keyframes loading {
+  0% {
+    transform: rotate(0deg); }
+  100% {
+    transform: rotate(360deg); } }
 
 .cherry-bubble {
   position: absolute;
@@ -1905,7 +1926,7 @@ green     #859900
   background-color: #f8fafb;
   min-height: auto;
   overflow-y: auto; }
-  .cherry-previewer.cherry-mobile-previewer .cherry-mobile-previewer-content {
+  .cherry-previewer .cherry-mobile-previewer-content {
     width: 375px;
     height: 100%;
     margin: 0 auto;

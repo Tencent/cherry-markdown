@@ -204,14 +204,14 @@ export default class List extends ParagraphBase {
     return { html: handledHtml, sign };
   }
 
-  makeHtml(str, sentenceMakeFunc, params) {
+  makeHtml(str, sentenceMakeFunc) {
     let $str = `${str}~0`;
     if (this.test($str)) {
       $str = $str.replace(this.RULE.reg, (wholeMatch, m1, m2) => {
         const ignoreEndLineFlags = wholeMatch.replace(/\n*(\s*~0)?$/g, '');
         const lines = this.getLineCount(ignoreEndLineFlags);
         const text = wholeMatch.replace(/~0$/g, '').replace(/^\n+/, '');
-        const { html: result, sign } = this.$wrapList(text, lines, sentenceMakeFunc, params);
+        const { html: result, sign } = this.$wrapList(text, lines, sentenceMakeFunc);
         return this.pushCache(result, sign, lines) + "\n\n";
       });
     }
