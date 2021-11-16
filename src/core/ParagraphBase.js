@@ -116,6 +116,7 @@ export default class ParagraphBase extends SyntaxBase {
 
   /**
    * 获取行号，只负责向上计算\n
+   * 会计算cache的行号
    * 
    * @param {string} md md内容
    * @param {string} preSpace 前置换行

@@ -102,7 +102,7 @@ export default class Paragraph extends ParagraphBase {
       if (cacheMixedInMatches) {
         return this.makeExcludingCached(`${preLines}${content}`, processor);
       }
-      return processor(match);
+      return processor(`${preLines}${content}`);
     });
   }
 

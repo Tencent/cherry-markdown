@@ -40,7 +40,7 @@ export default class Blockquote extends ParagraphBase {
     return str.replace(this.RULE.reg, (match, lines, content) => {
       const { sign: contentSign, html: parsedHtml } = sentenceMakeFunc(content);
       const sign = this.signWithCache(parsedHtml) || contentSign;
-      const lineCount = this.getLineCount(match); // 段落所占行数
+      const lineCount = this.getLineCount(match, lines); // 段落所占行数
       const listRegex = /^(([ \t]{0,3}([*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)([^\r]+?)($|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)))/;
       let lastIndent = computeLeadingSpaces(lines);
       // 逐行处理
@@ -50,7 +50,6 @@ export default class Blockquote extends ParagraphBase {
       let lastLevel = 1;
       let level = 0;
       let breakIndex = 0;
-      let returnHtml = '';
       let handledHtml = `<blockquote data-sign="${sign}_${lineCount}" data-lines="${lineCount}">`;
       for (let i = 0; contentLines[i]; i++) {
         if (i !== 0) {
@@ -87,15 +86,7 @@ export default class Blockquote extends ParagraphBase {
       }
       // 标签闭合
       handledHtml += '</blockquote>'.repeat(lastLevel);
-      if (breakIndex) {
-        // 缩进减少，提前结束引用，释放剩余html
-        returnHtml = '\n';
-        returnHtml += contentLines.slice(breakIndex).join('\n');
-        if (this.test(returnHtml)) {
-          returnHtml = this.handleMatch(returnHtml, sentenceMakeFunc);
-        }
-      }
-      return prependLineFeedForParagraph(match, `${lines}${this.pushCache(handledHtml, sign, lineCount)}${returnHtml}`);
+      return this.getCacheWithSpace(this.pushCache(handledHtml, sign, lineCount), match);
     });
   }
 
