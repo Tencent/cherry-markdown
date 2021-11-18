@@ -26,10 +26,12 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'yarn'
-    - uses: borales/actions-yarn@v2.3.0
+    - name: Install dependencies
+      uses: borales/actions-yarn@v2.3.0
       with:
         cmd: install
-    - uses: borales/actions-yarn@v2.3.0
+    - name: Run Build
+      uses: borales/actions-yarn@v2.3.0
       with:
         cmd: build
     # - uses: borales/actions-yarn@v2.3.0
