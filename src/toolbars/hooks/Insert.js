@@ -82,7 +82,7 @@ export default class Insert extends MenuBase {
   handleUpload(type = 'image') {
     // type为上传文件类型 image|video|audio|pdf|word
     const input = document.createElement('input');
-    input.type = 'file';
+    input.type = type || 'file';
     input.id = 'fileUpload';
     input.value = '';
     input.style.display = 'none';
