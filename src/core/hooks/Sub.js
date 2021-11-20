@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 import SyntaxBase from '@/core/SyntaxBase';
+import { isLookbehindSupported } from '@/utils/regexp';
+import { replaceLookbehind } from '@/utils/lookbehind-replace';
 
 export default class Sub extends SyntaxBase {
   static HOOK_NAME = 'sub';
@@ -22,15 +24,23 @@ export default class Sub extends SyntaxBase {
   //     super();
   // }
 
+  toHtml(whole, m1) {
+    return `<sub>${m1}</sub>`;
+  }
+
   makeHtml(str) {
-    if (!this.test(str)) {
-      return str;
+    if (isLookbehindSupported()) {
+      return str.replace(this.RULE.reg, this.toHtml);
     }
-    return str.replace(this.RULE.reg, '$1<sub>$2</sub>');
+    return replaceLookbehind(str, this.RULE.reg, this.toHtml, true, 1);
   }
 
   rule() {
-    const ret = { begin: '(^|[^\\\\])\\^\\^', end: '\\^\\^', content: '([\\w\\W]+?)' };
+    const ret = {
+      begin: isLookbehindSupported() ? '(?<!\\\\)\\^\\^' : '(^|[^\\\\])\\^\\^',
+      end: '\\^\\^',
+      content: '([\\w\\W]+?)',
+    };
     ret.reg = new RegExp(ret.begin + ret.content + ret.end, 'g');
     return ret;
   }
