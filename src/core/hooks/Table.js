@@ -96,7 +96,7 @@ export default class Table extends ParagraphBase {
     return { textAlignRules, COLUMN_ALIGN_MAP };
   }
 
-  $parseTable(lines, sentenceMakeFunc) {
+  $parseTable(lines, sentenceMakeFunc, dataLines) {
     let maxCol = 0;
     const rows = lines.map((line, index) => {
       const cols = line.replace(/\\\|/g, '~CS').split('|');
@@ -160,7 +160,7 @@ export default class Table extends ParagraphBase {
       }, [])
       .join('');
     // console.log('obj', tableObject);
-    const tableResult = this.$renderTable(COLUMN_ALIGN_MAP, tableHeader, tableRows, lines.length);
+    const tableResult = this.$renderTable(COLUMN_ALIGN_MAP, tableHeader, tableRows, dataLines);
     if (!chartOptions) {
       return tableResult;
     }
@@ -197,7 +197,7 @@ export default class Table extends ParagraphBase {
       })
       .replace(/\\\|/g, '|'); // escape \|
     return {
-      html: `<div class="cherry-table-container" data-sign="${sign}" data-lines="${dataLines}">
+      html: `<div class="cherry-table-container" data-sign="${sign}${dataLines}" data-lines="${dataLines}">
         <table class="cherry-table">${renderHtml}</table></div>`,
       sign,
     };
@@ -208,27 +208,29 @@ export default class Table extends ParagraphBase {
     // strict fenced mode
     if (this.test($str, TABLE_STRICT)) {
       $str = $str.replace(this.RULE[TABLE_STRICT].reg, (match, leading) => {
+        const dataLines = this.getLineCount(match, leading);
         // 必须先trim，否则分割出来的结果不对
         // 将fenced mode转换为loose mode
         const lines = match
           .trim()
           .split(/\n/)
           .map((line) => String(line).trim());
-        const { html: table, sign } = this.$parseTable(lines, sentenceMakeFunc);
-        return leading + this.pushCache(table, sign);
+        const { html: table, sign } = this.$parseTable(lines, sentenceMakeFunc, dataLines);
+        return leading + this.pushCache(table, sign, dataLines);
       });
     }
     // loose mode
     if (this.test($str, TABLE_LOOSE)) {
       // console.log(TABLE_LOOSE);
       $str = $str.replace(this.RULE[TABLE_LOOSE].reg, (match, leading) => {
+        const dataLines = this.getLineCount(match, leading);
         // 必须先trim，否则分割出来的结果不对
         const lines = match
           .trim()
           .split(/\n/)
-          .map((line) => line.trim());
-        const { html: table, sign } = this.$parseTable(lines, sentenceMakeFunc);
-        return leading + this.pushCache(table, sign);
+          .map((line) => String(line).trim());
+        const { html: table, sign } = this.$parseTable(lines, sentenceMakeFunc, dataLines);
+        return leading + this.pushCache(table, sign, dataLines);
       });
     }
     return $str;
@@ -248,7 +250,7 @@ export default class Table extends ParagraphBase {
      * ((?:\n\|[^\n]+\|)*)  Rows
      */
     const strict = {
-      begin: '(^|\\n)',
+      begin: '(?:^|\\n)(\\n*)',
       content: [
         '(\\h*\\|[^\\n]+\\|?\\h*)', // Header
         '\\n',
@@ -260,7 +262,7 @@ export default class Table extends ParagraphBase {
     strict.reg = compileRegExp(strict, 'g', true);
 
     const loose = {
-      begin: '(^|\\n)',
+      begin: '(?:^|\\n)(\\n*)',
       content: [
         '(\\|?[^\\n|]+(\\|[^\\n|]+)+\\|?)', // Header
         '\\n',

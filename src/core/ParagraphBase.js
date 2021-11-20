@@ -140,7 +140,7 @@ export default class ParagraphBase extends SyntaxBase {
     content = content.replace(/^\n+/g, '');
 
     const regex = new RegExp(
-      `\n*~~C\\d+I(?:${ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX})?\\w+_L(\\d+)\\$`,
+      `\n*~~C\\d+I(?:${ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX})?\\w+?_L(\\d+)\\$`,
       'g',
     );
     let cacheLineCount = 0;
@@ -190,7 +190,7 @@ export default class ParagraphBase extends SyntaxBase {
       `${this.cacheKey}I((?:${ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX})?\\w+)\\$`,
       'g',
     );
-    const $html = html.replace(regex, (match, cacheSign) => this.popCache(cacheSign.replace(/_L\d+/, '')));
+    const $html = html.replace(regex, (match, cacheSign) => this.popCache(cacheSign.replace(/_L\d+$/, '')));
     this.resetCache();
     return $html;
   }
