@@ -207,12 +207,12 @@ export default class List extends ParagraphBase {
   makeHtml(str, sentenceMakeFunc) {
     let $str = `${str}~0`;
     if (this.test($str)) {
-      $str = $str.replace(this.RULE.reg, (wholeMatch, m1, m2) => {
+      $str = $str.replace(this.RULE.reg, (wholeMatch, lineSpaces, m1, m2) => {
         const ignoreEndLineFlags = wholeMatch.replace(/\n*(\s*~0)?$/g, '');
-        const lines = ignoreEndLineFlags.match(/\n/) ? ignoreEndLineFlags.match(/\n/g).length + 1 : 1;
-        const text = wholeMatch.replace(/~0$/g, '');
+        const lines = this.getLineCount(ignoreEndLineFlags, lineSpaces);
+        const text = wholeMatch.replace(/~0$/g, '').replace(/^\n+/, '');
         const { html: result, sign } = this.$wrapList(text, lines, sentenceMakeFunc);
-        return this.pushCache(result, sign);
+        return this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
       });
     }
     $str = $str.replace(/~0$/g, '');
@@ -221,7 +221,7 @@ export default class List extends ParagraphBase {
 
   rule() {
     const ret = {
-      begin: '^(([ ]{0,3}([*+-]|\\d+[.]|[a-z]\\.|[I一二三四五六七八九十]+\\.)[ \\t]+)',
+      begin: '(?:^|\n)(\n*)(([ ]{0,3}([*+-]|\\d+[.]|[a-z]\\.|[I一二三四五六七八九十]+\\.)[ \\t]+)',
       content: '([^\\r]+?)',
       end: '(~0|\\n{2,}(?=\\S)(?![ \\t]*(?:[*+-]|\\d+[.]|[a-z]\\.|[I一二三四五六七八九十]+\\.)[ \\t]+)))',
     };

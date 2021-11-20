@@ -25,6 +25,7 @@ import { blockNames } from '@/utils/sanitize';
  * 段落级语法有以下义务：
  *  1、维护签名，签名用来实现预览区域的局部更新功能
  *  2、维护行号，行号用来实现编辑区和预览区同步滚动
+ *     每个段落语法负责计算上文的行号，上文行号不是0就是1，大于1会由BR语法计算行号
  */
 export default class Paragraph extends ParagraphBase {
   static HOOK_NAME = 'normalParagraph';
@@ -82,7 +83,6 @@ export default class Paragraph extends ParagraphBase {
       }
       // 判断当前内容里是否包含段落渲染引擎暂存缓存关键字
       const cacheMixedInMatches = this.isContainsCache(content);
-      const additionalLines = cacheMixedInMatches ? 0 : (preLines.match(/\n/g) || []).length;
       const processor = (p) => {
         if (p.trim() === '') {
           return '';
@@ -96,16 +96,15 @@ export default class Paragraph extends ParagraphBase {
           domName = 'div';
         }
         // 计算行号
-        const linesArr = html.match(/\n/g) || [];
-        const lines = linesArr.length + 1;
-        return `<${domName} data-sign="${sign}" data-type="${domName}" data-lines="${
-          lines + additionalLines
-        }">${this.$cleanParagraph(html)}</${domName}>`;
+        const lines = this.getLineCount(p, p);
+        return `<${domName} data-sign="${sign}${lines}" data-type="${domName}" data-lines="${lines}">${this.$cleanParagraph(
+          html,
+        )}</${domName}>`;
       };
       if (cacheMixedInMatches) {
-        return this.makeExcludingCached(content, processor);
+        return this.makeExcludingCached(`${preLines}${content}`, processor);
       }
-      return processor(content);
+      return processor(`${preLines}${content}`);
     });
   }
 
