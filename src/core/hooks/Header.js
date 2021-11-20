@@ -15,7 +15,7 @@
  */
 import ParagraphBase from '@/core/ParagraphBase';
 import { compileRegExp } from '@/utils/regexp';
-import { prependLineFeedForParagraph, calculateLinesOfParagraph } from '@/utils/lineFeed';
+import { calculateLinesOfParagraph } from '@/utils/lineFeed';
 
 const ATX_HEADER = 'atx';
 const SETEXT_HEADER = 'setext';
@@ -110,7 +110,7 @@ export default class Header extends ParagraphBase {
       const replaceFootNote = /~fn#([0-9]+)#/g;
       anchorID = this.generateIDNoDup(headerTextRaw.replace(replaceFootNote, ''));
     }
-    const sign = this.$engine.md5(`${level}-${processedText.sign}-${anchorID}`);
+    const sign = this.$engine.md5(`${level}-${processedText.sign}-${anchorID}-${dataLines}`);
     const result = [
       `<h${level} id="${anchorID}" data-sign="${sign}" data-lines="${dataLines}">`,
       `<a class="anchor" href="#${anchorID}"></a>`,
@@ -128,7 +128,7 @@ export default class Header extends ParagraphBase {
         if (text.trim() === '') {
           return match;
         }
-        return prependLineFeedForParagraph(match, this.pushCache(match));
+        return this.getCacheWithSpace(this.pushCache(match), match, true);
       });
     }
     // 按照目前的引擎，每个hook只会执行一次，所以需要并行执行替换
@@ -137,7 +137,7 @@ export default class Header extends ParagraphBase {
         if (text.trim() === '' || this.isContainsCache(text)) {
           return match;
         }
-        return prependLineFeedForParagraph(match, this.pushCache(match));
+        return this.getCacheWithSpace(this.pushCache(match), match, true);
       });
     }
     return $str;
@@ -150,11 +150,11 @@ export default class Header extends ParagraphBase {
     if (this.test($str, ATX_HEADER)) {
       $str = $str.replace(this.RULE[ATX_HEADER].reg, (match, lines, level, text) => {
         // 其中有两行是beforeMake加上的
-        const lineCount = calculateLinesOfParagraph(lines, 1);
+        const lineCount = calculateLinesOfParagraph(lines, this.getLineCount(match.replace(/^\n+/, '')));
         const $text = text.replace(/\s+#+\s*$/, ''); // close tag
         const { html: result, sign } = this.$wrapHeader($text, level.length, lineCount, sentenceMakeFunc);
         // 文章的开头不加换行
-        return prependLineFeedForParagraph(match, this.pushCache(result, sign));
+        return this.getCacheWithSpace(this.pushCache(result, sign, lineCount), match, true);
       });
     }
     // 按照目前的引擎，每个hook只会执行一次，所以需要并行执行替换
@@ -164,11 +164,11 @@ export default class Header extends ParagraphBase {
           return match;
         }
         // 其中有两行是beforeMake加上的
-        const lineCount = calculateLinesOfParagraph(lines, 2);
+        const lineCount = calculateLinesOfParagraph(lines, this.getLineCount(match.replace(/^\n+/, '')));
         const headerLevel = level[0] === '-' ? 2 : 1; // =: H1, -: H2
         const { html: result, sign } = this.$wrapHeader(text, headerLevel, lineCount, sentenceMakeFunc);
         // 文章的开头不加换行
-        return prependLineFeedForParagraph(match, this.pushCache(result, sign));
+        return this.getCacheWithSpace(this.pushCache(result, sign, lineCount), match, true);
       });
     }
     return $str;

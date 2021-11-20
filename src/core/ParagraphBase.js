@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import SyntaxBase, { HOOKS_TYPE_LIST } from './SyntaxBase';
+import { prependLineFeedForParagraph } from '@/utils/lineFeed';
 
 let cacheCounter = 0;
 // ~~C${cacheCounter}I${cacheIndex}$
@@ -97,17 +98,73 @@ export default class ParagraphBase extends SyntaxBase {
   }
 
   /**
+   * 获取非捕获匹配丢掉的换行，适用于能被【嵌套】的段落语法
    *
-   * @param {*} str
-   * @return {string} cacheKey ~~C0I0$
+   * @param {string} cache 需要返回的cache
+   * @param {string} md 原始的md字符串
+   * @param {boolean} alwaysAlone 是否能被【嵌套】，true：不能被嵌套，如标题、注释等；false：能被嵌套，如代码块、有序列表等
+   * @return {string} str
    */
-  pushCache(str, sign) {
+  getCacheWithSpace(cache, md, alwaysAlone = false) {
+    const preSpace = md.match(/^\n+/)?.[0] ?? '';
+    const afterSpace = md.match(/\n+$/)?.[0] ?? '';
+    if (alwaysAlone) {
+      return prependLineFeedForParagraph(md, cache);
+    }
+    return `${preSpace}${cache}${afterSpace}`;
+  }
+
+  /**
+   * 获取行号，只负责向上计算\n
+   * 会计算cache的行号
+   *
+   * @param {string} md md内容
+   * @param {string} preSpace 前置换行
+   * @return {number} 行数
+   */
+  getLineCount(md, preSpace = '') {
+    let content = md;
+    /**
+     * 前置换行个数，【注意】：前置换行个数不包括上文的最后一个\n
+     *    例：
+     *      - aa\n
+     *      - bb\n
+     *      \n
+     *      cc\n
+     *
+     *    cc的前置换行个数为 1，bb后的\n不计算在内
+     *    cc的正则为：/(?:^|\n)(\n*)xxxxxx/
+     */
+    let preLineCount = preSpace.match(/^\n+/g)?.[0]?.length ?? 0;
+    preLineCount = preLineCount === 1 ? 1 : 0; // 前置换行超过2个就交给BR进行渲染
+    content = content.replace(/^\n+/g, '');
+
+    const regex = new RegExp(
+      `\n*~~C\\d+I(?:${ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX})?\\w+?_L(\\d+)\\$`,
+      'g',
+    );
+    let cacheLineCount = 0;
+    content = content.replace(regex, (match, lineCount) => {
+      cacheLineCount += parseInt(lineCount, 10);
+      return match.replace(/^\n+/g, '');
+    });
+    return preLineCount + cacheLineCount + (content.match(/\n/g) || []).length + 1; // 实际内容所占行数，至少为1行
+  }
+
+  /**
+   *
+   * @param {string} str 渲染后的内容
+   * @param {string} sign 签名
+   * @param {number} lineCount md原文的行数
+   * @return {string} cacheKey ~~C0I0_L1$
+   */
+  pushCache(str, sign = '', lineCount = 0) {
     if (!this.cacheState) {
       return;
     }
     const $sign = sign || this.$engine.md5(str);
     this.cache[$sign] = str;
-    return `${this.cacheKey}I${$sign}$`;
+    return `${this.cacheKey}I${$sign}_L${lineCount}$`;
   }
 
   popCache(sign) {
@@ -133,7 +190,7 @@ export default class ParagraphBase extends SyntaxBase {
       `${this.cacheKey}I((?:${ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX})?\\w+)\\$`,
       'g',
     );
-    const $html = html.replace(regex, (match, cacheSign) => this.popCache(cacheSign));
+    const $html = html.replace(regex, (match, cacheSign) => this.popCache(cacheSign.replace(/_L\d+$/, '')));
     this.resetCache();
     return $html;
   }
