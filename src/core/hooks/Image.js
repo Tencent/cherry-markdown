@@ -96,6 +96,13 @@ export default class Image extends SyntaxBase {
     return match;
   }
 
+  toMediaHtml(match, leadingChar, mediaType, alt, link, title, ref, ...args) {
+    if (!this.extendMedia.replacer[mediaType]) {
+      return match;
+    }
+    return this.extendMedia.replacer[mediaType].call(this, match, leadingChar, alt, link, title, ref, ...args);
+  }
+
   makeHtml(str) {
     let $str = str;
     if (this.test($str)) {
@@ -106,12 +113,11 @@ export default class Image extends SyntaxBase {
       }
     }
     if (this.testMedia($str)) {
-      $str = $str.replace(this.RULE.regExtend, (match, leadingChar, mediaType, alt, link, title, ref, ...args) => {
-        if (!this.extendMedia.replacer[mediaType]) {
-          return match;
-        }
-        return this.extendMedia.replacer[mediaType].call(this, match, leadingChar, alt, link, title, ref, ...args);
-      });
+      if (isLookbehindSupported()) {
+        $str = $str.replace(this.RULE.regExtend, this.toMediaHtml.bind(this));
+      } else {
+        $str = replaceLookbehind($str, this.RULE.regExtend, this.toMediaHtml.bind(this), true, 1);
+      }
     }
     return $str;
   }
@@ -143,7 +149,9 @@ export default class Image extends SyntaxBase {
     if (extendMedia) {
       const extend = { ...ret };
       // TODO: 支持Lookbehind
-      extend.begin = `(^|[^\\\\])!(${extendMedia.tag.join('|')})`;
+      extend.begin = isLookbehindSupported()
+        ? `((?<!\\\\))!(${extendMedia.tag.join('|')})`
+        : `(^|[^\\\\])!(${extendMedia.tag.join('|')})`;
       ret.regExtend = compileRegExp(extend, 'g');
     }
     ret.reg = compileRegExp(ret, 'g');
