@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 import SyntaxBase from '@/core/SyntaxBase';
+import { isLookbehindSupported } from '@/utils/regexp';
+import { replaceLookbehind } from '@/utils/lookbehind-replace';
 
 export default class Color extends SyntaxBase {
   static HOOK_NAME = 'fontColor';
@@ -21,18 +23,22 @@ export default class Color extends SyntaxBase {
   //     super();
   // }
 
+  toHtml(whole, m1, m2) {
+    return `<span style="color:${m1}">${m2}</span>`;
+  }
+
   makeHtml(str) {
-    if (!this.test(str)) {
-      return str;
+    if (isLookbehindSupported()) {
+      return str.replace(this.RULE.reg, this.toHtml);
     }
-    return str.replace(this.RULE.reg, '$2<span style="color:$4">$5</span>$7');
+    return replaceLookbehind(str, this.RULE.reg, this.toHtml, true, 1);
   }
 
   rule() {
     const ret = {
-      begin: '((^|[^\\\\])(!!))',
-      end: '(!!([\\s\\S]|$))',
-      content: '(#[0-9a-zA-Z]{3,6}|[a-z]{3,20})[\\s]([\\w\\W]*?)',
+      begin: isLookbehindSupported() ? '(?<!\\\\)\\!\\!' : '(?:^|[^\\\\])\\!\\!',
+      end: '\\!\\!',
+      content: '(#[0-9a-zA-Z]{3,6}|[a-z]{3,20})[\\s]([\\w\\W]+?)',
     };
     ret.reg = new RegExp(ret.begin + ret.content + ret.end, 'g');
     return ret;
