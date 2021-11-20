@@ -44,12 +44,15 @@ export default class MathBlock extends ParagraphBase {
     const sign = this.$engine.md5(wholeMatch);
     let lines = this.getLineCount(wholeMatchWithoutSpace, lineSpaceWithoutPreSpace);
     // 判断公式是不是新行输入，如果不是新行，则行号减1
-    /\n/.test(lineSpace) || lines --;
+    if (!/\n/.test(lineSpace)) {
+      lines -= 1;
+    }
     // 判断公式后面有没有尾接内容，如果尾接了内容，则行号减1
-    /\n\s*$/.test(wholeMatch) || lines --;
+    if (!/\n\s*$/.test(wholeMatch)) {
+      lines -= 1;
+    }
     // 目前的机制还没有测过lines为负数的情况，先不处理
     lines = lines > 0 ? lines : 0;
-
 
     if (this.engine === 'katex') {
       // katex渲染

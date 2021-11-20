@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import SyntaxBase, { HOOKS_TYPE_LIST } from './SyntaxBase';
-import { prependLineFeedForParagraph, calculateLinesOfParagraph } from '@/utils/lineFeed';
+import { prependLineFeedForParagraph } from '@/utils/lineFeed';
 
 let cacheCounter = 0;
 // ~~C${cacheCounter}I${cacheIndex}$
@@ -99,7 +99,7 @@ export default class ParagraphBase extends SyntaxBase {
 
   /**
    * 获取非捕获匹配丢掉的换行，适用于能被【嵌套】的段落语法
-   * 
+   *
    * @param {string} cache 需要返回的cache
    * @param {string} md 原始的md字符串
    * @param {boolean} alwaysAlone 是否能被【嵌套】，true：不能被嵌套，如标题、注释等；false：能被嵌套，如代码块、有序列表等
@@ -108,7 +108,7 @@ export default class ParagraphBase extends SyntaxBase {
   getCacheWithSpace(cache, md, alwaysAlone = false) {
     const preSpace = md.match(/^\n+/)?.[0] ?? '';
     const afterSpace = md.match(/\n+$/)?.[0] ?? '';
-    if(alwaysAlone) {
+    if (alwaysAlone) {
       return prependLineFeedForParagraph(md, cache);
     }
     return `${preSpace}${cache}${afterSpace}`;
@@ -117,7 +117,7 @@ export default class ParagraphBase extends SyntaxBase {
   /**
    * 获取行号，只负责向上计算\n
    * 会计算cache的行号
-   * 
+   *
    * @param {string} md md内容
    * @param {string} preSpace 前置换行
    * @return {number} 行数
@@ -131,7 +131,7 @@ export default class ParagraphBase extends SyntaxBase {
      *      - bb\n
      *      \n
      *      cc\n
-     * 
+     *
      *    cc的前置换行个数为 1，bb后的\n不计算在内
      *    cc的正则为：/(?:^|\n)(\n*)xxxxxx/
      */
@@ -145,7 +145,7 @@ export default class ParagraphBase extends SyntaxBase {
     );
     let cacheLineCount = 0;
     content = content.replace(regex, (match, lineCount) => {
-      cacheLineCount += parseInt(lineCount);
+      cacheLineCount += parseInt(lineCount, 10);
       return match.replace(/^\n+/g, '');
     });
     return preLineCount + cacheLineCount + (content.match(/\n/g) || []).length + 1; // 实际内容所占行数，至少为1行

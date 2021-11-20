@@ -16,7 +16,6 @@
 import ParagraphBase from '@/core/ParagraphBase';
 import Prism from 'prismjs';
 import { escapeHTMLSpecialChar } from '@/utils/sanitize';
-import { prependLineFeedForParagraph } from '@/utils/lineFeed';
 
 Prism.manual = true;
 
@@ -134,7 +133,6 @@ export default class CodeBlock extends ParagraphBase {
     const sign = this.$engine.md5(match.replace(/^\n+/, '') + lines);
     return {
       sign,
-      leadingSpaces,
       lines,
     };
   }
@@ -207,7 +205,7 @@ export default class CodeBlock extends ParagraphBase {
 
     $str = $str.replace(this.RULE.reg, (match, leadingContent, lang, code) => {
       let $code = code;
-      const { sign, leadingSpaces, lines } = this.computeLines(match, leadingContent, code);
+      const { sign, lines } = this.computeLines(match, leadingContent, code);
       // 从缓存中获取html
       let cacheCode = this.$codeCache(sign);
       if (cacheCode && cacheCode !== '') {

@@ -15,7 +15,6 @@
  */
 import ParagraphBase from '@/core/ParagraphBase';
 import { compileRegExp } from '@/utils/regexp';
-import { prependLineFeedForParagraph } from '@/utils/lineFeed';
 
 function computeLeadingSpaces(leadingChars) {
   const indentRegex = /^(\t|[ ]{1,4})/;
@@ -49,13 +48,11 @@ export default class Blockquote extends ParagraphBase {
       const countReg = />/g;
       let lastLevel = 1;
       let level = 0;
-      let breakIndex = 0;
       let handledHtml = `<blockquote data-sign="${sign}_${lineCount}" data-lines="${lineCount}">`;
       for (let i = 0; contentLines[i]; i++) {
         if (i !== 0) {
           const leadIndent = computeLeadingSpaces(contentLines[i]);
           if (leadIndent <= lastIndent && listRegex.test(contentLines[i])) {
-            breakIndex = i;
             break;
           }
           lastIndent = leadIndent;

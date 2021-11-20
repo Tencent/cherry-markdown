@@ -97,7 +97,9 @@ export default class Paragraph extends ParagraphBase {
         }
         // 计算行号
         const lines = this.getLineCount(p, p);
-        return `<${domName} data-sign="${sign}${lines}" data-type="${domName}" data-lines="${lines}">${this.$cleanParagraph(html)}</${domName}>`;
+        return `<${domName} data-sign="${sign}${lines}" data-type="${domName}" data-lines="${lines}">${this.$cleanParagraph(
+          html,
+        )}</${domName}>`;
       };
       if (cacheMixedInMatches) {
         return this.makeExcludingCached(`${preLines}${content}`, processor);

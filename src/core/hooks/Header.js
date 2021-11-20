@@ -15,7 +15,7 @@
  */
 import ParagraphBase from '@/core/ParagraphBase';
 import { compileRegExp } from '@/utils/regexp';
-import { prependLineFeedForParagraph, calculateLinesOfParagraph } from '@/utils/lineFeed';
+import { calculateLinesOfParagraph } from '@/utils/lineFeed';
 
 const ATX_HEADER = 'atx';
 const SETEXT_HEADER = 'setext';
@@ -142,7 +142,7 @@ export default class Header extends ParagraphBase {
     }
     return $str;
   }
-  
+
   makeHtml(str, sentenceMakeFunc) {
     // 先还原
     let $str = this.restoreCache(str);
