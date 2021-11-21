@@ -216,7 +216,7 @@ export default class Table extends ParagraphBase {
           .split(/\n/)
           .map((line) => String(line).trim());
         const { html: table, sign } = this.$parseTable(lines, sentenceMakeFunc, dataLines);
-        return leading + this.pushCache(table, sign, dataLines);
+        return this.getCacheWithSpace(this.pushCache(table, sign, dataLines), match);
       });
     }
     // loose mode
@@ -230,7 +230,7 @@ export default class Table extends ParagraphBase {
           .split(/\n/)
           .map((line) => String(line).trim());
         const { html: table, sign } = this.$parseTable(lines, sentenceMakeFunc, dataLines);
-        return leading + this.pushCache(table, sign, dataLines);
+        return this.getCacheWithSpace(this.pushCache(table, sign, dataLines), match);
       });
     }
     return $str;
