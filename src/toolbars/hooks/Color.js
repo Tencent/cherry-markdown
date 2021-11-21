@@ -198,7 +198,7 @@ class BubbleColor {
       (evt) => {
         const { target } = /** @type {MouseEvent & {target:HTMLElement}}*/ (evt);
         this.colorValue = target.getAttribute('data-val');
-        if(!this.colorValue) {
+        if (!this.colorValue) {
           return false;
         }
         this.type = target.closest('.cherry-color-text') ? 'text' : 'bg';
