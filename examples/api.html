@@ -406,6 +406,38 @@ cherryObj.toolbar.toolbarHandlers.graph(4)</textarea>
       </div>
     </div>
 
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.export(type:string)</h2>
+      <p class="one-api__desc">cherry编辑器导出PDF/长图</p>
+      <table class="cherry-api-table">
+        <thead>
+          <tr>
+            <th>type</th>
+            <th>效果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>'pdf'</td>
+            <td>PDF</td>
+          </tr>
+          <tr>
+            <td>'screenShot'</td>
+            <td>长图</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.toolbar.toolbarHandlers.export('pdf')</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.toolbar.toolbarHandlers.export('screenShot')</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
   </div>
   <div id="markdown"></div>
 
