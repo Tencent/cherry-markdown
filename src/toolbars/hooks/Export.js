@@ -44,7 +44,9 @@ export default class Export extends MenuBase {
   }
 
   onClick(shortKey = '', type) {
-    /** @type {HTMLElement}*/ (document.querySelector('.cherry-dropdown[name=export]')).style.display = 'none';
+    if (document.querySelector('.cherry-dropdown[name=export]')) {
+      /** @type {HTMLElement}*/ (document.querySelector('.cherry-dropdown[name=export]')).style.display = 'none';
+    }
     if (type === 'pdf') this.exportPDF();
     else if (type === 'screenShot') this.exportScreenShot();
   }
