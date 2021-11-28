@@ -494,4 +494,13 @@ export default class Cherry extends CherryStatic {
       this.toolbar.fireShortcutKey(evt, codemirror);
     }
   }
+
+  /**
+   * 导出预览区域内容
+   * @public
+   * @param {String} type 'pdf'：导出成pdf文件; 'img'：导出成图片
+   */
+  export(type = 'pdf') {
+    this.previewer.export(type);
+  }
 }
