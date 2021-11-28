@@ -22,6 +22,7 @@ import Logger from './Logger';
 import Event from './Event';
 // import locale from './utils/locale';
 import { addEvent, removeEvent } from './utils/event';
+import { exportPDF, exportScreenShot } from './utils/export';
 import PreviewerBubble from './toolbars/PreviewerBubble';
 
 let onScroll = () => {}; // store in memory for remove event
@@ -728,6 +729,19 @@ export default class Previewer {
         // console.log('滚动编辑区域，左侧应scroll to ', lineNum, '::',scrollTo);
         return;
       }
+    }
+  }
+
+  /**
+   * 导出预览区域内容
+   * @public
+   * @param {String} type 'pdf'：导出成pdf文件; 'img'：导出成图片
+   */
+  export(type = 'pdf') {
+    if (type === 'pdf') {
+      exportPDF(this.getDomContainer());
+    } else {
+      exportScreenShot(this.getDomContainer());
     }
   }
 }
