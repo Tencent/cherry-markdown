@@ -33,6 +33,15 @@ function classNamesToAttributeString(array) {
   return '';
 }
 
+function makeChecklist(text) {
+  return text.replace(/([*+-]\s+)\[(\s|x)\]/g, (whole, pre, test) => {
+    const checkHtml = /\s/.test(test)
+      ? '<span class="ch-icon ch-icon-square"></span>'
+      : '<span class="ch-icon ch-icon-check"></span>';
+    return `${pre}${checkHtml}`;
+  });
+}
+
 export default class List extends ParagraphBase {
   static HOOK_NAME = 'list';
 
@@ -62,8 +71,8 @@ export default class List extends ParagraphBase {
   }
 
   $wrapList(text, dataLines, sentenceMakeFunc) {
-    const { sign: contentSign, html } = sentenceMakeFunc(text);
-    const sign = this.signWithCache(html) || contentSign;
+    const sign = this.$engine.md5(text);
+    const html = makeChecklist(text);
     const items = html.split('\n');
     // 列表结尾换行符个数
     const endLineFlagLength = html.match(/\n*$/g)[0].length;
@@ -128,6 +137,7 @@ export default class List extends ParagraphBase {
     // 内容处理
     const listStack = [null]; // 列表类型栈
     items.forEach((item, index) => {
+      const { html: itemWithHtml } = sentenceMakeFunc(item);
       // 数组越界，跳过
       if (index < 1) {
         return;
@@ -135,14 +145,14 @@ export default class List extends ParagraphBase {
 
       // 无类型列表单独处理，不入栈
       if (types[index] === 'blank') {
-        handledHtml += `<br>${item}`;
+        handledHtml += `<br>${itemWithHtml}`;
         return;
       }
 
       const itemClassNames = [];
       const blockAttrs = {};
       // checklist 判断
-      if (checklistRegex.test(item)) {
+      if (checklistRegex.test(itemWithHtml)) {
         itemClassNames.push('check-list-item');
       }
 
@@ -160,7 +170,7 @@ export default class List extends ParagraphBase {
           blockAttrs.start = `${starts[index]}`;
         }
         listStack.unshift(types[index]); // 有序、无序列表入栈
-        handledHtml += `<${types[index]}${attrsToAttributeString(blockAttrs)}>${newListItemStartTag}${item}`;
+        handledHtml += `<${types[index]}${attrsToAttributeString(blockAttrs)}>${newListItemStartTag}${itemWithHtml}`;
       } else if (indents[index] <= indents[index - 1]) {
         // 缩进减少，列表项闭合
         // delta表示需要出栈的次数
@@ -197,7 +207,7 @@ export default class List extends ParagraphBase {
         } else {
           handledHtml += `</li>${newListItemStartTag}`;
         }
-        handledHtml += item;
+        handledHtml += itemWithHtml;
       }
     });
 

@@ -38,7 +38,6 @@ import Blockquote from './hooks/Blockquote';
 import AutoLink from './hooks/AutoLink';
 import MathBlock from './hooks/MathBlock';
 import InlineMath from './hooks/InlineMath';
-import CheckList from './hooks/CheckList';
 import Toc from './hooks/Toc';
 import Footnote from './hooks/Footnote';
 import CommentReference from './hooks/CommentReference';
@@ -64,7 +63,6 @@ const hooksConfig = [
   CommentReference,
   Transfer,
   Br,
-  CheckList,
   Table,
   Blockquote,
   Toc,
