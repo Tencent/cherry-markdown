@@ -325,6 +325,12 @@ Click [extensions](./docs/extensions.md) if you want knoe more extension about c
 
 Welcome to join us to build a more powerful Markdown editor. Of course you can submit feature request to us. Please read[extensions](./docs/extensions.md) and [commit_convention](./docs/commit_convention.md) before you working on it.
 
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/Tencent/cherry-markdown.svg)](https://starchart.cc/Tencent/cherry-markdown)
+
+
 ## License
 
 Apache-2.0
