@@ -1,7 +1,7 @@
-const { URL_INLINE_NO_SLASH } = require('../../src/utils/regexp');
-const { expect } = require('chai');
+import { URL_INLINE_NO_SLASH } from '../../src/utils/regexp';
+import { expect } from 'chai';
 
-describe('ip address test', () => {
+describe('utils/regexp', () => {
   it('ip address', () => {
     const cases = [
       {

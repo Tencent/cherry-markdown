@@ -37,7 +37,7 @@
     "build:types": "tsc --project tsconfig.json",
     "clean": "rimraf ./dist",
     "check-bundle": "es-check es5 dist/cherry-markdown.js dist/cherry-markdown.min.js",
-    "test": "mocha --require @babel/register \"test/**/*.spec.js\"",
+    "test": "cross-env TS_NODE_PROJECT='test/tsconfig.test.json' mocha \"test/**/*.spec.ts\"",
     "lint": "eslint --ext .js .",
     "lint:fix": "eslint --ext .js . --fix",
     "commit": "./node_modules/cz-customizable/standalone.js",
@@ -45,6 +45,12 @@
     "prepublishOnly": "npm run build",
     "publish": "git push --follow-tags origin master && npm publish",
     "examples": "anywhere -p 3000 -s"
+  },
+  "mocha": {
+    "require": [
+      "ts-node/register",
+      "tsconfig-paths/register"
+    ]
   },
   "keywords": [
     "markdown"
@@ -76,6 +82,7 @@
     "@types/jsdom": "^16.2.13",
     "@types/lodash": "^4.14.170",
     "@types/mermaid": "^8.2.6",
+    "@types/mocha": "^9.0.0",
     "@types/virtual-dom": "^2.1.0",
     "@typescript-eslint/eslint-plugin": "^4.27.0",
     "@typescript-eslint/parser": "^4.27.0",
@@ -110,6 +117,8 @@
     "rollup-plugin-serve-proxy": "^1.1.4",
     "rollup-plugin-terser": "^5.3.0",
     "standard-version": "^9.3.2",
+    "ts-node": "^10.4.0",
+    "tsconfig-paths": "^3.12.0",
     "typescript": "4.3.5"
   },
   "dependencies": {
