@@ -1,15 +1,9 @@
-const AutoLink = require('../../../src/core/hooks/AutoLink').default;
-const { expect } = require('chai');
+import AutoLink from '../../../src/core/hooks/AutoLink';
+import { expect } from 'chai';
 
-const autoLinkHook = new AutoLink({});
+const autoLinkHook = new AutoLink({ config: {}, globalConfig: {}});
 
-describe('static name required', () => {
-  it('nameTest', () => {
-    expect(AutoLink.HOOK_NAME).to.be.equal('autoLink');
-  });
-});
-
-describe('autolink hook util function test', () => {
+describe('core/hooks/autolink', () => {
   it('isLinkInHtmlAttribute', () => {
     const cases = [
       {
