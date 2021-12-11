@@ -146,7 +146,7 @@ export default class HookCenter {
   register(HookClass, editorConfig, customHookConfig) {
     // filter Configs Here
     const { externals, engine } = editorConfig;
-    const { syntax } = engine;
+    const { syntax, customSyntax } = engine;
     let instance;
     let hookName;
     // 首先校验Hook是否合法
@@ -164,7 +164,7 @@ export default class HookCenter {
       }
     } else {
       hookName = /** @type {typeof SyntaxBase}*/ (HookClass).HOOK_NAME;
-      const config = syntax[hookName] ? syntax[hookName] : {};
+      const config = syntax[hookName] ? syntax[hookName] : customSyntax[hookName] ? customSyntax[hookName] : {};
       instance = new /** @type {typeof SyntaxBase}*/ (HookClass)({ externals, config, globalConfig: engine.global });
     }
     // Skip Internal Hook
