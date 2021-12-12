@@ -1,7 +1,7 @@
 {
   "name": "cherry-markdown",
   "license": "Apache-2.0",
-  "version": "0.5.14",
+  "version": "0.5.15",
   "description": "a new markdown editor",
   "repository": {
     "type": "git",
@@ -43,7 +43,7 @@
     "commit": "./node_modules/cz-customizable/standalone.js",
     "release": "standard-version",
     "prepublishOnly": "npm run build",
-    "publish": "git push --follow-tags origin master && npm publish",
+    "publish": "git push --follow-tags origin main && npm publish",
     "examples": "anywhere -p 3000 -s"
   },
   "mocha": {
