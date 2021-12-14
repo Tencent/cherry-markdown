@@ -48,4 +48,15 @@ if (!Array.isArray(options.external)) {
 }
 options.external.push('mermaid');
 
+/** 构建目标是否 node */
+const IS_COMMONJS_BUILD = process.env.BUILD_TARGET === 'commonjs';
+
+if (IS_COMMONJS_BUILD) {
+  options.output = {
+    ...options.output,
+    file: options.output.file.replace(/\.js$/, '.common.js'),
+    format: 'cjs',
+  };
+}
+
 export default options;

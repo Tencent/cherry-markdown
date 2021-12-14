@@ -14,24 +14,14 @@
  * limitations under the License.
  */
 import ParagraphBase from '@/core/ParagraphBase';
-import createDOMPurify from 'dompurify';
 import {
   whiteList,
   convertHTMLNumberToName,
   // isValidScheme, encodeURIOnce,
   escapeHTMLEntitiesWithoutSemicolon,
 } from '@/utils/sanitize';
-import { JSDOM } from 'jsdom';
+import { sanitizer } from '@/Sanitizer';
 import { isBrowser } from '@/utils/env';
-
-let sanitizer;
-
-if (isBrowser()) {
-  sanitizer = createDOMPurify(window);
-} else {
-  const { window } = new JSDOM('');
-  sanitizer = createDOMPurify(/** @type {any} */ (window));
-}
 
 export default class HtmlBlock extends ParagraphBase {
   static HOOK_NAME = 'htmlBlock';
