@@ -164,7 +164,7 @@ export default class HookCenter {
       }
     } else {
       hookName = /** @type {typeof SyntaxBase}*/ (HookClass).HOOK_NAME;
-      const config = syntax[hookName] ? syntax[hookName] : customSyntax[hookName] ? customSyntax[hookName] : {};
+      const config = syntax[hookName] || customSyntax[hookName] || {};
       instance = new /** @type {typeof SyntaxBase}*/ (HookClass)({ externals, config, globalConfig: engine.global });
     }
     // Skip Internal Hook
