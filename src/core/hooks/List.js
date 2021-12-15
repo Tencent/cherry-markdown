@@ -70,8 +70,7 @@ export default class List extends ParagraphBase {
     return 'default';
   }
 
-  $wrapList(text, dataLines, sentenceMakeFunc) {
-    const sign = this.$engine.md5(text);
+  $wrapList(text, sign, dataLines, sentenceMakeFunc) {
     const html = makeChecklist(text);
     const items = html.split('\n');
     // 列表结尾换行符个数
@@ -221,7 +220,7 @@ export default class List extends ParagraphBase {
         const ignoreEndLineFlags = wholeMatch.replace(/\n*(\s*~0)?$/g, '');
         const lines = this.getLineCount(ignoreEndLineFlags, lineSpaces);
         const text = wholeMatch.replace(/~0$/g, '').replace(/^\n+/, '');
-        const { html: result, sign } = this.$wrapList(text, lines, sentenceMakeFunc);
+        const { html: result, sign } = this.$wrapList(text, this.$engine.md5(text), lines, sentenceMakeFunc);
         return this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
       });
     }

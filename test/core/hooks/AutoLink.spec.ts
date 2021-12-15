@@ -1,5 +1,4 @@
 import AutoLink from '../../../src/core/hooks/AutoLink';
-import { expect } from 'chai';
 
 const autoLinkHook = new AutoLink({ config: {}, globalConfig: {}});
 
@@ -23,7 +22,7 @@ describe('core/hooks/autolink', () => {
       },
     ];
     cases.forEach((item) => {
-      expect(autoLinkHook.isLinkInHtmlAttribute(item.str, item.index, item.length)).to.be.equal(true);
+      expect(autoLinkHook.isLinkInHtmlAttribute(item.str, item.index, item.length)).toBe(true);
     });
   });
 });

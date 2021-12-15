@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`core/hooks/list checklist replace 1`] = `
+Object {
+  "html": "<br></li></null><ul data-sign=\\"1list1\\" data-lines=\\"1\\" class=\\"cherry-list__default\\"><li>1</li><li>2<ul class=\\"cherry-list__default\\"><li>2.1</li><li>2.2</li></ul></li><li>3<ul class=\\"cherry-list__circle\\"><li>3.1</li></ul></li><li>4<ul class=\\"cherry-list__square\\"><li>4.2</li></ul></li></ul><null data-sign=\\"1list1\\" data-lines=\\"1\\" class=\\"cherry-list__null\\"><li>",
+  "sign": "1",
+}
+`;
+
+exports[`core/hooks/list checklist replace 2`] = `
+Object {
+  "html": "<br></li></null><ul data-sign=\\"1list1\\" data-lines=\\"1\\" class=\\"cherry-list__default\\"><li>1<ul class=\\"cherry-list__default\\"><li>2<ul class=\\"cherry-list__default\\"><li>2.1</li><li>2.2</li></ul></li></ul></li><li>3<br>+ 3.1</li><li>4</li><li>4.2</li></ul><null data-sign=\\"1list1\\" data-lines=\\"1\\" class=\\"cherry-list__null\\"><li>",
+  "sign": "1",
+}
+`;
