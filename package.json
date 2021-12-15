@@ -95,6 +95,7 @@
     "eslint": "^7.17.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-config-tencent": "^1.0.2",
+    "eslint-plugin-jest": "^25.3.0",
     "eslint-plugin-prettier": "^3.3.1",
     "gulp": "^4.0.2",
     "gulp-consolidate": "^0.2.0",
