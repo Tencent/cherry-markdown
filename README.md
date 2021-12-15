@@ -254,6 +254,8 @@ Click [here](./docs/configuration.md) for the full documentation of Cherry confi
 ## Example
 
 Click [here](./examples/) for more examples.
+### Client
+[cherry-markdown client](./docs/cherry_editor_client.md)
 
 ## Extension
 

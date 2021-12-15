@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "cherry-markdown": "^0.5.14"
+  },
+  "scripts": {
+    "start": "electron ."
+  },
+  "name": "cherrymd",
+  "version": "1.0.0",
+  "main": "main.js",
+  "description": "Hello World!",
+  "author": "big joe",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^16.0.3"
+  }
+}

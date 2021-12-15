@@ -255,6 +255,9 @@ registerPlugin().then(() => {
 
 点击查看 [examples](./examples/)
 
+### 客户端
+[cherry-markdown 桌面客户端](./docs/cherry_editor_client.CN.md)
+
 ## 拓展
 
 ### 自定义语法

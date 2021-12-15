@@ -13,8 +13,8 @@
 <footer>
 ```
 
-- 标题行:  !!#ff0000 必填!! , 描述主要修改类型和内容，scope增强描述提交作用范围，例如我们cherry的core层、Edior、Previewer等
-- 主题内容: 描述为什么修改, 做了什么样的修改, 以及开发的思路； !!#ff0000 这里直接引用tapd源码关键字，若没有则不填!!
+- 标题行:  **必填** , 描述主要修改类型和内容，scope增强描述提交作用范围，例如我们cherry的core层、Edior、Previewer等
+- 主题内容: 描述为什么修改, 做了什么样的修改, 以及开发的思路； **这里直接引用tapd源码关键字，若没有则不填**
 - 页脚注释: 放 Breaking Changes 或 Closed Issues
 
 ### 示例
@@ -48,7 +48,7 @@ Close #10
 
 ## 三、自动生成changelog（生成release，为版本发布使用）
 
- !!#ff0000 master分支合并新代码!! 后生成新版本：
+**master分支合并新代码** 后生成新版本：
 执行指令
 `npm run release -- --release-as 1.1.0`
 
