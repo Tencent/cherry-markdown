@@ -1,17 +1,34 @@
-import { makeChecklist } from '../../../src/core/hooks/List';
-import { expect } from 'chai';
+import List from '../../../src/core/hooks/List';
 
-const list1 = '- [x] test';
+const list1 = `
+- 1
+- 2
+  - 2.1
+  - 2.2
+- 3
+  + 3.1
+- 4
+  * 4.2
+`;
+
+const list2 = `
+- 1
+  - 2
+       - 2.1
+    - 2.2
+ - 3
+          + 3.1
+ - 4
+* 4.2
+`;
+
+const listHook = new List({ config: {}});
 
 describe('core/hooks/list', () => {
   it('checklist replace', () => {
-    const cases = [
-      {
-        str: list1,
-      },
-    ];
+    const cases = [list1, list2];
     cases.forEach((item) => {
-      expect(makeChecklist(item.str)).to.be.equal('- <span class="ch-icon ch-icon-check"></span> test');
+      expect(listHook.$wrapList(item, '1', 1, (text) => ({ html: text }))).toMatchSnapshot();
     });
   });
 });
