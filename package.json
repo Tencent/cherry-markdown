@@ -40,7 +40,7 @@
     "build:types": "tsc --project tsconfig.json",
     "clean": "rimraf ./dist",
     "check-bundle": "es-check es5 dist/cherry-markdown.js dist/cherry-markdown.min.js",
-    "test": "cross-env TS_NODE_PROJECT='test/tsconfig.test.json' mocha \"test/**/*.spec.ts\"",
+    "test": "jest",
     "lint": "eslint --ext .js .",
     "lint:fix": "eslint --ext .js . --fix",
     "commit": "./node_modules/cz-customizable/standalone.js",
@@ -48,12 +48,6 @@
     "prepublishOnly": "npm run build",
     "publish": "git push --follow-tags origin main && npm publish",
     "examples": "anywhere -p 3000 -s"
-  },
-  "mocha": {
-    "require": [
-      "ts-node/register",
-      "tsconfig-paths/register"
-    ]
   },
   "keywords": [
     "markdown"
@@ -82,17 +76,17 @@
     "@types/codemirror": "^0.0.108",
     "@types/dompurify": "^2.2.3",
     "@types/echarts": "4.6.0",
+    "@types/jest": "^27.0.3",
     "@types/jsdom": "^16.2.13",
     "@types/lodash": "^4.14.170",
     "@types/mermaid": "^8.2.6",
-    "@types/mocha": "^9.0.0",
     "@types/virtual-dom": "^2.1.0",
     "@typescript-eslint/eslint-plugin": "^4.27.0",
     "@typescript-eslint/parser": "^4.27.0",
     "anywhere": "^1.5.0",
     "async": "^3.1.0",
+    "babel-jest": "^27.4.4",
     "babel-plugin-prismjs": "^2.1.0",
-    "chai": "^4.2.0",
     "commitizen": "^4.0.5",
     "core-js-pure": "^3.8.2",
     "cross-env": "^7.0.2",
@@ -106,7 +100,7 @@
     "gulp-consolidate": "^0.2.0",
     "gulp-iconfont": "^11.0.0",
     "gulp-rename": "^2.0.0",
-    "mocha": "^8.2.0",
+    "jest": "^27.4.4",
     "node-sass": "^6.0.1",
     "npm-run-all": "^4.1.5",
     "prettier": "2.2.1",
@@ -120,8 +114,7 @@
     "rollup-plugin-serve-proxy": "^1.1.4",
     "rollup-plugin-terser": "^5.3.0",
     "standard-version": "^9.3.2",
-    "ts-node": "^10.4.0",
-    "tsconfig-paths": "^3.12.0",
+    "ts-jest": "^27.1.1",
     "typescript": "4.3.5"
   },
   "dependencies": {

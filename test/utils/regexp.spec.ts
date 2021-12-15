@@ -1,5 +1,4 @@
 import { URL_INLINE_NO_SLASH } from '../../src/utils/regexp';
-import { expect } from 'chai';
 
 describe('utils/regexp', () => {
   it('ip address', () => {
@@ -20,9 +19,9 @@ describe('utils/regexp', () => {
     cases.forEach((item) => {
       const match = item.str.match(URL_INLINE_NO_SLASH);
       if (!item.match) {
-        expect(match).to.be.equal(null);
+        expect(match).toBe(null);
       } else {
-        expect(match[0]).to.be.equal(item.match);
+        expect(match[0]).toBe(item.match);
       }
     });
   });
