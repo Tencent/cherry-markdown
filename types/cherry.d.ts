@@ -37,6 +37,20 @@ export interface CherryExternalsOptions {
   [key: string]: any;
 }
 
+/**
+ *  自定义语法注册配置
+ */
+export interface CustomSyntaxRegConfig {
+  /** 语法class */
+  syntaxClass: typeof SyntaxBase;
+  /** 在某个hook前执行，填入hookName */
+  before?: string;
+  /** 在某个hook后执行，填入hookName */
+  after?: string;
+  /** 强制覆盖同名hook */
+  force?: boolean;
+}
+
 export interface CherryEngineOptions {
   /** 引擎的全局配置 */
   global?: {
@@ -65,18 +79,7 @@ export interface CherryEngineOptions {
   /** 内置语法配置 */
   syntax?: Record<string, Record<string, any> | false>;
   /** 自定义语法 */
-  customSyntax?:
-    | typeof SyntaxBase
-    | {
-        /** 语法class */
-        syntaxClass: typeof SyntaxBase;
-        /** 在某个hook前执行，填入hookName */
-        before?: string;
-        /** 在某个hook后执行，填入hookName */
-        after?: string;
-        /** 强制覆盖同名hook */
-        force?: boolean;
-      };
+  customSyntax?: Record<string, CustomSyntaxRegConfig['syntaxClass'] | CustomSyntaxRegConfig>;
 }
 
 export type EditorMode =
