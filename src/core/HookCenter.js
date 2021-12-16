@@ -18,6 +18,14 @@ import ParagraphBase from './ParagraphBase';
 import { $expectTarget } from '@/utils/error';
 import Logger from '@/Logger';
 
+/**
+ * @typedef {import('~types/cherry').CherryOptions} CherryOptions
+ * @typedef {import('~types/cherry').CherryEngineOptions} CherryEngineOptions
+ * @typedef {import('~types/cherry').CustomSyntaxRegConfig} CustomSyntaxRegConfig
+ * @typedef { (SyntaxBase | ParagraphBase) & { Cherry$$CUSTOM: true } } CustomSyntax
+ * @typedef { (typeof SyntaxBase | typeof ParagraphBase) & { Cherry$$CUSTOM: true } } CustomSyntaxClass
+ */
+
 const WARN_DUPLICATED = -1;
 const WARN_NOT_A_VALID_HOOK = -2;
 
@@ -43,11 +51,51 @@ function processWarning(type, objClass, index) {
   }
 }
 
+/**
+ * 是否一个合法的 HookClass
+ * @param {any} HookClass
+ * @returns { HookClass is (typeof SyntaxBase | typeof ParagraphBase) }
+ */
 function isHookValid(HookClass) {
-  return Object.getPrototypeOf(HookClass) === SyntaxBase || Object.getPrototypeOf(HookClass) === ParagraphBase;
+  return isProtoOfSyntaxBase(HookClass) || isProtoOfParagraphBase(HookClass);
 }
 
-/** @typedef {import('~types/cherry').CherryOptions} CherryOptions */
+/**
+ * 传入的类是否 SyntaxBase 的子类
+ * @param {any} value
+ * @returns { value is typeof SyntaxBase }
+ */
+function isProtoOfSyntaxBase(value) {
+  return Object.prototype.isPrototypeOf.call(SyntaxBase, value);
+}
+
+/**
+ * 传入的类是否 ParagraphBase 的子类
+ * @param {any} value
+ * @returns { value is typeof ParagraphBase }
+ */
+function isProtoOfParagraphBase(value) {
+  return Object.prototype.isPrototypeOf.call(ParagraphBase, value);
+}
+
+/**
+ * 是否一个配置型的自定义语法
+ * @param {any} value
+ * @returns { value is CustomSyntaxRegConfig }
+ */
+function isCustomSyntaxConfig(value) {
+  const syntaxClass = /** @type {any} */ (/** @type {CustomSyntaxRegConfig} */ (value)?.syntaxClass);
+  return isProtoOfSyntaxBase(syntaxClass) || isProtoOfParagraphBase(syntaxClass);
+}
+
+/**
+ * 是否一个已注册的自定义语法hook类
+ * @param {any} value
+ * @returns { value is CustomSyntaxClass }
+ */
+function isRegisteredCustomSyntaxClass(value) {
+  return isHookValid(value) && /** @type {CustomSyntaxClass} */ (value)?.Cherry$$CUSTOM === true;
+}
 
 /**
  * 语法注册中心
@@ -59,8 +107,18 @@ export default class HookCenter {
    * @param {Partial<CherryOptions>} editorConfig
    */
   constructor(hooksConfig, editorConfig) {
-    this.hookList = {};
+    /**
+     * @property
+     * @type {Record<import('./SyntaxBase').HookType, SyntaxBase[]>} hookList hook 名称 -> hook 类型的映射
+     */
+    this.hookList = /** @type {any} */ ({});
+
+    /**
+     * @property
+     * @type {Record<string, { type: import('./SyntaxBase').HookType }>} hookNameList hook 名称 -> hook 类型的映射
+     */
     this.hookNameList = {};
+
     $expectTarget(hooksConfig, Array);
     this.registerInternalHooks(hooksConfig, editorConfig);
     this.registerCustomHooks(editorConfig.engine.customSyntax, editorConfig);
@@ -87,27 +145,30 @@ export default class HookCenter {
 
   /**
    * 注册第三方的语法hook
-   * @param {CherryOptions['engine']['customSyntax']} customHooks 用户传入的配置
+   * @param {CherryEngineOptions['customSyntax']} customHooks 用户传入的配置
    * @param {Partial<CherryOptions>} editorConfig 编辑器配置
    */
   registerCustomHooks(customHooks, editorConfig) {
-    if (!customHooks || !Object.keys(customHooks)) {
+    if (!customHooks) {
       return;
     }
-    Object.keys(customHooks).forEach((CustomHook) => {
-      const paramType = typeof customHooks[CustomHook];
+    const hookNames = Object.keys(customHooks);
+    hookNames.forEach((hookName) => {
+      /** @type {number} */
       let result;
+      /** @type {typeof SyntaxBase} */
       let HookClass;
       const customHookConfig = {};
-      if (paramType === 'function') {
-        HookClass = customHooks[CustomHook];
-      } else if (paramType === 'object') {
-        HookClass = customHooks[CustomHook].syntaxClass;
-        customHookConfig.force = !!customHooks[CustomHook].force;
-        if (customHooks[CustomHook].before) {
-          customHookConfig.before = customHooks[CustomHook].before;
-        } else if (customHooks[CustomHook].after) {
-          customHookConfig.after = customHooks[CustomHook].after;
+      const hookClassOrConfig = customHooks[hookName];
+      if (isProtoOfSyntaxBase(hookClassOrConfig)) {
+        HookClass = hookClassOrConfig;
+      } else if (isCustomSyntaxConfig(hookClassOrConfig)) {
+        HookClass = hookClassOrConfig.syntaxClass;
+        customHookConfig.force = Boolean(hookClassOrConfig.force);
+        if (hookClassOrConfig.before) {
+          customHookConfig.before = hookClassOrConfig.before;
+        } else if (hookClassOrConfig.after) {
+          customHookConfig.after = hookClassOrConfig.after;
         }
       } else {
         return;
@@ -140,20 +201,25 @@ export default class HookCenter {
    *
    * @param {((...args: any[]) => any) | typeof SyntaxBase} HookClass
    * @param {Partial<CherryOptions>} editorConfig
-   * @param {Record<string, any>} [customHookConfig]
+   * @param {Omit<CustomSyntaxRegConfig, 'syntaxClass'>} [customHookConfig]
    * @returns
    */
   register(HookClass, editorConfig, customHookConfig) {
     // filter Configs Here
     const { externals, engine } = editorConfig;
-    const { syntax, customSyntax } = engine;
+    const { syntax } = engine;
+
+    /** @type {SyntaxBase | CustomSyntax} */
     let instance;
+
+    /** @type {string} */
     let hookName;
+
     // 首先校验Hook是否合法
     if (!isHookValid(HookClass)) {
       // 可能是一个function hook
       if (typeof HookClass === 'function') {
-        const funcHook = /** @type {((...args: any[]) => any)}*/ (HookClass);
+        const funcHook = HookClass;
         instance = funcHook(editorConfig);
         if (!instance || !isHookValid(instance.constructor)) {
           return WARN_NOT_A_VALID_HOOK;
@@ -163,19 +229,24 @@ export default class HookCenter {
         return WARN_NOT_A_VALID_HOOK;
       }
     } else {
-      hookName = /** @type {typeof SyntaxBase}*/ (HookClass).HOOK_NAME;
-      const config = syntax[hookName] || customSyntax[hookName] || {};
-      instance = new /** @type {typeof SyntaxBase}*/ (HookClass)({ externals, config, globalConfig: engine.global });
+      hookName = HookClass.HOOK_NAME;
+      // TODO: 需要考虑自定义 hook 配置的传入方式
+      const config = syntax?.[hookName] || {};
+      instance = new HookClass({ externals, config, globalConfig: engine.global });
     }
-    // Skip Internal Hook
-    if (syntax[hookName] === false && /** @type {any}*/ (HookClass).Cherry$$CUSTOM !== true) {
+    // TODO: 待校验是否需要跳过禁用的自定义 hook
+    // Skip Disabled Internal Hooks
+    if (syntax[hookName] === false && !isRegisteredCustomSyntaxClass(HookClass)) {
       return;
     }
+    // 下面处理的都是 CustomSyntax
     const hookType = instance.getType();
     if (this.hookNameList[hookName]) {
-      if (!(/** @type {any}*/ (HookClass).Cherry$$CUSTOM)) {
+      // 内置 hook 重名
+      if (!isRegisteredCustomSyntaxClass(HookClass)) {
         return WARN_DUPLICATED;
       }
+      // 自定义 hook 重名且没有开启覆盖的选项
       if (!customHookConfig.force) {
         return WARN_DUPLICATED;
       }
@@ -186,7 +257,7 @@ export default class HookCenter {
     this.hookNameList[hookName] = { type: hookType };
     this.hookList[hookType] = this.hookList[hookType] || [];
     // 内置Hook直接push到结尾
-    if (/** @type {any}*/ (HookClass).Cherry$$CUSTOM !== true) {
+    if (!isRegisteredCustomSyntaxClass(HookClass)) {
       this.hookList[hookType].push(instance);
       return;
     }
