@@ -113,6 +113,8 @@ const defaultConfig = {
         allowMultiToc: false,
       },
     },
+    // 自定义语法配置
+    customSyntax: {},
   },
   editor: {
     theme: 'default', // depend on codemirror theme name: https://codemirror.net/demo/theme.htm

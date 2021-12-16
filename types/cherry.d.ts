@@ -76,7 +76,8 @@ export interface CherryEngineOptions {
         after?: string;
         /** 强制覆盖同名hook */
         force?: boolean;
-      };
+      }
+    | {};
 }
 
 export type EditorMode =
