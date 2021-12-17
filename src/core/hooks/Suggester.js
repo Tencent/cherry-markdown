@@ -56,6 +56,9 @@ export default class Suggester extends SyntaxBase {
     const { suggester } = config;
 
     this.suggester = {};
+    if (!suggester) {
+      return;
+    }
     suggester.forEach((configItem) => {
       if (!configItem.suggestList) {
         console.warn('[cherry-suggester]: the suggestList of config is missing.');
