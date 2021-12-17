@@ -45,7 +45,7 @@ import HtmlBlock from './hooks/HtmlBlock';
 import Emoji from './hooks/Emoji';
 import Underline from './hooks/Underline';
 import HighLight from './hooks/HighLight';
-
+import Suggester from './hooks/Suggester';
 /**
  * 引擎各语法的配置
  * 主要决定支持哪些语法，以及各语法的执行顺序
@@ -86,6 +86,7 @@ const hooksConfig = [
   Strikethrough,
   Underline,
   HighLight,
+  Suggester,
 ];
 
 export default hooksConfig;
