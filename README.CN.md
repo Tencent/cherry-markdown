@@ -14,8 +14,6 @@ Cherry Markdown Editor 是一款 Javascript Markdown 编辑器，具有开箱即
 
 当 Cherry Markdown 编辑器支持的语法不满足开发者需求时，可以快速的进行二次开发或功能扩展。同时，CherryMarkdown编辑器应该由纯JavaScript实现，不应该依赖angular、vue、react等框架技术，框架只提供容器环境即可。
 
-DEMO **Coming soon**
-
 ## 特性
 
 ### 语法特性
