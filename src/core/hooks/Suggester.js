@@ -137,51 +137,12 @@ class SuggesterPanel {
     this.optionList = [];
     this.cursorMove = true;
     this.suggesterConfig = {};
-    document.head.append(this.createDom(SuggesterPanel.inlineStyle));
 
     if (!this.$suggesterPanel) {
       document.body.append(this.createDom(SuggesterPanel.panelWrap));
       this.$suggesterPanel = document.querySelector('.cherry-suggester-panel');
     }
   }
-
-  static inlineStyle = `
-    <style type="text/css">
-      .cherry-suggester-panel {
-        display: none;
-        position: absolute; left: 0;top: 0;
-        background: #fff;
-        border: 1px solid #ccc;
-        border-radius: 2px;
-        max-height: 200px;
-        box-shadow: 0 2px 8px 1px rgb(0 0 0 / 20%);
-      }
-
-      .cherry-suggester-panel .cherry-suggester-panel__item {
-        border: none;
-        white-space: nowrap;
-        min-width: 50px;
-        padding: 5px 13px;
-        color: #333;
-        display: block;
-        cursor: pointer;
-      }
-
-      .cherry-suggester-panel .cherry-suggester-panel__item.cherry-suggester-panel__item--selected {
-        background-color: #f2f2f5;
-        text-decoration: none;
-        color: #eb7350;
-      }
-
-      .cherry-suggestion {
-        background-color: #ebf3ff;
-        color: #3582fb;
-        padding: 1px 4px;
-        border-radius: 3px;
-        cursor: pointer;
-      }
-    </style>
-  `;
 
   static panelWrap = `<div class="cherry-suggester-panel"></div>`;
 
