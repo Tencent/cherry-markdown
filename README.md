@@ -16,8 +16,6 @@ Developer can call and instantiate Cherry Markdown Editor in a very simple way. 
 
 When the syntax that Cherry Markdown editor support can not meet your needs, secondary development or function extention can be carried out quickly. At the same time, Cherry Markdown editor should be implemented by pure JavaScript, and should not rely on framework technology such as angular, vue and react. Framework only provide a container environment.
 
-DEMO **Coming soon**
-
 ## Feature
 
 ### Syntax Feature
