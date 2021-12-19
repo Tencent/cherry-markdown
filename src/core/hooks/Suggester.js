@@ -108,7 +108,7 @@ export default class Suggester extends SyntaxBase {
   }
 
   rule() {
-    if (!this.suggester) {
+    if (!this.suggester || Object.keys(this.suggester).length <= 0) {
       return {};
     }
     const keys = Object.keys(this.suggester)
