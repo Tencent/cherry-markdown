@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.16](https://github.com/Tencent/cherry-markdown/compare/v0.5.15...v0.5.16) (2021-12-20)
+
+
+### Bug Fixes
+
+* **custom-syntax:** revert get config from customSyntax & fix type error ([e6fc6b8](https://github.com/Tencent/cherry-markdown/commit/e6fc6b8330437c77bf9023579292c88968208b10))
+
 ### [0.5.15](https://github.com/Tencent/cherry-markdown/compare/v0.5.14...v0.5.15) (2021-12-12)
 
 
