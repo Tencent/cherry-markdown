@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.17](https://github.com/Tencent/cherry-markdown/compare/v0.5.16...v0.5.17) (2021-12-21)
+
+
+### Bug Fixes
+
+* **upload:** fix wrong input type ([fd55600](https://github.com/Tencent/cherry-markdown/commit/fd55600e7dd07d76e2e901aed3694b11df56d6db))
+
 ### [0.5.16](https://github.com/Tencent/cherry-markdown/compare/v0.5.15...v0.5.16) (2021-12-20)
 
 
