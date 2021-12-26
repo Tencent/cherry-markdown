@@ -173,6 +173,8 @@ const defaultConfig = {
   },
   // 预览页面不需要绑定事件
   isPreviewOnly: false,
+  // 预览区域跟随编辑器光标自动滚动
+  autoScrollByCursor: true,
 };
 
 export default cloneDeep(defaultConfig);
