@@ -27,6 +27,8 @@ export interface CherryOptions {
   previewer: CherryPreviewerOptions;
   /** 是否开启仅预览模式 */
   isPreviewOnly: boolean;
+  /** 预览区域跟随编辑器光标自动滚动 */
+  autoScrollByCursor: boolean;
   /** 挂载DOM节点ID，引擎模式下不生效 */
   id: string;
   /** 初始内容，引擎模式下不生效 */
