@@ -50,5 +50,7 @@ export type EditorConfiguration = {
   onChange: (changeList: CodeMirror.EditorChangeLinkedList, codemirror: CodeMirror.Editor) => void;
   onScroll: EditorEventCallback;
   handlePaste?: EditorPasteEventHandler;
+  /** 预览区域跟随编辑器光标自动滚动 */
+  autoScrollByCursor: boolean;
   fileUpload?: (file: File, callback: (fileUrl: string) => void) => void;
 };
