@@ -52,6 +52,7 @@ export default class Editor {
       id: 'code',
       editorDom: document.createElement('div'),
       wrapperDom: null,
+      autoScrollByCursor: true,
       codemirror: {
         lineNumbers: false, // 显示行数
         cursorHeight: 0.85, // 光标高度，0.85好看一些
@@ -196,10 +197,10 @@ export default class Editor {
    * @param {MouseEvent} evt
    */
   onMouseDown = (codemirror, evt) => {
-    const {line:targetLine} = codemirror.getCursor();
-    const top = Math.abs( evt.y - codemirror.getWrapperElement().getBoundingClientRect().y );
+    const { line: targetLine } = codemirror.getCursor();
+    const top = Math.abs(evt.y - codemirror.getWrapperElement().getBoundingClientRect().y);
     this.previewer.scrollToLineNumWithOffset(targetLine + 1, top);
-  }
+  };
 
   /**
    *
@@ -260,12 +261,12 @@ export default class Editor {
       this.options.onPaste.call(this, evt, codemirror);
     });
 
-    if(this.options.autoScrollByCursor) {
-      editor.on('mousedown', (codemirror, evt)=>{
-        setTimeout(()=>{
+    if (this.options.autoScrollByCursor) {
+      editor.on('mousedown', (codemirror, evt) => {
+        setTimeout(() => {
           this.onMouseDown(codemirror, evt);
-        })
-      })
+        });
+      });
     }
 
     editor.on('scroll', (codemirror) => {

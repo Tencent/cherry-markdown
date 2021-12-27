@@ -699,7 +699,7 @@ export default class Previewer {
     if (lineNum === null) {
       return domContainer.scrollHeight;
     }
-    const $lineNum = parseInt(lineNum, 10);
+    const $lineNum = typeof lineNum === 'number' ? lineNum : parseInt(lineNum, 10);
     const doms = /** @type {NodeListOf<HTMLElement>}*/ (domContainer.querySelectorAll('[data-sign]'));
     let lines = 0;
     const containerY = domContainer.offsetTop;
