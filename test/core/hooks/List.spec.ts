@@ -52,13 +52,22 @@ cases[3] = `
 - test
 `;
 
+cases[4] = `
+- [ ] checklist 1
+- test
+  - [x] checklist 2
+ - [ ] checklist 3
+ - test
+      - [ ] checklist 4
+`;
+
 const listHook = new List({ config: {}});
 Object.defineProperty(listHook, '$engine', {
   value: { md5 },
 });
 
 describe('core/hooks/list', () => {
-  it('checklist replace', () => {
+  it('list hook', () => {
     cases.forEach((item) => {
       expect(listHook.toHtml(item, (text) => ({ html: text }))).toMatchSnapshot();
     });
