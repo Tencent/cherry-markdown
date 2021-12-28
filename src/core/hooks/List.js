@@ -15,6 +15,9 @@
  */
 import ParagraphBase from '@/core/ParagraphBase';
 
+const INDENT_SPACE_NUM = 4; // commonmark default use 1~4 spaces for indent
+const TAB_SPACE_NUM = 4; // 1 tab === 4 space
+
 function attrsToAttributeString(object) {
   if (typeof object !== 'object' && Object.keys(object).length < 1) {
     return '';
@@ -40,7 +43,7 @@ function handleIndent(str, node) {
   const indentRegex = /^(\t|[ ])/;
   let $str = str;
   while (indentRegex.test($str)) {
-    node.space += $str[0] === '\t' ? 4 : 1;
+    node.space += $str[0] === '\t' ? TAB_SPACE_NUM : 1;
     $str = $str.replace(indentRegex, '');
   }
   return $str;
@@ -101,9 +104,9 @@ export default class List extends ParagraphBase {
   constructor({ config }) {
     super({ needCache: true });
     this.config = config || {};
-    this.intentSpace = this.config.intentSpace > 0 ? this.config.intentSpace : 2;
     this.tree = [];
     this.emptyLines = 0;
+    this.indentSpace = Math.max(this.config.indentSpace, 2);
   }
 
   addNode(node, current, parent, last) {
@@ -143,14 +146,14 @@ export default class List extends ParagraphBase {
       } else {
         const { space } = node;
         const lastSpace = this.tree[last].space;
-        if (space < lastSpace + this.intentSpace) {
+        if (space < lastSpace + this.indentSpace) {
           // 成为同级节点
           if (this.config.listNested && this.tree[last].type !== node.type) {
             this.addNode(node, i, last);
           } else {
             this.addNode(node, i, this.tree[last].parent);
           }
-        } else if (space < lastSpace + this.intentSpace + 4) {
+        } else if (space < lastSpace + this.indentSpace + INDENT_SPACE_NUM) {
           // 成为子节点
           this.addNode(node, i, last);
         } else {
