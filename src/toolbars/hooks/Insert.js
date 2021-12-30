@@ -78,11 +78,12 @@ export default class Insert extends MenuBase {
   /**
    * 上传文件的逻辑
    * @param {string} type 上传文件的类型
+   * @param {string} [accept] TODO: 限定可选择的文件类型，接收 mime type 或后缀名字符串（以逗号分隔）
    */
-  handleUpload(type = 'image') {
+  handleUpload(type = 'image', accept) {
     // type为上传文件类型 image|video|audio|pdf|word
     const input = document.createElement('input');
-    input.type = type || 'file';
+    input.type = 'file';
     input.id = 'fileUpload';
     input.value = '';
     input.style.display = 'none';
