@@ -307,6 +307,9 @@
     .cherry-markdown ul li,
     .cherry-markdown ol li {
       list-style: inherit; }
+      .cherry-markdown ul li p,
+      .cherry-markdown ol li p {
+        margin: 0; }
   .cherry-markdown div ul,
   .cherry-markdown div ol {
     margin-bottom: 0; }
@@ -2022,6 +2025,36 @@ green     #859900
 .Cherry-Math svg {
   max-width: 100%; }
 
+.cherry-suggester-panel {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  max-height: 200px;
+  box-shadow: 0 2px 8px 1px #00000033; }
+  .cherry-suggester-panel .cherry-suggester-panel__item {
+    border: none;
+    white-space: nowrap;
+    min-width: 50px;
+    padding: 5px 13px;
+    color: #333;
+    display: block;
+    cursor: pointer; }
+    .cherry-suggester-panel .cherry-suggester-panel__item.cherry-suggester-panel__item--selected {
+      background-color: #f2f2f5;
+      text-decoration: none;
+      color: #eb7350; }
+
+.cherry-suggestion {
+  background-color: #ebf3ff;
+  color: #3582fb;
+  padding: 1px 4px;
+  border-radius: 3px;
+  cursor: pointer; }
+
 /* BASICS */
 .CodeMirror {
   /* Set height, width, borders, and global font properties here */
@@ -2241,11 +2274,11 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 .CodeMirror-scroll {
   overflow: scroll !important;
   /* Things will break if this is overridden */
-  /* 30px is the magic margin used to hide the element's real scrollbars */
+  /* 50px is the magic margin used to hide the element's real scrollbars */
   /* See overflow: hidden in .CodeMirror */
-  margin-bottom: -30px;
-  margin-right: -30px;
-  padding-bottom: 30px;
+  margin-bottom: -50px;
+  margin-right: -50px;
+  padding-bottom: 50px;
   height: 100%;
   outline: none;
   /* Prevent dragging from highlighting the element */
@@ -2253,7 +2286,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 
 .CodeMirror-sizer {
   position: relative;
-  border-right: 30px solid transparent; }
+  border-right: 50px solid transparent; }
 
 /* The fake, visible scrollbars. Used to force redraw during scrolling
    before actual scrolling happens, thus preventing shaking and
@@ -2261,7 +2294,8 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 .CodeMirror-vscrollbar, .CodeMirror-hscrollbar, .CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {
   position: absolute;
   z-index: 6;
-  display: none; }
+  display: none;
+  outline: none; }
 
 .CodeMirror-vscrollbar {
   right: 0;
@@ -2295,7 +2329,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   height: 100%;
   display: inline-block;
   vertical-align: top;
-  margin-bottom: -30px; }
+  margin-bottom: -50px; }
 
 .CodeMirror-gutter-wrapper {
   position: absolute;
