@@ -112,6 +112,9 @@ const defaultConfig = {
         /** 默认只渲染一个目录 */
         allowMultiToc: false,
       },
+      suggester: {
+        suggester: [],
+      },
     },
   },
   editor: {
