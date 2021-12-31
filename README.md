@@ -156,9 +156,13 @@ const cherryInstance = new Cherry({
 // Import Cherry engine core construction
 // Engine configuration items are the same as Cherry configuration items, the following document content only introduces the Cherry core package
 import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core';
+import Engine from 'cherry-markdown/dist/types/Engine';
+
 const cherryEngineInstance = new CherryEngine({
   value: '# welcome to cherry editor!',
-});
+}) as Engine;
+
+console.log(cherry.makeHtml("# welcome to cherry editor!"));
 ```
 
 ### ⚠️ About mermaid
