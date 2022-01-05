@@ -94,16 +94,16 @@ export default class Suggester extends SyntaxBase {
   toHtml(wholeMatch, leadingChar, keyword, text) {
     if (text) {
       return (
-        this.suggester[keyword]?.echo?.call(this, text) || `<span class="cherry-suggestion">${keyword}${text}</span>`
+        this.suggester[keyword]?.echo?.call(this, text) || `${leadingChar}<span class="cherry-suggestion">${keyword}${text}</span>`
       );
     }
     if (this.suggester[keyword]?.echo === false) {
-      return '';
+      return `${leadingChar}`;
     }
     if (!this.suggester[keyword]) {
-      return text;
+      return leadingChar + text;
     }
-    return text ?? '';
+    return  text ? leadingChar + text : `${leadingChar}`;
   }
 
   rule() {
