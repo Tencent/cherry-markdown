@@ -78,6 +78,7 @@ export default class Suggester extends SyntaxBase {
   }
 
   makeHtml(str) {
+    if (!this.RULE.reg) return str;
     if (!suggesterPanel.hasEditor()) {
       const { editor } = this.$engine.$cherry;
       suggesterPanel.setEditor(editor);
@@ -87,7 +88,7 @@ export default class Suggester extends SyntaxBase {
     if (isLookbehindSupported()) {
       return str.replace(this.RULE.reg, this.toHtml.bind(this));
     }
-    return this.RULE.reg ? replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this), true, 1) : str;
+    return replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this), true, 1);
   }
 
   toHtml(str) {
@@ -109,13 +110,13 @@ export default class Suggester extends SyntaxBase {
 
   rule() {
     if (!this.suggester || Object.keys(this.suggester).length <= 0) {
-      return new RegExp();
+      return {};
     }
     const keys = Object.keys(this.suggester)
       .map((key) => escapeRegExp(key))
       .join('|');
     const reg = new RegExp(
-      `${isLookbehindSupported() ? '(?<!\\\\)[ ]' : '(^|[^\\\\])[ ]'}(${keys})(([^${keys}\\s])+)`,
+      `${isLookbehindSupported() ? '((?<!\\\\))[ ]' : '(^|[^\\\\])[ ]'}(${keys})(([^${keys}\\s])+)`,
       'g',
     );
     return {
