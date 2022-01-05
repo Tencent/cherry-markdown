@@ -61,7 +61,10 @@ cases[4] = `
       - [ ] checklist 4
 `;
 
-const listHook = new List({ config: {}});
+const listHook = new List({ config: {
+  indentSpace: 2,
+}});
+
 Object.defineProperty(listHook, '$engine', {
   value: { md5 },
 });
