@@ -30,7 +30,7 @@ export function isLookbehindSupported() {
   return false;
 }
 
-export const HORIZONTAL_WHITESPACE = '[ \\t ]';
+export const HORIZONTAL_WHITESPACE = '[ \\t\\u00a0]';
 
 // 仅适用非多行模式的正则
 export const ALLOW_WHITESPACE_MULTILINE = '(?:.*?)(?:(?:\\n.*?)*?)';
