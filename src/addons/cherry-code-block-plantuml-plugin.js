@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import mergeWith from 'lodash/mergeWith';
-import deflate from '@/libs/rawdeflate';
+import deflate from '../libs/rawdeflate';
 
 function encode64(data) {
   let r = '';
