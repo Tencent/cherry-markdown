@@ -87,7 +87,7 @@ export default class Suggester extends SyntaxBase {
     if (isLookbehindSupported()) {
       return str.replace(this.RULE.reg, this.toHtml.bind(this));
     }
-    return replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this), true, 1);
+    return this.RULE.reg ? replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this), true, 1) : str;
   }
 
   toHtml(str) {
@@ -109,7 +109,7 @@ export default class Suggester extends SyntaxBase {
 
   rule() {
     if (!this.suggester || Object.keys(this.suggester).length <= 0) {
-      return {};
+      return new RegExp();
     }
     const keys = Object.keys(this.suggester)
       .map((key) => escapeRegExp(key))
