@@ -24,8 +24,8 @@ export default class Sub extends SyntaxBase {
   //     super();
   // }
 
-  toHtml(whole, m1) {
-    return `<sub>${m1}</sub>`;
+  toHtml(whole, leadingChar, m1) {
+    return `${leadingChar}<sub>${m1}</sub>`;
   }
 
   makeHtml(str) {
@@ -37,7 +37,7 @@ export default class Sub extends SyntaxBase {
 
   rule() {
     const ret = {
-      begin: isLookbehindSupported() ? '(?<!\\\\)\\^\\^' : '(^|[^\\\\])\\^\\^',
+      begin: isLookbehindSupported() ? '((?<!\\\\))\\^\\^' : '(^|[^\\\\])\\^\\^',
       end: '\\^\\^',
       content: '([\\w\\W]+?)',
     };

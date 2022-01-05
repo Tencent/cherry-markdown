@@ -24,8 +24,8 @@ export default class Sup extends SyntaxBase {
   //     super();
   // }
 
-  toHtml(whole, m1) {
-    return `<sup>${m1}</sup>`;
+  toHtml(whole, leadingChar, m1) {
+    return `${leadingChar}<sup>${m1}</sup>`;
   }
 
   makeHtml(str) {
@@ -37,7 +37,7 @@ export default class Sup extends SyntaxBase {
 
   rule() {
     const ret = {
-      begin: isLookbehindSupported() ? '(?<!\\\\)\\^' : '(?:^|[^\\\\])\\^',
+      begin: isLookbehindSupported() ? '((?<!\\\\))\\^' : '(^|[^\\\\])\\^',
       end: '\\^',
       content: '([\\w\\W]+?)',
     };
