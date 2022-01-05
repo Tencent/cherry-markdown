@@ -91,21 +91,19 @@ export default class Suggester extends SyntaxBase {
     return replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this), true, 1);
   }
 
-  toHtml(str) {
-    return str.replace(this.RULE.reg, (wholeMatch, keyword, text) => {
-      if (text && text !== 'undefined') {
-        return (
-          this.suggester[keyword]?.echo?.call(this, text) || `<span class="cherry-suggestion">${keyword}${text}</span>`
-        );
-      }
-      if (this.suggester[keyword]?.echo === false) {
-        return '';
-      }
-      if (!this.suggester[keyword]) {
-        return text;
-      }
-      return text === 'undefined' || text === null ? '' : text;
-    });
+  toHtml(wholeMatch, leadingChar, keyword, text) {
+    if (text) {
+      return (
+        this.suggester[keyword]?.echo?.call(this, text) || `<span class="cherry-suggestion">${keyword}${text}</span>`
+      );
+    }
+    if (this.suggester[keyword]?.echo === false) {
+      return '';
+    }
+    if (!this.suggester[keyword]) {
+      return text;
+    }
+    return text ?? '';
   }
 
   rule() {
