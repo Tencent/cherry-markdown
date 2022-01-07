@@ -1700,11 +1700,6 @@
   resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.178.tgz#341f6d2247db528d4a13ddbb374bcdc80406f4f8"
   integrity sha512-0d5Wd09ItQWH1qFbEyQ7oTQ3GZrMfth5JkbN3EvTKLXcHLRDSXeLnlvlOn0wvxVIwK5o2M8JzP/OWz7T3NRsbw==
 
-"@types/mathjax@^0.0.37":
-  version "0.0.37"
-  resolved "https://registry.npmjs.org/@types/mathjax/-/mathjax-0.0.37.tgz#31a0076ced55c2e12da75edb44db45098b6feed6"
-  integrity sha512-y0WSZBtBNQwcYipTU/BhgeFu1EZNlFvUNCmkMXV9kBQZq7/o5z82dNVyH3yy2Xv5zzeNeQoHSL4Xm06+EQiH+g==
-
 "@types/mermaid@^8.2.6":
   version "8.2.7"
   resolved "https://registry.npmjs.org/@types/mermaid/-/mermaid-8.2.7.tgz#1f9610c241361f66ed0591d3186e0bf3ed2211c8"

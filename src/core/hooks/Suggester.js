@@ -386,7 +386,7 @@ class SuggesterPanel {
     if (!this.$suggesterPanel) {
       return false;
     }
-    const { key, keyCode } = evt;
+    const { keyCode } = evt;
     // up down
     if ([38, 40].includes(keyCode)) {
       this.cursorMove = false;
