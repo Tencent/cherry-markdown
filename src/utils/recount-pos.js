@@ -35,14 +35,14 @@ export default function getPosBydiffs(pos, oldContent, newContent) {
     const opLength = val[1].length;
     switch (opType) {
       // 没有改变的内容
-      case 0:
+      case diff.EQUAL:
         if (tmpPos <= opLength) {
           return newPos;
         }
         tmpPos -= opLength;
         break;
       // 删除的内容
-      case -1:
+      case diff.DELETE:
         if (tmpPos <= opLength) {
           return newPos - opLength + tmpPos;
         }
@@ -50,7 +50,7 @@ export default function getPosBydiffs(pos, oldContent, newContent) {
         newPos -= opLength;
         break;
       // 新增的内容
-      case 1:
+      case diff.INSERT:
         newPos += opLength;
         break;
     }
