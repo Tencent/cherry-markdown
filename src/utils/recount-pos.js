@@ -23,37 +23,37 @@ import diff from 'fast-diff';
  * @returns {Number} newPos 新的光标偏移量
  */
 export default function getPosBydiffs(pos, oldContent, newContent) {
-    const diffs = diff(oldContent, newContent);
-    let newPos = pos;
-    let tmpPos = pos;
-    for(let i = 0; i < diffs.length; i++) {
-        const val = diffs[i];
-        if(tmpPos <= 0) {
-            return newPos;
-        }
-        const opType = val[0];
-        const opLength = val[1].length;
-        switch (opType) {
-            // 没有改变的内容
-            case 0:
-                if(tmpPos <= opLength) {
-                    return newPos;
-                }
-                tmpPos -= opLength;
-                break;
-            // 删除的内容
-            case -1:
-                if(tmpPos <= opLength) {
-                    return newPos - opLength + tmpPos;
-                }
-                tmpPos -= opLength;
-                newPos -= opLength;
-                break;
-            // 新增的内容
-            case 1:
-                newPos += opLength;
-                break;
-        }
+  const diffs = diff(oldContent, newContent);
+  let newPos = pos;
+  let tmpPos = pos;
+  for (let i = 0; i < diffs.length; i++) {
+    const val = diffs[i];
+    if (tmpPos <= 0) {
+      return newPos;
     }
-    return newPos;
+    const opType = val[0];
+    const opLength = val[1].length;
+    switch (opType) {
+      // 没有改变的内容
+      case 0:
+        if (tmpPos <= opLength) {
+          return newPos;
+        }
+        tmpPos -= opLength;
+        break;
+      // 删除的内容
+      case -1:
+        if (tmpPos <= opLength) {
+          return newPos - opLength + tmpPos;
+        }
+        tmpPos -= opLength;
+        newPos -= opLength;
+        break;
+      // 新增的内容
+      case 1:
+        newPos += opLength;
+        break;
+    }
+  }
+  return newPos;
 }

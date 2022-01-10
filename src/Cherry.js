@@ -26,7 +26,6 @@ import { customizer } from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
 import getPosBydiffs from './utils/recount-pos';
 import defaultConfig from './Cherry.config';
-
 import './sass/cherry.scss';
 import cloneDeep from 'lodash/cloneDeep';
 
@@ -244,14 +243,14 @@ export default class Cherry extends CherryStatic {
    * @returns
    */
   setValue(content, keepCursor = false) {
-    if(keepCursor === false) {
+    if (keepCursor === false) {
       return this.editor.editor.setValue(content);
     }
     const old = this.getValue();
-    const pos = this.editor.editor.doc.indexFromPos(this.editor.editor.getCursor());
+    const pos = this.editor.editor.getDoc().indexFromPos(this.editor.editor.getCursor());
     const newPos = getPosBydiffs(pos, old, content);
     const ret = this.editor.editor.setValue(content);
-    const cursor = this.editor.editor.doc.posFromIndex(newPos);
+    const cursor = this.editor.editor.getDoc().posFromIndex(newPos);
     this.editor.editor.setCursor(cursor);
     return ret;
   }
