@@ -24,8 +24,8 @@ import { createElement } from './utils/dom';
 import Sidebar from './toolbars/Sidebar';
 import { customizer } from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
+import getPosBydiffs from './utils/recount-pos';
 import defaultConfig from './Cherry.config';
-
 import './sass/cherry.scss';
 import cloneDeep from 'lodash/cloneDeep';
 
@@ -189,7 +189,7 @@ export default class Cherry extends CherryStatic {
    * @returns markdown源码内容
    */
   getMarkdown() {
-    return this.editor.editor.getValue();
+    return this.getValue();
   }
 
   /**
@@ -239,10 +239,21 @@ export default class Cherry extends CherryStatic {
   /**
    * 覆盖编辑区的内容
    * @param {string} content markdown内容
+   * @param {boolean} keepCursor 是否保持光标位置
    * @returns
    */
-  setValue(content) {
-    return this.editor.editor.setValue(content);
+  setValue(content, keepCursor = false) {
+    if (keepCursor === false) {
+      return this.editor.editor.setValue(content);
+    }
+    const codemirror = this.editor.editor;
+    const old = this.getValue();
+    const pos = codemirror.getDoc().indexFromPos(codemirror.getCursor());
+    const newPos = getPosBydiffs(pos, old, content);
+    const ret = codemirror.setValue(content);
+    const cursor = codemirror.getDoc().posFromIndex(newPos);
+    codemirror.setCursor(cursor);
+    return ret;
   }
 
   /**
@@ -277,10 +288,11 @@ export default class Cherry extends CherryStatic {
   /**
    * 覆盖编辑区的内容
    * @param {string} content markdown内容
+   * @param {boolean} keepCursor 是否保持光标位置
    * @returns
    */
-  setMarkdown(content) {
-    return this.editor.editor.setValue(content);
+  setMarkdown(content, keepCursor = false) {
+    return this.setValue(content, keepCursor);
   }
 
   /**
