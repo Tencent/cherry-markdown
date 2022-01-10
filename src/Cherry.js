@@ -246,12 +246,13 @@ export default class Cherry extends CherryStatic {
     if (keepCursor === false) {
       return this.editor.editor.setValue(content);
     }
+    const codemirror = this.editor.editor;
     const old = this.getValue();
-    const pos = this.editor.editor.getDoc().indexFromPos(this.editor.editor.getCursor());
+    const pos = codemirror.getDoc().indexFromPos(codemirror.getCursor());
     const newPos = getPosBydiffs(pos, old, content);
-    const ret = this.editor.editor.setValue(content);
-    const cursor = this.editor.editor.getDoc().posFromIndex(newPos);
-    this.editor.editor.setCursor(cursor);
+    const ret = codemirror.setValue(content);
+    const cursor = codemirror.getDoc().posFromIndex(newPos);
+    codemirror.setCursor(cursor);
     return ret;
   }
 
