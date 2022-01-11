@@ -86,6 +86,9 @@ export default class Cherry extends CherryStatic {
     let mountEl = document.getElementById(this.options.id);
 
     if (!mountEl) {
+      if (!this.options.forceAppend) {
+        return false;
+      }
       mountEl = document.createElement('div');
       mountEl.id = this.options.id || 'cherry-markdown';
       document.body.appendChild(mountEl);
