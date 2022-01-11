@@ -29,6 +29,8 @@ export interface CherryOptions {
   isPreviewOnly: boolean;
   /** 预览区域跟随编辑器光标自动滚动 */
   autoScrollByCursor: boolean;
+  /** 外层容器不存在时，是否强制输出到body上 */
+  forceAppend: boolean;
   /** 挂载DOM节点ID，引擎模式下不生效 */
   id: string;
   /** 初始内容，引擎模式下不生效 */
