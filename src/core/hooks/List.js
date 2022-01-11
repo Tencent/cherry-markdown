@@ -140,10 +140,11 @@ export default class List extends ParagraphBase {
         continue;
       }
       let last = i - 1;
-      while (!this.tree[last] || this.tree[last].space > node.space) last -= 1;
+      while (!this.tree[last]) last -= 1;
       if (node.type === 'blank') {
         this.addNode(node, i, this.tree[last].parent, last);
       } else {
+        while (!this.tree[last] || this.tree[last].space > node.space) last -= 1;
         const { space } = node;
         const lastSpace = this.tree[last].space;
         if (space < lastSpace + this.indentSpace) {
