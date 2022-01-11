@@ -19,7 +19,7 @@ import { processExtendAttributesInAlt, processExtendStyleInAlt } from '@/utils/i
 import { compileRegExp, isLookbehindSupported, NOT_ALL_WHITE_SPACES_INLINE } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 
-const replacerFactory = function (type, match, leadingChar, alt, link, title, config, globalConfig) {
+const replacerFactory = function (type, match, leadingChar, alt, link, title, posterContent, config, globalConfig) {
   const refType = typeof link === 'undefined' ? 'ref' : 'url';
   let attrs = '';
   if (refType === 'ref') {
@@ -34,6 +34,7 @@ const replacerFactory = function (type, match, leadingChar, alt, link, title, co
       style = ` style="${style}" `;
     }
     attrs = title && title.trim() !== '' ? ` title="${$e(title)}"` : '';
+    attrs += ` poster=${posterContent}`;
     const processedURL = globalConfig.urlProcessor(link, type);
     const defaultWrapper = `<${type} src="${encodeURIOnce(
       processedURL,
@@ -54,11 +55,11 @@ export default class Image extends SyntaxBase {
     this.extendMedia = {
       tag: ['video', 'audio'],
       replacer: {
-        video(match, leadingChar, alt, link, title) {
-          return replacerFactory('video', match, leadingChar, alt, link, title, config, globalConfig);
+        video(match, leadingChar, alt, link, title, poster) {
+          return replacerFactory('video', match, leadingChar, alt, link, title, poster, config, globalConfig);
         },
-        audio(match, leadingChar, alt, link, title) {
-          return replacerFactory('audio', match, leadingChar, alt, link, title, config, globalConfig);
+        audio(match, leadingChar, alt, link, title, poster) {
+          return replacerFactory('audio', match, leadingChar, alt, link, title, poster, config, globalConfig);
         },
       },
     };
@@ -96,11 +97,11 @@ export default class Image extends SyntaxBase {
     return match;
   }
 
-  toMediaHtml(match, leadingChar, mediaType, alt, link, title, ref, ...args) {
+  toMediaHtml(match, leadingChar, mediaType, alt, link, title, ref, posterWrap, poster, ...args) {
     if (!this.extendMedia.replacer[mediaType]) {
       return match;
     }
-    return this.extendMedia.replacer[mediaType].call(this, match, leadingChar, alt, link, title, ref, ...args);
+    return this.extendMedia.replacer[mediaType].call(this, match, leadingChar, alt, link, title, poster, ...args);
   }
 
   makeHtml(str) {
@@ -152,6 +153,7 @@ export default class Image extends SyntaxBase {
       extend.begin = isLookbehindSupported()
         ? `((?<!\\\\))!(${extendMedia.tag.join('|')})`
         : `(^|[^\\\\])!(${extendMedia.tag.join('|')})`;
+      extend.end = '({poster=(.*)})?';
       ret.regExtend = compileRegExp(extend, 'g');
     }
     ret.reg = compileRegExp(ret, 'g');
