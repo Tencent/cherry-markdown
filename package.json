@@ -146,6 +146,6 @@
     }
   },
   "optionalDependencies": {
-    "mermaid": "8.11.1"
+    "mermaid": "8.13.8"
   }
 }
