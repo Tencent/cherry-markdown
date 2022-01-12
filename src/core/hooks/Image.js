@@ -34,7 +34,10 @@ const replacerFactory = function (type, match, leadingChar, alt, link, title, po
       style = ` style="${style}" `;
     }
     attrs = title && title.trim() !== '' ? ` title="${$e(title)}"` : '';
-    attrs += ` poster=${posterContent}`;
+    if (posterContent) {
+      attrs += ` poster=${encodeURIOnce(posterContent)}`;
+    }
+
     const processedURL = globalConfig.urlProcessor(link, type);
     const defaultWrapper = `<${type} src="${encodeURIOnce(
       processedURL,
