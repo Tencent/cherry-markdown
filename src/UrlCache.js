@@ -77,6 +77,19 @@ export default class UrlCache {
   }
 
   /**
+   * 替换所有内部链接为原始的真实地址
+   * @param {string} html 包含 cherry-inner 协议地址的 html 文本
+   */
+  static restoreAll(html) {
+    const cherryInnerLinkRegex = /cherry-inner:\/\/([0-9a-f]+)/gi;
+    const $html = html.replace(cherryInnerLinkRegex, (match) => {
+      const originalUrl = UrlCache.get(match);
+      return originalUrl || match;
+    });
+    return $html;
+  }
+
+  /**
    * 清空缓存
    */
   static clear() {
