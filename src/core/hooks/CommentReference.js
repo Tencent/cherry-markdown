@@ -77,12 +77,7 @@ export default class CommentReference extends ParagraphBase {
   }
 
   afterMakeHtml(str) {
-    const cherryInnerLinkRegex = /cherry-inner:\/\/([0-9a-z]+)/gi;
-    const $str = str.replace(cherryInnerLinkRegex, (match) => {
-      const originalUrl = UrlCache.get(match);
-      return originalUrl || match;
-    });
-    return $str;
+    return UrlCache.restoreAll(str);
   }
 
   rule() {
