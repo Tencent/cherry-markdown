@@ -13,19 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// @ts-check
-/** @type {Partial<Console>} */
-const Logger = new Proxy(
-  {},
-  {
-    get(target, prop, receiver) {
-      // @ts-ignore
-      if (BUILD_ENV !== 'production' && typeof console !== 'undefined' && prop in console) {
-        return console[prop];
-      }
-      return () => {};
-    },
+const Logger: Console = new Proxy({} as any, {
+  get(target, prop, receiver) {
+    if (BUILD_ENV !== 'production' && typeof console !== 'undefined' && prop in console) {
+      // @ts-expect-error
+      return console[prop];
+    }
+    return () => {};
   },
-);
+});
 
 export default Logger;

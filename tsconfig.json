@@ -4,8 +4,9 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "baseUrl": ".",
+    "strict": true,
     "allowJs": true,
-    "checkJs": true,
+    "checkJs": false,
     "declaration": true,
     "declarationDir": "dist/types",
     "emitDeclarationOnly": true,
@@ -13,26 +14,11 @@
     "outDir": "dist/types",
     "target": "ES5",
     "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "~types/*": [
-        "types/*"
-      ],
+      "@/*": ["src/*"],
+      "~types/*": ["types/*"]
     }
   },
-  "include": [
-    "src/index.js",
-    "src/index.core.js",
-    "src/index.engine.js",
-  ],
-  "exclude": [
-    "**/node_modules/**",
-    "src/libs/**/*",
-    "dist"
-  ],
-  "files": [
-    "types/codemirror.d.ts",
-    "types/global.d.ts"
-  ]
+  "include": ["src/index.js", "src/index.core.js", "src/index.engine.js", "src/**/*.ts"],
+  "exclude": ["**/node_modules/**", "src/libs/**/*", "dist"],
+  "files": ["types/codemirror.d.ts", "types/global.d.ts"]
 }

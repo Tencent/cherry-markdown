@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "baseUrl": ".",
+    "allowJs": true,
+    "checkJs": true,
+    "declaration": true,
+    // "declarationDir": "dist/types",
+    // "emitDeclarationOnly": true,
+    // "outFile": "types/cherry-markdown.d.ts",
+    // "outDir": "dist/types",
+    "target": "ES5",
+    "paths": {
+      "@/*": ["src/*"],
+      "~types/*": ["types/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "types/**/*.d.ts"]
+}
