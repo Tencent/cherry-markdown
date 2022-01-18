@@ -396,11 +396,13 @@ $$
 
 ```
 这是个演示视频  !video[不带封面演示视频](images/demo.mp4)
+这是个演示视频  !video[带封面演示视频](images/demo.mp4){poster=images/demo-dog.png}
 这是个假音频!audio[描述](视频链接地址)
 ```
 **效果**
 
 这是个演示视频  !video[不带封面演示视频](images/demo.mp4)
+这是个演示视频  !video[带封面演示视频](images/demo.mp4){poster=images/demo-dog.png}
 这是个假音频!audio[描述](视频链接地址)
 
 

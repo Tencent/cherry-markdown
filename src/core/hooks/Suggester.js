@@ -78,6 +78,7 @@ export default class Suggester extends SyntaxBase {
   }
 
   makeHtml(str) {
+    if (!this.RULE.reg) return str;
     if (!suggesterPanel.hasEditor()) {
       const { editor } = this.$engine.$cherry;
       suggesterPanel.setEditor(editor);
@@ -90,21 +91,20 @@ export default class Suggester extends SyntaxBase {
     return replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this), true, 1);
   }
 
-  toHtml(str) {
-    return str.replace(this.RULE.reg, (wholeMatch, keyword, text) => {
-      if (text && text !== 'undefined') {
-        return (
-          this.suggester[keyword]?.echo?.call(this, text) || `<span class="cherry-suggestion">${keyword}${text}</span>`
-        );
-      }
-      if (this.suggester[keyword]?.echo === false) {
-        return '';
-      }
-      if (!this.suggester[keyword]) {
-        return text;
-      }
-      return text === 'undefined' || text === null ? '' : text;
-    });
+  toHtml(wholeMatch, leadingChar, keyword, text) {
+    if (text) {
+      return (
+        this.suggester[keyword]?.echo?.call(this, text) ||
+        `${leadingChar}<span class="cherry-suggestion">${keyword}${text}</span>`
+      );
+    }
+    if (this.suggester[keyword]?.echo === false) {
+      return `${leadingChar}`;
+    }
+    if (!this.suggester[keyword]) {
+      return leadingChar + text;
+    }
+    return text ? leadingChar + text : `${leadingChar}`;
   }
 
   rule() {
@@ -115,7 +115,7 @@ export default class Suggester extends SyntaxBase {
       .map((key) => escapeRegExp(key))
       .join('|');
     const reg = new RegExp(
-      `${isLookbehindSupported() ? '(?<!\\\\)[ ]' : '(^|[^\\\\])[ ]'}(${keys})(([^${keys}\\s])+)`,
+      `${isLookbehindSupported() ? '((?<!\\\\))[ ]' : '(^|[^\\\\])[ ]'}(${keys})(([^${keys}\\s])+)`,
       'g',
     );
     return {
@@ -386,7 +386,7 @@ class SuggesterPanel {
     if (!this.$suggesterPanel) {
       return false;
     }
-    const { key, keyCode } = evt;
+    const { keyCode } = evt;
     // up down
     if ([38, 40].includes(keyCode)) {
       this.cursorMove = false;
