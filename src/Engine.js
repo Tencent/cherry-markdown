@@ -162,10 +162,7 @@ export default class Engine {
         return oneHook[action](newMd, actionArgs, this.markdownParams);
       }, $md);
     } catch (e) {
-      throw new NestedError(
-        'Invalid syntax hooks definitions: define at least one sort mapping or one type mapping',
-        e,
-      );
+      throw new NestedError(e);
     }
     return $md;
   }
