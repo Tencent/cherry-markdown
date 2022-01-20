@@ -207,10 +207,11 @@ export default class List extends ParagraphBase {
       return html + subTree;
     }, '');
 
-    return (
-      html +
-      this.renderSubTree(node, children.slice(from, children.length), this.tree[children[children.length - 1]].type)
-    );
+    const childrenHtml = children.length
+      ? this.renderSubTree(node, children.slice(from, children.length), this.tree[children[children.length - 1]].type)
+      : '';
+
+    return html + childrenHtml;
   }
 
   toHtml(text, sentenceMakeFunc) {
