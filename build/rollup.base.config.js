@@ -23,6 +23,7 @@ import eslint from '@rollup/plugin-eslint';
 import alias from '@rollup/plugin-alias';
 import json from '@rollup/plugin-json';
 import envReplacePlugin from './env';
+import typescript from '@rollup/plugin-typescript';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const PROJECT_ROOT_PATH = path.resolve(__dirname, '..');
@@ -62,7 +63,9 @@ export default {
     resolve({
       ignoreGlobal: false,
       browser: true,
+      extensions: ['.ts', '.js', '.mjs', '.json'],
     }),
+    typescript(),
     commonjs({
       // non-CommonJS modules will be ignored, but you can also
       // specifically include/exclude files

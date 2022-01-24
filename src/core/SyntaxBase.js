@@ -81,9 +81,10 @@ export default class SyntaxBase {
   /**
    * 生命周期函数
    * @param {string} str 待处理的markdown文本
+   * @param {any[]} _args
    * @returns {string} 处理后的文本，一般为html
    */
-  makeHtml(str) {
+  makeHtml(str, ..._args) {
     return str;
   }
 
