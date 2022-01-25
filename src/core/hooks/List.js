@@ -214,21 +214,20 @@ export default class List extends ParagraphBase {
     return html + childrenHtml;
   }
 
-  toHtml(text, sentenceMakeFunc) {
-    this.sign = this.$engine.md5(text);
+  toHtml(wholeMatch, sentenceMakeFunc) {
+    // 行数计算吸收的空行
+    this.emptyLines = wholeMatch.match(/^\n\n/)?.length ?? 0;
+    const text = wholeMatch.replace(/~0$/g, '').replace(/^\n+/, '');
     this.buildTree(makeChecklist(text), sentenceMakeFunc);
-    return this.renderTree(0);
+    const result = this.renderTree(0);
+    return this.pushCache(result, this.sign);
   }
 
   makeHtml(str, sentenceMakeFunc) {
     let $str = `${str}~0`;
     if (this.test($str)) {
       $str = $str.replace(this.RULE.reg, (wholeMatch) => {
-        // 行数计算吸收的空行
-        this.emptyLines = wholeMatch.match(/^\n\n/)?.length ?? 0;
-        const text = wholeMatch.replace(/~0$/g, '').replace(/^\n+/, '');
-        const result = this.toHtml(text, sentenceMakeFunc);
-        return this.getCacheWithSpace(this.pushCache(result, this.sign), wholeMatch);
+        return this.getCacheWithSpace(this.checkCache(wholeMatch, sentenceMakeFunc), wholeMatch);
       });
     }
     $str = $str.replace(/~0$/g, '');

@@ -28,12 +28,17 @@ export default class ParagraphBase extends SyntaxBase {
 
   constructor({ needCache, defaultCache = {} } = { needCache: false }) {
     super({});
-    this.cacheState = !!needCache;
+    this.needCache = !!needCache;
+    this.sign = '';
     if (needCache) {
       this.cache = defaultCache || {};
       this.cacheKey = `~~C${cacheCounter}`;
       cacheCounter += 1;
     }
+  }
+
+  toHtml(str, sentenceMakeFunc) {
+    return str;
   }
 
   makeHtml(str, sentenceMakeFunc) {
@@ -159,31 +164,39 @@ export default class ParagraphBase extends SyntaxBase {
    * @return {string} cacheKey ~~C0I0_L1$
    */
   pushCache(str, sign = '', lineCount = 0) {
-    if (!this.cacheState) {
+    if (!this.needCache) {
       return;
     }
     const $sign = sign || this.$engine.md5(str);
-    this.cache[$sign] = str;
+    this.cache[$sign] = { 
+      content: str,
+      using: true,
+    };
     return `${this.cacheKey}I${$sign}_L${lineCount}$`;
   }
 
   popCache(sign) {
-    if (!this.cacheState) {
+    if (!this.needCache) {
       return;
     }
-    return this.cache[sign] || '';
+    return this.cache[sign].content || '';
   }
 
-  resetCache(defaultCache) {
-    if (!this.cacheState) {
+  resetCache() {
+    if (!this.needCache) {
       return;
     }
-    this.cache = defaultCache || {};
+    for (let key in this.cache) {
+      if (!this.cache[key].using) delete this.cache[key];
+    }
+    for (let key in this.cache) {
+      this.cache[key].using = false;
+    }
   }
 
   restoreCache(html) {
     // restore cached content
-    if (!this.cacheState) {
+    if (!this.needCache) {
       return html;
     }
     const regex = new RegExp(
@@ -193,6 +206,21 @@ export default class ParagraphBase extends SyntaxBase {
     const $html = html.replace(regex, (match, cacheSign) => this.popCache(cacheSign.replace(/_L\d+$/, '')));
     this.resetCache();
     return $html;
+  }
+
+  /**
+   *
+   * @param {string} wholeMatch whole match
+   */
+  checkCache(wholeMatch, sentenceMakeFunc, lineCount = 0) {
+    this.sign = this.$engine.md5(wholeMatch);
+    // miss cache
+    if (!this.cache[this.sign]) {
+      return this.toHtml(wholeMatch, sentenceMakeFunc);
+    }
+    // hit & mark cache
+    this.cache[this.sign].using = true;
+    return `${this.cacheKey}I${this.sign}_L${lineCount}$`;
   }
 
   mounted() {
