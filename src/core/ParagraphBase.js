@@ -168,7 +168,7 @@ export default class ParagraphBase extends SyntaxBase {
       return;
     }
     const $sign = sign || this.$engine.md5(str);
-    this.cache[$sign] = { 
+    this.cache[$sign] = {
       content: str,
       using: true,
     };
@@ -186,10 +186,10 @@ export default class ParagraphBase extends SyntaxBase {
     if (!this.needCache) {
       return;
     }
-    for (let key in this.cache) {
+    for (const key of Object.keys(this.cache)) {
       if (!this.cache[key].using) delete this.cache[key];
     }
-    for (let key in this.cache) {
+    for (const key of Object.keys(this.cache)) {
       this.cache[key].using = false;
     }
   }
