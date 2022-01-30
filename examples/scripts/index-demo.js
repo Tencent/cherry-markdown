@@ -31,7 +31,7 @@ var basicConfig = {
     },
     syntax: {
       table: {
-        enableChart: false,
+        // enableChart: false,
         // chartEngine: Engine Class
       },
       fontEmphasis: {

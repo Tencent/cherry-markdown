@@ -16,6 +16,7 @@
 import Cherry from './index.core';
 import MermaidCodeEngine from '@/addons/cherry-code-block-mermaid-plugin';
 import PlantUMLCodeEngine from '@/addons/cherry-code-block-plantuml-plugin';
+import TableChartCodeEngine from '@/addons/cherry-table-echarts-plugin';
 import mermaid from 'mermaid';
 
 const mermaidAPI = mermaid?.mermaidAPI;
@@ -25,6 +26,7 @@ Cherry.usePlugin(MermaidCodeEngine, {
   sequence: { useMaxWidth: false, showSequenceNumbers: true },
 });
 Cherry.usePlugin(PlantUMLCodeEngine, {});
+Cherry.usePlugin(TableChartCodeEngine, {});
 
 export * from './index.core';
 export default Cherry;

@@ -30,7 +30,7 @@ var cherryConfig = {
     },
     syntax: {
       table: {
-        enableChart: false,
+        // enableChart: false,
         // chartEngine: Engine Class
       },
       fontEmphasis: {
