@@ -30,6 +30,7 @@ import Paragraph from './hooks/Paragraph';
 import Header from './hooks/Header';
 import Transfer from './hooks/Transfer';
 import Table from './hooks/Table';
+import SimpleTable from './hooks/SimpleTable';
 import Br from './hooks/Br';
 import Hr from './hooks/Hr';
 import Image from './hooks/Image';
@@ -64,6 +65,7 @@ const hooksConfig = [
   Transfer,
   Br,
   Table,
+  SimpleTable,
   Blockquote,
   Toc,
   Header, // 处理标题, 传入strict属性严格要求ATX风格标题#后带空格
