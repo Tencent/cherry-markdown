@@ -1,0 +1,397 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`engine makeHtml 1`] = `
+"<h1 data-lines=\\"1\\" data-sign=\\"dac9d3dd9418fc39546123bf20e27749\\" id=\\"%E4%BE%8B%E5%AD%90\\"><a href=\\"#%E4%BE%8B%E5%AD%90\\" class=\\"anchor\\"></a>例子</h1>
+<blockquote data-lines=\\"1\\" data-sign=\\"adadda3ce713b81a881a012ce64bf330_1\\"><a target=\\"_blank\\" rel=\\"nofollow\\" href=\\"https://github.com/Tencent/cherry-markdown\\">Github 地址</a></blockquote>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"75d51b022c4b7c4063567f4dc8dfed10\\" data-lines=\\"10\\"><li><p><a target=\\"_blank\\" rel=\\"nofollow\\" href=\\"index.html\\">basic</a></p></li><li><p><a target=\\"_blank\\" rel=\\"nofollow\\" href=\\"h5.html\\">H5</a></p></li><li><p><a target=\\"_blank\\" rel=\\"nofollow\\" href=\\"multiple.html\\">多实例</a></p></li><li><p><a target=\\"_blank\\" rel=\\"nofollow\\" href=\\"notoolbar.html\\">无 toolbar</a></p></li><li><p><a target=\\"_blank\\" rel=\\"nofollow\\" href=\\"preview_only.html\\">纯预览模式</a></p></li><li><p><a target=\\"_blank\\" rel=\\"nofollow\\" href=\\"xss.html\\">注入</a></p></li><li><p><a target=\\"_blank\\" rel=\\"nofollow\\" href=\\"api.html\\">API</a></p></li><li><p><a target=\\"_blank\\" rel=\\"nofollow\\" href=\\"img.html\\">图片所见即所得编辑尺寸</a></p></li><li><p><a target=\\"_blank\\" rel=\\"nofollow\\" href=\\"head_num.html\\">标题自动序号</a></p></li></ul>
+
+<h1 data-lines=\\"2\\" data-sign=\\"874d63e2eda908cd9dc0bef26826cf31\\" id=\\"cherry-markdown-%E7%AE%80%E6%98%8E%E6%89%8B%E5%86%8C\\"><a href=\\"#cherry-markdown-%E7%AE%80%E6%98%8E%E6%89%8B%E5%86%8C\\" class=\\"anchor\\"></a>Cherry Markdown 简明手册</h1><dir data-lines=\\"2\\" data-sign=\\"7da2b9da4a040c3db972c9e21477981c-2\\" class=\\"toc\\"><p class=\\"toc-title\\">目录</p><li class=\\"toc-li\\"><a class=\\"level-1\\" href=\\"#%E4%BE%8B%E5%AD%90\\">例子</a></li><li class=\\"toc-li\\"><a class=\\"level-1\\" href=\\"#cherry-markdown-%E7%AE%80%E6%98%8E%E6%89%8B%E5%86%8C\\">Cherry Markdown 简明手册</a></li><li class=\\"toc-li\\"><a class=\\"level-1\\" href=\\"#%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95\\">基本语法</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E5%AD%97%E4%BD%93%E6%A0%B7%E5%BC%8F\\">字体样式</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E6%A0%87%E9%A2%98%E8%AE%BE%E7%BD%AE\\">标题设置</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E8%B6%85%E9%93%BE%E6%8E%A5\\">超链接</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E6%97%A0%E5%BA%8F%E5%88%97%E8%A1%A8\\">无序列表</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E6%9C%89%E5%BA%8F%E5%88%97%E8%A1%A8\\">有序列表</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E5%BC%95%E7%94%A8\\">引用</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E8%A1%8C%E5%86%85%E4%BB%A3%E7%A0%81\\">行内代码</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E4%BB%A3%E7%A0%81%E5%9D%97\\">代码块</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E6%8F%92%E5%85%A5%E5%9B%BE%E5%83%8F\\">插入图像</a></li><li class=\\"toc-li\\"><a class=\\"level-1\\" href=\\"#%E9%AB%98%E9%98%B6%E8%AF%AD%E6%B3%95%E6%89%8B%E5%86%8C\\">高阶语法手册</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E7%9B%AE%E5%BD%95\\">目录</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E8%AF%AD%E6%B3%95%E9%AB%98%E4%BA%AE\\">语法高亮</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#checklist\\">checklist</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E5%85%AC%E5%BC%8F\\">公式</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E6%8F%92%E5%85%A5%E9%9F%B3%E8%A7%86%E9%A2%91\\">插入音视频</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E5%B8%A6%E5%AF%B9%E9%BD%90%E5%8A%9F%E8%83%BD%E7%9A%84%E8%A1%A8%E6%A0%BC\\">带对齐功能的表格</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E6%B3%A8%E9%87%8A\\">注释</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E8%84%9A%E6%B3%A8\\">脚注</a></li><li class=\\"toc-li\\"><a class=\\"level-1\\" href=\\"#%E7%BC%96%E8%BE%91%E5%99%A8%E6%93%8D%E4%BD%9C%E8%83%BD%E5%8A%9B\\">编辑器操作能力</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E9%80%9A%E8%BF%87%E5%BF%AB%E6%8D%B7%E6%8C%89%E9%92%AE%E4%BF%AE%E6%94%B9%E5%AD%97%E4%BD%93%E6%A0%B7%E5%BC%8F\\">通过快捷按钮修改字体样式</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E5%A4%8D%E5%88%B6html%E5%86%85%E5%AE%B9%EF%BC%8C%E7%B2%98%E8%B4%B4%E6%88%90markdown\\">复制html内容，粘贴成markdown</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E5%BF%AB%E6%8D%B7%E9%94%AE\\">快捷键</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E5%8D%8F%E8%AE%AE\\">协议</a></li><li class=\\"toc-li\\"><a class=\\"level-1\\" href=\\"#%E7%89%B9%E6%80%A7%E5%B1%95%E7%A4%BA\\">特性展示</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E8%AF%AD%E6%B3%95%E7%89%B9%E6%80%A7\\">语法特性</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-3\\" href=\\"#%E7%89%B9%E6%80%A7-1%EF%BC%9A%E5%9B%BE%E7%89%87%E7%BC%A9%E6%94%BE%E3%80%81%E5%AF%B9%E9%BD%90%E3%80%81%E5%BC%95%E7%94%A8\\">特性 1：图片缩放、对齐、引用</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-4\\" href=\\"#%E8%AF%AD%E6%B3%95\\">语法</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-3\\" href=\\"#%E7%89%B9%E6%80%A7-2%EF%BC%9A%E6%A0%B9%E6%8D%AE%E8%A1%A8%E6%A0%BC%E5%86%85%E5%AE%B9%E7%94%9F%E6%88%90%E5%9B%BE%E8%A1%A8\\">特性 2：根据表格内容生成图表</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-3\\" href=\\"#%E7%89%B9%E6%80%A7-3%EF%BC%9A%E5%AD%97%E4%BD%93%E9%A2%9C%E8%89%B2%E3%80%81%E5%AD%97%E4%BD%93%E5%A4%A7%E5%B0%8F\\">特性 3：字体颜色、字体大小</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E5%8A%9F%E8%83%BD%E7%89%B9%E6%80%A7\\">功能特性</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-3\\" href=\\"#%E7%89%B9%E6%80%A7-1%EF%BC%9A%E5%A4%8D%E5%88%B6html%E7%B2%98%E8%B4%B4%E6%88%90md%E8%AF%AD%E6%B3%95\\">特性 1：复制Html粘贴成MD语法</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-4\\" href=\\"#%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF\\">使用场景</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-3\\" href=\\"#%E7%89%B9%E6%80%A7-2%EF%BC%9A%E7%BB%8F%E5%85%B8%E6%8D%A2%E8%A1%8C%E5%B8%B8%E8%A7%84%E6%8D%A2%E8%A1%8C\\">特性 2：经典换行&amp;常规换行</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-4\\" href=\\"#%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF-3\\">使用场景</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-3\\" href=\\"#%E7%89%B9%E6%80%A7-3-%E5%A4%9A%E5%85%89%E6%A0%87%E7%BC%96%E8%BE%91\\">特性 3: 多光标编辑</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-4\\" href=\\"#%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF-4\\">使用场景</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-3\\" href=\\"#%E7%89%B9%E6%80%A7-4%EF%BC%9A%E5%9B%BE%E7%89%87%E5%B0%BA%E5%AF%B8\\">特性 4：图片尺寸</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-3\\" href=\\"#%E7%89%B9%E6%80%A7-5%EF%BC%9A%E5%AF%BC%E5%87%BA\\">特性 5：导出</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-2\\" href=\\"#%E6%80%A7%E8%83%BD%E7%89%B9%E6%80%A7\\">性能特性</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-3\\" href=\\"#%E5%B1%80%E9%83%A8%E6%B8%B2%E6%9F%93\\">局部渲染</a></li><li class=\\"toc-li\\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class=\\"level-3\\" href=\\"#%E5%B1%80%E9%83%A8%E6%9B%B4%E6%96%B0\\">局部更新</a></li></dir>
+
+<h1 data-lines=\\"2\\" data-sign=\\"edf8e3eee32043d61bb19e450764604c\\" id=\\"%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95\\"><a href=\\"#%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95\\" class=\\"anchor\\"></a>基本语法</h1>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\">
+
+<h2 data-lines=\\"2\\" data-sign=\\"b45af2a8be81e06f00644e610a18e1db\\" id=\\"%E5%AD%97%E4%BD%93%E6%A0%B7%E5%BC%8F\\"><a href=\\"#%E5%AD%97%E4%BD%93%E6%A0%B7%E5%BC%8F\\" class=\\"anchor\\"></a>字体样式</h2><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"9e282dc968b46de399f90a4bd64b17eb2\\"><strong>说明</strong></p>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"9c45c438cb606bd3cbdf260340e07261\\" data-lines=\\"6\\"><li><p>使用<code>*(或_)</code> 和 <code>**(或__)</code> 表示<em>斜体</em>和 <strong>粗体</strong></p></li><li><p>使用 <code>/</code> 表示 <span style=\\"text-decoration: underline;\\">下划线</span> ,使用<code>~~</code> 表示<del>删除线</del></p></li><li><p>使用<code>^(或^^)</code>表示<sup>上标</sup>或<sub>下标</sub></p></li><li><p>使用 ! 号+数字 表示字体 <span style=\\"font-size:24px\\">大</span> !12 小! <sup><a class=\\"footnote\\" title=\\"专有语法提醒\\" id=\\"fnref:1\\" href=\\"#fn:1\\">[1]</a></sup></p></li><li><p>使用两个(三个)!号+RGB 颜色 表示<span style=\\"color:#ff0000\\">字体颜色</span>(<span style=\\"background-color:#f9cb9c\\">背景颜色</span>)<sup><a class=\\"footnote\\" title=\\"专有语法提醒\\" id=\\"fnref:1\\" href=\\"#fn:1\\">[1]</a></sup></p></li></ul><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"36f27fa16ebe87477e8e3ad1cab87cb32\\"><strong>示例</strong></p>
+
+<div data-sign=\\"2e89857671d334039bd646d3980e2de7\\" data-type=\\"codeBlock\\" data-lines=\\"9\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\"><span class=\\"token punctuation\\">[</span><span class=\\"token operator\\">!</span><span class=\\"token operator\\">!</span>#ff0000 红色超链接<span class=\\"token operator\\">!</span><span class=\\"token operator\\">!</span><span class=\\"token punctuation\\">]</span><span class=\\"token punctuation\\">(</span>http<span class=\\"token operator\\">:</span><span class=\\"token operator\\">/</span><span class=\\"token operator\\">/</span>www<span class=\\"token punctuation\\">.</span>qq<span class=\\"token punctuation\\">.</span>com<span class=\\"token punctuation\\">)</span></span>
+<span class=\\"code-line\\"><span class=\\"token punctuation\\">[</span><span class=\\"token operator\\">!</span><span class=\\"token operator\\">!</span>#ffffff <span class=\\"token operator\\">!</span><span class=\\"token operator\\">!</span><span class=\\"token operator\\">!</span>#<span class=\\"token number\\">000000</span> 黑底白字超链接<span class=\\"token operator\\">!</span><span class=\\"token operator\\">!</span><span class=\\"token operator\\">!</span><span class=\\"token operator\\">!</span><span class=\\"token operator\\">!</span><span class=\\"token punctuation\\">]</span><span class=\\"token punctuation\\">(</span>http<span class=\\"token operator\\">:</span><span class=\\"token operator\\">/</span><span class=\\"token operator\\">/</span>www<span class=\\"token punctuation\\">.</span>qq<span class=\\"token punctuation\\">.</span>com<span class=\\"token punctuation\\">)</span></span>
+<span class=\\"code-line\\"><span class=\\"token punctuation\\">[</span>新窗口打开<span class=\\"token punctuation\\">]</span><span class=\\"token punctuation\\">(</span><span class=\\"token parameter\\">http<span class=\\"token operator\\">:</span><span class=\\"token operator\\">/</span><span class=\\"token operator\\">/</span>www<span class=\\"token punctuation\\">.</span>qq<span class=\\"token punctuation\\">.</span>com</span><span class=\\"token punctuation\\">)</span><span class=\\"token punctuation\\">{</span>target<span class=\\"token operator\\">=</span>_blank<span class=\\"token punctuation\\">}</span></span>
+<span class=\\"code-line\\">鞋子 <span class=\\"token operator\\">!</span><span class=\\"token number\\">32</span> 特大号<span class=\\"token operator\\">!</span></span>
+<span class=\\"code-line\\">大头 <span class=\\"token operator\\">^</span><span class=\\"token template-string\\"><span class=\\"token template-punctuation string\\">\`</span><span class=\\"token string\\">儿子</span><span class=\\"token template-punctuation string\\">\`</span></span><span class=\\"token operator\\">^</span> 和小头 <span class=\\"token operator\\">^</span><span class=\\"token operator\\">^</span><span class=\\"token template-string\\"><span class=\\"token template-punctuation string\\">\`</span><span class=\\"token string\\">爸爸</span><span class=\\"token template-punctuation string\\">\`</span></span><span class=\\"token operator\\">^</span><span class=\\"token operator\\">^</span></span>
+<span class=\\"code-line\\">爱在<span class=\\"token operator\\">~</span><span class=\\"token operator\\">~</span>西元前<span class=\\"token operator\\">~</span><span class=\\"token operator\\">~</span><span class=\\"token operator\\">**</span>当下<span class=\\"token operator\\">**</span></span></code></pre>
+    </div><p data-lines=\\"8\\" data-type=\\"p\\" data-sign=\\"d86465cd181fffd22f39d59df4be51408\\"><strong>效果</strong><br><a rel=\\"nofollow\\" href=\\"http://www.qq.com\\"><span style=\\"color:#ff0000\\">红色超链接</span></a><br><a rel=\\"nofollow\\" href=\\"http://www.qq.com\\"><span style=\\"color:#ffffff\\"><span style=\\"background-color:#000000\\">黑底白字超链接</span></span></a><br><a target=\\"_blank\\" rel=\\"nofollow\\" href=\\"http://www.qq.com\\">新窗口打开</a><br>鞋子 <span style=\\"font-size:32px\\">特大号</span><br>大头 <sup><code>儿子</code></sup> 和小头 <sub><code>爸爸</code></sub><br>爱在<del>西元前</del><strong>当下</strong></p>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\">
+
+<h2 data-lines=\\"2\\" data-sign=\\"b0b805be3eed5d07ae5cd5d883648a8d\\" id=\\"%E6%A0%87%E9%A2%98%E8%AE%BE%E7%BD%AE\\"><a href=\\"#%E6%A0%87%E9%A2%98%E8%AE%BE%E7%BD%AE\\" class=\\"anchor\\"></a>标题设置</h2><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"9e282dc968b46de399f90a4bd64b17eb2\\"><strong>说明</strong></p>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"dbd7754a1c98771f59aaf7a498237df1\\" data-lines=\\"4\\"><li><p>在文字下方加 === 可使上一行文字变成一级标题</p></li><li><p>在文字下方加 --- 可使上一行文字变成二级标题</p></li><li><p>在行首加井号（#）表示不同级别的标题，例如：# H1, ##H2, ###H3</p></li></ul>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\">
+
+<h2 data-lines=\\"2\\" data-sign=\\"39a552653822d51beb7505bd5164f270\\" id=\\"%E8%B6%85%E9%93%BE%E6%8E%A5\\"><a href=\\"#%E8%B6%85%E9%93%BE%E6%8E%A5\\" class=\\"anchor\\"></a>超链接</h2><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"9e282dc968b46de399f90a4bd64b17eb2\\"><strong>说明</strong></p>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"321dd672170c51b3e1de115dfd9951fc\\" data-lines=\\"4\\"><li><p>使用 <code>[描述](URL)</code> 为文字增加外链接</p></li><li><p>使用<code>&lt;URL&gt;</code>插入一个链接</p></li><li><p>URL 会自动转成链接</p></li></ul><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"36f27fa16ebe87477e8e3ad1cab87cb32\\"><strong>示例</strong></p>
+
+<div data-sign=\\"fec09dd8451381cb343d178ae5789365\\" data-type=\\"codeBlock\\" data-lines=\\"9\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\">这是 <span class=\\"token punctuation\\">[</span>腾讯网<span class=\\"token punctuation\\">]</span><span class=\\"token punctuation\\">(</span>https<span class=\\"token operator\\">:</span><span class=\\"token operator\\">/</span><span class=\\"token operator\\">/</span>www<span class=\\"token punctuation\\">.</span>qq<span class=\\"token punctuation\\">.</span>com<span class=\\"token punctuation\\">)</span> 的链接。</span>
+<span class=\\"code-line\\">这是 <span class=\\"token punctuation\\">[</span>一个引用的<span class=\\"token punctuation\\">]</span><span class=\\"token punctuation\\">[</span>引用一个链接<span class=\\"token punctuation\\">]</span> 的链接。</span>
+<span class=\\"code-line\\">这是一个包含中文的链接<span class=\\"token operator\\">&lt;</span>https<span class=\\"token operator\\">:</span><span class=\\"token operator\\">/</span><span class=\\"token operator\\">/</span>www<span class=\\"token punctuation\\">.</span>qq<span class=\\"token punctuation\\">.</span>com<span class=\\"token operator\\">?</span>param<span class=\\"token operator\\">=</span>中文<span class=\\"token operator\\">></span>，中文</span>
+<span class=\\"code-line\\">直接识别成链接：https<span class=\\"token operator\\">:</span><span class=\\"token operator\\">/</span><span class=\\"token operator\\">/</span>www<span class=\\"token punctuation\\">.</span>qq<span class=\\"token punctuation\\">.</span>com<span class=\\"token operator\\">?</span>param<span class=\\"token operator\\">=</span>中文，中文 用空格结束</span>
+<span class=\\"code-line\\"><span class=\\"token punctuation\\">[</span>引用一个链接<span class=\\"token punctuation\\">]</span></span>
+<span class=\\"code-line\\"><span class=\\"token punctuation\\">[</span>引用一个链接<span class=\\"token punctuation\\">]</span><span class=\\"token operator\\">:</span> https<span class=\\"token operator\\">:</span><span class=\\"token operator\\">/</span><span class=\\"token operator\\">/</span>www<span class=\\"token punctuation\\">.</span>qq<span class=\\"token punctuation\\">.</span>com</span></code></pre>
+    </div><p data-lines=\\"7\\" data-type=\\"p\\" data-sign=\\"1348aebd57353c8e8b43246f6c9ea5ac7\\"><strong>效果</strong><br>这是 <a rel=\\"nofollow\\" href=\\"https://www.qq.com\\">腾讯网</a> 的链接。<br>这是 <a rel=\\"nofollow\\" href=\\"https://www.qq.com\\">一个引用的</a> 的链接。<br>这是一个包含中文的链接<a rel=\\"nofollow\\" href=\\"https://www.qq.com?param=%E4%B8%AD%E6%96%87\\">https://www.qq.com?param=中文</a>，中文<br>直接识别成链接：<a rel=\\"nofollow\\" href=\\"https://www.qq.com?param=%E4%B8%AD%E6%96%87%EF%BC%8C%E4%B8%AD%E6%96%87\\">https://www.qq.com?param=中文，中文</a> 用空格结束<br><a rel=\\"nofollow\\" href=\\"https://www.qq.com\\">引用一个链接</a></p>
+
+<p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p>
+
+<hr data-lines=\\"1\\" data-sign=\\"hr1\\">
+
+<h2 data-lines=\\"2\\" data-sign=\\"f6d2ae9402c9847dda26aebefd9e35ed\\" id=\\"%E6%97%A0%E5%BA%8F%E5%88%97%E8%A1%A8\\"><a href=\\"#%E6%97%A0%E5%BA%8F%E5%88%97%E8%A1%A8\\" class=\\"anchor\\"></a>无序列表</h2><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"9e282dc968b46de399f90a4bd64b17eb2\\"><strong>说明</strong></p>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"206d27589aa8558e30c5223b7090d8e7\\" data-lines=\\"2\\"><li><p>在行首使用 *，+，- 表示无序列表</p></li></ul><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"36f27fa16ebe87477e8e3ad1cab87cb32\\"><strong>示例</strong></p>
+
+<div data-sign=\\"8c40aa2a16b001ba963269b7c46a6be7\\" data-type=\\"codeBlock\\" data-lines=\\"14\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\"><span class=\\"token operator\\">-</span> 无序列表项 一<span class=\\"token template-string\\"><span class=\\"token template-punctuation string\\">\`</span><span class=\\"token string\\">默认</span><span class=\\"token template-punctuation string\\">\`</span></span></span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">-</span> 无序列表项 二</span>
+<span class=\\"code-line\\">  <span class=\\"token operator\\">-</span> 无序列表<span class=\\"token number\\">2.1</span></span>
+<span class=\\"code-line\\">  <span class=\\"token operator\\">-</span> 无序列表<span class=\\"token number\\">2.2</span></span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">-</span> 无序列表项 三</span>
+<span class=\\"code-line\\">  <span class=\\"token operator\\">+</span> 无序列表<span class=\\"token number\\">3.1</span><span class=\\"token template-string\\"><span class=\\"token template-punctuation string\\">\`</span><span class=\\"token string\\">空心圆</span><span class=\\"token template-punctuation string\\">\`</span></span></span>
+<span class=\\"code-line\\">  <span class=\\"token operator\\">+</span> 无序列表<span class=\\"token number\\">3.1</span></span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">-</span> 无序列表四</span>
+<span class=\\"code-line\\">  <span class=\\"token operator\\">*</span> 无序列表<span class=\\"token number\\">4.1</span><span class=\\"token template-string\\"><span class=\\"token template-punctuation string\\">\`</span><span class=\\"token string\\">实心方块</span><span class=\\"token template-punctuation string\\">\`</span></span></span>
+<span class=\\"code-line\\">  <span class=\\"token operator\\">*</span> 无序列表<span class=\\"token number\\">4.2</span></span>
+<span class=\\"code-line\\"></span></code></pre>
+    </div><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"ee417a96926faf5a356cff17cb2402ea2\\"><strong>效果</strong></p>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"9a1a60a4c1ed37bfb0f4f0ec7bd30aca\\" data-lines=\\"11\\"><li><p>无序列表项 一<code>默认</code></p></li><li><p>无序列表项 二</p><ul class=\\"cherry-list__default\\"><li><p>无序列表2.1</p></li><li><p>无序列表2.2</p></li></ul></li><li><p>无序列表项 三</p><ul class=\\"cherry-list__circle\\"><li><p>无序列表3.1<code>空心圆</code></p></li><li><p>无序列表3.1</p></li></ul></li><li><p>无序列表四</p><ul class=\\"cherry-list__square\\"><li><p>无序列表4.1<code>实心方块</code></p></li><li><p>无序列表4.2</p></li></ul></li></ul>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\">
+
+<h2 data-lines=\\"2\\" data-sign=\\"251bbb896cb67e1fbb6e12ad26b2e73d\\" id=\\"%E6%9C%89%E5%BA%8F%E5%88%97%E8%A1%A8\\"><a href=\\"#%E6%9C%89%E5%BA%8F%E5%88%97%E8%A1%A8\\" class=\\"anchor\\"></a>有序列表</h2><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"9e282dc968b46de399f90a4bd64b17eb2\\"><strong>说明</strong></p>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"82dac43ea74b8fc90f565de1dd126966\\" data-lines=\\"2\\"><li><p>在行首使用数字、字母、汉字和点表示有序列表</p></li></ul><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"36f27fa16ebe87477e8e3ad1cab87cb32\\"><strong>示例</strong></p>
+
+<div data-sign=\\"87c63f47fa1e02051fcbebb92fdaa624\\" data-type=\\"codeBlock\\" data-lines=\\"16\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\"><span class=\\"token number\\">1.</span> 有序列表项 一<span class=\\"token template-string\\"><span class=\\"token template-punctuation string\\">\`</span><span class=\\"token string\\">阿拉伯数字</span><span class=\\"token template-punctuation string\\">\`</span></span></span>
+<span class=\\"code-line\\"><span class=\\"token number\\">1.</span> 有序列表项 二</span>
+<span class=\\"code-line\\">  <span class=\\"token constant\\">I</span><span class=\\"token punctuation\\">.</span> 有序列表项 <span class=\\"token number\\">2.1</span><span class=\\"token template-string\\"><span class=\\"token template-punctuation string\\">\`</span><span class=\\"token string\\">罗马数字</span><span class=\\"token template-punctuation string\\">\`</span></span></span>
+<span class=\\"code-line\\">  <span class=\\"token constant\\">I</span><span class=\\"token punctuation\\">.</span> 有序列表项 <span class=\\"token number\\">2.2</span></span>
+<span class=\\"code-line\\">  <span class=\\"token constant\\">I</span><span class=\\"token punctuation\\">.</span> 有序列表项 <span class=\\"token number\\">2.3</span></span>
+<span class=\\"code-line\\"><span class=\\"token number\\">1.</span> 有序列表 三</span>
+<span class=\\"code-line\\">  a<span class=\\"token punctuation\\">.</span> 有序列表<span class=\\"token number\\">3.1</span><span class=\\"token template-string\\"><span class=\\"token template-punctuation string\\">\`</span><span class=\\"token string\\">希腊字母</span><span class=\\"token template-punctuation string\\">\`</span></span></span>
+<span class=\\"code-line\\">  a<span class=\\"token punctuation\\">.</span> 有序列表<span class=\\"token number\\">3.2</span></span>
+<span class=\\"code-line\\">  a<span class=\\"token punctuation\\">.</span> 有序列表<span class=\\"token number\\">3.3</span></span>
+<span class=\\"code-line\\"><span class=\\"token number\\">1.</span> 有序列表 四</span>
+<span class=\\"code-line\\">  一<span class=\\"token punctuation\\">.</span> 有序列表<span class=\\"token number\\">4.1</span><span class=\\"token template-string\\"><span class=\\"token template-punctuation string\\">\`</span><span class=\\"token string\\">中文数字</span><span class=\\"token template-punctuation string\\">\`</span></span></span>
+<span class=\\"code-line\\">  一<span class=\\"token punctuation\\">.</span> 有序列表<span class=\\"token number\\">4.2</span></span>
+<span class=\\"code-line\\">  一<span class=\\"token punctuation\\">.</span> 有序列表<span class=\\"token number\\">4.3</span></span></code></pre>
+    </div><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"ee417a96926faf5a356cff17cb2402ea2\\"><strong>效果</strong></p>
+
+<ol class=\\"cherry-list__default\\" data-sign=\\"75cb4299c8bffc57137f030e498ad98e\\" data-lines=\\"14\\"><li><p>有序列表项 一<code>阿拉伯数字</code></p></li><li><p>有序列表项 二</p><ol class=\\"cherry-list__upper-roman\\"><li><p>有序列表项 2.1<code>罗马数字</code></p></li><li><p>有序列表项 2.2</p></li><li><p>有序列表项 2.3</p></li></ol></li><li><p>有序列表 三</p><ol class=\\"cherry-list__lower-greek\\"><li><p>有序列表3.1<code>希腊字母</code></p></li><li><p>有序列表3.2</p></li><li><p>有序列表3.3</p></li></ol></li><li><p>有序列表 四</p><ol class=\\"cherry-list__cjk-ideographic\\"><li><p>有序列表4.1<code>中文数字</code></p></li><li><p>有序列表4.2</p></li><li><p>有序列表4.3</p></li></ol></li></ol>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\">
+
+<h2 data-lines=\\"2\\" data-sign=\\"c9cf49ce217838fd32b70e44a70713c2\\" id=\\"%E5%BC%95%E7%94%A8\\"><a href=\\"#%E5%BC%95%E7%94%A8\\" class=\\"anchor\\"></a>引用</h2><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"9e282dc968b46de399f90a4bd64b17eb2\\"><strong>说明</strong></p>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"0cf800e69390faa497e4333c9db96933\\" data-lines=\\"2\\"><li><p>在行首使用 &gt; 表示文字引用</p></li></ul><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"36f27fa16ebe87477e8e3ad1cab87cb32\\"><strong>示例</strong></p>
+
+<div data-sign=\\"8731360df69c4cace887a9b367b91130\\" data-type=\\"codeBlock\\" data-lines=\\"4\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\"><span class=\\"token operator\\">></span> 野火烧不尽，春风吹又生</span></code></pre>
+    </div><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"ee417a96926faf5a356cff17cb2402ea2\\"><strong>效果</strong></p>
+
+<blockquote data-lines=\\"2\\" data-sign=\\"e036d13d34f848ef263a2c0c7112680d_2\\">野火烧不尽，春风吹又生</blockquote>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\">
+
+<h2 data-lines=\\"2\\" data-sign=\\"e3d0dc4acea5ca8ebf28f3e15af785d5\\" id=\\"%E8%A1%8C%E5%86%85%E4%BB%A3%E7%A0%81\\"><a href=\\"#%E8%A1%8C%E5%86%85%E4%BB%A3%E7%A0%81\\" class=\\"anchor\\"></a>行内代码</h2><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"9e282dc968b46de399f90a4bd64b17eb2\\"><strong>说明</strong></p>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"33239fa96dc24e6efaff6faed3d73fa6\\" data-lines=\\"2\\"><li><p>使用 \`代码\` 表示行内代码</p></li></ul><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"36f27fa16ebe87477e8e3ad1cab87cb32\\"><strong>示例</strong></p>
+
+<div data-sign=\\"56851441a484e7841670f80063c95785\\" data-type=\\"codeBlock\\" data-lines=\\"4\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\">让我们聊聊 <span class=\\"token template-string\\"><span class=\\"token template-punctuation string\\">\`</span><span class=\\"token string\\">html</span><span class=\\"token template-punctuation string\\">\`</span></span></span></code></pre>
+    </div><p data-lines=\\"3\\" data-type=\\"p\\" data-sign=\\"0c2aec47df02cb2af6d2d4185b71cacd3\\"><strong>效果</strong><br>让我们聊聊 <code>html</code></p>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\">
+
+<h2 data-lines=\\"2\\" data-sign=\\"4ab8ecec85a02928ff4613072f0233e3\\" id=\\"%E4%BB%A3%E7%A0%81%E5%9D%97\\"><a href=\\"#%E4%BB%A3%E7%A0%81%E5%9D%97\\" class=\\"anchor\\"></a>代码块</h2><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"9e282dc968b46de399f90a4bd64b17eb2\\"><strong>说明</strong></p>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"bac6d0e9bf1c68780b34a1bce7e99379\\" data-lines=\\"2\\"><li><p>使用 三个\` 表示代码块</p></li></ul><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"ee417a96926faf5a356cff17cb2402ea2\\"><strong>效果</strong></p>
+
+<div data-sign=\\"9e661b10cf91c9a1a5bddea74f626cbc\\" data-type=\\"codeBlock\\" data-lines=\\"5\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\">    这是一个代码块</span>
+<span class=\\"code-line\\">    有两行</span></code></pre>
+    </div>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\">
+
+<h2 data-lines=\\"2\\" data-sign=\\"45a7b461f7be392bdeabfa67cbef41cd\\" id=\\"%E6%8F%92%E5%85%A5%E5%9B%BE%E5%83%8F\\"><a href=\\"#%E6%8F%92%E5%85%A5%E5%9B%BE%E5%83%8F\\" class=\\"anchor\\"></a>插入图像</h2><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"9e282dc968b46de399f90a4bd64b17eb2\\"><strong>说明</strong></p>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"b0ea978c92ce1484cb56d79e21d9c95d\\" data-lines=\\"4\\"><li><p>使用 <code>![描述](图片链接地址)</code> 插入图像</p></li><li><p>截图，在编辑器中粘贴（ctrl+V）也可以插入图像</p></li><li><p>使用<code>![描述#宽度#高度#对齐方式](图片链接地址)</code> 可以调整图片大小<sup><a class=\\"footnote\\" title=\\"专有语法提醒\\" id=\\"fnref:1\\" href=\\"#fn:1\\">[1]</a></sup></p></li></ul><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"36f27fa16ebe87477e8e3ad1cab87cb32\\"><strong>示例</strong></p>
+
+<div data-sign=\\"3ab277369be1886dd62c416d9f0b3610\\" data-type=\\"codeBlock\\" data-lines=\\"16\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\">标准图片  <span class=\\"token operator\\">!</span><span class=\\"token punctuation\\">[</span>一条dog#<span class=\\"token number\\">100</span>px<span class=\\"token punctuation\\">]</span><span class=\\"token punctuation\\">(</span>images<span class=\\"token operator\\">/</span>demo<span class=\\"token operator\\">-</span>dog<span class=\\"token punctuation\\">.</span>png<span class=\\"token punctuation\\">)</span></span>
+<span class=\\"code-line\\"><span class=\\"token function\\">设置图片大小</span><span class=\\"token punctuation\\">(</span>相对大小<span class=\\"token operator\\">&amp;</span>绝对大小<span class=\\"token punctuation\\">)</span>  <span class=\\"token operator\\">!</span><span class=\\"token punctuation\\">[</span>一条dog#<span class=\\"token number\\">10</span><span class=\\"token operator\\">%</span>#<span class=\\"token number\\">50</span>px<span class=\\"token punctuation\\">]</span><span class=\\"token punctuation\\">(</span>images<span class=\\"token operator\\">/</span>demo<span class=\\"token operator\\">-</span>dog<span class=\\"token punctuation\\">.</span>png<span class=\\"token punctuation\\">)</span></span>
+<span class=\\"code-line\\">设置图片对齐方式：</span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">**</span>左对齐<span class=\\"token operator\\">**</span></span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">!</span><span class=\\"token punctuation\\">[</span>一条dog#auto#<span class=\\"token number\\">100</span>px#left<span class=\\"token punctuation\\">]</span><span class=\\"token punctuation\\">(</span>images<span class=\\"token operator\\">/</span>demo<span class=\\"token operator\\">-</span>dog<span class=\\"token punctuation\\">.</span>png<span class=\\"token punctuation\\">)</span></span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">**</span>居中<span class=\\"token operator\\">**</span></span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">!</span><span class=\\"token punctuation\\">[</span>一条dog#auto#<span class=\\"token number\\">100</span>px#center<span class=\\"token punctuation\\">]</span><span class=\\"token punctuation\\">(</span>images<span class=\\"token operator\\">/</span>demo<span class=\\"token operator\\">-</span>dog<span class=\\"token punctuation\\">.</span>png<span class=\\"token punctuation\\">)</span></span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">**</span>右对齐<span class=\\"token operator\\">**</span></span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">!</span><span class=\\"token punctuation\\">[</span>一条dog#auto#<span class=\\"token number\\">100</span>px#right<span class=\\"token punctuation\\">]</span><span class=\\"token punctuation\\">(</span>images<span class=\\"token operator\\">/</span>demo<span class=\\"token operator\\">-</span>dog<span class=\\"token punctuation\\">.</span>png<span class=\\"token punctuation\\">)</span></span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">**</span>浮动左对齐<span class=\\"token operator\\">**</span></span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">!</span><span class=\\"token punctuation\\">[</span>一条dog#auto#<span class=\\"token number\\">100</span>px#float<span class=\\"token operator\\">-</span>left<span class=\\"token punctuation\\">]</span><span class=\\"token punctuation\\">(</span>images<span class=\\"token operator\\">/</span>demo<span class=\\"token operator\\">-</span>dog<span class=\\"token punctuation\\">.</span>png<span class=\\"token punctuation\\">)</span></span>
+<span class=\\"code-line\\">开心也是一天，不开心也是一天</span>
+<span class=\\"code-line\\">这样就过了两天，汪</span></code></pre>
+    </div><p data-lines=\\"15\\" data-type=\\"p\\" data-sign=\\"b696f9666a64fbfa8cae78b5e1a46bcf15\\"><strong>效果</strong><br>标准图片 <img alt=\\"一条dog#100px\\" width=\\"100px\\" src=\\"images/demo-dog.png\\"><br>设置图片大小(相对大小&amp;绝对大小) <img alt=\\"一条dog#10%#50px\\" height=\\"50px\\" width=\\"10%\\" src=\\"images/demo-dog.png\\"><br>设置图片对齐方式：<br><strong>左对齐</strong><br><img alt=\\"一条dog#auto#100px#left\\" style=\\"transform:translateX(0);margin-left:0;display:block;\\" height=\\"100px\\" width=\\"auto\\" src=\\"images/demo-dog.png\\"><br><strong>居中</strong><br><img alt=\\"一条dog#auto#100px#center\\" style=\\"transform:translateX(-50%);margin-left:50%;display:block;\\" height=\\"100px\\" width=\\"auto\\" src=\\"images/demo-dog.png\\"><br><strong>右对齐</strong><br><img alt=\\"一条dog#auto#100px#right\\" style=\\"transform:translateX(-100%);margin-left:100%;margin-right:-100%;display:block;\\" height=\\"100px\\" width=\\"auto\\" src=\\"images/demo-dog.png\\"><br><strong>浮动左对齐</strong><br><img alt=\\"一条dog#auto#100px#float-left\\" style=\\"float:left;transform:translateX(0);margin-left:0;display:block;\\" height=\\"100px\\" width=\\"auto\\" src=\\"images/demo-dog.png\\"><br>开心也是一天，不开心也是一天<br>这样就过了两天，汪</p>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\">
+
+<h1 data-lines=\\"2\\" data-sign=\\"d6bfc357d9ceb32efab4c62c0966daf9\\" id=\\"%E9%AB%98%E9%98%B6%E8%AF%AD%E6%B3%95%E6%89%8B%E5%86%8C\\"><a href=\\"#%E9%AB%98%E9%98%B6%E8%AF%AD%E6%B3%95%E6%89%8B%E5%86%8C\\" class=\\"anchor\\"></a>高阶语法手册</h1>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\">
+
+<h2 data-lines=\\"2\\" data-sign=\\"078b8dd8952188f585ef587ec29b588b\\" id=\\"%E7%9B%AE%E5%BD%95\\"><a href=\\"#%E7%9B%AE%E5%BD%95\\" class=\\"anchor\\"></a>目录</h2><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"9e282dc968b46de399f90a4bd64b17eb2\\"><strong>说明</strong></p>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"72c394de197e8cce442ef311e3a942b3\\" data-lines=\\"2\\"><li><p>使用<code>[[toc]]</code>，会自动生成一个页面目录，目录内容由一级、二级、三级标题组成</p></li></ul>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\">
+
+<h2 data-lines=\\"2\\" data-sign=\\"16667d9726cecdd35764368d1795304b\\" id=\\"%E8%AF%AD%E6%B3%95%E9%AB%98%E4%BA%AE\\"><a href=\\"#%E8%AF%AD%E6%B3%95%E9%AB%98%E4%BA%AE\\" class=\\"anchor\\"></a>语法高亮</h2><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"9e282dc968b46de399f90a4bd64b17eb2\\"><strong>说明</strong></p>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"1526f8d80094d69477bf4e9b250d8ec7\\" data-lines=\\"3\\"><li><p>在\`\`\`后面指明语法名</p></li><li><p>加强的代码块，支持四十一种编程语言的语法高亮的显示</p></li></ul><p data-lines=\\"3\\" data-type=\\"p\\" data-sign=\\"ddf9166ed415c95d9122b9c67d5575f93\\"><strong>效果</strong><br>非代码示例：</p>
+
+<div data-sign=\\"23acd53b73ebf15fced2ddb86af1ee69\\" data-type=\\"codeBlock\\" data-lines=\\"4\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\">$ sudo apt<span class=\\"token operator\\">-</span><span class=\\"token keyword\\">get</span> install vim<span class=\\"token operator\\">-</span>gnome</span></code></pre>
+    </div><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"725dd2b6d21bb4fc026f77db960a77922\\">Python 示例：</p>
+
+<div data-sign=\\"d41de5a06dd5cf81341978ec8323eb2f\\" data-type=\\"codeBlock\\" data-lines=\\"15\\">
+      <pre class=\\"language-python\\"><code class=\\"language-python wrap\\"><span class=\\"code-line\\"><span class=\\"token decorator annotation punctuation\\">@requires_authorization</span></span>
+<span class=\\"code-line\\"><span class=\\"token keyword\\">def</span> <span class=\\"token function\\">somefunc</span><span class=\\"token punctuation\\">(</span>param1<span class=\\"token operator\\">=</span><span class=\\"token string\\">''</span><span class=\\"token punctuation\\">,</span> param2<span class=\\"token operator\\">=</span><span class=\\"token number\\">0</span><span class=\\"token punctuation\\">)</span><span class=\\"token punctuation\\">:</span></span>
+<span class=\\"code-line\\">    <span class=\\"token triple-quoted-string string\\">'''A docstring'''</span></span>
+<span class=\\"code-line\\">    <span class=\\"token keyword\\">if</span> param1 <span class=\\"token operator\\">></span> param2<span class=\\"token punctuation\\">:</span> <span class=\\"token comment\\"># interesting</span></span>
+<span class=\\"code-line\\">        <span class=\\"token keyword\\">print</span> <span class=\\"token string\\">'Greater'</span></span>
+<span class=\\"code-line\\">    <span class=\\"token keyword\\">return</span> <span class=\\"token punctuation\\">(</span>param2 <span class=\\"token operator\\">-</span> param1 <span class=\\"token operator\\">+</span> <span class=\\"token number\\">1</span><span class=\\"token punctuation\\">)</span> <span class=\\"token keyword\\">or</span> <span class=\\"token boolean\\">None</span></span>
+<span class=\\"code-line\\"></span>
+<span class=\\"code-line\\"><span class=\\"token keyword\\">class</span> <span class=\\"token class-name\\">SomeClass</span><span class=\\"token punctuation\\">:</span></span>
+<span class=\\"code-line\\">    <span class=\\"token keyword\\">pass</span></span>
+<span class=\\"code-line\\"></span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">>></span><span class=\\"token operator\\">></span> message <span class=\\"token operator\\">=</span> <span class=\\"token triple-quoted-string string\\">'''interpreter</span></span>
+<span class=\\"code-line\\"><span class=\\"token triple-quoted-string string\\">... prompt'''</span></span></code></pre>
+    </div><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"cd5e7d320d31a0e10db88e8584f952b52\\">JavaScript 示例：</p>
+
+<div data-sign=\\"12a93400ce9cb1dad1963e776fd5812c\\" data-type=\\"codeBlock\\" data-lines=\\"21\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\"><span class=\\"token comment\\">/**</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> * nth element in the fibonacci series.</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> * @param n >= 0</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> * @return the nth element, >= 0.</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> */</span></span>
+<span class=\\"code-line\\"><span class=\\"token keyword\\">function</span> <span class=\\"token function\\">fib</span><span class=\\"token punctuation\\">(</span><span class=\\"token parameter\\">n</span><span class=\\"token punctuation\\">)</span> <span class=\\"token punctuation\\">{</span></span>
+<span class=\\"code-line\\">  <span class=\\"token keyword\\">var</span> a <span class=\\"token operator\\">=</span> <span class=\\"token number\\">1</span><span class=\\"token punctuation\\">,</span></span>
+<span class=\\"code-line\\">    b <span class=\\"token operator\\">=</span> <span class=\\"token number\\">1</span><span class=\\"token punctuation\\">;</span></span>
+<span class=\\"code-line\\">  <span class=\\"token keyword\\">var</span> tmp<span class=\\"token punctuation\\">;</span></span>
+<span class=\\"code-line\\">  <span class=\\"token keyword\\">while</span> <span class=\\"token punctuation\\">(</span><span class=\\"token operator\\">--</span>n <span class=\\"token operator\\">>=</span> <span class=\\"token number\\">0</span><span class=\\"token punctuation\\">)</span> <span class=\\"token punctuation\\">{</span></span>
+<span class=\\"code-line\\">    tmp <span class=\\"token operator\\">=</span> a<span class=\\"token punctuation\\">;</span></span>
+<span class=\\"code-line\\">    a <span class=\\"token operator\\">+=</span> b<span class=\\"token punctuation\\">;</span></span>
+<span class=\\"code-line\\">    b <span class=\\"token operator\\">=</span> tmp<span class=\\"token punctuation\\">;</span></span>
+<span class=\\"code-line\\">  <span class=\\"token punctuation\\">}</span></span>
+<span class=\\"code-line\\">  <span class=\\"token keyword\\">return</span> a<span class=\\"token punctuation\\">;</span></span>
+<span class=\\"code-line\\"><span class=\\"token punctuation\\">}</span></span>
+<span class=\\"code-line\\"></span>
+<span class=\\"code-line\\">document<span class=\\"token punctuation\\">.</span><span class=\\"token function\\">write</span><span class=\\"token punctuation\\">(</span><span class=\\"token function\\">fib</span><span class=\\"token punctuation\\">(</span><span class=\\"token number\\">10</span><span class=\\"token punctuation\\">)</span><span class=\\"token punctuation\\">)</span><span class=\\"token punctuation\\">;</span></span></code></pre>
+    </div>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\">
+
+<h2 data-lines=\\"2\\" data-sign=\\"3767bda26a8c5d96ef22d3b583d3ab93\\" id=\\"checklist\\"><a href=\\"#checklist\\" class=\\"anchor\\"></a>checklist<sup><a class=\\"footnote\\" title=\\"不通用提醒\\" id=\\"fnref:2\\" href=\\"#fn:2\\">[2]</a></sup></h2><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"9e282dc968b46de399f90a4bd64b17eb2\\"><strong>说明</strong></p>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"eb1df368ba5dcc5add87e6b79ae235ed\\" data-lines=\\"2\\"><li><p>输入<code>[ ]</code>或<code>[x]</code>，就会生成一个 checklist</p></li></ul><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"36f27fa16ebe87477e8e3ad1cab87cb32\\"><strong>示例</strong></p>
+
+<div data-sign=\\"bcf6350e4b371de5af5304a94b4d9b2d\\" data-type=\\"codeBlock\\" data-lines=\\"6\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\"><span class=\\"token operator\\">-</span> <span class=\\"token punctuation\\">[</span> <span class=\\"token punctuation\\">]</span> <span class=\\"token constant\\">AAA</span></span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">-</span> <span class=\\"token punctuation\\">[</span>x<span class=\\"token punctuation\\">]</span> <span class=\\"token constant\\">BBB</span></span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">-</span> <span class=\\"token punctuation\\">[</span> <span class=\\"token punctuation\\">]</span> <span class=\\"token constant\\">CCC</span></span></code></pre>
+    </div><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"ee417a96926faf5a356cff17cb2402ea2\\"><strong>效果</strong></p>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"1c9128a9ecf4f39f3bb09c0ea919d7ca\\" data-lines=\\"4\\"><li class=\\"check-list-item\\"><p><span class=\\"ch-icon ch-icon-square\\"></span> AAA</p></li><li class=\\"check-list-item\\"><p><span class=\\"ch-icon ch-icon-check\\"></span> BBB</p></li><li class=\\"check-list-item\\"><p><span class=\\"ch-icon ch-icon-square\\"></span> CCC</p></li></ul>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\">
+
+<h2 data-lines=\\"2\\" data-sign=\\"cb2d85cad98362827688a0e5949b5c05\\" id=\\"%E5%85%AC%E5%BC%8F\\"><a href=\\"#%E5%85%AC%E5%BC%8F\\" class=\\"anchor\\"></a>公式<sup><a class=\\"footnote\\" title=\\"不通用提醒\\" id=\\"fnref:2\\" href=\\"#fn:2\\">[2]</a></sup></h2><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"9e282dc968b46de399f90a4bd64b17eb2\\"><strong>说明</strong></p>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"7d877e47708fd9c7b119935cef128434\\" data-lines=\\"3\\"><li><p>输入<code>$$</code>或<code>$</code>，就会生成一个公式</p></li><li><p>访问 <a rel=\\"nofollow\\" href=\\"http://meta.math.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference\\">MathJax</a> 参考更多使用方法</p></li></ul><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"36f27fa16ebe87477e8e3ad1cab87cb32\\"><strong>示例</strong></p>
+
+<div data-sign=\\"9ede532307c7b86a030677e3a28ff778\\" data-type=\\"codeBlock\\" data-lines=\\"10\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\">块级公式：$$</span>
+<span class=\\"code-line\\">\\\\begin<span class=\\"token punctuation\\">{</span>aligned<span class=\\"token punctuation\\">}</span></span>
+<span class=\\"code-line\\"><span class=\\"token constant\\">P</span><span class=\\"token punctuation\\">(</span><span class=\\"token constant\\">B</span><span class=\\"token operator\\">|</span><span class=\\"token constant\\">A</span><span class=\\"token punctuation\\">)</span><span class=\\"token operator\\">&amp;=</span>\\\\frac<span class=\\"token punctuation\\">{</span><span class=\\"token constant\\">P</span><span class=\\"token punctuation\\">(</span><span class=\\"token constant\\">AB</span><span class=\\"token punctuation\\">)</span><span class=\\"token punctuation\\">}</span><span class=\\"token punctuation\\">{</span><span class=\\"token constant\\">P</span><span class=\\"token punctuation\\">(</span><span class=\\"token constant\\">A</span><span class=\\"token punctuation\\">)</span><span class=\\"token punctuation\\">}</span>\\\\\\\\</span>
+<span class=\\"code-line\\"><span class=\\"token constant\\">P</span><span class=\\"token punctuation\\">(</span>\\\\overline<span class=\\"token punctuation\\">{</span><span class=\\"token constant\\">B</span><span class=\\"token punctuation\\">}</span><span class=\\"token operator\\">|</span><span class=\\"token constant\\">A</span><span class=\\"token punctuation\\">)</span><span class=\\"token operator\\">&amp;=</span><span class=\\"token number\\">1</span><span class=\\"token operator\\">-</span><span class=\\"token constant\\">P</span><span class=\\"token punctuation\\">(</span><span class=\\"token constant\\">B</span><span class=\\"token operator\\">|</span><span class=\\"token constant\\">A</span><span class=\\"token punctuation\\">)</span><span class=\\"token operator\\">=</span><span class=\\"token number\\">1</span><span class=\\"token operator\\">-</span>\\\\frac<span class=\\"token punctuation\\">{</span><span class=\\"token constant\\">P</span><span class=\\"token punctuation\\">(</span><span class=\\"token constant\\">AB</span><span class=\\"token punctuation\\">)</span><span class=\\"token punctuation\\">}</span><span class=\\"token punctuation\\">{</span><span class=\\"token constant\\">P</span><span class=\\"token punctuation\\">(</span><span class=\\"token constant\\">A</span><span class=\\"token punctuation\\">)</span><span class=\\"token punctuation\\">}</span></span>
+<span class=\\"code-line\\">\\\\end<span class=\\"token punctuation\\">{</span>aligned<span class=\\"token punctuation\\">}</span></span>
+<span class=\\"code-line\\">$$</span>
+<span class=\\"code-line\\">行内公式： $e<span class=\\"token operator\\">=</span>mc<span class=\\"token operator\\">^</span><span class=\\"token number\\">2</span>$</span></code></pre>
+    </div><p data-lines=\\"3\\" data-type=\\"p\\" data-sign=\\"7fb8147495c7ac42ef21aac88f7e02303\\"><strong>效果</strong><br>块级公式：</p><div data-sign=\\"b05097dcca703f4e2bf99f58b686b8fb\\" class=\\"Cherry-Math\\" data-type=\\"mathBlock\\"
+          data-lines=\\"6\\">$$\\\\begin{aligned}
+P(B|A)&amp;=\\\\frac{P(AB)}{P(A)}\\\\\\\\
+P(\\\\overline{B}|A)&amp;=1-P(B|A)=1-\\\\frac{P(AB)}{P(A)}
+\\\\end{aligned}$$</div><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"eff6fc25eae2ebd1f27adefc9044ea641\\">行内公式： <span class=\\"Cherry-InlineMath\\" data-type=\\"mathBlock\\"
+        data-lines=\\"2\\">$e=mc^2$</span></p>
+
+<p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p>
+
+<hr data-lines=\\"1\\" data-sign=\\"hr1\\">
+
+<p data-lines=\\"3\\" data-type=\\"br\\" data-sign=\\"br3\\">&nbsp;</p><h2 data-lines=\\"1\\" data-sign=\\"db738c3a153babf6de9148951c7f4489\\" id=\\"%E6%8F%92%E5%85%A5%E9%9F%B3%E8%A7%86%E9%A2%91\\"><a href=\\"#%E6%8F%92%E5%85%A5%E9%9F%B3%E8%A7%86%E9%A2%91\\" class=\\"anchor\\"></a>插入音视频</h2><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"c6247c0bd51e035939c487df6d2a61cd1\\"><strong>说明</strong></p><ul class=\\"cherry-list__default\\" data-sign=\\"b45dcea8ef212f0ce3182df9f7e25c79\\" data-lines=\\"3\\"><li><p>使用 <code>!v[描述](视频链接地址)</code> 插入视频</p><ul class=\\"cherry-list__default\\"><li><p>使用 <code>!v[描述](视频链接地址){poster=封面地址}</code> 插入视频并配上封面</p></li></ul></li><li><p>使用 <code>!audio[描述](视频链接地址)</code> 插入音频</p></li></ul><p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"4dd561ee43c97ca00e59f6f71337c76f1\\"><strong>示例</strong></p><div data-sign=\\"e26b9df6376d764da4bead59d7fa494a\\" data-type=\\"codeBlock\\" data-lines=\\"6\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\">这是个演示视频  <span class=\\"token operator\\">!</span>video<span class=\\"token punctuation\\">[</span>不带封面演示视频<span class=\\"token punctuation\\">]</span><span class=\\"token punctuation\\">(</span>images<span class=\\"token operator\\">/</span>demo<span class=\\"token punctuation\\">.</span>mp4<span class=\\"token punctuation\\">)</span></span>
+<span class=\\"code-line\\">这是个演示视频  <span class=\\"token operator\\">!</span>video<span class=\\"token punctuation\\">[</span>带封面演示视频<span class=\\"token punctuation\\">]</span><span class=\\"token punctuation\\">(</span><span class=\\"token parameter\\">images<span class=\\"token operator\\">/</span>demo<span class=\\"token punctuation\\">.</span>mp4</span><span class=\\"token punctuation\\">)</span><span class=\\"token punctuation\\">{</span>poster<span class=\\"token operator\\">=</span>images<span class=\\"token operator\\">/</span>demo<span class=\\"token operator\\">-</span>dog<span class=\\"token punctuation\\">.</span>png<span class=\\"token punctuation\\">}</span></span>
+<span class=\\"code-line\\">这是个假音频<span class=\\"token operator\\">!</span>audio<span class=\\"token punctuation\\">[</span>描述<span class=\\"token punctuation\\">]</span><span class=\\"token punctuation\\">(</span>视频链接地址<span class=\\"token punctuation\\">)</span></span></code></pre>
+    </div><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"efd654910506af5189d56531036725e61\\"><strong>效果</strong></p><div data-lines=\\"4\\" data-type=\\"div\\" data-sign=\\"53dbf2b10aa87a42ea5e450e02585f604\\">这是个演示视频  <video controls=\\"controls\\" src=\\"images/demo.mp4\\">不带封面演示视频</video><br>这是个演示视频  <video controls=\\"controls\\" poster=\\"images/demo-dog.png\\" src=\\"images/demo.mp4\\">带封面演示视频</video><br>这是个假音频<audio controls=\\"controls\\" src=\\"%E8%A7%86%E9%A2%91%E9%93%BE%E6%8E%A5%E5%9C%B0%E5%9D%80\\">描述</audio></div>
+
+<p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p>
+
+<hr data-lines=\\"1\\" data-sign=\\"hr1\\">
+
+<p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p><h2 data-lines=\\"1\\" data-sign=\\"2b7fba14a1e9e847bc67579266d5a684\\" id=\\"%E5%B8%A6%E5%AF%B9%E9%BD%90%E5%8A%9F%E8%83%BD%E7%9A%84%E8%A1%A8%E6%A0%BC\\"><a href=\\"#%E5%B8%A6%E5%AF%B9%E9%BD%90%E5%8A%9F%E8%83%BD%E7%9A%84%E8%A1%A8%E6%A0%BC\\" class=\\"anchor\\"></a>带对齐功能的表格</h2><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"c6247c0bd51e035939c487df6d2a61cd1\\"><strong>说明</strong></p><ul class=\\"cherry-list__default\\" data-sign=\\"74389b71e26d93c5d5e6350aa55c838b\\" data-lines=\\"1\\"><li><p>一种比较通用的markdown表格语法</p></li></ul><p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"4dd561ee43c97ca00e59f6f71337c76f1\\"><strong>示例</strong></p><div data-sign=\\"94b0947323c980b5a0f943a6a937d85d\\" data-type=\\"codeBlock\\" data-lines=\\"6\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\"><span class=\\"token operator\\">|</span>项目（居中对齐）<span class=\\"token operator\\">|</span>价格（右对齐）<span class=\\"token operator\\">|</span>数量（左对齐）<span class=\\"token operator\\">|</span></span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">|</span><span class=\\"token operator\\">:</span><span class=\\"token operator\\">-</span><span class=\\"token operator\\">:</span><span class=\\"token operator\\">|</span><span class=\\"token operator\\">-</span><span class=\\"token operator\\">:</span><span class=\\"token operator\\">|</span><span class=\\"token operator\\">:</span><span class=\\"token operator\\">-</span><span class=\\"token operator\\">|</span></span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">|</span>计算机<span class=\\"token operator\\">|</span>￥<span class=\\"token number\\">1600</span><span class=\\"token operator\\">|</span><span class=\\"token number\\">5</span><span class=\\"token operator\\">|</span></span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">|</span>手机机<span class=\\"token operator\\">|</span>￥<span class=\\"token number\\">12</span><span class=\\"token operator\\">|</span><span class=\\"token number\\">50</span><span class=\\"token operator\\">|</span></span></code></pre>
+    </div><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"efd654910506af5189d56531036725e61\\"><strong>效果</strong></p><div data-lines=\\"4\\" data-sign=\\"772e27d318361aaae68aac2fc71096404\\" class=\\"cherry-table-container\\">
+        <table class=\\"cherry-table\\"><thead><tr><th align=\\"center\\">项目（居中对齐）</th><th align=\\"right\\">价格（右对齐）</th><th align=\\"left\\">数量（左对齐）</th></tr></thead><tbody><tr><td align=\\"center\\">计算机</td><td align=\\"right\\">￥1600</td><td align=\\"left\\">5</td></tr><tr><td align=\\"center\\">手机机</td><td align=\\"right\\">￥12</td><td align=\\"left\\">50</td></tr></tbody></table></div>
+
+<p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p>
+
+<hr data-lines=\\"1\\" data-sign=\\"hr1\\">
+
+<p data-lines=\\"3\\" data-type=\\"br\\" data-sign=\\"br3\\">&nbsp;</p><h2 data-lines=\\"1\\" data-sign=\\"af0a533550783fafa2fe16a504ff9b7a\\" id=\\"%E6%B3%A8%E9%87%8A\\"><a href=\\"#%E6%B3%A8%E9%87%8A\\" class=\\"anchor\\"></a>注释<sup><a class=\\"footnote\\" title=\\"不通用提醒\\" id=\\"fnref:2\\" href=\\"#fn:2\\">[2]</a></sup></h2><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"c6247c0bd51e035939c487df6d2a61cd1\\"><strong>说明</strong></p><ul class=\\"cherry-list__default\\" data-sign=\\"49044b1d0b476167a72cc8d7c93ed77f\\" data-lines=\\"3\\"><li><p>使用中括号+冒号（[]:）生成单行注释</p></li><li><p>使用中括号+尖号+冒号（[^]:）生成多行注释</p></li><li><p>多行注释以连续两次回车结束</p></li></ul><p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"4dd561ee43c97ca00e59f6f71337c76f1\\"><strong>示例</strong></p><div data-sign=\\"5a89924dcf95e4f0358d8ea5148ea6fd\\" data-type=\\"codeBlock\\" data-lines=\\"12\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\">下面是一行单行注释</span>
+<span class=\\"code-line\\"><span class=\\"token punctuation\\">[</span>注释摘要<span class=\\"token punctuation\\">]</span><span class=\\"token operator\\">:</span> 这是一段注释，不会显示到页面上</span>
+<span class=\\"code-line\\">上面面是一行单行注释</span>
+<span class=\\"code-line\\">下面是多行注释</span>
+<span class=\\"code-line\\"><span class=\\"token punctuation\\">[</span><span class=\\"token operator\\">^</span>注释摘要<span class=\\"token punctuation\\">]</span><span class=\\"token operator\\">:</span> 这是一段多行注释，不会显示到页面上</span>
+<span class=\\"code-line\\">可以换行</span>
+<span class=\\"code-line\\">    可以缩进</span>
+<span class=\\"code-line\\">以两次回车结束</span>
+<span class=\\"code-line\\"></span>
+<span class=\\"code-line\\">上面是多行注释</span></code></pre>
+    </div><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"8deb4aa6f283042380fb2e5cc58fbfce2\\"><strong>效果</strong><br>下面是一行单行注释</p><p data-lines=\\"3\\" data-type=\\"p\\" data-sign=\\"a32b818ba80eda59726117373e5d85c83\\">上面面是一行单行注释<br>下面是多行注释</p><p data-lines=\\"5\\" data-type=\\"br\\" data-sign=\\"br5\\">&nbsp;</p><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"a53dd44f69f77e4e466037d48d4427381\\">上面是多行注释</p>
+
+<p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p>
+
+<hr data-lines=\\"1\\" data-sign=\\"hr1\\">
+
+<p data-lines=\\"3\\" data-type=\\"br\\" data-sign=\\"br3\\">&nbsp;</p><h2 data-lines=\\"1\\" data-sign=\\"18f4eb17f7d1da5fd30719a7cfec9cdd\\" id=\\"%E8%84%9A%E6%B3%A8\\"><a href=\\"#%E8%84%9A%E6%B3%A8\\" class=\\"anchor\\"></a>脚注<sup><a class=\\"footnote\\" title=\\"不通用提醒\\" id=\\"fnref:2\\" href=\\"#fn:2\\">[2]</a></sup></h2><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"c6247c0bd51e035939c487df6d2a61cd1\\"><strong>说明</strong></p><ul class=\\"cherry-list__default\\" data-sign=\\"d0d90f72b0738cdc77056e94d753fc63\\" data-lines=\\"3\\"><li><p>在段落中引用多行注释即会生成脚注</p></li><li><p>脚注中括号中的数字以引用脚注的顺序自动生成</p></li><li><p>点击脚注的数字可以跳转到脚注详情或回到引用脚注位置</p></li></ul><p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"4dd561ee43c97ca00e59f6f71337c76f1\\"><strong>示例</strong></p><div data-sign=\\"2f5b418ea2a40213abc289eb2a03c7fb\\" data-type=\\"codeBlock\\" data-lines=\\"9\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\">这里需要一个脚注<span class=\\"token punctuation\\">[</span><span class=\\"token operator\\">^</span>脚注别名<span class=\\"token number\\">1</span><span class=\\"token punctuation\\">]</span>，另外这里也需要一个脚注<span class=\\"token punctuation\\">[</span><span class=\\"token operator\\">^</span>another<span class=\\"token punctuation\\">]</span>。</span>
+<span class=\\"code-line\\"><span class=\\"token punctuation\\">[</span><span class=\\"token operator\\">^</span>脚注别名<span class=\\"token number\\">1</span><span class=\\"token punctuation\\">]</span><span class=\\"token operator\\">:</span> 无论脚注内容写在哪里，脚注的内容总会显示在页面最底部</span>
+<span class=\\"code-line\\">以两次回车结束</span>
+<span class=\\"code-line\\"></span>
+<span class=\\"code-line\\"><span class=\\"token punctuation\\">[</span><span class=\\"token operator\\">^</span>another<span class=\\"token punctuation\\">]</span><span class=\\"token operator\\">:</span> 另外，脚注里也可以使用一些简单的markdown语法</span>
+<span class=\\"code-line\\"><span class=\\"token operator\\">></span>比如 <span class=\\"token operator\\">!</span><span class=\\"token operator\\">!</span>#ff0000 这里<span class=\\"token operator\\">!</span><span class=\\"token operator\\">!</span>有一段<span class=\\"token operator\\">**</span>引用<span class=\\"token operator\\">**</span></span>
+<span class=\\"code-line\\"></span></code></pre>
+    </div><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"1e50cbe6e7167b5b2c75ab1950f07bf42\\"><strong>效果</strong><br>这里需要一个脚注<sup><a class=\\"footnote\\" title=\\"脚注别名1\\" id=\\"fnref:3\\" href=\\"#fn:3\\">[3]</a></sup>，另外这里也需要一个脚注<sup><a class=\\"footnote\\" title=\\"another\\" id=\\"fnref:4\\" href=\\"#fn:4\\">[4]</a></sup>。</p>
+
+<p data-lines=\\"7\\" data-type=\\"br\\" data-sign=\\"br7\\">&nbsp;</p>
+
+<hr data-lines=\\"1\\" data-sign=\\"hr1\\">
+
+<p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p>
+
+<h1 data-lines=\\"1\\" data-sign=\\"118ca275ff7ea9b28be17982f26c1c6f\\" id=\\"%E7%BC%96%E8%BE%91%E5%99%A8%E6%93%8D%E4%BD%9C%E8%83%BD%E5%8A%9B\\"><a href=\\"#%E7%BC%96%E8%BE%91%E5%99%A8%E6%93%8D%E4%BD%9C%E8%83%BD%E5%8A%9B\\" class=\\"anchor\\"></a>编辑器操作能力</h1>
+
+<p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p>
+
+<hr data-lines=\\"1\\" data-sign=\\"hr1\\">
+
+<p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p><h2 data-lines=\\"1\\" data-sign=\\"7dc01fad51aa0edc1700ebcda8018a1a\\" id=\\"%E9%80%9A%E8%BF%87%E5%BF%AB%E6%8D%B7%E6%8C%89%E9%92%AE%E4%BF%AE%E6%94%B9%E5%AD%97%E4%BD%93%E6%A0%B7%E5%BC%8F\\"><a href=\\"#%E9%80%9A%E8%BF%87%E5%BF%AB%E6%8D%B7%E6%8C%89%E9%92%AE%E4%BF%AE%E6%94%B9%E5%AD%97%E4%BD%93%E6%A0%B7%E5%BC%8F\\" class=\\"anchor\\"></a>通过快捷按钮修改字体样式</h2><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"55f87d0c218cdfe223adbab3671411801\\"><img alt=\\"bubble menu\\" src=\\"images/feature_font.png\\"></p>
+
+<p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p>
+
+<hr data-lines=\\"1\\" data-sign=\\"hr1\\">
+
+<p data-lines=\\"3\\" data-type=\\"br\\" data-sign=\\"br3\\">&nbsp;</p><h2 data-lines=\\"1\\" data-sign=\\"fa33885dadccac413caa2e112486350c\\" id=\\"%E5%A4%8D%E5%88%B6html%E5%86%85%E5%AE%B9%EF%BC%8C%E7%B2%98%E8%B4%B4%E6%88%90markdown\\"><a href=\\"#%E5%A4%8D%E5%88%B6html%E5%86%85%E5%AE%B9%EF%BC%8C%E7%B2%98%E8%B4%B4%E6%88%90markdown\\" class=\\"anchor\\"></a>复制html内容，粘贴成markdown</h2><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"c6247c0bd51e035939c487df6d2a61cd1\\"><strong>说明</strong></p><ul class=\\"cherry-list__default\\" data-sign=\\"ed9586219542e381654152b3a4a78c93\\" data-lines=\\"2\\"><li><p>粘贴html内容时会自动转成markdown，也可以选择粘贴为纯文本格式</p></li><li><p>可以拖拽调整预览区域的宽度</p></li></ul><p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"6e6eb04ae7409350a6bdd3acb0f04fdb1\\"><img alt=\\"copy and paste\\" src=\\"images/feature_copy.gif\\"></p>
+
+<p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p>
+
+<hr data-lines=\\"1\\" data-sign=\\"hr1\\">
+
+<p data-lines=\\"2\\" data-type=\\"br\\" data-sign=\\"br2\\">&nbsp;</p>
+
+<h2 data-lines=\\"1\\" data-sign=\\"388f35f104126642d906aaa41cdeaaef\\" id=\\"%E5%BF%AB%E6%8D%B7%E9%94%AE\\"><a href=\\"#%E5%BF%AB%E6%8D%B7%E9%94%AE\\" class=\\"anchor\\"></a>快捷键</h2>
+<div data-lines=\\"14\\" data-sign=\\"a05993794f2404d9f1945d08f246301914\\" class=\\"cherry-table-container\\">
+        <table class=\\"cherry-table\\"><thead><tr><th>功能</th><th>按键</th></tr></thead><tbody><tr><td>1级标题</td><td><code>Ctrl + 1</code></td></tr><tr><td>2级标题</td><td><code>Ctrl + 2</code></td></tr><tr><td>3级标题</td><td><code>Ctrl + 3</code></td></tr><tr><td>4级标题</td><td><code>Ctrl + 4</code></td></tr><tr><td>5级标题</td><td><code>Ctrl + 5</code></td></tr><tr><td>6级标题</td><td><code>Ctrl + 6</code></td></tr><tr><td>加粗</td><td><code>Ctrl + b</code></td></tr><tr><td>斜体</td><td><code>Ctrl + i</code></td></tr><tr><td>插入链接</td><td><code>Ctrl + l</code></td></tr><tr><td>插入代码块</td><td><code>Ctrl + k</code></td></tr><tr><td>插入图片</td><td><code>Ctrl + g</code></td></tr><tr><td>插入公式</td><td><code>Ctrl + m</code></td></tr></tbody></table></div>
+
+<p data-lines=\\"3\\" data-type=\\"br\\" data-sign=\\"br3\\">&nbsp;</p>
+
+<h2 data-lines=\\"1\\" data-sign=\\"1355d58359b2aeba8b231bd19372e116\\" id=\\"%E5%8D%8F%E8%AE%AE\\"><a href=\\"#%E5%8D%8F%E8%AE%AE\\" class=\\"anchor\\"></a>协议</h2>
+<div data-sign=\\"d69815bd551d48cce85c4925000a7e28\\" data-type=\\"codeBlock\\" data-lines=\\"22\\">
+      <pre class=\\"language-javascript\\"><code class=\\"language-javascript wrap\\"><span class=\\"code-line\\"><span class=\\"token comment\\">/**</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> * Tencent is pleased to support the open source community by making CherryMarkdown available.</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> *</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> * Copyright (C) 2021 THL A29 Limited, a Tencent company. All rights reserved.</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> * The below software in this distribution may have been modified by THL A29 Limited (\\"Tencent Modifications\\").</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> *</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> * All Tencent Modifications are Copyright (C) THL A29 Limited.</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> *</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> * CherryMarkdown is licensed under the Apache License, Version 2.0 (the \\"License\\");</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> * you may not use this file except in compliance with the License.</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> * You may obtain a copy of the License at</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> *</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> *     http://www.apache.org/licenses/LICENSE-2.0</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> *</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> * Unless required by applicable law or agreed to in writing, software</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> * distributed under the License is distributed on an \\"AS IS\\" BASIS,</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> * See the License for the specific language governing permissions and</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> * limitations under the License.</span></span>
+<span class=\\"code-line\\"><span class=\\"token comment\\"> */</span></span></code></pre>
+    </div>
+
+<p data-lines=\\"8\\" data-type=\\"br\\" data-sign=\\"br8\\">&nbsp;</p>
+
+<h1 data-lines=\\"1\\" data-sign=\\"1cb0a179a2cb3dc7db0f6a1d26dac8ef\\" id=\\"%E7%89%B9%E6%80%A7%E5%B1%95%E7%A4%BA\\"><a href=\\"#%E7%89%B9%E6%80%A7%E5%B1%95%E7%A4%BA\\" class=\\"anchor\\"></a>特性展示</h1>
+
+<h2 data-lines=\\"2\\" data-sign=\\"299470099ccbeec0bf7663f8e4c8ebe8\\" id=\\"%E8%AF%AD%E6%B3%95%E7%89%B9%E6%80%A7\\"><a href=\\"#%E8%AF%AD%E6%B3%95%E7%89%B9%E6%80%A7\\" class=\\"anchor\\"></a>语法特性</h2>
+
+<blockquote data-lines=\\"2\\" data-sign=\\"344f1b2782706a1d17aed6453938afe9_2\\">支持了所有常用的、通用的语法，除此之外我们还支持了一些有意思的语法</blockquote>
+
+<h3 data-lines=\\"2\\" data-sign=\\"70dfa1bcfb96e38e7f8fbb7064a91191\\" id=\\"%E7%89%B9%E6%80%A7-1%EF%BC%9A%E5%9B%BE%E7%89%87%E7%BC%A9%E6%94%BE%E3%80%81%E5%AF%B9%E9%BD%90%E3%80%81%E5%BC%95%E7%94%A8\\"><a href=\\"#%E7%89%B9%E6%80%A7-1%EF%BC%9A%E5%9B%BE%E7%89%87%E7%BC%A9%E6%94%BE%E3%80%81%E5%AF%B9%E9%BD%90%E3%80%81%E5%BC%95%E7%94%A8\\" class=\\"anchor\\"></a>特性 1：图片缩放、对齐、引用</h3>
+
+<h4 data-lines=\\"2\\" data-sign=\\"ca418479e7cb83d4be4c3fd9ce9e4ad1\\" id=\\"%E8%AF%AD%E6%B3%95\\"><a href=\\"#%E8%AF%AD%E6%B3%95\\" class=\\"anchor\\"></a>语法</h4><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"7c9c309c121497300f69730d1eee9f4f2\\"><code>![img #宽度#高度#对齐方式][图片URL或引用]</code></p>
+
+<blockquote data-lines=\\"4\\" data-sign=\\"82319bc42e08100372c09ed88a53833e_4\\">其中，<code>宽度</code>、<code>高度</code>支持：绝对像素值（比如200px）、相对外层容器百分比（比如50%），<br><code>对齐方式</code>候选值有：左对齐（缺省）、右对齐（right）、居中（center）、悬浮左、右对齐（float-left/right）<br><img alt=\\"图片尺寸\\" src=\\"images/feature_image_size.png\\"></blockquote>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\"><h3 data-lines=\\"2\\" data-sign=\\"555b9f33a521edafffcb2762aa3ead16\\" id=\\"%E7%89%B9%E6%80%A7-2%EF%BC%9A%E6%A0%B9%E6%8D%AE%E8%A1%A8%E6%A0%BC%E5%86%85%E5%AE%B9%E7%94%9F%E6%88%90%E5%9B%BE%E8%A1%A8\\"><a href=\\"#%E7%89%B9%E6%80%A7-2%EF%BC%9A%E6%A0%B9%E6%8D%AE%E8%A1%A8%E6%A0%BC%E5%86%85%E5%AE%B9%E7%94%9F%E6%88%90%E5%9B%BE%E8%A1%A8\\" class=\\"anchor\\"></a>特性 2：根据表格内容生成图表</h3><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"08176e0b9bdbe19f80f55bfad6b052131\\"><img alt=\\"表格图表\\" src=\\"images/feature_table_chart.png\\"></p>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\"><h3 data-lines=\\"2\\" data-sign=\\"6255e4f8c9ade2ec0ca329ede6fe8f11\\" id=\\"%E7%89%B9%E6%80%A7-3%EF%BC%9A%E5%AD%97%E4%BD%93%E9%A2%9C%E8%89%B2%E3%80%81%E5%AD%97%E4%BD%93%E5%A4%A7%E5%B0%8F\\"><a href=\\"#%E7%89%B9%E6%80%A7-3%EF%BC%9A%E5%AD%97%E4%BD%93%E9%A2%9C%E8%89%B2%E3%80%81%E5%AD%97%E4%BD%93%E5%A4%A7%E5%B0%8F\\" class=\\"anchor\\"></a>特性 3：字体颜色、字体大小</h3><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"7ec0d1e94a0b45b7c3cdc25734aae1841\\"><img alt=\\"字体样式\\" src=\\"images/feature_font.png\\"></p>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\">
+
+<h2 data-lines=\\"2\\" data-sign=\\"cf2f3893bf4cd9df61f16d8a68d033e7\\" id=\\"%E5%8A%9F%E8%83%BD%E7%89%B9%E6%80%A7\\"><a href=\\"#%E5%8A%9F%E8%83%BD%E7%89%B9%E6%80%A7\\" class=\\"anchor\\"></a>功能特性</h2><h3 data-lines=\\"2\\" data-sign=\\"435821b12b17aa08b65aebe4c154b3e7\\" id=\\"%E7%89%B9%E6%80%A7-1%EF%BC%9A%E5%A4%8D%E5%88%B6html%E7%B2%98%E8%B4%B4%E6%88%90md%E8%AF%AD%E6%B3%95\\"><a href=\\"#%E7%89%B9%E6%80%A7-1%EF%BC%9A%E5%A4%8D%E5%88%B6html%E7%B2%98%E8%B4%B4%E6%88%90md%E8%AF%AD%E6%B3%95\\" class=\\"anchor\\"></a>特性 1：复制Html粘贴成MD语法</h3><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"176518ba390b077942a14c65feb690791\\"><img alt=\\"html转md\\" src=\\"images/feature_copy.gif\\"></p>
+
+<h4 data-lines=\\"2\\" data-sign=\\"061c197187de514bd711d31dcd1df9d1\\" id=\\"%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF\\"><a href=\\"#%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF\\" class=\\"anchor\\"></a>使用场景</h4>
+
+<ul class=\\"cherry-list__default\\" data-sign=\\"bed4f8a08fe3f414b94f62a1241149c9\\" data-lines=\\"3\\"><li><p>Markdown初学者快速熟悉MD语法的一个途径</p></li><li><p>为调用方提供一个历史富文本数据迁成Markdown数据的方法</p></li></ul>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\"><h3 data-lines=\\"2\\" data-sign=\\"55f6ec8d51553ffa572cce8f749c555d\\" id=\\"%E7%89%B9%E6%80%A7-2%EF%BC%9A%E7%BB%8F%E5%85%B8%E6%8D%A2%E8%A1%8C%E5%B8%B8%E8%A7%84%E6%8D%A2%E8%A1%8C\\"><a href=\\"#%E7%89%B9%E6%80%A7-2%EF%BC%9A%E7%BB%8F%E5%85%B8%E6%8D%A2%E8%A1%8C%E5%B8%B8%E8%A7%84%E6%8D%A2%E8%A1%8C\\" class=\\"anchor\\"></a>特性 2：经典换行&amp;常规换行</h3><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"c2243a4399a46aaa4d7b3eeb840f960d1\\"><img alt=\\"br\\" src=\\"images/feature_br.gif\\"></p>
+
+<h4 data-lines=\\"2\\" data-sign=\\"1b8a8d81427916cdb4575d6820e7b938\\" id=\\"%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF-3\\"><a href=\\"#%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF-3\\" class=\\"anchor\\"></a>使用场景</h4><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"caf9d11c55b2549449525022be820e322\\">团队对markdown源码有最大宽度限制？一键切回经典换行（两个及以上连续换行才算一个换行）</p>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\"><h3 data-lines=\\"2\\" data-sign=\\"1d055c69ad5afe9047428a39f9e008a7\\" id=\\"%E7%89%B9%E6%80%A7-3-%E5%A4%9A%E5%85%89%E6%A0%87%E7%BC%96%E8%BE%91\\"><a href=\\"#%E7%89%B9%E6%80%A7-3-%E5%A4%9A%E5%85%89%E6%A0%87%E7%BC%96%E8%BE%91\\" class=\\"anchor\\"></a>特性 3: 多光标编辑</h3><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"8fac9fc4d5d9732bd036a7995c4b13351\\"><img alt=\\"br\\" src=\\"images/feature_cursor.gif\\"></p>
+
+<h4 data-lines=\\"2\\" data-sign=\\"04fd88522e731870af5bf72c9a107c55\\" id=\\"%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF-4\\"><a href=\\"#%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF-4\\" class=\\"anchor\\"></a>使用场景</h4><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"69f7d8d9de108e0df2748011f3e7a40c2\\">想要批量修改？可以试试多光标编辑（快捷键、搜索多光标选中等功能正在开发中）</p><h3 data-lines=\\"2\\" data-sign=\\"74ad166c03dbb7d9f66d1d4784705a3b\\" id=\\"%E7%89%B9%E6%80%A7-4%EF%BC%9A%E5%9B%BE%E7%89%87%E5%B0%BA%E5%AF%B8\\"><a href=\\"#%E7%89%B9%E6%80%A7-4%EF%BC%9A%E5%9B%BE%E7%89%87%E5%B0%BA%E5%AF%B8\\" class=\\"anchor\\"></a>特性 4：图片尺寸</h3><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"91f0241338541b97867d45e844c4d4ed1\\"><img alt=\\"wysiwyg\\" src=\\"images/feature_image_wysiwyg.gif\\"></p><h3 data-lines=\\"2\\" data-sign=\\"b289aa6094e83f972ea59857f2633151\\" id=\\"%E7%89%B9%E6%80%A7-5%EF%BC%9A%E5%AF%BC%E5%87%BA\\"><a href=\\"#%E7%89%B9%E6%80%A7-5%EF%BC%9A%E5%AF%BC%E5%87%BA\\" class=\\"anchor\\"></a>特性 5：导出</h3><p data-lines=\\"1\\" data-type=\\"p\\" data-sign=\\"99ef01093febd093a9997050526dda3b1\\"><img alt=\\"wysiwyg\\" src=\\"images/feature_export.png\\"></p>
+
+<hr data-lines=\\"2\\" data-sign=\\"hr2\\">
+
+<h2 data-lines=\\"2\\" data-sign=\\"c5d61e473417d311eb4beff027e2d046\\" id=\\"%E6%80%A7%E8%83%BD%E7%89%B9%E6%80%A7\\"><a href=\\"#%E6%80%A7%E8%83%BD%E7%89%B9%E6%80%A7\\" class=\\"anchor\\"></a>性能特性</h2>
+
+<h3 data-lines=\\"2\\" data-sign=\\"e1a29ce917496de957e75f09e60bc98e\\" id=\\"%E5%B1%80%E9%83%A8%E6%B8%B2%E6%9F%93\\"><a href=\\"#%E5%B1%80%E9%83%A8%E6%B8%B2%E6%9F%93\\" class=\\"anchor\\"></a>局部渲染</h3>
+
+<blockquote data-lines=\\"2\\" data-sign=\\"5f3810b1a57b83c218e1651ec4a85ffd_2\\">CherryMarkdown会判断用户到底变更了哪个段落，做到只渲染变更的段落，从而提升修改时的渲染性能</blockquote><p data-lines=\\"2\\" data-type=\\"p\\" data-sign=\\"402f5c5014402ba4bfecb3b91d65817c2\\"><img alt=\\"wysiwyg\\" src=\\"images/feature_myers.png\\"></p>
+
+<h3 data-lines=\\"2\\" data-sign=\\"613518294d9407bcadaa281e565a0136\\" id=\\"%E5%B1%80%E9%83%A8%E6%9B%B4%E6%96%B0\\"><a href=\\"#%E5%B1%80%E9%83%A8%E6%9B%B4%E6%96%B0\\" class=\\"anchor\\"></a>局部更新</h3>
+
+<blockquote data-lines=\\"2\\" data-sign=\\"48f7d2efecb38192896a23963386b4ea_2\\">CherryMarkdown利用virtual dom机制实现对预览区域需要变更的内容进行局部更新的功能，从而减少了浏览器Dom操作，提高了修改时预览内容更新的性能</blockquote><div data-lines=\\"11\\" data-type=\\"div\\" data-sign=\\"570b9abe1e3850af09b8f8a4193bdba011\\"><img alt=\\"wysiwyg\\" src=\\"images/feature_vdom.gif\\"><br><div data-lines=\\"0\\" data-sign=\\"a6eb5014050e3a5c0e348b8578d336c2\\" class=\\"footnote\\"><div class=\\"footnote-title\\">脚注</div><div class=\\"one-footnote\\"><a class=\\"footnote-ref\\" title=\\"专有语法提醒\\" id=\\"fn:1\\" href=\\"#fnref:1\\">[1]</a>该语法是<strong>CherryMarkdown专有语法</strong>，可能无法在其他markdown平台上使用该语法<br></div><div class=\\"one-footnote\\"><a class=\\"footnote-ref\\" title=\\"不通用提醒\\" id=\\"fn:2\\" href=\\"#fnref:2\\">[2]</a>该语法不是markdown通用语法，无法保证在其他markdown平台上进行正确渲染<br></div><div class=\\"one-footnote\\"><a class=\\"footnote-ref\\" title=\\"脚注别名1\\" id=\\"fn:3\\" href=\\"#fnref:3\\">[3]</a>无论脚注内容写在哪里，脚注的内容总会显示在页面最底部<br>以两次回车结束<br></div><div class=\\"one-footnote\\"><a class=\\"footnote-ref\\" title=\\"another\\" id=\\"fn:4\\" href=\\"#fnref:4\\">[4]</a>另外，脚注里也可以使用一些简单的markdown语法</div><blockquote data-lines=\\"2\\" data-sign=\\"da7f9478a19efa68c75801c5653c3142_2\\">比如 <span style=\\"color:#ff0000\\">这里</span>有一段<strong>引用</strong><br></blockquote></div></div>"
+`;
