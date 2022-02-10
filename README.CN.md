@@ -156,9 +156,10 @@ const cherryInstance = new Cherry({
 // 引入Cherry引擎核心构建
 // 引擎配置项与Cherry通用，以下文档内容仅介绍Cherry核心包
 import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core';
-const cherryEngineInstance = new CherryEngine({
-  value: '# welcome to cherry editor!',
-});
+const cherryEngineInstance = new CherryEngine();
+const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!')
+
+// --> <h1>welcome to cherry editor!</h1>
 ```
 
 ### ⚠️ 关于 mermaid
