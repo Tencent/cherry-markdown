@@ -1,6 +1,6 @@
 .DS_Store
 node_modules
-dist/types/*
+dist/
 
 # local env files
 .env.local
@@ -20,5 +20,3 @@ yarn-error.log*
 *.sln
 *.sw?
 
-# dist types
-dist/**/*.d.ts
