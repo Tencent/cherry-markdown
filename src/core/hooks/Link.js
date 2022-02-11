@@ -25,15 +25,33 @@ export default class Link extends SyntaxBase {
     super({ config });
     this.urlProcessor = globalConfig.urlProcessor;
     this.openNewPage = config.openNewPage; // 是否支持链接新页面打开
+    this.smartOpenUrl = globalConfig.smartOpenUrl; // 同域名在当前窗口打开链接，否则打开新窗口，优先级高于openNewPage
   }
 
   /**
    * 提前处理转化link中的$，防止误判为公式语法
    * @param {string} str
    */
+  //   beforeMakeHtml(str) {
+  //     return str.replace(this.RULE.reg, (match) => {
+  //       return match.replace(/~D/g, '~1D');
+  //     });
+  //   }
+
   beforeMakeHtml(str) {
     return str.replace(this.RULE.reg, (match) => {
-      return match.replace(/~D/g, '~1D');
+      let str = match.replace(/~D/g, '~1D');
+      if (this.smartOpenUrl) {
+        try {
+          const [origin] = new RegExp(/(\w+:\/\/)([^/:]+)(:\d*)?/).exec(match);
+          origin === location.origin ? (str += '{target=_self}') : (str += '{target=_blank}');
+          return str;
+        } catch (e) {
+          return str;
+        }
+      } else {
+        return str;
+      }
     });
   }
 

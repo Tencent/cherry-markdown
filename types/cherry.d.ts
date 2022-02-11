@@ -77,6 +77,14 @@ export interface CherryEngineOptions {
      *    - 一般编辑权限可控的场景（如api文档系统）可以允许iframe、script等标签
      */
     htmlWhiteList?: string;
+    /**
+     * 自动处理链接的打开方式
+     * 默认为true
+     * 会检查链接的origin与当前origin是否一致
+     *    - 一致时在当前页面跳转
+     *    - 不一致在新窗口打开链接
+     */
+    smartOpenUrl?: boolean;
   };
   /** 内置语法配置 */
   syntax?: Record<string, Record<string, any> | false>;

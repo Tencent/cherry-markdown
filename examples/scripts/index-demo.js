@@ -25,7 +25,7 @@ var basicConfig = {
   engine: {
     global: {
       urlProcessor(url, srcType) {
-        console.log(`url-processor`, url, srcType);
+        // console.log(`url-processor`, url, srcType);
         return url;
       },
     },
@@ -98,7 +98,7 @@ var basicConfig = {
   //extensions: [],
 };
 
-fetch('./markdown/basic.md').then((response) => response.text()).then((value) => {
+fetch('./markdown/basic copy.md').then((response) => response.text()).then((value) => {
   var config = Object.assign({}, basicConfig, { value: value });
   window.cherry = new Cherry(config);
 });

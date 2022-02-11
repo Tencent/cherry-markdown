@@ -76,12 +76,13 @@ export default class Header extends ParagraphBase {
 
   generateIDNoDup(headerText) {
     // 处理被引擎转换过的实体字符
+    console.log(this.headerIDCache, this.headerIDCounter);
     const unescapedHeaderText = headerText.replace(/&#60;/g, '<').replace(/&#62;/g, '>');
     let newId = this.$generateId(unescapedHeaderText, true);
     const idIndex = this.headerIDCache.indexOf(newId);
     if (idIndex !== -1) {
       this.headerIDCounter[idIndex] += 1;
-      newId += `-${this.headerIDCounter[idIndex] + 1}`;
+      newId += `-${this.headerIDCounter[idIndex]}`;
     } else {
       const newIndex = this.headerIDCache.push(newId);
       this.headerIDCounter[newIndex - 1] = 1;

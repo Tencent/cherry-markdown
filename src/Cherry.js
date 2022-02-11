@@ -83,13 +83,15 @@ export default class Cherry extends CherryStatic {
    * @private
    */
   init() {
-    let mountEl = document.getElementById(this.options.id);
+    const mountEl = document.getElementById(this.options.id);
 
-    if (!mountEl) {
+    /* if (!mountEl) {
       mountEl = document.createElement('div');
       mountEl.id = this.options.id || 'cherry-markdown';
       document.body.appendChild(mountEl);
-    }
+    } */
+
+    if (!mountEl) return;
 
     if (!mountEl.style.height) {
       mountEl.style.height = this.options.editor.height;

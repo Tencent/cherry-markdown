@@ -337,7 +337,7 @@
 
     &:hover {
       //color: #036;
-      border-color: $borderColor;
+    //   border-color: $borderColor;
       background-color: rgba(89, 128, 166, 0.05);
     }
 
@@ -629,7 +629,7 @@
 }
 
 .cherry-switch-paste {
-  width: 224px;
+//   width: 224px;
   margin-left: -112px;
   left: 50%;
   .switch-btn--bg {
@@ -646,6 +646,7 @@
   .cherry-toolbar-button {
     width: 80px;
     text-align: center;
+    box-sizing: content-box;
     &:hover {
       border-color: transparent;
     }
