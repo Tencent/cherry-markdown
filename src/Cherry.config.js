@@ -72,7 +72,7 @@ const defaultConfig = {
       // }
       list: {
         listNested: false, // 同级列表类型转换后变为子级
-        intentSpace: 2, // 默认2个空格缩进
+        indentSpace: 2, // 默认2个空格缩进
       },
       table: {
         enableChart: false,
@@ -173,6 +173,8 @@ const defaultConfig = {
   },
   // 预览页面不需要绑定事件
   isPreviewOnly: false,
+  // 预览区域跟随编辑器光标自动滚动
+  autoScrollByCursor: true,
 };
 
 export default cloneDeep(defaultConfig);
