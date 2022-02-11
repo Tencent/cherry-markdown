@@ -74,11 +74,12 @@
   <div class="apis" onclick="dealClick">
     <h1>Cherry API</h1>
     <div class="one-api">
-      <h2 class="one-api__name">setMarkdown(content:string)</h2>
-      <p class="one-api__desc">设置内容，setValue(content:string)有同样的功能</p>
+      <h2 class="one-api__name">setMarkdown(content:string, keepCursor = false)</h2>
+      <p class="one-api__desc">设置内容，setValue(content:string, keepCursor = false)有同样的功能<br>keepCursor = true 更新内容的时候保持光标位置</p>
       <div class="one-api__try">
         <textarea id="setMarkdown" placeholder="输入内容">
 cherryObj.setMarkdown("输入内容");
+setTimeout(()=>{cherryObj.setMarkdown("输11111111111内容3223",1);},5000);
 </textarea>
         <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
       </div>

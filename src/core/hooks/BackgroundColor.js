@@ -23,8 +23,8 @@ export default class BackgroundColor extends SyntaxBase {
   //     super();
   // }
 
-  toHtml(whole, m1, m2) {
-    return `<span style="background-color:${m1}">${m2}</span>`;
+  toHtml(whole, leadingChar, m1, m2) {
+    return `${leadingChar}<span style="background-color:${m1}">${m2}</span>`;
   }
 
   makeHtml(str) {
@@ -36,8 +36,8 @@ export default class BackgroundColor extends SyntaxBase {
 
   rule() {
     const ret = {
-      begin: isLookbehindSupported() ? '(?<!\\\\)\\!\\!\\!' : '(?:^|[^\\\\])\\!\\!\\!',
-      end: '\\!\\!\\!',
+      begin: isLookbehindSupported() ? '((?<!\\\\))!!!' : '(^|[^\\\\])!!!',
+      end: '!!!',
       content: '(#[0-9a-zA-Z]{3,6}|[a-z]{3,10})[\\s]([\\w\\W]+?)',
     };
     ret.reg = new RegExp(ret.begin + ret.content + ret.end, 'g');

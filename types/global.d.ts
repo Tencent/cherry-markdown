@@ -10,5 +10,6 @@ declare global {
     mermaid?: mermaid.Mermaid;
     mermaidAPI?: mermaid.Mermaid['mermaidAPI'];
     echarts?: echarts.ECharts;
+    MathJax?: any;
   }
 }
