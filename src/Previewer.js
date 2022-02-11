@@ -22,6 +22,7 @@ import Logger from './Logger';
 import Event from './Event';
 // import locale from './utils/locale';
 import { addEvent, removeEvent } from './utils/event';
+import { exportPDF, exportScreenShot } from './utils/export';
 import PreviewerBubble from './toolbars/PreviewerBubble';
 
 let onScroll = () => {}; // store in memory for remove event
@@ -687,14 +688,18 @@ export default class Previewer {
     }
   }
 
-  scrollToLineNum(lineNum, linePercent) {
+  /**
+   * 根据行号计算出top值
+   * @param {Number} lineNum
+   * @param {Number} linePercent
+   * @return {Number} top
+   */
+  $getTopByLineNum(lineNum, linePercent = 0) {
     const domContainer = this.getDomContainer();
     if (lineNum === null) {
-      this.disableScrollListener = true;
-      domContainer.scrollTo(0, domContainer.scrollHeight);
-      return;
+      return domContainer.scrollHeight;
     }
-    const $lineNum = parseInt(lineNum, 10);
+    const $lineNum = typeof lineNum === 'number' ? lineNum : parseInt(lineNum, 10);
     const doms = /** @type {NodeListOf<HTMLElement>}*/ (domContainer.querySelectorAll('[data-sign]'));
     let lines = 0;
     const containerY = domContainer.offsetTop;
@@ -722,12 +727,41 @@ export default class Previewer {
           scrollTo = blockY + overScrolledHeight + blockLineHeight * linePercent;
           // console.log('overscrolled:', overScrolledHeight, blockLineHeight, linePercent);
         }
-        // console.log(lines, blockLines, lineNum, blockY, blockHeight, linePercent);
-        this.disableScrollListener = true;
-        domContainer.scrollTo(0, scrollTo);
         // console.log('滚动编辑区域，左侧应scroll to ', lineNum, '::',scrollTo);
-        return;
+        return scrollTo;
       }
+    }
+  }
+
+  /**
+   * 滚动到对应行号位置并加上偏移量
+   * @param {Number} lineNum
+   * @param {Number} offset
+   */
+  scrollToLineNumWithOffset(lineNum, offset) {
+    const domContainer = this.getDomContainer();
+    this.disableScrollListener = true;
+    const top = this.$getTopByLineNum(lineNum) - offset;
+    domContainer.scrollTo(0, top);
+  }
+
+  scrollToLineNum(lineNum, linePercent) {
+    const domContainer = this.getDomContainer();
+    this.disableScrollListener = true;
+    const top = this.$getTopByLineNum(lineNum, linePercent);
+    domContainer.scrollTo(0, top);
+  }
+
+  /**
+   * 导出预览区域内容
+   * @public
+   * @param {String} type 'pdf'：导出成pdf文件; 'img'：导出成图片
+   */
+  export(type = 'pdf') {
+    if (type === 'pdf') {
+      exportPDF(this.getDomContainer());
+    } else {
+      exportScreenShot(this.getDomContainer());
     }
   }
 }

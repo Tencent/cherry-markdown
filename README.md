@@ -16,8 +16,6 @@ Developer can call and instantiate Cherry Markdown Editor in a very simple way. 
 
 When the syntax that Cherry Markdown editor support can not meet your needs, secondary development or function extention can be carried out quickly. At the same time, Cherry Markdown editor should be implemented by pure JavaScript, and should not rely on framework technology such as angular, vue and react. Framework only provide a container environment.
 
-DEMO **Coming soon**
-
 ## Feature
 
 ### Syntax Feature
@@ -254,6 +252,8 @@ Click [here](./docs/configuration.md) for the full documentation of Cherry confi
 ## Example
 
 Click [here](./examples/) for more examples.
+### Client
+[cherry-markdown client](./docs/cherry_editor_client.md)
 
 ## Extension
 
@@ -324,6 +324,12 @@ Click [extensions](./docs/extensions.md) if you want knoe more extension about c
 ## Contributing
 
 Welcome to join us to build a more powerful Markdown editor. Of course you can submit feature request to us. Please read[extensions](./docs/extensions.md) and [commit_convention](./docs/commit_convention.md) before you working on it.
+
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/Tencent/cherry-markdown.svg)](https://starchart.cc/Tencent/cherry-markdown)
+
 
 ## License
 

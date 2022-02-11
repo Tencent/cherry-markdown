@@ -395,6 +395,7 @@ export default class Cherry extends CherryStatic {
       onChange: this.editText.bind(this),
       toolbars: this.options.toolbars,
       fileUpload: this.options.fileUpload,
+      autoScrollByCursor: this.options.autoScrollByCursor,
       ...this.options.editor,
     });
     return this.editor;
@@ -495,5 +496,14 @@ export default class Cherry extends CherryStatic {
       evt.preventDefault();
       this.toolbar.fireShortcutKey(evt, codemirror);
     }
+  }
+
+  /**
+   * 导出预览区域内容
+   * @public
+   * @param {String} type 'pdf'：导出成pdf文件; 'img'：导出成图片
+   */
+  export(type = 'pdf') {
+    this.previewer.export(type);
   }
 }

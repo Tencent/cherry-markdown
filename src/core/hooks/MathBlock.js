@@ -35,41 +35,52 @@ export default class MathBlock extends ParagraphBase {
     this.engine = isBrowser() ? config.engine ?? 'MathJax' : 'node';
   }
 
-  toHtml(wholeMatch, m1) {
+  toHtml(wholeMatch, lineSpace, content) {
     LoadMathModule.bind(this)('engine');
+    // 去掉开头的空字符，去掉结尾的换行符
+    const wholeMatchWithoutSpace = wholeMatch.replace(/^[ \f\r\t\v]*/, '').replace(/\s*$/, '');
+    // 去掉匹配到的第一个换行符
+    const lineSpaceWithoutPreSpace = lineSpace.replace(/^[ \f\r\t\v]*\n/, '');
     const sign = this.$engine.md5(wholeMatch);
-    const linesArr = m1.match(/\n/g);
-    const lines = linesArr ? linesArr.length + 2 : 2;
+    let lines = this.getLineCount(wholeMatchWithoutSpace, lineSpaceWithoutPreSpace);
+    // 判断公式是不是新行输入，如果不是新行，则行号减1
+    if (!/\n/.test(lineSpace)) {
+      lines -= 1;
+    }
+    // 判断公式后面有没有尾接内容，如果尾接了内容，则行号减1
+    if (!/\n\s*$/.test(wholeMatch)) {
+      lines -= 1;
+    }
+    // 目前的机制还没有测过lines为负数的情况，先不处理
+    lines = lines > 0 ? lines : 0;
 
     if (this.engine === 'katex') {
       // katex渲染
-      const html = this.katex.renderToString(m1, {
+      const html = this.katex.renderToString(content, {
         throwOnError: false,
         displayMode: true,
       });
       const result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
             data-lines="${lines}">${html}</div>`;
-      return this.pushCache(result, sign);
+      return this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
     }
     if (this.MathJax?.tex2svg) {
       // MathJax渲染
-      const svg = getHTML(this.MathJax.tex2svg(m1), true);
+      const svg = getHTML(this.MathJax.tex2svg(content), true);
       const result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
             data-lines="${lines}">${svg}</div>`;
-      return this.pushCache(result, sign);
+      return this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
     }
 
     // 既无MathJax又无katex时，原样输出
     const result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
-          data-lines="${lines}">$$${escapeFormulaPunctuations(m1)}$$</div>`;
-    return this.pushCache(result, sign);
+          data-lines="${lines}">$$${escapeFormulaPunctuations(content)}$$</div>`;
+    return this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
   }
 
   beforeMakeHtml(str) {
     let $str = str;
-    if (this.test($str)) {
-      $str = $str.replace(this.RULE.reg, this.toHtml.bind(this));
-    }
+    $str = $str.replace(this.RULE.reg, this.toHtml.bind(this));
     return $str;
   }
 
@@ -78,7 +89,7 @@ export default class MathBlock extends ParagraphBase {
   }
 
   rule() {
-    const ret = { begin: '~D~D\\s*', end: '\\s*~D~D', content: '([\\w\\W]*?)' };
+    const ret = { begin: '(\\s*)~D~D\\s*', end: '\\s*~D~D(?:\\s{0,1})', content: '([\\w\\W]*?)' };
     ret.reg = new RegExp(ret.begin + ret.content + ret.end, 'g');
     return ret;
   }

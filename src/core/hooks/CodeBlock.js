@@ -16,7 +16,6 @@
 import ParagraphBase from '@/core/ParagraphBase';
 import Prism from 'prismjs';
 import { escapeHTMLSpecialChar } from '@/utils/sanitize';
-import { prependLineFeedForParagraph } from '@/utils/lineFeed';
 
 Prism.manual = true;
 
@@ -129,16 +128,11 @@ export default class CodeBlock extends ParagraphBase {
    * @param {string} code
    */
   computeLines(match, leadingContent, code) {
-    const sign = this.$engine.md5(match);
-    const linesArr = code.match(/\n/g);
-    const leadingLines = leadingContent?.match(/\n/g)?.length ?? 0;
-    const leadingSpaces = leadingContent?.replace(/\n/g, '') ?? '';
-    // 只需要加上开头的换行，以及代码块边界的两行即可
-    const baseLines = leadingLines + 2;
-    const lines = linesArr ? linesArr.length + baseLines : baseLines;
+    const leadingSpaces = leadingContent;
+    const lines = this.getLineCount(match, leadingSpaces);
+    const sign = this.$engine.md5(match.replace(/^\n+/, '') + lines);
     return {
       sign,
-      leadingSpaces,
       lines,
     };
   }
@@ -209,52 +203,50 @@ export default class CodeBlock extends ParagraphBase {
   beforeMakeHtml(str, sentenceMakeFunc, markdownParams) {
     let $str = str;
 
-    if (this.test($str)) {
-      $str = $str.replace(this.RULE.reg, (match, leadingContent, lang, code) => {
-        let $code = code;
-        const { sign, leadingSpaces, lines } = this.computeLines(match, leadingContent, code);
-        // 从缓存中获取html
-        let cacheCode = this.$codeCache(sign);
+    $str = $str.replace(this.RULE.reg, (match, leadingContent, lang, code) => {
+      let $code = code;
+      const { sign, lines } = this.computeLines(match, leadingContent, code);
+      // 从缓存中获取html
+      let cacheCode = this.$codeCache(sign);
+      if (cacheCode && cacheCode !== '') {
+        return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
+      }
+      $code = $code.replace(/~D/g, '$');
+      $code = $code.replace(/~T/g, '~');
+
+      /** 处理缩进 - start: 当首行反引号前存在多个空格缩进时，代码内容要相应去除相同数量的空格 */
+      const indentSpaces = leadingContent?.match(/[ ]/g)?.length ?? 0;
+      if (indentSpaces > 0) {
+        const regex = new RegExp(`(^|\\n)[ ]{1,${indentSpaces}}`, 'g');
+        $code = $code.replace(regex, '$1');
+      }
+      /** 处理缩进 - end */
+
+      // 未命中缓存，执行渲染
+      let $lang = lang.trim();
+      // 如果是公式关键字，则直接返回
+      if (/^(math|katex|latex)$/i.test($lang) && !this.isInternalCustomLangCovered($lang)) {
+        const prefix = match.match(/^\s*/g);
+        // ~D为经编辑器中间转义后的$，code结尾包含结束```前的所有换行符，所以不需要补换行
+        return `${prefix}~D~D\n${$code}~D~D`; // 提供公式语法供公式钩子解析
+      }
+      [$code, $lang] = this.appendMermaid($code, $lang);
+      // 自定义语言渲染，可覆盖内置的自定义语言逻辑
+      if (this.customLang.indexOf($lang.toLowerCase()) !== -1) {
+        cacheCode = this.parseCustomLanguage($lang, $code, { lines, sign });
         if (cacheCode && cacheCode !== '') {
-          return prependLineFeedForParagraph(match, leadingSpaces + this.pushCache(cacheCode, sign), true);
+          this.$codeCache(sign, cacheCode);
+          return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
         }
-        $code = $code.replace(/~D/g, '$');
-        $code = $code.replace(/~T/g, '~');
-
-        /** 处理缩进 - start: 当首行反引号前存在多个空格缩进时，代码内容要相应去除相同数量的空格 */
-        const indentSpaces = leadingContent?.match(/[ ]/g)?.length ?? 0;
-        if (indentSpaces > 0) {
-          const regex = new RegExp(`(^|\\n)[ ]{1,${indentSpaces}}`, 'g');
-          $code = $code.replace(regex, '$1');
-        }
-        /** 处理缩进 - end */
-
-        // 未命中缓存，执行渲染
-        let $lang = lang.trim();
-        // 如果是公式关键字，则直接返回
-        if (/^(math|katex|latex)$/i.test($lang) && !this.isInternalCustomLangCovered($lang)) {
-          const prefix = match.match(/^\s*/g);
-          // ~D为经编辑器中间转义后的$，code结尾包含结束```前的所有换行符，所以不需要补换行
-          return `${prefix}~D~D\n${$code}~D~D`; // 提供公式语法供公式钩子解析
-        }
-        [$code, $lang] = this.appendMermaid($code, $lang);
-        // 自定义语言渲染，可覆盖内置的自定义语言逻辑
-        if (this.customLang.indexOf($lang.toLowerCase()) !== -1) {
-          cacheCode = this.parseCustomLanguage($lang, $code, { lines, sign });
-          if (cacheCode && cacheCode !== '') {
-            this.$codeCache(sign, cacheCode);
-            return prependLineFeedForParagraph(match, leadingSpaces + this.pushCache(cacheCode, sign), true);
-          }
-          // 渲染出错则按正常code进行渲染
-        }
-        // $code = this.$replaceSpecialChar($code);
-        $code = $code.replace(/~X/g, '\\`');
-        $code = $code.replace(/\\/g, '\\\\');
-        cacheCode = this.renderCodeBlock($code, $lang, sign, lines);
-        cacheCode = this.$codeCache(sign, cacheCode);
-        return prependLineFeedForParagraph(match, leadingSpaces + this.pushCache(cacheCode, sign), true);
-      });
-    }
+        // 渲染出错则按正常code进行渲染
+      }
+      // $code = this.$replaceSpecialChar($code);
+      $code = $code.replace(/~X/g, '\\`');
+      $code = $code.replace(/\\/g, '\\\\');
+      cacheCode = this.renderCodeBlock($code, $lang, sign, lines);
+      cacheCode = this.$codeCache(sign, cacheCode);
+      return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
+    });
     // 为了避免InlineCode被HtmlBlock转义，需要在这里提前缓存
     // InlineBlock只需要在afterMakeHtml还原即可
     const INLINE_CODE_REGEX = /(`+)(.+?(?:\n.+?)*?)\1/g;
@@ -295,11 +287,11 @@ export default class CodeBlock extends ParagraphBase {
   rule() {
     const ret = {
       /**
-       * (^|\n)是区块的通用开头
-       * (\n*?)捕获区块前的所有换行
+       * (?:^|\n)是区块的通用开头
+       * (\n*)捕获区块前的所有换行
        * (?:[^\S\n]*)捕获```前置的空格字符
        */
-      begin: /(?:^|\n)(\n*?(?:[^\S\n]*))```(.*?)\n/,
+      begin: /(?:^|\n)(\n*(?:[^\S\n]*))```(.*?)\n/,
       content: /([\w\W]*?)/, // '([\\w\\W]*?)',
       end: /[^\S\n]*```[ \t]*(?=$|\n+)/, // '\\s*```[ \\t]*(?=$|\\n+)',
     };

@@ -393,6 +393,7 @@ $$
 -----
 
 
+
 ## 插入音视频
 **说明**
 - 使用 `!v[描述](视频链接地址)` 插入视频
@@ -414,6 +415,7 @@ $$
 
 -----
 
+
 ## 带对齐功能的表格
 **说明**
 - 一种比较通用的markdown表格语法
@@ -433,6 +435,7 @@ $$
 |手机机|￥12|50|
 
 -----
+
 
 ## 流程图[^不通用提醒]
 **说明**
@@ -463,6 +466,7 @@ graph TD
 -----
 
 
+
 ## 时序图[^不通用提醒]
 **说明**
 - 访问[Mermaid 时序图](https://mermaid-js.github.io/mermaid/#/sequenceDiagram)参考具体使用方法
@@ -488,6 +492,7 @@ end
 -----
 
 
+
 ## 状态图[^不通用提醒]
 **说明**
 - 访问[Mermaid 状态图](https://mermaid-js.github.io/mermaid/#/stateDiagram)参考具体使用方法
@@ -509,6 +514,7 @@ C --> [*]
 
 
 -----
+
 
 
 ## UML图[^不通用提醒]
@@ -538,6 +544,7 @@ class Two{
 -----
 
 
+
 ## 饼图[^不通用提醒]
 **说明**
 - 访问[Mermaid 饼图](https://mermaid-js.github.io/mermaid/#/pie)参考具体使用方法
@@ -555,6 +562,7 @@ title 饼图
 
 
 -----
+
 
 
 ## 注释[^不通用提醒]
@@ -591,6 +599,7 @@ title 饼图
 
 
 -----
+
 
 
 ## 脚注[^不通用提醒]
@@ -633,6 +642,7 @@ title 饼图
 
 
 -----
+
 
 
 ## 复制html内容，粘贴成markdown
@@ -710,24 +720,24 @@ title 饼图
 
 > 其中，`宽度`、`高度`支持：绝对像素值（比如200px）、相对外层容器百分比（比如50%），
 `对齐方式`候选值有：左对齐（缺省）、右对齐（right）、居中（center）、悬浮左、右对齐（float-left/right）
-![图片尺寸](https://raw.githubusercontent.com/Tencent/cherry-markdown/main/examples/images/feature_image_size.png)
+![图片尺寸](images/feature_image_size.png)
 
 -----
 
 ### 特性 2：根据表格内容生成图表
-![表格图表](https://raw.githubusercontent.com/Tencent/cherry-markdown/main/examples/images/feature_table_chart.png)
+![表格图表](images/feature_table_chart.png)
 
 -----
 
 ### 特性 3：字体颜色、字体大小
-![字体样式](https://raw.githubusercontent.com/Tencent/cherry-markdown/main/examples/images/feature_font.png)
+![字体样式](images/feature_font.png)
 
 ------
 
 ## 功能特性
 
 ### 特性 1：复制Html粘贴成MD语法
-![html转md](https://raw.githubusercontent.com/Tencent/cherry-markdown/main/examples/images/feature_copy.gif)
+![html转md](images/feature_copy.gif)
 
 #### 使用场景
 
@@ -737,7 +747,7 @@ title 饼图
 ----
 
 ### 特性 2：经典换行&常规换行
-![br](https://raw.githubusercontent.com/Tencent/cherry-markdown/main/examples/images/feature_br.gif)
+![br](images/feature_br.gif)
 
 #### 使用场景
 
@@ -746,17 +756,17 @@ title 饼图
 -----
 
 ### 特性 3: 多光标编辑
-![br](https://raw.githubusercontent.com/Tencent/cherry-markdown/main/examples/images/feature_cursor.gif)
+![br](images/feature_cursor.gif)
 
 #### 使用场景
 
 想要批量修改？可以试试多光标编辑（快捷键、搜索多光标选中等功能正在开发中）
 
 ### 特性 4：图片尺寸
-![wysiwyg](https://raw.githubusercontent.com/Tencent/cherry-markdown/main/examples/images/feature_image_wysiwyg.gif)
+![wysiwyg](images/feature_image_wysiwyg.gif)
 
 ### 特性 5：导出
-![wysiwyg](https://raw.githubusercontent.com/Tencent/cherry-markdown/main/examples/images/feature_export.png)
+![wysiwyg](images/feature_export.png)
 
 -------
 
@@ -766,10 +776,10 @@ title 饼图
 
 > CherryMarkdown会判断用户到底变更了哪个段落，做到只渲染变更的段落，从而提升修改时的渲染性能
 
-![wysiwyg](https://raw.githubusercontent.com/Tencent/cherry-markdown/main/examples/images/feature_myers.png)
+![wysiwyg](images/feature_myers.png)
 
 ### 局部更新
 
 > CherryMarkdown利用virtual dom机制实现对预览区域需要变更的内容进行局部更新的功能，从而减少了浏览器Dom操作，提高了修改时预览内容更新的性能
 
-![wysiwyg](https://raw.githubusercontent.com/Tencent/cherry-markdown/main/examples/images/feature_vdom.gif)
+![wysiwyg](images/feature_vdom.gif)

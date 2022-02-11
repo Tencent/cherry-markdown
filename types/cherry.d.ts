@@ -27,6 +27,8 @@ export interface CherryOptions {
   previewer: CherryPreviewerOptions;
   /** 是否开启仅预览模式 */
   isPreviewOnly: boolean;
+  /** 预览区域跟随编辑器光标自动滚动 */
+  autoScrollByCursor: boolean;
   /** 挂载DOM节点ID，引擎模式下不生效 */
   id: string;
   /** 初始内容，引擎模式下不生效 */
@@ -35,6 +37,20 @@ export interface CherryOptions {
 
 export interface CherryExternalsOptions {
   [key: string]: any;
+}
+
+/**
+ *  自定义语法注册配置
+ */
+export interface CustomSyntaxRegConfig {
+  /** 语法class */
+  syntaxClass: typeof SyntaxBase;
+  /** 在某个hook前执行，填入hookName */
+  before?: string;
+  /** 在某个hook后执行，填入hookName */
+  after?: string;
+  /** 强制覆盖同名hook */
+  force?: boolean;
 }
 
 export interface CherryEngineOptions {
@@ -73,18 +89,7 @@ export interface CherryEngineOptions {
   /** 内置语法配置 */
   syntax?: Record<string, Record<string, any> | false>;
   /** 自定义语法 */
-  customSyntax?:
-    | typeof SyntaxBase
-    | {
-        /** 语法class */
-        syntaxClass: typeof SyntaxBase;
-        /** 在某个hook前执行，填入hookName */
-        before?: string;
-        /** 在某个hook后执行，填入hookName */
-        after?: string;
-        /** 强制覆盖同名hook */
-        force?: boolean;
-      };
+  customSyntax?: Record<string, CustomSyntaxRegConfig['syntaxClass'] | CustomSyntaxRegConfig>;
 }
 
 export type EditorMode =

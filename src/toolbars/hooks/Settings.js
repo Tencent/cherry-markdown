@@ -30,12 +30,15 @@ export default class Settings extends MenuBase {
     super(editor);
     this.setName('settings', 'settings');
     this.engine = engine;
-    const classicBrIconName = this.engine.$cherry.options.engine.global.classicBr ? 'br' : 'normal';
-    const previewIcon = editor.options.defaultModel === 'editOnly' ? 'preview' : 'previewClose';
-    const previewName = editor.options.defaultModel === 'editOnly' ? 'togglePreview' : 'previewClose';
+    const { classicBr } = this.engine.$cherry.options.engine.global;
+    const { defaultModel } = editor.options;
+    const classicBrIconName = classicBr ? 'br' : 'normal';
+    const classicBrName = classicBr ? 'classicBr' : 'normalBr';
+    const previewIcon = defaultModel === 'editOnly' ? 'preview' : 'previewClose';
+    const previewName = defaultModel === 'editOnly' ? 'togglePreview' : 'previewClose';
     this.instanceId = engine.$cherry.previewer.instanceId;
     this.subMenuConfig = [
-      { iconName: classicBrIconName, name: 'classicBr', onclick: this.bindSubClick.bind(this, 'classicBr') },
+      { iconName: classicBrIconName, name: classicBrName, onclick: this.bindSubClick.bind(this, 'classicBr') },
       { iconName: previewIcon, name: previewName, onclick: this.bindSubClick.bind(this, 'previewClose') },
     ];
     this.attachEventListeners();

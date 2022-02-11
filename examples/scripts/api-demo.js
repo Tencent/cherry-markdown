@@ -75,6 +75,7 @@ var cherryConfig = {
       { insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word'] },
       'graph',
       'settings',
+      'export'
     ],
   },
   editor: {},
@@ -87,6 +88,6 @@ var cherryConfig = {
 };
 
 fetch('./markdown/api.md').then((response) => response.text()).then((value) => {
-  var config = Object.assign({}, basicConfig, { value: value });
+  var config = Object.assign({}, cherryConfig, { value: value });
   window.cherryObj = new Cherry(config);
 });

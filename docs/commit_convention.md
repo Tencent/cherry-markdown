@@ -13,8 +13,8 @@ As a formal open-source project team, our submission specifications are consiste
 <footer>
 ```
 
-- Title line:  !!#ff0000 must be filled !! , describe your main modification type and content, scope enhance the description submission scope, such as the Cherry core layer, Edior, Previewer, etc.
-- Subject content: describe why you changed, what you had changed and development ideas  # Ff0000 here directly cites to the tapd source code keyword. Don't fill in if you don't have it!!
+- Title line:  **must be filled** , describe your main modification type and content, scope enhance the description submission scope, such as the Cherry core layer, Edior, Previewer, etc.
+- Subject content: describe why you changed, what you had changed and development ideas  **here directly cites to the tapd source code keyword. Don't fill in if you don't have it
 - Footer notes:  for Breaking Changes or Closed Issues
 
 ### Example
@@ -48,7 +48,7 @@ We support commitizen support for ease of use, use cz-customizable to configure.
 
 ## 三、Automatically generate Change log（generate release for release）
 
- Generate a new version after !!merging the new code in the #ff0000 master branch!!: Execute the command:
+ Generate a new version after **merging the new code in the master branch**: Execute the command:
 
 `npm run release -- --release-as 1.1.0`
 
