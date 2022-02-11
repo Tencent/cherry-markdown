@@ -23,6 +23,7 @@ export default class AutoLink extends SyntaxBase {
   constructor({ config, globalConfig }) {
     super({ config });
     this.urlProcessor = globalConfig.urlProcessor;
+    this.smartOpenUrl = globalConfig.smartOpenUrl; // 同域名在当前窗口打开链接，否则打开新窗口，优先级高于openNewPage
   }
 
   isLinkInHtmlAttribute(str, index, linkLength) {
@@ -204,6 +205,17 @@ export default class AutoLink extends SyntaxBase {
       linkText = url;
     }
     const processedURL = this.urlProcessor(url, 'autolink');
-    return `<a href="${encodeURIOnce(processedURL)}" rel="nofollow">${$e(linkText)}</a>`;
+    let target = '_blank';
+    if (this.smartOpenUrl) {
+      try {
+        const [origin] = new RegExp(/(\w+:\/\/)([^/:]+)(:\d*)?/).exec(processedURL);
+        if (origin === location.origin) {
+          target = '_self';
+        }
+      } catch (e) {
+        target = '_blank';
+      }
+    }
+    return `<a href="${encodeURIOnce(processedURL)}" rel="nofollow" target="${target}">${$e(linkText)}</a>`;
   }
 }

@@ -81,32 +81,32 @@
 
   h1,
   .h1 {
-    font-size: 2em;
+    font-size: 1.5em;
   }
 
   h2,
   .h2 {
-    font-size: 1.5em;
+    font-size: 1.25em;
   }
 
   h3,
   .h3 {
-    font-size: 1.25em;
+    font-size: 1em;
   }
 
   h4,
   .h4 {
-    font-size: 1em;
+    font-size: 0.85em;
   }
 
   h5,
   .h5 {
-    font-size: .875em;
+    font-size: .75em;
   }
 
   h6,
   .h6 {
-    font-size: .85em;
+    font-size: .65em;
   }
 
   b,
@@ -151,6 +151,16 @@
 
   a {
     color: $linkColor;
+    position: relative;
+    padding-right: 15px;
+		
+    &[target="_blank"]::after {
+			content: '\EA10';
+			font-size: 12px;
+			font-family: "ch-icon";
+			position: absolute;
+			margin-left: 3px
+    }
 
     &:hover {
       color: $linkHoverColor;
@@ -249,7 +259,8 @@
     vertical-align: middle;
     display: inline-block;
     text-align: center;
-    margin-left: -15px;
+    margin-left: -30px;
+    margin-top: -1em;
   }
 
   .toc {

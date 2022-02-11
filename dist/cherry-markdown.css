@@ -276,22 +276,22 @@
     font-size: 75%; }
   .cherry-markdown h1,
   .cherry-markdown .h1 {
-    font-size: 2em; }
+    font-size: 1.5em; }
   .cherry-markdown h2,
   .cherry-markdown .h2 {
-    font-size: 1.5em; }
+    font-size: 1.25em; }
   .cherry-markdown h3,
   .cherry-markdown .h3 {
-    font-size: 1.25em; }
+    font-size: 1em; }
   .cherry-markdown h4,
   .cherry-markdown .h4 {
-    font-size: 1em; }
+    font-size: 0.85em; }
   .cherry-markdown h5,
   .cherry-markdown .h5 {
-    font-size: .875em; }
+    font-size: .75em; }
   .cherry-markdown h6,
   .cherry-markdown .h6 {
-    font-size: .85em; }
+    font-size: .65em; }
   .cherry-markdown b,
   .cherry-markdown strong {
     font-weight: bold; }
@@ -320,7 +320,15 @@
   .cherry-markdown table {
     border-collapse: collapse; }
   .cherry-markdown a {
-    color: #3582fb; }
+    color: #3582fb;
+    position: relative;
+    padding-right: 15px; }
+    .cherry-markdown a[target="_blank"]::after {
+      content: '\EA10';
+      font-size: 12px;
+      font-family: "ch-icon";
+      position: absolute;
+      margin-left: 3px; }
     .cherry-markdown a:hover {
       color: #056bad; }
   .cherry-markdown em {
@@ -453,7 +461,8 @@
     vertical-align: middle;
     display: inline-block;
     text-align: center;
-    margin-left: -15px; }
+    margin-left: -30px;
+    margin-top: -1em; }
   .cherry-markdown .toc {
     margin-bottom: 16px; }
     .cherry-markdown .toc .toc-title {
@@ -1565,8 +1574,8 @@ green     #859900
 
 .cherry {
   font-family: "Helvetica Neue", Arial, "Hiragino Sans GB", "STHeiti", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
-  font-size: 16px;
-  line-height: 27px;
+  font-size: 14px;
+  line-height: 22px;
   color: #3f4a56;
   background: #f8fafb;
   box-shadow: 0 0 10px rgba(128, 145, 165, 0.2); }
@@ -1781,7 +1790,6 @@ green     #859900
     -ms-user-select: none;
     user-select: none; }
     .cherry-bubble .cherry-toolbar-button:hover {
-      border-color: #dfe6ee;
       background-color: rgba(89, 128, 166, 0.05); }
     .cherry-bubble .cherry-toolbar-button.cherry-toolbar-split {
       border-left: 1px solid #ddd;
@@ -1810,8 +1818,8 @@ green     #859900
   position: absolute;
   left: 30px;
   margin-left: 60px;
-  height: 27px;
-  line-height: 27px;
+  height: 22px;
+  line-height: 22px;
   border-radius: 3px;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -1821,8 +1829,8 @@ green     #859900
     float: left;
     padding: 0 9px;
     margin: 0;
-    height: 27px;
-    line-height: 27px;
+    height: 22px;
+    line-height: 22px;
     font-size: 14px;
     color: #3f4a56;
     overflow: hidden;
@@ -1979,7 +1987,6 @@ green     #859900
       border: 1px solid #000; }
 
 .cherry-switch-paste {
-  width: 224px;
   margin-left: -112px;
   left: 50%; }
   .cherry-switch-paste .switch-btn--bg {
@@ -1994,7 +2001,8 @@ green     #859900
     background-color: #5d9bfc; }
   .cherry-switch-paste .cherry-toolbar-button {
     width: 80px;
-    text-align: center; }
+    text-align: center;
+    box-sizing: content-box; }
     .cherry-switch-paste .cherry-toolbar-button:hover {
       border-color: transparent; }
   .cherry-switch-paste[data-type='text'] .cherry-text-btn {
