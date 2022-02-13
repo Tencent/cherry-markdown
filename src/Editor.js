@@ -57,6 +57,7 @@ export default class Editor {
         lineNumbers: false, // 显示行数
         cursorHeight: 0.85, // 光标高度，0.85好看一些
         indentUnit: 4, // 缩进单位为4
+        tabSize: 4, // 一个tab转换成的空格数量
         // styleActiveLine: false, // 当前行背景高亮
         // matchBrackets: true, // 括号匹配
         mode: 'markdown',

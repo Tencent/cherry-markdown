@@ -190,6 +190,15 @@
     margin: 0 0 $elementGap;
   }
 
+  pre {
+    padding: 16px;
+    overflow: auto;
+    font-size: 85%;
+    line-height: 1.45;
+    background-color: #f6f8fa;
+    border-radius: 6px;
+  }
+
   // 适配历史文章样式
   @import 'prettyprint/prettyprint.scss';
 
