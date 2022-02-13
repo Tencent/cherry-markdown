@@ -81,7 +81,7 @@ export interface CherryEngineOptions {
     htmlWhiteList?: string;
   };
   /** 内置语法配置 */
-  syntax?: Record<string, Record<string, any> | false>;
+  syntax?: Record<string, Record<string, any> | any>;
   /** 自定义语法 */
   customSyntax?: Record<string, CustomSyntaxRegConfig['syntaxClass'] | CustomSyntaxRegConfig>;
 }
