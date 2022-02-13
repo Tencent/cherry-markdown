@@ -119,7 +119,7 @@ const defaultConfig = {
          *  - autonumber    标题前面有自增序号锚点
          *  - none          标题没有锚点
          */
-        anchorStyle: 'none',
+        anchorStyle: 'default',
       },
     },
   },
