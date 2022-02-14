@@ -19,7 +19,9 @@
       "~types/*": [
         "types/*"
       ],
-    }
+    },
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
   },
   "include": [
     "src/index.js",
