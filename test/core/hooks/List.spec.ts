@@ -1,5 +1,5 @@
 import List from '../../../src/core/hooks/List';
-import * as md5 from 'md5';
+import md5 from 'md5';
 
 const cases = []
 cases[0] = `
