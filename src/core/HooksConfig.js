@@ -46,7 +46,6 @@ import Emoji from './hooks/Emoji';
 import Underline from './hooks/Underline';
 import HighLight from './hooks/HighLight';
 import Suggester from './hooks/Suggester';
-import Pre from './hooks/Pre';
 /**
  * 引擎各语法的配置
  * 主要决定支持哪些语法，以及各语法的执行顺序
@@ -55,7 +54,6 @@ const hooksConfig = [
   // 段落级 Hook
   // 引擎会按当前排序顺序执行beforeMake、makeHtml方法
   // 引擎会按当前排序逆序执行afterMake方法
-  Pre,
   CodeBlock,
   InlineCode,
   MathBlock,
