@@ -421,7 +421,8 @@ export default class Cherry extends CherryStatic {
   createPreviewer() {
     /** @type {HTMLDivElement} */
     let previewer;
-    const anchorStyle = this.options.engine.syntax.header.anchorStyle || 'default';
+    const anchorStyle =
+      (this.options.engine.syntax.header && this.options.engine.syntax.header.anchorStyle) || 'default';
     const autonumberClass = anchorStyle === 'autonumber' ? ' head-num' : '';
     const { className, dom } = this.options.previewer;
     const previewerClassName = `cherry-previewer ${className}${autonumberClass}`;
