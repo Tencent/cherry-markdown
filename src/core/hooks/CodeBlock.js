@@ -217,12 +217,13 @@ export default class CodeBlock extends ParagraphBase {
       return str;
     }
     return this.$recoverCodeInIndent(str).replace(this.$getIndentedCodeReg(), (match, code) => {
-      const lineCount = (match.match(/\n/g) || []).length;
+      const lineCount = (match.match(/\n/g) || []).length - 1;
       const sign = this.$engine.md5(match);
       const html = `<pre data-sign="${sign}" data-lines="${lineCount}">${escapeHTMLSpecialChar(
         code.replace(/\n( {4}|\t)/g, '\n'),
       )}</pre>`;
-      return this.getCacheWithSpace(this.pushCache(html), match, true);
+      // return this.getCacheWithSpace(this.pushCache(html), match, true);
+      return this.pushCache(html, sign, lineCount);
     });
   }
 
