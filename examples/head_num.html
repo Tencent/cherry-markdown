@@ -108,9 +108,12 @@
 <script>
   var cherry = new Cherry({
     id: 'markdown',
-    previewer: {
-      // head-num 表示启用标题自动序号
-      className: 'cherry-markdown head-num'
+    engine: {
+      syntax: {
+        header: {
+          anchorStyle: 'autonumber',
+        }
+      }
     },
     value: document.getElementById("demo-val").value,
   });
