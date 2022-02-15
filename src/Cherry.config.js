@@ -124,6 +124,15 @@ const defaultConfig = {
         /** 默认只渲染一个目录 */
         allowMultiToc: false,
       },
+      header: {
+        /**
+         * 标题的样式：
+         *  - default       默认样式，标题前面有锚点
+         *  - autonumber    标题前面有自增序号锚点
+         *  - none          标题没有锚点
+         */
+        anchorStyle: 'default',
+      },
     },
   },
   editor: {
