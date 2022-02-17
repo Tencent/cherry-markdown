@@ -144,6 +144,8 @@ const defaultConfig = {
     // editOnly: 纯编辑模式（没有预览，可通过toolbar切换成双栏或预览模式）
     // previewOnly: 预览模式（没有编辑框，toolbar只显示“返回编辑”按钮，可通过toolbar切换成编辑模式）
     defaultModel: 'edit&preview',
+    // 粘贴时是否自动将html转成markdown
+    convertWhenPaste: true,
   },
   toolbars: {
     theme: 'dark', // light or dark

@@ -42,6 +42,7 @@ export type EditorConfiguration = {
   wrapperDom: HTMLElement;
   toolbars: any;
   value?: string;
+  convertWhenPaste?: boolean;
   codemirror: CodeMirror.EditorConfiguration;
   onKeydown: EditorEventCallback<EditorEventMap['onKeydown']>;
   onFocus: EditorEventCallback<EditorEventMap['onFocus']>;
