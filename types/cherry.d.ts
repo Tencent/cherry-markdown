@@ -101,6 +101,8 @@ export interface CherryEditorOptions {
   height?: string;
   /** 编辑器初始化后的模式 */
   defaultModel?: EditorMode;
+  /** 粘贴时是否自动将html转成markdown */
+  convertWhenPaste?: boolean;
 }
 
 export type CherryLifecycle = (text: string, html: string) => void;
