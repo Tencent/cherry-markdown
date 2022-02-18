@@ -35,6 +35,7 @@ export default class CodeBlock extends ParagraphBase {
     this.customParser = {};
     this.wrap = config.wrap; // 超出是否换行
     this.lineNumber = config.lineNumber; // 是否显示行号
+    this.indentedCodeBlock = typeof config.indentedCodeBlock === 'undefined' ? true : config.indentedCodeBlock; // 是否支持缩进代码块
     if (config && config.customRenderer) {
       this.customLang = Object.keys(config.customRenderer).map((lang) => lang.toLowerCase());
       this.customParser = { ...config.customRenderer };
@@ -196,8 +197,65 @@ export default class CodeBlock extends ParagraphBase {
     return cacheCode;
   }
 
+  /**
+   * 获取缩进代码块语法的正则
+   */
+  $getIndentedCodeReg() {
+    const ret = {
+      begin: '(?:^|\\n\\s*\\n)(?: {4}|\\t)',
+      end: '(?=$|\\n( {0,3}[^ \\t\\n]|\\n[^ \\t\\n]))',
+      content: '([\\s\\S]+?)',
+    };
+    return new RegExp(ret.begin + ret.content + ret.end, 'g');
+  }
+
+  /**
+   * 生成缩进代码块（没有行号、没有代码高亮）
+   */
+  $getIndentCodeBlock(str) {
+    if (!this.indentedCodeBlock) {
+      return str;
+    }
+    return this.$recoverCodeInIndent(str).replace(this.$getIndentedCodeReg(), (match, code) => {
+      const lineCount = (match.match(/\n/g) || []).length - 1;
+      const sign = this.$engine.md5(match);
+      const html = `<pre data-sign="${sign}" data-lines="${lineCount}">${escapeHTMLSpecialChar(
+        code.replace(/\n( {4}|\t)/g, '\n'),
+      )}</pre>`;
+      // return this.getCacheWithSpace(this.pushCache(html), match, true);
+      return this.pushCache(html, sign, lineCount);
+    });
+  }
+
+  /**
+   * 预处理缩进代码块，将缩进代码块里的高亮代码块和行内代码进行占位处理
+   */
+  $replaceCodeInIndent(str) {
+    if (!this.indentedCodeBlock) {
+      return str;
+    }
+    return str.replace(this.$getIndentedCodeReg(), (match) => {
+      return match.replace(/`/g, '~~~IndentCode');
+    });
+  }
+
+  /**
+   * 恢复预处理的内容
+   */
+  $recoverCodeInIndent(str) {
+    if (!this.indentedCodeBlock) {
+      return str;
+    }
+    return str.replace(this.$getIndentedCodeReg(), (match) => {
+      return match.replace(/~~~IndentCode/g, '`');
+    });
+  }
+
   beforeMakeHtml(str, sentenceMakeFunc, markdownParams) {
     let $str = str;
+
+    // 预处理缩进代码块
+    $str = this.$replaceCodeInIndent($str);
 
     $str = $str.replace(this.RULE.reg, (match, leadingContent, lang, code) => {
       let $code = code;
@@ -262,6 +320,10 @@ export default class CodeBlock extends ParagraphBase {
       });
       $str = $str.replace(/~~not~inlineCode/g, '\\`');
     }
+
+    // 处理缩进代码块
+    $str = this.$getIndentCodeBlock($str);
+
     return $str;
   }
 

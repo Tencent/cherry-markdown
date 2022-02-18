@@ -15,6 +15,7 @@
  */
 
 import imgSizeHander from '@/utils/imgSizeHander';
+import Event from '@/Event';
 /**
  * 预览区域的响应式工具栏
  */
@@ -58,6 +59,9 @@ export default class PreviewerBubble {
     });
     this.previewerDom.addEventListener('scroll', (event) => {
       this.bubbleHandler.emit('scroll', event);
+    });
+    Event.on(this.previewer.instanceId, Event.Events.previewerClose, () => {
+      this.$removeAllPreviewerBubbles();
     });
     this.previewer.options.afterUpdateCallBack.push(() => {
       this.bubbleHandler.emit('previewUpdate', () => {
