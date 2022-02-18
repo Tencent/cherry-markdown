@@ -53,10 +53,12 @@ export default class Editor {
       editorDom: document.createElement('div'),
       wrapperDom: null,
       autoScrollByCursor: true,
+      convertWhenPaste: true,
       codemirror: {
         lineNumbers: false, // 显示行数
         cursorHeight: 0.85, // 光标高度，0.85好看一些
         indentUnit: 4, // 缩进单位为4
+        tabSize: 4, // 一个tab转换成的空格数量
         // styleActiveLine: false, // 当前行背景高亮
         // matchBrackets: true, // 括号匹配
         mode: 'markdown',
@@ -135,7 +137,7 @@ export default class Editor {
     // 复制html转换markdown
     const htmlText = clipboardData.getData('text/plain');
     let html = clipboardData.getData('Text/Html');
-    if (!html) {
+    if (!html || !this.options.convertWhenPaste) {
       return true;
     }
     const test = html.replace(/<(html|head|body|!)/g, '');

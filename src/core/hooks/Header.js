@@ -32,6 +32,7 @@ export default class Header extends ParagraphBase {
     this.RULE = this.rule();
     this.headerIDCache = [];
     this.headerIDCounter = {};
+    this.config = config || {};
     // TODO: AllowCustomID
   }
 
@@ -113,11 +114,19 @@ export default class Header extends ParagraphBase {
     const sign = this.$engine.md5(`${level}-${processedText.sign}-${anchorID}-${dataLines}`);
     const result = [
       `<h${level} id="${anchorID}" data-sign="${sign}" data-lines="${dataLines}">`,
-      `<a class="anchor" href="#${anchorID}"></a>`,
+      this.$getAnchor(anchorID),
       `${html}`,
       `</h${level}>`,
     ].join('');
     return { html: result, sign: `${sign}` };
+  }
+
+  $getAnchor(anchorID) {
+    const anchorStyle = this.config.anchorStyle || 'default';
+    if (anchorStyle === 'none') {
+      return '';
+    }
+    return `<a class="anchor" href="#${anchorID}"></a>`;
   }
 
   beforeMakeHtml(str) {

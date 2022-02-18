@@ -469,7 +469,7 @@
     font-size: 0.9em;
   }
 
-  .cm-s-default .cm-whitespace {
+  .cm-s-default .cm-whitespace, .cm-tab {
     font-family: $monospaceFont;
     font-size: 0.9em;
   }
@@ -629,9 +629,9 @@
 }
 
 .cherry-switch-paste {
-  width: 224px;
   margin-left: -112px;
   left: 50%;
+  box-sizing: content-box;
   .switch-btn--bg {
     transition: all 0.3s;
     position: absolute;

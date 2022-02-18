@@ -89,6 +89,18 @@ const defaultConfig = {
         customRenderer: {
           // 自定义语法渲染器
         },
+        /**
+         * indentedCodeBlock是缩进代码块是否启用的开关
+         *
+         *    在6.X之前的版本中默认不支持该语法。
+         *    因为cherry的开发团队认为该语法太丑了（容易误触）
+         *    开发团队希望用```代码块语法来彻底取代该语法
+         *    但在后续的沟通中，开发团队发现在某些场景下该语法有更好的显示效果
+         *    因此开发团队在6.X版本中才引入了该语法
+         *    已经引用6.x以下版本的业务如果想做到用户无感知升级，可以去掉该语法：
+         *        indentedCodeBlock：false
+         */
+        indentedCodeBlock: true,
       },
       emoji: {
         useUnicode: true, // 是否使用unicode进行渲染
@@ -112,6 +124,15 @@ const defaultConfig = {
         /** 默认只渲染一个目录 */
         allowMultiToc: false,
       },
+      header: {
+        /**
+         * 标题的样式：
+         *  - default       默认样式，标题前面有锚点
+         *  - autonumber    标题前面有自增序号锚点
+         *  - none          标题没有锚点
+         */
+        anchorStyle: 'default',
+      },
     },
   },
   editor: {
@@ -123,6 +144,8 @@ const defaultConfig = {
     // editOnly: 纯编辑模式（没有预览，可通过toolbar切换成双栏或预览模式）
     // previewOnly: 预览模式（没有编辑框，toolbar只显示“返回编辑”按钮，可通过toolbar切换成编辑模式）
     defaultModel: 'edit&preview',
+    // 粘贴时是否自动将html转成markdown
+    convertWhenPaste: true,
   },
   toolbars: {
     theme: 'dark', // light or dark
