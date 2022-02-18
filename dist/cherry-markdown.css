@@ -344,6 +344,13 @@
   .cherry-markdown blockquote,
   .cherry-markdown table {
     margin: 0 0 16px; }
+  .cherry-markdown pre {
+    padding: 16px;
+    overflow: auto;
+    font-size: 85%;
+    line-height: 1.45;
+    background-color: #f6f8fa;
+    border-radius: 6px; }
   .cherry-markdown .prettyprint {
     min-width: 500px;
     display: inline-block;
@@ -1873,7 +1880,7 @@ green     #859900
     color: #3582fb;
     font-family: "Menlo", "Liberation Mono", "Consolas", "DejaVu Sans Mono", "Ubuntu Mono", "Courier New", "andale mono", "lucida console", monospace;
     font-size: 0.9em; }
-  .cherry-editor .cm-s-default .cm-whitespace {
+  .cherry-editor .cm-s-default .cm-whitespace, .cherry-editor .cm-tab {
     font-family: "Menlo", "Liberation Mono", "Consolas", "DejaVu Sans Mono", "Ubuntu Mono", "Courier New", "andale mono", "lucida console", monospace;
     font-size: 0.9em; }
   .cherry-editor .cm-s-default .cm-quote {
@@ -1981,9 +1988,9 @@ green     #859900
       border: 1px solid #000; }
 
 .cherry-switch-paste {
-  width: 224px;
   margin-left: -112px;
-  left: 50%; }
+  left: 50%;
+  box-sizing: content-box; }
   .cherry-switch-paste .switch-btn--bg {
     transition: all 0.3s;
     position: absolute;
