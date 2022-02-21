@@ -271,6 +271,26 @@ export default class Editor {
       });
     }
 
+    editor.on('drop', (codemirror, evt) => {
+      const files = evt.dataTransfer.files || [];
+      if (files && files.length > 0) {
+        const mdImgList = [];
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const defaultName = (file.name && file.name.replace(/\.[^.]+$/, '')) || 'enter image description here';
+          this.options.fileUpload(file, (url, name = defaultName) => {
+            if (typeof url !== 'string') {
+              return;
+            }
+            mdImgList.push(`![${name}](${url})`);
+          });
+        }
+        setTimeout(() => {
+          codemirror.replaceSelection(mdImgList.join('\n'));
+        }, 100);
+      }
+    });
+
     editor.on('scroll', (codemirror) => {
       this.options.onScroll(codemirror);
     });
