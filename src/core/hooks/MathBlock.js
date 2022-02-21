@@ -89,7 +89,7 @@ export default class MathBlock extends ParagraphBase {
   }
 
   rule() {
-    const ret = { begin: '(\\s*)~D~D\\s*', end: '\\s*~D~D(?:\\s{0,1})', content: '([\\w\\W]*?)' };
+    const ret = { begin: '(\\s*)(?<!\\\\)~D~D\\s*', end: '\\s*(?<!\\\\)~D~D(?:\\s{0,1})', content: '([\\w\\W]*?)' };
     ret.reg = new RegExp(ret.begin + ret.content + ret.end, 'g');
     return ret;
   }
