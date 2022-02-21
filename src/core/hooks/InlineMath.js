@@ -75,7 +75,7 @@ export default class InlineMath extends ParagraphBase {
   }
 
   rule() {
-    const ret = { begin: '~D\\n?', end: '~D', content: '(.*?)\\n?' };
+    const ret = { begin: '(?<!\\\\)~D\\n?', end: '(?<!\\\\)~D', content: '(.*?)\\n?' };
     ret.reg = new RegExp(ret.begin + ret.content + ret.end, 'g');
     return ret;
   }
