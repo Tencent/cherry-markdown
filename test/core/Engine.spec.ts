@@ -4,7 +4,6 @@ import path from 'path';
 import { diff } from 'jest-diff';
 import Cherry from '../../src/index';
 import suites from '../suites/commonmark.spec.json';
-import { unescapeHTMLSpecialChar } from '../../src/utils/sanitize'
 
 const TEST_PATH = '../suites/engine.md';
 const readFile = (fileName) => util.promisify(fs.readFile)(fileName, 'utf8');
@@ -18,12 +17,12 @@ const cherry = new Cherry({
 
 expect.extend({
   matchHTML(result, standard) {
-    const resultWithoutAttr = unescapeHTMLSpecialChar(result).replace(/\s*<br>\s*/gm, '\n').replace(/(?<=<)([^\/\s>]+)[^<]*?(?=>)/gm, (match, tag) => {
+    const resultWithoutAttr = result.replace(/\s*<br>\s*/gm, '\n').replace(/(?<=<)([^\/\s>]+)[^<]*?(?=>)/gm, (match, tag) => {
       return tag;
-    }).replace('/\s*<p>&nbsp;</p>\s*/gm', '');
+    }).replace('/\s*<p>&nbsp;</p>\s*/gm', '').replace(/<a>.*<\/a>/, '').replace(/(?<=>)\n(?=<)/gm, '');;
     const standardWithoutAttr = standard.replace(/(?<=<)([^\/\s>]+)[^<]*?(?=>)/gm, (match, tag) => {
       return tag;
-    }).replace(/\s*<br>\s*/gm, '\n');
+    }).replace(/\s*<br>\s*/gm, '\n').replace(/(?<=>)\n(?=<)/gm, '');
     const pass = standardWithoutAttr === resultWithoutAttr;
     const message = pass ? '' : diff(standardWithoutAttr, resultWithoutAttr) + result;
     return {
