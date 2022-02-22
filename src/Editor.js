@@ -277,17 +277,31 @@ export default class Editor {
         const mdImgList = [];
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
-          const defaultName = (file.name && file.name.replace(/\.[^.]+$/, '')) || 'enter image description here';
-          this.options.fileUpload(file, (url, name = defaultName) => {
+          const fileType = file.type || '';
+          // 文本类型或者无类型的，直接读取内容，不做上传文件的操作
+          if (fileType === '' || /^text/i.test(fileType)) {
+            continue;
+          }
+          const defaultName = (file.name && file.name.replace(/\.[^.]+$/, '')) || 'enter description here';
+          const defaultIsImage = /^image/i.test(file.type);
+          this.options.fileUpload(file, (url, name = defaultName, isImage = defaultIsImage) => {
             if (typeof url !== 'string') {
               return;
             }
-            mdImgList.push(`![${name}](${url})`);
+            if (isImage) {
+              mdImgList.push(`![${name}](${url})`);
+            } else {
+              mdImgList.push(`[${name}](${url})`);
+            }
           });
         }
-        setTimeout(() => {
-          codemirror.replaceSelection(mdImgList.join('\n'));
-        }, 100);
+        if (mdImgList.length > 0) {
+          setTimeout(() => {
+            // 拖拽上传文件时，强制改成没有文字选择区的状态
+            codemirror.setSelection(codemirror.getCursor());
+            codemirror.replaceSelection(mdImgList.join('\n'));
+          }, 100);
+        }
       }
     });
 
