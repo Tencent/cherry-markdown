@@ -70,6 +70,9 @@ export default class Editor {
         extraKeys: { Enter: 'newlineAndIndentContinueMarkdownList' }, // 增加markdown回车自动补全
         matchTags: { bothTags: true }, // 自动高亮选中的闭合html标签
         placeholder: '',
+        // 设置为 contenteditable 对输入法定位更友好
+        // 但已知会影响某些悬浮菜单的定位，如粘贴选择文本或markdown模式的菜单
+        // inputStyle: 'contenteditable',
       },
       toolbars: {},
       onKeydown() {},
