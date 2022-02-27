@@ -265,6 +265,7 @@ export default class CodeBlock extends ParagraphBase {
       if (cacheCode && cacheCode !== '') {
         return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
       }
+      $code = this.$recoverCodeInIndent($code);
       $code = $code.replace(/~D/g, '$');
       $code = $code.replace(/~T/g, '~');
 
