@@ -1870,6 +1870,8 @@ green     #859900
     font-family: "Helvetica Neue", Arial, "Hiragino Sans GB", "STHeiti", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
     background: #f8fafb;
     color: #3f4a56; }
+    .cherry-editor .CodeMirror textarea {
+      font-size: 27px; }
   .cherry-editor .CodeMirror-lines {
     padding: 15px 34px; }
   .cherry-editor .cm-s-default .cm-header {
