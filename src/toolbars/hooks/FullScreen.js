@@ -21,6 +21,7 @@ export default class FullScreen extends MenuBase {
   constructor(editor) {
     super(editor);
     this.updateMarkdown = false;
+    this.editor = editor;
     this.setName('fullScreen', 'fullscreen');
   }
 
@@ -34,5 +35,6 @@ export default class FullScreen extends MenuBase {
     } else {
       cherryClass.add('fullscreen');
     }
+    this.editor.editor.refresh();
   }
 }
