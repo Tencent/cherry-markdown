@@ -97,6 +97,7 @@ export default class Cherry extends CherryStatic {
     if (!mountEl.style.height) {
       mountEl.style.height = this.options.editor.height;
     }
+    this.cherryDom = mountEl;
 
     // 蒙层dom，用来拖拽编辑区&预览区宽度时展示蒙层
     const wrapperDom = this.createWrapper();
@@ -144,6 +145,24 @@ export default class Cherry extends CherryStatic {
 
     // 切换模式，有纯预览模式、纯编辑模式、双栏编辑模式
     this.switchModel(this.options.editor.defaultModel);
+
+    this.cherryDomResize();
+  }
+
+  /**
+   *  监听 cherry 高度变化，高度改变触发 codemirror 内容刷新
+   * @private
+   */
+  cherryDomResize() {
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setTimeout(() => this.editor.editor.refresh(), 10);
+      }
+    });
+
+    observer.observe(this.cherryDom);
+
+    this.cherryDomReiszeObserver = observer;
   }
 
   /**
