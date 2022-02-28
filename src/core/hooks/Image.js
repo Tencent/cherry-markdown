@@ -127,9 +127,9 @@ export default class Image extends SyntaxBase {
     return $str;
   }
 
-  afterMakeHtml(str) {
-    return UrlCache.restoreAll(str);
-  }
+  // afterMakeHtml(str) {
+  //   return UrlCache.restoreAll(str);
+  // }
 
   testMedia(str) {
     return this.RULE.regExtend && this.RULE.regExtend.test(str);
