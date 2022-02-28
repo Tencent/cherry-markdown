@@ -449,6 +449,11 @@
     font-family: $fontFamily;
     background: $editorBg;
     color: $fontColor;
+    // codemirror 依赖隐藏的 textarea 计算行高，这里将字体大小设置为行高，避免输入法遮挡内容
+    // Fixed https://github.com/Tencent/cherry-markdown/issues/82
+    textarea {
+      font-size: $lineHeight;
+    }
   }
 
   .CodeMirror-lines {
