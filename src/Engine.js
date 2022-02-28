@@ -126,6 +126,7 @@ export default class Engine {
       })
       .replace(/\\&(?!(amp|lt|gt|quot|apos);)/, () => '&amp;');
     $str = $str.replace(/\\ <\//g, '\\</');
+    $str = UrlCache.restoreAll($str);
     return $str;
   }
 
@@ -200,7 +201,7 @@ export default class Engine {
   mounted() {
     this.$fireHookAction('', 'sentence', 'mounted');
     this.$fireHookAction('', 'paragraph', 'mounted');
-    UrlCache.clear();
+    // UrlCache.clear();
   }
 
   makeMarkdown(html) {
