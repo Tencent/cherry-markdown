@@ -129,11 +129,9 @@ const cherryInstance = new Cherry({
 ### Node
 
 ```javascript
-const { default: Cherry } = require('cherry-markdown');
-const cherryInstance = new Cherry({
-  id: 'markdown-container',
-  value: '# welcome to cherry editor!',
-});
+const { default: CherryEngine } = require('cherry-markdown/dist/cherry-markdown.engine.core.common');
+const cherryEngineInstance = new CherryEngine();
+const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!');
 ```
 
 ## Lite Version
