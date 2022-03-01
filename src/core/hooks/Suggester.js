@@ -21,9 +21,11 @@
  */
 import escapeRegExp from 'lodash/escapeRegExp';
 import SyntaxBase from '@/core/SyntaxBase';
-import Codemirror from 'codemirror';
+import { Pass } from 'codemirror/src/util/misc';
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
+import { isBrowser } from '@/utils/env';
+
 export default class Suggester extends SyntaxBase {
   static HOOK_NAME = 'suggester';
 
@@ -79,7 +81,7 @@ export default class Suggester extends SyntaxBase {
 
   makeHtml(str) {
     if (!this.RULE.reg) return str;
-    if (!suggesterPanel.hasEditor()) {
+    if (!suggesterPanel.hasEditor() && isBrowser()) {
       const { editor } = this.$engine.$cherry;
       suggesterPanel.setEditor(editor);
       suggesterPanel.setSuggester(this.suggester);
@@ -124,7 +126,7 @@ export default class Suggester extends SyntaxBase {
   }
 
   mounted() {
-    if (!suggesterPanel.hasEditor()) {
+    if (!suggesterPanel.hasEditor() && isBrowser()) {
       const { editor } = this.$engine.$cherry;
       suggesterPanel.setEditor(editor);
       suggesterPanel.setSuggester(this.suggester);
@@ -141,7 +143,7 @@ class SuggesterPanel {
     this.cursorMove = true;
     this.suggesterConfig = {};
 
-    if (!this.$suggesterPanel) {
+    if (!this.$suggesterPanel && isBrowser()) {
       document.body.append(this.createDom(SuggesterPanel.panelWrap));
       this.$suggesterPanel = document.querySelector('.cherry-suggester-panel');
     }
@@ -187,19 +189,19 @@ class SuggesterPanel {
       Up() {
         if (suggesterPanel.cursorMove) {
           // logic to decide whether to move up or not
-          return Codemirror.Pass;
+          return Pass;
         }
       },
       Down() {
         if (suggesterPanel.cursorMove) {
           // logic to decide whether to move up or not
-          return Codemirror.Pass;
+          return Pass;
         }
       },
       Enter() {
         if (suggesterPanel.cursorMove) {
           // logic to decide whether to move up or not
-          return Codemirror.Pass;
+          return Pass;
         }
       },
     });
