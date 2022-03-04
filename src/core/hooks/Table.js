@@ -138,8 +138,9 @@ export default class Table extends ParagraphBase {
     const tableHeader = this.$extendColumns(rows[0], maxCol)
       .map((cell, col) => {
         tableObject.header.push(cell.replace(/~CS/g, '\\|'));
+        const { html: cellHtml } = sentenceMakeFunc(cell.replace(/~CS/g, '\\|').trim());
         // 前后补一个空格，否则自动链接会将缓存的内容全部收入链接内部
-        return `~CTH${textAlignRules[col] || 'U'} ${cell.replace(/~CS/g, '\\|').trim()} ~CTH$`;
+        return `~CTH${textAlignRules[col] || 'U'} ${cellHtml} ~CTH$`;
       })
       .join('');
     const tableRows = rows
