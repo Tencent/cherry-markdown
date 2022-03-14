@@ -126,4 +126,4 @@ new Markdown({
 | iconName                           | String | 图标类名                               |
 | onClick (<br> selection: Function<br> ) | Function | 点击时的回调函数                                |
 | shortcutKeys   | Array | 快捷键集合, 用于注册键盘函数，当匹配的快捷键组合命中时，也会调用click函数   |
-| subMenuConfig (<br>name: String<br>iconName： String<Br>noIcon: Boolean<Br>onClick: Function ) | Function | 子菜单集合 |
+| subMenuConfig (<br>name: String<br>iconName： String<Br>noIcon: Boolean<Br>onClick: Function ) | Array | 子菜单集合 |
