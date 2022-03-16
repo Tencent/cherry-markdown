@@ -189,19 +189,19 @@ class SuggesterPanel {
       Up() {
         if (suggesterPanel.cursorMove) {
           // logic to decide whether to move up or not
-          return Pass;
+          return Pass.toString();
         }
       },
       Down() {
         if (suggesterPanel.cursorMove) {
           // logic to decide whether to move up or not
-          return Pass;
+          return Pass.toString();
         }
       },
       Enter() {
         if (suggesterPanel.cursorMove) {
           // logic to decide whether to move up or not
-          return Pass;
+          return Pass.toString();
         }
       },
     });
