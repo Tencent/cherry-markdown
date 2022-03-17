@@ -17,6 +17,8 @@ import ParagraphBase from '@/core/ParagraphBase';
 import { escapeFormulaPunctuations, LoadMathModule } from '@/utils/mathjax';
 import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
+import { isLookbehindSupported } from '@/utils/regexp';
+import { replaceLookbehind } from '@/utils/lookbehind-replace';
 
 export default class MathBlock extends ParagraphBase {
   static HOOK_NAME = 'mathBlock';
@@ -35,7 +37,7 @@ export default class MathBlock extends ParagraphBase {
     this.engine = isBrowser() ? config.engine ?? 'MathJax' : 'node';
   }
 
-  toHtml(wholeMatch, lineSpace, content) {
+  toHtml(wholeMatch, lineSpace, leadingChar, content) {
     LoadMathModule.bind(this)('engine');
     // 去掉开头的空字符，去掉结尾的换行符
     const wholeMatchWithoutSpace = wholeMatch.replace(/^[ \f\r\t\v]*/, '').replace(/\s*$/, '');
@@ -62,26 +64,27 @@ export default class MathBlock extends ParagraphBase {
       });
       const result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
             data-lines="${lines}">${html}</div>`;
-      return this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
+      return leadingChar + this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
     }
     if (this.MathJax?.tex2svg) {
       // MathJax渲染
       const svg = getHTML(this.MathJax.tex2svg(content), true);
       const result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
             data-lines="${lines}">${svg}</div>`;
-      return this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
+      return leadingChar + this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
     }
 
     // 既无MathJax又无katex时，原样输出
     const result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
           data-lines="${lines}">$$${escapeFormulaPunctuations(content)}$$</div>`;
-    return this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
+    return leadingChar + this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
   }
 
   beforeMakeHtml(str) {
-    let $str = str;
-    $str = $str.replace(this.RULE.reg, this.toHtml.bind(this));
-    return $str;
+    if (isLookbehindSupported()) {
+      return str.replace(this.RULE.reg, this.toHtml.bind(this));
+    }
+    return replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this), true, 1);
   }
 
   makeHtml(str) {
@@ -89,7 +92,11 @@ export default class MathBlock extends ParagraphBase {
   }
 
   rule() {
-    const ret = { begin: '(\\s*)(?<!\\\\)~D~D\\s*', end: '\\s*(?<!\\\\)~D~D(?:\\s{0,1})', content: '([\\w\\W]*?)' };
+    const ret = {
+      begin: isLookbehindSupported() ? '(\\s*)((?<!\\\\))~D~D\\s*' : '(\\s*)(^|[^\\\\])~D~D\\s*',
+      content: '([\\w\\W]*?)',
+      end: '(\\s*)~D~D(?:\\s{0,1})',
+    };
     ret.reg = new RegExp(ret.begin + ret.content + ret.end, 'g');
     return ret;
   }
