@@ -189,6 +189,9 @@ export default class List extends ParagraphBase {
       attr['data-lines'] = node.index === 0 ? lines + this.emptyLines : lines;
       attr['data-sign'] = this.sign;
     }
+    if (children[0] && type === 'ol') {
+      attr.start = this.tree[children[0]].start;
+    }
     attr.class = `cherry-list__${this.tree[children[0]].listStyle}`;
     return `<${type}${attrsToAttributeString(attr)}>${content}</${type}>`;
   }
