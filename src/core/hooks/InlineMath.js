@@ -81,7 +81,7 @@ export default class InlineMath extends ParagraphBase {
   }
 
   rule() {
-    const ret = { 
+    const ret = {
       begin: isLookbehindSupported() ? '((?<!\\\\))~D\\n?' : '(^|[^\\\\])~D\\n?',
       content: '(.*?)\\n?',
       end: '~D',
