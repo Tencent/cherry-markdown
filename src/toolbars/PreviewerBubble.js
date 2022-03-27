@@ -15,6 +15,7 @@
  */
 
 import imgSizeHander from '@/utils/imgSizeHander';
+import tableContentHander from '@/utils/tableContentHander';
 import Event from '@/Event';
 /**
  * 预览区域的响应式工具栏
@@ -57,6 +58,9 @@ export default class PreviewerBubble {
     document.addEventListener('mousemove', (event) => {
       this.bubbleHandler.emit('mousemove', event);
     });
+    document.addEventListener('keyup', (event) => {
+      this.bubbleHandler.emit('keyup', event);
+    });
     this.previewerDom.addEventListener('scroll', (event) => {
       this.bubbleHandler.emit('scroll', event);
     });
@@ -80,6 +84,10 @@ export default class PreviewerBubble {
       case 'IMG':
         this.bubbleHandler = this.$showImgPreviewerBubbles(target);
         break;
+      case 'TD':
+      case 'TH':
+        this.bubbleHandler = this.$showTablePreviewerBubbles(target);
+        break;
     }
   }
 
@@ -93,6 +101,16 @@ export default class PreviewerBubble {
       this.bubble = null;
       this.bubbleHandler = { emit: () => {} };
     }
+  }
+
+  /**
+   * 为选中的table增加操作工具栏
+   * @param {HTMLImageElement} htmlElement 用户点击的table dom
+   */
+  $showTablePreviewerBubbles(htmlElement) {
+    this.$creatPreviewerBubbles('table-content-hander');
+    tableContentHander.showBubble(htmlElement, this.bubble, this.previewerDom, this.editor.editor);
+    return tableContentHander;
   }
 
   /**
@@ -160,10 +178,13 @@ export default class PreviewerBubble {
     );
   }
 
-  $creatPreviewerBubbles() {
+  /**
+   * 预览区域编辑器的容器
+   */
+  $creatPreviewerBubbles(type = 'img-size-hander') {
     if (!this.bubble) {
       this.bubble = document.createElement('div');
-      this.bubble.className = 'cherry-previewer-img-size-hander';
+      this.bubble.className = `cherry-previewer-${type}`;
       this.previewerDom.after(this.bubble);
     }
   }
