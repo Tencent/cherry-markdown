@@ -38,6 +38,36 @@ export default class Link extends SyntaxBase {
   }
 
   /**
+   * 校验link中text的方括号是否符合规则
+   * @param {string} rawText
+   */
+  checkBrackets(rawText) {
+    const stack = [];
+    const text = `[${rawText}]`;
+    // 前方有奇数个\当前字符被转义
+    const checkEscape = (place) => text.slice(0, place).match(/\\*$/)[0].length & 1;
+    for (let i = text.length - 1; text[i]; i--) {
+      if (i === text.length - 1 && checkEscape(i)) break;
+      if (text[i] === ']' && !checkEscape(i)) stack.push(']');
+      if (text[i] === '[' && !checkEscape(i)) {
+        stack.pop();
+        if (!stack.length) {
+          return {
+            isValid: true,
+            coreText: text.slice(i + 1, text.length - 1),
+            extraLeadingChar: text.slice(0, i),
+          };
+        }
+      }
+    }
+    return {
+      isValid: false, // 方括号匹配不上
+      coreText: rawText,
+      extraLeadingChar: '',
+    };
+  }
+
+  /**
    *
    * @param {string} match 匹配的完整字符串
    * @param {string} leadingChar 正则分组一：前置字符
@@ -57,6 +87,8 @@ export default class Link extends SyntaxBase {
     }
 
     if (refType === 'url') {
+      const { isValid, coreText, extraLeadingChar } = this.checkBrackets(text);
+      if (!isValid) return match;
       attrs = title && title.trim() !== '' ? ` title="${_e(title.replace(/["']/g, ''))}"` : '';
       if (target) {
         attrs += ` target="${target.replace(/{target\s*=\s*(.*?)}/, '$1')}"`;
@@ -64,13 +96,15 @@ export default class Link extends SyntaxBase {
         attrs += ` target="_blank"`;
       }
       let processedURL = link.trim().replace(/~1D/g, '~D'); // 还原替换的$符号
-      const processedText = text.replace(/~1D/g, '~D'); // 还原替换的$符号
+      const processedText = coreText.replace(/~1D/g, '~D'); // 还原替换的$符号
       // text可能是html标签，依赖htmlBlock进行处理
       if (isValidScheme(processedURL)) {
         processedURL = this.urlProcessor(processedURL, 'link');
-        return `${leadingChar}<a href="${encodeURIOnce(processedURL)}" rel="nofollow"${attrs}>${processedText}</a>`;
+        return `${leadingChar + extraLeadingChar}<a href="${encodeURIOnce(
+          processedURL,
+        )}" rel="nofollow"${attrs}>${processedText}</a>`;
       }
-      return `${leadingChar}<span>${text}</span>`;
+      return `${leadingChar + extraLeadingChar}<span>${text}</span>`;
     }
     // should never happen
     return match;
