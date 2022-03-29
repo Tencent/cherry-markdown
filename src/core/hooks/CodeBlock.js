@@ -350,7 +350,7 @@ export default class CodeBlock extends ParagraphBase {
        * (\n*)捕获区块前的所有换行
        * (?:[^\S\n]*)捕获```前置的空格字符
        */
-      begin: /(?:^|\n)(\n*(?:[^\S\n]*))```(.*?)\n/,
+      begin: /(?:^|\n)(\n*(?:[^\S\n]*))```([^`]*?)\n/,
       content: /([\w\W]*?)/, // '([\\w\\W]*?)',
       end: /[^\S\n]*```[ \t]*(?=$|\n+)/, // '\\s*```[ \\t]*(?=$|\\n+)',
     };
