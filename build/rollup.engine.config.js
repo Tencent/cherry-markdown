@@ -31,11 +31,8 @@ const terserPlugin = (options = {}) =>
     ...options,
   });
 
-const options = {
-  ...baseConfig,
-  input: isCoreBuild ? 'src/index.engine.core.js' : 'src/index.engine.js',
-  output: {
-    ...baseConfig.output,
+const umdOutputConfig = {
+  ...baseConfig.output,
     exports: 'named',
     file: isCoreBuild ? 'dist/cherry-markdown.engine.core.js' : 'dist/cherry-markdown.engine.js',
     format: 'umd',
@@ -43,7 +40,27 @@ const options = {
     sourcemap: false,
     compact: true,
     plugins: [terserPlugin()],
-  },
+}
+
+const esmOutputConfig = {
+  ...baseConfig.output,
+  file: isCoreBuild ? 'dist/cherry-markdown.engine.core.esm.js' : 'dist/cherry-markdown.engine.esm.js',
+  format: 'esm',
+  name: 'CherryEngine',
+  sourcemap: false,
+  compact: true,
+  plugins: [
+    terserPlugin({
+      module: true,
+      ecma: 2015,
+    }),
+  ],
+}
+
+const options = {
+  ...baseConfig,
+  input: isCoreBuild ? 'src/index.engine.core.js' : 'src/index.engine.js',
+  output: [umdOutputConfig, esmOutputConfig],
 };
 
 if (!Array.isArray(options.external)) {
@@ -56,8 +73,8 @@ const IS_COMMONJS_BUILD = process.env.BUILD_TARGET === 'commonjs';
 
 if (IS_COMMONJS_BUILD) {
   options.output = {
-    ...options.output,
-    file: options.output.file.replace(/\.js$/, '.common.js'),
+    ...umdOutputConfig,
+    file: umdOutputConfig.file.replace(/\.js$/, '.common.js'),
     format: 'cjs',
   };
 }
