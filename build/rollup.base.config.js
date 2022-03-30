@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import path from 'path';
-import babel from '@rollup/plugin-babel';
+// import babel from '@rollup/plugin-babel';
 // node-resolve升级会导致出现新问题
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
@@ -23,6 +23,7 @@ import eslint from '@rollup/plugin-eslint';
 import alias from '@rollup/plugin-alias';
 import json from '@rollup/plugin-json';
 import envReplacePlugin from './env';
+import { swc } from 'rollup-plugin-swc3';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const PROJECT_ROOT_PATH = path.resolve(__dirname, '..');
@@ -102,10 +103,37 @@ export default {
         outputStyle: 'compressed',
       }),
     }),
-    babel({
-      babelHelpers: 'runtime',
+    swc({
+      jsc: {
+        parser: {
+          syntax: 'ecmascript',
+        },
+        target: 'es5',
+        baseUrl: '.',
+        paths: {
+          '@/*': ['src/*'],
+          '~types/*': ['types/*'],
+        },
+      },
       exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5)/],
+      sourceMaps: !IS_PRODUCTION,
+      tsconfig: 'tsconfig.json',
+      env: {
+        mode: 'usage',
+        coreJs: 3,
+      },
+      minify: IS_PRODUCTION,
+      module: {
+        type: 'es6',
+      },
+      // rollup: {
+      //   include: ['node_modules/codemirror/src/**', 'node_modules/parse5/*'],
+      // },
     }),
+    // babel({
+    //   babelHelpers: 'runtime',
+    //   exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5)/],
+    // }),
     // TODO: 重构抽出为独立的插件
     {
       name: 'dist-types',
