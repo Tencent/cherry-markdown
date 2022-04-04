@@ -9,6 +9,7 @@
 - [注入](xss.html){target=_blank}
 - [API](api.html){target=_blank}
 - [图片所见即所得编辑尺寸](img.html){target=_blank}
+- [表格所见即所得编辑尺寸](table.html){target=_blank}
 - [标题自动序号](head_num.html){target=_blank}
 
 # Cherry Markdown 简明手册

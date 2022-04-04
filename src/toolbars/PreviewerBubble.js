@@ -53,7 +53,9 @@ export default class PreviewerBubble {
       this.bubbleHandler.emit('mousedown', event);
     });
     document.addEventListener('mouseup', (event) => {
-      this.bubbleHandler.emit('mouseup', event);
+      this.bubbleHandler.emit('mouseup', event, () => {
+        this.$removeAllPreviewerBubbles();
+      });
     });
     document.addEventListener('mousemove', (event) => {
       this.bubbleHandler.emit('mousemove', event);

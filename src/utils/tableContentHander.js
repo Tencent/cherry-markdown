@@ -27,23 +27,68 @@ const tableContentHander = {
     editorDom: {}, // 编辑器容器
   },
 
-  emit(type, event = {}) {
+  emit(type, event = {}, callback = () => {}) {
     switch (type) {
       case 'keyup':
         return this.$onInputChange(event);
-      case 'mouseup':
-        return false;
-      case 'mousemove':
-        return false;
-      case 'scroll':
-        return false;
       case 'remove':
-        return false;
+        return this.$remove();
+      case 'scroll':
+        return this.$setInputOffset();
       case 'previewUpdate':
-        return false;
+        return this.$setInputOffset();
+      case 'mouseup':
+        return this.$tryRemoveMe(event, callback);
     }
   },
+  $tryRemoveMe(event, callback) {
+    if (!/textarea/i.test(event.target.tagName)) {
+      this.$remove();
+      callback();
+    }
+  },
+  /**
+   * 获取目标dom的位置信息和尺寸信息
+   */
+  $getTdPosition() {
+    const position = this.tableEditor.info.tdNode.getBoundingClientRect();
+    const editorPosition = this.previewerDom.parentNode.getBoundingClientRect();
+    return {
+      top: position.top - editorPosition.top,
+      height: position.height,
+      width: position.width,
+      left: position.left - editorPosition.left,
+      maxHeight: editorPosition.height,
+    };
+  },
+  $setInputOffset() {
+    const tdInfo = this.$getTdPosition();
+    const { inputDiv } = this.tableEditor.editorDom;
+    const inputDivInfo = inputDiv.getBoundingClientRect();
 
+    if (inputDivInfo.width !== tdInfo.width) {
+      inputDiv.style.width = `${tdInfo.width}px`;
+    }
+    if (inputDivInfo.height !== tdInfo.height) {
+      inputDiv.style.height = `${tdInfo.height}px`;
+    }
+    if (inputDivInfo.top !== tdInfo.top) {
+      inputDiv.style.top = `${tdInfo.top}px`;
+    }
+    if (inputDivInfo.left !== tdInfo.left) {
+      inputDiv.style.left = `${tdInfo.left}px`;
+    }
+
+    // 向上滚或向下滚动动超出边界消失
+    if (tdInfo.top < 0 || tdInfo.top + tdInfo.height > tdInfo.maxHeight) {
+      inputDiv.style.display = 'none';
+    } else {
+      inputDiv.style.display = '';
+    }
+  },
+  $remove() {
+    this.tableEditor = { info: {}, tableCodes: [], editorDom: {} };
+  },
   /**
    * 收集编辑器中的表格语法，并记录表格语法的开始的offset
    */
@@ -183,43 +228,43 @@ const tableContentHander = {
   $drawEditor() {
     const dom = document.createElement('div');
     dom.className = 'cherry-previewer-table-content-hander__input';
-    const input = document.createElement('input');
-    input.type = 'text';
-
+    const input = document.createElement('textarea');
     dom.append(input);
     this.tableEditor.editorDom.inputDiv = dom;
     this.tableEditor.editorDom.inputDom = input;
     this.$updateEditorPosition();
     this.container.append(this.tableEditor.editorDom.inputDiv);
-    this.tableEditor.editorDom.inputDom.value = this.tableEditor.info.code;
+    this.tableEditor.editorDom.inputDom.value = this.tableEditor.info.code.replace(/<br>/g, '\n');
     this.tableEditor.editorDom.inputDom.focus();
   },
 
   $onInputChange(e) {
-    this.codeMirror.replaceSelection(e.target.value, 'around');
+    this.codeMirror.replaceSelection(e.target.value.replace(/\n/g, '<br>'), 'around');
   },
 
   /**
    * 更新编辑器的位置（尺寸和位置）
    */
   $updateEditorPosition() {
-    const tdInfo = this.tableEditor.info.tdNode.getBoundingClientRect();
+    this.$setInputOffset();
     const tdStyle = getComputedStyle(this.tableEditor.info.tdNode);
-    this.tableEditor.editorDom.inputDiv.style.width = `${tdInfo.width}px`;
-    this.tableEditor.editorDom.inputDiv.style.height = `${tdInfo.height}px`;
-    this.tableEditor.editorDom.inputDiv.style.top = `${tdInfo.top}px`;
-    this.tableEditor.editorDom.inputDiv.style.left = `${tdInfo.left}px`;
     this.tableEditor.editorDom.inputDom.style.textAlign = tdStyle.textAlign || 'left';
     this.tableEditor.editorDom.inputDom.style.fontSize = tdStyle.fontSize || '16px';
     this.tableEditor.editorDom.inputDom.style.fontFamily = tdStyle.fontFamily;
     this.tableEditor.editorDom.inputDom.style.lineHeight = tdStyle.lineHeight;
+    this.tableEditor.editorDom.inputDom.style.padding = tdStyle.padding;
+    // 左对齐的时候，paddingRight设置成0，反之paddingLeft设置成0
+    if (/left/.test(tdStyle.textAlign)) {
+      this.tableEditor.editorDom.inputDom.style.paddingRight = '0px';
+    }
+    if (/right/.test(tdStyle.textAlign)) {
+      this.tableEditor.editorDom.inputDom.style.paddingLeft = '0px';
+    }
+    if (/center/.test(tdStyle.textAlign)) {
+      this.tableEditor.editorDom.inputDom.style.paddingLeft = '0px';
+      this.tableEditor.editorDom.inputDom.style.paddingRight = '0px';
+    }
   },
-
-  /**
-   * 获取目标dom的位置信息和尺寸信息
-   */
-  $getTdPosition() {},
-
   $getClosestNode(node, targetNodeName) {
     if (node.tagName === targetNodeName) {
       return node;
