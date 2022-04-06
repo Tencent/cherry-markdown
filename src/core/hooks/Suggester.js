@@ -185,26 +185,43 @@ class SuggesterPanel {
       keyAction = false;
     });
 
-    this.editor.editor.setOption('extraKeys', {
-      Up() {
-        if (suggesterPanel.cursorMove) {
-          // logic to decide whether to move up or not
-          return Pass.toString();
-        }
-      },
-      Down() {
-        if (suggesterPanel.cursorMove) {
-          // logic to decide whether to move up or not
-          return Pass.toString();
-        }
-      },
-      Enter() {
-        if (suggesterPanel.cursorMove) {
-          // logic to decide whether to move up or not
-          return Pass.toString();
-        }
-      },
+    const extraKeys = this.editor.editor.getOption('extraKeys');
+    const decorateKeys = ['Up', 'Down', 'Enter'];
+    decorateKeys.forEach((key) => {
+      if (typeof extraKeys[key] === 'function') {
+        const proxyTarget = extraKeys[key];
+        extraKeys[key] = (codemirror) => {
+          if (suggesterPanel.cursorMove) {
+            const res = proxyTarget.call(codemirror, codemirror);
+
+            if (res) {
+              return res;
+            }
+            // logic to decide whether to move up or not
+            return Pass.toString();
+          }
+        };
+      } else if (!extraKeys[key]) {
+        extraKeys[key] = () => {
+          if (suggesterPanel.cursorMove) {
+            // logic to decide whether to move up or not
+            return Pass.toString();
+          }
+        };
+      } else if (typeof extraKeys[key] === 'string') {
+        const command = extraKeys[key];
+        extraKeys[key] = (codemirror) => {
+          if (suggesterPanel.cursorMove) {
+            this.editor.editor.execCommand(command);
+
+            // logic to decide whether to move up or not
+            // return Pass.toString();
+          }
+        };
+      }
     });
+
+    this.editor.editor.setOption('extraKeys', extraKeys);
 
     this.editor.editor.on('scroll', (codemirror, evt) => {
       if (!this.searchCache) {
@@ -413,6 +430,7 @@ class SuggesterPanel {
 
       nextElement.classList.add('cherry-suggester-panel__item--selected');
     } else if (keyCode === 13) {
+      evt.stopPropagation();
       this.cursorMove = false;
       this.pasteSelectResult(this.findSelectedItemIndex());
       codemirror.focus();
