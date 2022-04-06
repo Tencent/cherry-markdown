@@ -111,6 +111,7 @@ export interface CherryPreviewerOptions {
   dom: HTMLDivElement | false;
   /** 预览区域的DOM className */
   className: string;
+  enablePreviewerBubble: boolean;
 }
 
 export type CherryToolbarSeparator = '|';
