@@ -110,7 +110,7 @@ export default class PreviewerBubble {
    * @param {HTMLImageElement} htmlElement 用户点击的table dom
    */
   $showTablePreviewerBubbles(htmlElement) {
-    this.$creatPreviewerBubbles('table-content-hander');
+    this.$createPreviewerBubbles('table-content-hander');
     tableContentHander.showBubble(htmlElement, this.bubble, this.previewerDom, this.editor.editor);
     return tableContentHander;
   }
@@ -120,7 +120,7 @@ export default class PreviewerBubble {
    * @param {HTMLImageElement} htmlElement 用户点击的图片dom
    */
   $showImgPreviewerBubbles(htmlElement) {
-    this.$creatPreviewerBubbles();
+    this.$createPreviewerBubbles();
     const list = Array.from(this.previewerDom.querySelectorAll('img'));
     this.totalImgs = list.length;
     this.imgIndex = list.indexOf(htmlElement);
