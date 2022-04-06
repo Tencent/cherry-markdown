@@ -183,7 +183,7 @@ export default class PreviewerBubble {
   /**
    * 预览区域编辑器的容器
    */
-  $creatPreviewerBubbles(type = 'img-size-hander') {
+  $createPreviewerBubbles(type = 'img-size-hander') {
     if (!this.bubble) {
       this.bubble = document.createElement('div');
       this.bubble.className = `cherry-previewer-${type}`;
