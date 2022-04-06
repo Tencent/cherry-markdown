@@ -264,6 +264,7 @@ const tableContentHander = {
       this.tableEditor.editorDom.inputDom.style.paddingLeft = '0px';
       this.tableEditor.editorDom.inputDom.style.paddingRight = '0px';
     }
+    this.tableEditor.editorDom.inputDom.style.paddingBottom = '0px';
   },
   $getClosestNode(node, targetNodeName) {
     if (node.tagName === targetNodeName) {
