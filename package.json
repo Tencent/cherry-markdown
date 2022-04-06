@@ -102,6 +102,7 @@
     "gulp-iconfont": "^11.0.0",
     "gulp-rename": "^2.0.0",
     "jest": "^27.5.1",
+    "jest-diff": "^27.5.1",
     "node-sass": "^6.0.1",
     "npm-run-all": "^4.1.5",
     "prettier": "2.2.1",
@@ -116,6 +117,7 @@
     "rollup-plugin-terser": "^5.3.0",
     "standard-version": "^9.3.2",
     "ts-jest": "^27.1.1",
+    "ts-node": "^10.7.0",
     "typescript": "4.3.5"
   },
   "dependencies": {
