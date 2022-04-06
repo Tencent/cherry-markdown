@@ -1,24 +1,36 @@
 import { diff } from 'jest-diff';
-import Cherry from '../../src/index';
+import CherryEngine from '../../src/index.engine.core';
 import suites from '../suites/commonmark.spec.json';
 
-const cherry = new Cherry({
+const cherryEngine = new CherryEngine({
   engine: {
     global: {
       classicBr: false
+    },
+    syntax: {
+      header: {
+        anchorStyle: 'none',
+      },
     }
   }
 });
 
-function cleanHTML (raw) {
+const cleanHTML = (raw) => {
   // 处理换行回车
   let html = raw.replace(/\s*<br>\s*/gm, '\n');
   html = html.replace(/(?<=>)\n(?=<)/gm, '');
   // 清理属性
   html = html.replace(/(?<=<)([^\/\s>]+)[^<]*?(?=>)/gm, (match, tag) => tag);
-  // 清理标题内的a标签锚点
-  html = html.replace(/(?<=<h\d>)(.*?)(<a><\/a>)(.*?)(?=<\/h\d>)/, (m, a1, a2, a3) => a1 + a3);
   return html;
+}
+
+const formatOutput = (message, input, standard, result) => {
+  return `
+    ${message}
+    input: ${input}
+    standard: ${standard}
+    cherry: ${result}
+  `
 }
 
 expect.extend({
@@ -29,12 +41,7 @@ expect.extend({
     const message = diff(standandHTML, resultHTML);
     return {
       pass,
-      message: () => `
-        ${message}
-        input: ${input}
-        standard: ${standard}
-        cherry: ${result}
-      `,
+      message: () => formatOutput(message, input, standard, result),
     };
   },
 });
@@ -43,7 +50,8 @@ describe('engine', () => {
   suites.forEach((item, index) => {
     test(`commonmark-${index}`, () => {
     // @ts-ignore
-      expect(cherry.engine.makeHtml(item.markdown)).matchHTML(item.html, item.markdown);
+      expect(cherryEngine.makeHtml(item.markdown)).matchHTML(item.html, item.markdown);
     });
   });
 });
+ 
