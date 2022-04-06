@@ -141,8 +141,7 @@ export function getTableRule(merge = false) {
     return { strict, loose };
   }
   const regStr = `(?:${strict.begin + strict.content + strict.end}|${loose.begin + loose.content + loose.end})`;
-  const source = regStr.replace(/\[\\h\]/g, HORIZONTAL_WHITESPACE).replace(/\\h/g, HORIZONTAL_WHITESPACE);
-  return new RegExp(source, 'g');
+  return compileRegExp({ begin: '', content: regStr, end: '' }, 'g', true);
 }
 
 export function getCodeBlockRule() {
