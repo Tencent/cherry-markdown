@@ -69,6 +69,7 @@ Cherry Markdown 有多种样式主题选择
 - [注入](https://tencent.github.io/cherry-markdown/examples/xss.html)（默认防注入，需要配置才允许注入）
 - [API](https://tencent.github.io/cherry-markdown/examples/api.html)
 - [图片所见即所得编辑尺寸](https://tencent.github.io/cherry-markdown/examples/img.html)
+- [表格编辑](https://tencent.github.io/cherry-markdown/examples/table.html)
 - [标题自动序号](https://tencent.github.io/cherry-markdown/examples/head_num.html)
 
 
