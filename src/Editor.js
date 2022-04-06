@@ -16,8 +16,9 @@
 // @ts-check
 import codemirror from 'codemirror';
 import 'codemirror/lib/codemirror.css';
-import 'codemirror/mode/markdown/markdown';
-import 'codemirror/mode/xml/xml';
+// import 'codemirror/mode/markdown/markdown';
+import 'codemirror/mode/gfm/gfm'; // https://codemirror.net/mode/gfm/index.html
+// import 'codemirror/mode/xml/xml';
 import 'codemirror/addon/edit/continuelist';
 import 'codemirror/addon/edit/closetag';
 import 'codemirror/addon/fold/xml-fold';
@@ -61,7 +62,7 @@ export default class Editor {
         tabSize: 4, // 一个tab转换成的空格数量
         // styleActiveLine: false, // 当前行背景高亮
         // matchBrackets: true, // 括号匹配
-        mode: 'markdown',
+        mode: 'gfm', // 从markdown模式改成gfm模式，以使用默认高亮规则
         lineWrapping: true, // 自动换行
         indentWithTabs: true, // 缩进用tab表示
         autofocus: true,
