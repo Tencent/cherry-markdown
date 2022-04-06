@@ -59,7 +59,12 @@ Want to batch modify? You can try multi-cursor editing (shortcut keys, search fo
 
 ![wysiwyg](https://raw.githubusercontent.com/Tencent/cherry-markdown/main/examples/images/feature_image_wysiwyg.gif)
 
-### Feature 5：export
+### Feature 5：Table edit
+
+![wysiwyg](https://raw.githubusercontent.com/Tencent/cherry-markdown/main/examples/images/feature_table_wysiwyg.gif)
+
+
+### Feature 6：export
 
 ![wysiwyg](https://raw.githubusercontent.com/Tencent/cherry-markdown/main/examples/images/feature_export.png)
 
