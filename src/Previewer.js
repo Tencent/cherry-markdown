@@ -764,7 +764,7 @@ export default class Previewer {
       const delta = this.animation.destinationTop - currentTop;
       // 100毫秒内完成动画
       const move = Math.ceil(Math.min(Math.abs(delta), Math.max(1, Math.abs(delta) / (100 / 16.7))));
-      if (delta === 0 || currentTop >= dom.scrollHeight || move >= Math.abs(delta)) {
+      if (delta === 0 || currentTop >= dom.scrollHeight || move > Math.abs(delta)) {
         cancelAnimationFrame(this.animation.timer);
         this.animation.timer = 0;
         return;
