@@ -88,6 +88,12 @@ export default class Previewer {
     };
 
     Object.assign(this.options, options);
+    /**
+     * @property
+     * @private
+     * @type {{ timer?: number; destinationTop?: number }}
+     */
+    this.animation = {};
   }
 
   init(editor) {
@@ -739,17 +745,40 @@ export default class Previewer {
    * @param {Number} offset
    */
   scrollToLineNumWithOffset(lineNum, offset) {
-    const domContainer = this.getDomContainer();
-    this.disableScrollListener = true;
     const top = this.$getTopByLineNum(lineNum) - offset;
-    domContainer.scrollTo(0, top);
+    this.$scrollAnimation(top);
+  }
+
+  /**
+   * 实现滚动动画
+   * @param { Number } targetY 目标位置
+   */
+  $scrollAnimation(targetY) {
+    this.animation.destinationTop = targetY;
+    if (this.animation.timer) {
+      return;
+    }
+    const animationHandler = () => {
+      const dom = this.getDomContainer();
+      const currentTop = dom.scrollTop;
+      const delta = this.animation.destinationTop - currentTop;
+      // 100毫秒内完成动画
+      const move = Math.ceil(Math.min(Math.abs(delta), Math.max(1, Math.abs(delta) / (100 / 16.7))));
+      if (delta === 0 || currentTop >= dom.scrollHeight || move > Math.abs(delta)) {
+        cancelAnimationFrame(this.animation.timer);
+        this.animation.timer = 0;
+        return;
+      }
+      this.disableScrollListener = true;
+      this.getDomContainer().scrollTo(null, currentTop + (delta / Math.abs(delta)) * move);
+      this.animation.timer = requestAnimationFrame(animationHandler);
+    };
+    this.animation.timer = requestAnimationFrame(animationHandler);
   }
 
   scrollToLineNum(lineNum, linePercent) {
-    const domContainer = this.getDomContainer();
-    this.disableScrollListener = true;
     const top = this.$getTopByLineNum(lineNum, linePercent);
-    domContainer.scrollTo(0, top);
+    this.$scrollAnimation(top);
   }
 
   /**
