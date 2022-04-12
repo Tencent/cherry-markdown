@@ -55,7 +55,11 @@
 ### 特性 4：图片尺寸
 ![wysiwyg](https://raw.githubusercontent.com/Tencent/cherry-markdown/main/examples/images/feature_image_wysiwyg.gif)
 
-### 特性 5：导出
+### Feature 5：表格编辑
+
+![wysiwyg](https://raw.githubusercontent.com/Tencent/cherry-markdown/main/examples/images/feature_table_wysiwyg.gif)
+
+### 特性 6：导出
 ![wysiwyg](https://raw.githubusercontent.com/Tencent/cherry-markdown/main/examples/images/feature_export.png)
 
 -------

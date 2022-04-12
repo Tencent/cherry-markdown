@@ -16,6 +16,7 @@
 import ParagraphBase from '@/core/ParagraphBase';
 import Prism from 'prismjs';
 import { escapeHTMLSpecialChar } from '@/utils/sanitize';
+import { getCodeBlockRule } from '@/utils/regexp';
 
 Prism.manual = true;
 
@@ -344,18 +345,7 @@ export default class CodeBlock extends ParagraphBase {
   }
 
   rule() {
-    const ret = {
-      /**
-       * (?:^|\n)是区块的通用开头
-       * (\n*)捕获区块前的所有换行
-       * (?:[^\S\n]*)捕获```前置的空格字符
-       */
-      begin: /(?:^|\n)(\n*(?:[^\S\n]*))```(.*?)\n/,
-      content: /([\w\W]*?)/, // '([\\w\\W]*?)',
-      end: /[^\S\n]*```[ \t]*(?=$|\n+)/, // '\\s*```[ \\t]*(?=$|\\n+)',
-    };
-    ret.reg = new RegExp(ret.begin.source + ret.content.source + ret.end.source, 'g');
-    return ret;
+    return getCodeBlockRule();
   }
 
   mounted(dom) {

@@ -1540,6 +1540,17 @@ green     #859900
   .cherry .cherry-previewer-img-size-hander .cherry-previewer-img-size-hander__points-rightMiddle {
     cursor: e-resize; }
 
+.cherry .cherry-previewer-table-content-hander .cherry-previewer-table-content-hander__input {
+  position: absolute; }
+  .cherry .cherry-previewer-table-content-hander .cherry-previewer-table-content-hander__input textarea {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    box-sizing: border-box;
+    resize: none;
+    outline: 1px solid #3582fb;
+    word-break: break-all; }
+
 @media print {
   img, figure, pre, table {
     page-break-inside: avoid; }

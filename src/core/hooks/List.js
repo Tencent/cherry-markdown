@@ -173,7 +173,7 @@ export default class List extends ParagraphBase {
       const child = this.tree[item];
       const itemAttr = {};
       const str = `<p>${child.strs.join('<br>')}</p>`;
-      child.lines += child.strs.length;
+      child.lines += this.getLineCount(child.strs.join('\n'));
       const children = child.children.length ? this.renderTree(item) : '';
       node.lines += child.lines;
       lines += child.lines;

@@ -101,3 +101,60 @@ export const URL_INLINE = new RegExp(
 export const URL_NO_SLASH = new RegExp(`^${URL_INLINE_NO_SLASH.source}$`);
 
 export const URL = new RegExp(`^${URL_INLINE.source}$`);
+
+export function getTableRule(merge = false) {
+  // ^(\|[^\n]+\|\r?\n)((?:\|:?[-]+:?)+\|)(\n(?:\|[^\n]+\|\r?\n?)*)?$
+  // (\\|?[^\\n|]+\\|?\\n)(?:\\|?[\\s]*:?[-]{2,}:?[\\s]*
+  // (?:\\|[\\s]*:?[-]{2,}:?[\\s]*)+\\|?)(\\n\\|?(\\|[^\\n|]+)*\\|?)?
+  /**
+   * (\|[^\n]+\|\n)     Headers
+   * ((\|[\s]*:?[-]{2,}:?[\s]*)+\|)      Column Options
+   * ((?:\n\|[^\n]+\|)*)  Rows
+   */
+  const strict = {
+    begin: '(?:^|\\n)(\\n*)',
+    content: [
+      '(\\h*\\|[^\\n]+\\|?\\h*)', // Header
+      '\\n',
+      '(?:(?:\\h*\\|\\h*:?[-]{1,}:?\\h*)+\\|?\\h*)', // Column Options
+      '((\\n\\h*\\|[^\\n]+\\|?\\h*)*)', // Rows
+    ].join(''),
+    end: '(?=$|\\n)',
+  };
+
+  strict.reg = compileRegExp(strict, 'g', true);
+
+  const loose = {
+    begin: '(?:^|\\n)(\\n*)',
+    content: [
+      '(\\|?[^\\n|]+(\\|[^\\n|]+)+\\|?)', // Header
+      '\\n',
+      '(?:\\|?\\h*:?[-]{1,}:?[\\h]*(?:\\|[\\h]*:?[-]{1,}:?\\h*)+\\|?)', // Column Options
+      '((\\n\\|?([^\\n|]+(\\|[^\\n|]*)+)\\|?)*)', // Rows
+    ].join(''),
+    end: '(?=$|\\n)',
+  };
+
+  loose.reg = compileRegExp(loose, 'g', true);
+
+  if (merge === false) {
+    return { strict, loose };
+  }
+  const regStr = `(?:${strict.begin + strict.content + strict.end}|${loose.begin + loose.content + loose.end})`;
+  return compileRegExp({ begin: '', content: regStr, end: '' }, 'g', true);
+}
+
+export function getCodeBlockRule() {
+  const codeBlock = {
+    /**
+     * (?:^|\n)是区块的通用开头
+     * (\n*)捕获区块前的所有换行
+     * (?:[^\S\n]*)捕获```前置的空格字符
+     */
+    begin: /(?:^|\n)(\n*(?:[^\S\n]*))```([^`]*?)\n/,
+    content: /([\w\W]*?)/, // '([\\w\\W]*?)',
+    end: /[^\S\n]*```[ \t]*(?=$|\n+)/, // '\\s*```[ \\t]*(?=$|\\n+)',
+  };
+  codeBlock.reg = new RegExp(codeBlock.begin.source + codeBlock.content.source + codeBlock.end.source, 'g');
+  return codeBlock;
+}
