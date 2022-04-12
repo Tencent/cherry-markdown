@@ -443,7 +443,7 @@ export default class Cherry extends CherryStatic {
     const anchorStyle =
       (this.options.engine.syntax.header && this.options.engine.syntax.header.anchorStyle) || 'default';
     const autonumberClass = anchorStyle === 'autonumber' ? ' head-num' : '';
-    const { className, dom } = this.options.previewer;
+    const { className, dom, enablePreviewerBubble } = this.options.previewer;
     const previewerClassName = ['cherry-previewer', className || '', autonumberClass].join(' ');
     if (dom) {
       previewer = dom;
@@ -462,6 +462,7 @@ export default class Cherry extends CherryStatic {
       previewerDom: previewer,
       value: this.options.value,
       isPreviewOnly: this.options.isPreviewOnly,
+      enablePreviewerBubble,
     });
 
     return this.previewer;

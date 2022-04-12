@@ -70,6 +70,7 @@ click [here](./docs/features.md) for more details
 - [XSS](https://tencent.github.io/cherry-markdown/examples/xss.html)（Not allowed by default）
 - [API](https://tencent.github.io/cherry-markdown/examples/api.html)
 - [img wysiwyg](https://tencent.github.io/cherry-markdown/examples/img.html)
+- [table wysiwyg](https://tencent.github.io/cherry-markdown/examples/table.html)
 - [headers with auto num](https://tencent.github.io/cherry-markdown/examples/head_num.html)
 
 
