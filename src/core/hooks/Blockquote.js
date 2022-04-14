@@ -99,7 +99,7 @@ export default class Blockquote extends ParagraphBase {
       begin: '(?:^|\\n)(\\s*)',
       content: [
         '(',
-        '>(?:.+?\n)(?:>*.+?\n)*(?:>*.+?)', // multiline
+        '>(?:.+?\\n(?![*+-]|\\d+[.]|[a-z]\\.))(?:>*.+?\\n(?![*+-]|\\d+[.]|[a-z]\\.))*(?:>*.+?)', // multiline
         '|', // or
         '>(?:.+?)', // single line
         ')',
