@@ -35,6 +35,7 @@ export interface CherryOptions {
   id: string;
   /** 初始内容，引擎模式下不生效 */
   value: string;
+  instanceId?: string;
 }
 
 export interface CherryExternalsOptions {
