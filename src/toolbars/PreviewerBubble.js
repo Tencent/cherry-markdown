@@ -27,7 +27,6 @@ export default class PreviewerBubble {
    * @param {import('../Editor').default} editor
    */
   constructor(previewer, editor) {
-    this.instanceId = `cherry-toolbar-${new Date().getTime()}`;
     /**
      * @property
      * @type {import('../Previewer').default}
@@ -77,6 +76,10 @@ export default class PreviewerBubble {
   }
 
   $onClick(e) {
+    // 只有双栏编辑模式才出现该功能
+    if (this.previewer.$cherry.getStatus().editor === 'hide') {
+      return;
+    }
     const { target } = e;
     this.$removeAllPreviewerBubbles();
     if (typeof target.tagName === 'undefined') {

@@ -28,6 +28,7 @@ import getPosBydiffs from './utils/recount-pos';
 import defaultConfig from './Cherry.config';
 import './sass/cherry.scss';
 import cloneDeep from 'lodash/cloneDeep';
+import Event from './Event';
 
 import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
@@ -71,6 +72,13 @@ export default class Cherry extends CherryStatic {
     }
 
     /**
+     * @property
+     * @type {string} 实例ID
+     */
+    this.instanceId = `cherry-${new Date().getTime()}${Math.random()}`;
+    this.options.instanceId = this.instanceId;
+
+    /**
      * @private
      * @type {Engine}
      */
@@ -83,6 +91,11 @@ export default class Cherry extends CherryStatic {
    * @private
    */
   init() {
+    this.status = {
+      toolbar: 'show',
+      previewer: 'show',
+      editor: 'show',
+    };
     let mountEl = document.getElementById(this.options.id);
 
     if (!mountEl) {
@@ -147,6 +160,24 @@ export default class Cherry extends CherryStatic {
     this.switchModel(this.options.editor.defaultModel);
 
     this.cherryDomResize();
+    Event.on(this.instanceId, Event.Events.toolbarHide, () => {
+      this.status.toolbar = 'hide';
+    });
+    Event.on(this.instanceId, Event.Events.toolbarShow, () => {
+      this.status.toolbar = 'show';
+    });
+    Event.on(this.instanceId, Event.Events.previewerClose, () => {
+      this.status.previewer = 'hide';
+    });
+    Event.on(this.instanceId, Event.Events.previewerOpen, () => {
+      this.status.previewer = 'show';
+    });
+    Event.on(this.instanceId, Event.Events.editorClose, () => {
+      this.status.editor = 'hide';
+    });
+    Event.on(this.instanceId, Event.Events.editorOpen, () => {
+      this.status.editor = 'show';
+    });
   }
 
   /**
@@ -155,7 +186,7 @@ export default class Cherry extends CherryStatic {
    */
   cherryDomResize() {
     const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
+      for (const {} of entries) {
         setTimeout(() => this.editor.editor.refresh(), 10);
       }
     });
@@ -196,6 +227,23 @@ export default class Cherry extends CherryStatic {
         this.toolbar && this.toolbar.previewOnly();
         break;
     }
+  }
+
+  /**
+   * 获取实例id
+   * @returns {string}
+   * @public
+   */
+  getInstanceId() {
+    return this.instanceId;
+  }
+
+  /**
+   * 获取编辑器状态
+   * @returns  {Object}
+   */
+  getStatus() {
+    return this.status;
   }
 
   /**
@@ -420,6 +468,7 @@ export default class Cherry extends CherryStatic {
     editor.appendChild(textArea);
 
     this.editor = new Editor({
+      $cherry: this,
       editorDom: editor,
       wrapperDom: this.wrapperDom,
       value: this.options.value,
@@ -456,6 +505,7 @@ export default class Cherry extends CherryStatic {
     const previewerMask = createElement('div', 'cherry-previewer-mask');
 
     this.previewer = new Previewer({
+      $cherry: this,
       virtualDragLineDom: virtualDragLine,
       editorMaskDom: editorMask,
       previewerMaskDom: previewerMask,
@@ -487,10 +537,10 @@ export default class Cherry extends CherryStatic {
 
   /**
    * @private
-   * @param {Event} evt
+   * @param {Event} _evt
    * @param {import('codemirror').Editor} codemirror
    */
-  editText(evt, codemirror) {
+  editText(_evt, codemirror) {
     try {
       if (this.timer) {
         clearTimeout(this.timer);
