@@ -94,6 +94,8 @@ export default class Editor {
       Object.assign(this.options.codemirror, codemirror);
     }
     Object.assign(this.options, restOptions);
+    this.$cherry = this.options.$cherry;
+    this.instanceId = this.$cherry.getInstanceId();
   }
 
   /**
