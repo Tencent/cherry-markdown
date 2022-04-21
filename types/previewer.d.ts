@@ -26,5 +26,5 @@ export interface PreviewerOptions {
   previewerMaskDom: HTMLDivElement;
   /** 是否开启预览区域菜单 */
   enablePreviewerBubble?: boolean;
-  $Cherry?: Cherry;
+  $cherry?: Cherry;
 }

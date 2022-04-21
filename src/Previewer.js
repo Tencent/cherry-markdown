@@ -83,8 +83,8 @@ export default class Previewer {
     };
 
     Object.assign(this.options, options);
-    this.$Cherry = this.options.$Cherry;
-    this.instanceId = this.$Cherry.getInstanceId();
+    this.$cherry = this.options.$cherry;
+    this.instanceId = this.$cherry.getInstanceId();
     /**
      * @property
      * @private

@@ -77,7 +77,7 @@ export default class PreviewerBubble {
 
   $onClick(e) {
     // 只有双栏编辑模式才出现该功能
-    if (this.previewer.$Cherry.getStatus().editor === 'hide') {
+    if (this.previewer.$cherry.getStatus().editor === 'hide') {
       return;
     }
     const { target } = e;

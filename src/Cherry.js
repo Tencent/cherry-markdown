@@ -468,7 +468,7 @@ export default class Cherry extends CherryStatic {
     editor.appendChild(textArea);
 
     this.editor = new Editor({
-      $Cherry: this,
+      $cherry: this,
       editorDom: editor,
       wrapperDom: this.wrapperDom,
       value: this.options.value,
@@ -505,7 +505,7 @@ export default class Cherry extends CherryStatic {
     const previewerMask = createElement('div', 'cherry-previewer-mask');
 
     this.previewer = new Previewer({
-      $Cherry: this,
+      $cherry: this,
       virtualDragLineDom: virtualDragLine,
       editorMaskDom: editorMask,
       previewerMaskDom: previewerMask,

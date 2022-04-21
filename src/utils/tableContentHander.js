@@ -96,12 +96,12 @@ const tableContentHander = {
     const tableCodes = [];
     this.codeMirror
       .getValue()
-      .replace(this.codeBlockReg, (...args) => {
+      .replace(this.codeBlockReg, (whole, ...args) => {
         // 先把代码块里的表格语法关键字干掉
-        return args[0]?.replace(/\|/g, '.');
+        return whole.replace(/\|/g, '.');
       })
-      .replace(this.tableReg, function (...args) {
-        const match = args[0].replace(/^\n*/, '');
+      .replace(this.tableReg, function (whole, ...args) {
+        const match = whole.replace(/^\n*/, '');
         const offsetBegin = args[args.length - 2] + args[0].match(/^\n*/)[0].length;
         tableCodes.push({
           code: match,
