@@ -102,7 +102,7 @@ const tableContentHander = {
       })
       .replace(this.tableReg, function (whole, ...args) {
         const match = whole.replace(/^\n*/, '');
-        const offsetBegin = args[args.length - 2] + args[0].match(/^\n*/)[0].length;
+        const offsetBegin = args[args.length - 2] + whole.match(/^\n*/)[0].length;
         tableCodes.push({
           code: match,
           offset: offsetBegin,
