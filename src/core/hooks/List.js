@@ -30,7 +30,7 @@ function attrsToAttributeString(object) {
 }
 
 export function makeChecklist(text) {
-  return text.replace(/([*+-]\s+)\[(\s|x)\]/g, (whole, pre, test) => {
+  return text.replace(/^((?:|[\t ]+)[*+-]\s+)\[(\s|x)\]/gm, (whole, pre, test) => {
     const checkHtml = /\s/.test(test)
       ? '<span class="ch-icon ch-icon-square"></span>'
       : '<span class="ch-icon ch-icon-check"></span>';
