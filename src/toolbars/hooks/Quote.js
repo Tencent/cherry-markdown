@@ -24,15 +24,19 @@ export default class Quote extends MenuBase {
   }
 
   /**
-   * 响应点击事件
-   * @param {string} selection 编辑器里选中的内容
-   * @param {string} shortKey 本函数不处理快捷键
+   * click handler
+   * @param {string} selection selection in editor
    * @returns
    */
-  onClick(selection, shortKey = '') {
+  onClick(selection) {
     let $selection = selection ? selection : '引用';
-    // TODO：如果选中的内容里已经有“引用”的语法了，需要实现自动清除引用语法的功能，从而达到功能自洽
-    $selection = $selection.replace(/(^)([^\n]+)($)/gm, '$1> $2$3').replace(/\n+$/, '\n\n');
+    const isWrapped = $selection.split('\n').every((text) => /^\s*>[^\n]+$/.exec(text));
+    // decrease level when all lines in selection are quote
+    if (isWrapped) {
+      $selection = $selection.replace(/(^\s*)>\s*([^\n]+)($)/gm, '$1$2$3').replace(/\n+$/, '\n\n');
+    } else {
+      $selection = $selection.replace(/(^)([^\n]+)($)/gm, '$1> $2$3').replace(/\n+$/, '\n\n');
+    }
     return $selection;
   }
 }
