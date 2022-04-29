@@ -17,6 +17,7 @@ import ParagraphBase from '@/core/ParagraphBase';
 import Prism from 'prismjs';
 import { escapeHTMLSpecialChar } from '@/utils/sanitize';
 import { getCodeBlockRule } from '@/utils/regexp';
+import { prependLineFeedForParagraph } from '@/utils/lineFeed';
 
 Prism.manual = true;
 
@@ -203,7 +204,7 @@ export default class CodeBlock extends ParagraphBase {
    */
   $getIndentedCodeReg() {
     const ret = {
-      begin: '(?<=^|\\n)(?: {4}|\\t)',
+      begin: '(?:^|\\n)(?: {4}|\\t)',
       end: '(?=$|\\n( {0,3}[^ \\t\\n]|\\n[^ \\t\\n]))',
       content: '([\\s\\S]+?)',
     };
@@ -224,7 +225,7 @@ export default class CodeBlock extends ParagraphBase {
         code.replace(/\n( {4}|\t)/g, '\n'),
       )}</code></pre>`;
       // return this.getCacheWithSpace(this.pushCache(html), match, true);
-      return this.pushCache(html, sign, lineCount);
+      return prependLineFeedForParagraph(match, this.pushCache(html, sign, lineCount));
     });
   }
 
