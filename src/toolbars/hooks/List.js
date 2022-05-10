@@ -53,7 +53,18 @@ export default class List extends MenuBase {
         pre = '- [x]';
         break;
     }
-    $selection = $selection.replace(/^(\s*)(\S[\s\S]*?)$/gm, `$1${pre} $2`);
+    $selection = $selection.replace(/^(\s*)([0-9a-zA-Z]+\.|- \[x\]|- \[ \]|-) /gm, '$1');
+    // 对有序列表进行序号自增处理
+    if (pre === '1.') {
+      const listNum = {};
+      $selection = $selection.replace(/^(\s*)(\S[\s\S]*?)$/gm, (match, p1, p2) => {
+        const space = p1.match(/[ \t]/g)?.length || 0;
+        listNum[space] = listNum[space] ? listNum[space] + 1 : 1;
+        return `${p1}${listNum[space]}. ${p2}`;
+      });
+    } else {
+      $selection = $selection.replace(/^(\s*)(\S[\s\S]*?)$/gm, `$1${pre} $2`);
+    }
     return $selection;
   }
 

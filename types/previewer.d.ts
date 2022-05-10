@@ -1,3 +1,4 @@
+import Cherry from '../src/Cherry.js';
 export type AfterUpdateCallbackFunc = () => void;
 
 export interface PreviewerOptions {
@@ -25,4 +26,5 @@ export interface PreviewerOptions {
   previewerMaskDom: HTMLDivElement;
   /** 是否开启预览区域菜单 */
   enablePreviewerBubble?: boolean;
+  $cherry?: Cherry;
 }
