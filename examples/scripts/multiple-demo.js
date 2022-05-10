@@ -152,6 +152,7 @@ fetch('./markdown/basic.md').then((response) => response.text()).then((value) =>
   var config1 = Object.assign({}, cherryConfig1, { value: value });
   window.cherry1 = new Cherry(config1);
 
-  var config2 = Object.assign({}, cherryConfig2, { value: value });
+  // init with empty string for height test
+  var config2 = Object.assign({}, cherryConfig2, { value: '' });
   window.cherry2 = new Cherry(config2);
 });
