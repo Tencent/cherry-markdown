@@ -312,9 +312,25 @@ new Cherry({
   id: 'markdown-container',
   value: '# welcome to cherry editor!',
   toolbars: {
+    toolbar: [
+      'bold',
+      // ...其他菜单项
+      // @see src/Cherry.config.js
+      'settings',
+      'addPrefix', // 在顶部菜单栏的尾部添加自定义菜单项
+    ],
+    bubble: [
+      'bold', /** ...其他菜单项 */, 'color',
+      'addPrefix', // 在气泡菜单（选中文本时出现）的尾部添加自定义菜单项
+    ], // array or false
+    float: [
+      'h1', /** ...其他菜单项 */, 'code',
+      'addPrefix', // 在浮动菜单（在新的空行出现）的尾部添加自定义菜单项
+    ], // array or false
     customMenu: {
       // 注入编辑器的菜单中
-      AddPrefixTemplate,
+      // 对象 key 可以作为菜单项的名字（需要保证唯一），在上方的配置中使用
+      addPrefix: AddPrefixTemplate,
     },
   },
 });
