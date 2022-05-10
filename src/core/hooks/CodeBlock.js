@@ -201,10 +201,11 @@ export default class CodeBlock extends ParagraphBase {
 
   /**
    * 获取缩进代码块语法的正则
+   * 缩进代码块必须要以连续两个以上的换行符开头
    */
   $getIndentedCodeReg() {
     const ret = {
-      begin: '(?:^|\\n)(?: {4}|\\t)',
+      begin: '(?:^|\\n\\s*\\n)(?: {4}|\\t)',
       end: '(?=$|\\n( {0,3}[^ \\t\\n]|\\n[^ \\t\\n]))',
       content: '([\\s\\S]+?)',
     };
@@ -219,7 +220,7 @@ export default class CodeBlock extends ParagraphBase {
       return str;
     }
     return this.$recoverCodeInIndent(str).replace(this.$getIndentedCodeReg(), (match, code) => {
-      const lineCount = (match.match(/\n/g) || []).length;
+      const lineCount = (match.match(/\n/g) || []).length - 1;
       const sign = this.$engine.md5(match);
       const html = `<pre data-sign="${sign}" data-lines="${lineCount}"><code>${escapeHTMLSpecialChar(
         code.replace(/\n( {4}|\t)/g, '\n'),

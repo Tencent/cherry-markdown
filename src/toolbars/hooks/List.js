@@ -53,6 +53,7 @@ export default class List extends MenuBase {
         pre = '- [x]';
         break;
     }
+    $selection = $selection.replace(/^(\s*)([0-9a-zA-Z]+\.|- \[x\]|- \[ \]|-) /gm, '$1');
     $selection = $selection.replace(/^(\s*)(\S[\s\S]*?)$/gm, `$1${pre} $2`);
     return $selection;
   }

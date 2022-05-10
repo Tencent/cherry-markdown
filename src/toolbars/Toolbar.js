@@ -109,7 +109,7 @@ export default class Toolbar {
         const ret = selections.map(
           (selection, index, srcArray) => ext.onClick(selection, shortKey, callback) || srcArray[index],
         );
-        this.options.editor.editor.replaceSelections(ret);
+        this.options.editor.editor.replaceSelections(ret, 'around');
         this.options.editor.editor.focus();
       };
     });

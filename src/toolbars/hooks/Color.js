@@ -186,7 +186,13 @@ class BubbleColor {
 
   onClick() {
     if (this.type === 'text') {
+      if (/^!!#\S+ [\s\S]+?!!/.test(this.selection)) {
+        return this.selection.replace(/^!!#\S+ ([\s\S]+?)!!/, `!!${this.colorValue} $1!!`);
+      }
       return `!!${this.colorValue} ${this.selection}!!`;
+    }
+    if (/^!!!#\S+ [\s\S]+?!!!/.test(this.selection)) {
+      return this.selection.replace(/^!!!#\S+ ([\s\S]+?)!!!/, `!!!${this.colorValue} $1!!!`);
     }
     return `!!!${this.colorValue} ${this.selection}!!!`;
   }
@@ -204,7 +210,7 @@ class BubbleColor {
         this.type = target.closest('.cherry-color-text') ? 'text' : 'bg';
         const selections = this.editor.editor.getSelections();
         const res = selections.map((selection, index, srcArray) => this.onClick() || srcArray[index]);
-        self.editor.editor.replaceSelections(res);
+        self.editor.editor.replaceSelections(res, 'around');
         self.editor.editor.focus();
       },
       false,
