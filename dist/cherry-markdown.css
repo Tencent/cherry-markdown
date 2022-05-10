@@ -1567,7 +1567,7 @@ green     #859900
   align-items: stretch;
   align-content: flex-start;
   height: 100%;
-  min-height: 400px;
+  min-height: 100px;
   position: relative; }
   .cherry .cherry-editor,
   .cherry .cherry-previewer {
