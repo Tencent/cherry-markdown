@@ -280,8 +280,7 @@ export default class Editor {
     editor.on('drop', (codemirror, evt) => {
       const files = evt.dataTransfer.files || [];
       if (files && files.length > 0) {
-        const mdImgList = [];
-        for (let i = 0; i < files.length; i++) {
+        for (let i = 0, needBr = false; i < files.length; i++) {
           const file = files[i];
           const fileType = file.type || '';
           // 文本类型或者无类型的，直接读取内容，不做上传文件的操作
@@ -294,19 +293,14 @@ export default class Editor {
             if (typeof url !== 'string') {
               return;
             }
-            if (isImage) {
-              mdImgList.push(`![${name}](${url})`);
-            } else {
-              mdImgList.push(`[${name}](${url})`);
-            }
-          });
-        }
-        if (mdImgList.length > 0) {
-          setTimeout(() => {
             // 拖拽上传文件时，强制改成没有文字选择区的状态
             codemirror.setSelection(codemirror.getCursor());
-            codemirror.replaceSelection(mdImgList.join('\n'));
-          }, 100);
+            let insertValue = isImage ? `![${name}](${url})` : `[${name}](${url})`;
+            insertValue = needBr ? `\n${insertValue}` : insertValue;
+            // 当批量上传文件时，每个被插入的文件中间需要加个换行，但单个上传文件的时候不需要加换行
+            needBr = true;
+            codemirror.replaceSelection(insertValue);
+          });
         }
       }
     });
