@@ -311,9 +311,25 @@ new Cherry({
   id: 'markdown-container',
   value: '# welcome to cherry editor!',
   toolbars: {
+    toolbar: [
+      'bold',
+      // ...other toolbar items
+      // @see src/Cherry.config.js
+      'settings',
+      'addPrefix', // append custom menu item to main top toolbar
+    ],
+    bubble: [
+      'bold', /** ...other toolbar items */, 'color',
+      'addPrefix', // append custom menu item to bubble toolbar (appears on selection)
+    ], // array or false
+    float: [
+      'h1', /** ...other toolbar items */, 'code',
+      'addPrefix', // append custom menu item to float toolbar (appears on new empty line)
+    ], // array or false
     customMenu: {
       // Inject into the editor's menu
-      AddPrefixTemplate,
+      // object key as item's unique name for toolbars'configuration
+      addPrefix: AddPrefixTemplate,
     },
   },
 });
