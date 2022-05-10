@@ -96,7 +96,8 @@ export default class Cherry extends CherryStatic {
       previewer: 'show',
       editor: 'show',
     };
-    let mountEl = document.getElementById(this.options.id);
+
+    let mountEl = this.options.id ? document.getElementById(this.options.id) : this.options.el;
 
     if (!mountEl) {
       if (!this.options.forceAppend) {

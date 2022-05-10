@@ -32,7 +32,9 @@ export interface CherryOptions {
   /** 外层容器不存在时，是否强制输出到body上 */
   forceAppend: boolean;
   /** 挂载DOM节点ID，引擎模式下不生效 */
-  id: string;
+  id?: string;
+  /** 挂载DOM节点，引擎模式下不生效 */
+  el?: HTMLElement;
   /** 初始内容，引擎模式下不生效 */
   value: string;
   instanceId?: string;
