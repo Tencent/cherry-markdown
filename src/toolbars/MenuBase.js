@@ -217,7 +217,7 @@ export default class MenuBase {
       const ret = selections.map((selection, index, srcArray) => this.onClick(selection, '', event) || srcArray[index]);
       if (!this.bubbleMenu && this.updateMarkdown) {
         // 非下拉菜单按钮保留selection
-        this.editor.editor.replaceSelections(ret);
+        this.editor.editor.replaceSelections(ret, 'around');
         this.editor.editor.focus();
       }
     }
@@ -232,7 +232,7 @@ export default class MenuBase {
    */
   onKeyDown(codemirror, selections, key) {
     const ret = selections.map((selection) => this.onClick(selection, key));
-    return codemirror.replaceSelections(ret);
+    return codemirror.replaceSelections(ret, 'around');
   }
 
   // 反转子菜单点击事件参数顺序
@@ -324,7 +324,7 @@ export default class MenuBase {
       // 当onClick返回null或undefined时，维持原样
       const ret = selections.map((selection, index, srcArray) => clickEventHandler(selection) || srcArray[index]);
       if (this.updateMarkdown) {
-        this.editor.editor.replaceSelections(ret);
+        this.editor.editor.replaceSelections(ret, 'around');
         this.editor.editor.focus();
       }
     }
