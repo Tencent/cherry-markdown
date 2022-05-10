@@ -17,6 +17,7 @@ import ParagraphBase from '@/core/ParagraphBase';
 import Prism from 'prismjs';
 import { escapeHTMLSpecialChar } from '@/utils/sanitize';
 import { getCodeBlockRule } from '@/utils/regexp';
+import { prependLineFeedForParagraph } from '@/utils/lineFeed';
 
 Prism.manual = true;
 
@@ -200,6 +201,7 @@ export default class CodeBlock extends ParagraphBase {
 
   /**
    * 获取缩进代码块语法的正则
+   * 缩进代码块必须要以连续两个以上的换行符开头
    */
   $getIndentedCodeReg() {
     const ret = {
@@ -218,13 +220,13 @@ export default class CodeBlock extends ParagraphBase {
       return str;
     }
     return this.$recoverCodeInIndent(str).replace(this.$getIndentedCodeReg(), (match, code) => {
-      const lineCount = (match.match(/\n/g) || []).length - 1;
+      const lineCount = (match.match(/\n/g) || []).length;
       const sign = this.$engine.md5(match);
       const html = `<pre data-sign="${sign}" data-lines="${lineCount}"><code>${escapeHTMLSpecialChar(
         code.replace(/\n( {4}|\t)/g, '\n'),
       )}</code></pre>`;
       // return this.getCacheWithSpace(this.pushCache(html), match, true);
-      return this.pushCache(html, sign, lineCount);
+      return prependLineFeedForParagraph(match, this.pushCache(html, sign, lineCount));
     });
   }
 

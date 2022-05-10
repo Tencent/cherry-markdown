@@ -53,7 +53,8 @@ export default class CommentReference extends ParagraphBase {
     if (this.test($str)) {
       $str = $str.replace(this.RULE.reg, (match, leading, key, content) => {
         this.pushCommentReferenceCache(key, content);
-        return match.match(/\n/g).join('');
+        const lineFeeds = match.match(/\n/g) ?? [];
+        return lineFeeds.join('');
       });
       // 替换实际引用
       const refRegex = /(\[[^\]\n]+?\])?(?:\[([^\]\n]+?)\])/g; // 匹配[xxx][ref]形式的内容，不严格大小写

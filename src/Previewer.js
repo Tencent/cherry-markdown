@@ -62,11 +62,6 @@ export default class Previewer {
   constructor(options) {
     /**
      * @property
-     * @type {string} 实例ID
-     */
-    this.instanceId = `cherry-previewer-${new Date().getTime()}`;
-    /**
-     * @property
      * @type {import('~types/previewer').PreviewerOptions}
      */
     this.options = {
@@ -88,6 +83,8 @@ export default class Previewer {
     };
 
     Object.assign(this.options, options);
+    this.$cherry = this.options.$cherry;
+    this.instanceId = this.$cherry.getInstanceId();
     /**
      * @property
      * @private
@@ -642,12 +639,15 @@ export default class Previewer {
       this.update(this.options.previewerCache.html);
     }
     this.cleanHtmlCache();
+    Event.emit(this.instanceId, Event.Events.previewerOpen);
+    Event.emit(this.instanceId, Event.Events.editorClose);
   }
 
   editOnly(dealToolbar = false) {
     this.$dealEditAndPreviewOnly(true);
     this.cleanHtmlCache();
     Event.emit(this.instanceId, Event.Events.previewerClose);
+    Event.emit(this.instanceId, Event.Events.editorOpen);
   }
 
   recoverPreviewer(dealToolbar = false) {
@@ -665,6 +665,7 @@ export default class Previewer {
     this.cleanHtmlCache();
 
     Event.emit(this.instanceId, Event.Events.previewerOpen);
+    Event.emit(this.instanceId, Event.Events.editorOpen);
 
     setTimeout(() => this.editor.editor.refresh(), 0);
   }

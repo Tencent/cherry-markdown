@@ -94,14 +94,20 @@ const tableContentHander = {
    */
   $collectTableCode() {
     const tableCodes = [];
-    this.codeMirror.getValue().replace(this.tableReg, function (...args) {
-      const match = args[0].replace(/^\n*/, '');
-      const offsetBegin = args[args.length - 2] + args[0].match(/^\n*/)[0].length;
-      tableCodes.push({
-        code: match,
-        offset: offsetBegin,
+    this.codeMirror
+      .getValue()
+      .replace(this.codeBlockReg, (whole, ...args) => {
+        // 先把代码块里的表格语法关键字干掉
+        return whole.replace(/\|/g, '.');
+      })
+      .replace(this.tableReg, function (whole, ...args) {
+        const match = whole.replace(/^\n*/, '');
+        const offsetBegin = args[args.length - 2] + whole.match(/^\n*/)[0].length;
+        tableCodes.push({
+          code: match,
+          offset: offsetBegin,
+        });
       });
-    });
     this.tableEditor.tableCodes = tableCodes;
   },
 
