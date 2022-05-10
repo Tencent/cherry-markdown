@@ -389,6 +389,17 @@ registerPlugin().then(() => {
 }
 ```
 
+### 关闭浮动菜单和气泡菜单
+
+```javascript
+  toolbars: {
+    ... // other config 
+    bubble: false, // array or false
+    float: false, // array or false
+  },
+
+```
+
 ### 更多信息
 
 如果你想自定义配置信息，可以看这里 [Configuration](./docs/configuration.CN.md)
