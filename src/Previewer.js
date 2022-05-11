@@ -392,6 +392,18 @@ export default class Previewer {
       // return this.editor.scrollToLineNum(lines - lineNum, 0, 0);
     };
     addEvent(domContainer, 'scroll', onScroll, false);
+    addEvent(
+      domContainer,
+      'wheel',
+      () => {
+        // 鼠标滚轮滚动时，强制监听滚动事件
+        this.disableScrollListener = false;
+        // 打断滚动动画
+        cancelAnimationFrame(this.animation.timer);
+        this.animation.timer = 0;
+      },
+      false,
+    );
   }
 
   removeScroll() {
