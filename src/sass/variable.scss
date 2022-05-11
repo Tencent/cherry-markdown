@@ -1,12 +1,9 @@
 //基础样式
 
-$fontFamily: "Helvetica Neue",
-Arial,
-"Hiragino Sans GB",
-"STHeiti",
-"Microsoft YaHei",
-"WenQuanYi Micro Hei",
-sans-serif;
+$fontFamily: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+"Noto Sans", Ubuntu, Cantarell, "Helvetica Neue", sans-serif,
+"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+"Noto Color Emoji";
 $monospaceFont: 'Menlo', 'Liberation Mono', 'Consolas', 'DejaVu Sans Mono', 'Ubuntu Mono', 'Courier New', 'andale mono', 'lucida console', monospace;
 $fontSize: 14px;
 $fontSizeLarge: 16px;
@@ -14,10 +11,10 @@ $lineHeight: 22px;
 $editorBg: #f8fafb;
 $previewBg: #f8fafb;
 $fontColor: #3f4a56;
-$linkColor: #3582fb;
+$linkColor: #3A84FF;
 $linkHoverColor: #056bad;
-$borderColor: #dfe6ee;
-$toolbarSplitColor: #dfe6ee;
+$borderColor: #cbd5e080;
+$toolbarSplitColor: #cbd5e080;
 $toolbarFontSize: 14px;
 $toolbarHeight: 48px;
 $elementGap: 16px;

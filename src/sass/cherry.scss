@@ -21,6 +21,10 @@
   position: relative;
   // overflow: hidden;
 
+  img {
+    max-width: 100%;
+  }
+
   .cherry-editor,
   .cherry-previewer {
     max-height: calc(100% - #{$toolbarHeight});
@@ -177,8 +181,8 @@
   box-sizing: border-box;
   z-index: 1;
   user-select: none;
-  box-shadow: $toolbarShadowLight;
   background: $toolbarBgLight;
+  border-bottom: 1px solid #e8eaee;
 
   [data-toolbar-theme='dark'] & {
     background: $toolbarBgDark;
@@ -446,6 +450,7 @@
   }
 
   .CodeMirror {
+    background: #fff;
     font-family: $fontFamily;
     background: $editorBg;
     color: $fontColor;
@@ -464,7 +469,7 @@
   }
 
   .cm-s-default .cm-comment {
-    color: $editorCommentColor;
+    color: $fontColor;
     font-family: $monospaceFont;
     font-size: 0.9em;
   }

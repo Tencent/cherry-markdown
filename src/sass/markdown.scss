@@ -13,7 +13,7 @@
   .h5,
   .h6 {
     font-family: inherit;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.1;
     color: inherit;
   }
@@ -206,11 +206,13 @@
   div[data-type='codeBlock'] {
     display: inline-block;
     width: 100%;
+    max-width: 800px;
     box-sizing: border-box;
     border-radius: 2px;
     margin-bottom: 16px;
-    font-size: 14px;
+    font-size: 12px;
     overflow-x: auto;
+    border-radius: 8px;
 
     & > pre {
       margin: 0;
@@ -222,9 +224,8 @@
         .code-line {
           display: inline-block;
           position: relative;
-          padding-left: 3em;
-          height: 1.3em;
-          line-height: 2em;
+          padding-left: 2em;
+          line-height: 1.5em;
           &:before {
             counter-increment: line;
             content: counter(line);
@@ -242,11 +243,11 @@
 
   /* Inline code */
   :not(pre) > code {
-    padding: .1em;
+    padding: .1em .3em;
     border-radius: .3em;
     white-space: normal;
-    color: #f85353;
-    background-color: #e5e5e5;
+    color: #f08d49;
+    background-color: #f2f2f2;
 
     [data-inline-code-theme='black'] & {
       color: #3f4a56;
@@ -323,13 +324,14 @@
     .cherry-table {
       th,
       td {
+        text-align: left;
         border: 1px solid $borderColor;
-        padding: 0.2em 0.4em;
+        padding: 0.2em 1em;
       }
       th {
         min-width: 100px;
         white-space: nowrap;
-        background-color: #eee;
+        background-color: #FAFBFD;
       }
       td {
         min-width: 100px;
