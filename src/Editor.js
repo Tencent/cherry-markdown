@@ -92,6 +92,10 @@ export default class Editor {
     this.animation = {};
     const { codemirror, ...restOptions } = options;
     if (codemirror) {
+      const { theme } = codemirror;
+      if (theme) {
+        import(`codemirror/theme/${theme}.css`);
+      }
       Object.assign(this.options.codemirror, codemirror);
     }
     Object.assign(this.options, restOptions);
