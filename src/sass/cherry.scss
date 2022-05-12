@@ -179,6 +179,7 @@
   user-select: none;
   box-shadow: $toolbarShadowLight;
   background: $toolbarBgLight;
+  overflow: hidden;
 
   [data-toolbar-theme='dark'] & {
     background: $toolbarBgDark;
