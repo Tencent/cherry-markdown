@@ -28,6 +28,10 @@ export default class Transfer extends SyntaxBase {
     return ret;
   }
 
+  beforeMakeHtml(str) {
+    return str.replace(/\\\n/g, '\\ \n');
+  }
+
   afterMakeHtml(str) {
     let $str = str.replace(/~Q/g, '~');
     $str = $str.replace(/~X/g, '`');
