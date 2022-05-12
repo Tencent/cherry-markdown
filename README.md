@@ -320,7 +320,11 @@ registerPlugin().then(() => {
     },
   },
   editor: {
-    theme: 'default', // depend on codemirror theme name: https://codemirror.net/demo/theme.htm
+    codemirror: {
+      // depend on codemirror theme name: https://codemirror.net/demo/theme.html
+      // manual import theme: `import 'codemirror/theme/<theme-name>.css';`
+      theme: 'default', 
+    },
     // The height of the editor is 100% by default. If the height of the mount point has an inline setting, the inline style will prevail
     height: '100%',
     // defaultModel The default mode of the editor after initialization. There are three modes: 1. Double column edit preview mode; 2. Pure editing mode; 3. Preview mode
