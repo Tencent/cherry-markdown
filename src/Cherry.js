@@ -554,6 +554,8 @@ export default class Cherry extends CherryStatic {
         if (this.options.callback.afterChange) {
           this.options.callback.afterChange(markdownText, html);
         }
+        // 强制每次编辑（包括undo、redo）编辑器都会自动滚动到光标位置
+        codemirror.scrollIntoView(null);
       }, 50);
     } catch (e) {
       throw new NestedError(e);
