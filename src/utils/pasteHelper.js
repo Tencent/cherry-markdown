@@ -37,6 +37,10 @@ const pasteHelper = {
     this.bindListener();
     this.initBubble();
     this.showBubble();
+    // 默认粘贴成markdown格式，如果用户上次选择粘贴为纯文本，则需要切换为text
+    if (this.getTypeFromLocalStorage() === 'text') {
+      this.switchTextClick();
+    }
   },
 
   init(currentCursor, editor, html, md) {
@@ -44,6 +48,26 @@ const pasteHelper = {
     this.md = md;
     this.codemirror = editor;
     this.currentCursor = currentCursor;
+  },
+
+  /**
+   * 获取缓存中的复制粘贴类型
+   */
+  getTypeFromLocalStorage() {
+    if (!!!localStorage) {
+      return 'md';
+    }
+    return localStorage.getItem('cherry-paste-type') || 'md';
+  },
+
+  /**
+   * 记忆最近一次用户选择的粘贴类型
+   */
+  setTypeToLocalStorage(type) {
+    if (!!!localStorage) {
+      return;
+    }
+    localStorage.setItem('cherry-paste-type', type);
   },
 
   /**
@@ -156,6 +180,7 @@ const pasteHelper = {
   },
 
   switchMDClick(event) {
+    this.setTypeToLocalStorage('md');
     if (this.bubbleDom.getAttribute('data-type') === 'md') {
       return;
     }
@@ -167,6 +192,7 @@ const pasteHelper = {
     this.noHide = false;
   },
   switchTextClick(event) {
+    this.setTypeToLocalStorage('text');
     if (this.bubbleDom.getAttribute('data-type') === 'text') {
       return;
     }
