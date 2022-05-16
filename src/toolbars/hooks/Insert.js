@@ -76,13 +76,33 @@ export default class Insert extends MenuBase {
   }
 
   /**
+   * 处理input的accept
+   * @param {string} type 上传文件的类型
+   */
+  handleAccept(type) {
+    switch (type) {
+      case 'image':
+        return 'image/*';
+      case 'video':
+        return 'video/*';
+      case 'audio':
+        return 'audio/*';
+      case 'pdf':
+        return '.pdf';
+      case 'word':
+        return '.doc,.docx';
+    }
+  }
+
+  /**
    * 上传文件的逻辑
    * @param {string} type 上传文件的类型
    */
   handleUpload(type = 'image') {
     // type为上传文件类型 image|video|audio|pdf|word
     const input = document.createElement('input');
-    input.type = type || 'file';
+    input.type = 'file';
+    input.accept = this.handleAccept(type);
     input.id = 'fileUpload';
     input.value = '';
     input.style.display = 'none';
