@@ -15,6 +15,8 @@
  */
 
 import imgSizeHander from '@/utils/imgSizeHander';
+import tableContentHander from '@/utils/tableContentHander';
+import Event from '@/Event';
 /**
  * 预览区域的响应式工具栏
  */
@@ -25,7 +27,6 @@ export default class PreviewerBubble {
    * @param {import('../Editor').default} editor
    */
   constructor(previewer, editor) {
-    this.instanceId = `cherry-toolbar-${new Date().getTime()}`;
     /**
      * @property
      * @type {import('../Previewer').default}
@@ -51,13 +52,21 @@ export default class PreviewerBubble {
       this.bubbleHandler.emit('mousedown', event);
     });
     document.addEventListener('mouseup', (event) => {
-      this.bubbleHandler.emit('mouseup', event);
+      this.bubbleHandler.emit('mouseup', event, () => {
+        this.$removeAllPreviewerBubbles();
+      });
     });
     document.addEventListener('mousemove', (event) => {
       this.bubbleHandler.emit('mousemove', event);
     });
+    document.addEventListener('keyup', (event) => {
+      this.bubbleHandler.emit('keyup', event);
+    });
     this.previewerDom.addEventListener('scroll', (event) => {
       this.bubbleHandler.emit('scroll', event);
+    });
+    Event.on(this.previewer.instanceId, Event.Events.previewerClose, () => {
+      this.$removeAllPreviewerBubbles();
     });
     this.previewer.options.afterUpdateCallBack.push(() => {
       this.bubbleHandler.emit('previewUpdate', () => {
@@ -67,6 +76,10 @@ export default class PreviewerBubble {
   }
 
   $onClick(e) {
+    // 只有双栏编辑模式才出现该功能
+    if (this.previewer.$cherry.getStatus().editor === 'hide') {
+      return;
+    }
     const { target } = e;
     this.$removeAllPreviewerBubbles();
     if (typeof target.tagName === 'undefined') {
@@ -75,6 +88,10 @@ export default class PreviewerBubble {
     switch (target.tagName) {
       case 'IMG':
         this.bubbleHandler = this.$showImgPreviewerBubbles(target);
+        break;
+      case 'TD':
+      case 'TH':
+        this.bubbleHandler = this.$showTablePreviewerBubbles(target);
         break;
     }
   }
@@ -92,11 +109,21 @@ export default class PreviewerBubble {
   }
 
   /**
+   * 为选中的table增加操作工具栏
+   * @param {HTMLImageElement} htmlElement 用户点击的table dom
+   */
+  $showTablePreviewerBubbles(htmlElement) {
+    this.$createPreviewerBubbles('table-content-hander');
+    tableContentHander.showBubble(htmlElement, this.bubble, this.previewerDom, this.editor.editor);
+    return tableContentHander;
+  }
+
+  /**
    * 为选中的图片增加操作工具栏
    * @param {HTMLImageElement} htmlElement 用户点击的图片dom
    */
   $showImgPreviewerBubbles(htmlElement) {
-    this.$creatPreviewerBubbles();
+    this.$createPreviewerBubbles();
     const list = Array.from(this.previewerDom.querySelectorAll('img'));
     this.totalImgs = list.length;
     this.imgIndex = list.indexOf(htmlElement);
@@ -156,10 +183,13 @@ export default class PreviewerBubble {
     );
   }
 
-  $creatPreviewerBubbles() {
+  /**
+   * 预览区域编辑器的容器
+   */
+  $createPreviewerBubbles(type = 'img-size-hander') {
     if (!this.bubble) {
       this.bubble = document.createElement('div');
-      this.bubble.className = 'cherry-previewer-img-size-hander';
+      this.bubble.className = `cherry-previewer-${type}`;
       this.previewerDom.after(this.bubble);
     }
   }

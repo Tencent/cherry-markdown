@@ -55,10 +55,15 @@ export default class Engine {
 
   initMath(opts) {
     // 无论MathJax还是Katex，都可以先进行MathJax配置
-    const { syntax } = opts.engine;
+    const { externals, engine } = opts;
+    const { syntax } = engine;
     const { plugins } = syntax.mathBlock;
     // 未开启公式
     if (!isBrowser() || (!syntax.mathBlock.src && !syntax.inlineMath.src)) {
+      return;
+    }
+    // 已经加载过MathJax
+    if (externals.MathJax || window.MathJax) {
       return;
     }
     configureMathJax(plugins);
@@ -121,6 +126,7 @@ export default class Engine {
       })
       .replace(/\\&(?!(amp|lt|gt|quot|apos);)/, () => '&amp;');
     $str = $str.replace(/\\ <\//g, '\\</');
+    $str = UrlCache.restoreAll($str);
     return $str;
   }
 
@@ -157,10 +163,7 @@ export default class Engine {
         return oneHook[action](newMd, actionArgs, this.markdownParams);
       }, $md);
     } catch (e) {
-      throw new NestedError(
-        'Invalid syntax hooks definitions: define at least one sort mapping or one type mapping',
-        e,
-      );
+      throw new NestedError(e);
     }
     return $md;
   }
@@ -198,7 +201,7 @@ export default class Engine {
   mounted() {
     this.$fireHookAction('', 'sentence', 'mounted');
     this.$fireHookAction('', 'paragraph', 'mounted');
-    UrlCache.clear();
+    // UrlCache.clear();
   }
 
   makeMarkdown(html) {

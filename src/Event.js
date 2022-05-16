@@ -26,6 +26,8 @@ export default new (class Event {
   Events = {
     previewerClose: 'previewer:close',
     previewerOpen: 'previewer:open',
+    editorClose: 'editor:close',
+    editorOpen: 'editor:open',
     toolbarHide: 'toolbar:hide',
     toolbarShow: 'toolbar:show',
   };

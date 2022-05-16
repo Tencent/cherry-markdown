@@ -29,10 +29,15 @@ export interface CherryOptions {
   isPreviewOnly: boolean;
   /** 预览区域跟随编辑器光标自动滚动 */
   autoScrollByCursor: boolean;
+  /** 外层容器不存在时，是否强制输出到body上 */
+  forceAppend: boolean;
   /** 挂载DOM节点ID，引擎模式下不生效 */
-  id: string;
+  id?: string;
+  /** 挂载DOM节点，引擎模式下不生效 */
+  el?: HTMLElement;
   /** 初始内容，引擎模式下不生效 */
   value: string;
+  instanceId?: string;
 }
 
 export interface CherryExternalsOptions {
@@ -107,6 +112,8 @@ export interface CherryEditorOptions {
   height?: string;
   /** 编辑器初始化后的模式 */
   defaultModel?: EditorMode;
+  /** 粘贴时是否自动将html转成markdown */
+  convertWhenPaste?: boolean;
 }
 
 export type CherryLifecycle = (text: string, html: string) => void;
@@ -115,6 +122,7 @@ export interface CherryPreviewerOptions {
   dom: HTMLDivElement | false;
   /** 预览区域的DOM className */
   className: string;
+  enablePreviewerBubble: boolean;
 }
 
 export type CherryToolbarSeparator = '|';

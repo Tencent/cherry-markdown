@@ -17,7 +17,7 @@
   align-items: stretch;
   align-content: flex-start;
   height: 100%;
-  min-height: 400px;
+  min-height: 100px;
   position: relative;
   // overflow: hidden;
 
@@ -454,6 +454,11 @@
     font-family: $fontFamily;
     background: $editorBg;
     color: $fontColor;
+    // codemirror 依赖隐藏的 textarea 计算行高，这里将字体大小设置为行高，避免输入法遮挡内容
+    // Fixed https://github.com/Tencent/cherry-markdown/issues/82
+    textarea {
+      font-size: $lineHeight;
+    }
   }
 
   .CodeMirror-lines {
@@ -474,7 +479,7 @@
     font-size: 0.9em;
   }
 
-  .cm-s-default .cm-whitespace {
+  .cm-s-default .cm-whitespace, .cm-tab {
     font-family: $monospaceFont;
     font-size: 0.9em;
   }
@@ -634,9 +639,9 @@
 }
 
 .cherry-switch-paste {
-//   width: 224px;
   margin-left: -112px;
   left: 50%;
+  box-sizing: content-box;
   .switch-btn--bg {
     transition: all 0.3s;
     position: absolute;

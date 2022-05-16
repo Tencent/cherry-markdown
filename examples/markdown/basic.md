@@ -9,6 +9,7 @@
 - [注入](xss.html){target=_blank}
 - [API](api.html){target=_blank}
 - [图片所见即所得编辑尺寸](img.html){target=_blank}
+- [表格所见即所得编辑尺寸](table.html){target=_blank}
 - [标题自动序号](head_num.html){target=_blank}
 
 # Cherry Markdown 简明手册
@@ -405,11 +406,13 @@ $$
 
 ```
 这是个演示视频  !video[不带封面演示视频](images/demo.mp4)
+这是个演示视频  !video[带封面演示视频](images/demo.mp4){poster=images/demo-dog.png}
 这是个假音频!audio[描述](视频链接地址)
 ```
 **效果**
 
 这是个演示视频  !video[不带封面演示视频](images/demo.mp4)
+这是个演示视频  !video[带封面演示视频](images/demo.mp4){poster=images/demo-dog.png}
 这是个假音频!audio[描述](视频链接地址)
 
 

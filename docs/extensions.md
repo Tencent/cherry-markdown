@@ -126,4 +126,4 @@ Create a custom menu hook
 | iconName                           | String | Icon class name                               |
 | onClick (<br> selection: Function<br> ) | Function | Callback function when clicked                                |
 | shortcutKeys   | Array | Shortcut key collection is used to register keyboard functions. When the matching shortcut key combination hits, the click function will also be called   |
-| subMenuConfig (<br>name: String<br>iconName： String<Br>noIcon: Boolean<Br>onClick: Function ) | Function | Submenu collection |
+| subMenuConfig (<br>name: String<br>iconName： String<Br>noIcon: Boolean<Br>onClick: Function ) | Array | Submenu collection |

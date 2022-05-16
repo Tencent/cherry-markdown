@@ -19,6 +19,9 @@
  * @param {{replacedText:string;begin:number;length:number;}[]} buffer
  */
 function replaceStringByBuffer(str, buffer) {
+  if (!buffer.length) {
+    return str;
+  }
   const slicedString = [];
   let offset = 0;
   buffer.forEach((buf, index) => {
@@ -41,6 +44,9 @@ function replaceStringByBuffer(str, buffer) {
  * @param {number} [rollbackLength=1] 连续匹配时，每次指针回退的长度，默认为 1
  */
 export function replaceLookbehind(str, regex, replacer, continuousMatch = false, rollbackLength = 1) {
+  if (!regex) {
+    return str;
+  }
   // 从头开始匹配
   regex.lastIndex = 0;
   let args;

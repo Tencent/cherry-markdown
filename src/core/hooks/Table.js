@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import ParagraphBase from '@/core/ParagraphBase';
-import { compileRegExp } from '@/utils/regexp';
+import { getTableRule } from '@/utils/regexp';
 
 const TABLE_LOOSE = 'loose';
 const TABLE_STRICT = 'strict';
@@ -138,8 +138,9 @@ export default class Table extends ParagraphBase {
     const tableHeader = this.$extendColumns(rows[0], maxCol)
       .map((cell, col) => {
         tableObject.header.push(cell.replace(/~CS/g, '\\|'));
+        const { html: cellHtml } = sentenceMakeFunc(cell.replace(/~CS/g, '\\|').trim());
         // 前后补一个空格，否则自动链接会将缓存的内容全部收入链接内部
-        return `~CTH${textAlignRules[col] || 'U'} ${cell.replace(/~CS/g, '\\|').trim()} ~CTH$`;
+        return `~CTH${textAlignRules[col] || 'U'} ${cellHtml} ~CTH$`;
       })
       .join('');
     const tableRows = rows
@@ -241,38 +242,6 @@ export default class Table extends ParagraphBase {
   }
 
   rule() {
-    // ^(\|[^\n]+\|\r?\n)((?:\|:?[-]+:?)+\|)(\n(?:\|[^\n]+\|\r?\n?)*)?$
-    // (\\|?[^\\n|]+\\|?\\n)(?:\\|?[\\s]*:?[-]{2,}:?[\\s]*
-    // (?:\\|[\\s]*:?[-]{2,}:?[\\s]*)+\\|?)(\\n\\|?(\\|[^\\n|]+)*\\|?)?
-    /**
-     * (\|[^\n]+\|\n)     Headers
-     * ((\|[\s]*:?[-]{2,}:?[\s]*)+\|)      Column Options
-     * ((?:\n\|[^\n]+\|)*)  Rows
-     */
-    const strict = {
-      begin: '(?:^|\\n)(\\n*)',
-      content: [
-        '(\\h*\\|[^\\n]+\\|?\\h*)', // Header
-        '\\n',
-        '(?:(?:\\h*\\|\\h*:?[-]{1,}:?\\h*)+\\|?\\h*)', // Column Options
-        '((\\n\\h*\\|[^\\n]+\\|?\\h*)*)', // Rows
-      ].join(''),
-      end: '(?=$|\\n)',
-    };
-    strict.reg = compileRegExp(strict, 'g', true);
-
-    const loose = {
-      begin: '(?:^|\\n)(\\n*)',
-      content: [
-        '(\\|?[^\\n|]+(\\|[^\\n|]+)+\\|?)', // Header
-        '\\n',
-        '(?:\\|?\\h*:?[-]{1,}:?[\\h]*(?:\\|[\\h]*:?[-]{1,}:?\\h*)+\\|?)', // Column Options
-        '((\\n\\|?([^\\n|]+(\\|[^\\n|]*)+)\\|?)*)', // Rows
-      ].join(''),
-      end: '(?=$|\\n)',
-    };
-    loose.reg = compileRegExp(loose, 'g', true);
-
-    return { strict, loose };
+    return getTableRule();
   }
 }

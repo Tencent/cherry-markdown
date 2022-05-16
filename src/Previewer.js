@@ -62,11 +62,6 @@ export default class Previewer {
   constructor(options) {
     /**
      * @property
-     * @type {string} 实例ID
-     */
-    this.instanceId = `cherry-previewer-${new Date().getTime()}`;
-    /**
-     * @property
      * @type {import('~types/previewer').PreviewerOptions}
      */
     this.options = {
@@ -88,6 +83,14 @@ export default class Previewer {
     };
 
     Object.assign(this.options, options);
+    this.$cherry = this.options.$cherry;
+    this.instanceId = this.$cherry.getInstanceId();
+    /**
+     * @property
+     * @private
+     * @type {{ timer?: number; destinationTop?: number }}
+     */
+    this.animation = {};
   }
 
   init(editor) {
@@ -636,12 +639,15 @@ export default class Previewer {
       this.update(this.options.previewerCache.html);
     }
     this.cleanHtmlCache();
+    Event.emit(this.instanceId, Event.Events.previewerOpen);
+    Event.emit(this.instanceId, Event.Events.editorClose);
   }
 
   editOnly(dealToolbar = false) {
     this.$dealEditAndPreviewOnly(true);
     this.cleanHtmlCache();
     Event.emit(this.instanceId, Event.Events.previewerClose);
+    Event.emit(this.instanceId, Event.Events.editorOpen);
   }
 
   recoverPreviewer(dealToolbar = false) {
@@ -659,6 +665,7 @@ export default class Previewer {
     this.cleanHtmlCache();
 
     Event.emit(this.instanceId, Event.Events.previewerOpen);
+    Event.emit(this.instanceId, Event.Events.editorOpen);
 
     setTimeout(() => this.editor.editor.refresh(), 0);
   }
@@ -739,17 +746,40 @@ export default class Previewer {
    * @param {Number} offset
    */
   scrollToLineNumWithOffset(lineNum, offset) {
-    const domContainer = this.getDomContainer();
-    this.disableScrollListener = true;
     const top = this.$getTopByLineNum(lineNum) - offset;
-    domContainer.scrollTo(0, top);
+    this.$scrollAnimation(top);
+  }
+
+  /**
+   * 实现滚动动画
+   * @param { Number } targetY 目标位置
+   */
+  $scrollAnimation(targetY) {
+    this.animation.destinationTop = targetY;
+    if (this.animation.timer) {
+      return;
+    }
+    const animationHandler = () => {
+      const dom = this.getDomContainer();
+      const currentTop = dom.scrollTop;
+      const delta = this.animation.destinationTop - currentTop;
+      // 100毫秒内完成动画
+      const move = Math.ceil(Math.min(Math.abs(delta), Math.max(1, Math.abs(delta) / (100 / 16.7))));
+      if (delta === 0 || currentTop >= dom.scrollHeight || move > Math.abs(delta)) {
+        cancelAnimationFrame(this.animation.timer);
+        this.animation.timer = 0;
+        return;
+      }
+      this.disableScrollListener = true;
+      this.getDomContainer().scrollTo(null, currentTop + (delta / Math.abs(delta)) * move);
+      this.animation.timer = requestAnimationFrame(animationHandler);
+    };
+    this.animation.timer = requestAnimationFrame(animationHandler);
   }
 
   scrollToLineNum(lineNum, linePercent) {
-    const domContainer = this.getDomContainer();
-    this.disableScrollListener = true;
     const top = this.$getTopByLineNum(lineNum, linePercent);
-    domContainer.scrollTo(0, top);
+    this.$scrollAnimation(top);
   }
 
   /**

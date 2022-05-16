@@ -16,8 +16,9 @@
 // @ts-check
 import codemirror from 'codemirror';
 import 'codemirror/lib/codemirror.css';
-import 'codemirror/mode/markdown/markdown';
-import 'codemirror/mode/xml/xml';
+// import 'codemirror/mode/markdown/markdown';
+import 'codemirror/mode/gfm/gfm'; // https://codemirror.net/mode/gfm/index.html
+// import 'codemirror/mode/xml/xml';
 import 'codemirror/addon/edit/continuelist';
 import 'codemirror/addon/edit/closetag';
 import 'codemirror/addon/fold/xml-fold';
@@ -53,13 +54,15 @@ export default class Editor {
       editorDom: document.createElement('div'),
       wrapperDom: null,
       autoScrollByCursor: true,
+      convertWhenPaste: true,
       codemirror: {
         lineNumbers: false, // 显示行数
         cursorHeight: 0.85, // 光标高度，0.85好看一些
         indentUnit: 4, // 缩进单位为4
+        tabSize: 4, // 一个tab转换成的空格数量
         // styleActiveLine: false, // 当前行背景高亮
         // matchBrackets: true, // 括号匹配
-        mode: 'markdown',
+        mode: 'gfm', // 从markdown模式改成gfm模式，以使用默认高亮规则
         lineWrapping: true, // 自动换行
         indentWithTabs: true, // 缩进用tab表示
         autofocus: true,
@@ -68,6 +71,9 @@ export default class Editor {
         extraKeys: { Enter: 'newlineAndIndentContinueMarkdownList' }, // 增加markdown回车自动补全
         matchTags: { bothTags: true }, // 自动高亮选中的闭合html标签
         placeholder: '',
+        // 设置为 contenteditable 对输入法定位更友好
+        // 但已知会影响某些悬浮菜单的定位，如粘贴选择文本或markdown模式的菜单
+        // inputStyle: 'contenteditable',
       },
       toolbars: {},
       onKeydown() {},
@@ -88,6 +94,8 @@ export default class Editor {
       Object.assign(this.options.codemirror, codemirror);
     }
     Object.assign(this.options, restOptions);
+    this.$cherry = this.options.$cherry;
+    this.instanceId = this.$cherry.getInstanceId();
   }
 
   /**
@@ -135,7 +143,7 @@ export default class Editor {
     // 复制html转换markdown
     const htmlText = clipboardData.getData('text/plain');
     let html = clipboardData.getData('Text/Html');
-    if (!html) {
+    if (!html || !this.options.convertWhenPaste) {
       return true;
     }
     const test = html.replace(/<(html|head|body|!)/g, '');
@@ -268,6 +276,34 @@ export default class Editor {
         });
       });
     }
+
+    editor.on('drop', (codemirror, evt) => {
+      const files = evt.dataTransfer.files || [];
+      if (files && files.length > 0) {
+        for (let i = 0, needBr = false; i < files.length; i++) {
+          const file = files[i];
+          const fileType = file.type || '';
+          // 文本类型或者无类型的，直接读取内容，不做上传文件的操作
+          if (fileType === '' || /^text/i.test(fileType)) {
+            continue;
+          }
+          const defaultName = (file.name && file.name.replace(/\.[^.]+$/, '')) || 'enter description here';
+          const defaultIsImage = /^image/i.test(file.type);
+          this.options.fileUpload(file, (url, name = defaultName, isImage = defaultIsImage) => {
+            if (typeof url !== 'string') {
+              return;
+            }
+            // 拖拽上传文件时，强制改成没有文字选择区的状态
+            codemirror.setSelection(codemirror.getCursor());
+            let insertValue = isImage ? `![${name}](${url})` : `[${name}](${url})`;
+            insertValue = needBr ? `\n${insertValue}` : insertValue;
+            // 当批量上传文件时，每个被插入的文件中间需要加个换行，但单个上传文件的时候不需要加换行
+            needBr = true;
+            codemirror.replaceSelection(insertValue);
+          });
+        }
+      }
+    });
 
     editor.on('scroll', (codemirror) => {
       this.options.onScroll(codemirror);

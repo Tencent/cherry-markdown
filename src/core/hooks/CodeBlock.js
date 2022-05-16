@@ -16,6 +16,8 @@
 import ParagraphBase from '@/core/ParagraphBase';
 import Prism from 'prismjs';
 import { escapeHTMLSpecialChar } from '@/utils/sanitize';
+import { getCodeBlockRule } from '@/utils/regexp';
+import { prependLineFeedForParagraph } from '@/utils/lineFeed';
 
 Prism.manual = true;
 
@@ -35,6 +37,7 @@ export default class CodeBlock extends ParagraphBase {
     this.customParser = {};
     this.wrap = config.wrap; // 超出是否换行
     this.lineNumber = config.lineNumber; // 是否显示行号
+    this.indentedCodeBlock = typeof config.indentedCodeBlock === 'undefined' ? true : config.indentedCodeBlock; // 是否支持缩进代码块
     if (config && config.customRenderer) {
       this.customLang = Object.keys(config.customRenderer).map((lang) => lang.toLowerCase());
       this.customParser = { ...config.customRenderer };
@@ -187,10 +190,6 @@ export default class CodeBlock extends ParagraphBase {
     } else {
       // 默认使用prism渲染代码块
       if (!lang || !Prism.languages[lang]) lang = 'javascript'; // 如果没有写语言，默认用js样式渲染
-      if (Prism.highlight('\\', Prism.languages[lang], lang).indexOf('span') > -1) {
-        // 斜杠\被转化为标签时将\\还原为\
-        cacheCode = cacheCode.replace(/\\\\/g, '\\');
-      }
       cacheCode = Prism.highlight(cacheCode, Prism.languages[lang], lang);
       cacheCode = this.renderLineNumber(cacheCode);
     }
@@ -200,8 +199,66 @@ export default class CodeBlock extends ParagraphBase {
     return cacheCode;
   }
 
+  /**
+   * 获取缩进代码块语法的正则
+   * 缩进代码块必须要以连续两个以上的换行符开头
+   */
+  $getIndentedCodeReg() {
+    const ret = {
+      begin: '(?:^|\\n\\s*\\n)(?: {4}|\\t)',
+      end: '(?=$|\\n( {0,3}[^ \\t\\n]|\\n[^ \\t\\n]))',
+      content: '([\\s\\S]+?)',
+    };
+    return new RegExp(ret.begin + ret.content + ret.end, 'g');
+  }
+
+  /**
+   * 生成缩进代码块（没有行号、没有代码高亮）
+   */
+  $getIndentCodeBlock(str) {
+    if (!this.indentedCodeBlock) {
+      return str;
+    }
+    return this.$recoverCodeInIndent(str).replace(this.$getIndentedCodeReg(), (match, code) => {
+      const lineCount = (match.match(/\n/g) || []).length;
+      const sign = this.$engine.md5(match);
+      const html = `<pre data-sign="${sign}" data-lines="${lineCount}"><code>${escapeHTMLSpecialChar(
+        code.replace(/\n( {4}|\t)/g, '\n'),
+      )}</code></pre>`;
+      // return this.getCacheWithSpace(this.pushCache(html), match, true);
+      return prependLineFeedForParagraph(match, this.pushCache(html, sign, lineCount));
+    });
+  }
+
+  /**
+   * 预处理缩进代码块，将缩进代码块里的高亮代码块和行内代码进行占位处理
+   */
+  $replaceCodeInIndent(str) {
+    if (!this.indentedCodeBlock) {
+      return str;
+    }
+    return str.replace(this.$getIndentedCodeReg(), (match) => {
+      return match.replace(/`/g, '~~~IndentCode');
+    });
+  }
+
+  /**
+   * 恢复预处理的内容
+   */
+  $recoverCodeInIndent(str) {
+    if (!this.indentedCodeBlock) {
+      return str;
+    }
+    return str.replace(this.$getIndentedCodeReg(), (match) => {
+      return match.replace(/~~~IndentCode/g, '`');
+    });
+  }
+
   beforeMakeHtml(str, sentenceMakeFunc, markdownParams) {
     let $str = str;
+
+    // 预处理缩进代码块
+    $str = this.$replaceCodeInIndent($str);
 
     $str = $str.replace(this.RULE.reg, (match, leadingContent, lang, code) => {
       let $code = code;
@@ -211,6 +268,7 @@ export default class CodeBlock extends ParagraphBase {
       if (cacheCode && cacheCode !== '') {
         return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
       }
+      $code = this.$recoverCodeInIndent($code);
       $code = $code.replace(/~D/g, '$');
       $code = $code.replace(/~T/g, '~');
 
@@ -242,8 +300,8 @@ export default class CodeBlock extends ParagraphBase {
       }
       // $code = this.$replaceSpecialChar($code);
       $code = $code.replace(/~X/g, '\\`');
-      $code = $code.replace(/\\/g, '\\\\');
       cacheCode = this.renderCodeBlock($code, $lang, sign, lines);
+      cacheCode = cacheCode.replace(/\\/g, '\\\\');
       cacheCode = this.$codeCache(sign, cacheCode);
       return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
     });
@@ -266,6 +324,10 @@ export default class CodeBlock extends ParagraphBase {
       });
       $str = $str.replace(/~~not~inlineCode/g, '\\`');
     }
+
+    // 处理缩进代码块
+    $str = this.$getIndentCodeBlock($str);
+
     return $str;
   }
 
@@ -285,18 +347,7 @@ export default class CodeBlock extends ParagraphBase {
   }
 
   rule() {
-    const ret = {
-      /**
-       * (?:^|\n)是区块的通用开头
-       * (\n*)捕获区块前的所有换行
-       * (?:[^\S\n]*)捕获```前置的空格字符
-       */
-      begin: /(?:^|\n)(\n*(?:[^\S\n]*))```(.*?)\n/,
-      content: /([\w\W]*?)/, // '([\\w\\W]*?)',
-      end: /[^\S\n]*```[ \t]*(?=$|\n+)/, // '\\s*```[ \\t]*(?=$|\\n+)',
-    };
-    ret.reg = new RegExp(ret.begin.source + ret.content.source + ret.end.source, 'g');
-    return ret;
+    return getCodeBlockRule();
   }
 
   mounted(dom) {

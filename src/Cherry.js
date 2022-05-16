@@ -24,10 +24,11 @@ import { createElement } from './utils/dom';
 import Sidebar from './toolbars/Sidebar';
 import { customizer } from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
+import getPosBydiffs from './utils/recount-pos';
 import defaultConfig from './Cherry.config';
-
 import './sass/cherry.scss';
 import cloneDeep from 'lodash/cloneDeep';
+import Event from './Event';
 
 import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
@@ -71,6 +72,13 @@ export default class Cherry extends CherryStatic {
     }
 
     /**
+     * @property
+     * @type {string} 实例ID
+     */
+    this.instanceId = `cherry-${new Date().getTime()}${Math.random()}`;
+    this.options.instanceId = this.instanceId;
+
+    /**
      * @private
      * @type {Engine}
      */
@@ -83,19 +91,27 @@ export default class Cherry extends CherryStatic {
    * @private
    */
   init() {
-    const mountEl = document.getElementById(this.options.id);
+    this.status = {
+      toolbar: 'show',
+      previewer: 'show',
+      editor: 'show',
+    };
 
-    /* if (!mountEl) {
+    let mountEl = this.options.id ? document.getElementById(this.options.id) : this.options.el;
+
+    if (!mountEl) {
+      if (!this.options.forceAppend) {
+        return false;
+      }
       mountEl = document.createElement('div');
       mountEl.id = this.options.id || 'cherry-markdown';
       document.body.appendChild(mountEl);
-    } */
-
-    if (!mountEl) return;
+    }
 
     if (!mountEl.style.height) {
       mountEl.style.height = this.options.editor.height;
     }
+    this.cherryDom = mountEl;
 
     // 蒙层dom，用来拖拽编辑区&预览区宽度时展示蒙层
     const wrapperDom = this.createWrapper();
@@ -143,6 +159,42 @@ export default class Cherry extends CherryStatic {
 
     // 切换模式，有纯预览模式、纯编辑模式、双栏编辑模式
     this.switchModel(this.options.editor.defaultModel);
+
+    this.cherryDomResize();
+    Event.on(this.instanceId, Event.Events.toolbarHide, () => {
+      this.status.toolbar = 'hide';
+    });
+    Event.on(this.instanceId, Event.Events.toolbarShow, () => {
+      this.status.toolbar = 'show';
+    });
+    Event.on(this.instanceId, Event.Events.previewerClose, () => {
+      this.status.previewer = 'hide';
+    });
+    Event.on(this.instanceId, Event.Events.previewerOpen, () => {
+      this.status.previewer = 'show';
+    });
+    Event.on(this.instanceId, Event.Events.editorClose, () => {
+      this.status.editor = 'hide';
+    });
+    Event.on(this.instanceId, Event.Events.editorOpen, () => {
+      this.status.editor = 'show';
+    });
+  }
+
+  /**
+   *  监听 cherry 高度变化，高度改变触发 codemirror 内容刷新
+   * @private
+   */
+  cherryDomResize() {
+    const observer = new ResizeObserver((entries) => {
+      for (const {} of entries) {
+        setTimeout(() => this.editor.editor.refresh(), 10);
+      }
+    });
+
+    observer.observe(this.cherryDom);
+
+    this.cherryDomReiszeObserver = observer;
   }
 
   /**
@@ -179,6 +231,23 @@ export default class Cherry extends CherryStatic {
   }
 
   /**
+   * 获取实例id
+   * @returns {string}
+   * @public
+   */
+  getInstanceId() {
+    return this.instanceId;
+  }
+
+  /**
+   * 获取编辑器状态
+   * @returns  {Object}
+   */
+  getStatus() {
+    return this.status;
+  }
+
+  /**
    * 获取编辑区内的markdown源码内容
    * @returns markdown源码内容
    */
@@ -191,7 +260,7 @@ export default class Cherry extends CherryStatic {
    * @returns markdown源码内容
    */
   getMarkdown() {
-    return this.editor.editor.getValue();
+    return this.getValue();
   }
 
   /**
@@ -241,10 +310,21 @@ export default class Cherry extends CherryStatic {
   /**
    * 覆盖编辑区的内容
    * @param {string} content markdown内容
+   * @param {boolean} keepCursor 是否保持光标位置
    * @returns
    */
-  setValue(content) {
-    return this.editor.editor.setValue(content);
+  setValue(content, keepCursor = false) {
+    if (keepCursor === false) {
+      return this.editor.editor.setValue(content);
+    }
+    const codemirror = this.editor.editor;
+    const old = this.getValue();
+    const pos = codemirror.getDoc().indexFromPos(codemirror.getCursor());
+    const newPos = getPosBydiffs(pos, old, content);
+    const ret = codemirror.setValue(content);
+    const cursor = codemirror.getDoc().posFromIndex(newPos);
+    codemirror.setCursor(cursor);
+    return ret;
   }
 
   /**
@@ -279,10 +359,11 @@ export default class Cherry extends CherryStatic {
   /**
    * 覆盖编辑区的内容
    * @param {string} content markdown内容
+   * @param {boolean} keepCursor 是否保持光标位置
    * @returns
    */
-  setMarkdown(content) {
-    return this.editor.editor.setValue(content);
+  setMarkdown(content, keepCursor = false) {
+    return this.setValue(content, keepCursor);
   }
 
   /**
@@ -388,6 +469,7 @@ export default class Cherry extends CherryStatic {
     editor.appendChild(textArea);
 
     this.editor = new Editor({
+      $cherry: this,
       editorDom: editor,
       wrapperDom: this.wrapperDom,
       value: this.options.value,
@@ -408,8 +490,11 @@ export default class Cherry extends CherryStatic {
   createPreviewer() {
     /** @type {HTMLDivElement} */
     let previewer;
-    const { className, dom } = this.options.previewer;
-    const previewerClassName = `cherry-previewer ${className}`;
+    const anchorStyle =
+      (this.options.engine.syntax.header && this.options.engine.syntax.header.anchorStyle) || 'default';
+    const autonumberClass = anchorStyle === 'autonumber' ? ' head-num' : '';
+    const { className, dom, enablePreviewerBubble } = this.options.previewer;
+    const previewerClassName = ['cherry-previewer', className || '', autonumberClass].join(' ');
     if (dom) {
       previewer = dom;
       previewer.className += ` ${previewerClassName}`;
@@ -421,12 +506,14 @@ export default class Cherry extends CherryStatic {
     const previewerMask = createElement('div', 'cherry-previewer-mask');
 
     this.previewer = new Previewer({
+      $cherry: this,
       virtualDragLineDom: virtualDragLine,
       editorMaskDom: editorMask,
       previewerMaskDom: previewerMask,
       previewerDom: previewer,
       value: this.options.value,
       isPreviewOnly: this.options.isPreviewOnly,
+      enablePreviewerBubble,
     });
 
     return this.previewer;
@@ -451,10 +538,10 @@ export default class Cherry extends CherryStatic {
 
   /**
    * @private
-   * @param {Event} evt
+   * @param {Event} _evt
    * @param {import('codemirror').Editor} codemirror
    */
-  editText(evt, codemirror) {
+  editText(_evt, codemirror) {
     try {
       if (this.timer) {
         clearTimeout(this.timer);

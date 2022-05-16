@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import CodeMirror from 'codemirror';
+import Cherry from '../src/Cherry.js';
 
 interface EditorEventMap {
   onBlur: FocusEvent;
@@ -42,6 +43,7 @@ export type EditorConfiguration = {
   wrapperDom: HTMLElement;
   toolbars: any;
   value?: string;
+  convertWhenPaste?: boolean;
   codemirror: CodeMirror.EditorConfiguration;
   onKeydown: EditorEventCallback<EditorEventMap['onKeydown']>;
   onFocus: EditorEventCallback<EditorEventMap['onFocus']>;
@@ -53,4 +55,5 @@ export type EditorConfiguration = {
   /** 预览区域跟随编辑器光标自动滚动 */
   autoScrollByCursor: boolean;
   fileUpload?: (file: File, callback: (fileUrl: string) => void) => void;
+  $cherry?: Cherry;
 };

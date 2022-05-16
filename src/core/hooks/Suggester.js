@@ -21,9 +21,11 @@
  */
 import escapeRegExp from 'lodash/escapeRegExp';
 import SyntaxBase from '@/core/SyntaxBase';
-import Codemirror from 'codemirror';
+import { Pass } from 'codemirror/src/util/misc';
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
+import { isBrowser } from '@/utils/env';
+
 export default class Suggester extends SyntaxBase {
   static HOOK_NAME = 'suggester';
 
@@ -78,7 +80,8 @@ export default class Suggester extends SyntaxBase {
   }
 
   makeHtml(str) {
-    if (!suggesterPanel.hasEditor()) {
+    if (!this.RULE.reg) return str;
+    if (!suggesterPanel.hasEditor() && isBrowser()) {
       const { editor } = this.$engine.$cherry;
       suggesterPanel.setEditor(editor);
       suggesterPanel.setSuggester(this.suggester);
@@ -90,21 +93,20 @@ export default class Suggester extends SyntaxBase {
     return replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this), true, 1);
   }
 
-  toHtml(str) {
-    return str.replace(this.RULE.reg, (wholeMatch, keyword, text) => {
-      if (text && text !== 'undefined') {
-        return (
-          this.suggester[keyword]?.echo?.call(this, text) || `<span class="cherry-suggestion">${keyword}${text}</span>`
-        );
-      }
-      if (this.suggester[keyword]?.echo === false) {
-        return '';
-      }
-      if (!this.suggester[keyword]) {
-        return text;
-      }
-      return text === 'undefined' || text === null ? '' : text;
-    });
+  toHtml(wholeMatch, leadingChar, keyword, text) {
+    if (text) {
+      return (
+        this.suggester[keyword]?.echo?.call(this, text) ||
+        `${leadingChar}<span class="cherry-suggestion">${keyword}${text}</span>`
+      );
+    }
+    if (this.suggester[keyword]?.echo === false) {
+      return `${leadingChar}`;
+    }
+    if (!this.suggester[keyword]) {
+      return leadingChar + text;
+    }
+    return text ? leadingChar + text : `${leadingChar}`;
   }
 
   rule() {
@@ -115,7 +117,7 @@ export default class Suggester extends SyntaxBase {
       .map((key) => escapeRegExp(key))
       .join('|');
     const reg = new RegExp(
-      `${isLookbehindSupported() ? '(?<!\\\\)[ ]' : '(^|[^\\\\])[ ]'}(${keys})(([^${keys}\\s])+)`,
+      `${isLookbehindSupported() ? '((?<!\\\\))[ ]' : '(^|[^\\\\])[ ]'}(${keys})(([^${keys}\\s])+)`,
       'g',
     );
     return {
@@ -124,7 +126,7 @@ export default class Suggester extends SyntaxBase {
   }
 
   mounted() {
-    if (!suggesterPanel.hasEditor()) {
+    if (!suggesterPanel.hasEditor() && isBrowser()) {
       const { editor } = this.$engine.$cherry;
       suggesterPanel.setEditor(editor);
       suggesterPanel.setSuggester(this.suggester);
@@ -141,7 +143,7 @@ class SuggesterPanel {
     this.cursorMove = true;
     this.suggesterConfig = {};
 
-    if (!this.$suggesterPanel) {
+    if (!this.$suggesterPanel && isBrowser()) {
       document.body.append(this.createDom(SuggesterPanel.panelWrap));
       this.$suggesterPanel = document.querySelector('.cherry-suggester-panel');
     }
@@ -183,26 +185,43 @@ class SuggesterPanel {
       keyAction = false;
     });
 
-    this.editor.editor.setOption('extraKeys', {
-      Up() {
-        if (suggesterPanel.cursorMove) {
-          // logic to decide whether to move up or not
-          return Codemirror.Pass;
-        }
-      },
-      Down() {
-        if (suggesterPanel.cursorMove) {
-          // logic to decide whether to move up or not
-          return Codemirror.Pass;
-        }
-      },
-      Enter() {
-        if (suggesterPanel.cursorMove) {
-          // logic to decide whether to move up or not
-          return Codemirror.Pass;
-        }
-      },
+    const extraKeys = this.editor.editor.getOption('extraKeys');
+    const decorateKeys = ['Up', 'Down', 'Enter'];
+    decorateKeys.forEach((key) => {
+      if (typeof extraKeys[key] === 'function') {
+        const proxyTarget = extraKeys[key];
+        extraKeys[key] = (codemirror) => {
+          if (suggesterPanel.cursorMove) {
+            const res = proxyTarget.call(codemirror, codemirror);
+
+            if (res) {
+              return res;
+            }
+            // logic to decide whether to move up or not
+            return Pass.toString();
+          }
+        };
+      } else if (!extraKeys[key]) {
+        extraKeys[key] = () => {
+          if (suggesterPanel.cursorMove) {
+            // logic to decide whether to move up or not
+            return Pass.toString();
+          }
+        };
+      } else if (typeof extraKeys[key] === 'string') {
+        const command = extraKeys[key];
+        extraKeys[key] = (codemirror) => {
+          if (suggesterPanel.cursorMove) {
+            this.editor.editor.execCommand(command);
+
+            // logic to decide whether to move up or not
+            // return Pass.toString();
+          }
+        };
+      }
     });
+
+    this.editor.editor.setOption('extraKeys', extraKeys);
 
     this.editor.editor.on('scroll', (codemirror, evt) => {
       if (!this.searchCache) {
@@ -386,7 +405,7 @@ class SuggesterPanel {
     if (!this.$suggesterPanel) {
       return false;
     }
-    const { key, keyCode } = evt;
+    const { keyCode } = evt;
     // up down
     if ([38, 40].includes(keyCode)) {
       this.cursorMove = false;
@@ -411,6 +430,7 @@ class SuggesterPanel {
 
       nextElement.classList.add('cherry-suggester-panel__item--selected');
     } else if (keyCode === 13) {
+      evt.stopPropagation();
       this.cursorMove = false;
       this.pasteSelectResult(this.findSelectedItemIndex());
       codemirror.focus();
