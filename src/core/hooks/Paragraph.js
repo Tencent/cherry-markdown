@@ -65,8 +65,8 @@ export default class Paragraph extends ParagraphBase {
   joinRawHtml(textContainsHtml) {
     if (!this.removeBrAfterBlock) {
       // preprocess custom white list
-      const customTagWhiteList = this.$engine.htmlWhiteListAppend?.split('|') ?? [];
-      customTagWhiteList
+      let customTagWhiteList = this.$engine.htmlWhiteListAppend?.split('|') ?? [];
+      customTagWhiteList = customTagWhiteList
         .map((tag) => {
           if (/[a-z-]+/gi.test(tag)) {
             return tag;
@@ -84,7 +84,7 @@ export default class Paragraph extends ParagraphBase {
        *  ^^
        * $1$2
        */
-      this.removeBrAfterBlock = new RegExp(`<(${allBlockNames})((?: [^>]*?)>)[^\\S\\n]*?\\n`, 'ig');
+      this.removeBrAfterBlock = new RegExp(`<(${allBlockNames})(>| [^>]*?>)[^\\S\\n]*?\\n`, 'ig');
       /**
        * remove newlines before end tag, and whitespaces before end tag will be preserved
        * e.g.
@@ -101,7 +101,7 @@ export default class Paragraph extends ParagraphBase {
        *  $1    $2 $3  $4
        */
       this.removeNewlinesBetweenTags = new RegExp(
-        `<\\/(${allBlockNames})>[^\\S\\n]*?\\n([^\\S\\n]*?)<(${allBlockNames})((?: [^>]*?)>)`,
+        `<\\/(${allBlockNames})>[^\\S\\n]*?\\n([^\\S\\n]*?)<(${allBlockNames})(>| [^>]*?>)`,
         'ig',
       );
     }
