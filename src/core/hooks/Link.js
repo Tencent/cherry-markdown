@@ -135,7 +135,14 @@ export default class Link extends SyntaxBase {
         `${
           '(?:' +
           '\\(' +
-          '([^"][^\\s)]+?[^"])' + // ?<link> url
+          /**
+           * allow double quotes
+           * e.g.
+           * [link](") ⭕️ valid
+           * [link]("") ⭕️ valid
+           * [link](" ") ❌ invalid
+           */
+          '([^\\s)]+)' + // ?<link> url
           '(?:[ \\t]((?:".*?")|(?:\'.*?\')))?' + // ?<title> optional
           '\\)' +
           '|' + // or
