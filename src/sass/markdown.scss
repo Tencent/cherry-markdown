@@ -150,6 +150,15 @@
 
   table {
     border-collapse: collapse;
+    th,
+    td {
+      border: 1px solid $borderColor;
+      padding: 0.2em 0.4em;
+      min-width: 100px;
+    }
+    th {
+      background-color: #eee;
+    }
   }
 
   a {
@@ -323,14 +332,10 @@
       td {
         border: 1px solid $borderColor;
         padding: 0.2em 0.4em;
+        min-width: 100px;
       }
       th {
-        min-width: 100px;
         white-space: nowrap;
-        background-color: #eee;
-      }
-      td {
-        min-width: 100px;
       }
     }
   }

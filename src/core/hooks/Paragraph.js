@@ -38,6 +38,7 @@ export default class Paragraph extends ParagraphBase {
     this.classicBr = options.globalConfig.classicBr;
     this.removeBrAfterBlock = null;
     this.removeBrBeforeBlock = null;
+    this.removeNewlinesBetweenTags = null;
   }
 
   /**
@@ -47,24 +48,67 @@ export default class Paragraph extends ParagraphBase {
    */
   $cleanParagraph(str) {
     const { classicBr } = this.$engine.$cherry.options.engine.global;
+    // remove leading and trailing newlines
+    const trimedPar = str.replace(/^\n+/, '').replace(/\n+$/, '');
     if (classicBr) {
-      return str.replace(/^\n+/, '').replace(/\n+$/, '');
+      return trimedPar;
     }
+    const minifiedPar = this.joinRawHtml(trimedPar);
+    return minifiedPar.replace(/\n/g, '<br>').replace(/\r/g, '\n'); // recover \n from \r
+  }
 
+  /**
+   * remove all newlines in html text
+   *
+   * @param {string} textContainsHtml
+   */
+  joinRawHtml(textContainsHtml) {
     if (!this.removeBrAfterBlock) {
-      const allBlockNames = this.$engine.htmlWhiteListAppend
-        ? `${this.$engine.htmlWhiteListAppend}|${blockNames}`.replace(/\|\|+/g, '|')
-        : blockNames;
+      // preprocess custom white list
+      const customTagWhiteList = this.$engine.htmlWhiteListAppend?.split('|') ?? [];
+      customTagWhiteList
+        .map((tag) => {
+          if (/[a-z-]+/gi.test(tag)) {
+            return tag;
+          }
+          return null;
+        })
+        .filter((tag) => tag !== null);
+      // concat all white list
+      const allBlockNames = customTagWhiteList.concat(blockNames).join('|');
       // 段落标签自然换行，所以去掉段落标签两边的换行符
-      this.removeBrAfterBlock = new RegExp(`<(${allBlockNames})(>| [^>]*>)\\s*\\n\\s*`, 'ig');
-      this.removeBrBeforeBlock = new RegExp(`\\n\\s*<\\/(${allBlockNames})>\\s*\\n`, 'ig');
+      /**
+       * remove newlines after start tag, and remove whitespaces before newline
+       * e.g.
+       * <p> \n  text</p> => <p>  text</p>
+       *  ^^
+       * $1$2
+       */
+      this.removeBrAfterBlock = new RegExp(`<(${allBlockNames})((?: [^>]*?)>)[^\\S\\n]*?\\n`, 'ig');
+      /**
+       * remove newlines before end tag, and whitespaces before end tag will be preserved
+       * e.g.
+       * <p>  text\n  </p> => <p>  text  </p>
+       *                ^
+       *               $1
+       */
+      this.removeBrBeforeBlock = new RegExp(`\\n[^\\S\\n]*?<\\/(${allBlockNames})>[^\\S\\n]*?\\n`, 'ig');
+      /**
+       * remove newlines between end tag & start tag
+       * e.g.
+       * </p> \n  <p   foo="bar"> => </p>\r  <p foo="bar">
+       *   ^    ^^ ^ ^^^^^^^^^^^^
+       *  $1    $2 $3  $4
+       */
+      this.removeNewlinesBetweenTags = new RegExp(
+        `<\\/(${allBlockNames})>[^\\S\\n]*?\\n([^\\S\\n]*?)<(${allBlockNames})((?: [^>]*?)>)`,
+        'ig',
+      );
     }
-    return str
-      .replace(/^\n+/, '')
-      .replace(/\n+$/, '')
+    return textContainsHtml
       .replace(this.removeBrAfterBlock, '<$1$2')
       .replace(this.removeBrBeforeBlock, '</$1>')
-      .replace(/\n/g, '<br>');
+      .replace(this.removeNewlinesBetweenTags, '</$1>\r$2<$3$4'); // replace \n to \r
   }
 
   /**
