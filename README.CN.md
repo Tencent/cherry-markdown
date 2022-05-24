@@ -426,7 +426,7 @@ registerPlugin().then(() => {
  * 范围是整个页面
  * 匹配规则会挂载到实例的RULE属性上
  */
-let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', 'page', {
+let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', 'paragraph', {
   makeHtml(str) {
     return str.replace(this.RULE.reg, '***');
   },

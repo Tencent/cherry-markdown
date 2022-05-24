@@ -425,7 +425,7 @@ Click [here](./examples/) for more examples.
  * The scope is the entire page
  * The matching rules will be attached to the RULE attribute of the instance
  */
-let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', 'page', {
+let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', 'paragraph', {
   makeHtml(str) {
     return str.replace(this.RULE.reg, '***');
   },
