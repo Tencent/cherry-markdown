@@ -146,6 +146,10 @@ const defaultConfig = {
     defaultModel: 'edit&preview',
     // 粘贴时是否自动将html转成markdown
     convertWhenPaste: true,
+    codemirror: {
+      // 是否自动focus 默认为true
+      autofocus: true,
+    },
   },
   toolbars: {
     theme: 'dark', // light or dark

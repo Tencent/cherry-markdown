@@ -26,7 +26,7 @@ export default class Size extends SyntaxBase {
     if (!this.test(str)) {
       return str;
     }
-    return str.replace(this.RULE.reg, '$2<span style="font-size:$4px">$5</span>$7');
+    return str.replace(this.RULE.reg, '$2<span style="font-size:$4px;line-height:1em;">$5</span>$7');
   }
 
   rule() {

@@ -112,7 +112,7 @@ export default class Footnote extends ParagraphBase {
 
   rule() {
     const ret = {
-      begin: '(^|\\n)',
+      begin: '(^|\\n)[ \t]*',
       content: [
         '\\[\\^([^\\]]+?)\\]:\\h*', // footnote key
         '([\\s\\S]+?)', // footnote content

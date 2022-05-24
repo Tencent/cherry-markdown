@@ -83,7 +83,7 @@ export default class CommentReference extends ParagraphBase {
 
   rule() {
     const ret = {
-      begin: '(^|\\n)',
+      begin: '(^|\\n)[ \t]*',
       content: [
         '\\[([^^][^\\]]*?)\\]:\\h*', // comment key
         '([^\\n]+?)', // comment content
