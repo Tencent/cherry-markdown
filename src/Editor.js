@@ -30,6 +30,7 @@ import 'codemirror/addon/display/placeholder';
 import htmlParser from '@/utils/htmlparser';
 import pasteHelper from '@/utils/pasteHelper';
 import lazyLoadImg from '@/utils/lazyLoadImg';
+import { addEvent } from './utils/event';
 import Logger from '@/Logger';
 
 /**
@@ -308,6 +309,19 @@ export default class Editor {
     editor.on('scroll', (codemirror) => {
       this.options.onScroll(codemirror);
     });
+
+    addEvent(
+      this.getEditorDom(),
+      'wheel',
+      () => {
+        // 鼠标滚轮滚动时，强制监听滚动事件
+        this.disableScrollListener = false;
+        // 打断滚动动画
+        cancelAnimationFrame(this.animation.timer);
+        this.animation.timer = 0;
+      },
+      false,
+    );
 
     if (previewer.options.isPreviewOnly) {
       previewer.options.afterUpdateCallBack.push(() => {

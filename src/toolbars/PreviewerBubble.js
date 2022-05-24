@@ -24,9 +24,8 @@ export default class PreviewerBubble {
   /**
    *
    * @param {import('../Previewer').default} previewer
-   * @param {import('../Editor').default} editor
    */
-  constructor(previewer, editor) {
+  constructor(previewer) {
     /**
      * @property
      * @type {import('../Previewer').default}
@@ -36,7 +35,7 @@ export default class PreviewerBubble {
      * @property
      * @type {import('../Editor').default}
      */
-    this.editor = editor;
+    this.editor = previewer.editor;
     this.previewerDom = this.previewer.getDom();
     /**
      * @property

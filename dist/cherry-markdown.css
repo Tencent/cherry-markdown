@@ -322,6 +322,13 @@
     overflow: visible; }
   .cherry-markdown table {
     border-collapse: collapse; }
+    .cherry-markdown table th,
+    .cherry-markdown table td {
+      border: 1px solid #dfe6ee;
+      padding: 0.2em 0.4em;
+      min-width: 100px; }
+    .cherry-markdown table th {
+      background-color: #eee; }
   .cherry-markdown a {
     color: #3582fb; }
     .cherry-markdown a:hover {
@@ -501,13 +508,10 @@
     .cherry-markdown .cherry-table-container .cherry-table th,
     .cherry-markdown .cherry-table-container .cherry-table td {
       border: 1px solid #dfe6ee;
-      padding: 0.2em 0.4em; }
-    .cherry-markdown .cherry-table-container .cherry-table th {
-      min-width: 100px;
-      white-space: nowrap;
-      background-color: #eee; }
-    .cherry-markdown .cherry-table-container .cherry-table td {
+      padding: 0.2em 0.4em;
       min-width: 100px; }
+    .cherry-markdown .cherry-table-container .cherry-table th {
+      white-space: nowrap; }
   .cherry-markdown mjx-assistive-mml {
     position: absolute;
     top: 0;
@@ -1683,7 +1687,8 @@ green     #859900
   z-index: 1;
   user-select: none;
   box-shadow: 0 0 10px rgba(128, 145, 165, 0.2);
-  background: white; }
+  background: white;
+  overflow: hidden; }
   [data-toolbar-theme='dark'] .cherry-toolbar {
     background: #20304b;
     box-shadow: 0 0 10px rgba(128, 145, 165, 0.2); }
