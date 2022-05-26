@@ -418,16 +418,65 @@ Click [here](./examples/) for more examples.
 
 ### Customize Syntax
 
+#### sentence Syntax
+
+If there are no additional special requirements for the compiled content, use the sentence syntax
 ```javascript
 /*
  * Generate a hook to block sensitive words
  * named blockSensitiveWords
- * The scope is the entire page
  * The matching rules will be attached to the RULE attribute of the instance
  */
-let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', 'page', {
+let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', Cherry.constants.HOOKS_TYPE_LIST.SEN, {
   makeHtml(str) {
     return str.replace(this.RULE.reg, '***');
+  },
+  rule(str) {
+    return {
+      reg: /sensitive words/g,
+    };
+  },
+});
+new Cherry({
+  id: 'markdown-container',
+  value: '# welcome to cherry editor!',
+  engine: {
+    customSyntax: {
+      // Inject into the editor's custom grammar
+      BlockSensitiveWordsHook: {
+      syntaxClass: BlockSensitiveWordsHook,
+      // If there is a Hook with the same name and it will be Forcibly covered 
+      force: true,
+      // Called before the hook for processing the picture
+      // before: 'image',
+      },
+    },
+  },
+});
+```
+
+#### paragraph Syntax
+If the compiled content requires no external influence, use paragraph syntax
+```javascript
+/*
+ * Generate a hook to block sensitive words
+ * named blockSensitiveWords
+ * The matching rules will be attached to the RULE attribute of the instance
+ */
+let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
+  // Enable caching to protect content
+  needCache: true,
+  // Pretreatment to avoid external influence
+  beforeMakeHtml(str) {
+    return str.replace(this.RULE.reg, (match, code) => {
+        const lineCount = (match.match(/\n/g) || []).length;
+        const sign = this.$engine.md5(match);
+        const html = `<div data-sign="${sign}" data-lines="${lineCount + 1}" >***</div>`;
+        return this.pushCache(html, sign, lineCount);
+    })
+  },
+  makeHtml(str, sentenceMakeFunc) {
+    return str;
   },
   rule(str) {
     return {
