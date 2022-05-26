@@ -1564,10 +1564,10 @@
   dependencies:
     "@types/trusted-types" "*"
 
-"@types/echarts@4.6.0":
-  version "4.6.0"
-  resolved "https://registry.npmjs.org/@types/echarts/-/echarts-4.6.0.tgz#0dbf5c35db16ed23f9e61370179989fcd62c2678"
-  integrity sha512-Unz/VUdQ3KwD3vtCh8bI295F3p6rFSApivwGPQJ1Mu6837xeit7C1YuX+75gRwfahotbaazmG8e2rLBNEzrfFg==
+"@types/echarts@4.9.15":
+  version "4.9.15"
+  resolved "https://registry.npmjs.org/@types/echarts/-/echarts-4.9.15.tgz#a3a5f577c2e747f8dc926dca788926493e6bebe1"
+  integrity sha512-C+GhOl8jYjpZrPE9JPYgI8pH8+mIfsib2WoE5E+WpM2wRWZDQhaIy6ZZ1HhaZOT1h+QkrHvDVWUoGvXCzcb0rw==
   dependencies:
     "@types/zrender" "*"
 
