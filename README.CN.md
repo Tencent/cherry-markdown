@@ -419,20 +419,70 @@ registerPlugin().then(() => {
 
 ### 自定义语法
 
+#### sentence Syntax
+如果编译内容没有额外特殊要求，使用普通语法
+
 ```javascript
 /*
  * 生成一个屏蔽敏感词汇的hook
  * 名字叫blockSensitiveWords
- * 范围是整个页面
  * 匹配规则会挂载到实例的RULE属性上
  */
-let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', 'page', {
+let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', Cherry.constants.HOOKS_TYPE_LIST.SEN, {
   makeHtml(str) {
     return str.replace(this.RULE.reg, '***');
   },
   rule(str) {
     return {
       reg: /敏感词汇/g,
+    };
+  },
+});
+new Cherry({
+  id: 'markdown-container',
+  value: '# welcome to cherry editor!',
+  engine: {
+    customSyntax: {
+      // 注入编辑器的自定义语法中
+      BlockSensitiveWordsHook: {
+      syntaxClass: BlockSensitiveWordsHook,
+      // 有同名hook则强制覆盖
+      force: true,
+      // 在处理图片的hook之前调用
+      // before: 'image',
+      },
+    },
+  },
+});
+```
+
+
+#### paragraph Syntax
+如果编译内容要求不受外界影响，则使用段落语法
+```javascript
+/*
+ * 生成一个屏蔽敏感词汇的hook
+ * 名字叫blockSensitiveWords
+ * 匹配规则会挂载到实例的RULE属性上
+ */
+let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
+  // 开启缓存，用于保护内容
+  needCache: true,
+  // 预处理文本，避免受影响
+  beforeMakeHtml(str) {
+    return str.replace(this.RULE.reg, (match, code) => {
+        const lineCount = (match.match(/\n/g) || []).length;
+        const sign = this.$engine.md5(match);
+        const html = `<div data-sign="${sign}" data-lines="${lineCount + 1}" >***</div>`;
+        return this.pushCache(html, sign, lineCount);
+    })
+  },
+  makeHtml(str, sentenceMakeFunc) {
+    return str;
+  },
+  rule(str) {
+    return {
+      reg: /sensitive words/g,
     };
   },
 });
