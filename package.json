@@ -75,7 +75,7 @@
     "@rollup/plugin-replace": "^2.3.1",
     "@types/codemirror": "^0.0.108",
     "@types/dompurify": "^2.2.3",
-    "@types/echarts": "4.6.0",
+    "@types/echarts": "4.9.15",
     "@types/jest": "^27.0.3",
     "@types/jsdom": "^16.2.13",
     "@types/lodash": "^4.14.170",
