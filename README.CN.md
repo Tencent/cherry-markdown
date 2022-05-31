@@ -512,7 +512,7 @@ new Cherry({
   * 名字叫AddPrefixTemplate
   * 图标类名icon-add-prefix
   */
-let AddPrefixTemplate = Cherry.createSyntaxHook('AddPrefixTemplate', 'icon-add-prefix', {
+let AddPrefixTemplate = Cherry.createMenuHook('AddPrefixTemplate', 'icon-add-prefix', {
   onClick(selection) {
     return 'Prefix-' + selection;
   },
