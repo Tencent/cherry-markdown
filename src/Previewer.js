@@ -176,9 +176,9 @@ export default class Previewer {
 
     const { editorMaskDom, previewerMaskDom, virtualDragLineDom: virtualLineDom } = this.options;
 
-    virtualLineDom.style.height = `${editorHeight}px`;
     virtualLineDom.style.top = `${editorTop}px`;
     virtualLineDom.style.left = `${previewerLeft}px`;
+    virtualLineDom.style.bottom = '0px';
 
     editorMaskDom.style.height = `${editorHeight}px`;
     editorMaskDom.style.top = `${editorTop}px`;
