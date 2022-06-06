@@ -543,7 +543,7 @@ new Cherry({
 });
 ```
 
-Click [extensions](./docs/extensions.md) if you want knoe more extension about cherry markdown.
+Click [extensions](./docs/extensions.md) if you want know more extension about cherry markdown.
 
 ## Contributing
 
