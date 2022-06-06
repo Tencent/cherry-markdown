@@ -106,10 +106,32 @@ const defaultConfig = {
         useUnicode: true, // 是否使用unicode进行渲染
       },
       fontEmphasis: {
-        allowWhitespace: false, // 是否允许首尾空格
+        /**
+         * 是否允许首尾空格
+         * 首尾、前后的定义： 语法前**语法首+内容+语法尾**语法后
+         * 例：
+         *    true:
+         *           __ hello __  ====>   <strong> hello </strong>
+         *           __hello__    ====>   <strong>hello</strong>
+         *    false:
+         *           __ hello __  ====>   <em>_ hello _</em>
+         *           __hello__    ====>   <strong>hello</strong>
+         */
+        allowWhitespace: false,
       },
       strikethrough: {
-        needWhitespace: false, // 是否必须有首位空格
+        /**
+         * 是否必须有前后空格
+         * 首尾、前后的定义： 语法前**语法首+内容+语法尾**语法后
+         * 例：
+         *    true:
+         *            hello wor~~l~~d     ====>   hello wor~~l~~d
+         *            hello wor ~~l~~ d   ====>   hello wor <del>l</del> d
+         *    false:
+         *            hello wor~~l~~d     ====>   hello wor<del>l</del>d
+         *            hello wor ~~l~~ d     ====>   hello wor <del>l</del> d
+         */
+        needWhitespace: false,
       },
       mathBlock: {
         engine: 'MathJax', // katex或MathJax
