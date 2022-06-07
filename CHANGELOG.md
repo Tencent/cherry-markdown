@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.7.4](https://github.com/Tencent/cherry-markdown/compare/v0.7.3...v0.7.4) (2022-06-07)
+
+
+### Bug Fixes
+
+* 删除线配置失效，顺便优化注释 ([b819667](https://github.com/Tencent/cherry-markdown/commit/b819667cd908ef89e1f5f7daf8cf974d0a4addf8))
+* 只读模式下出现了两个问题(1、只读模式下宽度变成50%了；2、只读模式下可以编辑图片尺寸) ([ff46352](https://github.com/Tencent/cherry-markdown/commit/ff46352d2709af3bf5784f9ea8812bf8d0c9d614)), closes [#246](https://github.com/Tencent/cherry-markdown/issues/246)
+
 ### [0.7.3](https://github.com/Tencent/cherry-markdown/compare/v0.7.2...v0.7.3) (2022-05-26)
 
 ### [0.7.1](https://github.com/Tencent/cherry-markdown/compare/v0.7.0...v0.7.1) (2022-05-10)
