@@ -510,7 +510,7 @@ new Cherry({
   * named AddPrefixTemplate
   * Icon css class icon-add-prefix
   */
-let AddPrefixTemplate = Cherry.createSyntaxHook('AddPrefixTemplate', 'icon-add-prefix', {
+let AddPrefixTemplate = Cherry.createMenuHook('AddPrefixTemplate', 'icon-add-prefix', {
   onClick(selection) {
     return 'Prefix-' + selection;
   },
