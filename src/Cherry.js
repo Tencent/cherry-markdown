@@ -66,9 +66,17 @@ export default class Cherry extends CherryStatic {
       this.options.engine.global.urlProcessor = urlProcessorProxy(this.options.engine.global.urlProcessor);
     }
 
+    this.status = {
+      toolbar: 'show',
+      previewer: 'show',
+      editor: 'show',
+    };
+
     if (this.options.isPreviewOnly) {
       this.options.toolbars.showToolbar = false;
       this.options.editor.defaultModel = 'previewOnly';
+      this.status.editor = 'hide';
+      this.status.toolbar = 'hide';
     }
 
     /**
@@ -91,12 +99,6 @@ export default class Cherry extends CherryStatic {
    * @private
    */
   init() {
-    this.status = {
-      toolbar: 'show',
-      previewer: 'show',
-      editor: 'show',
-    };
-
     let mountEl = this.options.id ? document.getElementById(this.options.id) : this.options.el;
 
     if (!mountEl) {

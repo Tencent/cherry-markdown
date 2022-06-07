@@ -102,9 +102,8 @@ export default class Previewer {
     this.disableScrollListener = false;
     this.bindScroll();
     this.editor = editor;
-    // 非必要操作无脑延时一下
-    setTimeout(this.bindDrag.bind(this), 100);
-    setTimeout(this.$initPreviewerBubble.bind(this), 100);
+    this.bindDrag();
+    this.$initPreviewerBubble();
   }
 
   $initPreviewerBubble() {
