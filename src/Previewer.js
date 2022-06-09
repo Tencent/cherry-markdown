@@ -113,9 +113,9 @@ export default class Previewer {
   }
 
   getDomContainer = () =>
-    /** @type {HTMLDivElement} */ (this.isMobilePreview
-      ? document.querySelector('.cherry-mobile-previewer-content')
-      : this.options.previewerDom);
+    /** @type {HTMLDivElement} */ (
+      this.isMobilePreview ? document.querySelector('.cherry-mobile-previewer-content') : this.options.previewerDom
+    );
 
   getDom() {
     return this.options.previewerDom;
