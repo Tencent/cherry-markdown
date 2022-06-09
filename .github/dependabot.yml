@@ -12,3 +12,4 @@ updates:
       time: "18:00"
       timezone: "Asia/Shanghai"
     versioning-strategy: "auto"
+    target-branch: "dev"
