@@ -40,7 +40,8 @@ export default class Blockquote extends ParagraphBase {
       const { sign: contentSign, html: parsedHtml } = sentenceMakeFunc(content);
       const sign = this.signWithCache(parsedHtml) || contentSign;
       const lineCount = this.getLineCount(match, lines); // 段落所占行数
-      const listRegex = /^(([ \t]{0,3}([*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)([^\r]+?)($|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)))/;
+      const listRegex =
+        /^(([ \t]{0,3}([*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)([^\r]+?)($|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)))/;
       let lastIndent = computeLeadingSpaces(lines);
       // 逐行处理
       const contentLines = parsedHtml.split('\n');
