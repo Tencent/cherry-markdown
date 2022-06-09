@@ -28,9 +28,11 @@ import { createElement } from '@/utils/dom';
  * @returns {HTMLDivElement}
  */
 function createDiv(name, className, position, type = 'bottom') {
-  const div = /** @type {HTMLDivElement} */ (createElement('div', className, {
-    name,
-  }));
+  const div = /** @type {HTMLDivElement} */ (
+    createElement('div', className, {
+      name,
+    })
+  );
   setPosition(div, position);
   return div;
 }
