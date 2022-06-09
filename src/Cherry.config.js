@@ -29,6 +29,7 @@ const callbacks = {
   afterChange: (text, html) => {},
   afterInit: (text, html) => {},
   beforeImageMounted: (srcProp, src) => ({ srcProp, src }),
+  onClickPreview: (event) => {},
 };
 
 /** @type {Partial<import('~types/cherry').CherryOptions>} */
@@ -215,6 +216,8 @@ const defaultConfig = {
     afterChange: callbacks.afterChange,
     afterInit: callbacks.afterInit,
     beforeImageMounted: callbacks.beforeImageMounted,
+    // 预览区域点击事件，previewer.enablePreviewerBubble = true 时生效
+    onClickPreview: callbacks.onClickPreview,
   },
   previewer: {
     dom: false,
