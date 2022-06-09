@@ -13,3 +13,5 @@ updates:
       timezone: "Asia/Shanghai"
     versioning-strategy: "auto"
     target-branch: "dev"
+    # Disable version updates for npm dependencies
+    open-pull-requests-limit: 0
