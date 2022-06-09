@@ -72,7 +72,7 @@ export default class Cherry extends CherryStatic {
       editor: 'show',
     };
 
-    if (this.options.isPreviewOnly) {
+    if (this.options.isPreviewOnly || this.options.editor.defaultModel === 'previewOnly') {
       this.options.toolbars.showToolbar = false;
       this.options.editor.defaultModel = 'previewOnly';
       this.status.editor = 'hide';
