@@ -235,6 +235,7 @@
           position: relative;
           padding-left: 2em;
           line-height: 1.5em;
+          min-height: 1.5em;
           &:before {
             counter-increment: line;
             content: counter(line);
