@@ -114,6 +114,8 @@ export interface CherryEditorOptions {
   defaultModel?: EditorMode;
   /** 粘贴时是否自动将html转成markdown */
   convertWhenPaste?: boolean;
+  /** 透传给codemirror的配置项 */
+  codemirror?: object;
 }
 
 export type CherryLifecycle = (text: string, html: string) => void;

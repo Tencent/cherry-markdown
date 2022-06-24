@@ -36,10 +36,13 @@
   }
 
   &.cherry--no-toolbar {
-    .cherry-toolbar, .cherry-sidebar {
+
+    .cherry-toolbar,
+    .cherry-sidebar {
       height: 0;
       display: none;
     }
+
     .cherry-editor,
     .cherry-previewer {
       max-height: 100%;
@@ -113,9 +116,11 @@
       }
     }
   }
+
   &[data-toolbar-theme='dark'] {
     .cherry-insert-table-menu-item {
       border-color: rgba(255, 255, 255, 0.2);
+
       &.active {
         background-color: $toolbarBtnColorDark;
       }
@@ -143,6 +148,7 @@
     font-style: normal;
     cursor: pointer;
     box-sizing: border-box;
+
     &:hover {
       background: $toolbarBtnBgHoverLight;
       color: $toolbarBtnHoverColorLight;
@@ -182,6 +188,7 @@
   user-select: none;
   background: $toolbarBgLight;
   border-bottom: 1px solid #e8eaee;
+  overflow: hidden;
 
   [data-toolbar-theme='dark'] & {
     background: $toolbarBgDark;
@@ -202,6 +209,7 @@
     .cherry-toolbar-button {
       display: none;
     }
+
     .cherry-toolbar-switchPreview {
       display: inline;
     }
@@ -251,6 +259,7 @@
   top: 48px;
   right: 7px;
   z-index: 999;
+
   .cherry-toolbar-button {
     height: 30px;
     padding: 3px 12px 0 12px;
@@ -265,6 +274,7 @@
         width: 8px;
         height: 8px;
       }
+
       &.loading:after {
         content: " ";
         display: block;
@@ -278,11 +288,12 @@
         animation: loading 1.2s linear infinite;
       }
     }
-    
+
     @keyframes loading {
       0% {
         transform: rotate(0deg);
       }
+
       100% {
         transform: rotate(360deg);
       }
@@ -340,7 +351,7 @@
 
     &:hover {
       //color: #036;
-    //   border-color: $borderColor;
+      //   border-color: $borderColor;
       background-color: rgba(89, 128, 166, 0.05);
     }
 
@@ -424,6 +435,7 @@
 
     &:hover {
       background: rgba(0, 0, 0, 0.05);
+
       .ch-icon {
         color: $toolbarBtnColorLight;
       }
@@ -453,6 +465,7 @@
     font-family: $fontFamily;
     background: $editorBg;
     color: $fontColor;
+
     // codemirror 依赖隐藏的 textarea 计算行高，这里将字体大小设置为行高，避免输入法遮挡内容
     // Fixed https://github.com/Tencent/cherry-markdown/issues/82
     textarea {
@@ -478,7 +491,8 @@
     font-size: 0.9em;
   }
 
-  .cm-s-default .cm-whitespace, .cm-tab {
+  .cm-s-default .cm-whitespace,
+  .cm-tab {
     font-family: $monospaceFont;
     font-size: 0.9em;
   }
@@ -612,6 +626,7 @@
     font-size: 12px;
     margin: 0px;
   }
+
   .cherry-color-text {
     float: left;
     width: 128px;
@@ -641,6 +656,7 @@
   margin-left: -112px;
   left: 50%;
   box-sizing: content-box;
+
   .switch-btn--bg {
     transition: all 0.3s;
     position: absolute;
@@ -652,52 +668,65 @@
     opacity: 0.3;
     background-color: $toolbarBtnHoverColorLight;
   }
+
   .cherry-toolbar-button {
     width: 80px;
     text-align: center;
     box-sizing: content-box;
+
     &:hover {
       border-color: transparent;
     }
   }
+
   &[data-type='text'] {
     .cherry-text-btn {
       color: $toolbarBtnColorLight;
     }
+
     .cherry-md-btn {
       color: $toolbarBtnHoverColorLight;
     }
   }
+
   &[data-type='md'] {
     .cherry-md-btn {
       color: $toolbarBtnColorLight;
     }
+
     .cherry-text-btn {
       color: $toolbarBtnHoverColorLight;
     }
+
     .switch-btn--bg {
       left: 50%;
     }
   }
+
   [data-toolbar-theme='dark'] & {
     .switch-btn--bg {
       background-color: $toolbarBtnHoverColorDark;
     }
+
     &[data-type='text'] {
       .cherry-text-btn {
         color: $toolbarBtnColorDark;
       }
+
       .cherry-md-btn {
         color: $toolbarBtnHoverColorDark;
       }
     }
+
     &[data-type='md'] {
       .cherry-md-btn {
         color: $toolbarBtnColorDark;
       }
+
       .cherry-text-btn {
         color: $toolbarBtnHoverColorDark;
       }
+
       .switch-btn--bg {
         left: 50%;
       }
@@ -714,7 +743,9 @@
 
 .cherry-suggester-panel {
   display: none;
-  position: absolute; left: 0;top: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 2px;
@@ -729,6 +760,7 @@
     color: #333;
     display: block;
     cursor: pointer;
+
     &.cherry-suggester-panel__item--selected {
       background-color: #f2f2f5;
       text-decoration: none;

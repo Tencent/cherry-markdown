@@ -1,5 +1,6 @@
 .cherry-markdown {
   word-break: break-all;
+
   h1,
   h2,
   h3,
@@ -126,6 +127,7 @@
 
     li {
       list-style: inherit;
+
       p {
         margin: 0;
       }
@@ -133,6 +135,7 @@
   }
 
   div {
+
     ul,
     ol {
       margin-bottom: 0;
@@ -150,19 +153,30 @@
 
   table {
     border-collapse: collapse;
+
+    th,
+    td {
+      border: 1px solid $borderColor;
+      padding: 0.2em 0.4em;
+      min-width: 100px;
+    }
+
+    th {
+      background-color: #eee;
+    }
   }
 
   a {
     color: $linkColor;
     position: relative;
     padding-right: 15px;
-		
+
     &[target="_blank"]::after {
-			content: '\EA10';
-			font-size: 12px;
-			font-family: "ch-icon";
-			position: absolute;
-			margin-left: 3px
+      content: '\EA10';
+      font-size: 12px;
+      font-family: "ch-icon";
+      position: absolute;
+      margin-left: 3px
     }
 
     &:hover {
@@ -223,19 +237,23 @@
     overflow-x: auto;
     border-radius: 8px;
 
-    & > pre {
+    &>pre {
       margin: 0;
+
       code[class*="language-"] {
         counter-reset: line;
+
         &.wrap {
           white-space: pre-wrap;
         }
+
         .code-line {
           display: inline-block;
           position: relative;
           padding-left: 2em;
           line-height: 1.5em;
           min-height: 1.5em;
+
           &:before {
             counter-increment: line;
             content: counter(line);
@@ -243,6 +261,7 @@
             position: absolute;
             left: 0;
           }
+
           &:last-child {
             margin-bottom: 0;
           }
@@ -252,7 +271,7 @@
   }
 
   /* Inline code */
-  :not(pre) > code {
+  :not(pre)>code {
     padding: .1em .3em;
     border-radius: .3em;
     white-space: normal;
@@ -331,20 +350,19 @@
   .cherry-table-container {
     max-width: 100%;
     overflow-x: auto;
+
     .cherry-table {
+
       th,
       td {
         text-align: left;
         border: 1px solid $borderColor;
-        padding: 0.2em 1em;
+        padding: 0.2em 0.4em;
+        min-width: 100px;
       }
+
       th {
-        min-width: 100px;
         white-space: nowrap;
-        background-color: #FAFBFD;
-      }
-      td {
-        min-width: 100px;
       }
     }
   }
@@ -360,8 +378,14 @@
   }
 
   &.head-num {
+
     // Auto Numbering for Headings
-    h1, h2, h3, h4, h5, h6 {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
       .anchor:before {
         width: auto;
         font-size: inherit;
@@ -399,27 +423,27 @@
 
     h2 .anchor:before {
       counter-increment: level2;
-      content: counter(level1) "." counter(level2) " "
+      content: counter(level1) "."counter(level2) " "
     }
 
     h3 .anchor:before {
       counter-increment: level3;
-      content: counter(level1) "." counter(level2) "." counter(level3) " "
+      content: counter(level1) "."counter(level2) "."counter(level3) " "
     }
 
     h4 .anchor:before {
       counter-increment: level4;
-      content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) " "
+      content: counter(level1) "."counter(level2) "."counter(level3) "."counter(level4) " "
     }
 
-    h5 .anchor:before{
+    h5 .anchor:before {
       counter-increment: level5;
-      content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) "." counter(level5) " "
+      content: counter(level1) "."counter(level2) "."counter(level3) "."counter(level4) "."counter(level5) " "
     }
 
     h6 .anchor:before {
       counter-increment: level6;
-      content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) "." counter(level5) "." counter(level6) " "
+      content: counter(level1) "."counter(level2) "."counter(level3) "."counter(level4) "."counter(level5) "."counter(level6) " "
     }
 
   }
