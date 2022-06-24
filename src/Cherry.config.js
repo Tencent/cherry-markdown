@@ -61,7 +61,7 @@ const defaultConfig = {
        *    - 一般编辑权限可控的场景（如api文档系统）可以允许iframe、script等标签
        */
       htmlWhiteList: '',
-      smartOpenUrl: true,
+      smartOpenUrl: false,
     },
     // 内置语法配置
     syntax: {

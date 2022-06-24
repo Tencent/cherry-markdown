@@ -28,6 +28,7 @@ var basicConfig = {
         // console.log(`url-processor`, url, srcType);
         return url;
       },
+      smartOpenUrl: false
     },
     syntax: {
       table: {
