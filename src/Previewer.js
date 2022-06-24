@@ -103,12 +103,12 @@ export default class Previewer {
     this.bindScroll();
     this.editor = editor;
     this.bindDrag();
-    this.$initPreviewerBubble(editor);
+    this.$initPreviewerBubble();
   }
 
-  $initPreviewerBubble(editor) {
+  $initPreviewerBubble() {
     if (this.options.enablePreviewerBubble) {
-      this.previewerBubble = new PreviewerBubble(this, editor);
+      this.previewerBubble = new PreviewerBubble(this);
     }
   }
 
@@ -175,9 +175,9 @@ export default class Previewer {
 
     const { editorMaskDom, previewerMaskDom, virtualDragLineDom: virtualLineDom } = this.options;
 
-    virtualLineDom.style.height = `${editorHeight}px`;
     virtualLineDom.style.top = `${editorTop}px`;
     virtualLineDom.style.left = `${previewerLeft}px`;
+    virtualLineDom.style.bottom = '0px';
 
     editorMaskDom.style.height = `${editorHeight}px`;
     editorMaskDom.style.top = `${editorTop}px`;
@@ -392,6 +392,18 @@ export default class Previewer {
       // return this.editor.scrollToLineNum(lines - lineNum, 0, 0);
     };
     addEvent(domContainer, 'scroll', onScroll, false);
+    addEvent(
+      domContainer,
+      'wheel',
+      () => {
+        // 鼠标滚轮滚动时，强制监听滚动事件
+        this.disableScrollListener = false;
+        // 打断滚动动画
+        cancelAnimationFrame(this.animation.timer);
+        this.animation.timer = 0;
+      },
+      false,
+    );
   }
 
   removeScroll() {

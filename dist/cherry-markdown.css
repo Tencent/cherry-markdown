@@ -446,7 +446,8 @@
           display: inline-block;
           position: relative;
           padding-left: 2em;
-          line-height: 1.5em; }
+          line-height: 1.5em;
+          min-height: 1.5em; }
           .cherry-markdown div[data-type='codeBlock'] > pre code[class*="language-"] .code-line:before {
             counter-increment: line;
             content: counter(line);
@@ -1667,7 +1668,6 @@ green     #859900
     padding: 0 15px;
     text-align: left;
     display: inline-block;
-    height: 36px;
     line-height: 36px;
     font-size: 14px;
     font-style: normal;
