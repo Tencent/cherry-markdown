@@ -1,23 +1,27 @@
 .cherry {
   .doing-resize-img {
-    -moz-user-select:none;
-    -webkit-user-select:none;
-    user-select:none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
+
   .cherry-previewer {
     background: #fff;
     border-left: 1px solid #cbd5e080;
+
     img {
       max-width: 100%;
       transition: all 0.1s;
     }
   }
+
   .cherry-previewer-img-size-hander {
-    position:absolute;
-    box-shadow: 0 1px 4px 0 rgba(20,81,154, 0.5);
-    border:1px solid #3582fb;
+    position: absolute;
+    box-shadow: 0 1px 4px 0 rgba(20, 81, 154, 0.5);
+    border: 1px solid #3582fb;
     box-sizing: content-box;
-    pointer-events:none;
+    pointer-events: none;
+
     .cherry-previewer-img-size-hander__points {
       position: absolute;
       height: 10px;
@@ -28,9 +32,10 @@
       background: #3582fb;
       border: 2px solid #fff;
       box-sizing: content-box;
-      box-shadow: 0px 2px 2px 0px rgba(20,81,154,0.5);
-      pointer-events:all;
+      box-shadow: 0px 2px 2px 0px rgba(20, 81, 154, 0.5);
+      pointer-events: all;
     }
+
     .cherry-previewer-img-size-hander__background {
       background-repeat: no-repeat;
       background-size: 100% 100%;
@@ -38,42 +43,52 @@
       width: 100%;
       height: 100%;
     }
+
     // 左上角
     .cherry-previewer-img-size-hander__points-leftTop {
-      cursor:nw-resize;
+      cursor: nw-resize;
     }
+
     // 右上角
     .cherry-previewer-img-size-hander__points-rightTop {
-      cursor:sw-resize;
+      cursor: sw-resize;
     }
+
     // 左下角
     .cherry-previewer-img-size-hander__points-leftBottom {
-      cursor:sw-resize;
+      cursor: sw-resize;
     }
+
     // 右下角
     .cherry-previewer-img-size-hander__points-rightBottom {
-      cursor:nw-resize;
+      cursor: nw-resize;
     }
+
     // 中上
     .cherry-previewer-img-size-hander__points-middleTop {
-      cursor:n-resize;
+      cursor: n-resize;
     }
+
     // 中下
     .cherry-previewer-img-size-hander__points-middleBottom {
-      cursor:n-resize;
+      cursor: n-resize;
     }
+
     // 中左
     .cherry-previewer-img-size-hander__points-leftMiddle {
-      cursor:e-resize;
+      cursor: e-resize;
     }
+
     // 中右
     .cherry-previewer-img-size-hander__points-rightMiddle {
-      cursor:e-resize;
+      cursor: e-resize;
     }
   }
+
   .cherry-previewer-table-content-hander {
     .cherry-previewer-table-content-hander__input {
       position: absolute;
+
       textarea {
         width: 100%;
         height: 100%;

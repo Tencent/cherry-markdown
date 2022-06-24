@@ -35,7 +35,10 @@ var basicConfig = {
         // chartEngine: Engine Class
       },
       fontEmphasis: {
-        allowWhitespace: true, // 是否允许首尾空格
+        allowWhitespace: false, // 是否允许首尾空格
+      },
+      strikethrough: {
+        needWhitespace: false, // 是否必须有前后空格
       },
       mathBlock: {
         engine: 'MathJax', // katex或MathJax

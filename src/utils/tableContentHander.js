@@ -115,7 +115,7 @@ const tableContentHander = {
    * 获取预览区域被点击的table对象，并记录table的顺位
    */
   $collectTableDom() {
-    const list = Array.from(this.previewerDom.querySelectorAll('table'));
+    const list = Array.from(this.previewerDom.querySelectorAll('table.cherry-table'));
     const tableNode = this.$getClosestNode(this.td, 'TABLE');
     if (tableNode === false) {
       return false;
