@@ -15,29 +15,28 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 /**
- * 插入代码块的按钮
+ * 插入行内公式
  */
-export default class Code extends MenuBase {
+export default class Formula extends MenuBase {
   constructor(editor) {
     super(editor);
-    this.setName('code', 'code');
+    this.setName('formula', 'insertFormula');
   }
 
   /**
    * 响应点击事件
    * @param {string} selection 被用户选中的文本内容
-   * @param {string} shortKey 快捷键参数，本函数不处理这个参数
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    const code = selection ? selection : 'code...';
-    return `\n\`\`\` \n${code}\n\`\`\`\n`;
+    // 插入行内公式
+    return `${selection} $ e=mc^2 $ `;
   }
 
   /**
    * 声明绑定的快捷键，快捷键触发onClick
    */
   get shortcutKeys() {
-    return ['Mod-k'];
+    return ['Mod-m'];
   }
 }
