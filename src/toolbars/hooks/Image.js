@@ -14,30 +14,31 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { handleUpload } from '@/utils/file';
 /**
- * 插入代码块的按钮
+ * 插入图片
  */
-export default class Code extends MenuBase {
+export default class H1 extends MenuBase {
   constructor(editor) {
     super(editor);
-    this.setName('code', 'code');
+    this.setName('image', 'image');
   }
 
   /**
    * 响应点击事件
    * @param {string} selection 被用户选中的文本内容
-   * @param {string} shortKey 快捷键参数，本函数不处理这个参数
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    const code = selection ? selection : 'code...';
-    return `\n\`\`\` \n${code}\n\`\`\`\n`;
+    // 插入图片，调用上传文件逻辑
+    handleUpload(this.editor, 'image');
+    return selection;
   }
 
   /**
    * 声明绑定的快捷键，快捷键触发onClick
    */
   get shortcutKeys() {
-    return ['Mod-k'];
+    return ['Mod-g'];
   }
 }
