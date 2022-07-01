@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Copyright (C) 2021 THL A29 Limited, a Tencent company.
  *
@@ -72,13 +73,16 @@ function compress(s1, url) {
 }
 
 export default class PlantUMLCodeEngine {
-  static install(cherryOptions, ...args) {
+  static install(cherryOptions, args) {
     mergeWith(cherryOptions, {
       engine: {
         syntax: {
           codeBlock: {
             customRenderer: {
-              plantuml: new PlantUMLCodeEngine(...args),
+              plantuml: new PlantUMLCodeEngine({
+                ...args,
+                ...(cherryOptions.engine.syntax.plantuml ?? {}),
+              }),
             },
           },
         },

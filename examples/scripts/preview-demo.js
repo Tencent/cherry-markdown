@@ -66,6 +66,20 @@ var cherryConfig = {
   editor: {
     defaultModel: 'previewOnly',
   },
+  callback: {
+    onClickPreview: function(e) {
+      const {target} = e;
+      if(target.tagName === 'IMG') {
+        console.log('click img', target);
+        const tmp = new Viewer(target, {
+            button: false,
+            navbar: false,
+            title: [1, (image, imageData) => `${image.alt.replace(/#.+$/, '')} (${imageData.naturalWidth} × ${imageData.naturalHeight})`],
+          });
+        tmp.show();
+      }
+    }
+  },
   previewer: {
     // 自定义markdown预览区域class
     // className: 'markdown'

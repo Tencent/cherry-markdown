@@ -23,6 +23,7 @@ import eslint from '@rollup/plugin-eslint';
 import alias from '@rollup/plugin-alias';
 import json from '@rollup/plugin-json';
 import envReplacePlugin from './env';
+import dartSass from 'sass';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const PROJECT_ROOT_PATH = path.resolve(__dirname, '..');
@@ -101,6 +102,7 @@ export default {
       ...(IS_PRODUCTION && {
         outputStyle: 'compressed',
       }),
+      sass: dartSass,
     }),
     babel({
       babelHelpers: 'runtime',
