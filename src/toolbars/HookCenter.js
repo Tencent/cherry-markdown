@@ -44,6 +44,19 @@ import Export from './hooks/Export';
 import Settings from './hooks/Settings';
 import Underline from './hooks/Underline';
 import SwitchModel from './hooks/SwitchModel';
+import Image from './hooks/Image';
+import Audio from './hooks/Audio';
+import Video from './hooks/Video';
+import Br from './hooks/Br';
+import Hr from './hooks/Hr';
+import Formula from './hooks/Formula';
+import Link from './hooks/Link';
+import Table from './hooks/Table';
+import Toc from './hooks/Toc';
+import LineTable from './hooks/LineTable';
+import BarTable from './hooks/BarTable';
+import Pdf from './hooks/Pdf';
+import Word from './hooks/Word';
 // Sidebar
 import MobilePreview from './hooks/MobilePreview';
 import Copy from './hooks/Copy';
@@ -82,6 +95,19 @@ const HookList = {
   redo: Redo,
   underline: Underline,
   switchModel: SwitchModel,
+  image: Image,
+  audio: Audio,
+  video: Video,
+  br: Br,
+  hr: Hr,
+  formula: Formula,
+  link: Link,
+  table: Table,
+  toc: Toc,
+  lineTable: LineTable,
+  barTable: BarTable,
+  pdf: Pdf,
+  word: Word,
 };
 
 export default class HookCenter {

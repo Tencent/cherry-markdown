@@ -76,7 +76,13 @@ export default class PreviewerBubble {
 
   $onClick(e) {
     // 只有双栏编辑模式才出现该功能
-    if (this.previewer.$cherry.getStatus().editor === 'hide') {
+    const cherryStatus = this.previewer.$cherry.getStatus();
+    if (cherryStatus.editor === 'hide') {
+      if (cherryStatus.previewer === 'show') {
+        // 纯预览模式下，支持点击放大图片功能（以回调的形式实现，需要业务侧实现图片放大功能）
+        this.previewer.$cherry.options.callback.onClickPreview &&
+          this.previewer.$cherry.options.callback.onClickPreview(e);
+      }
       return;
     }
     const { target } = e;
