@@ -17,6 +17,7 @@ import SyntaxBase from '@/core/SyntaxBase';
 import { escapeHTMLSpecialChar as _e, isValidScheme, encodeURIOnce } from '@/utils/sanitize';
 import { compileRegExp, isLookbehindSupported, NOT_ALL_WHITE_SPACES_INLINE } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
+import UrlCache from '@/UrlCache';
 
 export default class Link extends SyntaxBase {
   static HOOK_NAME = 'link';
@@ -100,7 +101,8 @@ export default class Link extends SyntaxBase {
       // text可能是html标签，依赖htmlBlock进行处理
       if (isValidScheme(processedURL)) {
         processedURL = this.urlProcessor(processedURL, 'link');
-        return `${leadingChar + extraLeadingChar}<a href="${encodeURIOnce(
+        processedURL = encodeURIOnce(processedURL);
+        return `${leadingChar + extraLeadingChar}<a href="${UrlCache.set(
           processedURL,
         )}" rel="nofollow"${attrs}>${processedText}</a>`;
       }
