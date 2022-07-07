@@ -26,7 +26,7 @@ export function processExtendAttributesInAlt(alt) {
  * @returns
  */
 export function processExtendStyleInAlt(alt) {
-  const styleRegex = /#(center|right|left|float-right|float-left)/i;
+  const styleRegex = /#(center|right|left|float-right|float-left|border|shadow)/i;
   const info = alt.match(styleRegex);
   if (!info) {
     return '';
@@ -48,6 +48,12 @@ export function processExtendStyleInAlt(alt) {
       break;
     case 'float-left':
       extendStyles += 'float:left;transform:translateX(0);margin-left:0;display:block;';
+      break;
+    case 'border':
+      extendStyles += 'border:1px solid #dfe6ee;';
+      break;
+    case 'shadow':
+      extendStyles += 'box-shadow:0 2px 15px -5px rgb(0 0 0 / 50%);';
       break;
   }
   return extendStyles;
