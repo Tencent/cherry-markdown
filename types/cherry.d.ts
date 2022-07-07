@@ -23,6 +23,7 @@ export interface CherryOptions {
     /** img 标签挂载前触发，可用于懒加载等场景 */
     beforeImageMounted: (srcProp: string, src: string) => { srcProp: string; src: string };
     onClickPreview: (e: MouseEvent) => void;
+    onCopyCode: (e: ClipboardEvent, code: string) => string|false;
   };
   /** 预览区域配置 */
   previewer: CherryPreviewerOptions;

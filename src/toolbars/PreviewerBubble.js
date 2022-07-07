@@ -75,17 +75,19 @@ export default class PreviewerBubble {
   }
 
   $onClick(e) {
-    // 只有双栏编辑模式才出现该功能
+    const { target } = e;
+    // 复制代码块操作不关心编辑器的状态
+    this.$dealCopyCodeBlock(e);
     const cherryStatus = this.previewer.$cherry.getStatus();
+    // 纯预览模式下，支持点击放大图片功能（以回调的形式实现，需要业务侧实现图片放大功能）
     if (cherryStatus.editor === 'hide') {
       if (cherryStatus.previewer === 'show') {
-        // 纯预览模式下，支持点击放大图片功能（以回调的形式实现，需要业务侧实现图片放大功能）
         this.previewer.$cherry.options.callback.onClickPreview &&
           this.previewer.$cherry.options.callback.onClickPreview(e);
       }
       return;
     }
-    const { target } = e;
+    // 只有双栏编辑模式才出现下面的功能
     this.$removeAllPreviewerBubbles();
     if (typeof target.tagName === 'undefined') {
       return;
@@ -98,6 +100,30 @@ export default class PreviewerBubble {
       case 'TH':
         this.bubbleHandler = this.$showTablePreviewerBubbles(target);
         break;
+    }
+  }
+
+  /**
+   * 处理复制代码块的操作
+   */
+  $dealCopyCodeBlock(e) {
+    const { target } = e;
+    if (target.className === 'cherry-copy-code-block' || target.parentNode.className === 'cherry-copy-code-block') {
+      const parentNode =
+        target.className === 'cherry-copy-code-block' ? target.parentNode : target.parentNode.parentNode;
+      const codeContent = parentNode.innerText;
+      const final = this.previewer.$cherry.options.callback.onCopyCode(e, codeContent);
+      if (final === false) {
+        return false;
+      }
+      const iconNode = parentNode.querySelector('i.ch-icon-copy');
+      if (iconNode) {
+        iconNode.className = iconNode.className.replace('copy', 'ok');
+        setTimeout(() => {
+          iconNode.className = iconNode.className.replace('ok', 'copy');
+        }, 1500);
+      }
+      return navigator.clipboard.writeText(final);
     }
   }
 
