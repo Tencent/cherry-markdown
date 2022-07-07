@@ -194,6 +194,7 @@ export default class CodeBlock extends ParagraphBase {
       cacheCode = this.renderLineNumber(cacheCode);
     }
     cacheCode = `<div data-sign="${sign}" data-type="codeBlock" data-lines="${lines}">
+      <div class="cherry-copy-code-block" style="display:none;"><i class="ch-icon ch-icon-copy" title="copy"></i></div>
       <pre class="language-${lang}">${this.wrapCode(cacheCode, lang)}</pre>
     </div>`;
     return cacheCode;
