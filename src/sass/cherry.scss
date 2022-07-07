@@ -594,6 +594,37 @@
   .cherry-list__square {
     list-style: square;
   }
+
+  div[data-type="codeBlock"]:hover {
+    .cherry-copy-code-block {
+      display: block !important;
+      position: relative;
+      width: 25px;
+      text-align: center;
+      height: 25px;
+      border: 1px solid #DDD;
+      cursor: pointer;
+      float: right;
+      right: 10px;
+      top: 15px;
+      color: #FFF;
+      border-radius: 5px;
+      margin-left: -27px;
+      transition: all 0.3s;
+      z-index: 1;
+    }
+    // 浅色系
+    [data-code-block-theme='default'] & ,[data-code-block-theme='funky'] & ,[data-code-block-theme='solarized-light'] & ,[data-code-block-theme='coy'] & {
+      .cherry-copy-code-block {
+        background-color: #3582fb;
+      }
+    }
+    .cherry-copy-code-block:hover {
+      color: #3582fb;
+      background-color: #eee;
+      border-color: #3582fb;
+    }
+  }
 }
 
 .cherry-color-wrap {

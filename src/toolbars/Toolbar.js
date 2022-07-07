@@ -63,7 +63,7 @@ export default class Toolbar {
 
   init() {
     this.collectShortcutKey();
-    this.collectToolbarHandler();
+    // this.collectToolbarHandler();
   }
 
   previewOnly() {
@@ -99,12 +99,11 @@ export default class Toolbar {
   }
 
   collectToolbarHandler() {
-    this.toolbarHandlers = {};
     this.options.extensions.forEach((ext) => {
       if (typeof ext.onClick !== 'function') {
         return;
       }
-      this.toolbarHandlers[ext.name] = (shortKey, callback) => {
+      (shortKey, callback) => {
         const selections = this.options.editor.editor.getSelections();
         const ret = selections.map(
           (selection, index, srcArray) => ext.onClick(selection, shortKey, callback) || srcArray[index],

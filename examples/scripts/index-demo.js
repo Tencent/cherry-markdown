@@ -30,6 +30,9 @@ var basicConfig = {
       },
     },
     syntax: {
+      codeBlock: {
+        theme: 'twilight',
+      },
       table: {
         enableChart: false,
         // chartEngine: Engine Class
