@@ -109,7 +109,7 @@ export default class PreviewerBubble {
    */
   $dealCopyCodeBlock(e) {
     const { target } = e;
-    if (target.className === 'cherry-copy-code-block' || target.parentNode.className === 'cherry-copy-code-block') {
+    if (target.className === 'cherry-copy-code-block' || target.parentNode?.className === 'cherry-copy-code-block') {
       const parentNode =
         target.className === 'cherry-copy-code-block' ? target.parentNode : target.parentNode.parentNode;
       const codeContent = parentNode.innerText;
