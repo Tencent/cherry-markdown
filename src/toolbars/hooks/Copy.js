@@ -15,6 +15,7 @@
  */
 import juice from 'juice';
 import MenuBase from '@/toolbars/MenuBase';
+import { copyToClip } from '@/utils/copy';
 /**
  * 复制按钮，用来复制预览区的html内容
  * 该操作会将预览区的css样式以行内样式的形式插入到html内容里，从而保证粘贴时样式一致
@@ -135,19 +136,4 @@ function convertImgToBase64(url, callback, outputFormat) {
     };
     img.src = url;
   });
-}
-
-/**
- * 将复制的内容赋值到系统剪切板中
- * @param {string} str 要复制的内容
- */
-function copyToClip(str) {
-  function listener(e) {
-    e.clipboardData.setData('text/html', str);
-    e.clipboardData.setData('text/plain', str);
-    e.preventDefault();
-  }
-  document.addEventListener('copy', listener);
-  document.execCommand('copy');
-  document.removeEventListener('copy', listener);
 }
