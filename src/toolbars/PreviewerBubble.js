@@ -17,6 +17,7 @@
 import imgSizeHander from '@/utils/imgSizeHander';
 import tableContentHander from '@/utils/tableContentHander';
 import Event from '@/Event';
+import { copyToClip } from '@/utils/copy';
 /**
  * 预览区域的响应式工具栏
  */
@@ -123,7 +124,7 @@ export default class PreviewerBubble {
           iconNode.className = iconNode.className.replace('ok', 'copy');
         }, 1500);
       }
-      return navigator.clipboard.writeText(final);
+      copyToClip(final);
     }
   }
 
