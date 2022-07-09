@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { getSelection } from '@/utils/selection';
 /**
  * 插入字体颜色或者字体背景颜色的按钮
  */
@@ -33,10 +34,10 @@ export default class Color extends MenuBase {
    * @returns 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '', event) {
-    const text = selection ? selection : '字体颜色或背景';
+    const $selection = getSelection(this.editor.editor, selection) || '字体颜色或背景';
     if (event) {
       // 暂存选中的文本内容
-      this.bubbleColor.setSelection(text);
+      this.bubbleColor.setSelection($selection);
 
       // 定位调色盘应该出现的位置
       // 该按钮可能出现在顶部工具栏，
