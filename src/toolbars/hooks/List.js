@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { getSelection } from '@/utils/selection';
 /**
  * 插入有序/无序/checklist列表的按钮
  */
@@ -76,11 +77,11 @@ export default class List extends MenuBase {
    */
   onClick(selection, shortKey = '') {
     const listType = [null, 'ol', 'ul', 'checklist']; // 下标1, 2, 3生效
-    let $selection = selection;
+    const $selection = getSelection(this.editor.editor, selection, 'line', true);
     const [before] = $selection.match(/^\n*/);
     const [after] = $selection.match(/\n*$/);
     if (listType[shortKey] !== null) {
-      $selection = `${before}${this.$dealSelection($selection, listType[shortKey])}${after}`;
+      return `${before}${this.$dealSelection($selection, listType[shortKey])}${after}`;
     }
     return $selection;
   }
