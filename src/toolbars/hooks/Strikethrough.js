@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { getSelection } from '@/utils/selection';
 /**
  * 删除线的按钮
  */
@@ -30,13 +31,11 @@ export default class Strikethrough extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    const $selection = getSelection(this.editor.editor, selection) || '删除线';
     // 如果被选中的文本中包含删除线语法，则去掉删除线语法
     if (/(~~)[\s\S]+(\1)/.test(selection)) {
       return selection.replace(/[\s]*(~~)([\s\S]+)(\1)[\s]*/g, '$2');
     }
-    let $selection = selection ? selection : '删除线';
-    // 反之加上删除线语法
-    $selection = $selection.replace(/(^)[\s]*([\s\S]+)[\s]*($)/g, '$1 ~~$2~~ $3');
-    return $selection;
+    return $selection.replace(/(^)[\s]*([\s\S]+)[\s]*($)/g, '$1 ~~$2~~ $3');
   }
 }

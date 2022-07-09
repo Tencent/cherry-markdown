@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { getSelection } from '@/utils/selection';
 /**
  * 插入“引用”的按钮
  */
@@ -29,14 +30,13 @@ export default class Quote extends MenuBase {
    * @returns
    */
   onClick(selection) {
-    let $selection = selection ? selection : '引用';
+    const $selection = getSelection(this.editor.editor, selection, 'line', true) || '引用';
     const isWrapped = $selection.split('\n').every((text) => /^\s*>[^\n]+$/.exec(text));
-    // decrease level when all lines in selection are quote
     if (isWrapped) {
-      $selection = $selection.replace(/(^\s*)>\s*([^\n]+)($)/gm, '$1$2$3').replace(/\n+$/, '\n\n');
-    } else {
-      $selection = $selection.replace(/(^)([^\n]+)($)/gm, '$1> $2$3').replace(/\n+$/, '\n\n');
+      // 去掉>号
+      return $selection.replace(/(^\s*)>\s*([^\n]+)($)/gm, '$1$2$3').replace(/\n+$/, '\n\n');
     }
-    return $selection;
+    // 给每一行增加>号
+    return $selection.replace(/(^)([^\n]+)($)/gm, '$1> $2$3').replace(/\n+$/, '\n\n');
   }
 }
