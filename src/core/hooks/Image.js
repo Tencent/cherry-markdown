@@ -15,7 +15,7 @@
  */
 import SyntaxBase from '@/core/SyntaxBase';
 import { escapeHTMLSpecialCharOnce as $e, encodeURIOnce } from '@/utils/sanitize';
-import { processExtendAttributesInAlt, processExtendStyleInAlt } from '@/utils/image';
+import imgAltHelper from '@/utils/image';
 import { compileRegExp, isLookbehindSupported, NOT_ALL_WHITE_SPACES_INLINE } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import UrlCache from '@/UrlCache';
@@ -29,10 +29,13 @@ const replacerFactory = function (type, match, leadingChar, alt, link, title, po
   }
 
   if (refType === 'url') {
-    const extent = processExtendAttributesInAlt(alt);
-    let style = processExtendStyleInAlt(alt);
+    const extent = imgAltHelper.processExtendAttributesInAlt(alt);
+    let { extendStyles: style, extendClasses: classes } = imgAltHelper.processExtendStyleInAlt(alt);
     if (style) {
       style = ` style="${style}" `;
+    }
+    if (classes) {
+      classes = ` class="${classes}" `;
     }
     attrs = title && title.trim() !== '' ? ` title="${$e(title)}"` : '';
     if (posterContent) {
@@ -42,7 +45,7 @@ const replacerFactory = function (type, match, leadingChar, alt, link, title, po
     const processedURL = globalConfig.urlProcessor(link, type);
     const defaultWrapper = `<${type} src="${UrlCache.set(
       encodeURIOnce(processedURL),
-    )}"${attrs} ${extent} ${style} controls="controls">${$e(alt || '')}</${type}>`;
+    )}"${attrs} ${extent} ${style} ${classes} controls="controls">${$e(alt || '')}</${type}>`;
     return `${leadingChar}${config.videoWrapper ? config.videoWrapper(link) : defaultWrapper}`;
   }
   // should never happen
@@ -79,10 +82,13 @@ export default class Image extends SyntaxBase {
       return match;
     }
     if (refType === 'url') {
-      const extent = processExtendAttributesInAlt(alt);
-      let style = processExtendStyleInAlt(alt);
+      const extent = imgAltHelper.processExtendAttributesInAlt(alt);
+      let { extendStyles: style, extendClasses: classes } = imgAltHelper.processExtendStyleInAlt(alt);
       if (style) {
         style = ` style="${style}" `;
+      }
+      if (classes) {
+        classes = ` class="${classes}" `;
       }
       attrs = title && title.trim() !== '' ? ` title="${$e(title.replace(/["']/g, ''))}"` : '';
       let srcProp = 'src';
@@ -95,7 +101,7 @@ export default class Image extends SyntaxBase {
       }
       return `${leadingChar}<img ${srcProp}="${UrlCache.set(
         encodeURIOnce(this.urlProcessor(srcValue, 'image')),
-      )}" ${extent} ${style} alt="${$e(alt || '')}"${attrs}/>`;
+      )}" ${extent} ${style} ${classes} alt="${$e(alt || '')}"${attrs}/>`;
     }
     // should never happen
     return match;
