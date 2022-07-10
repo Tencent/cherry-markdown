@@ -175,7 +175,6 @@ export default class PreviewerBubble {
     const testSrc = contentImgs[this.imgIndex]
       ? contentImgs[this.imgIndex].replace(/^!\[.*?\]\((.*?)\)/, '$1').trim()
       : '';
-    console.log('src', src, 'testSrc', testSrc);
     if (contentImgs.length === this.totalImgs || src === testSrc) {
       // 如果图片语法数量和预览区域的一样多
       // 暂时不需要考虑代码块和手动输入img标签的场景
@@ -189,8 +188,9 @@ export default class PreviewerBubble {
         return false;
       }
       const targetLine = targetFrom.line;
-      const imgAppendReg = /^!\[.*?#(center|right|left|float-right|float-left).*?\].*$/;
-      this.imgAppend = imgAppendReg.test(targetSearch) ? targetSearch.replace(imgAppendReg, '#$1') : false;
+      const imgAppendReg =
+        /^!\[.*?((?:#center|#right|#left|#float-right|#float-left|#border|#B|#shadow|#S|#radius|#R)+).*?\].*$/;
+      this.imgAppend = imgAppendReg.test(targetSearch) ? targetSearch.replace(imgAppendReg, '$1') : false;
       const targetChFrom = targetFrom.ch + targetSearch.replace(/^(!\[[^#\]]*).*$/, '$1').length;
       const targetChTo = targetChFrom + targetSearch.replace(/^(!\[[^#\]]*)([^\]]*?)\].*$/, '$2').length;
       this.editor.editor.setSelection({ line: targetLine, ch: targetChFrom }, { line: targetLine, ch: targetChTo });
