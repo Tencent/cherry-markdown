@@ -48,10 +48,10 @@ expect.extend({
 
 describe('engine', () => {
   suites.forEach((item, index) => {
+    item.markdown = item.markdown.replace(/^>\n/g, "> \n");
     test(`commonmark-${index}`, () => {
-    // @ts-ignore
+      // @ts-ignore
       expect(cherryEngine.makeHtml(item.markdown)).matchHTML(item.html, item.markdown);
     });
   });
 });
- 
