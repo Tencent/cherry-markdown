@@ -24,6 +24,7 @@ export interface CherryOptions {
     beforeImageMounted: (srcProp: string, src: string) => { srcProp: string; src: string };
     onClickPreview: (e: MouseEvent) => void;
     onCopyCode: (e: ClipboardEvent, code: string) => string|false;
+    changeString2Pinyin: (str: string) => string;
   };
   /** 预览区域配置 */
   previewer: CherryPreviewerOptions;
