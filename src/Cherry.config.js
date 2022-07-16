@@ -36,6 +36,15 @@ const callbacks = {
     // 对复制内容进行额外处理
     return code;
   },
+  // 获取中文的拼音
+  changeString2Pinyin: (string) => {
+    /**
+     * 推荐使用这个组件：https://github.com/liu11hao11/pinyin_js
+     *
+     * 可以在 ../scripts/pinyin/pinyin_dist.js 里直接引用
+     */
+    return string;
+  },
 };
 
 /** @type {Partial<import('~types/cherry').CherryOptions>} */
@@ -190,6 +199,7 @@ const defaultConfig = {
       '|',
       'color',
       'header',
+      'ruby',
       '|',
       'list',
       {
@@ -226,6 +236,8 @@ const defaultConfig = {
     onClickPreview: callbacks.onClickPreview,
     // 复制代码块代码时的回调
     onCopyCode: callbacks.onCopyCode,
+    // 把中文变成拼音的回调，当然也可以把中文变成英文、英文变成中文
+    changeString2Pinyin: callbacks.changeString2Pinyin,
   },
   previewer: {
     dom: false,
