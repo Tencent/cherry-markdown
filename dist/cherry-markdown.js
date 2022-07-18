@@ -77738,7 +77738,7 @@
 	  });
 	}
 
-	var VERSION = "0.7.4-b1cc7f88";
+	var VERSION = "0.7.4-3b7977eb";
 	var CherryStatic = /*#__PURE__*/function () {
 	  function CherryStatic() {
 	    _classCallCheck(this, CherryStatic);

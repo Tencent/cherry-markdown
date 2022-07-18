@@ -1,5 +1,5 @@
 {
-  "name": "@canway/cherry-markdown",
+  "name": "@devops/cherry-markdown",
   "license": "Apache-2.0",
   "version": "0.7.4",
   "description": "a new markdown editor",
@@ -46,7 +46,7 @@
     "commit": "./node_modules/cz-customizable/standalone.js",
     "release": "standard-version",
     "prepublishOnly": "npm run build",
-    "publish": "git push --follow-tags origin main && npm publish",
+    "publish": "git push --follow-tags origin main",
     "examples": "anywhere -p 3000 -s"
   },
   "keywords": [
