@@ -29,6 +29,10 @@ jobs:
         uses: borales/actions-yarn@v3.0.0
         with:
           cmd: install
+      - name: Eslint
+        uses: borales/actions-yarn@v3.0.0
+        with:
+          cmd: lint:ci
       - name: Run Build
         uses: borales/actions-yarn@v3.0.0
         with:
