@@ -41,6 +41,8 @@
     "clean": "rimraf ./dist",
     "check-bundle": "es-check es5 dist/cherry-markdown.js dist/cherry-markdown.min.js",
     "test": "jest",
+    "test:commonmark": "jest test/core/CommonMark.spec.ts",
+    "test:snapshot": "jest test/core/hooks/*.spec.ts",
     "lint": "eslint --plugin file-progress --rule \"file-progress/activate: 1\" --ext .js .",
     "lint:fix": "yarn lint --fix",
     "lint:ci": "eslint --max-warnings=0 --ext .js .",
