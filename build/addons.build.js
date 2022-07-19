@@ -1,4 +1,3 @@
-
 const babel = require('@rollup/plugin-babel').default;
 // node-resolve升级会导致出现新问题
 const resolve = require('rollup-plugin-node-resolve');
@@ -15,21 +14,25 @@ const fs = require('fs');
 
 const glob = require('glob');
 
-glob('src/addons/**/*-plugin.js', {
-  cwd: PROJECT_ROOT_PATH,
-}, (error, matches) => {
-  if (error) {
-    throw error;
-  }
-  buildAddons(matches);
-});
+glob(
+  'src/addons/**/*-plugin.js',
+  {
+    cwd: PROJECT_ROOT_PATH,
+  },
+  (error, matches) => {
+    if (error) {
+      throw error;
+    }
+    buildAddons(matches);
+  },
+);
 
 const rollup = require('rollup');
 const { terser } = require('rollup-plugin-terser');
 
 /**
- * 
- * @param {string[]} entries 
+ *
+ * @param {string[]} entries
  */
 function buildAddons(entries) {
   entries.forEach(async (entry) => {
@@ -41,7 +44,10 @@ function buildAddons(entries) {
     const inputFileName = path.basename(entry);
     const inputFileExt = path.extname(entry);
     const fileNameWithoutExt = inputFileName.replace(inputFileExt, ''); // 简单处理
-    const camelCaseModuleName = fileNameWithoutExt.split('-').map(segment => segment.replace(/^./, (char) => char.toUpperCase())).join('');
+    const camelCaseModuleName = fileNameWithoutExt
+      .split('-')
+      .map((segment) => segment.replace(/^./, (char) => char.toUpperCase()))
+      .join('');
 
     const addonBundle = await rollup.rollup({
       input: fullEntryPath,
@@ -52,10 +58,12 @@ function buildAddons(entries) {
         json(),
         // envReplacePlugin(),
         alias({
-          entries: [{
-            find: '@',
-            replacement: path.resolve(PROJECT_ROOT_PATH, 'src'),
-          }],
+          entries: [
+            {
+              find: '@',
+              replacement: path.resolve(PROJECT_ROOT_PATH, 'src'),
+            },
+          ],
         }),
         resolve({
           ignoreGlobal: false,
@@ -79,7 +87,7 @@ function buildAddons(entries) {
           babelHelpers: 'runtime',
           exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5)/],
         }),
-      ]
+      ],
     });
 
     console.log('[addons build] generating bundle %s', outputFile);
@@ -90,13 +98,11 @@ function buildAddons(entries) {
       file: outputFile,
       format: 'umd',
       name: camelCaseModuleName,
-      plugins: [
-        terser(),
-      ]
+      plugins: [terser()],
     });
 
     // TODO: ts declaration 生成的目录不符合预期，以下为临时处理方案
-    outputs.forEach(output => {
+    outputs.forEach((output) => {
       const fileNameOnly = path.basename(output.fileName);
       const targetPath = path.join(declarationDir, fileNameOnly);
       console.log('[addons build] writing %s %s', output.type, targetPath);
