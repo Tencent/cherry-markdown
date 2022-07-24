@@ -133,7 +133,7 @@ export interface CherryPreviewerOptions {
     // 针对加载失败的图片 或 beforeLoadOneImgCallback 返回false 的图片，最多尝试加载几次，为了防止死循环，最多5次。以图片的src为纬度统计重试次数
     maxTryTimesPerSrc: 0 | 1 | 2 | 3 | 4 | 5,
     // 加载一张图片之前的回调函数，函数return false 会终止加载操作
-    beforeLoadOneImgCallback: (img: HTMLImageElement) => boolean;
+    beforeLoadOneImgCallback: (img: HTMLImageElement) => void | boolean;
     // 加载一张图片失败之后的回调函数
     failLoadOneImgCallback: (img: HTMLImageElement) => void;
     // 加载一张图片之后的回调函数，如果图片加载失败，则不会回调该函数
