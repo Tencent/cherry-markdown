@@ -279,14 +279,7 @@ export default class Cherry extends CherryStatic {
    * @returns html内容
    */
   getHtml(wrapTheme = true) {
-    // 默认包裹theme
-    const html = this.previewer.isPreviewerHidden()
-      ? this.previewer.options.previewerCache.html
-      : this.previewer.getValue();
-    if (!wrapTheme) return html;
-    const inlineCodeTheme = document.querySelector('.cherry').getAttribute('data-inline-code-theme');
-    const codeBlockTheme = document.querySelector('.cherry').getAttribute('data-code-block-theme');
-    return `<div data-inline-code-theme="${inlineCodeTheme}" data-code-block-theme="${codeBlockTheme}">${html}</div>`;
+    return this.previewer.getValue(wrapTheme);
   }
 
   getPreviewer() {
@@ -516,6 +509,7 @@ export default class Cherry extends CherryStatic {
       value: this.options.value,
       isPreviewOnly: this.options.isPreviewOnly,
       enablePreviewerBubble,
+      lazyLoadImg: this.options.previewer.lazyLoadImg,
     });
 
     return this.previewer;
