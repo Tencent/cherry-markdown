@@ -24,6 +24,7 @@ import Event from './Event';
 import { addEvent, removeEvent } from './utils/event';
 import { exportPDF, exportScreenShot } from './utils/export';
 import PreviewerBubble from './toolbars/PreviewerBubble';
+import LazyLoadImg from '@/utils/lazyLoadImg';
 
 let onScroll = () => {}; // store in memory for remove event
 
@@ -80,6 +81,30 @@ export default class Previewer {
         htmlChanged: false,
         layout: {},
       },
+      /**
+       * 配置图片懒加载的逻辑
+       * 如果不希望图片懒加载，可配置成 lazyLoadImg = {maxNumPerTime: 6, autoLoadImgNum: -1}
+       */
+      lazyLoadImg: {
+        // 加载图片时如果需要展示loading图，则配置loading图的地址
+        loadingImgPath: '',
+        // 同一时间最多有几个图片请求，最大同时加载6张图片
+        maxNumPerTime: 2,
+        // 不进行懒加载处理的图片数量，如果为0，即所有图片都进行懒加载处理， 如果设置为-1，则所有图片都不进行懒加载处理
+        noLoadImgNum: 5,
+        // 首次自动加载几张图片（不论图片是否滚动到视野内），autoLoadImgNum = -1 表示会自动加载完所有图片
+        autoLoadImgNum: 5,
+        // 针对加载失败的图片 或 beforeLoadOneImgCallback 返回false 的图片，最多尝试加载几次，为了防止死循环，最多5次。以图片的src为纬度统计重试次数
+        maxTryTimesPerSrc: 2,
+        // 加载一张图片之前的回调函数，函数return false 会终止加载操作
+        beforeLoadOneImgCallback: (img) => {},
+        // 加载一张图片失败之后的回调函数
+        failLoadOneImgCallback: (img) => {},
+        // 加载一张图片之后的回调函数，如果图片加载失败，则不会回调该函数
+        afterLoadOneImgCallback: (img) => {},
+        // 加载完所有图片后调用的回调函数
+        afterLoadAllImgCallback: () => {},
+      },
     };
 
     Object.assign(this.options, options);
@@ -104,6 +129,8 @@ export default class Previewer {
     this.editor = editor;
     this.bindDrag();
     this.$initPreviewerBubble();
+    this.lazyLoadImg = new LazyLoadImg(this.options.lazyLoadImg, this);
+    this.lazyLoadImg.doLazyLoad();
   }
 
   $initPreviewerBubble() {
@@ -112,17 +139,39 @@ export default class Previewer {
     }
   }
 
-  getDomContainer = () =>
-    /** @type {HTMLDivElement} */ (
-      this.isMobilePreview ? document.querySelector('.cherry-mobile-previewer-content') : this.options.previewerDom
-    );
+  /**
+   * @returns {HTMLElement}
+   */
+  getDomContainer() {
+    return this.isMobilePreview
+      ? this.options.previewerDom.querySelector('.cherry-mobile-previewer-content')
+      : this.options.previewerDom;
+  }
 
   getDom() {
     return this.options.previewerDom;
   }
 
-  getValue() {
-    return this.options.previewerDom.innerHTML;
+  /**
+   * 获取预览区内的html内容
+   * @param {boolean} wrapTheme 是否在外层包裹主题class
+   * @returns html内容
+   */
+  getValue(wrapTheme = true) {
+    let html = '';
+    if (this.isPreviewerHidden()) {
+      html = this.options.previewerCache.html;
+    } else {
+      html = this.getDomContainer().innerHTML;
+    }
+    // 需要未加载的图片替换成原始图片
+    html = this.lazyLoadImg.changeDataSrc2Src(html);
+    if (!wrapTheme || !this.$cherry.wrapperDom) {
+      return html;
+    }
+    const inlineCodeTheme = this.$cherry.wrapperDom.getAttribute('data-inline-code-theme');
+    const codeBlockTheme = this.$cherry.wrapperDom.getAttribute('data-code-block-theme');
+    return `<div data-inline-code-theme="${inlineCodeTheme}" data-code-block-theme="${codeBlockTheme}">${html}</div>`;
   }
 
   isPreviewerHidden() {
@@ -538,6 +587,12 @@ export default class Previewer {
 
   $dealWithMyersDiffResult(result, oldContent, newContent, domContainer) {
     result.forEach((change) => {
+      if (newContent[change.newIndex].dom) {
+        // 把已经加载过的图片的data-src变成src
+        newContent[change.newIndex].dom.innerHTML = this.lazyLoadImg.changeLoadedDataSrc2Src(
+          newContent[change.newIndex].dom.innerHTML,
+        );
+      }
       switch (change.type) {
         case 'delete':
           domContainer.removeChild(oldContent[change.oldIndex].dom);
@@ -587,14 +642,16 @@ export default class Previewer {
   }
 
   update(html) {
+    const newHtml = this.lazyLoadImg.changeSrc2DataSrc(html);
     if (!this.isPreviewerHidden()) {
       // 标记当前正在更新预览区域，锁定同步滚动功能
       window.clearTimeout(this.syncScrollLockTimer);
       this.applyingDomChanges = true;
       // 预览区未隐藏时，直接更新
       const tmpDiv = document.createElement('div');
-      const domContainer = this.options.previewerDom;
-      tmpDiv.innerHTML = html;
+      const domContainer = this.getDomContainer();
+      // 把最新内容放进临时div的时候，为了防止图片加载，会强制把图片的src改成data-src
+      tmpDiv.innerHTML = this.lazyLoadImg.changeSrc2DataSrc(html, true);
       const newHtmlList = this.$getSignData(tmpDiv);
       const oldHtmlList = this.$getSignData(domContainer);
 
@@ -609,7 +666,7 @@ export default class Previewer {
       }
     } else {
       // 预览区隐藏时，先缓存起来，等到预览区打开再一次性更新
-      this.doHtmlCache(html);
+      this.doHtmlCache(newHtml);
     }
   }
 
