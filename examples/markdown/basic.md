@@ -242,32 +242,45 @@
 标准图片  ![一条dog#100px](images/demo-dog.png)
 设置图片大小(相对大小&绝对大小)  ![一条dog#10%#50px](images/demo-dog.png)
 设置图片对齐方式：
-**左对齐**
-![一条dog#auto#100px#left](images/demo-dog.png)
-**居中**
-![一条dog#auto#100px#center](images/demo-dog.png)
-**右对齐**
-![一条dog#auto#100px#right](images/demo-dog.png)
-**浮动左对齐**
-![一条dog#auto#100px#float-left](images/demo-dog.png)
+**左对齐+边框**
+![一条dog#auto#100px#left#border](images/demo-dog.png)
+**居中+边框+阴影**
+![一条dog#auto#100px#center#B#shadow](images/demo-dog.png)
+**右对齐+边框+阴影+圆角**
+![一条dog#auto#100px#right#B#S#radius](images/demo-dog.png)
+**浮动左对齐+边框+阴影+圆角**
+![一条dog#auto#100px#float-left#B#S#R](images/demo-dog.png)
 开心也是一天，不开心也是一天
 这样就过了两天，汪
 ```
 
 **效果**
-标准图片 ![一条dog#100px](images/demo-dog.png)
-设置图片大小(相对大小&绝对大小) ![一条dog#10%#50px](images/demo-dog.png)
+标准图片  ![一条dog#100px](images/demo-dog.png)
+设置图片大小(相对大小&绝对大小)  ![一条dog#10%#50px](images/demo-dog.png)
 设置图片对齐方式：
-**左对齐**
-![一条dog#auto#100px#left](images/demo-dog.png)
-**居中**
-![一条dog#auto#100px#center](images/demo-dog.png)
-**右对齐**
-![一条dog#auto#100px#right](images/demo-dog.png)
-**浮动左对齐**
-![一条dog#auto#100px#float-left](images/demo-dog.png)
+**左对齐+边框**
+![一条dog#auto#100px#left#border](images/demo-dog.png)
+**居中+边框+阴影**
+![一条dog#auto#100px#center#B#shadow](images/demo-dog.png)
+**右对齐+边框+阴影+圆角**
+![一条dog#auto#100px#right#B#S#radius](images/demo-dog.png)
+**浮动左对齐+边框+阴影+圆角**
+![一条dog#auto#100px#float-left#B#S#R](images/demo-dog.png)
 开心也是一天，不开心也是一天
 这样就过了两天，汪
+
+
+> 属性释义：
+- 宽度：第一个 `#100px` 或 `#10%` 或 `#auto`
+- 高度：第二个 `#100px` 或 `#10%` 或 `#auto`
+- 左对齐：`#left`
+- 右对齐：`#right`
+- 居中对齐：`#center`
+- 悬浮左对齐：`#float-left`
+- 悬浮右对齐：`#float-right`
+- 边框：`#border` 或 `#B`
+- 阴影：`#shadow` 或 `#S`
+- 圆角：`#radius` 或 `#R`
 
 ---
 

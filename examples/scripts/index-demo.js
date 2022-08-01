@@ -31,6 +31,9 @@ var basicConfig = {
       smartOpenUrl: false
     },
     syntax: {
+      codeBlock: {
+        theme: 'twilight',
+      },
       table: {
         enableChart: false,
         // chartEngine: Engine Class
@@ -70,6 +73,7 @@ var basicConfig = {
     },
   },
   toolbars: {
+    theme: 'light',
     toolbar: [
       'bold',
       'italic',

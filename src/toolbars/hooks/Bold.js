@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { getSelection } from '@/utils/selection';
 /**
  * 加粗按钮
  */
@@ -30,14 +31,12 @@ export default class Bold extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    const $selection = getSelection(this.editor.editor, selection) || '加粗';
     // 如果选中的文本中已经有加粗语法了，则去掉加粗语法
-    if (/^\s*(\*\*|__)[\s\S]+(\1)/.test(selection)) {
-      return selection.replace(/(^)(\s*)(\*\*|__)([^\n]+)(\3)(\s*)($)/gm, '$1$4$7');
+    if (/^\s*(\*\*|__)[\s\S]+(\1)/.test($selection)) {
+      return $selection.replace(/(^)(\s*)(\*\*|__)([^\n]+)(\3)(\s*)($)/gm, '$1$4$7');
     }
-    let $selection = selection ? selection : '加粗';
-    // 反之加上加粗语法
-    $selection = $selection.replace(/(^)([^\n]+)($)/gm, '$1**$2**$3');
-    return $selection;
+    return $selection.replace(/(^)([^\n]+)($)/gm, '$1**$2**$3');
   }
 
   /**

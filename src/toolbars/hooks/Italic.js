@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { getSelection } from '@/utils/selection';
 /**
  * 插入斜体的按钮
  */
@@ -30,12 +31,11 @@ export default class Italic extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    if (/^\s*(\*|_)[\s\S]+(\1)/.test(selection)) {
-      return selection.replace(/(^)(\s*)(\*|_)([^\n]+)(\3)(\s*)($)/gm, '$1$4$7');
+    const $selection = getSelection(this.editor.editor, selection) || '斜体';
+    if (/^\s*(\*|_)[\s\S]+(\1)/.test($selection)) {
+      return $selection.replace(/(^)(\s*)(\*|_)([^\n]+)(\3)(\s*)($)/gm, '$1$4$7');
     }
-    let $selection = selection ? selection : '斜体';
-    $selection = $selection.replace(/(^)([^\n]+)($)/gm, '$1 *$2* $3');
-    return $selection;
+    return $selection.replace(/(^)([^\n]+)($)/gm, '$1 *$2* $3');
   }
 
   /**

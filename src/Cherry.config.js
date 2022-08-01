@@ -29,6 +29,13 @@ const callbacks = {
   afterChange: (text, html) => {},
   afterInit: (text, html) => {},
   beforeImageMounted: (srcProp, src) => ({ srcProp, src }),
+  onClickPreview: (event) => {},
+  onCopyCode: (event, code) => {
+    // 阻止默认的粘贴事件
+    // return false;
+    // 对复制内容进行额外处理
+    return code;
+  },
 };
 
 /** @type {Partial<import('~types/cherry').CherryOptions>} */
@@ -216,6 +223,10 @@ const defaultConfig = {
     afterChange: callbacks.afterChange,
     afterInit: callbacks.afterInit,
     beforeImageMounted: callbacks.beforeImageMounted,
+    // 预览区域点击事件，previewer.enablePreviewerBubble = true 时生效
+    onClickPreview: callbacks.onClickPreview,
+    // 复制代码块代码时的回调
+    onCopyCode: callbacks.onCopyCode,
   },
   previewer: {
     dom: false,

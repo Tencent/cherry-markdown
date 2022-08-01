@@ -21,13 +21,14 @@ const imgSizeHander = {
   getImgPosition() {
     const position = this.img.getBoundingClientRect();
     const editorPosition = this.previewerDom.parentNode.getBoundingClientRect();
+    const padding = parseFloat(this.img.style.padding) || 0;
     return {
       bottom: position.bottom - editorPosition.bottom,
-      top: position.top - editorPosition.top,
+      top: position.top - editorPosition.top + padding * 1.5,
       height: position.height,
       width: position.width,
       right: position.right - editorPosition.right,
-      left: position.left - editorPosition.left,
+      left: position.left - editorPosition.left + padding * 1.5,
       x: position.x - editorPosition.x,
       y: position.y - editorPosition.y,
     };
