@@ -52,7 +52,7 @@
   "keywords": [
     "markdown"
   ],
-  "author": "Cherry Oteam",
+  "author": "Morris",
   "devDependencies": {
     "@babel/core": "^7.7.2",
     "@babel/eslint-parser": "^7.12.1",
