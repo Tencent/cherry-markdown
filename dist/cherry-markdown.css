@@ -294,373 +294,6 @@
   word-break: break-all;
   /* Specify class=linenums on a pre to get line numbering */
   /* Inline code */
-<<<<<<< HEAD
-  /* 数学表达式展示 */ }
-  .cherry-markdown h1,
-  .cherry-markdown h2,
-  .cherry-markdown h3,
-  .cherry-markdown h4,
-  .cherry-markdown h5,
-  .cherry-markdown h6,
-  .cherry-markdown .h1,
-  .cherry-markdown .h2,
-  .cherry-markdown .h3,
-  .cherry-markdown .h4,
-  .cherry-markdown .h5,
-  .cherry-markdown .h6 {
-    font-family: inherit;
-    font-weight: 600;
-    line-height: 1.1;
-    color: inherit; }
-  .cherry-markdown h1 small,
-  .cherry-markdown h2 small,
-  .cherry-markdown h3 small,
-  .cherry-markdown h4 small,
-  .cherry-markdown h5 small,
-  .cherry-markdown h6 small,
-  .cherry-markdown .h1 small,
-  .cherry-markdown .h2 small,
-  .cherry-markdown .h3 small,
-  .cherry-markdown .h4 small,
-  .cherry-markdown .h5 small,
-  .cherry-markdown .h6 small,
-  .cherry-markdown h1 .small,
-  .cherry-markdown h2 .small,
-  .cherry-markdown h3 .small,
-  .cherry-markdown h4 .small,
-  .cherry-markdown h5 .small,
-  .cherry-markdown h6 .small,
-  .cherry-markdown .h1 .small,
-  .cherry-markdown .h2 .small,
-  .cherry-markdown .h3 .small,
-  .cherry-markdown .h4 .small,
-  .cherry-markdown .h5 .small,
-  .cherry-markdown .h6 .small {
-    font-weight: normal;
-    line-height: 1;
-    color: #999; }
-  .cherry-markdown h1,
-  .cherry-markdown h2,
-  .cherry-markdown h3 {
-    margin-top: 30px;
-    margin-bottom: 16px; }
-  .cherry-markdown h1 small,
-  .cherry-markdown h2 small,
-  .cherry-markdown h3 small,
-  .cherry-markdown h1 .small,
-  .cherry-markdown h2 .small,
-  .cherry-markdown h3 .small {
-    font-size: 65%; }
-  .cherry-markdown h4,
-  .cherry-markdown h5,
-  .cherry-markdown h6 {
-    margin-top: 12px;
-    margin-bottom: 12px; }
-  .cherry-markdown h4 small,
-  .cherry-markdown h5 small,
-  .cherry-markdown h6 small,
-  .cherry-markdown h4 .small,
-  .cherry-markdown h5 .small,
-  .cherry-markdown h6 .small {
-    font-size: 75%; }
-  .cherry-markdown h1,
-  .cherry-markdown .h1 {
-    font-size: 1.5em; }
-  .cherry-markdown h2,
-  .cherry-markdown .h2 {
-    font-size: 1.25em; }
-  .cherry-markdown h3,
-  .cherry-markdown .h3 {
-    font-size: 1em; }
-  .cherry-markdown h4,
-  .cherry-markdown .h4 {
-    font-size: 0.85em; }
-  .cherry-markdown h5,
-  .cherry-markdown .h5 {
-    font-size: .75em; }
-  .cherry-markdown h6,
-  .cherry-markdown .h6 {
-    font-size: .65em; }
-  .cherry-markdown b,
-  .cherry-markdown strong {
-    font-weight: bold; }
-  .cherry-markdown ul,
-  .cherry-markdown ol {
-    padding-left: 24px;
-    margin-bottom: 16px; }
-    .cherry-markdown ul ul,
-    .cherry-markdown ul ol,
-    .cherry-markdown ol ul,
-    .cherry-markdown ol ol {
-      margin-bottom: 0; }
-    .cherry-markdown ul li,
-    .cherry-markdown ol li {
-      list-style: inherit; }
-      .cherry-markdown ul li p,
-      .cherry-markdown ol li p {
-        margin: 0; }
-  .cherry-markdown div ul,
-  .cherry-markdown div ol {
-    margin-bottom: 0; }
-  .cherry-markdown hr {
-    height: 0;
-    border: 0;
-    border-top: 1px solid #cbd5e080;
-    margin: 16px 0;
-    box-sizing: content-box;
-    overflow: visible; }
-  .cherry-markdown table {
-    border-collapse: collapse; }
-    .cherry-markdown table th,
-    .cherry-markdown table td {
-      border: 1px solid #cbd5e080;
-      padding: 0.2em 0.4em;
-      min-width: 100px; }
-    .cherry-markdown table th {
-      background-color: #eee; }
-  .cherry-markdown a {
-    color: #3A84FF;
-    position: relative;
-    padding-right: 15px; }
-    .cherry-markdown a[target="_blank"]::after {
-      content: '\EA10';
-      font-size: 12px;
-      font-family: "ch-icon";
-      position: absolute;
-      margin-left: 3px; }
-    .cherry-markdown a:hover {
-      color: #056bad; }
-  .cherry-markdown em {
-    font-style: italic; }
-  .cherry-markdown sup {
-    vertical-align: super; }
-  .cherry-markdown sub {
-    vertical-align: sub; }
-  .cherry-markdown figure {
-    overflow-x: auto; }
-  .cherry-markdown blockquote {
-    color: #6d6e6f;
-    padding: 10px 15px;
-    border-left: 10px solid #D6DBDF;
-    background: rgba(102, 128, 153, 0.05); }
-  .cherry-markdown p,
-  .cherry-markdown pre,
-  .cherry-markdown blockquote,
-  .cherry-markdown table {
-    margin: 0 0 16px; }
-  .cherry-markdown pre {
-    padding: 16px;
-    overflow: auto;
-    font-size: 85%;
-    line-height: 1.45;
-    background-color: #f6f8fa;
-    border-radius: 6px; }
-  .cherry-markdown .prettyprint {
-    min-width: 500px;
-    display: inline-block;
-    background: #00212b;
-    font-family: Menlo, "Bitstream Vera Sans Mono", "DejaVu Sans Mono", Monaco, Consolas, monospace;
-    border: 0 !important; }
-  .cherry-markdown .pln {
-    color: #dfe6ee; }
-  .cherry-markdown .str {
-    color: #ffaf21; }
-  .cherry-markdown .kwd {
-    color: #f85353; }
-  .cherry-markdown ol.linenums {
-    margin-top: 0;
-    margin-bottom: 0;
-    color: #969896; }
-  .cherry-markdown li.L0,
-  .cherry-markdown li.L1,
-  .cherry-markdown li.L2,
-  .cherry-markdown li.L3,
-  .cherry-markdown li.L4,
-  .cherry-markdown li.L5,
-  .cherry-markdown li.L6,
-  .cherry-markdown li.L7,
-  .cherry-markdown li.L8,
-  .cherry-markdown li.L9 {
-    padding-left: 1em;
-    background-color: #00212b;
-    list-style-type: decimal; }
-  @media screen {
-    .cherry-markdown .cherry-markdown {
-      /* comment */
-      /* type name */
-      /* literal value */
-      /* punctuation */
-      /* lisp open bracket */
-      /* lisp close bracket */
-      /* markup tag name */
-      /* markup attribute name */
-      /* markup attribute value */
-      /* declaration */
-      /* variable name */
-      /* function name */ }
-      .cherry-markdown .cherry-markdown .com {
-        color: #969896; }
-      .cherry-markdown .cherry-markdown .typ {
-        color: #81a2be; }
-      .cherry-markdown .cherry-markdown .lit {
-        color: #de935f; }
-      .cherry-markdown .cherry-markdown .pun {
-        color: #c5c8c6; }
-      .cherry-markdown .cherry-markdown .opn {
-        color: #c5c8c6; }
-      .cherry-markdown .cherry-markdown .clo {
-        color: #c5c8c6; }
-      .cherry-markdown .cherry-markdown .tag {
-        color: #cc6666; }
-      .cherry-markdown .cherry-markdown .atn {
-        color: #de935f; }
-      .cherry-markdown .cherry-markdown .atv {
-        color: #8abeb7; }
-      .cherry-markdown .cherry-markdown .dec {
-        color: #de935f; }
-      .cherry-markdown .cherry-markdown .var {
-        color: #cc6666; }
-      .cherry-markdown .cherry-markdown .fun {
-        color: #81a2be; } }
-  .cherry-markdown div[data-type='codeBlock'] {
-    display: inline-block;
-    width: 100%;
-    max-width: 800px;
-    box-sizing: border-box;
-    border-radius: 2px;
-    margin-bottom: 16px;
-    font-size: 12px;
-    overflow-x: auto;
-    border-radius: 8px; }
-    .cherry-markdown div[data-type='codeBlock'] > pre {
-      margin: 0; }
-      .cherry-markdown div[data-type='codeBlock'] > pre code[class*="language-"] {
-        counter-reset: line; }
-        .cherry-markdown div[data-type='codeBlock'] > pre code[class*="language-"].wrap {
-          white-space: pre-wrap; }
-        .cherry-markdown div[data-type='codeBlock'] > pre code[class*="language-"] .code-line {
-          display: inline-block;
-          position: relative;
-          padding-left: 2em;
-          line-height: 1.5em;
-          min-height: 1.5em; }
-          .cherry-markdown div[data-type='codeBlock'] > pre code[class*="language-"] .code-line:before {
-            counter-increment: line;
-            content: counter(line);
-            margin-right: 1em;
-            position: absolute;
-            left: 0; }
-          .cherry-markdown div[data-type='codeBlock'] > pre code[class*="language-"] .code-line:last-child {
-            margin-bottom: 0; }
-  .cherry-markdown :not(pre) > code {
-    padding: .1em .3em;
-    border-radius: .3em;
-    white-space: normal;
-    color: #f08d49;
-    background-color: #f2f2f2; }
-    [data-inline-code-theme='black'] .cherry-markdown :not(pre) > code {
-      color: #3f4a56;
-      background-color: #e5e5e5; }
-  .cherry-markdown a.anchor:before {
-    content: '\a7';
-    text-decoration: none;
-    width: 15px;
-    font-size: 0.5em;
-    vertical-align: middle;
-    display: inline-block;
-    text-align: center;
-    margin-left: -30px;
-    margin-top: -1em; }
-  .cherry-markdown .toc {
-    margin-bottom: 16px; }
-    .cherry-markdown .toc .toc-title {
-      font-size: 24px;
-      margin-bottom: 5px; }
-    .cherry-markdown .toc .toc-li {
-      border-bottom: 1px ridge #cbd5e080;
-      list-style: none; }
-      .cherry-markdown .toc .toc-li a {
-        text-decoration: none;
-        color: #3f4a56; }
-        .cherry-markdown .toc .toc-li a:hover {
-          color: #056bad; }
-  .cherry-markdown .check-list-item {
-    list-style: none; }
-    .cherry-markdown .check-list-item .ch-icon {
-      margin: 0 6px 0 -20px; }
-  .cherry-markdown .footnote:not(a) {
-    padding-top: 20px;
-    border-top: 1px solid #cbd5e080;
-    margin-top: 50px; }
-    .cherry-markdown .footnote:not(a) .footnote-title {
-      font-size: 20px;
-      margin-top: -38px;
-      background-color: #f8fafb;
-      width: 60px;
-      margin-bottom: 16px; }
-    .cherry-markdown .footnote:not(a) .one-footnote {
-      color: #6d6e6f;
-      margin-bottom: 16px;
-      border-bottom: 1px dotted #cbd5e080; }
-  .cherry-markdown .cherry-table-container {
-    max-width: 100%;
-    overflow-x: auto; }
-    .cherry-markdown .cherry-table-container .cherry-table th,
-    .cherry-markdown .cherry-table-container .cherry-table td {
-      text-align: left;
-      border: 1px solid #cbd5e080;
-      padding: 0.2em 0.4em;
-      min-width: 100px; }
-    .cherry-markdown .cherry-table-container .cherry-table th {
-      white-space: nowrap; }
-  .cherry-markdown mjx-assistive-mml {
-    position: absolute;
-    top: 0;
-    left: 0;
-    clip: rect(1px, 1px, 1px, 1px);
-    padding: 1px 0 0 0;
-    border: 0; }
-  .cherry-markdown.head-num {
-    counter-reset: level1; }
-    .cherry-markdown.head-num h1 .anchor:before,
-    .cherry-markdown.head-num h2 .anchor:before,
-    .cherry-markdown.head-num h3 .anchor:before,
-    .cherry-markdown.head-num h4 .anchor:before,
-    .cherry-markdown.head-num h5 .anchor:before,
-    .cherry-markdown.head-num h6 .anchor:before {
-      width: auto;
-      font-size: inherit;
-      vertical-align: inherit;
-      padding-right: 10px; }
-    .cherry-markdown.head-num h1 {
-      counter-reset: level2; }
-    .cherry-markdown.head-num h2 {
-      counter-reset: level3; }
-    .cherry-markdown.head-num h3 {
-      counter-reset: level4; }
-    .cherry-markdown.head-num h4 {
-      counter-reset: level5; }
-    .cherry-markdown.head-num h5 {
-      counter-reset: level6; }
-    .cherry-markdown.head-num h1 .anchor:before {
-      counter-increment: level1;
-      content: counter(level1) ". "; }
-    .cherry-markdown.head-num h2 .anchor:before {
-      counter-increment: level2;
-      content: counter(level1) "." counter(level2) " "; }
-    .cherry-markdown.head-num h3 .anchor:before {
-      counter-increment: level3;
-      content: counter(level1) "." counter(level2) "." counter(level3) " "; }
-    .cherry-markdown.head-num h4 .anchor:before {
-      counter-increment: level4;
-      content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) " "; }
-    .cherry-markdown.head-num h5 .anchor:before {
-      counter-increment: level5;
-      content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) "." counter(level5) " "; }
-    .cherry-markdown.head-num h6 .anchor:before {
-      counter-increment: level6;
-      content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) "." counter(level5) "." counter(level6) " "; }
-=======
   /* 数学表达式展示 */
 }
 .cherry-markdown h1,
@@ -676,7 +309,7 @@
 .cherry-markdown .h5,
 .cherry-markdown .h6 {
   font-family: inherit;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.1;
   color: inherit;
 }
@@ -738,27 +371,27 @@
 }
 .cherry-markdown h1,
 .cherry-markdown .h1 {
-  font-size: 2em;
+  font-size: 1.5em;
 }
 .cherry-markdown h2,
 .cherry-markdown .h2 {
-  font-size: 1.5em;
+  font-size: 1.25em;
 }
 .cherry-markdown h3,
 .cherry-markdown .h3 {
-  font-size: 1.25em;
+  font-size: 1em;
 }
 .cherry-markdown h4,
 .cherry-markdown .h4 {
-  font-size: 1em;
+  font-size: 0.85em;
 }
 .cherry-markdown h5,
 .cherry-markdown .h5 {
-  font-size: 0.875em;
+  font-size: 0.75em;
 }
 .cherry-markdown h6,
 .cherry-markdown .h6 {
-  font-size: 0.85em;
+  font-size: 0.65em;
 }
 .cherry-markdown b,
 .cherry-markdown strong {
@@ -790,7 +423,7 @@
 .cherry-markdown hr {
   height: 0;
   border: 0;
-  border-top: 1px solid #dfe6ee;
+  border-top: 1px solid rgba(203, 213, 224, 0.5019607843);
   margin: 16px 0;
   box-sizing: content-box;
   overflow: visible;
@@ -800,7 +433,7 @@
 }
 .cherry-markdown table th,
 .cherry-markdown table td {
-  border: 1px solid #dfe6ee;
+  border: 1px solid rgba(203, 213, 224, 0.5019607843);
   padding: 0.2em 0.4em;
   min-width: 100px;
 }
@@ -808,7 +441,16 @@
   background-color: #eee;
 }
 .cherry-markdown a {
-  color: #3582fb;
+  color: #3A84FF;
+  position: relative;
+  padding-right: 15px;
+}
+.cherry-markdown a[target=_blank]::after {
+  content: "\ea10";
+  font-size: 12px;
+  font-family: "ch-icon";
+  position: absolute;
+  margin-left: 3px;
 }
 .cherry-markdown a:hover {
   color: #056bad;
@@ -935,11 +577,13 @@
 .cherry-markdown div[data-type=codeBlock] {
   display: inline-block;
   width: 100%;
+  max-width: 800px;
   box-sizing: border-box;
   border-radius: 2px;
   margin-bottom: 16px;
-  font-size: 14px;
+  font-size: 12px;
   overflow-x: auto;
+  border-radius: 8px;
 }
 .cherry-markdown div[data-type=codeBlock] > pre {
   margin: 0;
@@ -953,9 +597,9 @@
 .cherry-markdown div[data-type=codeBlock] > pre code[class*=language-] .code-line {
   display: inline-block;
   position: relative;
-  padding-left: 3em;
-  height: 1.3em;
-  line-height: 2em;
+  padding-left: 2em;
+  line-height: 1.5em;
+  min-height: 1.5em;
 }
 .cherry-markdown div[data-type=codeBlock] > pre code[class*=language-] .code-line:before {
   counter-increment: line;
@@ -968,11 +612,11 @@
   margin-bottom: 0;
 }
 .cherry-markdown :not(pre) > code {
-  padding: 0.1em;
+  padding: 0.1em 0.3em;
   border-radius: 0.3em;
   white-space: normal;
-  color: #f85353;
-  background-color: #e5e5e5;
+  color: #f08d49;
+  background-color: #f2f2f2;
 }
 [data-inline-code-theme=black] .cherry-markdown :not(pre) > code {
   color: #3f4a56;
@@ -986,7 +630,8 @@
   vertical-align: middle;
   display: inline-block;
   text-align: center;
-  margin-left: -15px;
+  margin-left: -30px;
+  margin-top: -1em;
 }
 .cherry-markdown .toc {
   margin-bottom: 16px;
@@ -996,7 +641,7 @@
   margin-bottom: 5px;
 }
 .cherry-markdown .toc .toc-li {
-  border-bottom: 1px ridge #dfe6ee;
+  border-bottom: 1px ridge rgba(203, 213, 224, 0.5019607843);
   list-style: none;
 }
 .cherry-markdown .toc .toc-li a {
@@ -1014,7 +659,7 @@
 }
 .cherry-markdown .footnote:not(a) {
   padding-top: 20px;
-  border-top: 1px solid #dfe6ee;
+  border-top: 1px solid rgba(203, 213, 224, 0.5019607843);
   margin-top: 50px;
 }
 .cherry-markdown .footnote:not(a) .footnote-title {
@@ -1027,7 +672,7 @@
 .cherry-markdown .footnote:not(a) .one-footnote {
   color: #6d6e6f;
   margin-bottom: 16px;
-  border-bottom: 1px dotted #dfe6ee;
+  border-bottom: 1px dotted rgba(203, 213, 224, 0.5019607843);
 }
 .cherry-markdown .cherry-table-container {
   max-width: 100%;
@@ -1035,7 +680,8 @@
 }
 .cherry-markdown .cherry-table-container .cherry-table th,
 .cherry-markdown .cherry-table-container .cherry-table td {
-  border: 1px solid #dfe6ee;
+  text-align: left;
+  border: 1px solid rgba(203, 213, 224, 0.5019607843);
   padding: 0.2em 0.4em;
   min-width: 100px;
 }
@@ -1053,7 +699,12 @@
 .cherry-markdown.head-num {
   counter-reset: level1;
 }
-.cherry-markdown.head-num h1 .anchor:before, .cherry-markdown.head-num h2 .anchor:before, .cherry-markdown.head-num h3 .anchor:before, .cherry-markdown.head-num h4 .anchor:before, .cherry-markdown.head-num h5 .anchor:before, .cherry-markdown.head-num h6 .anchor:before {
+.cherry-markdown.head-num h1 .anchor:before,
+.cherry-markdown.head-num h2 .anchor:before,
+.cherry-markdown.head-num h3 .anchor:before,
+.cherry-markdown.head-num h4 .anchor:before,
+.cherry-markdown.head-num h5 .anchor:before,
+.cherry-markdown.head-num h6 .anchor:before {
   width: auto;
   font-size: inherit;
   vertical-align: inherit;
@@ -1098,7 +749,6 @@
   counter-increment: level6;
   content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) "." counter(level5) "." counter(level6) " ";
 }
->>>>>>> c7c645751be9f91f66eb2f77365f10237a2a5158
 
 div[data-type=codeBlock] {
   /* PrismJS 1.23.0
@@ -2179,23 +1829,16 @@ div[data-type=codeBlock] .token.inserted {
 .cherry .doing-resize-img {
   -moz-user-select: none;
   -webkit-user-select: none;
-<<<<<<< HEAD
-  user-select: none; }
-
-.cherry .cherry-previewer {
-  background: #fff;
-  border-left: 1px solid #cbd5e080; }
-  .cherry .cherry-previewer img {
-    max-width: 100%;
-    transition: all 0.1s; }
-
-=======
   user-select: none;
 }
+.cherry .cherry-previewer {
+  background: #fff;
+  border-left: 1px solid rgba(203, 213, 224, 0.5019607843);
+}
 .cherry .cherry-previewer img {
+  max-width: 100%;
   transition: all 0.1s;
 }
->>>>>>> c7c645751be9f91f66eb2f77365f10237a2a5158
 .cherry .cherry-previewer-img-size-hander {
   position: absolute;
   box-shadow: 0 1px 4px 0 rgba(20, 81, 154, 0.5);
@@ -2280,26 +1923,10 @@ div[data-type=codeBlock] .token.inserted {
   align-content: flex-start;
   height: 100%;
   min-height: 100px;
-<<<<<<< HEAD
-  position: relative; }
-  .cherry img {
-    max-width: 100%; }
-  .cherry .cherry-editor,
-  .cherry .cherry-previewer {
-    max-height: calc(100% - 48px);
-    min-height: calc(100% - 48px); }
-  .cherry .CodeMirror {
-    height: 100%; }
-  .cherry.cherry--no-toolbar .cherry-toolbar,
-  .cherry.cherry--no-toolbar .cherry-sidebar {
-    height: 0;
-    display: none; }
-  .cherry.cherry--no-toolbar .cherry-editor,
-  .cherry.cherry--no-toolbar .cherry-previewer {
-    max-height: 100%;
-    min-height: 100%; }
-=======
   position: relative;
+}
+.cherry img {
+  max-width: 100%;
 }
 .cherry .cherry-editor,
 .cherry .cherry-previewer {
@@ -2309,7 +1936,8 @@ div[data-type=codeBlock] .token.inserted {
 .cherry .CodeMirror {
   height: 100%;
 }
-.cherry.cherry--no-toolbar .cherry-toolbar, .cherry.cherry--no-toolbar .cherry-sidebar {
+.cherry.cherry--no-toolbar .cherry-toolbar,
+.cherry.cherry--no-toolbar .cherry-sidebar {
   height: 0;
   display: none;
 }
@@ -2318,7 +1946,6 @@ div[data-type=codeBlock] .token.inserted {
   max-height: 100%;
   min-height: 100%;
 }
->>>>>>> c7c645751be9f91f66eb2f77365f10237a2a5158
 
 .cherry {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -2326,55 +1953,6 @@ div[data-type=codeBlock] .token.inserted {
   line-height: 22px;
   color: #3f4a56;
   background: #f8fafb;
-<<<<<<< HEAD
-  box-shadow: 0 0 10px rgba(128, 145, 165, 0.2); }
-  .cherry .ch-icon {
-    vertical-align: middle; }
-  .cherry .clearfix {
-    zoom: 1; }
-    .cherry .clearfix:after {
-      content: '.';
-      display: block;
-      height: 0;
-      clear: both;
-      visibility: hidden;
-      overflow: hidden;
-      font-size: 0; }
-  .cherry.fullscreen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1000; }
-  .cherry .no-select {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none; }
-  .cherry .cherry-insert-table-menu {
-    display: block;
-    position: absolute;
-    top: 40px;
-    left: 40px;
-    border-collapse: separate;
-    box-shadow: 0 0 10px rgba(128, 145, 165, 0.2);
-    padding: 4px;
-    border-radius: 3px;
-    width: auto;
-    height: auto; }
-    .cherry .cherry-insert-table-menu-item {
-      padding: 7px;
-      border: 1px solid #cbd5e080; }
-      .cherry .cherry-insert-table-menu-item.active {
-        background-color: #ebf3ff; }
-  .cherry[data-toolbar-theme='dark'] .cherry-insert-table-menu-item {
-    border-color: rgba(255, 255, 255, 0.2); }
-    .cherry[data-toolbar-theme='dark'] .cherry-insert-table-menu-item.active {
-      background-color: #d7e6fe; }
-=======
   box-shadow: 0 0 10px rgba(128, 145, 165, 0.2);
 }
 .cherry .ch-icon {
@@ -2422,7 +2000,7 @@ div[data-type=codeBlock] .token.inserted {
 }
 .cherry .cherry-insert-table-menu-item {
   padding: 7px;
-  border: 1px solid #dfe6ee;
+  border: 1px solid rgba(203, 213, 224, 0.5019607843);
 }
 .cherry .cherry-insert-table-menu-item.active {
   background-color: #ebf3ff;
@@ -2433,7 +2011,6 @@ div[data-type=codeBlock] .token.inserted {
 .cherry[data-toolbar-theme=dark] .cherry-insert-table-menu-item.active {
   background-color: #d7e6fe;
 }
->>>>>>> c7c645751be9f91f66eb2f77365f10237a2a5158
 
 .cherry-dropdown {
   position: absolute;
@@ -2442,32 +2019,6 @@ div[data-type=codeBlock] .token.inserted {
   background: #fff;
   box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.5);
   margin-left: -60px;
-<<<<<<< HEAD
-  z-index: 1000; }
-  .cherry-dropdown-item {
-    width: 100%;
-    padding: 0 15px;
-    text-align: left;
-    display: inline-block;
-    line-height: 36px;
-    font-size: 14px;
-    font-style: normal;
-    cursor: pointer;
-    box-sizing: border-box; }
-    .cherry-dropdown-item:hover {
-      background: #ebf3ff;
-      color: #5d9bfc; }
-    .cherry-dropdown-item .ch-icon {
-      margin-right: 10px; }
-  [data-toolbar-theme='dark'] .cherry-dropdown {
-    background: #20304b; }
-    [data-toolbar-theme='dark'] .cherry-dropdown .cherry-dropdown-item {
-      background: transparent;
-      color: #d7e6fe; }
-      [data-toolbar-theme='dark'] .cherry-dropdown .cherry-dropdown-item:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: #fff; }
-=======
   z-index: 1000;
 }
 .cherry-dropdown-item {
@@ -2475,7 +2026,6 @@ div[data-type=codeBlock] .token.inserted {
   padding: 0 15px;
   text-align: left;
   display: inline-block;
-  height: 36px;
   line-height: 36px;
   font-size: 14px;
   font-style: normal;
@@ -2500,7 +2050,6 @@ div[data-type=codeBlock] .token.inserted {
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
 }
->>>>>>> c7c645751be9f91f66eb2f77365f10237a2a5158
 
 .cherry-toolbar {
   position: relative;
@@ -2515,51 +2064,7 @@ div[data-type=codeBlock] .token.inserted {
   z-index: 1;
   user-select: none;
   background: white;
-<<<<<<< HEAD
   border-bottom: 1px solid #e8eaee;
-  overflow: hidden; }
-  [data-toolbar-theme='dark'] .cherry-toolbar {
-    background: #20304b;
-    box-shadow: 0 0 10px rgba(128, 145, 165, 0.2); }
-    [data-toolbar-theme='dark'] .cherry-toolbar .cherry-toolbar-button {
-      color: #d7e6fe;
-      background: transparent; }
-      [data-toolbar-theme='dark'] .cherry-toolbar .cherry-toolbar-button:hover {
-        color: #fff;
-        background: rgba(255, 255, 255, 0.1); }
-  .cherry-toolbar.preview-only .cherry-toolbar-button {
-    display: none; }
-  .cherry-toolbar.preview-only .cherry-toolbar-switchPreview {
-    display: inline; }
-  .cherry-toolbar-button {
-    float: left;
-    padding: 0 12px;
-    margin: 4px 0;
-    height: 38px;
-    color: #3f4a56;
-    background: transparent;
-    border: 1px solid transparent;
-    -webkit-transition: background-color ease-in-out 0.15s, color ease-in-out 0.15s, border-color ease-in-out 0.15s;
-    transition: background-color ease-in-out 0.15s, color ease-in-out 0.15s, border-color ease-in-out 0.15s;
-    cursor: pointer;
-    font-style: normal; }
-    .cherry-toolbar-button:hover {
-      color: #5d9bfc;
-      background: #ebf3ff; }
-    .cherry-toolbar-button.cherry-toolbar-split {
-      font-size: 0;
-      height: 50%;
-      padding: 0;
-      margin-left: 4px;
-      margin-right: 4px;
-      border: none;
-      border-left: 1px solid #cbd5e080;
-      pointer-events: none;
-      overflow: hidden;
-      opacity: 0.5; }
-    .cherry-toolbar-button.disabled {
-      color: #ccc; }
-=======
   overflow: hidden;
 }
 [data-toolbar-theme=dark] .cherry-toolbar {
@@ -2604,7 +2109,7 @@ div[data-type=codeBlock] .token.inserted {
   margin-left: 4px;
   margin-right: 4px;
   border: none;
-  border-left: 1px solid #dfe6ee;
+  border-left: 1px solid rgba(203, 213, 224, 0.5019607843);
   pointer-events: none;
   overflow: hidden;
   opacity: 0.5;
@@ -2612,7 +2117,6 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-toolbar-button.disabled {
   color: #ccc;
 }
->>>>>>> c7c645751be9f91f66eb2f77365f10237a2a5158
 
 .cherry-sidebar {
   min-height: 200px;
@@ -2664,61 +2168,8 @@ div[data-type=codeBlock] .token.inserted {
   height: 35px;
   min-width: 50px;
   border-radius: 3px;
-  border: 1px solid #cbd5e080;
+  border: 1px solid rgba(203, 213, 224, 0.5019607843);
   z-index: 999;
-<<<<<<< HEAD
-  display: none; }
-  .cherry-bubble .cherry-bubble-top,
-  .cherry-bubble .cherry-bubble-bottom {
-    width: 0;
-    height: 0;
-    border-left: 8px solid rgba(0, 0, 0, 0);
-    border-right: 8px solid rgba(0, 0, 0, 0);
-    position: relative;
-    left: 50%;
-    margin-left: -8px; }
-  .cherry-bubble .cherry-bubble-top {
-    border-bottom: 8px solid #fff;
-    top: -8px; }
-  .cherry-bubble .cherry-bubble-bottom {
-    border-top: 8px solid #fff;
-    bottom: -35px; }
-  .cherry-bubble .cherry-toolbar-button {
-    line-height: 35px;
-    height: 100%;
-    overflow: hidden;
-    vertical-align: middle;
-    display: inline-block;
-    padding: 0 15px;
-    margin-top: -1px;
-    cursor: pointer;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none; }
-    .cherry-bubble .cherry-toolbar-button:hover {
-      background-color: rgba(89, 128, 166, 0.05); }
-    .cherry-bubble .cherry-toolbar-button.cherry-toolbar-split {
-      border-left: 1px solid #ddd;
-      width: 0;
-      padding: 0;
-      overflow: hidden; }
-  [data-toolbar-theme='dark'] .cherry-bubble {
-    border-color: #20304b;
-    background: #20304b; }
-    [data-toolbar-theme='dark'] .cherry-bubble .cherry-toolbar-button {
-      color: #d7e6fe;
-      background: transparent; }
-      [data-toolbar-theme='dark'] .cherry-bubble .cherry-toolbar-button:hover {
-        color: #fff;
-        background: rgba(255, 255, 255, 0.1); }
-    [data-toolbar-theme='dark'] .cherry-bubble .cherry-bubble-top {
-      border-bottom: 8px solid #20304b; }
-    [data-toolbar-theme='dark'] .cherry-bubble .cherry-bubble-bottom {
-      border-top: 8px solid #20304b; }
-    [data-toolbar-theme='dark'] .cherry-bubble .cherry-toolbar-button:hover {
-      border-color: #20304b; }
-=======
   display: none;
 }
 .cherry-bubble .cherry-bubble-top,
@@ -2754,7 +2205,6 @@ div[data-type=codeBlock] .token.inserted {
   user-select: none;
 }
 .cherry-bubble .cherry-toolbar-button:hover {
-  border-color: #dfe6ee;
   background-color: rgba(89, 128, 166, 0.05);
 }
 .cherry-bubble .cherry-toolbar-button.cherry-toolbar-split {
@@ -2784,7 +2234,6 @@ div[data-type=codeBlock] .token.inserted {
 [data-toolbar-theme=dark] .cherry-bubble .cherry-toolbar-button:hover {
   border-color: #20304b;
 }
->>>>>>> c7c645751be9f91f66eb2f77365f10237a2a5158
 
 .cherry-floatmenu {
   z-index: 100;
@@ -2798,44 +2247,14 @@ div[data-type=codeBlock] .token.inserted {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-<<<<<<< HEAD
-  user-select: none; }
-  .cherry-floatmenu .cherry-toolbar-button {
-    float: left;
-    padding: 0 9px;
-    margin: 0;
-    height: 22px;
-    line-height: 22px;
-    font-size: 14px;
-    color: #3f4a56;
-    overflow: hidden;
-    vertical-align: middle;
-    text-align: center;
-    border: 0;
-    cursor: pointer;
-    font-style: normal; }
-    .cherry-floatmenu .cherry-toolbar-button.cherry-toolbar-split {
-      border-left: 1px solid #cbd5e080;
-      width: 0;
-      padding: 0;
-      overflow: hidden;
-      height: 25px; }
-    .cherry-floatmenu .cherry-toolbar-button .ch-icon {
-      color: #aaa;
-      font-size: 12px; }
-    .cherry-floatmenu .cherry-toolbar-button:hover {
-      background: rgba(0, 0, 0, 0.05); }
-      .cherry-floatmenu .cherry-toolbar-button:hover .ch-icon {
-        color: #3f4a56; }
-=======
   user-select: none;
 }
 .cherry-floatmenu .cherry-toolbar-button {
   float: left;
   padding: 0 9px;
   margin: 0;
-  height: 27px;
-  line-height: 27px;
+  height: 22px;
+  line-height: 22px;
   font-size: 14px;
   color: #3f4a56;
   overflow: hidden;
@@ -2846,7 +2265,7 @@ div[data-type=codeBlock] .token.inserted {
   font-style: normal;
 }
 .cherry-floatmenu .cherry-toolbar-button.cherry-toolbar-split {
-  border-left: 1px solid #dfe6ee;
+  border-left: 1px solid rgba(203, 213, 224, 0.5019607843);
   width: 0;
   padding: 0;
   overflow: hidden;
@@ -2862,7 +2281,6 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-floatmenu .cherry-toolbar-button:hover .ch-icon {
   color: #3f4a56;
 }
->>>>>>> c7c645751be9f91f66eb2f77365f10237a2a5158
 
 .cherry-editor {
   position: relative;
@@ -2870,49 +2288,6 @@ div[data-type=codeBlock] .token.inserted {
   padding-right: 5px;
   width: 50%;
   box-sizing: border-box;
-<<<<<<< HEAD
-  overflow: hidden; }
-  .cherry-editor.cherry-editor--full {
-    width: 100%;
-    padding-right: 0; }
-  .cherry-editor.cherry-editor--hidden {
-    display: none; }
-  .cherry-editor .CodeMirror {
-    background: #fff;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    background: #f8fafb;
-    color: #3f4a56; }
-    .cherry-editor .CodeMirror textarea {
-      font-size: 22px; }
-  .cherry-editor .CodeMirror-lines {
-    padding: 15px 34px; }
-  .cherry-editor .cm-s-default .cm-header {
-    color: #3f4a56; }
-  .cherry-editor .cm-s-default .cm-string {
-    color: #3f4a56; }
-  .cherry-editor .cm-s-default .cm-comment {
-    color: #3f4a56;
-    font-family: "Menlo", "Liberation Mono", "Consolas", "DejaVu Sans Mono", "Ubuntu Mono", "Courier New", "andale mono", "lucida console", monospace;
-    font-size: 0.9em; }
-  .cherry-editor .cm-s-default .cm-whitespace,
-  .cherry-editor .cm-tab {
-    font-family: "Menlo", "Liberation Mono", "Consolas", "DejaVu Sans Mono", "Ubuntu Mono", "Courier New", "andale mono", "lucida console", monospace;
-    font-size: 0.9em; }
-  .cherry-editor .cm-s-default .cm-quote {
-    color: #3A84FF; }
-  .cherry-editor .cm-s-default .cm-link {
-    color: #3A84FF; }
-  .cherry-editor .cm-s-default .cm-url {
-    background: #d7e6fe;
-    font-family: "Menlo", "Liberation Mono", "Consolas", "DejaVu Sans Mono", "Ubuntu Mono", "Courier New", "andale mono", "lucida console", monospace;
-    font-size: 0.9em; }
-  .cherry-editor .cm-s-default .cm-variable-2 {
-    color: #3f4a56; }
-  .cherry-editor .cm-s-default .cm-variable-3 {
-    color: #3f4a56; }
-  .cherry-editor .cm-s-default .cm-keyword {
-    color: #3f4a56; }
-=======
   overflow: hidden;
 }
 .cherry-editor.cherry-editor--full {
@@ -2923,12 +2298,13 @@ div[data-type=codeBlock] .token.inserted {
   display: none;
 }
 .cherry-editor .CodeMirror {
-  font-family: "Helvetica Neue", Arial, "Hiragino Sans GB", "STHeiti", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+  background: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   background: #f8fafb;
   color: #3f4a56;
 }
 .cherry-editor .CodeMirror textarea {
-  font-size: 27px;
+  font-size: 22px;
 }
 .cherry-editor .CodeMirror-lines {
   padding: 15px 34px;
@@ -2940,19 +2316,20 @@ div[data-type=codeBlock] .token.inserted {
   color: #3f4a56;
 }
 .cherry-editor .cm-s-default .cm-comment {
-  color: #3582fb;
+  color: #3f4a56;
   font-family: "Menlo", "Liberation Mono", "Consolas", "DejaVu Sans Mono", "Ubuntu Mono", "Courier New", "andale mono", "lucida console", monospace;
   font-size: 0.9em;
 }
-.cherry-editor .cm-s-default .cm-whitespace, .cherry-editor .cm-tab {
+.cherry-editor .cm-s-default .cm-whitespace,
+.cherry-editor .cm-tab {
   font-family: "Menlo", "Liberation Mono", "Consolas", "DejaVu Sans Mono", "Ubuntu Mono", "Courier New", "andale mono", "lucida console", monospace;
   font-size: 0.9em;
 }
 .cherry-editor .cm-s-default .cm-quote {
-  color: #3582fb;
+  color: #3A84FF;
 }
 .cherry-editor .cm-s-default .cm-link {
-  color: #3582fb;
+  color: #3A84FF;
 }
 .cherry-editor .cm-s-default .cm-url {
   background: #d7e6fe;
@@ -2968,7 +2345,6 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-editor .cm-s-default .cm-keyword {
   color: #3f4a56;
 }
->>>>>>> c7c645751be9f91f66eb2f77365f10237a2a5158
 
 .cherry-drag {
   width: 15px;
@@ -3052,24 +2428,22 @@ div[data-type=codeBlock] .token.inserted {
   width: 25px;
   text-align: center;
   height: 25px;
-  border: 1px solid #DDD;
   cursor: pointer;
   float: right;
   right: 10px;
   top: 15px;
-  color: #FFF;
   border-radius: 5px;
   margin-left: -27px;
   transition: all 0.3s;
   z-index: 1;
-}
-[data-code-block-theme=default] .cherry-previewer div[data-type=codeBlock]:hover .cherry-copy-code-block, [data-code-block-theme=funky] .cherry-previewer div[data-type=codeBlock]:hover .cherry-copy-code-block, [data-code-block-theme=solarized-light] .cherry-previewer div[data-type=codeBlock]:hover .cherry-copy-code-block, [data-code-block-theme=coy] .cherry-previewer div[data-type=codeBlock]:hover .cherry-copy-code-block {
-  background-color: #3582fb;
+  border: 1px solid #CBD5E0;
+  color: #081E40;
+  background: #fff;
 }
 .cherry-previewer div[data-type=codeBlock]:hover .cherry-copy-code-block:hover {
-  color: #3582fb;
-  background-color: #eee;
-  border-color: #3582fb;
+  border: 1px solid #3A84FF;
+  color: #3A84FF;
+  background: #EBF2FF;
 }
 
 .cherry-color-wrap {
@@ -3109,47 +2483,6 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-switch-paste {
   margin-left: -112px;
   left: 50%;
-<<<<<<< HEAD
-  box-sizing: content-box; }
-  .cherry-switch-paste .switch-btn--bg {
-    transition: all 0.3s;
-    position: absolute;
-    width: 50%;
-    height: 100%;
-    box-sizing: border-box;
-    z-index: -1;
-    left: -1px;
-    opacity: 0.3;
-    background-color: #5d9bfc; }
-  .cherry-switch-paste .cherry-toolbar-button {
-    width: 80px;
-    text-align: center;
-    box-sizing: content-box; }
-    .cherry-switch-paste .cherry-toolbar-button:hover {
-      border-color: transparent; }
-  .cherry-switch-paste[data-type='text'] .cherry-text-btn {
-    color: #3f4a56; }
-  .cherry-switch-paste[data-type='text'] .cherry-md-btn {
-    color: #5d9bfc; }
-  .cherry-switch-paste[data-type='md'] .cherry-md-btn {
-    color: #3f4a56; }
-  .cherry-switch-paste[data-type='md'] .cherry-text-btn {
-    color: #5d9bfc; }
-  .cherry-switch-paste[data-type='md'] .switch-btn--bg {
-    left: 50%; }
-  [data-toolbar-theme='dark'] .cherry-switch-paste .switch-btn--bg {
-    background-color: #fff; }
-  [data-toolbar-theme='dark'] .cherry-switch-paste[data-type='text'] .cherry-text-btn {
-    color: #d7e6fe; }
-  [data-toolbar-theme='dark'] .cherry-switch-paste[data-type='text'] .cherry-md-btn {
-    color: #fff; }
-  [data-toolbar-theme='dark'] .cherry-switch-paste[data-type='md'] .cherry-md-btn {
-    color: #d7e6fe; }
-  [data-toolbar-theme='dark'] .cherry-switch-paste[data-type='md'] .cherry-text-btn {
-    color: #fff; }
-  [data-toolbar-theme='dark'] .cherry-switch-paste[data-type='md'] .switch-btn--bg {
-    left: 50%; }
-=======
   box-sizing: content-box;
 }
 .cherry-switch-paste .switch-btn--bg {
@@ -3166,6 +2499,7 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-switch-paste .cherry-toolbar-button {
   width: 80px;
   text-align: center;
+  box-sizing: content-box;
 }
 .cherry-switch-paste .cherry-toolbar-button:hover {
   border-color: transparent;
@@ -3203,7 +2537,6 @@ div[data-type=codeBlock] .token.inserted {
 [data-toolbar-theme=dark] .cherry-switch-paste[data-type=md] .switch-btn--bg {
   left: 50%;
 }
->>>>>>> c7c645751be9f91f66eb2f77365f10237a2a5158
 
 .Cherry-Math svg {
   max-width: 100%;
@@ -3241,7 +2574,13 @@ div[data-type=codeBlock] .token.inserted {
   padding: 1px 4px;
   border-radius: 3px;
   cursor: pointer;
-} /* BASICS */
+}
+
+[data-code-block-theme=twilight] div[data-type=codeBlock] pre[class*=language-] {
+  border: none;
+}
+
+/* BASICS */
 .CodeMirror {
   /* Set height, width, borders, and global font properties here */
   font-family: monospace;

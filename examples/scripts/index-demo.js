@@ -73,6 +73,7 @@ var basicConfig = {
     },
   },
   toolbars: {
+    theme: 'light',
     toolbar: [
       'bold',
       'italic',

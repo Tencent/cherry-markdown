@@ -619,27 +619,31 @@
       width: 25px;
       text-align: center;
       height: 25px;
-      border: 1px solid #DDD;
       cursor: pointer;
       float: right;
       right: 10px;
       top: 15px;
-      color: #FFF;
       border-radius: 5px;
       margin-left: -27px;
       transition: all 0.3s;
       z-index: 1;
+      border: 1px solid #CBD5E0;
+      color: #081E40;
+      background: #fff;
     }
+
     // 浅色系
-    [data-code-block-theme='default'] & ,[data-code-block-theme='funky'] & ,[data-code-block-theme='solarized-light'] & ,[data-code-block-theme='coy'] & {
-      .cherry-copy-code-block {
-        background-color: #3582fb;
-      }
+    [data-code-block-theme='default'] &,
+    [data-code-block-theme='funky'] &,
+    [data-code-block-theme='solarized-light'] &,
+    [data-code-block-theme='coy'] & {
+      .cherry-copy-code-block {}
     }
+
     .cherry-copy-code-block:hover {
-      color: #3582fb;
-      background-color: #eee;
-      border-color: #3582fb;
+      border: 1px solid #3A84FF;
+      color: #3A84FF;
+      background: #EBF2FF;
     }
   }
 }
@@ -807,4 +811,8 @@
   padding: 1px 4px;
   border-radius: 3px;
   cursor: pointer;
+}
+
+[data-code-block-theme=twilight] div[data-type=codeBlock] pre[class*=language-] {
+  border: none;
 }
