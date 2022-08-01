@@ -10,10 +10,13 @@
     "emitDeclarationOnly": false,
     "outDir": "dist/addons",
     "target": "ES5",
+    "paths": {
+      "@/libs/*": ["src/libs/*"]
+    },
   },
   // 按需引入addons，尽量不引入编辑器代码
   "include": [
-    "src/addons/cherry-code-block-mermaid-plugin.js",
+    "src/addons/**/*-plugin.js",
   ],
   "files": [
     "types/codemirror.d.ts",

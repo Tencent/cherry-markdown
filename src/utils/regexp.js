@@ -43,6 +43,7 @@ export const NOT_ALL_WHITE_SPACES_INLINE = '(?:[^\\n]*?\\S[^\\n]*?)';
 
 export const NORMAL_INDENT = '[ ]{0, 3}|\\t';
 export const NO_BACKSLASH_BEFORE_CAPTURE = '[^\\\\]';
+
 // https://spec.commonmark.org/0.29/#ascii-punctuation-character
 // !, ", #, $, %, &, ', (, ), *, +, ,, -, ., / (U+0021–2F),
 // :, ;, <, =, >, ?, @ (U+003A–0040),
@@ -50,9 +51,17 @@ export const NO_BACKSLASH_BEFORE_CAPTURE = '[^\\\\]';
 // {, |, }, or ~ (U+007B–007E).
 export const PUNCTUATION = '[\\u0021-\\u002F\\u003a-\\u0040\\u005b-\\u0060\\u007b-\\u007e]';
 
+// extra punctuations
+export const CHINESE_PUNCTUATION = '[！“”¥‘’（），。—：；《》？【】「」·～｜]';
+
 // 下划线强调语法允许的边界符号
-export const UNDERSCORE_EMPHASIS_BORDER =
-  '[\\u0021-\\u002F\\u003a-\\u0040\\u005b\\u005d\\u005e\\u0060\\u007b-\\u007e \\t\\n]';
+export const UNDERSCORE_EMPHASIS_BOUNDARY =
+  '[' +
+  '\\u0021-\\u002F\\u003a-\\u0040\\u005b\\u005d\\u005e\\u0060\\u007b-\\u007e' + // punctuations defined in commonmark
+  ' ' +
+  '\\t\\n' +
+  '！“”¥‘’（），。—：；《》？【】「」·～｜' + // chinese punctuations
+  ']';
 
 // https://html.spec.whatwg.org/multipage/input.html#e-mail-state-(type%3Demail)
 export const EMAIL_INLINE = new RegExp(

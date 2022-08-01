@@ -33,4 +33,11 @@ export default class Code extends MenuBase {
     const code = selection ? selection : 'code...';
     return `\n\`\`\` \n${code}\n\`\`\`\n`;
   }
+
+  /**
+   * 声明绑定的快捷键，快捷键触发onClick
+   */
+  get shortcutKeys() {
+    return ['Mod-k'];
+  }
 }

@@ -28,6 +28,10 @@ export default class Insert extends MenuBase {
     editor.options.wrapperDom.appendChild(this.subBubbleTableMenu.dom);
 
     // 定义子菜单
+    /**
+     * **TODO**:
+     *   这里所有子菜单的代码应该删掉，复用已有的toolbar对象
+     */
     this.subMenuConfig = [
       { iconName: 'image', name: 'image', onclick: this.bindSubClick.bind(this, 'image') },
       { iconName: 'video', name: 'audio', onclick: this.bindSubClick.bind(this, 'audio') },

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { getSelection } from '@/utils/selection';
 /**
  * 插入1级标题
  */
@@ -30,12 +31,18 @@ export default class H1 extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    // TODO: 1、改成获取整行内容进行判断； 2、根据#号个数判断是增加#号还是删除#号还是编辑#号
-    if (/^\s*(#+)\s*[\s\S]+/.test(selection)) {
-      return selection.replace(/(^\s*)(#+)(\s*)([\s\S]+$)/gm, '$1$4');
+    const $selection = getSelection(this.editor.editor, selection, 'line', true) || '标题';
+    // 如果有选中的内容，则根据选中的内容进行判断
+    if (/^\s*(#+)\s*.+/.test($selection)) {
+      // 如果选中的内容里有标题语法，并且标记级别与目标一致，则去掉标题语法
+      // 反之，修改标题级别与目标一致
+      let needClean = true;
+      const tmp = $selection.replace(/(^\s*)(#+)(\s*)(.+$)/gm, (w, m1, m2, m3, m4) => {
+        needClean = needClean ? m2 === '#' : false;
+        return `${m1}#${m3}${m4}`;
+      });
+      return !needClean ? tmp : $selection.replace(/(^\s*)(#+)(\s*)(.+$)/gm, '$1$4');
     }
-    let $selection = selection ? selection : '标题';
-    $selection = $selection.replace(/(^)([\s]*)([^\n]+)($)/gm, '$1# $3$4');
-    return $selection;
+    return $selection.replace(/(^)([\s]*)([^\n]+)($)/gm, '$1# $3$4');
   }
 }
