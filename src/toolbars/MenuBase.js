@@ -207,34 +207,137 @@ export default class MenuBase {
    * @param {MouseEvent} event 点击事件
    * @returns {void}
    */
-  $onClick(event) {
-    event.stopPropagation();
+  $onClick(event, shortKey = '') {
+    event?.stopPropagation();
     if (this.subMenuConfig.length) {
       return this.toggleSubMenu();
     }
     if (typeof this.onClick === 'function') {
       MenuBase.cleanSubMenu();
       const selections = this.editor.editor.getSelections();
+      // 判断是不是多选
+      this.isSelections = selections.length > 1;
       // 当onClick返回null或undefined时，维持原样
-      const ret = selections.map((selection, index, srcArray) => this.onClick(selection, '', event) || srcArray[index]);
+      const ret = selections.map(
+        (selection, index, srcArray) => this.onClick(selection, shortKey, event) || srcArray[index],
+      );
       if (!this.bubbleMenu && this.updateMarkdown) {
         // 非下拉菜单按钮保留selection
         this.editor.editor.replaceSelections(ret, 'around');
         this.editor.editor.focus();
+        this.$afterClick();
       }
     }
   }
 
   /**
+   * 获取当前选择区域的range
+   */
+  $getSelectionRange() {
+    const { anchor, head } = this.editor.editor.listSelections()[0];
+    // 如果begin在end的后面
+    if ((anchor.line === head.line && anchor.ch > head.ch) || anchor.line > head.line) {
+      return { begin: head, end: anchor };
+    }
+    return { begin: anchor, end: head };
+  }
+
+  /**
+   * 注册点击事件渲染后的回调函数
+   * @param {function} cb
+   */
+  registerAfterClickCb(cb) {
+    this.afterClickCb = cb;
+  }
+
+  /**
+   * 点击事件渲染后的回调函数
+   */
+  $afterClick() {
+    if (typeof this.afterClickCb === 'function' && !this.isSelections) {
+      this.afterClickCb();
+      this.afterClickCb = null;
+    }
+  }
+
+  /**
+   * 选中除了前后语法后的内容
+   * @param {String} lessBefore
+   * @param {String} lessAfter
+   */
+  setLessSelection(lessBefore, lessAfter) {
+    const cm = this.editor.editor;
+    const { begin, end } = this.$getSelectionRange();
+    const newBegin = { line: begin.line, ch: begin.ch + lessBefore.length };
+    const newEnd = { line: end.line, ch: end.ch - lessAfter.length };
+    cm.setSelection(newBegin, newEnd);
+  }
+
+  /**
+   * 基于当前已选择区域，获取更多的选择区
+   * @param {string} [appendBefore] 选择区前面追加的内容
+   * @param {string} [appendAfter] 选择区后面追加的内容
+   * @param {function} [cb] 回调函数，如果返回false，则恢复原来的选取
+   */
+  getMoreSelection(appendBefore, appendAfter, cb) {
+    const cm = this.editor.editor;
+    const { begin, end } = this.$getSelectionRange();
+    const newBeginCh = begin.ch > appendBefore.length ? begin.ch - appendBefore.length : 0;
+    const newBegin = { line: begin.line, ch: newBeginCh };
+    const newEndCh =
+      cm.getLine(end.line).length < end.ch + appendAfter.length
+        ? cm.getLine(end.line).length
+        : end.ch + appendAfter.length;
+    const newEnd = { line: end.line, ch: newEndCh };
+    cm.setSelection(newBegin, newEnd);
+    if (cb() === false) {
+      cm.setSelection(begin, end);
+    }
+  }
+
+  /**
+   * 获取用户选中的文本内容，如果没有选中文本，则返回光标所在的位置的内容
+   * @param {string} selection 当前选中的文本内容
+   * @param {string} type  'line': 当没有选择文本时，获取光标所在行的内容； 'word': 当没有选择文本时，获取光标所在单词的内容
+   * @param {boolean} focus true；强行选中光标处的内容，否则只获取选中的内容
+   * @returns {string}
+   */
+  getSelection(selection, type = 'word', focus = false) {
+    const cm = this.editor.editor;
+    // 多光标模式下不做处理
+    if (this.isSelections) {
+      return selection;
+    }
+    if (selection && !focus) {
+      return selection;
+    }
+    // 获取光标所在行的内容，同时选中所在行
+    if (type === 'line') {
+      const { begin, end } = this.$getSelectionRange();
+      cm.setSelection({ line: begin.line, ch: 0 }, { line: end.line, ch: cm.getLine(end.line).length });
+      return cm.getSelection();
+    }
+    // 获取光标所在单词的内容，同时选中所在单词
+    if (type === 'word') {
+      const { anchor: begin, head: end } = cm.findWordAt(cm.getCursor());
+      cm.setSelection(begin, end);
+      return cm.getSelection();
+    }
+  }
+
+  /**
    *
-   * @param {CodeMirror.Editor} codemirror cm实例
-   * @param {string[]} selections 选中的文本集合
    * @param {string} key 触发的快捷键
    * @returns
    */
-  onKeyDown(codemirror, selections, key) {
-    const ret = selections.map((selection) => this.onClick(selection, key));
-    return codemirror.replaceSelections(ret, 'around');
+  onKeyDown(key) {
+    if (this.getSubMenuConfig().length === 0) {
+      this.$onClick(null, key);
+    } else {
+      // 有子菜单的情况下，先用旧的调用方式
+      const ret = this.editor.editor.getSelections().map((selection) => this.onClick(selection, key));
+      return this.editor.editor.replaceSelections(ret, 'around');
+    }
   }
 
   // 反转子菜单点击事件参数顺序
@@ -259,7 +362,7 @@ export default class MenuBase {
     };
     return this.shortcutKeys.reduce((ret, key) => {
       const registerKey = shortcutReplacer(key);
-      ret[registerKey] = (evt, codemirror) => this.onKeyDown(codemirror, codemirror.getSelections(), key);
+      ret[registerKey] = (evt, codemirror) => this.onKeyDown(key);
       return ret;
     }, {});
   }
