@@ -16,18 +16,15 @@
 import MenuBase from '@/toolbars/MenuBase';
 import BubbleTableMenu from '@/toolbars/BubbleTable';
 import { getSelection } from '@/utils/selection';
-import Event from '@/Event';
 /**
  * "插入"按钮
  */
 export default class Insert extends MenuBase {
-  $toolbarStatus = false;
   // TODO: 需要优化参数传入方式
   constructor(editor, options, engine) {
     super(editor);
     this.setName('insert', 'insert');
-    this.$toolbarStatus = engine.markdownParams.toolbars.showToolbar; // 获取toolbar默认配置
-    this.engine = engine;
+
     this.subBubbleTableMenu = new BubbleTableMenu({ row: 9, col: 9 });
     editor.options.wrapperDom.appendChild(this.subBubbleTableMenu.dom);
 
@@ -53,7 +50,6 @@ export default class Insert extends MenuBase {
       { iconName: 'pdf', name: 'pdf', onclick: this.bindSubClick.bind(this, 'pdf') },
       { iconName: 'word', name: 'word', onclick: this.bindSubClick.bind(this, 'word') },
       { iconName: 'pinyin', name: 'ruby', onclick: this.bindSubClick.bind(this, 'ruby') },
-      { iconName: '', name: 'toggleToolbar', onclick: this.bindSubClick.bind(this, 'toggleToolbar') },
     ];
     // 用户可配置
     if (options instanceof Array) {
@@ -245,9 +241,6 @@ export default class Insert extends MenuBase {
           return $selection.replace(/^\s*\{\s*([\s\S]+?)\s*\|[\s\S]+\}\s*/gm, '$1');
         }
         return ` { ${$selection} | ${this.editor.$cherry.options.callback.changeString2Pinyin($selection).trim()} } `;
-      case 'toggleToolbar':
-        this.toggleToolbar();
-        return '';
     }
   }
 
@@ -286,25 +279,7 @@ export default class Insert extends MenuBase {
         shortKey: 'formula',
         shortcutKey: 'Mod-m',
       },
-      {
-        shortKey: 'toggleToolbar',
-        shortcutKey: 'Mod-q',
-      },
     ];
-  }
-
-  /**
-   * 切换Toolbar显示状态
-   */
-  toggleToolbar() {
-    const wrapperDom = this.engine.$cherry.cherryDom.childNodes[0];
-    if (wrapperDom instanceof HTMLDivElement) {
-      if (wrapperDom.className.indexOf('cherry--no-toolbar') > -1) {
-        wrapperDom.classList.remove('cherry--no-toolbar');
-      } else {
-        wrapperDom.classList.add('cherry--no-toolbar');
-      }
-    }
   }
 
   get shortcutKeys() {
