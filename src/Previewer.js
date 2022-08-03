@@ -518,7 +518,7 @@ export default class Previewer {
       }
     }
     if (ret.style) {
-      ret.style = ret.style.join(';');
+      ret.style = { cssText: ret.style.join(';') }; // see virtual-dom implementation
     }
     return ret;
   }
