@@ -465,7 +465,7 @@ export default class Previewer {
       return vDH('span', {}, []);
     }
     if (!dom.tagName) {
-      return dom.wholeText;
+      return dom.textContent;
     }
     const { tagName } = dom;
     const myAttrs = this.$getAttrsForH(dom.attributes);
