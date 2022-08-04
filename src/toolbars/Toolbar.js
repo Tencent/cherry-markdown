@@ -31,7 +31,13 @@ function getCurrentKey(event) {
     key += 'Command-';
   }
 
-  if (event.key) {
+  // 如果存在shift键
+  if (event.shiftKey) {
+    key += `Shift-`;
+  }
+
+  // 如果还有第三个键 且不是 shift键
+  if (event.key && event.key.toLowerCase() != 'shift') {
     key += event.key.toLowerCase();
   }
 
