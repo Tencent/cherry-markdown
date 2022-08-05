@@ -465,12 +465,16 @@ export default class Previewer {
       return vDH('span', {}, []);
     }
     if (!dom.tagName) {
-      return dom.wholeText;
+      return dom.textContent;
     }
     const { tagName } = dom;
+
+    // skip all children if data-cm-atomic attribute is set
+    const isAtomic = 'true' === dom.getAttribute('data-cm-atomic');
+
     const myAttrs = this.$getAttrsForH(dom.attributes);
     const children = [];
-    if (dom.childNodes && dom.childNodes.length > 0) {
+    if (!isAtomic && dom.childNodes && dom.childNodes.length > 0) {
       for (let i = 0; i < dom.childNodes.length; i++) {
         children.push(this.$html2H(dom.childNodes[i]));
       }
@@ -518,7 +522,7 @@ export default class Previewer {
       }
     }
     if (ret.style) {
-      ret.style = ret.style.join(';');
+      ret.style = { cssText: ret.style.join(';') }; // see virtual-dom implementation
     }
     return ret;
   }
