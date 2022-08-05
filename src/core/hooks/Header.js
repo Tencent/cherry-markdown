@@ -22,7 +22,6 @@ const SETEXT_HEADER = 'setext';
 const toDashChars = /[\s\-_]/;
 const alphabetic = /[A-Za-z]/;
 const numeric = /[0-9]/;
-const placeHolderRegex = `~~C\\d+I(?!${ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX})\\w+\\$`;
 
 export default class Header extends ParagraphBase {
   static HOOK_NAME = 'header';
@@ -189,11 +188,7 @@ export default class Header extends ParagraphBase {
         const headerLevel = level[0] === '-' ? 2 : 1; // =: H1, -: H2
         const { html: result, sign } = this.$wrapHeader(text, headerLevel, lineCount, sentenceMakeFunc);
         // 文章的开头不加换行
-        return this.getCacheWithSpace(
-          this.pushCache(result, sign, lineCount),
-          match.replace(/^\n+/).replace(/^\n+/),
-          true,
-        );
+        return this.getCacheWithSpace(this.pushCache(result, sign, lineCount), match.replace(/^\n+/), true);
       });
     }
 
