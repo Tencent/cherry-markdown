@@ -37,7 +37,7 @@ function getCurrentKey(event) {
   }
 
   // 如果还有第三个键 且不是 shift键
-  if (event.key && event.key.toLowerCase() != 'shift') {
+  if (event.key && event.key.toLowerCase() !== 'shift') {
     key += event.key.toLowerCase();
   }
 
