@@ -22,10 +22,10 @@ const SETEXT_HEADER = 'setext';
 const toDashChars = /[\s\-_]/;
 const alphabetic = /[A-Za-z]/;
 const numeric = /[0-9]/;
+const placeHolderRegex = `~~C\\d+I(?!${ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX})\\w+\\$`;
 
 export default class Header extends ParagraphBase {
   static HOOK_NAME = 'header';
-
   constructor({ externals, config } = { config: undefined, externals: undefined }) {
     super({ needCache: true });
     this.strict = config ? !!config.strict : true;
@@ -155,6 +155,7 @@ export default class Header extends ParagraphBase {
   makeHtml(str, sentenceMakeFunc) {
     // 先还原
     let $str = this.restoreCache(str);
+
     // atx 优先
     if (this.test($str, ATX_HEADER)) {
       $str = $str.replace(this.RULE[ATX_HEADER].reg, (match, lines, level, text) => {
@@ -163,6 +164,7 @@ export default class Header extends ParagraphBase {
         const $text = text.replace(/\s+#+\s*$/, ''); // close tag
         const { html: result, sign } = this.$wrapHeader($text, level.length, lineCount, sentenceMakeFunc);
         // 文章的开头不加换行
+
         return this.getCacheWithSpace(this.pushCache(result, sign, lineCount), match, true);
       });
     }
@@ -177,9 +179,10 @@ export default class Header extends ParagraphBase {
         const headerLevel = level[0] === '-' ? 2 : 1; // =: H1, -: H2
         const { html: result, sign } = this.$wrapHeader(text, headerLevel, lineCount, sentenceMakeFunc);
         // 文章的开头不加换行
-        return this.getCacheWithSpace(this.pushCache(result, sign, lineCount), match, true);
+        return this.getCacheWithSpace(this.pushCache(result, sign, lineCount), match.replace(/^\n+/), true);
       });
     }
+
     return $str;
   }
 
@@ -198,13 +201,15 @@ export default class Header extends ParagraphBase {
     // setext Header
     // TODO: 支持多行标题
     const setext = {
-      begin: '(?:^|\\n)(\\n*)', // (?<lines>\\n*)
+      begin: `(?:\\n*${placeHolderRegex}|\\n|^)(\\n*)`, // (?<lines>\\n*)
       content: [
         '(?:\\h*',
-        '(.+)', // (?<text>.+)
-        ')\\n',
+        '((?: {0,3})(?:.+\\n)(?:.+\\n)*?)', // (?<text>)
+        ')',
         '(?:\\h*',
+        '(?: {0,3})', // up to three spaces of indentation
         '([=]+|[-]+)', // (?<level>[=]+|[-]+)
+        '(?:[ \\t]*)', // may have trailing spaces or tabs
         ')',
       ].join(''),
       end: '(?=$|\\n)',
