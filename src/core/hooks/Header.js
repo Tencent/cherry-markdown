@@ -22,7 +22,6 @@ const SETEXT_HEADER = 'setext';
 const toDashChars = /[\s\-_]/;
 const alphabetic = /[A-Za-z]/;
 const numeric = /[0-9]/;
-const placeHolderRegex = `~~C\\d+I(?!${ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX})\\w+\\$`;
 
 export default class Header extends ParagraphBase {
   static HOOK_NAME = 'header';
