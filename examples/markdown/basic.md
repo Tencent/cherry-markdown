@@ -12,7 +12,7 @@
 - [表格所见即所得编辑尺寸](table.html){target=_blank}
 - [标题自动序号](head_num.html){target=_blank}
 
-# Cherry Markdown 简明手册
+# Cherry Markdown  { 简明手册 | jiǎn míng shǒu cè }
 
 [[toc]]
 

@@ -33,14 +33,14 @@ const terserPlugin = (options = {}) =>
 
 const umdOutputConfig = {
   ...baseConfig.output,
-    exports: 'named',
-    file: isCoreBuild ? 'dist/cherry-markdown.engine.core.js' : 'dist/cherry-markdown.engine.js',
-    format: 'umd',
-    name: 'CherryEngine',
-    sourcemap: false,
-    compact: true,
-    plugins: [terserPlugin()],
-}
+  exports: 'named',
+  file: isCoreBuild ? 'dist/cherry-markdown.engine.core.js' : 'dist/cherry-markdown.engine.js',
+  format: 'umd',
+  name: 'CherryEngine',
+  sourcemap: false,
+  compact: true,
+  plugins: [terserPlugin()],
+};
 
 const esmOutputConfig = {
   ...baseConfig.output,
@@ -55,7 +55,7 @@ const esmOutputConfig = {
       ecma: 2015,
     }),
   ],
-}
+};
 
 const options = {
   ...baseConfig,

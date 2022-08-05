@@ -547,6 +547,37 @@ new Cherry({
 
 如果你想看更多有关 cherry markdown 的拓展信息，可以看这里 [extensions](./docs/extensions.CN.md).
 
+
+## 单元测试
+
+选用 Jest 作为单元测试工具，主要看好其断言、支持异步和快照测试等功能。单元测试分为两个部分，CommonMark 用例测试和快照测试。
+
+### CommonMark 测试用例
+
+运行 `yarn run test:commonmark` 测试 CommonMark 官方用例，运行速度较快。
+
+用例位于 `test/suites/commonmark.spec.json`， 比如：
+```json
+{
+  "markdown": "  \tfoo\tbaz\t\tbim\n",
+  "html": "<pre><code>foo\tbaz\t\tbim\n</code></pre>\n",
+  "example": 2,
+  "start_line": 363,
+  "end_line": 368,
+  "section": "Tabs"
+},
+```
+对于这个测试点，Jest 会比对 `Cherry.makeHtml("  \tfoo\tbaz\t\tbim\n")` 生成的 html 与用例中的预期结果 `"<pre><code>foo\tbaz\t\tbim\n</code></pre>\n"`。Cherry Markdown 的匹配器已忽略 `data-line` 等私有属性。
+
+CommonMark 规范及测试用例可参考：https://spec.commonmark.org/ 。
+
+### 快照测试
+
+调用 `yarn run test:snapshot` 运行快照测试，书写用例可参考 `test/core/hooks/List.spec.ts`，新用例第一次运行会自动生成快照，第二次会将生成内容与快照进行比对。如果需要重新生成快照，将 `test/core/hooks/__snapshots__` 下对应的旧快照删除再运行一次即可。
+
+快照测试运行速度较慢，仅在易出错且包含 Cherry 特色语法的 Hook 上使用。
+
+
 ## Contributing
 
 欢迎加入我们打造强大的 Markdown 编辑器。当然你也可以给我们提交特性需求的 issue。 在写特性功能之前，你需要了解 [extensions](./docs/extensions.CN.md) 以及  [commit_convention](./docs/commit_convention.CN.md).

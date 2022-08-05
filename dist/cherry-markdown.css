@@ -290,6 +290,10 @@
   content: "\ea58";
 }
 
+.ch-icon-pinyin:before {
+  content: "\ea59";
+}
+
 .cherry-markdown {
   word-break: break-all;
   /* Specify class=linenums on a pre to get line numbering */
@@ -2093,7 +2097,6 @@ div[data-type=codeBlock] .token.inserted {
 }
 
 .cherry-sidebar {
-  min-height: 200px;
   width: 40px;
   position: absolute;
   top: 48px;
