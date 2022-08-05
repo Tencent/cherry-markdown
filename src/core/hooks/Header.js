@@ -141,6 +141,7 @@ export default class Header extends ParagraphBase {
       });
     }
     // 按照目前的引擎，每个hook只会执行一次，所以需要并行执行替换
+
     if (this.test($str, SETEXT_HEADER)) {
       $str = $str.replace(this.RULE[SETEXT_HEADER].reg, (match, lines, text) => {
         if (text.trim() === '' || this.isContainsCache(text)) {
@@ -149,6 +150,7 @@ export default class Header extends ParagraphBase {
         return this.getCacheWithSpace(this.pushCache(match), match, true);
       });
     }
+
     return $str;
   }
 
@@ -161,6 +163,7 @@ export default class Header extends ParagraphBase {
       $str = $str.replace(this.RULE[ATX_HEADER].reg, (match, lines, level, text) => {
         // 其中有两行是beforeMake加上的
         const lineCount = calculateLinesOfParagraph(lines, this.getLineCount(match.replace(/^\n+/, '')));
+
         const $text = text.replace(/\s+#+\s*$/, ''); // close tag
         const { html: result, sign } = this.$wrapHeader($text, level.length, lineCount, sentenceMakeFunc);
         // 文章的开头不加换行
@@ -170,16 +173,27 @@ export default class Header extends ParagraphBase {
     }
     // 按照目前的引擎，每个hook只会执行一次，所以需要并行执行替换
     if (this.test($str, SETEXT_HEADER)) {
+      // 在占位符后加一行换行来分隔text
+      $str = $str.replace(/_L\d+\$/, (match) => {
+        const newLine = '\n';
+        return [match, newLine].join('');
+      });
+
       $str = $str.replace(this.RULE[SETEXT_HEADER].reg, (match, lines, text, level) => {
         if (this.isContainsCache(text)) {
           return match;
         }
         // 其中有两行是beforeMake加上的
         const lineCount = calculateLinesOfParagraph(lines, this.getLineCount(match.replace(/^\n+/, '')));
+
         const headerLevel = level[0] === '-' ? 2 : 1; // =: H1, -: H2
         const { html: result, sign } = this.$wrapHeader(text, headerLevel, lineCount, sentenceMakeFunc);
         // 文章的开头不加换行
-        return this.getCacheWithSpace(this.pushCache(result, sign, lineCount), match.replace(/^\n+/), true);
+        return this.getCacheWithSpace(
+          this.pushCache(result, sign, lineCount),
+          match.replace(/^\n+/).replace(/^\n+/),
+          true,
+        );
       });
     }
 
@@ -201,14 +215,16 @@ export default class Header extends ParagraphBase {
     // setext Header
     // TODO: 支持多行标题
     const setext = {
-      begin: `(?:\\n*${placeHolderRegex}|\\n|^)(\\n*)`, // (?<lines>\\n*)
+      begin: `(?:^|\\n)(\\n*)`, // (?<lines>\\n*)
       content: [
         '(?:\\h*',
-        '((?: {0,3})(?:.+\\n)(?:.+\\n)*?)', // (?<text>)
-        ')',
+        '(?<! {4,})', // up to three spaces of indentation before content
+        '((?:.+)(?:\\n.+)*)', // (?<text>)
+        ')\\n',
         '(?:\\h*',
-        '(?: {0,3})', // up to three spaces of indentation
+        '(?<! {4,})', // up to three spaces of indentation before underline
         '([=]+|[-]+)', // (?<level>[=]+|[-]+)
+        '(?:[ \\t]*)', // may have trailing spaces or tabs
         '(?:[ \\t]*)', // may have trailing spaces or tabs
         ')',
       ].join(''),
