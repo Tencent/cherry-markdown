@@ -72,5 +72,7 @@ export default {
     mobilePreview: '移动端预览', // 移动端预览
     copy: '复制内容', // 复制内容
     export: '导出', // 导出PDF、长图
+    underline: '下划线', // 下划线
+    pinyin: '拼音', // 拼音
   },
 };

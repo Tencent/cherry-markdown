@@ -18,9 +18,9 @@ import { handleUpload } from '@/utils/file';
 /**
  * 插入图片
  */
-export default class H1 extends MenuBase {
-  constructor(editor) {
-    super(editor);
+export default class Image extends MenuBase {
+  constructor($cherry) {
+    super($cherry);
     this.setName('image', 'image');
   }
 
@@ -30,8 +30,22 @@ export default class H1 extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    if (this.hasCacheOnce()) {
+      // @ts-ignore
+      const { name, url } = this.getAndCleanCacheOnce();
+      const begin = '![';
+      const end = `](${url})`;
+      this.registerAfterClickCb(() => {
+        this.setLessSelection(begin, end);
+      });
+      return `${begin}${name}${end}`;
+    }
     // 插入图片，调用上传文件逻辑
-    handleUpload(this.editor, 'image');
+    handleUpload(this.editor, 'image', (name, url) => {
+      this.setCacheOnce({ name, url });
+      this.fire(null);
+    });
+    this.updateMarkdown = false;
     return selection;
   }
 
@@ -39,6 +53,6 @@ export default class H1 extends MenuBase {
    * 声明绑定的快捷键，快捷键触发onClick
    */
   get shortcutKeys() {
-    return ['Mod-g'];
+    return ['Ctrl-g'];
   }
 }

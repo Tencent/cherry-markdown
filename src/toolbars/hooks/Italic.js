@@ -18,8 +18,8 @@ import MenuBase from '@/toolbars/MenuBase';
  * 插入斜体的按钮
  */
 export default class Italic extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('italic', 'italic');
   }
 
@@ -65,6 +65,6 @@ export default class Italic extends MenuBase {
    * 在windows下是Ctrl+i，在mac下是cmd+i
    */
   get shortcutKeys() {
-    return ['Mod-i'];
+    return ['Ctrl-i'];
   }
 }

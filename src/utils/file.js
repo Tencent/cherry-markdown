@@ -15,10 +15,10 @@
  */
 
 /**
- * 上传文件的逻辑
+ * 上传文件的逻辑，如果有callback，则不再走默认的替换文本的逻辑，而是调用callback
  * @param {string} type 上传文件的类型
  */
-export function handleUpload(editor, type = 'image') {
+export function handleUpload(editor, type = 'image', callback = null) {
   // type为上传文件类型 image|video|audio|pdf|word
   const input = document.createElement('input');
   input.type = 'file';
@@ -49,9 +49,13 @@ export function handleUpload(editor, type = 'image') {
         // 默认返回超链接
         code = `[${file.name}](${url})`;
       }
-      // 替换选中区域
-      // @ts-ignore
-      editor.editor.doc.replaceSelection(code);
+      if (callback) {
+        callback(file.name, url);
+      } else {
+        // 替换选中区域
+        // @ts-ignore
+        editor.editor.doc.replaceSelection(code);
+      }
     });
   });
   input.click();

@@ -19,8 +19,8 @@ import { getSelection } from '@/utils/selection';
  * 生成ruby，使用场景：给中文增加拼音、给中文增加英文、给英文增加中文等等
  */
 export default class Ruby extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('pinyin', 'pinyin');
   }
 

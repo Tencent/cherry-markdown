@@ -111,9 +111,10 @@ const sample = {
  * 本功能依赖[Mermaid.js](https://mermaid-js.github.io)组件，请保证调用CherryMarkdown前已加载mermaid.js组件
  */
 export default class Graph extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('graph', 'insertChart');
+    this.noIcon = true;
     this.subMenuConfig = [
       // 流程图
       // 访问[Mermaid 流程图](https://mermaid-js.github.io/mermaid/#/flowchart)参考具体使用方法。

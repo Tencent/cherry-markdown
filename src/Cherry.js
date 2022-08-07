@@ -129,9 +129,9 @@ export default class Cherry extends CherryStatic {
     }
     $expectTarget(this.options.toolbars.toolbar, Array);
     // 创建顶部工具栏
-    this.toolbar = this.createToolbar(editor);
+    this.toolbar = this.createToolbar();
     // 创建预览区域的侧边工具栏
-    this.sidebar = this.createSidebar(editor);
+    this.sidebar = this.createSidebar();
 
     const wrapperFragment = document.createDocumentFragment();
     wrapperFragment.appendChild(this.toolbar.options.dom);
@@ -149,9 +149,9 @@ export default class Cherry extends CherryStatic {
 
     editor.init(previewer);
     // 创建bubble工具栏，所谓bubble工具栏，是指在编辑区选中文本时悬浮出现的工具栏
-    this.createBubble(editor);
+    this.createBubble();
     // 创建float工具栏，所谓float工具栏，是指当编辑区光标处于新行时，在行内联想出的工具栏
-    this.createFloatMenu(editor);
+    this.createFloatMenu();
     previewer.init(editor);
 
     previewer.registerAfterUpdate(this.engine.mounted.bind(this.engine));
@@ -383,70 +383,62 @@ export default class Cherry extends CherryStatic {
 
   /**
    * @private
-   * @param {import('@/Editor').default} editor
    * @returns
    */
-  createToolbar(editor) {
+  createToolbar() {
     const dom = createElement('div', 'cherry-toolbar');
     this.toolbar = new Toolbar({
       dom,
-      editor,
+      $cherry: this,
       buttonConfig: this.options.toolbars.toolbar,
       customMenu: this.options.toolbars.customMenu,
-      engine: this.engine,
     });
     return this.toolbar;
   }
 
   /**
    * @private
-   * @param {import('@/Editor').default} editor
    * @returns
    */
-  createSidebar(editor) {
+  createSidebar() {
     const externalClass = this.options.toolbars.theme === 'dark' ? 'dark' : '';
     const dom = createElement('div', `cherry-sidebar ${externalClass}`);
     this.sidebar = new Sidebar({
       dom,
-      editor,
+      $cherry: this,
       buttonConfig: this.options.toolbars.sidebar,
       customMenu: this.options.toolbars.customMenu,
-      engine: this.engine,
-      previewer: this.previewer,
     });
     return this.sidebar;
   }
 
   /**
    * @private
-   * @param {import('@/Editor').default} editor
    * @returns
    */
-  createFloatMenu(editor) {
+  createFloatMenu() {
     const dom = createElement('div', 'cherry-floatmenu');
     if (this.options.toolbars.float) {
       $expectTarget(this.options.toolbars.float, Array);
       this.floatMenu = new FloatMenu({
         dom,
-        editor,
+        $cherry: this,
         buttonConfig: this.options.toolbars.float,
-        engine: this.engine,
       });
     }
   }
 
   /**
    * @private
-   * @param {import('@/Editor').default} editor
    * @returns
    */
-  createBubble(editor) {
+  createBubble() {
     const dom = createElement('div', 'cherry-bubble');
     if (this.options.toolbars.bubble) {
       $expectTarget(this.options.toolbars.bubble, Array);
       this.bubble = new Bubble({
         dom,
-        editor,
+        $cherry: this,
         buttonConfig: this.options.toolbars.bubble,
         engine: this.engine,
       });
@@ -573,13 +565,12 @@ export default class Cherry extends CherryStatic {
   /**
    * @private
    * @param {*} evt
-   * @param {*} codemirror
    */
-  fireShortcutKey(evt, codemirror) {
+  fireShortcutKey(evt) {
     if (this.toolbar.matchShortcutKey(evt)) {
       // 快捷键
       evt.preventDefault();
-      this.toolbar.fireShortcutKey(evt, codemirror);
+      this.toolbar.fireShortcutKey(evt);
     }
   }
 

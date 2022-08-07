@@ -19,8 +19,8 @@ import { getSelection } from '@/utils/selection';
  * 上标的按钮
  **/
 export default class Sup extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('sup', 'sup');
   }
 

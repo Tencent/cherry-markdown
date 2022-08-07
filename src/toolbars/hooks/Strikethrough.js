@@ -19,8 +19,8 @@ import { getSelection } from '@/utils/selection';
  * 删除线的按钮
  */
 export default class Strikethrough extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('strikethrough', 'strike');
   }
 

@@ -18,8 +18,8 @@ import MenuBase from '@/toolbars/MenuBase';
  * 加粗按钮
  */
 export default class Bold extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('bold', 'bold');
   }
 
@@ -65,6 +65,6 @@ export default class Bold extends MenuBase {
    * 声明绑定的快捷键，快捷键触发onClick
    */
   get shortcutKeys() {
-    return ['Mod-b'];
+    return ['Ctrl-b'];
   }
 }
