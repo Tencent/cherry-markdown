@@ -18,8 +18,8 @@ import MenuBase from '@/toolbars/MenuBase';
  * 插入柱状图图+表格
  */
 export default class BrTable extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('brTable', 'table');
   }
 

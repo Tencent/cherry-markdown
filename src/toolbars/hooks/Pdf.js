@@ -19,8 +19,8 @@ import { handleUpload } from '@/utils/file';
  * 插入pdf
  */
 export default class Pdf extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('pdf', 'pdf');
   }
 
@@ -30,8 +30,22 @@ export default class Pdf extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    if (this.hasCacheOnce()) {
+      // @ts-ignore
+      const { name, url } = this.getAndCleanCacheOnce();
+      const begin = '[';
+      const end = `](${url})`;
+      this.registerAfterClickCb(() => {
+        this.setLessSelection(begin, end);
+      });
+      return `${begin}${name}${end}`;
+    }
     // 插入图片，调用上传文件逻辑
-    handleUpload(this.editor, 'pdf');
+    handleUpload(this.editor, 'pdf', (name, url) => {
+      this.setCacheOnce({ name, url });
+      this.fire(null);
+    });
+    this.updateMarkdown = false;
     return selection;
   }
 }

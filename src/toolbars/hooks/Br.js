@@ -18,8 +18,8 @@ import MenuBase from '@/toolbars/MenuBase';
  * 插入换行
  */
 export default class Br extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('br', 'br');
   }
 

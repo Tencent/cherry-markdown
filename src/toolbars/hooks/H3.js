@@ -19,8 +19,8 @@ import { getSelection } from '@/utils/selection';
  * 插入3级标题
  */
 export default class H3 extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('h3', 'h3');
   }
 

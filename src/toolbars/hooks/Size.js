@@ -17,8 +17,8 @@ import MenuBase from '@/toolbars/MenuBase';
 import { getSelection } from '@/utils/selection';
 
 export default class Size extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('size', 'size');
     this.subMenuConfig = [
       { name: '小', noIcon: true, onclick: this.bindSubClick.bind(this, '12') },

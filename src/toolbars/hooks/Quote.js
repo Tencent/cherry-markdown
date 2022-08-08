@@ -19,8 +19,8 @@ import { getSelection } from '@/utils/selection';
  * 插入“引用”的按钮
  */
 export default class Quote extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('quote', 'blockquote');
   }
 

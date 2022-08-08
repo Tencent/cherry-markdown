@@ -20,35 +20,6 @@ import { escapeHTMLSpecialCharOnce as $e } from '@/utils/sanitize';
 import { createElement } from '@/utils/dom';
 
 /**
- * 生成div
- * @param {string} name data-name
- * @param {string} className
- * @param {DOMRect} position
- * @param {'bottom'} type
- * @returns {HTMLDivElement}
- */
-function createDiv(name, className, position, type = 'bottom') {
-  const div = /** @type {HTMLDivElement} */ (
-    createElement('div', className, {
-      name,
-    })
-  );
-  setPosition(div, position);
-  return div;
-}
-
-/**
- * @param {HTMLElement} dom
- * @param {Pick<DOMRect, 'left' | 'top' | 'width' | 'height'>} position
- * @returns {HTMLElement}
- */
-function setPosition(dom, position) {
-  dom.style.left = `${position.left + position.width / 2}px`;
-  dom.style.top = `${position.top + position.height}px`;
-  return dom;
-}
-
-/**
  *
  * @param {HTMLElement} targetDom
  * @param {'absolute' | 'fixed'} [positionModel = 'absolute']
@@ -62,69 +33,6 @@ function getPosition(targetDom, positionModel = 'absolute') {
   return { left: targetDom.offsetLeft, top: targetDom.offsetTop, width: pos.width, height: pos.height };
 }
 
-export class SubMenu {
-  /**
-   *
-   * @param {MenuBase} menuContext 菜单上下文
-   * @param {string} name 菜单项名称
-   * @param {Pick<DOMRect, 'left' | 'top' | 'width' | 'height'>} defaultPosition 菜单定位
-   * @param {any} menuConfig 菜单项
-   * @param {Record<string, Function>} eventHandlers 事件回调
-   * @param {'absolute' | 'fixed'} positionModel 菜单定位方式
-   */
-  constructor(menuContext, name, defaultPosition, menuConfig, eventHandlers, positionModel = 'absolute') {
-    this.name = name;
-    this.dom = null;
-    this.visible = false;
-    this.context = menuContext;
-    this.positionModel = positionModel;
-    this.init(name, defaultPosition, menuConfig, eventHandlers);
-  }
-
-  init(name, defaultPosition, menuConfig, eventHandlers) {
-    const dom = createDiv(name, 'cherry-dropdown', defaultPosition);
-    dom.style.position = this.positionModel;
-    const clickHandler = typeof eventHandlers?.click === 'function' ? eventHandlers.click : this.onClick;
-    menuConfig.forEach((menuItem) => {
-      const item = createElement('span', 'cherry-dropdown-item');
-      if (menuItem.noIcon) {
-        item.innerHTML = `${menuItem.name}`;
-      } else {
-        const icon = createElement('i', `ch-icon ch-icon-${menuItem.iconName}`);
-        item.appendChild(icon);
-        item.innerHTML += locale.zh_CN[menuItem.name] || $e(menuItem.name);
-      }
-      item.addEventListener('click', clickHandler.bind(this.context, menuItem.onclick, menuItem.async), false);
-      dom.appendChild(item);
-    });
-    dom.addEventListener('EditorHideToolbarSubMenu', () => {
-      this.hide();
-    });
-    this.dom = dom;
-  }
-
-  /**
-   *
-   * @param {Pick<DOMRect, 'left' | 'top' | 'width' | 'height'>} [position] 定位
-   */
-  show(position) {
-    if (position) {
-      setPosition(this.dom, position);
-    }
-    this.dom.style.display = 'block';
-    this.visible = true;
-  }
-
-  hide() {
-    this.dom.style.display = 'none';
-    this.visible = false;
-  }
-
-  onClick() {
-    // empty function
-  }
-}
-
 /**
  * @typedef {import('@/Editor').default} Editor
  */
@@ -135,23 +43,26 @@ export class SubMenu {
 export default class MenuBase {
   /**
    * @deprecated
-   * @type {MenuBase['$onClick']}
+   * @type {MenuBase['fire']}
    */
   _onClick;
 
   /**
    *
-   * @param {Editor} editor
+   * @param {*} $cherry
    */
-  constructor(editor) {
+  constructor($cherry) {
     /** @type {boolean} 是否浮动菜单*/
+    this.$cherry = $cherry;
     this.bubbleMenu = false;
     this.subMenu = null; // 子菜单实例
     this.name = ''; // 菜单项Name
-    this.editor = editor; // markdown实例
+    this.editor = $cherry.editor; // markdown实例
     this.dom = null;
     this.updateMarkdown = true; // 是否更新markdown原文
     this.subMenuConfig = []; // 子菜单配置
+    this.noIcon = false; // 是否不显示图标
+    this.cacheOnce = false; // 是否保存一次点击事件生成的内容
     /**
      * 子菜单的定位方式
      * @property
@@ -161,9 +72,9 @@ export default class MenuBase {
     this.positionModel = 'absolute';
     // eslint-disable-next-line no-underscore-dangle
     if (typeof this._onClick === 'function') {
-      Logger.warn('`MenuBase._onClick` is deprecated. Override `$onClick` instead');
+      Logger.warn('`MenuBase._onClick` is deprecated. Override `fire` instead');
       // eslint-disable-next-line no-underscore-dangle
-      this.$onClick = this._onClick;
+      this.fire = this._onClick;
     }
   }
 
@@ -182,65 +93,210 @@ export default class MenuBase {
   }
 
   /**
-   * 初始化菜单项
+   * 设置一个一次性缓存
+   * 使用场景：
+   *  当需要异步操作是，比如上传视频、选择字体颜色、通过棋盘插入表格等
+   * 实现原理：
+   *  1、第一次点击按钮时触发fire()方法，触发选择文件、选择颜色、选择棋盘格的操作。此时onClick()不返回任何数据。
+   *  2、当异步操作完成后（如提交了文件、选择了颜色等），调用本方法（setCacheOnce）实现缓存，最后调用fire()方法
+   *  3、当fire()方法再次调用onClick()方法时，onClick()方法会返回缓存的数据（getAndCleanCacheOnce）
+   *
+   * 这么设计的原因：
+   *  1、可以复用MenuBase的相关方法
+   *  2、避免异步操作直接与codemirror交互
+   * @param {*} info
    */
-  createBtn() {
-    const classNames = [];
-    this.subMenuConfig.length > 0 && classNames.push('cherry-toolbar-dropdown');
-    classNames.push('cherry-toolbar-button', `cherry-toolbar-${this.iconName ? this.iconName : this.name}`);
-    const span = createElement('span', classNames.join(' '));
-    if (this.iconName && !['insert', 'graph'].includes(this.name)) {
-      const icon = createElement('i', `ch-icon ch-icon-${this.iconName}`, {
-        title: locale.zh_CN[this.name] || $e(this.name),
-      });
+  setCacheOnce(info) {
+    this.cacheOnce = info;
+  }
+
+  getAndCleanCacheOnce() {
+    this.updateMarkdown = true;
+    const ret = this.cacheOnce;
+    this.cacheOnce = false;
+    return ret;
+  }
+
+  hasCacheOnce() {
+    return this.cacheOnce !== false;
+  }
+
+  /**
+   * 创建一个一级菜单
+   * @param {boolean} asSubMenu 是否以子菜单的形式创建
+   */
+  createBtn(asSubMenu = false) {
+    const classNames = asSubMenu
+      ? 'cherry-dropdown-item'
+      : `cherry-toolbar-button cherry-toolbar-${this.iconName ? this.iconName : this.name}`;
+    const span = createElement('span', classNames, {
+      title: locale.zh_CN[this.name] || $e(this.name),
+    });
+    // 如果有图标，则添加图标
+    if (this.iconName && !this.noIcon) {
+      const icon = createElement('i', `ch-icon ch-icon-${this.iconName}`);
       span.appendChild(icon);
-    } else {
-      span.innerHTML = locale.zh_CN[this.name] || $e(this.name);
     }
-    span.addEventListener('click', this.$onClick.bind(this), false);
-    this.dom = span;
+    // 二级菜单强制显示文字，没有图标的按钮也显示文字
+    if (asSubMenu || this.noIcon) {
+      span.innerHTML += locale.zh_CN[this.name] || $e(this.name);
+    }
+    // 只有一级菜单才保存dom，且只保存一次
+    if (!asSubMenu && !this.dom) {
+      this.dom = span;
+    }
+    return span;
+  }
+
+  createSubBtnByConfig(config) {
+    const { name, iconName, onclick } = config;
+    const span = createElement('span', 'cherry-dropdown-item', {
+      title: locale.zh_CN[name] || $e(name),
+    });
+    if (iconName) {
+      const icon = createElement('i', `ch-icon ch-icon-${iconName}`);
+      span.appendChild(icon);
+    }
+    span.innerHTML += locale.zh_CN[name] || $e(name);
+    span.addEventListener('click', onclick, false);
     return span;
   }
 
   /**
-   * 内部处理菜单项点击事件
+   * 处理菜单项点击事件
    * @param {MouseEvent} event 点击事件
    * @returns {void}
    */
-  $onClick(event) {
-    event.stopPropagation();
-    if (this.subMenuConfig.length) {
-      return this.toggleSubMenu();
-    }
+  fire(event, shortKey = '') {
+    event?.stopPropagation();
     if (typeof this.onClick === 'function') {
-      MenuBase.cleanSubMenu();
       const selections = this.editor.editor.getSelections();
-      // 当onClick返回null或undefined时，维持原样
-      const ret = selections.map((selection, index, srcArray) => this.onClick(selection, '', event) || srcArray[index]);
+      // 判断是不是多选
+      this.isSelections = selections.length > 1;
+      // 当onClick返回null、undefined、false时，维持原样
+      const ret = selections.map(
+        (selection, index, srcArray) => this.onClick(selection, shortKey, event) || srcArray[index],
+      );
+
       if (!this.bubbleMenu && this.updateMarkdown) {
         // 非下拉菜单按钮保留selection
         this.editor.editor.replaceSelections(ret, 'around');
         this.editor.editor.focus();
+        this.$afterClick();
       }
     }
   }
 
   /**
-   *
-   * @param {CodeMirror.Editor} codemirror cm实例
-   * @param {string[]} selections 选中的文本集合
-   * @param {string} key 触发的快捷键
-   * @returns
+   * 获取当前选择区域的range
    */
-  onKeyDown(codemirror, selections, key) {
-    const ret = selections.map((selection) => this.onClick(selection, key));
-    return codemirror.replaceSelections(ret, 'around');
+  $getSelectionRange() {
+    const { anchor, head } = this.editor.editor.listSelections()[0];
+    // 如果begin在end的后面
+    if ((anchor.line === head.line && anchor.ch > head.ch) || anchor.line > head.line) {
+      return { begin: head, end: anchor };
+    }
+    return { begin: anchor, end: head };
   }
 
-  // 反转子菜单点击事件参数顺序
-  bindSubClick(shortcut, selection) {
-    return this.onClick(selection, shortcut);
+  /**
+   * 注册点击事件渲染后的回调函数
+   * @param {function} cb
+   */
+  registerAfterClickCb(cb) {
+    this.afterClickCb = cb;
   }
+
+  /**
+   * 点击事件渲染后的回调函数
+   */
+  $afterClick() {
+    if (typeof this.afterClickCb === 'function' && !this.isSelections) {
+      this.afterClickCb();
+      this.afterClickCb = null;
+    }
+  }
+
+  /**
+   * 选中除了前后语法后的内容
+   * @param {String} lessBefore
+   * @param {String} lessAfter
+   */
+  setLessSelection(lessBefore, lessAfter) {
+    const cm = this.editor.editor;
+    const { begin, end } = this.$getSelectionRange();
+    const newBeginLine = lessBefore.match(/\n/g)?.length > 0 ? begin.line + lessBefore.match(/\n/g).length : begin.line;
+    const newBeginCh =
+      lessBefore.match(/\n/g)?.length > 0
+        ? lessBefore.replace(/^[\s\S]*?\n([^\n]*)$/, '$1').length
+        : begin.ch + lessBefore.length;
+    const newBegin = { line: newBeginLine, ch: newBeginCh };
+    const newEndLine = lessAfter.match(/\n/g)?.length > 0 ? end.line - lessAfter.match(/\n/g).length : end.line;
+    const newEndCh = lessAfter.match(/\n/g)?.length > 0 ? cm.getLine(newEndLine).length : end.ch - lessAfter.length;
+    const newEnd = { line: newEndLine, ch: newEndCh };
+    cm.setSelection(newBegin, newEnd);
+  }
+
+  /**
+   * 基于当前已选择区域，获取更多的选择区
+   * @param {string} [appendBefore] 选择区前面追加的内容
+   * @param {string} [appendAfter] 选择区后面追加的内容
+   * @param {function} [cb] 回调函数，如果返回false，则恢复原来的选取
+   */
+  getMoreSelection(appendBefore, appendAfter, cb) {
+    const cm = this.editor.editor;
+    const { begin, end } = this.$getSelectionRange();
+    const newBeginCh = begin.ch > appendBefore.length ? begin.ch - appendBefore.length : 0;
+    const newBegin = { line: begin.line, ch: newBeginCh };
+    const newEndCh =
+      cm.getLine(end.line).length < end.ch + appendAfter.length
+        ? cm.getLine(end.line).length
+        : end.ch + appendAfter.length;
+    const newEnd = { line: end.line, ch: newEndCh };
+    cm.setSelection(newBegin, newEnd);
+    if (cb() === false) {
+      cm.setSelection(begin, end);
+    }
+  }
+
+  /**
+   * 获取用户选中的文本内容，如果没有选中文本，则返回光标所在的位置的内容
+   * @param {string} selection 当前选中的文本内容
+   * @param {string} type  'line': 当没有选择文本时，获取光标所在行的内容； 'word': 当没有选择文本时，获取光标所在单词的内容
+   * @param {boolean} focus true；强行选中光标处的内容，否则只获取选中的内容
+   * @returns {string}
+   */
+  getSelection(selection, type = 'word', focus = false) {
+    const cm = this.editor.editor;
+    // 多光标模式下不做处理
+    if (this.isSelections) {
+      return selection;
+    }
+    if (selection && !focus) {
+      return selection;
+    }
+    // 获取光标所在行的内容，同时选中所在行
+    if (type === 'line') {
+      const { begin, end } = this.$getSelectionRange();
+      cm.setSelection({ line: begin.line, ch: 0 }, { line: end.line, ch: cm.getLine(end.line).length });
+      return cm.getSelection();
+    }
+    // 获取光标所在单词的内容，同时选中所在单词
+    if (type === 'word') {
+      const { anchor: begin, head: end } = cm.findWordAt(cm.getCursor());
+      cm.setSelection(begin, end);
+      return cm.getSelection();
+    }
+  }
+
+  /**
+   * 反转子菜单点击事件参数顺序
+   * @deprecated
+   */
+  bindSubClick(shortcut, selection) {
+    return this.fire(null, shortcut);
+  }
+
   onClick(selection, shortcut, callback) {
     return selection;
   }
@@ -249,106 +305,15 @@ export default class MenuBase {
     return [];
   }
 
-  shortcutKey(options) {
-    // 快捷键
-    const shortcutReplacer = (shortcut) => {
-      if (options && options.isMac) {
-        return shortcut.replace(/mod/i, 'Command');
-      }
-      return shortcut.replace(/mod/i, 'Ctrl');
-    };
-    return this.shortcutKeys.reduce((ret, key) => {
-      const registerKey = shortcutReplacer(key);
-      ret[registerKey] = (evt, codemirror) => this.onKeyDown(codemirror, codemirror.getSelections(), key);
-      return ret;
-    }, {});
-  }
-
-  initSubMenu() {
-    if (!this.subMenuConfig.length) {
-      return;
-    }
-    if (/cherry-bubble/.test(this.dom.parentElement.className)) {
-      this.positionModel = 'fixed';
-    } else {
-      this.positionModel = 'absolute';
-    }
-    const pos = getPosition(this.dom, this.positionModel);
-    this.subMenu = new SubMenu(
-      this,
-      this.name,
-      pos,
-      this.subMenuConfig,
-      { click: this.onSubClick },
-      this.positionModel,
-    );
-    // append to editor
-    this.editor.options.wrapperDom.appendChild(this.subMenu.dom);
-  }
-
-  showSubMenu() {
-    if (!this.subMenu) {
-      this.initSubMenu();
-      MenuBase.hideSubMenuExcept(this.subMenu.name);
-      this.subMenu.show();
-      return;
-    }
-    MenuBase.hideSubMenuExcept(this.subMenu.name);
-    if (/cherry-bubble/.test(this.dom.parentElement.className)) {
-      this.positionModel = 'fixed';
-    } else {
-      this.positionModel = 'absolute';
-    }
-    const pos = getPosition(this.dom, this.positionModel);
-    this.subMenu.show(pos);
-  }
-
-  hideSubMenu() {
-    if (this.subMenu) {
-      this.subMenu.hide();
-    }
-  }
-
-  toggleSubMenu() {
-    if (this.subMenu && this.subMenu.visible) {
-      return this.hideSubMenu();
-    }
-    this.showSubMenu();
-  }
-
-  onSubClick(clickEventHandler, async, event) {
-    // 异步回调修改内容
-    if (async) {
-      const selection = this.editor.editor.getSelection();
-      clickEventHandler(selection, true, this.editor.editor.replaceSelection.bind(this.editor.editor));
-    } else {
-      const selections = this.editor.editor.getSelections();
-      // 当onClick返回null或undefined时，维持原样
-      const ret = selections.map((selection, index, srcArray) => clickEventHandler(selection) || srcArray[index]);
-      if (this.updateMarkdown) {
-        this.editor.editor.replaceSelections(ret, 'around');
-        this.editor.editor.focus();
-      }
-    }
-    this.hideSubMenu();
-  }
-
-  static cleanSubMenu() {
-    this.hideSubMenuExcept(null);
-  }
-
   /**
-   * 隐藏除给定名字外的所有子菜单
-   * @param {string | null} name 不隐藏的子菜单
+   * 获取当前菜单的位置
    */
-  static hideSubMenuExcept(name) {
-    /** @type {NodeListOf<HTMLElement>} */
-    const menu = document.querySelectorAll('.cherry-dropdown');
-    menu.forEach((element) => {
-      if (name && element.dataset.name === name) {
-        return;
-      }
-      element.dispatchEvent(new Event('EditorHideToolbarSubMenu'));
-    });
+  getMenuPosition() {
+    if (/cherry-bubble/.test(this.dom.parentElement.className)) {
+      this.positionModel = 'fixed';
+    } else {
+      this.positionModel = 'absolute';
+    }
+    return getPosition(this.dom, this.positionModel);
   }
 }

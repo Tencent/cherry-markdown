@@ -18,8 +18,8 @@ import MenuBase from '@/toolbars/MenuBase';
  * 插入代码块的按钮
  */
 export default class Code extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('code', 'code');
   }
 
@@ -31,6 +31,9 @@ export default class Code extends MenuBase {
    */
   onClick(selection, shortKey = '') {
     const code = selection ? selection : 'code...';
+    this.registerAfterClickCb(() => {
+      this.setLessSelection(`\n\`\`\` \n`, `\n\`\`\`\n`);
+    });
     return `\n\`\`\` \n${code}\n\`\`\`\n`;
   }
 
@@ -38,6 +41,6 @@ export default class Code extends MenuBase {
    * 声明绑定的快捷键，快捷键触发onClick
    */
   get shortcutKeys() {
-    return ['Mod-k'];
+    return ['Ctrl-k'];
   }
 }
