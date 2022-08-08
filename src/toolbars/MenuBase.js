@@ -233,17 +233,9 @@ export default class MenuBase {
    * @returns
    */
   onKeyDown(codemirror, selections, key) {
-    const ret = selections.map((selection) => this.onClick(selection, key));
-    let needReplaceSelections = true; // 默认需要执行替换
-    for (let i = 0; i < ret.length; i++) {
-      if (ret[i] == undefined || typeof ret[i] !== 'string') {
-        // 返回值的数组中有任何一个为undefined 或者任何一个不为string的不必执行replaceSelections
-        needReplaceSelections = false;
-        break;
-      }
-    }
-    if (needReplaceSelections) {
-      codemirror.replaceSelections(ret, 'around'); // replaceSelections 此函数不返回任何东西
+    const ret = selections.map((selection) => this.onClick(selection, key)).filter((v) => typeof v === 'string');
+    if (ret.length !== 0) {
+      codemirror.replaceSelections(ret, 'around');
     }
   }
 
