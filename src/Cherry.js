@@ -164,10 +164,10 @@ export default class Cherry extends CherryStatic {
 
     this.cherryDomResize();
 
-    Event.on(this.toolbar.instanceId, Event.Events.toolbarHide, () => {
+    Event.on(this.instanceId, Event.Events.toolbarHide, () => {
       this.status.toolbar = 'hide';
     });
-    Event.on(this.toolbar.instanceId, Event.Events.toolbarShow, () => {
+    Event.on(this.instanceId, Event.Events.toolbarShow, () => {
       this.status.toolbar = 'show';
     });
     Event.on(this.instanceId, Event.Events.previewerClose, () => {
