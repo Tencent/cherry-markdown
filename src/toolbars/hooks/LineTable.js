@@ -18,8 +18,8 @@ import MenuBase from '@/toolbars/MenuBase';
  * 插入折线图+表格
  */
 export default class LineTable extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('lineTable', 'table');
   }
 

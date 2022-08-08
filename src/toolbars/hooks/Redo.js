@@ -19,9 +19,8 @@ import MenuBase from '@/toolbars/MenuBase';
  * 依赖codemirror的undo接口
  */
 export default class Redo extends MenuBase {
-  constructor(editor) {
-    super(editor);
-    this.editor = editor;
+  constructor($cherry) {
+    super($cherry);
     this.setName('redo', 'redo');
   }
 

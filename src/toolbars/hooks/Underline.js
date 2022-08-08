@@ -18,8 +18,8 @@ import MenuBase from '@/toolbars/MenuBase';
  * 下划线按钮
  **/
 export default class Underline extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('underline', 'underline');
   }
 
@@ -44,6 +44,6 @@ export default class Underline extends MenuBase {
    * 声明绑定的快捷键，快捷键触发onClick
    */
   get shortcutKeys() {
-    return ['Mod-u'];
+    return ['Ctrl-u'];
   }
 }

@@ -18,8 +18,8 @@ import MenuBase from '@/toolbars/MenuBase';
  * 插入分割线
  */
 export default class Hr extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('hr', 'line');
   }
 

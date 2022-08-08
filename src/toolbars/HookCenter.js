@@ -114,41 +114,56 @@ const HookList = {
 
 export default class HookCenter {
   constructor(toolbar) {
-    return this.init(toolbar);
+    this.toolbar = toolbar;
+    // 保存所有菜单实例
+    this.hooks = {};
+    // 所有注册的菜单名称
+    this.allMenusName = [];
+    // 一级菜单的名称
+    this.level1MenusName = [];
+    // 二级菜单的名称 {一级菜单名称: [二级菜单名称1, 二级菜单名称2]}
+    this.level2MenusName = {};
+    this.init();
+  }
+
+  $newMenu(name) {
+    if (this.hooks[name]) {
+      return;
+    }
+    const { $cherry, customMenu } = this.toolbar.options;
+    if (HookList[name]) {
+      this.allMenusName.push(name);
+      this.hooks[name] = new HookList[name]($cherry);
+    } else if (customMenu[name]) {
+      this.allMenusName.push(name);
+      // 如果是自定义菜单，传参兼容旧版
+      this.hooks[name] = new customMenu[name]($cherry.editor, $cherry.engine, $cherry.toolbar, $cherry);
+    }
   }
 
   /**
    * 根据配置动态渲染、绑定工具栏
-   * @param {any} toolbar 工具栏配置对象
    * @returns
    */
-  init(toolbar) {
-    const { buttonConfig, editor, customMenu, engine } = toolbar.options;
-    // TODO: 去除重复代码
-    return buttonConfig.reduce((hookList, item) => {
+  init() {
+    const { buttonConfig } = this.toolbar.options;
+    buttonConfig.forEach((item) => {
       if (typeof item === 'string') {
-        // 字符串
-        if (HookList[item]) {
-          hookList.push(new HookList[item](editor, engine, toolbar));
-        } else if (customMenu[item]) {
-          // TODO: 校验合法性，重名处理
-          hookList.push(new customMenu[item](editor, engine, toolbar));
-        }
+        this.level1MenusName.push(item);
+        this.$newMenu(item);
       } else if (typeof item === 'object') {
         const keys = Object.keys(item);
-        if (keys.length !== 1) {
-          return hookList;
-        }
-        // 只接受形如{ name: [ subMenu ] }的参数
-        const [name] = keys;
-        if (HookList[name]) {
-          hookList.push(new HookList[name](editor, item[name], engine, toolbar));
-        } else if (customMenu[name]) {
-          // TODO: 校验合法性，重名处理
-          hookList.push(new customMenu[name](editor, item[name], engine, toolbar));
+        if (keys.length === 1) {
+          // 只接受形如{ name: [ subMenu ] }的参数
+          const [name] = keys;
+          this.level1MenusName.push(name);
+          this.$newMenu(name);
+          this.level2MenusName[name] = item[name];
+          item[name].forEach((subItem) => {
+            this.$newMenu(subItem);
+          });
         }
       }
-      return hookList;
-    }, []);
+    });
   }
 }

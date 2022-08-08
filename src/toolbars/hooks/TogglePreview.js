@@ -23,10 +23,10 @@ export default class TogglePreview extends MenuBase {
   /** @type {boolean} 当前预览状态 */
   $previewerHidden = false;
 
-  constructor(editor, engine) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('previewClose', 'previewClose');
-    this.instanceId = engine.$cherry.previewer.instanceId;
+    this.instanceId = $cherry.instanceId;
     this.updateMarkdown = false;
     this.attachEventListeners();
   }
