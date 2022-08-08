@@ -21,9 +21,9 @@ import { copyToClip } from '@/utils/copy';
  * 该操作会将预览区的css样式以行内样式的形式插入到html内容里，从而保证粘贴时样式一致
  */
 export default class Copy extends MenuBase {
-  constructor(editor, engine, toolbar) {
-    super(editor);
-    this.previewer = toolbar.options.previewer;
+  constructor($cherry) {
+    super($cherry);
+    this.previewer = $cherry.previewer;
     this.isLoading = false;
     this.updateMarkdown = false;
     this.setName('copy', 'copy');

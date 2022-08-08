@@ -22,10 +22,10 @@ import Event from '@/Event';
  * 只能切换成纯编辑模式和纯预览模式
  **/
 export default class SwitchModel extends MenuBase {
-  constructor(editor, engine, toolbar) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('switchPreview');
-    this.instanceId = toolbar.instanceId;
+    this.instanceId = $cherry.instanceId;
     this.attachEventListeners();
   }
 

@@ -19,8 +19,8 @@ import MenuBase from '@/toolbars/MenuBase';
  * 一个实例中可以配置多个分割线
  */
 export default class Split extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('split', '|');
   }
 

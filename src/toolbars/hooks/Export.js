@@ -16,9 +16,10 @@
 import MenuBase from '@/toolbars/MenuBase';
 
 export default class Export extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('export');
+    this.noIcon = true;
     this.updateMarkdown = false;
     this.subMenuConfig = [
       { noIcon: true, name: '导出PDF', onclick: this.bindSubClick.bind(this, 'pdf') },
