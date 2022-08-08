@@ -20,8 +20,8 @@ import MenuBase from '@/toolbars/MenuBase';
  * 该表格语法不是markdown通用语法，请慎用
  */
 export default class QuickTable extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('quickTable', 'table');
   }
 

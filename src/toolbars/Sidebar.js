@@ -20,19 +20,7 @@ import Toolbar from './Toolbar';
  *    比如复制预览区域内容、修改预览区域主题等
  */
 export default class Sidebar extends Toolbar {
-  constructor(options) {
-    super();
-    this.options = {
-      dom: document.createElement('div'),
-      buttonConfig: ['mobilePreview', 'copy'],
-      editor: {},
-      previewer: {},
-      extensions: [],
-      keysmap: {},
-      engine: {},
-      customMenu: [],
-    };
-    Object.assign(this.options, options);
-    this.initExtension();
-  }
+  // constructor(options) {
+  //   super(options);
+  // }
 }

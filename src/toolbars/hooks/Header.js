@@ -19,8 +19,8 @@ import { getSelection } from '@/utils/selection';
  * 插入1级~5级标题
  */
 export default class Header extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('header', 'header');
     this.subMenuConfig = [
       { iconName: 'h1', name: 'h1', onclick: this.bindSubClick.bind(this, '1') },

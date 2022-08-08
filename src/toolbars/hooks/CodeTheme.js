@@ -19,10 +19,11 @@ import MenuBase from '@/toolbars/MenuBase';
  * 本功能依赖[prism组件](https://github.com/PrismJS/prism)
  */
 export default class CodeTheme extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('codeTheme');
     this.updateMarkdown = false;
+    this.noIcon = true;
     this.subMenuConfig = [
       { noIcon: true, name: 'default', onclick: this.bindSubClick.bind(this, 'default') },
       { noIcon: true, name: 'dark', onclick: this.bindSubClick.bind(this, 'dark') },
