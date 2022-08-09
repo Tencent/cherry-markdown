@@ -220,7 +220,6 @@ export default class Header extends ParagraphBase {
         '(?<! {4,})', // up to three spaces of indentation before underline
         '([=]+|[-]+)', // (?<level>[=]+|[-]+)
         '(?:[ \\t]*)', // may have trailing spaces or tabs
-        '(?:[ \\t]*)', // may have trailing spaces or tabs
         ')',
       ].join(''),
       end: '(?=$|\\n)',
