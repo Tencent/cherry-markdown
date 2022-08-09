@@ -30,6 +30,7 @@ export default new (class Event {
     editorOpen: 'editor:open',
     toolbarHide: 'toolbar:hide',
     toolbarShow: 'toolbar:show',
+    cleanAllSubMenus: 'cleanAllSubMenus', // 清除所有子菜单弹窗
   };
 
   /**

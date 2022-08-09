@@ -18,10 +18,9 @@ import MenuBase from '@/toolbars/MenuBase';
  * 全屏按钮
  */
 export default class FullScreen extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.updateMarkdown = false;
-    this.editor = editor;
     this.setName('fullScreen', 'fullscreen');
   }
 

@@ -18,9 +18,9 @@ import { handleUpload } from '@/utils/file';
 /**
  * 插入音频
  */
-export default class H1 extends MenuBase {
-  constructor(editor) {
-    super(editor);
+export default class Audio extends MenuBase {
+  constructor($cherry) {
+    super($cherry);
     this.setName('audio', 'video');
   }
 
@@ -30,8 +30,22 @@ export default class H1 extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    if (this.hasCacheOnce()) {
+      // @ts-ignore
+      const { name, url } = this.getAndCleanCacheOnce();
+      const begin = '!audio[';
+      const end = `](${url})`;
+      this.registerAfterClickCb(() => {
+        this.setLessSelection(begin, end);
+      });
+      return `${begin}${name}${end}`;
+    }
     // 插入图片，调用上传文件逻辑
-    handleUpload(this.editor, 'audio');
+    handleUpload(this.editor, 'audio', (name, url) => {
+      this.setCacheOnce({ name, url });
+      this.fire(null);
+    });
+    this.updateMarkdown = false;
     return selection;
   }
 }

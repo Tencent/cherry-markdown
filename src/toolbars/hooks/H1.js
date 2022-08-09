@@ -19,8 +19,8 @@ import { getSelection } from '@/utils/selection';
  * 插入1级标题
  */
 export default class H1 extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('h1', 'h1');
   }
 

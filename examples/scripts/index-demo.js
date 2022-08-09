@@ -75,13 +75,15 @@ var basicConfig = {
     toolbar: [
       'bold',
       'italic',
-      'strikethrough',
+      {
+        strikethrough: ['strikethrough', 'underline', 'sub', 'sup', 'ruby'],
+      },
       '|',
       'color',
       'header',
-      'ruby',
       '|',
       'list',
+      'formula',
       {
         insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word', 'ruby'],
       },

@@ -18,8 +18,8 @@ import MenuBase from '@/toolbars/MenuBase';
  * 插入检查项的按钮
  */
 export default class CheckList extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('checklist', 'checklist');
   }
 

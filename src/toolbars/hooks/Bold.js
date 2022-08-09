@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { getSelection } from '@/utils/selection';
 /**
  * 加粗按钮
  */
 export default class Bold extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('bold', 'bold');
+  }
+
+  /**
+   * 是不是包含加粗语法
+   * @param {String} selection
+   * @returns {Boolean}
+   */
+  $testIsBold(selection) {
+    return /^\s*(\*\*|__)[\s\S]+(\1)/.test(selection);
   }
 
   /**
@@ -31,11 +39,25 @@ export default class Bold extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    const $selection = getSelection(this.editor.editor, selection) || '加粗';
+    let $selection = this.getSelection(selection) || '加粗';
+    // 如果是单选，并且选中内容的开始结束内没有加粗语法，则扩大选中范围
+    if (!this.isSelections && !this.$testIsBold($selection)) {
+      this.getMoreSelection('**', '**', () => {
+        const newSelection = this.editor.editor.getSelection();
+        const isBold = this.$testIsBold(newSelection);
+        if (isBold) {
+          $selection = newSelection;
+        }
+        return isBold;
+      });
+    }
     // 如果选中的文本中已经有加粗语法了，则去掉加粗语法
-    if (/^\s*(\*\*|__)[\s\S]+(\1)/.test($selection)) {
+    if (this.$testIsBold($selection)) {
       return $selection.replace(/(^)(\s*)(\*\*|__)([^\n]+)(\3)(\s*)($)/gm, '$1$4$7');
     }
+    this.registerAfterClickCb(() => {
+      this.setLessSelection('**', '**');
+    });
     return $selection.replace(/(^)([^\n]+)($)/gm, '$1**$2**$3');
   }
 
@@ -43,6 +65,6 @@ export default class Bold extends MenuBase {
    * 声明绑定的快捷键，快捷键触发onClick
    */
   get shortcutKeys() {
-    return ['Mod-b'];
+    return ['Ctrl-b'];
   }
 }

@@ -18,9 +18,9 @@ import MenuBase from '@/toolbars/MenuBase';
  * 预览区域切换到“移动端视图”的按钮
  */
 export default class MobilePreview extends MenuBase {
-  constructor(editor, engine, toolbar) {
-    super(editor);
-    this.previewer = toolbar.options.previewer;
+  constructor($cherry) {
+    super($cherry);
+    this.previewer = $cherry.previewer;
     this.updateMarkdown = false;
     this.setName('mobilePreview', 'phone');
   }
