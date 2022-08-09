@@ -107,11 +107,13 @@ export default class Toolbar {
     if (level2MenusName) {
       level2MenusName.forEach((level2Name) => {
         const subMenu = this.menus.hooks[level2Name];
-        const btn = subMenu.createBtn(true);
-        // 二级菜单的dom认定为一级菜单的
-        subMenu.dom = subMenu.dom ? subMenu.dom : this.menus.hooks[name].dom;
-        btn.addEventListener('click', (event) => this.onClick(event, level2Name, true), false);
-        this.subMenus[name].appendChild(btn);
+        if (subMenu !== undefined && typeof subMenu.createBtn === 'function') {
+          const btn = subMenu.createBtn(true);
+          // 二级菜单的dom认定为一级菜单的
+          subMenu.dom = subMenu.dom ? subMenu.dom : this.menus.hooks[name].dom;
+          btn.addEventListener('click', (event) => this.onClick(event, level2Name, true), false);
+          this.subMenus[name].appendChild(btn);
+        }
       });
     }
     // 兼容旧版本配置的二级菜单
