@@ -1,8 +1,4 @@
 @charset "UTF-8";
-.cherry * {
-  padding: 0;
-  margin: 0;
-}
 .cherry *::-webkit-scrollbar {
   height: 7px;
   width: 7px;
@@ -627,6 +623,7 @@
 }
 .cherry-markdown .toc {
   margin-bottom: 16px;
+  padding-left: 0;
 }
 .cherry-markdown .toc .toc-title {
   font-size: 24px;
