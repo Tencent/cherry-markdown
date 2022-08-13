@@ -26,6 +26,15 @@ export default class Color extends MenuBase {
     this.bubbleColor = new BubbleColor($cherry);
   }
 
+  $testIsColor(type, selection) {
+    const textReg = /^\s*!![^\s]+ [\s\S]+!!\s*$/;
+    const bgReg = /^\s*!!![^\s]+ [\s\S]+!!!\s*$/;
+    if (type === 'text') {
+      return textReg.test(selection) && !bgReg.test(selection);
+    }
+    return bgReg.test(selection);
+  }
+
   /**
    * 响应点击事件
    * @param {string} selection 被用户选中的文本内容
@@ -34,12 +43,37 @@ export default class Color extends MenuBase {
    * @returns 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '', event) {
-    const $selection = getSelection(this.editor.editor, selection) || '字体颜色或背景';
+    let $selection = getSelection(this.editor.editor, selection) || '字体颜色或背景';
     if (this.hasCacheOnce()) {
       // @ts-ignore
       const { type, color } = this.getAndCleanCacheOnce();
       const begin = type === 'text' ? `!!${color} ` : `!!!${color} `;
       const end = type === 'text' ? '!!' : '!!!';
+      if (!this.isSelections && !this.$testIsColor(type, $selection)) {
+        this.getMoreSelection(begin, end, () => {
+          const newSelection = this.editor.editor.getSelection();
+          if (this.$testIsColor(type, newSelection)) {
+            $selection = newSelection;
+            return true;
+          }
+          return false;
+        });
+      }
+      if (this.$testIsColor(type, $selection)) {
+        const reg = new RegExp(`(^\\s*${end})([^\\s]+) ([\\s\\S]+${end}\\s*$)`, 'gm');
+        let needClean = true;
+        const tmp = $selection.replace(reg, (w, m1, m2, m3) => {
+          needClean = needClean ? m2 === color : false;
+          return `${m1}${color} ${m3}`;
+        });
+        if (needClean) {
+          return $selection.replace(reg, '$3').replace(/!+\s*$/gm, '');
+        }
+        this.registerAfterClickCb(() => {
+          this.setLessSelection(begin, end);
+        });
+        return tmp;
+      }
       this.registerAfterClickCb(() => {
         this.setLessSelection(begin, end);
       });

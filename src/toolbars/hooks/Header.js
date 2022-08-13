@@ -45,6 +45,10 @@ export default class Header extends MenuBase {
     return '#'.repeat(test ? test : 1);
   }
 
+  $testIsHead(selection) {
+    return /^\s*(#+)\s*.+/.test(selection);
+  }
+
   /**
    * 响应点击事件
    * @param {string} selection 被用户选中的文本内容
@@ -52,9 +56,19 @@ export default class Header extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    const $selection = getSelection(this.editor.editor, selection, 'line', true) || '标题';
+    let $selection = getSelection(this.editor.editor, selection, 'line', true) || '标题';
     const header = this.$getFlagStr(shortKey);
-    if (/^\s*(#+)\s*.+/.test($selection)) {
+    if (!this.isSelections && !this.$testIsHead($selection)) {
+      this.getMoreSelection('\n', '', () => {
+        const newSelection = this.editor.editor.getSelection();
+        const isHead = this.$testIsHead(newSelection);
+        if (isHead) {
+          $selection = newSelection;
+        }
+        return isHead;
+      });
+    }
+    if (this.$testIsHead($selection)) {
       // 如果选中的内容里有标题语法，并且标记级别与目标一致，则去掉标题语法
       // 反之，修改标题级别与目标一致
       let needClean = true;
@@ -62,8 +76,17 @@ export default class Header extends MenuBase {
         needClean = needClean ? m2.length === header.length : false;
         return `${m1}${header}${m3}${m4}`;
       });
-      return !needClean ? tmp : $selection.replace(/(^\s*)(#+)(\s*)(.+$)/gm, '$1$4');
+      if (needClean) {
+        return $selection.replace(/(^\s*)(#+)(\s*)(.+$)/gm, '$1$4');
+      }
+      this.registerAfterClickCb(() => {
+        this.setLessSelection(`${header} `, '');
+      });
+      return tmp;
     }
+    this.registerAfterClickCb(() => {
+      this.setLessSelection(`${header} `, '');
+    });
     return $selection.replace(/(^)([\s]*)([^\n]+)($)/gm, `$1${header} $3$4`);
   }
 
@@ -72,6 +95,6 @@ export default class Header extends MenuBase {
    * 在windows下是Ctrl+1，在mac下是cmd+1
    */
   get shortcutKeys() {
-    return ['Mod-1', 'Mod-2', 'Mod-3', 'Mod-4', 'Mod-5', 'Mod-6'];
+    return ['Ctrl-1', 'Ctrl-2', 'Ctrl-3', 'Ctrl-4', 'Ctrl-5', 'Ctrl-6'];
   }
 }

@@ -23,6 +23,10 @@ export default class Underline extends MenuBase {
     this.setName('underline', 'underline');
   }
 
+  $testIsUnderline(selection) {
+    return /^\s*(\/)[\s\S]+(\1)/.test(selection);
+  }
+
   /**
    *
    * @param {string} selection 被用户选中的文本内容
@@ -30,14 +34,26 @@ export default class Underline extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    // 如果选中的内容里有下划线语法，则认为是要去掉下划线语法
-    if (/^\s*(\/)[\s\S]+(\1)/.test(selection)) {
-      return selection.replace(/(^)(\s*)(\/)([^\n]+)(\3)(\s*)($)/gm, '$1$4$7');
-    }
     let $selection = selection ? selection : '下划线';
+    // 如果选中的内容里有下划线语法，则认为是要去掉下划线语法
+    if (!this.isSelections && !this.$testIsUnderline($selection)) {
+      this.getMoreSelection(' /', '/ ', () => {
+        const newSelection = this.editor.editor.getSelection();
+        const isUnderline = this.$testIsUnderline(newSelection);
+        if (isUnderline) {
+          $selection = newSelection;
+        }
+        return isUnderline;
+      });
+    }
+    if (this.$testIsUnderline($selection)) {
+      return $selection.replace(/(^)(\s*)(\/)([^\n]+)(\3)(\s*)($)/gm, '$1$4$7');
+    }
+    this.registerAfterClickCb(() => {
+      this.setLessSelection(' /', '/ ');
+    });
     // 如果选中的内容里没有下划线语法，则加上下划线
-    $selection = $selection.replace(/(^)([^\n]+)($)/gm, '$1 /$2/ $3');
-    return $selection;
+    return $selection.replace(/(^)([^\n]+)($)/gm, '$1 /$2/ $3');
   }
 
   /**

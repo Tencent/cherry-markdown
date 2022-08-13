@@ -24,6 +24,10 @@ export default class Sub extends MenuBase {
     this.setName('sub', 'sub');
   }
 
+  $testIsSub(selection) {
+    return /^\s*(\^\^)[\s\S]+(\1)/.test(selection);
+  }
+
   /**
    *
    * @param {string} selection 被用户选中的文本内容
@@ -31,11 +35,24 @@ export default class Sub extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    const $selection = getSelection(this.editor.editor, selection) || '下标';
+    let $selection = getSelection(this.editor.editor, selection) || '下标';
     // 如果选中的内容里有下标的语法，则认为是要去掉下标语法
-    if (/^\s*(\^\^)[\s\S]+(\1)/.test($selection)) {
+    if (!this.isSelections && !this.$testIsSub($selection)) {
+      this.getMoreSelection('^^', '^^', () => {
+        const newSelection = this.editor.editor.getSelection();
+        const isSub = this.$testIsSub(newSelection);
+        if (isSub) {
+          $selection = newSelection;
+        }
+        return isSub;
+      });
+    }
+    if (this.$testIsSub($selection)) {
       return $selection.replace(/(^)(\s*)(\^\^)([^\n]+)(\3)(\s*)($)/gm, '$1$4$7');
     }
-    return $selection.replace(/(^)([^\n]+)($)/gm, '$1 ^^$2^^ $3');
+    this.registerAfterClickCb(() => {
+      this.setLessSelection('^^', '^^');
+    });
+    return $selection.replace(/(^)([^\n]+)($)/gm, '$1^^$2^^$3');
   }
 }
