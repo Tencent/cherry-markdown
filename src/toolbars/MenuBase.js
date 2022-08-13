@@ -246,7 +246,10 @@ export default class MenuBase {
   getMoreSelection(appendBefore, appendAfter, cb) {
     const cm = this.editor.editor;
     const { begin, end } = this.$getSelectionRange();
-    const newBeginCh = begin.ch > appendBefore.length ? begin.ch - appendBefore.length : 0;
+    let newBeginCh =
+      // 如果只有一个换行，则特殊处理一下
+      /^\n$/.test(appendBefore) ? 0 : begin.ch - appendBefore.length;
+    newBeginCh = newBeginCh < 0 ? 0 : newBeginCh;
     const newBegin = { line: begin.line, ch: newBeginCh };
     const newEndCh =
       cm.getLine(end.line).length < end.ch + appendAfter.length
