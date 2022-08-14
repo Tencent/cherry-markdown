@@ -24,6 +24,10 @@ export default class Strikethrough extends MenuBase {
     this.setName('strikethrough', 'strike');
   }
 
+  $testIsStrike(selection) {
+    return /(~~)[\s\S]+(\1)/.test(selection);
+  }
+
   /**
    *
    * @param {string} selection 被用户选中的文本内容
@@ -31,11 +35,31 @@ export default class Strikethrough extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    const $selection = getSelection(this.editor.editor, selection) || '删除线';
+    let $selection = getSelection(this.editor.editor, selection) || '删除线';
+    // @ts-ignore
+    const needWhitespace = this.$cherry?.options?.engine?.syntax?.strikethrough?.needWhitespace;
+    const space = needWhitespace ? ' ' : '';
     // 如果被选中的文本中包含删除线语法，则去掉删除线语法
-    if (/(~~)[\s\S]+(\1)/.test(selection)) {
+    if (!this.isSelections && !this.$testIsStrike($selection)) {
+      this.getMoreSelection(`${space}~~`, `~~${space}`, () => {
+        const newSelection = this.editor.editor.getSelection();
+        const isStrike = this.$testIsStrike(newSelection);
+        if (isStrike) {
+          $selection = newSelection;
+        }
+        return isStrike;
+      });
+    }
+    if (this.$testIsStrike($selection)) {
       return selection.replace(/[\s]*(~~)([\s\S]+)(\1)[\s]*/g, '$2');
     }
-    return $selection.replace(/(^)[\s]*([\s\S]+)[\s]*($)/g, '$1 ~~$2~~ $3');
+    this.registerAfterClickCb(() => {
+      this.setLessSelection(`${space}~~`, `~~${space}`);
+    });
+    return $selection.replace(/(^)[\s]*([\s\S]+?)[\s]*($)/g, `$1${space}~~$2~~${space}$3`);
+  }
+
+  get shortcutKeys() {
+    return ['Ctrl-d'];
   }
 }

@@ -153,6 +153,9 @@ export default class Graph extends MenuBase {
     if (!shortcutKeyMap[+shortcut]) {
       return;
     }
+    this.registerAfterClickCb(() => {
+      this.setLessSelection('\n\n\n\n\n', '\n\n');
+    });
     return `\n\n${this.$getSampleCode(selectedExample)}\n`;
   }
 
