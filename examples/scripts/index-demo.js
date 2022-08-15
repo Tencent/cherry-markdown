@@ -78,6 +78,7 @@ var basicConfig = {
       {
         strikethrough: ['strikethrough', 'underline', 'sub', 'sup', 'ruby'],
       },
+      'size',
       '|',
       'color',
       'header',
