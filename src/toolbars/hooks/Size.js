@@ -26,6 +26,12 @@ export default class Size extends MenuBase {
       { name: '大', noIcon: true, onclick: this.bindSubClick.bind(this, '24') },
       { name: '特大', noIcon: true, onclick: this.bindSubClick.bind(this, '32') },
     ];
+    this.shortKeyMap = {
+      'Alt-1': '12',
+      'Alt-2': '17',
+      'Alt-3': '24',
+      'Alt-4': '32',
+    };
   }
 
   getSubMenuConfig() {
@@ -41,19 +47,54 @@ export default class Size extends MenuBase {
     return header;
   }
 
+  $testIsSize(selection) {
+    return /^\s*(![0-9]+) [\s\S]+!/.test(selection);
+  }
+
+  $getSizeByShortKey(shortKey) {
+    if (/^[0-9]+$/.test(shortKey)) {
+      return shortKey;
+    }
+    return this.shortKeyMap[shortKey] || '17';
+  }
+
   onClick(selection, shortKey = '17') {
-    const $selection = getSelection(this.editor.editor, selection) || '字号';
+    const size = this.$getSizeByShortKey(shortKey);
+    let $selection = getSelection(this.editor.editor, selection) || '字号';
     // 如果选中的内容里有字号语法，则直接去掉该语法
-    if (/^\s*(![0-9]+)[\s\S]+(!)/.test(selection)) {
+    if (!this.isSelections && !this.$testIsSize($selection)) {
+      this.getMoreSelection('!32 ', '!', () => {
+        const newSelection = this.editor.editor.getSelection();
+        if (this.$testIsSize(newSelection)) {
+          $selection = newSelection;
+          return true;
+        }
+        return false;
+      });
+    }
+    if (this.$testIsSize($selection)) {
       // 如果选中的内容里有字号语法，并且字号与目标一致，则去掉字号语法
       // 反之，修改字号与目标一致
       let needClean = true;
       const tmp = $selection.replace(/(^)(\s*)(![0-9]+)([^\n]+)(!)(\s*)($)/gm, (w, m1, m2, m3, m4, m5, m6, m7) => {
-        needClean = needClean ? m3 === `!${shortKey}` : false;
-        return `${m1}${m2}!${shortKey}${m4}${m5}${m6}${m7}`;
+        needClean = needClean ? m3 === `!${size}` : false;
+        return `${m1}${m2}!${size}${m4}${m5}${m6}${m7}`;
       });
-      return !needClean ? tmp : $selection.replace(/(^)(\s*)(![0-9]+\s*)([^\n]+)(!)(\s*)($)/gm, '$1$4$7');
+      if (needClean) {
+        return $selection.replace(/(^)(\s*)(![0-9]+\s*)([^\n]+)(!)(\s*)($)/gm, '$1$4$7');
+      }
+      this.registerAfterClickCb(() => {
+        this.setLessSelection(`!${size} `, '!');
+      });
+      return tmp;
     }
-    return $selection.replace(/(^)([^\n]+)($)/gm, `$1 !${shortKey} $2! $3`);
+    this.registerAfterClickCb(() => {
+      this.setLessSelection(`!${size} `, '!');
+    });
+    return $selection.replace(/(^)([^\n]+)($)/gm, `$1!${size} $2!$3`);
+  }
+
+  get shortcutKeys() {
+    return ['Alt-1', 'Alt-2', 'Alt-3', 'Alt-4'];
   }
 }
