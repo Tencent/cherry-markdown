@@ -90,9 +90,15 @@ export default class Header extends ParagraphBase {
     return newId;
   }
 
+  $processHeaderText(text) {
+    let $text = text;
+    $text = $text.trim();
+    $text = $text.replace(/^\\>/, '>');
+    return $text;
+  }
   $wrapHeader(text, level, dataLines, sentenceMakeFunc) {
     // 需要经过一次escape
-    const processedText = sentenceMakeFunc(text.trim());
+    const processedText = sentenceMakeFunc(this.$processHeaderText(text));
     let { html } = processedText;
     // TODO: allowCustomID开关
     // let htmlAttr = this.getAttributes(html);
@@ -142,6 +148,11 @@ export default class Header extends ParagraphBase {
     }
     // 按照目前的引擎，每个hook只会执行一次，所以需要并行执行替换
     if (this.test($str, SETEXT_HEADER)) {
+      // 在有可能出现的br占位符后加一行换行来分隔占位符与标题正文
+      $str = $str.replace(/br\d_L\d+\$/g, (match) => {
+        const newLine = '\n';
+        return [match, newLine].join('');
+      });
       $str = $str.replace(this.RULE[SETEXT_HEADER].reg, (match, lines, text) => {
         if (text.trim() === '' || this.isContainsCache(text)) {
           return match;
@@ -177,7 +188,7 @@ export default class Header extends ParagraphBase {
         const headerLevel = level[0] === '-' ? 2 : 1; // =: H1, -: H2
         const { html: result, sign } = this.$wrapHeader(text, headerLevel, lineCount, sentenceMakeFunc);
         // 文章的开头不加换行
-        return this.getCacheWithSpace(this.pushCache(result, sign, lineCount), match, true);
+        return this.getCacheWithSpace(this.pushCache(result, sign, lineCount), match.replace(/^\n+/, ''), true);
       });
     }
     return $str;
@@ -201,10 +212,13 @@ export default class Header extends ParagraphBase {
       begin: '(?:^|\\n)(\\n*)', // (?<lines>\\n*)
       content: [
         '(?:\\h*',
-        '(.+)', // (?<text>.+)
-        ')\\n',
+        '(?!(?:[ ]{0,3}(?:>|-[ ]|[-]+\\n)))',
+        '((?:.+\\n)+?)', // (?<text>)
+        ')',
         '(?:\\h*',
+        '(?<![ ]{4,})', // up to three spaces of indentation before underline
         '([=]+|[-]+)', // (?<level>[=]+|[-]+)
+        '(?:[ \\t]*)', // may have trailing spaces or tabs
         ')',
       ].join(''),
       end: '(?=$|\\n)',
