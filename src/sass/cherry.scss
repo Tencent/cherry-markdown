@@ -638,6 +638,10 @@
   h3 {
     font-size: 12px;
     margin: 0px;
+    font-weight: 400;
+  }
+  [data-toolbar-theme='dark'] & h3{
+    color: $toolbarBtnColorDark;
   }
   .cherry-color-text {
     float: left;
