@@ -132,8 +132,8 @@ export default class Link extends SyntaxBase {
       // lookbehind启用分组是为了和不兼容lookbehind的场景共用一个回调
       begin: isLookbehindSupported() ? '((?<!\\\\))' : '(^|[^\\\\])',
       content: [
-        '\\[([^\\n]+?)\\]', // ?<text>
-        '[ \\t]*', // any spaces
+        '\\[([^\\n]*?)\\]', // ?<text>
+        '[\\t]*', // any spaces
         `${
           '(?:' +
           '\\(' +
@@ -144,8 +144,8 @@ export default class Link extends SyntaxBase {
            * [link]("") ⭕️ valid
            * [link](" ") ❌ invalid
            */
-          '([^\\s)]+)' + // ?<link> url
-          '(?:[ \\t]((?:".*?")|(?:\'.*?\')))?' + // ?<title> optional
+          '([^\\s(]*)' + // ?<link> url
+          '(?:[ \\t]+((?:".*?")|(?:\'.*?\')))?' + // ?<title> optional
           '\\)' +
           '|' + // or
           '\\[('
