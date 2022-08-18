@@ -655,7 +655,8 @@ export default class Previewer {
       const tmpDiv = document.createElement('div');
       const domContainer = this.getDomContainer();
       // 把最新内容放进临时div的时候，为了防止图片加载，会强制把图片的src改成data-src
-      tmpDiv.innerHTML = this.lazyLoadImg.changeSrc2DataSrc(html, true);
+      const enableLazyLoadImage = this.options.lazyLoadImg.noLoadImgNum > -1;
+      tmpDiv.innerHTML = this.lazyLoadImg.changeSrc2DataSrc(html, enableLazyLoadImage);
       const newHtmlList = this.$getSignData(tmpDiv);
       const oldHtmlList = this.$getSignData(domContainer);
 
