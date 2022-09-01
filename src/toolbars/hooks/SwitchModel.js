@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import locale from '@/utils/locale';
+import locale from '@/locales';
 import Event from '@/Event';
 /**
  * 切换预览/编辑模式的按钮
