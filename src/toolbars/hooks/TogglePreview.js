@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import locale from '@/locales';
+import locale from '@/locales/index';
 import MenuBase from '@/toolbars/MenuBase';
 import Event from '@/Event';
 /**

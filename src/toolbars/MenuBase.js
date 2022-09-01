@@ -15,7 +15,7 @@
  */
 // @ts-check
 import Logger from '@/Logger';
-import locale from '@/locales';
+import locale from '@/locales/index';
 import { escapeHTMLSpecialCharOnce as $e } from '@/utils/sanitize';
 import { createElement } from '@/utils/dom';
 

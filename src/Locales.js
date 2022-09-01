@@ -1,4 +1,4 @@
-import locales from '@/locales';
+import locales from '@/locales/index';
 
 /**
  * translate by key

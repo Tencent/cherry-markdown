@@ -2063,7 +2063,6 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-toolbar-button {
   float: left;
   padding: 0 12px;
-  margin: 4px 0;
   height: 38px;
   color: #3f4a56;
   background: transparent;
@@ -2135,47 +2134,49 @@ div[data-type=codeBlock] .token.inserted {
 
 .cherry-bubble {
   position: absolute;
-  top: 100px;
-  left: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  font-size: 14px;
+  min-height: 35px;
+  min-width: 50px;
+  border: 1px solid #dfe6ee;
   background-color: #fff;
   box-shadow: 0 2px 15px -5px rgba(0, 0, 0, 0.5);
-  height: 35px;
-  min-width: 50px;
   border-radius: 3px;
-  border: 1px solid #dfe6ee;
   z-index: 999;
-  display: none;
+}
+.cherry-bubble.cherry-bubble--centered {
+  left: 50%;
+  transform: translateX(-50%);
 }
 .cherry-bubble .cherry-bubble-top,
 .cherry-bubble .cherry-bubble-bottom {
+  position: absolute;
+  left: 50%;
   width: 0;
   height: 0;
+  margin-left: -8px;
   border-left: 8px solid rgba(0, 0, 0, 0);
   border-right: 8px solid rgba(0, 0, 0, 0);
-  position: relative;
-  left: 50%;
-  margin-left: -8px;
 }
 .cherry-bubble .cherry-bubble-top {
+  top: 0;
+  transform: translateY(-100%);
   border-bottom: 8px solid #fff;
-  top: -8px;
 }
 .cherry-bubble .cherry-bubble-bottom {
+  bottom: 0;
+  transform: translateY(100%);
   border-top: 8px solid #fff;
-  bottom: -35px;
 }
 .cherry-bubble .cherry-toolbar-button {
-  line-height: 35px;
-  height: 100%;
-  overflow: hidden;
-  vertical-align: middle;
-  display: inline-block;
-  padding: 0 15px;
-  margin-top: -1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 35px;
   cursor: pointer;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 .cherry-bubble .cherry-toolbar-button:hover {
@@ -2183,10 +2184,8 @@ div[data-type=codeBlock] .token.inserted {
   background-color: rgba(89, 128, 166, 0.05);
 }
 .cherry-bubble .cherry-toolbar-button.cherry-toolbar-split {
-  border-left: 1px solid #ddd;
-  width: 0;
-  padding: 0;
-  overflow: hidden;
+  height: 65%;
+  min-height: 22.75px;
 }
 [data-toolbar-theme=dark] .cherry-bubble {
   border-color: #20304b;
@@ -2201,13 +2200,70 @@ div[data-type=codeBlock] .token.inserted {
   background: rgba(255, 255, 255, 0.1);
 }
 [data-toolbar-theme=dark] .cherry-bubble .cherry-bubble-top {
-  border-bottom: 8px solid #20304b;
+  border-bottom-color: #20304b;
 }
 [data-toolbar-theme=dark] .cherry-bubble .cherry-bubble-bottom {
-  border-top: 8px solid #20304b;
+  border-top-color: #20304b;
 }
 [data-toolbar-theme=dark] .cherry-bubble .cherry-toolbar-button:hover {
   border-color: #20304b;
+}
+
+.cherry-switch-paste .switch-btn--bg {
+  position: absolute;
+  width: 50%;
+  height: 100%;
+  box-sizing: border-box;
+  z-index: -1;
+  left: 0;
+  top: 0;
+  opacity: 0.3;
+  background-color: #5d9bfc;
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+.cherry-switch-paste .cherry-toolbar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  text-align: center;
+}
+.cherry-switch-paste .cherry-toolbar-button:hover {
+  border-color: transparent;
+}
+.cherry-switch-paste[data-type=text] .cherry-text-btn {
+  color: #3f4a56;
+}
+.cherry-switch-paste[data-type=text] .cherry-md-btn {
+  color: #5d9bfc;
+}
+.cherry-switch-paste[data-type=md] .cherry-md-btn {
+  color: #3f4a56;
+}
+.cherry-switch-paste[data-type=md] .cherry-text-btn {
+  color: #5d9bfc;
+}
+.cherry-switch-paste[data-type=md] .switch-btn--bg {
+  left: 50%;
+}
+[data-toolbar-theme=dark] .cherry-switch-paste .switch-btn--bg {
+  background-color: #fff;
+}
+[data-toolbar-theme=dark] .cherry-switch-paste[data-type=text] .cherry-text-btn {
+  color: #d7e6fe;
+}
+[data-toolbar-theme=dark] .cherry-switch-paste[data-type=text] .cherry-md-btn {
+  color: #fff;
+}
+[data-toolbar-theme=dark] .cherry-switch-paste[data-type=md] .cherry-md-btn {
+  color: #d7e6fe;
+}
+[data-toolbar-theme=dark] .cherry-switch-paste[data-type=md] .cherry-text-btn {
+  color: #fff;
+}
+[data-toolbar-theme=dark] .cherry-switch-paste[data-type=md] .switch-btn--bg {
+  left: 50%;
 }
 
 .cherry-floatmenu {
@@ -2433,6 +2489,10 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-color-wrap h3 {
   font-size: 12px;
   margin: 0px;
+  font-weight: 400;
+}
+[data-toolbar-theme=dark] .cherry-color-wrap h3 {
+  color: #d7e6fe;
 }
 .cherry-color-wrap .cherry-color-text {
   float: left;
@@ -2453,63 +2513,6 @@ div[data-type=codeBlock] .token.inserted {
 }
 .cherry-color-wrap .cherry-color-item:hover {
   border: 1px solid #000;
-}
-
-.cherry-switch-paste {
-  margin-left: -112px;
-  left: 50%;
-  box-sizing: content-box;
-}
-.cherry-switch-paste .switch-btn--bg {
-  transition: all 0.3s;
-  position: absolute;
-  width: 50%;
-  height: 100%;
-  box-sizing: border-box;
-  z-index: -1;
-  left: -1px;
-  opacity: 0.3;
-  background-color: #5d9bfc;
-}
-.cherry-switch-paste .cherry-toolbar-button {
-  width: 80px;
-  text-align: center;
-}
-.cherry-switch-paste .cherry-toolbar-button:hover {
-  border-color: transparent;
-}
-.cherry-switch-paste[data-type=text] .cherry-text-btn {
-  color: #3f4a56;
-}
-.cherry-switch-paste[data-type=text] .cherry-md-btn {
-  color: #5d9bfc;
-}
-.cherry-switch-paste[data-type=md] .cherry-md-btn {
-  color: #3f4a56;
-}
-.cherry-switch-paste[data-type=md] .cherry-text-btn {
-  color: #5d9bfc;
-}
-.cherry-switch-paste[data-type=md] .switch-btn--bg {
-  left: 50%;
-}
-[data-toolbar-theme=dark] .cherry-switch-paste .switch-btn--bg {
-  background-color: #fff;
-}
-[data-toolbar-theme=dark] .cherry-switch-paste[data-type=text] .cherry-text-btn {
-  color: #d7e6fe;
-}
-[data-toolbar-theme=dark] .cherry-switch-paste[data-type=text] .cherry-md-btn {
-  color: #fff;
-}
-[data-toolbar-theme=dark] .cherry-switch-paste[data-type=md] .cherry-md-btn {
-  color: #d7e6fe;
-}
-[data-toolbar-theme=dark] .cherry-switch-paste[data-type=md] .cherry-text-btn {
-  color: #fff;
-}
-[data-toolbar-theme=dark] .cherry-switch-paste[data-type=md] .switch-btn--bg {
-  left: 50%;
 }
 
 .Cherry-Math svg {
@@ -2548,7 +2551,9 @@ div[data-type=codeBlock] .token.inserted {
   padding: 1px 4px;
   border-radius: 3px;
   cursor: pointer;
-} /* BASICS */
+}
+
+/* BASICS */
 .CodeMirror {
   /* Set height, width, borders, and global font properties here */
   font-family: monospace;
