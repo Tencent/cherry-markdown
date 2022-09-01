@@ -19,9 +19,29 @@ import Event from '@/Event';
  * 在编辑区域选中文本时浮现的bubble工具栏
  */
 export default class Bubble extends Toolbar {
+  /**
+   * @type {'flex' | 'block'}
+   */
+  static displayType = 'flex';
   // constructor(options) {
   //     super(options);
   // }
+
+  set visible(visible) {
+    const bubbleStyle = window.getComputedStyle(this.bubbleDom);
+    if (visible) {
+      bubbleStyle.display === 'none' && (this.bubbleDom.style.display = Bubble.displayType);
+      // bubbleStyle.visibility !== 'visible' && (this.bubbleBottom.style.visibility = 'visible');
+    } else {
+      bubbleStyle.display !== 'none' && (this.bubbleDom.style.display = 'none');
+      // bubbleStyle.visibility !== 'hidden' && (this.bubbleBottom.style.visibility = 'hidden');
+    }
+  }
+
+  get visible() {
+    const bubbleStyle = window.getComputedStyle(this.bubbleDom);
+    return bubbleStyle.display !== 'none' && bubbleStyle.visibility !== 'hidden';
+  }
 
   init() {
     this.options.editor = this.$cherry.editor;
@@ -44,7 +64,7 @@ export default class Bubble extends Toolbar {
    * 当编辑区域滚动的时候自动隐藏bubble工具栏和子工具栏
    */
   updatePositionWhenScroll() {
-    if (this.bubbleDom.style.display === 'block') {
+    if (this.bubbleDom.style.display === Bubble.displayType) {
       this.bubbleDom.style.marginTop = `${parseFloat(this.bubbleDom.dataset.scrollTop) - this.getScrollTop()}px`;
       Event.emit(this.instanceId, Event.Events.cleanAllSubMenus);
     }
@@ -57,12 +77,11 @@ export default class Bubble extends Toolbar {
    * @param {number} width 选中文本内容的宽度
    */
   showBubble(top, width) {
-    if (this.bubbleDom.style.display !== 'block') {
-      this.bubbleDom.style.display = 'block';
+    if (!this.visible) {
+      this.visible = true;
       this.bubbleDom.style.marginTop = '0';
       this.bubbleDom.dataset.scrollTop = String(this.getScrollTop());
     }
-    this.bubbleDom.style.visibility = 'visible';
     const positionLimit = this.editorDom.querySelector('.CodeMirror-lines').firstChild.getBoundingClientRect();
     const editorPosition = this.editorDom.getBoundingClientRect();
     const minLeft = positionLimit.left - editorPosition.left;
@@ -96,13 +115,12 @@ export default class Bubble extends Toolbar {
       // 让bubble工具栏的箭头处于工具栏的中间位置
       this.$setBubbleCursorPosition('50%');
     }
-    this.bubbleDom.style.left = `${left}px`;
+    // 安全边距 20px
+    this.bubbleDom.style.left = `${Math.max(20, left)}px`;
   }
 
   hideBubble() {
-    if (this.bubbleDom.style.display !== 'none') {
-      this.bubbleDom.style.display = 'none';
-    }
+    this.visible = false;
   }
 
   /**
@@ -129,6 +147,8 @@ export default class Bubble extends Toolbar {
     this.bubbleBottom = bottom;
     this.bubbleDom.appendChild(top);
     this.bubbleDom.appendChild(bottom);
+    // 默认不可见
+    this.visible = false;
   }
 
   getBubbleDom() {

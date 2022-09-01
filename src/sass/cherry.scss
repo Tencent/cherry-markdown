@@ -208,7 +208,7 @@
   &-button {
     float: left;
     padding: 0 12px;
-    margin: 4px 0;
+    // margin: 4px 0;
     height: 38px;
     color: $toolbarBtnColorLight;
     background: transparent;
@@ -287,95 +287,7 @@
   }
 }
 
-.cherry-bubble {
-  position: absolute;
-  top: 100px;
-  left: 200px;
-  background-color: #fff;
-  box-shadow: 0 2px 15px -5px rgba(0, 0, 0, 0.5);
-  height: 35px;
-  min-width: 50px;
-  border-radius: $borderRadius;
-  border: 1px solid $borderColor;
-  z-index: 999;
-  display: none;
-
-  .cherry-bubble-top,
-  .cherry-bubble-bottom {
-    width: 0;
-    height: 0;
-    border-left: 8px solid rgba(0, 0, 0, 0);
-    border-right: 8px solid rgba(0, 0, 0, 0);
-    position: relative;
-    left: 50%;
-    margin-left: -8px;
-  }
-
-  .cherry-bubble-top {
-    border-bottom: 8px solid #fff;
-    top: -8px;
-  }
-
-  .cherry-bubble-bottom {
-    border-top: 8px solid #fff;
-    bottom: -35px;
-  }
-
-  .cherry-toolbar-button {
-    line-height: 35px;
-    height: 100%;
-    overflow: hidden;
-    vertical-align: middle;
-    display: inline-block;
-    padding: 0 15px;
-    margin-top: -1px;
-    cursor: pointer;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-
-    &:hover {
-      //color: #036;
-      border-color: $borderColor;
-      background-color: rgba(89, 128, 166, 0.05);
-    }
-
-    &.cherry-toolbar-split {
-      border-left: 1px solid #ddd;
-      width: 0;
-      padding: 0;
-      overflow: hidden;
-    }
-  }
-
-  [data-toolbar-theme='dark'] & {
-    border-color: $toolbarBgDark;
-    background: $toolbarBgDark;
-
-    .cherry-toolbar-button {
-      color: $toolbarBtnColorDark;
-      background: $toolbarBtnBgDark;
-
-      &:hover {
-        color: $toolbarBtnHoverColorDark;
-        background: $toolbarBtnBgHoverDark;
-      }
-    }
-
-    .cherry-bubble-top {
-      border-bottom: 8px solid $toolbarBgDark;
-    }
-
-    .cherry-bubble-bottom {
-      border-top: 8px solid $toolbarBgDark;
-    }
-
-    .cherry-toolbar-button:hover {
-      border-color: $toolbarBgDark;
-    }
-  }
-}
+@import './components/bubble';
 
 .cherry-floatmenu {
   z-index: 100;
@@ -664,73 +576,6 @@
 
     &:hover {
       border: 1px solid #000;
-    }
-  }
-}
-
-.cherry-switch-paste {
-  margin-left: -112px;
-  left: 50%;
-  box-sizing: content-box;
-  .switch-btn--bg {
-    transition: all 0.3s;
-    position: absolute;
-    width: 50%;
-    height: 100%;
-    box-sizing: border-box;
-    z-index: -1;
-    left: -1px;
-    opacity: 0.3;
-    background-color: $toolbarBtnHoverColorLight;
-  }
-  .cherry-toolbar-button {
-    width: 80px;
-    text-align: center;
-    &:hover {
-      border-color: transparent;
-    }
-  }
-  &[data-type='text'] {
-    .cherry-text-btn {
-      color: $toolbarBtnColorLight;
-    }
-    .cherry-md-btn {
-      color: $toolbarBtnHoverColorLight;
-    }
-  }
-  &[data-type='md'] {
-    .cherry-md-btn {
-      color: $toolbarBtnColorLight;
-    }
-    .cherry-text-btn {
-      color: $toolbarBtnHoverColorLight;
-    }
-    .switch-btn--bg {
-      left: 50%;
-    }
-  }
-  [data-toolbar-theme='dark'] & {
-    .switch-btn--bg {
-      background-color: $toolbarBtnHoverColorDark;
-    }
-    &[data-type='text'] {
-      .cherry-text-btn {
-        color: $toolbarBtnColorDark;
-      }
-      .cherry-md-btn {
-        color: $toolbarBtnHoverColorDark;
-      }
-    }
-    &[data-type='md'] {
-      .cherry-md-btn {
-        color: $toolbarBtnColorDark;
-      }
-      .cherry-text-btn {
-        color: $toolbarBtnHoverColorDark;
-      }
-      .switch-btn--bg {
-        left: 50%;
-      }
     }
   }
 }
