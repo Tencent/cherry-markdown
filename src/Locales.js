@@ -1,9 +1,11 @@
+import locales from '@/locales';
+
 /**
  * translate by key
  * @param {string} key
- * @param {string} [_lang='zh_CN']
+ * @param {string} [lang='zh_CN']
  * @returns
  */
-export function t(key, _lang = 'zh_CN') {
-  return key;
+export function t(key, lang = 'zh_CN') {
+  return locales[lang]?.[key] ?? key;
 }
