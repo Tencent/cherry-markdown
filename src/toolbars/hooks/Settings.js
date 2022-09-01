@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import locale from '@/locales';
+import locale from '@/locales/index';
 import Event from '@/Event';
 
 /**
