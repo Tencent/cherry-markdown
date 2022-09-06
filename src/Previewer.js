@@ -646,6 +646,7 @@ export default class Previewer {
   }
 
   update(html) {
+    // 更新时保留图片懒加载逻辑
     const newHtml = this.lazyLoadImg.changeSrc2DataSrc(html);
     if (!this.isPreviewerHidden()) {
       // 标记当前正在更新预览区域，锁定同步滚动功能
@@ -654,9 +655,7 @@ export default class Previewer {
       // 预览区未隐藏时，直接更新
       const tmpDiv = document.createElement('div');
       const domContainer = this.getDomContainer();
-      // 把最新内容放进临时div的时候，为了防止图片加载，会强制把图片的src改成data-src
-      const enableLazyLoadImage = this.options.lazyLoadImg.noLoadImgNum > -1;
-      tmpDiv.innerHTML = this.lazyLoadImg.changeSrc2DataSrc(html, enableLazyLoadImage);
+      tmpDiv.innerHTML = newHtml;
       const newHtmlList = this.$getSignData(tmpDiv);
       const oldHtmlList = this.$getSignData(domContainer);
 
