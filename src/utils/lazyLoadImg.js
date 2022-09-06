@@ -294,9 +294,13 @@ export default class LazyLoadImg {
     const { noLoadImgNum } = this.options;
     let currentNoLoadImgNum = 0;
     return content.replace(/<img ([^>]*?)src="([^"]+)"([^>]*?)>/g, (match, m1, src, m3) => {
+      // 如果已经替换过data-src了，或者没有src属性，则不替换
+      if (/data-src="/.test(match) || !/ src="/.test(match)) {
+        return match;
+      }
       if (focus === false) {
-        // 如果src已经加载过，或者已经替换过data-src了，或者没有src属性，则不替换
-        if (this.isLoaded(src) || /data-src="/.test(match) || !/ src="/.test(match)) {
+        // 如果src已经加载过，则不替换
+        if (this.isLoaded(src)) {
           return match;
         }
         // 前noLoadImgNum张图片不替换
