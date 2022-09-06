@@ -213,7 +213,7 @@ export default class Header extends ParagraphBase {
 
     // atx header
     const atx = {
-      begin: '(?:^|\\n)(\\n*)(?:\\h*(#{1,6}))', // (?<lines>\\n*), (?<level>#{1,6})
+      begin: '(?:^|\\n)(\\n*)(?:\\h{0,3}(#{1,6})\\s+)', // (?<lines>\\n*), (?<level>#{1,6})
       content: '(.+?)', // '(?<text>.+?)'
       end: '(?=$|\\n)',
     };
