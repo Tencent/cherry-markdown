@@ -130,7 +130,7 @@ export default class LazyLoadImg {
       const img = imgs[i];
       const position = img.getBoundingClientRect();
       // 判断是否在视区内
-      const testPosition = position.top > 0 && position.top < maxHeight;
+      const testPosition = position.top > 0 && position.top < maxHeight && position.top < window.innerHeight + 100;
       // 判断是否需要自动加载
       const testAutoLoad = this.srcList.length <= autoLoadImgNum;
       if (!testPosition && !testAutoLoad) {
