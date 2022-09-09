@@ -142,6 +142,10 @@ export default {
     if (warning.code === 'EVAL' && warning.id.indexOf('mermaid') !== -1) {
       return;
     }
+    // 忽略 juice 的 circular dependency
+    if (warning.code === 'CIRCULAR_DEPENDENCY' && warning.importer.includes('node_modules/juice')) {
+      return;
+    }
     warn(warning);
   },
   external: [/@babel[\\/]runtime/, 'jsdom'],

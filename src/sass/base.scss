@@ -1,8 +1,5 @@
 .cherry {
   * {
-    padding: 0;
-    margin: 0;
-
     &::-webkit-scrollbar {
       height: 7px;
       width: 7px;
@@ -15,7 +12,7 @@
 
     &::-webkit-scrollbar-thumb {
       background: #d3d7da;
-      -webkit-border-radius: 6px
+      -webkit-border-radius: 6px;
     }
 
     &::-webkit-scrollbar-thumb:hover {

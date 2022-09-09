@@ -18,8 +18,8 @@ import MenuBase from '@/toolbars/MenuBase';
  * 插入超链接
  */
 export default class Link extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('link', 'link');
   }
 
@@ -41,6 +41,6 @@ export default class Link extends MenuBase {
    * 声明绑定的快捷键，快捷键触发onClick
    */
   get shortcutKeys() {
-    return ['Mod-l'];
+    return ['Ctrl-l'];
   }
 }

@@ -18,8 +18,8 @@ import MenuBase from '@/toolbars/MenuBase';
  * 插入行内公式
  */
 export default class Formula extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('formula', 'insertFormula');
   }
 
@@ -29,14 +29,19 @@ export default class Formula extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    const before = `${selection} $ `;
+    const after = ' $ ';
+    this.registerAfterClickCb(() => {
+      this.setLessSelection(before, after);
+    });
     // 插入行内公式
-    return `${selection} $ e=mc^2 $ `;
+    return `${before}e=mc^2${after}`;
   }
 
   /**
    * 声明绑定的快捷键，快捷键触发onClick
    */
   get shortcutKeys() {
-    return ['Mod-m'];
+    return ['Ctrl-m'];
   }
 }

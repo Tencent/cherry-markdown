@@ -29,7 +29,6 @@ import 'codemirror/addon/display/placeholder';
 // import 'codemirror/addon/edit/matchbrackets';
 import htmlParser from '@/utils/htmlparser';
 import pasteHelper from '@/utils/pasteHelper';
-import lazyLoadImg from '@/utils/lazyLoadImg';
 import { addEvent } from './utils/event';
 import Logger from '@/Logger';
 
@@ -323,11 +322,6 @@ export default class Editor {
       false,
     );
 
-    if (previewer.options.isPreviewOnly) {
-      previewer.options.afterUpdateCallBack.push(() => {
-        lazyLoadImg(previewer.options.previewerDom);
-      });
-    }
     /**
      * @property
      * @type {CodeMirror.Editor}
@@ -409,9 +403,6 @@ export default class Editor {
     const $lineNum = Math.max(0, lineNum);
     this.jumpToLine($lineNum, endLine, percent);
     Logger.log('滚动预览区域，左侧应scroll to ', $lineNum);
-    if (this.previewer.options.isPreviewOnly) {
-      lazyLoadImg(this.previewer.options.previewerDom);
-    }
   }
 
   /**

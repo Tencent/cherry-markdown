@@ -19,8 +19,8 @@ import { getSelection } from '@/utils/selection';
  * 插入“引用”的按钮
  */
 export default class Quote extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('quote', 'blockquote');
   }
 
@@ -36,6 +36,9 @@ export default class Quote extends MenuBase {
       // 去掉>号
       return $selection.replace(/(^\s*)>\s*([^\n]+)($)/gm, '$1$2$3').replace(/\n+$/, '\n\n');
     }
+    this.registerAfterClickCb(() => {
+      this.setLessSelection('> ', '');
+    });
     // 给每一行增加>号
     return $selection.replace(/(^)([^\n]+)($)/gm, '$1> $2$3').replace(/\n+$/, '\n\n');
   }

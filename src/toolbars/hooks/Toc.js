@@ -18,8 +18,8 @@ import MenuBase from '@/toolbars/MenuBase';
  * 插入目录
  */
 export default class Toc extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('toc', 'toc');
   }
 

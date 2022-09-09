@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import locale from '@/utils/locale';
+import locale from '@/locales/index';
 import MenuBase from '@/toolbars/MenuBase';
 import Event from '@/Event';
 /**
@@ -23,10 +23,10 @@ export default class TogglePreview extends MenuBase {
   /** @type {boolean} 当前预览状态 */
   $previewerHidden = false;
 
-  constructor(editor, engine) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('previewClose', 'previewClose');
-    this.instanceId = engine.$cherry.previewer.instanceId;
+    this.instanceId = $cherry.instanceId;
     this.updateMarkdown = false;
     this.attachEventListeners();
   }

@@ -77,14 +77,18 @@ var basicConfig = {
     toolbar: [
       'bold',
       'italic',
-      'strikethrough',
+      {
+        strikethrough: ['strikethrough', 'underline', 'sub', 'sup', 'ruby'],
+      },
+      'size',
       '|',
       'color',
       'header',
       '|',
       'list',
+      'formula',
       {
-        insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word'],
+        insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word', 'ruby'],
       },
       'graph',
       'togglePreview',
@@ -93,6 +97,7 @@ var basicConfig = {
       'codeTheme',
       'export',
     ],
+    bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
     sidebar: ['mobilePreview', 'copy'],
   },
   editor: {
@@ -104,6 +109,9 @@ var basicConfig = {
   },
   keydown: [],
   //extensions: [],
+  callback: {
+    changeString2Pinyin: pinyin,
+  }
 };
 
 fetch('./markdown/basic copy.md').then((response) => response.text()).then((value) => {
