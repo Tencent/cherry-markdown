@@ -194,6 +194,7 @@ export default class CodeBlock extends ParagraphBase {
       cacheCode = this.renderLineNumber(cacheCode);
     }
     cacheCode = `<div data-sign="${sign}" data-type="codeBlock" data-lines="${lines}">
+      <div class="cherry-copy-code-block" style="display:none;"><i class="ch-icon ch-icon-copy" title="copy"></i></div>
       <pre class="language-${lang}">${this.wrapCode(cacheCode, lang)}</pre>
     </div>`;
     return cacheCode;
@@ -280,7 +281,7 @@ export default class CodeBlock extends ParagraphBase {
       }
       /** 处理缩进 - end */
 
-      // 未命中缓存，执行渲染
+        // 未命中缓存，执行渲染
       let $lang = lang.trim();
       // 如果是公式关键字，则直接返回
       if (/^(math|katex|latex)$/i.test($lang) && !this.isInternalCustomLangCovered($lang)) {
@@ -307,9 +308,8 @@ export default class CodeBlock extends ParagraphBase {
     });
     // 为了避免InlineCode被HtmlBlock转义，需要在这里提前缓存
     // InlineBlock只需要在afterMakeHtml还原即可
-    const INLINE_CODE_REGEX = /(`+)(.+?(?:`?)(?:\n.+?)*?)\1/g;
+    const INLINE_CODE_REGEX = /(`+)[ ]*(.+?(`?)(?:\n.+?)*?)[ ]*\1/g;
     if (INLINE_CODE_REGEX.test($str)) {
-      $str = $str.replace(/\\`/g, '~~not~inlineCode');
       $str = $str.replace(INLINE_CODE_REGEX, (match, syntax, code) => {
         if (code.trim() === '`') {
           return match;
@@ -322,7 +322,7 @@ export default class CodeBlock extends ParagraphBase {
         CodeBlock.inlineCodeCache[sign] = html;
         return `~~CODE${sign}$`;
       });
-      $str = $str.replace(/~~not~inlineCode/g, '\\`');
+      $str = $str;
     }
 
     // 处理缩进代码块
