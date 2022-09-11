@@ -109,6 +109,9 @@ export function createMenuHook(name, options) {
   return class CustomMenu extends MenuBase {
     constructor(editorInstance) {
       super(editorInstance);
+      if (!filteredOptions.iconName) {
+        this.noIcon = true;
+      }
       this.setName(name, filteredOptions.iconName);
       this.subMenuConfig = filteredOptions.subMenuConfig || [];
     }
