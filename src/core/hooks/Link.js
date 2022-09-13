@@ -145,7 +145,7 @@ export default class Link extends SyntaxBase {
            * [link](" ") ❌ invalid
            */
           '([^\\s(]*)' + // ?<link> url
-          '(?:[ \\t]+((?:".*?")|(?:\'.*?\')))?' + // ?<title> optional
+          '(?:[ \\t]+((?:".*?")|(?:\'.*?\')|(?:\\(.*?\\))))?' + // ?<title> optional
           '\\)' +
           '|' + // or
           '\\[('

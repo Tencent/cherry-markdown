@@ -122,7 +122,7 @@ export default class AutoLink extends SyntaxBase {
           return match;
         case 'mailto:': // email
           if (EMAIL.test(address)) {
-            return `${prefix}<a href="${encodeURIOnce(`${$protocol}${address}`)}" rel="nofollow">${$e(
+            return `${prefix}<a href="${encodeURIOnce(`${$protocol}${address}`)}" rel="nofollow">${protocol}${$e(
               address,
             )}</a>${suffix}`;
           }

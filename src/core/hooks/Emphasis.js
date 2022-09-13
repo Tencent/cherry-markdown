@@ -92,7 +92,7 @@ export default class Emphasis extends SyntaxBase {
     const asterisk = {
       begin: '(^|[^\\\\])(\\*+)', // ?<leading>, ?<symbol>
       content: `(${REGEX})`, // ?<text>
-      end: '\\2',
+      end: '\\2(?![*]+])',
     };
 
     // UNDERSCORE_EMPHASIS_BORDER：允许除下划线以外的「标点符号」和空格出现，使用[^\w\S \t]或[\W\s]会有性能问题
