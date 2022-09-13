@@ -308,7 +308,7 @@ export default class CodeBlock extends ParagraphBase {
     });
     // 为了避免InlineCode被HtmlBlock转义，需要在这里提前缓存
     // InlineBlock只需要在afterMakeHtml还原即可
-    const INLINE_CODE_REGEX = /(`+)[ ]*(.+?(`?)(?:\n.+?)*?)[ ]*\1/g;
+    const INLINE_CODE_REGEX = /(`+)[ ]?([ ]*.+?(`*)(?:[^`\n]+?)*?)[ ]?\1/g;
     if (INLINE_CODE_REGEX.test($str)) {
       $str = $str.replace(INLINE_CODE_REGEX, (match, syntax, code) => {
         if (code.trim() === '`') {
