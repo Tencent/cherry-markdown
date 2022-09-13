@@ -90,7 +90,7 @@ export default class Emphasis extends SyntaxBase {
       ? ALLOW_WHITESPACE_MULTILINE
       : DO_NOT_STARTS_AND_END_WITH_SPACES_MULTILINE_ALLOW_EMPTY;
     const asterisk = {
-      begin: '(^|[^\\\\])(\\*+)', // ?<leading>, ?<symbol>
+      begin: '(^|[^\\\\])(\\*+)(?!\\*)', // ?<leading>, ?<symbol>
       content: `(${REGEX})`, // ?<text>
       end: '\\2',
     };
