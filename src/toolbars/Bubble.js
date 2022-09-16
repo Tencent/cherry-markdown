@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import Toolbar from './Toolbar';
-import Event from '@/Event';
 /**
  * 在编辑区域选中文本时浮现的bubble工具栏
  */
@@ -46,7 +45,6 @@ export default class Bubble extends Toolbar {
   updatePositionWhenScroll() {
     if (this.bubbleDom.style.display === 'block') {
       this.bubbleDom.style.marginTop = `${parseFloat(this.bubbleDom.dataset.scrollTop) - this.getScrollTop()}px`;
-      Event.emit(this.instanceId, Event.Events.cleanAllSubMenus);
     }
   }
 
@@ -139,12 +137,10 @@ export default class Bubble extends Toolbar {
     this.options.editor.addListener('change', (codemirror) => {
       // 当编辑区内容变更时自动隐藏bubble工具栏
       this.hideBubble();
-      Event.emit(this.instanceId, Event.Events.cleanAllSubMenus);
     });
     this.options.editor.addListener('refresh', (codemirror) => {
       // 当编辑区内容刷新时自动隐藏bubble工具栏
       this.hideBubble();
-      Event.emit(this.instanceId, Event.Events.cleanAllSubMenus);
     });
     this.options.editor.addListener('scroll', (codemirror) => {
       // 当编辑区滚动时，需要实时同步bubble工具栏的位置
@@ -164,7 +160,6 @@ export default class Bubble extends Toolbar {
       if (anchor > head) {
         direction = 'desc';
       }
-      Event.emit(this.instanceId, Event.Events.cleanAllSubMenus);
       setTimeout(() => {
         const selections = codemirror.getSelections();
         if (selections.join('').length <= 0) {

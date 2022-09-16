@@ -435,8 +435,8 @@ export default class Cherry extends CherryStatic {
    */
   createBubble() {
     const dom = createElement('div', 'cherry-bubble');
+    $expectTarget(this.options.toolbars.bubble, Array); // 与其后续判断，不如直接抛出错误
     if (this.options.toolbars.bubble) {
-      $expectTarget(this.options.toolbars.bubble, Array);
       this.bubble = new Bubble({
         dom,
         $cherry: this,
