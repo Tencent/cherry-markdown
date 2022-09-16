@@ -162,7 +162,7 @@
     }
   },
   "optionalDependencies": {
-    "mermaid": "8.13.8"
+    "mermaid": "9.1.7"
   },
   "lint-staged": {
     "*.js": "eslint --fix"
