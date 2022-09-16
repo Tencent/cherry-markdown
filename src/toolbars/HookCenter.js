@@ -137,7 +137,7 @@ export default class HookCenter {
     } else if (customMenu !== undefined && customMenu !== null && customMenu[name]) {
       this.allMenusName.push(name);
       // 如果是自定义菜单，传参兼容旧版
-      this.hooks[name] = new customMenu[name]($cherry.editor, $cherry.engine, $cherry.toolbar, $cherry);
+      this.hooks[name] = new customMenu[name]($cherry);
     }
   }
 

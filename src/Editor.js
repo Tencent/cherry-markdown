@@ -25,6 +25,7 @@ import 'codemirror/addon/fold/xml-fold';
 import 'codemirror/addon/edit/matchtags';
 import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/display/placeholder';
+import 'codemirror/keymap/sublime';
 // import 'codemirror/addon/selection/active-line';
 // import 'codemirror/addon/edit/matchbrackets';
 import htmlParser from '@/utils/htmlparser';
@@ -74,6 +75,7 @@ export default class Editor {
         // 设置为 contenteditable 对输入法定位更友好
         // 但已知会影响某些悬浮菜单的定位，如粘贴选择文本或markdown模式的菜单
         // inputStyle: 'contenteditable',
+        keyMap: 'sublime',
       },
       toolbars: {},
       onKeydown() {},

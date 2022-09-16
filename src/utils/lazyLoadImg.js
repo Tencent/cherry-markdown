@@ -130,7 +130,7 @@ export default class LazyLoadImg {
       const img = imgs[i];
       const position = img.getBoundingClientRect();
       // 判断是否在视区内
-      const testPosition = position.top > 0 && position.top < maxHeight;
+      const testPosition = position.top > 0 && position.top < maxHeight && position.top < window.innerHeight + 100;
       // 判断是否需要自动加载
       const testAutoLoad = this.srcList.length <= autoLoadImgNum;
       if (!testPosition && !testAutoLoad) {
@@ -294,24 +294,24 @@ export default class LazyLoadImg {
     const { noLoadImgNum } = this.options;
     let currentNoLoadImgNum = 0;
     return content.replace(/<img ([^>]*?)src="([^"]+)"([^>]*?)>/g, (match, m1, src, m3) => {
-      // 如果已经替换过data-src了，或者没有src属性，则不替换
-      if (/data-src="/.test(match) || !/ src="/.test(match)) {
+      // 如果已经替换过data-src了，或者没有src属性，或者关闭了懒加载功能，则不替换
+      if (/data-src="/.test(match) || !/ src="/.test(match) || noLoadImgNum < 0) {
         return match;
       }
       if (focus === false) {
+        // 前noLoadImgNum张图片不替换
+        currentNoLoadImgNum += 1;
+        if (currentNoLoadImgNum < noLoadImgNum) {
+          return match;
+        }
         // 如果src已经加载过，则不替换
         if (this.isLoaded(src)) {
           return match;
         }
-        // 前noLoadImgNum张图片不替换
-        currentNoLoadImgNum += 1;
-        if (currentNoLoadImgNum < noLoadImgNum || noLoadImgNum < 0) {
-          return match;
-        }
-        // 如果配置了loadingImgPath，则替换src为loadingImgPath
-        if (loadingImgPath) {
-          return `<img ${m1}src="${loadingImgPath}" data-src="${src}"${m3}>`;
-        }
+      }
+      // 如果配置了loadingImgPath，则替换src为loadingImgPath
+      if (loadingImgPath) {
+        return `<img ${m1}src="${loadingImgPath}" data-src="${src}"${m3}>`;
       }
       return `<img ${m1}data-src="${src}"${m3}>`;
     });
