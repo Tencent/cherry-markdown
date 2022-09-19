@@ -111,6 +111,7 @@ export default class Header extends ParagraphBase {
       const replaceFootNote = /~fn#([0-9]+)#/g;
       anchorID = this.generateIDNoDup(headerTextRaw.replace(replaceFootNote, ''));
     }
+    anchorID = `safe_${anchorID}`; // transform header id to avoid being sanitized
     const sign = this.$engine.md5(`${level}-${processedText.sign}-${anchorID}-${dataLines}`);
     const result = [
       `<h${level} id="${anchorID}" data-sign="${sign}" data-lines="${dataLines}">`,
