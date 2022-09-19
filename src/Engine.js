@@ -126,6 +126,7 @@ export default class Engine {
       })
       .replace(/\\&(?!(amp|lt|gt|quot|apos);)/, () => '&amp;');
     $str = $str.replace(/\\ <\//g, '\\</');
+    $str = $str.replace(/id="safe_(?=.*?")/g, 'id="'); // transform header id to avoid being sanitized
     $str = UrlCache.restoreAll($str);
     return $str;
   }
