@@ -233,7 +233,7 @@ export default class Toc extends ParagraphBase {
   afterMakeHtml(str) {
     let $str = super.afterMakeHtml(str);
     const headerList = [];
-    const headerRegex = /<h([1-6]) id="([^"]+?)" data-sign=".+?" data-lines="[0-9]+"><a[^/]+?\/a>(.+?)<\/h\1>/g;
+    const headerRegex = /<h([1-6])[^>]*? id="([^"]+?)"[^>]*?>(?:<a[^/]+?\/a>|)(.+?)<\/h\1>/g;
     let str2Md5 = '';
     $str.replace(headerRegex, (match, level, id, text) => {
       const $text = text.replace(/~fn#[0-9]+#/g, '');
