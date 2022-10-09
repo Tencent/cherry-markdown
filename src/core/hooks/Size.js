@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 import SyntaxBase from '@/core/SyntaxBase';
+import { isLookbehindSupported } from '@/utils/regexp';
+import { replaceLookbehind } from '@/utils/lookbehind-replace';
 
 export default class Size extends SyntaxBase {
   static HOOK_NAME = 'fontSize';
@@ -22,15 +24,27 @@ export default class Size extends SyntaxBase {
   //     super();
   // }
 
+  toHtml(whole, m1, m2, m3) {
+    return `${m1}<span style="font-size:${m2}px;line-height:1em;">${m3}</span>`;
+  }
+
   makeHtml(str) {
     if (!this.test(str)) {
       return str;
     }
-    return str.replace(this.RULE.reg, '$2<span style="font-size:$4px;line-height:1em;">$5</span>$7');
+
+    if (isLookbehindSupported()) {
+      return str.replace(this.RULE.reg, this.toHtml);
+    }
+    return replaceLookbehind(str, this.RULE.reg, this.toHtml, true, 1);
   }
 
   rule() {
-    const ret = { begin: '((^|[^\\\\])(\\!))', end: '(\\!([\\s\\S]|$))', content: '([0-9]{1,2})[\\s]([\\w\\W]*?)' };
+    const ret = {
+      begin: isLookbehindSupported() ? '((?<!\\\\))!' : '(^|[^\\\\])!',
+      end: '!',
+      content: '([0-9]{1,2})[\\s]([\\w\\W]*?)',
+    };
     ret.reg = new RegExp(ret.begin + ret.content + ret.end, 'g');
     return ret;
   }
