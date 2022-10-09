@@ -142,9 +142,9 @@ export default class Toolbar {
   }
 
   toggleSubMenu(name) {
+    this.hidAlleSubMenu(); // 切换前先隐藏所有的二级菜单，就不会出现首次点击的时候多个二级菜单的问题 add by ufec
     if (this.subMenus[name]) {
       const test = this.subMenus[name].style.display;
-      this.hidAlleSubMenu();
       this.subMenus[name].style.display = test === 'none' ? 'block' : 'none';
     } else {
       this.drawSubMenus(name);

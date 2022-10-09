@@ -32,6 +32,7 @@ import htmlParser from '@/utils/htmlparser';
 import pasteHelper from '@/utils/pasteHelper';
 import { addEvent } from './utils/event';
 import Logger from '@/Logger';
+import Event from '@/Event';
 
 /**
  * @typedef {import('~types/editor').EditorConfiguration} EditorConfiguration
@@ -177,6 +178,7 @@ export default class Editor {
    * @param {CodeMirror.Editor} codemirror
    */
   onScroll = (codemirror) => {
+    Event.emit(this.instanceId, Event.Events.cleanAllSubMenus); // 滚动时清除所有子菜单，这不应该在Bubble中处理，我们关注的是编辑器的滚动  add by ufec
     if (this.disableScrollListener) {
       this.disableScrollListener = false;
       return;
@@ -207,6 +209,7 @@ export default class Editor {
    * @param {MouseEvent} evt
    */
   onMouseDown = (codemirror, evt) => {
+    Event.emit(this.instanceId, Event.Events.cleanAllSubMenus); // Bubble中处理需要考虑太多，直接在编辑器中处理可包括Bubble中所有情况，因为产生Bubble的前提是光标在编辑器中 add by ufec
     const { line: targetLine } = codemirror.getCursor();
     const top = Math.abs(evt.y - codemirror.getWrapperElement().getBoundingClientRect().y);
     this.previewer.scrollToLineNumWithOffset(targetLine + 1, top);
