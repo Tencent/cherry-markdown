@@ -91,7 +91,7 @@
     "@typescript-eslint/parser": "^4.27.0",
     "anywhere": "^1.5.0",
     "async": "^3.2.4",
-    "babel-jest": "^28.1.0",
+    "babel-jest": "27",
     "babel-plugin-prismjs": "^2.1.0",
     "codemirror": "5.58.2",
     "commitizen": "^4.0.5",
