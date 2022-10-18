@@ -24,7 +24,17 @@ const callbacks = {
    */
   urlProcessor: (url, srcType) => url,
   fileUpload(file, callback) {
-    callback('images/demo-dog.png');
+    if (/video/i.test(file.type)) {
+      callback('images/demo-dog.png', {
+        name: `${file.name.replace(/\.[^.]+$/, '')}`,
+        poster: 'images/demo-dog.png?poster=true',
+        isBorder: true,
+        isShadow: true,
+        isRadius: true,
+      });
+    } else {
+      callback('images/demo-dog.png', { name: `${file.name.replace(/\.[^.]+$/, '')}`, isShadow: true });
+    }
   },
   afterChange: (text, html) => {},
   afterInit: (text, html) => {},
@@ -228,6 +238,16 @@ const defaultConfig = {
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'quickTable', 'code'], // array or false
   },
   fileUpload: callbacks.fileUpload,
+  /**
+   * 上传文件的时候用来指定文件类型
+   */
+  fileTypeLimitMap: {
+    video: 'video/*',
+    audio: 'audio/*',
+    image: 'image/*',
+    word: '.doc,.docx',
+    pdf: '.pdf',
+  },
   callback: {
     afterChange: callbacks.afterChange,
     afterInit: callbacks.afterInit,

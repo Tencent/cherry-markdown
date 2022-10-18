@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { handleUpload } from '@/utils/file';
+import { handleUpload, handelParams } from '@/utils/file';
 /**
  * 插入音频
  */
@@ -32,17 +32,19 @@ export default class Audio extends MenuBase {
   onClick(selection, shortKey = '') {
     if (this.hasCacheOnce()) {
       // @ts-ignore
-      const { name, url } = this.getAndCleanCacheOnce();
+      const { name, url, params } = this.getAndCleanCacheOnce();
       const begin = '!audio[';
       const end = `](${url})`;
       this.registerAfterClickCb(() => {
         this.setLessSelection(begin, end);
       });
-      return `${begin}${name}${end}`;
+      const finalName = params.name ? params.name : name;
+      return `${begin}${finalName}${handelParams(params)}${end}`;
     }
+    const accept = this.$cherry.options?.fileTypeLimitMap?.audio ?? '*';
     // 插入图片，调用上传文件逻辑
-    handleUpload(this.editor, 'audio', (name, url) => {
-      this.setCacheOnce({ name, url });
+    handleUpload(this.editor, 'audio', accept, (name, url, params) => {
+      this.setCacheOnce({ name, url, params });
       this.fire(null);
     });
     this.updateMarkdown = false;

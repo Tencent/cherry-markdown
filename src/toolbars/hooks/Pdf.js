@@ -32,17 +32,19 @@ export default class Pdf extends MenuBase {
   onClick(selection, shortKey = '') {
     if (this.hasCacheOnce()) {
       // @ts-ignore
-      const { name, url } = this.getAndCleanCacheOnce();
+      const { name, url, params } = this.getAndCleanCacheOnce();
       const begin = '[';
       const end = `](${url})`;
       this.registerAfterClickCb(() => {
         this.setLessSelection(begin, end);
       });
-      return `${begin}${name}${end}`;
+      const finalName = params.name ? params.name : name;
+      return `${begin}${finalName}${end}`;
     }
+    const accept = this.$cherry.options?.fileTypeLimitMap?.pdf ?? '*';
     // 插入图片，调用上传文件逻辑
-    handleUpload(this.editor, 'pdf', (name, url) => {
-      this.setCacheOnce({ name, url });
+    handleUpload(this.editor, 'pdf', accept, (name, url, params) => {
+      this.setCacheOnce({ name, url, params });
       this.fire(null);
     });
     this.updateMarkdown = false;
