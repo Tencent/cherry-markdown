@@ -33,6 +33,7 @@ import pasteHelper from '@/utils/pasteHelper';
 import { addEvent } from './utils/event';
 import Logger from '@/Logger';
 import Event from '@/Event';
+import { handelParams } from '@/utils/file';
 
 /**
  * @typedef {import('~types/editor').EditorConfiguration} EditorConfiguration
@@ -292,16 +293,28 @@ export default class Editor {
           if (fileType === '' || /^text/i.test(fileType)) {
             continue;
           }
-          const defaultName = (file.name && file.name.replace(/\.[^.]+$/, '')) || 'enter description here';
-          const defaultIsImage = /^image/i.test(file.type);
-          this.options.fileUpload(file, (url, name = defaultName, isImage = defaultIsImage) => {
+          this.options.fileUpload(file, (url, params) => {
             if (typeof url !== 'string') {
               return;
             }
             // 拖拽上传文件时，强制改成没有文字选择区的状态
             codemirror.setSelection(codemirror.getCursor());
-            let insertValue = isImage ? `![${name}](${url})` : `[${name}](${url})`;
-            insertValue = needBr ? `\n${insertValue}` : insertValue;
+            const name = params.name ? params.name : file.name;
+            let type = '';
+            let poster = '';
+            if (/video/i.test(file.type)) {
+              type = '!video';
+              poster = params.poster ? `{poster=${params.poster}}` : '';
+            }
+            if (/audio/i.test(file.type)) {
+              type = '!audio';
+            }
+            if (/image/i.test(file.type)) {
+              type = '!';
+            }
+            const style = type ? handelParams(params) : '';
+            type = needBr ? `\n${type}` : type;
+            const insertValue = `${type}[${name}${style}](${url})${poster}`;
             // 当批量上传文件时，每个被插入的文件中间需要加个换行，但单个上传文件的时候不需要加换行
             needBr = true;
             codemirror.replaceSelection(insertValue);

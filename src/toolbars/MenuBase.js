@@ -52,7 +52,6 @@ export default class MenuBase {
    * @param {*} $cherry
    */
   constructor($cherry) {
-    /** @type {boolean} 是否浮动菜单*/
     this.$cherry = $cherry;
     this.bubbleMenu = false;
     this.subMenu = null; // 子菜单实例
