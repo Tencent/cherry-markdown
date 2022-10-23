@@ -23,6 +23,8 @@ export interface CherryOptions {
     word: string,
     pdf: string,
   };
+  /** 有哪些主题 */
+  theme: {className: string, label: string}[];
   callback: {
     /** 编辑器内容改变并完成渲染后触发 */
     afterChange: CherryLifecycle;

@@ -58,6 +58,7 @@ import BarTable from './hooks/BarTable';
 import Pdf from './hooks/Pdf';
 import Word from './hooks/Word';
 import Ruby from './hooks/Ruby';
+import Theme from './hooks/Theme';
 // Sidebar
 import MobilePreview from './hooks/MobilePreview';
 import Copy from './hooks/Copy';
@@ -110,6 +111,7 @@ const HookList = {
   pdf: Pdf,
   word: Word,
   ruby: Ruby,
+  theme: Theme,
 };
 
 export default class HookCenter {

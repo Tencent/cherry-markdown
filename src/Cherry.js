@@ -22,7 +22,7 @@ import FloatMenu from './toolbars/FloatMenu';
 import Toolbar from './toolbars/Toolbar';
 import { createElement } from './utils/dom';
 import Sidebar from './toolbars/Sidebar';
-import { customizer } from './utils/config';
+import { customizer, getThemeFromLocal } from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
 import getPosBydiffs from './utils/recount-pos';
 import defaultConfig from './Cherry.config';
@@ -373,7 +373,7 @@ export default class Cherry extends CherryStatic {
     let codeBlockTheme = /** @type {{theme?: string;}} */ (this.options.engine.syntax.codeBlock).theme;
     if (codeBlockTheme === 'dark') codeBlockTheme = 'tomorrow-night';
     else if (codeBlockTheme === 'light') codeBlockTheme = 'solarized-light';
-    const wrapperDom = createElement('div', 'cherry clearfix', {
+    const wrapperDom = createElement('div', ['cherry', 'clearfix', getThemeFromLocal(true)].join(' '), {
       'data-toolbarTheme': toolbarTheme,
       'data-inlineCodeTheme': inlineCodeTheme,
       'data-codeBlockTheme': codeBlockTheme,
@@ -482,7 +482,9 @@ export default class Cherry extends CherryStatic {
       (this.options.engine.syntax.header && this.options.engine.syntax.header.anchorStyle) || 'default';
     const autonumberClass = anchorStyle === 'autonumber' ? ' head-num' : '';
     const { className, dom, enablePreviewerBubble } = this.options.previewer;
-    const previewerClassName = ['cherry-previewer', className || '', autonumberClass].join(' ');
+    const previewerClassName = ['cherry-previewer', className || '', autonumberClass, getThemeFromLocal(true)].join(
+      ' ',
+    );
     if (dom) {
       previewer = dom;
       previewer.className += ` ${previewerClassName}`;
