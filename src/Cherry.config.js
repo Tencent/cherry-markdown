@@ -297,6 +297,12 @@ const defaultConfig = {
       afterLoadAllImgCallback: () => {},
     },
   },
+  theme: [
+    { className: 'dark', label: '暗黑' },
+    { className: 'light', label: '明亮' },
+    { className: 'green', label: '清新' },
+    { className: 'red', label: '热情' },
+  ],
   // 预览页面不需要绑定事件
   isPreviewOnly: false,
   // 预览区域跟随编辑器光标自动滚动
