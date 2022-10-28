@@ -235,11 +235,11 @@ const tableContentHander = {
     const dom = document.createElement('div');
     dom.className = 'cherry-previewer-table-content-hander__input';
     const input = document.createElement('textarea');
-    dom.append(input);
+    dom.appendChild(input);
     this.tableEditor.editorDom.inputDiv = dom;
     this.tableEditor.editorDom.inputDom = input;
     this.$updateEditorPosition();
-    this.container.append(this.tableEditor.editorDom.inputDiv);
+    this.container.appendChild(this.tableEditor.editorDom.inputDiv);
     this.tableEditor.editorDom.inputDom.value = this.tableEditor.info.code.replace(/<br>/g, '\n');
     this.tableEditor.editorDom.inputDom.focus();
   },

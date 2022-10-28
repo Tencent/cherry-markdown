@@ -112,7 +112,7 @@ const imgSizeHander = {
     this.butsImg = document.createElement('div');
     this.butsImg.className = 'cherry-previewer-img-size-hander__background';
     this.butsImg.style.backgroundImage = `url(${this.buts.imgSrc})`;
-    this.butsLayout.append(this.butsImg);
+    this.butsLayout.appendChild(this.butsImg);
 
     this.butsPoints = {};
     Object.keys(this.buts.points.arr).forEach((index) => {
@@ -123,7 +123,7 @@ const imgSizeHander = {
         `cherry-previewer-img-size-hander__points-${name}`,
       ].join(' ');
       tmp.dataset.name = name;
-      this.butsLayout.append(tmp);
+      this.butsLayout.appendChild(tmp);
       this.butsPoints[`pints-${name}`] = tmp;
     });
     return this.updateBubbleButs();
