@@ -37,6 +37,7 @@ export default class CodeBlock extends ParagraphBase {
     this.customParser = {};
     this.wrap = config.wrap; // 超出是否换行
     this.lineNumber = config.lineNumber; // 是否显示行号
+    this.copyCode = config.copyCode; // 是否显示“复制”按钮
     this.indentedCodeBlock = typeof config.indentedCodeBlock === 'undefined' ? true : config.indentedCodeBlock; // 是否支持缩进代码块
     if (config && config.customRenderer) {
       this.customLang = Object.keys(config.customRenderer).map((lang) => lang.toLowerCase());
@@ -194,7 +195,11 @@ export default class CodeBlock extends ParagraphBase {
       cacheCode = this.renderLineNumber(cacheCode);
     }
     cacheCode = `<div data-sign="${sign}" data-type="codeBlock" data-lines="${lines}">
-      <div class="cherry-copy-code-block" style="display:none;"><i class="ch-icon ch-icon-copy" title="copy"></i></div>
+      ${
+        this.copyCode
+          ? '<div class="cherry-copy-code-block" style="display:none;"><i class="ch-icon ch-icon-copy" title="copy"></i></div>'
+          : ''
+      }
       <pre class="language-${lang}">${this.wrapCode(cacheCode, lang)}</pre>
     </div>`;
     return cacheCode;
