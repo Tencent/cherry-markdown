@@ -297,6 +297,16 @@ const defaultConfig = {
       afterLoadAllImgCallback: () => {},
     },
   },
+  /**
+   * 配置主题，第三方可以自行扩展主题
+   */
+  theme: [
+    { className: 'default', label: '默认' },
+    { className: 'dark', label: '暗黑' },
+    { className: 'light', label: '明亮' },
+    { className: 'green', label: '清新' },
+    { className: 'red', label: '热情' },
+  ],
   // 预览页面不需要绑定事件
   isPreviewOnly: false,
   // 预览区域跟随编辑器光标自动滚动

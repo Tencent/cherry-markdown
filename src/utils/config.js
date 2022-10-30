@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
  * 用于lodash.mergeWith的customizer
  * @param {any} objValue
@@ -23,4 +24,40 @@ export function customizer(objValue, srcValue) {
   if (Array.isArray(srcValue)) {
     return srcValue;
   }
+}
+
+/**
+ * 保存当前主题
+ * @param {string} theme
+ */
+function saveThemeToLocal(theme) {
+  if (localStorage) {
+    localStorage.setItem('cherry-theme', theme);
+  }
+}
+
+/**
+ * 获取当前主题
+ * @returns {string} 主题名
+ */
+export function getThemeFromLocal(fullClass = false) {
+  let ret = 'default';
+  if (localStorage) {
+    ret = localStorage.getItem('cherry-theme');
+  }
+  return fullClass ? `theme__${ret}` : ret;
+}
+
+/**
+ * 修改主题
+ * @param {object} $cherry
+ * @param {string} theme 如果没有传theme，则从本地缓存里取
+ */
+export function changeTheme($cherry, theme = '') {
+  const newTheme = (theme ? theme : getThemeFromLocal()).replace(/^.*theme__/, '');
+  const newClass = ` theme__${newTheme}`;
+  $cherry.wrapperDom.className = $cherry.wrapperDom.className.replace(/ theme__[^ $]+?( |$)/g, '') + newClass;
+  $cherry.previewer.getDomContainer().className =
+    $cherry.previewer.getDomContainer().className.replace(/ theme__[^ $]+?( |$)/g, '') + newClass;
+  saveThemeToLocal(newTheme);
 }
