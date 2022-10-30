@@ -27,6 +27,38 @@ export function customizer(objValue, srcValue) {
 }
 
 /**
+ * 检查本地有没有值
+ * @param {string} key
+ */
+export function testKeyInLocal(key) {
+  if (localStorage) {
+    return localStorage.getItem(`cherry-${key}`) !== null;
+  }
+  return false;
+}
+
+/**
+ * 保存是否经典换行
+ * @param {boolean} isClassicBr
+ */
+export function saveIsClassicBrToLocal(isClassicBr) {
+  if (localStorage) {
+    localStorage.setItem('cherry-classicBr', isClassicBr ? 'true' : 'false');
+  }
+}
+
+/**
+ * 是否经典换行
+ */
+export function getIsClassicBrFromLocal() {
+  let ret = 'false';
+  if (localStorage) {
+    ret = localStorage.getItem('cherry-classicBr');
+  }
+  return ret === 'true';
+}
+
+/**
  * 保存当前主题
  * @param {string} theme
  */
