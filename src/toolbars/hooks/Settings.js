@@ -16,6 +16,7 @@
 import MenuBase from '@/toolbars/MenuBase';
 import locale from '@/locales/index';
 import Event from '@/Event';
+import { saveIsClassicBrToLocal, getIsClassicBrFromLocal, testKeyInLocal } from '@/utils/config';
 
 /**
  * 设置按钮
@@ -29,7 +30,9 @@ export default class Settings extends MenuBase {
     this.setName('settings', 'settings');
     this.updateMarkdown = false;
     this.engine = $cherry.engine;
-    const { classicBr } = this.engine.$cherry.options.engine.global;
+    const classicBr = testKeyInLocal('classicBr')
+      ? getIsClassicBrFromLocal()
+      : this.engine.$cherry.options.engine.global?.classicBr;
     const { defaultModel } = $cherry.editor.options;
     const classicBrIconName = classicBr ? 'br' : 'normal';
     const classicBrName = classicBr ? 'classicBr' : 'normalBr';
@@ -39,7 +42,7 @@ export default class Settings extends MenuBase {
     this.subMenuConfig = [
       { iconName: classicBrIconName, name: classicBrName, onclick: this.bindSubClick.bind(this, 'classicBr') },
       { iconName: previewIcon, name: previewName, onclick: this.bindSubClick.bind(this, 'previewClose') },
-      { iconName: '', name: '隐藏Toolbar', onclick: this.bindSubClick.bind(this, 'toggleToolbar') },
+      { iconName: '', name: '隐藏(ctrl+0)', onclick: this.bindSubClick.bind(this, 'toggleToolbar') },
     ];
     this.attachEventListeners();
     this.shortcutKeyMaps = [
@@ -125,27 +128,21 @@ export default class Settings extends MenuBase {
     // eslint-disable-next-line no-param-reassign
     shortKey = this.matchShortcutKey(shortKey);
     if (shortKey === 'classicBr') {
-      const [dom] = Array.from(this.subMenu.dom.children);
-      if (dom.childNodes[1].textContent === locale.zh_CN.classicBr) {
-        dom.children[0].setAttribute(
-          'class',
-          dom.children[0].getAttribute('class').replace('ch-icon-br', 'ch-icon-normal'),
-        );
-        this.engine.$cherry.options.engine.global.classicBr = false;
-        this.engine.hookCenter.hookList.paragraph.forEach((item) => {
-          item.classicBr = false;
-        });
-        dom.childNodes[1].textContent = locale.zh_CN.normalBr;
+      const targetIsClassicBr = !getIsClassicBrFromLocal();
+      saveIsClassicBrToLocal(targetIsClassicBr);
+      this.engine.$cherry.options.engine.global.classicBr = targetIsClassicBr;
+      this.engine.hookCenter.hookList.paragraph.forEach((item) => {
+        item.classicBr = targetIsClassicBr;
+      });
+
+      let i = this.$cherry.wrapperDom.querySelector('.cherry-dropdown .ch-icon-normal');
+      i = i ? i : this.$cherry.wrapperDom.querySelector('.cherry-dropdown .ch-icon-br');
+      if (targetIsClassicBr) {
+        i.classList.replace('ch-icon-normal', 'ch-icon-br');
+        i.parentElement.childNodes[1].textContent = locale.zh_CN.classicBr;
       } else {
-        dom.children[0].setAttribute(
-          'class',
-          dom.children[0].getAttribute('class').replace('ch-icon-normal', 'ch-icon-br'),
-        );
-        this.engine.$cherry.options.engine.global.classicBr = true;
-        this.engine.hookCenter.hookList.paragraph.forEach((item) => {
-          item.classicBr = true;
-        });
-        dom.childNodes[1].textContent = locale.zh_CN.classicBr;
+        i.classList.replace('ch-icon-br', 'ch-icon-normal');
+        i.parentElement.childNodes[1].textContent = locale.zh_CN.normalBr;
       }
       this.engine.$cherry.previewer.update('');
       this.engine.$cherry.initText(this.engine.$cherry.editor.editor);
