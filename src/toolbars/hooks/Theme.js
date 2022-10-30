@@ -42,6 +42,7 @@ export default class Theme extends MenuBase {
    */
   onClick(selection, shortKey = '') {
     changeTheme(this.$cherry, shortKey);
-    return selection;
+    this.updateMarkdown = false;
+    return '';
   }
 }
