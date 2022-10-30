@@ -1,19 +1,34 @@
 @import '../variable.scss';
 
-/** 定义变量 */
+/** 色值可以参考：https://yeun.github.io/open-color/ */
 
 /** 工具栏样式 */
 $toolbarBg: $toolbarBgLight;
 $toolbarBtnColor: $toolbarBtnColorLight;
 $toolbarBtnBgHover: $toolbarBtnBgHoverLight;
 $toolbarBtnHoverColor: $toolbarBtnHoverColorLight;
+$toolbarColorItemHoverBorderColor: rgb(247, 133, 83);
 $sidebarShadow: $shadow;
 /** 编辑区域样式 */
-$editorBg: #FFF;
+$editorBg: rgb(255, 255, 255);
+$editorColor: rgb(63, 74, 86);
 $editorSelectedBg: $toolbarBtnBgHover;
+$editorUrlBg: rgb(215, 230, 254);
+$editorCursorColor: rgb(0,0,0);
+$editorImportantColor: rgb(34, 139, 230);
+$editorCodeColor: rgb(77, 171, 247);
 /** 预览区域样式 */
-$previewBg: #FFF;
-
+$previewBg: rgb(255, 255, 255);
+$previewMobileBgColor: $editorBg;
+/** markdown样式 */
+$mdColor: $editorColor;
+$mdHeaderColor: $editorImportantColor;
+$mdLineColor: rgb(25, 113, 194);
+$mdAColor: $editorCodeColor;
+$mdAHoverColor: $editorImportantColor;
+$mdInlineCodeColor: $editorCodeColor;
+$mdInlineCodeBg: $editorUrlBg;
+$mdBlockquoteBg: rgb(231, 245, 255);
 /** 编辑器样式 */
 .cherry.theme__light {
   
@@ -25,8 +40,11 @@ $previewBg: #FFF;
       color: $toolbarBtnColor;
       &:hover {
         background-color: $toolbarBtnBgHover;
-        color: $toolbarBtnHoverColor;
+        color: $toolbarBtnHoverColor !important;
         border-color: $toolbarBg;
+        i {
+          color: $toolbarBtnHoverColor !important;
+        }
       }
     }
   }
@@ -49,8 +67,12 @@ $previewBg: #FFF;
       }
       /** 色盘里的每一个色块 */
       .cherry-color-item {
-        width: 15px;
-        border: none;
+        // width: 15px;
+        // border: none;
+        border-color: $toolbarBtnBgHover;
+        &:hover {
+          border-color: $toolbarColorItemHoverBorderColor;
+        }
       }
     }
   }
@@ -70,6 +92,23 @@ $previewBg: #FFF;
     background-color: $editorBg;
     .CodeMirror {
       background-color: $editorBg;
+      .CodeMirror-cursor {
+        border-left: 1px solid $editorCursorColor;
+      }
+      .CodeMirror-scroll {
+        span, .cm-variable-2, .cm-string, .cm-strong, .cm-em, .cm-meta {
+          color: $editorColor;
+        }
+        .cm-image-marker, .cm-quote, .cm-header {
+          color: $editorImportantColor;
+        }
+        .cm-url {
+          background-color: $editorUrlBg;
+        }
+        .cm-comment, .cm-url {
+          color: $editorCodeColor;
+        }
+      }
       .CodeMirror-selected {
         background-color: $editorSelectedBg;
       }
@@ -82,14 +121,32 @@ $previewBg: #FFF;
 
   .cherry-previewer {
     background-color: $previewBg;
+    .cherry-mobile-previewer-content {
+      background-color: $previewMobileBgColor;
+    }
+  }
+
+  .cherry-previewer-table-content-hander {
+    .cherry-previewer-table-content-hander__input {
+      textarea {
+        background-color: $editorBg;
+        color: $editorColor;
+        outline-color: $editorImportantColor;
+      }
+    }
   }
 
 }
 /** 预览区域样式 */
 .cherry-markdown.theme__light {
+  color: $mdColor;
 
   p, div {
   
+  }
+
+  h1, h2, h3, h4, h5 {
+    color: $mdHeaderColor;
   }
   
   h1 {
@@ -162,11 +219,18 @@ $previewBg: #FFF;
 
 
   blockquote {
-  
+    color: $mdColor;
+    background-color: $mdBlockquoteBg;
+    border-color: $mdLineColor;
   }
   
   a {
-    
+    text-decoration: none;
+    color: $mdAColor;
+    &:hover {
+      text-decoration: underline;
+      color: $mdAHoverColor;
+    }
   }
   
   strong {
@@ -190,7 +254,7 @@ $previewBg: #FFF;
   }
   
   hr {
-    
+    border-color: $mdLineColor;
   }
   
   img {
@@ -207,7 +271,9 @@ $previewBg: #FFF;
   
   /** 行内代码 */
   p code, li code {
-    
+    background-color: $mdInlineCodeBg;
+    color: $mdInlineCodeColor;
+    border: 1px solid $mdLineColor;
   }
   
   /** 
@@ -220,15 +286,13 @@ $previewBg: #FFF;
   /** 
   * 表格
   */
-  table {
-    tr {
-  
-    }
+  table, .cherry-table {
+    color: $mdColor;
     th {
-  
+      background-color: $mdInlineCodeBg;
     }
-    td {
-  
+    tr, th, td {
+      border-color: $mdLineColor;
     }
   }
 
@@ -242,12 +306,15 @@ $previewBg: #FFF;
   
   /** 脚注 */
   .footnote {
+    border-color: $mdLineColor;
     .footnote-title {
-  
+      background-color: $mdInlineCodeBg;
     }
     .one-footnote {
+      color: $mdColor;
+      border-color: $mdLineColor;
       a.footnote-ref {
-  
+        padding: 5px;
       }
     }
   }
@@ -265,7 +332,6 @@ $previewBg: #FFF;
     /** 目录 */
   .toc {
     .toc-title {
-
     }
     .toc-li {
       .level-1 {
@@ -276,6 +342,10 @@ $previewBg: #FFF;
       }
       .level-3 {
 
+      }
+      a {
+        &:hover {
+        }
       }
     }
   }

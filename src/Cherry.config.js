@@ -297,7 +297,11 @@ const defaultConfig = {
       afterLoadAllImgCallback: () => {},
     },
   },
+  /**
+   * 配置主题，第三方可以自行扩展主题
+   */
   theme: [
+    { className: 'default', label: '默认' },
     { className: 'dark', label: '暗黑' },
     { className: 'light', label: '明亮' },
     { className: 'green', label: '清新' },
