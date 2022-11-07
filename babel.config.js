@@ -76,6 +76,7 @@ module.exports = {
           'objc',
           'pascal',
           'php',
+          'protobuf',
           'python',
           'r',
           'jsx',
