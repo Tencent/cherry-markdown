@@ -243,14 +243,16 @@
 }
 
 .cherry-sidebar {
-  width: 40px;
+  width: 30px;
   position: absolute;
   top: 48px;
   right: 7px;
-  z-index: 999;
+  z-index: 0;
+  bottom: 0;
+  overflow: hidden;
   .cherry-toolbar-button {
     height: 30px;
-    padding: 3px 12px 0 12px;
+    padding: 3px 12px 0 6px;
 
     &:hover {
       background: transparent;
@@ -620,3 +622,10 @@
   border-radius: 3px;
   cursor: pointer;
 }
+
+/** 引入自带的主题 */
+@import './themes/default.scss';
+@import './themes/dark.scss';
+@import './themes/light.scss';
+@import './themes/green.scss';
+@import './themes/red.scss';
