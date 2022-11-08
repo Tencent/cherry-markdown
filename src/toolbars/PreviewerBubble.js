@@ -38,6 +38,7 @@ export default class PreviewerBubble {
      */
     this.editor = previewer.editor;
     this.previewerDom = this.previewer.getDom();
+    this.enablePreviewerBubble = this.previewer.options.enablePreviewerBubble;
     /**
      * @property
      * @type {{ emit: (...args: any[]) => any}}
@@ -86,6 +87,10 @@ export default class PreviewerBubble {
         this.previewer.$cherry.options.callback.onClickPreview &&
           this.previewer.$cherry.options.callback.onClickPreview(e);
       }
+      return;
+    }
+
+    if (!this.enablePreviewerBubble) {
       return;
     }
     // 只有双栏编辑模式才出现下面的功能

@@ -150,8 +150,14 @@ export default class Editor {
     if (!html || !this.options.convertWhenPaste) {
       return true;
     }
+    /**
+     * 这里需要处理一个特殊逻辑：
+     *    从excel中复制而来的内容，剪切板里会有一张图片（一个<img>元素）和一段纯文本，在这种场景下，需要丢掉图片，直接粘贴纯文本
+     * 与此同时，当剪切板里有图片和其他html标签时（从web页面上复制的内容），则需要走下面的html转md的逻辑
+     * 基于上述两个场景，才有了下面四行奇葩的代码
+     */
     const test = html.replace(/<(html|head|body|!)/g, '');
-    if (test.match(/<[a-zA-Z]/g).length <= 1 && /<img/.test(test)) {
+    if (test.match(/<[a-zA-Z]/g)?.length <= 1 && /<img/.test(test)) {
       return true;
     }
     let divObj = document.createElement('DIV');
@@ -286,40 +292,43 @@ export default class Editor {
     editor.on('drop', (codemirror, evt) => {
       const files = evt.dataTransfer.files || [];
       if (files && files.length > 0) {
-        for (let i = 0, needBr = false; i < files.length; i++) {
-          const file = files[i];
-          const fileType = file.type || '';
-          // 文本类型或者无类型的，直接读取内容，不做上传文件的操作
-          if (fileType === '' || /^text/i.test(fileType)) {
-            continue;
+        // 增加延时，让drop的位置变成codemirror的光标位置
+        setTimeout(() => {
+          for (let i = 0, needBr = false; i < files.length; i++) {
+            const file = files[i];
+            const fileType = file.type || '';
+            // 文本类型或者无类型的，直接读取内容，不做上传文件的操作
+            if (fileType === '' || /^text/i.test(fileType)) {
+              continue;
+            }
+            this.options.fileUpload(file, (url, params) => {
+              if (typeof url !== 'string') {
+                return;
+              }
+              // 拖拽上传文件时，强制改成没有文字选择区的状态
+              codemirror.setSelection(codemirror.getCursor());
+              const name = params.name ? params.name : file.name;
+              let type = '';
+              let poster = '';
+              if (/video/i.test(file.type)) {
+                type = '!video';
+                poster = params.poster ? `{poster=${params.poster}}` : '';
+              }
+              if (/audio/i.test(file.type)) {
+                type = '!audio';
+              }
+              if (/image/i.test(file.type)) {
+                type = '!';
+              }
+              const style = type ? handelParams(params) : '';
+              type = needBr ? `\n${type}` : type;
+              const insertValue = `${type}[${name}${style}](${url})${poster}`;
+              // 当批量上传文件时，每个被插入的文件中间需要加个换行，但单个上传文件的时候不需要加换行
+              needBr = true;
+              codemirror.replaceSelection(insertValue);
+            });
           }
-          this.options.fileUpload(file, (url, params) => {
-            if (typeof url !== 'string') {
-              return;
-            }
-            // 拖拽上传文件时，强制改成没有文字选择区的状态
-            codemirror.setSelection(codemirror.getCursor());
-            const name = params.name ? params.name : file.name;
-            let type = '';
-            let poster = '';
-            if (/video/i.test(file.type)) {
-              type = '!video';
-              poster = params.poster ? `{poster=${params.poster}}` : '';
-            }
-            if (/audio/i.test(file.type)) {
-              type = '!audio';
-            }
-            if (/image/i.test(file.type)) {
-              type = '!';
-            }
-            const style = type ? handelParams(params) : '';
-            type = needBr ? `\n${type}` : type;
-            const insertValue = `${type}[${name}${style}](${url})${poster}`;
-            // 当批量上传文件时，每个被插入的文件中间需要加个换行，但单个上传文件的时候不需要加换行
-            needBr = true;
-            codemirror.replaceSelection(insertValue);
-          });
-        }
+        }, 50);
       }
     });
 

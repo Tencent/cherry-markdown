@@ -15,6 +15,7 @@
  */
 import ParagraphBase from '@/core/ParagraphBase';
 import { blockNames } from '@/utils/sanitize';
+import { getIsClassicBrFromLocal, testKeyInLocal } from '@/utils/config';
 /**
  * 段落级语法
  * 段落级语法可以具备以下特性：
@@ -35,7 +36,7 @@ export default class Paragraph extends ParagraphBase {
     // 是否启用经典换行逻辑
     // true：一个换行会被忽略，两个以上连续换行会分割成段落，
     // false： 一个换行会转成<br>，两个连续换行会分割成段落，三个以上连续换行会转成<br>并分割段落
-    this.classicBr = options.globalConfig.classicBr;
+    this.classicBr = testKeyInLocal('classicBr') ? getIsClassicBrFromLocal() : options.globalConfig.classicBr;
     this.removeBrAfterBlock = null;
     this.removeBrBeforeBlock = null;
     this.removeNewlinesBetweenTags = null;
@@ -47,10 +48,9 @@ export default class Paragraph extends ParagraphBase {
    * @returns markdown源码
    */
   $cleanParagraph(str) {
-    const { classicBr } = this.$engine.$cherry.options.engine.global;
     // remove leading and trailing newlines
     const trimedPar = str.replace(/^\n+/, '').replace(/\n+$/, '');
-    if (classicBr) {
+    if (this.classicBr) {
       return trimedPar;
     }
     const minifiedPar = this.joinRawHtml(trimedPar);

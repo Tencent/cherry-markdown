@@ -112,6 +112,7 @@ const defaultConfig = {
         theme: 'dark', // 默认为深色主题
         wrap: true, // 超出长度是否换行，false则显示滚动条
         lineNumber: true, // 默认显示行号
+        copyCode: true, // 是否显示“复制”按钮
         customRenderer: {
           // 自定义语法渲染器
         },
@@ -297,6 +298,16 @@ const defaultConfig = {
       afterLoadAllImgCallback: () => {},
     },
   },
+  /**
+   * 配置主题，第三方可以自行扩展主题
+   */
+  theme: [
+    { className: 'default', label: '默认' },
+    { className: 'dark', label: '暗黑' },
+    { className: 'light', label: '明亮' },
+    { className: 'green', label: '清新' },
+    { className: 'red', label: '热情' },
+  ],
   // 预览页面不需要绑定事件
   isPreviewOnly: false,
   // 预览区域跟随编辑器光标自动滚动

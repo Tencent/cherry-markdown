@@ -134,9 +134,7 @@ export default class Previewer {
   }
 
   $initPreviewerBubble() {
-    if (this.options.enablePreviewerBubble) {
-      this.previewerBubble = new PreviewerBubble(this);
-    }
+    this.previewerBubble = new PreviewerBubble(this);
   }
 
   /**
