@@ -29,16 +29,6 @@ export default class Link extends SyntaxBase {
   }
 
   /**
-   * 提前处理转化link中的$，防止误判为公式语法
-   * @param {string} str
-   */
-  beforeMakeHtml(str) {
-    return str.replace(this.RULE.reg, (match) => {
-      return match.replace(/~D/g, '~1D');
-    });
-  }
-
-  /**
    * 校验link中text的方括号是否符合规则
    * @param {string} rawText
    */
@@ -117,13 +107,18 @@ export default class Link extends SyntaxBase {
   }
 
   makeHtml(str) {
-    if (!this.test(str)) {
-      return str;
-    }
+    let $str = str.replace(this.RULE.reg, (match) => {
+      return match.replace(/~D/g, '~1D');
+    });
     if (isLookbehindSupported()) {
-      return str.replace(this.RULE.reg, this.toHtml.bind(this));
+      $str = $str.replace(this.RULE.reg, this.toHtml.bind(this));
+    } else {
+      $str = replaceLookbehind($str, this.RULE.reg, this.toHtml.bind(this), true, 1);
     }
-    return replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this), true, 1);
+    $str = $str.replace(this.RULE.reg, (match) => {
+      return match.replace(/~1D/g, '~D');
+    });
+    return $str;
   }
 
   rule() {
