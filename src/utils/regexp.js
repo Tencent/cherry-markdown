@@ -167,3 +167,39 @@ export function getCodeBlockRule() {
   codeBlock.reg = new RegExp(codeBlock.begin.source + codeBlock.content.source + codeBlock.end.source, 'g');
   return codeBlock;
 }
+
+/**
+ * 从selection里获取列表语法
+ * @param {*} selection
+ * @param {('ol'|'ul'|'checklist')} type  列表类型
+ * @returns {String}
+ */
+export function getListFromStr(selection, type) {
+  let $selection = selection ? selection : 'No.1\n    No.1.1\nNo.2';
+  $selection = $selection.replace(/^\n+/, '').replace(/\n+$/, '');
+  let pre = '1.';
+  switch (type) {
+    case 'ol':
+      pre = '1.';
+      break;
+    case 'ul':
+      pre = '-';
+      break;
+    case 'checklist':
+      pre = '- [x]';
+      break;
+  }
+  $selection = $selection.replace(/^(\s*)([0-9a-zA-Z]+\.|- \[x\]|- \[ \]|-) /gm, '$1');
+  // 对有序列表进行序号自增处理
+  if (pre === '1.') {
+    const listNum = {};
+    $selection = $selection.replace(/^(\s*)(\S[\s\S]*?)$/gm, (match, p1, p2) => {
+      const space = p1.match(/[ \t]/g)?.length || 0;
+      listNum[space] = listNum[space] ? listNum[space] + 1 : 1;
+      return `${p1}${listNum[space]}. ${p2}`;
+    });
+  } else {
+    $selection = $selection.replace(/^(\s*)(\S[\s\S]*?)$/gm, `$1${pre} $2`);
+  }
+  return $selection;
+}

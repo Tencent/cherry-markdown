@@ -151,7 +151,10 @@ var basicConfig = {
       'color',
       'header',
       '|',
-      'list',
+      'ol',
+      'ul',
+      'checklist',
+      '|',
       'formula',
       {
         insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word', 'ruby'],
