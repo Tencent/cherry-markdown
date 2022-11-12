@@ -31,7 +31,7 @@ export function customizer(objValue, srcValue) {
  * @param {string} key
  */
 export function testKeyInLocal(key) {
-  if (localStorage) {
+  if (typeof localStorage !== 'undefined') {
     return localStorage.getItem(`cherry-${key}`) !== null;
   }
   return false;
@@ -42,7 +42,7 @@ export function testKeyInLocal(key) {
  * @param {boolean} isClassicBr
  */
 export function saveIsClassicBrToLocal(isClassicBr) {
-  if (localStorage) {
+  if (typeof localStorage !== 'undefined') {
     localStorage.setItem('cherry-classicBr', isClassicBr ? 'true' : 'false');
   }
 }
@@ -52,7 +52,7 @@ export function saveIsClassicBrToLocal(isClassicBr) {
  */
 export function getIsClassicBrFromLocal() {
   let ret = 'false';
-  if (localStorage) {
+  if (typeof localStorage !== 'undefined') {
     ret = localStorage.getItem('cherry-classicBr');
   }
   return ret === 'true';
@@ -63,7 +63,7 @@ export function getIsClassicBrFromLocal() {
  * @param {string} theme
  */
 function saveThemeToLocal(theme) {
-  if (localStorage) {
+  if (typeof localStorage !== 'undefined') {
     localStorage.setItem('cherry-theme', theme);
   }
 }
@@ -74,7 +74,7 @@ function saveThemeToLocal(theme) {
  */
 export function getThemeFromLocal(fullClass = false) {
   let ret = 'default';
-  if (localStorage) {
+  if (typeof localStorage !== 'undefined') {
     ret = localStorage.getItem('cherry-theme');
   }
   return fullClass ? `theme__${ret}` : ret;
