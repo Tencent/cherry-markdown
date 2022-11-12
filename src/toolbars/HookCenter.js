@@ -26,9 +26,11 @@ import Color from './hooks/Color';
 import Header from './hooks/Header';
 import Insert from './hooks/Insert';
 import List from './hooks/List';
+import Ol from './hooks/Ol';
+import Ul from './hooks/Ul';
+import CheckList from './hooks/CheckList';
 import Graph from './hooks/Graph';
 import Size from './hooks/Size';
-import CheckList from './hooks/CheckList';
 import H1 from './hooks/H1';
 import H2 from './hooks/H2';
 import H3 from './hooks/H3';
@@ -76,9 +78,11 @@ const HookList = {
   header: Header,
   insert: Insert,
   list: List,
+  ol: Ol,
+  ul: Ul,
+  checklist: CheckList,
   graph: Graph,
   size: Size,
-  checklist: CheckList,
   h1: H1,
   h2: H2,
   h3: H3,

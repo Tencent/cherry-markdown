@@ -20,10 +20,10 @@ import { getListFromStr } from '@/utils/regexp';
 /**
  * 下标的按钮
  **/
-export default class Checklist extends MenuBase {
+export default class Ul extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('checklist', 'checklist');
+    this.setName('ul', 'ul');
   }
 
   /**
@@ -36,6 +36,6 @@ export default class Checklist extends MenuBase {
     const $selection = getSelection(this.editor.editor, selection, 'line', true) || 'No.1\n    No.1.1\nNo.2';
     const [before] = $selection.match(/^\n*/);
     const [after] = $selection.match(/\n*$/);
-    return `${before}${getListFromStr($selection, 'checklist')}${after}`;
+    return `${before}${getListFromStr($selection, 'ul')}${after}`;
   }
 }
