@@ -127,7 +127,7 @@
   //border: 1px solid $borderColor;
   box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.5);
   margin-left: -60px;
-  z-index: 1000;
+  z-index: 8;
 
   &-item {
     width: 100%;
@@ -175,7 +175,7 @@
   line-height: 2.8;
   flex-basis: 100%;
   box-sizing: border-box;
-  z-index: 1;
+  z-index: 2;
   user-select: none;
   box-shadow: $toolbarShadowLight;
   background: $toolbarBgLight;
@@ -292,7 +292,7 @@
 @import './components/bubble';
 
 .cherry-floatmenu {
-  z-index: 100;
+  z-index: 4;
   display: none;
   position: absolute;
   left: 30px;
@@ -424,7 +424,7 @@
   width: 15px;
   cursor: ew-resize;
   position: absolute;
-  z-index: 1000;
+  z-index: 12;
   background: transparent;
 
   &.cherry-drag--show {
@@ -439,7 +439,7 @@
 }
 
 .cherry-editor-mask {
-  z-index: 999;
+  z-index: 10;
   position: absolute;
   display: none;
   background: rgba(0, 0, 0, 0.2);
@@ -450,7 +450,7 @@
 }
 
 .cherry-previewer-mask {
-  z-index: 999;
+  z-index: 10;
   position: absolute;
   display: none;
   background: rgba(0, 0, 0, 0.4);
@@ -524,7 +524,7 @@
       border-radius: 5px;
       margin-left: -27px;
       transition: all 0.3s;
-      z-index: 1;
+      z-index: 2;
     }
     // 浅色系
     [data-code-block-theme='default'] & ,[data-code-block-theme='funky'] & ,[data-code-block-theme='solarized-light'] & ,[data-code-block-theme='coy'] & {
@@ -545,7 +545,7 @@
   position: fixed;
   width: auto;
   padding: 5px 10px;
-  z-index: 1000;
+  z-index: 6;
   background: #fff;
   box-shadow: $shadow;
 
