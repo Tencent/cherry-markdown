@@ -162,8 +162,6 @@ export default class Cherry extends CherryStatic {
     // 切换模式，有纯预览模式、纯编辑模式、双栏编辑模式
     this.switchModel(this.options.editor.defaultModel);
 
-    this.cherryDomResize();
-
     Event.on(this.instanceId, Event.Events.toolbarHide, () => {
       this.status.toolbar = 'hide';
     });
@@ -182,22 +180,6 @@ export default class Cherry extends CherryStatic {
     Event.on(this.instanceId, Event.Events.editorOpen, () => {
       this.status.editor = 'show';
     });
-  }
-
-  /**
-   *  监听 cherry 高度变化，高度改变触发 codemirror 内容刷新
-   * @private
-   */
-  cherryDomResize() {
-    const observer = new ResizeObserver((entries) => {
-      for (const {} of entries) {
-        setTimeout(() => this.editor.editor.refresh(), 10);
-      }
-    });
-
-    observer.observe(this.cherryDom);
-
-    this.cherryDomReiszeObserver = observer;
   }
 
   /**
