@@ -301,7 +301,7 @@ export default class Editor {
             if (fileType === '' || /^text/i.test(fileType)) {
               continue;
             }
-            this.options.fileUpload(file, (url, params) => {
+            this.options.fileUpload(file, (url, params = {}) => {
               if (typeof url !== 'string') {
                 return;
               }
