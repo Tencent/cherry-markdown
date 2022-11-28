@@ -22,8 +22,8 @@ export default class Export extends MenuBase {
     this.noIcon = true;
     this.updateMarkdown = false;
     this.subMenuConfig = [
-      { noIcon: true, name: '导出PDF', onclick: this.bindSubClick.bind(this, 'pdf') },
-      { noIcon: true, name: '导出长图', onclick: this.bindSubClick.bind(this, 'screenShot') },
+      { noIcon: true, name: 'exportToPdf', onclick: this.bindSubClick.bind(this, 'pdf') },
+      { noIcon: true, name: 'exportScreenshot', onclick: this.bindSubClick.bind(this, 'screenShot') },
     ];
   }
 
