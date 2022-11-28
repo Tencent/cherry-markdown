@@ -51,6 +51,8 @@ export interface CherryOptions {
   /** 初始内容，引擎模式下不生效 */
   value: string;
   instanceId?: string;
+  /** Locale **/
+  locale: string;
 }
 
 export interface CherryExternalsOptions {

@@ -29,6 +29,7 @@ import defaultConfig from './Cherry.config';
 import './sass/cherry.scss';
 import cloneDeep from 'lodash/cloneDeep';
 import Event from './Event';
+import locales from '@/locales/index';
 
 import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
@@ -61,6 +62,9 @@ export default class Cherry extends CherryStatic {
      * @type {Partial<CherryOptions>}
      */
     this.options = mergeWith({}, defaultConfigCopy, options, customizer);
+
+    // loading the locale
+    this.locale = locales[this.options.locale];
 
     if (typeof this.options.engine.global.urlProcessor === 'function') {
       this.options.engine.global.urlProcessor = urlProcessorProxy(this.options.engine.global.urlProcessor);

@@ -15,7 +15,6 @@
  */
 
 import { createElement } from '@/utils/dom';
-import { t } from '@/Locales';
 
 const SAFE_AREA_MARGIN = 15;
 
@@ -34,11 +33,11 @@ const pasteHelper = {
    * @param {string} md html对应的markdown源码
    * @returns
    */
-  showSwitchBtnAfterPasteHtml(currentCursor, editor, html, md) {
+  showSwitchBtnAfterPasteHtml($cherry, currentCursor, editor, html, md) {
     if (html.trim() === md.trim()) {
       return;
     }
-    this.init(currentCursor, editor, html, md);
+    this.init($cherry, currentCursor, editor, html, md);
     this.setSelection();
     this.bindListener();
     this.initBubble();
@@ -49,11 +48,13 @@ const pasteHelper = {
     }
   },
 
-  init(currentCursor, editor, html, md) {
+  init($cherry, currentCursor, editor, html, md) {
+    this.$cherry = $cherry;
     this.html = html;
     this.md = md;
     this.codemirror = editor;
     this.currentCursor = currentCursor;
+    this.locale = $cherry.locale;
   },
 
   /**
@@ -175,12 +176,12 @@ const pasteHelper = {
     dom.style.display = 'none';
 
     const switchText = createElement('span', 'cherry-toolbar-button cherry-text-btn', {
-      title: t('粘贴为纯文本格式'),
+      title: this.locale.pastePlain,
     });
     switchText.innerText = 'TEXT';
 
     const switchMd = createElement('span', 'cherry-toolbar-button cherry-md-btn', {
-      title: t('粘贴为markdown格式'),
+      title: this.locale.pasteMarkdown,
     });
     switchMd.innerText = 'Markdown';
 
