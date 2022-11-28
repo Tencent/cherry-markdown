@@ -391,6 +391,8 @@ registerPlugin().then(() => {
   autoScrollByCursor: true,
   // Whether to force output to the body when the outer container does not exist
   forceAppend: true,
+  // The locale Cherry is going to use. Locales live in /src/locales/
+  locale: 'zh_CN',
 }
 ```
 ### Close float menu or bubble menu

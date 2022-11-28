@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import locale from '@/locales/index';
 import MenuBase from '@/toolbars/MenuBase';
 import Event from '@/Event';
 /**
@@ -57,11 +56,11 @@ export default class TogglePreview extends MenuBase {
     if (state) {
       icon.classList.toggle('ch-icon-previewClose', false);
       icon.classList.toggle('ch-icon-preview', true);
-      icon.title = locale.zh_CN.togglePreview;
+      icon.title = this.locale.togglePreview;
     } else {
       icon.classList.toggle('ch-icon-previewClose', true);
       icon.classList.toggle('ch-icon-preview', false);
-      icon.title = locale.zh_CN.previewClose;
+      icon.title = this.locale.previewClose;
     }
     this.$previewerHidden = state;
   }

@@ -314,6 +314,8 @@ const defaultConfig = {
   autoScrollByCursor: true,
   // 外层容器不存在时，是否强制输出到body上
   forceAppend: true,
+  // The locale Cherry is going to use. Locales live in /src/locales/
+  locale: 'zh_CN',
 };
 
 export default cloneDeep(defaultConfig);

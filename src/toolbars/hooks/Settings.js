@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import locale from '@/locales/index';
 import Event from '@/Event';
 import { saveIsClassicBrToLocal, getIsClassicBrFromLocal, testKeyInLocal } from '@/utils/config';
 
@@ -42,7 +41,7 @@ export default class Settings extends MenuBase {
     this.subMenuConfig = [
       { iconName: classicBrIconName, name: classicBrName, onclick: this.bindSubClick.bind(this, 'classicBr') },
       { iconName: previewIcon, name: previewName, onclick: this.bindSubClick.bind(this, 'previewClose') },
-      { iconName: '', name: '隐藏(ctrl+0)', onclick: this.bindSubClick.bind(this, 'toggleToolbar') },
+      { iconName: '', name: 'hide', onclick: this.bindSubClick.bind(this, 'toggleToolbar') },
     ];
     this.attachEventListeners();
     this.shortcutKeyMaps = [
@@ -89,10 +88,10 @@ export default class Settings extends MenuBase {
         const icon = /** @type {HTMLElement} */ (dropdown.querySelector('.ch-icon-previewClose,.ch-icon-preview'));
         icon.classList.toggle('ch-icon-previewClose');
         icon.classList.toggle('ch-icon-preview');
-        icon.title = locale.zh_CN[previewName];
+        icon.title = this.locale[previewName];
         icon.parentElement.innerHTML = icon.parentElement.innerHTML.replace(
           /<\/i>.+$/,
-          `</i>${locale.zh_CN[previewName]}`,
+          `</i>${this.locale[previewName]}`,
         );
       }
     } else {
@@ -139,10 +138,10 @@ export default class Settings extends MenuBase {
       i = i ? i : this.$cherry.wrapperDom.querySelector('.cherry-dropdown .ch-icon-br');
       if (targetIsClassicBr) {
         i.classList.replace('ch-icon-normal', 'ch-icon-br');
-        i.parentElement.childNodes[1].textContent = locale.zh_CN.classicBr;
+        i.parentElement.childNodes[1].textContent = this.locale.classicBr;
       } else {
         i.classList.replace('ch-icon-br', 'ch-icon-normal');
-        i.parentElement.childNodes[1].textContent = locale.zh_CN.normalBr;
+        i.parentElement.childNodes[1].textContent = this.locale.normalBr;
       }
       this.engine.$cherry.previewer.update('');
       this.engine.$cherry.initText(this.engine.$cherry.editor.editor);

@@ -15,7 +15,6 @@
  */
 // @ts-check
 import Logger from '@/Logger';
-import locale from '@/locales/index';
 import { escapeHTMLSpecialCharOnce as $e } from '@/utils/sanitize';
 import { createElement } from '@/utils/dom';
 
@@ -57,6 +56,7 @@ export default class MenuBase {
     this.subMenu = null; // 子菜单实例
     this.name = ''; // 菜单项Name
     this.editor = $cherry.editor; // markdown实例
+    this.locale = $cherry.locale;
     this.dom = null;
     this.updateMarkdown = true; // 是否更新markdown原文
     this.subMenuConfig = []; // 子菜单配置
@@ -128,7 +128,7 @@ export default class MenuBase {
       ? 'cherry-dropdown-item'
       : `cherry-toolbar-button cherry-toolbar-${this.iconName ? this.iconName : this.name}`;
     const span = createElement('span', classNames, {
-      title: locale.zh_CN[this.name] || $e(this.name),
+      title: this.locale[this.name] || $e(this.name),
     });
     // 如果有图标，则添加图标
     if (this.iconName && !this.noIcon) {
@@ -137,7 +137,7 @@ export default class MenuBase {
     }
     // 二级菜单强制显示文字，没有图标的按钮也显示文字
     if (asSubMenu || this.noIcon) {
-      span.innerHTML += locale.zh_CN[this.name] || $e(this.name);
+      span.innerHTML += this.locale[this.name] || $e(this.name);
     }
     // 只有一级菜单才保存dom，且只保存一次
     if (!asSubMenu && !this.dom) {
@@ -149,13 +149,13 @@ export default class MenuBase {
   createSubBtnByConfig(config) {
     const { name, iconName, onclick } = config;
     const span = createElement('span', 'cherry-dropdown-item', {
-      title: locale.zh_CN[name] || $e(name),
+      title: this.locale[name] || $e(name),
     });
     if (iconName) {
       const icon = createElement('i', `ch-icon ch-icon-${iconName}`);
       span.appendChild(icon);
     }
-    span.innerHTML += locale.zh_CN[name] || $e(name);
+    span.innerHTML += this.locale[name] || $e(name);
     span.addEventListener('click', onclick, false);
     return span;
   }
