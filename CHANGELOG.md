@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.9](https://github.com/Tencent/cherry-markdown/compare/v0.8.8...v0.8.9) (2022-11-29)
+
+
+### Features
+
+* delete unnecessary observer to adapt old version browers ([869963c](https://github.com/Tencent/cherry-markdown/commit/869963cfe58a082604a9bd6b7ec9e19d27114e68))
+* localisation support ([7ca12b7](https://github.com/Tencent/cherry-markdown/commit/7ca12b7e2de2d79ee5bf8ac6524277f2a76701bf)), closes [#217](https://github.com/Tencent/cherry-markdown/issues/217)
+* 增加有序列表、无序列表按钮 ([f52ff42](https://github.com/Tencent/cherry-markdown/commit/f52ff427d752c44855e8a3c57bf3b030de7eee34))
+
+
+### Bug Fixes
+
+* [#357](https://github.com/Tencent/cherry-markdown/issues/357) 优化z-index的取值 ([729b404](https://github.com/Tencent/cherry-markdown/commit/729b404386c72005bb028a4e6d209cabfb1b0669))
+* [#358](https://github.com/Tencent/cherry-markdown/issues/358) ([56ceedc](https://github.com/Tencent/cherry-markdown/commit/56ceedc498d256af89a265adb84a8c1efd27a3bd))
+* issue 350 ([ebce611](https://github.com/Tencent/cherry-markdown/commit/ebce6111ee6fec87434478be6eacd2d5880825b2))
+* 修复无浏览器模式报错 [#353](https://github.com/Tencent/cherry-markdown/issues/353) ([5571a4f](https://github.com/Tencent/cherry-markdown/commit/5571a4ff49e03338d8efdf38d4b6ce1d899185d4))
+
 ### [0.8.8](https://github.com/Tencent/cherry-markdown/compare/v0.8.6...v0.8.8) (2022-11-08)
 
 
