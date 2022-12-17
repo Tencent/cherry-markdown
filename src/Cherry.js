@@ -339,6 +339,19 @@ export default class Cherry extends CherryStatic {
   }
 
   /**
+   * 强制重新渲染预览区域
+   */
+  refreshPreviewer() {
+    try {
+      const markdownText = this.getValue();
+      const html = this.engine.makeHtml(markdownText);
+      this.previewer.refresh(html);
+    } catch (e) {
+      throw new NestedError(e);
+    }
+  }
+
+  /**
    * 覆盖编辑区的内容
    * @param {string} content markdown内容
    * @param {boolean} keepCursor 是否保持光标位置
