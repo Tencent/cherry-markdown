@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.10](https://github.com/Tencent/cherry-markdown/compare/v0.8.9...v0.8.10) (2022-12-21)
+
+
+### Features
+
+* [#370](https://github.com/Tencent/cherry-markdown/issues/370) 增加refreshPreviewer方法，可以强制重新渲染预览区域 ([c347640](https://github.com/Tencent/cherry-markdown/commit/c3476407f5dd12ae85cd0069c18b44d0c09fbe12))
+
+
+### Bug Fixes
+
+* 跨单元格的行内公式、行内代码语法改成不生效 ([178a6ac](https://github.com/Tencent/cherry-markdown/commit/178a6acddd38c17ec109a194139bba175428a64b))
+
 ### [0.8.9](https://github.com/Tencent/cherry-markdown/compare/v0.8.8...v0.8.9) (2022-11-29)
 
 
