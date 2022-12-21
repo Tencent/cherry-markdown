@@ -17,7 +17,7 @@ import ParagraphBase from '@/core/ParagraphBase';
 import { escapeFormulaPunctuations, LoadMathModule } from '@/utils/mathjax';
 import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
-import { isLookbehindSupported } from '@/utils/regexp';
+import { getTableRule, isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 
 /**
@@ -67,6 +67,21 @@ export default class InlineMath extends ParagraphBase {
   }
 
   beforeMakeHtml(str) {
+    let $str = str;
+    // 格里处理行内公式，让一个td里的行内公式语法生效，让跨td的行内公式语法失效
+    $str = $str.replace(getTableRule(true), (whole, ...args) => {
+      return whole
+        .split('|')
+        .map((oneTd) => {
+          return this.makeInlineMath(oneTd);
+        })
+        .join('|')
+        .replace(/~D/g, '\\~D');
+    });
+    return this.makeInlineMath($str);
+  }
+
+  makeInlineMath(str) {
     if (!this.test(str)) {
       return str;
     }

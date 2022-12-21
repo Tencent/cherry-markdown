@@ -159,10 +159,11 @@ export function getCodeBlockRule() {
      * (?:^|\n)是区块的通用开头
      * (\n*)捕获区块前的所有换行
      * (?:[^\S\n]*)捕获```前置的空格字符
+     * 只要有连续3个及以上`并且前后`的数量相等，则认为是代码快语法
      */
-    begin: /(?:^|\n)(\n*(?:[^\S\n]*))```([^`]*?)\n/,
+    begin: /(?:^|\n)(\n*(?:[^\S\n]*))(`{3,})([^`]*?)\n/,
     content: /([\w\W]*?)/, // '([\\w\\W]*?)',
-    end: /[^\S\n]*```[ \t]*(?=$|\n+)/, // '\\s*```[ \\t]*(?=$|\\n+)',
+    end: /[^\S\n]*\2[ \t]*(?=$|\n+)/, // '\\s*```[ \\t]*(?=$|\\n+)',
   };
   codeBlock.reg = new RegExp(codeBlock.begin.source + codeBlock.content.source + codeBlock.end.source, 'g');
   return codeBlock;

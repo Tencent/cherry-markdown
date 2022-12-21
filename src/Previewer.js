@@ -643,6 +643,14 @@ export default class Previewer {
     }
   }
 
+  /**
+   * 强制重新渲染预览区域
+   */
+  refresh(html) {
+    const domContainer = this.getDomContainer();
+    domContainer.innerHTML = html;
+  }
+
   update(html) {
     // 更新时保留图片懒加载逻辑
     const newHtml = this.lazyLoadImg.changeSrc2DataSrc(html);
