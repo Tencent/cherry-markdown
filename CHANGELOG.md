@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.11](https://github.com/Tencent/cherry-markdown/compare/v0.8.10...v0.8.11) (2022-12-28)
+
+
+### Bug Fixes
+
+* **insert:** Fix insert code instruction failure ([#373](https://github.com/Tencent/cherry-markdown/issues/373)) ([a1b3914](https://github.com/Tencent/cherry-markdown/commit/a1b39142d90861964c9b25f04f76dd38b99f50a0))
+
 ### [0.8.10](https://github.com/Tencent/cherry-markdown/compare/v0.8.9...v0.8.10) (2022-12-21)
 
 
