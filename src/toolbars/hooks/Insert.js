@@ -80,8 +80,6 @@ export default class Insert extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '', callback) {
-    // eslint-disable-next-line no-param-reassign
-    shortKey = this.matchShortcutKey(shortKey);
     if (/normal-table/.test(shortKey)) {
       // 如果是插入markdown标准表格
       // 根据shortKey获取想插入表格的行号和列号
@@ -191,50 +189,5 @@ export default class Insert extends MenuBase {
         }
         return ` { ${$selection} | ${this.editor.$cherry.options.callback.changeString2Pinyin($selection).trim()} } `;
     }
-  }
-
-  /**
-   * 解析快捷键
-   * @param {string} shortcutKey 快捷键
-   * @returns
-   */
-  matchShortcutKey(shortcutKey) {
-    const shortcutKeyMaps = this.shortcutKeyMaps();
-    const shortcutKeyMap = shortcutKeyMaps.find((item) => {
-      return item.shortcutKey === shortcutKey;
-    });
-    return shortcutKeyMap !== undefined ? shortcutKeyMap.shortKey : shortcutKey;
-  }
-
-  /**
-   * 获得监听的快捷键
-   * 根据系统字段监听Ctrl+*和 cmd+*
-   */
-  shortcutKeyMaps() {
-    return [
-      {
-        shortKey: 'code',
-        shortcutKey: 'Mod-k',
-      },
-      {
-        shortKey: 'link',
-        shortcutKey: 'Mod-l',
-      },
-      {
-        shortKey: 'image',
-        shortcutKey: 'Mod-g',
-      },
-      {
-        shortKey: 'formula',
-        shortcutKey: 'Mod-m',
-      },
-    ];
-  }
-
-  get shortcutKeys() {
-    const shortcutKeyMap = this.shortcutKeyMaps();
-    return shortcutKeyMap.map((item) => {
-      return item.shortcutKey;
-    });
   }
 }
