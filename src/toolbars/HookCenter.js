@@ -159,8 +159,7 @@ export default class HookCenter {
    * 根据配置动态渲染、绑定工具栏
    * @returns
    */
-  init(toolbar) {
-    console.log(toolbar, this.toolbar);
+  init() {
     const { buttonConfig } = this.toolbar.options;
     buttonConfig.forEach((item) => {
       if (typeof item === 'string') {
