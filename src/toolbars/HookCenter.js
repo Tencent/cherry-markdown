@@ -144,14 +144,14 @@ export default class HookCenter {
     if (this.hooks[name]) {
       return;
     }
-    const { $cherry, customMenu } = this.toolbar.options;
+    const { $cherry, customMenu, editor, engine } = this.toolbar.options;
     if (HookList[name]) {
       this.allMenusName.push(name);
-      this.hooks[name] = new HookList[name]($cherry);
+      this.hooks[name] = new HookList[name]($cherry, editor, engine, this.toolbar.options);
     } else if (customMenu !== undefined && customMenu !== null && customMenu[name]) {
       this.allMenusName.push(name);
       // 如果是自定义菜单，传参兼容旧版
-      this.hooks[name] = new customMenu[name]($cherry);
+      this.hooks[name] = new customMenu[name]($cherry, editor, engine, this.toolbar.options);
     }
   }
 
@@ -159,7 +159,8 @@ export default class HookCenter {
    * 根据配置动态渲染、绑定工具栏
    * @returns
    */
-  init() {
+  init(toolbar) {
+    console.log(toolbar, this.toolbar);
     const { buttonConfig } = this.toolbar.options;
     buttonConfig.forEach((item) => {
       if (typeof item === 'string') {
