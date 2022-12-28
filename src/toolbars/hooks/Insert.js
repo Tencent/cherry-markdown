@@ -26,62 +26,8 @@ export default class Insert extends MenuBase {
     this.setName('insert', 'insert');
     this.noIcon = true;
 
-    const options = $cherry.options.toolbars.toolbar;
-    const { engine } = $cherry;
     this.subBubbleTableMenu = new BubbleTableMenu({ row: 9, col: 9 });
     $cherry.editor.options.wrapperDom.appendChild(this.subBubbleTableMenu.dom);
-
-    // 定义子菜单
-    /**
-     * **TODO**:
-     *   这里所有子菜单的代码应该删掉，复用已有的toolbar对象
-     */
-    this.subMenuConfig = [
-      { iconName: 'image', name: 'image', onclick: this.bindSubClick.bind(this, 'image') },
-      { iconName: 'video', name: 'audio', onclick: this.bindSubClick.bind(this, 'audio') },
-      { iconName: 'video', name: 'video', onclick: this.bindSubClick.bind(this, 'video') },
-      { iconName: 'link', name: 'link', onclick: this.bindSubClick.bind(this, 'link') },
-      { iconName: 'line', name: 'hr', onclick: this.bindSubClick.bind(this, 'hr') },
-      { iconName: 'br', name: 'br', onclick: this.bindSubClick.bind(this, 'br') },
-      { iconName: 'code', name: 'code', onclick: this.bindSubClick.bind(this, 'code') },
-      { iconName: 'insertFormula', name: 'formula', onclick: this.bindSubClick.bind(this, 'formula') },
-      { iconName: 'toc', name: 'toc', onclick: this.bindSubClick.bind(this, 'toc') },
-      { iconName: 'table', name: 'table', onclick: this.bindSubClick.bind(this, 'table'), async: true },
-      // { iconName: 'table', name: 'line-table', onclick: this.bindSubClick.bind(this, 'line-table') },
-      // { iconName: 'table', name: 'bar-table', onclick: this.bindSubClick.bind(this, 'bar-table') },
-      // {iconName:'headlessTable', onclick: this.bindSubClick.bind(this, 'headlessTable'), async: true},
-      { iconName: 'pdf', name: 'pdf', onclick: this.bindSubClick.bind(this, 'pdf') },
-      { iconName: 'word', name: 'word', onclick: this.bindSubClick.bind(this, 'word') },
-      { iconName: 'pinyin', name: 'ruby', onclick: this.bindSubClick.bind(this, 'ruby') },
-    ];
-    // 用户可配置
-    if (options instanceof Array) {
-      const menuMap = this.subMenuConfig.map((menu) => menu.name);
-      this.subMenuConfig = options.reduce((config, name) => {
-        const index = menuMap.indexOf(name);
-        if (index === -1) {
-          return config;
-        }
-        if (name === 'line-table' || name === 'bar-table') {
-          if (engine.markdownParams.engine.syntax.table.enableChart === false) {
-            return config;
-          }
-        }
-        config.push(this.subMenuConfig[index]);
-        return config;
-      }, []);
-    }
-  }
-
-  getSubMenuConfig() {
-    return this.subMenuConfig;
-  }
-
-  bindSubClick(shortCut, selection, async, callback) {
-    if (async) {
-      return this.onClick(selection, shortCut, callback);
-    }
-    return this.onClick(selection, shortCut);
   }
 
   /**
