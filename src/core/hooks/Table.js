@@ -174,8 +174,23 @@ export default class Table extends ParagraphBase {
     };
   }
 
+  /**
+   * 如果table.head是空的，就不渲染<thead>了
+   * @param {String} str
+   * @returns {Boolean}
+   */
+  $testHeadEmpty(str) {
+    const test = str
+      .replace(/&nbsp;/g, '')
+      .replace(/\s/g, '')
+      .replace(/(~CTH\$|~CTHU|~CTHL|~CTHR|~CTHC)/g, '');
+    return test?.length > 0;
+  }
+
   $renderTable(COLUMN_ALIGN_MAP, tableHeader, tableRows, dataLines) {
-    const cacheSrc = `~CTHD${tableHeader}~CTHD$~CTBD${tableRows}~CTBD$`;
+    const cacheSrc = this.$testHeadEmpty(tableHeader)
+      ? `~CTHD${tableHeader}~CTHD$~CTBD${tableRows}~CTBD$`
+      : `~CTBD${tableRows}~CTBD$`;
     const html = cacheSrc;
     const sign = this.$engine.md5(html);
     const renderHtml = html
