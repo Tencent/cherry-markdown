@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.12](https://github.com/Tencent/cherry-markdown/compare/v0.8.11...v0.8.12) (2023-01-13)
+
+
+### Features
+
+* [#379](https://github.com/Tencent/cherry-markdown/issues/379) 通过引入第三方组件cm-search-replace实现左侧编辑器搜索、替换功能 ([3b7d17d](https://github.com/Tencent/cherry-markdown/commit/3b7d17dce78a0f736b011f5c1cd02a4a96156c58))
+
+
+### Bug Fixes
+
+* [#374](https://github.com/Tencent/cherry-markdown/issues/374) 光标处于编辑区域最低部时，预览区域滚动到了顶部 ([cfdfd0d](https://github.com/Tencent/cherry-markdown/commit/cfdfd0dcec1f9071bb797a2980a8c1f33615b17c))
+* [#380](https://github.com/Tencent/cherry-markdown/issues/380) 修复粘贴时转义&的问题，同时修复粘贴table时出现过多换行的问题\n feat: 当表格thead为空的时候，不再渲染<thead> ([266a5f1](https://github.com/Tencent/cherry-markdown/commit/266a5f1716810f2b75348a8ecf3a38c15b510743))
+
 ### [0.8.11](https://github.com/Tencent/cherry-markdown/compare/v0.8.10...v0.8.11) (2022-12-28)
 
 

@@ -2092,6 +2092,10 @@ div[data-type=codeBlock] .token.inserted {
   color: #ccc;
 }
 
+.cherry .ace_search {
+  background: #FFF;
+}
+
 .cherry-sidebar {
   width: 30px;
   position: absolute;
