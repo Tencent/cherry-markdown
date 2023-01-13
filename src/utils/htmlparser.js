@@ -43,6 +43,7 @@ const htmlParser = {
       .replace(/\n{3,}/g, '\n\n\n')
       .replace(/&gt;/g, '>')
       .replace(/&lt;/g, '<')
+      .replace(/&amp;/g, '&')
       .trim('\n');
   },
   /**
@@ -68,43 +69,7 @@ const htmlParser = {
    */
   $handleTagObject(temObj, returnString) {
     let ret = returnString;
-    if (temObj.attrs.class && temObj.attrs.class.indexOf('mermaid') >= 0) {
-      // 针对 mermaid 图
-      try {
-        ret += [
-          '\n```',
-          temObj.attrs['data-type'],
-          '\n',
-          decodeURIComponent(atob(temObj.attrs['data-code'])),
-          '\n```\n',
-        ].join('');
-      } catch (e) {
-        ret += [
-          '\n```',
-          temObj.attrs['data-type'],
-          '\n',
-          decodeURIComponent(temObj.attrs['data-code']),
-          '\n```\n',
-        ].join('');
-      }
-    } else if (temObj.attrs.class && temObj.attrs.class.indexOf('mathjax-wrapper') >= 0) {
-      // 针对公式，首尾加空格是为了适应新语法
-      try {
-        ret += ` ${decodeURIComponent(atob(temObj.attrs['data-source']))} `;
-      } catch (e) {
-        ret += ` ${decodeURIComponent(temObj.attrs['data-source'])} `;
-      }
-    } else if (temObj.attrs['data-control'] && temObj.attrs['data-control'] === 'tapd-table') {
-      // 处理高阶表格 cherryMarkdown里不需要这段逻辑
-      ret += ['\n```', ' tapd-table ', temObj.attrs['data-size'], '\n'].join('');
-
-      if (temObj.children[1] && temObj.children[1].children[0].content) {
-        const data = temObj.children[1].children[0].content.replace(/\s+/g, '');
-        ret += ['\n', data, '\n```\n'].join('');
-      } else {
-        ret += ['\n', '"工作表":{"数据":{"19::25":" "}} ', '\n```\n'].join(''); // 高阶数据存在问题，转换为默认
-      }
-    } else if (temObj.attrs.class && temObj.attrs.class.indexOf('ch-icon') >= 0) {
+    if (temObj.attrs.class && temObj.attrs.class.indexOf('ch-icon') >= 0) {
       // 针对checklist
       if (temObj.attrs.class.indexOf('ch-icon-check') >= 0) {
         ret += '[x]';
@@ -168,8 +133,7 @@ const htmlParser = {
         // 递归找到对应的代码文本
         ret += self.$dealCodeTag(temObj);
       } else {
-        // 代码块会对<、>做转义，转成markdown时就不需要转义了
-        ret += temObj.content.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+        ret += temObj.content;
       }
     }
     return ret;
@@ -761,7 +725,7 @@ const htmlParser = {
     },
     convertCode(str) {
       if (/\n/.test(str)) {
-        return `\n\`\`\`\n${str.replace(/\n+$/, '')}\n\`\`\`\n`;
+        return `\`\`\`\n${str.replace(/\n+$/, '')}\n\`\`\``;
       }
       return ` \`${str.replace(/`/g, '\\`')}\` `;
     },
@@ -818,19 +782,19 @@ const htmlParser = {
       return `^^${str.trim().replace(/\^\^/g, '\\^\\^')}^^`;
     },
     convertTd(str) {
-      return `~|${str.trim().replace(/\n/g, '<br>')} ~|`;
+      return `~|${str.trim().replace(/\n{1,}/g, '<br>')} ~|`;
     },
     convertTh(str) {
-      return `~|${str.trim().replace(/\n/g, '<br>')} ~|`;
+      return `~|${str.trim().replace(/\n{1,}/g, '<br>')} ~|`;
     },
     convertTr(str) {
-      return `${str}\n`;
+      return `${str.replace(/\n/g, '')}\n`;
     },
     convertThead(str) {
       return `${str.replace(/~\|~\|/g, '~|').replace(/~\|/g, '|')}|:--|\n`;
     },
     convertTable(str) {
-      const ret = `\n${str.replace(/~\|~\|/g, '~|').replace(/~\|/g, '|')}\n`;
+      const ret = `\n${str.replace(/~\|~\|/g, '~|').replace(/~\|/g, '|')}\n`.replace(/\n{2,}/g, '\n');
       if (/\|:--\|/.test(ret)) {
         return ret;
       }
@@ -840,7 +804,7 @@ const htmlParser = {
       return `- ${str.replace(/^\n/, '').replace(/\n+$/, '').replace(/\n+/g, '\n\t')}\n`;
     },
     convertUl(str) {
-      return `\n\n${str}\n\n`;
+      return `${str}\n`;
     },
     convertOl(str) {
       const arr = str.split('\n');
@@ -852,7 +816,7 @@ const htmlParser = {
         }
       }
       const $str = arr.join('\n');
-      return `\n\n${$str}\n\n`;
+      return `${$str}\n`;
     },
     convertStrong(str) {
       return /^\s*$/.test(str) ? '' : `**${str}**`;
@@ -885,10 +849,10 @@ const htmlParser = {
       return `###### ${str.trim().replace(/\n+$/, '')}\n\n`;
     },
     convertBlockquote(str) {
-      return `\n>${str.trim()}\n\n`;
+      return `>${str.trim()}\n\n`;
     },
     convertAddress(str) {
-      return `\n>${str.trim()}\n\n`;
+      return `>${str.trim()}\n\n`;
     },
   },
   /**
