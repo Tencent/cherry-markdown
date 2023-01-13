@@ -817,6 +817,8 @@ export default class Previewer {
         return scrollTo;
       }
     }
+    // 如果计算完预览区域所有的行号依然＜左侧光标所在的行号，则预览区域直接滚到最低部
+    return domContainer.scrollHeight;
   }
 
   /**
