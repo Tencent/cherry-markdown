@@ -248,6 +248,7 @@ const defaultConfig = {
     image: 'image/*',
     word: '.doc,.docx',
     pdf: '.pdf',
+    file: '*',
   },
   callback: {
     afterChange: callbacks.afterChange,

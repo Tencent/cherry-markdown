@@ -73,6 +73,7 @@ export default {
   export: '导出', // 导出PDF、长图
   underline: '下划线', // 下划线
   pinyin: '拼音', // 拼音
+  file: '文件',
   pastePlain: '粘贴为纯文本格式', // 粘贴为纯文本格式
   pasteMarkdown: '粘贴为markdown格式', // 粘贴为markdown格式
   hide: '隐藏(ctrl+0)', // 隐藏(ctrl+0)
