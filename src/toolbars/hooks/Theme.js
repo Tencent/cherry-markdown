@@ -21,8 +21,7 @@ import { changeTheme } from '@/utils/config';
 export default class Theme extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.noIcon = true;
-    this.setName('主题', 'theme');
+    this.setName('主题', 'insertChart');
     this.subMenuConfig = [];
     const self = this;
     $cherry.options.theme.forEach((one) => {
