@@ -20,6 +20,17 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.ch-icon-create:before { content: "\EA5A" }
+.ch-icon-download:before { content: "\EA5B" }
+.ch-icon-edit:before { content: "\EA5C" }
+.ch-icon-export:before { content: "\EA5D" }
+.ch-icon-folder-open:before { content: "\EA5E" }
+.ch-icon-folder:before { content: "\EA5F" }
+.ch-icon-help:before { content: "\EA60" }
+.ch-icon-pen-fill:before { content: "\EA61" }
+.ch-icon-pen:before { content: "\EA62" }
+.ch-icon-search:before { content: "\EA63" }
+.ch-icon-tips:before { content: "\EA64" }
 .ch-icon-list:before { content: "\EA03" }
 .ch-icon-check:before { content: "\EA04" }
 .ch-icon-square:before { content: "\EA09" }
@@ -84,3 +95,4 @@
 .ch-icon-cherry-table-insert-top:before { content: "\EA57" }
 .ch-icon-sort-s:before { content: "\EA58" }
 .ch-icon-pinyin:before { content: "\EA59" }
+.ch-icon-warn:before { content: "\EA65" }
