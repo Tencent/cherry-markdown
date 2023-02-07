@@ -172,7 +172,7 @@ var basicConfig = {
       'theme'
     ],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
-    sidebar: ['mobilePreview', 'copy'],
+    sidebar: ['mobilePreview', 'copy', 'theme'],
     customMenu: {
       customMenuAName: customMenuA,
       customMenuBName: customMenuB,

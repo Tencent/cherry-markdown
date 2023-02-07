@@ -198,7 +198,10 @@ class BubbleColor {
     const colorStackDOM = this.colorStack
       .map(
         (color) =>
-          `<span class="cherry-color-item" unselectable="on" data-val="${color}"
+          `<span class="cherry-color-item cherry-color-item__${color.replace(
+            '#',
+            '',
+          )}" unselectable="on" data-val="${color}"
                   style="background-color:${color}"></span>`,
       )
       .join('');

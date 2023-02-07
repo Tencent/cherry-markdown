@@ -21,13 +21,22 @@ import { createElement } from '@/utils/dom';
 /**
  *
  * @param {HTMLElement} targetDom
- * @param {'absolute' | 'fixed'} [positionModel = 'absolute']
+ * @param {'absolute' | 'fixed' | 'sidebar'} [positionModel = 'absolute']
  * @returns {Pick<DOMRect, 'left' | 'top' | 'width' | 'height'>}
  */
 function getPosition(targetDom, positionModel = 'absolute') {
   const pos = targetDom.getBoundingClientRect();
   if (positionModel === 'fixed') {
     return pos;
+  }
+  // 侧边栏按钮做个特殊处理
+  if (positionModel === 'sidebar') {
+    return {
+      left: targetDom.parentElement.offsetLeft - 130 + pos.width,
+      top: targetDom.offsetTop + pos.height / 2,
+      width: pos.width,
+      height: pos.height,
+    };
   }
   return { left: targetDom.offsetLeft, top: targetDom.offsetTop, width: pos.width, height: pos.height };
 }
@@ -65,7 +74,7 @@ export default class MenuBase {
     /**
      * 子菜单的定位方式
      * @property
-     * @type {'absolute' | 'fixed'}
+     * @type {'absolute' | 'fixed' | 'sidebar'}
      */
     this.positionModel = 'absolute';
     // eslint-disable-next-line no-underscore-dangle
@@ -310,8 +319,11 @@ export default class MenuBase {
    * 获取当前菜单的位置
    */
   getMenuPosition() {
+    const isFromSidebar = /cherry-sidebar/.test(this.dom.parentElement.className);
     if (/cherry-bubble/.test(this.dom.parentElement.className)) {
       this.positionModel = 'fixed';
+    } else if (isFromSidebar) {
+      this.positionModel = 'sidebar';
     } else {
       this.positionModel = 'absolute';
     }

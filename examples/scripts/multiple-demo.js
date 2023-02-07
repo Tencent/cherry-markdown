@@ -78,6 +78,7 @@ var cherryConfig1 = {
       'word',
       'graph',
     ],
+    sidebar: ['mobilePreview', 'copy', 'theme'],
   },
   editor: {
     height: '600px',
@@ -135,6 +136,7 @@ var cherryConfig2 = {
       'bold',
       'italic',
       'strikethrough',
+      'color',
       '|',
       'list',
       { insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word'] },
@@ -143,7 +145,7 @@ var cherryConfig2 = {
       'settings',
       'export'
     ],
-    sidebar: ['mobilePreview'],
+    sidebar: ['copy', 'mobilePreview', 'theme'],
   },
   editor: {
     height: '600px',
