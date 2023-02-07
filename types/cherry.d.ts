@@ -97,6 +97,10 @@ export interface CherryEngineOptions {
      *    - 一般编辑权限可控的场景（如api文档系统）可以允许iframe、script等标签
      */
     htmlWhiteList?: string;
+    /** 是否开启短链接 */
+    enableShortLink: boolean;
+    /** 短链接长度 */
+    shortLinkLength: number;
   };
   /** 内置语法配置 */
   syntax?: Record<string, Record<string, any> | false>;

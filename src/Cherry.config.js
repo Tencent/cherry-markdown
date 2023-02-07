@@ -87,6 +87,10 @@ const defaultConfig = {
        *    - 一般编辑权限可控的场景（如api文档系统）可以允许iframe、script等标签
        */
       htmlWhiteList: '',
+      /** 是否开启短链接 */
+      enableShortLink: true,
+      /** 短链接长度 */
+      shortLinkLength: 20,
     },
     // 内置语法配置
     syntax: {
