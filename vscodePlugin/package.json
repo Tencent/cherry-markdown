@@ -2,7 +2,7 @@
   "name": "cherry-markdown",
   "displayName": "cherry-markdown",
   "description": "A markdown previewer powered by [cherry-markdown](https://github.com/Tencent/cherry-markdown)",
-  "version": "0.0.4",
+  "version": "0.0.7",
   "publisher": "cherryMarkdownPublisher",
   "license": "Apache License",
   "keywords": ["markdown", "markdown editor", "markdown preview"],
