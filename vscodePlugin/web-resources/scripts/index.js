@@ -36,6 +36,26 @@ const customMenuFont = Cherry.createMenuHook('字体样式',  {
 });
 
 // eslint-disable-next-line no-undef
+// const customMenuPublish = Cherry.createMenuHook('发布',  {
+//   iconName: 'publish',
+//   onClick: (selection, type) => {
+//     publish(type);
+//   },
+//   subMenuConfig: [
+//     { noIcon: true, name: '发布到Iwiki', onclick: () => {
+//       cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'iwiki');
+//     } },
+//     { noIcon: true, name: '发布到KM', onclick: () => {
+//       cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'km');
+//     } },
+//     { noIcon: true, name: '发布到简书', onclick: () => {
+//       cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'jianshu');
+//     } },
+//   ],
+// });
+
+
+// eslint-disable-next-line no-undef
 const customMenuChangeTheme = Cherry.createMenuHook('主题',  {
   iconName: 'insertChart',
   onClick: (selection, type) => {

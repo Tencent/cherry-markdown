@@ -39,15 +39,18 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  // 当修改文档内容的时候更新预览区域内容
+  // 当修改文档内容的时候更新预览区域内容，如果已经关闭预览了，则不需要重新打开预览
   vscode.workspace.onDidChangeTextDocument((e) => {
-    if (e?.document && !disableEditTrigger) {
+    if (isCherryPanelInit && e?.document && !disableEditTrigger) {
       triggerEditorContentChange();
     }
   });
 
   // 滚动的时候让预览区域同步滚动
   vscode.window.onDidChangeTextEditorVisibleRanges((e) => {
+    if (!isCherryPanelInit) {
+      return true;
+    }
     disableScrollTrigger || cherryPanel.webview.postMessage({ cmd: 'editor-scroll', data: e.visibleRanges[0].start.line });
   });
 }
@@ -107,7 +110,7 @@ let scrollTimeOut: NodeJS.Timeout;
 // eslint-disable-next-line no-unused-vars, no-undef
 let editTimeOut: NodeJS.Timeout;
 const initCherryPanelEvent = () => {
-  cherryPanel.webview.onDidReceiveMessage((e) => {
+  cherryPanel?.webview?.onDidReceiveMessage((e) => {
     const { type, data } = e;
     switch (type) {
       // 滚动的时候同步滚动
@@ -147,7 +150,7 @@ const initCherryPanelEvent = () => {
     }
   });
 
-  cherryPanel.onDidDispose(() => {
+  cherryPanel?.onDidDispose(() => {
     isCherryPanelInit = false;
   });
 };
