@@ -245,10 +245,6 @@ registerPlugin().then(() => {
        *    - Generally, scenes with controllable editing permissions (such as API document system) can allow iframe, script and other tags
        */
       htmlWhiteList: '',
-      /** default open short link display */
-      enableShortLink: true,
-      /** default display 20 characters */
-      shortLinkLength: 20,
     },
     // Built in syntax configuration
     syntax: {
@@ -258,6 +254,12 @@ registerPlugin().then(() => {
       // 'hookName': {
       //
       // }
+      autoLink: {
+        /** default open short link display */
+        enableShortLink: true,
+        /** default display 20 characters */
+        shortLinkLength: 20,
+      },
       list: {
         listNested: false, // The sibling list type becomes a child after conversion
         indentSpace: 2, // Default 2 space indents
