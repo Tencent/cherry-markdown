@@ -94,7 +94,7 @@ export default class Link extends SyntaxBase {
         processedURL = encodeURIOnce(processedURL);
         return `${leadingChar + extraLeadingChar}<a href="${UrlCache.set(
           processedURL,
-        )}" rel="nofollow"${attrs} target="_blank">${processedText}</a>`;
+        )}" rel="nofollow"${attrs}>${processedText}</a>`;
       }
       return `${leadingChar + extraLeadingChar}<span>${text}</span>`;
     }

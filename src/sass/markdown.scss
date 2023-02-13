@@ -181,12 +181,6 @@
       }
     }
 
-    &.ch-long-url {
-      &:after {
-        display: none;
-      }
-    }
-
     &:hover {
       color: $linkHoverColor;
     }

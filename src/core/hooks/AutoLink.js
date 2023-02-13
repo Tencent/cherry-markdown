@@ -23,9 +23,9 @@ export default class AutoLink extends SyntaxBase {
   constructor({ config, globalConfig }) {
     super({ config });
     this.urlProcessor = globalConfig.urlProcessor;
+    this.openNewPage = config.openNewPage; // 是否支持链接新页面打开
     this.enableShortLink = globalConfig.enableShortLink;
     this.shortLinkLength = globalConfig.shortLinkLength;
-    console.log(config, globalConfig);
   }
 
   isLinkInHtmlAttribute(str, index, linkLength) {
@@ -203,21 +203,17 @@ export default class AutoLink extends SyntaxBase {
    */
   renderLink(url, text) {
     let linkText = text;
-    const className = [];
     if (typeof linkText !== 'string') {
       if (this.enableShortLink) {
-        const Url = url.replace(/^https?:\/\/(www.)?/i, '');
-        Url.length > this.shortLinkLength ? className.push('ch-long-url') : className.push('ch-short-url');
+        const Url = url.replace(/^https?:\/\//i, '');
         linkText = `${Url.substring(0, this.shortLinkLength)}${Url.length > this.shortLinkLength ? '...' : ''}`;
       } else {
         linkText = url;
-        className.push('ch-short-url');
       }
     }
     const processedURL = this.urlProcessor(url, 'autolink');
-    // return `<a href="${encodeURIOnce(processedURL)}" rel="nofollow">${$e(linkText)}</a>`;
-    return `<span class="link-quote">(</span><a class="${className.join()}" title="点击打开链接" href="${encodeURIOnce(
+    return `<a target="${this.openNewPage ? '_blank' : '_self'}" rel="nofollow" title="${url}"  href="${encodeURIOnce(
       processedURL,
-    )}" rel="nofollow" target="_blank">${$e(linkText)}</a><span class="link-quote">)</span>`;
+    )}">${$e(linkText)}</a>`;
   }
 }
