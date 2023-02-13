@@ -283,7 +283,7 @@ const htmlParser = {
      * @returns {string} str
      */
     pParser(obj, str) {
-      const $str = str.replace(/\t/g, '');
+      const $str = str;
       if (/\n$/.test($str)) {
         return $str;
       }
@@ -296,7 +296,7 @@ const htmlParser = {
      * @returns {string} str
      */
     divParser(obj, str) {
-      const $str = str.replace(/\t/g, '');
+      const $str = str;
       if (/\n$/.test($str)) {
         return $str;
       }
