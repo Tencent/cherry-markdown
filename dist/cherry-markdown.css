@@ -1993,7 +1993,7 @@ div[data-type=codeBlock] .token.inserted {
   background: #fff;
   box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.5);
   margin-left: -60px;
-  z-index: 1000;
+  z-index: 8;
 }
 .cherry-dropdown-item {
   width: 100%;
@@ -2036,7 +2036,7 @@ div[data-type=codeBlock] .token.inserted {
   line-height: 2.8;
   flex-basis: 100%;
   box-sizing: border-box;
-  z-index: 1;
+  z-index: 2;
   user-select: none;
   box-shadow: 0 0 10px rgba(128, 145, 165, 0.2);
   background: white;
@@ -2090,6 +2090,10 @@ div[data-type=codeBlock] .token.inserted {
 }
 .cherry-toolbar-button.disabled {
   color: #ccc;
+}
+
+.cherry .ace_search {
+  background: #FFF;
 }
 
 .cherry-sidebar {
@@ -2147,7 +2151,7 @@ div[data-type=codeBlock] .token.inserted {
   background-color: #fff;
   box-shadow: 0 2px 15px -5px rgba(0, 0, 0, 0.5);
   border-radius: 3px;
-  z-index: 999;
+  z-index: 8;
 }
 .cherry-bubble.cherry-bubble--centered {
   left: 50%;
@@ -2269,7 +2273,7 @@ div[data-type=codeBlock] .token.inserted {
 }
 
 .cherry-floatmenu {
-  z-index: 100;
+  z-index: 4;
   display: none;
   position: absolute;
   left: 30px;
@@ -2381,7 +2385,7 @@ div[data-type=codeBlock] .token.inserted {
   width: 15px;
   cursor: ew-resize;
   position: absolute;
-  z-index: 1000;
+  z-index: 12;
   background: transparent;
 }
 .cherry-drag.cherry-drag--show {
@@ -2394,7 +2398,7 @@ div[data-type=codeBlock] .token.inserted {
 }
 
 .cherry-editor-mask {
-  z-index: 999;
+  z-index: 10;
   position: absolute;
   display: none;
   background: rgba(0, 0, 0, 0.2);
@@ -2404,7 +2408,7 @@ div[data-type=codeBlock] .token.inserted {
 }
 
 .cherry-previewer-mask {
-  z-index: 999;
+  z-index: 10;
   position: absolute;
   display: none;
   background: rgba(0, 0, 0, 0.4);
@@ -2468,7 +2472,7 @@ div[data-type=codeBlock] .token.inserted {
   border-radius: 5px;
   margin-left: -27px;
   transition: all 0.3s;
-  z-index: 1;
+  z-index: 2;
 }
 [data-code-block-theme=default] .cherry-previewer div[data-type=codeBlock]:hover .cherry-copy-code-block, [data-code-block-theme=funky] .cherry-previewer div[data-type=codeBlock]:hover .cherry-copy-code-block, [data-code-block-theme=solarized-light] .cherry-previewer div[data-type=codeBlock]:hover .cherry-copy-code-block, [data-code-block-theme=coy] .cherry-previewer div[data-type=codeBlock]:hover .cherry-copy-code-block {
   background-color: #3582fb;
@@ -2484,7 +2488,7 @@ div[data-type=codeBlock] .token.inserted {
   position: fixed;
   width: auto;
   padding: 5px 10px;
-  z-index: 1000;
+  z-index: 6;
   background: #fff;
   box-shadow: 0 0 10px rgba(128, 145, 165, 0.2);
 }

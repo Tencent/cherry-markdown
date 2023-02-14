@@ -8,11 +8,11 @@ Cherry Markdown Editor 是一款 Javascript Markdown 编辑器，具有开箱即
 
 ### **开箱即用**
 
-开发者可以使用非常简单的方式调用并实例化Cherry Markdown编辑器，实例化的编辑器默认支持大部分常用的markdown语法（如标题、目录、流程图、公式等）。
+开发者可以使用非常简单的方式调用并实例化 Cherry Markdown 编辑器，实例化的编辑器默认支持大部分常用的 markdown 语法（如标题、目录、流程图、公式等）。
 
 ### **易于拓展**
 
-当 Cherry Markdown 编辑器支持的语法不满足开发者需求时，可以快速的进行二次开发或功能扩展。同时，CherryMarkdown编辑器应该由纯JavaScript实现，不应该依赖angular、vue、react等框架技术，框架只提供容器环境即可。
+当 Cherry Markdown 编辑器支持的语法不满足开发者需求时，可以快速的进行二次开发或功能扩展。同时，CherryMarkdown 编辑器应该由纯 JavaScript 实现，不应该依赖 angular、vue、react 等框架技术，框架只提供容器环境即可。
 
 ## 特性
 
@@ -34,7 +34,7 @@ Cherry Markdown Editor 是一款 Javascript Markdown 编辑器，具有开箱即
 
 ### 功能特性
 
-1. 复制Html粘贴成MD语法
+1. 复制 Html 粘贴成 MD 语法
 2. 经典换行&常规换行
 3. 多光标编辑
 4. 图片尺寸
@@ -49,7 +49,7 @@ Cherry Markdown Editor 是一款 Javascript Markdown 编辑器，具有开箱即
 
 ### 安全
 
-Cherry Markdown 有内置的安全 Hook，通过过滤白名单以及DomPurify进行扫描过滤.
+Cherry Markdown 有内置的安全 Hook，通过过滤白名单以及 DomPurify 进行扫描过滤.
 
 ### 样式主题
 
@@ -71,8 +71,6 @@ Cherry Markdown 有多种样式主题选择
 - [图片所见即所得编辑尺寸](https://tencent.github.io/cherry-markdown/examples/img.html)
 - [表格编辑](https://tencent.github.io/cherry-markdown/examples/table.html)
 - [标题自动序号](https://tencent.github.io/cherry-markdown/examples/head_num.html)
-
-
 
 ## 安装
 
@@ -110,10 +108,10 @@ yarn add echarts@4.6.0
 <div id="markdown-container"></div>
 <script src="cherry-editor.min.js"></script>
 <script>
-    new Cherry({
-      id: 'markdown-container',
-      value: '# welcome to cherry editor!',
-    });
+  new Cherry({
+    id: 'markdown-container',
+    value: '# welcome to cherry editor!',
+  });
 </script>
 ```
 
@@ -149,14 +147,14 @@ const cherryInstance = new Cherry({
 });
 ```
 
-### 引擎模式  (语法编译)
+### 引擎模式 (语法编译)
 
 ```javascript
 // 引入Cherry引擎核心构建
 // 引擎配置项与Cherry通用，以下文档内容仅介绍Cherry核心包
 import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core';
 const cherryEngineInstance = new CherryEngine();
-const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!')
+const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!');
 
 // --> <h1>welcome to cherry editor!</h1>
 ```
@@ -215,7 +213,7 @@ registerPlugin().then(() => {
 
 ### 默认配置
 
-```javascript
+````javascript
   {
   // 第三方包
   externals: {
@@ -254,6 +252,12 @@ registerPlugin().then(() => {
       // 'hookName': {
       //
       // }
+      autoLink: {
+        /** 是否开启短链接 */
+        enableShortLink: true,
+        /** 短链接长度 */
+        shortLinkLength: 20,
+      },
       list: {
         listNested: false, // 同级列表类型转换后变为子级
         indentSpace: 2, // 默认2个空格缩进
@@ -323,7 +327,7 @@ registerPlugin().then(() => {
     codemirror: {
       // depend on codemirror theme name: https://codemirror.net/demo/theme.html
       // 自行导入主题文件: `import 'codemirror/theme/<theme-name>.css';`
-      theme: 'default', 
+      theme: 'default',
     },
     // 编辑器的高度，默认100%，如果挂载点存在内联设置的height则以内联样式为主
     height: '100%',
@@ -391,13 +395,13 @@ registerPlugin().then(() => {
   // 外层容器不存在时，是否强制输出到body上
   forceAppend: true,
 }
-```
+````
 
 ### 关闭浮动菜单和气泡菜单
 
 ```javascript
   toolbars: {
-    ... // other config 
+    ... // other config
     bubble: false, // array or false
     float: false, // array or false
   },
@@ -413,6 +417,7 @@ registerPlugin().then(() => {
 点击查看 [examples](./examples/)
 
 ### 客户端
+
 [cherry-markdown 桌面客户端](./docs/cherry_editor_client.CN.md)
 
 ## 拓展
@@ -420,6 +425,7 @@ registerPlugin().then(() => {
 ### 自定义语法
 
 #### sentence Syntax
+
 如果编译内容没有额外特殊要求，使用普通语法
 
 ```javascript
@@ -445,20 +451,21 @@ new Cherry({
     customSyntax: {
       // 注入编辑器的自定义语法中
       BlockSensitiveWordsHook: {
-      syntaxClass: BlockSensitiveWordsHook,
-      // 有同名hook则强制覆盖
-      force: true,
-      // 在处理图片的hook之前调用
-      // before: 'image',
+        syntaxClass: BlockSensitiveWordsHook,
+        // 有同名hook则强制覆盖
+        force: true,
+        // 在处理图片的hook之前调用
+        // before: 'image',
       },
     },
   },
 });
 ```
 
-
 #### paragraph Syntax
+
 如果编译内容要求不受外界影响，则使用段落语法
+
 ```javascript
 /*
  * 生成一个屏蔽敏感词汇的hook
@@ -471,11 +478,11 @@ let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', Che
   // 预处理文本，避免受影响
   beforeMakeHtml(str) {
     return str.replace(this.RULE.reg, (match, code) => {
-        const lineCount = (match.match(/\n/g) || []).length;
-        const sign = this.$engine.md5(match);
-        const html = `<div data-sign="${sign}" data-lines="${lineCount + 1}" >***</div>`;
-        return this.pushCache(html, sign, lineCount);
-    })
+      const lineCount = (match.match(/\n/g) || []).length;
+      const sign = this.$engine.md5(match);
+      const html = `<div data-sign="${sign}" data-lines="${lineCount + 1}" >***</div>`;
+      return this.pushCache(html, sign, lineCount);
+    });
   },
   makeHtml(str, sentenceMakeFunc) {
     return str;
@@ -493,11 +500,11 @@ new Cherry({
     customSyntax: {
       // 注入编辑器的自定义语法中
       BlockSensitiveWordsHook: {
-      syntaxClass: BlockSensitiveWordsHook,
-      // 有同名hook则强制覆盖
-      force: true,
-      // 在处理图片的hook之前调用
-      // before: 'image',
+        syntaxClass: BlockSensitiveWordsHook,
+        // 有同名hook则强制覆盖
+        force: true,
+        // 在处理图片的hook之前调用
+        // before: 'image',
       },
     },
   },
@@ -508,10 +515,10 @@ new Cherry({
 
 ```javascript
 /*
-  * 生成一个添加前缀模板的hook
-  * 名字叫AddPrefixTemplate
-  * 图标类名icon-add-prefix
-  */
+ * 生成一个添加前缀模板的hook
+ * 名字叫AddPrefixTemplate
+ * 图标类名icon-add-prefix
+ */
 let AddPrefixTemplate = Cherry.createMenuHook('AddPrefixTemplate', 'icon-add-prefix', {
   onClick(selection) {
     return 'Prefix-' + selection;
@@ -529,11 +536,15 @@ new Cherry({
       'addPrefix', // 在顶部菜单栏的尾部添加自定义菜单项
     ],
     bubble: [
-      'bold', /** ...其他菜单项 */, 'color',
+      'bold' /** ...其他菜单项 */,
+      ,
+      'color',
       'addPrefix', // 在气泡菜单（选中文本时出现）的尾部添加自定义菜单项
     ], // array or false
     float: [
-      'h1', /** ...其他菜单项 */, 'code',
+      'h1' /** ...其他菜单项 */,
+      ,
+      'code',
       'addPrefix', // 在浮动菜单（在新的空行出现）的尾部添加自定义菜单项
     ], // array or false
     customMenu: {
@@ -547,7 +558,6 @@ new Cherry({
 
 如果你想看更多有关 cherry markdown 的拓展信息，可以看这里 [extensions](./docs/extensions.CN.md).
 
-
 ## 单元测试
 
 选用 Jest 作为单元测试工具，主要看好其断言、支持异步和快照测试等功能。单元测试分为两个部分，CommonMark 用例测试和快照测试。
@@ -557,6 +567,7 @@ new Cherry({
 运行 `yarn run test:commonmark` 测试 CommonMark 官方用例，运行速度较快。
 
 用例位于 `test/suites/commonmark.spec.json`， 比如：
+
 ```json
 {
   "markdown": "  \tfoo\tbaz\t\tbim\n",
@@ -567,7 +578,8 @@ new Cherry({
   "section": "Tabs"
 },
 ```
-对于这个测试点，Jest 会比对 `Cherry.makeHtml("  \tfoo\tbaz\t\tbim\n")` 生成的 html 与用例中的预期结果 `"<pre><code>foo\tbaz\t\tbim\n</code></pre>\n"`。Cherry Markdown 的匹配器已忽略 `data-line` 等私有属性。
+
+对于这个测试点，Jest 会比对 `Cherry.makeHtml(" \tfoo\tbaz\t\tbim\n")` 生成的 html 与用例中的预期结果 `"<pre><code>foo\tbaz\t\tbim\n</code></pre>\n"`。Cherry Markdown 的匹配器已忽略 `data-line` 等私有属性。
 
 CommonMark 规范及测试用例可参考：https://spec.commonmark.org/ 。
 
@@ -577,10 +589,9 @@ CommonMark 规范及测试用例可参考：https://spec.commonmark.org/ 。
 
 快照测试运行速度较慢，仅在易出错且包含 Cherry 特色语法的 Hook 上使用。
 
-
 ## Contributing
 
-欢迎加入我们打造强大的 Markdown 编辑器。当然你也可以给我们提交特性需求的 issue。 在写特性功能之前，你需要了解 [extensions](./docs/extensions.CN.md) 以及  [commit_convention](./docs/commit_convention.CN.md).
+欢迎加入我们打造强大的 Markdown 编辑器。当然你也可以给我们提交特性需求的 issue。 在写特性功能之前，你需要了解 [extensions](./docs/extensions.CN.md) 以及 [commit_convention](./docs/commit_convention.CN.md).
 
 ## License
 

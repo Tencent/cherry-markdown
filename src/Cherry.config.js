@@ -96,6 +96,12 @@ const defaultConfig = {
       // 'hookName': {
       //
       // }
+      autoLink: {
+        /** 是否开启短链接 */
+        enableShortLink: true,
+        /** 短链接长度 */
+        shortLinkLength: 20,
+      },
       list: {
         listNested: false, // 同级列表类型转换后变为子级
         indentSpace: 2, // 默认2个空格缩进
