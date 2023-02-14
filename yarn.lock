@@ -2979,6 +2979,11 @@ cloneable-readable@^1.0.0:
     process-nextick-args "^2.0.0"
     readable-stream "^2.3.5"
 
+cm-search-replace@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/cm-search-replace/-/cm-search-replace-1.0.0.tgz#a3cf3c78af751d35fdc0f4707a1389c08f0de732"
+  integrity sha512-QlzFliHmKI2wWDQh7+DUoffHIbyHgI14+w7UwrC+9nJQFwqFoaC6RmjnCy5oL+jT8qOourY9ywjDNLlM5GPZbw==
+
 co@^4.6.0:
   version "4.6.0"
   resolved "https://registry.npmjs.org/co/-/co-4.6.0.tgz#6ea6bdf3d853ae54ccb8e47bfa0bf3f9031fb184"
