@@ -738,9 +738,9 @@ const htmlParser = {
     convertU(str) {
       return /^\s*$/.test(str) ? '' : ` /${str}/ `;
     },
-    convertImg(str, attr) {
-      const $str = str && str.length > 0 ? $str : 'image';
-      return `![${$str}](${attr})`;
+    convertImg(alt, src) {
+      const $alt = alt && alt.length > 0 ? alt : 'image';
+      return `![${$alt}](${src})`;
     },
     convertGraph(str, attr, data, obj) {
       const $str = str && str.length > 0 ? str : 'graph';
