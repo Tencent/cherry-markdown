@@ -23,6 +23,9 @@ export default class AutoLink extends SyntaxBase {
   constructor({ config, globalConfig }) {
     super({ config });
     this.urlProcessor = globalConfig.urlProcessor;
+    this.openNewPage = !!config.openNewPage; // 是否支持链接新页面打开
+    this.enableShortLink = !!config.enableShortLink;
+    this.shortLinkLength = config.shortLinkLength;
   }
 
   isLinkInHtmlAttribute(str, index, linkLength) {
@@ -201,9 +204,16 @@ export default class AutoLink extends SyntaxBase {
   renderLink(url, text) {
     let linkText = text;
     if (typeof linkText !== 'string') {
-      linkText = url;
+      if (this.enableShortLink) {
+        const Url = url.replace(/^https?:\/\//i, '');
+        linkText = `${Url.substring(0, this.shortLinkLength)}${Url.length > this.shortLinkLength ? '...' : ''}`;
+      } else {
+        linkText = url;
+      }
     }
     const processedURL = this.urlProcessor(url, 'autolink');
-    return `<a href="${encodeURIOnce(processedURL)}" rel="nofollow">${$e(linkText)}</a>`;
+    return `<a target="${this.openNewPage ? '_blank' : '_self'}" rel="nofollow" title="${$e(
+      url,
+    )}"  href="${encodeURIOnce(processedURL)}">${$e(linkText)}</a>`;
   }
 }
