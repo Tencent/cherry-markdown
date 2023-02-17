@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.13](https://github.com/Tencent/cherry-markdown/compare/v0.8.12...v0.8.13) (2023-02-17)
+
+
+### Features
+
+* (hooks) 自动超链接-支持展示固定长度字符 ([#391](https://github.com/Tencent/cherry-markdown/issues/391)) ([69056e4](https://github.com/Tencent/cherry-markdown/commit/69056e4ad9490bb09c1350b4f39a4d5b4e96e6fe))
+* 丰富图标，优化侧边栏切换主题按钮的下拉框定位 ([d17d0fe](https://github.com/Tencent/cherry-markdown/commit/d17d0fee634fd0ced49c3102d3b372fda61e0542))
+* 丰富图标，优化侧边栏切换主题按钮的下拉框定位 ([452ae1f](https://github.com/Tencent/cherry-markdown/commit/452ae1fd63a052efde307b689f61e14b291984ed))
+* 增加vscode plugin，可以在vscode扩展中输入cherry-markdown搜索安装该插件 ([61be297](https://github.com/Tencent/cherry-markdown/commit/61be29709f7b1c4cbc107c00e3ed5711d3b67554))
+
+
+### Bug Fixes
+
+* [#388](https://github.com/Tencent/cherry-markdown/issues/388) 修复复制粘贴图片时，图片alt属性丢失的问题 ([21a505a](https://github.com/Tencent/cherry-markdown/commit/21a505af9a772307183e9ea54338cbfec8850943))
+* unity header anchor safe id ([d28c488](https://github.com/Tencent/cherry-markdown/commit/d28c4883dd0c215726ec4e5f41914026b6a94104))
+* 复制粘贴代码块的时候会丢失\t ([a1179c5](https://github.com/Tencent/cherry-markdown/commit/a1179c5004c8e58efe243418217e9b764419846b))
+
 ### [0.8.12](https://github.com/Tencent/cherry-markdown/compare/v0.8.11...v0.8.12) (2023-01-13)
 
 

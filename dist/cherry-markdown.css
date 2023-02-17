@@ -290,6 +290,54 @@
   content: "\ea59";
 }
 
+.ch-icon-create:before {
+  content: "\ea5a";
+}
+
+.ch-icon-download:before {
+  content: "\ea5b";
+}
+
+.ch-icon-edit:before {
+  content: "\ea5c";
+}
+
+.ch-icon-export:before {
+  content: "\ea5d";
+}
+
+.ch-icon-folder-open:before {
+  content: "\ea5e";
+}
+
+.ch-icon-folder:before {
+  content: "\ea5f";
+}
+
+.ch-icon-help:before {
+  content: "\ea60";
+}
+
+.ch-icon-pen-fill:before {
+  content: "\ea61";
+}
+
+.ch-icon-pen:before {
+  content: "\ea62";
+}
+
+.ch-icon-search:before {
+  content: "\ea63";
+}
+
+.ch-icon-tips:before {
+  content: "\ea64";
+}
+
+.ch-icon-warn:before {
+  content: "\ea65";
+}
+
 .cherry-markdown {
   word-break: break-all;
   /* Specify class=linenums on a pre to get line numbering */
@@ -440,8 +488,22 @@
 .cherry-markdown table th {
   background-color: #eee;
 }
+.cherry-markdown .link-quote {
+  color: #3582fb;
+}
 .cherry-markdown a {
   color: #3582fb;
+  position: relative;
+  text-decoration: none;
+}
+.cherry-markdown a[target=_blank] {
+  padding: 0 2px;
+}
+.cherry-markdown a[target=_blank]::after {
+  content: "\ea10";
+  font-size: 12px;
+  font-family: "ch-icon";
+  margin: 0 2px;
 }
 .cherry-markdown a:hover {
   color: #056bad;
@@ -687,7 +749,12 @@
 .cherry-markdown.head-num {
   counter-reset: level1;
 }
-.cherry-markdown.head-num h1 .anchor:before, .cherry-markdown.head-num h2 .anchor:before, .cherry-markdown.head-num h3 .anchor:before, .cherry-markdown.head-num h4 .anchor:before, .cherry-markdown.head-num h5 .anchor:before, .cherry-markdown.head-num h6 .anchor:before {
+.cherry-markdown.head-num h1 .anchor:before,
+.cherry-markdown.head-num h2 .anchor:before,
+.cherry-markdown.head-num h3 .anchor:before,
+.cherry-markdown.head-num h4 .anchor:before,
+.cherry-markdown.head-num h5 .anchor:before,
+.cherry-markdown.head-num h6 .anchor:before {
   width: auto;
   font-size: inherit;
   vertical-align: inherit;
@@ -1962,7 +2029,7 @@ div[data-type=codeBlock] .token.inserted {
 }
 .cherry .cherry-insert-table-menu {
   display: block;
-  position: absolute;
+  position: fixed;
   top: 40px;
   left: 40px;
   border-collapse: separate;
