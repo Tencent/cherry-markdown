@@ -58,6 +58,7 @@ import Toc from './hooks/Toc';
 import LineTable from './hooks/LineTable';
 import BarTable from './hooks/BarTable';
 import Pdf from './hooks/Pdf';
+import File from './hooks/File';
 import Word from './hooks/Word';
 import Ruby from './hooks/Ruby';
 import Theme from './hooks/Theme';
@@ -116,6 +117,7 @@ const HookList = {
   word: Word,
   ruby: Ruby,
   theme: Theme,
+  file: File,
 };
 
 export default class HookCenter {

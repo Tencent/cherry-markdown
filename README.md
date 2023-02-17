@@ -57,11 +57,12 @@ Cherry Markdown has a built-in security Hook, by filtering the whitelist and Dom
 
 Cherry Markdown has a variety of style themes to choose from.
 
-
 ### Features show
+
 click [here](./docs/features.md) for more details
 
 ### Demos
+
 - [basic](https://tencent.github.io/cherry-markdown/examples/index.html)
 - [mobile](https://tencent.github.io/cherry-markdown/examples/h5.html)
 - [multiple instances](https://tencent.github.io/cherry-markdown/examples/multiple.html)
@@ -72,7 +73,6 @@ click [here](./docs/features.md) for more details
 - [img wysiwyg](https://tencent.github.io/cherry-markdown/examples/img.html)
 - [table wysiwyg](https://tencent.github.io/cherry-markdown/examples/table.html)
 - [headers with auto num](https://tencent.github.io/cherry-markdown/examples/head_num.html)
-
 
 ## Install
 
@@ -110,10 +110,10 @@ yarn add echarts@4.6.0
 <div id="markdown-container"></div>
 <script src="cherry-editor.min.js"></script>
 <script>
-    new Cherry({
-      id: 'markdown-container',
-      value: '# welcome to cherry editor!',
-    });
+  new Cherry({
+    id: 'markdown-container',
+    value: '# welcome to cherry editor!',
+  });
 </script>
 ```
 
@@ -149,14 +149,14 @@ const cherryInstance = new Cherry({
 });
 ```
 
-### Engine Mode  (Just Syntax Compile)
+### Engine Mode (Just Syntax Compile)
 
 ```javascript
 // Import Cherry engine core construction
 // Engine configuration items are the same as Cherry configuration items, the following document content only introduces the Cherry core package
 import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core';
 const cherryEngineInstance = new CherryEngine();
-const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!')
+const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!');
 
 // --> <h1>welcome to cherry editor!</h1>
 ```
@@ -187,7 +187,7 @@ const cherryInstance = new Cherry({
 
 ### Dynamic import
 
-**recommend**  Using Dynamic import, the following is an example of webpack Dynamic import.
+**recommend** Using Dynamic import, the following is an example of webpack Dynamic import.
 
 ```javascript
 import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
@@ -254,6 +254,12 @@ registerPlugin().then(() => {
       // 'hookName': {
       //
       // }
+      autoLink: {
+        /** default open short link display */
+        enableShortLink: true,
+        /** default display 20 characters */
+        shortLinkLength: 20,
+      },
       list: {
         listNested: false, // The sibling list type becomes a child after conversion
         indentSpace: 2, // Default 2 space indents
@@ -323,7 +329,7 @@ registerPlugin().then(() => {
     codemirror: {
       // depend on codemirror theme name: https://codemirror.net/demo/theme.html
       // manual import theme: `import 'codemirror/theme/<theme-name>.css';`
-      theme: 'default', 
+      theme: 'default',
     },
     // The height of the editor is 100% by default. If the height of the mount point has an inline setting, the inline style will prevail
     height: '100%',
@@ -395,11 +401,12 @@ registerPlugin().then(() => {
   locale: 'zh_CN',
 }
 ```
+
 ### Close float menu or bubble menu
 
 ```javascript
   toolbars: {
-    ... // other config 
+    ... // other config
     bubble: false, // array or false
     float: false, // array or false
   },
@@ -413,7 +420,9 @@ Click [here](./docs/configuration.md) for the full documentation of Cherry confi
 ## Example
 
 Click [here](./examples/) for more examples.
+
 ### Client
+
 [cherry-markdown client](./docs/cherry_editor_client.md)
 
 ## Extension
@@ -423,6 +432,7 @@ Click [here](./examples/) for more examples.
 #### sentence Syntax
 
 If there are no additional special requirements for the compiled content, use the sentence syntax
+
 ```javascript
 /*
  * Generate a hook to block sensitive words
@@ -446,11 +456,11 @@ new Cherry({
     customSyntax: {
       // Inject into the editor's custom grammar
       BlockSensitiveWordsHook: {
-      syntaxClass: BlockSensitiveWordsHook,
-      // If there is a Hook with the same name and it will be Forcibly covered 
-      force: true,
-      // Called before the hook for processing the picture
-      // before: 'image',
+        syntaxClass: BlockSensitiveWordsHook,
+        // If there is a Hook with the same name and it will be Forcibly covered
+        force: true,
+        // Called before the hook for processing the picture
+        // before: 'image',
       },
     },
   },
@@ -458,7 +468,9 @@ new Cherry({
 ```
 
 #### paragraph Syntax
+
 If the compiled content requires no external influence, use paragraph syntax
+
 ```javascript
 /*
  * Generate a hook to block sensitive words
@@ -471,11 +483,11 @@ let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', Che
   // Pretreatment to avoid external influence
   beforeMakeHtml(str) {
     return str.replace(this.RULE.reg, (match, code) => {
-        const lineCount = (match.match(/\n/g) || []).length;
-        const sign = this.$engine.md5(match);
-        const html = `<div data-sign="${sign}" data-lines="${lineCount + 1}" >***</div>`;
-        return this.pushCache(html, sign, lineCount);
-    })
+      const lineCount = (match.match(/\n/g) || []).length;
+      const sign = this.$engine.md5(match);
+      const html = `<div data-sign="${sign}" data-lines="${lineCount + 1}" >***</div>`;
+      return this.pushCache(html, sign, lineCount);
+    });
   },
   makeHtml(str, sentenceMakeFunc) {
     return str;
@@ -493,11 +505,11 @@ new Cherry({
     customSyntax: {
       // Inject into the editor's custom grammar
       BlockSensitiveWordsHook: {
-      syntaxClass: BlockSensitiveWordsHook,
-      // If there is a Hook with the same name and it will be Forcibly covered 
-      force: true,
-      // Called before the hook for processing the picture
-      // before: 'image',
+        syntaxClass: BlockSensitiveWordsHook,
+        // If there is a Hook with the same name and it will be Forcibly covered
+        force: true,
+        // Called before the hook for processing the picture
+        // before: 'image',
       },
     },
   },
@@ -508,10 +520,10 @@ new Cherry({
 
 ```javascript
 /*
-  * generate a hook with prefix template
-  * named AddPrefixTemplate
-  * Icon css class icon-add-prefix
-  */
+ * generate a hook with prefix template
+ * named AddPrefixTemplate
+ * Icon css class icon-add-prefix
+ */
 let AddPrefixTemplate = Cherry.createMenuHook('AddPrefixTemplate', 'icon-add-prefix', {
   onClick(selection) {
     return 'Prefix-' + selection;
@@ -529,11 +541,15 @@ new Cherry({
       'addPrefix', // append custom menu item to main top toolbar
     ],
     bubble: [
-      'bold', /** ...other toolbar items */, 'color',
+      'bold' /** ...other toolbar items */,
+      ,
+      'color',
       'addPrefix', // append custom menu item to bubble toolbar (appears on selection)
     ], // array or false
     float: [
-      'h1', /** ...other toolbar items */, 'code',
+      'h1' /** ...other toolbar items */,
+      ,
+      'code',
       'addPrefix', // append custom menu item to float toolbar (appears on new empty line)
     ], // array or false
     customMenu: {
@@ -556,7 +572,8 @@ Jest is selected as a unit testing tool for its assertion, asynchronous support 
 Call `yarn run test:commonmark` to test the official CommonMark suites. This command runs fast.
 
 Suites are located in `test/suites/commonmark.spec.json`, for example:
-````json
+
+```json
 {
   "markdown": " \tfoo\tbaz\t\tbim\n",
   "html": "<pre><code>foo\tbaz\t\tbim\n</code></pre>\n",
@@ -565,7 +582,8 @@ Suites are located in `test/suites/commonmark.spec.json`, for example:
   "end_line": 368,
   "section": "Tabs"
 },
-````
+```
+
 In this case, Jest will compare the html generated by `Cherry.makeHtml(" \tfoo\tbaz\t\tbim\n")` with the expected result `"<pre><code>foo\tbaz\t \tbim\n</code></pre>\n"`. Cherry Markdown's matcher has ignored private attributes like `data-line`.
 
 CommonMark specifications and suites are from: https://spec.commonmark.org/ .
@@ -576,16 +594,13 @@ Call `yarn run test:snapshot` to run snapshot test. You can write snapshot suite
 
 Snapshot test runs slower. It should only be used to test Hooks that are error-prone and contain Cherry Markdown special syntax.
 
-
 ## Contributing
 
 Welcome to join us to build a more powerful Markdown editor. Of course you can submit feature request to us. Please read[extensions](./docs/extensions.md) and [commit_convention](./docs/commit_convention.md) before you working on it.
 
-
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/Tencent/cherry-markdown.svg)](https://starchart.cc/Tencent/cherry-markdown)
-
 
 ## License
 
