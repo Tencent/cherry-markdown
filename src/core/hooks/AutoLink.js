@@ -212,8 +212,9 @@ export default class AutoLink extends SyntaxBase {
       }
     }
     const processedURL = this.urlProcessor(url, 'autolink');
-    return `<a target="${this.openNewPage ? '_blank' : '_self'}" rel="nofollow" title="${$e(
-      url,
-    )}"  href="${encodeURIOnce(processedURL)}">${$e(linkText)}</a>`;
+    return `<a target="${this.openNewPage ? '\\_blank' : '\\_self'}" rel="nofollow" title="${$e(url).replace(
+      /_/g,
+      '\\_',
+    )}"  href="${encodeURIOnce(processedURL).replace(/_/g, '\\_')}">${$e(linkText).replace(/_/g, '\\_')}</a>`;
   }
 }
