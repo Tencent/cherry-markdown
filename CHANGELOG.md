@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.14](https://github.com/Tencent/cherry-markdown/compare/v0.8.13...v0.8.14) (2023-02-21)
+
+
+### Bug Fixes
+
+* 临时解决超链接和斜体语法冲突的问题，最终解决方案应该是AutoLink语法实现排他 ([9d23c56](https://github.com/Tencent/cherry-markdown/commit/9d23c565d682535b14d9bfbae3cefa35012b0b86))
+
 ### [0.8.13](https://github.com/Tencent/cherry-markdown/compare/v0.8.12...v0.8.13) (2023-02-17)
 
 
