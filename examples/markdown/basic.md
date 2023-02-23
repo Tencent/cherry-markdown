@@ -287,6 +287,31 @@
 
 ---
 
+## 信息面板
+
+**说明**
+使用连续三个冒号`:::`和关键字（`[primary | info | warning | danger | success]`）来声明
+```
+:::primary // [primary | info | warning | danger | success]
+标题
+:
+内容
+:::
+```
+
+**效果**
+:::p
+标题
+:
+内容
+:::
+:::success
+内容
+:::
+
+
+---
+
 ## 语法高亮
 
 **说明**
