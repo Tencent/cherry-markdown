@@ -154,6 +154,7 @@ var basicConfig = {
       'ol',
       'ul',
       'checklist',
+      'panel',
       '|',
       'formula',
       {

@@ -204,3 +204,17 @@ export function getListFromStr(selection, type) {
   }
   return $selection;
 }
+
+/**
+ * 信息面板的识别正则
+ * @returns {object}
+ */
+export function getPanelRule() {
+  const ret = {
+    begin: /(?:^|\n)(\n*(?:[^\S\n]*)):::([^:\n\s]+?)\s*\n/,
+    content: /([\w\W]*?)/,
+    end: /[^\S\n]*:::[ \t]*(?=$|\n+)/,
+  };
+  ret.reg = new RegExp(ret.begin.source + ret.content.source + ret.end.source, 'g');
+  return ret;
+}

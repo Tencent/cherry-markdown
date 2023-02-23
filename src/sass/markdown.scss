@@ -470,3 +470,73 @@ div[data-type='codeBlock'] {
     @import 'prism/solarized-light';
   }
 }
+
+.cherry-panel {
+  margin: 10px 0;
+  overflow: hidden;
+  border-radius: 8px;
+  box-sizing: border-box;
+  border: 0.5px solid;
+  .cherry-panel--title {
+    color: #fff;
+    padding: 5px 20px;
+    &.cherry-panel--title__not-empty::before {
+      font-family: 'ch-icon';
+      margin: 0 12px 0 -6px;
+      vertical-align: bottom;
+    }
+  }
+  .cherry-panel--body {
+    padding: 5px 20px;
+  }
+}
+.cherry-panel__primary {
+  background-color: #cfe2ff;
+  color: #0a58ca;
+  .cherry-panel--title {
+    background-color: #0a58ca;
+    &.cherry-panel--title__not-empty::before {
+      content: '\EA6A';
+    }
+  }
+}
+.cherry-panel__info {
+  background-color: #cff4fc;
+  color: #087990;
+  .cherry-panel--title {
+    background-color: #0dcaf0;
+    &.cherry-panel--title__not-empty::before {
+      content: '\EA69';
+    }
+  }
+}
+.cherry-panel__warning {
+  background-color: #fff3cd;
+  color: #997404;
+  .cherry-panel--title {
+    background-color: #997404;
+    &.cherry-panel--title__not-empty::before {
+      content: '\EA6B';
+    }
+  }
+}
+.cherry-panel__danger {
+  background-color: #f8d7da;
+  color: #b02a37;
+  .cherry-panel--title {
+    background-color: #b02a37;
+    &.cherry-panel--title__not-empty::before {
+      content: '\EA68';
+    }
+  }
+}
+.cherry-panel__success {
+  background-color: #d1e7dd;
+  color: #146c43;
+  .cherry-panel--title {
+    background-color: #146c43;
+    &.cherry-panel--title__not-empty::before {
+      content: '\EA67';
+    }
+  }
+}

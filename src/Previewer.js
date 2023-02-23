@@ -381,7 +381,8 @@ export default class Previewer {
         this.editor.scrollToLineNum(0, 0, 1);
         return;
       }
-      if (domContainer.scrollTop + domContainer.offsetHeight > domContainer.scrollHeight) {
+      // 判定预览区域是否滚动到底部的逻辑，增加10px的冗余
+      if (domContainer.scrollTop + domContainer.offsetHeight + 10 > domContainer.scrollHeight) {
         this.editor.scrollToLineNum(null);
         return;
       }
