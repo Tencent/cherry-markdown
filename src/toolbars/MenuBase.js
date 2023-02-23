@@ -254,15 +254,24 @@ export default class MenuBase {
     const cm = this.editor.editor;
     const { begin, end } = this.$getSelectionRange();
     let newBeginCh =
-      // 如果只有一个换行，则特殊处理一下
-      /^\n$/.test(appendBefore) ? 0 : begin.ch - appendBefore.length;
+      // 如果只包含换行，则起始位置一定是0
+      /\n/.test(appendBefore) ? 0 : begin.ch - appendBefore.length;
     newBeginCh = newBeginCh < 0 ? 0 : newBeginCh;
-    const newBegin = { line: begin.line, ch: newBeginCh };
-    const newEndCh =
-      cm.getLine(end.line).length < end.ch + appendAfter.length
-        ? cm.getLine(end.line).length
-        : end.ch + appendAfter.length;
-    const newEnd = { line: end.line, ch: newEndCh };
+    let newBeginLine = /\n/.test(appendBefore) ? begin.line - appendBefore.match(/\n/g).length : begin.line;
+    newBeginLine = newBeginLine < 0 ? 0 : newBeginLine;
+    const newBegin = { line: newBeginLine, ch: newBeginCh };
+    let newEndLine = end.line;
+    let newEndCh = end.ch;
+    if (/\n/.test(appendAfter)) {
+      newEndLine = end.line + appendAfter.match(/\n/g).length;
+      newEndCh = cm.getLine(newEndLine)?.length;
+    } else {
+      newEndCh =
+        cm.getLine(end.line).length < end.ch + appendAfter.length
+          ? cm.getLine(end.line).length
+          : end.ch + appendAfter.length;
+    }
+    const newEnd = { line: newEndLine, ch: newEndCh };
     cm.setSelection(newBegin, newEnd);
     if (cb() === false) {
       cm.setSelection(begin, end);
