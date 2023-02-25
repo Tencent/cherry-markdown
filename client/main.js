@@ -24,8 +24,7 @@ app.whenReady().then(() => {
             message:'确认退出？',
             buttons: ['确认', '取消'],
             cancelId: 1,
-        }).then(idx => {    
-            console.log(idx)
+        }).then(idx => {
             if (idx.response == 1) {
                 e.preventDefault();
             } else {
