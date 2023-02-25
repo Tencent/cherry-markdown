@@ -105,3 +105,18 @@ export function exportScreenShot(previeweDom) {
     });
   });
 }
+
+/**
+ * 导出markdown文件
+ * @param {String} markdownText markdown文本
+ */
+export function exportMarkdownFile(markdownText) {
+  const blob = new Blob([markdownText], { type: 'text/markdown;charset=utf-8' });
+  const aLink = document.createElement('a');
+  aLink.style.display = 'none';
+  aLink.href = URL.createObjectURL(blob);
+  aLink.download = 'cherry.md';
+  document.body.appendChild(aLink);
+  aLink.click();
+  document.body.removeChild(aLink);
+}

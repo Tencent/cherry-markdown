@@ -78,4 +78,5 @@ export default {
   hide: 'Hide (ctrl+0)',
   exportToPdf: 'Export to PDF',
   exportScreenshot: 'Screenshot',
+  exportMarkdownFile: 'Export Markdown File',
 };
