@@ -79,4 +79,5 @@ export default {
   exportToPdf: 'Export to PDF',
   exportScreenshot: 'Screenshot',
   exportMarkdownFile: 'Export Markdown File',
+  exportHTMLFile: 'Export preview HTML File',
 };
