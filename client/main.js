@@ -12,7 +12,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-    mainWindow = createWindow()
+    const mainWindow = createWindow()
     app.on('activate', function () {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
@@ -28,8 +28,7 @@ app.whenReady().then(() => {
             if (idx.response == 1) {
                 e.preventDefault();
             } else {
-                mainWindow = null
-                app.exit();
+                mainWindow.destroy();
             }
         })
     })
