@@ -60,6 +60,7 @@ export default class Panel extends MenuBase {
    */
   $getNameFromStr(str) {
     let ret = false;
+    this.panelRule.lastIndex = 0;
     str.replace(this.panelRule, (match, preLines, name, content) => {
       ret = name ? name : '';
       return match;
@@ -92,6 +93,7 @@ export default class Panel extends MenuBase {
       // 如果命中了面板语法，则尝试去掉语法或者变更语法
       if (currentName === shortKey) {
         // 去掉面板语法
+        this.panelRule.lastIndex = 0;
         return $selection.replace(this.panelRule, (match, preLines, name, content) => {
           return content;
         });
@@ -100,8 +102,9 @@ export default class Panel extends MenuBase {
       this.registerAfterClickCb(() => {
         this.setLessSelection('\n', '\n');
       });
+      this.panelRule.lastIndex = 0;
       return $selection.replace(this.panelRule, (match, preLines, name, content) => {
-        return `:::${shortKey}\n${content}:::`;
+        return `:::${shortKey}\n${content.replace(/\n+$/, '')}\n:::`;
       });
     }
     this.registerAfterClickCb(() => {
