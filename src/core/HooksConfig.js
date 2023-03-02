@@ -48,6 +48,7 @@ import HighLight from './hooks/HighLight';
 import Suggester from './hooks/Suggester';
 import Ruby from './hooks/Ruby';
 import Panel from './hooks/Panel';
+import Detail from './hooks/Detail';
 /**
  * 引擎各语法的配置
  * 主要决定支持哪些语法，以及各语法的执行顺序
@@ -71,6 +72,7 @@ const hooksConfig = [
   Header, // 处理标题, 传入strict属性严格要求ATX风格标题#后带空格
   Hr,
   List,
+  Detail,
   Panel,
   Paragraph, // 普通段落
 

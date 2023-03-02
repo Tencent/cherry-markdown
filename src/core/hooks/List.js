@@ -224,14 +224,23 @@ export default class List extends ParagraphBase {
     const text = wholeMatch.replace(/~0$/g, '').replace(/^\n+/, '');
     this.buildTree(makeChecklist(text), sentenceMakeFunc);
     const result = this.renderTree(0);
-    return this.pushCache(result, this.sign);
+    return this.pushCache(result, this.sign, this.$getLineNum(wholeMatch));
+  }
+
+  $getLineNum(str) {
+    const beginLine = str.match(/^\n\n/)?.length ?? 0;
+    const $str = str.replace(/^\n+/, '').replace(/\n+$/, '\n');
+    return $str.match(/\n/g)?.length ?? 0 + beginLine;
   }
 
   makeHtml(str, sentenceMakeFunc) {
     let $str = `${str}~0`;
     if (this.test($str)) {
       $str = $str.replace(this.RULE.reg, (wholeMatch) => {
-        return this.getCacheWithSpace(this.checkCache(wholeMatch, sentenceMakeFunc), wholeMatch);
+        return this.getCacheWithSpace(
+          this.checkCache(wholeMatch, sentenceMakeFunc, this.$getLineNum(wholeMatch)),
+          wholeMatch,
+        );
       });
     }
     $str = $str.replace(/~0$/g, '');

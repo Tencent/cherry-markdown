@@ -496,11 +496,14 @@ export default class Previewer {
           continue;
         }
       }
-      if (/^(class|id|href|rel|target|src|title|controls|align|width|height|style)$/i.test(name)) {
+      if (/^(class|id|href|rel|target|src|title|controls|align|width|height|style|open)$/i.test(name)) {
         name = name === 'class' ? 'className' : name;
         if (name === 'style') {
           ret.style = ret.style ? ret.style : [];
           ret.style.push(value);
+        } else if (name === 'open') {
+          // 只要有open这个属性，就一定是true
+          ret[name] = true;
         } else {
           ret[name] = value;
         }
