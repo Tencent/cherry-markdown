@@ -105,3 +105,33 @@ export function exportScreenShot(previeweDom) {
     });
   });
 }
+
+/**
+ * 导出 markdown 文件
+ * @param {String} markdownText markdown文本
+ */
+export function exportMarkdownFile(markdownText) {
+  const blob = new Blob([markdownText], { type: 'text/markdown;charset=utf-8' });
+  const aLink = document.createElement('a');
+  aLink.style.display = 'none';
+  aLink.href = URL.createObjectURL(blob);
+  aLink.download = 'cherry.md';
+  document.body.appendChild(aLink);
+  aLink.click();
+  document.body.removeChild(aLink);
+}
+
+/**
+ * 导出预览区 HTML 文件
+ * @param {String} HTMLText HTML文本
+ */
+export function exportHTMLFile(HTMLText) {
+  const blob = new Blob([HTMLText], { type: 'text/markdown;charset=utf-8' });
+  const aLink = document.createElement('a');
+  aLink.style.display = 'none';
+  aLink.href = URL.createObjectURL(blob);
+  aLink.download = 'cherry.html';
+  document.body.appendChild(aLink);
+  aLink.click();
+  document.body.removeChild(aLink);
+}

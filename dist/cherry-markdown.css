@@ -34,6 +34,18 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.ch-icon-danger:before {
+  content: "\ea68";
+}
+
+.ch-icon-info:before {
+  content: "\ea69";
+}
+
+.ch-icon-primary:before {
+  content: "\ea6a";
+}
+
 .ch-icon-list:before {
   content: "\ea03";
 }
@@ -290,6 +302,66 @@
   content: "\ea59";
 }
 
+.ch-icon-create:before {
+  content: "\ea5a";
+}
+
+.ch-icon-download:before {
+  content: "\ea5b";
+}
+
+.ch-icon-edit:before {
+  content: "\ea5c";
+}
+
+.ch-icon-export:before {
+  content: "\ea5d";
+}
+
+.ch-icon-folder-open:before {
+  content: "\ea5e";
+}
+
+.ch-icon-folder:before {
+  content: "\ea5f";
+}
+
+.ch-icon-help:before {
+  content: "\ea60";
+}
+
+.ch-icon-pen-fill:before {
+  content: "\ea61";
+}
+
+.ch-icon-pen:before {
+  content: "\ea62";
+}
+
+.ch-icon-search:before {
+  content: "\ea63";
+}
+
+.ch-icon-tips:before {
+  content: "\ea64";
+}
+
+.ch-icon-warn:before {
+  content: "\ea65";
+}
+
+.ch-icon-mistake:before {
+  content: "\ea66";
+}
+
+.ch-icon-success:before {
+  content: "\ea67";
+}
+
+.ch-icon-warning:before {
+  content: "\ea6b";
+}
+
 .cherry-markdown {
   word-break: break-all;
   /* Specify class=linenums on a pre to get line numbering */
@@ -440,8 +512,22 @@
 .cherry-markdown table th {
   background-color: #eee;
 }
+.cherry-markdown .link-quote {
+  color: #3582fb;
+}
 .cherry-markdown a {
   color: #3582fb;
+  position: relative;
+  text-decoration: none;
+}
+.cherry-markdown a[target=_blank] {
+  padding: 0 2px;
+}
+.cherry-markdown a[target=_blank]::after {
+  content: "\ea10";
+  font-size: 12px;
+  font-family: "ch-icon";
+  margin: 0 2px;
 }
 .cherry-markdown a:hover {
   color: #056bad;
@@ -687,7 +773,12 @@
 .cherry-markdown.head-num {
   counter-reset: level1;
 }
-.cherry-markdown.head-num h1 .anchor:before, .cherry-markdown.head-num h2 .anchor:before, .cherry-markdown.head-num h3 .anchor:before, .cherry-markdown.head-num h4 .anchor:before, .cherry-markdown.head-num h5 .anchor:before, .cherry-markdown.head-num h6 .anchor:before {
+.cherry-markdown.head-num h1 .anchor:before,
+.cherry-markdown.head-num h2 .anchor:before,
+.cherry-markdown.head-num h3 .anchor:before,
+.cherry-markdown.head-num h4 .anchor:before,
+.cherry-markdown.head-num h5 .anchor:before,
+.cherry-markdown.head-num h6 .anchor:before {
   width: auto;
   font-size: inherit;
   vertical-align: inherit;
@@ -1809,6 +1900,81 @@ div[data-type=codeBlock] .token.inserted {
   cursor: help;
 }
 
+.cherry-panel {
+  margin: 10px 0;
+  overflow: hidden;
+  border-radius: 8px;
+  box-sizing: border-box;
+  border: 0.5px solid;
+}
+.cherry-panel .cherry-panel--title {
+  color: #fff;
+  padding: 5px 20px;
+}
+.cherry-panel .cherry-panel--title.cherry-panel--title__not-empty::before {
+  font-family: "ch-icon";
+  margin: 0 12px 0 -6px;
+  vertical-align: bottom;
+}
+.cherry-panel .cherry-panel--body {
+  padding: 5px 20px;
+}
+
+.cherry-panel__primary {
+  background-color: #cfe2ff;
+  color: #0a58ca;
+}
+.cherry-panel__primary .cherry-panel--title {
+  background-color: #0d6dfe;
+}
+.cherry-panel__primary .cherry-panel--title.cherry-panel--title__not-empty::before {
+  content: "\ea6a";
+}
+
+.cherry-panel__info {
+  background-color: #cff4fc;
+  color: #087990;
+}
+.cherry-panel__info .cherry-panel--title {
+  background-color: #099cba;
+}
+.cherry-panel__info .cherry-panel--title.cherry-panel--title__not-empty::before {
+  content: "\ea69";
+}
+
+.cherry-panel__warning {
+  background-color: #fff3cd;
+  color: #997404;
+}
+.cherry-panel__warning .cherry-panel--title {
+  background-color: #b38806;
+}
+.cherry-panel__warning .cherry-panel--title.cherry-panel--title__not-empty::before {
+  content: "\ea6b";
+}
+
+.cherry-panel__danger {
+  background-color: #f8d7da;
+  color: #b02a37;
+}
+.cherry-panel__danger .cherry-panel--title {
+  background-color: #dc3545;
+}
+.cherry-panel__danger .cherry-panel--title.cherry-panel--title__not-empty::before {
+  content: "\ea68";
+}
+
+.cherry-panel__success {
+  background-color: #d1e7dd;
+  color: #146c43;
+}
+.cherry-panel__success .cherry-panel--title {
+  background-color: #198754;
+}
+.cherry-panel__success .cherry-panel--title.cherry-panel--title__not-empty::before {
+  content: "\ea67";
+}
+
 .cherry .doing-resize-img {
   -moz-user-select: none;
   -webkit-user-select: none;
@@ -1962,7 +2128,7 @@ div[data-type=codeBlock] .token.inserted {
 }
 .cherry .cherry-insert-table-menu {
   display: block;
-  position: absolute;
+  position: fixed;
   top: 40px;
   left: 40px;
   border-collapse: separate;
@@ -2418,7 +2584,7 @@ div[data-type=codeBlock] .token.inserted {
 }
 
 .cherry-previewer {
-  padding: 20px 34px;
+  padding: 20px 45px 20px 20px;
   border-left: 2px solid #ebedee;
   width: 50%;
   box-sizing: border-box;

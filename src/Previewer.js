@@ -22,7 +22,7 @@ import Logger from './Logger';
 import Event from './Event';
 // import locale from './utils/locale';
 import { addEvent, removeEvent } from './utils/event';
-import { exportPDF, exportScreenShot } from './utils/export';
+import { exportPDF, exportScreenShot, exportMarkdownFile, exportHTMLFile } from './utils/export';
 import PreviewerBubble from './toolbars/PreviewerBubble';
 import LazyLoadImg from '@/utils/lazyLoadImg';
 
@@ -875,8 +875,12 @@ export default class Previewer {
   export(type = 'pdf') {
     if (type === 'pdf') {
       exportPDF(this.getDomContainer());
-    } else {
+    } else if (type === 'screenShot') {
       exportScreenShot(this.getDomContainer());
+    } else if (type === 'markdown') {
+      exportMarkdownFile(this.$cherry.getMarkdown());
+    } else if (type === 'html') {
+      exportHTMLFile(this.getValue());
     }
   }
 }
