@@ -12,6 +12,6 @@
   "author": "big joe",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^16.0.6"
+    "electron": "^18.3.7"
   }
 }
