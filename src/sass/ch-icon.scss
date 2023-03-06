@@ -20,6 +20,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.ch-icon-danger:before { content: "\EA68" }
+.ch-icon-info:before { content: "\EA69" }
+.ch-icon-primary:before { content: "\EA6A" }
 .ch-icon-list:before { content: "\EA03" }
 .ch-icon-check:before { content: "\EA04" }
 .ch-icon-square:before { content: "\EA09" }
@@ -96,3 +99,6 @@
 .ch-icon-search:before { content: "\EA63" }
 .ch-icon-tips:before { content: "\EA64" }
 .ch-icon-warn:before { content: "\EA65" }
+.ch-icon-mistake:before { content: "\EA66" }
+.ch-icon-success:before { content: "\EA67" }
+.ch-icon-warning:before { content: "\EA6B" }

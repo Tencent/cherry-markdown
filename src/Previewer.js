@@ -22,7 +22,7 @@ import Logger from './Logger';
 import Event from './Event';
 // import locale from './utils/locale';
 import { addEvent, removeEvent } from './utils/event';
-import { exportPDF, exportScreenShot } from './utils/export';
+import { exportPDF, exportScreenShot, exportMarkdownFile, exportHTMLFile } from './utils/export';
 import PreviewerBubble from './toolbars/PreviewerBubble';
 import LazyLoadImg from '@/utils/lazyLoadImg';
 
@@ -381,7 +381,8 @@ export default class Previewer {
         this.editor.scrollToLineNum(0, 0, 1);
         return;
       }
-      if (domContainer.scrollTop + domContainer.offsetHeight > domContainer.scrollHeight) {
+      // 判定预览区域是否滚动到底部的逻辑，增加10px的冗余
+      if (domContainer.scrollTop + domContainer.offsetHeight + 10 > domContainer.scrollHeight) {
         this.editor.scrollToLineNum(null);
         return;
       }
@@ -495,11 +496,14 @@ export default class Previewer {
           continue;
         }
       }
-      if (/^(class|id|href|rel|target|src|title|controls|align|width|height|style)$/i.test(name)) {
+      if (/^(class|id|href|rel|target|src|title|controls|align|width|height|style|open)$/i.test(name)) {
         name = name === 'class' ? 'className' : name;
         if (name === 'style') {
           ret.style = ret.style ? ret.style : [];
           ret.style.push(value);
+        } else if (name === 'open') {
+          // 只要有open这个属性，就一定是true
+          ret[name] = true;
         } else {
           ret[name] = value;
         }
@@ -871,8 +875,12 @@ export default class Previewer {
   export(type = 'pdf') {
     if (type === 'pdf') {
       exportPDF(this.getDomContainer());
-    } else {
+    } else if (type === 'screenShot') {
       exportScreenShot(this.getDomContainer());
+    } else if (type === 'markdown') {
+      exportMarkdownFile(this.$cherry.getMarkdown());
+    } else if (type === 'html') {
+      exportHTMLFile(this.getValue());
     }
   }
 }

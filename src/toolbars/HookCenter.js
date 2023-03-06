@@ -65,6 +65,8 @@ import Theme from './hooks/Theme';
 // Sidebar
 import MobilePreview from './hooks/MobilePreview';
 import Copy from './hooks/Copy';
+import Panel from './hooks/Panel';
+import Detail from './hooks/Detail';
 
 // 定义默认支持的工具栏
 // 目前不支持按需动态加载
@@ -118,6 +120,8 @@ const HookList = {
   ruby: Ruby,
   theme: Theme,
   file: File,
+  panel: Panel,
+  detail: Detail,
 };
 
 export default class HookCenter {

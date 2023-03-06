@@ -481,9 +481,12 @@ export default class Cherry extends CherryStatic {
       (this.options.engine.syntax.header && this.options.engine.syntax.header.anchorStyle) || 'default';
     const autonumberClass = anchorStyle === 'autonumber' ? ' head-num' : '';
     const { className, dom, enablePreviewerBubble } = this.options.previewer;
-    const previewerClassName = ['cherry-previewer', className || '', autonumberClass, getThemeFromLocal(true)].join(
-      ' ',
-    );
+    const previewerClassName = [
+      'cherry-previewer cherry-markdown',
+      className || '',
+      autonumberClass,
+      getThemeFromLocal(true),
+    ].join(' ');
     if (dom) {
       previewer = dom;
       previewer.className += ` ${previewerClassName}`;

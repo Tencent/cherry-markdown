@@ -219,6 +219,8 @@ const defaultConfig = {
       'ruby',
       '|',
       'list',
+      'panel',
+      'detail',
       {
         insert: [
           'image',
