@@ -213,7 +213,36 @@ export function getPanelRule() {
   const ret = {
     begin: /(?:^|\n)(\n*(?:[^\S\n]*)):::([^:\n\s]+?)\s*\n/,
     content: /([\w\W]*?)/,
-    end: /[^\S\n]*:::[ \t]*(?=$|\n+)/,
+    end: /\n[ \t]*:::[ \t]*(?=$|\n+)/,
+  };
+  ret.reg = new RegExp(ret.begin.source + ret.content.source + ret.end.source, 'g');
+  return ret;
+}
+
+/**
+ * 手风琴/detail语法的识别正则
+ * 例：
+ * +++(+|-)
+ * 点击查看详情
+ * :
+ * body
+ * body
+ * +-
+ * 标题（默认收起内容）
+ * :
+ * 内容
+ * ++
+ * 标题（默认展开内容）
+ * :
+ * 内容2
+ * +++
+ * @returns {object}
+ */
+export function getDetailRule() {
+  const ret = {
+    begin: /(?:^|\n)(\n*(?:[^\S\n]*))\+\+\+(\+|-)\s*\n/,
+    content: /([\w\W]+?\n:\n[\w\W]+?)/,
+    end: /\n[ \t]*\+\+\+[ \t]*(?=$|\n+)/,
   };
   ret.reg = new RegExp(ret.begin.source + ret.content.source + ret.end.source, 'g');
   return ret;

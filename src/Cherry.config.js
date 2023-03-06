@@ -220,6 +220,7 @@ const defaultConfig = {
       '|',
       'list',
       'panel',
+      'detail',
       {
         insert: [
           'image',

@@ -83,4 +83,7 @@ export default {
   exportHTMLFile: '导出html', // 导出预览区html文件
   theme: '主题', // 导出长图
   panel: '面板', // 导出长图
+  theme: '主题', // 主题
+  panel: '面板', // 面板
+  detail: '手风琴', // 手风琴
 };
