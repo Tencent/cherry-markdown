@@ -79,4 +79,9 @@ export default {
   hide: '隐藏(ctrl+0)', // 隐藏(ctrl+0)
   exportToPdf: '导出PDF', // 导出PDF
   exportScreenshot: '导出长图', // 导出长图
+  exportMarkdownFile: '导出markdown', // 导出markdown文件
+  exportHTMLFile: '导出html', // 导出预览区html文件
+  theme: '主题', // 导出长图
+  panel: '面板', // 导出长图
+  detail: '手风琴', // 手风琴
 };
