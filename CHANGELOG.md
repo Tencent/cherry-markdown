@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.15](https://github.com/Tencent/cherry-markdown/compare/v0.8.14...v0.8.15) (2023-03-06)
+
+
+### Features
+
+* 客户端增加关闭提醒和导出markdown/HTML文件功能 ([#399](https://github.com/Tencent/cherry-markdown/issues/399)) ([520eb00](https://github.com/Tencent/cherry-markdown/commit/520eb001e476c4ded2c25378ffc0d715da11f82f))
+* 优化信息面板标题的背景色值 ([318740e](https://github.com/Tencent/cherry-markdown/commit/318740e5859b75f34efa1e176d192c8d9e25edfd))
+* 增加手风琴语法和对应的按钮；fix: 修复换行、列表语法占位符没有行号信息的问题 ([e21cc35](https://github.com/Tencent/cherry-markdown/commit/e21cc35f180aaffafd2c86d08266f33f485bfad3))
+* 增加信息面板语法和对应的按钮 ([fc7bc1f](https://github.com/Tencent/cherry-markdown/commit/fc7bc1f536022750971563cf7a99e27f77cb629e))
+
+
+### Bug Fixes
+
+* [#396](https://github.com/Tencent/cherry-markdown/issues/396) ([07ebfd5](https://github.com/Tencent/cherry-markdown/commit/07ebfd55edb12b93f1e6f50385bf89d2a16f864b))
+* 修复翻译 ([4be5d37](https://github.com/Tencent/cherry-markdown/commit/4be5d37d8d7fe121a37dfb4cc64bf73fc9ab9b9e))
+
 ### [0.8.14](https://github.com/Tencent/cherry-markdown/compare/v0.8.13...v0.8.14) (2023-02-21)
 
 
