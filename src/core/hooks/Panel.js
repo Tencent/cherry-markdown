@@ -16,6 +16,7 @@
 import ParagraphBase from '@/core/ParagraphBase';
 import { prependLineFeedForParagraph } from '@/utils/lineFeed';
 import { getPanelRule } from '@/utils/regexp';
+import { blockNames } from '@/utils/sanitize';
 /**
  * 面板语法
  * 例：
@@ -60,7 +61,27 @@ export default class Panel extends ParagraphBase {
     ret.title = `<div class="cherry-panel--title ${ret.title ? 'cherry-panel--title__not-empty' : ''}">${
       ret.title
     }</div>`;
-    ret.body = `<div class="cherry-panel--body">${this.$cleanParagraph(sentenceMakeFunc(ret.body).html)}</div>`;
+    const paragraphProcessor = (str) => {
+      if (str.trim() === '') {
+        return '';
+      }
+      // 调用行内语法，获得段落的签名和对应html内容
+      const { html } = sentenceMakeFunc(str);
+      let domName = 'p';
+      // 如果包含html块级标签（比如div、blockquote等），则当前段落外层用div包裹，反之用p包裹
+      const isContainBlockTest = new RegExp(`<(${blockNames})[^>]*>`, 'i');
+      if (isContainBlockTest.test(html)) {
+        domName = 'div';
+      }
+      return `<${domName}>${this.$cleanParagraph(html)}</${domName}>`;
+    };
+    let $body = '';
+    if (this.isContainsCache(ret.body)) {
+      $body = this.makeExcludingCached(ret.body, paragraphProcessor);
+    } else {
+      $body = paragraphProcessor(ret.body);
+    }
+    ret.body = `<div class="cherry-panel--body">${$body}</div>`;
     return ret;
   }
 
