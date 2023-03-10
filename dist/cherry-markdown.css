@@ -1900,6 +1900,36 @@ div[data-type=codeBlock] .token.inserted {
   cursor: help;
 }
 
+.cherry-detail details {
+  background: rgba(248, 249, 250, 0.6666666667);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.cherry-detail details summary {
+  user-select: none;
+  padding: 5px 10px;
+  background-color: #6c757d;
+  color: #FFF;
+  border-radius: 8px;
+}
+.cherry-detail details .cherry-detail-body {
+  padding: 15px 25px 0 25px;
+}
+
+.cherry-detail__multiple {
+  border-radius: 8px;
+  overflow: hidden;
+}
+.cherry-detail__multiple details {
+  margin-bottom: 1px;
+  border-radius: 0;
+  border: none;
+}
+.cherry-detail__multiple details summary {
+  border-radius: 0;
+}
+
 .cherry-panel {
   margin: 10px 0;
   overflow: hidden;
