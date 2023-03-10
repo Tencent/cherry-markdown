@@ -159,8 +159,8 @@ export default class Toolbar {
   toggleSubMenu(name) {
     if (!this.subMenus[name]) {
       // 如果没有二级菜单，则先画出来，然后再显示
-      this.drawSubMenus(name);
       this.hideAllSubMenu();
+      this.drawSubMenus(name);
       this.subMenus[name].style.display = 'block';
       return;
     }
