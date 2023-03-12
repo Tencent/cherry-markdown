@@ -211,7 +211,7 @@ export function getListFromStr(selection, type) {
  */
 export function getPanelRule() {
   const ret = {
-    begin: /(?:^|\n)(\n*(?:[^\S\n]*)):::([^:\n\s]+?)\s*\n/,
+    begin: /(?:^|\n)(\n*(?:[^\S\n]*)):::([^:][^\n]+?)\s*\n/,
     content: /([\w\W]*?)/,
     end: /\n[ \t]*:::[ \t]*(?=$|\n+)/,
   };
@@ -222,26 +222,20 @@ export function getPanelRule() {
 /**
  * 手风琴/detail语法的识别正则
  * 例：
- * +++(+|-)
- * 点击查看详情
- * :
+ * +++(-) 点击查看详情
  * body
  * body
- * +-
- * 标题（默认收起内容）
- * :
+ * ++ 标题（默认收起内容）
  * 内容
- * ++
- * 标题（默认展开内容）
- * :
+ * ++- 标题（默认展开内容）
  * 内容2
  * +++
  * @returns {object}
  */
 export function getDetailRule() {
   const ret = {
-    begin: /(?:^|\n)(\n*(?:[^\S\n]*))\+\+\+(\+|-)\s*\n/,
-    content: /([\w\W]+?\n:\n[\w\W]+?)/,
+    begin: /(?:^|\n)(\n*(?:[^\S\n]*))\+\+\+([-]{0,1})\s+([^\n]+)\n/,
+    content: /([\w\W]+?)/,
     end: /\n[ \t]*\+\+\+[ \t]*(?=$|\n+)/,
   };
   ret.reg = new RegExp(ret.begin.source + ret.content.source + ret.end.source, 'g');
