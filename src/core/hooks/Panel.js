@@ -53,11 +53,7 @@ export default class Panel extends ParagraphBase {
   }
 
   $getPanelInfo(name, str, sentenceMakeFunc) {
-    const ret = { type: this.$getTargetType(name), title: '', body: str };
-    str.replace(/^([^\n]+)\n\s*:\s*\n([\w\W]+)$/, (match, title, body) => {
-      ret.title = sentenceMakeFunc(title).html;
-      ret.body = body;
-    });
+    const ret = { type: this.$getTargetType(name), title: sentenceMakeFunc(this.$getTitle(name)).html, body: str };
     ret.title = `<div class="cherry-panel--title ${ret.title ? 'cherry-panel--title__not-empty' : ''}">${
       ret.title
     }</div>`;
@@ -85,8 +81,14 @@ export default class Panel extends ParagraphBase {
     return ret;
   }
 
+  $getTitle(name) {
+    const $name = name.trim();
+    return /\s/.test($name) ? $name.replace(/[^\s]+\s/, '') : '';
+  }
+
   $getTargetType(name) {
-    switch (name.toLowerCase()) {
+    const $name = /\s/.test(name.trim()) ? name.trim().replace(/\s.*$/, '') : name;
+    switch ($name.trim().toLowerCase()) {
       case 'primary':
       case 'p':
         return 'primary';
