@@ -19,18 +19,12 @@ import { getDetailRule } from '@/utils/regexp';
 import { blockNames } from '@/utils/sanitize';
 
 /**
- * +++(+|-)
- * 点击查看详情
- * :
+ * +++(-) 点击查看详情
  * body
  * body
- * +-
- * 标题（默认收起内容）
- * :
+ * ++ 标题（默认收起内容）
  * 内容
- * ++
- * 标题（默认展开内容）
- * :
+ * ++- 标题（默认展开内容）
  * 内容2
  * +++
  */
@@ -42,10 +36,10 @@ export default class Detail extends ParagraphBase {
   }
 
   makeHtml(str, sentenceMakeFunc) {
-    return str.replace(this.RULE.reg, (match, preLines, isShow, content) => {
+    return str.replace(this.RULE.reg, (match, preLines, isOpen, title, content) => {
       const lineCount = this.getLineCount(match, preLines);
       const sign = this.$engine.md5(match);
-      const { type, html } = this.$getDetailInfo(isShow, content, sentenceMakeFunc);
+      const { type, html } = this.$getDetailInfo(isOpen, title, content, sentenceMakeFunc);
       const ret = this.pushCache(
         `<div class="cherry-detail cherry-detail__${type}" data-sign="${sign}" data-lines="${lineCount}" >${html}</div>`,
         sign,
@@ -55,27 +49,29 @@ export default class Detail extends ParagraphBase {
     });
   }
 
-  $getDetailInfo(isShow, str, sentenceMakeFunc) {
-    const type = /\n\s*(\+\+|\+-)\s*\n/.test(str) ? 'multiple' : 'single';
-    const arr = str.split(/\n\s*(\+\+|\+-)\s*\n/);
-    let defaultShow = isShow !== '+';
+  $getDetailInfo(isOpen, title, str, sentenceMakeFunc) {
+    const type = /\n\s*(\+\+|\+\+-)\s*[^\n]+\n/.test(str) ? 'multiple' : 'single';
+    const arr = str.split(/\n\s*(\+\+[-]{0,1}\s*[^\n]+)\n/);
+    let defaultOpen = isOpen === '-';
+    let currentTitle = title;
     let html = '';
     if (type === 'multiple') {
       arr.forEach((item) => {
-        if (/(\+\+|\+-)/.test(item)) {
-          defaultShow = item !== '++';
+        if (/\+\+/.test(item)) {
+          defaultOpen = /\+\+-/.test(item);
+          currentTitle = item.replace(/\+\+[-]{0,1}\s*([^\n]+)$/, '$1');
           return true;
         }
-        html += this.$getDetailHtml(defaultShow, item, sentenceMakeFunc);
+        html += this.$getDetailHtml(defaultOpen, currentTitle, item, sentenceMakeFunc);
       });
     } else {
-      html = this.$getDetailHtml(defaultShow, str, sentenceMakeFunc);
+      html = this.$getDetailHtml(defaultOpen, currentTitle, str, sentenceMakeFunc);
     }
     return { type, html };
   }
 
-  $getDetailHtml(defaultShow, str, sentenceMakeFunc) {
-    let ret = `<details ${defaultShow ? 'open' : ''}>`;
+  $getDetailHtml(defaultOpen, title, str, sentenceMakeFunc) {
+    let ret = `<details ${defaultOpen ? 'open' : ''}>`;
     const paragraphProcessor = (str) => {
       if (str.trim() === '') {
         return '';
@@ -90,16 +86,14 @@ export default class Detail extends ParagraphBase {
       }
       return `<${domName}>${this.$cleanParagraph(html)}</${domName}>`;
     };
-    str.replace(/(^[\w\W]+?)\n\s*:\s*\n([\w\W]+$)/, (match, title, body) => {
-      ret += `<summary>${sentenceMakeFunc(title).html}</summary>`;
-      let $body = '';
-      if (this.isContainsCache(body)) {
-        $body = this.makeExcludingCached(body, paragraphProcessor);
-      } else {
-        $body = paragraphProcessor(body);
-      }
-      ret += `<div class="cherry-detail-body">${$body}</div>`;
-    });
+    ret += `<summary>${sentenceMakeFunc(title).html}</summary>`;
+    let $body = '';
+    if (this.isContainsCache(str)) {
+      $body = this.makeExcludingCached(str, paragraphProcessor);
+    } else {
+      $body = paragraphProcessor(str);
+    }
+    ret += `<div class="cherry-detail-body">${$body}</div>`;
     ret += `</details>`;
     return ret;
   }
