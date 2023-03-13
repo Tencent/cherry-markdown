@@ -50,7 +50,7 @@ export default class Toolbar {
   init() {
     this.collectShortcutKey();
     this.collectToolbarHandler();
-    Event.on(this.instanceId, Event.Events.cleanAllSubMenus, () => this.hidAlleSubMenu());
+    Event.on(this.instanceId, Event.Events.cleanAllSubMenus, () => this.hideAllSubMenu());
   }
 
   previewOnly() {
@@ -130,13 +130,16 @@ export default class Toolbar {
     if (subMenuConfig.length > 0) {
       subMenuConfig.forEach((config) => {
         const btn = this.menus.hooks[name].createSubBtnByConfig(config);
-        btn.addEventListener('click', () => this.hidAlleSubMenu(), false);
+        btn.addEventListener('click', () => this.hideAllSubMenu(), false);
         this.subMenus[name].appendChild(btn);
       });
     }
     this.$cherry.wrapperDom.appendChild(this.subMenus[name]);
   }
 
+  /**
+   * 处理点击事件
+   */
   onClick(event, name, focusEvent = false) {
     const menu = this.menus.hooks[name];
     if (!menu) {
@@ -145,25 +148,36 @@ export default class Toolbar {
     if (this.isHasSubMenu(name) && !focusEvent) {
       this.toggleSubMenu(name);
     } else {
-      this.hidAlleSubMenu();
+      this.hideAllSubMenu();
       menu.fire(event, name);
     }
   }
 
+  /**
+   * 展开/收起二级菜单
+   */
   toggleSubMenu(name) {
-    this.hidAlleSubMenu(); // 切换前先隐藏所有的二级菜单，就不会出现首次点击的时候多个二级菜单的问题 add by ufec
-    if (this.subMenus[name]) {
-      const test = this.subMenus[name].style.display;
-      this.subMenus[name].style.display = test === 'none' ? 'block' : 'none';
-    } else {
+    if (!this.subMenus[name]) {
+      // 如果没有二级菜单，则先画出来，然后再显示
+      this.hideAllSubMenu();
       this.drawSubMenus(name);
+      this.subMenus[name].style.display = 'block';
+      return;
+    }
+    if (this.subMenus[name].style.display === 'none') {
+      // 如果是隐藏的，则先隐藏所有二级菜单，再显示当前二级菜单
+      this.hideAllSubMenu();
+      this.subMenus[name].style.display = 'block';
+    } else {
+      // 如果是显示的，则隐藏当前二级菜单
+      this.subMenus[name].style.display = 'none';
     }
   }
 
   /**
    * 隐藏所有的二级菜单
    */
-  hidAlleSubMenu() {
+  hideAllSubMenu() {
     this.$cherry.wrapperDom.querySelectorAll('.cherry-dropdown').forEach((dom) => {
       dom.style.display = 'none';
     });

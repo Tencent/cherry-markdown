@@ -34,11 +34,11 @@ export default class Detail extends MenuBase {
   onClick(selection) {
     let $selection =
       getSelection(this.editor.editor, selection, 'line', true) ||
-      '点击展开更多\n:\n内容\n+-\n默认展开\n:\n内容\n++\n默认收起\n:\n内容';
+      '点击展开更多\n内容\n++- 默认展开\n内容\n++ 默认收起\n内容';
     this.detailRule.lastIndex = 0;
     if (!this.detailRule.test($selection)) {
       // 如果没有命中手风琴语法，则尝试扩大选区
-      this.getMoreSelection('\n', '\n', () => {
+      this.getMoreSelection('+++ ', '\n', () => {
         const newSelection = this.editor.editor.getSelection();
         this.detailRule.lastIndex = 0;
         const isMatch = this.detailRule.test(newSelection);
@@ -52,13 +52,19 @@ export default class Detail extends MenuBase {
     if (this.detailRule.test($selection)) {
       // 如果命中了手风琴语法，则去掉手风琴语法
       this.detailRule.lastIndex = 0;
-      return $selection.replace(this.detailRule, (match, preLines, isShow, content) => {
-        return content;
+      return $selection.replace(this.detailRule, (match, preLines, isOpen, title, content) => {
+        return `${title}\n${content}`;
       });
     }
+    // 去掉开头的空格
+    $selection = $selection.replace(/^\s+/, '');
+    // 如果选中的内容不包含换行，则强制增加一个换行
+    if (!/\n/.test($selection)) {
+      $selection = `${$selection}\n${$selection}`;
+    }
     this.registerAfterClickCb(() => {
-      this.setLessSelection('\n', '\n');
+      this.setLessSelection('+++ ', '\n');
     });
-    return `++++\n${$selection}\n+++`.replace(/\n{2,}\+\+\+/g, '\n+++');
+    return `+++ ${$selection}\n+++`.replace(/\n{2,}\+\+\+/g, '\n+++');
   }
 }
