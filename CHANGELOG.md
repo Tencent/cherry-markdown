@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.16](https://github.com/Tencent/cherry-markdown/compare/v0.8.15...v0.8.16) (2023-03-13)
+
+
+### Features
+
+* 修改信息面板和手风琴语法 ([a7e1f96](https://github.com/Tencent/cherry-markdown/commit/a7e1f960944954c3d0b148b41f308988f0935289))
+
+
+### Bug Fixes
+
+* 改正了一处typo，并且修复了子菜单关闭逻辑的bug ([#410](https://github.com/Tencent/cherry-markdown/issues/410)) ([6ce02cf](https://github.com/Tencent/cherry-markdown/commit/6ce02cf1e2e0de7872a7b7fce5a85cdc6a376338))
+* 将之前的更新适配至electron客户端 ([#405](https://github.com/Tencent/cherry-markdown/issues/405)) ([d8774c6](https://github.com/Tencent/cherry-markdown/commit/d8774c652b4274ccb110e02603972cdac76e3048))
+
 ### [0.8.15](https://github.com/Tencent/cherry-markdown/compare/v0.8.14...v0.8.15) (2023-03-06)
 
 
