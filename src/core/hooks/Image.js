@@ -73,7 +73,7 @@ export default class Image extends SyntaxBase {
     this.RULE = this.rule(this.extendMedia);
   }
 
-  toHtml(match, leadingChar, alt, link, title, ref) {
+  toHtml(match, leadingChar, alt, link, title, ref, extendAttrs) {
     // console.log(match, alt, link, ref, title);
     const refType = typeof link === 'undefined' ? 'ref' : 'url';
     let attrs = '';
@@ -99,9 +99,12 @@ export default class Image extends SyntaxBase {
         srcProp = imgAttrs.srcProp || srcProp;
         srcValue = imgAttrs.src || link;
       }
+      const extendAttrStr = extendAttrs
+        ? extendAttrs.replace(/[{}]/g, '').replace(/([^=\s]+)=([^\s]+)/g, '$1="$2"')
+        : '';
       return `${leadingChar}<img ${srcProp}="${UrlCache.set(
         encodeURIOnce(this.urlProcessor(srcValue, 'image')),
-      )}" ${extent} ${style} ${classes} alt="${$e(alt || '')}"${attrs}/>`;
+      )}" ${extent} ${style} ${classes} alt="${$e(alt || '')}"${attrs} ${extendAttrStr}/>`;
     }
     // should never happen
     return match;
@@ -159,7 +162,7 @@ export default class Image extends SyntaxBase {
         }${NOT_ALL_WHITE_SPACES_INLINE})\\]` + // ?<ref> global ref
           ')',
       ].join(''),
-      end: '', // TODO: extend attrs e.g. {width=50 height=60}
+      end: '({[^{}]+?})?', // extend attrs e.g. {width=50 height=60}
     };
     if (extendMedia) {
       const extend = { ...ret };
