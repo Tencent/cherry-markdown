@@ -84,7 +84,7 @@ export default class Editor {
         keyMap: 'sublime',
       },
       toolbars: {},
-      onKeydown() {},
+      onKeydown: this.onKeydown,
       onChange() {},
       onFocus() {},
       onBlur() {},
@@ -105,6 +105,16 @@ export default class Editor {
     this.$cherry = this.options.$cherry;
     this.instanceId = this.$cherry.getInstanceId();
   }
+
+  /**
+   *
+   * @param {KeyboardEvent} e
+   * @param {CodeMirror.Editor} codemirror
+   */
+  onKeydown = (e, codemirror) => {
+    const { line: targetLine } = codemirror.getCursor();
+    this.previewer.highlightLine(targetLine + 1);
+  };
 
   /**
    *
@@ -278,7 +288,7 @@ export default class Editor {
     });
 
     editor.on('keydown', (codemirror, evt) => {
-      this.options.onKeydown(evt, codemirror);
+      this.onKeydown(evt, codemirror);
     });
 
     editor.on('paste', (codemirror, evt) => {
