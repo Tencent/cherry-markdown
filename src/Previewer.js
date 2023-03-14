@@ -766,6 +766,7 @@ export default class Previewer {
 
   afterUpdate() {
     this.options.afterUpdateCallBack.map((fn) => fn());
+    this.highlightLine(this.highlightLineNum);
   }
 
   registerAfterUpdate(fn) {
@@ -826,6 +827,37 @@ export default class Previewer {
   }
 
   /**
+   * 高亮预览区域对应的行
+   * @param {Number} lineNum
+   */
+  highlightLine(lineNum) {
+    if (lineNum === undefined) {
+      return;
+    }
+    const domContainer = this.getDomContainer();
+    const doms = /** @type {NodeListOf<HTMLElement>}*/ (domContainer.querySelectorAll('[data-sign]'));
+    // 先取消所有行的高亮效果
+    for (let index = 0; index < doms.length; index++) {
+      doms[index].classList.remove(`cherry-highlight-line`);
+    }
+    let lines = 0;
+    for (let index = 0; index < doms.length; index++) {
+      if (doms[index].parentNode !== domContainer) {
+        continue;
+      }
+      const blockLines = parseInt(doms[index].getAttribute('data-lines'), 10);
+      if (lines + blockLines < lineNum) {
+        lines += blockLines;
+        continue;
+      } else {
+        this.highlightLineNum = lineNum;
+        doms[index].classList.add(`cherry-highlight-line`);
+        return;
+      }
+    }
+  }
+
+  /**
    * 滚动到对应行号位置并加上偏移量
    * @param {Number} lineNum
    * @param {Number} offset
@@ -833,6 +865,7 @@ export default class Previewer {
   scrollToLineNumWithOffset(lineNum, offset) {
     const top = this.$getTopByLineNum(lineNum) - offset;
     this.$scrollAnimation(top);
+    this.highlightLine(lineNum);
   }
 
   /**
