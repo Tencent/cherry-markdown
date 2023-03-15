@@ -108,6 +108,16 @@ export default class Editor {
 
   /**
    *
+   * @param {KeyboardEvent} e
+   * @param {CodeMirror.Editor} codemirror
+   */
+  onKeyup = (e, codemirror) => {
+    const { line: targetLine } = codemirror.getCursor();
+    this.previewer.highlightLine(targetLine + 1);
+  };
+
+  /**
+   *
    * @param {ClipboardEvent} e
    * @param {CodeMirror.Editor} codemirror
    */
@@ -279,6 +289,10 @@ export default class Editor {
 
     editor.on('keydown', (codemirror, evt) => {
       this.options.onKeydown(evt, codemirror);
+    });
+
+    editor.on('keyup', (codemirror, evt) => {
+      this.onKeyup(evt, codemirror);
     });
 
     editor.on('paste', (codemirror, evt) => {
