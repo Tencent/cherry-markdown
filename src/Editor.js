@@ -84,7 +84,7 @@ export default class Editor {
         keyMap: 'sublime',
       },
       toolbars: {},
-      onKeydown: this.onKeydown,
+      onKeydown() {},
       onChange() {},
       onFocus() {},
       onBlur() {},
@@ -111,7 +111,7 @@ export default class Editor {
    * @param {KeyboardEvent} e
    * @param {CodeMirror.Editor} codemirror
    */
-  onKeydown = (e, codemirror) => {
+  onKeyup = (e, codemirror) => {
     const { line: targetLine } = codemirror.getCursor();
     this.previewer.highlightLine(targetLine + 1);
   };
@@ -288,7 +288,11 @@ export default class Editor {
     });
 
     editor.on('keydown', (codemirror, evt) => {
-      this.onKeydown(evt, codemirror);
+      this.options.onKeydown(evt, codemirror);
+    });
+
+    editor.on('keyup', (codemirror, evt) => {
+      this.onKeyup(evt, codemirror);
     });
 
     editor.on('paste', (codemirror, evt) => {

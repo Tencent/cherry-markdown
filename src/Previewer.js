@@ -766,6 +766,9 @@ export default class Previewer {
 
   afterUpdate() {
     this.options.afterUpdateCallBack.map((fn) => fn());
+    if (this.highlightLineNum === undefined) {
+      this.highlightLineNum = 0;
+    }
     this.highlightLine(this.highlightLineNum);
   }
 
@@ -831,9 +834,6 @@ export default class Previewer {
    * @param {Number} lineNum
    */
   highlightLine(lineNum) {
-    if (lineNum === undefined) {
-      return;
-    }
     const domContainer = this.getDomContainer();
     const doms = /** @type {NodeListOf<HTMLElement>}*/ (domContainer.querySelectorAll('[data-sign]'));
     // 先取消所有行的高亮效果
