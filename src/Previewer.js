@@ -837,9 +837,9 @@ export default class Previewer {
     const domContainer = this.getDomContainer();
     const doms = /** @type {NodeListOf<HTMLElement>}*/ (domContainer.querySelectorAll('[data-sign]'));
     // 先取消所有行的高亮效果
-    for (let index = 0; index < doms.length; index++) {
-      doms[index].classList.remove(`cherry-highlight-line`);
-    }
+    domContainer.querySelectorAll('.cherry-highlight-line').forEach((element) => {
+      element.classList.remove('cherry-highlight-line');
+    });
     let lines = 0;
     for (let index = 0; index < doms.length; index++) {
       if (doms[index].parentNode !== domContainer) {
