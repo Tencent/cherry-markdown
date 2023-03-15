@@ -2076,6 +2076,9 @@ div[data-type=codeBlock] .token.inserted {
   outline: 1px solid #3582fb;
   word-break: break-all;
 }
+.cherry .cherry-highlight-line {
+  background-color: #ffffcc;
+}
 
 @media print {
   img, figure, pre, table {
