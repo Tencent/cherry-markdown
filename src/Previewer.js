@@ -835,11 +835,11 @@ export default class Previewer {
    */
   highlightLine(lineNum) {
     const domContainer = this.getDomContainer();
-    const doms = /** @type {NodeListOf<HTMLElement>}*/ (domContainer.querySelectorAll('[data-sign]'));
     // 先取消所有行的高亮效果
     domContainer.querySelectorAll('.cherry-highlight-line').forEach((element) => {
       element.classList.remove('cherry-highlight-line');
     });
+    const doms = /** @type {NodeListOf<HTMLElement>}*/ (domContainer.querySelectorAll('[data-sign]'));
     let lines = 0;
     for (let index = 0; index < doms.length; index++) {
       if (doms[index].parentNode !== domContainer) {
@@ -851,7 +851,7 @@ export default class Previewer {
         continue;
       } else {
         this.highlightLineNum = lineNum;
-        doms[index].classList.add(`cherry-highlight-line`);
+        doms[index].classList.add('cherry-highlight-line');
         return;
       }
     }
