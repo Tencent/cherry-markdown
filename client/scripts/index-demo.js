@@ -74,6 +74,8 @@ var cherry = new Cherry({
       'color',
       'header',
       '|',
+      'drawIo',
+      '|',
       'list',
       {
         insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word'],

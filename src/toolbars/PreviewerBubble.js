@@ -16,8 +16,10 @@
 
 import imgSizeHander from '@/utils/imgSizeHander';
 import tableContentHander from '@/utils/tableContentHander';
+import { drawioDialog } from '@/utils/dialog';
 import Event from '@/Event';
 import { copyToClip } from '@/utils/copy';
+import { imgDrawioReg, getCodeBlockRule } from '@/utils/regexp';
 /**
  * 预览区域的响应式工具栏
  */
@@ -87,6 +89,19 @@ export default class PreviewerBubble {
         this.previewer.$cherry.options.callback.onClickPreview &&
           this.previewer.$cherry.options.callback.onClickPreview(e);
       }
+      return;
+    }
+
+    // 编辑draw.io不受enablePreviewerBubble配置的影响
+    if (target.tagName === 'IMG' && target.getAttribute('data-type') === 'drawio') {
+      if (!this.beginChangeDrawioImg(target)) {
+        return;
+      }
+      const xmlData = decodeURI(target.getAttribute('data-xml'));
+      drawioDialog(this.previewer.$cherry.options.drawioIframeUrl, xmlData, (newData) => {
+        const { xmlData, base64 } = newData;
+        this.editor.editor.replaceSelection(`(${base64}){data-type=drawio data-xml=${encodeURI(xmlData)}}`, 'around');
+      });
       return;
     }
 
@@ -172,38 +187,115 @@ export default class PreviewerBubble {
     return imgSizeHander;
   }
 
+  getValueWithoutCode() {
+    return this.editor.editor
+      .getValue()
+      .replace(getCodeBlockRule().reg, (whole) => {
+        // 把代码块里的内容干掉
+        return whole.replace(/^.*$/gm, '/n');
+      })
+      .replace(/(`+)(.+?(?:\n.+?)*?)\1/g, (whole) => {
+        // 把行内代码的符号去掉
+        return whole.replace(/[![\]()]/g, '.');
+      });
+  }
+
+  /**
+   * TODO: beginChangeDrawioImg 和 beginChangeImgValue 代码高度重合，后面有时间重构下，抽成一个可以复用的，可以避开代码块、行内代码影响的通用方法
+   * 修改draw.io图片时选中编辑区域的对应文本
+   * @param {*} htmlElement 图片node
+   */
+  beginChangeDrawioImg(htmlElement) {
+    const allDrawioImgs = Array.from(this.previewerDom.querySelectorAll('img[data-type="drawio"]'));
+    const totalDrawioImgs = allDrawioImgs.length;
+    const drawioImgIndex = allDrawioImgs.indexOf(htmlElement);
+    const content = this.getValueWithoutCode();
+    const drawioImgsCode = content.match(imgDrawioReg);
+    const testSrc = drawioImgsCode[drawioImgIndex]
+      ? drawioImgsCode[drawioImgIndex].replace(/^!\[.*?\]\((.*?)\)/, '$1').trim()
+      : '';
+    if (drawioImgsCode.length === totalDrawioImgs || htmlElement.getAttribute('src') === testSrc) {
+      // 如果drawio语法数量和预览区域的一样多
+      const totalValue = content.split(imgDrawioReg);
+      let line = 0;
+      let beginCh = 0;
+      let endCh = 0;
+      let testIndex = 0;
+      for (let i = 0; i < totalValue.length; i++) {
+        const targetString = totalValue[i];
+        if (targetString === drawioImgsCode[testIndex]) {
+          // 如果找到目标代码
+          if (testIndex === drawioImgIndex) {
+            endCh = beginCh + targetString.length;
+            beginCh += targetString.replace(/^(!\[[^\]]*])[^\n]*$/, '$1').length;
+            this.editor.editor.setSelection({ line, ch: beginCh }, { line, ch: endCh });
+            // 更新后需要再调用一次markText机制
+            this.editor.dealBigData();
+            return true;
+          }
+          testIndex += 1;
+        } else {
+          line += targetString.match(/\n/g)?.length ?? 0;
+          if (/\n/.test(targetString)) {
+            // 如果有换行，则开始位置的字符计数从最后一个换行开始计数
+            beginCh = targetString.replace(/^[\w\W]*\n([^\n]*)$/, '$1').length;
+          } else {
+            // 如果没有换行，则继续按上次的beginCh为起始开始计数
+            beginCh += targetString.length;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * 选中图片对应的MD语法
+   * @param {*} htmlElement 图片node
+   * @returns {boolean}
+   */
   beginChangeImgValue(htmlElement) {
-    const content = this.editor.editor.getValue();
+    const content = this.getValueWithoutCode();
     const src = htmlElement.getAttribute('src');
-    const imgReg = /!\[[^\n]*?\](\([^)]+\)|\[[^\]]+\])/g;
+    const imgReg = /(!\[[^\n]*?\]\([^)]+\))/g;
     const contentImgs = content.match(imgReg);
     const testSrc = contentImgs[this.imgIndex]
       ? contentImgs[this.imgIndex].replace(/^!\[.*?\]\((.*?)\)/, '$1').trim()
       : '';
     if (contentImgs.length === this.totalImgs || src === testSrc) {
       // 如果图片语法数量和预览区域的一样多
-      // 暂时不需要考虑代码块和手动输入img标签的场景
-      const searcher = this.editor.editor.getSearchCursor(imgReg);
-      let targetSearch;
-      for (let i = 0; i <= this.imgIndex; i++) {
-        targetSearch = searcher.findNext()?.[0] ?? false;
-      }
-      const targetFrom = searcher.from();
-      if (!targetFrom) {
-        return false;
-      }
-      const targetLine = targetFrom.line;
+      // 暂时不需要考虑手动输入img标签的场景 和 引用图片的场景
+      const totalValue = content.split(imgReg);
       const imgAppendReg =
         /^!\[.*?((?:#center|#right|#left|#float-right|#float-left|#border|#B|#shadow|#S|#radius|#R)+).*?\].*$/;
-      this.imgAppend = imgAppendReg.test(targetSearch) ? targetSearch.replace(imgAppendReg, '$1') : false;
-      const targetChFrom = targetFrom.ch + targetSearch.replace(/^(!\[[^#\]]*).*$/, '$1').length;
-      const targetChTo = targetChFrom + targetSearch.replace(/^(!\[[^#\]]*)([^\]]*?)\].*$/, '$2').length;
-      this.editor.editor.setSelection({ line: targetLine, ch: targetChFrom }, { line: targetLine, ch: targetChTo });
-      return true;
+      let line = 0;
+      let beginCh = 0;
+      let endCh = 0;
+      let testIndex = 0;
+      for (let i = 0; i < totalValue.length; i++) {
+        const targetString = totalValue[i];
+        if (targetString === contentImgs[testIndex]) {
+          // 如果找到目标代码
+          if (testIndex === this.imgIndex) {
+            this.imgAppend = imgAppendReg.test(targetString) ? targetString.replace(imgAppendReg, '$1') : false;
+            beginCh += targetString.replace(/^(!\[[^#\]]*).*$/, '$1').length;
+            endCh = beginCh + targetString.replace(/^(!\[[^#\]]*)([^\]]*?)\].*$/, '$2').length;
+            this.editor.editor.setSelection({ line, ch: beginCh }, { line, ch: endCh });
+            return true;
+          }
+          testIndex += 1;
+        } else {
+          line += targetString.match(/\n/g)?.length ?? 0;
+          if (/\n/.test(targetString)) {
+            // 如果有换行，则开始位置的字符计数从最后一个换行开始计数
+            beginCh = targetString.replace(/^[\w\W]*\n([^\n]*)$/, '$1').length;
+          } else {
+            // 如果没有换行，则继续按上次的beginCh为起始开始计数
+            beginCh += targetString.length;
+          }
+        }
+      }
     }
-    // 有代码块、行内代码、手动输入img标签的场景
-    // 暂时不考虑
-
     return false;
   }
 
