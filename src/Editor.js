@@ -38,6 +38,8 @@ import { addEvent } from './utils/event';
 import Logger from '@/Logger';
 import Event from '@/Event';
 import { handelParams } from '@/utils/file';
+import { createElement } from './utils/dom';
+import { imgBase64Reg, imgDrawioXmlReg } from './utils/regexp';
 
 /**
  * @typedef {import('~types/editor').EditorConfiguration} EditorConfiguration
@@ -105,6 +107,50 @@ export default class Editor {
     this.$cherry = this.options.$cherry;
     this.instanceId = this.$cherry.getInstanceId();
   }
+
+  /**
+   * 处理draw.io的xml数据和图片的base64数据，对这种超大的数据增加省略号
+   */
+  dealBigData = () => {
+    if (this.noChange) {
+      this.noChange = false;
+      return;
+    }
+    this.formatBigData2Mark(imgBase64Reg, 'cm-url base64');
+    this.formatBigData2Mark(imgDrawioXmlReg, 'cm-url drawio');
+  };
+
+  /**
+   * 把大字符串变成省略号
+   * @param {*} reg 正则
+   * @param {*} className 利用codemirror的MarkText生成的新元素的class
+   */
+  formatBigData2Mark = (reg, className) => {
+    const codemirror = this.editor;
+    const searcher = codemirror.getSearchCursor(reg);
+
+    let oneSearch = searcher.findNext();
+    for (; oneSearch !== false; oneSearch = searcher.findNext()) {
+      const target = searcher.from();
+      if (!target) {
+        continue;
+      }
+      const bigString = oneSearch[2] ?? '';
+      const targetChFrom = target.ch + oneSearch[1]?.length;
+      const targetChTo = targetChFrom + bigString.length;
+      const targetLine = target.line;
+      const begin = { line: targetLine, ch: targetChFrom };
+      const end = { line: targetLine, ch: targetChTo };
+      // 如果所在区域已经有mark了，则不再增加mark
+      if (codemirror.findMarks(begin, end).length > 0) {
+        continue;
+      }
+      const newSpan = createElement('span', `cm-string ${className}`, { title: bigString });
+      newSpan.textContent = bigString;
+      this.noChange = true;
+      codemirror.markText(begin, end, { replacedWith: newSpan, atomic: true });
+    }
+  };
 
   /**
    *
@@ -285,6 +331,7 @@ export default class Editor {
 
     editor.on('change', (codemirror, evt) => {
       this.options.onChange(evt, codemirror);
+      this.dealBigData();
     });
 
     editor.on('keydown', (codemirror, evt) => {

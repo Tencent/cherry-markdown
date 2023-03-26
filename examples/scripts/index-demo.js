@@ -151,6 +151,8 @@ var basicConfig = {
       'color',
       'header',
       '|',
+      'drawIo',
+      '|',
       'ol',
       'ul',
       'checklist',
@@ -181,6 +183,7 @@ var basicConfig = {
       customMenuCName: customMenuC,
     },
   },
+  drawioIframeUrl: './drawio_demo.html',
   editor: {
     defaultModel: 'edit&preview',
   },

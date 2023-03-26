@@ -379,6 +379,18 @@
 
   .CodeMirror-lines {
     padding: 15px 34px;
+
+    // 对draw.io的xml数据，和图片里base64格式的数据限定最大宽度
+    .drawio, .base64 {
+      display: inline-block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 80px;
+      white-space: nowrap;
+      vertical-align: bottom;
+      color: darkmagenta !important;
+      font-size: 12px !important;
+    }
   }
 
   .cm-s-default .cm-header {

@@ -241,3 +241,15 @@ export function getDetailRule() {
   ret.reg = new RegExp(ret.begin.source + ret.content.source + ret.end.source, 'g');
   return ret;
 }
+
+// 匹配图片URL里的base64
+export const imgBase64Reg = /(!\[[^\n]*?\]\(data:image\/png;base64,)([^)]+)\)/g;
+
+// 匹配图片{}里的data-xml属性
+export const imgDrawioXmlReg = /(!\[[^\n]*?\]\([^)]+\)\{[^}]* data-xml=)([^}]+)\}/g;
+
+/**
+ * 匹配draw.io的图片语法
+ * 图片的语法为 ![alt](${base64}){data-type=drawio data-xml=${xml}}
+ */
+export const imgDrawioReg = /(!\[[^\n]*?\]\(data:image\/png;base64,[^)]+\)\{data-type=drawio data-xml=[^}]+\})/g;

@@ -246,6 +246,9 @@ const defaultConfig = {
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'quickTable', 'code'], // array or false
   },
+  // 打开draw.io编辑页的url，如果为空则drawio按钮失效
+  drawioIframeUrl: '',
+  // 上传文件的回调
   fileUpload: callbacks.fileUpload,
   /**
    * 上传文件的时候用来指定文件类型

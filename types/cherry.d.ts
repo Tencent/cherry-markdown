@@ -13,6 +13,8 @@ export interface CherryOptions {
   editor: CherryEditorOptions;
   /** 工具栏区域配置 */
   toolbars: CherryToolbarOptions;
+  // 打开draw.io编辑页的url，如果为空则drawio按钮失效
+  drawioIframeUrl: string;
   /** 文件上传回调 */
   fileUpload: CherryFileUploadHandler;
   /** 上传文件的时候用来指定文件类型 */
