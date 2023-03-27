@@ -34,18 +34,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.ch-icon-danger:before {
-  content: "\ea68";
-}
-
-.ch-icon-info:before {
-  content: "\ea69";
-}
-
-.ch-icon-primary:before {
-  content: "\ea6a";
-}
-
 .ch-icon-list:before {
   content: "\ea03";
 }
@@ -356,6 +344,18 @@
 
 .ch-icon-success:before {
   content: "\ea67";
+}
+
+.ch-icon-danger:before {
+  content: "\ea68";
+}
+
+.ch-icon-info:before {
+  content: "\ea69";
+}
+
+.ch-icon-primary:before {
+  content: "\ea6a";
 }
 
 .ch-icon-warning:before {
