@@ -180,6 +180,8 @@ export default class Cherry extends CherryStatic {
     });
     Event.on(this.instanceId, Event.Events.editorClose, () => {
       this.status.editor = 'hide';
+      // 关闭编辑区时，需要清除所有高亮
+      this.previewer.highlightLine(0);
     });
     Event.on(this.instanceId, Event.Events.editorOpen, () => {
       this.status.editor = 'show';
