@@ -143,9 +143,9 @@ class SuggesterPanel {
     this.cursorMove = true;
     this.suggesterConfig = {};
 
-    if (!this.$suggesterPanel && isBrowser()) {
-      document.body.appendChild(this.createDom(SuggesterPanel.panelWrap));
-      this.$suggesterPanel = document.querySelector('.cherry-suggester-panel');
+    if (!this.$suggesterPanel && isBrowser() && document) {
+      document?.body?.appendChild(this.createDom(SuggesterPanel.panelWrap));
+      this.$suggesterPanel = document?.querySelector('.cherry-suggester-panel');
     }
   }
 
@@ -255,7 +255,7 @@ class SuggesterPanel {
   }
 
   showsuggesterPanel({ left, top, items }) {
-    if (!this.$suggesterPanel) {
+    if (!this.$suggesterPanel && isBrowser()) {
       document.body.appendChild(this.createDom(SuggesterPanel.panelWrap));
       this.$suggesterPanel = document.querySelector('.cherry-suggester-panel');
     }
