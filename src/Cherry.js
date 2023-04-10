@@ -22,7 +22,7 @@ import FloatMenu from './toolbars/FloatMenu';
 import Toolbar from './toolbars/Toolbar';
 import { createElement } from './utils/dom';
 import Sidebar from './toolbars/Sidebar';
-import { customizer, getThemeFromLocal } from './utils/config';
+import { customizer, getThemeFromLocal, changeTheme } from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
 import getPosBydiffs from './utils/recount-pos';
 import defaultConfig from './Cherry.config';
@@ -180,6 +180,8 @@ export default class Cherry extends CherryStatic {
     });
     Event.on(this.instanceId, Event.Events.editorClose, () => {
       this.status.editor = 'hide';
+      // 关闭编辑区时，需要清除所有高亮
+      this.previewer.highlightLine(0);
     });
     Event.on(this.instanceId, Event.Events.editorOpen, () => {
       this.status.editor = 'show';
@@ -586,5 +588,13 @@ export default class Cherry extends CherryStatic {
    */
   export(type = 'pdf') {
     this.previewer.export(type);
+  }
+
+  /**
+   * 修改主题
+   * @param {string} theme option.theme里的className
+   */
+  setTheme(theme = 'default') {
+    changeTheme(this, theme);
   }
 }
