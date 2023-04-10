@@ -29,11 +29,16 @@ export default class FullScreen extends MenuBase {
    */
   onClick() {
     const cherryClass = this.editor.options.editorDom.parentElement.classList;
+    const cherryId = this.$cherry.cherryDom.id;
+    const cherryIdElement = document.getElementById(cherryId);
     if (cherryClass.contains('fullscreen')) {
       cherryClass.remove('fullscreen');
+      document.exitFullscreen();
     } else {
       cherryClass.add('fullscreen');
+      cherryIdElement.requestFullscreen().catch((err) => {
+        alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+      });
     }
-    this.editor.editor.refresh();
   }
 }
