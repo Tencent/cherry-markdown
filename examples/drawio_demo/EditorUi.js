@@ -2955,14 +2955,9 @@ EditorUi.prototype.initCanvas = function()
 					var ty = graph.view.translate.y;
 					graph.view.setTranslate(dx, dy);
 
-					//全屏，滚动条移至正中间
-                    if (parent.document.querySelector('#tdialog') && parent.document.querySelector('#tdialog').clientWidth === parent.document.body.clientWidth) {
-						graph.container.scrollLeft = document.body.clientWidth / 2;
-					} else {
-                        // LATER: Fix rounding errors for small zoom
-                        graph.container.scrollLeft += Math.round((dx - tx) * graph.view.scale);
-                        graph.container.scrollTop += Math.round((dy - ty) * graph.view.scale);
-                    }
+          // LATER: Fix rounding errors for small zoom
+          graph.container.scrollLeft += Math.round((dx - tx) * graph.view.scale);
+          graph.container.scrollTop += Math.round((dy - ty) * graph.view.scale);
 					this.autoTranslate = false;
 					
 					return;
