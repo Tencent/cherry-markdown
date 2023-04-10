@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.18](https://github.com/Tencent/cherry-markdown/compare/v0.8.16...v0.8.18) (2023-04-10)
+
+
+### Features
+
+* 对正在编辑的区域进行高亮 ([#413](https://github.com/Tencent/cherry-markdown/issues/413)) ([bac8173](https://github.com/Tencent/cherry-markdown/commit/bac8173dbad26c159bb179b7db18676e7c5614b4))
+* 图片语法增加花括号扩展能力 ([44d8063](https://github.com/Tencent/cherry-markdown/commit/44d806355db28afe067c1c21041058673d9c1bd5))
+* 增加插入draw.io功能；增加编辑draw.io机制；\n fix: 修复编辑图片尺寸时有可能受代码块语法影响的问题 ([e326b86](https://github.com/Tencent/cherry-markdown/commit/e326b86ddd85b680c34a5ca071a9d735a22c6148))
+* 增加设置主题的api ([681857f](https://github.com/Tencent/cherry-markdown/commit/681857f749e059290025e6bfd58fa37618473a4c))
+* 增加draw.io示例里的图形种类 ([2aba33b](https://github.com/Tencent/cherry-markdown/commit/2aba33ba68d77e381edb33f78bf54344a45f9402))
+
+
+### Bug Fixes
+
+* [#395](https://github.com/Tencent/cherry-markdown/issues/395) 尝试无脑修复，需要humyfred确认 ([1f30506](https://github.com/Tencent/cherry-markdown/commit/1f305062f753355ee579ae42e946aba3f950f57d))
+* 代码块逆解析成代码块语法时有多余的中括号产生 [#414](https://github.com/Tencent/cherry-markdown/issues/414) ([76acd94](https://github.com/Tencent/cherry-markdown/commit/76acd94450de761878832f06dcfbe89c3798c653))
+* 非双栏模式，或者从双栏模式切换到单栏模式时，需要去掉高亮光标对应预览区域的机制 ([6cb9821](https://github.com/Tencent/cherry-markdown/commit/6cb98216264a61034be5c68e1fe1f32703889328))
+* 删除多余逻辑 ([668993b](https://github.com/Tencent/cherry-markdown/commit/668993b7310fdd0485e517a77eec9b97c124a1d5))
+
 ### [0.8.16](https://github.com/Tencent/cherry-markdown/compare/v0.8.15...v0.8.16) (2023-03-13)
 
 
