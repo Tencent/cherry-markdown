@@ -839,6 +839,10 @@ export default class Previewer {
     domContainer.querySelectorAll('.cherry-highlight-line').forEach((element) => {
       element.classList.remove('cherry-highlight-line');
     });
+    // 只有双栏模式下才需要高亮光标对应的预览区域
+    if (this.$cherry?.status?.previewer !== 'show' || this.$cherry?.status?.editor !== 'show') {
+      return;
+    }
     const doms = /** @type {NodeListOf<HTMLElement>}*/ (domContainer.querySelectorAll('[data-sign]'));
     let lines = 0;
     for (let index = 0; index < doms.length; index++) {
