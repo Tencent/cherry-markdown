@@ -3,3 +3,5 @@ out
 node_modules
 .vscode-test/
 
+web-resources/scripts/global-vars.js
+

@@ -90,6 +90,7 @@ const getMarkdownFileInfo = () => {
  */
 const initCherryPanel = () => {
   const { mdInfo, currentTitle } = getMarkdownFileInfo();
+  const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath ?? '';
   cherryPanel = vscode.window.createWebviewPanel(
     'cherrymarkdown.preview',
     currentTitle,
@@ -97,6 +98,11 @@ const initCherryPanel = () => {
     {
       enableScripts: true,
       retainContextWhenHidden: true,
+      localResourceRoots: [
+        vscode.Uri.file(path.join(extensionPath, 'web-resources')),
+        vscode.Uri.file(path.join(extensionPath, 'dist')),
+        vscode.Uri.file(workspaceFolder),
+      ],
     }
   );
   cherryPanel.webview.html = getWebviewContent(mdInfo, cherryPanel, extensionPath);
