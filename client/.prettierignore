@@ -1,0 +1,8 @@
+# build/**
+dist/**
+public
+LICENSE
+dist-electron/**
+node_modules/**
+.*
+
