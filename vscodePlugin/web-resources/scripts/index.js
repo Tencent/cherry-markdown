@@ -1,4 +1,5 @@
 import 'mathjax/es5/tex-svg.js';
+import path from 'path-browserify';
 
 /**
  * 在侧边栏增加编辑/预览入口
@@ -204,8 +205,27 @@ const basicConfig = {
   callback: {
     // eslint-disable-next-line no-undef
     changeString2Pinyin: pinyin,
+    beforeImageMounted(srcProp, srcValue) {
+      if(isHttpUrl(srcValue) || isDataUrl(srcValue)) {
+        return {
+          src: srcValue,
+        };
+      }
+      const basePath = window._baseResourcePath || '';
+      return {
+        src: path.join(basePath, srcValue),
+      }
+    }
   },
 };
+
+function isDataUrl(url) {
+  return /^data:/.test(url);
+}
+
+function isHttpUrl(url) {
+  return /https?:\/\//.test(url);
+}
 
 const mdInfo = JSON.parse(document.getElementById('markdown-info').value);
 const config = Object.assign({}, basicConfig, { value: mdInfo.text });

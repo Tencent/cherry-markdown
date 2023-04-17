@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
 
 /**
  * 返回webview需要的html页面
@@ -9,7 +10,12 @@ import * as path from 'path';
  * @returns string
  */
 export function getWebviewContent(mdInfo: object, currentPanel: vscode.WebviewPanel, extensionPath: string) {
+  const baseResourcePath = getBaseResourcePath(currentPanel);
+  const filePath = writeGlobalVarsToFile(extensionPath, {
+    baseResourcePath,
+  });
   const pageResourceUrlsMap = {
+    'global-vars.js': currentPanel.webview.asWebviewUri(vscode.Uri.file(filePath)),
     'index.css': currentPanel.webview.asWebviewUri(vscode.Uri.file(path.join(extensionPath, 'web-resources/index.css'))),
     'cherry-markdown.css': currentPanel.webview.asWebviewUri(vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/cherry-markdown.min.css'))),
     'cherry-markdown.js': currentPanel.webview.asWebviewUri(vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/cherry-markdown.min.js'))),
@@ -27,7 +33,7 @@ export function getWebviewContent(mdInfo: object, currentPanel: vscode.WebviewPa
     <meta charset="UTF-8">
     <meta
 http-equiv="Content-Security-Policy"
-content="default-src 'none'; img-src ${currentPanel.webview.cspSource} https:; script-src ${currentPanel.webview.cspSource}; style-src ${currentPanel.webview.cspSource}; font-src ${currentPanel.webview.cspSource};"
+content="default-src 'none'; img-src ${currentPanel.webview.cspSource} https: http: data:; script-src ${currentPanel.webview.cspSource}; style-src ${currentPanel.webview.cspSource}; font-src ${currentPanel.webview.cspSource};"
 />
     <title>Cherry Editor - Markdown Editor</title>
     <link rel="preload" as="font" href="${pageResourceUrlsMap['dist/fonts/ch-icon.woff']}">
@@ -37,7 +43,8 @@ content="default-src 'none'; img-src ${currentPanel.webview.cspSource} https:; s
     <link rel="stylesheet" type="text/css" href="${pageResourceUrlsMap['cherry-markdown.css']}">
     <link rel="stylesheet" type="text/css" href="${pageResourceUrlsMap['index.css']}">
     <link rel="stylesheet" type="text/css" href="${pageResourceUrlsMap['scripts/index.css']}">
-  </head>
+    <script src="${pageResourceUrlsMap['global-vars.js']}"></script>
+    </head>
   
   <body>
     <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%;"></div>
@@ -48,4 +55,34 @@ content="default-src 'none'; img-src ${currentPanel.webview.cspSource} https:; s
     <script src="${pageResourceUrlsMap['scripts/index.js']}"></script>
   </body>
   </html>`;
+}
+
+function getBaseResourcePath(currentPanel: vscode.WebviewPanel) {
+  const workspaceFolder = vscode.workspace.workspaceFolders![0].uri.fsPath ?? '';
+  const webviewResourcePath = currentPanel.webview.asWebviewUri(vscode.Uri.parse(workspaceFolder)).toString();
+  const basePath = path.join(webviewResourcePath, getRelativePath());
+  return basePath;
+}
+
+function writeGlobalVarsToFile(extensionPath: string, globalVars: { baseResourcePath: string }): string {
+  const globalVarsContent = `
+    window._baseResourcePath = "${globalVars.baseResourcePath}";
+  `
+  const filePath = path.join(extensionPath, 'web-resources/scripts', 'global-vars.js');
+  fs.writeFileSync(filePath, globalVarsContent);
+  return filePath;
+}
+
+function getRelativePath(): string {
+  if(!vscode.window.activeTextEditor) {
+    return '';
+  }
+  const documentUri = vscode.window.activeTextEditor.document.uri;
+  const workspaceFolderUri = vscode.workspace.getWorkspaceFolder(documentUri);
+  if(!workspaceFolderUri) {
+    return '';
+  }
+  const workspaceFolder = workspaceFolderUri.uri.fsPath;
+  const mdFileFolder = path.dirname(documentUri.fsPath);
+  return path.relative( workspaceFolder, mdFileFolder);
 }
