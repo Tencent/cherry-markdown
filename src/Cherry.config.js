@@ -191,6 +191,9 @@ const defaultConfig = {
     },
   },
   editor: {
+    id: 'code', // textarea 的id属性值
+    name: 'code', // textarea 的name属性值
+    autoSave2Textarea: false, // 是否自动将编辑区的内容回写到textarea里
     theme: 'default', // depend on codemirror theme name: https://codemirror.net/demo/theme.htm
     // 编辑器的高度，默认100%，如果挂载点存在内联设置的height则以内联样式为主
     height: '100%',

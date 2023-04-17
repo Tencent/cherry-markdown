@@ -59,7 +59,9 @@ export default class Editor {
      * @type {EditorConfiguration}
      */
     this.options = {
-      id: 'code',
+      id: 'code', // textarea 的id属性值
+      name: 'code', // textarea 的name属性值
+      autoSave2Textarea: false,
       editorDom: document.createElement('div'),
       wrapperDom: null,
       autoScrollByCursor: true,
@@ -332,6 +334,11 @@ export default class Editor {
     editor.on('change', (codemirror, evt) => {
       this.options.onChange(evt, codemirror);
       this.dealBigData();
+      if (this.options.autoSave2Textarea) {
+        // @ts-ignore
+        // 将codemirror里的内容回写到textarea里
+        codemirror.save();
+      }
     });
 
     editor.on('keydown', (codemirror, evt) => {

@@ -196,6 +196,11 @@ var basicConfig = {
   //extensions: [],
   callback: {
     changeString2Pinyin: pinyin,
+  },
+  editor: {
+    id: 'cherry-text',
+    name: 'cherry-text',
+    autoSave2Textarea: true,
   }
 };
 

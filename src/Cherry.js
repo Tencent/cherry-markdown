@@ -453,7 +453,10 @@ export default class Cherry extends CherryStatic {
    * @returns {import('@/Editor').default}
    */
   createEditor() {
-    const textArea = createElement('textarea', '', { id: 'code', name: 'code' });
+    const textArea = createElement('textarea', '', {
+      id: this.options.editor.id ?? 'code',
+      name: this.options.editor.name ?? 'code',
+    });
     textArea.textContent = this.options.value;
     const editor = createElement('div', 'cherry-editor');
     editor.appendChild(textArea);
