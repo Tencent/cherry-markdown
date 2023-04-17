@@ -216,8 +216,8 @@ export interface CherryToolbarOptions {
     | (CherryCustomToolbar | CherryDefaultBubbleToolbar | CherryDefaultBubbleToolbar | CherryDefaultToolbar)[]
     | false;
   toolbarRight?:
-  | ('fullScreen')[]
-  | false;
+    | (CherryCustomToolbar | CherryDefaultBubbleToolbar | CherryDefaultBubbleToolbar | CherryDefaultToolbar)[]
+    | false;
   /** 是否展示顶部工具栏 */
   showToolbar?: boolean;
   /** 侧边栏配置 */
