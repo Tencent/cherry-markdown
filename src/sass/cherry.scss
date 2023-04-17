@@ -32,10 +32,13 @@
   }
 
   &.cherry--no-toolbar {
-    .cherry-toolbar, .cherry-sidebar {
+
+    .cherry-toolbar,
+    .cherry-sidebar {
       height: 0;
       display: none;
     }
+
     .cherry-editor,
     .cherry-previewer {
       max-height: 100%;
@@ -109,9 +112,11 @@
       }
     }
   }
+
   &[data-toolbar-theme='dark'] {
     .cherry-insert-table-menu-item {
       border-color: rgba(255, 255, 255, 0.2);
+
       &.active {
         background-color: $toolbarBtnColorDark;
       }
@@ -140,6 +145,7 @@
     font-style: normal;
     cursor: pointer;
     box-sizing: border-box;
+
     &:hover {
       background: $toolbarBtnBgHoverLight;
       color: $toolbarBtnHoverColorLight;
@@ -168,7 +174,8 @@
 .cherry-toolbar {
   position: relative;
   display: flex;
-  align-items: center;
+  // align-items: center;
+  justify-content: space-between;
   padding: 0 20px;
   height: $toolbarHeight;
   font-size: $toolbarFontSize;
@@ -196,10 +203,32 @@
     }
   }
 
+  .toolbar-left,
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    height: $toolbarHeight;
+    overflow: hidden;
+  }
+
+  .toolbar-left {
+    flex: 0 0 auto;
+    margin-right: 20px;
+  }
+
+  .toolbar-right {
+    flex: 0 1 auto;
+    flex-direction: row-reverse;
+    margin-left: 10px;
+     box-sizing: border-box;
+    border-left: 2px solid rgb(152, 152, 152);
+  }
+
   &.preview-only {
     .cherry-toolbar-button {
       display: none;
     }
+
     .cherry-toolbar-switchPreview {
       display: inline;
     }
@@ -257,6 +286,7 @@
   z-index: 0;
   bottom: 0;
   overflow: hidden;
+
   .cherry-toolbar-button {
     height: 30px;
     padding: 3px 12px 0 6px;
@@ -271,6 +301,7 @@
         width: 8px;
         height: 8px;
       }
+
       &.loading:after {
         content: " ";
         display: block;
@@ -284,11 +315,12 @@
         animation: loading 1.2s linear infinite;
       }
     }
-    
+
     @keyframes loading {
       0% {
         transform: rotate(0deg);
       }
+
       100% {
         transform: rotate(360deg);
       }
@@ -342,6 +374,7 @@
 
     &:hover {
       background: rgba(0, 0, 0, 0.05);
+
       .ch-icon {
         color: $toolbarBtnColorLight;
       }
@@ -370,6 +403,7 @@
     font-family: $fontFamily;
     background: $editorBg;
     color: $fontColor;
+
     // codemirror 依赖隐藏的 textarea 计算行高，这里将字体大小设置为行高，避免输入法遮挡内容
     // Fixed https://github.com/Tencent/cherry-markdown/issues/82
     textarea {
@@ -381,7 +415,8 @@
     padding: 15px 34px;
 
     // 对draw.io的xml数据，和图片里base64格式的数据限定最大宽度
-    .drawio, .base64 {
+    .drawio,
+    .base64 {
       display: inline-block;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -407,7 +442,8 @@
     font-size: 0.9em;
   }
 
-  .cm-s-default .cm-whitespace, .cm-tab {
+  .cm-s-default .cm-whitespace,
+  .cm-tab {
     font-family: $monospaceFont;
     font-size: 0.9em;
   }
@@ -545,12 +581,17 @@
       transition: all 0.3s;
       z-index: 2;
     }
+
     // 浅色系
-    [data-code-block-theme='default'] & ,[data-code-block-theme='funky'] & ,[data-code-block-theme='solarized-light'] & ,[data-code-block-theme='coy'] & {
+    [data-code-block-theme='default'] &,
+    [data-code-block-theme='funky'] &,
+    [data-code-block-theme='solarized-light'] &,
+    [data-code-block-theme='coy'] & {
       .cherry-copy-code-block {
         background-color: #3582fb;
       }
     }
+
     .cherry-copy-code-block:hover {
       color: #3582fb;
       background-color: #eee;
@@ -573,9 +614,11 @@
     margin: 0px;
     font-weight: 400;
   }
-  [data-toolbar-theme='dark'] & h3{
+
+  [data-toolbar-theme='dark'] & h3 {
     color: $toolbarBtnColorDark;
   }
+
   .cherry-color-text {
     float: left;
     width: 128px;
@@ -610,7 +653,9 @@
 
 .cherry-suggester-panel {
   display: none;
-  position: absolute; left: 0;top: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 2px;
@@ -625,6 +670,7 @@
     color: #333;
     display: block;
     cursor: pointer;
+
     &.cherry-suggester-panel__item--selected {
       background-color: #f2f2f5;
       text-decoration: none;

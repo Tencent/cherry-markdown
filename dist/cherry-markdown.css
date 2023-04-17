@@ -2110,7 +2110,8 @@ div[data-type=codeBlock] .token.inserted {
 .cherry .CodeMirror {
   height: 100%;
 }
-.cherry.cherry--no-toolbar .cherry-toolbar, .cherry.cherry--no-toolbar .cherry-sidebar {
+.cherry.cherry--no-toolbar .cherry-toolbar,
+.cherry.cherry--no-toolbar .cherry-sidebar {
   height: 0;
   display: none;
 }
@@ -2228,7 +2229,7 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-toolbar {
   position: relative;
   display: flex;
-  align-items: center;
+  justify-content: space-between;
   padding: 0 20px;
   height: 48px;
   font-size: 14px;
@@ -2252,6 +2253,24 @@ div[data-type=codeBlock] .token.inserted {
 [data-toolbar-theme=dark] .cherry-toolbar .cherry-toolbar-button:hover {
   color: #fff;
   background: rgba(255, 255, 255, 0.1);
+}
+.cherry-toolbar .toolbar-left,
+.cherry-toolbar .toolbar-right {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  overflow: hidden;
+}
+.cherry-toolbar .toolbar-left {
+  flex: 0 0 auto;
+  margin-right: 20px;
+}
+.cherry-toolbar .toolbar-right {
+  flex: 0 1 auto;
+  flex-direction: row-reverse;
+  margin-left: 10px;
+  box-sizing: border-box;
+  border-left: 2px solid rgb(152, 152, 152);
 }
 .cherry-toolbar.preview-only .cherry-toolbar-button {
   display: none;
@@ -2544,7 +2563,8 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-editor .CodeMirror-lines {
   padding: 15px 34px;
 }
-.cherry-editor .CodeMirror-lines .drawio, .cherry-editor .CodeMirror-lines .base64 {
+.cherry-editor .CodeMirror-lines .drawio,
+.cherry-editor .CodeMirror-lines .base64 {
   display: inline-block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2565,7 +2585,8 @@ div[data-type=codeBlock] .token.inserted {
   font-family: "Menlo", "Liberation Mono", "Consolas", "DejaVu Sans Mono", "Ubuntu Mono", "Courier New", "andale mono", "lucida console", monospace;
   font-size: 0.9em;
 }
-.cherry-editor .cm-s-default .cm-whitespace, .cherry-editor .cm-tab {
+.cherry-editor .cm-s-default .cm-whitespace,
+.cherry-editor .cm-tab {
   font-family: "Menlo", "Liberation Mono", "Consolas", "DejaVu Sans Mono", "Ubuntu Mono", "Courier New", "andale mono", "lucida console", monospace;
   font-size: 0.9em;
 }

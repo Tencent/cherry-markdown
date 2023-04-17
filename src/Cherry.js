@@ -392,6 +392,7 @@ export default class Cherry extends CherryStatic {
     this.toolbar = new Toolbar({
       dom,
       $cherry: this,
+      buttonRightConfig: this.options.toolbars.toolbarRight,
       buttonConfig: this.options.toolbars.toolbar,
       customMenu: this.options.toolbars.customMenu,
     });
