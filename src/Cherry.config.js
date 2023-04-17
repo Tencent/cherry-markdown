@@ -242,7 +242,7 @@ const defaultConfig = {
       'graph',
       'settings',
     ],
-    toolbarRight: ['fullScreen'],
+    toolbarRight: [],
     sidebar: [],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'quickTable', 'code'], // array or false

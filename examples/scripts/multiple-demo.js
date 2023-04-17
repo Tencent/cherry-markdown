@@ -78,6 +78,7 @@ var cherryConfig1 = {
       'word',
       'graph',
     ],
+    toolbarRight: ['fullScreen'],
     sidebar: ['mobilePreview', 'copy', 'theme'],
   },
   editor: {
@@ -145,6 +146,7 @@ var cherryConfig2 = {
       'settings',
       'export'
     ],
+    toolbarRight: ['fullScreen'],
     sidebar: ['copy', 'mobilePreview', 'theme'],
   },
   editor: {

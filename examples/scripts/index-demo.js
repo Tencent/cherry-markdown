@@ -173,8 +173,9 @@ var basicConfig = {
         customMenuBName: ['ruby', 'audio', 'video', 'customMenuAName'],
       },
       'customMenuCName',
-      'theme'
+      'theme',
     ],
+    toolbarRight: ['fullScreen', '|'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
     sidebar: ['mobilePreview', 'copy', 'theme'],
     customMenu: {
