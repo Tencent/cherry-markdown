@@ -5,7 +5,11 @@
   "version": "0.0.7",
   "publisher": "cherryMarkdownPublisher",
   "license": "Apache License",
-  "keywords": ["markdown", "markdown editor", "markdown preview"],
+  "keywords": [
+    "markdown",
+    "markdown editor",
+    "markdown preview"
+  ],
   "icon": "favicon.ico",
   "repository": {
     "type": "git",
@@ -45,7 +49,13 @@
         "cherryMarkdown.theme": {
           "type": "string",
           "default": "dark",
-          "enum": ["default", "dark", "light", "green", "red"],
+          "enum": [
+            "default",
+            "dark",
+            "light",
+            "green",
+            "red"
+          ],
           "description": "cherry-markdown's theme, available values: [ default | dark | light | green | red ]"
         },
         "cherryMarkdown.fileUploadUrl": {
@@ -93,6 +103,7 @@
     "@types/mathjax": "0.0.37",
     "katex": "^0.16.4",
     "mathjax": "^3.2.2",
+    "path-browserify": "^1.0.1",
     "xmldom-sre": "^0.1.31"
   }
 }
