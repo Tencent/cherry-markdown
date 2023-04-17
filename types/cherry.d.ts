@@ -116,6 +116,9 @@ export type EditorMode =
   | 'edit&preview';
 
 export interface CherryEditorOptions {
+  id?: string; // textarea 的id属性值
+  name?: string; // textarea 的name属性值
+  autoSave2Textarea?: boolean; // 是否自动将编辑区的内容回写到textarea里
   /** depends on codemirror theme name: https://codemirror.net/demo/theme.htm */
   theme?: string;
   /** 编辑器的高度，默认100%，如果挂载点存在内联设置的height则以内联样式为主 */

@@ -38,7 +38,9 @@ type EditorPasteEventHandler = (
 ) => void;
 
 export type EditorConfiguration = {
-  id: string;
+  id?: string; // textarea 的id属性值
+  name?: string; // textarea 的name属性值
+  autoSave2Textarea?: boolean; // 是否自动将编辑区的内容回写到textarea里
   editorDom: HTMLElement;
   wrapperDom: HTMLElement;
   toolbars: any;
