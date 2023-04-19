@@ -1,6 +1,7 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, Menu } from 'electron';
 import { release } from 'node:os';
 import { join } from 'node:path';
+import { menuConfig } from '../until/menu';
 
 // The built directory structure
 //
@@ -40,7 +41,7 @@ const indexHtml = join(process.env.DIST, 'index.html');
 
 async function createWindow() {
   win = new BrowserWindow({
-    title: 'Main window',
+    title: 'Cherry',
     icon: join(process.env.PUBLIC, 'favicon.ico'),
     webPreferences: {
       preload,
@@ -72,6 +73,8 @@ async function createWindow() {
     return { action: 'deny' };
   });
   // win.webContents.on('will-navigate', (event, url) => { }) #344
+  const menu = Menu.buildFromTemplate(menuConfig)
+  Menu.setApplicationMenu(menu);
 }
 
 app.whenReady().then(createWindow);
