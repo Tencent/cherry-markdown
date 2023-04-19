@@ -1,9 +1,10 @@
 {
   "dependencies": {
-    "cherry-markdown": "^0.5.14"
+    "cherry-markdown": "^0.8.18"
   },
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "inspect": "electron --inspect ."
   },
   "name": "cherrymd",
   "version": "1.0.0",
