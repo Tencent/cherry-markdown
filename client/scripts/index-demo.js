@@ -89,6 +89,7 @@ var cherry = new Cherry({
     ],
     sidebar: ['mobilePreview', 'copy'],
   },
+  drawioIframeUrl: './drawio_demo.html',
   editor: {
     defaultModel: 'edit&preview',
   },
