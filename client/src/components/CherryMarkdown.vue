@@ -5,11 +5,10 @@
 
 import Cherry from 'cherry-markdown'
 import { toolbarsOptions } from "./toolbarsOptions"
-import { app, ipcRenderer } from "electron";
+import { ipcRenderer } from "electron";
 import { MessagePlugin as TMessagePlugin } from 'tdesign-vue-next';
 import { ref } from 'vue';
-import path from 'path';
-import fs from 'fs';
+
 
 const filePath = ref('');
 
@@ -17,6 +16,7 @@ const cherryMarkdown = new Cherry({
   id: 'cherry-markdown',
   value: '',
   toolbars: toolbarsOptions,
+  drawioIframeUrl: 'drawio_demo.html',
   fileUpload(file: any, callback: (arg0: any) => void) {
 
   },

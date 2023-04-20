@@ -1,6 +1,6 @@
 {
   "name": "cherry-noted",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist-electron/main/index.js",
   "description": "cherry markdown editor in the Desktop.",
   "author": "Cherry Oteam",
