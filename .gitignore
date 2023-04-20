@@ -22,3 +22,9 @@ yarn-error.log*
 
 # Lock files
 package-lock.json
+/pnpm-lock.yaml
+
+#client
+/client/dist-electron
+/client/dist
+/client/release
