@@ -53,6 +53,8 @@ const toolbarsOptions: CherryOptions['toolbar']= {
       'italic',
       'strikethrough',
       '|',
+      'drawIo',
+      '|',
       'ol',
       'ul',
       'checklist',
