@@ -157,6 +157,7 @@ var basicConfig = {
       'ul',
       'checklist',
       'panel',
+      'justify',
       'detail',
       '|',
       'formula',

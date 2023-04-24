@@ -42,9 +42,9 @@ export default class Panel extends ParagraphBase {
     return str.replace(this.RULE.reg, (match, preLines, name, content) => {
       const lineCount = this.getLineCount(match, preLines);
       const sign = this.$engine.md5(match);
-      const { type, title, body } = this.$getPanelInfo(name, content, sentenceMakeFunc);
+      const { title, body, appendStyle, className } = this.$getPanelInfo(name, content, sentenceMakeFunc);
       const ret = this.pushCache(
-        `<div class="cherry-panel cherry-panel__${type}" data-sign="${sign}" data-lines="${lineCount}" >${title}${body}</div>`,
+        `<div class="${className}" data-sign="${sign}" data-lines="${lineCount}" ${appendStyle}>${title}${body}</div>`,
         sign,
         lineCount,
       );
@@ -52,8 +52,25 @@ export default class Panel extends ParagraphBase {
     });
   }
 
+  $getClassByType(type) {
+    if (/(left|right|center)/i.test(type)) {
+      return `cherry-text-align cherry-text-align__${type}`;
+    }
+    return `cherry-panel cherry-panel__${type}`;
+  }
+
   $getPanelInfo(name, str, sentenceMakeFunc) {
-    const ret = { type: this.$getTargetType(name), title: sentenceMakeFunc(this.$getTitle(name)).html, body: str };
+    const ret = {
+      type: this.$getTargetType(name),
+      title: sentenceMakeFunc(this.$getTitle(name)).html,
+      body: str,
+      appendStyle: '',
+      className: '',
+    };
+    ret.className = this.$getClassByType(ret.type);
+    if (/(left|right|center)/i.test(ret.type)) {
+      ret.appendStyle = `style="text-align:${ret.type};"`;
+    }
     ret.title = `<div class="cherry-panel--title ${ret.title ? 'cherry-panel--title__not-empty' : ''}">${
       ret.title
     }</div>`;
@@ -104,6 +121,15 @@ export default class Panel extends ParagraphBase {
       case 'success':
       case 's':
         return 'success';
+      case 'right':
+      case 'r':
+        return 'right';
+      case 'center':
+      case 'c':
+        return 'center';
+      case 'left':
+      case 'l':
+        return 'left';
       default:
         return 'primary';
     }

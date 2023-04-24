@@ -66,6 +66,7 @@ import Theme from './hooks/Theme';
 import MobilePreview from './hooks/MobilePreview';
 import Copy from './hooks/Copy';
 import Panel from './hooks/Panel';
+import Justify from './hooks/Justify';
 import Detail from './hooks/Detail';
 import DrawIo from './hooks/DrawIo';
 
@@ -122,6 +123,7 @@ const HookList = {
   theme: Theme,
   file: File,
   panel: Panel,
+  justify: Justify,
   detail: Detail,
   drawIo: DrawIo,
 };
