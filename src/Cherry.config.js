@@ -223,6 +223,7 @@ const defaultConfig = {
       '|',
       'list',
       'panel',
+      // 'justify', // 对齐方式，默认不推荐这么“复杂”的样式要求
       'detail',
       {
         insert: [

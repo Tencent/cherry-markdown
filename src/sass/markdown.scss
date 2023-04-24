@@ -503,6 +503,19 @@ div[data-type='codeBlock'] {
   }
 }
 
+.cherry-text-align__center {
+  table {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.cherry-text-align__right {
+  table {
+    margin-left: auto;
+  }
+}
+
 .cherry-panel {
   margin: 10px 0;
   overflow: hidden;
