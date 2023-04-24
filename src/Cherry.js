@@ -134,13 +134,12 @@ export default class Cherry extends CherryStatic {
     $expectTarget(this.options.toolbars.toolbar, Array);
     // 创建顶部工具栏
     this.toolbar = this.createToolbar();
-    // 创建预览区域的侧边工具栏
-    this.sidebar = this.createSidebar();
 
     const wrapperFragment = document.createDocumentFragment();
     wrapperFragment.appendChild(this.toolbar.options.dom);
     wrapperFragment.appendChild(editor.options.editorDom);
-    wrapperFragment.appendChild(this.sidebar.options.dom);
+    // 创建预览区域的侧边工具栏
+    this.createSidebar(wrapperFragment);
     if (!this.options.previewer.dom) {
       wrapperFragment.appendChild(previewer.options.previewerDom);
     }
@@ -403,16 +402,19 @@ export default class Cherry extends CherryStatic {
    * @private
    * @returns
    */
-  createSidebar() {
-    const externalClass = this.options.toolbars.theme === 'dark' ? 'dark' : '';
-    const dom = createElement('div', `cherry-sidebar ${externalClass}`);
-    this.sidebar = new Sidebar({
-      dom,
-      $cherry: this,
-      buttonConfig: this.options.toolbars.sidebar,
-      customMenu: this.options.toolbars.customMenu,
-    });
-    return this.sidebar;
+  createSidebar(wrapperFragment) {
+    if (this.options.toolbars.sidebar) {
+      $expectTarget(this.options.toolbars.sidebar, Array);
+      const externalClass = this.options.toolbars.theme === 'dark' ? 'dark' : '';
+      const dom = createElement('div', `cherry-sidebar ${externalClass}`);
+      this.sidebar = new Sidebar({
+        dom,
+        $cherry: this,
+        buttonConfig: this.options.toolbars.sidebar,
+        customMenu: this.options.toolbars.customMenu,
+      });
+      wrapperFragment.appendChild(this.sidebar.options.dom);
+    }
   }
 
   /**
@@ -420,8 +422,8 @@ export default class Cherry extends CherryStatic {
    * @returns
    */
   createFloatMenu() {
-    const dom = createElement('div', 'cherry-floatmenu');
     if (this.options.toolbars.float) {
+      const dom = createElement('div', 'cherry-floatmenu');
       $expectTarget(this.options.toolbars.float, Array);
       this.floatMenu = new FloatMenu({
         dom,
@@ -436,8 +438,8 @@ export default class Cherry extends CherryStatic {
    * @returns
    */
   createBubble() {
-    const dom = createElement('div', 'cherry-bubble');
     if (this.options.toolbars.bubble) {
+      const dom = createElement('div', 'cherry-bubble');
       $expectTarget(this.options.toolbars.bubble, Array);
       this.bubble = new Bubble({
         dom,
