@@ -124,13 +124,17 @@ export default class LazyLoadImg {
    */
   loadOneImg() {
     const imgs = this.previewerDom.querySelectorAll('img[data-src]');
-    const maxHeight = this.previewerDom.getBoundingClientRect().height + 100;
+    const { height, top } = this.previewerDom.getBoundingClientRect();
+    const previewerHeight = height + top + 100; // 冗余一定高度用于提前加载
+    const windowsHeight = window?.innerHeight ?? 0 + 100; // 浏览器的视口高度
+    const maxHeight = Math.min(previewerHeight, windowsHeight); // 目标视区高度一定是小于浏览器视口高度的，也一定是小于预览区高度的
+    const minHeight = top - 30; // 计算顶部高度时，需要预加载一行高
     const { autoLoadImgNum } = this.options;
     for (let i = 0; i < imgs.length; i++) {
       const img = imgs[i];
       const position = img.getBoundingClientRect();
       // 判断是否在视区内
-      const testPosition = position.top > 0 && position.top < maxHeight && position.top < window.innerHeight + 100;
+      const testPosition = position.top >= minHeight && position.top <= maxHeight;
       // 判断是否需要自动加载
       const testAutoLoad = this.srcList.length <= autoLoadImgNum;
       if (!testPosition && !testAutoLoad) {
