@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.19](https://github.com/Tencent/cherry-markdown/compare/v0.8.18...v0.8.19) (2023-04-24)
+
+
+### Features
+
+* [#412](https://github.com/Tencent/cherry-markdown/issues/412) 增加textarea的name属性配置能力 ([b20c260](https://github.com/Tencent/cherry-markdown/commit/b20c26061dea3c7d392a860bb5bb8fa150eeff4a))
+* [#424](https://github.com/Tencent/cherry-markdown/issues/424) 增加对齐方式语法和对应按钮 ([f0973d6](https://github.com/Tencent/cherry-markdown/commit/f0973d6b7259f4ba2e51fe7f87a0a0e3c6c4a0d8))
+* add fullScreen function ([#420](https://github.com/Tencent/cherry-markdown/issues/420)) ([#426](https://github.com/Tencent/cherry-markdown/issues/426)) ([843ad64](https://github.com/Tencent/cherry-markdown/commit/843ad647d8d6cfb1ed4eb247fee1a495c25dfce0))
+* support drawIo in client ([92a3119](https://github.com/Tencent/cherry-markdown/commit/92a3119167e100ea8ec97dde91dd03ef58bc5560))
+* vscode 插件支持预览工作区图片 ([cd09242](https://github.com/Tencent/cherry-markdown/commit/cd092429c13243e80dd3173d072a312544f8caec))
+
+
+### Bug Fixes
+
+* [#439](https://github.com/Tencent/cherry-markdown/issues/439) 修复sidebar设置为false失效的问题 ([4474e47](https://github.com/Tencent/cherry-markdown/commit/4474e478c1790b95125dbc6dc436388e63484bba))
+* [#440](https://github.com/Tencent/cherry-markdown/issues/440) 修复顶格插入表格时，预览区域表格无法进行编辑 ([3e5b3b8](https://github.com/Tencent/cherry-markdown/commit/3e5b3b82e7547fbc78779ed79bee93814e5d4d82))
+* 处理右对齐工具栏的默认值问题 ([dc9186d](https://github.com/Tencent/cherry-markdown/commit/dc9186df0e0c1748d0bdff5e62d320e236b33d4f))
+* 修复侧边栏二级菜单定位不准确的问题 ([8bc6c3b](https://github.com/Tencent/cherry-markdown/commit/8bc6c3b21dd0c0beb97ed7544f8af4a8f769ba8f))
+* 优化判断图片是否在视区内的判断逻辑 ([83efd75](https://github.com/Tencent/cherry-markdown/commit/83efd758e0b3a4621c4aa7cdbaf3c2f294f62f65))
+* use up-to-date script for client to avoid drawIo not found error ([8ed9400](https://github.com/Tencent/cherry-markdown/commit/8ed9400c651b18f360ed0d2b14066bb5f7de3e90))
+
 ### [0.8.18](https://github.com/Tencent/cherry-markdown/compare/v0.8.16...v0.8.18) (2023-04-10)
 
 

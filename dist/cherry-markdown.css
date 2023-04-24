@@ -362,6 +362,22 @@
   content: "\ea6b";
 }
 
+.ch-icon-justify:before {
+  content: "\ea6c";
+}
+
+.ch-icon-justifyCenter:before {
+  content: "\ea6d";
+}
+
+.ch-icon-justifyLeft:before {
+  content: "\ea6e";
+}
+
+.ch-icon-justifyRight:before {
+  content: "\ea6f";
+}
+
 .cherry-markdown {
   word-break: break-all;
   /* Specify class=linenums on a pre to get line numbering */
@@ -1930,6 +1946,15 @@ div[data-type=codeBlock] .token.inserted {
   border-radius: 0;
 }
 
+.cherry-text-align__center table {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cherry-text-align__right table {
+  margin-left: auto;
+}
+
 .cherry-panel {
   margin: 10px 0;
   overflow: hidden;
@@ -2270,7 +2295,6 @@ div[data-type=codeBlock] .token.inserted {
   flex-direction: row-reverse;
   margin-left: 10px;
   box-sizing: border-box;
-  border-left: 2px solid rgb(152, 152, 152);
 }
 .cherry-toolbar.preview-only .cherry-toolbar-button {
   display: none;
