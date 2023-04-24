@@ -31,8 +31,9 @@ function getPosition(targetDom, positionModel = 'absolute') {
   }
   // 侧边栏按钮做个特殊处理
   if (positionModel === 'sidebar') {
+    const parent = MenuBase.getTargetParentByButton(targetDom);
     return {
-      left: targetDom.parentElement.offsetLeft - 130 + pos.width,
+      left: parent.offsetLeft - 130 + pos.width,
       top: targetDom.offsetTop + pos.height / 2,
       width: pos.width,
       height: pos.height,
@@ -328,8 +329,9 @@ export default class MenuBase {
    * 获取当前菜单的位置
    */
   getMenuPosition() {
-    const isFromSidebar = /cherry-sidebar/.test(this.dom.parentElement.className);
-    if (/cherry-bubble/.test(this.dom.parentElement.className)) {
+    const parent = MenuBase.getTargetParentByButton(this.dom);
+    const isFromSidebar = /cherry-sidebar/.test(parent.className);
+    if (/cherry-bubble/.test(parent.className)) {
       this.positionModel = 'fixed';
     } else if (isFromSidebar) {
       this.positionModel = 'sidebar';
@@ -337,5 +339,18 @@ export default class MenuBase {
       this.positionModel = 'absolute';
     }
     return getPosition(this.dom, this.positionModel);
+  }
+
+  /**
+   * 根据按钮获取按钮的父元素，这里父元素要绕过toolbar-(left|right)那一层
+   * @param {HTMLElement} dom 按钮元素
+   * @returns {HTMLElement} 父元素
+   */
+  static getTargetParentByButton(dom) {
+    let parent = dom.parentElement;
+    if (/toolbar-(left|right)/.test(parent.className)) {
+      parent = parent.parentElement;
+    }
+    return parent;
   }
 }
