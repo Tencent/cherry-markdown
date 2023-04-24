@@ -142,7 +142,7 @@ const tableContentHander = {
     const tableCode = this.tableEditor.tableCodes[index];
     const whole = this.codeMirror.getValue();
     const selectTdInfo = this.tableEditor.info;
-    const beginLine = whole.slice(0, tableCode.offset).match(/\n/g).length;
+    const beginLine = whole.slice(0, tableCode.offset).match(/\n/g)?.length ?? 0;
     const { preLine, preCh, plusCh, currentTd } = this.$getTdOffset(
       tableCode.code,
       selectTdInfo.isTHead,
