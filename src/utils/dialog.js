@@ -66,7 +66,7 @@ const dialog = {
     this.iframeDom = createElement('iframe', 'cherry-dialog-iframe', { src: iframeSrc, style: 'border: none;' });
     this.dom = createElement('div', 'cherry-dialog', {
       style: [
-        'z-index:99',
+        'z-index:9999',
         'display: block',
         'position: absolute',
         'top: 10%;left: 10%;bottom: 10%;right: 10%',
