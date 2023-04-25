@@ -2175,7 +2175,7 @@ div[data-type=codeBlock] .token.inserted {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1000;
+  z-index: 99;
 }
 .cherry .no-select {
   -webkit-touch-callout: none;
