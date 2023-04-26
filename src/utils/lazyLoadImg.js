@@ -136,7 +136,7 @@ export default class LazyLoadImg {
       // 判断是否在视区内
       const testPosition = position.top >= minHeight && position.top <= maxHeight;
       // 判断是否需要自动加载
-      const testAutoLoad = this.srcList.length <= autoLoadImgNum;
+      const testAutoLoad = this.srcList.length < autoLoadImgNum;
       if (!testPosition && !testAutoLoad) {
         continue;
       }
@@ -154,7 +154,7 @@ export default class LazyLoadImg {
         continue;
       }
       // 超过最大并发量时停止加载
-      if (this.loadingImgNum > this.options.maxNumPerTime) {
+      if (this.loadingImgNum >= this.options.maxNumPerTime) {
         return false;
       }
       const test = this.options.beforeLoadOneImgCallback(img);
@@ -251,7 +251,7 @@ export default class LazyLoadImg {
       setTimeout(polling, 200);
     };
     polling();
-    setTimeout(polling, 200);
+    // setTimeout(polling, 200);
     setInterval(() => {
       this.isLoadedAllDone();
     }, 1000);
@@ -308,8 +308,8 @@ export default class LazyLoadImg {
       }
       if (focus === false) {
         // 前noLoadImgNum张图片不替换
-        currentNoLoadImgNum += 1;
         if (currentNoLoadImgNum < noLoadImgNum) {
+          currentNoLoadImgNum += 1;
           return match;
         }
         // 如果src已经加载过，则不替换
