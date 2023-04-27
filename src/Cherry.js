@@ -429,6 +429,7 @@ export default class Cherry extends CherryStatic {
         dom,
         $cherry: this,
         buttonConfig: this.options.toolbars.float,
+        customMenu: this.options.toolbars.customMenu,
       });
     }
   }
@@ -445,6 +446,7 @@ export default class Cherry extends CherryStatic {
         dom,
         $cherry: this,
         buttonConfig: this.options.toolbars.bubble,
+        customMenu: this.options.toolbars.customMenu,
         engine: this.engine,
       });
     }
