@@ -119,9 +119,28 @@ export default class PreviewerBubble {
         break;
       case 'TD':
       case 'TH':
+        // eslint-disable-next-line no-case-declarations
+        const container = this.$getClosestNode(target, 'DIV');
+        if (container === false) {
+          return;
+        }
+        // 只有由cherry生成的表格可以进行预览区域编辑，且简单表格不支持编辑
+        if (/simple-table/.test(container.className) || !/cherry-table-container/.test(container.className)) {
+          return;
+        }
         this.bubbleHandler = this.$showTablePreviewerBubbles(target);
         break;
     }
+  }
+
+  $getClosestNode(node, targetNodeName) {
+    if (node.tagName === targetNodeName) {
+      return node;
+    }
+    if (node.parentNode.tagName === 'BODY') {
+      return false;
+    }
+    return this.$getClosestNode(node.parentNode, targetNodeName);
   }
 
   /**
