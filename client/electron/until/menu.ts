@@ -103,7 +103,7 @@ const menuConfig: Array<MenuItemConstructorOptions | MenuItem> = [
         enabled: true,
       },
       {
-        label: '保存',
+        label: '另存为',
         click: () => saveFiles(),
         enabled: true,
       },
