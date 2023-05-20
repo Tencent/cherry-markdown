@@ -50,6 +50,7 @@ async function createWindow() {
       // Read more on https://www.electronjs.org/docs/latest/tutorial/context-isolation
       nodeIntegration: true,
       contextIsolation: false,
+      webSecurity: false
     },
   });
 
@@ -105,7 +106,6 @@ app.on('activate', () => {
 ipcMain.handle('open-win', (_, arg) => {
   const childWindow = new BrowserWindow({
     webPreferences: {
-      preload,
       nodeIntegration: true,
       contextIsolation: false,
     },
