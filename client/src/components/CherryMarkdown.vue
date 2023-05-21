@@ -3,7 +3,8 @@
 </template>
 <script setup lang="ts">
 
-import { cherryMarkdown } from "./cherryConfigs"
+import Cherry from 'cherry-markdown'
+import { toolbarsOptions } from "./toolbarsOptions"
 import { ipcRenderer } from "electron";
 import { MessagePlugin as TMessagePlugin } from 'tdesign-vue-next';
 import { ref } from 'vue';
@@ -11,10 +12,21 @@ import { ref } from 'vue';
 
 const filePath = ref('');
 
+const cherryMarkdown = new Cherry({
+  id: 'cherry-markdown',
+  value: '',
+  toolbars: toolbarsOptions,
+  drawioIframeUrl: 'drawio_demo.html',
+  fileUpload(file: any, callback: (arg0: any) => void) {
+
+  },
+});
+
 /**
  * @description 打开文档
  */
 ipcRenderer.on('open_files_success', (event, arg: { data: string, filePath: string }) => {
+  console.log(event, arg)
   cherryMarkdown.setMarkdown(arg.data)
   filePath.value = arg.filePath
 })

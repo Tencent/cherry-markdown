@@ -14,7 +14,7 @@
 	var bundle = mxResources.getDefaultBundle(mxLanguage);
 	
 	// Fixes possible asynchronous requests
-	mxUtils.getAll([bundle, './theme/default.xml'], function(xhr)
+	mxUtils.getAll([bundle, './drawio_demo/theme/default.xml'], function(xhr)
 	{
 		// Adds bundle text to resources
 		mxResources.parse(xhr[0].getText());
