@@ -50,6 +50,9 @@ export default class Blockquote extends ParagraphBase {
       let lastLevel = 1;
       let level = 0;
       let handledHtml = `<blockquote data-sign="${sign}_${lineCount}" data-lines="${lineCount}">`;
+      // 存储$line值和level值
+      const lineMap = new Map();
+      const levelMap = new Map();
       for (let i = 0; contentLines[i]; i++) {
         if (i !== 0) {
           const leadIndent = computeLeadingSpaces(contentLines[i]);
@@ -70,20 +73,36 @@ export default class Blockquote extends ParagraphBase {
           }
           return '';
         });
+        // lineMap && levelMap
+        lineMap.set(i, $line);
+        levelMap.set(i, level);
+      }
+
+      for (let i = 0; contentLines[i]; i++) {
         // 同层级，且不为首行时补充一个换行
-        if (lastLevel === level && i !== 0) {
+        if (lastLevel === levelMap.get(i) && i !== 0) {
           handledHtml += '<br>';
         }
         // 补充缩进
-        if (lastLevel < level) {
-          handledHtml += '<blockquote>'.repeat(level - lastLevel);
-          lastLevel = level;
+        if (lastLevel < levelMap.get(i)) {
+          handledHtml += '<blockquote>'.repeat(levelMap.get(i) - lastLevel);
+          lastLevel = levelMap.get(i);
         }
         // 插入当前行内容
-        handledHtml += $line;
+        if (lineMap.get(i) && !lineMap.get(i - 1)) {
+          handledHtml += '<p>';
+          handledHtml += lineMap.get(i);
+          handledHtml += lineMap.get(i + 1) ? '' : '</p>';
+        } else if (lineMap.get(i) && lineMap.get(i - 1)) {
+          handledHtml += lineMap.get(i);
+          handledHtml += lineMap.get(i + 1) ? '' : '</p>';
+        }
       }
       // 标签闭合
       handledHtml += '</blockquote>'.repeat(lastLevel);
+      console.log(handledHtml);
+      // 避免分割成段落
+      handledHtml = handledHtml.replace(/(<br>){2,}/g, '<br>');
       return this.getCacheWithSpace(this.pushCache(handledHtml, sign, lineCount), match);
     });
   }
