@@ -8,6 +8,7 @@
   "private": true,
   "keywords": [
     "electron",
+    "rollup",
     "vite",
     "vue3",
     "vue"
@@ -19,7 +20,11 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build && electron-builder"
+    "build": "vue-tsc --noEmit && vite build && electron-builder",
+    "lint": "run-s eslint prettier",
+    "eslint": "eslint --ext .js,.jsx,.ts,.tsx,.vue --ignore-pattern \"bad.*\" .",
+    "prettier": "prettier -l \"./**/*\"",
+    "prettier:fix": "prettier --write -l \"./**/*\""
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.1.0",
