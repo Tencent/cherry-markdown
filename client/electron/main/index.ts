@@ -1,7 +1,7 @@
 import { app, BrowserWindow, shell, ipcMain, Menu } from 'electron';
 import { release } from 'node:os';
 import { join } from 'node:path';
-import { menuConfig } from '../until/menu';
+import { menuConfig } from '../preload/menu';
 
 // The built directory structure
 //
@@ -50,6 +50,7 @@ async function createWindow() {
       // Read more on https://www.electronjs.org/docs/latest/tutorial/context-isolation
       nodeIntegration: true,
       contextIsolation: false,
+      webSecurity: true
     },
   });
 
@@ -105,7 +106,6 @@ app.on('activate', () => {
 ipcMain.handle('open-win', (_, arg) => {
   const childWindow = new BrowserWindow({
     webPreferences: {
-      preload,
       nodeIntegration: true,
       contextIsolation: false,
     },
