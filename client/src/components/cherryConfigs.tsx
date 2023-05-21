@@ -15,6 +15,7 @@
  */
 
 import Cherry from "cherry-markdown";
+import { ipcRenderer } from "electron";
 
 /**
  * 帮助中心
@@ -55,9 +56,9 @@ const callbacks = {
   /**
    * 上传文件回调
    */
-  fileUpload(file: File, callback: (path: string, arg:{ [key: string]: any }) => void) {
+  fileUpload(file: File, callback: (path: string, arg: { [key: string]: any }) => void) {
     console.log(file)
-     const fileUrl=  URL.createObjectURL(file)
+    const fileUrl = URL.createObjectURL(file)
     console.log('url', fileUrl)
     if (/video/i.test(file.type)) {
       callback(fileUrl, {
@@ -66,19 +67,22 @@ const callbacks = {
         isBorder: true,
         isShadow: true,
         isRadius: true,
-        width:'300px',
-        height:'auto',
+        width: '300px',
+        height: 'auto',
       });
     } else {
       callback(fileUrl, { name: `${file.name.replace(/\.[^.]+$/, '')}`, isShadow: true });
     }
   },
-  afterChange: (text: string, html: string) => { },
+  afterChange: (text: string, html: string) => {
+    // 是否改变
+    ipcRenderer.send('is-text-change')
+  },
   afterInit: (text: string, html: string) => { },
   beforeImageMounted: (srcProp: string, src: string) => ({ srcProp, src }),
-   // 预览区域点击事件，previewer.enablePreviewerBubble = true 时生效
+  // 预览区域点击事件，previewer.enablePreviewerBubble = true 时生效
   onClickPreview: (event: Event) => { },
-   // 复制代码块代码时的回调
+  // 复制代码块代码时的回调
   onCopyCode: (event: Event, code: string) => {
     // 阻止默认的粘贴事件
     // return false;
@@ -97,7 +101,7 @@ const callbacks = {
 };
 
 export const defaultConfig = {
-  id:"cherry-markdown",
+  id: "cherry-markdown",
   // 第三方包
   externals: {
     // externals
@@ -273,7 +277,7 @@ export const defaultConfig = {
       '|',
       'formula',
       {
-        insert: ['link', 'hr', 'br', 'code', 'formula', 'toc', 'table','ruby'],
+        insert: ['link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'ruby'],
       },
       {
         customMenu_fileUpload: ['image', 'audio', 'video', 'pdf', 'word']
@@ -287,7 +291,7 @@ export const defaultConfig = {
     ],
     toolbarRight: ['fullScreen', '|'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
-    sidebar: ['mobilePreview', 'copy', 'theme','customMenu_question'],
+    sidebar: ['mobilePreview', 'copy', 'theme', 'customMenu_question'],
     customMenu: {
       customMenu_question: customMenu_question,
       customMenu_fileUpload: customMenu_fileUpload,
