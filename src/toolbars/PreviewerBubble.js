@@ -77,11 +77,48 @@ export default class PreviewerBubble {
       });
     });
   }
+  $dealCheckboxClick(e) {
+    const { target } = e;
+    // 先计算是previewer中第几个checkbox
+    const list = Array.from(this.previewerDom.querySelectorAll('.ch-icon-square, .ch-icon-check'));
+    this.checkboxIdx = list.indexOf(target);
+
+    // 然后找到Editor中对应的`- []`或者`- [ ]`进行修改
+    const contents = this.getValueWithoutCode().split('\n');
+
+    let editorCheckboxCount = 0;
+    // [ ]中的空格，或者[x]中的x的位置
+    let targetLine = -1;
+    let targetCh = -1;
+    contents.forEach((lineContent, lineIdx) => {
+      const tmp = lineContent.trim(); // 去掉句首的空格和制表符
+      if (tmp.startsWith('- [ ]') || tmp.startsWith('- [x]')) {
+        // 如果是个checkbox
+        if (editorCheckboxCount === this.checkboxIdx) {
+          targetLine = lineIdx;
+          targetCh = lineContent.indexOf('- [') + 3;
+        }
+        editorCheckboxCount += 1;
+      }
+    });
+    if (targetLine === -1) {
+      // 无法找到对应的checkbox
+      return;
+    }
+    this.editor.editor.setSelection({ line: targetLine, ch: targetCh }, { line: targetLine, ch: targetCh + 1 });
+    this.editor.editor.replaceSelection(this.editor.editor.getSelection() === ' ' ? 'x' : ' ', 'around');
+  }
 
   $onClick(e) {
     const { target } = e;
     // 复制代码块操作不关心编辑器的状态
     this.$dealCopyCodeBlock(e);
+
+    // checkbox所见即所得编辑操作
+    if (target.className === 'ch-icon ch-icon-square' || target.className === 'ch-icon ch-icon-check') {
+      this.$dealCheckboxClick(e);
+    }
+
     const cherryStatus = this.previewer.$cherry.getStatus();
     // 纯预览模式下，支持点击放大图片功能（以回调的形式实现，需要业务侧实现图片放大功能）
     if (cherryStatus.editor === 'hide') {
