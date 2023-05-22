@@ -38,6 +38,7 @@ export default class CodeBlock extends ParagraphBase {
     this.wrap = config.wrap; // 超出是否换行
     this.lineNumber = config.lineNumber; // 是否显示行号
     this.copyCode = config.copyCode; // 是否显示“复制”按钮
+    this.mermaid = config.mermaid; // mermaid的配置，目前仅支持格式设置，svg2img=true 展示成图片，false 展示成svg
     this.indentedCodeBlock = typeof config.indentedCodeBlock === 'undefined' ? true : config.indentedCodeBlock; // 是否支持缩进代码块
     this.INLINE_CODE_REGEX = /(`+)(.+?(?:\n.+?)*?)\1/g;
     if (config && config.customRenderer) {
@@ -69,7 +70,7 @@ export default class CodeBlock extends ParagraphBase {
     if (!engine || typeof engine.render !== 'function') {
       return false;
     }
-    const html = engine.render(codeSrc, props.sign, this.$engine);
+    const html = engine.render(codeSrc, props.sign, this.$engine, this.mermaid);
     if (!html) {
       return false;
     }

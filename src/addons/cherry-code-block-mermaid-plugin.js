@@ -112,8 +112,10 @@ export default class MermaidCodeEngine {
         // fix end
         svgHtml = svgDoc.documentElement.outerHTML;
         // 屏蔽转img标签功能，如需要转换为img解除屏蔽即可
-        // const dataUrl = `data:image/svg+xml,${encodeURIComponent(svgDoc.documentElement.outerHTML)}`;
-        // svgHtml = `<img class="svg-img" src="${dataUrl}" alt="${graphId}" />`;
+        if (this.svg2img) {
+          const dataUrl = `data:image/svg+xml,${encodeURIComponent(svgDoc.documentElement.outerHTML)}`;
+          svgHtml = `<img class="svg-img" src="${dataUrl}" alt="${graphId}" />`;
+        }
       } else {
         svgHtml = injectSvgFallback(svgCode);
       }
@@ -123,7 +125,7 @@ export default class MermaidCodeEngine {
     return svgHtml;
   }
 
-  render(src, sign, $engine) {
+  render(src, sign, $engine, config = {}) {
     let $sign = sign;
     if (!$sign) {
       $sign = Math.round(Math.random() * 100000000);
@@ -134,6 +136,7 @@ export default class MermaidCodeEngine {
     // 需要通过添加时间戳使得多次渲染相同内容的图像ID唯一
     // 图像渲染节流在CodeBlock Hook内部控制
     const graphId = `mermaid-${$sign}-${new Date().getTime()}`;
+    this.svg2img = config?.svg2img ?? false;
     try {
       this.mermaidAPIRefs.render(
         graphId,
