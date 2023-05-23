@@ -113,12 +113,6 @@ export default class PreviewerBubble {
     const { target } = e;
     // 复制代码块操作不关心编辑器的状态
     this.$dealCopyCodeBlock(e);
-
-    // checkbox所见即所得编辑操作
-    if (target.className === 'ch-icon ch-icon-square' || target.className === 'ch-icon ch-icon-check') {
-      this.$dealCheckboxClick(e);
-    }
-
     const cherryStatus = this.previewer.$cherry.getStatus();
     // 纯预览模式下，支持点击放大图片功能（以回调的形式实现，需要业务侧实现图片放大功能）
     if (cherryStatus.editor === 'hide') {
@@ -146,6 +140,10 @@ export default class PreviewerBubble {
       return;
     }
     // 只有双栏编辑模式才出现下面的功能
+    // checkbox所见即所得编辑操作
+    if (target.className === 'ch-icon ch-icon-square' || target.className === 'ch-icon ch-icon-check') {
+      this.$dealCheckboxClick(e);
+    }
     this.$removeAllPreviewerBubbles();
     if (typeof target.tagName === 'undefined') {
       return;
