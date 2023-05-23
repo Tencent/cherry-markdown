@@ -1,0 +1,1 @@
+# CHANGELOG Cherry Noted Client
