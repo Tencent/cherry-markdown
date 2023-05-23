@@ -1,5 +1,6 @@
 import 'mathjax/es5/tex-svg.js';
 import path from 'path-browserify';
+// import md5 from 'md5';
 
 /**
  * 在侧边栏增加编辑/预览入口
@@ -101,8 +102,12 @@ const basicConfig = {
   isPreviewOnly: false,
   engine: {
     global: {
+      // eslint-disable-next-line no-unused-vars
       urlProcessor(url, srcType) {
-        console.log('url-processor', url, srcType);
+        // console.log('url-processor', url, srcType);
+        // if (srcType === 'image') {
+        //   loadOneImg({ src: url });
+        // }
         return url;
       },
     },
@@ -132,14 +137,19 @@ const basicConfig = {
       header: {
         anchorStyle: 'none',
       },
+      codeBlock: {
+        mermaid: {
+          svg2img: false, // 是否将mermaid生成的画图变成img格式
+        },
+      },
     },
   },
   toolbars: {
     toolbar: [
       'bold',
-      'italic',
       {
         customMenuFont: [
+          'italic',
           'strikethrough',
           'underline',
           'sub',
@@ -152,6 +162,10 @@ const basicConfig = {
       '|',
       'header',
       'list',
+      '|',
+      'panel',
+      'justify',
+      'detail',
       '|',
       {
         insert: [
@@ -167,12 +181,10 @@ const basicConfig = {
           'table',
           // 'pdf',
           // 'word',
-          'ruby',
         ],
       },
-      'graph',
+      // 'graph',
       'togglePreview',
-      'customMenuChangeTheme',
     ],
     bubble: [
       'bold',
@@ -199,6 +211,9 @@ const basicConfig = {
   previewer: {
     // 自定义markdown预览区域class
     // className: 'markdown'
+    lazyLoadImg: {
+      // afterLoadOneImgCallback: loadOneImg,
+    },
   },
   keydown: [],
   // extensions: [],
@@ -206,16 +221,17 @@ const basicConfig = {
     // eslint-disable-next-line no-undef
     changeString2Pinyin: pinyin,
     beforeImageMounted(srcProp, srcValue) {
-      if(isHttpUrl(srcValue) || isDataUrl(srcValue)) {
+      if (isHttpUrl(srcValue) || isDataUrl(srcValue)) {
         return {
           src: srcValue,
         };
       }
+      // eslint-disable-next-line no-underscore-dangle
       const basePath = window._baseResourcePath || '';
       return {
         src: path.join(basePath, srcValue),
-      }
-    }
+      };
+    },
   },
 };
 
@@ -234,7 +250,31 @@ const { theme } = mdInfo;
 const cherry = new Cherry(config);
 // eslint-disable-next-line no-undef
 const vscode = acquireVsCodeApi();
+// 图片缓存
+// const imgCache = {};
 changeTheme(theme);
+
+// function afterInit() {
+//   setTimeout(() => {
+//     const imgs = cherry.previewer.getDom().querySelectorAll('img');
+//     imgs.forEach((img) => {
+//       loadOneImg(img);
+//     });
+//   }, 100);
+// }
+
+// function loadOneImg(img) {
+//   const { src } = img;
+//   const sign = md5(src);
+//   if (typeof imgCache[sign] !== 'undefined') {
+//     return true;
+//   }
+//   imgCache[sign] = true;
+//   vscode.postMessage({
+//     type: 'cherry-load-img',
+//     data: src,
+//   });
+// }
 
 // 预览区域滚动的时候发送事件
 cherry.previewer.getDom().addEventListener('scroll', () => {
