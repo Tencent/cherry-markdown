@@ -338,15 +338,14 @@ export default class PreviewerBubble {
             return true;
           }
           testIndex += 1;
+        }
+        line += targetString.match(/\n/g)?.length ?? 0;
+        if (/\n/.test(targetString)) {
+          // 如果有换行，则开始位置的字符计数从最后一个换行开始计数
+          beginCh = targetString.replace(/^[\w\W]*\n([^\n]*)$/, '$1').length;
         } else {
-          line += targetString.match(/\n/g)?.length ?? 0;
-          if (/\n/.test(targetString)) {
-            // 如果有换行，则开始位置的字符计数从最后一个换行开始计数
-            beginCh = targetString.replace(/^[\w\W]*\n([^\n]*)$/, '$1').length;
-          } else {
-            // 如果没有换行，则继续按上次的beginCh为起始开始计数
-            beginCh += targetString.length;
-          }
+          // 如果没有换行，则继续按上次的beginCh为起始开始计数
+          beginCh += targetString.length;
         }
       }
     }
