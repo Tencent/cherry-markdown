@@ -3089,6 +3089,9 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-markdown.theme__dark figure svg circle.state-start {
   fill: rgb(250, 160, 0) !important;
 }
+.cherry-markdown.theme__dark .cherry-highlight-line {
+  background-color: #151422;
+}
 
 /** 色值可以参考：https://yeun.github.io/open-color/ */
 /** 工具栏样式 */

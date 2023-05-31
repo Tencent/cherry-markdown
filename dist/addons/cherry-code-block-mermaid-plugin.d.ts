@@ -27,5 +27,6 @@ export default class MermaidCodeEngine {
      * @returns {string}
      */
     convertMermaidSvgToImg(svgCode: string, graphId: string): string;
-    render(src: any, sign: any, $engine: any): boolean;
+    render(src: any, sign: any, $engine: any, config?: {}): boolean;
+    svg2img: any;
 }

@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.20](https://github.com/Tencent/cherry-markdown/compare/v0.8.19...v0.8.20) (2023-05-31)
+
+
+### Features
+
+* 增加mermaid配置功能，可指定mermaid生成的是svg还是图片 ([2bcded7](https://github.com/Tencent/cherry-markdown/commit/2bcded78dae523fb1e766a7b91389658d1e23f3b))
+* **client:** add `cherry markdown` to use ([#451](https://github.com/Tencent/cherry-markdown/issues/451)) ([7054200](https://github.com/Tencent/cherry-markdown/commit/70542001c4ac0c47f69fdb88b1f709267b623ae5))
+* **preview:** ([#432](https://github.com/Tencent/cherry-markdown/issues/432)) support checkbox what-you-see-is-what-you-get feature ([#457](https://github.com/Tencent/cherry-markdown/issues/457)) ([baf592f](https://github.com/Tencent/cherry-markdown/commit/baf592f7ad803c130ff4fef1f815e0efb22751cc))
+
+
+### Bug Fixes
+
+* [#444](https://github.com/Tencent/cherry-markdown/issues/444) 初始化 float 和 bubble 时传入 customMenu ([#446](https://github.com/Tencent/cherry-markdown/issues/446)) ([1fc0972](https://github.com/Tencent/cherry-markdown/commit/1fc0972d8d4629f679970047f4b0f91af410fbfe))
+* 同一行多个img所见即所得编辑时无法选中正确的图片 ([f64430d](https://github.com/Tencent/cherry-markdown/commit/f64430d92c6d94e4305d1ab22c4f5a47df42c946))
+* 限制表格预览区域编辑的判定范围 ([ee28d26](https://github.com/Tencent/cherry-markdown/commit/ee28d26531b1e0a8087a27b46c96652939745d03))
+* 优化图片懒加载的配置判断逻辑 ([61974b9](https://github.com/Tencent/cherry-markdown/commit/61974b9d4aada1fc660ed4d5e30b51d19ff89f38))
+* **fullScreen:** icon switch (close [#445](https://github.com/Tencent/cherry-markdown/issues/445)) ([#447](https://github.com/Tencent/cherry-markdown/issues/447)) ([bd310c1](https://github.com/Tencent/cherry-markdown/commit/bd310c16c9fa096fb4ba7281456efabc4850ba1a))
+* **Previewer:** 调整暗黑模式下高亮行颜色 ([69ad07d](https://github.com/Tencent/cherry-markdown/commit/69ad07d9b48008512297c172a5ba1fa8f2e7b008))
+
 ### [0.8.19](https://github.com/Tencent/cherry-markdown/compare/v0.8.18...v0.8.19) (2023-04-24)
 
 
