@@ -169,6 +169,19 @@ export default class CodeBlock extends ParagraphBase {
   }
 
   /**
+   * 生成preview区域的代码语言设置区域
+   */
+  getPreviewCodeLangSelectElement(lang) {
+    const optionsElement = previewCodeLangSelectList.map((item) => {
+      return `<option value="${item}" ${lang === item ? 'selected' : ''}>${item}</option>`;
+    });
+
+    return `<select id="code-preview-lang-select" class="cherry-preview-code-lang-select">
+      ${optionsElement.join('')}
+    </select>`;
+  }
+
+  /**
    * 包裹代码块，解决单行代码超出长度
    * @param {string} $code
    * @param {string} lang
@@ -196,7 +209,9 @@ export default class CodeBlock extends ParagraphBase {
       cacheCode = Prism.highlight(cacheCode, Prism.languages[lang], lang);
       cacheCode = this.renderLineNumber(cacheCode);
     }
+    const previewCodeLangSelectElement = this.getPreviewCodeLangSelectElement($lang);
     cacheCode = `<div data-sign="${sign}" data-type="codeBlock" data-lines="${lines}">
+      ${previewCodeLangSelectElement}
       ${
         this.copyCode
           ? '<div class="cherry-copy-code-block" style="display:none;"><i class="ch-icon ch-icon-copy" title="copy"></i></div>'
@@ -377,3 +392,5 @@ export default class CodeBlock extends ParagraphBase {
     // prettyPrint.prettyPrint();
   }
 }
+
+const previewCodeLangSelectList = ['javascript', 'python', 'golang', 'java'];

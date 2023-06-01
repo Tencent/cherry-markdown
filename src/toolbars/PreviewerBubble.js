@@ -76,6 +76,7 @@ export default class PreviewerBubble {
         this.$removeAllPreviewerBubbles();
       });
     });
+    this.previewerDom.addEventListener('change', this.$onChange.bind(this));
   }
   $dealCheckboxClick(e) {
     const { target } = e;
@@ -165,6 +166,15 @@ export default class PreviewerBubble {
         }
         this.bubbleHandler = this.$showTablePreviewerBubbles(target);
         break;
+    }
+  }
+
+  $onChange(e) {
+    console.log(e);
+    const { target } = e;
+    if (target.className === 'cherry-preview-code-lang-select') {
+      console.log('change lang', e);
+      // to do;
     }
   }
 
