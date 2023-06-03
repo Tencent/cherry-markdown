@@ -153,6 +153,10 @@ const initCherryPanelEvent = () => {
       case 'tips':
         vscode.window.showInformationMessage(data, 'OK');
         break;
+      case 'cherry-load-img':
+        // vscode.window.showInformationMessage('暂不支持展示图片，如需要，请前往 https://github.com/Tencent/cherry-markdown 反馈', 'OK');
+        // loadOneImg(data);
+        break;
     }
   });
 

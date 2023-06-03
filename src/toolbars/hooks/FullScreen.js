@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { createElement } from '@/utils/dom';
 /**
  * 全屏按钮
  */
@@ -29,16 +30,21 @@ export default class FullScreen extends MenuBase {
    */
   onClick() {
     const cherryClass = this.editor.options.editorDom.parentElement.classList;
-    const cherryId = this.$cherry.cherryDom.id;
-    const cherryIdElement = document.getElementById(cherryId);
-    if (cherryClass.contains('fullscreen')) {
-      cherryClass.remove('fullscreen');
-      document.exitFullscreen();
-    } else {
-      cherryClass.add('fullscreen');
-      cherryIdElement.requestFullscreen().catch((err) => {
-        alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-      });
+    const cherryToolbarFullscreen = document.querySelector('.cherry-toolbar-fullscreen');
+    while (cherryToolbarFullscreen.firstChild) {
+      // 循环删除父元素下的第一个子元素，直到父元素下没有子元素
+      cherryToolbarFullscreen.removeChild(cherryToolbarFullscreen.firstChild);
     }
+
+    if (cherryClass.contains('fullscreen')) {
+      const fullScreen = createElement('i', 'ch-icon ch-icon-fullscreen');
+      cherryToolbarFullscreen.appendChild(fullScreen);
+      cherryClass.remove('fullscreen');
+    } else {
+      const minScreen = createElement('i', 'ch-icon ch-icon-minscreen');
+      cherryToolbarFullscreen.appendChild(minScreen);
+      cherryClass.add('fullscreen');
+    }
+    this.editor.editor.refresh();
   }
 }

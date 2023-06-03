@@ -1,1 +1,1 @@
-# electron-vite-vue
+# Cherry-Noted

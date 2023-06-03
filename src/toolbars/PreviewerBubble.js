@@ -77,6 +77,37 @@ export default class PreviewerBubble {
       });
     });
   }
+  $dealCheckboxClick(e) {
+    const { target } = e;
+    // 先计算是previewer中第几个checkbox
+    const list = Array.from(this.previewerDom.querySelectorAll('.ch-icon-square, .ch-icon-check'));
+    this.checkboxIdx = list.indexOf(target);
+
+    // 然后找到Editor中对应的`- []`或者`- [ ]`进行修改
+    const contents = this.getValueWithoutCode().split('\n');
+
+    let editorCheckboxCount = 0;
+    // [ ]中的空格，或者[x]中的x的位置
+    let targetLine = -1;
+    let targetCh = -1;
+    contents.forEach((lineContent, lineIdx) => {
+      const tmp = lineContent.trim(); // 去掉句首的空格和制表符
+      if (tmp.startsWith('- [ ]') || tmp.startsWith('- [x]')) {
+        // 如果是个checkbox
+        if (editorCheckboxCount === this.checkboxIdx) {
+          targetLine = lineIdx;
+          targetCh = lineContent.indexOf('- [') + 3;
+        }
+        editorCheckboxCount += 1;
+      }
+    });
+    if (targetLine === -1) {
+      // 无法找到对应的checkbox
+      return;
+    }
+    this.editor.editor.setSelection({ line: targetLine, ch: targetCh }, { line: targetLine, ch: targetCh + 1 });
+    this.editor.editor.replaceSelection(this.editor.editor.getSelection() === ' ' ? 'x' : ' ', 'around');
+  }
 
   $onClick(e) {
     const { target } = e;
@@ -109,6 +140,10 @@ export default class PreviewerBubble {
       return;
     }
     // 只有双栏编辑模式才出现下面的功能
+    // checkbox所见即所得编辑操作
+    if (target.className === 'ch-icon ch-icon-square' || target.className === 'ch-icon ch-icon-check') {
+      this.$dealCheckboxClick(e);
+    }
     this.$removeAllPreviewerBubbles();
     if (typeof target.tagName === 'undefined') {
       return;
@@ -119,9 +154,28 @@ export default class PreviewerBubble {
         break;
       case 'TD':
       case 'TH':
+        // eslint-disable-next-line no-case-declarations
+        const container = this.$getClosestNode(target, 'DIV');
+        if (container === false) {
+          return;
+        }
+        // 只有由cherry生成的表格可以进行预览区域编辑，且简单表格不支持编辑
+        if (/simple-table/.test(container.className) || !/cherry-table-container/.test(container.className)) {
+          return;
+        }
         this.bubbleHandler = this.$showTablePreviewerBubbles(target);
         break;
     }
+  }
+
+  $getClosestNode(node, targetNodeName) {
+    if (node.tagName === targetNodeName) {
+      return node;
+    }
+    if (node.parentNode.tagName === 'BODY') {
+      return false;
+    }
+    return this.$getClosestNode(node.parentNode, targetNodeName);
   }
 
   /**
@@ -284,15 +338,14 @@ export default class PreviewerBubble {
             return true;
           }
           testIndex += 1;
+        }
+        line += targetString.match(/\n/g)?.length ?? 0;
+        if (/\n/.test(targetString)) {
+          // 如果有换行，则开始位置的字符计数从最后一个换行开始计数
+          beginCh = targetString.replace(/^[\w\W]*\n([^\n]*)$/, '$1').length;
         } else {
-          line += targetString.match(/\n/g)?.length ?? 0;
-          if (/\n/.test(targetString)) {
-            // 如果有换行，则开始位置的字符计数从最后一个换行开始计数
-            beginCh = targetString.replace(/^[\w\W]*\n([^\n]*)$/, '$1').length;
-          } else {
-            // 如果没有换行，则继续按上次的beginCh为起始开始计数
-            beginCh += targetString.length;
-          }
+          // 如果没有换行，则继续按上次的beginCh为起始开始计数
+          beginCh += targetString.length;
         }
       }
     }

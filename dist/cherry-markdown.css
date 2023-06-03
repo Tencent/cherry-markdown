@@ -2175,7 +2175,7 @@ div[data-type=codeBlock] .token.inserted {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1000;
+  z-index: 99;
 }
 .cherry .no-select {
   -webkit-touch-callout: none;
@@ -3088,6 +3088,9 @@ div[data-type=codeBlock] .token.inserted {
 }
 .cherry-markdown.theme__dark figure svg circle.state-start {
   fill: rgb(250, 160, 0) !important;
+}
+.cherry-markdown.theme__dark .cherry-highlight-line {
+  background-color: #151422;
 }
 
 /** 色值可以参考：https://yeun.github.io/open-color/ */

@@ -2,7 +2,7 @@
   "name": "cherry-markdown",
   "displayName": "cherry-markdown",
   "description": "A markdown previewer powered by [cherry-markdown](https://github.com/Tencent/cherry-markdown)",
-  "version": "0.0.7",
+  "version": "0.0.10",
   "publisher": "cherryMarkdownPublisher",
   "license": "Apache License",
   "keywords": [
@@ -103,6 +103,7 @@
     "@types/mathjax": "0.0.37",
     "katex": "^0.16.4",
     "mathjax": "^3.2.2",
+    "md5": "^2.3.0",
     "path-browserify": "^1.0.1",
     "xmldom-sre": "^0.1.31"
   }

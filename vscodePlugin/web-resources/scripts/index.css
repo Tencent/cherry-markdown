@@ -2,8 +2,12 @@
     display: none;
 }
 
-.cherry-toolbar {
-    height: 32px;
+.cherry-toolbar, .toolbar-left, .toolbar-right {
+    height: 32px !important;
+}
+
+.cherry-highlight-line {
+    background-color: rgb(0,0,0,0) !important;
 }
 
 .cherry-dropdown {
@@ -19,7 +23,7 @@
 }
 
 .cherry-toolbar .cherry-toolbar-insertChart {
-    display: none;
+    /* display: none; */
 }
 
 .markdown-preview-only .cherry-toolbar {
