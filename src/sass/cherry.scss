@@ -562,6 +562,18 @@
     list-style: square;
   }
 
+  div[data-type="codeBlock"] {
+    position: relative;
+    .cherry-code-preview-lang-select{
+      position: absolute;
+      transform: translate(2px, 50%);
+    }
+
+    pre {
+      padding: 2em 1em 1em !important;
+    }
+  }
+
   div[data-type="codeBlock"]:hover {
     .cherry-copy-code-block {
       display: block !important;

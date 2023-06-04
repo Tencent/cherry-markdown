@@ -2711,6 +2711,16 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-previewer .cherry-list__square {
   list-style: square;
 }
+.cherry-previewer div[data-type=codeBlock] {
+  position: relative;
+}
+.cherry-previewer div[data-type=codeBlock] .cherry-code-preview-lang-select {
+  position: absolute;
+  transform: translate(2px, 50%);
+}
+.cherry-previewer div[data-type=codeBlock] pre {
+  padding: 2em 1em 1em !important;
+}
 .cherry-previewer div[data-type=codeBlock]:hover .cherry-copy-code-block {
   display: block !important;
   position: relative;
