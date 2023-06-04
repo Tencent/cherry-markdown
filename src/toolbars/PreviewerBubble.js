@@ -20,6 +20,7 @@ import { drawioDialog } from '@/utils/dialog';
 import Event from '@/Event';
 import { copyToClip } from '@/utils/copy';
 import { imgDrawioReg, getCodeBlockRule } from '@/utils/regexp';
+import { CODE_PREVIEWER_LANG_SELECT_ID } from '@/utils/code-preview-language-setting';
 /**
  * 预览区域的响应式工具栏
  */
@@ -170,11 +171,10 @@ export default class PreviewerBubble {
   }
 
   $onChange(e) {
-    console.log(e);
     const { target } = e;
-    if (target.className === 'cherry-preview-code-lang-select') {
-      console.log('change lang', e);
-      // to do;
+    // code预览区域，修改语言设置项事件处理
+    if (target.className === CODE_PREVIEWER_LANG_SELECT_ID) {
+      this.$codePreviewLangSelectEventHandler(e);
     }
   }
 
@@ -389,4 +389,50 @@ export default class PreviewerBubble {
   $showBorderBubbles() {}
 
   $showBtnBubbles() {}
+
+  /**
+   * 修改预览区域代码语言设置的回调
+   */
+  $codePreviewLangSelectEventHandler(event) {
+    // console.log(event);
+    const list = Array.from(this.previewerDom.querySelectorAll(`.${CODE_PREVIEWER_LANG_SELECT_ID}`));
+    const codePreviewIndex = list.indexOf(event.target);
+    // console.log(codePreviewIndex);
+    // console.log('editor value list:', this.editor.editor.getValue().split('\n'));
+    const contentList = this.editor.editor.getValue().split('\n');
+    let targetCodePreviewSelectLine = -1;
+    let findCodeArea = -1;
+    // 查找选择设置的代码块在哪一行:
+    let left = 0;
+    while (left < contentList.length) {
+      if (findCodeArea >= codePreviewIndex) {
+        break;
+      }
+      let right = left + 1;
+      if (/^`{3,}/.test(contentList[left])) {
+        while (right < contentList.length) {
+          let isMatched = false;
+          if (/^`{3,}$/.test(contentList[right])) {
+            isMatched = true;
+            findCodeArea = findCodeArea + 1;
+            // console.log('match status:', findCodeArea, codePreviewIndex, left, right);
+            if (findCodeArea === codePreviewIndex) {
+              targetCodePreviewSelectLine = left;
+            }
+          }
+          right = right + 1;
+          if (isMatched) {
+            break;
+          }
+        }
+      }
+      left = right;
+    }
+    // console.log('find res:', targetCodePreviewSelectLine);
+    this.editor.editor.setSelection(
+      { line: targetCodePreviewSelectLine, ch: 0 },
+      { line: targetCodePreviewSelectLine, ch: 100 },
+    );
+    this.editor.editor.replaceSelection(`\`\`\`${event.target.value || ''}`);
+  }
 }
