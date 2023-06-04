@@ -2145,6 +2145,27 @@ div[data-type=codeBlock] .token.inserted {
   max-height: 100%;
   min-height: 100%;
 }
+.cherry div[data-type=codeBlock] {
+  position: relative;
+}
+.cherry div[data-type=codeBlock] .cherry-code-preview-lang-select {
+  position: absolute;
+  transform: translate(2px, 50%);
+}
+.cherry div[data-type=codeBlock] pre {
+  padding: 2em 1em 1em !important;
+}
+.cherry .cherry-preview--full div[data-type=codeBlock] {
+  position: unset;
+}
+.cherry .cherry-preview--full div[data-type=codeBlock] .cherry-code-preview-lang-select {
+  position: unset;
+  transform: unset;
+  display: none;
+}
+.cherry .cherry-preview--full div[data-type=codeBlock] pre {
+  padding: unset !important;
+}
 
 .cherry {
   font-family: "Helvetica Neue", Arial, "Hiragino Sans GB", "STHeiti", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
@@ -2710,16 +2731,6 @@ div[data-type=codeBlock] .token.inserted {
 }
 .cherry-previewer .cherry-list__square {
   list-style: square;
-}
-.cherry-previewer div[data-type=codeBlock] {
-  position: relative;
-}
-.cherry-previewer div[data-type=codeBlock] .cherry-code-preview-lang-select {
-  position: absolute;
-  transform: translate(2px, 50%);
-}
-.cherry-previewer div[data-type=codeBlock] pre {
-  padding: 2em 1em 1em !important;
 }
 .cherry-previewer div[data-type=codeBlock]:hover .cherry-copy-code-block {
   display: block !important;

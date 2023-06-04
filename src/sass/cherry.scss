@@ -45,6 +45,33 @@
       min-height: 100%;
     }
   }
+
+  div[data-type="codeBlock"] {
+    position: relative;
+    .cherry-code-preview-lang-select{
+      position: absolute;
+      transform: translate(2px, 50%);
+    }
+
+    pre {
+      padding: 2em 1em 1em !important;
+    }
+  }
+
+  .cherry-preview--full {
+    div[data-type="codeBlock"] {
+      position: unset;
+      .cherry-code-preview-lang-select{
+        position: unset;
+        transform: unset;
+        display: none;
+      }
+  
+      pre {
+        padding: unset !important;
+      }
+    }
+  }
 }
 
 .cherry {
@@ -562,17 +589,6 @@
     list-style: square;
   }
 
-  div[data-type="codeBlock"] {
-    position: relative;
-    .cherry-code-preview-lang-select{
-      position: absolute;
-      transform: translate(2px, 50%);
-    }
-
-    pre {
-      padding: 2em 1em 1em !important;
-    }
-  }
 
   div[data-type="codeBlock"]:hover {
     .cherry-copy-code-block {
