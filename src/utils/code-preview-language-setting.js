@@ -1,6 +1,6 @@
 // 预览区域代码块可切换语言功能: https://github.com/Tencent/cherry-markdown/issues/433;
 
-export const CODE_PREVIEWER_LANG_SELECT_ID = 'cherry-code-preview-lang-select';
+export const CODE_PREVIEWER_LANG_SELECT_CLASS_NAME = 'cherry-code-preview-lang-select';
 
 /**
  * 生成preview区域的代码语言设置区域
@@ -12,7 +12,7 @@ export const getCodePreviewLangSelectElement = (lang) => {
     }
     return `<option value="${item}">${item}</option>`;
   });
-  return `<select id="code-preview-lang-select" class="${CODE_PREVIEWER_LANG_SELECT_ID}">
+  return `<select id="code-preview-lang-select" class="${CODE_PREVIEWER_LANG_SELECT_CLASS_NAME}">
       <option value="" selected disabled hidden>Choose here</option>
       ${optionsElement.join('')}
     </select>`;

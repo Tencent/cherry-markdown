@@ -20,7 +20,7 @@ import { drawioDialog } from '@/utils/dialog';
 import Event from '@/Event';
 import { copyToClip } from '@/utils/copy';
 import { imgDrawioReg, getCodeBlockRule } from '@/utils/regexp';
-import { CODE_PREVIEWER_LANG_SELECT_ID } from '@/utils/code-preview-language-setting';
+import { CODE_PREVIEWER_LANG_SELECT_CLASS_NAME } from '@/utils/code-preview-language-setting';
 /**
  * 预览区域的响应式工具栏
  */
@@ -173,7 +173,7 @@ export default class PreviewerBubble {
   $onChange(e) {
     const { target } = e;
     // code预览区域，修改语言设置项事件处理
-    if (target.className === CODE_PREVIEWER_LANG_SELECT_ID) {
+    if (target.className === CODE_PREVIEWER_LANG_SELECT_CLASS_NAME) {
       this.$codePreviewLangSelectEventHandler(e);
     }
   }
@@ -395,7 +395,7 @@ export default class PreviewerBubble {
    */
   $codePreviewLangSelectEventHandler(event) {
     // console.log(event);
-    const list = Array.from(this.previewerDom.querySelectorAll(`.${CODE_PREVIEWER_LANG_SELECT_ID}`));
+    const list = Array.from(this.previewerDom.querySelectorAll(`.${CODE_PREVIEWER_LANG_SELECT_CLASS_NAME}`));
     const codePreviewIndex = list.indexOf(event.target);
     // console.log(codePreviewIndex);
     // console.log('editor value list:', this.editor.editor.getValue().split('\n'));
