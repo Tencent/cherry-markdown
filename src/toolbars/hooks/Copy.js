@@ -78,7 +78,7 @@ export default class Copy extends MenuBase {
     // 切换loading状态
     if (this.isLoading) {
       const loadingButton = document.querySelector('.icon-loading');
-      loadingButton.outerHTML = '<i class="ch-icon ch-icon-copy" title="复制内容"></i>';
+      loadingButton.outerHTML = `<i class="ch-icon ch-icon-copy" title="${this.locale.copy}"></i>`;
     } else {
       const copyButton = document.querySelector('.ch-icon-copy');
       copyButton.outerHTML = '<div class="icon-loading loading"></div>';

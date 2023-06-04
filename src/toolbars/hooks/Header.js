@@ -56,7 +56,7 @@ export default class Header extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    let $selection = getSelection(this.editor.editor, selection, 'line', true) || '标题';
+    let $selection = getSelection(this.editor.editor, selection, 'line', true) || this.locale.header;
     const header = this.$getFlagStr(shortKey);
     if (!this.isSelections && !this.$testIsHead($selection)) {
       this.getMoreSelection('\n', '', () => {
