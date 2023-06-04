@@ -7,15 +7,11 @@ export const CODE_PREVIEWER_LANG_SELECT_ID = 'cherry-code-preview-lang-select';
  */
 export const getCodePreviewLangSelectElement = (lang) => {
   const optionsElement = codePreviewLangSelectList.map((item) => {
-    console.log(item, lang, lang === item, lang === item ? 'selected' : '');
     if (lang === item) {
-      return `<option value="${item}" selected>${item}</option>`;
+      return `<option value="${item}" selected="selected">${item}</option>`;
     }
     return `<option value="${item}">${item}</option>`;
-    // return `<option value="${item}" ${lang === item ? 'selected' : ''}>${item}</option>`;
   });
-
-  console.log(optionsElement);
   return `<select id="code-preview-lang-select" class="${CODE_PREVIEWER_LANG_SELECT_ID}">
       <option value="" selected disabled hidden>Choose here</option>
       ${optionsElement.join('')}
