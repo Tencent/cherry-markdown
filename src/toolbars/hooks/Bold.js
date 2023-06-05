@@ -39,7 +39,7 @@ export default class Bold extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    let $selection = this.getSelection(selection) || '加粗';
+    let $selection = this.getSelection(selection) || this.locale.bold;
     // 如果是单选，并且选中内容的开始结束内没有加粗语法，则扩大选中范围
     if (!this.isSelections && !this.$testIsBold($selection)) {
       this.getMoreSelection('**', '**', () => {

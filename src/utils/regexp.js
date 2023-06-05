@@ -176,7 +176,7 @@ export function getCodeBlockRule() {
  * @returns {String}
  */
 export function getListFromStr(selection, type) {
-  let $selection = selection ? selection : 'No.1\n    No.1.1\nNo.2';
+  let $selection = selection ? selection : 'Item 1\n    Item 1.1\nItem 2';
   $selection = $selection.replace(/^\n+/, '').replace(/\n+$/, '');
   let pre = '1.';
   switch (type) {
