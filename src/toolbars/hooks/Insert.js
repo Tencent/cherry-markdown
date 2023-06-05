@@ -109,13 +109,13 @@ export default class Insert extends MenuBase {
         return `${selection}\n\n$ e=mc^2 $\n\n`;
       case 'checklist':
         // 插入检查项
-        return `${selection}\n\n- [x] No.1\n- [ ] No.2\n- [ ] No.3\n`;
+        return `${selection}\n\n- [x] Item 1\n- [ ] Item 2\n- [ ] Item 3\n`;
       case 'toc':
         // 插入目录
         return `${selection}\n\n[[toc]]\n`;
       case 'link':
         // 插入超链接
-        return `${selection}[超链接](http://url.com) `;
+        return `${selection}[${this.locale.link}](http://url.com) `;
       case 'image':
         // 插入图片，调用上传文件逻辑
         this.handleUpload('image');

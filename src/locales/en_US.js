@@ -29,7 +29,7 @@ export default {
   quickTable: 'Quick Table',
   quote: 'Quote',
   size: 'Size',
-  color: 'Color',
+  color: 'Text Color & Background',
   strikethrough: 'Strikethrough',
   sub: 'Sub',
   sup: 'Sup',
