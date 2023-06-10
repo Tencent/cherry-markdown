@@ -45,6 +45,26 @@
       min-height: 100%;
     }
   }
+
+  div[data-type="codeBlock"]:hover  {
+    position: relative;
+    .cherry-code-preview-lang-select{
+      display: block !important;
+      position: absolute;
+      transform: translate(2px, 50%);
+    }
+
+  }
+
+  .cherry-preview--full {
+    div[data-type="codeBlock"]:hover  {
+      position: unset;
+      .cherry-code-preview-lang-select{
+        display: none !important;
+        position: unset;
+      }
+    }
+  }
 }
 
 .cherry {
@@ -561,6 +581,7 @@
   .cherry-list__square {
     list-style: square;
   }
+
 
   div[data-type="codeBlock"]:hover {
     .cherry-copy-code-block {
