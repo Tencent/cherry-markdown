@@ -11,7 +11,7 @@
 - [图片所见即所得编辑尺寸](img.html){target=_blank}
 - [标题自动序号](head_num.html){target=_blank}
 
-<!-- <script>alert('hello')</script> -->
+<script>alert('hello')</script>
 <style>
   div {
     color:red;
