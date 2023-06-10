@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Cherry Markdown API</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0;
+      width: 70%;
+      min-width: 800px;
+      height: 100%;
+    }
+
+    #markdown {
+      position: fixed;
+      width: 50%;
+      right: 0;
+      bottom: 0;
+      min-width: 800px;
+    }
+
+    .apis {
+      position: absolute;
+      left: 0;
+      width: 50%;
+    }
+
+    .one-api {
+      padding-left: 25px;
+      margin-top: 10px;
+      border-top: 1px solid #dfe6ee;
+      padding-top: 10px;
+    }
+
+    textarea {
+      display: inline-block;
+      width: 80%;
+    }
+
+    .one-api__try a {
+      cursor: pointer;
+      color: #3582fb;
+      font-size: 14px;
+    }
+
+    .cherry-api-table {
+      width: 90%;
+    }
+
+    .cherry-api-table th {
+      background-color: #dfe6ee;
+    }
+
+    .cherry-api-table td {
+      border-bottom: 1px solid #dfe6ee;
+      text-align: center;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css"
+    href="https://cdn.jsdelivr.net/npm/cherry-markdown@latest/dist/cherry-markdown.css">
+  <link rel="Shortcut Icon" href="./logo/favicon.ico">
+  <link rel="Shortcut Icon" href="../logo/favicon.ico">
+  <link rel="Bookmark" href="../logo/favicon.ico">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+    integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
+  <link href="./markdown/api.md" rel="preload">
+</head>
+
+<body>
+  <div class="apis" onclick="dealClick">
+    <h1>Cherry API</h1>
+    <div class="one-api">
+      <h2 class="one-api__name">setMarkdown(content:string, keepCursor = false)</h2>
+      <p class="one-api__desc">设置内容，setValue(content:string, keepCursor = false)有同样的功能<br>keepCursor = true 更新内容的时候保持光标位置</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.setMarkdown("输入内容");
+setTimeout(()=>{cherryObj.setMarkdown("输11111111111内容3223",1);},5000);
+</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">insert(content:string, isSelect = false, anchor = false, focus = true)</h2>
+      <p class="one-api__desc">插入内容<br>isSelect=true 选中刚插入的内容<br>anchor=false 在光标处插入内容，anchor=[1,3] 在第2行第4个字符处插入内容</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.insert("在光标处插入内容");
+cherryObj.insert("在第二行插入内容，并选中插入的内容", true, [1,0]);
+</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">getMarkdown()</h2>
+      <p class="one-api__desc">获取markdown内容</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+alert(cherryObj.getMarkdown());
+console.log(cherryObj.getMarkdown());</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">getHtml()</h2>
+      <p class="one-api__desc">获取渲染后的html内容</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+alert(cherryObj.getHtml());
+console.log(cherryObj.getHtml());</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">export(type:string)</h2>
+      <p class="one-api__desc">导出预览区域的内容，type：{'pdf'|'img'}</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="5">
+if(confirm('导出pdf')) {
+  cherryObj.export();
+}else if(confirm('导出长图')) {
+  cherryObj.export('img');
+}</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">switchModel(model:string)</h2>
+      <p class="one-api__desc">
+        切换模式：{'edit&preview'|'editOnly'|'previewOnly'}
+      </p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="7">
+if(confirm('只读模式')) {
+  cherryObj.switchModel('previewOnly');
+}else if(confirm('纯编辑模式')) {
+  cherryObj.switchModel('editOnly');
+}else if(confirm('双栏编辑模式')) {
+  cherryObj.switchModel('edit&preview');
+}</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">getToc()</h2>
+      <p class="one-api__desc">获取由标题组成的目录</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+alert(cherryObj.getToc());
+console.log(cherryObj.getToc());</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">getCodeMirror()</h2>
+      <p class="one-api__desc">获取左侧编辑器实例</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+alert(cherryObj.getCodeMirror());
+console.log(cherryObj.getCodeMirror());</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">getPreviewer()</h2>
+      <p class="one-api__desc">获取右侧预览区对象实例</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+alert(cherryObj.getPreviewer());
+console.log(cherryObj.getPreviewer());</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <br>
+    <hr>
+
+    <h1>Cherry.engine API</h1>
+
+    <div class="one-api">
+      <h2 class="one-api__name">engine.makeHtml(markdown:string)</h2>
+      <p class="one-api__desc">将markdown字符串渲染成Html</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+alert(cherryObj.engine.makeHtml('This is `inline code`'));
+console.log(cherryObj.engine.makeHtml('This is `inline code`'));</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">engine.makeMarkdown(html:string)</h2>
+      <p class="one-api__desc">将html字符串渲染成markdown</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="4">
+var html = `<p>This is <code>inline code</code></p>`;
+alert(cherryObj.engine.makeMarkdown(html));
+console.log(cherryObj.engine.makeMarkdown(html));</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <br>
+    <hr>
+
+    <h1>Cherry.toolbar.toolbarHandlers API</h1>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.bold()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入加粗语法</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.toolbar.toolbarHandlers.bold()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.italic()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入斜体语法</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.toolbar.toolbarHandlers.italic()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.header(level:int)</h2>
+      <p class="one-api__desc">向cherry编辑器中插入标题语法</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="3">
+cherryObj.toolbar.toolbarHandlers.header(1)
+cherryObj.toolbar.toolbarHandlers.header(2)
+cherryObj.toolbar.toolbarHandlers.header(4)</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.strikethrough()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入删除线语法</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.toolbar.toolbarHandlers.strikethrough()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.list(type:string)</h2>
+      <p class="one-api__desc">
+        向cherry编辑器中插入有序、无序列表或者checklist语法
+      <table class="cherry-api-table">
+        <thead>
+          <tr>
+            <th>level</th>
+            <th>效果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>'1'</td>
+            <td>ol 列表</td>
+          </tr>
+          <tr>
+            <td>'2'</td>
+            <td>ul 列表</td>
+          </tr>
+          <tr>
+            <td>'3'</td>
+            <td>checklist</td>
+          </tr>
+        </tbody>
+      </table>
+      </p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="7">
+if(confirm('有序列表')) {
+  cherryObj.toolbar.toolbarHandlers.list(1);
+}else if(confirm('无序列表')) {
+  cherryObj.toolbar.toolbarHandlers.list('2');
+}else if(confirm('checklist')) {
+  cherryObj.toolbar.toolbarHandlers.list(3);
+}</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.insert(type:string)</h2>
+      <p class="one-api__desc">
+        向cherry编辑器中插入特定语法：
+      <table class="cherry-api-table">
+        <thead>
+          <tr>
+            <th>type</th>
+            <th>效果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>'hr'</td>
+            <td>删除线</td>
+          </tr>
+          <tr>
+            <td>'br'</td>
+            <td>强制换行</td>
+          </tr>
+          <tr>
+            <td>'code'</td>
+            <td>代码块</td>
+          </tr>
+          <tr>
+            <td>'formula'</td>
+            <td>行内公式</td>
+          </tr>
+          <tr>
+            <td>'checklist'</td>
+            <td>检查项</td>
+          </tr>
+          <tr>
+            <td>'toc'</td>
+            <td>目录</td>
+          </tr>
+          <tr>
+            <td>'link'</td>
+            <td>超链接</td>
+          </tr>
+          <tr>
+            <td>'image'</td>
+            <td>图片</td>
+          </tr>
+          <tr>
+            <td>'video'</td>
+            <td>视频</td>
+          </tr>
+          <tr>
+            <td>'audio'</td>
+            <td>音频</td>
+          </tr>
+          <tr>
+            <td>'normal-table'</td>
+            <td>插入3行5列的表格</td>
+          </tr>
+          <tr>
+            <td>'normal-table-row*col'</td>
+            <td>如<code>normal-table-2*4</code>插入2行(包含表头是3行)4列的表格</td>
+          </tr>
+        </tbody>
+      </table>
+      </p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="7">
+if(confirm('插入3*4的表格')) {
+  cherryObj.toolbar.toolbarHandlers.insert('normal-table-3*4');
+}else if(confirm('插入checklist')) {
+  cherryObj.toolbar.toolbarHandlers.insert('checklist');
+}</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.graph(type:string)</h2>
+      <p class="one-api__desc">
+        向cherry编辑器中插入画图语法
+      <table class="cherry-api-table">
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>效果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>'1'</td>
+            <td>流程图</td>
+          </tr>
+          <tr>
+            <td>'2'</td>
+            <td>时序图</td>
+          </tr>
+          <tr>
+            <td>'3'</td>
+            <td>状态图</td>
+          </tr>
+          <tr>
+            <td>'4'</td>
+            <td>类图</td>
+          </tr>
+          <tr>
+            <td>'5'</td>
+            <td>饼图</td>
+          </tr>
+          <tr>
+            <td>'6'</td>
+            <td>甘特图</td>
+          </tr>
+        </tbody>
+      </table>
+      </p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="3">
+cherryObj.toolbar.toolbarHandlers.graph(1)
+cherryObj.toolbar.toolbarHandlers.graph('2')
+cherryObj.toolbar.toolbarHandlers.graph(4)</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="markdown"></div>
+
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.js"></script>
+  <!--<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>-->
+  <script src="https://cdn.jsdelivr.net/npm/cherry-markdown@latest/dist/cherry-markdown.js"></script>
+  <script src="./scripts/api-demo.js"></script>
+</body>
+
+</html>
