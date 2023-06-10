@@ -48,7 +48,7 @@ expect.extend({
 
 describe('engine', () => {
   suites.forEach((item, index) => {
-    test(`commonmark-${index}`, () => {
+    test(`commonmark-${item.example}`, () => {
     // @ts-ignore
       expect(cherryEngine.makeHtml(item.markdown)).matchHTML(item.html, item.markdown);
     });
