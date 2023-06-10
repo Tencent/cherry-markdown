@@ -431,10 +431,13 @@ export default class PreviewerBubble {
       }
       left = right;
     }
-    this.editor.editor.setSelection(
-      { line: targetCodePreviewSelectLine, ch: matchedSignalNum },
-      { line: targetCodePreviewSelectLine, ch: contentList[targetCodePreviewSelectLine].length },
-    );
-    this.editor.editor.replaceSelection(event.target.value || '');
+    // 只有匹配了代码块才进行替换
+    if (matchedSignalNum) {
+      this.editor.editor.setSelection(
+        { line: targetCodePreviewSelectLine, ch: matchedSignalNum },
+        { line: targetCodePreviewSelectLine, ch: contentList[targetCodePreviewSelectLine].length },
+      );
+      this.editor.editor.replaceSelection(event.target.value || '');
+    }
   }
 }
