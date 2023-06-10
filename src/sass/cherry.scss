@@ -46,29 +46,22 @@
     }
   }
 
-  div[data-type="codeBlock"] {
+  div[data-type="codeBlock"]:hover  {
     position: relative;
     .cherry-code-preview-lang-select{
+      display: block !important;
       position: absolute;
       transform: translate(2px, 50%);
     }
 
-    pre {
-      padding: 2em 1em 1em !important;
-    }
   }
 
   .cherry-preview--full {
-    div[data-type="codeBlock"] {
+    div[data-type="codeBlock"]:hover  {
       position: unset;
       .cherry-code-preview-lang-select{
+        display: none !important;
         position: unset;
-        transform: unset;
-        display: none;
-      }
-  
-      pre {
-        padding: unset !important;
       }
     }
   }

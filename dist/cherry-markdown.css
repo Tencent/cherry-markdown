@@ -2145,26 +2145,20 @@ div[data-type=codeBlock] .token.inserted {
   max-height: 100%;
   min-height: 100%;
 }
-.cherry div[data-type=codeBlock] {
+.cherry div[data-type=codeBlock]:hover {
   position: relative;
 }
-.cherry div[data-type=codeBlock] .cherry-code-preview-lang-select {
+.cherry div[data-type=codeBlock]:hover .cherry-code-preview-lang-select {
+  display: block !important;
   position: absolute;
   transform: translate(2px, 50%);
 }
-.cherry div[data-type=codeBlock] pre {
-  padding: 2em 1em 1em !important;
-}
-.cherry .cherry-preview--full div[data-type=codeBlock] {
+.cherry .cherry-preview--full div[data-type=codeBlock]:hover {
   position: unset;
 }
-.cherry .cherry-preview--full div[data-type=codeBlock] .cherry-code-preview-lang-select {
+.cherry .cherry-preview--full div[data-type=codeBlock]:hover .cherry-code-preview-lang-select {
+  display: none !important;
   position: unset;
-  transform: unset;
-  display: none;
-}
-.cherry .cherry-preview--full div[data-type=codeBlock] pre {
-  padding: unset !important;
 }
 
 .cherry {

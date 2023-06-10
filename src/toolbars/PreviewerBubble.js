@@ -394,14 +394,13 @@ export default class PreviewerBubble {
    * 修改预览区域代码语言设置的回调
    */
   $codePreviewLangSelectEventHandler(event) {
-    // console.log(event);
     const list = Array.from(this.previewerDom.querySelectorAll(`.${CODE_PREVIEWER_LANG_SELECT_CLASS_NAME}`));
     const codePreviewIndex = list.indexOf(event.target);
-    // console.log(codePreviewIndex);
-    // console.log('editor value list:', this.editor.editor.getValue().split('\n'));
     const contentList = this.editor.editor.getValue().split('\n');
     let targetCodePreviewSelectLine = -1;
     let findCodeArea = -1;
+    // 相互匹配的`的数量
+    let matchedSignalNum = 0;
     // 查找选择设置的代码块在哪一行:
     let left = 0;
     while (left < contentList.length) {
@@ -409,15 +408,19 @@ export default class PreviewerBubble {
         break;
       }
       let right = left + 1;
-      if (/^`{3,}/.test(contentList[left])) {
+      if (/^`{3,}[\s\S]*$/.test(contentList[left])) {
+        // 起始的`的数量
+        const topSignalNum = contentList[left].match(/^(`*)/g)?.[0].length ?? 0;
         while (right < contentList.length) {
           let isMatched = false;
-          if (/^`{3,}$/.test(contentList[right])) {
+          const bottomSignalNum = contentList[right].match(/^(`*)/g)?.[0].length ?? 0;
+          // 支持: 3个及以上的`的相互匹配
+          if (/^`{3,}$/.test(contentList[right]) && bottomSignalNum === topSignalNum) {
             isMatched = true;
             findCodeArea = findCodeArea + 1;
-            // console.log('match status:', findCodeArea, codePreviewIndex, left, right);
             if (findCodeArea === codePreviewIndex) {
               targetCodePreviewSelectLine = left;
+              matchedSignalNum = topSignalNum;
             }
           }
           right = right + 1;
@@ -428,11 +431,10 @@ export default class PreviewerBubble {
       }
       left = right;
     }
-    // console.log('find res:', targetCodePreviewSelectLine);
     this.editor.editor.setSelection(
-      { line: targetCodePreviewSelectLine, ch: 0 },
-      { line: targetCodePreviewSelectLine, ch: 100 },
+      { line: targetCodePreviewSelectLine, ch: matchedSignalNum },
+      { line: targetCodePreviewSelectLine, ch: contentList[targetCodePreviewSelectLine].length },
     );
-    this.editor.editor.replaceSelection(`\`\`\`${event.target.value || ''}`);
+    this.editor.editor.replaceSelection(event.target.value || '');
   }
 }
