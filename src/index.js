@@ -22,7 +22,7 @@ const mermaidAPI = mermaid?.mermaidAPI;
 Cherry.usePlugin(MermaidCodeEngine, {
   mermaidAPI,
   theme: 'default',
-  sequence: { useMaxWidth: false, showSequenceNumbers: true },
+  sequence: { useMaxWidth: false },
 });
 Cherry.usePlugin(PlantUMLCodeEngine, {});
 
