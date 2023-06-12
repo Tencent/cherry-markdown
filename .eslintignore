@@ -10,3 +10,4 @@ example-applications/**
 examples/**
 client
 vscodePlugin
+docs/**
