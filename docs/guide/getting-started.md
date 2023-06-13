@@ -27,6 +27,11 @@ yarn add echarts@4.6.0
 
 ## 使用
 
+::: tip
+如果你想了解详细配置选项？跳至 [基础配置](../configuration/base).
+:::
+
+
 ### Browser - UMD
 
 ```html
