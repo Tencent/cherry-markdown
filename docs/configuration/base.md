@@ -131,18 +131,18 @@ toolbars:{
 
 - Description: 用于配置顶部工具栏及菜单按钮顺序
 - Type: `Array<string | { insert: Array<string> }> | false`
-- Default: `['bold', 'italic', 'strikethrough', '|', 'color', 'header', '|', 'list', { insert: [ 'image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'line-table', 'bar-table', 'pdf', 'word', ], }, 'graph', 'settings']`
+- Default: `['bold', 'italic', 'strikethrough', '|', 'color', 'header', '|', 'list', { insert: [ 'image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word', ], }, 'graph', 'settings']`
 - Options:
-  - `false`: 传入 **false** 时关闭顶部菜单 **(v4.0.11及以前版本不支持)**
+  - `false`: 传入 **false** 时关闭顶部菜单
   - `string[]`: 菜单名称的集合，渲染的菜单按钮顺序跟随数组的元素顺序
 
 #### `toolbarRight`
 
-- Description: 工具栏右侧展示的工具选项
+- Description: 顶部工具栏右侧展示的工具选项
 - Type: `Array<string | { insert: Array<string> }> | false`
 - Default:[]
 - Options:
-  - `false`: 传入 **false** 时关闭顶部菜单 **(v4.0.11及以前版本不支持)**
+  - `false`: 传入 **false** 时关闭顶部菜单
   - `string[]`: 菜单名称的集合，渲染的菜单按钮顺序跟随数组的元素顺序
 
 #### `sidebar`
@@ -151,7 +151,7 @@ toolbars:{
 - Type: `Array<string | { insert: Array<string> }> | false`
 - Default:`['mobilePreview', 'copy', 'theme', 'customMenu_question']`
 - Options:
-  - `false`: 传入 **false** 时关闭顶部菜单 **(v4.0.11及以前版本不支持)**
+  - `false`: 传入 **false** 时关闭顶部菜单
   - `string[]`: 菜单名称的集合，渲染的菜单按钮顺序跟随数组的元素顺序
 
 #### `bubble`
@@ -174,7 +174,7 @@ toolbars:{
 
 #### `customMenu`
 
-- Description: 用于配置编辑区域的主题
+- Description:声明自定义菜单按钮。声明后可在toolbar、bubble等配置里使用。
 - Type: `Array<string | { insert: Array<string> }> | false`
 - Default: `{}`
 
@@ -188,8 +188,8 @@ toolbars:{
 :::
 
 - Options:
-  - **audio**:  插入音频
-  - **bartable**:  插入柱状图图+表格
+  - ~~**audio**: 插入音频~~<Badge type="danger" text="敬请期待" />
+  - ~~**bartable**:  插入柱状图图+表格~~<Badge type="danger" text="敬请期待" />
   - **bold**:  加粗按钮
   - **br**:   插入换行
   - **checklist**:  下标的按钮
@@ -211,18 +211,17 @@ toolbars:{
   - **hr**:  插入分割线
   - **image**:  插入图片
   - **insert**:  "插入"按钮
-  - **italic**:  插入斜体的按钮
-  - **justify**:  插入对齐方式
-  - **link**:  插入超链接
-  - **linetable**:  插入折线图+表格
+  - ~~**italic**:  插入斜体的按钮~~<Badge type="danger" text="敬请期待" />
+  - ~~**justify**:  插入对齐方式~~<Badge type="danger" text="敬请期待" />
+  - ~~**link**:  插入超链接~~<Badge type="danger" text="敬请期待" />
+  - ~~**linetable**:  插入折线图+表格~~<Badge type="danger" text="敬请期待" />
   - **list**:  插入有序/无序/checklist列表的按钮
   - **mobilepreview**:  预览区域切换到“移动端视图”的按钮
   - **ol**:  无序列表
-  - **panel**:  插入面板
-  - **pdf**:  插入pdf
-  - **quote**:  插入“引用”的按钮
-  - **quicktable**:  插入“简单表格”的按钮;所谓简单表格，是源于[TAPD](https://tapd.cn) wiki应用里的一种表格语法
-                     (该表格语法不是markdown通用语法，请慎用)
+  - ~~**panel**:  插入面板~~<Badge type="danger" text="敬请期待" />
+  - ~~**pdf**:  插入pdf~~<Badge type="danger" text="敬请期待" />
+  - ~~**quote**:  插入“引用”的按钮~~<Badge type="danger" text="敬请期待" />
+  - ~~**quicktable**:  插入“简单表格”的按钮;所谓简单表格，是源于[TAPD](https://tapd.cn) wiki应用里的一种表格语法(该表格语法不是markdown通用语法，请慎用)~~<Badge type="danger" text="敬请期待" />
   - **redo**:  撤销/重做 里的“重做”按键
   - **ruby**:  生成ruby，使用场景：给中文增加拼音、给中文增加英文、给英文增加中文等等
   - **settings**:  设置按钮
@@ -233,8 +232,6 @@ toolbars:{
   - **sup**:  上标的按钮
   - **switchmodel**:  切换预览/编辑模式的按钮(只能切换成纯编辑模式和纯预览模式)
   - **table**:  插入普通表格
-    - **line-table**: 插入带折线图的高级表格(需要引入**echarts**)
-    - **bar-table**: 插入带柱状图的高级表格(需要引入**echarts**)
   - **theme**:  修改主题
   - **toc**:  插入目录
   - **togglepreview**: 关闭/展示预览区域的按钮
@@ -244,9 +241,9 @@ toolbars:{
   - **video**:  插入视频
   - **word**:插入word
 
-## engine 引擎配置
+## `engine` 引擎配置
 
-可通过配置 engine 对象来配置 markdown 的解析规则，比如 table 是否可使用 chart（pro 版本可用）
+可通过配置 engine 对象来配置 markdown 的解析规则
 
 ```js
   engine: {
@@ -404,7 +401,7 @@ toolbars:{
 
 ## `externals` 拓展配置
 
-外部依赖配置
+<!-- 外部依赖配置
 
 - Type: `{ [packageName: string]: Object }`
 - Default: `{}`
@@ -412,7 +409,7 @@ toolbars:{
   从全局对象引入
 
 ```Javascript
-new Markdown({
+new Cherry({
     externals: {
         echarts: window.echarts
     }
@@ -424,14 +421,14 @@ new Markdown({
 ```Javascript
 import echarts from 'echarts';
 
-new Markdown({
+new Cherry({
     externals: {
         echarts
     }
 });
-```
+``` -->
 
-## fileUpload 静态资源上传配置
+## `fileUpload` 静态资源上传配置
 
 Cherry Markdown Editor 不会直接上传图片或是文件，只会通过钩子函数(fileUpload)向上游提供用户所选择的图片、word 文档等，fileUpload 函数接受两个传入参数：
 
