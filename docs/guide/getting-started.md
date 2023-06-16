@@ -16,7 +16,7 @@ npm install cherry-markdown --save
 
 如果需要开启 `mermaid` 画图、表格自动转图表功能，需要同时添加`mermaid` 与`echarts`包。
 
-目前**Cherry**推荐的插件版本为`echarts@4.6.0`、`mermaid@8.11.1`
+目前 Cherry 推荐的插件版本为`echarts@4.6.0`、`mermaid@8.11.1`
 
 ```bash
 # 安装mermaid依赖开启mermaid画图功能
@@ -28,7 +28,7 @@ yarn add echarts@4.6.0
 ## 使用
 
 ::: tip
-如果你想了解详细配置选项？跳至 [基础配置](../configuration/base).
+如果你想了解详细配置选项？跳至 [基础配置](../configuration/base)。
 :::
 
 
@@ -66,7 +66,7 @@ const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!')
 
 ## 使用轻量版本
 
-因 mermaid 库尺寸非常大，Cherry 构建产物中包含了不内置 mermaid 的核心构建包，可按以下方式引入核心构建。
+因 `mermaid` 库尺寸非常大，Cherry 构建产物中包含了不内置 mermaid 的核心构建包，可按以下方式引入核心构建。
 
 ### 完整模式 (图形界面)
 

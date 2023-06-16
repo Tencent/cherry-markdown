@@ -6,16 +6,16 @@
 
 ```js
 engine: {
-    // 自定义语法
-    customSyntax: {
-        // 名字冲突时强制覆盖内置语法解析器
-        // SyntaxClass: {             
-        //   syntax: SyntaxClass,      
-        //   force: true,              
-        //   before: 'HOOK_NAME',      
-        //   after: 'HOOK_NAME'        
-        // }
-    }
+  // 自定义语法
+  customSyntax: {
+    // 名字冲突时强制覆盖内置语法解析器
+    // SyntaxClass: {             
+    //   syntax: SyntaxClass,      
+    //   force: true,              
+    //   before: 'HOOK_NAME',      
+    //   after: 'HOOK_NAME'        
+    // }
+  }
 }
 ```
 
@@ -56,25 +56,25 @@ engine: {
 
 ```Javascript
 const CustomHook = Cherry.createSyntaxHook(
-    'customHook',
-    Cherry.constants.HOOKS_TYPE_LIST.PAR,
-    {
-        makeHtml(str) {
-            console.log('hello custom hook');
-            return str;
-        },
-        rule() {
-            return { reg: new RegExp() };
-        }
+  'customHook',
+  Cherry.constants.HOOKS_TYPE_LIST.PAR,
+  {
+    makeHtml(str) {
+      console.log('hello custom hook');
+      return str;
+    },
+    rule() {
+      return { reg: new RegExp() };
     }
+  }
 );
 
 new Cherry({
-    engine: {
-        customSyntax: {
-          CustomHook: CustomHook
-        }
+  engine: {
+    customSyntax: {
+      CustomHook: CustomHook
     }
+  }
 });
 ```
 
@@ -82,29 +82,30 @@ new Cherry({
 
 ```Javascript
 new Cherry({
-    engine: {
-        customSyntax: {
-            CustomHook: {
-                syntax: CustomHook,
-                before: 'codeBlock',
-                // after: 'codeBlock'
-            }
-        }
+  engine: {
+    customSyntax: {
+      CustomHook: {
+        syntax: CustomHook,
+        before: 'codeBlock',
+        // after: 'codeBlock'
+      }
     }
+  }
 });
 ```
 
 #### 强制覆盖内置的语法Hook
 
 ```Javascript
-new Cherry({engine: {
-        customSyntax: {
-            CustomHook: {
-                syntax: CustomHook,
-                force: true
-            }
-        }
+new Cherry({
+  engine: {
+    customSyntax: {
+      CustomHook: {
+        syntax: CustomHook,
+        force: true
+      }
     }
+  }
 });
 ```
 
@@ -205,9 +206,12 @@ const customMenuC = Cherry.createMenuHook('帮助中心',  {
     }
   },
   subMenuConfig: [
-    { noIcon: true, name: '快捷键', onclick: (event)=>{cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'shortKey')} },
-    { noIcon: true, name: '联系我们', onclick: (event)=>{cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'github')} },
-    { noIcon: true, name: '更新日志', onclick: (event)=>{cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'release')} },
+    { noIcon: true, name: '快捷键', onclick: (event)=>
+      {cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'shortKey')} },
+    { noIcon: true, name: '联系我们', onclick: (event)=>
+      {cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'github')} },
+    { noIcon: true, name: '更新日志', onclick: (event)=>
+      {cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'release')} },
   ]
 });
 
