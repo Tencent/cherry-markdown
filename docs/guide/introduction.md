@@ -2,21 +2,22 @@
 
 ## 介绍
 
-Cherry Markdown Editor 是一款 Javascript Markdown 编辑器，具有开箱即用、轻量简洁、易于扩展等特点. 它可以运行在浏览器或服务端(NodeJs).
+Cherry Markdown Editor 是一款 Javascript Markdown 编辑器，具有开箱即用、轻量简洁、易于扩展等特点. 它可以运行在浏览器或服务端(NodeJs)。
 
 ::: tip
 
-只是想立即开始？跳至 [开始使用](./getting-started).
+只是想立即开始？跳至 [开始使用](./getting-started)。
 
 :::
 
-### **开箱即用**
+### 开箱即用
 
 开发者可以使用非常简单的方式调用并实例化 Cherry Markdown 编辑器，实例化的编辑器默认支持大部分常用的 markdown 语法（如标题、目录、流程图、公式等）。
 
-### **易于拓展**
+### 易于拓展
 
-当 Cherry Markdown 编辑器支持的语法不满足开发者需求时，可以快速的进行二次开发或功能扩展。同时，CherryMarkdown 编辑器应该由纯 JavaScript 实现，不应该依赖 angular、vue、react 等框架技术，框架只提供容器环境即可。
+当 Cherry Markdown 编辑器支持的语法不满足开发者需求时，可以快速的进行二次开发或功能扩展。
+同时，CherryMarkdown 编辑器应该由纯 JavaScript 实现，不应该依赖 angular、vue、react 等框架技术，框架只提供容器环境即可。
 
 ## 特性
 
@@ -53,12 +54,12 @@ Cherry Markdown Editor 是一款 Javascript Markdown 编辑器，具有开箱即
 
 ### 安全
 
-Cherry Markdown 有内置的安全 Hook，通过过滤白名单以及 DomPurify 进行扫描过滤.
+Cherry Markdown 有内置的安全 Hook，通过过滤白名单以及 DomPurify 进行扫描过滤。
 
 ### 样式主题
 
-Cherry Markdown 有多种样式主题选择
+Cherry Markdown 有多种样式主题选择。
 
 ### 特性展示
 
-这里可以看到特性的简短的演示 [语法特性](./features.md)
+这里可以看到特性的简短的演示 [语法特性](./features.md)。
