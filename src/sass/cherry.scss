@@ -658,7 +658,7 @@
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 2px;
-  max-height: 200px;
+  max-height: 500px;
   box-shadow: 0 2px 8px 1px #00000033;
 
   .cherry-suggester-panel__item {
@@ -674,6 +674,11 @@
       background-color: #f2f2f5;
       text-decoration: none;
       color: #eb7350;
+    }
+    & > i {
+      display: inline-block;
+      transform: translateY(2px);
+      margin-right: 8px;
     }
   }
 
