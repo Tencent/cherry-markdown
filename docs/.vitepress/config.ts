@@ -42,6 +42,14 @@ export default defineConfig({
           { text: '语法特性', link: '/guide/features' },
           { text: '快速预览', link: '/guide/examples' },
         ]
+      },
+      {
+        text: '配置',
+        items: [
+          { text: '基础配置', link: '/configuration/base' },
+          { text: '快速配置', link: '/configuration/quick-configuration' },
+          { text: '拓展配置', link: '/configuration/extensions' }, 
+        ]
       }
     ],
 
