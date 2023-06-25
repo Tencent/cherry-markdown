@@ -21,7 +21,7 @@ import { createElement } from '@/utils/dom';
 /**
  * @typedef {Object} SubMenuConfigItem
  * @property {string} name - 子菜单项名称
- * @property {string} iconName - 子菜单项图标名称
+ * @property {string=} iconName - 子菜单项图标名称
  * @property {function} onclick - 子菜单项点击事件
  */
 

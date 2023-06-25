@@ -33,18 +33,13 @@ export default class Table extends MenuBase {
    * @param {string} selection 被用户选中的文本内容
    * @returns {*} 回填到编辑器光标位置/选中文本区域的内容
    */
-  onClick(selection, shortKey = '', left = 0, top = 0) {
+  onClick(selection, shortKey = '') {
     // 如果二维面板处于隐藏状态，说明是第一次点击
     if (this.subBubbleTableMenu.dom.style.display === 'none' || !this.hasCacheOnce()) {
       // 插入表格，会出现一个二维面板，用户可以通过点击决定插入表格的行号和列号
-      if (left && top) {
-        this.subBubbleTableMenu.dom.style.left = `${left}px`;
-        this.subBubbleTableMenu.dom.style.top = `${top}px`;
-      } else {
-        const pos = this.dom.getBoundingClientRect();
-        this.subBubbleTableMenu.dom.style.left = `${pos.left + pos.width}px`;
-        this.subBubbleTableMenu.dom.style.top = `${pos.top + pos.height}px`;
-      }
+      const pos = this.dom.getBoundingClientRect();
+      this.subBubbleTableMenu.dom.style.left = `${pos.left + pos.width}px`;
+      this.subBubbleTableMenu.dom.style.top = `${pos.top + pos.height}px`;
       this.subBubbleTableMenu.show((row, col) => {
         const headerText = ' Header |'.repeat(col);
         const controlText = ' ------ |'.repeat(col);

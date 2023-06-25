@@ -73,52 +73,6 @@ var basicConfig = {
               return '';
             },
           },
-          {
-            keyword: '/',
-            suggestList(word, callback) {
-              callback([
-                {
-                  type: 'header',
-                  icon: 'h1',
-                  sub: 'h1',
-                  text: 'H1 一级标题',
-                },
-                {
-                  type: 'header',
-                  icon: 'h2',
-                  sub: 'h2',
-                  text: 'H2 二级标题',
-                },
-                {
-                  type: 'header',
-                  icon: 'h3',
-                  sub: 'h3',
-                  text: 'H3 三级标题',
-                },
-                {
-                  type: 'quickTable',
-                  icon: 'table',
-                  text: '快捷表格',
-                },
-                {
-                  type: 'codeBlock',
-                  icon: 'code',
-                  text: '代码块',
-                },
-                {
-                  type: 'graph',
-                  sub: 'insertFlow',
-                  icon: 'insertFlow',
-                  text: '流程图',
-                },
-                {
-                  type: 'formula',
-                  icon: 'insertFormula',
-                  text: '公式',
-                },
-              ]);
-            },
-          },
         ],
       },
     },
