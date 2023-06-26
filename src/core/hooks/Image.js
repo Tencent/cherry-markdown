@@ -100,7 +100,10 @@ export default class Image extends SyntaxBase {
         srcValue = imgAttrs.src || link;
       }
       const extendAttrStr = extendAttrs
-        ? extendAttrs.replace(/[{}]/g, '').replace(/([^=\s]+)=([^\s]+)/g, '$1="$2"')
+        ? extendAttrs
+            .replace(/[{}]/g, '')
+            .replace(/([^=\s]+)=([^\s]+)/g, '$1="$2"')
+            .replace(/&/g, '&amp;') // 对&多做一次转义，cherry现有的机制会自动把&amp;转成&，只有多做一次转义才能抵消cherry的机制
         : '';
       return `${leadingChar}<img ${srcProp}="${UrlCache.set(
         encodeURIOnce(this.urlProcessor(srcValue, 'image')),
