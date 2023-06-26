@@ -31,6 +31,8 @@ const formatOutput = (message, input, standard, result) => {
     input: ${input}
     standard: ${standard}
     cherry: ${result}
+    standard(cleaned): ${cleanHTML(standard)}
+    cherry(cleaned): ${cleanHTML(result)}
   `
 }
 
