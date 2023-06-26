@@ -19,6 +19,13 @@ import { escapeHTMLSpecialCharOnce as $e } from '@/utils/sanitize';
 import { createElement } from '@/utils/dom';
 
 /**
+ * @typedef {Object} SubMenuConfigItem
+ * @property {string} name - 子菜单项名称
+ * @property {string=} iconName - 子菜单项图标名称
+ * @property {function} onclick - 子菜单项点击事件
+ */
+
+/**
  *
  * @param {HTMLElement} targetDom
  * @param {'absolute' | 'fixed' | 'sidebar'} [positionModel = 'absolute']
@@ -69,6 +76,7 @@ export default class MenuBase {
     this.locale = $cherry.locale;
     this.dom = null;
     this.updateMarkdown = true; // 是否更新markdown原文
+    /** @type {SubMenuConfigItem[]} */
     this.subMenuConfig = []; // 子菜单配置
     this.noIcon = false; // 是否不显示图标
     this.cacheOnce = false; // 是否保存一次点击事件生成的内容
