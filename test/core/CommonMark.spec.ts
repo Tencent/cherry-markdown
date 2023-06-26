@@ -22,6 +22,8 @@ const cleanHTML = (raw) => {
   html = html.replace(/(?<=>)\n(?=<)/gm, '');
   // 清理属性
   html = html.replace(/(?<=<)([^\/\s>]+)[^<]*?(?=>)/gm, (match, tag) => tag);
+  // 清理首尾的多余空格
+  html = html.trim();
   return html;
 }
 
