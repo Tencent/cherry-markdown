@@ -18,6 +18,7 @@ const cherryEngine = new CherryEngine({
 const cleanHTML = (raw) => {
   // 处理换行回车
   let html = raw.replace(/\s*<br>\s*/gm, '\n');
+  html = html.replace(/\s*<br \/>\s*/gm, '\n');
   html = html.replace(/(?<=>)\n(?=<)/gm, '');
   // 清理属性
   html = html.replace(/(?<=<)([^\/\s>]+)[^<]*?(?=>)/gm, (match, tag) => tag);
