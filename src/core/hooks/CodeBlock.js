@@ -273,26 +273,11 @@ export default class CodeBlock extends ParagraphBase {
         if (leadingContentBlockQuote) {
           const regex = new RegExp(`^\n*`, '');
           const leadingNewline = result.match(regex)[0];
-          console.warn(regex, leadingNewline, leadingContentBlockQuote);
           // eslint-disable-next-line no-param-reassign
           result = leadingNewline + leadingContentBlockQuote + result.replace(regex, (_) => '');
         }
         return result;
       }
-      console.warn(
-        'Codeblock match',
-        match,
-        '|',
-        leadingContent,
-        '|',
-        leadingContentBlockQuote,
-        '|',
-        begin,
-        '|',
-        lang,
-        '|',
-        code,
-      );
       let $code = code;
       const { sign, lines } = this.computeLines(match, leadingContent, code);
       // 从缓存中获取html
@@ -340,7 +325,6 @@ export default class CodeBlock extends ParagraphBase {
       }
       // $code = this.$replaceSpecialChar($code);
       $code = $code.replace(/~X/g, '\\`');
-      console.warn('Codeblock code', $code);
       cacheCode = this.renderCodeBlock($code, $lang, sign, lines);
       cacheCode = cacheCode.replace(/\\/g, '\\\\');
       cacheCode = this.$codeCache(sign, cacheCode);
