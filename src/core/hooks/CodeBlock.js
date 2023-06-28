@@ -268,13 +268,39 @@ export default class CodeBlock extends ParagraphBase {
     // 预处理缩进代码块
     $str = this.$replaceCodeInIndent($str);
 
-    $str = $str.replace(this.RULE.reg, (match, leadingContent, begin, lang, code) => {
+    $str = $str.replace(this.RULE.reg, (match, leadingContent, leadingContentBlockQuote, begin, lang, code) => {
+      function addBlockQuoteSignToResult(result) {
+        if (leadingContentBlockQuote) {
+          const regex = new RegExp(`^\n*`, '');
+          const leadingNewline = result.match(regex)[0];
+          console.warn(regex, leadingNewline, leadingContentBlockQuote);
+          // eslint-disable-next-line no-param-reassign
+          result = leadingNewline + leadingContentBlockQuote + result.replace(regex, (_) => '');
+        }
+        return result;
+      }
+      console.warn(
+        'Codeblock match',
+        match,
+        '|',
+        leadingContent,
+        '|',
+        leadingContentBlockQuote,
+        '|',
+        begin,
+        '|',
+        lang,
+        '|',
+        code,
+      );
       let $code = code;
       const { sign, lines } = this.computeLines(match, leadingContent, code);
       // 从缓存中获取html
       let cacheCode = this.$codeCache(sign);
       if (cacheCode && cacheCode !== '') {
-        return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
+        // 别忘了把 ">"（引用块）加回来
+        const result = this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
+        return addBlockQuoteSignToResult(result);
       }
       $code = this.$recoverCodeInIndent($code);
       $code = $code.replace(/~D/g, '$');
@@ -287,6 +313,12 @@ export default class CodeBlock extends ParagraphBase {
         $code = $code.replace(regex, '$1');
       }
       /** 处理缩进 - end */
+
+      // 如果本代码块处于一个引用块（形如 "> " 或 "> > "）中，那么需要从代码中每一行去掉引用块的符号
+      if (leadingContentBlockQuote) {
+        const regex = new RegExp(`(^|\\n)${leadingContentBlockQuote}`, 'g');
+        $code = $code.replace(regex, '$1');
+      }
 
       // 未命中缓存，执行渲染
       let $lang = lang.trim();
@@ -308,10 +340,12 @@ export default class CodeBlock extends ParagraphBase {
       }
       // $code = this.$replaceSpecialChar($code);
       $code = $code.replace(/~X/g, '\\`');
+      console.warn('Codeblock code', $code);
       cacheCode = this.renderCodeBlock($code, $lang, sign, lines);
       cacheCode = cacheCode.replace(/\\/g, '\\\\');
       cacheCode = this.$codeCache(sign, cacheCode);
-      return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
+      const result = this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
+      return addBlockQuoteSignToResult(result);
     });
     // 表格里处理行内代码，让一个td里的行内代码语法生效，让跨td的行内代码语法失效
     $str = $str.replace(getTableRule(true), (whole, ...args) => {

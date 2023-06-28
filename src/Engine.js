@@ -194,8 +194,11 @@ export default class Engine {
 
   makeHtml(md) {
     let $md = this.$beforeMakeHtml(md);
+    console.warn('Engine', 'after beforeMakeHtml', $md);
     $md = this.$dealParagraph($md);
+    console.warn('Engine', 'after dealParagraph', $md);
     $md = this.$afterMakeHtml($md);
+    // console.warn('Engine', 'after afterMakeHtml', $md);
     return $md;
   }
 
