@@ -18,6 +18,7 @@ import { escapeHTMLSpecialChar as _e, isValidScheme, encodeURIOnce } from '@/uti
 import { compileRegExp, isLookbehindSupported, NOT_ALL_WHITE_SPACES_INLINE } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import UrlCache from '@/UrlCache';
+import Logger from '@/Logger';
 
 export default class Link extends SyntaxBase {
   static HOOK_NAME = 'link';
@@ -94,9 +95,9 @@ export default class Link extends SyntaxBase {
         processedURL = encodeURIOnce(processedURL);
         return `${leadingChar + extraLeadingChar}<a href="${UrlCache.set(
           processedURL,
-        )}" rel="nofollow"${attrs}>${processedText}</a>`;
+        )}" rel="nofollow"${attrs} contenteditable="false">${processedText}</a>`;
       }
-      return `${leadingChar + extraLeadingChar}<span>${text}</span>`;
+      return `${leadingChar + extraLeadingChar}<span contenteditable="false">${text}</span>`;
     }
     // should never happen
     return match;
@@ -118,6 +119,7 @@ export default class Link extends SyntaxBase {
     $str = $str.replace(this.RULE.reg, (match) => {
       return match.replace(/~1D/g, '~D');
     });
+    // Logger.log('makeHtml \n', str,'\n to \n', $str);
     return $str;
   }
 

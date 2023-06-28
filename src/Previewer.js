@@ -737,11 +737,11 @@ export default class Previewer {
     this.options.previewerDom.classList.remove('cherry-previewer--hidden');
     this.options.virtualDragLineDom.classList.remove('cherry-drag--hidden');
     this.editor.options.editorDom.classList.remove('cherry-editor--full');
+    
     // 恢复现场
-    if (this.options.previewerCache.layout !== {}) {
-      const { layout } = this.options.previewerCache;
-      this.setRealLayout(layout.editorPercentage, layout.previewerPercentage);
-    }
+    const { layout } = this.options.previewerCache;
+    this.setRealLayout(layout.editorPercentage, layout.previewerPercentage);
+  
     if (this.options.previewerCache.htmlChanged) {
       this.update(this.options.previewerCache.html);
     }

@@ -33,6 +33,7 @@ import locales from '@/locales/index';
 
 import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
+import Logger from './Logger';
 
 /** @typedef {import('~types/cherry').CherryOptions} CherryOptions */
 export default class Cherry extends CherryStatic {
@@ -165,6 +166,25 @@ export default class Cherry extends CherryStatic {
     // 切换模式，有纯预览模式、纯编辑模式、双栏编辑模式
     this.switchModel(this.options.editor.defaultModel);
 
+    let targetNode = document.querySelector('.cherry-previewer');
+
+    let callback = function(mutationsList, observer) {
+        for(let mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+                console.log('A child node has been added or removed.');
+            }
+            else if (mutation.type === 'attributes') {
+                console.log('The ' + mutation.attributeName + ' attribute was modified.');
+            }
+        }
+    };
+    
+    let config = { attributes: true, childList: true, subtree: true };
+    
+    let observer = new MutationObserver(callback);
+    
+    observer.observe(targetNode, config);
+    
     Event.on(this.instanceId, Event.Events.toolbarHide, () => {
       this.status.toolbar = 'hide';
     });
@@ -501,7 +521,7 @@ export default class Cherry extends CherryStatic {
       previewer = dom;
       previewer.className += ` ${previewerClassName}`;
     } else {
-      previewer = createElement('div', previewerClassName);
+      previewer = createElement('div', previewerClassName, { contenteditable: 'true' });
     }
     const virtualDragLine = createElement('div', 'cherry-drag');
     const editorMask = createElement('div', 'cherry-editor-mask');

@@ -96,7 +96,7 @@ export default class HtmlBlock extends ParagraphBase {
     let $str = str;
     const config = {
       ALLOW_UNKNOWN_PROTOCOLS: true,
-      ADD_ATTR: ['target'],
+      ADD_ATTR: ['target','contenteditable'],
     };
     if (this.htmlWhiteListAppend !== false) {
       config.ADD_TAGS = this.htmlWhiteList;

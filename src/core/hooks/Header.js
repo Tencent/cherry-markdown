@@ -127,7 +127,7 @@ export default class Header extends ParagraphBase {
     if (anchorStyle === 'none') {
       return '';
     }
-    return `<a class="anchor" href="#${anchorID}"></a>`;
+    return `<a class="anchor" href="#${anchorID}" contenteditable="false"></a>`;
   }
 
   beforeMakeHtml(str) {

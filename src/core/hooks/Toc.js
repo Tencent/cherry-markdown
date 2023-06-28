@@ -103,7 +103,7 @@ export default class Toc extends ParagraphBase {
       nodePrefix = this.$makeLevel(node.level);
     }
     const tocLink = this.linkProcessor(`#${node.id}`.replace(/safe_/g, '')); // transform header id to avoid being sanitized
-    return `<li class="${this.tocNodeClass}">${nodePrefix}<a href="${tocLink}" class="level-${node.level}">${
+    return `<li class="${this.tocNodeClass}">${nodePrefix}<a href="${tocLink}" class="level-${node.level}" contenteditable="false">${
       node.text
     }</a>${closeTag ? '</li>' : ''}`;
   }

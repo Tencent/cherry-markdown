@@ -205,7 +205,7 @@ export default class MyersDiff {
         yOffset += 1;
       }
     });
-    Logger.log(consoleStr, ...args);
+    // Logger.log(consoleStr, ...args);
     return result;
   }
 }

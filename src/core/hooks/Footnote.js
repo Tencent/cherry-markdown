@@ -47,8 +47,8 @@ export default class Footnote extends ParagraphBase {
     }
     const num = this.footnote.length + 1;
     const fn = {};
-    fn.fn = `<sup><a href="#fn:${num}" id="fnref:${num}" title="${key}" class="footnote">[${num}]</a></sup>`;
-    fn.fnref = `<a href="#fnref:${num}" id="fn:${num}" title="${key}" class="footnote-ref">[${num}]</a>`;
+    fn.fn = `<sup><a href="#fn:${num}" id="fnref:${num}" title="${key}" class="footnote" contenteditable="false">[${num}]</a></sup>`;
+    fn.fnref = `<a href="#fnref:${num}" id="fn:${num}" title="${key}" class="footnote-ref" contenteditable="false">[${num}]</a>`;
     fn.num = num;
     fn.note = note.trim();
     this.footnote.push(fn);
