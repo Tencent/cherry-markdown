@@ -1,6 +1,6 @@
 <p align="center"><img src="logo/new_logo.png" alt="cherry logo" width="50%"/></p>
 
-# Cherry Markdown Editor
+# Cherry Markdown Writer
 
 English | [简体中文](./README.CN.md)
 
