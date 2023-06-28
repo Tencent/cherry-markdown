@@ -61,30 +61,47 @@ const tableContentHander = {
       maxHeight: editorPosition.height,
     };
   },
+  /**
+   * TODO: 这里是分别对文本框、操作符号和选项设置偏移，应该作为一个整体来设置
+   */
   $setInputOffset() {
     const tdInfo = this.$getTdPosition();
-    const { inputDiv } = this.tableEditor.editorDom;
+    const { rowSymbolDiv, colSymbolDiv, inputDiv, rowOptionsDiv, colOptionsDiv } = this.tableEditor.editorDom;
     const inputDivInfo = inputDiv.getBoundingClientRect();
+    const rowSymbolDivInfo = rowSymbolDiv.getBoundingClientRect();
+    const colSymbolDivInfo = colSymbolDiv.getBoundingClientRect();
+    const rowOptionsDivInfo = rowOptionsDiv.getBoundingClientRect();
+    const colOptionsDivInfo = colOptionsDiv.getBoundingClientRect();
 
-    if (inputDivInfo.width !== tdInfo.width) {
-      inputDiv.style.width = `${tdInfo.width}px`;
-    }
-    if (inputDivInfo.height !== tdInfo.height) {
-      inputDiv.style.height = `${tdInfo.height}px`;
-    }
-    if (inputDivInfo.top !== tdInfo.top) {
-      inputDiv.style.top = `${tdInfo.top}px`;
-    }
-    if (inputDivInfo.left !== tdInfo.left) {
-      inputDiv.style.left = `${tdInfo.left}px`;
-    }
+    const setStyle = (element, info, property, value) => {
+      if (info[property] !== value) {
+        element.style[property] = value;
+      }
+    };
 
-    // 向上滚或向下滚动动超出边界消失
-    if (tdInfo.top < 0 || tdInfo.top + tdInfo.height > tdInfo.maxHeight) {
-      inputDiv.style.display = 'none';
-    } else {
-      inputDiv.style.display = '';
-    }
+    // 设置文本框的偏移及大小
+    setStyle(inputDiv, inputDivInfo, 'width', `${tdInfo.width}px`);
+    setStyle(inputDiv, inputDivInfo, 'height', `${tdInfo.height}px`);
+    setStyle(inputDiv, inputDivInfo, 'top', `${tdInfo.top}px`);
+    setStyle(inputDiv, inputDivInfo, 'left', `${tdInfo.left}px`);
+    // 设置操作符号的偏移
+    setStyle(rowSymbolDiv, rowSymbolDivInfo, 'top', `${tdInfo.top}px`);
+    setStyle(rowSymbolDiv, rowSymbolDivInfo, 'left', `${tdInfo.left - 20}px`);
+    setStyle(colSymbolDiv, colSymbolDivInfo, 'top', `${tdInfo.top + tdInfo.height}px`);
+    setStyle(colSymbolDiv, colSymbolDivInfo, 'left', `${tdInfo.left + (1 / 2) * tdInfo.width}px`);
+    // 设置操作选项偏移
+    setStyle(rowOptionsDiv, rowOptionsDivInfo, 'top', `${tdInfo.top}px`);
+    setStyle(rowOptionsDiv, rowOptionsDivInfo, 'left', `${tdInfo.left}px`);
+    setStyle(colOptionsDiv, colOptionsDivInfo, 'top', `${tdInfo.top + tdInfo.height}px`);
+    setStyle(colOptionsDiv, colOptionsDivInfo, 'left', `${tdInfo.left + (1 / 2) * tdInfo.width + 20}px`);
+    rowOptionsDiv.style.display = 'none';
+    colOptionsDiv.style.display = 'none';
+
+    // 根据是否超出边界来显示或者隐藏元素
+    const isWithinBounds = tdInfo.top >= 0 && tdInfo.top + tdInfo.height <= tdInfo.maxHeight;
+    setStyle(inputDiv, inputDivInfo, 'display', isWithinBounds ? '' : 'none');
+    setStyle(rowSymbolDiv, rowSymbolDivInfo, 'display', isWithinBounds ? '' : 'none');
+    setStyle(colSymbolDiv, colSymbolDivInfo, 'display', isWithinBounds ? '' : 'none');
   },
   $remove() {
     this.tableEditor = { info: {}, tableCodes: [], editorDom: {} };
@@ -120,6 +137,11 @@ const tableContentHander = {
     if (tableNode === false) {
       return false;
     }
+    const columns = Array.from(this.td.parentElement.childNodes).filter((child) => {
+      // 计算列数
+      return child.tagName.toLowerCase() === 'td';
+    }).length;
+
     this.tableEditor.info = {
       tableNode,
       tdNode: this.td,
@@ -130,6 +152,7 @@ const tableContentHander = {
       totalTables: list.length,
       tableIndex: list.indexOf(tableNode),
       tableText: tableNode.textContent.replace(/[\s]/g, ''),
+      columns,
     };
   },
 
@@ -229,9 +252,11 @@ const tableContentHander = {
   },
 
   /**
-   * 把表格上的input单行文本框画出来
+   * 把表格上的input单行文本框和操作符号画出来
    */
   $drawEditor() {
+    this.$drawSymbol(this.rowOptions, 'row');
+    this.$drawSymbol(this.colOptions, 'col');
     const dom = document.createElement('div');
     dom.className = 'cherry-previewer-table-content-hander__input';
     const input = document.createElement('textarea');
@@ -281,6 +306,143 @@ const tableContentHander = {
     }
     return this.$getClosestNode(node.parentNode, targetNodeName);
   },
+
+  /**
+   * 绘制操作符号
+   * @param {Array} options 选项数组，每个选项包括label和action
+   * @param {string} optionType 选项类型
+   */
+  $drawSymbol(options, optionType) {
+    this.drawOptions(options, optionType);
+    const symbolDiv = document.createElement('div');
+    symbolDiv.className = `cherry-previewer-table-content-hander__${optionType}-symbol`;
+    symbolDiv.innerHTML = '⊕';
+    symbolDiv.addEventListener('click', (event) => {
+      this.tableEditor.editorDom.rowOptionsDiv.style.display = optionType === 'row' ? '' : 'none';
+      this.tableEditor.editorDom.colOptionsDiv.style.display = optionType === 'col' ? '' : 'none';
+    });
+    symbolDiv.addEventListener('mouseup', (event) => {
+      // 阻止事件冒泡触发$removeAllPreviewerBubbles
+      event.stopPropagation();
+    });
+    this.tableEditor.editorDom[`${optionType}SymbolDiv`] = symbolDiv;
+    this.container.appendChild(this.tableEditor.editorDom[`${optionType}SymbolDiv`]);
+  },
+
+  /**
+   * 绘制操作选项
+   * @param {Array} options
+   * @param {string} optionType
+   */
+  drawOptions(options, optionType) {
+    // 记录编辑区被光标选中的行
+    this.selectionStartLine = this.codeMirror.getCursor('from').line;
+    this.selectionEndLine = this.codeMirror.getCursor('to').line;
+
+    // 创建操作选项的容器
+    const optionsDiv = document.createElement('div');
+    optionsDiv.className = `cherry-previewer-table-content-hander__${optionType}-options`;
+    // 默认隐藏
+    optionsDiv.style.display = 'none';
+
+    // 创建每个选项并添加 mouseup 事件
+    options.forEach((option) => {
+      const optionElement = document.createElement('div');
+      optionElement.textContent = option.label;
+      optionElement.className = 'row-option';
+      optionElement.addEventListener('mouseup', (event) => {
+        option.action.call(this);
+      });
+      optionsDiv.appendChild(optionElement);
+    });
+
+    // 将选项添加到容器上
+    this.tableEditor.editorDom[`${optionType}OptionsDiv`] = optionsDiv;
+    this.container.appendChild(optionsDiv);
+  },
+  rowOptions: [
+    {
+      label: '删除行',
+      action() {
+        // 删除选中行的内容
+        for (let i = this.selectionStartLine; i <= this.selectionEndLine; i++) {
+          this.codeMirror.replaceRange('', { line: i, ch: 0 }, { line: i + 1, ch: 0 });
+        }
+        // 清除编辑状态
+        this.$remove();
+      },
+    },
+    {
+      label: '在上方添加行',
+      action() {
+        const newRow = `${'|'.repeat(this.tableEditor.info.columns)}\n`;
+        this.codeMirror.replaceRange(newRow, { line: this.selectionStartLine, ch: 0 });
+        this.$remove();
+      },
+    },
+    {
+      label: '在下方添加行',
+      action() {
+        const newRow = `${'|'.repeat(this.tableEditor.info.columns)}\n`;
+        this.codeMirror.replaceRange(newRow, { line: this.selectionEndLine + 1, ch: 0 });
+        this.$remove();
+      },
+    },
+  ],
+  colOptions: [
+    {
+      label: '删除列',
+      action() {
+        this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+        const selection = this.codeMirror.getSelection();
+        const lines = selection.split('\n');
+        const newLines = lines.map((line) => {
+          const cells = line.split('|');
+          if (cells.length > this.tableEditor.info.tdIndex) {
+            cells.splice(this.tableEditor.info.tdIndex + 1, 1);
+          }
+          return cells.join('|');
+        });
+        const newText = newLines.join('\n');
+        this.codeMirror.replaceSelection(newText);
+        this.$remove();
+      },
+    },
+    {
+      label: '在左侧添加列',
+      action() {
+        this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+        const selection = this.codeMirror.getSelection();
+        const lines = selection.split('\n');
+        const newLines = lines.map((line, index) => {
+          const cells = line.split('|');
+          const replaceItem = 1 === index ? ':-:' : '';
+          cells.splice(this.tableEditor.info.tdIndex + 1, 0, replaceItem);
+          return cells.join('|');
+        });
+        const newText = newLines.join('\n');
+        this.codeMirror.replaceSelection(newText);
+        this.$remove();
+      },
+    },
+    {
+      label: '在右侧添加列',
+      action() {
+        this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+        const selection = this.codeMirror.getSelection();
+        const lines = selection.split('\n');
+        const newLines = lines.map((line, index) => {
+          const cells = line.split('|');
+          const replaceItem = 1 === index ? ':-:' : '';
+          cells.splice(this.tableEditor.info.tdIndex + 2, 0, replaceItem);
+          return cells.join('|');
+        });
+        const newText = newLines.join('\n');
+        this.codeMirror.replaceSelection(newText);
+        this.$remove();
+      },
+    },
+  ],
 };
 
 export default tableContentHander;
