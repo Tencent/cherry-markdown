@@ -96,6 +96,10 @@ const defaultConfig = {
       // 'hookName': {
       //
       // }
+      // 启用输入联想功能
+      suggester: {
+        suggester: [{}],
+      },
       autoLink: {
         /** 是否开启短链接 */
         enableShortLink: true,
@@ -252,7 +256,7 @@ const defaultConfig = {
     toolbarRight: [],
     sidebar: [],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
-    float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'quickTable', 'code'], // array or false
+    float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'table', 'code'], // array or false
   },
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: '',

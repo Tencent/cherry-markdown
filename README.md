@@ -1,4 +1,4 @@
-<p align="center"><img src="logo/logo--color.svg" alt="cherry logo" width="50%"/></p>
+<p align="center"><img src="logo/new_logo.png" alt="cherry logo" width="50%"/></p>
 
 # Cherry Markdown Editor
 
