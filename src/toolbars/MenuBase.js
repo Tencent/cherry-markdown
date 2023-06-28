@@ -339,7 +339,7 @@ export default class MenuBase {
   getMenuPosition() {
     const parent = MenuBase.getTargetParentByButton(this.dom);
     const isFromSidebar = /cherry-sidebar/.test(parent.className);
-    if (/cherry-bubble/.test(parent.className)) {
+    if (/cherry-bubble/.test(parent.className) || /cherry-floatmenu/.test(parent.className)) {
       this.positionModel = 'fixed';
     } else if (isFromSidebar) {
       this.positionModel = 'sidebar';
