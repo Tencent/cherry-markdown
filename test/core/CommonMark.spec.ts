@@ -18,9 +18,12 @@ const cherryEngine = new CherryEngine({
 const cleanHTML = (raw) => {
   // 处理换行回车
   let html = raw.replace(/\s*<br>\s*/gm, '\n');
+  html = html.replace(/\s*<br \/>\s*/gm, '\n');
   html = html.replace(/(?<=>)\n(?=<)/gm, '');
   // 清理属性
   html = html.replace(/(?<=<)([^\/\s>]+)[^<]*?(?=>)/gm, (match, tag) => tag);
+  // 清理首尾的多余空格
+  html = html.trim();
   return html;
 }
 
@@ -30,6 +33,8 @@ const formatOutput = (message, input, standard, result) => {
     input: ${input}
     standard: ${standard}
     cherry: ${result}
+    standard(cleaned): ${cleanHTML(standard)}
+    cherry(cleaned): ${cleanHTML(result)}
   `
 }
 
@@ -48,7 +53,7 @@ expect.extend({
 
 describe('engine', () => {
   suites.forEach((item, index) => {
-    test(`commonmark-${index}`, () => {
+    test(`commonmark-${item.example}`, () => {
     // @ts-ignore
       expect(cherryEngine.makeHtml(item.markdown)).matchHTML(item.html, item.markdown);
     });
