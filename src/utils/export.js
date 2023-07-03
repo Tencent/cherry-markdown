@@ -47,6 +47,11 @@ const undoHideBodyChildren = (displayList = []) => {
  */
 const getReadyToExport = (previeweDom, cb) => {
   const cherryPreviewer = /** @type {HTMLElement}*/ (previeweDom.cloneNode(true));
+  const mmls = cherryPreviewer.querySelectorAll('mjx-assistive-mml');
+  // a fix for html2canvas
+  mmls.forEach((e) => {
+    if (e instanceof HTMLElement) e.style.setProperty('visibility', 'hidden');
+  });
   const cherryWrapper = document.createElement('div');
   cherryWrapper.appendChild(cherryPreviewer);
   const displayList = hideBodyChildren();
