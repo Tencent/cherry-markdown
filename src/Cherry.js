@@ -166,25 +166,9 @@ export default class Cherry extends CherryStatic {
     // 切换模式，有纯预览模式、纯编辑模式、双栏编辑模式
     this.switchModel(this.options.editor.defaultModel);
 
-    let targetNode = document.querySelector('.cherry-previewer');
+    // 注册previewer的monitor,实现所见即所得
+    this.setUpPreviwerMonitor();
 
-    let callback = function(mutationsList, observer) {
-        for(let mutation of mutationsList) {
-            if (mutation.type === 'childList') {
-                console.log('A child node has been added or removed.');
-            }
-            else if (mutation.type === 'attributes') {
-                console.log('The ' + mutation.attributeName + ' attribute was modified.');
-            }
-        }
-    };
-    
-    let config = { attributes: true, childList: true, subtree: true };
-    
-    let observer = new MutationObserver(callback);
-    
-    observer.observe(targetNode, config);
-    
     Event.on(this.instanceId, Event.Events.toolbarHide, () => {
       this.status.toolbar = 'hide';
     });
@@ -238,6 +222,92 @@ export default class Cherry extends CherryStatic {
         this.toolbar && this.toolbar.previewOnly();
         break;
     }
+  }
+
+  setUpPreviwerMonitor() {
+    // 建立mutationsList,监视previewer方面更改,实现初步所见即所得
+    this.targetNode = document.querySelector('.cherry-previewer');
+
+    /**
+     * 一个辅助函数,寻找我们当前修改节点内容在整个html的pure_text中出现为位置(对于的次数)
+     * @param mutationNode:更改处对应dom树节点
+     * @param targetValue:目标字符串
+     * @returns 出现的index(以0开始,即将html出现的位置视作list,返回的是index)
+     */
+    function findOccurrencePosition(rootNode, mutationNode, targetValue) {
+      let occurrencePosition = 0;
+
+      const walkDOM = function (currentNode, func) {
+        if (currentNode === mutationNode) return true;
+        if (currentNode.nodeName.toLowerCase() === 'dir') return false; // 如果节点是<dir>，则跳过
+        func(currentNode);
+        let childNode = currentNode.firstChild;
+        while (childNode) {
+          if (walkDOM(childNode, func)) return true;
+          childNode = childNode.nextSibling;
+        }
+        return false;
+      };
+
+      walkDOM(rootNode, function (node) {
+        if (node.nodeType === 3 && node.textContent.includes(targetValue)) {
+          const textSegments = node.textContent.split(targetValue);
+          occurrencePosition += textSegments.length - 1;
+        }
+      });
+      return occurrencePosition;
+    }
+
+    /**
+     * 一个辅助函数,替换原md中第occurrencePosition出现(0开始)的oldValue
+     * @param md:传入的md源文档
+     * @param oldValue:目标字符串
+     * @param newValue:替换字符串
+     * @param occurrencePosition:需要修改的字符串位置
+     * @returns 修改后的md
+     */
+    function replaceNthOccurrence(md, oldValue, newValue, occurrencePosition) {
+      let index = -1;
+      for (let i = 0; i <= occurrencePosition; i++) {
+        index = md.indexOf(oldValue, index + 1);
+        if (index === -1) {
+          return md; // old value not found
+        }
+      }
+      // Replace the nth occurrence
+      return md.slice(0, index) + newValue + md.slice(index + oldValue.length);
+    }
+
+    const callback = (mutationsList, observer) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'characterData') {
+          if (mutation.oldValue.length === 0) {
+            // 若原字符为空,我们不进行操作
+            console.log('do nothing for plain text');
+            this.refreshPreviewer();
+          } else {
+            const occurrencePosition = findOccurrencePosition(this.targetNode, mutation.target, mutation.oldValue);
+            let md = this.getMarkdown();
+            md = replaceNthOccurrence(md, mutation.oldValue, mutation.target.textContent, occurrencePosition);
+            this.setMarkdown(md);
+            console.log(`Old text: ${mutation.oldValue}`);
+            console.log(`New text: ${mutation.target.textContent}`);
+            console.log(`Occurrence position: ${occurrencePosition}`);
+          }
+        }
+      }
+    };
+
+    this.monitorConfig = {
+      attributes: false,
+      childList: true,
+      subtree: true,
+      characterData: true,
+      characterDataOldValue: true,
+    };
+
+    this.observer = new MutationObserver(callback);
+    this.observer.observe(this.targetNode, this.monitorConfig);
   }
 
   /**
@@ -573,7 +643,9 @@ export default class Cherry extends CherryStatic {
       this.timer = setTimeout(() => {
         const markdownText = codemirror.getValue();
         const html = this.engine.makeHtml(markdownText);
+        this.observer.disconnect();
         this.previewer.update(html);
+        this.observer.observe(this.targetNode, this.monitorConfig);
         if (this.options.callback.afterChange) {
           this.options.callback.afterChange(markdownText, html);
         }

@@ -125,9 +125,9 @@ export default class AutoLink extends SyntaxBase {
           return match;
         case 'mailto:': // email
           if (EMAIL.test(address)) {
-            return `${prefix}<a href="${encodeURIOnce(`${$protocol}${address}`)}" rel="nofollow" contenteditable="false">${$e(
-              address,
-            )}</a>${suffix}`;
+            return `${prefix}<a href="${encodeURIOnce(
+              `${$protocol}${address}`,
+            )}" rel="nofollow" contenteditable="false">${$e(address)}</a>${suffix}`;
           }
           return match;
         case '': // 协议为空
@@ -135,7 +135,9 @@ export default class AutoLink extends SyntaxBase {
           if (prefix === suffix || !isWrappedByBracket) {
             // mailto
             if (EMAIL.test(address)) {
-              return `${prefix}<a href="mailto:${encodeURIOnce(address)}" rel="nofollow" contenteditable="false">${$e(address)}</a>${suffix}`;
+              return `${prefix}<a href="mailto:${encodeURIOnce(address)}" rel="nofollow" contenteditable="false">${$e(
+                address,
+              )}</a>${suffix}`;
             }
             // 不识别无协议头的URL，且开头不应该含有斜杠
             if (URL_NO_SLASH.test(address)) {
@@ -148,7 +150,9 @@ export default class AutoLink extends SyntaxBase {
           if (isWrappedByBracket) {
             // mailto
             if (EMAIL.test(address)) {
-              return `<a href="mailto:${encodeURIOnce(address)}" rel="nofollow" contenteditable="false">${$e(address)}</a>`;
+              return `<a href="mailto:${encodeURIOnce(address)}" rel="nofollow" contenteditable="false">${$e(
+                address,
+              )}</a>`;
             }
             // 可识别任意协议的URL，或不以斜杠开头的URL
             if (URL.test(address) || URL_NO_SLASH.test(address)) {
@@ -215,6 +219,9 @@ export default class AutoLink extends SyntaxBase {
     return `<a target="${this.openNewPage ? '\\_blank' : '\\_self'}" rel="nofollow" title="${$e(url).replace(
       /_/g,
       '\\_',
-    )}"  href="${encodeURIOnce(processedURL).replace(/_/g, '\\_')}" contenteditable="false">${$e(linkText).replace(/_/g, '\\_')}</a>`;
+    )}"  href="${encodeURIOnce(processedURL).replace(/_/g, '\\_')}" contenteditable="false">${$e(linkText).replace(
+      /_/g,
+      '\\_',
+    )}</a>`;
   }
 }

@@ -147,7 +147,7 @@ export default class Engine {
     }
     try {
       $md = this.hooks[type][method]((newMd, oneHook) => {
-        // Logger.log(`[hook] ${oneHook.constructor.name} ${action}`, newMd);
+        // Logger.log(`[hook] ${type} ${oneHook.constructor.name} ${action}`, newMd);
         if (!oneHook.$engine) {
           oneHook.$engine = this;
           // Deprecated
