@@ -474,7 +474,7 @@ export default class Cherry extends CherryStatic {
 
   /**
    * @private
-   * @returns
+   * @returns {Toolbar}
    */
   createToolbar() {
     const dom = createElement('div', 'cherry-toolbar');

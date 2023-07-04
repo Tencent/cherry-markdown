@@ -35,7 +35,7 @@ export default class Strikethrough extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    let $selection = getSelection(this.editor.editor, selection) || '删除线';
+    let $selection = getSelection(this.editor.editor, selection) || this.locale.strikethrough;
     // @ts-ignore
     const needWhitespace = this.$cherry?.options?.engine?.syntax?.strikethrough?.needWhitespace;
     const space = needWhitespace ? ' ' : '';

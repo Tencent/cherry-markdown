@@ -31,9 +31,9 @@ export default class Link extends MenuBase {
   onClick(selection, shortKey = '') {
     // 插入图片，调用上传文件逻辑
     if (/^http/.test(selection)) {
-      return `[超链接](${selection})`;
+      return `[${this.locale.link}](${selection})`;
     }
-    const title = selection ? selection : '超链接';
+    const title = selection ? selection : this.locale.link;
     return `[${title}](http://url.com) `;
   }
 

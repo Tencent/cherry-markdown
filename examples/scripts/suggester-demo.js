@@ -51,27 +51,29 @@ var basicConfig = {
         upperCase: true,
       },
       suggester: {
-        suggester: [{
-          // 获取 列表
-          suggestList (word, callback){
-            suggest.push(list[Math.floor(Math.random() * 6)]);
-            if (suggest.length >= 6) {
-              suggest.shift();
-            }
-            callback(suggest);
+        suggester: [
+          {
+            // 获取 列表
+            suggestList(word, callback) {
+              suggest.push(list[Math.floor(Math.random() * 6)]);
+              if (suggest.length >= 6) {
+                suggest.shift();
+              }
+              callback(suggest);
+            },
+            // 唤醒关键字
+            // default '@'
+            keyword: '@',
+            // 建议模板
+            suggestListRender(valueArray) {
+              return '';
+            },
+            // 回填回调
+            echo(value) {
+              return '';
+            },
           },
-          // 唤醒关键字
-          // default '@'
-          keyword: '@',
-          // 建议模板
-          suggestListRender(valueArray) {
-            return '';
-          },
-          // 回填回调
-          echo(value) {
-            return '';
-          }
-        }]
+        ],
       },
     },
     customSyntax: {
@@ -116,7 +118,9 @@ var basicConfig = {
   //extensions: [],
 };
 
-fetch('./markdown/basic.md').then((response) => response.text()).then((value) => {
-  var config = Object.assign({}, basicConfig, { value: value });
-  window.cherry = new Cherry(config);
-});
+fetch('./markdown/basic.md')
+  .then((response) => response.text())
+  .then((value) => {
+    var config = Object.assign({}, basicConfig, { value });
+    window.cherry = new Cherry(config);
+  });

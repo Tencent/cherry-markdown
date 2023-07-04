@@ -34,7 +34,7 @@ export default class Underline extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    let $selection = selection ? selection : '下划线';
+    let $selection = selection ? selection : this.locale.underline;
     // 如果选中的内容里有下划线语法，则认为是要去掉下划线语法
     if (!this.isSelections && !this.$testIsUnderline($selection)) {
       this.getMoreSelection(' /', '/ ', () => {

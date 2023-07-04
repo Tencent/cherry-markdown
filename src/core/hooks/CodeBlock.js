@@ -18,6 +18,7 @@ import Prism from 'prismjs';
 import { escapeHTMLSpecialChar } from '@/utils/sanitize';
 import { getTableRule, getCodeBlockRule } from '@/utils/regexp';
 import { prependLineFeedForParagraph } from '@/utils/lineFeed';
+import { getCodePreviewLangSelectElement } from '@/utils/code-preview-language-setting';
 
 Prism.manual = true;
 
@@ -163,7 +164,7 @@ export default class CodeBlock extends ParagraphBase {
     if (lang === 'mermaid') {
       // 8.4.8版本兼容8.5.2版本的语法
       code = code.replace(/(^[\s]*)stateDiagram-v2\n/, '$1stateDiagram\n');
-      code = code.replace(/(^[\s]*)sequenceDiagram[ \t]*\n[\s]*autonumber[ \t]*\n/, '$1sequenceDiagram\n');
+      // code = code.replace(/(^[\s]*)sequenceDiagram[ \t]*\n[\s]*autonumber[ \t]*\n/, '$1sequenceDiagram\n');
     }
     return [code, lang];
   }
@@ -197,6 +198,7 @@ export default class CodeBlock extends ParagraphBase {
       cacheCode = this.renderLineNumber(cacheCode);
     }
     cacheCode = `<div data-sign="${sign}" data-type="codeBlock" data-lines="${lines}">
+      ${getCodePreviewLangSelectElement($lang)}
       ${
         this.copyCode
           ? '<div class="cherry-copy-code-block" style="display:none;"><i class="ch-icon ch-icon-copy" title="copy"></i></div>'

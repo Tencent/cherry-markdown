@@ -60,7 +60,7 @@ const htmlParser = {
         ret += temObj.content
           .replace(/&nbsp;/g, ' ')
           .replace(/[\n]+/g, '\n')
-          .replace(/^[ \t\n]+$/, '\n');
+          .replace(/^[ \t\n]+\n\s*$/, '\n');
       }
     }
     return ret;
@@ -79,6 +79,9 @@ const htmlParser = {
       } else {
         ret += '[ ]';
       }
+    } else if (temObj.attrs.class && /cherry-code-preview-lang-select/.test(temObj.attrs.class)) {
+      // 如果是代码块的选择语言标签，则不做任何处理
+      ret += '';
     } else {
       // 如果是标签
       ret += this.$dealTag(temObj);
@@ -313,7 +316,7 @@ const htmlParser = {
      * @returns {string} str
      */
     spanParser(obj, str) {
-      const $str = str.replace(/\t/g, '');
+      const $str = str.replace(/\t/g, '').replace(/\n/g, ' '); // span标签里不应该有\n的，有的话就转化成空格
       if (obj.attrs && obj.attrs.style) {
         // 先屏蔽字体颜色、字体大小、字体背景色的转义逻辑
         // let color = this.styleParser.colorAttrParser(obj.attrs.style);
@@ -322,6 +325,7 @@ const htmlParser = {
         // str  = this.formatEngine.convertColor(str, color);
         // str  = this.formatEngine.convertSize(str, size);
         // str  = this.formatEngine.convertBgColor(str, bgcolor);
+        // return str;
       }
       return $str;
     },

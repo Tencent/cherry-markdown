@@ -28,3 +28,7 @@ pnpm-lock.yaml
 /client/dist-electron
 /client/dist
 /client/release
+
+# docs
+/docs/.vitepress/cache/
+/docs/.vitepress/dist/

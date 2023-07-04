@@ -131,6 +131,7 @@ export default class Previewer {
     this.$initPreviewerBubble();
     this.lazyLoadImg = new LazyLoadImg(this.options.lazyLoadImg, this);
     this.lazyLoadImg.doLazyLoad();
+    this.onMouseDown();
   }
 
   $initPreviewerBubble() {
@@ -904,6 +905,13 @@ export default class Previewer {
     this.$scrollAnimation(top);
   }
 
+  onMouseDown() {
+    addEvent(this.getDomContainer(), 'mousedown', () => {
+      setTimeout(() => {
+        Event.emit(this.instanceId, Event.Events.cleanAllSubMenus);
+      });
+    });
+  }
   /**
    * 导出预览区域内容
    * @public

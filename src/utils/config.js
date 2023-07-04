@@ -75,7 +75,10 @@ function saveThemeToLocal(theme) {
 export function getThemeFromLocal(fullClass = false) {
   let ret = 'default';
   if (typeof localStorage !== 'undefined') {
-    ret = localStorage.getItem('cherry-theme');
+    const localTheme = localStorage.getItem('cherry-theme');
+    if (localTheme) {
+      ret = localTheme;
+    }
   }
   return fullClass ? `theme__${ret}` : ret;
 }

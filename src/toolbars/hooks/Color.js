@@ -43,7 +43,7 @@ export default class Color extends MenuBase {
    * @returns 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '', event) {
-    let $selection = getSelection(this.editor.editor, selection) || '字体颜色或背景';
+    let $selection = getSelection(this.editor.editor, selection) || this.locale.color;
     if (this.hasCacheOnce()) {
       // @ts-ignore
       const { type, color } = this.getAndCleanCacheOnce();
