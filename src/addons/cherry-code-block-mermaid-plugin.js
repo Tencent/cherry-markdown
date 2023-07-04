@@ -151,7 +151,7 @@ export default class MermaidCodeEngine {
         this.mermaidCanvas,
       );
     } catch (e) {
-      return false;
+      return e?.str;
     }
     return html;
   }
