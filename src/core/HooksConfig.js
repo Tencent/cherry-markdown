@@ -64,7 +64,6 @@ const hooksConfig = [
   HtmlBlock,
   Footnote,
   CommentReference,
-  Transfer,
   Br,
   Table,
   Blockquote,
@@ -78,6 +77,7 @@ const hooksConfig = [
 
   // 行内Hook
   // 引擎会按当前顺序执行makeHtml方法
+  Transfer,
   Emoji,
   Image,
   Link,

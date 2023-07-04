@@ -205,7 +205,7 @@ var basicConfig = {
   }
 };
 
-fetch('./markdown/basic.md').then((response) => response.text()).then((value) => {
+fetch('./markdown/easy.md').then((response) => response.text()).then((value) => {
   var config = Object.assign({}, basicConfig, { value: value });
   window.cherry = new Cherry(config);
 });

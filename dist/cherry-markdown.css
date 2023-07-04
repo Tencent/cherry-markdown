@@ -2802,7 +2802,7 @@ div[data-type=codeBlock] .token.inserted {
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 2px;
-  max-height: 200px;
+  max-height: 500px;
   box-shadow: 0 2px 8px 1px rgba(0, 0, 0, 0.2);
 }
 .cherry-suggester-panel .cherry-suggester-panel__item {
@@ -2818,6 +2818,11 @@ div[data-type=codeBlock] .token.inserted {
   background-color: #f2f2f5;
   text-decoration: none;
   color: #eb7350;
+}
+.cherry-suggester-panel .cherry-suggester-panel__item > i {
+  display: inline-block;
+  transform: translateY(2px);
+  margin-right: 8px;
 }
 
 .cherry-suggestion {

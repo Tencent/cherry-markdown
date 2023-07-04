@@ -1,16 +1,23 @@
 {
   "name": "cherry-markdown",
-  "license": "Apache-2.0",
   "version": "0.8.20",
   "description": "a new markdown editor",
+  "keywords": [
+    "markdown"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Tencent/cherry-markdown.git"
   },
+  "license": "Apache-2.0",
+  "author": "Cherry Oteam",
+  "sideEffects": [
+    "./dist/*.css"
+  ],
   "main": "./dist/cherry-markdown.min.js",
   "module": "./dist/cherry-markdown.esm.js",
-  "style": "./dist/cherry-markdown.min.css",
   "types": "./dist/types/index.d.ts",
+  "style": "./dist/cherry-markdown.min.css",
   "directories": {
     "doc": "docs",
     "example": "examples"
@@ -20,9 +27,6 @@
     "src",
     "test",
     "types"
-  ],
-  "sideEffects": [
-    "./dist/*.css"
   ],
   "scripts": {
     "iconfont": "gulp",
@@ -52,10 +56,30 @@
     "publish": "git push --follow-tags origin main",
     "examples": "anywhere -p 3000 -s"
   },
-  "keywords": [
-    "markdown"
-  ],
-  "author": "Cherry Oteam",
+  "lint-staged": {
+    "*.js": "eslint --fix"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-customizable"
+    }
+  },
+  "resolutions": {
+    "ansi-regex": "5.0.1",
+    "glob-parent": "5.1.2",
+    "lodash.template": "4.5.0",
+    "set-value": "4.0.1",
+    "xmldom": "0.5.0",
+    "yargs-parser": "20.2.9"
+  },
+  "dependencies": {
+    "@types/codemirror": "^0.0.108",
+    "@types/dompurify": "^2.2.3",
+    "cm-search-replace": "^1.0.0",
+    "jsdom": "~19.0.0",
+    "mitt": "^3.0.0",
+    "parse5": "5.1.0"
+  },
   "devDependencies": {
     "@babel/core": "^7.7.2",
     "@babel/eslint-parser": "^7.12.1",
@@ -118,6 +142,7 @@
     "lodash": "^4.17.20",
     "md5": "^2.2.1",
     "npm-run-all": "^4.1.5",
+    "parse5": "^5.1.0",
     "postcss": "^8.2.15",
     "prettier": "2.6.2",
     "prismjs": "^1.24.1",
@@ -135,33 +160,10 @@
     "standard-version": "^9.3.2",
     "ts-jest": "^27.1.1",
     "ts-node": "^10.7.0",
-    "typescript": "4.3.5",
+    "typescript": "4.5",
     "virtual-dom": "^2.1.1"
-  },
-  "dependencies": {
-    "@types/codemirror": "^0.0.108",
-    "@types/dompurify": "^2.2.3",
-    "cm-search-replace": "^1.0.0",
-    "jsdom": "~19.0.0",
-    "mitt": "^3.0.0"
-  },
-  "resolutions": {
-    "glob-parent": "5.1.2",
-    "set-value": "4.0.1",
-    "lodash.template": "4.5.0",
-    "yargs-parser": "20.2.9",
-    "xmldom": "0.5.0",
-    "ansi-regex": "5.0.1"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-customizable"
-    }
   },
   "optionalDependencies": {
     "mermaid": "9.1.7"
-  },
-  "lint-staged": {
-    "*.js": "eslint --fix"
   }
 }
