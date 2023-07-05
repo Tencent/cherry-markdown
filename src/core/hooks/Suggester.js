@@ -198,7 +198,7 @@ class SuggesterPanel {
               return res;
             }
             // logic to decide whether to move up or not
-            return Pass.toString();
+            // return Pass.toString();
           }
         };
       } else if (!extraKeys[key]) {
