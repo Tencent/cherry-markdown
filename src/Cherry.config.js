@@ -96,10 +96,6 @@ const defaultConfig = {
       // 'hookName': {
       //
       // }
-      // 启用输入联想功能
-      suggester: {
-        suggester: [{}],
-      },
       autoLink: {
         /** 是否开启短链接 */
         enableShortLink: true,

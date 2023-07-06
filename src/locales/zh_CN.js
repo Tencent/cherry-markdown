@@ -84,4 +84,7 @@ export default {
   theme: '主题', // 导出长图
   panel: '面板', // 导出长图
   detail: '手风琴', // 手风琴
+  'H1 Heading': 'H1 一级标题',
+  'H2 Heading': 'H2 二级标题',
+  'H3 Heading': 'H3 三级标题',
 };

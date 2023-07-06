@@ -25,6 +25,7 @@ import { Pass } from 'codemirror/src/util/misc';
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import { isBrowser } from '@/utils/env';
+import locales from '@/locales/index';
 import Cherry from '@/Cherry';
 
 /**
@@ -33,10 +34,10 @@ import Cherry from '@/Cherry';
 
 /**
  * @typedef { Object } SuggestListItemObject 推荐列表项对象
- * @property { string } type 类型
  * @property { string } icon 图标
- * @property { string } text 文本
- * @property { string= } sub 推荐列表项子项(常用于列表项有子项的情况，例如：header)
+ * @property { string } label 候选列表回显的内容
+ * @property { string } value 点击候选项的时候回填的值
+ * @property { string } keyword 关键词，通过关键词控制候选项的显隐
  * @typedef { SuggestListItemObject | string } SuggestListItem 推荐列表项
  * @typedef { Array<SuggestListItem> } SuggestList 推荐列表
  */
@@ -75,8 +76,79 @@ export default class Suggester extends SyntaxBase {
 
     super({ needCache: true });
 
-    this.initConfig(config);
+    this.config = config;
     this.RULE = this.rule();
+  }
+
+  afterInit(callback) {
+    if (typeof callback === 'function') {
+      callback();
+    }
+    this.initConfig(this.config);
+  }
+
+  /**
+   * 获取系统默认的候选项列表
+   * TODO：后面考虑增加层级机制，比如“公式”是一级，“集合、逻辑运算、方程式”是公式的二级候选值
+   */
+  getSystemSuggestList() {
+    const locales = this.$locale;
+    return [
+      {
+        icon: 'h1',
+        label: locales['H1 Heading'],
+        keyword: 'head1',
+        value: '# ',
+      },
+      {
+        icon: 'h2',
+        label: locales['H2 Heading'],
+        keyword: 'head2',
+        value: '## ',
+      },
+      {
+        icon: 'h3',
+        label: locales['H3 Heading'],
+        keyword: 'head3',
+        value: '### ',
+      },
+      {
+        icon: 'table',
+        label: locales.table,
+        keyword: 'table',
+        value: '| Header | Header | Header |\n| --- | --- | --- |\n| Content | Content | Content |\n',
+      },
+      {
+        icon: 'code',
+        label: locales.code,
+        keyword: 'code',
+        value: '```\n\n```\n',
+      },
+      {
+        icon: 'link',
+        label: locales.link,
+        keyword: 'link',
+        value: `[title](https://url)`,
+      },
+      {
+        icon: 'checklist',
+        label: locales.checklist,
+        keyword: 'checklist',
+        value: `- [ ] item\n- [x] item`,
+      },
+      {
+        icon: 'tips',
+        label: locales.panel,
+        keyword: 'panel tips info warning danger success',
+        value: `::: primary title\ncontent\n:::\n`,
+      },
+      {
+        icon: 'insertFlow',
+        label: locales.detail,
+        keyword: 'detail',
+        value: `+++ 点击展开更多\n内容\n++- 默认展开\n内容\n++ 默认收起\n内容\n+++\n`,
+      },
+    ];
   }
 
   /**
@@ -84,57 +156,30 @@ export default class Suggester extends SyntaxBase {
    * @param {SuggesterConfig} config
    */
   initConfig(config) {
-    const { suggester } = config;
+    let { suggester } = config;
 
     this.suggester = {};
     if (!suggester) {
-      return;
+      suggester = [];
     }
+    const systemSuggestList = this.getSystemSuggestList();
     // 默认的唤醒关键字
     suggester.unshift({
       keyword: '/',
       suggestList(word, callback) {
-        callback([
-          {
-            type: 'header',
-            icon: 'h1',
-            sub: 'h1',
-            text: 'H1 一级标题',
-          },
-          {
-            type: 'header',
-            icon: 'h2',
-            sub: 'h2',
-            text: 'H2 二级标题',
-          },
-          {
-            type: 'header',
-            icon: 'h3',
-            sub: 'h3',
-            text: 'H3 三级标题',
-          },
-          {
-            type: 'quickTable',
-            icon: 'table',
-            text: '快捷表格',
-          },
-          {
-            type: 'codeBlock',
-            icon: 'code',
-            text: '代码块',
-          },
-          {
-            type: 'graph',
-            sub: 'insertFlow',
-            icon: 'insertFlow',
-            text: '流程图',
-          },
-          {
-            type: 'formula',
-            icon: 'insertFormula',
-            text: '公式',
-          },
-        ]);
+        const $word = word.replace(/^\//, '');
+        // 加个空格就直接退出联想
+        if (/^\s$/.test($word)) {
+          callback(false);
+          return;
+        }
+        const keyword = $word.replace(/\s+/g, '').split('').join('.*?');
+        const test = new RegExp(`^.*?${keyword}.*?$`, 'i');
+        const suggestList = systemSuggestList.filter((item) => {
+          // TODO: 首次联想的时候会把所有的候选项列出来，后续可以增加一些机制改成默认拉取一部分候选项
+          return !$word || test.test(item.keyword);
+        });
+        callback(suggestList);
       },
     });
     suggester.forEach((configItem) => {
@@ -362,7 +407,7 @@ class SuggesterPanel {
     let defaultValue = suggestList
       .map((suggest, idx) => {
         if (typeof suggest === 'object' && suggest !== null) {
-          let renderContent = suggest.text;
+          let renderContent = suggest.label;
           if (suggest?.icon) {
             renderContent = `<i class="ch-icon ch-icon-${suggest.icon}"></i>${renderContent}`;
           }
@@ -455,7 +500,6 @@ class SuggesterPanel {
     this.cursorFrom = from;
     this.keyword = keyword;
     this.searchCache = true;
-    this.searchKeyCache = [keyword];
     this.relocatePanel(codemirror);
   }
 
@@ -487,8 +531,12 @@ class SuggesterPanel {
     const { cursorFrom, cursorTo } = this; // 缓存光标位置
     if (this.optionList[idx]) {
       let result = '';
-      if (typeof this.optionList[idx] === 'object' && this.optionList[idx] !== null) {
-        result = this.matchQuickTool(this.optionList[idx], this.editor.$cherry);
+      if (
+        typeof this.optionList[idx] === 'object' &&
+        this.optionList[idx] !== null &&
+        typeof this.optionList[idx].value === 'string'
+      ) {
+        result = this.optionList[idx].value;
       }
       if (typeof this.optionList[idx] === 'string') {
         result = ` ${this.keyword}${this.optionList[idx]} `;
@@ -498,29 +546,6 @@ class SuggesterPanel {
         this.editor.editor.replaceRange(result, cursorFrom, cursorTo);
       }
     }
-  }
-
-  /**
-   * 匹配快捷工具
-   * @param {SuggestListItemObject} suggester
-   * @param {import('../../Cherry').default} cherry
-   * @returns {string}
-   */
-  matchQuickTool(suggester, cherry) {
-    if (typeof suggester !== 'object' || suggester === null) return '';
-    if (cherry instanceof Cherry === false) return '';
-    const { type = '', sub = '' } = suggester;
-    const quickToolMap = {
-      header: (sub) => cherry.toolbar.menus.hooks.header.onClick('/', sub),
-      quickTable: () => cherry.floatMenu.menus.hooks.quickTable.onClick(''),
-      codeBlock: () => cherry.floatMenu.menus.hooks.code.onClick(''),
-      graph: (sub) => cherry.toolbar.menus.hooks.graph.subMenuConfig.find((menu) => menu.name === sub)?.onclick(),
-      formula: () => cherry.toolbar.menus.hooks.formula.onClick(''),
-    };
-    if (typeof quickToolMap[type] === 'function') {
-      return quickToolMap[type](sub) ?? '';
-    }
-    return '';
   }
 
   /**
@@ -547,9 +572,11 @@ class SuggesterPanel {
     const { text, from, to, origin } = evt;
     const changeValue = text.length === 1 ? text[0] : '';
 
-    if (this.suggesterConfig[changeValue]) {
+    // 首次输入命中关键词的时候开启联想
+    if (!this.enableRelate() && this.suggesterConfig[changeValue]) {
       this.startRelate(codemirror, changeValue, from);
-    } else if (this.enableRelate() && (changeValue || origin === '+delete')) {
+    }
+    if (this.enableRelate() && (changeValue || origin === '+delete')) {
       this.cursorTo = to;
       if (changeValue) {
         this.searchKeyCache.push(changeValue);
@@ -564,10 +591,13 @@ class SuggesterPanel {
       if (typeof this.suggesterConfig[this.keyword]?.suggestList === 'function') {
         // 请求api 返回结果拼凑
         this.suggesterConfig[this.keyword].suggestList(this.searchKeyCache.join(''), (res) => {
-          if (!res || !res.length) {
+          // 如果返回了false，则强制退出联想
+          if (res === false) {
+            this.stopRelate();
             return;
           }
-          this.optionList = res;
+          // 回显命中的结果
+          this.optionList = !res || !res.length ? [] : res;
           this.updatePanel(this.optionList);
         });
       }
@@ -616,6 +646,13 @@ class SuggesterPanel {
       // setTimeout(() => {
       //   codemirror.setCursor(cache);
       // }, 100);
+      setTimeout(() => {
+        this.stopRelate();
+      }, 0);
+    } else if (keyCode === 27) {
+      // 按下esc的时候退出联想
+      evt.stopPropagation();
+      codemirror.focus();
       setTimeout(() => {
         this.stopRelate();
       }, 0);

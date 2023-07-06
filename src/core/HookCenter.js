@@ -106,7 +106,8 @@ export default class HookCenter {
    * @param {(typeof SyntaxBase)[]} hooksConfig
    * @param {Partial<CherryOptions>} editorConfig
    */
-  constructor(hooksConfig, editorConfig) {
+  constructor(hooksConfig, editorConfig, cherry) {
+    this.$locale = cherry.locale;
     /**
      * @property
      * @type {Record<import('./SyntaxBase').HookType, SyntaxBase[]>} hookList hook 名称 -> hook 类型的映射
@@ -233,6 +234,9 @@ export default class HookCenter {
       // TODO: 需要考虑自定义 hook 配置的传入方式
       const config = syntax?.[hookName] || {};
       instance = new HookClass({ externals, config, globalConfig: engine.global });
+      instance.afterInit(() => {
+        instance.setLocale(this.$locale);
+      });
     }
     // TODO: 待校验是否需要跳过禁用的自定义 hook
     // Skip Disabled Internal Hooks
