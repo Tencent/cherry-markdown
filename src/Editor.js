@@ -40,6 +40,7 @@ import Event from '@/Event';
 import { handelParams } from '@/utils/file';
 import { createElement } from './utils/dom';
 import { imgBase64Reg, imgDrawioXmlReg } from './utils/regexp';
+import { handleNewlineIndentList } from './utils/autoindent';
 
 /**
  * @typedef {import('~types/editor').EditorConfiguration} EditorConfiguration
@@ -79,7 +80,9 @@ export default class Editor {
         autofocus: true,
         theme: 'default',
         autoCloseTags: true, // 输入html标签时自动补充闭合标签
-        extraKeys: { Enter: 'newlineAndIndentContinueMarkdownList' }, // 增加markdown回车自动补全
+        extraKeys: {
+          Enter: handleNewlineIndentList,
+        }, // 增加markdown回车自动补全
         matchTags: { bothTags: true }, // 自动高亮选中的闭合html标签
         placeholder: '',
         // 设置为 contenteditable 对输入法定位更友好
