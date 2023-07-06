@@ -25,8 +25,6 @@ import { Pass } from 'codemirror/src/util/misc';
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import { isBrowser } from '@/utils/env';
-import locales from '@/locales/index';
-import Cherry from '@/Cherry';
 
 /**
  * @typedef {import('codemirror')} CodeMirror
