@@ -49,6 +49,7 @@ export default class SyntaxBase {
    * @type {import('../Engine').default}
    */
   $engine;
+  $locale;
 
   /**
    * @constructor
@@ -67,6 +68,16 @@ export default class SyntaxBase {
 
   getName() {
     return /** @type {typeof SyntaxBase} */ (this.constructor).HOOK_NAME;
+  }
+
+  afterInit(callback) {
+    if (typeof callback === 'function') {
+      callback();
+    }
+  }
+
+  setLocale(locale) {
+    this.$locale = locale;
   }
 
   /**

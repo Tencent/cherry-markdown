@@ -44,7 +44,7 @@ export default class Engine {
     });
     this.initMath(markdownParams);
     this.$configInit(markdownParams);
-    this.hookCenter = new HookCenter(hooksConfig, markdownParams);
+    this.hookCenter = new HookCenter(hooksConfig, markdownParams, cherry);
     this.hooks = this.hookCenter.getHookList();
     this.md5Cache = {};
     this.md5StrMap = {};
