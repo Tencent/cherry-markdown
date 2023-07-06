@@ -13,7 +13,7 @@ As a formal open-source project team, our submission specifications are consiste
 <footer>
 ```
 
-- Title line:  **must be filled** , describe your main modification type and content, scope enhance the description submission scope, such as the Cherry core layer, Edior, Previewer, etc.
+- Title line:  **must be filled** , describe your main modification type and content, scope enhance the description submission scope, such as the Cherry core layer, Editor, Previewer, etc.
 - Subject content: describe why you changed, what you had changed and development ideas  **here directly cites to the tapd source code keyword. Don't fill in if you don't have it
 - Footer notes:  for Breaking Changes or Closed Issues
 

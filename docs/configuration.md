@@ -48,7 +48,7 @@ editor: {
 
 ### Toolbar Config
 
-Cherry Markdown Editor contains three configurable toolbars，Including toolbar (fixed toolbar above)、bubble( appears toolbar when select the text) and float (appears at the beginning of a new liner), in which you can customize and add the required functions.
+Cherry Markdown Editor contains three configurable toolbars,Including toolbar (fixed toolbar above)、bubble( appears toolbar when select the text) and float (appears at the beginning of a new liner), in which you can customize and add the required functions.
 
 ```js
 toolbars:{                                                                                                     
@@ -183,8 +183,8 @@ engine: {
         // 'SyntaxClass': {             <[String]> hook name
         //    syntax: SyntaxClass,      <[SyntaxBase]> hook Constructor
         //    force: true,              <[Boolean]> whether force overwrite the same name hook
-        //    before: 'HOOK_NAME',      <[String]> hookName，execute before this hook
-        //    after: 'HOOK_NAME'        <[String]> hookName，execute before this hook
+        //    before: 'HOOK_NAME',      <[String]> hookName,execute before this hook
+        //    after: 'HOOK_NAME'        <[String]> hookName,execute before this hook
         // }
     }
 }

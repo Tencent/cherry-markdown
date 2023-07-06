@@ -28,8 +28,8 @@ engine: {
   - SyntaxClass   `<[String]> hook name`
     - syntax    `<[SyntaxBase]> hook constructor`
     - force     `<[Boolean]> whether overwrite hook with the same name`
-    - before    `<[String]> hookName，execute before this hook`
-    - after     `<[String]> hookName，execute after this hook`
+    - before    `<[String]> hookName,execute before this hook`
+    - after     `<[String]> hookName,execute after this hook`
 
 ## Custom Syntax
 

@@ -13,7 +13,7 @@
 <footer>
 ```
 
-- 标题行:  **必填** , 描述主要修改类型和内容，scope增强描述提交作用范围，例如我们cherry的core层、Edior、Previewer等
+- 标题行:  **必填** , 描述主要修改类型和内容，scope增强描述提交作用范围，例如我们cherry的core层、Editor、Previewer等
 - 主题内容: 描述为什么修改, 做了什么样的修改, 以及开发的思路； **这里直接引用tapd源码关键字，若没有则不填**
 - 页脚注释: 放 Breaking Changes 或 Closed Issues
 
