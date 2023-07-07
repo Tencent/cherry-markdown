@@ -27,7 +27,7 @@ $editorCursorColor: $VIOLET9;
 $editorImportantColor: $VIOLET7;
 $editorCodeColor: $VIOLET6;
 /** 预览区域样式 */
-$previewBg: $VIOLET0;
+$previewBg: #FFF;
 $previewMobileBgColor: #FFF;
 /** markdown样式 */
 $mdColor: $editorColor;
@@ -40,7 +40,7 @@ $mdInlineCodeBg: $VIOLET1;
 $mdBlockquoteBg: $VIOLET1;
 
 /** 编辑器样式 */
-.cherry.theme__VIOLET {
+.cherry.theme__violet {
   
   /** 顶部按钮, 选中文字时弹出的按钮, 光标focus到空行时联想出的按钮, 侧边栏按钮 */
   .cherry-toolbar, .cherry-floatmenu, .cherry-bubble, .cherry-sidebar {
