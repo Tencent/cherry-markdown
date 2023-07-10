@@ -15,12 +15,13 @@
  */
 
 import imgSizeHander from '@/utils/imgSizeHander';
-import tableContentHander from '@/utils/tableContentHander';
+import TableHandler from '@/utils/tableContentHander';
 import { drawioDialog } from '@/utils/dialog';
 import Event from '@/Event';
 import { copyToClip } from '@/utils/copy';
 import { imgDrawioReg, getCodeBlockRule } from '@/utils/regexp';
 import { CODE_PREVIEWER_LANG_SELECT_CLASS_NAME } from '@/utils/code-preview-language-setting';
+import debounce from 'lodash/debounce';
 /**
  * 预览区域的响应式工具栏
  */
@@ -44,41 +45,97 @@ export default class PreviewerBubble {
     this.enablePreviewerBubble = this.previewer.options.enablePreviewerBubble;
     /**
      * @property
-     * @type {{ emit: (...args: any[]) => any}}
+     * @type {{ [key: string]: HTMLDivElement}}
      */
-    this.bubbleHandler = { emit: () => {} };
+    this.bubble = {};
+    /**
+     * @property
+     * @type {{ [key: string]: { emit: (...args: any[]) => any, [key:string]: any }}}
+     */
+    this.bubbleHandler = {};
     this.init();
   }
 
   init() {
     this.previewerDom.addEventListener('click', this.$onClick.bind(this));
+    this.previewerDom.addEventListener('mouseover', this.$onMouseOver.bind(this));
+    this.previewerDom.addEventListener('mouseout', this.$onMouseOut.bind(this));
+
     document.addEventListener('mousedown', (event) => {
-      this.bubbleHandler.emit('mousedown', event);
+      Object.values(this.bubbleHandler).forEach((handler) => handler.emit('mousedown', event));
     });
     document.addEventListener('mouseup', (event) => {
-      this.bubbleHandler.emit('mouseup', event, () => {
-        this.$removeAllPreviewerBubbles();
-      });
+      Object.values(this.bubbleHandler).forEach((handler) =>
+        handler.emit('mouseup', event, () => this.$removeAllPreviewerBubbles('click')),
+      );
     });
     document.addEventListener('mousemove', (event) => {
-      this.bubbleHandler.emit('mousemove', event);
+      Object.values(this.bubbleHandler).forEach((handler) => handler.emit('mousemove', event));
     });
     document.addEventListener('keyup', (event) => {
-      this.bubbleHandler.emit('keyup', event);
+      Object.values(this.bubbleHandler).forEach((handler) => handler.emit('keyup', event));
     });
-    this.previewerDom.addEventListener('scroll', (event) => {
-      this.bubbleHandler.emit('scroll', event);
-    });
-    Event.on(this.previewer.instanceId, Event.Events.previewerClose, () => {
-      this.$removeAllPreviewerBubbles();
-    });
+    this.previewerDom.addEventListener(
+      'scroll',
+      (event) => {
+        Object.values(this.bubbleHandler).forEach((handler) => handler.emit('scroll', event));
+      },
+      true,
+    );
+    Event.on(this.previewer.instanceId, Event.Events.previewerClose, () => this.$removeAllPreviewerBubbles());
     this.previewer.options.afterUpdateCallBack.push(() => {
-      this.bubbleHandler.emit('previewUpdate', () => {
-        this.$removeAllPreviewerBubbles();
-      });
+      Object.values(this.bubbleHandler).forEach((handler) =>
+        handler.emit('previewUpdate', () => this.$removeAllPreviewerBubbles()),
+      );
     });
     this.previewerDom.addEventListener('change', this.$onChange.bind(this));
+    this.removeHoverBubble = debounce(() => this.$removeAllPreviewerBubbles('hover'), 400);
   }
+
+  /**
+   * 是否为由cherry生成的表格，且不是简单表格
+   * @param {HTMLElement} element
+   * @returns {boolean}
+   */
+  isCherryTable(element) {
+    const container = this.$getClosestNode(element, 'DIV');
+    if (container === false) {
+      return false;
+    }
+    if (/simple-table/.test(container.className) || !/cherry-table-container/.test(container.className)) {
+      return false;
+    }
+    return true;
+  }
+
+  $onMouseOver(e) {
+    if (!this.enablePreviewerBubble) {
+      return;
+    }
+    const { target } = e;
+    if (typeof target.tagName === 'undefined') {
+      return;
+    }
+    switch (target.tagName) {
+      case 'TD':
+      case 'TH':
+        if (!this.isCherryTable(e.target)) {
+          return;
+        }
+        this.removeHoverBubble.cancel();
+        this.$removeAllPreviewerBubbles('hover');
+        this.$showTablePreviewerBubbles('hover', e.target);
+        return;
+    }
+  }
+
+  $onMouseOut() {
+    if (!this.enablePreviewerBubble) {
+      return;
+    }
+    this.removeHoverBubble();
+  }
+
   $dealCheckboxClick(e) {
     const { target } = e;
     // 先计算是previewer中第几个checkbox
@@ -152,20 +209,14 @@ export default class PreviewerBubble {
     }
     switch (target.tagName) {
       case 'IMG':
-        this.bubbleHandler = this.$showImgPreviewerBubbles(target);
+        this.$showImgPreviewerBubbles(target);
         break;
       case 'TD':
       case 'TH':
-        // eslint-disable-next-line no-case-declarations
-        const container = this.$getClosestNode(target, 'DIV');
-        if (container === false) {
+        if (!this.isCherryTable(e.target)) {
           return;
         }
-        // 只有由cherry生成的表格可以进行预览区域编辑，且简单表格不支持编辑
-        if (/simple-table/.test(container.className) || !/cherry-table-container/.test(container.className)) {
-          return;
-        }
-        this.bubbleHandler = this.$showTablePreviewerBubbles(target);
+        this.$showTablePreviewerBubbles('click', e.target);
         break;
     }
   }
@@ -214,24 +265,33 @@ export default class PreviewerBubble {
 
   /**
    * 隐藏预览区域已经激活的工具栏
+   * @param {string} trigger 移除指定的触发方式，不传默认全部移除
    */
-  $removeAllPreviewerBubbles() {
-    if (this.bubble) {
-      this.bubble.remove();
-      this.bubbleHandler.emit('remove');
-      this.bubble = null;
-      this.bubbleHandler = { emit: () => {} };
-    }
+  $removeAllPreviewerBubbles(trigger = '') {
+    Object.entries(this.bubble)
+      .filter(([key]) => !trigger || trigger === key)
+      .forEach(([key, value]) => {
+        value.remove();
+        delete this.bubble[key];
+      });
+    Object.entries(this.bubbleHandler)
+      .filter(([key]) => !trigger || trigger === key)
+      .forEach(([key, value]) => {
+        value.emit('remove');
+        delete this.bubbleHandler[key];
+      });
   }
 
   /**
-   * 为选中的table增加操作工具栏
-   * @param {HTMLImageElement} htmlElement 用户点击的table dom
+   * 为触发的table增加操作工具栏
+   * @param {string} trigger 触发方式
+   * @param {HTMLElement} htmlElement 用户触发的table dom
    */
-  $showTablePreviewerBubbles(htmlElement) {
-    this.$createPreviewerBubbles('table-content-hander');
-    tableContentHander.showBubble(htmlElement, this.bubble, this.previewerDom, this.editor.editor);
-    return tableContentHander;
+  $showTablePreviewerBubbles(trigger, htmlElement) {
+    this.$createPreviewerBubbles(trigger, trigger === 'click' ? 'table-content-hander' : 'table-hover-handler');
+    const handler = new TableHandler(trigger, htmlElement, this.bubble[trigger], this.previewerDom, this.editor.editor);
+    handler.showBubble();
+    this.bubbleHandler[trigger] = handler;
   }
 
   /**
@@ -246,9 +306,9 @@ export default class PreviewerBubble {
     if (!this.beginChangeImgValue(htmlElement)) {
       return { emit: () => {} };
     }
-    imgSizeHander.showBubble(htmlElement, this.bubble, this.previewerDom);
+    imgSizeHander.showBubble(htmlElement, this.bubble.click, this.previewerDom);
     imgSizeHander.bindChange(this.changeImgValue.bind(this));
-    return imgSizeHander;
+    this.bubbleHandler.click = imgSizeHander;
   }
 
   getValueWithoutCode() {
@@ -377,12 +437,19 @@ export default class PreviewerBubble {
 
   /**
    * 预览区域编辑器的容器
+   * @param {string} trigger 触发方式
+   * @param {string} type 容器类型（用作样式名：cherry-previewer-{type}）
    */
-  $createPreviewerBubbles(type = 'img-size-hander') {
-    if (!this.bubble) {
-      this.bubble = document.createElement('div');
-      this.bubble.className = `cherry-previewer-${type}`;
-      this.previewerDom.after(this.bubble);
+  $createPreviewerBubbles(trigger = 'click', type = 'img-size-hander') {
+    if (!this.bubble[trigger]) {
+      this.bubble[trigger] = document.createElement('div');
+      this.bubble[trigger].className = `cherry-previewer-${type}`;
+      this.previewerDom.after(this.bubble[trigger]);
+
+      if (trigger === 'hover') {
+        this.bubble[trigger].addEventListener('mouseover', this.removeHoverBubble.cancel);
+        this.bubble[trigger].addEventListener('mouseout', this.removeHoverBubble);
+      }
     }
   }
 
