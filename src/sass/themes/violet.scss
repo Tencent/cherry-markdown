@@ -1,0 +1,381 @@
+@import '../variable.scss';
+
+$VIOLET0: #f3f0ff;
+$VIOLET1: #e5dbff;
+$VIOLET2: #d0bfff;
+$VIOLET3: #b197fc;
+$VIOLET4: #9775fa;
+$VIOLET5: #845ef7;
+$VIOLET6: #7950f2;
+$VIOLET7: #7048e8;
+$VIOLET8: #6741d9;
+$VIOLET9: #5f3dc4;
+
+/** 工具栏样式 */
+$toolbarBg: #FFF;
+$toolbarBtnColor: $VIOLET9;
+$toolbarBtnBgHover: $VIOLET5;
+$toolbarBtnHoverColor: $VIOLET0;
+$toolbarColorItemHoverBorderColor: $VIOLET9;
+$sidebarShadow: $shadow;
+/** 编辑区域样式 */
+$editorBg: #FFF;
+$editorColor: $VIOLET9;
+$editorSelectedBg: $VIOLET2;
+$editorUrlBg: $VIOLET0;
+$editorCursorColor: $VIOLET9;
+$editorImportantColor: $VIOLET7;
+$editorCodeColor: $VIOLET6;
+/** 预览区域样式 */
+$previewBg: #FFF;
+$previewMobileBgColor: #FFF;
+/** markdown样式 */
+$mdColor: $editorColor;
+$mdHeaderColor: $editorImportantColor;
+$mdLineColor: $VIOLET8;
+$mdAColor: $editorCodeColor;
+$mdAHoverColor: $editorImportantColor;
+$mdInlineCodeColor: $editorCodeColor;
+$mdInlineCodeBg: $VIOLET1;
+$mdBlockquoteBg: $VIOLET1;
+
+/** 编辑器样式 */
+.cherry.theme__violet {
+  
+  /** 顶部按钮, 选中文字时弹出的按钮, 光标focus到空行时联想出的按钮, 侧边栏按钮 */
+  .cherry-toolbar, .cherry-floatmenu, .cherry-bubble, .cherry-sidebar {
+    background: $toolbarBg;
+    border-color: $toolbarBg;
+    .cherry-toolbar-button {
+      color: $toolbarBtnColor;
+      i {
+        color: $toolbarBtnColor;
+      }
+      &:hover {
+        background-color: $toolbarBtnBgHover;
+        color: $toolbarBtnHoverColor !important;
+        border-color: $toolbarBg;
+        i {
+          color: $toolbarBtnHoverColor !important;
+        }
+      }
+    }
+  }
+
+  /** 二级菜单 */
+  .cherry-dropdown {
+    background: $toolbarBg;
+    .cherry-dropdown-item {
+      color: $toolbarBtnColor;
+      &:hover {
+        background-color: $toolbarBtnBgHover;
+        color: $toolbarBtnHoverColor;
+      }
+    }
+    /** 选择颜色的按钮 */
+    &.cherry-color-wrap {
+      /** 色盘的标题 */
+      h3 {
+        color: $toolbarBtnColor;
+      }
+      /** 色盘里的每一个色块 */
+      .cherry-color-item {
+        // width: 15px;
+        // border: none;
+        border-color: $toolbarBtnBgHover;
+        &:hover {
+          border-color: $toolbarColorItemHoverBorderColor;
+        }
+      }
+    }
+  }
+
+  /** 选中文字时弹出的按钮 */
+  .cherry-bubble {
+    .cherry-bubble-bottom {
+      border-top-color: $toolbarBg;
+    }
+    /** 粘贴HTML内容时弹出的选择按钮 */
+    &.cherry-switch-paste {
+      
+    }
+  }
+
+
+  /** 光标focus到空行时联想出的按钮 */
+
+  .cherry-editor {
+    background-color: $editorBg;
+    .CodeMirror {
+      background-color: $editorBg;
+      .CodeMirror-cursor {
+        border-left: 1px solid $editorCursorColor;
+      }
+      .CodeMirror-scroll {
+        span, .cm-variable-2, .cm-string, .cm-strong, .cm-em, .cm-meta {
+          color: $editorColor;
+        }
+        .cm-image-marker, .cm-quote, .cm-header {
+          color: $editorImportantColor;
+        }
+        .cm-url {
+          background-color: $editorUrlBg;
+        }
+        .cm-comment, .cm-url {
+          color: $editorCodeColor;
+        }
+      }
+      .CodeMirror-selected {
+        background-color: $editorSelectedBg;
+      }
+    }
+  }
+
+  .cherry-sidebar {
+    box-shadow: $sidebarShadow;
+  }
+
+  .cherry-previewer {
+    background-color: $previewBg;
+    .cherry-mobile-previewer-content {
+      background-color: $previewMobileBgColor;
+    }
+  }
+
+  .cherry-previewer-table-content-hander {
+    .cherry-previewer-table-content-hander__input {
+      textarea {
+        background-color: $editorBg;
+        color: $editorColor;
+        outline-color: $editorImportantColor;
+      }
+    }
+  }
+
+}
+/** 预览区域样式 */
+.cherry-markdown.theme__violet {
+  color: $mdColor;
+
+  p, div {
+  
+  }
+
+  h1, h2, h3, h4, h5 {
+    color: $mdHeaderColor;
+    text-align: center;
+    margin-bottom: 35px;
+  }
+  
+  h1 {
+    
+  }
+  
+  h2 {
+    
+  }
+  
+  h3 {
+    
+  }
+
+  h4 {
+
+  }
+
+  h5 {
+
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    /** 标题前面的锚点或序号 */
+    .anchor {
+
+    }
+  }
+  
+  ul {
+    &.cherry-list__upper-roman {
+      list-style: upper-roman;
+    }
+  
+    &.cherry-list__lower-greek {
+      list-style: lower-greek;
+    }
+  
+    &.cherry-list__cjk-ideographic {
+      list-style: cjk-ideographic;
+    }
+  
+    &.cherry-list__circle {
+      list-style: circle;
+    }
+  
+    &.cherry-list__square {
+      list-style: square;
+    }
+
+    &.cherry-list__default {
+
+    }
+
+    /** checklist 模式，未勾选时 */
+    .ch-icon-square {
+
+    }
+    /** checklist 模式，勾选时 */
+    .ch-icon-check {
+
+    }
+  }
+  
+  ol {
+    li {
+      
+    }
+  }
+
+
+  blockquote {
+    color: $mdColor;
+    background-color: $mdBlockquoteBg;
+    border-color: $mdLineColor;
+  }
+  
+  a {
+    text-decoration: none;
+    color: $mdAColor;
+    &:hover {
+      text-decoration: underline;
+      color: $mdAHoverColor;
+    }
+  }
+  
+  strong {
+    
+  }
+  
+  em {
+    
+  }
+  
+  del {
+    
+  }
+
+  sup {
+
+  }
+
+  sub {
+
+  }
+  
+  hr {
+    border-color: $mdLineColor;
+  }
+  
+  img {
+    
+  }
+
+  video {
+
+  }
+
+  audio {
+
+  }
+  
+  /** 行内代码 */
+  p code, li code {
+    background-color: $mdInlineCodeBg;
+    color: $mdInlineCodeColor;
+    border: 1px solid $mdLineColor;
+  }
+  
+  /** 
+  * 代码块
+  */
+  pre code {
+    
+  }
+  
+  /** 
+  * 表格
+  */
+  table, .cherry-table {
+    color: $mdColor;
+    th {
+      background-color: $mdInlineCodeBg;
+    }
+    tr, th, td {
+      border-color: $mdLineColor;
+    }
+  }
+
+  /** 可以理解为上下结构的音标，下部是文字，上部是对应的拼音 */
+  ruby {
+    /** 上部的拼音 */
+    rt {
+
+    }
+  }
+  
+  /** 脚注 */
+  .footnote {
+    border-color: $mdLineColor;
+    .footnote-title {
+      background-color: $mdInlineCodeBg;
+    }
+    .one-footnote {
+      color: $mdColor;
+      border-color: $mdLineColor;
+      a.footnote-ref {
+        padding: 5px;
+      }
+    }
+  }
+  
+  /** 行间公式 */
+  .Cherry-InlineMath {
+    
+  }
+  
+  /** 段落公式 */
+  .Cherry-Math {
+  
+  }
+
+    /** 目录 */
+  .toc {
+    border-bottom: 1px solid $mdLineColor;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+    .toc-title {
+      text-align: center;
+      padding-bottom: 15px;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid $mdLineColor;
+    }
+    .toc-li {
+      border: none;
+      .level-1 {
+
+      }
+      .level-2 {
+
+      }
+      .level-3 {
+
+      }
+      a {
+        color: $mdColor;
+        &:hover {
+          color: $mdAHoverColor;
+        }
+      }
+    }
+  }
+}
