@@ -418,6 +418,44 @@
     display: none;
   }
 
+  &-writing-style {
+    &--focus {
+      &::before {
+        content: '';
+        display: block;
+        width: 100%;
+        position: absolute;
+        top: 0;
+        background-color: rgba(0, 0, 0, 0.2);
+        pointer-events: none;
+        z-index: 11;
+      }
+      &::after {
+        content: '';
+        display: block;
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.2);
+        pointer-events: none;
+        z-index: 11;
+      }
+    }
+    &--typewriter {
+      .CodeMirror-lines {
+        position: relative;
+        &::before {
+          content: '';
+          display: block;
+        }
+        &::after {
+          content: '';
+          display: block;
+        }
+      }
+    }
+  }
+
   .CodeMirror {
     font-family: $fontFamily;
     background: $editorBg;

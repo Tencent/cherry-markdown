@@ -211,6 +211,7 @@ const defaultConfig = {
       // 是否自动focus 默认为true
       autofocus: true,
     },
+    writingStyle: 'normal', // 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal
   },
   toolbars: {
     theme: 'dark', // light or dark
