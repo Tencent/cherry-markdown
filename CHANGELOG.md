@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.21](https://github.com/Tencent/cherry-markdown/compare/v0.8.20...v0.8.21) (2023-07-14)
+
+
+### Features
+
+* 丰富表格所见即所得功能 ([#479](https://github.com/Tencent/cherry-markdown/issues/479)) ([aa574a7](https://github.com/Tencent/cherry-markdown/commit/aa574a78492783a8f8556a4f46943343c0494ee1))
+* 优化输入联想的交互体验 ([2dcb231](https://github.com/Tencent/cherry-markdown/commit/2dcb231d5777ebb8e3444fefd913b355b5d2d176))
+* 预览区支持hover相关逻辑、表格支持hover添加行列 ([#502](https://github.com/Tencent/cherry-markdown/issues/502)) ([57ba97b](https://github.com/Tencent/cherry-markdown/commit/57ba97bf4bb7da037ed6be3dc5032628cab86699))
+* 支持专注模式、打字机模式 ([#503](https://github.com/Tencent/cherry-markdown/issues/503)) ([8c22aea](https://github.com/Tencent/cherry-markdown/commit/8c22aeaa334c8f62243a698ce4e069834d88b9d9))
+* add mermaid error, issue [#488](https://github.com/Tencent/cherry-markdown/issues/488) ([5fcdbbe](https://github.com/Tencent/cherry-markdown/commit/5fcdbbee7e3e621a4e76171c6af3bb394c4c1d11))
+* **docs:** add configuration option ([#468](https://github.com/Tencent/cherry-markdown/issues/468)) ([73be84c](https://github.com/Tencent/cherry-markdown/commit/73be84cfce5ee90ba2b4b0c2bfbe81c26d7bb5e7))
+* **Editor:** 增加对罗马数字与汉字列表的换行自动补全 ([#493](https://github.com/Tencent/cherry-markdown/issues/493)) ([085b5ea](https://github.com/Tencent/cherry-markdown/commit/085b5ea28f841418e85fa63584f9095ee06c6465))
+* **Suggester:** Suggester扩展 [#430](https://github.com/Tencent/cherry-markdown/issues/430) ([#473](https://github.com/Tencent/cherry-markdown/issues/473)) ([d315708](https://github.com/Tencent/cherry-markdown/commit/d3157081396ef80c0247f0b70da92af2f6f10172))
+* support switching language when previewing code ([#464](https://github.com/Tencent/cherry-markdown/issues/464)) ([21d5b98](https://github.com/Tencent/cherry-markdown/commit/21d5b98a141a21a2a5ac1fd1aa6f62f8f987a546))
+
+
+### Bug Fixes
+
+* [#466](https://github.com/Tencent/cherry-markdown/issues/466) 去掉时序图强制显示序号的逻辑 ([2bcefc7](https://github.com/Tencent/cherry-markdown/commit/2bcefc73366ff52f32cbf47d2ad50d1416aa733a))
+* 避免出现 theme__null class 以及修复了常用操作的一些i18n国际化问题 ([#463](https://github.com/Tencent/cherry-markdown/issues/463)) ([b2c0805](https://github.com/Tencent/cherry-markdown/commit/b2c0805685970c98775f32e3a69af7ce91eea0fe))
+* close [#470](https://github.com/Tencent/cherry-markdown/issues/470) 点击float 插入 menu位置错位 ([1b0844d](https://github.com/Tencent/cherry-markdown/commit/1b0844d6af48634d33cd908bc7136ea7a73a6058))
+* close [#472](https://github.com/Tencent/cherry-markdown/issues/472) 修复点击draw.io图片出现无法回显编辑内容的情况 ([047d48e](https://github.com/Tencent/cherry-markdown/commit/047d48ee3a5ab53c29e68f7e1de3a428b75a01e3))
+* close [#476](https://github.com/Tencent/cherry-markdown/issues/476) 处理粘贴代码时出现多余换行的情况，同时顺便修复复制粘贴代码块出现select标签的情况 ([08c351b](https://github.com/Tencent/cherry-markdown/commit/08c351bf9c3c0af8a10d5f37a8e6b309374087ca))
+* **Engine:** 修复 blockquote 里，代码块被渲染为行内代码的 bug ([#481](https://github.com/Tencent/cherry-markdown/issues/481)) ([22940ae](https://github.com/Tencent/cherry-markdown/commit/22940aea6dc85360659289b6fcdde32a0890a951))
+* **preview:** 修复html2canvas导致的含MathJax的截图导出重影问题 ([#484](https://github.com/Tencent/cherry-markdown/issues/484)) ([855b633](https://github.com/Tencent/cherry-markdown/commit/855b633ed31c5b8f10c3724568ebb69b1f3d6435))
+* **Unittest:** 修复了单元测试代码中的诸多小问题 ([#482](https://github.com/Tencent/cherry-markdown/issues/482)) ([58092e4](https://github.com/Tencent/cherry-markdown/commit/58092e46e5284a89ea581d12052dae17bb0b5ba4))
+
 ### [0.8.20](https://github.com/Tencent/cherry-markdown/compare/v0.8.19...v0.8.20) (2023-05-31)
 
 
