@@ -167,7 +167,6 @@ var basicConfig = {
       'graph',
       'togglePreview',
       'settings',
-      'switchModel',
       'codeTheme',
       'export',
       {

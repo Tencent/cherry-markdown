@@ -152,7 +152,7 @@
   //border: 1px solid $borderColor;
   box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.5);
   margin-left: -60px;
-  z-index: 8;
+  z-index: 11;
 
   &-item {
     width: 100%;
@@ -302,7 +302,7 @@
   position: absolute;
   top: 48px;
   right: 7px;
-  z-index: 0;
+  z-index: 11;
   bottom: 0;
   overflow: hidden;
 
@@ -426,7 +426,7 @@
         width: 100%;
         position: absolute;
         top: 0;
-        background-color: rgba(0, 0, 0, 0.2);
+        background: linear-gradient(to bottom, #00000006, #00000033);
         pointer-events: none;
         z-index: 11;
       }
@@ -436,7 +436,7 @@
         width: 100%;
         position: absolute;
         bottom: 0;
-        background-color: rgba(0, 0, 0, 0.2);
+        background: linear-gradient(to top, #00000006, #00000033);
         pointer-events: none;
         z-index: 11;
       }
