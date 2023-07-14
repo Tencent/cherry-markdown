@@ -2101,8 +2101,38 @@ div[data-type=codeBlock] .token.inserted {
   outline: 1px solid #3582fb;
   word-break: break-all;
 }
+.cherry .cherry-previewer-table-hover-handler {
+  position: absolute;
+  pointer-events: none;
+  z-index: 999;
+}
+.cherry .cherry-previewer-table-hover-handler-container {
+  position: relative;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+.cherry .cherry-previewer-table-hover-handler__symbol {
+  pointer-events: auto;
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  color: #3582fb;
+  width: 12px;
+  height: 12px;
+  line-height: 12px;
+  border: 1px solid rgba(53, 130, 251, 0);
+  background-color: rgba(255, 255, 255, 0);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.cherry .cherry-previewer-table-hover-handler__symbol:hover {
+  background-color: rgba(53, 130, 251, 0.5333333333);
+  color: #FFF;
+}
 .cherry .cherry-highlight-line {
-  background-color: #ffffcc;
+  background-color: rgba(255, 255, 204, 0.5333333333);
 }
 
 @media print {
@@ -2233,7 +2263,7 @@ div[data-type=codeBlock] .token.inserted {
   background: #fff;
   box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.5);
   margin-left: -60px;
-  z-index: 8;
+  z-index: 11;
 }
 .cherry-dropdown-item {
   width: 100%;
@@ -2358,7 +2388,7 @@ div[data-type=codeBlock] .token.inserted {
   position: absolute;
   top: 48px;
   right: 7px;
-  z-index: 0;
+  z-index: 11;
   bottom: 0;
   overflow: hidden;
 }
@@ -2591,6 +2621,37 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-editor.cherry-editor--hidden {
   display: none;
 }
+.cherry-editor-writing-style--focus::before {
+  content: "";
+  display: block;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.0235294118), rgba(0, 0, 0, 0.2));
+  pointer-events: none;
+  z-index: 11;
+}
+.cherry-editor-writing-style--focus::after {
+  content: "";
+  display: block;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.0235294118), rgba(0, 0, 0, 0.2));
+  pointer-events: none;
+  z-index: 11;
+}
+.cherry-editor-writing-style--typewriter .CodeMirror-lines {
+  position: relative;
+}
+.cherry-editor-writing-style--typewriter .CodeMirror-lines::before {
+  content: "";
+  display: block;
+}
+.cherry-editor-writing-style--typewriter .CodeMirror-lines::after {
+  content: "";
+  display: block;
+}
 .cherry-editor .CodeMirror {
   font-family: "Helvetica Neue", Arial, "Hiragino Sans GB", "STHeiti", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   background: #f8fafb;
@@ -2800,9 +2861,8 @@ div[data-type=codeBlock] .token.inserted {
   left: 0;
   top: 0;
   background: #fff;
-  border: 1px solid #ccc;
   border-radius: 2px;
-  max-height: 200px;
+  max-height: 500px;
   box-shadow: 0 2px 8px 1px rgba(0, 0, 0, 0.2);
 }
 .cherry-suggester-panel .cherry-suggester-panel__item {
@@ -2818,6 +2878,11 @@ div[data-type=codeBlock] .token.inserted {
   background-color: #f2f2f5;
   text-decoration: none;
   color: #eb7350;
+}
+.cherry-suggester-panel .cherry-suggester-panel__item > i {
+  display: inline-block;
+  transform: translateY(2px);
+  margin-right: 8px;
 }
 
 .cherry-suggestion {
