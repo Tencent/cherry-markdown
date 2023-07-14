@@ -58,4 +58,6 @@ export type EditorConfiguration = {
   autoScrollByCursor: boolean;
   fileUpload?: (file: File, callback: (fileUrl: string) => void) => void;
   $cherry?: Cherry;
+  /** 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal */
+  writingStyle?: string;
 };

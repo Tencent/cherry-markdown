@@ -288,6 +288,13 @@ export default class Editor {
   };
 
   /**
+   * 光标变化事件
+   */
+  onCursorActivity = () => {
+    this.refreshWritingStatus();
+  };
+
+  /**
    *
    * @param {*} previewer
    */
@@ -409,6 +416,11 @@ export default class Editor {
 
     editor.on('scroll', (codemirror) => {
       this.options.onScroll(codemirror);
+      this.options.writingStyle === 'focus' && this.refreshWritingStatus();
+    });
+
+    editor.on('cursorActivity', () => {
+      this.onCursorActivity();
     });
 
     addEvent(
@@ -429,6 +441,10 @@ export default class Editor {
      * @type {CodeMirror.Editor}
      */
     this.editor = editor;
+
+    if (this.options.writingStyle !== 'normal') {
+      this.initWritingStyle();
+    }
   }
 
   /**
@@ -522,5 +538,65 @@ export default class Editor {
    */
   addListener(event, callback) {
     this.editor.on(event, callback);
+  }
+
+  /**
+   * 初始化书写风格
+   */
+  initWritingStyle() {
+    const { writingStyle } = this.options;
+    const className = `cherry-editor-writing-style--${writingStyle}`;
+    const editorDom = this.getEditorDom();
+    // 重置状态
+    Array.from(editorDom.classList)
+      .filter((className) => className.startsWith('cherry-editor-writing-style--'))
+      .forEach((className) => editorDom.classList.remove(className));
+    if (writingStyle === 'normal') {
+      return;
+    }
+    editorDom.classList.add(className);
+    this.refreshWritingStatus();
+  }
+
+  /**
+   * 刷新书写状态
+   */
+  refreshWritingStatus() {
+    const { writingStyle } = this.options;
+    const className = `cherry-editor-writing-style--${writingStyle}`;
+    /**
+     * @type {HTMLStyleElement}
+     */
+    const style = document.querySelector('#cherry-editor-writing-style') || document.createElement('style');
+    style.id = 'cherry-editor-writing-style';
+    Array.from(document.head.childNodes).find((node) => node === style) || document.head.appendChild(style);
+    const { sheet } = style;
+    Array.from(Array(sheet.cssRules.length)).forEach(() => sheet.deleteRule(0));
+    if (writingStyle === 'focus') {
+      const editorDomRect = this.getEditorDom().getBoundingClientRect();
+      // 获取光标所在位置
+      const { top, bottom } = this.editor.charCoords(this.editor.getCursor());
+      // 光标上部距离编辑器顶部距离（不包含菜单）
+      const topHeight = top - editorDomRect.top;
+      // 光标下部距离编辑器底部距离
+      const bottomHeight = editorDomRect.height - (bottom - editorDomRect.top);
+      sheet.insertRule(`.${className}::before { height: ${topHeight > 0 ? topHeight : 0}px; }`, 0);
+      sheet.insertRule(`.${className}::after { height: ${bottomHeight > 0 ? bottomHeight : 0}px; }`, 0);
+    }
+    if (writingStyle === 'typewriter') {
+      // 编辑器顶/底部填充的空白高度 (用于内容不足时使光标所在行滚动到编辑器中央)
+      const height = this.editor.getScrollInfo().clientHeight / 2;
+      sheet.insertRule(`.${className} .CodeMirror-lines::before { height: ${height}px; }`, 0);
+      sheet.insertRule(`.${className} .CodeMirror-lines::after { height: ${height}px; }`, 0);
+      this.editor.scrollTo(null, this.editor.cursorCoords(null, 'local').top - height);
+    }
+  }
+
+  /**
+   * 修改书写风格
+   */
+  setWritingStyle(writingStyle) {
+    this.options.writingStyle = writingStyle;
+    this.initWritingStyle();
   }
 }
