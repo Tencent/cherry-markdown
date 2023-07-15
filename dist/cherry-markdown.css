@@ -3984,6 +3984,217 @@ div[data-type=codeBlock] .token.inserted {
   color: #7048e8;
 }
 
+/** 色值可以参考：https://yeun.github.io/open-color/ */
+/** 工具栏样式 */
+/** 编辑区域样式 */
+/** 预览区域样式 */
+/** markdown样式 */
+/** 编辑器样式 */
+.cherry.theme__blue {
+  /** 顶部按钮, 选中文字时弹出的按钮, 光标focus到空行时联想出的按钮, 侧边栏按钮 */
+  /** 二级菜单 */
+  /** 选中文字时弹出的按钮 */
+}
+.cherry.theme__blue .cherry-toolbar, .cherry.theme__blue .cherry-floatmenu, .cherry.theme__blue .cherry-bubble, .cherry.theme__blue .cherry-sidebar {
+  background: #e5dbff;
+  border-color: #e5dbff;
+}
+.cherry.theme__blue .cherry-toolbar .cherry-toolbar-button, .cherry.theme__blue .cherry-floatmenu .cherry-toolbar-button, .cherry.theme__blue .cherry-bubble .cherry-toolbar-button, .cherry.theme__blue .cherry-sidebar .cherry-toolbar-button {
+  color: #3b5bdb;
+}
+.cherry.theme__blue .cherry-toolbar .cherry-toolbar-button i, .cherry.theme__blue .cherry-floatmenu .cherry-toolbar-button i, .cherry.theme__blue .cherry-bubble .cherry-toolbar-button i, .cherry.theme__blue .cherry-sidebar .cherry-toolbar-button i {
+  color: #3b5bdb;
+}
+.cherry.theme__blue .cherry-toolbar .cherry-toolbar-button:hover, .cherry.theme__blue .cherry-floatmenu .cherry-toolbar-button:hover, .cherry.theme__blue .cherry-bubble .cherry-toolbar-button:hover, .cherry.theme__blue .cherry-sidebar .cherry-toolbar-button:hover {
+  background-color: #845ef7;
+  color: #edf2ff !important;
+  border-color: #e5dbff;
+}
+.cherry.theme__blue .cherry-toolbar .cherry-toolbar-button:hover i, .cherry.theme__blue .cherry-floatmenu .cherry-toolbar-button:hover i, .cherry.theme__blue .cherry-bubble .cherry-toolbar-button:hover i, .cherry.theme__blue .cherry-sidebar .cherry-toolbar-button:hover i {
+  color: #edf2ff !important;
+}
+.cherry.theme__blue .cherry-dropdown {
+  background: #e5dbff;
+  /** 选择颜色的按钮 */
+}
+.cherry.theme__blue .cherry-dropdown .cherry-dropdown-item {
+  color: #3b5bdb;
+}
+.cherry.theme__blue .cherry-dropdown .cherry-dropdown-item:hover {
+  background-color: #845ef7;
+  color: #edf2ff;
+}
+.cherry.theme__blue .cherry-dropdown.cherry-color-wrap {
+  /** 色盘的标题 */
+  /** 色盘里的每一个色块 */
+}
+.cherry.theme__blue .cherry-dropdown.cherry-color-wrap h3 {
+  color: #3b5bdb;
+}
+.cherry.theme__blue .cherry-dropdown.cherry-color-wrap .cherry-color-item {
+  border-color: #845ef7;
+}
+.cherry.theme__blue .cherry-dropdown.cherry-color-wrap .cherry-color-item:hover {
+  border-color: #364fc7;
+}
+.cherry.theme__blue .cherry-bubble {
+  /** 粘贴HTML内容时弹出的选择按钮 */
+}
+.cherry.theme__blue .cherry-bubble .cherry-bubble-bottom {
+  border-top-color: #e5dbff;
+}
+.cherry.theme__blue .cherry-editor {
+  background-color: #f3f0ff;
+}
+.cherry.theme__blue .cherry-editor .CodeMirror {
+  background-color: #f3f0ff;
+}
+.cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-cursor {
+  border-left: 1px solid #364fc7;
+}
+.cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll span, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-variable-2, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-string, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-strong, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-em, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-meta {
+  color: #364fc7;
+}
+.cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-image-marker, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-quote, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-header {
+  color: #4263eb;
+}
+.cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-url {
+  background-color: #e5dbff;
+}
+.cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-comment, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-url {
+  color: #5c7cfa;
+}
+.cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-selected {
+  background-color: #d0bfff;
+}
+.cherry.theme__blue .cherry-sidebar {
+  box-shadow: 0 0 10px #bac8ff;
+}
+.cherry.theme__blue .cherry-previewer {
+  background-color: #f3f0ff;
+}
+.cherry.theme__blue .cherry-previewer .cherry-mobile-previewer-content {
+  background-color: #f3f0ff;
+}
+.cherry.theme__blue .cherry-previewer-table-content-hander .cherry-previewer-table-content-hander__input textarea {
+  background-color: #f3f0ff;
+  color: #364fc7;
+  outline-color: #4263eb;
+}
+
+/** 预览区域样式 */
+.cherry-markdown.theme__blue {
+  color: #364fc7;
+  /** 行内代码 */
+  /** 
+  * 代码块
+  */
+  /** 
+  * 表格
+  */
+  /** 可以理解为上下结构的音标，下部是文字，上部是对应的拼音 */
+  /** 脚注 */
+  /** 行间公式 */
+  /** 段落公式 */
+  /** 目录 */
+}
+.cherry-markdown.theme__blue h1, .cherry-markdown.theme__blue h2, .cherry-markdown.theme__blue h3, .cherry-markdown.theme__blue h4, .cherry-markdown.theme__blue h5 {
+  color: #4263eb;
+  text-align: center;
+  border-bottom: 1px dashed #3b5bdb;
+  padding-bottom: 15px;
+  margin-bottom: 25px;
+}
+.cherry-markdown.theme__blue h1, .cherry-markdown.theme__blue h2, .cherry-markdown.theme__blue h3, .cherry-markdown.theme__blue h4, .cherry-markdown.theme__blue h5, .cherry-markdown.theme__blue h6 {
+  /** 标题前面的锚点或序号 */
+}
+.cherry-markdown.theme__blue ul {
+  /** checklist 模式，未勾选时 */
+  /** checklist 模式，勾选时 */
+}
+.cherry-markdown.theme__blue ul.cherry-list__upper-roman {
+  list-style: upper-roman;
+}
+.cherry-markdown.theme__blue ul.cherry-list__lower-greek {
+  list-style: lower-greek;
+}
+.cherry-markdown.theme__blue ul.cherry-list__cjk-ideographic {
+  list-style: cjk-ideographic;
+}
+.cherry-markdown.theme__blue ul.cherry-list__circle {
+  list-style: circle;
+}
+.cherry-markdown.theme__blue ul.cherry-list__square {
+  list-style: square;
+}
+.cherry-markdown.theme__blue blockquote {
+  color: #364fc7;
+  background-color: #e5dbff;
+  border-color: #3b5bdb;
+}
+.cherry-markdown.theme__blue a {
+  text-decoration: none;
+  color: #5c7cfa;
+}
+.cherry-markdown.theme__blue a:hover {
+  text-decoration: underline;
+  color: #4263eb;
+}
+.cherry-markdown.theme__blue hr {
+  border-color: #3b5bdb;
+}
+.cherry-markdown.theme__blue p code, .cherry-markdown.theme__blue li code {
+  background-color: #e5dbff;
+  color: #5c7cfa;
+  border: 1px solid #3b5bdb;
+}
+.cherry-markdown.theme__blue table, .cherry-markdown.theme__blue .cherry-table {
+  color: #364fc7;
+}
+.cherry-markdown.theme__blue table th, .cherry-markdown.theme__blue .cherry-table th {
+  background-color: #e5dbff;
+}
+.cherry-markdown.theme__blue table tr, .cherry-markdown.theme__blue table th, .cherry-markdown.theme__blue table td, .cherry-markdown.theme__blue .cherry-table tr, .cherry-markdown.theme__blue .cherry-table th, .cherry-markdown.theme__blue .cherry-table td {
+  border-color: #3b5bdb;
+}
+.cherry-markdown.theme__blue ruby {
+  /** 上部的拼音 */
+}
+.cherry-markdown.theme__blue .footnote {
+  border-color: #3b5bdb;
+}
+.cherry-markdown.theme__blue .footnote .footnote-title {
+  background-color: #e5dbff;
+}
+.cherry-markdown.theme__blue .footnote .one-footnote {
+  color: #364fc7;
+  border-color: #3b5bdb;
+}
+.cherry-markdown.theme__blue .footnote .one-footnote a.footnote-ref {
+  padding: 5px;
+}
+.cherry-markdown.theme__blue .toc {
+  border-bottom: 1px solid #3b5bdb;
+  padding-bottom: 15px;
+  margin-bottom: 30px;
+}
+.cherry-markdown.theme__blue .toc .toc-title {
+  text-align: center;
+  padding-bottom: 15px;
+  margin-top: 30px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #3b5bdb;
+}
+.cherry-markdown.theme__blue .toc .toc-li {
+  border: none;
+}
+.cherry-markdown.theme__blue .toc .toc-li a {
+  color: #364fc7;
+}
+.cherry-markdown.theme__blue .toc .toc-li a:hover {
+  color: #4263eb;
+}
+
 /* BASICS */
 .CodeMirror {
   /* Set height, width, borders, and global font properties here */
