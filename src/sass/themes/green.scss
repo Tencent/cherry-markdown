@@ -154,6 +154,7 @@ $mdBlockquoteBg: $GREEN1;
 /** 预览区域样式 */
 .cherry-markdown.theme__green {
   color: $mdColor;
+  background-color: $previewBg;
 
   p, div {
   

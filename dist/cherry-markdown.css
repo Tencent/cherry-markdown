@@ -3051,6 +3051,7 @@ div[data-type=codeBlock] .token.inserted {
 /** 预览区域样式 */
 .cherry-markdown.theme__dark {
   color: rgb(200, 200, 200);
+  background-color: rgb(51, 51, 51);
   /** 行内代码 */
   /** 
   * 代码块
@@ -3271,6 +3272,7 @@ div[data-type=codeBlock] .token.inserted {
 /** 预览区域样式 */
 .cherry-markdown.theme__light {
   color: rgb(63, 74, 86);
+  background-color: rgb(255, 255, 255);
   /** 行内代码 */
   /** 
   * 代码块
@@ -3456,6 +3458,7 @@ div[data-type=codeBlock] .token.inserted {
 /** 预览区域样式 */
 .cherry-markdown.theme__green {
   color: #2b8a3e;
+  background-color: #ebfbee;
   /** 行内代码 */
   /** 
   * 代码块
@@ -3665,6 +3668,7 @@ div[data-type=codeBlock] .token.inserted {
 /** 预览区域样式 */
 .cherry-markdown.theme__red {
   color: #a61e4d;
+  background-color: #fff0f6;
   /** 行内代码 */
   /** 
   * 代码块
@@ -3876,6 +3880,7 @@ div[data-type=codeBlock] .token.inserted {
 /** 预览区域样式 */
 .cherry-markdown.theme__violet {
   color: #5f3dc4;
+  background-color: #FFF;
   /** 行内代码 */
   /** 
   * 代码块
@@ -4085,6 +4090,7 @@ div[data-type=codeBlock] .token.inserted {
 /** 预览区域样式 */
 .cherry-markdown.theme__blue {
   color: #364fc7;
+  background-color: #f3f0ff;
   /** 行内代码 */
   /** 
   * 代码块
