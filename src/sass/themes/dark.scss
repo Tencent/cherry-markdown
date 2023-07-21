@@ -140,6 +140,7 @@ $mdSvgTextColor: rgb(250, 160, 0);
 /** 预览区域样式 */
 .cherry-markdown.theme__dark {
   color: $mdColor;
+  background-color: $previewBg;
 
   p, div {
   

@@ -140,6 +140,7 @@ $mdBlockquoteBg: rgb(231, 245, 255);
 /** 预览区域样式 */
 .cherry-markdown.theme__light {
   color: $mdColor;
+  background-color: $previewBg;
 
   p, div {
   
