@@ -59,7 +59,7 @@ Cherry Markdown has a variety of style themes to choose from.
 
 ### Features show
 
-click [here](./docs/features.md) for more details
+click [here](./docs/guide/features.md) for more details
 
 ### Demos
 
