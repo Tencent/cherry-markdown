@@ -580,6 +580,7 @@
   background-color: $previewBg;
   min-height: auto;
   overflow-y: auto;
+  -webkit-print-color-adjust: exact;
 
   .cherry-mobile-previewer-content {
     width: 375px;
