@@ -33,6 +33,10 @@ export default class Export extends MenuBase {
     if (document.querySelector('.cherry-dropdown[name=export]')) {
       /** @type {HTMLElement}*/ (document.querySelector('.cherry-dropdown[name=export]')).style.display = 'none';
     }
+    // 强制刷新一下预览区域的内容
+    if (this.editor.previewer.isPreviewerHidden()) {
+      this.$cherry.refreshPreviewer();
+    }
     this.editor.previewer.export(type);
   }
 }
