@@ -47,6 +47,9 @@ const undoHideBodyChildren = (displayList = []) => {
  */
 const getReadyToExport = (previeweDom, cb) => {
   const cherryPreviewer = /** @type {HTMLElement}*/ (previeweDom.cloneNode(true));
+  // 强制去掉预览区的隐藏class
+  cherryPreviewer.className = cherryPreviewer.className.replace('cherry-previewer--hidden', '');
+  cherryPreviewer.style.width = '100%';
   const mmls = cherryPreviewer.querySelectorAll('mjx-assistive-mml');
   // a fix for html2canvas
   mmls.forEach((e) => {
