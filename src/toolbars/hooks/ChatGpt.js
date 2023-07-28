@@ -34,7 +34,7 @@ export default class ChatGpt extends MenuBase {
     if (this.$cherry.options.apiKey) {
       const openai = new openAI.OpenAIApi(
         new openAI.Configuration({
-          apiKey: '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', // your API key goes here
+          apiKey: '', // your API key goes here
         }),
       );
       this.openai = openai;
@@ -55,7 +55,6 @@ export default class ChatGpt extends MenuBase {
     if (!shortKey) {
       return;
     }
-    let res;
     const that = this;
     switch (shortKey) {
       case 'complement':
@@ -67,7 +66,7 @@ export default class ChatGpt extends MenuBase {
           .createCompletion(
             {
               model: 'text-davinci-003',
-              prompt: `continue writing with the following text: ${selection}`,
+              prompt: `continue writing with the following text: ${selection || this.$cherry.editor.editor.getValue()}`,
               temperature: 0.6,
               max_tokens: 500,
             },
@@ -79,14 +78,33 @@ export default class ChatGpt extends MenuBase {
             },
           )
           .then((res) => {
-            console.log(`\ncomplement ${res.data?.choices?.[0]?.text}`);
-            that.editor.editor.replaceSelections(`\ncomplement ${res.data?.choices?.[0]?.text}`, 'around');
+            that.editor.editor.replaceSelection(`${selection || ''} \n${res.data?.choices?.[0]?.text}`);
             that.editor.editor.focus();
             that.$afterClick();
           });
         break;
       case 'conclude':
-        return '\nconclude';
+        this.openai
+          .createCompletion(
+            {
+              model: 'text-davinci-003',
+              prompt: `summary the following text: ${selection || this.$cherry.editor.editor.getValue()}`,
+              temperature: 0.6,
+              max_tokens: 500,
+            },
+            {
+              proxy: {
+                host: '127.0.0.1',
+                port: 7890,
+              },
+            },
+          )
+          .then((res) => {
+            that.editor.editor.replaceSelection(`${selection || ''} \n${res.data?.choices?.[0]?.text}`);
+            that.editor.editor.focus();
+            that.$afterClick();
+          });
+        break;
       default:
         return;
     }
