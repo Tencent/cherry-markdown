@@ -143,13 +143,16 @@ export default class Toolbar {
     this.options.dom.appendChild(toolbarRight);
   }
 
+  setSubMenuPosition(menuObj, subMenuObj) {
+    const pos = menuObj.getMenuPosition();
+    subMenuObj.style.left = `${pos.left + pos.width / 2}px`;
+    subMenuObj.style.top = `${pos.top + pos.height}px`;
+    subMenuObj.style.position = menuObj.positionModel;
+  }
+
   drawSubMenus(name) {
-    const menu = this.menus.hooks[name];
-    const pos = menu.getMenuPosition();
     this.subMenus[name] = createElement('div', 'cherry-dropdown', { name });
-    this.subMenus[name].style.left = `${pos.left + pos.width / 2}px`;
-    this.subMenus[name].style.top = `${pos.top + pos.height}px`;
-    this.subMenus[name].style.position = menu.positionModel;
+    this.setSubMenuPosition(this.menus.hooks[name], this.subMenus[name]);
     // 如果有配置的二级菜单
     const level2MenusName = this.isHasLevel2Menu(name);
     if (level2MenusName) {
@@ -207,6 +210,7 @@ export default class Toolbar {
       // 如果是隐藏的，则先隐藏所有二级菜单，再显示当前二级菜单
       this.hideAllSubMenu();
       this.subMenus[name].style.display = 'block';
+      this.setSubMenuPosition(this.menus.hooks[name], this.subMenus[name]);
     } else {
       // 如果是显示的，则隐藏当前二级菜单
       this.subMenus[name].style.display = 'none';
