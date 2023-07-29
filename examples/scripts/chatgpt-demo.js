@@ -101,7 +101,14 @@ var customMenuC = Cherry.createMenuHook('帮助中心', {
 });
 
 var basicConfig = {
-  apiKey: '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',
+  openai: {
+    apiKey: '', // apiKey
+    proxy: {
+      host: '127.0.0.1',
+      port: '7890',
+    }, // http & https代理配置
+    ignoreError: false, // 是否忽略请求失败，默认忽略
+  },
   id: 'markdown',
   externals: {
     echarts: window.echarts,

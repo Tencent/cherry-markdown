@@ -44,12 +44,12 @@ export default class ChatGpt extends MenuBase {
         onclick: this.bindSubClick.bind(this, FUNC_MAP.SUMMARY),
       },
     ];
-    const { apiKey = '', proxy: { host = '', port = '' } = {} } = this.$cherry.options || {};
+    const { apiKey = '', proxy: { host = '', port = '' } = {}, ignoreError } = this.$cherry.options.openai || {};
     // 设置apiKey
     if (apiKey) {
       const openai = new openAI.OpenAIApi(
         new openAI.Configuration({
-          apiKey: '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', // your API key goes here
+          apiKey,
         }),
       );
       this.openai = openai;
@@ -61,7 +61,7 @@ export default class ChatGpt extends MenuBase {
         port,
       };
     }
-    this.queryOpenAIApi = queryOpenAIApi.bind(this);
+    this.ignoreError = ignoreError;
   }
 
   getSubMenuConfig() {
@@ -78,29 +78,53 @@ export default class ChatGpt extends MenuBase {
     if (!shortKey) {
       return;
     }
-    const that = this;
     switch (shortKey) {
       case FUNC_MAP.COMPLEMENT:
         if (!this.openai) {
           // 触发一个事件表示没有apiKey？
           return;
         }
-        this.queryOpenAIApi(FUNC_MAP.COMPLEMENT, selection || this.$cherry.editor.editor.getValue()).then((res) => {
-          that.editor.editor.replaceSelection(`${selection || ''} \n${res.data?.choices?.[0]?.text}`);
-          that.editor.editor.focus();
-          that.$afterClick();
-        });
+        this.queryOpenAIApi(FUNC_MAP.COMPLEMENT, selection);
         break;
       case FUNC_MAP.SUMMARY:
-        this.queryOpenAIApi(FUNC_MAP.SUMMARY, selection || this.$cherry.editor.editor.getValue()).then((res) => {
-          that.editor.editor.replaceSelection(`${selection || ''} \n${res.data?.choices?.[0]?.text}`);
-          that.editor.editor.focus();
-          that.$afterClick();
-        });
+        this.queryOpenAIApi(FUNC_MAP.SUMMARY, selection);
         break;
       default:
         return;
     }
+  }
+
+  /**
+   * 在编辑器中添加文字
+   */
+  concatText(selection, text) {
+    this.editor?.editor?.replaceSelection(`${selection || ''} \n${text}`);
+    this.editor?.editor?.focus();
+  }
+
+  /**
+   * 请求openai api，成功回调&失败回调
+   * @param {string} name
+   * @param {string} selection
+   */
+  queryOpenAIApi(name, selection) {
+    if (!this.openai) {
+      return;
+    }
+    // const that = this;
+    const inputText = selection || this.$cherry.editor.editor.getValue();
+    queryMap[name]
+      .apply(this, [inputText])
+      .then((res) => this.concatText(this, [selection, res.data?.choices?.[0]?.text || '']))
+      .catch((res) => {
+        // 请求失败处理，两种方案
+        // 1. 抛出一个事件给第三方使用者，在cherry里怎么实现？
+        // 2. cherry处理并在编辑器中提示用户，目前采取这种方式
+        const errMsg = res?.response?.data?.error?.message || '';
+        if (errMsg && this.ignoreError === false) {
+          this.concatText(selection, errMsg);
+        }
+      });
   }
 }
 
@@ -135,10 +159,3 @@ const queryMap = {
     return queryCompletion.apply(this, [FUNC_MAP.SUMMARY, input]);
   },
 };
-
-function queryOpenAIApi(name, input) {
-  if (!this.openai) {
-    return;
-  }
-  return queryMap[name].apply(this, [input]);
-}
