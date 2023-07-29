@@ -115,7 +115,7 @@ export default class ChatGpt extends MenuBase {
     const inputText = selection || this.$cherry.editor.editor.getValue();
     queryMap[name]
       .apply(this, [inputText])
-      .then((res) => this.concatText(this, [selection, res.data?.choices?.[0]?.text || '']))
+      .then((res) => this.concatText(selection, res.data?.choices?.[0]?.message?.content || ''))
       .catch((res) => {
         // 请求失败处理，两种方案
         // 1. 抛出一个事件给第三方使用者，在cherry里怎么实现？
@@ -129,21 +129,32 @@ export default class ChatGpt extends MenuBase {
 }
 
 const generatePromptMap = {
-  [FUNC_MAP.COMPLEMENT](text) {
+  [FUNC_MAP.COMPLEMENT](text, language) {
+    if (language === 'zh_CN') {
+      return `请续写以下文字: ${text}`;
+    }
     return `continue writing with the following text: ${text}`;
   },
-  [FUNC_MAP.SUMMARY](text) {
+  [FUNC_MAP.SUMMARY](text, language) {
+    if (language === 'zh_CN') {
+      return `请总结以下文字: ${text}`;
+    }
     return `summary the following text: ${text}`;
   },
 };
 
 function queryCompletion(type, input) {
-  return this.openai.createCompletion(
+  return this.openai.createChatCompletion(
     {
-      model: 'text-davinci-003',
-      prompt: generatePromptMap[type](input),
-      temperature: 0.6,
-      max_tokens: 500,
+      model: 'gpt-3.5-turbo',
+      messages: [
+        {
+          role: 'user',
+          content: generatePromptMap[type](input, this.$cherry.options.locale || ''),
+        },
+      ],
+      // temperature: 0.6,
+      // max_tokens: 500,
     },
     {
       proxy: this.proxy,
