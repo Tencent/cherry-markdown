@@ -91,7 +91,7 @@ export default class Suggester extends SyntaxBase {
    */
   getSystemSuggestList() {
     const locales = this.$locale;
-    return [
+    const suggestList = [
       {
         icon: 'h1',
         label: locales['H1 Heading'],
@@ -146,7 +146,32 @@ export default class Suggester extends SyntaxBase {
         keyword: 'detail',
         value: `+++ 点击展开更多\n内容\n++- 默认展开\n内容\n++ 默认收起\n内容\n+++\n`,
       },
+      {
+        icon: 'pen',
+        label: '续写',
+        keyword: 'xu xie chatgpt',
+        value: () => {
+          if (!this.$engine.$cherry.options.openai.apiKey) {
+            return '请先配置openai apiKey';
+          }
+          this.$engine.$cherry.toolbar.toolbarHandlers.chatgpt('complement');
+          return `\n`;
+        },
+      },
+      {
+        icon: 'pen',
+        label: '总结',
+        keyword: 'zong jie chatgpt',
+        value: () => {
+          if (!this.$engine.$cherry.options.openai.apiKey) {
+            return '请先配置openai apiKey';
+          }
+          this.$engine.$cherry.toolbar.toolbarHandlers.chatgpt('summary');
+          return `\n`;
+        },
+      },
     ];
+    return suggestList;
   }
 
   /**
@@ -535,6 +560,13 @@ class SuggesterPanel {
         typeof this.optionList[idx].value === 'string'
       ) {
         result = this.optionList[idx].value;
+      }
+      if (
+        typeof this.optionList[idx] === 'object' &&
+        this.optionList[idx] !== null &&
+        typeof this.optionList[idx].value === 'function'
+      ) {
+        result = this.optionList[idx].value();
       }
       if (typeof this.optionList[idx] === 'string') {
         result = ` ${this.keyword}${this.optionList[idx]} `;
