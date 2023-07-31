@@ -98,6 +98,8 @@ export default class ChatGpt extends MenuBase {
    * 在编辑器中添加文字
    */
   concatText(selection, text) {
+    this.button.className = this.button.className.replace('icon-loading loading', '');
+    this.button.innerText = this.button.title;
     this.editor?.editor?.replaceSelection(`${selection || ''} \n${text}`);
     this.editor?.editor?.focus();
   }
@@ -111,6 +113,14 @@ export default class ChatGpt extends MenuBase {
     if (!this.openai) {
       return;
     }
+    // 增加loading
+    // eslint-disable-next-line prefer-destructuring
+    this.button = this.$cherry.wrapperDom.getElementsByClassName('cherry-toolbar-chatgpt')[0];
+    if (/icon-loading loading/.test(this.button.className)) {
+      return;
+    }
+    this.button.className += ' icon-loading loading';
+    this.button.innerText = '';
     // const that = this;
     const inputText = selection || this.$cherry.editor.editor.getValue();
     queryMap[name]
