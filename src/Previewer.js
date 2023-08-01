@@ -29,6 +29,27 @@ import LazyLoadImg from '@/utils/lazyLoadImg';
 let onScroll = () => {}; // store in memory for remove event
 
 /**
+ * 解析第一个节点
+ * @param {Node} node 经过DOMParser转换的HTML
+ * @returns {String | null}
+ */
+const findNonEmptyNode = (node) => {
+  // 如果节点是文本节点且内容不为空，则返回该节点
+  if (node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '') {
+    return node.textContent.trim();
+  }
+
+  for (let i = 0; i < node.childNodes.length; i++) {
+    const childNode = node.childNodes[i];
+    const result = findNonEmptyNode(childNode);
+    if (result) {
+      return result;
+    }
+  }
+  return null;
+};
+
+/**
  * 作用：
  *  dom更新
  *  局部加载（分片）
@@ -916,17 +937,30 @@ export default class Previewer {
    * 导出预览区域内容
    * @public
    * @param {String} type 'pdf'：导出成pdf文件; 'img'：导出成图片
-   * @param {String} fileName 导出文件名
+   * @param {String |Function} fileName 导出文件名
    */
   export(type = 'pdf', fileName = '') {
+    // console.log(this.options);
+    let name;
+    if (!fileName) {
+      const parser = new DOMParser();
+      const domTree = parser.parseFromString(this.getValue(), 'text/html');
+      const firstNodeText = findNonEmptyNode(domTree);
+      firstNodeText ? (name = firstNodeText) : (name = 'cherry');
+    }
+    // if (typeof fileName === 'function') {
+    //   name = fileName();
+    // } else {
+    //   name = fileName;
+    // }
     if (type === 'pdf') {
-      exportPDF(this.getDomContainer(), fileName);
+      exportPDF(this.getDomContainer(), name);
     } else if (type === 'screenShot') {
-      exportScreenShot(this.getDomContainer(), fileName);
+      exportScreenShot(this.getDomContainer(), name);
     } else if (type === 'markdown') {
-      exportMarkdownFile(this.$cherry.getMarkdown(), fileName);
+      exportMarkdownFile(this.$cherry.getMarkdown(), name);
     } else if (type === 'html') {
-      exportHTMLFile(this.getValue(), fileName);
+      exportHTMLFile(this.getValue(), name);
     }
   }
 }

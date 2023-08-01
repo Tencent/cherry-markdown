@@ -84,40 +84,13 @@ const fileDownload = (downloadUrl, fileName) => {
 };
 
 /**
- * 解析第一个节点
- * @param {Node} node 经过DOMParser转换的HTML
- * @returns {String | null}
- */
-const findNonEmptyNode = (node) => {
-  // 如果节点是文本节点且内容不为空，则返回该节点
-  if (node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '') {
-    return node.textContent.trim();
-  }
-
-  for (let i = 0; i < node.childNodes.length; i++) {
-    const childNode = node.childNodes[i];
-    const result = findNonEmptyNode(childNode);
-    if (result) {
-      console.log('result', result);
-      return result;
-    }
-  }
-  return null;
-};
-
-/**
  * 利用window.print导出成PDF
  * @param {HTMLElement} previeweDom 预览区域的dom
  * @param {String} fileName 导出PDF文件名
  */
 export function exportPDF(previeweDom, fileName) {
   const oldTitle = document.title;
-  let name = fileName;
-  if (!fileName) {
-    const firstNodeText = findNonEmptyNode(previeweDom);
-    firstNodeText ? (name = firstNodeText) : (name = 'cherry');
-  }
-  document.title = name;
+  document.title = fileName;
   getReadyToExport(previeweDom, (/** @type {HTMLElement}*/ cherryPreviewer, /** @type {function}*/ thenFinish) => {
     window.print();
     thenFinish();
@@ -131,11 +104,6 @@ export function exportPDF(previeweDom, fileName) {
  * @param {String} fileName 导出图片文件名
  */
 export function exportScreenShot(previeweDom, fileName) {
-  let name = fileName;
-  if (!name) {
-    const firstNodeText = findNonEmptyNode(previeweDom);
-    firstNodeText ? (name = firstNodeText) : (name = 'cherry');
-  }
   getReadyToExport(previeweDom, (/** @type {HTMLElement}*/ cherryPreviewer, /** @type {function}*/ thenFinish) => {
     window.scrollTo(0, 0);
     html2canvas(cherryPreviewer, {
@@ -146,7 +114,7 @@ export function exportScreenShot(previeweDom, fileName) {
       scrollX: 0,
     }).then((canvas) => {
       const imgData = canvas.toDataURL('image/jpeg');
-      fileDownload(imgData, name);
+      fileDownload(imgData, fileName);
       thenFinish();
     });
   });
@@ -158,25 +126,11 @@ export function exportScreenShot(previeweDom, fileName) {
  * @param {String} fileName 导出markdown文件名
  */
 export function exportMarkdownFile(markdownText, fileName) {
-  let name = fileName;
-  // 替换除0-9和任何语言类以外的字符 (\p{L} 匹配任何语言类字符)
-  const regex = /[^0-9\p{L}]/gu;
-  if (!name && markdownText) {
-    const newLineIndex = markdownText.indexOf('\n');
-    if (newLineIndex !== -1) {
-      name = markdownText.substring(0, newLineIndex).replace(regex, '');
-    } else {
-      name = markdownText.replace(regex, '');
-    }
-  } else {
-    name = 'cherry';
-  }
-
   const blob = new Blob([markdownText], { type: 'text/markdown;charset=utf-8' });
   const aLink = document.createElement('a');
   aLink.style.display = 'none';
   aLink.href = URL.createObjectURL(blob);
-  aLink.download = `${name}.md`;
+  aLink.download = `${fileName}.md`;
   document.body.appendChild(aLink);
   aLink.click();
   document.body.removeChild(aLink);
@@ -188,18 +142,11 @@ export function exportMarkdownFile(markdownText, fileName) {
  * @param {String} fileName 导出HTML文件名
  */
 export function exportHTMLFile(HTMLText, fileName) {
-  let name = fileName;
-  if (!name) {
-    const parser = new DOMParser();
-    const domTree = parser.parseFromString(HTMLText, 'text/html');
-    const firstNodeText = findNonEmptyNode(domTree);
-    firstNodeText ? (name = firstNodeText) : (name = 'cherry');
-  }
   const blob = new Blob([HTMLText], { type: 'text/markdown;charset=utf-8' });
   const aLink = document.createElement('a');
   aLink.style.display = 'none';
   aLink.href = URL.createObjectURL(blob);
-  aLink.download = `${name}.html`;
+  aLink.download = `${fileName}.html`;
   document.body.appendChild(aLink);
   aLink.click();
   document.body.removeChild(aLink);
