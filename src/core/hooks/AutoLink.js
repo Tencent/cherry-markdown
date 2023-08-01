@@ -23,9 +23,11 @@ export default class AutoLink extends SyntaxBase {
   constructor({ config, globalConfig }) {
     super({ config });
     this.urlProcessor = globalConfig.urlProcessor;
-    this.openNewPage = !!config.openNewPage; // 是否支持链接新页面打开
     this.enableShortLink = !!config.enableShortLink;
     this.shortLinkLength = config.shortLinkLength;
+    // eslint-disable-next-line no-nested-ternary
+    this.target = config.target ? `target="${config.target}"` : !!config.openNewPage ? 'target="_blank"' : '';
+    this.rel = config.rel ? `rel="${config.rel}"` : '';
   }
 
   isLinkInHtmlAttribute(str, index, linkLength) {
@@ -125,7 +127,7 @@ export default class AutoLink extends SyntaxBase {
           return match;
         case 'mailto:': // email
           if (EMAIL.test(address)) {
-            return `${prefix}<a href="${encodeURIOnce(`${$protocol}${address}`)}" rel="nofollow">${$e(
+            return `${prefix}<a href="${encodeURIOnce(`${$protocol}${address}`)}" ${this.target} ${this.rel}>${$e(
               address,
             )}</a>${suffix}`;
           }
@@ -135,7 +137,9 @@ export default class AutoLink extends SyntaxBase {
           if (prefix === suffix || !isWrappedByBracket) {
             // mailto
             if (EMAIL.test(address)) {
-              return `${prefix}<a href="mailto:${encodeURIOnce(address)}" rel="nofollow">${$e(address)}</a>${suffix}`;
+              return `${prefix}<a href="mailto:${encodeURIOnce(address)}" ${this.target} ${this.rel}>${$e(
+                address,
+              )}</a>${suffix}`;
             }
             // 不识别无协议头的URL，且开头不应该含有斜杠
             if (URL_NO_SLASH.test(address)) {
@@ -148,7 +152,7 @@ export default class AutoLink extends SyntaxBase {
           if (isWrappedByBracket) {
             // mailto
             if (EMAIL.test(address)) {
-              return `<a href="mailto:${encodeURIOnce(address)}" rel="nofollow">${$e(address)}</a>`;
+              return `<a href="mailto:${encodeURIOnce(address)}" ${this.target} ${this.rel}>${$e(address)}</a>`;
             }
             // 可识别任意协议的URL，或不以斜杠开头的URL
             if (URL.test(address) || URL_NO_SLASH.test(address)) {
@@ -212,9 +216,8 @@ export default class AutoLink extends SyntaxBase {
       }
     }
     const processedURL = this.urlProcessor(url, 'autolink');
-    return `<a target="${this.openNewPage ? '\\_blank' : '\\_self'}" rel="nofollow" title="${$e(url).replace(
-      /_/g,
-      '\\_',
-    )}"  href="${encodeURIOnce(processedURL).replace(/_/g, '\\_')}">${$e(linkText).replace(/_/g, '\\_')}</a>`;
+    return `<a ${this.target} ${this.rel} title="${$e(url).replace(/_/g, '\\_')}"  href="${encodeURIOnce(
+      processedURL,
+    ).replace(/_/g, '\\_')}">${$e(linkText).replace(/_/g, '\\_')}</a>`;
   }
 }

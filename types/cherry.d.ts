@@ -5,6 +5,7 @@ export interface Cherry {
 }
 
 export interface CherryOptions {
+  openai: any;
   /** 第三方依赖 */
   externals: CherryExternalsOptions;
   /** 引擎配置 */

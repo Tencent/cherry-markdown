@@ -25,7 +25,9 @@ export default class Link extends SyntaxBase {
   constructor({ config, globalConfig }) {
     super({ config });
     this.urlProcessor = globalConfig.urlProcessor;
-    this.openNewPage = config.openNewPage; // 是否支持链接新页面打开
+    // eslint-disable-next-line no-nested-ternary
+    this.target = config.target ? `target="${config.target}"` : !!config.openNewPage ? 'target="_blank"' : '';
+    this.rel = config.rel ? `rel="${config.rel}"` : '';
   }
 
   /**
@@ -83,8 +85,8 @@ export default class Link extends SyntaxBase {
       attrs = title && title.trim() !== '' ? ` title="${_e(title.replace(/["']/g, ''))}"` : '';
       if (target) {
         attrs += ` target="${target.replace(/{target\s*=\s*(.*?)}/, '$1')}"`;
-      } else if (this.openNewPage) {
-        attrs += ` target="_blank"`;
+      } else if (this.target) {
+        attrs += ` ${this.target}`;
       }
       let processedURL = link.trim().replace(/~1D/g, '~D'); // 还原替换的$符号
       const processedText = coreText.replace(/~1D/g, '~D'); // 还原替换的$符号
@@ -92,9 +94,9 @@ export default class Link extends SyntaxBase {
       if (isValidScheme(processedURL)) {
         processedURL = this.urlProcessor(processedURL, 'link');
         processedURL = encodeURIOnce(processedURL);
-        return `${leadingChar + extraLeadingChar}<a href="${UrlCache.set(
-          processedURL,
-        )}" rel="nofollow"${attrs}>${processedText}</a>`;
+        return `${leadingChar + extraLeadingChar}<a href="${UrlCache.set(processedURL)}" ${
+          this.rel
+        } ${attrs}>${processedText}</a>`;
       }
       return `${leadingChar + extraLeadingChar}<span>${text}</span>`;
     }
