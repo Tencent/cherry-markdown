@@ -33,6 +33,17 @@ export default class Export extends MenuBase {
     if (document.querySelector('.cherry-dropdown[name=export]')) {
       /** @type {HTMLElement}*/ (document.querySelector('.cherry-dropdown[name=export]')).style.display = 'none';
     }
-    this.editor.previewer.export(type);
+    // 强制刷新一下预览区域的内容
+    const { previewer } = this.$cherry;
+    let html = '';
+    if (previewer.isPreviewerHidden()) {
+      html = previewer.options.previewerCache.html;
+    } else {
+      html = previewer.getDomContainer().innerHTML;
+    }
+    // 需要未加载的图片替换成原始图片
+    html = previewer.lazyLoadImg.changeDataSrc2Src(html);
+    previewer.refresh(html);
+    previewer.export(type);
   }
 }

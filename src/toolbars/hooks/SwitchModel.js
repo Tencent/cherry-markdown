@@ -43,13 +43,13 @@ export default class SwitchModel extends MenuBase {
     if (this.editor.previewer.isPreviewerHidden()) {
       // 从编辑模式切换到预览模式
       this.editor.previewer.previewOnly();
-      const toolbar = this.dom.parentElement;
+      const toolbar = this.dom.parentElement.parentElement;
       toolbar.classList.add('preview-only');
       this.dom.textContent = this.locale.switchEdit;
     } else {
       // 从预览模式切换到编辑模式
       this.editor.previewer.editOnly(true);
-      const toolbar = this.dom.parentElement;
+      const toolbar = this.dom.parentElement.parentElement;
       toolbar.classList.remove('preview-only');
       this.dom.textContent = this.locale.switchPreview;
     }

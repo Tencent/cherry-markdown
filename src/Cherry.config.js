@@ -63,6 +63,15 @@ const defaultConfig = {
   externals: {
     // externals
   },
+  // chatGpt的openai配置
+  openai: {
+    apiKey: '', // apiKey
+    // proxy: {
+    //   host: '127.0.0.1',
+    //   port: '7890',
+    // }, // http & https代理配置
+    ignoreError: false, // 是否忽略请求失败，默认忽略
+  },
   // 解析引擎配置
   engine: {
     // 全局配置
@@ -96,7 +105,17 @@ const defaultConfig = {
       // 'hookName': {
       //
       // }
+      link: {
+        /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
+        target: '',
+        /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
+        rel: '',
+      },
       autoLink: {
+        /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
+        target: '',
+        /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
+        rel: '',
         /** 是否开启短链接 */
         enableShortLink: true,
         /** 短链接长度 */
@@ -329,6 +348,7 @@ const defaultConfig = {
     { className: 'green', label: '清新' },
     { className: 'red', label: '热情' },
     { className: 'violet', label: '淡雅' },
+    { className: 'blue', label: '清幽' },
   ],
   // 预览页面不需要绑定事件
   isPreviewOnly: false,
