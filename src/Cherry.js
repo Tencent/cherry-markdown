@@ -593,9 +593,10 @@ export default class Cherry extends CherryStatic {
    * 导出预览区域内容
    * @public
    * @param {String} type 'pdf'：导出成pdf文件; 'img'：导出成图片
+   * @param {String} fileName 导出文件名
    */
-  export(type = 'pdf') {
-    this.previewer.export(type);
+  export(type = 'pdf', fileName) {
+    this.previewer.export(type, fileName);
   }
 
   /**

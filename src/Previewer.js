@@ -916,16 +916,17 @@ export default class Previewer {
    * 导出预览区域内容
    * @public
    * @param {String} type 'pdf'：导出成pdf文件; 'img'：导出成图片
+   * @param {String} fileName 导出文件名
    */
-  export(type = 'pdf') {
+  export(type = 'pdf', fileName = '') {
     if (type === 'pdf') {
-      exportPDF(this.getDomContainer());
+      exportPDF(this.getDomContainer(), fileName);
     } else if (type === 'screenShot') {
-      exportScreenShot(this.getDomContainer());
+      exportScreenShot(this.getDomContainer(), fileName);
     } else if (type === 'markdown') {
-      exportMarkdownFile(this.$cherry.getMarkdown());
+      exportMarkdownFile(this.$cherry.getMarkdown(), fileName);
     } else if (type === 'html') {
-      exportHTMLFile(this.getValue());
+      exportHTMLFile(this.getValue(), fileName);
     }
   }
 }
