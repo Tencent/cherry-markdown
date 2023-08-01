@@ -2,46 +2,58 @@
 
 /** 色值可以参考：https://yeun.github.io/open-color/ */
 
-$PINK0: #fff0f6;
-$PINK1: #ffdeeb;
-$PINK2: #fcc2d7;
-$PINK3: #faa2c1;
-$PINK4: #f783ac;
-$PINK5: #f06595;
-$PINK6: #e64980;
-$PINK7: #d6336c;
-$PINK8: #c2255c;
-$PINK9: #a61e4d;
+$INDIGO0: #edf2ff;
+$INDIGO1: #dbe4ff;
+$INDIGO2: #bac8ff;
+$INDIGO3: #91a7ff;
+$INDIGO4: #748ffc;
+$INDIGO5: #5c7cfa;
+$INDIGO6: #4c6ef5;
+$INDIGO7: #4263eb;
+$INDIGO8: #3b5bdb;
+$INDIGO9: #364fc7;
+
+$VIOLET0: #f3f0ff;
+$VIOLET1: #e5dbff;
+$VIOLET2: #d0bfff;
+$VIOLET3: #b197fc;
+$VIOLET4: #9775fa;
+$VIOLET5: #845ef7;
+$VIOLET6: #7950f2;
+$VIOLET7: #7048e8;
+$VIOLET8: #6741d9;
+$VIOLET9: #5f3dc4;
+
 
 /** 工具栏样式 */
-$toolbarBg: $PINK1;
-$toolbarBtnColor: $PINK8;
-$toolbarBtnBgHover: $PINK5;
-$toolbarBtnHoverColor: $PINK0;
-$toolbarColorItemHoverBorderColor: $PINK9;
-$sidebarShadow: 0 0 10px $PINK2;
+$toolbarBg: $VIOLET1;
+$toolbarBtnColor: $INDIGO8;
+$toolbarBtnBgHover: $VIOLET5;
+$toolbarBtnHoverColor: $INDIGO0;
+$toolbarColorItemHoverBorderColor: $INDIGO9;
+$sidebarShadow: 0 0 10px $INDIGO2;
 /** 编辑区域样式 */
-$editorBg: $PINK0;
-$editorColor: $PINK9;
-$editorSelectedBg: $PINK2;
-$editorUrlBg: $PINK1;
-$editorCursorColor: $PINK9;
-$editorImportantColor: $PINK7;
-$editorCodeColor: $PINK5;
+$editorBg: $VIOLET0;
+$editorColor: $INDIGO9;
+$editorSelectedBg: $VIOLET2;
+$editorUrlBg: $VIOLET1;
+$editorCursorColor: $INDIGO9;
+$editorImportantColor: $INDIGO7;
+$editorCodeColor: $INDIGO5;
 /** 预览区域样式 */
-$previewBg: $PINK0;
+$previewBg: $VIOLET0;
 $previewMobileBgColor: $editorBg;
 /** markdown样式 */
 $mdColor: $editorColor;
 $mdHeaderColor: $editorImportantColor;
-$mdLineColor: $PINK8;
+$mdLineColor: $INDIGO8;
 $mdAColor: $editorCodeColor;
 $mdAHoverColor: $editorImportantColor;
 $mdInlineCodeColor: $editorCodeColor;
-$mdInlineCodeBg: $PINK1;
-$mdBlockquoteBg: $PINK1;
+$mdInlineCodeBg: $VIOLET1;
+$mdBlockquoteBg: $VIOLET1;
 /** 编辑器样式 */
-.cherry.theme__red {
+.cherry.theme__blue {
   
   /** 顶部按钮, 选中文字时弹出的按钮, 光标focus到空行时联想出的按钮, 侧边栏按钮 */
   .cherry-toolbar, .cherry-floatmenu, .cherry-bubble, .cherry-sidebar {
@@ -152,7 +164,7 @@ $mdBlockquoteBg: $PINK1;
 
 }
 /** 预览区域样式 */
-.cherry-markdown.theme__red {
+.cherry-markdown.theme__blue {
   color: $mdColor;
   background-color: $previewBg;
 

@@ -47,6 +47,9 @@ const undoHideBodyChildren = (displayList = []) => {
  */
 const getReadyToExport = (previeweDom, cb) => {
   const cherryPreviewer = /** @type {HTMLElement}*/ (previeweDom.cloneNode(true));
+  // 强制去掉预览区的隐藏class
+  cherryPreviewer.className = cherryPreviewer.className.replace('cherry-previewer--hidden', '');
+  cherryPreviewer.style.width = '100%';
   const mmls = cherryPreviewer.querySelectorAll('mjx-assistive-mml');
   // a fix for html2canvas
   mmls.forEach((e) => {
@@ -68,12 +71,13 @@ const getReadyToExport = (previeweDom, cb) => {
 /**
  * 下载文件
  * @param {String} downloadUrl 图片本地地址
+ * @param {String} fileName 导出图片文件名
  */
-const fileDownload = (downloadUrl) => {
+const fileDownload = (downloadUrl, fileName) => {
   const aLink = document.createElement('a');
   aLink.style.display = 'none';
   aLink.href = downloadUrl;
-  aLink.download = 'cherry.png';
+  aLink.download = `${fileName}.png`;
   document.body.appendChild(aLink);
   aLink.click();
   document.body.removeChild(aLink);
@@ -82,19 +86,24 @@ const fileDownload = (downloadUrl) => {
 /**
  * 利用window.print导出成PDF
  * @param {HTMLElement} previeweDom 预览区域的dom
+ * @param {String} fileName 导出PDF文件名
  */
-export function exportPDF(previeweDom) {
+export function exportPDF(previeweDom, fileName) {
+  const oldTitle = document.title;
+  document.title = fileName;
   getReadyToExport(previeweDom, (/** @type {HTMLElement}*/ cherryPreviewer, /** @type {function}*/ thenFinish) => {
     window.print();
     thenFinish();
+    document.title = oldTitle;
   });
 }
 
 /**
  * 利用canvas将html内容导出成图片
  * @param {HTMLElement} previeweDom 预览区域的dom
+ * @param {String} fileName 导出图片文件名
  */
-export function exportScreenShot(previeweDom) {
+export function exportScreenShot(previeweDom, fileName) {
   getReadyToExport(previeweDom, (/** @type {HTMLElement}*/ cherryPreviewer, /** @type {function}*/ thenFinish) => {
     window.scrollTo(0, 0);
     html2canvas(cherryPreviewer, {
@@ -105,7 +114,7 @@ export function exportScreenShot(previeweDom) {
       scrollX: 0,
     }).then((canvas) => {
       const imgData = canvas.toDataURL('image/jpeg');
-      fileDownload(imgData);
+      fileDownload(imgData, fileName);
       thenFinish();
     });
   });
@@ -114,13 +123,14 @@ export function exportScreenShot(previeweDom) {
 /**
  * 导出 markdown 文件
  * @param {String} markdownText markdown文本
+ * @param {String} fileName 导出markdown文件名
  */
-export function exportMarkdownFile(markdownText) {
+export function exportMarkdownFile(markdownText, fileName) {
   const blob = new Blob([markdownText], { type: 'text/markdown;charset=utf-8' });
   const aLink = document.createElement('a');
   aLink.style.display = 'none';
   aLink.href = URL.createObjectURL(blob);
-  aLink.download = 'cherry.md';
+  aLink.download = `${fileName}.md`;
   document.body.appendChild(aLink);
   aLink.click();
   document.body.removeChild(aLink);
@@ -129,13 +139,14 @@ export function exportMarkdownFile(markdownText) {
 /**
  * 导出预览区 HTML 文件
  * @param {String} HTMLText HTML文本
+ * @param {String} fileName 导出HTML文件名
  */
-export function exportHTMLFile(HTMLText) {
+export function exportHTMLFile(HTMLText, fileName) {
   const blob = new Blob([HTMLText], { type: 'text/markdown;charset=utf-8' });
   const aLink = document.createElement('a');
   aLink.style.display = 'none';
   aLink.href = URL.createObjectURL(blob);
-  aLink.download = 'cherry.html';
+  aLink.download = `${fileName}.html`;
   document.body.appendChild(aLink);
   aLink.click();
   document.body.removeChild(aLink);

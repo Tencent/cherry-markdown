@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.22](https://github.com/Tencent/cherry-markdown/compare/v0.8.21...v0.8.22) (2023-08-01)
+
+
+### Features
+
+* 点击chatgpt的时候增加loading ([ede7e45](https://github.com/Tencent/cherry-markdown/commit/ede7e45c48b93a33ace00e81b4f086eb6f16e41b))
+* 增加超链接新页面打开配置能力，同时顺手关掉联想里的续写和总结功能 ([be1800a](https://github.com/Tencent/cherry-markdown/commit/be1800a64e9592f9f3b2c5c1ebd36b45ab471f14))
+* 增加chatgpt输入联想功能 ([6714211](https://github.com/Tencent/cherry-markdown/commit/6714211187afb468e3a05dc40e8c6a825e35177d))
+* custom export file name close([#506](https://github.com/Tencent/cherry-markdown/issues/506)) ([#517](https://github.com/Tencent/cherry-markdown/issues/517)) ([4b60dd7](https://github.com/Tencent/cherry-markdown/commit/4b60dd761848a57e3c124fca2894a174a88c3882))
+
+
+### Bug Fixes
+
+* 纯预览模式下不提供表格所见即所得编辑能力 close [#513](https://github.com/Tencent/cherry-markdown/issues/513) ([edbd0fe](https://github.com/Tencent/cherry-markdown/commit/edbd0fe4f13e06b5a2dd7d33f0086ed9a573fd4d))
+* 导出时处理懒加载的图片 close [#504](https://github.com/Tencent/cherry-markdown/issues/504) ([8a26cda](https://github.com/Tencent/cherry-markdown/commit/8a26cda2233ae074b4da3c6f34e41cb2ef739fc5))
+* 导出PDF不支持背景 closed [#456](https://github.com/Tencent/cherry-markdown/issues/456) ；fix: 表格里不支持转义符 ([7a4d5d2](https://github.com/Tencent/cherry-markdown/commit/7a4d5d2693da06cfdedbefd4274fe40570b5d969))
+* 二级菜单定位错误 close [#514](https://github.com/Tencent/cherry-markdown/issues/514) ([a437562](https://github.com/Tencent/cherry-markdown/commit/a437562bb7d222284fc35cc8809da70caa9ffd69))
+* 修复导出PDF的bug close [#512](https://github.com/Tencent/cherry-markdown/issues/512) ([8fdaf6a](https://github.com/Tencent/cherry-markdown/commit/8fdaf6aa00db6be36a3bb97d1e27d15cefeed172))
+
 ### [0.8.21](https://github.com/Tencent/cherry-markdown/compare/v0.8.20...v0.8.21) (2023-07-14)
 
 

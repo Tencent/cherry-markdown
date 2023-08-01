@@ -76,6 +76,7 @@ export default class InlineMath extends ParagraphBase {
           return this.makeInlineMath(oneTd);
         })
         .join('|')
+        .replace(/\\~D/g, '~D') // 出现反斜杠的情况（如/$e=m^2$）会导致多一个反斜杠，这里替换掉
         .replace(/~D/g, '\\~D');
     });
     return this.makeInlineMath($str);

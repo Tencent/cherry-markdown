@@ -112,6 +112,11 @@ export default class PreviewerBubble {
     if (!this.enablePreviewerBubble) {
       return;
     }
+    const cherryStatus = this.previewer.$cherry.getStatus();
+    // 左侧编辑器被隐藏时不再提供后续功能
+    if (cherryStatus.editor === 'hide') {
+      return;
+    }
     const { target } = e;
     if (typeof target.tagName === 'undefined') {
       return;
@@ -131,6 +136,11 @@ export default class PreviewerBubble {
 
   $onMouseOut() {
     if (!this.enablePreviewerBubble) {
+      return;
+    }
+    const cherryStatus = this.previewer.$cherry.getStatus();
+    // 左侧编辑器被隐藏时不再提供后续功能
+    if (cherryStatus.editor === 'hide') {
       return;
     }
     this.removeHoverBubble();
