@@ -159,8 +159,8 @@ export function exportScreenShot(previeweDom, fileName) {
  */
 export function exportMarkdownFile(markdownText, fileName) {
   let name = fileName;
-  // Unicode属性 \p{L} 匹配任何语言类的字符
-  const regex = /[^a-zA-Z0-9\p{L}]/gu;
+  // 替换除0-9和任何语言类以外的字符 (\p{L} 匹配任何语言类字符)
+  const regex = /[^0-9\p{L}]/gu;
   if (!name && markdownText) {
     const newLineIndex = markdownText.indexOf('\n');
     if (newLineIndex !== -1) {
