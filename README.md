@@ -90,11 +90,11 @@ npm install cherry-markdown --save
 
 If you need to enable the functions of `mermaid` drawing and table-to-chart, you need to add `mermaid` and `echarts` packages at the same time.
 
-Currently, the plug-in version **Cherry** recommend is `echarts@4.6.0` `mermaid@8.11.1`.
+Currently, the plug-in version **Cherry** recommend is `echarts@4.6.0` `mermaid@9.4.3`.
 
 ```bash
 # Install mermaid, enable mermaid and drawing function
-yarn add mermaid@8.11.1
+yarn add mermaid@9.4.3
 # Install echarts, turn on the table-to-chart function
 yarn add echarts@4.6.0
 ```

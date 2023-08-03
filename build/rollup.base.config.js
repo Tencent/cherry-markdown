@@ -97,7 +97,7 @@ export default {
     }),
     scss({
       // Filename to write all styles to
-      fileName: IS_PRODUCTION ? 'dist/cherry-markdown.min.css' : 'dist/cherry-markdown.css',
+      fileName: IS_PRODUCTION ? 'cherry-markdown.min.css' : 'cherry-markdown.css',
 
       // Determine if node process should be terminated on error (default: false)
       failOnError: true,
