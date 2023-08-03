@@ -1,6 +1,5 @@
 const babel = require('@rollup/plugin-babel').default;
-// node-resolve升级会导致出现新问题
-const resolve = require('rollup-plugin-node-resolve');
+const resolve = require('@rollup/plugin-node-resolve');
 const commonjs = require('@rollup/plugin-commonjs');
 const eslint = require('@rollup/plugin-eslint');
 const alias = require('@rollup/plugin-alias');
@@ -28,7 +27,7 @@ glob(
 );
 
 const rollup = require('rollup');
-const { terser } = require('rollup-plugin-terser');
+const terser = require('@rollup/plugin-terser').default;
 
 /**
  *
@@ -66,7 +65,6 @@ function buildAddons(entries) {
           ],
         }),
         resolve({
-          ignoreGlobal: false,
           browser: true,
         }),
         typescript({

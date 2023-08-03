@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { terser } from 'rollup-plugin-terser';
+import terser from '@rollup/plugin-terser';
 import baseConfig from './rollup.base.config';
 
 // TODO: 新增完整版引擎构建, 目前引擎构建仅支持核心构建

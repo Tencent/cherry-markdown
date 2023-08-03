@@ -15,8 +15,7 @@
  */
 import path from 'path';
 import babel from '@rollup/plugin-babel';
-// node-resolve升级会导致出现新问题
-import resolve from 'rollup-plugin-node-resolve';
+import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import scss from 'rollup-plugin-scss';
 import eslint from '@rollup/plugin-eslint';
@@ -52,6 +51,8 @@ export default {
     globals: {
       jsdom: 'jsdom',
     },
+    // disable code splitting
+    manualChunks: () => 'cherry',
   },
   plugins: [
     eslint({
@@ -61,13 +62,14 @@ export default {
     envReplacePlugin(),
     alias(aliasPluginOptions),
     resolve({
-      ignoreGlobal: false,
+      // ignoreGlobal: false,
       browser: true,
     }),
     commonjs({
       // non-CommonJS modules will be ignored, but you can also
       // specifically include/exclude files
       include: [/node_modules/, /src[\\/]libs/], // Default: undefined
+      exclude: [/node_modules[\\/](lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
       // exclude: [/src\/(?!libs)/],
       // exclude: [ 'node_modules/foo/**', 'node_modules/bar/**' ],  // Default: undefined
       // these values can also be regular expressions
@@ -95,7 +97,7 @@ export default {
     }),
     scss({
       // Filename to write all styles to
-      output: IS_PRODUCTION ? 'dist/cherry-markdown.min.css' : 'dist/cherry-markdown.css',
+      fileName: IS_PRODUCTION ? 'cherry-markdown.min.css' : 'cherry-markdown.css',
 
       // Determine if node process should be terminated on error (default: false)
       failOnError: true,
@@ -106,7 +108,7 @@ export default {
     }),
     babel({
       babelHelpers: 'runtime',
-      exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5)/],
+      exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5|lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
     }),
     // TODO: 重构抽出为独立的插件
     {
@@ -138,16 +140,15 @@ export default {
     },
   ],
   onwarn(warning, warn) {
-    // 忽略 mermaid 的 eval
-    if (warning.code === 'EVAL' && warning.id.indexOf('mermaid') !== -1) {
-      return;
-    }
     // 忽略 juice 的 circular dependency
-    if (warning.code === 'CIRCULAR_DEPENDENCY' && warning.importer.includes('node_modules/juice')) {
+    if (
+      warning.code === 'CIRCULAR_DEPENDENCY' &&
+      (warning.importer.includes('node_modules/juice') || warning.importer.includes('node_modules/d3-'))
+    ) {
       return;
     }
     warn(warning);
   },
-  external: [/@babel[\\/]runtime/, 'jsdom'],
+  external: ['jsdom'],
   // external: ['echarts']
 };

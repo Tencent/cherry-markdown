@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { terser } from 'rollup-plugin-terser';
+import terser from '@rollup/plugin-terser';
 import baseConfig from './rollup.base.config';
 
 const terserPlugin = (options = {}) =>
@@ -40,6 +40,7 @@ const options = {
     sourcemap: false,
     compact: true,
     plugins: [terserPlugin()],
+    manualChunks: () => 'main',
   },
 };
 
