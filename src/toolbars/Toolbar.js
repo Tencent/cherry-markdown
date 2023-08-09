@@ -95,7 +95,7 @@ export default class Toolbar {
       btn.addEventListener(
         'click',
         (event) => {
-          this.onClick(event, name);
+          this.onClick(this.menus.hooks[name], event, name);
         },
         false,
       );
@@ -112,6 +112,7 @@ export default class Toolbar {
   }
   /**
    * 根据配置画出来右侧一级工具栏
+   * @param {any[]} buttonRightConfig
    */
   drawRightMenus(buttonRightConfig) {
     const toolbarRight = createElement('div', 'toolbar-right');
@@ -120,7 +121,7 @@ export default class Toolbar {
       options: {
         $cherry: this.$cherry,
         buttonConfig: buttonRightConfig,
-        customMenu: [],
+        customMenu: this.options.customMenu,
       },
     };
 
@@ -128,11 +129,11 @@ export default class Toolbar {
 
     rightMenus.level1MenusName.forEach((name) => {
       const btn = rightMenus.hooks[name].createBtn();
+      console.log(rightMenus);
       btn.addEventListener(
         'click',
         (event) => {
-          console.log('第一次点击');
-          rightMenus.hooks[name].fire(event, name);
+          this.onClick(this.menus.hooks[name], event, name);
         },
         false,
       );
@@ -143,6 +144,10 @@ export default class Toolbar {
     this.options.dom.appendChild(toolbarRight);
   }
 
+  /**
+   * @param {import("@/toolbars/MenuBase").default} menuObj
+   * @param {{ style: { left: string; top: string; position: any; }; }} subMenuObj
+   */
   setSubMenuPosition(menuObj, subMenuObj) {
     const pos = menuObj.getMenuPosition();
     subMenuObj.style.left = `${pos.left + pos.width / 2}px`;
@@ -162,7 +167,11 @@ export default class Toolbar {
           const btn = subMenu.createBtn(true);
           // 二级菜单的dom认定为一级菜单的
           subMenu.dom = subMenu.dom ? subMenu.dom : this.menus.hooks[name].dom;
-          btn.addEventListener('click', (event) => this.onClick(event, level2Name, true), false);
+          btn.addEventListener(
+            'click',
+            (event) => this.onClick(this.menus.hooks[name], event, level2Name, true),
+            false,
+          );
           this.subMenus[name].appendChild(btn);
         }
       });
@@ -181,9 +190,11 @@ export default class Toolbar {
 
   /**
    * 处理点击事件
+   * @param {import('@/toolbars/MenuBase').default} menu
+   * @param {MouseEvent | KeyboardEvent} event
+   * @param {string} name
    */
-  onClick(event, name, focusEvent = false) {
-    const menu = this.menus.hooks[name];
+  onClick(menu, event, name, focusEvent = false) {
     if (!menu) {
       return;
     }

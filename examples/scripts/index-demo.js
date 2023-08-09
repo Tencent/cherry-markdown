@@ -21,9 +21,9 @@ var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TY
  * 点第一次时，把选中的文字变成同时加粗和斜体
  * 保持光标选区不变，点第二次时，把加粗斜体的文字变成普通文本
  */
-var customMenuA = Cherry.createMenuHook('加粗斜体',  {
+var customMenuA = Cherry.createMenuHook('加粗斜体', {
   iconName: 'font',
-  onClick: function(selection) {
+  onClick: function (selection) {
     // 获取用户选中的文字，调用getSelection方法后，如果用户没有选中任何文字，会尝试获取光标所在位置的单词或句子
     let $selection = this.getSelection(selection) || '同时加粗斜体';
     // 如果是单选，并且选中内容的开始结束内没有加粗语法，则扩大选中范围
@@ -55,16 +55,16 @@ var customMenuA = Cherry.createMenuHook('加粗斜体',  {
 /**
  * 定义一个空壳，用于自行规划cherry已有工具栏的层级结构
  */
-var customMenuB = Cherry.createMenuHook('实验室',  {
+var customMenuB = Cherry.createMenuHook('实验室', {
   iconName: '',
 });
 /**
  * 定义一个自带二级菜单的工具栏
  */
-var customMenuC = Cherry.createMenuHook('帮助中心',  {
+var customMenuC = Cherry.createMenuHook('帮助中心', {
   iconName: 'question',
   onClick: (selection, type) => {
-    switch(type) {
+    switch (type) {
       case 'shortKey':
         return `${selection}快捷键看这里：https://codemirror.net/5/demo/sublime.html`;
       case 'github':
@@ -76,9 +76,9 @@ var customMenuC = Cherry.createMenuHook('帮助中心',  {
     }
   },
   subMenuConfig: [
-    { noIcon: true, name: '快捷键', onclick: (event)=>{cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'shortKey')} },
-    { noIcon: true, name: '联系我们', onclick: (event)=>{cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'github')} },
-    { noIcon: true, name: '更新日志', onclick: (event)=>{cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'release')} },
+    { noIcon: true, name: '快捷键', onclick: (event) => { cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'shortKey') } },
+    { noIcon: true, name: '联系我们', onclick: (event) => { cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'github') } },
+    { noIcon: true, name: '更新日志', onclick: (event) => { cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'release') } },
   ]
 });
 
@@ -175,7 +175,9 @@ var basicConfig = {
       'customMenuCName',
       'theme',
     ],
-    toolbarRight: ['fullScreen', '|'],
+    toolbarRight: ['fullScreen', 'customMenuCName', {
+      strikethrough: ['strikethrough', 'underline', 'sub', 'sup', 'ruby', 'customMenuAName'],
+    }, '|'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
     sidebar: ['mobilePreview', 'copy', 'theme'],
     customMenu: {
