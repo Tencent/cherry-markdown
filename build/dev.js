@@ -46,6 +46,13 @@ if (process.env.CODESPACES === 'true') {
   process.env.CODESANDBOX_SSE = 'true';
 }
 
+// Using Tencent Cloud Studio is always 'TRUE' for Cloud Development Environment (X_IDE_IS_CLOUDSTUDIO=TRUE)
+if (process.env.X_IDE_IS_CLOUDSTUDIO === 'TRUE') {
+  // a hack for rollup-plugin-livereload's websocket connection
+  process.env.CODESANDBOX_SSE = 'true';
+}
+
+
 if (enableHotReload) {
   options.plugins = options.plugins.concat([
     serve({
