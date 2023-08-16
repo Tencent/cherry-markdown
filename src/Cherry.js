@@ -20,6 +20,7 @@ import Previewer from './Previewer';
 import Bubble from './toolbars/Bubble';
 import FloatMenu from './toolbars/FloatMenu';
 import Toolbar from './toolbars/Toolbar';
+import ToolbarRight from './toolbars/ToolbarRight';
 import { createElement } from './utils/dom';
 import Sidebar from './toolbars/Sidebar';
 import { customizer, getThemeFromLocal, changeTheme } from './utils/config';
@@ -133,7 +134,8 @@ export default class Cherry extends CherryStatic {
     }
     $expectTarget(this.options.toolbars.toolbar, Array);
     // 创建顶部工具栏
-    this.toolbar = this.createToolbar();
+    this.createToolbar();
+    this.createToolbarRight();
 
     const wrapperFragment = document.createDocumentFragment();
     wrapperFragment.appendChild(this.toolbar.options.dom);
@@ -388,14 +390,29 @@ export default class Cherry extends CherryStatic {
    */
   createToolbar() {
     const dom = createElement('div', 'cherry-toolbar');
+    this.toolbarContainer = dom;
     this.toolbar = new Toolbar({
       dom,
       $cherry: this,
-      buttonRightConfig: this.options.toolbars.toolbarRight,
       buttonConfig: this.options.toolbars.toolbar,
       customMenu: this.options.toolbars.customMenu,
     });
     return this.toolbar;
+  }
+
+  /**
+   * @private
+   * @returns {Toolbar}
+   */
+  createToolbarRight() {
+    this.toolbarRight = new ToolbarRight({
+      dom: this.toolbarContainer,
+      $cherry: this,
+      buttonConfig: this.options.toolbars.toolbarRight,
+      customMenu: this.options.toolbars.customMenu,
+    });
+    this.toolbar.toolbarHandlers = Object.assign({}, this.toolbar.toolbarHandlers, this.toolbarRight.toolbarHandlers);
+    return this.toolbarRight;
   }
 
   /**
@@ -413,6 +430,7 @@ export default class Cherry extends CherryStatic {
         buttonConfig: this.options.toolbars.sidebar,
         customMenu: this.options.toolbars.customMenu,
       });
+      this.toolbar.toolbarHandlers = Object.assign({}, this.toolbar.toolbarHandlers, this.sidebar.toolbarHandlers);
       wrapperFragment.appendChild(this.sidebar.options.dom);
     }
   }
@@ -431,6 +449,7 @@ export default class Cherry extends CherryStatic {
         buttonConfig: this.options.toolbars.float,
         customMenu: this.options.toolbars.customMenu,
       });
+      this.toolbar.toolbarHandlers = Object.assign({}, this.toolbar.toolbarHandlers, this.floatMenu.toolbarHandlers);
     }
   }
 
@@ -449,6 +468,7 @@ export default class Cherry extends CherryStatic {
         customMenu: this.options.toolbars.customMenu,
         engine: this.engine,
       });
+      this.toolbar.toolbarHandlers = Object.assign({}, this.toolbar.toolbarHandlers, this.bubble.toolbarHandlers);
     }
   }
 

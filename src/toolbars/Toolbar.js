@@ -37,7 +37,6 @@ export default class Toolbar {
       dom: document.createElement('div'),
       buttonConfig: ['bold'],
       customMenu: [],
-      buttonRightConfig: [],
     };
 
     Object.assign(this.options, options);
@@ -107,40 +106,6 @@ export default class Toolbar {
 
     toolbarLeft.appendChild(fragLeft);
     this.options.dom.appendChild(toolbarLeft);
-
-    this.options.buttonRightConfig?.length ? this.drawRightMenus(this.options.buttonRightConfig) : null;
-  }
-  /**
-   * 根据配置画出来右侧一级工具栏
-   */
-  drawRightMenus(buttonRightConfig) {
-    const toolbarRight = createElement('div', 'toolbar-right');
-    const fragRight = document.createDocumentFragment();
-    const rightOptions = {
-      options: {
-        $cherry: this.$cherry,
-        buttonConfig: buttonRightConfig,
-        customMenu: [],
-      },
-    };
-
-    const rightMenus = new HookCenter(rightOptions);
-
-    rightMenus.level1MenusName.forEach((name) => {
-      const btn = rightMenus.hooks[name].createBtn();
-      btn.addEventListener(
-        'click',
-        (event) => {
-          console.log('第一次点击');
-          rightMenus.hooks[name].fire(event, name);
-        },
-        false,
-      );
-      fragRight.appendChild(btn);
-    });
-
-    toolbarRight.appendChild(fragRight);
-    this.options.dom.appendChild(toolbarRight);
   }
 
   setSubMenuPosition(menuObj, subMenuObj) {
