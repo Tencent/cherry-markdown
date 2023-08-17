@@ -58,9 +58,84 @@
           ],
           "description": "cherry-markdown's theme, available values: [ default | dark | light | green | red ]"
         },
-        "cherryMarkdown.fileUploadUrl": {
-          "type": "url",
-          "description": "file upload url"
+        "cherryMarkdown.UploadType": {
+          "type": "string",
+          "default": "None",
+          "enum": [
+            "None",
+            "CustomUploader",
+            "PicGoServer"
+          ],
+          "enumDescriptions": [
+            "dont use any uploader, use base64 to show image",
+            "use custom uploader",
+            "use picgo server"
+          ],
+          "description": "cherry-markdown's upload mode, available values: [ None | CustomUploader | PicGoServer ]"
+        },
+        "cherryMarkdown.CustomUploader": {
+          "type": "object",
+          "default": {
+            "enable": true,
+            "url": "https://your-server.com/upload",
+            "headers": {
+              "Access-Control-Allow-Origin": "*"
+            }
+          },
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "default": false,
+              "description": "enable custom uploader"
+            },
+            "url": {
+              "type": "string",
+              "default": "",
+              "description": "custom uploader url"
+            },
+            "headers": {
+              "type": "object",
+              "default": {},
+              "description": "custom uploader headers",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "default": "",
+                  "description": "custom uploader header key"
+                },
+                "value": {
+                  "type": "string",
+                  "default": "",
+                  "description": "custom uploader header value"
+                }
+              }
+            }
+          },
+          "description": "cherry-markdown's custom uploader, you need config it if you want to upload images / video / audio to your own server"
+        },
+        "cherryMarkdown.PicGoServer": {
+          "type": "string",
+          "description": "cherry-markdown's picgo server, you need config it if you want to upload images / video / audio to picgo server,",
+          "default": "http://127.0.0.1:36677/upload"
+        },
+        "cherryMarkdown.BackfillImageProps": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "isBorder",
+              "isShadow",
+              "isRadius"
+            ],
+            "description": "Select multiple items",
+            "enumDescriptions": [
+              "Whether to add a border to the image",
+              "Whether to add a shadow to the image",
+              "Whether to add a rounded corner to the image"
+            ]
+          },
+          "default": [],
+          "description": "cherry-markdown's backfill image props, you need config it if you want to backfill image props"
         }
       }
     }
@@ -79,7 +154,6 @@
   "devDependencies": {
     "@babel/core": "^7.20.12",
     "@babel/preset-env": "^7.20.2",
-    "@tencent/eslint-config-tencent": "^0.15.0",
     "@types/glob": "^7.1.3",
     "@types/mocha": "^8.2.2",
     "@types/node": "14.x",
@@ -89,6 +163,7 @@
     "babel-loader": "^9.1.2",
     "eslint": "^7.27.0",
     "eslint-config-prettier": "^8.5.0",
+    "eslint-config-tencent": "^1.0.4",
     "eslint-plugin-prettier": "^4.0.0",
     "glob": "^7.1.7",
     "mocha": "^8.4.0",
@@ -99,8 +174,9 @@
     "webpack-cli": "^4.7.0"
   },
   "dependencies": {
-    "@tencent/eslint-config-tencent": "^0.15.2",
     "@types/mathjax": "0.0.37",
+    "axios": "^1.4.0",
+    "eslint-config-tencent": "^1.0.4",
     "katex": "^0.16.4",
     "mathjax": "^3.2.2",
     "md5": "^2.3.0",
