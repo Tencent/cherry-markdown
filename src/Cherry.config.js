@@ -273,6 +273,13 @@ const defaultConfig = {
     sidebar: [],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'table', 'code'], // array or false
+    // 快捷键配置，如果配置为空，则使用toolbar的配置
+    shortcutKey: {
+      // 'Alt-1': 'header',
+      // 'Alt-2': 'header',
+      // 'Ctrl-b': 'bold',
+      // 'Ctrl-Alt-m': 'formula',
+    },
   },
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: '',

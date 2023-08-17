@@ -396,6 +396,7 @@ export default class Cherry extends CherryStatic {
       $cherry: this,
       buttonConfig: this.options.toolbars.toolbar,
       customMenu: this.options.toolbars.customMenu,
+      shortcutKey: this.options.toolbars.shortcutKey,
     });
     return this.toolbar;
   }
@@ -411,7 +412,7 @@ export default class Cherry extends CherryStatic {
       buttonConfig: this.options.toolbars.toolbarRight,
       customMenu: this.options.toolbars.customMenu,
     });
-    this.toolbar.toolbarHandlers = Object.assign({}, this.toolbar.toolbarHandlers, this.toolbarRight.toolbarHandlers);
+    this.toolbar.collectMenuInfo(this.toolbarRight);
     return this.toolbarRight;
   }
 
@@ -430,7 +431,7 @@ export default class Cherry extends CherryStatic {
         buttonConfig: this.options.toolbars.sidebar,
         customMenu: this.options.toolbars.customMenu,
       });
-      this.toolbar.toolbarHandlers = Object.assign({}, this.toolbar.toolbarHandlers, this.sidebar.toolbarHandlers);
+      this.toolbar.collectMenuInfo(this.sidebar);
       wrapperFragment.appendChild(this.sidebar.options.dom);
     }
   }
@@ -449,7 +450,7 @@ export default class Cherry extends CherryStatic {
         buttonConfig: this.options.toolbars.float,
         customMenu: this.options.toolbars.customMenu,
       });
-      this.toolbar.toolbarHandlers = Object.assign({}, this.toolbar.toolbarHandlers, this.floatMenu.toolbarHandlers);
+      this.toolbar.collectMenuInfo(this.floatMenu);
     }
   }
 
@@ -468,7 +469,7 @@ export default class Cherry extends CherryStatic {
         customMenu: this.options.toolbars.customMenu,
         engine: this.engine,
       });
-      this.toolbar.toolbarHandlers = Object.assign({}, this.toolbar.toolbarHandlers, this.bubble.toolbarHandlers);
+      this.toolbar.collectMenuInfo(this.bubble);
     }
   }
 
