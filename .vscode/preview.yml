@@ -1,0 +1,9 @@
+# .vscode/preview.yml
+autoOpen: true # 打开工作空间时是否自动开启所有应用的预览
+apps:
+  - port: 8000 # 应用的端口
+    run: yarn && yarn run dev # 应用的启动命令
+    root: ./ # 应用的启动目录
+    name: Cherry Markdown Editor # 应用名称
+    description: Cherry Markdown Editor # 应用描述
+    autoOpen: true # 打开工作空间时是否自动开启预览（优先级高于根级 autoOpen）
