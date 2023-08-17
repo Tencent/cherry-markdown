@@ -196,14 +196,34 @@ export default class Toolbar {
   }
 
   /**
+   * 收集工具栏的各项信息，主要有：
+   *   this.toolbarHandlers
+   *   this.menus.hooks
+   *   this.shortcutKeyMap
+   * @param {Toolbar} toolbarObj 工具栏对象
+   */
+  collectMenuInfo(toolbarObj) {
+    this.toolbarHandlers = Object.assign({}, this.toolbarHandlers, toolbarObj.toolbarHandlers);
+    this.menus.hooks = Object.assign({}, this.menus.hooks, toolbarObj.menus.hooks);
+    // 只有没设置自定义快捷键的时候才需要收集其他toolbar对象的快捷键配置
+    if (!this.options.shortcutKey || Object.keys(this.options.shortcutKey).length <= 0) {
+      this.shortcutKeyMap = Object.assign({}, this.shortcutKeyMap, toolbarObj.shortcutKeyMap);
+    }
+  }
+
+  /**
    * 收集快捷键
    */
   collectShortcutKey() {
-    this.menus.allMenusName.forEach((name) => {
-      this.menus.hooks[name].shortcutKeys?.forEach((key) => {
-        this.shortcutKeyMap[key] = name;
+    if (this.options.shortcutKey && Object.keys(this.options.shortcutKey).length > 0) {
+      this.shortcutKeyMap = this.options.shortcutKey;
+    } else {
+      this.menus.allMenusName.forEach((name) => {
+        this.menus.hooks[name].shortcutKeys?.forEach((key) => {
+          this.shortcutKeyMap[key] = name;
+        });
       });
-    });
+    }
   }
 
   collectToolbarHandler() {
