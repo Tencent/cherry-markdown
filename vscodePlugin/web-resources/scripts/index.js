@@ -6,13 +6,13 @@ import path from 'path-browserify';
  * 在侧边栏增加编辑/预览入口
  */
 // eslint-disable-next-line no-undef
-const customMenuChangeModule = Cherry.createMenuHook('编辑',  {
+const customMenuChangeModule = Cherry.createMenuHook('编辑', {
   iconName: 'pen',
   onClick(selection) {
     if (window.isDisableEdit) {
       vscode.postMessage({
         type: 'tips',
-        data: 'can\'t edit presently  当前文档已失焦点，编辑后无法保存',
+        data: "can't edit presently  当前文档已失焦点，编辑后无法保存",
       });
       return selection;
     }
@@ -33,7 +33,7 @@ const customMenuChangeModule = Cherry.createMenuHook('编辑',  {
 });
 
 // eslint-disable-next-line no-undef
-const customMenuFont = Cherry.createMenuHook('字体样式',  {
+const customMenuFont = Cherry.createMenuHook('字体样式', {
   iconName: 'font',
 });
 
@@ -56,9 +56,8 @@ const customMenuFont = Cherry.createMenuHook('字体样式',  {
 //   ],
 // });
 
-
 // eslint-disable-next-line no-undef
-const customMenuChangeTheme = Cherry.createMenuHook('主题',  {
+const customMenuChangeTheme = Cherry.createMenuHook('主题', {
   iconName: 'insertChart',
   onClick: (selection, type) => {
     changeTheme(type);
@@ -68,35 +67,69 @@ const customMenuChangeTheme = Cherry.createMenuHook('主题',  {
     });
   },
   subMenuConfig: [
-    { noIcon: true, name: '默认·default', onclick: () => {
-      cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'default');
-    } },
-    { noIcon: true, name: '暗黑·dark', onclick: () => {
-      cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'dark');
-    } },
-    { noIcon: true, name: '明亮·light', onclick: () => {
-      cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'light');
-    } },
-    { noIcon: true, name: '清新·green', onclick: () => {
-      cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'green');
-    } },
-    { noIcon: true, name: '热情·red', onclick: () => {
-      cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'red');
-    } },
-    { noIcon: true, name: '淡雅·violet', onclick: () => {
-      cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'violet');
-    } },
-    { noIcon: true, name: '清幽·blue', onclick: () => {
-      cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'blue');
-    } },
+    {
+      noIcon: true,
+      name: '默认·default',
+      onclick: () => {
+        cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'default');
+      },
+    },
+    {
+      noIcon: true,
+      name: '暗黑·dark',
+      onclick: () => {
+        cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'dark');
+      },
+    },
+    {
+      noIcon: true,
+      name: '明亮·light',
+      onclick: () => {
+        cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'light');
+      },
+    },
+    {
+      noIcon: true,
+      name: '清新·green',
+      onclick: () => {
+        cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'green');
+      },
+    },
+    {
+      noIcon: true,
+      name: '热情·red',
+      onclick: () => {
+        cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'red');
+      },
+    },
+    {
+      noIcon: true,
+      name: '淡雅·violet',
+      onclick: () => {
+        cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'violet');
+      },
+    },
+    {
+      noIcon: true,
+      name: '清幽·blue',
+      onclick: () => {
+        cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'blue');
+      },
+    },
   ],
 });
 
 function changeTheme(theme) {
   const cherryDom = cherry.wrapperDom;
   const cherryPreviewDom = cherry.previewer.getDom();
-  cherryDom.className = `${cherryDom.className.replace(/ theme__[\S]+$/, '')} theme__${theme}`;
-  cherryPreviewDom.className = `${cherryPreviewDom.className.replace(/ theme__[\S]+$/, '')} theme__${theme}`;
+  cherryDom.className = `${cherryDom.className.replace(
+    / theme__[\S]+$/,
+    '',
+  )} theme__${theme}`;
+  cherryPreviewDom.className = `${cherryPreviewDom.className.replace(
+    / theme__[\S]+$/,
+    '',
+  )} theme__${theme}`;
 }
 
 const basicConfig = {
@@ -175,7 +208,7 @@ const basicConfig = {
       '|',
       {
         insert: [
-          // 'image',
+          'image',
           // 'audio',
           // 'video',
           'link',
@@ -205,7 +238,12 @@ const basicConfig = {
       'size',
       'color',
     ], // array or false
-    sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'customMenuChangeTheme'],
+    sidebar: [
+      'customMenuChangeModule',
+      'mobilePreview',
+      'copy',
+      'customMenuChangeTheme',
+    ],
     customMenu: {
       customMenuChangeModule,
       customMenuFont,
@@ -213,6 +251,36 @@ const basicConfig = {
     },
   },
   editor: {
+    /**
+     * @typedef {Object} fileUploadParams
+     * @property {string=} name 文件名
+     * @property {string=} poster 封面
+     * @property {boolean=} isBorder 是否有边框
+     * @property {boolean} isShadow 是否有阴影
+     * @property {boolean} isRadius 是否圆角
+     */
+    /**
+     * @callback fileUploadCallback 回填回调函数
+     * @param {string} url 回填的url
+     * @param {fileUploadParams} params 回填的参数
+     */
+    /**
+     * 文件上传逻辑（涉及到文件上传均会调用此处）
+     * @param {File} file 具体文件
+     * @param {fileUploadCallback=} callback
+     */
+    fileUpload: (file, callback) => {
+      vscode.postMessage({
+        type: 'upload-file',
+        data: {
+          name: file.name,
+          path: file.path,
+          size: file.size,
+          type: file.type,
+        },
+      });
+      window.uploadFileCallback = callback;
+    },
   },
   previewer: {
     // 自定义markdown预览区域class
@@ -292,7 +360,10 @@ cherry.previewer.getDom().addEventListener('scroll', () => {
     postScrollMessage(0);
     return true;
   }
-  if (domContainer.scrollTop + domContainer.offsetHeight > domContainer.scrollHeight) {
+  if (
+    domContainer.scrollTop + domContainer.offsetHeight >
+    domContainer.scrollHeight
+  ) {
     postScrollMessage(-1);
     return true;
   }
@@ -318,7 +389,11 @@ cherry.previewer.getDom().addEventListener('scroll', () => {
   // 获取观察点处最近的markdown元素
   let mdElement = targetElement.closest('[data-sign]');
   // 由于新增脚注，内部容器也有可能存在data-sign，所以需要循环往父级找
-  while (mdElement && mdElement.parentElement && mdElement.parentElement !== domContainer) {
+  while (
+    mdElement &&
+    mdElement.parentElement &&
+    mdElement.parentElement !== domContainer
+  ) {
     mdElement = mdElement.parentElement.closest('[data-sign]');
   }
   if (!mdElement) {
@@ -352,7 +427,7 @@ function postScrollMessage(line) {
   });
 }
 
-cherry.onChange((newValue) => {
+cherry.onChange(newValue => {
   if (window.disableEditListener) {
     return true;
   }
@@ -364,7 +439,7 @@ cherry.onChange((newValue) => {
 
 let scrollTimeOut;
 let editTimeOut;
-window.addEventListener('message', (e) => {
+window.addEventListener('message', e => {
   const { cmd, data } = e.data;
   switch (cmd) {
     case 'editor-change':
@@ -398,6 +473,10 @@ window.addEventListener('message', (e) => {
     case 'enable-edit':
       window.isDisableEdit = false;
       break;
+    case 'upload-file-callback':
+      const { url, ...rest } = data;
+      window.uploadFileCallback(url, rest);
+      break;
   }
 });
 
@@ -413,7 +492,9 @@ function elementsFromPoint(x, y) {
     return document.elementsFromPoint(x, y);
   }
 
-  if (typeof (/** @type {any}*/ (document).msElementsFromPoint) === 'function') {
+  if (
+    typeof (/** @type {any}*/ (document).msElementsFromPoint) === 'function'
+  ) {
     const nodeList = /** @type {any}*/ (document).msElementsFromPoint(x, y);
     return nodeList !== null ? Array.from(nodeList) : nodeList;
   }
@@ -422,7 +503,9 @@ function elementsFromPoint(x, y) {
   /** @type {HTMLElement} */
   let ele;
   do {
-    const currentElement = /** @type {HTMLElement} */ (document.elementFromPoint(x, y));
+    const currentElement = /** @type {HTMLElement} */ (
+      document.elementFromPoint(x, y)
+    );
     if (ele !== currentElement) {
       ele = currentElement;
       elements.push(ele);
