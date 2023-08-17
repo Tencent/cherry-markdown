@@ -51,9 +51,9 @@ class CherryEngine extends CherryStatic {
       opts.engine.global.urlProcessor = urlProcessorProxy(opts.engine.global.urlProcessor);
     }
 
+    /** @type {import('./Engine').default}*/
     // @ts-ignore hack Cherry Instance
-    const $engine = new Engine(opts, { options: opts });
-    return $engine;
+    this.engine = new Engine(opts, { options: opts });
   }
 }
 
