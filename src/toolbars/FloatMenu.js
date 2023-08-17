@@ -29,6 +29,10 @@ export default class FloatMenu extends Toolbar {
     this.initAction();
   }
 
+  appendMenusToDom(menus) {
+    this.options.dom.appendChild(menus);
+  }
+
   initAction() {
     const self = this;
     this.editor.addListener('cursorActivity', (codemirror, evt) => {

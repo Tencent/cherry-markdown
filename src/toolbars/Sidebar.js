@@ -23,4 +23,7 @@ export default class Sidebar extends Toolbar {
   // constructor(options) {
   //   super(options);
   // }
+  appendMenusToDom(menus) {
+    this.options.dom.appendChild(menus);
+  }
 }
