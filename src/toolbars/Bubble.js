@@ -51,6 +51,10 @@ export default class Bubble extends Toolbar {
     this.editorDom.querySelector('.CodeMirror').appendChild(this.bubbleDom);
   }
 
+  appendMenusToDom(menus) {
+    this.options.dom.appendChild(menus);
+  }
+
   /**
    * 计算编辑区域的偏移量
    * @returns {number} 编辑区域的滚动区域

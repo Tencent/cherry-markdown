@@ -22,26 +22,9 @@ export default class ToolbarRight extends Toolbar {
   /**
    * 根据配置画出来一级工具栏
    */
-  drawMenus() {
-    const fragRight = document.createDocumentFragment();
-    const toolbarRight = createElement('div', 'toolbar-right');
-
-    this.menus.level1MenusName.forEach((name) => {
-      const btn = this.menus.hooks[name].createBtn();
-      btn.addEventListener(
-        'click',
-        (event) => {
-          this.onClick(event, name);
-        },
-        false,
-      );
-      if (this.isHasSubMenu(name)) {
-        btn.classList.add('cherry-toolbar-dropdown');
-      }
-      fragRight.appendChild(btn);
-    });
-
-    toolbarRight.appendChild(fragRight);
-    this.options.dom.appendChild(toolbarRight);
+  appendMenusToDom(menus) {
+    const toolbarLeft = createElement('div', 'toolbar-right');
+    toolbarLeft.appendChild(menus);
+    this.options.dom.appendChild(toolbarLeft);
   }
 }

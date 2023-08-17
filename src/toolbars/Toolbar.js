@@ -87,7 +87,6 @@ export default class Toolbar {
    */
   drawMenus() {
     const fragLeft = document.createDocumentFragment();
-    const toolbarLeft = createElement('div', 'toolbar-left');
 
     this.menus.level1MenusName.forEach((name) => {
       const btn = this.menus.hooks[name].createBtn();
@@ -104,7 +103,12 @@ export default class Toolbar {
       fragLeft.appendChild(btn);
     });
 
-    toolbarLeft.appendChild(fragLeft);
+    this.appendMenusToDom(fragLeft);
+  }
+
+  appendMenusToDom(menus) {
+    const toolbarLeft = createElement('div', 'toolbar-left');
+    toolbarLeft.appendChild(menus);
     this.options.dom.appendChild(toolbarLeft);
   }
 
