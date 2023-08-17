@@ -92,8 +92,7 @@ export default class Cherry extends CherryStatic {
     this.options.instanceId = this.instanceId;
 
     /**
-     * @private
-     * @type {Engine}
+     * @type {import('./Engine').default}
      */
     this.engine = new Engine(this.options, this);
     this.init();
