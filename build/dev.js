@@ -52,7 +52,6 @@ if (process.env.X_IDE_IS_CLOUDSTUDIO === 'TRUE') {
   process.env.CODESANDBOX_SSE = 'true';
 }
 
-
 if (enableHotReload) {
   options.plugins = options.plugins.concat([
     serve({
