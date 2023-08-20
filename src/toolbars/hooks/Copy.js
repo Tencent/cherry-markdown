@@ -51,7 +51,9 @@ export default class Copy extends MenuBase {
   }
 
   getStyleFromSheets(keyword) {
-    const sheets = Array.from(document.styleSheets).filter((item) => item.cssRules[0].cssText.indexOf(keyword) > -1);
+    const sheets = Array.from(document.styleSheets).filter(
+      (item) => item.cssRules[0] && item.cssRules[0].cssText.indexOf(keyword) > -1,
+    );
     return `<style>${sheets.reduce((html, sheet) => {
       return html + Array.from(sheet.cssRules).reduce((html, rule) => html + rule.cssText, '');
     }, '')}</style>`;
