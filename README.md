@@ -60,7 +60,7 @@ Cherry Markdown has a variety of style themes to choose from.
 
 ### Features show
 
-click [here](./docs/guide/features.md) for more details
+click [here](https://github.com/Tencent/cherry-markdown/wiki/%E7%89%B9%E6%80%A7%E5%B1%95%E7%A4%BA-features) for more details
 
 ### Demos
 
