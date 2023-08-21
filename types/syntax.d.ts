@@ -44,4 +44,9 @@ export interface BasicHookRegexpRule {
 }
 
 // TODO:
-export type HookRegexpRule = Record<string, any>;
+export type HookRegexpRule = {
+  begin: string;
+  end: string;
+  content: string;
+  reg?: RegExp;
+};
