@@ -256,7 +256,11 @@ export default class Table extends ParagraphBase {
     return this.RULE[flavor].reg && this.RULE[flavor].reg.test(str);
   }
 
+  /**
+   * TODO: fix type errors
+   * @returns
+   */
   rule() {
-    return getTableRule();
+    return /** @type {any} */ (getTableRule());
   }
 }

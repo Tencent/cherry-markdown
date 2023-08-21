@@ -62,4 +62,9 @@ export class CherryStatic {
     // @ts-ignore
     PluginClass.$cherry$mounted = true;
   }
+
+  // for type check only
+  // TODO: fix this error
+  // eslint-disable-next-line no-useless-constructor
+  constructor(...args) {}
 }
