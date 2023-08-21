@@ -168,6 +168,7 @@ export default class Toolbar {
    * 展开/收起二级菜单
    */
   toggleSubMenu(name) {
+    console.log('name: ', name);
     if (!this.subMenus[name]) {
       // 如果没有二级菜单，则先画出来，然后再显示
       this.hideAllSubMenu();
