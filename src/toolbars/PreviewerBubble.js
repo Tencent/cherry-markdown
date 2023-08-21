@@ -22,6 +22,7 @@ import { copyToClip } from '@/utils/copy';
 import { imgDrawioReg, getCodeBlockRule } from '@/utils/regexp';
 import { CODE_PREVIEWER_LANG_SELECT_CLASS_NAME } from '@/utils/code-preview-language-setting';
 import debounce from 'lodash/debounce';
+import FormulaHandler from '@/utils/formulaUtilsHandler';
 /**
  * 预览区域的响应式工具栏
  */
@@ -117,8 +118,10 @@ export default class PreviewerBubble {
     if (cherryStatus.editor === 'hide') {
       return;
     }
+    /** @type {Event} */
     const { target } = e;
-    if (typeof target.tagName === 'undefined') {
+    // 这里要用Element，而不是HTMLElement
+    if (!(target instanceof Element) || typeof target.tagName === 'undefined') {
       return;
     }
     switch (target.tagName) {
@@ -178,13 +181,18 @@ export default class PreviewerBubble {
     this.editor.editor.replaceSelection(this.editor.editor.getSelection() === ' ' ? 'x' : ' ', 'around');
   }
 
+  /**
+   * 点击预览区域的事件处理
+   * @param {MouseEvent} e
+   * @returns
+   */
   $onClick(e) {
     const { target } = e;
     // 复制代码块操作不关心编辑器的状态
     this.$dealCopyCodeBlock(e);
     const cherryStatus = this.previewer.$cherry.getStatus();
     // 纯预览模式下，支持点击放大图片功能（以回调的形式实现，需要业务侧实现图片放大功能）
-    if (cherryStatus.editor === 'hide') {
+    if (cherryStatus.editor === 'hide' || !(target instanceof Element)) {
       if (cherryStatus.previewer === 'show') {
         this.previewer.$cherry.options.callback.onClickPreview &&
           this.previewer.$cherry.options.callback.onClickPreview(e);
@@ -193,16 +201,18 @@ export default class PreviewerBubble {
     }
 
     // 编辑draw.io不受enablePreviewerBubble配置的影响
-    if (target.tagName === 'IMG' && target.getAttribute('data-type') === 'drawio') {
-      if (!this.beginChangeDrawioImg(target)) {
+    if (target instanceof HTMLImageElement) {
+      if (target.tagName === 'IMG' && target.getAttribute('data-type') === 'drawio') {
+        if (!this.beginChangeDrawioImg(target)) {
+          return;
+        }
+        const xmlData = decodeURI(target.getAttribute('data-xml'));
+        drawioDialog(this.previewer.$cherry.options.drawioIframeUrl, xmlData, (newData) => {
+          const { xmlData, base64 } = newData;
+          this.editor.editor.replaceSelection(`(${base64}){data-type=drawio data-xml=${encodeURI(xmlData)}}`, 'around');
+        });
         return;
       }
-      const xmlData = decodeURI(target.getAttribute('data-xml'));
-      drawioDialog(this.previewer.$cherry.options.drawioIframeUrl, xmlData, (newData) => {
-        const { xmlData, base64 } = newData;
-        this.editor.editor.replaceSelection(`(${base64}){data-type=drawio data-xml=${encodeURI(xmlData)}}`, 'around');
-      });
-      return;
     }
 
     if (!this.enablePreviewerBubble) {
@@ -217,16 +227,27 @@ export default class PreviewerBubble {
     if (typeof target.tagName === 'undefined') {
       return;
     }
+
     switch (target.tagName) {
       case 'IMG':
-        this.$showImgPreviewerBubbles(target);
+        if (target instanceof HTMLImageElement) {
+          this.$showImgPreviewerBubbles(target);
+        }
         break;
       case 'TD':
       case 'TH':
-        if (!this.isCherryTable(e.target)) {
-          return;
+        if (target instanceof HTMLElement) {
+          if (!this.isCherryTable(target)) {
+            return;
+          }
+          this.$showTablePreviewerBubbles('click', target);
         }
-        this.$showTablePreviewerBubbles('click', e.target);
+        break;
+      case 'svg':
+        if (target?.parentElement?.tagName === 'MJX-CONTAINER') {
+          this.$removeAllPreviewerBubbles('click');
+          this.$showFormulaPreviewerBubbles('click', target, { x: e.pageX, y: e.pageY });
+        }
         break;
     }
   }
@@ -319,6 +340,19 @@ export default class PreviewerBubble {
     imgSizeHander.showBubble(htmlElement, this.bubble.click, this.previewerDom);
     imgSizeHander.bindChange(this.changeImgValue.bind(this));
     this.bubbleHandler.click = imgSizeHander;
+  }
+
+  /**
+   * 为触发的公式增加操作工具栏
+   * @param {string} trigger 触发方式
+   * @param {Element} target 用户触发的公式dom
+   * @param {{x?: number, y?: number}} options 额外参数
+   */
+  $showFormulaPreviewerBubbles(trigger, target, options = {}) {
+    this.$createPreviewerBubbles(trigger, 'formula-hover-handler');
+    const formulaHandler = new FormulaHandler(trigger, target, this.bubble[trigger], this.previewerDom, this.editor);
+    formulaHandler.showBubble(options?.x || 0, options?.y || 0);
+    this.bubbleHandler[trigger] = formulaHandler;
   }
 
   getValueWithoutCode() {
