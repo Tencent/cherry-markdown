@@ -1,10 +1,9 @@
 .cherry-insert-formula-wrappler {
-  width: 500px;
-  height: 300px;
+  width: 500px !important; // 覆盖默认.cherry-dropdown样式
+  height: 300px !important;
   padding: 15px;
   display: flex;
-  background-color: #fff;
-  position: fixed;
+  position: fixed !important;
   z-index: 9999999;
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
   box-sizing: border-box;
@@ -32,7 +31,9 @@
         text-decoration: none;
         user-select: none;
         user-select: none;
-        color: black;
+      }
+      &:not(:first-child) {
+        margin-top: 10px;
       }
     }
 
@@ -106,7 +107,6 @@
         cursor: pointer;
         display: inline-block;
         font-weight: 400;
-        color: #212529;
         text-align: center;
         vertical-align: middle;
         user-select: none;
