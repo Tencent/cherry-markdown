@@ -4,6 +4,8 @@
 @import './markdown.scss';
 @import './previewer.scss';
 @import './print.scss';
+@import './bubble_formula.scss';
+@import './formula_utils_bubble.scss';
 
 @mixin cherryFont {
   font-family: $fontFamily;
@@ -32,7 +34,6 @@
   }
 
   &.cherry--no-toolbar {
-
     .cherry-toolbar,
     .cherry-sidebar {
       height: 0;
@@ -46,20 +47,19 @@
     }
   }
 
-  div[data-type="codeBlock"]:hover  {
+  div[data-type='codeBlock']:hover {
     position: relative;
-    .cherry-code-preview-lang-select{
+    .cherry-code-preview-lang-select {
       display: block !important;
       position: absolute;
       transform: translate(2px, 50%);
     }
-
   }
 
   .cherry-preview--full {
-    div[data-type="codeBlock"]:hover  {
+    div[data-type='codeBlock']:hover {
       position: unset;
-      .cherry-code-preview-lang-select{
+      .cherry-code-preview-lang-select {
         display: none !important;
         position: unset;
       }
@@ -215,7 +215,7 @@
     }
 
     &.loading:after {
-      content: " ";
+      content: ' ';
       display: block;
       width: 8px;
       height: 8px;
@@ -310,10 +310,9 @@
   }
 }
 
-
 .cherry {
   .ace_search {
-    background: #FFF;
+    background: #fff;
   }
 }
 
@@ -342,7 +341,7 @@
       }
 
       &.loading:after {
-        content: " ";
+        content: ' ';
         display: block;
         width: 8px;
         height: 8px;
@@ -641,20 +640,19 @@
     list-style: square;
   }
 
-
-  div[data-type="codeBlock"]:hover {
+  div[data-type='codeBlock']:hover {
     .cherry-copy-code-block {
       display: block !important;
       position: relative;
       width: 25px;
       text-align: center;
       height: 25px;
-      border: 1px solid #DDD;
+      border: 1px solid #ddd;
       cursor: pointer;
       float: right;
       right: 10px;
       top: 15px;
-      color: #FFF;
+      color: #fff;
       border-radius: 5px;
       margin-left: -27px;
       transition: all 0.3s;
@@ -723,7 +721,6 @@
   }
 }
 
-
 .Cherry-Math {
   svg {
     max-width: 100%;
@@ -761,7 +758,6 @@
       margin-right: 8px;
     }
   }
-
 }
 
 .cherry-suggestion {
