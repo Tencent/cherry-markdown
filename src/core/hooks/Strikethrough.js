@@ -41,12 +41,12 @@ export default class Strikethrough extends SyntaxBase {
   }
 
   rule({ config } = { config: undefined }) {
-    /** @type {Partial<import('~types/syntax').BasicHookRegexpRule>} */
-    let ret = {};
+    /** @type {import('~types/syntax').BasicHookRegexpRule} */
+    let ret = /** @type {any} */ ({});
     if (!!config.needWhitespace) {
-      ret = { begin: '(^|[\\s])\\~T\\~T', end: '\\~T\\~T(?=\\s|$)', content: '([\\w\\W]+?)' };
+      ret = { ...ret, begin: '(^|[\\s])\\~T\\~T', end: '\\~T\\~T(?=\\s|$)', content: '([\\w\\W]+?)' };
     } else {
-      ret = { begin: '(^|[^\\\\])\\~T\\~T', end: '\\~T\\~T', content: '([\\w\\W]+?)' };
+      ret = { ...ret, begin: '(^|[^\\\\])\\~T\\~T', end: '\\~T\\~T', content: '([\\w\\W]+?)' };
     }
     ret.reg = new RegExp(ret.begin + ret.content + ret.end, 'g');
     return ret;

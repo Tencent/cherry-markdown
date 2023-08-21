@@ -167,7 +167,12 @@ export function getCodeBlockRule() {
     end: /[^\S\n]*\3[ \t]*(?=$|\n+)/, // '\\s*```[ \\t]*(?=$|\\n+)',
   };
   codeBlock.reg = new RegExp(codeBlock.begin.source + codeBlock.content.source + codeBlock.end.source, 'g');
-  return codeBlock;
+  return {
+    ...codeBlock,
+    begin: codeBlock.begin.source,
+    content: codeBlock.content.source,
+    end: codeBlock.end.source,
+  };
 }
 
 /**

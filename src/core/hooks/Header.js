@@ -195,6 +195,10 @@ export default class Header extends ParagraphBase {
     return this.RULE[flavor].reg && this.RULE[flavor].reg.test(str);
   }
 
+  /**
+   * TODO: fix type errors, prefer use `rules` for multiple spec instead
+   * @returns
+   */
   rule() {
     // setext Header
     // TODO: 支持多行标题
@@ -221,6 +225,6 @@ export default class Header extends ParagraphBase {
     this.strict && (atx.begin += '(?=\\h+)'); // (?=\\s+) for strict mode
     atx.reg = compileRegExp(atx, 'g', true);
 
-    return { setext, atx };
+    return /** @type {any} */ ({ setext, atx });
   }
 }

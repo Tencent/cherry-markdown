@@ -264,9 +264,9 @@ export default class Suggester extends SyntaxBase {
       `${isLookbehindSupported() ? '((?<!\\\\))[ ]' : '(^|[^\\\\])[ ]'}(${keys})(([^${keys}\\s])+)`,
       'g',
     );
-    return {
+    return /** @type {any} */ ({
       reg,
-    };
+    });
   }
 
   mounted() {

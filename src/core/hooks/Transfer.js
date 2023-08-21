@@ -23,9 +23,12 @@ export default class Transfer extends SyntaxBase {
   // }
 
   rule() {
-    const ret = {};
-    ret.reg = new RegExp('');
-    return ret;
+    return {
+      begin: '',
+      content: '',
+      end: '',
+      reg: new RegExp(''),
+    };
   }
 
   beforeMakeHtml(str) {
