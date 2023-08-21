@@ -44,9 +44,4 @@ export interface BasicHookRegexpRule {
 }
 
 // TODO:
-export type HookRegexpRule = {
-  begin: string;
-  end: string;
-  content: string;
-  reg?: RegExp;
-};
+export type HookRegexpRule = {};

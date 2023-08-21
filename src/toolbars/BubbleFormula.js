@@ -51,12 +51,17 @@ export default class BubbleFormula {
    */
   afterClick(latex) {}
 
-  constructor() {
+  /**
+   * @param {Object.<string, FormulaMenu>} formulaConfig
+   */
+  constructor(formulaConfig = {}) {
+    this.formulaConfig = formulaConfig;
     this.init();
     this.initEventListeners();
   }
 
   generateBubbleFormulaHtmlStr() {
+    console.log('this.formulaConfig: ', this.formulaConfig);
     const entries = Object.entries(this.formulaConfig || {});
     const liStr = entries
       .map(
@@ -90,7 +95,7 @@ export default class BubbleFormula {
               })
               .join('');
             const formulaCategaryFuncStr = `<div class="cherry-insert-formula-categary__func no-scrollbar" data-name="${subCategoryKey}">${formulaCategaryFuncInnerStr}</div>`;
-            const formulaCategaryBtnStr = `<button class="cherry-insert-formula-categary__btn btn-light" data-name="${subCategoryKey}">${subCategory.title}</button>`;
+            const formulaCategaryBtnStr = `<button class="cherry-toolbar-button cherry-insert-formula-categary__btn btn-light" data-name="${subCategoryKey}">${subCategory.title}</button>`;
             return `<div class="cherry-insert-formula-categary" data-name="${subCategoryKey}" title="${subCategory.title}">${formulaCategaryBtnStr}${formulaCategaryFuncStr}</div>`;
           })
           .join('');
@@ -103,11 +108,13 @@ export default class BubbleFormula {
   }
 
   init() {
-    this.dom = document.createElement('div');
-    this.dom.className = ['cherry-insert-formula', 'cherry-insert-formula-wrappler'].join(' ');
-    this.dom.innerHTML = this.generateBubbleFormulaHtmlStr();
-    // 实例化后，将容器插入到富文本编辑器中，默认隐藏
-    this.dom.style.display = 'none';
+    if (Object.keys(this.formulaConfig).length) {
+      this.dom = document.createElement('div');
+      this.dom.className = ['cherry-dropdown', 'cherry-insert-formula', 'cherry-insert-formula-wrappler'].join(' ');
+      this.dom.innerHTML = this.generateBubbleFormulaHtmlStr();
+      // 实例化后，将容器插入到富文本编辑器中，默认隐藏
+      this.dom.style.display = 'none';
+    }
   }
 
   /**
