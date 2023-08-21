@@ -52,9 +52,13 @@ export default class Emphasis extends SyntaxBase {
       $str = $str.replace(/(^|\n[\s]*)(\*{2,})((?:.*?)(?:(?:\n.*?)*?))\2/g, converAsterisk);
       $str = $str.replace(/([^\n*\\\s][ ]*)(\*+)((?:.*?)(?:(?:\n.*?)*?))\2/g, converAsterisk);
     } else {
+      // TODO: fix this error
+      // @ts-expect-error
       $str = $str.replace(this.RULE.asterisk.reg, converAsterisk);
     }
 
+    // TODO: fix this error
+    // @ts-expect-error
     $str = $str.replace(this.RULE.underscore.reg, (match, leading, symbol, text, index, string) => {
       if (text.trim() === '') {
         return match;
@@ -84,6 +88,10 @@ export default class Emphasis extends SyntaxBase {
     return this.RULE[flavor].reg && this.RULE[flavor].reg.test(str);
   }
 
+  /**
+   * TODO: fix type errors, prefer use `rules` for multiple spec instead
+   * @returns
+   */
   rule({ config } = { config: undefined }) {
     const allowWhitespace = config ? !!config.allowWhitespace : false;
     const REGEX = allowWhitespace
@@ -104,6 +112,6 @@ export default class Emphasis extends SyntaxBase {
 
     asterisk.reg = compileRegExp(asterisk, 'g');
     underscore.reg = compileRegExp(underscore, 'g');
-    return { asterisk, underscore };
+    return /** @type {any} */ ({ asterisk, underscore });
   }
 }

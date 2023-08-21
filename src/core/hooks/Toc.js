@@ -54,6 +54,8 @@ export default class Toc extends ParagraphBase {
   beforeMakeHtml(str) {
     let $str = str;
     if (this.test($str, 'extend')) {
+      // TODO: fix this error
+      // @ts-expect-error
       $str = $str.replace(this.RULE.extend.reg, (match, lines, toc) => {
         if (!this.allowMultiToc && !this.isFirstTocToken) {
           // 需要补齐非捕获的\n，以及第一个分组中的\n
@@ -65,6 +67,8 @@ export default class Toc extends ParagraphBase {
       });
     }
     if (this.test($str, 'standard')) {
+      // TODO: fix this error
+      // @ts-expect-error
       $str = $str.replace(this.RULE.standard.reg, (match, lines, toc) => {
         if (!this.allowMultiToc && !this.isFirstTocToken) {
           // 需要补齐非捕获的\n，以及第一个分组中的\n
@@ -245,10 +249,14 @@ export default class Toc extends ParagraphBase {
       match.replace(/(\]\]|\]|】】)([<~])/, '$1\n$2'),
     );
     // 首先识别扩展语法
+    // TODO: fix this error
+    // @ts-expect-error
     $str = $str.replace(this.RULE.extend.reg, (match, preLinesMatch) =>
       this.$makeToc(headerList, str2Md5, preLinesMatch),
     );
     // 处理标准语法
+    // TODO: fix this error
+    // @ts-expect-error
     $str = $str.replace(this.RULE.standard.reg, (match, preLinesMatch) =>
       this.$makeToc(headerList, str2Md5, preLinesMatch),
     );
@@ -261,6 +269,10 @@ export default class Toc extends ParagraphBase {
     return this.RULE[flavor].reg ? this.RULE[flavor].reg.test(str) : false;
   }
 
+  /**
+   * TODO: fix type errors, prefer use `rules` for multiple spec instead
+   * @returns
+   */
   rule() {
     const extend = {
       begin: '(?:^|\\n)(\\n*)',
@@ -270,6 +282,6 @@ export default class Toc extends ParagraphBase {
     extend.reg = new RegExp(extend.begin + extend.content + extend.end, 'g');
     const standard = { begin: '(?:^|\\n)(\\n*)', end: '(?=$|\\n)', content: '[ ]*(\\[(?:toc|TOC)\\])[ ]*' };
     standard.reg = new RegExp(standard.begin + standard.content + standard.end, 'g');
-    return { extend, standard };
+    return /** @type {any} */ ({ extend, standard });
   }
 }
