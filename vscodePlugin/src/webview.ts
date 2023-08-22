@@ -67,22 +67,22 @@ function getBaseResourcePath(currentPanel: vscode.WebviewPanel) {
 function writeGlobalVarsToFile(extensionPath: string, globalVars: { baseResourcePath: string }): string {
   const globalVarsContent = `
     window._baseResourcePath = "${globalVars.baseResourcePath}";
-  `
+  `;
   const filePath = path.join(extensionPath, 'web-resources/scripts', 'global-vars.js');
   fs.writeFileSync(filePath, globalVarsContent);
   return filePath;
 }
 
 function getRelativePath(): string {
-  if(!vscode.window.activeTextEditor) {
+  if (!vscode.window.activeTextEditor) {
     return '';
   }
   const documentUri = vscode.window.activeTextEditor.document.uri;
   const workspaceFolderUri = vscode.workspace.getWorkspaceFolder(documentUri);
-  if(!workspaceFolderUri) {
+  if (!workspaceFolderUri) {
     return '';
   }
   const workspaceFolder = workspaceFolderUri.uri.fsPath;
   const mdFileFolder = path.dirname(documentUri.fsPath);
-  return path.relative( workspaceFolder, mdFileFolder);
+  return path.relative(workspaceFolder, mdFileFolder);
 }

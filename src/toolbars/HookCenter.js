@@ -62,7 +62,7 @@ import File from './hooks/File';
 import Word from './hooks/Word';
 import Ruby from './hooks/Ruby';
 import Theme from './hooks/Theme';
-import ChatGpt from './hooks/ChatGpt';
+// import ChatGpt from './hooks/ChatGpt';
 // Sidebar
 import MobilePreview from './hooks/MobilePreview';
 import Copy from './hooks/Copy';
@@ -127,7 +127,7 @@ const HookList = {
   justify: Justify,
   detail: Detail,
   drawIo: DrawIo,
-  chatgpt: ChatGpt,
+  // chatgpt: ChatGpt,
 };
 
 export default class HookCenter {
