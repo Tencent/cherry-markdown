@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import {
   UploadType,
+  // eslint-disable-next-line no-unused-vars
   CustomUploader,
   BackfillImageProps,
   BackfillImage,
@@ -33,6 +34,7 @@ export const uploadFileHandler = async (fileInfo: FileInfo) => {
     .getConfiguration('cherryMarkdown')
     .get<BackfillImageProps>('BackfillImageProps', []);
 
+  // eslint-disable-next-line no-param-reassign
   BackfillImageProps.reduce((prev, curr) => ((prev[curr] = true), prev), res);
 
   switch (UploadType) {
@@ -57,25 +59,11 @@ export const uploadFileHandler = async (fileInfo: FileInfo) => {
       throw new Error('自定义上传暂未开发');
       break;
     case 'PicGoServer':
-      const PicGoServer = vscode.workspace
-        .getConfiguration('cherryMarkdown')
-        .get<string>('PicGoServer', 'http://127.0.0.1:36677/upload');
+      // eslint-disable-next-line no-case-declarations
+      const PicGoServer = vscode.workspace.getConfiguration('cherryMarkdown').get<string>('PicGoServer', 'http://127.0.0.1:36677/upload');
       // 请求PicGo服务
-      const upload = await axios.post<
-        any,
-        AxiosResponse<{ success: boolean; result: string[] }>,
-        { list: string[] }
-      >(
-        PicGoServer,
-        {
-          list: [path],
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
-      );
+      // eslint-disable-next-line no-case-declarations
+      const upload = await axios.post<any, AxiosResponse<{ success: boolean; result: string[] }>, { list: string[] } >(PicGoServer, { list: [path] }, { headers: { 'Content-Type': 'application/json' } },);
       if (upload.data?.success !== true) {
         throw new Error('上传失败');
       } else {

@@ -30,7 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   // 切换文件的时候更新预览区域内容
-  vscode.window.onDidChangeActiveTextEditor(e => {
+  vscode.window.onDidChangeActiveTextEditor((e) => {
     if (e?.document) {
       triggerEditorContentChange();
       // 如果打开的不是md文件，则让cherry强制进入预览模式
@@ -43,19 +43,19 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   // 当修改文档内容的时候更新预览区域内容，如果已经关闭预览了，则不需要重新打开预览
-  vscode.workspace.onDidChangeTextDocument(e => {
+  vscode.workspace.onDidChangeTextDocument((e) => {
     if (isCherryPanelInit && e?.document && !disableEditTrigger) {
       triggerEditorContentChange();
     }
   });
 
   // 滚动的时候让预览区域同步滚动
-  vscode.window.onDidChangeTextEditorVisibleRanges(e => {
+  vscode.window.onDidChangeTextEditorVisibleRanges((e) => {
     if (!isCherryPanelInit) {
       return true;
     }
-    disableScrollTrigger ||
-      cherryPanel.webview.postMessage({
+    disableScrollTrigger
+      || cherryPanel.webview.postMessage({
         cmd: 'editor-scroll',
         data: e.visibleRanges[0].start.line,
       });
@@ -76,8 +76,8 @@ const getMarkdownFileInfo = () => {
   let currentText = '';
   let currentTitle = '';
   if (
-    currentDoc?.languageId !== 'markdown' &&
-    targetDocument.document.languageId === 'markdown'
+    currentDoc?.languageId !== 'markdown'
+    && targetDocument.document.languageId === 'markdown'
   ) {
     currentEditor = targetDocument;
     currentDoc = targetDocument.document;
@@ -104,8 +104,7 @@ const getMarkdownFileInfo = () => {
  */
 const initCherryPanel = () => {
   const { mdInfo, currentTitle } = getMarkdownFileInfo();
-  const workspaceFolder =
-    vscode.workspace.workspaceFolders?.[0].uri.fsPath ?? '';
+  const workspaceFolder =    vscode.workspace.workspaceFolders?.[0].uri.fsPath ?? '';
   cherryPanel = vscode.window.createWebviewPanel(
     'cherrymarkdown.preview',
     currentTitle,
@@ -135,7 +134,7 @@ let scrollTimeOut: NodeJS.Timeout;
 // eslint-disable-next-line no-unused-vars, no-undef
 let editTimeOut: NodeJS.Timeout;
 const initCherryPanelEvent = () => {
-  cherryPanel?.webview?.onDidReceiveMessage(async e => {
+  cherryPanel?.webview?.onDidReceiveMessage(async (e) => {
     const { type, data } = e;
     switch (type) {
       // 滚动的时候同步滚动
@@ -161,7 +160,7 @@ const initCherryPanelEvent = () => {
       // 内容变更的时候同时更新对应的文档内容
       case 'cherry-change':
         disableEditTrigger = true;
-        targetDocument.edit(editBuilder => {
+        targetDocument.edit((editBuilder) => {
           const endNum = targetDocument.document.lineCount + 1;
           const end = new vscode.Position(endNum, 0);
           editBuilder.replace(
@@ -182,7 +181,7 @@ const initCherryPanelEvent = () => {
         // loadOneImg(data);
         break;
       case 'upload-file':
-        uploadFileHandler(data).then(res => {
+        uploadFileHandler(data).then((res) => {
           if (res.url !== '') {
             cherryPanel.webview.postMessage({
               cmd: 'upload-file-callback',
