@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import {
   UploadType,
   // eslint-disable-next-line no-unused-vars
-  CustomUploader,
+  // CustomUploader,
   BackfillImageProps,
   BackfillImage,
 } from '../types';
