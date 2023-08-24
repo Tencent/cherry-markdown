@@ -215,8 +215,10 @@ export default class FormulaHandler {
                 // TODO: other engine
               } else if (name === 'latex') {
                 copyToClip(code);
-              } else if (name === '$' || name === '$$') {
+              } else if (name === '$') {
                 copyToClip(`${name}${code}${name}`);
+              } else if (name === '$$') {
+                copyToClip(`${name}\n${code}\n${name}`);
               } else if (name === '\\') {
                 copyToClip(`\\${code}`);
               }

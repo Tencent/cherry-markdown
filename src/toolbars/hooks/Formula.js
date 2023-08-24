@@ -39,8 +39,10 @@ export default class Formula extends MenuBase {
       this.subBubbleFormulaMenu.dom.style.left = `${pos.left + pos.width}px`;
       this.subBubbleFormulaMenu.dom.style.top = `${pos.top + pos.height}px`;
       this.subBubbleFormulaMenu.show((latex) => {
-        const before = `${selection} $ `;
-        const after = ' $ ';
+        const before = /\n/.test(latex)
+          ? `${/\n$/.test(selection) ? selection : `${selection}\n`}$$`
+          : `${selection} $ `;
+        const after = /\n/.test(latex) ? '\n$$ ' : ' $ ';
         this.registerAfterClickCb(() => {
           this.setLessSelection(before, after);
         });

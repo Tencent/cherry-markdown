@@ -1,5 +1,5 @@
 .cherry-insert-formula-wrappler {
-  width: 500px !important; // 覆盖默认.cherry-dropdown样式
+  width: 610px !important; // 覆盖默认.cherry-dropdown样式
   height: 300px !important;
   padding: 15px;
   display: flex;
@@ -8,6 +8,14 @@
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
   box-sizing: border-box;
   border-radius: 10px;
+  background-color: #FFF !important;
+  overflow: hidden;
+
+  .cherry-insert-formula-more {
+    position: absolute;
+    bottom: 0;
+    font-size: 12px;
+  }
 
   .cherry-insert-formula-tabs {
     width: 100px;
@@ -57,16 +65,15 @@
       }
 
       .cherry-insert-formula-categary__func {
-        width: 200px;
-        height: 250px;
+        min-width: 200px;
+        height: 260px;
         position: absolute;
-        left: 254px;
-        top: 14px;
+        left: 255px;
+        top: 0;
         z-index: 100;
-        padding: 10px;
+        padding: 20px 10px;
         background-color: #fff;
-        border: 1px solid rgba(0, 0, 0, 0.15);
-        border-radius: 0.25rem;
+        border-left: 1px solid rgba(0, 0, 0, 0.15);
         display: none;
         overflow-y: scroll;
 
@@ -96,6 +103,9 @@
             border-color: #dae0e5;
             background-color: #e2e6ea;
           }
+          svg {
+            pointer-events: none;
+          }
         }
 
         &:hover {
@@ -121,6 +131,10 @@
         & > img {
           width: 100%;
           height: 60%;
+        }
+
+        &:hover {
+          color: #3582fb;
         }
 
         &:hover + .cherry-insert-formula-categary__func {
