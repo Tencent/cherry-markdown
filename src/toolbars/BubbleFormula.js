@@ -42,6 +42,7 @@
 export default class BubbleFormula {
   /**
    * @type {Object.<string, FormulaMenu>}
+   * @see https://github.com/QianJianTech/LaTeXLive/blob/master/json/map_input.json
    */
   formulaConfig = {
     toolbar: {
