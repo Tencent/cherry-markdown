@@ -1,6 +1,9 @@
 <p align="center"><img src="logo/new_logo.png" alt="cherry logo" width="50%"/></p>
 
 # Cherry Markdown Writer
+[WIKI](https://github.com/Tencent/cherry-markdown/wiki)
+
+[![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
 
 English | [简体中文](./README.CN.md)
 
