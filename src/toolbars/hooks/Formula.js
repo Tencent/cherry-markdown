@@ -23,7 +23,7 @@ export default class Formula extends MenuBase {
   constructor($cherry) {
     super($cherry);
     this.setName('formula', 'insertFormula');
-    this.subBubbleFormulaMenu = new BubbleFormula($cherry?.options?.engine?.syntax?.formula?.config || {});
+    this.subBubbleFormulaMenu = new BubbleFormula($cherry?.options?.toolbars?.config?.formula);
     $cherry.editor.options.wrapperDom.appendChild(this.subBubbleFormulaMenu.dom);
     this.catchOnce = '';
   }

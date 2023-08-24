@@ -280,6 +280,13 @@ const defaultConfig = {
       // 'Ctrl-b': 'bold',
       // 'Ctrl-Alt-m': 'formula',
     },
+    // 一些按钮的配置信息
+    config: {
+      formula: {
+        showLatexLive: true, // true: 显示 www.latexlive.com 外链； false：不显示
+        templateConfig: false, // false: 使用默认模板
+      },
+    },
   },
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: '',
