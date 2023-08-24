@@ -235,6 +235,8 @@ export interface CherryToolbarOptions {
   customMenu?: Record<string, any>;
   /** 自定义快捷键 */
   shortcutKey?: Object | false;
+   /** 一些按钮的配置信息 */
+  config?: Object;
 }
 
 export interface CherryFileUploadHandler {

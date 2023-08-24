@@ -157,17 +157,20 @@ export default class BubbleFormula {
   };
 
   /**
+   * 是否显示 www.latexlive.com 的外链
+   */
+  showLatexLive = true;
+
+  /**
    * 点击具体公式后的回调函数
    * @param {string} latex
    */
   afterClick(latex) {}
 
-  /**
-   * @param {Object.<string, FormulaMenu>} formulaConfig
-   */
-  constructor(formulaConfig = {}) {
-    if (Object.keys(formulaConfig).length) {
-      this.formulaConfig = formulaConfig;
+  constructor(options = {}) {
+    if (Object.keys(options).length) {
+      this.formulaConfig = options.templateConfig || this.formulaConfig;
+      this.showLatexLive = options.showLatexLive;
     }
     this.init();
     this.initEventListeners();
@@ -209,7 +212,9 @@ export default class BubbleFormula {
         }" data-name="${formulaMenuKey}">${formulaMenuStr}</div>`;
       })
       .join('');
-    const appendLatexLive = `<div class="cherry-insert-formula-more">查看更多：<a href="https://www.latexlive.com/" target="_blank">www.latexlive.com</a></div>`;
+    const appendLatexLive = this.showLatexLive
+      ? `<div class="cherry-insert-formula-more">查看更多：<a href="https://www.latexlive.com/" target="_blank">www.latexlive.com</a></div>`
+      : '';
     return `${ulStr}${formulaSelect}${appendLatexLive}`;
   }
 
