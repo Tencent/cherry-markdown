@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.23](https://github.com/Tencent/cherry-markdown/compare/v0.8.22...v0.8.23) (2023-08-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* @tencent/cherry-markdown no longer supports node < 14
+
+* chore(*): track dist files with lfs
+
+* chore(*): fix styles output path & update docs
+
+### Features
+
+* [#437](https://github.com/Tencent/cherry-markdown/issues/437) 优化插入公式选择模板的功能，并增加预览区域公式导出、复制操作 ([#537](https://github.com/Tencent/cherry-markdown/issues/537)) ([0e40577](https://github.com/Tencent/cherry-markdown/commit/0e4057793c4a4ee1bc67ff984cd5ef4dfbcbafd6))
+* 434 vscode插件支持配置图床 ([#534](https://github.com/Tencent/cherry-markdown/issues/534)) ([4fdbb93](https://github.com/Tencent/cherry-markdown/commit/4fdbb93fbc50493d499c962eedfdcbbbdf0e81b3))
+* 增加配置快捷键的功能 close [#406](https://github.com/Tencent/cherry-markdown/issues/406) ([55e582f](https://github.com/Tencent/cherry-markdown/commit/55e582f2abe6bab54c4e1f76163f5091bb0aa124))
+
+
+### Bug Fixes
+
+* [#387](https://github.com/Tencent/cherry-markdown/issues/387) CherryEngine TypeError ([#535](https://github.com/Tencent/cherry-markdown/issues/535)) ([56165bf](https://github.com/Tencent/cherry-markdown/commit/56165bf01bb67a0fe2474873e036024968d987ae))
+* 复制html内容时有报错 [#536](https://github.com/Tencent/cherry-markdown/issues/536)；更新vscode插件 ([402a05d](https://github.com/Tencent/cherry-markdown/commit/402a05d0e702c71a942fe4226fad4ba1866f74f1))
+* 修复右侧顶部工具栏不支持自定义菜单的问题，修复cherry.toolbar.toolbarHandlers收集按钮不全的问题 ([ca2347f](https://github.com/Tencent/cherry-markdown/commit/ca2347fbaabfbaa43699e4b5e8c2b35bff12bd6f))
+* 修复右侧顶部工具栏不支持自定义菜单的问题，修复cherry.toolbar.toolbarHandlers收集按钮不全的问题 ([#531](https://github.com/Tencent/cherry-markdown/issues/531)) ([7e4a125](https://github.com/Tencent/cherry-markdown/commit/7e4a125e707f0b0e3be0931069976f5f4bac0c98))
+* 支持空链接 [#530](https://github.com/Tencent/cherry-markdown/issues/530) ([0fc0399](https://github.com/Tencent/cherry-markdown/commit/0fc03992cbed61c19da581b246e50be19e2da212))
+* close [#532](https://github.com/Tencent/cherry-markdown/issues/532) ([a1df190](https://github.com/Tencent/cherry-markdown/commit/a1df19037ba45945ccadcc6ebc1a566cf30e5bbc))
+* syntax type err & formula config ([#539](https://github.com/Tencent/cherry-markdown/issues/539)) ([5484c4a](https://github.com/Tencent/cherry-markdown/commit/5484c4a0ae56896196fd7b482134bed7aa3da4b8)), closes [#437](https://github.com/Tencent/cherry-markdown/issues/437)
+* **types:** fix type check & security issues ([#538](https://github.com/Tencent/cherry-markdown/issues/538)) ([0f036e9](https://github.com/Tencent/cherry-markdown/commit/0f036e964a8f53a545b1049d3e6a4424753389dd))
+
+
+### chore
+
+* upgrade mermaid@10.2.4 ([#520](https://github.com/Tencent/cherry-markdown/issues/520)) ([c842448](https://github.com/Tencent/cherry-markdown/commit/c842448139d9f1fd0af9e949469c9b36d838c9e8)), closes [#510](https://github.com/Tencent/cherry-markdown/issues/510)
+
 ### [0.8.22](https://github.com/Tencent/cherry-markdown/compare/v0.8.21...v0.8.22) (2023-08-01)
 
 
