@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.8.23-lastest](https://github.com/Tencent/cherry-markdown/compare/v0.8.23...v0.8.23-lastest) (2023-08-25)
 
+### Bug Fixes
+
+* [#546](https://github.com/Tencent/cherry-markdown/issues/546) 在node环境下，输入联想会引发报错 ([e24f1e1](https://github.com/Tencent/cherry-markdown/commit/e24f1e1db09b198c63b8b47ab3d16b91eb3bf0a7))
+
 ### [0.8.23](https://github.com/Tencent/cherry-markdown/compare/v0.8.22...v0.8.23) (2023-08-24)
 
 

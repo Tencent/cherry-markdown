@@ -79,6 +79,10 @@ export default class Suggester extends SyntaxBase {
   }
 
   afterInit(callback) {
+    // node环境下直接跳过输入联想
+    if (!isBrowser()) {
+      return;
+    }
     if (typeof callback === 'function') {
       callback();
     }
