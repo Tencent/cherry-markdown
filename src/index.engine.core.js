@@ -54,6 +54,8 @@ class CherryEngine extends CherryStatic {
     /** @type {import('./Engine').default}*/
     // @ts-ignore hack Cherry Instance
     this.engine = new Engine(opts, { options: opts });
+    // @ts-ignore
+    return this.engine;
   }
 }
 
