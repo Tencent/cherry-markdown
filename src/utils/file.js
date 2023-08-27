@@ -91,3 +91,21 @@ export function handelParams(params) {
   }
   return ret.join(' ');
 }
+
+export function handelFileUploadCallback(url, params, file) {
+  const name = params.name ? params.name : file.name;
+  let type = '';
+  let poster = '';
+  if (/video/i.test(file.type)) {
+    type = '!video';
+    poster = params.poster ? `{poster=${params.poster}}` : '';
+  }
+  if (/audio/i.test(file.type)) {
+    type = '!audio';
+  }
+  if (/image/i.test(file.type)) {
+    type = '!';
+  }
+  const style = type ? handelParams(params) : '';
+  return `${type}[${name}${style}](${url})${poster}`;
+}

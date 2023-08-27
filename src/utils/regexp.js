@@ -250,7 +250,7 @@ export function getDetailRule() {
 }
 
 // 匹配图片URL里的base64
-export const imgBase64Reg = /(!\[[^\n]*?\]\(data:image\/png;base64,)([^)]+)\)/g;
+export const imgBase64Reg = /(!\[[^\n]*?\]\(data:image\/[a-z]{1,10};base64,)([^)]+)\)/g;
 
 // 匹配图片{}里的data-xml属性
 export const imgDrawioXmlReg = /(!\[[^\n]*?\]\([^)]+\)\{[^}]* data-xml=)([^}]+)\}/g;
@@ -259,4 +259,5 @@ export const imgDrawioXmlReg = /(!\[[^\n]*?\]\([^)]+\)\{[^}]* data-xml=)([^}]+)\
  * 匹配draw.io的图片语法
  * 图片的语法为 ![alt](${base64}){data-type=drawio data-xml=${xml}}
  */
-export const imgDrawioReg = /(!\[[^\n]*?\]\(data:image\/png;base64,[^)]+\)\{data-type=drawio data-xml=[^}]+\})/g;
+export const imgDrawioReg =
+  /(!\[[^\n]*?\]\(data:image\/[a-z]{1,10};base64,[^)]+\)\{data-type=drawio data-xml=[^}]+\})/g;
