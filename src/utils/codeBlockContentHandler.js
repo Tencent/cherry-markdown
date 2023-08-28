@@ -64,7 +64,8 @@ export default class CodeBlockHandler {
     }
   }
   $tryRemoveMe(event, callback) {
-    if (!'.cherry-previewer-codeBlock-content-handler__input'.contains(event.target)) {
+    const dom = document.querySelector('.cherry-previewer-codeBlock-content-handler__input');
+    if (!dom.contains(event.target)) {
       this.$remove();
       callback();
     }
