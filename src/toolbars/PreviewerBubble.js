@@ -23,6 +23,7 @@ import { imgDrawioReg, getCodeBlockRule } from '@/utils/regexp';
 import { CODE_PREVIEWER_LANG_SELECT_CLASS_NAME } from '@/utils/code-preview-language-setting';
 import debounce from 'lodash/debounce';
 import FormulaHandler from '@/utils/formulaUtilsHandler';
+import ListHandler from '@/utils/listContentHandler';
 /**
  * 预览区域的响应式工具栏
  */
@@ -249,6 +250,11 @@ export default class PreviewerBubble {
           this.$showFormulaPreviewerBubbles('click', target, { x: e.pageX, y: e.pageY });
         }
         break;
+      case 'P':
+        if (target instanceof HTMLParagraphElement && target.parentElement instanceof HTMLLIElement) {
+          this.$showListPreviewerBubbles('click', target);
+        }
+        break;
     }
   }
 
@@ -353,6 +359,18 @@ export default class PreviewerBubble {
     const formulaHandler = new FormulaHandler(trigger, target, this.bubble[trigger], this.previewerDom, this.editor);
     formulaHandler.showBubble(options?.x || 0, options?.y || 0);
     this.bubbleHandler[trigger] = formulaHandler;
+  }
+
+  /**
+   * 为触发的列表增加操作工具栏
+   * @param {string} trigger 触发方式
+   * @param {HTMLParagraphElement} target 用户触发的列表dom
+   */
+  $showListPreviewerBubbles(trigger, target, options = {}) {
+    this.$createPreviewerBubbles(trigger, 'list-hover-handler');
+    const listHandler = new ListHandler(trigger, target, this.bubble[trigger], this.previewerDom, this.editor);
+    listHandler.showBubble();
+    this.bubbleHandler[trigger] = listHandler;
   }
 
   getValueWithoutCode() {

@@ -260,3 +260,19 @@ export const imgDrawioXmlReg = /(!\[[^\n]*?\]\([^)]+\)\{[^}]* data-xml=)([^}]+)\
  * 图片的语法为 ![alt](${base64}){data-type=drawio data-xml=${xml}}
  */
 export const imgDrawioReg = /(!\[[^\n]*?\]\(data:image\/png;base64,[^)]+\)\{data-type=drawio data-xml=[^}]+\})/g;
+
+/**
+ * 从编辑器里的内容中获取没有代码块的内容
+ * @param {string} value
+ * @returns {string}
+ */
+export const getValueWithoutCode = (value = '') =>
+  value
+    .replace(getCodeBlockRule().reg, (whole) => {
+      // 把代码块里的内容干掉
+      return whole.replace(/^.*$/gm, '/n');
+    })
+    .replace(/(`+)(.+?(?:\n.+?)*?)\1/g, (whole) => {
+      // 把行内代码的符号去掉
+      return whole.replace(/[![\]()]/g, '.');
+    });
