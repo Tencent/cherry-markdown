@@ -39,6 +39,7 @@ export default class CodeBlock extends ParagraphBase {
     this.wrap = config.wrap; // 超出是否换行
     this.lineNumber = config.lineNumber; // 是否显示行号
     this.copyCode = config.copyCode; // 是否显示“复制”按钮
+    this.editCode = config.editCode; // 是否显示“编辑”按钮
     this.mermaid = config.mermaid; // mermaid的配置，目前仅支持格式设置，svg2img=true 展示成图片，false 展示成svg
     this.indentedCodeBlock = typeof config.indentedCodeBlock === 'undefined' ? true : config.indentedCodeBlock; // 是否支持缩进代码块
     this.INLINE_CODE_REGEX = /(`+)(.+?(?:\n.+?)*?)\1/g;
@@ -199,6 +200,11 @@ export default class CodeBlock extends ParagraphBase {
     }
     cacheCode = `<div data-sign="${sign}" data-type="codeBlock" data-lines="${lines}">
       ${getCodePreviewLangSelectElement($lang)}
+      ${
+        this.editCode
+          ? '<div class="cherry-edit-code-block" style="display:none;"><i class="ch-icon ch-icon-edit" title="edit"></i></div>'
+          : ''
+      }
       ${
         this.copyCode
           ? '<div class="cherry-copy-code-block" style="display:none;"><i class="ch-icon ch-icon-copy" title="copy"></i></div>'

@@ -82,6 +82,11 @@
       }
     }
   }
+  .cherry-previewer-codeBlock-content-handler {
+    .cherry-previewer-codeBlock-content-handler__input {
+      position: absolute;
+    }
+  }
   .cherry-previewer-table-hover-handler {
     position: absolute;
     pointer-events: none;
