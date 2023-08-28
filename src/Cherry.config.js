@@ -154,6 +154,7 @@ const defaultConfig = {
         wrap: true, // 超出长度是否换行，false则显示滚动条
         lineNumber: true, // 默认显示行号
         copyCode: true, // 是否显示“复制”按钮
+        editCode: true, // 是否显示“编辑”按钮
         customRenderer: {
           // 自定义语法渲染器
         },

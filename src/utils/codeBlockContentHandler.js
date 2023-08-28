@@ -42,8 +42,6 @@ export default class CodeBlockHandler {
 
   emit(type, event = {}, callback = () => {}) {
     switch (type) {
-      case 'keyup':
-        return this.trigger === 'click';
       case 'remove':
         return this.$remove();
       case 'scroll':
@@ -66,7 +64,7 @@ export default class CodeBlockHandler {
     }
   }
   $tryRemoveMe(event, callback) {
-    if ('.cherry-previewer-codeBlock-content-handler__input'.contains(event.target)) {
+    if (!'.cherry-previewer-codeBlock-content-handler__input'.contains(event.target)) {
       this.$remove();
       callback();
     }
@@ -80,7 +78,7 @@ export default class CodeBlockHandler {
     this.$setSelection(this.codeBlockEditor.info.codeBlockIndex, 'code', this.trigger === 'click');
   }
   /**
-   * 定位代码块源代码在右侧Previewer的位置
+   * 找到预览区被点击编辑按钮的代码块，并记录这个代码块在预览区域所有代码块中的顺位
    */
   $collectCodeBlockDom() {
     const list = Array.from(this.previewerDom.querySelectorAll('[data-type="codeBlock"]'));
@@ -91,12 +89,6 @@ export default class CodeBlockHandler {
       codeBlockNode,
       codeBlockIndex: list.indexOf(codeBlockNode),
     };
-    console.log('codeBlockList: ');
-    console.log(list);
-    console.log('codeBlockNode: ');
-    console.log(codeBlockNode);
-    console.log('codeBlockNodeChildrenNodes: ');
-    console.log(codeBlockNode.childNodes);
   }
   $collectCodeBlockCode() {
     const codeBlockCodes = [];
@@ -114,8 +106,8 @@ export default class CodeBlockHandler {
   }
   $setSelection(index, type = 'code', select = true) {
     const codeBlockCode = this.codeBlockEditor.codeBlockCodes[index];
-    console.log('选中代码块: ');
-    console.log(codeBlockCode);
+    // console.log('选中代码块: ');
+    // console.log(codeBlockCode);
     const whole = this.codeMirror.getValue();
     const beginLine = whole.slice(0, codeBlockCode.offset).match(/\n/g)?.length ?? 0;
     const endLine = beginLine + codeBlockCode.code.match(/\n/g).length;
@@ -153,11 +145,10 @@ export default class CodeBlockHandler {
     this.codeBlockEditor.editorDom.inputDom = editorInstance;
     this.$updateEditorPosition();
     this.container.appendChild(this.codeBlockEditor.editorDom.inputDiv);
-    console.log(this.codeBlockEditor.info.code);
     this.codeBlockEditor.editorDom.inputDom.focus();
     this.codeBlockEditor.editorDom.inputDom.refresh();
     editorInstance.setValue(this.codeMirror.getSelection());
-    editorInstance.setCursor(114514, 1919810);
+    editorInstance.setCursor(Number.MAX_VALUE, Number.MAX_VALUE); // 指针设置至CodeBlock末尾
   }
 
   /**
@@ -180,8 +171,6 @@ export default class CodeBlockHandler {
   $setInputOffset() {
     const codeBlockInfo = this.$getPosition();
     const { inputDiv } = this.codeBlockEditor.editorDom;
-    // console.log(codeBlockInfo);
-    // console.log(inputDiv);
     // 设置文本框的偏移及大小
     this.setStyle(inputDiv, 'width', `${codeBlockInfo.width}px`);
     this.setStyle(inputDiv, 'height', `${codeBlockInfo.height}px`);
@@ -196,8 +185,8 @@ export default class CodeBlockHandler {
     }
   }
 
-  $getPosition(node = this.codeBlockEditor.info.codeBlockNode) {
-    console.log(node);
+  $getPosition() {
+    const node = this.codeBlockEditor.info.codeBlockNode;
     const position = node.getBoundingClientRect();
     const editorPosition = this.previewerDom.parentNode.getBoundingClientRect();
     return {
