@@ -69,7 +69,7 @@ export function handleUpload(editor, type = 'image', accept = '*', callback = nu
  * @param params?.width 设置宽度，可以是像素、也可以是百分比（图片、视频场景下生效）
  * @param params?.height 设置高度，可以是像素、也可以是百分比（图片、视频场景下生效）
  */
-export function handelParams(params) {
+export function handleParams(params) {
   const ret = [];
   if (params.isBorder) {
     ret.push('#B');
@@ -92,7 +92,7 @@ export function handelParams(params) {
   return ret.join(' ');
 }
 
-export function handelFileUploadCallback(url, params, file) {
+export function handleFileUploadCallback(url, params, file) {
   const name = params.name ? params.name : file.name;
   let type = '';
   let poster = '';
@@ -106,6 +106,6 @@ export function handelFileUploadCallback(url, params, file) {
   if (/image/i.test(file.type)) {
     type = '!';
   }
-  const style = type ? handelParams(params) : '';
+  const style = type ? handleParams(params) : '';
   return `${type}[${name}${style}](${url})${poster}`;
 }
