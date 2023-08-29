@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+
 import imgSizeHandler from '@/utils/imgSizeHandler';
 import TableHandler from '@/utils/tableContentHandler';
+import CodeHandler from '@/utils/codeBlockContentHandler';
 import { drawioDialog } from '@/utils/dialog';
 import Event from '@/Event';
 import { copyToClip } from '@/utils/copy';
@@ -250,6 +252,7 @@ export default class PreviewerBubble {
         }
         break;
     }
+    this.$dealCodeBlockEditorMode(e);
   }
 
   $onChange(e) {
@@ -268,6 +271,16 @@ export default class PreviewerBubble {
       return false;
     }
     return this.$getClosestNode(node.parentNode, targetNodeName);
+  }
+
+  /**
+   * 处理编辑代码块的操作
+   */
+  $dealCodeBlockEditorMode(e) {
+    const { target } = e;
+    if (target.className === 'cherry-edit-code-block' || target.parentNode?.className === 'cherry-edit-code-block') {
+      this.$showCodeBlockPreviewerBubbles('click', e.target);
+    }
   }
 
   /**
@@ -321,6 +334,13 @@ export default class PreviewerBubble {
   $showTablePreviewerBubbles(trigger, htmlElement) {
     this.$createPreviewerBubbles(trigger, trigger === 'click' ? 'table-content-handler' : 'table-hover-handler');
     const handler = new TableHandler(trigger, htmlElement, this.bubble[trigger], this.previewerDom, this.editor.editor);
+    handler.showBubble();
+    this.bubbleHandler[trigger] = handler;
+  }
+
+  $showCodeBlockPreviewerBubbles(trigger, htmlElement) {
+    this.$createPreviewerBubbles(trigger, trigger === 'click' ? 'codeBlock-content-handler' : 'none');
+    const handler = new CodeHandler(trigger, htmlElement, this.bubble[trigger], this.previewerDom, this.editor.editor);
     handler.showBubble();
     this.bubbleHandler[trigger] = handler;
   }
