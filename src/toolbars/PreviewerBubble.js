@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import imgSizeHandler from '@/utils/imgSizeHandler';
 import TableHandler from '@/utils/tableContentHandler';
 import CodeHandler from '@/utils/codeBlockContentHandler';
