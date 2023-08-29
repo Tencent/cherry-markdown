@@ -318,7 +318,7 @@ export default class TableHandler {
    */
   $drawEditor() {
     const dom = document.createElement('div');
-    dom.className = 'cherry-previewer-table-content-hander__input';
+    dom.className = 'cherry-previewer-table-content-handler__input';
     const input = document.createElement('textarea');
     dom.appendChild(input);
     this.tableEditor.editorDom.inputDiv = dom;

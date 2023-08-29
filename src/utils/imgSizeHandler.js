@@ -16,7 +16,7 @@
 /**
  * 用于在图片四周画出调整图片尺寸的边框
  */
-const imgSizeHander = {
+const imgSizeHandler = {
   mouseResize: {},
   getImgPosition() {
     const position = this.img.getBoundingClientRect();
@@ -110,7 +110,7 @@ const imgSizeHander = {
     }
     this.butsLayout = this.container;
     this.butsImg = document.createElement('div');
-    this.butsImg.className = 'cherry-previewer-img-size-hander__background';
+    this.butsImg.className = 'cherry-previewer-img-size-handler__background';
     this.butsImg.style.backgroundImage = `url(${this.buts.imgSrc})`;
     this.butsLayout.appendChild(this.butsImg);
 
@@ -119,8 +119,8 @@ const imgSizeHander = {
       const name = this.buts.points.arr[index];
       const tmp = document.createElement('div');
       tmp.className = [
-        'cherry-previewer-img-size-hander__points',
-        `cherry-previewer-img-size-hander__points-${name}`,
+        'cherry-previewer-img-size-handler__points',
+        `cherry-previewer-img-size-handler__points-${name}`,
       ].join(' ');
       tmp.dataset.name = name;
       this.butsLayout.appendChild(tmp);
@@ -187,7 +187,7 @@ const imgSizeHander = {
   },
   resizeBegin(event) {
     const point = event.target;
-    if (!point.classList.contains('cherry-previewer-img-size-hander__points')) {
+    if (!point.classList.contains('cherry-previewer-img-size-handler__points')) {
       return false;
     }
     this.mouseResize.left = event.clientX;
@@ -276,4 +276,4 @@ const imgSizeHander = {
   },
 };
 
-export default imgSizeHander;
+export default imgSizeHandler;
