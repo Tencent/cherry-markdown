@@ -37,7 +37,7 @@ import pasteHelper from '@/utils/pasteHelper';
 import { addEvent } from './utils/event';
 import Logger from '@/Logger';
 import Event from '@/Event';
-import { handelFileUploadCallback } from '@/utils/file';
+import { handleFileUploadCallback } from '@/utils/file';
 import { createElement } from './utils/dom';
 import { imgBase64Reg, imgDrawioXmlReg } from './utils/regexp';
 import { handleNewlineIndentList } from './utils/autoindent';
@@ -203,7 +203,7 @@ export default class Editor {
           if (typeof url !== 'string') {
             return;
           }
-          const mdStr = handelFileUploadCallback(url, params, file);
+          const mdStr = handleFileUploadCallback(url, params, file);
           codemirrorDoc.replaceSelection(mdStr);
         });
         event.preventDefault();
@@ -390,7 +390,7 @@ export default class Editor {
               }
               // 拖拽上传文件时，强制改成没有文字选择区的状态
               codemirror.setSelection(codemirror.getCursor());
-              const mdStr = handelFileUploadCallback(url, params, file);
+              const mdStr = handleFileUploadCallback(url, params, file);
               // 当批量上传文件时，每个被插入的文件中间需要加个换行，但单个上传文件的时候不需要加换行
               const insertValue = i > 0 ? `\n${mdStr} ` : `${mdStr} `;
               codemirror.replaceSelection(insertValue);
