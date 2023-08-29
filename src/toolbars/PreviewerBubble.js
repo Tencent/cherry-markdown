@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import imgSizeHander from '@/utils/imgSizeHander';
-import TableHandler from '@/utils/tableContentHander';
+import imgSizeHandler from '@/utils/imgSizeHandler';
+import TableHandler from '@/utils/tableContentHandler';
+import CodeHandler from '@/utils/codeBlockContentHandler';
 import { drawioDialog } from '@/utils/dialog';
 import Event from '@/Event';
 import { copyToClip } from '@/utils/copy';
@@ -256,6 +257,7 @@ export default class PreviewerBubble {
         }
         break;
     }
+    this.$dealCodeBlockEditorMode(e);
   }
 
   $onChange(e) {
@@ -274,6 +276,16 @@ export default class PreviewerBubble {
       return false;
     }
     return this.$getClosestNode(node.parentNode, targetNodeName);
+  }
+
+  /**
+   * 处理编辑代码块的操作
+   */
+  $dealCodeBlockEditorMode(e) {
+    const { target } = e;
+    if (target.className === 'cherry-edit-code-block' || target.parentNode?.className === 'cherry-edit-code-block') {
+      this.$showCodeBlockPreviewerBubbles('click', e.target);
+    }
   }
 
   /**
@@ -325,8 +337,15 @@ export default class PreviewerBubble {
    * @param {HTMLElement} htmlElement 用户触发的table dom
    */
   $showTablePreviewerBubbles(trigger, htmlElement) {
-    this.$createPreviewerBubbles(trigger, trigger === 'click' ? 'table-content-hander' : 'table-hover-handler');
+    this.$createPreviewerBubbles(trigger, trigger === 'click' ? 'table-content-handler' : 'table-hover-handler');
     const handler = new TableHandler(trigger, htmlElement, this.bubble[trigger], this.previewerDom, this.editor.editor);
+    handler.showBubble();
+    this.bubbleHandler[trigger] = handler;
+  }
+
+  $showCodeBlockPreviewerBubbles(trigger, htmlElement) {
+    this.$createPreviewerBubbles(trigger, trigger === 'click' ? 'codeBlock-content-handler' : 'none');
+    const handler = new CodeHandler(trigger, htmlElement, this.bubble[trigger], this.previewerDom, this.editor.editor);
     handler.showBubble();
     this.bubbleHandler[trigger] = handler;
   }
@@ -343,9 +362,9 @@ export default class PreviewerBubble {
     if (!this.beginChangeImgValue(htmlElement)) {
       return { emit: () => {} };
     }
-    imgSizeHander.showBubble(htmlElement, this.bubble.click, this.previewerDom);
-    imgSizeHander.bindChange(this.changeImgValue.bind(this));
-    this.bubbleHandler.click = imgSizeHander;
+    imgSizeHandler.showBubble(htmlElement, this.bubble.click, this.previewerDom);
+    imgSizeHandler.bindChange(this.changeImgValue.bind(this));
+    this.bubbleHandler.click = imgSizeHandler;
   }
 
   /**
@@ -501,7 +520,7 @@ export default class PreviewerBubble {
    * @param {string} trigger 触发方式
    * @param {string} type 容器类型（用作样式名：cherry-previewer-{type}）
    */
-  $createPreviewerBubbles(trigger = 'click', type = 'img-size-hander') {
+  $createPreviewerBubbles(trigger = 'click', type = 'img-size-handler') {
     if (!this.bubble[trigger]) {
       this.bubble[trigger] = document.createElement('div');
       this.bubble[trigger].className = `cherry-previewer-${type}`;

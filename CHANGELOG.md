@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.24](https://github.com/Tencent/cherry-markdown/compare/v0.8.23-1.0...v0.8.24) (2023-08-28)
+
+
+### Features
+
+* 当没有配置图片上传回调接口时，粘贴、拖拽上传的图片以base64格式展示 close [#545](https://github.com/Tencent/cherry-markdown/issues/545) ([ec88880](https://github.com/Tencent/cherry-markdown/commit/ec88880b33020aaf7c22274b32e0ec6bbaf83d82))
+
 ### [0.8.23-1.0](https://github.com/Tencent/cherry-markdown/compare/v0.8.23-lastest...v0.8.23-1.0) (2023-08-25)
 
 ### [0.8.23-lastest](https://github.com/Tencent/cherry-markdown/compare/v0.8.23...v0.8.23-lastest) (2023-08-25)

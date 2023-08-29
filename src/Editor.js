@@ -37,7 +37,7 @@ import pasteHelper from '@/utils/pasteHelper';
 import { addEvent } from './utils/event';
 import Logger from '@/Logger';
 import Event from '@/Event';
-import { handelParams } from '@/utils/file';
+import { handleFileUploadCallback } from '@/utils/file';
 import { createElement } from './utils/dom';
 import { imgBase64Reg, imgDrawioXmlReg } from './utils/regexp';
 import { handleNewlineIndentList } from './utils/autoindent';
@@ -199,11 +199,12 @@ export default class Editor {
       if (item && item.kind === 'file' && item.type.match(/^image\//i)) {
         // 读取该图片
         const file = item.getAsFile();
-        this.options.fileUpload(file, (url) => {
+        this.options.fileUpload(file, (url, params) => {
           if (typeof url !== 'string') {
             return;
           }
-          codemirrorDoc.replaceSelection(`![enter image description here](${url})`);
+          const mdStr = handleFileUploadCallback(url, params, file);
+          codemirrorDoc.replaceSelection(mdStr);
         });
         event.preventDefault();
       }
@@ -376,7 +377,7 @@ export default class Editor {
       if (files && files.length > 0) {
         // 增加延时，让drop的位置变成codemirror的光标位置
         setTimeout(() => {
-          for (let i = 0, needBr = false; i < files.length; i++) {
+          for (let i = 0; i < files.length; i++) {
             const file = files[i];
             const fileType = file.type || '';
             // 文本类型或者无类型的，直接读取内容，不做上传文件的操作
@@ -389,25 +390,11 @@ export default class Editor {
               }
               // 拖拽上传文件时，强制改成没有文字选择区的状态
               codemirror.setSelection(codemirror.getCursor());
-              const name = params.name ? params.name : file.name;
-              let type = '';
-              let poster = '';
-              if (/video/i.test(file.type)) {
-                type = '!video';
-                poster = params.poster ? `{poster=${params.poster}}` : '';
-              }
-              if (/audio/i.test(file.type)) {
-                type = '!audio';
-              }
-              if (/image/i.test(file.type)) {
-                type = '!';
-              }
-              const style = type ? handelParams(params) : '';
-              type = needBr ? `\n${type}` : type;
-              const insertValue = `${type}[${name}${style}](${url})${poster}`;
+              const mdStr = handleFileUploadCallback(url, params, file);
               // 当批量上传文件时，每个被插入的文件中间需要加个换行，但单个上传文件的时候不需要加换行
-              needBr = true;
+              const insertValue = i > 0 ? `\n${mdStr} ` : `${mdStr} `;
               codemirror.replaceSelection(insertValue);
+              this.dealBigData();
             });
           }
         }, 50);

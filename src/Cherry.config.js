@@ -32,8 +32,24 @@ const callbacks = {
         isShadow: true,
         isRadius: true,
       });
+    } else if (/image/i.test(file.type)) {
+      // 如果上传的是图片，则默认回显base64内容（因为没有图床）
+      // 创建 FileReader 对象
+      const reader = new FileReader();
+      // 读取文件内容
+      reader.onload = (event) => {
+        // 获取 base64 内容
+        const base64Content = event.target.result;
+        callback(base64Content, {
+          name: `${file.name.replace(/\.[^.]+$/, '')}`,
+          isShadow: true,
+          width: '60%',
+          height: 'auto',
+        });
+      };
+      reader.readAsDataURL(file);
     } else {
-      callback('images/demo-dog.png', { name: `${file.name.replace(/\.[^.]+$/, '')}`, isShadow: true });
+      callback('images/demo-dog.png');
     }
   },
   afterChange: (text, html) => {},
@@ -138,6 +154,7 @@ const defaultConfig = {
         wrap: true, // 超出长度是否换行，false则显示滚动条
         lineNumber: true, // 默认显示行号
         copyCode: true, // 是否显示“复制”按钮
+        editCode: true, // 是否显示“编辑”按钮
         customRenderer: {
           // 自定义语法渲染器
         },
