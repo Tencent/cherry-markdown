@@ -1,24 +1,15 @@
-/**
- * Copyright (C) 2021 THL A29 Limited, a Tencent company.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import Cherry from "cherry-markdown";
+<template>
+  <div id="cherry-markdown" />
+</template>
+<script setup lang="ts">
 import { ipcRenderer } from "electron";
+import { MessagePlugin as TMessagePlugin } from 'tdesign-vue-next';
+import { useElMenuFileStore } from "@/store/elMenuFile";
+import Cherry from "cherry-markdown";
+import { onMounted } from "vue";
 
 /**
- * 帮助中心
+ * @description 帮助中心
  */
 const customMenu_question = Cherry.createMenuHook('帮助中心', {
   iconName: 'question',
@@ -100,7 +91,10 @@ const callbacks = {
   },
 };
 
-export const defaultConfig = {
+/**
+ * 默认配置
+ */
+const defaultConfig = {
   id: "cherry-markdown",
   // 第三方包
   externals: {
@@ -384,4 +378,80 @@ export const defaultConfig = {
 };
 
 
-export const cherryMarkdown = new Cherry(defaultConfig);
+let cherryMarkdown: Cherry;
+
+onMounted(() => {
+  cherryMarkdown = new Cherry(defaultConfig);
+})
+
+const useElMenuFile = useElMenuFileStore()
+
+/**
+ * @description 新建文件
+ */
+ipcRenderer.on('new_file', () => {
+  cherryMarkdown.setMarkdown('')
+  useElMenuFile.saveFilePath = ''
+})
+
+/**
+ * @description 打开文档
+ * @description 仅当 status=1,data、filePath 存在
+ */
+ipcRenderer.on('open_file', (event, arg: { status: -2 | -1 | -3 | 1, message: string, data: string, filePath: string }) => {
+  switch (arg.status) {
+    case -2:
+      TMessagePlugin.error(arg.message);
+      break;
+    case -1:
+      TMessagePlugin.error(arg.message);
+      break;
+    case -3:
+      TMessagePlugin.warning(arg.message);
+      break;
+    case 1:
+      cherryMarkdown.setMarkdown(arg.data)
+      useElMenuFile.saveFilePath = arg.filePath
+      break;
+  }
+
+})
+/**
+ * @description 另存为
+ */
+ipcRenderer.on('save-file-as',
+  () => ipcRenderer.send('save-file-as-info', { data: cherryMarkdown.getMarkdown() }))
+
+ipcRenderer.on('save-file-as-reply', (event, arg: { status: -2 | -1 | 1, message: string, filePath: string }) => {
+  switch (arg.status) {
+    case -1:
+      TMessagePlugin.error(arg.message);
+      break;
+    case 1:
+      useElMenuFile.saveFilePath = arg.filePath
+      break;
+    case -2:
+      TMessagePlugin.warning(arg.message);
+      break;
+  }
+})
+
+/**
+ * @description 保存文件
+ */
+ipcRenderer.on('save-file', () => {
+  ipcRenderer.send('sava-file-type', { filePath: useElMenuFile.saveFilePath, data: cherryMarkdown.getMarkdown() })
+})
+
+ipcRenderer.on('save-file-reply', (event, arg: { status: -1 | 1, message: string }) => {
+  if (arg.status === -1) {
+    TMessagePlugin.error(arg.message);
+  }
+})  
+</script>
+
+<style lang="scss" scoped>
+#cherry-markdown {
+  width: 100%;
+}
+</style>
