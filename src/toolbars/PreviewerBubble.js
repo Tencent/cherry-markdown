@@ -369,7 +369,6 @@ export default class PreviewerBubble {
   $showListPreviewerBubbles(trigger, target, options = {}) {
     this.$createPreviewerBubbles(trigger, 'list-hover-handler');
     const listHandler = new ListHandler(trigger, target, this.bubble[trigger], this.previewerDom, this.editor);
-    listHandler.showBubble();
     this.bubbleHandler[trigger] = listHandler;
   }
 
