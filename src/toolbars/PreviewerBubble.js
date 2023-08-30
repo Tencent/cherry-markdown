@@ -20,10 +20,7 @@ import { drawioDialog } from '@/utils/dialog';
 import Event from '@/Event';
 import { copyToClip } from '@/utils/copy';
 import { imgDrawioReg, getCodeBlockRule } from '@/utils/regexp';
-import {
-  CODE_PREVIEWER_LANG_SELECT_CLASS_NAME,
-  codePreviewLangSelectList,
-} from '@/utils/code-preview-language-setting';
+import { CODE_PREVIEWER_LANG_SELECT_CLASS_NAME } from '@/utils/code-preview-language-setting';
 import debounce from 'lodash/debounce';
 import FormulaHandler from '@/utils/formulaUtilsHandler';
 /**
@@ -281,9 +278,7 @@ export default class PreviewerBubble {
     if (target.className === 'cherry-copy-code-block' || target.parentNode?.className === 'cherry-copy-code-block') {
       const parentNode =
         target.className === 'cherry-copy-code-block' ? target.parentNode : target.parentNode.parentNode;
-      const l = codePreviewLangSelectList.length;
-      const lines = parentNode.innerText.split('\n');
-      const codeContent = lines.slice(l + 1).join('\n');
+      const codeContent = parentNode.lastElementChild.innerText;
       const final = this.previewer.$cherry.options.callback.onCopyCode(e, codeContent);
       if (final === false) {
         return false;
