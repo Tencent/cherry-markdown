@@ -290,7 +290,7 @@ export default class PreviewerBubble {
     if (target.className === 'cherry-copy-code-block' || target.parentNode?.className === 'cherry-copy-code-block') {
       const parentNode =
         target.className === 'cherry-copy-code-block' ? target.parentNode : target.parentNode.parentNode;
-      const codeContent = parentNode.innerText;
+      const codeContent = parentNode.lastElementChild.innerText;
       const final = this.previewer.$cherry.options.callback.onCopyCode(e, codeContent);
       if (final === false) {
         return false;
