@@ -19,7 +19,7 @@ export const getCodePreviewLangSelectElement = (lang) => {
 };
 
 // program language list:
-const codePreviewLangSelectList = [
+export const codePreviewLangSelectList = [
   'javascript',
   'typescript',
   'html',
