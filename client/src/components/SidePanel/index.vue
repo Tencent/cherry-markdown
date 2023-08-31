@@ -17,7 +17,7 @@ import { Tag } from "@/types";
 
 import { ref } from "vue";
 const tags = ref<Tag[]>([{
-  label: '文件目录',  
+  label: '文件目录',
   value: 'fileDirectory',
   isChecked: true
 }, {
@@ -34,5 +34,6 @@ const tagListCheck = (value: Tag[]) => {
 <style scoped lang="scss">
 .side-panel {
   min-width: 300px;
+  background-color: rgb(235, 235, 235);
 }
 </style>

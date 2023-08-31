@@ -18,7 +18,6 @@ ipcRenderer.on('show-directory-panel', () => isShowSidePanel.value = !isShowSide
 <style scoped lang="scss">
 .home {
   display: flex;
-  width: 100%;
   height: 100%;
 }
 </style>
