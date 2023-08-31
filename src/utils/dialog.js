@@ -16,11 +16,16 @@
 
 import { createElement } from './dom';
 
+const clamp = (num, min, max) => {
+  return Math.min(Math.max(num, min), max);
+};
+
 /**
  * 对话框基操集合
  */
 const dialog = {
   open() {
+    this.resetStyle();
     this.dom.style.display = 'block';
     this.postMessage('ready?');
   },
@@ -31,6 +36,63 @@ const dialog = {
 
   postMessage(messageName, value = '') {
     this.iframeDom?.contentWindow?.postMessage({ eventName: messageName, value }, '*');
+  },
+
+  resetStyle() {
+    const { dom } = this;
+    dom.style.left = '10%';
+    dom.style.top = '10%';
+  },
+
+  bindEvents() {
+    this.bindClickEvents();
+    this.bindDNDEvents();
+  },
+
+  bindClickEvents() {
+    this.headCloseButton.addEventListener('click', () => {
+      this.close();
+    });
+
+    this.footSureButton.addEventListener('click', () => {
+      this.postMessage('getData');
+    });
+  },
+
+  bindDNDEvents() {
+    const { dom, head, body } = this;
+
+    let offsetX;
+    let offsetY;
+
+    const handleMouseMove = function (e) {
+      e.preventDefault();
+      const left = clamp(e.clientX - offsetX, 0, window.innerWidth - 16);
+      const top = clamp(e.clientY - offsetY, 0, window.innerHeight - 16);
+      dom.style.left = `${left}px`;
+      dom.style.top = `${top}px`;
+    };
+
+    const handleMouseUp = function (e) {
+      head.style.cursor = 'grab';
+      body.style.pointerEvents = null;
+
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mousemove', handleMouseUp);
+    };
+
+    head.addEventListener('mousedown', function (e) {
+      if (e.target.classList.contains('cherry-dialog--close')) {
+        return;
+      }
+      offsetX = e.clientX - dom.offsetLeft;
+      offsetY = e.clientY - dom.offsetTop;
+      head.style.cursor = 'grabbing';
+      body.style.pointerEvents = 'none';
+
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    });
   },
 
   draw(params, onReady, onSubmit) {
@@ -69,7 +131,7 @@ const dialog = {
         'z-index:9999',
         'display: block',
         'position: absolute',
-        'top: 10%;left: 10%;bottom: 10%;right: 10%',
+        'top: 10%;left: 10%;width: 80%;height: 80%;',
         'background-color: #FFF',
         'box-shadow: 0px 50px 100px -12px rgba(0,0,0,.05),0px 30px 60px -30px rgba(0,0,0,.1)',
         'border-radius: 6px',
@@ -77,7 +139,9 @@ const dialog = {
       ].join(';'),
     });
     this.head = createElement('div', 'cherry-dialog--head', {
-      style: ['height: 30px', 'line-height: 30px', 'padding-left: 10px', 'padding-right: 10px'].join(';'),
+      style: ['height: 30px', 'line-height: 30px', 'padding-left: 10px', 'padding-right: 10px', 'cursor: grab;'].join(
+        ';',
+      ),
     });
     this.body = createElement('div', 'cherry-dialog--body', {
       style: ['position: absolute', 'bottom: 30px', 'top: 30px', 'left: 0', 'right: 0', 'overflow: hidden'].join(';'),
@@ -125,13 +189,8 @@ const dialog = {
     this.dom.appendChild(this.body);
     this.dom.appendChild(this.foot);
 
-    this.headCloseButton.addEventListener('click', () => {
-      this.close();
-    });
+    this.bindEvents();
 
-    this.footSureButton.addEventListener('click', () => {
-      this.postMessage('getData');
-    });
     document.body.appendChild(this.dom);
   },
 };
