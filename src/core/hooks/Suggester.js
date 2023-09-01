@@ -650,6 +650,14 @@ class SuggesterPanel {
     const { keyCode } = evt;
     // up down
     if ([38, 40].includes(keyCode)) {
+      // issue 558
+      if (this.optionList.length === 0) {
+        setTimeout(() => {
+          this.stopRelate();
+        }, 0);
+        return;
+      }
+
       this.cursorMove = false;
 
       const selectedItem = this.$suggesterPanel.querySelector('.cherry-suggester-panel__item--selected');
