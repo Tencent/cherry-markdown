@@ -1,3 +1,19 @@
+/**
+ * Copyright (C) 2021 THL A29 Limited, a Tencent company.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { getValueWithoutCode } from '@/utils/regexp';
 
 export default class ListHandler {
@@ -6,6 +22,12 @@ export default class ListHandler {
 
   // 正则结果[全部, 判定符之前的空格或者tab, 判定符, checkbox内容(没有就是undefined), 列表内容]
   regList = /([ \t]*)([*+-][ ](\[[ x]\])?|[a-z0-9I一二三四五六七八九十零]+\.)([^\r\n]+)/;
+
+  /** @type{Array.<import('codemirror').Position>} */
+  range = [];
+
+  /** @type{import('codemirror').Position} */
+  position = { line: 0, ch: 0 };
 
   /**
    * @param {string} trigger 触发方式
@@ -21,7 +43,9 @@ export default class ListHandler {
     this.previewerDom = previewerDom;
     this.editor = editor;
     this.handleEditablesInputBinded = this.handleEditablesInput.bind(this); // 保证this指向正确以及能够正确移除事件
+    this.handleEditablesUnfocusBinded = this.handleEditablesUnfocus.bind(this);
     this.target.addEventListener('input', this.handleEditablesInputBinded, false);
+    this.target.addEventListener('focusout', this.handleEditablesUnfocusBinded, false);
     this.setSelection();
   }
 
@@ -34,11 +58,6 @@ export default class ListHandler {
     switch (type) {
       case 'remove':
         return this.remove();
-      case 'mousedown':
-        if (event.target !== this.bubbleContainer) {
-          return this.remove();
-        }
-        break;
     }
   }
 
@@ -49,9 +68,11 @@ export default class ListHandler {
         this.bubbleContainer.children[0].value = ''; // 清空内容
       }
     }
+    this.target.removeAttribute('contenteditable');
     this.target.removeEventListener('input', this.handleEditablesInputBinded, false);
+    this.target.removeEventListener('focusout', this.handleEditablesUnfocusBinded, false);
     const cursor = this.editor.editor.getCursor(); // 获取光标位置
-    this.editor.editor.setSelection(cursor, cursor); // 将光标移动到当前位置
+    this.editor.editor.setSelection(cursor, cursor); // 取消选中
   }
 
   setSelection() {
@@ -78,10 +99,11 @@ export default class ListHandler {
         contentsLiCount += 1;
       }
     });
-    this.editor.editor.setSelection(
-      { line: targetLine, ch: targetCh },
-      { line: targetLine, ch: targetCh + targetContent.length },
-    );
+    const from = { line: targetLine, ch: targetCh };
+    const to = { line: targetLine, ch: targetCh + targetContent.length };
+    this.editor.editor.setSelection(from, to);
+    this.range = [from, to];
+    this.position = this.editor.editor.getCursor(); // 输入就获取光标位置，防止后面点到编辑器dom的时候光标位置不对
   }
 
   /**
@@ -91,13 +113,28 @@ export default class ListHandler {
   handleEditablesInput(event) {
     event.stopPropagation();
     event.preventDefault();
-    if (event.inputType === 'insertText') {
-      if (event.target instanceof HTMLParagraphElement) {
-        this.editor.editor.replaceSelection(event.target.textContent, 'around'); // 替换当前选中的内容, arrow表示在当前选中的内容的前后插入
+    /** @typedef {'insertText'|'insertFromPaste'|'insertParagraph'|'insertLineBreak'|'deleteContentBackward'|'deleteContentForward'|'deleteByCut'|'deleteContentForward'|'deleteWordBackward'} InputType*/
+    if (event.target instanceof HTMLParagraphElement) {
+      if (event.inputType === 'insertParagraph' || event.inputType === 'insertLineBreak') {
+        this.handleInsertLineBreak();
       }
-    } else if (event.inputType === 'insertLineBreak') {
-      // 插入换行符
-      this.handleInsertLineBreak();
+    }
+  }
+
+  /**
+   * 处理contenteditable元素的失去焦点事件
+   * @param {FocusEvent} event
+   */
+  handleEditablesUnfocus(event) {
+    event.stopPropagation();
+    event.preventDefault();
+    if (event.target instanceof HTMLParagraphElement) {
+      console.log('event', event);
+      const md = this.editor.$cherry.engine.makeMarkdown(event.target.innerHTML);
+      console.log('md', md);
+      const [from, to] = this.range;
+      this.editor.editor.replaceRange(md, from, to);
+      this.remove();
     }
   }
 
@@ -106,9 +143,7 @@ export default class ListHandler {
     const cursor = this.editor.editor.getCursor();
     // 获取光标行的内容
     const lineContent = this.editor.editor.getLine(cursor.line);
-    console.log('lineContent: ', JSON.stringify(lineContent));
     const regRes = this.regList.exec(lineContent);
-    console.log('regRes: ', regRes);
     let insertContent = '\n- ';
     if (regRes !== null) {
       // 存在选中的checkbox则替换为未选中的checkbox，其他的保持原样
