@@ -1,6 +1,8 @@
 <template>
-<CherryMarkdown></CherryMarkdown>
+  <Home/>
 </template>
+
 <script setup lang="ts">
-import CherryMarkdown from "./components/CherryMarkdown.vue"
+import Home from "@/pages/home.vue"
 </script>
+
