@@ -44,12 +44,12 @@ export default class Toolbar {
     this.instanceId = this.$cherry.instanceId;
     this.menus = new HookCenter(this);
     this.drawMenus();
+    this.collectShortcutKey();
+    this.collectToolbarHandler();
     this.init();
   }
 
   init() {
-    this.collectShortcutKey();
-    this.collectToolbarHandler();
     Event.on(this.instanceId, Event.Events.cleanAllSubMenus, () => this.hideAllSubMenu());
   }
 
