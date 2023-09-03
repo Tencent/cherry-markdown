@@ -205,7 +205,7 @@ export default class Toolbar {
    */
   collectMenuInfo(toolbarObj) {
     this.toolbarHandlers = Object.assign({}, this.toolbarHandlers, toolbarObj.toolbarHandlers);
-    this.menus.hooks = Object.assign({}, this.menus.hooks, toolbarObj.menus.hooks);
+    this.menus.hooks = Object.assign({}, toolbarObj.menus.hooks, this.menus.hooks);
     // 只有没设置自定义快捷键的时候才需要收集其他toolbar对象的快捷键配置
     if (!this.options.shortcutKey || Object.keys(this.options.shortcutKey).length <= 0) {
       this.shortcutKeyMap = Object.assign({}, this.shortcutKeyMap, toolbarObj.shortcutKeyMap);
