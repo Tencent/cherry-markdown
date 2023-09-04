@@ -111,6 +111,9 @@ export const URL_NO_SLASH = new RegExp(`^${URL_INLINE_NO_SLASH.source}$`);
 
 export const URL = new RegExp(`^${URL_INLINE.source}$`);
 
+// 正则结果[全部, 判定符之前的空格或者tab, 判定符, checkbox内容(没有就是undefined), 列表内容]
+export const LIST_CONTENT = /([ \t]*)([*+-][ ](\[[ x]\])?|[a-z0-9I一二三四五六七八九十零]+\.)([^\r\n]*)/;
+
 export function getTableRule(merge = false) {
   // ^(\|[^\n]+\|\r?\n)((?:\|:?[-]+:?)+\|)(\n(?:\|[^\n]+\|\r?\n?)*)?$
   // (\\|?[^\\n|]+\\|?\\n)(?:\\|?[\\s]*:?[-]{2,}:?[\\s]*
@@ -261,3 +264,19 @@ export const imgDrawioXmlReg = /(!\[[^\n]*?\]\([^)]+\)\{[^}]* data-xml=)([^}]+)\
  */
 export const imgDrawioReg =
   /(!\[[^\n]*?\]\(data:image\/[a-z]{1,10};base64,[^)]+\)\{data-type=drawio data-xml=[^}]+\})/g;
+
+/**
+ * 从编辑器里的内容中获取没有代码块的内容
+ * @param {string} value
+ * @returns {string}
+ */
+export const getValueWithoutCode = (value = '') =>
+  value
+    .replace(getCodeBlockRule().reg, (whole) => {
+      // 把代码块里的内容干掉
+      return whole.replace(/^.*$/gm, '/n');
+    })
+    .replace(/(`+)(.+?(?:\n.+?)*?)\1/g, (whole) => {
+      // 把行内代码的符号去掉
+      return whole.replace(/[![\]()]/g, '.');
+    });

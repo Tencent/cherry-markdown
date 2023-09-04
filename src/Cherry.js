@@ -34,6 +34,7 @@ import locales from '@/locales/index';
 
 import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
+import { LIST_CONTENT } from '@/utils/regexp';
 
 /** @typedef {import('~types/cherry').CherryOptions} CherryOptions */
 export default class Cherry extends CherryStatic {
@@ -599,9 +600,22 @@ export default class Cherry extends CherryStatic {
 
   /**
    * @private
-   * @param {*} evt
+   * @param {KeyboardEvent} evt
    */
   fireShortcutKey(evt) {
+    const cursor = this.editor.editor.getCursor();
+    const lineContent = this.editor.editor.getLine(cursor.line);
+    // shift + tab 已经被绑定为缩进，所以这里不做处理
+    if (!evt.shiftKey && evt.key === 'Tab' && LIST_CONTENT.test(lineContent)) {
+      // 每按一次Tab，如果当前光标在行首或者行尾，就在行首加一个\t
+      if (cursor.ch === 0 || cursor.ch === lineContent.length || cursor.ch === lineContent.length + 1) {
+        evt.preventDefault();
+        this.editor.editor.setSelection({ line: cursor.line, ch: 0 }, { line: cursor.line, ch: lineContent.length });
+        this.editor.editor.replaceSelection(`\t${lineContent}`, 'around');
+        const newCursor = this.editor.editor.getCursor();
+        this.editor.editor.setSelection(newCursor, newCursor);
+      }
+    }
     if (this.toolbar.matchShortcutKey(evt)) {
       // 快捷键
       evt.preventDefault();
