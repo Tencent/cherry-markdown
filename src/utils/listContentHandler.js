@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { getValueWithoutCode } from '@/utils/regexp';
+import { getValueWithoutCode, LIST_CONTENT } from '@/utils/regexp';
 
 export default class ListHandler {
   /** @type{HTMLElement} */
   bubbleContainer = null;
 
-  // 正则结果[全部, 判定符之前的空格或者tab, 判定符, checkbox内容(没有就是undefined), 列表内容]
-  regList = /([ \t]*)([*+-][ ](\[[ x]\])?|[a-z0-9I一二三四五六七八九十零]+\.)([^\r\n]+)/;
+  regList = LIST_CONTENT;
 
   /** @type{Array.<import('codemirror').Position>} */
   range = [];

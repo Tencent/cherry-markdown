@@ -120,25 +120,4 @@
   .cherry-highlight-line {
     background-color: #ffffcc88;
   }
-  .cherry-previewer-list-content-hander__input {
-    display: block;
-    position: fixed;
-    background-color: #fff;
-    & > textarea {
-      width: 100%;
-      height: 100%;
-      resize: none;
-      border: none;
-      outline: none;
-      padding: 0;
-      margin: 0;
-      overflow: auto;
-      box-sizing: border-box;
-      border-radius: 0;
-      color: inherit;
-      line-height: inherit;
-      font-size: inherit;
-      font-family: inherit;
-    }
-  }
 }
