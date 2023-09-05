@@ -123,6 +123,7 @@ yarn add echarts@4.6.0
 #### ESM
 
 ```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
 import Cherry from 'cherry-markdown';
 const cherryInstance = new Cherry({
   id: 'markdown-container',
