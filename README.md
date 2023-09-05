@@ -66,7 +66,8 @@ click [here](https://github.com/Tencent/cherry-markdown/wiki/%E7%89%B9%E6%80%A7%
 
 ### Demos
 
-- [basic](https://tencent.github.io/cherry-markdown/examples/index.html)
+- [full model](https://tencent.github.io/cherry-markdown/examples/index.html)
+- [basic](https://tencent.github.io/cherry-markdown/examples/basic.html)
 - [mobile](https://tencent.github.io/cherry-markdown/examples/h5.html)
 - [multiple instances](https://tencent.github.io/cherry-markdown/examples/multiple.html)
 - [editor without toolbar](https://tencent.github.io/cherry-markdown/examples/notoolbar.html)
@@ -146,6 +147,7 @@ Because the size of the mermaid library is very large, the cherry build product 
 ### Full mode (With UI Interface)
 
 ```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
 import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
 const cherryInstance = new Cherry({
   id: 'markdown-container',
@@ -170,6 +172,7 @@ const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!')
 The core build package does not contain mermaid dependency, should import related plug-ins manually.
 
 ```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
 import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
 import CherryMermaidPlugin from 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin';
 import mermaid from 'mermaid';
@@ -194,6 +197,7 @@ const cherryInstance = new Cherry({
 **recommend** Using Dynamic import, the following is an example of webpack Dynamic import.
 
 ```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
 import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
 
 const registerPlugin = async () => {

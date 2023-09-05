@@ -76,6 +76,7 @@ export default class Suggester extends SyntaxBase {
 
     this.config = config;
     this.RULE = this.rule();
+    this.suggesterPanel = new SuggesterPanel();
   }
 
   afterInit(callback) {
@@ -222,18 +223,18 @@ export default class Suggester extends SyntaxBase {
     });
 
     // 反复初始化时， 缓存还在， dom 已更新情况
-    if (suggesterPanel.hasEditor()) {
-      suggesterPanel.editor = null;
+    if (this.suggesterPanel.hasEditor()) {
+      this.suggesterPanel.editor = null;
     }
   }
 
   makeHtml(str) {
     if (!this.RULE.reg) return str;
-    if (!suggesterPanel.hasEditor() && isBrowser()) {
+    if (!this.suggesterPanel.hasEditor() && isBrowser()) {
       const { editor } = this.$engine.$cherry;
-      suggesterPanel.setEditor(editor);
-      suggesterPanel.setSuggester(this.suggester);
-      suggesterPanel.bindEvent();
+      this.suggesterPanel.setEditor(editor);
+      this.suggesterPanel.setSuggester(this.suggester);
+      this.suggesterPanel.bindEvent();
     }
     if (isLookbehindSupported()) {
       return str.replace(this.RULE.reg, this.toHtml.bind(this));
@@ -274,11 +275,11 @@ export default class Suggester extends SyntaxBase {
   }
 
   mounted() {
-    if (!suggesterPanel.hasEditor() && isBrowser()) {
+    if (!this.suggesterPanel.hasEditor() && isBrowser()) {
       const { editor } = this.$engine.$cherry;
-      suggesterPanel.setEditor(editor);
-      suggesterPanel.setSuggester(this.suggester);
-      suggesterPanel.bindEvent();
+      this.suggesterPanel.setEditor(editor);
+      this.suggesterPanel.setSuggester(this.suggester);
+      this.suggesterPanel.bindEvent();
     }
   }
 }
@@ -290,14 +291,19 @@ class SuggesterPanel {
     this.optionList = [];
     this.cursorMove = true;
     this.suggesterConfig = {};
+  }
 
+  /**
+   * 如果没有panel，则尝试初始化一个，在node模式不初始化
+   */
+  tryCreatePanel() {
     if (!this.$suggesterPanel && isBrowser() && document) {
-      document?.body?.appendChild(this.createDom(SuggesterPanel.panelWrap));
+      document?.body?.appendChild(this.createDom(this.panelWrap));
       this.$suggesterPanel = document?.querySelector('.cherry-suggester-panel');
     }
   }
 
-  static panelWrap = `<div class="cherry-suggester-panel"></div>`;
+  panelWrap = `<div class="cherry-suggester-panel"></div>`;
 
   hasEditor() {
     return !!this.editor && !!this.editor.editor.display && !!this.editor.editor.display.wrapper;
@@ -343,7 +349,7 @@ class SuggesterPanel {
       if (typeof extraKeys[key] === 'function') {
         const proxyTarget = extraKeys[key];
         extraKeys[key] = (codemirror) => {
-          if (suggesterPanel.cursorMove) {
+          if (this.cursorMove) {
             const res = proxyTarget.call(codemirror, codemirror);
 
             if (res) {
@@ -355,7 +361,7 @@ class SuggesterPanel {
         };
       } else if (!extraKeys[key]) {
         extraKeys[key] = () => {
-          if (suggesterPanel.cursorMove) {
+          if (this.cursorMove) {
             // logic to decide whether to move up or not
             return Pass.toString();
           }
@@ -363,7 +369,7 @@ class SuggesterPanel {
       } else if (typeof extraKeys[key] === 'string') {
         const command = extraKeys[key];
         extraKeys[key] = (codemirror) => {
-          if (suggesterPanel.cursorMove) {
+          if (this.cursorMove) {
             this.editor.editor.execCommand(command);
 
             // logic to decide whether to move up or not
@@ -387,6 +393,7 @@ class SuggesterPanel {
   }
 
   onClickPancelItem() {
+    this.tryCreatePanel();
     this.$suggesterPanel.addEventListener(
       'click',
       (evt) => {
@@ -407,8 +414,9 @@ class SuggesterPanel {
   }
 
   showsuggesterPanel({ left, top, items }) {
+    this.tryCreatePanel();
     if (!this.$suggesterPanel && isBrowser()) {
-      document.body.appendChild(this.createDom(SuggesterPanel.panelWrap));
+      document.body.appendChild(this.createDom(this.panelWrap));
       this.$suggesterPanel = document.querySelector('.cherry-suggester-panel');
     }
     this.updatePanel(items);
@@ -420,6 +428,7 @@ class SuggesterPanel {
   }
 
   hidesuggesterPanel() {
+    this.tryCreatePanel();
     // const $suggesterPanel = document.querySelector('.cherry-suggester-panel');
     if (this.$suggesterPanel) {
       this.$suggesterPanel.style.display = 'none';
@@ -431,6 +440,7 @@ class SuggesterPanel {
    * @param {SuggestList} suggestList
    */
   updatePanel(suggestList) {
+    this.tryCreatePanel();
     let defaultValue = suggestList
       .map((suggest, idx) => {
         if (typeof suggest === 'object' && suggest !== null) {
@@ -644,6 +654,7 @@ class SuggesterPanel {
    * @param {KeyboardEvent} evt
    */
   onKeyDown(codemirror, evt) {
+    this.tryCreatePanel();
     if (!this.$suggesterPanel) {
       return false;
     }
@@ -701,5 +712,3 @@ class SuggesterPanel {
     }
   }
 }
-
-const suggesterPanel = new SuggesterPanel();

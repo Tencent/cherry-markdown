@@ -1,7 +1,8 @@
 # 例子
 > [Github 地址](https://github.com/Tencent/cherry-markdown){target=_blank}
 
-- [basic](index.html){target=_blank}
+- [full model](index.html){target=_blank}
+- [basic](basic.html){target=_blank}
 - [H5](h5.html){target=_blank}
 - [多实例](multiple.html){target=_blank}
 - [无 toolbar](notoolbar.html){target=_blank}
