@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.25](https://github.com/Tencent/cherry-markdown/compare/v0.8.24...v0.8.25) (2023-09-05)
+
+
+### Features
+
+* 有序列表、无序列表、checklist支持所见即所得编辑 [#543](https://github.com/Tencent/cherry-markdown/issues/543) ([#553](https://github.com/Tencent/cherry-markdown/issues/553)) ([47770e8](https://github.com/Tencent/cherry-markdown/commit/47770e8d7ba8f4770a1f64db648218c191862534))
+* add issue templates ([#570](https://github.com/Tencent/cherry-markdown/issues/570)) ([faf53c0](https://github.com/Tencent/cherry-markdown/commit/faf53c05f40be89933da68539112e33b4b87f7a7)), closes [#565](https://github.com/Tencent/cherry-markdown/issues/565)
+* **client:** add `SidePanel`  file directory ([#554](https://github.com/Tencent/cherry-markdown/issues/554)) ([d1e7d65](https://github.com/Tencent/cherry-markdown/commit/d1e7d6569d30a1332e22452858e2628c04071bbe))
+* CodeBlock所见即所得支持 ([#549](https://github.com/Tencent/cherry-markdown/issues/549)) ([aba8877](https://github.com/Tencent/cherry-markdown/commit/aba8877a5aa202bf99627dfd3c9c2a4495c88f72))
+
+
+### Bug Fixes
+
+* [#560](https://github.com/Tencent/cherry-markdown/issues/560) toolbar合并hooks时，重名的处理方式改为保留toolbar原有hook ([#568](https://github.com/Tencent/cherry-markdown/issues/568)) ([d69c0ad](https://github.com/Tencent/cherry-markdown/commit/d69c0ad60fb5589e3d2928c22d2c59751e722157))
+* [#567](https://github.com/Tencent/cherry-markdown/issues/567) toolbar子类重写init导致未执行部分初始化 ([#569](https://github.com/Tencent/cherry-markdown/issues/569)) ([b8244f6](https://github.com/Tencent/cherry-markdown/commit/b8244f616920a667b7edf7103d6364dfae6358d2))
+* **DrawIo:** 支持 cherry-dialog 拖拽 ([#442](https://github.com/Tencent/cherry-markdown/issues/442)) ([#559](https://github.com/Tencent/cherry-markdown/issues/559)) ([491cb0e](https://github.com/Tencent/cherry-markdown/commit/491cb0e96e9bd999703aefaf7b6a3c2a9dfe48c5))
+
+
+### Code Refactoring
+
+* suggester初始化机制；refactor: 最简版demo；fix: 超链接规则过严导致带感叹号的url被转义 ([c40d25d](https://github.com/Tencent/cherry-markdown/commit/c40d25dbfbe5f88fde99f3df1a07a9d8ac38fd8a))
+
 ### [0.8.24](https://github.com/Tencent/cherry-markdown/compare/v0.8.23-1.0...v0.8.24) (2023-08-28)
 
 
