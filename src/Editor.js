@@ -550,6 +550,9 @@ export default class Editor {
    */
   refreshWritingStatus() {
     const { writingStyle } = this.options;
+    if (writingStyle !== 'focus' && writingStyle !== 'typewriter') {
+      return;
+    }
     const className = `cherry-editor-writing-style--${writingStyle}`;
     /**
      * @type {HTMLStyleElement}
