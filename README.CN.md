@@ -62,7 +62,8 @@ Cherry Markdown 有多种样式主题选择
 
 ### 在线体验
 
-- [basic](https://tencent.github.io/cherry-markdown/examples/index.html)
+- [全功能](https://tencent.github.io/cherry-markdown/examples/index.html)
+- [基础版](https://tencent.github.io/cherry-markdown/examples/basic.html)
 - [H5](https://tencent.github.io/cherry-markdown/examples/h5.html)
 - [多实例](https://tencent.github.io/cherry-markdown/examples/multiple.html)
 - [无 toolbar](https://tencent.github.io/cherry-markdown/examples/notoolbar.html)
@@ -119,6 +120,7 @@ yarn add echarts@4.6.0
 #### ESM
 
 ```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
 import Cherry from 'cherry-markdown';
 const cherryInstance = new Cherry({
   id: 'markdown-container',
@@ -141,6 +143,7 @@ const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!')
 ### 完整模式 (图形界面)
 
 ```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
 import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
 const cherryInstance = new Cherry({
   id: 'markdown-container',
@@ -165,6 +168,7 @@ const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!')
 核心构建包不包含 mermaid 依赖，需要手动引入相关插件。
 
 ```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
 import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
 import CherryMermaidPlugin from 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin';
 import mermaid from 'mermaid';
@@ -189,6 +193,7 @@ const cherryInstance = new Cherry({
 **recommend** 使用异步引入，以下为 webpack 异步引入样例。
 
 ```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
 import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
 
 const registerPlugin = async () => {

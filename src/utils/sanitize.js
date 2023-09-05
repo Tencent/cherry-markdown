@@ -473,7 +473,5 @@ export function encodeURIComponentRFC3986(str) {
  * @param {string} str
  */
 export function encodeURIOnce(str) {
-  return encodeURI(str)
-    .replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16)}`)
-    .replace(/%25/g, '%');
+  return encodeURI(str).replace(/%25/g, '%');
 }

@@ -1,45 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
   <meta charset="UTF-8">
   <title>Cherry Editor - Markdown Editor</title>
+  <link rel="stylesheet" type="text/css" href="../dist/cherry-markdown.css">
+  <link rel="Shortcut Icon" href="../logo/favicon.ico">
   <style>
-    html,
+    html {
+      height: 100%;
+    }
     body {
-      margin: 0;
-      padding: 0;
       height: 100%;
       overflow: hidden;
+      margin: 0;
     }
-
-    video {
-      max-width: 400px;
-    }
-
-    #demo-val {
-      display: none;
-    }
-
-    img {
-      max-width: 100%;
-    }
-    iframe.cherry-dialog-iframe {
-      width: 100%;
-      height: 100%;
+    #markdown {
+      min-width: 1800px;
+      max-width: 2600px;
+      width: 70%;
+      margin: 0 auto;
     }
   </style>
-  <link rel="stylesheet" type="text/css" href="../dist/cherry-markdown.css">
-  <link rel="Shortcut Icon" href="./logo/favicon.ico">
-  <link rel="Shortcut Icon" href="../logo/favicon.ico">
-  <link rel="Bookmark" href="../logo/favicon.ico">
 </head>
 
 <body>
-  <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%;"></div>
   <div id="markdown"></div>
   <script src="../dist/cherry-markdown.js"></script>
-  <script src="./scripts/basic.js"></script>
 </body>
-
+<script>
+var config = {
+  id: 'markdown',
+  value: '',
+  callback: {
+    afterChange: function(md, html) {
+      console.log('change');
+    }
+  },
+};
+var sourceCode = document.documentElement.outerHTML;
+var cherry = new Cherry(config);
+cherry.setValue(`##源码如下：\n\`\`\` html\n${sourceCode}\n\`\`\``);
+</script>
 </html>
