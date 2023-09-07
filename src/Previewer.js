@@ -29,27 +29,6 @@ import LazyLoadImg from '@/utils/lazyLoadImg';
 let onScroll = () => {}; // store in memory for remove event
 
 /**
- * 解析第一个节点
- * @param {Node} node 经过DOMParser转换的HTML
- * @returns {String | null}
- */
-const findNonEmptyNode = (node) => {
-  // 如果节点是文本节点且内容不为空，则返回该节点
-  if (node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '') {
-    return node.textContent.trim();
-  }
-
-  for (let i = 0; i < node.childNodes.length; i++) {
-    const childNode = node.childNodes[i];
-    const result = findNonEmptyNode(childNode);
-    if (result) {
-      return result;
-    }
-  }
-  return null;
-};
-
-/**
  * 作用：
  *  dom更新
  *  局部加载（分片）
