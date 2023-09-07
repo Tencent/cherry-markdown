@@ -935,8 +935,9 @@ export default class Previewer {
   /**
    * 导出预览区域内容
    * @public
-   * @param {String} type 'pdf'：导出成pdf文件; 'img'：导出成图片
-   * @param {String} fileName 导出文件名
+   * @param {'pdf' | 'img' | 'screenShot' | 'markdown' | 'html'} [type='pdf']
+   * 'pdf'：导出成pdf文件; 'img' | screenShot：导出成png图片; 'markdown'：导出成markdown文件; 'html'：导出成html文件;
+   * @param {string} [fileName] 导出文件名
    */
   export(type = 'pdf', fileName = '') {
     const name = fileName || this.getDomContainer().innerText.match(/^\s*([^\s][^\n]*)\n/)[1] || 'cherry-export';

@@ -42,11 +42,11 @@ const undoHideBodyChildren = (displayList = []) => {
 
 /**
  * 将预览区域的内容放在body上准备后续导出操作
- * @param {HTMLElement} previeweDom 预览区域的dom
+ * @param {HTMLElement} previewDom 预览区域的dom
  * @param {function} cb 准备好导出后开始执行导出操作
  */
-const getReadyToExport = (previeweDom, cb) => {
-  const cherryPreviewer = /** @type {HTMLElement}*/ (previeweDom.cloneNode(true));
+const getReadyToExport = (previewDom, cb) => {
+  const cherryPreviewer = /** @type {HTMLElement}*/ (previewDom.cloneNode(true));
   // 强制去掉预览区的隐藏class
   cherryPreviewer.className = cherryPreviewer.className.replace('cherry-previewer--hidden', '');
   cherryPreviewer.style.width = '100%';
@@ -85,13 +85,13 @@ const fileDownload = (downloadUrl, fileName) => {
 
 /**
  * 利用window.print导出成PDF
- * @param {HTMLElement} previeweDom 预览区域的dom
+ * @param {HTMLElement} previewDom 预览区域的dom
  * @param {String} fileName 导出PDF文件名
  */
-export function exportPDF(previeweDom, fileName) {
+export function exportPDF(previewDom, fileName) {
   const oldTitle = document.title;
   document.title = fileName;
-  getReadyToExport(previeweDom, (/** @type {HTMLElement}*/ cherryPreviewer, /** @type {function}*/ thenFinish) => {
+  getReadyToExport(previewDom, (/** @type {HTMLElement}*/ cherryPreviewer, /** @type {function}*/ thenFinish) => {
     window.print();
     thenFinish();
     document.title = oldTitle;
@@ -100,11 +100,11 @@ export function exportPDF(previeweDom, fileName) {
 
 /**
  * 利用canvas将html内容导出成图片
- * @param {HTMLElement} previeweDom 预览区域的dom
+ * @param {HTMLElement} previewDom 预览区域的dom
  * @param {String} fileName 导出图片文件名
  */
-export function exportScreenShot(previeweDom, fileName) {
-  getReadyToExport(previeweDom, (/** @type {HTMLElement}*/ cherryPreviewer, /** @type {function}*/ thenFinish) => {
+export function exportScreenShot(previewDom, fileName) {
+  getReadyToExport(previewDom, (/** @type {HTMLElement}*/ cherryPreviewer, /** @type {function}*/ thenFinish) => {
     window.scrollTo(0, 0);
     html2canvas(cherryPreviewer, {
       allowTaint: true,
