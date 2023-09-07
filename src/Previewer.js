@@ -936,25 +936,13 @@ export default class Previewer {
    * 导出预览区域内容
    * @public
    * @param {String} type 'pdf'：导出成pdf文件; 'img'：导出成图片
-   * @param {String |Function} fileName 导出文件名
+   * @param {String} fileName 导出文件名
    */
   export(type = 'pdf', fileName = '') {
-    // console.log(this.options);
-    let name;
-    if (!fileName) {
-      const parser = new DOMParser();
-      const domTree = parser.parseFromString(this.getValue(), 'text/html');
-      const firstNodeText = findNonEmptyNode(domTree);
-      firstNodeText ? (name = firstNodeText) : (name = 'cherry');
-    }
-    // if (typeof fileName === 'function') {
-    //   name = fileName();
-    // } else {
-    //   name = fileName;
-    // }
+    const name = fileName || this.getDomContainer().innerText.match(/^\s*([^\s][^\n]*)\n/)[1] || 'cherry-export';
     if (type === 'pdf') {
       exportPDF(this.getDomContainer(), name);
-    } else if (type === 'screenShot') {
+    } else if (type === 'screenShot' || type === 'img') {
       exportScreenShot(this.getDomContainer(), name);
     } else if (type === 'markdown') {
       exportMarkdownFile(this.$cherry.getMarkdown(), name);
