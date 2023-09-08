@@ -13,7 +13,7 @@ async function replacePaths() {
       }
     }
   } catch (error) {
-    console.error('Error occurred:', error);
+    throw error;
   }
 }
 
