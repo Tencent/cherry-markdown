@@ -20,8 +20,6 @@ body:
     attributes:
       label: Suggested solution
       description: 'I want a xx function that can be used to do xxx things. Its implementation is beneficial for...'
-    validations:
-      required: true
   - type: textarea
     id: additional-context
     attributes:
@@ -34,7 +32,6 @@ body:
       description: Before submitting the issue, please make sure you do the following
       options:
         - label: Check that there isn't already an issue that request the same feature to avoid creating a duplicate.
-          required: true
   - type: dropdown
     id: help-us
     attributes:
