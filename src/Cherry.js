@@ -254,7 +254,7 @@ export default class Cherry extends CherryStatic {
   }
 
   /**
-   * 获取CodeMirror实例
+   * 获取CodeMirror 实例
    * @returns { CodeMirror.Editor } CodeMirror实例
    */
   getCodeMirror() {
@@ -270,8 +270,8 @@ export default class Cherry extends CherryStatic {
     return this.previewer.getValue(wrapTheme);
   }
   /**
-   * 获取CodeMirror实例
-   * @returns {Previewer} CodeMirror实例
+   * 获取Previewer 预览实例
+   * @returns {Previewer} Previewer 预览实例
    */
   getPreviewer() {
     return this.previewer;
