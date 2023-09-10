@@ -19,9 +19,51 @@ import Event from '@/Event';
 import { createElement } from '@/utils/dom';
 import Logger from '@/Logger';
 
+/**
+ * @typedef {()=>void} Bold 向cherry编辑器中插入粗体语法
+ * @typedef {()=>void} Italic 向cherry编辑器中插入斜体语法
+ * @typedef {(level:1|2|3|4|5|'1'|'2'|'3'|'4'|'5')=>void} Header  向cherry编辑器中插入标题语法
+ * - level 标题等级 1~5
+ * @typedef {()=>void} Strikethrough 向cherry编辑器中插入删除线语法
+ * @typedef {(type:'ol'|'ul'|'checklist'|1|2|3|'1'|'2'|'3')=>void} List 向cherry编辑器中插入有序、无序列表或者checklist语法
+ * - ol(1)有序
+ * - ul(2)无序列表
+ * - checklist(3)checklist
+ * @typedef {(insert:'hr'|'br'|'code'|'formula'|'checklist'|'toc'|'link'|'image'|'video'|'audio'|'normal-table'|'normal-table-row*col')=>void} Insert 向cherry编辑器中插入特定语法
+ * - hr 水平分割线
+ * - br 换行
+ * - code 代码块
+ * - formula 公式
+ * - checklist 检查项
+ * - toc 目录
+ * - link 链接
+ * - image 图片
+ * - video 视频
+ * - audio 音频
+ * - normal-table 插入3行5列的表格
+ * - normal-table-row*col 如normal-table-2*4插入2行(包含表头是3行)4列的表格
+ * @typedef {(type:'1'|'2'|'3'|'4'|'5'|'6'|1|2|3|4|5|6|'flow'|'sequence'|'state'|'class'|'pie'|'gantt')=>void} Graph 向cherry编辑器中插入画图语法
+ * - flow(1) 流程图
+ * - sequence(2) 时序图
+ * - state(3)状态图
+ * - class(4)类图
+ * - pie(5)饼图
+ * - gantt(6)甘特图
+ */
+
 export default class Toolbar {
   /**
-   * @type {Record<string, any>} 外部获取 toolbarHandler
+   * @typedef {{
+   * bold?:Bold;
+   * italic?:Italic;
+   * header?:Header;
+   * strikethrough?:Strikethrough;
+   * list?:List;
+   * insert?:Insert;
+   * graph?:Graph;
+   * [key:string]:any;
+   * }} ToolbarHandlers
+   * @type ToolbarHandlers 外部获取 toolbarHandlers 的部分功能
    */
   toolbarHandlers = {};
 

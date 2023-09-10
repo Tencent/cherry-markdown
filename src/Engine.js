@@ -192,6 +192,10 @@ export default class Engine {
     return this.$fireHookAction(md, 'paragraph', 'makeHtml', this.$dealSentenceByCache.bind(this));
   }
 
+  /**
+   * @param {string} md md字符串
+   * @returns {string} 获取html
+   */
   makeHtml(md) {
     let $md = this.$beforeMakeHtml(md);
     $md = this.$dealParagraph($md);
@@ -205,6 +209,10 @@ export default class Engine {
     // UrlCache.clear();
   }
 
+  /**
+   * @param {string} html html字符串
+   * @returns {string} 获取markdown
+   */
   makeMarkdown(html) {
     return htmlParser.run(html);
   }
