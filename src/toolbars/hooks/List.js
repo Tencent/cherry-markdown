@@ -48,6 +48,9 @@ export default class List extends MenuBase {
     const $selection = getSelection(this.editor.editor, selection, 'line', true);
     const [before] = $selection.match(/^\n*/);
     const [after] = $selection.match(/\n*$/);
+    if (shortKey === 'ol' || shortKey === 'ul' || shortKey === 'checklist') {
+      return `${before}${getListFromStr($selection, shortKey)}${after}`;
+    }
     if (listType[shortKey] !== null) {
       return `${before}${getListFromStr($selection, listType[shortKey])}${after}`;
     }

@@ -147,16 +147,23 @@ export default class Graph extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    const shortcut = `${shortKey}`;
     const shortcutKeyMap = [null, 'flow', 'sequence', 'state', 'class', 'pie', 'gantt'];
-    const selectedExample = shortcutKeyMap[+shortcut];
-    if (!shortcutKeyMap[+shortcut]) {
-      return;
-    }
     this.registerAfterClickCb(() => {
       this.setLessSelection('\n\n\n\n\n', '\n\n');
     });
-    return `\n\n${this.$getSampleCode(selectedExample)}\n`;
+    if (
+      shortKey === 'flow' ||
+      shortKey === 'sequence' ||
+      shortKey === 'state' ||
+      shortKey === 'class' ||
+      shortKey === 'pie' ||
+      shortKey === 'gantt'
+    ) {
+      return `\n\n${this.$getSampleCode(shortKey)}\n`;
+    }
+    if (shortcutKeyMap[shortKey]) {
+      return `\n\n${this.$getSampleCode(shortcutKeyMap[shortKey])}\n`;
+    }
   }
 
   /**
