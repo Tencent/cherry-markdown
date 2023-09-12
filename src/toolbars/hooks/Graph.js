@@ -143,27 +143,20 @@ export default class Graph extends MenuBase {
   /**
    * 响应点击事件
    * @param {string} selection 被用户选中的文本内容，本函数不处理选中的内容，会直接清空用户选中的内容
-   * @param {'1'|'2'|'3'|'4'|'5'|'6'|1|2|3|4|5|6|'flow'|'sequence'|'state'|'class'|'pie'|'gantt'|''} shortKey 快捷键参数
+   * @param {1|2|3|4|5|6|'1'|'2'|'3'|'4'|'5'|'6'|'flow'|'sequence'|'state'|'class'|'pie'|'gantt'|''} shortKey 快捷键参数
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
     const shortcutKeyMap = [null, 'flow', 'sequence', 'state', 'class', 'pie', 'gantt'];
+    const type = shortcutKeyMap[shortKey] ? shortcutKeyMap[shortKey] : shortKey;
+
+    if (!type || !/^(flow|sequence|state|class|pie|gantt)$/.test(type)) {
+      return;
+    }
     this.registerAfterClickCb(() => {
       this.setLessSelection('\n\n\n\n\n', '\n\n');
     });
-    if (
-      shortKey === 'flow' ||
-      shortKey === 'sequence' ||
-      shortKey === 'state' ||
-      shortKey === 'class' ||
-      shortKey === 'pie' ||
-      shortKey === 'gantt'
-    ) {
-      return `\n\n${this.$getSampleCode(shortKey)}\n`;
-    }
-    if (shortcutKeyMap[shortKey]) {
-      return `\n\n${this.$getSampleCode(shortcutKeyMap[shortKey])}\n`;
-    }
+    return `\n\n${this.$getSampleCode(type)}\n`;
   }
 
   /**
