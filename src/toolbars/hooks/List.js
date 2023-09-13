@@ -37,20 +37,19 @@ export default class List extends MenuBase {
   /**
    * 响应点击事件
    * @param {string} selection 编辑区选中的文本内容
-   * @param {'ol'|'ul'|'checklist'|1|2|3|'1'|'2'|'3'|''} [shortKey] 快捷键：ol(1)有序列表，ul(2)无序列表，checklist(3) 检查项
+   * @param {1|2|3|'ol'|'1'|'2'|'3'|'ul'|'checklist'|''} shortKey 快捷键：ol(1)有序列表，ul(2)无序列表，checklist(3) 检查项
    * @returns 对应markdown的源码
    */
   onClick(selection, shortKey = '') {
-    /**
-     * @type {['', 'ol', 'ul', 'checklist']}
-     */
     const listType = [null, 'ol', 'ul', 'checklist']; // 下标1, 2, 3生效
     const $selection = getSelection(this.editor.editor, selection, 'line', true);
     const [before] = $selection.match(/^\n*/);
     const [after] = $selection.match(/\n*$/);
-    if (listType[shortKey] !== null) {
-      return `${before}${getListFromStr($selection, listType[shortKey])}${after}`;
+    const type = listType[shortKey] ? listType[shortKey] : shortKey;
+
+    if (!type || !/^(ol|ul|checklist)$/.test(type)) {
+      return $selection;
     }
-    return $selection;
+    return `${before}${getListFromStr($selection, type)}${after}`;
   }
 }
