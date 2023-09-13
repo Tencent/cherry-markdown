@@ -114,13 +114,15 @@ export default class Editor {
   }
 
   /**
-   * 处理draw.io的xml数据和图片的base64数据，对这种超大的数据增加省略号
+   * 在onChange后处理draw.io的xml数据和图片的base64数据，对这种超大的数据增加省略号，
+   * 以及对全角符号进行特殊染色。
    */
-  dealBigData = () => {
+  dealSpecialWords = () => {
     if (this.noChange) {
       this.noChange = false;
       return;
     }
+    this.formatFullWidthMark();
     this.formatBigData2Mark(imgBase64Reg, 'cm-url base64');
     this.formatBigData2Mark(imgDrawioXmlReg, 'cm-url drawio');
   };
@@ -157,6 +159,70 @@ export default class Editor {
     }
   };
 
+  /**
+   * 高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》
+   */
+  formatFullWidthMark() {
+    const { editor } = this;
+    const regex = /[·￥、“”【】（）《》]+/g; // 此处以仅匹配多个连续的全角符号
+    const searcher = editor.getSearchCursor(regex);
+    let oneSearch = searcher.findNext();
+    editor.getAllMarks().forEach(function (mark) {
+      // 重新加载cm-fullwidth的mark
+      if (mark.className === 'cm-fullwidth') {
+        mark.clear();
+      }
+    });
+    for (; oneSearch !== false; oneSearch = searcher.findNext()) {
+      const target = searcher.from();
+      if (!target) {
+        continue;
+      }
+      const targetChFrom = target.ch;
+      const targetChTo = targetChFrom + oneSearch[0].length;
+      const targetLine = target.line;
+      const begin = { line: targetLine, ch: targetChFrom };
+      const end = { line: targetLine, ch: targetChTo };
+      editor.markText(begin, end, {
+        className: 'cm-fullwidth',
+        title: '按住Ctrl点击切换成半角（Hold down Ctrl and click to switch to half-width）',
+        attributes: { from: targetChFrom, to: targetChTo, line: targetLine },
+      });
+    }
+  }
+
+  /**
+   *
+   * @param {CodeMirror.Editor} codemirror
+   * @param {MouseEvent} evt
+   */
+  toHalfWidth(codemirror, evt) {
+    const { target } = evt;
+    if (evt.target.classList.contains('cm-fullwidth') && evt.ctrlKey && evt.buttons === 1) {
+      const begin = { line: target.getAttribute('line'), ch: target.getAttribute('from') };
+      const end = { line: target.getAttribute('line'), ch: target.getAttribute('to') };
+      codemirror.getDoc().setSelection(begin, end);
+      codemirror
+        .getDoc()
+        .replaceSelection(
+          target.innerHTML
+            .replaceAll('·', '`')
+            .replaceAll('￥', '$')
+            .replaceAll('、', '/')
+            .replaceAll('：', ':')
+            .replaceAll('“', '"')
+            .replaceAll('”', '"')
+            .replaceAll('【', '[')
+            .replaceAll('】', ']')
+            .replaceAll('（', '(')
+            .replaceAll('）', ')')
+            .replaceAll('《', '<')
+            .replaceAll('》', '>'),
+          'around',
+        );
+      codemirror.setCursor(end);
+    }
+  }
   /**
    *
    * @param {KeyboardEvent} e
@@ -286,6 +352,7 @@ export default class Editor {
     const { line: targetLine } = codemirror.getCursor();
     const top = Math.abs(evt.y - codemirror.getWrapperElement().getBoundingClientRect().y);
     this.previewer.scrollToLineNumWithOffset(targetLine + 1, top);
+    this.toHalfWidth(codemirror, evt);
   };
 
   /**
@@ -344,7 +411,7 @@ export default class Editor {
 
     editor.on('change', (codemirror, evt) => {
       this.options.onChange(evt, codemirror);
-      this.dealBigData();
+      this.dealSpecialWords();
       if (this.options.autoSave2Textarea) {
         // @ts-ignore
         // 将codemirror里的内容回写到textarea里
@@ -394,7 +461,7 @@ export default class Editor {
               // 当批量上传文件时，每个被插入的文件中间需要加个换行，但单个上传文件的时候不需要加换行
               const insertValue = i > 0 ? `\n${mdStr} ` : `${mdStr} `;
               codemirror.replaceSelection(insertValue);
-              this.dealBigData();
+              this.dealSpecialWords();
             });
           }
         }, 50);
