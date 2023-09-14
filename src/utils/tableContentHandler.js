@@ -48,6 +48,8 @@ export default class TableHandler {
         return this.$refreshPosition();
       case 'previewUpdate':
         return this.$refreshPosition();
+      case 'mousedown':
+        return this.trigger !== 'click' && this.$drawDrag();
       case 'mouseup':
         return this.trigger === 'click' && this.$tryRemoveMe(event, callback);
     }
@@ -465,5 +467,124 @@ export default class TableHandler {
     this.codeMirror.replaceSelection(newText);
     this.$findTableInEditor();
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+  }
+
+  /**
+   * 拖拽
+   */
+  $drawDrag() {
+    const { isTHead } = this.tableEditor.info;
+    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+    if (isTHead) {
+      this.$dragCol();
+    } else {
+      this.$dragLine();
+    }
+  }
+
+  /**
+   * 拖拽列
+   */
+  $dragCol() {
+    const oldTdIndex = this.tableEditor.info.tdIndex;
+    const thNode = this.target.parentElement;
+    const lines = this.codeMirror.getSelection().split(/\n/);
+    const { tdNode } = this.tableEditor.info;
+    const that = this;
+    tdNode.setAttribute('draggable', true);
+
+    // 离开需要还原边框
+    thNode.addEventListener('dragleave', function (event) {
+      that.setStyle(event.target, 'border', '1px solid #dfe6ee');
+    });
+    // 改变将要放到的位置边框的颜色
+    thNode.addEventListener('dragover', function (event) {
+      event.preventDefault();
+      const tdIndex = Array.from(event.target.parentElement.childNodes).indexOf(event.target);
+      that.$dragSymbol(event.target, oldTdIndex, tdIndex);
+    });
+    thNode.addEventListener('drop', function (event) {
+      event.preventDefault();
+      const tdIndex = Array.from(event.target.parentElement.childNodes).indexOf(event.target);
+      const newLines = lines.map((line, index) => {
+        const cells = line.split('|').filter((item, i) => item !== '');
+        return `|${that.$operateLines(oldTdIndex, tdIndex, cells).join('|')}|`;
+      });
+      const newText = newLines.join('\n');
+      that.codeMirror.replaceSelection(newText);
+      that.setStyle(event.target, 'border', '1px solid #dfe6ee');
+      that.$findTableInEditor();
+      that.$setSelection(that.tableEditor.info.tableIndex, 'table');
+    });
+  }
+
+  /**
+   * 拖拽行
+   */
+  $dragLine() {
+    const { trNode } = this.tableEditor.info;
+    trNode.setAttribute('draggable', true);
+    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+    const oldTrIndex = this.tableEditor.info.trIndex + 2;
+    const tBody = trNode.parentElement;
+    const lines = this.codeMirror.getSelection().split(/\n/);
+    const that = this;
+
+    tBody.addEventListener('dragleave', function (event) {
+      that.setStyle(event.target.parentElement, 'border', '1px solid #dfe6ee');
+    });
+    tBody.addEventListener('dragover', function (event) {
+      // 默认元素不可放置，这里取消默认，将放置目标修改为可放置的
+      event.preventDefault();
+      const trIndex =
+        Array.from(event.target.parentElement.parentElement.childNodes).indexOf(event.target.parentElement) + 2;
+      that.$dragSymbol(event.target, oldTrIndex, trIndex);
+    });
+    tBody.addEventListener('drop', function (event) {
+      event.preventDefault();
+      const trIndex =
+        Array.from(event.target.parentElement.parentElement.childNodes).indexOf(event.target.parentElement) + 2;
+      const newText = that.$operateLines(oldTrIndex, trIndex, lines).join('\n');
+      that.codeMirror.replaceSelection(newText);
+
+      that.$findTableInEditor();
+      that.$setSelection(that.tableEditor.info.tableIndex, 'table');
+      that.setStyle(event.target.parentElement, 'border', '1px solid #dfe6ee');
+    });
+  }
+
+  $dragSymbol(objTarget, oldIndex, index) {
+    const { target } = this;
+    if (target !== objTarget && oldIndex !== index) {
+      if (target.tagName === 'TH') {
+        if (oldIndex < index) {
+          this.setStyle(objTarget, 'border', `1px solid #dfe6ee`);
+          this.setStyle(objTarget, 'border-right', `2px solid #6897bb`);
+        } else if (oldIndex > index) {
+          this.setStyle(objTarget, 'border', `1px solid #dfe6ee`);
+          this.setStyle(objTarget, 'border-left', `2px solid #6897bb`);
+        }
+      } else if (target.tagName === 'TD') {
+        if (oldIndex < index) {
+          this.setStyle(objTarget.parentElement, 'border', `1px solid #dfe6ee`);
+          this.setStyle(objTarget.parentElement, 'border-bottom', `2px solid #6897bb`);
+        } else if (oldIndex > index) {
+          this.setStyle(objTarget.parentElement, 'border', `1px solid #dfe6ee`);
+          this.setStyle(objTarget.parentElement, 'border-top', `2px solid #6897bb`);
+        }
+      }
+    }
+  }
+
+  $operateLines(oldIndex, index, lines) {
+    if (oldIndex < index) {
+      lines.splice(index + 1, 0, lines[oldIndex]);
+      lines.splice(oldIndex, 1);
+    } else if (oldIndex > index) {
+      const line = lines[oldIndex];
+      lines.splice(oldIndex, 1);
+      lines.splice(index, 0, line);
+    }
+    return lines;
   }
 }
