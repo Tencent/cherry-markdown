@@ -115,8 +115,11 @@ export default class Suggester extends SyntaxBase {
             callback(false);
             return;
           }
-          // 删掉word当中suggesterKeywords出现的字符
-          const keyword = word.replace(new RegExp(suggesterKeyword, 'g'), '').split('').join('.*?');
+          const keyword = word
+            .replace(/\s+/g, '') // 删掉空格，避免产生不必要的空数组元素
+            .replace(new RegExp(`^${suggesterKeyword}`, 'g'), '') // 删掉word当中suggesterKeywords出现的字符
+            .split('')
+            .join('.*?');
           const test = new RegExp(`^.*?${keyword}.*?$`, 'i');
           const suggestList = systemSuggestList.filter((item) => {
             // TODO: 首次联想的时候会把所有的候选项列出来，后续可以增加一些机制改成默认拉取一部分候选项
@@ -127,7 +130,6 @@ export default class Suggester extends SyntaxBase {
         },
       });
     }
-    console.log(suggester);
     suggester.forEach((configItem) => {
       if (!configItem.suggestList) {
         console.warn('[cherry-suggester]: the suggestList of config is missing.');

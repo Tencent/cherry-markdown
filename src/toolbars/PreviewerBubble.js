@@ -433,7 +433,7 @@ export default class PreviewerBubble {
             beginCh += targetString.replace(/^(!\[[^\]]*])[^\n]*$/, '$1').length;
             this.editor.editor.setSelection({ line, ch: beginCh }, { line, ch: endCh });
             // 更新后需要再调用一次markText机制
-            this.editor.dealBigData();
+            this.editor.dealSpecialWords();
             return true;
           }
           testIndex += 1;

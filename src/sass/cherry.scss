@@ -550,14 +550,12 @@
     color: $editorKeywordColor;
   }
 
-  .cm-s-default .cm-fullwidth {
-    color: $fullwidthColor;
+  .cm-s-default .cm-fullWidth {
+    color: $fullWidthColor;
     z-index: 3;
-  }
-
-  .cm-s-default .cm-fullwidth :hover {
     cursor: pointer;
   }
+
 }
 
 .cherry-drag {
