@@ -28,6 +28,8 @@ export default class ListHandler {
   /** @type{import('codemirror').Position} */
   position = { line: 0, ch: 0 };
 
+  input = false;
+
   /**
    * @param {string} trigger 触发方式
    * @param {HTMLParagraphElement} target 目标dom
@@ -75,7 +77,7 @@ export default class ListHandler {
   }
 
   setSelection() {
-    const allLi = Array.from(this.previewerDom.querySelectorAll('li')); // 预览区域内所有的li
+    const allLi = Array.from(this.previewerDom.querySelectorAll('.cherry-list-item')); // 预览区域内所有的li
     const targetLiIdx = allLi.findIndex((li) => li === this.target.parentElement);
     if (targetLiIdx === -1) {
       return; // 没有找到li
@@ -86,6 +88,9 @@ export default class ListHandler {
     let targetCh = -1; // 列
     let targetContent = ''; // 当前点击的li的内容
     contents.forEach((lineContent, lineIdx) => {
+      if (!lineContent || lineContent === '/n') {
+        return;
+      }
       // 匹配是否符合列表的正则
       const regRes = this.regList.exec(lineContent);
       if (regRes !== null) {
@@ -94,6 +99,10 @@ export default class ListHandler {
           // eslint-disable-next-line prefer-destructuring
           targetContent = regRes[4]; // 这里只取一个没必要解构
           targetCh = lineContent.indexOf(targetContent);
+          // 1. 这种需要特殊处理
+          if (regRes[2]?.endsWith('.')) {
+            targetCh += 1;
+          }
         }
         contentsLiCount += 1;
       }
@@ -110,6 +119,7 @@ export default class ListHandler {
    * @param {InputEvent} event
    */
   handleEditablesInput(event) {
+    this.input = true;
     event.stopPropagation();
     event.preventDefault();
     /** @typedef {'insertText'|'insertFromPaste'|'insertParagraph'|'insertLineBreak'|'deleteContentBackward'|'deleteContentForward'|'deleteByCut'|'deleteContentForward'|'deleteWordBackward'} InputType*/
@@ -128,11 +138,12 @@ export default class ListHandler {
     event.stopPropagation();
     event.preventDefault();
     if (event.target instanceof HTMLParagraphElement) {
-      console.log('event', event);
-      const md = this.editor.$cherry.engine.makeMarkdown(event.target.innerHTML);
-      console.log('md', md);
-      const [from, to] = this.range;
-      this.editor.editor.replaceRange(md, from, to);
+      // 输入过才需要替换
+      if (this.input) {
+        const md = this.editor.$cherry.engine.makeMarkdown(event.target.innerHTML);
+        const [from, to] = this.range;
+        this.editor.editor.replaceRange(md, from, to);
+      }
       this.remove();
     }
   }
