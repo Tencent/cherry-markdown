@@ -165,7 +165,7 @@ export default class Editor {
    */
   formatFullWidthMark() {
     const { editor } = this;
-    const regex = /[·￥、：“”【】（）《》]/g; // 此处以仅匹配单个全角符号
+    const regex = /[·￥、：“”【】（）《》]/; // 此处以仅匹配单个全角符号
     const searcher = editor.getSearchCursor(regex);
     let oneSearch = searcher.findNext();
     editor.getAllMarks().forEach(function (mark) {
@@ -224,18 +224,18 @@ export default class Editor {
         .getDoc()
         .replaceSelection(
           target.innerText
-            .replaceAll('·', '`')
-            .replaceAll('￥', '$')
-            .replaceAll('、', '/')
-            .replaceAll('：', ':')
-            .replaceAll('“', '"')
-            .replaceAll('”', '"')
-            .replaceAll('【', '[')
-            .replaceAll('】', ']')
-            .replaceAll('（', '(')
-            .replaceAll('）', ')')
-            .replaceAll('《', '<')
-            .replaceAll('》', '>'),
+            .replace('·', '`')
+            .replace('￥', '$')
+            .replace('、', '/')
+            .replace('：', ':')
+            .replace('“', '"')
+            .replace('”', '"')
+            .replace('【', '[')
+            .replace('】', ']')
+            .replace('（', '(')
+            .replace('）', ')')
+            .replace('《', '<')
+            .replace('》', '>'),
         );
     }
   }
