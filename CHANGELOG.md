@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.26](https://github.com/Tencent/cherry-markdown/compare/v0.8.25...v0.8.26) (2023-09-14)
+
+
+### Bug Fixes
+
+* **emphasis:** fix poor performance when matching across lines ([6246d87](https://github.com/Tencent/cherry-markdown/commit/6246d874f5cc7afc87dfa33fa8f7412ee79f3185))
+
 ### [0.8.25](https://github.com/Tencent/cherry-markdown/compare/v0.8.24...v0.8.25) (2023-09-05)
 
 

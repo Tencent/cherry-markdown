@@ -37,6 +37,12 @@ export const ALLOW_WHITESPACE_MULTILINE = '(?:.*?)(?:(?:\\n.*?)*?)';
 export const DO_NOT_STARTS_AND_END_WITH_SPACES = '(?:\\S|(?:\\S.*?\\S))';
 export const DO_NOT_STARTS_AND_END_WITH_SPACES_MULTILINE =
   '(?:(?:\\S|(?:\\S[^\\n]*?\\S))(?:\\n(?:\\S|(?:\\S[^\\n]*?\\S)))*?)';
+
+/**
+ * @deprecated
+ *
+ * 存在严重性能问题，应弃用
+ */
 export const DO_NOT_STARTS_AND_END_WITH_SPACES_MULTILINE_ALLOW_EMPTY = '(?:(?:\\S|(?:\\S.*?\\S))(?:[ \\t]*\\n.*?)*?)';
 
 export const NOT_ALL_WHITE_SPACES_INLINE = '(?:[^\\n]*?\\S[^\\n]*?)';
