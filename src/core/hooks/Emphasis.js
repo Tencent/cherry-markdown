@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 import SyntaxBase from '@/core/SyntaxBase';
-import {
-  compileRegExp,
-  DO_NOT_STARTS_AND_END_WITH_SPACES_MULTILINE_ALLOW_EMPTY,
-  ALLOW_WHITESPACE_MULTILINE,
-  UNDERSCORE_EMPHASIS_BOUNDARY,
-} from '@/utils/regexp';
+import { compileRegExp, ALLOW_WHITESPACE_MULTILINE, UNDERSCORE_EMPHASIS_BOUNDARY } from '@/utils/regexp';
 
 export default class Emphasis extends SyntaxBase {
   static HOOK_NAME = 'fontEmphasis';
@@ -94,19 +89,20 @@ export default class Emphasis extends SyntaxBase {
    */
   rule({ config } = { config: undefined }) {
     const allowWhitespace = config ? !!config.allowWhitespace : false;
-    const REGEX = allowWhitespace
-      ? ALLOW_WHITESPACE_MULTILINE
-      : DO_NOT_STARTS_AND_END_WITH_SPACES_MULTILINE_ALLOW_EMPTY;
+    const emRegexp = (allowWhitespace, symbol) => {
+      const char = `[^${symbol}\\s]`;
+      return allowWhitespace ? ALLOW_WHITESPACE_MULTILINE : `(${char}|${char}(.*?(\n${char}.*)*)${char})`;
+    };
     const asterisk = {
-      begin: '(^|[^\\\\])(\\*+)', // ?<leading>, ?<symbol>
-      content: `(${REGEX})`, // ?<text>
+      begin: '(^|[^\\\\])([*]+)', // ?<leading>, ?<symbol>
+      content: `(${emRegexp(allowWhitespace, '*')})`, // ?<text>
       end: '\\2',
     };
 
     // UNDERSCORE_EMPHASIS_BORDER：允许除下划线以外的「标点符号」和空格出现，使用[^\w\S \t]或[\W\s]会有性能问题
     const underscore = {
       begin: `(^|${UNDERSCORE_EMPHASIS_BOUNDARY})(_+)`, // ?<leading>, ?<symbol>
-      content: `(${REGEX})`, // ?<text>
+      content: `(${emRegexp(allowWhitespace, '_')})`, // ?<text>
       end: `\\2(?=${UNDERSCORE_EMPHASIS_BOUNDARY}|$)`,
     };
 
