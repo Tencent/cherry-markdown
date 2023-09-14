@@ -118,7 +118,8 @@ export const URL_NO_SLASH = new RegExp(`^${URL_INLINE_NO_SLASH.source}$`);
 export const URL = new RegExp(`^${URL_INLINE.source}$`);
 
 // 正则结果[全部, 判定符之前的空格或者tab, 判定符, checkbox内容(没有就是undefined), 列表内容]
-export const LIST_CONTENT = /([ \t]*)([*+-][ ](\[[ x]\])?|[a-z0-9I一二三四五六七八九十零]+\.)([^\r\n]*)/;
+export const LIST_CONTENT =
+  /^([ \t]*)([*+-][ ](\[[ x]\])?|[0-9一二三四五六七八九十零]+\.|[a-z]\.|\b(?:M{0,3}(?:CM|CD|D?C{0,3})(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3}))\b\.)([^\r\n]*)/;
 
 export function getTableRule(merge = false) {
   // ^(\|[^\n]+\|\r?\n)((?:\|:?[-]+:?)+\|)(\n(?:\|[^\n]+\|\r?\n?)*)?$
