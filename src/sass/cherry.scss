@@ -549,6 +549,13 @@
   .cm-s-default .cm-keyword {
     color: $editorKeywordColor;
   }
+
+  .cm-s-default .cm-fullWidth {
+    color: $fullWidthColor;
+    z-index: 3;
+    cursor: pointer;
+  }
+
 }
 
 .cherry-drag {
