@@ -165,12 +165,12 @@ export default class Editor {
    */
   formatFullWidthMark() {
     const { editor } = this;
-    const regex = /[·￥、：“”【】（）《》]+/g; // 此处以仅匹配多个连续的全角符号
+    const regex = /[·￥、：“”【】（）《》]/g; // 此处以仅匹配单个全角符号
     const searcher = editor.getSearchCursor(regex);
     let oneSearch = searcher.findNext();
     editor.getAllMarks().forEach(function (mark) {
       // 重新加载cm-fullWidth的mark
-      if (mark.className === 'cm-fullWidth' && !regex.test(mark.innerText)) {
+      if (mark.className === 'cm-fullWidth' && !regex.test(mark.attributes.content)) {
         mark.clear();
       }
     });
@@ -193,7 +193,7 @@ export default class Editor {
         editor.markText(begin, end, {
           className: 'cm-fullWidth',
           title: '按住Ctrl/Cmd点击切换成半角（Hold down Ctrl/Cmd and click to switch to half-width）',
-          attributes: { from: `${targetChFrom}`, to: `${targetChTo}`, line: `${targetLine}` },
+          attributes: { from: `${targetChFrom}`, to: `${targetChTo}`, line: `${targetLine}`, content: oneSearch[0] },
         });
       }
     }
@@ -206,13 +206,19 @@ export default class Editor {
    */
   toHalfWidth(codemirror, evt) {
     const { target } = evt;
-    if (!target instanceof HTMLElement) {
+    if (!(target instanceof HTMLElement)) {
       return;
     }
     // 针对windows用户为Ctrl按键，Mac用户为Cmd按键
     if (target.classList.contains('cm-fullWidth') && (evt.ctrlKey || evt.metaKey) && evt.buttons === 1) {
-      const begin = { line: target.getAttribute('line'), ch: target.getAttribute('from') };
-      const end = { line: target.getAttribute('line'), ch: target.getAttribute('to') };
+      const begin = {
+        line: parseInt(target.getAttribute('line'), 10),
+        ch: parseInt(target.getAttribute('from'), 10),
+      };
+      const end = {
+        line: parseInt(target.getAttribute('line'), 10),
+        ch: parseInt(target.getAttribute('to'), 10),
+      };
       codemirror.getDoc().setSelection(begin, end);
       codemirror
         .getDoc()
