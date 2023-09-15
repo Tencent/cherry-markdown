@@ -89,4 +89,5 @@ export default {
   'H3 Heading': 'H3 三级标题',
   complement: '续写',
   summary: '总结',
+  justify: '对齐方式',
 };
