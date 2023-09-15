@@ -215,9 +215,7 @@ export default class Editor {
       const to = { line: from.line, ch: from.ch + 1 };
       codemirror.setSelection(from, to);
       codemirror.replaceSelection(
-        codemirror
-          .getDoc()
-          .getRange(from, to)
+        target.innerText
           .replace('·', '`')
           .replace('￥', '$')
           .replace('、', '/')
