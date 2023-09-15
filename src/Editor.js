@@ -168,9 +168,11 @@ export default class Editor {
     const regex = /[·￥、：“”【】（）《》]/; // 此处以仅匹配单个全角符号
     const searcher = editor.getSearchCursor(regex);
     let oneSearch = searcher.findNext();
+    // 防止出现错误的mark
     editor.getAllMarks().forEach(function (mark) {
-      // 重新加载cm-fullWidth的mark
-      if (mark.className === 'cm-fullWidth' && !regex.test(mark.attributes.content)) {
+      const range = JSON.parse(JSON.stringify(mark.find()));
+      const markedText = editor.getRange(range.from, range.to);
+      if (mark.className === 'cm-fullWidth' && !regex.test(markedText)) {
         mark.clear();
       }
     });
@@ -179,21 +181,17 @@ export default class Editor {
       if (!target) {
         continue;
       }
-      const targetChFrom = target.ch;
-      const targetChTo = targetChFrom + oneSearch[0].length;
-      const targetLine = target.line;
-      const begin = { line: targetLine, ch: targetChFrom };
-      const end = { line: targetLine, ch: targetChTo };
+      const from = { line: target.line, ch: target.ch };
+      const to = { line: target.line, ch: target.ch + 1 };
       // 当没有标记时再进行标记，判断textMaker的className必须为"cm-fullWidth"，
       // 因为cm的addon里会引入className: "CodeMirror-composing"的textMaker干扰判断
-      const existMarksLength = editor.findMarks(begin, end).filter((item) => {
+      const existMarksLength = editor.findMarks(from, to).filter((item) => {
         return item.className === 'cm-fullWidth';
       });
       if (existMarksLength.length === 0) {
-        editor.markText(begin, end, {
+        editor.markText(from, to, {
           className: 'cm-fullWidth',
           title: '按住Ctrl/Cmd点击切换成半角（Hold down Ctrl/Cmd and click to switch to half-width）',
-          attributes: { from: `${targetChFrom}`, to: `${targetChTo}`, line: `${targetLine}`, content: oneSearch[0] },
         });
       }
     }
@@ -211,32 +209,26 @@ export default class Editor {
     }
     // 针对windows用户为Ctrl按键，Mac用户为Cmd按键
     if (target.classList.contains('cm-fullWidth') && (evt.ctrlKey || evt.metaKey) && evt.buttons === 1) {
-      const begin = {
-        line: parseInt(target.getAttribute('line'), 10),
-        ch: parseInt(target.getAttribute('from'), 10),
-      };
-      const end = {
-        line: parseInt(target.getAttribute('line'), 10),
-        ch: parseInt(target.getAttribute('to'), 10),
-      };
-      codemirror.getDoc().setSelection(begin, end);
-      codemirror
-        .getDoc()
-        .replaceSelection(
-          target.innerText
-            .replace('·', '`')
-            .replace('￥', '$')
-            .replace('、', '/')
-            .replace('：', ':')
-            .replace('“', '"')
-            .replace('”', '"')
-            .replace('【', '[')
-            .replace('】', ']')
-            .replace('（', '(')
-            .replace('）', ')')
-            .replace('《', '<')
-            .replace('》', '>'),
-        );
+      const rect = target.getBoundingClientRect();
+      // 由于是一个字符，所以肯定在一行
+      const from = codemirror.coordsChar({ left: rect.left, top: rect.top });
+      const to = { line: from.line, ch: from.ch + 1 };
+      codemirror.setSelection(from, to);
+      codemirror.replaceSelection(
+        target.innerText
+          .replace('·', '`')
+          .replace('￥', '$')
+          .replace('、', '/')
+          .replace('：', ':')
+          .replace('“', '"')
+          .replace('”', '"')
+          .replace('【', '[')
+          .replace('】', ']')
+          .replace('（', '(')
+          .replace('）', ')')
+          .replace('《', '<')
+          .replace('》', '>'),
+      );
     }
   }
   /**
