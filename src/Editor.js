@@ -170,7 +170,8 @@ export default class Editor {
     let oneSearch = searcher.findNext();
     // 防止出现错误的mark
     editor.getAllMarks().forEach(function (mark) {
-      const markedText = editor.getRange(mark.find().from, mark.find().to);
+      const range = JSON.parse(JSON.stringify(mark.find()));
+      const markedText = editor.getRange(range.from, range.to);
       if (mark.className === 'cm-fullWidth' && !regex.test(markedText)) {
         mark.clear();
       }
