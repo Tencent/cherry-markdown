@@ -28,6 +28,10 @@ export default class ListHandler {
   /** @type{import('codemirror').Position} */
   position = { line: 0, ch: 0 };
 
+  input = false;
+
+  isCheckbox = false;
+
   /**
    * @param {string} trigger 触发方式
    * @param {HTMLParagraphElement} target 目标dom
@@ -75,7 +79,7 @@ export default class ListHandler {
   }
 
   setSelection() {
-    const allLi = Array.from(this.previewerDom.querySelectorAll('li')); // 预览区域内所有的li
+    const allLi = Array.from(this.previewerDom.querySelectorAll('li.cherry-list-item')); // 预览区域内所有的li
     const targetLiIdx = allLi.findIndex((li) => li === this.target.parentElement);
     if (targetLiIdx === -1) {
       return; // 没有找到li
@@ -86,14 +90,26 @@ export default class ListHandler {
     let targetCh = -1; // 列
     let targetContent = ''; // 当前点击的li的内容
     contents.forEach((lineContent, lineIdx) => {
+      if (!lineContent || lineContent === '/n') {
+        return;
+      }
       // 匹配是否符合列表的正则
       const regRes = this.regList.exec(lineContent);
       if (regRes !== null) {
-        if (contentsLiCount === targetLiIdx && regRes[1] !== undefined) {
+        const [, indent, identifier, checkbox, content] = regRes;
+        if (contentsLiCount === targetLiIdx && indent !== undefined) {
           targetLine = lineIdx;
           // eslint-disable-next-line prefer-destructuring
-          targetContent = regRes[4]; // 这里只取一个没必要解构
+          targetContent = content; // 这里只取一个没必要解构
           targetCh = lineContent.indexOf(targetContent);
+          // 1. 这种需要特殊处理，需要跳过一个空格位，否则层级会错乱
+          if (identifier?.endsWith('.')) {
+            targetCh += 1;
+          }
+          // checkbox 编辑的元素内以选中的checkbox开头时需要去掉，否则会被解析
+          if (checkbox) {
+            this.isCheckbox = true;
+          }
         }
         contentsLiCount += 1;
       }
@@ -110,6 +126,7 @@ export default class ListHandler {
    * @param {InputEvent} event
    */
   handleEditablesInput(event) {
+    this.input = true;
     event.stopPropagation();
     event.preventDefault();
     /** @typedef {'insertText'|'insertFromPaste'|'insertParagraph'|'insertLineBreak'|'deleteContentBackward'|'deleteContentForward'|'deleteByCut'|'deleteContentForward'|'deleteWordBackward'} InputType*/
@@ -128,11 +145,16 @@ export default class ListHandler {
     event.stopPropagation();
     event.preventDefault();
     if (event.target instanceof HTMLParagraphElement) {
-      console.log('event', event);
-      const md = this.editor.$cherry.engine.makeMarkdown(event.target.innerHTML);
-      console.log('md', md);
-      const [from, to] = this.range;
-      this.editor.editor.replaceRange(md, from, to);
+      if (this.input) {
+        const replaceHtml = !this.isCheckbox
+          ? event.target.innerHTML
+          : event.target.innerHTML.replace(/<span class="ch-icon ch-icon-(square|check)"><\/span>/, '');
+        const md = this.editor.$cherry.engine.makeMarkdown(replaceHtml);
+        const [from, to] = this.range;
+        this.editor.editor.replaceRange(md, from, to);
+        this.isCheckbox = false;
+        this.input = false;
+      }
       this.remove();
     }
   }

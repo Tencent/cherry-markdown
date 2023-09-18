@@ -424,7 +424,12 @@ class SuggesterPanel {
 
   // 面板重定位
   relocatePanel(codemirror) {
-    const $cursor = document.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
+    // 找到光标位置来确定候选框位置
+    let $cursor = document.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
+    // 当editor选中某一内容时，".CodeMirror-cursor"会消失，此时通过定位".selected"来确定候选框位置
+    if (!$cursor) {
+      $cursor = document.querySelector('.CodeMirror-selected');
+    }
     if (!$cursor) {
       return false;
     }

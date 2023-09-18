@@ -172,7 +172,9 @@ export default class List extends ParagraphBase {
     const attr = {};
     const content = children.reduce((html, item) => {
       const child = this.tree[item];
-      const itemAttr = {};
+      const itemAttr = {
+        class: 'cherry-list-item',
+      };
       const str = `<p>${child.strs.join('<br>')}</p>`;
       child.lines += this.getLineCount(child.strs.join('\n'));
       const children = child.children.length ? this.renderTree(item) : '';
@@ -181,7 +183,7 @@ export default class List extends ParagraphBase {
       // checklist 样式适配
       const checklistRegex = /<span class="ch-icon ch-icon-(square|check)"><\/span>/;
       if (checklistRegex.test(str)) {
-        itemAttr.class = 'check-list-item';
+        itemAttr.class += ' check-list-item';
       }
       return `${html}<li${attrsToAttributeString(itemAttr)}>${str}${children}</li>`;
     }, '');
