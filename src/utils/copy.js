@@ -27,3 +27,29 @@ export function copyToClip(str) {
   document.execCommand('copy');
   document.removeEventListener('copy', listener);
 }
+
+/**
+ * 复制文本内容到剪贴板
+ * @param {string} str 复制文本
+ */
+export function copyByInput(str) {
+  const input = document.createElement('input');
+  input.value = str;
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand('copy');
+  document.body.removeChild(input);
+}
+
+/**
+ * 复制文本
+ * @param {string} str 复制文本
+ * @returns
+ */
+export async function copyTextByClipboard(str) {
+  if (!navigator.clipboard) {
+    copyByInput(str);
+    return;
+  }
+  return await navigator.clipboard.writeText(str);
+}
