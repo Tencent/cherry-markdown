@@ -15,7 +15,7 @@
  */
 
 import { svg2img, getSvgString } from '@/utils/svgUtils';
-import { copyToClip } from '@/utils/copy';
+import { copyTextByClipboard } from '@/utils/copy';
 import MathBlock from '@/core/hooks/MathBlock';
 
 export default class FormulaHandler {
@@ -173,11 +173,11 @@ export default class FormulaHandler {
           // 涉及到代码的操作
           if (this.target instanceof SVGSVGElement) {
             if (name === 'svgcode') {
-              copyToClip(getSvgString(this.target));
+              copyTextByClipboard(getSvgString(this.target));
             } else {
               const mathElement = this.target.parentElement.querySelector('math');
               mathElement.setAttribute('xmlns', 'http://www.w3.org/1998/Math/MathML');
-              copyToClip(mathElement.outerHTML);
+              copyTextByClipboard(mathElement.outerHTML);
             }
           }
           break;
@@ -203,10 +203,10 @@ export default class FormulaHandler {
                 // @ts-ignore
                 const hook = this.editor.$cherry.engine.hooks.paragraph.find((hook) => hook instanceof MathBlock);
                 if (hook && hook.engine === 'MathJax') {
-                  hook.MathJax?.texReset();
-                  hook.MathJax?.tex2mmlPromise?.(code, { display: true }).then((mml) => {
+                  window.MathJax?.texReset();
+                  window.MathJax?.tex2mmlPromise?.(code, { display: true }).then((mml) => {
                     if (name === 'mathml') {
-                      copyToClip(mml);
+                      copyTextByClipboard(mml);
                     } else {
                       // TODO: docx
                     }
@@ -214,13 +214,13 @@ export default class FormulaHandler {
                 }
                 // TODO: other engine
               } else if (name === 'latex') {
-                copyToClip(code);
+                copyTextByClipboard(code);
               } else if (name === '$') {
-                copyToClip(`${name}${code}${name}`);
+                copyTextByClipboard(`${name}${code}${name}`);
               } else if (name === '$$') {
-                copyToClip(`${name}\n${code}\n${name}`);
+                copyTextByClipboard(`${name}\n${code}\n${name}`);
               } else if (name === '\\') {
-                copyToClip(`\\${code}`);
+                copyTextByClipboard(`\\${code}`);
               }
             }
           }
