@@ -164,9 +164,6 @@ export default class Cherry extends CherryStatic {
     // default value init
     this.initText(editor.editor);
 
-    // 切换模式，有纯预览模式、纯编辑模式、双栏编辑模式
-    this.switchModel(this.options.editor.defaultModel);
-
     Event.on(this.instanceId, Event.Events.toolbarHide, () => {
       this.status.toolbar = 'hide';
     });
@@ -187,6 +184,9 @@ export default class Cherry extends CherryStatic {
     Event.on(this.instanceId, Event.Events.editorOpen, () => {
       this.status.editor = 'show';
     });
+
+    // 切换模式，有纯预览模式、纯编辑模式、双栏编辑模式
+    this.switchModel(this.options.editor.defaultModel);
   }
 
   /**
