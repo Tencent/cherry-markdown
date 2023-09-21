@@ -26,6 +26,13 @@ const flowChartContent = [
   '\tC -->|No| E[买一斤包子]',
 ].join('\n');
 
+const flowChartContentEn = [
+  '\tA[Company] -->| Finish work | B(Grocery Store)',
+  '\tB --> C{See<br>Watermelon Seller}',
+  '\tC -->|Yes| D[Buy a bun]',
+  '\tC -->|No| E[Buy a kilogram of buns]',
+].join('\n');
+
 const sample = {
   flow: [
     'FlowChart',
@@ -106,6 +113,87 @@ const sample = {
   ),
 };
 
+// 英文例子
+const sampleEn = {
+  flow: [
+    'FlowChart',
+    generateExample('Left-right structure', `graph LR\n${flowChartContentEn}`),
+    generateExample('Top-bottom structure', `graph TD\n${flowChartContentEn}`),
+  ].join('\n'),
+  sequence: generateExample(
+    'SequenceDiagram',
+    [
+      'sequenceDiagram',
+      'autonumber',
+      'A-->A: text1',
+      'A->>B: text2',
+      'loop loop1',
+      'loop loop2',
+      'A->B: text3',
+      'end',
+      'loop loop3',
+      'B -->>A: text4',
+      'end',
+      'B -->> B: text5',
+      'end',
+    ].join('\n'),
+  ),
+  state: generateExample(
+    'StateDiagram',
+    [
+      'stateDiagram-v2',
+      '[*] --> A',
+      'A --> B',
+      'A --> C',
+      'state A {',
+      '  \t[*] --> D',
+      '  \tD --> [*]',
+      '}',
+      'B --> [*]',
+      'C --> [*]',
+    ].join('\n'),
+  ),
+  class: generateExample(
+    'ClassDiagram',
+    [
+      'classDiagram',
+      'Base <|-- One',
+      'Base <|-- Two',
+      'Base : +String name',
+      'Base: +getName()',
+      'Base: +setName(String name)',
+      'class One{',
+      '  \t+String newName',
+      '  \t+getNewName()',
+      '}',
+      'class Two{',
+      '  \t-int id',
+      '  \t-getId()',
+      '}',
+    ].join('\n'),
+  ),
+  pie: generateExample('PieChart', ['pie', 'title pie', '"A" : 100', '"B" : 80', '"C" : 40', '"D" : 30'].join('\n')),
+  gantt: generateExample(
+    'GanttChart',
+    [
+      'gantt',
+      '\ttitle work',
+      '\tsection session 1',
+      '\t\twork1     :a1, 2020-03-01, 4d',
+      '\t\twork2        :after a1, 5d',
+      '\t\twork3     : 1d',
+      '\tsection session 2',
+      '\t\twork4      :a2, 2020-03-11, 2d',
+      '\t\twork5          :2020-03-15, 7d',
+      '\t\twork6          :2020-03-22, 5d',
+      '\tsection session 3',
+      '\t\twork7: 1d',
+      '\t\twork8: 2d',
+      '\t\twork9: 1d',
+    ].join('\n'),
+  ),
+};
+
 /**
  * 插入“画图”的按钮
  * 本功能依赖[Mermaid.js](https://mermaid-js.github.io)组件，请保证调用CherryMarkdown前已加载mermaid.js组件
@@ -115,6 +203,7 @@ export default class Graph extends MenuBase {
     super($cherry);
     this.setName('graph', 'insertChart');
     this.noIcon = true;
+    this.locale = $cherry.options.locale;
     this.subMenuConfig = [
       // 流程图
       // 访问[Mermaid 流程图](https://mermaid-js.github.io/mermaid/#/flowchart)参考具体使用方法。
@@ -165,6 +254,10 @@ export default class Graph extends MenuBase {
    * @returns
    */
   $getSampleCode(type) {
-    return sample[type].replace(/\t/g, '    ');
+    if (this.locale !== 'zh-CN') {
+      // 只要不是中文，就返回英文例子
+      return sampleEn[type]?.replace(/\t/g, '    ');
+    }
+    return sample[type]?.replace(/\t/g, '    ');
   }
 }

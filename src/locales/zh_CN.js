@@ -90,4 +90,7 @@ export default {
   complement: '续写',
   summary: '总结',
   justify: '对齐方式',
+  justifyLeft: '左对齐',
+  justifyCenter: '居中',
+  justifyRight: '右对齐',
 };
