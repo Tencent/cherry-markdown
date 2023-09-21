@@ -23,20 +23,21 @@ export default class Justify extends Panel {
     super($cherry);
     this.setName('justify', 'justify');
     this.panelRule = getPanelRule().reg;
+    const { locale } = this.$cherry;
     this.subMenuConfig = [
       {
         iconName: 'justifyLeft',
-        name: '左对齐',
+        name: locale?.justifyLeft ?? '左对齐',
         onclick: this.bindSubClick.bind(this, 'left'),
       },
       {
         iconName: 'justifyCenter',
-        name: '居中',
+        name: locale?.justifyCenter ?? '居中',
         onclick: this.bindSubClick.bind(this, 'center'),
       },
       {
         iconName: 'justifyRight',
-        name: '右对齐',
+        name: locale?.justifyRight ?? '右对齐',
         onclick: this.bindSubClick.bind(this, 'right'),
       },
     ];

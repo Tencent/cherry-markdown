@@ -85,4 +85,8 @@ export default {
   'H3 Heading': 'H1 Heading',
   complement: 'Complement',
   summary: 'Summary',
+  justify: 'justify',
+  justifyLeft: 'Left',
+  justifyCenter: 'Center',
+  justifyRight: 'Right',
 };
