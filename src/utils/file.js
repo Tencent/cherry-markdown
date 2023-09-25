@@ -71,19 +71,19 @@ export function handleUpload(editor, type = 'image', accept = '*', callback = nu
  */
 export function handleParams(params) {
   const ret = [];
-  if (params.isBorder) {
+  if (params?.isBorder) {
     ret.push('#B');
   }
-  if (params.isShadow) {
+  if (params?.isShadow) {
     ret.push('#S');
   }
-  if (params.isRadius) {
+  if (params?.isRadius) {
     ret.push('#R');
   }
-  if (params.width) {
+  if (params?.width) {
     ret.push(`#${params.width}`);
   }
-  if (params.height) {
+  if (params?.height) {
     if (!params.width) {
       ret.push('#auto');
     }
@@ -93,12 +93,12 @@ export function handleParams(params) {
 }
 
 export function handleFileUploadCallback(url, params, file) {
-  const name = params.name ? params.name : file.name;
+  const name = params?.name ?? file.name;
   let type = '';
   let poster = '';
   if (/video/i.test(file.type)) {
     type = '!video';
-    poster = params.poster ? `{poster=${params.poster}}` : '';
+    poster = params?.poster ? `{poster=${params.poster}}` : '';
   }
   if (/audio/i.test(file.type)) {
     type = '!audio';
