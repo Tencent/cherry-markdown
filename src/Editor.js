@@ -273,7 +273,7 @@ export default class Editor {
       if (item && item.kind === 'file' && item.type.match(/^image\//i)) {
         // 读取该图片
         const file = item.getAsFile();
-        this.options.fileUpload(file, (url, params) => {
+        this.options.fileUpload(file, (url, params = {}) => {
           if (typeof url !== 'string') {
             return;
           }
