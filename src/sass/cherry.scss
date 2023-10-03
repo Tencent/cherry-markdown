@@ -293,11 +293,10 @@
 
     &.cherry-toolbar-split {
       font-size: 0;
-      height: 50%;
+      height: 19px;
       padding: 0;
-      margin-left: 4px;
-      margin-right: 4px;
-      border: none;
+      margin: 9.5px 4px;
+      border: 1px solid transparent;
       border-left: 1px solid $toolbarSplitColor;
       pointer-events: none;
       overflow: hidden;
