@@ -893,10 +893,10 @@ chalk@^4.0.2, chalk@^4.1.1:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
-cherry-markdown@0.8.23-1.0:
-  version "0.8.23-1.0"
-  resolved "https://registry.npmjs.org/cherry-markdown/-/cherry-markdown-0.8.23-1.0.tgz#76d72e2446fe3d9cd10b6ecd12331d86438103b8"
-  integrity sha512-aVKIb32adaI0S65PBRqcgpd8giP43LQYvZAA6NU9mDdaif2S15nvVZsKvw8q3OOxglPA5TI/apuB0vEBp11TUw==
+cherry-markdown@^0.8.24:
+  version "0.8.26"
+  resolved "https://registry.npmjs.org/cherry-markdown/-/cherry-markdown-0.8.26.tgz#b205119cda1bee49465a54ec54b816a5e0ff82b9"
+  integrity sha512-Cjl69gKq8wSVyN0YKZd/FGExkdPvCg0Z8353VDohan9ksjBs3x3LSuZwM3/HjzRlcP27bxDoB23z4lN2BWi5WQ==
   dependencies:
     "@types/codemirror" "^0.0.108"
     "@types/dompurify" "^2.2.3"
