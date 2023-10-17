@@ -75,6 +75,9 @@ var cherryConfig = {
             button: false,
             navbar: false,
             title: [1, (image, imageData) => `${image.alt.replace(/#.+$/, '')} (${imageData.naturalWidth} × ${imageData.naturalHeight})`],
+            hidden(){
+              tmp.destroy()
+            },
           });
         tmp.show();
       }
