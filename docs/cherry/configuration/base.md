@@ -6,15 +6,15 @@
 
 ## 基础配置
 
-| 参数       | 说明                  | 类型     | 可选值                                 | 默认值              | 必填 |
-| ---------- | --------------------- | -------- | -------------------------------------- | ------------------- | ---- |
-| value      | 绑定值(markdown 原文) | string   | -                                      | -                   | 否   |
-| id         | 绑定编辑器dom         | string   | -                                      |` 'cherry-markdown'` | 否   |
-| editor     | 编辑器配置            | object   | [见下方](#editor-编辑器配置)           | -                   | 否   |
-| toolbars   | 工具栏配置            | object   | [见下方](#toolbars-工具栏配置)         | -                   | 否   |
-| engine     | 引擎配置              | object   | [见下方](#engine-引擎配置)             | -                   | 否   |
-| externals  | 引入第三方组件配置    | object   | [见下方](#externals-拓展配置)          | -                   | 否   |
-| fileUpload | 静态资源上传配置      | function | [见下方](#fileupload-静态资源上传配置) | -                   | 否   |
+| 参数       | 说明                  | 类型     | 可选值                                 | 默认值               | 必填 |
+| ---------- | --------------------- | -------- | -------------------------------------- | -------------------- | ---- |
+| value      | 绑定值(markdown 原文) | string   | -                                      | -                    | 否   |
+| id         | 绑定编辑器dom         | string   | -                                      | ` 'cherry-markdown'` | 否   |
+| editor     | 编辑器配置            | object   | [见下方](#editor-编辑器配置)           | -                    | 否   |
+| toolbars   | 工具栏配置            | object   | [见下方](#toolbars-工具栏配置)         | -                    | 否   |
+| engine     | 引擎配置              | object   | [见下方](#engine-引擎配置)             | -                    | 否   |
+| externals  | 引入第三方组件配置    | object   | [见下方](#externals-拓展配置)          | -                    | 否   |
+| fileUpload | 静态资源上传配置      | function | [见下方](#fileupload-静态资源上传配置) | -                    | 否   |
 
 ## `editor` 编辑器配置
 
@@ -196,7 +196,7 @@ toolbars:{
 :::
 
 - Options:
-  - ~~**audio**: 插入音频~~<Badge type="danger" text="敬请期待" />
+  - **audio**: 插入音频
   - ~~**bartable**:  插入柱状图图+表格~~<Badge type="danger" text="敬请期待" />
   - **bold**:  加粗按钮
   - **br**:   插入换行
@@ -219,16 +219,16 @@ toolbars:{
   - **hr**:  插入分割线
   - **image**:  插入图片
   - **insert**:  "插入"按钮
-  - ~~**italic**:  插入斜体的按钮~~<Badge type="danger" text="敬请期待" />
-  - ~~**justify**:  插入对齐方式~~<Badge type="danger" text="敬请期待" />
-  - ~~**link**:  插入超链接~~<Badge type="danger" text="敬请期待" />
+  - **italic**:  插入斜体的按钮
+  - **justify**:  插入对齐方式<Badge type="warning" text="非md支持" />
+  - **link**:  插入超链接
   - ~~**linetable**:  插入折线图+表格~~<Badge type="danger" text="敬请期待" />
   - **list**:  插入有序/无序/checklist列表的按钮
   - **mobilepreview**:  预览区域切换到“移动端视图”的按钮
   - **ol**:  无序列表
-  - ~~**panel**:  插入面板~~<Badge type="danger" text="敬请期待" />
-  - ~~**pdf**:  插入pdf~~<Badge type="danger" text="敬请期待" />
-  - ~~**quote**:  插入“引用”的按钮~~<Badge type="danger" text="敬请期待" />
+  - **panel**:  插入面板
+  - **pdf**:  插入pdf
+  - **quote**:  插入“引用”的按钮
   - ~~**quicktable**:  插入“简单表格”的按钮;所谓简单表格，是源于[TAPD](https://tapd.cn) wiki应用里的一种表格语法(该表格语法不是markdown通用语法，请慎用)~~<Badge type="danger" text="敬请期待" />
   - **redo**:  撤销/重做 里的“重做”按键
   - **ruby**:  生成ruby，使用场景：给中文增加拼音、给中文增加英文、给英文增加中文等等
@@ -313,7 +313,7 @@ toolbars:{
         // 自定义语法渲染器
       },
       mermaid: {
-        svg2img: false, // 是否将mermaid生成的画图变成img格式
+        svg2img: false, // true=img,false=svg
       },
       /**
        * indentedCodeBlock是缩进代码块是否启用的开关
@@ -451,3 +451,6 @@ new Cherry({
   },
 });
 ```
+
+
+<!--  增加配置快捷键的功能 -->
