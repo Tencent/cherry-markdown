@@ -12,10 +12,10 @@ hero:
   actions:
     - theme: brand
       text: 开始使用
-      link: /guide/getting-started
+      link: /cherry/guide/getting-started
     - theme: alt
       text: 快速预览
-      link:  /guide/examples
+      link:  /cherry/guide/examples
     - theme: alt
       text: 查看 GitHub
       link: https://github.com/Tencent/cherry-markdown

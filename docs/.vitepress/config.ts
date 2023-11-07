@@ -1,8 +1,8 @@
-import { defineConfig } from 'vitepress'
+import { DefaultTheme, defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  ignoreDeadLinks:true,
+  ignoreDeadLinks: true,
   title: "Cherry Markdown Editor",
   description: "一个具有开箱即用、轻量级、易于扩展等优点的Javascript Markdown 编辑器。",
   head: [
@@ -15,46 +15,89 @@ export default defineConfig({
     ],
   ],
   themeConfig: {
-    // https://vitepress.dev/reference/default-theme-config
-    // 客户端 客户端最新下载地址
-    // Vscode插件 地址
-    nav: [
-      { text: '介绍', link: '/guide/introduction' },
-      {
-        text: '其他', items: [
-          // {
-          //   text: '客户端',
-          //   link: 'https://github.com/Tencent/cherry-markdown/tree/main/client'
-          // },
-          {
-            text: 'Vscode 插件',
-            link: 'https://marketplace.visualstudio.com/items?itemName=cherryMarkdownPublisher.cherry-markdown'
-          }
-        ]
-      },
-    ],
-    sidebar: [
-      {
-        text: '指导',
-        items: [
-          { text: '介绍', link: '/guide/introduction' },
-          { text: '开始使用', link: '/guide/getting-started' },
-          { text: '语法特性', link: '/guide/features' },
-          { text: '快速预览', link: '/guide/examples' },
-        ]
-      },
-      {
-        text: '配置',
-        items: [
-          { text: '基础配置', link: '/configuration/base' },
-          { text: '快速配置', link: '/configuration/quick-configuration' },
-          { text: '拓展配置', link: '/configuration/extensions' }, 
-        ]
-      }
-    ],
-
+    nav: nav(),
+    sidebar: {
+      '/cherry/': { base: '/cherry/', items: sideGuide() },
+      '/cherry-client/': { base: '/cherry-client/', items: sideCherryClient() },
+      '/cherry-vscode-plugin/': { base: '/cherry-vscode-plugin/', items: sideCherryVscodePlugin() }
+    },
     socialLinks: [
       { icon: 'github', link: 'https://github.com/Tencent/cherry-markdown' }
     ]
   }
 })
+
+function nav(): DefaultTheme.NavItem[] {
+  return [
+    {
+      text: '介绍',
+      link: '/cherry/guide/introduction',
+      activeMatch: '/guide/'
+    },
+    {
+      text: 'PC 客户端',
+      link: '/cherry-client/guide/introduction',
+      activeMatch: '/cherry-client/'
+    },
+    {
+      text: 'VsCode 插件',
+      link: '/cherry-vscode-plugin/guide/introduction',
+      activeMatch: '/cherry-vscode-plugin'
+    },
+  ]
+}
+
+function sideGuide(): DefaultTheme.SidebarItem[] {
+  return [
+    {
+      text: '指导',
+      base: '/cherry/guide/',
+      items: [
+        { text: '介绍', link: 'introduction' },
+        { text: '开始使用', link: 'getting-started' },
+        { text: '语法特性', link: 'features' },
+        { text: '快速预览', link: 'examples' },
+      ]
+    },
+    {
+      text: '配置',
+      base: '/cherry/configuration/',
+      items: [
+        { text: '基础配置', link: 'base' },
+        { text: '快速配置', link: 'quick-configuration' },
+        { text: '拓展配置', link: 'extensions' },
+      ]
+    },
+    {
+      text: '功能',
+      base: '/cherry/operation/',
+      items: [
+        { text: 'API操作', link: 'api' },
+      ]
+    },
+  ]
+}
+
+function sideCherryClient(): DefaultTheme.SidebarItem[] {
+  return [
+    {
+      text: '客户端',
+      base: '/cherry-client/guide/',
+      items: [
+        { text: '介绍', link: 'introduction' },
+      ]
+    },
+  ]
+}
+
+function sideCherryVscodePlugin(): DefaultTheme.SidebarItem[] {
+  return [
+    {
+      text: 'VsCode 插件',
+      base: '/cherry-vscode-plugin/guide/',
+      items: [
+        { text: '介绍', link: 'introduction' },
+      ]
+    },
+  ]
+}
