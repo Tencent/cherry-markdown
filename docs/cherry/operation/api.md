@@ -31,7 +31,7 @@
 ### 插入内容 -- `insert`
    -  **content** : `string` 插入的内容
    -  **isSelect** ?: (默认false) `boolean` 是否选中刚插入的内容
-   -  **anchor** ?: (默认false) `boolean | [x,y]` [x,y] 代表x+1行，y+1字符偏移量，会从光标处插入
+   -  **anchor** ?: (默认false) `boolean | [x,y]` [x,y] 代表x+1行，y+1字符偏移量，false时会从光标处插入
    -  **focus** ?: (默认true) `boolean` 是否持编辑器处于focus状态，选中编辑器（用户可以继续输入）
   
       插入内容。
@@ -60,12 +60,12 @@
 
 ### 导出文件 -- `export`
    -  **type** ?: (默认'pdf') `'pdf'|'img'|'html'|'markdown'`
-   -  **fileName** ?: (默认'cherry.*') ` string`
+   -  **fileName** ?: (默认'') ` string` 默认为当前有内容的第一行内容，第一行内容为空时为'cherry-export.*'
   
       你可以自定义导出的文件名。
       
       ```ts
-         export(type='pdf',fileName='cherry.*');
+         export(type='pdf',fileName='');
       ```
 
 ### 切换模式 -- `switchModel`
@@ -110,7 +110,7 @@
 ### 修改主题 -- `setTheme`
    - theme ?: (默认'default') `string`
 
-      你可以使用 [option.theme](../../cherry/configuration/base.html#theme-toolbars) 里的 className。
+      你可以使用 [option.theme](../../cherry/configuration/base.html#theme-编辑器主题配置) 里的 className。
     
        ```ts
          setTheme(theme='default');

@@ -10,11 +10,43 @@
 | ---------- | --------------------- | -------- | -------------------------------------- | -------------------- | ---- |
 | value      | 绑定值(markdown 原文) | string   | -                                      | -                    | 否   |
 | id         | 绑定编辑器dom         | string   | -                                      | ` 'cherry-markdown'` | 否   |
-| editor     | 编辑器配置            | object   | [见下方](#editor-编辑器配置)           | -                    | 否   |
-| toolbars   | 工具栏配置            | object   | [见下方](#toolbars-工具栏配置)         | -                    | 否   |
-| engine     | 引擎配置              | object   | [见下方](#engine-引擎配置)             | -                    | 否   |
 | externals  | 引入第三方组件配置    | object   | [见下方](#externals-拓展配置)          | -                    | 否   |
+| editor     | 编辑器配置            | object   | [见下方](#editor-编辑器配置)           | -                    | 否   |
+| engine     | 引擎配置              | object   | [见下方](#engine-引擎配置)             | -                    | 否   |
+| toolbars   | 工具栏配置            | object   | [见下方](#toolbars-工具栏配置)         | -                    | 否   |
 | fileUpload | 静态资源上传配置      | function | [见下方](#fileupload-静态资源上传配置) | -                    | 否   |
+| theme      | 编辑器主题配置        | object   | [见下方](#theme-编辑器主题配置)        | -                     | 否   |
+
+## `externals` 拓展配置
+
+<!-- 外部依赖配置
+
+- Type: `{ [packageName: string]: Object }`
+- Default: `{}`
+- Usage:
+  从全局对象引入
+
+```Javascript
+new Cherry({
+    externals: {
+        echarts: window.echarts
+    }
+});
+```
+
+通过`import`引入
+
+```Javascript
+import echarts from 'echarts';
+
+new Cherry({
+    externals: {
+        echarts
+    }
+});
+``` -->
+
+---
 
 ## `editor` 编辑器配置
 
@@ -94,160 +126,7 @@ editor: {
 - Default:
 - Options: 参考[CodeMirror配置选项](<https://codemirror.net/5/doc/manual.html#config>)
 
-## `toolbars` 工具栏配置
-
-Cherry Markdown Editor 包含三种可配置的工具栏，包括 toolbar(上方固定工具栏)、bubble(选中文本弹出工具栏)与 float(创建新行弹出工具栏)，在其中自定义增加需要的功能。
-
-```js
-toolbars:{                                                                                                     
-  theme: "dark", // light or dark
-  showToolbar: true,
-  toolbar: [
-    "bold",
-    "italic",
-    "strikethrough",
-    "|",
-    "header",
-    "list",
-    "insert",
-    "graph",
-    "togglePreview",
-  ],
-  toolbarRight: ["fullScreen", "|"],
-  sidebar: ["mobilePreview", "copy", "theme", "customMenu_question"],
-  bubble: ["bold", "italic", "strikethrough", "sub", "sup", "|", "size"], // array or false
-  float: ["h1", "h2", "h3", "|", "checklist", "quote", "quickTable", "code"], // array or false
-  customMenu: {},
-}
-```
-
-#### `theme`(toolbars)
-
-- Description: 用于配置编辑区域的主题
-- Type: `String`
-- Default: `'dark'`
-- Options:
-  - `light`: 亮色主题
-  - `dark`: 暗色主题
-
-#### `showToolbar`
-
-- Description: 是否展示工具栏
-- Type: `Boolean`
-- Default: `true`
-
-#### `toolbar`
-
-- Description: 用于配置顶部工具栏及菜单按钮顺序
-- Type: `Array<string | { insert: Array<string> }> | false`
-- Default: `['bold', 'italic', 'strikethrough', '|', 'color', 'header', '|', 'list', { insert: [ 'image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word', ], }, 'graph', 'settings']`
-- Options:
-  - `false`: 传入 **false** 时关闭顶部菜单
-  - `string[]`: 菜单名称的集合，渲染的菜单按钮顺序跟随数组的元素顺序
-
-#### `toolbarRight`
-
-- Description: 顶部工具栏右侧展示的工具选项
-- Type: `Array<string | { insert: Array<string> }> | false`
-- Default:[]
-- Options:
-  - `false`: 传入 `false` 时关闭顶部菜单
-  - `string[]`: 菜单名称的集合，渲染的菜单按钮顺序跟随数组的元素顺序
-
-#### `sidebar`
-
-- Description: 右侧侧边工具栏展示的工具选项
-- Type: `Array<string | { insert: Array<string> }> | false`
-- Default:`['mobilePreview', 'copy', 'theme', 'customMenu_question']`
-- Options:
-  - `false`: 传入 **false** 时关闭顶部菜单
-  - `string[]`: 菜单名称的集合，渲染的菜单按钮顺序跟随数组的元素顺序
-
-#### `bubble`
-
-- Description: 用于配置选中后的悬浮菜单
-- Type: `Array<string | { insert: Array<string> }> | false`
-- Default: `['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', '|', 'size', 'color']`
-- Options:
-  - `false`: 传入 **false** 时关闭悬浮菜单
-  - `string[]`: 菜单名称的集合，渲染的菜单按钮顺序跟随数组的元素顺序
-
-#### `float`
-
-- Description: 用于配置新行的行内菜单
-- Type: `Array<string | { insert: Array<string> }> | false`
-- Default: `['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', '|', 'size', 'color']`
-- Options:
-  - `false`: 传入 **false** 时关闭新行行内菜单
-  - `string[]`: 菜单名称的集合，渲染的菜单按钮顺序跟随数组的元素顺序
-
-#### `customMenu`
-
-- Description:声明自定义菜单按钮。声明后可在toolbar、bubble等配置里使用。
-- Type: `Array<string | { insert: Array<string> }> | false`
-- Default: `{}`
-
-
-## toolbars **内置菜单名称参考**
-
-:::tip
-这是 [toolbars-工具栏配置](#toolbars-工具栏配置):toolbar(上方固定工具栏)、bubble(选中文本弹出工具栏)与 float(创建新行弹出工具栏)
-内可选Options的详细参考。
-:::
-
-- Options:
-  - **audio**: 插入音频
-  - ~~**bartable**:  插入柱状图图+表格~~<Badge type="danger" text="敬请期待" />
-  - **bold**:  加粗按钮
-  - **br**:   插入换行
-  - **checklist**:  下标的按钮
-  - **code**:   插入代码块的按钮
-  - **codetheme**:  设置代码块的主题
-  - **color**:  插入字体颜色或者字体背景颜色的按钮
-  - **copy**:  复制按钮，用来复制预览区的html内容
-  - **detail**:  插入手风琴
-  - **drawio**:  打开draw.io画图对话框，点击确定后向编辑器插入图片语法
-  - **export**:  导出
-  - **file**:  插入文件
-  - **formula**:  插入行内公式
-  - **fullscreen**:  全屏按钮
-  - **graph**: 画图(需要引入**mermaid**)
-  - **header**: 插入1级~5级标题
-  - **h1**:  插入1级标题
-  - **h2**:  插入2级标题
-  - **h3**:  插入3级标题
-  - **hr**:  插入分割线
-  - **image**:  插入图片
-  - **insert**:  "插入"按钮
-  - **italic**:  插入斜体的按钮
-  - **justify**:  插入对齐方式<Badge type="warning" text="非md支持" />
-  - **link**:  插入超链接
-  - ~~**linetable**:  插入折线图+表格~~<Badge type="danger" text="敬请期待" />
-  - **list**:  插入有序/无序/checklist列表的按钮
-  - **mobilepreview**:  预览区域切换到“移动端视图”的按钮
-  - **ol**:  无序列表
-  - **panel**:  插入面板
-  - **pdf**:  插入pdf
-  - **quote**:  插入“引用”的按钮
-  - ~~**quicktable**:  插入“简单表格”的按钮;所谓简单表格，是源于[TAPD](https://tapd.cn) wiki应用里的一种表格语法(该表格语法不是markdown通用语法，请慎用)~~<Badge type="danger" text="敬请期待" />
-  - **redo**:  撤销/重做 里的“重做”按键
-  - **ruby**:  生成ruby，使用场景：给中文增加拼音、给中文增加英文、给英文增加中文等等
-  - **settings**:  设置按钮
-  - **size**:  设置字体大小
-  - **split**:  工具栏里的分割线，用来切分不同类型按钮的区域
-  - **strikethrough**:  删除线的按钮
-  - **sub**:  下标的按钮
-  - **sup**:  上标的按钮
-  - **switchmodel**:  切换预览/编辑模式的按钮(只能切换成纯编辑模式和纯预览模式)
-  - **table**:  插入普通表格
-  - **theme**:  修改主题
-  - **toc**:  插入目录
-  - **togglepreview**: 关闭/展示预览区域的按钮
-  - **ul**: 有序列表
-  - **underline**: 下划线按钮
-  - **undo**:  撤销回退按钮，点击后触发编辑器的undo操作
-  - **video**:  插入视频
-  - **word**:插入word
+---
 
 ## `engine` 引擎配置
 
@@ -385,6 +264,163 @@ toolbars:{
 },
 ```
 
+---
+
+## `toolbars` 工具栏配置
+
+Cherry Markdown Editor 包含三种可配置的工具栏，包括 toolbar(上方固定工具栏)、bubble(选中文本弹出工具栏)与 float(创建新行弹出工具栏)，在其中自定义增加需要的功能。
+
+```js
+toolbars:{                                                                                                     
+  theme: "dark", // light or dark
+  showToolbar: true,
+  toolbar: [
+    "bold",
+    "italic",
+    "strikethrough",
+    "|",
+    "header",
+    "list",
+    "insert",
+    "graph",
+    "togglePreview",
+  ],
+  toolbarRight: ["fullScreen", "|"],
+  sidebar: ["mobilePreview", "copy", "theme", "customMenu_question"],
+  bubble: ["bold", "italic", "strikethrough", "sub", "sup", "|", "size"], // array or false
+  float: ["h1", "h2", "h3", "|", "checklist", "quote", "quickTable", "code"], // array or false
+  customMenu: {},
+}
+```
+
+#### `theme`(toolbars)
+
+- Description: 用于配置编辑区域的主题
+- Type: `String`
+- Default: `'dark'`
+- Options:
+  - `light`: 亮色主题
+  - `dark`: 暗色主题
+
+#### `showToolbar`
+
+- Description: 是否展示工具栏
+- Type: `Boolean`
+- Default: `true`
+
+#### `toolbar`
+
+- Description: 用于配置顶部工具栏及菜单按钮顺序
+- Type: `Array<string | { insert: Array<string> }> | false`
+- Default: `['bold', 'italic', 'strikethrough', '|', 'color', 'header', '|', 'list', { insert: [ 'image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word', ], }, 'graph', 'settings']`
+- Options:
+  - `false`: 传入 **false** 时关闭顶部菜单
+  - `string[]`: 菜单名称的集合，渲染的菜单按钮顺序跟随数组的元素顺序
+
+#### `toolbarRight`
+
+- Description: 顶部工具栏右侧展示的工具选项
+- Type: `Array<string | { insert: Array<string> }> | false`
+- Default:[]
+- Options:
+  - `false`: 传入 `false` 时关闭顶部菜单
+  - `string[]`: 菜单名称的集合，渲染的菜单按钮顺序跟随数组的元素顺序
+
+#### `sidebar`
+
+- Description: 右侧侧边工具栏展示的工具选项
+- Type: `Array<string | { insert: Array<string> }> | false`
+- Default:`['mobilePreview', 'copy', 'theme', 'customMenu_question']`
+- Options:
+  - `false`: 传入 **false** 时关闭顶部菜单
+  - `string[]`: 菜单名称的集合，渲染的菜单按钮顺序跟随数组的元素顺序
+
+#### `bubble`
+
+- Description: 用于配置选中后的悬浮菜单
+- Type: `Array<string | { insert: Array<string> }> | false`
+- Default: `['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', '|', 'size', 'color']`
+- Options:
+  - `false`: 传入 **false** 时关闭悬浮菜单
+  - `string[]`: 菜单名称的集合，渲染的菜单按钮顺序跟随数组的元素顺序
+
+#### `float`
+
+- Description: 用于配置新行的行内菜单
+- Type: `Array<string | { insert: Array<string> }> | false`
+- Default: `['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', '|', 'size', 'color']`
+- Options:
+  - `false`: 传入 **false** 时关闭新行行内菜单
+  - `string[]`: 菜单名称的集合，渲染的菜单按钮顺序跟随数组的元素顺序
+
+#### `customMenu`
+
+- Description:声明自定义菜单按钮。声明后可在toolbar、bubble等配置里使用。
+- Type: `Array<string | { insert: Array<string> }> | false`
+- Default: `{}`
+
+
+### toolbars **内置菜单名称参考**
+
+:::tip
+这是 [toolbars-工具栏配置](#toolbars-工具栏配置):toolbar(上方固定工具栏)、bubble(选中文本弹出工具栏)与 float(创建新行弹出工具栏)
+内可选Options的详细参考。
+:::
+
+- Options:
+  - **audio**: 插入音频
+  - ~~**bartable**:  插入柱状图图+表格~~<Badge type="danger" text="敬请期待" />
+  - **bold**:  加粗按钮
+  - **br**:   插入换行
+  - **checklist**:  下标的按钮
+  - **code**:   插入代码块的按钮
+  - **codetheme**:  设置代码块的主题
+  - **color**:  插入字体颜色或者字体背景颜色的按钮
+  - **copy**:  复制按钮，用来复制预览区的html内容
+  - **detail**:  插入手风琴
+  - **drawio**:  打开draw.io画图对话框，点击确定后向编辑器插入图片语法
+  - **export**:  导出
+  - **file**:  插入文件
+  - **formula**:  插入行内公式
+  - **fullscreen**:  全屏按钮
+  - **graph**: 画图(需要引入**mermaid**)
+  - **header**: 插入1级~5级标题
+  - **h1**:  插入1级标题
+  - **h2**:  插入2级标题
+  - **h3**:  插入3级标题
+  - **hr**:  插入分割线
+  - **image**:  插入图片
+  - **insert**:  "插入"按钮
+  - **italic**:  插入斜体的按钮
+  - **justify**:  插入对齐方式<Badge type="warning" text="非md支持" />
+  - **link**:  插入超链接
+  - ~~**linetable**:  插入折线图+表格~~<Badge type="danger" text="敬请期待" />
+  - **list**:  插入有序/无序/checklist列表的按钮
+  - **mobilepreview**:  预览区域切换到“移动端视图”的按钮
+  - **ol**:  无序列表
+  - **panel**:  插入面板
+  - **pdf**:  插入pdf
+  - **quote**:  插入“引用”的按钮
+  - ~~**quicktable**:  插入“简单表格”的按钮;所谓简单表格，是源于[TAPD](https://tapd.cn) wiki应用里的一种表格语法(该表格语法不是markdown通用语法，请慎用)~~<Badge type="danger" text="敬请期待" />
+  - **redo**:  撤销/重做 里的“重做”按键
+  - **ruby**:  生成ruby，使用场景：给中文增加拼音、给中文增加英文、给英文增加中文等等
+  - **settings**:  设置按钮
+  - **size**:  设置字体大小
+  - **split**:  工具栏里的分割线，用来切分不同类型按钮的区域
+  - **strikethrough**:  删除线的按钮
+  - **sub**:  下标的按钮
+  - **sup**:  上标的按钮
+  - **switchmodel**:  切换预览/编辑模式的按钮(只能切换成纯编辑模式和纯预览模式)
+  - **table**:  插入普通表格
+  - **theme**:  修改主题
+  - **toc**:  插入目录
+  - **togglepreview**: 关闭/展示预览区域的按钮
+  - **ul**: 有序列表
+  - **underline**: 下划线按钮
+  - **undo**:  撤销回退按钮，点击后触发编辑器的undo操作
+  - **video**:  插入视频
+  - **word**:插入word
+
 ### `global`
 
 - Description: 全局配置
@@ -405,35 +441,7 @@ toolbars:{
 
 如果你想了解更多有关 Cherry Markdown 自定义拓展， 可以看这里 [extensions](./extensions.md)。
 
-
-## `externals` 拓展配置
-
-<!-- 外部依赖配置
-
-- Type: `{ [packageName: string]: Object }`
-- Default: `{}`
-- Usage:
-  从全局对象引入
-
-```Javascript
-new Cherry({
-    externals: {
-        echarts: window.echarts
-    }
-});
-```
-
-通过`import`引入
-
-```Javascript
-import echarts from 'echarts';
-
-new Cherry({
-    externals: {
-        echarts
-    }
-});
-``` -->
+---
 
 ## `fileUpload` 静态资源上传配置
 
@@ -452,5 +460,23 @@ new Cherry({
 });
 ```
 
+## theme 编辑器主题配置
+
+这里是内置主题配置选项，`className`对应主题在css的className，`label`对应你在工具栏显示的文本。
+
+```ts
+  theme: [
+    { className: 'default', label: '默认' },
+    { className: 'dark', label: '暗黑' },
+    { className: 'light', label: '明亮' },
+    { className: 'green', label: '清新' },
+    { className: 'red', label: '热情' },
+    { className: 'violet', label: '淡雅' },
+    { className: 'blue', label: '清幽' },
+  ],
+```
+
+### 自定义主题:
+ 补充中。
 
 <!--  增加配置快捷键的功能 -->
