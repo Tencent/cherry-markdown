@@ -50,6 +50,8 @@ yarn add echarts@4.6.0
 
 ```javascript
 import Cherry from 'cherry-markdown';
+import "cherry-markdown/dist/cherry-markdown.css";
+
 const cherryInstance = new Cherry({
   id: 'markdown-container',
   value: '# welcome to cherry editor!',

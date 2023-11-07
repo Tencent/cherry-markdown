@@ -119,7 +119,7 @@ const defaultConfig = {
           // 自定义语法渲染器
         },
         mermaid: {
-          svg2img: false, // 是否将mermaid生成的画图变成img格式
+          svg2img: false, // true=img,false=svg
         },
         /**
          * indentedCodeBlock是缩进代码块是否启用的开关
