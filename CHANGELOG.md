@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.27](https://github.com/Tencent/cherry-markdown/compare/v0.8.26...v0.8.27) (2023-11-07)
+
+
+### Features
+
+* 输入中文符号时给出英文联想 [#541](https://github.com/Tencent/cherry-markdown/issues/541) ([#585](https://github.com/Tencent/cherry-markdown/issues/585)) ([c02887d](https://github.com/Tencent/cherry-markdown/commit/c02887d31e94d68b2af5fc1a3b3d45a433c731f3))
+* 支持表格行和列拖拽改变位置所见即所得 ([#584](https://github.com/Tencent/cherry-markdown/issues/584)) ([e230b2b](https://github.com/Tencent/cherry-markdown/commit/e230b2b552b7f14043a652fd2acf67846907a984))
+* **client:** add `Toc` side panel ([#612](https://github.com/Tencent/cherry-markdown/issues/612)) ([3a0e55b](https://github.com/Tencent/cherry-markdown/commit/3a0e55b3fe6c7434c904bafa93b5f3204eb129e2))
+
+
+### Bug Fixes
+
+*  List 预览编辑会导致格式失效 ([#593](https://github.com/Tencent/cherry-markdown/issues/593)) ([04c0341](https://github.com/Tencent/cherry-markdown/commit/04c03416328343039138ef68f3e88542b337fb57)), closes [#579](https://github.com/Tencent/cherry-markdown/issues/579) [#579](https://github.com/Tencent/cherry-markdown/issues/579)
+*  types of external `api`, `Engine` and `toolbarHandlers` APIs, ([#580](https://github.com/Tencent/cherry-markdown/issues/580)) ([8b05654](https://github.com/Tencent/cherry-markdown/commit/8b056540d7f0da526062d8ab4243d7e5fb94fa64))
+* `CherryEngine` type declaration ([#630](https://github.com/Tencent/cherry-markdown/issues/630)) ([9d93b32](https://github.com/Tencent/cherry-markdown/commit/9d93b322d4af35b75b29408ac1f84392a62167d6)), closes [#628](https://github.com/Tencent/cherry-markdown/issues/628)
+* 类型构建的路径替换脚本遇到错误需抛出 ([f9b86a9](https://github.com/Tencent/cherry-markdown/commit/f9b86a93ec2c354680e65844dc4a98f22cb7495b))
+* 修复对齐方式没有翻译的问题 [#603](https://github.com/Tencent/cherry-markdown/issues/603) ([0b7c3e1](https://github.com/Tencent/cherry-markdown/commit/0b7c3e17f8e6b72e86e07583c5105cebde316429))
+* 修复默认为editOnly时status错误的问题 ([#608](https://github.com/Tencent/cherry-markdown/issues/608)) ([8af042a](https://github.com/Tencent/cherry-markdown/commit/8af042ae159ebd4ce025cdd6408ff9600f2d3d7c))
+* 修复生成类型中的path错误导致 ([5523433](https://github.com/Tencent/cherry-markdown/commit/5523433040b24802ba0b1ad6fe84996b46e21aee))
+* 修复无法导出图片的问题，修复导出图片时没有传文件名时没有给出默认文件名的问题 ([8cadbea](https://github.com/Tencent/cherry-markdown/commit/8cadbea6fa0799ca03e7a9161ba977be6aa59a47))
+* 修复粘贴图片时fileUpload的callback需要params参数的问题 ([7609a0d](https://github.com/Tencent/cherry-markdown/commit/7609a0d5b69abfde616745634b08cc3e9f8fbc54))
+* enable `list` and `graph` to support the use of method names ([#581](https://github.com/Tencent/cherry-markdown/issues/581)) ([7276f6a](https://github.com/Tencent/cherry-markdown/commit/7276f6a4c220b69a1af7a8acc2a6d88d1afe734c))
+* graph无法翻译的问题 ([5ea2d4d](https://github.com/Tencent/cherry-markdown/commit/5ea2d4df6c92081814cc03f40c835fdfea84a22b))
+* issue[#583](https://github.com/Tencent/cherry-markdown/issues/583) ([#591](https://github.com/Tencent/cherry-markdown/issues/591)) ([7e866c7](https://github.com/Tencent/cherry-markdown/commit/7e866c7f007321c4d7bc929d2007dcbfc3dd03ae))
+* issue[#595](https://github.com/Tencent/cherry-markdown/issues/595) 全角替换半角存在定位问题 ([#596](https://github.com/Tencent/cherry-markdown/issues/596)) ([624c748](https://github.com/Tencent/cherry-markdown/commit/624c748974e0bb44cac8c426c8d4318b9402b5ac))
+
+
+### Performance Improvements
+
+* **split:** fixed toolbar split line height ([#611](https://github.com/Tencent/cherry-markdown/issues/611)) ([58883b5](https://github.com/Tencent/cherry-markdown/commit/58883b5369e1a2a5b196cd67b138f9e6d009e527))
+
 ### [0.8.26](https://github.com/Tencent/cherry-markdown/compare/v0.8.25...v0.8.26) (2023-09-14)
 
 
