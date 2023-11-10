@@ -90,9 +90,11 @@ export function getThemeFromLocal(fullClass = false) {
  */
 export function changeTheme($cherry, theme = '') {
   const newTheme = (theme ? theme : getThemeFromLocal()).replace(/^.*theme__/, '');
-  const newClass = ` theme__${newTheme}`;
-  $cherry.wrapperDom.className = $cherry.wrapperDom.className.replace(/ theme__[^ $]+?( |$)/g, '') + newClass;
-  $cherry.previewer.getDomContainer().className =
-    $cherry.previewer.getDomContainer().className.replace(/ theme__[^ $]+?( |$)/g, '') + newClass;
+  const reg = /(\stheme__)([^ $]+?)( |$)/g;
+  const replacer = (match, p1, p2, p3) => {
+    return `${p1}${newTheme}${p3}`;
+  };
+  $cherry.wrapperDom.className = $cherry.wrapperDom.className.replace(reg, replacer);
+  $cherry.previewer.getDomContainer().className = $cherry.previewer.getDomContainer().className.replace(reg, replacer);
   saveThemeToLocal(newTheme);
 }
