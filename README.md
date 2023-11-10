@@ -1,7 +1,11 @@
 <p align="center"><img src="logo/new_logo.png" alt="cherry logo" width="50%"/></p>
 
 # Cherry Markdown Writer
-[WIKI](https://github.com/Tencent/cherry-markdown/wiki)
+
+
+**详细文档**
+[看这里](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)
+
 
 [![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
 
@@ -220,6 +224,7 @@ registerPlugin().then(() => {
 ```
 
 ## Configuration
+具体文档[看这里](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)
 
 ### Default configuration
 
