@@ -15,6 +15,9 @@
  */
 import { getCodeBlockRule } from '@/utils/regexp';
 import codemirror from 'codemirror';
+import { getCodePreviewLangSelectElement } from '@/utils/code-preview-language-setting';
+import { copyToClip } from '@/utils/copy';
+import 'codemirror/keymap/sublime';
 
 export default class CodeBlockHandler {
   /**
@@ -25,15 +28,16 @@ export default class CodeBlockHandler {
     editorDom: {}, // 编辑器容器
   };
 
-  constructor(trigger, target, container, previewerDom, codeMirror) {
+  constructor(trigger, target, container, previewerDom, codeMirror, parent) {
     // 触发方式 click / hover
     this.trigger = trigger;
     this.target = target;
     this.previewerDom = previewerDom;
     this.container = container;
     this.codeMirror = codeMirror;
+    this.$cherry = parent.previewer.$cherry;
+    this.parent = parent;
     this.$initReg();
-    this.$findCodeInEditor();
   }
 
   $initReg() {
@@ -45,27 +49,22 @@ export default class CodeBlockHandler {
       case 'remove':
         return this.$remove();
       case 'scroll':
-        return this.$refreshPosition();
+        return this.$updateContainerPosition();
       case 'previewUpdate':
-        return this.$refreshPosition();
+        this.$updateContainerPosition();
+        this.editing && this.$setInputOffset();
+        return;
       case 'mouseup':
-        return this.trigger === 'click' && this.$tryRemoveMe(event, callback);
+        return this.$tryRemoveMe(event, callback);
     }
   }
   $remove() {
     this.codeBlockEditor = { info: {}, codeBlockCodes: [], editorDom: {} };
   }
-  /**
-   * 刷新定位
-   */
-  $refreshPosition() {
-    if (this.trigger === 'click') {
-      this.$setInputOffset();
-    }
-  }
   $tryRemoveMe(event, callback) {
-    const dom = document.querySelector('.cherry-previewer-codeBlock-content-handler__input');
-    if (!dom.contains(event.target)) {
+    const dom = this.codeBlockEditor.editorDom.inputDiv;
+    if (this.editing && dom && !dom.contains(event.target)) {
+      this.editing = false;
       this.$remove();
       callback();
     }
@@ -73,22 +72,23 @@ export default class CodeBlockHandler {
   /**
    * 定位代码块源代码在左侧Editor的位置
    */
-  $findCodeInEditor() {
+  $findCodeInEditor(selectLang = false) {
     this.$collectCodeBlockDom();
     this.$collectCodeBlockCode();
-    this.$setSelection(this.codeBlockEditor.info.codeBlockIndex, 'code', this.trigger === 'click');
+    if (selectLang) {
+      this.$setLangSelection(this.codeBlockEditor.info.codeBlockIndex);
+    } else {
+      this.$setBlockSelection(this.codeBlockEditor.info.codeBlockIndex);
+    }
   }
   /**
    * 找到预览区被点击编辑按钮的代码块，并记录这个代码块在预览区域所有代码块中的顺位
    */
   $collectCodeBlockDom() {
     const list = Array.from(this.previewerDom.querySelectorAll('[data-type="codeBlock"]'));
-    const { target } = this;
-    const codeBlockNode =
-      target.className === 'cherry-edit-code-block' ? target.parentNode : target.parentNode.parentNode;
     this.codeBlockEditor.info = {
-      codeBlockNode,
-      codeBlockIndex: list.indexOf(codeBlockNode),
+      codeBlockNode: this.target,
+      codeBlockIndex: list.indexOf(this.target),
     };
   }
   $collectCodeBlockCode() {
@@ -105,24 +105,123 @@ export default class CodeBlockHandler {
     });
     this.codeBlockEditor.codeBlockCodes = codeBlockCodes;
   }
-  $setSelection(index, type = 'code', select = true) {
+  $setBlockSelection(index) {
     const codeBlockCode = this.codeBlockEditor.codeBlockCodes[index];
-    // console.log('选中代码块: ');
-    // console.log(codeBlockCode);
     const whole = this.codeMirror.getValue();
     const beginLine = whole.slice(0, codeBlockCode.offset).match(/\n/g)?.length ?? 0;
     const endLine = beginLine + codeBlockCode.code.match(/\n/g).length;
     const endCh = codeBlockCode.code.slice(0, -3).match(/[^\n]+\n*$/)[0].length;
+    // 从下往上选中内容，这样当代码块内容很多时，选中整个代码块不会触发滚动条滚动
     this.codeBlockEditor.info.selection = [
-      { line: beginLine + 1, ch: 0 },
       { line: endLine - 1, ch: endCh },
+      { line: beginLine + 1, ch: 0 },
     ];
-    select && this.codeMirror.setSelection(...this.codeBlockEditor.info.selection);
+    this.codeMirror.setSelection(...this.codeBlockEditor.info.selection);
   }
-  showBubble() {
-    if (this.trigger === 'click') {
-      this.$drawEditor();
+  $setLangSelection(index) {
+    const codeBlockCode = this.codeBlockEditor.codeBlockCodes[index];
+    const whole = this.codeMirror.getValue();
+    const beginLine = whole.slice(0, codeBlockCode.offset).match(/\n/g)?.length ?? 0;
+    const firstLine = codeBlockCode.code.match(/```\s*[^\n]+/)[0] ?? '```';
+    const beginCh = 3;
+    const endLine = firstLine.length;
+    this.codeBlockEditor.info.selection = [
+      { line: beginLine, ch: beginCh },
+      { line: beginLine, ch: endLine },
+    ];
+    this.codeMirror.setSelection(...this.codeBlockEditor.info.selection);
+  }
+  showBubble(isEnableBubbleAndEditorShow = true) {
+    this.$updateContainerPosition();
+    if (this.trigger === 'hover') {
+      this.$showBtn(isEnableBubbleAndEditorShow);
     }
+    if (this.trigger === 'click') {
+      this.$showContentEditor();
+    }
+    /**
+     * 把代码块操作相关元素上的鼠标滚动事件同步到预览区
+     */
+    this.container.addEventListener('wheel', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      this.previewerDom.scrollTop += e.deltaY / 3; // 降低滚动的速度，懒得加动画了
+    });
+  }
+  /**
+   * 展示代码块编辑区的编辑器
+   */
+  $showContentEditor() {
+    this.editing = true;
+    this.$findCodeInEditor();
+    this.$drawEditor();
+  }
+  /**
+   * 展示代码块区域的按钮
+   */
+  $showBtn(isEnableBubbleAndEditorShow) {
+    const { changeLang, editCode, copyCode, lang } = this.target.dataset;
+    this.container.innerHTML = '';
+    if (changeLang === 'true' && isEnableBubbleAndEditorShow) {
+      // 添加删除btn
+      this.container.innerHTML = getCodePreviewLangSelectElement(lang);
+      const changeLangDom = this.container.querySelector('#code-preview-lang-select');
+      this.changeLangDom = changeLangDom;
+      this.changeLangDom.addEventListener('change', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.parent.$removeAllPreviewerBubbles('click');
+        this.$changeLang(e.target.value || '');
+      });
+    }
+    if (editCode === 'true' && isEnableBubbleAndEditorShow) {
+      // 添加编辑btn
+      const editDom = document.createElement('div');
+      editDom.className = 'cherry-edit-code-block';
+      editDom.innerHTML = '<i class="ch-icon ch-icon-edit"></i>';
+      this.container.appendChild(editDom);
+      editDom.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.$hideAllBtn();
+        this.parent.$removeAllPreviewerBubbles('click');
+        this.parent.showCodeBlockPreviewerBubbles('click', this.target);
+      });
+      this.editDom = editDom;
+    }
+    if (copyCode === 'true') {
+      // 添加复制btn
+      const copyDom = document.createElement('div');
+      copyDom.className = 'cherry-copy-code-block';
+      copyDom.innerHTML = '<i class="ch-icon ch-icon-copy"></i>';
+      this.container.appendChild(copyDom);
+      copyDom.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.parent.$removeAllPreviewerBubbles('click');
+        this.$copyCodeBlock();
+      });
+      this.copyDom = copyDom;
+    }
+  }
+  // 隐藏所有按钮（切换语言、编辑、复制）
+  $hideAllBtn() {
+    if (this.changeLangDom?.style?.display) {
+      this.changeLangDom.style.display = 'none';
+    }
+    if (this.editDom?.style?.display) {
+      this.editDom.style.display = 'none';
+    }
+    if (this.copyDom?.style?.display) {
+      this.copyDom.style.display = 'none';
+    }
+  }
+  /**
+   * 切换代码块的语言
+   */
+  $changeLang(lang) {
+    this.$findCodeInEditor(true);
+    this.codeMirror.replaceSelection(lang, 'around');
   }
   $drawEditor() {
     const dom = document.createElement('div');
@@ -137,6 +236,10 @@ export default class CodeBlockHandler {
       lineNumbers: true, // 显示行号
       autofocus: true, // 自动对焦
       lineWrapping: true, // 自动换行
+      cursorHeight: 0.85, // 光标高度，0.85好看一些
+      indentUnit: 4, // 缩进单位为4
+      tabSize: 4, // 一个tab转换成的空格数量
+      keyMap: 'sublime',
     });
     const editor = this.codeMirror;
     editorInstance.on('change', () => {
@@ -149,7 +252,38 @@ export default class CodeBlockHandler {
     this.codeBlockEditor.editorDom.inputDom.focus();
     this.codeBlockEditor.editorDom.inputDom.refresh();
     editorInstance.setValue(this.codeMirror.getSelection());
-    editorInstance.setCursor(Number.MAX_VALUE, Number.MAX_VALUE); // 指针设置至CodeBlock末尾
+    // 去掉下面的逻辑，因为在代码块比较高时，强制让光标定位在最后会让页面出现跳跃的情况
+    // editorInstance.setCursor(Number.MAX_VALUE, Number.MAX_VALUE); // 指针设置至CodeBlock末尾
+  }
+
+  /**
+   * 处理复制代码块的操作
+   */
+  $copyCodeBlock() {
+    const codeContent = this.target.lastElementChild.innerText;
+    const final = this.$cherry.options.callback.onCopyCode({ target: this.target }, codeContent);
+    if (final === false) {
+      return false;
+    }
+    const iconNode = this.copyDom.querySelector('i.ch-icon-copy');
+    if (iconNode) {
+      iconNode.className = iconNode.className.replace('copy', 'ok');
+      setTimeout(() => {
+        iconNode.className = iconNode.className.replace('ok', 'copy');
+      }, 1000);
+    }
+    copyToClip(final);
+  }
+
+  /**
+   * 更新代码块复制、编辑等按钮的位置
+   */
+  $updateContainerPosition() {
+    this.codeBlockEditor.info.codeBlockNode = this.target;
+    const codeBlockInfo = this.$getPosition();
+    this.setStyle(this.container, 'width', `${codeBlockInfo.width}px`);
+    this.setStyle(this.container, 'top', `${codeBlockInfo.top}px`);
+    this.setStyle(this.container, 'left', `${codeBlockInfo.left}px`);
   }
 
   /**
@@ -158,12 +292,11 @@ export default class CodeBlockHandler {
   $updateEditorPosition() {
     this.$setInputOffset();
     const spanStyle = getComputedStyle(this.codeBlockEditor.info.codeBlockNode);
-    this.codeBlockEditor.editorDom.inputDom.getWrapperElement().style.fontSize = spanStyle.fontSize || '16px';
-    this.codeBlockEditor.editorDom.inputDom.getWrapperElement().style.fontFamily = spanStyle.fontFamily;
-    this.codeBlockEditor.editorDom.inputDom.getWrapperElement().style.lineHeight = spanStyle.lineHeight;
-    this.codeBlockEditor.editorDom.inputDom.getWrapperElement().style.padding = spanStyle.padding;
-    this.codeBlockEditor.editorDom.inputDom.getWrapperElement().style.paddingBottom = '0px';
-    this.codeBlockEditor.editorDom.inputDom.getWrapperElement().style.zIndex = '1';
+    const editorWrapper = this.codeBlockEditor.editorDom.inputDom.getWrapperElement();
+    this.setStyle(editorWrapper, 'fontSize', spanStyle.fontSize || '16px');
+    this.setStyle(editorWrapper, 'fontFamily', spanStyle.fontFamily);
+    this.setStyle(editorWrapper, 'lineHeight', '1.8em');
+    this.setStyle(editorWrapper, 'zIndex', '1');
   }
 
   /**
@@ -172,11 +305,9 @@ export default class CodeBlockHandler {
   $setInputOffset() {
     const codeBlockInfo = this.$getPosition();
     const { inputDiv } = this.codeBlockEditor.editorDom;
-    // 设置文本框的偏移及大小
+    // 设置文本框的大小
     this.setStyle(inputDiv, 'width', `${codeBlockInfo.width}px`);
-    this.setStyle(inputDiv, 'height', `${codeBlockInfo.height}px`);
-    this.setStyle(inputDiv, 'top', `${codeBlockInfo.top}px`);
-    this.setStyle(inputDiv, 'left', `${codeBlockInfo.left}px`);
+    this.setStyle(inputDiv, 'height', `${codeBlockInfo.height + 10}px`);
   }
 
   setStyle(element, property, value) {
