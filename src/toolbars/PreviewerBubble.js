@@ -20,7 +20,6 @@ import CodeHandler from '@/utils/codeBlockContentHandler';
 import { drawioDialog } from '@/utils/dialog';
 import Event from '@/Event';
 import { imgDrawioReg, getValueWithoutCode } from '@/utils/regexp';
-import { CODE_PREVIEWER_LANG_SELECT_CLASS_NAME } from '@/utils/code-preview-language-setting';
 import debounce from 'lodash/debounce';
 import FormulaHandler from '@/utils/formulaUtilsHandler';
 import ListHandler from '@/utils/listContentHandler';
