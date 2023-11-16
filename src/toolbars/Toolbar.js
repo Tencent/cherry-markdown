@@ -97,11 +97,13 @@ export default class Toolbar {
 
   previewOnly() {
     this.options.dom.classList.add('preview-only');
+    this.$cherry.wrapperDom.classList.add('cherry--no-toolbar');
     Event.emit(this.instanceId, Event.Events.toolbarHide);
   }
 
   showToolbar() {
     this.options.dom.classList.remove('preview-only');
+    this.$cherry.wrapperDom.classList.remove('cherry--no-toolbar');
     Event.emit(this.instanceId, Event.Events.toolbarShow);
   }
 
