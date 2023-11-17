@@ -135,7 +135,7 @@ export default class Toolbar {
     this.menus.level1MenusName.forEach((name) => {
       const btn = this.menus.hooks[name].createBtn();
       btn.addEventListener(
-        'click',
+        'pointerup',
         (event) => {
           this.onClick(event, name);
         },
