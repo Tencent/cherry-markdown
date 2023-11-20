@@ -19,9 +19,7 @@ import TableHandler from '@/utils/tableContentHandler';
 import CodeHandler from '@/utils/codeBlockContentHandler';
 import { drawioDialog } from '@/utils/dialog';
 import Event from '@/Event';
-import { copyToClip } from '@/utils/copy';
 import { imgDrawioReg, getValueWithoutCode } from '@/utils/regexp';
-import { CODE_PREVIEWER_LANG_SELECT_CLASS_NAME } from '@/utils/code-preview-language-setting';
 import debounce from 'lodash/debounce';
 import FormulaHandler from '@/utils/formulaUtilsHandler';
 import ListHandler from '@/utils/listContentHandler';
@@ -61,9 +59,11 @@ export default class PreviewerBubble {
   }
 
   init() {
+    // 记录cherry外层容器的overflow属性，在后续的操作中会临时修改overflow属性，所以需要先记录
+    this.oldWrapperDomOverflow = this.previewer.$cherry.wrapperDom.style.overflow;
     this.previewerDom.addEventListener('click', this.$onClick.bind(this));
     this.previewerDom.addEventListener('mouseover', this.$onMouseOver.bind(this));
-    this.previewerDom.addEventListener('mouseout', this.$onMouseOut.bind(this));
+    // this.previewerDom.addEventListener('mouseout', this.$onMouseOut.bind(this));
 
     document.addEventListener('mousedown', (event) => {
       Object.values(this.bubbleHandler).forEach((handler) => handler.emit('mousedown', event));
@@ -97,6 +97,25 @@ export default class PreviewerBubble {
   }
 
   /**
+   * 判断是否为代码块
+   * @param {HTMLElement} element
+   * @returns {boolean|HTMLElement}
+   */
+  isCherryCodeBlock(element) {
+    if (element.nodeName === 'DIV' && element.dataset.type === 'codeBlock') {
+      return element;
+    }
+    const container = this.$getClosestNode(element, 'DIV');
+    if (container === false) {
+      return false;
+    }
+    if (container.dataset.type === 'codeBlock') {
+      return container;
+    }
+    return false;
+  }
+
+  /**
    * 是否为由cherry生成的表格，且不是简单表格
    * @param {HTMLElement} element
    * @returns {boolean}
@@ -112,15 +131,22 @@ export default class PreviewerBubble {
     return true;
   }
 
-  $onMouseOver(e) {
+  /**
+   * 是否开启了预览区操作 && 是否有编辑区
+   * @returns {boolean}
+   */
+  $isEnableBubbleAndEditorShow() {
     if (!this.enablePreviewerBubble) {
-      return;
+      return false;
     }
     const cherryStatus = this.previewer.$cherry.getStatus();
-    // 左侧编辑器被隐藏时不再提供后续功能
     if (cherryStatus.editor === 'hide') {
-      return;
+      return false;
     }
+    return true;
+  }
+
+  $onMouseOver(e) {
     /** @type {Event} */
     const { target } = e;
     // 这里要用Element，而不是HTMLElement
@@ -130,6 +156,9 @@ export default class PreviewerBubble {
     switch (target.tagName) {
       case 'TD':
       case 'TH':
+        if (!this.$isEnableBubbleAndEditorShow()) {
+          return;
+        }
         if (!this.isCherryTable(e.target)) {
           return;
         }
@@ -137,7 +166,19 @@ export default class PreviewerBubble {
         this.$removeAllPreviewerBubbles('hover');
         this.$showTablePreviewerBubbles('hover', e.target);
         return;
+      case 'PRE':
+      case 'CODE':
+      case 'SPAN':
+      case 'DIV':
+        // eslint-disable-next-line no-case-declarations
+        const codeBlock = this.isCherryCodeBlock(e.target);
+        if (codeBlock === false) {
+          return;
+        }
+        this.showCodeBlockPreviewerBubbles('hover', codeBlock);
+        return;
     }
+    this.removeHoverBubble();
   }
 
   $onMouseOut() {
@@ -149,7 +190,7 @@ export default class PreviewerBubble {
     if (cherryStatus.editor === 'hide') {
       return;
     }
-    this.removeHoverBubble();
+    // this.removeHoverBubble();
   }
 
   $dealCheckboxClick(e) {
@@ -191,8 +232,6 @@ export default class PreviewerBubble {
    */
   $onClick(e) {
     const { target } = e;
-    // 复制代码块操作不关心编辑器的状态
-    this.$dealCopyCodeBlock(e);
     const cherryStatus = this.previewer.$cherry.getStatus();
     // 纯预览模式下，支持点击放大图片功能（以回调的形式实现，需要业务侧实现图片放大功能）
     if (cherryStatus.editor === 'hide' || !(target instanceof Element)) {
@@ -226,7 +265,7 @@ export default class PreviewerBubble {
     if (target.className === 'ch-icon ch-icon-square' || target.className === 'ch-icon ch-icon-check') {
       this.$dealCheckboxClick(e);
     }
-    this.$removeAllPreviewerBubbles();
+    this.$removeAllPreviewerBubbles('click');
     if (typeof target.tagName === 'undefined') {
       return;
     }
@@ -248,7 +287,6 @@ export default class PreviewerBubble {
         break;
       case 'svg':
         if (target?.parentElement?.tagName === 'MJX-CONTAINER') {
-          this.$removeAllPreviewerBubbles('click');
           this.$showFormulaPreviewerBubbles('click', target, { x: e.pageX, y: e.pageY });
         }
         break;
@@ -269,15 +307,10 @@ export default class PreviewerBubble {
         }
         break;
     }
-    this.$dealCodeBlockEditorMode(e);
   }
 
   $onChange(e) {
-    const { target } = e;
-    // code预览区域，修改语言设置项事件处理
-    if (target.className === CODE_PREVIEWER_LANG_SELECT_CLASS_NAME) {
-      this.$codePreviewLangSelectEventHandler(e);
-    }
+    return;
   }
 
   $getClosestNode(node, targetNodeName) {
@@ -288,40 +321,6 @@ export default class PreviewerBubble {
       return false;
     }
     return this.$getClosestNode(node.parentNode, targetNodeName);
-  }
-
-  /**
-   * 处理编辑代码块的操作
-   */
-  $dealCodeBlockEditorMode(e) {
-    const { target } = e;
-    if (target.className === 'cherry-edit-code-block' || target.parentNode?.className === 'cherry-edit-code-block') {
-      this.$showCodeBlockPreviewerBubbles('click', e.target);
-    }
-  }
-
-  /**
-   * 处理复制代码块的操作
-   */
-  $dealCopyCodeBlock(e) {
-    const { target } = e;
-    if (target.className === 'cherry-copy-code-block' || target.parentNode?.className === 'cherry-copy-code-block') {
-      const parentNode =
-        target.className === 'cherry-copy-code-block' ? target.parentNode : target.parentNode.parentNode;
-      const codeContent = parentNode.lastElementChild.innerText;
-      const final = this.previewer.$cherry.options.callback.onCopyCode(e, codeContent);
-      if (final === false) {
-        return false;
-      }
-      const iconNode = parentNode.querySelector('i.ch-icon-copy');
-      if (iconNode) {
-        iconNode.className = iconNode.className.replace('copy', 'ok');
-        setTimeout(() => {
-          iconNode.className = iconNode.className.replace('ok', 'copy');
-        }, 1500);
-      }
-      copyToClip(final);
-    }
   }
 
   /**
@@ -341,6 +340,9 @@ export default class PreviewerBubble {
         value.emit('remove');
         delete this.bubbleHandler[key];
       });
+    if (Object.keys(this.bubbleHandler).length <= 0) {
+      this.previewer.$cherry.wrapperDom.style.overflow = this.oldWrapperDomOverflow || '';
+    }
   }
 
   /**
@@ -355,10 +357,25 @@ export default class PreviewerBubble {
     this.bubbleHandler[trigger] = handler;
   }
 
-  $showCodeBlockPreviewerBubbles(trigger, htmlElement) {
-    this.$createPreviewerBubbles(trigger, trigger === 'click' ? 'codeBlock-content-handler' : 'none');
-    const handler = new CodeHandler(trigger, htmlElement, this.bubble[trigger], this.previewerDom, this.editor.editor);
-    handler.showBubble();
+  showCodeBlockPreviewerBubbles(trigger, htmlElement) {
+    if (this.bubbleHandler[trigger]) {
+      if (this.bubbleHandler[trigger].target === htmlElement) {
+        // 已经存在相同的target，直接返回
+        this.removeHoverBubble.cancel();
+        return;
+      }
+    }
+    this.$removeAllPreviewerBubbles('hover');
+    this.$createPreviewerBubbles(trigger, `codeBlock-${trigger}-handler`);
+    const handler = new CodeHandler(
+      trigger,
+      htmlElement,
+      this.bubble[trigger],
+      this.previewerDom,
+      this.editor.editor,
+      this,
+    );
+    handler.showBubble(this.$isEnableBubbleAndEditorShow());
     this.bubbleHandler[trigger] = handler;
   }
 
@@ -529,61 +546,12 @@ export default class PreviewerBubble {
         this.bubble[trigger].addEventListener('mouseover', this.removeHoverBubble.cancel);
         this.bubble[trigger].addEventListener('mouseout', this.removeHoverBubble);
       }
+      // 暂时让最上层容器的overflow变成hidden
+      this.previewer.$cherry.wrapperDom.style.overflow = 'hidden';
     }
   }
 
   $showBorderBubbles() {}
 
   $showBtnBubbles() {}
-
-  /**
-   * 修改预览区域代码语言设置的回调
-   */
-  $codePreviewLangSelectEventHandler(event) {
-    const list = Array.from(this.previewerDom.querySelectorAll(`.${CODE_PREVIEWER_LANG_SELECT_CLASS_NAME}`));
-    const codePreviewIndex = list.indexOf(event.target);
-    const contentList = this.editor.editor.getValue().split('\n');
-    let targetCodePreviewSelectLine = -1;
-    let findCodeArea = -1;
-    // 相互匹配的`的数量
-    let matchedSignalNum = 0;
-    // 查找选择设置的代码块在哪一行:
-    let left = 0;
-    while (left < contentList.length) {
-      if (findCodeArea >= codePreviewIndex) {
-        break;
-      }
-      let right = left + 1;
-      if (/^`{3,}[\s\S]*$/.test(contentList[left])) {
-        // 起始的`的数量
-        const topSignalNum = contentList[left].match(/^(`*)/g)?.[0].length ?? 0;
-        while (right < contentList.length) {
-          let isMatched = false;
-          const bottomSignalNum = contentList[right].match(/^(`*)/g)?.[0].length ?? 0;
-          // 支持: 3个及以上的`的相互匹配
-          if (/^`{3,}$/.test(contentList[right]) && bottomSignalNum === topSignalNum) {
-            isMatched = true;
-            findCodeArea = findCodeArea + 1;
-            if (findCodeArea === codePreviewIndex) {
-              targetCodePreviewSelectLine = left;
-              matchedSignalNum = topSignalNum;
-            }
-          }
-          right = right + 1;
-          if (isMatched) {
-            break;
-          }
-        }
-      }
-      left = right;
-    }
-    // 只有匹配了代码块才进行替换
-    if (matchedSignalNum) {
-      this.editor.editor.setSelection(
-        { line: targetCodePreviewSelectLine, ch: matchedSignalNum },
-        { line: targetCodePreviewSelectLine, ch: contentList[targetCodePreviewSelectLine].length },
-      );
-      this.editor.editor.replaceSelection(event.target.value || '');
-    }
-  }
 }

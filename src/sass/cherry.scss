@@ -46,25 +46,6 @@
       min-height: 100%;
     }
   }
-
-  div[data-type='codeBlock']:hover {
-    position: relative;
-    .cherry-code-preview-lang-select {
-      display: block !important;
-      position: absolute;
-      transform: translate(2px, 50%);
-    }
-  }
-
-  .cherry-preview--full {
-    div[data-type='codeBlock']:hover {
-      position: unset;
-      .cherry-code-preview-lang-select {
-        display: none !important;
-        position: unset;
-      }
-    }
-  }
 }
 
 .cherry {
@@ -554,7 +535,6 @@
     z-index: 3;
     cursor: pointer;
   }
-
 }
 
 .cherry-drag {
@@ -594,6 +574,49 @@
 
   &.cherry-previewer-mask--show {
     display: block;
+  }
+}
+
+.cherry-previewer-codeBlock-click-handler {
+  position: absolute;
+  z-index: 1;
+}
+.cherry-previewer-codeBlock-hover-handler {
+  z-index: 0;
+  position: absolute;
+  .cherry-copy-code-block,
+  .cherry-edit-code-block {
+    position: relative;
+    width: 25px;
+    text-align: center;
+    height: 25px;
+    border: 1px solid #3582fb;
+    cursor: pointer;
+    float: right;
+    top: 15px;
+    border-radius: 5px;
+    margin-left: -27px;
+    transition: all 0.3s;
+    z-index: 2;
+    color: #3582fb;
+    background-color: #eee;
+    border-color: #3582fb;
+  }
+  .cherry-copy-code-block {
+    right: 10px;
+  }
+  .cherry-edit-code-block {
+    right: 10+25+10px;
+  }
+  .cherry-copy-code-block:hover,
+  .cherry-edit-code-block:hover {
+    color: #eee;
+    background-color: #3582fb;
+    border-color: #eee;
+  }
+  .cherry-code-preview-lang-select {
+    position: absolute;
+    transform: translate(2px, -50%);
   }
 }
 
@@ -646,45 +669,14 @@
     list-style: square;
   }
 
-  div[data-type='codeBlock']:hover {
-    .cherry-copy-code-block, .cherry-edit-code-block {
-      display: block !important;
-      position: relative;
-      width: 25px;
-      text-align: center;
-      height: 25px;
-      border: 1px solid #ddd;
-      cursor: pointer;
-      float: right;
-      //right: 10px; right: 10+25+10px
-      top: 15px;
-      color: #fff;
-      border-radius: 5px;
-      margin-left: -27px;
-      transition: all 0.3s;
-      z-index: 2;
-    }
-    .cherry-copy-code-block {
-      right: 10px;
-    }
+  // 浅色系
+  [data-code-block-theme='default'] &,
+  [data-code-block-theme='funky'] &,
+  [data-code-block-theme='solarized-light'] &,
+  [data-code-block-theme='coy'] & {
+    .cherry-copy-code-block,
     .cherry-edit-code-block {
-      right: 10+25+10px;
-    }
-
-    // 浅色系
-    [data-code-block-theme='default'] &,
-    [data-code-block-theme='funky'] &,
-    [data-code-block-theme='solarized-light'] &,
-    [data-code-block-theme='coy'] & {
-      .cherry-copy-code-block, .cherry-edit-code-block {
-        background-color: #3582fb;
-      }
-    }
-
-    .cherry-copy-code-block:hover, .cherry-edit-code-block:hover {
-      color: #3582fb;
-      background-color: #eee;
-      border-color: #3582fb;
+      background-color: #3582fb;
     }
   }
 }

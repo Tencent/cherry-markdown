@@ -4,7 +4,8 @@
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview"
   },
+  "type": "module",
   "devDependencies": {
-    "vitepress": "^1.0.0-beta.1"
+    "vitepress": "1.0.0-rc.20"
   }
 }
