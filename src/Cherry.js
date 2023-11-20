@@ -138,11 +138,14 @@ export default class Cherry extends CherryStatic {
 
     const wrapperFragment = document.createDocumentFragment();
     wrapperFragment.appendChild(this.toolbar.options.dom);
-    wrapperFragment.appendChild(editor.options.editorDom);
+    // 把编辑区 预览区 侧栏放在一起
+    const wrapperContent = createElement('div', `cherry-body`);
+    wrapperFragment.appendChild(wrapperContent);
+    wrapperContent.appendChild(editor.options.editorDom);
     // 创建预览区域的侧边工具栏
-    this.createSidebar(wrapperFragment);
+    this.createSidebar(wrapperContent);
     if (!this.options.previewer.dom) {
-      wrapperFragment.appendChild(previewer.options.previewerDom);
+      wrapperContent.appendChild(previewer.options.previewerDom);
     }
     wrapperFragment.appendChild(previewer.options.virtualDragLineDom);
     wrapperFragment.appendChild(previewer.options.editorMaskDom);
