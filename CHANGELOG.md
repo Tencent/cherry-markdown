@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.29](https://github.com/Tencent/cherry-markdown/compare/v0.8.28...v0.8.29) (2023-11-20)
+
 ### [0.8.28](https://github.com/Tencent/cherry-markdown/compare/v0.8.27...v0.8.28) (2023-11-20)
 
 
