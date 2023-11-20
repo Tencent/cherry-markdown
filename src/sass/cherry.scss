@@ -14,13 +14,12 @@
 
 // 主要布局控制，可以不合并进下面的区块
 .cherry {
-  display: flex;
-  flex-flow: row wrap;
-  align-items: stretch;
-  align-content: flex-start;
-  height: 100%;
-  min-height: 100px;
-  position: relative;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: flex-start;
+    min-height: 200px;
   // overflow: hidden;
 
   .cherry-editor,
@@ -47,7 +46,14 @@
     }
   }
 }
-
+.cherry-body{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  width: 100%;
+  flex-grow: 1;
+  align-items: stretch;
+}
 .cherry {
   @include cherryFont;
   line-height: $lineHeight;
@@ -173,7 +179,8 @@
 }
 
 .cherry-toolbar {
-  position: relative;
+  position: sticky;
+  top: 0px;
   display: flex;
   // align-items: center;
   justify-content: space-between;
@@ -183,7 +190,7 @@
   line-height: 2.8;
   flex-basis: 100%;
   box-sizing: border-box;
-  z-index: 2;
+  z-index: 3;
   user-select: none;
   box-shadow: $toolbarShadowLight;
   background: $toolbarBgLight;
@@ -255,7 +262,6 @@
   }
 
   &-button {
-    float: left;
     padding: 0 12px;
     // margin: 4px 0;
     height: 38px;
@@ -298,16 +304,20 @@
 
 .cherry-sidebar {
   width: 30px;
-  position: absolute;
-  top: 48px;
-  right: 7px;
-  z-index: 11;
-  bottom: 0;
+  order: 3;
+  position: sticky;
+  top: $toolbarHeight;
+  margin-top:5px;
+  height: min-content;
   overflow: hidden;
 
   .cherry-toolbar-button {
     height: 30px;
-    padding: 3px 12px 0 6px;
+    display: inline-block;
+    margin: 3px 0px 6px;
+    padding: unset;
+    width: 100%;
+    text-align: center;
 
     &:hover {
       background: transparent;
@@ -401,12 +411,18 @@
 }
 
 .cherry-editor {
-  position: relative;
   padding-top: 5px;
   padding-right: 5px;
-  width: 50%;
+  order: 1;
+  flex-grow: 1;
   box-sizing: border-box;
   overflow: hidden;
+  &.cherry-editor--full ~ .cherry-previewer{
+    display: none !important;
+  }
+  &:not([class~="cherry-editor--full"]){
+    border-right: 2px solid #ebedee;
+  }
 
   &.cherry-editor--full {
     width: 100%;
@@ -621,12 +637,16 @@
 }
 
 .cherry-previewer {
+  order: 2;
+  flex-grow: 1;
+  position: sticky;
+  top:$toolbarHeight;
+  height: min-content;
+  /*这里有个问题 因为编辑区换行 预览区不显示 导致不同步*/
   padding: 20px 45px 20px 20px;
   border-left: 2px solid #ebedee;
-  width: 50%;
   box-sizing: border-box;
   background-color: $previewBg;
-  min-height: auto;
   overflow-y: auto;
   -webkit-print-color-adjust: exact;
 
