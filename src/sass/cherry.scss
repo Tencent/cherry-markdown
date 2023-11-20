@@ -644,7 +644,6 @@
   height: min-content;
   /*这里有个问题 因为编辑区换行 预览区不显示 导致不同步*/
   padding: 20px 45px 20px 20px;
-  border-left: 2px solid #ebedee;
   box-sizing: border-box;
   background-color: $previewBg;
   overflow-y: auto;
