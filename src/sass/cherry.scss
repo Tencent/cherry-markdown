@@ -535,7 +535,6 @@
     z-index: 3;
     cursor: pointer;
   }
-
 }
 
 .cherry-drag {
@@ -585,7 +584,8 @@
 .cherry-previewer-codeBlock-hover-handler {
   z-index: 0;
   position: absolute;
-  .cherry-copy-code-block, .cherry-edit-code-block {
+  .cherry-copy-code-block,
+  .cherry-edit-code-block {
     position: relative;
     width: 25px;
     text-align: center;
@@ -608,7 +608,8 @@
   .cherry-edit-code-block {
     right: 10+25+10px;
   }
-  .cherry-copy-code-block:hover, .cherry-edit-code-block:hover {
+  .cherry-copy-code-block:hover,
+  .cherry-edit-code-block:hover {
     color: #eee;
     background-color: #3582fb;
     border-color: #eee;
@@ -668,18 +669,16 @@
     list-style: square;
   }
 
-
   // 浅色系
   [data-code-block-theme='default'] &,
   [data-code-block-theme='funky'] &,
   [data-code-block-theme='solarized-light'] &,
   [data-code-block-theme='coy'] & {
-    .cherry-copy-code-block, .cherry-edit-code-block {
+    .cherry-copy-code-block,
+    .cherry-edit-code-block {
       background-color: #3582fb;
     }
   }
-
-  
 }
 
 .cherry-color-wrap {
