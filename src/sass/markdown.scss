@@ -1,3 +1,5 @@
+@import './variable.scss';
+
 .cherry-markdown {
   word-break: break-all;
   h1,
@@ -481,7 +483,7 @@ div[data-type='codeBlock'] {
       user-select: none;
       padding: 5px 10px;
       background-color: #6c757d;
-      color: #FFF;
+      color: #fff;
       border-radius: 8px;
     }
     .cherry-detail-body {

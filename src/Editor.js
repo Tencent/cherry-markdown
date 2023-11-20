@@ -15,7 +15,6 @@
  */
 // @ts-check
 import codemirror from 'codemirror';
-import 'codemirror/lib/codemirror.css';
 // import 'codemirror/mode/markdown/markdown';
 import 'codemirror/mode/gfm/gfm'; // https://codemirror.net/mode/gfm/index.html
 // import 'codemirror/mode/xml/xml';

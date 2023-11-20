@@ -12,7 +12,7 @@ export const getCodePreviewLangSelectElement = (lang) => {
     }
     return `<option value="${item}">${item}</option>`;
   });
-  return `<select id="code-preview-lang-select"  style="display:none;" class="${CODE_PREVIEWER_LANG_SELECT_CLASS_NAME}">
+  return `<select id="code-preview-lang-select" class="${CODE_PREVIEWER_LANG_SELECT_CLASS_NAME}">
       <option value="" selected disabled hidden>Choose here</option>
       ${optionsElement.join('')}
     </select>`;
