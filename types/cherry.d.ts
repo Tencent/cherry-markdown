@@ -48,6 +48,8 @@ export interface CherryOptions {
   autoScrollByCursor: boolean;
   /** 外层容器不存在时，是否强制输出到body上 */
   forceAppend: boolean;
+  /** cherry初始化后是否检查 location.hash 尝试滚动到对应位置 */
+  autoScrollByHashAfterInit: boolean;
   /** 挂载DOM节点ID，引擎模式下不生效 */
   id?: string;
   /** 挂载DOM节点，引擎模式下不生效 */
