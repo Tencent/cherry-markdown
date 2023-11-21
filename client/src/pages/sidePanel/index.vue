@@ -8,8 +8,10 @@
         </div>
         <Icon icon="icon-park-outline:left-bar" class="side-panel__title--right" @click="sidePanelChange" />
       </div>
-      <Toc />
-      <Files />
+      <div class="side-panel--operation-area">
+        <Toc />
+        <Files />
+      </div>
     </div>
   </transition>
 </template>
@@ -26,11 +28,11 @@ const sidePanelChange = () => {
 
 </script>
 <style scoped lang="scss">
+$side-panel-width: 400px;
+
 .side-panel {
   height: 100%;
-  width: 380px;
-  overflow: hidden;
-  overflow-y: auto;
+  width: $side-panel-width;
 
   &__title {
     font-size: 24px;
@@ -60,41 +62,17 @@ const sidePanelChange = () => {
       }
     }
   }
+
+  &--operation-area {
+    height: calc(100% - 50px);
+    overflow-y: auto;
+  }
 }
 
 .side-panel-enter-active {
-  animation: side-panel-enter 0.3s;
-}
-
-.side-panel-leave-active {
-  animation: side-panel-leave 0.3s;
-}
-
-@keyframes side-panel-enter {
-  0% {
-    opacity: 0;
-  }
-
-  30% {
-    opacity: 0.5;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes side-panel-leave {
-  0% {
-    opacity: 1;
-  }
-
-  30% {
-    opacity: 0.5;
-  }
-
-  100% {
-    opacity: 0;
-  }
+  opacity: 0;
+  animation: all .2s ease-in-out;
+  animation-fill-mode: forwards;
+  animation-delay: 0.1s;
 }
 </style>
