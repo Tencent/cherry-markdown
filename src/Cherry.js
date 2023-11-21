@@ -27,7 +27,6 @@ import { customizer, getThemeFromLocal, changeTheme } from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
 import getPosBydiffs from './utils/recount-pos';
 import defaultConfig from './Cherry.config';
-import './sass/cherry.scss';
 import cloneDeep from 'lodash/cloneDeep';
 import Event from './Event';
 import locales from '@/locales/index';

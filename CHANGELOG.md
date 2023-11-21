@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.29](https://github.com/Tencent/cherry-markdown/compare/v0.8.28...v0.8.29) (2023-11-20)
+
+### [0.8.28](https://github.com/Tencent/cherry-markdown/compare/v0.8.27...v0.8.28) (2023-11-20)
+
+
+### Bug Fixes
+
+* [#621](https://github.com/Tencent/cherry-markdown/issues/621) closed 修复纯预览模式切换成编辑模式时工具栏不显示的问题 ([8d31d89](https://github.com/Tencent/cherry-markdown/commit/8d31d898ca28e51ac3b247640f144a86e7828b6d))
+* [#623](https://github.com/Tencent/cherry-markdown/issues/623) 重构代码块预览区编辑功能，同时修复预览区工具栏滚动时超出界面的问题，增加是否允许切换代码块语言的功能 ([1fed833](https://github.com/Tencent/cherry-markdown/commit/1fed833a17365249f53ae01b2a505ad613f71720))
+
 ### [0.8.27](https://github.com/Tencent/cherry-markdown/compare/v0.8.26...v0.8.27) (2023-11-07)
 
 

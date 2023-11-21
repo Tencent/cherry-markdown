@@ -17,12 +17,10 @@ import path from 'path';
 import babel from '@rollup/plugin-babel';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import scss from 'rollup-plugin-scss';
 import eslint from '@rollup/plugin-eslint';
 import alias from '@rollup/plugin-alias';
 import json from '@rollup/plugin-json';
 import envReplacePlugin from './env';
-import dartSass from 'sass';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const PROJECT_ROOT_PATH = path.resolve(__dirname, '..');
@@ -45,7 +43,10 @@ if (IS_COMMONJS_BUILD) {
   });
 }
 
-export default {
+/**
+ * @type {import('rollup').RollupOptions}
+ */
+const options = {
   input: 'src/index.js',
   output: {
     globals: {
@@ -56,7 +57,7 @@ export default {
   },
   plugins: [
     eslint({
-      exclude: ['node_modules/**', 'src/sass/**', 'src/libs/**'],
+      exclude: ['node_modules/**', 'src/libs/**'],
     }),
     json(),
     envReplacePlugin(),
@@ -94,17 +95,6 @@ export default {
       // or a `id => boolean` function. Only use this
       // option if you know what you're doing!
       // ignore: [ 'conditional-runtime-dependency' ]
-    }),
-    scss({
-      // Filename to write all styles to
-      fileName: IS_PRODUCTION ? 'cherry-markdown.min.css' : 'cherry-markdown.css',
-
-      // Determine if node process should be terminated on error (default: false)
-      failOnError: true,
-      ...(IS_PRODUCTION && {
-        outputStyle: 'compressed',
-      }),
-      sass: dartSass,
     }),
     babel({
       babelHelpers: 'runtime',
@@ -152,3 +142,5 @@ export default {
   external: ['jsdom'],
   // external: ['echarts']
 };
+
+export default options;
