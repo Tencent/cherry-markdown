@@ -21,13 +21,13 @@ import { getSelection } from '@/utils/selection';
 export default class Header extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('header', 'header');
+    this.setName('header', 'heading');
     this.subMenuConfig = [
-      { iconName: 'h1', name: 'h1', onclick: this.bindSubClick.bind(this, '1') },
-      { iconName: 'h2', name: 'h2', onclick: this.bindSubClick.bind(this, '2') },
-      { iconName: 'h3', name: 'h3', onclick: this.bindSubClick.bind(this, '3') },
-      { iconName: 'h4', name: 'h4', onclick: this.bindSubClick.bind(this, '4') },
-      { iconName: 'h5', name: 'h5', onclick: this.bindSubClick.bind(this, '5') },
+      { iconName: 'heading1', name: 'h1', onclick: this.bindSubClick.bind(this, '1') },
+      { iconName: 'heading2', name: 'h2', onclick: this.bindSubClick.bind(this, '2') },
+      { iconName: 'heading3', name: 'h3', onclick: this.bindSubClick.bind(this, '3') },
+      { iconName: 'heading4', name: 'h4', onclick: this.bindSubClick.bind(this, '4') },
+      { iconName: 'heading5', name: 'h5', onclick: this.bindSubClick.bind(this, '5') },
     ];
   }
 

@@ -21,7 +21,7 @@ import { drawioDialog } from '@/utils/dialog';
 export default class DrawIo extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('draw.io', 'draw.io');
+    this.setName('draw.io', 'drawio');
     this.noIcon = true;
     this.drawioIframeUrl = $cherry.options.drawioIframeUrl;
   }
@@ -45,7 +45,7 @@ export default class DrawIo extends MenuBase {
       this.registerAfterClickCb(() => {
         this.setLessSelection(begin, end);
       });
-      return `${begin}在预览区点击图片重新编辑draw.io${end}`;
+      return `${begin}${this.locale.drawioCache}draw.io${end}`;
     }
     // 插入图片，调用上传文件逻辑
     drawioDialog(this.drawioIframeUrl, '', (data) => {

@@ -16,7 +16,7 @@
 // @ts-check
 import Logger from '@/Logger';
 import { escapeHTMLSpecialCharOnce as $e } from '@/utils/sanitize';
-import { createElement } from '@/utils/dom';
+import { createElement, createIcon } from '@/utils/dom';
 
 /**
  * @typedef {Object} SubMenuConfigItem
@@ -150,8 +150,8 @@ export default class MenuBase {
     });
     // 如果有图标，则添加图标
     if (this.iconName && !this.noIcon) {
-      const icon = createElement('i', `ch-icon ch-icon-${this.iconName}`);
-      span.appendChild(icon);
+      const icon = createIcon(this.iconName);
+      icon && span.appendChild(icon);
     }
     // 二级菜单强制显示文字，没有图标的按钮也显示文字
     if (asSubMenu || this.noIcon) {
@@ -170,8 +170,8 @@ export default class MenuBase {
       title: this.locale[name] || $e(name),
     });
     if (iconName) {
-      const icon = createElement('i', `ch-icon ch-icon-${iconName}`);
-      span.appendChild(icon);
+      const icon = createIcon(iconName);
+      icon && span.appendChild(icon);
     }
     span.innerHTML += this.locale[name] || $e(name);
     span.addEventListener('click', onclick, false);

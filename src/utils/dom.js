@@ -1,3 +1,5 @@
+import { icons } from '@/assets/icons';
+
 /**
  * Copyright (C) 2021 THL A29 Limited, a Tencent company.
  *
@@ -159,4 +161,15 @@ export function createElement(tagName, className = '', attributes = {}) {
     });
   }
   return element;
+}
+
+export function createIcon(name) {
+  if (!name || !icons[name]) {
+    return null;
+  }
+
+  const parser = new DOMParser();
+  const icon = parser.parseFromString(icons[name], 'image/svg+xml');
+
+  return icon.firstChild;
 }

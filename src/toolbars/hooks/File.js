@@ -21,7 +21,7 @@ import { handleUpload } from '@/utils/file';
 export default class File extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('file', 'phone');
+    this.setName('file', 'create');
   }
 
   /**

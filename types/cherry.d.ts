@@ -14,6 +14,7 @@ export interface CherryOptions {
   editor: CherryEditorOptions;
   /** 工具栏区域配置 */
   toolbars: CherryToolbarOptions;
+  toolbar: CherryToolbar;
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: string;
   /** 文件上传回调 */
@@ -29,16 +30,16 @@ export interface CherryOptions {
   };
   /** 有哪些主题 */
   theme: {className: string, label: string}[];
-  callback: {
+  callback?: {
     /** 编辑器内容改变并完成渲染后触发 */
-    afterChange: CherryLifecycle;
+    afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */
-    afterInit: CherryLifecycle;
+    afterInit?: CherryLifecycle;
     /** img 标签挂载前触发，可用于懒加载等场景 */
-    beforeImageMounted: (srcProp: string, src: string) => { srcProp: string; src: string };
-    onClickPreview: (e: MouseEvent) => void;
-    onCopyCode: (e: ClipboardEvent, code: string) => string|false;
-    changeString2Pinyin: (str: string) => string;
+    beforeImageMounted?: (srcProp: string, src: string) => { srcProp: string; src: string };
+    onClickPreview?: (e: MouseEvent) => void;
+    onCopyCode?: (e: ClipboardEvent, code: string) => string|false;
+    changeString2Pinyin?: (str: string) => string;
   };
   /** 预览区域配置 */
   previewer: CherryPreviewerOptions;
@@ -164,6 +165,52 @@ export interface CherryPreviewerOptions {
   };
 }
 
+export type CherryHookCenter = {
+  toolbar: any;
+  hooks: {
+    [key: string]: any;
+  };
+  allMenusName: string[];
+  level1MenusName: string[];
+  level2MenusName: {
+    [parentName: string]: string[];
+  };
+  $newMenu(name: any): void;
+  init(): void;
+}
+
+export type CherryToolbar = {
+  toolbarHandlers: Record<string, any>;
+  menus: CherryHookCenter;
+  shortcutKeyMap: {};
+  subMenus: {};
+  options: {
+    dom: HTMLDivElement;
+    buttonConfig: string[];
+    customMenu: any[];
+  };
+  instanceId: any;
+  init: () => void;
+  previewOnly: () => void;
+  showToolbar: () => void;
+  isHasLevel2Menu: (name: any) => string[];
+  isHasConfigMenu: (name: any) => any[];
+  isHasSubMenu: (name: string) => boolean;
+  drawMenus: () => void;
+  appendMenusToDom: (menus: any) => void;
+  setSubMenuPosition: (menuObj: any, subMenuObj: any) => void;
+  drawSubMenus: (name: any) => void;
+  onClick: (event: any, name: any, focusEvent?: boolean) => void;
+  toggleSubMenu: (name: any) => void;
+  hideAllSubMenu: () => void;
+  collectMenuInfo: (toolbarObj: CherryToolbar) => void;
+  collectShortcutKey: () => void;
+  collectToolbarHandler: () => void;
+  matchShortcutKey: (evt: KeyboardEvent) => boolean;
+  fireShortcutKey: (evt: KeyboardEvent) => void;
+  getCurrentKey: (event: KeyboardEvent) => string;
+};
+
 export type CherryToolbarSeparator = '|';
 
 export type CherryCustomToolbar = string;
@@ -244,7 +291,7 @@ export interface CherryFileUploadHandler {
    * @param file 用户上传的文件对象
    * @param callback 回调函数，接收最终的文件url
    */
-  (file: File, 
+  (file: File,
     /**
      * @param params.name 回填的alt信息
      * @param params.poster 封面图片地址（视频的场景下生效）

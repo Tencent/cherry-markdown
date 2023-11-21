@@ -23,7 +23,7 @@ import { getListFromStr } from '@/utils/regexp';
 export default class Checklist extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('checklist', 'checklist');
+    this.setName('checklist', 'listCheck');
   }
 
   /**
@@ -33,7 +33,9 @@ export default class Checklist extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    const $selection = getSelection(this.editor.editor, selection, 'line', true) || 'Item 1\n    Item 1.1\nItem 2';
+    const $selection =
+      getSelection(this.editor.editor, selection, 'line', true) ||
+      `- [ ] ${this.locale.checkListPrimary}\n- [x] ${this.locale.checkListSecondary}`;
     const [before] = $selection.match(/^\n*/);
     const [after] = $selection.match(/\n*$/);
     return `${before}${getListFromStr($selection, 'checklist')}${after}`;

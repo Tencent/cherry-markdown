@@ -97,11 +97,13 @@ export default class Toolbar {
 
   previewOnly() {
     this.options.dom.classList.add('preview-only');
+    this.$cherry.wrapperDom.classList.add('cherry--no-toolbar');
     Event.emit(this.instanceId, Event.Events.toolbarHide);
   }
 
   showToolbar() {
     this.options.dom.classList.remove('preview-only');
+    this.$cherry.wrapperDom.classList.remove('cherry--no-toolbar');
     Event.emit(this.instanceId, Event.Events.toolbarShow);
   }
 
@@ -131,9 +133,13 @@ export default class Toolbar {
     const fragLeft = document.createDocumentFragment();
 
     this.menus.level1MenusName.forEach((name) => {
+      if (!this.menus.hooks[name]) {
+        return;
+      }
+
       const btn = this.menus.hooks[name].createBtn();
       btn.addEventListener(
-        'click',
+        'pointerup',
         (event) => {
           this.onClick(event, name);
         },

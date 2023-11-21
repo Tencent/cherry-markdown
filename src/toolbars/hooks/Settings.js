@@ -16,6 +16,7 @@
 import MenuBase from '@/toolbars/MenuBase';
 import Event from '@/Event';
 import { saveIsClassicBrToLocal, getIsClassicBrFromLocal, testKeyInLocal } from '@/utils/config';
+import { icons } from '@/assets/icons';
 
 /**
  * 设置按钮
@@ -33,9 +34,9 @@ export default class Settings extends MenuBase {
       ? getIsClassicBrFromLocal()
       : this.engine.$cherry.options.engine.global?.classicBr;
     const { defaultModel } = $cherry.editor.options;
-    const classicBrIconName = classicBr ? 'br' : 'normal';
+    const classicBrIconName = classicBr ? 'break' : 'new-line';
     const classicBrName = classicBr ? 'classicBr' : 'normalBr';
-    const previewIcon = defaultModel === 'editOnly' ? 'preview' : 'previewClose';
+    const previewIcon = defaultModel === 'editOnly' ? 'visible' : 'invisible';
     const previewName = defaultModel === 'editOnly' ? 'togglePreview' : 'previewClose';
     this.instanceId = $cherry.instanceId;
     this.subMenuConfig = [
@@ -80,24 +81,20 @@ export default class Settings extends MenuBase {
    * @param {boolean} isOpen 预览模式是否打开
    */
   togglePreviewBtn(isOpen) {
-    const previewIcon = isOpen ? 'previewClose' : 'preview';
+    const previewIcon = isOpen ? 'invisible' : 'visible';
     const previewName = isOpen ? 'previewClose' : 'togglePreview';
     if (this.subMenu) {
       const dropdown = document.querySelector('.cherry-dropdown[name="settings"]');
       if (dropdown) {
-        const icon = /** @type {HTMLElement} */ (dropdown.querySelector('.ch-icon-previewClose,.ch-icon-preview'));
-        icon.classList.toggle('ch-icon-previewClose');
-        icon.classList.toggle('ch-icon-preview');
-        icon.title = this.locale[previewName];
-        icon.parentElement.innerHTML = icon.parentElement.innerHTML.replace(
-          /<\/i>.+$/,
-          `</i>${this.locale[previewName]}`,
-        );
+        const icon = /** @type {HTMLElement} */ (dropdown.querySelector('.ch-icon-invisible,.ch-icon-visible'));
+        const dropdownItem = icon.parentNode;
+        icon.replaceWith(previewIcon);
+        dropdownItem.textContent = this.locale[previewName];
       }
     } else {
       this.subMenuConfig = this.subMenuConfig.map((item) => {
-        if (item.iconName === 'previewClose' || item.iconName === 'preview') {
-          return { iconName: previewIcon, name: previewName, onclick: this.bindSubClick.bind(this, 'previewClose') };
+        if (item.iconName === 'invisible' || item.iconName === 'visible') {
+          return { iconName: previewIcon, name: previewName, onclick: this.bindSubClick.bind(this, 'invisible') };
         }
         return item;
       });
@@ -134,13 +131,13 @@ export default class Settings extends MenuBase {
         item.classicBr = targetIsClassicBr;
       });
 
-      let i = this.$cherry.wrapperDom.querySelector('.cherry-dropdown .ch-icon-normal');
-      i = i ? i : this.$cherry.wrapperDom.querySelector('.cherry-dropdown .ch-icon-br');
+      let i = this.$cherry.wrapperDom.querySelector('.cherry-dropdown .ch-icon-new-line');
+      i = i ? i : this.$cherry.wrapperDom.querySelector('.cherry-dropdown .ch-icon-break');
       if (targetIsClassicBr) {
-        i.classList.replace('ch-icon-normal', 'ch-icon-br');
+        i.replaceWith(icons.break);
         i.parentElement.childNodes[1].textContent = this.locale.classicBr;
       } else {
-        i.classList.replace('ch-icon-br', 'ch-icon-normal');
+        i.replaceWith(icons.newLine);
         i.parentElement.childNodes[1].textContent = this.locale.normalBr;
       }
       this.engine.$cherry.previewer.update('');

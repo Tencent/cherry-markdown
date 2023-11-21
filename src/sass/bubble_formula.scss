@@ -1,5 +1,5 @@
 .cherry-insert-formula-wrappler {
-  width: 610px !important; // 覆盖默认.cherry-dropdown样式
+  width: 670px !important; // 覆盖默认.cherry-dropdown样式
   height: 300px !important;
   padding: 15px;
   display: flex;
@@ -18,7 +18,7 @@
   }
 
   .cherry-insert-formula-tabs {
-    width: 100px;
+    width: 130px;
     height: 100%;
     list-style: none;
     padding: 0;
@@ -37,7 +37,6 @@
       & > a {
         display: block;
         text-decoration: none;
-        user-select: none;
         user-select: none;
       }
       &:not(:first-child) {
@@ -58,17 +57,18 @@
     display: none;
     overflow-y: scroll;
 
-    .cherry-insert-formula-categary {
+    .cherry-insert-formula-category {
       width: 130px;
       &:not(:first-child) {
         margin-top: 10px;
       }
 
-      .cherry-insert-formula-categary__func {
+      .cherry-insert-formula-category__func {
         min-width: 200px;
         height: 260px;
         position: absolute;
-        left: 255px;
+        left: 295px;
+        right: 0;
         top: 0;
         z-index: 100;
         padding: 20px 10px;
@@ -77,7 +77,7 @@
         display: none;
         overflow-y: scroll;
 
-        .cherry-insert-formula-categary__func-categary {
+        .cherry-insert-formula-category__func-category {
           border-top: 1px solid rgb(233, 236, 239);
           border-bottom: 1px solid rgb(233, 236, 239);
           margin-bottom: 10px;
@@ -86,9 +86,9 @@
           white-space: nowrap;
         }
 
-        .cherry-insert-formula-categary__func-item {
+        .cherry-insert-formula-category__func-item {
           cursor: pointer;
-          border: 1px solid #fff;
+          border: 1px solid #f8f9fa;
           display: inline-block;
           text-align: center;
           background-color: #f8f9fa;
@@ -96,10 +96,10 @@
           padding: 2px;
           vertical-align: middle;
           line-height: 30px;
-          border-color: #f8f9fa;
           border-radius: 5px;
 
-          &:hover {
+          &:hover,
+          &._active {
             border-color: #dae0e5;
             background-color: #e2e6ea;
           }
@@ -108,12 +108,12 @@
           }
         }
 
-        &:hover {
+        &._active {
           display: block;
         }
       }
 
-      .cherry-insert-formula-categary__btn {
+      .cherry-insert-formula-category__btn {
         cursor: pointer;
         display: inline-block;
         font-weight: 400;
@@ -133,11 +133,12 @@
           height: 60%;
         }
 
-        &:hover {
+        &:hover,
+        &._active {
           color: #3582fb;
         }
 
-        &:hover + .cherry-insert-formula-categary__func {
+        .cherry-insert-formula-category__func._active {
           float: left;
           display: block;
         }

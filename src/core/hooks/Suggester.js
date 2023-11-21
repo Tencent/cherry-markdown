@@ -26,6 +26,7 @@ import { Pass } from 'codemirror/src/util/misc';
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import { isBrowser } from '@/utils/env';
+import { icons } from '@/assets/icons';
 
 /**
  * @typedef {import('codemirror')} CodeMirror
@@ -68,9 +69,9 @@ export default class Suggester extends SyntaxBase {
       },
       回填回调 function
       echo(value) {
-            
+
       }]
-     * 
+     *
      */
 
     super({ needCache: true });
@@ -366,7 +367,7 @@ class SuggesterPanel {
         if (typeof suggest === 'object' && suggest !== null) {
           let renderContent = suggest.label;
           if (suggest?.icon) {
-            renderContent = `<i class="ch-icon ch-icon-${suggest.icon}"></i>${renderContent}`;
+            renderContent = `${icons[suggest.icon] || ''} ${renderContent}`;
           }
           return this.renderPanelItem(renderContent, idx === 0);
         }

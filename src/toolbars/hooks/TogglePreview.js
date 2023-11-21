@@ -15,13 +15,15 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import Event from '@/Event';
+import { createIcon } from '@/utils/dom';
 /**
  * 关闭/展示预览区域的按钮
  */
 export default class TogglePreview extends MenuBase {
   /** @type {boolean} 当前预览状态 */
   $previewerHidden = false;
-
+  visibleIcon = createIcon('visible');
+  invisibleIcon = createIcon('invisible');
   constructor($cherry) {
     super($cherry);
     this.setName('previewClose', 'previewClose');
@@ -51,16 +53,14 @@ export default class TogglePreview extends MenuBase {
     if (state === this.$previewerHidden) {
       return;
     }
-    const icon = this.dom.querySelector('i');
-    // 隐藏预览，按钮状态为打开预览
+    this.dom.innerHTML = '';
+
     if (state) {
-      icon.classList.toggle('ch-icon-previewClose', false);
-      icon.classList.toggle('ch-icon-preview', true);
-      icon.title = this.locale.togglePreview;
+      this.dom.appendChild(this.visibleIcon);
+      this.dom.title = this.locale.togglePreview;
     } else {
-      icon.classList.toggle('ch-icon-previewClose', true);
-      icon.classList.toggle('ch-icon-preview', false);
-      icon.title = this.locale.previewClose;
+      this.dom.appendChild(this.invisibleIcon);
+      this.dom.title = this.locale.previewClose;
     }
     this.$previewerHidden = state;
   }

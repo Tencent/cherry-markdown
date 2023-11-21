@@ -19,12 +19,12 @@ import { getSelection } from '@/utils/selection';
 export default class Size extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('size', 'size');
+    this.setName('size', 'font');
     this.subMenuConfig = [
-      { name: '小', noIcon: true, onclick: this.bindSubClick.bind(this, '12') },
-      { name: '中', noIcon: true, onclick: this.bindSubClick.bind(this, '17') },
-      { name: '大', noIcon: true, onclick: this.bindSubClick.bind(this, '24') },
-      { name: '特大', noIcon: true, onclick: this.bindSubClick.bind(this, '32') },
+      { name: this.locale.fontSizeXS, iconName: 'xsmall', onclick: this.bindSubClick.bind(this, '12') },
+      { name: this.locale.fontSizeS, iconName: 'small', onclick: this.bindSubClick.bind(this, '17') },
+      { name: this.locale.fontSizeM, iconName: 'medium', onclick: this.bindSubClick.bind(this, '24') },
+      { name: this.locale.fontSizeL, iconName: 'large', onclick: this.bindSubClick.bind(this, '32') },
     ];
     this.shortKeyMap = {
       'Alt-1': '12',

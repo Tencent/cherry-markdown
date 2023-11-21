@@ -84,6 +84,7 @@ var customMenuC = Cherry.createMenuHook('帮助中心',  {
 
 var basicConfig = {
   id: 'markdown',
+  locale: 'ru_RU',
   externals: {
     echarts: window.echarts,
     katex: window.katex,

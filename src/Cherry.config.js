@@ -155,6 +155,7 @@ const defaultConfig = {
         lineNumber: true, // 默认显示行号
         copyCode: true, // 是否显示“复制”按钮
         editCode: true, // 是否显示“编辑”按钮
+        changeLang: true, // 是否显示“切换语言”按钮
         customRenderer: {
           // 自定义语法渲染器
         },

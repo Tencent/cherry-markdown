@@ -21,7 +21,7 @@ import { getSelection } from '@/utils/selection';
 export default class Quote extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('quote', 'blockquote');
+    this.setName('quote', 'quote');
   }
 
   /**

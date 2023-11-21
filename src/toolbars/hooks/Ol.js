@@ -23,7 +23,7 @@ import { getListFromStr } from '@/utils/regexp';
 export default class Ol extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('ol', 'ol');
+    this.setName('ol', 'listNum');
   }
 
   /**
@@ -33,7 +33,9 @@ export default class Ol extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    const $selection = getSelection(this.editor.editor, selection, 'line', true) || 'Item 1\n    Item 1.1\nItem 2';
+    const $selection =
+      getSelection(this.editor.editor, selection, 'line', true) ||
+      `${this.locale.numberListPrimary}\n    ${this.locale.numberListNested}\n${this.locale.numberListSecondary}`;
     const [before] = $selection.match(/^\n*/);
     const [after] = $selection.match(/\n*$/);
     return `${before}${getListFromStr($selection, 'ol')}${after}`;

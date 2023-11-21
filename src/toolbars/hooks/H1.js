@@ -21,7 +21,7 @@ import { getSelection } from '@/utils/selection';
 export default class H1 extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('h1', 'h1');
+    this.setName('h1', 'heading1');
   }
 
   $testIsHead(selection) {

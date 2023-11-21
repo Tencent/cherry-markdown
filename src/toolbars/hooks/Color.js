@@ -21,7 +21,7 @@ import { getSelection } from '@/utils/selection';
 export default class Color extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('color', 'color');
+    this.setName('color', 'style');
     // this.bubbleMenu = true;
     this.bubbleColor = new BubbleColor($cherry);
   }
@@ -91,7 +91,7 @@ export default class Color extends MenuBase {
       top = clientRect.top + $colorDom.offsetHeight;
       left = /** @type {HTMLElement}*/ (event.target.closest('.cherry-toolbar-color')).offsetLeft + clientRect.left;
     } else {
-      const $colorDom = /** @type {HTMLElement}*/ (event.target.closest('.cherry-toolbar-color'));
+      const $colorDom = /** @type {HTMLElement}*/ (event.target.closest('.cherry-toolbar-style'));
       const clientRect = $colorDom.getBoundingClientRect();
       top = clientRect.top + $colorDom.offsetHeight;
       left = clientRect.left;
@@ -112,6 +112,8 @@ export default class Color extends MenuBase {
 class BubbleColor {
   constructor($cherry) {
     this.editor = $cherry.editor;
+    this.locale = $cherry.locale;
+
     this.init();
     this.initAction();
   }
@@ -214,12 +216,12 @@ class BubbleColor {
     $colorWrap.classList.add('cherry-dropdown');
     const $textWrap = document.createElement('div');
     $textWrap.classList.add('cherry-color-text');
-    $textWrap.innerHTML = this.getFontColorDom('文本颜色');
+    $textWrap.innerHTML = this.getFontColorDom(this.locale.fontColor);
     $colorWrap.appendChild($textWrap);
 
     const $bgWrap = document.createElement('div');
     $bgWrap.classList.add('cherry-color-bg');
-    $bgWrap.innerHTML = this.getFontColorDom('背景颜色');
+    $bgWrap.innerHTML = this.getFontColorDom(this.locale.bgColor);
     $colorWrap.appendChild($bgWrap);
 
     return $colorWrap;

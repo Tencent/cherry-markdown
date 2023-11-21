@@ -22,11 +22,11 @@ import { getListFromStr } from '@/utils/regexp';
 export default class List extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('list', 'list');
+    this.setName('list', 'listDot');
     this.subMenuConfig = [
-      { iconName: 'ol', name: 'ol', onclick: this.bindSubClick.bind(this, '1') },
-      { iconName: 'ul', name: 'ul', onclick: this.bindSubClick.bind(this, '2') },
-      { iconName: 'checklist', name: 'checklist', onclick: this.bindSubClick.bind(this, '3') },
+      { iconName: 'listNum', name: 'ol', onclick: this.bindSubClick.bind(this, '1') },
+      { iconName: 'listDot', name: 'ul', onclick: this.bindSubClick.bind(this, '2') },
+      { iconName: 'listCheck', name: 'checklist', onclick: this.bindSubClick.bind(this, '3') },
     ];
   }
 

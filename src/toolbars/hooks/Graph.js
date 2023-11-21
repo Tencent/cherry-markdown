@@ -19,12 +19,13 @@ function generateExample(title, mermaidCode) {
   return [title, '```mermaid', mermaidCode, '```'].join('\n');
 }
 
-const flowChartContent = [
-  '\tA[公司] -->| 下 班 | B(菜市场)',
-  '\tB --> C{看见<br>卖西瓜的}',
-  '\tC -->|Yes| D[买一个包子]',
-  '\tC -->|No| E[买一斤包子]',
-].join('\n');
+const flowChartContent = (locale) =>
+  [
+    '\tA[公司] -->| 下 班 | B(菜市场)',
+    '\tB --> C{看见<br>卖西瓜的}',
+    '\tC -->|Yes| D[买一个包子]',
+    '\tC -->|No| E[买一斤包子]',
+  ].join('\n');
 
 const flowChartContentEn = [
   '\tA[Company] -->| Finish work | B(Grocery Store)',
@@ -201,27 +202,27 @@ const sampleEn = {
 export default class Graph extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('graph', 'insertChart');
+    this.setName('graph', 'diagram');
     this.noIcon = true;
     this.localeName = $cherry.options.locale;
     this.subMenuConfig = [
       // 流程图
       // 访问[Mermaid 流程图](https://mermaid-js.github.io/mermaid/#/flowchart)参考具体使用方法。
-      { iconName: 'insertFlow', name: 'insertFlow', onclick: this.bindSubClick.bind(this, '1') },
+      { iconName: 'flow', name: 'insertFlow', onclick: this.bindSubClick.bind(this, '1') },
       // 时序图
       // 访问[Mermaid 时序图](https://mermaid-js.github.io/mermaid/#/sequenceDiagram)参考具体使用方法
-      { iconName: 'insertSeq', name: 'insertSeq', onclick: this.bindSubClick.bind(this, '2') },
+      { iconName: 'loop', name: 'insertSeq', onclick: this.bindSubClick.bind(this, '2') },
       // 状态图
       // 访问[Mermaid 状态图](https://mermaid-js.github.io/mermaid/#/stateDiagram)参考具体使用方法
-      { iconName: 'insertState', name: 'insertState', onclick: this.bindSubClick.bind(this, '3') },
+      { iconName: 'state', name: 'insertState', onclick: this.bindSubClick.bind(this, '3') },
       // 类图
       // 访问[Mermaid UML图](https://mermaid-js.github.io/mermaid/#/classDiagram)参考具体使用方法
-      { iconName: 'insertClass', name: 'insertClass', onclick: this.bindSubClick.bind(this, '4') },
+      { iconName: 'class', name: 'insertClass', onclick: this.bindSubClick.bind(this, '4') },
       // 饼图
       // 访问[Mermaid 饼图](https://mermaid-js.github.io/mermaid/#/pie)参考具体使用方法
-      { iconName: 'insertPie', name: 'insertPie', onclick: this.bindSubClick.bind(this, '5') },
+      { iconName: 'pie', name: 'insertPie', onclick: this.bindSubClick.bind(this, '5') },
       // 甘特图
-      { iconName: 'insertGantt', name: 'insertGantt', onclick: this.bindSubClick.bind(this, '6') },
+      { iconName: 'gant', name: 'insertGantt', onclick: this.bindSubClick.bind(this, '6') },
     ];
   }
 

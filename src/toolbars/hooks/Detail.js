@@ -22,7 +22,7 @@ import { getSelection } from '@/utils/selection';
 export default class Detail extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('detail', 'insertFlow');
+    this.setName('detail', 'details');
     this.detailRule = getDetailRule().reg;
   }
 
@@ -34,7 +34,7 @@ export default class Detail extends MenuBase {
   onClick(selection) {
     let $selection =
       getSelection(this.editor.editor, selection, 'line', true) ||
-      '点击展开更多\n内容\n++- 默认展开\n内容\n++ 默认收起\n内容';
+      `${this.locale.detailFirst}\n${this.locale.detailFirstContent}\n++- ${this.locale.detailSecond}\n${this.locale.detailSecondContent}\n++ ${this.locale.detailThird}\n${this.locale.detailThirdContent}`;
     this.detailRule.lastIndex = 0;
     if (!this.detailRule.test($selection)) {
       // 如果没有命中手风琴语法，则尝试扩大选区

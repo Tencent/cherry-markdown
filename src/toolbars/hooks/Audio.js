@@ -21,7 +21,7 @@ import { handleUpload, handleParams } from '@/utils/file';
 export default class Audio extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('audio', 'video');
+    this.setName('audio', 'audio');
   }
 
   /**

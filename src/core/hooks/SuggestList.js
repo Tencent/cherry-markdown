@@ -29,61 +29,61 @@ export const suggesterKeywords = '/·￥、：“”【】（）《》'.concat(a
 /*
  * 系统联想候选表，主要为'、'以及'、'的联想。
  */
-const SystemSuggestList = [
+const SystemSuggestList = (locales) => [
   {
-    icon: 'h1',
-    label: 'H1 Heading',
+    icon: 'heading1',
+    label: 'Заголовок 1',
     keyword: 'head1',
     value: '# ',
   },
   {
-    icon: 'h2',
-    label: 'H2  Heading',
+    icon: 'heading2',
+    label: 'Заголовок 2',
     keyword: 'head2',
     value: '## ',
   },
   {
-    icon: 'h3',
-    label: 'H3  Heading',
+    icon: 'heading3',
+    label: 'Заголовок 3',
     keyword: 'head3',
     value: '### ',
   },
   {
     icon: 'table',
-    label: 'Table',
+    label: 'Таблица',
     keyword: 'table',
-    value: '| Header | Header | Header |\n| --- | --- | --- |\n| Content | Content | Content |\n',
+    value: `| Колонка 1 | Колонка 2 | Колонка 3 |\n| --- | --- | --- |\n| Ячейка | Ячейка | Ячейка |\n`,
   },
   {
     icon: 'code',
-    label: 'Code',
+    label: 'Код',
     keyword: 'code',
     value: '```\n\n```\n',
   },
   {
     icon: 'link',
-    label: 'Link',
+    label: 'Ссылка',
     keyword: 'link',
-    value: `[title](https://url)`,
-    selection: { from: 'title](https://url)'.length, to: '](https://url)'.length },
+    value: `[название](https://url){target=_blank}`,
+    selection: { from: `название](https://url)`.length, to: '](https://url)'.length },
   },
   {
-    icon: 'checklist',
-    label: 'Checklist',
+    icon: 'listCheck',
+    label: 'Контрольный список',
     keyword: 'checklist',
-    value: `- [ ] item\n- [x] item`,
+    value: `- [ ] Невыполненый пункт\n- [x] Выполненный пункт`,
   },
   {
-    icon: 'tips',
-    label: 'Panel',
+    icon: 'alerts',
+    label: 'Панель',
     keyword: 'panel tips info warning danger success',
-    value: `::: primary title\ncontent\n:::\n`,
+    value: `::: Заголовок панели\nТекст сообщения\n:::\n`,
   },
   {
-    icon: 'insertFlow',
-    label: 'Detail',
+    icon: 'details',
+    label: 'Акордеон',
     keyword: 'detail',
-    value: `+++ 点击展开更多\n内容\n++- 默认展开\n内容\n++ 默认收起\n内容\n+++\n`,
+    value: `+++ Название\nДетальное описание\n++- Название\nДетальное описание\n++ Название\nДетальное описание`,
   },
   // {
   //   icon: 'pen',
@@ -268,7 +268,7 @@ const MoreSuggestList = [
  */
 const OtherSuggestList = HalfWidthSuggestList.concat(MoreSuggestList);
 export function allSuggestList(keyword, locales) {
-  const systemSuggestList = [].concat(SystemSuggestList);
+  const systemSuggestList = [].concat(SystemSuggestList(locales));
   const otherSuggestList = [].concat(OtherSuggestList);
   systemSuggestList.forEach((item) => {
     item.label = locales ? locales[item.label] : item.label;

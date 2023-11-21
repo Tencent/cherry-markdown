@@ -20,7 +20,7 @@ import MenuBase from '@/toolbars/MenuBase';
 export default class Br extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('br', 'br');
+    this.setName('br', 'break');
   }
 
   /**

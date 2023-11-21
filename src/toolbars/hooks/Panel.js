@@ -22,7 +22,7 @@ import { getSelection } from '@/utils/selection';
 export default class Panel extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('panel', 'tips');
+    this.setName('panel', 'alerts');
     this.panelRule = getPanelRule().reg;
     this.subMenuConfig = [
       {
