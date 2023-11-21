@@ -186,6 +186,30 @@ export default class Cherry extends CherryStatic {
 
     // 切换模式，有纯预览模式、纯编辑模式、双栏编辑模式
     this.switchModel(this.options.editor.defaultModel);
+
+    // 如果配置了初始化后根据hash自动滚动
+    if (this.options.autoScrollByHashAfterInit) {
+      setTimeout(this.scrollByHash.bind(this));
+    }
+  }
+
+  /**
+   * 滚动到hash位置，实际上就是通过修改location.hash来触发hashChange事件，剩下的就交给浏览器了
+   */
+  scrollByHash() {
+    if (location.hash) {
+      try {
+        const { hash } = location;
+        // 检查是否有对应id的元素
+        const testDom = document.getElementById(hash.replace('#', ''));
+        if (testDom && this.previewer.getDomContainer().contains(testDom)) {
+          location.hash = '';
+          location.hash = hash;
+        }
+      } catch (error) {
+        // empty
+      }
+    }
   }
 
   /**
