@@ -203,6 +203,7 @@ export default class Cherry extends CherryStatic {
         if (this.toolbar) {
           this.toolbar.showToolbar();
         }
+        this.wrapperDom.classList.remove('cherry--no-toolbar');
         break;
       case 'editOnly':
         if (!this.previewer.isPreviewerHidden()) {
@@ -211,10 +212,12 @@ export default class Cherry extends CherryStatic {
         if (this.toolbar) {
           this.toolbar.showToolbar();
         }
+        this.wrapperDom.classList.remove('cherry--no-toolbar');
         break;
       case 'previewOnly':
         this.previewer.previewOnly();
         this.toolbar && this.toolbar.previewOnly();
+        this.wrapperDom.classList.add('cherry--no-toolbar');
         break;
     }
   }
