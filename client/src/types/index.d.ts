@@ -1,5 +1,7 @@
-export type Tag = {
-  label: string,
-  value: string,
-  isChecked: boolean
+export interface CheckedSidePanelType {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  size: number;
 }
