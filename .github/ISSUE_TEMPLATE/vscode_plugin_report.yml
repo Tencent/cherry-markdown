@@ -1,7 +1,7 @@
-name: 🔌 vscodePlugin issue
-description: About vscodePlugin issue
-title: '[vscodePlugin]'
-labels: [vscodePlugin]
+name: 🔌 VSCode Plugin issue
+description: About VSCode Plugin issue
+title: '[VSCode Plugin]'
+labels: [VSCode Plugin]
 body:
   - type: markdown
     attributes:
@@ -11,7 +11,7 @@ body:
     id: type
     attributes:
       label: issue type
-      description: What type of issue is this about vscodePlugin? 
+      description: What type of issue is this about VSCode Plugin? 
       options:
         - Bug
         - Feature
