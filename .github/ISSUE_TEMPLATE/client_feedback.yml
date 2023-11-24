@@ -11,7 +11,7 @@ body:
     id: prerequisites
     attributes:
       label: Prerequisites
-      description: Before submitting the issue, ensure the following:
+      description: 'Before submitting the issue, ensure the following:'
       options:
         - label: There isn't an existing issue that requests the same feature, to avoid duplicates.
   - type: dropdown
