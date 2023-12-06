@@ -508,6 +508,8 @@ export default class Editor {
     if (this.options.writingStyle !== 'normal') {
       this.initWritingStyle();
     }
+    // 处理特殊字符，主要将base64等大文本替换成占位符，以提高可读性
+    this.dealSpecialWords();
   }
 
   /**
