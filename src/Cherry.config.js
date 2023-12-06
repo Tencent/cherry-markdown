@@ -249,6 +249,7 @@ const defaultConfig = {
       autofocus: true,
     },
     writingStyle: 'normal', // 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal
+    keepDocumentScrollAfterInit: true, // 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置
   },
   toolbars: {
     theme: 'dark', // light or dark
