@@ -74,7 +74,13 @@ function sideGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: 'API操作', link: 'api' },
       ]
-    },
+    }, {
+      text: '高级功能',
+      base: '/cherry/advanced/',
+      items: [
+        { text: '自定义语法', link: 'custom-render' },
+      ]
+    }
   ]
 }
 
