@@ -330,6 +330,7 @@ export default class Cherry extends CherryStatic {
    * @param {boolean} keepCursor 是否保持光标位置
    */
   setValue(content, keepCursor = false) {
+    this.editor.storeDocumentScroll();
     if (keepCursor === false) {
       return this.editor.editor.setValue(content);
     }
@@ -607,6 +608,7 @@ export default class Cherry extends CherryStatic {
         }
         // 强制每次编辑（包括undo、redo）编辑器都会自动滚动到光标位置
         codemirror.scrollIntoView(null);
+        this.editor.restoreDocumentScroll();
       }, 50);
     } catch (e) {
       throw new NestedError(e);
