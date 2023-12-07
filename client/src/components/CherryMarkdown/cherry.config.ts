@@ -1,5 +1,6 @@
 import { useStoreCherry } from "@/store/storeCherry";
 import Cherry from "cherry-markdown";
+import { CherryOptions } from "cherry-markdown/types/cherry";
 import { ipcRenderer } from "electron";
 import { onMounted } from "vue";
 
@@ -255,7 +256,7 @@ const initCherryMarkdown = () => {
   };
 
   onMounted(() => {
-    const cherryInstance = new Cherry(defaultConfig);
+    const cherryInstance = new Cherry(defaultConfig as Partial<CherryOptions>);
     storeCherry.cherry = cherryInstance
   })
 }

@@ -48,6 +48,8 @@ export interface CherryOptions {
   autoScrollByCursor: boolean;
   /** 外层容器不存在时，是否强制输出到body上 */
   forceAppend: boolean;
+  /** cherry初始化后是否检查 location.hash 尝试滚动到对应位置 */
+  autoScrollByHashAfterInit: boolean;
   /** 挂载DOM节点ID，引擎模式下不生效 */
   id?: string;
   /** 挂载DOM节点，引擎模式下不生效 */
@@ -132,6 +134,8 @@ export interface CherryEditorOptions {
   codemirror?: object;
   /** 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal */
   writingStyle?: string;
+  /** 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置 */
+  keepDocumentScrollAfterInit?: boolean;
 }
 
 export type CherryLifecycle = (text: string, html: string) => void;
