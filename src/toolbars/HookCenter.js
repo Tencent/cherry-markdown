@@ -62,6 +62,7 @@ import File from './hooks/File';
 import Word from './hooks/Word';
 import Ruby from './hooks/Ruby';
 import Theme from './hooks/Theme';
+import WordCount from './hooks/WordCount';
 // import ChatGpt from './hooks/ChatGpt';
 // Sidebar
 import MobilePreview from './hooks/MobilePreview';
@@ -127,6 +128,7 @@ const HookList = {
   justify: Justify,
   detail: Detail,
   drawIo: DrawIo,
+  wordCount: WordCount,
   // chatgpt: ChatGpt,
 };
 

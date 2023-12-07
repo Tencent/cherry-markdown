@@ -89,4 +89,5 @@ export default {
   justifyLeft: 'Left',
   justifyCenter: 'Center',
   justifyRight: 'Right',
+  wordCount: 'Word Count',
 };

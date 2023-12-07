@@ -169,10 +169,12 @@ export default class Editor {
     let oneSearch = searcher.findNext();
     // 防止出现错误的mark
     editor.getAllMarks().forEach(function (mark) {
-      const range = JSON.parse(JSON.stringify(mark.find()));
-      const markedText = editor.getRange(range.from, range.to);
-      if (mark.className === 'cm-fullWidth' && !regex.test(markedText)) {
-        mark.clear();
+      if (mark.className === 'cm-fullWidth') {
+        const range = JSON.parse(JSON.stringify(mark.find()));
+        const markedText = editor.getRange(range.from, range.to);
+        if (!regex.test(markedText)) {
+          mark.clear();
+        }
       }
     });
     for (; oneSearch !== false; oneSearch = searcher.findNext()) {
@@ -370,10 +372,34 @@ export default class Editor {
   };
 
   /**
+   * 记忆页面的滚动高度，在cherry初始化后恢复到这个高度
+   */
+  storeDocumentScroll() {
+    if (!this.options.keepDocumentScrollAfterInit) {
+      return;
+    }
+    this.needRestoreDocumentScroll = true;
+    this.documentElementScrollTop = document.documentElement.scrollTop;
+    this.documentElementScrollLeft = document.documentElement.scrollLeft;
+  }
+
+  /**
+   * 在cherry初始化后恢复到这个高度
+   */
+  restoreDocumentScroll() {
+    if (!this.options.keepDocumentScrollAfterInit || !this.needRestoreDocumentScroll) {
+      return;
+    }
+    this.needRestoreDocumentScroll = false;
+    window.scrollTo(this.documentElementScrollLeft, this.documentElementScrollTop);
+  }
+
+  /**
    *
    * @param {*} previewer
    */
   init(previewer) {
+    this.storeDocumentScroll();
     const textArea = this.options.editorDom.querySelector(`#${this.options.id}`);
     if (!(textArea instanceof HTMLTextAreaElement)) {
       throw new Error('The specific element is not a textarea.');
@@ -506,6 +532,9 @@ export default class Editor {
     if (this.options.writingStyle !== 'normal') {
       this.initWritingStyle();
     }
+    // 处理特殊字符，主要将base64等大文本替换成占位符，以提高可读性
+    this.dealSpecialWords();
+    this.restoreDocumentScroll();
   }
 
   /**
