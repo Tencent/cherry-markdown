@@ -378,6 +378,7 @@ export default class Editor {
     if (!this.options.keepDocumentScrollAfterInit) {
       return;
     }
+    this.needRestoreDocumentScroll = true;
     this.documentElementScrollTop = document.documentElement.scrollTop;
     this.documentElementScrollLeft = document.documentElement.scrollLeft;
   }
@@ -386,9 +387,10 @@ export default class Editor {
    * 在cherry初始化后恢复到这个高度
    */
   restoreDocumentScroll() {
-    if (!this.options.keepDocumentScrollAfterInit) {
+    if (!this.options.keepDocumentScrollAfterInit || !this.needRestoreDocumentScroll) {
       return;
     }
+    this.needRestoreDocumentScroll = false;
     window.scrollTo(this.documentElementScrollLeft, this.documentElementScrollTop);
   }
 
