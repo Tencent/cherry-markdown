@@ -101,7 +101,6 @@ export default class Suggester extends SyntaxBase {
     this.suggester = {};
     const defaultSuggest = [];
     // 默认的唤醒关键字
-    debugger;
     for (const suggesterKeyword of suggesterKeywords) {
       defaultSuggest.push({
         keyword: suggesterKeyword,

@@ -178,6 +178,10 @@ var basicConfig = {
     toolbarRight: ['fullScreen', '|'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
     sidebar: ['mobilePreview', 'copy', 'theme'],
+    toc: {
+      updateLocationHash: false, // 要不要更新URL的hash
+      defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
+    },
     customMenu: {
       customMenuAName: customMenuA,
       customMenuBName: customMenuB,
