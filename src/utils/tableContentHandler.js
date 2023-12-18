@@ -27,7 +27,7 @@ export default class TableHandler {
     editorDom: {}, // 编辑器容器
   };
 
-  constructor(trigger, target, container, previewerDom, codeMirror) {
+  constructor(trigger, target, container, previewerDom, codeMirror, tableElement) {
     // 触发方式 click / hover
     this.trigger = trigger;
     this.target = target;
@@ -36,6 +36,7 @@ export default class TableHandler {
     this.codeMirror = codeMirror;
     this.$initReg();
     this.$findTableInEditor();
+    this.tableElement = tableElement;
   }
 
   emit(type, event = {}, callback = () => {}) {
@@ -49,7 +50,8 @@ export default class TableHandler {
       case 'previewUpdate':
         return this.$refreshPosition();
       case 'mousedown':
-        return this.trigger !== 'click' && this.$drawDrag();
+        // return this.trigger !== 'click' && this.$drawDrag();
+        return;
       case 'mouseup':
         return this.trigger === 'click' && this.$tryRemoveMe(event, callback);
     }

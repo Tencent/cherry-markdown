@@ -39,7 +39,7 @@ const replacerFactory = function (type, match, leadingChar, alt, link, title, po
     }
     attrs = title && title.trim() !== '' ? ` title="${$e(title)}"` : '';
     if (posterContent) {
-      attrs += ` poster=${encodeURIOnce(posterContent)}`;
+      attrs += ` poster="${encodeURIOnce(posterContent)}"`;
     }
 
     const processedURL = globalConfig.urlProcessor(link, type);

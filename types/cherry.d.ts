@@ -228,6 +228,11 @@ export interface CherryToolbarOptions {
   toolbarRight?:
     | (CherryCustomToolbar | CherryDefaultBubbleToolbar | CherryDefaultBubbleToolbar | CherryDefaultToolbar)[]
     | false;
+  /** 是否展示悬浮目录 */
+  toc?: false | {
+    updateLocationHash: boolean, // 要不要更新URL的hash
+    defaultModel: 'pure' | 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
+  };
   /** 是否展示顶部工具栏 */
   showToolbar?: boolean;
   /** 侧边栏配置 */
