@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.32](https://github.com/Tencent/cherry-markdown/compare/v0.8.30...v0.8.32) (2023-12-18)
+
+
+### Features
+
+* [#658](https://github.com/Tencent/cherry-markdown/issues/658) 增加悬浮目录及相关配置、记忆、回显、跳转等功能 ([308b15b](https://github.com/Tencent/cherry-markdown/commit/308b15b45a697a9761c72936529d06f82670f29e))
+* 目录滚动效果不再依赖scrollIntoView ([6b9fdef](https://github.com/Tencent/cherry-markdown/commit/6b9fdef22c8059f35466b0fe4d353d7ae7ac0a65))
+
+
+### Bug Fixes
+
+* [#667](https://github.com/Tencent/cherry-markdown/issues/667) closed 修复视频封面无法展示的问题 ([b38dc15](https://github.com/Tencent/cherry-markdown/commit/b38dc152bd1319ae32a3f57b9aa38a68869174e0))
+* [#668](https://github.com/Tencent/cherry-markdown/issues/668) [#662](https://github.com/Tencent/cherry-markdown/issues/662) closed 修复表格所见即所得编辑定位的问题，解决方案：先屏蔽拖拽行列的功能 ([ad8e9e4](https://github.com/Tencent/cherry-markdown/commit/ad8e9e452bbd9d1933732e24b4d12e57f812f7b1))
+* 修改@关键字及默认keyword顺序 ([#664](https://github.com/Tencent/cherry-markdown/issues/664)) ([d35f790](https://github.com/Tencent/cherry-markdown/commit/d35f790699e11ba6e9425eda0ed3d457b694938c))
+
 ### [0.8.30--skip.tag](https://github.com/Tencent/cherry-markdown/compare/v0.8.29...v0.8.30--skip.tag) (2023-12-07)
 
 
