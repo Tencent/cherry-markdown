@@ -772,6 +772,130 @@
   cursor: pointer;
 }
 
+.cherry-flex-toc {
+  z-index: 11;
+  position: absolute;
+  width: 160px;
+  height: calc(100% - 220px);
+  max-height: 600px;
+  right: 0;
+  top: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: #FFFFFF33;
+  margin-right: 8px;
+  box-sizing: border-box;
+  user-select: none;
+  box-shadow: 0px 5px 11px #33333333;
+  border-radius: 10px;
+  transition: all 0.3s;
+  &:hover {
+    background-color: #FFF;
+    width: 260px;
+  }
+  .cherry-toc-head {
+    border-bottom: 1px dashed #33333333;
+    padding: 5px;
+    .cherry-toc-title{
+      font-size: 16px;
+      font-weight: bold;
+      padding-left: 5px;
+    }
+    .ch-icon-chevronsLeft {
+      display: none;
+    }
+    .ch-icon-chevronsRight, .ch-icon-chevronsLeft {
+      padding: 5px;
+      position: absolute;
+      right: 0;
+      top:0;
+    }
+    i {
+      cursor: pointer;
+      padding: 5px 5px 0;
+      &:hover {
+        color: #3582fb;
+      }
+    }
+  }
+  .cherry-toc-list {
+    overflow-y: auto;
+    height: calc(100% - 40px);
+    overflow-x: hidden;
+    width: 100%;
+    padding-bottom: 10px;
+    .cherry-toc-one-a {
+      display: block;
+      text-decoration: none;
+      color: #000;
+      border-left: 5px solid #33333333;
+      height: 28px;
+      line-height: 28px;
+      transition: all 0.3s;
+      padding-left: 10px;
+      overflow: hidden;
+      word-break: break-all;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      &.current {
+        border-left-color: #3582fb;
+        color: #3582fb;
+      }
+      &:hover {
+        border-left-color: #3582fbaa;
+        color: #3582fbaa;
+      }
+    }
+    .cherry-toc-one-a__1 {
+      font-weight: bold;
+    }
+    .cherry-toc-one-a__2 {
+      padding-left: 20px;
+    }
+    .cherry-toc-one-a__3 {
+      padding-left: 40px;
+    }
+    .cherry-toc-one-a__4 {
+      padding-left: 60px;
+    }
+    .cherry-toc-one-a__5 {
+      padding-left: 80px;
+    }
+  }
+  &.cherry-flex-toc__pure {
+    width: 30px;
+    height: calc(100% - 200px);
+    max-height: 600px;
+    background: #FFFFFF00;
+    box-shadow: none;
+    border-radius: 0;
+    .cherry-toc-head {
+      height: 25px;
+      border-bottom: 1px dashed #33333300;
+      .cherry-toc-title {
+        display: none;
+      }
+      .ch-icon-chevronsRight {
+        display: none;
+      }
+      .ch-icon-chevronsLeft {
+        display: inline;
+      }
+    }
+    .cherry-toc-list {
+      padding-left: 7px;
+      .cherry-toc-one-a {
+        overflow: hidden;
+        width: 0;
+        margin-bottom: 3px;
+        height: 5px;
+        border-left-width: 18px;
+      }
+    }
+  }
+}
+
 /** 引入自带的主题 */
 @import './themes/default.scss';
 @import './themes/dark.scss';

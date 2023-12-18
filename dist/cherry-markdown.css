@@ -878,6 +878,14 @@ span.CodeMirror-selectedtext {
   content: "\ea6f";
 }
 
+.ch-icon-chevronsLeft:before {
+  content: "\ea70";
+}
+
+.ch-icon-chevronsRight:before {
+  content: "\ea71";
+}
+
 .cherry-markdown {
   word-break: break-all;
   /* Specify class=linenums on a pre to get line numbering */
@@ -3647,6 +3655,130 @@ div[data-type=codeBlock] .token.inserted {
   padding: 1px 4px;
   border-radius: 3px;
   cursor: pointer;
+}
+
+.cherry-flex-toc {
+  z-index: 11;
+  position: absolute;
+  width: 160px;
+  height: calc(100% - 220px);
+  max-height: 600px;
+  right: 0;
+  top: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: rgba(255, 255, 255, 0.2);
+  margin-right: 8px;
+  box-sizing: border-box;
+  user-select: none;
+  box-shadow: 0px 5px 11px rgba(51, 51, 51, 0.2);
+  border-radius: 10px;
+  transition: all 0.3s;
+}
+.cherry-flex-toc:hover {
+  background-color: #FFF;
+  width: 260px;
+}
+.cherry-flex-toc .cherry-toc-head {
+  border-bottom: 1px dashed rgba(51, 51, 51, 0.2);
+  padding: 5px;
+}
+.cherry-flex-toc .cherry-toc-head .cherry-toc-title {
+  font-size: 16px;
+  font-weight: bold;
+  padding-left: 5px;
+}
+.cherry-flex-toc .cherry-toc-head .ch-icon-chevronsLeft {
+  display: none;
+}
+.cherry-flex-toc .cherry-toc-head .ch-icon-chevronsRight, .cherry-flex-toc .cherry-toc-head .ch-icon-chevronsLeft {
+  padding: 5px;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+.cherry-flex-toc .cherry-toc-head i {
+  cursor: pointer;
+  padding: 5px 5px 0;
+}
+.cherry-flex-toc .cherry-toc-head i:hover {
+  color: #3582fb;
+}
+.cherry-flex-toc .cherry-toc-list {
+  overflow-y: auto;
+  height: calc(100% - 40px);
+  overflow-x: hidden;
+  width: 100%;
+  padding-bottom: 10px;
+}
+.cherry-flex-toc .cherry-toc-list .cherry-toc-one-a {
+  display: block;
+  text-decoration: none;
+  color: #000;
+  border-left: 5px solid rgba(51, 51, 51, 0.2);
+  height: 28px;
+  line-height: 28px;
+  transition: all 0.3s;
+  padding-left: 10px;
+  overflow: hidden;
+  word-break: break-all;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.cherry-flex-toc .cherry-toc-list .cherry-toc-one-a.current {
+  border-left-color: #3582fb;
+  color: #3582fb;
+}
+.cherry-flex-toc .cherry-toc-list .cherry-toc-one-a:hover {
+  border-left-color: rgba(53, 130, 251, 0.6666666667);
+  color: rgba(53, 130, 251, 0.6666666667);
+}
+.cherry-flex-toc .cherry-toc-list .cherry-toc-one-a__1 {
+  font-weight: bold;
+}
+.cherry-flex-toc .cherry-toc-list .cherry-toc-one-a__2 {
+  padding-left: 20px;
+}
+.cherry-flex-toc .cherry-toc-list .cherry-toc-one-a__3 {
+  padding-left: 40px;
+}
+.cherry-flex-toc .cherry-toc-list .cherry-toc-one-a__4 {
+  padding-left: 60px;
+}
+.cherry-flex-toc .cherry-toc-list .cherry-toc-one-a__5 {
+  padding-left: 80px;
+}
+.cherry-flex-toc.cherry-flex-toc__pure {
+  width: 30px;
+  height: calc(100% - 200px);
+  max-height: 600px;
+  background: rgba(255, 255, 255, 0);
+  box-shadow: none;
+  border-radius: 0;
+}
+.cherry-flex-toc.cherry-flex-toc__pure .cherry-toc-head {
+  height: 25px;
+  border-bottom: 1px dashed rgba(51, 51, 51, 0);
+}
+.cherry-flex-toc.cherry-flex-toc__pure .cherry-toc-head .cherry-toc-title {
+  display: none;
+}
+.cherry-flex-toc.cherry-flex-toc__pure .cherry-toc-head .ch-icon-chevronsRight {
+  display: none;
+}
+.cherry-flex-toc.cherry-flex-toc__pure .cherry-toc-head .ch-icon-chevronsLeft {
+  display: inline;
+}
+.cherry-flex-toc.cherry-flex-toc__pure .cherry-toc-list {
+  padding-left: 7px;
+}
+.cherry-flex-toc.cherry-flex-toc__pure .cherry-toc-list .cherry-toc-one-a {
+  overflow: hidden;
+  width: 0;
+  margin-bottom: 3px;
+  height: 5px;
+  border-left-width: 18px;
 }
 
 /** 引入自带的主题 */

@@ -128,7 +128,7 @@ export default class PreviewerBubble {
     if (/simple-table/.test(container.className) || !/cherry-table-container/.test(container.className)) {
       return false;
     }
-    return true;
+    return container;
   }
 
   /**
@@ -159,12 +159,15 @@ export default class PreviewerBubble {
         if (!this.$isEnableBubbleAndEditorShow()) {
           return;
         }
-        if (!this.isCherryTable(e.target)) {
+        // eslint-disable-next-line no-case-declarations
+        const table = this.isCherryTable(e.target);
+        if (false === table) {
           return;
         }
         this.removeHoverBubble.cancel();
         this.$removeAllPreviewerBubbles('hover');
-        this.$showTablePreviewerBubbles('hover', e.target);
+        // @ts-ignore
+        this.$showTablePreviewerBubbles('hover', e.target, table);
         return;
       case 'PRE':
       case 'CODE':
@@ -279,10 +282,12 @@ export default class PreviewerBubble {
       case 'TD':
       case 'TH':
         if (target instanceof HTMLElement) {
-          if (!this.isCherryTable(target)) {
+          const table = this.isCherryTable(target);
+          if (false === table) {
             return;
           }
-          this.$showTablePreviewerBubbles('click', target);
+          // @ts-ignore
+          this.$showTablePreviewerBubbles('click', target, table);
         }
         break;
       case 'svg':
@@ -350,9 +355,23 @@ export default class PreviewerBubble {
    * @param {string} trigger 触发方式
    * @param {HTMLElement} htmlElement 用户触发的table dom
    */
-  $showTablePreviewerBubbles(trigger, htmlElement) {
+  $showTablePreviewerBubbles(trigger, htmlElement, tableElement) {
+    if (this.bubbleHandler[trigger]) {
+      if (this.bubbleHandler[trigger].tableElement === tableElement) {
+        // 已经存在相同的target，直接返回
+        this.bubbleHandler[trigger].showBubble();
+        return;
+      }
+    }
     this.$createPreviewerBubbles(trigger, trigger === 'click' ? 'table-content-handler' : 'table-hover-handler');
-    const handler = new TableHandler(trigger, htmlElement, this.bubble[trigger], this.previewerDom, this.editor.editor);
+    const handler = new TableHandler(
+      trigger,
+      htmlElement,
+      this.bubble[trigger],
+      this.previewerDom,
+      this.editor.editor,
+      tableElement,
+    );
     handler.showBubble();
     this.bubbleHandler[trigger] = handler;
   }
