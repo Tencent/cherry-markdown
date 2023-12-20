@@ -58,7 +58,7 @@ Cherry Markdown 有多种样式主题选择
 
 ### 特性展示
 
-这里可以看到特性的简短的演示 [screenshot](./docs/features.md)
+这里可以看到特性的简短的演示 [screenshot](https://github.com/Tencent/cherry-markdown/wiki/%E7%89%B9%E6%80%A7%E5%B1%95%E7%A4%BA-features)
 
 ### 在线体验
 
@@ -216,353 +216,28 @@ registerPlugin().then(() => {
 ```
 
 ## 配置
+所有的配置基本都在/src/Cherry.config.js里进行了标注，具体[看这里](https://github.com/Tencent/cherry-markdown/wiki/%E9%85%8D%E7%BD%AE%E9%A1%B9%E5%85%A8%E8%A7%A3)
 
-### 默认配置
-
-````javascript
-  {
-  // 第三方包
-  externals: {
-    // externals
-  },
-  // 解析引擎配置
-  engine: {
-    // 全局配置
-    global: {
-      // 是否启用经典换行逻辑
-      // true：一个换行会被忽略，两个以上连续换行会分割成段落，
-      // false： 一个换行会转成<br>，两个连续换行会分割成段落，三个以上连续换行会转成<br>并分割段落
-      classicBr: false,
-      /**
-       * 全局的URL处理器
-       * @param {string} url 来源url
-       * @param {'image'|'audio'|'video'|'autolink'|'link'} srcType 来源类型
-       * @returns
-       */
-      urlProcessor: callbacks.urlProcessor,
-      /**
-       * 额外允许渲染的html标签
-       * 标签以英文竖线分隔，如：htmlWhiteList: 'iframe|script|style'
-       * 默认为空，默认允许渲染的html见src/utils/sanitize.js whiteList 属性
-       * 需要注意：
-       *    - 启用iframe、script等标签后，会产生xss注入，请根据实际场景判断是否需要启用
-       *    - 一般编辑权限可控的场景（如api文档系统）可以允许iframe、script等标签
-       */
-      htmlWhiteList: '',
-    },
-    // 内置语法配置
-    syntax: {
-      // 语法开关
-      // 'hookName': false,
-      // 语法配置
-      // 'hookName': {
-      //
-      // }
-      autoLink: {
-        /** 是否开启短链接 */
-        enableShortLink: true,
-        /** 短链接长度 */
-        shortLinkLength: 20,
-      },
-      list: {
-        listNested: false, // 同级列表类型转换后变为子级
-        indentSpace: 2, // 默认2个空格缩进
-      },
-      table: {
-        enableChart: false,
-        // chartRenderEngine: EChartsTableEngine,
-        // externals: ['echarts'],
-      },
-      inlineCode: {
-        theme: 'red',
-      },
-      codeBlock: {
-        theme: 'dark', // 默认为深色主题
-        wrap: true, // 超出长度是否换行，false则显示滚动条
-        lineNumber: true, // 默认显示行号
-        customRenderer: {
-          // 自定义语法渲染器
-        },
-        /**
-         * indentedCodeBlock是缩进代码块是否启用的开关
-         *
-         *    在6.X之前的版本中默认不支持该语法。
-         *    因为cherry的开发团队认为该语法太丑了（容易误触）
-         *    开发团队希望用```代码块语法来彻底取代该语法
-         *    但在后续的沟通中，开发团队发现在某些场景下该语法有更好的显示效果
-         *    因此开发团队在6.X版本中才引入了该语法
-         *    已经引用6.x以下版本的业务如果想做到用户无感知升级，可以去掉该语法：
-         *        indentedCodeBlock：false
-         */
-        indentedCodeBlock: true,
-      },
-      emoji: {
-        useUnicode: true, // 是否使用unicode进行渲染
-      },
-      fontEmphasis: {
-        allowWhitespace: false, // 是否允许首尾空格
-      },
-      strikethrough: {
-        needWhitespace: false, // 是否必须有首位空格
-      },
-      mathBlock: {
-        engine: 'MathJax', // katex或MathJax
-        src: '',
-        plugins: true, // 默认加载插件
-      },
-      inlineMath: {
-        engine: 'MathJax', // katex或MathJax
-        src: '',
-      },
-      toc: {
-        /** 默认只渲染一个目录 */
-        allowMultiToc: false,
-      },
-      header: {
-        /**
-         * 标题的样式：
-         *  - default       默认样式，标题前面有锚点
-         *  - autonumber    标题前面有自增序号锚点
-         *  - none          标题没有锚点
-         */
-        anchorStyle: 'default',
-      },
-    },
-  },
-  editor: {
-    codemirror: {
-      // depend on codemirror theme name: https://codemirror.net/demo/theme.html
-      // 自行导入主题文件: `import 'codemirror/theme/<theme-name>.css';`
-      theme: 'default',
-    },
-    // 编辑器的高度，默认100%，如果挂载点存在内联设置的height则以内联样式为主
-    height: '100%',
-    // defaultModel 编辑器初始化后的默认模式，一共有三种模式：1、双栏编辑预览模式；2、纯编辑模式；3、预览模式
-    // edit&preview: 双栏编辑预览模式
-    // editOnly: 纯编辑模式（没有预览，可通过toolbar切换成双栏或预览模式）
-    // previewOnly: 预览模式（没有编辑框，toolbar只显示“返回编辑”按钮，可通过toolbar切换成编辑模式）
-    defaultModel: 'edit&preview',
-    // 粘贴时是否自动将html转成markdown
-    convertWhenPaste: true,
-  },
-  toolbars: {
-    theme: 'dark', // light or dark
-    showToolbar: true, // false：不展示顶部工具栏； true：展示工具栏; toolbars.showToolbar=false 与 toolbars.toolbar=false 等效
-    toolbar: [
-      'bold',
-      'italic',
-      'strikethrough',
-      '|',
-      'color',
-      'header',
-      '|',
-      'list',
-      {
-        insert: [
-          'image',
-          'audio',
-          'video',
-          'link',
-          'hr',
-          'br',
-          'code',
-          'formula',
-          'toc',
-          'table',
-          'line-table',
-          'bar-table',
-          'pdf',
-          'word',
-        ],
-      },
-      'graph',
-      'settings',
-    ],
-    sidebar: [],
-    bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
-    float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'quickTable', 'code'], // array or false
-  },
-  fileUpload: callbacks.fileUpload,
-  callback: {
-    afterChange: callbacks.afterChange,
-    afterInit: callbacks.afterInit,
-    beforeImageMounted: callbacks.beforeImageMounted,
-  },
-  previewer: {
-    dom: false,
-    className: 'cherry-markdown',
-    // 是否启用预览区域编辑能力（目前支持编辑图片尺寸、编辑表格内容）
-    enablePreviewerBubble: true,
-  },
-  // 预览页面不需要绑定事件
-  isPreviewOnly: false,
-  // 预览区域跟随编辑器光标自动滚动
-  autoScrollByCursor: true,
-  // 外层容器不存在时，是否强制输出到body上
-  forceAppend: true,
-}
-````
-
-### 关闭浮动菜单和气泡菜单
-
-```javascript
-  toolbars: {
-    ... // other config
-    bubble: false, // array or false
-    float: false, // array or false
-  },
-
-```
-
-### 更多信息
-
-如果你想自定义配置信息，可以看这里 [Configuration](./docs/configuration.CN.md)
 
 ## 例子
 
-点击查看 [examples](./examples/)
+点击查看 [各种例子](https://github.com/Tencent/cherry-markdown/wiki)
 
 ### 客户端
 
-[cherry-markdown 桌面客户端](./docs/cherry_editor_client.CN.md)
+正在开发中... ，可见`/client`目录
 
 ## 拓展
 
 ### 自定义语法
-
-#### sentence Syntax
-
-如果编译内容没有额外特殊要求，使用普通语法
-
-```javascript
-/*
- * 生成一个屏蔽敏感词汇的hook
- * 名字叫blockSensitiveWords
- * 匹配规则会挂载到实例的RULE属性上
- */
-let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', Cherry.constants.HOOKS_TYPE_LIST.SEN, {
-  makeHtml(str) {
-    return str.replace(this.RULE.reg, '***');
-  },
-  rule(str) {
-    return {
-      reg: /敏感词汇/g,
-    };
-  },
-});
-new Cherry({
-  id: 'markdown-container',
-  value: '# welcome to cherry editor!',
-  engine: {
-    customSyntax: {
-      // 注入编辑器的自定义语法中
-      BlockSensitiveWordsHook: {
-        syntaxClass: BlockSensitiveWordsHook,
-        // 有同名hook则强制覆盖
-        force: true,
-        // 在处理图片的hook之前调用
-        // before: 'image',
-      },
-    },
-  },
-});
-```
-
-#### paragraph Syntax
-
-如果编译内容要求不受外界影响，则使用段落语法
-
-```javascript
-/*
- * 生成一个屏蔽敏感词汇的hook
- * 名字叫blockSensitiveWords
- * 匹配规则会挂载到实例的RULE属性上
- */
-let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
-  // 开启缓存，用于保护内容
-  needCache: true,
-  // 预处理文本，避免受影响
-  beforeMakeHtml(str) {
-    return str.replace(this.RULE.reg, (match, code) => {
-      const lineCount = (match.match(/\n/g) || []).length;
-      const sign = this.$engine.md5(match);
-      const html = `<div data-sign="${sign}" data-lines="${lineCount + 1}" >***</div>`;
-      return this.pushCache(html, sign, lineCount);
-    });
-  },
-  makeHtml(str, sentenceMakeFunc) {
-    return str;
-  },
-  rule(str) {
-    return {
-      reg: /sensitive words/g,
-    };
-  },
-});
-new Cherry({
-  id: 'markdown-container',
-  value: '# welcome to cherry editor!',
-  engine: {
-    customSyntax: {
-      // 注入编辑器的自定义语法中
-      BlockSensitiveWordsHook: {
-        syntaxClass: BlockSensitiveWordsHook,
-        // 有同名hook则强制覆盖
-        force: true,
-        // 在处理图片的hook之前调用
-        // before: 'image',
-      },
-    },
-  },
-});
-```
+可以看[这里](https://github.com/Tencent/cherry-markdown/wiki/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E6%B3%95)
 
 ### 自定义工具栏
+cherry有**五种**工具栏位置，如下：
+![cherry工具栏](https://github.com/Tencent/cherry-markdown/assets/998441/fecbc23c-5e85-4072-9dc5-8c71faa9d700)
 
-```javascript
-/*
- * 生成一个添加前缀模板的hook
- * 名字叫AddPrefixTemplate
- * 图标类名icon-add-prefix
- */
-let AddPrefixTemplate = Cherry.createMenuHook('AddPrefixTemplate', 'icon-add-prefix', {
-  onClick(selection) {
-    return 'Prefix-' + selection;
-  },
-});
-new Cherry({
-  id: 'markdown-container',
-  value: '# welcome to cherry editor!',
-  toolbars: {
-    toolbar: [
-      'bold',
-      // ...其他菜单项
-      // @see src/Cherry.config.js
-      'settings',
-      'addPrefix', // 在顶部菜单栏的尾部添加自定义菜单项
-    ],
-    bubble: [
-      'bold' /** ...其他菜单项 */,
-      ,
-      'color',
-      'addPrefix', // 在气泡菜单（选中文本时出现）的尾部添加自定义菜单项
-    ], // array or false
-    float: [
-      'h1' /** ...其他菜单项 */,
-      ,
-      'code',
-      'addPrefix', // 在浮动菜单（在新的空行出现）的尾部添加自定义菜单项
-    ], // array or false
-    customMenu: {
-      // 注入编辑器的菜单中
-      // 对象 key 可以作为菜单项的名字（需要保证唯一），在上方的配置中使用
-      addPrefix: AddPrefixTemplate,
-    },
-  },
-});
-```
+每个位置都可以增加自定义工具栏，具体可以看[这里](https://github.com/Tencent/cherry-markdown/wiki/%E8%B0%83%E6%95%B4%E5%B7%A5%E5%85%B7%E6%A0%8F#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B7%A5%E5%85%B7%E6%A0%8F%E6%8C%89%E9%92%AE)
 
-如果你想看更多有关 cherry markdown 的拓展信息，可以看这里 [extensions](./docs/extensions.CN.md).
 
 ## 单元测试
 
@@ -597,7 +272,7 @@ CommonMark 规范及测试用例可参考：https://spec.commonmark.org/ 。
 
 ## Contributing
 
-欢迎加入我们打造强大的 Markdown 编辑器。当然你也可以给我们提交特性需求的 issue。 在写特性功能之前，你需要了解 [extensions](./docs/extensions.CN.md) 以及 [commit_convention](./docs/commit_convention.CN.md).
+欢迎加入我们打造强大的 Markdown 编辑器。当然你也可以给我们提交特性需求的 issue。 在写特性功能之前，你需要了解 [这些内容](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8#%E4%BB%8E%E5%BC%80%E5%A7%8B%E5%88%B0%E4%B8%8B%E7%8F%AD)
 
 ## License
 
