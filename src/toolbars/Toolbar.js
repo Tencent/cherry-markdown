@@ -134,13 +134,33 @@ export default class Toolbar {
 
     this.menus.level1MenusName.forEach((name) => {
       const btn = this.menus.hooks[name].createBtn();
-      btn.addEventListener(
-        'pointerup',
-        (event) => {
-          this.onClick(event, name);
-        },
-        false,
-      );
+      if (typeof window === 'object' && 'onpointerup' in window) {
+        // 只有先down再up的才触发click逻辑，避免误触（尤其是float menu的场景）
+        btn.addEventListener(
+          'pointerdown',
+          () => {
+            this.isPointerDown = true;
+          },
+          false,
+        );
+        btn.addEventListener(
+          'pointerup',
+          (event) => {
+            this.isPointerDown && this.onClick(event, name);
+            this.isPointerDown = false;
+          },
+          false,
+        );
+      } else {
+        // vscode 插件里不支持 pointer event
+        btn.addEventListener(
+          'click',
+          (event) => {
+            this.onClick(event, name);
+          },
+          false,
+        );
+      }
       if (this.isHasSubMenu(name)) {
         btn.classList.add('cherry-toolbar-dropdown');
       }
