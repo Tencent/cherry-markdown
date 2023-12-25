@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.33](https://github.com/Tencent/cherry-markdown/compare/v0.8.32...v0.8.33) (2023-12-25)
+
+
+### Bug Fixes
+
+* 额外兼容node场景 ([0d04a68](https://github.com/Tencent/cherry-markdown/commit/0d04a680f88fefd5516b9325e16adf59990b16ea))
+* 修复pointer event导致的误触，兼容浏览器不支持pointer event的情况 ([08965e5](https://github.com/Tencent/cherry-markdown/commit/08965e5dc05e2036c2443ed0ba089f4014c180e9))
+
+### [0.8.31](https://github.com/Tencent/cherry-markdown/compare/v0.8.30...v0.8.31) (2023-12-07)
+
 ### [0.8.32](https://github.com/Tencent/cherry-markdown/compare/v0.8.30...v0.8.32) (2023-12-18)
 
 
