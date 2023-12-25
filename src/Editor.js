@@ -265,6 +265,7 @@ export default class Editor {
    * @returns {boolean | void}
    */
   handlePaste(event, clipboardData, codemirror) {
+    this.pasterHtml = false;
     const { items } = clipboardData;
     const types = clipboardData.types || [];
     const codemirrorDoc = codemirror.getDoc();
@@ -279,7 +280,13 @@ export default class Editor {
             return;
           }
           const mdStr = handleFileUploadCallback(url, params, file);
-          codemirrorDoc.replaceSelection(mdStr);
+          if (this.pasterHtml) {
+            const { line, ch } = codemirror.getCursor();
+            codemirror.setSelection({ line, ch }, { line, ch });
+            codemirrorDoc.replaceSelection(`\n${mdStr}`, 'end');
+          } else {
+            codemirrorDoc.replaceSelection(mdStr);
+          }
         });
         event.preventDefault();
       }
@@ -291,21 +298,13 @@ export default class Editor {
     if (!html || !this.options.convertWhenPaste) {
       return true;
     }
-    /**
-     * 这里需要处理一个特殊逻辑：
-     *    从excel中复制而来的内容，剪切板里会有一张图片（一个<img>元素）和一段纯文本，在这种场景下，需要丢掉图片，直接粘贴纯文本
-     * 与此同时，当剪切板里有图片和其他html标签时（从web页面上复制的内容），则需要走下面的html转md的逻辑
-     * 基于上述两个场景，才有了下面四行奇葩的代码
-     */
-    const test = html.replace(/<(html|head|body|!)/g, '');
-    if (test.match(/<[a-zA-Z]/g)?.length <= 1 && /<img/.test(test)) {
-      return true;
-    }
+
     let divObj = document.createElement('DIV');
     divObj.innerHTML = html;
     html = divObj.innerHTML;
     const mdText = htmlParser.run(html);
     if (typeof mdText === 'string' && mdText.trim().length > 0) {
+      this.pasterHtml = true;
       const range = codemirror.listSelections();
       if (codemirror.getSelections().length <= 1 && range[0] && range[0].anchor) {
         const currentCursor = {};

@@ -100,8 +100,7 @@ const htmlParser = {
       // 递归每一个子元素
       tmpText = self.$dealHtml(obj.children);
     }
-    if (obj.name === 'style') {
-      // 不解析样式属性，只处理行内样式
+    if (/(style|meta|link|script)/.test(obj.name)) {
       return '';
     }
     if (obj.name === 'code' || obj.name === 'pre') {
@@ -791,23 +790,41 @@ const htmlParser = {
       return `^^${str.trim().replace(/\^\^/g, '\\^\\^')}^^`;
     },
     convertTd(str) {
-      return `~|${str.trim().replace(/\n{1,}/g, '<br>')} ~|`;
+      return `~|${str
+        .trim()
+        .replace(/\n{1,}/g, '<br>')
+        .replace(/ /g, '~s~')} ~|`;
     },
     convertTh(str) {
+      if (/^\s*$/.test(str)) {
+        return '';
+      }
       return `~|${str.trim().replace(/\n{1,}/g, '<br>')} ~|`;
     },
     convertTr(str) {
-      return `${str.replace(/\n/g, '')}\n`;
+      if (/^\s*$/.test(str)) {
+        return '';
+      }
+      return `${str.trim().replace(/\n/g, '')}\n`;
     },
     convertThead(str) {
-      return `${str.replace(/~\|~\|/g, '~|').replace(/~\|/g, '|')}|:--|\n`;
+      const $str = `${str
+        .trim()
+        .replace(/~\|[ \t]*~\|/g, '~|')
+        .replace(/~\|/g, '|')}\n`;
+      const headsCount = $str.match(/\|/g).length - 1;
+      return `${$str}|${':-:|'.repeat(headsCount)}\n`;
     },
     convertTable(str) {
-      const ret = `\n${str.replace(/~\|~\|/g, '~|').replace(/~\|/g, '|')}\n`.replace(/\n{2,}/g, '\n');
-      if (/\|:--\|/.test(ret)) {
-        return ret;
+      const $str = str.replace(/^\s+/gm, '').replace(/~s~/g, ' ');
+      let ret = `\n${$str.replace(/~\|[ \t]*~\|/g, '~|').replace(/~\|/g, '|')}\n`
+        .replace(/\n{2,}/g, '\n')
+        .replace(/\n[ \t]+\n/g, '\n');
+      if (!/\|:-:\|/.test(ret)) {
+        const headsCount = ret.match(/^\n[^\n]+\n/)[0].match(/\|/g).length - 1;
+        ret = `\n|${' |'.repeat(headsCount)}\n|${':-:|'.repeat(headsCount)}${ret}`;
       }
-      return `\n| |\n|:--|${ret}`;
+      return ret;
     },
     convertLi(str) {
       return `- ${str.replace(/^\n/, '').replace(/\n+$/, '').replace(/\n+/g, '\n\t')}\n`;
