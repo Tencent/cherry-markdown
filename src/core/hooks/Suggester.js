@@ -487,7 +487,7 @@ class SuggesterPanel {
    * @param {KeyboardEvent} evt 键盘事件
    */
   pasteSelectResult(idx, evt) {
-    if (!this.cursorTo) {
+    if (!this.cursorTo || this.cursorTo === this.cursorFrom) {
       this.cursorTo = JSON.parse(JSON.stringify(this.cursorFrom));
     }
     if (!this.cursorTo) {
