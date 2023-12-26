@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import juice from 'juice';
+// import juice from 'juice';
 import MenuBase from '@/toolbars/MenuBase';
 import { copyToClip } from '@/utils/copy';
 /**
@@ -104,11 +104,10 @@ export default class Copy extends MenuBase {
     // 将css样式以行内样式的形式插入到html内容里
     this.adaptWechat(html).then((html) => {
       copyToClip(
-        juice(
-          `<div data-inline-code-theme="${inlineCodeTheme}" data-code-block-theme="${codeBlockTheme}">
-            <div class="cherry-markdown">${html}</div>
-          </div>${mathStyle + echartStyle + cherryStyle}`,
-        ),
+        `${mathStyle + echartStyle + cherryStyle}
+        <div data-inline-code-theme="${inlineCodeTheme}" data-code-block-theme="${codeBlockTheme}">
+          <div class="cherry-markdown">${html}</div>
+        </div>`,
       );
       this.toggleLoading();
     });
