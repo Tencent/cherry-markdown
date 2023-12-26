@@ -809,17 +809,20 @@ const htmlParser = {
     },
     convertThead(str) {
       const $str = `${str
-        .trim()
-        .replace(/~\|[ \t]*~\|/g, '~|')
+        .replace(/[ \t]+/g, '')
+        .replace(/~\|~\|/g, '~|')
         .replace(/~\|/g, '|')}\n`;
       const headsCount = $str.match(/\|/g).length - 1;
       return `${$str}|${':-:|'.repeat(headsCount)}\n`;
     },
     convertTable(str) {
-      const $str = str.replace(/^\s+/gm, '').replace(/~s~/g, ' ');
-      let ret = `\n${$str.replace(/~\|[ \t]*~\|/g, '~|').replace(/~\|/g, '|')}\n`
+      let ret = `\n${str
+        .replace(/[ \t]+/g, '')
+        .replace(/~\|~\|/g, '~|')
+        .replace(/~\|/g, '|')}\n`
         .replace(/\n{2,}/g, '\n')
-        .replace(/\n[ \t]+\n/g, '\n');
+        .replace(/\n[ \t]+\n/g, '\n')
+        .replace(/~s~/g, ' ');
       if (!/\|:-:\|/.test(ret)) {
         const headsCount = ret.match(/^\n[^\n]+\n/)[0].match(/\|/g).length - 1;
         ret = `\n|${' |'.repeat(headsCount)}\n|${':-:|'.repeat(headsCount)}${ret}`;
