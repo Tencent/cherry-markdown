@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.34](https://github.com/Tencent/cherry-markdown/compare/v0.8.32...v0.8.34) (2023-12-26)
+
+
+### Bug Fixes
+
+* [#657](https://github.com/Tencent/cherry-markdown/issues/657) closed 修复复制按钮点击报错问题 ([de3f368](https://github.com/Tencent/cherry-markdown/commit/de3f36859e58e2171726346a69fb58030e724b3b))
+* [#673](https://github.com/Tencent/cherry-markdown/issues/673) closed 修复粘贴excel只有图片的问题 ([9f46d5e](https://github.com/Tencent/cherry-markdown/commit/9f46d5e667e44d96f546bd0064332a37b212f184))
+* 额外兼容node场景 ([0d04a68](https://github.com/Tencent/cherry-markdown/commit/0d04a680f88fefd5516b9325e16adf59990b16ea))
+* 修复pointer event导致的误触，兼容浏览器不支持pointer event的情况 ([08965e5](https://github.com/Tencent/cherry-markdown/commit/08965e5dc05e2036c2443ed0ba089f4014c180e9))
+* 重构表格逆解析时，处理空格的逻辑 ([49e4907](https://github.com/Tencent/cherry-markdown/commit/49e49072f3224a04e07db2bb026a41db1302c0ea))
+
+### [0.8.31](https://github.com/Tencent/cherry-markdown/compare/v0.8.30...v0.8.31) (2023-12-07)
+
 ### [0.8.33](https://github.com/Tencent/cherry-markdown/compare/v0.8.32...v0.8.33) (2023-12-25)
 
 
