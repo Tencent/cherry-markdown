@@ -8,15 +8,14 @@ type CherryToc = {
 }
 
 /**
- * 
  * @param cherry - Cherry 实例
  * @param cherryMarkdown - CherryMarkdown 的 markdown 文本
+ * @param cherryMarkdownHtml - CherryMarkdown 的 markdown 转换成的 html 文本
  */
 type CherryState = {
   cherry: Cherry | null;
   cherryMarkdown: string;
   cherryMarkdownHtml: string;
-  cherryToc: CherryToc[];
 }
 
 export const useStoreCherry = defineStore('cherry', {
@@ -24,6 +23,5 @@ export const useStoreCherry = defineStore('cherry', {
     cherry: null,
     cherryMarkdown: '',
     cherryMarkdownHtml: '',
-    cherryToc: [],
   }),
 })

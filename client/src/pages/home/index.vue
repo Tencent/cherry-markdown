@@ -8,7 +8,7 @@
 <script setup lang="ts">
 import CherryMarkdown from "@/components/CherryMarkdown/index.vue"
 import SidePanel from "@/pages/sidePanel/index.vue"
-import SideTagList from "@/pages/sideTagList/index.vue"
+import SideTagList from "@/pages/sidePanel/tagList.vue"
 import { ipcRenderer } from "electron";
 import { ref } from "vue";
 

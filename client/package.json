@@ -36,7 +36,7 @@
     "vue-tsc": "^1.8.22"
   },
   "dependencies": {
-    "cherry-markdown": "^0.8.27",
+    "cherry-markdown": "^0.8.34",
     "pinia": "^2.1.7",
     "tdesign-vue-next": "^1.6.8",
     "vue": "^3.3.8"
