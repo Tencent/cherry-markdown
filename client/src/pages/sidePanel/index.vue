@@ -9,7 +9,6 @@
         <Icon icon="icon-park-outline:left-bar" class="side-panel__title--right" @click="sidePanelChange" />
       </div>
       <div class="side-panel--operation-area">
-        <Toc />
         <Files />
       </div>
     </div>
@@ -17,7 +16,6 @@
 </template>
 <script setup lang="ts">
 import Files from "./components/Files/index.vue";
-import Toc from "./components/Toc/index.vue";
 import { Icon } from "@iconify/vue";
 import { useStoreSidePanel } from "@/store/storeSidePanel";
 
