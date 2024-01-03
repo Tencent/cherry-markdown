@@ -1,4 +1,5 @@
 # 例子
+
 > [Github 地址](https://github.com/Tencent/cherry-markdown){target=_blank}
 
 - [full model](index.html){target=_blank}
@@ -33,7 +34,7 @@
 
 **示例**
 
-```
+```markdown
 [!!#ff0000 红色超链接!!](http://www.qq.com)
 [!!#ffffff !!!#000000 黑底白字超链接!!!!!](http://www.qq.com)
 [新窗口打开](http://www.qq.com){target=_blank}
@@ -72,7 +73,7 @@
 
 **示例**
 
-```
+```markdown
 这是 [腾讯网](https://www.qq.com) 的链接。
 这是 [一个引用的][引用一个链接] 的链接。
 这是一个包含中文的链接<https://www.qq.com?param=中文>，中文
@@ -85,9 +86,9 @@
 这是 [腾讯网](https://www.qq.com) 的链接。
 这是 [一个引用的][引用一个链接] 的链接。
 这是一个包含中文的链接<https://www.qq.com?param=中文>，中文
-直接识别成链接：https://www.qq.com?param=中文，中文 用空格结束
+直接识别成链接：<https://www.qq.com?param=中文，中文> 用空格结束
 [引用一个链接]
-[引用一个链接]: https://www.qq.com
+[引用一个链接]: <https://www.qq.com>
 
 ---
 
@@ -99,7 +100,7 @@
 
 **示例**
 
-```
+```markdown
 - 无序列表项 一`默认`
 - 无序列表项 二
   - 无序列表2.1
@@ -110,7 +111,6 @@
 - 无序列表四
   * 无序列表4.1`实心方块`
   * 无序列表4.2
-
 ```
 
 **效果**
@@ -120,11 +120,11 @@
   - 无序列表2.1
   - 无序列表2.2
 - 无序列表项 三
-  + 无序列表3.1`空心圆`
-  + 无序列表3.1
+  - 无序列表3.1`空心圆`
+  - 无序列表3.1
 - 无序列表四
-  * 无序列表4.1`实心方块`
-  * 无序列表4.2
+  - 无序列表4.1`实心方块`
+  - 无序列表4.2
 
 ---
 
@@ -136,7 +136,7 @@
 
 **示例**
 
-```
+```markdown
 1. 有序列表项 一`阿拉伯数字`
 1. 有序列表项 二
   I. 有序列表项 2.1`罗马数字`
@@ -178,7 +178,7 @@
 
 **示例**
 
-```
+```markdown
 > 野火烧不尽，春风吹又生
 ```
 
@@ -213,7 +213,7 @@
 
 **效果**
 
-```
+```markdown
     这是一个代码块
     有两行
 ```
@@ -230,7 +230,7 @@
 
 **示例**
 
-```
+```markdown
 标准图片  ![一条dog#100px](images/demo-dog.png)
 设置图片大小(相对大小&绝对大小)  ![一条dog#10%#50px](images/demo-dog.png)
 设置图片对齐方式：
@@ -261,8 +261,8 @@
 开心也是一天，不开心也是一天
 这样就过了两天，汪
 
-
 > 属性释义：
+
 - 宽度：第一个 `#100px` 或 `#10%` 或 `#auto`
 - 高度：第二个 `#100px` 或 `#10%` 或 `#auto`
 - 左对齐：`#left`
@@ -292,7 +292,8 @@
 
 **说明**
 使用连续三个冒号`:::`和关键字（`[primary | info | warning | danger | success]`）来声明
-```
+
+```markdown
 :::primary // [primary | info | warning | danger | success] 标题
 内容
 :::
@@ -306,14 +307,14 @@
 内容
 :::
 
-
 ---
 
 ## 手风琴
 
 **说明**
 使用连续三个加号`+++`和关键字（`[ + | - ]`）来声明，关键字`+`表示默认收起，关键字`-`表示默认展开
-```
+
+```markdown
 +++ 点击展开更多
 内容
 ++- 默认展开
@@ -331,7 +332,6 @@
 ++ 默认收起
 内容
 +++
-
 
 ---
 
@@ -345,8 +345,8 @@
 **效果**
 非代码示例：
 
-```
-$ sudo apt-get install vim-gnome
+```bash
+sudo apt-get install vim-gnome
 ```
 
 Python 示例：
@@ -399,7 +399,7 @@ document.write(fib(10));
 
 **示例**
 
-```
+```markdown
 - [ ] AAA
 - [x] BBB
 - [ ] CCC
@@ -422,7 +422,7 @@ document.write(fib(10));
 
 **示例**
 
-```
+```markdown
 块级公式：$$
 \begin{aligned}
 P(B|A)&=\frac{P(AB)}{P(A)}\\
@@ -442,48 +442,46 @@ P(\overline{B}|A)&=1-P(B|A)=1-\frac{P(AB)}{P(A)}
 $$
 行内公式： $e=mc^2$
 
-
 -----
 
-
-
 ## 插入音视频
+
 **说明**
 - 使用 `!v[描述](视频链接地址)` 插入视频
     - 使用 `!v[描述](视频链接地址){poster=封面地址}` 插入视频并配上封面
 - 使用 `!audio[描述](视频链接地址)` 插入音频
 
-
 **示例**
 
-```
+```markdown
 这是个演示视频  !video[不带封面演示视频](images/demo.mp4)
 这是个演示视频  !video[带封面演示视频](images/demo.mp4){poster=images/demo-dog.png}
 这是个假音频!audio[描述](视频链接地址)
 ```
+
 **效果**
 
 这是个演示视频  !video[不带封面演示视频](images/demo.mp4)
 这是个演示视频  !video[带封面演示视频](images/demo.mp4){poster=images/demo-dog.png}
 这是个假音频!audio[描述](视频链接地址)
 
-
 -----
-
 
 ## 带对齐功能的表格
 **说明**
 - 一种比较通用的markdown表格语法
 
-
 **示例**
-```
+
+```markdown
 |项目（居中对齐）|价格（右对齐）|数量（左对齐）|
 |:-:|-:|:-|
 |计算机|￥1600|5|
 |手机机|￥12|50|
 ```
+
 **效果**
+
 |项目（居中对齐）|价格（右对齐）|数量（左对齐）|
 |:-:|-:|:-|
 |计算机|￥1600|5|
@@ -491,16 +489,16 @@ $$
 
 -----
 
-
 ## 流程图[^不通用提醒]
+
 **说明**
 - 访问[Mermaid 流程图](https://mermaid-js.github.io/mermaid/#/flowchart)参考具体使用方法。
-
 
 **效果**
 小明老婆让小明下班时买一斤包子，如果遇到卖西瓜的，买一个。
 
 左右结构
+
 ```mermaid
 graph LR
     A[公司] -->| 下 班 | B(菜市场)
@@ -508,7 +506,9 @@ graph LR
     C -->|Yes| D[买一个包子]
     C -->|No| E[买一斤包子]
 ```
+
 上下结构
+
 ```mermaid
 graph TD
     A[公司] -->| 下 班 | B(菜市场)
@@ -517,17 +517,14 @@ graph TD
     C -->|No| E[买一斤包子]
 ```
 
-
 -----
-
-
 
 ## 时序图[^不通用提醒]
 **说明**
 - 访问[Mermaid 时序图](https://mermaid-js.github.io/mermaid/#/sequenceDiagram)参考具体使用方法
 
-
 **效果**
+
 ```mermaid
 sequenceDiagram
 A-->A: 文本1
@@ -543,17 +540,14 @@ B -->> B: 文本5
 end
 ```
 
-
 -----
-
-
 
 ## 状态图[^不通用提醒]
 **说明**
 - 访问[Mermaid 状态图](https://mermaid-js.github.io/mermaid/#/stateDiagram)参考具体使用方法
 
-
 **效果**
+
 ```mermaid
 stateDiagram
 [*] --> A
@@ -567,17 +561,14 @@ B --> [*]
 C --> [*]
 ```
 
-
 -----
-
-
 
 ## UML图[^不通用提醒]
 **说明**
 - 访问[Mermaid UML图](https://mermaid-js.github.io/mermaid/#/classDiagram)参考具体使用方法
 
-
 **效果**
+
 ```mermaid
 classDiagram
 Base <|-- One
@@ -595,17 +586,14 @@ class Two{
 }
 ```
 
-
 -----
-
-
 
 ## 饼图[^不通用提醒]
 **说明**
 - 访问[Mermaid 饼图](https://mermaid-js.github.io/mermaid/#/pie)参考具体使用方法
 
-
 **效果**
+
 ```mermaid
 pie
 title 饼图
@@ -615,10 +603,7 @@ title 饼图
 "D" : 10
 ```
 
-
 -----
-
-
 
 ## 注释[^不通用提醒]
 **说明**
@@ -626,9 +611,9 @@ title 饼图
 - 使用中括号+尖号+冒号（[^]:）生成多行注释
 - 多行注释以连续两次回车结束
 
-
 **示例**
-```
+
+```markdown
 下面是一行单行注释
 [注释摘要]: 这是一段注释，不会显示到页面上
 上面面是一行单行注释
@@ -640,6 +625,7 @@ title 饼图
 
 上面是多行注释
 ```
+
 **效果**
 下面是一行单行注释
 [注释摘要]: 这是一段注释，不会显示到页面上
@@ -652,10 +638,7 @@ title 饼图
 
 上面是多行注释
 
-
 -----
-
-
 
 ## 脚注[^不通用提醒]
 **说明**
@@ -663,8 +646,8 @@ title 饼图
 - 脚注中括号中的数字以引用脚注的顺序自动生成
 - 点击脚注的数字可以跳转到脚注详情或回到引用脚注位置
 
-
 **示例**
+
 ```
 这里需要一个脚注[^脚注别名1]，另外这里也需要一个脚注[^another]。
 [^脚注别名1]: 无论脚注内容写在哪里，脚注的内容总会显示在页面最底部
@@ -674,6 +657,7 @@ title 饼图
 >比如 !!#ff0000 这里!!有一段**引用**
 
 ```
+
 **效果**
 这里需要一个脚注[^脚注别名1]，另外这里也需要一个脚注[^another]。
 [^脚注别名1]: 无论脚注内容写在哪里，脚注的内容总会显示在页面最底部
@@ -682,55 +666,45 @@ title 饼图
 [^another]: 另外，脚注里也可以使用一些简单的markdown语法
 >比如 !!#ff0000 这里!!有一段**引用**
 
-
 -----
-
 
 # 编辑器操作能力
 
-
 -----
-
 
 ## 通过快捷按钮修改字体样式
 ![bubble menu](images/feature_font.png)
 
-
 -----
-
-
 
 ## 复制html内容，粘贴成markdown
 **说明**
 - 粘贴html内容时会自动转成markdown，也可以选择粘贴为纯文本格式
 - 可以拖拽调整预览区域的宽度
 
-
 ![copy and paste](images/feature_copy.gif)
-
 
 -----
 
-
 ## 快捷键
-| 功能| 按键|
+
+| 功能| 按键(Windows) | 按键(macOS) |
 |--|--|
-|1级标题|    `Ctrl + 1`|
-|2级标题|    `Ctrl + 2`|
-|3级标题|    `Ctrl + 3`|
-|4级标题|    `Ctrl + 4`|
-|5级标题|    `Ctrl + 5`|
-|6级标题|    `Ctrl + 6`|
-|加粗|    `Ctrl + b`|
-|斜体|    `Ctrl + i`	|
-|插入链接|    `Ctrl + l`	|
-|插入代码块|    `Ctrl + k`	|
-|插入图片|     `Ctrl + g`	|
-|插入公式|    `Ctrl + m`	|
-
-
+|1级标题|    <kbd>Ctrl</kbd> + <kbd>1</kbd>|    <kbd>⌘</kbd> + <kbd>1</kbd>|
+|2级标题|    <kbd>Ctrl</kbd> + <kbd>2</kbd>|    <kbd>⌘</kbd> + <kbd>2</kbd>|
+|3级标题|    <kbd>Ctrl</kbd> + <kbd>3</kbd>|    <kbd>⌘</kbd> + <kbd>3</kbd>|
+|4级标题|    <kbd>Ctrl</kbd> + <kbd>4</kbd>|    <kbd>⌘</kbd> + <kbd>4</kbd>|
+|5级标题|    <kbd>Ctrl</kbd> + <kbd>5</kbd>|    <kbd>⌘</kbd> + <kbd>5</kbd>|
+|6级标题|    <kbd>Ctrl</kbd> + <kbd>6</kbd>|    <kbd>⌘</kbd> + <kbd>6</kbd>|
+|加粗|    <kbd>Ctrl</kbd> + <kbd>b</kbd>|    <kbd>⌘</kbd> + <kbd>b</kbd>|
+|斜体|    <kbd>Ctrl</kbd> + <kbd>i</kbd> |    <kbd>⌘</kbd> + <kbd>i</kbd>|
+|插入链接|    <kbd>Ctrl</kbd> + <kbd>l</kbd> |    <kbd>⌘</kbd> + <kbd>l</kbd>|
+|插入代码块|    <kbd>Ctrl</kbd> + <kbd>k</kbd> |    <kbd>⌘</kbd> + <kbd>k</kbd>|
+|插入图片|     <kbd>Ctrl</kbd> + <kbd>g</kbd> |    <kbd>⌘</kbd> + <kbd>g</kbd>|
+|插入公式|    <kbd>Ctrl</kbd> + <kbd>m</kbd> |    <kbd>⌘</kbd> + <kbd>m</kbd>|
 
 ## 协议
+
 ```
 /**
  * Tencent is pleased to support the open source community by making CherryMarkdown available.
@@ -754,12 +728,9 @@ title 饼图
  */
 ```
 
-
-
 [^专有语法提醒]: 该语法是**CherryMarkdown专有语法**，可能无法在其他markdown平台上使用该语法
 
 [^不通用提醒]: 该语法不是markdown通用语法，无法保证在其他markdown平台上进行正确渲染
-
 
 # 特性展示
 
