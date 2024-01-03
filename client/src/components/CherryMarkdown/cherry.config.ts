@@ -194,7 +194,10 @@ const initCherryMarkdown = () => {
       toolbarRight: ['fullScreen', '|'],
       bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
       sidebar: ['mobilePreview', 'copy', 'theme'],
-      toc: true,
+      toc: {
+        updateLocationHash: false,
+        defaultModel: 'pure',
+      },
       customMenu: {
         customMenu_fileUpload: customMenu_fileUpload,
       },
