@@ -14,12 +14,12 @@ type SidePanel = {
 export const useStoreSidePanel = defineStore('side-panel', {
   state: (): SidePanel => ({
     checkedSidePanel: {
-      id: 'toc',
-      name: "目录列表",
-      icon: "material-symbols-light:lists-rounded",
+      id: 'files',
+      name: "文件目录",
+      icon: "ph:files-bold",
       color: "#000000",
-      size: 24,
+      size: 32,
     },
-    isSidePanelOpen: true,
+    isSidePanelOpen: false,
   }),
 }) 

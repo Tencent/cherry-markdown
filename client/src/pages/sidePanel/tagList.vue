@@ -13,13 +13,6 @@ import { CheckedSidePanelType } from "@/types";
 const storeSidePanel = useStoreSidePanel();
 const sideTagList = [
   {
-    id: 'toc',
-    name: "标题列表",
-    icon: "lucide:list",
-    color: "#000000",
-    size: 32,
-  },
-  {
     id: 'files',
     name: "文件目录",
     icon: "ph:files-bold",
