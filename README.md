@@ -3,8 +3,8 @@
 # Cherry Markdown Writer
 
 
-**详细文档**
-[看这里](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)
+**Wiki**
+[here](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)
 
 
 [![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
@@ -224,357 +224,22 @@ registerPlugin().then(() => {
 ```
 
 ## Configuration
-具体文档[看这里](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)
-
-### Default configuration
-
-```javascript
-{
-  // Third party package
-  externals: {
-    // externals
-  },
-  // engine configuration
-  engine: {
-    // Global configuration
-    global: {
-      // Enable classic new line logic
-      // true：One line break is ignored and more than two consecutive lines break into paragraphs
-      // false： One line break will turn into < br >, two consecutive line breaks will be divided into paragraphs, and more than three consecutive line breaks will turn into < br > and divide into paragraphs
-      classicBr: false,
-      /**
-       * global URL processor
-       * @param {string} url 来源url
-       * @param {'image'|'audio'|'video'|'autolink'|'link'} srcType 来源类型
-       * @returns
-       */
-      urlProcessor: callbacks.urlProcessor,
-      /**
-       * Additional HTML tags that allow rendering
-       * Labels are separated by vertical lines in English，such as htmlWhiteList: 'iframe|script|style'
-       * It is empty by default. See Src / utils / sanitize.html for the HTML allowed to be rendered by default JS whitelist property
-       * attention：
-       *    - After enabling iframe, script and other tags, XSS injection will be generated. Please judge whether it needs to be enabled according to the actual scene
-       *    - Generally, scenes with controllable editing permissions (such as API document system) can allow iframe, script and other tags
-       */
-      htmlWhiteList: '',
-    },
-    // Built in syntax configuration
-    syntax: {
-      // Syntax switch
-      // 'hookName': false,
-      // Syntax configuration
-      // 'hookName': {
-      //
-      // }
-      autoLink: {
-        /** default open short link display */
-        enableShortLink: true,
-        /** default display 20 characters */
-        shortLinkLength: 20,
-      },
-      list: {
-        listNested: false, // The sibling list type becomes a child after conversion
-        indentSpace: 2, // Default 2 space indents
-      },
-      table: {
-        enableChart: false,
-        // chartRenderEngine: EChartsTableEngine,
-        // externals: ['echarts'],
-      },
-      inlineCode: {
-        theme: 'red',
-      },
-      codeBlock: {
-        theme: 'dark', // Default to dark theme
-        wrap: true, // If it exceeds the length, whether to wrap the line. If false, the scroll bar will be displayed
-        lineNumber: true, // Default display line number
-        customRenderer: {
-          // Custom syntax renderer
-        },
-        /**
-         * indentedCodeBlock Is the switch whether indent code block is enabled
-         *
-         *    this syntax is not supported by default in versions before 6.X.
-         *    Because cherry's development team thinks the syntax is too ugly (easy to touch by mistake)
-         *    The development team hopes to completely replace this syntax with ` ` code block syntax
-         *    However, in the subsequent communication, the development team found that the syntax had better display effect in some scenarios
-         *    Therefore, the development team in 6 This syntax was introduced in version X
-         *    if you want to upgrade the following versions of services without users' awareness, you can remove this syntax:
-         *        indentedCodeBlock：false
-         */
-        indentedCodeBlock: true,
-      },
-      emoji: {
-        useUnicode: true, // Whether to render using Unicode
-      },
-      fontEmphasis: {
-        allowWhitespace: false, // Allow leading and trailing spaces
-      },
-      strikethrough: {
-        needWhitespace: false, // Must there be a first space
-      },
-      mathBlock: {
-        engine: 'MathJax', // katex or MathJax
-        src: '',
-        plugins: true, // Default load plug-in
-      },
-      inlineMath: {
-        engine: 'MathJax', // katex or MathJax
-        src: '',
-      },
-      toc: {
-        /** By default, only one directory is rendered */
-        allowMultiToc: false,
-      },
-      header: {
-        /**
-         * Style of title：
-         *  - default       Default style with anchor in front of title
-         *  - autonumber    There is a self incrementing sequence number anchor in front of the title
-         *  - none          Title has no anchor
-         */
-        anchorStyle: 'default',
-      },
-    },
-  },
-  editor: {
-    codemirror: {
-      // depend on codemirror theme name: https://codemirror.net/demo/theme.html
-      // manual import theme: `import 'codemirror/theme/<theme-name>.css';`
-      theme: 'default',
-    },
-    // The height of the editor is 100% by default. If the height of the mount point has an inline setting, the inline style will prevail
-    height: '100%',
-    // defaultModel The default mode of the editor after initialization. There are three modes: 1. Double column edit preview mode; 2. Pure editing mode; 3. Preview mode
-    // edit&preview: Double column edit preview mode
-    // editOnly: Pure editing mode (without preview, you can switch to double column or preview mode through toolbar)
-    // previewOnly: Preview mode (there is no edit box, the toolbar only displays the "return to edit" button, which can be switched to edit mode through the toolbar)
-    defaultModel: 'edit&preview',
-    // Whether to automatically convert HTML to markdown when pasting
-    convertWhenPaste: true,
-  },
-  // toolbar configuration
-  toolbars: {
-    theme: 'dark', // light or dark
-    showToolbar: true, // False: the top toolbar is not displayed; True: display toolbar; toolbars. Showtoolbar = false and toolbars Toolbar = false equivalent
-    toolbar: [
-      'bold',
-      'italic',
-      'strikethrough',
-      '|',
-      'color',
-      'header',
-      '|',
-      'list',
-      {
-        insert: [
-          'image',
-          'audio',
-          'video',
-          'link',
-          'hr',
-          'br',
-          'code',
-          'formula',
-          'toc',
-          'table',
-          'line-table',
-          'bar-table',
-          'pdf',
-          'word',
-        ],
-      },
-      'graph',
-      'settings',
-    ],
-    sidebar: [],
-    bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
-    float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'quickTable', 'code'], // array or false
-  },
-  fileUpload: callbacks.fileUpload,
-  callback: {
-    afterChange: callbacks.afterChange,
-    afterInit: callbacks.afterInit,
-    beforeImageMounted: callbacks.beforeImageMounted,
-  },
-  previewer: {
-    dom: false,
-    className: 'cherry-markdown',
-    // Whether to enable the editing ability of preview area (currently supports editing picture size and table content)
-    enablePreviewerBubble: true,
-  },
-  // The preview page does not need to bind events
-  isPreviewOnly: false,
-  // The preview area automatically scrolls with the editor cursor
-  autoScrollByCursor: true,
-  // Whether to force output to the body when the outer container does not exist
-  forceAppend: true,
-  // The locale Cherry is going to use. Locales live in /src/locales/
-  locale: 'zh_CN',
-}
-```
-
-### Close float menu or bubble menu
-
-```javascript
-  toolbars: {
-    ... // other config
-    bubble: false, // array or false
-    float: false, // array or false
-  },
-
-```
-
-### More Information
-
-Click [here](./docs/configuration.md) for the full documentation of Cherry configuration.
+see `/src/Cherry.config.js` or click [here](https://github.com/Tencent/cherry-markdown/wiki/%E9%85%8D%E7%BD%AE%E9%A1%B9%E5%85%A8%E8%A7%A3)
 
 ## Example
 
-Click [here](./examples/) for more examples.
+Click [here](https://github.com/Tencent/cherry-markdown/wiki) for more examples.
 
 ### Client
-
-[cherry-markdown client](./docs/cherry_editor_client.md)
+Under development, please stay tuned or see `/client/`
 
 ## Extension
 
 ### Customize Syntax
-
-#### sentence Syntax
-
-If there are no additional special requirements for the compiled content, use the sentence syntax
-
-```javascript
-/*
- * Generate a hook to block sensitive words
- * named blockSensitiveWords
- * The matching rules will be attached to the RULE attribute of the instance
- */
-let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', Cherry.constants.HOOKS_TYPE_LIST.SEN, {
-  makeHtml(str) {
-    return str.replace(this.RULE.reg, '***');
-  },
-  rule(str) {
-    return {
-      reg: /sensitive words/g,
-    };
-  },
-});
-new Cherry({
-  id: 'markdown-container',
-  value: '# welcome to cherry editor!',
-  engine: {
-    customSyntax: {
-      // Inject into the editor's custom grammar
-      BlockSensitiveWordsHook: {
-        syntaxClass: BlockSensitiveWordsHook,
-        // If there is a Hook with the same name and it will be Forcibly covered
-        force: true,
-        // Called before the hook for processing the picture
-        // before: 'image',
-      },
-    },
-  },
-});
-```
-
-#### paragraph Syntax
-
-If the compiled content requires no external influence, use paragraph syntax
-
-```javascript
-/*
- * Generate a hook to block sensitive words
- * named blockSensitiveWords
- * The matching rules will be attached to the RULE attribute of the instance
- */
-let BlockSensitiveWordsHook = Cherry.createSyntaxHook('blockSensitiveWords', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
-  // Enable caching to protect content
-  needCache: true,
-  // Pretreatment to avoid external influence
-  beforeMakeHtml(str) {
-    return str.replace(this.RULE.reg, (match, code) => {
-      const lineCount = (match.match(/\n/g) || []).length;
-      const sign = this.$engine.md5(match);
-      const html = `<div data-sign="${sign}" data-lines="${lineCount + 1}" >***</div>`;
-      return this.pushCache(html, sign, lineCount);
-    });
-  },
-  makeHtml(str, sentenceMakeFunc) {
-    return str;
-  },
-  rule(str) {
-    return {
-      reg: /sensitive words/g,
-    };
-  },
-});
-new Cherry({
-  id: 'markdown-container',
-  value: '# welcome to cherry editor!',
-  engine: {
-    customSyntax: {
-      // Inject into the editor's custom grammar
-      BlockSensitiveWordsHook: {
-        syntaxClass: BlockSensitiveWordsHook,
-        // If there is a Hook with the same name and it will be Forcibly covered
-        force: true,
-        // Called before the hook for processing the picture
-        // before: 'image',
-      },
-    },
-  },
-});
-```
+click [here](https://github.com/Tencent/cherry-markdown/wiki/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E6%B3%95)
 
 ### Customize Toolbar
-
-```javascript
-/*
- * generate a hook with prefix template
- * named AddPrefixTemplate
- * Icon css class icon-add-prefix
- */
-let AddPrefixTemplate = Cherry.createMenuHook('AddPrefixTemplate', 'icon-add-prefix', {
-  onClick(selection) {
-    return 'Prefix-' + selection;
-  },
-});
-new Cherry({
-  id: 'markdown-container',
-  value: '# welcome to cherry editor!',
-  toolbars: {
-    toolbar: [
-      'bold',
-      // ...other toolbar items
-      // @see src/Cherry.config.js
-      'settings',
-      'addPrefix', // append custom menu item to main top toolbar
-    ],
-    bubble: [
-      'bold' /** ...other toolbar items */,
-      ,
-      'color',
-      'addPrefix', // append custom menu item to bubble toolbar (appears on selection)
-    ], // array or false
-    float: [
-      'h1' /** ...other toolbar items */,
-      ,
-      'code',
-      'addPrefix', // append custom menu item to float toolbar (appears on new empty line)
-    ], // array or false
-    customMenu: {
-      // Inject into the editor's menu
-      // object key as item's unique name for toolbars'configuration
-      addPrefix: AddPrefixTemplate,
-    },
-  },
-});
-```
-
-Click [extensions](./docs/extensions.md) if you want know more extension about cherry markdown.
+click [here](https://github.com/Tencent/cherry-markdown/wiki/%E8%B0%83%E6%95%B4%E5%B7%A5%E5%85%B7%E6%A0%8F)
 
 ## Unit Test
 
@@ -609,7 +274,7 @@ Snapshot test runs slower. It should only be used to test Hooks that are error-p
 
 ## Contributing
 
-Welcome to join us to build a more powerful Markdown editor. Of course you can submit feature request to us. Please read[extensions](./docs/extensions.md) and [commit_convention](./docs/commit_convention.md) before you working on it.
+Welcome to join us to build a more powerful Markdown editor. Of course you can submit feature request to us. Please read [me](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8) before you working on it.
 
 ## Stargazers over time
 

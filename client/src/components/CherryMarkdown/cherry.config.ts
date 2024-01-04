@@ -48,7 +48,6 @@ const initCherryMarkdown = () => {
       ipcRenderer.send('is-text-change')
       storeCherry.cherryMarkdown = text;
       storeCherry.cherryMarkdownHtml = html;
-      storeCherry.cherryToc = storeCherry.cherry?.getToc() || [];
     },
     afterInit: (text: string, html: string) => { },
     beforeImageMounted: (srcProp: string, src: string) => ({ srcProp, src }),
@@ -194,7 +193,11 @@ const initCherryMarkdown = () => {
       ],
       toolbarRight: ['fullScreen', '|'],
       bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
-      sidebar: ['mobilePreview', 'copy', 'theme',],
+      sidebar: ['mobilePreview', 'copy', 'theme'],
+      toc: {
+        updateLocationHash: false,
+        defaultModel: 'pure',
+      },
       customMenu: {
         customMenu_fileUpload: customMenu_fileUpload,
       },
