@@ -149,7 +149,7 @@ const basicConfig = {
         useUnicode: false,
         customResourceURL:
           'https://github.githubassets.com/images/icons/emoji/unicode/${code}.png?v8',
-        upperCase: true,
+        upperCase: false,
       },
       // toc: {
       //     tocStyle: 'nested'

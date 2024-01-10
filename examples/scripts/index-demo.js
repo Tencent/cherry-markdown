@@ -119,9 +119,9 @@ var basicConfig = {
         engine: 'MathJax', // katex或MathJax
       },
       emoji: {
-        useUnicode: false,
+        useUnicode: true,
         customResourceURL: 'https://github.githubassets.com/images/icons/emoji/unicode/${code}.png?v8',
-        upperCase: true,
+        upperCase: false,
       },
       // toc: {
       //     tocStyle: 'nested'
