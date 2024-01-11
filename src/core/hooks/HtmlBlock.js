@@ -23,6 +23,22 @@ import {
 import { sanitizer } from '@/Sanitizer';
 import { isBrowser } from '@/utils/env';
 
+/**
+ * encode unsafe link-related attributes
+ */
+const unsafeAttributes = ['href', 'src'];
+
+sanitizer.addHook('afterSanitizeAttributes', (node) => {
+  unsafeAttributes.forEach((attr) => {
+    if (!node.hasAttribute(attr)) {
+      return;
+    }
+    const value = node.getAttribute(attr);
+    // encode unsafe backslash in link attributes
+    node.setAttribute(attr, value.replace(/\\/g, '%5c'));
+  });
+});
+
 export default class HtmlBlock extends ParagraphBase {
   static HOOK_NAME = 'htmlBlock';
   constructor() {
