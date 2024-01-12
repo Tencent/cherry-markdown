@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.35](https://github.com/Tencent/cherry-markdown/compare/v0.8.34...v0.8.35) (2024-01-12)
+
+
+### Features
+
+* **kbd:** add styles to \<kbd> tag & update examples ([#679](https://github.com/Tencent/cherry-markdown/issues/679)) ([ac3650d](https://github.com/Tencent/cherry-markdown/commit/ac3650d65eddb9e9b77337a336cfeb4206b82ea9))
+
+
+### Bug Fixes
+
+* add dom purifier to math result for security ([f79dc95](https://github.com/Tencent/cherry-markdown/commit/f79dc95acb93af6a8f5109cf1fd3ee1c78059343))
+* **client:** redeclare the 'toc' state ([#678](https://github.com/Tencent/cherry-markdown/issues/678)) ([9216837](https://github.com/Tencent/cherry-markdown/commit/9216837c57c0a02a78b9fb3ae7cd0ebfb21004f3)), closes [#675](https://github.com/Tencent/cherry-markdown/issues/675) [#676](https://github.com/Tencent/cherry-markdown/issues/676) [#677](https://github.com/Tencent/cherry-markdown/issues/677)
+* **xss:** fix potential xss in raw html ([596805c](https://github.com/Tencent/cherry-markdown/commit/596805cc6eaff2d0528bb75956abaf7ffdc3f9fe))
+* 修改示例中emoji表情的配置 ([66c3ecc](https://github.com/Tencent/cherry-markdown/commit/66c3ecca0e4e6cda7281f124f5063a116d772969))
+
+
+### Code Refactoring
+
+* **client:** use `cherry-markdown`'s TOC component ([#677](https://github.com/Tencent/cherry-markdown/issues/677)) ([b8899af](https://github.com/Tencent/cherry-markdown/commit/b8899af1052ec5b1f2ac1a2537b02a1000b0ea23))
+
+### [0.8.33](https://github.com/Tencent/cherry-markdown/compare/v0.8.32...v0.8.33) (2023-12-25)
+
 ### [0.8.34](https://github.com/Tencent/cherry-markdown/compare/v0.8.32...v0.8.34) (2023-12-26)
 
 
