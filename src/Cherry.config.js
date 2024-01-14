@@ -249,6 +249,7 @@ const defaultConfig = {
       autofocus: true,
     },
     writingStyle: 'normal', // 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal
+    keepDocumentScrollAfterInit: false, // 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置
   },
   toolbars: {
     theme: 'dark', // light or dark
@@ -291,6 +292,11 @@ const defaultConfig = {
     sidebar: [],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'table', 'code'], // array or false
+    toc: false, // 不展示悬浮目录
+    // toc: {
+    //   updateLocationHash: false, // 要不要更新URL的hash
+    //   defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
+    // },
     // 快捷键配置，如果配置为空，则使用toolbar的配置
     shortcutKey: {
       // 'Alt-1': 'header',

@@ -99,12 +99,10 @@ export default class Suggester extends SyntaxBase {
     let { suggester } = config;
 
     this.suggester = {};
-    if (!suggester) {
-      suggester = [];
-    }
+    const defaultSuggest = [];
     // 默认的唤醒关键字
     for (const suggesterKeyword of suggesterKeywords) {
-      suggester.push({
+      defaultSuggest.push({
         keyword: suggesterKeyword,
         suggestList(_word, callback) {
           // 将word全转成小写
@@ -130,6 +128,12 @@ export default class Suggester extends SyntaxBase {
         },
       });
     }
+    if (!suggester) {
+      suggester = defaultSuggest;
+    } else {
+      suggester = suggester.concat(defaultSuggest);
+    }
+
     suggester.forEach((configItem) => {
       if (!configItem.suggestList) {
         console.warn('[cherry-suggester]: the suggestList of config is missing.');
@@ -483,7 +487,7 @@ class SuggesterPanel {
    * @param {KeyboardEvent} evt 键盘事件
    */
   pasteSelectResult(idx, evt) {
-    if (!this.cursorTo) {
+    if (!this.cursorTo || this.cursorTo === this.cursorFrom) {
       this.cursorTo = JSON.parse(JSON.stringify(this.cursorFrom));
     }
     if (!this.cursorTo) {
@@ -499,15 +503,15 @@ class SuggesterPanel {
         typeof this.optionList[idx].value === 'string'
       ) {
         result = this.optionList[idx].value;
-      }
-      if (
+      } else if (
         typeof this.optionList[idx] === 'object' &&
         this.optionList[idx] !== null &&
         typeof this.optionList[idx].value === 'function'
       ) {
         result = this.optionList[idx].value();
-      }
-      if (typeof this.optionList[idx] === 'string') {
+      } else if (typeof this.optionList[idx] === 'string') {
+        result = `${this.optionList[idx]} `;
+      } else {
         result = ` ${this.keyword}${this.optionList[idx]} `;
       }
       // this.cursorTo.ch = this.cursorFrom.ch + result.length;

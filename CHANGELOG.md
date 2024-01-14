@@ -2,6 +2,93 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.35](https://github.com/Tencent/cherry-markdown/compare/v0.8.34...v0.8.35) (2024-01-12)
+
+
+### Features
+
+* **kbd:** add styles to \<kbd> tag & update examples ([#679](https://github.com/Tencent/cherry-markdown/issues/679)) ([ac3650d](https://github.com/Tencent/cherry-markdown/commit/ac3650d65eddb9e9b77337a336cfeb4206b82ea9))
+
+
+### Bug Fixes
+
+* add dom purifier to math result for security ([f79dc95](https://github.com/Tencent/cherry-markdown/commit/f79dc95acb93af6a8f5109cf1fd3ee1c78059343))
+* **client:** redeclare the 'toc' state ([#678](https://github.com/Tencent/cherry-markdown/issues/678)) ([9216837](https://github.com/Tencent/cherry-markdown/commit/9216837c57c0a02a78b9fb3ae7cd0ebfb21004f3)), closes [#675](https://github.com/Tencent/cherry-markdown/issues/675) [#676](https://github.com/Tencent/cherry-markdown/issues/676) [#677](https://github.com/Tencent/cherry-markdown/issues/677)
+* **xss:** fix potential xss in raw html ([596805c](https://github.com/Tencent/cherry-markdown/commit/596805cc6eaff2d0528bb75956abaf7ffdc3f9fe))
+* 修改示例中emoji表情的配置 ([66c3ecc](https://github.com/Tencent/cherry-markdown/commit/66c3ecca0e4e6cda7281f124f5063a116d772969))
+
+
+### Code Refactoring
+
+* **client:** use `cherry-markdown`'s TOC component ([#677](https://github.com/Tencent/cherry-markdown/issues/677)) ([b8899af](https://github.com/Tencent/cherry-markdown/commit/b8899af1052ec5b1f2ac1a2537b02a1000b0ea23))
+
+### [0.8.33](https://github.com/Tencent/cherry-markdown/compare/v0.8.32...v0.8.33) (2023-12-25)
+
+### [0.8.34](https://github.com/Tencent/cherry-markdown/compare/v0.8.32...v0.8.34) (2023-12-26)
+
+
+### Bug Fixes
+
+* [#657](https://github.com/Tencent/cherry-markdown/issues/657) closed 修复复制按钮点击报错问题 ([de3f368](https://github.com/Tencent/cherry-markdown/commit/de3f36859e58e2171726346a69fb58030e724b3b))
+* [#673](https://github.com/Tencent/cherry-markdown/issues/673) closed 修复粘贴excel只有图片的问题 ([9f46d5e](https://github.com/Tencent/cherry-markdown/commit/9f46d5e667e44d96f546bd0064332a37b212f184))
+* 额外兼容node场景 ([0d04a68](https://github.com/Tencent/cherry-markdown/commit/0d04a680f88fefd5516b9325e16adf59990b16ea))
+* 修复pointer event导致的误触，兼容浏览器不支持pointer event的情况 ([08965e5](https://github.com/Tencent/cherry-markdown/commit/08965e5dc05e2036c2443ed0ba089f4014c180e9))
+* 重构表格逆解析时，处理空格的逻辑 ([49e4907](https://github.com/Tencent/cherry-markdown/commit/49e49072f3224a04e07db2bb026a41db1302c0ea))
+
+### [0.8.31](https://github.com/Tencent/cherry-markdown/compare/v0.8.30...v0.8.31) (2023-12-07)
+
+### [0.8.33](https://github.com/Tencent/cherry-markdown/compare/v0.8.32...v0.8.33) (2023-12-25)
+
+
+### Bug Fixes
+
+* 额外兼容node场景 ([0d04a68](https://github.com/Tencent/cherry-markdown/commit/0d04a680f88fefd5516b9325e16adf59990b16ea))
+* 修复pointer event导致的误触，兼容浏览器不支持pointer event的情况 ([08965e5](https://github.com/Tencent/cherry-markdown/commit/08965e5dc05e2036c2443ed0ba089f4014c180e9))
+
+### [0.8.31](https://github.com/Tencent/cherry-markdown/compare/v0.8.30...v0.8.31) (2023-12-07)
+
+### [0.8.32](https://github.com/Tencent/cherry-markdown/compare/v0.8.30...v0.8.32) (2023-12-18)
+
+
+### Features
+
+* [#658](https://github.com/Tencent/cherry-markdown/issues/658) 增加悬浮目录及相关配置、记忆、回显、跳转等功能 ([308b15b](https://github.com/Tencent/cherry-markdown/commit/308b15b45a697a9761c72936529d06f82670f29e))
+* 目录滚动效果不再依赖scrollIntoView ([6b9fdef](https://github.com/Tencent/cherry-markdown/commit/6b9fdef22c8059f35466b0fe4d353d7ae7ac0a65))
+
+
+### Bug Fixes
+
+* [#667](https://github.com/Tencent/cherry-markdown/issues/667) closed 修复视频封面无法展示的问题 ([b38dc15](https://github.com/Tencent/cherry-markdown/commit/b38dc152bd1319ae32a3f57b9aa38a68869174e0))
+* [#668](https://github.com/Tencent/cherry-markdown/issues/668) [#662](https://github.com/Tencent/cherry-markdown/issues/662) closed 修复表格所见即所得编辑定位的问题，解决方案：先屏蔽拖拽行列的功能 ([ad8e9e4](https://github.com/Tencent/cherry-markdown/commit/ad8e9e452bbd9d1933732e24b4d12e57f812f7b1))
+* 修改@关键字及默认keyword顺序 ([#664](https://github.com/Tencent/cherry-markdown/issues/664)) ([d35f790](https://github.com/Tencent/cherry-markdown/commit/d35f790699e11ba6e9425eda0ed3d457b694938c))
+
+### [0.8.31](https://github.com/Tencent/cherry-markdown/compare/v0.8.30...v0.8.31) (2023-12-07)
+
+### [0.8.30--skip.tag](https://github.com/Tencent/cherry-markdown/compare/v0.8.29...v0.8.30--skip.tag) (2023-12-07)
+
+
+### Features
+
+* [#642](https://github.com/Tencent/cherry-markdown/issues/642) close 增加配置，是否在初始化时保持页面的滚动位置 ([b58de6d](https://github.com/Tencent/cherry-markdown/commit/b58de6d83fba8ab1ff12a039f529f43e9f3e8447))
+* [#642](https://github.com/Tencent/cherry-markdown/issues/642) 修改配置的默认值为false（与旧版本效果保持一致） ([c7a800d](https://github.com/Tencent/cherry-markdown/commit/c7a800d4bb762f026b616c78e7b4d454abec8a42))
+* [#642](https://github.com/Tencent/cherry-markdown/issues/642) 在调用setMarkdown/setValue时保持页面的滚动位置 ([5106859](https://github.com/Tencent/cherry-markdown/commit/51068590a67d52e33ccd9fd9dcad2b52dd306e25))
+* [#653](https://github.com/Tencent/cherry-markdown/issues/653) 增加新的配置开关，打开后cherry完成初始化后会根据hash进行 滚动定位 ([50bc19d](https://github.com/Tencent/cherry-markdown/commit/50bc19d6ed73e644a0f610face5eb644220dacd3))
+* [#653](https://github.com/Tencent/cherry-markdown/issues/653) 增加新的配置开关，打开后cherry完成初始化后会根据hash进行 滚动定位 在demo里默认打开 ([029f3d2](https://github.com/Tencent/cherry-markdown/commit/029f3d2840ea8b1eeba19fcd7d76ec15522cceb0))
+* 优化处理base64数据的时机和正则，确保base64数据能够及时被替换成占位符 ([5bbb803](https://github.com/Tencent/cherry-markdown/commit/5bbb8034c1a7bc31b88c473599301a6a1f2f4ff4))
+* 增加字数统计功能 ([#659](https://github.com/Tencent/cherry-markdown/issues/659)) ([e313d0c](https://github.com/Tencent/cherry-markdown/commit/e313d0c3f6da6642db49b72fc7ddeac82616a897))
+
+
+### Bug Fixes
+
+* [#650](https://github.com/Tencent/cherry-markdown/issues/650) switchModel()API切换预览模式时隐藏工具栏 ([b573fd3](https://github.com/Tencent/cherry-markdown/commit/b573fd3b8f800044520ebbdcc3944510f08a2ee3))
+* [#650](https://github.com/Tencent/cherry-markdown/issues/650) 修复切换主题时原始class被改错的问题 ([30be078](https://github.com/Tencent/cherry-markdown/commit/30be078aec720a69b160e9cb54121481d21d1c7b))
+* 修复formatFullWidthMark函数 ([#655](https://github.com/Tencent/cherry-markdown/issues/655)) ([8d34763](https://github.com/Tencent/cherry-markdown/commit/8d3476318914297ad0952658377184f29dbe7ae9))
+
+
+### Code Refactoring
+
+* **client:** add sidebar tags ([#644](https://github.com/Tencent/cherry-markdown/issues/644)) ([32e8525](https://github.com/Tencent/cherry-markdown/commit/32e8525a8b7b55d9c03f7d8280f5a2209880227a))
+
 ### [0.8.29](https://github.com/Tencent/cherry-markdown/compare/v0.8.28...v0.8.29) (2023-11-20)
 
 ### [0.8.28](https://github.com/Tencent/cherry-markdown/compare/v0.8.27...v0.8.28) (2023-11-20)

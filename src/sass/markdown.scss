@@ -150,6 +150,15 @@
     overflow: visible;
   }
 
+  kbd {
+    border: 1px solid $borderColor;
+    border-radius: 4px;
+    padding: 1px 2px;
+    box-sizing: border-box;
+    box-shadow: inset 0px -1px $borderColor;
+    font-size: 0.85rem;
+  }
+
   table {
     border-collapse: collapse;
     th,

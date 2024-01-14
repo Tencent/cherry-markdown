@@ -169,10 +169,12 @@ export default class Editor {
     let oneSearch = searcher.findNext();
     // 防止出现错误的mark
     editor.getAllMarks().forEach(function (mark) {
-      const range = JSON.parse(JSON.stringify(mark.find()));
-      const markedText = editor.getRange(range.from, range.to);
-      if (mark.className === 'cm-fullWidth' && !regex.test(markedText)) {
-        mark.clear();
+      if (mark.className === 'cm-fullWidth') {
+        const range = JSON.parse(JSON.stringify(mark.find()));
+        const markedText = editor.getRange(range.from, range.to);
+        if (!regex.test(markedText)) {
+          mark.clear();
+        }
       }
     });
     for (; oneSearch !== false; oneSearch = searcher.findNext()) {
@@ -263,6 +265,7 @@ export default class Editor {
    * @returns {boolean | void}
    */
   handlePaste(event, clipboardData, codemirror) {
+    this.pasterHtml = false;
     const { items } = clipboardData;
     const types = clipboardData.types || [];
     const codemirrorDoc = codemirror.getDoc();
@@ -277,7 +280,13 @@ export default class Editor {
             return;
           }
           const mdStr = handleFileUploadCallback(url, params, file);
-          codemirrorDoc.replaceSelection(mdStr);
+          if (this.pasterHtml) {
+            const { line, ch } = codemirror.getCursor();
+            codemirror.setSelection({ line, ch }, { line, ch });
+            codemirrorDoc.replaceSelection(`\n${mdStr}`, 'end');
+          } else {
+            codemirrorDoc.replaceSelection(mdStr);
+          }
         });
         event.preventDefault();
       }
@@ -289,21 +298,13 @@ export default class Editor {
     if (!html || !this.options.convertWhenPaste) {
       return true;
     }
-    /**
-     * 这里需要处理一个特殊逻辑：
-     *    从excel中复制而来的内容，剪切板里会有一张图片（一个<img>元素）和一段纯文本，在这种场景下，需要丢掉图片，直接粘贴纯文本
-     * 与此同时，当剪切板里有图片和其他html标签时（从web页面上复制的内容），则需要走下面的html转md的逻辑
-     * 基于上述两个场景，才有了下面四行奇葩的代码
-     */
-    const test = html.replace(/<(html|head|body|!)/g, '');
-    if (test.match(/<[a-zA-Z]/g)?.length <= 1 && /<img/.test(test)) {
-      return true;
-    }
+
     let divObj = document.createElement('DIV');
     divObj.innerHTML = html;
     html = divObj.innerHTML;
     const mdText = htmlParser.run(html);
     if (typeof mdText === 'string' && mdText.trim().length > 0) {
+      this.pasterHtml = true;
       const range = codemirror.listSelections();
       if (codemirror.getSelections().length <= 1 && range[0] && range[0].anchor) {
         const currentCursor = {};
@@ -370,10 +371,34 @@ export default class Editor {
   };
 
   /**
+   * 记忆页面的滚动高度，在cherry初始化后恢复到这个高度
+   */
+  storeDocumentScroll() {
+    if (!this.options.keepDocumentScrollAfterInit) {
+      return;
+    }
+    this.needRestoreDocumentScroll = true;
+    this.documentElementScrollTop = document.documentElement.scrollTop;
+    this.documentElementScrollLeft = document.documentElement.scrollLeft;
+  }
+
+  /**
+   * 在cherry初始化后恢复到这个高度
+   */
+  restoreDocumentScroll() {
+    if (!this.options.keepDocumentScrollAfterInit || !this.needRestoreDocumentScroll) {
+      return;
+    }
+    this.needRestoreDocumentScroll = false;
+    window.scrollTo(this.documentElementScrollLeft, this.documentElementScrollTop);
+  }
+
+  /**
    *
    * @param {*} previewer
    */
   init(previewer) {
+    this.storeDocumentScroll();
     const textArea = this.options.editorDom.querySelector(`#${this.options.id}`);
     if (!(textArea instanceof HTMLTextAreaElement)) {
       throw new Error('The specific element is not a textarea.');
@@ -506,6 +531,9 @@ export default class Editor {
     if (this.options.writingStyle !== 'normal') {
       this.initWritingStyle();
     }
+    // 处理特殊字符，主要将base64等大文本替换成占位符，以提高可读性
+    this.dealSpecialWords();
+    this.restoreDocumentScroll();
   }
 
   /**

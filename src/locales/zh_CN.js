@@ -94,4 +94,5 @@ export default {
   justifyCenter: '居中',
   justifyRight: '右对齐',
   publish: '发布',
+  wordCount: '字数',
 };

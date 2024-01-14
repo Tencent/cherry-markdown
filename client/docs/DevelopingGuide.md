@@ -1,6 +1,6 @@
 # Developing Cherry Noted Client
 
-Here is a guide for client [client](../../client) development. If you have any questions about the client's functionality, please refer to: [docs/README.md](/docs/README.md)
+Here is a guide for client [client](../../client) development.
 
 ## Getting Started
 
@@ -10,10 +10,17 @@ Please pull the `dev` branch of [Cherry markdown](https://github.com/Tencent/che
 
 ## Quick Start
 
+- Environment:`node>=18`.
+- Directory `cd client`
+- Install `yarn`
+- Run `yarn dev`
+
+## Introduction to Basic Knowledge
+
 - `/electron` : Process code for Electron.
   - `/electron/main/index` : The function entrance of Electron is preset with some Electon functions.
 - `preload` : Contains custom Electron functionality.
-- `src` : The production of rendered pages.
+- `src` : The production of rendered pages.use [vue3](https://vuejs.org/).
 - Communication between [rendering processes](https://www.electronjs.org/docs/latest/api/ipc-renderer) and [service processes](https://www.electronjs.org/docs/latest/api/ipc-main).
 
 ## Future
@@ -23,11 +30,3 @@ Please pull the `dev` branch of [Cherry markdown](https://github.com/Tencent/che
 If you want to add new functional requirements (not included in [Future](/docs/Future.md)),Please open an [issue](https://github.com/Tencent/cherry-markdown/issues) for discussion.
 
 If the [Future](/docs/Future.md)  plan has been implemented, please ask the administrator to annotate it with the PR index and declare it completed.
-
-## CHANGELOG
-
-[CHANGELOG](/docs/CHANGELOG.md) is update logs for every **Cherry Noted** post. Administrators should update in a timely manner when publishing.
-
-## README
-
-[docs/README.md](/docs/README.md) The newly added features and usage tips should be explained here. It should mainly explain to users how to use it.

@@ -21,6 +21,7 @@ import Bubble from './toolbars/Bubble';
 import FloatMenu from './toolbars/FloatMenu';
 import Toolbar from './toolbars/Toolbar';
 import ToolbarRight from './toolbars/ToolbarRight';
+import Toc from './toolbars/Toc';
 import { createElement } from './utils/dom';
 import Sidebar from './toolbars/Sidebar';
 import { customizer, getThemeFromLocal, changeTheme } from './utils/config';
@@ -191,6 +192,21 @@ export default class Cherry extends CherryStatic {
     if (this.options.autoScrollByHashAfterInit) {
       setTimeout(this.scrollByHash.bind(this));
     }
+    // 强制进行一次渲染
+    this.editText(null, this.editor.editor);
+    if (this.options.toolbars.toc !== false) {
+      this.createToc();
+    }
+  }
+
+  createToc() {
+    this.toc = new Toc({
+      $cherry: this,
+      // @ts-ignore
+      updateLocationHash: this.options.toolbars.toc.updateLocationHash ?? true,
+      // @ts-ignore
+      defaultModel: this.options.toolbars.toc.defaultModel ?? 'pure',
+    });
   }
 
   /**
@@ -318,7 +334,7 @@ export default class Cherry extends CherryStatic {
     const headerList = [];
     const headerRegex = /<h([1-6]).*?id="([^"]+?)".*?>(.+?)<\/h[0-6]>/g;
     str.replace(headerRegex, (match, level, id, text) => {
-      headerList.push({ level: +level, id, text });
+      headerList.push({ level: +level, id, text: text.replace(/<a .+?<\/a>/, '') });
       return match;
     });
     return headerList;
@@ -330,6 +346,7 @@ export default class Cherry extends CherryStatic {
    * @param {boolean} keepCursor 是否保持光标位置
    */
   setValue(content, keepCursor = false) {
+    this.editor.storeDocumentScroll();
     if (keepCursor === false) {
       return this.editor.editor.setValue(content);
     }
@@ -607,6 +624,7 @@ export default class Cherry extends CherryStatic {
         }
         // 强制每次编辑（包括undo、redo）编辑器都会自动滚动到光标位置
         codemirror.scrollIntoView(null);
+        this.editor.restoreDocumentScroll();
       }, 50);
     } catch (e) {
       throw new NestedError(e);

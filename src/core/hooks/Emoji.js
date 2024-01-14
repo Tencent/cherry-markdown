@@ -68,7 +68,7 @@ export default class Emoji extends SyntaxBase {
     }
     const { useUnicode, customResourceURL, customRenderer, upperCase } = config;
     this.options.useUnicode = typeof useUnicode === 'boolean' ? useUnicode : this.options.useUnicode;
-    this.options.upperCase = typeof useUnicode === 'boolean' ? upperCase : this.options.upperCase;
+    this.options.upperCase = typeof upperCase === 'boolean' ? upperCase : this.options.upperCase;
     if (useUnicode === false && typeof customResourceURL === 'string') {
       this.options.resourceURL = customResourceURL;
     }
