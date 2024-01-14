@@ -70,6 +70,7 @@ import Panel from './hooks/Panel';
 import Justify from './hooks/Justify';
 import Detail from './hooks/Detail';
 import DrawIo from './hooks/DrawIo';
+import Publish from './hooks/Publish';
 
 // 定义默认支持的工具栏
 // 目前不支持按需动态加载
@@ -128,6 +129,7 @@ const HookList = {
   detail: Detail,
   drawIo: DrawIo,
   // chatgpt: ChatGpt,
+  publish: Publish,
 };
 
 export default class HookCenter {

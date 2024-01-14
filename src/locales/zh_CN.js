@@ -93,4 +93,5 @@ export default {
   justifyLeft: '左对齐',
   justifyCenter: '居中',
   justifyRight: '右对齐',
+  publish: '发布',
 };

@@ -1,3 +1,4 @@
+import CodeMirror from 'codemirror';
 import SyntaxBase from '../src/core/SyntaxBase';
 
 export interface Cherry {
@@ -134,6 +135,7 @@ export interface CherryEditorOptions {
   codemirror?: object;
   /** 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal */
   writingStyle?: string;
+  editor?: CodeMirror.Editor;
 }
 
 export type CherryLifecycle = (text: string, html: string) => void;
@@ -218,6 +220,28 @@ export type CherryDefaultFloatToolbar =
   | 'quickTable'
   | 'code';
 
+export type SupportPlatform = 'wechat' | 'toutiao';
+export interface CherryPublishToolbarOption {
+  /** 发布平台名称 */
+  name: string;
+  /** 发布平台唯一标识 */
+  key: SupportPlatform;
+  /** 发布平台图标地址 */
+  icon?: string;
+  /** 发布平台图标名称(需存在) */
+  iconName?: string;
+  /** 发布平台服务地址 */
+  serviceUrl: string;
+  /**
+   * 额外注入的payload
+   */
+  injectPayload?: Record<string, any> | (() => Promise<Record<string, any>>) | (() => Record<string, any>);
+}
+export interface CherryToolbarConfig {
+  /** 发布功能配置 */
+  publish?: CherryPublishToolbarOption[]
+}
+
 export interface CherryToolbarOptions {
   theme: 'light' | 'dark';
   toolbar?:
@@ -238,7 +262,7 @@ export interface CherryToolbarOptions {
   /** 自定义快捷键 */
   shortcutKey?: Object | false;
    /** 一些按钮的配置信息 */
-  config?: Object;
+  config?: CherryToolbarConfig;
 }
 
 export interface CherryFileUploadHandler {

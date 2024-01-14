@@ -22,7 +22,8 @@ import { createElement } from '@/utils/dom';
  * @typedef {Object} SubMenuConfigItem
  * @property {string} name - 子菜单项名称
  * @property {string=} iconName - 子菜单项图标名称
- * @property {function} onclick - 子菜单项点击事件
+ * @property {function(MouseEvent): any} onclick - 子菜单项点击事件
+ * @property {string=} icon - 子菜单项图标(url)
  */
 
 /**
@@ -65,7 +66,7 @@ export default class MenuBase {
 
   /**
    *
-   * @param {*} $cherry
+   * @param {Partial<import('../Cherry').default>} $cherry
    */
   constructor($cherry) {
     this.$cherry = $cherry;
@@ -164,14 +165,24 @@ export default class MenuBase {
     return span;
   }
 
+  /**
+   * 通过配置创建一个二级菜单
+   * @param {SubMenuConfigItem} config 配置
+   */
   createSubBtnByConfig(config) {
-    const { name, iconName, onclick } = config;
+    const { name, iconName, icon, onclick } = config;
     const span = createElement('span', 'cherry-dropdown-item', {
       title: this.locale[name] || $e(name),
     });
     if (iconName) {
-      const icon = createElement('i', `ch-icon ch-icon-${iconName}`);
-      span.appendChild(icon);
+      const iconElement = createElement('i', `ch-icon ch-icon-${iconName}`);
+      span.appendChild(iconElement);
+    } else if (icon) {
+      const iconElement = createElement('img', 'ch-icon', {
+        src: icon,
+        style: 'width: 16px; height: 16px; vertical-align: sub;',
+      });
+      span.appendChild(iconElement);
     }
     span.innerHTML += this.locale[name] || $e(name);
     span.addEventListener('click', onclick, false);
