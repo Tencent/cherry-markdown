@@ -1,4 +1,6 @@
+import CodeMirror from 'codemirror';
 import SyntaxBase from '../src/core/SyntaxBase';
+import { FormulaMenu } from '@/toolbars/BubbleFormula';
 
 export interface Cherry {
   options: CherryOptions;
@@ -134,6 +136,7 @@ export interface CherryEditorOptions {
   codemirror?: object;
   /** 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal */
   writingStyle?: string;
+  editor?: CodeMirror.Editor;
   /** 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置 */
   keepDocumentScrollAfterInit?: boolean;
 }
@@ -220,6 +223,37 @@ export type CherryDefaultFloatToolbar =
   | 'quickTable'
   | 'code';
 
+export type SupportPlatform = 'wechat' | 'toutiao';
+export interface CherryPublishToolbarOption {
+  /** 发布平台名称 */
+  name: string;
+  /** 发布平台唯一标识 */
+  key: SupportPlatform;
+  /** 发布平台图标地址 */
+  icon?: string;
+  /** 发布平台图标名称(需存在) */
+  iconName?: string;
+  /** 发布平台服务地址 */
+  serviceUrl: string;
+  /**
+   * 额外注入的payload
+   */
+  injectPayload?: Record<string, any> | (() => Promise<Record<string, any>>) | (() => Record<string, any>);
+}
+
+export interface CherryFormulaToolbarOption {
+  /** 显示外链 */
+  showLatexLive?: boolean;
+  /** 使用默认模板 */
+  templateConfig?: boolean | Record<string, FormulaMenu>;
+}
+export interface CherryToolbarConfig {
+  /** 发布功能配置 */
+  publish?: CherryPublishToolbarOption[]
+  /** 公式 */
+  formula?: CherryFormulaToolbarOption
+}
+
 export interface CherryToolbarOptions {
   theme: 'light' | 'dark';
   toolbar?:
@@ -245,7 +279,7 @@ export interface CherryToolbarOptions {
   /** 自定义快捷键 */
   shortcutKey?: Object | false;
    /** 一些按钮的配置信息 */
-  config?: Object;
+  config?: CherryToolbarConfig;
 }
 
 export interface CherryFileUploadHandler {
