@@ -1,5 +1,6 @@
 import CodeMirror from 'codemirror';
 import SyntaxBase from '../src/core/SyntaxBase';
+import { FormulaMenu } from '@/toolbars/BubbleFormula';
 
 export interface Cherry {
   options: CherryOptions;
@@ -239,9 +240,18 @@ export interface CherryPublishToolbarOption {
    */
   injectPayload?: Record<string, any> | (() => Promise<Record<string, any>>) | (() => Record<string, any>);
 }
+
+export interface CherryFormulaToolbarOption {
+  /** 显示外链 */
+  showLatexLive?: boolean;
+  /** 使用默认模板 */
+  templateConfig?: boolean | Record<string, FormulaMenu>;
+}
 export interface CherryToolbarConfig {
   /** 发布功能配置 */
   publish?: CherryPublishToolbarOption[]
+  /** 公式 */
+  formula?: CherryFormulaToolbarOption
 }
 
 export interface CherryToolbarOptions {
