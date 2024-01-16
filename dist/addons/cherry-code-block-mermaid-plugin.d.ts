@@ -1,32 +1,3 @@
-export default class MermaidCodeEngine {
-    static TYPE: string;
-    static install(cherryOptions: any, ...args: any[]): void;
-    constructor(mermaidOptions?: {});
-    mermaidAPIRefs: any;
-    options: {
-        theme: string;
-        altFontFamily: string;
-        fontFamily: string;
-        themeCSS: string;
-        flowchart: {
-            useMaxWidth: boolean;
-        };
-        sequence: {
-            useMaxWidth: boolean;
-        };
-        startOnLoad: boolean;
-        logLevel: number;
-    };
-    dom: any;
-    mermaidCanvas: any;
-    mountMermaidCanvas($engine: any): void;
-    /**
-     * 转换svg为img，如果出错则直出svg
-     * @param {string} svgCode
-     * @param {string} graphId
-     * @returns {string}
-     */
-    convertMermaidSvgToImg(svgCode: string, graphId: string): string;
-    render(src: any, sign: any, $engine: any, config?: {}): any;
-    svg2img: any;
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:f7e94c0e0790e3a81858a2788b170845f35dbda7a081f4c5ad677482e7b27128
+size 930

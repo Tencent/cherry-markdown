@@ -32,3 +32,6 @@ pnpm-lock.yaml
 # docs
 /docs/.vitepress/cache/
 /docs/.vitepress/dist/
+
+# config
+examples/cherry-markdown-publish/src/common/config/*.yaml
