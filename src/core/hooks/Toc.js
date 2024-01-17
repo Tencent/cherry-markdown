@@ -219,7 +219,7 @@ export default class Toc extends ParagraphBase {
 
   $makeToc(arr, dataSign, preLinesMatch) {
     const lines = calculateLinesOfParagraph(preLinesMatch, 1);
-    let ret = `<dir class="${this.tocContainerClass}" data-sign="${dataSign}-${lines}" data-lines="${lines}">`;
+    let ret = `<div class="${this.tocContainerClass}" data-sign="${dataSign}-${lines}" data-lines="${lines}">`;
     ret += `<p class="${this.tocTitleClass}">目录</p>`;
     if (arr.length <= 0) {
       return '';
@@ -230,7 +230,7 @@ export default class Toc extends ParagraphBase {
     } else {
       ret += this.$makePlainToc(arr);
     }
-    ret += '</dir>';
+    ret += '</div>';
     return ret;
   }
 
