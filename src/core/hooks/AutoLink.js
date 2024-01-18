@@ -20,6 +20,13 @@ import { compileRegExp, EMAIL, EMAIL_INLINE, URL_INLINE_NO_SLASH, URL, URL_NO_SL
 export default class AutoLink extends SyntaxBase {
   static HOOK_NAME = 'autoLink';
 
+  static escapePreservedSymbol = (text) => {
+    // _ prevent conflict with emphasis
+    // _ => 0x5f
+    // * => 0x2a
+    return text.replace(/_/g, '&#x5f;').replace(/\*/g, '&#x2a;');
+  };
+
   constructor({ config, globalConfig }) {
     super({ config });
     this.urlProcessor = globalConfig.urlProcessor;
@@ -216,8 +223,11 @@ export default class AutoLink extends SyntaxBase {
       }
     }
     const processedURL = this.urlProcessor(url, 'autolink');
-    return `<a ${this.target} ${this.rel} title="${$e(url).replace(/_/g, '\\_')}"  href="${encodeURIOnce(
-      processedURL,
-    ).replace(/_/g, '\\_')}">${$e(linkText).replace(/_/g, '\\_')}</a>`;
+    const safeUri = encodeURIOnce(processedURL);
+    const displayUri = $e(url);
+    const additionalAttrs = [this.target, this.rel].filter(Boolean).join(' ');
+    return `<a href="${AutoLink.escapePreservedSymbol(safeUri)}" title="${AutoLink.escapePreservedSymbol(
+      displayUri,
+    )}" ${additionalAttrs}>${AutoLink.escapePreservedSymbol(displayUri)}</a>`;
   }
 }
