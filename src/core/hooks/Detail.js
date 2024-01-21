@@ -57,8 +57,8 @@ export default class Detail extends ParagraphBase {
     let html = '';
     if (type === 'multiple') {
       arr.forEach((item) => {
-        if (/\+\+/.test(item)) {
-          defaultOpen = /\+\+-/.test(item);
+        if (/^\s*\+\+/.test(item)) {
+          defaultOpen = /^\s*\+\+-/.test(item);
           currentTitle = item.replace(/\+\+[-]{0,1}\s*([^\n]+)$/, '$1');
           return true;
         }
