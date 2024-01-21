@@ -31,6 +31,8 @@ export interface CherryOptions {
   };
   /** 有哪些主题 */
   theme: {className: string, label: string}[];
+  /** 定义主题的作用范围，相同themeNameSpace的实例共享主题配置 */
+  themeNameSpace: string,
   callback: {
     /** 编辑器内容改变并完成渲染后触发 */
     afterChange: CherryLifecycle;

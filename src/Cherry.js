@@ -560,7 +560,7 @@ export default class Cherry extends CherryStatic {
       'cherry-previewer cherry-markdown',
       className || '',
       autonumberClass,
-      getThemeFromLocal(true),
+      getThemeFromLocal(true, this.options.themeNameSpace),
     ].join(' ');
     if (dom) {
       previewer = dom;

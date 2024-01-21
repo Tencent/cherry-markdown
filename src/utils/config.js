@@ -62,9 +62,9 @@ export function getIsClassicBrFromLocal() {
  * 保存当前主题
  * @param {string} theme
  */
-function saveThemeToLocal(theme) {
+function saveThemeToLocal(nameSpace, theme) {
   if (typeof localStorage !== 'undefined') {
-    localStorage.setItem('cherry-theme', theme);
+    localStorage.setItem(`${nameSpace}-theme`, theme);
   }
 }
 
@@ -72,10 +72,10 @@ function saveThemeToLocal(theme) {
  * 获取当前主题
  * @returns {string} 主题名
  */
-export function getThemeFromLocal(fullClass = false) {
+export function getThemeFromLocal(fullClass = false, nameSpace = 'cherry') {
   let ret = 'default';
   if (typeof localStorage !== 'undefined') {
-    const localTheme = localStorage.getItem('cherry-theme');
+    const localTheme = localStorage.getItem(`${nameSpace}-theme`);
     if (localTheme) {
       ret = localTheme;
     }
@@ -89,10 +89,11 @@ export function getThemeFromLocal(fullClass = false) {
  * @param {string} theme 如果没有传theme，则从本地缓存里取
  */
 export function changeTheme($cherry, theme = '') {
-  const newTheme = (theme ? theme : getThemeFromLocal()).replace(/^.*theme__/, '');
+  const themeNameSpace = $cherry.options.themeNameSpace || 'cherry';
+  const newTheme = (theme ? theme : getThemeFromLocal(false, themeNameSpace)).replace(/^.*theme__/, '');
   const newClass = ` theme__${newTheme}`;
   $cherry.wrapperDom.className = $cherry.wrapperDom.className.replace(/ theme__[^ $]+?( |$)/g, ' ') + newClass;
   $cherry.previewer.getDomContainer().className =
     $cherry.previewer.getDomContainer().className.replace(/ theme__[^ $]+?( |$)/g, ' ') + newClass;
-  saveThemeToLocal(newTheme);
+  saveThemeToLocal(themeNameSpace, newTheme);
 }
