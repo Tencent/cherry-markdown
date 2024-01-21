@@ -156,6 +156,7 @@ const defaultConfig = {
         copyCode: true, // 是否显示“复制”按钮
         editCode: true, // 是否显示“编辑”按钮
         changeLang: true, // 是否显示“切换语言”按钮
+        selfClosing: true, // 自动闭合，为true时，当md中有奇数个```时，会自动在md末尾追加一个```
         customRenderer: {
           // 自定义语法渲染器
         },
