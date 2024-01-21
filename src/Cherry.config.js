@@ -389,6 +389,8 @@ const defaultConfig = {
     { className: 'violet', label: '淡雅' },
     { className: 'blue', label: '清幽' },
   ],
+  // 定义主题的作用范围，相同themeNameSpace的实例共享主题配置
+  themeNameSpace: 'cherry',
   // 预览页面不需要绑定事件
   isPreviewOnly: false,
   // 预览区域跟随编辑器光标自动滚动
