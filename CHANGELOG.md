@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.36](https://github.com/Tencent/cherry-markdown/compare/v0.8.35...v0.8.36) (2024-01-22)
+
+
+### Features
+
+* [#683](https://github.com/Tencent/cherry-markdown/issues/683) 增加主题缓存的命名空间机制 ([f4bf980](https://github.com/Tencent/cherry-markdown/commit/f4bf9808921ac7bb0161c2daee5e613018c55a05))
+* [#697](https://github.com/Tencent/cherry-markdown/issues/697) 代码块支持自动闭合 ([4989771](https://github.com/Tencent/cherry-markdown/commit/4989771151719a0fe5ab3a2135c2a5e01c142dbb))
+* **publish:** 支持发布功能 ([#689](https://github.com/Tencent/cherry-markdown/issues/689)) ([f7cc3a5](https://github.com/Tencent/cherry-markdown/commit/f7cc3a59ffb42ffd83a1684ffc2222080e1e9b5e))
+
+
+### Bug Fixes
+
+* [#683](https://github.com/Tencent/cherry-markdown/issues/683) 修复最小高度引入的样式问题 ([03f7a99](https://github.com/Tencent/cherry-markdown/commit/03f7a99dcf9db268eec53637509b524066511ca9))
+* [#698](https://github.com/Tencent/cherry-markdown/issues/698) 修复手风琴语法无法显示图片的问题 ([e232a99](https://github.com/Tencent/cherry-markdown/commit/e232a9958acf4a2ff5f7d88066f7cc5f0bdeea00))
+* **autolink:** fix unexpected %5c in uris with underscore ([#695](https://github.com/Tencent/cherry-markdown/issues/695)) ([3ac4b60](https://github.com/Tencent/cherry-markdown/commit/3ac4b60344cd0cfb55c0d02b49d3862cd22e54b4))
+* **Toc:** use `div` replace obsolete HTML elements `dir` ([#693](https://github.com/Tencent/cherry-markdown/issues/693)) ([30bef8d](https://github.com/Tencent/cherry-markdown/commit/30bef8d11e58c99c7a7cee58b17ab2980ad00e7e))
+
 ### [0.8.35](https://github.com/Tencent/cherry-markdown/compare/v0.8.34...v0.8.35) (2024-01-12)
 
 
