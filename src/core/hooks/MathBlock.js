@@ -19,7 +19,6 @@ import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
-import { sanitizer } from '@/Sanitizer';
 
 export default class MathBlock extends ParagraphBase {
   static HOOK_NAME = 'mathBlock';
@@ -58,8 +57,7 @@ export default class MathBlock extends ParagraphBase {
     lines = lines > 0 ? lines : 0;
 
     // 既无MathJax又无katex时，原样输出
-    let result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
-          data-lines="${lines}">$$${escapeFormulaPunctuations(content)}$$</div>`;
+    let result = '';
 
     if (this.engine === 'katex') {
       // katex渲染
@@ -69,15 +67,15 @@ export default class MathBlock extends ParagraphBase {
       });
       result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
             data-lines="${lines}">${html}</div>`;
-    }
-    if (this.MathJax?.tex2svg) {
+    } else if (this.MathJax?.tex2svg) {
       // MathJax渲染
       const svg = getHTML(this.MathJax.tex2svg(content), true);
       result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
             data-lines="${lines}">${svg}</div>`;
+    } else {
+      result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
+      data-lines="${lines}">$$${escapeFormulaPunctuations(content)}$$</div>`;
     }
-
-    result = sanitizer.sanitize(result);
 
     return leadingChar + this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
   }
