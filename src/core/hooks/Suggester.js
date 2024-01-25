@@ -372,9 +372,9 @@ class SuggesterPanel {
           if (suggest?.icon) {
             renderContent = `<i class="ch-icon ch-icon-${suggest.icon}"></i>${renderContent}`;
           }
-          return this.renderPanelItem(renderContent, idx === 0);
+          return this.renderPanelItem(renderContent, false);
         }
-        return this.renderPanelItem(suggest, idx === 0);
+        return this.renderPanelItem(suggest, false);
       })
       .join('');
     /**
@@ -613,7 +613,9 @@ class SuggesterPanel {
 
       this.cursorMove = false;
 
-      const selectedItem = this.$suggesterPanel.querySelector('.cherry-suggester-panel__item--selected');
+      const selectedItem =
+        this.$suggesterPanel.querySelector('.cherry-suggester-panel__item--selected') ||
+        this.$suggesterPanel.querySelector('.cherry-suggester-panel__item:last-child');
       let nextElement = null;
       if (keyCode === 38 && !selectedItem.previousElementSibling) {
         nextElement = this.$suggesterPanel.lastElementChild;
@@ -633,10 +635,13 @@ class SuggesterPanel {
 
       nextElement.classList.add('cherry-suggester-panel__item--selected');
     } else if (keyCode === 13) {
-      evt.stopPropagation();
-      this.cursorMove = false;
-      this.pasteSelectResult(this.findSelectedItemIndex(), evt);
-      codemirror.focus();
+      const index = this.findSelectedItemIndex();
+      if (index >= 0) {
+        evt.stopPropagation();
+        this.cursorMove = false;
+        this.pasteSelectResult(index, evt);
+        codemirror.focus();
+      }
       // const cache = JSON.parse(JSON.stringify(this.cursorTo));
       // setTimeout(() => {
       //   codemirror.setCursor(cache);
