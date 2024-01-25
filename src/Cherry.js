@@ -419,11 +419,15 @@ export default class Cherry extends CherryStatic {
     let codeBlockTheme = /** @type {{theme?: string;}} */ (this.options.engine.syntax.codeBlock).theme;
     if (codeBlockTheme === 'dark') codeBlockTheme = 'tomorrow-night';
     else if (codeBlockTheme === 'light') codeBlockTheme = 'solarized-light';
-    const wrapperDom = createElement('div', ['cherry', 'clearfix', getThemeFromLocal(true)].join(' '), {
-      'data-toolbarTheme': toolbarTheme,
-      'data-inlineCodeTheme': inlineCodeTheme,
-      'data-codeBlockTheme': codeBlockTheme,
-    });
+    const wrapperDom = createElement(
+      'div',
+      ['cherry', 'clearfix', getThemeFromLocal(true, this.options.themeNameSpace)].join(' '),
+      {
+        'data-toolbarTheme': toolbarTheme,
+        'data-inlineCodeTheme': inlineCodeTheme,
+        'data-codeBlockTheme': codeBlockTheme,
+      },
+    );
     this.wrapperDom = wrapperDom;
     return wrapperDom;
   }
