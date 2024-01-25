@@ -19,7 +19,6 @@ import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
 import { getTableRule, isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
-import { sanitizer } from '@/Sanitizer';
 
 /**
  * 行内公式的语法
@@ -47,23 +46,22 @@ export default class InlineMath extends ParagraphBase {
     const lines = linesArr ? linesArr.length + 2 : 2;
     const sign = this.$engine.md5(wholeMatch);
     // 既无MathJax又无katex时，原样输出
-    let result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock"
-        data-lines="${lines}">$${escapeFormulaPunctuations(m1)}$</span>`;
+    let result = '';
     if (this.engine === 'katex' && this.katex?.renderToString) {
       // katex渲染
       const html = this.katex.renderToString(m1, {
         throwOnError: false,
       });
       result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}">${html}</span>`;
-    }
-
-    if (this.MathJax?.tex2svg) {
+    } else if (this.MathJax?.tex2svg) {
       // MathJax渲染
       const svg = getHTML(this.MathJax.tex2svg(m1, { em: 12, ex: 6, display: false }), true);
       result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}">${svg}</span>`;
+    } else {
+      result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock"
+        data-lines="${lines}">$${escapeFormulaPunctuations(m1)}$</span>`;
     }
 
-    result = sanitizer.sanitize(result);
     return this.pushCache(result, ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX + sign);
   }
 

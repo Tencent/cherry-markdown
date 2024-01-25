@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.37](https://github.com/Tencent/cherry-markdown/compare/v0.8.36...v0.8.37) (2024-01-25)
+
+
+### Bug Fixes
+
+* [#683](https://github.com/Tencent/cherry-markdown/issues/683) themeNamespace 没有应用到cherry的外层容器 ([56e0ee7](https://github.com/Tencent/cherry-markdown/commit/56e0ee71b05d818df4b22c3183b8922686895ef1))
+* 去掉冒号的联想 ([a03b749](https://github.com/Tencent/cherry-markdown/commit/a03b7498e09d714d64cdd40ccd1ac6565d63ee40))
+* 引入mathjax safe组件，防止通过mathjax引入xss注入 ([5e3e74c](https://github.com/Tencent/cherry-markdown/commit/5e3e74c96885c18d2be2e264bb713223f2d8517f))
+
 ### [0.8.36](https://github.com/Tencent/cherry-markdown/compare/v0.8.35...v0.8.36) (2024-01-22)
 
 

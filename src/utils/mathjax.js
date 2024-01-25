@@ -36,8 +36,8 @@ export const configureMathJax = (usePlugins) => {
     return;
   }
   const plugins = usePlugins
-    ? ['input/asciimath', '[tex]/noerrors', '[tex]/cancel', '[tex]/color', '[tex]/boldsymbol']
-    : [];
+    ? ['input/asciimath', '[tex]/noerrors', '[tex]/cancel', '[tex]/color', '[tex]/boldsymbol', 'ui/safe']
+    : ['ui/safe'];
   // @ts-ignore
   window.MathJax = {
     startup: {
