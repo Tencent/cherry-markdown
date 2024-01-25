@@ -140,12 +140,6 @@ const HalfWidthSuggestList = [
   },
   {
     icon: 'FullWidth',
-    label: ':',
-    keyword: '：',
-    value: ':',
-  },
-  {
-    icon: 'FullWidth',
     label: '"',
     keyword: '“',
     value: '"',
