@@ -110,6 +110,7 @@ export default class Cherry extends CherryStatic {
       if (!this.options.forceAppend) {
         return false;
       }
+      this.noMountEl = true;
       mountEl = document.createElement('div');
       mountEl.id = this.options.id || 'cherry-markdown';
       document.body.appendChild(mountEl);
@@ -150,6 +151,7 @@ export default class Cherry extends CherryStatic {
     wrapperFragment.appendChild(previewer.options.previewerMaskDom);
 
     wrapperDom.appendChild(wrapperFragment);
+    this.wrapperDom = wrapperDom;
     mountEl.appendChild(wrapperDom);
 
     editor.init(previewer);
@@ -196,6 +198,14 @@ export default class Cherry extends CherryStatic {
     this.editText(null, this.editor.editor);
     if (this.options.toolbars.toc !== false) {
       this.createToc();
+    }
+  }
+
+  destroy() {
+    if (this.noMountEl) {
+      this.cherryDom.remove();
+    } else {
+      this.wrapperDom.remove();
     }
   }
 
