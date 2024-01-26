@@ -120,6 +120,27 @@ console.log(cherryObj.getHtml());</textarea>
     </div>
 
     <div class="one-api">
+      <h2 class="one-api__name">destroy()</h2>
+      <p class="one-api__desc">销毁函数</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.destroy();</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">resetToolbar(type:string, toolbar:array)</h2>
+      <p class="one-api__desc">重置工具栏<br>type 修改工具栏的类型 {'toolbar'|'toolbarRight'|'sidebar'|'bubble'|'float'}<br>toolbar 工具栏配置</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.resetToolbar('toolbar', ['bold', 'table']);
+</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
       <h2 class="one-api__name">export(type:string)</h2>
       <p class="one-api__desc">导出预览区域的内容，type：{'pdf'|'img'}</p>
       <div class="one-api__try">
