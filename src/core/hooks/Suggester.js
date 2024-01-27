@@ -131,7 +131,7 @@ export default class Suggester extends SyntaxBase {
     if (!suggester) {
       suggester = defaultSuggest;
     } else {
-      suggester = suggester.concat(defaultSuggest);
+      suggester = defaultSuggest.concat(suggester);
     }
 
     suggester.forEach((configItem) => {
@@ -509,8 +509,6 @@ class SuggesterPanel {
         typeof this.optionList[idx].value === 'function'
       ) {
         result = this.optionList[idx].value();
-      } else if (typeof this.optionList[idx] === 'string') {
-        result = `${this.optionList[idx]} `;
       } else {
         result = ` ${this.keyword}${this.optionList[idx]} `;
       }
