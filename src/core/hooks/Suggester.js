@@ -54,7 +54,7 @@ import { isBrowser } from '@/utils/env';
 export default class Suggester extends SyntaxBase {
   static HOOK_NAME = 'suggester';
 
-  constructor({ config }) {
+  constructor({ config, cherry }) {
     /**
      * config.suggester 内容
      * [{
@@ -77,7 +77,8 @@ export default class Suggester extends SyntaxBase {
 
     this.config = config;
     this.RULE = this.rule();
-    this.suggesterPanel = new SuggesterPanel();
+    this.$cherry = cherry;
+    this.suggesterPanel = new SuggesterPanel(cherry);
   }
 
   afterInit(callback) {
@@ -209,12 +210,13 @@ export default class Suggester extends SyntaxBase {
 }
 
 class SuggesterPanel {
-  constructor() {
+  constructor(cherry) {
     this.searchCache = false;
     this.searchKeyCache = [];
     this.optionList = [];
     this.cursorMove = true;
     this.suggesterConfig = {};
+    this.$cherry = cherry;
   }
 
   /**
@@ -222,8 +224,8 @@ class SuggesterPanel {
    */
   tryCreatePanel() {
     if (!this.$suggesterPanel && isBrowser() && document) {
-      document?.body?.appendChild(this.createDom(this.panelWrap));
-      this.$suggesterPanel = document?.querySelector('.cherry-suggester-panel');
+      this.$cherry.wrapperDom.appendChild(this.createDom(this.panelWrap));
+      this.$suggesterPanel = this.$cherry.wrapperDom.querySelector('.cherry-suggester-panel');
     }
   }
 
@@ -340,8 +342,8 @@ class SuggesterPanel {
   showSuggesterPanel({ left, top, items }) {
     this.tryCreatePanel();
     if (!this.$suggesterPanel && isBrowser()) {
-      document.body.appendChild(this.createDom(this.panelWrap));
-      this.$suggesterPanel = document.querySelector('.cherry-suggester-panel');
+      this.$cherry.wrapperDom.appendChild(this.createDom(this.panelWrap));
+      this.$suggesterPanel = this.$cherry.wrapperDom.querySelector('.cherry-suggester-panel');
     }
     this.updatePanel(items);
     this.$suggesterPanel.style.left = `${left}px`;
@@ -429,19 +431,18 @@ class SuggesterPanel {
   // 面板重定位
   relocatePanel(codemirror) {
     // 找到光标位置来确定候选框位置
-    let $cursor = document.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
+    let $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
     // 当editor选中某一内容时，".CodeMirror-cursor"会消失，此时通过定位".selected"来确定候选框位置
     if (!$cursor) {
-      $cursor = document.querySelector('.CodeMirror-selected');
+      $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-selected');
     }
     if (!$cursor) {
       return false;
     }
-    const pos = codemirror.getCursor();
-    const lineHeight = codemirror.lineInfo(pos.line).handle.height;
+    const editorDomRect = this.$cherry.wrapperDom.getBoundingClientRect();
     const rect = $cursor.getBoundingClientRect();
-    const top = rect.top + lineHeight;
-    const { left } = rect;
+    const top = rect.top + rect.height + 5 - editorDomRect.top;
+    const left = rect.left - editorDomRect.left;
     this.showSuggesterPanel({ left, top, items: this.optionList });
   }
 
