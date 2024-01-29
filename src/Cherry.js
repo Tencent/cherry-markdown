@@ -110,6 +110,7 @@ export default class Cherry extends CherryStatic {
       if (!this.options.forceAppend) {
         return false;
       }
+      this.noMountEl = true;
       mountEl = document.createElement('div');
       mountEl.id = this.options.id || 'cherry-markdown';
       document.body.appendChild(mountEl);
@@ -140,8 +141,6 @@ export default class Cherry extends CherryStatic {
     const wrapperFragment = document.createDocumentFragment();
     wrapperFragment.appendChild(this.toolbar.options.dom);
     wrapperFragment.appendChild(editor.options.editorDom);
-    // 创建预览区域的侧边工具栏
-    this.createSidebar(wrapperFragment);
     if (!this.options.previewer.dom) {
       wrapperFragment.appendChild(previewer.options.previewerDom);
     }
@@ -150,6 +149,9 @@ export default class Cherry extends CherryStatic {
     wrapperFragment.appendChild(previewer.options.previewerMaskDom);
 
     wrapperDom.appendChild(wrapperFragment);
+    this.wrapperDom = wrapperDom;
+    // 创建预览区域的侧边工具栏
+    this.createSidebar();
     mountEl.appendChild(wrapperDom);
 
     editor.init(previewer);
@@ -196,6 +198,14 @@ export default class Cherry extends CherryStatic {
     this.editText(null, this.editor.editor);
     if (this.options.toolbars.toc !== false) {
       this.createToc();
+    }
+  }
+
+  destroy() {
+    if (this.noMountEl) {
+      this.cherryDom.remove();
+    } else {
+      this.wrapperDom.remove();
     }
   }
 
@@ -437,16 +447,54 @@ export default class Cherry extends CherryStatic {
    * @returns {Toolbar}
    */
   createToolbar() {
-    const dom = createElement('div', 'cherry-toolbar');
-    this.toolbarContainer = dom;
+    if (!this.toolbarContainer) {
+      const dom = createElement('div', 'cherry-toolbar');
+      this.toolbarContainer = dom;
+    }
     this.toolbar = new Toolbar({
-      dom,
+      dom: this.toolbarContainer,
       $cherry: this,
       buttonConfig: this.options.toolbars.toolbar,
       customMenu: this.options.toolbars.customMenu,
       shortcutKey: this.options.toolbars.shortcutKey,
     });
     return this.toolbar;
+  }
+
+  /**
+   * 动态重置工具栏配置
+   * @public
+   * @param {'toolbar'|'toolbarRight'|'sidebar'|'bubble'|'float'} [type] 修改工具栏的类型
+   * @param {Array} [toolbar] 要重置的对应工具栏配置
+   * @returns {Boolean}
+   */
+  resetToolbar(type, toolbar) {
+    const $type = /(toolbar|toolbarRight|sidebar|bubble|float)/.test(type) ? type : false;
+    if ($type === false) {
+      return false;
+    }
+    if (this.toolbarContainer) {
+      this.toolbarContainer.innerHTML = '';
+    }
+    if (this.toolbarFloatContainer) {
+      this.toolbarFloatContainer.innerHTML = '';
+    }
+    if (this.toolbarBubbleContainer) {
+      this.toolbarBubbleContainer.innerHTML = '';
+    }
+    if (this.sidebarDom) {
+      this.sidebarDom.innerHTML = '';
+    }
+    this.cherryDom.querySelectorAll('.cherry-dropdown').forEach((item) => {
+      item.remove();
+    });
+    this.options.toolbars[type] = toolbar;
+    this.createToolbar();
+    this.createToolbarRight();
+    this.createBubble();
+    this.createFloatMenu();
+    this.createSidebar();
+    return true;
   }
 
   /**
@@ -468,19 +516,26 @@ export default class Cherry extends CherryStatic {
    * @private
    * @returns
    */
-  createSidebar(wrapperFragment) {
+  createSidebar() {
     if (this.options.toolbars.sidebar) {
       $expectTarget(this.options.toolbars.sidebar, Array);
-      const externalClass = this.options.toolbars.theme === 'dark' ? 'dark' : '';
-      const dom = createElement('div', `cherry-sidebar ${externalClass}`);
+      let init = false;
+      if (!this.sidebarDom) {
+        init = true;
+        const externalClass = this.options.toolbars.theme === 'dark' ? 'dark' : '';
+        const dom = createElement('div', `cherry-sidebar ${externalClass}`);
+        this.sidebarDom = dom;
+      }
       this.sidebar = new Sidebar({
-        dom,
+        dom: this.sidebarDom,
         $cherry: this,
         buttonConfig: this.options.toolbars.sidebar,
         customMenu: this.options.toolbars.customMenu,
       });
       this.toolbar.collectMenuInfo(this.sidebar);
-      wrapperFragment.appendChild(this.sidebar.options.dom);
+      if (init === true) {
+        this.wrapperDom.appendChild(this.sidebarDom);
+      }
     }
   }
 
@@ -490,10 +545,13 @@ export default class Cherry extends CherryStatic {
    */
   createFloatMenu() {
     if (this.options.toolbars.float) {
-      const dom = createElement('div', 'cherry-floatmenu');
+      if (!this.toolbarFloatContainer) {
+        const dom = createElement('div', 'cherry-floatmenu');
+        this.toolbarFloatContainer = dom;
+      }
       $expectTarget(this.options.toolbars.float, Array);
       this.floatMenu = new FloatMenu({
-        dom,
+        dom: this.toolbarFloatContainer,
         $cherry: this,
         buttonConfig: this.options.toolbars.float,
         customMenu: this.options.toolbars.customMenu,
@@ -508,10 +566,13 @@ export default class Cherry extends CherryStatic {
    */
   createBubble() {
     if (this.options.toolbars.bubble) {
-      const dom = createElement('div', 'cherry-bubble');
+      if (!this.toolbarBubbleContainer) {
+        const dom = createElement('div', 'cherry-bubble');
+        this.toolbarBubbleContainer = dom;
+      }
       $expectTarget(this.options.toolbars.bubble, Array);
       this.bubble = new Bubble({
-        dom,
+        dom: this.toolbarBubbleContainer,
         $cherry: this,
         buttonConfig: this.options.toolbars.bubble,
         customMenu: this.options.toolbars.customMenu,
