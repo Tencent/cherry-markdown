@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.38](https://github.com/Tencent/cherry-markdown/compare/v0.8.37...v0.8.38) (2024-01-29)
+
+
+### Features
+
+* [#702](https://github.com/Tencent/cherry-markdown/issues/702) 提供销毁函数 ([bb3c856](https://github.com/Tencent/cherry-markdown/commit/bb3c85699b1430a5ad90387017f393f82793b5d1))
+* [#703](https://github.com/Tencent/cherry-markdown/issues/703) 增加动态重置工具栏的API ([4011335](https://github.com/Tencent/cherry-markdown/commit/4011335ec0b98adeb2aaa462b33a850767672b15))
+* 优化联想的选中逻辑，默认不选中任意选项，不影响回车键 ([5ef6505](https://github.com/Tencent/cherry-markdown/commit/5ef6505d7c4d1b994cb9c35342f3124bd02c9370))
+
+
+### Bug Fixes
+
+* 修复自定义keyword覆盖问题 ([#705](https://github.com/Tencent/cherry-markdown/issues/705)) ([aa099ea](https://github.com/Tencent/cherry-markdown/commit/aa099eaff80850b6c2bc87d2c321b9bebd739f3f))
+* 联想功能支持多实例 ([9d50c88](https://github.com/Tencent/cherry-markdown/commit/9d50c8806dc017f0575b14b4ba988a507faac9ca))
+
 ### [0.8.37](https://github.com/Tencent/cherry-markdown/compare/v0.8.36...v0.8.37) (2024-01-25)
 
 
