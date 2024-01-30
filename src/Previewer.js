@@ -873,6 +873,27 @@ export default class Previewer {
   }
 
   /**
+   * 滚动到对应id的位置，实现锚点滚动能力
+   * @param {string} id 元素的id属性值
+   * @return {boolean} 是否有对应id的元素并执行滚动
+   */
+  scrollToId(id) {
+    const dom = this.getDomContainer();
+    let $id = id.replace(/^\s*#/, '').trim();
+    $id = /%/.test($id) ? $id : encodeURIComponent($id);
+    const target = dom.querySelector(`[id="${$id}"]`) ?? false;
+    if (target === false) {
+      return false;
+    }
+    const scrollTop = dom.scrollTop + target.getBoundingClientRect().y - dom.getBoundingClientRect().y - 20;
+    dom.scrollTo({
+      top: scrollTop,
+      left: 0,
+      behavior: 'smooth',
+    });
+  }
+
+  /**
    * 实现滚动动画
    * @param { Number } targetY 目标位置
    */
