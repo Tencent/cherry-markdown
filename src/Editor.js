@@ -267,9 +267,8 @@ export default class Editor {
   handlePaste(event, clipboardData, codemirror) {
     this.pasterHtml = false;
     const { items } = clipboardData;
-    const types = clipboardData.types || [];
     const codemirrorDoc = codemirror.getDoc();
-    for (let i = 0; i < types.length; i++) {
+    for (let i = 0; i < items.length; i++) {
       const item = items[i];
       // 判断是否为图片数据
       if (item && item.kind === 'file' && item.type.match(/^image\//i)) {
@@ -279,11 +278,12 @@ export default class Editor {
           if (typeof url !== 'string') {
             return;
           }
-          const mdStr = handleFileUploadCallback(url, params, file);
+          const mdStr = `${i > 0 ? '\n' : ''}${handleFileUploadCallback(url, params, file)}`;
           if (this.pasterHtml) {
+            // 如果同时粘贴了html内容和文件内容，则在文件上传完成后强制让光标处于非选中状态，以防止自动选中的html内容被文件内容替换掉
             const { line, ch } = codemirror.getCursor();
             codemirror.setSelection({ line, ch }, { line, ch });
-            codemirrorDoc.replaceSelection(`\n${mdStr}`, 'end');
+            codemirrorDoc.replaceSelection(mdStr, 'end');
           } else {
             codemirrorDoc.replaceSelection(mdStr);
           }
