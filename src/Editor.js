@@ -265,10 +265,11 @@ export default class Editor {
    * @returns {boolean | void}
    */
   handlePaste(event, clipboardData, codemirror) {
-    this.pasterHtml = false;
+    let html = clipboardData.getData('Text/Html');
     const { items } = clipboardData;
     const codemirrorDoc = codemirror.getDoc();
-    for (let i = 0; i < items.length; i++) {
+    // 只要有html内容，就不处理剪切板里的其他内容，这么做的后果是粘贴excel内容时，只会粘贴html内容，不会把excel对应的截图粘进来
+    for (let i = 0; !html && i < items.length; i++) {
       const item = items[i];
       // 判断是否为图片数据
       if (item && item.kind === 'file' && item.type.match(/^image\//i)) {
@@ -279,14 +280,15 @@ export default class Editor {
             return;
           }
           const mdStr = `${i > 0 ? '\n' : ''}${handleFileUploadCallback(url, params, file)}`;
-          if (this.pasterHtml) {
-            // 如果同时粘贴了html内容和文件内容，则在文件上传完成后强制让光标处于非选中状态，以防止自动选中的html内容被文件内容替换掉
-            const { line, ch } = codemirror.getCursor();
-            codemirror.setSelection({ line, ch }, { line, ch });
-            codemirrorDoc.replaceSelection(mdStr, 'end');
-          } else {
-            codemirrorDoc.replaceSelection(mdStr);
-          }
+          codemirrorDoc.replaceSelection(mdStr);
+          // if (this.pasterHtml) {
+          //   // 如果同时粘贴了html内容和文件内容，则在文件上传完成后强制让光标处于非选中状态，以防止自动选中的html内容被文件内容替换掉
+          //   const { line, ch } = codemirror.getCursor();
+          //   codemirror.setSelection({ line, ch }, { line, ch });
+          //   codemirrorDoc.replaceSelection(mdStr, 'end');
+          // } else {
+          //   codemirrorDoc.replaceSelection(mdStr);
+          // }
         });
         event.preventDefault();
       }
@@ -294,7 +296,6 @@ export default class Editor {
 
     // 复制html转换markdown
     const htmlText = clipboardData.getData('text/plain');
-    let html = clipboardData.getData('Text/Html');
     if (!html || !this.options.convertWhenPaste) {
       return true;
     }
@@ -304,7 +305,6 @@ export default class Editor {
     html = divObj.innerHTML;
     const mdText = htmlParser.run(html);
     if (typeof mdText === 'string' && mdText.trim().length > 0) {
-      this.pasterHtml = true;
       const range = codemirror.listSelections();
       if (codemirror.getSelections().length <= 1 && range[0] && range[0].anchor) {
         const currentCursor = {};
