@@ -132,6 +132,19 @@ export default class Previewer {
     this.lazyLoadImg = new LazyLoadImg(this.options.lazyLoadImg, this);
     this.lazyLoadImg.doLazyLoad();
     this.onMouseDown();
+    this.onSizeChange();
+  }
+
+  /**
+   * “监听”编辑器的尺寸变化，变化时更新拖拽条的位置
+   */
+  onSizeChange() {
+    // 创建一个新的 ResizeObserver 实例
+    const resizeObserver = new ResizeObserver(() => {
+      this.syncVirtualLayoutFromReal();
+    });
+    // 开始监听元素
+    resizeObserver.observe(this.$cherry.wrapperDom);
   }
 
   $initPreviewerBubble() {
@@ -223,19 +236,25 @@ export default class Previewer {
 
     const { editorMaskDom, previewerMaskDom, virtualDragLineDom: virtualLineDom } = this.options;
 
-    virtualLineDom.style.top = `${editorTop}px`;
-    virtualLineDom.style.left = `${previewerLeft}px`;
-    virtualLineDom.style.bottom = '0px';
+    this.$tryChangeValue(virtualLineDom, 'top', `${editorTop}px`);
+    this.$tryChangeValue(virtualLineDom, 'left', `${previewerLeft}px`);
+    this.$tryChangeValue(virtualLineDom, 'bottom', '0px');
 
-    editorMaskDom.style.height = `${editorHeight}px`;
-    editorMaskDom.style.top = `${editorTop}px`;
-    editorMaskDom.style.left = '0px';
-    editorMaskDom.style.width = `${editorWidth}px`;
+    this.$tryChangeValue(editorMaskDom, 'height', `${editorHeight}px`);
+    this.$tryChangeValue(editorMaskDom, 'top', `${editorTop}px`);
+    this.$tryChangeValue(editorMaskDom, 'left', '0px');
+    this.$tryChangeValue(editorMaskDom, 'width', `${editorWidth}px`);
 
-    previewerMaskDom.style.height = `${editorHeight}px`;
-    previewerMaskDom.style.top = `${editorTop}px`;
-    previewerMaskDom.style.left = `${previewerLeft}px`;
-    previewerMaskDom.style.width = `${previewerWidth}px`;
+    this.$tryChangeValue(previewerMaskDom, 'height', `${editorHeight}px`);
+    this.$tryChangeValue(previewerMaskDom, 'top', `${editorTop}px`);
+    this.$tryChangeValue(previewerMaskDom, 'left', `${previewerLeft}px`);
+    this.$tryChangeValue(previewerMaskDom, 'width', `${previewerWidth}px`);
+  }
+
+  $tryChangeValue(obj, key, value) {
+    if (obj.style[key] !== value) {
+      obj.style[key] = value;
+    }
   }
 
   calculateVirtualLayout(editorLeft, editorRight) {
