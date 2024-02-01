@@ -267,7 +267,21 @@ export default class Editor {
   handlePaste(event, clipboardData, codemirror) {
     let html = clipboardData.getData('Text/Html');
     const { items } = clipboardData;
+    // 清空注释
+    html = html.replace(/<!--[^>]+>/g, '');
+    /**
+     * 处理“右键复制图片”场景
+     * 在这种场景下，我们希望粘贴进来的图片可以走文件上传逻辑，所以当检测到这种场景后，我们会清空html
+     */
+    if (
+      /<body>\s*<img [^>]+>\s*<\/body>/.test(html) &&
+      items[1]?.kind === 'file' &&
+      items[1]?.type.match(/^image\//i)
+    ) {
+      html = '';
+    }
     const codemirrorDoc = codemirror.getDoc();
+    this.fileUploadCount = 0;
     // 只要有html内容，就不处理剪切板里的其他内容，这么做的后果是粘贴excel内容时，只会粘贴html内容，不会把excel对应的截图粘进来
     for (let i = 0; !html && i < items.length; i++) {
       const item = items[i];
@@ -276,10 +290,11 @@ export default class Editor {
         // 读取该图片
         const file = item.getAsFile();
         this.options.fileUpload(file, (url, params = {}) => {
+          this.fileUploadCount += 1;
           if (typeof url !== 'string') {
             return;
           }
-          const mdStr = `${i > 0 ? '\n' : ''}${handleFileUploadCallback(url, params, file)}`;
+          const mdStr = `${this.fileUploadCount > 1 ? '\n' : ''}${handleFileUploadCallback(url, params, file)}`;
           codemirrorDoc.replaceSelection(mdStr);
           // if (this.pasterHtml) {
           //   // 如果同时粘贴了html内容和文件内容，则在文件上传完成后强制让光标处于非选中状态，以防止自动选中的html内容被文件内容替换掉
