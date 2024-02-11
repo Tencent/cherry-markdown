@@ -2,6 +2,7 @@ import { app, BrowserWindow, shell, ipcMain, Menu } from 'electron';
 import { release } from 'node:os';
 import { join } from 'node:path';
 import { menuConfig } from '../preload/menu';
+import fs from 'fs';
 
 // The built directory structure
 //
@@ -67,7 +68,32 @@ async function createWindow() {
 
   // Test actively push message to the Electron-Renderer
   win.webContents.on('did-finish-load', () => {
-    win?.webContents.send('main-process-message', new Date().toLocaleString());
+    /**
+     * @description 直接打开文件
+     * @param status -1 读取文件失败; -2 取消读取; 0 读取成功
+     * @param message 读取文件失败的原因
+     * @param data 读取成功的文件内容
+     * @param filePath 读取成功的文件路径
+     */
+    try {
+      if (process.argv.length > 1 && fs.existsSync(process.argv[1])) {
+        const md = fs.readFileSync(process.argv[1]);
+        const readResult = {
+          status: 0,
+          message: 'success',
+          data: md.toString(),
+          filePath: process.argv[1]
+        }
+        win?.webContents.send('open_file', readResult);
+      }
+    } catch (error) {
+      win?.webContents.send('open_file', {
+        status: -1,
+        message: error.message,
+        data: '',
+        filePath: ''
+      });
+    }
   });
 
   // Make all links open with the browser, not with the application
@@ -80,7 +106,9 @@ async function createWindow() {
   Menu.setApplicationMenu(menu);
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
+});
 
 app.on('window-all-closed', () => {
   win = null;

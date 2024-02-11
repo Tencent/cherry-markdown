@@ -23,9 +23,8 @@ ipcRenderer.on('new_file', () => {
 
 /**
  * @description 打开文档
- * @description 仅当 status=1,data、filePath 存在
  */
-ipcRenderer.on('open_file', (event, arg: { status: -2 | -1 | -3 | 1, message: string, data: string, filePath: string }) => {
+ipcRenderer.on('open_file', (_event, arg: { status: -2 | -1 | 0, message: string, data: string, filePath: string }) => {
   switch (arg.status) {
     case -2:
       TMessagePlugin.error(arg.message);
@@ -33,12 +32,9 @@ ipcRenderer.on('open_file', (event, arg: { status: -2 | -1 | -3 | 1, message: st
     case -1:
       TMessagePlugin.error(arg.message);
       break;
-    case -3:
-      TMessagePlugin.warning(arg.message);
-      break;
-    case 1:
-      storeCherry.cherry?.setMarkdown(arg.data)
-      storeElectronMenu.saveFilePath = arg.filePath
+    case 0:
+      storeCherry.cherry?.setMarkdown(arg.data);
+      storeElectronMenu.saveFilePath = arg.filePath;
       break;
   }
 
@@ -49,13 +45,13 @@ ipcRenderer.on('open_file', (event, arg: { status: -2 | -1 | -3 | 1, message: st
 ipcRenderer.on('save-file-as',
   () => ipcRenderer.send('save-file-as-info', { data: storeCherry.cherry?.getMarkdown() }))
 
-ipcRenderer.on('save-file-as-reply', (event, arg: { status: -2 | -1 | 1, message: string, filePath: string }) => {
+ipcRenderer.on('save-file-as-reply', (event, arg: { status: -2 | -1 | 0, message: string, filePath: string }) => {
   switch (arg.status) {
+    case 0:
+      storeElectronMenu.saveFilePath = arg.filePath
+      break;
     case -1:
       TMessagePlugin.error(arg.message);
-      break;
-    case 1:
-      storeElectronMenu.saveFilePath = arg.filePath
       break;
     case -2:
       TMessagePlugin.warning(arg.message);
@@ -70,7 +66,7 @@ ipcRenderer.on('save-file', () => {
   ipcRenderer.send('sava-file-type', { filePath: storeElectronMenu.saveFilePath, data: storeCherry.cherry?.getMarkdown() })
 })
 
-ipcRenderer.on('save-file-reply', (event, arg: { status: -1 | 1, message: string }) => {
+ipcRenderer.on('save-file-reply', (event, arg: { status: -1 | 0, message: string }) => {
   if (arg.status === -1) {
     TMessagePlugin.error(arg.message);
   }

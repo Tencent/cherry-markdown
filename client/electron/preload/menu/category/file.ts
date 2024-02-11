@@ -1,7 +1,6 @@
 import { BrowserWindow, dialog, ipcMain, Menu } from "electron"
 import fs from "node:fs"
 
-
 /**
  * @description 新建文件
  */
@@ -12,7 +11,10 @@ export const newFile = () => {
 
 /**
  * @description 打开文件
- * @param status -2 -1 读取文件失败; -3 取消读取; 1 读取成功
+ * @param status -1 读取文件失败; -2 取消读取; 0 读取成功
+ * @param message 读取文件失败的原因
+ * @param data 读取成功的文件内容
+ * @param filePath 读取成功的文件路径
  */
 export const openFile = () => {
   // 获取第一个窗口
@@ -24,26 +26,49 @@ export const openFile = () => {
     ],
   }).then(result => {
     if (result.canceled) {
-      win.webContents.send('open_file', { status: -3, message: 'open file canceled' })
+      win.webContents.send('open_file', {
+        status: -2,
+        message: 'open file canceled',
+        data: '',
+        filePath: ''
+      })
       return;
     };
 
     let filePath = result.filePaths[0];
     fs.readFile(filePath, 'utf-8', (err, data) => {
       if (err) {
-        win.webContents.send('open_file', { status: -1, message: err.message })
+        win.webContents.send('open_file', {
+          status: -1,
+          message: err.message,
+          data: '',
+          filePath: ''
+        })
         return;
       }
-      win.webContents.send('open_file', { status: 1, message: 'open file success', data: data, filePath: filePath })
+      win.webContents.send('open_file', {
+        status: 0,
+        message: 'open file success',
+        data: data,
+        filePath: filePath
+      })
     });
   }).catch(err => {
-    win.webContents.send('open_file', { status: -2, message: err })
+    win.webContents.send('open_file', {
+      status: -1,
+      message: err.message,
+      data: '',
+      filePath: ''
+    })
   });
 }
 
 /**
  * @description 另存为...
- *  @description status -2 -1 读取文件失败; 0 取消读取; 1 读取成功
+ * @description status -2 -1 保存文件失败; 0 取消读取; 1 读取成功
+ * @description message 保存文件失败的原因
+ * @description filePath 保存文件成功的路径
+ * 
  */
 export const saveFileAs = () => {
   const win = BrowserWindow.getAllWindows()[0];
@@ -63,7 +88,7 @@ ipcMain.on('save-file-as-info', async (event, arg: { data: string }) => {
       if (err) {
         event.reply('save-file-as-reply', { status: -1, message: err.message, filePath: '' })
       } else {
-        event.reply('save-file-as-reply', { status: 1, message: 'save file as success', filePath: filePath })
+        event.reply('save-file-as-reply', { status: 0, message: 'save file as success', filePath: filePath })
         const menu = Menu.getApplicationMenu();
         const saveFileBtn = menu.getMenuItemById('save-file');
         saveFileBtn.enabled = false
@@ -77,6 +102,8 @@ ipcMain.on('save-file-as-info', async (event, arg: { data: string }) => {
 
 /**
  * @description 保存文件
+ * @description status  0 保存成功; -1 保存失败
+ * @description message 保存失败的原因
  */
 export const saveFile = () => {
   // 询问是否有文件路径->如没有则调用另存为文件功能
@@ -91,7 +118,7 @@ ipcMain.on('sava-file-type', (event, arg: { filePath: string, data: string }) =>
         event.reply('save-file-reply', { status: -1, message: err.message, });
       } else {
         console.error('success');
-        event.reply('save-file-reply', { status: 1, message: 'save file as success' });
+        event.reply('save-file-reply', { status: 0, message: 'save file as success' });
         const menu = Menu.getApplicationMenu();
         const saveFileBtn = menu.getMenuItemById('save-file');
         saveFileBtn.enabled = false
