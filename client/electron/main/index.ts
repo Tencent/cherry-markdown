@@ -66,30 +66,47 @@ async function createWindow() {
     win.loadFile(indexHtml);
   }
 
-  // Test actively push message to the Electron-Renderer
   win.webContents.on('did-finish-load', () => {
     /**
-     * @description 直接打开文件
+     * @description Windows 直接打开文件
      * @param status -1 读取文件失败; -2 取消读取; 0 读取成功
      * @param message 读取文件失败的原因
      * @param data 读取成功的文件内容
      * @param filePath 读取成功的文件路径
      */
     try {
-      if (process.argv.length > 1 && fs.existsSync(process.argv[1])) {
-        const md = fs.readFileSync(process.argv[1]);
-        const readResult = {
+      if (process.argv.length > 1 && fs.statSync(process.argv[1]).isFile() && process.argv[1].endsWith('.md')) {
+        win?.webContents.send('open_file', {
           status: 0,
           message: 'success',
-          data: md.toString(),
+          data: fs.readFileSync(process.argv[1]).toString(),
           filePath: process.argv[1]
-        }
-        win?.webContents.send('open_file', readResult);
+        });
       }
     } catch (error) {
       win?.webContents.send('open_file', {
         status: -1,
         message: error.message,
+        data: '',
+        filePath: ''
+      });
+    }
+  });
+
+  // mac 打开文件
+  app.on('open-file', (event, path) => {
+    event.preventDefault();
+    if (path.endsWith('.md')) {
+      win?.webContents.send('open_file', {
+        status: 0,
+        message: 'success',
+        data: fs.readFileSync(path).toString(),
+        filePath: path
+      });
+    }else{
+      win?.webContents.send('open_file', {
+        status: -1,
+        message: '文件格式不支持',
         data: '',
         filePath: ''
       });
