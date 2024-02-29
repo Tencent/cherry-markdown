@@ -2,7 +2,7 @@
  * @see https://www.electron.build/configuration/configuration
  */
 {
-  appId: 'com.electron.cherry-noted',
+  appId: 'cherry-noted',
   productName: 'Cherry Noted',
   asar: true,
   icon: 'public/favicon.ico',
@@ -25,8 +25,16 @@
   },
   nsis: {
     oneClick: false,
-    perMachine: false,
+    "perMachine": true,
     allowToChangeInstallationDirectory: true,
-    deleteAppDataOnUninstall: false,
   },
+  fileAssociations: [
+    {
+      ext: ['md'],
+      name: 'Cherry Noted',
+      description: 'Cherry Noted file',
+      role: 'Editor',
+      icon: './public/favicon.ico',
+    },
+  ],
 }

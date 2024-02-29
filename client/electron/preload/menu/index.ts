@@ -95,8 +95,8 @@ const menuConfig: Array<MenuItemConstructorOptions | MenuItem> = [
     ]
   },
 ]
-
-isPackaged ? [] : menuConfig.push({
+// isPackaged ? [] :
+ menuConfig.push({
   label: "打开DevTools",
   role: 'toggleDevTools'
 })
