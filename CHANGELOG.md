@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.39](https://github.com/Tencent/cherry-markdown/compare/v0.8.38...v0.8.39) (2024-02-29)
+
+
+### Features
+
+* [#707](https://github.com/Tencent/cherry-markdown/issues/707) 提供滚动到对应锚点的api ([3d96efc](https://github.com/Tencent/cherry-markdown/commit/3d96efc9427d2d8f2f527cce5ff46d302c08420c))
+* **client:** add file right-click menu to `*.md` and directly read file content ([#717](https://github.com/Tencent/cherry-markdown/issues/717)) ([18b650a](https://github.com/Tencent/cherry-markdown/commit/18b650a72e8c8ff2c01d8fd75a6df30087677ce1))
+
+
+### Bug Fixes
+
+* [#461](https://github.com/Tencent/cherry-markdown/issues/461) 修复全屏时编辑区和预览区中间分割线拖拽位置错位的问题 ([539f77f](https://github.com/Tencent/cherry-markdown/commit/539f77faddb19e737491e0a0bd512c213f49aed4))
+* [#681](https://github.com/Tencent/cherry-markdown/issues/681) 修复粘贴图片会出现两张图片的情况 ([83b47ea](https://github.com/Tencent/cherry-markdown/commit/83b47ea50df0b64e9e4620037b91485c39477068))
+* [#681](https://github.com/Tencent/cherry-markdown/issues/681) 修复粘贴图片会出现两张图片的情况 ([634ccd3](https://github.com/Tencent/cherry-markdown/commit/634ccd3caaf6d942e5687a75e803549d3d360067))
+* [#710](https://github.com/Tencent/cherry-markdown/issues/710) 修复粘贴多个文件时只能上传一个文件的问题 ([6830671](https://github.com/Tencent/cherry-markdown/commit/68306714b8fe45fde8f5a194602ece62d6d3de1c))
+
 ### [0.8.38](https://github.com/Tencent/cherry-markdown/compare/v0.8.37...v0.8.38) (2024-01-29)
 
 
