@@ -132,6 +132,10 @@ export default class Header extends ParagraphBase {
 
   beforeMakeHtml(str) {
     let $str = str;
+    if (this.$engine.globalConfig.flowSessionContext) {
+      // 适配流式会话的场景，文章末尾的段横线标题语法（`\n-`）失效
+      $str = $str.replace(/(\n\s*-{1,})\s*$/, '$1 ');
+    }
     // atx 优先
     if (this.test($str, ATX_HEADER)) {
       $str = $str.replace(this.RULE[ATX_HEADER].reg, (match, lines, level, text) => {
