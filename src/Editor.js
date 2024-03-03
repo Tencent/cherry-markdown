@@ -494,8 +494,8 @@ export default class Editor {
           for (let i = 0; i < files.length; i++) {
             const file = files[i];
             const fileType = file.type || '';
-            // 文本类型或者无类型的，直接读取内容，不做上传文件的操作
-            if (fileType === '' || /^text/i.test(fileType)) {
+            // text格式或md格式文件，直接读取内容，不做上传文件的操作
+            if (/\.(text|md)/.test(file.name) || /^text/i.test(fileType)) {
               continue;
             }
             this.options.fileUpload(file, (url, params = {}) => {
