@@ -190,7 +190,7 @@ export default class Cherry extends CherryStatic {
     });
 
     // 切换模式，有纯预览模式、纯编辑模式、双栏编辑模式
-    this.switchModel(this.options.editor.defaultModel);
+    this.switchModel(this.options.editor.defaultModel, this.options.toolbars.showToolbar);
 
     // 如果配置了初始化后根据hash自动滚动
     if (this.options.autoScrollByHashAfterInit) {
@@ -245,26 +245,34 @@ export default class Cherry extends CherryStatic {
    * @param {'edit&preview'|'editOnly'|'previewOnly'} [model=edit&preview] 模式类型
    * 一般纯预览模式和纯编辑模式适合在屏幕较小的终端使用，比如手机移动端
    */
-  switchModel(model = 'edit&preview') {
+  switchModel(model = 'edit&preview', showToolbar = true) {
     switch (model) {
       case 'edit&preview':
         if (this.previewer) {
           this.previewer.editOnly(true);
           this.previewer.recoverPreviewer();
         }
-        if (this.toolbar) {
+        if (this.toolbar && showToolbar) {
           this.toolbar.showToolbar();
         }
-        this.wrapperDom.classList.remove('cherry--no-toolbar');
+        if (showToolbar) {
+          this.wrapperDom.classList.remove('cherry--no-toolbar');
+        } else {
+          this.wrapperDom.classList.add('cherry--no-toolbar');
+        }
         break;
       case 'editOnly':
         if (!this.previewer.isPreviewerHidden()) {
           this.previewer.editOnly(true);
         }
-        if (this.toolbar) {
+        if (this.toolbar && showToolbar) {
           this.toolbar.showToolbar();
         }
-        this.wrapperDom.classList.remove('cherry--no-toolbar');
+        if (showToolbar) {
+          this.wrapperDom.classList.remove('cherry--no-toolbar');
+        } else {
+          this.wrapperDom.classList.add('cherry--no-toolbar');
+        }
         break;
       case 'previewOnly':
         this.previewer.previewOnly();
