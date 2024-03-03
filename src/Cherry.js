@@ -131,7 +131,9 @@ export default class Cherry extends CherryStatic {
     if (this.options.toolbars.showToolbar === false || this.options.toolbars.toolbar === false) {
       // 即便配置了不展示工具栏，也要让工具栏加载对应的语法hook
       wrapperDom.classList.add('cherry--no-toolbar');
-      this.options.toolbars.toolbar = this.defaultToolbar;
+      this.options.toolbars.toolbar = this.options.toolbars.toolbar
+        ? this.options.toolbars.toolbar
+        : this.defaultToolbar;
     }
     $expectTarget(this.options.toolbars.toolbar, Array);
     // 创建顶部工具栏
