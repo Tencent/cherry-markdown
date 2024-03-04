@@ -367,6 +367,7 @@ export default class Cherry extends CherryStatic {
     codemirror.setValue(content);
     const cursor = codemirror.getDoc().posFromIndex(newPos);
     codemirror.setCursor(cursor);
+    this.editor.dealSpecialWords();
   }
 
   /**
