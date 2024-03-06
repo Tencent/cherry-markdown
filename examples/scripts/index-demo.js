@@ -204,9 +204,6 @@ var basicConfig = {
     // },
   },
   drawioIframeUrl: './drawio_demo.html',
-  editor: {
-    defaultModel: 'edit&preview',
-  },
   previewer: {
     // 自定义markdown预览区域class
     // className: 'markdown'
@@ -220,6 +217,7 @@ var basicConfig = {
     id: 'cherry-text',
     name: 'cherry-text',
     autoSave2Textarea: true,
+    defaultModel: 'edit&preview',
   },
   // cherry初始化后是否检查 location.hash 尝试滚动到对应位置
   autoScrollByHashAfterInit: true,

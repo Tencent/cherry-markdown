@@ -50,7 +50,8 @@ export default class Engine {
     this.md5StrMap = {};
     this.markdownParams = markdownParams;
     this.currentStrMd5 = [];
-    this.htmlWhiteListAppend = markdownParams.engine.global.htmlWhiteList;
+    this.globalConfig = markdownParams.engine.global;
+    this.htmlWhiteListAppend = this.globalConfig.htmlWhiteList;
   }
 
   initMath(opts) {
