@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.40](https://github.com/Tencent/cherry-markdown/compare/v0.8.39...v0.8.40) (2024-03-06)
+
+
+### Features
+
+* [#724](https://github.com/Tencent/cherry-markdown/issues/724) 增加流式会话场景的适配 ([ac98580](https://github.com/Tencent/cherry-markdown/commit/ac98580f6d278b11e0e4e3cc5161fdb25ecf363e))
+
+
+### Bug Fixes
+
+* [#719](https://github.com/Tencent/cherry-markdown/issues/719) 增加对工具栏显隐的控制，并增加switchModel的第二个参数 ([6294fa9](https://github.com/Tencent/cherry-markdown/commit/6294fa997485a5e83bb901f200e377e661547182))
+* [#721](https://github.com/Tencent/cherry-markdown/issues/721) 修复纯预览模式下工具栏配置失效的问题 ([e69dd3c](https://github.com/Tencent/cherry-markdown/commit/e69dd3ca3fa20c3a7c30314db7df9761b7ab72ed))
+* [#725](https://github.com/Tencent/cherry-markdown/issues/725) 拖放文件时，尽可能的走文件上传逻辑 ([6e8a0fd](https://github.com/Tencent/cherry-markdown/commit/6e8a0fd0df14ea56a5184a45ee227fbbf492f1f7))
+* setValue后处理img-base64格式防止显示长字符串 ([#727](https://github.com/Tencent/cherry-markdown/issues/727)) ([e3f2d3f](https://github.com/Tencent/cherry-markdown/commit/e3f2d3f58b13e026392d5d00f9f9816562726f25))
+
 ### [0.8.39](https://github.com/Tencent/cherry-markdown/compare/v0.8.38...v0.8.39) (2024-02-29)
 
 
