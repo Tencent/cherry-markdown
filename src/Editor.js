@@ -265,6 +265,12 @@ export default class Editor {
    * @returns {boolean | void}
    */
   handlePaste(event, clipboardData, codemirror) {
+    const onPasteRet = this.$cherry.options.callback.onPaste(clipboardData);
+    if (onPasteRet !== false && typeof onPasteRet === 'string') {
+      event.preventDefault();
+      codemirror.replaceSelection(onPasteRet);
+      return;
+    }
     let html = clipboardData.getData('Text/Html');
     const { items } = clipboardData;
     // 清空注释
