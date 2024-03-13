@@ -56,6 +56,16 @@ const callbacks = {
   afterInit: (text, html) => {},
   beforeImageMounted: (srcProp, src) => ({ srcProp, src }),
   onClickPreview: (event) => {},
+  /**
+   * 粘贴时触发
+   * @param {ClipboardEvent['clipboardData']} clipboardData
+   * @returns
+   *    false: 走cherry粘贴的默认逻辑
+   *    string: 直接粘贴的内容
+   */
+  onPaste: (clipboardData) => {
+    return false;
+  },
   onCopyCode: (event, code) => {
     // 阻止默认的粘贴事件
     // return false;
@@ -346,6 +356,14 @@ const defaultConfig = {
     onCopyCode: callbacks.onCopyCode,
     // 把中文变成拼音的回调，当然也可以把中文变成英文、英文变成中文
     changeString2Pinyin: callbacks.changeString2Pinyin,
+    /**
+     * 粘贴时触发
+     * @param {ClipboardEvent['clipboardData']} clipboardData
+     * @returns
+     *    false: 走cherry粘贴的默认逻辑
+     *    string: 直接粘贴的内容
+     */
+    onPaste: callbacks.onPaste,
   },
   previewer: {
     dom: false,

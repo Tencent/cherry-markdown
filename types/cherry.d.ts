@@ -43,6 +43,7 @@ export interface CherryOptions {
     onClickPreview: (e: MouseEvent) => void;
     onCopyCode: (e: ClipboardEvent, code: string) => string|false;
     changeString2Pinyin: (str: string) => string;
+    onPaste: (clipboardData: ClipboardEvent['clipboardData']) => string|boolean;
   };
   /** 预览区域配置 */
   previewer: CherryPreviewerOptions;
