@@ -896,6 +896,52 @@
   }
 }
 
+.cherry-markdown.head-num ~ .cherry-flex-toc {   
+  .cherry-toc-list {
+    counter-reset: toclevel1;
+
+    .cherry-toc-one-a__1{
+      counter-reset: toclevel2;
+    }
+    .cherry-toc-one-a__2{
+      counter-reset: toclevel3;
+    }
+    .cherry-toc-one-a__3{
+      counter-reset: toclevel4;
+    }
+    .cherry-toc-one-a__4{
+      counter-reset: toclevel5;
+    }
+    .cherry-toc-one-a__5{
+      counter-reset: toclevel6;
+    }
+    .cherry-toc-one-a__1:before{
+      counter-increment: toclevel1;
+      content: counter(toclevel1) " ";
+    }
+    .cherry-toc-one-a__2:before{
+      counter-increment: toclevel2;
+      content: counter(toclevel1) "." counter(toclevel2) " ";
+    }
+    .cherry-toc-one-a__3:before{
+      counter-increment: toclevel3;
+      content: counter(toclevel1) "." counter(toclevel2) "." counter(toclevel3) " ";
+    }
+    .cherry-toc-one-a__4:before{
+      counter-increment: toclevel4;
+      content: counter(toclevel1) "." counter(toclevel2) "." counter(toclevel3) "." counter(toclevel4) " ";
+    }
+    .cherry-toc-one-a__5:before{
+      counter-increment: toclevel5;
+      content: counter(toclevel1) "." counter(toclevel2) "." counter(toclevel3) "." counter(toclevel4) "." counter(toclevel5) " ";
+    }
+    .cherry-toc-one-a__6:before{
+      counter-increment: toclevel5;
+      content: counter(toclevel1) "." counter(toclevel2) "." counter(toclevel3) "." counter(toclevel4) "." counter(toclevel5) "." counter(toclevel6) " ";
+    }
+  }
+}
+
 /** 引入自带的主题 */
 @import './themes/default.scss';
 @import './themes/dark.scss';

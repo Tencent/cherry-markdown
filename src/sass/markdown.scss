@@ -323,6 +323,21 @@
         }
       }
     }
+
+    ul {
+      list-style: none;
+      counter-reset: nested-counter;
+
+      li {
+        counter-increment: nested-counter;
+        line-height: 1.6;
+
+        &:before{
+          content: counters(nested-counter, ".") ". ";
+          font-weight: bold;
+        }
+      }
+    }
   }
 
   .check-list-item {
