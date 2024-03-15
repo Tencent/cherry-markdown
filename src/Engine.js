@@ -60,7 +60,10 @@ export default class Engine {
     const { syntax } = engine;
     const { plugins } = syntax.mathBlock;
     // 未开启公式
-    if (!isBrowser() || (!syntax.mathBlock.src && !syntax.inlineMath.src)) {
+    if (
+      !isBrowser() ||
+      (!syntax.mathBlock.src && !syntax.inlineMath.src && !syntax.mathBlock.engine && !syntax.inlineMath.engine)
+    ) {
       return;
     }
     // 已经加载过MathJax
