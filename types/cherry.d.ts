@@ -63,6 +63,9 @@ export interface CherryOptions {
   instanceId?: string;
   /** Locale **/
   locale: string;
+  locales: {
+    [locale: string]: Record<string, string>
+  }
 }
 
 export interface CherryExternalsOptions {
@@ -297,7 +300,7 @@ export interface CherryFileUploadHandler {
    * @param file 用户上传的文件对象
    * @param callback 回调函数，接收最终的文件url
    */
-  (file: File, 
+  (file: File,
     /**
      * @param params.name 回填的alt信息
      * @param params.poster 封面图片地址（视频的场景下生效）
