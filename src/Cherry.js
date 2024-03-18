@@ -226,6 +226,8 @@ export default class Cherry extends CherryStatic {
       updateLocationHash: this.options.toolbars.toc.updateLocationHash ?? true,
       // @ts-ignore
       defaultModel: this.options.toolbars.toc.defaultModel ?? 'pure',
+      // @ts-ignore
+      showAutoNumber: this.options.toolbars.toc.showAutoNumber ?? false,
     });
   }
 

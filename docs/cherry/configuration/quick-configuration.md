@@ -177,6 +177,8 @@ const defaultConfig = {
       toc: {
         /** 默认只渲染一个目录 */
         allowMultiToc: false,
+        /** 是否显示自增序号 */
+        showAutoNumber: false,
       },
       header: {
         /**

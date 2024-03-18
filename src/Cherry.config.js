@@ -237,6 +237,8 @@ const defaultConfig = {
       toc: {
         /** 默认只渲染一个目录 */
         allowMultiToc: false,
+        /** 是否显示自增序号 */
+        showAutoNumber: false,
       },
       header: {
         /**
@@ -315,6 +317,7 @@ const defaultConfig = {
     // toc: {
     //   updateLocationHash: false, // 要不要更新URL的hash
     //   defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
+    //   showAutoNumber: false, // 是否显示自增序号
     // },
     // 快捷键配置，如果配置为空，则使用toolbar的配置
     shortcutKey: {
