@@ -425,6 +425,8 @@ const defaultConfig = {
   forceAppend: true,
   // The locale Cherry is going to use. Locales live in /src/locales/
   locale: 'zh_CN',
+  // Supplementary locales
+  locales: {},
   // cherry初始化后是否检查 location.hash 尝试滚动到对应位置
   autoScrollByHashAfterInit: false,
 };
