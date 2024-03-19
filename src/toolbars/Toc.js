@@ -25,6 +25,7 @@ export default class Toc {
     this.tocStr = '';
     this.updateLocationHash = options.updateLocationHash ?? true;
     this.defaultModel = options.defaultModel ?? 'full';
+    this.showAutoNumber = options.showAutoNumber ?? false;
     this.init();
   }
 
@@ -58,7 +59,10 @@ export default class Toc {
   }
 
   drawDom() {
-    const tocDom = createElement('div', 'cherry-flex-toc cherry-flex-toc__pure');
+    const tocDom = createElement(
+      'div',
+      `cherry-flex-toc cherry-flex-toc__pure${this.showAutoNumber ? ' auto-num' : ''}`,
+    );
     const tocHead = createElement('div', 'cherry-toc-head');
     const tocTitle = createElement('span', 'cherry-toc-title');
     tocTitle.append(this.$cherry.locale.toc);
