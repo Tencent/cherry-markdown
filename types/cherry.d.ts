@@ -280,6 +280,7 @@ export interface CherryToolbarOptions {
   toc?: false | {
     updateLocationHash: boolean, // 要不要更新URL的hash
     defaultModel: 'pure' | 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
+    showAutoNumber: boolean, // 是否显示自增序号
   };
   /** 是否展示顶部工具栏 */
   showToolbar?: boolean;

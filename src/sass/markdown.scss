@@ -325,6 +325,57 @@
     }
   }
 
+  .auto-num-toc {
+    counter-reset: headtoclevel1;
+
+    .toc-li-1 {
+      counter-reset: headtoclevel2;
+      a:before {
+        counter-increment: headtoclevel1;
+        content: counter(headtoclevel1) ". "
+      }
+    }
+
+    .toc-li-2 {
+      counter-reset: headtoclevel3;
+      a:before {
+        counter-increment: headtoclevel2;
+        content: counter(headtoclevel1) "." counter(headtoclevel2) ". "
+      }
+    }
+
+    .toc-li-3 {
+      counter-reset: headtoclevel4;
+      a:before {
+        counter-increment: headtoclevel3;
+        content: counter(headtoclevel1) "." counter(headtoclevel2) "." counter(headtoclevel3) ". "
+      }
+    }
+
+    .toc-li-4 {
+      counter-reset: headtoclevel5;
+      a:before {
+        counter-increment: headtoclevel4;
+        content: counter(headtoclevel1) "." counter(headtoclevel2) "." counter(headtoclevel3) "." counter(headtoclevel4) ". "
+      }
+    }
+
+    .toc-li-5 {
+      counter-reset: headtoclevel6;
+      a:before {
+        counter-increment: headtoclevel5;
+        content: counter(headtoclevel1) "." counter(headtoclevel2) "." counter(headtoclevel3) "." counter(headtoclevel4) "." counter(headtoclevel5) ". "
+      }
+    }
+
+    .toc-li-6 {
+      a:before {
+        counter-increment: headtoclevel6;
+        content: counter(headtoclevel1) "." counter(headtoclevel2) "." counter(headtoclevel3) "." counter(headtoclevel4) "." counter(headtoclevel5) "." counter(headtoclevel6) ". "
+      }
+    }
+  }
+
   .check-list-item {
     list-style: none;
 
