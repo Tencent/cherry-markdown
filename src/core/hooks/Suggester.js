@@ -248,6 +248,9 @@ class SuggesterPanel {
   }
 
   bindEvent() {
+    if (!this.editor.options.showSuggestList) {
+      return;
+    }
     let keyAction = false;
     this.editor.editor.on('change', (codemirror, evt) => {
       keyAction = true;

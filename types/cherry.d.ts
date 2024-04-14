@@ -153,6 +153,10 @@ export interface CherryEditorOptions {
   editor?: CodeMirror.Editor;
   /** 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置 */
   keepDocumentScrollAfterInit?: boolean;
+  /** 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》 */
+  showFullWidthMark?: boolean;
+  /** 是否显示联想框 */
+  showSuggestList?: boolean;
 }
 
 export type CherryLifecycle = (text: string, html: string) => void;

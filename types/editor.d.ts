@@ -47,6 +47,10 @@ export type EditorConfiguration = {
   value?: string;
   convertWhenPaste?: boolean;
   keepDocumentScrollAfterInit?: boolean;
+  /** 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》 */
+  showFullWidthMark?: boolean;
+  /** 是否显示联想框 */
+  showSuggestList?: boolean;
   codemirror: CodeMirror.EditorConfiguration;
   onKeydown: EditorEventCallback<EditorEventMap['onKeydown']>;
   onFocus: EditorEventCallback<EditorEventMap['onFocus']>;

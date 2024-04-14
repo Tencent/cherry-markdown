@@ -66,6 +66,8 @@ export default class Editor {
       wrapperDom: null,
       autoScrollByCursor: true,
       convertWhenPaste: true,
+      showFullWidthMark: true,
+      showSuggestList: true,
       codemirror: {
         lineNumbers: false, // 显示行数
         cursorHeight: 0.85, // 光标高度，0.85好看一些
@@ -163,6 +165,9 @@ export default class Editor {
    * full width翻译为全角
    */
   formatFullWidthMark() {
+    if (!this.options.showFullWidthMark) {
+      return;
+    }
     const { editor } = this;
     const regex = /[·￥、：“”【】（）《》]/; // 此处以仅匹配单个全角符号
     const searcher = editor.getSearchCursor(regex);
