@@ -100,6 +100,7 @@ var basicConfig = {
     syntax: {
       codeBlock: {
         theme: 'twilight',
+        lineNumber: true, // 默认显示行号
       },
       table: {
         enableChart: false,
@@ -218,6 +219,8 @@ var basicConfig = {
     name: 'cherry-text',
     autoSave2Textarea: true,
     defaultModel: 'edit&preview',
+    showFullWidthMark: true, // 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》
+    showSuggestList: true, // 是否显示联想框
   },
   // cherry初始化后是否检查 location.hash 尝试滚动到对应位置
   autoScrollByHashAfterInit: true,
