@@ -82,6 +82,17 @@ var customMenuC = Cherry.createMenuHook('帮助中心',  {
   ]
 });
 
+/**
+ * 定义带图表表格的按钮
+ */
+var customMenuTable = Cherry.createMenuHook('图表',  {
+  iconName: 'trendingUp',
+  subMenuConfig: [
+    { noIcon: true, name: '折线图', onclick: (event)=>{cherry.insert('\n| :line:{x,y} | Header1 | Header2 | Header3 | Header4 |\n| ------ | ------ | ------ | ------ | ------ |\n| Sample1 | 11 | 11 | 4 | 33 |\n| Sample2 | 112 | 111 | 22 | 222 |\n| Sample3 | 333 | 142 | 311 | 11 |\n');} },
+    { noIcon: true, name: '柱状图', onclick: (event)=>{cherry.insert('\n| :bar:{x,y} | Header1 | Header2 | Header3 | Header4 |\n| ------ | ------ | ------ | ------ | ------ |\n| Sample1 | 11 | 11 | 4 | 33 |\n| Sample2 | 112 | 111 | 22 | 222 |\n| Sample3 | 333 | 142 | 311 | 11 |\n');} },
+  ]
+});
+
 var basicConfig = {
   id: 'markdown',
   externals: {
@@ -103,8 +114,7 @@ var basicConfig = {
         lineNumber: true, // 默认显示行号
       },
       table: {
-        enableChart: false,
-        // chartEngine: Engine Class
+        enableChart: true,
       },
       fontEmphasis: {
         allowWhitespace: false, // 是否允许首尾空格
@@ -166,6 +176,7 @@ var basicConfig = {
         insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word', 'ruby'],
       },
       'graph',
+      'customMenuTable',
       'togglePreview',
       'settings',
       'codeTheme',
@@ -181,13 +192,14 @@ var basicConfig = {
     sidebar: ['mobilePreview', 'copy', 'theme', 'publish'],
     sidebar: ['mobilePreview', 'copy', 'theme'],
     toc: {
-      updateLocationHash: false, // 要不要更新URL的hash
+      updateLocationHash: true, // 要不要更新URL的hash
       defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
     },
     customMenu: {
       customMenuAName: customMenuA,
       customMenuBName: customMenuB,
       customMenuCName: customMenuC,
+      customMenuTable,
     },
     // config: {
     //   publish: [

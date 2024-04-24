@@ -633,10 +633,28 @@ export default class Previewer {
           break;
         case 'update':
           try {
-            if (newContent[change.newIndex].dom.querySelector('svg')) {
+            // 处理表格包含图表的特殊场景
+            let hasUpdate = false;
+            if (
+              newContent[change.newIndex].dom.className === 'cherry-table-container' &&
+              newContent[change.newIndex].dom.querySelector('.cherry-table-figure') &&
+              oldContent[change.oldIndex].dom.querySelector('.cherry-table-figure')
+            ) {
+              oldContent[change.oldIndex].dom
+                .querySelector('.cherry-table-figure')
+                .replaceWith(newContent[change.newIndex].dom.querySelector('.cherry-table-figure'));
+              oldContent[change.oldIndex].dom.dataset.sign = newContent[change.oldIndex].dom.dataset.sign;
+              this.$updateDom(
+                newContent[change.newIndex].dom.querySelector('.cherry-table'),
+                oldContent[change.oldIndex].dom.querySelector('.cherry-table'),
+              );
+              hasUpdate = true;
+            } else if (newContent[change.newIndex].dom.querySelector('svg')) {
               throw new Error(); // SVG暂不使用patch更新
             }
-            this.$updateDom(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
+            if (!hasUpdate) {
+              this.$updateDom(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
+            }
           } catch (e) {
             domContainer.insertBefore(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
             domContainer.removeChild(oldContent[change.oldIndex].dom);
