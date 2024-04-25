@@ -109,6 +109,12 @@ var basicConfig = {
       },
     },
     syntax: {
+      image: {
+        videoWrapper: (link, type, defaultWrapper) => {
+          console.log(type);
+          return defaultWrapper;
+        },
+      },
       codeBlock: {
         theme: 'twilight',
         lineNumber: true, // 默认显示行号
