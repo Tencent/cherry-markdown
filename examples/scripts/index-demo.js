@@ -192,7 +192,7 @@ var basicConfig = {
     sidebar: ['mobilePreview', 'copy', 'theme', 'publish'],
     sidebar: ['mobilePreview', 'copy', 'theme'],
     toc: {
-      updateLocationHash: true, // 要不要更新URL的hash
+      updateLocationHash: false, // 要不要更新URL的hash
       defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
     },
     customMenu: {
@@ -225,6 +225,9 @@ var basicConfig = {
   //extensions: [],
   callback: {
     changeString2Pinyin: pinyin,
+    onClickPreview: (event) => {
+      console.log("onClickPreview", event);
+    },
   },
   editor: {
     id: 'cherry-text',
