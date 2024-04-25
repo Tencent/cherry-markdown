@@ -131,6 +131,7 @@ export default class Previewer {
     this.$initPreviewerBubble();
     this.lazyLoadImg = new LazyLoadImg(this.options.lazyLoadImg, this);
     this.lazyLoadImg.doLazyLoad();
+    this.bindClick();
     this.onMouseDown();
     this.onSizeChange();
   }
@@ -960,6 +961,44 @@ export default class Previewer {
   scrollToLineNum(lineNum, linePercent) {
     const top = this.$getTopByLineNum(lineNum, linePercent);
     this.$scrollAnimation(top);
+  }
+
+  scrollToHeadByIndex(index) {
+    const previewDom = this.getDomContainer();
+    const targetHead = previewDom.querySelectorAll('h1,h2,h3,h4,h5,h6,h7,h8')[index] ?? false;
+    if (targetHead !== false) {
+      const scrollTop =
+        previewDom.scrollTop + targetHead.getBoundingClientRect().y - previewDom.getBoundingClientRect().y - 10;
+      previewDom.scrollTo({
+        top: scrollTop,
+        left: 0,
+        behavior: 'smooth',
+      });
+    }
+  }
+
+  bindClick() {
+    this.getDomContainer().addEventListener('click', (event) => {
+      if (this.$cherry.options.callback.onClickPreview) {
+        const ret = this.$cherry.options.callback.onClickPreview(event);
+        // @ts-ignore
+        if (ret === false) {
+          return ret;
+        }
+      }
+      // 如果配置了点击toc目录不更新location hash
+      // @ts-ignore
+      if (this.$cherry.options.toolbars.toc?.updateLocationHash === false) {
+        const { target } = event;
+        if (target instanceof Element && target.nodeName === 'A' && /level-\d+/.test(target.className)) {
+          const liNode = target.parentElement;
+          const index = Array.from(liNode.parentElement.children).indexOf(liNode) - 1;
+          this.scrollToHeadByIndex(index);
+          event.stopPropagation();
+          event.preventDefault();
+        }
+      }
+    });
   }
 
   onMouseDown() {

@@ -102,17 +102,7 @@ export default class Toc {
           this.$cherry.editor.scrollToLineNum(target.line, target.line + 1, 0);
         } else {
           // 有预览的情况下，直接通过滚动预览区位置实现滚动到锚点
-          const previewDom = this.$cherry.previewer.getDomContainer();
-          const target = previewDom.querySelectorAll('h1,h2,h3,h4,h5,h6,h7,h8')[index] ?? false;
-          if (target !== false) {
-            const scrollTop =
-              previewDom.scrollTop + target.getBoundingClientRect().y - previewDom.getBoundingClientRect().y - 20;
-            previewDom.scrollTo({
-              top: scrollTop,
-              left: 0,
-              behavior: 'smooth',
-            });
-          }
+          this.$cherry.previewer.scrollToHeadByIndex(index);
         }
         if (this.updateLocationHash) {
           location.href = id;
