@@ -10,9 +10,9 @@ import * as fs from 'fs';
  * @returns string
  */
 export function getWebviewContent(mdInfo: object, currentPanel: vscode.WebviewPanel, extensionPath: string) {
-  const baseResourcePath = getBaseResourcePath(currentPanel);
+  const baseResourcePath = getWebViewPath(currentPanel);
   const filePath = writeGlobalVarsToFile(extensionPath, {
-    baseResourcePath,
+    baseResourcePath
   });
   const pageResourceUrlsMap = {
     'global-vars.js': currentPanel.webview.asWebviewUri(vscode.Uri.file(filePath)),
@@ -57,14 +57,13 @@ content="default-src 'none'; img-src ${currentPanel.webview.cspSource} https: ht
   </html>`;
 }
 
-function getBaseResourcePath(currentPanel: vscode.WebviewPanel) {
+const getWebViewPath = (currentPanel: vscode.WebviewPanel) => {
   const workspaceFolder = vscode.workspace.workspaceFolders![0].uri.fsPath ?? '';
-  const webviewResourcePath = currentPanel.webview.asWebviewUri(vscode.Uri.parse(workspaceFolder)).toString();
-  const basePath = path.join(webviewResourcePath, getRelativePath());
-  return basePath;
+  const imgUri = vscode.Uri.file(workspaceFolder);
+  return currentPanel.webview.asWebviewUri(imgUri);
 }
 
-function writeGlobalVarsToFile(extensionPath: string, globalVars: { baseResourcePath: string }): string {
+function writeGlobalVarsToFile(extensionPath: string, globalVars: { baseResourcePath: vscode.Uri }): string {
   const globalVarsContent = `
     window._baseResourcePath = "${globalVars.baseResourcePath}";
   `;
@@ -73,16 +72,3 @@ function writeGlobalVarsToFile(extensionPath: string, globalVars: { baseResource
   return filePath;
 }
 
-function getRelativePath(): string {
-  if (!vscode.window.activeTextEditor) {
-    return '';
-  }
-  const documentUri = vscode.window.activeTextEditor.document.uri;
-  const workspaceFolderUri = vscode.workspace.getWorkspaceFolder(documentUri);
-  if (!workspaceFolderUri) {
-    return '';
-  }
-  const workspaceFolder = workspaceFolderUri.uri.fsPath;
-  const mdFileFolder = path.dirname(documentUri.fsPath);
-  return path.relative(workspaceFolder, mdFileFolder);
-}
