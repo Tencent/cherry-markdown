@@ -1,6 +1,5 @@
 import 'mathjax/es5/tex-svg.js';
 import path from 'path-browserify';
-import vscodeApi from 'vscode';
 // import md5 from 'md5';
 
 /**
@@ -296,22 +295,15 @@ const basicConfig = {
     // eslint-disable-next-line no-undef
     changeString2Pinyin: pinyin,
     beforeImageMounted(srcProp, srcValue) {
-      console.log('beforeImageMounted', srcProp, srcValue);
       if (isHttpUrl(srcValue) || isDataUrl(srcValue)) {
         return {
           src: srcValue,
         };
       }
-      let imgPath = srcValue;
-      const { workspaceFolders } = vscodeApi.workspace;
-      if (workspaceFolders && workspaceFolders.length > 0) {
-        const workspacePath = workspaceFolders[0].uri.fsPath;
-        imgPath = path.join(workspacePath, srcValue);
-      }
-
+      // eslint-disable-next-line no-underscore-dangle
+      const basePath = window._baseResourcePath || '';
       return {
-        // src: path.join(basePath, srcValue),
-        src: imgPath,
+        src: path.join(basePath, srcValue),
       };
     },
   },
