@@ -76,9 +76,14 @@ export default class Suggester extends SyntaxBase {
     super({ needCache: true });
 
     this.config = config;
-    this.RULE = this.rule();
     this.$cherry = cherry;
     this.suggesterPanel = new SuggesterPanel(cherry);
+
+    if (!this.inited) {
+      this.initConfig(this.config);
+    }
+
+    this.RULE = this.rule();
   }
 
   afterInit(callback) {
@@ -89,7 +94,6 @@ export default class Suggester extends SyntaxBase {
     if (typeof callback === 'function') {
       callback();
     }
-    this.initConfig(this.config);
   }
 
   /**
@@ -127,6 +131,9 @@ export default class Suggester extends SyntaxBase {
           // 当没有候选项时直接推出联想
           callback(suggestList.length === 0 ? false : suggestList);
         },
+        echo() {
+          return '';
+        },
       });
     }
     if (!suggester) {
@@ -151,6 +158,8 @@ export default class Suggester extends SyntaxBase {
     if (this.suggesterPanel.hasEditor()) {
       this.suggesterPanel.editor = null;
     }
+
+    this.inited = true;
   }
 
   makeHtml(str) {
@@ -184,12 +193,18 @@ export default class Suggester extends SyntaxBase {
   }
 
   rule() {
-    if (!this.suggester || Object.keys(this.suggester).length <= 0) {
+    if (!this.config?.suggester || Object.keys(this.config?.suggester).length <= 0) {
       return {};
     }
-    const keys = Object.keys(this.suggester)
-      .map((key) => escapeRegExp(key))
-      .join('|');
+
+    let suggester;
+    if (Array.isArray(this.config.suggester)) {
+      suggester = this.config.suggester.map((obj) => obj.keyword || '');
+    } else {
+      suggester = Object.keys(this.config.suggester).map((key) => this.config.suggester[key].keyword || '');
+    }
+
+    const keys = suggester.map((key) => escapeRegExp(key)).join('|');
     const reg = new RegExp(
       `${isLookbehindSupported() ? '((?<!\\\\))[ ]' : '(^|[^\\\\])[ ]'}(${keys})(([^${keys}\\s])+)`,
       'g',
