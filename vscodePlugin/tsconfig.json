@@ -4,7 +4,8 @@
 		"target": "es6",
 		"outDir": "out",
 		"lib": [
-			"es6"
+			"es6",
+			"DOM"
 		],
 		"sourceMap": true,
 		"rootDir": "src",
@@ -14,6 +15,9 @@
 		// "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
 		// "noUnusedParameters": true,  /* Report errors on unused parameters. */
 	},
+	"include": [
+		"src/**/*.ts"
+	],
 	"exclude": [
 		"node_modules",
 		".vscode-test"

@@ -46,7 +46,7 @@ const replacerFactory = function (type, match, leadingChar, alt, link, title, po
     const defaultWrapper = `<${type} src="${UrlCache.set(
       encodeURIOnce(processedURL),
     )}"${attrs} ${extent} ${style} ${classes} controls="controls">${$e(alt || '')}</${type}>`;
-    return `${leadingChar}${config.videoWrapper ? config.videoWrapper(link) : defaultWrapper}`;
+    return `${leadingChar}${config.videoWrapper ? config.videoWrapper(link, type, defaultWrapper) : defaultWrapper}`;
   }
   // should never happen
   return match;

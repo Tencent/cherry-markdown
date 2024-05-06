@@ -166,11 +166,13 @@ export default class Table extends ParagraphBase {
       return tableResult;
     }
     const chart = this.chartRenderEngine.render(chartOptions.type, chartOptions.options, tableObject);
-    const chartHtml = `<figure id="table_chart_${chartOptionsSign}_${tableResult.sign}"
-      data-sign="table_chart_${chartOptionsSign}_${tableResult.sign}" data-lines="0">${chart}</figure>`;
+    const chartHtml = `<figure class="cherry-table-figure">${chart}</figure>`;
+    const newSign = `${tableResult.sign}${chartOptionsSign}`;
     return {
-      html: `${chartHtml}${tableResult.html}`,
-      sign: chartOptionsSign + tableResult.sign,
+      html: tableResult.html
+        .replace(/(^<div .*?>)/, `$1${chartHtml}`)
+        .replace(/(^<div .*? data-sign=")[^"]+?"/, `$1${newSign}"`),
+      sign: newSign,
     };
   }
 
