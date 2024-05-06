@@ -31,7 +31,11 @@ export function activate(context: vscode.ExtensionContext) {
 
   // 切换文件的时候更新预览区域内容
   vscode.window.onDidChangeActiveTextEditor((e) => {
-    if (e?.document) {
+    const cherryUsage: 'active' | 'only-manual' | undefined = vscode.workspace
+      .getConfiguration('cherryMarkdown')
+      .get('usage');
+
+    if (e?.document && cherryUsage === 'active') {
       triggerEditorContentChange();
       // 如果打开的不是md文件，则让cherry强制进入预览模式
       if (e.document.languageId !== 'markdown' && targetDocument) {
