@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.41](https://github.com/Tencent/cherry-markdown/compare/v0.8.40...v0.8.41) (2024-05-06)
+
+
+### Features
+
+* [#714](https://github.com/Tencent/cherry-markdown/issues/714) 增加粘贴的回调 ([e9154f6](https://github.com/Tencent/cherry-markdown/commit/e9154f6ad05cf081cfe90dae4ff06dcf3fc58cd8))
+* [#728](https://github.com/Tencent/cherry-markdown/issues/728) 把根据表格生成图表的功能放出来 ([e1df984](https://github.com/Tencent/cherry-markdown/commit/e1df9847d1f3ef0f7564784da9987876720a46cf))
+* [#743](https://github.com/Tencent/cherry-markdown/issues/743) 增加联想、全角符号提示的配置能力 ([5f43a52](https://github.com/Tencent/cherry-markdown/commit/5f43a529148299e805ddcd3b7e681e3273f3a723))
+* [#746](https://github.com/Tencent/cherry-markdown/issues/746) 增加自定义视频播放器容器的配置能力 ([3c9952f](https://github.com/Tencent/cherry-markdown/commit/3c9952f632b371d56fda8d498604355e525f9ccd))
+* support config mathjax installed by npm ([872ec1e](https://github.com/Tencent/cherry-markdown/commit/872ec1e53c153ff5ab85d598793804630565ebd1))
+
+
+### Bug Fixes
+
+* [#750](https://github.com/Tencent/cherry-markdown/issues/750) 修复预览区点击回调事件失效的问题; feat: [#750](https://github.com/Tencent/cherry-markdown/issues/750) 增加点击toc页面目录不更新location hash的特性 ([0cff250](https://github.com/Tencent/cherry-markdown/commit/0cff250305ff5db08a4deb9777ddd698323c3411))
+* image loading failed in vscode plugin ([#748](https://github.com/Tencent/cherry-markdown/issues/748)) ([b2c6a0e](https://github.com/Tencent/cherry-markdown/commit/b2c6a0e8b3c2e63508861193891421daa3465974)), closes [#744](https://github.com/Tencent/cherry-markdown/issues/744)
+
 ### [0.8.40](https://github.com/Tencent/cherry-markdown/compare/v0.8.39...v0.8.40) (2024-03-06)
 
 

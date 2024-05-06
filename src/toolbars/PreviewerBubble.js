@@ -235,13 +235,7 @@ export default class PreviewerBubble {
    */
   $onClick(e) {
     const { target } = e;
-    const cherryStatus = this.previewer.$cherry.getStatus();
-    // 纯预览模式下，支持点击放大图片功能（以回调的形式实现，需要业务侧实现图片放大功能）
-    if (cherryStatus.editor === 'hide' || !(target instanceof Element)) {
-      if (cherryStatus.previewer === 'show') {
-        this.previewer.$cherry.options.callback.onClickPreview &&
-          this.previewer.$cherry.options.callback.onClickPreview(e);
-      }
+    if (!(target instanceof Element)) {
       return;
     }
 

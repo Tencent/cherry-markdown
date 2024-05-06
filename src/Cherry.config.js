@@ -56,6 +56,16 @@ const callbacks = {
   afterInit: (text, html) => {},
   beforeImageMounted: (srcProp, src) => ({ srcProp, src }),
   onClickPreview: (event) => {},
+  /**
+   * 粘贴时触发
+   * @param {ClipboardEvent['clipboardData']} clipboardData
+   * @returns
+   *    false: 走cherry粘贴的默认逻辑
+   *    string: 直接粘贴的内容
+   */
+  onPaste: (clipboardData) => {
+    return false;
+  },
   onCopyCode: (event, code) => {
     // 阻止默认的粘贴事件
     // return false;
@@ -227,6 +237,8 @@ const defaultConfig = {
       toc: {
         /** 默认只渲染一个目录 */
         allowMultiToc: false,
+        /** 是否显示自增序号 */
+        showAutoNumber: false,
       },
       header: {
         /**
@@ -259,6 +271,8 @@ const defaultConfig = {
     },
     writingStyle: 'normal', // 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal
     keepDocumentScrollAfterInit: false, // 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置
+    showFullWidthMark: true, // 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》
+    showSuggestList: true, // 是否显示联想框
   },
   toolbars: {
     theme: 'dark', // light or dark
@@ -305,6 +319,7 @@ const defaultConfig = {
     // toc: {
     //   updateLocationHash: false, // 要不要更新URL的hash
     //   defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
+    //   showAutoNumber: false, // 是否显示自增序号
     // },
     // 快捷键配置，如果配置为空，则使用toolbar的配置
     shortcutKey: {
@@ -346,6 +361,14 @@ const defaultConfig = {
     onCopyCode: callbacks.onCopyCode,
     // 把中文变成拼音的回调，当然也可以把中文变成英文、英文变成中文
     changeString2Pinyin: callbacks.changeString2Pinyin,
+    /**
+     * 粘贴时触发
+     * @param {ClipboardEvent['clipboardData']} clipboardData
+     * @returns
+     *    false: 走cherry粘贴的默认逻辑
+     *    string: 直接粘贴的内容
+     */
+    onPaste: callbacks.onPaste,
   },
   previewer: {
     dom: false,
@@ -407,6 +430,8 @@ const defaultConfig = {
   forceAppend: true,
   // The locale Cherry is going to use. Locales live in /src/locales/
   locale: 'zh_CN',
+  // Supplementary locales
+  locales: {},
   // cherry初始化后是否检查 location.hash 尝试滚动到对应位置
   autoScrollByHashAfterInit: false,
 };

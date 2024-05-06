@@ -26,6 +26,7 @@ const defaultOptions = {
   tocContainerClass: 'toc',
   tocTitleClass: 'toc-title',
   linkProcessor: defaultLinkProcessor,
+  showAutoNumber: false,
 };
 
 const emptyLinePlaceholder = '<p data-sign="empty-toc" data-lines="1">&nbsp;</p>';
@@ -43,6 +44,8 @@ export default class Toc extends ParagraphBase {
   isFirstTocToken = true;
   /** 允许渲染多个TOC */
   allowMultiToc = false;
+  /** 是否显示自增序号 */
+  showAutoNumber = false;
 
   constructor({ externals, config }) {
     super({ needCache: true });
@@ -107,9 +110,8 @@ export default class Toc extends ParagraphBase {
       nodePrefix = this.$makeLevel(node.level);
     }
     const tocLink = this.linkProcessor(`#${node.id}`.replace(/safe_/g, '')); // transform header id to avoid being sanitized
-    return `<li class="${this.tocNodeClass}">${nodePrefix}<a href="${tocLink}" class="level-${node.level}">${
-      node.text
-    }</a>${closeTag ? '</li>' : ''}`;
+    return `<li class="${this.tocNodeClass}${this.showAutoNumber ? ` toc-li-${node.level}` : ''}">
+    ${nodePrefix}<a href="${tocLink}" class="level-${node.level}">${node.text}</a>${closeTag ? '</li>' : ''}`;
   }
 
   $makePlainToc(tocNodeList) {
@@ -219,7 +221,8 @@ export default class Toc extends ParagraphBase {
 
   $makeToc(arr, dataSign, preLinesMatch) {
     const lines = calculateLinesOfParagraph(preLinesMatch, 1);
-    let ret = `<div class="${this.tocContainerClass}" data-sign="${dataSign}-${lines}" data-lines="${lines}">`;
+    let ret = `<div class="${this.tocContainerClass}${this.showAutoNumber ? ' auto-num-toc' : ''}"
+      data-sign="${dataSign}-${lines}" data-lines="${lines}">`;
     ret += `<p class="${this.tocTitleClass}">目录</p>`;
     if (arr.length <= 0) {
       return '';

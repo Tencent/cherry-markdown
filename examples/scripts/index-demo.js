@@ -82,6 +82,17 @@ var customMenuC = Cherry.createMenuHook('帮助中心',  {
   ]
 });
 
+/**
+ * 定义带图表表格的按钮
+ */
+var customMenuTable = Cherry.createMenuHook('图表',  {
+  iconName: 'trendingUp',
+  subMenuConfig: [
+    { noIcon: true, name: '折线图', onclick: (event)=>{cherry.insert('\n| :line:{x,y} | Header1 | Header2 | Header3 | Header4 |\n| ------ | ------ | ------ | ------ | ------ |\n| Sample1 | 11 | 11 | 4 | 33 |\n| Sample2 | 112 | 111 | 22 | 222 |\n| Sample3 | 333 | 142 | 311 | 11 |\n');} },
+    { noIcon: true, name: '柱状图', onclick: (event)=>{cherry.insert('\n| :bar:{x,y} | Header1 | Header2 | Header3 | Header4 |\n| ------ | ------ | ------ | ------ | ------ |\n| Sample1 | 11 | 11 | 4 | 33 |\n| Sample2 | 112 | 111 | 22 | 222 |\n| Sample3 | 333 | 142 | 311 | 11 |\n');} },
+  ]
+});
+
 var basicConfig = {
   id: 'markdown',
   externals: {
@@ -98,12 +109,18 @@ var basicConfig = {
       },
     },
     syntax: {
+      image: {
+        videoWrapper: (link, type, defaultWrapper) => {
+          console.log(type);
+          return defaultWrapper;
+        },
+      },
       codeBlock: {
         theme: 'twilight',
+        lineNumber: true, // 默认显示行号
       },
       table: {
-        enableChart: false,
-        // chartEngine: Engine Class
+        enableChart: true,
       },
       fontEmphasis: {
         allowWhitespace: false, // 是否允许首尾空格
@@ -165,6 +182,7 @@ var basicConfig = {
         insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word', 'ruby'],
       },
       'graph',
+      'customMenuTable',
       'togglePreview',
       'settings',
       'codeTheme',
@@ -187,6 +205,7 @@ var basicConfig = {
       customMenuAName: customMenuA,
       customMenuBName: customMenuB,
       customMenuCName: customMenuC,
+      customMenuTable,
     },
     // config: {
     //   publish: [
@@ -212,12 +231,17 @@ var basicConfig = {
   //extensions: [],
   callback: {
     changeString2Pinyin: pinyin,
+    onClickPreview: (event) => {
+      console.log("onClickPreview", event);
+    },
   },
   editor: {
     id: 'cherry-text',
     name: 'cherry-text',
     autoSave2Textarea: true,
     defaultModel: 'edit&preview',
+    showFullWidthMark: true, // 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》
+    showSuggestList: true, // 是否显示联想框
   },
   // cherry初始化后是否检查 location.hash 尝试滚动到对应位置
   autoScrollByHashAfterInit: true,

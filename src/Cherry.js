@@ -65,8 +65,16 @@ export default class Cherry extends CherryStatic {
      */
     this.options = mergeWith({}, defaultConfigCopy, options, customizer);
 
+    this.locales = locales;
+    if (this.options.locales) {
+      this.locales = {
+        ...this.options.locales,
+        ...this.locales,
+      };
+    }
+
     // loading the locale
-    this.locale = locales[this.options.locale];
+    this.locale = this.locales[this.options.locale];
 
     if (typeof this.options.engine.global.urlProcessor === 'function') {
       this.options.engine.global.urlProcessor = urlProcessorProxy(this.options.engine.global.urlProcessor);
@@ -218,6 +226,8 @@ export default class Cherry extends CherryStatic {
       updateLocationHash: this.options.toolbars.toc.updateLocationHash ?? true,
       // @ts-ignore
       defaultModel: this.options.toolbars.toc.defaultModel ?? 'pure',
+      // @ts-ignore
+      showAutoNumber: this.options.toolbars.toc.showAutoNumber ?? false,
     });
   }
 

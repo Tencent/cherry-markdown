@@ -43,6 +43,7 @@ export interface CherryOptions {
     onClickPreview: (e: MouseEvent) => void;
     onCopyCode: (e: ClipboardEvent, code: string) => string|false;
     changeString2Pinyin: (str: string) => string;
+    onPaste: (clipboardData: ClipboardEvent['clipboardData']) => string|boolean;
   };
   /** 预览区域配置 */
   previewer: CherryPreviewerOptions;
@@ -63,6 +64,9 @@ export interface CherryOptions {
   instanceId?: string;
   /** Locale **/
   locale: string;
+  locales: {
+    [locale: string]: Record<string, string>
+  }
 }
 
 export interface CherryExternalsOptions {
@@ -149,6 +153,10 @@ export interface CherryEditorOptions {
   editor?: CodeMirror.Editor;
   /** 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置 */
   keepDocumentScrollAfterInit?: boolean;
+  /** 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》 */
+  showFullWidthMark?: boolean;
+  /** 是否显示联想框 */
+  showSuggestList?: boolean;
 }
 
 export type CherryLifecycle = (text: string, html: string) => void;
@@ -276,6 +284,7 @@ export interface CherryToolbarOptions {
   toc?: false | {
     updateLocationHash: boolean, // 要不要更新URL的hash
     defaultModel: 'pure' | 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
+    showAutoNumber: boolean, // 是否显示自增序号
   };
   /** 是否展示顶部工具栏 */
   showToolbar?: boolean;
@@ -297,7 +306,7 @@ export interface CherryFileUploadHandler {
    * @param file 用户上传的文件对象
    * @param callback 回调函数，接收最终的文件url
    */
-  (file: File, 
+  (file: File,
     /**
      * @param params.name 回填的alt信息
      * @param params.poster 封面图片地址（视频的场景下生效）
