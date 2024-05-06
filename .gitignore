@@ -13,7 +13,8 @@ yarn-error.log*
 
 # Editor directories and files
 .idea
-.vscode
+.vscode/*
+! vscodePlugin/.vscode
 *.suo
 *.ntvs*
 *.njsproj

@@ -124,6 +124,7 @@ const initCherryPanel = () => {
     cherryPanel,
     extensionPath,
   );
+  cherryPanel.iconPath = vscode.Uri.file(path.join(extensionPath, 'favicon.ico'));
   isCherryPanelInit = true;
 
   initCherryPanelEvent();
