@@ -31,9 +31,18 @@
     "commands": [
       {
         "command": "cherrymarkdown.preview",
-        "title": "open cherrymarkdown demo"
+        "title": "Open Cherry Markdown"
       }
     ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "cherrymarkdown.preview",
+          "when": "editorLangId == markdown",
+          "group": "navigation"
+        }
+      ]
+    },
     "icons": {
       "distro-ubuntu": {
         "description": "cherry-markdown icon",
@@ -46,6 +55,15 @@
     "configuration": {
       "title": "cherryMarkdown",
       "properties": {
+        "cherryMarkdown.usage": {
+          "type": "string",
+          "default": "active",
+          "enum": [
+            "active",
+            "only-manual"
+          ],
+          "description": "cherry-markdown's triggering method values: [ active | only-manual ]"
+        },
         "cherryMarkdown.theme": {
           "type": "string",
           "default": "dark",
