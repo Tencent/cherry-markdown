@@ -1016,7 +1016,11 @@ export default class Previewer {
    * @param {string} [fileName] 导出文件名
    */
   export(type = 'pdf', fileName = '') {
-    const name = fileName || this.getDomContainer().innerText.match(/^\s*([^\s][^\n]*)\n/)[1] || 'cherry-export';
+    let name = fileName;
+    if (!fileName) {
+      const { innerText } = this.getDomContainer();
+      name = /^\s*([^\s][^\n]*)\n/.test(innerText) ? innerText.match(/^\s*([^\s][^\n]*)\n/)[1] : 'cherry-export';
+    }
     if (type === 'pdf') {
       exportPDF(this.getDomContainer(), name);
     } else if (type === 'screenShot' || type === 'img') {
