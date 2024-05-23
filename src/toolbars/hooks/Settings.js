@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import Event from '@/Event';
 import { saveIsClassicBrToLocal, getIsClassicBrFromLocal, testKeyInLocal } from '@/utils/config';
 
 /**
@@ -108,10 +107,10 @@ export default class Settings extends MenuBase {
    * 绑定预览事件
    */
   attachEventListeners() {
-    Event.on(this.instanceId, Event.Events.previewerClose, () => {
+    this.$cherry.$event.on('previewerClose', () => {
       this.togglePreviewBtn(false);
     });
-    Event.on(this.instanceId, Event.Events.previewerOpen, () => {
+    this.$cherry.$event.on('previewerOpen', () => {
       this.togglePreviewBtn(true);
     });
   }
@@ -175,13 +174,12 @@ export default class Settings extends MenuBase {
   toggleToolbar() {
     const { wrapperDom } = this.engine.$cherry;
     if (wrapperDom instanceof HTMLDivElement) {
-      const toolbarInstanceId = this.engine.$cherry.toolbar.instanceId;
       if (wrapperDom.className.indexOf('cherry--no-toolbar') > -1) {
         wrapperDom.classList.remove('cherry--no-toolbar');
-        Event.emit(toolbarInstanceId, Event.Events.toolbarShow);
+        this.$cherry.$event.emit('toolbarShow');
       } else {
         wrapperDom.classList.add('cherry--no-toolbar');
-        Event.emit(toolbarInstanceId, Event.Events.toolbarHide);
+        this.$cherry.$event.emit('toolbarHide');
       }
     }
   }
