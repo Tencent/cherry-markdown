@@ -305,7 +305,7 @@ const defaultConfig = {
       'settings',
     ],
     toolbarRight: [],
-    sidebar: [],
+    sidebar: false,
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'table', 'code'], // array or false
     toc: false, // 不展示悬浮目录
