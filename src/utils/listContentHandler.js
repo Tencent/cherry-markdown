@@ -144,7 +144,6 @@ export default class ListHandler {
    * @param {FocusEvent} event
    */
   handleEditablesUnfocus(event) {
-    console.log('handleEditablesUnfocus: ');
     event.stopPropagation();
     event.preventDefault();
     if (event.target instanceof HTMLParagraphElement) {
