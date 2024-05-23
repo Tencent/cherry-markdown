@@ -15,7 +15,6 @@
  */
 import { mac } from 'codemirror/src/util/browser';
 import HookCenter from './HookCenter';
-import Event from '@/Event';
 import { createElement } from '@/utils/dom';
 import Logger from '@/Logger';
 
@@ -92,19 +91,19 @@ export default class Toolbar {
   }
 
   init() {
-    Event.on(this.instanceId, Event.Events.cleanAllSubMenus, () => this.hideAllSubMenu());
+    this.$cherry.$event.on('cleanAllSubMenus', () => this.hideAllSubMenu());
   }
 
   previewOnly() {
     this.options.dom.classList.add('preview-only');
     this.$cherry.wrapperDom.classList.add('cherry--no-toolbar');
-    Event.emit(this.instanceId, Event.Events.toolbarHide);
+    this.$cherry.$event.emit('toolbarHide');
   }
 
   showToolbar() {
     this.options.dom.classList.remove('preview-only');
     this.$cherry.wrapperDom.classList.remove('cherry--no-toolbar');
-    Event.emit(this.instanceId, Event.Events.toolbarShow);
+    this.$cherry.$event.emit('toolbarShow');
   }
 
   isHasLevel2Menu(name) {

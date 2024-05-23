@@ -48,6 +48,9 @@ class CherryEngine extends CherryStatic {
 
     if (typeof opts.engine.global.urlProcessor === 'function') {
       opts.engine.global.urlProcessor = urlProcessorProxy(opts.engine.global.urlProcessor);
+      opts.callback.urlProcessor = opts.engine.global.urlProcessor;
+    } else {
+      opts.callback.urlProcessor = urlProcessorProxy(opts.callback.urlProcessor);
     }
 
     // @ts-ignore hack Cherry Instance
