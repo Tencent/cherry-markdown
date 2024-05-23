@@ -19,7 +19,6 @@ import vDPatch from 'virtual-dom/patch';
 import MyersDiff from './utils/myersDiff';
 import { getBlockTopAndHeightWithMargin, elementsFromPoint } from './utils/dom';
 import Logger from './Logger';
-import Event from './Event';
 // import locale from './utils/locale';
 import { addEvent, removeEvent } from './utils/event';
 import { exportPDF, exportScreenShot, exportMarkdownFile, exportHTMLFile } from './utils/export';
@@ -762,15 +761,15 @@ export default class Previewer {
       this.update(this.options.previewerCache.html);
     }
     this.cleanHtmlCache();
-    Event.emit(this.instanceId, Event.Events.previewerOpen);
-    Event.emit(this.instanceId, Event.Events.editorClose);
+    this.$cherry.$event.emit('previewerOpen');
+    this.$cherry.$event.emit('editorClose');
   }
 
   editOnly(dealToolbar = false) {
     this.$dealEditAndPreviewOnly(true);
     this.cleanHtmlCache();
-    Event.emit(this.instanceId, Event.Events.previewerClose);
-    Event.emit(this.instanceId, Event.Events.editorOpen);
+    this.$cherry.$event.emit('previewerClose');
+    this.$cherry.$event.emit('editorOpen');
   }
 
   recoverPreviewer(dealToolbar = false) {
@@ -785,8 +784,8 @@ export default class Previewer {
     }
     this.cleanHtmlCache();
 
-    Event.emit(this.instanceId, Event.Events.previewerOpen);
-    Event.emit(this.instanceId, Event.Events.editorOpen);
+    this.$cherry.$event.emit('previewerOpen');
+    this.$cherry.$event.emit('editorOpen');
 
     setTimeout(() => this.editor.editor.refresh(), 0);
   }
@@ -1004,7 +1003,7 @@ export default class Previewer {
   onMouseDown() {
     addEvent(this.getDomContainer(), 'mousedown', () => {
       setTimeout(() => {
-        Event.emit(this.instanceId, Event.Events.cleanAllSubMenus);
+        this.$cherry.$event.emit('cleanAllSubMenus');
       });
     });
   }

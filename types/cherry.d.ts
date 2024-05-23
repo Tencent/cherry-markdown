@@ -34,16 +34,32 @@ export interface CherryOptions {
   /** 定义主题的作用范围，相同themeNameSpace的实例共享主题配置 */
   themeNameSpace: string,
   callback: {
+    /**
+     * 全局的URL处理器，返回值将填充到编辑区域
+     * @param url 来源url
+     * @param srcType 来源类型
+     */
+    urlProcessor?: (url: string, srcType: 'image' | 'audio' | 'video' | 'autolink' | 'link') => string;
+    /** 文件上传回调 */
+    fileUpload?: CherryFileUploadHandler;
     /** 编辑器内容改变并完成渲染后触发 */
-    afterChange: CherryLifecycle;
+    afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */
-    afterInit: CherryLifecycle;
+    afterInit?: CherryLifecycle;
     /** img 标签挂载前触发，可用于懒加载等场景 */
-    beforeImageMounted: (srcProp: string, src: string) => { srcProp: string; src: string };
-    onClickPreview: (e: MouseEvent) => void;
-    onCopyCode: (e: ClipboardEvent, code: string) => string|false;
-    changeString2Pinyin: (str: string) => string;
-    onPaste: (clipboardData: ClipboardEvent['clipboardData']) => string|boolean;
+    beforeImageMounted?: (srcProp: string, src: string) => { srcProp: string; src: string };
+    onClickPreview?: (e: MouseEvent) => void;
+    onCopyCode?: (e: ClipboardEvent, code: string) => string|false;
+    changeString2Pinyin?: (str: string) => string;
+    onPaste?: (clipboardData: ClipboardEvent['clipboardData']) => string|boolean;
+  };
+  event: {
+    focus?: (e: MouseEvent, cherry: Cherry) => void;
+    blur?: (e: MouseEvent, cherry: Cherry) => void;
+    /** 编辑器内容改变并完成渲染后触发 */
+    afterChange?: CherryLifecycle;
+    /** 编辑器完成初次渲染后触发 */
+    afterInit?: CherryLifecycle;
   };
   /** 预览区域配置 */
   previewer: CherryPreviewerOptions;

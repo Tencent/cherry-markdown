@@ -31,7 +31,7 @@ export function handleUpload(editor, type = 'image', accept = '*', callback = nu
     // @ts-ignore
     const [file] = event.target.files;
     // 文件上传后的回调函数可以由调用方自己实现
-    editor.options.fileUpload(file, (url, params = {}) => {
+    editor.$cherry.options.callback.fileUpload(file, (url, params = {}) => {
       // 文件上传的默认回调行数，调用方可以完全不使用该函数
       if (typeof url !== 'string' || !url) {
         return;

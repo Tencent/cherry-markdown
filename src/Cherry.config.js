@@ -107,13 +107,6 @@ const defaultConfig = {
       // false： 一个换行会转成<br>，两个连续换行会分割成段落，三个以上连续换行会转成<br>并分割段落
       classicBr: false,
       /**
-       * 全局的URL处理器
-       * @param {string} url 来源url
-       * @param {'image'|'audio'|'video'|'autolink'|'link'} srcType 来源类型
-       * @returns
-       */
-      urlProcessor: callbacks.urlProcessor,
-      /**
        * 额外允许渲染的html标签
        * 标签以英文竖线分隔，如：htmlWhiteList: 'iframe|script|style'
        * 默认为空，默认允许渲染的html见src/utils/sanitize.js whiteList 属性
@@ -338,8 +331,6 @@ const defaultConfig = {
   },
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: '',
-  // 上传文件的回调
-  fileUpload: callbacks.fileUpload,
   /**
    * 上传文件的时候用来指定文件类型
    */
@@ -352,8 +343,15 @@ const defaultConfig = {
     file: '*',
   },
   callback: {
-    afterChange: callbacks.afterChange,
-    afterInit: callbacks.afterInit,
+    /**
+     * 全局的URL处理器
+     * @param {string} url 来源url
+     * @param {'image'|'audio'|'video'|'autolink'|'link'} srcType 来源类型
+     * @returns
+     */
+    urlProcessor: callbacks.urlProcessor,
+    // 上传文件的回调
+    fileUpload: callbacks.fileUpload,
     beforeImageMounted: callbacks.beforeImageMounted,
     // 预览区域点击事件，previewer.enablePreviewerBubble = true 时生效
     onClickPreview: callbacks.onClickPreview,
@@ -369,6 +367,13 @@ const defaultConfig = {
      *    string: 直接粘贴的内容
      */
     onPaste: callbacks.onPaste,
+  },
+  event: {
+    // 当编辑区内容有实际变化时触发
+    afterChange: callbacks.afterChange,
+    afterInit: callbacks.afterInit,
+    focus: (event, cherryInstance) => {},
+    blur: (event, cherryInstance) => {},
   },
   previewer: {
     dom: false,
