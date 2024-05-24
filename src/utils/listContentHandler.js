@@ -172,6 +172,7 @@ export default class ListHandler {
     let splitInnerText = [];
     // @ts-ignore
     if ('innerText' in event.target && typeof event.target.innerText === 'string') {
+      // @ts-ignore
       splitInnerText = event.target.innerText.split('\n');
     }
     // 只有第一段是换行，后面的换行都应该认为是另一行
