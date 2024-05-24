@@ -45,6 +45,7 @@ export default class ListHandler {
     this.container = container;
     this.previewerDom = previewerDom;
     this.editor = editor;
+    this.insertLineBreak = false; // 是否为插入换行符
     this.handleEditablesInputBinded = this.handleEditablesInput.bind(this); // 保证this指向正确以及能够正确移除事件
     this.handleEditablesUnfocusBinded = this.handleEditablesUnfocus.bind(this);
     this.target.addEventListener('input', this.handleEditablesInputBinded, false);
@@ -132,7 +133,8 @@ export default class ListHandler {
     /** @typedef {'insertText'|'insertFromPaste'|'insertParagraph'|'insertLineBreak'|'deleteContentBackward'|'deleteContentForward'|'deleteByCut'|'deleteContentForward'|'deleteWordBackward'} InputType*/
     if (event.target instanceof HTMLParagraphElement) {
       if (event.inputType === 'insertParagraph' || event.inputType === 'insertLineBreak') {
-        this.handleInsertLineBreak();
+        this.insertLineBreak = true;
+        this.handleInsertLineBreak(event);
       }
     }
   }
@@ -146,20 +148,35 @@ export default class ListHandler {
     event.preventDefault();
     if (event.target instanceof HTMLParagraphElement) {
       if (this.input) {
-        const replaceHtml = !this.isCheckbox
-          ? event.target.innerHTML
-          : event.target.innerHTML.replace(/<span class="ch-icon ch-icon-(square|check)"><\/span>/, '');
-        const md = this.editor.$cherry.engine.makeMarkdown(replaceHtml);
-        const [from, to] = this.range;
-        this.editor.editor.replaceRange(md, from, to);
+        if (!this.insertLineBreak) {
+          const replaceHtml = !this.isCheckbox
+            ? event.target.innerHTML
+            : event.target.innerHTML.replace(/<span class="ch-icon ch-icon-(square|check)"><\/span>/, '');
+          const md = this.editor.$cherry.engine.makeMarkdown(replaceHtml);
+          const [from, to] = this.range;
+          this.editor.editor.replaceRange(md, from, to);
+        }
         this.isCheckbox = false;
         this.input = false;
+        this.insertLineBreak = false;
       }
       this.remove();
     }
   }
 
-  handleInsertLineBreak() {
+  /**
+   * @param {InputEvent} event
+   */
+  handleInsertLineBreak(event) {
+    /** @type {Array<string>} */
+    let splitInnerText = [];
+    // @ts-ignore
+    if ('innerText' in event.target && typeof event.target.innerText === 'string') {
+      // @ts-ignore
+      splitInnerText = event.target.innerText.split('\n');
+    }
+    // 只有第一段是换行，后面的换行都应该认为是另一行
+    const [before, ...after] = splitInnerText;
     // 获取当前光标位置
     const cursor = this.editor.editor.getCursor();
     // 获取光标行的内容
@@ -170,10 +187,23 @@ export default class ListHandler {
       // 存在选中的checkbox则替换为未选中的checkbox，其他的保持原样
       insertContent = `\n${regRes[1]}${regRes[2]?.replace('[x]', '[ ] ')}`;
     }
+    insertContent += after?.join('') ?? '';
+    // 把当前行内容剪掉
+    this.editor.editor.replaceRange(
+      before,
+      {
+        line: cursor.line,
+        ch: regRes[2]?.length ?? 0,
+      },
+      {
+        line: cursor.line,
+        ch: lineContent.length,
+      },
+    );
     // 在当前行的末尾插入一个换行符，这会创建一个新行
     this.editor.editor.replaceRange(insertContent, {
       line: cursor.line,
-      ch: this.editor.editor.getLine(cursor.line).length,
+      ch: lineContent.length,
     });
     // 将光标移动到新行
     this.editor.editor.setCursor({ line: cursor.line + 1, ch: insertContent.length + 1 });
