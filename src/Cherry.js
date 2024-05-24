@@ -731,6 +731,7 @@ export default class Cherry extends CherryStatic {
         clearTimeout(this.timer);
         this.timer = null;
       }
+      const interval = this.options.engine.global.flowSessionContext ? 10 : 50;
       this.timer = setTimeout(() => {
         const markdownText = codemirror.getValue();
         if (markdownText !== this.lastMarkdownText) {
@@ -745,7 +746,7 @@ export default class Cherry extends CherryStatic {
         // 强制每次编辑（包括undo、redo）编辑器都会自动滚动到光标位置
         codemirror.scrollIntoView(null);
         this.editor.restoreDocumentScroll();
-      }, 50);
+      }, interval);
     } catch (e) {
       throw new NestedError(e);
     }
