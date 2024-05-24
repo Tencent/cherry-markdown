@@ -298,7 +298,7 @@ export default class CodeBlock extends ParagraphBase {
   beforeMakeHtml(str, sentenceMakeFunc, markdownParams) {
     let $str = str;
 
-    if (this.selfClosing || this.$engine.globalConfig.flowSessionContext) {
+    if (this.selfClosing || this.$engine.$cherry.options.engine.global.flowSessionContext) {
       $str = this.$dealUnclosingCode($str);
     }
 
