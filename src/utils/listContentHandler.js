@@ -170,6 +170,7 @@ export default class ListHandler {
   handleInsertLineBreak(event) {
     /** @type {Array<string>} */
     let splitInnerText = [];
+    // @ts-ignore
     if ('innerText' in event.target && typeof event.target.innerText === 'string') {
       splitInnerText = event.target.innerText.split('\n');
     }
