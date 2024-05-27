@@ -27,6 +27,7 @@
 - [图片所见即所得编辑尺寸](https://tencent.github.io/cherry-markdown/examples/img.html)
 - [表格编辑](https://tencent.github.io/cherry-markdown/examples/table.html)
 - [标题自动序号](https://tencent.github.io/cherry-markdown/examples/head_num.html)
+- [流式输入模式（AI chart场景）](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)
 
 
 -----

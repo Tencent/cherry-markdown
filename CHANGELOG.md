@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.42](https://github.com/Tencent/cherry-markdown/compare/v0.8.41...v0.8.42) (2024-05-27)
+
+
+### Features
+
+* 默认不展示右侧侧边栏 ([b68b1b4](https://github.com/Tencent/cherry-markdown/commit/b68b1b45946120a3ac6321748bc22a4fc52b995a))
+* 优化事件机制，增加cherry.on动态绑定事件机制 ([a24bcd9](https://github.com/Tencent/cherry-markdown/commit/a24bcd9fe95a84b79b83b013e371cc325962f491))
+* 增加表格和加粗斜体语法对流式输出场景的适配 ([ebc8338](https://github.com/Tencent/cherry-markdown/commit/ebc8338488cbfe1299aedb503fc94e11e45e7d42))
+* 增加流式会话的例子 ([88873c2](https://github.com/Tencent/cherry-markdown/commit/88873c2c564ee41137e5151bd836ad31ebd78c79))
+* add configuration and right-click menu processing preview ([#760](https://github.com/Tencent/cherry-markdown/issues/760)) ([6372859](https://github.com/Tencent/cherry-markdown/commit/6372859407d22a1c625bc6a1ffbaf88ec0d32226))
+* **vscodePlugin:** add webview icon ([#754](https://github.com/Tencent/cherry-markdown/issues/754)) ([b38ceea](https://github.com/Tencent/cherry-markdown/commit/b38ceea4b1df707e5facffdab7e33dcd13fc016f))
+
+
+### Bug Fixes
+
+* 当预览区只有一行内容时，导出文档api报错 ([f4b6201](https://github.com/Tencent/cherry-markdown/commit/f4b620155aae85b19bcd96c5ae8753e82d455c98))
+* 联想配置模板失效 ([#757](https://github.com/Tencent/cherry-markdown/issues/757)) ([f93e2af](https://github.com/Tencent/cherry-markdown/commit/f93e2afbbba88ae4045e0e7558cc875e66001aca))
+* 修复列表有多行时选区只选择第一行的问题 ([082a032](https://github.com/Tencent/cherry-markdown/commit/082a032c4717f7b22c4b331632f7f3dd836cebf9))
+* 右侧编辑列表过程中, 输入回车后, 再次编辑此列表, 数据会异常 [#751](https://github.com/Tencent/cherry-markdown/issues/751) ([#772](https://github.com/Tencent/cherry-markdown/issues/772)) ([3e1e9fd](https://github.com/Tencent/cherry-markdown/commit/3e1e9fd057c0008f5f3d001a818fda1a8291b0a9))
+
 ### [0.8.41](https://github.com/Tencent/cherry-markdown/compare/v0.8.40...v0.8.41) (2024-05-06)
 
 
