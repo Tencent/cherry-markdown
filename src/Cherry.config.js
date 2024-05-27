@@ -154,6 +154,7 @@ const defaultConfig = {
       },
       table: {
         enableChart: false,
+        selfClosing: false, // 自动闭合，为true时，当输入第一行table内容时，cherry会自动按表格进行解析
         // chartRenderEngine: EChartsTableEngine,
         // externals: ['echarts'],
       },
@@ -203,6 +204,7 @@ const defaultConfig = {
          *           __hello__    ====>   <strong>hello</strong>
          */
         allowWhitespace: false,
+        selfClosing: false, // 自动闭合，为true时，当输入**XXX时，会自动在末尾追加**
       },
       strikethrough: {
         /**
