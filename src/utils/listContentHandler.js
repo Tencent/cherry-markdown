@@ -89,20 +89,28 @@ export default class ListHandler {
     let contentsLiCount = 0; // 编辑器中是列表的数量
     let targetLine = -1; // 行
     let targetCh = -1; // 列
-    let targetContent = ''; // 当前点击的li的内容
-    contents.forEach((lineContent, lineIdx) => {
+    const targetContent = []; // 当前点击的li的内容
+    for (let lineIdx = 0; lineIdx < contents.length; lineIdx++) {
+      const lineContent = contents[lineIdx];
       if (!lineContent || lineContent === '/n') {
-        return;
+        if (targetContent.length <= 0) {
+          continue;
+        } else {
+          break;
+        }
       }
       // 匹配是否符合列表的正则
       const regRes = this.regList.exec(lineContent);
       if (regRes !== null) {
+        if (targetContent.length > 0) {
+          break;
+        }
         const [, indent, identifier, checkbox, content] = regRes;
         if (contentsLiCount === targetLiIdx && indent !== undefined) {
           targetLine = lineIdx;
           // eslint-disable-next-line prefer-destructuring
-          targetContent = content; // 这里只取一个没必要解构
-          targetCh = lineContent.indexOf(targetContent);
+          targetContent.push(content); // 这里只取一个没必要解构
+          targetCh = lineContent.indexOf(content);
           // 1. 这种需要特殊处理，需要跳过一个空格位，否则层级会错乱
           if (identifier?.endsWith('.')) {
             targetCh += 1;
@@ -113,10 +121,15 @@ export default class ListHandler {
           }
         }
         contentsLiCount += 1;
+      } else if (targetContent.length > 0) {
+        targetContent.push(lineContent);
       }
-    });
+    }
     const from = { line: targetLine, ch: targetCh };
-    const to = { line: targetLine, ch: targetCh + targetContent.length };
+    const to = {
+      line: targetLine + targetContent.length - 1,
+      ch: targetCh + targetContent[targetContent.length - 1].length,
+    };
     this.editor.editor.setSelection(from, to);
     this.range = [from, to];
     this.position = this.editor.editor.getCursor(); // 输入就获取光标位置，防止后面点到编辑器dom的时候光标位置不对
