@@ -52,8 +52,8 @@ const callbacks = {
       callback('images/demo-dog.png');
     }
   },
-  afterChange: ({ text, html }) => {},
-  afterInit: ({ text, html }) => {},
+  afterChange: (text, html) => {},
+  afterInit: (text, html) => {},
   beforeImageMounted: (srcProp, src) => ({ srcProp, src }),
   onClickPreview: (event) => {},
   /**
