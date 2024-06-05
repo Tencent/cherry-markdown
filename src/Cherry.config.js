@@ -52,8 +52,8 @@ const callbacks = {
       callback('images/demo-dog.png');
     }
   },
-  afterChange: (text, html) => {},
-  afterInit: (text, html) => {},
+  afterChange: ({ text, html }) => {},
+  afterInit: ({ text, html }) => {},
   beforeImageMounted: (srcProp, src) => ({ srcProp, src }),
   onClickPreview: (event) => {},
   /**
@@ -374,8 +374,9 @@ const defaultConfig = {
     // 当编辑区内容有实际变化时触发
     afterChange: callbacks.afterChange,
     afterInit: callbacks.afterInit,
-    focus: (event, cherryInstance) => {},
-    blur: (event, cherryInstance) => {},
+    focus: ({ e, cherry }) => {},
+    blur: ({ e, cherry }) => {},
+    selectionChange: ({ selections, lastSelections, info }) => {},
   },
   previewer: {
     dom: false,

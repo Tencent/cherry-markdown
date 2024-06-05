@@ -54,12 +54,13 @@ export interface CherryOptions {
     onPaste?: (clipboardData: ClipboardEvent['clipboardData']) => string|boolean;
   };
   event: {
-    focus?: (e: MouseEvent, cherry: Cherry) => void;
-    blur?: (e: MouseEvent, cherry: Cherry) => void;
+    focus?: ({ e: MouseEvent, cherry: Cherry }) => void;
+    blur?: ({ e: MouseEvent, cherry: Cherry }) => void;
     /** 编辑器内容改变并完成渲染后触发 */
     afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */
     afterInit?: CherryLifecycle;
+    selectionChange?: ({ selections: [], lastSelections: [], info} ) => void;
   };
   /** 预览区域配置 */
   previewer: CherryPreviewerOptions;
@@ -175,7 +176,7 @@ export interface CherryEditorOptions {
   showSuggestList?: boolean;
 }
 
-export type CherryLifecycle = (text: string, html: string) => void;
+export type CherryLifecycle = ({ text, html }) => void;
 
 export interface CherryPreviewerOptions {
   dom: HTMLDivElement | false;
