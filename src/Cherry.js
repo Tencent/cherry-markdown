@@ -228,6 +228,12 @@ export default class Cherry extends CherryStatic {
 
   on(eventName, callback) {
     if (this.$event.Events[eventName]) {
+      if (/afterInit|afterChange/.test(eventName)) {
+        // 做特殊处理
+        return this.$event.on(eventName, (msg) => {
+          callback(msg.markdownText, msg.html);
+        });
+      }
       return this.$event.on(eventName, callback);
     }
     switch (eventName) {
@@ -712,9 +718,9 @@ export default class Cherry extends CherryStatic {
       const markdownText = codemirror.getValue();
       const html = this.engine.makeHtml(markdownText);
       this.previewer.update(html);
-      if (this.options.callback.afterInit) {
-        this.options.callback.afterInit(markdownText, html);
-      }
+      setTimeout(() => {
+        this.$event.emit('afterInit', { markdownText, html });
+      }, 10);
     } catch (e) {
       throw new NestedError(e);
     }

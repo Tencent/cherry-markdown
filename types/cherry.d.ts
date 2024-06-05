@@ -176,7 +176,7 @@ export interface CherryEditorOptions {
   showSuggestList?: boolean;
 }
 
-export type CherryLifecycle = ({ text, html }) => void;
+export type CherryLifecycle = (text: String, html: String) => void;
 
 export interface CherryPreviewerOptions {
   dom: HTMLDivElement | false;
