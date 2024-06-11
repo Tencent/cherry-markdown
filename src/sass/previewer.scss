@@ -117,7 +117,12 @@
       }
     }
   }
+  @keyframes changeBgColor {
+    0% { background-color: #ffffcc88; }
+    60% { background-color: #ffffcc88; }
+    100% { background-color: #ffffcc00; }
+  }
   .cherry-highlight-line {
-    background-color: #ffffcc88;
+    animation: changeBgColor 3s;
   }
 }
