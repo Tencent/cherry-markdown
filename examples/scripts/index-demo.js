@@ -245,6 +245,7 @@ var basicConfig = {
   },
   // cherry初始化后是否检查 location.hash 尝试滚动到对应位置
   autoScrollByHashAfterInit: true,
+  // locale: 'en_US',
 };
 
 fetch('./markdown/basic.md').then((response) => response.text()).then((value) => {
