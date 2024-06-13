@@ -97,3 +97,46 @@ export function changeTheme($cherry, theme = '') {
     $cherry.previewer.getDomContainer().className.replace(/ theme__[^ $]+?( |$)/g, ' ') + newClass;
   saveThemeToLocal(themeNameSpace, newTheme);
 }
+
+/**
+ * 保存当前代码主题
+ * @param {string} nameSpace
+ * @param {string} codeTheme
+ */
+function saveCodeThemeToLocal(nameSpace, codeTheme) {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem(`${nameSpace}-codeTheme`, codeTheme);
+  }
+}
+
+/**
+ * 获取当前代码主题
+ * @param {string} nameSpace
+ * @returns {string} 主题名
+ */
+export function getCodeThemeFromLocal(nameSpace = 'cherry') {
+  let res = 'default';
+  if (typeof localStorage !== 'undefined') {
+    const localTheme = localStorage.getItem(`${nameSpace}-codeTheme`);
+    if (localTheme) {
+      res = localTheme;
+    }
+  }
+  return res;
+}
+
+/**
+ * 修改代码主题
+ * 相同themeNameSpace的实例有一样的代码主题配置
+ * @param {object} $cherry
+ * @param {string} codeTheme 如果没有传codeTheme，则从本地缓存里取
+ */
+export function changeCodeTheme($cherry, codeTheme) {
+  const themeNameSpace = $cherry.options.themeNameSpace || 'cherry';
+
+  const newTheme = codeTheme ? codeTheme : getCodeThemeFromLocal(themeNameSpace);
+
+  document.querySelector('.cherry').setAttribute('data-code-block-theme', newTheme);
+
+  saveCodeThemeToLocal(themeNameSpace, newTheme);
+}
