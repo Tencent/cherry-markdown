@@ -136,7 +136,7 @@ export function changeCodeTheme($cherry, codeTheme) {
 
   const newTheme = codeTheme ? codeTheme : getCodeThemeFromLocal(themeNameSpace);
 
-  document.querySelector('.cherry').setAttribute('data-code-block-theme', newTheme);
+  $cherry.wrapperDom.setAttribute('data-code-block-theme', newTheme);
 
   saveCodeThemeToLocal(themeNameSpace, newTheme);
 }
