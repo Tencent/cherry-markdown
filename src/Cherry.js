@@ -24,7 +24,7 @@ import ToolbarRight from './toolbars/ToolbarRight';
 import Toc from './toolbars/Toc';
 import { createElement } from './utils/dom';
 import Sidebar from './toolbars/Sidebar';
-import { customizer, getThemeFromLocal, changeTheme } from './utils/config';
+import { customizer, getThemeFromLocal, changeTheme, getCodeThemeFromLocal } from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
 import getPosBydiffs from './utils/recount-pos';
 import defaultConfig from './Cherry.config';
@@ -492,6 +492,9 @@ export default class Cherry extends CherryStatic {
         'data-codeBlockTheme': codeBlockTheme,
       },
     );
+
+    wrapperDom.setAttribute('data-code-block-theme', getCodeThemeFromLocal(this.options.themeNameSpace));
+
     this.wrapperDom = wrapperDom;
     return wrapperDom;
   }
