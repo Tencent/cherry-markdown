@@ -101,4 +101,5 @@ export default {
   medium: '中',
   large: '大',
   superLarge: '特大',
+  detailDefaultContent: '点击展开更多\n内容\n++- 默认展开\n内容\n++ 默认收起\n内容',
 };

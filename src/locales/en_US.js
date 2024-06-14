@@ -97,4 +97,6 @@ export default {
   medium: 'Medium',
   large: 'Large',
   superLarge: 'Super Large',
+  detailDefaultContent:
+    'Click to expand more\nContent\n++- Expand by default\nContent\n++ Collapse by default\nContent',
 };
