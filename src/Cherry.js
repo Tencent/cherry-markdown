@@ -283,6 +283,22 @@ export default class Cherry extends CherryStatic {
     }
   }
 
+  $t(str) {
+    return this.locale[str] ? this.locale[str] : str;
+  }
+
+  addLocale(key, value) {
+    this.locale[key] = value;
+  }
+
+  addLocales(locales) {
+    this.locale = Object.assign(this.locale, locales);
+  }
+
+  getLocales() {
+    return this.locale;
+  }
+
   /**
    * 切换编辑模式
    * @param {'edit&preview'|'editOnly'|'previewOnly'} [model=edit&preview] 模式类型
