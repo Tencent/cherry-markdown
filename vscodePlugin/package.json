@@ -23,7 +23,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:cherrymarkdown.preview"
+    "onLanguage:markdown"
   ],
   "main": "./dist/extension.js",
   "contributes": {
