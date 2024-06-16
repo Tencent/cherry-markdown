@@ -27,6 +27,7 @@ export default class Copy extends MenuBase {
     this.isLoading = false;
     this.updateMarkdown = false;
     this.setName('copy', 'copy');
+    this.lastIconOuterHtml = '';
   }
 
   async adaptWechat(rawHtml) {
@@ -79,11 +80,11 @@ export default class Copy extends MenuBase {
   toggleLoading() {
     // 切换loading状态
     if (this.isLoading) {
-      const loadingButton = document.querySelector('.icon-loading');
-      loadingButton.outerHTML = `<i class="ch-icon ch-icon-copy" title="${this.locale.copy}"></i>`;
+      this.dom.lastElementChild.outerHTML = this.lastIconOuterHtml;
+      this.lastIconOuterHtml = '';
     } else {
-      const copyButton = document.querySelector('.ch-icon-copy');
-      copyButton.outerHTML = '<div class="icon-loading loading"></div>';
+      this.lastIconOuterHtml = this.dom.lastElementChild.outerHTML;
+      this.dom.lastElementChild.outerHTML = '<div class="icon-loading loading"></div>';
     }
     this.isLoading = !this.isLoading;
   }
