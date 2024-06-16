@@ -741,6 +741,8 @@
   border-radius: 2px;
   max-height: 500px;
   box-shadow: 0 2px 8px 1px #00000033;
+  overflow-x: hidden;
+  overflow-y: auto;
 
   .cherry-suggester-panel__item {
     border: none;
@@ -783,7 +785,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  background: #FFFFFF33;
+  background: #ffffff33;
   margin-right: 8px;
   box-sizing: border-box;
   user-select: none;
@@ -791,13 +793,13 @@
   border-radius: 10px;
   transition: all 0.3s;
   &:hover {
-    background-color: #FFF;
+    background-color: #fff;
     width: 260px;
   }
   .cherry-toc-head {
     border-bottom: 1px dashed #33333333;
     padding: 5px;
-    .cherry-toc-title{
+    .cherry-toc-title {
       font-size: 16px;
       font-weight: bold;
       padding-left: 5px;
@@ -805,11 +807,12 @@
     .ch-icon-chevronsLeft {
       display: none;
     }
-    .ch-icon-chevronsRight, .ch-icon-chevronsLeft {
+    .ch-icon-chevronsRight,
+    .ch-icon-chevronsLeft {
       padding: 5px;
       position: absolute;
       right: 0;
-      top:0;
+      top: 0;
     }
     i {
       cursor: pointer;
@@ -867,7 +870,7 @@
     width: 30px;
     height: calc(100% - 200px);
     max-height: 600px;
-    background: #FFFFFF00;
+    background: #ffffff00;
     box-shadow: none;
     border-radius: 0;
     .cherry-toc-head {
@@ -894,49 +897,51 @@
       }
     }
   }
-  
+
   &.auto-num {
     .cherry-toc-list {
       counter-reset: toclevel1;
 
-      .cherry-toc-one-a__1{
+      .cherry-toc-one-a__1 {
         counter-reset: toclevel2;
       }
-      .cherry-toc-one-a__2{
+      .cherry-toc-one-a__2 {
         counter-reset: toclevel3;
       }
-      .cherry-toc-one-a__3{
+      .cherry-toc-one-a__3 {
         counter-reset: toclevel4;
       }
-      .cherry-toc-one-a__4{
+      .cherry-toc-one-a__4 {
         counter-reset: toclevel5;
       }
-      .cherry-toc-one-a__5{
+      .cherry-toc-one-a__5 {
         counter-reset: toclevel6;
       }
-      .cherry-toc-one-a__1:before{
+      .cherry-toc-one-a__1:before {
         counter-increment: toclevel1;
-        content: counter(toclevel1) ". ";
+        content: counter(toclevel1) '. ';
       }
-      .cherry-toc-one-a__2:before{
+      .cherry-toc-one-a__2:before {
         counter-increment: toclevel2;
-        content: counter(toclevel1) "." counter(toclevel2) ". ";
+        content: counter(toclevel1) '.' counter(toclevel2) '. ';
       }
-      .cherry-toc-one-a__3:before{
+      .cherry-toc-one-a__3:before {
         counter-increment: toclevel3;
-        content: counter(toclevel1) "." counter(toclevel2) "." counter(toclevel3) ". ";
+        content: counter(toclevel1) '.' counter(toclevel2) '.' counter(toclevel3) '. ';
       }
-      .cherry-toc-one-a__4:before{
+      .cherry-toc-one-a__4:before {
         counter-increment: toclevel4;
-        content: counter(toclevel1) "." counter(toclevel2) "." counter(toclevel3) "." counter(toclevel4) ". ";
+        content: counter(toclevel1) '.' counter(toclevel2) '.' counter(toclevel3) '.' counter(toclevel4) '. ';
       }
-      .cherry-toc-one-a__5:before{
+      .cherry-toc-one-a__5:before {
         counter-increment: toclevel5;
-        content: counter(toclevel1) "." counter(toclevel2) "." counter(toclevel3) "." counter(toclevel4) "." counter(toclevel5) ". ";
+        content: counter(toclevel1) '.' counter(toclevel2) '.' counter(toclevel3) '.' counter(toclevel4) '.'
+          counter(toclevel5) '. ';
       }
-      .cherry-toc-one-a__6:before{
+      .cherry-toc-one-a__6:before {
         counter-increment: toclevel5;
-        content: counter(toclevel1) "." counter(toclevel2) "." counter(toclevel3) "." counter(toclevel4) "." counter(toclevel5) "." counter(toclevel6) ". ";
+        content: counter(toclevel1) '.' counter(toclevel2) '.' counter(toclevel3) '.' counter(toclevel4) '.'
+          counter(toclevel5) '.' counter(toclevel6) '. ';
       }
     }
   }
