@@ -67,7 +67,7 @@ export default class MenuBase {
 
   /**
    *
-   * @param {Partial<import('../Cherry').default> & {$currentMenuOptions:import('~types/menus').CustomMenuConfig}} $cherry
+   * @param {Partial<import('@/Cherry').default> & {$currentMenuOptions?:import('~types/menus').CustomMenuConfig}} $cherry
    */
   constructor($cherry) {
     this.$cherry = $cherry;
