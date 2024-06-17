@@ -52,6 +52,33 @@ const options = [
       },
     ],
   },
+  {
+    input: 'src/sass/previewer.scss',
+    output: {
+      file: 'dist/cherry-previewer.styles.js',
+    },
+    plugins: [
+      scss({
+        fileName: IS_PRODUCTION ? 'cherry-markdown.previewer.min.css' : 'cherry-markdown.previewer.css',
+        // node进程是否在错误时终止
+        failOnError: true,
+        ...(IS_PRODUCTION && {
+          outputStyle: 'compressed',
+        }),
+        sass: dartSass,
+      }),
+      {
+        generateBundle: (option, bundle) => {
+          // remove all non-asset files from bundle
+          Object.keys(bundle).forEach((key) => {
+            if (bundle[key].type !== 'asset') {
+              delete bundle[key];
+            }
+          });
+        },
+      },
+    ],
+  },
   // {
   //   input: 'src/sass/markdown.scss',
   //   output: {
