@@ -53,13 +53,13 @@ const options = [
     ],
   },
   {
-    input: 'src/sass/previewer.scss',
+    input: 'src/sass/markdown_pure.scss',
     output: {
       file: 'dist/cherry-previewer.styles.js',
     },
     plugins: [
       scss({
-        fileName: IS_PRODUCTION ? 'cherry-markdown.previewer.min.css' : 'cherry-markdown.previewer.css',
+        fileName: IS_PRODUCTION ? 'cherry-markdown.markdown.min.css' : 'cherry-markdown.markdown.css',
         // node进程是否在错误时终止
         failOnError: true,
         ...(IS_PRODUCTION && {
@@ -79,35 +79,6 @@ const options = [
       },
     ],
   },
-  // {
-  //   input: 'src/sass/markdown.scss',
-  //   output: {
-  //     file: 'dist/cherry-markdown.styles.js',
-  //   },
-  //   plugins: [
-  //     scss({
-  //       // Filename to write all styles to
-  //       fileName: IS_PRODUCTION ? 'cherry-markdown.markdown.min.css' : 'cherry-markdown.markdown.css',
-
-  //       // Determine if node process should be terminated on error (default: false)
-  //       failOnError: true,
-  //       ...(IS_PRODUCTION && {
-  //         outputStyle: 'compressed',
-  //       }),
-  //       sass: dartSass,
-  //     }),
-  //     {
-  //       generateBundle: (option, bundle) => {
-  //         // remove all non-asset files from bundle
-  //         Object.keys(bundle).forEach((key) => {
-  //           if (bundle[key].type !== 'asset') {
-  //             delete bundle[key];
-  //           }
-  //         });
-  //       },
-  //     },
-  //   ],
-  // },
 ];
 
 export default options;
