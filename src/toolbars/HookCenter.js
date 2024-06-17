@@ -153,21 +153,35 @@ export default class HookCenter {
      * @type {{ [parentName: string]: string[]}} 二级菜单的名称, e.g. {一级菜单名称: [二级菜单名称1, 二级菜单名称2]}
      */
     this.level2MenusName = {};
+    // menu 参数配置的属性名
+    this.menuOptionsKey = ['name', 'icon', 'subMenu'];
     this.init();
   }
 
-  $newMenu(name) {
+  /**
+   * 实例化菜单
+   * @param {string} name 菜单名称
+   * @param {null|import('~types/menus').CustomMenuConfig} options 菜单配置项
+   * @returns
+   */
+  $newMenu(name, options = null) {
     if (this.hooks[name]) {
       return;
     }
+    /**
+     * 传入了options代表是新写法，不传兼容旧写法：即name和iconName一致，省去了在MenuBase的子类中调用setName
+     * 因为下面判断了name的合法性，这里就不需要再判断一次了，也防止了setName写错
+     * @type {import('~types/menus').CustomMenuConfig}
+     */
+    const currentMenuOptions = options || { name, icon: name };
     const { $cherry, customMenu } = this.toolbar.options;
     if (HookList[name]) {
       this.allMenusName.push(name);
-      this.hooks[name] = new HookList[name]($cherry);
+      this.hooks[name] = new HookList[name]({ ...$cherry, $currentMenuOptions: currentMenuOptions });
     } else if (customMenu !== undefined && customMenu !== null && customMenu[name]) {
       this.allMenusName.push(name);
       // 如果是自定义菜单，传参兼容旧版
-      this.hooks[name] = new customMenu[name]($cherry);
+      this.hooks[name] = new customMenu[name]({ ...$cherry, $currentMenuOptions: currentMenuOptions });
     }
   }
 
@@ -186,12 +200,24 @@ export default class HookCenter {
         if (keys.length === 1) {
           // 只接受形如{ name: [ subMenu ] }的参数
           const [name] = keys;
+          if (this.menuOptionsKey.includes(name)) {
+            throw Error(`this menu key is not allowed: ${name}, forbid menu key: ${this.menuOptionsKey}`);
+          }
+          console.warn(
+            `this subMenu config type will be deprecated, please use {subMenu: ['${name}']} config: ${item}`,
+          );
           this.level1MenusName.push(name);
           this.$newMenu(name);
           this.level2MenusName[name] = item[name];
           item[name].forEach((subItem) => {
             this.$newMenu(subItem);
           });
+        } else {
+          if (!item.name) {
+            return;
+          }
+          this.level1MenusName.push(item.name);
+          this.$newMenu(item.name, item);
         }
       }
     });
