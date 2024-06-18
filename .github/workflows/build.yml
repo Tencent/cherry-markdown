@@ -37,6 +37,28 @@ jobs:
         uses: borales/actions-yarn@v3.0.0
         with:
           cmd: build
+    
+      - name: Archive build dist
+        if: matrix.node-version == '16.x'
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-dist
+          path: dist
+          
+      - name: Archive examples
+        if: matrix.node-version == '16.x'
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-examples
+          path: examples
     # - uses: borales/actions-yarn@v2.3.0
     #   with:
     #     cmd: test
+
+  review:
+    needs: build
+    permissions: write-all
+    uses: ./.github/workflows/pr-viewer.yml
+    # inherit the secrets from the parent workflow
+    # https://docs.github.com/actions/using-workflows/reusing-workflows#using-inputs-and-secrets-in-a-reusable-workflow
+    secrets: inherit
