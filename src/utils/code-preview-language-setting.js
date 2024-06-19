@@ -44,4 +44,6 @@ export const codePreviewLangSelectList = [
   'perl',
   'r',
   'sql',
+  'xml',
+  'svg',
 ];
