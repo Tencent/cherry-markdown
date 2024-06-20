@@ -991,7 +991,7 @@ export default class Previewer {
         scrollTop = scrollDom.scrollTop + targetHead.getBoundingClientRect().y - 10;
       } else {
         scrollTop =
-        scrollDom.scrollTop + targetHead.getBoundingClientRect().y - scrollDom.getBoundingClientRect().y - 10;
+          scrollDom.scrollTop + targetHead.getBoundingClientRect().y - scrollDom.getBoundingClientRect().y - 10;
       }
       scrollDom.scrollTo({
         top: scrollTop,
@@ -999,7 +999,7 @@ export default class Previewer {
         behavior: 'smooth',
       });
     }
-}
+  }
 
   bindClick() {
     this.getDomContainer().addEventListener('click', (event) => {
