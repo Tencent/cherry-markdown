@@ -962,19 +962,44 @@ export default class Previewer {
     this.$scrollAnimation(top);
   }
 
+  /**
+   * 获取有滚动条的dom
+   */
+  getDomCanScroll(currentDom = this.getDomContainer()) {
+    if (currentDom.scrollHeight > currentDom.clientHeight || currentDom.clientHeight < window.innerHeight) {
+      return currentDom;
+    }
+    if (currentDom.parentElement) {
+      if (currentDom.nodeName === 'BODY') {
+        // 如果当前是body了，再往上就是html了
+        if (document.documentElement.scrollHeight > document.documentElement.clientHeight) {
+          return document.documentElement;
+        }
+        return currentDom;
+      }
+      return this.getDomCanScroll(currentDom.parentElement);
+    }
+  }
+
   scrollToHeadByIndex(index) {
     const previewDom = this.getDomContainer();
+    const scrollDom = this.getDomCanScroll(previewDom);
     const targetHead = previewDom.querySelectorAll('h1,h2,h3,h4,h5,h6,h7,h8')[index] ?? false;
+    let scrollTop = 0;
     if (targetHead !== false) {
-      const scrollTop =
-        previewDom.scrollTop + targetHead.getBoundingClientRect().y - previewDom.getBoundingClientRect().y - 10;
-      previewDom.scrollTo({
+      if (scrollDom.nodeName === 'HTML') {
+        scrollTop = scrollDom.scrollTop + targetHead.getBoundingClientRect().y - 10;
+      } else {
+        scrollTop =
+        scrollDom.scrollTop + targetHead.getBoundingClientRect().y - scrollDom.getBoundingClientRect().y - 10;
+      }
+      scrollDom.scrollTo({
         top: scrollTop,
         left: 0,
         behavior: 'smooth',
       });
     }
-  }
+}
 
   bindClick() {
     this.getDomContainer().addEventListener('click', (event) => {
