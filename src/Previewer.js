@@ -694,7 +694,7 @@ export default class Previewer {
     domContainer.innerHTML = html;
   }
 
-  update(html) {
+  update(html, selectAll = false) {
     // 更新时保留图片懒加载逻辑
     const newHtml = this.lazyLoadImg.changeSrc2DataSrc(html);
     if (!this.isPreviewerHidden()) {
@@ -704,6 +704,9 @@ export default class Previewer {
       // 预览区未隐藏时，直接更新
       const tmpDiv = document.createElement('div');
       const domContainer = this.getDomContainer();
+      if (selectAll) {
+        domContainer.innerHTML = '';
+      }
       tmpDiv.innerHTML = newHtml;
       const newHtmlList = this.$getSignData(tmpDiv);
       const oldHtmlList = this.$getSignData(domContainer);

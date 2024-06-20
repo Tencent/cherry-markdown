@@ -727,6 +727,7 @@ export default class Cherry extends CherryStatic {
    */
   editText(_evt, codemirror) {
     try {
+      const selectionText = document.getSelection().toString() || window.getSelection().toString();
       if (this.timer) {
         clearTimeout(this.timer);
         this.timer = null;
@@ -735,9 +736,11 @@ export default class Cherry extends CherryStatic {
       this.timer = setTimeout(() => {
         const markdownText = codemirror.getValue();
         if (markdownText !== this.lastMarkdownText) {
+          const selectAll = selectionText && selectionText === this.lastMarkdownText;
+
           this.lastMarkdownText = markdownText;
           const html = this.engine.makeHtml(markdownText);
-          this.previewer.update(html);
+          this.previewer.update(html, selectAll);
           this.$event.emit('afterChange', {
             markdownText,
             html,
