@@ -792,6 +792,9 @@
   box-shadow: 0px 5px 11px #33333333;
   border-radius: 10px;
   transition: all 0.3s;
+  &.cherry-flex-toc__fixed {
+    position: fixed;
+  }
   &:hover {
     background-color: #fff;
     width: 260px;

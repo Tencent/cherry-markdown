@@ -26,6 +26,8 @@ export default class Toc {
     this.updateLocationHash = options.updateLocationHash ?? true;
     this.defaultModel = options.defaultModel ?? 'full';
     this.showAutoNumber = options.showAutoNumber ?? false;
+    this.position = options.position ?? 'absolute';
+    this.cssText = options.cssText ?? '';
     this.init();
   }
 
@@ -63,6 +65,14 @@ export default class Toc {
       'div',
       `cherry-flex-toc cherry-flex-toc__pure${this.showAutoNumber ? ' auto-num' : ''}`,
     );
+    if (this.position === 'fixed') {
+      tocDom.classList.add('cherry-flex-toc__fixed');
+    }
+
+    if (this.cssText.length > 0) {
+      tocDom.style.cssText = this.cssText;
+    }
+
     const tocHead = createElement('div', 'cherry-toc-head');
     const tocTitle = createElement('span', 'cherry-toc-title');
     tocTitle.append(this.$cherry.locale.toc);
@@ -125,9 +135,16 @@ export default class Toc {
     this.editor.on('scroll', (codemirror, evt) => {
       this.updateTocList(true);
     });
-    this.$cherry.previewer.getDomContainer().addEventListener('scroll', () => {
-      this.updateTocList(true);
-    });
+    const scrollDom = this.$cherry.previewer.getDomCanScroll();
+    if (scrollDom.nodeName === 'HTML') {
+      window.addEventListener('scroll', () => {
+        this.updateTocList(true);
+      });
+    } else {
+      scrollDom.addEventListener('scroll', () => {
+        this.updateTocList(true);
+      });
+    }
   }
 
   $switchModel(model = 'pure') {
@@ -200,7 +217,8 @@ export default class Toc {
     if (this.$cherry.status.previewer === 'hide') {
       // 似乎没有特别好的办法，先欠着
     } else {
-      const minY = this.$cherry.previewer.getDomContainer().getBoundingClientRect().y;
+      const scrollDom = this.$cherry.previewer.getDomCanScroll();
+      const minY = scrollDom.nodeName === 'HTML' ? 0 : scrollDom.getBoundingClientRect().y;
       const headList = this.$cherry.previewer.getDomContainer().querySelectorAll('h1,h2,h3,h4,h5,h6,h7,h8');
       let index = 0;
       for (; index < headList.length; index++) {

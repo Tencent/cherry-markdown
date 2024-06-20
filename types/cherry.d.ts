@@ -302,6 +302,8 @@ export interface CherryToolbarOptions {
     updateLocationHash: boolean, // 要不要更新URL的hash
     defaultModel: 'pure' | 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
     showAutoNumber: boolean, // 是否显示自增序号
+    position: 'absolute' | 'fixed', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
+    cssText: string, // 额外样式
   };
   /** 是否展示顶部工具栏 */
   showToolbar?: boolean;
