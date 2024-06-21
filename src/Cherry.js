@@ -737,7 +737,7 @@ export default class Cherry extends CherryStatic {
         if (markdownText !== this.lastMarkdownText) {
           this.lastMarkdownText = markdownText;
           const html = this.engine.makeHtml(markdownText);
-          this.previewer.update(html, this.editor.selectAll);
+          this.previewer.update(html);
           this.$event.emit('afterChange', {
             markdownText,
             html,
