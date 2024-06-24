@@ -704,6 +704,9 @@ export default class Previewer {
       // 预览区未隐藏时，直接更新
       const tmpDiv = document.createElement('div');
       const domContainer = this.getDomContainer();
+      if (this.editor.selectAll) {
+        domContainer.innerHTML = '';
+      }
       tmpDiv.innerHTML = newHtml;
       const newHtmlList = this.$getSignData(tmpDiv);
       const oldHtmlList = this.$getSignData(domContainer);

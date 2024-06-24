@@ -104,6 +104,7 @@ export default class Editor {
      * @type {{ timer?: number; destinationTop?: number }}
      */
     this.animation = {};
+    this.selectAll = false;
     const { codemirror, ...restOptions } = options;
     if (codemirror) {
       Object.assign(this.options.codemirror, codemirror);
@@ -534,6 +535,9 @@ export default class Editor {
 
     editor.on('cursorActivity', () => {
       this.onCursorActivity();
+    });
+    editor.on('beforeChange', (codemirror) => {
+      this.selectAll = this.editor.getValue() === codemirror.getSelection();
     });
 
     addEvent(
