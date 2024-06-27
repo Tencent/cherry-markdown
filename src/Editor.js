@@ -25,6 +25,7 @@ import 'codemirror/addon/edit/matchtags';
 import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/display/placeholder';
 import 'codemirror/keymap/sublime';
+import 'codemirror/keymap/vim';
 
 import 'cm-search-replace/src/search';
 import 'codemirror/addon/scroll/annotatescrollbar';
@@ -65,6 +66,7 @@ export default class Editor {
       wrapperDom: null,
       autoScrollByCursor: true,
       convertWhenPaste: true,
+      keyMap: 'sublime',
       showFullWidthMark: true,
       showSuggestList: true,
       codemirror: {
@@ -110,6 +112,7 @@ export default class Editor {
       Object.assign(this.options.codemirror, codemirror);
     }
     Object.assign(this.options, restOptions);
+    this.options.codemirror.keyMap = this.options.keyMap;
     this.$cherry = this.options.$cherry;
     this.instanceId = this.$cherry.getInstanceId();
   }

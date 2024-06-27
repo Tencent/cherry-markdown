@@ -163,6 +163,8 @@ export interface CherryEditorOptions {
   defaultModel?: EditorMode;
   /** 粘贴时是否自动将html转成markdown */
   convertWhenPaste?: boolean;
+  /** 快捷键风格，目前仅支持 sublime 和 vim */
+  keyMap?: 'sublime' | 'vim';
   /** 透传给codemirror的配置项 */
   codemirror?: object;
   /** 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal */
