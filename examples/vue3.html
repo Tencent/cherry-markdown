@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Vue3 demo</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #app {
+      display: flex;
+      height: 100%;
+    }
+
+    .editor-container,
+    .preview-container {
+      flex: 1;
+      overflow: auto;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .editor-container {
+      border-right: 1px solid #ccc;
+    }
+
+    .one-api {
+      padding-left: 25px;
+      margin-top: 10px;
+      border-top: 1px solid #dfe6ee;
+      padding-top: 10px;
+    }
+
+    textarea {
+      display: inline-block;
+      width: 80%;
+    }
+
+    .one-api__try a {
+      cursor: pointer;
+      color: #3582fb;
+      font-size: 14px;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="../dist/cherry-markdown.css">
+  <link rel="Shortcut Icon" href="./logo/favicon.ico">
+  <link rel="Bookmark" href="../logo/favicon.ico">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+    integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
+  <link href="./markdown/api.md" rel="preload">
+</head>
+
+<body>
+  <div id="app">
+    <div class="editor-container">
+      <div id="markdown-editor"></div>
+    </div>
+    <div class="preview-container">
+      <h1>Cherry API test</h1>
+      <div class="one-api" v-for="(api, index) in apis" :key="index">
+        <h2 class="one-api__name">{{ api.name }}</h2>
+        <p class="one-api__desc" v-html="api.desc"></p>
+        <div class="one-api__try">
+          <textarea :id="'setMarkdown' + index" v-model="api.content" :ref="'textarea' + index"></textarea>
+          <a class="one-api__btn" @click="dealClick(index)">试一试</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 引入Vue3和Cherry -->
+  <script src="../dist/cherry-markdown.js"></script>
+  <script src="https://unpkg.com/vue@3"></script>
+  <script>
+    const { createApp } = Vue;
+    createApp({
+      data() {
+        return {
+          apis: [
+            {
+              name: 'setMarkdown(content:string, keepCursor = false)',
+              desc: '设置内容，setValue(content:string, keepCursor = false)有同样的功能<br>keepCursor = true 更新内容的时候保持光标位置',
+              content: `cherryObj.setMarkdown("输入内容");
+setTimeout(()=>{cherryObj.setMarkdown("内容为空",1);},5000);`
+            },
+            {
+              name: 'insert(content:string, isSelect = false, anchor = false, focus = true)',
+              desc: '插入内容<br>isSelect=true 选中刚插入的内容<br>anchor=false 在光标处插入内容，anchor=[1,3] 在第2行第4个字符处插入内容',
+              content: `cherryObj.insert("在光标处插入内容");
+cherryObj.insert("在第二行插入内容，并选中插入的内容", true, [1,0]);`
+            },
+            {
+              name: 'getMarkdown()',
+              desc: '获取markdown内容',
+              content: `alert(cherryObj.getMarkdown());
+console.log(cherryObj.getMarkdown());`
+            },
+            {
+              name: 'getHtml()',
+              desc: '获取渲染后的html内容',
+              content: `alert(cherryObj.getHtml());
+console.log(cherryObj.getHtml());`
+            },
+            {
+              name: 'destroy()',
+              desc: '销毁函数',
+              content: `cherryObj.destroy();`
+            },
+            {
+              name: 'resetToolbar(type:string, toolbar:array)',
+              desc: '重置工具栏<br>type 修改工具栏的类型 {"toolbar"|"toolbarRight"|"sidebar"|"bubble"|"float"}<br>toolbar 工具栏配置',
+              content: `cherryObj.resetToolbar('toolbar', ['bold', 'table']);`
+            },
+            {
+              name: 'export(type:string)',
+              desc: '导出预览区域的内容，type：{"pdf"|"img"}',
+              content: `if(confirm('导出pdf')) {
+  cherryObj.export();
+}else if(confirm('导出长图')) {
+  cherryObj.export('img');
+}`
+            },
+            {
+              name: 'switchModel(model:string)',
+              desc: '切换模式：{"edit&preview"|"editOnly"|"previewOnly"}',
+              content: `if(confirm('只读模式')) {
+  cherryObj.switchModel('previewOnly');
+}else if(confirm('纯编辑模式')) {
+  cherryObj.switchModel('editOnly');
+}else if(confirm('双栏编辑模式')) {
+  cherryObj.switchModel('edit&preview');
+}`
+            },
+            {
+              name: 'getToc()',
+              desc: '获取由标题组成的目录',
+              content: `alert(cherryObj.getToc());
+console.log(cherryObj.getToc());`
+            },
+            {
+              name: 'getCodeMirror()',
+              desc: '获取左侧编辑器实例',
+              content: `alert(cherryObj.getCodeMirror());
+console.log(cherryObj.getCodeMirror());`
+            },
+            {
+              name: 'getPreviewer()',
+              desc: '获取右侧预览区对象实例',
+              content: `alert(cherryObj.getPreviewer());
+console.log(cherryObj.getPreviewer());`
+            },
+            {
+              name: 'getCherry()',
+              desc: '获取cherry对象实例',
+              content: `alert(cherryObj.getCherry());
+console.log(cherryObj.getCherry());`
+            },
+            {
+              name: 'search(keyword:string)',
+              desc: '查询功能，支持内容高亮和跳转',
+              content: `cherryObj.search('内容');`
+            },
+            {
+              name: 'showSlide(number:number)',
+              desc: '将markdown以幻灯片形式展示，number:number从第几页开始展示（从0开始）',
+              content: `cherryObj.showSlide(0);`
+            }
+          ]
+        };
+      },
+      methods: {
+        dealClick(index) {
+          const content = this.$refs[`textarea${index}`][0].value;
+          eval(content);
+        }
+      }
+    }).mount('#app');
+
+    const cherryObj = new Cherry({
+      id: 'markdown-editor',
+      value: '## 这是一个Vue3 demo, 可以在左侧使用接口测试',
+    });
+  </script>
+</body>
+
+</html>
