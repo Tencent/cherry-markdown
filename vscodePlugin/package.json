@@ -2,7 +2,7 @@
   "name": "cherry-markdown",
   "displayName": "cherry-markdown",
   "description": "A markdown previewer powered by [cherry-markdown](https://github.com/Tencent/cherry-markdown)",
-  "version": "0.0.11",
+  "version": "0.0.16",
   "publisher": "cherryMarkdownPublisher",
   "license": "Apache License",
   "keywords": [
@@ -23,7 +23,6 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:cherrymarkdown.preview",
     "onLanguage:markdown"
   ],
   "main": "./dist/extension.js",

@@ -21,10 +21,10 @@ export default class Size extends MenuBase {
     super($cherry);
     this.setName('size', 'size');
     this.subMenuConfig = [
-      { name: '小', noIcon: true, onclick: this.bindSubClick.bind(this, '12') },
-      { name: '中', noIcon: true, onclick: this.bindSubClick.bind(this, '17') },
-      { name: '大', noIcon: true, onclick: this.bindSubClick.bind(this, '24') },
-      { name: '特大', noIcon: true, onclick: this.bindSubClick.bind(this, '32') },
+      { name: this.$cherry.locale.small, noIcon: true, onclick: this.bindSubClick.bind(this, '12') },
+      { name: this.$cherry.locale.medium, noIcon: true, onclick: this.bindSubClick.bind(this, '17') },
+      { name: this.$cherry.locale.large, noIcon: true, onclick: this.bindSubClick.bind(this, '24') },
+      { name: this.$cherry.locale.superLarge, noIcon: true, onclick: this.bindSubClick.bind(this, '32') },
     ];
     this.shortKeyMap = {
       'Alt-1': '12',

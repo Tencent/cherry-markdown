@@ -95,4 +95,11 @@ export default {
   justifyRight: '右对齐',
   publish: '发布',
   wordCount: '字数',
+  fontColor: '文本颜色',
+  fontBgColor: '背景颜色',
+  small: '小',
+  medium: '中',
+  large: '大',
+  superLarge: '特大',
+  detailDefaultContent: '点击展开更多\n内容\n++- 默认展开\n内容\n++ 默认收起\n内容',
 };

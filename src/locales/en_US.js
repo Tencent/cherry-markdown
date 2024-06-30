@@ -91,4 +91,12 @@ export default {
   justifyRight: 'Right',
   publish: 'Publish',
   wordCount: 'Word Count',
+  fontColor: 'Font Color',
+  fontBgColor: 'Font Bg Color',
+  small: 'Small',
+  medium: 'Medium',
+  large: 'Large',
+  superLarge: 'Super Large',
+  detailDefaultContent:
+    'Click to expand more\nContent\n++- Expand by default\nContent\n++ Collapse by default\nContent',
 };

@@ -24,7 +24,7 @@ import ToolbarRight from './toolbars/ToolbarRight';
 import Toc from './toolbars/Toc';
 import { createElement } from './utils/dom';
 import Sidebar from './toolbars/Sidebar';
-import { customizer, getThemeFromLocal, changeTheme } from './utils/config';
+import { customizer, getThemeFromLocal, changeTheme, getCodeThemeFromLocal } from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
 import getPosBydiffs from './utils/recount-pos';
 import defaultConfig from './Cherry.config';
@@ -228,6 +228,12 @@ export default class Cherry extends CherryStatic {
 
   on(eventName, callback) {
     if (this.$event.Events[eventName]) {
+      if (/afterInit|afterChange/.test(eventName)) {
+        // 做特殊处理
+        return this.$event.on(eventName, (msg) => {
+          callback(msg.markdownText, msg.html);
+        });
+      }
       return this.$event.on(eventName, callback);
     }
     switch (eventName) {
@@ -252,6 +258,10 @@ export default class Cherry extends CherryStatic {
       // @ts-ignore
       updateLocationHash: this.options.toolbars.toc.updateLocationHash ?? true,
       // @ts-ignore
+      position: this.options.toolbars.toc.position ?? 'absolute',
+      // @ts-ignore
+      cssText: this.options.toolbars.toc.cssText ?? '',
+      // @ts-ignore
       defaultModel: this.options.toolbars.toc.defaultModel ?? 'pure',
       // @ts-ignore
       showAutoNumber: this.options.toolbars.toc.showAutoNumber ?? false,
@@ -275,6 +285,22 @@ export default class Cherry extends CherryStatic {
         // empty
       }
     }
+  }
+
+  $t(str) {
+    return this.locale[str] ? this.locale[str] : str;
+  }
+
+  addLocale(key, value) {
+    this.locale[key] = value;
+  }
+
+  addLocales(locales) {
+    this.locale = Object.assign(this.locale, locales);
+  }
+
+  getLocales() {
+    return this.locale;
   }
 
   /**
@@ -486,6 +512,9 @@ export default class Cherry extends CherryStatic {
         'data-codeBlockTheme': codeBlockTheme,
       },
     );
+
+    wrapperDom.setAttribute('data-code-block-theme', getCodeThemeFromLocal(this.options.themeNameSpace));
+
     this.wrapperDom = wrapperDom;
     return wrapperDom;
   }
@@ -712,9 +741,9 @@ export default class Cherry extends CherryStatic {
       const markdownText = codemirror.getValue();
       const html = this.engine.makeHtml(markdownText);
       this.previewer.update(html);
-      if (this.options.callback.afterInit) {
-        this.options.callback.afterInit(markdownText, html);
-      }
+      setTimeout(() => {
+        this.$event.emit('afterInit', { markdownText, html });
+      }, 10);
     } catch (e) {
       throw new NestedError(e);
     }
