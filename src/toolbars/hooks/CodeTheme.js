@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { changeCodeTheme } from '@/utils/config';
 /**
  * 设置代码块的主题
  * 本功能依赖[prism组件](https://github.com/PrismJS/prism)
@@ -39,10 +40,9 @@ export default class CodeTheme extends MenuBase {
   /**
    * 响应点击事件
    * @param {string} shortKey 快捷键参数，本函数不处理这个参数
-   * @param {string} theme 具体的代码块主题
-   * @returns 回填到编辑器光标位置/选中文本区域的内容
+   * @param {string} codeTheme 具体的代码块主题
    */
-  onClick(shortKey = '', theme) {
-    document.querySelector('.cherry').setAttribute('data-code-block-theme', theme);
+  onClick(shortKey = '', codeTheme) {
+    changeCodeTheme(this.$cherry, codeTheme);
   }
 }

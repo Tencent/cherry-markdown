@@ -260,6 +260,8 @@ const defaultConfig = {
     defaultModel: 'edit&preview',
     // 粘贴时是否自动将html转成markdown
     convertWhenPaste: true,
+    // 快捷键风格，目前仅支持 sublime 和 vim
+    keyMap: 'sublime',
     codemirror: {
       // 是否自动focus 默认为true
       autofocus: true,
@@ -315,6 +317,8 @@ const defaultConfig = {
     //   updateLocationHash: false, // 要不要更新URL的hash
     //   defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
     //   showAutoNumber: false, // 是否显示自增序号
+    //   position: 'absolute', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
+    //   cssText: '', // 自定义样式
     // },
     // 快捷键配置，如果配置为空，则使用toolbar的配置
     shortcutKey: {
@@ -374,8 +378,9 @@ const defaultConfig = {
     // 当编辑区内容有实际变化时触发
     afterChange: callbacks.afterChange,
     afterInit: callbacks.afterInit,
-    focus: (event, cherryInstance) => {},
-    blur: (event, cherryInstance) => {},
+    focus: ({ e, cherry }) => {},
+    blur: ({ e, cherry }) => {},
+    selectionChange: ({ selections, lastSelections, info }) => {},
   },
   previewer: {
     dom: false,

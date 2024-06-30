@@ -32,6 +32,7 @@ English | [简体中文](./README.CN.md)
 - [table wysiwyg](https://tencent.github.io/cherry-markdown/examples/table.html)
 - [headers with auto num](https://tencent.github.io/cherry-markdown/examples/head_num.html)
 - [流式输入模式（AI chart场景）](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)
+- [VIM 编辑模式](https://tencent.github.io/cherry-markdown/examples/vim.html)
 
 -----
 
