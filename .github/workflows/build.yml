@@ -14,6 +14,8 @@ on:
 
 jobs:
   build:
+    # do not run on PRs in forks
+    if: github.repository == 'Tencent/cherry-markdown'
     runs-on: ubuntu-latest
     # 将权限设置为 `read-all`，以防止工作流意外地对仓库进行写操作
     permissions: read-all
@@ -64,6 +66,7 @@ jobs:
     needs: build
     # 需要写权限才能在相应的PR中创建评论
     permissions: write-all
+    if: github.event_name == 'pull_request_target'
     uses: ./.github/workflows/pr-viewer.yml
     # inherit the secrets from the parent workflow
     # https://docs.github.com/actions/using-workflows/reusing-workflows#using-inputs-and-secrets-in-a-reusable-workflow
