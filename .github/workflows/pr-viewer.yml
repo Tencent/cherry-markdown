@@ -1,9 +1,50 @@
 name: PR Reviewer
 
 on:
-  workflow_call:
+  workflow_dispatch:
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+      - name: Install dependencies
+        uses: borales/actions-yarn@v3.0.0
+        with:
+          cmd: install
+      - name: Eslint
+        uses: borales/actions-yarn@v3.0.0
+        with:
+          cmd: lint:ci
+      - name: Run Build
+        uses: borales/actions-yarn@v3.0.0
+        with:
+          cmd: build
+      - name: Archive build dist
+        if: matrix.node-version == '16.x'
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-dist
+          path: dist
+          
+      - name: Archive examples
+        if: matrix.node-version == '16.x'
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-examples
+          path: examples
+
   upload:
     runs-on: ubuntu-latest
 
