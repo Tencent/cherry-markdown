@@ -6,12 +6,17 @@ name: Package Build
 on:
   push:
     branches: [main, dev]
-  pull_request:
+  # 由 pull_request_target 事件触发的工作流中，GITHUB_TOKEN 被授予了对仓库的读写访问权限。
+  # 请注意限制每个作业的权限！
+  # https://docs.github.com/actions/using-jobs/assigning-permissions-to-jobs
+  pull_request_target:
     branches: [main, dev]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # 将权限设置为 `read-all`，以防止工作流意外地对仓库进行写操作
+    permissions: read-all
 
     strategy:
       matrix:
@@ -57,6 +62,7 @@ jobs:
 
   review:
     needs: build
+    # 需要写权限才能在相应的PR中创建评论
     permissions: write-all
     uses: ./.github/workflows/pr-viewer.yml
     # inherit the secrets from the parent workflow
