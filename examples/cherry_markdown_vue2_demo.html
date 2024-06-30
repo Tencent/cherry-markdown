@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue2 Demo</title>
+  <link rel="stylesheet" type="text/css" href="../dist/cherry-markdown.css">
+  <link rel="Shortcut Icon" href="./logo/favicon.ico">
+  <link rel="Bookmark" href="../logo/favicon.ico">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+    integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
+  <link href="./markdown/api.md" rel="preload">
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <script src="../dist/cherry-markdown.min.js"></script>
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    #app {
+
+      width: 100%;
+      min-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .apis {
+      flex: 1;
+      padding: 20px;
+    }
+
+    .one-api {
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+
+    .one-api__try {
+      margin-top: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      margin-bottom: 10px;
+    }
+
+    a {
+      color: blue;
+    }
+
+    .preview {
+      flex: 1;
+      padding: 20px;
+      border: 1px solid #ccc;
+    }
+
+    .preview-content {
+      margin-top: 10px;
+    }
+
+
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="apis">
+      <h1>Cherry API</h1>
+      <div class="one-api" v-for="(api, index) in apis" :key="index">
+        <h2 class="one-api__name" v-html="api.name"></h2>
+        <p class="one-api__desc" v-html="api.desc"></p>
+        <div class="one-api__try">
+          <textarea v-model="api.text" placeholder="输入内容"></textarea>
+          <a class="one-api__btn" @click="dealClick(index)">试一试</a>
+        </div>
+      </div>
+    </div>
+    <div class="preview">
+      <h1>Cherry Markdown Preview</h1>
+      <div class="preview-content" ></div>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        cherryInstance: null,
+        apis: [
+          {
+            name: 'setMarkdown(content:string, keepCursor = false)', desc: '设置内容，setValue(content:string, keepCursor = false)有同样的功能<br>keepCursor = true更新内容的时候保持光标位置',
+            text: `this.cherryInstance.setMarkdown("输入内容");setTimeout(()=>{this.cherryInstance.setMarkdown("输11111111111内容3223",1);},5000);`
+          },
+          {
+            name: 'insert(content:string, isSelect = false, anchor = false, focus = true)', desc: '插入内容<br>isSelect=true 选中刚插入的内容<br>anchor=false 在光标处插入内容，anchor=[1,3] 在第2行第4个字符处插入内容',
+            text: `this.cherryInstance.insert("在光标处插入内容");this.cherryInstance.insert("在第二行插入内容，并选中插入的内容", true, [1,0]);`
+          },
+          {
+            name: 'getMarkdown()', desc: '获取markdown内容',
+            text: `alert(this.cherryInstance.getMarkdown());console.log(this.cherryInstance.getMarkdown());`
+          },
+        ],
+        previewContent: ''
+      },
+
+      mounted() {
+        this.cherryInstance = new Cherry({
+          id: 'markdown-editor',
+          value: '## Vue2 Demo，欢迎尝试',
+          editor: {
+            height: '500px',
+          },
+        });
+      },
+
+      methods: {
+        dealClick(index) {
+          const content = this.apis[index].text;
+          new Function(content).call(this);
+          this.previewContent = this.cherryInstance.getHtml(); 
+        }
+      },
+    })
+  </script>
+</body>
+
+</html>
