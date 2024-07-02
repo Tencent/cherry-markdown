@@ -24,7 +24,7 @@ jobs:
           echo "Changed files: ${DIFF_DOCUMENTS}"
 
           # 过滤出相关文件
-          GIT_DIFF_CONTENT=$(echo "${DIFF_DOCUMENTS}" | egrep -i "^src/.*\.(js|ts|jsx|tsx|html|css|scss)$" | xargs)
+          GIT_DIFF_CONTENT=$(echo "${DIFF_DOCUMENTS}" | egrep -i "\.(js|ts|jsx|tsx|html|css|scss)$" | xargs)
           echo "Filtered files: ${GIT_DIFF_CONTENT}"
           
           # 将结果存储在环境变量中
