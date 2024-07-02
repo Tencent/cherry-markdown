@@ -21,8 +21,12 @@ jobs:
           # 使用 GitHub API 获取变更文件列表
           DIFF_DOCUMENTS=$(gh api repos/${{ github.repository }}/compare/${{ env.BASE_SHA }}...${{ env.HEAD_SHA }} \
             --jq '.files | .[] | select(.status|IN("added", "modified", "renamed", "copied", "changed")) | .filename')
+          echo "Changed files: ${DIFF_DOCUMENTS}"
+
           # 过滤出相关文件
           GIT_DIFF_CONTENT=$(echo "${DIFF_DOCUMENTS}" | egrep -i "^src/.*\.(js|ts|jsx|tsx|html|css|scss)$" | xargs)
+          echo "Filtered files: ${GIT_DIFF_CONTENT}"
+          
           # 将结果存储在环境变量中
           echo "GIT_DIFF_CONTENT=${GIT_DIFF_CONTENT}" >> $GITHUB_ENV
         env:
