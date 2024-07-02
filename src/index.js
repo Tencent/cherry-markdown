@@ -27,6 +27,7 @@ Cherry.usePlugin(MermaidCodeEngine, {
 });
 Cherry.usePlugin(PlantUMLCodeEngine, {});
 Cherry.usePlugin(EChartsTableEngine);
+console.log('测试测试 => cherry loaded');
 
 export * from './index.core';
 export default Cherry;
