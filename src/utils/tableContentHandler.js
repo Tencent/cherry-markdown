@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import { getTableRule, getCodeBlockRule } from '@/utils/regexp';
+
 /**
  * 用于在表格上出现编辑区，并提供拖拽行列的功能
  */
@@ -166,6 +167,7 @@ export default class TableHandler {
       return;
     }
     this.$setSymbolOffset();
+    this.$setDeleteButtonPosition();
   }
 
   $remove() {
@@ -307,6 +309,7 @@ export default class TableHandler {
       return;
     }
     this.$drawSymbol();
+    this.$drawDelete();
   }
 
   /**
@@ -469,6 +472,55 @@ export default class TableHandler {
     this.codeMirror.replaceSelection(newText);
     this.$findTableInEditor();
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+  }
+
+  /**
+   * 添加删除按钮
+   */
+  $drawDelete() {
+    const types = ['top', 'bottom'];
+    const buttons = types.map((type) => [type]);
+    const container = document.createElement('div');
+    container.className = 'cherry-previewer-table-hover-handler-delete-container';
+    buttons.forEach(([type]) => {
+      const button = document.createElement('button');
+      button.setAttribute('data-type', type);
+      button.className = 'cherry-previewer-table-hover-handler__delete';
+      button.innerHTML = '删除';
+      button.title = '删除当前列';
+      button.addEventListener('click', (e) => {
+        // this.$deleteCurrentColumn();
+      });
+      container.appendChild(button);
+    });
+    this.tableEditor.editorDom.deleteContainer = container;
+    this.container.appendChild(this.tableEditor.editorDom.deleteContainer);
+    this.$setDeleteButtonPosition();
+  }
+
+  /**
+   * 设置删除按钮的位置
+   */
+  $setDeleteButtonPosition() {
+    const container = this.tableEditor.editorDom.deleteContainer;
+    const { tableNode, tdNode } = this.tableEditor.info;
+    const tableInfo = this.$getPosition(tableNode);
+    const tdInfo = this.$getPosition(tdNode);
+    // 设置容器宽高
+    this.setStyle(this.container, 'width', `${tableInfo.width}px`);
+    this.setStyle(this.container, 'height', `${tableInfo.height}px`);
+    this.setStyle(this.container, 'top', `${tableInfo.top}px`);
+    this.setStyle(this.container, 'left', `${tableInfo.left}px`);
+
+    // 设置删除按钮位置
+    container.childNodes.forEach((node) => {
+      const { type } = node.dataset;
+      const offset = {
+        outer: 20,
+      };
+      this.setStyle(node, `${type}`, `-${offset.outer}px`);
+      this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
+    });
   }
 
   /**
