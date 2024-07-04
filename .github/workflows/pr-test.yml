@@ -20,11 +20,11 @@ jobs:
         run: |
           # 使用 GitHub API 获取变更文件列表
           DIFF_DOCUMENTS=$(gh api repos/${{ github.repository }}/compare/${{ env.BASE_SHA }}...${{ env.HEAD_SHA }} \
-            --jq '.files | .[] | {filename, status}')
+            --jq '.files | .[] | select(.status|IN("added", "modified", "renamed", "copied", "changed")) | .filename')
           echo "Changed files: ${DIFF_DOCUMENTS}"
 
-          # 过滤出相关文件并生成环境变量
-          GIT_DIFF_CONTENT=$(echo "${DIFF_DOCUMENTS}" | jq -r '. | select(.filename | test("\\.(js|ts|jsx|tsx|html|css|scss)$")) | "\(.status) \(.filename)"')
+          # 过滤出相关文件
+          GIT_DIFF_CONTENT=$(echo "${DIFF_DOCUMENTS}" | egrep -i "\.(js|ts|jsx|tsx|html|css|scss)$" | xargs)
           echo "Filtered files: ${GIT_DIFF_CONTENT}"
           
           # 将结果存储在环境变量中
@@ -42,30 +42,27 @@ jobs:
       - name: Replace changed files
         if: ${{ env.GIT_DIFF_CONTENT }}
         run: |
-          IFS=$'\n'
-          for entry in ${{ env.GIT_DIFF_CONTENT }}; do
-            status=$(echo $entry | cut -d ' ' -f 1)
-            file=$(echo $entry | cut -d ' ' -f 2-)
-            echo "Processing $file with status $status..."
-            if [ "$status" = "added" ] || [ "$status" = "modified" ] || [ "$status" = "renamed" ] || [ "$status" = "copied" ] || [ "$status" = "changed" ]; then
-              echo "Adding or modifying $file..."
-              mkdir -p "base-repo/$(dirname $file)"
+          for file in ${{ env.GIT_DIFF_CONTENT }}; do
+            echo "Checking if $file exists..."
+            if [ -f "$file" ]; then
+              echo "$file exists. Copying to base-repo/$file..."
               cp "$file" "base-repo/$file"
               if [ $? -eq 0 ]; then
                 echo "Successfully copied $file to base-repo/$file"
               else
                 echo "Failed to copy $file to base-repo/$file"
               fi
-            elif [ "$status" = "removed" ]; then
-              echo "Removing $file..."
-              rm -f "base-repo/$file"
-              if [ $? -eq 0 ]; then
-                echo "Successfully removed $file from base-repo/$file"
-              else
-                echo "Failed to remove $file from base-repo/$file"
-              fi
             else
-              echo "Unknown status $status for $file"
+              echo "$file does not exist in HEAD_SHA. Checking if it was deleted..."
+              if [ $(git ls-files --deleted --error-unmatch "$file" 2>/dev/null) ]; then
+                echo "$file was deleted. Deleting from base-repo..."
+                rm "base-repo/$file"
+                if [ $? -eq 0 ]; then
+                  echo "Successfully deleted $file from base-repo"
+                else
+                  echo "Failed to delete $file from base-repo"
+                fi
+              fi
             fi
           done
 
