@@ -105,6 +105,6 @@ jobs:
               body: `
             ### 【预览链接】
             
-            - https://cherry-markdown-dev-1301618266.cos-website.ap-shanghai.myqcloud.com/pr${{ github.event.pull_request.number }}/examples/index.html
+            - https://cherrymd.com/pr${{ github.event.pull_request.number }}/examples/index.html
               `
             });
