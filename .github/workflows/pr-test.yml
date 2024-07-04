@@ -93,5 +93,5 @@ jobs:
   review:
     needs: build
     permissions: write-all
-    uses: ./pr-reviewer.yml
+    uses: ./.github/workflows/pr-reviewer.yml
     secrets: inherit
