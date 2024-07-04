@@ -1,96 +1,9 @@
 name: PR Reviewer
 
-on:
-  pull_request_target: 
-    branches: [main, dev]
+on: workflow_call
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    env:
-      BASE_SHA: ${{ github.event.pull_request.base.sha }}
-      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: "${{ env.HEAD_SHA }}"
-
-      - name: Get changed files
-        run: |
-          # 使用 GitHub API 获取变更文件列表
-          DIFF_DOCUMENTS=$(gh api repos/${{ github.repository }}/compare/${{ env.BASE_SHA }}...${{ env.HEAD_SHA }} \
-            --jq '.files | .[] | select(.status|IN("added", "modified", "renamed", "copied", "changed")) | .filename')
-          echo "Changed files: ${DIFF_DOCUMENTS}"
-
-          # 过滤出相关文件
-          GIT_DIFF_CONTENT=$(echo "${DIFF_DOCUMENTS}" | egrep -i "\.(js|ts|jsx|tsx|html|css|scss)$" | xargs)
-          echo "Filtered files: ${GIT_DIFF_CONTENT}"
-          
-          # 将结果存储在环境变量中
-          echo "GIT_DIFF_CONTENT=${GIT_DIFF_CONTENT}" >> $GITHUB_ENV
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/checkout@v2
-        if: ${{ env.GIT_DIFF_CONTENT }}
-        with:
-          repository: ${{ github.repository }}
-          ref: "${{ env.BASE_SHA }}"
-          path: base-repo
-
-      - name: Replace changed files
-        if: ${{ env.GIT_DIFF_CONTENT }}
-        run: |
-          for file in ${{ env.GIT_DIFF_CONTENT }}; do
-            echo "Checking if $file exists..."
-            if [ -f "$file" ]; then
-              echo "$file exists. Copying to base-repo/$file..."
-              cp "$file" "base-repo/$file"
-              if [ $? -eq 0 ]; then
-                echo "Successfully copied $file to base-repo/$file"
-              else
-                echo "Failed to copy $file to base-repo/$file"
-              fi
-            else
-              echo "$file does not exist!"
-            fi
-          done
-
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-          cache: 'yarn'
-
-      - name: Install dependencies
-        uses: borales/actions-yarn@v3.0.0
-        with:
-          cmd: install
-
-      # - name: Eslint
-      #   uses: borales/actions-yarn@v3.0.0
-      #   with:
-      #     cmd: lint:ci
-
-      - name: Run Build
-        uses: borales/actions-yarn@v3.0.0
-        with:
-          cmd: build
-
-      - name: Archive build dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-dist
-          path: dist
-          
-      - name: Archive examples
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-examples
-          path: examples
-
-  upload:
+  review:
     runs-on: ubuntu-latest
     needs: build
 
@@ -192,8 +105,6 @@ jobs:
               issue_number: context.issue.number,
               body: `
             ### 【预览链接】
-            
-            通过下方链接查看效果 
             
             - https://cherry-markdown-dev-1301618266.cos-website.ap-shanghai.myqcloud.com/pr${{ github.event.pull_request.number }}/examples/index.html
               `
