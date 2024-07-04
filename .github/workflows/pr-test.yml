@@ -1,4 +1,4 @@
-name: PR Reviewer
+name: PR Test
 
 on:
   pull_request_target: 
@@ -93,5 +93,5 @@ jobs:
   review:
     needs: build
     permissions: write-all
-    uses: ./.github/workflows/pr-reviewer.yml
+    uses: ./pr-reviewer.yml
     secrets: inherit
