@@ -179,7 +179,7 @@ var basicConfig = {
       '|',
       'formula',
       {
-        insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word', 'ruby'],
+        insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word'],
       },
       'graph',
       'customMenuTable',

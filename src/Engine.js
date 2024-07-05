@@ -19,7 +19,7 @@ import NestedError, { $expectTarget, $expectInherit, $expectInstance } from './u
 import md5 from 'md5';
 import SyntaxBase from './core/SyntaxBase';
 import ParagraphBase from './core/ParagraphBase';
-import { PUNCTUATION } from './utils/regexp';
+import { PUNCTUATION, imgBase64Reg, imgDrawioXmlReg } from './utils/regexp';
 import { escapeHTMLSpecialChar } from './utils/sanitize';
 import Logger from './Logger';
 import { configureMathJax } from './utils/mathjax';
@@ -48,6 +48,7 @@ export default class Engine {
     this.hooks = this.hookCenter.getHookList();
     this.md5Cache = {};
     this.md5StrMap = {};
+    this.cachedBigData = {};
     this.markdownParams = markdownParams;
     this.currentStrMd5 = [];
     this.globalConfig = markdownParams.engine.global;
@@ -227,14 +228,37 @@ export default class Engine {
     return this.$fireHookAction(md, 'paragraph', 'makeHtml', this.$dealSentenceByCache.bind(this));
   }
 
+  // 缓存大文本数据，用以提升渲染性能
+  $cacheBigData(md) {
+    let $md = md.replace(imgBase64Reg, (whole, m1, m2) => {
+      const cacheKey = `bigDataBegin${this.md5(m2)}bigDataEnd`;
+      this.cachedBigData[cacheKey] = m2;
+      return `${m1}${cacheKey})`;
+    });
+    $md = $md.replace(imgDrawioXmlReg, (whole, m1, m2) => {
+      const cacheKey = `bigDataBegin${this.md5(m2)}bigDataEnd`;
+      this.cachedBigData[cacheKey] = m2;
+      return `${m1}${cacheKey}}`;
+    });
+    return $md;
+  }
+
+  $deCacheBigData(md) {
+    return md.replace(/bigDataBegin[^\n]+?bigDataEnd/g, (whole) => {
+      return this.cachedBigData[whole];
+    });
+  }
+
   /**
    * @param {string} md md字符串
    * @returns {string} 获取html
    */
   makeHtml(md) {
-    let $md = this.$beforeMakeHtml(md);
+    let $md = this.$cacheBigData(md);
+    $md = this.$beforeMakeHtml($md);
     $md = this.$dealParagraph($md);
     $md = this.$afterMakeHtml($md);
+    $md = this.$deCacheBigData($md);
     return $md;
   }
 
