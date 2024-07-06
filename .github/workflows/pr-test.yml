@@ -41,7 +41,7 @@ jobs:
         run: |
           GIT_DIFF_FILES=${{ env.GIT_DIFF_FILES }}
           for file in $GIT_DIFF_FILES; do
-            cp "base-repo/$file" "$file"
+            cp "$file" "base-repo/$file"
           done
 
       - name: Use Node.js 16.x
@@ -59,8 +59,9 @@ jobs:
         if: ${{ env.GIT_DIFF_FILES }}
         run: |
           GIT_DIFF_FILES=${{ env.GIT_DIFF_FILES }}
-          for file in $GIT_DIFF_FILES; do
-            yarn eslint "$file"
+          echo "${DIFF_FILES}" | jq -c '.[]' | while read -r file_info; do
+            filename=$(echo "${file_info}" | jq -r '.filename')
+            yarn eslint "$filename"
           done
 
       - name: Run Build
