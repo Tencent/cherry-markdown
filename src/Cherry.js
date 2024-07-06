@@ -35,6 +35,7 @@ import locales from '@/locales/index';
 import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
 import { LIST_CONTENT } from '@/utils/regexp';
+import { storageKeyMap, clearAllStorageKeyMap } from './utils/shortcutKey';
 
 /** @typedef {import('~types/cherry').CherryOptions} CherryOptions */
 export default class Cherry extends CherryStatic {
@@ -110,6 +111,26 @@ export default class Cherry extends CherryStatic {
      */
     this.engine = new Engine(this.options, this);
     this.init();
+    const toolbarShortcutKeyMap = this.toolbar?.shortcutKeyMap ?? {};
+    if (
+      toolbarShortcutKeyMap &&
+      typeof toolbarShortcutKeyMap === 'object' &&
+      Object.keys(toolbarShortcutKeyMap).length
+    ) {
+      const cacheShortcutKeyMap = Object.entries(toolbarShortcutKeyMap)
+        .filter(([_, value]) => value && typeof value === 'object')
+        .reduce((prev, curr) => {
+          const [key, value] = curr;
+          if (key in prev) {
+            throw Error(`Duplicate shortcut key: ${key}`);
+          }
+          return (prev[key] = value), prev;
+        }, {});
+      storageKeyMap(this.instanceId, cacheShortcutKeyMap);
+      this.clearAllStorageKeyMap = clearAllStorageKeyMap;
+      // 页面关闭时清除缓存
+      window.addEventListener('unload', this.clearAllStorageKeyMap);
+    }
   }
 
   /**

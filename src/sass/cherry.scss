@@ -6,6 +6,7 @@
 @import './print.scss';
 @import './bubble_formula.scss';
 @import './formula_utils_bubble.scss';
+@import './components/shortcut_key_config.scss';
 
 @mixin cherryFont {
   font-family: $fontFamily;

@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
 /**
  * 插入代码块的按钮
  */
 export default class Code extends MenuBase {
+  /**
+   * @param {import('@/toolbars/MenuBase').MenuBaseConstructorParams} $cherry
+   */
   constructor($cherry) {
     super($cherry);
     this.setName('code', 'code');
+    this.shortcutKeyMap = {
+      [`${CONTROL_KEY}-${getKeyCode('k')}`]: {
+        hookName: this.name,
+        aliasName: this.$cherry.locale[this.name],
+      },
+    };
   }
 
   /**
@@ -35,12 +45,5 @@ export default class Code extends MenuBase {
       this.setLessSelection(`\n\`\`\` \n`, `\n\`\`\`\n`);
     });
     return `\n\`\`\` \n${code}\n\`\`\`\n`;
-  }
-
-  /**
-   * 声明绑定的快捷键，快捷键触发onClick
-   */
-  get shortcutKeys() {
-    return ['Ctrl-k'];
   }
 }

@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
 /**
  * 下划线按钮
  **/
 export default class Underline extends MenuBase {
+  /**
+   * @param {import('@/toolbars/MenuBase').MenuBaseConstructorParams} $cherry
+   */
   constructor($cherry) {
     super($cherry);
     this.setName('underline', 'underline');
+    this.shortcutKeyMap = {
+      [`${CONTROL_KEY}-${getKeyCode('u')}`]: {
+        hookName: this.name,
+        aliasName: this.$cherry.locale[this.name],
+      },
+    };
   }
 
   $testIsUnderline(selection) {
@@ -54,12 +64,5 @@ export default class Underline extends MenuBase {
     });
     // 如果选中的内容里没有下划线语法，则加上下划线
     return $selection.replace(/(^)([^\n]+)($)/gm, '$1 /$2/ $3');
-  }
-
-  /**
-   * 声明绑定的快捷键，快捷键触发onClick
-   */
-  get shortcutKeys() {
-    return ['Ctrl-u'];
   }
 }
