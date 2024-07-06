@@ -39,8 +39,7 @@ jobs:
       - name: Replace changed files
         if: ${{ env.GIT_DIFF_FILES }}
         run: |
-          GIT_DIFF_FILES=${{ env.GIT_DIFF_FILES }}
-          for file in $GIT_DIFF_FILES; do
+          for file in ${{ env.GIT_DIFF_FILES }}; do
             cp "$file" "base-repo/$file"
           done
 
@@ -58,9 +57,7 @@ jobs:
       - name: Lint Changed Files
         if: ${{ env.GIT_DIFF_FILES }}
         run: |
-          GIT_DIFF_FILES=${{ env.GIT_DIFF_FILES }}
-          echo "${DIFF_FILES}" | jq -c '.[]' | while read -r file_info; do
-            filename=$(echo "${file_info}" | jq -r '.filename')
+          for file in ${{ env.GIT_DIFF_FILES }}; do
             yarn eslint "$filename"
           done
 
