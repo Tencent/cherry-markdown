@@ -58,7 +58,7 @@ jobs:
         if: ${{ env.GIT_DIFF_FILES }}
         run: |
           for file in ${{ env.GIT_DIFF_FILES }}; do
-            yarn eslint "$filename"
+            yarn eslint "$file"
           done
 
       - name: Run Build
