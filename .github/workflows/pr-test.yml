@@ -19,8 +19,8 @@ jobs:
       - name: Get changed files and operations
         run: |
           # 使用 GitHub API 获取变更文件列表及其操作
-          DIFF_FILES=$(gh api repos/${{ github.repository }}/compare/${{ env.BASE_SHA }}...${{ env.HEAD_SHA }} \
-            --jq '.files | .[] | {filename, status}')
+          DIFF_FILES=$(gh api repos/Saraph1nes/cherry-markdown/compare/f66d99c5d4c8e36a1ed62b355977b61cd146bc6e...3f9de696dfa67f66554b8a41af8703ff8a257e22 \
+            --jq '.files | map({filename, status}) | @json')
           echo "Changed files and operations: ${DIFF_FILES}"
 
           # 将结果存储在环境变量中
