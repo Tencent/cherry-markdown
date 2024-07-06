@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
 /**
  * 加粗按钮
  */
 export default class Bold extends MenuBase {
+  /**
+   * @param {import('@/toolbars/MenuBase').MenuBaseConstructorParams} $cherry
+   */
   constructor($cherry) {
     super($cherry);
     this.setName('bold', 'bold');
+    this.shortcutKeyMap = {
+      [`${CONTROL_KEY}-${getKeyCode('b')}`]: {
+        hookName: this.name,
+        aliasName: $cherry.locale[this.name],
+      },
+    };
   }
 
   /**
@@ -59,12 +69,5 @@ export default class Bold extends MenuBase {
       this.setLessSelection('**', '**');
     });
     return $selection.replace(/(^)([^\n]+)($)/gm, '$1**$2**$3');
-  }
-
-  /**
-   * 声明绑定的快捷键，快捷键触发onClick
-   */
-  get shortcutKeys() {
-    return ['Ctrl-b'];
   }
 }
