@@ -19,34 +19,29 @@ jobs:
       - name: Get changed files and operations
         run: |
           # 使用 GitHub API 获取变更文件列表及其操作
-          DIFF_FILES=$(gh api repos/${{ github.repository }}/compare/${{ env.BASE_SHA }}...${{ env.HEAD_SHA }} \
-            --jq '.files | map({filename, status}) | @json')
-          echo "Changed files and operations: ${DIFF_FILES}"
+          DIFF_DOCUMENTS=$(gh api repos/${{ github.repository }}/compare/${{ env.BASE_SHA }}...${{ env.HEAD_SHA }} \
+            --jq '.files | .[] | select(.status|IN("added", "modified", "renamed", "copied", "changed")) | .filename')
+          echo "Changed files and operations: ${DIFF_DOCUMENTS}"
 
-          # 将结果存储在环境变量中
-          echo "DIFF_FILES=${DIFF_FILES}" >> $GITHUB_ENV
+          # 忽略 .github/workflows 下的文件
+          GIT_DIFF_FILES=$(echo "${DIFF_DOCUMENTS}" | grep -vE '^\.github\/workflows\/.*' | xargs)
+          echo "GIT_DIFF_FILES=${GIT_DIFF_FILES}" >> $GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/checkout@v2
-        if: ${{ env.DIFF_FILES }}
+        if: ${{ env.GIT_DIFF_FILES }}
         with:
           repository: ${{ github.repository }}
           ref: '${{ env.BASE_SHA }}'
           path: base-repo
 
       - name: Replace changed files
-        if: ${{ env.DIFF_FILES }}
+        if: ${{ env.GIT_DIFF_FILES }}
         run: |
-          DIFF_FILES=${{ env.DIFF_FILES }}
-          echo "${DIFF_FILES}" | jq -c '.[]' | while read -r file_info; do
-            filename=$(echo "${file_info}" | jq -r '.filename')
-            status=$(echo "${file_info}" | jq -r '.status')
-            if [ "$status" = "modified" ] || [ "$status" = "added" ]; then
-              cp "base-repo/$filename" "$filename"
-            elif [ "$status" = "removed" ]; then
-              rm -f "$filename"
-            fi
+          GIT_DIFF_FILES=${{ env.GIT_DIFF_FILES }}
+          for file in $GIT_DIFF_FILES; do
+            cp "base-repo/$file" "$file"
           done
 
       - name: Use Node.js 16.x
@@ -60,13 +55,12 @@ jobs:
         with:
           cmd: install
 
-      - name: Eslint
-        if: ${{ env.DIFF_FILES }}
+      - name: Lint Changed Files
+        if: ${{ env.GIT_DIFF_FILES }}
         run: |
-          DIFF_FILES=${{ env.DIFF_FILES }}
-          echo "${DIFF_FILES}" | jq -c '.[]' | while read -r file_info; do
-            filename=$(echo "${file_info}" | jq -r '.filename')
-            yarn eslint "$filename"
+          GIT_DIFF_FILES=${{ env.GIT_DIFF_FILES }}
+          for file in $GIT_DIFF_FILES; do
+            yarn eslint "$file"
           done
 
       - name: Run Build
