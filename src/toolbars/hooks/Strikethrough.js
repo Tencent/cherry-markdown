@@ -15,13 +15,23 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import { getSelection } from '@/utils/selection';
+import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
 /**
  * 删除线的按钮
  */
 export default class Strikethrough extends MenuBase {
+  /**
+   * @param {import('@/toolbars/MenuBase').MenuBaseConstructorParams} $cherry
+   */
   constructor($cherry) {
     super($cherry);
     this.setName('strikethrough', 'strike');
+    this.shortcutKeyMap = {
+      [`${CONTROL_KEY}-${getKeyCode('d')}`]: {
+        hookName: this.name,
+        aliasName: this.$cherry.locale[this.name],
+      },
+    };
   }
 
   $testIsStrike(selection) {
@@ -57,9 +67,5 @@ export default class Strikethrough extends MenuBase {
       this.setLessSelection(`${space}~~`, `~~${space}`);
     });
     return $selection.replace(/(^)[\s]*([\s\S]+?)[\s]*($)/g, `$1${space}~~$2~~${space}$3`);
-  }
-
-  get shortcutKeys() {
-    return ['Ctrl-d'];
   }
 }
