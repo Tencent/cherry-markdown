@@ -39,7 +39,7 @@ jobs:
         if: ${{ env.DIFF_FILES }}
         run: |
           DIFF_FILES=${{ env.DIFF_FILES }}
-          for file_info in $(echo "${DIFF_FILES}" | jq -c '.'); do
+          echo "${DIFF_FILES}" | jq -c '.[]' | while read file_info; do
             filename=$(echo "${file_info}" | jq -r '.filename')
             status=$(echo "${file_info}" | jq -r '.status')
             if [ "$status" = "modified" ] || [ "$status" = "added" ]; then
@@ -64,7 +64,7 @@ jobs:
         if: ${{ env.DIFF_FILES }}
         run: |
           DIFF_FILES=${{ env.DIFF_FILES }}
-          for file_info in $(echo "${DIFF_FILES}" | jq -c '.'); do
+          echo "${DIFF_FILES}" | jq -c '.[]' | while read file_info; do
             filename=$(echo "${file_info}" | jq -r '.filename')
             yarn eslint "$filename"
           done
