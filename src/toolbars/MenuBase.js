@@ -129,6 +129,7 @@ export default class MenuBase {
   setName(name, iconName) {
     this.name = name;
     this.iconName = iconName;
+    this.$currentMenuOptions = { name, icon: iconName };
   }
 
   /**

@@ -279,6 +279,10 @@ export default class Cherry extends CherryStatic {
       // @ts-ignore
       updateLocationHash: this.options.toolbars.toc.updateLocationHash ?? true,
       // @ts-ignore
+      position: this.options.toolbars.toc.position ?? 'absolute',
+      // @ts-ignore
+      cssText: this.options.toolbars.toc.cssText ?? '',
+      // @ts-ignore
       defaultModel: this.options.toolbars.toc.defaultModel ?? 'pure',
       // @ts-ignore
       showAutoNumber: this.options.toolbars.toc.showAutoNumber ?? false,

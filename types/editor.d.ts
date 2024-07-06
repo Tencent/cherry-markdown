@@ -47,6 +47,7 @@ export type EditorConfiguration = {
   toolbars: any;
   value?: string;
   convertWhenPaste?: boolean;
+  keyMap?: 'sublime' | 'vim'; // 快捷键风格，目前仅支持 sublime 和 vim
   keepDocumentScrollAfterInit?: boolean;
   /** 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》 */
   showFullWidthMark?: boolean;

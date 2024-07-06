@@ -163,6 +163,8 @@ export interface CherryEditorOptions {
   defaultModel?: EditorMode;
   /** 粘贴时是否自动将html转成markdown */
   convertWhenPaste?: boolean;
+  /** 快捷键风格，目前仅支持 sublime 和 vim */
+  keyMap?: 'sublime' | 'vim';
   /** 透传给codemirror的配置项 */
   codemirror?: object;
   /** 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal */
@@ -302,6 +304,8 @@ export interface CherryToolbarOptions {
     updateLocationHash: boolean, // 要不要更新URL的hash
     defaultModel: 'pure' | 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
     showAutoNumber: boolean, // 是否显示自增序号
+    position: 'absolute' | 'fixed', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
+    cssText: string, // 额外样式
   };
   /** 是否展示顶部工具栏 */
   showToolbar?: boolean;

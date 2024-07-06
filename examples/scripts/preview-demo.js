@@ -66,6 +66,8 @@ var cherryConfig = {
     toc: {
       updateLocationHash: false, // 要不要更新URL的hash
       defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
+      position: 'fixed', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
+      cssText: 'right: 20px;',
     },
   },
   editor: {
