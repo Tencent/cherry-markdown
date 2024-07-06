@@ -63,8 +63,8 @@ jobs:
             const uploadFile = (filePath, key) => {
               return new Promise((resolve, reject) => {
                 cos.uploadFile({
-                  Bucket: 'cherry-markdown-dev-1301618266',
-                  Region: 'ap-shanghai',
+                  Bucket: 'cherrymd-1301618266',
+                  Region: 'ap-singapore',
                   Key: key,
                   FilePath: filePath,
                   SliceSize: 1024 * 1024 * 5,  /* 触发分块上传的阈值，超过5MB使用分块上传，非必须 */
@@ -105,7 +105,7 @@ jobs:
               issue_number: context.issue.number,
               body: `
             ### 【预览链接】
-
-            - https://cherry-markdown-dev-1301618266.cos-website.ap-shanghai.myqcloud.com/pr${{ github.event.pull_request.number }}/examples/index.html
+            
+            - https://cherrymd.com/pr${{ github.event.pull_request.number }}/examples/index.html
               `
             });
