@@ -1,0 +1,85 @@
+name: PR Test
+
+on:
+  pull_request_target:
+    branches: [main, dev]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: '${{ env.HEAD_SHA }}'
+
+      - name: Get changed files and operations
+        run: |
+          # 使用 GitHub API 获取变更文件列表及其操作
+          DIFF_DOCUMENTS=$(gh api repos/${{ github.repository }}/compare/${{ env.BASE_SHA }}...${{ env.HEAD_SHA }} \
+            --jq '.files | .[] | select(.status|IN("added", "modified", "renamed", "copied", "changed")) | .filename')
+          echo "Changed files and operations: ${DIFF_DOCUMENTS}"
+
+          # 忽略 .github/workflows 下的文件
+          GIT_DIFF_FILES=$(echo "${DIFF_DOCUMENTS}" | grep -vE '^\.github\/workflows\/.*' | xargs)
+          echo "GIT_DIFF_FILES=${GIT_DIFF_FILES}" >> $GITHUB_ENV
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/checkout@v2
+        if: ${{ env.GIT_DIFF_FILES }}
+        with:
+          repository: ${{ github.repository }}
+          ref: '${{ env.BASE_SHA }}'
+          path: base-repo
+
+      - name: Replace changed files
+        if: ${{ env.GIT_DIFF_FILES }}
+        run: |
+          for file in ${{ env.GIT_DIFF_FILES }}; do
+            cp "$file" "base-repo/$file"
+          done
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: 'yarn'
+
+      - name: Install dependencies
+        uses: borales/actions-yarn@v3.0.0
+        with:
+          cmd: install
+
+      - name: Lint Changed Files
+        if: ${{ env.GIT_DIFF_FILES }}
+        run: |
+          for file in ${{ env.GIT_DIFF_FILES }}; do
+            yarn eslint "$file"
+          done
+
+      - name: Run Build
+        uses: borales/actions-yarn@v3.0.0
+        with:
+          cmd: build
+
+      - name: Archive build dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-dist
+          path: dist
+
+      - name: Archive examples
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-examples
+          path: examples
+
+  review:
+    needs: build
+    permissions: write-all
+    uses: ./.github/workflows/pr-reviewer.yml
+    secrets: inherit
