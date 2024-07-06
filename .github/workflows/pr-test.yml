@@ -23,35 +23,29 @@ jobs:
             --jq '.files | .[] | {filename, status}')
           echo "Changed files and operations: ${DIFF_FILES}"
 
-          # 过滤出相关文件及其操作
-          GIT_DIFF_CONTENT=$(echo "${DIFF_FILES}" | jq -r '.filename')
-          GIT_DIFF_OPERATIONS=$(echo "${DIFF_FILES}" | jq -r '.status')
-          echo "Filtered files: ${GIT_DIFF_CONTENT}"
-          echo "File operations: ${GIT_DIFF_OPERATIONS}"
-
           # 将结果存储在环境变量中
-          echo "GIT_DIFF_CONTENT=${GIT_DIFF_CONTENT}" >> $GITHUB_ENV
-          echo "GIT_DIFF_OPERATIONS=${GIT_DIFF_OPERATIONS}" >> $GITHUB_ENV
+          echo "DIFF_FILES=${DIFF_FILES}" >> $GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/checkout@v2
-        if: ${{ env.GIT_DIFF_CONTENT }}
+        if: ${{ env.DIFF_FILES }}
         with:
           repository: ${{ github.repository }}
           ref: '${{ env.BASE_SHA }}'
           path: base-repo
 
       - name: Replace changed files
-        if: ${{ env.GIT_DIFF_CONTENT }}
+        if: ${{ env.DIFF_FILES }}
         run: |
-          IFS=$'\n'
-          for file in ${{ env.GIT_DIFF_CONTENT }}; do
-            operation=$(echo "${GIT_DIFF_OPERATIONS}" | grep -m 1 -F "$file")
-            if [ "$operation" = "modified" ] || [ "$operation" = "added" ]; then
-              cp "base-repo/$file" "$file"
-            elif [ "$operation" = "removed" ]; then
-              rm -f "$file"
+          DIFF_FILES=${{ env.DIFF_FILES }}
+          for file_info in $(echo "${DIFF_FILES}" | jq -c '.'); do
+            filename=$(echo "${file_info}" | jq -r '.filename')
+            status=$(echo "${file_info}" | jq -r '.status')
+            if [ "$status" = "modified" ] || [ "$status" = "added" ]; then
+              cp "base-repo/$filename" "$filename"
+            elif [ "$status" = "removed" ]; then
+              rm -f "$filename"
             fi
           done
 
@@ -67,9 +61,13 @@ jobs:
           cmd: install
 
       - name: Eslint
-        if: ${{ env.GIT_DIFF_CONTENT }}
+        if: ${{ env.DIFF_FILES }}
         run: |
-          yarn eslint ${{ env.GIT_DIFF_CONTENT }}
+          DIFF_FILES=${{ env.DIFF_FILES }}
+          for file_info in $(echo "${DIFF_FILES}" | jq -c '.'); do
+            filename=$(echo "${file_info}" | jq -r '.filename')
+            yarn eslint "$filename"
+          done
 
       - name: Run Build
         uses: borales/actions-yarn@v3.0.0
