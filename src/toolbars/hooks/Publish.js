@@ -24,7 +24,7 @@ const supportPlatforms = ['wechat'];
 
 export default class Publish extends MenuBase {
   /**
-   * @param {Partial<import('@/Cherry').default> & {$currentMenuOptions?:import('~types/menus').CustomMenuConfig}} $cherry
+   * @param {import('@/toolbars/MenuBase').MenuBaseConstructorParams} $cherry
    */
   constructor($cherry) {
     super($cherry);

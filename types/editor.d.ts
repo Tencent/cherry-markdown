@@ -15,6 +15,7 @@
  */
 import CodeMirror from 'codemirror';
 import Cherry from '../src/Cherry.js';
+import { EditorMode } from './cherry.js';
 
 interface EditorEventMap {
   onBlur: FocusEvent;
@@ -66,4 +67,6 @@ export type EditorConfiguration = {
   $cherry?: Cherry;
   /** 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal */
   writingStyle?: string;
+  /** 编辑器初始化后的模式 */
+  defaultModel?: EditorMode;
 };
