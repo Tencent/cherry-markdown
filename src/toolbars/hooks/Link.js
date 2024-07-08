@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
 /**
  * 插入超链接
  */
 export default class Link extends MenuBase {
+  /**
+   * @param {import('@/toolbars/MenuBase').MenuBaseConstructorParams} $cherry
+   */
   constructor($cherry) {
     super($cherry);
     this.setName('link', 'link');
+    this.shortcutKeyMap = {
+      [`${CONTROL_KEY}-${getKeyCode('l')}`]: {
+        hookName: this.name,
+        aliasName: this.$cherry.locale[this.name],
+      },
+    };
   }
 
   /**
@@ -35,12 +45,5 @@ export default class Link extends MenuBase {
     }
     const title = selection ? selection : this.locale.link;
     return `[${title}](http://url.com) `;
-  }
-
-  /**
-   * 声明绑定的快捷键，快捷键触发onClick
-   */
-  get shortcutKeys() {
-    return ['Ctrl-l'];
   }
 }
