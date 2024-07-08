@@ -248,6 +248,7 @@ console.log(cherryObj.engine.makeMarkdown(html));</textarea>
     <hr>
 
     <h1>Cherry.toolbar.toolbarHandlers API</h1>
+    <p><strong>注：</strong>要调用 toolbarHandlers 的API，需要先在<code>cherry.config.toolbars</code>的“toolbar|toolbarRight|sidebar|bubble|float”中的其中一项里配置上对应的工具栏</p>
 
     <div class="one-api">
       <h2 class="one-api__name">toolbar.toolbarHandlers.bold()</h2>
@@ -372,18 +373,6 @@ if(confirm('有序列表')) {
             <td>超链接</td>
           </tr>
           <tr>
-            <td>'image'</td>
-            <td>图片</td>
-          </tr>
-          <tr>
-            <td>'video'</td>
-            <td>视频</td>
-          </tr>
-          <tr>
-            <td>'audio'</td>
-            <td>音频</td>
-          </tr>
-          <tr>
             <td>'normal-table'</td>
             <td>插入3行5列的表格</td>
           </tr>
@@ -401,6 +390,56 @@ if(confirm('插入3*4的表格')) {
 }else if(confirm('插入checklist')) {
   cherryObj.toolbar.toolbarHandlers.insert('checklist');
 }</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.image()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入图片文件</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.toolbar.toolbarHandlers.image()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.video()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入视频文件</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.toolbar.toolbarHandlers.video()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.audio()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入音频文件</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.toolbar.toolbarHandlers.audio()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.pdf()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入PDF文件</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.toolbar.toolbarHandlers.pdf()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.word()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入Word文件</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.toolbar.toolbarHandlers.word()</textarea>
         <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
       </div>
     </div>

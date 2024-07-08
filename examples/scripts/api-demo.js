@@ -72,7 +72,7 @@ var cherryConfig = {
       'header',
       '|',
       'list',
-      { insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word'] },
+      { insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word', 'file'] },
       'graph',
       'settings',
       'export'
