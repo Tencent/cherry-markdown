@@ -13,7 +13,7 @@ $sidebarShadow: $shadow;
 $editorBg: rgb(37, 37, 38);
 $editorColor: rgb(200, 200, 200);
 $editorSelectedBg: $toolbarBtnBgHover;
-$editorUrlBg: rgb(0,0,0);
+$editorUrlBg: rgba(81,56,56,1);
 $editorCursorColor: rgb(255,255,255);
 $editorImportantColor: rgb(247, 133, 83);
 $editorCodeColor: rgb(255, 203, 107);
@@ -199,7 +199,7 @@ $mdSvgTextColor: rgb(250, 160, 0);
     }
 
     &.cherry-list__default {
-
+      background-color: $previewBg;
     }
 
     /** checklist 模式，未勾选时 */
@@ -382,7 +382,7 @@ $mdSvgTextColor: rgb(250, 160, 0);
   }
 
   .cherry-highlight-line {
-    background-color: #151422;
+    background-color: $previewBg;
   }
 
 }
