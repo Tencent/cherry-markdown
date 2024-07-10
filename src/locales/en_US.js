@@ -99,4 +99,6 @@ export default {
   superLarge: 'Super Large',
   detailDefaultContent:
     'Click to expand more\nContent\n++- Expand by default\nContent\n++ Collapse by default\nContent',
+  inlineCode: 'Inline Code',
+  codeBlock: 'Code Block',
 };
