@@ -178,7 +178,7 @@ export interface CherryEditorOptions {
   showSuggestList?: boolean;
 }
 
-export type CherryLifecycle = (text: String, html: String) => void;
+export type CherryLifecycle = (text: string, html: string) => void;
 
 export interface CherryPreviewerOptions {
   dom: HTMLDivElement | false;
@@ -237,7 +237,7 @@ export type CherryDefaultToolbar =
   | 'settings';
 
 export type CherryInsertToolbar = {
-  insert: string[];
+  string: string[];
 };
 
 export type CherryDefaultBubbleToolbar =
