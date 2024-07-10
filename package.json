@@ -144,7 +144,7 @@
     "standard-version": "^9.3.2",
     "ts-jest": "^27.1.1",
     "ts-node": "^10.7.0",
-    "typescript": "4.5.5",
+    "typescript": "4.7.2",
     "virtual-dom": "^2.1.1"
   },
   "dependencies": {

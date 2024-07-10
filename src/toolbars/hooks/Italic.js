@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
 /**
  * 插入斜体的按钮
  */
 export default class Italic extends MenuBase {
+  /**
+   * @param {import('@/toolbars/MenuBase').MenuBaseConstructorParams} $cherry
+   */
   constructor($cherry) {
     super($cherry);
     this.setName('italic', 'italic');
+    this.shortcutKeyMap = {
+      [`${CONTROL_KEY}-${getKeyCode('i')}`]: {
+        hookName: this.name,
+        aliasName: this.$cherry.locale[this.name],
+      },
+    };
   }
 
   /**
@@ -58,13 +68,5 @@ export default class Italic extends MenuBase {
       this.setLessSelection('*', '*');
     });
     return $selection.replace(/(^)([^\n]+)($)/gm, '$1*$2*$3');
-  }
-
-  /**
-   * 获得监听的快捷键
-   * 在windows下是Ctrl+i，在mac下是cmd+i
-   */
-  get shortcutKeys() {
-    return ['Ctrl-i'];
   }
 }

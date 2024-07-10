@@ -15,17 +15,28 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import BubbleFormula from '../BubbleFormula';
+import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
+
 /**
  * 插入行内公式
  * @see https://github.com/QianJianTech/LaTeXLive/blob/master/README.md
  */
 export default class Formula extends MenuBase {
+  /**
+   * @param {import('@/toolbars/MenuBase').MenuBaseConstructorParams} $cherry
+   */
   constructor($cherry) {
     super($cherry);
     this.setName('formula', 'insertFormula');
     this.subBubbleFormulaMenu = new BubbleFormula($cherry?.options?.toolbars?.config?.formula);
     $cherry.editor.options.wrapperDom.appendChild(this.subBubbleFormulaMenu.dom);
     this.catchOnce = '';
+    this.shortcutKeyMap = {
+      [`${CONTROL_KEY}-${getKeyCode('m')}`]: {
+        hookName: this.name,
+        aliasName: this.$cherry.locale[this.name],
+      },
+    };
   }
 
   /**
@@ -54,12 +65,5 @@ export default class Formula extends MenuBase {
       return false;
     }
     return this.getAndCleanCacheOnce();
-  }
-
-  /**
-   * 声明绑定的快捷键，快捷键触发onClick
-   */
-  get shortcutKeys() {
-    return ['Ctrl-m'];
   }
 }
