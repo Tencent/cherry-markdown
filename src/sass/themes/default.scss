@@ -39,6 +39,12 @@
     }
   }
 
+  // 更改编辑区域选中文字区域的背景色
+  // 覆盖了 codemirror.css 中的默认样式
+  .CodeMirror-focused .CodeMirror-selected { background: #bac8ff; }
+  .CodeMirror-line::selection, .CodeMirror-line > span::selection, .CodeMirror-line > span > span::selection { background: #bac8ff; }
+  .CodeMirror-line::-moz-selection, .CodeMirror-line > span::-moz-selection, .CodeMirror-line > span > span::-moz-selection { background: #bac8ff; }
+
 
   /** 光标focus到空行时联想出的按钮 */
   .cherry-floatmenu {
