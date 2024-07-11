@@ -2,6 +2,60 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.44](https://github.com/Tencent/cherry-markdown/compare/v0.8.43...v0.8.44) (2024-06-25)
+
+### Bug Fixes
+
+* [#808](https://github.com/Tencent/cherry-markdown/issues/808) ([d63a4a0](https://github.com/Tencent/cherry-markdown/commit/d63a4a0228b19a759eee4870d821310c375ead3c))
+
+### [0.8.43](https://github.com/Tencent/cherry-markdown/compare/v0.8.42...v0.8.43) (2024-06-24)
+
+
+### Features
+
+* [#696](https://github.com/Tencent/cherry-markdown/issues/696) 构建产物里额外提供预览区样式的文件 ([#783](https://github.com/Tencent/cherry-markdown/issues/783)) ([e33c0d6](https://github.com/Tencent/cherry-markdown/commit/e33c0d68bf5a5d2324d6a118a32f7372d5052d1f))
+* [#767](https://github.com/Tencent/cherry-markdown/issues/767) 代码块、行内代码相关提示交互优化 ([#787](https://github.com/Tencent/cherry-markdown/issues/787)) ([4e05ac6](https://github.com/Tencent/cherry-markdown/commit/4e05ac696323c6dc6bd8d1961ab3adcbb44e7d92))
+* [#769](https://github.com/Tencent/cherry-markdown/issues/769) 代码块主题缓存 ([#781](https://github.com/Tencent/cherry-markdown/issues/781)) ([912c25e](https://github.com/Tencent/cherry-markdown/commit/912c25e268a57bfd0c15f82de2c8b992db945ef7))
+* [#774](https://github.com/Tencent/cherry-markdown/issues/774) 增加选区改变事件 selectionChange ([1859e20](https://github.com/Tencent/cherry-markdown/commit/1859e2080f908ee19f0aeb057631807ded5feded))
+* [#790](https://github.com/Tencent/cherry-markdown/issues/790) 锚点/toc滚动兼容滚动条在window的情况 ([42be1bc](https://github.com/Tencent/cherry-markdown/commit/42be1bc8b2ee066acc5281f2907be4ab207dd26f))
+* 独立一个markdown样式文件（含主题） ([467d870](https://github.com/Tencent/cherry-markdown/commit/467d87043ace777f05afd04958a982a358376a0f))
+* 优化高亮区的显示逻辑，改成每次高亮只亮3秒，不再常驻高亮 ([6365f27](https://github.com/Tencent/cherry-markdown/commit/6365f27453949ab08db8fa7a55f8b406502bf6c4))
+* 增加表格和加粗斜体语法对流式输出场景的适配 ([b1a07a7](https://github.com/Tencent/cherry-markdown/commit/b1a07a7f782c363d29d11681331a49bf5e318264))
+* 增加流式会话的例子 ([0de1a93](https://github.com/Tencent/cherry-markdown/commit/0de1a9372dee6c336208a20cfda8c0900c1776f0))
+* 增加一些小api ([e7bc008](https://github.com/Tencent/cherry-markdown/commit/e7bc0085f15a2b5c5255f0781240646a073bbbc0))
+
+
+### Bug Fixes
+
+* [#778](https://github.com/Tencent/cherry-markdown/issues/778) 修复国际化漏掉的地方 ([5bb2b26](https://github.com/Tencent/cherry-markdown/commit/5bb2b265193f5c0fe3a9f969a3d16f8c8ad13e94))
+* [#782](https://github.com/Tencent/cherry-markdown/issues/782) 补上英文 ([d5e4d47](https://github.com/Tencent/cherry-markdown/commit/d5e4d470129a02ea580488959aae12b75f63808c))
+* 修复afterInit失效的问题 ([8c03f95](https://github.com/Tencent/cherry-markdown/commit/8c03f959a93312ab8dcc0ae27b298d9a7f557bf3))
+* 修复vscode插件自动打开预览的问题 ([036f070](https://github.com/Tencent/cherry-markdown/commit/036f070b3d0a724075366dbd3b1fe4f92d6154f7))
+* 右侧编辑列表过程中, 输入回车后, 再次编辑此列表, 数据会异常 [#751](https://github.com/Tencent/cherry-markdown/issues/751) ([#772](https://github.com/Tencent/cherry-markdown/issues/772)) ([38ee8dc](https://github.com/Tencent/cherry-markdown/commit/38ee8dc21acece973946e5955dcf3b2c941d7401))
+* 自定义icon兼容自定义菜单 & 完善propTypes校验 ([#791](https://github.com/Tencent/cherry-markdown/issues/791)) ([335b9bd](https://github.com/Tencent/cherry-markdown/commit/335b9bd6434d376ff0615695efdf39bd35df13f6)), closes [#589](https://github.com/Tencent/cherry-markdown/issues/589)
+* **vscodePlugin:** activation timing for VSCode extension ([#773](https://github.com/Tencent/cherry-markdown/issues/773)) ([15e019f](https://github.com/Tencent/cherry-markdown/commit/15e019f0d2d210535207b4c372e5ebebb4a779e5))
+* **vscodePlugin:** first open markdown will not activate the extension ([#784](https://github.com/Tencent/cherry-markdown/issues/784)) ([a1c24d2](https://github.com/Tencent/cherry-markdown/commit/a1c24d228f5d6510355f0264309f3251f8bd75f2))
+
+### [0.8.42](https://github.com/Tencent/cherry-markdown/compare/v0.8.41...v0.8.42) (2024-05-27)
+
+
+### Features
+
+* 默认不展示右侧侧边栏 ([b68b1b4](https://github.com/Tencent/cherry-markdown/commit/b68b1b45946120a3ac6321748bc22a4fc52b995a))
+* 优化事件机制，增加cherry.on动态绑定事件机制 ([a24bcd9](https://github.com/Tencent/cherry-markdown/commit/a24bcd9fe95a84b79b83b013e371cc325962f491))
+* 增加表格和加粗斜体语法对流式输出场景的适配 ([ebc8338](https://github.com/Tencent/cherry-markdown/commit/ebc8338488cbfe1299aedb503fc94e11e45e7d42))
+* 增加流式会话的例子 ([88873c2](https://github.com/Tencent/cherry-markdown/commit/88873c2c564ee41137e5151bd836ad31ebd78c79))
+* add configuration and right-click menu processing preview ([#760](https://github.com/Tencent/cherry-markdown/issues/760)) ([6372859](https://github.com/Tencent/cherry-markdown/commit/6372859407d22a1c625bc6a1ffbaf88ec0d32226))
+* **vscodePlugin:** add webview icon ([#754](https://github.com/Tencent/cherry-markdown/issues/754)) ([b38ceea](https://github.com/Tencent/cherry-markdown/commit/b38ceea4b1df707e5facffdab7e33dcd13fc016f))
+
+
+### Bug Fixes
+
+* 当预览区只有一行内容时，导出文档api报错 ([f4b6201](https://github.com/Tencent/cherry-markdown/commit/f4b620155aae85b19bcd96c5ae8753e82d455c98))
+* 联想配置模板失效 ([#757](https://github.com/Tencent/cherry-markdown/issues/757)) ([f93e2af](https://github.com/Tencent/cherry-markdown/commit/f93e2afbbba88ae4045e0e7558cc875e66001aca))
+* 修复列表有多行时选区只选择第一行的问题 ([082a032](https://github.com/Tencent/cherry-markdown/commit/082a032c4717f7b22c4b331632f7f3dd836cebf9))
+* 右侧编辑列表过程中, 输入回车后, 再次编辑此列表, 数据会异常 [#751](https://github.com/Tencent/cherry-markdown/issues/751) ([#772](https://github.com/Tencent/cherry-markdown/issues/772)) ([3e1e9fd](https://github.com/Tencent/cherry-markdown/commit/3e1e9fd057c0008f5f3d001a818fda1a8291b0a9))
+
 ### [0.8.41](https://github.com/Tencent/cherry-markdown/compare/v0.8.40...v0.8.41) (2024-05-06)
 
 

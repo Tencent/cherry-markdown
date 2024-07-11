@@ -19,7 +19,6 @@ import vDPatch from 'virtual-dom/patch';
 import MyersDiff from './utils/myersDiff';
 import { getBlockTopAndHeightWithMargin, elementsFromPoint } from './utils/dom';
 import Logger from './Logger';
-import Event from './Event';
 // import locale from './utils/locale';
 import { addEvent, removeEvent } from './utils/event';
 import { exportPDF, exportScreenShot, exportMarkdownFile, exportHTMLFile } from './utils/export';
@@ -705,6 +704,9 @@ export default class Previewer {
       // 预览区未隐藏时，直接更新
       const tmpDiv = document.createElement('div');
       const domContainer = this.getDomContainer();
+      if (this.editor.selectAll) {
+        domContainer.innerHTML = '';
+      }
       tmpDiv.innerHTML = newHtml;
       const newHtmlList = this.$getSignData(tmpDiv);
       const oldHtmlList = this.$getSignData(domContainer);
@@ -762,15 +764,15 @@ export default class Previewer {
       this.update(this.options.previewerCache.html);
     }
     this.cleanHtmlCache();
-    Event.emit(this.instanceId, Event.Events.previewerOpen);
-    Event.emit(this.instanceId, Event.Events.editorClose);
+    this.$cherry.$event.emit('previewerOpen');
+    this.$cherry.$event.emit('editorClose');
   }
 
   editOnly(dealToolbar = false) {
     this.$dealEditAndPreviewOnly(true);
     this.cleanHtmlCache();
-    Event.emit(this.instanceId, Event.Events.previewerClose);
-    Event.emit(this.instanceId, Event.Events.editorOpen);
+    this.$cherry.$event.emit('previewerClose');
+    this.$cherry.$event.emit('editorOpen');
   }
 
   recoverPreviewer(dealToolbar = false) {
@@ -785,8 +787,8 @@ export default class Previewer {
     }
     this.cleanHtmlCache();
 
-    Event.emit(this.instanceId, Event.Events.previewerOpen);
-    Event.emit(this.instanceId, Event.Events.editorOpen);
+    this.$cherry.$event.emit('previewerOpen');
+    this.$cherry.$event.emit('editorOpen');
 
     setTimeout(() => this.editor.editor.refresh(), 0);
   }
@@ -963,13 +965,38 @@ export default class Previewer {
     this.$scrollAnimation(top);
   }
 
+  /**
+   * 获取有滚动条的dom
+   */
+  getDomCanScroll(currentDom = this.getDomContainer()) {
+    if (currentDom.scrollHeight > currentDom.clientHeight || currentDom.clientHeight < window.innerHeight) {
+      return currentDom;
+    }
+    if (currentDom.parentElement) {
+      if (currentDom.nodeName === 'BODY') {
+        // 如果当前是body了，再往上就是html了
+        if (document.documentElement.scrollHeight > document.documentElement.clientHeight) {
+          return document.documentElement;
+        }
+        return currentDom;
+      }
+      return this.getDomCanScroll(currentDom.parentElement);
+    }
+  }
+
   scrollToHeadByIndex(index) {
     const previewDom = this.getDomContainer();
+    const scrollDom = this.getDomCanScroll(previewDom);
     const targetHead = previewDom.querySelectorAll('h1,h2,h3,h4,h5,h6,h7,h8')[index] ?? false;
+    let scrollTop = 0;
     if (targetHead !== false) {
-      const scrollTop =
-        previewDom.scrollTop + targetHead.getBoundingClientRect().y - previewDom.getBoundingClientRect().y - 10;
-      previewDom.scrollTo({
+      if (scrollDom.nodeName === 'HTML') {
+        scrollTop = scrollDom.scrollTop + targetHead.getBoundingClientRect().y - 10;
+      } else {
+        scrollTop =
+          scrollDom.scrollTop + targetHead.getBoundingClientRect().y - scrollDom.getBoundingClientRect().y - 10;
+      }
+      scrollDom.scrollTo({
         top: scrollTop,
         left: 0,
         behavior: 'smooth',
@@ -1004,7 +1031,7 @@ export default class Previewer {
   onMouseDown() {
     addEvent(this.getDomContainer(), 'mousedown', () => {
       setTimeout(() => {
-        Event.emit(this.instanceId, Event.Events.cleanAllSubMenus);
+        this.$cherry.$event.emit('cleanAllSubMenus');
       });
     });
   }
@@ -1016,7 +1043,11 @@ export default class Previewer {
    * @param {string} [fileName] 导出文件名
    */
   export(type = 'pdf', fileName = '') {
-    const name = fileName || this.getDomContainer().innerText.match(/^\s*([^\s][^\n]*)\n/)[1] || 'cherry-export';
+    let name = fileName;
+    if (!fileName) {
+      const { innerText } = this.getDomContainer();
+      name = /^\s*([^\s][^\n]*)\n/.test(innerText) ? innerText.match(/^\s*([^\s][^\n]*)\n/)[1] : 'cherry-export';
+    }
     if (type === 'pdf') {
       exportPDF(this.getDomContainer(), name);
     } else if (type === 'screenShot' || type === 'img') {

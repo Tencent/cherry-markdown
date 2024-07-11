@@ -107,13 +107,6 @@ const defaultConfig = {
       // false： 一个换行会转成<br>，两个连续换行会分割成段落，三个以上连续换行会转成<br>并分割段落
       classicBr: false,
       /**
-       * 全局的URL处理器
-       * @param {string} url 来源url
-       * @param {'image'|'audio'|'video'|'autolink'|'link'} srcType 来源类型
-       * @returns
-       */
-      urlProcessor: callbacks.urlProcessor,
-      /**
        * 额外允许渲染的html标签
        * 标签以英文竖线分隔，如：htmlWhiteList: 'iframe|script|style'
        * 默认为空，默认允许渲染的html见src/utils/sanitize.js whiteList 属性
@@ -161,6 +154,7 @@ const defaultConfig = {
       },
       table: {
         enableChart: false,
+        selfClosing: false, // 自动闭合，为true时，当输入第一行table内容时，cherry会自动按表格进行解析
         // chartRenderEngine: EChartsTableEngine,
         // externals: ['echarts'],
       },
@@ -210,6 +204,7 @@ const defaultConfig = {
          *           __hello__    ====>   <strong>hello</strong>
          */
         allowWhitespace: false,
+        selfClosing: false, // 自动闭合，为true时，当输入**XXX时，会自动在末尾追加**
       },
       strikethrough: {
         /**
@@ -265,6 +260,8 @@ const defaultConfig = {
     defaultModel: 'edit&preview',
     // 粘贴时是否自动将html转成markdown
     convertWhenPaste: true,
+    // 快捷键风格，目前仅支持 sublime 和 vim
+    keyMap: 'sublime',
     codemirror: {
       // 是否自动focus 默认为true
       autofocus: true,
@@ -312,7 +309,7 @@ const defaultConfig = {
       'settings',
     ],
     toolbarRight: [],
-    sidebar: [],
+    sidebar: false,
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'table', 'code'], // array or false
     toc: false, // 不展示悬浮目录
@@ -320,6 +317,8 @@ const defaultConfig = {
     //   updateLocationHash: false, // 要不要更新URL的hash
     //   defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
     //   showAutoNumber: false, // 是否显示自增序号
+    //   position: 'absolute', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
+    //   cssText: '', // 自定义样式
     // },
     // 快捷键配置，如果配置为空，则使用toolbar的配置
     shortcutKey: {
@@ -338,8 +337,6 @@ const defaultConfig = {
   },
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: '',
-  // 上传文件的回调
-  fileUpload: callbacks.fileUpload,
   /**
    * 上传文件的时候用来指定文件类型
    */
@@ -352,8 +349,15 @@ const defaultConfig = {
     file: '*',
   },
   callback: {
-    afterChange: callbacks.afterChange,
-    afterInit: callbacks.afterInit,
+    /**
+     * 全局的URL处理器
+     * @param {string} url 来源url
+     * @param {'image'|'audio'|'video'|'autolink'|'link'} srcType 来源类型
+     * @returns
+     */
+    urlProcessor: callbacks.urlProcessor,
+    // 上传文件的回调
+    fileUpload: callbacks.fileUpload,
     beforeImageMounted: callbacks.beforeImageMounted,
     // 预览区域点击事件，previewer.enablePreviewerBubble = true 时生效
     onClickPreview: callbacks.onClickPreview,
@@ -369,6 +373,14 @@ const defaultConfig = {
      *    string: 直接粘贴的内容
      */
     onPaste: callbacks.onPaste,
+  },
+  event: {
+    // 当编辑区内容有实际变化时触发
+    afterChange: callbacks.afterChange,
+    afterInit: callbacks.afterInit,
+    focus: ({ e, cherry }) => {},
+    blur: ({ e, cherry }) => {},
+    selectionChange: ({ selections, lastSelections, info }) => {},
   },
   previewer: {
     dom: false,

@@ -80,6 +80,11 @@ var cherryConfig1 = {
     ],
     toolbarRight: ['fullScreen'],
     sidebar: ['mobilePreview', 'copy', 'theme'],
+    // 配置目录
+    toc: {
+      updateLocationHash: false, // 要不要更新URL的hash
+      defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
+    },
   },
   editor: {
     height: '600px',
@@ -148,6 +153,11 @@ var cherryConfig2 = {
     ],
     toolbarRight: ['fullScreen'],
     sidebar: ['copy', 'mobilePreview', 'theme'],
+    // 配置目录
+    toc: {
+      updateLocationHash: false, // 要不要更新URL的hash
+      defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
+    },
   },
   editor: {
     height: '600px',

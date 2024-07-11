@@ -15,22 +15,44 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import { getSelection } from '@/utils/selection';
+import { ALT_KEY, getKeyCode } from '@/utils/shortcutKey';
 
 export default class Size extends MenuBase {
+  /**
+   * @param {import('@/toolbars/MenuBase').MenuBaseConstructorParams} $cherry
+   */
   constructor($cherry) {
     super($cherry);
     this.setName('size', 'size');
     this.subMenuConfig = [
-      { name: '小', noIcon: true, onclick: this.bindSubClick.bind(this, '12') },
-      { name: '中', noIcon: true, onclick: this.bindSubClick.bind(this, '17') },
-      { name: '大', noIcon: true, onclick: this.bindSubClick.bind(this, '24') },
-      { name: '特大', noIcon: true, onclick: this.bindSubClick.bind(this, '32') },
+      { name: this.$cherry.locale.small, noIcon: true, onclick: this.bindSubClick.bind(this, '12') },
+      { name: this.$cherry.locale.medium, noIcon: true, onclick: this.bindSubClick.bind(this, '17') },
+      { name: this.$cherry.locale.large, noIcon: true, onclick: this.bindSubClick.bind(this, '24') },
+      { name: this.$cherry.locale.superLarge, noIcon: true, onclick: this.bindSubClick.bind(this, '32') },
     ];
     this.shortKeyMap = {
       'Alt-1': '12',
       'Alt-2': '17',
       'Alt-3': '24',
       'Alt-4': '32',
+    };
+    this.shortcutKeyMap = {
+      [`${ALT_KEY}-${getKeyCode(1)}`]: {
+        hookName: this.name,
+        aliasName: `${this.$cherry.locale[this.name]}-${this.$cherry.locale.small}`,
+      },
+      [`${ALT_KEY}-${getKeyCode(2)}`]: {
+        hookName: this.name,
+        aliasName: `${this.$cherry.locale[this.name]}-${this.$cherry.locale.medium}`,
+      },
+      [`${ALT_KEY}-${getKeyCode(3)}`]: {
+        hookName: this.name,
+        aliasName: `${this.$cherry.locale[this.name]}-${this.$cherry.locale.large}`,
+      },
+      [`${ALT_KEY}-${getKeyCode(4)}`]: {
+        hookName: this.name,
+        aliasName: `${this.$cherry.locale[this.name]}-${this.$cherry.locale.superLarge}`,
+      },
     };
   }
 
@@ -92,9 +114,5 @@ export default class Size extends MenuBase {
       this.setLessSelection(`!${size} `, '!');
     });
     return $selection.replace(/(^)([^\n]+)($)/gm, `$1!${size} $2!$3`);
-  }
-
-  get shortcutKeys() {
-    return ['Alt-1', 'Alt-2', 'Alt-3', 'Alt-4'];
   }
 }

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import Event from '@/Event';
 /**
  * 切换预览/编辑模式的按钮
  * 该按钮不支持切换到双栏编辑模式
@@ -29,11 +28,11 @@ export default class SwitchModel extends MenuBase {
   }
 
   attachEventListeners() {
-    Event.on(this.instanceId, Event.Events.toolbarHide, () => {
+    this.$cherry.$event.on('toolbarHide', () => {
       // 当收到工具栏隐藏事件后，修改工具栏的内容为切换到编辑模式的内容
       this.dom.textContent = this.locale.switchEdit;
     });
-    Event.on(this.instanceId, Event.Events.toolbarShow, () => {
+    this.$cherry.$event.on('toolbarShow', () => {
       // 当收到工具栏显示事件后，修改工具栏的内容为切换到预览模式的内容
       this.dom.textContent = this.locale.switchPreview;
     });

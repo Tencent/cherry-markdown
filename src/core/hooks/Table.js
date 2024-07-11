@@ -26,11 +26,13 @@ export default class Table extends ParagraphBase {
     super({ needCache: true });
     const {
       enableChart,
+      selfClosing,
       chartRenderEngine: ChartRenderEngine,
       externals: requiredPackages,
       chartEngineOptions = {},
     } = config;
     this.chartRenderEngine = null;
+    this.selfClosing = selfClosing;
     if (enableChart === true) {
       try {
         this.chartRenderEngine = new ChartRenderEngine({
@@ -223,6 +225,11 @@ export default class Table extends ParagraphBase {
 
   makeHtml(str, sentenceMakeFunc) {
     let $str = str;
+    if (this.$engine.$cherry.options.engine.global.flowSessionContext || this.selfClosing) {
+      if (/(^|^[^|][^\n]*\n|\n\n|\n[^|][^\n]*\n)\s*\|[^\n]+\n{0,1}[|:-\s]*\n*$/.test($str)) {
+        $str = `${$str.replace(/\n[|:-\s]*\n*$/, '')}\n|-|`;
+      }
+    }
     // strict fenced mode
     if (this.test($str, TABLE_STRICT)) {
       $str = $str.replace(this.RULE[TABLE_STRICT].reg, (match, leading) => {

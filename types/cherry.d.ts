@@ -34,16 +34,33 @@ export interface CherryOptions {
   /** 定义主题的作用范围，相同themeNameSpace的实例共享主题配置 */
   themeNameSpace: string,
   callback: {
+    /**
+     * 全局的URL处理器，返回值将填充到编辑区域
+     * @param url 来源url
+     * @param srcType 来源类型
+     */
+    urlProcessor?: (url: string, srcType: 'image' | 'audio' | 'video' | 'autolink' | 'link') => string;
+    /** 文件上传回调 */
+    fileUpload?: CherryFileUploadHandler;
     /** 编辑器内容改变并完成渲染后触发 */
-    afterChange: CherryLifecycle;
+    afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */
-    afterInit: CherryLifecycle;
+    afterInit?: CherryLifecycle;
     /** img 标签挂载前触发，可用于懒加载等场景 */
-    beforeImageMounted: (srcProp: string, src: string) => { srcProp: string; src: string };
-    onClickPreview: (e: MouseEvent) => void;
-    onCopyCode: (e: ClipboardEvent, code: string) => string|false;
-    changeString2Pinyin: (str: string) => string;
-    onPaste: (clipboardData: ClipboardEvent['clipboardData']) => string|boolean;
+    beforeImageMounted?: (srcProp: string, src: string) => { srcProp: string; src: string };
+    onClickPreview?: (e: MouseEvent) => void;
+    onCopyCode?: (e: ClipboardEvent, code: string) => string|false;
+    changeString2Pinyin?: (str: string) => string;
+    onPaste?: (clipboardData: ClipboardEvent['clipboardData']) => string|boolean;
+  };
+  event: {
+    focus?: ({ e: MouseEvent, cherry: Cherry }) => void;
+    blur?: ({ e: MouseEvent, cherry: Cherry }) => void;
+    /** 编辑器内容改变并完成渲染后触发 */
+    afterChange?: CherryLifecycle;
+    /** 编辑器完成初次渲染后触发 */
+    afterInit?: CherryLifecycle;
+    selectionChange?: ({ selections: [], lastSelections: [], info} ) => void;
   };
   /** 预览区域配置 */
   previewer: CherryPreviewerOptions;
@@ -146,6 +163,8 @@ export interface CherryEditorOptions {
   defaultModel?: EditorMode;
   /** 粘贴时是否自动将html转成markdown */
   convertWhenPaste?: boolean;
+  /** 快捷键风格，目前仅支持 sublime 和 vim */
+  keyMap?: 'sublime' | 'vim';
   /** 透传给codemirror的配置项 */
   codemirror?: object;
   /** 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal */
@@ -159,7 +178,7 @@ export interface CherryEditorOptions {
   showSuggestList?: boolean;
 }
 
-export type CherryLifecycle = (text: string, html: string) => void;
+export type CherryLifecycle = (text: String, html: String) => void;
 
 export interface CherryPreviewerOptions {
   dom: HTMLDivElement | false;
@@ -285,6 +304,8 @@ export interface CherryToolbarOptions {
     updateLocationHash: boolean, // 要不要更新URL的hash
     defaultModel: 'pure' | 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
     showAutoNumber: boolean, // 是否显示自增序号
+    position: 'absolute' | 'fixed', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
+    cssText: string, // 额外样式
   };
   /** 是否展示顶部工具栏 */
   showToolbar?: boolean;
@@ -318,4 +339,22 @@ export interface CherryFileUploadHandler {
      */
     callback: (url: string, params?: {name?: string, poster?: string, isBorder?: boolean, isShadow?: boolean, isRadius?: boolean; width?: string, height?: string}
   ) => void): void;
+}
+
+
+type ShortcutKeyMapStruct = {
+  /**
+   * 原始hook
+   */
+  hookName: string;
+  /**
+   * 展示名称
+   */
+  aliasName: string;
+  /**
+   * 其他扩展字段
+   * 如果存在则会赋值给 data-[fieldName]=value 存储记录
+   * @summary 切记不要使用驼峰，因为dataset 会全部转成全小写，除非你在取值的时候能记住，否则永远不要这么做
+   */
+  [x: string]: string | number;
 }

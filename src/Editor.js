@@ -25,6 +25,7 @@ import 'codemirror/addon/edit/matchtags';
 import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/display/placeholder';
 import 'codemirror/keymap/sublime';
+import 'codemirror/keymap/vim';
 
 import 'cm-search-replace/src/search';
 import 'codemirror/addon/scroll/annotatescrollbar';
@@ -35,7 +36,6 @@ import htmlParser from '@/utils/htmlparser';
 import pasteHelper from '@/utils/pasteHelper';
 import { addEvent } from './utils/event';
 import Logger from '@/Logger';
-import Event from '@/Event';
 import { handleFileUploadCallback } from '@/utils/file';
 import { createElement } from './utils/dom';
 import { imgBase64Reg, imgDrawioXmlReg } from './utils/regexp';
@@ -66,6 +66,7 @@ export default class Editor {
       wrapperDom: null,
       autoScrollByCursor: true,
       convertWhenPaste: true,
+      keyMap: 'sublime',
       showFullWidthMark: true,
       showSuggestList: true,
       codemirror: {
@@ -105,11 +106,13 @@ export default class Editor {
      * @type {{ timer?: number; destinationTop?: number }}
      */
     this.animation = {};
+    this.selectAll = false;
     const { codemirror, ...restOptions } = options;
     if (codemirror) {
       Object.assign(this.options.codemirror, codemirror);
     }
     Object.assign(this.options, restOptions);
+    this.options.codemirror.keyMap = this.options.keyMap;
     this.$cherry = this.options.$cherry;
     this.instanceId = this.$cherry.getInstanceId();
   }
@@ -300,7 +303,7 @@ export default class Editor {
       if (item && item.kind === 'file' && item.type.match(/^image\//i)) {
         // 读取该图片
         const file = item.getAsFile();
-        this.options.fileUpload(file, (url, params = {}) => {
+        this.$cherry.options.callback.fileUpload(file, (url, params = {}) => {
           this.fileUploadCount += 1;
           if (typeof url !== 'string') {
             return;
@@ -351,7 +354,7 @@ export default class Editor {
    * @param {CodeMirror.Editor} codemirror
    */
   onScroll = (codemirror) => {
-    Event.emit(this.instanceId, Event.Events.cleanAllSubMenus); // 滚动时清除所有子菜单，这不应该在Bubble中处理，我们关注的是编辑器的滚动  add by ufec
+    this.$cherry.$event.emit('cleanAllSubMenus'); // 滚动时清除所有子菜单，这不应该在Bubble中处理，我们关注的是编辑器的滚动  add by ufec
     if (this.disableScrollListener) {
       this.disableScrollListener = false;
       return;
@@ -382,7 +385,7 @@ export default class Editor {
    * @param {MouseEvent} evt
    */
   onMouseDown = (codemirror, evt) => {
-    Event.emit(this.instanceId, Event.Events.cleanAllSubMenus); // Bubble中处理需要考虑太多，直接在编辑器中处理可包括Bubble中所有情况，因为产生Bubble的前提是光标在编辑器中 add by ufec
+    this.$cherry.$event.emit('cleanAllSubMenus'); // Bubble中处理需要考虑太多，直接在编辑器中处理可包括Bubble中所有情况，因为产生Bubble的前提是光标在编辑器中 add by ufec
     const { line: targetLine } = codemirror.getCursor();
     const top = Math.abs(evt.y - codemirror.getWrapperElement().getBoundingClientRect().y);
     this.previewer.scrollToLineNumWithOffset(targetLine + 1, top);
@@ -461,10 +464,12 @@ export default class Editor {
 
     editor.on('blur', (codemirror, evt) => {
       this.options.onBlur(evt, codemirror);
+      this.$cherry.$event.emit('blur', { evt, cherry: this.$cherry });
     });
 
     editor.on('focus', (codemirror, evt) => {
       this.options.onFocus(evt, codemirror);
+      this.$cherry.$event.emit('focus', { evt, cherry: this.$cherry });
     });
 
     editor.on('change', (codemirror, evt) => {
@@ -509,7 +514,7 @@ export default class Editor {
             if (/\.(text|md)/.test(file.name) || /^text/i.test(fileType)) {
               continue;
             }
-            this.options.fileUpload(file, (url, params = {}) => {
+            this.$cherry.options.callback.fileUpload(file, (url, params = {}) => {
               if (typeof url !== 'string') {
                 return;
               }
@@ -533,6 +538,9 @@ export default class Editor {
 
     editor.on('cursorActivity', () => {
       this.onCursorActivity();
+    });
+    editor.on('beforeChange', (codemirror) => {
+      this.selectAll = this.editor.getValue() === codemirror.getSelection();
     });
 
     addEvent(

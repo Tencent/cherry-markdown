@@ -29,7 +29,6 @@ export default class AutoLink extends SyntaxBase {
 
   constructor({ config, globalConfig }) {
     super({ config });
-    this.urlProcessor = globalConfig.urlProcessor;
     this.enableShortLink = !!config.enableShortLink;
     this.shortLinkLength = config.shortLinkLength;
     // eslint-disable-next-line no-nested-ternary
@@ -222,7 +221,7 @@ export default class AutoLink extends SyntaxBase {
         linkText = url;
       }
     }
-    const processedURL = this.urlProcessor(url, 'autolink');
+    const processedURL = this.$engine.$cherry.options.callback.urlProcessor(url, 'autolink');
     const safeUri = encodeURIOnce(processedURL);
     const displayUri = $e(url);
     const additionalAttrs = [this.target, this.rel].filter(Boolean).join(' ');

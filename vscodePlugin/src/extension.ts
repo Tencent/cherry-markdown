@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
   const disposable = vscode.commands.registerCommand(
     'cherrymarkdown.preview',
     () => {
-      triggerEditorContentChange();
+      triggerEditorContentChange(true);
     },
   );
 
@@ -26,12 +26,16 @@ export function activate(context: vscode.ExtensionContext) {
 
   // 打开文件的时候触发
   vscode.workspace.onDidOpenTextDocument(() => {
-    vscode.commands.executeCommand('cherrymarkdown.preview');
+    triggerEditorContentChange();
   });
 
   // 切换文件的时候更新预览区域内容
   vscode.window.onDidChangeActiveTextEditor((e) => {
-    if (e?.document) {
+    const cherryUsage: 'active' | 'only-manual' | undefined = vscode.workspace
+      .getConfiguration('cherryMarkdown')
+      .get('usage');
+
+    if (e?.document && cherryUsage === 'active') {
       triggerEditorContentChange();
       // 如果打开的不是md文件，则让cherry强制进入预览模式
       if (e.document.languageId !== 'markdown' && targetDocument) {
@@ -203,14 +207,19 @@ const initCherryPanelEvent = () => {
 /**
  * 向预览区发送vscode编辑区内容变更的消息
  */
-const triggerEditorContentChange = () => {
+const triggerEditorContentChange = (focus: boolean = false) => {
   if (isCherryPanelInit) {
     const { mdInfo, currentTitle } = getMarkdownFileInfo();
     cherryPanel.title = currentTitle;
     cherryPanel.webview.postMessage({ cmd: 'editor-change', data: mdInfo });
   } else {
     if (vscode.window.activeTextEditor?.document?.languageId === 'markdown') {
-      initCherryPanel();
+      const cherryUsage: 'active' | 'only-manual' | undefined = vscode.workspace
+      .getConfiguration('cherryMarkdown')
+      .get('usage');
+      if (cherryUsage === 'active' || focus) {
+        initCherryPanel();
+      }
     }
   }
 };

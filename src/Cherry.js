@@ -24,7 +24,7 @@ import ToolbarRight from './toolbars/ToolbarRight';
 import Toc from './toolbars/Toc';
 import { createElement } from './utils/dom';
 import Sidebar from './toolbars/Sidebar';
-import { customizer, getThemeFromLocal, changeTheme } from './utils/config';
+import { customizer, getThemeFromLocal, changeTheme, getCodeThemeFromLocal } from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
 import getPosBydiffs from './utils/recount-pos';
 import defaultConfig from './Cherry.config';
@@ -35,6 +35,7 @@ import locales from '@/locales/index';
 import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
 import { LIST_CONTENT } from '@/utils/regexp';
+import { storageKeyMap, clearAllStorageKeyMap } from './utils/shortcutKey';
 
 /** @typedef {import('~types/cherry').CherryOptions} CherryOptions */
 export default class Cherry extends CherryStatic {
@@ -78,6 +79,9 @@ export default class Cherry extends CherryStatic {
 
     if (typeof this.options.engine.global.urlProcessor === 'function') {
       this.options.engine.global.urlProcessor = urlProcessorProxy(this.options.engine.global.urlProcessor);
+      this.options.callback.urlProcessor = this.options.engine.global.urlProcessor;
+    } else {
+      this.options.callback.urlProcessor = urlProcessorProxy(this.options.callback.urlProcessor);
     }
 
     this.status = {
@@ -99,12 +103,34 @@ export default class Cherry extends CherryStatic {
      */
     this.instanceId = `cherry-${new Date().getTime()}${Math.random()}`;
     this.options.instanceId = this.instanceId;
+    this.lastMarkdownText = '';
+    this.$event = new Event(this.instanceId);
 
     /**
      * @type {import('./Engine').default}
      */
     this.engine = new Engine(this.options, this);
     this.init();
+    const toolbarShortcutKeyMap = this.toolbar?.shortcutKeyMap ?? {};
+    if (
+      toolbarShortcutKeyMap &&
+      typeof toolbarShortcutKeyMap === 'object' &&
+      Object.keys(toolbarShortcutKeyMap).length
+    ) {
+      const cacheShortcutKeyMap = Object.entries(toolbarShortcutKeyMap)
+        .filter(([_, value]) => value && typeof value === 'object')
+        .reduce((prev, curr) => {
+          const [key, value] = curr;
+          if (key in prev) {
+            throw Error(`Duplicate shortcut key: ${key}`);
+          }
+          return (prev[key] = value), prev;
+        }, {});
+      storageKeyMap(this.instanceId, cacheShortcutKeyMap);
+      this.clearAllStorageKeyMap = clearAllStorageKeyMap;
+      // 页面关闭时清除缓存
+      window.addEventListener('unload', this.clearAllStorageKeyMap);
+    }
   }
 
   /**
@@ -176,24 +202,24 @@ export default class Cherry extends CherryStatic {
     // default value init
     this.initText(editor.editor);
 
-    Event.on(this.instanceId, Event.Events.toolbarHide, () => {
+    this.$event.on('toolbarHide', () => {
       this.status.toolbar = 'hide';
     });
-    Event.on(this.instanceId, Event.Events.toolbarShow, () => {
+    this.$event.on('toolbarShow', () => {
       this.status.toolbar = 'show';
     });
-    Event.on(this.instanceId, Event.Events.previewerClose, () => {
+    this.$event.on('previewerClose', () => {
       this.status.previewer = 'hide';
     });
-    Event.on(this.instanceId, Event.Events.previewerOpen, () => {
+    this.$event.on('previewerOpen', () => {
       this.status.previewer = 'show';
     });
-    Event.on(this.instanceId, Event.Events.editorClose, () => {
+    this.$event.on('editorClose', () => {
       this.status.editor = 'hide';
       // 关闭编辑区时，需要清除所有高亮
       this.previewer.highlightLine(0);
     });
-    Event.on(this.instanceId, Event.Events.editorOpen, () => {
+    this.$event.on('editorOpen', () => {
       this.status.editor = 'show';
     });
 
@@ -209,6 +235,7 @@ export default class Cherry extends CherryStatic {
     if (this.options.toolbars.toc !== false) {
       this.createToc();
     }
+    this.$event.bindCallbacksByOptions(this.options);
   }
 
   destroy() {
@@ -217,6 +244,33 @@ export default class Cherry extends CherryStatic {
     } else {
       this.wrapperDom.remove();
     }
+    this.$event.clearAll();
+  }
+
+  on(eventName, callback) {
+    if (this.$event.Events[eventName]) {
+      if (/afterInit|afterChange/.test(eventName)) {
+        // 做特殊处理
+        return this.$event.on(eventName, (msg) => {
+          callback(msg.markdownText, msg.html);
+        });
+      }
+      return this.$event.on(eventName, callback);
+    }
+    switch (eventName) {
+      case 'urlProcessor':
+        this.options.callback.urlProcessor = urlProcessorProxy(callback);
+        break;
+      default:
+        this.options.callback[eventName] = callback;
+    }
+  }
+
+  off(eventName, callback) {
+    if (this.$event.Events[eventName]) {
+      return this.$event.off(eventName, callback);
+    }
+    this.options.callback[eventName] = () => {};
   }
 
   createToc() {
@@ -224,6 +278,10 @@ export default class Cherry extends CherryStatic {
       $cherry: this,
       // @ts-ignore
       updateLocationHash: this.options.toolbars.toc.updateLocationHash ?? true,
+      // @ts-ignore
+      position: this.options.toolbars.toc.position ?? 'absolute',
+      // @ts-ignore
+      cssText: this.options.toolbars.toc.cssText ?? '',
       // @ts-ignore
       defaultModel: this.options.toolbars.toc.defaultModel ?? 'pure',
       // @ts-ignore
@@ -248,6 +306,22 @@ export default class Cherry extends CherryStatic {
         // empty
       }
     }
+  }
+
+  $t(str) {
+    return this.locale[str] ? this.locale[str] : str;
+  }
+
+  addLocale(key, value) {
+    this.locale[key] = value;
+  }
+
+  addLocales(locales) {
+    this.locale = Object.assign(this.locale, locales);
+  }
+
+  getLocales() {
+    return this.locale;
   }
 
   /**
@@ -459,6 +533,9 @@ export default class Cherry extends CherryStatic {
         'data-codeBlockTheme': codeBlockTheme,
       },
     );
+
+    wrapperDom.setAttribute('data-code-block-theme', getCodeThemeFromLocal(this.options.themeNameSpace));
+
     this.wrapperDom = wrapperDom;
     return wrapperDom;
   }
@@ -616,6 +693,10 @@ export default class Cherry extends CherryStatic {
     const editor = createElement('div', 'cherry-editor');
     editor.appendChild(textArea);
 
+    if (typeof this.options.fileUpload === 'function') {
+      this.options.callback.fileUpload = this.options.fileUpload;
+    }
+
     this.editor = new Editor({
       $cherry: this,
       editorDom: editor,
@@ -624,7 +705,6 @@ export default class Cherry extends CherryStatic {
       onKeydown: this.fireShortcutKey.bind(this),
       onChange: this.editText.bind(this),
       toolbars: this.options.toolbars,
-      fileUpload: this.options.fileUpload,
       autoScrollByCursor: this.options.autoScrollByCursor,
       ...this.options.editor,
     });
@@ -682,9 +762,9 @@ export default class Cherry extends CherryStatic {
       const markdownText = codemirror.getValue();
       const html = this.engine.makeHtml(markdownText);
       this.previewer.update(html);
-      if (this.options.callback.afterInit) {
-        this.options.callback.afterInit(markdownText, html);
-      }
+      setTimeout(() => {
+        this.$event.emit('afterInit', { markdownText, html });
+      }, 10);
     } catch (e) {
       throw new NestedError(e);
     }
@@ -701,17 +781,22 @@ export default class Cherry extends CherryStatic {
         clearTimeout(this.timer);
         this.timer = null;
       }
+      const interval = this.options.engine.global.flowSessionContext ? 10 : 50;
       this.timer = setTimeout(() => {
         const markdownText = codemirror.getValue();
-        const html = this.engine.makeHtml(markdownText);
-        this.previewer.update(html);
-        if (this.options.callback.afterChange) {
-          this.options.callback.afterChange(markdownText, html);
+        if (markdownText !== this.lastMarkdownText) {
+          this.lastMarkdownText = markdownText;
+          const html = this.engine.makeHtml(markdownText);
+          this.previewer.update(html);
+          this.$event.emit('afterChange', {
+            markdownText,
+            html,
+          });
         }
         // 强制每次编辑（包括undo、redo）编辑器都会自动滚动到光标位置
         codemirror.scrollIntoView(null);
         this.editor.restoreDocumentScroll();
-      }, 50);
+      }, interval);
     } catch (e) {
       throw new NestedError(e);
     }
