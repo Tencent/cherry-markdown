@@ -281,8 +281,9 @@
     padding: 0.1em;
     border-radius: 0.3em;
     white-space: normal;
-    color: #f85353;
-    background-color: #e5e5e5;
+    color: #495057;
+    background-color: #e9ecef;
+    border: 0.1em solid #ced4da;
 
     [data-inline-code-theme='black'] & {
       color: #3f4a56;
