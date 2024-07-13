@@ -489,7 +489,7 @@ export default class TableHandler {
       button.innerHTML = '删除';
       button.title = '删除当前列';
       button.addEventListener('click', (e) => {
-        // this.$deleteCurrentColumn();
+        this.$deleteCurrentColumn();
       });
       container.appendChild(button);
     });
@@ -521,6 +521,25 @@ export default class TableHandler {
       this.setStyle(node, `${type}`, `-${offset.outer}px`);
       this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
     });
+  }
+
+  /**
+   * 删除当前列
+   */
+  $deleteCurrentColumn() {
+    const { tableIndex, tdIndex } = this.tableEditor.info;
+    this.$setSelection(tableIndex, 'table');
+    const selection = this.codeMirror.getSelection();
+    const table = selection.split('\n');
+    const rows = table.map((row) => row.split('|').slice(1, -1));
+    rows.forEach((row) => {
+      if (tdIndex >= 0 && tdIndex < row.length) {
+        row.splice(tdIndex, 1);
+      }
+    });
+    const newTable = rows.map((row) => (row.length === 0 ? '' : `|${row.join('|')}|`));
+    const newText = newTable.join('\n');
+    this.codeMirror.replaceSelection(newText);
   }
 
   /**
