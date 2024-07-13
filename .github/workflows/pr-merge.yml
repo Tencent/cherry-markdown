@@ -1,0 +1,79 @@
+name: PR Closed
+
+on:
+  pull_request_target:
+    types:
+      - closed
+
+jobs:
+  remove_assets:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 检出仓库代码
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # 打印 PR 详细信息
+      - name: Print PR details
+        run: |
+          echo "The PR ID is ${{ github.event.pull_request.id }}"
+          echo "The PR number is ${{ github.event.pull_request.number }}"
+          echo "The PR title is ${{ github.event.pull_request.title }}"
+          echo "The PR branch is ${{ github.event.pull_request.head.ref }}"
+
+      # 安装 cos-nodejs-sdk-v5
+      - name: Install cos-nodejs-sdk-v5
+        run: npm install cos-nodejs-sdk-v5
+
+      # 删除对应的资源
+      - name: Delete Resources On COS
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const COS = require('cos-nodejs-sdk-v5');
+
+            const cos = new COS({
+              SecretId: process.env.COS_SECRETID,
+              SecretKey: process.env.COS_SECRETKEY,
+            });
+
+            const bucket = 'cherrymd-1301618266';
+            const region = 'ap-singapore';
+            const prNumber = '${{ github.event.pull_request.number }}';
+            const prefix = `pr${prNumber}/`;
+
+            // List objects in the bucket with the specified prefix
+            cos.getBucket({
+              Bucket: bucket,
+              Region: region,
+              Prefix: prefix,
+            }, (err, data) => {
+              if (err) {
+                console.error('Error listing objects:', err);
+                return;
+              }
+
+              const objectsToDelete = data.Contents.map(item => ({ Key: item.Key }));
+
+              if (objectsToDelete.length === 0) {
+                console.log('No objects to delete.');
+                return;
+              }
+
+              // Delete the listed objects
+              cos.deleteMultipleObject({
+                Bucket: bucket,
+                Region: region,
+                Objects: objectsToDelete,
+              }, (err, data) => {
+                if (err) {
+                  console.error('Error deleting objects:', err);
+                } else {
+                  console.log('Successfully deleted objects:', data);
+                }
+              });
+            });
+        env:
+          COS_SECRETID: ${{ secrets.COS_SECRETID }}
+          COS_SECRETKEY: ${{ secrets.COS_SECRETKEY }}
