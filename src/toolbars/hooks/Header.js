@@ -15,10 +15,14 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import { getSelection } from '@/utils/selection';
+import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
 /**
  * 插入1级~5级标题
  */
 export default class Header extends MenuBase {
+  /**
+   * @param {import('@/toolbars/MenuBase').MenuBaseConstructorParams} $cherry
+   */
   constructor($cherry) {
     super($cherry);
     this.setName('header', 'header');
@@ -29,6 +33,28 @@ export default class Header extends MenuBase {
       { iconName: 'h4', name: 'h4', onclick: this.bindSubClick.bind(this, '4') },
       { iconName: 'h5', name: 'h5', onclick: this.bindSubClick.bind(this, '5') },
     ];
+    this.shortcutKeyMap = {
+      [`${CONTROL_KEY}-${getKeyCode(1)}`]: {
+        hookName: this.name,
+        aliasName: this.$cherry.locale.h1,
+      },
+      [`${CONTROL_KEY}-${getKeyCode(2)}`]: {
+        hookName: this.name,
+        aliasName: this.$cherry.locale.h2,
+      },
+      [`${CONTROL_KEY}-${getKeyCode(3)}`]: {
+        hookName: this.name,
+        aliasName: this.$cherry.locale.h3,
+      },
+      [`${CONTROL_KEY}-${getKeyCode(4)}`]: {
+        hookName: this.name,
+        aliasName: this.$cherry.locale.h4,
+      },
+      [`${CONTROL_KEY}-${getKeyCode(5)}`]: {
+        hookName: this.name,
+        aliasName: this.$cherry.locale.h5,
+      },
+    };
   }
 
   getSubMenuConfig() {
@@ -88,13 +114,5 @@ export default class Header extends MenuBase {
       this.setLessSelection(`${header} `, '');
     });
     return $selection.replace(/(^)([\s]*)([^\n]+)($)/gm, `$1${header} $3$4`);
-  }
-
-  /**
-   * 获得监听的快捷键
-   * 在windows下是Ctrl+1，在mac下是cmd+1
-   */
-  get shortcutKeys() {
-    return ['Ctrl-1', 'Ctrl-2', 'Ctrl-3', 'Ctrl-4', 'Ctrl-5', 'Ctrl-6'];
   }
 }

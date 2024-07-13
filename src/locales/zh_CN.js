@@ -76,7 +76,7 @@ export default {
   file: '文件',
   pastePlain: '粘贴为纯文本格式', // 粘贴为纯文本格式
   pasteMarkdown: '粘贴为markdown格式', // 粘贴为markdown格式
-  hide: '隐藏(ctrl+0)', // 隐藏(ctrl+0)
+  hide: '隐藏工具栏', // 隐藏
   exportToPdf: '导出PDF', // 导出PDF
   exportScreenshot: '导出长图', // 导出长图
   exportMarkdownFile: '导出markdown', // 导出markdown文件
@@ -102,4 +102,7 @@ export default {
   large: '大',
   superLarge: '特大',
   detailDefaultContent: '点击展开更多\n内容\n++- 默认展开\n内容\n++ 默认收起\n内容',
+  inlineCode: '行内代码',
+  codeBlock: '代码块',
+  editShortcutKeyConfigTip: '双击快捷键区域编辑快捷键',
 };

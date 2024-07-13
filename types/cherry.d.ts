@@ -340,3 +340,21 @@ export interface CherryFileUploadHandler {
     callback: (url: string, params?: {name?: string, poster?: string, isBorder?: boolean, isShadow?: boolean, isRadius?: boolean; width?: string, height?: string}
   ) => void): void;
 }
+
+
+type ShortcutKeyMapStruct = {
+  /**
+   * 原始hook
+   */
+  hookName: string;
+  /**
+   * 展示名称
+   */
+  aliasName: string;
+  /**
+   * 其他扩展字段
+   * 如果存在则会赋值给 data-[fieldName]=value 存储记录
+   * @summary 切记不要使用驼峰，因为dataset 会全部转成全小写，除非你在取值的时候能记住，否则永远不要这么做
+   */
+  [x: string]: string | number;
+}

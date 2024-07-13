@@ -18,6 +18,7 @@ import Logger from '@/Logger';
 import { escapeHTMLSpecialCharOnce as $e } from '@/utils/sanitize';
 import { createElement } from '@/utils/dom';
 import NestedError from '@/utils/error';
+import { updateStorageKeyMap } from '@/utils/shortcutKey';
 
 /**
  * @typedef {Object} SubMenuConfigItem
@@ -25,6 +26,11 @@ import NestedError from '@/utils/error';
  * @property {string=} iconName - 子菜单项图标名称
  * @property {function(MouseEvent): any} onclick - 子菜单项点击事件
  * @property {string=} icon - 子菜单项图标(url)
+ * @property {boolean=} [disabledHideAllSubMenu=false] - 是否禁用后续调用hideAllSubMenu
+ */
+
+/**
+ * @typedef {Record<string, import('~types/cherry').ShortcutKeyMapStruct>} HookShortcutKeyMap
  */
 
 /**
@@ -56,6 +62,10 @@ function getPosition(targetDom, positionModel = 'absolute') {
  */
 
 /**
+ * @typedef {Partial<import('@/Cherry').default> & {$currentMenuOptions?:import('~types/menus').CustomMenuConfig}} MenuBaseConstructorParams
+ */
+
+/**
  * @class MenuBase
  */
 export default class MenuBase {
@@ -66,8 +76,7 @@ export default class MenuBase {
   _onClick;
 
   /**
-   *
-   * @param {Partial<import('@/Cherry').default> & {$currentMenuOptions?:import('~types/menus').CustomMenuConfig}} $cherry
+   * @param {MenuBaseConstructorParams} $cherry
    */
   constructor($cherry) {
     this.$cherry = $cherry;
@@ -101,6 +110,11 @@ export default class MenuBase {
       // eslint-disable-next-line no-underscore-dangle
       this.fire = this._onClick;
     }
+    /**
+     * 快捷键map映射
+     * @type {HookShortcutKeyMap}
+     */
+    this.shortcutKeyMap = {};
   }
 
   getSubMenuConfig() {
@@ -427,8 +441,43 @@ export default class MenuBase {
     return selection;
   }
 
+  /**
+   * 兼容之前的写法，但不支持配置
+   */
   get shortcutKeys() {
     return [];
+  }
+
+  /**
+   * @param {HookShortcutKeyMap} value 新值
+   */
+  setShortcutKeyMap(value) {
+    if (!value || typeof value !== 'object') {
+      throw new Error('shortcutKeyMap must be an object');
+    }
+    this.shortcutKeyMap = value;
+  }
+
+  /**
+   * 更新快捷键映射
+   * @param {string} oldShortcutKey 旧的快捷键
+   * @param {string} newShortcutKey 新的快捷键
+   */
+  updateShortcutKeyMap(oldShortcutKey, newShortcutKey) {
+    const old = this.shortcutKeyMap[oldShortcutKey];
+    if (!old) {
+      return false;
+    }
+    // 删除旧值
+    delete this.shortcutKeyMap[oldShortcutKey];
+    const newValue = {
+      ...this.shortcutKeyMap,
+      [newShortcutKey]: old,
+    };
+    // 更新内存中的映射
+    this.shortcutKeyMap = newValue;
+    // 更新缓存中的映射
+    updateStorageKeyMap(this.$cherry.instanceId, oldShortcutKey, newValue);
   }
 
   /**
@@ -506,6 +555,14 @@ export default class MenuBase {
       this.positionModel = 'absolute';
     }
     return getPosition(this.dom, this.positionModel);
+  }
+
+  hide() {
+    this.dom.style.display = 'none';
+  }
+
+  show() {
+    this.dom.style.display = 'block';
   }
 
   /**
