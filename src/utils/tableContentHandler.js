@@ -475,9 +475,47 @@ export default class TableHandler {
   }
 
   /**
+   * 高亮当前列
+   * @param {number} tdIndex 当前列的索引
+   */
+  $highlightColumn(tdIndex) {
+    const { tableNode } = this.tableEditor.info;
+    const { rows } = tableNode;
+    rows[0].cells[tdIndex].style.borderTop = '1px solid red';
+    rows[rows.length - 1].cells[tdIndex].style.borderBottom = '1px solid red';
+    for (let i = 0; i < rows.length; i++) {
+      const { cells } = rows[i];
+      if (cells[tdIndex]) {
+        if (tdIndex === 0) cells[tdIndex].style.borderLeft = '1px solid red';
+        else cells[tdIndex - 1].style.borderRight = '1px solid red';
+        cells[tdIndex].style.borderRight = '1px solid red';
+      }
+    }
+  }
+
+  /**
+   * 取消高亮当前列
+   * @param {number} tdIndex 当前列的索引
+   */
+  $cancelHighlightColumn(tdIndex) {
+    const { tableNode } = this.tableEditor.info;
+    if (tableNode) {
+      const { rows } = tableNode;
+      for (let i = 0; i < rows.length; i++) {
+        const { cells } = rows[i];
+        if (cells[tdIndex]) {
+          if (tdIndex !== 0) cells[tdIndex - 1].style.border = '';
+          cells[tdIndex].style.border = ''; // 恢复原始边框
+        }
+      }
+    }
+  }
+
+  /**
    * 添加删除按钮
    */
   $drawDelete() {
+    const { tdIndex } = this.tableEditor.info;
     const types = ['top', 'bottom'];
     const buttons = types.map((type) => [type]);
     const container = document.createElement('div');
@@ -488,8 +526,14 @@ export default class TableHandler {
       button.className = 'cherry-previewer-table-hover-handler__delete';
       button.innerHTML = '删除';
       button.title = '删除当前列';
-      button.addEventListener('click', (e) => {
+      button.addEventListener('click', () => {
         this.$deleteCurrentColumn();
+      });
+      button.addEventListener('mouseover', () => {
+        this.$highlightColumn(tdIndex);
+      });
+      button.addEventListener('mouseout', () => {
+        this.$cancelHighlightColumn(tdIndex);
       });
       container.appendChild(button);
     });
