@@ -15,7 +15,7 @@ $editorBg: #f8fafb;
 $previewBg: #f8fafb;
 $fontColor: #3f4a56;
 $linkColor: #3582fb;
-$linkHoverColor: #056bad;
+$linkHoverColor: #364fc7;
 $borderColor: #dfe6ee;
 $toolbarSplitColor: #dfe6ee;
 $fullWidthColor: #d71616;
@@ -66,7 +66,7 @@ $editorKeywordColor: $fontColor;
 
 // 工具栏
 // 暗色
-$toolbarBgDark: #364fc7;
+$toolbarBgDark: $linkHoverColor;
 $toolbarShadowDark: $shadow;
 $toolbarBtnBgDark: transparent;
 $toolbarBtnColorDark: #d7e6fe;

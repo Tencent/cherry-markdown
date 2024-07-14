@@ -141,7 +141,9 @@
   }
   
   a {
-    
+    &:hover {
+      text-decoration: underline;
+    }
   }
   
   strong {
@@ -239,6 +241,9 @@
 
     /** 目录 */
   .toc {
+    a:hover {
+      text-decoration: none;
+    }
     .toc-title {
 
     }
