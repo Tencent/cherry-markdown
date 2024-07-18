@@ -193,7 +193,7 @@ var basicConfig = {
       'customMenuCName',
       'theme',
     ],
-    toolbarRight: ['fullScreen', '|'],
+    toolbarRight: ['fullScreen', '|', 'wordCount'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
     sidebar: ['mobilePreview', 'copy', 'theme', 'publish'],
     sidebar: ['mobilePreview', 'copy', 'theme'],
