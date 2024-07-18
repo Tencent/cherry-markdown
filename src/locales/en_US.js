@@ -104,5 +104,5 @@ export default {
   wordCount: 'Word Count',
   wordCountP: 'P',
   wordCountW: 'W',
-  wordCountC: 'C'
+  wordCountC: 'C',
 };

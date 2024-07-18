@@ -107,5 +107,5 @@ export default {
   wordCount: '字数统计',
   wordCountP: '段落',
   wordCountW: '单词',
-  wordCountC: '字符'
+  wordCountC: '字符',
 };
