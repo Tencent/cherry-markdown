@@ -175,13 +175,14 @@ export default class HookCenter {
      */
     const currentMenuOptions = options || { name, icon: name };
     const { $cherry, customMenu } = this.toolbar.options;
+    $cherry.$currentMenuOptions = currentMenuOptions;
     if (HookList[name]) {
       this.allMenusName.push(name);
-      this.hooks[name] = new HookList[name]({ ...$cherry, $currentMenuOptions: currentMenuOptions });
+      this.hooks[name] = new HookList[name]($cherry);
     } else if (customMenu !== undefined && customMenu !== null && customMenu[name]) {
       this.allMenusName.push(name);
       // 如果是自定义菜单，传参兼容旧版
-      this.hooks[name] = new customMenu[name]({ ...$cherry, $currentMenuOptions: currentMenuOptions });
+      this.hooks[name] = new customMenu[name]($cherry);
     }
   }
 
