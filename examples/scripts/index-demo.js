@@ -179,7 +179,7 @@ var basicConfig = {
       '|',
       'formula',
       {
-        insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word'],
+        insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'inlineCode', 'formula', 'toc', 'table', 'pdf', 'word'],
       },
       'graph',
       'customMenuTable',
@@ -216,7 +216,7 @@ var basicConfig = {
     //       serviceUrl: 'http://localhost:3001',
     //       injectPayload: {
     //         thumb_media_id: 'ft7IwCi1eukC6lRHzmkYuzeMmVXWbU3JoipysW2EZamblyucA67wdgbYTix4X377',
-    //         author: 'Cherry Markdown', 
+    //         author: 'Cherry Markdown',
     //       },
     //     }
     //   ],
