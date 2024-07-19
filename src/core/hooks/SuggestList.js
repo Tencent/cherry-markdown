@@ -261,14 +261,14 @@ const MoreSuggestList = [
   },
   {
     icon: 'FullWidth',
-    label: '行内代码',
+    label: 'inlineCode',
     keyword: '`',
     value: '``',
     goLeft: 1,
   },
   {
     icon: 'FullWidth',
-    label: '代码块',
+    label: 'codeBlock',
     keyword: '`',
     value: '```\n\n```\n',
     goTop: 2,
@@ -316,10 +316,10 @@ export function allSuggestList(keyword, locales) {
   const systemSuggestList = [].concat(SystemSuggestList);
   const otherSuggestList = [].concat(OtherSuggestList);
   systemSuggestList.forEach((item) => {
-    item.label = locales ? locales[item.label] : item.label;
+    item.label = locales[item.label] || item.label;
   });
   otherSuggestList.forEach((item) => {
-    item.label = locales ? locales[item.label] : item.label;
+    item.label = locales[item.label] || item.label;
   });
   if (keyword[0] === '/' || keyword[0] === '、' || addonsKeywords.includes(keyword[0])) {
     systemSuggestList.forEach((item) => {

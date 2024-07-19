@@ -260,6 +260,8 @@ const defaultConfig = {
     defaultModel: 'edit&preview',
     // 粘贴时是否自动将html转成markdown
     convertWhenPaste: true,
+    // 快捷键风格，目前仅支持 sublime 和 vim
+    keyMap: 'sublime',
     codemirror: {
       // 是否自动focus 默认为true
       autofocus: true,
