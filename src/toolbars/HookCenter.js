@@ -41,6 +41,7 @@ import FullScreen from './hooks/FullScreen';
 import Undo from './hooks/Undo';
 import Redo from './hooks/Redo';
 import Code from './hooks/Code';
+import InlineCode from './hooks/InlineCode';
 import CodeTheme from './hooks/CodeTheme';
 import Export from './hooks/Export';
 import Settings from './hooks/Settings';
@@ -99,6 +100,7 @@ const HookList = {
   quickTable: QuickTable,
   togglePreview: TogglePreview,
   code: Code,
+  inlineCode: InlineCode,
   codeTheme: CodeTheme,
   export: Export,
   settings: Settings,
