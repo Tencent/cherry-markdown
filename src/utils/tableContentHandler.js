@@ -623,10 +623,13 @@ export default class TableHandler {
       event.preventDefault();
       const tdIndex = Array.from(event.target.parentElement.childNodes).indexOf(event.target);
       const newLines = lines.map((line, index) => {
-        const cells = line.split('|').filter((item, i) => item !== '');
+        const cells = line
+          .split('|')
+          .map((item) => (item === '' ? 'CHERRY_MARKDOWN_PENDING_TEXT_FOR_EMPTY_CELL' : item))
+          .slice(1, -1);
         return `|${that.$operateLines(oldTdIndex, tdIndex, cells).join('|')}|`;
       });
-      const newText = newLines.join('\n');
+      const newText = newLines.join('\n').replace(/CHERRY_MARKDOWN_PENDING_TEXT_FOR_EMPTY_CELL/g, '');
       that.codeMirror.replaceSelection(newText);
       that.setStyle(event.target, 'border', '1px solid #dfe6ee');
       that.$findTableInEditor();
