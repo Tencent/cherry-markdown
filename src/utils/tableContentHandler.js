@@ -51,7 +51,6 @@ export default class TableHandler {
       case 'previewUpdate':
         return this.$refreshPosition();
       case 'mousedown':
-        // return this.trigger !== 'click' && this.$drawDrag();
         return;
       case 'mouseup':
         return this.trigger === 'click' && this.$tryRemoveMe(event, callback);
@@ -587,15 +586,6 @@ export default class TableHandler {
   /**
    * 拖拽
    */
-  $drawDrag() {
-    const { isTHead } = this.tableEditor.info;
-    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
-    if (isTHead) {
-      this.$dragCol();
-    } else {
-      this.$dragLine();
-    }
-  }
 
   /**
    * 拖拽列
