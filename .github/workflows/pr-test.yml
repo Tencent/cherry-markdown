@@ -6,6 +6,8 @@ on:
 
 jobs:
   build:
+    # 不需要在fork仓库的pr中运行
+    if: github.repository == 'Tencent/cherry-markdown'
     runs-on: ubuntu-latest
     env:
       BASE_SHA: ${{ github.event.pull_request.base.sha }}
