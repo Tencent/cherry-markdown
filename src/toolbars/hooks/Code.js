@@ -24,7 +24,7 @@ export default class Code extends MenuBase {
    */
   constructor($cherry) {
     super($cherry);
-    this.setName('code', 'codeBlock');
+    this.setName('codeBlock', 'codeBlock');
     this.shortcutKeyMap = {
       [`${CONTROL_KEY}-${getKeyCode('k')}`]: {
         hookName: this.name,

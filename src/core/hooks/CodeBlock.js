@@ -189,7 +189,7 @@ export default class CodeBlock extends ParagraphBase {
    */
   renderCodeBlock($code, $lang, sign, lines) {
     let cacheCode = $code;
-    let lang = $lang;
+    let lang = $lang.toLowerCase();
     if (this.customHighlighter) {
       // 平台自定义代码块样式
       cacheCode = this.customHighlighter(cacheCode, lang);
