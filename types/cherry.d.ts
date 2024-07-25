@@ -307,6 +307,8 @@ export interface CherryToolbarOptions {
     position: 'absolute' | 'fixed', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
     cssText: string, // 额外样式
   };
+  /** 不展示在编辑器中的工具栏，只使用工具栏的api和快捷键功能 */
+  hiddenToolbar?: any[];
   /** 是否展示顶部工具栏 */
   showToolbar?: boolean;
   /** 侧边栏配置 */
