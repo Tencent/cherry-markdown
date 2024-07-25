@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
+import { CONTROL_KEY } from '@/utils/shortcutKey';
 /**
- * 插入代码块的按钮
+ * 插入行内代码的按钮
  */
-export default class Code extends MenuBase {
-  /**
-   * @param {import('@/toolbars/MenuBase').MenuBaseConstructorParams} $cherry
-   */
+export default class InlineCode extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('codeBlock', 'codeBlock');
+    this.setName('inlineCode', 'inlineCode');
     this.shortcutKeyMap = {
-      [`${CONTROL_KEY}-${getKeyCode('k')}`]: {
+      [`${CONTROL_KEY}-Backquote`]: {
         hookName: this.name,
         aliasName: this.$cherry.locale[this.name],
       },
@@ -40,10 +37,17 @@ export default class Code extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    const code = selection ? selection : 'code...';
-    this.registerAfterClickCb(() => {
-      this.setLessSelection(`\n\`\`\` \n`, `\n\`\`\`\n`);
-    });
-    return `\n\`\`\` \n${code}\n\`\`\`\n`;
+    if (!selection) {
+      this.registerAfterClickCb(() => this.setLessSelection('`', '`'));
+      return '``';
+    }
+
+    if (!selection.includes('\n')) {
+      this.registerAfterClickCb(() => this.setLessSelection('`', '`'));
+      return `\`${selection}\``;
+    }
+
+    const arr = selection.split('\n').map((item) => `\`${item}\``);
+    return arr.join('\n');
   }
 }

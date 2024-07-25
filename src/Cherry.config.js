@@ -312,6 +312,7 @@ const defaultConfig = {
     sidebar: false,
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'table', 'code'], // array or false
+    hiddenToolbar: [], // 不展示在编辑器中的工具栏，只使用工具栏的api和快捷键功能
     toc: false, // 不展示悬浮目录
     // toc: {
     //   updateLocationHash: false, // 要不要更新URL的hash

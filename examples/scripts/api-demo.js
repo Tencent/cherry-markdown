@@ -77,6 +77,7 @@ var cherryConfig = {
       'settings',
       'export'
     ],
+    hiddenToolbar: ['panel', 'justify'],
   },
   editor: {},
   previewer: {

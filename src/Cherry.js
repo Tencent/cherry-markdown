@@ -24,6 +24,7 @@ import ToolbarRight from './toolbars/ToolbarRight';
 import Toc from './toolbars/Toc';
 import { createElement } from './utils/dom';
 import Sidebar from './toolbars/Sidebar';
+import HiddenToolbar from './toolbars/HiddenToolbar';
 import { customizer, getThemeFromLocal, changeTheme, getCodeThemeFromLocal } from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
 import getPosBydiffs from './utils/recount-pos';
@@ -188,6 +189,7 @@ export default class Cherry extends CherryStatic {
     this.wrapperDom = wrapperDom;
     // 创建预览区域的侧边工具栏
     this.createSidebar();
+    this.createHiddenToolbar();
     mountEl.appendChild(wrapperDom);
 
     editor.init(previewer);
@@ -592,6 +594,7 @@ export default class Cherry extends CherryStatic {
     this.createBubble();
     this.createFloatMenu();
     this.createSidebar();
+    this.createHiddenToolbar();
     return true;
   }
 
@@ -634,6 +637,19 @@ export default class Cherry extends CherryStatic {
       if (init === true) {
         this.wrapperDom.appendChild(this.sidebarDom);
       }
+    }
+  }
+
+  createHiddenToolbar() {
+    console.log(this.options.toolbars.hiddenToolbar);
+    if (this.options.toolbars.hiddenToolbar) {
+      $expectTarget(this.options.toolbars.hiddenToolbar, Array);
+      this.hiddenToolbar = new HiddenToolbar({
+        $cherry: this,
+        buttonConfig: this.options.toolbars.hiddenToolbar,
+        customMenu: this.options.toolbars.customMenu,
+      });
+      this.toolbar.collectMenuInfo(this.hiddenToolbar);
     }
   }
 
