@@ -75,6 +75,8 @@ var cherryConfig = {
       { insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word', 'file'] },
       'graph',
       'settings',
+      'panel',
+      'justify',
       'export'
     ],
   },
