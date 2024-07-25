@@ -2,11 +2,26 @@ import CodeMirror from 'codemirror';
 import SyntaxBase from '../src/core/SyntaxBase';
 import { FormulaMenu } from '@/toolbars/BubbleFormula';
 
-export interface Cherry {
-  options: CherryOptions;
+
+export interface CherryExternalsOptions {
+  [key: string]: any;
 }
 
-export interface CherryOptions {
+type CherryToolbarsCustomType = {
+  CustomMenuType: CherryExternalsOptions
+}
+
+type CherryCustomOptions = {
+  CustomToolbar: CherryToolbarsCustomType
+}
+
+export interface Cherry<T extends CherryCustomOptions = CherryCustomOptions> {
+  options: CherryOptions<T>;
+}
+
+export type CherryOptions<T extends CherryCustomOptions = CherryCustomOptions> = Partial<_CherryOptions<T>>;
+
+export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOptions> {
   openai: any;
   /** 第三方依赖 */
   externals: CherryExternalsOptions;
@@ -15,7 +30,7 @@ export interface CherryOptions {
   /** 编辑区域配置 */
   editor: CherryEditorOptions;
   /** 工具栏区域配置 */
-  toolbars: CherryToolbarOptions;
+  toolbars: CherryToolbarsOptions<T['CustomToolbar']>;
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: string;
   /** 文件上传回调 */
@@ -30,7 +45,7 @@ export interface CherryOptions {
     file: string,
   };
   /** 有哪些主题 */
-  theme: {className: string, label: string}[];
+  theme: { className: string, label: string }[];
   /** 定义主题的作用范围，相同themeNameSpace的实例共享主题配置 */
   themeNameSpace: string,
   callback: {
@@ -49,9 +64,9 @@ export interface CherryOptions {
     /** img 标签挂载前触发，可用于懒加载等场景 */
     beforeImageMounted?: (srcProp: string, src: string) => { srcProp: string; src: string };
     onClickPreview?: (e: MouseEvent) => void;
-    onCopyCode?: (e: ClipboardEvent, code: string) => string|false;
+    onCopyCode?: (e: ClipboardEvent, code: string) => string | false;
     changeString2Pinyin?: (str: string) => string;
-    onPaste?: (clipboardData: ClipboardEvent['clipboardData']) => string|boolean;
+    onPaste?: (clipboardData: ClipboardEvent['clipboardData']) => string | boolean;
   };
   event: {
     focus?: ({ e: MouseEvent, cherry: Cherry }) => void;
@@ -60,7 +75,7 @@ export interface CherryOptions {
     afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */
     afterInit?: CherryLifecycle;
-    selectionChange?: ({ selections: [], lastSelections: [], info} ) => void;
+    selectionChange?: ({ selections: [], lastSelections: [], info }) => void;
   };
   /** 预览区域配置 */
   previewer: CherryPreviewerOptions;
@@ -84,10 +99,6 @@ export interface CherryOptions {
   locales: {
     [locale: string]: Record<string, string>
   }
-}
-
-export interface CherryExternalsOptions {
-  [key: string]: any;
 }
 
 /**
@@ -213,32 +224,60 @@ export type CherryToolbarSeparator = '|';
 export type CherryCustomToolbar = string;
 
 export type CherryDefaultToolbar =
-  | CherryInsertToolbar
-  | CherryToolbarSeparator
-  | 'bold'
-  | 'italic'
-  | 'strikethrough'
-  | 'color'
-  | 'header'
-  | 'list'
-  | 'image'
+  // | CherryToolbarSeparator
   | 'audio'
-  | 'video'
-  | 'link'
-  | 'hr'
+  | 'barTable'
+  | 'bold'
   | 'br'
+  | 'checklist'
   | 'code'
+  | 'codeTheme'
+  | 'color'
+  | 'copy'
+  | 'detail'
+  | 'drawIo'
+  | 'export'
+  | 'file'
+  | 'fullScreen'
   | 'formula'
-  | 'toc'
-  | 'table'
-  | 'pdf'
-  | 'word'
   | 'graph'
-  | 'settings';
-
-export type CherryInsertToolbar = {
-  string: string[];
-};
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'header'
+  | 'hr'
+  | 'image'
+  | 'insert'
+  | 'italic'
+  | 'justify'
+  | 'lineTable'
+  | 'link'
+  | 'list'
+  | 'mobilePreview'
+  | 'ol'
+  | 'panel'
+  | 'pdf'
+  | 'publish'
+  | 'quickTable'
+  | 'quote'
+  | 'redo'
+  | 'ruby'
+  | 'settings'
+  | 'size'
+  | 'strikethrough'
+  | 'sub'
+  | 'sup'
+  | 'switchModel'
+  | 'table'
+  | 'theme'
+  | 'toc'
+  | 'togglePreview'
+  | 'underline'
+  | 'undo'
+  | 'ul'
+  | 'video'
+  | 'word'
+  | 'wordCount';
 
 export type CherryDefaultBubbleToolbar =
   | CherryToolbarSeparator
@@ -291,22 +330,27 @@ export interface CherryToolbarConfig {
   formula?: CherryFormulaToolbarOption
 }
 
-export interface CherryToolbarOptions {
+export interface CherryToolbarsOptions<F extends CherryToolbarsCustomType = CherryToolbarsCustomType> {
   theme: 'light' | 'dark';
   toolbar?:
-    | (CherryCustomToolbar | CherryDefaultBubbleToolbar | CherryDefaultBubbleToolbar | CherryDefaultToolbar)[]
-    | false;
+  | (CherryCustomToolbar |
+    CherryDefaultBubbleToolbar |
+    CherryDefaultToolbar |
+  { [K in keyof Partial<F['CustomMenuType']> | CherryDefaultToolbar]?: (keyof F['CustomMenuType'] | CherryDefaultToolbar)[] })[]
+  | false;
   toolbarRight?:
-    | (CherryCustomToolbar | CherryDefaultBubbleToolbar | CherryDefaultBubbleToolbar | CherryDefaultToolbar)[]
-    | false;
+  | (CherryCustomToolbar | CherryDefaultBubbleToolbar | CherryDefaultToolbar)[]
+  | false;
   /** 是否展示悬浮目录 */
   toc?: false | {
-    updateLocationHash: boolean, // 要不要更新URL的hash
-    defaultModel: 'pure' | 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
-    showAutoNumber: boolean, // 是否显示自增序号
-    position: 'absolute' | 'fixed', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
-    cssText: string, // 额外样式
+    updateLocationHash?: boolean, // 要不要更新URL的hash
+    defaultModel?: 'pure' | 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
+    showAutoNumber?: boolean, // 是否显示自增序号
+    position?: 'absolute' | 'fixed', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
+    cssText?: string, // 额外样式
   };
+  /** 不展示在编辑器中的工具栏，只使用工具栏的api和快捷键功能 */
+  hiddenToolbar?: any[];
   /** 是否展示顶部工具栏 */
   showToolbar?: boolean;
   /** 侧边栏配置 */
@@ -318,7 +362,7 @@ export interface CherryToolbarOptions {
   customMenu?: Record<string, any>;
   /** 自定义快捷键 */
   shortcutKey?: Object | false;
-   /** 一些按钮的配置信息 */
+  /** 一些按钮的配置信息 */
   config?: CherryToolbarConfig;
 }
 
@@ -337,8 +381,8 @@ export interface CherryFileUploadHandler {
      * @param params.width 设置宽度，可以是像素、也可以是百分比（图片、视频场景下生效）
      * @param params.height 设置高度，可以是像素、也可以是百分比（图片、视频场景下生效）
      */
-    callback: (url: string, params?: {name?: string, poster?: string, isBorder?: boolean, isShadow?: boolean, isRadius?: boolean; width?: string, height?: string}
-  ) => void): void;
+    callback: (url: string, params?: { name?: string, poster?: string, isBorder?: boolean, isShadow?: boolean, isRadius?: boolean; width?: string, height?: string }
+    ) => void): void;
 }
 
 
