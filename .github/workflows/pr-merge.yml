@@ -1,4 +1,4 @@
-name: PR Closed
+name: PR Closed Or Merge
 
 on:
   pull_request_target:
@@ -7,6 +7,8 @@ on:
 
 jobs:
   remove_assets:
+    # 不需要在fork仓库的pr中运行
+    if: github.repository == 'Tencent/cherry-markdown'
     runs-on: ubuntu-latest
 
     steps:
