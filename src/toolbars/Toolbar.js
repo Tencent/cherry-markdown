@@ -17,6 +17,7 @@ import { mac } from 'codemirror/src/util/browser';
 import HookCenter from './HookCenter';
 import { createElement } from '@/utils/dom';
 import Logger from '@/Logger';
+import { getAllowedShortcutKey, getStorageKeyMap, keyStack2UniqueString } from '@/utils/shortcutKey';
 
 /**
  * @typedef {()=>void} Bold 向cherry编辑器中插入粗体语法
@@ -204,7 +205,9 @@ export default class Toolbar {
     if (subMenuConfig.length > 0) {
       subMenuConfig.forEach((config) => {
         const btn = this.menus.hooks[name].createSubBtnByConfig(config);
-        btn.addEventListener('click', () => this.hideAllSubMenu(), false);
+        if (!config?.disabledHideAllSubMenu) {
+          btn.addEventListener('click', () => this.hideAllSubMenu(), false);
+        }
         this.subMenus[name].appendChild(btn);
       });
     }
@@ -231,7 +234,6 @@ export default class Toolbar {
    * 展开/收起二级菜单
    */
   toggleSubMenu(name) {
-    console.log('name: ', name);
     if (!this.subMenus[name]) {
       // 如果没有二级菜单，则先画出来，然后再显示
       this.hideAllSubMenu();
@@ -280,12 +282,24 @@ export default class Toolbar {
    */
   collectShortcutKey() {
     if (this.options.shortcutKey && Object.keys(this.options.shortcutKey).length > 0) {
+      console.warn(
+        'options.shortcutKey will deprecated in the future, please use shortcutKeyMap instead, get more info at https://github.com/Tencent/cherry-markdown/wiki',
+      );
       this.shortcutKeyMap = this.options.shortcutKey;
     } else {
       this.menus.allMenusName.forEach((name) => {
         this.menus.hooks[name].shortcutKeys?.forEach((key) => {
           this.shortcutKeyMap[key] = name;
         });
+        if (typeof this.menus.hooks[name].shortcutKeyMap === 'object' && this.menus.hooks[name].shortcutKeyMap) {
+          Object.entries(this.menus.hooks[name].shortcutKeyMap).forEach(([key, value]) => {
+            if (key in this.shortcutKeyMap) {
+              console.error(`The shortcut key ${key} is already registered`);
+              return;
+            }
+            this.shortcutKeyMap[key] = value;
+          });
+        }
       });
     }
   }
@@ -314,6 +328,17 @@ export default class Toolbar {
    * @returns {boolean} 是否有对应的快捷键
    */
   matchShortcutKey(evt) {
+    const storageShortcutKeyMap = getStorageKeyMap(this.instanceId);
+    if (storageShortcutKeyMap) {
+      try {
+        const onKeyStack = getAllowedShortcutKey(evt);
+        const shortcutKey = keyStack2UniqueString(onKeyStack);
+        return !!storageShortcutKeyMap?.[shortcutKey];
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
+    }
     return !!this.shortcutKeyMap[this.getCurrentKey(evt)];
   }
 
@@ -322,8 +347,23 @@ export default class Toolbar {
    * @param {KeyboardEvent} evt
    */
   fireShortcutKey(evt) {
-    const currentKey = this.getCurrentKey(evt);
-    this.menus.hooks[this.shortcutKeyMap[currentKey]]?.fire(evt, currentKey);
+    const storageShortcutKeyMap = getStorageKeyMap(this.instanceId);
+    let currentKey = '';
+    let keyMap;
+    if (storageShortcutKeyMap) {
+      const onKeyStack = getAllowedShortcutKey(evt);
+      currentKey = keyStack2UniqueString(onKeyStack);
+      keyMap = storageShortcutKeyMap[currentKey];
+    } else {
+      currentKey = this.getCurrentKey(evt);
+      keyMap = this.shortcutKeyMap[currentKey];
+    }
+    if (typeof keyMap === 'string' && keyMap) {
+      this.menus.hooks[keyMap]?.fire(evt, currentKey);
+    } else if (typeof keyMap === 'object' && keyMap) {
+      const { hookName } = keyMap;
+      this.menus.hooks[hookName]?.fire(evt, currentKey);
+    }
   }
 
   /**

@@ -5,7 +5,7 @@
 
 [![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
 
-English | [简体中文](./README.CN.md)
+English | [简体中文](./README.CN.md) | [日本語](./README.JP.md)
 
 ### Document
 - [初识cherry markdown 编辑器](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)
@@ -32,6 +32,7 @@ English | [简体中文](./README.CN.md)
 - [table wysiwyg](https://tencent.github.io/cherry-markdown/examples/table.html)
 - [headers with auto num](https://tencent.github.io/cherry-markdown/examples/head_num.html)
 - [流式输入模式（AI chart场景）](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)
+- [VIM 编辑模式](https://tencent.github.io/cherry-markdown/examples/vim.html)
 
 -----
 

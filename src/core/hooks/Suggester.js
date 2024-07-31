@@ -105,6 +105,7 @@ export default class Suggester extends SyntaxBase {
 
     this.suggester = {};
     const defaultSuggest = [];
+    const that = this;
     // 默认的唤醒关键字
     for (const suggesterKeyword of suggesterKeywords) {
       defaultSuggest.push({
@@ -112,7 +113,7 @@ export default class Suggester extends SyntaxBase {
         suggestList(_word, callback) {
           // 将word全转成小写
           const word = _word.toLowerCase();
-          const systemSuggestList = allSuggestList(suggesterKeyword, this.$locale);
+          const systemSuggestList = allSuggestList(suggesterKeyword, that.$locale);
           // 加个空格就直接退出联想
           if (/^\s$/.test(word)) {
             callback(false);
@@ -123,8 +124,13 @@ export default class Suggester extends SyntaxBase {
             .replace(new RegExp(`^${suggesterKeyword}`, 'g'), '') // 删掉word当中suggesterKeywords出现的字符
             .split('')
             .join('.*?');
+          // 匹配任何包含 "keyword" 的字符串，无论 "keyword" 是在字符串的开头、中间还是结尾，并且不区分大小写
           const test = new RegExp(`^.*?${keyword}.*?$`, 'i');
           const suggestList = systemSuggestList.filter((item) => {
+            // 处理精确匹配
+            if (item.exactMatch) {
+              return !word || item.keyword === word;
+            }
             // TODO: 首次联想的时候会把所有的候选项列出来，后续可以增加一些机制改成默认拉取一部分候选项
             return !word || test.test(item.keyword);
           });
@@ -535,11 +541,17 @@ class SuggesterPanel {
       if (result) {
         this.editor.editor.replaceRange(result, cursorFrom, cursorTo);
       }
-      // 控制光标左移一位或者选中某个范围
+      // 控制光标左移若干位
       if (this.optionList[idx].goLeft) {
         const cursor = this.editor.editor.getCursor();
         this.editor.editor.setCursor(cursor.line, cursor.ch - this.optionList[idx].goLeft);
       }
+      // 控制光标上移若干位
+      if (this.optionList[idx].goTop) {
+        const cursor = this.editor.editor.getCursor();
+        this.editor.editor.setCursor(cursor.line - this.optionList[idx].goTop, cursor.ch);
+      }
+      // 选中某个范围
       if (this.optionList[idx].selection) {
         const { line } = this.editor.editor.getCursor();
         const { ch } = this.editor.editor.getCursor();
@@ -651,6 +663,21 @@ class SuggesterPanel {
       selectedItem.classList.remove('cherry-suggester-panel__item--selected');
 
       nextElement.classList.add('cherry-suggester-panel__item--selected');
+
+      // 提示面板高度
+      const suggestPanelHeight = this.$suggesterPanel.offsetHeight;
+      // 可视区域范围上端
+      const viewTop = this.$suggesterPanel.scrollTop;
+      // 可视区域范围下端
+      const viewBottom = viewTop + suggestPanelHeight;
+      // item的上端
+      const nextEleTop = nextElement.offsetTop;
+      // item高度
+      const nextEleHeight = nextElement.offsetHeight;
+      // 当前元素全部或部分在可视区域之外，就滚动
+      if (nextEleTop < viewTop || nextEleTop + nextEleHeight > viewBottom) {
+        this.$suggesterPanel.scrollTop = nextEleTop - suggestPanelHeight / 2;
+      }
     } else if (keyCode === 13) {
       const index = this.findSelectedItemIndex();
       if (index >= 0) {

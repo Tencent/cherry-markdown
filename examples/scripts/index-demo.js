@@ -179,7 +179,7 @@ var basicConfig = {
       '|',
       'formula',
       {
-        insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word', 'ruby'],
+        insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'inlineCode', 'formula', 'toc', 'table', 'pdf', 'word'],
       },
       'graph',
       'customMenuTable',
@@ -193,7 +193,7 @@ var basicConfig = {
       'customMenuCName',
       'theme',
     ],
-    toolbarRight: ['fullScreen', '|'],
+    toolbarRight: ['fullScreen', '|', 'wordCount'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
     sidebar: ['mobilePreview', 'copy', 'theme', 'publish'],
     sidebar: ['mobilePreview', 'copy', 'theme'],
@@ -216,7 +216,7 @@ var basicConfig = {
     //       serviceUrl: 'http://localhost:3001',
     //       injectPayload: {
     //         thumb_media_id: 'ft7IwCi1eukC6lRHzmkYuzeMmVXWbU3JoipysW2EZamblyucA67wdgbYTix4X377',
-    //         author: 'Cherry Markdown', 
+    //         author: 'Cherry Markdown',
     //       },
     //     }
     //   ],
@@ -245,6 +245,7 @@ var basicConfig = {
   },
   // cherry初始化后是否检查 location.hash 尝试滚动到对应位置
   autoScrollByHashAfterInit: true,
+  // locale: 'en_US',
 };
 
 fetch('./markdown/basic.md').then((response) => response.text()).then((value) => {

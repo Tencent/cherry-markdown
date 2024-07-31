@@ -32,18 +32,29 @@ export default class wordCount extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    const span = document.querySelector('.cherry-toolbar-button.cherry-toolbar-wordCount');
+    const span = this.$cherry.wrapperDom.querySelector('.cherry-toolbar-button.cherry-toolbar-wordCount');
     // 首次点击时添加监听器
     if (this.countState === 0) {
       span.addEventListener('count', () => {
         const markdown = this.$cherry.getMarkdown();
         const { characters, words, paragraphs } = this.wordCount(markdown);
-        if (this.countState === 1) {
-          span.innerHTML = `P ${paragraphs}`;
-        } else if (this.countState === 2) {
-          span.innerHTML = `W ${words}`;
-        } else {
-          span.innerHTML = `C ${characters}`;
+        const { locale } = this.$cherry;
+        switch (this.countState) {
+          case 0:
+            span.innerHTML = locale.wordCount;
+            break;
+          case 1:
+            span.innerHTML = `${locale.wordCountC} ${characters}`;
+            break;
+          case 2:
+            span.innerHTML = `${locale.wordCountW} ${words}`;
+            break;
+          case 3:
+            span.innerHTML = `${locale.wordCountP} ${paragraphs}`;
+            break;
+          case 4:
+            span.innerHTML = `${locale.wordCountC}  ${characters} &nbsp; ${locale.wordCountW} ${words} &nbsp; ${locale.wordCountP} ${paragraphs}`;
+            break;
         }
       });
 
@@ -60,8 +71,11 @@ export default class wordCount extends MenuBase {
         }, 500);
       });
     }
-    // 循环切换3种状态
-    this.countState = ((this.countState + 1) % 3) + 1;
+    // 循环切换4种状态
+    this.countState += 1;
+    if (this.countState > 4) {
+      this.countState = 0;
+    }
     span.dispatchEvent(this.countEvent);
     return selection;
   }

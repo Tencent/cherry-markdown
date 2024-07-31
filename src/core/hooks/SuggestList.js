@@ -18,6 +18,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import { codePreviewLangSelectList } from '@/utils/code-preview-language-setting';
+
 /*
  * 外加配置系统联想词
  */
@@ -25,7 +28,7 @@ export const addonsKeywords = '#';
 /*
  * 预留联想词
  */
-export const suggesterKeywords = '/·￥、：“”【】（）《》'.concat(addonsKeywords);
+export const suggesterKeywords = '/·￥、：“”【】（）《》`'.concat(addonsKeywords);
 /*
  * 系统联想候选表，主要为'、'以及'、'的联想。
  */
@@ -256,19 +259,67 @@ const MoreSuggestList = [
     value: `”“`,
     goLeft: 1,
   },
+  {
+    icon: 'FullWidth',
+    label: 'inlineCode',
+    keyword: '`',
+    value: '``',
+    goLeft: 1,
+  },
+  {
+    icon: 'FullWidth',
+    label: 'codeBlock',
+    keyword: '`',
+    value: '```\n\n```\n',
+    goTop: 2,
+  },
 ];
+
+// TODO 提示列表超过一定长度的时候，需要跟随箭头上下滚动列表，以保证待选择项始终可见
+
+// 代码语言的候选表
+const CodeLangSuggestList = (() => {
+  const CodePreviewLangSuggestList = codePreviewLangSelectList.map((lang) => ({
+    icon: 'FullWidth',
+    label: lang,
+    keyword: '```',
+    value: `\`\`\`${lang}\n\n\`\`\`\n`,
+    goTop: 2,
+    exactMatch: true,
+  }));
+
+  const CodePreviewLangSuggestListExact = [];
+  codePreviewLangSelectList.forEach((lang) => {
+    let str = '';
+    for (const i of lang) {
+      str += i;
+      CodePreviewLangSuggestListExact.push({
+        icon: 'FullWidth',
+        label: lang,
+        keyword: `\`\`\`${str}`,
+        value: `\`\`\`${lang}\n\n\`\`\`\n`,
+        goTop: 2,
+        exactMatch: true,
+      });
+    }
+  });
+
+  return CodePreviewLangSuggestList.concat(CodePreviewLangSuggestListExact);
+})();
+
 /*
  * 除开系统联想候选表的其他所有表之和
  */
-const OtherSuggestList = HalfWidthSuggestList.concat(MoreSuggestList);
+const OtherSuggestList = HalfWidthSuggestList.concat(MoreSuggestList).concat(CodeLangSuggestList);
+
 export function allSuggestList(keyword, locales) {
   const systemSuggestList = [].concat(SystemSuggestList);
   const otherSuggestList = [].concat(OtherSuggestList);
   systemSuggestList.forEach((item) => {
-    item.label = locales ? locales[item.label] : item.label;
+    item.label = locales[item.label] || item.label;
   });
   otherSuggestList.forEach((item) => {
-    item.label = locales ? locales[item.label] : item.label;
+    item.label = locales[item.label] || item.label;
   });
   if (keyword[0] === '/' || keyword[0] === '、' || addonsKeywords.includes(keyword[0])) {
     systemSuggestList.forEach((item) => {
