@@ -29,6 +29,15 @@ export interface CherryOptions {
     pdf: string,
     file: string,
   };
+  /** 文件是否支持多选 */
+  multipleFileSelection: {
+    video: boolean;
+    audio: boolean;
+    image: boolean;
+    word: boolean;
+    pdf: boolean;
+    file: boolean;
+  };
   /** 有哪些主题 */
   theme: {className: string, label: string}[];
   /** 定义主题的作用范围，相同themeNameSpace的实例共享主题配置 */
