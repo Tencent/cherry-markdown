@@ -59,6 +59,8 @@ export interface CherryOptions {
     beforeImageMounted?: (srcProp: string, src: string) => { srcProp: string; src: string };
     onClickPreview?: (e: MouseEvent) => void;
     onCopyCode?: (e: ClipboardEvent, code: string) => string|false;
+    onExpandCode?: (e: ClipboardEvent, code: string) => string|false;
+    onUnExpandCode?: (e: ClipboardEvent, code: string) => string|false;
     changeString2Pinyin?: (str: string) => string;
     onPaste?: (clipboardData: ClipboardEvent['clipboardData']) => string|boolean;
   };
