@@ -30,7 +30,7 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
   /** 编辑区域配置 */
   editor: CherryEditorOptions;
   /** 工具栏区域配置 */
-  toolbars: CherryToolbarsOptions<T['CustomToolbar']>;
+  toolbars: CherryToolbarsOptions<T['CustomToolbar']> | undefined;
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: string;
   /** 文件上传回调 */
@@ -343,11 +343,11 @@ export interface CherryToolbarsOptions<F extends CherryToolbarsCustomType = Cher
   | false;
   /** 是否展示悬浮目录 */
   toc?: false | {
-    updateLocationHash?: boolean, // 要不要更新URL的hash
-    defaultModel?: 'pure' | 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
-    showAutoNumber?: boolean, // 是否显示自增序号
-    position?: 'absolute' | 'fixed', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
-    cssText?: string, // 额外样式
+    updateLocationHash: boolean, // 要不要更新URL的hash
+    defaultModel: 'pure' | 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
+    showAutoNumber: boolean, // 是否显示自增序号
+    position: 'absolute' | 'fixed', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
+    cssText: string, // 额外样式
   };
   /** 不展示在编辑器中的工具栏，只使用工具栏的api和快捷键功能 */
   hiddenToolbar?: any[];
