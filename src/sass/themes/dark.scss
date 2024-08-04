@@ -135,6 +135,112 @@ $mdSvgTextColor: rgb(250, 160, 0);
       }
     }
   }
+  /* 目录区域样式 */
+  .cherry-flex-toc {
+    &:hover {
+      background-color: #d0cece;
+      width: 260px;
+    }
+    .cherry-toc-head {
+      i {
+        &:hover {
+          color: $toolbarColorItemHoverBorderColor;
+        }
+      }
+    }
+    .cherry-toc-list {
+      .cherry-toc-one-a {
+        &.current {
+          border-left-color: rgb(255, 100, 33);
+          color: rgb(255, 100, 33);
+        }
+        &:hover {
+          border-left-color: rgb(247, 162, 14);
+          color: rgb(247, 162, 14) ;
+        }
+      }
+    }
+
+    &.cherry-flex-toc__pure {
+      width: 30px;
+      height: calc(100% - 200px);
+      max-height: 600px;
+      background: #ffffff00;
+      box-shadow: none;
+      border-radius: 0;
+      .cherry-toc-head {
+        height: 25px;
+        border-bottom: 1px dashed #33333300;
+        .cherry-toc-title {
+          display: none;
+        }
+        .ch-icon-chevronsRight {
+          display: none;
+        }
+        .ch-icon-chevronsLeft {
+          display: inline;
+        }
+      }
+      .cherry-toc-list {
+        padding-left: 7px;
+        .cherry-toc-one-a {
+          overflow: hidden;
+          width: 0;
+          margin-bottom: 3px;
+          height: 5px;
+          border-left-width: 18px;
+        }
+      }
+    }
+
+    &.auto-num {
+      .cherry-toc-list {
+        counter-reset: toclevel1;
+  
+        .cherry-toc-one-a__1 {
+          counter-reset: toclevel2;
+        }
+        .cherry-toc-one-a__2 {
+          counter-reset: toclevel3;
+        }
+        .cherry-toc-one-a__3 {
+          counter-reset: toclevel4;
+        }
+        .cherry-toc-one-a__4 {
+          counter-reset: toclevel5;
+        }
+        .cherry-toc-one-a__5 {
+          counter-reset: toclevel6;
+        }
+        .cherry-toc-one-a__1:before {
+          counter-increment: toclevel1;
+          content: counter(toclevel1) '. ';
+        }
+        .cherry-toc-one-a__2:before {
+          counter-increment: toclevel2;
+          content: counter(toclevel1) '.' counter(toclevel2) '. ';
+        }
+        .cherry-toc-one-a__3:before {
+          counter-increment: toclevel3;
+          content: counter(toclevel1) '.' counter(toclevel2) '.' counter(toclevel3) '. ';
+        }
+        .cherry-toc-one-a__4:before {
+          counter-increment: toclevel4;
+          content: counter(toclevel1) '.' counter(toclevel2) '.' counter(toclevel3) '.' counter(toclevel4) '. ';
+        }
+        .cherry-toc-one-a__5:before {
+          counter-increment: toclevel5;
+          content: counter(toclevel1) '.' counter(toclevel2) '.' counter(toclevel3) '.' counter(toclevel4) '.'
+            counter(toclevel5) '. ';
+        }
+        .cherry-toc-one-a__6:before {
+          counter-increment: toclevel5;
+          content: counter(toclevel1) '.' counter(toclevel2) '.' counter(toclevel3) '.' counter(toclevel4) '.'
+            counter(toclevel5) '.' counter(toclevel6) '. ';
+        }
+      }
+    }
+  }
 
 }
 /** 预览区域样式 */
