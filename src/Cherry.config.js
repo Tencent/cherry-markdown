@@ -52,6 +52,62 @@ const callbacks = {
       callback('images/demo-dog.png');
     }
   },
+  fileUploadMulti(files, callback) {
+    const fileType = files[0].type;
+    const promises = [];
+    for (const file of files) {
+      const promise = new Promise((resolve) => {
+        if (/video/i.test(fileType)) {
+          resolve({
+            url: 'images/demo-dog.png',
+            params: {
+              name: `${file.name.replace(/\.[^.]+$/, '')}`,
+              poster: 'images/demo-dog.png?poster=true',
+              isBorder: true,
+              isShadow: true,
+              isRadius: true,
+            },
+          });
+        } else if (/image/i.test(fileType)) {
+          // 如果上传的是图片，则默认回显base64内容（因为没有图床）
+          // 创建 FileReader 对象
+          const reader = new FileReader();
+          // 读取文件内容
+          reader.onload = (event) => {
+            // 获取 base64 内容
+            const base64Content = event.target.result;
+            resolve({
+              url: base64Content,
+              params: {
+                name: `${file.name.replace(/\.[^.]+$/, '')}`,
+                isShadow: true,
+                width: '60%',
+                height: 'auto',
+              },
+            });
+          };
+          reader.readAsDataURL(file);
+        } else if (/audio/i.test(fileType)) {
+          resolve({
+            url: 'images/demo-dog.png',
+            params: {
+              name: `${file.name.replace(/\.[^.]+$/, '')}`,
+              poster: 'images/demo-dog.png?poster=true',
+              isBorder: true,
+              isShadow: true,
+              isRadius: true,
+            },
+          });
+        } else {
+          resolve('images/demo-dog.png');
+        }
+      });
+      promises.push(promise);
+    }
+    Promise.all(promises).then((results) => {
+      callback(results);
+    });
+  },
   afterChange: (text, html) => {},
   afterInit: (text, html) => {},
   beforeImageMounted: (srcProp, src) => ({ srcProp, src }),
@@ -365,6 +421,17 @@ const defaultConfig = {
     pdf: '.pdf',
     file: '*',
   },
+  /**
+   * 上传文件的时候是否开启多选
+   */
+  multipleFileSelection: {
+    video: false,
+    audio: false,
+    image: false,
+    word: false,
+    pdf: false,
+    file: false,
+  },
   callback: {
     /**
      * 全局的URL处理器
@@ -375,6 +442,8 @@ const defaultConfig = {
     urlProcessor: callbacks.urlProcessor,
     // 上传文件的回调
     fileUpload: callbacks.fileUpload,
+    // 上传多文件的回调
+    fileUploadMulti: callbacks.fileUploadMulti,
     beforeImageMounted: callbacks.beforeImageMounted,
     // 预览区域点击事件，previewer.enablePreviewerBubble = true 时生效
     onClickPreview: callbacks.onClickPreview,
