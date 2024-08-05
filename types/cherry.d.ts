@@ -29,6 +29,15 @@ export interface CherryOptions {
     pdf: string,
     file: string,
   };
+  /** 文件是否支持多选 */
+  multipleFileSelection: {
+    video: boolean;
+    audio: boolean;
+    image: boolean;
+    word: boolean;
+    pdf: boolean;
+    file: boolean;
+  };
   /** 有哪些主题 */
   theme: {className: string, label: string}[];
   /** 定义主题的作用范围，相同themeNameSpace的实例共享主题配置 */
@@ -42,6 +51,8 @@ export interface CherryOptions {
     urlProcessor?: (url: string, srcType: 'image' | 'audio' | 'video' | 'autolink' | 'link') => string;
     /** 文件上传回调 */
     fileUpload?: CherryFileUploadHandler;
+    /** 多文件上传回调 */
+    fileUploadMulti?: CherryFileUploadHandler;
     /** 编辑器内容改变并完成渲染后触发 */
     afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */

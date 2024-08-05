@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { handleUpload, handleParams } from '@/utils/file';
+import { handleUpload, handleParams, handleUploadMulti } from '@/utils/file';
 /**
  * 插入音频
  */
@@ -30,6 +30,33 @@ export default class Audio extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    const accept = this.$cherry.options?.fileTypeLimitMap?.audio ?? '*';
+    const multiple = this.$cherry?.options.multipleFileSelection?.audio ?? false;
+    if (multiple) {
+      if (this.hasCacheOnce()) {
+        // @ts-ignore
+        const arr = this.getAndCleanCacheOnce();
+        let res = '';
+        // @ts-ignore
+        for (const { url, params } of arr) {
+          const begin = '!audio[';
+          const end = `](${url})`;
+          this.registerAfterClickCb(() => {
+            this.setLessSelection(begin, end);
+          });
+          const finalName = params.name ? params.name : name;
+          res += `${begin}${finalName}${handleParams(params)}${end}\n`;
+        }
+        return res;
+      }
+      // 插入图片，调用上传文件逻辑
+      handleUploadMulti(this.editor, 'audio', accept, (arr) => {
+        this.setCacheOnce(arr);
+        this.fire(null);
+      });
+      this.updateMarkdown = false;
+      return selection;
+    }
     if (this.hasCacheOnce()) {
       // @ts-ignore
       const { name, url, params } = this.getAndCleanCacheOnce();
@@ -41,7 +68,6 @@ export default class Audio extends MenuBase {
       const finalName = params.name ? params.name : name;
       return `${begin}${finalName}${handleParams(params)}${end}`;
     }
-    const accept = this.$cherry.options?.fileTypeLimitMap?.audio ?? '*';
     // 插入图片，调用上传文件逻辑
     handleUpload(this.editor, 'audio', accept, (name, url, params) => {
       this.setCacheOnce({ name, url, params });
