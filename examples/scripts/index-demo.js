@@ -156,6 +156,14 @@ var basicConfig = {
       },
     },
   },
+  multipleFileSelection: {
+    video: true,
+    audio: false,
+    image: true,
+    word: false,
+    pdf: true,
+    file: true,
+  },
   toolbars: {
     toolbar: [
       'bold',
@@ -179,7 +187,7 @@ var basicConfig = {
       '|',
       'formula',
       {
-        insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'inlineCode', 'formula', 'toc', 'table', 'pdf', 'word'],
+        insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'inlineCode', 'formula', 'toc', 'table', 'pdf', 'word', 'file'],
       },
       'graph',
       'customMenuTable',
