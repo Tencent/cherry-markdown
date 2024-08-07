@@ -1,0 +1,26 @@
+.cherry {
+  * {
+    &::-webkit-scrollbar {
+      height: 7px;
+      width: 7px;
+      background: transparent
+    }
+
+    &::-webkit-scrollbar:hover {
+      background: rgba(128, 128, 128, 0.1)
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #d3d7da;
+      -webkit-border-radius: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.6)
+    }
+
+    &::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+  }
+}

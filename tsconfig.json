@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    // "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "baseUrl": ".",
+    "allowJs": true,
+    "checkJs": true,
+    "declaration": true,
+    "declarationDir": "dist/types",
+    "emitDeclarationOnly": true,
+    // "outFile": "types/cherry-markdown.d.ts",
+    "outDir": "dist/types",
+    "target": "ES5",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "~types/*": [
+        "types/*"
+      ],
+    },
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+  },
+  "include": [
+    "src/index.js",
+    "src/index.core.js",
+    "src/index.engine.js",
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "src/libs/**/*",
+    "dist"
+  ],
+  "files": [
+    "types/codemirror.d.ts",
+    "types/global.d.ts"
+  ]
+}

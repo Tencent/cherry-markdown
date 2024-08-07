@@ -1,0 +1,82 @@
+.formula-utils-bubble-container {
+  width: 350px;
+  height: 40px;
+  background-color: #fff;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: none;
+  z-index: 1000;
+  box-sizing: border-box;
+
+  // 每一个子菜单
+  .formula-utils-btn {
+    flex: 1;
+    position: relative;
+
+    & > button {
+      width: 100%;
+      height: 100%;
+      border: 1px solid #fff;
+      background-color: #ebecf2;
+      cursor: pointer;
+      border-radius: 5px;
+
+      &:hover {
+        background-color: #eee;
+      }
+
+      &:focus {
+        outline: none;
+      }
+
+      &:active {
+        background-color: #ddd;
+      }
+
+      &:hover + .formula-utils-submenu {
+        display: block;
+      }
+    }
+
+    .formula-utils-submenu {
+      position: absolute;
+      display: none;
+      width: 100%;
+      background-color: #fff;
+      border: 1px solid #f8f9fa;
+      left: 0;
+      top: 100%;
+      box-shadow: 0 0 5px #f8f9fa;
+
+      &:hover {
+        display: block;
+      }
+
+      div {
+        width: 100%;
+        height: 40px;
+
+        button {
+          width: 100%;
+          height: 100%;
+          border: 1px solid #fff;
+          background-color: #fff;
+          cursor: pointer;
+
+          &:hover {
+            background-color: #eee;
+          }
+
+          &:focus {
+            outline: none;
+          }
+
+          &:active {
+            background-color: #ddd;
+          }
+        }
+      }
+    }
+  }
+}

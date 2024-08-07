@@ -1,0 +1,44 @@
+{
+  "name": "cherry-noted",
+  "version": "0.0.5",
+  "main": "dist-electron/main/index.js",
+  "description": "cherry markdown editor in the Desktop.",
+  "author": "Cherry Oteam",
+  "license": "Apache-2.0",
+  "private": true,
+  "keywords": [
+    "electron",
+    "vite",
+    "vue3",
+    "vue"
+  ],
+  "debug": {
+    "env": {
+      "VITE_DEV_SERVER_URL": "http://127.0.0.1:3344/"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build && electron-builder"
+  },
+  "devDependencies": {
+    "@iconify/json": "^2.2.143",
+    "@iconify/vue": "^4.1.1",
+    "@types/node": "^20.9.2",
+    "@vitejs/plugin-vue": "^4.5.0",
+    "electron": "^23.1.1",
+    "electron-builder": "^23.6.0",
+    "sass": "^1.62.0",
+    "typescript": "^5.0.2",
+    "vite": "^4.1.4",
+    "vite-plugin-electron": "0.15.4",
+    "vite-plugin-electron-renderer": "^0.14.5",
+    "vue-tsc": "^1.8.22"
+  },
+  "dependencies": {
+    "cherry-markdown": "^0.8.34",
+    "pinia": "^2.1.7",
+    "tdesign-vue-next": "^1.6.8",
+    "vue": "^3.3.8"
+  }
+}
