@@ -187,7 +187,7 @@ const defaultConfig = {
       htmlWhiteList: '',
       /**
        * 适配流式会话的场景，开启后将具备以下特性：
-       * - cherry渲染频率从50ms/次提升到10ms/次 
+       * - cherry渲染频率从50ms/次提升到10ms/次
        * - 代码块自动闭合，相当于强制 `engine.syntax.codeBlock.selfClosing=true`
        * - 文章末尾的段横线标题语法（`\n-`）失效
        * - 表格语法自动闭合，相当于强制`engine.syntax.table.selfClosing=true`
