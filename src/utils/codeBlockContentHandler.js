@@ -160,7 +160,7 @@ export default class CodeBlockHandler {
    * 展示代码块区域的按钮
    */
   $showBtn(isEnableBubbleAndEditorShow) {
-    const { changeLang, editCode, copyCode, lang, expandCode, lines } = this.target.dataset;
+    const { changeLang, editCode, copyCode, lang, expandCode } = this.target.dataset;
     this.container.innerHTML = '';
     if (changeLang === 'true' && isEnableBubbleAndEditorShow) {
       // 添加删除btn
