@@ -200,7 +200,7 @@ export default class CodeBlock extends ParagraphBase {
       cacheCode = Prism.highlight(cacheCode, Prism.languages[lang], lang);
       cacheCode = this.renderLineNumber(cacheCode);
     }
-    const needUnExpand = this.expandCode && $code.match(/\n/g)?.length > 10;  // 是否需要收起代码块
+    const needUnExpand = this.expandCode && $code.match(/\n/g)?.length > 10; // 是否需要收起代码块
     cacheCode = `<div
         data-sign="${sign}"
         data-type="codeBlock"
