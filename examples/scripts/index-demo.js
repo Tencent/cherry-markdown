@@ -118,6 +118,7 @@ var basicConfig = {
       codeBlock: {
         theme: 'twilight',
         lineNumber: true, // 默认显示行号
+        expandCode: true,
       },
       table: {
         enableChart: true,
