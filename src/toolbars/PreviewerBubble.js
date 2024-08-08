@@ -254,6 +254,16 @@ export default class PreviewerBubble {
       }
     }
 
+    // 点击展开代码块操作
+    if (target.className === 'expand-btn ' || target.className === 'ch-icon ch-icon-expand') {
+      const expandBtnDom = this.$getClosestNode(target, 'DIV');
+      expandBtnDom.parentNode.parentNode.classList.remove('cherry-code-unExpand');
+      expandBtnDom.parentNode.parentNode.classList.add('cherry-code-expand');
+      if (this.bubbleHandler?.hover?.unExpandDom) {
+        this.bubbleHandler.hover.unExpandDom.classList.remove('hidden');
+      }
+    }
+
     if (!this.enablePreviewerBubble) {
       return;
     }

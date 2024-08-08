@@ -187,8 +187,11 @@ const defaultConfig = {
       htmlWhiteList: '',
       /**
        * 适配流式会话的场景，开启后将具备以下特性：
-       * 1. 代码块自动闭合，相当于强制 `engine.syntax.codeBlock.selfClosing=true`
-       * 2. 文章末尾的段横线标题语法（`\n-`）失效
+       * - cherry渲染频率从50ms/次提升到10ms/次 
+       * - 代码块自动闭合，相当于强制 `engine.syntax.codeBlock.selfClosing=true`
+       * - 文章末尾的段横线标题语法（`\n-`）失效
+       * - 表格语法自动闭合，相当于强制`engine.syntax.table.selfClosing=true`
+       * - 加粗、斜体语法自动闭合，相当于强制`engine.syntax.fontEmphasis.selfClosing=true`
        *
        * 后续如果有新的需求，可提issue反馈
        */
@@ -238,8 +241,7 @@ const defaultConfig = {
         copyCode: true, // 是否显示“复制”按钮
         editCode: true, // 是否显示“编辑”按钮
         changeLang: true, // 是否显示“切换语言”按钮
-        expandCode: true, // 是否展开代码块
-        unExpandCode: false, // 是否展开代码块
+        expandCode: false, // 是否展开/收起代码块，当代码块行数大于10行时，会自动收起代码块
         selfClosing: true, // 自动闭合，为true时，当md中有奇数个```时，会自动在md末尾追加一个```
         customRenderer: {
           // 自定义语法渲染器
