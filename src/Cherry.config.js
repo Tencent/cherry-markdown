@@ -412,6 +412,8 @@ const defaultConfig = {
   },
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: '',
+  // drawio iframe的样式
+  drawioIframeStyle: 'border: none;',
   /**
    * 上传文件的时候用来指定文件类型
    */

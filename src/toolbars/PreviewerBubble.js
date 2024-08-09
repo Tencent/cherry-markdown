@@ -249,10 +249,18 @@ export default class PreviewerBubble {
           return;
         }
         const xmlData = decodeURI(target.getAttribute('data-xml'));
-        drawioDialog(this.previewer.$cherry.options.drawioIframeUrl, xmlData, (newData) => {
-          const { xmlData, base64 } = newData;
-          this.editor.editor.replaceSelection(`(${base64}){data-type=drawio data-xml=${encodeURI(xmlData)}}`, 'around');
-        });
+        drawioDialog(
+          this.previewer.$cherry.options.drawioIframeUrl,
+          this.previewer.$cherry.options.drawioIframeStyle,
+          xmlData,
+          (newData) => {
+            const { xmlData, base64 } = newData;
+            this.editor.editor.replaceSelection(
+              `(${base64}){data-type=drawio data-xml=${encodeURI(xmlData)}}`,
+              'around',
+            );
+          },
+        );
         return;
       }
     }
