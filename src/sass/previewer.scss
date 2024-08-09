@@ -116,6 +116,30 @@
         color: #FFF;
       }
     }
+    &-sort-container {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+      list-style-type: none;
+    }
+    &__sort {
+      pointer-events: auto;
+      display: flex;
+      justify-content: center;
+      position: absolute;
+      color: #3582fb;
+      width: 12px;
+      height: 12px;
+      line-height: 12px;
+      border: 1px solid #3582fb00;
+      background-color: #ffffff00;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    }
+
   }
   @keyframes changeBgColor {
     0% { background-color: #ffffcc88; }
@@ -125,4 +149,4 @@
   .cherry-highlight-line {
     animation: changeBgColor 3s;
   }
-}
+
