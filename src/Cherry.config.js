@@ -447,7 +447,7 @@ const defaultConfig = {
     // 上传多文件的回调
     fileUploadMulti: callbacks.fileUploadMulti,
     beforeImageMounted: callbacks.beforeImageMounted,
-    // 预览区域点击事件，previewer.enablePreviewerBubble = true 时生效
+    // 预览区域点击事件
     onClickPreview: callbacks.onClickPreview,
     // 复制代码块代码时的回调
     onCopyCode: callbacks.onCopyCode,
