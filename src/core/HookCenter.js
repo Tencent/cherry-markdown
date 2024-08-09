@@ -104,7 +104,7 @@ export default class HookCenter {
   /**
    *
    * @param {(typeof SyntaxBase)[]} hooksConfig
-   * @param {Partial<CherryOptions>} editorConfig
+   * @param {CherryOptions} editorConfig
    */
   constructor(hooksConfig, editorConfig, cherry) {
     this.$locale = cherry.locale;
@@ -129,7 +129,7 @@ export default class HookCenter {
   /**
    * 注册系统默认的语法hook
    * @param {any[]} hooksConfig 在hookconfig.js里定义的配置
-   * @param {Partial<CherryOptions>} editorConfig 编辑器配置
+   * @param {CherryOptions} editorConfig 编辑器配置
    */
   registerInternalHooks(hooksConfig, editorConfig) {
     hooksConfig.forEach(
@@ -148,7 +148,7 @@ export default class HookCenter {
   /**
    * 注册第三方的语法hook
    * @param {CherryEngineOptions['customSyntax']} customHooks 用户传入的配置
-   * @param {Partial<CherryOptions>} editorConfig 编辑器配置
+   * @param {CherryOptions} editorConfig 编辑器配置
    */
   registerCustomHooks(customHooks, editorConfig) {
     if (!customHooks) {
@@ -202,7 +202,7 @@ export default class HookCenter {
   /**
    *
    * @param {((...args: any[]) => any) | typeof SyntaxBase} HookClass
-   * @param {Partial<CherryOptions>} editorConfig
+   * @param {CherryOptions} editorConfig
    * @param {Omit<CustomSyntaxRegConfig, 'syntaxClass'>} [customHookConfig]
    * @returns
    */
