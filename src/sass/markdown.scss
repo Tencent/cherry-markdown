@@ -512,8 +512,20 @@ div[data-type='codeBlock'] {
     @import 'prism/dark';
   }
 
-  [data-code-block-theme='funky'] & {
-    @import 'prism/funky';
+  [data-code-block-theme='one-dark'] & {
+    @import 'prism/one-dark';
+  }
+
+  [data-code-block-theme='one-light'] & {
+    @import 'prism/one-light';
+  }
+
+  [data-code-block-theme='vs-dark'] & {
+    @import 'prism/vs-dark';
+  }
+
+  [data-code-block-theme='vs-light'] & {
+    @import 'prism/vs-light';
   }
 
   [data-code-block-theme='okaidia'] & {
