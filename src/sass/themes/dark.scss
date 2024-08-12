@@ -489,13 +489,13 @@ $mdSvgTextColor: rgb(250, 160, 0);
     }
   }
 
-  @keyframes changeBgColor {
+  @keyframes changeBgColorDark {
     0% { background-color: rgb(78 76 76); }
     60% { background-color: rgb(78 76 76); }
     100% { background-color: $previewBg; }
   }
   .cherry-highlight-line {
-    background: $previewBg;
+    animation: changeBgColorDark 3s;
   }
 
 }
