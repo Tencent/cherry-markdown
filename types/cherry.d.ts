@@ -18,6 +18,8 @@ export interface CherryOptions {
   toolbars: CherryToolbarOptions;
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: string;
+  // drawio iframe的样式
+  drawioIframeStyle: string;
   /** 文件上传回调 */
   fileUpload: CherryFileUploadHandler;
   /** 上传文件的时候用来指定文件类型 */
@@ -28,6 +30,15 @@ export interface CherryOptions {
     word: string,
     pdf: string,
     file: string,
+  };
+  /** 文件是否支持多选 */
+  multipleFileSelection: {
+    video: boolean;
+    audio: boolean;
+    image: boolean;
+    word: boolean;
+    pdf: boolean;
+    file: boolean;
   };
   /** 有哪些主题 */
   theme: {className: string, label: string}[];
@@ -42,6 +53,8 @@ export interface CherryOptions {
     urlProcessor?: (url: string, srcType: 'image' | 'audio' | 'video' | 'autolink' | 'link') => string;
     /** 文件上传回调 */
     fileUpload?: CherryFileUploadHandler;
+    /** 多文件上传回调 */
+    fileUploadMulti?: CherryFileUploadHandler;
     /** 编辑器内容改变并完成渲染后触发 */
     afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */
@@ -50,6 +63,8 @@ export interface CherryOptions {
     beforeImageMounted?: (srcProp: string, src: string) => { srcProp: string; src: string };
     onClickPreview?: (e: MouseEvent) => void;
     onCopyCode?: (e: ClipboardEvent, code: string) => string|false;
+    onExpandCode?: (e: ClipboardEvent, code: string) => string|false;
+    onUnExpandCode?: (e: ClipboardEvent, code: string) => string|false;
     changeString2Pinyin?: (str: string) => string;
     onPaste?: (clipboardData: ClipboardEvent['clipboardData']) => string|boolean;
   };
