@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.46](https://github.com/Tencent/cherry-markdown/compare/v0.8.45...v0.8.46) (2024-08-12)
+
+
+### Features
+
+* [#813](https://github.com/Tencent/cherry-markdown/issues/813) 增加对drawioIframe样式的配置 ([91e943a](https://github.com/Tencent/cherry-markdown/commit/91e943ab23795ed9f92cda89dcc362c1c4c68136))
+* [#815](https://github.com/Tencent/cherry-markdown/issues/815) 多文件上传 ([#863](https://github.com/Tencent/cherry-markdown/issues/863)) ([bca1789](https://github.com/Tencent/cherry-markdown/commit/bca1789310473319336046c96c30edef5555ecaa))
+* [#822](https://github.com/Tencent/cherry-markdown/issues/822) 增加代码块主题 ([9ae7cb2](https://github.com/Tencent/cherry-markdown/commit/9ae7cb2539bb2ceafd6692f05fc9cdaf4e563be9))
+* 预览区代码块支持展开收起功能和对应的配置 ([#793](https://github.com/Tencent/cherry-markdown/issues/793)) ([cf68be2](https://github.com/Tencent/cherry-markdown/commit/cf68be2b57926142a59f004714dca355742503d3))
+* pr-merge action execute limit repository ([aa3ca4d](https://github.com/Tencent/cherry-markdown/commit/aa3ca4dcda2ba7cd348e7e63b5a1cb4ab979df1e))
+
+
+### Bug Fixes
+
+* [#858](https://github.com/Tencent/cherry-markdown/issues/858) 修复漏洞 ([122e27a](https://github.com/Tencent/cherry-markdown/commit/122e27a34c546c4e6f25826b955d0c907db547eb))
+* [#866](https://github.com/Tencent/cherry-markdown/issues/866) 修复draw.io在预览区无脑打开编辑框的问题 ([1c907da](https://github.com/Tencent/cherry-markdown/commit/1c907dad6eb1438e0bde5f6bfe3ae648958ee206))
+* 修复代码块展开收起引入的bug，并优化展开收起的交互体验 ([4a3c195](https://github.com/Tencent/cherry-markdown/commit/4a3c19574f8ffa6ed739c22d0ba8a0c77b455e0b))
+
+
+### Css or Code Change
+
+* 暗黑主题优化 ([#837](https://github.com/Tencent/cherry-markdown/issues/837)) ([9425441](https://github.com/Tencent/cherry-markdown/commit/9425441b29264728d942cefeaa96372c2f5118a0))
+* 修改图标产生的冲突 ([1ef9e47](https://github.com/Tencent/cherry-markdown/commit/1ef9e47ede0267b4a3fa03e99174f5282d94f346))
+* 优化暗黑模式下的细节 ([5bc8d6a](https://github.com/Tencent/cherry-markdown/commit/5bc8d6a338f48c3b2a51e420802d2193f8a9d08f))
+* 优化暗黑模式下的细节 ([b294536](https://github.com/Tencent/cherry-markdown/commit/b294536f07965d3a628262215af635c1afd8eda9))
+
 ### [0.8.45](https://github.com/Tencent/cherry-markdown/compare/v0.8.44...v0.8.45) (2024-07-25)
 
 
