@@ -1,4 +1,4 @@
-name: PR Closed
+name: PR Closed Or Merge
 
 on:
   pull_request_target:
@@ -7,20 +7,14 @@ on:
 
 jobs:
   remove_assets:
+    # 不需要在fork仓库的pr中运行
+    if: github.repository == 'Tencent/cherry-markdown'
     runs-on: ubuntu-latest
 
     steps:
       # 检出仓库代码
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      # 打印 PR 详细信息
-      - name: Print PR details
-        run: |
-          echo "The PR ID is ${{ github.event.pull_request.id }}"
-          echo "The PR number is ${{ github.event.pull_request.number }}"
-          echo "The PR title is ${{ github.event.pull_request.title }}"
-          echo "The PR branch is ${{ github.event.pull_request.head.ref }}"
 
       # 安装 cos-nodejs-sdk-v5
       - name: Install cos-nodejs-sdk-v5

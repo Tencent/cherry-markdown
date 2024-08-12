@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { handleUpload } from '@/utils/file';
+import { handleUpload, handleUploadMulti } from '@/utils/file';
 /**
  * 插入pdf
  */
@@ -30,6 +30,32 @@ export default class Pdf extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    const accept = this.$cherry.options?.fileTypeLimitMap?.pdf ?? '*';
+    const multiple = this.$cherry?.options.multipleFileSelection?.pdf ?? false;
+    if (multiple) {
+      if (this.hasCacheOnce()) {
+        const arr = this.getAndCleanCacheOnce();
+        let res = '';
+        // @ts-ignore
+        for (const { url, params } of arr) {
+          const begin = '[';
+          const end = `](${url})`;
+          this.registerAfterClickCb(() => {
+            this.setLessSelection(begin, end);
+          });
+          const finalName = params.name ? params.name : name;
+          res += `${begin}${finalName}${end}\n`;
+        }
+        return res;
+      }
+      // 插入图片，调用上传文件逻辑
+      handleUploadMulti(this.editor, 'pdf', accept, (arr) => {
+        this.setCacheOnce(arr);
+        this.fire(null);
+      });
+      this.updateMarkdown = false;
+      return selection;
+    }
     if (this.hasCacheOnce()) {
       // @ts-ignore
       const { name, url, params } = this.getAndCleanCacheOnce();
@@ -41,7 +67,6 @@ export default class Pdf extends MenuBase {
       const finalName = params.name ? params.name : name;
       return `${begin}${finalName}${end}`;
     }
-    const accept = this.$cherry.options?.fileTypeLimitMap?.pdf ?? '*';
     // 插入图片，调用上传文件逻辑
     handleUpload(this.editor, 'pdf', accept, (name, url, params) => {
       this.setCacheOnce({ name, url, params });

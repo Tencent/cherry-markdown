@@ -118,6 +118,7 @@ var basicConfig = {
       codeBlock: {
         theme: 'twilight',
         lineNumber: true, // 默认显示行号
+        expandCode: true,
       },
       table: {
         enableChart: true,
@@ -156,6 +157,14 @@ var basicConfig = {
       },
     },
   },
+  multipleFileSelection: {
+    video: true,
+    audio: false,
+    image: true,
+    word: false,
+    pdf: true,
+    file: true,
+  },
   toolbars: {
     toolbar: [
       'bold',
@@ -179,7 +188,7 @@ var basicConfig = {
       '|',
       'formula',
       {
-        insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'inlineCode', 'formula', 'toc', 'table', 'pdf', 'word'],
+        insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'inlineCode', 'formula', 'toc', 'table', 'pdf', 'word', 'file'],
       },
       'graph',
       'customMenuTable',
