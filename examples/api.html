@@ -271,6 +271,56 @@ cherryObj.toolbar.toolbarHandlers.italic()</textarea>
     </div>
 
     <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.strikethrough()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入删除线语法</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.toolbar.toolbarHandlers.strikethrough()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.size(fontSize: int)</h2>
+      <p class="one-api__desc">向cherry编辑器中插入字体大小语法</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.toolbar.toolbarHandlers.size(28)</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.color(param:string)</h2>
+      <p class="one-api__desc">
+        向cherry编辑器中插入字体颜色或字体背景色语法
+        <table class="cherry-api-table">
+          <thead>
+            <tr>
+              <th style="width: 400px;">param</th>
+              <th>效果</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>'color: #c2255c'</td>
+              <td>字体颜色</td>
+            </tr>
+            <tr>
+              <td>'background-color: #c2255c'</td>
+              <td>字体背景颜色</td>
+            </tr>
+          </tbody>
+        </table>
+      </p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.toolbar.toolbarHandlers.color('color: #3582fb')</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
       <h2 class="one-api__name">toolbar.toolbarHandlers.header(level:int)</h2>
       <p class="one-api__desc">向cherry编辑器中插入标题语法</p>
       <div class="one-api__try">
@@ -283,11 +333,65 @@ cherryObj.toolbar.toolbarHandlers.header(4)</textarea>
     </div>
 
     <div class="one-api">
-      <h2 class="one-api__name">toolbar.toolbarHandlers.strikethrough()</h2>
-      <p class="one-api__desc">向cherry编辑器中插入删除线语法</p>
+      <h2 class="one-api__name">toolbar.toolbarHandlers.quote()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入引用语法</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="2">
+cherryObj.toolbar.toolbarHandlers.quote()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.panel(param:string)</h2>
+      <p class="one-api__desc">
+        向cherry编辑器中插入对齐方式或信息面板语法
+        <table class="cherry-api-table">
+          <thead>
+            <tr>
+              <th style="width: 400px;">param</th>
+              <th>效果</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>'left'</td>
+              <td>左对齐</td>
+            </tr>
+            <tr>
+              <td>'center'</td>
+              <td>居中对齐</td>
+            </tr>
+            <tr>
+              <td>'right'</td>
+              <td>右对齐</td>
+            </tr>
+            <tr>
+              <td>'primary'</td>
+              <td>首选项</td>
+            </tr>
+            <tr>
+              <td>'info'</td>
+              <td>一般信息</td>
+            </tr>
+            <tr>
+              <td>'warning'</td>
+              <td>警告</td>
+            </tr>
+            <tr>
+              <td>'danger'</td>
+              <td>危险</td>
+            </tr>
+            <tr>
+              <td>'success'</td>
+              <td>成功</td>
+            </tr>
+          </tbody>
+        </table>
+      </p>
       <div class="one-api__try">
         <textarea id="setMarkdown" placeholder="输入内容">
-cherryObj.toolbar.toolbarHandlers.strikethrough()</textarea>
+cherryObj.toolbar.toolbarHandlers.panel('success')</textarea>
         <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
       </div>
     </div>

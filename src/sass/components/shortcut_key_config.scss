@@ -32,6 +32,9 @@
         .shortcut-key-config-panel-kbd {
           display: flex;
           gap: 10px;
+          min-width: 120px;
+          justify-content: right;
+
           .keyboard-key {
             border-radius: 3px;
             border-style: solid;
@@ -43,7 +46,7 @@
             vertical-align: middle;
             line-height: 20px;
             margin: 4px;
-            width: 10px;
+            min-width: 16px;
             text-align: center;
           }
         }

@@ -15,6 +15,46 @@
  */
 
 /**
+ * 多选上传文件的逻辑，如果有callback，则不再走默认的替换文本的逻辑，而是调用callback
+ * @param {string} type 上传文件的类型
+ */
+export function handleUploadMulti(editor, type = 'image', accept = '*', callback = null) {
+  // type为上传文件类型 image|video|audio|pdf|word
+  const input = document.createElement('input');
+  const inputMultiple = editor.$cherry.options.multipleFileSelection || false;
+  input.type = 'file';
+  input.id = 'fileUpload';
+  input.value = '';
+  input.style.display = 'none';
+  input.accept = accept;
+  input.multiple = inputMultiple;
+  // document.body.appendChild(input);
+  input.addEventListener('change', (event) => {
+    // @ts-ignore
+    const { files } = event.target;
+    // 文件上传后的回调函数可以由调用方自己实现
+    editor.$cherry.options.callback.fileUploadMulti(files, (arr) => {
+      // 文件上传的默认回调行数，调用方可以完全不使用该函数
+      if (arr.length === 0) {
+        return;
+      }
+      if (callback) {
+        return callback(arr);
+      }
+      let code = '';
+      for (const file of files) {
+        const { url } = file;
+        code += `${handleType(type, file, url)}/n`;
+      }
+      // 替换选中区域
+      // @ts-ignore
+      editor.editor.doc.replaceSelection(code);
+    });
+  });
+  input.click();
+}
+
+/**
  * 上传文件的逻辑，如果有callback，则不再走默认的替换文本的逻辑，而是调用callback
  * @param {string} type 上传文件的类型
  */
@@ -40,19 +80,7 @@ export function handleUpload(editor, type = 'image', accept = '*', callback = nu
         return callback(file.name, url, params);
       }
       let code = '';
-      if (type === 'image') {
-        // 如果是图片，则返回固定的图片markdown源码
-        code = `![${file.name}](${url})`;
-      } else if (type === 'video') {
-        // 如果是视频，则返回固定的视频markdown源码
-        code = `!video[${file.name}](${url})`;
-      } else if (type === 'audio') {
-        // 如果是音频，则返回固定的音频markdown源码
-        code = `!audio[${file.name}](${url})`;
-      } else {
-        // 默认返回超链接
-        code = `[${file.name}](${url})`;
-      }
+      code = handleType(type, file, url);
       // 替换选中区域
       // @ts-ignore
       editor.editor.doc.replaceSelection(code);
@@ -60,6 +88,30 @@ export function handleUpload(editor, type = 'image', accept = '*', callback = nu
   });
   input.click();
 }
+
+/**
+ * 处理要插入的代码
+ * @param type 文件类型
+ * @param file 文件
+ * @param url 路径
+ * @returns string
+ */
+const handleType = (type, file, url) => {
+  if (type === 'image') {
+    // 如果是图片，则返回固定的图片markdown源码
+    return `![${file.name}](${url})`;
+  }
+  if (type === 'video') {
+    // 如果是视频，则返回固定的视频markdown源码
+    return `!video[${file.name}](${url})`;
+  }
+  if (type === 'audio') {
+    // 如果是音频，则返回固定的音频markdown源码
+    return `!audio[${file.name}](${url})`;
+  }
+  // 默认返回超链接
+  return `[${file.name}](${url})`;
+};
 
 /**
  * 解析params参数
