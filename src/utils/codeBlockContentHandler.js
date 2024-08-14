@@ -160,7 +160,7 @@ export default class CodeBlockHandler {
    * 展示代码块区域的按钮
    */
   $showBtn(isEnableBubbleAndEditorShow) {
-    const { changeLang, editCode, copyCode, lang, expandCode, unexpandCode, lines } = this.target.dataset;
+    const { changeLang, editCode, copyCode, lang, expandCode } = this.target.dataset;
     this.container.innerHTML = '';
     if (changeLang === 'true' && isEnableBubbleAndEditorShow) {
       // 添加删除btn
@@ -183,6 +183,7 @@ export default class CodeBlockHandler {
       editDom.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        this.$expandCodeBlock(true);
         this.$hideAllBtn();
         this.parent.$removeAllPreviewerBubbles('click');
         this.parent.showCodeBlockPreviewerBubbles('click', this.target);
@@ -204,35 +205,21 @@ export default class CodeBlockHandler {
       this.copyDom = copyDom;
     }
     if (expandCode === 'true') {
-      if (lines - 3 <= 10) return;
-      if (this.target.dataset.unexpandCode === 'true') return;
-      // 添加展开btn
-      const expandDom = document.createElement('div');
-      expandDom.className = 'cherry-expand-code-block';
-      expandDom.innerHTML = '<i class="ch-icon ch-icon-expand"></i>';
-      this.container.appendChild(expandDom);
-      expandDom.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.parent.$removeAllPreviewerBubbles('click');
-        this.$expandCodeBlock('0');
-      });
-      this.expandDom = expandDom;
-    }
-    if (unexpandCode === 'true') {
-      if (lines - 3 <= 10) return;
-      if (this.target.dataset.expandCode === 'true') return;
+      const isExpand = this.target.classList.contains('cherry-code-expand');
+      const maskDom = this.target.querySelector('.cherry-mask-code-block');
       // 添加缩起btn
       const unExpandDom = document.createElement('div');
       unExpandDom.className = 'cherry-unExpand-code-block';
       unExpandDom.innerHTML = '<i class="ch-icon ch-icon-unExpand"></i>';
-      unExpandDom.style.top = `${(lines - 3) * 25}px`;
+      if (!isExpand || !maskDom) {
+        unExpandDom.classList.add('hidden');
+      }
       this.container.appendChild(unExpandDom);
       unExpandDom.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         this.parent.$removeAllPreviewerBubbles('click');
-        this.$expandCodeBlock('1');
+        this.$expandCodeBlock(false);
       });
       this.unExpandDom = unExpandDom;
     }
@@ -247,9 +234,6 @@ export default class CodeBlockHandler {
     }
     if (this.copyDom?.style?.display) {
       this.copyDom.style.display = 'none';
-    }
-    if (this.expandDom?.style?.display) {
-      this.expandDom.style.display = 'none';
     }
     if (this.unExpandDom?.style?.display) {
       this.unExpandDom.style.display = 'none';
@@ -298,36 +282,22 @@ export default class CodeBlockHandler {
   /**
    * 处理扩展、缩起代码块的操作
    */
-  $expandCodeBlock(str) {
-    const expandDomDiv = this.target.childNodes[1];
-    const maskDom = this.target.childNodes[3];
-    this.setStyle(expandDomDiv, 'height', str === '0' ? `${(this.target.dataset.lines - 3) * 25}px` : '240px');
-    this.setStyle(expandDomDiv, 'overflow', str === '0' ? 'auto' : 'hidden');
-    this.setStyle(maskDom, 'display', str === '0' ? 'none' : 'inline-block');
-    str === '0' ? this.setStyle(this.expandDom, 'display', 'none') : this.setStyle(this.unExpandDom, 'display', 'none');
-    str === '0' ? this.expandDom.remove() : this.unExpandDom.remove();
-    // 添加缩起btn
-    const unExpandDom = document.createElement('div');
-    unExpandDom.className = str === '0' ? 'cherry-unExpand-code-block' : 'cherry-expand-code-block';
-    unExpandDom.innerHTML =
-      str === '0' ? '<i class="ch-icon ch-icon-unExpand"></i>' : '<i class="ch-icon ch-icon-expand"></i>';
-    unExpandDom.style.top = str === '0' ? `${(this.target.dataset.lines - 3) * 25}px` : '45px';
-    this.container.appendChild(unExpandDom);
-    unExpandDom.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.parent.$removeAllPreviewerBubbles('click');
-      str === '0' ? this.$expandCodeBlock('1') : this.$expandCodeBlock('0');
-    });
-    str === '0' ? (this.unExpandDom = unExpandDom) : (this.expandDom = unExpandDom);
-    this.target.dataset.unexpandCode = str === '0' ? 'true' : 'false';
-    this.target.dataset.expandCode = str === '0' ? 'false' : 'true';
+  $expandCodeBlock(isExpand = true) {
+    this.target.classList.remove('cherry-code-unExpand');
+    this.target.classList.remove('cherry-code-expand');
+    this.unExpandDom.classList.remove('hidden');
+    if (isExpand) {
+      this.target.classList.add('cherry-code-expand');
+    } else {
+      this.unExpandDom.classList.add('hidden');
+      this.target.classList.add('cherry-code-unExpand');
+    }
   }
   /**
    * 处理复制代码块的操作
    */
   $copyCodeBlock() {
-    const codeContent = this.target.lastElementChild.innerText;
+    const codeContent = this.target.querySelector('pre').innerText;
     const final = this.$cherry.options.callback.onCopyCode({ target: this.target }, codeContent);
     if (final === false) {
       return false;

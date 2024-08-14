@@ -39,7 +39,6 @@ export default class CodeBlock extends ParagraphBase {
     this.lineNumber = config.lineNumber; // 是否显示行号
     this.copyCode = config.copyCode; // 是否显示“复制”按钮
     this.expandCode = config.expandCode; // 是否显示“展开”按钮
-    this.unExpandCode = config.unExpandCode; // 是否显示“缩放”按钮
     this.editCode = config.editCode; // 是否显示“编辑”按钮
     this.changeLang = config.changeLang; // 是否显示“切换语言”按钮
     this.selfClosing = config.selfClosing; // 自动闭合，为true时，当md中有奇数个```时，会自动在md末尾追加一个```
@@ -201,7 +200,7 @@ export default class CodeBlock extends ParagraphBase {
       cacheCode = Prism.highlight(cacheCode, Prism.languages[lang], lang);
       cacheCode = this.renderLineNumber(cacheCode);
     }
-    const maskclassName = lines - 3 > 10 ? 'maskHeight' : '';
+    const needUnExpand = this.expandCode && $code.match(/\n/g)?.length > 10; // 是否需要收起代码块
     cacheCode = `<div
         data-sign="${sign}"
         data-type="codeBlock"
@@ -209,16 +208,21 @@ export default class CodeBlock extends ParagraphBase {
         data-edit-code="${this.editCode}" 
         data-copy-code="${this.copyCode}"
         data-expand-code="${this.expandCode}"
-        data-unexpand-code="${this.unExpandCode}"
         data-change-lang="${this.changeLang}"
         data-lang="${$lang}"
         style="position:relative"
+        class="${needUnExpand ? 'cherry-code-unExpand' : 'cherry-code-expand'}"
       >
-      <pre class="language-${lang} ${maskclassName}">${this.wrapCode(cacheCode, lang)}</pre>
-      <div class="cherry-mark-code-block" style="top:82px;display:${
-        maskclassName === 'maskHeight' ? 'inline-block' : 'none'
-      }"></div>
-    </div>`;
+      <pre class="language-${lang}">${this.wrapCode(cacheCode, lang)}</pre>
+      `;
+    if (needUnExpand) {
+      cacheCode += `<div class="cherry-mask-code-block">
+        <div class="expand-btn ">
+          <i class="ch-icon ch-icon-expand"></i>
+        </div>
+      </div>`;
+    }
+    cacheCode += '</div>';
     return cacheCode;
   }
 

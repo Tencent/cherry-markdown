@@ -33,6 +33,8 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
   toolbars: CherryToolbarsOptions<T['CustomToolbar']> | undefined;
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: string;
+  // drawio iframe的样式
+  drawioIframeStyle: string;
   /** 文件上传回调 */
   fileUpload: CherryFileUploadHandler;
   /** 上传文件的时候用来指定文件类型 */
