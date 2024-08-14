@@ -6,6 +6,7 @@
 @import './print.scss';
 @import './bubble_formula.scss';
 @import './formula_utils_bubble.scss';
+@import './components/shortcut_key_config.scss';
 
 @mixin cherryFont {
   font-family: $fontFamily;
@@ -581,10 +582,54 @@
   position: absolute;
   z-index: 1;
 }
+
+.cherry-mask-code-block{
+  width: 100%;
+  padding-top: 50px;
+  display: none;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0)), to(#fff));
+  background-image: linear-gradient(-180deg, rgba(255, 255, 255, 0) 0%, #fff 100%);
+  text-align: center;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.5em;
+  z-index: 10;
+  .expand-btn {
+    width: 25px;
+    height: 25px;
+    border: 1px solid #ffffff00;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.3s;
+    z-index: 12;
+    color: #3582fb;
+    background-color: #d7e6fe;
+    display: inline-block;
+    &:hover {
+      color: #eee;
+      background-color: #3582fb;
+      border-color: #eee;
+    }
+  }
+}
+
+
+.cherry-code-unExpand{
+  pre {
+    height: 240px;
+    overflow: hidden !important;
+  }
+  .cherry-mask-code-block {
+    display: inline-block;
+  }
+}
+
 .cherry-previewer-codeBlock-hover-handler {
   z-index: 0;
   position: absolute;
   .cherry-copy-code-block,
+  .cherry-unExpand-code-block,
   .cherry-edit-code-block {
     position: relative;
     width: 25px;
@@ -602,13 +647,43 @@
     background-color: #eee;
     border-color: #3582fb;
   }
+  .cherry-expand-code-block{
+    position: absolute;
+    width: 25px;
+    text-align: center;
+    height: 25px;
+    border: 1px solid #3582fb;
+    cursor: pointer;
+    float: right;
+    border-radius: 5px;
+    margin-left: -27px;
+    transition: all 0.3s;
+    z-index: 2;
+    color: #3582fb;
+    background-color: #eee;
+    border-color: #3582fb;
+  }
+  .cherry-expand-code-block {
+    top: 45px;
+    right:10px;
+  }
+  .cherry-unExpand-code-block{
+    right: 10px;
+    z-index: 12;
+    margin-top: 30px;
+    &.hidden {
+      display: none;
+    }
+  }
   .cherry-copy-code-block {
     right: 10px;
   }
   .cherry-edit-code-block {
-    right: 10+25+10px;
+    right: 10+25+5px;
   }
   .cherry-copy-code-block:hover,
+  .cherry-expand-code-block:hover,
+  .cherry-unExpand-code-block:hover,
   .cherry-edit-code-block:hover {
     color: #eee;
     background-color: #3582fb;
@@ -675,6 +750,8 @@
   [data-code-block-theme='solarized-light'] &,
   [data-code-block-theme='coy'] & {
     .cherry-copy-code-block,
+    .cherry-expand-code-block,
+    .cherry-unExpand-code-block,
     .cherry-edit-code-block {
       background-color: #3582fb;
     }

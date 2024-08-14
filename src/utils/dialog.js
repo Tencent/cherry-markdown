@@ -96,7 +96,7 @@ const dialog = {
   },
 
   draw(params, onReady, onSubmit) {
-    const { iframeSrc, title } = params;
+    const { iframeSrc, iframeStyle, title } = params;
     this.onSubmit = onSubmit;
     this.onReady = onReady;
 
@@ -125,7 +125,7 @@ const dialog = {
       }
     });
     // 构造页面元素
-    this.iframeDom = createElement('iframe', 'cherry-dialog-iframe', { src: iframeSrc, style: 'border: none;' });
+    this.iframeDom = createElement('iframe', 'cherry-dialog-iframe', { src: iframeSrc, style: iframeStyle });
     this.dom = createElement('div', 'cherry-dialog', {
       style: [
         'z-index:9999',
@@ -200,8 +200,8 @@ const dialog = {
  * @param {string} xml draw.io的xml格式的字符串数据
  * @param {*} callback 回调
  */
-export function drawioDialog(iframeSrc = '', xml = '', callback = null) {
-  const dialogParam = { iframeSrc, title: 'draw.io' };
+export function drawioDialog(iframeSrc = '', iframeStyle = '', xml = '', callback = null) {
+  const dialogParam = { iframeSrc, iframeStyle, title: 'draw.io' };
   dialog.draw(
     dialogParam,
     () => {

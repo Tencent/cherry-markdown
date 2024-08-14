@@ -75,7 +75,7 @@ export default {
   pinyin: 'Pinyin',
   pastePlain: 'Paste as Plain Text',
   pasteMarkdown: 'Paste as Markdown',
-  hide: 'Hide (ctrl+0)',
+  hide: 'Hide Toolbar',
   exportToPdf: 'Export to PDF',
   exportScreenshot: 'Screenshot',
   exportMarkdownFile: 'Export Markdown File',
@@ -90,7 +90,6 @@ export default {
   justifyCenter: 'Center',
   justifyRight: 'Right',
   publish: 'Publish',
-  wordCount: 'Word Count',
   fontColor: 'Font Color',
   fontBgColor: 'Font Bg Color',
   small: 'Small',
@@ -99,4 +98,11 @@ export default {
   superLarge: 'Super Large',
   detailDefaultContent:
     'Click to expand more\nContent\n++- Expand by default\nContent\n++ Collapse by default\nContent',
+  inlineCode: 'Inline Code',
+  codeBlock: 'Code Block',
+  editShortcutKeyConfigTip: 'double click shortcut key area to edit',
+  wordCount: 'Word Count',
+  wordCountP: 'P',
+  wordCountW: 'W',
+  wordCountC: 'C',
 };

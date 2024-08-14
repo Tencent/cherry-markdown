@@ -18,6 +18,8 @@ export interface CherryOptions {
   toolbars: CherryToolbarOptions;
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: string;
+  // drawio iframe的样式
+  drawioIframeStyle: string;
   /** 文件上传回调 */
   fileUpload: CherryFileUploadHandler;
   /** 上传文件的时候用来指定文件类型 */
@@ -28,6 +30,15 @@ export interface CherryOptions {
     word: string,
     pdf: string,
     file: string,
+  };
+  /** 文件是否支持多选 */
+  multipleFileSelection: {
+    video: boolean;
+    audio: boolean;
+    image: boolean;
+    word: boolean;
+    pdf: boolean;
+    file: boolean;
   };
   /** 有哪些主题 */
   theme: {className: string, label: string}[];
@@ -42,6 +53,8 @@ export interface CherryOptions {
     urlProcessor?: (url: string, srcType: 'image' | 'audio' | 'video' | 'autolink' | 'link') => string;
     /** 文件上传回调 */
     fileUpload?: CherryFileUploadHandler;
+    /** 多文件上传回调 */
+    fileUploadMulti?: CherryFileUploadHandler;
     /** 编辑器内容改变并完成渲染后触发 */
     afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */
@@ -50,6 +63,8 @@ export interface CherryOptions {
     beforeImageMounted?: (srcProp: string, src: string) => { srcProp: string; src: string };
     onClickPreview?: (e: MouseEvent) => void;
     onCopyCode?: (e: ClipboardEvent, code: string) => string|false;
+    onExpandCode?: (e: ClipboardEvent, code: string) => string|false;
+    onUnExpandCode?: (e: ClipboardEvent, code: string) => string|false;
     changeString2Pinyin?: (str: string) => string;
     onPaste?: (clipboardData: ClipboardEvent['clipboardData']) => string|boolean;
   };
@@ -163,6 +178,8 @@ export interface CherryEditorOptions {
   defaultModel?: EditorMode;
   /** 粘贴时是否自动将html转成markdown */
   convertWhenPaste?: boolean;
+  /** 快捷键风格，目前仅支持 sublime 和 vim */
+  keyMap?: 'sublime' | 'vim';
   /** 透传给codemirror的配置项 */
   codemirror?: object;
   /** 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal */
@@ -305,6 +322,8 @@ export interface CherryToolbarOptions {
     position: 'absolute' | 'fixed', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
     cssText: string, // 额外样式
   };
+  /** 不展示在编辑器中的工具栏，只使用工具栏的api和快捷键功能 */
+  hiddenToolbar?: any[];
   /** 是否展示顶部工具栏 */
   showToolbar?: boolean;
   /** 侧边栏配置 */
@@ -337,4 +356,22 @@ export interface CherryFileUploadHandler {
      */
     callback: (url: string, params?: {name?: string, poster?: string, isBorder?: boolean, isShadow?: boolean, isRadius?: boolean; width?: string, height?: string}
   ) => void): void;
+}
+
+
+type ShortcutKeyMapStruct = {
+  /**
+   * 原始hook
+   */
+  hookName: string;
+  /**
+   * 展示名称
+   */
+  aliasName: string;
+  /**
+   * 其他扩展字段
+   * 如果存在则会赋值给 data-[fieldName]=value 存储记录
+   * @summary 切记不要使用驼峰，因为dataset 会全部转成全小写，除非你在取值的时候能记住，否则永远不要这么做
+   */
+  [x: string]: string | number;
 }

@@ -24,6 +24,7 @@ import ToolbarRight from './toolbars/ToolbarRight';
 import Toc from './toolbars/Toc';
 import { createElement } from './utils/dom';
 import Sidebar from './toolbars/Sidebar';
+import HiddenToolbar from './toolbars/HiddenToolbar';
 import { customizer, getThemeFromLocal, changeTheme, getCodeThemeFromLocal } from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
 import getPosBydiffs from './utils/recount-pos';
@@ -35,6 +36,7 @@ import locales from '@/locales/index';
 import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
 import { LIST_CONTENT } from '@/utils/regexp';
+import { storageKeyMap, clearAllStorageKeyMap } from './utils/shortcutKey';
 
 /** @typedef {import('~types/cherry').CherryOptions} CherryOptions */
 export default class Cherry extends CherryStatic {
@@ -110,6 +112,26 @@ export default class Cherry extends CherryStatic {
      */
     this.engine = new Engine(this.options, this);
     this.init();
+    const toolbarShortcutKeyMap = this.toolbar?.shortcutKeyMap ?? {};
+    if (
+      toolbarShortcutKeyMap &&
+      typeof toolbarShortcutKeyMap === 'object' &&
+      Object.keys(toolbarShortcutKeyMap).length
+    ) {
+      const cacheShortcutKeyMap = Object.entries(toolbarShortcutKeyMap)
+        .filter(([_, value]) => value && typeof value === 'object')
+        .reduce((prev, curr) => {
+          const [key, value] = curr;
+          if (key in prev) {
+            throw Error(`Duplicate shortcut key: ${key}`);
+          }
+          return (prev[key] = value), prev;
+        }, {});
+      storageKeyMap(this.instanceId, cacheShortcutKeyMap);
+      this.clearAllStorageKeyMap = clearAllStorageKeyMap;
+      // 页面关闭时清除缓存
+      window.addEventListener('unload', this.clearAllStorageKeyMap);
+    }
   }
 
   /**
@@ -167,6 +189,7 @@ export default class Cherry extends CherryStatic {
     this.wrapperDom = wrapperDom;
     // 创建预览区域的侧边工具栏
     this.createSidebar();
+    this.createHiddenToolbar();
     mountEl.appendChild(wrapperDom);
 
     editor.init(previewer);
@@ -571,6 +594,7 @@ export default class Cherry extends CherryStatic {
     this.createBubble();
     this.createFloatMenu();
     this.createSidebar();
+    this.createHiddenToolbar();
     return true;
   }
 
@@ -613,6 +637,19 @@ export default class Cherry extends CherryStatic {
       if (init === true) {
         this.wrapperDom.appendChild(this.sidebarDom);
       }
+    }
+  }
+
+  createHiddenToolbar() {
+    console.log(this.options.toolbars.hiddenToolbar);
+    if (this.options.toolbars.hiddenToolbar) {
+      $expectTarget(this.options.toolbars.hiddenToolbar, Array);
+      this.hiddenToolbar = new HiddenToolbar({
+        $cherry: this,
+        buttonConfig: this.options.toolbars.hiddenToolbar,
+        customMenu: this.options.toolbars.customMenu,
+      });
+      this.toolbar.collectMenuInfo(this.hiddenToolbar);
     }
   }
 

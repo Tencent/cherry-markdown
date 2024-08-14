@@ -52,10 +52,80 @@ const callbacks = {
       callback('images/demo-dog.png');
     }
   },
+  fileUploadMulti(files, callback) {
+    const fileType = files[0].type;
+    const promises = [];
+    for (const file of files) {
+      const promise = new Promise((resolve) => {
+        if (/video/i.test(fileType)) {
+          resolve({
+            url: 'images/demo-dog.png',
+            params: {
+              name: `${file.name.replace(/\.[^.]+$/, '')}`,
+              poster: 'images/demo-dog.png?poster=true',
+              isBorder: true,
+              isShadow: true,
+              isRadius: true,
+            },
+          });
+        } else if (/image/i.test(fileType)) {
+          // 如果上传的是图片，则默认回显base64内容（因为没有图床）
+          // 创建 FileReader 对象
+          const reader = new FileReader();
+          // 读取文件内容
+          reader.onload = (event) => {
+            // 获取 base64 内容
+            const base64Content = event.target.result;
+            resolve({
+              url: base64Content,
+              params: {
+                name: `${file.name.replace(/\.[^.]+$/, '')}`,
+                isShadow: true,
+                width: '60%',
+                height: 'auto',
+              },
+            });
+          };
+          reader.readAsDataURL(file);
+        } else if (/audio/i.test(fileType)) {
+          resolve({
+            url: 'images/demo-dog.png',
+            params: {
+              name: `${file.name.replace(/\.[^.]+$/, '')}`,
+              poster: 'images/demo-dog.png?poster=true',
+              isBorder: true,
+              isShadow: true,
+              isRadius: true,
+            },
+          });
+        } else {
+          resolve('images/demo-dog.png');
+        }
+      });
+      promises.push(promise);
+    }
+    Promise.all(promises).then((results) => {
+      callback(results);
+    });
+  },
   afterChange: (text, html) => {},
   afterInit: (text, html) => {},
   beforeImageMounted: (srcProp, src) => ({ srcProp, src }),
   onClickPreview: (event) => {},
+  onExpandCode: (event, code) => {
+    // 阻止默认的粘贴事件
+    // return false;
+    // 对复制内容进行额外处理
+    // console.log(event, code);
+    return code;
+  },
+  onUnExpandCode: (event, code) => {
+    // 阻止默认的粘贴事件
+    // return false;
+    // 对复制内容进行额外处理
+    // console.log(event, code);
+    return code;
+  },
   /**
    * 粘贴时触发
    * @param {ClipboardEvent['clipboardData']} clipboardData
@@ -117,8 +187,11 @@ const defaultConfig = {
       htmlWhiteList: '',
       /**
        * 适配流式会话的场景，开启后将具备以下特性：
-       * 1. 代码块自动闭合，相当于强制 `engine.syntax.codeBlock.selfClosing=true`
-       * 2. 文章末尾的段横线标题语法（`\n-`）失效
+       * - cherry渲染频率从50ms/次提升到10ms/次
+       * - 代码块自动闭合，相当于强制 `engine.syntax.codeBlock.selfClosing=true`
+       * - 文章末尾的段横线标题语法（`\n-`）失效
+       * - 表格语法自动闭合，相当于强制`engine.syntax.table.selfClosing=true`
+       * - 加粗、斜体语法自动闭合，相当于强制`engine.syntax.fontEmphasis.selfClosing=true`
        *
        * 后续如果有新的需求，可提issue反馈
        */
@@ -168,6 +241,7 @@ const defaultConfig = {
         copyCode: true, // 是否显示“复制”按钮
         editCode: true, // 是否显示“编辑”按钮
         changeLang: true, // 是否显示“切换语言”按钮
+        expandCode: false, // 是否展开/收起代码块，当代码块行数大于10行时，会自动收起代码块
         selfClosing: true, // 自动闭合，为true时，当md中有奇数个```时，会自动在md末尾追加一个```
         customRenderer: {
           // 自定义语法渲染器
@@ -260,6 +334,8 @@ const defaultConfig = {
     defaultModel: 'edit&preview',
     // 粘贴时是否自动将html转成markdown
     convertWhenPaste: true,
+    // 快捷键风格，目前仅支持 sublime 和 vim
+    keyMap: 'sublime',
     codemirror: {
       // 是否自动focus 默认为true
       autofocus: true,
@@ -310,6 +386,7 @@ const defaultConfig = {
     sidebar: false,
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'table', 'code'], // array or false
+    hiddenToolbar: [], // 不展示在编辑器中的工具栏，只使用工具栏的api和快捷键功能
     toc: false, // 不展示悬浮目录
     // toc: {
     //   updateLocationHash: false, // 要不要更新URL的hash
@@ -335,6 +412,8 @@ const defaultConfig = {
   },
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: '',
+  // drawio iframe的样式
+  drawioIframeStyle: 'border: none;',
   /**
    * 上传文件的时候用来指定文件类型
    */
@@ -346,6 +425,17 @@ const defaultConfig = {
     pdf: '.pdf',
     file: '*',
   },
+  /**
+   * 上传文件的时候是否开启多选
+   */
+  multipleFileSelection: {
+    video: false,
+    audio: false,
+    image: false,
+    word: false,
+    pdf: false,
+    file: false,
+  },
   callback: {
     /**
      * 全局的URL处理器
@@ -356,11 +446,17 @@ const defaultConfig = {
     urlProcessor: callbacks.urlProcessor,
     // 上传文件的回调
     fileUpload: callbacks.fileUpload,
+    // 上传多文件的回调
+    fileUploadMulti: callbacks.fileUploadMulti,
     beforeImageMounted: callbacks.beforeImageMounted,
-    // 预览区域点击事件，previewer.enablePreviewerBubble = true 时生效
+    // 预览区域点击事件
     onClickPreview: callbacks.onClickPreview,
     // 复制代码块代码时的回调
     onCopyCode: callbacks.onCopyCode,
+    // 展开代码块代码时的回调
+    onExpandCode: callbacks.onExpandCode,
+    // 缩起代码块代码时的回调
+    onUnExpandCode: callbacks.onUnExpandCode,
     // 把中文变成拼音的回调，当然也可以把中文变成英文、英文变成中文
     changeString2Pinyin: callbacks.changeString2Pinyin,
     /**
