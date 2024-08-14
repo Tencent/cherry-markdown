@@ -1,6 +1,6 @@
 import { useStoreCherry } from "@/store/storeCherry";
 import Cherry from "cherry-markdown";
-import { CherryExternalsOptions, CherryOptions } from "../../../../types/cherry";
+import { CherryOptions } from "cherry-markdown/types/cherry";
 import { ipcRenderer } from "electron";
 import { onMounted } from "vue";
 
@@ -86,26 +86,10 @@ const initCherryMarkdown = () => {
   };
 
 
-  const customMenuConfig: ICustomMenuConfig = {
-    customMenu_fileUpload: customMenu_fileUpload,
-  }
-
-  type ICustomMenuConfig = {
-    customMenu_fileUpload: any
-  }
-
-  type CustomConfig = {
-    CustomToolbar: {
-      CustomMenuType: {
-    customMenu_fileUpload: any
-  }
-    }
-  }
-
   /**
    * 默认配置
    */
-  const defaultConfig: CherryOptions<CustomConfig> = {
+  const defaultConfig = {
     id: "cherry-markdown",
     // 第三方包
     externals: {
@@ -217,10 +201,7 @@ const initCherryMarkdown = () => {
           insert: ['link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'ruby'],
         },
         {
-          customMenu_fileUpload: ['1231', 'audio', 'video', 'pdf', 'word']
-        },
-        {
-          customMenu_fileUpload: ['custom', 'customMenu_fileUpload', 'audio', 'video', 'pdf', 'word']
+          customMenu_fileUpload: ['image', 'audio', 'video', 'pdf', 'word']
         },
         'graph',
         'togglePreview',
@@ -233,7 +214,9 @@ const initCherryMarkdown = () => {
         updateLocationHash: false,
         defaultModel: 'pure',
       },
-      customMenu: customMenuConfig,
+      customMenu: {
+        customMenu_fileUpload: customMenu_fileUpload,
+      },
     },
     drawioIframeUrl: 'drawio_demo/drawio_demo.html',
     fileUpload: callbacks.fileUpload,
@@ -295,7 +278,7 @@ const initCherryMarkdown = () => {
   };
 
   onMounted(() => {
-    const cherryInstance = new Cherry(defaultConfig);
+    const cherryInstance = new Cherry(defaultConfig as Partial<CherryOptions>);
     storeCherry.cherry = cherryInstance
   })
 }
