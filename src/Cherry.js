@@ -48,12 +48,12 @@ export default class Cherry extends CherryStatic {
    * @readonly
    */
   static config = {
-    /** @type {Partial<CherryOptions>} */
+    /** @type {CherryOptions} */
     defaults: defaultConfig,
   };
 
   /**
-   * @param {Partial<CherryOptions>} options
+   * @param {CherryOptions} options
    */
   constructor(options) {
     super();
@@ -63,7 +63,7 @@ export default class Cherry extends CherryStatic {
     $expectTarget(options, Object);
     /**
      * @property
-     * @type {Partial<CherryOptions>}
+     * @type {CherryOptions}
      */
     this.options = mergeWith({}, defaultConfigCopy, options, customizer);
 
