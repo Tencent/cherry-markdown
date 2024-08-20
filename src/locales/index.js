@@ -21,5 +21,5 @@ import ruRu from './ru_RU';
 export default {
   zh_CN: zhCn,
   en_US: enUs,
-  ru_RU: ruRU,
+  ru_RU: ruRu,
 };
