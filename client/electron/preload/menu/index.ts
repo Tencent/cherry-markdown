@@ -32,21 +32,25 @@ const menuConfig: Array<MenuItemConstructorOptions | MenuItem> = [
       {
         id: "new-file",
         label: '新建文件',
+        accelerator: isMac ? 'Cmd+N' : 'Ctrl+N',
         click: () => newFile(),
       },
       {
         id: "open-file",
         label: '打开文件...',
+        accelerator: isMac ? 'Cmd+O' : 'Ctrl+O',
         click: () => openFile(),
       },
       {
         id: "save-file-as",
         label: '另存为...',
+        accelerator: isMac ? 'Cmd+Shift+S' : 'Ctrl+Shift+S',
         click: () => saveFileAs(),
       },
       {
         id: "save-file",
         label: '保存',
+        accelerator: isMac ? 'Cmd+S' : 'Ctrl+S',
         click: () => saveFile(),
         enabled: false
       },
@@ -96,7 +100,7 @@ const menuConfig: Array<MenuItemConstructorOptions | MenuItem> = [
   },
 ]
 // isPackaged ? [] :
- menuConfig.push({
+menuConfig.push({
   label: "打开DevTools",
   role: 'toggleDevTools'
 })
