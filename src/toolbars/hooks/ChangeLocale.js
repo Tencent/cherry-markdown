@@ -54,6 +54,7 @@ export default class ChangeLocale extends MenuBase {
     if (!this.$cherry.locales[shortKey]) {
       return;
     }
+    this.$cherry.$event.emit('afterChangeLocale', shortKey);
     this.$cherry.options.locale = shortKey;
     this.$cherry.locale = this.$cherry.locales[shortKey];
     this.$cherry.resetToolbar('toolbar', this.$cherry.options.toolbars.toolbar || []);
