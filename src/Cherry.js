@@ -251,7 +251,7 @@ export default class Cherry extends CherryStatic {
 
   on(eventName, callback) {
     if (this.$event.Events[eventName]) {
-      if (/afterInit|afterChange/.test(eventName)) {
+      if (/^(afterInit|afterChange)$/.test(eventName)) {
         // 做特殊处理
         return this.$event.on(eventName, (msg) => {
           callback(msg.markdownText, msg.html);
