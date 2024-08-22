@@ -343,8 +343,12 @@ export interface CherryToolbarConfig {
   publish?: CherryPublishToolbarOption[]
   /** 公式 */
   formula?: CherryFormulaToolbarOption
+  changeLocale?: CherryChangeLocaleToolbarOption[]
 }
-
+export interface CherryChangeLocaleToolbarOption {
+  locale: string;
+  name: string;
+}
 export interface CherryToolbarsOptions<F extends CherryToolbarsCustomType = CherryToolbarsCustomType> {
   theme: 'light' | 'dark';
   toolbar?:
