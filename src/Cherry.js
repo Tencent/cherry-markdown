@@ -880,4 +880,20 @@ export default class Cherry extends CherryStatic {
   setWritingStyle(writingStyle) {
     this.editor.setWritingStyle(writingStyle);
   }
+
+  /**
+   * 修改语言
+   * @param {string} locale
+   * @returns {boolean} false: 修改失败，因为没有对应的语言；true: 修改成功
+   */
+  setLocale(locale) {
+    if (!this.locales[locale]) {
+      return false;
+    }
+    this.options.locale = locale;
+    this.locale = this.locales[locale];
+    this.$event.emit('afterChangeLocale', locale);
+    this.resetToolbar('toolbar', this.options.toolbars.toolbar || []);
+    return true;
+  }
 }
