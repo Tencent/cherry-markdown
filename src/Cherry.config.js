@@ -408,6 +408,20 @@ const defaultConfig = {
         showLatexLive: true, // true: 显示 www.latexlive.com 外链； false：不显示
         templateConfig: false, // false: 使用默认模板
       },
+      changeLocale: [
+        {
+          locale: 'zh_CN',
+          name: '中文',
+        },
+        {
+          locale: 'en_US',
+          name: 'English',
+        },
+        {
+          locale: 'ru_RU',
+          name: 'Русский',
+        },
+      ],
     },
   },
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效

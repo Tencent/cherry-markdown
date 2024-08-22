@@ -641,7 +641,6 @@ export default class Cherry extends CherryStatic {
   }
 
   createHiddenToolbar() {
-    console.log(this.options.toolbars.hiddenToolbar);
     if (this.options.toolbars.hiddenToolbar) {
       $expectTarget(this.options.toolbars.hiddenToolbar, Array);
       this.hiddenToolbar = new HiddenToolbar({
