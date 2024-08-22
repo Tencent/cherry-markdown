@@ -39,6 +39,7 @@ export default class Event {
     focus: 'focus', // 焦点
     blur: 'blur', // 失焦
     selectionChange: 'selectionChange', // 选区内容改变时触发
+    afterChangeLocale: 'afterChangeLocale', // 语言改变
   };
 
   /**
@@ -94,6 +95,11 @@ export default class Event {
     if (options.event.selectionChange) {
       this.on(this.Events.selectionChange, (event) => {
         options.event.selectionChange(event);
+      });
+    }
+    if (options.event.afterChangeLocale) {
+      this.on(this.Events.afterChangeLocale, (locale) => {
+        options.event.afterChangeLocale(locale);
       });
     }
   }

@@ -489,6 +489,7 @@ const defaultConfig = {
     focus: ({ e, cherry }) => {},
     blur: ({ e, cherry }) => {},
     selectionChange: ({ selections, lastSelections, info }) => {},
+    afterChangeLocale: (locale) => {},
   },
   previewer: {
     dom: false,

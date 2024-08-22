@@ -90,7 +90,10 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */
     afterInit?: CherryLifecycle;
+    /** 编辑器选区变化时触发 */
     selectionChange?: ({ selections: [], lastSelections: [], info }) => void;
+    /** 变更语言时触发 */
+    afterChangeLocale?: ( locale: string ) => void;
   };
   /** 预览区域配置 */
   previewer: CherryPreviewerOptions;
