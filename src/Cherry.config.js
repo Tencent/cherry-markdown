@@ -232,10 +232,16 @@ const defaultConfig = {
         // externals: ['echarts'],
       },
       inlineCode: {
-        theme: 'red',
+        /**
+         * @deprecated 不再支持theme的配置，统一在`themeSettings.inlineCodeTheme`中配置
+         */
+        // theme: 'red',
       },
       codeBlock: {
-        theme: 'dark', // 默认为深色主题
+        /**
+         * @deprecated 不再支持theme的配置，统一在`themeSettings.codeBlockTheme`中配置
+         */
+        // theme: 'dark', // 默认为深色主题
         wrap: true, // 超出长度是否换行，false则显示滚动条
         lineNumber: true, // 默认显示行号
         copyCode: true, // 是否显示“复制”按钮
@@ -324,7 +330,10 @@ const defaultConfig = {
     id: 'code', // textarea 的id属性值
     name: 'code', // textarea 的name属性值
     autoSave2Textarea: false, // 是否自动将编辑区的内容回写到textarea里
-    theme: 'default', // depend on codemirror theme name: https://codemirror.net/demo/theme.htm
+    /**
+     * @deprecated 不再支持theme的配置，废弃该功能，统一由`themeSettings.mainTheme`配置
+     */
+    // theme: 'default',
     // 编辑器的高度，默认100%，如果挂载点存在内联设置的height则以内联样式为主
     height: '100%',
     // defaultModel 编辑器初始化后的默认模式，一共有三种模式：1、双栏编辑预览模式；2、纯编辑模式；3、预览模式
@@ -346,7 +355,10 @@ const defaultConfig = {
     showSuggestList: true, // 是否显示联想框
   },
   toolbars: {
-    theme: 'dark', // light or dark
+    /**
+     * @deprecated 不再支持theme的配置，统一在`themeSettings.toolbarTheme`中配置
+     */
+    // theme: 'dark', // light or dark
     showToolbar: true, // false：不展示顶部工具栏； true：展示工具栏; toolbars.showToolbar=false 与 toolbars.toolbar=false 等效
     toolbar: [
       'bold',
@@ -490,6 +502,8 @@ const defaultConfig = {
     blur: ({ e, cherry }) => {},
     selectionChange: ({ selections, lastSelections, info }) => {},
     afterChangeLocale: (locale) => {},
+    changeMainTheme: (theme) => {},
+    changeCodeBlockTheme: (theme) => {},
   },
   previewer: {
     dom: false,
@@ -529,20 +543,24 @@ const defaultConfig = {
       afterLoadAllImgCallback: () => {},
     },
   },
-  /**
-   * 配置主题，第三方可以自行扩展主题
-   */
-  theme: [
-    { className: 'default', label: '默认' },
-    { className: 'dark', label: '暗黑' },
-    { className: 'light', label: '明亮' },
-    { className: 'green', label: '清新' },
-    { className: 'red', label: '热情' },
-    { className: 'violet', label: '淡雅' },
-    { className: 'blue', label: '清幽' },
-  ],
-  // 定义主题的作用范围，相同themeNameSpace的实例共享主题配置
-  themeNameSpace: 'cherry',
+  themeSettings: {
+    // 定义主题的作用范围，相同themeNameSpace的实例共享主题配置
+    themeNameSpace: 'cherry',
+    // 主题列表，用于切换主题
+    themeList: [
+      { className: 'default', label: '默认' },
+      { className: 'dark', label: '暗黑' },
+      { className: 'light', label: '明亮' },
+      { className: 'green', label: '清新' },
+      { className: 'red', label: '热情' },
+      { className: 'violet', label: '淡雅' },
+      { className: 'blue', label: '清幽' },
+    ],
+    mainTheme: 'light',
+    codeBlockTheme: 'default',
+    inlineCodeTheme: 'red', // red or black
+    toolbarTheme: 'dark', // light or dark 优先级低于mainTheme
+  },
   // 预览页面不需要绑定事件
   isPreviewOnly: false,
   // 预览区域跟随编辑器光标自动滚动
