@@ -55,10 +55,35 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     pdf: boolean;
     file: boolean;
   };
-  /** 有哪些主题 */
+  /**
+   * 有哪些主题，第三方可以自行扩展主题
+   * @deprecated 不再支持theme的配置，统一在`themeSettings.themeList`中配置
+   */
   theme: { className: string, label: string }[];
-  /** 定义主题的作用范围，相同themeNameSpace的实例共享主题配置 */
+  /**
+   * 定义主题的作用范围，相同themeNameSpace的实例共享主题配置
+   * @deprecated 不再支持themeNameSpace的配置，统一在`themeSettings.themeNameSpace`中配置
+   */
   themeNameSpace: string,
+  themeSettings: {
+    /** 定义主题的作用范围，相同themeNameSpace的实例共享主题配置 */
+    themeNameSpace: string,
+    /** 主题列表，用于切换主题 */
+    themeList:{
+      /** 主题对应的class名 */
+      className: string,
+      /** 主题名称 */
+      label: string
+    }[],
+    /** cherry主题，控制工具栏、编辑区、预览区的样式 */
+    mainTheme: string,
+    /** 代码块主题 */
+    codeBlockTheme: string,
+    /** 行内代码主题，只有 red 和 black 两个主题 */
+    inlineCodeTheme: 'red' | 'black',
+    /** 工具栏主题，只有 light 和 dark 两个主题，优先级低于 mainTheme */
+    toolbarTheme: 'light' | 'dark',
+  }
   callback: {
     /**
      * 全局的URL处理器，返回值将填充到编辑区域
@@ -94,6 +119,10 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     selectionChange?: ({ selections: [], lastSelections: [], info }) => void;
     /** 变更语言时触发 */
     afterChangeLocale?: ( locale: string ) => void;
+    /** 变更主题时触发 */
+    changeMainTheme?: ( theme: string ) => void;
+    /** 变更代码块主题时触发 */
+    changeCodeBlockTheme?: ( theme: string ) => void;
   };
   /** 预览区域配置 */
   previewer: CherryPreviewerOptions;
@@ -184,7 +213,9 @@ export interface CherryEditorOptions {
   id?: string; // textarea 的id属性值
   name?: string; // textarea 的name属性值
   autoSave2Textarea?: boolean; // 是否自动将编辑区的内容回写到textarea里
-  /** depends on codemirror theme name: https://codemirror.net/demo/theme.htm */
+  /**
+   * @deprecated 不再支持theme的配置，废弃该功能，统一由`themeSettings.mainTheme`配置
+   */
   theme?: string;
   /** 编辑器的高度，默认100%，如果挂载点存在内联设置的height则以内联样式为主 */
   height?: string;
@@ -353,7 +384,10 @@ export interface CherryChangeLocaleToolbarOption {
   name: string;
 }
 export interface CherryToolbarsOptions<F extends CherryToolbarsCustomType = CherryToolbarsCustomType> {
-  theme: 'light' | 'dark';
+  /**
+   * @deprecated 不再支持theme的配置，统一在`themeSettings.toolbarTheme`中配置
+   */
+  theme?: 'light' | 'dark';
   toolbar?:
   | (CherryCustomToolbar |
     CherryDefaultBubbleToolbar |

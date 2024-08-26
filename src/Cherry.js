@@ -25,7 +25,14 @@ import Toc from './toolbars/Toc';
 import { createElement } from './utils/dom';
 import Sidebar from './toolbars/Sidebar';
 import HiddenToolbar from './toolbars/HiddenToolbar';
-import { customizer, getThemeFromLocal, changeTheme, getCodeThemeFromLocal } from './utils/config';
+import {
+  customizer,
+  getThemeFromLocal,
+  changeTheme,
+  getCodeThemeFromLocal,
+  testHasLocal,
+  changeCodeTheme,
+} from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
 import getPosBydiffs from './utils/recount-pos';
 import defaultConfig from './Cherry.config';
@@ -520,21 +527,41 @@ export default class Cherry extends CherryStatic {
    * @returns
    */
   createWrapper() {
-    const toolbarTheme = this.options.toolbars.theme === 'dark' ? 'dark' : '';
-    // TODO: 完善类型
-    const inlineCodeTheme = /** @type {{theme?: string;}} */ (this.options.engine.syntax.inlineCode).theme;
-    let codeBlockTheme = /** @type {{theme?: string;}} */ (this.options.engine.syntax.codeBlock).theme;
+    let mainTheme = '';
+    let toolbarTheme = '';
+    let inlineCodeTheme = '';
+    let codeBlockTheme = '';
+    const { themeNameSpace } = this.options.themeSettings;
+    if (testHasLocal(themeNameSpace, 'theme')) {
+      mainTheme = getThemeFromLocal(true, themeNameSpace);
+    } else {
+      mainTheme = this.options.themeSettings.mainTheme;
+    }
+    if (typeof this.options.toolbars.theme === 'string') {
+      toolbarTheme = this.options.toolbars.theme === 'dark' ? 'dark' : 'light';
+    } else {
+      toolbarTheme = this.options.themeSettings.toolbarTheme === 'dark' ? 'dark' : 'light';
+    }
+    // @ts-ignore
+    if (typeof this.options.engine.syntax.inlineCode.theme === 'string') {
+      inlineCodeTheme =
+        /** @type {{theme?: string;}} */ (this.options.engine.syntax.inlineCode).theme === 'black' ? 'black' : 'red';
+    } else {
+      inlineCodeTheme = this.options.themeSettings.inlineCodeTheme === 'black' ? 'black' : 'red';
+    }
+    // @ts-ignore
+    if (typeof this.options.engine.syntax.codeBlock.theme === 'string') {
+      inlineCodeTheme = /** @type {{theme?: string;}} */ (this.options.engine.syntax.codeBlock).theme;
+    } else {
+      inlineCodeTheme = this.options.themeSettings.codeBlockTheme;
+    }
     if (codeBlockTheme === 'dark') codeBlockTheme = 'tomorrow-night';
     else if (codeBlockTheme === 'light') codeBlockTheme = 'solarized-light';
-    const wrapperDom = createElement(
-      'div',
-      ['cherry', 'clearfix', getThemeFromLocal(true, this.options.themeNameSpace)].join(' '),
-      {
-        'data-toolbarTheme': toolbarTheme,
-        'data-inlineCodeTheme': inlineCodeTheme,
-        'data-codeBlockTheme': codeBlockTheme,
-      },
-    );
+    const wrapperDom = createElement('div', ['cherry', 'clearfix', mainTheme].join(' '), {
+      'data-toolbarTheme': toolbarTheme,
+      'data-inlineCodeTheme': inlineCodeTheme,
+      'data-codeBlockTheme': codeBlockTheme,
+    });
 
     wrapperDom.setAttribute('data-code-block-theme', getCodeThemeFromLocal(this.options.themeNameSpace));
 
@@ -737,12 +764,16 @@ export default class Cherry extends CherryStatic {
       (this.options.engine.syntax.header && this.options.engine.syntax.header.anchorStyle) || 'default';
     const autonumberClass = anchorStyle === 'autonumber' ? ' head-num' : '';
     const { className, dom, enablePreviewerBubble } = this.options.previewer;
-    const previewerClassName = [
-      'cherry-previewer cherry-markdown',
-      className || '',
-      autonumberClass,
-      getThemeFromLocal(true, this.options.themeNameSpace),
-    ].join(' ');
+    const { themeNameSpace } = this.options.themeSettings;
+    let mainTheme = '';
+    if (testHasLocal(themeNameSpace, 'theme')) {
+      mainTheme = getThemeFromLocal(true, themeNameSpace);
+    } else {
+      mainTheme = this.options.themeSettings.mainTheme;
+    }
+    const previewerClassName = ['cherry-previewer cherry-markdown', className || '', autonumberClass, mainTheme].join(
+      ' ',
+    );
     if (dom) {
       previewer = dom;
       previewer.className += ` ${previewerClassName}`;
@@ -867,10 +898,20 @@ export default class Cherry extends CherryStatic {
 
   /**
    * 修改主题
-   * @param {string} theme option.theme里的className
+   * @param {string} theme option.themeSettings.themeList 里的className
    */
   setTheme(theme = 'default') {
+    this.$event.emit('changeMainTheme', theme);
     changeTheme(this, theme);
+  }
+
+  /**
+   * 修改代码块主题
+   * @param {string} theme option.themeSettings.codeBlockTheme
+   */
+  setCodeBlockTheme(theme = 'default') {
+    this.$event.emit('changeCodeBlockTheme', theme);
+    changeCodeTheme(this, theme);
   }
 
   /**
