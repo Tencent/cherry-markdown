@@ -26,6 +26,8 @@ export interface PreviewerOptions {
   previewerMaskDom: HTMLDivElement;
   /** 是否开启预览区域菜单 */
   enablePreviewerBubble?: boolean;
+  // 是否在关闭预览区时，将预览区浮动
+  floatWhenClosePreviewer?: boolean;
   $cherry?: Cherry;
   // 配置图片懒加载的逻辑
   lazyLoadImg: {

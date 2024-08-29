@@ -68,6 +68,18 @@ export default class TogglePreview extends MenuBase {
    * 响应点击事件
    */
   onClick() {
+    // 需要浮动预览
+    if (this.editor.previewer.isPreviewerNeedFloat()) {
+      // 正在浮动预览
+      if (this.editor.previewer.isPreviewerFloat()) {
+        this.editor.previewer.recoverFloatPreviewer(true);
+        this.isHidden = false;
+      } else {
+        this.editor.previewer.floatPreviewer();
+        this.isHidden = true;
+      }
+      return;
+    }
     if (this.editor.previewer.isPreviewerHidden()) {
       this.editor.previewer.recoverPreviewer(true);
       this.isHidden = false;
