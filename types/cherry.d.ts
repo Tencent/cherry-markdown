@@ -200,6 +200,7 @@ export interface CherryPreviewerOptions {
   /** 预览区域的DOM className */
   className: string;
   enablePreviewerBubble: boolean;
+  floatWhenClosePreviewer: boolean;
   // 配置图片懒加载的逻辑
   lazyLoadImg: {
     // 加载图片时如果需要展示loaing图，则配置loading图的地址

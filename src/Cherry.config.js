@@ -481,6 +481,7 @@ const defaultConfig = {
     className: 'cherry-markdown',
     // 是否启用预览区域编辑能力（目前支持编辑图片尺寸、编辑表格内容）
     enablePreviewerBubble: true,
+    floatWhenClosePreviewer: false,
     /**
      * 配置图片懒加载的逻辑
      * - 如果不希望图片懒加载，可配置成 lazyLoadImg = {noLoadImgNum: -1}

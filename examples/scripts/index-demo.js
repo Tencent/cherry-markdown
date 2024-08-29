@@ -235,6 +235,7 @@ var basicConfig = {
   previewer: {
     // 自定义markdown预览区域class
     // className: 'markdown'
+    floatWhenClosePreviewer: true,
   },
   keydown: [],
   //extensions: [],

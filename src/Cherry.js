@@ -67,6 +67,13 @@ export default class Cherry extends CherryStatic {
      */
     this.options = mergeWith({}, defaultConfigCopy, options, customizer);
 
+    this.storageFloatPreviewerWrapData = {
+      x: 50,
+      y: 58,
+      width: 800,
+      height: 500,
+    };
+
     this.locales = locales;
     if (this.options.locales) {
       this.locales = {
@@ -737,7 +744,7 @@ export default class Cherry extends CherryStatic {
     const anchorStyle =
       (this.options.engine.syntax.header && this.options.engine.syntax.header.anchorStyle) || 'default';
     const autonumberClass = anchorStyle === 'autonumber' ? ' head-num' : '';
-    const { className, dom, enablePreviewerBubble } = this.options.previewer;
+    const { className, dom, enablePreviewerBubble, floatWhenClosePreviewer } = this.options.previewer;
     const previewerClassName = [
       'cherry-previewer cherry-markdown',
       className || '',
@@ -763,10 +770,86 @@ export default class Cherry extends CherryStatic {
       value: this.options.value,
       isPreviewOnly: this.options.isPreviewOnly,
       enablePreviewerBubble,
+      floatWhenClosePreviewer,
       lazyLoadImg: this.options.previewer.lazyLoadImg,
     });
 
     return this.previewer;
+  }
+
+  clearFloatPreviewer() {
+    this.wrapperDom.appendChild(this.previewer.getDom());
+    this.storageFloatPreviewerWrapData = {
+      x: this.floatPreviewerWrapDom.offsetLeft,
+      y: this.floatPreviewerWrapDom.offsetTop,
+      height: this.floatPreviewerWrapDom.offsetHeight,
+      width: this.floatPreviewerWrapDom.offsetWidth,
+    };
+    this.floatPreviewerWrapDom.remove();
+  }
+
+  /**
+   * @private
+   * @returns {import('@/Previewer').default}
+   */
+  createFloatPreviewer() {
+    const floatPreviewerWrap = createElement('div', 'float-previewer-wrap');
+    const floatPreviewerHeader = createElement('div', 'float-previewer-header');
+    const floatPreviewerClose = createElement('div', 'float-previewer-close');
+    const floatPreviewerTitle = createElement('div', 'float-previewer-title');
+    floatPreviewerTitle.innerHTML = '预览';
+    floatPreviewerWrap.style.left = `${this.storageFloatPreviewerWrapData.x}px`;
+    floatPreviewerWrap.style.top = `${this.storageFloatPreviewerWrapData.y}px`;
+    floatPreviewerWrap.style.height = `${this.storageFloatPreviewerWrapData.height}px`;
+    floatPreviewerWrap.style.width = `${this.storageFloatPreviewerWrapData.width}px`;
+    floatPreviewerHeader.appendChild(floatPreviewerTitle);
+    floatPreviewerHeader.appendChild(floatPreviewerClose);
+    floatPreviewerWrap.appendChild(floatPreviewerHeader);
+    floatPreviewerWrap.appendChild(this.previewer.getDom());
+    this.floatPreviewerWrapDom = floatPreviewerWrap;
+    this.wrapperDom.appendChild(floatPreviewerWrap);
+
+    const pageWidth = document.body.clientWidth;
+    const pageHeight = document.body.clientHeight;
+
+    let initOffsetX = 0;
+    let initOffsetY = 0;
+
+    document.addEventListener('mousedown', (evt) => {
+      if (evt.target !== floatPreviewerHeader) return;
+      evt.preventDefault();
+      initOffsetX = evt.offsetX;
+      initOffsetY = evt.offsetY;
+      floatPreviewerWrap.classList.add('float-previewer-dragging');
+    });
+
+    document.addEventListener('mouseup', (evt) => {
+      floatPreviewerWrap.classList.remove('float-previewer-dragging');
+    });
+
+    document.addEventListener('mousemove', (evt) => {
+      if (!floatPreviewerWrap.classList.contains('float-previewer-dragging')) return;
+      evt.preventDefault();
+      const { clientX, clientY } = evt;
+      let newRight = clientX - initOffsetX;
+      let newTop = clientY - initOffsetY;
+      if (newRight < 0) {
+        newRight = 0;
+      }
+      if (newTop < 0) {
+        newTop = 0;
+      }
+      if (newRight + floatPreviewerWrap.offsetWidth > pageWidth) {
+        newRight = pageWidth - floatPreviewerWrap.offsetWidth;
+      }
+      if (newTop + floatPreviewerWrap.offsetHeight > pageHeight) {
+        newTop = pageHeight - floatPreviewerWrap.offsetHeight;
+      }
+      requestAnimationFrame(() => {
+        floatPreviewerWrap.style.left = `${newRight}px`;
+        floatPreviewerWrap.style.top = `${newTop}px`;
+      });
+    });
   }
 
   /**
