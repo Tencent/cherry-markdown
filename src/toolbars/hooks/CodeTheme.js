@@ -46,6 +46,7 @@ export default class CodeTheme extends MenuBase {
    * @param {string} codeTheme 具体的代码块主题
    */
   onClick(shortKey = '', codeTheme) {
+    this.$cherry.$event.emit('changeCodeBlockTheme', codeTheme);
     changeCodeTheme(this.$cherry, codeTheme);
   }
 }

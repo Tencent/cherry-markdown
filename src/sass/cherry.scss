@@ -695,6 +695,51 @@
   }
 }
 
+.float-previewer-wrap {
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 100;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.1);
+  resize: both;
+  min-width: 430px;
+  min-height: 300px;
+
+  &.float-previewer-dragging{
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.3);
+
+    .float-previewer-header{
+      cursor: grabbing;
+      background: #ace4ff;
+    }
+  }
+
+  .float-previewer-header{
+    z-index: 999999;
+    height: 40px;
+    border-bottom: 1px solid #ebedee;
+    background: #caecfd;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    cursor: grab;
+
+    .float-previewer-title{
+      user-select: none;
+      font-size: 16px;
+      color: #333;
+      font-weight: bold;
+    }
+  }
+
+  .cherry-previewer{
+    border-left: none;
+  }
+}
+
 .cherry-previewer {
   padding: 20px 45px 20px 20px;
   border-left: 2px solid #ebedee;

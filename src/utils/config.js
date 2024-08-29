@@ -68,6 +68,13 @@ function saveThemeToLocal(nameSpace, theme) {
   }
 }
 
+export function testHasLocal(nameSpace, key) {
+  if (typeof localStorage !== 'undefined') {
+    return !!localStorage.getItem(`${nameSpace}-${key}`);
+  }
+  return false;
+}
+
 /**
  * 获取当前主题
  * @returns {string} 主题名
@@ -89,7 +96,12 @@ export function getThemeFromLocal(fullClass = false, nameSpace = 'cherry') {
  * @param {string} theme 如果没有传theme，则从本地缓存里取
  */
 export function changeTheme($cherry, theme = '') {
-  const themeNameSpace = $cherry.options.themeNameSpace || 'cherry';
+  let themeNameSpace = 'cherry';
+  if (typeof $cherry.options.themeNameSpace === 'string') {
+    themeNameSpace = $cherry.options.themeNameSpace;
+  } else {
+    themeNameSpace = $cherry.options.themeSettings.themeNameSpace || 'cherry';
+  }
   const newTheme = (theme ? theme : getThemeFromLocal(false, themeNameSpace)).replace(/^.*theme__/, '');
   const newClass = ` theme__${newTheme}`;
   $cherry.wrapperDom.className = $cherry.wrapperDom.className.replace(/ theme__[^ $]+?( |$)/g, ' ') + newClass;
@@ -132,7 +144,12 @@ export function getCodeThemeFromLocal(nameSpace = 'cherry') {
  * @param {string} codeTheme 如果没有传codeTheme，则从本地缓存里取
  */
 export function changeCodeTheme($cherry, codeTheme) {
-  const themeNameSpace = $cherry.options.themeNameSpace || 'cherry';
+  let themeNameSpace = 'cherry';
+  if (typeof $cherry.options.themeNameSpace === 'string') {
+    themeNameSpace = $cherry.options.themeNameSpace;
+  } else {
+    themeNameSpace = $cherry.options.themeSettings.themeNameSpace || 'cherry';
+  }
 
   const newTheme = codeTheme ? codeTheme : getCodeThemeFromLocal(themeNameSpace);
 

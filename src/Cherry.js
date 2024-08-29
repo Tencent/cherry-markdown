@@ -25,7 +25,14 @@ import Toc from './toolbars/Toc';
 import { createElement } from './utils/dom';
 import Sidebar from './toolbars/Sidebar';
 import HiddenToolbar from './toolbars/HiddenToolbar';
-import { customizer, getThemeFromLocal, changeTheme, getCodeThemeFromLocal } from './utils/config';
+import {
+  customizer,
+  getThemeFromLocal,
+  changeTheme,
+  getCodeThemeFromLocal,
+  testHasLocal,
+  changeCodeTheme,
+} from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
 import getPosBydiffs from './utils/recount-pos';
 import defaultConfig from './Cherry.config';
@@ -66,6 +73,13 @@ export default class Cherry extends CherryStatic {
      * @type {CherryOptions}
      */
     this.options = mergeWith({}, defaultConfigCopy, options, customizer);
+
+    this.storageFloatPreviewerWrapData = {
+      x: 50,
+      y: 58,
+      width: 800,
+      height: 500,
+    };
 
     this.locales = locales;
     if (this.options.locales) {
@@ -251,7 +265,7 @@ export default class Cherry extends CherryStatic {
 
   on(eventName, callback) {
     if (this.$event.Events[eventName]) {
-      if (/afterInit|afterChange/.test(eventName)) {
+      if (/^(afterInit|afterChange)$/.test(eventName)) {
         // 做特殊处理
         return this.$event.on(eventName, (msg) => {
           callback(msg.markdownText, msg.html);
@@ -520,21 +534,41 @@ export default class Cherry extends CherryStatic {
    * @returns
    */
   createWrapper() {
-    const toolbarTheme = this.options.toolbars.theme === 'dark' ? 'dark' : '';
-    // TODO: 完善类型
-    const inlineCodeTheme = /** @type {{theme?: string;}} */ (this.options.engine.syntax.inlineCode).theme;
-    let codeBlockTheme = /** @type {{theme?: string;}} */ (this.options.engine.syntax.codeBlock).theme;
+    let mainTheme = '';
+    let toolbarTheme = '';
+    let inlineCodeTheme = '';
+    let codeBlockTheme = '';
+    const { themeNameSpace } = this.options.themeSettings;
+    if (testHasLocal(themeNameSpace, 'theme')) {
+      mainTheme = getThemeFromLocal(true, themeNameSpace);
+    } else {
+      mainTheme = this.options.themeSettings.mainTheme;
+    }
+    if (typeof this.options.toolbars.theme === 'string') {
+      toolbarTheme = this.options.toolbars.theme === 'dark' ? 'dark' : 'light';
+    } else {
+      toolbarTheme = this.options.themeSettings.toolbarTheme === 'dark' ? 'dark' : 'light';
+    }
+    // @ts-ignore
+    if (typeof this.options.engine.syntax.inlineCode.theme === 'string') {
+      inlineCodeTheme =
+        /** @type {{theme?: string;}} */ (this.options.engine.syntax.inlineCode).theme === 'black' ? 'black' : 'red';
+    } else {
+      inlineCodeTheme = this.options.themeSettings.inlineCodeTheme === 'black' ? 'black' : 'red';
+    }
+    // @ts-ignore
+    if (typeof this.options.engine.syntax.codeBlock.theme === 'string') {
+      inlineCodeTheme = /** @type {{theme?: string;}} */ (this.options.engine.syntax.codeBlock).theme;
+    } else {
+      inlineCodeTheme = this.options.themeSettings.codeBlockTheme;
+    }
     if (codeBlockTheme === 'dark') codeBlockTheme = 'tomorrow-night';
     else if (codeBlockTheme === 'light') codeBlockTheme = 'solarized-light';
-    const wrapperDom = createElement(
-      'div',
-      ['cherry', 'clearfix', getThemeFromLocal(true, this.options.themeNameSpace)].join(' '),
-      {
-        'data-toolbarTheme': toolbarTheme,
-        'data-inlineCodeTheme': inlineCodeTheme,
-        'data-codeBlockTheme': codeBlockTheme,
-      },
-    );
+    const wrapperDom = createElement('div', ['cherry', 'clearfix', mainTheme].join(' '), {
+      'data-toolbarTheme': toolbarTheme,
+      'data-inlineCodeTheme': inlineCodeTheme,
+      'data-codeBlockTheme': codeBlockTheme,
+    });
 
     wrapperDom.setAttribute('data-code-block-theme', getCodeThemeFromLocal(this.options.themeNameSpace));
 
@@ -641,7 +675,6 @@ export default class Cherry extends CherryStatic {
   }
 
   createHiddenToolbar() {
-    console.log(this.options.toolbars.hiddenToolbar);
     if (this.options.toolbars.hiddenToolbar) {
       $expectTarget(this.options.toolbars.hiddenToolbar, Array);
       this.hiddenToolbar = new HiddenToolbar({
@@ -737,13 +770,17 @@ export default class Cherry extends CherryStatic {
     const anchorStyle =
       (this.options.engine.syntax.header && this.options.engine.syntax.header.anchorStyle) || 'default';
     const autonumberClass = anchorStyle === 'autonumber' ? ' head-num' : '';
-    const { className, dom, enablePreviewerBubble } = this.options.previewer;
-    const previewerClassName = [
-      'cherry-previewer cherry-markdown',
-      className || '',
-      autonumberClass,
-      getThemeFromLocal(true, this.options.themeNameSpace),
-    ].join(' ');
+    const { className, dom, enablePreviewerBubble, floatWhenClosePreviewer } = this.options.previewer;
+    const { themeNameSpace } = this.options.themeSettings;
+    let mainTheme = '';
+    if (testHasLocal(themeNameSpace, 'theme')) {
+      mainTheme = getThemeFromLocal(true, themeNameSpace);
+    } else {
+      mainTheme = this.options.themeSettings.mainTheme;
+    }
+    const previewerClassName = ['cherry-previewer cherry-markdown', className || '', autonumberClass, mainTheme].join(
+      ' ',
+    );
     if (dom) {
       previewer = dom;
       previewer.className += ` ${previewerClassName}`;
@@ -763,10 +800,82 @@ export default class Cherry extends CherryStatic {
       value: this.options.value,
       isPreviewOnly: this.options.isPreviewOnly,
       enablePreviewerBubble,
+      floatWhenClosePreviewer,
       lazyLoadImg: this.options.previewer.lazyLoadImg,
     });
 
     return this.previewer;
+  }
+
+  clearFloatPreviewer() {
+    this.wrapperDom.appendChild(this.previewer.getDom());
+    this.storageFloatPreviewerWrapData = {
+      x: this.floatPreviewerWrapDom.offsetLeft,
+      y: this.floatPreviewerWrapDom.offsetTop,
+      height: this.floatPreviewerWrapDom.offsetHeight,
+      width: this.floatPreviewerWrapDom.offsetWidth,
+    };
+    this.floatPreviewerWrapDom.remove();
+  }
+
+  createFloatPreviewer() {
+    const floatPreviewerWrap = createElement('div', 'float-previewer-wrap');
+    const floatPreviewerHeader = createElement('div', 'float-previewer-header');
+    const floatPreviewerClose = createElement('div', 'float-previewer-close');
+    const floatPreviewerTitle = createElement('div', 'float-previewer-title');
+    floatPreviewerTitle.innerHTML = '预览';
+    floatPreviewerWrap.style.left = `${this.storageFloatPreviewerWrapData.x}px`;
+    floatPreviewerWrap.style.top = `${this.storageFloatPreviewerWrapData.y}px`;
+    floatPreviewerWrap.style.height = `${this.storageFloatPreviewerWrapData.height}px`;
+    floatPreviewerWrap.style.width = `${this.storageFloatPreviewerWrapData.width}px`;
+    floatPreviewerHeader.appendChild(floatPreviewerTitle);
+    floatPreviewerHeader.appendChild(floatPreviewerClose);
+    floatPreviewerWrap.appendChild(floatPreviewerHeader);
+    floatPreviewerWrap.appendChild(this.previewer.getDom());
+    this.floatPreviewerWrapDom = floatPreviewerWrap;
+    this.wrapperDom.appendChild(floatPreviewerWrap);
+
+    const pageWidth = document.body.clientWidth;
+    const pageHeight = document.body.clientHeight;
+
+    let initOffsetX = 0;
+    let initOffsetY = 0;
+
+    document.addEventListener('mousedown', (evt) => {
+      if (evt.target !== floatPreviewerHeader) return;
+      evt.preventDefault();
+      initOffsetX = evt.offsetX;
+      initOffsetY = evt.offsetY;
+      floatPreviewerWrap.classList.add('float-previewer-dragging');
+    });
+
+    document.addEventListener('mouseup', (evt) => {
+      floatPreviewerWrap.classList.remove('float-previewer-dragging');
+    });
+
+    document.addEventListener('mousemove', (evt) => {
+      if (!floatPreviewerWrap.classList.contains('float-previewer-dragging')) return;
+      evt.preventDefault();
+      const { clientX, clientY } = evt;
+      let newRight = clientX - initOffsetX;
+      let newTop = clientY - initOffsetY;
+      if (newRight < 0) {
+        newRight = 0;
+      }
+      if (newTop < 0) {
+        newTop = 0;
+      }
+      if (newRight + floatPreviewerWrap.offsetWidth > pageWidth) {
+        newRight = pageWidth - floatPreviewerWrap.offsetWidth;
+      }
+      if (newTop + floatPreviewerWrap.offsetHeight > pageHeight) {
+        newTop = pageHeight - floatPreviewerWrap.offsetHeight;
+      }
+      requestAnimationFrame(() => {
+        floatPreviewerWrap.style.left = `${newRight}px`;
+        floatPreviewerWrap.style.top = `${newTop}px`;
+      });
+    });
   }
 
   /**
@@ -868,10 +977,20 @@ export default class Cherry extends CherryStatic {
 
   /**
    * 修改主题
-   * @param {string} theme option.theme里的className
+   * @param {string} theme option.themeSettings.themeList 里的className
    */
   setTheme(theme = 'default') {
+    this.$event.emit('changeMainTheme', theme);
     changeTheme(this, theme);
+  }
+
+  /**
+   * 修改代码块主题
+   * @param {string} theme option.themeSettings.codeBlockTheme
+   */
+  setCodeBlockTheme(theme = 'default') {
+    this.$event.emit('changeCodeBlockTheme', theme);
+    changeCodeTheme(this, theme);
   }
 
   /**
@@ -880,5 +999,21 @@ export default class Cherry extends CherryStatic {
    */
   setWritingStyle(writingStyle) {
     this.editor.setWritingStyle(writingStyle);
+  }
+
+  /**
+   * 修改语言
+   * @param {string} locale
+   * @returns {boolean} false: 修改失败，因为没有对应的语言；true: 修改成功
+   */
+  setLocale(locale) {
+    if (!this.locales[locale]) {
+      return false;
+    }
+    this.options.locale = locale;
+    this.locale = this.locales[locale];
+    this.$event.emit('afterChangeLocale', locale);
+    this.resetToolbar('toolbar', this.options.toolbars.toolbar || []);
+    return true;
   }
 }
