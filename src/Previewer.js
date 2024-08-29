@@ -72,6 +72,7 @@ export default class Previewer {
       minBlockPercentage: 0.2, // editor或previewer所占宽度比例的最小值
       value: '',
       enablePreviewerBubble: true,
+      floatWhenClosePreviewer: false, // 是否在关闭预览区时，将预览区浮动
       afterUpdateCallBack: [],
       isPreviewOnly: false,
       previewerCache: {
@@ -188,6 +189,15 @@ export default class Previewer {
 
   isPreviewerHidden() {
     return this.options.previewerDom.classList.contains('cherry-previewer--hidden');
+  }
+
+  isPreviewerFloat() {
+    const floatDom = this.$cherry.cherryDom.querySelector('.float-previewer-wrap');
+    return this.$cherry.cherryDom.contains(floatDom);
+  }
+
+  isPreviewerNeedFloat() {
+    return this.options.floatWhenClosePreviewer;
   }
 
   calculateRealLayout(editorWidth) {
@@ -773,6 +783,24 @@ export default class Previewer {
     this.cleanHtmlCache();
     this.$cherry.$event.emit('previewerClose');
     this.$cherry.$event.emit('editorOpen');
+  }
+
+  floatPreviewer() {
+    const fullEditorLayout = {
+      editorPercentage: '100%',
+      previewerPercentage: '100%',
+    };
+    const editorWidth = this.editor.options.editorDom.getBoundingClientRect().width;
+    const layout = this.calculateRealLayout(editorWidth);
+    this.options.previewerCache.layout = layout;
+    this.setRealLayout(fullEditorLayout.editorPercentage, fullEditorLayout.previewerPercentage);
+    this.options.virtualDragLineDom.classList.add('cherry-drag--hidden');
+    this.$cherry.createFloatPreviewer();
+  }
+
+  recoverFloatPreviewer() {
+    this.recoverPreviewer(true);
+    this.$cherry.clearFloatPreviewer();
   }
 
   recoverPreviewer(dealToolbar = false) {
