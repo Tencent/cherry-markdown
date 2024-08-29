@@ -948,7 +948,7 @@ export default class Previewer {
   scrollToId(id) {
     const dom = this.getDomContainer();
     let $id = id.replace(/^\s*#/, '').trim();
-    $id = /%/.test($id) ? $id : encodeURIComponent($id);
+    $id = /[%:]/.test($id) ? $id : encodeURIComponent($id);
     const target = dom.querySelector(`[id="${$id}"]`) ?? false;
     if (target === false) {
       return false;
@@ -1049,6 +1049,13 @@ export default class Previewer {
           const liNode = target.parentElement;
           const index = Array.from(liNode.parentElement.children).indexOf(liNode) - 1;
           this.scrollToHeadByIndex(index);
+          event.stopPropagation();
+          event.preventDefault();
+        }
+        /** 增加个潜规则逻辑，脚注跳转时是否更新location hash也跟随options.toolbars.toc.updateLocationHash 的配置 */
+        if (target instanceof Element && target.nodeName === 'A' && /(footnote|footnote-ref)/.test(target.className)) {
+          const id = target.getAttribute('href');
+          this.scrollToId(id);
           event.stopPropagation();
           event.preventDefault();
         }
