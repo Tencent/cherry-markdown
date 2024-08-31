@@ -254,6 +254,7 @@ export default class Cherry extends CherryStatic {
     this.$event.bindCallbacksByOptions(this.options);
   }
 
+  // test
   destroy() {
     if (this.noMountEl) {
       this.cherryDom.remove();
