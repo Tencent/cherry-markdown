@@ -45,6 +45,8 @@ import { CherryStatic } from './CherryStatic';
 import { LIST_CONTENT } from '@/utils/regexp';
 import { storageKeyMap, clearAllStorageKeyMap } from './utils/shortcutKey';
 
+// test
+
 /** @typedef {import('~types/cherry').CherryOptions} CherryOptions */
 export default class Cherry extends CherryStatic {
   /**
