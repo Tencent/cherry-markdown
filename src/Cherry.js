@@ -816,12 +816,60 @@ export default class Cherry extends CherryStatic {
       width: this.floatPreviewerWrapDom.offsetWidth,
     };
     this.floatPreviewerWrapDom.remove();
+    this.removeFloatPreviewerListener();
+  }
+
+  handleFloatPreviewerMouseDown = (evt) => {
+    if (evt.target !== this.floatPreviewerHeaderDom) return;
+    evt.preventDefault();
+    this.floatPreviewerInitOffsetX = evt.offsetX;
+    this.floatPreviewerInitOffsetY = evt.offsetY;
+    this.floatPreviewerWrapDom.classList.add('float-previewer-dragging');
+  };
+
+  handleFloatPreviewerMouseMove = (evt) => {
+    if (!this.floatPreviewerWrapDom.classList.contains('float-previewer-dragging')) return;
+    evt.preventDefault();
+    const { clientX, clientY } = evt;
+    let newRight = clientX - this.floatPreviewerInitOffsetX;
+    let newTop = clientY - this.floatPreviewerInitOffsetY;
+    if (newRight < 0) {
+      newRight = 0;
+    }
+    if (newTop < 0) {
+      newTop = 0;
+    }
+    if (newRight + this.floatPreviewerWrapDom.offsetWidth > this.pageWidth) {
+      newRight = this.pageWidth - this.floatPreviewerWrapDom.offsetWidth;
+    }
+    if (newTop + this.floatPreviewerWrapDom.offsetHeight > this.pageHeight) {
+      newTop = this.pageHeight - this.floatPreviewerWrapDom.offsetHeight;
+    }
+    requestAnimationFrame(() => {
+      this.floatPreviewerWrapDom.style.left = `${newRight}px`;
+      this.floatPreviewerWrapDom.style.top = `${newTop}px`;
+    });
+  };
+
+  handleFloatPreviewerMouseUp = (evt) => {
+    this.floatPreviewerWrapDom.classList.remove('float-previewer-dragging');
+  };
+
+  createFloatPreviewerListener() {
+    document.addEventListener('mousedown', this.handleFloatPreviewerMouseDown);
+    document.addEventListener('mousemove', this.handleFloatPreviewerMouseMove);
+    document.addEventListener('mouseup', this.handleFloatPreviewerMouseUp);
+  }
+
+  removeFloatPreviewerListener() {
+    document.removeEventListener('mousedown', this.handleFloatPreviewerMouseDown);
+    document.removeEventListener('mousemove', this.handleFloatPreviewerMouseMove);
+    document.removeEventListener('mouseup', this.handleFloatPreviewerMouseUp);
   }
 
   createFloatPreviewer() {
     const floatPreviewerWrap = createElement('div', 'float-previewer-wrap');
     const floatPreviewerHeader = createElement('div', 'float-previewer-header');
-    const floatPreviewerClose = createElement('div', 'float-previewer-close');
     const floatPreviewerTitle = createElement('div', 'float-previewer-title');
     floatPreviewerTitle.innerHTML = '预览';
     floatPreviewerWrap.style.left = `${this.storageFloatPreviewerWrapData.x}px`;
@@ -829,53 +877,16 @@ export default class Cherry extends CherryStatic {
     floatPreviewerWrap.style.height = `${this.storageFloatPreviewerWrapData.height}px`;
     floatPreviewerWrap.style.width = `${this.storageFloatPreviewerWrapData.width}px`;
     floatPreviewerHeader.appendChild(floatPreviewerTitle);
-    floatPreviewerHeader.appendChild(floatPreviewerClose);
     floatPreviewerWrap.appendChild(floatPreviewerHeader);
     floatPreviewerWrap.appendChild(this.previewer.getDom());
-    this.floatPreviewerWrapDom = floatPreviewerWrap;
     this.wrapperDom.appendChild(floatPreviewerWrap);
 
-    const pageWidth = document.body.clientWidth;
-    const pageHeight = document.body.clientHeight;
+    this.floatPreviewerHeaderDom = floatPreviewerHeader;
+    this.floatPreviewerWrapDom = floatPreviewerWrap;
+    this.pageWidth = document.body.clientWidth;
+    this.pageHeight = document.body.clientHeight;
 
-    let initOffsetX = 0;
-    let initOffsetY = 0;
-
-    document.addEventListener('mousedown', (evt) => {
-      if (evt.target !== floatPreviewerHeader) return;
-      evt.preventDefault();
-      initOffsetX = evt.offsetX;
-      initOffsetY = evt.offsetY;
-      floatPreviewerWrap.classList.add('float-previewer-dragging');
-    });
-
-    document.addEventListener('mouseup', (evt) => {
-      floatPreviewerWrap.classList.remove('float-previewer-dragging');
-    });
-
-    document.addEventListener('mousemove', (evt) => {
-      if (!floatPreviewerWrap.classList.contains('float-previewer-dragging')) return;
-      evt.preventDefault();
-      const { clientX, clientY } = evt;
-      let newRight = clientX - initOffsetX;
-      let newTop = clientY - initOffsetY;
-      if (newRight < 0) {
-        newRight = 0;
-      }
-      if (newTop < 0) {
-        newTop = 0;
-      }
-      if (newRight + floatPreviewerWrap.offsetWidth > pageWidth) {
-        newRight = pageWidth - floatPreviewerWrap.offsetWidth;
-      }
-      if (newTop + floatPreviewerWrap.offsetHeight > pageHeight) {
-        newTop = pageHeight - floatPreviewerWrap.offsetHeight;
-      }
-      requestAnimationFrame(() => {
-        floatPreviewerWrap.style.left = `${newRight}px`;
-        floatPreviewerWrap.style.top = `${newTop}px`;
-      });
-    });
+    this.createFloatPreviewerListener();
   }
 
   /**
