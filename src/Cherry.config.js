@@ -407,12 +407,29 @@ const defaultConfig = {
     //   position: 'absolute', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
     //   cssText: '', // 自定义样式
     // },
-    // 快捷键配置，如果配置为空，则使用toolbar的配置
+    /**
+     * 自定义快捷键
+     * @deprecated 请使用`shortcutKeySettings`
+     */
     shortcutKey: {
       // 'Alt-1': 'header',
       // 'Alt-2': 'header',
       // 'Ctrl-b': 'bold',
       // 'Ctrl-Alt-m': 'formula',
+    },
+    shortcutKeySettings: {
+      /** 是否替换已有的快捷键, true: 替换默认快捷键； false： 会追加到默认快捷键里，相同的shortcutKey会覆盖默认的 */
+      isReplace: false,
+      shortcutKeyMap: {
+        'Alt-Digit1': {
+          hookName: 'header',
+          aliasName: '标题',
+        },
+        'Control-Shift-KeyB': {
+          hookName: 'bold',
+          aliasName: '加粗',
+        },
+      },
     },
     // 一些按钮的配置信息
     config: {
@@ -544,9 +561,9 @@ const defaultConfig = {
       afterLoadAllImgCallback: () => {},
     },
   },
+  /** 定义cherry缓存的作用范围，相同nameSpace的实例共享localStorage缓存 */
+  nameSpace: 'cherry',
   themeSettings: {
-    // 定义主题的作用范围，相同themeNameSpace的实例共享主题配置
-    themeNameSpace: 'cherry',
     // 主题列表，用于切换主题
     themeList: [
       { className: 'default', label: '默认' },
