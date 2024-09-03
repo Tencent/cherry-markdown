@@ -171,45 +171,15 @@ var basicConfig = {
   },
   toolbars: {
     toolbar: [
-      'bold',
-      'italic',
-      {
-        strikethrough: ['strikethrough', 'underline', 'sub', 'sup', 'ruby', 'customMenuAName'],
-      },
-      'size',
-      '|',
-      'color',
-      'header',
-      '|',
-      'drawIo',
-      '|',
-      'ol',
-      'ul',
-      'checklist',
-      'panel',
-      'justify',
-      'detail',
-      '|',
-      'formula',
-      {
-        insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'inlineCode', 'formula', 'toc', 'table', 'pdf', 'word', 'file'],
-      },
-      'graph',
-      'customMenuTable',
-      'togglePreview',
       'settings',
       'codeTheme',
       'export',
-      {
-        customMenuBName: ['ruby', 'audio', 'video', 'customMenuAName'],
-      },
-      'customMenuCName',
       'theme',
     ],
-    toolbarRight: ['fullScreen', '|', 'changeLocale', 'wordCount'],
-    bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
-    sidebar: ['mobilePreview', 'copy', 'theme', 'publish'],
-    sidebar: ['mobilePreview', 'copy', 'theme'],
+    toolbarRight: [],
+    bubble: [], // array or false
+    sidebar: [],
+    hiddenToolbar: ['bold', 'italic', 'header', 'togglePreview', 'fullScreen', '|', 'changeLocale', 'wordCount', 'bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color', 'mobilePreview', 'copy', 'theme'],
     toc: {
       updateLocationHash: false, // 要不要更新URL的hash
       defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
@@ -219,6 +189,23 @@ var basicConfig = {
       customMenuBName: customMenuB,
       customMenuCName: customMenuC,
       customMenuTable,
+    },
+    shortcutKey: {
+      'Alt-s': 'fullScreen',
+    },
+    shortcutKeySettings: {
+      /** 是否替换已有的快捷键, true: 替换默认快捷键； false： 会追加到默认快捷键里，相同的shortcutKey会覆盖默认的 */
+      isReplace: false,
+      shortcutKeyMap: {
+        'Alt-Digit1': {
+          hookName: 'header',
+          aliasName: '标题',
+        },
+        'Control-Shift-KeyX': {
+          hookName: 'bold',
+          aliasName: '加粗',
+        },
+      },
     },
     // config: {
     //   publish: [
