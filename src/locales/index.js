@@ -16,8 +16,10 @@
 
 import zhCn from './zh_CN';
 import enUs from './en_US';
+import ruRu from './ru_RU';
 
 export default {
   zh_CN: zhCn,
   en_US: enUs,
+  ru_RU: ruRu,
 };

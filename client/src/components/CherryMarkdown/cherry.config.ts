@@ -2,7 +2,7 @@ import { useStoreCherry } from "@/store/storeCherry";
 import Cherry from "cherry-markdown";
 import { CherryOptions } from "cherry-markdown/types/cherry";
 import { ipcRenderer } from "electron";
-import { onMounted } from "vue";
+import { onMounted, shallowReactive } from "vue";
 
 /**
  *@description  初始化 CherryMarkdown
@@ -279,7 +279,7 @@ const initCherryMarkdown = () => {
 
   onMounted(() => {
     const cherryInstance = new Cherry(defaultConfig as Partial<CherryOptions>);
-    storeCherry.cherry = cherryInstance
+    storeCherry.cherry = shallowReactive(cherryInstance)
   })
 }
 

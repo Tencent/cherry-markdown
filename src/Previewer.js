@@ -72,6 +72,7 @@ export default class Previewer {
       minBlockPercentage: 0.2, // editor或previewer所占宽度比例的最小值
       value: '',
       enablePreviewerBubble: true,
+      floatWhenClosePreviewer: false, // 是否在关闭预览区时，将预览区浮动
       afterUpdateCallBack: [],
       isPreviewOnly: false,
       previewerCache: {
@@ -188,6 +189,15 @@ export default class Previewer {
 
   isPreviewerHidden() {
     return this.options.previewerDom.classList.contains('cherry-previewer--hidden');
+  }
+
+  isPreviewerFloat() {
+    const floatDom = this.$cherry.cherryDom.querySelector('.float-previewer-wrap');
+    return this.$cherry.cherryDom.contains(floatDom);
+  }
+
+  isPreviewerNeedFloat() {
+    return this.options.floatWhenClosePreviewer;
   }
 
   calculateRealLayout(editorWidth) {
@@ -775,6 +785,24 @@ export default class Previewer {
     this.$cherry.$event.emit('editorOpen');
   }
 
+  floatPreviewer() {
+    const fullEditorLayout = {
+      editorPercentage: '100%',
+      previewerPercentage: '100%',
+    };
+    const editorWidth = this.editor.options.editorDom.getBoundingClientRect().width;
+    const layout = this.calculateRealLayout(editorWidth);
+    this.options.previewerCache.layout = layout;
+    this.setRealLayout(fullEditorLayout.editorPercentage, fullEditorLayout.previewerPercentage);
+    this.options.virtualDragLineDom.classList.add('cherry-drag--hidden');
+    this.$cherry.createFloatPreviewer();
+  }
+
+  recoverFloatPreviewer() {
+    this.recoverPreviewer(true);
+    this.$cherry.clearFloatPreviewer();
+  }
+
   recoverPreviewer(dealToolbar = false) {
     this.options.previewerDom.classList.remove('cherry-previewer--hidden');
     this.options.virtualDragLineDom.classList.remove('cherry-drag--hidden');
@@ -920,7 +948,7 @@ export default class Previewer {
   scrollToId(id) {
     const dom = this.getDomContainer();
     let $id = id.replace(/^\s*#/, '').trim();
-    $id = /%/.test($id) ? $id : encodeURIComponent($id);
+    $id = /[%:]/.test($id) ? $id : encodeURIComponent($id);
     const target = dom.querySelector(`[id="${$id}"]`) ?? false;
     if (target === false) {
       return false;
@@ -1021,6 +1049,13 @@ export default class Previewer {
           const liNode = target.parentElement;
           const index = Array.from(liNode.parentElement.children).indexOf(liNode) - 1;
           this.scrollToHeadByIndex(index);
+          event.stopPropagation();
+          event.preventDefault();
+        }
+        /** 增加个潜规则逻辑，脚注跳转时是否更新location hash也跟随options.toolbars.toc.updateLocationHash 的配置 */
+        if (target instanceof Element && target.nodeName === 'A' && /(footnote|footnote-ref)/.test(target.className)) {
+          const id = target.getAttribute('href');
+          this.scrollToId(id);
           event.stopPropagation();
           event.preventDefault();
         }

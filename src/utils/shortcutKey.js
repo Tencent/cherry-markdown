@@ -171,24 +171,24 @@ export const keyStackIsModifierkeys = (keyStack) => {
 
 /**
  * 缓存快捷键映射
- * @param {string} cherryInstanceId cherry 实例id
+ * @param {string} nameSpace cherry 的缓存命名空间
  * @param {import('@/toolbars/MenuBase').HookShortcutKeyMap} keyMap 快捷键映射
  * @returns
  */
-export const storageKeyMap = (cherryInstanceId, keyMap) => {
+export const storageKeyMap = (nameSpace, keyMap) => {
   if (!keyMap || typeof keyMap !== 'object') {
     throw new Error('keyMap must be a object');
   }
-  return window.localStorage.setItem(`cherry-shortcut-keymap-${cherryInstanceId}`, JSON.stringify(keyMap));
+  return window.localStorage.setItem(`${nameSpace}-cherry-shortcut-keymap`, JSON.stringify(keyMap));
 };
 
 /**
  * 获取缓存快捷键映射
- * @param {string} cherryInstanceId cherry 实例id
+ * @param {string} nameSpace cherry 的缓存命名空间
  * @returns
  */
-export const getStorageKeyMap = (cherryInstanceId) => {
-  const shortcutKeyMapStorage = window.localStorage.getItem(`cherry-shortcut-keymap-${cherryInstanceId}`);
+export const getStorageKeyMap = (nameSpace) => {
+  const shortcutKeyMapStorage = window.localStorage.getItem(`${nameSpace}-cherry-shortcut-keymap`);
   if (shortcutKeyMapStorage) {
     try {
       /** @type {import('@/toolbars/MenuBase').HookShortcutKeyMap} */
@@ -212,35 +212,6 @@ export const keyStack2UniqueString = (keyStack) => {
     throw new Error('keyStack must be a array');
   }
   return keyStack.join('-');
-};
-
-/**
- * 清除cherry 实例的快捷键映射
- */
-export const clearAllStorageKeyMap = () => {
-  // 清除所有 cherry 实例的快捷键映射，即删除以`cherry-shortcut-keymap-` 开头的所有 localStorage
-  Object.keys(window.localStorage).forEach((key) => {
-    if (key.startsWith('cherry-shortcut-keymap-')) {
-      window.localStorage.removeItem(key);
-    }
-  });
-};
-
-/**
- * 更新缓存中的快捷键映射
- * @param {string} cherryInstanceId cherry 实例id
- * @param {string} oldShortcutKey 旧的快捷键
- * @param {import('@/toolbars/MenuBase').HookShortcutKeyMap} keyMap 快捷键映射
- */
-export const updateStorageKeyMap = (cherryInstanceId, oldShortcutKey, keyMap) => {
-  const originStorageKeyMap = getStorageKeyMap(cherryInstanceId);
-  if (originStorageKeyMap) {
-    // 先删除旧值
-    delete originStorageKeyMap[oldShortcutKey];
-    // 再添加新值
-    Object.assign(originStorageKeyMap, keyMap);
-    storageKeyMap(cherryInstanceId, originStorageKeyMap);
-  }
 };
 
 /**
