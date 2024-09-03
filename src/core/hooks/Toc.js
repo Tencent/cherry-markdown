@@ -111,7 +111,9 @@ export default class Toc extends ParagraphBase {
     }
     const tocLink = this.linkProcessor(`#${node.id}`.replace(/safe_/g, '')); // transform header id to avoid being sanitized
     return `<li class="${this.tocNodeClass}${this.showAutoNumber ? ` toc-li-${node.level}` : ''}">
-    ${nodePrefix}<a href="${tocLink}" class="level-${node.level}">${node.text}</a>${closeTag ? '</li>' : ''}`;
+    ${nodePrefix}<a href="${tocLink}" class="level-${node.level}" target="_self">${node.text}</a>${
+      closeTag ? '</li>' : ''
+    }`;
   }
 
   $makePlainToc(tocNodeList) {
