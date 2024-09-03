@@ -18,7 +18,6 @@ import Logger from '@/Logger';
 import { escapeHTMLSpecialCharOnce as $e } from '@/utils/sanitize';
 import { createElement } from '@/utils/dom';
 import NestedError from '@/utils/error';
-import { updateStorageKeyMap } from '@/utils/shortcutKey';
 
 /**
  * @typedef {Object} SubMenuConfigItem
@@ -446,38 +445,6 @@ export default class MenuBase {
    */
   get shortcutKeys() {
     return [];
-  }
-
-  /**
-   * @param {HookShortcutKeyMap} value 新值
-   */
-  setShortcutKeyMap(value) {
-    if (!value || typeof value !== 'object') {
-      throw new Error('shortcutKeyMap must be an object');
-    }
-    this.shortcutKeyMap = value;
-  }
-
-  /**
-   * 更新快捷键映射
-   * @param {string} oldShortcutKey 旧的快捷键
-   * @param {string} newShortcutKey 新的快捷键
-   */
-  updateShortcutKeyMap(oldShortcutKey, newShortcutKey) {
-    const old = this.shortcutKeyMap[oldShortcutKey];
-    if (!old) {
-      return false;
-    }
-    // 删除旧值
-    delete this.shortcutKeyMap[oldShortcutKey];
-    const newValue = {
-      ...this.shortcutKeyMap,
-      [newShortcutKey]: old,
-    };
-    // 更新内存中的映射
-    this.shortcutKeyMap = newValue;
-    // 更新缓存中的映射
-    updateStorageKeyMap(this.$cherry.instanceId, oldShortcutKey, newValue);
   }
 
   /**
