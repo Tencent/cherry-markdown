@@ -27,6 +27,9 @@ export default class FloatMenu extends Toolbar {
     this.editorDom = this.editor.getEditorDom();
     this.editorDom.querySelector('.CodeMirror-scroll').appendChild(this.options.dom);
     this.initAction();
+    Object.entries(this.shortcutKeyMap).forEach(([key, value]) => {
+      this.$cherry.toolbar.shortcutKeyMap[key] = value;
+    });
   }
 
   appendMenusToDom(menus) {

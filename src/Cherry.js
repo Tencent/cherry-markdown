@@ -43,7 +43,6 @@ import locales from '@/locales/index';
 import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
 import { LIST_CONTENT } from '@/utils/regexp';
-import { storageKeyMap, clearAllStorageKeyMap } from './utils/shortcutKey';
 
 /** @typedef {import('~types/cherry').CherryOptions} CherryOptions */
 export default class Cherry extends CherryStatic {
@@ -126,26 +125,6 @@ export default class Cherry extends CherryStatic {
      */
     this.engine = new Engine(this.options, this);
     this.init();
-    const toolbarShortcutKeyMap = this.toolbar?.shortcutKeyMap ?? {};
-    if (
-      toolbarShortcutKeyMap &&
-      typeof toolbarShortcutKeyMap === 'object' &&
-      Object.keys(toolbarShortcutKeyMap).length
-    ) {
-      const cacheShortcutKeyMap = Object.entries(toolbarShortcutKeyMap)
-        .filter(([_, value]) => value && typeof value === 'object')
-        .reduce((prev, curr) => {
-          const [key, value] = curr;
-          if (key in prev) {
-            throw Error(`Duplicate shortcut key: ${key}`);
-          }
-          return (prev[key] = value), prev;
-        }, {});
-      storageKeyMap(this.instanceId, cacheShortcutKeyMap);
-      this.clearAllStorageKeyMap = clearAllStorageKeyMap;
-      // 页面关闭时清除缓存
-      window.addEventListener('unload', this.clearAllStorageKeyMap);
-    }
   }
 
   /**
@@ -169,6 +148,13 @@ export default class Cherry extends CherryStatic {
       mountEl.style.height = this.options.editor.height;
     }
     this.cherryDom = mountEl;
+
+    // 生成名称空间
+    if (typeof this.options.themeNameSpace === 'string') {
+      this.nameSpace = this.options.themeNameSpace;
+    } else {
+      this.nameSpace = this.options.nameSpace;
+    }
 
     // 蒙层dom，用来拖拽编辑区&预览区宽度时展示蒙层
     const wrapperDom = this.createWrapper();
@@ -538,9 +524,8 @@ export default class Cherry extends CherryStatic {
     let toolbarTheme = '';
     let inlineCodeTheme = '';
     let codeBlockTheme = '';
-    const { themeNameSpace } = this.options.themeSettings;
-    if (testHasLocal(themeNameSpace, 'theme')) {
-      mainTheme = getThemeFromLocal(true, themeNameSpace);
+    if (testHasLocal(this.nameSpace, 'theme')) {
+      mainTheme = getThemeFromLocal(true, this.nameSpace);
     } else {
       mainTheme = this.options.themeSettings.mainTheme;
     }
@@ -570,7 +555,7 @@ export default class Cherry extends CherryStatic {
       'data-codeBlockTheme': codeBlockTheme,
     });
 
-    wrapperDom.setAttribute('data-code-block-theme', getCodeThemeFromLocal(this.options.themeNameSpace));
+    wrapperDom.setAttribute('data-code-block-theme', getCodeThemeFromLocal(this.nameSpace));
 
     this.wrapperDom = wrapperDom;
     return wrapperDom;
@@ -585,12 +570,16 @@ export default class Cherry extends CherryStatic {
       const dom = createElement('div', 'cherry-toolbar');
       this.toolbarContainer = dom;
     }
+    if (this.options.toolbars.shortcutKey && Object.keys(this.options.toolbars.shortcutKey).length > 0) {
+      console.warn(
+        'options.shortcutKey is deprecated, please use shortcutKeySettings.shortcutKeyMap instead, get more info at https://github.com/Tencent/cherry-markdown/wiki',
+      );
+    }
     this.toolbar = new Toolbar({
       dom: this.toolbarContainer,
       $cherry: this,
       buttonConfig: this.options.toolbars.toolbar,
       customMenu: this.options.toolbars.customMenu,
-      shortcutKey: this.options.toolbars.shortcutKey,
     });
     return this.toolbar;
   }
@@ -771,10 +760,9 @@ export default class Cherry extends CherryStatic {
       (this.options.engine.syntax.header && this.options.engine.syntax.header.anchorStyle) || 'default';
     const autonumberClass = anchorStyle === 'autonumber' ? ' head-num' : '';
     const { className, dom, enablePreviewerBubble, floatWhenClosePreviewer } = this.options.previewer;
-    const { themeNameSpace } = this.options.themeSettings;
     let mainTheme = '';
-    if (testHasLocal(themeNameSpace, 'theme')) {
-      mainTheme = getThemeFromLocal(true, themeNameSpace);
+    if (testHasLocal(this.nameSpace, 'theme')) {
+      mainTheme = getThemeFromLocal(true, this.nameSpace);
     } else {
       mainTheme = this.options.themeSettings.mainTheme;
     }

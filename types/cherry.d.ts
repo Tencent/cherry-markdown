@@ -55,6 +55,8 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     pdf: boolean;
     file: boolean;
   };
+  /** 定义cherry缓存的作用范围，相同nameSpace的实例共享localStorage缓存 */
+  nameSpace: string;
   /**
    * 有哪些主题，第三方可以自行扩展主题
    * @deprecated 不再支持theme的配置，统一在`themeSettings.themeList`中配置
@@ -62,12 +64,10 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
   theme: { className: string, label: string }[];
   /**
    * 定义主题的作用范围，相同themeNameSpace的实例共享主题配置
-   * @deprecated 不再支持themeNameSpace的配置，统一在`themeSettings.themeNameSpace`中配置
+   * @deprecated 不再支持themeNameSpace的配置，统一在`nameSpace`中配置
    */
   themeNameSpace: string,
   themeSettings: {
-    /** 定义主题的作用范围，相同themeNameSpace的实例共享主题配置 */
-    themeNameSpace: string,
     /** 主题列表，用于切换主题 */
     themeList:{
       /** 主题对应的class名 */
@@ -422,8 +422,19 @@ export interface CherryToolbarsOptions<F extends CherryToolbarsCustomType = Cher
   /** 新行悬停菜单配置 */
   float?: any[] | false;
   customMenu?: Record<string, any>;
-  /** 自定义快捷键 */
+  /**
+   * 自定义快捷键 
+   * @deprecated 请使用`shortcutKeySettings`
+   */
   shortcutKey?: Object | false;
+  /**
+   * 自定义快捷键
+   */
+  shortcutKeySettings?: {
+    /** 是否替换已有的快捷键, true: 替换默认快捷键； false： 会追加到默认快捷键里，相同的shortcutKey会覆盖默认的 */
+    isReplace?: boolean,
+    shortcutKeyMap?: { [shortcutKey:string]: ShortcutKeyMapStruct};
+  };
   /** 一些按钮的配置信息 */
   config?: CherryToolbarConfig;
 }
