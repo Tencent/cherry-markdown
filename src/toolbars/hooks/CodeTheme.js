@@ -26,14 +26,17 @@ export default class CodeTheme extends MenuBase {
     this.updateMarkdown = false;
     this.noIcon = true;
     this.subMenuConfig = [
-      { noIcon: true, name: 'default', onclick: this.bindSubClick.bind(this, 'default') },
+      { noIcon: true, name: 'light', onclick: this.bindSubClick.bind(this, 'default') },
       { noIcon: true, name: 'dark', onclick: this.bindSubClick.bind(this, 'dark') },
-      { noIcon: true, name: 'funky', onclick: this.bindSubClick.bind(this, 'funky') },
+      { noIcon: true, name: 'one light', onclick: this.bindSubClick.bind(this, 'one-light') },
+      { noIcon: true, name: 'one dark', onclick: this.bindSubClick.bind(this, 'one-dark') },
+      { noIcon: true, name: 'vs light', onclick: this.bindSubClick.bind(this, 'vs-light') },
+      { noIcon: true, name: 'vs dark', onclick: this.bindSubClick.bind(this, 'vs-dark') },
+      { noIcon: true, name: 'solarized light', onclick: this.bindSubClick.bind(this, 'solarized-light') },
+      { noIcon: true, name: 'tomorrow dark', onclick: this.bindSubClick.bind(this, 'tomorrow-night') },
       { noIcon: true, name: 'okaidia', onclick: this.bindSubClick.bind(this, 'okaidia') },
       { noIcon: true, name: 'twilight', onclick: this.bindSubClick.bind(this, 'twilight') },
       { noIcon: true, name: 'coy', onclick: this.bindSubClick.bind(this, 'coy') },
-      { noIcon: true, name: 'solarized light', onclick: this.bindSubClick.bind(this, 'solarized-light') },
-      { noIcon: true, name: 'tomorrow night', onclick: this.bindSubClick.bind(this, 'tomorrow-night') },
     ];
   }
 
@@ -43,6 +46,7 @@ export default class CodeTheme extends MenuBase {
    * @param {string} codeTheme 具体的代码块主题
    */
   onClick(shortKey = '', codeTheme) {
+    this.$cherry.$event.emit('changeCodeBlockTheme', codeTheme);
     changeCodeTheme(this.$cherry, codeTheme);
   }
 }

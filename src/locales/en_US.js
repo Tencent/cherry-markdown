@@ -90,7 +90,6 @@ export default {
   justifyCenter: 'Center',
   justifyRight: 'Right',
   publish: 'Publish',
-  wordCount: 'Word Count',
   fontColor: 'Font Color',
   fontBgColor: 'Font Bg Color',
   small: 'Small',
@@ -102,4 +101,8 @@ export default {
   inlineCode: 'Inline Code',
   codeBlock: 'Code Block',
   editShortcutKeyConfigTip: 'double click shortcut key area to edit',
+  wordCount: 'Word Count',
+  wordCountP: 'P',
+  wordCountW: 'W',
+  wordCountC: 'C',
 };

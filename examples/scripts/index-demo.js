@@ -56,7 +56,11 @@ var customMenuA = Cherry.createMenuHook('加粗斜体',  {
  * 定义一个空壳，用于自行规划cherry已有工具栏的层级结构
  */
 var customMenuB = Cherry.createMenuHook('实验室',  {
-  iconName: '',
+  icon: {
+    type: 'svg',
+    content: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></svg>',
+    iconStyle: 'width: 15px; height: 15px; vertical-align: middle;',
+  },
 });
 /**
  * 定义一个自带二级菜单的工具栏
@@ -118,6 +122,7 @@ var basicConfig = {
       codeBlock: {
         theme: 'twilight',
         lineNumber: true, // 默认显示行号
+        expandCode: true,
       },
       table: {
         enableChart: true,
@@ -156,6 +161,14 @@ var basicConfig = {
       },
     },
   },
+  multipleFileSelection: {
+    video: true,
+    audio: false,
+    image: true,
+    word: false,
+    pdf: true,
+    file: true,
+  },
   toolbars: {
     toolbar: [
       'bold',
@@ -179,7 +192,7 @@ var basicConfig = {
       '|',
       'formula',
       {
-        insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word'],
+        insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'inlineCode', 'formula', 'toc', 'table', 'pdf', 'word', 'file'],
       },
       'graph',
       'customMenuTable',
@@ -193,7 +206,7 @@ var basicConfig = {
       'customMenuCName',
       'theme',
     ],
-    toolbarRight: ['fullScreen', '|'],
+    toolbarRight: ['fullScreen', '|', 'changeLocale', 'wordCount'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
     sidebar: ['mobilePreview', 'copy', 'theme', 'publish'],
     sidebar: ['mobilePreview', 'copy', 'theme'],
@@ -216,7 +229,7 @@ var basicConfig = {
     //       serviceUrl: 'http://localhost:3001',
     //       injectPayload: {
     //         thumb_media_id: 'ft7IwCi1eukC6lRHzmkYuzeMmVXWbU3JoipysW2EZamblyucA67wdgbYTix4X377',
-    //         author: 'Cherry Markdown', 
+    //         author: 'Cherry Markdown',
     //       },
     //     }
     //   ],
@@ -226,6 +239,7 @@ var basicConfig = {
   previewer: {
     // 自定义markdown预览区域class
     // className: 'markdown'
+    floatWhenClosePreviewer: true,
   },
   keydown: [],
   //extensions: [],

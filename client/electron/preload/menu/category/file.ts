@@ -86,16 +86,16 @@ ipcMain.on('save-file-as-info', async (event, arg: { data: string }) => {
   if (filePath) {
     fs.writeFile(filePath, arg.data, (err) => {
       if (err) {
-        event.reply('save-file-as-reply', { status: -1, message: err.message, filePath: '' })
+        event.reply('save-file-as-reply', { status: -1, message: err.message, filePath: '', isSaved: false })
       } else {
-        event.reply('save-file-as-reply', { status: 0, message: 'save file as success', filePath: filePath })
         const menu = Menu.getApplicationMenu();
         const saveFileBtn = menu.getMenuItemById('save-file');
-        saveFileBtn.enabled = false
+        saveFileBtn.enabled = false;
+        event.reply('save-file-as-reply', { status: 0, message: 'save file as success', filePath: filePath, isSaved: true })
       }
     });
   } else {
-    event.reply('save-file-as-reply', { status: -2, message: 'save file as canceled', filePath: '' })
+    event.reply('save-file-as-reply', { status: -2, message: 'save file as canceled', filePath: '', isSaved: false })
   }
 
 })
@@ -114,17 +114,15 @@ ipcMain.on('sava-file-type', (event, arg: { filePath: string, data: string }) =>
   if (arg.filePath) {
     fs.writeFile(arg.filePath, arg.data, (err) => {
       if (err) {
-        console.error('err', err);
-        event.reply('save-file-reply', { status: -1, message: err.message, });
+        event.reply('save-file-reply', { status: -1, message: err.message, isSaved: false });
       } else {
-        console.error('success');
-        event.reply('save-file-reply', { status: 0, message: 'save file as success' });
         const menu = Menu.getApplicationMenu();
         const saveFileBtn = menu.getMenuItemById('save-file');
-        saveFileBtn.enabled = false
+        saveFileBtn.enabled = false;
+        event.reply('save-file-reply', { status: 0, message: 'save file as success', isSaved: true });
       }
     });
   } else {
-    saveFileAs()
+    saveFileAs();
   }
 })

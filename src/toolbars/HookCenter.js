@@ -41,6 +41,7 @@ import FullScreen from './hooks/FullScreen';
 import Undo from './hooks/Undo';
 import Redo from './hooks/Redo';
 import Code from './hooks/Code';
+import InlineCode from './hooks/InlineCode';
 import CodeTheme from './hooks/CodeTheme';
 import Export from './hooks/Export';
 import Settings from './hooks/Settings';
@@ -72,6 +73,7 @@ import Justify from './hooks/Justify';
 import Detail from './hooks/Detail';
 import DrawIo from './hooks/DrawIo';
 import Publish from './hooks/Publish';
+import ChangeLocale from './hooks/ChangeLocale';
 
 // 定义默认支持的工具栏
 // 目前不支持按需动态加载
@@ -99,6 +101,7 @@ const HookList = {
   quickTable: QuickTable,
   togglePreview: TogglePreview,
   code: Code,
+  inlineCode: InlineCode,
   codeTheme: CodeTheme,
   export: Export,
   settings: Settings,
@@ -132,6 +135,7 @@ const HookList = {
   wordCount: WordCount,
   // chatgpt: ChatGpt,
   publish: Publish,
+  changeLocale: ChangeLocale,
 };
 
 export default class HookCenter {
@@ -175,13 +179,14 @@ export default class HookCenter {
      */
     const currentMenuOptions = options || { name, icon: name };
     const { $cherry, customMenu } = this.toolbar.options;
+    $cherry.$currentMenuOptions = currentMenuOptions;
     if (HookList[name]) {
       this.allMenusName.push(name);
-      this.hooks[name] = new HookList[name]({ ...$cherry, $currentMenuOptions: currentMenuOptions });
+      this.hooks[name] = new HookList[name]($cherry);
     } else if (customMenu !== undefined && customMenu !== null && customMenu[name]) {
       this.allMenusName.push(name);
       // 如果是自定义菜单，传参兼容旧版
-      this.hooks[name] = new customMenu[name]({ ...$cherry, $currentMenuOptions: currentMenuOptions });
+      this.hooks[name] = new customMenu[name]($cherry);
     }
   }
 
