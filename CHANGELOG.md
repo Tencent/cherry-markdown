@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.47](https://github.com/Tencent/cherry-markdown/compare/v0.8.46...v0.8.47) (2024-09-03)
+
+
+### Features
+
+* [#874](https://github.com/Tencent/cherry-markdown/issues/874) 优化主题、代码块主题的相关逻辑，便于做持久化，优先级：本地缓存>配置>默认配置 ([993d986](https://github.com/Tencent/cherry-markdown/commit/993d986928a9532670892647d27cfbc47e5e4e1d))
+* [#876](https://github.com/Tencent/cherry-markdown/issues/876) 窗口浮动 ([#884](https://github.com/Tencent/cherry-markdown/issues/884)) ([1a16235](https://github.com/Tencent/cherry-markdown/commit/1a162353c3638d6651527d4b17f49efb50895a30))
+* 浮动预览窗口优化 ([1199562](https://github.com/Tencent/cherry-markdown/commit/11995625f617e0f5d6f1f8df1c5715e656625e19))
+* **client:** add shortcut keys ([#878](https://github.com/Tencent/cherry-markdown/issues/878)) ([4e4cc3c](https://github.com/Tencent/cherry-markdown/commit/4e4cc3c10e39e7f72e54cf524dd2ac3c0b0b7d6e))
+
+
+### Bug Fixes
+
+* [#871](https://github.com/Tencent/cherry-markdown/issues/871) 重做了下快捷键配置机制 ([999a6cc](https://github.com/Tencent/cherry-markdown/commit/999a6ccf9d615a948d43453d61502bb0c78a9e5c))
+* [#879](https://github.com/Tencent/cherry-markdown/issues/879) 脚注跳转支持不更新location hash ([0cfe8b2](https://github.com/Tencent/cherry-markdown/commit/0cfe8b260a7c3acb5d4faa96712904c0577f0334))
+* 注释掉config里的无用配置 ([30c6fd7](https://github.com/Tencent/cherry-markdown/commit/30c6fd75dd1475d06f47887fcbf788355dd6fb57))
+* **client:** due to the proxy of the editor instance, data cannot be edit ([#877](https://github.com/Tencent/cherry-markdown/issues/877)) ([82a1974](https://github.com/Tencent/cherry-markdown/commit/82a19744504b173402f296b606289ac99f49b44d))
+* Ensure target directories exist ([486eaef](https://github.com/Tencent/cherry-markdown/commit/486eaefff973d473e4baa219ae141542346e0f74))
+* **type:** type error in config ([#839](https://github.com/Tencent/cherry-markdown/issues/839)) ([10a226c](https://github.com/Tencent/cherry-markdown/commit/10a226cb92aa9e56604a400f19eb61aa60273a5a))
+
 ### [0.8.46](https://github.com/Tencent/cherry-markdown/compare/v0.8.45...v0.8.46) (2024-08-12)
 
 
