@@ -2,9 +2,8 @@ import CodeMirror from 'codemirror';
 import SyntaxBase from '../src/core/SyntaxBase';
 import { FormulaMenu } from '@/toolbars/BubbleFormula';
 
-
 export interface CherryExternalsOptions {
-  [key: string]: any;
+  [key: symbol]: any;
 }
 
 type CherryToolbarsCustomType = {
@@ -69,7 +68,7 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
   themeNameSpace: string,
   themeSettings: {
     /** 主题列表，用于切换主题 */
-    themeList:{
+    themeList: {
       /** 主题对应的class名 */
       className: string,
       /** 主题名称 */
@@ -118,11 +117,11 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     /** 编辑器选区变化时触发 */
     selectionChange?: ({ selections: [], lastSelections: [], info }) => void;
     /** 变更语言时触发 */
-    afterChangeLocale?: ( locale: string ) => void;
+    afterChangeLocale?: (locale: string) => void;
     /** 变更主题时触发 */
-    changeMainTheme?: ( theme: string ) => void;
+    changeMainTheme?: (theme: string) => void;
     /** 变更代码块主题时触发 */
-    changeCodeBlockTheme?: ( theme: string ) => void;
+    changeCodeBlockTheme?: (theme: string) => void;
   };
   /** 预览区域配置 */
   previewer: CherryPreviewerOptions;
@@ -271,10 +270,7 @@ export interface CherryPreviewerOptions {
 
 export type CherryToolbarSeparator = '|';
 
-export type CherryCustomToolbar = string;
-
 export type CherryDefaultToolbar =
-  // | CherryToolbarSeparator
   | 'audio'
   | 'barTable'
   | 'bold'
@@ -390,13 +386,12 @@ export interface CherryToolbarsOptions<F extends CherryToolbarsCustomType = Cher
    */
   theme?: 'light' | 'dark';
   toolbar?:
-  | (CherryCustomToolbar |
-    CherryDefaultBubbleToolbar |
+  | (CherryDefaultBubbleToolbar |
     CherryDefaultToolbar |
-  { [K in keyof Partial<F['CustomMenuType']> | CherryDefaultToolbar]?: (keyof F['CustomMenuType'] | CherryDefaultToolbar)[] })[]
+  { [K in (keyof Partial<F['CustomMenuType']>) | CherryDefaultToolbar]?: (keyof F['CustomMenuType'] | CherryDefaultToolbar)[] })[]
   | false;
   toolbarRight?:
-  | (CherryCustomToolbar | CherryDefaultBubbleToolbar | CherryDefaultToolbar)[]
+  | (CherryDefaultBubbleToolbar | CherryDefaultToolbar)[]
   | false;
   /** 是否展示悬浮目录 */
   toc?: false | {
@@ -433,7 +428,7 @@ export interface CherryToolbarsOptions<F extends CherryToolbarsCustomType = Cher
   shortcutKeySettings?: {
     /** 是否替换已有的快捷键, true: 替换默认快捷键； false： 会追加到默认快捷键里，相同的shortcutKey会覆盖默认的 */
     isReplace?: boolean,
-    shortcutKeyMap?: { [shortcutKey:string]: ShortcutKeyMapStruct};
+    shortcutKeyMap?: { [shortcutKey: string]: ShortcutKeyMapStruct };
   };
   /** 一些按钮的配置信息 */
   config?: CherryToolbarConfig;

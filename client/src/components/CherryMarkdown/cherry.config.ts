@@ -1,6 +1,6 @@
 import { useStoreCherry } from "@/store/storeCherry";
 import Cherry from "cherry-markdown";
-import { CherryOptions } from "cherry-markdown/types/cherry";
+import { CherryOptions } from "../../../../types/cherry";
 import { ipcRenderer } from "electron";
 import { onMounted, shallowReactive } from "vue";
 
@@ -60,14 +60,14 @@ const initCherryMarkdown = () => {
       // 对复制内容进行额外处理
       return code;
     },
-    onExpandCode: (event, code) => {
+    onExpandCode: (event: any, code: string) => {
       // 阻止默认的粘贴事件
       // return false;
       // 对复制内容进行额外处理
       // console.log(event, code);
       return code;
     },
-    onUnExpandCode: (event, code) => {
+    onUnExpandCode: (event: any, code: string) => {
       // 阻止默认的粘贴事件
       // return false;
       // 对复制内容进行额外处理
@@ -85,11 +85,19 @@ const initCherryMarkdown = () => {
     },
   };
 
+  type CustomConfig = {
+    CustomToolbar: {
+      CustomMenuType: {
+        customMenu_fileUpload: any
+      }
+    }
+  }
 
   /**
    * 默认配置
    */
-  const defaultConfig = {
+  // const defaultConfig: CherryOptions<CustomConfig> = {
+  const defaultConfig: CherryOptions = {
     id: "cherry-markdown",
     // 第三方包
     externals: {
@@ -278,7 +286,7 @@ const initCherryMarkdown = () => {
   };
 
   onMounted(() => {
-    const cherryInstance = new Cherry(defaultConfig as Partial<CherryOptions>);
+    const cherryInstance = new Cherry(defaultConfig);
     storeCherry.cherry = shallowReactive(cherryInstance)
   })
 }
