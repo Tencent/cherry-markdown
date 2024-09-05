@@ -26,4 +26,11 @@ export default class HiddenToolbar extends Toolbar {
   appendMenusToDom(menus) {
     return;
   }
+
+  init() {
+    super.init();
+    Object.entries(this.shortcutKeyMap).forEach(([key, value]) => {
+      this.$cherry.toolbar.shortcutKeyMap[key] = value;
+    });
+  }
 }

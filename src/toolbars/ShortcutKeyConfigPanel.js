@@ -74,12 +74,9 @@ export default class ShortcutKeyConfigPanel {
                 if (oldShortcutKeys.length === shortcutPanel.children.length) {
                   // 旧的shortcutKey用于在更新时比较，删除旧值
                   const oldShortcutKey = keyStack2UniqueString(oldShortcutKeys);
-                  if (hookname && this.$cherry?.toolbar?.menus?.hooks?.[hookname]) {
+                  if (hookname) {
                     // 触发更新快捷键
-                    this.$cherry?.toolbar?.menus?.hooks?.[hookname].updateShortcutKeyMap(
-                      oldShortcutKey,
-                      keyStack2UniqueString(keyStack),
-                    );
+                    this.$cherry?.toolbar?.updateShortcutKeyMap(oldShortcutKey, keyStack2UniqueString(keyStack));
                     // 取二者较大者
                     const endIndex = Math.max(keyStack.length, shortcutPanel.children.length);
                     // 更新界面展示的快捷键

@@ -2,11 +2,26 @@ import CodeMirror from 'codemirror';
 import SyntaxBase from '../src/core/SyntaxBase';
 import { FormulaMenu } from '@/toolbars/BubbleFormula';
 
-export interface Cherry {
-  options: CherryOptions;
+
+export interface CherryExternalsOptions {
+  [key: string]: any;
 }
 
-export interface CherryOptions {
+type CherryToolbarsCustomType = {
+  CustomMenuType: CherryExternalsOptions
+}
+
+type CherryCustomOptions = {
+  CustomToolbar: CherryToolbarsCustomType
+}
+
+export interface Cherry<T extends CherryCustomOptions = CherryCustomOptions> {
+  options: CherryOptions<T>;
+}
+
+export type CherryOptions<T extends CherryCustomOptions = CherryCustomOptions> = Partial<_CherryOptions<T>>;
+
+export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOptions> {
   openai: any;
   /** 第三方依赖 */
   externals: CherryExternalsOptions;
@@ -15,7 +30,7 @@ export interface CherryOptions {
   /** 编辑区域配置 */
   editor: CherryEditorOptions;
   /** 工具栏区域配置 */
-  toolbars: CherryToolbarOptions;
+  toolbars: CherryToolbarsOptions<T['CustomToolbar']> | undefined;
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: string;
   // drawio iframe的样式
@@ -40,10 +55,35 @@ export interface CherryOptions {
     pdf: boolean;
     file: boolean;
   };
-  /** 有哪些主题 */
-  theme: {className: string, label: string}[];
-  /** 定义主题的作用范围，相同themeNameSpace的实例共享主题配置 */
+  /** 定义cherry缓存的作用范围，相同nameSpace的实例共享localStorage缓存 */
+  nameSpace: string;
+  /**
+   * 有哪些主题，第三方可以自行扩展主题
+   * @deprecated 不再支持theme的配置，统一在`themeSettings.themeList`中配置
+   */
+  theme: { className: string, label: string }[];
+  /**
+   * 定义主题的作用范围，相同themeNameSpace的实例共享主题配置
+   * @deprecated 不再支持themeNameSpace的配置，统一在`nameSpace`中配置
+   */
   themeNameSpace: string,
+  themeSettings: {
+    /** 主题列表，用于切换主题 */
+    themeList:{
+      /** 主题对应的class名 */
+      className: string,
+      /** 主题名称 */
+      label: string
+    }[],
+    /** cherry主题，控制工具栏、编辑区、预览区的样式 */
+    mainTheme: string,
+    /** 代码块主题 */
+    codeBlockTheme: string,
+    /** 行内代码主题，只有 red 和 black 两个主题 */
+    inlineCodeTheme: 'red' | 'black',
+    /** 工具栏主题，只有 light 和 dark 两个主题，优先级低于 mainTheme */
+    toolbarTheme: 'light' | 'dark',
+  }
   callback: {
     /**
      * 全局的URL处理器，返回值将填充到编辑区域
@@ -62,11 +102,11 @@ export interface CherryOptions {
     /** img 标签挂载前触发，可用于懒加载等场景 */
     beforeImageMounted?: (srcProp: string, src: string) => { srcProp: string; src: string };
     onClickPreview?: (e: MouseEvent) => void;
-    onCopyCode?: (e: ClipboardEvent, code: string) => string|false;
-    onExpandCode?: (e: ClipboardEvent, code: string) => string|false;
-    onUnExpandCode?: (e: ClipboardEvent, code: string) => string|false;
+    onCopyCode?: (e: ClipboardEvent, code: string) => string | false;
     changeString2Pinyin?: (str: string) => string;
-    onPaste?: (clipboardData: ClipboardEvent['clipboardData']) => string|boolean;
+    onPaste?: (clipboardData: ClipboardEvent['clipboardData']) => string | boolean;
+    onExpandCode?: (e: MouseEvent, code: string) => string;
+    onUnExpandCode?: (e: MouseEvent, code: string) => string;
   };
   event: {
     focus?: ({ e: MouseEvent, cherry: Cherry }) => void;
@@ -75,7 +115,14 @@ export interface CherryOptions {
     afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */
     afterInit?: CherryLifecycle;
-    selectionChange?: ({ selections: [], lastSelections: [], info} ) => void;
+    /** 编辑器选区变化时触发 */
+    selectionChange?: ({ selections: [], lastSelections: [], info }) => void;
+    /** 变更语言时触发 */
+    afterChangeLocale?: ( locale: string ) => void;
+    /** 变更主题时触发 */
+    changeMainTheme?: ( theme: string ) => void;
+    /** 变更代码块主题时触发 */
+    changeCodeBlockTheme?: ( theme: string ) => void;
   };
   /** 预览区域配置 */
   previewer: CherryPreviewerOptions;
@@ -99,10 +146,6 @@ export interface CherryOptions {
   locales: {
     [locale: string]: Record<string, string>
   }
-}
-
-export interface CherryExternalsOptions {
-  [key: string]: any;
 }
 
 /**
@@ -170,7 +213,9 @@ export interface CherryEditorOptions {
   id?: string; // textarea 的id属性值
   name?: string; // textarea 的name属性值
   autoSave2Textarea?: boolean; // 是否自动将编辑区的内容回写到textarea里
-  /** depends on codemirror theme name: https://codemirror.net/demo/theme.htm */
+  /**
+   * @deprecated 不再支持theme的配置，废弃该功能，统一由`themeSettings.mainTheme`配置
+   */
   theme?: string;
   /** 编辑器的高度，默认100%，如果挂载点存在内联设置的height则以内联样式为主 */
   height?: string;
@@ -193,13 +238,14 @@ export interface CherryEditorOptions {
   showSuggestList?: boolean;
 }
 
-export type CherryLifecycle = (text: String, html: String) => void;
+export type CherryLifecycle = (text: string, html: string) => void;
 
 export interface CherryPreviewerOptions {
   dom: HTMLDivElement | false;
   /** 预览区域的DOM className */
   className: string;
   enablePreviewerBubble: boolean;
+  floatWhenClosePreviewer: boolean;
   // 配置图片懒加载的逻辑
   lazyLoadImg: {
     // 加载图片时如果需要展示loaing图，则配置loading图的地址
@@ -228,32 +274,60 @@ export type CherryToolbarSeparator = '|';
 export type CherryCustomToolbar = string;
 
 export type CherryDefaultToolbar =
-  | CherryInsertToolbar
-  | CherryToolbarSeparator
-  | 'bold'
-  | 'italic'
-  | 'strikethrough'
-  | 'color'
-  | 'header'
-  | 'list'
-  | 'image'
+  // | CherryToolbarSeparator
   | 'audio'
-  | 'video'
-  | 'link'
-  | 'hr'
+  | 'barTable'
+  | 'bold'
   | 'br'
+  | 'checklist'
   | 'code'
+  | 'codeTheme'
+  | 'color'
+  | 'copy'
+  | 'detail'
+  | 'drawIo'
+  | 'export'
+  | 'file'
+  | 'fullScreen'
   | 'formula'
-  | 'toc'
-  | 'table'
-  | 'pdf'
-  | 'word'
   | 'graph'
-  | 'settings';
-
-export type CherryInsertToolbar = {
-  insert: string[];
-};
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'header'
+  | 'hr'
+  | 'image'
+  | 'insert'
+  | 'italic'
+  | 'justify'
+  | 'lineTable'
+  | 'link'
+  | 'list'
+  | 'mobilePreview'
+  | 'ol'
+  | 'panel'
+  | 'pdf'
+  | 'publish'
+  | 'quickTable'
+  | 'quote'
+  | 'redo'
+  | 'ruby'
+  | 'settings'
+  | 'size'
+  | 'strikethrough'
+  | 'sub'
+  | 'sup'
+  | 'switchModel'
+  | 'table'
+  | 'theme'
+  | 'toc'
+  | 'togglePreview'
+  | 'underline'
+  | 'undo'
+  | 'ul'
+  | 'video'
+  | 'word'
+  | 'wordCount';
 
 export type CherryDefaultBubbleToolbar =
   | CherryToolbarSeparator
@@ -304,23 +378,38 @@ export interface CherryToolbarConfig {
   publish?: CherryPublishToolbarOption[]
   /** 公式 */
   formula?: CherryFormulaToolbarOption
+  changeLocale?: CherryChangeLocaleToolbarOption[]
 }
-
-export interface CherryToolbarOptions {
-  theme: 'light' | 'dark';
+export interface CherryChangeLocaleToolbarOption {
+  locale: string;
+  name: string;
+}
+export interface CherryToolbarsOptions<F extends CherryToolbarsCustomType = CherryToolbarsCustomType> {
+  /**
+   * @deprecated 不再支持theme的配置，统一在`themeSettings.toolbarTheme`中配置
+   */
+  theme?: 'light' | 'dark';
   toolbar?:
-    | (CherryCustomToolbar | CherryDefaultBubbleToolbar | CherryDefaultBubbleToolbar | CherryDefaultToolbar)[]
-    | false;
+  | (CherryCustomToolbar |
+    CherryDefaultBubbleToolbar |
+    CherryDefaultToolbar |
+  { [K in keyof Partial<F['CustomMenuType']> | CherryDefaultToolbar]?: (keyof F['CustomMenuType'] | CherryDefaultToolbar)[] })[]
+  | false;
   toolbarRight?:
-    | (CherryCustomToolbar | CherryDefaultBubbleToolbar | CherryDefaultBubbleToolbar | CherryDefaultToolbar)[]
-    | false;
+  | (CherryCustomToolbar | CherryDefaultBubbleToolbar | CherryDefaultToolbar)[]
+  | false;
   /** 是否展示悬浮目录 */
   toc?: false | {
-    updateLocationHash: boolean, // 要不要更新URL的hash
-    defaultModel: 'pure' | 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
-    showAutoNumber: boolean, // 是否显示自增序号
-    position: 'absolute' | 'fixed', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
-    cssText: string, // 额外样式
+    /** 要不要更新URL的hash */
+    updateLocationHash?: boolean,
+    /** pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题 */
+    defaultModel?: 'pure' | 'full',
+    /** 是否显示自增序号 */
+    showAutoNumber?: boolean,
+    /** 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed */
+    position?: 'absolute' | 'fixed',
+    /** 额外样式 */
+    cssText?: string,
   };
   /** 不展示在编辑器中的工具栏，只使用工具栏的api和快捷键功能 */
   hiddenToolbar?: any[];
@@ -333,9 +422,20 @@ export interface CherryToolbarOptions {
   /** 新行悬停菜单配置 */
   float?: any[] | false;
   customMenu?: Record<string, any>;
-  /** 自定义快捷键 */
+  /**
+   * 自定义快捷键 
+   * @deprecated 请使用`shortcutKeySettings`
+   */
   shortcutKey?: Object | false;
-   /** 一些按钮的配置信息 */
+  /**
+   * 自定义快捷键
+   */
+  shortcutKeySettings?: {
+    /** 是否替换已有的快捷键, true: 替换默认快捷键； false： 会追加到默认快捷键里，相同的shortcutKey会覆盖默认的 */
+    isReplace?: boolean,
+    shortcutKeyMap?: { [shortcutKey:string]: ShortcutKeyMapStruct};
+  };
+  /** 一些按钮的配置信息 */
   config?: CherryToolbarConfig;
 }
 
@@ -354,8 +454,8 @@ export interface CherryFileUploadHandler {
      * @param params.width 设置宽度，可以是像素、也可以是百分比（图片、视频场景下生效）
      * @param params.height 设置高度，可以是像素、也可以是百分比（图片、视频场景下生效）
      */
-    callback: (url: string, params?: {name?: string, poster?: string, isBorder?: boolean, isShadow?: boolean, isRadius?: boolean; width?: string, height?: string}
-  ) => void): void;
+    callback: (url: string, params?: { name?: string, poster?: string, isBorder?: boolean, isShadow?: boolean, isRadius?: boolean; width?: string, height?: string }
+    ) => void): void;
 }
 
 
