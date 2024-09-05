@@ -272,7 +272,7 @@ export type CherryToolbarSeparator = '|';
 
 export type CherryDefaultToolbar =
   | 'audio'
-  | 'barTable'
+  | 'bar-table'
   | 'bold'
   | 'br'
   | 'checklist'
