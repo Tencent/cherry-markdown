@@ -296,7 +296,7 @@ export type CherryDefaultToolbar =
   | 'insert'
   | 'italic'
   | 'justify'
-  | 'lineTable'
+  | 'line-table'
   | 'link'
   | 'list'
   | 'mobilePreview'
