@@ -220,6 +220,20 @@ var basicConfig = {
       customMenuCName: customMenuC,
       customMenuTable,
     },
+    shortcutKeySettings: {
+      /** 是否替换已有的快捷键, true: 替换默认快捷键； false： 会追加到默认快捷键里，相同的shortcutKey会覆盖默认的 */
+      isReplace: false,
+      shortcutKeyMap: {
+        'Alt-Digit1': {
+          hookName: 'header',
+          aliasName: '标题',
+        },
+        'Control-Shift-KeyX': {
+          hookName: 'bold',
+          aliasName: '加粗',
+        },
+      },
+    },
     // config: {
     //   publish: [
     //     {

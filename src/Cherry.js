@@ -43,7 +43,6 @@ import locales from '@/locales/index';
 import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
 import { LIST_CONTENT } from '@/utils/regexp';
-import { storageKeyMap, clearAllStorageKeyMap } from './utils/shortcutKey';
 
 /** @typedef {import('~types/cherry').CherryOptions} CherryOptions */
 export default class Cherry extends CherryStatic {
@@ -126,26 +125,6 @@ export default class Cherry extends CherryStatic {
      */
     this.engine = new Engine(this.options, this);
     this.init();
-    const toolbarShortcutKeyMap = this.toolbar?.shortcutKeyMap ?? {};
-    if (
-      toolbarShortcutKeyMap &&
-      typeof toolbarShortcutKeyMap === 'object' &&
-      Object.keys(toolbarShortcutKeyMap).length
-    ) {
-      const cacheShortcutKeyMap = Object.entries(toolbarShortcutKeyMap)
-        .filter(([_, value]) => value && typeof value === 'object')
-        .reduce((prev, curr) => {
-          const [key, value] = curr;
-          if (key in prev) {
-            throw Error(`Duplicate shortcut key: ${key}`);
-          }
-          return (prev[key] = value), prev;
-        }, {});
-      storageKeyMap(this.instanceId, cacheShortcutKeyMap);
-      this.clearAllStorageKeyMap = clearAllStorageKeyMap;
-      // 页面关闭时清除缓存
-      window.addEventListener('unload', this.clearAllStorageKeyMap);
-    }
   }
 
   /**
@@ -169,6 +148,13 @@ export default class Cherry extends CherryStatic {
       mountEl.style.height = this.options.editor.height;
     }
     this.cherryDom = mountEl;
+
+    // 生成名称空间
+    if (typeof this.options.themeNameSpace === 'string') {
+      this.nameSpace = this.options.themeNameSpace;
+    } else {
+      this.nameSpace = this.options.nameSpace;
+    }
 
     // 蒙层dom，用来拖拽编辑区&预览区宽度时展示蒙层
     const wrapperDom = this.createWrapper();
@@ -538,9 +524,8 @@ export default class Cherry extends CherryStatic {
     let toolbarTheme = '';
     let inlineCodeTheme = '';
     let codeBlockTheme = '';
-    const { themeNameSpace } = this.options.themeSettings;
-    if (testHasLocal(themeNameSpace, 'theme')) {
-      mainTheme = getThemeFromLocal(true, themeNameSpace);
+    if (testHasLocal(this.nameSpace, 'theme')) {
+      mainTheme = getThemeFromLocal(true, this.nameSpace);
     } else {
       mainTheme = this.options.themeSettings.mainTheme;
     }
@@ -570,7 +555,7 @@ export default class Cherry extends CherryStatic {
       'data-codeBlockTheme': codeBlockTheme,
     });
 
-    wrapperDom.setAttribute('data-code-block-theme', getCodeThemeFromLocal(this.options.themeNameSpace));
+    wrapperDom.setAttribute('data-code-block-theme', getCodeThemeFromLocal(this.nameSpace));
 
     this.wrapperDom = wrapperDom;
     return wrapperDom;
@@ -585,12 +570,16 @@ export default class Cherry extends CherryStatic {
       const dom = createElement('div', 'cherry-toolbar');
       this.toolbarContainer = dom;
     }
+    if (this.options.toolbars.shortcutKey && Object.keys(this.options.toolbars.shortcutKey).length > 0) {
+      console.warn(
+        'options.shortcutKey is deprecated, please use shortcutKeySettings.shortcutKeyMap instead, get more info at https://github.com/Tencent/cherry-markdown/wiki',
+      );
+    }
     this.toolbar = new Toolbar({
       dom: this.toolbarContainer,
       $cherry: this,
       buttonConfig: this.options.toolbars.toolbar,
       customMenu: this.options.toolbars.customMenu,
-      shortcutKey: this.options.toolbars.shortcutKey,
     });
     return this.toolbar;
   }
@@ -771,10 +760,9 @@ export default class Cherry extends CherryStatic {
       (this.options.engine.syntax.header && this.options.engine.syntax.header.anchorStyle) || 'default';
     const autonumberClass = anchorStyle === 'autonumber' ? ' head-num' : '';
     const { className, dom, enablePreviewerBubble, floatWhenClosePreviewer } = this.options.previewer;
-    const { themeNameSpace } = this.options.themeSettings;
     let mainTheme = '';
-    if (testHasLocal(themeNameSpace, 'theme')) {
-      mainTheme = getThemeFromLocal(true, themeNameSpace);
+    if (testHasLocal(this.nameSpace, 'theme')) {
+      mainTheme = getThemeFromLocal(true, this.nameSpace);
     } else {
       mainTheme = this.options.themeSettings.mainTheme;
     }
@@ -816,12 +804,60 @@ export default class Cherry extends CherryStatic {
       width: this.floatPreviewerWrapDom.offsetWidth,
     };
     this.floatPreviewerWrapDom.remove();
+    this.removeFloatPreviewerListener();
+  }
+
+  handleFloatPreviewerMouseDown = (evt) => {
+    if (evt.target !== this.floatPreviewerHeaderDom) return;
+    evt.preventDefault();
+    this.floatPreviewerInitOffsetX = evt.offsetX;
+    this.floatPreviewerInitOffsetY = evt.offsetY;
+    this.floatPreviewerWrapDom.classList.add('float-previewer-dragging');
+  };
+
+  handleFloatPreviewerMouseMove = (evt) => {
+    if (!this.floatPreviewerWrapDom.classList.contains('float-previewer-dragging')) return;
+    evt.preventDefault();
+    const { clientX, clientY } = evt;
+    let newRight = clientX - this.floatPreviewerInitOffsetX;
+    let newTop = clientY - this.floatPreviewerInitOffsetY;
+    if (newRight < 0) {
+      newRight = 0;
+    }
+    if (newTop < 0) {
+      newTop = 0;
+    }
+    if (newRight + this.floatPreviewerWrapDom.offsetWidth > this.pageWidth) {
+      newRight = this.pageWidth - this.floatPreviewerWrapDom.offsetWidth;
+    }
+    if (newTop + this.floatPreviewerWrapDom.offsetHeight > this.pageHeight) {
+      newTop = this.pageHeight - this.floatPreviewerWrapDom.offsetHeight;
+    }
+    requestAnimationFrame(() => {
+      this.floatPreviewerWrapDom.style.left = `${newRight}px`;
+      this.floatPreviewerWrapDom.style.top = `${newTop}px`;
+    });
+  };
+
+  handleFloatPreviewerMouseUp = (evt) => {
+    this.floatPreviewerWrapDom.classList.remove('float-previewer-dragging');
+  };
+
+  createFloatPreviewerListener() {
+    document.addEventListener('mousedown', this.handleFloatPreviewerMouseDown);
+    document.addEventListener('mousemove', this.handleFloatPreviewerMouseMove);
+    document.addEventListener('mouseup', this.handleFloatPreviewerMouseUp);
+  }
+
+  removeFloatPreviewerListener() {
+    document.removeEventListener('mousedown', this.handleFloatPreviewerMouseDown);
+    document.removeEventListener('mousemove', this.handleFloatPreviewerMouseMove);
+    document.removeEventListener('mouseup', this.handleFloatPreviewerMouseUp);
   }
 
   createFloatPreviewer() {
     const floatPreviewerWrap = createElement('div', 'float-previewer-wrap');
     const floatPreviewerHeader = createElement('div', 'float-previewer-header');
-    const floatPreviewerClose = createElement('div', 'float-previewer-close');
     const floatPreviewerTitle = createElement('div', 'float-previewer-title');
     floatPreviewerTitle.innerHTML = '预览';
     floatPreviewerWrap.style.left = `${this.storageFloatPreviewerWrapData.x}px`;
@@ -829,53 +865,16 @@ export default class Cherry extends CherryStatic {
     floatPreviewerWrap.style.height = `${this.storageFloatPreviewerWrapData.height}px`;
     floatPreviewerWrap.style.width = `${this.storageFloatPreviewerWrapData.width}px`;
     floatPreviewerHeader.appendChild(floatPreviewerTitle);
-    floatPreviewerHeader.appendChild(floatPreviewerClose);
     floatPreviewerWrap.appendChild(floatPreviewerHeader);
     floatPreviewerWrap.appendChild(this.previewer.getDom());
-    this.floatPreviewerWrapDom = floatPreviewerWrap;
     this.wrapperDom.appendChild(floatPreviewerWrap);
 
-    const pageWidth = document.body.clientWidth;
-    const pageHeight = document.body.clientHeight;
+    this.floatPreviewerHeaderDom = floatPreviewerHeader;
+    this.floatPreviewerWrapDom = floatPreviewerWrap;
+    this.pageWidth = document.body.clientWidth;
+    this.pageHeight = document.body.clientHeight;
 
-    let initOffsetX = 0;
-    let initOffsetY = 0;
-
-    document.addEventListener('mousedown', (evt) => {
-      if (evt.target !== floatPreviewerHeader) return;
-      evt.preventDefault();
-      initOffsetX = evt.offsetX;
-      initOffsetY = evt.offsetY;
-      floatPreviewerWrap.classList.add('float-previewer-dragging');
-    });
-
-    document.addEventListener('mouseup', (evt) => {
-      floatPreviewerWrap.classList.remove('float-previewer-dragging');
-    });
-
-    document.addEventListener('mousemove', (evt) => {
-      if (!floatPreviewerWrap.classList.contains('float-previewer-dragging')) return;
-      evt.preventDefault();
-      const { clientX, clientY } = evt;
-      let newRight = clientX - initOffsetX;
-      let newTop = clientY - initOffsetY;
-      if (newRight < 0) {
-        newRight = 0;
-      }
-      if (newTop < 0) {
-        newTop = 0;
-      }
-      if (newRight + floatPreviewerWrap.offsetWidth > pageWidth) {
-        newRight = pageWidth - floatPreviewerWrap.offsetWidth;
-      }
-      if (newTop + floatPreviewerWrap.offsetHeight > pageHeight) {
-        newTop = pageHeight - floatPreviewerWrap.offsetHeight;
-      }
-      requestAnimationFrame(() => {
-        floatPreviewerWrap.style.left = `${newRight}px`;
-        floatPreviewerWrap.style.top = `${newTop}px`;
-      });
-    });
+    this.createFloatPreviewerListener();
   }
 
   /**
