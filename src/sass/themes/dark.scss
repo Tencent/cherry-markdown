@@ -13,10 +13,10 @@ $sidebarShadow: $shadow;
 $editorBg: rgb(37, 37, 38);
 $editorColor: rgb(200, 200, 200);
 $editorSelectedBg: $toolbarBtnBgHover;
-$editorUrlBg: rgba(81,56,56,1);
+$editorUrlBg: #343a40;
 $editorCursorColor: rgb(255,255,255);
-$editorImportantColor: rgb(247, 133, 83);
-$editorCodeColor: rgb(255, 203, 107);
+$editorImportantColor: #e9ecef;
+$editorCodeColor: $editorImportantColor;
 /** 预览区域样式 */
 $previewBg: rgb(51, 51, 51);
 $previewMobileBgColor: $editorBg;
@@ -24,10 +24,10 @@ $previewMobileBgColor: $editorBg;
 $mdColor: $editorColor;
 $mdHeaderColor: $editorImportantColor;
 $mdLineColor: rgb(105, 105, 105);
-$mdAColor: $editorCodeColor;
+$mdAColor: #ced4da;
 $mdAHoverColor: $editorImportantColor;
-$mdInlineCodeColor: $editorCodeColor;
-$mdInlineCodeBg: $editorUrlBg;
+$mdInlineCodeColor: $editorColor;
+$mdInlineCodeBg: #212529;
 $mdSvgTextColor: rgb(250, 160, 0);
 /** 编辑器样式 */
 .cherry.theme__dark {
@@ -144,20 +144,21 @@ $mdSvgTextColor: rgb(250, 160, 0);
     .cherry-toc-head {
       i {
         &:hover {
-          color: $toolbarColorItemHoverBorderColor;
+          color: $toolbarBtnHoverColor;
         }
       }
     }
     .cherry-toc-list {
       .cherry-toc-one-a {
-        border-left-color: rgb(247, 133, 83, 0.3);
+        color:#343a40;
+        border-left-color: #868e96;
         &.current {
-          border-left-color: rgb(255, 100, 33);
-          color: rgb(255, 100, 33);
+          border-left-color: $toolbarBtnHoverColor;
+          color: #000;
         }
         &:hover {
-          border-left-color: rgb(247, 162, 14);
-          color: rgb(255, 100, 33);
+          border-left-color: #ced4da;
+          color: #000;
         }
       }
     }
@@ -180,7 +181,7 @@ $mdSvgTextColor: rgb(250, 160, 0);
         }
         .ch-icon-chevronsLeft {
           display: inline;
-          color: rgb(255, 100, 33);
+          color: $toolbarBtnHoverColor;
         }
       }
       .cherry-toc-list {
@@ -332,7 +333,7 @@ $mdSvgTextColor: rgb(250, 160, 0);
   }
   
   a {
-    text-decoration: none;
+    text-decoration: underline;
     color: $mdAColor;
     &:hover {
       color: $mdAHoverColor;
@@ -463,6 +464,7 @@ $mdSvgTextColor: rgb(250, 160, 0);
         color: $mdColor;
         &:hover {
           color: $mdAHoverColor;
+          text-decoration: underline;
         }
       }
     }
