@@ -49,6 +49,9 @@ export default class Bubble extends Toolbar {
     this.editorDom = this.options.editor.getEditorDom();
     this.initBubbleDom();
     this.editorDom.querySelector('.CodeMirror').appendChild(this.bubbleDom);
+    Object.entries(this.shortcutKeyMap).forEach(([key, value]) => {
+      this.$cherry.toolbar.shortcutKeyMap[key] = value;
+    });
   }
 
   appendMenusToDom(menus) {
