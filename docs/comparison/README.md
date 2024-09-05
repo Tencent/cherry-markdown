@@ -5,8 +5,6 @@
 > 该对比测评暂写于2024.8.25~2024.9.5。
 >
 > 本项目为腾讯犀牛鸟计划cherry-markdown课题实战项目中阶任务，[2024腾讯犀牛鸟开源人才培养计划—Cherry Markdown · Issue #41](https://github.com/Tencent/OpenSourceTalent/issues/41)
->
-> TODO：深入各个项目的源码实现，进行语法覆盖率与性能测试
 
 项目版本：
 
@@ -24,7 +22,7 @@
 - markdown-it: https://github.com/markdown-it/markdown-it/tree/14.1.0
 - marked: https://github.com/markedjs/marked/tree/v14.0.0
 - lute：https://github.com/88250/lute/tree/v1.7.6
-
+- remark: https://github.com/remarkjs/remark/tree/remark-cli%4012.0.0
 
 ## 项目整体情况
 
@@ -46,7 +44,6 @@
 - ![vditor](https://img.shields.io/github/license/Vanessa219/vditor?label=vditor)
 - ![bytemd](https://img.shields.io/github/license/bytedance/bytemd?label=bytemd)
 - ![EasyMDE](https://img.shields.io/github/license/Ionaru/easy-markdown-editor?label=EasyMDE)
-- ![react-md-editor](https://img.shields.io/github/license/uiwjs/react-md-editor?label=react-md-editor)
 
 
 ​    
@@ -57,7 +54,6 @@
 - ![milkdown](https://img.shields.io/github/last-commit/Milkdown/milkdown?label=milkdown)![milkdown](https://img.shields.io/github/issues/Milkdown/milkdown?label=issues)![milkdown](https://img.shields.io/github/issues-pr/Milkdown/milkdown?label=pr)
 - ![cherry-markdown](https://img.shields.io/github/last-commit/Tencent/cherry-markdown?label=cherry-markdown)![cherry-markdown](https://img.shields.io/github/issues/Tencent/cherry-markdown?label=issues)![cherry-markdown](https://img.shields.io/github/issues-pr/Tencent/cherry-markdown?label=pr)
 - ![vditor](https://img.shields.io/github/last-commit/Vanessa219/vditor?label=vditor)![vditor](https://img.shields.io/github/issues/Vanessa219/vditor?label=issues)![vditor](https://img.shields.io/github/issues-pr/Vanessa219/vditor?label=pr)
-- ![react-md-editor](https://img.shields.io/github/last-commit/uiwjs/react-md-editor?label=react-md-editor)![react-md-editor](https://img.shields.io/github/issues/uiwjs/react-md-editor?label=issues)![react-md-editor](https://img.shields.io/github/issues-pr/uiwjs/react-md-editor?label=pr)
 - ![EasyMDE](https://img.shields.io/github/last-commit/Ionaru/easy-markdown-editor?label=EasyMDE)![EasyMDE](https://img.shields.io/github/issues/Ionaru/easy-markdown-editor?label=issues)![EasyMDE](https://img.shields.io/github/issues-pr/Ionaru/easy-markdown-editor?label=pr)
 - ![bytemd](https://img.shields.io/github/last-commit/bytedance/bytemd?label=bytemd)![bytemd](https://img.shields.io/github/issues/bytedance/bytemd?label=issues)![bytemd](https://img.shields.io/github/issues-pr/bytedance/bytemd?label=pr)
 - ![TOAST UI Editor](https://img.shields.io/github/last-commit/nhn/tui.editor?label=tui.editor)![TOAST UI Editor](https://img.shields.io/github/issues/nhn/tui.editor?label=issues)![TOAST UI Editor](https://img.shields.io/github/issues-pr/nhn/tui.editor?label=pr)
@@ -66,7 +62,6 @@
 
 
 ### 4. npm下载量
-- ![react-md-editor](https://img.shields.io/npm/dm/@uiw/react-md-editor?label=react-md-editor)
 - ![TOAST UI Editor](https://img.shields.io/npm/dm/@toast-ui/editor?label=tui.editor)
 - ![EasyMDE](https://img.shields.io/npm/dm/easymde?label=EasyMDE)
 - ![vditor](https://img.shields.io/npm/dm/vditor?label=vditor)
@@ -207,10 +202,9 @@ Markdown渲染引擎一般采用AST或正则这两种方式。
 结合三个纯markdown解析器进行对比
 - ![marked](https://img.shields.io/github/stars/markedjs/marked?label=marked)
 - ![markdown-it](https://img.shields.io/github/stars/markdown-it/markdown-it?label=markdown-it)
+- ![remark](https://img.shields.io/github/stars/remarkjs/remark?label=remark)
 - ![commonmark.js](https://img.shields.io/github/stars/commonmark/commonmark.js?label=commonmark.js)
 - ![lute](https://img.shields.io/github/stars/88250/lute?label=lute)
-
-
 
 TODO
 
