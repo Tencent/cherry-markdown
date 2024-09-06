@@ -1,5 +1,3 @@
-# Cherry-Markdown-competitor-analysis
-
 
 ### 内容介绍
 
@@ -105,19 +103,21 @@ Cherry Markdown 有多种样式主题选择
 
 #### 2.1 目前主要的markdown编辑器
 
-1. **ByteMD（https://github.com/bytedance/bytemd?tab=readme-ov-file）**：由字节跳动旗下掘金社区出品的轻量级、扩展性强的Markdown编辑器JavaScript库。它不需要导入任何UI Framework包，可以用于React、Vue和Angular等框架。ByteMD内置了基本Markdown语法的扩展插件系统，支持代码语法高亮显示、数学公式和流程图等。它还处理了常见的跨网站脚本攻击，兼容SSR。
+
+1. ByteMD（https://github.com/bytedance/bytemd?tab=readme-ov-file）：由字节跳动旗下掘金社区出品的轻量级、扩展性强的Markdown编辑器JavaScript库。它不需要导入任何UI Framework包，可以用于React、Vue和Angular等框架。ByteMD内置了基本Markdown语法的扩展插件系统，支持代码语法高亮显示、数学公式和流程图等。它还处理了常见的跨网站脚本攻击，兼容SSR。
     
-2. **Mavon-Editor（https://github.com/hinesboy/mavonEditor）**：这是一个基于Vue的Markdown编辑器库，提供了所见即所得的编辑体验，提供了丰富的功能，既可以用于编辑也可以用于解析。它支持标题、图片、备注、代码块、无序列表、有序列表、链接、表格等Markdown标签，并且对代码块和备注的支持较好。
+2. Mavon-Editor（https://github.com/hinesboy/mavonEditor）：这是一个基于Vue的Markdown编辑器库，提供了所见即所得的编辑体验，提供了丰富的功能，既可以用于编辑也可以用于解析。它支持标题、图片、备注、代码块、无序列表、有序列表、链接、表格等Markdown标签，并且对代码块和备注的支持较好。
     
-3. **Editor.md（https://github.com/pandao/editor.md）**：这是一个基于CodeMirror、jQuery和Marked的开源可嵌入在线Markdown编辑器（组件）。它支持实时预览、图像上载、预格式化文本/代码块/表格插入、代码折叠、搜索替换、只读、主题、多语言、HTML实体、代码语法突出显示等功能。
+3. Editor.md（https://github.com/pandao/editor.md）：这是一个基于CodeMirror、jQuery和Marked的开源可嵌入在线Markdown编辑器（组件）。它支持实时预览、图像上载、预格式化文本/代码块/表格插入、代码折叠、搜索替换、只读、主题、多语言、HTML实体、代码语法突出显示等功能。
     
-3. **Vditor（https://github.com/Vanessa219/vditor）**：这是一款浏览器端的Markdown编辑器，支持所见即所得（富文本）、即时渲染（类似Typora）和分屏预览模式。
+3. Vditor（https://github.com/Vanessa219/vditor）：这是一款浏览器端的Markdown编辑器，支持所见即所得（富文本）、即时渲染（类似Typora）和分屏预览模式。
     
-4. **Vue-markdown-editor（https://github.com/code-farmer-i/vue-markdown-editor）**：这是一个基于Vue开发的Markdown编辑器组件。
+4. Vue-markdown-editor（https://github.com/code-farmer-i/vue-markdown-editor）：这是一个基于Vue开发的Markdown编辑器组件。
     
-5. **Md-editor-v3（https://github.com/imzbf/md-editor-v3）**：这是一个Markdown编辑器的Vue3版本，使用JSX和TypeScript语法开发，支持切换主题、Prettier美化文本等。
+5. Md-editor-v3（https://github.com/imzbf/md-editor-v3）：这是一个Markdown编辑器的Vue3版本，使用JSX和TypeScript语法开发，支持切换主题、Prettier美化文本等。
     
-6. **tui.editor（https://github.com/nhn/tui.editor）**：这是一个Markdown所见即所得编辑器，高效且可扩展，使用MIT开源协议。
+6. tui.editor（https://github.com/nhn/tui.editor）：这是一个Markdown所见即所得编辑器，高效且可扩展，使用MIT开源协议。
+
 
 #### 2.2 定位和目标用户
 
