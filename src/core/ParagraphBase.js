@@ -119,6 +119,27 @@ export default class ParagraphBase extends SyntaxBase {
   }
 
   toHtml(str, sentenceMakeFunc) {
+    // 处理标题
+    str = str.replace(/^(#{1,6})\s+(.+)$/gm, (match, hashes, content) => {
+      const level = hashes.length;
+      return `<h${level}>${sentenceMakeFunc(content).html}</h${level}>`;
+    });
+
+    // 处理无序列表
+    str = str.replace(/^(\s*)-\s+(.+)$/gm, (match, indent, content) => {
+      return `<ul><li>${sentenceMakeFunc(content).html}</li></ul>`;
+    });
+
+    // 处理有序列表
+    str = str.replace(/^(\s*)\d+\.\s+(.+)$/gm, (match, indent, content) => {
+      return `<ol><li>${sentenceMakeFunc(content).html}</li></ol>`;
+    });
+
+    // 处理引用块
+    str = str.replace(/^>\s+(.+)$/gm, (match, content) => {
+      return `<blockquote>${sentenceMakeFunc(content).html}</blockquote>`;
+    });
+
     return str;
   }
 
