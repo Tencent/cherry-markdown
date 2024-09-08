@@ -195,7 +195,133 @@ export interface CherryEngineOptions {
     flowSessionContext?: boolean;
   };
   /** 内置语法配置 */
-  syntax?: Record<string, Record<string, any> | false>;
+  syntax?: {
+    // 语法开关
+    // 'hookName': false,
+    // 语法配置
+    // 'hookName': {
+    //
+    // }
+    link?: {
+      /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
+      target?: '_blank' | '',
+      /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
+      rel?: '_blank' | 'nofollow' | '',
+    },
+    autoLink?: {
+      /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
+      target?: '_blank' | '',
+      /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
+      rel?: '_blank' | 'nofollow' | '',
+      /** 是否开启短链接 默认:true */
+      enableShortLink?: boolean,
+      /** 短链接长度 默认:20 */
+      shortLinkLength?: number,
+    },
+    list?: {
+      listNested?: boolean, // 同级列表类型转换后变为子级
+      indentSpace?: number, // 默认2个空格缩进
+    },
+    table: {
+      enableChart?: boolean,
+      selfClosing?: boolean, // 自动闭合，为true时，当输入第一行table内容时，cherry会自动按表格进行解析
+      // chartRenderEngine: EChartsTableEngine,
+      // externals: ['echarts'],
+    },
+    inlineCode?: {
+      /**
+       * @deprecated 不再支持theme的配置，统一在`themeSettings.inlineCodeTheme`中配置
+       */
+      // theme: 'red',
+    },
+    codeBlock?: {
+      /**
+       * @deprecated 不再支持theme的配置，统一在`themeSettings.codeBlockTheme`中配置
+       */
+      // theme: 'dark', // 默认为深色主题
+      wrap?: boolean, // 超出长度是否换行，false则显示滚动条
+      lineNumber?: boolean, // 默认显示行号
+      copyCode?: boolean, // 是否显示“复制”按钮
+      editCode?: boolean, // 是否显示“编辑”按钮
+      changeLang?: boolean, // 是否显示“切换语言”按钮
+      expandCode?: boolean, // 是否展开/收起代码块，当代码块行数大于10行时，会自动收起代码块
+      selfClosing?: boolean, // 自动闭合，为true时，当md中有奇数个```时，会自动在md末尾追加一个```
+      customRenderer?: {
+        // 自定义语法渲染器
+      },
+      mermaid?: {
+        svg2img?: boolean, // 是否将mermaid生成的画图变成img格式
+      },
+      /**
+       * indentedCodeBlock是缩进代码块是否启用的开关
+       *
+       *    在6.X之前的版本中默认不支持该语法。
+       *    因为cherry的开发团队认为该语法太丑了（容易误触）
+       *    开发团队希望用```代码块语法来彻底取代该语法
+       *    但在后续的沟通中，开发团队发现在某些场景下该语法有更好的显示效果
+       *    因此开发团队在6.X版本中才引入了该语法
+       *    已经引用6.x以下版本的业务如果想做到用户无感知升级，可以去掉该语法：
+       *        indentedCodeBlock：false
+       */
+      indentedCodeBlock?: boolean,
+    },
+    emoji?: {
+      useUnicode?: boolean, // 是否使用unicode进行渲染
+    },
+    fontEmphasis?: {
+      /**
+       * 是否允许首尾空格
+       * 首尾、前后的定义： 语法前**语法首+内容+语法尾**语法后
+       * 例：
+       *    true:
+       *           __ hello __  ====>   <strong> hello </strong>
+       *           __hello__    ====>   <strong>hello</strong>
+       *    false:
+       *           __ hello __  ====>   <em>_ hello _</em>
+       *           __hello__    ====>   <strong>hello</strong>
+       */
+      allowWhitespace?: boolean,
+      selfClosing?: boolean, // 自动闭合，为true时，当输入**XXX时，会自动在末尾追加**
+    },
+    strikethrough?: {
+      /**
+       * 是否必须有前后空格
+       * 首尾、前后的定义： 语法前**语法首+内容+语法尾**语法后
+       * 例：
+       *    true:
+       *            hello wor~~l~~d     ====>   hello wor~~l~~d
+       *            hello wor ~~l~~ d   ====>   hello wor <del>l</del> d
+       *    false:
+       *            hello wor~~l~~d     ====>   hello wor<del>l</del>d
+       *            hello wor ~~l~~ d     ====>   hello wor <del>l</del> d
+       */
+      needWhitespace?: boolean,
+    },
+    mathBlock?: {
+      engine?: 'katex' | 'MathJax', // katex或MathJax
+      src?: string,
+      plugins?: boolean, // 加载插件
+    },
+    inlineMath?: {
+      engine?: 'katex' | 'MathJax', // katex或MathJax
+      src?: string,
+    },
+    toc?: {
+      /** 默认只渲染一个目录 */
+      allowMultiToc?: boolean,
+      /** 是否显示自增序号 */
+      showAutoNumber?: boolean,
+    },
+    header?: {
+      /**
+       * 标题的样式：
+       *  - default       默认样式，标题前面有锚点
+       *  - autonumber    标题前面有自增序号锚点
+       *  - none          标题没有锚点
+       */
+      anchorStyle?: 'default' | 'autonumber' | 'none',
+    },
+  };
   /** 自定义语法 */
   customSyntax?: Record<string, CustomSyntaxRegConfig['syntaxClass'] | CustomSyntaxRegConfig>;
 }
