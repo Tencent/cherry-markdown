@@ -330,7 +330,7 @@ Cherry Markdown Editor 可以运行在**浏览器或服务端(NodeJs).** 相较�
 
 ### 9.2 开发复杂度
 
-#### 9.3 API和插件
+### 9.3 API和插件
 
 
 
