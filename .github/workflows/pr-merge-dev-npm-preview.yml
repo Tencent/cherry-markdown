@@ -22,7 +22,7 @@ jobs:
       - name: Get merge commit SHA
         run: |
           if [ "${{ github.event.pull_request.merged }}" == "true" ]; then
-             SHORT_SHA="${{ github.event.pull_request.merge_commit_sha:0:7 }}"
+              SHORT_SHA=$(echo "${{ github.event.pull_request.merge_commit_sha }}" | cut -c1-7)
               echo "MERGE_COMMIT_SHA=$SHORT_SHA" >> "$GITHUB_ENV"
           else
             echo "Not a merged PR, skipping"
