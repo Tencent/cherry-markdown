@@ -1,4 +1,4 @@
-name: PR Closed Or Merge
+name: PR Closed Or Merge To Clean COS
 
 on:
   pull_request_target:
