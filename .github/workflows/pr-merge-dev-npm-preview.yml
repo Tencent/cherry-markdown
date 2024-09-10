@@ -23,8 +23,7 @@ jobs:
         run: |
           if [ "${{ github.event.pull_request.merged }}" == "true" ]; then
               SHORT_SHA=$(echo "${{ github.event.pull_request.merge_commit_sha }}" | cut -c1-7)
-              echo "MERGE_COMMIT_SHA=$SHORT_SHA" >> "$GITHUB_ENV".
-              echo "切割后的 SHA: $SHORT_SHA"
+              echo "MERGE_COMMIT_SHA=$SHORT_SHA" >> "$GITHUB_ENV"
           else
             echo "Not a merged PR, skipping"
           fi
@@ -34,14 +33,8 @@ jobs:
       - name: Update package version and name
         run: |
           if [ -f package.json ]; then
-
-             # 获取当前版本号并添加后缀
-              VERSION=$(node -p "require('./package.json').version")-dev.$MERGE_COMMIT_SHA
-              echo "version=$VERSION" >> "$GITHUB_ENV"
-
-              # 修改 package.json 中的 name 和 version
-              jq --arg version "$VERSION" '.name="test-cherry-markdown" | .version=$version' package.json > temp.json && mv temp.json package.json
-
+          echo "version=$(node -p \"require('./package.json').version\")-dev.$MERGE_COMMIT_SHA" >> "$GITHUB_ENV" && \
+          jq '.name="test-cherry-markdown"' package.json > temp.json && mv temp.json package.json
              else
             echo "package.json 文件不存在"
           fi
