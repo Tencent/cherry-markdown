@@ -1,5 +1,15 @@
 name: PR Merge Dev NPM Preview
 
+# TODO:
+# 1. 仅在主仓库中运行
+# 2. 仅在pr合并时运行
+# 3. 仅在pr合并到dev分支时运行
+# 4. 当pr合并时，获取pr合并后的commit id
+# 5. 根据commit id 修改package.json中的版本号和名称
+# 6. 发布到npm
+# 7. 发布成功后，将发布的版本号和链接回复到当前pr下
+# 8. 发布成功后，将发布的版本号和链接回复到相关issue中(注意可能有没有issue和多个issue的情况)
+
 on:
   pull_request_target:
     types:
