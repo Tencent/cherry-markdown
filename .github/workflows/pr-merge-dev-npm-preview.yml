@@ -25,6 +25,7 @@ jobs:
               SHORT_SHA=$(echo "${{ github.event.pull_request.merge_commit_sha }}" | cut -c1-7)
               echo "MERGE_COMMIT_SHA=$SHORT_SHA" >> "$GITHUB_ENV"
               echo "切割后的 SHA: $SHORT_SHA"
+              echo "切割后的 MERGE_COMMIT_SHA: $MERGE_COMMIT_SHA"
           else
             echo "Not a merged PR, skipping"
           fi
@@ -35,10 +36,10 @@ jobs:
         run: |
           if [ -f package.json ]; then
             # 打印 SHORT_SHA
-            echo "SHORT_SHA=$SHORT_SHA"
+            echo "SHORT_SHA=$MERGE_COMMIT_SHA"
 
              # 获取当前版本号并添加后缀
-              VERSION=$(node -p "require('./package.json').version")-dev.$SHORT_SHA
+              VERSION=$(node -p "require('./package.json').version")-dev.$MERGE_COMMIT_SHA
               echo "version=$VERSION" >> "$GITHUB_ENV"
 
               # 修改 package.json 中的 name 和 version
