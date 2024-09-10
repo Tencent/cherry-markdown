@@ -6,44 +6,51 @@ on:
       - closed
 
 jobs:
- dev-deploy:
-  # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
-  # if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true
-  runs-on: ubuntu-latest
+  dev-deploy:
+    # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
+    # if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
 
-  steps:
-    # 检出仓库代码
-    - name: Checkout repository
-      uses:
-        actions/checkout@v4
+    steps:
+      # 检出仓库代码
+      - name: Checkout repository
+        uses:
+          actions/checkout@v4
 
-        # 获取PR合并后的SHA
-    - name: Get merge commit SHA
-      run: echo "MERGE_COMMIT_SHA=${{ github.event.pull_request.merge_commit_sha }}" >> $GITHUB_ENV
+          # 获取PR合并后的SHA
+      - name: Get merge commit SHA
+        run: |
+          if [ "${{ github.event.pull_request.merged }}" == "true" ]; then
+             SHORT_SHA="${{ github.event.pull_request.merge_commit_sha:0:7 }}"
+              echo "MERGE_COMMIT_SHA=$SHORT_SHA" >> "$GITHUB_ENV"
+          else
+            echo "Not a merged PR, skipping"
+          fi
 
-    # 根据commit id 修改package.json中的版本号和名称
-    # jq '.name="@cherry-markdown/preview-dev"' package.json > temp.json && mv temp.json package.json
-    - name: Update package version and name
-      run: |
-        if [ -f package.json ]; then
-        echo "version=$(node -p \"require('./package.json').version\")-dev.$MERGE_COMMIT_SHA" >> "$GITHUB_ENV" && \
-        jq '.name="test-cherry-markdown"' package.json > temp.json && mv temp.json package.json
-           else
-          echo "package.json 文件不存在"
-        fi
+      # 根据commit id 修改package.json中的版本号和名称
+      # jq '.name="@cherry-markdown/preview-dev"' package.json > temp.json && mv temp.json package.json
+      - name: Update package version and name
+        run: |
+          if [ -f package.json ]; then
+          echo "version=$(node -p \"require('./package.json').version\")-dev.$MERGE_COMMIT_SHA" >> "$GITHUB_ENV" && \
+          jq '.name="test-cherry-markdown"' package.json > temp.json && mv temp.json package.json
+             else
+            echo "package.json 文件不存在"
+          fi
 
-    - name: Install Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: "18"
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
 
-    - name: yarn install
-      run: npm i -g yarn && yarn install
+      - name: yarn install
+        run: npm i -g yarn && yarn install
 
-    - name: build
-      run: yarn build
+      - name: build
+        run: yarn build
 
-    - name: npm publish
-      run: npm publish
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: npm publish
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
