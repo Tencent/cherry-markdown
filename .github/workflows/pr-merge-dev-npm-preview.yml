@@ -72,6 +72,14 @@ jobs:
             echo "package.json 文件不存在"
           fi
 
+            # 重写或创建 README.md 文件
+             cat <<EOF > README.md
+                <p align="center"><img src="logo/new_logo.png" alt="cherry logo" width="50%"/></p>
+                 # Cherry Markdown Writer
+                > [!WARNING]
+                > This is a dev preview version of `Cherry Markdown`, please use it with caution. No responsibility for production versions.
+             EOF
+
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
@@ -79,9 +87,9 @@ jobs:
           registry-url: https://registry.npmjs.org/
 
       - name: yarn install
-        run: | 
-             npm i yarn -g
-             yarn install
+        run: |
+          npm i yarn -g
+          yarn install
 
       - name: build
         run: yarn build
