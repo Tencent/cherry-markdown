@@ -528,6 +528,7 @@ export default class Cherry extends CherryStatic {
       mainTheme = getThemeFromLocal(true, this.nameSpace);
     } else {
       mainTheme = this.options.themeSettings.mainTheme;
+      mainTheme = mainTheme.replace(/theme__/g, '');
       mainTheme = `theme__${mainTheme}`;
     }
     if (typeof this.options.toolbars.theme === 'string') {
