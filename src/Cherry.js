@@ -545,9 +545,12 @@ export default class Cherry extends CherryStatic {
     }
     // @ts-ignore
     if (typeof this.options.engine.syntax.codeBlock.theme === 'string') {
-      inlineCodeTheme = /** @type {{theme?: string;}} */ (this.options.engine.syntax.codeBlock).theme;
+      codeBlockTheme = /** @type {{theme?: string;}} */ (this.options.engine.syntax.codeBlock).theme;
     } else {
-      inlineCodeTheme = this.options.themeSettings.codeBlockTheme;
+      codeBlockTheme = this.options.themeSettings.codeBlockTheme;
+    }
+    if (testHasLocal(this.nameSpace, 'codeTheme')) {
+      codeBlockTheme = getCodeThemeFromLocal(this.nameSpace);
     }
     if (codeBlockTheme === 'dark') codeBlockTheme = 'tomorrow-night';
     else if (codeBlockTheme === 'light') codeBlockTheme = 'solarized-light';
@@ -556,9 +559,6 @@ export default class Cherry extends CherryStatic {
       'data-inlineCodeTheme': inlineCodeTheme,
       'data-codeBlockTheme': codeBlockTheme,
     });
-
-    wrapperDom.setAttribute('data-code-block-theme', getCodeThemeFromLocal(this.nameSpace));
-
     this.wrapperDom = wrapperDom;
     return wrapperDom;
   }
