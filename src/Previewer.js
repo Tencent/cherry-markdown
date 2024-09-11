@@ -946,15 +946,21 @@ export default class Previewer {
    * @return {boolean} 是否有对应id的元素并执行滚动
    */
   scrollToId(id) {
-    const dom = this.getDomContainer();
+    const previewDom = this.getDomContainer();
+    const scrollDom = this.getDomCanScroll(previewDom);
     let $id = id.replace(/^\s*#/, '').trim();
     $id = /[%:]/.test($id) ? $id : encodeURIComponent($id);
-    const target = dom.querySelector(`[id="${$id}"]`) ?? false;
+    const target = previewDom.querySelector(`[id="${$id}"]`) ?? false;
     if (target === false) {
       return false;
     }
-    const scrollTop = dom.scrollTop + target.getBoundingClientRect().y - dom.getBoundingClientRect().y - 20;
-    dom.scrollTo({
+    let scrollTop = 0;
+    if (scrollDom.nodeName === 'HTML') {
+      scrollTop = scrollDom.scrollTop + target.getBoundingClientRect().y - 20;
+    } else {
+      scrollTop = scrollDom.scrollTop + target.getBoundingClientRect().y - scrollDom.getBoundingClientRect().y - 20;
+    }
+    scrollDom.scrollTo({
       top: scrollTop,
       left: 0,
       behavior: 'smooth',
