@@ -9,6 +9,7 @@ name: PR Merge Dev NPM Preview
 # 6. 发布到npm
 # 7. 发布成功后，将发布的版本号和链接回复到当前pr下
 # 8. 发布成功后，将发布的版本号和链接回复到相关issue中(注意可能有没有issue和多个issue的情况)
+# 9. 修改README.md 提示 dev版本需谨慎使用
 
 on:
   pull_request_target:
@@ -73,12 +74,10 @@ jobs:
           fi
 
             # 重写或创建 README.md 文件
-             cat <<EOF > README.md
-                <p align="center"><img src="logo/new_logo.png" alt="cherry logo" width="50%"/></p>
-                 # Cherry Markdown Writer
-                > [!WARNING]
-                > This is a dev preview version of `Cherry Markdown`, please use it with caution. No responsibility for production versions.
-             EOF
+              echo '<p align="center"><img src="logo/new_logo.png" alt="cherry logo" width="50%"/></p>' > README.md
+              echo '# Cherry Markdown Writer' >> README.md
+              echo '> [!WARNING]' >> README.md
+              echo '> This is a dev preview version of `Cherry Markdown`, please use it with caution. No responsibility for production versions.' >> README.md
 
       - name: Install Node.js
         uses: actions/setup-node@v4
