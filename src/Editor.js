@@ -725,4 +725,11 @@ export default class Editor {
     this.options.writingStyle = writingStyle;
     this.initWritingStyle();
   }
+
+  /**
+   * 设置编辑器值
+   */
+  setValue(value = '') {
+    this.editor.setOption('value', value);
+  }
 }
