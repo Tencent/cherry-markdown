@@ -53,12 +53,21 @@ jobs:
               echo "version=$VERSION" >> "$GITHUB_ENV"
 
               # 修改 package.json 中的 name 和 version
-              jq --arg version "$VERSION" '.name="test-cherry-markdown" | .version=$version' package.json > temp.json && mv temp.json package.json
+              jq --arg version "$VERSION" '.name="test-cherry-markdown" |
+                 .version=$version  | 
+                 if .scripts.publish then del(.scripts.publish) 
+                 else . end '
+                 package.json > package.json > temp.json && mv temp.json package.json
 
               # 打印修改后的 name 和 version
               echo "Updated package.json:"
               cat package.json | jq '.name, .version'
 
+              # 检查 scripts 中是否存在 publish 属性，如果存在则移除
+              if jq -e '.scripts.publish' package.json > /dev/null; then
+                 jq 'del(.scripts.publish)' package.json > temp.json && mv temp.json package.json
+              fi
+              
              else
             echo "package.json 文件不存在"
           fi
