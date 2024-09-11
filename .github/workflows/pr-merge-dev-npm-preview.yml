@@ -67,6 +67,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18"
+          registry-url: https://registry.npmjs.org/
 
       - name: yarn install
         run: npm i -g yarn && yarn install
@@ -75,6 +76,6 @@ jobs:
         run: yarn build
 
       - name: npm publish
-        run: yarn npm publish
+        run: yarn publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
