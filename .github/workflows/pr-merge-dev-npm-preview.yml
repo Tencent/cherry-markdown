@@ -52,12 +52,12 @@ jobs:
               VERSION=$(node -p "require('./package.json').version")-dev.$MERGE_COMMIT_SHA
               echo "version=$VERSION" >> "$GITHUB_ENV"
 
-              # 修改 package.json 中的 name 和 version
-              jq --arg version "$VERSION" '.name="test-cherry-markdown" |
-                 .version=$version  | 
-                 if .scripts.publish then del(.scripts.publish) 
-                 else . end '
-                 package.json > package.json > temp.json && mv temp.json package.json
+            # 修改 package.json 中的 name 和 version，并检查 scripts 中是否存在 publish 属性，如果存在则移除
+                jq --arg version "$VERSION" '
+                  .name="test-cherry-markdown" |
+                  .version=$version |
+                  if .scripts.publish then del(.scripts.publish) else . end
+                ' package.json > temp.json && mv temp.json package.json
 
               # 打印修改后的 name 和 version
               echo "Updated package.json:"
