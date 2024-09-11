@@ -70,12 +70,14 @@ jobs:
           registry-url: https://registry.npmjs.org/
 
       - name: yarn install
-        run: npm i -g yarn && yarn install
+        run: | 
+             npm i yarn -g
+             yarn install
 
       - name: build
         run: yarn build
 
       - name: npm publish
-        run: yarn publish
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
