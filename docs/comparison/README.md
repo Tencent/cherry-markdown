@@ -145,15 +145,15 @@ TODO 对于上方各维度生成柱状图并给予分析
 - [commonmark 0.31.2](https://spec.commonmark.org/0.31.2/)
 - [GFM 0.29-gfm](https://github.github.com/gfm)
 
-
+测试数据见 https://github.com/urlyy/mde-comparison/datasets
 
 
 均基本实现了commonmark和gfm，需要后续使用commonmark和GFM的测试集查看通过率。TODO
 
 |名称| EasyMDE | bytemd | milkdown | vditor | cherry-markdown | tui.editor | editor.md |
 | ------- | ------- | ------ | -------- | ------ | --------------- | --------------- | --------------- |
-| CommonMark |         |        |          |  |                 |  |                 |
-| GFM |         |        |          |  |                 |  |                 |
+| CommonMark (652测试用例) |         |        |          | 578 |                 |  |                 |
+| GFM (677测试用例) |         |        |          | 593 |                 |  |                 |
 | 特殊语法 | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ |
 
 各项目特殊语法相关文档：
@@ -197,6 +197,10 @@ Markdown渲染引擎一般采用AST或正则这两种方式。
 | AST  | 比较容易实现符合规范的引擎，运行效率较高   | 使用门槛高，用户难以自行扩展                         | vditor(Lute)、EasyMDE(marked)、tui.editor(自实现)、bytemd(remark)、editor.md(marked)、Milkdown(remark) |
 | 正则 | 使用门槛低，实现较简单，方便用户自定义语法 | 很难完全实现符合GFM/Commonmark规范的解析，且性能较差 | cherry-markdown(自实现)                                      |
 
+各项目测试代码见 https://github.com/urlyy/mde-comparison/projects
+
+测试数据见 https://github.com/urlyy/mde-comparison/datasets
+
 ### 1. 解析器              
 
 结合三个纯markdown解析器进行对比
@@ -206,7 +210,15 @@ Markdown渲染引擎一般采用AST或正则这两种方式。
 - ![commonmark.js](https://img.shields.io/github/stars/commonmark/commonmark.js?label=commonmark.js)
 - ![lute](https://img.shields.io/github/stars/88250/lute?label=lute)
 
-TODO
+| 名称 | 中小文本初次渲染(s) | 超大文本初次渲染(s) | 中小文本变更(s) | 超大文本变更(s) |
+| ---- | ------------------- | ------------------- | --------------- | --------------- |
+| lute | 0.01903             | 3.84123             |                 |                 |
+|      |                     |                     |                 |                 |
+|      |                     |                     |                 |                 |
+|      |                     |                     |                 |                 |
+|      |                     |                     |                 |                 |
+
+
 
 ### 2. onChange时的性能
 
