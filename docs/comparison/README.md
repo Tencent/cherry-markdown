@@ -197,9 +197,9 @@ Markdown渲染引擎一般采用AST或正则这两种方式。
 | AST  | 比较容易实现符合规范的引擎，运行效率较高   | 使用门槛高，用户难以自行扩展                         | vditor(Lute)、EasyMDE(marked)、tui.editor(自实现)、bytemd(remark)、editor.md(marked)、Milkdown(remark) |
 | 正则 | 使用门槛低，实现较简单，方便用户自定义语法 | 很难完全实现符合GFM/Commonmark规范的解析，且性能较差 | cherry-markdown(自实现)                                      |
 
-各项目测试代码见 https://github.com/urlyy/mde-comparison/projects
+各项目测试代码见 https://github.com/urlyy/mde-comparison/tree/main/projects
 
-测试数据见 https://github.com/urlyy/mde-comparison/datasets
+测试数据见 https://github.com/urlyy/mde-comparison/tree/main/datasets
 
 ### 1. 解析器              
 
