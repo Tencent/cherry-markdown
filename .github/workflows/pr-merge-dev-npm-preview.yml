@@ -2,14 +2,14 @@ name: PR Merge Dev NPM Preview
 
 # TODO:
 # 1. 仅在主仓库中运行
-# 2. 仅在pr合并时运行
+# 2. 仅在pr合并时运行 (done)
 # 3. 仅在pr合并到dev分支时运行
-# 4. 当pr合并时，获取pr合并后的commit id
-# 5. 根据commit id 修改package.json中的版本号和名称
-# 6. 发布到npm
+# 4. 当pr合并时，获取pr合并后的commit id (done)
+# 5. 根据commit id 修改package.json中的版本号和名称 (done)
+# 6. 发布到npm (done)
 # 7. 发布成功后，将发布的版本号和链接回复到当前pr下
 # 8. 发布成功后，将发布的版本号和链接回复到相关issue中(注意可能有没有issue和多个issue的情况)
-# 9. 修改README.md 提示 dev版本需谨慎使用
+# 9. 修改README.md 提示 dev版本需谨慎使用 (done)
 
 on:
   pull_request_target:
@@ -43,7 +43,7 @@ jobs:
 
       # 根据commit id 修改package.json中的版本号和名称
       # jq '.name="@cherry-markdown/preview-dev"' package.json > temp.json && mv temp.json package.json
-      - name: Update package version and name
+      - name: dev package version and name
         run: |
           if [ -f package.json ]; then
             # 打印 SHORT_SHA
@@ -76,8 +76,31 @@ jobs:
           # 重写或创建 README.md 文件
           echo -e '<p align="center"><img src="logo/new_logo.png" alt="cherry logo" width="50%"/></p>\n' > README.md
           echo -e '# Cherry Markdown Writer\n' >> README.md
-          echo -e '> [!WARNING]\n' >> README.md
-          echo -e '> This is a dev preview version of `Cherry Markdown`, please use it with caution. No responsibility for production versions.\n' >> README.md
+          echo -e '> !WARNING\n This is a dev preview version of `Cherry Markdown`, please use it with caution. No responsibility for production versions.\n' >> README.md
+
+      - name: Get PR details
+        id: get_pr_number
+        run: |
+          PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          echo "::set-output name=pr_number::$PR_NUMBER"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment on related issues
+        run: |
+          PR_NUMBER=${{ steps.get_pr_number.outputs.pr_number }}
+          PR_DATA=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                      -H "Accept: application/vnd.github.v3+json" \
+                      https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER)
+
+          ISSUES=$(echo $PR_DATA | jq -r '.body' | grep -o '#[0-9]\+' | tr -d '#')
+          for ISSUE in $ISSUES; do
+          COMMENT="发布成功！版本号：${{  env.version  }}，链接：[查看发布](https://www.npmjs.com/package/test-cherry-markdown/v/${{ env.version  }})"
+          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               --data "{\"body\": \"$COMMENT\"}" \
+               https://api.github.com/repos/${{ github.repository }}/issues/$ISSUE/comments
+          done
 
       - name: Install Node.js
         uses: actions/setup-node@v4
