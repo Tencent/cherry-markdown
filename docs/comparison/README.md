@@ -16,13 +16,12 @@
 - vditor: https://github.com/Vanessa219/vditor/tree/v3.10.4
 - editor.md: https://github.com/pandao/editor.md/tree/v1.5.0
 
--- -
+---
 
-- commonmark.js: https://github.com/commonmark/commonmark.js/tree/0.31.1
-- markdown-it: https://github.com/markdown-it/markdown-it/tree/14.1.0
 - marked: https://github.com/markedjs/marked/tree/v14.0.0
 - lute：https://github.com/88250/lute/tree/v1.7.6
 - remark: https://github.com/remarkjs/remark/tree/remark-cli%4012.0.0
+- toastmark:  https://github.com/nhn/tui.editor/tree/editor%403.2.2/libs/toastmark
 
 ## 项目整体情况
 
@@ -45,8 +44,6 @@
 - ![bytemd](https://img.shields.io/github/license/bytedance/bytemd?label=bytemd)
 - ![EasyMDE](https://img.shields.io/github/license/Ionaru/easy-markdown-editor?label=EasyMDE)
 
-
-​    
 开源协议参考图：
 ![license](assets/license.png)
 
@@ -145,15 +142,16 @@ TODO 对于上方各维度生成柱状图并给予分析
 - [commonmark 0.31.2](https://spec.commonmark.org/0.31.2/)
 - [GFM 0.29-gfm](https://github.github.com/gfm)
 
-测试数据见 https://github.com/urlyy/mde-comparison/datasets
+测试数据见 https://github.com/urlyy/mde-comparison/tree/main/datasets
 
+均基本实现了commonmark，因此对commonmark进行通过率测试。
 
-均基本实现了commonmark和gfm，需要后续使用commonmark和GFM的测试集查看通过率。TODO
+gfm有的实现了特定样式，故仅展示是否实现。
 
 |名称| EasyMDE | bytemd | milkdown | vditor | cherry-markdown | tui.editor | editor.md |
 | ------- | ------- | ------ | -------- | ------ | --------------- | --------------- | --------------- |
-| CommonMark (652测试用例) |         |        |          | 578 |                 |  |                 |
-| GFM (677测试用例) |         |        |          | 593 |                 |  |                 |
+| CommonMark (652测试用例) | 470 | 474 | 474 | 578 | 211 | 571 | 470 |
+| GFM | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | 特殊语法 | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ |
 
 各项目特殊语法相关文档：
@@ -194,35 +192,27 @@ Markdown渲染引擎一般采用AST或正则这两种方式。
 
 | 类型 | 优点                                       | 缺点                                                 | 相关编辑器                                                   |
 | ---- | ------------------------------------------ | ---------------------------------------------------- | ------------------------------------------------------------ |
-| AST  | 比较容易实现符合规范的引擎，运行效率较高   | 使用门槛高，用户难以自行扩展                         | vditor(Lute)、EasyMDE(marked)、tui.editor(自实现)、bytemd(remark)、editor.md(marked)、Milkdown(remark) |
+| AST  | 比较容易实现符合规范的引擎，运行效率较高   | 使用门槛高，用户难以自行扩展                         | vditor(Lute)、EasyMDE(marked)、tui.editor(toastmark)、bytemd(remark)、editor.md(marked)、Milkdown(remark) |
 | 正则 | 使用门槛低，实现较简单，方便用户自定义语法 | 很难完全实现符合GFM/Commonmark规范的解析，且性能较差 | cherry-markdown(自实现)                                      |
 
 各项目测试代码见 https://github.com/urlyy/mde-comparison/tree/main/projects
 
 测试数据见 https://github.com/urlyy/mde-comparison/tree/main/datasets
 
-### 1. 解析器              
+### 1. 解析器
 
-结合三个纯markdown解析器进行对比
+结合三个纯markdown解析器和两个项目中实现的解析器，进行对比。
 - ![marked](https://img.shields.io/github/stars/markedjs/marked?label=marked)
-- ![markdown-it](https://img.shields.io/github/stars/markdown-it/markdown-it?label=markdown-it)
 - ![remark](https://img.shields.io/github/stars/remarkjs/remark?label=remark)
-- ![commonmark.js](https://img.shields.io/github/stars/commonmark/commonmark.js?label=commonmark.js)
 - ![lute](https://img.shields.io/github/stars/88250/lute?label=lute)
 
-| 名称 | 中小文本初次渲染(s) | 超大文本初次渲染(s) | 中小文本变更(s) | 超大文本变更(s) |
-| ---- | ------------------- | ------------------- | --------------- | --------------- |
-| lute | 0.01903             | 3.84123             |                 |                 |
-|      |                     |                     |                 |                 |
-|      |                     |                     |                 |                 |
-|      |                     |                     |                 |                 |
-|      |                     |                     |                 |                 |
-
-
-
-### 2. onChange时的性能
-
-TODO
+| 名称            | 中小文本初次渲染(ms) | 大文本初次渲染(s) | 中小文本变更(s) | 大文本变更(s) | 备注 |
+| --------------- | -------------------- | ----------------- | --------------- | ------------- | ---- |
+| lute            | 4.73249              | 2102.60656        |                 |               |      |
+| remark          | 8.67605              | 621.51755         |                 |               |      |
+| marked          | 1.02415              | 47.94791          |                 |               |      |
+| toastmark       | 2.51111              | 108.11728         |                 |               |      |
+| cherry-markdown | 11.16318             | 607.96156         |                 |               |      |
 
 
 
@@ -230,7 +220,7 @@ TODO
 ## 安全
 开源Markdown编辑器常见风险：
 
-- 可能加载包含恶意脚本或内容的外部资源导致XSS攻击，如在编辑区中填入`<img src="x" onerror="while(true)alert('show me the bitcoin')">`。
+- 可能加载包含恶意脚本或内容的外部资源导致XSS攻击，如在编辑区加载到`<img src="x" onerror="while(true)alert('show me the bitcoin')">`。
 
 - 恶意资源加载：某些编辑器支持加载外部资源，如图片、样式表或完整的网页(即`<iframe>`）。
   - 外部资源的提供者可以收集用户的信息如IP地址等。
@@ -264,7 +254,7 @@ TODO
 
 常用解决方案：
 
-- 实现Sanitizer以移除潜在有害的HTML代码。如将`<`转为`&lt;`，将`>`转为`&gt;`。可以使用安全的Markdown解析库，如`marked`、`remark`等。
+- 实现Sanitizer以替换或移除潜在有害的HTML代码。如将`<`转为`&lt;`，将`>`转为`&gt;`。可以使用安全的Markdown解析库。
 - 配置内容安全策略(CSP)，限制编辑器可加载的资源来源。
 - 禁用`iframe`标签。
 - 使用`<iframe>`的`sandbox`属性来增强安全性。
