@@ -2,7 +2,7 @@
 
 > NOTE: 参选项目均为可在前端项目中引入的第三方markdown编辑器库，而非富文本/代码编辑器或成熟的笔记软件。
 >
-> 该对比测评暂写于2024.8.25~2024.9.5。
+> 该对比测评暂写于2024.8.25~2024.9.20。
 >
 > 本项目为腾讯犀牛鸟计划cherry-markdown课题实战项目中阶任务，[2024腾讯犀牛鸟开源人才培养计划—Cherry Markdown · Issue #41](https://github.com/Tencent/OpenSourceTalent/issues/41)
 
@@ -98,7 +98,7 @@ TODO 对于上方各维度生成柱状图并给予分析
 | cherry-markdown |     分屏预览      |    ✅     |   mermaid、md表格转为折线/柱状图   |   ✅    |    ✅    |    ✅     |    ❌     |        ✅         |        ✅        |
 |    editor.md    |     分屏预览      |    ✅     |     flowchart、sequenceDiagram     |   ✅    |    ❌    |    ❌     |    ❌     |        ❌         |        ✅        |
 
-较特殊的功能
+##### 较特殊的功能
 
 |      名称       | 大纲 | FrontMatter | 图片缩放(media zoom) | Footnote | html自动转markdown |            预览区编辑            |
 | :-------------: | :--: | :---------: | :------------------: | :------: | :----------------: | :------------------------------: |
@@ -110,7 +110,7 @@ TODO 对于上方各维度生成柱状图并给予分析
 | cherry-markdown |  ✅   |      ❌      |          ❌           |    ✅     |         ✅          |        图大小缩放、表格✅         |
 |    editor.md    |  ✅   |      ❌      |          ❌           |    ✅     |         ❌          |                ❌                 |
 
-几乎独有的功能
+##### 几乎独有的功能
 
 | 名称            | 功能                                                         |
 | --------------- | ------------------------------------------------------------ |
@@ -123,6 +123,10 @@ TODO 对于上方各维度生成柱状图并给予分析
 | editor.md       |                                                              |
 
 此处选取的编辑器未涉及到的更多Markdown相关功能可以参考：https://github.com/mundimark/awesome-markdown
+
+##### 总结
+vditor和cherry-markdown比较亮眼。vditor作为老牌编辑器，功能非常完善。而cherry-markdown在基础功能上也实现的很全面，并且新增了很多特色功能如流式适配等。
+
 
 ## 扩展能力
 
@@ -157,8 +161,9 @@ gfm有的实现了特定样式，故仅展示是否实现。
 各项目特殊语法相关文档：
 
 - tui.editor: https://github.com/nhn/tui.editor/blob/master/docs/en/custom-block.md
-- cherry-markdown：https://github.com/Tencent/cherry-markdown/wiki/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E6%B3%95
 - milkdown：https://milkdown.dev/docs/plugin/example-iframe-plugin
+- cherry-markdown：https://github.com/Tencent/cherry-markdown/wiki/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E6%B3%95
+
 
 ## 引入成本 
 
@@ -206,7 +211,7 @@ Markdown渲染引擎一般采用AST或正则这两种方式。
 - ![remark](https://img.shields.io/github/stars/remarkjs/remark?label=remark)
 - ![lute](https://img.shields.io/github/stars/88250/lute?label=lute)
 
-| 名称            | 中小文本初次渲染(ms) | 大文本初次渲染(s) | 中小文本变更(s) | 大文本变更(s) | 备注 |
+| 名称            | 中小文本初次渲染(ms) | 大文本初次渲染(ms) | 中小文本变更(ms) | 大文本变更(ms) | 备注 |
 | --------------- | -------------------- | ----------------- | --------------- | ------------- | ---- |
 | lute            | 4.73249              | 2102.60656        |                 |               |      |
 | remark          | 8.67605              | 621.51755         |                 |               |      |
@@ -218,7 +223,7 @@ Markdown渲染引擎一般采用AST或正则这两种方式。
 
 
 ## 安全
-开源Markdown编辑器常见风险：
+开源Markdown编辑器组件常见风险：
 
 - 可能加载包含恶意脚本或内容的外部资源导致XSS攻击，如在编辑区加载到`<img src="x" onerror="while(true)alert('show me the bitcoin')">`。
 
@@ -251,6 +256,8 @@ Markdown渲染引擎一般采用AST或正则这两种方式。
       ```
 
   - 通过透明或伪装的`<iframe>`诱骗用户执行非预期操作。
+
+> 考虑到编辑器组件应聚焦于编辑与展示，CSP、权限控制等应交给客户端上层或服务端处理。本分析仅考虑能否应对XSS攻击。
 
 常用解决方案：
 
