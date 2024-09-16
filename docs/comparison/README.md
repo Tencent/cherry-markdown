@@ -25,53 +25,39 @@
 
 ## 项目整体情况
 
-### 1. Star
-- ![tui.editor](https://img.shields.io/github/stars/nhn/tui.editor?label=tui.editor)
-- ![editor.md](https://img.shields.io/github/stars/pandao/editor.md?label=editor.md)
-- ![milkdown](https://img.shields.io/github/stars/Milkdown/milkdown?label=milkdown)
-- ![vditor](https://img.shields.io/github/stars/Vanessa219/vditor?label=vditor)
-- ![cherry-markdown](https://img.shields.io/github/stars/Tencent/cherry-markdown?label=cherry-markdown)
-- ![EasyMDE](https://img.shields.io/github/stars/Ionaru/easy-markdown-editor?label=EasyMDE)
-- ![bytemd](https://img.shields.io/github/stars/bytedance/bytemd?label=bytemd)
+| 名称            | star | license | 最近 commit 时间 | issue | pr | npm下载量 |
+| --------------- | ---- | ------- | ---- | ---- | ---- | ---- |
+| tui.editor      | ![tui.editor](https://img.shields.io/github/stars/nhn/tui.editor?label=tui.editor)     | ![tui.editor](https://img.shields.io/github/license/nhn/tui.editor?label=tui.editor)        | ![TOAST UI Editor](https://img.shields.io/github/last-commit/nhn/tui.editor?label=tui.editor)     | ![TOAST UI Editor](https://img.shields.io/github/issues/nhn/tui.editor?label=issues)     | ![TOAST UI Editor](https://img.shields.io/github/issues-pr/nhn/tui.editor?label=pr)     | ![TOAST UI Editor](https://img.shields.io/npm/dm/@toast-ui/editor?label=tui.editor)     |
+| editor.md          | ![editor.md](https://img.shields.io/github/stars/pandao/editor.md?label=editor.md)     | ![editor.md](https://img.shields.io/github/license/pandao/editor.md?label=editor.md)        | ![editor.md](https://img.shields.io/github/last-commit/pandao/editor.md?label=editor.md)     | ![editor.md](https://img.shields.io/github/issues/pandao/editor.md?label=issues)     | ![editor.md](https://img.shields.io/github/issues-pr/pandao/editor.md?label=pr)     | ![editor.md](https://img.shields.io/npm/dm/editor.md?label=editor.md)     |
+| milkdown         | ![milkdown](https://img.shields.io/github/stars/Milkdown/milkdown?label=milkdown)     | ![milkdown](https://img.shields.io/github/license/Milkdown/milkdown?label=milkdown)        | ![milkdown](https://img.shields.io/github/last-commit/Milkdown/milkdown?label=milkdown)     | ![milkdown](https://img.shields.io/github/issues/Milkdown/milkdown?label=issues)     | ![milkdown](https://img.shields.io/github/issues-pr/Milkdown/milkdown?label=pr)     | ![milkdown](https://img.shields.io/npm/dm/@milkdown/kit?label=milkdown)     |
+| vditor        | ![vditor](https://img.shields.io/github/stars/Vanessa219/vditor?label=vditor)     | ![vditor](https://img.shields.io/github/license/Vanessa219/vditor?label=vditor)        | ![vditor](https://img.shields.io/github/last-commit/Vanessa219/vditor?label=vditor)     | ![vditor](https://img.shields.io/github/issues/Vanessa219/vditor?label=issues)     | ![vditor](https://img.shields.io/github/issues-pr/Vanessa219/vditor?label=pr)     | ![vditor](https://img.shields.io/npm/dm/vditor?label=vditor)     |
+| cherry-markdown          | ![cherry-markdown](https://img.shields.io/github/stars/Tencent/cherry-markdown?label=cherry-markdown)     | Apache | ![cherry-markdown](https://img.shields.io/github/last-commit/Tencent/cherry-markdown?label=cherry-markdown)     | ![cherry-markdown](https://img.shields.io/github/issues/Tencent/cherry-markdown?label=issues)     | ![cherry-markdown](https://img.shields.io/github/issues-pr/Tencent/cherry-markdown?label=pr)     | ![cherry-markdown](https://img.shields.io/npm/dm/cherry-markdown?label=cherry-markdown)     |
+| EasyMDE | ![EasyMDE](https://img.shields.io/github/stars/Ionaru/easy-markdown-editor?label=EasyMDE)     | ![EasyMDE](https://img.shields.io/github/license/Ionaru/easy-markdown-editor?label=EasyMDE)        | ![EasyMDE](https://img.shields.io/github/last-commit/Ionaru/easy-markdown-editor?label=EasyMDE)     | ![EasyMDE](https://img.shields.io/github/issues/Ionaru/easy-markdown-editor?label=issues)     | ![EasyMDE](https://img.shields.io/github/issues-pr/Ionaru/easy-markdown-editor?label=pr)     | ![EasyMDE](https://img.shields.io/npm/dm/easymde?label=EasyMDE)     |
+| bytemd       | ![bytemd](https://img.shields.io/github/stars/bytedance/bytemd?label=bytemd)     | ![bytemd](https://img.shields.io/github/license/bytedance/bytemd?label=bytemd)        |![bytemd](https://img.shields.io/github/last-commit/bytedance/bytemd?label=bytemd)      | ![bytemd](https://img.shields.io/github/issues/bytedance/bytemd?label=issues)     | ![bytemd](https://img.shields.io/github/issues-pr/bytedance/bytemd?label=pr)     | ![bytemd](https://img.shields.io/npm/dm/bytemd?label=bytemd)     |
 
-
-### 2. 开源协议
-- ![cherry-markdown](https://img.shields.io/github/license/Tencent/cherry-markdown?label=cherry-markdown)(插件未能检测到，实际为Apache)
-- ![editor.md](https://img.shields.io/github/license/pandao/editor.md?label=editor.md)
-- ![tui.editor](https://img.shields.io/github/license/nhn/tui.editor?label=tui.editor)
-- ![milkdown](https://img.shields.io/github/license/Milkdown/milkdown?label=milkdown)
-- ![vditor](https://img.shields.io/github/license/Vanessa219/vditor?label=vditor)
-- ![bytemd](https://img.shields.io/github/license/bytedance/bytemd?label=bytemd)
-- ![EasyMDE](https://img.shields.io/github/license/Ionaru/easy-markdown-editor?label=EasyMDE)
-
-开源协议参考图：
+开源许可证参考图：
 ![license](assets/license.png)
 
-### 3. 最近更新时间/issue/pr
-- ![milkdown](https://img.shields.io/github/last-commit/Milkdown/milkdown?label=milkdown)![milkdown](https://img.shields.io/github/issues/Milkdown/milkdown?label=issues)![milkdown](https://img.shields.io/github/issues-pr/Milkdown/milkdown?label=pr)
-- ![cherry-markdown](https://img.shields.io/github/last-commit/Tencent/cherry-markdown?label=cherry-markdown)![cherry-markdown](https://img.shields.io/github/issues/Tencent/cherry-markdown?label=issues)![cherry-markdown](https://img.shields.io/github/issues-pr/Tencent/cherry-markdown?label=pr)
-- ![vditor](https://img.shields.io/github/last-commit/Vanessa219/vditor?label=vditor)![vditor](https://img.shields.io/github/issues/Vanessa219/vditor?label=issues)![vditor](https://img.shields.io/github/issues-pr/Vanessa219/vditor?label=pr)
-- ![EasyMDE](https://img.shields.io/github/last-commit/Ionaru/easy-markdown-editor?label=EasyMDE)![EasyMDE](https://img.shields.io/github/issues/Ionaru/easy-markdown-editor?label=issues)![EasyMDE](https://img.shields.io/github/issues-pr/Ionaru/easy-markdown-editor?label=pr)
-- ![bytemd](https://img.shields.io/github/last-commit/bytedance/bytemd?label=bytemd)![bytemd](https://img.shields.io/github/issues/bytedance/bytemd?label=issues)![bytemd](https://img.shields.io/github/issues-pr/bytedance/bytemd?label=pr)
-- ![TOAST UI Editor](https://img.shields.io/github/last-commit/nhn/tui.editor?label=tui.editor)![TOAST UI Editor](https://img.shields.io/github/issues/nhn/tui.editor?label=issues)![TOAST UI Editor](https://img.shields.io/github/issues-pr/nhn/tui.editor?label=pr)
-- ![editor.md](https://img.shields.io/github/last-commit/pandao/editor.md?label=editor.md)![editor.md](https://img.shields.io/github/issues/pandao/editor.md?label=issues)![editor.md](https://img.shields.io/github/issues-pr/pandao/editor.md?label=pr)
+表格数据柱状图：
+
+![bar](assets/bar.jpg)
+
+### 分析
+
+在柱状图中，从左到右 star 数依次减少。star 数越多说明项目越受全球开发者关注，而 npm 下载量越多说明项目被更多开发者和网站使用。而距离上一次 commit 的时间说明项目是否有在持续更新维护中，间隔时间越短说明更新越频繁。而表格中的 issue 和 pr 数量仅作为参考数据，因为数量多不一定是社区活跃，可能是项目无人维护导致 issue 和 pr 积压。
+
+在这些项目中，EasyMDE 和 editor.md 相对较早。EasyMDE 是 9.9k star 项目 SimpleMDE 的 fork 项目(相当于2.0)，因此 star 较少但是使用量多。editor.md 可能主要是中国开发者使用，使用量少，star 偏多。
+
+其他几个项目的最早提交都在最近的三到四年，由于宣传、项目功能等方面的差别，star 数有多有少。其中 tui.editor 来自 NHN 公司，开发投入应该较多，star数多，并且可能因为作为组件运用在它的其他产品中，所以下载量大。vditor 被用于链滴社区中，有较多的star和使用量，且更新较频繁，社区活跃。
+
+milkdown 主要为作者一人开发，但更新频繁。它的 "插件驱动"设计理念相比其他markdown编辑器有一定特点，star数排第三，但使用门槛也较高，使用用户也相对较少，因此下载量偏低。
+
+cherry-markdown 和 bytemd 分别是腾讯与字节跳动的团队开发的Markdown编辑器。bytemd 已经有一个正在开发的 v2 版本项目 hashmd ，但后者文档较不全面，因此先拿 bytemd 作为参选项目。可能由于 cherry-markdown 的宣传较晚，其使用量比起已经用于掘金社区的 bytemd 还是偏少，但有段时间 cherry-markdown 突然在 Github 上爆火，star 数飞涨并且目前远超 bytemd。同时 bytemd 和 hashmd 的最近一次 commit 都在 9 个月前，而 cherry-markdown 基本每周都有 commit 记录，社区较 bytemd 活跃。
+
+Markdown 编辑器已经有很长的发展历史了，普通用户对于 Markdown 的需求可能就是 Markdown 文本转 HTML 元素，因此受到全球开发者认可的老项目如今也有不错的下载量和关注度。但类似 cherry-markdown 这样的新项目包含的具有特色的新功能，仍可以为开发的网站增加亮点、吸引用户，虽然当前的 star 和下载量较少，但相信在新项目中这些"新一代"编辑器会被越来越多的使用。
 
 
-
-### 4. npm下载量
-- ![TOAST UI Editor](https://img.shields.io/npm/dm/@toast-ui/editor?label=tui.editor)
-- ![EasyMDE](https://img.shields.io/npm/dm/easymde?label=EasyMDE)
-- ![vditor](https://img.shields.io/npm/dm/vditor?label=vditor)
-- ![bytemd](https://img.shields.io/npm/dm/bytemd?label=bytemd)
-- ![editor.md](https://img.shields.io/npm/dm/editor.md?label=editor.md)
-- ![cherry-markdown](https://img.shields.io/npm/dm/cherry-markdown?label=cherry-markdown)
-- ![milkdown](https://img.shields.io/npm/dm/@milkdown/kit?label=milkdown)
-
-
-### 5. 总结
-TODO 对于上方各维度生成柱状图并给予分析
-
-#### 功能
+## 功能
 
 均支持的功能：
 
@@ -84,9 +70,9 @@ TODO 对于上方各维度生成柱状图并给予分析
 
 > 功能参考自各项目文档介绍，如有遗漏或错误，欢迎指出。
 
-##### 基本功能
+### 基本功能
 
-> WYSIWYG(所见即所得)：在编辑区即可进行Markdown渲染，类似Typora。
+> WYSIWYG(所见即所得)：在编辑区即可进行 HTML 元素的渲染，类似 Typora 的效果。
 
 |      名称       |     编辑模式      | 数学公式 |              可视化图              | 多主题 | 导出pdf | 拖拽上传 | 本地缓存 | 编辑区悬浮菜单栏 |     多语言      |
 | :-------------: | :---------------: | :------: | :--------------------------------: | :----: | :-----: | :------: | :------: | :--------------: | :-------------: |
@@ -98,7 +84,7 @@ TODO 对于上方各维度生成柱状图并给予分析
 | cherry-markdown |     分屏预览      |    ✅     |   mermaid、md表格转为折线/柱状图   |   ✅    |    ✅    |    ✅     |    ❌     |        ✅         |        ✅        |
 |    editor.md    |     分屏预览      |    ✅     |     flowchart、sequenceDiagram     |   ✅    |    ❌    |    ❌     |    ❌     |        ❌         |        ✅        |
 
-##### 较特殊的功能
+### 较特殊的功能
 
 |      名称       | 大纲 | FrontMatter | 图片缩放(media zoom) | Footnote | html自动转markdown |            预览区编辑            |
 | :-------------: | :--: | :---------: | :------------------: | :------: | :----------------: | :------------------------------: |
@@ -110,7 +96,7 @@ TODO 对于上方各维度生成柱状图并给予分析
 | cherry-markdown |  ✅   |      ❌      |          ❌           |    ✅     |         ✅          |        图大小缩放、表格✅         |
 |    editor.md    |  ✅   |      ❌      |          ❌           |    ✅     |         ❌          |                ❌                 |
 
-##### 几乎独有的功能
+### 几乎独有的功能
 
 | 名称            | 功能                                                         |
 | --------------- | ------------------------------------------------------------ |
@@ -124,7 +110,7 @@ TODO 对于上方各维度生成柱状图并给予分析
 
 此处选取的编辑器未涉及到的更多Markdown相关功能可以参考：https://github.com/mundimark/awesome-markdown
 
-##### 总结
+### 总结
 vditor和cherry-markdown比较亮眼。vditor作为老牌编辑器，功能非常完善。而cherry-markdown在基础功能上也实现的很全面，并且新增了很多特色功能如流式适配等。
 
 
@@ -182,13 +168,15 @@ gfm有的实现了特定样式，故仅展示是否实现。
 
 ## 兼容性
 
-TODO
+- 浏览器版本(不打算对比)
+- 由于参选项目均未使用特定框架如React、Vue等开发，因此兼容这些特定框架。
 
 |类型| EasyMDE | bytemd | milkdown | vditor     | cherry-markdown | tui.editor | editor.md |
 | :-----: | :----: | :------: | :--------: | :-------------: | :-------------: | :-------------: | :-------------: |
-|  浏览器版本       |  |          |  |  |                 |  |                 |
-|   移动端适配  | ✅ |          |  | ✅ | ✅ |  | ✅ |
-|   与开发框架集成   | Vanilla | Svelte、React、Vue、Vanilla、SSR | React、Vue、Svelte、Solidjs、Nextjs、Nuxtjs、Angular、Vue2 | Vanilla、React、Vue、Angular | Vanilla、all? | Vanilla、Vue、React、 | Jquery |
+| 与React、Vue等框架兼容 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 移动端适配(TODO)  | ✅ |          |  | ✅ | ✅ |  | ✅ |
+|   SSR(TODO)   |         |   ✅    |          |        |                 |            |           |
+
 
 ## 性能
 ### 解析方案
@@ -204,7 +192,7 @@ Markdown渲染引擎一般采用AST或正则这两种方式。
 
 测试数据见 https://github.com/urlyy/mde-comparison/tree/main/datasets
 
-### 1. 解析器
+### 1. 解析器(初次渲染)
 
 结合三个纯markdown解析器和两个项目中实现的解析器，进行对比。
 - ![marked](https://img.shields.io/github/stars/markedjs/marked?label=marked)
@@ -219,7 +207,9 @@ Markdown渲染引擎一般采用AST或正则这两种方式。
 | toastmark       | 2.51111              | 108.11728         |                 |               |      |
 | cherry-markdown | 11.16318             | 607.96156         |                 |               |      |
 
+### 2. 文本变更
 
+TODO
 
 
 ## 安全
