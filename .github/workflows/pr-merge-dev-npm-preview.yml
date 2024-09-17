@@ -54,9 +54,9 @@ jobs:
              VERSION=$(node -p "require('./package.json').version")-dev.${{ env.MERGE_COMMIT_SHORT_SHA }}
 
              # 设置环境变量
-             echo "package_version=$VERSION" >> "$GITHUB_ENV"
-             PACKAGE_NAME="test-cherry-markdown"
-             echo "package_name=$PACKAGE_NAME" >> "$GITHUB_ENV"
+             echo "PACKAGE_VERSION=$VERSION" >> "$GITHUB_ENV"
+             package_name="test-cherry-markdown"
+             echo "PACKAGE_NAME=$package_name" >> "$GITHUB_ENV"
 
              # 打印当前版本号
               echo "Current version: $VERSION"
@@ -67,7 +67,6 @@ jobs:
                   .version=$package_version |
                   if .scripts.publish then del(.scripts.publish) else . end
                 ' package.json > temp.json && mv temp.json package.json
-
 
               # 打印修改后的 name 和 version
               echo "Updated package.json:"
@@ -106,7 +105,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-    #  [查看发布版本](https://www.npmjs.com/package/@cherry-markdown/preview-dev/v/${process.env.package_version})
+    #  [查看发布版本](https://www.npmjs.com/package/@cherry-markdown/preview-dev/v/${process.env.PACKAGE_VERSION})
       - name: Comment on related issues
         id: get-issues
         uses: actions/github-script@v7
@@ -134,7 +133,7 @@ jobs:
                  \`\`\`shell
                  npm install @cherry-markdown/preview-dev@${process.env.package_version}
                  \`\`\`
-                 [查看发布版本](https://www.npmjs.com/package/${process.env.package_name}/v/${process.env.package_version}),
+                 [查看发布版本](https://www.npmjs.com/package/${process.env.package_name}/v/${process.env.PACKAGE_VERSION}),
                 请注意这是一个开发版本,请谨慎使用,不承担生产版本的责任`;
 
                 // 发布评论到issue
