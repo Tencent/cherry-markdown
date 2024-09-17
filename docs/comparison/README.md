@@ -44,7 +44,7 @@
 
 ### 分析
 
-在柱状图中，从左到右 star 数依次减少。star 数越多说明项目越受全球开发者关注，而 npm 下载量越多说明项目被更多开发者和网站使用。而距离上一次 commit 的时间说明项目是否有在持续更新维护中，间隔时间越短说明更新越频繁。而表格中的 issue 和 pr 数量仅作为参考数据，因为数量多不一定是社区活跃，可能是项目无人维护导致 issue 和 pr 积压。
+在柱状图中，从左到右 star 数依次减少。star 数越多说明项目越受全球开发者关注，而 npm 下载量越多说明项目被更多开发者和网站使用。距离上一次 commit 的时间说明项目是否有在持续更新维护中，间隔时间越短说明更新越频繁。表格中的 issue 和 pr 数量仅作为参考数据，因为数量多不一定是社区活跃，可能是项目无人维护导致 issue 和 pr 积压。
 
 在这些项目中，EasyMDE 和 editor.md 相对较早。EasyMDE 是 9.9k star 项目 SimpleMDE 的 fork 项目(相当于2.0)，因此 star 较少但是使用量多。editor.md 可能主要是中国开发者使用，使用量少，star 偏多。
 
@@ -52,9 +52,9 @@
 
 milkdown 主要为作者一人开发，但更新频繁。它的 "插件驱动"设计理念相比其他markdown编辑器有一定特点，star数排第三，但使用门槛也较高，使用用户也相对较少，因此下载量偏低。
 
-cherry-markdown 和 bytemd 分别是腾讯与字节跳动的团队开发的Markdown编辑器。bytemd 已经有一个正在开发的 v2 版本项目 hashmd ，但后者文档较不全面，因此先拿 bytemd 作为参选项目。可能由于 cherry-markdown 的宣传较晚，其使用量比起已经用于掘金社区的 bytemd 还是偏少，但有段时间 cherry-markdown 突然在 Github 上爆火，star 数飞涨并且目前远超 bytemd。同时 bytemd 和 hashmd 的最近一次 commit 都在 9 个月前，而 cherry-markdown 基本每周都有 commit 记录，社区较 bytemd 活跃。
+cherry-markdown 和 bytemd 分别是腾讯与字节跳动的团队开发的Markdown编辑器。bytemd 已经有一个正在开发的 v2 版本项目 hashmd ，但后者文档较不全面，因此先拿 bytemd 作为参选项目。可能由于 cherry-markdown 的宣传较晚，其使用量比起已经用于掘金社区的 bytemd 还是偏少，但有段时间 cherry-markdown 突然在 Github 上爆火，star 数飞涨并且目前远超 bytemd。同时 bytemd 和 hashmd 的最近一次 commit 都在 9 个月前，而 cherry-markdown 基本上每周都有 commit 记录，社区较 bytemd 活跃。
 
-Markdown 编辑器已经有很长的发展历史了，普通用户对于 Markdown 的需求可能就是 Markdown 文本转 HTML 元素，因此受到全球开发者认可的老项目如今也有不错的下载量和关注度。但类似 cherry-markdown 这样的新项目包含的具有特色的新功能，仍可以为开发的网站增加亮点、吸引用户，虽然当前的 star 和下载量较少，但相信在新项目中这些"新一代"编辑器会被越来越多的使用。
+Markdown 编辑器已经有很长的发展历史了，普通用户对于这种编辑器的需求可能仅仅就是 Markdown 文本转 HTML 元素，因此受到全球开发者认可的老项目如今也有不错的下载量和关注度。但类似 cherry-markdown 这样的新编辑器包含的具有特色的新功能，仍可以为开发的网站增加亮点、吸引用户，虽然当前的 star 和下载量较少，但相信在新项目中这些"新一代"编辑器会被越来越多的使用。
 
 
 ## 功能
@@ -65,7 +65,7 @@ Markdown 编辑器已经有很长的发展历史了，普通用户对于 Markdow
 - 工具栏
 - 快捷键
 - 图片上传、表格
-- TODO列表
+- checklist
 - 代码块高亮
 
 > 功能参考自各项目文档介绍，如有遗漏或错误，欢迎指出。
@@ -174,8 +174,7 @@ gfm有的实现了特定样式，故仅展示是否实现。
 |类型| EasyMDE | bytemd | milkdown | vditor     | cherry-markdown | tui.editor | editor.md |
 | :-----: | :----: | :------: | :--------: | :-------------: | :-------------: | :-------------: | :-------------: |
 | 与React、Vue等框架兼容 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 移动端适配(TODO)  | ✅ |          |  | ✅ | ✅ |  | ✅ |
-|   SSR(TODO)   |         |   ✅    |          |        |                 |            |           |
+|   SSR(TODO)   |  |   ✅    |          |        |  |            |           |
 
 
 ## 性能
