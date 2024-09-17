@@ -62,11 +62,12 @@ jobs:
               echo "Current version: $VERSION"
 
             # 修改 package.json 中的 name 和 version，并检查 scripts 中是否存在 publish 属性，如果存在则移除
-                jq --arg version "$VERSION" '
+              jq --arg package_name "$PACKAGE_NAME" --arg package_version "$PACKAGE_VERSION" '
                   .name=$package_name |
                   .version=$package_version |
                   if .scripts.publish then del(.scripts.publish) else . end
                 ' package.json > temp.json && mv temp.json package.json
+
 
               # 打印修改后的 name 和 version
               echo "Updated package.json:"
