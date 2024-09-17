@@ -1,7 +1,7 @@
 name: PR Merge Dev NPM Preview
 
 # task:
-# 1. 1仅在主仓库中运行
+# 1. 仅在主仓库中运行
 # 2. 仅在pr合并时运行 (done)
 # 3. 仅在pr合并到dev分支时运行
 # 4. 当pr合并时，获取pr合并后的commit id (done)
