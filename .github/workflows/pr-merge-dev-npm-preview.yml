@@ -39,8 +39,7 @@ jobs:
           if [ "${{ github.event.pull_request.merged }}" == "true" ]; then
               SHORT_SHA=$(echo "${{ github.event.pull_request.merge_commit_sha }}" | cut -c1-7)
               echo "MERGE_COMMIT_SHORT_SHA=$SHORT_SHA" >> "$GITHUB_ENV"
-              echo "SHA: $SHORT_SHA"
-              echo "切割后的 MERGE_COMMIT_SHORT_SHA: $MERGE_COMMIT_SHA"
+    
           else
             echo "Not a merged PR, skipping"
           fi
@@ -52,12 +51,15 @@ jobs:
           if [ -f package.json ]; then
 
              # 获取当前版本号并添加 merge commit SHA
-             VERSION=$(node -p "require('./package.json').version")-dev.$MERGE_COMMIT_SHORT_SHA
+             VERSION=$(node -p "require('./package.json').version")-dev.${{ env.MERGE_COMMIT_SHORT_SHA }}
 
              # 设置环境变量
              echo "package_version=$VERSION" >> "$GITHUB_ENV"
              PACKAGE_NAME="test-cherry-markdown"
              echo "package_name=$PACKAGE_NAME" >> "$GITHUB_ENV"
+
+             # 打印当前版本号
+              echo "Current version: $VERSION"
 
             # 修改 package.json 中的 name 和 version，并检查 scripts 中是否存在 publish 属性，如果存在则移除
                 jq --arg version "$VERSION" '
@@ -84,99 +86,6 @@ jobs:
           echo -e '# Cherry Markdown Writer\n' >> README.md
           echo -e '> !WARNING\n This is a dev preview version of `Cherry Markdown`, please use it with caution. No responsibility for production versions.\n' >> README.md
 
-       #  [查看发布版本](https://www.npmjs.com/package/@cherry-markdown/preview-dev/v/${process.env.package_version})
-      - name: Comment on related issues
-        id: get-issues
-        uses: actions/github-script@v7
-        with:
-          result-encoding: string
-          retries: 3
-          retry-exempt-status-codes: 400,401
-          script: |
-            let issue_array = [];
-
-            // 添加issue到数组并去重
-            const addIssueToArray = (newIssues) => {
-              issue_array.push(...newIssues);
-              issue_array = [...new Set(issue_array)];
-            };
-
-            try {
-            // 获取pr的issue编号并且转换成数字数组
-            const getIssueRegex =(issueText)=>{
-              const issueRegex = /#(\d+)/g
-              return Array.from(issueText.matchAll(issueRegex), match =>  parseInt(match[1], 10));
-            };
-            
-            const comment = `谢谢, 这个问题已经被修复,请安装安装测试版体验:
-              \`\`\`shell
-              npm install @cherry-markdown/preview-dev@${process.env.package_version}
-              \`\`\`
-              [查看发布版本](https://www.npmjs.com/package/${process.env.package_name}/v/${process.env.package_version}),
-               请注意这是一个开发版本,请谨慎使用,不承担生产版本的责任`;
-
-            // 发布评论到issue
-            const createComment= async (issueNumbers) => {
-            issueNumbers.forEach(async (issueNumber) => {
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issueNumber,
-                  body: comment
-                });
-              });
-            };
-
-            // 获取当前提交的pr信息[title,body]
-            const { data: pullCommits } =
-            await github.rest.pulls.get({
-                owner:context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.issue.number
-            });
-            const pullCommitsIssueTitleNumbers = getIssueRegex(pullCommits.title);
-            addIssueToArray(pullCommitsIssueTitleNumbers);
-            const pullCommitsIssueBodyNumbers = getIssueRegex(pullCommits.body);
-            addIssueToArray(pullCommitsIssueBodyNumbers);
-
-             console.log('pullCommits-title',pullCommitsIssueTitleNumbers);
-             console.log('pullCommits-body',pullCommitsIssueBodyNumbers);
-
-            // 获取当前pr的issue信息[body]
-            const { data: listPrIssue } =
-            await github.rest.issues.listComments({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number
-            });
-            listPrIssue.forEach((item) => {
-                const listPrIssueIssueNumbers = getIssueRegex(item.body);
-                addIssueToArray(listPrIssueIssueNumbers);
-
-                console.log('listPrIssue',item.body);
-                console.log('listPrIssue',listPrIssueIssueNumbers);
-            });
-
-            // 获取当前pr的 review 信息[body]
-            const { data: listReviewComments } = 
-            await github.rest.pulls.listReviewComments({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.issue.number
-            });
-            listReviewComments.forEach((item) => {
-                const listReviewCommentsIssueNumbers = getIssueRegex(item.body);
-                addIssueToArray(listReviewCommentsIssueNumbers);
-
-                console.log('listReviewComments',item.body);
-                console.log('listReviewComments',listReviewCommentsIssueNumbers);
-            });
-
-            createComment(issue_array);
-             }catch(error){
-               console.log('error',error);
-            }
-
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
@@ -195,3 +104,96 @@ jobs:
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    #  [查看发布版本](https://www.npmjs.com/package/@cherry-markdown/preview-dev/v/${process.env.package_version})
+      - name: Comment on related issues
+        id: get-issues
+        uses: actions/github-script@v7
+        with:
+           result-encoding: string
+           retries: 3
+           retry-exempt-status-codes: 400,401
+           script: |
+                let issue_array = [];
+
+                // 添加issue到数组并去重
+                const addIssueToArray = (newIssues) => {
+                issue_array.push(...newIssues);
+                issue_array = [...new Set(issue_array)];
+                };
+
+                try {
+                 // 获取pr的issue编号并且转换成数字数组
+                 const getIssueRegex =(issueText)=>{
+                 const issueRegex = /#(\d+)/g
+                 return Array.from(issueText.matchAll(issueRegex), match =>  parseInt(match[1], 10));
+                 };
+       
+                  const comment = `谢谢, 这个问题已经被修复,请安装安装测试版体验:
+                 \`\`\`shell
+                 npm install @cherry-markdown/preview-dev@${process.env.package_version}
+                 \`\`\`
+                 [查看发布版本](https://www.npmjs.com/package/${process.env.package_name}/v/${process.env.package_version}),
+                请注意这是一个开发版本,请谨慎使用,不承担生产版本的责任`;
+
+                // 发布评论到issue
+                 const createComment= async (issueNumbers) => {
+                issueNumbers.forEach(async (issueNumber) => {
+                await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: comment
+                    });
+                  });
+                };
+
+                // 获取当前提交的pr信息[title,body]
+                const { data: pullCommits } =
+                await github.rest.pulls.get({
+                      owner:context.repo.owner,
+                      repo: context.repo.repo,
+                     pull_number: context.issue.number
+                   });
+                const pullCommitsIssueTitleNumbers = getIssueRegex(pullCommits.title);
+                      addIssueToArray(pullCommitsIssueTitleNumbers);
+                const pullCommitsIssueBodyNumbers = getIssueRegex(pullCommits.body);
+                      addIssueToArray(pullCommitsIssueBodyNumbers);
+
+                 console.log('pullCommits-title',pullCommitsIssueTitleNumbers);
+                 console.log('pullCommits-body',pullCommitsIssueBodyNumbers);
+      
+                 // 获取当前pr的issue信息[body]
+                const { data: listPrIssue } =
+                 await github.rest.issues.listComments({
+                       owner: context.repo.owner,
+                       repo: context.repo.repo,
+                       issue_number: context.issue.number
+                      });
+                listPrIssue.forEach((item) => {
+                       const listPrIssueIssueNumbers = getIssueRegex(item.body);
+                       addIssueToArray(listPrIssueIssueNumbers);
+
+                       console.log('listPrIssue',item.body);
+                       console.log('listPrIssue',listPrIssueIssueNumbers);
+                   });
+
+                // 获取当前pr的 review 信息[body]
+                const { data: listReviewComments } = 
+                await github.rest.pulls.listReviewComments({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      pull_number: context.issue.number
+                   });
+                listReviewComments.forEach((item) => {
+                      const listReviewCommentsIssueNumbers = getIssueRegex(item.body);
+                      addIssueToArray(listReviewCommentsIssueNumbers);
+
+                      console.log('listReviewComments',item.body);
+                      console.log('listReviewComments',listReviewCommentsIssueNumbers);
+                   });
+
+                createComment(issue_array);
+                 }catch(error){
+                     console.log('error',error);
+                }
