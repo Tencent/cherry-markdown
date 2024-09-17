@@ -1,6 +1,6 @@
 name: PR Merge Dev NPM Preview
 
-# TODO:
+# task:
 # 1. 仅在主仓库中运行
 # 2. 仅在pr合并时运行 (done)
 # 3. 仅在pr合并到dev分支时运行
@@ -15,6 +15,10 @@ on:
   pull_request_target:
     types:
       - closed
+
+permissions:
+  pull-requests: write
+  issues: write
 
 jobs:
   dev-deploy:
@@ -78,29 +82,92 @@ jobs:
           echo -e '# Cherry Markdown Writer\n' >> README.md
           echo -e '> !WARNING\n This is a dev preview version of `Cherry Markdown`, please use it with caution. No responsibility for production versions.\n' >> README.md
 
-      - name: Get PR details
-        id: get_pr_number
-        run: |
-          PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-          echo "::set-output name=pr_number::$PR_NUMBER"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Comment on related issues
-        run: |
-          PR_NUMBER=${{ steps.get_pr_number.outputs.pr_number }}
-          PR_DATA=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                      -H "Accept: application/vnd.github.v3+json" \
-                      https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER)
+        id: get-issues
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          retries: 3
+          retry-exempt-status-codes: 400,401
+          script: |
+            let issue_array = [];
 
-          ISSUES=$(echo $PR_DATA | jq -r '.body' | grep -o '#[0-9]\+' | tr -d '#')
-          for ISSUE in $ISSUES; do
-          COMMENT="发布成功！版本号：${{  env.version  }}，链接：[查看发布](https://www.npmjs.com/package/test-cherry-markdown/v/${{ env.version  }})"
-          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Accept: application/vnd.github.v3+json" \
-               --data "{\"body\": \"$COMMENT\"}" \
-               https://api.github.com/repos/${{ github.repository }}/issues/$ISSUE/comments
-          done
+            // 添加issue到数组并去重
+            const addIssueToArray = (newIssues) => {
+              issue_array.push(...newIssues);
+              issue_array = [...new Set(issue_array)];
+            };
+
+            try {
+            // 获取pr的issue编号并且转换成数字数组
+            const getIssueRegex =(issueText)=>{
+              const issueRegex = /#(\d+)/g
+              return Array.from(issueText.matchAll(issueRegex), match =>  parseInt(match[1], 10));
+            };
+            
+            const comment = `发布成功`;
+
+            // 发布评论到issue
+            const createComment= async (issueNumbers) => {
+            issueNumbers.forEach(async (issueNumber) => {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  body: comment
+                });
+              });
+            };
+
+            // 获取当前提交的pr信息[title,body]
+            const { data: pullCommits } =
+            await github.rest.pulls.get({
+                owner:context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number
+            });
+            const pullCommitsIssueTitleNumbers = getIssueRegex(pullCommits.title);
+            addIssueToArray(pullCommitsIssueTitleNumbers);
+            const pullCommitsIssueBodyNumbers = getIssueRegex(pullCommits.body);
+            addIssueToArray(pullCommitsIssueBodyNumbers);
+
+             console.log('pullCommits-title',pullCommitsIssueTitleNumbers);
+             console.log('pullCommits-body',pullCommitsIssueBodyNumbers);
+
+            // 获取当前pr的issue信息[body]
+            const { data: listPrIssue } =
+            await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number
+            });
+            listPrIssue.forEach((item) => {
+                const listPrIssueIssueNumbers = getIssueRegex(item.body);
+                addIssueToArray(listPrIssueIssueNumbers);
+
+                console.log('listPrIssue',item.body);
+                console.log('listPrIssue',listPrIssueIssueNumbers);
+            });
+
+            // 获取当前pr的 review 信息[body]
+            const { data: listReviewComments } = 
+            await github.rest.pulls.listReviewComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number
+            });
+            listReviewComments.forEach((item) => {
+                const listReviewCommentsIssueNumbers = getIssueRegex(item.body);
+                addIssueToArray(listReviewCommentsIssueNumbers);
+
+                console.log('listReviewComments',item.body);
+                console.log('listReviewComments',listReviewCommentsIssueNumbers);
+            });
+
+            createComment(issue_array);
+             }catch(error){
+               console.log('error',error);
+            }
 
       - name: Install Node.js
         uses: actions/setup-node@v4
