@@ -38,9 +38,9 @@ jobs:
         run: |
           if [ "${{ github.event.pull_request.merged }}" == "true" ]; then
               SHORT_SHA=$(echo "${{ github.event.pull_request.merge_commit_sha }}" | cut -c1-7)
-              echo "MERGE_COMMIT_SHA=$SHORT_SHA" >> "$GITHUB_ENV"
-              echo "切割后的 SHA: $SHORT_SHA"
-              echo "切割后的 MERGE_COMMIT_SHA: $MERGE_COMMIT_SHA"
+              echo "MERGE_COMMIT_SHORT_SHA=$SHORT_SHA" >> "$GITHUB_ENV"
+              echo "SHA: $SHORT_SHA"
+              echo "切割后的 MERGE_COMMIT_SHORT_SHA: $MERGE_COMMIT_SHA"
           else
             echo "Not a merged PR, skipping"
           fi
@@ -50,17 +50,19 @@ jobs:
       - name: dev package version and name
         run: |
           if [ -f package.json ]; then
-            # 打印 SHORT_SHA
-            echo "SHORT_SHA=$MERGE_COMMIT_SHA"
 
-             # 获取当前版本号并添加后缀
-              VERSION=$(node -p "require('./package.json').version")-dev.$MERGE_COMMIT_SHA
-              echo "version=$VERSION" >> "$GITHUB_ENV"
+             # 获取当前版本号并添加 merge commit SHA
+             VERSION=$(node -p "require('./package.json').version")-dev.$MERGE_COMMIT_SHORT_SHA
+
+             # 设置环境变量
+             echo "package_version=$VERSION" >> "$GITHUB_ENV"
+             PACKAGE_NAME="test-cherry-markdown"
+             echo "package_name=$PACKAGE_NAME" >> "$GITHUB_ENV"
 
             # 修改 package.json 中的 name 和 version，并检查 scripts 中是否存在 publish 属性，如果存在则移除
                 jq --arg version "$VERSION" '
-                  .name="test-cherry-markdown" |
-                  .version=$version |
+                  .name=$package_name |
+                  .version=$package_version |
                   if .scripts.publish then del(.scripts.publish) else . end
                 ' package.json > temp.json && mv temp.json package.json
 
@@ -82,6 +84,7 @@ jobs:
           echo -e '# Cherry Markdown Writer\n' >> README.md
           echo -e '> !WARNING\n This is a dev preview version of `Cherry Markdown`, please use it with caution. No responsibility for production versions.\n' >> README.md
 
+       #  [查看发布版本](https://www.npmjs.com/package/@cherry-markdown/preview-dev/v/${process.env.package_version})
       - name: Comment on related issues
         id: get-issues
         uses: actions/github-script@v7
@@ -105,7 +108,12 @@ jobs:
               return Array.from(issueText.matchAll(issueRegex), match =>  parseInt(match[1], 10));
             };
             
-            const comment = `发布成功`;
+            const comment = `谢谢, 这个问题已经被修复,请安装安装测试版体验:
+              \`\`\`shell
+              npm install @cherry-markdown/preview-dev@${process.env.package_version}
+              \`\`\`
+              [查看发布版本](https://www.npmjs.com/package/${process.env.package_name}/v/${process.env.package_version}),
+               请注意这是一个开发版本,请谨慎使用,不承担生产版本的责任`;
 
             // 发布评论到issue
             const createComment= async (issueNumbers) => {
