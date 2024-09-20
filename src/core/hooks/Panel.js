@@ -42,6 +42,10 @@ export default class Panel extends ParagraphBase {
     return str.replace(this.RULE.reg, (match, preLines, name, content) => {
       const lineCount = this.getLineCount(match, preLines);
       const sign = this.$engine.md5(match);
+      const testHasCache = this.testHasCache(sign);
+      if (testHasCache !== false) {
+        return prependLineFeedForParagraph(match, testHasCache);
+      }
       const { title, body, appendStyle, className } = this.$getPanelInfo(name, content, sentenceMakeFunc);
       const ret = this.pushCache(
         `<div class="${className}" data-sign="${sign}" data-lines="${lineCount}" ${appendStyle}>${title}${body}</div>`,

@@ -37,61 +37,22 @@ export default class Blockquote extends ParagraphBase {
 
   handleMatch(str, sentenceMakeFunc) {
     return str.replace(this.RULE.reg, (match, lines, content) => {
-      const { sign: contentSign, html: parsedHtml } = sentenceMakeFunc(content);
-      const sign = this.signWithCache(parsedHtml) || contentSign;
       const lineCount = this.getLineCount(match, lines); // 段落所占行数
-      const listRegex =
-        /^(([ \t]{0,3}([*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)([^\r]+?)($|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)))/;
-      let lastIndent = computeLeadingSpaces(lines);
-      // 逐行处理
-      const contentLines = parsedHtml.split('\n');
-      const replaceReg = /^[>\s]+/;
-      const countReg = />/g;
-      let lastLevel = 1;
-      let level = 0;
-      let handledHtml = `<blockquote data-sign="${sign}_${lineCount}" data-lines="${lineCount}">`;
-      for (let i = 0; contentLines[i]; i++) {
-        if (i !== 0) {
-          const leadIndent = computeLeadingSpaces(contentLines[i]);
-          if (leadIndent <= lastIndent && listRegex.test(contentLines[i])) {
-            break;
-          }
-          lastIndent = leadIndent;
-        }
-        /* eslint-disable no-loop-func */
-        const $line = contentLines[i].replace(replaceReg, (leadSymbol) => {
-          const leadSymbols = leadSymbol.match(countReg);
-          // 本行引用嵌套层级比上层要多
-          if (leadSymbols && leadSymbols.length > lastLevel) {
-            level = leadSymbols.length;
-          } else {
-            // 否则保持当前缩进层级
-            level = lastLevel;
-          }
-          return '';
-        });
-        // 同层级，且不为首行时补充一个换行
-        if (lastLevel === level && i !== 0) {
-          handledHtml += '<br>';
-        }
-        // 补充缩进
-        if (lastLevel < level) {
-          handledHtml += '<blockquote>'.repeat(level - lastLevel);
-          lastLevel = level;
-        }
-        // 插入当前行内容
-        handledHtml += $line;
+      const sign = this.$engine.md5(match);
+      const testHasCache = this.testHasCache(sign);
+      if (testHasCache !== false) {
+        return this.getCacheWithSpace(testHasCache, match);
       }
+      let handledHtml = `<blockquote data-sign="${sign}_${lineCount}" data-lines="${lineCount}">`;
+      const $content = content.replace(/^([ \t]*>)/gm, '');
+      handledHtml += this.$engine.makeHtmlForBlockquote($content);
       // 标签闭合
-      handledHtml += '</blockquote>'.repeat(lastLevel);
+      handledHtml += '</blockquote>';
       return this.getCacheWithSpace(this.pushCache(handledHtml, sign, lineCount), match);
     });
   }
 
   makeHtml(str, sentenceMakeFunc) {
-    if (!this.test(str)) {
-      return str;
-    }
     return this.handleMatch(str, sentenceMakeFunc);
   }
 
