@@ -16,17 +16,6 @@
 import ParagraphBase from '@/core/ParagraphBase';
 import { compileRegExp } from '@/utils/regexp';
 
-function computeLeadingSpaces(leadingChars) {
-  const indentRegex = /^(\t|[ ]{1,4})/;
-  let leadingCharsTemp = leadingChars;
-  let indent = 0;
-  while (indentRegex.test(leadingCharsTemp)) {
-    leadingCharsTemp = leadingCharsTemp.replace(/^(\t|[ ]{1,4})/g, '');
-    indent += 1;
-  }
-  return indent;
-}
-
 export default class Blockquote extends ParagraphBase {
   static HOOK_NAME = 'blockquote';
 
