@@ -232,8 +232,8 @@ export default class Cherry extends CherryStatic {
     if (this.options.autoScrollByHashAfterInit) {
       setTimeout(this.scrollByHash.bind(this));
     }
-    // 强制进行一次渲染
-    this.editText(null, this.editor.editor);
+    // 强制进行一次渲染 // 不记得为啥要强制渲染了，先屏蔽了
+    // this.editText(null, this.editor.editor);
     if (this.options.toolbars.toc !== false) {
       this.createToc();
     }
@@ -886,11 +886,10 @@ export default class Cherry extends CherryStatic {
   initText(codemirror) {
     try {
       const markdownText = codemirror.getValue();
+      this.lastMarkdownText = markdownText;
       const html = this.engine.makeHtml(markdownText);
       this.previewer.update(html);
-      setTimeout(() => {
-        this.$event.emit('afterInit', { markdownText, html });
-      }, 10);
+      this.$event.emit('afterInit', { markdownText, html });
     } catch (e) {
       throw new NestedError(e);
     }

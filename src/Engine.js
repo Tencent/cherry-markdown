@@ -262,6 +262,13 @@ export default class Engine {
     return $md;
   }
 
+  makeHtmlForBlockquote(md) {
+    let $md = md;
+    $md = this.$dealParagraph($md);
+    $md = this.$afterMakeHtml($md);
+    return $md;
+  }
+
   mounted() {
     this.$fireHookAction('', 'sentence', 'mounted');
     this.$fireHookAction('', 'paragraph', 'mounted');
