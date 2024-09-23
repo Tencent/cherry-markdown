@@ -129,7 +129,7 @@ jobs:
        
                 const comment = `谢谢您的大力支持,请安装和此相关的测试版进行极速体验:
                  \`\`\`shell
-                 npm install ${process.env.PACKAGE_NAME}@${process.env.package_version}
+                 npm install ${process.env.PACKAGE_NAME}@${process.env.PACKAGE_VERSION}
                  \`\`\`
                  [查看npm发布版本](https://www.npmjs.com/package/${process.env.PACKAGE_NAME}/v/${process.env.PACKAGE_VERSION})，请注意这是一个开发预览版本,请谨慎使用!`;
 
