@@ -258,6 +258,7 @@ export default class Engine {
     $md = this.$beforeMakeHtml($md);
     $md = this.$dealParagraph($md);
     $md = this.$afterMakeHtml($md);
+    this.$fireHookAction($md, 'paragraph', '$cleanCache');
     $md = this.$deCacheBigData($md);
     return $md;
   }
@@ -265,7 +266,7 @@ export default class Engine {
   makeHtmlForBlockquote(md) {
     let $md = md;
     $md = this.$dealParagraph($md);
-    $md = this.$afterMakeHtml($md);
+    $md = this.$fireHookAction($md, 'paragraph', 'afterMakeHtml');
     return $md;
   }
 

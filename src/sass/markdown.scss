@@ -213,18 +213,21 @@
     overflow-x: auto;
   }
 
-  blockquote {
-    color: $quoteColor;
-    padding: 10px 15px;
-    border-left: 10px solid $quoteBorderColor;
-    background: $quoteBackground;
-  }
-
   p,
   pre,
   blockquote,
   table {
     margin: 0 0 $elementGap;
+  }
+
+  blockquote {
+    color: $quoteColor;
+    padding: 10px 15px;
+    border-left: 10px solid $quoteBorderColor;
+    background: $quoteBackground;
+    p, blockquote, table, pre, ul, ol{
+      margin: 0;
+    }
   }
 
   pre {
