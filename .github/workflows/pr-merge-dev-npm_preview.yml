@@ -124,7 +124,7 @@ jobs:
                  // 获取pr的issue编号并且转换成数字数组
                  const getIssueRegex =(issueText)=>{
                  const issueRegex = /#(\d+)/g
-                 return Array.from(issueText.matchAll(issueRegex), match =>  parseInt(match[1], 10));
+                 return Array.from(issueText?.matchAll(issueRegex), match =>  parseInt(match[1], 10));
                  };
        
                 const comment = `谢谢您的大力支持,请安装和此相关的测试版进行极速体验:
