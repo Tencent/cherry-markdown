@@ -249,11 +249,12 @@ export default class ParagraphBase extends SyntaxBase {
       return;
     }
     const $sign = sign || this.$engine.md5(str);
+    const key = `${this.cacheKey}I${$sign}_L${lineCount}$`;
     this.cache[$sign] = {
       content: str,
-      using: true,
+      key,
     };
-    return `${this.cacheKey}I${$sign}_L${lineCount}$`;
+    return key;
   }
 
   popCache(sign) {
@@ -263,15 +264,28 @@ export default class ParagraphBase extends SyntaxBase {
     return this.cache[sign].content || '';
   }
 
+  testHasCache(sign) {
+    if (!this.needCache || !this.cache[sign]) {
+      return false;
+    }
+    return this.cache[sign].key;
+  }
+
+  // 当缓存全部被消费后，调用此方法清理多大的缓存
   resetCache() {
     if (!this.needCache) {
       return;
     }
-    for (const key of Object.keys(this.cache)) {
-      if (!this.cache[key].using) delete this.cache[key];
-    }
-    for (const key of Object.keys(this.cache)) {
-      this.cache[key].using = false;
+    // 当缓存队列比较大时，随机抛弃500个缓存
+    if (Object.keys(this.cache).length > 3000) {
+      let limit = 0;
+      for (const key of Object.keys(this.cache)) {
+        limit += 1;
+        if (limit > 500) {
+          return;
+        }
+        delete this.cache[key];
+      }
     }
   }
 
@@ -285,7 +299,13 @@ export default class ParagraphBase extends SyntaxBase {
       'g',
     );
     const $html = html.replace(regex, (match, cacheSign) => this.popCache(cacheSign.replace(/_L\d+$/, '')));
-    this.resetCache();
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
+    this.timer = setTimeout(() => {
+      this.resetCache();
+    }, 1000);
     return $html;
   }
 
@@ -299,8 +319,6 @@ export default class ParagraphBase extends SyntaxBase {
     if (!this.cache[this.sign]) {
       return this.toHtml(wholeMatch, sentenceMakeFunc);
     }
-    // hit & mark cache
-    this.cache[this.sign].using = true;
     return `${this.cacheKey}I${this.sign}_L${lineCount}$`;
   }
 

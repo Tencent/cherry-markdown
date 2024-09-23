@@ -232,8 +232,8 @@ export default class Cherry extends CherryStatic {
     if (this.options.autoScrollByHashAfterInit) {
       setTimeout(this.scrollByHash.bind(this));
     }
-    // 强制进行一次渲染
-    this.editText(null, this.editor.editor);
+    // 强制进行一次渲染 // 不记得为啥要强制渲染了，先屏蔽了
+    // this.editText(null, this.editor.editor);
     if (this.options.toolbars.toc !== false) {
       this.createToc();
     }
@@ -528,6 +528,8 @@ export default class Cherry extends CherryStatic {
       mainTheme = getThemeFromLocal(true, this.nameSpace);
     } else {
       mainTheme = this.options.themeSettings.mainTheme;
+      mainTheme = mainTheme.replace(/theme__/g, '');
+      mainTheme = `theme__${mainTheme}`;
     }
     if (typeof this.options.toolbars.theme === 'string') {
       toolbarTheme = this.options.toolbars.theme === 'dark' ? 'dark' : 'light';
@@ -543,9 +545,12 @@ export default class Cherry extends CherryStatic {
     }
     // @ts-ignore
     if (typeof this.options.engine.syntax.codeBlock.theme === 'string') {
-      inlineCodeTheme = /** @type {{theme?: string;}} */ (this.options.engine.syntax.codeBlock).theme;
+      codeBlockTheme = /** @type {{theme?: string;}} */ (this.options.engine.syntax.codeBlock).theme;
     } else {
-      inlineCodeTheme = this.options.themeSettings.codeBlockTheme;
+      codeBlockTheme = this.options.themeSettings.codeBlockTheme;
+    }
+    if (testHasLocal(this.nameSpace, 'codeTheme')) {
+      codeBlockTheme = getCodeThemeFromLocal(this.nameSpace);
     }
     if (codeBlockTheme === 'dark') codeBlockTheme = 'tomorrow-night';
     else if (codeBlockTheme === 'light') codeBlockTheme = 'solarized-light';
@@ -554,9 +559,6 @@ export default class Cherry extends CherryStatic {
       'data-inlineCodeTheme': inlineCodeTheme,
       'data-codeBlockTheme': codeBlockTheme,
     });
-
-    wrapperDom.setAttribute('data-code-block-theme', getCodeThemeFromLocal(this.nameSpace));
-
     this.wrapperDom = wrapperDom;
     return wrapperDom;
   }
@@ -884,11 +886,10 @@ export default class Cherry extends CherryStatic {
   initText(codemirror) {
     try {
       const markdownText = codemirror.getValue();
+      this.lastMarkdownText = markdownText;
       const html = this.engine.makeHtml(markdownText);
       this.previewer.update(html);
-      setTimeout(() => {
-        this.$event.emit('afterInit', { markdownText, html });
-      }, 10);
+      this.$event.emit('afterInit', { markdownText, html });
     } catch (e) {
       throw new NestedError(e);
     }

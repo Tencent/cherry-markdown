@@ -1,0 +1,197 @@
+name: PR Merge Dev NPM Preview
+
+# task:
+# 1. 仅在主仓库中运行 (done)
+# 2. 仅在pr合并时运行 (done)
+# 3. 当pr合并时，获取pr合并后的commit id (done)
+# 4. 根据commit id 修改package.json中的版本号和名称 (done)
+# 5. 发布到npm (done)
+# 6. 发布成功后，将发布的版本号和链接回复到当前pr下(done)
+# 7. 发布成功后，将发布的版本号和链接回复到本repo的相关issue中 (done)
+# 8. 修改README.md —— 提示dev版本需谨慎使用 (done)
+
+on:
+  pull_request_target:
+    types:
+      - closed
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  dev-deploy:
+    # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
+    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      # 检出仓库代码
+      - name: Checkout repository
+        uses:
+          actions/checkout@v4
+
+          # 获取PR合并后的SHA
+      - name: Get merge commit SHA
+        run: |
+          if [ "${{ github.event.pull_request.merged }}" == "true" ]; then
+              SHORT_SHA=$(echo "${{ github.event.pull_request.merge_commit_sha }}" | cut -c1-7)
+              echo "MERGE_COMMIT_SHORT_SHA=$SHORT_SHA" >> "$GITHUB_ENV"
+    
+          else
+            echo "Not a merged PR, skipping"
+          fi
+
+      # 根据commit id 修改package.json中的版本号和名称
+      - name: dev package version and name
+        run: |
+          if [ -f package.json ]; then
+
+             # 获取当前版本号并添加 merge commit SHA
+             VERSION=$(node -p "require('./package.json').version")-dev.${{ env.MERGE_COMMIT_SHORT_SHA }}
+
+             # 设置环境变量
+             echo "PACKAGE_VERSION=$VERSION" >> "$GITHUB_ENV"
+             package_name="@cherry-markdown/preview-dev"
+             echo "PACKAGE_NAME=$package_name" >> "$GITHUB_ENV"
+
+             # 打印当前版本号
+              echo "Current version: $PACKAGE_VERSION"
+
+            # 修改 package.json 中的 name 和 version，并检查 scripts 中是否存在 publish 属性，如果存在则移除
+              jq --arg package_name "$package_name" --arg package_version "$VERSION" '
+                  .name=$package_name |
+                  .version=$package_version |
+                  if .scripts.publish then del(.scripts.publish) else . end
+                ' package.json > temp.json && mv temp.json package.json
+
+              # 打印修改后的 name 和 version
+              echo "Updated package.json:"
+              cat package.json | jq '.name, .version'
+
+              echo "$PACKAGE_VERSION"
+
+              # 检查 scripts 中是否存在 publish 属性，如果存在则移除
+              if jq -e '.scripts.publish' package.json > /dev/null; then
+                 jq 'del(.scripts.publish)' package.json > temp.json && mv temp.json package.json
+              fi
+              
+             else
+            echo "package.json 文件不存在"
+          fi
+
+          # 重写或创建 README.md 文件
+          echo -e '<p align="center"><img src="logo/new_logo.png" alt="cherry logo" width="50%"/></p>\n' > README.md
+          echo -e '# Cherry Markdown Writer\n' >> README.md
+          echo -e '> !WARNING\n This is a dev preview version of `Cherry Markdown`, please use it with caution. No responsibility for production versions.\n' >> README.md
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          registry-url: https://registry.npmjs.org/
+
+      - name: yarn install
+        run: |
+          npm i yarn -g
+          yarn install
+
+      - name: build
+        run: yarn build
+
+      - name: npm publish
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Comment on related issues
+        id: get-issues
+        uses: actions/github-script@v7
+        with:
+           result-encoding: string
+           retries: 3
+           retry-exempt-status-codes: 400,401
+           script: |
+                let issue_array =[context.issue.number];
+
+                // 添加issue到数组并去重
+                const addIssueToArray = (newIssues) => {
+                issue_array.push(...newIssues);
+                issue_array = [...new Set(issue_array)];
+                };
+
+                try {
+                 // 获取pr的issue编号并且转换成数字数组
+                 const getIssueRegex =(issueText)=>{
+                 const issueRegex = /#(\d+)/g
+                 return Array.from(issueText.matchAll(issueRegex), match =>  parseInt(match[1], 10));
+                 };
+       
+                const comment = `谢谢您的大力支持,请安装和此相关的测试版进行极速体验:
+                 \`\`\`shell
+                 npm install ${process.env.PACKAGE_NAME}@${process.env.package_version}
+                 \`\`\`
+                 [查看npm发布版本](https://www.npmjs.com/package/${process.env.PACKAGE_NAME}/v/${process.env.PACKAGE_VERSION})，请注意这是一个开发预览版本,请谨慎使用!`;
+
+                // 发布评论到issue
+                 const createComment= async (issueNumbers) => {
+                   if(typeof value === 'number' && !isNaN(value)) return;
+                          issueNumbers.forEach(async (issueNumber) => {
+                          await github.rest.issues.createComment({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          issue_number: issueNumber,
+                          body: comment
+                         });
+                     });
+                  };
+
+                // 获取当前提交的pr信息[title,body]
+                const { data: pullCommits } =
+                await github.rest.pulls.get({
+                      owner:context.repo.owner,
+                      repo: context.repo.repo,
+                     pull_number: context.issue.number
+                   });
+                const pullCommitsIssueTitleNumbers = getIssueRegex(pullCommits.title);
+                      addIssueToArray(pullCommitsIssueTitleNumbers);
+                const pullCommitsIssueBodyNumbers = getIssueRegex(pullCommits.body);
+                      addIssueToArray(pullCommitsIssueBodyNumbers);
+
+                 console.log('pullCommits-title',pullCommitsIssueTitleNumbers);
+                 console.log('pullCommits-body',pullCommitsIssueBodyNumbers);
+      
+                 // 获取当前pr的issue信息[body]
+                const { data: listPrIssue } =
+                 await github.rest.issues.listComments({
+                       owner: context.repo.owner,
+                       repo: context.repo.repo,
+                       issue_number: context.issue.number
+                      });
+                listPrIssue.forEach((item) => {
+                       const listPrIssueIssueNumbers = getIssueRegex(item.body);
+                       addIssueToArray(listPrIssueIssueNumbers);
+
+                       console.log('listPrIssue',item.body);
+                       console.log('listPrIssue',listPrIssueIssueNumbers);
+                   });
+
+                // 获取当前pr的 review 信息[body]
+                const { data: listReviewComments } = 
+                await github.rest.pulls.listReviewComments({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      pull_number: context.issue.number
+                   });
+                listReviewComments.forEach((item) => {
+                      const listReviewCommentsIssueNumbers = getIssueRegex(item.body);
+                      addIssueToArray(listReviewCommentsIssueNumbers);
+
+                      console.log('listReviewComments',item.body);
+                      console.log('listReviewComments',listReviewCommentsIssueNumbers);
+                   });
+
+                createComment(issue_array);
+                 }catch(error){
+                     console.log('error',error);
+                }
