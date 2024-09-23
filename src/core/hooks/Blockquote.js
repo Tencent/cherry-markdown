@@ -33,15 +33,22 @@ export default class Blockquote extends ParagraphBase {
         return this.getCacheWithSpace(testHasCache, match);
       }
       let handledHtml = `<blockquote data-sign="${sign}_${lineCount}" data-lines="${lineCount}">`;
-      const $content = content.replace(/^([ \t]*>)/gm, '');
+      const htmlDomTest = content.split(/\n</);
+      // 如果引用内容后面有html dom结构，就认为这不是引用内容
+      let after = '';
+      if (htmlDomTest.length > 1) {
+        after = `\n<${htmlDomTest.slice(1).join('\n<')}`;
+      }
+      const $content = htmlDomTest[0].replace(/^([ \t]*>)/gm, '');
       handledHtml += this.$engine.makeHtmlForBlockquote($content);
       // 标签闭合
       handledHtml += '</blockquote>';
-      return this.getCacheWithSpace(this.pushCache(handledHtml, sign, lineCount), match);
+      return `${this.getCacheWithSpace(this.pushCache(handledHtml, sign, lineCount), match)}${after}`;
     });
   }
 
   makeHtml(str, sentenceMakeFunc) {
+    // return str;
     return this.handleMatch(str, sentenceMakeFunc);
   }
 
