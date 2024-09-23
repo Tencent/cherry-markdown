@@ -52,7 +52,7 @@ jobs:
 
              # 设置环境变量
              echo "PACKAGE_VERSION=$VERSION" >> "$GITHUB_ENV"
-             package_name="@cherry-markdown/preview-dev"
+             package_name="@cherry-markdown-publisher/preview-dev"
              echo "PACKAGE_NAME=$package_name" >> "$GITHUB_ENV"
 
              # 打印当前版本号
