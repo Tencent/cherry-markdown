@@ -225,7 +225,7 @@ export default class Toc extends ParagraphBase {
     const lines = calculateLinesOfParagraph(preLinesMatch, 1);
     let ret = `<div class="${this.tocContainerClass}${this.showAutoNumber ? ' auto-num-toc' : ''}"
       data-sign="${dataSign}-${lines}" data-lines="${lines}">`;
-    ret += `<p class="${this.tocTitleClass}">目录</p>`;
+    ret += `<p class="${this.tocTitleClass}">${this.$locale.toc}</p>`;
     if (arr.length <= 0) {
       return '';
     }

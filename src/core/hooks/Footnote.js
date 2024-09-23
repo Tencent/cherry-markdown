@@ -106,7 +106,7 @@ export default class Footnote extends ParagraphBase {
   afterMakeHtml(str) {
     const footNotes = this.getFootNote();
     const $str = str.replace(/\0~fn#([0-9]+)#\0/g, (match, num) => footNotes[num].fn);
-    this.$cleanCache();
+    // this.$cleanCache();
     return $str;
   }
 

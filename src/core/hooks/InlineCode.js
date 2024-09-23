@@ -32,9 +32,12 @@ export default class InlineCode extends ParagraphBase {
     let $str = str;
     if (Object.keys(CodeBlock.inlineCodeCache).length > 0) {
       $str = $str.replace(/~~CODE([0-9a-zA-Z]+)\$/g, (match, sign) => CodeBlock.inlineCodeCache[sign]);
-      CodeBlock.inlineCodeCache = {};
     }
     return $str;
+  }
+
+  $cleanCache() {
+    CodeBlock.inlineCodeCache = {};
   }
 
   rule() {
