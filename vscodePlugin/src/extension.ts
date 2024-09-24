@@ -195,6 +195,18 @@ const initCherryPanelEvent = () => {
           }
         });
         break;
+      case 'open-url':
+        console.log('open-url', data);
+        // http/https协议的链接，直接打开
+        if (/^(http|https):\/\//.test(data)) {
+          console.log('http: ', data);
+          vscode.env.openExternal(vscode.Uri.parse(data));
+        }
+        // vscode协议的链接，打开vscode
+        console.log('vscode: ', data);
+        vscode.env.openExternal(vscode.Uri.parse(data));
+        console.log('open-url完成');
+        break;
     }
   });
   cherryPanel?.onDidDispose(() => {

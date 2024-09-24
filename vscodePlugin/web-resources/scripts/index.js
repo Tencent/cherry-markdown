@@ -132,6 +132,16 @@ function changeTheme(theme) {
   )} theme__${theme}`;
 }
 
+/** 处理 a 链接跳转问题 */
+const onClickLink = (target) => {
+  console.log('onClickLink', target);
+  console.log('onClickLink', target.href);
+  vscode.postMessage({
+    type: 'open-url',
+    data: target.href,
+  });
+};
+
 const basicConfig = {
   id: 'markdown',
   externals: {
@@ -295,6 +305,7 @@ const basicConfig = {
     // eslint-disable-next-line no-undef
     changeString2Pinyin: pinyin,
     beforeImageMounted(srcProp, srcValue) {
+      console.log('beforeImageMounted', srcProp, srcValue);
       if (isHttpUrl(srcValue) || isDataUrl(srcValue)) {
         return {
           src: srcValue,
@@ -304,6 +315,19 @@ const basicConfig = {
       const basePath = window._baseResourcePath || '';
       return {
         src: path.join(basePath, srcValue),
+      };
+    },
+    onClickPreview: (e) => {
+      const { target } = e;
+      switch (target?.nodeName) {
+        case 'SPAN':
+          if (target?.parentElement?.nodeName === 'A') {
+            onClickLink(target?.parentElement);
+          }
+          break;
+        case 'A':
+          onClickLink(target);
+          break;
       };
     },
   },
