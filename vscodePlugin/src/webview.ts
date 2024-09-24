@@ -61,7 +61,7 @@ const getWebViewPath = (currentPanel: vscode.WebviewPanel) => {
   const workspaceFolder = vscode.workspace.workspaceFolders![0].uri.fsPath ?? '';
   const imgUri = vscode.Uri.file(workspaceFolder);
   return currentPanel.webview.asWebviewUri(imgUri);
-}
+};
 
 function writeGlobalVarsToFile(extensionPath: string, globalVars: { baseResourcePath: vscode.Uri }): string {
   const globalVarsContent = `

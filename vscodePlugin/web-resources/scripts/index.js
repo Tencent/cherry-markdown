@@ -12,7 +12,7 @@ const customMenuChangeModule = Cherry.createMenuHook('编辑', {
     if (window.isDisableEdit) {
       vscode.postMessage({
         type: 'tips',
-        data: "can't edit presently  当前文档已失焦点，编辑后无法保存",
+        data: 'can\'t edit presently  当前文档已失焦点，编辑后无法保存',
       });
       return selection;
     }
@@ -361,8 +361,8 @@ cherry.previewer.getDom().addEventListener('scroll', () => {
     return true;
   }
   if (
-    domContainer.scrollTop + domContainer.offsetHeight >
-    domContainer.scrollHeight
+    domContainer.scrollTop + domContainer.offsetHeight
+    > domContainer.scrollHeight
   ) {
     postScrollMessage(-1);
     return true;
@@ -390,9 +390,9 @@ cherry.previewer.getDom().addEventListener('scroll', () => {
   let mdElement = targetElement.closest('[data-sign]');
   // 由于新增脚注，内部容器也有可能存在data-sign，所以需要循环往父级找
   while (
-    mdElement &&
-    mdElement.parentElement &&
-    mdElement.parentElement !== domContainer
+    mdElement
+    && mdElement.parentElement
+    && mdElement.parentElement !== domContainer
   ) {
     mdElement = mdElement.parentElement.closest('[data-sign]');
   }
@@ -427,7 +427,7 @@ function postScrollMessage(line) {
   });
 }
 
-cherry.onChange(newValue => {
+cherry.onChange((newValue) => {
   if (window.disableEditListener) {
     return true;
   }
@@ -439,7 +439,7 @@ cherry.onChange(newValue => {
 
 let scrollTimeOut;
 let editTimeOut;
-window.addEventListener('message', e => {
+window.addEventListener('message', (e) => {
   const { cmd, data } = e.data;
   switch (cmd) {
     case 'editor-change':
@@ -473,10 +473,11 @@ window.addEventListener('message', e => {
     case 'enable-edit':
       window.isDisableEdit = false;
       break;
-    case 'upload-file-callback':
+    case 'upload-file-callback': {
       const { url, ...rest } = data;
       window.uploadFileCallback(url, rest);
       break;
+    }
   }
 });
 
