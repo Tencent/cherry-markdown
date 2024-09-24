@@ -216,7 +216,7 @@ export default class Header extends ParagraphBase {
         '([=]+|[-]+)', // (?<level>[=]+|[-]+)
         ')',
       ].join(''),
-      end: '(?=$|\\n)',
+      end: '(?=$|\\n*)',
     };
     setext.reg = compileRegExp(setext, 'g', true);
 
