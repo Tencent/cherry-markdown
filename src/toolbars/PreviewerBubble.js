@@ -101,6 +101,10 @@ export default class PreviewerBubble {
    * @returns {boolean|HTMLElement}
    */
   isCherryCodeBlock(element) {
+    // 引用里的代码块先不支持所见即所得编辑
+    if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
+      return false;
+    }
     if (element.nodeName === 'DIV' && element.dataset.type === 'codeBlock') {
       return element;
     }
@@ -125,6 +129,10 @@ export default class PreviewerBubble {
       return false;
     }
     if (/simple-table/.test(container.className) || !/cherry-table-container/.test(container.className)) {
+      return false;
+    }
+    // 引用里的表格先不支持所见即所得编辑
+    if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
       return false;
     }
     return container;
@@ -314,7 +322,12 @@ export default class PreviewerBubble {
         e.stopPropagation(); // 阻止冒泡，避免触发预览区域的点击事件
         break;
       case 'P':
-        if (target instanceof HTMLParagraphElement && target.parentElement instanceof HTMLLIElement) {
+        if (
+          target instanceof HTMLParagraphElement &&
+          target.parentElement instanceof HTMLLIElement &&
+          // 引用里的列表先不支持所见即所得编辑
+          this.$getClosestNode(target, 'BLOCKQUOTE') === false
+        ) {
           if (target.children.length !== 0) {
             // 富文本
             e.preventDefault();

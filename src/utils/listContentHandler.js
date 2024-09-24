@@ -128,7 +128,7 @@ export default class ListHandler {
     const from = { line: targetLine, ch: targetCh };
     const to = {
       line: targetLine + targetContent.length - 1,
-      ch: targetCh + targetContent[targetContent.length - 1].length,
+      ch: targetCh + targetContent[targetContent.length - 1]?.length,
     };
     this.editor.editor.setSelection(from, to);
     this.range = [from, to];
