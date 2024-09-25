@@ -108,4 +108,10 @@ export default {
   wordCountP: '段落',
   wordCountW: '单词',
   wordCountC: '字符',
+  deleteColumn: '删除列',
+  deleteRow: '删除行',
+  addRow: '添加行',
+  addCol: '添加列',
+  moveRow: '移动行',
+  moveCol: '移动列',
 };

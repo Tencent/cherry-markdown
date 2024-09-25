@@ -105,4 +105,10 @@ export default {
   wordCountP: 'P',
   wordCountW: 'W',
   wordCountC: 'C',
+  deleteColumn: 'Удалить столбец',
+  deleteRow: 'Удалить строку',
+  addRow: 'Добавить строку',
+  addCol: 'Добавить столбец',
+  moveRow: 'Переместить строку',
+  moveCol: 'Переместить столбец',
 };

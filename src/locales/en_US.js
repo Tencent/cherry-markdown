@@ -105,4 +105,10 @@ export default {
   wordCountP: 'P',
   wordCountW: 'W',
   wordCountC: 'C',
+  deleteColumn: 'delete column',
+  deleteRow: 'delete row',
+  addRow: 'add row',
+  addCol: 'add column',
+  moveRow: 'move row',
+  moveCol: 'move column',
 };

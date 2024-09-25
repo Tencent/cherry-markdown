@@ -91,9 +91,10 @@
     position: absolute;
     pointer-events: none;
     z-index: 999;
-    &-container {
+    &-container, &-sort-container, &-delete-container {
       position: absolute;
       height: 100%;
+      width: 100%;
       padding: 0;
       margin: 0;
       list-style-type: none;
@@ -109,20 +110,13 @@
       line-height: 12px;
       border: 1px solid #3582fb00;
       background-color: #ffffff00;
+      border-radius: 3px;
       cursor: pointer;
       transition: all 0.3s;
       &:hover {
         background-color: #3582fb88;
         color: #FFF;
       }
-    }
-    &-sort-container, &-delete-container {
-      position: absolute;
-      height: 100%;
-      width: 100%;
-      padding: 0;
-      margin: 0;
-      list-style-type: none;
     }
     &__sort {
       pointer-events: auto;
@@ -132,28 +126,45 @@
       color: #3582fb;
       width: 12px;
       height: 12px;
+      padding: 5px 0;
       line-height: 12px;
       border: 1px solid #3582fb00;
       background-color: #ffffff00;
+      border-radius: 3px;
       cursor: pointer;
       transition: all 0.3s;
+      &:hover {
+        background-color: #3582fb88;
+        border-color: #3582fb88;
+        color: #FFF;
+      }
+      &[data-type='ColUp'], &[data-type='ColDown'] {
+        padding: 0 5px;
+      }
     }
     &__delete {
       pointer-events: auto;
       position: absolute;
       color: #FFF;
-      width: 40px;
-      height: 18px;
+      width: 25px;
+      height: 15px;
       font-size: 12px;
       line-height: 12px;
-      border: 1px solid #FF4D4F;
-      border-radius: 5px;
-      background-color: #FF4D4F;
+      border: 1px solid rgba(255, 77, 79, 0);
+      border-radius: 3px;
+      background-color: rgba(255, 77, 79, 0);
+      color: rgba(255, 77, 79, 0.5);
       cursor: pointer;
       transition: all 0.3s;
       &:hover {
-        background-color: #FF7875;
+        background-color: rgba(255, 77, 79);
+        border-color: rgba(255, 77, 79);
         color: #FFF;
+      }
+      &[data-type='left'], &[data-type='right'] {
+        padding: 0;
+        width: 18px;
+        height: 18px;
       }
     }
   }
@@ -165,4 +176,4 @@
   .cherry-highlight-line {
     animation: changeBgColor 3s;
   }
-
+}
