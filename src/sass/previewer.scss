@@ -92,7 +92,7 @@
     pointer-events: none;
     z-index: 999;
     &-container {
-      position: relative;
+      position: absolute;
       height: 100%;
       padding: 0;
       margin: 0;
@@ -113,6 +113,31 @@
       transition: all 0.3s;
       &:hover {
         background-color: #3582fb88;
+        color: #FFF;
+      }
+    }
+    &-delete-container {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+    }
+    &__delete {
+      pointer-events: auto;
+      position: absolute;
+      color: #FFF;
+      width: 40px;
+      height: 18px;
+      font-size: 12px;
+      line-height: 12px;
+      border: 1px solid #FF4D4F;
+      border-radius: 5px;
+      background-color: #FF4D4F;
+      cursor: pointer;
+      transition: all 0.3s;
+      &:hover {
+        background-color: #FF7875;
         color: #FFF;
       }
     }
