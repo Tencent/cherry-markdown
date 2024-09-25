@@ -399,6 +399,7 @@ export default class PreviewerBubble {
       this.previewerDom,
       this.editor.editor,
       tableElement,
+      this.previewer.$cherry,
     );
     handler.showBubble();
     this.bubbleHandler[trigger] = handler;

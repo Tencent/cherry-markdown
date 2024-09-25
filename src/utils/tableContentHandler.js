@@ -28,7 +28,7 @@ export default class TableHandler {
     editorDom: {}, // 编辑器容器
   };
 
-  constructor(trigger, target, container, previewerDom, codeMirror, tableElement) {
+  constructor(trigger, target, container, previewerDom, codeMirror, tableElement, cherry) {
     // 触发方式 click / hover
     this.trigger = trigger;
     this.target = target;
@@ -38,6 +38,7 @@ export default class TableHandler {
     this.$initReg();
     this.$findTableInEditor();
     this.tableElement = tableElement;
+    this.$cherry = cherry;
   }
 
   emit(type, event = {}, callback = () => {}) {
@@ -385,8 +386,8 @@ export default class TableHandler {
     const types = ['Last', 'Next'];
     const dirs = ['Row', 'Col'];
     const textDict = {
-      Row: '行',
-      Col: '列',
+      Row: 'Row',
+      Col: 'Col',
     };
     const symbols = dirs.map((_, index) => types.map((type) => dirs.map((dir) => [`${index}`, type, dir]))).flat(2);
     const container = document.createElement('ul');
@@ -397,7 +398,7 @@ export default class TableHandler {
       li.setAttribute('data-type', type);
       li.setAttribute('data-dir', dir);
       li.className = 'cherry-previewer-table-hover-handler__symbol';
-      li.title = `添加${textDict[dir]}`;
+      li.title = this.$cherry.locale[`add${textDict[dir]}`];
       li.innerHTML = '+';
       li.addEventListener('click', (e) => {
         const { target } = e;
@@ -414,19 +415,19 @@ export default class TableHandler {
     this.$setSymbolOffset();
   }
   $drawSortSymbol() {
-    const types = ['RowLeft', 'RowRight', 'ColUp', 'ColDown'];
+    // const types = ['RowLeft', 'RowRight', 'ColUp', 'ColDown']; // 不要底部的拖拽按钮了，貌似没啥用
+    const types = ['RowLeft', 'RowRight', 'ColUp'];
 
     const container = document.createElement('ul');
     container.className = 'cherry-previewer-table-hover-handler-sort-container';
     types.forEach((type) => {
       const sortSymbol = document.createElement('li');
       sortSymbol.setAttribute('data-type', type);
-      sortSymbol.className = 'cherry-previewer-table-hover-handler__sort';
+      sortSymbol.className = 'cherry-previewer-table-hover-handler__sort ch-icon';
       sortSymbol.draggable = true;
-      sortSymbol.addEventListener('mousedown', () => (sortSymbol.innerHTML = '▮'));
       if (type.startsWith('Row')) {
-        sortSymbol.title = '移动行';
-        sortSymbol.innerHTML = '▯';
+        sortSymbol.title = this.$cherry.locale.moveRow;
+        sortSymbol.classList.add('ch-icon-swap-vert');
         sortSymbol.addEventListener('mouseover', () => {
           const { tdNode } = this.tableEditor.info;
           tdNode.draggable = true;
@@ -443,9 +444,8 @@ export default class TableHandler {
           this.$dragLine();
         });
       } else {
-        sortSymbol.title = '移动列';
-        sortSymbol.innerHTML = '▯';
-        sortSymbol.style.transform = 'rotate(90deg)';
+        sortSymbol.title = this.$cherry.locale.moveCol;
+        sortSymbol.classList.add('ch-icon-swap');
         const highLightTrDom = [];
         sortSymbol.addEventListener('mouseover', () => {
           const { tdNode } = this.tableEditor.info;
@@ -495,28 +495,20 @@ export default class TableHandler {
 
       switch (type) {
         case 'RowLeft':
-          this.setStyle(
-            node,
-            'top',
-            `${tdInfo.top - tableInfo.top - tableInfo.height + tdInfo.height / 2 - node.offsetHeight / 2}px`,
-          );
+          this.setStyle(node, 'top', `${tdInfo.top - tableInfo.top + tdInfo.height / 2 - node.offsetHeight / 2}px`);
           this.setStyle(node, 'left', `${-node.offsetWidth / 2}px`);
           break;
         case 'RowRight':
-          this.setStyle(
-            node,
-            'top',
-            `${tdInfo.top - tableInfo.top - tableInfo.height + tdInfo.height / 2 - node.offsetHeight / 2}px`,
-          );
+          this.setStyle(node, 'top', `${tdInfo.top - tableInfo.top + tdInfo.height / 2 - node.offsetHeight / 2}px`);
           this.setStyle(node, 'left', `${tableInfo.width - node.offsetWidth / 2}px`);
           break;
         case 'ColUp':
           this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
-          this.setStyle(node, 'top', `${-tableInfo.height - node.offsetHeight / 2}px`);
+          this.setStyle(node, 'top', `${-node.offsetHeight / 2}px`);
           break;
         case 'ColDown':
           this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
-          this.setStyle(node, 'top', `${-node.offsetHeight / 2}px`);
+          this.setStyle(node, 'top', `${tableInfo.height - node.offsetHeight / 2}px`);
 
           break;
       }
@@ -587,10 +579,9 @@ export default class TableHandler {
 
   /**
    * 高亮当前列
-   * @param {number} tdIndex 当前列的索引
    */
-  $highlightColumn(tdIndex) {
-    const { tableNode } = this.tableEditor.info;
+  $highlightColumn() {
+    const { tableNode, tdIndex } = this.tableEditor.info;
     const { rows } = tableNode;
     rows[0].cells[tdIndex].style.borderTop = '1px solid red';
     rows[rows.length - 1].cells[tdIndex].style.borderBottom = '1px solid red';
@@ -606,10 +597,9 @@ export default class TableHandler {
 
   /**
    * 取消高亮当前列
-   * @param {number} tdIndex 当前列的索引
    */
-  $cancelHighlightColumn(tdIndex) {
-    const { tableNode } = this.tableEditor.info;
+  $cancelHighlightColumn() {
+    const { tableNode, tdIndex } = this.tableEditor.info;
     if (tableNode) {
       const { rows } = tableNode;
       for (let i = 0; i < rows.length; i++) {
@@ -623,29 +613,66 @@ export default class TableHandler {
   }
 
   /**
+   * 高亮当前行
+   */
+  $highlightRow() {
+    this.$doHighlightRow('1px solid red');
+  }
+
+  /**
+   * 取消高亮当前行
+   */
+  $cancelHighlightRow() {
+    this.$doHighlightRow('');
+  }
+
+  $doHighlightRow(style = '') {
+    const { trNode, tableNode } = this.tableEditor.info;
+    const tds = trNode.cells;
+    const preTds = trNode.previousElementSibling?.cells || tableNode.tHead.firstChild.cells;
+    for (let i = 0; i < tds.length; i++) {
+      if (preTds[i]) preTds[i].style.borderBottom = style;
+      tds[i].style.borderBottom = style;
+    }
+    tds[0].style.borderLeft = style;
+    tds[tds.length - 1].style.borderRight = style;
+  }
+
+  /**
    * 添加删除按钮
    */
   $drawDelete() {
-    const { tdIndex } = this.tableEditor.info;
-    const types = ['top', 'bottom'];
+    const types = ['top', 'bottom', 'right'];
     const buttons = types.map((type) => [type]);
     const container = document.createElement('div');
     container.className = 'cherry-previewer-table-hover-handler-delete-container';
     buttons.forEach(([type]) => {
       const button = document.createElement('button');
       button.setAttribute('data-type', type);
-      button.className = 'cherry-previewer-table-hover-handler__delete';
-      button.innerHTML = '删除';
-      button.title = '删除当前列';
-      button.addEventListener('click', () => {
-        this.$deleteCurrentColumn();
-      });
-      button.addEventListener('mouseover', () => {
-        this.$highlightColumn(tdIndex);
-      });
-      button.addEventListener('mouseout', () => {
-        this.$cancelHighlightColumn(tdIndex);
-      });
+      button.className = 'cherry-previewer-table-hover-handler__delete ch-icon ch-icon-cherry-table-delete';
+      if (/(right|left)/.test(type)) {
+        button.title = this.$cherry.locale.deleteRow;
+        button.addEventListener('click', () => {
+          this.$deleteCurrentRow();
+        });
+        button.addEventListener('mouseover', () => {
+          this.$highlightRow();
+        });
+        button.addEventListener('mouseout', () => {
+          this.$cancelHighlightRow();
+        });
+      } else {
+        button.title = this.$cherry.locale.deleteColumn;
+        button.addEventListener('click', () => {
+          this.$deleteCurrentColumn();
+        });
+        button.addEventListener('mouseover', () => {
+          this.$highlightColumn();
+        });
+        button.addEventListener('mouseout', () => {
+          this.$cancelHighlightColumn();
+        });
+      }
       container.appendChild(button);
     });
     this.tableEditor.editorDom.deleteContainer = container;
@@ -658,7 +685,7 @@ export default class TableHandler {
    */
   $setDeleteButtonPosition() {
     const container = this.tableEditor.editorDom.deleteContainer;
-    const { tableNode, tdNode } = this.tableEditor.info;
+    const { tableNode, tdNode, isTHead } = this.tableEditor.info;
     const tableInfo = this.$getPosition(tableNode);
     const tdInfo = this.$getPosition(tdNode);
     // 设置容器宽高
@@ -673,9 +700,30 @@ export default class TableHandler {
       const offset = {
         outer: 20,
       };
-      this.setStyle(node, `${type}`, `-${offset.outer}px`);
-      this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
+      if (/(right|left)/.test(type)) {
+        if (isTHead) {
+          this.setStyle(node, 'display', 'none');
+        }
+        this.setStyle(node, 'top', `${tdInfo.top - tableInfo.top + tdInfo.height / 2 - node.offsetHeight / 2}px`);
+        this.setStyle(node, `${type}`, `-${node.offsetWidth + 5}px`);
+      } else {
+        this.setStyle(node, `${type}`, `-${offset.outer}px`);
+        this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
+      }
     });
+  }
+
+  /**
+   * 删除当前行
+   */
+  $deleteCurrentRow() {
+    const { tableIndex, trIndex } = this.tableEditor.info;
+    this.$setSelection(tableIndex, 'table');
+    const selection = this.codeMirror.getSelection();
+    const table = selection.split('\n');
+    table.splice(trIndex + 2, 1);
+    const newText = table.join('\n');
+    this.codeMirror.replaceSelection(newText);
   }
 
   /**
@@ -696,10 +744,6 @@ export default class TableHandler {
     const newText = newTable.join('\n');
     this.codeMirror.replaceSelection(newText);
   }
-
-  /**
-   * 拖拽
-   */
 
   /**
    * 拖拽列
