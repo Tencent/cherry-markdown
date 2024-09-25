@@ -23,7 +23,6 @@ export default class DrawIo extends MenuBase {
     super($cherry);
     this.setName('draw.io', 'draw.io');
     this.noIcon = true;
-    this.drawioIframeUrl = $cherry.options.drawioIframeUrl;
   }
 
   /**
@@ -33,7 +32,7 @@ export default class DrawIo extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    if (!this.drawioIframeUrl) {
+    if (!this.$cherry.options.drawioIframeUrl) {
       // 如果没有配置drawio的编辑页URL，则直接失效
       return selection;
     }
@@ -48,7 +47,7 @@ export default class DrawIo extends MenuBase {
       return `${begin}在预览区点击图片重新编辑draw.io${end}`;
     }
     // 插入图片，调用上传文件逻辑
-    drawioDialog(this.drawioIframeUrl, '', (data) => {
+    drawioDialog(this.$cherry.options.drawioIframeUrl, this.$cherry.options.drawioIframeStyle, '', (data) => {
       this.setCacheOnce(data);
       this.fire(null);
     });

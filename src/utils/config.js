@@ -68,6 +68,13 @@ function saveThemeToLocal(nameSpace, theme) {
   }
 }
 
+export function testHasLocal(nameSpace, key) {
+  if (typeof localStorage !== 'undefined') {
+    return !!localStorage.getItem(`${nameSpace}-${key}`);
+  }
+  return false;
+}
+
 /**
  * 获取当前主题
  * @returns {string} 主题名
@@ -89,13 +96,12 @@ export function getThemeFromLocal(fullClass = false, nameSpace = 'cherry') {
  * @param {string} theme 如果没有传theme，则从本地缓存里取
  */
 export function changeTheme($cherry, theme = '') {
-  const themeNameSpace = $cherry.options.themeNameSpace || 'cherry';
-  const newTheme = (theme ? theme : getThemeFromLocal(false, themeNameSpace)).replace(/^.*theme__/, '');
+  const newTheme = (theme ? theme : getThemeFromLocal(false, $cherry.nameSpace)).replace(/^.*theme__/, '');
   const newClass = ` theme__${newTheme}`;
   $cherry.wrapperDom.className = $cherry.wrapperDom.className.replace(/ theme__[^ $]+?( |$)/g, ' ') + newClass;
   $cherry.previewer.getDomContainer().className =
     $cherry.previewer.getDomContainer().className.replace(/ theme__[^ $]+?( |$)/g, ' ') + newClass;
-  saveThemeToLocal(themeNameSpace, newTheme);
+  saveThemeToLocal($cherry.nameSpace, newTheme);
 }
 
 /**
@@ -127,16 +133,14 @@ export function getCodeThemeFromLocal(nameSpace = 'cherry') {
 
 /**
  * 修改代码主题
- * 相同themeNameSpace的实例有一样的代码主题配置
+ * 相同nameSpace的实例有一样的代码主题配置
  * @param {object} $cherry
  * @param {string} codeTheme 如果没有传codeTheme，则从本地缓存里取
  */
 export function changeCodeTheme($cherry, codeTheme) {
-  const themeNameSpace = $cherry.options.themeNameSpace || 'cherry';
-
-  const newTheme = codeTheme ? codeTheme : getCodeThemeFromLocal(themeNameSpace);
+  const newTheme = codeTheme ? codeTheme : getCodeThemeFromLocal($cherry.nameSpace);
 
   $cherry.wrapperDom.setAttribute('data-code-block-theme', newTheme);
 
-  saveCodeThemeToLocal(themeNameSpace, newTheme);
+  saveCodeThemeToLocal($cherry.nameSpace, newTheme);
 }

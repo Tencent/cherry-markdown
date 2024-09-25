@@ -105,6 +105,7 @@ export default class Suggester extends SyntaxBase {
 
     this.suggester = {};
     const defaultSuggest = [];
+    const that = this;
     // 默认的唤醒关键字
     for (const suggesterKeyword of suggesterKeywords) {
       defaultSuggest.push({
@@ -112,7 +113,7 @@ export default class Suggester extends SyntaxBase {
         suggestList(_word, callback) {
           // 将word全转成小写
           const word = _word.toLowerCase();
-          const systemSuggestList = allSuggestList(suggesterKeyword, this.$locale);
+          const systemSuggestList = allSuggestList(suggesterKeyword, that.$locale);
           // 加个空格就直接退出联想
           if (/^\s$/.test(word)) {
             callback(false);
@@ -121,6 +122,8 @@ export default class Suggester extends SyntaxBase {
           const keyword = word
             .replace(/\s+/g, '') // 删掉空格，避免产生不必要的空数组元素
             .replace(new RegExp(`^${suggesterKeyword}`, 'g'), '') // 删掉word当中suggesterKeywords出现的字符
+            .replace(/^[#]+/, '#')
+            .replace(/^[/]+/, '/')
             .split('')
             .join('.*?');
           // 匹配任何包含 "keyword" 的字符串，无论 "keyword" 是在字符串的开头、中间还是结尾，并且不区分大小写

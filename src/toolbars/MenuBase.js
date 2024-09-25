@@ -25,6 +25,11 @@ import NestedError from '@/utils/error';
  * @property {string=} iconName - 子菜单项图标名称
  * @property {function(MouseEvent): any} onclick - 子菜单项点击事件
  * @property {string=} icon - 子菜单项图标(url)
+ * @property {boolean=} [disabledHideAllSubMenu=false] - 是否禁用后续调用hideAllSubMenu
+ */
+
+/**
+ * @typedef {Record<string, import('~types/cherry').ShortcutKeyMapStruct>} HookShortcutKeyMap
  */
 
 /**
@@ -56,6 +61,10 @@ function getPosition(targetDom, positionModel = 'absolute') {
  */
 
 /**
+ * @typedef {Partial<import('@/Cherry').default> & {$currentMenuOptions?:import('~types/menus').CustomMenuConfig}} MenuBaseConstructorParams
+ */
+
+/**
  * @class MenuBase
  */
 export default class MenuBase {
@@ -66,8 +75,7 @@ export default class MenuBase {
   _onClick;
 
   /**
-   *
-   * @param {Partial<import('@/Cherry').default> & {$currentMenuOptions?:import('~types/menus').CustomMenuConfig}} $cherry
+   * @param {MenuBaseConstructorParams} $cherry
    */
   constructor($cherry) {
     this.$cherry = $cherry;
@@ -101,6 +109,11 @@ export default class MenuBase {
       // eslint-disable-next-line no-underscore-dangle
       this.fire = this._onClick;
     }
+    /**
+     * 快捷键map映射
+     * @type {HookShortcutKeyMap}
+     */
+    this.shortcutKeyMap = {};
   }
 
   getSubMenuConfig() {
@@ -427,6 +440,9 @@ export default class MenuBase {
     return selection;
   }
 
+  /**
+   * 兼容之前的写法，但不支持配置
+   */
   get shortcutKeys() {
     return [];
   }
@@ -506,6 +522,14 @@ export default class MenuBase {
       this.positionModel = 'absolute';
     }
     return getPosition(this.dom, this.positionModel);
+  }
+
+  hide() {
+    this.dom.style.display = 'none';
+  }
+
+  show() {
+    this.dom.style.display = 'block';
   }
 
   /**

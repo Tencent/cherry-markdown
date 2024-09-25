@@ -43,7 +43,6 @@ export default class PreviewerBubble {
      */
     this.editor = previewer.editor;
     this.previewerDom = this.previewer.getDom();
-    this.enablePreviewerBubble = this.previewer.options.enablePreviewerBubble;
     this.$cherry = previewer.$cherry;
     /**
      * @property
@@ -102,6 +101,10 @@ export default class PreviewerBubble {
    * @returns {boolean|HTMLElement}
    */
   isCherryCodeBlock(element) {
+    // 引用里的代码块先不支持所见即所得编辑
+    if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
+      return false;
+    }
     if (element.nodeName === 'DIV' && element.dataset.type === 'codeBlock') {
       return element;
     }
@@ -128,6 +131,10 @@ export default class PreviewerBubble {
     if (/simple-table/.test(container.className) || !/cherry-table-container/.test(container.className)) {
       return false;
     }
+    // 引用里的表格先不支持所见即所得编辑
+    if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
+      return false;
+    }
     return container;
   }
 
@@ -136,7 +143,7 @@ export default class PreviewerBubble {
    * @returns {boolean}
    */
   $isEnableBubbleAndEditorShow() {
-    if (!this.enablePreviewerBubble) {
+    if (!this.previewer.options.enablePreviewerBubble) {
       return false;
     }
     const cherryStatus = this.previewer.$cherry.getStatus();
@@ -185,7 +192,7 @@ export default class PreviewerBubble {
   }
 
   $onMouseOut() {
-    if (!this.enablePreviewerBubble) {
+    if (!this.previewer.options.enablePreviewerBubble) {
       return;
     }
     const cherryStatus = this.previewer.$cherry.getStatus();
@@ -239,22 +246,44 @@ export default class PreviewerBubble {
       return;
     }
 
-    // 编辑draw.io不受enablePreviewerBubble配置的影响
+    // 编辑draw.io不受previewer.options.enablePreviewerBubble配置的影响
     if (target instanceof HTMLImageElement) {
-      if (target.tagName === 'IMG' && target.getAttribute('data-type') === 'drawio') {
+      if (
+        target.tagName === 'IMG' &&
+        target.getAttribute('data-type') === 'drawio' &&
+        this.$cherry.status.editor === 'show'
+      ) {
         if (!this.beginChangeDrawioImg(target)) {
           return;
         }
         const xmlData = decodeURI(target.getAttribute('data-xml'));
-        drawioDialog(this.previewer.$cherry.options.drawioIframeUrl, xmlData, (newData) => {
-          const { xmlData, base64 } = newData;
-          this.editor.editor.replaceSelection(`(${base64}){data-type=drawio data-xml=${encodeURI(xmlData)}}`, 'around');
-        });
+        drawioDialog(
+          this.previewer.$cherry.options.drawioIframeUrl,
+          this.previewer.$cherry.options.drawioIframeStyle,
+          xmlData,
+          (newData) => {
+            const { xmlData, base64 } = newData;
+            this.editor.editor.replaceSelection(
+              `(${base64}){data-type=drawio data-xml=${encodeURI(xmlData)}}`,
+              'around',
+            );
+          },
+        );
         return;
       }
     }
 
-    if (!this.enablePreviewerBubble) {
+    // 点击展开代码块操作
+    if (target.className === 'expand-btn ' || target.className === 'ch-icon ch-icon-expand') {
+      const expandBtnDom = this.$getClosestNode(target, 'DIV');
+      expandBtnDom.parentNode.parentNode.classList.remove('cherry-code-unExpand');
+      expandBtnDom.parentNode.parentNode.classList.add('cherry-code-expand');
+      if (this.bubbleHandler?.hover?.unExpandDom) {
+        this.bubbleHandler.hover.unExpandDom.classList.remove('hidden');
+      }
+    }
+
+    if (!this.previewer.options.enablePreviewerBubble) {
       return;
     }
     // 只有双栏编辑模式才出现下面的功能
@@ -293,7 +322,12 @@ export default class PreviewerBubble {
         e.stopPropagation(); // 阻止冒泡，避免触发预览区域的点击事件
         break;
       case 'P':
-        if (target instanceof HTMLParagraphElement && target.parentElement instanceof HTMLLIElement) {
+        if (
+          target instanceof HTMLParagraphElement &&
+          target.parentElement instanceof HTMLLIElement &&
+          // 引用里的列表先不支持所见即所得编辑
+          this.$getClosestNode(target, 'BLOCKQUOTE') === false
+        ) {
           if (target.children.length !== 0) {
             // 富文本
             e.preventDefault();

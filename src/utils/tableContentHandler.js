@@ -166,6 +166,7 @@ export default class TableHandler {
       return;
     }
     this.$setSymbolOffset();
+    this.$setDeleteButtonPosition();
   }
 
   $remove() {
@@ -308,6 +309,7 @@ export default class TableHandler {
     }
     this.$drawSymbol();
     this.$drawSortSymbol();
+    this.$drawDelete();
   }
 
   /**
@@ -581,6 +583,118 @@ export default class TableHandler {
     this.codeMirror.replaceSelection(newText);
     this.$findTableInEditor();
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+  }
+
+  /**
+   * 高亮当前列
+   * @param {number} tdIndex 当前列的索引
+   */
+  $highlightColumn(tdIndex) {
+    const { tableNode } = this.tableEditor.info;
+    const { rows } = tableNode;
+    rows[0].cells[tdIndex].style.borderTop = '1px solid red';
+    rows[rows.length - 1].cells[tdIndex].style.borderBottom = '1px solid red';
+    for (let i = 0; i < rows.length; i++) {
+      const { cells } = rows[i];
+      if (cells[tdIndex]) {
+        if (tdIndex === 0) cells[tdIndex].style.borderLeft = '1px solid red';
+        else cells[tdIndex - 1].style.borderRight = '1px solid red';
+        cells[tdIndex].style.borderRight = '1px solid red';
+      }
+    }
+  }
+
+  /**
+   * 取消高亮当前列
+   * @param {number} tdIndex 当前列的索引
+   */
+  $cancelHighlightColumn(tdIndex) {
+    const { tableNode } = this.tableEditor.info;
+    if (tableNode) {
+      const { rows } = tableNode;
+      for (let i = 0; i < rows.length; i++) {
+        const { cells } = rows[i];
+        if (cells[tdIndex]) {
+          if (tdIndex !== 0) cells[tdIndex - 1].style.border = '';
+          cells[tdIndex].style.border = ''; // 恢复原始边框
+        }
+      }
+    }
+  }
+
+  /**
+   * 添加删除按钮
+   */
+  $drawDelete() {
+    const { tdIndex } = this.tableEditor.info;
+    const types = ['top', 'bottom'];
+    const buttons = types.map((type) => [type]);
+    const container = document.createElement('div');
+    container.className = 'cherry-previewer-table-hover-handler-delete-container';
+    buttons.forEach(([type]) => {
+      const button = document.createElement('button');
+      button.setAttribute('data-type', type);
+      button.className = 'cherry-previewer-table-hover-handler__delete';
+      button.innerHTML = '删除';
+      button.title = '删除当前列';
+      button.addEventListener('click', () => {
+        this.$deleteCurrentColumn();
+      });
+      button.addEventListener('mouseover', () => {
+        this.$highlightColumn(tdIndex);
+      });
+      button.addEventListener('mouseout', () => {
+        this.$cancelHighlightColumn(tdIndex);
+      });
+      container.appendChild(button);
+    });
+    this.tableEditor.editorDom.deleteContainer = container;
+    this.container.appendChild(this.tableEditor.editorDom.deleteContainer);
+    this.$setDeleteButtonPosition();
+  }
+
+  /**
+   * 设置删除按钮的位置
+   */
+  $setDeleteButtonPosition() {
+    const container = this.tableEditor.editorDom.deleteContainer;
+    const { tableNode, tdNode } = this.tableEditor.info;
+    const tableInfo = this.$getPosition(tableNode);
+    const tdInfo = this.$getPosition(tdNode);
+    // 设置容器宽高
+    this.setStyle(this.container, 'width', `${tableInfo.width}px`);
+    this.setStyle(this.container, 'height', `${tableInfo.height}px`);
+    this.setStyle(this.container, 'top', `${tableInfo.top}px`);
+    this.setStyle(this.container, 'left', `${tableInfo.left}px`);
+
+    // 设置删除按钮位置
+    container.childNodes.forEach((node) => {
+      const { type } = node.dataset;
+      const offset = {
+        outer: 20,
+      };
+      this.setStyle(node, `${type}`, `-${offset.outer}px`);
+      this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
+    });
+  }
+
+  /**
+   * 删除当前列
+   */
+  $deleteCurrentColumn() {
+    const { tableIndex, tdIndex } = this.tableEditor.info;
+    this.$setSelection(tableIndex, 'table');
+    const selection = this.codeMirror.getSelection();
+    const table = selection.split('\n');
+    const rows = table.map((row) => row.split('|').slice(1, -1));
+    rows.forEach((row) => {
+      if (tdIndex >= 0 && tdIndex < row.length) {
+        row.splice(tdIndex, 1);
+      }
+    });
+    const newTable = rows.map((row) => (row.length === 0 ? '' : `|${row.join('|')}|`));
+    const newText = newTable.join('\n');
+    this.codeMirror.replaceSelection(newText);
   }
 
   /**

@@ -2,6 +2,62 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.46](https://github.com/Tencent/cherry-markdown/compare/v0.8.45...v0.8.46) (2024-08-12)
+
+
+### Features
+
+* [#813](https://github.com/Tencent/cherry-markdown/issues/813) 增加对drawioIframe样式的配置 ([91e943a](https://github.com/Tencent/cherry-markdown/commit/91e943ab23795ed9f92cda89dcc362c1c4c68136))
+* [#815](https://github.com/Tencent/cherry-markdown/issues/815) 多文件上传 ([#863](https://github.com/Tencent/cherry-markdown/issues/863)) ([bca1789](https://github.com/Tencent/cherry-markdown/commit/bca1789310473319336046c96c30edef5555ecaa))
+* [#822](https://github.com/Tencent/cherry-markdown/issues/822) 增加代码块主题 ([9ae7cb2](https://github.com/Tencent/cherry-markdown/commit/9ae7cb2539bb2ceafd6692f05fc9cdaf4e563be9))
+* 预览区代码块支持展开收起功能和对应的配置 ([#793](https://github.com/Tencent/cherry-markdown/issues/793)) ([cf68be2](https://github.com/Tencent/cherry-markdown/commit/cf68be2b57926142a59f004714dca355742503d3))
+* pr-merge action execute limit repository ([aa3ca4d](https://github.com/Tencent/cherry-markdown/commit/aa3ca4dcda2ba7cd348e7e63b5a1cb4ab979df1e))
+
+
+### Bug Fixes
+
+* [#858](https://github.com/Tencent/cherry-markdown/issues/858) 修复漏洞 ([122e27a](https://github.com/Tencent/cherry-markdown/commit/122e27a34c546c4e6f25826b955d0c907db547eb))
+* [#866](https://github.com/Tencent/cherry-markdown/issues/866) 修复draw.io在预览区无脑打开编辑框的问题 ([1c907da](https://github.com/Tencent/cherry-markdown/commit/1c907dad6eb1438e0bde5f6bfe3ae648958ee206))
+* 修复代码块展开收起引入的bug，并优化展开收起的交互体验 ([4a3c195](https://github.com/Tencent/cherry-markdown/commit/4a3c19574f8ffa6ed739c22d0ba8a0c77b455e0b))
+
+
+### Css or Code Change
+
+* 暗黑主题优化 ([#837](https://github.com/Tencent/cherry-markdown/issues/837)) ([9425441](https://github.com/Tencent/cherry-markdown/commit/9425441b29264728d942cefeaa96372c2f5118a0))
+* 修改图标产生的冲突 ([1ef9e47](https://github.com/Tencent/cherry-markdown/commit/1ef9e47ede0267b4a3fa03e99174f5282d94f346))
+* 优化暗黑模式下的细节 ([5bc8d6a](https://github.com/Tencent/cherry-markdown/commit/5bc8d6a338f48c3b2a51e420802d2193f8a9d08f))
+* 优化暗黑模式下的细节 ([b294536](https://github.com/Tencent/cherry-markdown/commit/b294536f07965d3a628262215af635c1afd8eda9))
+
+### [0.8.45](https://github.com/Tencent/cherry-markdown/compare/v0.8.44...v0.8.45) (2024-07-25)
+
+
+### Features
+
+* [#522](https://github.com/Tencent/cherry-markdown/issues/522) 增加vim编辑模式的配置 ([40ba66f](https://github.com/Tencent/cherry-markdown/commit/40ba66fd3cda87542bc916b9252863a38eb18cd9))
+* [#755](https://github.com/Tencent/cherry-markdown/issues/755) 增加隐藏工具栏机制 ([71b8c03](https://github.com/Tencent/cherry-markdown/commit/71b8c031d94220d1d1ac9f3d5786928448b0bfc0))
+* [#794](https://github.com/Tencent/cherry-markdown/issues/794) 脚本支持pr预览 ([c1bed21](https://github.com/Tencent/cherry-markdown/commit/c1bed21cec99000f9a71f78f557500cafde6a7e3))
+* [#794](https://github.com/Tencent/cherry-markdown/issues/794) 脚本支持pr预览 ([#816](https://github.com/Tencent/cherry-markdown/issues/816)) ([d26a3be](https://github.com/Tencent/cherry-markdown/commit/d26a3bec891ed93115210d94f71cdbfa38c2c884))
+* [#814](https://github.com/Tencent/cherry-markdown/issues/814) 丰富联想代码语言 ([a249820](https://github.com/Tencent/cherry-markdown/commit/a2498203be566aff2e24663424f34eb1b73f43a3))
+* [#823](https://github.com/Tencent/cherry-markdown/issues/823) 丰富api文档，增加字体颜色、字体背景色、信息面板、对齐方式等api ([ba0f71e](https://github.com/Tencent/cherry-markdown/commit/ba0f71e8b880b161454677408c9360a5c7c41fa9))
+* [#836](https://github.com/Tencent/cherry-markdown/issues/836) PR合并后自动清除PR在线预览相关资源 ([0da9aba](https://github.com/Tencent/cherry-markdown/commit/0da9aba0bbb783c23b09343a224a18b806a2fbb0))
+* [#838](https://github.com/Tencent/cherry-markdown/issues/838) 代码块语法忽略大小写 ([c82ab40](https://github.com/Tencent/cherry-markdown/commit/c82ab407207e753171745ec4805052bfc0a64081))
+* [#847](https://github.com/Tencent/cherry-markdown/issues/847) 插入菜单添加“内联代码”按钮 ([#849](https://github.com/Tencent/cherry-markdown/issues/849)) ([3476f21](https://github.com/Tencent/cherry-markdown/commit/3476f213fcaa8394b1db43b963c8c7ebb397227e))
+* 调整pr-viewer脚本 ([adc310b](https://github.com/Tencent/cherry-markdown/commit/adc310be0926912122be6405da258077ff69e28d))
+* 设置actions权限，支持pr构建 ([f728487](https://github.com/Tencent/cherry-markdown/commit/f72848760d50142bac1defe46831cd1de15c360a))
+* 优化有大量base64数据时的渲染性能 ([a03c999](https://github.com/Tencent/cherry-markdown/commit/a03c999e98f2295d607f92fc109f72337634ca43))
+* add react demo for cherry-markdown [#797](https://github.com/Tencent/cherry-markdown/issues/797) ([28c0e81](https://github.com/Tencent/cherry-markdown/commit/28c0e816fe0945cf165e4a2e01a54096715cca42))
+* pr-test脚本eslint只检查js文件 ([8faef0a](https://github.com/Tencent/cherry-markdown/commit/8faef0ac679584706b59af88bbe8965b4ddd7d27))
+* **ShortcutKey:** 增加快捷键配置能力 Closes [#571](https://github.com/Tencent/cherry-markdown/issues/571) ([837bf15](https://github.com/Tencent/cherry-markdown/commit/837bf153f68e3c13c8a183ea71d2f5daf2d96a5c))
+
+
+### Bug Fixes
+
+* [#835](https://github.com/Tencent/cherry-markdown/issues/835) 处理eslint报错 ([0cd79ca](https://github.com/Tencent/cherry-markdown/commit/0cd79ca80916cd93cdba0a8372995b9dcd727a4c))
+* [#835](https://github.com/Tencent/cherry-markdown/issues/835) 代码提示自动补全国际化问题 ([d94b357](https://github.com/Tencent/cherry-markdown/commit/d94b357b2338fbf641e6b3ceb48edb3c8a02e9eb))
+* 修复字数统计工具报错的问题 ([e61ec5f](https://github.com/Tencent/cherry-markdown/commit/e61ec5f17ea4b789019f8bcb79ed6a040bc950dd))
+* 修复menu.setName失效的问题 ([d398c6a](https://github.com/Tencent/cherry-markdown/commit/d398c6a4f4c98a9c4e1616eb8e1633ef2957deea))
+* github actions build排除掉push ([9214bd4](https://github.com/Tencent/cherry-markdown/commit/9214bd47caf8abbd4cc5155d7cc72a2ae8adc781))
+
 ### [0.8.44](https://github.com/Tencent/cherry-markdown/compare/v0.8.43...v0.8.44) (2024-06-25)
 
 ### Bug Fixes

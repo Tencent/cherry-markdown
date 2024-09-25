@@ -34,5 +34,9 @@ pnpm-lock.yaml
 /docs/.vitepress/cache/
 /docs/.vitepress/dist/
 
+
+#vscodePlugin
+/vscodePlugin/yarn.lock
+
 # config
 examples/cherry-markdown-publish/src/common/config/*.yaml

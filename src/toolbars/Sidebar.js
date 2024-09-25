@@ -26,4 +26,11 @@ export default class Sidebar extends Toolbar {
   appendMenusToDom(menus) {
     this.options.dom.appendChild(menus);
   }
+
+  init() {
+    super.init();
+    Object.entries(this.shortcutKeyMap).forEach(([key, value]) => {
+      this.$cherry.toolbar.shortcutKeyMap[key] = value;
+    });
+  }
 }

@@ -2,7 +2,7 @@ import { useStoreCherry } from "@/store/storeCherry";
 import Cherry from "cherry-markdown";
 import { CherryOptions } from "cherry-markdown/types/cherry";
 import { ipcRenderer } from "electron";
-import { onMounted } from "vue";
+import { onMounted, shallowReactive } from "vue";
 
 /**
  *@description  初始化 CherryMarkdown
@@ -60,6 +60,20 @@ const initCherryMarkdown = () => {
       // 对复制内容进行额外处理
       return code;
     },
+    onExpandCode: (event, code) => {
+      // 阻止默认的粘贴事件
+      // return false;
+      // 对复制内容进行额外处理
+      // console.log(event, code);
+      return code;
+    },
+    onUnExpandCode: (event, code) => {
+      // 阻止默认的粘贴事件
+      // return false;
+      // 对复制内容进行额外处理
+      // console.log(event, code);
+      return code;
+    },
     // 获取中文的拼音
     changeString2Pinyin: (string: string) => {
       /**
@@ -114,6 +128,8 @@ const initCherryMarkdown = () => {
           wrap: true,
           lineNumber: true,
           copyCode: true,
+          expandCode: true, // 是否展开代码块
+          unExpandCode: true, // 是否展开代码块
           customRenderer: {
           },
           indentedCodeBlock: true,
@@ -218,6 +234,9 @@ const initCherryMarkdown = () => {
       beforeImageMounted: callbacks.beforeImageMounted,
       onClickPreview: callbacks.onClickPreview,
       onCopyCode: callbacks.onCopyCode,
+      // 展开代码块代码时的回调
+      onExpandCode: callbacks.onExpandCode,
+      onUnExpandCode: callbacks.onUnExpandCode,
       changeString2Pinyin: callbacks.changeString2Pinyin,
     },
     previewer: {
@@ -260,7 +279,7 @@ const initCherryMarkdown = () => {
 
   onMounted(() => {
     const cherryInstance = new Cherry(defaultConfig as Partial<CherryOptions>);
-    storeCherry.cherry = cherryInstance
+    storeCherry.cherry = shallowReactive(cherryInstance)
   })
 }
 

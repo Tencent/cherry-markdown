@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { handleUpload, handleParams } from '@/utils/file';
+import { handleUpload, handleParams, handleUploadMulti } from '@/utils/file';
+import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
 /**
  * 插入图片
  */
 export default class Image extends MenuBase {
+  /**
+   * @param {import('@/toolbars/MenuBase').MenuBaseConstructorParams} $cherry
+   */
   constructor($cherry) {
     super($cherry);
     this.setName('image', 'image');
+    this.shortcutKeyMap = {
+      [`${CONTROL_KEY}-${getKeyCode('g')}`]: {
+        hookName: this.name,
+        aliasName: this.$cherry.locale[this.name],
+      },
+    };
   }
 
   /**
@@ -30,6 +40,35 @@ export default class Image extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    const accept = this.$cherry.options?.fileTypeLimitMap?.image ?? '*';
+    const multiple = this.$cherry?.options.multipleFileSelection?.image ?? false;
+
+    if (multiple) {
+      if (this.hasCacheOnce()) {
+        // @ts-ignore
+        const arr = this.getAndCleanCacheOnce();
+        let res = '';
+        // @ts-ignore
+        for (const { url, params } of arr) {
+          const begin = '![';
+          const end = `](${url})`;
+          this.registerAfterClickCb(() => {
+            this.setLessSelection(begin, end);
+          });
+          const finalName = params.name ? params.name : name;
+          res += `${begin}${finalName}${handleParams(params)}${end}\n`;
+        }
+        return res;
+      }
+      // 插入图片，调用上传文件逻辑
+      handleUploadMulti(this.editor, 'image', accept, (arr) => {
+        this.setCacheOnce(arr);
+        this.fire(null);
+      });
+      this.updateMarkdown = false;
+      return selection;
+    }
+
     if (this.hasCacheOnce()) {
       // @ts-ignore
       const { name, url, params } = this.getAndCleanCacheOnce();
@@ -41,7 +80,6 @@ export default class Image extends MenuBase {
       const finalName = params.name ? params.name : name;
       return `${begin}${finalName}${handleParams(params)}${end}`;
     }
-    const accept = this.$cherry.options?.fileTypeLimitMap?.image ?? '*';
     // 插入图片，调用上传文件逻辑
     handleUpload(this.editor, 'image', accept, (name, url, params) => {
       this.setCacheOnce({ name, url, params });
@@ -49,12 +87,5 @@ export default class Image extends MenuBase {
     });
     this.updateMarkdown = false;
     return selection;
-  }
-
-  /**
-   * 声明绑定的快捷键，快捷键触发onClick
-   */
-  get shortcutKeys() {
-    return ['Ctrl-g'];
   }
 }

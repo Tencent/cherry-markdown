@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { mac } from 'codemirror/src/util/browser';
 import HookCenter from './HookCenter';
 import { createElement } from '@/utils/dom';
 import Logger from '@/Logger';
+import { getAllowedShortcutKey, getStorageKeyMap, keyStack2UniqueString, storageKeyMap } from '@/utils/shortcutKey';
 
 /**
  * @typedef {()=>void} Bold 向cherry编辑器中插入粗体语法
@@ -204,7 +204,9 @@ export default class Toolbar {
     if (subMenuConfig.length > 0) {
       subMenuConfig.forEach((config) => {
         const btn = this.menus.hooks[name].createSubBtnByConfig(config);
-        btn.addEventListener('click', () => this.hideAllSubMenu(), false);
+        if (!config?.disabledHideAllSubMenu) {
+          btn.addEventListener('click', () => this.hideAllSubMenu(), false);
+        }
         this.subMenus[name].appendChild(btn);
       });
     }
@@ -231,7 +233,6 @@ export default class Toolbar {
    * 展开/收起二级菜单
    */
   toggleSubMenu(name) {
-    console.log('name: ', name);
     if (!this.subMenus[name]) {
       // 如果没有二级菜单，则先画出来，然后再显示
       this.hideAllSubMenu();
@@ -279,15 +280,78 @@ export default class Toolbar {
    * 收集快捷键
    */
   collectShortcutKey() {
-    if (this.options.shortcutKey && Object.keys(this.options.shortcutKey).length > 0) {
-      this.shortcutKeyMap = this.options.shortcutKey;
+    // 兼容旧版本配置
+    if (
+      this.$cherry.options.toolbars.shortcutKey &&
+      Object.keys(this.$cherry.options.toolbars.shortcutKey).length > 0
+    ) {
+      Object.entries(this.$cherry.options.toolbars.shortcutKey).forEach(([key, value]) => {
+        const $key = key
+          .replace(/Ctrl-/g, 'Control-')
+          .replace(/-([A-Za-z])$/g, (w, m1) => {
+            return `-Key${m1.toUpperCase()}`;
+          })
+          .replace(/-([0-9])$/g, '-Digit$1');
+        this.shortcutKeyMap[$key] = { hookName: value, aliasName: this.$cherry.locale[value] || value };
+      });
+    }
+    if (this.$cherry.options.toolbars.shortcutKeySettings.isReplace) {
+      this.shortcutKeyMap = this.$cherry.options.toolbars.shortcutKeySettings.shortcutKeyMap;
     } else {
       this.menus.allMenusName.forEach((name) => {
         this.menus.hooks[name].shortcutKeys?.forEach((key) => {
           this.shortcutKeyMap[key] = name;
         });
+        if (typeof this.menus.hooks[name].shortcutKeyMap === 'object' && this.menus.hooks[name].shortcutKeyMap) {
+          Object.entries(this.menus.hooks[name].shortcutKeyMap).forEach(([key, value]) => {
+            if (key in this.shortcutKeyMap) {
+              console.error(`The shortcut key ${key} is already registered`);
+              return;
+            }
+            this.shortcutKeyMap[key] = value;
+          });
+        }
       });
+      Object.entries(this.$cherry.options.toolbars.shortcutKeySettings.shortcutKeyMap).forEach(([key, value]) => {
+        this.shortcutKeyMap[key] = value;
+      });
+      // 本地缓存的快捷键配置优先级最高，按 hookName-aliasName 替换相同的快捷键
+      const cachedMap = getStorageKeyMap(this.$cherry.nameSpace);
+      if (cachedMap) {
+        const nameKeyMap = {};
+        Object.entries(this.shortcutKeyMap).forEach(([key, value]) => {
+          nameKeyMap[`${value.hookName}-${value.aliasName}`] = key;
+        });
+        Object.entries(cachedMap).forEach(([key, value]) => {
+          const testKey = `${value.hookName}-${value.aliasName}`;
+          if (nameKeyMap[testKey]) {
+            delete this.shortcutKeyMap[nameKeyMap[testKey]];
+          }
+          this.shortcutKeyMap[key] = value;
+        });
+      }
     }
+  }
+
+  /**
+   * 更新快捷键映射
+   * @param {string} oldShortcutKey 旧的快捷键
+   * @param {string} newShortcutKey 新的快捷键
+   */
+  updateShortcutKeyMap(oldShortcutKey, newShortcutKey) {
+    if (oldShortcutKey === newShortcutKey) {
+      return false;
+    }
+    const old = this.shortcutKeyMap[oldShortcutKey];
+    if (!old) {
+      return false;
+    }
+    // 删除旧值
+    delete this.shortcutKeyMap[oldShortcutKey];
+    // 更新内存中的映射
+    this.shortcutKeyMap[newShortcutKey] = old;
+    // 更新缓存中的映射
+    storageKeyMap(this.$cherry.nameSpace, this.shortcutKeyMap);
   }
 
   collectToolbarHandler() {
@@ -314,7 +378,9 @@ export default class Toolbar {
    * @returns {boolean} 是否有对应的快捷键
    */
   matchShortcutKey(evt) {
-    return !!this.shortcutKeyMap[this.getCurrentKey(evt)];
+    const onKeyStack = getAllowedShortcutKey(evt);
+    const shortcutKey = keyStack2UniqueString(onKeyStack);
+    return !!this.shortcutKeyMap?.[shortcutKey];
   }
 
   /**
@@ -322,39 +388,12 @@ export default class Toolbar {
    * @param {KeyboardEvent} evt
    */
   fireShortcutKey(evt) {
-    const currentKey = this.getCurrentKey(evt);
-    this.menus.hooks[this.shortcutKeyMap[currentKey]]?.fire(evt, currentKey);
-  }
-
-  /**
-   * 格式化当前按键，mac下的command按键转换为ctrl
-   * @param {KeyboardEvent} event
-   * @returns
-   */
-  getCurrentKey(event) {
-    let key = '';
-    if (event.ctrlKey) {
-      key += 'Ctrl-';
+    const onKeyStack = getAllowedShortcutKey(evt);
+    const currentKey = keyStack2UniqueString(onKeyStack);
+    const keyMap = this.shortcutKeyMap[currentKey]?.hookName;
+    console.log(keyMap, currentKey);
+    if (typeof keyMap === 'string' && keyMap) {
+      this.menus.hooks[keyMap]?.fire(evt, currentKey);
     }
-
-    if (event.altKey) {
-      key += 'Alt-';
-    }
-
-    if (event.metaKey && mac) {
-      key += 'Ctrl-';
-    }
-
-    // 如果存在shift键
-    if (event.shiftKey) {
-      key += `Shift-`;
-    }
-
-    // 如果还有第三个键 且不是 shift键
-    if (event.key && event.key.toLowerCase() !== 'shift') {
-      key += event.key.toLowerCase();
-    }
-
-    return key;
   }
 }

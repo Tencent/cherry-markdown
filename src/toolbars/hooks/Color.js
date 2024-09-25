@@ -35,18 +35,31 @@ export default class Color extends MenuBase {
     return bgReg.test(selection);
   }
 
+  $testIsShortKey(shortKey) {
+    return /(color|background-color)\s*:/.test(shortKey);
+  }
+
+  $getTypeAndColor(shortKey) {
+    if (this.$testIsShortKey(shortKey)) {
+      const type = /background-color\s*:/.test(shortKey) ? 'background-color' : 'text';
+      const color = shortKey.replace(/(color|background-color)\s*:\s*([#0-9a-zA-Z]+)[^#0-9a-zA-Z]*$/, '$2').trim();
+      return { type, color };
+    }
+    return this.getAndCleanCacheOnce();
+  }
+
   /**
    * 响应点击事件
    * @param {string} selection 被用户选中的文本内容
-   * @param {string} shortKey 快捷键参数，本函数不处理这个参数
+   * @param {string} shortKey 快捷键参数，color: #000000 | background-color: #000000
    * @param {Event & {target:HTMLElement}} event 点击事件，用来从被点击的调色盘中获得对应的颜色
    * @returns 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '', event) {
     let $selection = getSelection(this.editor.editor, selection) || this.locale.color;
-    if (this.hasCacheOnce()) {
+    if (this.hasCacheOnce() || this.$testIsShortKey(shortKey)) {
       // @ts-ignore
-      const { type, color } = this.getAndCleanCacheOnce();
+      const { type, color } = this.$getTypeAndColor(shortKey);
       const begin = type === 'text' ? `!!${color} ` : `!!!${color} `;
       const end = type === 'text' ? '!!' : '!!!';
       if (!this.isSelections && !this.$testIsColor(type, $selection)) {
