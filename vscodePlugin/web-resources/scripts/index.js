@@ -134,11 +134,17 @@ function changeTheme(theme) {
 
 /** 处理 a 链接跳转问题 */
 const onClickLink = (target) => {
-  console.log('onClickLink', target);
-  console.log('onClickLink', target.href);
+  // 这里不能直接使用 target.href，因为本地相对文件地址会被vscode转成`webview://`协议
+  const href = target.attributes?.href.value;
+  if (!href) {
+    vscode.postMessage({
+      type: 'open-url',
+      data: 'href-invalid',
+    });
+  };
   vscode.postMessage({
     type: 'open-url',
-    data: target.href,
+    data: href,
   });
 };
 
