@@ -311,7 +311,6 @@ const basicConfig = {
     // eslint-disable-next-line no-undef
     changeString2Pinyin: pinyin,
     beforeImageMounted(srcProp, srcValue) {
-      console.log('beforeImageMounted', srcProp, srcValue);
       if (isHttpUrl(srcValue) || isDataUrl(srcValue)) {
         return {
           src: srcValue,
