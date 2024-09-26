@@ -17,18 +17,22 @@
       list-style: none;
       padding: 0;
       margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
 
       .shortcut-key-item {
         display: flex;
         justify-content: space-between;
-        // .shortcut-key-config-panel-name {
-        //   &:hover {
-        //     color: #333;
-        //   }
-        // }
+        height: auto;
+        padding: 2px 15px;
+        border-top: 1px solid #eee;
+        .input-shortcut-wrapper {
+          width: 100px;
+          input {
+            width: 100%;
+          }
+        }
+        .shortcut-key-config-panel-name {
+          max-width: 120px;
+        }
         .shortcut-key-config-panel-kbd {
           display: flex;
           gap: 10px;
@@ -52,5 +56,30 @@
         }
       }
     }
+  }
+  .shortcut-static {
+    background-color: #fff;
+    .cherry-shortcut-key-config-panel-ul {
+      gap: 0;
+      .shortcut-key-item {
+        cursor: default;
+        .shortcut-key-config-panel-static {
+          display: flex;
+          gap: 3px;
+          min-width: 80px;
+          justify-content: right;
+          .shortcut-split {
+            color: #aaa;
+          }
+        }
+      }
+    }
+  }
+  .shortcut-panel-title {
+    font-size: 14px;
+    padding: 10px 15px;
+    background-color: #eee; 
+    // border-bottom: 1px solid #888;
+    // border-top: 1px solid #888;
   }
 }
