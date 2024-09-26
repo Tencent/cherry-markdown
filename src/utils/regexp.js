@@ -96,9 +96,9 @@ export const URL_INLINE_NO_SLASH = new RegExp(
     '(?:\\.(?:1\\d\\d|2[0-4]\\d|25[0-4]|[1-9]\\d?))' +
     '|' +
     // host & domain names, may end with dot
-    '(?![-_])(?:[-\\w\\xa1-\\xff]{0,63}[^-_]\\.)+' +
+    '(?![-_])(?:[-w\xa1-\xff,]{0,63}[^-_].?)+' +
     // TLD identifier name, may end with dot
-    '(?:[a-zA-Z\\xa1-\\xff]{2,}\\.?)' +
+    '(?:[a-zA-Z\\xa1-\\xff]{0,}\\.?)' +
     ')' +
     // port number (optional)
     '(?::\\d{2,5})?' +

@@ -173,7 +173,10 @@ export default class AutoLink extends SyntaxBase {
             return match;
           }
           // TODO: Url Validator
-          return `${prefix}${this.renderLink(`${$protocol}${address}`)}${suffix}`;
+          return `${prefix}${this.renderLink(
+            // 将特殊字符进行转义
+            `${$protocol}${address.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}`,
+          )}${suffix}`;
       }
       // this should never happen
       return match;
@@ -184,7 +187,7 @@ export default class AutoLink extends SyntaxBase {
     // (?<protocol>\\w+:)\\/\\/
     const ret = {
       // ?<left>
-      begin: '(<?)',
+      begin: '(<)',
       content: [
         // ?<protocol>
         '((?:[a-z][a-z0-9+.-]{1,31}:)?)', // protocol is any seq of 2-32 chars beginning with letter
@@ -199,7 +202,7 @@ export default class AutoLink extends SyntaxBase {
         // ')'
       ].join(''),
       // ?<right>
-      end: '(>?)', // TODO: extend attrs e.g. {target=_blank}
+      end: '(>)', // TODO: extend attrs e.g. {target=_blank}
     };
     ret.reg = compileRegExp(ret, 'ig');
     return ret;
