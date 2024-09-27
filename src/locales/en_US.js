@@ -100,6 +100,7 @@ export default {
     'Click to expand more\nContent\n++- Expand by default\nContent\n++ Collapse by default\nContent',
   inlineCode: 'Inline Code',
   codeBlock: 'Code Block',
+  shortcutKeySetting: 'Keyboard Shortcuts',
   editShortcutKeyConfigTip: 'double click shortcut key area to edit',
   wordCount: 'Word Count',
   wordCountP: 'P',
