@@ -320,6 +320,16 @@ export interface CherryEngineOptions {
        *  - none          标题没有锚点
        */
       anchorStyle?: 'default' | 'autonumber' | 'none',
+      /**
+       * 是否开启严格模式
+       *    true：严格模式
+       *      # head ⭕️ valid
+       *      #head ❌ invalid
+       *    false：宽松模式
+       *      # head ⭕️ valid
+       *      #head ⭕️ valid
+       */
+      strict?: boolean,
     },
   };
   /** 自定义语法 */
