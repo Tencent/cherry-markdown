@@ -46,7 +46,7 @@ export default class Settings extends MenuBase {
       { iconName: '', name: 'hide', onclick: this.bindSubClick.bind(this, 'toggleToolbar') },
       {
         iconName: '',
-        name: '快捷键配置',
+        name: this.$cherry.locale.shortcutKeySetting,
         onclick: this.bindSubClick.bind(this, 'shortcutKey'),
         disabledHideAllSubMenu: true,
       },
