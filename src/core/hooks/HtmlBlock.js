@@ -41,8 +41,9 @@ sanitizer.addHook('afterSanitizeAttributes', (node) => {
 
 export default class HtmlBlock extends ParagraphBase {
   static HOOK_NAME = 'htmlBlock';
-  constructor() {
+  constructor({ config }) {
     super({ needCache: true });
+    this.filterStyle = config.filterStyle || false;
   }
 
   // ref: http://www.vfmd.org/vfmd-spec/specification/#procedure-for-detecting-automatic-links
@@ -97,6 +98,10 @@ export default class HtmlBlock extends ParagraphBase {
     $str = $str.replace(/<(?=\/?(\w|\n|$))/g, '&#60;');
     // 还原被替换的尖括号
     $str = $str.replace(/\$#60;/g, '<').replace(/\$#62;/g, '>');
+    // 过滤HTML标签的style属性
+    if (this.filterStyle) {
+      $str = $str.replace(/<([^/][^>]+?) style="[^"]+"([^>]*)>/gi, '<$1$2>');
+    }
     return $str;
   }
 

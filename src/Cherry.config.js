@@ -334,6 +334,14 @@ const defaultConfig = {
          */
         strict: false,
       },
+      htmlBlock: {
+        /**
+         * 是否过滤html标签中的style属性
+         *    true：过滤style属性
+         *    false：不过滤style属性
+         */
+        filterStyle: false,
+      },
     },
   },
   editor: {
