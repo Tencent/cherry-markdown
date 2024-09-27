@@ -46,6 +46,12 @@ export default class ShortcutKeyConfigPanel {
           // 显示输入框
           inputWrapper.setAttribute('style', 'display: block;');
           const inputElement = inputWrapper.querySelector('input');
+          const placeholder = [];
+          shortcutPanel.childNodes.forEach((element) => {
+            // @ts-ignore
+            placeholder.push(element.innerText);
+          });
+          inputElement.placeholder = placeholder.join('-');
           // 获取焦点
           inputElement.focus();
           inputElement.onblur = () => {
@@ -175,10 +181,58 @@ export default class ShortcutKeyConfigPanel {
     // </div>
     const ulStr = `
       <div class="cherry-shortcut-key-config-panel-inner">
-        <div class="cherry-dropdown-item">${this.$cherry.locale.editShortcutKeyConfigTip}</div>
+        <div class="shortcut-panel-title">${this.$cherry.locale.editShortcutKeyConfigTip}</div>
         <ul class="${this.shortcutUlClassName}" id="${this.shortcutUlId}">${liStr}</ul>
+        ${this.$getStaticShortcut()}
       </div>`;
     return ulStr;
+  }
+
+  /**
+   * 定义不支持修改的快捷键信息（是codemirror提供的类sublime快捷键）
+   */
+  $getStaticShortcut() {
+    if (this.$cherry.options.editor.keyMap === 'vim') {
+      return '';
+    }
+    const list = [
+      { name: this.$cherry.locale.shortcutStatic1, key: 'Ctrl+[' },
+      { name: this.$cherry.locale.shortcutStatic2, key: 'Ctrl+]' },
+      { name: this.$cherry.locale.shortcutStatic3, key: 'Ctrl+Shift+D' },
+      { name: this.$cherry.locale.shortcutStatic4, key: 'Ctrl+Enter' },
+      { name: this.$cherry.locale.shortcutStatic5, key: 'Ctrl+Shift+Enter' },
+      { name: this.$cherry.locale.shortcutStatic6, key: 'Ctrl+Shift+↑' },
+      { name: this.$cherry.locale.shortcutStatic7, key: 'Ctrl+Shift+↓' },
+      { name: this.$cherry.locale.shortcutStatic8, key: 'Ctrl+Shift+K' },
+      { name: this.$cherry.locale.shortcutStatic9, key: 'Ctrl+Shift+←' },
+      { name: this.$cherry.locale.shortcutStatic10, key: 'Ctrl+Shift+→' },
+      { name: this.$cherry.locale.shortcutStatic11, key: 'Ctrl+Backspace' },
+      { name: this.$cherry.locale.shortcutStatic12, key: 'Ctrl+Shift+M' },
+      { name: this.$cherry.locale.shortcutStatic13, key: `Ctrl+${this.$cherry.locale.leftMouseButton}` },
+      { name: this.$cherry.locale.shortcutStatic14, key: 'Ctrl+Shift+L' },
+      { name: this.$cherry.locale.shortcutStatic15, key: 'Ctrl+F' },
+      { name: this.$cherry.locale.shortcutStatic16, key: 'Alt+F3' },
+      { name: this.$cherry.locale.shortcutStatic17, key: 'Ctrl+Z' },
+      { name: this.$cherry.locale.shortcutStatic18, key: 'Ctrl+Y' },
+    ];
+    const li = [];
+    for (let i = 0; i < list.length; i++) {
+      const one = list[i];
+      li.push(`
+        <li class="cherry-dropdown-item shortcut-key-item">
+          <div class="shortcut-key-config-panel-name">${one.name}</div>
+          <div class="shortcut-key-config-panel-static">${one.key.replace(
+            /\+/g,
+            '<span class="shortcut-split">+</span>',
+          )}
+          </div>
+        </li>
+      `);
+    }
+    return `<div class="shortcut-static">
+      <div class="shortcut-panel-title">${this.$cherry.locale.shortcutStaticTitle}</div>
+      <ul class="cherry-shortcut-key-config-panel-ul">${li.join('')}</ul>
+    </div>`;
   }
 
   /**

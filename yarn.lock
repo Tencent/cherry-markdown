@@ -25,6 +25,7 @@
   dependencies:
     "@babel/highlight" "^7.10.4"
 
+
 "@babel/compat-data@^7.22.6", "@babel/compat-data@^7.24.7":
   "integrity" "sha512-qJzAIcv03PyaWqxRgO4mSU3lihncDT296vnyuE2O8uA4w3UHWI4S3hgeZd1L8W1Bft40w9JxJ2b412iDUFFRhw=="
   "resolved" "https://registry.npmjs.org/@babel/compat-data/-/compat-data-7.24.7.tgz"
@@ -237,6 +238,7 @@
   "integrity" "sha512-7MbVt6xrwFQbunH2DNQsAP5sTGxfqQtErvBIvIMi6EQnbgUOuVYanvREcmFrOPhoXBrTtjhhP+lW+o5UfK+tDg=="
   "resolved" "https://registry.npmjs.org/@babel/helper-string-parser/-/helper-string-parser-7.24.7.tgz"
   "version" "7.24.7"
+
 
 "@babel/helper-validator-identifier@^7.24.7":
   "integrity" "sha512-rR+PBcQ1SMQDDyF6X0wxtG8QyLCgUB0eRAGguqRLfkCA87l7yAP7ehq8SNj96OOGTO8OBV70KhuFYcIkHXOg0w=="
