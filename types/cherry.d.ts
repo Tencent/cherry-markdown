@@ -3,11 +3,27 @@ import SyntaxBase from '../src/core/SyntaxBase';
 import { FormulaMenu } from '@/toolbars/BubbleFormula';
 
 export interface CherryExternalsOptions {
-  [key: symbol]: any;
+  [key: string]: any;
 }
 
+/**
+* 自定义toolbar键名[key]
+*/
+export interface CustomMenuType {
+  [key: string]: any;
+}
+
+
+/**
+* 自定义按钮功能
+* example:
+* `customMenu:{
+*    customMenu_fileUpload: any,
+* }`
+* 其中`customMenu`是自定按钮的固定属性，`customMenu_fileUpload`是自定义按钮的键名
+*/
 type CherryToolbarsCustomType = {
-  CustomMenuType: CherryExternalsOptions
+  CustomMenuType: CustomMenuType
 }
 
 type CherryCustomOptions = {
@@ -532,6 +548,7 @@ export interface CherryToolbarsOptions<F extends CherryToolbarsCustomType = Cher
   toolbar?:
   | (CherryDefaultBubbleToolbar |
     CherryDefaultToolbar |
+    keyof Partial<F['CustomMenuType']> |
   { [K in (keyof Partial<F['CustomMenuType']>) | CherryDefaultToolbar]?: (keyof F['CustomMenuType'] | CherryDefaultToolbar)[] })[]
   | false;
   toolbarRight?:
