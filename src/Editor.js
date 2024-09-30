@@ -497,6 +497,7 @@ export default class Editor {
 
     editor.on('paste', (codemirror, evt) => {
       this.options.onPaste.call(this, evt, codemirror);
+      this.$cherry.$event.emit('paste', { evt, cherry: this.$cherry });
     });
 
     if (this.options.autoScrollByCursor) {
