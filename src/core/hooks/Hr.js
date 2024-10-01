@@ -31,7 +31,7 @@ export default class Hr extends ParagraphBase {
       // 计算签名，签名可能会重复，符合预期
       const sign = `hr${lineCount}`;
       const placeHolder = this.pushCache(`<hr data-sign="${sign}" data-lines="${lineCount}" />`, sign);
-      return prependLineFeedForParagraph(match, placeHolder);
+      return prependLineFeedForParagraph(match, placeHolder,true);
     });
   }
 
