@@ -210,7 +210,7 @@ export default class Header extends ParagraphBase {
       begin: '(?:^|\\n)(\\n*)', // (?<lines>\\n*)
       content: [
         '(?:\\h*',
-        '(.+[\\n]*.+)', // (?<text>.+)
+        '(.[^=\\-]*[\\n]*.[^=\\-]*)', // (?<text>.+)
         ')\\n',
         '(?:\\h*',
         '([=]+|[-]+)', // (?<level>[=]+|[-]+)
