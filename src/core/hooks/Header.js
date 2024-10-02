@@ -210,19 +210,19 @@ export default class Header extends ParagraphBase {
       begin: '(?:^|\\n)(\\n*)', // (?<lines>\\n*)
       content: [
         '(?:\\h*',
-        '(.+)', // (?<text>.+)
+        '(.[^=\\-]*[\\n]*.[^=\\-]*)', // (?<text>.+)
         ')\\n',
         '(?:\\h*',
         '([=]+|[-]+)', // (?<level>[=]+|[-]+)
         ')',
       ].join(''),
-      end: '(?=$|\\n)',
+      end: '(?=$|\\n*)',
     };
     setext.reg = compileRegExp(setext, 'g', true);
 
     // atx header
     const atx = {
-      begin: '(?:^|\\n)(\\n*)(?:\\h*(#{1,6}))', // (?<lines>\\n*), (?<level>#{1,6})
+      begin: '(?:^|\\n)(\\n*)(?:\\h{0,3}(#{1,6})\\h{1,}(?![#]))', // (?<lines>\\n*), (?<level>#{1,6})
       content: '(.+?)', // '(?<text>.+?)'
       end: '(?=$|\\n)',
     };
