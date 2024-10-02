@@ -338,6 +338,11 @@ export default class CodeBlock extends ParagraphBase {
         return addBlockQuoteSignToResult(result);
       }
       $code = this.$recoverCodeInIndent($code);
+      /**
+       * ~1D is replaced from ~D in Link Hook
+       * TODO: provide a global intermediate symbol mapping
+       */
+      $code = $code.replace(/~1D/g, '~D');
       $code = $code.replace(/~D/g, '$');
       $code = $code.replace(/~T/g, '~');
 
