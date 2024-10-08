@@ -13,15 +13,6 @@ export interface CustomMenuType {
   [key: string]: any;
 }
 
-
-/**
-* 自定义按钮功能
-* example:
-* `customMenu:{
-*    customMenu_fileUpload: any,
-* }`
-* 其中`customMenu`是自定按钮的固定属性，`customMenu_fileUpload`是自定义按钮的键名
-*/
 type CherryToolbarsCustomType = {
   CustomMenuType: CustomMenuType
 }
@@ -29,6 +20,43 @@ type CherryToolbarsCustomType = {
 type CherryCustomOptions = {
   CustomToolbar: CherryToolbarsCustomType
 }
+
+
+/**
+* @description By by default, the types declared by Cherry markdown are supported.
+* @description If you want to force the **custom toolbar** key type, please refer to the following.
+* @example  
+* ```
+* type CustomConfig = {
+*  CustomToolbar: {
+*    CustomMenuType: {
+*      customMenu_fileUpload: string
+*    },
+*  },
+* }
+* 
+* const cherryConfig: CherryOptions<CustomConfig> = {
+*  ...
+*  toolbars: {
+*    toolbar: [
+*     'bold',
+*     'italic',
+*       "customMenu_fileUpload",
+*       {
+*         customMenu_fileUpload: [
+*           'image',
+*           'audio',
+*         ],
+*       },
+*       'settings',
+*     ],
+*     customMenu: {
+*       customMenu_fileUpload: customMenu_fileUpload,
+*    },
+* }
+* ```
+* Among them, `customMenu` is the fixed attribute of the custom menu, and `customMenu_fileUpload` is the key name of the custom button
+*/
 
 export interface Cherry<T extends CherryCustomOptions = CherryCustomOptions> {
   options: CherryOptions<T>;
