@@ -7,4 +7,4 @@ Test Suites: 5 failed, 2 passed, 7 total
 Tests:       442 failed, 213 passed, 655 total
 Snapshots:   5 failed, 5 total
 Time:        10.266 s, estimated 16 s
-现在的测试结果还在跑
+现在的测试结果
