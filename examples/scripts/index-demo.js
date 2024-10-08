@@ -145,6 +145,9 @@ var basicConfig = {
         customResourceURL: 'https://github.githubassets.com/images/icons/emoji/unicode/${code}.png?v8',
         upperCase: false,
       },
+      // htmlBlock: {
+      //   filterStyle: true,
+      // }
       // toc: {
       //     tocStyle: 'nested'
       // }

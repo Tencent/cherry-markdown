@@ -100,7 +100,8 @@ export default class HtmlBlock extends ParagraphBase {
     $str = $str.replace(/\$#60;/g, '<').replace(/\$#62;/g, '>');
     // 过滤HTML标签的style属性
     if (this.filterStyle) {
-      $str = $str.replace(/<([^/][^>]+?) style="[^"]+"([^>]*)>/gi, '<$1$2>');
+      $str = $str.replace(/<([^/][^>]+?) style="[^>\n]+?"([^>\n]*)>/gi, '<$1$2>');
+      $str = $str.replace(/<([^/][^>]+?) style='[^>\n]+?'([^>\n]*)>/gi, '<$1$2>');
     }
     return $str;
   }
