@@ -44,7 +44,7 @@ export default class CodeBlock extends ParagraphBase {
     this.selfClosing = config.selfClosing; // 自动闭合，为true时，当md中有奇数个```时，会自动在md末尾追加一个```
     this.mermaid = config.mermaid; // mermaid的配置，目前仅支持格式设置，svg2img=true 展示成图片，false 展示成svg
     this.indentedCodeBlock = typeof config.indentedCodeBlock === 'undefined' ? true : config.indentedCodeBlock; // 是否支持缩进代码块
-    this.INLINE_CODE_REGEX = /(`+)(.+?(?:\n.+?)*?)\1/g;
+    this.INLINE_CODE_REGEX = /(`+)[ ]?([ ]*.+?(`*)(?:[^`\n]+?)*?)[ ]?\1/g;
     if (config && config.customRenderer) {
       this.customLang = Object.keys(config.customRenderer).map((lang) => lang.toLowerCase());
       this.customParser = { ...config.customRenderer };
