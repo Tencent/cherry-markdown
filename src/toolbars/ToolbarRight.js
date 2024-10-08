@@ -27,4 +27,11 @@ export default class ToolbarRight extends Toolbar {
     toolbarLeft.appendChild(menus);
     this.options.dom.appendChild(toolbarLeft);
   }
+
+  init() {
+    super.init();
+    Object.entries(this.shortcutKeyMap).forEach(([key, value]) => {
+      this.$cherry.toolbar.shortcutKeyMap[key] = value;
+    });
+  }
 }

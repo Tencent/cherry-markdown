@@ -46,7 +46,7 @@ export default class Settings extends MenuBase {
       { iconName: '', name: 'hide', onclick: this.bindSubClick.bind(this, 'toggleToolbar') },
       {
         iconName: '',
-        name: '快捷键配置',
+        name: this.$cherry.locale.shortcutKeySetting,
         onclick: this.bindSubClick.bind(this, 'shortcutKey'),
         disabledHideAllSubMenu: true,
       },
@@ -191,7 +191,7 @@ export default class Settings extends MenuBase {
     const shortcutConfig = Object.values(this.shortcutKeyMap).find(({ sub }) => sub === shortcutKey);
     if (typeof shortcutConfig === 'undefined') {
       // 尝试找快捷键
-      const storageKeyMap = getStorageKeyMap(this.$cherry.instanceId);
+      const storageKeyMap = getStorageKeyMap(this.$cherry.nameSpace);
       const storageShortcutConfig = storageKeyMap?.[shortcutKey];
       return storageShortcutConfig ? String(storageShortcutConfig.sub) : shortcutKey;
     }

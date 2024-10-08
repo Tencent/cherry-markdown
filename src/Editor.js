@@ -76,7 +76,11 @@ export default class Editor {
         tabSize: 4, // 一个tab转换成的空格数量
         // styleActiveLine: false, // 当前行背景高亮
         // matchBrackets: true, // 括号匹配
-        mode: 'gfm', // 从markdown模式改成gfm模式，以使用默认高亮规则
+        // mode: 'gfm', // 从markdown模式改成gfm模式，以使用默认高亮规则
+        mode: {
+          name: 'gfm',
+          gitHubSpice: false,
+        },
         lineWrapping: true, // 自动换行
         indentWithTabs: true, // 缩进用tab表示
         autofocus: true,
@@ -433,28 +437,29 @@ export default class Editor {
       throw new Error('The specific element is not a textarea.');
     }
     const editor = codemirror.fromTextArea(textArea, this.options.codemirror);
-    editor.addOverlay({
-      name: 'invisibles',
-      token: function nextToken(stream) {
-        let tokenClass;
-        let spaces = 0;
-        let peek = stream.peek() === ' ';
-        if (peek) {
-          while (peek && spaces < Number.MAX_VALUE) {
-            spaces += 1;
-            stream.next();
-            peek = stream.peek() === ' ';
-          }
-          tokenClass = `whitespace whitespace-${spaces}`;
-        } else {
-          while (!stream.eol()) {
-            stream.next();
-          }
-          tokenClass = '';
-        }
-        return tokenClass;
-      },
-    });
+    // 以下逻辑是针对\t等空白字符的处理，似乎已经不需要了，先注释掉，等有反馈了再考虑加回来
+    // editor.addOverlay({
+    //   name: 'invisibles',
+    //   token: function nextToken(stream) {
+    //     let tokenClass;
+    //     let spaces = 0;
+    //     let peek = stream.peek() === ' ';
+    //     if (peek) {
+    //       while (peek && spaces < Number.MAX_VALUE) {
+    //         spaces += 1;
+    //         stream.next();
+    //         peek = stream.peek() === ' ';
+    //       }
+    //       tokenClass = `whitespace whitespace-${spaces}`;
+    //     } else {
+    //       while (!stream.eol()) {
+    //         stream.next();
+    //       }
+    //       tokenClass = '';
+    //     }
+    //     return tokenClass;
+    //   },
+    // });
     this.previewer = previewer;
     this.disableScrollListener = false;
 
@@ -724,5 +729,12 @@ export default class Editor {
   setWritingStyle(writingStyle) {
     this.options.writingStyle = writingStyle;
     this.initWritingStyle();
+  }
+
+  /**
+   * 设置编辑器值
+   */
+  setValue(value = '') {
+    this.editor.setOption('value', value);
   }
 }

@@ -24,13 +24,23 @@ export default class Theme extends MenuBase {
     this.setName('theme', 'insertChart');
     this.subMenuConfig = [];
     const self = this;
-    $cherry.options.theme.forEach((one) => {
-      self.subMenuConfig.push({
-        iconName: one.className,
-        name: one.label,
-        onclick: self.bindSubClick.bind(self, one.className),
+    if (typeof $cherry.options.theme !== 'undefined') {
+      $cherry.options.theme.forEach((one) => {
+        self.subMenuConfig.push({
+          iconName: one.className,
+          name: one.label,
+          onclick: self.bindSubClick.bind(self, one.className),
+        });
       });
-    });
+    } else {
+      $cherry.options.themeSettings.themeList.forEach((one) => {
+        self.subMenuConfig.push({
+          iconName: one.className,
+          name: one.label,
+          onclick: self.bindSubClick.bind(self, one.className),
+        });
+      });
+    }
   }
 
   /**
@@ -40,6 +50,7 @@ export default class Theme extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    this.$cherry.$event.emit('changeMainTheme', shortKey);
     changeTheme(this.$cherry, shortKey);
     this.updateMarkdown = false;
     return '';

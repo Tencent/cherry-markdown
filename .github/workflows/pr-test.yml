@@ -46,6 +46,7 @@ jobs:
         if: ${{ env.GIT_DIFF_FILES }}
         run: |
           for file in ${{ env.GIT_DIFF_FILES }}; do
+            mkdir -p "base-repo/$(dirname "$file")"
             cp "$file" "base-repo/$file"
           done
 
@@ -87,5 +88,5 @@ jobs:
   review:
     needs: build
     permissions: write-all
-    uses: ./.github/workflows/pr-reviewer.yml
+    uses: ./.github/workflows/pr-reviewer-COS.yml
     secrets: inherit

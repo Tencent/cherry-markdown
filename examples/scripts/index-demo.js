@@ -56,7 +56,11 @@ var customMenuA = Cherry.createMenuHook('加粗斜体',  {
  * 定义一个空壳，用于自行规划cherry已有工具栏的层级结构
  */
 var customMenuB = Cherry.createMenuHook('实验室',  {
-  iconName: '',
+  icon: {
+    type: 'svg',
+    content: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></svg>',
+    iconStyle: 'width: 15px; height: 15px; vertical-align: middle;',
+  },
 });
 /**
  * 定义一个自带二级菜单的工具栏
@@ -202,7 +206,7 @@ var basicConfig = {
       'customMenuCName',
       'theme',
     ],
-    toolbarRight: ['fullScreen', '|', 'wordCount'],
+    toolbarRight: ['fullScreen', '|', 'changeLocale', 'wordCount'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
     sidebar: ['mobilePreview', 'copy', 'theme', 'publish'],
     sidebar: ['mobilePreview', 'copy', 'theme'],
@@ -215,6 +219,20 @@ var basicConfig = {
       customMenuBName: customMenuB,
       customMenuCName: customMenuC,
       customMenuTable,
+    },
+    shortcutKeySettings: {
+      /** 是否替换已有的快捷键, true: 替换默认快捷键； false： 会追加到默认快捷键里，相同的shortcutKey会覆盖默认的 */
+      isReplace: false,
+      shortcutKeyMap: {
+        'Alt-Digit1': {
+          hookName: 'header',
+          aliasName: '标题',
+        },
+        'Control-Shift-KeyX': {
+          hookName: 'bold',
+          aliasName: '加粗',
+        },
+      },
     },
     // config: {
     //   publish: [
@@ -235,6 +253,7 @@ var basicConfig = {
   previewer: {
     // 自定义markdown预览区域class
     // className: 'markdown'
+    floatWhenClosePreviewer: true,
   },
   keydown: [],
   //extensions: [],
@@ -255,6 +274,9 @@ var basicConfig = {
   // cherry初始化后是否检查 location.hash 尝试滚动到对应位置
   autoScrollByHashAfterInit: true,
   // locale: 'en_US',
+  themeSettings: {
+    mainTheme: 'light',
+  },
 };
 
 fetch('./markdown/basic.md').then((response) => response.text()).then((value) => {
