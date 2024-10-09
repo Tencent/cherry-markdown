@@ -207,13 +207,13 @@ export default class Header extends ParagraphBase {
     // setext Header
     // TODO: 支持多行标题
     const setext = {
-      begin: '(?:^|\\n)(\\n*)', // (?<lines>\\n*)
+      begin: '(?:^|\\n)(\\n*)',
       content: [
         '(?:\\h*',
-        '(.+)', // (?<text>.+)
+        '(.+?)', // 使用非贪婪匹配
         ')\\n',
         '(?:\\h*',
-        '([=]+|[-]+)', // (?<level>[=]+|[-]+)
+        '([=]+|[-]+)\\s*', // 允许结尾有空白字符
         ')',
       ].join(''),
       end: '(?=$|\\n)',
@@ -222,8 +222,8 @@ export default class Header extends ParagraphBase {
 
     // atx header
     const atx = {
-      begin: '(?:^|\\n)(\\n*)(?:\\h*(#{1,6}))', // (?<lines>\\n*), (?<level>#{1,6})
-      content: '(.+?)', // '(?<text>.+?)'
+      begin: '(?:^|\\n)(\\n*)(?:\\h{0,3}(#{1,6})\\s+)', // 允许最多3个空格缩进
+      content: '(.+?)(?:\\s+#+\\s*)?', // 允许可选的结束#
       end: '(?=$|\\n)',
     };
     this.strict && (atx.begin += '(?=\\h+)'); // (?=\\s+) for strict mode

@@ -179,27 +179,12 @@ export default class AutoLink extends SyntaxBase {
       return match;
     });
   }
-
+  // 将正则表达式更改为不匹配没有任何换行字符的裸 URL
   rule() {
-    // (?<protocol>\\w+:)\\/\\/
     const ret = {
-      // ?<left>
-      begin: '(<?)',
-      content: [
-        // ?<protocol>
-        '((?:[a-z][a-z0-9+.-]{1,31}:)?)', // protocol is any seq of 2-32 chars beginning with letter
-        // '(?<slash>(?:\\/{2})?)',
-        // ?<address>
-        // '([^\\s\\x00-\\x1f"<>]+)',
-        `((?:${URL_INLINE.source})|(?:${EMAIL_INLINE.source}))`,
-        // [
-        //     `(?<url>${ URL_INLINE.source })`,
-        //     `(?<email>${ EMAIL_INLINE.source })`, // email
-        // ].join('|'),
-        // ')'
-      ].join(''),
-      // ?<right>
-      end: '(>?)', // TODO: extend attrs e.g. {target=_blank}
+      begin: '(<)',
+      content: ['((?:[a-z][a-z0-9+.-]{1,31}:)?)', `((?:${URL_INLINE.source})|(?:${EMAIL_INLINE.source}))`].join(''),
+      end: '(>)',
     };
     ret.reg = compileRegExp(ret, 'ig');
     return ret;
