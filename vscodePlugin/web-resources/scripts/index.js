@@ -249,6 +249,7 @@ const basicConfig = {
       customMenuFont,
       customMenuChangeTheme,
     },
+    toc: true,
   },
   editor: {
     /**
