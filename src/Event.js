@@ -38,6 +38,7 @@ export default class Event {
     afterInit: 'afterInit', // 编辑器初始化完成
     focus: 'focus', // 焦点
     blur: 'blur', // 失焦
+    paste: 'paste', // 粘贴
     selectionChange: 'selectionChange', // 选区内容改变时触发
     afterChangeLocale: 'afterChangeLocale', // 语言改变
     changeMainTheme: 'changeMainTheme', // 变更主题
@@ -92,6 +93,11 @@ export default class Event {
     if (options.event.blur) {
       this.on(this.Events.blur, (event) => {
         options.event.blur(event);
+      });
+    }
+    if (options.event.paste) {
+      this.on(this.Events.paste, (event) => {
+        options.event.paste(event);
       });
     }
     if (options.event.selectionChange) {

@@ -110,6 +110,7 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
   event: {
     focus?: ({ e: MouseEvent, cherry: Cherry }) => void;
     blur?: ({ e: MouseEvent, cherry: Cherry }) => void;
+    paste?: ({ e: MouseEvent, cherry: Cherry }) => void;
     /** 编辑器内容改变并完成渲染后触发 */
     afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */
