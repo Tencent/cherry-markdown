@@ -55,28 +55,36 @@ export default class Engine {
     this.htmlWhiteListAppend = this.globalConfig.htmlWhiteList;
   }
 
-  initMath(opts) {
-    // 无论MathJax还是Katex，都可以先进行MathJax配置
+  async initMath(opts) {
     const { externals, engine } = opts;
     const { syntax } = engine;
     const { plugins } = syntax.mathBlock;
-    // 未开启公式
+
     if (
       !isBrowser() ||
       (!syntax.mathBlock.src && !syntax.inlineMath.src && !syntax.mathBlock.engine && !syntax.inlineMath.engine)
     ) {
       return;
     }
-    // 已经加载过MathJax
+
     if (externals.MathJax || window.MathJax) {
       return;
     }
+
     configureMathJax(plugins);
-    // 等待MathJax各种插件加载
+
+    // 异步加载外部脚本
     const script = document.createElement('script');
     script.src = syntax.mathBlock.src ? syntax.mathBlock.src : syntax.inlineMath.src;
     script.async = true;
-    if (script.src) document.head.appendChild(script);
+    if (script.src) {
+      document.head.appendChild(script);
+      // 使用 Promise 等待脚本加载完成
+      await new Promise((resolve, reject) => {
+        script.onload = resolve;
+        script.onerror = reject;
+      });
+    }
   }
 
   $configInit(params) {
