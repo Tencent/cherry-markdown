@@ -222,7 +222,7 @@ Cherry Markdown Editor在自定义功能和插件系统方面表现出色，具�
 | Editor.md              | ❌      | ❌      | 同样不支持局部渲染和更新，编辑时性能会受到一定影响。                               |
 | Vditor                 | ✅      | ✅      | 支持局部渲染和更新，特别是在所见即所得模式下表现良好。                              |
 | Vue-Markdown-editor    | ❌      | ❌      | 作为Vue组件，目前不支持局部渲染和更新。                                    |
-| ==Md-editor-v3==       | ✅      | ✅      | 支持局部更新，但效果不如Cherry Markdown Editor和Vditor。               |
+|   Md-editor-v3         | ✅      | ✅      | 支持局部更新，但效果不如Cherry Markdown Editor和Vditor。               |
 | tui.editor             | ✅      | ✅      | 支持局部渲染和更新，性能表现良好。                                        |
 
 ### 5.3 性能测试结果
@@ -268,7 +268,7 @@ Cherry Markdown Editor在自定义功能和插件系统方面表现出色，具�
 	</tr>
 </table>
 
-接下来我们根据**三个维度**设计了**12种不同情景**进行性能测试，**最终根据各种场景下的性能进行打分，并得出最终得分**。具体的测试过程整理见[[cherry markdown performance testing]]
+接下来我们根据**三个维度**设计了**12种不同情景**进行性能测试，**最终根据各种场景下的性能进行打分，并得出最终得分**。具体的测试过程整理见[[[cherry markdown performance testing]]](https://github.com/Zerwolrod/cherry-markdown-competitor-analysis/blob/analysis/docs/cherry%20markdown%20performance%20testing.md)
 
 ![](https://s2.loli.net/2024/10/11/CiMSO5d9XZkKl17.png)
 ![image.png](https://s2.loli.net/2024/10/11/sJjqleAagZFtXnP.png)
