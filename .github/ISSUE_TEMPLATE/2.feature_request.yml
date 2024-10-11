@@ -1,12 +1,12 @@
-name: 🚀 New feature proposal
+name: 🚀 New Feature Request
 description: Suggest an idea for this project
 title: "[Feature Request]"
 labels: [🚀enhancement, pending-no-confirmed]
 body:
   - type: markdown
     attributes:
-      value: |
-        Thank you for your interest in the project and taking the time to fill out this feature report!
+      value: Thank you for your interest in the project and taking the time to fill out this feature report.
+
   - type: checkboxes
     id: prerequisites
     attributes:
@@ -35,7 +35,7 @@ body:
     attributes:
       label: Further Information
       description: Provide any other relevant information or screenshots about the feature request here.
-      
+
   - type: dropdown
     id: help-us
     attributes:
