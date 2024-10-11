@@ -2,7 +2,7 @@
 
 ## 内容介绍
 
-本项目是 [2024腾讯犀牛鸟开源人才培养计划—Cherry Markdown](https://github.com/Tencent/OpenSourceTalent/issues/41) 中的竞品分析任务。此次分析将从语法能力、功能、安全、性能、扩展能力以及引擎实现方式和二次开发难易程度等多个维度展开，全面对比 Cherry Markdown 与其他主要 Markdown 编辑器的差异。
+本项目是[2024腾讯犀牛鸟开源人才培养计划—Cherry Markdown](https://github.com/Tencent/OpenSourceTalent/issues/41)中的竞品分析任务。此次分析将从语法能力、功能、安全、性能、扩展能力以及引擎实现方式和二次开发难易程度等多个维度展开，全面对比 Cherry Markdown 与其他主要 Markdown 编辑器的差异。
 
 ## 文档结构
 
@@ -13,7 +13,7 @@
 
 ### 1.1 项目介绍
 
-[Cherry Markdown](https://github.com/Tencent/cherry-markdown) 是一款 **Javascript Markdown 编辑器**，具有**开箱即用、轻量简洁、易于扩展**等特点。它可以运行在**浏览器或服务端(NodeJs)。**
+[Cherry Markdown Editor](https://github.com/Tencent/Cherry Markdown)是一款 **Javascript Markdown 编辑器**，具有**开箱即用、轻量简洁、易于扩展**等特点。它可以运行在**浏览器或服务端(NodeJs)。**
 
 ![PixPin_2024-09-05_19-03-44.png](https://s2.loli.net/2024/09/09/gQCGNfY4Boyz8Rh.png)
 
@@ -85,7 +85,7 @@
 
 我们将这些编辑器分为四个明确的类别：框架集成型编辑器、多功能Markdown编辑器、所见即所得（WYSIWYG）编辑器以及轻量级与高性能编辑器。
 
-> 各竞品的详情界面及链接展示见 [Competitive product display](https://github.com/Zerwolrod/cherry-markdown-competitor-analysis/blob/main/docs/Competitive%20product%20display.md)
+> 各竞品的详情界面及链接展示见[[Competitive product display]]
 
 <table>
     <tr>
@@ -192,7 +192,6 @@
 | Vue-Markdown-editor | 支持Markdown和HTML编辑、提供自定义插件和工具栏选项、支持代码高亮和图表渲染                                                                 |
 | Md-editor-v3        | 支持基础的Markdown编辑和预览、支持图片上传、裁剪图片上传、支持暗黑主题和多光标编辑、提供API参考文档，支持内容格式化和屏幕全屏                                        |
 | tui.editor          | 所见即所得的Markdown编辑器、实时预览、语法高亮、自动生成目录索引、支持表格、UML图和图表等内容的编辑、支持多种主题和样式                                           |
-
 Cherry Markdown Editor在自定义功能和插件系统方面表现出色，具有别的浏览器没有的功能比如导出长图、信息面板/手风琴等等，非常适合需要高度定制化和编程功能的用户。
 
 而其他编辑器也各有特点，比如Vditor可以实现复制到微信公众号和知乎功能，可以满足不同的使用场景和需求，Cherry Markdown编辑器在未来为了优化用户体验，也可以考虑引入同类竞品的个性化功能，打破功能垄断，提升竞争力。
@@ -215,35 +214,157 @@ Cherry Markdown Editor在自定义功能和插件系统方面表现出色，具�
 
 ### 5.2 局部渲染和更新
 
-| 编辑器名称                  | 局部渲染支持 | 局部更新支持 | 描述  |
-| ---------------------- | ------ | ------ | --- |
-| Cherry Markdown Editor |        |        |     |
-| ByteMD                 |        |        |     |
-| Mavon-Editor           |        |        |     |
-| Editor.md              |        |        |     |
-| Vditor                 |        |        |     |
-| Vue-Markdown-editor    |        |        |     |
-| Md-editor-v3           |        |        |     |
-| tui.editor             |        |        |     |
+| 编辑器名称                  | 局部渲染支持 | 局部更新支持 | 描述                                                       |
+| ---------------------- | ------ | ------ | -------------------------------------------------------- |
+| Cherry Markdown Editor | ✅      | ✅      | 利用virtual dom机制，判断用户变更段落，只渲染变更段落，实现局部更新，减少浏览器DOM操作，提高性能。 |
+| ByteMD                 | ✅      | ✅      | 支持局部渲染和更新，通过插件系统和优化的DOM操作实现。                             |
+| ==Mavon-Editor==       | ❌      | ❌      | 目前不支持局部渲染和更新，每次编辑都会重新渲染整个文档。                             |
+| Editor.md              | ❌      | ❌      | 同样不支持局部渲染和更新，编辑时性能会受到一定影响。                               |
+| Vditor                 | ✅      | ✅      | 支持局部渲染和更新，特别是在所见即所得模式下表现良好。                              |
+| Vue-Markdown-editor    | ❌      | ❌      | 作为Vue组件，目前不支持局部渲染和更新。                                    |
+| ==Md-editor-v3==       | ✅      | ✅      | 支持局部更新，但效果不如Cherry Markdown Editor和Vditor。               |
+| tui.editor             | ✅      | ✅      | 支持局部渲染和更新，性能表现良好。                                        |
 
 ### 5.3 性能测试结果
 
-性能测试主要关注编辑器的加载时间、首次渲染时间、编辑操作响应时间等指标。以下是各编辑器的性能测试结果：
+通过对比在各种场景下的页面渲染速度来对比各种markdown插件的性能，我们将测试场景细分为以下三个关键维度：篇幅长短、内容复杂度、以及渲染类型。
 
-| 编辑器名称                  | 加载时间 (ms) | 首次渲染时间 (ms) | 编辑操作响应时间 (ms) | 备注  |
-| ---------------------- | --------- | ----------- | ------------- | --- |
-| Cherry Markdown Editor |           |             |               |     |
-| ByteMD                 |           |             |               |     |
-| Mavon-Editor           |           |             |               |     |
-| Editor.md              |           |             |               |     |
-| Vditor                 |           |             |               |     |
-| Vue-Markdown-editor    |           |             |               |     |
-| Md-editor-v3           |           |             |               |     |
-| tui.editor             |           |             |               |     |
+<table>
+    <tr>
+        <td ><strong>维度</td>
+        <td><strong>类别</td>
+        <td><strong>描述</td>
+    </tr>
+    <tr>
+        <td rowspan="3"><strong>篇幅长短</strong></td>
+        <td>1. 10kb以内</td>
+        <td>适用于短小文档或文章的快速渲染。</td>
+    </tr>
+    <tr>
+        <td>2. 10kb～100kb</td>
+        <td>适用于中等长度文档的渲染，平衡速度与功能。</td>
+    </tr>
+    <tr>
+        <td>3. 100kb以上</td>
+        <td>适用于长篇文档，重点测试处理大量数据时的性能。</td>
+    </tr>
+    <tr>
+        <td rowspan="2"><strong>内容复杂度</strong></td>
+        <td>1. 纯文本</td>
+        <td>仅包含基础文本内容，无额外Markdown语法元素。</td>
+    </tr>
+    <tr>
+        <td>2. 复杂文本</td>
+        <td>包含多种Markdown语法元素，如标题、列表、代码块等。</td>
+    </tr>
+    <tr>
+        <td rowspan="2"><strong>渲染类型</strong></td>
+        <td>1.浏览</td>
+        <td>重点测试文档浏览性能，适用于阅读场景。</td>
+    </tr>
+	<tr>
+	    <td>2. 编辑</td>
+	    <td>重点测试文档编辑时的实时渲染性能。</td>
+	</tr>
+</table>
+
+接下来我们根据**三个维度**设计了**12种不同情景**进行性能测试，**最终根据各种场景下的性能进行打分，并得出最终得分**。具体的测试过程整理见[[cherry markdown performance testing]]
+
+![](https://s2.loli.net/2024/10/11/CiMSO5d9XZkKl17.png)
+![image.png](https://s2.loli.net/2024/10/11/sJjqleAagZFtXnP.png)
+![image.png](https://s2.loli.net/2024/10/11/jHKNvewx1YyoUmM.png)
+![image.png](https://s2.loli.net/2024/10/11/zmHCnU8cGpBtabr.png)
+
+![image.png](https://s2.loli.net/2024/10/11/ojqx5lIX4hPfaVY.png)
+![image.png](https://s2.loli.net/2024/10/11/tmzIXbQLJZx3Gnw.png)
+![image.png](https://s2.loli.net/2024/10/11/By5mMnNlQoUJbPF.png)
+
+我们综合以上数据为各个markdown编辑器按照0-10打分可以得出以下结论：
+### 短篇简单评分
+
+|项目名称|浏览渲染时长(ms)|编辑渲染时长(ms)|平均时长(ms)|评分|
+|---|---|---|---|---|
+|cherry-markdown|38.3|20.12|29.21|9.75|
+|tui.editor|47.05|38.29|42.67|9.45|
+|md-editor-v3|56.24|46.63|51.44|9.05|
+|mavonEditor|67.51|30.49|49.00|9.15|
+|Vue Markdown Editor|73.26|46.29|59.78|8.75|
+|Vditor|103.48|79.06|91.27|7.35|
+|Editor.md|330.33|326.64|328.49|3.75|
+|ByteMD|345.51|335.29|340.40|3.50|
+
+### 短篇复杂评分
+
+|项目名称|浏览渲染时长(ms)|编辑渲染时长(ms)|平均时长(ms)|评分|
+|---|---|---|---|---|
+|cherry-markdown|38.3|20.12|29.21|9.75|
+|tui.editor|47.05|38.29|42.67|9.45|
+|md-editor-v3|56.24|46.63|51.44|9.05|
+|mavonEditor|67.51|30.49|49.00|9.15|
+|Vue Markdown Editor|73.26|46.29|59.78|8.75|
+|Vditor|103.48|79.06|91.27|7.35|
+|Editor.md|330.33|326.64|328.49|3.75|
+|ByteMD|345.51|335.29|340.40|3.50|
+
+### 中篇简单评分
+
+|项目名称|浏览渲染时长(ms)|编辑渲染时长(ms)|平均时长(ms)|评分|
+|---|---|---|---|---|
+|tui.editor|38.88|39.78|39.33|9.65|
+|cherry-markdown|89.24|65.54|77.39|8.00|
+|Editor.md|92.56|755.26|428.91|4.75|
+|mavonEditor|110.56|95.83|103.20|7.00|
+|md-editor-v3|157.37|137.25|147.31|5.75|
+|ByteMD|170.46|153.12|161.79|5.25|
+|Vditor|192.4|86.38|139.39|5.90|
+|Vue Markdown Editor|198.25|104.62|151.44|5.40|
+
+### 中篇复杂评分
+
+|项目名称|浏览渲染时长(ms)|编辑渲染时长(ms)|平均时长(ms)|评分|
+|---|---|---|---|---|
+|Editor.md|179.46|154.62|167.04|5.75|
+|tui.editor|189.93|139.65|164.79|5.90|
+|cherry-markdown|208.21|162.22|185.22|4.90|
+|Vue Markdown Editor|221.63|161.31|191.47|4.75|
+|md-editor-v3|245.13|162.36|203.75|4.45|
+|mavonEditor|262.63|201.51|232.07|4.20|
+|Vditor|291.28|308.86|300.07|3.50|
+|ByteMD|315.25|256.62|285.94|3.75|
+
+### 长篇简单评分
+
+|项目名称|浏览渲染时长(ms)|编辑渲染时长(ms)|平均时长(ms)|评分|
+|---|---|---|---|---|
+|Editor.md|672.52|1714.36|1193.44|2.90|
+|md-editor-v3|713.26|1624.16|1168.71|3.10|
+|cherry-markdown|782.28|2129.58|1450.93|2.45|
+|mavonEditor|831.41|1724.61|1278.01|2.75|
+|ByteMD|915.51|1815.24|1365.38|2.60|
+|Vue Markdown Editor|1153.15|2915.42|2034.29|1.95|
+|tui.editor|1457.76|2150.60|1804.18|2.10|
+|Vditor|1854.10|5167.83|3510.97|1.00|
+
+### 长篇复杂评分
+
+| 项目名称                | 浏览渲染时长(ms) | 编辑渲染时长(ms) | 平均时长(ms) | 评分   |
+| ------------------- | ---------- | ---------- | -------- | ---- |
+| Editor.md           | 1152.67    | 1712.51    | 1432.59  | 2.50 |
+| Vditor              | 1263.60    | 1937.27    | 1600.44  | 2.20 |
+| mavonEditor         | 1415.25    | 2621.13    | 2018.19  | 1.95 |
+| tui.editor          | 1486.27    | 1681.66    | 1583.97  | 2.25 |
+| Vue Markdown Editor | 1514.52    | 1262.14    | 1388.33  | 2.60 |
+| ByteMD              | 1521.51    | 2611.25    | 2066.38  | 1.90 |
+| cherry-markdown     | 1533.16    | 711.02     | 1122.09  | 3.30 |
+| md-editor-v3        | 2562.45    | 1523.51    | 2042.98  | 1.90 |
+
+> 注：由于测试小规模增删时间太短且要一直键盘操作，本测试的编辑速度是通过“向文本开头插入一段与原文本相同规模的文本的速度”来判断的。
+
+> 由于vditor有默认的一秒延迟，记录的时候直接-1s进行测量。
 
 ## 6.安全对比
 
-对于Markdown编辑器，主要面对的安全风险包括跨站脚本攻击（XSS）和数据泄露问题。具体见[markdown editor security risks](https://github.com/Zerwolrod/cherry-markdown-competitor-analysis/blob/main/docs/markdown%20editor%20security%20risks.md)。针对这些安全风险，我们对各竞品选取了防XSS攻击、用户数据隔离两个指标作为对比，以评估它们的安全性能。
+对于Markdown编辑器，主要面对的安全风险包括跨站脚本攻击（XSS）和数据泄露问题。具体见[[markdown editor security risks]]。针对这些安全风险，我们对各竞品选取了防XSS攻击、用户数据隔离两个指标作为对比，以评估它们的安全性能。
 
 参考资料：
 https://portswigger.net/web-security/cross-site-scripting
@@ -297,7 +418,6 @@ Cherry Markdown Editor 内置了安全钩子，通过过滤白名单以及使用
 | Vue-Markdown-editor    | 高    | 中      | 作为Vue组件，外观定制灵活，但行为定制受限于Vue生态。支持Markdown和HTML编辑，提供自定义插件和工具栏选项。                                |
 | Md-editor-v3           | 高    | 高      | 支持高度自定义，包括主题切换、Prettier文本美化等。支持Vue3，使用TypeScript和JSX开发，支持国际化。                                |
 | tui.editor             | 高    | 高      | 提供了所见即所得编辑体验，外观和行为定制灵活。支持Markdown和HTML编辑，提供多种API，支持实时预览、语法高亮、自动生成目录索引等功能。                    |
-
 ![image.png](https://s2.loli.net/2024/10/11/DpnFdIfHVQewJ16.png)
 
 
@@ -364,7 +484,8 @@ CherryMarkdown采用纯JavaScript开发，模块化的架构设计提高了代�
 
 综上，Cherry Markdown Editor在多个维度上展现出了强大的竞争力，特别是在语法能力、功能丰富度、安全性能和拓展能力方面。虽然作为一个较新的项目，它在社区支持和成熟度方面还有提升空间，但其创新的特性和积极的社区参与表明，它有潜力成为市场上的领先Markdown编辑器之一。对于寻求高度定制化和现代化编辑体验的用户来说，Cherry Markdown Editor无疑是一个值得考虑的选择。
 
-![image.png](https://s2.loli.net/2024/10/11/VO6qU7YiKehNglG.png)
+![image.png](https://s2.loli.net/2024/10/11/RYmjalLJbMAPf6S.png)
+
 
 
 以上为我的本次竞品分析项目内容，请各位导师批评指正。
