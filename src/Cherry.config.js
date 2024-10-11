@@ -323,6 +323,24 @@ const defaultConfig = {
          *  - none          标题没有锚点
          */
         anchorStyle: 'default',
+        /**
+         * 是否开启严格模式
+         *    true：严格模式
+         *      # head ⭕️ valid
+         *      #head ❌ invalid
+         *    false：宽松模式
+         *      # head ⭕️ valid
+         *      #head ⭕️ valid
+         */
+        strict: false,
+      },
+      htmlBlock: {
+        /**
+         * 是否过滤html标签中的style属性
+         *    true：过滤style属性
+         *    false：不过滤style属性
+         */
+        filterStyle: false,
       },
     },
   },

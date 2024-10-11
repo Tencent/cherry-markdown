@@ -75,12 +75,19 @@ $mdSvgTextColor: rgb(250, 160, 0);
         }
       }
     }
+    /** 选择表格的按钮 */
+    .cherry-insert-table-menu-item {
+      border-color: $toolbarBtnBgHover;
+    }
   }
 
   /** 选中文字时弹出的按钮 */
   .cherry-bubble {
     .cherry-bubble-bottom {
       border-top-color: $toolbarBg;
+    }
+    .cherry-bubble-top {
+      border-bottom-color: $toolbarBg;
     }
     /** 粘贴HTML内容时弹出的选择按钮 */
     &.cherry-switch-paste {

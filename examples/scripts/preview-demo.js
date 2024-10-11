@@ -72,6 +72,7 @@ var cherryConfig = {
   },
   editor: {
     defaultModel: 'previewOnly',
+    keepDocumentScrollAfterInit: true,
   },
   callback: {
     onClickPreview: function(e) {
