@@ -41,7 +41,7 @@ export default class InlineCode extends ParagraphBase {
   }
 
   rule() {
-    const ret = { begin: '(`+)[ ]*', end: '[ ]?\\1',  content: '([^`\\n]*(?:\\n[^`\\n]*)*)(?=\\1|$)' }; 
+    const ret = { begin: '(`+)[ ]*', end: '[ ]?\\1',  content: '([^`\\n]*(?:\\n[^`\\n]*)*)(?=\\1|$)', }; 
     ret.reg = compileRegExp(ret, 'g');
     return ret;
   }
