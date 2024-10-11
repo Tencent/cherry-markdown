@@ -277,7 +277,7 @@ export default class Editor {
    * @returns {boolean | void}
    */
   handlePaste(event, clipboardData, codemirror) {
-    const onPasteRet = this.$cherry.options.callback.onPaste(clipboardData);
+    const onPasteRet = this.$cherry.options.callback.onPaste(clipboardData, this.$cherry);
     if (onPasteRet !== false && typeof onPasteRet === 'string') {
       event.preventDefault();
       codemirror.replaceSelection(onPasteRet);
