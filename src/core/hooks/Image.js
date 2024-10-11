@@ -149,7 +149,7 @@ export default class Image extends SyntaxBase {
         `${
           '(?:' +
           '\\(' +
-          '([^"][^\\s]+?)' + // ?<link> url
+          '((?:[^\\s()]*\\([^\\s()]*\\)[^\\s()]*)+|(?:[^"][^\\s]+?))' + // ?<link> url
           '(?:[ \\t]((?:".*?")|(?:\'.*?\')))?' + // ?<title> optional
           '\\)' +
           '|' + // or

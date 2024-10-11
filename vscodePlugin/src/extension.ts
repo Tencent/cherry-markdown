@@ -67,7 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }
 
 /**
  * 获取当前文件的信息
@@ -108,7 +108,7 @@ const getMarkdownFileInfo = () => {
  */
 const initCherryPanel = () => {
   const { mdInfo, currentTitle } = getMarkdownFileInfo();
-  const workspaceFolder =    vscode.workspace.workspaceFolders?.[0].uri.fsPath ?? '';
+  const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath ?? '';
   cherryPanel = vscode.window.createWebviewPanel(
     'cherrymarkdown.preview',
     currentTitle,
@@ -134,10 +134,8 @@ const initCherryPanel = () => {
   initCherryPanelEvent();
 };
 
-// eslint-disable-next-line no-unused-vars, no-undef
-let scrollTimeOut: NodeJS.Timeout;
-// eslint-disable-next-line no-unused-vars, no-undef
-let editTimeOut: NodeJS.Timeout;
+let scrollTimeOut: ReturnType<typeof setTimeout> | undefined;
+let editTimeOut: ReturnType<typeof setTimeout> | undefined;
 const initCherryPanelEvent = () => {
   cherryPanel?.webview?.onDidReceiveMessage(async (e) => {
     const { type, data } = e;
@@ -215,8 +213,8 @@ const triggerEditorContentChange = (focus: boolean = false) => {
   } else {
     if (vscode.window.activeTextEditor?.document?.languageId === 'markdown') {
       const cherryUsage: 'active' | 'only-manual' | undefined = vscode.workspace
-      .getConfiguration('cherryMarkdown')
-      .get('usage');
+        .getConfiguration('cherryMarkdown')
+        .get('usage');
       if (cherryUsage === 'active' || focus) {
         initCherryPanel();
       }

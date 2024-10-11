@@ -2,6 +2,57 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.49](https://github.com/Tencent/cherry-markdown/compare/v0.8.48...v0.8.49) (2024-09-27)
+
+
+### Features
+
+* [#927](https://github.com/Tencent/cherry-markdown/issues/927) 增加对html标签里style属性过滤的配置 ([858f862](https://github.com/Tencent/cherry-markdown/commit/858f86285da2c92a54cc05668629f1b14c691a61))
+* 表格增加删除列操作 ([#843](https://github.com/Tencent/cherry-markdown/issues/843)) ([d8ed2ec](https://github.com/Tencent/cherry-markdown/commit/d8ed2ecb561c73b586799b022808a34d71ad0acc))
+* 优化快捷键工具栏，增加不可修改的快捷键信息 ([93de3b1](https://github.com/Tencent/cherry-markdown/commit/93de3b136e7b1e518768cbce5d5e2975dd0369ca))
+
+
+### Bug Fixes
+
+* [#923](https://github.com/Tencent/cherry-markdown/issues/923) 支持多个括号 ([a3da98b](https://github.com/Tencent/cherry-markdown/commit/a3da98b994b72dc375f6040884f1bca876d766f0))
+* [#925](https://github.com/Tencent/cherry-markdown/issues/925) 默认关掉codemirror对github特殊链接格式的支持 ([22d691b](https://github.com/Tencent/cherry-markdown/commit/22d691ba04af77e69770740098aadf0642535377))
+* 增加ci脚本的鲁棒性 ([a9611d9](https://github.com/Tencent/cherry-markdown/commit/a9611d9ef5d3b62d740045bd256ac546e4227802))
+* github-bot message npm version ([#918](https://github.com/Tencent/cherry-markdown/issues/918)) ([88e1a48](https://github.com/Tencent/cherry-markdown/commit/88e1a489a40882d4415f4e4c2e87021575d28b3a))
+* rename npm-dev-test package ([#917](https://github.com/Tencent/cherry-markdown/issues/917)) ([40f7d6b](https://github.com/Tencent/cherry-markdown/commit/40f7d6b708e534a77441f86dbfa8374956ec4911))
+
+
+### Code Refactoring
+
+* 优化表格所见即所得编辑里，拖拽行列、删除行列的交互和功能 ([77bf4db](https://github.com/Tencent/cherry-markdown/commit/77bf4db26dbc6f05bacef9cda66afffbfa702216))
+
+
+### Css or Code Change
+
+* 优化配色 ([ed4d8f4](https://github.com/Tencent/cherry-markdown/commit/ed4d8f4cd90bd7005e88e1721fd43a55fdb602be))
+
+### [0.8.48](https://github.com/Tencent/cherry-markdown/compare/v0.8.47...v0.8.48) (2024-09-23)
+
+
+### Features
+
+* [#900](https://github.com/Tencent/cherry-markdown/issues/900) “引用“语法支持嵌套，并支持嵌套其他语法（如表格、代码块、列表、信息面板等） ([d7a887d](https://github.com/Tencent/cherry-markdown/commit/d7a887dc8d8a4f70214d984b4fafea1fd6c88b44))
+* [#900](https://github.com/Tencent/cherry-markdown/issues/900) “引用“语法支持嵌套，并支持嵌套其他语法（如表格、代码块、列表、信息面板等）fix lint ([9366d1e](https://github.com/Tencent/cherry-markdown/commit/9366d1eecb2107e93eb42eb38fab18407f3817ad))
+* 支持设置编辑器的值 ([bcb1b23](https://github.com/Tencent/cherry-markdown/commit/bcb1b232bcfae5e06a651d1ce7e34f670b1a334c))
+
+
+### Bug Fixes
+
+* [#879](https://github.com/Tencent/cherry-markdown/issues/879) 修复脚注在滚动条在html时无法滚动的问题 ([ad1362a](https://github.com/Tencent/cherry-markdown/commit/ad1362ac8ab164182e3f849f75b1d6a7f39d586f))
+* [#898](https://github.com/Tencent/cherry-markdown/issues/898) 修复配置代码块主题失效的问题 ([90f3c1d](https://github.com/Tencent/cherry-markdown/commit/90f3c1db578cc8cfa4305cb5e2537a7fc2033e81))
+* [#898](https://github.com/Tencent/cherry-markdown/issues/898) 修复配置主题失效的问题 ([191206b](https://github.com/Tencent/cherry-markdown/commit/191206b965a4d6b1ebd6ac5867569aa786b24460))
+* [#898](https://github.com/Tencent/cherry-markdown/issues/898) 修复配置主题失效的问题 ([afa5a7f](https://github.com/Tencent/cherry-markdown/commit/afa5a7f4bf9d5bc0dd420843673eba8f5a54dfe7))
+* [#903](https://github.com/Tencent/cherry-markdown/issues/903) 修复联想功能引入的性能问题 ([fbf1f0c](https://github.com/Tencent/cherry-markdown/commit/fbf1f0cbf67f7a6ce41493428f928acd200a5271))
+* [#910](https://github.com/Tencent/cherry-markdown/issues/910) 图片和超链接支持一对括号（时间有限，先只支持一对括号，再多的后续再考虑实现） ([e609e95](https://github.com/Tencent/cherry-markdown/commit/e609e95ef776ae831af629c9ffa479e6d7cdd88e))
+* [#910](https://github.com/Tencent/cherry-markdown/issues/910) 图片和超链接支持一对括号（时间有限，先只支持一对括号，再多的后续再考虑实现） ([688b7eb](https://github.com/Tencent/cherry-markdown/commit/688b7ebe888730933bbb69824f5bb59cc95c520f))
+* [#913](https://github.com/Tencent/cherry-markdown/issues/913) 文章目录支持国际化 ([#915](https://github.com/Tencent/cherry-markdown/issues/915)) ([52f01c9](https://github.com/Tencent/cherry-markdown/commit/52f01c90681bd79d443d843dbc6a7c0c9361ab03))
+* 对于配置config 类型的修复 ([#890](https://github.com/Tencent/cherry-markdown/issues/890)) ([588f862](https://github.com/Tencent/cherry-markdown/commit/588f862a83e78193047f5c8690fe909d36051bc3))
+* 修复为支持引用嵌套导致页面报错的问题 ([e930143](https://github.com/Tencent/cherry-markdown/commit/e930143a12b95e98d303e1f0b4c1c8c8a5f50cc3))
+
 ### [0.8.47](https://github.com/Tencent/cherry-markdown/compare/v0.8.46...v0.8.47) (2024-09-03)
 
 

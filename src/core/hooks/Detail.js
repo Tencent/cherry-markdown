@@ -39,6 +39,10 @@ export default class Detail extends ParagraphBase {
     return str.replace(this.RULE.reg, (match, preLines, isOpen, title, content) => {
       const lineCount = this.getLineCount(match, preLines);
       const sign = this.$engine.md5(match);
+      const testHasCache = this.testHasCache(sign);
+      if (testHasCache !== false) {
+        return prependLineFeedForParagraph(match, testHasCache);
+      }
       const { type, html } = this.$getDetailInfo(isOpen, title, content, sentenceMakeFunc);
       const ret = this.pushCache(
         `<div class="cherry-detail cherry-detail__${type}" data-sign="${sign}" data-lines="${lineCount}" >${html}</div>`,
