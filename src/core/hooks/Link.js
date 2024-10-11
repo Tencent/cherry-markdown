@@ -129,7 +129,6 @@ export default class Link extends SyntaxBase {
       begin: isLookbehindSupported() ? '((?<!\\\\))' : '(^|[^\\\\])',
       content: [
         '\\[([^\\n]*?)\\]', // ?<text>
-        // 同样匹配方括号内的非换行字符，但使用了*?进行非贪婪匹配
         '[ \\t]*', // any spaces
         `${
           '(?:' +
