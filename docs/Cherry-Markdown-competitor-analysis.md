@@ -268,7 +268,7 @@ Cherry Markdown Editor在自定义功能和插件系统方面表现出色，具�
 	</tr>
 </table>
 
-接下来我们根据**三个维度**设计了**12种不同情景**进行性能测试，**最终根据各种场景下的性能进行打分，并得出最终得分**。具体的测试过程整理见[[cherry markdown performance testing]]
+接下来我们根据**三个维度**设计了**12种不同情景**进行性能测试，**最终根据各种场景下的性能进行打分，并得出最终得分**。具体的测试过程整理见[[[cherry markdown performance testing]]](https://github.com/Zerwolrod/cherry-markdown-competitor-analysis/blob/analysis/docs/cherry%20markdown%20performance%20testing.md)，测试工程文件见[[[test]]](https://github.com/Zerwolrod/test)。
 
 ![](https://s2.loli.net/2024/10/11/CiMSO5d9XZkKl17.png)
 ![image.png](https://s2.loli.net/2024/10/11/Tk1K73bovqjHGRs.png)
