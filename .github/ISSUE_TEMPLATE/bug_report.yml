@@ -24,7 +24,7 @@ body:
     attributes:
       label: Version
       description: Providing the current version of cherry-markdown that will generate bugs.
-      placeholder: "example: 1.0.0"
+      placeholder: "v1.0.0"
     validations:
       required: true
 

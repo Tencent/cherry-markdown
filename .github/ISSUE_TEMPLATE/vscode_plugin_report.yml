@@ -1,7 +1,7 @@
 name: 🔌 VSCode Plugin issue
 description: About VSCode Plugin issue
 title: "[VSCode Plugin]"
-labels: [🔌VSCode-Plugin, padding-no-confirmed]
+labels: [🔌vscode-plugin, padding-no-confirmed]
 body:
   - type: markdown
     attributes:
@@ -32,7 +32,7 @@ body:
     attributes:
       label: Version
       description: If it is a bug, please tell us which version the bug occurred in. If it is a Feature, please tell us which version you are currently using.
-      placeholder: Version
+      placeholder: v1.0.0
     validations:
       required: true
 

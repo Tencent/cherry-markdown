@@ -14,6 +14,7 @@ body:
       description: "Before submitting the issue, ensure the following:"
       options:
         - label: There isn't an existing issue that requests the same feature, to avoid duplicates.
+
   - type: textarea
     id: feature-description
     attributes:
@@ -22,16 +23,19 @@ body:
       placeholder: Feature description
     validations:
       required: true
+
   - type: textarea
     id: suggested-solution
     attributes:
       label: Suggested solution
       description: "I want a xx function that can be used to do xxx things. Its implementation is beneficial for..."
+
   - type: textarea
     id: additional-context
     attributes:
       label: Further Information
       description: Provide any other relevant information or screenshots about the feature request here.
+      
   - type: dropdown
     id: help-us
     attributes:
