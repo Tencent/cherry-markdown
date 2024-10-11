@@ -1,0 +1,16 @@
+name: ✏️ Others
+description: If none of them are in other ranges, please use this to illustrate.
+title: "[Others]"
+labels: [pending-no-confirmed]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for your interest in the project and for taking the time to provide your feedback.
+
+  - type: textarea
+    id: issue-description
+    attributes:
+      label: Clear and concise description of the problem or idea.
+      placeholder: Questions or ideas.
+    validations:
+      required: true

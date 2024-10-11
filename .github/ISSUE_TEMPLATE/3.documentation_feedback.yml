@@ -1,29 +1,34 @@
-name: 💻 Client Feedback
-description: Client feedback
-title: '[Client]'
-labels: [client]
+name: 📃 Documentation Feedback
+description: Ask a question or submit a bug related to our documentation
+title: "[Docs]"
+labels: [📃documentation, pending-no-confirmed]
 body:
   - type: markdown
     attributes:
       value: |
-        Thank you for your interest in the project and for taking the time to provide your feedback.
+        Thank you for your interest in the project and taking the time to provide your feedback.
+        [For current usage documentation, please see here.](https://github.com/Tencent/cherry-markdown/wiki)
+
   - type: checkboxes
     id: prerequisites
     attributes:
       label: Prerequisites
       description: 'Before submitting the issue, ensure the following:'
       options:
-        - label: There isn't an existing issue that requests the same feature, to avoid duplicates.
+        - label: There isn't an existing issue with the same question or request to avoid duplicates.
+
   - type: dropdown
     id: type
     attributes:
       label: Issue Type
       description: What type of issue is this? 
       options:
-        - Bug Report
-        - Feature Request
+        - Question
+        - Documentation Error
+        - Update Request
     validations:
         required: true
+
   - type: textarea
     id: issue-description
     attributes:
@@ -31,11 +36,13 @@ body:
       placeholder: Describe your questions or share your ideas here.
     validations:
       required: true
+
   - type: textarea
-    id: further-info
+    id: additional-context
     attributes:
       label: Further Information
-      description: Provide any other relevant information or screenshots about the feature request here.
+      description: Provide any other relevant information or screenshots about the question here.
+      
   - type: dropdown
     id: help-us
     attributes:
