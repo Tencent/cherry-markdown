@@ -271,13 +271,12 @@ Cherry Markdown Editor在自定义功能和插件系统方面表现出色，具�
 接下来我们根据**三个维度**设计了**12种不同情景**进行性能测试，**最终根据各种场景下的性能进行打分，并得出最终得分**。具体的测试过程整理见[[[cherry markdown performance testing]]](https://github.com/Zerwolrod/cherry-markdown-competitor-analysis/blob/analysis/docs/cherry%20markdown%20performance%20testing.md)，测试工程文件见[[[test]]](https://github.com/Zerwolrod/test)。
 
 ![](https://s2.loli.net/2024/10/11/CiMSO5d9XZkKl17.png)
-![image.png](https://s2.loli.net/2024/10/11/sJjqleAagZFtXnP.png)
-![image.png](https://s2.loli.net/2024/10/11/jHKNvewx1YyoUmM.png)
-![image.png](https://s2.loli.net/2024/10/11/zmHCnU8cGpBtabr.png)
-
-![image.png](https://s2.loli.net/2024/10/11/ojqx5lIX4hPfaVY.png)
-![image.png](https://s2.loli.net/2024/10/11/tmzIXbQLJZx3Gnw.png)
-![image.png](https://s2.loli.net/2024/10/11/By5mMnNlQoUJbPF.png)
+![image.png](https://s2.loli.net/2024/10/11/Tk1K73bovqjHGRs.png)
+![image.png](https://s2.loli.net/2024/10/11/9uQK1wWnZe4NRMC.png)
+![image.png](https://s2.loli.net/2024/10/11/nl8xhYLI67DpU1M.png)
+![image.png](https://s2.loli.net/2024/10/11/9SYsNZ3lUoitW6u.png)
+![image.png](https://s2.loli.net/2024/10/11/b7HJOGluvDWwnke.png)
+![image.png](https://s2.loli.net/2024/10/11/cH5ykBwRza2QZDU.png)
 
 我们综合以上数据为各个markdown编辑器按照0-10打分可以得出以下结论：
 ### 短篇简单评分
