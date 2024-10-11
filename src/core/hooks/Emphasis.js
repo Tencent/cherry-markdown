@@ -95,7 +95,7 @@ export default class Emphasis extends SyntaxBase {
     };
     const asterisk = {
       begin: '(^|[^\\\\])(\\*+)(?!\\*)', // ?<leading>, ?<symbol>
-      //防止连续星号：改后的正则表达式不允许捕获的星号序列后紧跟另一个星号
+      // 防止连续星号：改后的正则表达式不允许捕获的星号序列后紧跟另一个星号
       content: `(${emRegexp(allowWhitespace, '*')})`, // ?<text>
       end: '\\2',
     };
