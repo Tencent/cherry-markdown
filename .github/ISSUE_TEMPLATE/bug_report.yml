@@ -1,7 +1,7 @@
 name: 🐞 Bug Report
 description: Report a bug
 title: "[Bug Report]"
-labels: [bug, padding-no-confirmed]
+labels: [🐞bug, padding-no-confirmed]
 body:
   - type: markdown
     attributes:
@@ -16,15 +16,15 @@ body:
         - label: There isn't an existing issue that reports the same bug to avoid duplicates.
         - label:
             The provided information offers a [minimal reproducible example](https://github.com/Tencent/cherry-markdown/tree/main/examples) of the bug,
-            (Why create a Minimal, Reproducible Example](https://stackoverflow.com/help/minimal-reproducible-example)).
+            ([Why create a Minimal, Reproducible Example](https://stackoverflow.com/help/minimal-reproducible-example)).
         - label: For Q&A, please open a [GitHub Discussion](https://github.com/Tencent/cherry-markdown/discussions) instead.
 
   - type: input
     id: version
     attributes:
       label: Version
-      description: Provide a version of `cherry-markdown` that generates bugs.
-      placeholder: Version
+      description: Providing the current version of cherry-markdown that will generate bugs.
+      placeholder: "example: 1.0.0"
     validations:
       required: true
 

@@ -1,7 +1,7 @@
 name: 🔌 VSCode Plugin issue
 description: About VSCode Plugin issue
 title: "[VSCode Plugin]"
-labels: [VSCode-Plugin, padding-no-confirmed]
+labels: [🔌VSCode-Plugin, padding-no-confirmed]
 body:
   - type: markdown
     attributes:

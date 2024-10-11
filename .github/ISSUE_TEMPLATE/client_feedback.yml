@@ -1,7 +1,7 @@
 name: 💻 Client Feedback
 description: Client feedback
 title: "[Client]"
-labels: [client, padding-no-confirmed]
+labels: [💻client, padding-no-confirmed]
 body:
   - type: markdown
     attributes:
