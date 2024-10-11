@@ -85,7 +85,7 @@
 
 我们将这些编辑器分为四个明确的类别：框架集成型编辑器、多功能Markdown编辑器、所见即所得（WYSIWYG）编辑器以及轻量级与高性能编辑器。
 
-> 各竞品的详情界面及链接展示见[[Competitive product display.md]]
+> 各竞品的详情界面及链接展示见![Competitive product display]([https://github.com/Zerwolrod/cherry-markdown-competitor-analysis/blob/main/docs/markdown%20editor%20security%20risks.md](https://github.com/Zerwolrod/cherry-markdown-competitor-analysis/blob/main/docs/Competitive%20product%20display.md))
 
 <table>
     <tr>
@@ -243,7 +243,7 @@ Cherry Markdown Editor在自定义功能和插件系统方面表现出色，具�
 
 ## 6.安全对比
 
-对于Markdown编辑器，主要面对的安全风险包括跨站脚本攻击（XSS）和数据泄露问题。具体见[[markdown editor security risks]]。针对这些安全风险，我们对各竞品选取了防XSS攻击、用户数据隔离两个指标作为对比，以评估它们的安全性能。
+对于Markdown编辑器，主要面对的安全风险包括跨站脚本攻击（XSS）和数据泄露问题。具体见![markdown editor security risks](https://github.com/Zerwolrod/cherry-markdown-competitor-analysis/blob/main/docs/markdown%20editor%20security%20risks.md)。针对这些安全风险，我们对各竞品选取了防XSS攻击、用户数据隔离两个指标作为对比，以评估它们的安全性能。
 
 参考资料：
 https://portswigger.net/web-security/cross-site-scripting
