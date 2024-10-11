@@ -1,12 +1,12 @@
 name: 🐞 Bug Report
 description: Report a bug
 title: "[Bug Report]"
-labels: [🐞bug, padding-no-confirmed]
+labels: [🐞bug, pending-no-confirmed]
 body:
   - type: markdown
     attributes:
-      value: |
-        Thank you for taking the time to report this bug.
+      value:  Thank you for taking the time to report this bug.
+
   - type: checkboxes
     id: prerequisites
     attributes:
@@ -14,7 +14,7 @@ body:
       description: "Before submitting the issue, ensure the following:"
       options:
         - label: There isn't an existing issue that reports the same bug to avoid duplicates.
-        - label:
+        - label: |
             The provided information offers a [minimal reproducible example](https://github.com/Tencent/cherry-markdown/tree/main/examples) of the bug,
             ([Why create a Minimal, Reproducible Example](https://stackoverflow.com/help/minimal-reproducible-example)).
         - label: For Q&A, please open a [GitHub Discussion](https://github.com/Tencent/cherry-markdown/discussions) instead.

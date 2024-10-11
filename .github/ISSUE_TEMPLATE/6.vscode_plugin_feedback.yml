@@ -1,12 +1,11 @@
 name: 🔌 VSCode Plugin issue
 description: About VSCode Plugin issue
 title: "[VSCode Plugin]"
-labels: [🔌vscode-plugin, padding-no-confirmed]
+labels: [🔌vscode-plugin, pending-no-confirmed]
 body:
   - type: markdown
     attributes:
-      value: |
-        Thanks for your interest in the project and taking the time to fill out this feature report!
+      value: Thank you for your interest in the project and for taking the time to provide your feedback.
 
   - type: checkboxes
     id: checkboxes

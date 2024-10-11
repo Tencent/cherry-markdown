@@ -1,7 +1,7 @@
 name: 📃 Documentation Feedback
 description: Ask a question or submit a bug related to our documentation
 title: "[Docs]"
-labels: [📃documentation, padding-no-confirmed]
+labels: [📃documentation, pending-no-confirmed]
 body:
   - type: markdown
     attributes:

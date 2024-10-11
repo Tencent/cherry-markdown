@@ -1,12 +1,11 @@
 name: 💻 Client Feedback
 description: Client feedback
 title: "[Client]"
-labels: [💻client, padding-no-confirmed]
+labels: [💻client, pending-no-confirmed]
 body:
   - type: markdown
     attributes:
-      value: |
-        Thank you for your interest in the project and for taking the time to provide your feedback.
+      value: Thank you for your interest in the project and for taking the time to provide your feedback.
 
   - type: checkboxes
     id: prerequisites
