@@ -39,7 +39,7 @@ export default class InlineCode extends ParagraphBase {
 
   rule() {
     const ret = { begin: '(`+)[ ]*', end: '[ ]?\\1',  content: '([^`\\n]*(?:\\n[^`\\n]*)*)(?=\\1|$)' }; 
-    // 简化content部分，使用非贪婪匹配来捕获任意数量的非反引号字符（包括换行符），  
+    // 简化content部分 
     ret.reg = compileRegExp(ret, 'g');
     return ret;
   }
