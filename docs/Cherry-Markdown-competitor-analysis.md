@@ -13,7 +13,7 @@
 
 ### 1.1 项目介绍
 
-[Cherry Markdown Editor](https://github.com/Tencent/Cherry Markdown)是一款 **Javascript Markdown 编辑器**，具有**开箱即用、轻量简洁、易于扩展**等特点。它可以运行在**浏览器或服务端(NodeJs)。**
+[Cherry Markdown Editor](https://github.com/Tencent/Cherry Markdown) 是一款 **Javascript Markdown 编辑器**，具有**开箱即用、轻量简洁、易于扩展**等特点。它可以运行在**浏览器或服务端(NodeJs)。**
 
 ![PixPin_2024-09-05_19-03-44.png](https://s2.loli.net/2024/09/09/gQCGNfY4Boyz8Rh.png)
 
