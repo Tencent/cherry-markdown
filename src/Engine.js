@@ -204,7 +204,39 @@ export default class Engine {
     }
     return $md;
   }
-
+  /**在Engine类中添加一个新的异步方法$fireAsyncHookAction。这个方法的主要目的是并行处理所有异步hook，从而提高性能
+保持兼容性：新方法的设计保持了与原有$fireHookAction方法相似的接口，这样可以最小化对现有代码的修改，保持向后兼容性
+异步处理：使用Promise.all来并行执行所有异步hook。这样可以显著提高处理大量数据或复杂操作时的性能
+错误处理：使用try-catch块来捕获并处理可能出现的错误，确保异步操作的稳定性
+ */
+  async $fireAsyncHookAction(md, type, action, actionArgs) {
+    let $md = md;
+    if (!this.hooks || !this.hooks[type]) {
+      return $md;
+    }
+  
+    const hooks = this.hooks[type];
+    const asyncHooks = hooks.filter(hook => hook[action] && hook[action].constructor.name === 'AsyncFunction');
+  
+    try {
+      const results = await Promise.all(asyncHooks.map(async (hook) => {
+        if (!hook.$engine) {
+          hook.$engine = this;
+        }
+        return await hook[action]($md, actionArgs, this.markdownParams);
+      }));
+  
+      results.forEach(result => {
+        if (result) {
+          $md = result;
+        }
+      });
+    } catch (e) {
+      throw new NestedError(e);
+    }
+  
+    return $md;
+  }
   md5(str) {
     if (!this.md5StrMap[str]) {
       this.md5StrMap[str] = md5(str);
@@ -261,7 +293,16 @@ export default class Engine {
     $md = this.$deCacheBigData($md);
     return $md;
   }
-
+  /**使得makehtml成为异步方法，只对makeHtml方法中的$dealParagraph调用进行修改，使用新的$fireAsyncHookAction方法。这样可以保持其他部分的代码不变，减少潜在的bug
+   * async makeHtml(md) {
+    let $md = this.$cacheBigData(md);
+    $md = this.$beforeMakeHtml($md);
+    $md = await this.$fireAsyncHookAction($md, 'paragraph', 'makeHtml', this.$dealSentenceByCache.bind(this));
+    $md = this.$afterMakeHtml($md);
+    $md = this.$deCacheBigData($md);
+    return $md;
+  }
+  */
   mounted() {
     this.$fireHookAction('', 'sentence', 'mounted');
     this.$fireHookAction('', 'paragraph', 'mounted');
