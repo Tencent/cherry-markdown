@@ -132,6 +132,22 @@ function changeTheme(theme) {
   )} theme__${theme}`;
 }
 
+/** 处理 a 链接跳转问题 */
+const onClickLink = (target) => {
+  // 这里不能直接使用 target.href，因为本地相对文件地址会被vscode转成`webview://`协议
+  const href = target.attributes?.href.value;
+  if (!href) {
+    vscode.postMessage({
+      type: 'open-url',
+      data: 'href-invalid',
+    });
+  };
+  vscode.postMessage({
+    type: 'open-url',
+    data: href,
+  });
+};
+
 const basicConfig = {
   id: 'markdown',
   externals: {
@@ -305,6 +321,19 @@ const basicConfig = {
       const basePath = window._baseResourcePath || '';
       return {
         src: path.join(basePath, srcValue),
+      };
+    },
+    onClickPreview: (e) => {
+      const { target } = e;
+      switch (target?.nodeName) {
+        case 'SPAN':
+          if (target?.parentElement?.nodeName === 'A') {
+            onClickLink(target?.parentElement);
+          }
+          break;
+        case 'A':
+          onClickLink(target);
+          break;
       };
     },
   },
