@@ -30,7 +30,7 @@
     "commands": [
       {
         "command": "cherrymarkdown.preview",
-        "title": "Open Cherry Markdown"
+        "title": "Preview In Cherry Markdown"
       }
     ],
     "menus": {
@@ -42,6 +42,13 @@
         }
       ]
     },
+    "keybindings": [
+      {
+        "command": "cherrymarkdown.preview",
+        "key": "F10",
+        "when": "editorTextFocus && editorLangId == markdown"
+      }
+    ],
     "icons": {
       "distro-ubuntu": {
         "description": "cherry-markdown icon",
