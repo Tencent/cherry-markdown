@@ -85,7 +85,7 @@
 
 我们将这些编辑器分为四个明确的类别：框架集成型编辑器、多功能Markdown编辑器、所见即所得（WYSIWYG）编辑器以及轻量级与高性能编辑器。
 
-> 各竞品的详情界面及链接展示见[[Competitive product display]]
+> 各竞品的详情界面及链接展示见[[Competitive product display.md]]
 
 <table>
     <tr>
@@ -192,6 +192,7 @@
 | Vue-Markdown-editor | 支持Markdown和HTML编辑、提供自定义插件和工具栏选项、支持代码高亮和图表渲染                                                                 |
 | Md-editor-v3        | 支持基础的Markdown编辑和预览、支持图片上传、裁剪图片上传、支持暗黑主题和多光标编辑、提供API参考文档，支持内容格式化和屏幕全屏                                        |
 | tui.editor          | 所见即所得的Markdown编辑器、实时预览、语法高亮、自动生成目录索引、支持表格、UML图和图表等内容的编辑、支持多种主题和样式                                           |
+
 Cherry Markdown Editor在自定义功能和插件系统方面表现出色，具有别的浏览器没有的功能比如导出长图、信息面板/手风琴等等，非常适合需要高度定制化和编程功能的用户。
 
 而其他编辑器也各有特点，比如Vditor可以实现复制到微信公众号和知乎功能，可以满足不同的使用场景和需求，Cherry Markdown编辑器在未来为了优化用户体验，也可以考虑引入同类竞品的个性化功能，打破功能垄断，提升竞争力。
@@ -296,6 +297,7 @@ Cherry Markdown Editor 内置了安全钩子，通过过滤白名单以及使用
 | Vue-Markdown-editor    | 高    | 中      | 作为Vue组件，外观定制灵活，但行为定制受限于Vue生态。支持Markdown和HTML编辑，提供自定义插件和工具栏选项。                                |
 | Md-editor-v3           | 高    | 高      | 支持高度自定义，包括主题切换、Prettier文本美化等。支持Vue3，使用TypeScript和JSX开发，支持国际化。                                |
 | tui.editor             | 高    | 高      | 提供了所见即所得编辑体验，外观和行为定制灵活。支持Markdown和HTML编辑，提供多种API，支持实时预览、语法高亮、自动生成目录索引等功能。                    |
+
 ![image.png](https://s2.loli.net/2024/10/11/DpnFdIfHVQewJ16.png)
 
 
