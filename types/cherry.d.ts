@@ -103,7 +103,7 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     onClickPreview?: (e: MouseEvent) => void;
     onCopyCode?: (e: ClipboardEvent, code: string) => string | false;
     changeString2Pinyin?: (str: string) => string;
-    onPaste?: (clipboardData: ClipboardEvent['clipboardData']) => string | boolean;
+    onPaste?: (clipboardData: ClipboardEvent['clipboardData'], cherry: Cherry) => string | boolean;
     onExpandCode?: (e: MouseEvent, code: string) => string;
     onUnExpandCode?: (e: MouseEvent, code: string) => string;
   };
