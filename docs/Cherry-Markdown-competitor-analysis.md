@@ -85,7 +85,7 @@
 
 我们将这些编辑器分为四个明确的类别：框架集成型编辑器、多功能Markdown编辑器、所见即所得（WYSIWYG）编辑器以及轻量级与高性能编辑器。
 
-> 各竞品的详情界面及链接展示见[[Competitive product display]]
+> 各竞品的详情界面及链接展示见[[[Competitive product display]]](https://github.com/Zerwolrod/cherry-markdown-competitor-analysis/blob/analysis/docs/Competitive%20product%20display.md)
 
 <table>
     <tr>
