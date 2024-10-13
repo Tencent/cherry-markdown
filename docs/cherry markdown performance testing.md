@@ -43,9 +43,7 @@
 
 接下来我们根据**三个维度**设计了**12种不同情景**进行性能测试，**最终根据各种场景下的性能进行打分，并得出最终得分**。
 
-## 测试过程截图
-
-### cherry-markdown
+## 测试过程截图(部分）
 
 ![](https://s2.loli.net/2024/10/11/dGsEy4l9ZpoFAfh.png)
 ![aad27171186c6361d3aa3250f49b1ac.png](https://s2.loli.net/2024/10/11/KQEPkcpsgCji9DO.png)
@@ -59,7 +57,7 @@
 ![5eca229b78baf180c871d20e0bf59fe.png](https://s2.loli.net/2024/10/11/nRiN7ckELDsU8Pl.png)
 ![a93d605d6b1432bf4dcb5d1e58866d1.png](https://s2.loli.net/2024/10/11/F1kZH3Uzrd7gxfI.png)
 ![](https://s2.loli.net/2024/10/11/F1kZH3Uzrd7gxfI.png)
-### tui.editor
+
 ![66bc320b8efb40db698513193121612.png](https://s2.loli.net/2024/10/11/mgOVHFt9AKlT3Ms.png)
 ![cc39dc5f104f0f7375dd9541abb3db5.png](https://s2.loli.net/2024/10/11/phOVUM8xy4PA7Xm.png)
 ![f4fe19ada922b47a39c75b30fbc87bb.png](https://s2.loli.net/2024/10/11/c2ld4aTgwpmztuI.png)
@@ -74,5 +72,22 @@
 ![703f866bea590587e88dc939301a3c2.png](https://s2.loli.net/2024/10/11/G2VIOxPZHtFqm69.png)
 ![3623e2a173d7753096c17cb29c22a9d.png](https://s2.loli.net/2024/10/11/bMR36FUksVtelgj.png)
 ![](https://s2.loli.net/2024/10/11/bMR36FUksVtelgj.png)![b188c5d359502d84a9afdb9699007df.png](https://s2.loli.net/2024/10/11/fsdgWaGhMYoFDCb.png)
-### Vditor
+
 ![154822676f1773c7e04bcd29f2d0464.png](https://s2.loli.net/2024/10/11/rUOlC1ozKqNcIiS.png)
+![](https://s2.loli.net/2024/10/13/WirCBVeLclpNJfx.png)
+![](https://s2.loli.net/2024/10/13/aZ8ub1G4oeTBRlF.png)
+![](https://s2.loli.net/2024/10/13/corXBp8bHEiTISG.png)
+![](https://s2.loli.net/2024/10/13/Iiv9cy4qSlXrj8C.png)
+![](https://s2.loli.net/2024/10/13/Ezlrp5TGXOVv9us.png)
+![](https://s2.loli.net/2024/10/13/GhNjgAZ3WU1Y9Vk.png)
+![](https://s2.loli.net/2024/10/13/gNABXs76eodpZVx.png)
+![](https://s2.loli.net/2024/10/13/ZyTeJVjFHG8p2wt.png)
+![](https://s2.loli.net/2024/10/13/HgEld9aoBtj8pbA.png)
+![](https://s2.loli.net/2024/10/13/qyRA1DQaFmLeN4E.png)
+![](https://s2.loli.net/2024/10/13/sCEOSw3Z4rMVPKk.png)
+![](https://s2.loli.net/2024/10/13/P9cK4B2JQykCbTs.png)
+![](https://s2.loli.net/2024/10/13/d7wEGR6itSNylru.png)
+![](https://s2.loli.net/2024/10/13/Q7H9cxfCG3uwsEe.png)
+![](https://s2.loli.net/2024/10/13/v2KmC5OnHQly67Z.png)
+![](https://s2.loli.net/2024/10/13/qH9ELofd6XSnR73.png)
+![](https://s2.loli.net/2024/10/13/SzZFt4UlBKcDqwO.png)
