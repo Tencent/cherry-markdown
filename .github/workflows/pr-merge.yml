@@ -5,11 +5,10 @@ on:
     types:
       - closed
     paths:   # 这里是用来指定哪个文件更改，才会触发的
-      - 'src/**/*.js'
-      - 'src/**/*.scss'
+      - 'src/**'
       - 'package.json'
       - 'types/**'
-      - 'build/*.js'
+      - 'examples/**'
 
 jobs:
   remove_assets:

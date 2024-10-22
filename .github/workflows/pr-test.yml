@@ -3,6 +3,11 @@ name: PR Test
 on:
   pull_request_target:
     branches: [main, dev]
+    paths:   # 这里是用来指定哪个文件更改，才会触发的
+      - 'src/**'
+      - 'package.json'
+      - 'types/**'
+      - 'examples/**'
 
 jobs:
   build:
