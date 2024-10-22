@@ -14,6 +14,12 @@ on:
   pull_request_target:
     types:
       - closed
+    paths:   # 这里是用来指定哪个文件更改，才会触发的
+      - 'src/**/*.js'
+      - 'src/**/*.scss'
+      - 'package.json'
+      - 'types/**'
+      - 'build/*.js'
 
 permissions:
   pull-requests: write
