@@ -3,6 +3,12 @@ name: PR Test
 on:
   pull_request_target:
     branches: [main, dev]
+    paths: # 这里是用来指定哪个文件更改，才会触发的
+      - "src/**"
+      - "package.json"
+      - "types/**"
+      - "examples/**"
+      - "test/**"
 
 jobs:
   build:
@@ -16,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: '${{ env.HEAD_SHA }}'
+          ref: "${{ env.HEAD_SHA }}"
 
       - name: Get changed files and operations
         run: |
@@ -39,7 +45,7 @@ jobs:
         if: ${{ env.GIT_DIFF_FILES }}
         with:
           repository: ${{ github.repository }}
-          ref: '${{ env.BASE_SHA }}'
+          ref: "${{ env.BASE_SHA }}"
           path: base-repo
 
       - name: Replace changed files
@@ -54,7 +60,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 16.x
-          cache: 'yarn'
+          cache: "yarn"
 
       - name: Install dependencies
         uses: borales/actions-yarn@v3.0.0
