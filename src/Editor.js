@@ -17,6 +17,7 @@
 import codemirror from 'codemirror';
 // import 'codemirror/mode/markdown/markdown';
 import 'codemirror/mode/gfm/gfm'; // https://codemirror.net/mode/gfm/index.html
+import 'codemirror/mode/yaml-frontmatter/yaml-frontmatter'; // https://codemirror.net/5/mode/yaml-frontmatter/index.html
 // import 'codemirror/mode/xml/xml';
 import 'codemirror/addon/edit/continuelist';
 import 'codemirror/addon/edit/closetag';
@@ -78,7 +79,7 @@ export default class Editor {
         // matchBrackets: true, // 括号匹配
         // mode: 'gfm', // 从markdown模式改成gfm模式，以使用默认高亮规则
         mode: {
-          name: 'gfm',
+          name: 'yaml-frontmatter', // yaml-frontmatter在gfm的基础上增加了对yaml的支持
           gitHubSpice: false,
         },
         lineWrapping: true, // 自动换行
