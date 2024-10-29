@@ -224,7 +224,13 @@ export default class Toolbar {
     if (this.isHasSubMenu(name) && !focusEvent) {
       this.toggleSubMenu(name);
     } else {
-      this.hideAllSubMenu();
+      // 如果是颜色选择器，则隐藏其他二级菜单，但不隐藏自己（因为颜色选择器的二级菜单是自己实现的独立逻辑）
+      if (name === 'color') {
+        // @ts-ignore
+        menu.hideOtherSubMenu(() => this.hideAllSubMenu());
+      } else {
+        this.hideAllSubMenu();
+      }
       menu.fire(event, name);
     }
   }
