@@ -49,6 +49,7 @@ import Suggester from './hooks/Suggester';
 import Ruby from './hooks/Ruby';
 import Panel from './hooks/Panel';
 import Detail from './hooks/Detail';
+import FrontMatter from './hooks/FrontMatter';
 /**
  * 引擎各语法的配置
  * 主要决定支持哪些语法，以及各语法的执行顺序
@@ -57,6 +58,7 @@ const hooksConfig = [
   // 段落级 Hook
   // 引擎会按当前排序顺序执行beforeMake、makeHtml方法
   // 引擎会按当前排序逆序执行afterMake方法
+  FrontMatter,
   CodeBlock,
   InlineCode,
   MathBlock,
