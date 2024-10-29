@@ -27,7 +27,7 @@ export default class FrontMatter extends ParagraphBase {
     return str.replace(this.RULE.reg, (match, content) => {
       const lineCount = match.match(/\n/g)?.length ?? 0;
       const sign = `fontMatter${lineCount}`;
-      content.replace(/\n\s*(font-size|fontSize): ([0-9a-zA-Z]+)(\n|$)/, (match, m1, m2) => {
+      content.replace(/(?:^|\n)\s*(font-size|fontSize): ([0-9a-zA-Z]+)(\n|$)/, (match, m1, m2) => {
         this.$engine.$cherry.previewer.getDom().style.fontSize = m2;
         return match;
       });
