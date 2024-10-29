@@ -72,15 +72,11 @@ var cherryConfig = {
       'italic',
       'strikethrough',
       '|',
-      'color',
-      'header',
-      '|',
       'list',
       {
         insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word'],
       },
       'graph',
-      'settings',
     ],
   },
   editor: {
