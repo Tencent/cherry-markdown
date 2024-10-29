@@ -309,7 +309,8 @@ export default class CodeBlock extends ParagraphBase {
   }
 
   beforeMakeHtml(str, sentenceMakeFunc, markdownParams) {
-    let $str = str;
+    // 消除字符串两端的空格
+    let $str = str.trim();
 
     if (this.selfClosing || this.$engine.$cherry.options.engine.global.flowSessionContext) {
       $str = this.$dealUnclosingCode($str);
