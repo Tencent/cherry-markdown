@@ -26,8 +26,6 @@ import NestedError from '@/utils/error';
  * @property {function(MouseEvent): any} onclick - 子菜单项点击事件
  * @property {string=} icon - 子菜单项图标(url)
  * @property {boolean=} [disabledHideAllSubMenu=false] - 是否禁用后续调用hideAllSubMenu
- * @property {function(string): boolean} [getSelectState] - 获取是否选中
- * @property {function(HTMLSpanElement): void} [setSubMenuHighlight] -  设置子菜单项高亮
  */
 
 /**
@@ -272,14 +270,10 @@ export default class MenuBase {
    * @param {SubMenuConfigItem} config 配置
    */
   createSubBtnByConfig(config) {
-    const { name, iconName, icon, onclick, getSelectState, setSubMenuHighlight } = config;
-    const { subMenuHighlight } = this.$cherry.options.toolbars;
-    const isSelected = subMenuHighlight && getSelectState?.(iconName);
-
-    const span = createElement('span', `cherry-dropdown-item ${isSelected ? 'cherry-dropdown-item__selected' : ''}`, {
+    const { name, iconName, icon, onclick } = config;
+    const span = createElement('span', 'cherry-dropdown-item', {
       title: this.locale[name] || $e(name),
     });
-
     if (iconName) {
       const iconElement = createElement('i', `ch-icon ch-icon-${iconName}`);
       span.appendChild(iconElement);
@@ -290,20 +284,8 @@ export default class MenuBase {
       });
       span.appendChild(iconElement);
     }
-    /**
-     * @param {MouseEvent} e
-     */
-    function onSubMenuClick(e) {
-      if (typeof onclick === 'function') {
-        onclick(e);
-      }
-      if (typeof setSubMenuHighlight === 'function' && subMenuHighlight) {
-        setSubMenuHighlight(span);
-      }
-    }
-
     span.innerHTML += this.locale[name] || $e(name);
-    span.addEventListener('click', onSubMenuClick, false);
+    span.addEventListener('click', onclick, false);
     return span;
   }
 
@@ -561,5 +543,14 @@ export default class MenuBase {
       parent = parent.parentElement;
     }
     return parent;
+  }
+
+  /**
+   * 绑定子菜单点击事件
+   * @param {HTMLDivElement} subMenuDomPanel
+   * @returns {number} 当前激活的子菜单索引
+   */
+  getActiveSubMenuIndex(subMenuDomPanel) {
+    return -1;
   }
 }

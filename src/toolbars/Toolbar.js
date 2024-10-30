@@ -194,7 +194,14 @@ export default class Toolbar {
           const btn = subMenu.createBtn(true);
           // 二级菜单的dom认定为一级菜单的
           subMenu.dom = subMenu.dom ? subMenu.dom : this.menus.hooks[name].dom;
-          btn.addEventListener('click', (event) => this.onClick(event, level2Name, true), false);
+          btn.addEventListener(
+            'click',
+            (event) => {
+              this.onClick(event, level2Name, true);
+              this.activeSubMenuItem(name);
+            },
+            false,
+          );
           this.subMenus[name].appendChild(btn);
         }
       });
@@ -205,7 +212,14 @@ export default class Toolbar {
       subMenuConfig.forEach((config) => {
         const btn = this.menus.hooks[name].createSubBtnByConfig(config);
         if (!config?.disabledHideAllSubMenu) {
-          btn.addEventListener('click', () => this.hideAllSubMenu(), false);
+          btn.addEventListener(
+            'click',
+            () => {
+              this.hideAllSubMenu();
+              this.activeSubMenuItem(name);
+            },
+            false,
+          );
         }
         this.subMenus[name].appendChild(btn);
       });
@@ -224,15 +238,20 @@ export default class Toolbar {
     if (this.isHasSubMenu(name) && !focusEvent) {
       this.toggleSubMenu(name);
     } else {
-      // 如果是颜色选择器，则隐藏其他二级菜单，但不隐藏自己（因为颜色选择器的二级菜单是自己实现的独立逻辑）
-      if (name === 'color') {
-        // @ts-ignore
-        menu.hideOtherSubMenu(() => this.hideAllSubMenu());
-      } else {
-        this.hideAllSubMenu();
-      }
+      this.hideAllSubMenu();
       menu.fire(event, name);
     }
+  }
+  /**
+   * 激活二级菜单添加选中颜色
+   * @param {string} name
+   */
+  activeSubMenuItem(name) {
+    const subMenu = this.subMenus[name];
+    const index = this.menus.hooks?.[name]?.getActiveSubMenuIndex(subMenu);
+    subMenu?.querySelectorAll('.cherry-dropdown-item').forEach((item, i) => {
+      item.classList.toggle('cherry-dropdown-item__selected', i === index);
+    });
   }
 
   /**
@@ -244,6 +263,7 @@ export default class Toolbar {
       this.hideAllSubMenu();
       this.drawSubMenus(name);
       this.subMenus[name].style.display = 'block';
+      this.activeSubMenuItem(name);
       return;
     }
     if (this.subMenus[name].style.display === 'none') {

@@ -24,27 +24,27 @@ export default class Theme extends MenuBase {
     this.setName('theme', 'insertChart');
     this.subMenuConfig = [];
     const self = this;
-    if (typeof $cherry.options.theme !== 'undefined') {
-      $cherry.options.theme.forEach((one) => {
-        self.subMenuConfig.push({
-          iconName: one.className,
-          name: one.label,
-          onclick: self.bindSubClick.bind(self, one.className),
-          getSelectState: self.getSelectState,
-          setSubMenuHighlight: self.setSubMenuHighlight.bind(self),
-        });
+
+    const themes = $cherry.options.theme || $cherry.options.themeSettings.themeList;
+    themes.forEach((one) => {
+      self.subMenuConfig.push({
+        iconName: one.className,
+        name: one.label,
+        onclick: self.bindSubClick.bind(self, one.className),
       });
-    } else {
-      $cherry.options.themeSettings.themeList.forEach((one) => {
-        self.subMenuConfig.push({
-          iconName: one.className,
-          name: one.label,
-          onclick: self.bindSubClick.bind(self, one.className),
-          getSelectState: self.getSelectState,
-          setSubMenuHighlight: self.setSubMenuHighlight.bind(self),
-        });
-      });
-    }
+    });
+  }
+
+  /**
+   * 绑定子菜单点击事件
+   * @param {HTMLDivElement} subMenuDomPanel
+   * @returns {number} 当前激活的子菜单索引
+   */
+  getActiveSubMenuIndex(subMenuDomPanel) {
+    const theme = this.$cherry.wrapperDom.className.match(/theme__([^\s]+)/)?.[1] || '';
+    return Array.from(subMenuDomPanel.querySelectorAll('.cherry-dropdown-item')).findIndex((item) =>
+      item.querySelector(`.ch-icon-${theme}`),
+    );
   }
 
   /**
@@ -58,47 +58,5 @@ export default class Theme extends MenuBase {
     changeTheme(this.$cherry, shortKey);
     this.updateMarkdown = false;
     return '';
-  }
-
-  /**
-   * 设置子菜单高亮
-   * // todo 抽离到父类
-   * @param {HTMLSpanElement} currentIcon 当前选中的图标名称
-   */
-  setSubMenuHighlight(currentIcon) {
-    const targetChild = Array.from(currentIcon.children).find((child) => child.classList.contains('ch-icon'));
-    if (!targetChild) return;
-
-    const domIconName = Array.from(targetChild.classList)
-      .find((className) => className.startsWith('ch-icon-'))
-      ?.split('ch-icon-')[1];
-
-    this.subMenuConfig.forEach((item) => {
-      const { iconName } = item;
-      const currentIDom = document.querySelector(`.ch-icon-${item.iconName}`);
-
-      if (currentIDom && currentIDom.parentNode instanceof HTMLElement) {
-        const currentSpan = currentIDom.parentNode;
-        if (domIconName === iconName) {
-          currentSpan.classList.add('cherry-dropdown-item__selected');
-        } else {
-          currentSpan.classList.remove('cherry-dropdown-item__selected');
-        }
-      }
-    });
-  }
-
-  /**
-   * 获取选中状态(当配置项`subMenuHighlight`为`false`时永远返回`false`,调用时已拦截)
-   * @param {string} iconName 图标名称
-   * @returns {boolean} 是否选中
-   */
-  getSelectState(iconName) {
-    const cherryDom = document.querySelector('.cherry');
-    const currentTheme = Array.from(cherryDom.classList)
-      .find((item) => item.includes('theme__'))
-      ?.split('theme__')[1];
-
-    return iconName === currentTheme;
   }
 }
