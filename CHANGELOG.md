@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.50](https://github.com/Tencent/cherry-markdown/compare/v0.8.49...v0.8.50) (2024-10-31)
+
+
+### Features
+
+* [#931](https://github.com/Tencent/cherry-markdown/issues/931) onPaste入参增加cherry实例 ([91778f3](https://github.com/Tencent/cherry-markdown/commit/91778f3152c18d2aa1218f2491a4d7218db59a41))
+* [#954](https://github.com/Tencent/cherry-markdown/issues/954) [#940](https://github.com/Tencent/cherry-markdown/issues/940) 增加frontMatter语法，并在frontMatter语法里支持了设置全局字体大小的能力 ([2e30a1f](https://github.com/Tencent/cherry-markdown/commit/2e30a1f2122f5e49825718494afc2a108e8c85b6))
+* [#954](https://github.com/Tencent/cherry-markdown/issues/954) 优化字号匹配逻辑 ([daf4f68](https://github.com/Tencent/cherry-markdown/commit/daf4f68a5ab2b9b252681f1a10f8c9c182654e3e))
+* 增加控制右侧悬浮目录显隐的api ([45b7a98](https://github.com/Tencent/cherry-markdown/commit/45b7a9844695034e9b61de46fc0f6f9ca1896b13))
+* theme item highlight ([#959](https://github.com/Tencent/cherry-markdown/issues/959)) ([fdf9fc4](https://github.com/Tencent/cherry-markdown/commit/fdf9fc470e243665ae9911f471ec2607099d3c4d))
+* **vscodePlugin:** add right click menu shortcut key ` F10` ([#934](https://github.com/Tencent/cherry-markdown/issues/934)) ([a37d521](https://github.com/Tencent/cherry-markdown/commit/a37d5215cddf75f756c3a68256fe75ab007a9248))
+* **vscodePlugin:** open web  link and open file link ([#922](https://github.com/Tencent/cherry-markdown/issues/922)) ([796b087](https://github.com/Tencent/cherry-markdown/commit/796b087131280f1a8962f5c99fde008809feefc0))
+
+
+### Bug Fixes
+
+* [#876](https://github.com/Tencent/cherry-markdown/issues/876) toolbar设置中的预览按钮支持窗口浮动 ([#938](https://github.com/Tencent/cherry-markdown/issues/938)) ([03a3ed7](https://github.com/Tencent/cherry-markdown/commit/03a3ed7ed17037d5420f0c6d9ea97dbcbfb99cb8))
+* [#927](https://github.com/Tencent/cherry-markdown/issues/927) 对style的过滤没有兼容单引号的情况 ([25d3b0c](https://github.com/Tencent/cherry-markdown/commit/25d3b0c3c4935d93e989ff7b564e623a027af7cb))
+* [#948](https://github.com/Tencent/cherry-markdown/issues/948) 下拉菜单点击穿透到预览视窗拉条 ([#949](https://github.com/Tencent/cherry-markdown/issues/949)) ([d104f16](https://github.com/Tencent/cherry-markdown/commit/d104f16d11893d13f025bb99bc564004ae379f37))
+* [#953](https://github.com/Tencent/cherry-markdown/issues/953) 统一颜色按钮的交互 ([66a898c](https://github.com/Tencent/cherry-markdown/commit/66a898cf66a41c417617528a5de2f1ed5ca5ff29))
+* **type:** add key name declaration for custom toolbar ([#932](https://github.com/Tencent/cherry-markdown/issues/932)) ([ef7a946](https://github.com/Tencent/cherry-markdown/commit/ef7a946fd70058fcd4007d6b96b79f71af340970))
+* **vscode-plugin:** vscode dark mode and it's default theme，black scrollbar appears ([#946](https://github.com/Tencent/cherry-markdown/issues/946)) ([fbec3d9](https://github.com/Tencent/cherry-markdown/commit/fbec3d90f2a6a9c084c255a26ed5a2301f405767))
+
+
+### Css or Code Change
+
+* 编辑区增加对yaml语法的高亮展示 ([08c220d](https://github.com/Tencent/cherry-markdown/commit/08c220d6a75cbccdd88fb3df9e8f39b98179cd36))
+* Refine 'blue' theme ([#829](https://github.com/Tencent/cherry-markdown/issues/829)) ([ca74e55](https://github.com/Tencent/cherry-markdown/commit/ca74e55cb7bb305fbe77640b4608e33455af569c))
+
 ### [0.8.49](https://github.com/Tencent/cherry-markdown/compare/v0.8.48...v0.8.49) (2024-09-27)
 
 
