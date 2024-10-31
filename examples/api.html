@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cherry Markdown API</title>
   <style>
     html,
@@ -131,10 +132,12 @@ cherryObj.destroy();</textarea>
 
     <div class="one-api">
       <h2 class="one-api__name">resetToolbar(type:string, toolbar:array)</h2>
-      <p class="one-api__desc">重置工具栏<br>type 修改工具栏的类型 {'toolbar'|'toolbarRight'|'sidebar'|'bubble'|'float'}<br>toolbar 工具栏配置</p>
+      <p class="one-api__desc">重置工具栏<br>type 修改工具栏的类型 {'toolbar'|'toolbarRight'|'sidebar'|'bubble'|'float'|'toc'}<br>toolbar 工具栏配置</p>
       <div class="one-api__try">
-        <textarea id="setMarkdown" placeholder="输入内容">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="5">
 cherryObj.resetToolbar('toolbar', ['bold', 'table']);
+cherryObj.resetToolbar('toolbarRight', ['fullScreen', 'togglePreview', 'export', 'wordCount']);
+cherryObj.resetToolbar('toc', true);
 </textarea>
         <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
       </div>

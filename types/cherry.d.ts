@@ -3,16 +3,60 @@ import SyntaxBase from '../src/core/SyntaxBase';
 import { FormulaMenu } from '@/toolbars/BubbleFormula';
 
 export interface CherryExternalsOptions {
-  [key: symbol]: any;
+  [key: string]: any;
+}
+
+/**
+* 自定义toolbar键名[key]
+*/
+export interface CustomMenuType {
+  [key: string]: any;
 }
 
 type CherryToolbarsCustomType = {
-  CustomMenuType: CherryExternalsOptions
+  CustomMenuType: CustomMenuType
 }
 
 type CherryCustomOptions = {
   CustomToolbar: CherryToolbarsCustomType
 }
+
+
+/**
+* @description By by default, the types declared by Cherry markdown are supported.
+* @description If you want to force the **custom toolbar** key type, please refer to the following.
+* @example  
+* ```
+* type CustomConfig = {
+*  CustomToolbar: {
+*    CustomMenuType: {
+*      customMenu_fileUpload: string
+*    },
+*  },
+* }
+* 
+* const cherryConfig: CherryOptions<CustomConfig> = {
+*  ...
+*  toolbars: {
+*    toolbar: [
+*     'bold',
+*     'italic',
+*       "customMenu_fileUpload",
+*       {
+*         customMenu_fileUpload: [
+*           'image',
+*           'audio',
+*         ],
+*       },
+*       'settings',
+*     ],
+*     customMenu: {
+*       customMenu_fileUpload: customMenu_fileUpload,
+*    },
+* }
+* ```
+* Among them, `customMenu` is the fixed attribute of the custom menu, and `customMenu_fileUpload` is the key name of the custom button
+*/
 
 export interface Cherry<T extends CherryCustomOptions = CherryCustomOptions> {
   options: CherryOptions<T>;
@@ -103,7 +147,7 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     onClickPreview?: (e: MouseEvent) => void;
     onCopyCode?: (e: ClipboardEvent, code: string) => string | false;
     changeString2Pinyin?: (str: string) => string;
-    onPaste?: (clipboardData: ClipboardEvent['clipboardData']) => string | boolean;
+    onPaste?: (clipboardData: ClipboardEvent['clipboardData'], cherry: Cherry) => string | boolean;
     onExpandCode?: (e: MouseEvent, code: string) => string;
     onUnExpandCode?: (e: MouseEvent, code: string) => string;
   };
@@ -532,6 +576,7 @@ export interface CherryToolbarsOptions<F extends CherryToolbarsCustomType = Cher
   toolbar?:
   | (CherryDefaultBubbleToolbar |
     CherryDefaultToolbar |
+    keyof Partial<F['CustomMenuType']> |
   { [K in (keyof Partial<F['CustomMenuType']>) | CherryDefaultToolbar]?: (keyof F['CustomMenuType'] | CherryDefaultToolbar)[] })[]
   | false;
   toolbarRight?:

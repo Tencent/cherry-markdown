@@ -54,6 +54,11 @@ $mdBlockquoteBg: rgb(231, 245, 255);
     background: $toolbarBg;
     .cherry-dropdown-item {
       color: $toolbarBtnColor;
+      // 选中子菜单高亮
+      &__selected {
+        background-color: $toolbarBtnBgHover;
+        color: $toolbarBtnHoverColor;
+      }
       &:hover {
         background-color: $toolbarBtnBgHover;
         color: $toolbarBtnHoverColor;
@@ -106,7 +111,7 @@ $mdBlockquoteBg: rgb(231, 245, 255);
         span, .cm-variable-2, .cm-string, .cm-strong, .cm-em, .cm-meta {
           color: $editorColor;
         }
-        .cm-image-marker, .cm-quote, .cm-header {
+        .cm-image-marker, .cm-quote, .cm-header, .cm-atom {
           color: $editorImportantColor;
         }
         .cm-url {

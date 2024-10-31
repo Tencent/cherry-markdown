@@ -1,0 +1,53 @@
+name: 📃 Documentation Feedback
+description: Ask a question or submit a bug related to our documentation
+title: "[Docs]"
+labels: [📃documentation, pending-no-confirmed]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for your interest in the project and taking the time to provide your feedback.
+        [For current usage documentation, please see here.](https://github.com/Tencent/cherry-markdown/wiki)
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: 'Before submitting the issue, ensure the following:'
+      options:
+        - label: There isn't an existing issue with the same question or request to avoid duplicates.
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Issue Type
+      description: What type of issue is this? 
+      options:
+        - Question
+        - Documentation Error
+        - Update Request
+    validations:
+        required: true
+
+  - type: textarea
+    id: issue-description
+    attributes:
+      label: Description of the Problem or Idea
+      placeholder: Describe your questions or share your ideas here.
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Further Information
+      description: Provide any other relevant information or screenshots about the question here.
+      
+  - type: dropdown
+    id: help-us
+    attributes:
+      label: Contributing
+      description: Would you consider contributing a PR for this issue?
+      options:
+        - Yes, I'd like to submit a PR for this issue.
+        - No, I don't plan to at this time.

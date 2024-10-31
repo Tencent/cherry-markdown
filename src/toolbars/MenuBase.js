@@ -544,4 +544,13 @@ export default class MenuBase {
     }
     return parent;
   }
+
+  /**
+   * 绑定子菜单点击事件
+   * @param {HTMLDivElement} subMenuDomPanel
+   * @returns {number} 当前激活的子菜单索引
+   */
+  getActiveSubMenuIndex(subMenuDomPanel) {
+    return -1;
+  }
 }

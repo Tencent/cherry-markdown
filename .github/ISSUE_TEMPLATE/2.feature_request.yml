@@ -1,0 +1,46 @@
+name: 🚀 New Feature Request
+description: Suggest an idea for this project
+title: "[Feature Request]"
+labels: [🚀enhancement, pending-no-confirmed]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for your interest in the project and taking the time to fill out this feature report.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: "Before submitting the issue, ensure the following:"
+      options:
+        - label: There isn't an existing issue that requests the same feature, to avoid duplicates.
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Clear and concise description of the problem
+      description: As a developer using cherry-markdown I want [goal / wish] so that [benefit].
+      placeholder: Feature description
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-solution
+    attributes:
+      label: Suggested solution
+      description: "I want a xx function that can be used to do xxx things. Its implementation is beneficial for..."
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Further Information
+      description: Provide any other relevant information or screenshots about the feature request here.
+
+  - type: dropdown
+    id: help-us
+    attributes:
+      label: Contributing
+      description: Would you consider contributing a PR for this issue?
+      options:
+        - Yes, I'd like to submit a PR for this issue.
+        - No, I don't plan to at this time.

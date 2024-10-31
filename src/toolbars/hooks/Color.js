@@ -48,6 +48,12 @@ export default class Color extends MenuBase {
     return this.getAndCleanCacheOnce();
   }
 
+  hideOtherSubMenu(hideAllSubMenu) {
+    const lastDisplay = this.bubbleColor.dom.style.display || 'none';
+    hideAllSubMenu();
+    this.bubbleColor.dom.style.display = lastDisplay;
+  }
+
   /**
    * 响应点击事件
    * @param {string} selection 被用户选中的文本内容
@@ -56,8 +62,8 @@ export default class Color extends MenuBase {
    * @returns 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '', event) {
-    let $selection = getSelection(this.editor.editor, selection) || this.locale.color;
     if (this.hasCacheOnce() || this.$testIsShortKey(shortKey)) {
+      let $selection = getSelection(this.editor.editor, selection) || this.locale.color;
       // @ts-ignore
       const { type, color } = this.$getTypeAndColor(shortKey);
       const begin = type === 'text' ? `!!${color} ` : `!!!${color} `;
@@ -111,7 +117,7 @@ export default class Color extends MenuBase {
     }
     this.updateMarkdown = false;
     // 【TODO】需要增加getMoreSelection的逻辑
-    this.bubbleColor.show({
+    this.bubbleColor.toggle({
       left,
       top,
       $color: this,
@@ -273,18 +279,17 @@ class BubbleColor {
       },
       false,
     );
-    this.dom.addEventListener('EditorHideToolbarSubMenu', () => {
-      if (this.dom.style.display !== 'none') {
-        this.dom.style.display = 'none';
-      }
-    });
   }
 
   /**
-   * 在对应的坐标展示调色盘
+   * 在对应的坐标展示/关闭调色盘
    * @param {Object} 坐标
    */
-  show({ left, top, $color }) {
+  toggle({ left, top, $color }) {
+    if (this.dom.style.display?.length > 0 && this.dom.style.display !== 'none') {
+      this.dom.style.display = 'none';
+      return;
+    }
     this.dom.style.left = `${left}px`;
     this.dom.style.top = `${top}px`;
     this.dom.style.display = 'block';

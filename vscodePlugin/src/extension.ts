@@ -195,6 +195,32 @@ const initCherryPanelEvent = () => {
           }
         });
         break;
+      case 'open-url': {
+        if (data === 'href-invalid') {
+          vscode.window.showErrorMessage('link is not valid, please check it.');
+          return;
+        }
+        // http/https协议的链接，直接打开
+        if (/^(http|https):\/\//.test(data)) {
+          vscode.env.openExternal(vscode.Uri.parse(data));
+          return;
+        }
+        // 本地绝对路径，打开文件(绝对路径需要解码)
+        const decodedData = decodeURIComponent(data);
+        if (path.isAbsolute(decodedData)) {
+          const decodedDataPath = vscode.Uri.file(decodedData);
+          vscode.commands.executeCommand('vscode.open', decodedDataPath, { preview: true });
+          return;
+        }
+        // 以#开头的锚点不处理
+        if (data.startsWith('#')) {
+          return;
+        }
+        // 本地相对路径，打开文件
+        const uri = vscode.Uri.file(path.join(targetDocument.document.uri.fsPath, '..', data));
+        vscode.commands.executeCommand('vscode.open', uri, { preview: true });
+        break;
+      }
     }
   });
   cherryPanel?.onDidDispose(() => {
