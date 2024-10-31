@@ -152,6 +152,10 @@
       background: $toolbarBtnBgHoverLight;
       color: $toolbarBtnHoverColorLight;
     }
+    &__selected {
+      background: $toolbarBtnBgHoverLight;
+      color: $toolbarBtnHoverColorLight;
+    }
 
     .ch-icon {
       margin-right: 10px;
@@ -168,6 +172,10 @@
       &:hover {
         background: $toolbarBtnBgHoverDark;
         color: $toolbarBtnHoverColorDark;
+      }
+      &__selected {
+        background: $toolbarBtnBgHoverDark;
+        color: $toolbarBtnHoverColorLight;
       }
     }
   }
