@@ -161,6 +161,16 @@ export default class Settings extends MenuBase {
       this.engine.$cherry.previewer.update('');
       this.engine.$cherry.initText(this.engine.$cherry.editor.editor);
     } else if (shortKey === 'previewClose') {
+      // 需要浮动预览
+      if (this.editor.previewer.isPreviewerNeedFloat()) {
+        // 正在浮动预览
+        if (this.editor.previewer.isPreviewerFloat()) {
+          this.editor.previewer.recoverFloatPreviewer(true);
+        } else {
+          this.editor.previewer.floatPreviewer();
+        }
+        return;
+      }
       if (this.editor.previewer.isPreviewerHidden()) {
         this.editor.previewer.recoverPreviewer(true);
       } else {

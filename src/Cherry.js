@@ -234,9 +234,7 @@ export default class Cherry extends CherryStatic {
     }
     // 强制进行一次渲染 // 不记得为啥要强制渲染了，先屏蔽了
     // this.editText(null, this.editor.editor);
-    if (this.options.toolbars.toc !== false) {
-      this.createToc();
-    }
+    this.createToc();
     this.$event.bindCallbacksByOptions(this.options);
   }
 
@@ -276,6 +274,10 @@ export default class Cherry extends CherryStatic {
   }
 
   createToc() {
+    if (this.options.toolbars.toc === false) {
+      this.toc = false;
+      return;
+    }
     this.toc = new Toc({
       $cherry: this,
       // @ts-ignore
@@ -594,7 +596,7 @@ export default class Cherry extends CherryStatic {
    * @returns {Boolean}
    */
   resetToolbar(type, toolbar) {
-    const $type = /(toolbar|toolbarRight|sidebar|bubble|float)/.test(type) ? type : false;
+    const $type = /(toolbar|toolbarRight|sidebar|bubble|float|toc)/.test(type) ? type : false;
     if ($type === false) {
       return false;
     }
@@ -610,6 +612,10 @@ export default class Cherry extends CherryStatic {
     if (this.sidebarDom) {
       this.sidebarDom.innerHTML = '';
     }
+    if (this.toc) {
+      // @ts-ignore
+      this.toc.tocDom.remove();
+    }
     this.cherryDom.querySelectorAll('.cherry-dropdown').forEach((item) => {
       item.remove();
     });
@@ -620,6 +626,7 @@ export default class Cherry extends CherryStatic {
     this.createFloatMenu();
     this.createSidebar();
     this.createHiddenToolbar();
+    this.createToc();
     return true;
   }
 

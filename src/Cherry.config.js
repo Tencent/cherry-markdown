@@ -129,11 +129,12 @@ const callbacks = {
   /**
    * 粘贴时触发
    * @param {ClipboardEvent['clipboardData']} clipboardData
+   * @param {object} cherry
    * @returns
    *    false: 走cherry粘贴的默认逻辑
    *    string: 直接粘贴的内容
    */
-  onPaste: (clipboardData) => {
+  onPaste: (clipboardData, cherry) => {
     return false;
   },
   onCopyCode: (event, code) => {
@@ -523,6 +524,7 @@ const defaultConfig = {
     /**
      * 粘贴时触发
      * @param {ClipboardEvent['clipboardData']} clipboardData
+     * @param {Cherry} cherry
      * @returns
      *    false: 走cherry粘贴的默认逻辑
      *    string: 直接粘贴的内容

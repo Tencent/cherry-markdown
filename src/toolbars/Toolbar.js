@@ -224,9 +224,27 @@ export default class Toolbar {
     if (this.isHasSubMenu(name) && !focusEvent) {
       this.toggleSubMenu(name);
     } else {
-      this.hideAllSubMenu();
+      // 如果是颜色选择器，则隐藏其他二级菜单，但不隐藏自己（因为颜色选择器的二级菜单是自己实现的独立逻辑）
+      if (name === 'color') {
+        // @ts-ignore
+        menu.hideOtherSubMenu(() => this.hideAllSubMenu());
+      } else {
+        this.hideAllSubMenu();
+      }
       menu.fire(event, name);
     }
+  }
+
+  /**
+   * 激活二级菜单添加选中颜色
+   * @param {string} name
+   */
+  activeSubMenuItem(name) {
+    const subMenu = this.subMenus[name];
+    const index = this.menus.hooks?.[name]?.getActiveSubMenuIndex(subMenu);
+    subMenu?.querySelectorAll('.cherry-dropdown-item').forEach((item, i) => {
+      item.classList.toggle('cherry-dropdown-item__selected', i === index);
+    });
   }
 
   /**
@@ -238,6 +256,7 @@ export default class Toolbar {
       this.hideAllSubMenu();
       this.drawSubMenus(name);
       this.subMenus[name].style.display = 'block';
+      this.activeSubMenuItem(name);
       return;
     }
     if (this.subMenus[name].style.display === 'none') {
@@ -245,6 +264,7 @@ export default class Toolbar {
       this.hideAllSubMenu();
       this.subMenus[name].style.display = 'block';
       this.setSubMenuPosition(this.menus.hooks[name], this.subMenus[name]);
+      this.activeSubMenuItem(name);
     } else {
       // 如果是显示的，则隐藏当前二级菜单
       this.subMenus[name].style.display = 'none';
