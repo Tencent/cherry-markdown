@@ -236,6 +236,18 @@ export default class Toolbar {
   }
 
   /**
+   * 激活二级菜单添加选中颜色
+   * @param {string} name
+   */
+  activeSubMenuItem(name) {
+    const subMenu = this.subMenus[name];
+    const index = this.menus.hooks?.[name]?.getActiveSubMenuIndex(subMenu);
+    subMenu?.querySelectorAll('.cherry-dropdown-item').forEach((item, i) => {
+      item.classList.toggle('cherry-dropdown-item__selected', i === index);
+    });
+  }
+
+  /**
    * 展开/收起二级菜单
    */
   toggleSubMenu(name) {
@@ -244,6 +256,7 @@ export default class Toolbar {
       this.hideAllSubMenu();
       this.drawSubMenus(name);
       this.subMenus[name].style.display = 'block';
+      this.activeSubMenuItem(name);
       return;
     }
     if (this.subMenus[name].style.display === 'none') {
@@ -251,6 +264,7 @@ export default class Toolbar {
       this.hideAllSubMenu();
       this.subMenus[name].style.display = 'block';
       this.setSubMenuPosition(this.menus.hooks[name], this.subMenus[name]);
+      this.activeSubMenuItem(name);
     } else {
       // 如果是显示的，则隐藏当前二级菜单
       this.subMenus[name].style.display = 'none';

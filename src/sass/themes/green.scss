@@ -68,6 +68,11 @@ $mdBlockquoteBg: $GREEN1;
     background: $toolbarBg;
     .cherry-dropdown-item {
       color: $toolbarBtnColor;
+      // 选中子菜单高亮
+      &__selected {
+        background-color: $toolbarBtnBgHover;
+        color: $toolbarBtnHoverColor;
+      }
       &:hover {
         background-color: $toolbarBtnBgHover;
         color: $toolbarBtnHoverColor;
