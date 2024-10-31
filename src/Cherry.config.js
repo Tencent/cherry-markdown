@@ -379,7 +379,6 @@ const defaultConfig = {
      */
     // theme: 'dark', // light or dark
     showToolbar: true, // false：不展示顶部工具栏； true：展示工具栏; toolbars.showToolbar=false 与 toolbars.toolbar=false 等效
-    subMenuHighlight: true, // 是否高亮子菜单
     toolbar: [
       'bold',
       'italic',

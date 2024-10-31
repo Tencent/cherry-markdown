@@ -599,8 +599,6 @@ export interface CherryToolbarsOptions<F extends CherryToolbarsCustomType = Cher
   hiddenToolbar?: any[];
   /** 是否展示顶部工具栏 */
   showToolbar?: boolean;
-  /** 是否高亮子菜单 */
-  subMenuHighlight: boolean;
   /** 侧边栏配置 */
   sidebar?: any[] | false;
   /** 选中悬停菜单配置 */
