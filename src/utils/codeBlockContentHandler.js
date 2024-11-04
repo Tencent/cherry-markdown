@@ -283,6 +283,9 @@ export default class CodeBlockHandler {
    * 处理扩展、缩起代码块的操作
    */
   $expandCodeBlock(isExpand = true) {
+    if (!this.unExpandDom) {
+      return;
+    }
     this.target.classList.remove('cherry-code-unExpand');
     this.target.classList.remove('cherry-code-expand');
     this.unExpandDom.classList.remove('hidden');
