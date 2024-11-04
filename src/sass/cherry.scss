@@ -636,6 +636,10 @@
 .cherry-previewer-codeBlock-hover-handler {
   z-index: 0;
   position: absolute;
+  pointer-events: none;
+  * {
+    pointer-events: all;
+  }
   .cherry-copy-code-block,
   .cherry-unExpand-code-block,
   .cherry-edit-code-block {
