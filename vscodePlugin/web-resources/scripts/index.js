@@ -56,81 +56,6 @@ const customMenuFont = Cherry.createMenuHook('字体样式', {
 //   ],
 // });
 
-// eslint-disable-next-line no-undef
-const customMenuChangeTheme = Cherry.createMenuHook('主题', {
-  iconName: 'insertChart',
-  onClick: (selection, type) => {
-    changeTheme(type);
-    vscode.postMessage({
-      type: 'change-theme',
-      data: type,
-    });
-  },
-  subMenuConfig: [
-    {
-      noIcon: true,
-      name: '默认·default',
-      onclick: () => {
-        cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'default');
-      },
-    },
-    {
-      noIcon: true,
-      name: '暗黑·dark',
-      onclick: () => {
-        cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'dark');
-      },
-    },
-    {
-      noIcon: true,
-      name: '明亮·light',
-      onclick: () => {
-        cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'light');
-      },
-    },
-    {
-      noIcon: true,
-      name: '清新·green',
-      onclick: () => {
-        cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'green');
-      },
-    },
-    {
-      noIcon: true,
-      name: '热情·red',
-      onclick: () => {
-        cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'red');
-      },
-    },
-    {
-      noIcon: true,
-      name: '淡雅·violet',
-      onclick: () => {
-        cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'violet');
-      },
-    },
-    {
-      noIcon: true,
-      name: '清幽·blue',
-      onclick: () => {
-        cherry.toolbar.menus.hooks.customMenuChangeTheme.fire(null, 'blue');
-      },
-    },
-  ],
-});
-
-function changeTheme(theme) {
-  const cherryDom = cherry.wrapperDom;
-  const cherryPreviewDom = cherry.previewer.getDom();
-  cherryDom.className = `${cherryDom.className.replace(
-    / theme__[\S]+$/,
-    '',
-  )} theme__${theme}`;
-  cherryPreviewDom.className = `${cherryPreviewDom.className.replace(
-    / theme__[\S]+$/,
-    '',
-  )} theme__${theme}`;
-}
 
 /** 处理 a 链接跳转问题 */
 const onClickLink = (target) => {
@@ -258,12 +183,11 @@ const basicConfig = {
       'customMenuChangeModule',
       'mobilePreview',
       'copy',
-      'customMenuChangeTheme',
+      'theme',
     ],
     customMenu: {
       customMenuChangeModule,
       customMenuFont,
-      customMenuChangeTheme,
     },
     toc: true,
   },
@@ -297,6 +221,15 @@ const basicConfig = {
         },
       });
       window.uploadFileCallback = callback;
+    },
+  },
+  event: {
+    // 当编辑区内容有实际变化时触发
+    changeMainTheme: (theme) => {
+      vscode.postMessage({
+        type: 'change-theme',
+        data: theme,
+      });
     },
   },
   previewer: {
@@ -349,14 +282,12 @@ function isHttpUrl(url) {
 
 const mdInfo = JSON.parse(document.getElementById('markdown-info').value);
 const config = Object.assign({}, basicConfig, { value: mdInfo.text });
-const { theme } = mdInfo;
 // eslint-disable-next-line new-cap, no-undef
 const cherry = new Cherry(config);
 // eslint-disable-next-line no-undef
 const vscode = acquireVsCodeApi();
 // 图片缓存
 // const imgCache = {};
-changeTheme(theme);
 
 // function afterInit() {
 //   setTimeout(() => {
@@ -475,7 +406,6 @@ window.addEventListener('message', (e) => {
     case 'editor-change':
       window.disableEditListener = true;
       cherry.setValue(data.text);
-      changeTheme(data.theme);
       editTimeOut && clearTimeout(editTimeOut);
       editTimeOut = setTimeout(() => {
         window.disableEditListener = false;
