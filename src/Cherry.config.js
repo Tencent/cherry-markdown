@@ -218,7 +218,7 @@ const defaultConfig = {
         /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
         rel: '',
         /** 是否开启短链接 */
-        enableShortLink: true,
+        enableShortLink: false,
         /** 短链接长度 */
         shortLinkLength: 20,
       },

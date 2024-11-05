@@ -223,10 +223,10 @@ export default class AutoLink extends SyntaxBase {
     }
     const processedURL = this.$engine.$cherry.options.callback.urlProcessor(url, 'autolink');
     const safeUri = encodeURIOnce(processedURL);
-    const displayUri = $e(url);
+    const displayUri = $e(linkText);
     const additionalAttrs = [this.target, this.rel].filter(Boolean).join(' ');
     return `<a href="${AutoLink.escapePreservedSymbol(safeUri)}" title="${AutoLink.escapePreservedSymbol(
-      displayUri,
+      $e(url),
     )}" ${additionalAttrs}>${AutoLink.escapePreservedSymbol(displayUri)}</a>`;
   }
 }
