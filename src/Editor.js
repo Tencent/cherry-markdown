@@ -131,6 +131,10 @@ export default class Editor {
       this.noChange = false;
       return;
     }
+    // 如果编辑器隐藏了，则不再处理（否则有性能问题）
+    if (this.$cherry.status.editor === 'hide') {
+      return;
+    }
     this.formatFullWidthMark();
     this.formatBigData2Mark(imgBase64Reg, 'cm-url base64');
     this.formatBigData2Mark(imgDrawioXmlReg, 'cm-url drawio');
