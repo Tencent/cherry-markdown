@@ -4199,7 +4199,7 @@ div[data-type=codeBlock] .token.inserted {
   background: #fff;
   box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.5);
   margin-left: -60px;
-  z-index: 11;
+  z-index: 13;
 }
 .cherry-dropdown-item {
   width: 100%;
@@ -4217,6 +4217,10 @@ div[data-type=codeBlock] .token.inserted {
   background: #ebf3ff;
   color: #5d9bfc;
 }
+.cherry-dropdown-item__selected {
+  background: #ebf3ff;
+  color: #5d9bfc;
+}
 .cherry-dropdown-item .ch-icon {
   margin-right: 10px;
 }
@@ -4230,6 +4234,10 @@ div[data-type=codeBlock] .token.inserted {
 [data-toolbar-theme=dark] .cherry-dropdown .cherry-dropdown-item:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
+}
+[data-toolbar-theme=dark] .cherry-dropdown .cherry-dropdown-item__selected {
+  background: rgba(255, 255, 255, 0.1);
+  color: #5d9bfc;
 }
 
 .cherry-toolbar {
@@ -5262,6 +5270,10 @@ div[data-type=codeBlock] .token.inserted {
 .cherry.theme__dark .cherry-dropdown .cherry-dropdown-item {
   color: #d7e6fe;
 }
+.cherry.theme__dark .cherry-dropdown .cherry-dropdown-item__selected {
+  background-color: rgb(69, 70, 70);
+  color: rgb(255, 255, 255);
+}
 .cherry.theme__dark .cherry-dropdown .cherry-dropdown-item:hover {
   background-color: rgb(69, 70, 70);
   color: rgb(255, 255, 255);
@@ -5303,7 +5315,7 @@ div[data-type=codeBlock] .token.inserted {
 .cherry.theme__dark .cherry-editor .CodeMirror .CodeMirror-scroll span, .cherry.theme__dark .cherry-editor .CodeMirror .CodeMirror-scroll .cm-variable-2, .cherry.theme__dark .cherry-editor .CodeMirror .CodeMirror-scroll .cm-string, .cherry.theme__dark .cherry-editor .CodeMirror .CodeMirror-scroll .cm-strong, .cherry.theme__dark .cherry-editor .CodeMirror .CodeMirror-scroll .cm-em, .cherry.theme__dark .cherry-editor .CodeMirror .CodeMirror-scroll .cm-meta {
   color: rgb(200, 200, 200);
 }
-.cherry.theme__dark .cherry-editor .CodeMirror .CodeMirror-scroll .cm-image-marker, .cherry.theme__dark .cherry-editor .CodeMirror .CodeMirror-scroll .cm-quote, .cherry.theme__dark .cherry-editor .CodeMirror .CodeMirror-scroll .cm-header {
+.cherry.theme__dark .cherry-editor .CodeMirror .CodeMirror-scroll .cm-image-marker, .cherry.theme__dark .cherry-editor .CodeMirror .CodeMirror-scroll .cm-quote, .cherry.theme__dark .cherry-editor .CodeMirror .CodeMirror-scroll .cm-header, .cherry.theme__dark .cherry-editor .CodeMirror .CodeMirror-scroll .cm-atom {
   color: rgb(247, 133, 83);
 }
 .cherry.theme__dark .cherry-editor .CodeMirror .CodeMirror-scroll .cm-url {
@@ -5596,6 +5608,10 @@ div[data-type=codeBlock] .token.inserted {
 .cherry.theme__light .cherry-dropdown .cherry-dropdown-item {
   color: #3f4a56;
 }
+.cherry.theme__light .cherry-dropdown .cherry-dropdown-item__selected {
+  background-color: #ebf3ff;
+  color: #5d9bfc;
+}
 .cherry.theme__light .cherry-dropdown .cherry-dropdown-item:hover {
   background-color: #ebf3ff;
   color: #5d9bfc;
@@ -5637,7 +5653,7 @@ div[data-type=codeBlock] .token.inserted {
 .cherry.theme__light .cherry-editor .CodeMirror .CodeMirror-scroll span, .cherry.theme__light .cherry-editor .CodeMirror .CodeMirror-scroll .cm-variable-2, .cherry.theme__light .cherry-editor .CodeMirror .CodeMirror-scroll .cm-string, .cherry.theme__light .cherry-editor .CodeMirror .CodeMirror-scroll .cm-strong, .cherry.theme__light .cherry-editor .CodeMirror .CodeMirror-scroll .cm-em, .cherry.theme__light .cherry-editor .CodeMirror .CodeMirror-scroll .cm-meta {
   color: rgb(63, 74, 86);
 }
-.cherry.theme__light .cherry-editor .CodeMirror .CodeMirror-scroll .cm-image-marker, .cherry.theme__light .cherry-editor .CodeMirror .CodeMirror-scroll .cm-quote, .cherry.theme__light .cherry-editor .CodeMirror .CodeMirror-scroll .cm-header {
+.cherry.theme__light .cherry-editor .CodeMirror .CodeMirror-scroll .cm-image-marker, .cherry.theme__light .cherry-editor .CodeMirror .CodeMirror-scroll .cm-quote, .cherry.theme__light .cherry-editor .CodeMirror .CodeMirror-scroll .cm-header, .cherry.theme__light .cherry-editor .CodeMirror .CodeMirror-scroll .cm-atom {
   color: rgb(34, 139, 230);
 }
 .cherry.theme__light .cherry-editor .CodeMirror .CodeMirror-scroll .cm-url {
@@ -5789,6 +5805,10 @@ div[data-type=codeBlock] .token.inserted {
 .cherry.theme__green .cherry-dropdown .cherry-dropdown-item {
   color: #2b8a3e;
 }
+.cherry.theme__green .cherry-dropdown .cherry-dropdown-item__selected {
+  background-color: #51cf66;
+  color: #ebfbee;
+}
 .cherry.theme__green .cherry-dropdown .cherry-dropdown-item:hover {
   background-color: #51cf66;
   color: #ebfbee;
@@ -5830,7 +5850,7 @@ div[data-type=codeBlock] .token.inserted {
 .cherry.theme__green .cherry-editor .CodeMirror .CodeMirror-scroll span, .cherry.theme__green .cherry-editor .CodeMirror .CodeMirror-scroll .cm-variable-2, .cherry.theme__green .cherry-editor .CodeMirror .CodeMirror-scroll .cm-string, .cherry.theme__green .cherry-editor .CodeMirror .CodeMirror-scroll .cm-strong, .cherry.theme__green .cherry-editor .CodeMirror .CodeMirror-scroll .cm-em, .cherry.theme__green .cherry-editor .CodeMirror .CodeMirror-scroll .cm-meta {
   color: #2b8a3e;
 }
-.cherry.theme__green .cherry-editor .CodeMirror .CodeMirror-scroll .cm-image-marker, .cherry.theme__green .cherry-editor .CodeMirror .CodeMirror-scroll .cm-quote, .cherry.theme__green .cherry-editor .CodeMirror .CodeMirror-scroll .cm-header {
+.cherry.theme__green .cherry-editor .CodeMirror .CodeMirror-scroll .cm-image-marker, .cherry.theme__green .cherry-editor .CodeMirror .CodeMirror-scroll .cm-quote, .cherry.theme__green .cherry-editor .CodeMirror .CodeMirror-scroll .cm-header, .cherry.theme__green .cherry-editor .CodeMirror .CodeMirror-scroll .cm-atom {
   color: #37b24d;
 }
 .cherry.theme__green .cherry-editor .CodeMirror .CodeMirror-scroll .cm-url {
@@ -6006,6 +6026,10 @@ div[data-type=codeBlock] .token.inserted {
 .cherry.theme__red .cherry-dropdown .cherry-dropdown-item {
   color: #c2255c;
 }
+.cherry.theme__red .cherry-dropdown .cherry-dropdown-item__selected {
+  background-color: #f06595;
+  color: #fff0f6;
+}
 .cherry.theme__red .cherry-dropdown .cherry-dropdown-item:hover {
   background-color: #f06595;
   color: #fff0f6;
@@ -6047,7 +6071,7 @@ div[data-type=codeBlock] .token.inserted {
 .cherry.theme__red .cherry-editor .CodeMirror .CodeMirror-scroll span, .cherry.theme__red .cherry-editor .CodeMirror .CodeMirror-scroll .cm-variable-2, .cherry.theme__red .cherry-editor .CodeMirror .CodeMirror-scroll .cm-string, .cherry.theme__red .cherry-editor .CodeMirror .CodeMirror-scroll .cm-strong, .cherry.theme__red .cherry-editor .CodeMirror .CodeMirror-scroll .cm-em, .cherry.theme__red .cherry-editor .CodeMirror .CodeMirror-scroll .cm-meta {
   color: #a61e4d;
 }
-.cherry.theme__red .cherry-editor .CodeMirror .CodeMirror-scroll .cm-image-marker, .cherry.theme__red .cherry-editor .CodeMirror .CodeMirror-scroll .cm-quote, .cherry.theme__red .cherry-editor .CodeMirror .CodeMirror-scroll .cm-header {
+.cherry.theme__red .cherry-editor .CodeMirror .CodeMirror-scroll .cm-image-marker, .cherry.theme__red .cherry-editor .CodeMirror .CodeMirror-scroll .cm-quote, .cherry.theme__red .cherry-editor .CodeMirror .CodeMirror-scroll .cm-header, .cherry.theme__red .cherry-editor .CodeMirror .CodeMirror-scroll .cm-atom {
   color: #d6336c;
 }
 .cherry.theme__red .cherry-editor .CodeMirror .CodeMirror-scroll .cm-url {
@@ -6225,6 +6249,10 @@ div[data-type=codeBlock] .token.inserted {
 .cherry.theme__violet .cherry-dropdown .cherry-dropdown-item {
   color: #5f3dc4;
 }
+.cherry.theme__violet .cherry-dropdown .cherry-dropdown-item__selected {
+  background-color: #845ef7;
+  color: #f3f0ff;
+}
 .cherry.theme__violet .cherry-dropdown .cherry-dropdown-item:hover {
   background-color: #845ef7;
   color: #f3f0ff;
@@ -6266,7 +6294,7 @@ div[data-type=codeBlock] .token.inserted {
 .cherry.theme__violet .cherry-editor .CodeMirror .CodeMirror-scroll span, .cherry.theme__violet .cherry-editor .CodeMirror .CodeMirror-scroll .cm-variable-2, .cherry.theme__violet .cherry-editor .CodeMirror .CodeMirror-scroll .cm-string, .cherry.theme__violet .cherry-editor .CodeMirror .CodeMirror-scroll .cm-strong, .cherry.theme__violet .cherry-editor .CodeMirror .CodeMirror-scroll .cm-em, .cherry.theme__violet .cherry-editor .CodeMirror .CodeMirror-scroll .cm-meta {
   color: #5f3dc4;
 }
-.cherry.theme__violet .cherry-editor .CodeMirror .CodeMirror-scroll .cm-image-marker, .cherry.theme__violet .cherry-editor .CodeMirror .CodeMirror-scroll .cm-quote, .cherry.theme__violet .cherry-editor .CodeMirror .CodeMirror-scroll .cm-header {
+.cherry.theme__violet .cherry-editor .CodeMirror .CodeMirror-scroll .cm-image-marker, .cherry.theme__violet .cherry-editor .CodeMirror .CodeMirror-scroll .cm-quote, .cherry.theme__violet .cherry-editor .CodeMirror .CodeMirror-scroll .cm-header, .cherry.theme__violet .cherry-editor .CodeMirror .CodeMirror-scroll .cm-atom {
   color: #7048e8;
 }
 .cherry.theme__violet .cherry-editor .CodeMirror .CodeMirror-scroll .cm-url {
@@ -6417,33 +6445,38 @@ div[data-type=codeBlock] .token.inserted {
   /** 选中文字时弹出的按钮 */
 }
 .cherry.theme__blue .cherry-toolbar, .cherry.theme__blue .cherry-floatmenu, .cherry.theme__blue .cherry-bubble, .cherry.theme__blue .cherry-sidebar {
-  background: #e5dbff;
-  border-color: #e5dbff;
+  background: #EDE7F6;
+  border-color: #EDE7F6;
+  box-shadow: 0 0 12px #C5CAE9;
 }
 .cherry.theme__blue .cherry-toolbar .cherry-toolbar-button, .cherry.theme__blue .cherry-floatmenu .cherry-toolbar-button, .cherry.theme__blue .cherry-bubble .cherry-toolbar-button, .cherry.theme__blue .cherry-sidebar .cherry-toolbar-button {
-  color: #3b5bdb;
+  color: #3949AB;
 }
 .cherry.theme__blue .cherry-toolbar .cherry-toolbar-button i, .cherry.theme__blue .cherry-floatmenu .cherry-toolbar-button i, .cherry.theme__blue .cherry-bubble .cherry-toolbar-button i, .cherry.theme__blue .cherry-sidebar .cherry-toolbar-button i {
-  color: #3b5bdb;
+  color: #3949AB;
 }
 .cherry.theme__blue .cherry-toolbar .cherry-toolbar-button:hover, .cherry.theme__blue .cherry-floatmenu .cherry-toolbar-button:hover, .cherry.theme__blue .cherry-bubble .cherry-toolbar-button:hover, .cherry.theme__blue .cherry-sidebar .cherry-toolbar-button:hover {
-  background-color: #845ef7;
+  background-color: #B39DDB;
   color: #edf2ff !important;
-  border-color: #e5dbff;
+  border-color: #EDE7F6;
 }
 .cherry.theme__blue .cherry-toolbar .cherry-toolbar-button:hover i, .cherry.theme__blue .cherry-floatmenu .cherry-toolbar-button:hover i, .cherry.theme__blue .cherry-bubble .cherry-toolbar-button:hover i, .cherry.theme__blue .cherry-sidebar .cherry-toolbar-button:hover i {
   color: #edf2ff !important;
 }
 .cherry.theme__blue .cherry-dropdown {
-  background: #e5dbff;
+  background: #EDE7F6;
   /** 选择颜色的按钮 */
   /** 选择表格的按钮 */
 }
 .cherry.theme__blue .cherry-dropdown .cherry-dropdown-item {
-  color: #3b5bdb;
+  color: #3949AB;
+}
+.cherry.theme__blue .cherry-dropdown .cherry-dropdown-item__selected {
+  background-color: #B39DDB;
+  color: #edf2ff;
 }
 .cherry.theme__blue .cherry-dropdown .cherry-dropdown-item:hover {
-  background-color: #845ef7;
+  background-color: #B39DDB;
   color: #edf2ff;
 }
 .cherry.theme__blue .cherry-dropdown.cherry-color-wrap {
@@ -6451,69 +6484,69 @@ div[data-type=codeBlock] .token.inserted {
   /** 色盘里的每一个色块 */
 }
 .cherry.theme__blue .cherry-dropdown.cherry-color-wrap h3 {
-  color: #3b5bdb;
+  color: #3949AB;
 }
 .cherry.theme__blue .cherry-dropdown.cherry-color-wrap .cherry-color-item {
-  border-color: #845ef7;
+  border-color: #B39DDB;
 }
 .cherry.theme__blue .cherry-dropdown.cherry-color-wrap .cherry-color-item:hover {
-  border-color: #364fc7;
+  border-color: #283593;
 }
 .cherry.theme__blue .cherry-dropdown .cherry-insert-table-menu-item {
-  border-color: #845ef7;
+  border-color: #B39DDB;
 }
 .cherry.theme__blue .cherry-bubble {
   /** 粘贴HTML内容时弹出的选择按钮 */
 }
 .cherry.theme__blue .cherry-bubble .cherry-bubble-bottom {
-  border-top-color: #e5dbff;
+  border-top-color: #EDE7F6;
 }
 .cherry.theme__blue .cherry-bubble .cherry-bubble-top {
-  border-bottom-color: #e5dbff;
+  border-bottom-color: #EDE7F6;
 }
 .cherry.theme__blue .cherry-editor {
-  background-color: #f3f0ff;
+  background-color: rgba(243, 240, 255, 0.862745098);
 }
 .cherry.theme__blue .cherry-editor .CodeMirror {
-  background-color: #f3f0ff;
+  background-color: rgba(243, 240, 255, 0.862745098);
 }
 .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-cursor {
-  border-left: 1px solid #364fc7;
+  border-left: 1px solid #283593;
 }
 .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll span, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-variable-2, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-string, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-strong, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-em, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-meta {
-  color: #364fc7;
+  color: #283593;
 }
-.cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-image-marker, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-quote, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-header {
-  color: #4263eb;
+.cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-image-marker, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-quote, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-header, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-atom {
+  color: #303F9F;
 }
 .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-url {
-  background-color: #e5dbff;
+  background-color: #EDE7F6;
 }
 .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-comment, .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-scroll .cm-url {
-  color: #5c7cfa;
+  color: #8C9EFF;
 }
 .cherry.theme__blue .cherry-editor .CodeMirror .CodeMirror-selected {
-  background-color: #d0bfff;
+  background-color: #D1C4E9;
 }
 .cherry.theme__blue .cherry-sidebar {
-  box-shadow: 0 0 10px #bac8ff;
+  box-shadow: 0 0 12px #C5CAE9;
 }
 .cherry.theme__blue .cherry-previewer {
-  background-color: #f3f0ff;
+  background-color: rgba(243, 240, 255, 0.862745098);
 }
 .cherry.theme__blue .cherry-previewer .cherry-mobile-previewer-content {
-  background-color: #f3f0ff;
+  background-color: rgba(243, 240, 255, 0.862745098);
 }
 .cherry.theme__blue .cherry-previewer-table-content-handler .cherry-previewer-table-content-handler__input textarea {
-  background-color: #f3f0ff;
-  color: #364fc7;
-  outline-color: #4263eb;
+  background-color: rgba(243, 240, 255, 0.862745098);
+  color: #283593;
+  outline-color: #303F9F;
 }
 
 /** 预览区域样式 */
 .cherry-markdown.theme__blue {
-  color: #364fc7;
-  background-color: #f3f0ff;
+  color: #283593;
+  background-color: rgba(243, 240, 255, 0.862745098);
   /** 行内代码 */
   /** 
   * 代码块
@@ -6528,9 +6561,9 @@ div[data-type=codeBlock] .token.inserted {
   /** 目录 */
 }
 .cherry-markdown.theme__blue h1, .cherry-markdown.theme__blue h2, .cherry-markdown.theme__blue h3, .cherry-markdown.theme__blue h4, .cherry-markdown.theme__blue h5 {
-  color: #4263eb;
+  color: #303F9F;
   text-align: center;
-  border-bottom: 1px dashed #3b5bdb;
+  border-bottom: 1px dashed #3949AB;
   padding-bottom: 15px;
   margin-bottom: 25px;
 }
@@ -6557,53 +6590,53 @@ div[data-type=codeBlock] .token.inserted {
   list-style: square;
 }
 .cherry-markdown.theme__blue blockquote {
-  color: #364fc7;
-  background-color: #e5dbff;
-  border-color: #3b5bdb;
+  color: #283593;
+  background-color: #EDE7F6;
+  border-color: #3949AB;
 }
 .cherry-markdown.theme__blue a {
   text-decoration: none;
-  color: #5c7cfa;
+  color: #8C9EFF;
 }
 .cherry-markdown.theme__blue a:hover {
   text-decoration: underline;
-  color: #4263eb;
+  color: #303F9F;
 }
 .cherry-markdown.theme__blue hr {
-  border-color: #3b5bdb;
+  border-color: #3949AB;
 }
 .cherry-markdown.theme__blue p code, .cherry-markdown.theme__blue li code {
-  background-color: #e5dbff;
-  color: #5c7cfa;
-  border: 1px solid #3b5bdb;
+  background-color: #EDE7F6;
+  color: #8C9EFF;
+  border: 1px solid #3949AB;
 }
 .cherry-markdown.theme__blue table, .cherry-markdown.theme__blue .cherry-table {
-  color: #364fc7;
+  color: #283593;
 }
 .cherry-markdown.theme__blue table th, .cherry-markdown.theme__blue .cherry-table th {
-  background-color: #e5dbff;
+  background-color: #EDE7F6;
 }
 .cherry-markdown.theme__blue table tr, .cherry-markdown.theme__blue table th, .cherry-markdown.theme__blue table td, .cherry-markdown.theme__blue .cherry-table tr, .cherry-markdown.theme__blue .cherry-table th, .cherry-markdown.theme__blue .cherry-table td {
-  border-color: #3b5bdb;
+  border-color: #3949AB;
 }
 .cherry-markdown.theme__blue ruby {
   /** 上部的拼音 */
 }
 .cherry-markdown.theme__blue .footnote {
-  border-color: #3b5bdb;
+  border-color: #3949AB;
 }
 .cherry-markdown.theme__blue .footnote .footnote-title {
-  background-color: #e5dbff;
+  background-color: #EDE7F6;
 }
 .cherry-markdown.theme__blue .footnote .one-footnote {
-  color: #364fc7;
-  border-color: #3b5bdb;
+  color: #283593;
+  border-color: #3949AB;
 }
 .cherry-markdown.theme__blue .footnote .one-footnote a.footnote-ref {
   padding: 5px;
 }
 .cherry-markdown.theme__blue .toc {
-  border-bottom: 1px solid #3b5bdb;
+  border-bottom: 1px solid #3949AB;
   padding-bottom: 15px;
   margin-bottom: 30px;
 }
@@ -6612,14 +6645,14 @@ div[data-type=codeBlock] .token.inserted {
   padding-bottom: 15px;
   margin-top: 30px;
   margin-bottom: 15px;
-  border-bottom: 1px solid #3b5bdb;
+  border-bottom: 1px solid #3949AB;
 }
 .cherry-markdown.theme__blue .toc .toc-li {
   border: none;
 }
 .cherry-markdown.theme__blue .toc .toc-li a {
-  color: #364fc7;
+  color: #283593;
 }
 .cherry-markdown.theme__blue .toc .toc-li a:hover {
-  color: #4263eb;
+  color: #303F9F;
 }
