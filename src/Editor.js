@@ -23,12 +23,12 @@ import 'codemirror/addon/edit/continuelist';
 import 'codemirror/addon/edit/closetag';
 import 'codemirror/addon/fold/xml-fold';
 import 'codemirror/addon/edit/matchtags';
-import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/display/placeholder';
 import 'codemirror/keymap/sublime';
 import 'codemirror/keymap/vim';
 
-import 'cm-search-replace/src/search';
+// import 'cm-search-replace/src/search';
+import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/scroll/annotatescrollbar';
 import 'codemirror/addon/search/matchesonscrollbar';
 // import 'codemirror/addon/selection/active-line';
@@ -123,6 +123,18 @@ export default class Editor {
   }
 
   /**
+   * 禁用快捷键
+   * @param {boolean} disable 是否禁用快捷键
+   */
+  disableShortcut = (disable = true) => {
+    if (disable) {
+      this.editor.setOption('keyMap', 'default');
+    } else {
+      this.editor.setOption('keyMap', this.options.keyMap);
+    }
+  };
+
+  /**
    * 在onChange后处理draw.io的xml数据和图片的base64数据，对这种超大的数据增加省略号，
    * 以及对全角符号进行特殊染色。
    */
@@ -131,7 +143,14 @@ export default class Editor {
       this.noChange = false;
       return;
     }
-    // 如果编辑器隐藏了，则不再处理（否则有性能问题）
+    /**
+     * 如果编辑器隐藏了，则不再处理（否则有性能问题）
+     * - 性能问题出现的原因：
+     *  1. 纯预览模式下，cherry的高度可能会被设置成auto（也就是没有滚动条）
+     *  2. 这时候codemirror的高度也是auto，其“视窗懒加载”提升性能的手段就失效了
+     *  3. 这时再大量的调用markText等api就会非常耗时
+     * - 经过上述分析，最好的判断应该是判断**编辑器高度是否为auto**，但考虑到一般只有纯预览模式才大概率设置成auto，所以就只判断纯预览模式了
+     */
     if (this.$cherry.status.editor === 'hide') {
       return;
     }

@@ -7,6 +7,9 @@ import {
   keyStack2UniqueString,
   shortcutCode2Key,
   keyStack2UnPlatformUniqueString,
+  isEnableShortcutKey,
+  setDisableShortcutKey,
+  storageKeyMap,
 } from '@/utils/shortcutKey';
 import { createElement } from '@/utils/dom';
 /**
@@ -32,6 +35,9 @@ export default class ShortcutKeyConfigPanel {
     this.shortcutKeyboardKeyClassName = 'keyboard-key';
     // 双击快捷键区域
     this.handleDbClick = (/** @type {MouseEvent} */ e) => {
+      if (!isEnableShortcutKey(this.$cherry.nameSpace)) {
+        return;
+      }
       if (e.target instanceof HTMLElement) {
         if (
           e.target.classList.contains(this.shortcutConfigPanelKbdClassName) ||
@@ -129,6 +135,27 @@ export default class ShortcutKeyConfigPanel {
         }
       }
     };
+    this.clickSettingsDisableBtn = () => {
+      if (!isEnableShortcutKey(this.$cherry.nameSpace)) {
+        setDisableShortcutKey(this.$cherry.nameSpace, 'enable');
+        this.dom.classList.remove('disable');
+        this.$cherry.editor.disableShortcut(false);
+      } else {
+        setDisableShortcutKey(this.$cherry.nameSpace, 'disable');
+        this.dom.classList.add('disable');
+        this.$cherry.editor.disableShortcut(true);
+      }
+    };
+    this.clickSettingsRecoverBtn = () => {
+      setDisableShortcutKey(this.$cherry.nameSpace, 'enable');
+      this.dom.classList.remove('disable');
+      this.$cherry.editor.disableShortcut(false);
+      this.$cherry.toolbar.shortcutKeyMap = {};
+      this.$cherry.toolbar.collectShortcutKey(false);
+      storageKeyMap(this.$cherry.nameSpace, this.$cherry.toolbar.shortcutKeyMap);
+      this.dom.innerHTML = this.generateShortcutKeyConfigPanelHtmlStr();
+      this.show();
+    };
     this.init();
   }
 
@@ -143,6 +170,9 @@ export default class ShortcutKeyConfigPanel {
       this.dom.innerHTML = this.generateShortcutKeyConfigPanelHtmlStr();
       // 实例化后，将容器插入到富文本编辑器中，默认隐藏
       this.dom.style.display = 'none';
+      if (!isEnableShortcutKey(this.$cherry.nameSpace)) {
+        this.dom.classList.add('disable');
+      }
       this.$cherry.wrapperDom.append(this.dom);
     }
   }
@@ -181,6 +211,14 @@ export default class ShortcutKeyConfigPanel {
     // </div>
     const ulStr = `
       <div class="cherry-shortcut-key-config-panel-inner">
+        <div class="shortcut-panel-settings">
+          <btn class="shortcut-settings-btn j-shortcut-settings-disable-btn"><i class="ch-icon ch-icon-cherry-table-delete"></i> ${
+            this.$cherry.locale.disableShortcut
+          }</btn>
+          <btn class="shortcut-settings-btn j-shortcut-settings-recover-btn"><i class="ch-icon ch-icon-undo"></i> ${
+            this.$cherry.locale.recoverShortcut
+          }</btn>
+        </div>
         <div class="shortcut-panel-title">${this.$cherry.locale.editShortcutKeyConfigTip}</div>
         <ul class="${this.shortcutUlClassName}" id="${this.shortcutUlId}">${liStr}</ul>
         ${this.$getStaticShortcut()}
@@ -210,7 +248,6 @@ export default class ShortcutKeyConfigPanel {
       { name: this.$cherry.locale.shortcutStatic12, key: 'Ctrl+Shift+M' },
       { name: this.$cherry.locale.shortcutStatic13, key: `Ctrl+${this.$cherry.locale.leftMouseButton}` },
       { name: this.$cherry.locale.shortcutStatic14, key: 'Ctrl+Shift+L' },
-      { name: this.$cherry.locale.shortcutStatic15, key: 'Ctrl+F' },
       { name: this.$cherry.locale.shortcutStatic16, key: 'Alt+F3' },
       { name: this.$cherry.locale.shortcutStatic17, key: 'Ctrl+Z' },
       { name: this.$cherry.locale.shortcutStatic18, key: 'Ctrl+Y' },
@@ -240,19 +277,35 @@ export default class ShortcutKeyConfigPanel {
    */
   show() {
     this.dom.style.removeProperty('display');
-    const ulWrapper = document.querySelector(`#${this.shortcutUlId}`);
+    const ulWrapper = this.dom.querySelector(`#${this.shortcutUlId}`);
     if (ulWrapper instanceof HTMLUListElement) {
       // 监听双击
       ulWrapper.addEventListener('dblclick', this.handleDbClick);
+    }
+    const settingsDisableBtn = this.dom.querySelector('.j-shortcut-settings-disable-btn');
+    if (settingsDisableBtn instanceof HTMLElement) {
+      settingsDisableBtn.addEventListener('click', this.clickSettingsDisableBtn);
+    }
+    const settingsRecoverBtn = this.dom.querySelector('.j-shortcut-settings-recover-btn');
+    if (settingsRecoverBtn instanceof HTMLElement) {
+      settingsRecoverBtn.addEventListener('click', this.clickSettingsRecoverBtn);
     }
   }
 
   hide() {
     this.dom.style.display = 'none';
-    const ulWrapper = document.querySelector(`#${this.shortcutUlId}`);
+    const ulWrapper = this.dom.querySelector(`#${this.shortcutUlId}`);
     if (ulWrapper instanceof HTMLUListElement) {
       // 销毁时取消监听
       ulWrapper.removeEventListener('dblclick', this.handleDbClick);
+    }
+    const settingsDisableBtn = this.dom.querySelector('.j-shortcut-settings-disable-btn');
+    if (settingsDisableBtn instanceof HTMLElement) {
+      settingsDisableBtn.removeEventListener('click', this.clickSettingsDisableBtn);
+    }
+    const settingsRecoverBtn = this.dom.querySelector('.j-shortcut-settings-recover-btn');
+    if (settingsRecoverBtn instanceof HTMLElement) {
+      settingsRecoverBtn.removeEventListener('click', this.clickSettingsRecoverBtn);
     }
   }
 
@@ -274,9 +327,16 @@ export default class ShortcutKeyConfigPanel {
     }
     const pos = settingsDom.getBoundingClientRect();
     if (this.isHide()) {
-      this.dom.style.left = `${pos.left + pos.width}px`;
+      this.dom.style.left = `${pos.left + pos.width / 2}px`;
       this.dom.style.top = `${pos.top + pos.height}px`;
       this.show();
+      const me = this.dom.getBoundingClientRect();
+      this.dom.style.marginLeft = `0px`;
+      this.dom.style.left = `${pos.left + pos.width / 2 - me.width / 2}px`;
+      // 如果弹窗位置超出屏幕，则自动调整位置
+      if (me.left + me.width > window.innerWidth) {
+        this.dom.style.left = `${window.innerWidth - me.width - 5}px`;
+      }
       return;
     }
     return this.hide();

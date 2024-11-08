@@ -74,11 +74,35 @@
       }
     }
   }
-  .shortcut-panel-title {
+  .shortcut-panel-title, .shortcut-panel-settings {
     font-size: 14px;
     padding: 10px 15px;
     background-color: #eee; 
     // border-bottom: 1px solid #888;
     // border-top: 1px solid #888;
+  }
+  .shortcut-panel-settings {
+    padding: 10px 15px;
+    font-size: 12px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid #aaa;
+    justify-content: space-between;
+    display: flex;
+    .shortcut-settings-btn {
+      height: auto;
+      line-height: 1.2em;
+      &:hover {
+        color: rgb(255, 77, 79);
+      }
+    }
+  }
+  &.disable {
+    .cherry-shortcut-key-config-panel-ul {
+      opacity: 0.3;
+    }
+    .j-shortcut-settings-disable-btn {
+      color: rgb(255, 77, 79);
+    }
   }
 }

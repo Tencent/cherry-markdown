@@ -132,4 +132,7 @@ export default {
   shortcutStatic17: 'Отменить',
   shortcutStatic18: 'Вернуть отмену',
   leftMouseButton: 'левая кнопка мыши',
+  disableShortcut: 'Отключить все горячие клавиши',
+  recoverShortcut: 'Восстановить по умолчанию',
+  search: 'Поиск',
 };
