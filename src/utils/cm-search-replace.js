@@ -31,6 +31,7 @@ export default class SearchBox {
 
     this.initElements(el);
     this.activeInput = this.searchInput;
+    // @ts-ignore
     this.element.style.display = 'none';
     // this.bindKeys();
 
@@ -532,15 +533,18 @@ export default class SearchBox {
   hide() {
     const { cm } = this;
     this.clearSearch(cm);
+    // @ts-ignore
     this.element.style.display = 'none';
     cm.focus();
   }
 
   isVisible() {
+    // @ts-ignore
     return this.element.style.display !== 'none';
   }
 
   show(value, isReplace) {
+    // @ts-ignore
     this.element.style.display = '';
     this.replaceBox.style.display = isReplace ? '' : 'none';
     this.isReplace = isReplace;
