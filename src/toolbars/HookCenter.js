@@ -74,6 +74,8 @@ import Detail from './hooks/Detail';
 import DrawIo from './hooks/DrawIo';
 import Publish from './hooks/Publish';
 import ChangeLocale from './hooks/ChangeLocale';
+import ShortcutKey from './hooks/ShortcutKey';
+import Search from './hooks/Search';
 
 // 定义默认支持的工具栏
 // 目前不支持按需动态加载
@@ -136,6 +138,8 @@ const HookList = {
   // chatgpt: ChatGpt,
   publish: Publish,
   changeLocale: ChangeLocale,
+  shortcutKey: ShortcutKey,
+  search: Search,
 };
 
 export default class HookCenter {

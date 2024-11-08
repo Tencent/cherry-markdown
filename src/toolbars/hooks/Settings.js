@@ -44,12 +44,6 @@ export default class Settings extends MenuBase {
       { iconName: classicBrIconName, name: classicBrName, onclick: this.bindSubClick.bind(this, 'classicBr') },
       { iconName: previewIcon, name: previewName, onclick: this.bindSubClick.bind(this, 'previewClose') },
       { iconName: '', name: 'hide', onclick: this.bindSubClick.bind(this, 'toggleToolbar') },
-      {
-        iconName: '',
-        name: this.$cherry.locale.shortcutKeySetting,
-        onclick: this.bindSubClick.bind(this, 'shortcutKey'),
-        disabledHideAllSubMenu: true,
-      },
     ];
     this.attachEventListeners();
     this.shortcutKeyMap = {

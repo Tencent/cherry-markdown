@@ -16,7 +16,13 @@
 import HookCenter from './HookCenter';
 import { createElement } from '@/utils/dom';
 import Logger from '@/Logger';
-import { getAllowedShortcutKey, getStorageKeyMap, keyStack2UniqueString, storageKeyMap } from '@/utils/shortcutKey';
+import {
+  getAllowedShortcutKey,
+  getStorageKeyMap,
+  keyStack2UniqueString,
+  storageKeyMap,
+  isEnableShortcutKey,
+} from '@/utils/shortcutKey';
 
 /**
  * @typedef {()=>void} Bold 向cherry编辑器中插入粗体语法
@@ -224,8 +230,12 @@ export default class Toolbar {
     if (this.isHasSubMenu(name) && !focusEvent) {
       this.toggleSubMenu(name);
     } else {
-      // 如果是颜色选择器，则隐藏其他二级菜单，但不隐藏自己（因为颜色选择器的二级菜单是自己实现的独立逻辑）
-      if (name === 'color') {
+      /**
+       * 如果定义了hideOtherSubMenu，则隐藏其他二级菜单，但不隐藏自己（因为其二级菜单是自己实现的独立逻辑）
+       *  比如：颜色选择器、快捷键配置
+       */
+      // @ts-ignore
+      if (typeof menu.hideOtherSubMenu === 'function') {
         // @ts-ignore
         menu.hideOtherSubMenu(() => this.hideAllSubMenu());
       } else {
@@ -298,8 +308,9 @@ export default class Toolbar {
 
   /**
    * 收集快捷键
+   * @param {boolean} useUserSettings 是否使用用户配置的快捷键
    */
-  collectShortcutKey() {
+  collectShortcutKey(useUserSettings = true) {
     // 兼容旧版本配置
     if (
       this.$cherry.options.toolbars.shortcutKey &&
@@ -335,6 +346,9 @@ export default class Toolbar {
       Object.entries(this.$cherry.options.toolbars.shortcutKeySettings.shortcutKeyMap).forEach(([key, value]) => {
         this.shortcutKeyMap[key] = value;
       });
+      if (!useUserSettings) {
+        return;
+      }
       // 本地缓存的快捷键配置优先级最高，按 hookName-aliasName 替换相同的快捷键
       const cachedMap = getStorageKeyMap(this.$cherry.nameSpace);
       if (cachedMap) {
@@ -406,14 +420,19 @@ export default class Toolbar {
   /**
    * 触发对应快捷键的事件
    * @param {KeyboardEvent} evt
+   * @returns {boolean} 是否需要阻塞后续事件，true: 阻塞；false: 不阻塞
    */
   fireShortcutKey(evt) {
+    // 如果禁用了快捷键，则不再触发快捷键事件
+    if (!isEnableShortcutKey(this.$cherry.nameSpace)) {
+      return false;
+    }
     const onKeyStack = getAllowedShortcutKey(evt);
     const currentKey = keyStack2UniqueString(onKeyStack);
     const keyMap = this.shortcutKeyMap[currentKey]?.hookName;
-    console.log(keyMap, currentKey);
     if (typeof keyMap === 'string' && keyMap) {
       this.menus.hooks[keyMap]?.fire(evt, currentKey);
     }
+    return true;
   }
 }

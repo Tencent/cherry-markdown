@@ -966,8 +966,10 @@ export default class Cherry extends CherryStatic {
     }
     if (this.toolbar.matchShortcutKey(evt)) {
       // 快捷键
-      evt.preventDefault();
-      this.toolbar.fireShortcutKey(evt);
+      const needPreventDefault = this.toolbar.fireShortcutKey(evt);
+      if (needPreventDefault) {
+        evt.preventDefault();
+      }
     }
   }
 

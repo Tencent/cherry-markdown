@@ -169,6 +169,18 @@ export const keyStackIsModifierkeys = (keyStack) => {
   return (includeShiftKey || includeAltKey) && !keyStack.includes(META_KEY) && !keyStack.includes(CONTROL_KEY);
 };
 
+export const setDisableShortcutKey = (nameSpace, value = 'disable') => {
+  window.localStorage.setItem(`${nameSpace}-disable-cherry-shortcut-key`, value);
+};
+
+export const isEnableShortcutKey = (nameSpace) => {
+  const disableShortcutKeyStorage = window.localStorage.getItem(`${nameSpace}-disable-cherry-shortcut-key`);
+  if (disableShortcutKeyStorage === 'disable') {
+    return false;
+  }
+  return true;
+};
+
 /**
  * 缓存快捷键映射
  * @param {string} nameSpace cherry 的缓存命名空间

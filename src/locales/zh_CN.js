@@ -135,4 +135,7 @@ export default {
   shortcutStatic17: '撤销',
   shortcutStatic18: '回滚撤销',
   leftMouseButton: '鼠标左键',
+  disableShortcut: '禁用所有快捷键',
+  recoverShortcut: '恢复默认',
+  search: '搜索',
 };

@@ -119,6 +119,16 @@ var basicConfig = {
           return defaultWrapper;
         },
       },
+      autoLink: {
+        /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
+        target: '',
+        /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
+        rel: '',
+        /** 是否开启短链接 */
+        enableShortLink: true,
+        /** 短链接长度 */
+        shortLinkLength: 20,
+      },
       codeBlock: {
         theme: 'twilight',
         lineNumber: true, // 默认显示行号
@@ -200,16 +210,15 @@ var basicConfig = {
       'graph',
       'customMenuTable',
       'togglePreview',
-      'settings',
       'codeTheme',
-      'export',
+      'search',
+      'shortcutKey',
       {
         customMenuBName: ['ruby', 'audio', 'video', 'customMenuAName'],
       },
       'customMenuCName',
-      'theme',
     ],
-    toolbarRight: ['fullScreen', '|', 'changeLocale', 'wordCount'],
+    toolbarRight: ['fullScreen', '|', 'export', 'changeLocale', 'wordCount'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
     sidebar: ['mobilePreview', 'copy', 'theme', 'publish'],
     sidebar: ['mobilePreview', 'copy', 'theme'],

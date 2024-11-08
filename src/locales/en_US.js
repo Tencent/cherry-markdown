@@ -132,4 +132,7 @@ export default {
   shortcutStatic17: 'Undo',
   shortcutStatic18: 'Redo',
   leftMouseButton: 'left mouse button',
+  disableShortcut: 'Disable all shortcuts',
+  recoverShortcut: 'Restore default',
+  search: 'Search',
 };
