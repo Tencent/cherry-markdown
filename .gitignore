@@ -26,9 +26,7 @@ package-lock.json
 pnpm-lock.yaml
 
 #client
-/client/dist-electron
-/client/dist
-/client/release
+/client/yarn.lock
 
 # docs
 /docs/.vitepress/cache/
