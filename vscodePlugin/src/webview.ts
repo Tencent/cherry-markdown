@@ -11,8 +11,10 @@ import * as fs from 'fs';
  */
 export function getWebviewContent(mdInfo: object, currentPanel: vscode.WebviewPanel, extensionPath: string) {
   const baseResourcePath = getWebViewPath(currentPanel);
+  const activeTextEditorPath = getActiveTextEditorPath(currentPanel);
   const filePath = writeGlobalVarsToFile(extensionPath, {
-    baseResourcePath
+    baseResourcePath,
+    activeTextEditorPath,
   });
   const pageResourceUrlsMap = {
     'global-vars.js': currentPanel.webview.asWebviewUri(vscode.Uri.file(filePath)),
@@ -57,18 +59,25 @@ content="default-src 'none'; img-src ${currentPanel.webview.cspSource} https: ht
   </html>`;
 }
 
-const getWebViewPath = (currentPanel: vscode.WebviewPanel) => {
+const getWebViewPath = (currentPanel: vscode.WebviewPanel): vscode.Uri => {
   const workspaceFolder = vscode.workspace.workspaceFolders![0].uri.fsPath ?? '';
-  const imgUri = vscode.Uri.file(workspaceFolder);
-  return currentPanel.webview.asWebviewUri(imgUri);
+  const workspacePath = vscode.Uri.file(workspaceFolder);
+  return currentPanel.webview.asWebviewUri(workspacePath);
 };
 
-function writeGlobalVarsToFile(extensionPath: string, globalVars: { baseResourcePath: vscode.Uri }): string {
+const getActiveTextEditorPath = (currentPanel: vscode.WebviewPanel): vscode.Uri => {
+  const editor = vscode.window.activeTextEditor;
+  const activeTextEditorPath = editor ? currentPanel.webview.asWebviewUri(editor.document.uri) : getWebViewPath(currentPanel);;
+  return activeTextEditorPath;
+};
+
+function writeGlobalVarsToFile(extensionPath: string, globalVars: { baseResourcePath: vscode.Uri, activeTextEditorPath: vscode.Uri }): string {
   const globalVarsContent = `
     window._baseResourcePath = "${globalVars.baseResourcePath}";
+    window._activeTextEditorPath = "${globalVars.activeTextEditorPath}";
   `;
+
   const filePath = path.join(extensionPath, 'web-resources/scripts', 'global-vars.js');
   fs.writeFileSync(filePath, globalVarsContent);
   return filePath;
 }
-
