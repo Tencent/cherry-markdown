@@ -245,15 +245,20 @@ const basicConfig = {
     // eslint-disable-next-line no-undef
     changeString2Pinyin: pinyin,
     beforeImageMounted(srcProp, srcValue) {
+      const { _activeTextEditorPath } = window;
+
+      //  http路径 或 data路径
       if (isHttpUrl(srcValue) || isDataUrl(srcValue)) {
         return {
           src: srcValue,
         };
       }
-      // eslint-disable-next-line no-underscore-dangle
-      const basePath = window._baseResourcePath || '';
+      // TODO: 绝对路径(如windows上D:\GithubDesktop\cherry-markdown\README.md)
+
+      // 相对路径
+      const absolutePath = new URL(srcValue, _activeTextEditorPath).href;
       return {
-        src: path.join(basePath, srcValue),
+        src: absolutePath,
       };
     },
     onClickPreview: (e) => {
