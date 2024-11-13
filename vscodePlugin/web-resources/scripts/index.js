@@ -58,18 +58,25 @@ const customMenuFont = Cherry.createMenuHook('字体样式', {
 
 
 /** 处理 a 链接跳转问题 */
-const onClickLink = (target) => {
+const onClickLink = (e, target) => {
+
+
   // 这里不能直接使用 target.href，因为本地相对文件地址会被vscode转成`webview://`协议
   const href = target.attributes?.href.value;
-  if (!href) {
+
+  const hrefValidation = href ? href : 'href-invalid';
+  if (isHttpUrl(hrefValidation) || hrefValidation) {
+    // 阻止a链接在webview的默认跳转行为
+    e.preventDefault();
     vscode.postMessage({
       type: 'open-url',
-      data: 'href-invalid',
+      data: href,
     });
-  };
+    return;
+  }
   vscode.postMessage({
     type: 'open-url',
-    data: href,
+    data: 'href-invalid',
   });
 };
 
@@ -266,11 +273,11 @@ const basicConfig = {
       switch (target?.nodeName) {
         case 'SPAN':
           if (target?.parentElement?.nodeName === 'A') {
-            onClickLink(target?.parentElement);
+            onClickLink(e, target?.parentElement);
           }
           break;
         case 'A':
-          onClickLink(target);
+          onClickLink(e, target);
           break;
       };
     },
