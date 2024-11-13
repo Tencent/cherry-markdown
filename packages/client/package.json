@@ -1,0 +1,29 @@
+{
+  "name": "cherry-markdown-client",
+  "private": true,
+  "version": "0.1.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-dialog": "^2.0.0",
+    "@tauri-apps/plugin-fs": "~2",
+    "cherry-markdown": "0.8.50",
+    "pinia": "^2.2.4",
+    "vue": "^3.3.4"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.0.3",
+    "@vitejs/plugin-vue": "^5.0.5",
+    "typescript": "^5.2.2",
+    "vite": "^5.3.1",
+    "vue-tsc": "^2.0.22"
+  }
+}

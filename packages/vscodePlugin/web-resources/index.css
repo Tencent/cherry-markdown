@@ -1,0 +1,13 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh !important;
+    overflow: hidden;
+}
+
+@supports selector(::-webkit-scrollbar) {
+    html {
+        scrollbar-color: unset;
+    }
+}

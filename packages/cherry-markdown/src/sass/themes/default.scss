@@ -1,0 +1,251 @@
+@import '../variable.scss';
+
+/** 编辑器样式 */
+.cherry.theme__default {
+  
+  .cherry-toolbar {
+    
+  }
+
+  /** 二级菜单 */
+  .cherry-dropdown {
+    .cherry-dropdown-item {
+      /** 图标 */
+      i {
+
+      }
+    }
+    /** 选择颜色的按钮 */
+    &.cherry-color-wrap {
+      .cherry-color-text {
+        /** 色盘的标题 */
+        h3 {
+
+        }
+        /** 色盘里的每一个色块 */
+        .cherry-color-item {
+
+        }
+      }
+    }
+  }
+
+  /** 选中文字时弹出的按钮 */
+  .cherry-bubble {
+
+    /** 粘贴HTML内容时弹出的选择按钮 */
+    &.cherry-switch-paste {
+  
+    }
+  }
+
+
+  /** 光标focus到空行时联想出的按钮 */
+  .cherry-floatmenu {
+
+  }
+
+  .cherry-editor {
+
+  }
+
+  .cherry-sidebar {
+
+  }
+
+}
+/** 预览区域样式 */
+.cherry-markdown.theme__default {
+
+  p, div {
+  
+  }
+  
+  h1 {
+    
+  }
+  
+  h2 {
+    
+  }
+  
+  h3 {
+    
+  }
+
+  h4 {
+
+  }
+
+  h5 {
+
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    /** 标题前面的锚点或序号 */
+    .anchor {
+
+    }
+  }
+  
+  ul {
+    &.cherry-list__upper-roman {
+      list-style: upper-roman;
+    }
+  
+    &.cherry-list__lower-greek {
+      list-style: lower-greek;
+    }
+  
+    &.cherry-list__cjk-ideographic {
+      list-style: cjk-ideographic;
+    }
+  
+    &.cherry-list__circle {
+      list-style: circle;
+    }
+  
+    &.cherry-list__square {
+      list-style: square;
+    }
+
+    &.cherry-list__default {
+
+    }
+
+    /** checklist 模式，未勾选时 */
+    .ch-icon-square {
+
+    }
+    /** checklist 模式，勾选时 */
+    .ch-icon-check {
+
+    }
+  }
+  
+  ol {
+    li {
+      
+    }
+  }
+
+
+  blockquote {
+  
+  }
+  
+  a {
+    
+  }
+  
+  strong {
+    
+  }
+  
+  em {
+    
+  }
+  
+  del {
+    
+  }
+
+  sup {
+
+  }
+
+  sub {
+
+  }
+  
+  hr {
+    
+  }
+  
+  img {
+    
+  }
+
+  video {
+
+  }
+
+  audio {
+
+  }
+  
+  /** 行内代码 */
+  p code, li code {
+    
+  }
+  
+  /** 
+  * 代码块
+  */
+  pre code {
+    
+  }
+  
+  /** 
+  * 表格
+  */
+  table {
+    tr {
+  
+    }
+    th {
+  
+    }
+    td {
+  
+    }
+  }
+
+  /** 可以理解为上下结构的音标，下部是文字，上部是对应的拼音 */
+  ruby {
+    /** 上部的拼音 */
+    rt {
+
+    }
+  }
+  
+  /** 脚注 */
+  .footnote {
+    .footnote-title {
+  
+    }
+    .one-footnote {
+      a.footnote-ref {
+  
+      }
+    }
+  }
+  
+  /** 行间公式 */
+  .Cherry-InlineMath {
+    
+  }
+  
+  /** 段落公式 */
+  .Cherry-Math {
+  
+  }
+
+    /** 目录 */
+  .toc {
+    .toc-title {
+
+    }
+    .toc-li {
+      .level-1 {
+
+      }
+      .level-2 {
+
+      }
+      .level-3 {
+
+      }
+    }
+  }
+}

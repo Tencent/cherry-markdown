@@ -1,0 +1,179 @@
+.cherry {
+  .doing-resize-img {
+    -moz-user-select:none;
+    -webkit-user-select:none;
+    user-select:none;
+  }
+  .cherry-previewer {
+    img {
+      transition: all 0.1s;
+    }
+  }
+  .cherry-previewer-img-size-handler {
+    position:absolute;
+    box-shadow: 0 1px 4px 0 rgba(20,81,154, 0.5);
+    border:1px solid #3582fb;
+    box-sizing: content-box;
+    pointer-events:none;
+    .cherry-previewer-img-size-handler__points {
+      position: absolute;
+      height: 10px;
+      width: 10px;
+      margin-top: -7px;
+      margin-left: -7px;
+      border-radius: 9px;
+      background: #3582fb;
+      border: 2px solid #fff;
+      box-sizing: content-box;
+      box-shadow: 0px 2px 2px 0px rgba(20,81,154,0.5);
+      pointer-events:all;
+    }
+    .cherry-previewer-img-size-handler__background {
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      opacity: 0.5;
+      width: 100%;
+      height: 100%;
+    }
+    // 左上角
+    .cherry-previewer-img-size-handler__points-leftTop {
+      cursor:nw-resize;
+    }
+    // 右上角
+    .cherry-previewer-img-size-handler__points-rightTop {
+      cursor:sw-resize;
+    }
+    // 左下角
+    .cherry-previewer-img-size-handler__points-leftBottom {
+      cursor:sw-resize;
+    }
+    // 右下角
+    .cherry-previewer-img-size-handler__points-rightBottom {
+      cursor:nw-resize;
+    }
+    // 中上
+    .cherry-previewer-img-size-handler__points-middleTop {
+      cursor:n-resize;
+    }
+    // 中下
+    .cherry-previewer-img-size-handler__points-middleBottom {
+      cursor:n-resize;
+    }
+    // 中左
+    .cherry-previewer-img-size-handler__points-leftMiddle {
+      cursor:e-resize;
+    }
+    // 中右
+    .cherry-previewer-img-size-handler__points-rightMiddle {
+      cursor:e-resize;
+    }
+  }
+  .cherry-previewer-table-content-handler {
+    .cherry-previewer-table-content-handler__input {
+      position: absolute;
+      textarea {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        box-sizing: border-box;
+        resize: none;
+        outline: 1px solid #3582fb;
+        word-break: break-all;
+      }
+    }
+  }
+  .cherry-previewer-codeBlock-content-handler {
+    .cherry-previewer-codeBlock-content-handler__input {
+      position: absolute;
+    }
+  }
+  .cherry-previewer-table-hover-handler {
+    position: absolute;
+    pointer-events: none;
+    z-index: 999;
+    &-container, &-sort-container, &-delete-container {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+      list-style-type: none;
+    }
+    &__symbol {
+      pointer-events: auto;
+      display: flex;
+      justify-content: center;
+      position: absolute;
+      color: #3582fb;
+      width: 12px;
+      height: 12px;
+      line-height: 12px;
+      border: 1px solid #3582fb00;
+      background-color: #ffffff00;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.3s;
+      &:hover {
+        background-color: #3582fb88;
+        color: #FFF;
+      }
+    }
+    &__sort {
+      pointer-events: auto;
+      display: flex;
+      justify-content: center;
+      position: absolute;
+      color: #3582fb;
+      width: 12px;
+      height: 12px;
+      padding: 5px 0;
+      line-height: 12px;
+      border: 1px solid #3582fb00;
+      background-color: #ffffff00;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.3s;
+      &:hover {
+        background-color: #3582fb88;
+        border-color: #3582fb88;
+        color: #FFF;
+      }
+      &[data-type='ColUp'], &[data-type='ColDown'] {
+        padding: 0 5px;
+      }
+    }
+    &__delete {
+      pointer-events: auto;
+      position: absolute;
+      color: #FFF;
+      width: 25px;
+      height: 15px;
+      font-size: 12px;
+      line-height: 12px;
+      border: 1px solid rgba(255, 77, 79, 0);
+      border-radius: 3px;
+      background-color: rgba(255, 77, 79, 0);
+      color: rgba(255, 77, 79, 0.5);
+      cursor: pointer;
+      transition: all 0.3s;
+      &:hover {
+        background-color: rgba(255, 77, 79);
+        border-color: rgba(255, 77, 79);
+        color: #FFF;
+      }
+      &[data-type='left'], &[data-type='right'] {
+        padding: 0;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+  @keyframes changeBgColor {
+    0% { background-color: #ffffcc88; }
+    60% { background-color: #ffffcc88; }
+    100% { background-color: #ffffcc00; }
+  }
+  .cherry-highlight-line {
+    animation: changeBgColor 3s;
+  }
+}

@@ -1,0 +1,112 @@
+#markdown-info {
+    display: none;
+}
+
+.cherry-toolbar, .toolbar-left, .toolbar-right {
+    height: 32px !important;
+}
+
+.cherry-highlight-line {
+    background-color: rgb(0,0,0,0) !important;
+}
+
+.cherry-dropdown {
+    margin-top: -4px;
+}
+
+.cherry-sidebar {
+    top: 33px;
+}
+
+.cherry-editor, .cherry-previewer {
+    max-height: calc(100% - 33px) !important;
+}
+
+.cherry-toolbar .cherry-toolbar-insertChart {
+    /* display: none; */
+}
+
+.markdown-preview-only .cherry-toolbar {
+    display: none;
+}
+.markdown-preview-only .cherry-sidebar {
+    top: 0;
+    padding-top: 33px;
+}
+.markdown-preview-only .cherry-editor {
+    display: none;
+}
+.markdown-preview-only .cherry-previewer {
+    width: 100% !important;
+    max-height: 100% !important;
+    display: block !important;
+}
+
+.cherry-copy-code-block {
+    display: none;
+}
+
+.cherry-color-item__000000 { background-color: #000000;}
+.cherry-color-item__444444 { background-color: #444444;}
+.cherry-color-item__666666 { background-color: #666666;}
+.cherry-color-item__999999 { background-color: #999999;}
+.cherry-color-item__cccccc { background-color: #cccccc;}
+.cherry-color-item__eeeeee { background-color: #eeeeee;}
+.cherry-color-item__f3f3f3 { background-color: #f3f3f3;}
+.cherry-color-item__ffffff { background-color: #ffffff;}
+.cherry-color-item__ff0000 { background-color: #ff0000;}
+.cherry-color-item__ff9900 { background-color: #ff9900;}
+.cherry-color-item__ffff00 { background-color: #ffff00;}
+.cherry-color-item__00ff00 { background-color: #00ff00;}
+.cherry-color-item__00ffff { background-color: #00ffff;}
+.cherry-color-item__0000ff { background-color: #0000ff;}
+.cherry-color-item__9900ff { background-color: #9900ff;}
+.cherry-color-item__ff00ff { background-color: #ff00ff;}
+.cherry-color-item__f4cccc { background-color: #f4cccc;}
+.cherry-color-item__fce5cd { background-color: #fce5cd;}
+.cherry-color-item__fff2cc { background-color: #fff2cc;}
+.cherry-color-item__d9ead3 { background-color: #d9ead3;}
+.cherry-color-item__d0e0e3 { background-color: #d0e0e3;}
+.cherry-color-item__cfe2f3 { background-color: #cfe2f3;}
+.cherry-color-item__d9d2e9 { background-color: #d9d2e9;}
+.cherry-color-item__ead1dc { background-color: #ead1dc;}
+.cherry-color-item__ea9999 { background-color: #ea9999;}
+.cherry-color-item__f9cb9c { background-color: #f9cb9c;}
+.cherry-color-item__ffe599 { background-color: #ffe599;}
+.cherry-color-item__b6d7a8 { background-color: #b6d7a8;}
+.cherry-color-item__a2c4c9 { background-color: #a2c4c9;}
+.cherry-color-item__9fc5e8 { background-color: #9fc5e8;}
+.cherry-color-item__b4a7d6 { background-color: #b4a7d6;}
+.cherry-color-item__d5a6bd { background-color: #d5a6bd;}
+.cherry-color-item__e06666 { background-color: #e06666;}
+.cherry-color-item__f6b26b { background-color: #f6b26b;}
+.cherry-color-item__ffd966 { background-color: #ffd966;}
+.cherry-color-item__93c47d { background-color: #93c47d;}
+.cherry-color-item__76a5af { background-color: #76a5af;}
+.cherry-color-item__6fa8dc { background-color: #6fa8dc;}
+.cherry-color-item__8e7cc3 { background-color: #8e7cc3;}
+.cherry-color-item__c27ba0 { background-color: #c27ba0;}
+.cherry-color-item__cc0000 { background-color: #cc0000;}
+.cherry-color-item__e69138 { background-color: #e69138;}
+.cherry-color-item__f1c232 { background-color: #f1c232;}
+.cherry-color-item__6aa84f { background-color: #6aa84f;}
+.cherry-color-item__45818e { background-color: #45818e;}
+.cherry-color-item__3d85c6 { background-color: #3d85c6;}
+.cherry-color-item__674ea7 { background-color: #674ea7;}
+.cherry-color-item__a64d79 { background-color: #a64d79;}
+.cherry-color-item__990000 { background-color: #990000;}
+.cherry-color-item__b45f06 { background-color: #b45f06;}
+.cherry-color-item__bf9000 { background-color: #bf9000;}
+.cherry-color-item__38761d { background-color: #38761d;}
+.cherry-color-item__134f5c { background-color: #134f5c;}
+.cherry-color-item__0b5394 { background-color: #0b5394;}
+.cherry-color-item__351c75 { background-color: #351c75;}
+.cherry-color-item__741b47 { background-color: #741b47;}
+.cherry-color-item__660000 { background-color: #660000;}
+.cherry-color-item__783f04 { background-color: #783f04;}
+.cherry-color-item__7f6000 { background-color: #7f6000;}
+.cherry-color-item__274e13 { background-color: #274e13;}
+.cherry-color-item__0c343d { background-color: #0c343d;}
+.cherry-color-item__073763 { background-color: #073763;}
+.cherry-color-item__20124d { background-color: #20124d;}
+.cherry-color-item__4c1130 { background-color: #4c1130;}

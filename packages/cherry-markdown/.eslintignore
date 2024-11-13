@@ -1,0 +1,13 @@
+# build/**
+dist/**
+**/dist/**
+node_modules/**
+**/node_modules/**
+src/sass/**
+**/*.css
+src/libs/*.js
+example-applications/**
+examples/**
+client
+vscodePlugin
+docs/**
