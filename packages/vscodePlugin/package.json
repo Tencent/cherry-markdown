@@ -204,6 +204,7 @@
     "mathjax": "^3.2.2",
     "md5": "^2.3.0",
     "path-browserify": "^1.0.1",
-    "xmldom-sre": "^0.1.31"
+    "xmldom-sre": "^0.1.31",
+    "cherry-markdown": "workspace:*"
   }
 }

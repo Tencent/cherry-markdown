@@ -1,5 +1,5 @@
 {
-  "name": "cherry-markdown-client",
+  "name": "@cherry-markdown/client",
   "private": true,
   "version": "0.1.1",
   "type": "module",
@@ -15,7 +15,7 @@
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-dialog": "^2.0.0",
     "@tauri-apps/plugin-fs": "~2",
-    "cherry-markdown": "0.8.50",
+    "cherry-markdown": "workspace:*",
     "pinia": "^2.2.4",
     "vue": "^3.3.4"
   },
