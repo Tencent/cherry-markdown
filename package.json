@@ -2,6 +2,22 @@
   "name": "cherry-markdown",
   "version": "0.0.0",
   "description": "",
-  "scripts": {},
-  "license": "ISC"
+  "scripts": {
+    "prepare": "husky install"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "husky": "9.1.6"
+  },
+  "pnpm": {
+    "overrides": {
+      "glob-parent": "5.1.2",
+      "set-value": "4.0.1",
+      "lodash.template": "4.5.0",
+      "yargs-parser": "20.2.9",
+      "xmldom": "0.5.0",
+      "ansi-regex": "5.0.1",
+      "glob-watcher": "6.0.0"
+    }
+  }
 }
