@@ -7,6 +7,7 @@
   },
   "license": "ISC",
   "devDependencies": {
+    "@changesets/cli": "^2.27.9",
     "husky": "9.1.6"
   },
   "pnpm": {
