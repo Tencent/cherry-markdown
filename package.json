@@ -3,12 +3,19 @@
   "version": "0.0.0",
   "description": "",
   "scripts": {
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "preinstall": "npx only-allow pnpm",
+    "version-packages": "changeset version",
+    "release": "pnpm build && changeset publish"
   },
   "license": "ISC",
   "devDependencies": {
     "@changesets/cli": "^2.27.9",
     "husky": "9.1.6"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": "18.x"
   },
   "pnpm": {
     "overrides": {

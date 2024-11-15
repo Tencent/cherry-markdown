@@ -5,6 +5,7 @@ dist/types/*
 # local env files
 .env.local
 .env.*.local
+.turbo
 
 # Log files
 npm-debug.log*
