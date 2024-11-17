@@ -32,6 +32,8 @@ import {
   getCodeThemeFromLocal,
   testHasLocal,
   changeCodeTheme,
+  getCodeWrapFromLocal,
+  saveCodeWrapToLocal,
 } from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
 import getPosBydiffs from './utils/recount-pos';
@@ -132,6 +134,7 @@ export default class Cherry extends CherryStatic {
    * @private
    */
   init() {
+    this.storeDocumentScroll();
     let mountEl = this.options.id ? document.getElementById(this.options.id) : this.options.el;
 
     if (!mountEl) {
@@ -236,6 +239,30 @@ export default class Cherry extends CherryStatic {
     // this.editText(null, this.editor.editor);
     this.createToc();
     this.$event.bindCallbacksByOptions(this.options);
+    this.restoreDocumentScroll();
+  }
+
+  /**
+   * 记忆页面的滚动高度，在cherry初始化后恢复到这个高度
+   */
+  storeDocumentScroll() {
+    if (!this.options.editor.keepDocumentScrollAfterInit) {
+      return;
+    }
+    this.needRestoreDocumentScroll = true;
+    this.documentElementScrollTop = document.documentElement.scrollTop;
+    this.documentElementScrollLeft = document.documentElement.scrollLeft;
+  }
+
+  /**
+   * 在cherry初始化后恢复到这个高度
+   */
+  restoreDocumentScroll() {
+    if (!this.options.editor.keepDocumentScrollAfterInit || !this.needRestoreDocumentScroll) {
+      return;
+    }
+    this.needRestoreDocumentScroll = false;
+    window.scrollTo(this.documentElementScrollLeft, this.documentElementScrollTop);
   }
 
   destroy() {
@@ -556,13 +583,25 @@ export default class Cherry extends CherryStatic {
     }
     if (codeBlockTheme === 'dark') codeBlockTheme = 'tomorrow-night';
     else if (codeBlockTheme === 'light') codeBlockTheme = 'solarized-light';
+    // @ts-ignore
+    const codeWrap = getCodeWrapFromLocal(this.nameSpace, this.options.engine.syntax.codeBlock.wrap);
     const wrapperDom = createElement('div', ['cherry', 'clearfix', mainTheme].join(' '), {
       'data-toolbarTheme': toolbarTheme,
       'data-inlineCodeTheme': inlineCodeTheme,
       'data-codeBlockTheme': codeBlockTheme,
+      'data-codeWrap': codeWrap === 'wrap' ? 'wrap' : 'nowrap',
     });
     this.wrapperDom = wrapperDom;
     return wrapperDom;
+  }
+
+  getCodeWrap() {
+    return this.wrapperDom.dataset.codeWrap || 'wrap';
+  }
+
+  setCodeWrap(codeWrap) {
+    this.wrapperDom.dataset.codeWrap = codeWrap === 'wrap' ? 'wrap' : 'nowrap';
+    saveCodeWrapToLocal(this.nameSpace, codeWrap);
   }
 
   /**

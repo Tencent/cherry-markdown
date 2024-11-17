@@ -507,6 +507,10 @@
 div[data-type='codeBlock'] {
   @import 'prism/tomorrow-night';
 
+  div[data-code-wrap='wrap'] & code[class*=language-]{
+    white-space: pre-wrap;
+  }
+
   [data-code-block-theme='default'] & {
     @import 'prism/default';
   }

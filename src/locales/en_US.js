@@ -135,4 +135,5 @@ export default {
   disableShortcut: 'Disable all shortcuts',
   recoverShortcut: 'Restore default',
   search: 'Search',
+  autoWrap: 'Auto Wrap',
 };

@@ -144,3 +144,31 @@ export function changeCodeTheme($cherry, codeTheme) {
 
   saveCodeThemeToLocal($cherry.nameSpace, newTheme);
 }
+
+/**
+ * 获取代码块是否换行的配置
+ * @param {string} nameSpace
+ * @param {boolean} defaultWrap
+ * @returns {string} 主题名
+ */
+export function getCodeWrapFromLocal(nameSpace = 'cherry', defaultWrap = true) {
+  let res = defaultWrap ? 'wrap' : 'nowrap';
+  if (typeof localStorage !== 'undefined') {
+    const localTheme = localStorage.getItem(`${nameSpace}-codeWrap`);
+    if (localTheme) {
+      res = localTheme;
+    }
+  }
+  return res;
+}
+
+/**
+ * 保存当前代码主题
+ * @param {string} nameSpace
+ * @param {string} wrap
+ */
+export function saveCodeWrapToLocal(nameSpace, wrap) {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem(`${nameSpace}-codeWrap`, wrap);
+  }
+}
