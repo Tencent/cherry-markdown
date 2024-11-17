@@ -135,4 +135,5 @@ export default {
   disableShortcut: 'Отключить все горячие клавиши',
   recoverShortcut: 'Восстановить по умолчанию',
   search: 'Поиск',
+  autoWrap: 'Автоперенос строк',
 };

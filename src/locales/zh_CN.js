@@ -138,4 +138,5 @@ export default {
   disableShortcut: '禁用所有快捷键',
   recoverShortcut: '恢复默认',
   search: '搜索',
+  autoWrap: '自动换行',
 };

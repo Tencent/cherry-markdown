@@ -239,10 +239,7 @@ const defaultConfig = {
         // theme: 'red',
       },
       codeBlock: {
-        /**
-         * @deprecated 不再支持theme的配置，统一在`themeSettings.codeBlockTheme`中配置
-         */
-        // theme: 'dark', // 默认为深色主题
+        // theme: 'dark', //  @deprecated 不再支持theme的配置，统一在`themeSettings.codeBlockTheme`中配置
         wrap: true, // 超出长度是否换行，false则显示滚动条
         lineNumber: true, // 默认显示行号
         copyCode: true, // 是否显示“复制”按钮

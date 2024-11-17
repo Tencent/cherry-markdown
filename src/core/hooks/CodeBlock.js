@@ -35,7 +35,6 @@ export default class CodeBlock extends ParagraphBase {
     this.codeCache = {};
     this.customLang = [];
     this.customParser = {};
-    this.wrap = config.wrap; // 超出是否换行
     this.lineNumber = config.lineNumber; // 是否显示行号
     this.copyCode = config.copyCode; // 是否显示“复制”按钮
     this.expandCode = config.expandCode; // 是否显示“展开”按钮
@@ -178,7 +177,7 @@ export default class CodeBlock extends ParagraphBase {
    * @param {string} lang
    */
   wrapCode($code, lang) {
-    return `<code class="language-${lang}${this.wrap ? ' wrap' : ''}">${$code}</code>`;
+    return `<code class="language-${lang}">${$code}</code>`;
   }
 
   /**
