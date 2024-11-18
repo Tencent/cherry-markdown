@@ -347,6 +347,9 @@ export default class PreviewerBubble {
   }
 
   $getClosestNode(node, targetNodeName) {
+    if (!node || !node.tagName) {
+      return false;
+    }
     if (node.tagName === targetNodeName) {
       return node;
     }
