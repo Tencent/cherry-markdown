@@ -175,6 +175,9 @@ export default class Toc {
   }
 
   $getClosestNode(node, targetNodeName) {
+    if (!node || !node.tagName) {
+      return false;
+    }
     if (node.tagName === targetNodeName) {
       return node;
     }
