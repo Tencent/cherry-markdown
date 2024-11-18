@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.51](https://github.com/Tencent/cherry-markdown/compare/v0.8.50...v0.8.51) (2024-11-18)
+
+
+### Features
+
+* [#967](https://github.com/Tencent/cherry-markdown/issues/967) 增加代码块是否自动换行配置 fix: [#978](https://github.com/Tencent/cherry-markdown/issues/978) 尝试修复editor.keepDocumentScrollAfterInit=true失效的问题 ([2e54a7e](https://github.com/Tencent/cherry-markdown/commit/2e54a7eee07dd49dd6c54eca8f708d0afd95054f))
+* 增加禁用所有快捷键的功能；增加搜索的按钮 ([60748e9](https://github.com/Tencent/cherry-markdown/commit/60748e924b567d4a4c1acc5260217618e6783a73))
+* **vscodePlugin:** support `theme` selected state ([#965](https://github.com/Tencent/cherry-markdown/issues/965)) ([468592a](https://github.com/Tencent/cherry-markdown/commit/468592a2cee173ca2aec321c567ca9bbd4b092d7))
+
+
+### Bug Fixes
+
+* [#963](https://github.com/Tencent/cherry-markdown/issues/963) 避免代码块的辅助工具阻塞鼠标事件 ([e2e0e85](https://github.com/Tencent/cherry-markdown/commit/e2e0e85bfe878f4307ba2b7bb79404f9eea12d56))
+* [#978](https://github.com/Tencent/cherry-markdown/issues/978) 尝试修复editor.keepDocumentScrollAfterInit=true失效的问题 ([fded636](https://github.com/Tencent/cherry-markdown/commit/fded636233c2d58daef53ab905cd7b38021ee2c1))
+* 修复纯预览模式性能问题 ([ebcfe61](https://github.com/Tencent/cherry-markdown/commit/ebcfe61954aabb17d896207b6a5d0858cd5ea621))
+* 修复点击代码块编辑按钮时页面报错的问题 ([6ea15c3](https://github.com/Tencent/cherry-markdown/commit/6ea15c31600853448269cca8884079890b0bdc1a))
+* 修复短链接配置失效的问题 ([79c34ca](https://github.com/Tencent/cherry-markdown/commit/79c34caa8aa4c38be8e9239103f720832fb47af2))
+* **vscodePlugin:** prevent the default redirect behavior of links in vscode webview ([#973](https://github.com/Tencent/cherry-markdown/issues/973)) ([8f9a319](https://github.com/Tencent/cherry-markdown/commit/8f9a319d427da319e5c2d7d61517161c2f1d20d2))
+* **vscodePlugin:** relative path img ([#972](https://github.com/Tencent/cherry-markdown/issues/972)) ([67c5ae5](https://github.com/Tencent/cherry-markdown/commit/67c5ae55c99d686de111ac0480b2c02de799af4e))
+
+
+### Code Refactoring
+
+* **client:** migrate to tauri implementation ([#969](https://github.com/Tencent/cherry-markdown/issues/969)) ([f30e8a6](https://github.com/Tencent/cherry-markdown/commit/f30e8a6b29171a1429c748a7362a0d02636442cd))
+
 ### [0.8.50](https://github.com/Tencent/cherry-markdown/compare/v0.8.49...v0.8.50) (2024-10-31)
 
 
