@@ -43,7 +43,7 @@ const imgAltHelper = {
    * @returns {{extendStyles:string, extendClasses:string}}
    */
   processExtendStyleInAlt(alt) {
-    let extendStyles = this.$getAlignment(alt);
+    let extendStyles = imgAltHelper.$getAlignment(alt);
     let extendClasses = '';
     const info = alt.match(/#(border|shadow|radius|B|S|R)/g);
     if (info) {
