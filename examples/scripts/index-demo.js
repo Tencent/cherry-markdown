@@ -220,7 +220,6 @@ var basicConfig = {
     ],
     toolbarRight: ['fullScreen', '|', 'export', 'changeLocale', 'wordCount'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
-    sidebar: ['mobilePreview', 'copy', 'theme', 'publish'],
     sidebar: ['mobilePreview', 'copy', 'theme'],
     toc: {
       updateLocationHash: false, // 要不要更新URL的hash
