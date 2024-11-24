@@ -89,10 +89,29 @@ export default class HtmlBlock extends ParagraphBase {
           return whole.replace(/</g, '&#60;').replace(/>/g, '&#62;');
         }
       }
+      let wholeStr = whole;
+      // 识别<a>和<img>标签的href和src属性，并触发urlProcessor回调
+      m1.replace(/^a .*? href="([^"]+)"/, (all, href) => {
+        const processedURL = this.$engine.$cherry.options.callback.urlProcessor(href, 'link');
+        wholeStr = wholeStr.replace(/ href="[^"]+"/, ` href="${processedURL}"`);
+      });
+      m1.replace(/^a href="([^"]+)"/, (all, href) => {
+        const processedURL = this.$engine.$cherry.options.callback.urlProcessor(href, 'link');
+        wholeStr = wholeStr.replace(/ href="[^"]+"/, ` href="${processedURL}"`);
+      });
+      m1.replace(/^img .*? src="([^"]+)"/, (all, src) => {
+        const processedURL = this.$engine.$cherry.options.callback.urlProcessor(src, 'image');
+        wholeStr = wholeStr.replace(/ src="[^"]+"/, ` src="${processedURL}"`);
+      });
+      m1.replace(/^img src="([^"]+)"/, (all, src) => {
+        const processedURL = this.$engine.$cherry.options.callback.urlProcessor(src, 'image');
+        wholeStr = wholeStr.replace(/ src="[^"]+"/, ` src="${processedURL}"`);
+      });
+
       // 到达此分支的包含被尖括号包裹的AutoLink语法以及在白名单内的HTML标签
       // 没有被AutoLink解析并渲染的标签会被DOMPurify过滤掉，正常情况下不会出现遗漏
       // 临时替换完整的HTML标签首尾为$#60;和$#62;，供下一步剔除损坏的HTML标签
-      return whole.replace(/</g, '$#60;').replace(/>/g, '$#62;');
+      return wholeStr.replace(/</g, '$#60;').replace(/>/g, '$#62;');
     });
     // 替换所有形如「<abcd」和「</abcd」的左尖括号
     $str = $str.replace(/<(?=\/?(\w|\n|$))/g, '&#60;');
