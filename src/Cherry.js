@@ -1064,4 +1064,26 @@ export default class Cherry extends CherryStatic {
     this.resetToolbar('toolbar', this.options.toolbars.toolbar || []);
     return true;
   }
+
+  /**
+   * 切换TOC的模式（极简 or 展开）
+   * @param {'full'|'pure'|''} focusModel 是否强制切换模式，如果为空，则根据当前模式切换
+   */
+  toggleToc(focusModel = '') {
+    if (!this.toc) {
+      return;
+    }
+    let targetModel = 'full';
+    if (focusModel === '') {
+      // @ts-ignore
+      const { model } = this.toc;
+      targetModel = model === 'full' ? 'pure' : 'full';
+    } else {
+      targetModel = focusModel;
+    }
+    // @ts-ignore
+    this.toc.$switchModel(targetModel);
+    // @ts-ignore
+    this.toc.setModelToLocalStorage(targetModel);
+  }
 }
