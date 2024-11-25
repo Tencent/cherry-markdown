@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.52](https://github.com/Tencent/cherry-markdown/compare/v0.8.51...v0.8.52) (2024-11-25)
+
+
+### Features
+
+* [#897](https://github.com/Tencent/cherry-markdown/issues/897) 增加切换toc悬浮目录状态的api ([b69bf1f](https://github.com/Tencent/cherry-markdown/commit/b69bf1f0c7bd2d7ab0efaf0a9ba50081366408ba))
+* [#947](https://github.com/Tencent/cherry-markdown/issues/947) 对html block增加urlProcessor回调 ([8488d1d](https://github.com/Tencent/cherry-markdown/commit/8488d1ddca02da3dd49c7df4aac360c24089bede))
+
+
+### Bug Fixes
+
+* 修复可能的报错 ([ab2eb4a](https://github.com/Tencent/cherry-markdown/commit/ab2eb4acb8831401fa10a9ad7ffbd07fa59bcc2d))
+* 修复preview hover时报错的问题 ([#980](https://github.com/Tencent/cherry-markdown/issues/980)) ([e71e585](https://github.com/Tencent/cherry-markdown/commit/e71e58561cfdf5cd016105ebfaab69142302a218))
+
 ### [0.8.51](https://github.com/Tencent/cherry-markdown/compare/v0.8.50...v0.8.51) (2024-11-18)
 
 
