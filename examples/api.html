@@ -249,6 +249,18 @@ cherryObj.setCodeBlockTheme('one-dark');</textarea>
       </div>
     </div>
 
+    <div class="one-api">
+      <h2 class="one-api__name">toggleToc(focusModel:{'full'|'pure'|''})</h2>
+      <p class="one-api__desc">修改右侧悬浮目录的状态</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="5">
+cherryObj.toggleToc(); // 切换状态
+cherryObj.toggleToc('full'); // 强制切换到全屏状态
+cherryObj.toggleToc('pure'); // 强制切换到极简状态</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
     <br>
     <hr>
 
