@@ -23,7 +23,7 @@ yarn-error.log*
 
 # Lock files
 package-lock.json
-pnpm-lock.yaml
+#pnpm-lock.yaml
 
 #client
 /client/yarn.lock

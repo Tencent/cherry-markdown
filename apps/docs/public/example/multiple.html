@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Cherry Markdown 非全屏效果</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0;
+      width: 70%;
+      min-width: 800px;
+      height: 100%;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cherry-markdown@latest/dist/cherry-markdown.css">
+  <link rel="Shortcut Icon" href="./logo/favicon.ico">
+  <link rel="Shortcut Icon" href="../logo/favicon.ico">
+  <link rel="Bookmark" href="../logo/favicon.ico">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+    integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
+  <link href="./markdown/basic.md" rel="preload">
+</head>
+
+<body>
+  <div style="height: 200px;font-size:20px;background-color: #FFF;text-align: center;">
+    <H1>Cherry Markdown Editor</H1>
+  </div>
+  <div id="markdown1"></div>
+  <div style="height: 200px;font-size:20px;background-color: #FFF;text-align: center;">
+    <H1>Cherry Markdown Editor</H1>
+  </div>
+  <div id="markdown2"></div>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.js"></script>
+  <!--<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>-->
+  <script src="https://cdn.jsdelivr.net/npm/cherry-markdown@latest/dist/cherry-markdown.js"></script>
+
+  <script src="./scripts/multiple-demo.js"></script>
+</body>
+
+</html>

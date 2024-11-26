@@ -1,1 +1,0 @@
-export { useFileStore } from './modal/file';

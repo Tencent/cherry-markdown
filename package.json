@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "cherry-markdown",
   "license": "Apache-2.0",
   "version": "0.8.52",
@@ -25,37 +26,9 @@
     "./dist/*.css"
   ],
   "scripts": {
-    "iconfont": "gulp",
-    "dev": "run-p watch:js watch:styles iconfont",
-    "watch:js": "cross-env NODE_ENV=development rollup -w --config build/dev.js",
-    "watch:styles": "cross-env NODE_ENV=development rollup -w --config build/rollup.styles.config.js",
-    "dev:js": "cross-env NODE_ENV=development HOT_RELOAD=false rollup --config build/dev.js",
-    "dev:styles": "cross-env NODE_ENV=development rollup --config build/rollup.styles.config.js",
-    "build": "run-s clean build:debug build:all build:cjs",
-    "build:all": "run-p iconfont build:styles build:types build:addons build:full build:core build:engine",
-    "build:cjs": "run-p build:core-cjs build:engine-cjs",
-    "build:debug": "run-p dev:js dev:styles",
-    "build:full": "cross-env NODE_ENV=production rollup --config build/build.js",
-    "build:core": "cross-env CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.core.config.js",
-    "build:core-cjs": "cross-env BUILD_TARGET=commonjs CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.core.config.js",
-    "build:engine": "cross-env CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.engine.config.js",
-    "build:engine-cjs": "cross-env BUILD_TARGET=commonjs CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.engine.config.js",
-    "build:addons": "node build/addons.build.js",
-    "build:types": "tsc --project tsconfig.json && node build/replacePaths.js",
-    "build:styles": "cross-env NODE_ENV=production rollup --config build/rollup.styles.config.js",
-    "clean": "rimraf ./dist",
-    "check-bundle": "es-check es5 dist/cherry-markdown.js dist/cherry-markdown.min.js",
-    "test": "jest",
-    "test:commonmark": "jest test/core/CommonMark.spec.ts",
-    "test:snapshot": "jest test/core/hooks/*.spec.ts",
-    "lint": "eslint --plugin file-progress --rule \"file-progress/activate: 1\" --ext .js .",
-    "lint:fix": "yarn lint --fix",
-    "lint:ci": "eslint --max-warnings=0 --ext .js .",
-    "commit": "./node_modules/cz-customizable/standalone.js",
-    "release": "standard-version",
-    "prepare": "husky install",
-    "publish": "git push --follow-tags origin main",
-    "examples": "serve -p 3000 ."
+    "dev:cherry": "pnpm run --filter=cherry-markdown dev",
+    "build:cherry": "pnpm run --filter=cherry-markdown build",
+    "clean:cherry": "pnpm run --filter=cherry-markdown clean"
   },
   "keywords": [
     "markdown"

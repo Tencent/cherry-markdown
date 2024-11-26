@@ -1,0 +1,178 @@
+:root {
+  --width: 1400px;
+  --color: #e26862;
+}
+
+header {
+  height: 60px;
+  border-bottom: 1px solid var(--color);
+  display: flex;
+  justify-content: center;
+}
+
+h2 {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+h3 {
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+.header-wrapper {
+  height: 100%;
+  width: var(--width);
+  display: flex;
+  justify-content: start;
+  align-items: center;
+}
+
+.header-logo {
+  height: 60%;
+  width: auto;
+  object-fit: contain;
+}
+
+.header-repo-a {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.header-text {
+  font-size: 20px;
+  text-decoration: none;
+  color: inherit;
+  padding: 10px;
+
+  margin-left: 15px;
+  border-radius: 5px;
+}
+
+.header-text:hover {
+  background-color: var(--color);
+  color: white;
+}
+
+.header-text:nth-child(2) {
+  background-color: var(--color);
+  color: white;
+}
+
+main {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+}
+
+.main-wrapper {
+  width: var(--width)
+}
+
+.title-wrapper {
+  width: 100%;
+}
+
+.title {
+  display: flex;
+  justify-content: start;
+}
+
+.menu {
+  border: 1px solid gray;
+  padding: 8px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+
+#markdown-container {
+  width: 100%;
+  height: 800px !important;
+}
+
+.custom-select-container {
+  display: inline-block;
+  min-width: 250px;
+  text-align: center;
+  position: relative;
+  z-index: 100;
+  margin-left: 5px;
+}
+
+.custom-select {
+  padding: 5px;
+  border-bottom: 1px solid var(--color);
+}
+
+.custom-option-wrapper {
+  position: absolute;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  background: white;
+  border: 1px solid var(--color);
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.custom-option {
+  list-style-type: none;
+  margin: 6px 10px;
+  border-bottom: 1px solid gainsboro;
+  cursor: pointer;
+  line-height: 30px;
+  border-radius: 5px;
+}
+
+.custom-option:hover {
+  /* background-color: gray; */
+  color: #ffffff;
+  background-color: var(--color);
+}
+
+
+.code-input {
+  width: 99%;
+  max-width: 99%;
+  padding: 5px;
+  font-size: 20px;
+}
+
+
+.demo-desc {
+  font-size: 17px;
+  white-space: pre-wrap;
+}
+
+
+.run-btn {
+  background-color: white;
+  font-size: 20px;
+  color: white;
+  border: 1px solid var(--color);
+  background-color: var(--color);
+  border-radius: 5px;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.run-btn:disabled {
+  background-color: gainsboro;
+  border: 1px solid gainsboro;
+  cursor: default;
+}
+
+.run-btn:disabled:hover {
+  background-color: gainsboro;
+  border: 1px solid gainsboro;
+}
+
+.run-btn:hover {
+  background-color: red;
+  border: 1px solid red;
+}

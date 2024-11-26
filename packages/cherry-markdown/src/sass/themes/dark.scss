@@ -1,0 +1,513 @@
+@import '../variable.scss';
+
+/** 色值可以参考：https://yeun.github.io/open-color/ */
+
+/** 工具栏样式 */
+$toolbarBg: rgb(60, 60, 60);
+$toolbarBtnColor: $toolbarBtnColorDark;
+$toolbarBtnBgHover: rgb(69, 70, 70);
+$toolbarBtnHoverColor: rgb(255,255,255);
+$toolbarColorItemHoverBorderColor: rgb(247, 133, 83);
+$sidebarShadow: $shadow;
+/** 编辑区域样式 */
+$editorBg: rgb(37, 37, 38);
+$editorColor: rgb(200, 200, 200);
+$editorSelectedBg: $toolbarBtnBgHover;
+$editorUrlBg: rgba(81,56,56,1);
+$editorCursorColor: rgb(255,255,255);
+$editorImportantColor: rgb(247, 133, 83);
+$editorCodeColor: rgb(255, 203, 107);
+/** 预览区域样式 */
+$previewBg: rgb(51, 51, 51);
+$previewMobileBgColor: $editorBg;
+/** markdown样式 */
+$mdColor: $editorColor;
+$mdHeaderColor: $editorImportantColor;
+$mdLineColor: rgb(105, 105, 105);
+$mdAColor: $editorCodeColor;
+$mdAHoverColor: $editorImportantColor;
+$mdInlineCodeColor: $editorCodeColor;
+$mdInlineCodeBg: $editorUrlBg;
+$mdSvgTextColor: rgb(250, 160, 0);
+/** 编辑器样式 */
+.cherry.theme__dark {
+  
+  /** 顶部按钮, 选中文字时弹出的按钮, 光标focus到空行时联想出的按钮, 侧边栏按钮 */
+  .cherry-toolbar, .cherry-floatmenu, .cherry-bubble, .cherry-sidebar {
+    background: $toolbarBg;
+    border-color: $toolbarBg;
+    .cherry-toolbar-button {
+      color: $toolbarBtnColor;
+      &:hover {
+        background-color: $toolbarBtnBgHover;
+        color: $toolbarBtnHoverColor !important;
+        border-color: $toolbarBg;
+        i {
+          color: $toolbarBtnHoverColor !important;
+        }
+      }
+    }
+  }
+
+  /** 二级菜单 */
+  .cherry-dropdown {
+    background: $toolbarBg;
+    .cherry-dropdown-item {
+      color: $toolbarBtnColor;
+      // 选中子菜单高亮 
+      &__selected {
+        background-color: $toolbarBtnBgHover;
+        color: $toolbarBtnHoverColor;
+      }
+      &:hover {
+        background-color: $toolbarBtnBgHover;
+        color: $toolbarBtnHoverColor;
+      }
+    }
+    /** 选择颜色的按钮 */
+    &.cherry-color-wrap {
+      /** 色盘的标题 */
+      h3 {
+        color: $toolbarBtnColor;
+      }
+      /** 色盘里的每一个色块 */
+      .cherry-color-item {
+        // width: 15px;
+        // border: none;
+        border-color: $toolbarBtnBgHover;
+        &:hover {
+          border-color: $toolbarColorItemHoverBorderColor;
+        }
+      }
+    }
+    /** 选择表格的按钮 */
+    .cherry-insert-table-menu-item {
+      border-color: $toolbarBtnBgHover;
+    }
+  }
+
+  /** 选中文字时弹出的按钮 */
+  .cherry-bubble {
+    .cherry-bubble-bottom {
+      border-top-color: $toolbarBg;
+    }
+    .cherry-bubble-top {
+      border-bottom-color: $toolbarBg;
+    }
+    /** 粘贴HTML内容时弹出的选择按钮 */
+    &.cherry-switch-paste {
+      
+    }
+  }
+
+  .cherry-editor {
+    background-color: $editorBg;
+    .CodeMirror {
+      background-color: $editorBg;
+      .CodeMirror-cursor {
+        border-left: 1px solid $editorCursorColor;
+      }
+      .CodeMirror-scroll {
+        span, .cm-variable-2, .cm-string, .cm-strong, .cm-em, .cm-meta {
+          color: $editorColor;
+        }
+        .cm-image-marker, .cm-quote, .cm-header, .cm-atom {
+          color: $editorImportantColor;
+        }
+        .cm-url {
+          background-color: $editorUrlBg;
+        }
+        .cm-comment, .cm-url {
+          color: $editorCodeColor;
+        }
+      }
+      .CodeMirror-selected {
+        background-color: $editorSelectedBg;
+      }
+    }
+  }
+
+  .cherry-sidebar {
+    box-shadow: $sidebarShadow;
+  }
+
+  .cherry-previewer {
+    background-color: $previewBg;
+    .cherry-mobile-previewer-content {
+      background-color: $previewMobileBgColor;
+    }
+  }
+
+  .cherry-previewer-table-content-handler {
+    .cherry-previewer-table-content-handler__input {
+      textarea {
+        background-color: $editorBg;
+        color: $editorColor;
+        outline-color: $editorImportantColor;
+      }
+    }
+  }
+  /* 目录区域样式 */
+  .cherry-flex-toc {
+    &:hover {
+      background-color: #d0cece;
+      width: 260px;
+    }
+    .cherry-toc-head {
+      i {
+        &:hover {
+          color: $toolbarColorItemHoverBorderColor;
+        }
+      }
+    }
+    .cherry-toc-list {
+      .cherry-toc-one-a {
+        border-left-color: rgb(247, 133, 83, 0.3);
+        &.current {
+          border-left-color: rgb(255, 100, 33);
+          color: rgb(255, 100, 33);
+        }
+        &:hover {
+          border-left-color: rgb(247, 162, 14);
+          color: rgb(255, 100, 33);
+        }
+      }
+    }
+
+    &.cherry-flex-toc__pure {
+      width: 30px;
+      height: calc(100% - 200px);
+      max-height: 600px;
+      background: #ffffff00;
+      box-shadow: none;
+      border-radius: 0;
+      .cherry-toc-head {
+        height: 25px;
+        border-bottom: 1px dashed #33333300;
+        .cherry-toc-title {
+          display: none;
+        }
+        .ch-icon-chevronsRight {
+          display: none;
+        }
+        .ch-icon-chevronsLeft {
+          display: inline;
+          color: rgb(255, 100, 33);
+        }
+      }
+      .cherry-toc-list {
+        padding-left: 7px;
+        .cherry-toc-one-a {
+          overflow: hidden;
+          width: 0;
+          margin-bottom: 3px;
+          height: 5px;
+          border-left-width: 18px;
+        }
+      }
+    }
+
+    &.auto-num {
+      .cherry-toc-list {
+        counter-reset: toclevel1;
+  
+        .cherry-toc-one-a__1 {
+          counter-reset: toclevel2;
+        }
+        .cherry-toc-one-a__2 {
+          counter-reset: toclevel3;
+        }
+        .cherry-toc-one-a__3 {
+          counter-reset: toclevel4;
+        }
+        .cherry-toc-one-a__4 {
+          counter-reset: toclevel5;
+        }
+        .cherry-toc-one-a__5 {
+          counter-reset: toclevel6;
+        }
+        .cherry-toc-one-a__1:before {
+          counter-increment: toclevel1;
+          content: counter(toclevel1) '. ';
+        }
+        .cherry-toc-one-a__2:before {
+          counter-increment: toclevel2;
+          content: counter(toclevel1) '.' counter(toclevel2) '. ';
+        }
+        .cherry-toc-one-a__3:before {
+          counter-increment: toclevel3;
+          content: counter(toclevel1) '.' counter(toclevel2) '.' counter(toclevel3) '. ';
+        }
+        .cherry-toc-one-a__4:before {
+          counter-increment: toclevel4;
+          content: counter(toclevel1) '.' counter(toclevel2) '.' counter(toclevel3) '.' counter(toclevel4) '. ';
+        }
+        .cherry-toc-one-a__5:before {
+          counter-increment: toclevel5;
+          content: counter(toclevel1) '.' counter(toclevel2) '.' counter(toclevel3) '.' counter(toclevel4) '.'
+            counter(toclevel5) '. ';
+        }
+        .cherry-toc-one-a__6:before {
+          counter-increment: toclevel5;
+          content: counter(toclevel1) '.' counter(toclevel2) '.' counter(toclevel3) '.' counter(toclevel4) '.'
+            counter(toclevel5) '.' counter(toclevel6) '. ';
+        }
+      }
+    }
+  }
+
+}
+/** 预览区域样式 */
+.cherry-markdown.theme__dark {
+  color: $mdColor;
+  background-color: $previewBg;
+
+  p, div {
+  
+  }
+
+  h1, h2, h3, h4, h5 {
+    color: $mdHeaderColor;
+  }
+  
+  h1 {
+    
+  }
+  
+  h2 {
+    
+  }
+  
+  h3 {
+    
+  }
+
+  h4 {
+
+  }
+
+  h5 {
+
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    /** 标题前面的锚点或序号 */
+    .anchor {
+
+    }
+  }
+  
+  ul {
+    &.cherry-list__upper-roman {
+      list-style: upper-roman;
+    }
+  
+    &.cherry-list__lower-greek {
+      list-style: lower-greek;
+    }
+  
+    &.cherry-list__cjk-ideographic {
+      list-style: cjk-ideographic;
+    }
+  
+    &.cherry-list__circle {
+      list-style: circle;
+    }
+  
+    &.cherry-list__square {
+      list-style: square;
+    }
+
+    &.cherry-list__default {
+      background-color: $previewBg;
+    }
+
+    /** checklist 模式，未勾选时 */
+    .ch-icon-square {
+
+    }
+    /** checklist 模式，勾选时 */
+    .ch-icon-check {
+
+    }
+  }
+  
+  ol {
+    li {
+      
+    }
+  }
+
+
+  blockquote {
+    color: $mdColor;
+  }
+  
+  a {
+    text-decoration: none;
+    color: $mdAColor;
+    &:hover {
+      color: $mdAHoverColor;
+    }
+  }
+  
+  strong {
+    
+  }
+  
+  em {
+    
+  }
+  
+  del {
+    
+  }
+
+  sup {
+
+  }
+
+  sub {
+
+  }
+  
+  hr {
+    border-color: $mdLineColor;
+  }
+  
+  img {
+    
+  }
+
+  video {
+
+  }
+
+  audio {
+
+  }
+  
+  /** 行内代码 */
+  p code, li code {
+    background-color: $mdInlineCodeBg;
+    color: $mdInlineCodeColor;
+    border: 1px solid $mdLineColor;
+  }
+  
+  /** 
+  * 代码块
+  */
+  pre code {
+    
+  }
+  
+  /** 
+  * 表格
+  */
+  table, .cherry-table {
+    color: $mdColor;
+    th {
+      background-color: $mdInlineCodeBg;
+    }
+    tr, th, td {
+      border-color: $mdLineColor;
+    }
+  }
+
+  /** 可以理解为上下结构的音标，下部是文字，上部是对应的拼音 */
+  ruby {
+    /** 上部的拼音 */
+    rt {
+
+    }
+  }
+  
+  /** 脚注 */
+  .footnote {
+    border-color: $mdLineColor;
+    .footnote-title {
+      background-color: $mdInlineCodeBg;
+    }
+    .one-footnote {
+      color: $mdColor;
+      border-color: $mdLineColor;
+      a.footnote-ref {
+        padding: 5px;
+      }
+    }
+  }
+  
+  /** 行间公式 */
+  .Cherry-InlineMath {
+    
+  }
+  
+  /** 段落公式 */
+  .Cherry-Math {
+  
+  }
+
+    /** 目录 */
+  .toc {
+    border: 1px solid $mdLineColor;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    margin-right: 15px;
+
+    .toc-title {
+      padding: 15px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid $mdLineColor;
+    }
+    .toc-li {
+      border: none;
+      padding: 0 20px;
+      .level-1 {
+
+      }
+      .level-2 {
+
+      }
+      .level-3 {
+
+      }
+      a {
+        color: $mdColor;
+        &:hover {
+          color: $mdAHoverColor;
+        }
+      }
+    }
+  }
+
+  figure {
+    svg {
+      path, rect, line {
+        stroke: $mdAColor !important;
+      }
+      text {
+        fill: $mdSvgTextColor !important;
+        stroke: none !important;
+      }
+      tspan {
+        fill: $mdSvgTextColor !important;
+      }
+      circle {
+        fill: rgb(236, 236, 255) !important;
+        &.state-start {
+          fill: $mdSvgTextColor !important;
+        }
+      }
+    }
+  }
+
+  @keyframes changeBgColorDark {
+    0% { background-color: rgb(78 76 76); }
+    60% { background-color: rgb(78 76 76); }
+    100% { background-color: $previewBg; }
+  }
+  .cherry-highlight-line {
+    animation: changeBgColorDark 3s;
+  }
+
+}

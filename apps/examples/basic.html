@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cherry Editor - Markdown Editor</title>
+  <link rel="stylesheet" type="text/css" href="../dist/cherry-markdown.css">
+  <link rel="Shortcut Icon" href="../logo/favicon.ico">
+  <style>
+    html {
+      height: 100%;
+    }
+    body {
+      height: 100%;
+      overflow: hidden;
+      margin: 0;
+    }
+    #markdown {
+      min-width: 800px;
+      max-width: 2600px;
+      width: 70%;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="markdown"></div>
+  <script src="../dist/cherry-markdown.js"></script>
+</body>
+<script>
+var config = {
+  id: 'markdown',
+  value: '',
+  callback: {
+    afterChange: function(md, html) {
+      console.log('change');
+    }
+  },
+};
+var sourceCode = document.documentElement.outerHTML;
+var cherry = new Cherry(config);
+cherry.setValue(`##源码如下：\n\`\`\` html\n${sourceCode}\n\`\`\``);
+</script>
+</html>
