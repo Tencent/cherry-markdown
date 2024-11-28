@@ -326,13 +326,14 @@ export default class ShortcutKeyConfigPanel {
       throw new Error(`settingsDom must be an instance of HTMLElement, but got: ${settingsDom}`);
     }
     const pos = settingsDom.getBoundingClientRect();
+    const cherryWrapPos = this.$cherry.wrapperDom.getBoundingClientRect();
     if (this.isHide()) {
-      this.dom.style.left = `${pos.left + pos.width / 2}px`;
-      this.dom.style.top = `${pos.top + pos.height}px`;
+      this.dom.style.left = `${pos.left - cherryWrapPos.left + pos.width / 2}px`;
+      this.dom.style.top = `${pos.top - cherryWrapPos.top + pos.height}px`;
       this.show();
       const me = this.dom.getBoundingClientRect();
       this.dom.style.marginLeft = `0px`;
-      this.dom.style.left = `${pos.left + pos.width / 2 - me.width / 2}px`;
+      this.dom.style.left = `${pos.left - cherryWrapPos.left + pos.width / 2 - me.width / 2}px`;
       // 如果弹窗位置超出屏幕，则自动调整位置
       if (me.left + me.width > window.innerWidth) {
         this.dom.style.left = `${window.innerWidth - me.width - 5}px`;
