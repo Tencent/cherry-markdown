@@ -1,0 +1,17 @@
+branch:
+  trunk_name: "master"
+  branch_type_A:
+    tag:
+      pattern: 'v'
+      versionnumber: "{Major-version}.{Feature-version}.{Fix-version}"
+artifact:
+  - path: "/"
+    artifact_name: "仓库名称"
+    repository_url: "仓库的工蜂地址"
+    artifact_type: "web"
+
+source:
+  auto_generate_source:
+    filepath_regex: [ ".*/package-lock.json", "/web-resources/.*" ]
+  third_party_source:
+    filepath_regex: [ "/node_modules/.*" ]

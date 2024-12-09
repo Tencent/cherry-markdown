@@ -1,0 +1,10 @@
+app:
+  prefix: /
+  port: 3001
+
+publishConfig:
+  wechat:
+    APPID:
+    APPSECRET:
+    ContentType: HTML
+    ThumbMediaId:

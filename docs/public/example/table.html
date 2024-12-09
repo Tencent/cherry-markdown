@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>表格所见即所得编辑</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    #markdown {
+      margin-top: 5%;
+      width: 70%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css"
+    href="https://cdn.jsdelivr.net/npm/cherry-markdown@latest/dist/cherry-markdown.css">
+  <link rel="Shortcut Icon" href="./logo/favicon.ico">
+  <link rel="Shortcut Icon" href="../logo/favicon.ico">
+  <link rel="Bookmark" href="../logo/favicon.ico">
+</head>
+
+<body>
+  <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%;"></div>
+  <div id="markdown"></div>
+  <script>
+    markdownSample = `## 预览区域表格编辑
+
+![wysiwyg#80%](images/feature_table_wysiwyg.gif)
+
+- dd
+- ddd
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 33332
+
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 33333
+
+- dd
+- ddd
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 33334
+
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 33335
+
+- dd
+- ddd
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 33336
+
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 33337
+
+- dd
+- ddd
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 33338
+
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 33339
+
+- dd
+- ddd
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 333310
+
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+  `;
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/cherry-markdown@latest/dist/cherry-markdown.js"></script>
+  <script>
+    var cherry = new Cherry({
+      id: 'markdown',
+      toolbars: {
+        toolbar: ['bold', 'italic', 'strikethrough', '|', 'header', 'list', 'graph']
+      },
+      editor: {
+        height: '70%'
+      },
+      value: markdownSample,
+    });
+  </script>
+</body>
+
+</html>

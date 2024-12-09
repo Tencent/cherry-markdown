@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Cherry Editor - Markdown Editor</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    video {
+      max-width: 400px;
+    }
+
+    #demo-val {
+      display: none;
+    }
+
+    img {
+      max-width: 100%;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="./dist/cherry-markdown.css">
+  <link rel="Shortcut Icon" href="./logo/favicon.ico">
+  <link rel="Bookmark" href="./logo/favicon.ico">
+  <link href="./markdown/basic.md" rel="preload">
+</head>
+
+<body>
+  <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%;"></div>
+  <div id="markdown"></div>
+  <script src="./dist/cherry-markdown.js"></script>
+  <script src="./scripts/pinyin/pinyin_dist.js"></script>
+  <script src="./scripts/index-demo.js"></script>
+</body>
+</html>

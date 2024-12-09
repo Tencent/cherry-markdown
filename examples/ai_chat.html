@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>流式输出md内容</title>
+  <link rel="stylesheet" type="text/css" href="../dist/cherry-markdown.css">
+  <style>
+    html,
+    body {
+      margin: 0;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0;
+      width: 70%;
+    }
+    .one-msg {
+      margin-top: 50px;
+      margin-left: 50px;
+    }
+    .cherry {
+      min-height: 0;
+    }
+    .avator {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid #ccc;
+      line-height: 40px;
+      text-align: center;
+      margin-left: -50px;
+      margin-bottom: -40px;
+    }
+    .j-one-msg {
+      display: none;
+    }
+    .chat-one-msg {
+      display: inline-block;
+      max-width: 600px;
+    }
+    .buttons {
+      margin-top: 50px;
+      margin-bottom: 100px;
+    }
+    .button {
+      display: inline-block;
+      border: 1px solid #ccc;
+      background-color: #0d68ff;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 5px;
+      box-shadow: 1px 1px 3px #ccc;
+      cursor: pointer;
+    }
+    .status {
+      display: inline-block;
+      margin-left: 30px;
+    }
+    .status-input {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+  </style>
+  <link rel="Shortcut Icon" href="./logo/favicon.ico">
+  <link rel="Shortcut Icon" href="../logo/favicon.ico">
+  <link rel="Bookmark" href="../logo/favicon.ico">
+</head>
+
+<body>
+  <div class="dialog j-dialog">
+  </div>
+  <div class="one-msg j-one-msg">
+    <div class="avator">
+      AI
+    </div>
+    <div class="chat-one-msg"></div>
+  </div>
+  <div class="buttons">
+    <div class="button j-button">
+      获取消息（剩余<span class="j-button-tips"></span>条消息）
+    </div>
+    <div class="status">
+      <input class="j-status-input status-input" type="checkbox" checked>开启流式适配
+    </div>
+  </div>
+  <script src="../dist/cherry-markdown.js"></script>
+  <script src="./scripts/ai-chat-demo.js"></script>
+</body>
+
+</html>
