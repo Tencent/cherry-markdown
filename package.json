@@ -55,6 +55,7 @@
     "release": "standard-version",
     "prepare": "husky install",
     "publish": "git push --follow-tags origin main",
+    "prepublishOnly": "node build/configure.js",
     "examples": "serve -p 3000 ."
   },
   "keywords": [
