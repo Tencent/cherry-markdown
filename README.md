@@ -38,15 +38,15 @@ English | [简体中文](./README.CN.md) | [日本語](./README.JP.md)
 
 ## Introduction
 
-Cherry Markdown Editor is a Javascript Markdown editor. It has the advantages such as out-of-the-box, lightweight and easy to extend. It can run in browser or server(with NodeJs).
+The Cherry Markdown Editor is a JavaScript-based Markdown editor that offers out-of-the-box functionality, a lightweight design, and ease of extension. It can be run in both browser and server environments that include Node.js.
 
 ### **Out-of-the-box**
 
-Developer can call and instantiate Cherry Markdown Editor in a very simple way. The instantiated Cherry Markdown Editor supports most commonly used markdown syntax (such as title, TOC, flowchart, formula, etc.) by default.
+Developers can easily instantiate the Cherry Markdown Editor, which supports a wide range of commonly used Markdown syntax elements out of the box, including titles, tables of contents, flowcharts, formulas, and more.
 
 ### **Easy to extend**
 
-When the syntax that Cherry Markdown editor support can not meet your needs, secondary development or function extention can be carried out quickly. At the same time, Cherry Markdown editor should be implemented by pure JavaScript, and should not rely on framework technology such as angular, vue and react. Framework only provide a container environment.
+If the syntax supported by the Cherry Markdown Editor doesn't meet your requirements, you can quickly extend its functionality through secondary development. The editor is built using pure JavaScript, making it framework-agnostic and independent of technologies like Angular, Vue, and React. Instead, frameworks simply provide a container environment for the editor to run in.
 
 ## Feature
 
