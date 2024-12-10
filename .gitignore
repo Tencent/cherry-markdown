@@ -1,6 +1,6 @@
 .DS_Store
 node_modules
-/dist
+cherry-markdown/dist
 
 # local env files
 .env.local
