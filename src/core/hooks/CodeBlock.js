@@ -139,7 +139,7 @@ export default class CodeBlock extends ParagraphBase {
   computeLines(match, leadingContent, code) {
     const leadingSpaces = leadingContent;
     const lines = this.getLineCount(match, leadingSpaces);
-    const sign = this.$engine.md5(match.replace(/^\n+/, '') + lines);
+    const sign = this.$engine.hash(match.replace(/^\n+/, '') + lines);
     return {
       sign,
       lines,
@@ -247,7 +247,7 @@ export default class CodeBlock extends ParagraphBase {
     }
     return this.$recoverCodeInIndent(str).replace(this.$getIndentedCodeReg(), (match, code) => {
       const lineCount = (match.match(/\n/g) || []).length;
-      const sign = this.$engine.md5(match);
+      const sign = this.$engine.hash(match);
       const html = `<pre data-sign="${sign}" data-lines="${lineCount}"><code>${escapeHTMLSpecialChar(
         code.replace(/\n( {4}|\t)/g, '\n'),
       )}</code></pre>`;
@@ -412,7 +412,7 @@ export default class CodeBlock extends ParagraphBase {
         $code = this.$replaceSpecialChar($code);
         $code = $code.replace(/\\/g, '\\\\');
         const html = `<code>${escapeHTMLSpecialChar($code)}</code>`;
-        const sign = this.$engine.md5(html);
+        const sign = this.$engine.hash(html);
         CodeBlock.inlineCodeCache[sign] = html;
         return `~~CODE${sign}$`;
       });
