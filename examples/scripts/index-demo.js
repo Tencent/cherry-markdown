@@ -133,6 +133,13 @@ var basicConfig = {
         theme: 'twilight',
         lineNumber: true, // 默认显示行号
         expandCode: true,
+        copyCode: true,
+        editCode: true,
+        changeLang: true,
+        customBtns: [
+          { html: '自定义按钮1', onClick: (event, code)=>{console.log(`自定义按钮1: ${code}`);} },
+          { html: '自定义按钮2', onClick: (event, code)=>{console.log(`自定义按钮2: ${code}`);} },
+        ],
       },
       table: {
         enableChart: true,
