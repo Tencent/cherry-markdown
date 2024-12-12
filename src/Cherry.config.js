@@ -265,6 +265,10 @@ const defaultConfig = {
          *        indentedCodeBlock：false
          */
         indentedCodeBlock: true,
+        /**
+         * 自定义按钮，出现在代码块右上角
+         **/
+        customBtns: [],
       },
       emoji: {
         useUnicode: true, // 是否使用unicode进行渲染

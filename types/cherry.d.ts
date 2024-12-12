@@ -308,6 +308,13 @@ export interface CherryEngineOptions {
        *        indentedCodeBlock：false
        */
       indentedCodeBlock?: boolean,
+      /**
+         * 自定义按钮，出现在代码块右上角
+         **/
+      customBtns?: {
+        'html': '',
+        'onClick': (event: MouseEvent, code: string) => {},
+      }[],
     },
     emoji?: {
       useUnicode?: boolean, // 是否使用unicode进行渲染
