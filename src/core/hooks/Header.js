@@ -112,7 +112,7 @@ export default class Header extends ParagraphBase {
       anchorID = this.generateIDNoDup(headerTextRaw.replace(replaceFootNote, ''));
     }
     const safeAnchorID = `safe_${anchorID}`; // transform header id to avoid being sanitized
-    const sign = this.$engine.md5(`${level}-${processedText.sign}-${anchorID}-${dataLines}`);
+    const sign = this.$engine.hash(`${level}-${processedText.sign}-${anchorID}-${dataLines}`);
     const result = [
       `<h${level} id="${safeAnchorID}" data-sign="${sign}" data-lines="${dataLines}">`,
       this.$getAnchor(anchorID),

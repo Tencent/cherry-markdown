@@ -120,7 +120,7 @@ export default class Table extends ParagraphBase {
       rowLength: rows.length - 2, // 去除表头和控制行
     };
     const chartOptions = this.$parseChartOptions(rows[0][0]);
-    const chartOptionsSign = this.$engine.md5(rows[0][0]);
+    const chartOptionsSign = this.$engine.hash(rows[0][0]);
     // 如果需要生成图表，
     if (chartOptions) {
       rows[0][0] = '';
@@ -196,7 +196,7 @@ export default class Table extends ParagraphBase {
       ? `~CTHD${tableHeader}~CTHD$~CTBD${tableRows}~CTBD$`
       : `~CTBD${tableRows}~CTBD$`;
     const html = cacheSrc;
-    const sign = this.$engine.md5(html);
+    const sign = this.$engine.hash(html);
     const renderHtml = html
       .replace(/~CTHD\$/g, '</thead>')
       .replace(/~CTHD/g, '<thead>')

@@ -16,7 +16,7 @@
 import HookCenter from './core/HookCenter';
 import hooksConfig from './core/HooksConfig';
 import NestedError, { $expectTarget, $expectInherit, $expectInstance } from './utils/error';
-import md5 from 'md5';
+import CryptoJS from 'crypto-js';
 import SyntaxBase from './core/SyntaxBase';
 import ParagraphBase from './core/ParagraphBase';
 import { PUNCTUATION, imgBase64Reg, imgDrawioXmlReg } from './utils/regexp';
@@ -46,8 +46,8 @@ export default class Engine {
     this.$configInit(markdownParams);
     this.hookCenter = new HookCenter(hooksConfig, markdownParams, cherry);
     this.hooks = this.hookCenter.getHookList();
-    this.md5Cache = {};
-    this.md5StrMap = {};
+    this.hashCache = {};
+    this.hashStrMap = {};
     this.cachedBigData = {};
     this.markdownParams = markdownParams;
     this.currentStrMd5 = [];
@@ -205,23 +205,35 @@ export default class Engine {
     return $md;
   }
 
+  /**
+   * @deprecated 已废弃，推荐使用 .hash()
+   */
   md5(str) {
-    if (!this.md5StrMap[str]) {
-      this.md5StrMap[str] = md5(str);
+    return this.hash(str);
+  }
+
+  /**
+   * 计算哈希值
+   * @param {String} str 被计算的字符串
+   * @returns {String} 哈希值
+   */
+  hash(str) {
+    if (!this.hashStrMap[str]) {
+      this.hashStrMap[str] = CryptoJS.SHA256(str).toString();
     }
-    return this.md5StrMap[str];
+    return this.hashStrMap[str];
   }
 
   $checkCache(str, func) {
-    const sign = this.md5(str);
-    if (typeof this.md5Cache[sign] === 'undefined') {
-      this.md5Cache[sign] = func(str);
+    const sign = this.hash(str);
+    if (typeof this.hashCache[sign] === 'undefined') {
+      this.hashCache[sign] = func(str);
       if (BUILD_ENV !== 'production') {
         // 生产环境屏蔽
         Logger.log('markdown引擎渲染了：', str);
       }
     }
-    return { sign, html: this.md5Cache[sign] };
+    return { sign, html: this.hashCache[sign] };
   }
 
   $dealParagraph(md) {
@@ -231,12 +243,12 @@ export default class Engine {
   // 缓存大文本数据，用以提升渲染性能
   $cacheBigData(md) {
     let $md = md.replace(imgBase64Reg, (whole, m1, m2) => {
-      const cacheKey = `bigDataBegin${this.md5(m2)}bigDataEnd`;
+      const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
       this.cachedBigData[cacheKey] = m2;
       return `${m1}${cacheKey})`;
     });
     $md = $md.replace(imgDrawioXmlReg, (whole, m1, m2) => {
-      const cacheKey = `bigDataBegin${this.md5(m2)}bigDataEnd`;
+      const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
       this.cachedBigData[cacheKey] = m2;
       return `${m1}${cacheKey}}`;
     });

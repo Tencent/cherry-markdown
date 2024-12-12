@@ -67,7 +67,7 @@ export default class Footnote extends ParagraphBase {
       return '';
     }
     let html = footnote.map((note) => `<div class="one-footnote">\n${note.fnref}${note.note}\n</div>`).join('');
-    const sign = this.$engine.md5(html);
+    const sign = this.$engine.hash(html);
     html = `<div class="footnote" data-sign="${sign}" data-lines="0"><div class="footnote-title">脚注</div>${html}</div>`;
     return html;
   }

@@ -43,7 +43,7 @@ export default class MathBlock extends ParagraphBase {
     const wholeMatchWithoutSpace = wholeMatch.replace(/^[ \f\r\t\v]*/, '').replace(/\s*$/, '');
     // 去掉匹配到的第一个换行符
     const lineSpaceWithoutPreSpace = lineSpace.replace(/^[ \f\r\t\v]*\n/, '');
-    const sign = this.$engine.md5(wholeMatch);
+    const sign = this.$engine.hash(wholeMatch);
     let lines = this.getLineCount(wholeMatchWithoutSpace, lineSpaceWithoutPreSpace);
     // 判断公式是不是新行输入，如果不是新行，则行号减1
     if (!/\n/.test(lineSpace)) {

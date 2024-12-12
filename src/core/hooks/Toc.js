@@ -243,13 +243,13 @@ export default class Toc extends ParagraphBase {
     let $str = super.afterMakeHtml(str);
     const headerList = [];
     const headerRegex = /<h([1-6])[^>]*? id="([^"]+?)"[^>]*?>(?:<a[^/]+?\/a>|)(.+?)<\/h\1>/g;
-    let str2Md5 = '';
+    let str2Hash = '';
     $str.replace(headerRegex, (match, level, id, text) => {
       const $text = text.replace(/~fn#[0-9]+#/g, '');
       headerList.push({ level: +level, id, text: $text });
-      str2Md5 += `${level}${id}`;
+      str2Hash += `${level}${id}`;
     });
-    str2Md5 = this.$engine.md5(str2Md5);
+    str2Hash = this.$engine.hash(str2Hash);
     $str = $str.replace(/(?:^|\n)(\[\[|\[|【【)(toc|TOC)(\]\]|\]|】】)([<~])/, (match) =>
       match.replace(/(\]\]|\]|】】)([<~])/, '$1\n$2'),
     );
@@ -257,13 +257,13 @@ export default class Toc extends ParagraphBase {
     // TODO: fix this error
     // @ts-expect-error
     $str = $str.replace(this.RULE.extend.reg, (match, preLinesMatch) =>
-      this.$makeToc(headerList, str2Md5, preLinesMatch),
+      this.$makeToc(headerList, str2Hash, preLinesMatch),
     );
     // 处理标准语法
     // TODO: fix this error
     // @ts-expect-error
     $str = $str.replace(this.RULE.standard.reg, (match, preLinesMatch) =>
-      this.$makeToc(headerList, str2Md5, preLinesMatch),
+      this.$makeToc(headerList, str2Hash, preLinesMatch),
     );
     // 重置toc状态
     this.isFirstTocToken = true;

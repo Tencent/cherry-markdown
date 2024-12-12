@@ -27,7 +27,7 @@ export default class Blockquote extends ParagraphBase {
   handleMatch(str, sentenceMakeFunc) {
     return str.replace(this.RULE.reg, (match, lines, content) => {
       const lineCount = this.getLineCount(match, lines); // 段落所占行数
-      const sign = this.$engine.md5(match);
+      const sign = this.$engine.hash(match);
       const testHasCache = this.testHasCache(sign);
       if (testHasCache !== false) {
         return this.getCacheWithSpace(testHasCache, match);

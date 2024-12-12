@@ -123,7 +123,6 @@
     "juice": "^8.0.0",
     "lint-staged": "~12.5.0",
     "lodash": "^4.17.20",
-    "md5": "^2.2.1",
     "mitt": "^3.0.0",
     "npm-run-all": "^4.1.5",
     "openai": "^3.3.0",
@@ -150,6 +149,7 @@
   "dependencies": {
     "@types/codemirror": "^0.0.108",
     "@types/dompurify": "^2.2.3",
+    "crypto-js": "^4.2.0",
     "jsdom": "~19.0.0"
   },
   "resolutions": {

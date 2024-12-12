@@ -44,7 +44,7 @@ export default class InlineMath extends ParagraphBase {
     LoadMathModule.bind(this)('engine');
     const linesArr = m1.match(/\n/g);
     const lines = linesArr ? linesArr.length + 2 : 2;
-    const sign = this.$engine.md5(wholeMatch);
+    const sign = this.$engine.hash(wholeMatch);
     // 既无MathJax又无katex时，原样输出
     let result = '';
     if (this.engine === 'katex' && this.katex?.renderToString) {

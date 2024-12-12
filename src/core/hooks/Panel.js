@@ -41,7 +41,7 @@ export default class Panel extends ParagraphBase {
   makeHtml(str, sentenceMakeFunc) {
     return str.replace(this.RULE.reg, (match, preLines, name, content) => {
       const lineCount = this.getLineCount(match, preLines);
-      const sign = this.$engine.md5(match);
+      const sign = this.$engine.hash(match);
       const testHasCache = this.testHasCache(sign);
       if (testHasCache !== false) {
         return prependLineFeedForParagraph(match, testHasCache);
