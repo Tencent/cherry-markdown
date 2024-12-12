@@ -38,7 +38,7 @@ export default class Detail extends ParagraphBase {
   makeHtml(str, sentenceMakeFunc) {
     return str.replace(this.RULE.reg, (match, preLines, isOpen, title, content) => {
       const lineCount = this.getLineCount(match, preLines);
-      const sign = this.$engine.md5(match);
+      const sign = this.$engine.hash(match);
       const testHasCache = this.testHasCache(sign);
       if (testHasCache !== false) {
         return prependLineFeedForParagraph(match, testHasCache);

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import { createElement } from '../utils/dom';
-import md5 from 'md5';
 /**
  * 悬浮目录
  */
@@ -197,7 +196,7 @@ export default class Toc {
         tocStr += item.text;
         return item;
       });
-      tocStr = md5(tocStr);
+      tocStr = this.$cherry.engine.hash(tocStr);
       if (this.tocStr !== tocStr) {
         this.tocStr = tocStr;
         let tocHtml = '';

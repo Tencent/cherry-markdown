@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import md5 from 'md5';
+import CryptoJS from 'crypto-js';
 
 let urlCache = {};
 const cherryInnerLinkRegex = /^cherry-inner:\/\/([0-9a-f]+)$/i;
@@ -44,7 +44,7 @@ export default class UrlCache {
    * @returns
    */
   static set(url) {
-    const urlSign = md5(url);
+    const urlSign = CryptoJS.SHA256(url).toString();
     urlCache[urlSign] = url;
     return `cherry-inner://${urlSign}`;
   }

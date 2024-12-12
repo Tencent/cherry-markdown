@@ -248,7 +248,7 @@ export default class ParagraphBase extends SyntaxBase {
     if (!this.needCache) {
       return;
     }
-    const $sign = sign || this.$engine.md5(str);
+    const $sign = sign || this.$engine.hash(str);
     const key = `${this.cacheKey}I${$sign}_L${lineCount}$`;
     this.cache[$sign] = {
       content: str,
@@ -314,7 +314,7 @@ export default class ParagraphBase extends SyntaxBase {
    * @param {string} wholeMatch whole match
    */
   checkCache(wholeMatch, sentenceMakeFunc, lineCount = 0) {
-    this.sign = this.$engine.md5(wholeMatch);
+    this.sign = this.$engine.hash(wholeMatch);
     // miss cache
     if (!this.cache[this.sign]) {
       return this.toHtml(wholeMatch, sentenceMakeFunc);
