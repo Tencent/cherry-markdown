@@ -1,5 +1,5 @@
 {
-  "name": "cherry-markdown",
+  "name": "@cherry-markdown/vscode",
   "displayName": "cherry-markdown",
   "description": "A markdown previewer powered by [cherry-markdown](https://github.com/Tencent/cherry-markdown)",
   "version": "0.0.18",
