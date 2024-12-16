@@ -137,8 +137,8 @@ var basicConfig = {
         editCode: true,
         changeLang: true,
         customBtns: [
-          { html: '自定义按钮1', onClick: (event, code)=>{console.log(`自定义按钮1: ${code}`);} },
-          { html: '自定义按钮2', onClick: (event, code)=>{console.log(`自定义按钮2: ${code}`);} },
+          { html: '自定义按钮1', onClick: (event, code, lang)=>{console.log(`【${lang}】: ${code}`);} },
+          { html: '自定义按钮2', onClick: (event, code, lang)=>{console.log(`【${lang}】: ${code}`);} },
         ],
       },
       table: {
