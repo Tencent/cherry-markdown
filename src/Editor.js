@@ -39,7 +39,7 @@ import { addEvent } from './utils/event';
 import Logger from '@/Logger';
 import { handleFileUploadCallback } from '@/utils/file';
 import { createElement } from './utils/dom';
-import { imgBase64Reg, imgDrawioXmlReg } from './utils/regexp';
+import { longTextReg, base64Reg, imgDrawioXmlReg } from './utils/regexp';
 import { handleNewlineIndentList } from './utils/autoindent';
 
 /**
@@ -139,10 +139,6 @@ export default class Editor {
    * 以及对全角符号进行特殊染色。
    */
   dealSpecialWords = () => {
-    if (this.noChange) {
-      this.noChange = false;
-      return;
-    }
     /**
      * 如果编辑器隐藏了，则不再处理（否则有性能问题）
      * - 性能问题出现的原因：
@@ -154,9 +150,10 @@ export default class Editor {
     if (this.$cherry.status.editor === 'hide') {
       return;
     }
-    this.formatFullWidthMark();
-    this.formatBigData2Mark(imgBase64Reg, 'cm-url base64');
+    this.formatBigData2Mark(base64Reg, 'cm-url base64');
     this.formatBigData2Mark(imgDrawioXmlReg, 'cm-url drawio');
+    this.formatBigData2Mark(longTextReg, 'cm-url long-text');
+    this.formatFullWidthMark();
   };
 
   /**
@@ -186,7 +183,6 @@ export default class Editor {
       }
       const newSpan = createElement('span', `cm-string ${className}`, { title: bigString });
       newSpan.textContent = bigString;
-      this.noChange = true;
       codemirror.markText(begin, end, { replacedWith: newSpan, atomic: true });
     }
   };
