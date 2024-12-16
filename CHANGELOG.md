@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.53](https://github.com/Tencent/cherry-markdown/compare/v0.8.52...v0.8.53) (2024-12-16)
+
+
+### Features
+
+* [#992](https://github.com/Tencent/cherry-markdown/issues/992) 增加配置代码块自定义按钮的功能 ([a645e7f](https://github.com/Tencent/cherry-markdown/commit/a645e7f8bce686854c0946e94392aa83beae4ff7))
+* [#999](https://github.com/Tencent/cherry-markdown/issues/999) 处理大文本缩略展示的逻辑，对单行超大文本作特殊缩略处理 ([#1000](https://github.com/Tencent/cherry-markdown/issues/1000)) ([fdbb48c](https://github.com/Tencent/cherry-markdown/commit/fdbb48c5030359e70e42e9cb22f1aa8beefef080))
+* 顶部操作栏自适应换行 ([#991](https://github.com/Tencent/cherry-markdown/issues/991)) ([57fb28d](https://github.com/Tencent/cherry-markdown/commit/57fb28d63858a71664cdd9b89db306ea2256c13e))
+
+
+### Bug Fixes
+
+* [#985](https://github.com/Tencent/cherry-markdown/issues/985) 修复快捷键配置弹窗定位问题 ([37e15c6](https://github.com/Tencent/cherry-markdown/commit/37e15c6834563e7825376f8dcc468224a9521ae1))
+* [#989](https://github.com/Tencent/cherry-markdown/issues/989) 修复点击img获取不到data-formula-code属性的问题 ([75718fc](https://github.com/Tencent/cherry-markdown/commit/75718fc26e795fafb7fa5b85af255a017e71cae5))
+* **example:** remove duplicate configurations ([#983](https://github.com/Tencent/cherry-markdown/issues/983)) ([e509c9f](https://github.com/Tencent/cherry-markdown/commit/e509c9f70663cd62284e75dcab182c15470ac80e))
+
+
+### Code Refactoring
+
+* [#995](https://github.com/Tencent/cherry-markdown/issues/995) 封装新的哈希算法，从md5改成sha256 ([#998](https://github.com/Tencent/cherry-markdown/issues/998)) ([d9275e6](https://github.com/Tencent/cherry-markdown/commit/d9275e63acb49687b9e00a0791c35dd64293bb5c))
+
 ### [0.8.52](https://github.com/Tencent/cherry-markdown/compare/v0.8.51...v0.8.52) (2024-11-25)
 
 
