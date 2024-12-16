@@ -223,7 +223,8 @@ export default class CodeBlockHandler {
           e.preventDefault();
           e.stopPropagation();
           const codeContent = this.target.querySelector('pre').innerText;
-          btn.onClick(e, codeContent);
+          const language = this.target.dataset.lang ?? '';
+          btn.onClick(e, codeContent, language);
         });
         this.codeBlockCustomBtns.push(dom);
         oneLineBtnsRight += 8;

@@ -313,7 +313,7 @@ export interface CherryEngineOptions {
          **/
       customBtns?: {
         'html': '',
-        'onClick': (event: MouseEvent, code: string) => {},
+        'onClick': (event: MouseEvent, code: string, language: string) => {},
       }[],
     },
     emoji?: {
