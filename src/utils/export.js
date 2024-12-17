@@ -92,6 +92,11 @@ export function exportPDF(previewDom, fileName) {
   const oldTitle = document.title;
   document.title = fileName;
   getReadyToExport(previewDom, (/** @type {HTMLElement}*/ cherryPreviewer, /** @type {function}*/ thenFinish) => {
+    // 强制展开所有代码块
+    cherryPreviewer.innerHTML = cherryPreviewer.innerHTML.replace(
+      /class="cherry-code-unExpand("| )/g,
+      'class="cherry-code-expand$1',
+    );
     window.print();
     thenFinish();
     document.title = oldTitle;
