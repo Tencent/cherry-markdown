@@ -109,6 +109,11 @@ export function exportScreenShot(previewDom, fileName) {
     // 去掉audio和video标签
     cherryPreviewer.innerHTML = cherryPreviewer.innerHTML.replace(/<audio [^>]+?>([^\n]*?)<\/audio>/g, '$1');
     cherryPreviewer.innerHTML = cherryPreviewer.innerHTML.replace(/<video [^>]+?>([^\n]*?)<\/video>/g, '$1');
+    // 强制展开所有代码块
+    cherryPreviewer.innerHTML = cherryPreviewer.innerHTML.replace(
+      /class="cherry-code-unExpand("| )/g,
+      'class="cherry-code-expand$1',
+    );
     html2canvas(cherryPreviewer, {
       allowTaint: true,
       height: cherryPreviewer.clientHeight,
