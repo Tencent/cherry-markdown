@@ -43,8 +43,8 @@ export default class Emphasis extends SyntaxBase {
     };
     let $str = str;
     if (this.allowWhitespace) {
-      $str = $str.replace(/(^|\n[\s]*)(\*)([^\s*](?:.*?)(?:(?:\n.*?)*?))\*/g, converAsterisk);
-      $str = $str.replace(/(^|\n[\s]*)(\*{2,})((?:.*?)(?:(?:\n.*?)*?))\2/g, converAsterisk);
+      $str = $str.replace(/(^[\s]*|\n[\s]*)(\*)([^\s*](?:.*?)(?:(?:\n.*?)*?))\*/g, converAsterisk);
+      $str = $str.replace(/(^[\s]*|\n[\s]*)(\*{2,})((?:.*?)(?:(?:\n.*?)*?))\2/g, converAsterisk);
       $str = $str.replace(/([^\n*\\\s][ ]*)(\*+)((?:.*?)(?:(?:\n.*?)*?))\2/g, converAsterisk);
     } else {
       // TODO: fix this error
