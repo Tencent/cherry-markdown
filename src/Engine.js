@@ -19,7 +19,7 @@ import NestedError, { $expectTarget, $expectInherit, $expectInstance } from './u
 import CryptoJS from 'crypto-js';
 import SyntaxBase from './core/SyntaxBase';
 import ParagraphBase from './core/ParagraphBase';
-import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg } from './utils/regexp';
+import { PUNCTUATION, longTextReg, base64Reg, imgBase64Reg, imgDrawioXmlReg } from './utils/regexp';
 import { escapeHTMLSpecialChar } from './utils/sanitize';
 import Logger from './Logger';
 import { configureMathJax } from './utils/mathjax';
@@ -248,6 +248,11 @@ export default class Engine {
       return `${m1}${cacheKey})`;
     });
     $md = $md.replace(imgDrawioXmlReg, (whole, m1, m2) => {
+      const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
+      this.cachedBigData[cacheKey] = m2;
+      return `${m1}${cacheKey}}`;
+    });
+    $md = $md.replace(base64Reg, (whole, m1, m2) => {
       const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
       this.cachedBigData[cacheKey] = m2;
       return `${m1}${cacheKey}}`;
