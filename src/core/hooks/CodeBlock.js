@@ -231,7 +231,7 @@ export default class CodeBlock extends ParagraphBase {
    */
   $getIndentedCodeReg() {
     const ret = {
-      begin: '(?:^|\\n\\s*\\n)(?: {4}|\\t)',
+      begin: '(?:^|\\n\\s*\\n)(?: {4}|\\t| {1:4}\\t)',
       end: '(?=$|\\n( {0,3}[^ \\t\\n]|\\n[^ \\t\\n]))',
       content: '([\\s\\S]+?)',
     };
@@ -250,7 +250,7 @@ export default class CodeBlock extends ParagraphBase {
       const sign = this.$engine.hash(match);
       const html = `<pre data-sign="${sign}" data-lines="${lineCount}"><code>${escapeHTMLSpecialChar(
         code.replace(/\n( {4}|\t)/g, '\n'),
-      )}</code></pre>`;
+      )}</code></pre>\n`;
       // return this.getCacheWithSpace(this.pushCache(html), match, true);
       return prependLineFeedForParagraph(match, this.pushCache(html, sign, lineCount));
     });
