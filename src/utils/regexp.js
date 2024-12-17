@@ -266,7 +266,7 @@ export const imgBase64Reg = /(\[[^\n]*?\]\(data:image\/[a-z]{1,10};base64,)([^)]
 export const base64Reg = /(data:image\/[a-z]{1,10};base64,)([0-9a-zA-Z+/]+)/g;
 
 // 匹配内容非常多的单行文本
-export const longTextReg = /([^\n]{100})([^\n]{500,})/g;
+export const longTextReg = /([^\n]{100})([^\n]{5900,})/g;
 
 // 匹配图片{}里的data-xml属性
 export const imgDrawioXmlReg = /(!\[[^\n]*?\]\([^)]+\)\{[^}]* data-xml=)([^}]+)\}/g;
