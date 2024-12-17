@@ -106,6 +106,9 @@ export function exportPDF(previewDom, fileName) {
 export function exportScreenShot(previewDom, fileName) {
   getReadyToExport(previewDom, (/** @type {HTMLElement}*/ cherryPreviewer, /** @type {function}*/ thenFinish) => {
     window.scrollTo(0, 0);
+    // 去掉audio和video标签
+    cherryPreviewer.innerHTML = cherryPreviewer.innerHTML.replace(/<audio [^>]+?>([^\n]*?)<\/audio>/g, '$1');
+    cherryPreviewer.innerHTML = cherryPreviewer.innerHTML.replace(/<video [^>]+?>([^\n]*?)<\/video>/g, '$1');
     html2canvas(cherryPreviewer, {
       allowTaint: true,
       height: cherryPreviewer.clientHeight,
