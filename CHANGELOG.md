@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.56](https://github.com/Tencent/cherry-markdown/compare/v0.8.55...v0.8.56) (2024-12-18)
+
+
+### Features
+
+* 优化单行大文本的判定逻辑 ([2b5d8fc](https://github.com/Tencent/cherry-markdown/commit/2b5d8fc88f75f0d62ab5988c47d297d45c5fa29b))
+
+
+### Bug Fixes
+
+* 处理图片base64和base64数据正则替换冲突的问题 ([dc3306e](https://github.com/Tencent/cherry-markdown/commit/dc3306e4a7a6a2ccdd5aecd61c11dc4ef31ad0d8))
+
 ### [0.8.53](https://github.com/Tencent/cherry-markdown/compare/v0.8.52...v0.8.53) (2024-12-16)
 
 
