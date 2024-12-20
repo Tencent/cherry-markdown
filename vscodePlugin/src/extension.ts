@@ -11,7 +11,7 @@ let disableScrollTrigger: boolean = false; // true：滚动时不往webview发�
 let disableEditTrigger: boolean = false; // true：变更内容时不往webview发送内容变更事件，反之发送
 let cherryTheme: string | undefined = vscode.workspace
   .getConfiguration('cherryMarkdown')
-  .get('theme'); // 缓存主题
+  .get('Theme'); // 缓存主题
 export function activate(context: vscode.ExtensionContext) {
   extensionPath = context.extensionPath;
   // 注册命令
@@ -33,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.window.onDidChangeActiveTextEditor((e) => {
     const cherryUsage: 'active' | 'only-manual' | undefined = vscode.workspace
       .getConfiguration('cherryMarkdown')
-      .get('usage');
+      .get('Usage');
 
     if (e?.document && cherryUsage === 'active') {
       triggerEditorContentChange();
@@ -93,12 +93,13 @@ const getMarkdownFileInfo = () => {
     currentText = currentDoc?.getText() || '';
     currentTitle = path.basename(currentDoc?.fileName) || '';
   }
+
   currentTitle = currentTitle
-    ? `预览 ${currentTitle}   by cherry-markdown`
+    ? `${vscode.l10n.t('Preview')} ${currentTitle} ${vscode.l10n.t('By')} cherry-markdown`
     : '不支持当前文件 by cherry-markdown';
   const theme = cherryTheme
     ? cherryTheme
-    : vscode.workspace.getConfiguration('cherryMarkdown').get('theme');
+    : vscode.workspace.getConfiguration('cherryMarkdown').get('Theme');
   const mdInfo = { text: currentText, theme };
   return { mdInfo, currentTitle };
 };
@@ -240,7 +241,7 @@ const triggerEditorContentChange = (focus: boolean = false) => {
     if (vscode.window.activeTextEditor?.document?.languageId === 'markdown') {
       const cherryUsage: 'active' | 'only-manual' | undefined = vscode.workspace
         .getConfiguration('cherryMarkdown')
-        .get('usage');
+        .get('Usage');
       if (cherryUsage === 'active' || focus) {
         initCherryPanel();
       }
