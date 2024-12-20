@@ -251,6 +251,7 @@
     flex-direction: row-reverse;
     margin-left: 10px;
     box-sizing: border-box;
+    min-height: 0;
   }
 
   &.preview-only {
