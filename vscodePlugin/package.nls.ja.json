@@ -1,5 +1,6 @@
 {
   "description_ja": "[cherry-markdown](https://github.com/Tencent/cherry-markdown) によって提供される Markdown プレビューア",
+  "commands.preview.title": "Cherry Markdown でプレビュー",
   "usage.enum.active": "アクティブ",
   "usage.enum.only-manual": "手動のみ",
   "usage.description": "cherry-markdownのトリガーメソッドの値: [ アクティブ | 手動のみ ]",

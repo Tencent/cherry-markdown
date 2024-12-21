@@ -31,7 +31,7 @@
     "commands": [
       {
         "command": "cherrymarkdown.preview",
-        "title": "Preview In Cherry Markdown"
+        "title": "%commands.preview.title%"
       }
     ],
     "menus": {

@@ -1,5 +1,6 @@
 {
   "description": "由 [cherry-markdown](https://github.com/Tencent/cherry-markdown) 提供支持的 Markdown 预览器",
+  "commands.preview.title": "在 Cherry Markdown 中预览",
   "usage.enum.active": "激活",
   "usage.enum.only-manual": "仅手动",
   "usage.description": "cherry-markdown 的触发方式值：[ 激活 | 仅手动 ]",

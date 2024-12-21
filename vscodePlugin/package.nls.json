@@ -1,5 +1,6 @@
 {
   "description": "A markdown previewer powered by [cherry-markdown](https://github.com/Tencent/cherry-markdown)",
+  "commands.preview.title": "Preview In Cherry Markdown",
   "usage.enum.active": "active",
   "usage.enum.only-manual": "only-manual",
   "usage.description": "cherry-markdown's triggering method values: [ active | only-manual ]",
