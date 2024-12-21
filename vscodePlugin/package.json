@@ -10,6 +10,7 @@
     "markdown editor",
     "markdown preview"
   ],
+  "l10n": "./l10n",
   "icon": "favicon.ico",
   "repository": {
     "type": "git",
