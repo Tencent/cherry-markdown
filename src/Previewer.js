@@ -17,7 +17,7 @@ import vDH from 'virtual-dom/h';
 import vDDiff from 'virtual-dom/diff';
 import vDPatch from 'virtual-dom/patch';
 import MyersDiff from './utils/myersDiff';
-import { getBlockTopAndHeightWithMargin, elementsFromPoint } from './utils/dom';
+import { getBlockTopAndHeightWithMargin } from './utils/dom';
 import Logger from './Logger';
 // import locale from './utils/locale';
 import { addEvent, removeEvent } from './utils/event';
@@ -416,51 +416,34 @@ export default class Previewer {
         this.editor.scrollToLineNum(null);
         return;
       }
-      // 获取预览容器基准坐标
-      const basePoint = domContainer.getBoundingClientRect();
-      // 观察点坐标，取容器中轴线
-      const watchPoint = {
-        x: basePoint.left + basePoint.width / 2,
-        y: basePoint.top + 1,
-      };
-      // 获取观察点处的DOM
-      const targetElements = elementsFromPoint(watchPoint.x, watchPoint.y);
+      const domPosition = domContainer.getBoundingClientRect();
       let targetElement;
-      for (let i = 0; i < targetElements.length; i++) {
-        if (domContainer.contains(targetElements[i])) {
-          targetElement = targetElements[i];
+      let lines = 0;
+      const elements = domContainer.children;
+      for (let i = 0; i < elements.length; i++) {
+        const element = elements[i];
+        if (element.getBoundingClientRect().top < domPosition.top) {
+          targetElement = element;
+          const currentLines = element.getAttribute('data-lines') ?? 0;
+          lines += +currentLines;
+        } else {
           break;
         }
       }
-      if (!targetElement || targetElement === domContainer) {
+      if (!targetElement) {
+        this.editor.scrollToLineNum(0, 0, 1);
         return;
-      }
-      // 获取观察点处最近的markdown元素
-      let mdElement = targetElement.closest('[data-sign]');
-      // 由于新增脚注，内部容器也有可能存在data-sign，所以需要循环往父级找
-      while (mdElement && mdElement.parentElement && mdElement.parentElement !== domContainer) {
-        mdElement = mdElement.parentElement.closest('[data-sign]');
-      }
-      if (!mdElement) {
-        return;
-      }
-      // 计算当前焦点容器的所在行数
-      let lines = 0;
-      let element = mdElement;
-      while (element) {
-        lines += +element.getAttribute('data-lines');
-        element = element.previousElementSibling; // 取上一个兄弟节点，直到为null
       }
       // markdown元素存在margin，getBoundingRect不能获取到margin
-      const mdElementStyle = getComputedStyle(mdElement);
+      const mdElementStyle = getComputedStyle(targetElement);
       const marginTop = parseFloat(mdElementStyle.marginTop);
       const marginBottom = parseFloat(mdElementStyle.marginBottom);
       // markdown元素基于当前页面的矩形模型
-      const mdRect = mdElement.getBoundingClientRect();
+      const mdRect = targetElement.getBoundingClientRect();
       const mdActualHeight = mdRect.height + marginTop + marginBottom;
       // (mdRect.y - marginTop)为顶部触达区域，basePoint.y为预览区域的顶部，故可视范围应减去预览区域的偏移
-      const mdOffsetTop = mdRect.y - marginTop - basePoint.y;
-      const lineNum = +mdElement.getAttribute('data-lines'); // 当前markdown元素所占行数
+      const mdOffsetTop = mdRect.y - marginTop - domPosition.y;
+      const lineNum = +targetElement.getAttribute('data-lines'); // 当前markdown元素所占行数
       const percent = (100 * Math.abs(mdOffsetTop)) / mdActualHeight / 100;
       // console.log('destLine:', lines, percent,
       //  mdRect.height + marginTop + marginBottom, mdOffsetTop, mdElement);
@@ -941,11 +924,27 @@ export default class Previewer {
   }
 
   /**
+   * 滚动到对应位置
+   * @param {number} scrollTop 元素的id属性值
+   * @param {'auto'|'smooth'|'instant'} behavior 滚动方式
+   */
+  scrollToTop(scrollTop, behavior = 'auto') {
+    const previewDom = this.getDomContainer();
+    const scrollDom = this.getDomCanScroll(previewDom);
+    scrollDom.scrollTo({
+      top: scrollTop,
+      left: 0,
+      behavior,
+    });
+  }
+
+  /**
    * 滚动到对应id的位置，实现锚点滚动能力
    * @param {string} id 元素的id属性值
+   * @param {'smooth'|'instant'|'auto'} behavior 滚动方式
    * @return {boolean} 是否有对应id的元素并执行滚动
    */
-  scrollToId(id) {
+  scrollToId(id, behavior = 'smooth') {
     const previewDom = this.getDomContainer();
     const scrollDom = this.getDomCanScroll(previewDom);
     let $id = id.replace(/^\s*#/, '').trim();
@@ -963,7 +962,7 @@ export default class Previewer {
     scrollDom.scrollTo({
       top: scrollTop,
       left: 0,
-      behavior: 'smooth',
+      behavior,
     });
   }
 
