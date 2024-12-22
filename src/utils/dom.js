@@ -86,6 +86,7 @@ export function getBlockTopAndHeightWithMargin(element) {
 /**
  * document.elementsFromPoint polyfill
  * ref: https://github.com/JSmith01/elementsfrompoint-polyfill/blob/master/index.js
+ * @deprecated 这个方法有问题，输入目标坐标如果介于两个子元素中间，则会返回最外层父元素
  * @param {number} x
  * @param {number} y
  */
