@@ -237,6 +237,13 @@ export interface CherryEngineOptions {
        * 后续如果有新的需求，可提issue反馈
        */
     flowSessionContext?: boolean;
+    /**
+     * 流式会话时，在最后位置增加一个类似光标的dom
+     * - 'default'：用cherry提供的默认样式
+     * - ''：不增加任何dom
+     * - '<span class="custom-cursor"></span>': 自定义的dom
+     */
+    flowSessionCursor?: string;
   };
   /** 内置语法配置 */
   syntax?: {

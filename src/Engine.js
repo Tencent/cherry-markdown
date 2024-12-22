@@ -267,16 +267,48 @@ export default class Engine {
   }
 
   /**
+   * 流式输出场景时，在最后增加一个光标占位
+   * @param {string} md 内容
+   * @returns {string}
+   */
+  $setFlowSessionCursorCache(md) {
+    if (this.$cherry.options.engine.global.flowSessionContext && this.$cherry.options.engine.global.flowSessionCursor) {
+      return `${md}CHERRY_FLOW_SESSION_CURSOR`;
+    }
+    return md;
+  }
+
+  /**
+   * 流式输出场景时，把最后的光标占位替换为配置的dom元素，并在一段时间后删除该元素
+   * @param {string} md 内容
+   * @returns {string}
+   */
+  $clearFlowSessionCursorCache(md) {
+    if (this.$cherry.options.engine.global.flowSessionCursor) {
+      if (this.clearCursorTimer) {
+        clearTimeout(this.clearCursorTimer);
+      }
+      this.clearCursorTimer = setTimeout(() => {
+        this.$cherry.clearFlowSessionCursor();
+      }, 2560);
+      return md.replace(/CHERRY_FLOW_SESSION_CURSOR/g, this.$cherry.options.engine.global.flowSessionCursor);
+    }
+    return md;
+  }
+
+  /**
    * @param {string} md md字符串
    * @returns {string} 获取html
    */
   makeHtml(md) {
-    let $md = this.$cacheBigData(md);
+    let $md = this.$setFlowSessionCursorCache(md);
+    $md = this.$cacheBigData($md);
     $md = this.$beforeMakeHtml($md);
     $md = this.$dealParagraph($md);
     $md = this.$afterMakeHtml($md);
     this.$fireHookAction($md, 'paragraph', '$cleanCache');
     $md = this.$deCacheBigData($md);
+    $md = this.$clearFlowSessionCursorCache($md);
     return $md;
   }
 
