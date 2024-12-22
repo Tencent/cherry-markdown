@@ -81,7 +81,7 @@ export default class HtmlBlock extends ParagraphBase {
     let $str = str;
     $str = convertHTMLNumberToName($str);
     $str = escapeHTMLEntitiesWithoutSemicolon($str);
-    $str = $str.replace(/<[/]?(.*?)>/g, (whole, m1) => {
+    $str = $str.replace(/<[/]?([^<]*?)>/g, (whole, m1) => {
       // 匹配到非白名单且非AutoLink语法的尖括号会被转义
       // 如果是HTML注释，放行
       if (!whiteList.test(m1) && !this.isAutoLinkTag(whole) && !this.isHtmlComment(whole)) {
