@@ -59,8 +59,6 @@ const customMenuFont = Cherry.createMenuHook('字体样式', {
 
 /** 处理 a 链接跳转问题 */
 const onClickLink = (e, target) => {
-
-
   // 这里不能直接使用 target.href，因为本地相对文件地址会被vscode转成`webview://`协议
   const href = target.attributes?.href.value;
 
@@ -292,8 +290,32 @@ function isHttpUrl(url) {
   return /https?:\/\//.test(url);
 }
 
+/**
+ * [vscode language](https://code.visualstudio.com/docs/getstarted/locales#_available-locales);
+ * [cherry language](https://github.com/Tencent/cherry-markdown/wiki/%E5%A4%9A%E8%AF%AD%E8%A8%80);
+ * */
+const languageIdentifiers = {
+  en: 'en_US', // English (US)
+  'zh-cn': 'zh_CN', // Simplified Chinese
+  'zh-tw': '繁体中文', // Traditional Chinese
+  fr: '法语', // French
+  de: '德语', // German
+  it: '意大利语', // Italian
+  es: '西班牙语', // Spanish
+  ja: 'ja_JP', // Japanese
+  ko: '韩国人', // Korean
+  ru: 'ru_RU', // Russian
+  'pt-br': '葡萄牙语（巴西）', // Portuguese (Brazil)
+  tr: '土耳其', // Turkish
+  pl: '抛光', // Polish
+  cs: '捷克语', // Czech
+  hu: '匈牙利', // Hungarian
+};
+
 const mdInfo = JSON.parse(document.getElementById('markdown-info').value);
-const config = Object.assign({}, basicConfig, { value: mdInfo.text });
+const locale = languageIdentifiers[mdInfo.vscodeLanguage] || 'zh_CN';
+
+const config = Object.assign({}, basicConfig, { value: mdInfo.text, locale });
 // eslint-disable-next-line new-cap, no-undef
 const cherry = new Cherry(config);
 // eslint-disable-next-line no-undef

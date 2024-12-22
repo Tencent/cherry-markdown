@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/Tencent/cherry-markdown",
   "engines": {
-    "vscode": "^1.58.0"
+    "vscode": "^1.73.0"
   },
   "categories": [
     "Other"

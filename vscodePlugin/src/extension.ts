@@ -95,8 +95,8 @@ const getMarkdownFileInfo = () => {
   }
 
   currentTitle = currentTitle
-    ? `${vscode.l10n.t('Preview')} ${currentTitle} ${vscode.l10n.t('By')} cherry-markdown`
-    : '不支持当前文件 by cherry-markdown';
+    ? `${vscode.l10n.t('Preview')} ${currentTitle} ${vscode.l10n.t('By')} Cherry Markdown`
+    : `${vscode.l10n.t('UnSupported')} ${vscode.l10n.t('By')} Cherry Markdown`;
   const theme = cherryTheme
     ? cherryTheme
     : vscode.workspace.getConfiguration('cherryMarkdown').get('Theme');
@@ -124,8 +124,9 @@ const initCherryPanel = () => {
       ],
     },
   );
+  console.log('vscode.env.language', vscode.env.language);
   cherryPanel.webview.html = getWebviewContent(
-    mdInfo,
+    { ...mdInfo, vscodeLanguage: vscode.env.language },
     cherryPanel,
     extensionPath,
   );
