@@ -209,12 +209,22 @@ console.log(cherryObj.getPreviewer());</textarea>
     </div>
 
     <div class="one-api">
-      <h2 class="one-api__name">Previewer.scrollToId(id:string)</h2>
-      <p class="one-api__desc">滚动到对应id的元素位置<br>id 可以为带#号hash，也可以是id值</p>
+      <h2 class="one-api__name">Previewer.scrollToId(id:string, behavior:{'smooth'|'instant'|'auto'})</h2>
+      <p class="one-api__desc">滚动到对应id的元素位置<br>id 可以为带#号hash，也可以是id值<br>behavior: smooth(默认) 平滑滚动；instant 立即滚动；auto 跟随浏览器默认行为</p>
       <div class="one-api__try">
         <textarea id="setMarkdown" placeholder="输入内容">
 // cherryObj.previewer.scrollToId('#gettoc'); 两种写法都可以
 cherryObj.previewer.scrollToId('gettoc');</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">Previewer.scrollToTop(scrollTop:number, behavior:{'auto'|'smooth'|'instant'})</h2>
+      <p class="one-api__desc">滚动到对应位置<br>scrollTop 滚动距离<br>behavior: auto(默认) 跟随浏览器默认行为；smooth 平滑滚动；instant 立即滚动</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">
+cherryObj.previewer.scrollToTop(3000);</textarea>
         <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
       </div>
     </div>
