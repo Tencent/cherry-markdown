@@ -568,6 +568,16 @@ export default class Editor {
     }
     // 处理特殊字符，主要将base64等大文本替换成占位符，以提高可读性
     this.dealSpecialWords();
+
+    this.domWidth = this.getEditorDom().offsetWidth;
+    // 监听编辑器宽度变化
+    const resizeObserver = new ResizeObserver((entries) => {
+      if (this.getEditorDom().offsetWidth !== this.domWidth) {
+        this.domWidth = this.getEditorDom().offsetWidth;
+        this.editor.refresh();
+      }
+    });
+    resizeObserver.observe(this.getEditorDom());
   }
 
   /**
