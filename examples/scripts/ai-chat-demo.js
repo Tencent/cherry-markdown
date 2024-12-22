@@ -7,6 +7,7 @@ var cherryConfig = {
     global: {
       // 开启流式模式 （默认 true）
       flowSessionContext: true,
+      flowSessionCursor: 'default',
     },
     syntax: {
       codeBlock: {

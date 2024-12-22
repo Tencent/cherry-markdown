@@ -122,6 +122,9 @@ export default class Cherry extends CherryStatic {
     this.lastMarkdownText = '';
     this.$event = new Event(this.instanceId);
 
+    if (this.options.engine.global.flowSessionCursor === 'default') {
+      this.options.engine.global.flowSessionCursor = '<span class="cherry-flow-session-cursor"></span>';
+    }
     /**
      * @type {import('./Engine').default}
      */
@@ -1085,5 +1088,17 @@ export default class Cherry extends CherryStatic {
     this.toc.$switchModel(targetModel);
     // @ts-ignore
     this.toc.setModelToLocalStorage(targetModel);
+  }
+
+  /**
+   * 清空流程会话中添加的虚拟光标
+   */
+  clearFlowSessionCursor() {
+    if (this.options.engine.global.flowSessionCursor) {
+      this.previewer.getDom().innerHTML = this.previewer
+        .getDom()
+        // @ts-ignore
+        .innerHTML.replaceAll(this.options.engine.global.flowSessionCursor, '');
+    }
   }
 }
