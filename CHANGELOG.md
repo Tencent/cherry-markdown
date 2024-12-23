@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.57](https://github.com/Tencent/cherry-markdown/compare/v0.8.56...v0.8.57) (2024-12-23)
+
+
+### Features
+
+* [#1005](https://github.com/Tencent/cherry-markdown/issues/1005) 增加滚动到具体位置的api，增加滚动行为控制的参数，修复预览区滚动没有触发编辑区滚动的bug ([7b7f7ad](https://github.com/Tencent/cherry-markdown/commit/7b7f7ad970aa7bbe66fb2bfcc1e4312f3e7b5a18))
+* [#1006](https://github.com/Tencent/cherry-markdown/issues/1006) 流式会话场景中，增加`flowSessionCursor`配置项，实现虚拟光标的效果 ([5e025bf](https://github.com/Tencent/cherry-markdown/commit/5e025bf048b720652ef96321c18ba67085ce1683))
+* **vscodePlugin:** add i18n ([#1010](https://github.com/Tencent/cherry-markdown/issues/1010)) ([9c9265c](https://github.com/Tencent/cherry-markdown/commit/9c9265caaee98cd396e67215163c06a0b9b981a3))
+
+
+### Bug Fixes
+
+* [#1009](https://github.com/Tencent/cherry-markdown/issues/1009) 处理容器宽度发生变化时，编辑器光标出现错位的问题 ([ccae682](https://github.com/Tencent/cherry-markdown/commit/ccae6827eee15b8ba152e607779ed29819104c3e))
+* [#1009](https://github.com/Tencent/cherry-markdown/issues/1009) 调整编辑器刷新时机，只有编辑器处于显示状态时才需要刷新 ([2b8696f](https://github.com/Tencent/cherry-markdown/commit/2b8696f0eb4f95ef9b343dc1ab833f479475c1ca))
+* [#993](https://github.com/Tencent/cherry-markdown/issues/993) 修复识别html标签的正则逻辑 ([c58466e](https://github.com/Tencent/cherry-markdown/commit/c58466ee19994d7862571aada595412e812bd10f))
+* 修复没有顶部右对齐工具栏时，顶部工具栏高度变高的问题 ([99f6bae](https://github.com/Tencent/cherry-markdown/commit/99f6bae05ed2c5933ac7312a81ad0aec6dbb0d83))
+
+
+### Code Refactoring
+
+* 废弃elementsFromPoint方法 ([2f732ea](https://github.com/Tencent/cherry-markdown/commit/2f732ea534cdeed5b42cc5365c08958feb1bb09e))
+
 ### [0.8.56](https://github.com/Tencent/cherry-markdown/compare/v0.8.55...v0.8.56) (2024-12-18)
 
 
