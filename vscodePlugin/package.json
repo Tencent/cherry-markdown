@@ -10,6 +10,7 @@
     "markdown editor",
     "markdown preview"
   ],
+  "l10n": "./l10n",
   "icon": "favicon.ico",
   "repository": {
     "type": "git",
@@ -17,7 +18,7 @@
   },
   "homepage": "https://github.com/Tencent/cherry-markdown",
   "engines": {
-    "vscode": "^1.58.0"
+    "vscode": "^1.73.0"
   },
   "categories": [
     "Other"
@@ -30,7 +31,7 @@
     "commands": [
       {
         "command": "cherrymarkdown.preview",
-        "title": "Preview In Cherry Markdown"
+        "title": "%commands.preview.title%"
       }
     ],
     "menus": {
@@ -61,41 +62,41 @@
     "configuration": {
       "title": "cherryMarkdown",
       "properties": {
-        "cherryMarkdown.usage": {
+        "cherryMarkdown.Usage": {
           "type": "string",
-          "default": "active",
+          "default": "%usage.enum.active%",
           "enum": [
-            "active",
-            "only-manual"
+            "%usage.enum.active%",
+            "%usage.enum.only-manual%"
           ],
-          "description": "cherry-markdown's triggering method values: [ active | only-manual ]"
+          "description": "%usage.description%"
         },
-        "cherryMarkdown.theme": {
+        "cherryMarkdown.Theme": {
           "type": "string",
-          "default": "dark",
+          "default": "%theme.enum.default%",
           "enum": [
-            "default",
-            "dark",
-            "light",
-            "green",
-            "red"
+          "%theme.enum.default%",
+          "%theme.enum.dark%",
+          "%theme.enum.light%",
+          "%theme.enum.green%",
+          "%theme.enum.red%"
           ],
-          "description": "cherry-markdown's theme, available values: [ default | dark | light | green | red ]"
+          "description": "%theme.description%"
         },
         "cherryMarkdown.UploadType": {
           "type": "string",
-          "default": "None",
+          "default": "%uploadType.enum.None%",
           "enum": [
-            "None",
-            "CustomUploader",
-            "PicGoServer"
+            "%uploadType.enum.None%",
+            "%uploadType.enum.CustomUploader%",
+            "%uploadType.enum.PicGoServer%"
           ],
           "enumDescriptions": [
-            "dont use any uploader, use base64 to show image",
-            "use custom uploader",
-            "use picgo server"
+            "%uploadType.enumDescriptions.None%",
+            "%uploadType.enumDescriptions.CustomUploader%",
+            "%uploadType.enumDescriptions.PicGoServer%"
           ],
-          "description": "cherry-markdown's upload mode, available values: [ None | CustomUploader | PicGoServer ]"
+          "description": "%uploadType.description%"
         },
         "cherryMarkdown.CustomUploader": {
           "type": "object",
@@ -110,36 +111,36 @@
             "enable": {
               "type": "boolean",
               "default": false,
-              "description": "enable custom uploader"
+              "description": "%customUploader.enable.description%"
             },
             "url": {
               "type": "string",
               "default": "",
-              "description": "custom uploader url"
+              "description": "%customUploader.url.description%"
             },
             "headers": {
               "type": "object",
               "default": {},
-              "description": "custom uploader headers",
+              "description": "%customUploader.headers%",
               "properties": {
                 "key": {
                   "type": "string",
                   "default": "",
-                  "description": "custom uploader header key"
+                  "description": "%customUploader.headers.key.description%"
                 },
                 "value": {
                   "type": "string",
                   "default": "",
-                  "description": "custom uploader header value"
+                  "description": "%customUploader.headers.value.description%"
                 }
               }
             }
           },
-          "description": "cherry-markdown's custom uploader, you need config it if you want to upload images / video / audio to your own server"
+          "description": "%customUploader.description%"
         },
         "cherryMarkdown.PicGoServer": {
           "type": "string",
-          "description": "cherry-markdown's picgo server, you need config it if you want to upload images / video / audio to picgo server,",
+          "description": "%picGoServer.description%",
           "default": "http://127.0.0.1:36677/upload"
         },
         "cherryMarkdown.BackfillImageProps": {
@@ -147,19 +148,19 @@
           "items": {
             "type": "string",
             "enum": [
-              "isBorder",
-              "isShadow",
-              "isRadius"
+              "%backfillImageProps.enum.isBorder%",
+              "%backfillImageProps.enum.isShadow%",
+              "%backfillImageProps.enum.isRadius%"
             ],
             "description": "Select multiple items",
             "enumDescriptions": [
-              "Whether to add a border to the image",
-              "Whether to add a shadow to the image",
-              "Whether to add a rounded corner to the image"
+              "%backfillImageProps.enumDescriptions.isBorder%",
+              "%backfillImageProps.enumDescriptions.isShadow%",
+              "%backfillImageProps.enumDescriptions.isRadius%"
             ]
           },
           "default": [],
-          "description": "cherry-markdown's backfill image props, you need config it if you want to backfill image props"
+          "description": "%backfillImageProps.description%"
         }
       }
     }
