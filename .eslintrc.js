@@ -15,6 +15,7 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: ['prettier', 'jest'],
+  ignorePatterns: ['dist/**'],
   rules: {
     'prettier/prettier': 'error',
     // curly: 'error',
