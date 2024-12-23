@@ -297,19 +297,19 @@ function isHttpUrl(url) {
 const languageIdentifiers = {
   en: 'en_US', // English (US)
   'zh-cn': 'zh_CN', // Simplified Chinese
-  'zh-tw': '繁体中文', // Traditional Chinese
-  fr: '法语', // French
-  de: '德语', // German
-  it: '意大利语', // Italian
-  es: '西班牙语', // Spanish
-  ja: 'ja_JP', // Japanese
-  ko: '韩国人', // Korean
+  // 'zh-tw': '繁体中文', // Traditional Chinese
+  // fr: '法语', // French
+  // de: '德语', // German
+  // it: '意大利语', // Italian
+  // es: '西班牙语', // Spanish
+  // ja: '日语', // Japanese
+  // ko: '韩国人', // Korean
   ru: 'ru_RU', // Russian
-  'pt-br': '葡萄牙语（巴西）', // Portuguese (Brazil)
-  tr: '土耳其', // Turkish
-  pl: '抛光', // Polish
-  cs: '捷克语', // Czech
-  hu: '匈牙利', // Hungarian
+  // 'pt-br': '葡萄牙语（巴西）', // Portuguese (Brazil)
+  // tr: '土耳其', // Turkish
+  // pl: '波兰', // Polish
+  // cs: '捷克语', // Czech
+  // hu: '匈牙利', // Hungarian
 };
 
 const mdInfo = JSON.parse(document.getElementById('markdown-info').value);
