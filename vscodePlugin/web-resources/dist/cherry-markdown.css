@@ -826,10 +826,6 @@ span.CodeMirror-selectedtext {
   content: "\ea62";
 }
 
-.ch-icon-search:before {
-  content: "\ea63";
-}
-
 .ch-icon-tips:before {
   content: "\ea64";
 }
@@ -890,10 +886,6 @@ span.CodeMirror-selectedtext {
   content: "\ea72";
 }
 
-.ch-icon-inlineCode:before {
-  content: "\ea73";
-}
-
 .ch-icon-codeBlock:before {
   content: "\ea74";
 }
@@ -912,6 +904,18 @@ span.CodeMirror-selectedtext {
 
 .ch-icon-swap:before {
   content: "\ea78";
+}
+
+.ch-icon-keyboard:before {
+  content: "\ea79";
+}
+
+.ch-icon-command:before {
+  content: "\ea7a";
+}
+
+.ch-icon-search:before {
+  content: "\ea7b";
 }
 
 .cherry-markdown {
@@ -1535,6 +1539,9 @@ div[data-type=codeBlock] .token.entity {
 }
 div[data-type=codeBlock] .token.inserted {
   color: green;
+}
+div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
+  white-space: pre-wrap;
 }
 [data-code-block-theme=default] div[data-type=codeBlock] {
   /* PrismJS 1.23.0
@@ -3903,7 +3910,7 @@ div[data-type=codeBlock] .token.inserted {
   border-color: #dae0e5;
   background-color: #e2e6ea;
 }
-.cherry-insert-formula-wrappler .cherry-insert-formula-select .cherry-insert-formula-categary .cherry-insert-formula-categary__func .cherry-insert-formula-categary__func-item svg {
+.cherry-insert-formula-wrappler .cherry-insert-formula-select .cherry-insert-formula-categary .cherry-insert-formula-categary__func .cherry-insert-formula-categary__func-item svg, .cherry-insert-formula-wrappler .cherry-insert-formula-select .cherry-insert-formula-categary .cherry-insert-formula-categary__func .cherry-insert-formula-categary__func-item img {
   pointer-events: none;
 }
 .cherry-insert-formula-wrappler .cherry-insert-formula-select .cherry-insert-formula-categary .cherry-insert-formula-categary__func:hover {
@@ -4093,10 +4100,32 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-shortcut-key-config-panel-wrapper .shortcut-static .cherry-shortcut-key-config-panel-ul .shortcut-key-item .shortcut-key-config-panel-static .shortcut-split {
   color: #aaa;
 }
-.cherry-shortcut-key-config-panel-wrapper .shortcut-panel-title {
+.cherry-shortcut-key-config-panel-wrapper .shortcut-panel-title, .cherry-shortcut-key-config-panel-wrapper .shortcut-panel-settings {
   font-size: 14px;
   padding: 10px 15px;
   background-color: #eee;
+}
+.cherry-shortcut-key-config-panel-wrapper .shortcut-panel-settings {
+  padding: 10px 15px;
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid #aaa;
+  justify-content: space-between;
+  display: flex;
+}
+.cherry-shortcut-key-config-panel-wrapper .shortcut-panel-settings .shortcut-settings-btn {
+  height: auto;
+  line-height: 1.2em;
+}
+.cherry-shortcut-key-config-panel-wrapper .shortcut-panel-settings .shortcut-settings-btn:hover {
+  color: rgb(255, 77, 79);
+}
+.cherry-shortcut-key-config-panel-wrapper.disable .cherry-shortcut-key-config-panel-ul {
+  opacity: 0.3;
+}
+.cherry-shortcut-key-config-panel-wrapper.disable .j-shortcut-settings-disable-btn {
+  color: rgb(255, 77, 79);
 }
 
 .cherry {
@@ -4243,9 +4272,10 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-toolbar {
   position: relative;
   display: flex;
+  align-items: baseline;
   justify-content: space-between;
   padding: 0 20px;
-  height: 48px;
+  min-height: 48px;
   font-size: 14px;
   line-height: 2.8;
   flex-basis: 100%;
@@ -4289,11 +4319,11 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-toolbar .toolbar-right {
   display: flex;
   align-items: center;
-  height: 48px;
-  overflow: hidden;
+  min-height: 48px;
+  flex-wrap: wrap;
+  flex: 1;
 }
 .cherry-toolbar .toolbar-left {
-  flex: 0 0 auto;
   margin-right: 20px;
 }
 .cherry-toolbar .toolbar-right {
@@ -4301,6 +4331,7 @@ div[data-type=codeBlock] .token.inserted {
   flex-direction: row-reverse;
   margin-left: 10px;
   box-sizing: border-box;
+  min-height: 0;
 }
 .cherry-toolbar.preview-only .cherry-toolbar-button {
   display: none;
@@ -4623,6 +4654,7 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-editor .CodeMirror-lines {
   padding: 15px 34px;
 }
+.cherry-editor .CodeMirror-lines .long-text,
 .cherry-editor .CodeMirror-lines .drawio,
 .cherry-editor .CodeMirror-lines .base64 {
   display: inline-block;
@@ -4759,7 +4791,12 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-previewer-codeBlock-hover-handler {
   z-index: 0;
   position: absolute;
+  pointer-events: none;
 }
+.cherry-previewer-codeBlock-hover-handler * {
+  pointer-events: all;
+}
+.cherry-previewer-codeBlock-hover-handler .cherry-code-block-custom-btn,
 .cherry-previewer-codeBlock-hover-handler .cherry-copy-code-block,
 .cherry-previewer-codeBlock-hover-handler .cherry-unExpand-code-block,
 .cherry-previewer-codeBlock-hover-handler .cherry-edit-code-block {
@@ -4772,12 +4809,14 @@ div[data-type=codeBlock] .token.inserted {
   float: right;
   top: 15px;
   border-radius: 5px;
-  margin-left: -27px;
   transition: all 0.3s;
   z-index: 2;
   color: #3582fb;
   background-color: #eee;
   border-color: #3582fb;
+}
+.cherry-previewer-codeBlock-hover-handler .cherry-code-block-custom-btn {
+  width: auto;
 }
 .cherry-previewer-codeBlock-hover-handler .cherry-expand-code-block {
   position: absolute;
@@ -4800,19 +4839,12 @@ div[data-type=codeBlock] .token.inserted {
   right: 10px;
 }
 .cherry-previewer-codeBlock-hover-handler .cherry-unExpand-code-block {
-  right: 10px;
   z-index: 12;
-  margin-top: 30px;
 }
 .cherry-previewer-codeBlock-hover-handler .cherry-unExpand-code-block.hidden {
   display: none;
 }
-.cherry-previewer-codeBlock-hover-handler .cherry-copy-code-block {
-  right: 10px;
-}
-.cherry-previewer-codeBlock-hover-handler .cherry-edit-code-block {
-  right: 40px;
-}
+.cherry-previewer-codeBlock-hover-handler .cherry-code-block-custom-btn:hover,
 .cherry-previewer-codeBlock-hover-handler .cherry-copy-code-block:hover,
 .cherry-previewer-codeBlock-hover-handler .cherry-expand-code-block:hover,
 .cherry-previewer-codeBlock-hover-handler .cherry-unExpand-code-block:hover,
@@ -4907,20 +4939,40 @@ div[data-type=codeBlock] .token.inserted {
 .cherry-previewer .cherry-list__square {
   list-style: square;
 }
+[data-code-block-theme=default] .cherry-previewer .cherry-code-block-custom-btn,
 [data-code-block-theme=default] .cherry-previewer .cherry-copy-code-block,
 [data-code-block-theme=default] .cherry-previewer .cherry-expand-code-block,
 [data-code-block-theme=default] .cherry-previewer .cherry-unExpand-code-block,
-[data-code-block-theme=default] .cherry-previewer .cherry-edit-code-block, [data-code-block-theme=funky] .cherry-previewer .cherry-copy-code-block,
+[data-code-block-theme=default] .cherry-previewer .cherry-edit-code-block, [data-code-block-theme=funky] .cherry-previewer .cherry-code-block-custom-btn,
+[data-code-block-theme=funky] .cherry-previewer .cherry-copy-code-block,
 [data-code-block-theme=funky] .cherry-previewer .cherry-expand-code-block,
 [data-code-block-theme=funky] .cherry-previewer .cherry-unExpand-code-block,
-[data-code-block-theme=funky] .cherry-previewer .cherry-edit-code-block, [data-code-block-theme=solarized-light] .cherry-previewer .cherry-copy-code-block,
+[data-code-block-theme=funky] .cherry-previewer .cherry-edit-code-block, [data-code-block-theme=solarized-light] .cherry-previewer .cherry-code-block-custom-btn,
+[data-code-block-theme=solarized-light] .cherry-previewer .cherry-copy-code-block,
 [data-code-block-theme=solarized-light] .cherry-previewer .cherry-expand-code-block,
 [data-code-block-theme=solarized-light] .cherry-previewer .cherry-unExpand-code-block,
-[data-code-block-theme=solarized-light] .cherry-previewer .cherry-edit-code-block, [data-code-block-theme=coy] .cherry-previewer .cherry-copy-code-block,
+[data-code-block-theme=solarized-light] .cherry-previewer .cherry-edit-code-block, [data-code-block-theme=coy] .cherry-previewer .cherry-code-block-custom-btn,
+[data-code-block-theme=coy] .cherry-previewer .cherry-copy-code-block,
 [data-code-block-theme=coy] .cherry-previewer .cherry-expand-code-block,
 [data-code-block-theme=coy] .cherry-previewer .cherry-unExpand-code-block,
 [data-code-block-theme=coy] .cherry-previewer .cherry-edit-code-block {
   background-color: #3582fb;
+}
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.cherry-previewer .cherry-flow-session-cursor {
+  background-color: rgba(53, 130, 251, 0.5333333333);
+  padding: 0 2.5px;
+  animation: blink 1s infinite;
 }
 
 .cherry-color-wrap {
