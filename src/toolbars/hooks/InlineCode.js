@@ -21,7 +21,7 @@ import { CONTROL_KEY } from '@/utils/shortcutKey';
 export default class InlineCode extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('inlineCode', 'inlineCode');
+    this.setName('inlineCode', 'code');
     this.shortcutKeyMap = {
       [`${CONTROL_KEY}-Backquote`]: {
         hookName: this.name,
