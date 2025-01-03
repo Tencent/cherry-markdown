@@ -19,12 +19,12 @@ let urlCache = {};
 const cherryInnerLinkRegex = /^cherry-inner:\/\/([0-9a-f]+)$/i;
 
 export function urlProcessorProxy(urlProcessor) {
-  return function (url, srcType) {
+  return function (url, srcType, callback) {
     if (UrlCache.isInnerLink(url)) {
-      const newUrl = urlProcessor(UrlCache.get(url), srcType);
+      const newUrl = urlProcessor(UrlCache.get(url), srcType, callback);
       return UrlCache.replace(url, newUrl);
     }
-    return urlProcessor(url, srcType);
+    return urlProcessor(url, srcType, callback);
   };
 }
 

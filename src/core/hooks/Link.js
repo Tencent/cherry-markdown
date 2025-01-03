@@ -91,7 +91,7 @@ export default class Link extends SyntaxBase {
       const processedText = coreText.replace(/~1D/g, '~D'); // 还原替换的$符号
       // text可能是html标签，依赖htmlBlock进行处理
       if (isValidScheme(processedURL)) {
-        processedURL = this.$engine.$cherry.options.callback.urlProcessor(processedURL, 'link');
+        processedURL = this.$engine.urlProcessor(processedURL, 'link');
         processedURL = encodeURIOnce(processedURL);
         return `${leadingChar + extraLeadingChar}<a href="${UrlCache.set(processedURL)}" ${
           this.rel
