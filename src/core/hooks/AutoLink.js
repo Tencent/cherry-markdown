@@ -221,7 +221,7 @@ export default class AutoLink extends SyntaxBase {
         linkText = url;
       }
     }
-    const processedURL = this.$engine.$cherry.options.callback.urlProcessor(url, 'autolink');
+    const processedURL = this.$engine.urlProcessor(url, 'autolink');
     const safeUri = encodeURIOnce(processedURL);
     const displayUri = $e(linkText);
     const additionalAttrs = [this.target, this.rel].filter(Boolean).join(' ');

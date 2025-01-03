@@ -92,19 +92,19 @@ export default class HtmlBlock extends ParagraphBase {
       let wholeStr = whole;
       // 识别<a>和<img>标签的href和src属性，并触发urlProcessor回调
       m1.replace(/^a .*? href="([^"]+)"/, (all, href) => {
-        const processedURL = this.$engine.$cherry.options.callback.urlProcessor(href, 'link');
+        const processedURL = this.$engine.urlProcessor(href, 'link');
         wholeStr = wholeStr.replace(/ href="[^"]+"/, ` href="${processedURL}"`);
       });
       m1.replace(/^a href="([^"]+)"/, (all, href) => {
-        const processedURL = this.$engine.$cherry.options.callback.urlProcessor(href, 'link');
+        const processedURL = this.$engine.urlProcessor(href, 'link');
         wholeStr = wholeStr.replace(/ href="[^"]+"/, ` href="${processedURL}"`);
       });
       m1.replace(/^img .*? src="([^"]+)"/, (all, src) => {
-        const processedURL = this.$engine.$cherry.options.callback.urlProcessor(src, 'image');
+        const processedURL = this.$engine.urlProcessor(src, 'image');
         wholeStr = wholeStr.replace(/ src="[^"]+"/, ` src="${processedURL}"`);
       });
       m1.replace(/^img src="([^"]+)"/, (all, src) => {
-        const processedURL = this.$engine.$cherry.options.callback.urlProcessor(src, 'image');
+        const processedURL = this.$engine.urlProcessor(src, 'image');
         wholeStr = wholeStr.replace(/ src="[^"]+"/, ` src="${processedURL}"`);
       });
 

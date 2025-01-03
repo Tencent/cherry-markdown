@@ -53,6 +53,52 @@ export default class Engine {
     this.currentStrMd5 = [];
     this.globalConfig = markdownParams.engine.global;
     this.htmlWhiteListAppend = this.globalConfig.htmlWhiteList;
+    this.urlProcessorMap = {};
+  }
+
+  /**
+   * 重新生成html
+   * 这是为urlProcessor支持异步回调函数而实现的重新生成html的方法
+   * 该方法会清空所有缓存，所以降低了该方法的执行频率，1s内最多执行一次
+   */
+  reMakeHtml() {
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
+    this.timer = setTimeout(() => {
+      this.$cherry.lastMarkdownText = '';
+      this.hashCache = {};
+      const markdownText = this.$cherry.editor.editor.getValue();
+      const html = this.makeHtml(markdownText);
+      this.$cherry.previewer.refresh(html);
+      this.$cherry.$event.emit('afterChange', {
+        markdownText,
+        html,
+      });
+    }, 1000);
+  }
+
+  urlProcessor(url, srcType) {
+    const key = `${srcType}_${url}`;
+    if (this.urlProcessorMap[key]) {
+      return this.urlProcessorMap[key];
+    }
+    const ret = this.$cherry.options.callback.urlProcessor(url, srcType, (/** @type {string} */ newUrl) => {
+      if (newUrl) {
+        if (!this.urlProcessorMap[key]) {
+          this.urlProcessorMap[key] = newUrl;
+          this.reMakeHtml();
+        }
+      } else {
+        delete this.urlProcessorMap[key];
+      }
+      return;
+    });
+    if (ret) {
+      return ret;
+    }
+    return url;
   }
 
   initMath(opts) {

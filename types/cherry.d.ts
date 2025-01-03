@@ -133,7 +133,7 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
      * @param url 来源url
      * @param srcType 来源类型
      */
-    urlProcessor?: (url: string, srcType: 'image' | 'audio' | 'video' | 'autolink' | 'link') => string;
+    urlProcessor?: (url: string, srcType: 'image' | 'audio' | 'video' | 'autolink' | 'link', callback?: any) => string;
     /** 文件上传回调 */
     fileUpload?: CherryFileUploadHandler;
     /** 多文件上传回调 */
@@ -219,7 +219,7 @@ export interface CherryEngineOptions {
      * @param url 来源url
      * @param srcType 来源类型
      */
-    urlProcessor?: (url: string, srcType: 'image' | 'audio' | 'video' | 'autolink' | 'link') => string;
+    urlProcessor?: (url: string, srcType: 'image' | 'audio' | 'video' | 'autolink' | 'link', callback?: any) => string;
     /**
      * 额外允许渲染的html标签
      * 标签以英文竖线分隔，如：htmlWhiteList: 'iframe|script|style'

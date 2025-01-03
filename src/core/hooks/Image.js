@@ -53,7 +53,7 @@ export default class Image extends SyntaxBase {
         attrs += ` poster="${encodeURIOnce(poster)}"`;
       }
 
-      const processedURL = this.$engine.$cherry.options.callback.urlProcessor(link, type);
+      const processedURL = this.$engine.urlProcessor(link, type);
       const defaultWrapper = `<${type} src="${UrlCache.set(
         encodeURIOnce(processedURL),
       )}"${attrs} ${extent} ${style} ${classes} controls="controls">${$e(alt || '')}</${type}>`;
@@ -98,7 +98,7 @@ export default class Image extends SyntaxBase {
             .replace(/&/g, '&amp;') // 对&多做一次转义，cherry现有的机制会自动把&amp;转成&，只有多做一次转义才能抵消cherry的机制
         : '';
       return `${leadingChar}<img ${srcProp}="${UrlCache.set(
-        encodeURIOnce(this.$engine.$cherry.options.callback.urlProcessor(srcValue, 'image')),
+        encodeURIOnce(this.$engine.urlProcessor(srcValue, 'image')),
       )}" ${extent} ${style} ${classes} alt="${$e(alt || '')}"${attrs} ${extendAttrStr}/>`;
     }
     // should never happen
