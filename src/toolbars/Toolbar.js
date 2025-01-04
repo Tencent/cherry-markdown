@@ -34,7 +34,9 @@ import {
  * - ol(1)有序
  * - ul(2)无序列表
  * - checklist(3)checklist
- * @typedef {(insert:'hr'|'br'|'code'|'formula'|'checklist'|'toc'|'link'|'image'|'video'|'audio'|'normal-table'|'normal-table-row*col')=>void} Insert 向cherry编辑器中插入特定语法
+ * @typedef {`normal-table-${number}*${number}`} normalTableRowCol 插入表格语法约束
+ * 
+ * @typedef {(insert:'hr'|'br'|'code'|'formula'|'checklist'|'toc'|'link'|'image'|'video'|'audio'|'normal-table'|normalTableRowCol)=>void} Insert 向cherry编辑器中插入特定语法(需要在`toolbar`中预先配置功能)
  * - hr 水平分割线
  * - br 换行
  * - code 代码块
