@@ -65,4 +65,5 @@ listen('save', () => {
 });
 
 listen('save_as', async () => saveAsMarkdown());
+listen('show_toolbar', () => cherryMarkdown.toolbar.toolbarHandlers.switchModel());
 </script>

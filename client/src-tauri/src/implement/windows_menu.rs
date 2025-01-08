@@ -31,9 +31,13 @@ fn create_window_menu(
         .item(&language_sub_en.build(handle)?)
         .item(&language_sub_zh.build(handle)?);
 
+    let setting_menu = SubmenuBuilder::new(handle, language.setting.get_lang(lang_str))
+        .text("show_toolbar", language.show_toolbar.get_lang(lang_str));
+
     let menu = MenuBuilder::new(handle)
         .item(&file_menu.build()?)
         .item(&language_menu.build()?)
+        .item(&setting_menu.build()?)
         .build()?;
     Ok(menu)
 }
@@ -70,6 +74,9 @@ pub fn window_menu(app: &mut App) -> Result<(), tauri::Error> {
             }
             "save_as" => {
                 let _ = app_handle.emit("save_as", "");
+            }
+            "show_toolbar" => {
+                let _ = app_handle.emit("show_toolbar", "");
             }
             "quit" => {
                 app_handle.exit(0);

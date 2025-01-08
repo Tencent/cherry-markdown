@@ -72,6 +72,8 @@ pub struct Language {
     pub quit: BilingualMenuItem,
     pub language: BilingualMenuItem,
     pub open_cherry_markdown: BilingualMenuItem,
+    pub setting: BilingualMenuItem,
+    pub show_toolbar: BilingualMenuItem,
 }
 
 impl Language {
@@ -88,6 +90,8 @@ impl Language {
                 "Open Cherry Markdown",
                 "打开 Cherry Markdown",
             ),
+            setting: BilingualMenuItem::new("Setting", "设置"),
+            show_toolbar: BilingualMenuItem::new("Show Toolbar", "显示工具栏"),
         }
     }
 }
