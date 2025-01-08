@@ -60,7 +60,7 @@
       }
     },
     "configuration": {
-      "title": "cherryMarkdown",
+      "title": "Cherry Markdown",
       "properties": {
         "cherryMarkdown.Usage": {
           "type": "string",
