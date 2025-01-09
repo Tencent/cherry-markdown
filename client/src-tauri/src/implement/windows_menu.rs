@@ -39,7 +39,6 @@ fn create_window_menu(
         .item(&language_sub_en.build(handle)?)
         .item(&language_sub_zh.build(handle)?);
 
-        println!("state.is_show_toolbar: {}", state.is_show_toolbar);
     let toggle_toolbar = CheckMenuItemBuilder::new(language.show_toolbar.get_lang(&state.lang_str))
         .id("toggle_toolbar")
         .checked(state.is_show_toolbar);
@@ -115,10 +114,8 @@ pub fn window_menu(app: &mut App) -> Result<(), tauri::Error> {
             let language_clone = language.clone();
 
             move |msg: NotifyMessage| {
-                println!("windows_menu: {:?}", msg);
                 match msg {
                     NotifyMessage::CurrentLang(lang) => {
-                        println!("CurrentLang: {}", lang);
                         if let Ok(menu) = create_window_menu(
                             &handle_clone,
                             language_clone.clone(),
@@ -131,7 +128,6 @@ pub fn window_menu(app: &mut App) -> Result<(), tauri::Error> {
                         }
                     }
                     NotifyMessage::IsShowToolbar(show) => {
-                        println!("IsShowToolbar: {}", show);
                         if let Ok(menu) = create_window_menu(
                             &handle_clone,
                             language_clone.clone(),
