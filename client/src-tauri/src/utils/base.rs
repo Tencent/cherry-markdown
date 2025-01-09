@@ -28,28 +28,30 @@ pub struct Observer {
 }
 
 #[derive(Clone)]
+#[derive(Debug)]
 pub enum NotifyMessage {
     // 控制当前语言
     CurrentLang(String),
     // 控制是否显示工具栏
+    #[allow(dead_code)]
     IsShowToolbar(bool),
 }
 
 impl Observer {
-    // 构造函数，创建一个新的 Observer 实例。
+    // @OBSERVER 构造函数，创建一个新的 Observer 实例。
     fn new() -> Self {
         Observer {
             callbacks: Mutex::new(HashMap::new()),
         }
     }
 
-    // 订阅方法，添加一个新的回调函数。
+    // @OBSERVER 订阅方法，添加一个新的回调函数。
     pub fn subscribe(&self, id: String, callback: Callback) {
         let mut callbacks = self.callbacks.lock().unwrap();
         callbacks.insert(id, callback);
     }
 
-    // 通知方法，调用所有已订阅的回调函数。
+    // @OBSERVER 通知方法，调用所有已订阅的回调函数。
     pub fn notify(&self, msg: NotifyMessage) {
         let callbacks = self.callbacks.lock().unwrap();
         for callback in callbacks.values() {
@@ -58,22 +60,17 @@ impl Observer {
     }
 }
 
-/// 设置当前语言并通知观察者
+/// @OBSERVER 设置当前语言并通知观察者
 pub fn set_current_lang(lang: &str) {
     let mut current_lang = CURRENT_LANG.lock().unwrap();
     *current_lang = lang.to_string();
     return OBSERVER.notify(NotifyMessage::CurrentLang(current_lang.clone()));
 }
 
-/// 获取当前语言
+/// @OBSERVER 获取当前语言
 pub fn get_current_lang() -> String {
     let current_lang = CURRENT_LANG.lock().unwrap();
     return current_lang.clone();
-}
-
-/// 订阅语言变化的回调函数。
-pub fn subscribe_to_lang_change(id: String, callback: Callback) {
-    return OBSERVER.subscribe(id, callback);
 }
 
 /// 设置是否显示工具栏并通知观察者。
@@ -89,7 +86,7 @@ pub fn get_current_show_toolbar() -> bool {
     return current_toolbar.clone();
 }
 
-// 订阅工具栏变化的回调函数。
-pub fn subscribe_to_show_toolbar_change(id: String, callback: Callback) {
+/// @OBSERVER 订阅变化的回调函数。
+pub fn subscribe_observer(id: String, callback: Callback) {
     return OBSERVER.subscribe(id, callback);
 }

@@ -7,8 +7,7 @@ use tauri::{
 use crate::utils::i18n::Language;
 
 use crate::utils::base::{
-    get_current_lang, restore_and_focus_window, set_current_lang, subscribe_to_lang_change,
-    NotifyMessage,
+    get_current_lang, restore_and_focus_window, set_current_lang
 };
 
 fn create_tray_menu(app: &AppHandle, lang_str: &str) -> Result<Menu<Wry>, tauri::Error> {
@@ -101,29 +100,5 @@ pub fn system_tray_menu(app: &mut App) -> Result<(), tauri::Error> {
         }
         _ => {}
     });
-    let system_tray_clone_for_subscribe = system_tray.clone();
-    let app_handle_clone_for_subscribe = app_handle_clone.clone();
-
-    subscribe_to_lang_change(
-        "system_tray".to_string(),
-        Box::new({
-            move |msg: NotifyMessage| {
-                if let NotifyMessage::CurrentLang(lang) = msg {
-                    let new_menu = match create_tray_menu(&app_handle_clone_for_subscribe, &lang) {
-                        Ok(menu) => menu,
-                        Err(e) => {
-                            eprintln!("Error creating tray menu: {:?}", e);
-                            return;
-                        }
-                    };
-                    if let Err(e) = system_tray_clone_for_subscribe.set_menu(Some(new_menu.clone()))
-                    {
-                        eprintln!("Error setting menu: {:?}", e);
-                    }
-                }
-            }
-        }) as Box<dyn Fn(NotifyMessage) + Send + Sync>,
-    );
-
     Ok(())
 }
