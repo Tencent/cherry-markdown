@@ -1,17 +1,37 @@
 import Cherry from 'cherry-markdown';
 import { CherryOptions } from 'cherry-markdown/types/cherry';
 import { onUpdated } from 'vue';
+import { previewOnlySidebar } from '../utils';
 
 type CustomConfig = {
   CustomToolbar: {
     CustomMenuType: {
-      customMenu_fileUpload: string
+      customMenu_fileUpload: any;
+      customMenuChangeModule: any;
     },
   },
 }
 
 const customMenu_fileUpload = Cherry.createMenuHook('文件上传', {
   iconName: '',
+});
+
+const customMenuChangeModule = Cherry.createMenuHook('编辑', {
+  iconName: 'pen',
+  onClick() {
+    const markdownPreviewOnly = document.querySelector('.markdown-preview-only');
+    if (markdownPreviewOnly) {
+      markdownPreviewOnly.classList.remove('markdown-preview-only');
+      cherryInstance().switchModel('edit&preview');
+      const cherryToolbarPen = document.querySelector('.cherry-toolbar-pen');
+      if (cherryToolbarPen) {
+        cherryToolbarPen.className = `${cherryToolbarPen.className} active`;
+        cherryToolbarPen.innerHTML = '<i class="ch-icon ch-icon-pen-fill"></i>';
+      }
+    } else {
+      previewOnlySidebar();
+    }
+  },
 });
 
 const cherryConfig: CherryOptions<CustomConfig> = {
@@ -200,7 +220,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     // edit&preview: 双栏编辑预览模式
     // editOnly: 纯编辑模式（没有预览，可通过toolbar切换成双栏或预览模式）
     // previewOnly: 预览模式（没有编辑框，toolbar只显示“返回编辑”按钮，可通过toolbar切换成编辑模式）
-    defaultModel: 'edit&preview',
+    defaultModel: 'editOnly',
     // 粘贴时是否自动将html转成markdown
     convertWhenPaste: true,
     // 快捷键风格，目前仅支持 sublime 和 vim
@@ -256,7 +276,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       'settings',
     ],
     toolbarRight: [],
-    sidebar: false,
+    sidebar: ['customMenuChangeModule','theme'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'table', 'code'], // array or false
     hiddenToolbar: [], // 不展示在编辑器中的工具栏，只使用工具栏的api和快捷键功能
@@ -270,6 +290,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     // },
     customMenu: {
       customMenu_fileUpload: customMenu_fileUpload,
+      customMenuChangeModule: customMenuChangeModule
     },
     /**
      * 自定义快捷键

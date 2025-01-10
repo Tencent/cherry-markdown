@@ -7,6 +7,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cherry Markdown Client</title>
   <style>
+    .markdown-preview-only .cherry-toolbar {
+      display: none;
+    }
+
+    .markdown-preview-only .cherry-sidebar {
+      display: block !important;
+      top: 0 !important;
+      padding-top: 33px !important;
+      height: auto !important;
+    }
+
+    .markdown-preview-only .cherry-editor {
+      display: none;
+    }
+
+    .markdown-preview-only .cherry-previewer {
+      width: 100% !important;
+      max-height: 100% !important;
+      display: block !important;
+    }
+  </style>
+  <style>
     body {
       margin: 0;
       padding: 0;
