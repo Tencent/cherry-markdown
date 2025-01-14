@@ -96,7 +96,6 @@
     "codemirror": "5.58.2",
     "core-js-pure": "^3.8.2",
     "cross-env": "^7.0.2",
-    "cz-customizable": "^6.2.0",
     "dom-parser": "^0.1.6",
     "dompurify": "^3.0.8",
     "es-check": "^7.1.1",
@@ -109,7 +108,6 @@
     "jest": "^27.5.1",
     "jest-diff": "^27.5.1",
     "juice": "^8.0.0",
-    "lint-staged": "~12.5.0",
     "lodash": "^4.17.20",
     "mitt": "^3.0.0",
     "npm-run-all": "^4.1.5",
@@ -151,9 +149,6 @@
   },
   "optionalDependencies": {
     "mermaid": "9.4.3"
-  },
-  "lint-staged": {
-    "*.js": "eslint --fix"
   },
   "engines": {
     "node": ">=14"

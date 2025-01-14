@@ -31,7 +31,12 @@
     "@typescript-eslint/eslint-plugin": "^4.27.0",
     "@typescript-eslint/parser": "^4.27.0",
     "babel-eslint": "^10.1.0",
+    "lint-staged": "~12.5.0",
+    "cz-customizable": "^6.2.0",
     "@babel/eslint-parser": "^7.12.1"
+  },
+  "lint-staged": {
+    "*.js": "eslint --fix"
   },
   "config": {
     "commitizen": {
