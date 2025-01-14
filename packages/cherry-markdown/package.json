@@ -149,7 +149,8 @@
     "@types/codemirror": "^0.0.108",
     "@types/dompurify": "^2.2.3",
     "crypto-js": "^4.2.0",
-    "jsdom": "~19.0.0"
+    "jsdom": "~19.0.0",
+    "ws": "^8.18.0"
   },
   "resolutions": {
     "glob-parent": "5.1.2",
@@ -160,7 +161,6 @@
     "ansi-regex": "5.0.1",
     "glob-watcher": "6.0.0"
   },
-
   "optionalDependencies": {
     "mermaid": "9.4.3"
   },
