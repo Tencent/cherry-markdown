@@ -97,7 +97,6 @@
     "babel-plugin-prismjs": "^2.1.0",
     "cm-search-replace": "^1.0.0",
     "codemirror": "5.58.2",
-    "commitizen": "^4.0.5",
     "core-js-pure": "^3.8.2",
     "cross-env": "^7.0.2",
     "cz-customizable": "^6.2.0",
@@ -161,11 +160,7 @@
     "ansi-regex": "5.0.1",
     "glob-watcher": "6.0.0"
   },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-customizable"
-    }
-  },
+
   "optionalDependencies": {
     "mermaid": "9.4.3"
   },

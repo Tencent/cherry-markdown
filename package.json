@@ -16,5 +16,13 @@
   "scripts": {},
   "engines": {
     "node": ">=16"
+  },
+  "devDependencies": {
+    "commitizen": "^4.0.5"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-customizable"
+    }
   }
 }
