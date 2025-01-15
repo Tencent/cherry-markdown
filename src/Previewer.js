@@ -25,7 +25,7 @@ import { exportPDF, exportScreenShot, exportMarkdownFile, exportHTMLFile } from 
 import PreviewerBubble from './toolbars/PreviewerBubble';
 import LazyLoadImg from '@/utils/lazyLoadImg';
 
-let onScroll = () => {}; // store in memory for remove event
+let onScroll = () => { }; // store in memory for remove event
 
 /**
  * 作用：
@@ -97,13 +97,13 @@ export default class Previewer {
         // 针对加载失败的图片 或 beforeLoadOneImgCallback 返回false 的图片，最多尝试加载几次，为了防止死循环，最多5次。以图片的src为纬度统计重试次数
         maxTryTimesPerSrc: 2,
         // 加载一张图片之前的回调函数，函数return false 会终止加载操作
-        beforeLoadOneImgCallback: (img) => {},
+        beforeLoadOneImgCallback: (img) => { },
         // 加载一张图片失败之后的回调函数
-        failLoadOneImgCallback: (img) => {},
+        failLoadOneImgCallback: (img) => { },
         // 加载一张图片之后的回调函数，如果图片加载失败，则不会回调该函数
-        afterLoadOneImgCallback: (img) => {},
+        afterLoadOneImgCallback: (img) => { },
         // 加载完所有图片后调用的回调函数
-        afterLoadAllImgCallback: () => {},
+        afterLoadAllImgCallback: () => { },
       },
     };
 
@@ -947,23 +947,108 @@ export default class Previewer {
   scrollToId(id, behavior = 'smooth') {
     const previewDom = this.getDomContainer();
     const scrollDom = this.getDomCanScroll(previewDom);
+    // 设置未加载图片的默认尺寸
+    const images = previewDom.getElementsByTagName('img');
+    const modifiedImages = new Set(); // 记录被修改过样式的图片
+    let isDealScroll = false;
+    Array.from(images).forEach((img) => {
+      if (!img.hasAttribute('width') && !img.hasAttribute('height') && !img.style.width && !img.style.height) {
+        img.style.minHeight = '200px';
+        img.style.aspectRatio = '16/9';
+        modifiedImages.add(img);
+      }
+    });
+
     let $id = id.replace(/^\s*#/, '').trim();
     $id = /[%:]/.test($id) ? $id : encodeURIComponent($id);
     const target = previewDom.querySelector(`[id="${$id}"]`) ?? false;
     if (target === false) {
       return false;
     }
+
     let scrollTop = 0;
     if (scrollDom.nodeName === 'HTML') {
       scrollTop = scrollDom.scrollTop + target.getBoundingClientRect().y - 20;
     } else {
       scrollTop = scrollDom.scrollTop + target.getBoundingClientRect().y - scrollDom.getBoundingClientRect().y - 20;
     }
+
+    // 创建一个函数来清理图片样式并重新滚动
+    const cleanupAndScroll = () => {
+      // 先清理样式
+      modifiedImages.forEach((img) => {
+        img.style.minHeight = '';
+        img.style.aspectRatio = '';
+      });
+      modifiedImages.clear();
+
+      // 重新计算位置并滚动
+      let newScrollTop = 0;
+      if (scrollDom.nodeName === 'HTML') {
+        newScrollTop = scrollDom.scrollTop + target.getBoundingClientRect().y - 10;
+      } else {
+        newScrollTop =
+          scrollDom.scrollTop + target.getBoundingClientRect().y - scrollDom.getBoundingClientRect().y - 10;
+      }
+      // 如果位置有变化，使用instant行为重新滚动
+      if (Math.abs(newScrollTop - scrollTop) > 5) {
+        scrollDom.scrollTo({
+          top: newScrollTop,
+          left: 0,
+          behavior: 'instant',
+        });
+      }
+    };
+
+    // 监听滚动结束事件
+    const handleScrollEnd = () => {
+      if (isDealScroll) {
+        return;
+      }
+      isDealScroll = true;
+      // 移除滚动事件监听器
+      scrollDom.removeEventListener('scrollend', handleScrollEnd);
+      // 等待一小段时间确保图片开始加载
+      setTimeout(() => {
+        // 获取所有修改过的图片的加载状态
+        const imageLoadPromises = Array.from(modifiedImages).map((img) => {
+          if (img.complete) return Promise.resolve();
+          return new Promise((resolve) => {
+            const onLoad = () => {
+              img.removeEventListener('load', onLoad);
+              img.removeEventListener('error', onLoad);
+              resolve();
+            };
+            img.addEventListener('load', onLoad);
+            img.addEventListener('error', onLoad);
+          });
+        });
+
+        // 等待所有图片加载完成后再清理样式
+        Promise.all(imageLoadPromises).then(() => {
+          // 使用 requestAnimationFrame 确保在下一帧渲染时处理
+          requestAnimationFrame(cleanupAndScroll);
+        });
+      }, 100);
+    };
+
+    // 添加滚动结束事件监听器
+    scrollDom.addEventListener('scrollend', handleScrollEnd);
+
+    // 如果浏览器不支持 scrollend 事件，使用 setTimeout 作为后备方案
+    setTimeout(() => {
+      scrollDom.removeEventListener('scrollend', handleScrollEnd);
+      handleScrollEnd();
+    }, 1000);
+
+    // 开始滚动
     scrollDom.scrollTo({
       top: scrollTop,
       left: 0,
       behavior,
     });
+
+    return true;
   }
 
   /**
