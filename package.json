@@ -1,6 +1,5 @@
 {
   "name": "@cherry-markdown/workspaces",
-  "version": "0.1.0",
   "description": "a new markdown editor",
   "repository": {
     "type": "git",

@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.58](https://github.com/Tencent/cherry-markdown/compare/v0.8.57...v0.8.58) (2025-01-13)
+
+
+### Features
+
+* [#947](https://github.com/Tencent/cherry-markdown/issues/947) urlProcessor支持第三个参数，第三个参数为回调函数 ([05c6cab](https://github.com/Tencent/cherry-markdown/commit/05c6cab6383e3d56ccaedcfc1966528a088ece41))
+* **client:** 导入 *.md 文件时默认启用预览效果，导航栏显示控制 ([#1022](https://github.com/Tencent/cherry-markdown/issues/1022)) ([dfb16fe](https://github.com/Tencent/cherry-markdown/commit/dfb16fed0d2166adfcd27346ce8972173c9d2594))
+
+
+### Bug Fixes
+
+* [#1014](https://github.com/Tencent/cherry-markdown/issues/1014) 修复engine.makeHtml报错的问题 ([5a5e8f9](https://github.com/Tencent/cherry-markdown/commit/5a5e8f9fb7d14a0cfaa7dd1e1366598e3e6d51ae))
+* 去掉github特殊语法高亮 ([fd13e45](https://github.com/Tencent/cherry-markdown/commit/fd13e45d22495c55d62f6835a3c5ba52e4220093))
+* **type:** `insert` api's `normal-table-row*col` type constraints ([#1019](https://github.com/Tencent/cherry-markdown/issues/1019)) ([c7217f0](https://github.com/Tencent/cherry-markdown/commit/c7217f045c5c3a1b03a0764028c5030f7375e0b5))
+
 ### [0.8.57](https://github.com/Tencent/cherry-markdown/compare/v0.8.56...v0.8.57) (2024-12-23)
 
 
