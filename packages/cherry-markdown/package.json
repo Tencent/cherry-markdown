@@ -1,7 +1,7 @@
 {
   "name": "cherry-markdown",
   "license": "Apache-2.0",
-  "version": "0.8.57",
+  "version": "0.8.58",
   "description": "a new markdown editor",
   "repository": {
     "type": "git",
@@ -149,8 +149,5 @@
   },
   "optionalDependencies": {
     "mermaid": "9.4.3"
-  },
-  "engines": {
-    "node": ">=14"
   }
 }

@@ -1,5 +1,4 @@
 {
-
   "name": "@cherry-markdown/workspaces",
   "description": "a new markdown editor",
   "repository": {
@@ -14,13 +13,13 @@
     "examples/*"
   ],
   "scripts": {},
-  "engines": {
-    "node": ">=16"
-  },
   "devDependencies": {
-    "husky": "~7.0.4",
+    "@babel/eslint-parser": "^7.12.1",
+    "@typescript-eslint/eslint-plugin": "^4.27.0",
+    "@typescript-eslint/parser": "^4.27.0",
+    "babel-eslint": "^10.1.0",
     "commitizen": "^4.0.5",
-    "prettier": "2.6.2",
+    "cz-customizable": "^6.2.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-config-tencent": "^1.0.2",
@@ -28,20 +27,21 @@
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jest": "^25.3.0",
     "eslint-plugin-prettier": "^4.0.0",
-    "@typescript-eslint/eslint-plugin": "^4.27.0",
-    "@typescript-eslint/parser": "^4.27.0",
-    "babel-eslint": "^10.1.0",
+    "husky": "~7.0.4",
     "lint-staged": "~12.5.0",
-    "cz-customizable": "^6.2.0",
-    "@babel/eslint-parser": "^7.12.1"
+    "prettier": "2.6.2"
   },
   "lint-staged": {
     "*.js": "eslint --fix"
   },
+  "dependencies": {},
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-customizable"
     }
   },
-  "dependencies": {}
+  "engines": {
+    "node": ">=18 <19",
+    "yarn": "^1.22.22"
+  }
 }
