@@ -1,18 +1,18 @@
 {
-  "$schema": "https://schema.tauri.app/config/2.0.0",
+  "$schema": "https://schema.tauri.app/config/2",
   "productName": "cherry-markdown",
   "version": "0.1.0",
-  "identifier": "cherry-markdown",
+  "identifier": "com.cherry-markdown.app",
   "build": {
-    "beforeDevCommand": "pnpm dev",
+    "beforeDevCommand": "yarn dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm build",
+    "beforeBuildCommand": "yarn build",
     "frontendDist": "../dist"
   },
   "app": {
     "windows": [
       {
-        "title": "cherry-markdown",
+        "title": "Cherry Markdown",
         "width": 800,
         "height": 600
       }

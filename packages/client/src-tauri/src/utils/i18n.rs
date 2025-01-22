@@ -29,7 +29,6 @@ pub struct Language {
     pub save_as: BilingualMenuItem,
     pub quit: BilingualMenuItem,
     pub language: BilingualMenuItem,
-    pub open_cherry_markdown: BilingualMenuItem,
     pub setting: BilingualMenuItem,
     pub show_toolbar: BilingualMenuItem,
 }
@@ -44,10 +43,6 @@ impl Language {
             save_as: BilingualMenuItem::new("Save As...", "另存为..."),
             quit: BilingualMenuItem::new("Quit", "退出"),
             language: BilingualMenuItem::new("Language", "语言"),
-            open_cherry_markdown: BilingualMenuItem::new(
-                "Open Cherry Markdown",
-                "打开 Cherry Markdown",
-            ),
             setting: BilingualMenuItem::new("Setting", "设置"),
             show_toolbar: BilingualMenuItem::new("Show Toolbar", "显示工具栏"),
         }
