@@ -16,7 +16,7 @@
     "@tauri-apps/plugin-dialog": "^2.0.0",
     "@tauri-apps/plugin-fs": "2.2.0",
     "pinia": "^2.2.4",
-    "cherry-markdown": "workspace:*"
+    "cherry-markdown": "*"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",

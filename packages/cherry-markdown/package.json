@@ -12,7 +12,6 @@
   "style": "./dist/cherry-markdown.min.css",
   "types": "./dist/types/index.d.ts",
   "directories": {
-    "doc": "docs",
     "example": "examples"
   },
   "files": [
