@@ -1,9 +1,10 @@
-## 发布插件
-```
+# 发布插件
+
+```bash
 // 安装vsce
 npm install -g @vscode/vsce
 // 登录
-vsce login cherryMarkdownPublisher
+vsce login CherryMarkdown
 // 根据提示输入token
 // token在这里：https://dev.azure.com/cherry-markdown/_usersSettings/tokens
 cd ./vscodePlugin
