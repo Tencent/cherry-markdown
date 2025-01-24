@@ -15,10 +15,9 @@
   "scripts": {
     "dev": "yarn workspace cherry-markdown dev",
     "build": "yarn workspace cherry-markdown build",
-    "dev:client": "yarn workspace @cherry-markdown/client dev",
-    "build:client": "yarn workspace @cherry-markdown/client build",
-    "preview:client": "yarn workspace @cherry-markdown/client preview",
-    "tauri:client": "yarn workspace @cherry-markdown/client tauri"
+    "postbuild": "tsx scripts/post-build.ts",
+    "dev:client": "yarn workspace @cherry-markdown/client tauri dev",
+    "build:client": "yarn workspace @cherry-markdown/client tauri build"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.12.1",
@@ -36,7 +35,9 @@
     "eslint-plugin-prettier": "^4.0.0",
     "husky": "~7.0.4",
     "lint-staged": "~12.5.0",
-    "prettier": "2.6.2"
+    "prettier": "2.6.2",
+    "tsx": "^4.19.2",
+    "typescript": "5.7.3"
   },
   "lint-staged": {
     "*.js": "eslint --fix"
