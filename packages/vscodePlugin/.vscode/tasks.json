@@ -4,11 +4,12 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "yarn:watch",
 			"type": "npm",
 			"script": "watch",
 			"problemMatcher": [
-                "$ts-webpack-watch",
-                "$tslint-webpack-watch"
+				"$tsc-watch",
+				"$eslint-compact"
 			],
 			"isBackground": true,
 			"presentation": {
@@ -18,16 +19,6 @@
 				"kind": "build",
 				"isDefault": true
 			}
-		},
-		{
-			"type": "npm",
-			"script": "test-watch",
-			"problemMatcher": "$tsc-watch",
-			"isBackground": true,
-			"presentation": {
-				"reveal": "never"
-			},
-			"group": "build"
 		}
 	]
 }
