@@ -17,15 +17,15 @@
     "build": "yarn workspace cherry-markdown build",
     "postbuild": "tsx scripts/post-build.ts",
     "dev:client": "yarn workspace @cherry-markdown/client tauri dev",
-    "build:client": "yarn workspace @cherry-markdown/client tauri build"
+    "build:client": "yarn workspace @cherry-markdown/client tauri build",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.12.1",
     "@typescript-eslint/eslint-plugin": "^4.27.0",
     "@typescript-eslint/parser": "^4.27.0",
     "babel-eslint": "^10.1.0",
-    "commitizen": "^4.0.5",
-    "cz-customizable": "^6.2.0",
+    "commitlint": "^19.6.1",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-config-tencent": "^1.0.2",
@@ -33,21 +33,17 @@
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jest": "^25.3.0",
     "eslint-plugin-prettier": "^4.0.0",
-    "husky": "~7.0.4",
+    "husky": "~9.1.7",
     "lint-staged": "~12.5.0",
     "prettier": "2.6.2",
     "tsx": "^4.19.2",
-    "typescript": "5.7.3"
+    "typescript": "5.7.3",
+    "@commitlint/config-conventional": "^19.6.0"
   },
   "lint-staged": {
     "*.js": "eslint --fix"
   },
   "dependencies": {},
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-customizable"
-    }
-  },
   "engines": {
     "node": ">=18",
     "yarn": "^1.22.22"

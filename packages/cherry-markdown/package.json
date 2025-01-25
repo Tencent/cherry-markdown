@@ -50,9 +50,7 @@
     "lint": "...",
     "lint:fix": "yarn lint --fix",
     "lint:ci": "eslint --max-warnings=0 --ext .js .",
-    "commit": "./node_modules/cz-customizable/standalone.js",
     "release": "standard-version",
-    "prepare": "husky install",
     "publish": "git push --follow-tags origin main",
     "examples": "serve -p 3000 ."
   },
