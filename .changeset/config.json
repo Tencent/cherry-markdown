@@ -7,5 +7,7 @@
   "access": "restricted",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@cherry-markdown/cherry-markdown-publish"]
+  "ignore": [
+    "@cherry-markdown/*_demo"
+  ]
 }
