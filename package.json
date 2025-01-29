@@ -13,12 +13,14 @@
     "examples/*"
   ],
   "scripts": {
+    "prepare": "husky",
     "dev": "yarn workspace cherry-markdown dev",
     "build": "yarn workspace cherry-markdown build",
     "postbuild": "tsx scripts/post-build.ts",
     "dev:client": "yarn workspace @cherry-markdown/client tauri dev",
     "build:client": "yarn workspace @cherry-markdown/client tauri build",
-    "prepare": "husky"
+    "example:react": "yarn workspace @cherry-markdown/react_demo dev",
+    "example:vue": "yarn workspace  @cherry-markdown/client dev"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.12.1",
