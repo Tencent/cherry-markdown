@@ -2,7 +2,6 @@
 
 # Cherry Markdown Writer
 
-
 [![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
 
 English | [简体中文](./README.CN.md) | [日本語](./README.JP.md)
