@@ -25,7 +25,7 @@ import { exportPDF, exportScreenShot, exportMarkdownFile, exportHTMLFile } from 
 import PreviewerBubble from './toolbars/PreviewerBubble';
 import LazyLoadImg from '@/utils/lazyLoadImg';
 
-let onScroll = () => { }; // store in memory for remove event
+let onScroll = () => {}; // store in memory for remove event
 
 /**
  * 作用：
@@ -97,13 +97,13 @@ export default class Previewer {
         // 针对加载失败的图片 或 beforeLoadOneImgCallback 返回false 的图片，最多尝试加载几次，为了防止死循环，最多5次。以图片的src为纬度统计重试次数
         maxTryTimesPerSrc: 2,
         // 加载一张图片之前的回调函数，函数return false 会终止加载操作
-        beforeLoadOneImgCallback: (img) => { },
+        beforeLoadOneImgCallback: (img) => {},
         // 加载一张图片失败之后的回调函数
-        failLoadOneImgCallback: (img) => { },
+        failLoadOneImgCallback: (img) => {},
         // 加载一张图片之后的回调函数，如果图片加载失败，则不会回调该函数
-        afterLoadOneImgCallback: (img) => { },
+        afterLoadOneImgCallback: (img) => {},
         // 加载完所有图片后调用的回调函数
-        afterLoadAllImgCallback: () => { },
+        afterLoadAllImgCallback: () => {},
       },
     };
 
