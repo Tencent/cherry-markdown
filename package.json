@@ -14,13 +14,14 @@
   ],
   "scripts": {
     "prepare": "husky",
+    "changeset": "npx @changesets/cli",
+    "changeset-version": "npx @changesets/cli version",
     "dev": "yarn workspace cherry-markdown dev",
     "build": "yarn workspace cherry-markdown build",
     "postbuild": "tsx scripts/post-build.ts",
     "dev:client": "yarn workspace @cherry-markdown/client tauri dev",
     "build:client": "yarn workspace @cherry-markdown/client tauri build",
-    "example:react": "yarn workspace @cherry-markdown/react_demo dev",
-    "example:vue": "yarn workspace  @cherry-markdown/client dev"
+    "example:react": "yarn workspace @cherry-markdown/react_demo dev"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.12.1",
