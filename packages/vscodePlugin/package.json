@@ -198,12 +198,13 @@
   "dependencies": {
     "@types/mathjax": "0.0.37",
     "axios": "^1.4.0",
+    "cherry-markdown": "*",
     "eslint-config-tencent": "^1.0.4",
+    "html-to-image": "^1.11.11",
     "katex": "^0.16.4",
     "mathjax": "^3.2.2",
     "md5": "^2.3.0",
     "path-browserify": "^1.0.1",
-    "xmldom-sre": "^0.1.31",
-    "cherry-markdown": "*"
+    "xmldom-sre": "^0.1.31"
   }
 }
