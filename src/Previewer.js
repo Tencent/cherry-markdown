@@ -967,10 +967,11 @@ export default class Previewer {
     }
 
     let scrollTop = 0;
+
     if (scrollDom.nodeName === 'HTML') {
-      scrollTop = scrollDom.scrollTop + target.getBoundingClientRect().y - 20;
+      scrollTop = scrollDom.scrollTop + target.getBoundingClientRect().y - 10;
     } else {
-      scrollTop = scrollDom.scrollTop + target.getBoundingClientRect().y - scrollDom.getBoundingClientRect().y - 20;
+      scrollTop = scrollDom.scrollTop + target.getBoundingClientRect().y - scrollDom.getBoundingClientRect().y - 10;
     }
 
     // 创建一个函数来清理图片样式并重新滚动
@@ -1104,21 +1105,9 @@ export default class Previewer {
 
   scrollToHeadByIndex(index) {
     const previewDom = this.getDomContainer();
-    const scrollDom = this.getDomCanScroll(previewDom);
     const targetHead = previewDom.querySelectorAll('h1,h2,h3,h4,h5,h6,h7,h8')[index] ?? false;
-    let scrollTop = 0;
     if (targetHead !== false) {
-      if (scrollDom.nodeName === 'HTML') {
-        scrollTop = scrollDom.scrollTop + targetHead.getBoundingClientRect().y - 10;
-      } else {
-        scrollTop =
-          scrollDom.scrollTop + targetHead.getBoundingClientRect().y - scrollDom.getBoundingClientRect().y - 10;
-      }
-      scrollDom.scrollTo({
-        top: scrollTop,
-        left: 0,
-        behavior: 'smooth',
-      });
+      this.scrollToId(targetHead.id);
     }
   }
 
