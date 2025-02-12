@@ -1,6 +1,5 @@
 import Cherry from 'cherry-markdown';
 import { CherryOptions } from 'cherry-markdown/types/cherry';
-import { onUpdated } from 'vue';
 import { previewOnlySidebar } from '../utils';
 
 type CustomConfig = {
@@ -251,8 +250,6 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       '|',
       'list',
       'panel',
-      // 'justify', // 对齐方式，默认不推荐这么“复杂”的样式要求
-      "customMenu_fileUpload",
       'detail',
       {
         customMenu_fileUpload: [
@@ -273,6 +270,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
         ],
       },
       'graph',
+      'export',
       'settings',
     ],
     toolbarRight: [],
@@ -449,11 +447,3 @@ export const cherryInstance = (() => {
     return _cherryInstance;
   };
 })();
-
-onUpdated(() => {
-  // 避免开发环境下重复创建实例
-  if (!import.meta.env.PROD) {
-    console.log('cherry updated');
-    cherryInstance().destroy();
-  }
-});
