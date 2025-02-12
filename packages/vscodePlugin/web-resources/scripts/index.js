@@ -1,5 +1,6 @@
 import 'mathjax/es5/tex-svg.js';
-import path from 'path-browserify';
+import { toPng } from 'html-to-image';
+
 // import md5 from 'md5';
 
 /**
@@ -35,6 +36,37 @@ const customMenuChangeModule = Cherry.createMenuHook('编辑', {
 // eslint-disable-next-line no-undef
 const customMenuFont = Cherry.createMenuHook('字体样式', {
   iconName: 'font',
+});
+
+// eslint-disable-next-line no-undef
+const customMenuExport = Cherry.createMenuHook('保存', {
+  iconName: 'export',
+  subMenuConfig: [
+    { noIcon: true, name: '保存为 PNG', onclick: () => {
+      const cherrymarkdown = document.querySelector('.cherry-previewer');
+      if (!cherrymarkdown) {
+        vscode.postMessage({
+          type: 'export-png',
+          data: 'export-fail',
+        });
+      }
+      toPng(cherrymarkdown)
+        .then((dataUrl) => {
+          console.log(dataUrl);
+          vscode.postMessage({
+            type: 'export-png',
+            data: dataUrl,
+          });
+        })
+        .catch((error) => {
+          console.error('toPng error:', error);
+          vscode.postMessage({
+            type: 'export-png',
+            data: 'export-fail',
+          });
+        });
+    } },
+  ],
 });
 
 // eslint-disable-next-line no-undef
@@ -189,10 +221,12 @@ const basicConfig = {
       'mobilePreview',
       'copy',
       'theme',
+      'customMenuExport',
     ],
     customMenu: {
       customMenuChangeModule,
       customMenuFont,
+      customMenuExport,
     },
     toc: true,
   },

@@ -223,6 +223,32 @@ const initCherryPanelEvent = () => {
         vscode.commands.executeCommand('vscode.open', uri, { preview: true });
         break;
       }
+      case 'export-png': {
+        if (data === 'export-fail') {
+          vscode.window.showErrorMessage('导出错误，请重新尝试');
+          return;
+        }
+
+        const uri = await vscode.window.showSaveDialog({
+          filters: {
+            Images: ['png'],
+          },
+          saveLabel: '保存截图',
+        });
+
+        // 如果用户选择了保存路径
+        if (uri) {
+          // 去掉 Base64 前缀
+          const base64Data = data.replace(/^data:image\/png;base64,/, '');
+          // 将 Base64 数据转换为 Buffer
+          const buffer = Buffer.from(base64Data, 'base64');
+          await vscode.workspace.fs.writeFile(uri, buffer);
+          vscode.window.showInformationMessage('Image saved successfully!');
+        } else {
+          vscode.window.showWarningMessage('Save cancelled.');
+        }
+        break;
+      }
     }
   });
   cherryPanel?.onDidDispose(() => {
