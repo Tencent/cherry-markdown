@@ -183,14 +183,30 @@ export default class Toolbar {
   }
 
   setSubMenuPosition(menuObj, subMenuObj) {
-    const pos = menuObj.getMenuPosition();
-    subMenuObj.style.left = `${pos.left + pos.width / 2}px`;
-    subMenuObj.style.top = `${pos.top + pos.height}px`;
-    subMenuObj.style.position = menuObj.positionModel;
+    const updatePosition = () => {
+      const pos = menuObj.getMenuPosition();
+      subMenuObj.style.left = `${pos.left + pos.width / 2}px`;
+      subMenuObj.style.top = `${pos.top + pos.height}px`;
+      subMenuObj.style.position = menuObj.positionModel;
+    };
+    updatePosition();
+    if (!this.resizeHandlers) {
+      this.resizeHandlers = new Set();
+    }
+    const handler = () => requestAnimationFrame(updatePosition);
+    this.resizeHandlers.add(handler);
+    window.addEventListener('resize', handler);
+    subMenuObj.cleanup = () => {
+      window.removeEventListener('resize', handler);
+      this.resizeHandlers.delete(handler);
+    };
   }
 
   drawSubMenus(name) {
     this.subMenus[name] = createElement('div', 'cherry-dropdown', { name });
+    if (this.subMenus[name]?.cleanup) {
+      this.subMenus[name].cleanup();
+    }
     this.setSubMenuPosition(this.menus.hooks[name], this.subMenus[name]);
     // 如果有配置的二级菜单
     const level2MenusName = this.isHasLevel2Menu(name);
