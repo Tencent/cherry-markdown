@@ -953,8 +953,8 @@ export default class Previewer {
     let isDealScroll = false;
     Array.from(images).forEach((img) => {
       if (!img.hasAttribute('width') && !img.hasAttribute('height') && !img.style.width && !img.style.height) {
-        img.style.minHeight = '200px';
-        img.style.aspectRatio = '16/9';
+        // img.style.minHeight = '200px';
+        // img.style.aspectRatio = '16/9';
         modifiedImages.add(img);
       }
     });
@@ -976,10 +976,10 @@ export default class Previewer {
 
     // 创建一个函数来清理图片样式并重新滚动
     const cleanupAndScroll = () => {
-      modifiedImages.forEach((img) => {
-        img.style.minHeight = '';
-        img.style.aspectRatio = '';
-      });
+      // modifiedImages.forEach((img) => {
+      //   img.style.minHeight = '';
+      //   img.style.aspectRatio = '';
+      // });
       modifiedImages.clear();
 
       // 重新计算位置并滚动
