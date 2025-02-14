@@ -143,6 +143,7 @@ export default class Previewer {
     // 创建一个新的 ResizeObserver 实例
     const resizeObserver = new ResizeObserver(() => {
       this.syncVirtualLayoutFromReal();
+      this.$cherry.sidebar.updateSubMenuPosition();
     });
     // 开始监听元素
     resizeObserver.observe(this.$cherry.wrapperDom);

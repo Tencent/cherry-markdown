@@ -80,6 +80,7 @@ export default class Toolbar {
     this.shortcutKeyMap = {};
     // 存储所有二级菜单面板
     this.subMenus = {};
+    this.currentActiveSubMenu = null;
     // 默认的菜单配置
     this.options = {
       dom: document.createElement('div'),
@@ -183,30 +184,14 @@ export default class Toolbar {
   }
 
   setSubMenuPosition(menuObj, subMenuObj) {
-    const updatePosition = () => {
-      const pos = menuObj.getMenuPosition();
-      subMenuObj.style.left = `${pos.left + pos.width / 2}px`;
-      subMenuObj.style.top = `${pos.top + pos.height}px`;
-      subMenuObj.style.position = menuObj.positionModel;
-    };
-    updatePosition();
-    if (!this.resizeHandlers) {
-      this.resizeHandlers = new Set();
-    }
-    const handler = () => requestAnimationFrame(updatePosition);
-    this.resizeHandlers.add(handler);
-    window.addEventListener('resize', handler);
-    subMenuObj.cleanup = () => {
-      window.removeEventListener('resize', handler);
-      this.resizeHandlers.delete(handler);
-    };
+    const pos = menuObj.getMenuPosition();
+    subMenuObj.style.left = `${pos.left + pos.width / 2}px`;
+    subMenuObj.style.top = `${pos.top + pos.height}px`;
+    subMenuObj.style.position = menuObj.positionModel;
   }
 
   drawSubMenus(name) {
     this.subMenus[name] = createElement('div', 'cherry-dropdown', { name });
-    if (this.subMenus[name]?.cleanup) {
-      this.subMenus[name].cleanup();
-    }
     this.setSubMenuPosition(this.menus.hooks[name], this.subMenus[name]);
     // 如果有配置的二级菜单
     const level2MenusName = this.isHasLevel2Menu(name);
@@ -273,6 +258,11 @@ export default class Toolbar {
       item.classList.toggle('cherry-dropdown-item__selected', i === index);
     });
   }
+  updateSubMenuPosition() {
+    if (this.currentActiveSubMenu && this.subMenus[this.currentActiveSubMenu]) {
+      this.setSubMenuPosition(this.menus.hooks[this.currentActiveSubMenu], this.subMenus[this.currentActiveSubMenu]);
+    }
+  }
 
   /**
    * 展开/收起二级菜单
@@ -284,6 +274,7 @@ export default class Toolbar {
       this.drawSubMenus(name);
       this.subMenus[name].style.display = 'block';
       this.activeSubMenuItem(name);
+      this.currentActiveSubMenu = name;
       return;
     }
     if (this.subMenus[name].style.display === 'none') {
@@ -292,9 +283,11 @@ export default class Toolbar {
       this.subMenus[name].style.display = 'block';
       this.setSubMenuPosition(this.menus.hooks[name], this.subMenus[name]);
       this.activeSubMenuItem(name);
+      this.currentActiveSubMenu = name;
     } else {
       // 如果是显示的，则隐藏当前二级菜单
       this.subMenus[name].style.display = 'none';
+      this.currentActiveSubMenu = null;
     }
   }
 
@@ -302,6 +295,7 @@ export default class Toolbar {
    * 隐藏所有的二级菜单
    */
   hideAllSubMenu() {
+    this.currentActiveSubMenu = null;
     this.$cherry.wrapperDom.querySelectorAll('.cherry-dropdown').forEach((dom) => {
       dom.style.display = 'none';
     });
