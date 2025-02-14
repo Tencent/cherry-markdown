@@ -19,10 +19,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
-        run: yarn
+        run: |
+          yarn
+          yarn build
 
       - name: Check for changesets
         id: changesets
@@ -38,23 +40,22 @@ jobs:
       - name: Publish cherry-markdown
         if: ${{ contains(steps.changesets.outputs.publishedPackages, '"name":"cherry-markdown"') }}
         run: |
-            yarn build
-            cd packages/cherry-markdown
-            npm publish --access public
+          cd packages/cherry-markdown
+          npm publish --access public
         env:
-            NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-            NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-  
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Publish VSCode Extension
         if: ${{ contains(steps.changesets.outputs.publishedPackages, '"name":"@cherry-markdown/vscode-plugin"') }}
         run: |
-            yarn build
-            npm install -g vsce
-            cd packages/vscodePlugin
-            vsce package
-            vsce publish
+          npm install -g vsce
+          cd packages/vscodePlugin
+          jq '.name="cherry-markdown"' package.json > temp.json && mv temp.json package.json
+          vsce package
+          vsce publish
         env:
-            VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
       - name: client_version Output
         id: extract_client_version
@@ -69,4 +70,4 @@ jobs:
     if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"@cherry-markdown/client"') }}
     uses: ./.github/workflows/build-client-release.yaml
     with:
-        client_version: ${{ needs.release.outputs.publishedClientVersion }}
+      client_version: ${{ needs.release.outputs.publishedClientVersion }}
