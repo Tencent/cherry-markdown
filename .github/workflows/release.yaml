@@ -49,7 +49,7 @@ jobs:
       - name: Publish VSCode Extension
         if: ${{ contains(steps.changesets.outputs.publishedPackages, '"name":"@cherry-markdown/vscode-plugin"') }}
         run: |
-          jq ".workspaces = [\"examples/cherry-markdown\", \"examples/client\"]" package.json > workspaces.json && mv workspaces.json package.json
+          jq ".workspaces = [\"packages/cherry-markdown\", \"packages/client\", \"examples/*\"]" package.json > workspaces.json && mv workspaces.json package.json
           npm install -g vsce
           cd packages/vscodePlugin
           yarn
