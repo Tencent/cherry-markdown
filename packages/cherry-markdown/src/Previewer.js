@@ -151,7 +151,9 @@ export default class Previewer {
 
   subMenusPositionChange() {
     ['toolbar', 'sidebar', 'toolbarRight'].forEach((toolbarName) => {
-      this.$cherry[toolbarName].updateSubMenuPosition();
+      if (this.$cherry[toolbarName]) {
+        this.$cherry[toolbarName].updateSubMenuPosition();
+      }
     });
   }
 
