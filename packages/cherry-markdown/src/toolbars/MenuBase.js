@@ -301,15 +301,28 @@ export default class MenuBase {
       // 判断是不是多选
       this.isSelections = selections.length > 1;
       // 当onClick返回null、undefined、false时，维持原样
-      const ret = selections.map(
+      const results = selections.map(
         (selection, index, srcArray) => this.onClick(selection, shortKey, event) || srcArray[index],
       );
-
       if (!this.bubbleMenu && this.updateMarkdown) {
-        // 非下拉菜单按钮保留selection
-        this.editor.editor.replaceSelections(ret, 'around');
-        this.editor.editor.focus();
-        this.$afterClick();
+        const hasPromise = results.some((result) => result instanceof Promise);
+        if (hasPromise) {
+          // 非下拉菜单按钮保留selection
+          Promise.all(results.map((result) => (result instanceof Promise ? result : Promise.resolve(result)))).then(
+            (resolvedResults) => {
+              const safeResults = resolvedResults.map((result, index) =>
+                result === undefined || result === null ? selections[index] : String(result),
+              );
+              this.editor.editor.replaceSelections(safeResults, 'around');
+              this.editor.editor.focus();
+              this.$afterClick();
+            },
+          );
+        } else {
+          this.editor.editor.replaceSelections(results, 'around');
+          this.editor.editor.focus();
+          this.$afterClick();
+        }
       }
     }
   }
