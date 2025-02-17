@@ -302,6 +302,10 @@ $mdSvgTextColor: rgb(250, 160, 0);
       list-style: upper-roman;
     }
   
+    &.cherry-list__lower-alpha {
+      list-style: lower-alpha;
+    }
+  
     &.cherry-list__lower-greek {
       list-style: lower-greek;
     }
