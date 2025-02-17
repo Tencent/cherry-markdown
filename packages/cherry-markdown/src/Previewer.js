@@ -143,9 +143,18 @@ export default class Previewer {
     // 创建一个新的 ResizeObserver 实例
     const resizeObserver = new ResizeObserver(() => {
       this.syncVirtualLayoutFromReal();
+      this.subMenusPositionChange();
     });
     // 开始监听元素
     resizeObserver.observe(this.$cherry.wrapperDom);
+  }
+
+  subMenusPositionChange() {
+    ['toolbar', 'sidebar', 'toolbarRight'].forEach((toolbarName) => {
+      if (this.$cherry[toolbarName]) {
+        this.$cherry[toolbarName].updateSubMenuPosition();
+      }
+    });
   }
 
   $initPreviewerBubble() {
