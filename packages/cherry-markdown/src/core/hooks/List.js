@@ -51,6 +51,9 @@ function handleIndent(str, node) {
 
 // 序号样式处理
 function getListStyle(m2) {
+  if (/^en-[a-z]/.test(m2)) {
+    return 'lower-alpha';
+  }
   if (/^[a-z]/.test(m2)) {
     return 'lower-greek';
   }
@@ -72,7 +75,7 @@ function getListStyle(m2) {
 // 标识符处理
 function handleMark(str, node) {
   const listRegex =
-    /^((([*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)([^\r]*?)($|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)))/;
+    /^((([*+-]|\d+[.]|en-[a-z]\.|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)([^\r]*?)($|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.]|en-[a-z]\.|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)))/;
   if (!listRegex.test(str)) {
     node.type = 'blank';
     return str;
@@ -251,9 +254,9 @@ export default class List extends ParagraphBase {
 
   rule() {
     const ret = {
-      begin: '(?:^|\n)(\n*)(([ ]{0,3}([*+-]|\\d+[.]|[a-z]\\.|[I一二三四五六七八九十]+\\.)[ \\t]+)',
+      begin: '(?:^|\n)(\n*)(([ ]{0,3}([*+-]|\\d+[.]|en-[a-z]\\.|[a-z]\\.|[I一二三四五六七八九十]+\\.)[ \\t]+)',
       content: '([^\\r]+?)',
-      end: '(~0|\\n{2,}(?=\\S)(?![ \\t]*(?:[*+-]|\\d+[.]|[a-z]\\.|[I一二三四五六七八九十]+\\.)[ \\t]+)))',
+      end: '(~0|\\n{2,}(?=\\S)(?![ \\t]*(?:[*+-]|\\d+[.]|en-[a-z]\\.|[a-z]\\.|[I一二三四五六七八九十]+\\.)[ \\t]+)))',
     };
     ret.reg = new RegExp(ret.begin + ret.content + ret.end, 'gm');
     return ret;
