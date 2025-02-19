@@ -159,5 +159,6 @@ export function handleFileUploadCallback(url, params, file) {
     type = '!';
   }
   const style = type ? handleParams(params) : '';
-  return `${type}[${name}${style}](${url})${poster}`;
+  const { before = '', after = '' } = params;
+  return `${before}${type}[${name}${style}](${url})${poster}${after}`;
 }
