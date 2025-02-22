@@ -19,6 +19,7 @@
     "dev": "yarn workspace cherry-markdown dev",
     "build": "yarn workspace cherry-markdown build",
     "postbuild": "tsx scripts/post-build.ts",
+    "lint:cherry-markdown:ci": "yarn workspace cherry-markdown lint:ci",
     "dev:client": "yarn workspace @cherry-markdown/client tauri dev",
     "build:client": "yarn workspace @cherry-markdown/client tauri build",
     "example:react": "yarn workspace @cherry-markdown/react_demo dev"
