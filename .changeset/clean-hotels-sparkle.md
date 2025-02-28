@@ -2,4 +2,4 @@
 'cherry-markdown': patch
 ---
 
-table toolbar popup malposition in tdesign drawer
+fix: table toolbar popup malposition in tdesign drawer
