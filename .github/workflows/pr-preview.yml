@@ -4,11 +4,7 @@ on:
   pull_request_target:
     branches: [main, dev]
     paths: # 这里是用来指定哪个文件更改，才会触发的
-      - "src/**"
-      - "package.json"
-      - "types/**"
-      - "examples/**"
-      - "test/**"
+      - "packages/cherry-markdown/**"
 
 jobs:
   build:
@@ -20,7 +16,7 @@ jobs:
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: "${{ env.HEAD_SHA }}"
 
@@ -63,9 +59,7 @@ jobs:
           cache: "yarn"
 
       - name: Install dependencies
-        uses: borales/actions-yarn@v3.0.0
-        with:
-          cmd: install
+        run: yarn install
 
       - name: Lint Changed Files
         if: ${{ env.LINT_FILES }}
@@ -75,15 +69,14 @@ jobs:
           done
 
       - name: Run Build
-        uses: borales/actions-yarn@v3.0.0
-        with:
-          cmd: build
+        run: yarn build
+
 
       - name: Archive build dist
         uses: actions/upload-artifact@v4
         with:
           name: build-dist
-          path: dist
+          path: ./packages/cherry-markdown/dist
 
       - name: Archive examples
         uses: actions/upload-artifact@v4

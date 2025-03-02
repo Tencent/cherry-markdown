@@ -8,7 +8,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Print PR details
         run: |
@@ -23,7 +23,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-dist
-          path: dist
+          path: ./packages/cherry-markdown/dist
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
