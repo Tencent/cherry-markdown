@@ -2,14 +2,12 @@ name: PR Test
 
 on:
   pull_request_target:
-    branches: [main, dev, test-pr]
+    branches: [main, dev]
     # paths: # 这里是用来指定哪个文件更改，才会触发的
       # - "packages/cherry-markdown/**"
 
 jobs:
   build:
-    # 不需要在fork仓库的pr中运行
-    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     env:
       BASE_SHA: ${{ github.event.pull_request.base.sha }}
