@@ -1,5 +1,5 @@
 ---
-'cherry-markdown': patch
+'cherry-markdown': minor
 ---
 
 ci(core): add action for test build
