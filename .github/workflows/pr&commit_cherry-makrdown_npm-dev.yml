@@ -1,0 +1,161 @@
+name: PR Merge Dev NPM Preview
+
+on:
+  pull_request_target:
+    types: [closed]
+    paths: 
+      - "packages/cherry-markdown/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  dev-deploy:
+    # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
+    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get Merge Commit SHA
+        run: echo "COMMIT_SHORT_SHA=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: sudo apt-get install -y moreutils
+
+      - name: Update package.json
+        working-directory: ./packages/cherry-markdown
+        run: |
+          BASE_VERSION=$(jq -r .version package.json)
+          VERSION="${BASE_VERSION}-dev.${{ env.COMMIT_SHORT_SHA }}"
+          jq --arg name "@cherry-markdown/cherry-markdown-dev" \
+             --arg version "$VERSION" \
+             '.name = $name | .version = $version | del(.scripts.publish?)' package.json | sponge package.json
+          echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "PACKAGE_NAME=@cherry-markdown/cherry-markdown-dev" >> $GITHUB_ENV
+
+      - name: Update README
+        working-directory: ./packages/cherry-markdown
+        run: |
+          cat <<-EOF > README.md
+            <!-- DEV PREVIEW WARNING -->
+              <div align="center">
+                <div style="padding: 16px; background: #fff3d8; border-radius: 8px; margin: 20px 0;">
+                  <strong>⚠️ 开发预览警告 / Development Preview Warning</strong>
+                  <p>此版本为临时测试版（${PACKAGE_NAME}@${PACKAGE_VERSION}），禁止在生产环境使用！最后更新时间：$(date +'%Y-%m-%d %H:%M:%S')</p>
+                  <p>This is a development preview version (${PACKAGE_NAME}@${PACKAGE_VERSION}), do NOT use in production! Last updated: $(date +'%Y-%m-%d %H:%M:%S')</p>
+                </div>
+              </div>
+          EOF
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          registry-url: https://registry.npmjs.org/
+          cache: yarn
+
+      - name: Install and build
+        working-directory: ./packages/cherry-markdown
+        run: yarn install && yarn build
+      
+      - name: npm publish
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Post comments
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const extractIssues = (text) => {
+              if (!text) return [];
+              const issueRegex = /#(\d+)/gm;
+              const matches = text.matchAll(issueRegex) || [];
+              return Array.from(matches, match => parseInt(match[1], 10)).filter(Boolean);
+            };
+
+            // 初始化集合
+            const issueSet = new Set();
+            const addIssues = (issues) => {
+              issues.forEach(issue => {
+                if (issue) issueSet.add(issue);
+              });
+            };
+
+            try {
+              const processPullRequest = async (pullNumber) => {
+                addIssues([pullNumber]);
+
+                const { data: pullRequest } = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pullNumber,
+                  headers: { "X-GitHub-Api-Version": "2022-11-28" }
+                });
+
+                [pullRequest.title, pullRequest.body].forEach(text => 
+                  addIssues(extractIssues(text))
+                );
+
+                // 合并获取评论的逻辑
+                const [issueComments, reviewComments] = await Promise.all([
+                  github.rest.issues.listComments({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: pullNumber
+                  }),
+                  github.rest.pulls.listReviewComments({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: pullNumber
+                  })
+                ]);
+
+                [...issueComments.data, ...reviewComments.data].forEach(c => 
+                  addIssues(extractIssues(c.body))
+                );
+              };
+
+              const processCommits = async () => {
+                context.payload.commits?.forEach(commit => {
+                  addIssues(extractIssues(commit.message || ''));
+                });
+              };
+
+              if (context.payload.pull_request) {
+                await processPullRequest(context.payload.pull_request.number);
+              } else if (context.payload.commits) {
+                await processCommits();
+              }
+
+              const comment = 
+               `谢谢您的大力支持,请安装和此相关的测试版进行极速体验:
+              [查看npm发布版本](https://www.npmjs.com/package/${process.env.PACKAGE_NAME}/v/${process.env.PACKAGE_VERSION})，请注意这是一个开发预览版本,请谨慎使用!
+            
+              \`\`\`shell
+                npm install ${process.env.PACKAGE_NAME}@${process.env.PACKAGE_VERSION}
+              \`\`\`
+                
+              `;
+              
+              console.log("Collected issues:", Array.from(issueSet));
+              github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            } catch (error) {
+              console.error('Error:', error);
+              github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `❌ 错误: ${error.message}`
+              });
+            }
