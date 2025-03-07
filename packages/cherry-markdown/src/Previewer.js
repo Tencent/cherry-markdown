@@ -144,6 +144,8 @@ export default class Previewer {
     const resizeObserver = new ResizeObserver(() => {
       this.syncVirtualLayoutFromReal();
       this.subMenusPositionChange();
+      // 发布编辑器大小变化事件
+      this.$cherry.$event.emit('editor.size.change');
     });
     // 开始监听元素
     resizeObserver.observe(this.$cherry.wrapperDom);
