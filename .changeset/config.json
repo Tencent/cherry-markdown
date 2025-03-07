@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.0.5/schema.json",
-  "changelog": "@changesets/cli/changelog",
+  "changelog": ["@cherry-markdown/changesets-changelog-github", {"repo": "Tencent/cherry-markdown"}],
   "commit": false,
   "fixed": [],
   "linked": [],
