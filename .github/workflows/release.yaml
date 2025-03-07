@@ -40,6 +40,10 @@ jobs:
       - name: Publish cherry-markdown
         if: ${{ contains(steps.changesets.outputs.publishedPackages, '"name":"cherry-markdown"') }}
         run: |
+          cp README.CN.md packages/cherry-markdown/
+          cp README..md packages/cherry-markdown/
+          cp README.JP.md packages/cherry-markdown/
+           
           cd packages/cherry-markdown
           npm publish --access public
         env:
