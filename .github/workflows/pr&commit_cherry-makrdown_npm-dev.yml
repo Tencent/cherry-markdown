@@ -1,4 +1,4 @@
-name: PR Merge cherry-markdown NPM Dev Preview
+name: PR Merge cherry-markdown Dev NPM Preview
 
 on:
   pull_request_target:
@@ -190,17 +190,14 @@ jobs:
               }
 
               // 阶段 3：评论发送
-              const commentTemplate = `📦 **cherry-markdown Dev Preview Published**
-
-              在 [NPM](https://www.npmjs.com/package/${process.env.PACKAGE_NAME}/v/${process.env.PACKAGE_VERSION}) 上查看。
+              const commentTemplate = `📦 **cherry-markdown dev preview published**
+              ⚠️ **注意**: 此版本为开发预览版，禁止在生产环境使用！
+              ⚠️ **Note**: This version is a developer preview and should not be used in production environments!
               
-              Install with:
+              **Install [NPM](https://www.npmjs.com/package/${process.env.PACKAGE_NAME}/v/${process.env.PACKAGE_VERSION}) with** :
               \`\`\`bash
               npm install ${process.env.PACKAGE_NAME}@${process.env.PACKAGE_VERSION}
               \`\`\`
-              
-              ⚠️ **注意**: 此版本为开发预览版，禁止在生产环境使用！
-              ⚠️ **Note**: This version is a developer preview and should not be used in production environments!
               `;
 
               // 并发发送控制（每秒 2 个请求）
