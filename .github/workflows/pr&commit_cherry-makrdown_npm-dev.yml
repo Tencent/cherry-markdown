@@ -1,4 +1,4 @@
-name: PR Merge Dev NPM Preview
+name: PR Merge cherry-markdown NPM Dev Preview
 
 on:
   pull_request_target:
@@ -31,7 +31,7 @@ jobs:
         working-directory: ./packages/cherry-markdown
         run: |
           BASE_VERSION=$(jq -r .version package.json)
-          VERSION="${BASE_VERSION}-dev.${{ env.COMMIT_SHORT_SHA }}"
+          VERSION="${BASE_VERSION}-dev.$(date +'%Y%m%d%H%M').${{ env.COMMIT_SHORT_SHA }}"
           jq --arg name "@cherry-markdown/cherry-markdown-dev" \
              --arg version "$VERSION" \
              '.name = $name | .version = $version | del(.scripts.publish?)' package.json | sponge package.json
@@ -64,6 +64,7 @@ jobs:
         run: yarn install && yarn build
       
       - name: npm publish
+        working-directory: ./packages/cherry-markdown
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -72,90 +73,165 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const extractIssues = (text) => {
+           // 工具函数：增强型 Issue 提取
+            const extractValidReferences = (text) => {
               if (!text) return [];
-              const issueRegex = /#(\d+)/gm;
-              const matches = text.matchAll(issueRegex) || [];
-              return Array.from(matches, match => parseInt(match[1], 10)).filter(Boolean);
+              // 匹配当前仓库格式的 #数字 或 owner/repo#数字（精确匹配当前仓库）
+              const repoRegex = new RegExp(
+                `(?:^|\\s)(?:#(\\d+)|${context.repo.owner}/${context.repo.repo}#(\\d+))`,
+                'gm'
+              );
+              
+              const matches = text.matchAll(repoRegex) || [];
+              return Array.from(matches, match => {
+                // 优先捕获跨仓库引用（第二捕获组）
+                return match[2] ? parseInt(match[2], 10) : parseInt(match[1], 10);
+              }).filter(num => !isNaN(num));
             };
 
-            // 初始化集合
-            const issueSet = new Set();
-            const addIssues = (issues) => {
-              issues.forEach(issue => {
-                if (issue) issueSet.add(issue);
-              });
+            // 验证 Issue/PR 归属
+            const isValidTarget = async (number) => {
+              try {
+                await github.rest.issues.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: number,
+                  headers: { "X-GitHub-Api-Version": "2022-11-28" }
+                });
+                return true;
+              } catch (error) {
+                // 404 表示目标不存在或不属于本仓库
+                if (error.status === 404) return false;
+                // 其他错误视为无效
+                console.error('Validation error:', error);
+                return false;
+              }
+            };
+
+            // 异步批次处理器
+            const batchProcessor = async (items, processor, batchSize = 10) => {
+              const results = [];
+              for (let i = 0; i < items.length; i += batchSize) {
+                const batch = items.slice(i, i + batchSize);
+                const batchResults = await Promise.all(batch.map(processor));
+                results.push(...batchResults);
+                // 避免触发 GitHub API 速率限制
+                await new Promise(resolve => setTimeout(resolve, 500));
+              }
+              return results;
             };
 
             try {
-              const processPullRequest = async (pullNumber) => {
-                addIssues([pullNumber]);
+              // 阶段 1：数据收集
+              const targets = new Set();
+              
+              // 收集当前 PR 自身
+              if (context.payload.pull_request?.number) {
+                targets.add(context.payload.pull_request.number);
+              }
 
-                const { data: pullRequest } = await github.rest.pulls.get({
+              // 收集 PR 相关内容
+              if (context.payload.pull_request) {
+                const { data: pr } = await github.rest.pulls.get({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  pull_number: pullNumber,
+                  pull_number: context.payload.pull_request.number,
                   headers: { "X-GitHub-Api-Version": "2022-11-28" }
                 });
 
-                [pullRequest.title, pullRequest.body].forEach(text => 
-                  addIssues(extractIssues(text))
-                );
+                // 处理标题和正文
+                [pr.title, pr.body].forEach(text => {
+                  extractValidReferences(text).forEach(num => targets.add(num));
+                });
 
-                // 合并获取评论的逻辑
-                const [issueComments, reviewComments] = await Promise.all([
+                // 处理评论（常规评论 + 代码评审评论）
+                const [comments, reviews] = await Promise.all([
                   github.rest.issues.listComments({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    issue_number: pullNumber
+                    issue_number: context.payload.pull_request.number,
+                    per_page: 100
                   }),
                   github.rest.pulls.listReviewComments({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    pull_number: pullNumber
+                    pull_number: context.payload.pull_request.number,
+                    per_page: 100
                   })
                 ]);
 
-                [...issueComments.data, ...reviewComments.data].forEach(c => 
-                  addIssues(extractIssues(c.body))
-                );
-              };
-
-              const processCommits = async () => {
-                context.payload.commits?.forEach(commit => {
-                  addIssues(extractIssues(commit.message || ''));
+                [...comments.data, ...reviews.data].forEach(comment => {
+                  extractValidReferences(comment.body).forEach(num => targets.add(num));
                 });
-              };
-
-              if (context.payload.pull_request) {
-                await processPullRequest(context.payload.pull_request.number);
-              } else if (context.payload.commits) {
-                await processCommits();
               }
 
-              const comment = 
-               `谢谢您的大力支持,请安装和此相关的测试版进行极速体验:
-              [查看npm发布版本](https://www.npmjs.com/package/${process.env.PACKAGE_NAME}/v/${process.env.PACKAGE_VERSION})，请注意这是一个开发预览版本,请谨慎使用!
-            
-              \`\`\`shell
-                npm install ${process.env.PACKAGE_NAME}@${process.env.PACKAGE_VERSION}
-              \`\`\`
-                
-              `;
+              // 处理提交信息
+              context.payload.commits?.forEach(commit => {
+                extractValidReferences(commit.message).forEach(num => targets.add(num));
+              });
+
+              // 阶段 2：数据验证
+              const candidateNumbers = Array.from(targets);
+              console.log('Candidate targets:', candidateNumbers);
               
-              console.log("Collected issues:", Array.from(issueSet));
-              github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: comment
-              });
+              // 批次验证有效性
+              const validationResults = await batchProcessor(
+                candidateNumbers,
+                async num => ({ num, valid: await isValidTarget(num) })
+              );
+              
+              const validNumbers = validationResults
+                .filter(r => r.valid)
+                .map(r => r.num);
+
+              console.log('Validated targets:', validNumbers);
+              if (validNumbers.length === 0) {
+                console.log('No valid targets found');
+                return;
+              }
+
+              // 阶段 3：评论发送
+              const commentTemplate = `📦 **cherry-markdown Dev Preview Published**
+                
+              **Package**: \`${process.env.PACKAGE_NAME}@${process.env.PACKAGE_VERSION}\`
+              **NPM**: https://www.npmjs.com/package/${process.env.PACKAGE_NAME}/v/${process.env.PACKAGE_VERSION}
+              
+              Install with:
+              \`\`\`bash
+              npm install ${process.env.PACKAGE_NAME}@${process.env.PACKAGE_VERSION}
+              \`\`\`
+              
+              ⚠️ **注意**: 此版本为开发预览版，禁止在生产环境使用！
+              `;
+
+              // 并发发送控制（每秒 2 个请求）
+              await batchProcessor(
+                validNumbers,
+                async number => {
+                  try {
+                    await github.rest.issues.createComment({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: number,
+                      body: commentTemplate,
+                      headers: { "X-GitHub-Api-Version": "2022-11-28" }
+                    });
+                    console.log(`Commented on #${number}`);
+                  } catch (error) {
+                    console.error(`Failed to comment on #${number}:`, error.message);
+                  }
+                },
+              );
+
             } catch (error) {
-              console.error('Error:', error);
-              github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: `❌ 错误: ${error.message}`
-              });
+              console.error('Workflow failed:', error);
+              // 仅在当前 PR 上报告错误
+              if (context.payload.pull_request?.number) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.payload.pull_request.number,
+                  body: `🚨 发布流程失败: ${error.message}`
+                });
+              }
             }
