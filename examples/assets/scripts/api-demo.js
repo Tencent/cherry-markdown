@@ -88,7 +88,7 @@ var cherryConfig = {
   //extensions: [],
 };
 
-fetch('./markdown/api.md').then((response) => response.text()).then((value) => {
+fetch('./assets/markdown/api.md').then((response) => response.text()).then((value) => {
   var config = Object.assign({}, cherryConfig, { value: value });
   window.cherryObj = new Cherry(config);
 });

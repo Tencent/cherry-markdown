@@ -1,4 +1,4 @@
-fetch('./markdown/xss.md').then((response) => response.text()).then((value) => {
+fetch('./assets/markdown/xss.md').then((response) => response.text()).then((value) => {
   window.cherry = new Cherry({
     id: 'markdown',
     engine: {
