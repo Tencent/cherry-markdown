@@ -13,14 +13,16 @@ var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TY
     return regex;
   },
 });
-
-var cherryConfig = {
+var suggest = [];
+var list = ['barryhu', 'ivorwei', 'sunsunliu', 'jiaweicui', 'other', 'new'];
+var basicConfig = {
   id: 'markdown',
   externals: {
     echarts: window.echarts,
     katex: window.katex,
     MathJax: window.MathJax,
   },
+  isPreviewOnly: false,
   engine: {
     global: {
       urlProcessor(url, srcType) {
@@ -38,7 +40,7 @@ var cherryConfig = {
       },
       mathBlock: {
         engine: 'MathJax', // katex或MathJax
-        src: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js', // 如果使用MathJax将js在此处引入，katex则需要将js提前引入
+        src: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js', // 如果使用MathJax plugins，则需要使用该url通过script标签引入
       },
       inlineMath: {
         engine: 'MathJax', // katex或MathJax
@@ -48,12 +50,31 @@ var cherryConfig = {
         customResourceURL: 'https://github.githubassets.com/images/icons/emoji/unicode/${code}.png?v8',
         upperCase: true,
       },
-      // toc: {
-      //     tocStyle: 'nested'
-      // }
-      // 'header': {
-      //   strict: false
-      // }
+      suggester: {
+        suggester: [
+          {
+            // 获取 列表
+            suggestList(word, callback) {
+              suggest.push(list[Math.floor(Math.random() * 6)]);
+              if (suggest.length >= 6) {
+                suggest.shift();
+              }
+              callback(suggest);
+            },
+            // 唤醒关键字
+            // default '@'
+            keyword: '@',
+            // 建议模板
+            suggestListRender(valueArray) {
+              return '';
+            },
+            // 回填回调
+            echo(value) {
+              return '';
+            },
+          },
+        ],
+      },
     },
     customSyntax: {
       // SyntaxHookClass
@@ -66,21 +87,28 @@ var cherryConfig = {
   },
   toolbars: {
     toolbar: [
-      'switchModel',
-      '|',
       'bold',
       'italic',
       'strikethrough',
+      '|',
+      'color',
+      'header',
       '|',
       'list',
       {
         insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word'],
       },
       'graph',
+      'togglePreview',
+      'settings',
+      'switchModel',
+      'codeTheme',
+      'export',
     ],
+    sidebar: ['mobilePreview', 'copy'],
   },
   editor: {
-    defaultModel: 'editOnly',
+    defaultModel: 'edit&preview',
   },
   previewer: {
     // 自定义markdown预览区域class
@@ -90,7 +118,9 @@ var cherryConfig = {
   //extensions: [],
 };
 
-fetch('./markdown/basic.md').then((response) => response.text()).then((value) => {
-  var config = Object.assign({}, cherryConfig, { value: value });
-  window.cherry = new Cherry(config);
-});
+fetch('./assets/markdown/basic.md')
+  .then((response) => response.text())
+  .then((value) => {
+    var config = Object.assign({}, basicConfig, { value });
+    window.cherry = new Cherry(config);
+  });

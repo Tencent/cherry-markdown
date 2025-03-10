@@ -245,7 +245,7 @@ var basicConfig = {
   },
 };
 
-fetch('./markdown/basic.md')
+fetch('./assets/markdown/basic.md')
   .then((response) => response.text())
   .then((value) => {
     var config = Object.assign({}, basicConfig, { value: value });
