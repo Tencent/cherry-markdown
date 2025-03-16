@@ -61,36 +61,16 @@ var cherryConfig = {
     },
   },
   toolbars: {
+    showToolbar: false,
     toolbar: false,
-    // 配置目录
-    toc: {
-      updateLocationHash: true, // 要不要更新URL的hash
-      defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
-      position: 'fixed', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
-      cssText: 'right: 20px;',
-    },
+    bubble: false,
+    float: false,
   },
   editor: {
-    defaultModel: 'previewOnly',
-    keepDocumentScrollAfterInit: true,
-  },
-  autoScrollByHashAfterInit: true,
-  callback: {
-    onClickPreview: function(e) {
-      const {target} = e;
-      if(target.tagName === 'IMG') {
-        console.log('click img', target);
-        const tmp = new Viewer(target, {
-            button: false,
-            navbar: false,
-            title: [1, (image, imageData) => `${image.alt.replace(/#.+$/, '')} (${imageData.naturalWidth} × ${imageData.naturalHeight})`],
-            hidden(){
-              tmp.destroy()
-            },
-          });
-        tmp.show();
-      }
-    }
+    defaultModel: 'edit&preview',
+    codemirror: {
+      placeholder: '请输入内容...',
+    },
   },
   previewer: {
     // 自定义markdown预览区域class
@@ -100,7 +80,7 @@ var cherryConfig = {
   //extensions: [],
 };
 
-fetch('./markdown/basic.md').then((response) => response.text()).then((value) => {
+fetch('./assets/markdown/basic.md').then((response) => response.text()).then((value) => {
   var config = Object.assign({}, cherryConfig, { value: value });
   window.cherry = new Cherry(config);
 });
