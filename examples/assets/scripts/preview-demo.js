@@ -95,6 +95,9 @@ var cherryConfig = {
   previewer: {
     // 自定义markdown预览区域class
     // className: 'markdown'
+    
+    // 是否启用预览区域编辑能力（目前支持编辑图片尺寸、编辑表格内容）
+    enablePreviewerBubble: false,
   },
   keydown: [],
   //extensions: [],
