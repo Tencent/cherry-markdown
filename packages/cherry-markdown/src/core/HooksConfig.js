@@ -61,8 +61,13 @@ const hooksConfig = [
   FrontMatter,
   CodeBlock,
   InlineCode,
-  MathBlock,
+  /**
+   * 理论上行内公式（InlineMath）应该在段落公式（MathBlock）的后面，否则行内公式会破坏段落公式的渲染
+   * 但实际交换顺序后，发现没啥问题，还顺带解决了[这个issue #1090](https://github.com/Tencent/cherry-markdown/issues/1090)的问题
+   * 没问题的原因是对于段落公式（比如$$(a+b)^2=a^2+2ab+b^2$$），行内公式的确会命中，会识别出来两个'$$'，所以无事发生
+   */
   InlineMath,
+  MathBlock,
   HtmlBlock,
   Footnote,
   CommentReference,
