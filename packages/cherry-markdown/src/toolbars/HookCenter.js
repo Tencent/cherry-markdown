@@ -212,9 +212,6 @@ export default class HookCenter {
           if (this.menuOptionsKey.includes(name)) {
             throw Error(`this menu key is not allowed: ${name}, forbid menu key: ${this.menuOptionsKey}`);
           }
-          console.warn(
-            `this subMenu config type will be deprecated, please use {subMenu: ['${name}']} config: ${item}`,
-          );
           this.level1MenusName.push(name);
           this.$newMenu(name);
           this.level2MenusName[name] = item[name];
