@@ -161,6 +161,10 @@ export default class Engine {
         const lastLineStr = $str.match(/(^|\n)([^\n]+)$/)[2].split(/(\*{1,3})/g);
         const emphasis = [];
         for (let i = 0; i < lastLineStr.length; i++) {
+          // 判断是否命中无序列表语法（用* 也可表示无序列表）
+          if (i === 1 && lastLineStr[i] === '*' && lastLineStr[i + 1] && /^\s+$/.test(lastLineStr[i + 1])) {
+            continue;
+          }
           if (/\*{1,3}/.test(lastLineStr[i])) {
             const current = lastLineStr[i];
             if (emphasis.length <= 0) {
@@ -174,9 +178,11 @@ export default class Engine {
             }
           }
         }
+        // 只剩一个未配对的，表示最后没有*
         if (emphasis.length === 1) {
           $str = $str.replace(/(\*{1,3})(\s*)([^*\n]+?)$/, '$1$2$3$2$1');
         }
+        // 剩两个未配对的，表示最后有未配对的*
         if (emphasis.length === 2) {
           $str = $str.replace(/(\*{1,3})(\s*)([^*\n]+?)\*{0,2}$/, '$1$2$3$2$1');
         }
