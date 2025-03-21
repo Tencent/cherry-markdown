@@ -117,6 +117,12 @@ export default class HtmlBlock extends ParagraphBase {
     $str = $str.replace(/<(?=\/?(\w|\n|$))/g, '&#60;');
     // 还原被替换的尖括号
     $str = $str.replace(/\$#60;/g, '<').replace(/\$#62;/g, '>');
+    // 针对 \< 和 \> 进行转义
+    $str = $str
+      .replace(/\\&#60;/g, '&lt;')
+      .replace(/\\&#62;/g, '&gt;')
+      .replace(/\\</g, '&lt;')
+      .replace(/\\>/g, '&gt;');
     // 过滤HTML标签的style属性
     if (this.filterStyle) {
       $str = $str.replace(/<([^/][^>]+?) style="[^>\n]+?"([^>\n]*)>/gi, '<$1$2>');
