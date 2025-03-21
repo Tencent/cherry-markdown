@@ -121,7 +121,6 @@ export default class HtmlBlock extends ParagraphBase {
     $str = $str
       .replace(/\\&#60;/g, '&lt;')
       .replace(/\\&#62;/g, '&gt;')
-      .replace(/\\&lt;/g, '&lt;')
       .replace(/\\</g, '&lt;')
       .replace(/\\>/g, '&gt;');
     // 过滤HTML标签的style属性
