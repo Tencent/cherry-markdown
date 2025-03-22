@@ -4,11 +4,7 @@ on:
   pull_request_target:
     branches: [main, dev]
     paths:
-      - "packages/cherry-markdown/src/**"
-      - "packages/cherry-markdown/types/**"
-      - "packages/cherry-markdown/test/**"
-      - "package.json"
-      - "examples/**"
+      - "packages/cherry-markdown/**"
 
 jobs:
   build:
@@ -19,7 +15,7 @@ jobs:
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: "${{ env.HEAD_SHA }}"
 
@@ -40,7 +36,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         if: ${{ env.GIT_DIFF_FILES }}
         with:
           repository: ${{ github.repository }}
@@ -55,16 +51,14 @@ jobs:
             cp "$file" "base-repo/$file"
           done
 
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v2
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version: 18.x
           cache: "yarn"
 
       - name: Install dependencies
-        uses: borales/actions-yarn@v3.0.0
-        with:
-          cmd: install
+        run: yarn install
 
       - name: Lint Changed Files
         if: ${{ env.LINT_FILES }}
@@ -74,9 +68,7 @@ jobs:
           done
 
       - name: Run Build
-        uses: borales/actions-yarn@v3.0.0
-        with:
-          cmd: build
+        run: yarn build
 
       - name: Archive build dist
         uses: actions/upload-artifact@v4
