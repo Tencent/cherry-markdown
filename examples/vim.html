@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIM demo - Cherry Editor</title>
+  <link rel="stylesheet" type="text/css" href="../dist/cherry-markdown.css">
+  <link rel="Shortcut Icon" href="../logo/favicon.ico">
+  <style>
+    html {
+      height: 100%;
+    }
+    body {
+      height: 100%;
+      overflow: hidden;
+      margin: 0;
+    }
+    #markdown {
+      min-width: 800px;
+      max-width: 2600px;
+      width: 70%;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="markdown"></div>
+  <script src="../dist/cherry-markdown.js"></script>
+</body>
+<script>
+var config = {
+  id: 'markdown',
+  value: '',
+  editor: {
+    keyMap: 'vim',
+  },
+  callback: {
+    afterChange: function(md, html) {
+      console.log('change');
+    }
+  },
+};
+var sourceCode = document.documentElement.outerHTML;
+var cherry = new Cherry(config);
+cherry.setValue(`## 移动光标\n- h j k l 上 下 左 右\n- w 跳到下一个字首，按标点或单词分割\n- W 跳到下一个字首，长跳，如end-of-line被认为是一个字\n- e 跳到下一个字尾\n- E 跳到下一个字尾，长跳\n- b 跳到上一个字\n- B 跳到上一个字，长跳\n- ^ 跳至行首的第一个字符\n- gg 跳至文首\n- G 调至文尾\n- 5gg/5G 调至第5行\n## 删除复制\n- dd 删除光标所在行\n- dw 删除一个字(word)\n- d/D 删除到行末\n- x 删除当前字符\n- X 删除前一个字符\n## 插入模式\n- i 从当前光标处进入插入模式\n- I 进入插入模式，并置光标于行首\n- a 追加模式，置光标于当前光标之后\n- A 追加模式，置光标于行末\n- o 在当前行之下新加一行，并进入插入模式\n- O 在当前行之上新加一行，并进入插入模式\n- Esc 退出插入模式\n## 更多\n查看[更多](https://codemirror.net/5/keymap/vim.js)\n`);
+</script>
+</html>
