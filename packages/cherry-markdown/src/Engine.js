@@ -162,7 +162,7 @@ export default class Engine {
         const emphasis = [];
         for (let i = 0; i < lastLineStr.length; i++) {
           // 判断是否命中无序列表语法（用* 也可表示无序列表）
-          if (i === 1 && lastLineStr[i] === '*' && lastLineStr[i + 1] && /^\s+$/.test(lastLineStr[i + 1])) {
+          if (i === 1 && lastLineStr[i] === '*' && lastLineStr[i + 1] && /^\s+/.test(lastLineStr[i + 1])) {
             continue;
           }
           if (/\*{1,3}/.test(lastLineStr[i])) {
