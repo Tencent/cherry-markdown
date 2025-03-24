@@ -230,6 +230,15 @@ export interface CherryEngineOptions {
      */
     htmlWhiteList?: string;
     /**
+       * html黑名单，优先级高于htmlWhiteList
+       * 标签以英文竖线分隔，如：htmlBlackList: 'div|span'
+       * 默认为空，表示不禁止渲染任何html标签
+       * 需要注意：
+       *    - 启用htmlBlackList后，将禁止渲染htmlBlackList里配置的标签
+       *    - 如果要禁用所有html标签，可配置htmlBlackList: '*'
+       */
+    htmlBlackList?: string,
+    /**
        * 适配流式会话的场景，开启后将具备以下特性：
        * 1. 代码块自动闭合，相当于强制 `engine.syntax.codeBlock.selfClosing=true`
        * 2. 文章末尾的段横线标题语法（`\n-`）失效
