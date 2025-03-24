@@ -189,7 +189,12 @@ export default class CodeBlock extends ParagraphBase {
    */
   renderCodeBlock($code, $lang, sign, lines) {
     let cacheCode = $code;
-    let lang = $lang.toLowerCase();
+    let lang = $lang;
+    // 兼容流式输出时占位光标影响代码块语言识别的场景
+    if (/\s*CHERRY_FLOW_SESSION_CURSOR/.test(lang)) {
+      lang = lang.replace(/\s*CHERRY_FLOW_SESSION_CURSOR/, '');
+    }
+    lang = lang.toLowerCase();
     if (this.customHighlighter) {
       // 平台自定义代码块样式
       cacheCode = this.customHighlighter(cacheCode, lang);
@@ -208,7 +213,7 @@ export default class CodeBlock extends ParagraphBase {
         data-copy-code="${this.copyCode}"
         data-expand-code="${this.expandCode}"
         data-change-lang="${this.changeLang}"
-        data-lang="${$lang}"
+        data-lang="${lang}"
         style="position:relative"
         class="${needUnExpand ? 'cherry-code-unExpand' : 'cherry-code-expand'}"
       >
@@ -281,7 +286,9 @@ export default class CodeBlock extends ParagraphBase {
   }
 
   $dealUnclosingCode(str) {
-    const codes = str.match(/(?:^|\n)(\n*((?:>[\t ]*)*)(?:[^\S\n]*))(`{3,})([^`]*?)(?=$|\n)/g);
+    const codes = str.match(
+      /(?:^|\n)(\n*((?:>[\t ]*)*)(?:[^\S\n]*))(`{3,})([^`]*?)(?=CHERRY_FLOW_SESSION_CURSOR|$|\n)/g,
+    );
     if (!codes || codes.length <= 0) {
       return str;
     }
@@ -301,10 +308,13 @@ export default class CodeBlock extends ParagraphBase {
     // 如果有奇数个代码块关键字，则进行自动闭合
     if ($codes.length % 2 === 1) {
       const lastCode = $codes[$codes.length - 1].replace(/(`)[^`]+$/, '$1').replace(/\n+/, '');
-      const $str = str.replace(/\n+$/, '').replace(/\n`{1,2}$/, '');
+      const $str = str
+        .replace(/\n+`{1,2}\n*(CHERRY_FLOW_SESSION_CURSOR|$)/, '')
+        .replace(/\n+CHERRY_FLOW_SESSION_CURSOR\n+$/, '')
+        .replace(/\n+$/, '');
       return `${$str}\n${lastCode}\n`;
     }
-    return str;
+    return str.replace(/(`{2,})CHERRY_FLOW_SESSION_CURSOR/, '$1\nCHERRY_FLOW_SESSION_CURSOR');
   }
 
   beforeMakeHtml(str, sentenceMakeFunc, markdownParams) {
