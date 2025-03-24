@@ -1,5 +1,10 @@
 name: Deploy to GitHub Pages
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 on:
   push:
     branches:
@@ -43,3 +48,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: public
           destination_branch: gh-pages
+          force_orphan: true #强制重置目标分支
+          keep_files: false #清除旧文件
