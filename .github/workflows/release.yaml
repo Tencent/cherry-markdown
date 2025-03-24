@@ -7,71 +7,44 @@ on:
 
 jobs:
   release:
+    # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
+    if: github.repository == 'Tencent/cherry-markdown'
     runs-on: ubuntu-latest
     outputs:
       publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
-      publishedClientVersion: ${{ steps.extract_client_version.outputs.client_version }}
+      publishedClientVersion: ${{ steps.extract_version.outputs.clientVersion }}
+      publishedVscodePluginVersion: ${{ steps.extract_version.outputs.vscodePluginVersion }}
+      publishedCherryMarkdownVersion: ${{ steps.extract_version.outputs.cherrymarkdownVersion }}
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          registry-url: "https://registry.npmjs.org"
-
-      - name: Install dependencies
-        run: |
-          yarn
-          yarn build
-
-      - name: Check for changesets
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          version: yarn changeset-version
-          title: "chore: release"
-          commit: "chore: release"
-          publish: yarn changeset tag
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish cherry-markdown
-        if: ${{ contains(steps.changesets.outputs.publishedPackages, '"name":"cherry-markdown"') }}
-        run: |
-          cp README*.md packages/cherry-markdown/
-           
-          cd packages/cherry-markdown
-          npm publish --access public
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish VSCode Extension
-        if: ${{ contains(steps.changesets.outputs.publishedPackages, '"name":"@cherry-markdown/vscode-plugin"') }}
-        run: |
-          jq ".workspaces = [\"packages/cherry-markdown\", \"packages/client\", \"examples/*\"]" package.json > workspaces.json && mv workspaces.json package.json
-          npm install -g vsce
-          cd packages/vscodePlugin
-          yarn
-          jq '.name="cherry-markdown"' package.json > temp.json && mv temp.json package.json
-          vsce package
-          vsce publish
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-
-      - name: client_version Output
-        id: extract_client_version
+      - name: Version Output
+        id: extract_version
         run: |
           echo "publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}"
 
-          client_version=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/client") | .version')
-          echo "client_version=$client_version" >> $GITHUB_OUTPUT
+          cherrymarkdownVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="cherry-markdown") | .version')
+          echo "cherrymarkdownVersion=$cherrymarkdownVersion" >> $GITHUB_OUTPUT          
+
+          clientVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/client") | .version')
+          echo "clientVersion=$clientVersion" >> $GITHUB_OUTPUT
+
+          vscodePluginVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="cherry-markdown-vscode-plugin") | .version')
+          echo "vscodePluginVersion=$vscodePluginVersion" >> $GITHUB_OUTPUT
+ 
+  build-core-release:
+    needs: release
+    if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"cherry-markdown"') }}
+    uses: ./.github/workflows/release-cherry-markdown-build.yaml
 
   build-client-release:
     needs: release
     if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"@cherry-markdown/client"') }}
-    uses: ./.github/workflows/build-client-release.yaml
+    uses: ./.github/workflows/release-client-build.yaml
     with:
       client_version: ${{ needs.release.outputs.publishedClientVersion }}
+
+  build-vscodePlugin-release:
+    needs: release
+    if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"cherry-markdown-vscode-plugin"') }}
+    uses: ./.github/workflows/release-vscode-plugin-build.yaml
+    with:
+      vscode_plugin_version: ${{ needs.release.outputs.publishedVscodePluginVersion }}
