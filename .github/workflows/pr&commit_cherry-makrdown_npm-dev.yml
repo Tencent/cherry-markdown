@@ -12,7 +12,7 @@ permissions:
   issues: write
 
 jobs:
-  dev-deploy:
+  cherrymarkdown-preview:
     # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
     if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
