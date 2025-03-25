@@ -53,6 +53,7 @@ export default class Engine {
     this.currentStrMd5 = [];
     this.globalConfig = markdownParams.engine.global;
     this.htmlWhiteListAppend = this.globalConfig.htmlWhiteList;
+    this.htmlBlackList = this.globalConfig.htmlBlackList;
     this.urlProcessorMap = {};
   }
 
