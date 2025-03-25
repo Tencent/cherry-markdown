@@ -1,0 +1,80 @@
+name: PR Merge VscodePlugin Dev Preview
+
+on:
+  pull_request_target:
+    types: [closed]
+    paths: 
+      - "packages/vscodePlugin/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
+
+jobs:
+  vscodePlugin-preview:
+    # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
+    if: github.repository == 'Tencent/cherry-markdown' &&github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Change Package Files
+        run: |
+
+          jq '."scripts"."build" = "yarn workspace cherry-markdown-core build"' package.json > temp.json && mv temp.json package.json
+          jq '."scripts"."build:vscodePlugin" = "yarn workspace cherry-markdown build"' package.json > temp.json && mv temp.json package.json
+
+          cd packages/cherry-markdown
+          jq '.name = "cherry-markdown-core"' package.json > temp.json && mv temp.json package.json
+
+          cd ../vscodePlugin
+          jq '.name = "cherry-markdown"' package.json > temp.json && mv temp.json package.json
+  
+
+      - name: Build VSCode Plugin
+        run: |
+          yarn global add vsce
+          yarn --network-timeout 100000
+          yarn build
+          yarn build:vscodePlugin
+
+      - name: Upload Files
+        id: upload-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cherry-markdown_vscode_plugin_${{ github.sha }}
+          path: ./packages/vscodePlugin/*.vsix
+      - name: Artifact Commit
+        run: |
+          echo "Artifact URL: ${{ steps.upload-artifact.outputs.artifact-url }}"
+
+      - name: Extract package info
+        id: extract-package
+        run: |
+          $name = node -p "require('./packages/vscodePlugin/package.json').name"
+          $version = node -p "require('./packages/vscodePlugin/package.json').version"
+          "name=$name" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+        shell: pwsh
+
+      - name: Post Artifact URL to PR
+        uses: actions/github-script@v6
+        env:
+          ARTIFACT_URL: ${{ steps.upload-artifact.outputs.artifact-url }}
+          NAME: ${{ steps.extract-package.outputs.name }}
+          VERSION: ${{ steps.extract-package.outputs.version }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `📦 vscodePlugin 预览 (Preview) [${process.env.NAME}@${process.env.VERSION}](${process.env.ARTIFACT_URL})`
+            });

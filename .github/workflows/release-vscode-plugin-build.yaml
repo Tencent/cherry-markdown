@@ -1,0 +1,45 @@
+name: "Build VscodePlugin Release"
+
+on:
+  workflow_call:
+    inputs:
+      vscode_plugin_version:
+        required: true
+        type: string
+jobs:
+  vscodePlugin-build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Change Package Files
+        run: |
+
+          jq '."scripts"."build" = "yarn workspace cherry-markdown-core build"' package.json > temp.json && mv temp.json package.json
+          jq '."scripts"."build:vscodePlugin" = "yarn workspace cherry-markdown build"' package.json > temp.json && mv temp.json package.json
+
+          cd packages/cherry-markdown
+          jq '.name = "cherry-markdown-core"' package.json > temp.json && mv temp.json package.json
+
+          cd ../vscodePlugin
+          jq '.name = "cherry-markdown"' package.json > temp.json && mv temp.json package.json
+  
+
+      - name: Build VSCode Plugin
+        run: |
+          yarn global add vsce
+          yarn --network-timeout 100000
+          yarn build
+          yarn build:vscodePlugin
+
+      - name: Upload vscode plugin artifact
+        uses: AButler/upload-release-assets@v3.0
+        with:
+            files:  packages/vscodePlugin/*.vsix
+            release-tag: "cherry-markdown-vscode-plugin@${{ inputs.vscode_plugin_version }}"
+            repo-token: ${{ secrets.GITHUB_TOKEN }}

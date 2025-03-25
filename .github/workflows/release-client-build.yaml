@@ -4,11 +4,10 @@ on:
   workflow_call:
     inputs:
       client_version:
-        description: 'client package version'
         required: true
         type: string
 jobs:
-  publish-tauri:
+  client-build-and-release:
     permissions:
       contents: write
     strategy:
