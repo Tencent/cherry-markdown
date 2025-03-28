@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.draft == false
+    if: github.repository == 'Firebasky/cherry-markdown' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     env:
       BASE_SHA: ${{ github.event.pull_request.base.sha }}
