@@ -1,0 +1,19 @@
+[package]
+name = "cherry-markdown-client"
+version = "0.1.0"
+description = "A Cherry Markdown Client"
+authors = ["Cherry OTeam"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2.2.0", features = ["tray-icon"] }
+tauri-plugin-opener = "2.2.0"
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.137"
+lazy_static = "1.4.0"
+tauri-plugin-dialog = "2.2.0"
+tauri-plugin-fs = "2.2.0"
+

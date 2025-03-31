@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
+    if: github.repository == 'Tencent/cherry-markdown'
+    runs-on: ubuntu-latest
+    outputs:
+      publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
+      publishedClientVersion: ${{ steps.extract_version.outputs.clientVersion }}
+      publishedVscodePluginVersion: ${{ steps.extract_version.outputs.vscodePluginVersion }}
+      publishedCherryMarkdownVersion: ${{ steps.extract_version.outputs.cherrymarkdownVersion }}
+    steps:
+      - name: Version Output
+        id: extract_version
+        run: |
+          echo "publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}"
+
+          cherrymarkdownVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="cherry-markdown") | .version')
+          echo "cherrymarkdownVersion=$cherrymarkdownVersion" >> $GITHUB_OUTPUT          
+
+          clientVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/client") | .version')
+          echo "clientVersion=$clientVersion" >> $GITHUB_OUTPUT
+
+          vscodePluginVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="cherry-markdown-vscode-plugin") | .version')
+          echo "vscodePluginVersion=$vscodePluginVersion" >> $GITHUB_OUTPUT
+ 
+  build-core-release:
+    needs: release
+    if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"cherry-markdown"') }}
+    uses: ./.github/workflows/release-cherry-markdown-build.yaml
+
+  build-client-release:
+    needs: release
+    if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"@cherry-markdown/client"') }}
+    uses: ./.github/workflows/release-client-build.yaml
+    with:
+      client_version: ${{ needs.release.outputs.publishedClientVersion }}
+
+  build-vscodePlugin-release:
+    needs: release
+    if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"cherry-markdown-vscode-plugin"') }}
+    uses: ./.github/workflows/release-vscode-plugin-build.yaml
+    with:
+      vscode_plugin_version: ${{ needs.release.outputs.publishedVscodePluginVersion }}

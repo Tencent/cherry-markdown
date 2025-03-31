@@ -1,0 +1,91 @@
+name: PR Test
+
+on:
+  pull_request_target:
+    branches: [main, dev]
+    paths:
+      - "packages/cherry-markdown/**"
+
+jobs:
+  build:
+    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: "${{ env.HEAD_SHA }}"
+
+      - name: Get changed files and operations
+        run: |
+          # 使用 GitHub API 获取变更文件列表及其操作
+          DIFF_DOCUMENTS=$(gh api repos/${{ github.repository }}/compare/${{ env.BASE_SHA }}...${{ env.HEAD_SHA }} \
+            --jq '.files | .[] | select(.status|IN("added", "modified", "renamed", "copied", "changed")) | .filename')
+          echo "Changed files and operations: ${DIFF_DOCUMENTS}"
+
+          # Eslint 检查js文件
+          LINT_FILES=$(echo "${DIFF_DOCUMENTS}" | grep -E '^.*\.js$' | xargs)
+          echo "LINT_FILES=${LINT_FILES}" >> $GITHUB_ENV
+
+          # 忽略 .github/workflows 下的文件
+          GIT_DIFF_FILES=$(echo "${DIFF_DOCUMENTS}" | grep -vE '^\.github\/workflows\/.*' | xargs)
+          echo "GIT_DIFF_FILES=${GIT_DIFF_FILES}" >> $GITHUB_ENV
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/checkout@v4
+        if: ${{ env.GIT_DIFF_FILES }}
+        with:
+          repository: ${{ github.repository }}
+          ref: "${{ env.BASE_SHA }}"
+          path: base-repo
+
+      - name: Replace changed files
+        if: ${{ env.GIT_DIFF_FILES }}
+        run: |
+          for file in ${{ env.GIT_DIFF_FILES }}; do
+            mkdir -p "base-repo/$(dirname "$file")"
+            cp "$file" "base-repo/$file"
+          done
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Lint Changed Files
+        if: ${{ env.LINT_FILES }}
+        run: |
+          for file in ${{ env.LINT_FILES }}; do
+            yarn eslint "$file"
+          done
+
+      - name: Run Build
+        run: yarn build
+
+      - name: Archive build dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-dist
+          path: packages/cherry-markdown/dist
+
+      - name: Archive examples
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-examples
+          path: |
+            examples/assets/**
+            examples/*.html
+
+  review:
+    needs: build
+    permissions: write-all
+    uses: ./.github/workflows/pr-reviewer-COS.yml
+    secrets: inherit
