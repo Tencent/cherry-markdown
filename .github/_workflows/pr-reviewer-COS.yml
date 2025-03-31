@@ -23,13 +23,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-dist
-          path: dist
+          path: download_dist
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: build-examples
-          path: examples
+          path: download_examples
 
       - name: Upload to COS
         uses: actions/github-script@v7
@@ -85,8 +85,8 @@ jobs:
 
             (async () => {
               try {
-                await uploadDirectory('dist', 'pr${{ github.event.pull_request.number }}/dist');
-                await uploadDirectory('examples', 'pr${{ github.event.pull_request.number }}/examples');
+                await uploadDirectory('download_dist', 'pr${{ github.event.pull_request.number }}/packages/cherry-markdown/dist');
+                await uploadDirectory('download_examples', 'pr${{ github.event.pull_request.number }}/examples');
                 console.log('Upload success');
               } catch (err) {
                 console.error('Upload failed:', err);
