@@ -1,8 +1,8 @@
-# Changelog
+# Change Log
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+## 0.8.58
 
-### [0.8.58](https://github.com/Tencent/cherry-markdown/compare/v0.8.57...v0.8.58) (2025-01-13)
+### Patch Changes
 
 
 ### Features
