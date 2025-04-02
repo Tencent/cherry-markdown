@@ -44,11 +44,10 @@ jobs:
           cat <<-EOF > README.md
             **⚠️ 开发预览警告 / Development Preview Warning**
 
-            此版本为临时测试版（${PACKAGE_NAME}@${PACKAGE_VERSION}），禁止在生产环境使用！  
-            最后更新时间：`$(date +'%Y-%m-%d %H:%M:%S')`
+            此版本为[临时测试版](${PACKAGE_NAME}@${PACKAGE_VERSION})，禁止在生产环境使用！  
 
-            This is a development preview version (${PACKAGE_NAME}@${PACKAGE_VERSION}), do NOT use in production!  
-            Last updated: `$(date +'%Y-%m-%d %H:%M:%S')`
+            This is a [development preview version](${PACKAGE_NAME}@${PACKAGE_VERSION}), do NOT use in production!  
+
           EOF
 
       - name: Set up Node.js
@@ -66,13 +65,13 @@ jobs:
         working-directory: ./packages/cherry-markdown
         run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_ORG_DEV }}
 
       - name: Post comments
         uses: actions/github-script@v7
         with:
           script: |
-           // 工具函数：增强型 Issue 提取
+           // 工具函数：增强型 Issue 提取 (TODO: 未来只支持当前 pr进行评论-确保安全)
             const extractValidReferences = (text) => {
               if (!text) return [];
               // 匹配当前仓库格式的 #数字 或 owner/repo#数字（精确匹配当前仓库）
