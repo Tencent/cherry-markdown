@@ -8,7 +8,7 @@ on:
 jobs:
   release:
     # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
-    # if: github.repository == 'Tencent/cherry-markdown'
+    if: github.repository == 'Tencent/cherry-markdown'
     runs-on: ubuntu-latest
     outputs:
       publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
