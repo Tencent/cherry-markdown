@@ -297,8 +297,8 @@ cherryObj.clearFlowSessionCursor();</textarea>
     <h1>Cherry.engine API</h1>
 
     <div class="one-api">
-      <h2 class="one-api__name">engine.makeHtml(markdown:string)</h2>
-      <p class="one-api__desc">将markdown字符串渲染成Html</p>
+      <h2 class="one-api__name">engine.makeHtml(markdown:string, returnType:string = 'string')</h2>
+      <p class="one-api__desc">将markdown字符串渲染成Html<br>returnType='string'：返回html字符串<br>returnType='object'：返回HTMLCollection</p>
       <div class="one-api__try">
         <textarea id="setMarkdown" placeholder="输入内容">
 alert(cherryObj.engine.makeHtml('This is `inline code`'));
