@@ -3,7 +3,7 @@ name: "Build Cherry Markdown Release"
 on:
   workflow_call:
 jobs:
-  cherry-markdown-build-and-release:
+  release-cherry-markdown-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,19 +19,7 @@ jobs:
           yarn
           yarn build
 
-      - name: Check for changesets
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          version: yarn changeset-version
-          title: "chore: release"
-          commit: "chore: release"
-          publish: yarn changeset tag
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Publish cherry-markdown
-        if: ${{ contains(steps.changesets.outputs.publishedPackages, '"name":"cherry-markdown"') }}
         run: |
           cp README*.md packages/cherry-markdown/
            
