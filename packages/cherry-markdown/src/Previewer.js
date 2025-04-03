@@ -580,11 +580,11 @@ export default class Previewer {
     }
     return false;
   }
-  $getSignData(dom) {
-    const list = dom.querySelectorAll('[data-sign]');
+  $getSignData(list) {
+    // const list = dom.querySelectorAll('[data-sign]');
     const ret = { list: [], signs: {} };
     for (let i = 0; i < list.length; i++) {
-      if (!this.$testChild(list[i])) {
+      if (!list[i].getAttribute('data-sign')) {
         continue;
       }
       const sign = list[i].getAttribute('data-sign');
@@ -704,14 +704,23 @@ export default class Previewer {
       window.clearTimeout(this.syncScrollLockTimer);
       this.applyingDomChanges = true;
       // 预览区未隐藏时，直接更新
-      const tmpDiv = document.createElement('div');
       const domContainer = this.getDomContainer();
       if (this.editor.selectAll) {
         domContainer.innerHTML = '';
       }
-      tmpDiv.innerHTML = newHtml;
-      const newHtmlList = this.$getSignData(tmpDiv);
-      const oldHtmlList = this.$getSignData(domContainer);
+      let tmpDiv = null;
+      if (typeof window.DOMParser !== 'undefined') {
+        // 如果支持DOMParser，则使用DOMParser将html字符串转成对应的HtmlElement
+        // 使用DOMParser是为了防止newHtml里的图片等资源自动加载
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(newHtml, 'text/html');
+        tmpDiv = doc.querySelector('body');
+      } else {
+        tmpDiv = document.createElement('div');
+        tmpDiv.innerHTML = newHtml;
+      }
+      const newHtmlList = this.$getSignData(tmpDiv.children);
+      const oldHtmlList = this.$getSignData(domContainer.children);
 
       try {
         this.$dealUpdate(domContainer, oldHtmlList, newHtmlList);

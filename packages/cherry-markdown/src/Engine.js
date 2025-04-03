@@ -351,9 +351,10 @@ export default class Engine {
 
   /**
    * @param {string} md md字符串
-   * @returns {string} 获取html
+   * @param {'string'|'object'} returnType 返回格式，string：返回html字符串，object：返回结构化数据
+   * @returns {string|HTMLCollection} 获取html
    */
-  makeHtml(md) {
+  makeHtml(md, returnType = 'string') {
     let $md = this.$setFlowSessionCursorCache(md);
     $md = this.$cacheBigData($md);
     $md = this.$beforeMakeHtml($md);
@@ -362,6 +363,19 @@ export default class Engine {
     this.$fireHookAction($md, 'paragraph', '$cleanCache');
     $md = this.$deCacheBigData($md);
     $md = this.$clearFlowSessionCursorCache($md);
+    if (returnType === 'object') {
+      let ret = null;
+      if (typeof window.DOMParser !== 'undefined') {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString($md, 'text/html');
+        ret = doc.querySelector('body').children;
+      } else {
+        const tmpDiv = document.createElement('div');
+        tmpDiv.innerHTML = $md;
+        ret = tmpDiv.children;
+      }
+      return ret;
+    }
     return $md;
   }
 
