@@ -2,4 +2,4 @@
 'cherry-markdown': minor
 ---
 
-fix: #1095 去掉告警信息
+fix: 去掉告警信息 close #1095
