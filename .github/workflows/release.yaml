@@ -29,15 +29,17 @@ jobs:
           commit: "chore: release"
           publish: yarn changeset tag
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
 
       - name: Version Output
         id: extract_version
         run: |
-          echo "publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}"
-
           clientVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/client") | .version')
           echo "clientVersion=$clientVersion" >> $GITHUB_OUTPUT
+
+          # Debugging output
+          echo "publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}"
+          echo "clientVersion: $clientVersion"
  
   build-core-release:
     needs: release
