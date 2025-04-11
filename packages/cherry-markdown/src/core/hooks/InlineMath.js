@@ -45,17 +45,18 @@ export default class InlineMath extends ParagraphBase {
     const linesArr = m1.match(/\n/g);
     const lines = linesArr ? linesArr.length + 2 : 2;
     const sign = this.$engine.hash(wholeMatch);
+    const $m1 = m1.replace(/\\~D/g, '$').replace(/\\~T/g, '~').replace(/~T/g, '~');
     // 既无MathJax又无katex时，原样输出
     let result = '';
     if (this.engine === 'katex' && this.katex?.renderToString) {
       // katex渲染
-      const html = this.katex.renderToString(m1, {
+      const html = this.katex.renderToString($m1, {
         throwOnError: false,
       });
       result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}">${html}</span>`;
     } else if (this.MathJax?.tex2svg) {
       // MathJax渲染
-      const svg = getHTML(this.MathJax.tex2svg(m1, { em: 12, ex: 6, display: false }), true);
+      const svg = getHTML(this.MathJax.tex2svg($m1, { em: 12, ex: 6, display: false }), true);
       result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}">${svg}</span>`;
     } else {
       result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock"
@@ -99,7 +100,7 @@ export default class InlineMath extends ParagraphBase {
     const ret = {
       begin: isLookbehindSupported() ? '((?<!\\\\))~D\\n?' : '(^|[^\\\\])~D\\n?',
       content: '(.*?)\\n?',
-      end: '~D',
+      end: isLookbehindSupported() ? '((?<!\\\\))~D' : '[^\\\\]~D',
     };
     ret.reg = new RegExp(ret.begin + ret.content + ret.end, 'g');
     return ret;
