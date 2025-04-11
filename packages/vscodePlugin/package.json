@@ -2,7 +2,7 @@
   "name": "cherry-markdown-vscode-plugin",
   "displayName": "Cherry Markdown",
   "description": "A markdown previewer powered by [cherry-markdown](https://github.com/Tencent/cherry-markdown)",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "publisher": "cherryMarkdownPublisher",
   "license": "Apache-2.0",
   "keywords": [
