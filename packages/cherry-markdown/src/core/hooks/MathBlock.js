@@ -58,10 +58,11 @@ export default class MathBlock extends ParagraphBase {
 
     // 既无MathJax又无katex时，原样输出
     let result = '';
+    const $content = content.replace(/\\~D/g, '$').replace(/\\~T/g, '~').replace(/~T/g, '~');
 
     if (this.engine === 'katex') {
       // katex渲染
-      const html = this.katex.renderToString(content, {
+      const html = this.katex.renderToString($content, {
         throwOnError: false,
         displayMode: true,
       });
@@ -69,7 +70,7 @@ export default class MathBlock extends ParagraphBase {
             data-lines="${lines}">${html}</div>`;
     } else if (this.MathJax?.tex2svg) {
       // MathJax渲染
-      const svg = getHTML(this.MathJax.tex2svg(content), true);
+      const svg = getHTML(this.MathJax.tex2svg($content), true);
       result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
             data-lines="${lines}">${svg}</div>`;
     } else {
