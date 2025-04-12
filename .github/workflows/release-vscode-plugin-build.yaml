@@ -27,10 +27,16 @@ jobs:
           jq '.name = "cherry-markdown"' package.json > temp.json && mv temp.json package.json
   
 
-      - name: Build VSCode Plugin
+      - name: Install and Build Dependencies
         run: |
           yarn global add vsce
           yarn --network-timeout 100000
           yarn build
           yarn build:vscodePlugin
-          vsce publish
+
+      - name: Publish VSCode Plugin
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          cd packages/vscodePlugin
+          vsce publish  --no-yarn -p $VSCE_PAT
