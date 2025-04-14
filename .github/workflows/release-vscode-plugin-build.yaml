@@ -39,4 +39,4 @@ jobs:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
           cd packages/vscodePlugin
-          vsce publish  --no-yarn -p $VSCE_PAT
+          vsce publish -p $VSCE_PAT
