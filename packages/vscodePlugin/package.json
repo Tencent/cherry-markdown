@@ -167,7 +167,7 @@
   },
   "scripts": {
     "build": "vsce package",
-    "vscode:prepublish": "npm run package",
+    "vscode:prepublish": "npm run package -no-dependencies --no-yarn",
     "compile": "webpack",
     "watch": "webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
