@@ -34,7 +34,8 @@ jobs:
           jq '.name = "cherry-markdown-core"' package.json > temp.json && mv temp.json package.json
 
           cd ../vscodePlugin
-          jq '.name = "cherry-markdown"' package.json > temp.json && mv temp.json package.json
+          jq '.name = "cherry-markdown-dev"' package.json > temp.json && mv temp.json package.json
+          jq --arg sha "$(git rev-parse --short HEAD)" '.version = "0.0.1-\($sha)"' package.json > temp.json && mv temp.json package.json
   
 
       - name: Build VSCode Plugin
