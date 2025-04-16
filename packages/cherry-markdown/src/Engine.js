@@ -230,12 +230,17 @@ export default class Engine {
 
   $fireHookAction(md, type, action, actionArgs) {
     let $md = md;
+    const before = actionArgs?.before || '';
     const method = action === 'afterMakeHtml' ? 'reduceRight' : 'reduce';
     if (!this.hooks && !this.hooks[type] && !this.hooks[type][method]) {
       return $md;
     }
     try {
+      let canContinue = true;
       $md = this.hooks[type][method]((newMd, oneHook) => {
+        if (!canContinue) {
+          return newMd;
+        }
         if (!oneHook.$engine) {
           oneHook.$engine = this;
           // Deprecated
@@ -249,6 +254,12 @@ export default class Engine {
 
         if (!oneHook[action]) {
           return newMd;
+        }
+        // 特殊处理：引用语法在实现嵌套引用时，需要将引用语法之前的语法进行执行，但不需要执行引用语法之后的语法
+        if (before && type === 'paragraph' && action === 'afterMakeHtml') {
+          if (oneHook.getName() === before) {
+            canContinue = false;
+          }
         }
         return oneHook[action](newMd, actionArgs, this.markdownParams);
       }, $md);
@@ -382,7 +393,7 @@ export default class Engine {
   makeHtmlForBlockquote(md) {
     let $md = md;
     $md = this.$dealParagraph($md);
-    $md = this.$fireHookAction($md, 'paragraph', 'afterMakeHtml');
+    $md = this.$fireHookAction($md, 'paragraph', 'afterMakeHtml', { before: 'blockquote' });
     return $md;
   }
 
