@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.0.20
+
+### Patch Changes
+
+- ci: declare dev preview, dynamic dev independent version [@RSS1102](https://github.com/RSS1102)([#1142](https://github.com/Tencent/cherry-markdown/pull/1142))([`22f03fb`](https://github.com/Tencent/cherry-markdown/commit/22f03fbe318b00829e1baebd94d7019f7fe5f2e9))
+- Updated dependencies [[`d23d141`](https://github.com/Tencent/cherry-markdown/commit/d23d14101114925ef7b2a5f341120ed41c53bc73), [`0f39d6b`](https://github.com/Tencent/cherry-markdown/commit/0f39d6b00217c6f0181d99251f36e2dc9a93982b), [`63982bc`](https://github.com/Tencent/cherry-markdown/commit/63982bce5cb16871f1d7f9103648f1e99d8ab945)]:
+  - cherry-markdown@0.9.1
+
 ## 0.0.19
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.9.1
+
+### Patch Changes
+
+- chore: modified products include files [@RSS1102](https://github.com/RSS1102)([#1143](https://github.com/Tencent/cherry-markdown/pull/1143))([`d23d141`](https://github.com/Tencent/cherry-markdown/commit/d23d14101114925ef7b2a5f341120ed41c53bc73))
+- fix: 修复自定义语法在引用语法里无法正常渲染自定义标签的问题 [@sunsonliu](https://github.com/sunsonliu)([#1144](https://github.com/Tencent/cherry-markdown/pull/1144))([`0f39d6b`](https://github.com/Tencent/cherry-markdown/commit/0f39d6b00217c6f0181d99251f36e2dc9a93982b))
+- fix: #1137 支持在公式里输入美元符号 [@sunsonliu](https://github.com/sunsonliu)([#1138](https://github.com/Tencent/cherry-markdown/pull/1138))([`63982bc`](https://github.com/Tencent/cherry-markdown/commit/63982bce5cb16871f1d7f9103648f1e99d8ab945))
+
 ## 0.9.0
 
 ### Minor Changes
