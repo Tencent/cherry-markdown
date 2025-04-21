@@ -48,8 +48,6 @@
     "lint": "eslint --ignore-path ../../.eslintignore --plugin file-progress --rule \"file-progress/activate: 1\" --ext .js .",
     "lint:fix": "eslint --ignore-path ../../.eslintignore --plugin file-progress --rule \"file-progress/activate: 1\" --ext .js . --fix",
     "lint:ci": "eslint --ignore-path ../../.eslintignore --max-warnings=0 --ext .js .",
-    "release": "standard-version",
-    "publish": "git push --follow-tags ori gin main",
     "examples": "serve -p 3000 ."
   },
   "keywords": [
