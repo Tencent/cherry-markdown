@@ -318,7 +318,7 @@ $mdBlockquoteBg: $VIOLET1;
   }
   
   /** 行内代码 */
-  p code, li code {
+  code:not([class]) {
     background-color: $mdInlineCodeBg;
     color: $mdInlineCodeColor;
     border: 1px solid $mdLineColor;
