@@ -253,7 +253,7 @@ export default class CodeBlock extends ParagraphBase {
     return this.$recoverCodeInIndent(str).replace(this.$getIndentedCodeReg(), (match, code) => {
       const lineCount = (match.match(/\n/g) || []).length;
       const sign = this.$engine.hash(match);
-      const html = `<pre data-sign="${sign}" data-lines="${lineCount}"><code>${escapeHTMLSpecialChar(
+      const html = `<pre data-sign="${sign}" data-lines="${lineCount}"><code class="indent-code">${escapeHTMLSpecialChar(
         code.replace(/\n( {4}|\t)/g, '\n'),
       )}</code></pre>`;
       // return this.getCacheWithSpace(this.pushCache(html), match, true);
