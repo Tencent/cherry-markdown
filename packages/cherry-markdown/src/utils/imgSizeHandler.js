@@ -274,6 +274,22 @@ const imgSizeHandler = {
     }
     return ret;
   },
+  /**
+   * 更新图片大小处理器的位置
+   */
+  updatePosition() {
+    if (!this.img || !this.butsLayout || !this.previewerDom || this.$isResizing()) {
+      return;
+    }
+    // 重新计算图片位置
+    const newPosition = this.getImgPosition();
+    this.buts.position = newPosition;
+    this.buts.style.left = newPosition.left - 1;
+    this.buts.style.top = newPosition.top - 1;
+    this.buts.style.marginTop = 0;
+    this.buts.style.marginLeft = 0;
+    this.updateBubbleButs();
+  },
 };
 
 export default imgSizeHandler;

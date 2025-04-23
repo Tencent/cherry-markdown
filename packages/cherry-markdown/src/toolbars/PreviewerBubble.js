@@ -444,6 +444,16 @@ export default class PreviewerBubble {
     }
     imgSizeHandler.showBubble(htmlElement, this.bubble.click, this.previewerDom);
     imgSizeHandler.bindChange(this.changeImgValue.bind(this));
+    // 订阅编辑器大小变化事件
+    const updateHandler = imgSizeHandler.updatePosition.bind(imgSizeHandler);
+    this.$cherry.$event.on('editor.size.change', updateHandler);
+    // 保存原始的remove方法
+    const originalRemove = imgSizeHandler.remove;
+    imgSizeHandler.remove = () => {
+      this.$cherry.$event.off('editor.size.change', updateHandler);
+      // 调用原始的remove方法
+      return originalRemove.call(imgSizeHandler);
+    };
     this.bubbleHandler.click = imgSizeHandler;
   }
 
