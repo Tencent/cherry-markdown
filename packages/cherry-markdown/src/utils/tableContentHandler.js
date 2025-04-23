@@ -651,6 +651,7 @@ export default class TableHandler {
     container.className = 'cherry-previewer-table-hover-handler-delete-container';
     buttons.forEach(([type]) => {
       const button = document.createElement('button');
+      button.setAttribute('type', 'button');
       button.setAttribute('data-type', type);
       button.className = 'cherry-previewer-table-hover-handler__delete ch-icon ch-icon-cherry-table-delete';
       if (/(right|left)/.test(type)) {
