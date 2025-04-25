@@ -15,6 +15,7 @@
  */
 import ParagraphBase from '@/core/ParagraphBase';
 import { compileRegExp } from '@/utils/regexp';
+import { escapeHTMLSpecialChar } from '@/utils/sanitize';
 
 export default class FrontMatter extends ParagraphBase {
   static HOOK_NAME = 'frontMatter';
@@ -27,13 +28,36 @@ export default class FrontMatter extends ParagraphBase {
     return str.replace(this.RULE.reg, (match, content) => {
       const lineCount = match.match(/\n/g)?.length ?? 0;
       const sign = `fontMatter${lineCount}`;
-      content.replace(/(?:^|\n)\s*(font-size|fontSize): ([0-9a-zA-Z]+)(\n|$)/, (match, m1, m2) => {
-        this.$engine.$cherry.previewer.getDom().style.fontSize = m2;
+      let frontmatter;
+      try {
+        // 优先按 JSON 格式解析
+        frontmatter = JSON.parse(content.trim());
+      } catch (error) {
+        // 按 k:v[\nk:v]* 格式解析
+        const lines = content.trim().split('\n');
+        frontmatter = {};
+        lines.forEach((line) => {
+          const [key, value] = line.split(':');
+          if (typeof key === 'string' && typeof value === 'string') {
+            if (key.length > 1024) {
+              // maximum key length 1024
+              return;
+            }
+            frontmatter[key.trim()] = value.trim();
+          }
+        });
+      }
+      // empty frontmatter, skip parse
+      if (Object.keys(frontmatter).length <= 0) {
         return match;
-      });
-      // 预判下是否为json格式，json格式就去掉换行，yaml格式就把换成换成分号
-      const dataContent = /^\s*{/.test(content) ? content.replace(/\n/g, '') : content.replace(/\n/g, ';');
-      const html = `<p data-sign="${sign}" data-type="frontMatter" data-lines="${lineCount}" data-content="${dataContent}"></p>`;
+      }
+      // update font-size
+      if ('font-size' in frontmatter || 'fontSize' in frontmatter) {
+        this.$engine.$cherry.previewer.getDom().style.fontSize = frontmatter['font-size'] || frontmatter.fontSize;
+      }
+      const html = `<p data-sign="${sign}" data-type="frontMatter" data-lines="${lineCount}" data-content="${escapeHTMLSpecialChar(
+        JSON.stringify(frontmatter),
+      )}"></p>`;
       const placeHolder = this.pushCache(html, sign, lineCount);
       return `${placeHolder}\n`;
     });
@@ -44,7 +68,7 @@ export default class FrontMatter extends ParagraphBase {
   }
 
   rule() {
-    const ret = { begin: '^\\s*-{3,}[^\\n]*\\n', end: '\\n-{3,}[^\\n]*\\n', content: '([\\s\\S]+?)' };
+    const ret = { begin: '^\\s*-{3}[^\\n]*\\n', end: '\\n-{3}[^\\n]*\\n', content: '([\\s\\S]+?)' };
     ret.reg = compileRegExp(ret, 'g', true);
     return ret;
   }
