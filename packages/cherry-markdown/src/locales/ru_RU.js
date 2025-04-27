@@ -136,4 +136,5 @@ export default {
   recoverShortcut: 'Восстановить по умолчанию',
   search: 'Поиск',
   autoWrap: 'Автоперенос строк',
+  footnoteTitle: 'Сноска',
 };
