@@ -128,6 +128,10 @@ export default class FootnoteHoverHandler {
   }
 
   $remove() {
-    
+    this.bubbleCard = {
+      refNum: 0, // 角标的序号
+      refTitle: '', // 角标的标题
+      content: '', // 弹窗的内容
+    };
   }
 }
