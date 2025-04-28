@@ -397,6 +397,13 @@ export default class Engine {
     return $md;
   }
 
+  makeHtmlForFootnote(md) {
+    let $md = md;
+    $md = this.$dealParagraph($md);
+    $md = this.$fireHookAction($md, 'paragraph', 'afterMakeHtml', { before: 'footnote' });
+    return $md;
+  }
+
   mounted() {
     this.$fireHookAction('', 'sentence', 'mounted');
     this.$fireHookAction('', 'paragraph', 'mounted');

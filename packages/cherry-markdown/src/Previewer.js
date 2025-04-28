@@ -1130,36 +1130,7 @@ export default class Previewer {
     }
   }
 
-  bindClick() {
-    this.getDomContainer().addEventListener('click', (event) => {
-      if (this.$cherry.options.callback.onClickPreview) {
-        const ret = this.$cherry.options.callback.onClickPreview(event);
-        // @ts-ignore
-        if (ret === false) {
-          return ret;
-        }
-      }
-      // 如果配置了点击toc目录不更新location hash
-      // @ts-ignore
-      if (this.$cherry.options.toolbars.toc?.updateLocationHash === false) {
-        const { target } = event;
-        if (target instanceof Element && target.nodeName === 'A' && /level-\d+/.test(target.className)) {
-          const liNode = target.parentElement;
-          const index = Array.from(liNode.parentElement.children).indexOf(liNode) - 1;
-          this.scrollToHeadByIndex(index);
-          event.stopPropagation();
-          event.preventDefault();
-        }
-        /** 增加个潜规则逻辑，脚注跳转时是否更新location hash也跟随options.toolbars.toc.updateLocationHash 的配置 */
-        if (target instanceof Element && target.nodeName === 'A' && /(footnote|footnote-ref)/.test(target.className)) {
-          const id = target.getAttribute('href');
-          this.scrollToId(id);
-          event.stopPropagation();
-          event.preventDefault();
-        }
-      }
-    });
-  }
+  bindClick() {}
 
   onMouseDown() {
     addEvent(this.getDomContainer(), 'mousedown', () => {

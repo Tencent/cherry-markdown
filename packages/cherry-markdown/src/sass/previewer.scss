@@ -9,6 +9,19 @@
       transition: all 0.1s;
     }
   }
+  .cherry-previewer-footnote-ref-hover-handler {
+    position: absolute;
+    min-width: 200px;
+    max-width: 500px;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 11;
+    box-shadow:  rgba(0, 0, 0, 0.05) 0px 3px 14px 2px, rgba(0, 0, 0, 0.06) 0px 8px 10px 1px, rgba(0, 0, 0, 0.1) 0px 5px 5px -3px, rgba(0, 0, 0, 0.08) 0px 0.5px 0px 0px inset, rgba(0, 0, 0, 0.08) 0.5px 0px 0px 0px inset, rgba(0, 0, 0, 0.08) 0px -0.5px 0px 0px inset, rgba(0, 0, 0, 0.08) -0.5px 0px 0px 0px inset;
+    background: #fff;
+  }
+  .footnote.hidden {
+    display: none;
+  }
   .cherry-previewer-img-size-handler {
     position:absolute;
     box-shadow: 0 1px 4px 0 rgba(20,81,154, 0.5);

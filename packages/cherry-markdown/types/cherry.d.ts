@@ -262,13 +262,13 @@ export interface CherryEngineOptions {
     // 'hookName': {
     //
     // }
-    link?: {
+    link?: false | {
       /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
       target?: '_blank' | '',
       /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
       rel?: '_blank' | 'nofollow' | '',
     },
-    autoLink?: {
+    autoLink?: false | {
       /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
       target?: '_blank' | '',
       /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
@@ -278,23 +278,23 @@ export interface CherryEngineOptions {
       /** 短链接长度 默认:20 */
       shortLinkLength?: number,
     },
-    list?: {
+    list?: false | {
       listNested?: boolean, // 同级列表类型转换后变为子级
       indentSpace?: number, // 默认2个空格缩进
     },
-    table: {
+    table: false | {
       enableChart?: boolean,
       selfClosing?: boolean, // 自动闭合，为true时，当输入第一行table内容时，cherry会自动按表格进行解析
       // chartRenderEngine: EChartsTableEngine,
       // externals: ['echarts'],
     },
-    inlineCode?: {
+    inlineCode?: false | {
       /**
        * @deprecated 不再支持theme的配置，统一在`themeSettings.inlineCodeTheme`中配置
        */
       // theme: 'red',
     },
-    codeBlock?: {
+    codeBlock?: false | {
       /**
        * @deprecated 不再支持theme的配置，统一在`themeSettings.codeBlockTheme`中配置
        */
@@ -332,10 +332,10 @@ export interface CherryEngineOptions {
         'onClick': (event: MouseEvent, code: string, language: string) => {},
       }[],
     },
-    emoji?: {
+    emoji?: false | {
       useUnicode?: boolean, // 是否使用unicode进行渲染
     },
-    fontEmphasis?: {
+    fontEmphasis?: false | {
       /**
        * 是否允许首尾空格
        * 首尾、前后的定义： 语法前**语法首+内容+语法尾**语法后
@@ -350,7 +350,7 @@ export interface CherryEngineOptions {
       allowWhitespace?: boolean,
       selfClosing?: boolean, // 自动闭合，为true时，当输入**XXX时，会自动在末尾追加**
     },
-    strikethrough?: {
+    strikethrough?: false | {
       /**
        * 是否必须有前后空格
        * 首尾、前后的定义： 语法前**语法首+内容+语法尾**语法后
@@ -364,22 +364,22 @@ export interface CherryEngineOptions {
        */
       needWhitespace?: boolean,
     },
-    mathBlock?: {
+    mathBlock?: false | {
       engine?: 'katex' | 'MathJax', // katex或MathJax
       src?: string,
       plugins?: boolean, // 加载插件
     },
-    inlineMath?: {
+    inlineMath?: false | {
       engine?: 'katex' | 'MathJax', // katex或MathJax
       src?: string,
     },
-    toc?: {
+    toc?: false | {
       /** 默认只渲染一个目录 */
       allowMultiToc?: boolean,
       /** 是否显示自增序号 */
       showAutoNumber?: boolean,
     },
-    header?: {
+    header?: false | {
       /**
        * 标题的样式：
        *  - default       默认样式，标题前面有锚点
@@ -398,13 +398,45 @@ export interface CherryEngineOptions {
        */
       strict?: boolean,
     },
-    htmlBlock?: {
+    htmlBlock?: false | {
       /**
        * 是否过滤html标签中的style属性
        *    true：过滤style属性
        *    false：不过滤style属性
        */
       filterStyle?: boolean,
+    },
+    footnote?: false | {
+      /**
+       * 脚注标号的配置
+       */
+      refNumber?: {
+        appendClass?: string, // 添加到引用序号的类名
+        render?: (refNum: number, refTitle: string) => string, // 脚注标号的内容
+        clickRefNumberCallback?: (event: MouseEvent, refNum: number, refTitle: string, content: string) => boolean, // 点击标号时回调，如果返回false，则不再执行cherry的默认动作
+      },
+      /**
+       * 脚注列表的配置
+       */
+      refList?: false | {
+        appendClass?: string, // 添加到脚注列表的类名
+        title: {
+          appendClass?: string, // 添加到脚注列表标题的类名
+          render?: () => string, // 标题的内容
+        },
+        listItem?: {
+          appendClass?: string, // 添加到脚注列表单个脚注的类名
+          render?: (refNum: number, refTitle: string, content: string, refNumberLinkRender: (refNum: number, refTitle: string) => string) => string, // 点击脚注列表单个脚注时回调
+        }
+      },
+      /**
+       * hover到脚注标号时，显示一个卡片
+       *  - false: 不响应hover事件
+       */
+      bubbleCard?: false | {
+        appendClass?: string, // 添加到卡片上的类名
+        render?: (refNum: number, refTitle: string, content: string) => string, // 自定义渲染卡片内容
+      },
     },
   };
   /** 自定义语法 */

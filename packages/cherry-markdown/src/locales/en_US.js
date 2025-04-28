@@ -136,4 +136,5 @@ export default {
   recoverShortcut: 'Restore default',
   search: 'Search',
   autoWrap: 'Auto Wrap',
+  footnoteTitle: 'Footnote',
 };
