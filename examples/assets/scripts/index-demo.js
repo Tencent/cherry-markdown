@@ -171,6 +171,54 @@ var basicConfig = {
       // 'header': {
       //   strict: false
       // }
+      footnote: {
+        /**
+         * 脚注标号的配置
+         */
+        refNumber: {
+          appendClass: 'ref-number', // 添加到引用序号的类名
+          // 脚注标号的内容
+          render: (refNum, refTitle) => `[${refNum}]`,
+          // 点击标号时回调
+          clickRefNumberCallback: (event, refNum, refTitle, content) => {
+            // console.log(refNum, refTitle, content);
+          },
+        },
+        /**
+         * 脚注列表的配置
+         *  - refList: false 不渲染脚注列表
+         */
+        // refList: false,
+        refList: {
+          appendClass: 'ref-list',
+          title: {
+            appendClass: 'ref-list-title', // 添加到脚注列表标题的类名
+            render: () => '', // 标题的内容，为空则渲染cherry默认的标题
+          },
+          listItem: {
+            appendClass: 'ref-list-item', // 添加到脚注列表单个脚注的类名
+            render: (refNum, refTitle, content, refNumberLinkRender) => {
+              return `${refNumberLinkRender(refNum, refTitle)}${content}`;
+            },
+          },
+        },
+        /**
+         * hover到脚注标号时，显示一个卡片
+         *  - bubbleCard: false 不响应hover事件
+         */
+        // bubbleCard: false,
+        bubbleCard: {
+          appendClass: 'bubble-card', // 添加到卡片上的类名
+          // 自定义渲染卡片内容
+          render: (refNum, refTitle, content) => {
+            return `
+              <div class="cherry-ref-bubble-card__title">${refNum}. ${refTitle}</div>
+              <div class="cherry-ref-bubble-card__content">${content}</div>
+              <div class="cherry-ref-bubble-card__foot"></div>
+            `;
+          },
+        },
+      },
     },
     customSyntax: {
       // SyntaxHookClass
@@ -229,7 +277,7 @@ var basicConfig = {
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
     sidebar: ['mobilePreview', 'copy', 'theme'],
     toc: {
-      updateLocationHash: false, // 要不要更新URL的hash
+      // updateLocationHash: false, // 要不要更新URL的hash
       defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
     },
     customMenu: {

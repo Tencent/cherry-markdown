@@ -21,6 +21,7 @@ export default class Footnote extends ParagraphBase {
 
   constructor({ externals, config }) {
     super();
+    this.config = config;
     this.footnoteCache = {};
     this.footnoteMap = {}; // 角标缓存索引
     this.footnote = [];
@@ -45,12 +46,22 @@ export default class Footnote extends ParagraphBase {
       // 重复引用时返回已缓存下标
       return this.footnoteMap[key];
     }
+    const $key = key.replace(/"/g, "'");
     const num = this.footnote.length + 1;
     const fn = {};
-    fn.fn = `<sup><a href="#fn:${num}" id="fnref:${num}" title="${key}" class="footnote">[${num}]</a></sup>`;
-    fn.fnref = `<a href="#fnref:${num}" id="fn:${num}" title="${key}" class="footnote-ref">[${num}]</a>`;
+    const refNumberContent = this.config.refNumber.render(num, $key) || `[${num}]`;
+    const refNumberClass = this.config.refNumber?.appendClass || '';
+    const refNumberLinkContent = this.config.refList?.listItem?.render(num, $key, note, () => {
+      const refNumberContent = this.config.refNumber.render(num, $key) || `[${num}]`;
+      return `<a href="#fnref:${num}" id="fn:${num}" title="${$key}" class="footnote-ref ${refNumberClass}">${refNumberContent}</a>`;
+    });
+    fn.fnref = `<a href="#fnref:${num}" id="fn:${num}" title="${$key}" class="footnote-ref ${refNumberClass}">${refNumberContent}</a>`;
     fn.num = num;
-    fn.note = note.trim();
+    fn.note = refNumberLinkContent || fn.fnref + note.trim();
+    fn.note = this.$engine.makeHtmlForFootnote(fn.note);
+    const refNumberBubble = this.config.bubbleCard ? 'cherry-show-bubble-card' : '';
+    const refNumberFinalClass = `footnote ${refNumberClass} ${refNumberBubble}`.replace(/ {2,}/g, ' ');
+    fn.fn = `<sup class="cherry-footnote-number"><a href="#fn:${num}" id="fnref:${num}" title="${$key}" data-index="${num}" data-key="${$key}" class="${refNumberFinalClass}">${refNumberContent}</a></sup>`;
     this.footnote.push(fn);
     const replaceKey = `\0~fn#${num - 1}#\0`;
     this.footnoteMap[key] = replaceKey;
@@ -66,9 +77,18 @@ export default class Footnote extends ParagraphBase {
     if (footnote.length <= 0) {
       return '';
     }
-    let html = footnote.map((note) => `<div class="one-footnote">\n${note.fnref}${note.note}\n</div>`).join('');
+    const oneFootnoteClass = this.config.refList?.listItem?.appendClass || '';
+    let html = footnote
+      .map(
+        (note, index) => `<div data-index="${index + 1}" class="one-footnote ${oneFootnoteClass}">${note.note}</div>`,
+      )
+      .join('');
     const sign = this.$engine.hash(html);
-    html = `<div class="footnote" data-sign="${sign}" data-lines="0"><div class="footnote-title">脚注</div>${html}</div>`;
+    const title = this.config.refList?.title?.render() || this.$engine.$cherry.locale.footnoteTitle;
+    const hiddenClass = this.config.refList ? '' : 'hidden';
+    const footnoteClass = this.config.refList?.appendClass || '';
+    const footnoteTitleClass = this.config.refList?.title?.appendClass || '';
+    html = `<div class="footnote ${footnoteClass} ${hiddenClass}" data-sign="${sign}" data-lines="0"><div class="footnote-title ${footnoteTitleClass}">${title}</div>${html}</div>`;
     return html;
   }
 

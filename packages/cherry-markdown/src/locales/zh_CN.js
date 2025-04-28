@@ -139,4 +139,5 @@ export default {
   recoverShortcut: '恢复默认',
   search: '搜索',
   autoWrap: '自动换行',
+  footnoteTitle: '脚注',
 };

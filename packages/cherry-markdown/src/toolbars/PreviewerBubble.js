@@ -16,6 +16,7 @@
 
 import imgSizeHandler from '@/utils/imgSizeHandler';
 import TableHandler from '@/utils/tableContentHandler';
+import FootnoteHoverHandler from '@/utils/footnoteHoverHandler';
 import CodeHandler from '@/utils/codeBlockContentHandler';
 import { drawioDialog } from '@/utils/dialog';
 import { imgDrawioReg, getValueWithoutCode } from '@/utils/regexp';
@@ -187,6 +188,16 @@ export default class PreviewerBubble {
         }
         this.showCodeBlockPreviewerBubbles('hover', codeBlock);
         return;
+      case 'A':
+        // @ts-ignore
+        // eslint-disable-next-line no-case-declarations
+        const bubbleCard = this.previewer?.$cherry?.options?.engine?.syntax?.footnote?.bubbleCard || false;
+        if (bubbleCard !== false && /cherry-show-bubble-card/.test(e.target.className)) {
+          this.removeHoverBubble.cancel();
+          this.$removeAllPreviewerBubbles('hover');
+          this.$showFootNoteBubbleCardPreviewerBubbles('hover', e.target, bubbleCard);
+          return;
+        }
     }
     this.removeHoverBubble();
   }
@@ -241,6 +252,14 @@ export default class PreviewerBubble {
    * @returns
    */
   $onClick(e) {
+    if (this.previewer.$cherry.options.callback.onClickPreview) {
+      // 如果有自定义的onClickPreview回调函数，则先执行
+      const ret = this.previewer.$cherry.options.callback.onClickPreview(e);
+      // @ts-ignore
+      if (ret === false) {
+        return ret;
+      }
+    }
     const { target } = e;
     if (!(target instanceof Element)) {
       return;
@@ -281,6 +300,55 @@ export default class PreviewerBubble {
       if (this.bubbleHandler?.hover?.unExpandDom) {
         this.bubbleHandler.hover.unExpandDom.classList.remove('hidden');
       }
+    }
+
+    // 不论enablePreviewerBubble是否开启，以下功能全都可以执行
+    switch (target.tagName) {
+      case 'A':
+        // 如果配置了点击toc目录不更新location hash
+        // @ts-ignore
+        if (this.previewer.$cherry.options.toolbars.toc?.updateLocationHash === false) {
+          if (target instanceof Element && target.nodeName === 'A' && /level-\d+/.test(target.className)) {
+            const liNode = target.parentElement;
+            const index = Array.from(liNode.parentElement.children).indexOf(liNode) - 1;
+            this.previewer.scrollToHeadByIndex(index);
+            e.stopPropagation();
+            e.preventDefault();
+          }
+        }
+        // 如果点击的是脚注
+        if (target instanceof Element && target.nodeName === 'A' && /(footnote|footnote-ref)/.test(target.className)) {
+          // @ts-ignore
+          if (this.previewer.$cherry.options.engine?.syntax?.footnote?.refNumber?.clickRefNumberCallback) {
+            const refNum = target.getAttribute('data-index');
+            const refTitle = target.getAttribute('data-key');
+            const content =
+              this.previewer.getDomContainer().querySelector(`.one-footnote[data-index="${refNum}"]`).innerHTML ?? '';
+            // 如果有自定义的clickRefNumberCallback回调函数，则先执行
+            // @ts-ignore
+            const ret = this.previewer.$cherry.options.engine.syntax.footnote.refNumber.clickRefNumberCallback(
+              e,
+              refNum,
+              refTitle,
+              content,
+            );
+            // @ts-ignore
+            if (ret === false) {
+              e.stopPropagation();
+              e.preventDefault();
+              return ret;
+            }
+          }
+          /** 增加个潜规则逻辑，脚注跳转时是否更新location hash也跟随options.toolbars.toc.updateLocationHash 的配置 */
+          // @ts-ignore
+          if (this.previewer.$cherry.options.toolbars.toc?.updateLocationHash === false) {
+            const id = target.getAttribute('href');
+            this.previewer.scrollToId(id);
+            e.stopPropagation();
+            e.preventDefault();
+          }
+        }
+        break;
     }
 
     if (!this.previewer.options.enablePreviewerBubble) {
@@ -379,6 +447,35 @@ export default class PreviewerBubble {
     if (Object.keys(this.bubbleHandler).length <= 0) {
       this.previewer.$cherry.wrapperDom.style.overflow = this.oldWrapperDomOverflow || '';
     }
+  }
+
+  /**
+   * hover到脚注的数字角标时展示悬浮卡片
+   * @param {string} trigger 触发方式
+   * @param {HTMLElement} htmlElement 触发的角标
+   * @param {object} bubbleConfig 悬浮卡片的配置
+   */
+  $showFootNoteBubbleCardPreviewerBubbles(trigger, htmlElement, bubbleConfig) {
+    if (this.bubbleHandler[trigger]) {
+      if (this.bubbleHandler[trigger].aElement === htmlElement) {
+        // 已经存在相同的target，直接返回
+        this.bubbleHandler[trigger].showBubble();
+        return;
+      }
+    }
+    this.$createPreviewerBubbles(
+      trigger,
+      `footnote-ref-hover-handler cherry-markdown ${bubbleConfig.appendClass ?? ''}`,
+    );
+    const handler = new FootnoteHoverHandler(
+      trigger,
+      htmlElement,
+      this.bubble[trigger],
+      this.previewer.$cherry,
+      bubbleConfig,
+    );
+    handler.showBubble();
+    this.bubbleHandler[trigger] = handler;
   }
 
   /**

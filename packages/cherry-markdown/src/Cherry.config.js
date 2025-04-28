@@ -360,6 +360,52 @@ const defaultConfig = {
          */
         filterStyle: false,
       },
+      footnote: {
+        /**
+         * 脚注标号的配置
+         */
+        refNumber: {
+          appendClass: '', // 添加到引用序号的类名
+          // 脚注标号的内容
+          render: (refNum, refTitle) => `[${refNum}]`,
+          // 点击标号时回调
+          clickRefNumberCallback: (event, refNum, refTitle, content) => {
+            return true;
+          },
+        },
+        /**
+         * 脚注列表的配置
+         *  - refList: false 不渲染脚注列表
+         */
+        refList: {
+          appendClass: '',
+          title: {
+            appendClass: '', // 添加到脚注列表标题的类名
+            render: () => '', // 标题的内容，为空则渲染cherry默认的标题
+          },
+          listItem: {
+            appendClass: '', // 添加到脚注列表单个脚注的类名
+            render: (refNum, refTitle, content, refNumberLinkRender) => {
+              return `${refNumberLinkRender(refNum, refTitle)}${content}`;
+            },
+          },
+        },
+        /**
+         * hover到脚注标号时，显示一个卡片
+         *  - bubbleCard: false 不响应hover事件
+         */
+        bubbleCard: {
+          appendClass: '', // 添加到卡片上的类名
+          // 自定义渲染卡片内容
+          render: (refNum, refTitle, content) => {
+            return `
+              <div class="cherry-ref-bubble-card__title">${refNum}. ${refTitle}</div>
+              <div class="cherry-ref-bubble-card__content">${content}</div>
+              <div class="cherry-ref-bubble-card__foot"></div>
+            `;
+          },
+        },
+      },
     },
   },
   editor: {
