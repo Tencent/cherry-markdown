@@ -30,6 +30,7 @@ export default class FootnoteHoverHandler {
   constructor(trigger, target, container, cherry, bubbleConfig) {
     this.trigger = trigger;
     this.target = target;
+    this.aElement = target;
     this.previewerDom = cherry.previewer.getDomContainer();
     this.container = container;
     this.$cherry = cherry;

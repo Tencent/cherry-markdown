@@ -197,6 +197,7 @@ export default class Cherry extends CherryStatic {
     this.createSidebar();
     this.createHiddenToolbar();
     mountEl.appendChild(wrapperDom);
+    this.$event.bindCallbacksByOptions(this.options);
 
     editor.init(previewer);
     // 创建bubble工具栏，所谓bubble工具栏，是指在编辑区选中文本时悬浮出现的工具栏
@@ -241,7 +242,6 @@ export default class Cherry extends CherryStatic {
     // 强制进行一次渲染 // 不记得为啥要强制渲染了，先屏蔽了
     // this.editText(null, this.editor.editor);
     this.createToc();
-    this.$event.bindCallbacksByOptions(this.options);
     this.restoreDocumentScroll();
   }
 
