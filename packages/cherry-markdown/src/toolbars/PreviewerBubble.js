@@ -457,7 +457,7 @@ export default class PreviewerBubble {
    */
   $showFootNoteBubbleCardPreviewerBubbles(trigger, htmlElement, bubbleConfig) {
     if (this.bubbleHandler[trigger]) {
-      if (this.bubbleHandler[trigger].aElement === htmlElement) {
+      if (this.bubbleHandler[trigger]?.aElement === htmlElement) {
         // 已经存在相同的target，直接返回
         this.bubbleHandler[trigger].showBubble();
         return;
