@@ -186,7 +186,7 @@ export default class CodeBlockHandler {
       editDom.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        this.$expandCodeBlock(true);
+        this.$expandCodeBlock(true, e);
         this.$hideAllBtn();
         this.parent.$removeAllPreviewerBubbles('click');
         this.parent.showCodeBlockPreviewerBubbles('click', this.target);
@@ -246,7 +246,7 @@ export default class CodeBlockHandler {
         e.preventDefault();
         e.stopPropagation();
         this.parent.$removeAllPreviewerBubbles('click');
-        this.$expandCodeBlock(false);
+        this.$expandCodeBlock(false, e);
       });
       this.unExpandDom = unExpandDom;
       oneLineBtnsRight += 8;
@@ -310,16 +310,23 @@ export default class CodeBlockHandler {
   /**
    * 处理扩展、缩起代码块的操作
    */
-  $expandCodeBlock(isExpand = true) {
+  $expandCodeBlock(isExpand = true, event) {
     if (!this.unExpandDom) {
       return;
     }
     this.target.classList.remove('cherry-code-unExpand');
     this.target.classList.remove('cherry-code-expand');
     this.unExpandDom.classList.remove('hidden');
+    const codeContent = this.target.querySelector('pre').innerText;
     if (isExpand) {
+      if (this.$cherry.options.callback.onExpandCode) {
+        this.$cherry.options.callback.onUnExpandCode(event, codeContent);
+      }
       this.target.classList.add('cherry-code-expand');
     } else {
+      if (this.$cherry.options.callback.onExpandCode) {
+        this.$cherry.options.callback.onExpandCode(event, codeContent);
+      }
       this.unExpandDom.classList.add('hidden');
       this.target.classList.add('cherry-code-unExpand');
     }
