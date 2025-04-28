@@ -337,6 +337,30 @@ export default class Engine {
    */
   $setFlowSessionCursorCache(md) {
     if (this.$cherry.options.engine.global.flowSessionContext && this.$cherry.options.engine.global.flowSessionCursor) {
+      // 为了不破坏加粗、斜体等语法，光标占位符放在加粗、斜体语法后面
+      if (/[*_~/^})\]]+\n*$/.test(md)) {
+        return md.replace(/([*_~/^})\]]+\n*)$/, 'CHERRY_FLOW_SESSION_CURSOR$1');
+      }
+      // 针对代码块做特殊处理
+      if (/\n\s*`{1,}\s*\n*$/.test(md)) {
+        return md.replace(/(\n\s*`{1,}\s*\n*)$/, 'CHERRY_FLOW_SESSION_CURSOR$1');
+      }
+      // 针对无序列表做特殊处理
+      if (/\n\s*[-*]$/.test(md)) {
+        return md.replace(/(\n\s*[-*])$/, 'CHERRY_FLOW_SESSION_CURSOR$1');
+      }
+      // 针对表格做特殊处理
+      // 针对表格的第二行做特殊处理
+      if (/\|[\s-:]+\|*\n*$/.test(md)) {
+        return md;
+      }
+      if (/\|\n*$/.test(md)) {
+        return md.replace(/(\|\n*)$/, 'CHERRY_FLOW_SESSION_CURSOR$1');
+      }
+      // 针对换行符做特殊处理
+      if (/\n+$/.test(md)) {
+        return md.replace(/(\n+)$/, 'CHERRY_FLOW_SESSION_CURSOR$1');
+      }
       return `${md}CHERRY_FLOW_SESSION_CURSOR`;
     }
     return md;

@@ -308,13 +308,10 @@ export default class CodeBlock extends ParagraphBase {
     // 如果有奇数个代码块关键字，则进行自动闭合
     if ($codes.length % 2 === 1) {
       const lastCode = $codes[$codes.length - 1].replace(/(`)[^`]+$/, '$1').replace(/\n+/, '');
-      const $str = str
-        .replace(/\n+`{1,2}\n*(CHERRY_FLOW_SESSION_CURSOR|$)/, '')
-        .replace(/\n+CHERRY_FLOW_SESSION_CURSOR\n+$/, '')
-        .replace(/\n+$/, '');
+      const $str = str.replace(/\n+$/, '').replace(/\n`{1,2}$/, '');
       return `${$str}\n${lastCode}\n`;
     }
-    return str.replace(/(`{2,})CHERRY_FLOW_SESSION_CURSOR/, '$1\nCHERRY_FLOW_SESSION_CURSOR');
+    return str;
   }
 
   beforeMakeHtml(str, sentenceMakeFunc, markdownParams) {
