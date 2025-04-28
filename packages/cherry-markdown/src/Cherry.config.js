@@ -113,17 +113,11 @@ const callbacks = {
   beforeImageMounted: (srcProp, src) => ({ srcProp, src }),
   onClickPreview: (event) => {},
   onExpandCode: (event, code) => {
-    // 阻止默认的粘贴事件
-    // return false;
-    // 对复制内容进行额外处理
-    // console.log(event, code);
+    // 收起代码块
     return code;
   },
   onUnExpandCode: (event, code) => {
-    // 阻止默认的粘贴事件
-    // return false;
-    // 对复制内容进行额外处理
-    // console.log(event, code);
+    // 展开代码块
     return code;
   },
   /**
