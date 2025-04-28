@@ -159,6 +159,10 @@ export default class Engine {
     ) {
       // 自动补全最后一行的加粗、斜体语法
       if (/(^|\n)[^\n]*\*{1,3}[^\n]+$/.test($str) && $str.match(/(^|\n)([^\n]+)$/)) {
+        // 处理公式里有*号的情况
+        $str = $str.replace(/(~D{1,2})([^\n]+?)\1/g, (match, begin, content) => {
+          return `${begin}${content.replace(/\*/g, 'Σ*CONTENT*TMP')}${begin}`;
+        });
         const lastLineStr = $str.match(/(^|\n)([^\n]+)$/)[2].split(/(\*{1,3})/g);
         const emphasis = [];
         for (let i = 0; i < lastLineStr.length; i++) {
@@ -187,6 +191,9 @@ export default class Engine {
         if (emphasis.length === 2) {
           $str = $str.replace(/(\*{1,3})(\s*)([^*\n]+?)\*{0,2}$/, '$1$2$3$2$1');
         }
+        $str = $str.replace(/(~D{1,2})([^\n]+?)\1/g, (match, begin, content) => {
+          return `${begin}${content.replace(/Σ\*CONTENT\*TMP/g, '*')}${begin}`;
+        });
       }
     }
     // 避免正则性能问题，如/.+\n/.test(' '.repeat(99999)), 回溯次数过多
