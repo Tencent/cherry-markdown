@@ -297,6 +297,10 @@ export default class PreviewerBubble {
       const expandBtnDom = this.$getClosestNode(target, 'DIV');
       expandBtnDom.parentNode.parentNode.classList.remove('cherry-code-unExpand');
       expandBtnDom.parentNode.parentNode.classList.add('cherry-code-expand');
+      if (this.$cherry.options.callback.onExpandCode) {
+        const codeContent = expandBtnDom.parentNode.parentNode.innerText;
+        this.$cherry.options.callback.onUnExpandCode(e, codeContent);
+      }
       if (this.bubbleHandler?.hover?.unExpandDom) {
         this.bubbleHandler.hover.unExpandDom.classList.remove('hidden');
       }
