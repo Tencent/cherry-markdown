@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.9.2
+
+### Patch Changes
+
+- fix: browser size changes picture control layer offset problem [@YFAnt](https://github.com/YFAnt)([#1072](https://github.com/Tencent/cherry-markdown/pull/1072))([`291ce59`](https://github.com/Tencent/cherry-markdown/commit/291ce59468f26031f41b2dc0725af61f6c4da2e6))
+- fix: #1150 修复自动补全加粗被公式干扰的情况 [@sunsonliu](https://github.com/sunsonliu)([#1166](https://github.com/Tencent/cherry-markdown/pull/1166))([`1e5b450`](https://github.com/Tencent/cherry-markdown/commit/1e5b450921889448d562790716063546c2c617e3))
+- fix: #1148 修复 afterInit 事件没有触发的问题 [@sunsonliu](https://github.com/sunsonliu)([#1165](https://github.com/Tencent/cherry-markdown/pull/1165))([`7cb7843`](https://github.com/Tencent/cherry-markdown/commit/7cb7843593166b44bf0759f82c74bdd70c5b7944))
+- feat: #1080 扩展脚注的功能，增加 hover 数字角标出现 tips 的能力 [@sunsonliu](https://github.com/sunsonliu)([#1161](https://github.com/Tencent/cherry-markdown/pull/1161))([`d7cf684`](https://github.com/Tencent/cherry-markdown/commit/d7cf684ecffc4c779eb39bec2291caed509cf579))
+- feat: 优化流式输出的效果 [@sunsonliu](https://github.com/sunsonliu)([#1164](https://github.com/Tencent/cherry-markdown/pull/1164))([`40a7cef`](https://github.com/Tencent/cherry-markdown/commit/40a7cefc678111c09e4dfbf494e0d0c488281f5c))
+- fix: #1154 修复有序列表嵌套代码块时出现边框样式的问题 [@sunsonliu](https://github.com/sunsonliu)([#1156](https://github.com/Tencent/cherry-markdown/pull/1156))([`f5faca5`](https://github.com/Tencent/cherry-markdown/commit/f5faca58a30ed87a2b8f6980f6a2208e2bee342d))
+
 ## 0.9.1
 
 ### Patch Changes
