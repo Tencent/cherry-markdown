@@ -49,6 +49,30 @@ export default class CodeBlock extends ParagraphBase {
       this.customParser = { ...config.customRenderer };
     }
     this.customHighlighter = config.highlighter;
+    this.failedCleanCacheTimes = 0;
+    this.codeTimer = null;
+  }
+
+  afterMakeHtml(html) {
+    if (this.codeTimer) {
+      clearTimeout(this.codeTimer);
+      this.failedCleanCacheTimes += 1;
+      this.codeTimer = null;
+    }
+    this.codeTimer = setTimeout(() => {
+      this.$resetCache();
+    }, 500);
+    if (this.failedCleanCacheTimes > 5) {
+      this.failedCleanCacheTimes = 0;
+      setTimeout(() => {
+        this.$resetCache();
+      }, 500);
+    }
+    return this.restoreCache(html);
+  }
+
+  $resetCache() {
+    this.codeCache = {};
   }
 
   $codeCache(sign, str) {
@@ -59,11 +83,6 @@ export default class CodeBlock extends ParagraphBase {
     if (this.codeCache[sign]) {
       return this.codeCache[sign];
     }
-
-    if (this.codeCache.length > 40) {
-      this.codeCache.length = 0;
-    }
-
     return false;
   }
 
