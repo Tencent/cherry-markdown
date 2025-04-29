@@ -79,6 +79,7 @@ export default class Engine {
      */
     makeHtml(md: string, returnType?: 'string' | 'object'): string | HTMLCollection;
     makeHtmlForBlockquote(md: any): any;
+    makeHtmlForFootnote(md: any): any;
     mounted(): void;
     /**
      * @param {string} html html字符串

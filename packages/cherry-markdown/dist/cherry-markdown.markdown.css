@@ -3030,7 +3030,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 .cherry-markdown.theme__dark hr {
   border-color: rgb(105, 105, 105);
 }
-.cherry-markdown.theme__dark p code, .cherry-markdown.theme__dark li code {
+.cherry-markdown.theme__dark code:not([class]) {
   background-color: rgb(81, 56, 56);
   color: rgb(255, 203, 107);
   border: 1px solid rgb(105, 105, 105);
@@ -3279,7 +3279,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 .cherry-markdown.theme__light hr {
   border-color: rgb(25, 113, 194);
 }
-.cherry-markdown.theme__light p code, .cherry-markdown.theme__light li code {
+.cherry-markdown.theme__light code:not([class]) {
   background-color: rgb(215, 230, 254);
   color: rgb(77, 171, 247);
   border: 1px solid rgb(25, 113, 194);
@@ -3481,7 +3481,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 .cherry-markdown.theme__green hr {
   border-color: #2f9e44;
 }
-.cherry-markdown.theme__green p code, .cherry-markdown.theme__green li code {
+.cherry-markdown.theme__green code:not([class]) {
   background-color: #d3f9d8;
   color: #40c057;
   border: 1px solid #2f9e44;
@@ -3707,7 +3707,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 .cherry-markdown.theme__red hr {
   border-color: #c2255c;
 }
-.cherry-markdown.theme__red p code, .cherry-markdown.theme__red li code {
+.cherry-markdown.theme__red code:not([class]) {
   background-color: #ffdeeb;
   color: #f06595;
   border: 1px solid #c2255c;
@@ -3964,8 +3964,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 .cherry-markdown.theme__violet hr {
   border-color: #6741d9;
 }
-.cherry-markdown.theme__violet p code,
-.cherry-markdown.theme__violet li code {
+.cherry-markdown.theme__violet code:not([class]) {
   background-color: #e5dbff;
   color: #7950f2;
   border: 1px solid #6741d9;
@@ -4199,7 +4198,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 .cherry-markdown.theme__blue hr {
   border-color: #3949AB;
 }
-.cherry-markdown.theme__blue p code, .cherry-markdown.theme__blue li code {
+.cherry-markdown.theme__blue code:not([class]) {
   background-color: #EDE7F6;
   color: #8C9EFF;
   border: 1px solid #3949AB;

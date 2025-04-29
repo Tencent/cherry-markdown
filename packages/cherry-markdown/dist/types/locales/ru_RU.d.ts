@@ -120,5 +120,6 @@ declare const _default: {
     recoverShortcut: string;
     search: string;
     autoWrap: string;
+    footnoteTitle: string;
 };
 export default _default;

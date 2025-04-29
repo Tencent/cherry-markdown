@@ -161,6 +161,7 @@ export default class Cherry extends CherryStatic {
             recoverShortcut: string;
             search: string;
             autoWrap: string;
+            footnoteTitle: string;
         };
         en_US: {
             bold: string;
@@ -287,6 +288,7 @@ export default class Cherry extends CherryStatic {
             recoverShortcut: string;
             search: string;
             autoWrap: string;
+            footnoteTitle: string;
         };
         ru_RU: {
             bold: string;
@@ -415,6 +417,7 @@ export default class Cherry extends CherryStatic {
             recoverShortcut: string;
             search: string;
             autoWrap: string;
+            footnoteTitle: string;
         };
     };
     locale: any;

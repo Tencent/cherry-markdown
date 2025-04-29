@@ -3,6 +3,7 @@ export default class Footnote extends ParagraphBase {
         externals: any;
         config: any;
     });
+    config: any;
     footnoteCache: {};
     footnoteMap: {};
     footnote: any[];

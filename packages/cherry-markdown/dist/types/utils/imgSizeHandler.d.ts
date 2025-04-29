@@ -285,4 +285,12 @@ declare namespace imgSizeHandler {
         changeX: number;
         changeY: number;
     };
+    /**
+     * 更新图片大小处理器的位置
+     */
+    function updatePosition(): void;
+    /**
+     * 更新图片大小处理器的位置
+     */
+    function updatePosition(): void;
 }

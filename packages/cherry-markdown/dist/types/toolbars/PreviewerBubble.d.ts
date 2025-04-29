@@ -65,7 +65,7 @@ export default class PreviewerBubble {
      * @param {MouseEvent} e
      * @returns
      */
-    $onClick(e: MouseEvent): void;
+    $onClick(e: MouseEvent): any;
     $onChange(e: any): void;
     $getClosestNode(node: any, targetNodeName: any): any;
     /**
@@ -73,6 +73,13 @@ export default class PreviewerBubble {
      * @param {string} trigger 移除指定的触发方式，不传默认全部移除
      */
     $removeAllPreviewerBubbles(trigger?: string): void;
+    /**
+     * hover到脚注的数字角标时展示悬浮卡片
+     * @param {string} trigger 触发方式
+     * @param {HTMLElement} htmlElement 触发的角标
+     * @param {object} bubbleConfig 悬浮卡片的配置
+     */
+    $showFootNoteBubbleCardPreviewerBubbles(trigger: string, htmlElement: HTMLElement, bubbleConfig: object): void;
     /**
      * 为触发的table增加操作工具栏
      * @param {string} trigger 触发方式

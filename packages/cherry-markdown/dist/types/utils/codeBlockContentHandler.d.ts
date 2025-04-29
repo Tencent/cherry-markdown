@@ -54,7 +54,7 @@ export default class CodeBlockHandler {
     /**
      * 处理扩展、缩起代码块的操作
      */
-    $expandCodeBlock(isExpand?: boolean): void;
+    $expandCodeBlock(isExpand: boolean, event: any): void;
     /**
      * 处理复制代码块的操作
      */
