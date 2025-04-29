@@ -292,7 +292,19 @@ export default class Engine {
     if (!this.hashStrMap[str]) {
       this.hashStrMap[str] = CryptoJS.SHA256(str).toString();
     }
-    return this.hashStrMap[str];
+    const ret = this.hashStrMap[str];
+    // 当缓存队列比较大时，随机抛弃500个缓存
+    if (Object.keys(this.hashStrMap).length > 2000) {
+      let limit = 0;
+      for (const key of Object.keys(this.hashStrMap)) {
+        limit += 1;
+        if (limit > 200) {
+          return;
+        }
+        delete this.hashStrMap[key];
+      }
+    }
+    return ret;
   }
 
   $checkCache(str, func) {
