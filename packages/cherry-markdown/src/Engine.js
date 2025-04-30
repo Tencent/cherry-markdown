@@ -345,16 +345,20 @@ export default class Engine {
   $setFlowSessionCursorCache(md) {
     if (this.$cherry.options.engine.global.flowSessionContext && this.$cherry.options.engine.global.flowSessionCursor) {
       // 为了不破坏加粗、斜体等语法，光标占位符放在加粗、斜体语法后面
-      if (/[*_~/^})\]]+\n*$/.test(md)) {
-        return md.replace(/([*_~/^})\]]+\n*)$/, 'CHERRY_FLOW_SESSION_CURSOR$1');
+      if (/[*_~^]+\n*$/.test(md)) {
+        return md.replace(/([*_~^]+\n*)$/, 'CHERRYFLOWSESSIONCURSOR$1');
+      }
+      // 针对信息面板和手风琴做特殊处理
+      if (/:::\s*\n*$/.test(md) || /\+\+[+-]*\s*\n*$/.test(md)) {
+        return md;
       }
       // 针对代码块做特殊处理
       if (/\n\s*`{1,}\s*\n*$/.test(md)) {
-        return md.replace(/(\n\s*`{1,}\s*\n*)$/, 'CHERRY_FLOW_SESSION_CURSOR$1');
+        return md.replace(/(\n\s*`{1,}\s*\n*)$/, 'CHERRYFLOWSESSIONCURSOR$1');
       }
       // 针对无序列表做特殊处理
       if (/\n\s*[-*]$/.test(md)) {
-        return md.replace(/(\n\s*[-*])$/, 'CHERRY_FLOW_SESSION_CURSOR$1');
+        return md.replace(/(\n\s*[-*])$/, 'CHERRYFLOWSESSIONCURSOR$1');
       }
       // 针对表格做特殊处理
       // 针对表格的第二行做特殊处理
@@ -362,13 +366,13 @@ export default class Engine {
         return md;
       }
       if (/\|\n*$/.test(md)) {
-        return md.replace(/(\|\n*)$/, 'CHERRY_FLOW_SESSION_CURSOR$1');
+        return md.replace(/(\|\n*)$/, 'CHERRYFLOWSESSIONCURSOR$1');
       }
       // 针对换行符做特殊处理
       if (/\n+$/.test(md)) {
-        return md.replace(/(\n+)$/, 'CHERRY_FLOW_SESSION_CURSOR$1');
+        return md.replace(/(\n+)$/, 'CHERRYFLOWSESSIONCURSOR$1');
       }
-      return `${md}CHERRY_FLOW_SESSION_CURSOR`;
+      return `${md}CHERRYFLOWSESSIONCURSOR`;
     }
     return md;
   }
@@ -386,7 +390,7 @@ export default class Engine {
       this.clearCursorTimer = setTimeout(() => {
         this.$cherry.clearFlowSessionCursor();
       }, 2560);
-      return md.replace(/CHERRY_FLOW_SESSION_CURSOR/g, this.$cherry.options.engine.global.flowSessionCursor);
+      return md.replace(/CHERRYFLOWSESSIONCURSOR/g, this.$cherry.options.engine.global.flowSessionCursor);
     }
     return md;
   }
