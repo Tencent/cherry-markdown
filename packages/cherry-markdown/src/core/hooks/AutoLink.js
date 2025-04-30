@@ -103,9 +103,10 @@ export default class AutoLink extends SyntaxBase {
     if (!(this.test(str) && (EMAIL_INLINE.test(str) || URL_INLINE_NO_SLASH.test(str)))) {
       return str;
     }
-    return str.replace(this.RULE.reg, (match, left, protocol, address, right, index, str) => {
+    return str.replace(this.RULE.reg, (match, left, protocol, _address, right, index, str) => {
       // 数字实体字符系临时处理方法，详情参见HTMLBlock注释
       // maybe a html attr, skip it
+      const address = _address?.replace(/CHERRYFLOWSESSIONCURSOR/g, '');
       if (
         // ((left !== '<' || left !== '&#60;') && (right !== '>' || right !== '&#62;')) ||
         this.isLinkInHtmlAttribute(str, index, protocol.length + address.length) ||
@@ -212,7 +213,7 @@ export default class AutoLink extends SyntaxBase {
    * @returns 渲染的a标签
    */
   renderLink(url, text) {
-    let linkText = text;
+    let linkText = text?.replace(/CHERRYFLOWSESSIONCURSOR/g, '');
     if (typeof linkText !== 'string') {
       if (this.enableShortLink) {
         const Url = url.replace(/^https?:\/\//i, '');
