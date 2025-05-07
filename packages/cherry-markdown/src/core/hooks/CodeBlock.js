@@ -89,6 +89,15 @@ export default class CodeBlock extends ParagraphBase {
     }
 
     if (this.codeCache[sign]) {
+      // 如果命中了缓存，则更新缓存顺序
+      for (let i = 0; i < this.codeCacheList.length - 100; i++) {
+        if (this.codeCacheList[i] === sign) {
+          // 删除i位置的元素
+          this.codeCacheList.splice(i, 1);
+          this.codeCacheList.push(sign);
+          break;
+        }
+      }
       return this.codeCache[sign];
     }
     return false;
