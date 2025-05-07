@@ -33,6 +33,7 @@ export default class CodeBlock extends ParagraphBase {
     super({ needCache: true });
     CodeBlock.inlineCodeCache = {};
     this.codeCache = {};
+    this.codeCacheList = [];
     this.customLang = [];
     this.customParser = {};
     this.lineNumber = config.lineNumber; // 是否显示行号
@@ -72,11 +73,18 @@ export default class CodeBlock extends ParagraphBase {
   }
 
   $resetCache() {
-    this.codeCache = {};
+    if (this.codeCacheList.length > 100) {
+      // 如果缓存超过100条，则清空最早的缓存
+      for (let i = 0; i < this.codeCacheList.length - 100; i++) {
+        delete this.codeCache[this.codeCacheList[i]];
+      }
+      this.codeCacheList = this.codeCacheList.slice(-100);
+    }
   }
 
   $codeCache(sign, str) {
     if (sign && str) {
+      this.codeCacheList.push(sign);
       this.codeCache[sign] = str;
     }
 
