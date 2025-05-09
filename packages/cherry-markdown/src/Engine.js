@@ -26,6 +26,7 @@ import { configureMathJax } from './utils/mathjax';
 import UrlCache from './UrlCache';
 import htmlParser from './utils/htmlparser';
 import { isBrowser } from './utils/env';
+import { JSDOM } from 'jsdom';
 
 export default class Engine {
   /**
@@ -416,7 +417,12 @@ export default class Engine {
     $md = this.$clearFlowSessionCursorCache($md);
     if (returnType === 'object') {
       let ret = null;
-      if (typeof window.DOMParser !== 'undefined') {
+      if (!isBrowser()) {
+        const { window } = new JSDOM('');
+        const tmpDiv = window.document.createElement('div');
+        tmpDiv.innerHTML = $md;
+        ret = tmpDiv.children;
+      } else if (typeof window.DOMParser !== 'undefined') {
         const parser = new DOMParser();
         const doc = parser.parseFromString($md, 'text/html');
         ret = doc.querySelector('body').children;
