@@ -825,7 +825,7 @@ const htmlParser = {
         .replace(/~s~/g, ' ');
       if (!/\|:-:\|/.test(ret)) {
         const headerMatch = ret.match(/^\n[^\n]+\n/);
-        if(headerMatch) {
+        if (headerMatch) {
           const pipeMatches = headerMatch[0].match(/\|/g);
           if (pipeMatches) {
             const headsCount = pipeMatches.length - 1;
