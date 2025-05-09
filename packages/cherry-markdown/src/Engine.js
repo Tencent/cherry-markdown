@@ -289,6 +289,11 @@ export default class Engine {
    * @returns {String} 哈希值
    */
   hash(str) {
+    // 当缓存队列比较大时，随机抛弃500个缓存
+    if (Object.keys(this.hashStrMap).length > 2000) {
+      const keys = Object.keys(this.hashStrMap).slice(0, 200);
+      keys.forEach((key) => delete this.hashStrMap[key]);
+    }
     if (!this.hashStrMap[str]) {
       this.hashStrMap[str] = CryptoJS.SHA256(str).toString();
     }

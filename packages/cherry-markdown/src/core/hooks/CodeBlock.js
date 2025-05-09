@@ -33,6 +33,7 @@ export default class CodeBlock extends ParagraphBase {
     super({ needCache: true });
     CodeBlock.inlineCodeCache = {};
     this.codeCache = {};
+    this.codeCacheList = [];
     this.customLang = [];
     this.customParser = {};
     this.lineNumber = config.lineNumber; // 是否显示行号
@@ -49,21 +50,56 @@ export default class CodeBlock extends ParagraphBase {
       this.customParser = { ...config.customRenderer };
     }
     this.customHighlighter = config.highlighter;
+    this.failedCleanCacheTimes = 0;
+    this.codeTimer = null;
+  }
+
+  afterMakeHtml(html) {
+    if (this.codeTimer) {
+      clearTimeout(this.codeTimer);
+      this.failedCleanCacheTimes += 1;
+      this.codeTimer = null;
+    }
+    this.codeTimer = setTimeout(() => {
+      this.$resetCache();
+    }, 500);
+    if (this.failedCleanCacheTimes > 5) {
+      this.failedCleanCacheTimes = 0;
+      setTimeout(() => {
+        this.$resetCache();
+      }, 500);
+    }
+    return this.restoreCache(html);
+  }
+
+  $resetCache() {
+    if (this.codeCacheList.length > 100) {
+      // 如果缓存超过100条，则清空最早的缓存
+      for (let i = 0; i < this.codeCacheList.length - 100; i++) {
+        delete this.codeCache[this.codeCacheList[i]];
+      }
+      this.codeCacheList = this.codeCacheList.slice(-100);
+    }
   }
 
   $codeCache(sign, str) {
     if (sign && str) {
+      this.codeCacheList.push(sign);
       this.codeCache[sign] = str;
     }
 
     if (this.codeCache[sign]) {
+      // 如果命中了缓存，则更新缓存顺序
+      for (let i = 0; i < this.codeCacheList.length - 100; i++) {
+        if (this.codeCacheList[i] === sign) {
+          // 删除i位置的元素
+          this.codeCacheList.splice(i, 1);
+          this.codeCacheList.push(sign);
+          break;
+        }
+      }
       return this.codeCache[sign];
     }
-
-    if (this.codeCache.length > 40) {
-      this.codeCache.length = 0;
-    }
-
     return false;
   }
 
