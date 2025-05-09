@@ -37,6 +37,7 @@ export default class ParagraphBase extends SyntaxBase {
       this.cacheKey = `~~C${cacheCounter}`;
       cacheCounter += 1;
     }
+    this.failedResetCacheTimes = 0;
   }
 
   initBrReg(classicBr = false) {
@@ -276,17 +277,7 @@ export default class ParagraphBase extends SyntaxBase {
     if (!this.needCache) {
       return;
     }
-    // 当缓存队列比较大时，随机抛弃500个缓存
-    if (Object.keys(this.cache).length > 3000) {
-      let limit = 0;
-      for (const key of Object.keys(this.cache)) {
-        limit += 1;
-        if (limit > 500) {
-          return;
-        }
-        delete this.cache[key];
-      }
-    }
+    this.cache = {};
   }
 
   restoreCache(html) {
@@ -301,11 +292,18 @@ export default class ParagraphBase extends SyntaxBase {
     const $html = html.replace(regex, (match, cacheSign) => this.popCache(cacheSign.replace(/_L\d+$/, '')));
     if (this.timer) {
       clearTimeout(this.timer);
+      this.failedResetCacheTimes += 1;
       this.timer = null;
     }
     this.timer = setTimeout(() => {
       this.resetCache();
-    }, 1000);
+    }, 500);
+    if (this.failedResetCacheTimes > 5) {
+      this.failedResetCacheTimes = 0;
+      setTimeout(() => {
+        this.resetCache();
+      }, 500);
+    }
     return $html;
   }
 
