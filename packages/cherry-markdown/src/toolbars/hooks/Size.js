@@ -31,10 +31,10 @@ export default class Size extends MenuBase {
       { name: this.$cherry.locale.superLarge, noIcon: true, onclick: this.bindSubClick.bind(this, '32') },
     ];
     this.shortKeyMap = {
-      'Alt-1': '12',
-      'Alt-2': '17',
-      'Alt-3': '24',
-      'Alt-4': '32',
+      'Alt-Digit1': '12',
+      'Alt-Digit2': '17',
+      'Alt-Digit3': '24',
+      'Alt-Digit4': '32',
     };
     this.shortcutKeyMap = {
       [`${ALT_KEY}-${getKeyCode(1)}`]: {
