@@ -1,18 +1,19 @@
-import { diff } from 'jest-diff';
+import { describe, expect, vi, test } from 'vitest';
+import { diff } from '@vitest/utils/diff';
 import CherryEngine from '../../src/index.engine.core';
 import suites from '../suites/commonmark.spec.json';
 
 const cherryEngine = new CherryEngine({
   engine: {
     global: {
-      classicBr: false
+      classicBr: false,
     },
     syntax: {
       header: {
         anchorStyle: 'none',
       },
-    }
-  }
+    },
+  },
 });
 
 const cleanHTML = (raw) => {
@@ -25,7 +26,7 @@ const cleanHTML = (raw) => {
   // 清理首尾的多余空格
   html = html.trim();
   return html;
-}
+};
 
 const formatOutput = (message, input, standard, result) => {
   return `
@@ -35,13 +36,13 @@ const formatOutput = (message, input, standard, result) => {
     cherry: ${result}
     standard(cleaned): ${cleanHTML(standard)}
     cherry(cleaned): ${cleanHTML(result)}
-  `
-}
+  `;
+};
 
 expect.extend({
   matchHTML(result, standard, input) {
     const resultHTML = cleanHTML(result);
-    const standandHTML = cleanHTML(standard)
+    const standandHTML = cleanHTML(standard);
     const pass = standandHTML === resultHTML;
     const message = diff(standandHTML, resultHTML);
     return {
@@ -52,11 +53,13 @@ expect.extend({
 });
 
 describe('engine', () => {
+  beforeEach(() => {
+    vi.stubGlobal('BUILD_ENV', 'production');
+  });
   suites.forEach((item, index) => {
     test(`commonmark-${item.example}`, () => {
-    // @ts-ignore
-      expect(cherryEngine.makeHtml(item.markdown)).matchHTML(item.html, item.markdown);
+      // @ts-ignore
+      expect(cleanHTML(cherryEngine.makeHtml(item.markdown))).toBe(cleanHTML(item.html));
     });
   });
 });
- 
