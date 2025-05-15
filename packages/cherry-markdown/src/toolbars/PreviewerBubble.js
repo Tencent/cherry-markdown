@@ -80,13 +80,9 @@ export default class PreviewerBubble {
       Object.values(this.bubbleHandler).forEach((handler) => handler.emit('keyup', event));
     });
 
-    if (ResizeObserver) {
-      const observer = new ResizeObserver((entries) => {
-        Object.values(this.bubbleHandler).forEach((handler) => handler.emit('resize', {}));
-      });
-
-      observer.observe(this.previewerDom);
-    }
+    this.$cherry.$event.on('editor.size.change', () => {
+      Object.values(this.bubbleHandler).forEach((handler) => handler.emit('resize', {}));
+    });
 
     this.previewerDom.addEventListener(
       'scroll',
