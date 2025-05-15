@@ -38,8 +38,15 @@ export default class Table extends MenuBase {
     if (this.subBubbleTableMenu.dom.style.display === 'none' || !this.hasCacheOnce()) {
       // 插入表格，会出现一个二维面板，用户可以通过点击决定插入表格的行号和列号
       const pos = this.dom.getBoundingClientRect();
-      this.subBubbleTableMenu.dom.style.left = `${pos.left + pos.width}px`;
-      this.subBubbleTableMenu.dom.style.top = `${pos.top + pos.height}px`;
+      // 使用绝对定位，相对于编辑器容器定位，而不是相对于视口
+      // 获取编辑器容器的位置信息
+      const editorContainer = this.$cherry.editor.options.wrapperDom;
+      const containerRect = editorContainer.getBoundingClientRect();
+      const relativeLeft = pos.left - containerRect.left + pos.width;
+      const relativeTop = pos.top - containerRect.top + pos.height;
+      this.subBubbleTableMenu.dom.style.position = 'absolute';
+      this.subBubbleTableMenu.dom.style.left = `${relativeLeft}px`;
+      this.subBubbleTableMenu.dom.style.top = `${relativeTop}px`;
       this.subBubbleTableMenu.show((row, col) => {
         const headerText = ' Header |'.repeat(col);
         const controlText = ' ------ |'.repeat(col);
