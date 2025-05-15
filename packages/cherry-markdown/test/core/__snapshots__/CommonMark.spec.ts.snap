@@ -96,7 +96,7 @@ exports[`engine > commonmark-19 1`] = `
 `;
 
 exports[`engine > commonmark-20 1`] = `
-"<p data-lines="1" data-type="p" data-sign="e79ecea7e601a4fff6204bfec20346c295280df1c060f4d2c791c350e3dd2cdb1"><a title="http://example.com?find=*" href="http://example.com?find=%5C*">http://example.com?find=*</a></p>
+"<p data-lines="1" data-type="p" data-sign="1b168ff51132863e0f54030a514c67cf8f7ce897099d812fade0652389296bba1"><a title="https://example.com?find=*" href="https://example.com?find=%5C*">https://example.com?find=*</a></p>
 "
 `;
 
@@ -2135,12 +2135,12 @@ exports[`engine > commonmark-332 1`] = `
 `;
 
 exports[`engine > commonmark-333 1`] = `
-"<p data-lines="1" data-type="p" data-sign="13c24bf324760a9f177c7c44cef0470ce438957d0b2c5af3378f2cb72454ae951"><code> b </code></p>
+"<p data-lines="1" data-type="p" data-sign="daa243612fdb8046969dcc1a931d65f732e21cf58bac0a1500005d29aa5300df1"><code> b </code></p>
 "
 `;
 
 exports[`engine > commonmark-334 1`] = `
-"<p data-lines="2" data-type="p" data-sign="a148c48fb13b6353b8baaa9e86c5d22e18d28647c99349eaf8cf2833db2b9e062"><code> </code><br><code>  </code></p>
+"<p data-lines="2" data-type="p" data-sign="63473e5c8a2a1e2e0050231be8f188686d40adcaebd17bcf3f765e2d02e5973f2"><code> </code><br><code>  </code></p>
 "
 `;
 
@@ -2202,12 +2202,12 @@ exports[`engine > commonmark-344 1`] = `
 `;
 
 exports[`engine > commonmark-345 1`] = `
-"<p data-lines="1" data-type="p" data-sign="27ef354a044e8404d1ff8a856b9997d28d1a99cf961d47d1bfc6023b3bf5132c1"><code>&lt;http://foo.bar.</code>baz&gt;\`</p>
+"<p data-lines="1" data-type="p" data-sign="ab7fb8d5f4764e99172de42b7fe240dca9d8242d74c80c79dc2ce9c6388966431"><code>&lt;https://foo.bar.</code>baz&gt;\`</p>
 "
 `;
 
 exports[`engine > commonmark-346 1`] = `
-"<p data-lines="1" data-type="p" data-sign="a845cf4b1eae3664cb25b880ca9fd1d59f6e55bbf19d5b4845ed571e9a1ea02e1">&lt;<a title="http://foo.bar." href="http://foo.bar.">http://foo.bar.</a><code>baz&gt;</code></p>
+"<p data-lines="1" data-type="p" data-sign="0d510553f232290a1c4dd791e0c8a70a5ebc340cfe14fbb26a55d21c9ffb161d1">&lt;<a title="https://foo.bar." href="https://foo.bar.">https://foo.bar.</a><code>baz&gt;</code></p>
 "
 `;
 
@@ -2241,1224 +2241,1219 @@ exports[`engine > commonmark-352 1`] = `
 "
 `;
 
-exports[`engine > commonmark-353 1`] = `
-"<p data-lines="1" data-type="p" data-sign="eec24cce9d24f1e78f8f6536741347b9c48f15f1c66f167202a0c1f5639cbff91">*&nbsp;a&nbsp;*</p>
-"
-`;
+exports[`engine > commonmark-353 1`] = `"<ul class="cherry-list__square" data-sign="029947d06ddebd8e255b6239669edbbbe03117d3227d34934523e4d7b7487690" data-lines="1"><li class="cherry-list-item"><p>a *</p></li></ul>"`;
 
 exports[`engine > commonmark-354 1`] = `
-"<p data-lines="1" data-type="p" data-sign="1eb1e69db884a1a1629c0746b5ea07090f51e008626d683cdeb0809f76ae82d41">foo<em>bar</em></p>
+"<p data-lines="1" data-type="p" data-sign="539ac6a532a4c930db5ac0e53ad52a122c9d119d6c61ea74736a4341103777a51"><em>$</em>alpha.</p><p data-lines="2" data-type="p" data-sign="f3e3651134b1f442237b7202a1fc1bd1ff07a82bd6caff394ce51e037a35ba1e2"><em>£</em>bravo.</p><p data-lines="2" data-type="p" data-sign="2b02a949f726c9776724f14d0b958864374ee1c9e747327244df33fef42212ac2"><em>€</em>charlie.</p>
 "
 `;
 
 exports[`engine > commonmark-355 1`] = `
-"<p data-lines="1" data-type="p" data-sign="169498801f3559b4a5c682c7f547e2aec767e78867fe6b56c531e2dfe261b9af1">5<em>6</em>78</p>
+"<p data-lines="1" data-type="p" data-sign="1eb1e69db884a1a1629c0746b5ea07090f51e008626d683cdeb0809f76ae82d41">foo<em>bar</em></p>
 "
 `;
 
 exports[`engine > commonmark-356 1`] = `
-"<p data-lines="1" data-type="p" data-sign="c17b14c1badd2f740d02625364e67eee006f89d587ed2e32a6d62d8d500afee51"><em>foo bar</em></p>
+"<p data-lines="1" data-type="p" data-sign="169498801f3559b4a5c682c7f547e2aec767e78867fe6b56c531e2dfe261b9af1">5<em>6</em>78</p>
 "
 `;
 
 exports[`engine > commonmark-357 1`] = `
-"<p data-lines="1" data-type="p" data-sign="f3c7b9c6f20517329f73f604ea53600a46d71a861061635f65efaeef5b81713e1">_ foo bar_</p>
+"<p data-lines="1" data-type="p" data-sign="c17b14c1badd2f740d02625364e67eee006f89d587ed2e32a6d62d8d500afee51"><em>foo bar</em></p>
 "
 `;
 
 exports[`engine > commonmark-358 1`] = `
-"<p data-lines="1" data-type="p" data-sign="acaf04482154a7c048cfb1ab360781c77f089afa8409956b8c6e491c20a6ad811">a_"foo"_</p>
+"<p data-lines="1" data-type="p" data-sign="f3c7b9c6f20517329f73f604ea53600a46d71a861061635f65efaeef5b81713e1">_ foo bar_</p>
 "
 `;
 
 exports[`engine > commonmark-359 1`] = `
-"<p data-lines="1" data-type="p" data-sign="4a2c834fb90f49e78a7552e5361bf201be9592be74f389c949f7d2cefea0259b1">foo_bar_</p>
+"<p data-lines="1" data-type="p" data-sign="acaf04482154a7c048cfb1ab360781c77f089afa8409956b8c6e491c20a6ad811">a_"foo"_</p>
 "
 `;
 
 exports[`engine > commonmark-360 1`] = `
-"<p data-lines="1" data-type="p" data-sign="9c4a7df20f3fdfe34a09a989d605f387bcb110721b3e83aa060dfc0325bb55de1">5_6_78</p>
+"<p data-lines="1" data-type="p" data-sign="4a2c834fb90f49e78a7552e5361bf201be9592be74f389c949f7d2cefea0259b1">foo_bar_</p>
 "
 `;
 
 exports[`engine > commonmark-361 1`] = `
-"<p data-lines="1" data-type="p" data-sign="43b2fbe602d0896c2c3e80ed07683b77f98dd76928e201691d3870434e782ec01">пристаням_стремятся_</p>
+"<p data-lines="1" data-type="p" data-sign="9c4a7df20f3fdfe34a09a989d605f387bcb110721b3e83aa060dfc0325bb55de1">5_6_78</p>
 "
 `;
 
 exports[`engine > commonmark-362 1`] = `
-"<p data-lines="1" data-type="p" data-sign="19673b803173ca74ac172d0dc17817ee1e0eb915f2a4a5292ebed8e10247905c1">aa_"bb"_cc</p>
+"<p data-lines="1" data-type="p" data-sign="43b2fbe602d0896c2c3e80ed07683b77f98dd76928e201691d3870434e782ec01">пристаням_стремятся_</p>
 "
 `;
 
 exports[`engine > commonmark-363 1`] = `
-"<p data-lines="1" data-type="p" data-sign="439242f51873ce10eb9ee8d7bc4fbad11a9acee7c4902b33ffe88fb0c611d8c41">foo-<em>(bar)</em></p>
+"<p data-lines="1" data-type="p" data-sign="19673b803173ca74ac172d0dc17817ee1e0eb915f2a4a5292ebed8e10247905c1">aa_"bb"_cc</p>
 "
 `;
 
 exports[`engine > commonmark-364 1`] = `
-"<p data-lines="1" data-type="p" data-sign="3b5a3798fb36cf728765d40f01ca93064a7f46f084f6d2aeccb2cba01ccd7e821">_foo*</p>
+"<p data-lines="1" data-type="p" data-sign="439242f51873ce10eb9ee8d7bc4fbad11a9acee7c4902b33ffe88fb0c611d8c41">foo-<em>(bar)</em></p>
 "
 `;
 
 exports[`engine > commonmark-365 1`] = `
-"<p data-lines="1" data-type="p" data-sign="3b184268ce8eb7ba24a8dc1e880b303920a4b1a5b4a0b74fae8370e4a9d13f9a1">*foo bar *</p>
+"<p data-lines="1" data-type="p" data-sign="3b5a3798fb36cf728765d40f01ca93064a7f46f084f6d2aeccb2cba01ccd7e821">_foo*</p>
 "
 `;
 
 exports[`engine > commonmark-366 1`] = `
-"<p data-lines="2" data-type="p" data-sign="4dd2a004ab2dc56405de2584ccc73e14ab8f5e654f6808ad5a1ef2104acf751f2">*foo bar<br>*</p>
+"<p data-lines="1" data-type="p" data-sign="3b184268ce8eb7ba24a8dc1e880b303920a4b1a5b4a0b74fae8370e4a9d13f9a1">*foo bar *</p>
 "
 `;
 
 exports[`engine > commonmark-367 1`] = `
-"<p data-lines="1" data-type="p" data-sign="1a1db5be89c0b3cac561972cce4431e3390cd0f812bc6fdd67d5ca3f41399cd51"><em>(</em>foo)</p>
+"<p data-lines="2" data-type="p" data-sign="4dd2a004ab2dc56405de2584ccc73e14ab8f5e654f6808ad5a1ef2104acf751f2">*foo bar<br>*</p>
 "
 `;
 
 exports[`engine > commonmark-368 1`] = `
-"<p data-lines="1" data-type="p" data-sign="aef576fe43aaa42a0bb310c4934a3e895540a0daff87fe27c26e6d33c3f719331"><em>(</em>foo<em>)</em></p>
+"<p data-lines="1" data-type="p" data-sign="1a1db5be89c0b3cac561972cce4431e3390cd0f812bc6fdd67d5ca3f41399cd51"><em>(</em>foo)</p>
 "
 `;
 
 exports[`engine > commonmark-369 1`] = `
-"<p data-lines="1" data-type="p" data-sign="31264cf2c3baf6a36efd1bd2d5d1a0208592530abedb761a588628906ba504d51"><em>foo</em>bar</p>
+"<p data-lines="1" data-type="p" data-sign="aef576fe43aaa42a0bb310c4934a3e895540a0daff87fe27c26e6d33c3f719331"><em>(</em>foo<em>)</em></p>
 "
 `;
 
 exports[`engine > commonmark-370 1`] = `
-"<p data-lines="1" data-type="p" data-sign="d2b1d722326d872b8278f906f8b33c5750b68f52bf9c62edcbac8b2cd9b167041">_foo bar _</p>
+"<p data-lines="1" data-type="p" data-sign="31264cf2c3baf6a36efd1bd2d5d1a0208592530abedb761a588628906ba504d51"><em>foo</em>bar</p>
 "
 `;
 
 exports[`engine > commonmark-371 1`] = `
-"<p data-lines="1" data-type="p" data-sign="7ceecc91e19cce105833382240c4ff134d1b145a3541ad42f7cbb39c05e7e08e1">_(_foo)</p>
+"<p data-lines="1" data-type="p" data-sign="d2b1d722326d872b8278f906f8b33c5750b68f52bf9c62edcbac8b2cd9b167041">_foo bar _</p>
 "
 `;
 
 exports[`engine > commonmark-372 1`] = `
-"<p data-lines="1" data-type="p" data-sign="e303a2fa287019e40dfdbf102eb45138b86264b4d8f0321d694ae46b0d93f1571"><em>(_foo</em>)_</p>
+"<p data-lines="1" data-type="p" data-sign="7ceecc91e19cce105833382240c4ff134d1b145a3541ad42f7cbb39c05e7e08e1">_(_foo)</p>
 "
 `;
 
 exports[`engine > commonmark-373 1`] = `
-"<p data-lines="1" data-type="p" data-sign="2218d27a90c2253abd09868ed2a9fd09689b96f87d7b2761539fa3279fe56c631">_foo_bar</p>
+"<p data-lines="1" data-type="p" data-sign="e303a2fa287019e40dfdbf102eb45138b86264b4d8f0321d694ae46b0d93f1571"><em>(_foo</em>)_</p>
 "
 `;
 
 exports[`engine > commonmark-374 1`] = `
-"<p data-lines="1" data-type="p" data-sign="05c9ad270b41ddb26e9c3e12d6812a2faf40fa05f3c1355b3c2141556f5462aa1">_пристаням_стремятся</p>
+"<p data-lines="1" data-type="p" data-sign="2218d27a90c2253abd09868ed2a9fd09689b96f87d7b2761539fa3279fe56c631">_foo_bar</p>
 "
 `;
 
 exports[`engine > commonmark-375 1`] = `
-"<p data-lines="1" data-type="p" data-sign="ed6d6a8614facfe0d6031282eee9c82a07821e7453d516a91fb9bd67151f9ef41"><em>foo_bar_baz</em></p>
+"<p data-lines="1" data-type="p" data-sign="05c9ad270b41ddb26e9c3e12d6812a2faf40fa05f3c1355b3c2141556f5462aa1">_пристаням_стремятся</p>
 "
 `;
 
 exports[`engine > commonmark-376 1`] = `
-"<p data-lines="1" data-type="p" data-sign="003a4a31f7cd90d85d7ea0bd55bef5e73cbce5f9684174fd3ddf76d6cf8c98321"><em>(bar)</em>.</p>
+"<p data-lines="1" data-type="p" data-sign="ed6d6a8614facfe0d6031282eee9c82a07821e7453d516a91fb9bd67151f9ef41"><em>foo_bar_baz</em></p>
 "
 `;
 
 exports[`engine > commonmark-377 1`] = `
-"<p data-lines="1" data-type="p" data-sign="f04b8d0fb1997c2fbcc02d9747dd816c8c5ef8a2341adcb83a374acdd8d30f071"><strong>foo bar</strong></p>
+"<p data-lines="1" data-type="p" data-sign="003a4a31f7cd90d85d7ea0bd55bef5e73cbce5f9684174fd3ddf76d6cf8c98321"><em>(bar)</em>.</p>
 "
 `;
 
 exports[`engine > commonmark-378 1`] = `
-"<p data-lines="1" data-type="p" data-sign="e35f1c29742697b53e59556f3ea86751545a12f9d4d30ce6095619ab8142c3531">** foo bar**</p>
+"<p data-lines="1" data-type="p" data-sign="f04b8d0fb1997c2fbcc02d9747dd816c8c5ef8a2341adcb83a374acdd8d30f071"><strong>foo bar</strong></p>
 "
 `;
 
 exports[`engine > commonmark-379 1`] = `
-"<p data-lines="1" data-type="p" data-sign="2d8b74263c75a9ab06c8519f2c02dcb472c4580bbdfa302144791c90768d83dc1">a<strong>"foo"</strong></p>
+"<p data-lines="1" data-type="p" data-sign="e35f1c29742697b53e59556f3ea86751545a12f9d4d30ce6095619ab8142c3531">** foo bar**</p>
 "
 `;
 
 exports[`engine > commonmark-380 1`] = `
-"<p data-lines="1" data-type="p" data-sign="febcf73833c85fe4499e62ada375f60fb7f6565c8fbebd3101282301111585541">foo<strong>bar</strong></p>
+"<p data-lines="1" data-type="p" data-sign="2d8b74263c75a9ab06c8519f2c02dcb472c4580bbdfa302144791c90768d83dc1">a<strong>"foo"</strong></p>
 "
 `;
 
 exports[`engine > commonmark-381 1`] = `
-"<p data-lines="1" data-type="p" data-sign="07249e9a2adc35165779ade04c469f0616cdbc2f1b0e78ccbb0d6851cd3966c71"><strong>foo bar</strong></p>
+"<p data-lines="1" data-type="p" data-sign="febcf73833c85fe4499e62ada375f60fb7f6565c8fbebd3101282301111585541">foo<strong>bar</strong></p>
 "
 `;
 
 exports[`engine > commonmark-382 1`] = `
-"<p data-lines="1" data-type="p" data-sign="7d16444e043ccb4c51f7028f1661e5db26d218514f2ab043ea9ad9f00db8c6b81">__ foo bar__</p>
+"<p data-lines="1" data-type="p" data-sign="07249e9a2adc35165779ade04c469f0616cdbc2f1b0e78ccbb0d6851cd3966c71"><strong>foo bar</strong></p>
 "
 `;
 
 exports[`engine > commonmark-383 1`] = `
-"<p data-lines="2" data-type="p" data-sign="ecb9f48fb1505bf8afceb68eaf3e70235359fb32d407324b3464d63f7dfc431f2">__<br>foo bar__</p>
+"<p data-lines="1" data-type="p" data-sign="7d16444e043ccb4c51f7028f1661e5db26d218514f2ab043ea9ad9f00db8c6b81">__ foo bar__</p>
 "
 `;
 
 exports[`engine > commonmark-384 1`] = `
-"<p data-lines="1" data-type="p" data-sign="b30bbc0051b3935068718141b08bdac3994e984ac5eaa9ab4c2dd96e5ca822341">a__"foo"__</p>
+"<p data-lines="2" data-type="p" data-sign="ecb9f48fb1505bf8afceb68eaf3e70235359fb32d407324b3464d63f7dfc431f2">__<br>foo bar__</p>
 "
 `;
 
 exports[`engine > commonmark-385 1`] = `
-"<p data-lines="1" data-type="p" data-sign="acabcffda4cfdfb117f9e826273e81eaff64da0c6d1115b251d713823aa7f21d1">foo__bar__</p>
+"<p data-lines="1" data-type="p" data-sign="b30bbc0051b3935068718141b08bdac3994e984ac5eaa9ab4c2dd96e5ca822341">a__"foo"__</p>
 "
 `;
 
 exports[`engine > commonmark-386 1`] = `
-"<p data-lines="1" data-type="p" data-sign="6f64d35aac6bf1e72588904a31086ba1ba4178bd48e831687e9bdc59a24e2ae51">5__6__78</p>
+"<p data-lines="1" data-type="p" data-sign="acabcffda4cfdfb117f9e826273e81eaff64da0c6d1115b251d713823aa7f21d1">foo__bar__</p>
 "
 `;
 
 exports[`engine > commonmark-387 1`] = `
-"<p data-lines="1" data-type="p" data-sign="ea4634fa304ae1b397ade6f2185a39031900c328ee4fcff1455050b3b05980fd1">пристаням__стремятся__</p>
+"<p data-lines="1" data-type="p" data-sign="6f64d35aac6bf1e72588904a31086ba1ba4178bd48e831687e9bdc59a24e2ae51">5__6__78</p>
 "
 `;
 
 exports[`engine > commonmark-388 1`] = `
-"<p data-lines="1" data-type="p" data-sign="ee2003de0a523e6a2eb63859552cba6139cc2148f9ddc68d968168684bcce24a1"><strong>foo, __bar</strong>, baz__</p>
+"<p data-lines="1" data-type="p" data-sign="ea4634fa304ae1b397ade6f2185a39031900c328ee4fcff1455050b3b05980fd1">пристаням__стремятся__</p>
 "
 `;
 
 exports[`engine > commonmark-389 1`] = `
-"<p data-lines="1" data-type="p" data-sign="7e1f14b9b12c55adea584cad222cccf858577836d7e4afd2971afb3d50fdb00e1">foo-<strong>(bar)</strong></p>
+"<p data-lines="1" data-type="p" data-sign="ee2003de0a523e6a2eb63859552cba6139cc2148f9ddc68d968168684bcce24a1"><strong>foo, __bar</strong>, baz__</p>
 "
 `;
 
 exports[`engine > commonmark-390 1`] = `
-"<p data-lines="1" data-type="p" data-sign="100523724c32bad486d57b94c1a5241584cf1c9f28f457694138989339104ff81">**foo bar **</p>
+"<p data-lines="1" data-type="p" data-sign="7e1f14b9b12c55adea584cad222cccf858577836d7e4afd2971afb3d50fdb00e1">foo-<strong>(bar)</strong></p>
 "
 `;
 
 exports[`engine > commonmark-391 1`] = `
-"<p data-lines="1" data-type="p" data-sign="328ef2072680bcf3a58eb51e4fede7e879a9736fe23d7ab476da43d5052c47f71"><strong>(</strong>foo)</p>
+"<p data-lines="1" data-type="p" data-sign="100523724c32bad486d57b94c1a5241584cf1c9f28f457694138989339104ff81">**foo bar **</p>
 "
 `;
 
 exports[`engine > commonmark-392 1`] = `
-"<p data-lines="1" data-type="p" data-sign="abf3ea93c4b6fd48f1d6d9fb5bcbe1cf4ffd466c4ff236d905c405f898849c7e1"><em>(</em>*foo*<em>)</em></p>
+"<p data-lines="1" data-type="p" data-sign="328ef2072680bcf3a58eb51e4fede7e879a9736fe23d7ab476da43d5052c47f71"><strong>(</strong>foo)</p>
 "
 `;
 
 exports[`engine > commonmark-393 1`] = `
-"<p data-lines="2" data-type="p" data-sign="791554992ecd90654924486cd7b2a9eee27aceb56f46c62d086d5ef37d45d1e72">*<em>Gomphocarpus (</em>Gomphocarpus physocarpus*, syn.<br><em>Asclepias physocarpa</em>)**</p>
+"<p data-lines="1" data-type="p" data-sign="abf3ea93c4b6fd48f1d6d9fb5bcbe1cf4ffd466c4ff236d905c405f898849c7e1"><em>(</em>*foo*<em>)</em></p>
 "
 `;
 
 exports[`engine > commonmark-394 1`] = `
-"<p data-lines="1" data-type="p" data-sign="36ff9542d83e38788e2ebafc2815b1d9a6deed619a58583e66ddfd9402548cdf1"><strong>foo "<em>bar</em>" foo</strong></p>
+"<p data-lines="2" data-type="p" data-sign="791554992ecd90654924486cd7b2a9eee27aceb56f46c62d086d5ef37d45d1e72">*<em>Gomphocarpus (</em>Gomphocarpus physocarpus*, syn.<br><em>Asclepias physocarpa</em>)**</p>
 "
 `;
 
 exports[`engine > commonmark-395 1`] = `
-"<p data-lines="1" data-type="p" data-sign="66b7c084d7cb9fbbc2c57b4f2447108786f2520bd57c70733fa9261952489b6e1"><strong>foo</strong>bar</p>
+"<p data-lines="1" data-type="p" data-sign="36ff9542d83e38788e2ebafc2815b1d9a6deed619a58583e66ddfd9402548cdf1"><strong>foo "<em>bar</em>" foo</strong></p>
 "
 `;
 
 exports[`engine > commonmark-396 1`] = `
-"<p data-lines="1" data-type="p" data-sign="0991ee252aa9a0dc04f9192a11021dbfb54a488688631b4f1e51c839b883285b1">__foo bar __</p>
+"<p data-lines="1" data-type="p" data-sign="66b7c084d7cb9fbbc2c57b4f2447108786f2520bd57c70733fa9261952489b6e1"><strong>foo</strong>bar</p>
 "
 `;
 
 exports[`engine > commonmark-397 1`] = `
-"<p data-lines="1" data-type="p" data-sign="0ab860296d7c774e22262542c96234ecf4c93beb42d143be66df040c892c08ed1">__(__foo)</p>
+"<p data-lines="1" data-type="p" data-sign="0991ee252aa9a0dc04f9192a11021dbfb54a488688631b4f1e51c839b883285b1">__foo bar __</p>
 "
 `;
 
 exports[`engine > commonmark-398 1`] = `
-"<p data-lines="1" data-type="p" data-sign="870ff114340a83c78f7d825086fbdc03929b36ef1b599cfef4e3274bebe207c61"><em>(<strong>foo</strong>)</em></p>
+"<p data-lines="1" data-type="p" data-sign="0ab860296d7c774e22262542c96234ecf4c93beb42d143be66df040c892c08ed1">__(__foo)</p>
 "
 `;
 
 exports[`engine > commonmark-399 1`] = `
-"<p data-lines="1" data-type="p" data-sign="40485707ee11322d6280ba157d3703345e7f3290c9ffd5938783ec42ff47bcdc1">__foo__bar</p>
+"<p data-lines="1" data-type="p" data-sign="870ff114340a83c78f7d825086fbdc03929b36ef1b599cfef4e3274bebe207c61"><em>(<strong>foo</strong>)</em></p>
 "
 `;
 
 exports[`engine > commonmark-400 1`] = `
-"<p data-lines="1" data-type="p" data-sign="2e640039c1987b6d91a231b05edba68cf1b2bf11d820c37ec4d2529e87fa19c61">__пристаням__стремятся</p>
+"<p data-lines="1" data-type="p" data-sign="40485707ee11322d6280ba157d3703345e7f3290c9ffd5938783ec42ff47bcdc1">__foo__bar</p>
 "
 `;
 
 exports[`engine > commonmark-401 1`] = `
-"<p data-lines="1" data-type="p" data-sign="266f9649bb3d18cb7045f491a2b9586d03a044cc581ddd3f6094bed7f82d56fe1"><strong>foo__bar__baz</strong></p>
+"<p data-lines="1" data-type="p" data-sign="2e640039c1987b6d91a231b05edba68cf1b2bf11d820c37ec4d2529e87fa19c61">__пристаням__стремятся</p>
 "
 `;
 
 exports[`engine > commonmark-402 1`] = `
-"<p data-lines="1" data-type="p" data-sign="8db3b630d64aff6d7b258fb8515c531159c01f2126278191c0fef3502848e1c31"><strong>(bar)</strong>.</p>
+"<p data-lines="1" data-type="p" data-sign="266f9649bb3d18cb7045f491a2b9586d03a044cc581ddd3f6094bed7f82d56fe1"><strong>foo__bar__baz</strong></p>
 "
 `;
 
 exports[`engine > commonmark-403 1`] = `
-"<p data-lines="1" data-type="p" data-sign="3b4916b798f16e63e29479f9d205e3d2cf809762fdc65679a9682bbd9d4685c61"><em>foo <a href="/url">bar</a></em></p>
+"<p data-lines="1" data-type="p" data-sign="8db3b630d64aff6d7b258fb8515c531159c01f2126278191c0fef3502848e1c31"><strong>(bar)</strong>.</p>
 "
 `;
 
 exports[`engine > commonmark-404 1`] = `
-"<p data-lines="2" data-type="p" data-sign="52ab1d9b92ade37f08276034238431b99ae8cdbe9d647bb969c4eeac385e7b692"><em>foo<br>bar</em></p>
+"<p data-lines="1" data-type="p" data-sign="3b4916b798f16e63e29479f9d205e3d2cf809762fdc65679a9682bbd9d4685c61"><em>foo <a href="/url">bar</a></em></p>
 "
 `;
 
 exports[`engine > commonmark-405 1`] = `
-"<p data-lines="1" data-type="p" data-sign="c6f2297274dfba7ff9ddf89d1f0c2a25be374d9bf769b009fb470f8883ced9b71"><em>foo <strong>bar</strong> baz</em></p>
+"<p data-lines="2" data-type="p" data-sign="52ab1d9b92ade37f08276034238431b99ae8cdbe9d647bb969c4eeac385e7b692"><em>foo<br>bar</em></p>
 "
 `;
 
 exports[`engine > commonmark-406 1`] = `
-"<p data-lines="1" data-type="p" data-sign="12e977273f62812f52507540ca32202c3b221e20be184e86d480172e94ff7de81"><em>foo _bar</em> baz_</p>
+"<p data-lines="1" data-type="p" data-sign="c6f2297274dfba7ff9ddf89d1f0c2a25be374d9bf769b009fb470f8883ced9b71"><em>foo <strong>bar</strong> baz</em></p>
 "
 `;
 
 exports[`engine > commonmark-407 1`] = `
-"<p data-lines="1" data-type="p" data-sign="eb751696a3d31f75698df903ed03f24a2a38d2a15b9f5b25f57284096fea4db51">__foo_ bar_</p>
+"<p data-lines="1" data-type="p" data-sign="12e977273f62812f52507540ca32202c3b221e20be184e86d480172e94ff7de81"><em>foo _bar</em> baz_</p>
 "
 `;
 
 exports[`engine > commonmark-408 1`] = `
-"<p data-lines="1" data-type="p" data-sign="6d06fa726da992a694f041749e43e2e3282707f67489bb27b610cee7395e7ce71"><em>foo *bar</em>*</p>
+"<p data-lines="1" data-type="p" data-sign="eb751696a3d31f75698df903ed03f24a2a38d2a15b9f5b25f57284096fea4db51">__foo_ bar_</p>
 "
 `;
 
 exports[`engine > commonmark-409 1`] = `
-"<p data-lines="1" data-type="p" data-sign="aa92166caf462374d2877d3c8d81a8e947b9c1ff4e5abdc639f5d30c36e8d91a1"><em>foo **bar</em>* baz*</p>
+"<p data-lines="1" data-type="p" data-sign="6d06fa726da992a694f041749e43e2e3282707f67489bb27b610cee7395e7ce71"><em>foo *bar</em>*</p>
 "
 `;
 
 exports[`engine > commonmark-410 1`] = `
-"<p data-lines="1" data-type="p" data-sign="35d595d10fb333d2b45c1364ee00ae6e8a3d7c5464184ba46a893e4a750583271"><em>foo</em>*bar*<em>baz</em></p>
+"<p data-lines="1" data-type="p" data-sign="aa92166caf462374d2877d3c8d81a8e947b9c1ff4e5abdc639f5d30c36e8d91a1"><em>foo **bar</em>* baz*</p>
 "
 `;
 
 exports[`engine > commonmark-411 1`] = `
-"<p data-lines="1" data-type="p" data-sign="4283394248f42cfa8adabef563c5529bf2551e79d49dc29db36749f7d2cdbccc1"><em>foo</em>*bar*</p>
+"<p data-lines="1" data-type="p" data-sign="35d595d10fb333d2b45c1364ee00ae6e8a3d7c5464184ba46a893e4a750583271"><em>foo</em>*bar*<em>baz</em></p>
 "
 `;
 
 exports[`engine > commonmark-412 1`] = `
-"<p data-lines="1" data-type="p" data-sign="5beb64b3a4ce109c08609dae02b3735ac41088a7db81d63d710de5b24edbee291">*<strong>foo</strong> bar*</p>
+"<p data-lines="1" data-type="p" data-sign="4283394248f42cfa8adabef563c5529bf2551e79d49dc29db36749f7d2cdbccc1"><em>foo</em>*bar*</p>
 "
 `;
 
 exports[`engine > commonmark-413 1`] = `
-"<p data-lines="1" data-type="p" data-sign="7ee706171340a1bc17b057361d273a5e9a5c207b97814ddf107eb3f04ec3befa1"><em>foo **bar</em>**</p>
+"<p data-lines="1" data-type="p" data-sign="5beb64b3a4ce109c08609dae02b3735ac41088a7db81d63d710de5b24edbee291">*<strong>foo</strong> bar*</p>
 "
 `;
 
 exports[`engine > commonmark-414 1`] = `
-"<p data-lines="1" data-type="p" data-sign="e026cbe9ca0ad02a71aabc26ff87ad7ae3ce2d18fd87ec85deb2ad75355d16341"><em>foo</em>*bar***</p>
+"<p data-lines="1" data-type="p" data-sign="7ee706171340a1bc17b057361d273a5e9a5c207b97814ddf107eb3f04ec3befa1"><em>foo **bar</em>**</p>
 "
 `;
 
 exports[`engine > commonmark-415 1`] = `
-"<p data-lines="1" data-type="p" data-sign="44e883c6d0b90928895925f3817389d47d7188ba7e09b2bf00faee53f8b5a9b91">foo<strong><em>bar</em></strong>baz</p>
+"<p data-lines="1" data-type="p" data-sign="e026cbe9ca0ad02a71aabc26ff87ad7ae3ce2d18fd87ec85deb2ad75355d16341"><em>foo</em>*bar***</p>
 "
 `;
 
 exports[`engine > commonmark-416 1`] = `
-"<p data-lines="1" data-type="p" data-sign="4eaf0489d3bec4d1b9944d9ec93de08777857a68254ac1e6269817edb0fac64f1">foo<strong><strong><strong>bar</strong></strong></strong>***baz</p>
+"<p data-lines="1" data-type="p" data-sign="44e883c6d0b90928895925f3817389d47d7188ba7e09b2bf00faee53f8b5a9b91">foo<strong><em>bar</em></strong>baz</p>
 "
 `;
 
 exports[`engine > commonmark-417 1`] = `
-"<p data-lines="1" data-type="p" data-sign="8a947c16bacf11614cb6a37735b97498b7108b68cc19a4518ec8f237ffb74fc21"><em>foo **bar *baz</em> bim** bop*</p>
+"<p data-lines="1" data-type="p" data-sign="4eaf0489d3bec4d1b9944d9ec93de08777857a68254ac1e6269817edb0fac64f1">foo<strong><strong><strong>bar</strong></strong></strong>***baz</p>
 "
 `;
 
 exports[`engine > commonmark-418 1`] = `
-"<p data-lines="1" data-type="p" data-sign="72bb22472b7c8c9f3995c9ed038eed63ba1cf4a5def9fe8a152c6817238a47fa1"><em>foo <a href="/url"></a></em><a href="/url">bar<em></em></a></p>
+"<p data-lines="1" data-type="p" data-sign="8a947c16bacf11614cb6a37735b97498b7108b68cc19a4518ec8f237ffb74fc21"><em>foo **bar *baz</em> bim** bop*</p>
 "
 `;
 
 exports[`engine > commonmark-419 1`] = `
-"<p data-lines="1" data-type="p" data-sign="66f24a1c5513fe1001bcbadbd43fa162aa6d22f7189a038b3449c02cca752ff21">** is not an empty emphasis</p>
+"<p data-lines="1" data-type="p" data-sign="72bb22472b7c8c9f3995c9ed038eed63ba1cf4a5def9fe8a152c6817238a47fa1"><em>foo <a href="/url"></a></em><a href="/url">bar<em></em></a></p>
 "
 `;
 
 exports[`engine > commonmark-420 1`] = `
-"<p data-lines="1" data-type="p" data-sign="cf4a73feac0d74b20412944b655bcd4c299259e47da99d334a4dff41b85473011">**** is not an empty strong emphasis</p>
+"<p data-lines="1" data-type="p" data-sign="66f24a1c5513fe1001bcbadbd43fa162aa6d22f7189a038b3449c02cca752ff21">** is not an empty emphasis</p>
 "
 `;
 
 exports[`engine > commonmark-421 1`] = `
-"<p data-lines="1" data-type="p" data-sign="f97138b185b5e31c4b0f46df21d83a6c0004c65eb1078cee08f74a148ad5f2a41"><strong>foo <a href="/url">bar</a></strong></p>
+"<p data-lines="1" data-type="p" data-sign="cf4a73feac0d74b20412944b655bcd4c299259e47da99d334a4dff41b85473011">**** is not an empty strong emphasis</p>
 "
 `;
 
 exports[`engine > commonmark-422 1`] = `
-"<p data-lines="2" data-type="p" data-sign="9d1a98d311ea5a27bc3432726ad528f98f5c1604867c182f35fc981ed21809522"><strong>foo<br>bar</strong></p>
+"<p data-lines="1" data-type="p" data-sign="f97138b185b5e31c4b0f46df21d83a6c0004c65eb1078cee08f74a148ad5f2a41"><strong>foo <a href="/url">bar</a></strong></p>
 "
 `;
 
 exports[`engine > commonmark-423 1`] = `
-"<p data-lines="1" data-type="p" data-sign="d2ad6aebde3a109e9fc60d6736421f95731a123422e96aedd3ddc34c9c61b39c1"><strong>foo <em>bar</em> baz</strong></p>
+"<p data-lines="2" data-type="p" data-sign="9d1a98d311ea5a27bc3432726ad528f98f5c1604867c182f35fc981ed21809522"><strong>foo<br>bar</strong></p>
 "
 `;
 
 exports[`engine > commonmark-424 1`] = `
-"<p data-lines="1" data-type="p" data-sign="e3a06b371336aeff655d15b70093840c0504d22b29d3bca5813af0cd5fc2e2b61"><strong>foo __bar</strong> baz__</p>
+"<p data-lines="1" data-type="p" data-sign="d2ad6aebde3a109e9fc60d6736421f95731a123422e96aedd3ddc34c9c61b39c1"><strong>foo <em>bar</em> baz</strong></p>
 "
 `;
 
 exports[`engine > commonmark-425 1`] = `
-"<p data-lines="1" data-type="p" data-sign="51434155dd735b72ea87e9b568cf7acb96c552ba30355aca69c74ecc11344df21">____foo__ bar__</p>
+"<p data-lines="1" data-type="p" data-sign="e3a06b371336aeff655d15b70093840c0504d22b29d3bca5813af0cd5fc2e2b61"><strong>foo __bar</strong> baz__</p>
 "
 `;
 
 exports[`engine > commonmark-426 1`] = `
-"<p data-lines="1" data-type="p" data-sign="75cc84b7b4b389e8b2851d14762a60e3561554bd4c3845df67d2151a279c82fd1"><strong>foo **bar</strong>**</p>
+"<p data-lines="1" data-type="p" data-sign="51434155dd735b72ea87e9b568cf7acb96c552ba30355aca69c74ecc11344df21">____foo__ bar__</p>
 "
 `;
 
 exports[`engine > commonmark-427 1`] = `
-"<p data-lines="1" data-type="p" data-sign="87fc4feb3e8b43ea7c05c57a6c9a91e192a554ceb6d34cd67fa3ae730150c3131"><strong>foo <em>bar</em> baz</strong></p>
+"<p data-lines="1" data-type="p" data-sign="75cc84b7b4b389e8b2851d14762a60e3561554bd4c3845df67d2151a279c82fd1"><strong>foo **bar</strong>**</p>
 "
 `;
 
 exports[`engine > commonmark-428 1`] = `
-"<p data-lines="1" data-type="p" data-sign="c8b2f62aeed07bae744d413b7e5f781573a6d2838c56791ff204c47e715155b91"><strong>foo<em>bar</em>baz</strong></p>
+"<p data-lines="1" data-type="p" data-sign="87fc4feb3e8b43ea7c05c57a6c9a91e192a554ceb6d34cd67fa3ae730150c3131"><strong>foo <em>bar</em> baz</strong></p>
 "
 `;
 
 exports[`engine > commonmark-429 1`] = `
-"<p data-lines="1" data-type="p" data-sign="fc43b6119dc30cdf1df4d3154d5acb46d08ba1204783fea524856683f1830c0a1">*<strong>foo* bar</strong></p>
+"<p data-lines="1" data-type="p" data-sign="c8b2f62aeed07bae744d413b7e5f781573a6d2838c56791ff204c47e715155b91"><strong>foo<em>bar</em>baz</strong></p>
 "
 `;
 
 exports[`engine > commonmark-430 1`] = `
-"<p data-lines="1" data-type="p" data-sign="17dc2f809065a4d65dc13ee44270b2dbe330a9828d142441ed0d4f9e834897651"><strong>foo *bar</strong>*</p>
+"<p data-lines="1" data-type="p" data-sign="fc43b6119dc30cdf1df4d3154d5acb46d08ba1204783fea524856683f1830c0a1">*<strong>foo* bar</strong></p>
 "
 `;
 
 exports[`engine > commonmark-431 1`] = `
-"<p data-lines="2" data-type="p" data-sign="a56dd13cee0b00b0f8bf5e43500a6d50ac627f1b36c32d3396c7c71960cec93e2"><strong>foo *bar **baz</strong><br>bim* bop**</p>
+"<p data-lines="1" data-type="p" data-sign="17dc2f809065a4d65dc13ee44270b2dbe330a9828d142441ed0d4f9e834897651"><strong>foo *bar</strong>*</p>
 "
 `;
 
 exports[`engine > commonmark-432 1`] = `
-"<p data-lines="1" data-type="p" data-sign="5130a3d8b5dbbb1252367f6a38bc13fb530d71687b39b5e45fc9851c90841c7b1"><strong>foo <a href="/url"><em>bar</em></a></strong></p>
+"<p data-lines="2" data-type="p" data-sign="a56dd13cee0b00b0f8bf5e43500a6d50ac627f1b36c32d3396c7c71960cec93e2"><strong>foo *bar **baz</strong><br>bim* bop**</p>
 "
 `;
 
 exports[`engine > commonmark-433 1`] = `
-"<p data-lines="1" data-type="p" data-sign="dc7dd83a961afd75d8762f69a8f1691aae888fe222ef0c7efc715232527fb8311">__ is not an empty emphasis</p>
+"<p data-lines="1" data-type="p" data-sign="5130a3d8b5dbbb1252367f6a38bc13fb530d71687b39b5e45fc9851c90841c7b1"><strong>foo <a href="/url"><em>bar</em></a></strong></p>
 "
 `;
 
 exports[`engine > commonmark-434 1`] = `
-"<p data-lines="1" data-type="p" data-sign="71b79cbe9dfb44ee461e14c3a9d7d9437149725ced3e3ad1e7b6e0fa1976484e1">____ is not an empty strong emphasis</p>
+"<p data-lines="1" data-type="p" data-sign="dc7dd83a961afd75d8762f69a8f1691aae888fe222ef0c7efc715232527fb8311">__ is not an empty emphasis</p>
 "
 `;
 
 exports[`engine > commonmark-435 1`] = `
-"<p data-lines="1" data-type="p" data-sign="3691d7633f8494c238f1a99ea996fbb1ab518fef78bea37f08ecdcf7070ec5231">foo ***</p>
+"<p data-lines="1" data-type="p" data-sign="71b79cbe9dfb44ee461e14c3a9d7d9437149725ced3e3ad1e7b6e0fa1976484e1">____ is not an empty strong emphasis</p>
 "
 `;
 
 exports[`engine > commonmark-436 1`] = `
-"<p data-lines="1" data-type="p" data-sign="4f13bcdf44b6c4bdef21c1940692d50a445c138e237e9fe0df08f9b6c9cd1a9d1">foo <em>\\</em>*</p>
+"<p data-lines="1" data-type="p" data-sign="3691d7633f8494c238f1a99ea996fbb1ab518fef78bea37f08ecdcf7070ec5231">foo ***</p>
 "
 `;
 
 exports[`engine > commonmark-437 1`] = `
-"<p data-lines="1" data-type="p" data-sign="e3d1a6f02cede78ed21f0812fe375bcdf60c7a6f0848d5876e88d7e86397de131">foo <em>_</em></p>
+"<p data-lines="1" data-type="p" data-sign="4f13bcdf44b6c4bdef21c1940692d50a445c138e237e9fe0df08f9b6c9cd1a9d1">foo <em>\\</em>*</p>
 "
 `;
 
 exports[`engine > commonmark-438 1`] = `
-"<p data-lines="1" data-type="p" data-sign="7d76a1fe9f719fa4bd0b7e7e6f6a4e7e815e86e87ae6c2c9ce771cf9c9a3dfa01">foo *****</p>
+"<p data-lines="1" data-type="p" data-sign="e3d1a6f02cede78ed21f0812fe375bcdf60c7a6f0848d5876e88d7e86397de131">foo <em>_</em></p>
 "
 `;
 
 exports[`engine > commonmark-439 1`] = `
-"<p data-lines="1" data-type="p" data-sign="7693c4af7fd2b6951c7c91cf4173399ce1c5c751aac47b87a6a396421765b74d1">foo <strong>\\</strong>*</p>
+"<p data-lines="1" data-type="p" data-sign="7d76a1fe9f719fa4bd0b7e7e6f6a4e7e815e86e87ae6c2c9ce771cf9c9a3dfa01">foo *****</p>
 "
 `;
 
 exports[`engine > commonmark-440 1`] = `
-"<p data-lines="1" data-type="p" data-sign="a773122ced541e9420ded5f21c243e794b034133b5e73a5ae79e6d754365ce3c1">foo <strong>_</strong></p>
+"<p data-lines="1" data-type="p" data-sign="7693c4af7fd2b6951c7c91cf4173399ce1c5c751aac47b87a6a396421765b74d1">foo <strong>\\</strong>*</p>
 "
 `;
 
 exports[`engine > commonmark-441 1`] = `
-"<p data-lines="1" data-type="p" data-sign="0bccf8f81aacf37721246395a0f90dac726910eebaab8f7aba6e6172dfbe5f321">*<em>foo</em></p>
+"<p data-lines="1" data-type="p" data-sign="a773122ced541e9420ded5f21c243e794b034133b5e73a5ae79e6d754365ce3c1">foo <strong>_</strong></p>
 "
 `;
 
 exports[`engine > commonmark-442 1`] = `
-"<p data-lines="1" data-type="p" data-sign="f502683872887939c9a017e4376ff8dceebf1322c090a87b880de58eddb159e41"><em>foo</em>*</p>
+"<p data-lines="1" data-type="p" data-sign="0bccf8f81aacf37721246395a0f90dac726910eebaab8f7aba6e6172dfbe5f321">*<em>foo</em></p>
 "
 `;
 
 exports[`engine > commonmark-443 1`] = `
-"<p data-lines="1" data-type="p" data-sign="34be24e98642e0311a6573f2183ed7d683fa35312719bc9fe625b741f2e37b651">*<strong>foo</strong></p>
+"<p data-lines="1" data-type="p" data-sign="f502683872887939c9a017e4376ff8dceebf1322c090a87b880de58eddb159e41"><em>foo</em>*</p>
 "
 `;
 
 exports[`engine > commonmark-444 1`] = `
-"<p data-lines="1" data-type="p" data-sign="a1835975cc389cdf6f6a560439cfe67d9aac61e8e8f5ebcdba9bd60dc7462dea1">***<em>foo</em></p>
+"<p data-lines="1" data-type="p" data-sign="34be24e98642e0311a6573f2183ed7d683fa35312719bc9fe625b741f2e37b651">*<strong>foo</strong></p>
 "
 `;
 
 exports[`engine > commonmark-445 1`] = `
-"<p data-lines="1" data-type="p" data-sign="69988b411bfd8dab49e4dc33093dca7e5c44c2e4b011815d05bf7fba817956ee1"><strong>foo</strong>*</p>
+"<p data-lines="1" data-type="p" data-sign="a1835975cc389cdf6f6a560439cfe67d9aac61e8e8f5ebcdba9bd60dc7462dea1">***<em>foo</em></p>
 "
 `;
 
 exports[`engine > commonmark-446 1`] = `
-"<p data-lines="1" data-type="p" data-sign="d75cf54ff7b2ad2002128fbbe1ebe0cdd6d785889577652c8c86d51b2aabf75c1"><em>foo</em>***</p>
+"<p data-lines="1" data-type="p" data-sign="69988b411bfd8dab49e4dc33093dca7e5c44c2e4b011815d05bf7fba817956ee1"><strong>foo</strong>*</p>
 "
 `;
 
 exports[`engine > commonmark-447 1`] = `
-"<p data-lines="1" data-type="p" data-sign="e15bb6b6901fcb46478d17c1f5e773e6996b5a99b0f2555b4fe4481c171e6f531">foo ___</p>
+"<p data-lines="1" data-type="p" data-sign="d75cf54ff7b2ad2002128fbbe1ebe0cdd6d785889577652c8c86d51b2aabf75c1"><em>foo</em>***</p>
 "
 `;
 
 exports[`engine > commonmark-448 1`] = `
-"<p data-lines="1" data-type="p" data-sign="b0a394aeecfac683feabb991b286a501de88bd4b9037550f740b432b9e4d63161">foo ___</p>
+"<p data-lines="1" data-type="p" data-sign="e15bb6b6901fcb46478d17c1f5e773e6996b5a99b0f2555b4fe4481c171e6f531">foo ___</p>
 "
 `;
 
 exports[`engine > commonmark-449 1`] = `
-"<p data-lines="1" data-type="p" data-sign="b9c7f5804f80e5547084060b5697d5959f67e0f1a48225e243d45527dde124181">foo <em>*</em></p>
+"<p data-lines="1" data-type="p" data-sign="b0a394aeecfac683feabb991b286a501de88bd4b9037550f740b432b9e4d63161">foo ___</p>
 "
 `;
 
 exports[`engine > commonmark-450 1`] = `
-"<p data-lines="1" data-type="p" data-sign="090c6adaea67d53d17aabef4fda728587fe1e471d05deee7da06e0ff984493ff1">foo _____</p>
+"<p data-lines="1" data-type="p" data-sign="b9c7f5804f80e5547084060b5697d5959f67e0f1a48225e243d45527dde124181">foo <em>*</em></p>
 "
 `;
 
 exports[`engine > commonmark-451 1`] = `
-"<p data-lines="1" data-type="p" data-sign="bbcbc5f8c8471b618ec14578d4d25a059638bd755a3db72a4ccec21348b01ce71">foo _____</p>
+"<p data-lines="1" data-type="p" data-sign="090c6adaea67d53d17aabef4fda728587fe1e471d05deee7da06e0ff984493ff1">foo _____</p>
 "
 `;
 
 exports[`engine > commonmark-452 1`] = `
-"<p data-lines="1" data-type="p" data-sign="cd897683e7cc0a41f4b5e9a31b33cf89cab900fadf75e3e37b1e124e1208b30a1">foo <strong>*</strong></p>
+"<p data-lines="1" data-type="p" data-sign="bbcbc5f8c8471b618ec14578d4d25a059638bd755a3db72a4ccec21348b01ce71">foo _____</p>
 "
 `;
 
 exports[`engine > commonmark-453 1`] = `
-"<p data-lines="1" data-type="p" data-sign="22b5204f729862dda78cf6151ff56f5bdfb465b3e790be37d3197a05231482401">__foo_</p>
+"<p data-lines="1" data-type="p" data-sign="cd897683e7cc0a41f4b5e9a31b33cf89cab900fadf75e3e37b1e124e1208b30a1">foo <strong>*</strong></p>
 "
 `;
 
 exports[`engine > commonmark-454 1`] = `
-"<p data-lines="1" data-type="p" data-sign="b1bf36e45bfe69246efae4ee0e6793163b2209cc0be84cd074aa3c5bf05230861">_foo__</p>
+"<p data-lines="1" data-type="p" data-sign="22b5204f729862dda78cf6151ff56f5bdfb465b3e790be37d3197a05231482401">__foo_</p>
 "
 `;
 
 exports[`engine > commonmark-455 1`] = `
-"<p data-lines="1" data-type="p" data-sign="b1d60773884e140dfe367426adb3282b629ebe1eb8197155d8ccbb1f413c02f51">___foo__</p>
+"<p data-lines="1" data-type="p" data-sign="b1bf36e45bfe69246efae4ee0e6793163b2209cc0be84cd074aa3c5bf05230861">_foo__</p>
 "
 `;
 
 exports[`engine > commonmark-456 1`] = `
-"<p data-lines="1" data-type="p" data-sign="b5bf05e6e009c38979ba3ba0533cb9576b65f37d30c3f5115e346225fbbd56431">____foo_</p>
+"<p data-lines="1" data-type="p" data-sign="b1d60773884e140dfe367426adb3282b629ebe1eb8197155d8ccbb1f413c02f51">___foo__</p>
 "
 `;
 
 exports[`engine > commonmark-457 1`] = `
-"<p data-lines="1" data-type="p" data-sign="f3b8f39e0aad49e98571d8087d9011590343b6cc2657d363dce2f962ab69ae0b1">__foo___</p>
+"<p data-lines="1" data-type="p" data-sign="b5bf05e6e009c38979ba3ba0533cb9576b65f37d30c3f5115e346225fbbd56431">____foo_</p>
 "
 `;
 
 exports[`engine > commonmark-458 1`] = `
-"<p data-lines="1" data-type="p" data-sign="9922794cc8a56f55f7117a134cc012321b7d5b578302278f5f864df791d63aff1">_foo____</p>
+"<p data-lines="1" data-type="p" data-sign="f3b8f39e0aad49e98571d8087d9011590343b6cc2657d363dce2f962ab69ae0b1">__foo___</p>
 "
 `;
 
 exports[`engine > commonmark-459 1`] = `
-"<p data-lines="1" data-type="p" data-sign="412c6e92a05e0c353653f0f260be38d32121f381c53e742f84a2a09f6c50ff781"><strong>foo</strong></p>
+"<p data-lines="1" data-type="p" data-sign="9922794cc8a56f55f7117a134cc012321b7d5b578302278f5f864df791d63aff1">_foo____</p>
 "
 `;
 
 exports[`engine > commonmark-460 1`] = `
-"<p data-lines="1" data-type="p" data-sign="949d81397c1e7acadcb5e36424b46023598b90098aeafc252d69981820f0d3741"><em><em>foo</em></em></p>
+"<p data-lines="1" data-type="p" data-sign="412c6e92a05e0c353653f0f260be38d32121f381c53e742f84a2a09f6c50ff781"><strong>foo</strong></p>
 "
 `;
 
 exports[`engine > commonmark-461 1`] = `
-"<p data-lines="1" data-type="p" data-sign="a535c0f959d8bc13e256e989b30ef1ae2c02dfa0d3d55ef70c5091a671ebf3e21"><strong>foo</strong></p>
+"<p data-lines="1" data-type="p" data-sign="949d81397c1e7acadcb5e36424b46023598b90098aeafc252d69981820f0d3741"><em><em>foo</em></em></p>
 "
 `;
 
 exports[`engine > commonmark-462 1`] = `
-"<p data-lines="1" data-type="p" data-sign="9b70c8fceefe5f34e8b6d0d5f0cbb3b38a7c974169db98ff75f22d38ceb56a081"><em><em>foo</em></em></p>
+"<p data-lines="1" data-type="p" data-sign="a535c0f959d8bc13e256e989b30ef1ae2c02dfa0d3d55ef70c5091a671ebf3e21"><strong>foo</strong></p>
 "
 `;
 
 exports[`engine > commonmark-463 1`] = `
-"<p data-lines="1" data-type="p" data-sign="a62dd9840c8665fb26cf0c8435e92c5c22c13b9d524618b51e3372df68b32d071"><strong><strong>foo</strong></strong></p>
+"<p data-lines="1" data-type="p" data-sign="9b70c8fceefe5f34e8b6d0d5f0cbb3b38a7c974169db98ff75f22d38ceb56a081"><em><em>foo</em></em></p>
 "
 `;
 
 exports[`engine > commonmark-464 1`] = `
-"<p data-lines="1" data-type="p" data-sign="18b8a39ec22272ad398e8fe80872173582f84831b806e6a1fd3c0f93abeda4e11"><strong><strong>foo</strong></strong></p>
+"<p data-lines="1" data-type="p" data-sign="a62dd9840c8665fb26cf0c8435e92c5c22c13b9d524618b51e3372df68b32d071"><strong><strong>foo</strong></strong></p>
 "
 `;
 
 exports[`engine > commonmark-465 1`] = `
-"<p data-lines="1" data-type="p" data-sign="262d883367d94ff000fc1d197c9e67134cdf37e382fdfa2e9c56787fb9e369431"><strong><strong><strong>foo</strong></strong></strong></p>
+"<p data-lines="1" data-type="p" data-sign="18b8a39ec22272ad398e8fe80872173582f84831b806e6a1fd3c0f93abeda4e11"><strong><strong>foo</strong></strong></p>
 "
 `;
 
 exports[`engine > commonmark-466 1`] = `
-"<p data-lines="1" data-type="p" data-sign="86418a6adbb905ec3aa175db738e4bb744721f3b80f6873409d92013818049701"><strong><em>foo</em></strong></p>
+"<p data-lines="1" data-type="p" data-sign="262d883367d94ff000fc1d197c9e67134cdf37e382fdfa2e9c56787fb9e369431"><strong><strong><strong>foo</strong></strong></strong></p>
 "
 `;
 
 exports[`engine > commonmark-467 1`] = `
-"<p data-lines="1" data-type="p" data-sign="15a669dfb5361e0a124a56dc30c71d4b5716556d83082bb22df770e399e977ae1"><strong><strong><em>foo</em></strong></strong></p>
+"<p data-lines="1" data-type="p" data-sign="86418a6adbb905ec3aa175db738e4bb744721f3b80f6873409d92013818049701"><strong><em>foo</em></strong></p>
 "
 `;
 
 exports[`engine > commonmark-468 1`] = `
-"<p data-lines="1" data-type="p" data-sign="2f39d492ca8b35faa86a7c3d3373c6a4323240f497e749ce5d9b827d3c5407a11"><em>foo _bar</em> baz_</p>
+"<p data-lines="1" data-type="p" data-sign="15a669dfb5361e0a124a56dc30c71d4b5716556d83082bb22df770e399e977ae1"><strong><strong><em>foo</em></strong></strong></p>
 "
 `;
 
 exports[`engine > commonmark-469 1`] = `
-"<p data-lines="1" data-type="p" data-sign="952b9bae11c03f832cdb1ebe5072ea4b91731180992ad20a51b02326ad5bcd161"><em>foo <strong>bar *baz bim</strong> bam</em></p>
+"<p data-lines="1" data-type="p" data-sign="2f39d492ca8b35faa86a7c3d3373c6a4323240f497e749ce5d9b827d3c5407a11"><em>foo _bar</em> baz_</p>
 "
 `;
 
 exports[`engine > commonmark-470 1`] = `
-"<p data-lines="1" data-type="p" data-sign="a4c420b3aad554f940ca4bcb5da3a9f702d7aa4ad70c4eb35950009644c7d68f1"><strong>foo **bar baz</strong></p>
+"<p data-lines="1" data-type="p" data-sign="952b9bae11c03f832cdb1ebe5072ea4b91731180992ad20a51b02326ad5bcd161"><em>foo <strong>bar *baz bim</strong> bam</em></p>
 "
 `;
 
 exports[`engine > commonmark-471 1`] = `
-"<p data-lines="1" data-type="p" data-sign="c04aa20d3d864abf72d99e035d6dc7df07e7a1dea3ff16d1a18dd5d61aaf6c601"><em>foo *bar baz</em></p>
+"<p data-lines="1" data-type="p" data-sign="a4c420b3aad554f940ca4bcb5da3a9f702d7aa4ad70c4eb35950009644c7d68f1"><strong>foo **bar baz</strong></p>
 "
 `;
 
 exports[`engine > commonmark-472 1`] = `
-"<p data-lines="1" data-type="p" data-sign="8ce2226989967f97477bae9dbd07901b5c153103236cde529e0719d68dccae8f1"><em><a href="/url">bar</a></em></p>
+"<p data-lines="1" data-type="p" data-sign="c04aa20d3d864abf72d99e035d6dc7df07e7a1dea3ff16d1a18dd5d61aaf6c601"><em>foo *bar baz</em></p>
 "
 `;
 
 exports[`engine > commonmark-473 1`] = `
-"<p data-lines="1" data-type="p" data-sign="77f19814a682de3151e8bfeb18d7ee3f7967ebd3f71914b6ecbe9c3c148bdcd41"><em>foo <a href="/url">bar</a></em></p>
+"<p data-lines="1" data-type="p" data-sign="8ce2226989967f97477bae9dbd07901b5c153103236cde529e0719d68dccae8f1"><em><a href="/url">bar</a></em></p>
 "
 `;
 
 exports[`engine > commonmark-474 1`] = `
+"<p data-lines="1" data-type="p" data-sign="77f19814a682de3151e8bfeb18d7ee3f7967ebd3f71914b6ecbe9c3c148bdcd41"><em>foo <a href="/url">bar</a></em></p>
+"
+`;
+
+exports[`engine > commonmark-475 1`] = `
 "<p data-lines="1" data-type="p" data-sign="7088cc0c9d5c6b3fd9e685c5b63c49725b16a9285de6f9c19028278d0a85f4801"><em><img title="</em>" src="foo"></em></p><em>
 </em>"
 `;
 
-exports[`engine > commonmark-475 1`] = `
+exports[`engine > commonmark-476 1`] = `
 "<p data-lines="1" data-type="p" data-sign="24c7af56bf99a58dad9704f1eb5b24ca9787405d2dae2614a370b3b165f721a11"><strong><a href="</strong>"></a></strong></p><strong><a href="</strong>">
 </a></strong>"
 `;
 
-exports[`engine > commonmark-476 1`] = `
+exports[`engine > commonmark-477 1`] = `
 "<p data-lines="1" data-type="p" data-sign="602eac3c11391747aac5034a0833a9589912ba1a06231fda58758e5a9c9a13ab1"><strong><a href="</strong>"></a></strong></p><strong><a href="</strong>">
 </a></strong>"
 `;
 
-exports[`engine > commonmark-477 1`] = `
+exports[`engine > commonmark-478 1`] = `
 "<p data-lines="1" data-type="p" data-sign="6f534b325ae81bf186eb52e23955df4fba8ae35443cb0b4c94b12e881894d75d1"><em>a <code>*</code></em></p>
 "
 `;
 
-exports[`engine > commonmark-478 1`] = `
+exports[`engine > commonmark-479 1`] = `
 "<p data-lines="1" data-type="p" data-sign="67ccb072e63d44147e2b52f3de9ed9cef3fb53eeaa73ba902c31bf60e214a3a11"><em>a <code>_</code></em></p>
 "
 `;
 
-exports[`engine > commonmark-479 1`] = `
-"<p data-lines="1" data-type="p" data-sign="183dc5fd01378e9d112ec0c6538ac7388dbd3322045001b706227832585244231">**a<a title="http://foo.bar/?q=**" href="http://foo.bar/?q=**">http://foo.bar/?q=**</a></p>
-"
-`;
-
 exports[`engine > commonmark-480 1`] = `
-"<p data-lines="1" data-type="p" data-sign="6999023deb33d8fd47f416fd329259f43bcb53415b255765e1be86766ba17d141">__a<a title="http://foo.bar/?q=__" href="http://foo.bar/?q=__">http://foo.bar/?q=__</a></p>
+"<p data-lines="1" data-type="p" data-sign="a88ddba0756b550e2cb4ea4415b94482c47296e64a4bd4828868d61e62995cf91">**a<a title="https://foo.bar/?q=**" href="https://foo.bar/?q=**">https://foo.bar/?q=**</a></p>
 "
 `;
 
 exports[`engine > commonmark-481 1`] = `
-"<p data-lines="1" data-type="p" data-sign="ac0baef338abbcf650a2d7d3616d67b7e02690c78b22415835c9e9ab78142d2a1"><a title="title" href="/uri">link</a></p>
+"<p data-lines="1" data-type="p" data-sign="24d065511536e4fdba5f4a7f9b9bde639da673c39dae4b0913cc85d89074c8671">__a<a title="https://foo.bar/?q=__" href="https://foo.bar/?q=__">https://foo.bar/?q=__</a></p>
 "
 `;
 
 exports[`engine > commonmark-482 1`] = `
-"<p data-lines="1" data-type="p" data-sign="3a1fd2435f4179c2b4a0f9ba2457387d141ed00db99cf982fd7854b40318dbc41"><a href="/uri">link</a></p>
+"<p data-lines="1" data-type="p" data-sign="ac0baef338abbcf650a2d7d3616d67b7e02690c78b22415835c9e9ab78142d2a1"><a title="title" href="/uri">link</a></p>
 "
 `;
 
 exports[`engine > commonmark-483 1`] = `
-"<p data-lines="1" data-type="p" data-sign="1d00710dd53629ccf2d0bb6f9157c8d5d70848e3371bb0a22c89174ebbc1811b1"><a href="./target.md"></a></p>
+"<p data-lines="1" data-type="p" data-sign="3a1fd2435f4179c2b4a0f9ba2457387d141ed00db99cf982fd7854b40318dbc41"><a href="/uri">link</a></p>
 "
 `;
 
 exports[`engine > commonmark-484 1`] = `
-"<p data-lines="1" data-type="p" data-sign="5f2561e7a11199e9517adf44fbf6856fab06a9ac656533404a3ba3dae1b16bef1">[link]()</p>
+"<p data-lines="1" data-type="p" data-sign="1d00710dd53629ccf2d0bb6f9157c8d5d70848e3371bb0a22c89174ebbc1811b1"><a href="./target.md"></a></p>
 "
 `;
 
 exports[`engine > commonmark-485 1`] = `
-"<p data-lines="1" data-type="p" data-sign="dfd1ee42e08a6e6e42e0f4ac962f65f7c5c475e6c2a0fb9b4ea7254bc411068c1"><a href="<>">link</a></p>
+"<p data-lines="1" data-type="p" data-sign="5f2561e7a11199e9517adf44fbf6856fab06a9ac656533404a3ba3dae1b16bef1">[link]()</p>
 "
 `;
 
 exports[`engine > commonmark-486 1`] = `
-"<p data-lines="1" data-type="p" data-sign="9e37b730e84cfeb9ae5279f64b3f2423eb9a0bbea3b4448bc4628cc5263d9e0f1">[]()</p>
+"<p data-lines="1" data-type="p" data-sign="dfd1ee42e08a6e6e42e0f4ac962f65f7c5c475e6c2a0fb9b4ea7254bc411068c1"><a href="<>">link</a></p>
 "
 `;
 
 exports[`engine > commonmark-487 1`] = `
-"<p data-lines="1" data-type="p" data-sign="3e450badacb537a58991ccf439afb725b2d62d13d75819221af1f10b2ef1918f1">[link](/my uri)</p>
+"<p data-lines="1" data-type="p" data-sign="9e37b730e84cfeb9ae5279f64b3f2423eb9a0bbea3b4448bc4628cc5263d9e0f1">[]()</p>
 "
 `;
 
 exports[`engine > commonmark-488 1`] = `
-"<p data-lines="1" data-type="p" data-sign="8d9f06acd50f182e653a2e095219661629a1c8b90c7dfdcfa2cce61ec1aed3371">[link](&lt;/my uri&gt;)</p>
+"<p data-lines="1" data-type="p" data-sign="3e450badacb537a58991ccf439afb725b2d62d13d75819221af1f10b2ef1918f1">[link](/my uri)</p>
 "
 `;
 
 exports[`engine > commonmark-489 1`] = `
-"<p data-lines="2" data-type="p" data-sign="7d41330742f0fdb92e1db5e8ccb043ceee76a8fdebef0d948c46f2804c6cfc052">[link](foo<br>bar)</p>
+"<p data-lines="1" data-type="p" data-sign="8d9f06acd50f182e653a2e095219661629a1c8b90c7dfdcfa2cce61ec1aed3371">[link](&lt;/my uri&gt;)</p>
 "
 `;
 
 exports[`engine > commonmark-490 1`] = `
-"<p data-lines="2" data-type="p" data-sign="225d73564ab8427975fe1037b3e73642bde465597664efff9799e84b10a746222">[link](&lt;foo<br>bar&gt;)</p>
+"<p data-lines="2" data-type="p" data-sign="7d41330742f0fdb92e1db5e8ccb043ceee76a8fdebef0d948c46f2804c6cfc052">[link](foo<br>bar)</p>
 "
 `;
 
 exports[`engine > commonmark-491 1`] = `
-"<p data-lines="1" data-type="p" data-sign="51e80383932471f6a44b19665dda67aff2f8373d64005d637024cc00224ec1d51"><a href="<b">a</a>c&gt;)</p>
+"<p data-lines="2" data-type="p" data-sign="225d73564ab8427975fe1037b3e73642bde465597664efff9799e84b10a746222">[link](&lt;foo<br>bar&gt;)</p>
 "
 `;
 
 exports[`engine > commonmark-492 1`] = `
-"<p data-lines="1" data-type="p" data-sign="f1fafd521a109ca1cc3462f3b37422308dc217f54e899acb31bf406a9a212a2c1"><a href="<foo>">link</a></p>
+"<p data-lines="1" data-type="p" data-sign="51e80383932471f6a44b19665dda67aff2f8373d64005d637024cc00224ec1d51"><a href="<b">a</a>c&gt;)</p>
 "
 `;
 
 exports[`engine > commonmark-493 1`] = `
-"<p data-lines="3" data-type="p" data-sign="a5f40516bb6c08738319b1af1af7d8e4ab070909ef9601542f32564ba80ec8273"><a href="<b">a</a>c<br><a href="<b">a</a>c&gt;<br><a href="%3Cb%3Ec">a</a></p>
+"<p data-lines="1" data-type="p" data-sign="f1fafd521a109ca1cc3462f3b37422308dc217f54e899acb31bf406a9a212a2c1"><a href="<foo>">link</a></p>
 "
 `;
 
 exports[`engine > commonmark-494 1`] = `
-"<p data-lines="1" data-type="p" data-sign="1f137dbb12625e23630ed16439e72bd3223cc85a3c504540c241f01dc9e813791"><a href="%5C(foo%5C)">link</a></p>
+"<p data-lines="3" data-type="p" data-sign="a5f40516bb6c08738319b1af1af7d8e4ab070909ef9601542f32564ba80ec8273"><a href="<b">a</a>c<br><a href="<b">a</a>c&gt;<br><a href="%3Cb%3Ec">a</a></p>
 "
 `;
 
 exports[`engine > commonmark-495 1`] = `
-"<p data-lines="1" data-type="p" data-sign="80e3163b40b57ec9c4bf4f1f13f7ad049f89bd3ef90d8ee858bb6cd3618fadf31"><a href="foo(and(bar">link</a>))</p>
+"<p data-lines="1" data-type="p" data-sign="1f137dbb12625e23630ed16439e72bd3223cc85a3c504540c241f01dc9e813791"><a href="%5C(foo%5C)">link</a></p>
 "
 `;
 
 exports[`engine > commonmark-496 1`] = `
-"<p data-lines="1" data-type="p" data-sign="5648104e5a9795814fcc2953f2bee0489e021ff1d5be3c0e329cd351fccbdf981"><a href="foo(and(bar">link</a>)</p>
+"<p data-lines="1" data-type="p" data-sign="80e3163b40b57ec9c4bf4f1f13f7ad049f89bd3ef90d8ee858bb6cd3618fadf31"><a href="foo(and(bar">link</a>))</p>
 "
 `;
 
 exports[`engine > commonmark-497 1`] = `
-"<p data-lines="1" data-type="p" data-sign="b3d809ad8e9632bce8956e4766d6aa210db3202ad2b5d0eef0f10c46cc0015b91"><a href="foo%5C(and%5C(bar%5C">link</a>)</p>
+"<p data-lines="1" data-type="p" data-sign="5648104e5a9795814fcc2953f2bee0489e021ff1d5be3c0e329cd351fccbdf981"><a href="foo(and(bar">link</a>)</p>
 "
 `;
 
 exports[`engine > commonmark-498 1`] = `
-"<p data-lines="1" data-type="p" data-sign="50645de21dd905d2c15114b8407a773ec2b9409188812e6005056652ab750f131"><a href="<foo(and(bar">link</a>&gt;)</p>
+"<p data-lines="1" data-type="p" data-sign="b3d809ad8e9632bce8956e4766d6aa210db3202ad2b5d0eef0f10c46cc0015b91"><a href="foo%5C(and%5C(bar%5C">link</a>)</p>
 "
 `;
 
 exports[`engine > commonmark-499 1`] = `
-"<p data-lines="1" data-type="p" data-sign="5a3ca225d2dda48261d7a72b41c2266dc16edf511324ac24bf236db5e85e56511"><a href="foo%5C">link</a>:)</p>
+"<p data-lines="1" data-type="p" data-sign="50645de21dd905d2c15114b8407a773ec2b9409188812e6005056652ab750f131"><a href="<foo(and(bar">link</a>&gt;)</p>
 "
 `;
 
 exports[`engine > commonmark-500 1`] = `
-"<p data-lines="1" data-type="p" data-sign="206ad468cb9e40bec3c056b0debc67f8b1068e2cb89bb472179c2364f97c7c231"><a href="#fragment">link</a></p><p data-lines="2" data-type="p" data-sign="fe56cb972e09e6a686945e34ca1b7094eea42624933f4588befdff19c011bf312"><a href="http://example.com#fragment">link</a></p><p data-lines="2" data-type="p" data-sign="ddef61fd8c9ac9839e05cca579c129f812ccd5270f9b9f5b6a4176f0643a37622"><a href="http://example.com?foo=3#frag">link</a></p>
+"<p data-lines="1" data-type="p" data-sign="5a3ca225d2dda48261d7a72b41c2266dc16edf511324ac24bf236db5e85e56511"><a href="foo%5C">link</a>:)</p>
 "
 `;
 
 exports[`engine > commonmark-501 1`] = `
-"<p data-lines="1" data-type="p" data-sign="ccdeb7f3616675624732fe7704cd07afcb4dfe8389ede97a50e142135256e31f1"><a href="foo%5Cbar">link</a></p>
+"<p data-lines="1" data-type="p" data-sign="206ad468cb9e40bec3c056b0debc67f8b1068e2cb89bb472179c2364f97c7c231"><a href="#fragment">link</a></p><p data-lines="2" data-type="p" data-sign="08e8f4ea4afd34778ba26e59478f570a6490607c076320aac008f60ae41713ad2"><a href="https://example.com#fragment">link</a></p><p data-lines="2" data-type="p" data-sign="5fa8febbed2bd405705394228faf18e546ce7f7df66f549152feaf85fe41460b2"><a href="https://example.com?foo=3#frag">link</a></p>
 "
 `;
 
 exports[`engine > commonmark-502 1`] = `
-"<p data-lines="1" data-type="p" data-sign="29bca68dedbb354ce15cf220604f1a72adfd6348676899a0a7f744b7edfec3ae1"><a href="foo%20bä">link</a></p>
+"<p data-lines="1" data-type="p" data-sign="ccdeb7f3616675624732fe7704cd07afcb4dfe8389ede97a50e142135256e31f1"><a href="foo%5Cbar">link</a></p>
 "
 `;
 
 exports[`engine > commonmark-503 1`] = `
-"<p data-lines="1" data-type="p" data-sign="0d0407bbc87ad19aa0d001b6d9ca0fee4b4b4d833e6a5bea8fe484481d5dac621"><a href="%22title%22">link</a></p>
+"<p data-lines="1" data-type="p" data-sign="29bca68dedbb354ce15cf220604f1a72adfd6348676899a0a7f744b7edfec3ae1"><a href="foo%20bä">link</a></p>
 "
 `;
 
 exports[`engine > commonmark-504 1`] = `
-"<p data-lines="3" data-type="p" data-sign="ac3d56a2710695f69133b828d7b3a255b83c603d5b75f8850875a4f467d56e4b3"><a title="title" href="/url">link</a><br><a title="title" href="/url">link</a><br>[link](/url (title))</p>
+"<p data-lines="1" data-type="p" data-sign="0d0407bbc87ad19aa0d001b6d9ca0fee4b4b4d833e6a5bea8fe484481d5dac621"><a href="%22title%22">link</a></p>
 "
 `;
 
 exports[`engine > commonmark-505 1`] = `
-"<p data-lines="1" data-type="p" data-sign="14627044c6060863e5648c497c67a78ddaa04ca6214703877d1c9281ab8aeea01"><a title="title \\&amp;quot;" href="/url">link</a></p>
+"<p data-lines="3" data-type="p" data-sign="ac3d56a2710695f69133b828d7b3a255b83c603d5b75f8850875a4f467d56e4b3"><a title="title" href="/url">link</a><br><a title="title" href="/url">link</a><br>[link](/url (title))</p>
 "
 `;
 
 exports[`engine > commonmark-506 1`] = `
-"<p data-lines="1" data-type="p" data-sign="73ea4322c0d26aed9d96bcd86c90663c3c20a09c972a646396cdbdb5919b36fa1">[link](/url&nbsp;"title")</p>
+"<p data-lines="1" data-type="p" data-sign="14627044c6060863e5648c497c67a78ddaa04ca6214703877d1c9281ab8aeea01"><a title="title \\&amp;quot;" href="/url">link</a></p>
 "
 `;
 
 exports[`engine > commonmark-507 1`] = `
-"<p data-lines="1" data-type="p" data-sign="2c0ec2650b82e2fd4da5abb2f7ef21487dce341ee76b33416caf5834cf48543b1"><a title="title and title" href="/url">link</a></p>
+"<p data-lines="1" data-type="p" data-sign="711b3a48512d5724e7e577674aef2ebbcb628f4a61125aab155998dcf184a2281"><a title="title" href="/url">link</a></p>
 "
 `;
 
 exports[`engine > commonmark-508 1`] = `
-"<p data-lines="1" data-type="p" data-sign="223dccef1f755444be52d778623bad00fec92c79415a7b18f6907dc3e233640d1"><a title="title and title" href="/url">link</a></p>
+"<p data-lines="1" data-type="p" data-sign="2c0ec2650b82e2fd4da5abb2f7ef21487dce341ee76b33416caf5834cf48543b1"><a title="title and title" href="/url">link</a></p>
 "
 `;
 
 exports[`engine > commonmark-509 1`] = `
-"<p data-lines="2" data-type="p" data-sign="6201b5694cfea36405ff04357556ad4ae70a6431097049d47a5f970a8abd76042">[link](   /uri<br>  "title"  )</p>
+"<p data-lines="1" data-type="p" data-sign="223dccef1f755444be52d778623bad00fec92c79415a7b18f6907dc3e233640d1"><a title="title and title" href="/url">link</a></p>
 "
 `;
 
 exports[`engine > commonmark-510 1`] = `
-"<p data-lines="1" data-type="p" data-sign="b6c429dac5fccf0845c60370be38322172cb995a8d16b851d34d20940645adc61"><a href="/uri">link</a></p>
+"<p data-lines="2" data-type="p" data-sign="6201b5694cfea36405ff04357556ad4ae70a6431097049d47a5f970a8abd76042">[link](   /uri<br>  "title"  )</p>
 "
 `;
 
 exports[`engine > commonmark-511 1`] = `
-"<p data-lines="1" data-type="p" data-sign="6960ea00625fd935a26de8ffd90bdedb28542b61d0c3c056db50338d71ba08bc1"><a href="/uri">link [foo [bar]]</a></p>
+"<p data-lines="1" data-type="p" data-sign="b6c429dac5fccf0845c60370be38322172cb995a8d16b851d34d20940645adc61"><a href="/uri">link</a></p>
 "
 `;
 
 exports[`engine > commonmark-512 1`] = `
-"<p data-lines="1" data-type="p" data-sign="37446adc4636c6580bd3c9a3020ff078cdc8bc10fb7cc7b7076b5bd2c758606f1">[link] bar](/uri)</p>
+"<p data-lines="1" data-type="p" data-sign="6960ea00625fd935a26de8ffd90bdedb28542b61d0c3c056db50338d71ba08bc1"><a href="/uri">link [foo [bar]]</a></p>
 "
 `;
 
 exports[`engine > commonmark-513 1`] = `
-"<p data-lines="1" data-type="p" data-sign="2f2f48d3af1a3ec46dfac26f12f5e1fced0aa0dee7b74d90df50a726dcc087221">[link <a href="/uri">bar</a></p>
+"<p data-lines="1" data-type="p" data-sign="37446adc4636c6580bd3c9a3020ff078cdc8bc10fb7cc7b7076b5bd2c758606f1">[link] bar](/uri)</p>
 "
 `;
 
 exports[`engine > commonmark-514 1`] = `
-"<p data-lines="1" data-type="p" data-sign="398e76ffea4de2b48d1d8c8e7b359f04029fd602155363e078f3af8987c163641"><a href="/uri">link [bar</a></p>
+"<p data-lines="1" data-type="p" data-sign="2f2f48d3af1a3ec46dfac26f12f5e1fced0aa0dee7b74d90df50a726dcc087221">[link <a href="/uri">bar</a></p>
 "
 `;
 
 exports[`engine > commonmark-515 1`] = `
-"<p data-lines="1" data-type="p" data-sign="a074fbcf4311dc35ad84b35744fe12d3d98d7da111567931ce966d372686dcac1"><a href="/uri">link <em>foo **bar</em>* <code>#</code>*</a></p>
+"<p data-lines="1" data-type="p" data-sign="398e76ffea4de2b48d1d8c8e7b359f04029fd602155363e078f3af8987c163641"><a href="/uri">link [bar</a></p>
 "
 `;
 
 exports[`engine > commonmark-516 1`] = `
-"<p data-lines="1" data-type="p" data-sign="eea3303cdb690995c791edd6c64674d1545e0c5db33de89cb35db85762868aea1"><a href="/uri"><img alt="moon" src="moon.jpg"></a></p>
+"<p data-lines="1" data-type="p" data-sign="a074fbcf4311dc35ad84b35744fe12d3d98d7da111567931ce966d372686dcac1"><a href="/uri">link <em>foo **bar</em>* <code>#</code>*</a></p>
 "
 `;
 
 exports[`engine > commonmark-517 1`] = `
-"<p data-lines="1" data-type="p" data-sign="86ee098bc7cf7e1f981bbb0a19bc7aeb36d92503d4863cf0e50fe9ae81f1f4b11">[foo <a href="/uri">bar</a>](/uri)</p>
+"<p data-lines="1" data-type="p" data-sign="eea3303cdb690995c791edd6c64674d1545e0c5db33de89cb35db85762868aea1"><a href="/uri"><img alt="moon" src="moon.jpg"></a></p>
 "
 `;
 
 exports[`engine > commonmark-518 1`] = `
-"<p data-lines="1" data-type="p" data-sign="f6b7c63202f6fc605e4f1cb6bf08703ee3a211d06d930f8a4e8147ec51701f431">[foo <em><a href="/uri">bar </a><a href="/uri">baz</a></em>](/uri)</p>
+"<p data-lines="1" data-type="p" data-sign="86ee098bc7cf7e1f981bbb0a19bc7aeb36d92503d4863cf0e50fe9ae81f1f4b11">[foo <a href="/uri">bar</a>](/uri)</p>
 "
 `;
 
 exports[`engine > commonmark-519 1`] = `
-"<p data-lines="1" data-type="p" data-sign="1da62f9a4332229ff10297d8d74dc7e9cfd0099b53033b4adf622b5a3e09a9171"><img alt="[<a href=" src="uri1">foo" /&gt;](uri3)</p>
+"<p data-lines="1" data-type="p" data-sign="f6b7c63202f6fc605e4f1cb6bf08703ee3a211d06d930f8a4e8147ec51701f431">[foo <em><a href="/uri">bar </a><a href="/uri">baz</a></em>](/uri)</p>
 "
 `;
 
 exports[`engine > commonmark-520 1`] = `
-"<p data-lines="1" data-type="p" data-sign="b84efa7f0e62ce4694d505cfbbf36d90679751e9947da3ff50a267f906cd76ee1"><em><a href="/uri">foo</a></em></p>
+"<p data-lines="1" data-type="p" data-sign="1da62f9a4332229ff10297d8d74dc7e9cfd0099b53033b4adf622b5a3e09a9171"><img alt="[<a href=" src="uri1">foo" /&gt;](uri3)</p>
 "
 `;
 
 exports[`engine > commonmark-521 1`] = `
-"<p data-lines="1" data-type="p" data-sign="6faa64ab378c0628f9cd9a8dc1099e38299c98dd561a0c64751f6fe5733118931"><a href="baz*">foo *bar</a></p>
+"<p data-lines="1" data-type="p" data-sign="b84efa7f0e62ce4694d505cfbbf36d90679751e9947da3ff50a267f906cd76ee1"><em><a href="/uri">foo</a></em></p>
 "
 `;
 
 exports[`engine > commonmark-522 1`] = `
-"<p data-lines="1" data-type="p" data-sign="aaea05d233d77241417f3aeabec19eef2aa0b368e34f33e97697ed0de674cc031"><em>foo [bar</em> baz]</p>
+"<p data-lines="1" data-type="p" data-sign="6faa64ab378c0628f9cd9a8dc1099e38299c98dd561a0c64751f6fe5733118931"><a href="baz*">foo *bar</a></p>
 "
 `;
 
 exports[`engine > commonmark-523 1`] = `
-"<p data-lines="1" data-type="p" data-sign="77cfe98e01046adf37ea61701f6d7c383434114386ae21d2a9bb8203a57d07001"><a href="baz">foo &lt;bar attr="</a>"&gt;</p>
+"<p data-lines="1" data-type="p" data-sign="aaea05d233d77241417f3aeabec19eef2aa0b368e34f33e97697ed0de674cc031"><em>foo [bar</em> baz]</p>
 "
 `;
 
 exports[`engine > commonmark-524 1`] = `
-"<p data-lines="1" data-type="p" data-sign="20991b30b8e0196dbf9347fc5e75e9869a6cfe702573d7c49f36bc0253b2069a1">[foo<code>](/uri)</code></p>
+"<p data-lines="1" data-type="p" data-sign="77cfe98e01046adf37ea61701f6d7c383434114386ae21d2a9bb8203a57d07001"><a href="baz">foo &lt;bar attr="</a>"&gt;</p>
 "
 `;
 
 exports[`engine > commonmark-525 1`] = `
-"<p data-lines="1" data-type="p" data-sign="3bc9dcb4c63e112056bef0256906f9b8b2f746638a01f0a3bf2ed719127237351"><a href="uri">foo&lt;</a><a title="http://example.com/?search=" href="http://example.com/?search=">http://example.com/?search=</a>&gt;</p>
+"<p data-lines="1" data-type="p" data-sign="20991b30b8e0196dbf9347fc5e75e9869a6cfe702573d7c49f36bc0253b2069a1">[foo<code>](/uri)</code></p>
 "
 `;
 
 exports[`engine > commonmark-526 1`] = `
-"<p data-lines="1" data-type="p" data-sign="936c986e1e5afc66b9027bc1f5c2808226716b7f86e8d2a10089f95373957e6f1"><a title="title" href="/url">foo</a></p>
-
-<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
+"<p data-lines="1" data-type="p" data-sign="21b837527f43b73e27312f95b2d84b134bc864f0ede44a181f3ca82ac27f56fa1"><a href="uri">foo&lt;</a><a title="https://example.com/?search=" href="https://example.com/?search=">https://example.com/?search=</a>&gt;</p>
 "
 `;
 
 exports[`engine > commonmark-527 1`] = `
-"<p data-lines="1" data-type="p" data-sign="663d21aad14b1295d788748e795dd8c9061f625ab0cef3c464729a00acfc9ef41">[link [foo [bar]]][ref](/uri)</p>
+"<p data-lines="1" data-type="p" data-sign="936c986e1e5afc66b9027bc1f5c2808226716b7f86e8d2a10089f95373957e6f1"><a title="title" href="/url">foo</a></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-528 1`] = `
-"<p data-lines="1" data-type="p" data-sign="ba8eae0f4cdaec35fde391c112a0b1520ebe7d22d391fb322cace41d92ffc9781"><a href="/uri">link [bar</a></p>
+"<p data-lines="1" data-type="p" data-sign="663d21aad14b1295d788748e795dd8c9061f625ab0cef3c464729a00acfc9ef41">[link [foo [bar]]][ref](/uri)</p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-529 1`] = `
-"<p data-lines="1" data-type="p" data-sign="fb0a0189dbc67f36f219538efbf5755eb646a58e46186a9713ff049fd1c46a831"><a href="/uri">link <em>foo **bar</em>* <code>#</code>*</a></p>
+"<p data-lines="1" data-type="p" data-sign="ba8eae0f4cdaec35fde391c112a0b1520ebe7d22d391fb322cace41d92ffc9781"><a href="/uri">link [bar</a></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-530 1`] = `
-"<p data-lines="1" data-type="p" data-sign="b2d484c1e5aa0368e2d82c9483005ecc88df29decf0d67b373246578019300e21">[<img alt="moon" src="moon.jpg">][ref](/uri)</p>
+"<p data-lines="1" data-type="p" data-sign="fb0a0189dbc67f36f219538efbf5755eb646a58e46186a9713ff049fd1c46a831"><a href="/uri">link <em>foo **bar</em>* <code>#</code>*</a></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-531 1`] = `
-"<p data-lines="1" data-type="p" data-sign="3895c550bf871d181a194d4fc6925b0f2d159b145415a42441adaec8b35c07ee1">[foo <a href="/uri">bar</a>]<a href="/uri">ref</a></p>
+"<p data-lines="1" data-type="p" data-sign="b2d484c1e5aa0368e2d82c9483005ecc88df29decf0d67b373246578019300e21">[<img alt="moon" src="moon.jpg">][ref](/uri)</p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-532 1`] = `
-"<p data-lines="1" data-type="p" data-sign="b7e34d9c8176768c52417b8100fd4dc5e3c31425b7e0985fc40a3f7f2d724d6c1">[foo <em>bar <a href="/uri">baz</a></em>]<a href="/uri">ref</a></p>
+"<p data-lines="1" data-type="p" data-sign="3895c550bf871d181a194d4fc6925b0f2d159b145415a42441adaec8b35c07ee1">[foo <a href="/uri">bar</a>]<a href="/uri">ref</a></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-533 1`] = `
-"<p data-lines="1" data-type="p" data-sign="fe0456e79aba124610c34217b25a184f02e85ce77e5f4dafb09b50a75fa5cfe81"><em><a href="/uri">foo</a></em></p>
+"<p data-lines="1" data-type="p" data-sign="b7e34d9c8176768c52417b8100fd4dc5e3c31425b7e0985fc40a3f7f2d724d6c1">[foo <em>bar <a href="/uri">baz</a></em>]<a href="/uri">ref</a></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-534 1`] = `
-"<p data-lines="1" data-type="p" data-sign="ef1ce4771c9770c9a886ba8fb3d19d80f55c4432c64ceab547fe6ae725148c2a1"><a href="/uri">foo <em>bar</em></a></p>
+"<p data-lines="1" data-type="p" data-sign="fe0456e79aba124610c34217b25a184f02e85ce77e5f4dafb09b50a75fa5cfe81"><em><a href="/uri">foo</a></em></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-535 1`] = `
+"<p data-lines="1" data-type="p" data-sign="ef1ce4771c9770c9a886ba8fb3d19d80f55c4432c64ceab547fe6ae725148c2a1"><a href="/uri">foo <em>bar</em></a></p>
+
+<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
+"
+`;
+
+exports[`engine > commonmark-536 1`] = `
 "<p data-lines="1" data-type="p" data-sign="bb8f27c7a02d35844d7262c9f22d90e54b1874f43296c98ae371ec4d7cdae5ad1"><a href="/uri">foo &lt;bar attr="</a>"&gt;</p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-536 1`] = `""`;
-
-exports[`engine > commonmark-537 1`] = `
-"<p data-lines="1" data-type="p" data-sign="166d5b0590a3a0d55303e368defd6dc5fa3d722993bde4f317034956f13572621"><a href="/uri">foo&lt;</a><a title="http://example.com/?search=" href="http://example.com/?search=">http://example.com/?search=</a>&gt;</p>
-
-<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
-"
-`;
+exports[`engine > commonmark-537 1`] = `""`;
 
 exports[`engine > commonmark-538 1`] = `
-"<p data-lines="1" data-type="p" data-sign="936c986e1e5afc66b9027bc1f5c2808226716b7f86e8d2a10089f95373957e6f1"><a title="title" href="/url">foo</a></p>
+"<p data-lines="1" data-type="p" data-sign="d9137970fcc7dc4f911223e9457ee362ee404cac9666e1e2a9f01d519e10686a1"><a href="/uri">foo&lt;</a><a title="https://example.com/?search=" href="https://example.com/?search=">https://example.com/?search=</a>&gt;</p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-539 1`] = `
-"<p data-lines="1" data-type="p" data-sign="ba0bdc91d74fbe5dd021008a4bdc5486ceed675a7c24658f73501fa9d632a08b1">[ẞ]</p>
-
-<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
-"
-`;
-
-exports[`engine > commonmark-540 1`] = `
-"<p data-lines="1" data-type="p" data-sign="58b3accdf7492f70a9f6f92e0cde3d226012102dbcef357b60f01b95a266ec991">[Baz][Foo bar]</p>
-"
-`;
-
-exports[`engine > commonmark-541 1`] = `
-"<p data-lines="1" data-type="p" data-sign="8b325311bf4778c4ebf5405643d0817dc83a8d3bf3352148b9a7970074afdefb1">[foo] [bar](/url "title")</p>
-
-<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
-"
-`;
-
-exports[`engine > commonmark-542 1`] = `
-"<p data-lines="2" data-type="p" data-sign="9c4a62b4b17bd49518be20a723fd29f88250c54882a194681729b4b8e248febc2">[foo]<br><a title="title" href="/url">bar</a></p>
-
-<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
-"
-`;
-
-exports[`engine > commonmark-543 1`] = `
-"<p data-lines="1" data-type="p" data-sign="a0842d77f7a3c8f906c5b05367ae875b48fa04ecd09eefffcb894b8e7b3406071"><a href="/url2">bar</a></p>
-"
-`;
-
-exports[`engine > commonmark-544 1`] = `
-"<p data-lines="1" data-type="p" data-sign="a81feba6e2237bc5106d472b503479bb0a05a6d29cddbd2c6accdff6c54d79211">[bar][foo!]</p>
-
-<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
-"
-`;
-
-exports[`engine > commonmark-545 1`] = `
-"<p data-lines="1" data-type="p" data-sign="8185f3787b0fa5e6256fc112fb809a54e555f6399278f1cc936443c0afaff1841"><a href="/uri">foo</a></p>
-
-<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
-"
-`;
-
-exports[`engine > commonmark-546 1`] = `
-"<p data-lines="1" data-type="p" data-sign="5623fb03a2c32e319545df93a8a0c4054025d16746a18c4b342a9c86f4827da11">[foo][ref[bar]]</p><p data-lines="2" data-type="p" data-sign="374126fce7fcb53f892f73df473530a319f9c9c0d32bbed37b43a6f6224274af2">[ref[bar]]: /uri</p>
-"
-`;
-
-exports[`engine > commonmark-547 1`] = `
-"<p data-lines="1" data-type="p" data-sign="db2d79f6b283d47217aa1e4a04c89ca1f74c6fa9a11f5904917dcc2a795179801">[[[foo]]]</p><p data-lines="2" data-type="p" data-sign="5b218337319f27f776e0ea394918d37b73bdcedf24e4981f970d2a2dbe4dd7fd2">[[[foo]]]: /url</p>
-"
-`;
-
-exports[`engine > commonmark-548 1`] = `
-"<p data-lines="1" data-type="p" data-sign="8185f3787b0fa5e6256fc112fb809a54e555f6399278f1cc936443c0afaff1841"><a href="/uri">foo</a></p>
-
-<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
-"
-`;
-
-exports[`engine > commonmark-549 1`] = `
-"<p data-lines="1" data-type="p" data-sign="8739d9621d339133b0e0ee3c560f7081aefaca056e1dbec734469d4f000595d31"><a href="/uri">bar\\</a></p>
-"
-`;
-
-exports[`engine > commonmark-550 1`] = `""`;
-
-exports[`engine > commonmark-551 1`] = `
-"<p data-lines="2" data-type="p" data-sign="a4924e463a804ce9eae8b30b28aba44b56acf8bf4b26a45ceebfca8e6a353fa02">[<br> ]</p>
-
-<p data-lines="3" data-type="br" data-sign="br3">&nbsp;</p>
-"
-`;
-
-exports[`engine > commonmark-552 1`] = `
-"<p data-lines="1" data-type="p" data-sign="711aa6106906856c30731557637f901c2c8a1f09ab4b4d4e18d8e89ea6592bc81"><a title="title" href="/url">foo</a>[]</p>
-
-<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
-"
-`;
-
-exports[`engine > commonmark-553 1`] = `
-"<p data-lines="1" data-type="p" data-sign="9aaaaea000297018472c26d0d35a51e6786340a00f3acfa5bab0d38ab0384f7e1"><a title="title" href="/url"><em>foo</em> bar</a>[]</p>
-
-<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
-"
-`;
-
-exports[`engine > commonmark-554 1`] = `
-"<p data-lines="1" data-type="p" data-sign="258aef42550eb08edd5fa50b061f894f4c2175a77ceef3cd8e75dfe9d07559811"><a title="title" href="/url">Foo</a>[]</p>
-
-<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
-"
-`;
-
-exports[`engine > commonmark-555 1`] = `
-"<p data-lines="1" data-type="p" data-sign="2337a5a564f08331dce6cfc14ab352a224780c6b0a0b171d931698ef0debf1a41">[foo] </p>
-
-<p data-lines="3" data-type="br" data-sign="br3">&nbsp;</p>
-"
-`;
-
-exports[`engine > commonmark-556 1`] = `
 "<p data-lines="1" data-type="p" data-sign="936c986e1e5afc66b9027bc1f5c2808226716b7f86e8d2a10089f95373957e6f1"><a title="title" href="/url">foo</a></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
+exports[`engine > commonmark-540 1`] = `
+"<p data-lines="1" data-type="p" data-sign="ba0bdc91d74fbe5dd021008a4bdc5486ceed675a7c24658f73501fa9d632a08b1">[ẞ]</p>
+
+<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
+"
+`;
+
+exports[`engine > commonmark-541 1`] = `
+"<p data-lines="1" data-type="p" data-sign="58b3accdf7492f70a9f6f92e0cde3d226012102dbcef357b60f01b95a266ec991">[Baz][Foo bar]</p>
+"
+`;
+
+exports[`engine > commonmark-542 1`] = `
+"<p data-lines="1" data-type="p" data-sign="8b325311bf4778c4ebf5405643d0817dc83a8d3bf3352148b9a7970074afdefb1">[foo] [bar](/url "title")</p>
+
+<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
+"
+`;
+
+exports[`engine > commonmark-543 1`] = `
+"<p data-lines="2" data-type="p" data-sign="9c4a62b4b17bd49518be20a723fd29f88250c54882a194681729b4b8e248febc2">[foo]<br><a title="title" href="/url">bar</a></p>
+
+<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
+"
+`;
+
+exports[`engine > commonmark-544 1`] = `
+"<p data-lines="1" data-type="p" data-sign="a0842d77f7a3c8f906c5b05367ae875b48fa04ecd09eefffcb894b8e7b3406071"><a href="/url2">bar</a></p>
+"
+`;
+
+exports[`engine > commonmark-545 1`] = `
+"<p data-lines="1" data-type="p" data-sign="a81feba6e2237bc5106d472b503479bb0a05a6d29cddbd2c6accdff6c54d79211">[bar][foo!]</p>
+
+<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
+"
+`;
+
+exports[`engine > commonmark-546 1`] = `
+"<p data-lines="1" data-type="p" data-sign="8185f3787b0fa5e6256fc112fb809a54e555f6399278f1cc936443c0afaff1841"><a href="/uri">foo</a></p>
+
+<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
+"
+`;
+
+exports[`engine > commonmark-547 1`] = `
+"<p data-lines="1" data-type="p" data-sign="5623fb03a2c32e319545df93a8a0c4054025d16746a18c4b342a9c86f4827da11">[foo][ref[bar]]</p><p data-lines="2" data-type="p" data-sign="374126fce7fcb53f892f73df473530a319f9c9c0d32bbed37b43a6f6224274af2">[ref[bar]]: /uri</p>
+"
+`;
+
+exports[`engine > commonmark-548 1`] = `
+"<p data-lines="1" data-type="p" data-sign="db2d79f6b283d47217aa1e4a04c89ca1f74c6fa9a11f5904917dcc2a795179801">[[[foo]]]</p><p data-lines="2" data-type="p" data-sign="5b218337319f27f776e0ea394918d37b73bdcedf24e4981f970d2a2dbe4dd7fd2">[[[foo]]]: /url</p>
+"
+`;
+
+exports[`engine > commonmark-549 1`] = `
+"<p data-lines="1" data-type="p" data-sign="8185f3787b0fa5e6256fc112fb809a54e555f6399278f1cc936443c0afaff1841"><a href="/uri">foo</a></p>
+
+<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
+"
+`;
+
+exports[`engine > commonmark-550 1`] = `
+"<p data-lines="1" data-type="p" data-sign="8739d9621d339133b0e0ee3c560f7081aefaca056e1dbec734469d4f000595d31"><a href="/uri">bar\\</a></p>
+"
+`;
+
+exports[`engine > commonmark-551 1`] = `""`;
+
+exports[`engine > commonmark-552 1`] = `
+"<p data-lines="2" data-type="p" data-sign="a4924e463a804ce9eae8b30b28aba44b56acf8bf4b26a45ceebfca8e6a353fa02">[<br> ]</p>
+
+<p data-lines="3" data-type="br" data-sign="br3">&nbsp;</p>
+"
+`;
+
+exports[`engine > commonmark-553 1`] = `
+"<p data-lines="1" data-type="p" data-sign="711aa6106906856c30731557637f901c2c8a1f09ab4b4d4e18d8e89ea6592bc81"><a title="title" href="/url">foo</a>[]</p>
+
+<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
+"
+`;
+
+exports[`engine > commonmark-554 1`] = `
+"<p data-lines="1" data-type="p" data-sign="9aaaaea000297018472c26d0d35a51e6786340a00f3acfa5bab0d38ab0384f7e1"><a title="title" href="/url"><em>foo</em> bar</a>[]</p>
+
+<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
+"
+`;
+
+exports[`engine > commonmark-555 1`] = `
+"<p data-lines="1" data-type="p" data-sign="258aef42550eb08edd5fa50b061f894f4c2175a77ceef3cd8e75dfe9d07559811"><a title="title" href="/url">Foo</a>[]</p>
+
+<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
+"
+`;
+
+exports[`engine > commonmark-556 1`] = `
+"<p data-lines="1" data-type="p" data-sign="2337a5a564f08331dce6cfc14ab352a224780c6b0a0b171d931698ef0debf1a41">[foo] </p>
+
+<p data-lines="3" data-type="br" data-sign="br3">&nbsp;</p>
+"
+`;
+
 exports[`engine > commonmark-557 1`] = `
-"<p data-lines="1" data-type="p" data-sign="d2d0859eeaf04dae24c215e806dbce774a4d03b13481f1e0ba5a2a1d6846db391"><a title="title" href="/url"><em>foo</em> bar</a></p>
+"<p data-lines="1" data-type="p" data-sign="936c986e1e5afc66b9027bc1f5c2808226716b7f86e8d2a10089f95373957e6f1"><a title="title" href="/url">foo</a></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-558 1`] = `
-"<p data-lines="1" data-type="p" data-sign="78deedc42999c4db73c8cf22c2fce14e22d55408c4aba7090adfa3026775645c1">[[<em>foo</em> bar]]</p>
+"<p data-lines="1" data-type="p" data-sign="d2d0859eeaf04dae24c215e806dbce774a4d03b13481f1e0ba5a2a1d6846db391"><a title="title" href="/url"><em>foo</em> bar</a></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-559 1`] = `
-"<p data-lines="1" data-type="p" data-sign="37ea8a3a483498b39a89ad31a86311712004b23c3d02cd09f575e88cf7577cd91">[[bar [foo]</p>
+"<p data-lines="1" data-type="p" data-sign="78deedc42999c4db73c8cf22c2fce14e22d55408c4aba7090adfa3026775645c1">[[<em>foo</em> bar]]</p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-560 1`] = `
-"<p data-lines="1" data-type="p" data-sign="d3360a49284403df508ab0ee20cd96c8289791c6b281cba1312f00283179994c1"><a title="title" href="/url">Foo</a></p>
+"<p data-lines="1" data-type="p" data-sign="37ea8a3a483498b39a89ad31a86311712004b23c3d02cd09f575e88cf7577cd91">[[bar [foo]</p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-561 1`] = `
-"<p data-lines="1" data-type="p" data-sign="c743e80f67449ccd0229ce188327d64b502a7ceb235f4272994f3b4c88965ff21"><a href="/url">foo</a> bar</p>
+"<p data-lines="1" data-type="p" data-sign="d3360a49284403df508ab0ee20cd96c8289791c6b281cba1312f00283179994c1"><a title="title" href="/url">Foo</a></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-562 1`] = `
-"<p data-lines="1" data-type="p" data-sign="6352d461ea29d788dc7d312c27c7bf2e9f473a16d2a8e3e0ab41d92465c31aa61">[foo](/url "title")</p>
+"<p data-lines="1" data-type="p" data-sign="c743e80f67449ccd0229ce188327d64b502a7ceb235f4272994f3b4c88965ff21"><a href="/url">foo</a> bar</p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-563 1`] = `
-"<p data-lines="1" data-type="p" data-sign="cd087bd5be8bf406dd8f32101607eca09a2b7d813882617f79f987dc3e8c21b51"><em><a href="/url">foo</a></em></p>
+"<p data-lines="1" data-type="p" data-sign="6352d461ea29d788dc7d312c27c7bf2e9f473a16d2a8e3e0ab41d92465c31aa61">[foo](/url "title")</p>
+
+<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-564 1`] = `
+"<p data-lines="1" data-type="p" data-sign="cd087bd5be8bf406dd8f32101607eca09a2b7d813882617f79f987dc3e8c21b51"><em><a href="/url">foo</a></em></p>
+"
+`;
+
+exports[`engine > commonmark-565 1`] = `
 "<p data-lines="1" data-type="p" data-sign="7ed505f0e6421fa7dfa2d398cee157eaaa60866711da3dbfedbcd7c1cd1855f61"><a href="/url2">foo</a></p>
 
 <p data-lines="3" data-type="br" data-sign="br3">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-565 1`] = `
+exports[`engine > commonmark-566 1`] = `
 "<p data-lines="1" data-type="p" data-sign="e75d809631db0749c15ba04399d57c20e9d38a519842c3565ce7684b36e554c91"><a href="/url1">foo</a>[]</p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-566 1`] = `
+exports[`engine > commonmark-567 1`] = `
 "<p data-lines="1" data-type="p" data-sign="5e2f57ac02072416c8f6b2b4c0d512d5903b5f1f16d3aa91e29dcd4c3fa866eb1"><a href="/url1">foo</a>()</p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-567 1`] = `
+exports[`engine > commonmark-568 1`] = `
 "<p data-lines="1" data-type="p" data-sign="17fa084d49494f9bd16f3f484907f69034a3bcbf55c55a990167ea0abd23fb3e1"><a href="/url1">foo</a>(not a link)</p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-568 1`] = `
+exports[`engine > commonmark-569 1`] = `
 "<p data-lines="1" data-type="p" data-sign="4305269b31ff159f7969446c52dbfa05ff5977a6a5f27f4b9cb76184266855b61">[foo][bar]<a href="/url">baz</a></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-569 1`] = `
+exports[`engine > commonmark-570 1`] = `
 "<p data-lines="1" data-type="p" data-sign="6232bd171a821d4d68752ac8255ccaf917e5beb879a06c40b5b52f0ae483aa3e1"><a href="/url2">foo</a><a href="/url1">baz</a></p>
 
 <p data-lines="3" data-type="br" data-sign="br3">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-570 1`] = `
+exports[`engine > commonmark-571 1`] = `
 "<p data-lines="1" data-type="p" data-sign="223f7fb5cee19fa719c42d59afba188780925b16da0022af1c2c50fe25346a6d1">[foo][bar]<a href="/url1">baz</a></p>
 
 <p data-lines="3" data-type="br" data-sign="br3">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-571 1`] = `
+exports[`engine > commonmark-572 1`] = `
 "<p data-lines="1" data-type="p" data-sign="a12b1330c8ad36f9fc658d573c844966b6d8ef4bc3fa50d2fd4afdb9ca77d3551"><img title="title" alt="foo" src="/url"></p>
 "
 `;
 
-exports[`engine > commonmark-572 1`] = `
+exports[`engine > commonmark-573 1`] = `
 "<p data-lines="1" data-type="p" data-sign="54a4c798e5aaa11e8aff58d0754b1488bda4c8e5c6526e3c57e80866653923141"><img title="train &amp; tracks" alt="foo <em>bar</em>" src="train.jpg"></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-573 1`] = `
+exports[`engine > commonmark-574 1`] = `
 "<p data-lines="1" data-type="p" data-sign="bb34a4a4a77b1865341931ce11cef6ba7f39017e99e93b33c01f065e3a5c13571"><img alt="foo !<a href=" src="/url">bar" /&gt;</p>
 "
 `;
 
-exports[`engine > commonmark-574 1`] = `
+exports[`engine > commonmark-575 1`] = `
 "<p data-lines="1" data-type="p" data-sign="38a969bc1d3c0fafda711e00e688d78f23db6a8ebf4c106a4858eb8b77cbaff41"><img alt="foo <a href=" src="/url">bar" /&gt;</p>
 "
 `;
 
-exports[`engine > commonmark-575 1`] = `
+exports[`engine > commonmark-576 1`] = `
 "<p data-lines="1" data-type="p" data-sign="16bddfea64baf56836f4dc4de53db801590bbd459879f033de4ea42c8f8a97321"><img title="train &amp; tracks" alt="foo <em>bar</em>" src="train.jpg">[]</p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-576 1`] = `
+exports[`engine > commonmark-577 1`] = `
 "<p data-lines="1" data-type="p" data-sign="54a4c798e5aaa11e8aff58d0754b1488bda4c8e5c6526e3c57e80866653923141"><img title="train &amp; tracks" alt="foo <em>bar</em>" src="train.jpg"></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-577 1`] = `
+exports[`engine > commonmark-578 1`] = `
 "<p data-lines="1" data-type="p" data-sign="4bf0d4da0246a9d7cafb15f44074a8e7421dbde26958aaf04b8153705b5719101"><img alt="foo" src="train.jpg"></p>
 "
 `;
 
-exports[`engine > commonmark-578 1`] = `
+exports[`engine > commonmark-579 1`] = `
 "<p data-lines="1" data-type="p" data-sign="e4dc0e6a32811e353385d378ffe68b511db3069671f6392248c3f1862256147b1">My ![foo bar](/path/to/train.jpg  "title"   )</p>
 "
 `;
 
-exports[`engine > commonmark-579 1`] = `
+exports[`engine > commonmark-580 1`] = `
 "<p data-lines="1" data-type="p" data-sign="a830480150feefc244f2ff165b0885604dc0e7e69612819d4641c6c3e62ca47f1"><img alt="foo" src="<url>"></p>
 "
 `;
 
-exports[`engine > commonmark-580 1`] = `
-"<p data-lines="1" data-type="p" data-sign="2dca8f0211140c97de8287bc3152e9d7d0b720daabf4a2ba4316ec3593c6b6371"><img alt="" src="/url"></p>
-"
-`;
-
 exports[`engine > commonmark-581 1`] = `
-"<p data-lines="1" data-type="p" data-sign="44bb3df9dc93d8f7638e93dfdc9525142368a83bc935fb46a0b956ee08f6786c1"><img alt="foo" src="/url"></p>
-
-<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
+"<p data-lines="1" data-type="p" data-sign="2dca8f0211140c97de8287bc3152e9d7d0b720daabf4a2ba4316ec3593c6b6371"><img alt="" src="/url"></p>
 "
 `;
 
@@ -3470,237 +3465,239 @@ exports[`engine > commonmark-582 1`] = `
 `;
 
 exports[`engine > commonmark-583 1`] = `
-"<p data-lines="1" data-type="p" data-sign="2ad0673ce75deafa39157f111c14b6f5e51dcab45b7af81c816bcccca2c4ca9b1"><img title="title" alt="foo" src="/url">[]</p>
+"<p data-lines="1" data-type="p" data-sign="44bb3df9dc93d8f7638e93dfdc9525142368a83bc935fb46a0b956ee08f6786c1"><img alt="foo" src="/url"></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-584 1`] = `
-"<p data-lines="1" data-type="p" data-sign="6d767d90fd7e85afa843410dd5cfdc1dfb5557017c34ace70a362c75171026951"><img title="title" alt="<em>foo</em> bar" src="/url">[]</p>
+"<p data-lines="1" data-type="p" data-sign="2ad0673ce75deafa39157f111c14b6f5e51dcab45b7af81c816bcccca2c4ca9b1"><img title="title" alt="foo" src="/url">[]</p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-585 1`] = `
-"<p data-lines="1" data-type="p" data-sign="95fa6002db74570aac7ea4f568398443aa650530ae3d239c1904f2e02978cac41"><img title="title" alt="Foo" src="/url">[]</p>
+"<p data-lines="1" data-type="p" data-sign="6d767d90fd7e85afa843410dd5cfdc1dfb5557017c34ace70a362c75171026951"><img title="title" alt="<em>foo</em> bar" src="/url">[]</p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
 exports[`engine > commonmark-586 1`] = `
+"<p data-lines="1" data-type="p" data-sign="95fa6002db74570aac7ea4f568398443aa650530ae3d239c1904f2e02978cac41"><img title="title" alt="Foo" src="/url">[]</p>
+
+<p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
+"
+`;
+
+exports[`engine > commonmark-587 1`] = `
 "<p data-lines="1" data-type="p" data-sign="7be45a8268f94f54e39cbd77e4277f9a70194fc1cca6a5f6bd5104610c82fcd61">![foo] </p>
 
 <p data-lines="3" data-type="br" data-sign="br3">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-587 1`] = `
+exports[`engine > commonmark-588 1`] = `
 "<p data-lines="1" data-type="p" data-sign="0ab5d9476473635b608a499a891bac02c4e57a0469957a90954e6b9650b060111"><img title="title" alt="foo" src="/url"></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-588 1`] = `
+exports[`engine > commonmark-589 1`] = `
 "<p data-lines="1" data-type="p" data-sign="4be64a90d74310ee71a684778bd0868294bf448a30be33b54ed8b0875c8649a61"><img title="title" alt="<em>foo</em> bar" src="/url"></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-589 1`] = `
+exports[`engine > commonmark-590 1`] = `
 "<p data-lines="1" data-type="p" data-sign="2cc17cdd73b3c5342841206eaf24ee02c1135e425bec385a345209d1755944b31">![[foo]]</p><p data-lines="2" data-type="p" data-sign="5f5c2105165a590417cc9215122fd29f837b7bc00be8eb44f02be63e0aab28e62">[[foo]]: /url "title"</p>
 "
 `;
 
-exports[`engine > commonmark-590 1`] = `
+exports[`engine > commonmark-591 1`] = `
 "<p data-lines="1" data-type="p" data-sign="4b74c29a85279a2c1d540c9eeaf60380db06d97ec4a52988fb1ec56eaa92f74d1"><img title="title" alt="Foo" src="/url"></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-591 1`] = `
+exports[`engine > commonmark-592 1`] = `
 "<p data-lines="1" data-type="p" data-sign="da434fd9dc00f441da29d806d55a3ecbf8e961cf9af02178b0596a3e97ffe7501">![foo](/url "title")</p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-592 1`] = `
+exports[`engine > commonmark-593 1`] = `
 "<p data-lines="1" data-type="p" data-sign="4640e0acfb0965e543605a4df32c2a4756d06fb53fefb9823938e7c0336714251">!<a title="title" href="/url">foo</a></p>
 
 <p data-lines="2" data-type="br" data-sign="br2">&nbsp;</p>
 "
 `;
 
-exports[`engine > commonmark-593 1`] = `
+exports[`engine > commonmark-594 1`] = `
 "<p data-lines="1" data-type="p" data-sign="e4f72b689d703337923e8ae2ba773a37b9911ac149d62ef0d50dad812c10b3341"><a title="http://foo.bar.baz" href="http://foo.bar.baz">http://foo.bar.baz</a></p>
 "
 `;
 
-exports[`engine > commonmark-594 1`] = `
-"<p data-lines="1" data-type="p" data-sign="09184d052b6171ef817f6271ccf80327b7d9552e79480b16a20599d1dcb6e1e21"><a title="http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean" href="http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean">http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean</a></p>
-"
-`;
-
 exports[`engine > commonmark-595 1`] = `
-"<p data-lines="1" data-type="p" data-sign="1eb38128faa4f256d535ff238d5b7f1839cd14e042588fa6a1bdbc8577148bea1"><a title="irc://foo.bar:2233/baz" href="irc://foo.bar:2233/baz">irc://foo.bar:2233/baz</a></p>
+"<p data-lines="1" data-type="p" data-sign="1ece818c01d7e57c0fe41439d8e688419d48798eaa9766fb3246d0404d7113301"><a title="https://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean" href="https://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean">https://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean</a></p>
 "
 `;
 
 exports[`engine > commonmark-596 1`] = `
-"<p data-lines="1" data-type="p" data-sign="61b8274dcf61677d3ca81d0827e500e9f408dd237c0f7d7ca8e2e99deeb930d91"><a href="mailto:FOO@BAR.BAZ">FOO@BAR.BAZ</a></p>
+"<p data-lines="1" data-type="p" data-sign="1eb38128faa4f256d535ff238d5b7f1839cd14e042588fa6a1bdbc8577148bea1"><a title="irc://foo.bar:2233/baz" href="irc://foo.bar:2233/baz">irc://foo.bar:2233/baz</a></p>
 "
 `;
 
 exports[`engine > commonmark-597 1`] = `
-"<p data-lines="1" data-type="p" data-sign="8f2c5876667fddddcfcdcf8d820d1d4a20f148e9e2c914686fec44cd44187cc21">&lt;a+b+c:d&gt;</p>
+"<p data-lines="1" data-type="p" data-sign="61b8274dcf61677d3ca81d0827e500e9f408dd237c0f7d7ca8e2e99deeb930d91"><a href="mailto:FOO@BAR.BAZ">FOO@BAR.BAZ</a></p>
 "
 `;
 
 exports[`engine > commonmark-598 1`] = `
-"<p data-lines="1" data-type="p" data-sign="a4f7c452997fdb1de152854a799010bbb959db23938820f3141a5e9305bb7d591"></p>
+"<p data-lines="1" data-type="p" data-sign="8f2c5876667fddddcfcdcf8d820d1d4a20f148e9e2c914686fec44cd44187cc21">&lt;a+b+c:d&gt;</p>
 "
 `;
 
 exports[`engine > commonmark-599 1`] = `
-"<p data-lines="1" data-type="p" data-sign="57fcc5029c97031ad1374467fd99ab28fb0ea6759093f7d5eba7461bedace1011"></p>
+"<p data-lines="1" data-type="p" data-sign="a4f7c452997fdb1de152854a799010bbb959db23938820f3141a5e9305bb7d591"></p>
 "
 `;
 
 exports[`engine > commonmark-600 1`] = `
-"<p data-lines="1" data-type="p" data-sign="c123dac0a45ceba453c5b7f554e7b574b24bb20151c327ab99afc20a1e4085871">&lt;localhost:5001/foo&gt;</p>
+"<p data-lines="1" data-type="p" data-sign="93e25791d97bbc0cfba6e655440771fde2202f480e4eac9c8bbd8b32ea83361c1"></p>
 "
 `;
 
 exports[`engine > commonmark-601 1`] = `
-"<p data-lines="1" data-type="p" data-sign="fb7e8db78b00d8402d3040f154b9e2c3a3376e23c2d8b82975d5adb4eb1a3c501">&lt;<a title="http://foo.bar/baz" href="http://foo.bar/baz">http://foo.bar/baz</a> bim&gt;</p>
+"<p data-lines="1" data-type="p" data-sign="c123dac0a45ceba453c5b7f554e7b574b24bb20151c327ab99afc20a1e4085871">&lt;localhost:5001/foo&gt;</p>
 "
 `;
 
 exports[`engine > commonmark-602 1`] = `
-"<p data-lines="1" data-type="p" data-sign="31110a0e7445bf6fa3ca8226debb1e5642536984a14505d5d3ed939faa3704f01">&lt;<a title="http://example.com/[>" href="http://example.com/%5C%5B>">http://example.com/[&gt;</a></p>
+"<p data-lines="1" data-type="p" data-sign="fa1645ae399ee74217eee011c0b015e5ad038f4ba57b8b0cd0ebd47b06062ea81">&lt;<a title="https://foo.bar/baz" href="https://foo.bar/baz">https://foo.bar/baz</a> bim&gt;</p>
 "
 `;
 
 exports[`engine > commonmark-603 1`] = `
-"<p data-lines="1" data-type="p" data-sign="53cba64e3886e642e25281698de74ad196e3870774d0f16e6ab0e0805b342f8c1"><a href="mailto:foo@bar.example.com">foo@bar.example.com</a></p>
+"<p data-lines="1" data-type="p" data-sign="d91634baf2d79bd2755796a0360aa578ec28dd347e3e3b213dd9a7109e12e4891">&lt;<a title="https://example.com/[>" href="https://example.com/%5C%5B>">https://example.com/[&gt;</a></p>
 "
 `;
 
 exports[`engine > commonmark-604 1`] = `
-"<p data-lines="1" data-type="p" data-sign="a882447f73eadf81320f080233b1d8b89169dc385215138569f6f445596291181"><a href="mailto:foo+special@Bar.baz-bar0.com">foo+special@Bar.baz-bar0.com</a></p>
+"<p data-lines="1" data-type="p" data-sign="53cba64e3886e642e25281698de74ad196e3870774d0f16e6ab0e0805b342f8c1"><a href="mailto:foo@bar.example.com">foo@bar.example.com</a></p>
 "
 `;
 
 exports[`engine > commonmark-605 1`] = `
-"<p data-lines="1" data-type="p" data-sign="a788fe107c0e5aad7505c83186c06ae1f854859e42efa66a6eb1e1f818540a561">&lt;foo+@bar.example.com&gt;</p>
+"<p data-lines="1" data-type="p" data-sign="a882447f73eadf81320f080233b1d8b89169dc385215138569f6f445596291181"><a href="mailto:foo+special@Bar.baz-bar0.com">foo+special@Bar.baz-bar0.com</a></p>
 "
 `;
 
 exports[`engine > commonmark-606 1`] = `
-"<p data-lines="1" data-type="p" data-sign="f98740138f588db124c3b5dc11bc21bbd55b9db78092240f469a1941ff2be90d1">&lt;&gt;</p>
+"<p data-lines="1" data-type="p" data-sign="a788fe107c0e5aad7505c83186c06ae1f854859e42efa66a6eb1e1f818540a561">&lt;foo+@bar.example.com&gt;</p>
 "
 `;
 
 exports[`engine > commonmark-607 1`] = `
-"<p data-lines="1" data-type="p" data-sign="13c378d065c69e4a4a83b2c6335e4c67eb55d7ab42d15aed93f5aba75c18c10c1">&lt; <a title="http://foo.bar" href="http://foo.bar">http://foo.bar</a> &gt;</p>
+"<p data-lines="1" data-type="p" data-sign="f98740138f588db124c3b5dc11bc21bbd55b9db78092240f469a1941ff2be90d1">&lt;&gt;</p>
 "
 `;
 
 exports[`engine > commonmark-608 1`] = `
-"<p data-lines="1" data-type="p" data-sign="114ede219279db7fb340b8d67dfb31fc4610ea3ff51c39f47576c460c88f45e51">&lt;m:abc&gt;</p>
+"<p data-lines="1" data-type="p" data-sign="2983b44a9dbd3ac15f2eb43bd8c464b7ed99a3c11770877c9e200622844dc4191">&lt; <a title="https://foo.bar" href="https://foo.bar">https://foo.bar</a> &gt;</p>
 "
 `;
 
 exports[`engine > commonmark-609 1`] = `
-"<p data-lines="1" data-type="p" data-sign="a50cdbd24f6129d8b1f54baae1ebaf40a20bd0ce1a14a8159bc143e5895655c31">&lt;foo.bar.baz&gt;</p>
+"<p data-lines="1" data-type="p" data-sign="114ede219279db7fb340b8d67dfb31fc4610ea3ff51c39f47576c460c88f45e51">&lt;m:abc&gt;</p>
 "
 `;
 
 exports[`engine > commonmark-610 1`] = `
-"<p data-lines="1" data-type="p" data-sign="f0e6a6a97042a4f1f1c87f5f7d44315b2d852c2df5c7991cc66241bf7072d1c41"><a title="http://example.com" href="http://example.com">http://example.com</a></p>
+"<p data-lines="1" data-type="p" data-sign="a50cdbd24f6129d8b1f54baae1ebaf40a20bd0ce1a14a8159bc143e5895655c31">&lt;foo.bar.baz&gt;</p>
 "
 `;
 
 exports[`engine > commonmark-611 1`] = `
-"<p data-lines="1" data-type="p" data-sign="477e0bfbd9815e34fa91b44c77b156f89f7e29ced215fae96f33ae3a56ba441d1">foo@bar.example.com</p>
+"<p data-lines="1" data-type="p" data-sign="100680ad546ce6a577f42f52df33b4cfdca756859e664b8d7de329b150d09ce91"><a title="https://example.com" href="https://example.com">https://example.com</a></p>
 "
 `;
 
 exports[`engine > commonmark-612 1`] = `
+"<p data-lines="1" data-type="p" data-sign="477e0bfbd9815e34fa91b44c77b156f89f7e29ced215fae96f33ae3a56ba441d1">foo@bar.example.com</p>
+"
+`;
+
+exports[`engine > commonmark-613 1`] = `
 "<p data-lines="1" data-type="p" data-sign="e8673a5e940d0f25eaab0720e38e3aace32e3d261e01785d8c0556858c142d241"><a>&lt;bab&gt;&lt;c2c&gt;</a></p><a>
 </a>"
 `;
 
-exports[`engine > commonmark-613 1`] = `
+exports[`engine > commonmark-614 1`] = `
 "<p data-lines="1" data-type="p" data-sign="77847b2478fb2e3857cb181d0218764b8fdcf362fa31a0f34134f1a48e2d6b981"><a>&lt;b2/&gt;</a></p><a>
 </a>"
 `;
 
-exports[`engine > commonmark-614 1`] = `
+exports[`engine > commonmark-615 1`] = `
 "<p data-lines="2" data-type="p" data-sign="0d32966215b0c36978c05ad72c0b250ce2e239ceb21c75ba9daa22dc4f0b1d232"><a>&lt;b2<br>data="foo" &gt;</a></p><a>
 </a>"
 `;
 
-exports[`engine > commonmark-615 1`] = `
+exports[`engine > commonmark-616 1`] = `
 "<p data-lines="2" data-type="p" data-sign="62a83c8b874cc7756ce3358befbf7934ecb86d1c681b0d82ba7405976eba52e82">&lt;a foo="bar" bam = 'baz <em>"</em>'<br>_boolean zoop:33=zoop:33 /&gt;</p>
 "
 `;
 
-exports[`engine > commonmark-616 1`] = `
+exports[`engine > commonmark-617 1`] = `
 "<p data-lines="1" data-type="p" data-sign="d8998408c2a4aaed8c41c76fe85a9208be096e8862a56cb7453504ee1399fa711">Foo &lt;responsive-image src="foo.jpg" /&gt;</p>
 "
 `;
 
-exports[`engine > commonmark-617 1`] = `
+exports[`engine > commonmark-618 1`] = `
 "<p data-lines="1" data-type="p" data-sign="56ac8d8726d721e0b84a935c128fd5f0de3be419409e33246c76d902d5c5e8731">&lt;33&gt; &lt;__&gt;</p>
 "
 `;
 
-exports[`engine > commonmark-618 1`] = `
+exports[`engine > commonmark-619 1`] = `
 "<p data-lines="1" data-type="p" data-sign="c4c182277ff2d741c0191a71fad19c1e3422cd4264118cbf4ed4e7b2dcf5160f1"><a></a></p><a>
 </a>"
 `;
 
-exports[`engine > commonmark-619 1`] = `"<p data-lines="1" data-type="p" data-sign="df9692a363554f2642af1878d533cb9fc6f99df74b558c134dbeda3c52ec0ca61"></p>"`;
+exports[`engine > commonmark-620 1`] = `"<p data-lines="1" data-type="p" data-sign="df9692a363554f2642af1878d533cb9fc6f99df74b558c134dbeda3c52ec0ca61"></p>"`;
 
-exports[`engine > commonmark-620 1`] = `
+exports[`engine > commonmark-621 1`] = `
 "<p data-lines="4" data-type="p" data-sign="50e5f0da119e405402f5ec1bcf4bb31decd8eff175015042ca439b1c0c101e234">&lt; a&gt;&lt;<br>foo&gt;&lt;bar/ &gt;<br>&lt;foo bar=baz<br>bim!bop /&gt;</p>
 "
 `;
 
-exports[`engine > commonmark-621 1`] = `
+exports[`engine > commonmark-622 1`] = `
 "<p data-lines="1" data-type="p" data-sign="650357623889a3f66866cc0319d756cdb2d0753f964d3f31fa1f92689e5febcd1"><a title="title" href="bar"></a></p><a title="title" href="bar">
 </a>"
 `;
 
-exports[`engine > commonmark-622 1`] = `
+exports[`engine > commonmark-623 1`] = `
 "<p data-lines="1" data-type="p" data-sign="6a115e057d519e0ecda1e5582dbe176b24625b5ee6b893b4990d262f9652a8561">&lt;/foo &gt;</p>
 "
 `;
 
-exports[`engine > commonmark-623 1`] = `
+exports[`engine > commonmark-624 1`] = `
 "<p data-lines="1" data-type="p" data-sign="725258934aebd07718b406d55c5c5db2a9a28d1570418de4ad750465d970301c1"></p>
 "
 `;
 
-exports[`engine > commonmark-624 1`] = `
-"<p data-lines="2" data-type="p" data-sign="2e46971d88d1f71d1a8a26f8fbfa498189b59bf0e0fcadd0ee1faa78708e71f42">foo &lt;!-- this is a<br>comment - with hyphen --&gt;</p>
-"
-`;
-
 exports[`engine > commonmark-625 1`] = `
-"<p data-lines="1" data-type="p" data-sign="3c998e936c570b5f69900640e634521b023b5cf1e76f17899d1d1496f4a8cdb21">foo </p>
+"<p data-lines="2" data-type="p" data-sign="74214b5a89fc0e49d41370d9cb2b566410d8e2485bce53e509f6a170e6a5153d2">foo &lt;!-- this is a --<br>comment - with hyphens --&gt;</p>
 "
 `;
 
 exports[`engine > commonmark-626 1`] = `
-"<p data-lines="1" data-type="p" data-sign="7251ef99e8552e202fa433fe46faff4aeab3cfae87d593af83c8a50b6f72f98f1">foo &lt;!--&gt; foo --&gt;</p><p data-lines="2" data-type="p" data-sign="7026f1632e63a96c3218bba022a2386b013379f16178d44f785f78011ec9f8732">foo </p>
+"<p data-lines="1" data-type="p" data-sign="7251ef99e8552e202fa433fe46faff4aeab3cfae87d593af83c8a50b6f72f98f1">foo &lt;!--&gt; foo --&gt;</p><p data-lines="2" data-type="p" data-sign="87b068bc2455829926a17bdc034ed994282a2699f93ce0814390d95b814e9d442">foo &lt;!---&gt; foo --&gt;</p>
 "
 `;
 

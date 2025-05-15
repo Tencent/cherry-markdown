@@ -59,7 +59,7 @@ describe('engine', () => {
   suites.forEach((item, index) => {
     test(`commonmark-${item.example}`, () => {
       // @ts-ignore
-      expect(cleanHTML(cherryEngine.makeHtml(item.markdown))).toBe(cleanHTML(item.html));
+      expect(cherryEngine.makeHtml(item.markdown)).toMatchSnapshot();
     });
   });
 });
