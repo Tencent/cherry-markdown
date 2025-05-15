@@ -27,7 +27,7 @@ import AsyncRenderHandler from './utils/async-render-handler';
 import UrlCache from './UrlCache';
 import htmlParser from './utils/htmlparser';
 import { isBrowser } from './utils/env';
-import { JSDOM } from 'jsdom';
+import * as htmlparser2 from 'htmlparser2';
 
 export default class Engine {
   /**
@@ -415,7 +415,7 @@ export default class Engine {
   /**
    * @param {string} md md字符串
    * @param {'string'|'object'} returnType 返回格式，string：返回html字符串，object：返回结构化数据
-   * @returns {string|HTMLCollection} 获取html
+   * @returns {string|object} 获取html
    */
   makeHtml(md, returnType = 'string') {
     this.$prepareMakeHtml(md);
@@ -429,22 +429,7 @@ export default class Engine {
     $md = this.$clearFlowSessionCursorCache($md);
     this.$completeMakeHtml($md);
     if (returnType === 'object') {
-      let ret = null;
-      if (!isBrowser()) {
-        const { window } = new JSDOM('');
-        const tmpDiv = window.document.createElement('div');
-        tmpDiv.innerHTML = $md;
-        ret = tmpDiv.children;
-      } else if (typeof window.DOMParser !== 'undefined') {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString($md, 'text/html');
-        ret = doc.querySelector('body').children;
-      } else {
-        const tmpDiv = document.createElement('div');
-        tmpDiv.innerHTML = $md;
-        ret = tmpDiv.children;
-      }
-      return ret;
+      return htmlparser2.parseDocument($md.replace(/\n/g, ''));
     }
     return $md;
   }
