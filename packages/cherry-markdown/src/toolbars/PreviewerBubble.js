@@ -79,6 +79,11 @@ export default class PreviewerBubble {
     document.addEventListener('keyup', (event) => {
       Object.values(this.bubbleHandler).forEach((handler) => handler.emit('keyup', event));
     });
+
+    this.$cherry.$event.on('editor.size.change', () => {
+      Object.values(this.bubbleHandler).forEach((handler) => handler.emit('resize', {}));
+    });
+
     this.previewerDom.addEventListener(
       'scroll',
       (event) => {

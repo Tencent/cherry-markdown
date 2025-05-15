@@ -56,6 +56,8 @@ export default class CodeBlockHandler {
         return;
       case 'mouseup':
         return this.$tryRemoveMe(event, callback);
+      case 'resize':
+        return this.$updateContainerPosition();
     }
   }
   $remove() {
