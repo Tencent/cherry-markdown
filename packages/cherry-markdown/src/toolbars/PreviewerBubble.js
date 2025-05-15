@@ -79,6 +79,15 @@ export default class PreviewerBubble {
     document.addEventListener('keyup', (event) => {
       Object.values(this.bubbleHandler).forEach((handler) => handler.emit('keyup', event));
     });
+
+    if (ResizeObserver) {
+      const observer = new ResizeObserver((entries) => {
+        Object.values(this.bubbleHandler).forEach((handler) => handler.emit('resize', {}));
+      });
+
+      observer.observe(this.previewerDom);
+    }
+
     this.previewerDom.addEventListener(
       'scroll',
       (event) => {
