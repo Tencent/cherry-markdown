@@ -55,6 +55,7 @@ export default {
   insertClass: '类图', // 类图
   insertPie: '饼图', // 饼图
   insertGantt: '甘特图', // 甘特图
+  insertMindMap: '脑图', // 脑图
   checklist: '清单', // 清单
   ol: '有序列表', // 有序列表
   ul: '无序列表', // 无序列表

@@ -55,6 +55,7 @@ export default {
   insertClass: 'Insert Class',
   insertPie: 'Insert Pie',
   insertGantt: 'Insert Gantt',
+  insertMindMap: 'Insert Mind Map',
   checklist: 'Checklist',
   ol: 'Ordered List',
   ul: 'Unordered List',

@@ -55,6 +55,7 @@ export default {
   insertClass: 'Вставить класс',
   insertPie: 'Вставить Pie',
   insertGantt: 'Вставить Gantt',
+  insertMindMap: 'Вставить Mind Map',
   checklist: 'Контрольный список',
   ol: 'Упорядоченный список',
   ul: 'Неупорядоченный список',

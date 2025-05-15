@@ -111,6 +111,28 @@ const sample = {
       '\t\t回顾: 1d',
     ].join('\n'),
   ),
+  mindMap: generateExample(
+    'mindmap',
+    [
+      'mindmap',
+      '\troot((mindmap))',
+      '\t\tOrigins',
+      '\t\t\tLong history',
+      '\t\t\t::icon(fa fa-book)',
+      '\t\t\tPopularisation',
+      '\t\t\t\tBritish popular psychology author Tony Buzan',
+      '\t\tResearch',
+      '\t\t\tOn effectiveness<br/>and features',
+      '\t\t\tOn Automatic creation',
+      '\t\t\t\tUses',
+      '\t\t\t\t\t\tCreative techniques',
+      '\t\t\t\t\t\tStrategic planning',
+      '\t\t\t\t\t\tArgument mapping',
+      '\t\tTools',
+      '\t\t\tPen and paper',
+      '\t\t\tMermaid',
+    ].join('\n'),
+  ),
 };
 
 // 英文例子
@@ -192,6 +214,28 @@ const sampleEn = {
       '\t\twork9: 1d',
     ].join('\n'),
   ),
+  mindMap: generateExample(
+    'mindmap',
+    [
+      'mindmap',
+      '\troot((mindmap))',
+      '\t\tOrigins',
+      '\t\t\tLong history',
+      '\t\t\t::icon(fa fa-book)',
+      '\t\t\tPopularisation',
+      '\t\t\t\tBritish popular psychology author Tony Buzan',
+      '\t\tResearch',
+      '\t\t\tOn effectiveness<br/>and features',
+      '\t\t\tOn Automatic creation',
+      '\t\t\t\tUses',
+      '\t\t\t\t\t\tCreative techniques',
+      '\t\t\t\t\t\tStrategic planning',
+      '\t\t\t\t\t\tArgument mapping',
+      '\t\tTools',
+      '\t\t\tPen and paper',
+      '\t\t\tMermaid',
+    ].join('\n'),
+  ),
 };
 
 /**
@@ -222,6 +266,8 @@ export default class Graph extends MenuBase {
       { iconName: 'insertPie', name: 'insertPie', onclick: this.bindSubClick.bind(this, '5') },
       // 甘特图
       { iconName: 'insertGantt', name: 'insertGantt', onclick: this.bindSubClick.bind(this, '6') },
+      // 思维导图
+      { iconName: 'insertMindMap', name: 'insertMindMap', onclick: this.bindSubClick.bind(this, '7') },
     ];
   }
 
@@ -236,10 +282,10 @@ export default class Graph extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    const shortcutKeyMap = [null, 'flow', 'sequence', 'state', 'class', 'pie', 'gantt'];
+    const shortcutKeyMap = [null, 'flow', 'sequence', 'state', 'class', 'pie', 'gantt', 'mindMap'];
     const type = shortcutKeyMap[shortKey] ? shortcutKeyMap[shortKey] : shortKey;
 
-    if (!type || !/^(flow|sequence|state|class|pie|gantt)$/.test(type)) {
+    if (!type || !/^(flow|sequence|state|class|pie|gantt|mindMap)$/.test(type)) {
       return;
     }
     this.registerAfterClickCb(() => {
