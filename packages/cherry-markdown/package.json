@@ -79,7 +79,6 @@
     "@types/jest": "^27.0.3",
     "@types/jsdom": "^16.2.13",
     "@types/lodash": "^4.14.170",
-    "@types/mermaid": "^9.2.0",
     "@types/node": "^17.0.42",
     "@types/virtual-dom": "^2.1.0",
     "async": "^3.2.4",
