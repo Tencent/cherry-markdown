@@ -204,6 +204,30 @@ const cherryInstance = new Cherry({
 });
 ```
 
+从 mermaid v10.0.0 开始，渲染逻辑由之前的同步渲染改成了异步渲染，`afterChange` 或者 `afterInit` 事件后，mermaid 代码块会先渲染为占位符，然后异步渲染并替换。
+
+如需在异步渲染结束后获取内容，可以按以下方式。
+
+```javascript
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+  value: '
+    ```mermaid
+    graph LR
+        A[公司] -->| 下 班 | B(菜市场)
+        B --> C{看见<br>卖西瓜的}
+        C -->|Yes| D[买一个包子]
+        C -->|No| E[买一斤包子]
+    ```
+  ',
+  callback: {
+    afterAsyncRender: (md, html) => {
+      // md 是 markdown 源码，html 是渲染结果
+    }
+  }
+});
+```
+
 ### 异步加载
 
 **recommend** 使用异步引入，以下为 webpack 异步引入样例。

@@ -23,6 +23,7 @@ import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg } from './utils
 import { escapeHTMLSpecialChar } from './utils/sanitize';
 import Logger from './Logger';
 import { configureMathJax } from './utils/mathjax';
+import AsyncRenderHandler from './utils/async-render-handler';
 import UrlCache from './UrlCache';
 import htmlParser from './utils/htmlparser';
 import { isBrowser } from './utils/env';
@@ -47,6 +48,7 @@ export default class Engine {
     this.$configInit(markdownParams);
     this.hookCenter = new HookCenter(hooksConfig, markdownParams, cherry);
     this.hooks = this.hookCenter.getHookList();
+    this.asyncRenderHandler = new AsyncRenderHandler(cherry);
     this.hashCache = {};
     this.hashStrMap = {};
     this.cachedBigData = {};
@@ -146,6 +148,15 @@ export default class Engine {
         }
       }
     }
+  }
+
+  $prepareMakeHtml(md) {
+    this.asyncRenderHandler.clear();
+    this.asyncRenderHandler.handleSyncRenderStart(md);
+  }
+
+  $completeMakeHtml(md) {
+    this.asyncRenderHandler.handleSyncRenderCompleted(md);
   }
 
   $beforeMakeHtml(str) {
@@ -407,6 +418,7 @@ export default class Engine {
    * @returns {string|HTMLCollection} 获取html
    */
   makeHtml(md, returnType = 'string') {
+    this.$prepareMakeHtml(md);
     let $md = this.$setFlowSessionCursorCache(md);
     $md = this.$cacheBigData($md);
     $md = this.$beforeMakeHtml($md);
@@ -415,6 +427,7 @@ export default class Engine {
     this.$fireHookAction($md, 'paragraph', '$cleanCache');
     $md = this.$deCacheBigData($md);
     $md = this.$clearFlowSessionCursorCache($md);
+    this.$completeMakeHtml($md);
     if (returnType === 'object') {
       let ret = null;
       if (!isBrowser()) {
