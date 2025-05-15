@@ -14,6 +14,31 @@
  * limitations under the License.
  */
 import mergeWith from 'lodash/mergeWith';
+import { isBrowser } from '@/utils/env';
+
+const CHART_TYPES = [
+  'flowchart',
+  'sequence',
+  'gantt',
+  'journey',
+  'timeline',
+  'class',
+  'state',
+  'er',
+  'pie',
+  'quadrantChart',
+  'xyChart',
+  'requirement',
+  'architecture',
+  'mindmap',
+  'kanban',
+  'gitGraph',
+  'c4',
+  'sankey',
+  'packet',
+  'block',
+  'radar',
+];
 
 const DEFAULT_OPTIONS = {
   // TODO: themes
@@ -21,17 +46,16 @@ const DEFAULT_OPTIONS = {
   altFontFamily: 'sans-serif',
   fontFamily: 'sans-serif',
   themeCSS: '.label foreignObject { font-size: 90%; overflow: visible; } .label { font-family: sans-serif; }',
-  flowchart: {
-    useMaxWidth: false,
-  },
-  sequence: {
-    useMaxWidth: false,
-  },
   startOnLoad: false,
   logLevel: 5,
   // fontFamily: 'Arial, monospace'
 };
 
+CHART_TYPES.forEach((type) => {
+  DEFAULT_OPTIONS[type] = {
+    useMaxWidth: false,
+  };
+});
 export default class MermaidCodeEngine {
   static TYPE = 'figure';
 
@@ -66,9 +90,18 @@ export default class MermaidCodeEngine {
     }
     this.options = { ...DEFAULT_OPTIONS, ...(mermaidOptions || {}) };
     this.mermaidAPIRefs = mermaidAPI || window.mermaidAPI || mermaid.mermaidAPI || window.mermaid.mermaidAPI;
+    if (this.isAsyncRenderVersion()) {
+      // 异步渲染时，只有 mermaid.render 有队列优化，使用 mermaidAPI 会导致渲染出错
+      this.mermaidAPIRefs = mermaid || window.mermaid || this.mermaidAPIRefs;
+    }
     delete this.options.mermaid;
     delete this.options.mermaidAPI;
     this.mermaidAPIRefs.initialize(this.options);
+  }
+
+  // v10 以上开始，render 变为异步渲染，render 函数的参数数量从 4 变为 3
+  isAsyncRenderVersion() {
+    return this.mermaidAPIRefs.render.length === 3;
   }
 
   mountMermaidCanvas($engine) {
@@ -125,28 +158,23 @@ export default class MermaidCodeEngine {
     return svgHtml;
   }
 
-  render(src, sign, $engine, config = {}) {
-    let $sign = sign;
-    if (!$sign) {
-      $sign = Math.round(Math.random() * 100000000);
-    }
-    this.mountMermaidCanvas($engine);
+  processSvgCode(svgCode, graphId) {
+    const fixedSvg = svgCode
+      .replace(/\s*markerUnits="0"/g, '')
+      .replace(/\s*x="NaN"/g, '')
+      .replace(/<br>/g, '<br/>');
+    const html = this.convertMermaidSvgToImg(fixedSvg, graphId);
+    return html;
+  }
+
+  syncRender(graphId, src, sign, $engine) {
     let html;
-    // 多实例的情况下相同的内容ID相同会导致mermaid渲染异常
-    // 需要通过添加时间戳使得多次渲染相同内容的图像ID唯一
-    // 图像渲染节流在CodeBlock Hook内部控制
-    const graphId = `mermaid-${$sign}-${new Date().getTime()}`;
-    this.svg2img = config?.svg2img ?? false;
     try {
       this.mermaidAPIRefs.render(
         graphId,
         src,
         (svgCode) => {
-          const fixedSvg = svgCode
-            .replace(/\s*markerUnits="0"/g, '')
-            .replace(/\s*x="NaN"/g, '')
-            .replace(/<br>/g, '<br/>');
-          html = this.convertMermaidSvgToImg(fixedSvg, graphId);
+          html = this.processSvgCode(svgCode, graphId);
         },
         this.mermaidCanvas,
       );
@@ -154,5 +182,53 @@ export default class MermaidCodeEngine {
       return e?.str;
     }
     return html;
+  }
+
+  handleAsyncRenderDone(graphId, sign, $engine, props, html) {
+    props.updateCache(html);
+    const container = $engine.$cherry.wrapperDom || document.body;
+    if (isBrowser()) {
+      container.querySelector(`[data-sign="${sign}"][data-type="codeBlock"]`).parentElement.innerHTML = html;
+    }
+    $engine.asyncRenderHandler.done(graphId, {
+      replacer: (md) => {
+        const regex = new RegExp(`<div data-sign="${sign}" data-type="codeBlock"[^>]*>.*?<\\/div>`, 'g');
+        return md.replace(regex, html);
+      },
+    });
+  }
+
+  asyncRender(graphId, src, sign, $engine, props) {
+    $engine.asyncRenderHandler.add(graphId);
+    this.mermaidAPIRefs
+      .render(graphId, src, this.mermaidCanvas)
+      .then(({ svg: svgCode }) => {
+        // 渲染完成后，替换为渲染结果
+        const html = this.processSvgCode(svgCode, graphId);
+        this.handleAsyncRenderDone(graphId, sign, $engine, props, html);
+      })
+      .catch(() => {
+        // 渲染失败后，回退到源码
+        const html = props.fallback();
+        this.handleAsyncRenderDone(graphId, sign, $engine, props, html);
+      });
+    // 先渲染源码
+    return props.fallback();
+  }
+
+  render(src, sign, $engine, props = {}) {
+    let $sign = sign;
+    if (!$sign) {
+      $sign = Math.round(Math.random() * 100000000);
+    }
+    this.mountMermaidCanvas($engine);
+    // 多实例的情况下相同的内容ID相同会导致mermaid渲染异常
+    // 需要通过添加时间戳使得多次渲染相同内容的图像ID唯一
+    // 图像渲染节流在CodeBlock Hook内部控制
+    const graphId = `mermaid-${sign}-${new Date().getTime()}`;
+    this.svg2img = props.mermaidConfig?.svg2img ?? false;
+    return this.isAsyncRenderVersion()
+      ? this.asyncRender(graphId, src, $sign, $engine, props)
+      : this.syncRender(graphId, src, $sign, $engine);
   }
 }

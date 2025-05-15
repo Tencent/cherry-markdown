@@ -21,6 +21,7 @@ import mermaid from 'mermaid';
 
 const mermaidAPI = mermaid?.mermaidAPI;
 Cherry.usePlugin(MermaidCodeEngine, {
+  mermaid,
   mermaidAPI,
   theme: 'default',
   sequence: { useMaxWidth: false },

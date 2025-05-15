@@ -36,6 +36,7 @@ export default class Event {
     cleanAllSubMenus: 'cleanAllSubMenus', // 清除所有子菜单弹窗
     afterChange: 'afterChange', // 编辑器内容变化
     afterInit: 'afterInit', // 编辑器初始化完成
+    afterAsyncRender: 'afterAsyncRender', // 编辑器完成所有异步渲染后触发
     focus: 'focus', // 焦点
     blur: 'blur', // 失焦
     selectionChange: 'selectionChange', // 选区内容改变时触发
@@ -74,6 +75,11 @@ export default class Event {
         options.callback.afterInit(msg.markdownText, msg.html);
       });
     }
+    if (options.callback.afterAsyncRender) {
+      this.on(this.Events.afterAsyncRender, (msg) => {
+        options.callback.afterAsyncRender(msg.markdownText, msg.html);
+      });
+    }
     if (options.event.afterChange) {
       this.on(this.Events.afterChange, (msg) => {
         options.event.afterChange(msg.markdownText, msg.html);
@@ -82,6 +88,11 @@ export default class Event {
     if (options.event.afterInit) {
       this.on(this.Events.afterInit, (msg) => {
         options.event.afterInit(msg.markdownText, msg.html);
+      });
+    }
+    if (options.event.afterAsyncRender) {
+      this.on(this.Events.afterAsyncRender, (msg) => {
+        options.event.afterAsyncRender(msg.markdownText, msg.html);
       });
     }
     if (options.event.focus) {
