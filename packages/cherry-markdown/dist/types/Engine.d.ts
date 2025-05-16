@@ -8,6 +8,7 @@ export default class Engine {
     $cherry: import("./Cherry").default;
     hookCenter: HookCenter;
     hooks: Record<import("../types/syntax").HookType, SyntaxBase[]>;
+    asyncRenderHandler: AsyncRenderHandler;
     hashCache: {};
     hashStrMap: {};
     cachedBigData: {};
@@ -34,6 +35,8 @@ export default class Engine {
     urlProcessor(url: any, srcType: any): any;
     initMath(opts: any): void;
     $configInit(params: any): void;
+    $prepareMakeHtml(md: any): void;
+    $completeMakeHtml(md: any): void;
     $beforeMakeHtml(str: any): any;
     $afterMakeHtml(str: any): any;
     $dealSentenceByCache(md: any): {
@@ -75,9 +78,9 @@ export default class Engine {
     /**
      * @param {string} md md字符串
      * @param {'string'|'object'} returnType 返回格式，string：返回html字符串，object：返回结构化数据
-     * @returns {string|HTMLCollection} 获取html
+     * @returns {string|object} 获取html
      */
-    makeHtml(md: string, returnType?: 'string' | 'object'): string | HTMLCollection;
+    makeHtml(md: string, returnType?: 'string' | 'object'): string | object;
     makeHtmlForBlockquote(md: any): any;
     makeHtmlForFootnote(md: any): any;
     mounted(): void;
@@ -89,3 +92,4 @@ export default class Engine {
 }
 import HookCenter from "./core/HookCenter";
 import SyntaxBase from "./core/SyntaxBase";
+import AsyncRenderHandler from "./utils/async-render-handler";

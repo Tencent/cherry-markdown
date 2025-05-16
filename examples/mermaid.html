@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIM demo - Cherry Editor</title>
+  <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css">
+  <link rel="Shortcut Icon" href="../logo/favicon.ico">
+  <style>
+    html {
+      height: 100%;
+    }
+    body {
+      height: 100%;
+      overflow: hidden;
+      margin: 0;
+    }
+    #markdown {
+      min-width: 800px;
+      max-width: 2600px;
+      width: 70%;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="markdown"></div>
+<textarea id="md-source">
+## 引入cherry并使用自己的[mermaid](https://mermaid.js.org/){target=_blank}
+```html
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"></script>
+<script src="yourPath/cherry-markdown.core.js"></script>
+<script src="yourPath/addons/cherry-code-block-mermaid-plugin.js"></script>
+<script>
+Cherry.usePlugin(CherryCodeBlockMermaidPlugin, {
+  mermaid: window.mermaid,
+  mermaidAPI: window.mermaid,
+});
+var cherryEditor = new Cherry({id: 'markdown'});
+</script>
+```
+
+## 效果
+> 可以使用对应版本mermaid的语法
+
+- 思维导图：
+```mermaid
+mindmap
+  root((mindmap))
+    Origins
+      Long history
+      ::icon(fa fa-book)
+      Popularisation
+        British popular psychology author Tony Buzan
+    Research
+      On effectiveness<br/>and features
+      On Automatic creation
+        Uses
+            Creative techniques
+            Strategic planning
+            Argument mapping
+    Tools
+      Pen and paper
+      Mermaid
+```
+- 统计图
+```mermaid
+    xychart-beta
+    title "Sales Revenue"
+    x-axis [jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec]
+    y-axis "Revenue (in $)" 4000 --> 11000
+    bar [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]
+    line [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]
+```
+- 计划
+```mermaid
+journey
+    title My working day
+    section Go to work
+      Make tea: 5: Me
+      Go upstairs: 3: Me
+      Do work: 1: Me, Cat
+    section Go home
+      Go downstairs: 5: Me
+      Sit down: 3: Me
+```
+</textarea>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"></script>
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.core.js"></script>
+  <script src="../packages/cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin.js"></script>
+</body>
+<script>
+Cherry.usePlugin(CherryCodeBlockMermaidPlugin, {
+  mermaid: window.mermaid,
+  mermaidAPI: window.mermaid,
+});
+var config = {
+  id: 'markdown',
+  engine: {
+    syntax: {
+      codeBlock: {
+        changeLang: false,
+      }
+    }
+  }
+};
+var cherry = new Cherry(config);
+cherry.setValue(document.getElementById('md-source').value);
+</script>
+</html>

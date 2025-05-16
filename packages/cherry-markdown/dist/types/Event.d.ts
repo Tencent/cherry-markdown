@@ -18,6 +18,7 @@ export default class Event {
         cleanAllSubMenus: string;
         afterChange: string;
         afterInit: string;
+        afterAsyncRender: string;
         focus: string;
         blur: string;
         selectionChange: string;

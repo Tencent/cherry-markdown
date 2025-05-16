@@ -5,6 +5,7 @@ export default class CodeBlock extends ParagraphBase {
         config: any;
     });
     codeCache: {};
+    codeCacheList: any[];
     customLang: any[];
     customParser: any;
     lineNumber: any;
@@ -17,6 +18,10 @@ export default class CodeBlock extends ParagraphBase {
     indentedCodeBlock: any;
     INLINE_CODE_REGEX: RegExp;
     customHighlighter: any;
+    failedCleanCacheTimes: number;
+    codeTimer: NodeJS.Timeout;
+    $resetCache(): void;
+    $codeReplace($codeSrc: any, $lang: any, sign: any, lines: any): any;
     $codeCache(sign: any, str: any): any;
     parseCustomLanguage(lang: any, codeSrc: any, props: any): string | false;
     fillTag(lines: any): any;

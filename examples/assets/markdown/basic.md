@@ -15,6 +15,7 @@
 - [标题自动序号](head_num.html){target=_blank}
 - [流式输入模式（AI chart场景）](ai_chat.html){target=_blank}
 - [VIM 编辑模式](vim.html){target=_blank}
+- [应用mermaid version 10版本以上](mermaid.html){target=_blank}
 
 
 # Cherry Markdown  { 简明手册 | jiǎn míng shǒu cè }

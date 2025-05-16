@@ -8,17 +8,12 @@ export default class MermaidCodeEngine {
         altFontFamily: string;
         fontFamily: string;
         themeCSS: string;
-        flowchart: {
-            useMaxWidth: boolean;
-        };
-        sequence: {
-            useMaxWidth: boolean;
-        };
         startOnLoad: boolean;
         logLevel: number;
     };
     dom: any;
     mermaidCanvas: any;
+    isAsyncRenderVersion(): boolean;
     mountMermaidCanvas($engine: any): void;
     /**
      * 转换svg为img，如果出错则直出svg
@@ -27,6 +22,10 @@ export default class MermaidCodeEngine {
      * @returns {string}
      */
     convertMermaidSvgToImg(svgCode: string, graphId: string): string;
-    render(src: any, sign: any, $engine: any, config?: {}): any;
+    processSvgCode(svgCode: any, graphId: any): string;
+    syncRender(graphId: any, src: any, sign: any, $engine: any): any;
+    handleAsyncRenderDone(graphId: any, sign: any, $engine: any, props: any, html: any): void;
+    asyncRender(graphId: any, src: any, sign: any, $engine: any, props: any): any;
+    render(src: any, sign: any, $engine: any, props?: {}): any;
     svg2img: any;
 }

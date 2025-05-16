@@ -9,6 +9,7 @@ export default class ParagraphBase extends SyntaxBase {
     sign: string;
     cache: {};
     cacheKey: string;
+    failedResetCacheTimes: number;
     initBrReg(classicBr?: boolean): void;
     classicBr: boolean;
     removeBrAfterBlock: RegExp;

@@ -5,10 +5,10 @@ export default class Size extends MenuBase {
         onclick: any;
     }[];
     shortKeyMap: {
-        'Alt-1': string;
-        'Alt-2': string;
-        'Alt-3': string;
-        'Alt-4': string;
+        'Alt-Digit1': string;
+        'Alt-Digit2': string;
+        'Alt-Digit3': string;
+        'Alt-Digit4': string;
     };
     shortcutKeyMap: {
         [x: string]: {
