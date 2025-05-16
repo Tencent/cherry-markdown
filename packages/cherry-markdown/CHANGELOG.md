@@ -1,5 +1,17 @@
 # Change Log
 
+## 0.9.3
+
+### Patch Changes
+
+- fix:[Bug Report] html 转 markdown 时，html 中带有空 table，会有报错 close #1181 [@austwayliu](https://github.com/austwayliu)([#1181](https://github.com/Tencent/cherry-markdown/pull/1181))([`5921856`](https://github.com/Tencent/cherry-markdown/commit/5921856d7916637ed74e28c32ed9957f04de455c))
+- fix: #1188 修复脚注弹窗报错问题 [@sunsonliu](https://github.com/sunsonliu)([#1191](https://github.com/Tencent/cherry-markdown/pull/1191))([`49b1db9`](https://github.com/Tencent/cherry-markdown/commit/49b1db90f53477d3a4c244ba18f047b68f177674))
+- fix(快捷键): 更新快捷键映射以使用标准键名 [@RSS1102](https://github.com/RSS1102)([#1183](https://github.com/Tencent/cherry-markdown/pull/1183))([`0dbc2b1`](https://github.com/Tencent/cherry-markdown/commit/0dbc2b1099d9fee942cf9da4692b83701c674119))
+- fix: 修复 node 环境下执行 engine.makeHtml()报错的问题 [@sunsonliu](https://github.com/sunsonliu)([#1179](https://github.com/Tencent/cherry-markdown/pull/1179))([`0404752`](https://github.com/Tencent/cherry-markdown/commit/0404752e2dbe5e078d0d3331ce3b44c7745a912d))
+- fix: #1170 修复追加流式光标破坏超链接语法的问题 [@sunsonliu](https://github.com/sunsonliu)([#1172](https://github.com/Tencent/cherry-markdown/pull/1172))([`efcaa40`](https://github.com/Tencent/cherry-markdown/commit/efcaa40985a3f141d0faa66c39b4bab2e79cf96f))
+- fix: 优化 cache 逻辑，避免内存爆炸 [@sunsonliu](https://github.com/sunsonliu)([#1169](https://github.com/Tencent/cherry-markdown/pull/1169))([`818bac2`](https://github.com/Tencent/cherry-markdown/commit/818bac2a60f14212f34019699fd02cf4d7e8dc56))
+- fix: #1176 修复代码块按钮没有响应尺寸变化的问题 [@sunsonliu](https://github.com/sunsonliu)([#1192](https://github.com/Tencent/cherry-markdown/pull/1192))([`2f7ea63`](https://github.com/Tencent/cherry-markdown/commit/2f7ea63721b26719f1c108636eb1bc325b9913a4))
+
 ## 0.9.2
 
 ### Patch Changes
