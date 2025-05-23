@@ -90,7 +90,6 @@
     "core-js-pure": "^3.8.2",
     "cross-env": "^7.0.2",
     "dom-parser": "^0.1.6",
-    "dompurify": "^3.0.8",
     "es-check": "^7.1.1",
     "glob": "^8.0.3",
     "gulp": "^4.0.2",
@@ -125,7 +124,7 @@
   },
   "dependencies": {
     "@types/codemirror": "^0.0.108",
-    "@types/dompurify": "^2.2.3",
+    "dompurify": "^3.2.6",
     "crypto-js": "^4.2.0",
     "htmlparser2": "^10.0.0",
     "jsdom": "~19.0.0",
