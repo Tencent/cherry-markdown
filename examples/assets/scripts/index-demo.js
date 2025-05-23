@@ -171,6 +171,13 @@ var basicConfig = {
       // 'header': {
       //   strict: false
       // }
+      
+      panel: {
+        // 是否支持对齐语法
+        enableJustify: true,
+        // 是否支持信息面板语法
+        enablePanel: true,
+      },
       footnote: {
         /**
          * 脚注标号的配置

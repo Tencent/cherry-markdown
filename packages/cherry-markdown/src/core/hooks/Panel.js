@@ -35,11 +35,21 @@ export default class Panel extends ParagraphBase {
 
   constructor(options) {
     super({ needCache: true });
+    const { enableJustify = true, enablePanel = true } = options.config;
+    this.enableJustify = enableJustify;
+    this.enablePanel = enablePanel;
     this.initBrReg(options.globalConfig.classicBr);
   }
 
   makeHtml(str, sentenceMakeFunc) {
     return str.replace(this.RULE.reg, (match, preLines, name, content) => {
+      const type = this.$getTargetType(name);
+      if (!this.enablePanel && /primary|info|warning|danger|success/i.test(type)) {
+        return match;
+      }
+      if (!this.enableJustify && /(left|right|center)/i.test(type)) {
+        return match;
+      }
       const lineCount = this.getLineCount(match, preLines);
       const sign = this.$engine.hash(match);
       const testHasCache = this.testHasCache(sign);
