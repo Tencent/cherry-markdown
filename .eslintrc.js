@@ -3,7 +3,6 @@ module.exports = {
   env: {
     browser: true,
     es6: true,
-    'vitest/globals': true,
   },
   extends: ['eslint-config-tencent', 'plugin:prettier/recommended'],
   globals: {
