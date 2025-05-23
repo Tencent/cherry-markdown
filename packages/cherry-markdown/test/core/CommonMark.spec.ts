@@ -56,7 +56,7 @@ describe('engine', () => {
   beforeEach(() => {
     vi.stubGlobal('BUILD_ENV', 'production');
   });
-  it.each(suites)('commonmark-$example', (item) => {
+  it.each(suites)('CommonMark-$example', (item) => {
      // @ts-ignore
     const cherryHtml=cherryEngine.makeHtml(item.markdown)
    
