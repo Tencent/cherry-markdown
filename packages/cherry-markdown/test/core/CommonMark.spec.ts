@@ -1,4 +1,4 @@
-import { describe, expect, vi, test } from 'vitest';
+import { describe, expect, vi, test, beforeEach } from 'vitest';
 import { diff } from '@vitest/utils/diff';
 import CherryEngine from '../../src/index.engine.core';
 import suites from '../suites/commonmark.spec.json';
