@@ -1,4 +1,4 @@
-import { describe, expect, vi, test, beforeEach } from 'vitest';
+import { describe, expect, vi, test, beforeEach, it } from 'vitest';
 import { diff } from '@vitest/utils/diff';
 import CherryEngine from '../../src/index.engine.core';
 import suites from '../suites/commonmark.spec.json';
@@ -56,10 +56,11 @@ describe('engine', () => {
   beforeEach(() => {
     vi.stubGlobal('BUILD_ENV', 'production');
   });
-  suites.forEach((item, index) => {
-    test(`commonmark-${item.example}`, () => {
-      // @ts-ignore
-      expect(cherryEngine.makeHtml(item.markdown)).toMatchSnapshot();
-    });
+  it.each(suites)('commonmark-$example', (item) => {
+     // @ts-ignore
+    const cherryHtml=cherryEngine.makeHtml(item.markdown)
+   
+     expect(cherryHtml).toMatchSnapshot();
   });
+ 
 });
