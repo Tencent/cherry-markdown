@@ -410,6 +410,12 @@ export interface CherryEngineOptions {
        */
       filterStyle?: boolean,
     },
+    panel?: false | {
+      // 是否支持对齐语法
+      enableJustify: boolean,
+      // 是否支持信息面板语法
+      enablePanel: boolean,
+    },
     footnote?: false | {
       /**
        * 脚注标号的配置
