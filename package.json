@@ -9,8 +9,7 @@
   "license": "Apache-2.0",
   "private": true,
   "workspaces": [
-    "packages/*",
-    "examples/*"
+    "packages/*"
   ],
   "scripts": {
     "prepare": "husky",
