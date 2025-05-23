@@ -142,6 +142,8 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */
     afterInit?: CherryLifecycle;
+    /** 编辑器完成所有异步渲染后触发 */
+    afterAsyncRender?: CherryLifecycle;
     /** img 标签挂载前触发，可用于懒加载等场景 */
     beforeImageMounted?: (srcProp: string, src: string) => { srcProp: string; src: string };
     onClickPreview?: (e: MouseEvent) => void;
@@ -158,6 +160,8 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */
     afterInit?: CherryLifecycle;
+    /** 编辑器完成所有异步渲染后触发 */
+    afterAsyncRender?: CherryLifecycle;
     /** 编辑器选区变化时触发 */
     selectionChange?: ({ selections: [], lastSelections: [], info }) => void;
     /** 变更语言时触发 */
@@ -405,6 +409,12 @@ export interface CherryEngineOptions {
        *    false：不过滤style属性
        */
       filterStyle?: boolean,
+    },
+    panel?: false | {
+      // 是否支持对齐语法
+      enableJustify: boolean,
+      // 是否支持信息面板语法
+      enablePanel: boolean,
     },
     footnote?: false | {
       /**

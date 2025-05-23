@@ -194,6 +194,21 @@ export default class HtmlBlock extends ParagraphBase {
     if (!isBrowser()) {
       config.FORBID_ATTR = ['data-sign', 'data-lines'];
     }
+
+    // 解决 foreignObject 被清除导致渲染错误 https://github.com/cure53/DOMPurify/issues/1002
+    if (!config.ADD_TAGS) {
+      config.ADD_TAGS = [];
+    }
+    if (typeof config.ADD_TAGS === 'string') {
+      config.ADD_TAGS += '|foreignObject';
+    } else if (Array.isArray(config.ADD_TAGS)) {
+      config.ADD_TAGS.push('foreignObject');
+    }
+    if (!config.HTML_INTEGRATION_POINTS) {
+      config.HTML_INTEGRATION_POINTS = {};
+    }
+    config.HTML_INTEGRATION_POINTS.foreignobject = true;
+
     return sanitizer.sanitize($str, config);
   }
 }

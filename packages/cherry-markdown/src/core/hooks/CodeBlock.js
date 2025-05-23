@@ -82,6 +82,13 @@ export default class CodeBlock extends ParagraphBase {
     }
   }
 
+  $codeReplace($codeSrc, $lang, sign, lines) {
+    let $code = $codeSrc.replace(/~X/g, '\\`');
+    $code = this.renderCodeBlock($code, $lang, sign, lines);
+    $code = $code.replace(/\\/g, '\\\\');
+    return $code;
+  }
+
   $codeCache(sign, str) {
     if (sign && str) {
       this.codeCacheList.push(sign);
@@ -109,12 +116,25 @@ export default class CodeBlock extends ParagraphBase {
     if (!engine || typeof engine.render !== 'function') {
       return false;
     }
-    const html = engine.render(codeSrc, props.sign, this.$engine, this.mermaid);
+    const tag = CUSTOM_WRAPPER[engine.constructor.TYPE] || 'div';
+    const addContainer = (html) => {
+      return `<${tag} data-sign="${props.sign}" data-type="${lang}" data-lines="${props.lines}">${html}</${tag}>`;
+    };
+    const html = engine.render(codeSrc, props.sign, this.$engine, {
+      mermaidConfig: this.mermaid,
+      updateCache: (cacheCode) => {
+        this.$codeCache(props.sign, addContainer(cacheCode));
+        this.pushCache(addContainer(cacheCode), props.sign, props.lines);
+      },
+      fallback: () => {
+        const $code = this.$codeReplace(codeSrc, lang, props.sign, props.lines);
+        return $code;
+      },
+    });
     if (!html) {
       return false;
     }
-    const tag = CUSTOM_WRAPPER[engine.constructor.TYPE] || 'div';
-    return `<${tag} data-sign="${props.sign}" data-type="${lang}" data-lines="${props.lines}">${html}</${tag}>`;
+    return addContainer(html);
   }
 
   // 修复渲染行号时打散的标签
@@ -408,7 +428,7 @@ export default class CodeBlock extends ParagraphBase {
       [$code, $lang] = this.appendMermaid($code, $lang);
       // 自定义语言渲染，可覆盖内置的自定义语言逻辑
       if (this.customLang.indexOf($lang.toLowerCase()) !== -1) {
-        cacheCode = this.parseCustomLanguage($lang, $code, { lines, sign });
+        cacheCode = this.parseCustomLanguage($lang, $code, { lines, sign, match, addBlockQuoteSignToResult });
         if (cacheCode && cacheCode !== '') {
           this.$codeCache(sign, cacheCode);
           return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
@@ -416,10 +436,7 @@ export default class CodeBlock extends ParagraphBase {
         // 渲染出错则按正常code进行渲染
       }
       // $code = this.$replaceSpecialChar($code);
-      $code = $code.replace(/~X/g, '\\`');
-      cacheCode = this.renderCodeBlock($code, $lang, sign, lines);
-      cacheCode = cacheCode.replace(/\\/g, '\\\\');
-      cacheCode = this.$codeCache(sign, cacheCode);
+      cacheCode = this.$codeReplace($code, $lang, sign, lines);
       const result = this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
       return addBlockQuoteSignToResult(result);
     });
