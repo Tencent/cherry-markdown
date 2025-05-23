@@ -1,6 +1,7 @@
+import { describe, it, expect } from 'vitest';
 import AutoLink from '../../../src/core/hooks/AutoLink';
 
-const autoLinkHook = new AutoLink({ config: {}, globalConfig: {}});
+const autoLinkHook = new AutoLink({ config: {}, globalConfig: {} });
 
 describe('core/hooks/autolink', () => {
   it('isLinkInHtmlAttribute', () => {
