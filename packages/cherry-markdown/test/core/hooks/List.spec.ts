@@ -1,7 +1,8 @@
 import List from '../../../src/core/hooks/List';
-import md5 from 'md5';
+import CryptoJS from 'crypto-js';
+import { describe, it } from 'vitest';
 
-const cases = []
+const cases: string[] = [];
 cases[0] = `
 - 1
 - 2
@@ -61,12 +62,14 @@ cases[4] = `
       - [ ] checklist 4
 `;
 
-const listHook = new List({ config: {
-  indentSpace: 2,
-}});
+const listHook = new List({
+  config: {
+    indentSpace: 2,
+  },
+});
 
 Object.defineProperty(listHook, '$engine', {
-  value: { md5 },
+  value: { hash: (str) => CryptoJS.SHA256(str).toString() },
 });
 
 describe('core/hooks/list', () => {
