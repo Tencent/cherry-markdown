@@ -32,7 +32,7 @@ jobs:
             cp -r packages/cherry-markdown/dist playground
             cp -r examples/assets playground
             cp examples/*.html playground
-            find playground -type f -name "playground/*.html" -exec sed -i '' "s|\.\./packages|./packages|g" {} +
+            find playground -type f -name "*.html" -exec sed -i '' "s|\.\./packages|./packages|g" {} +
 
       - uses: actions/upload-artifact@v4
         with:
