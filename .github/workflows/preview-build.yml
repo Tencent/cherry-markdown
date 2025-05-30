@@ -28,8 +28,8 @@ jobs:
       - run: yarn build
 
       - run: |
-            mkdir playground
-            cp -r packages/cherry-markdown/dist playground
+            mkdir -p playground/packages/cherry-markdown/dist
+            cp -r packages/cherry-markdown/dist playground/packages/cherry-markdown
             cp -r examples/assets playground
             cp examples/*.html playground
             find playground -type f -name "*.html" -exec sed -i 's|\.\./packages|./packages|g' {} +
