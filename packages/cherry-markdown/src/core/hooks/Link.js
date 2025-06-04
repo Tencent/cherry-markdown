@@ -15,7 +15,7 @@
  */
 import SyntaxBase from '@/core/SyntaxBase';
 import { escapeHTMLSpecialChar as _e, isValidScheme, encodeURIOnce } from '@/utils/sanitize';
-import { compileRegExp, isLookbehindSupported, NOT_ALL_WHITE_SPACES_INLINE } from '@/utils/regexp';
+import { compileRegExp, isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import UrlCache from '@/UrlCache';
 
@@ -65,42 +65,62 @@ export default class Link extends SyntaxBase {
    * @param {string} leadingChar 正则分组一：前置字符
    * @param {string} text 正则分组二：链接文字
    * @param {string|undefined} link 正则分组三：链接URL
-   * @param {string|undefined} title 正则分组四：链接title
-   * @param {string|undefined} ref 正则分组五：链接引用
-   * @param {string|undefined} target 正则分组六：新窗口打开
+   * @param {string|undefined} target 正则分组四：新窗口打开
    * @returns
    */
-  toHtml(match, leadingChar, text, link, title, ref, target) {
-    const refType = typeof link === 'undefined' ? 'ref' : 'url';
+  toHtml(match, leadingChar, text, link, target) {
     let attrs = '';
-    if (refType === 'ref') {
-      // 全局引用，理应在CommentReference中被替换，没有被替换说明没有定义引用项
+
+    // 检查链接文本中的方括号是否配对
+    const { isValid, coreText, extraLeadingChar } = this.checkBrackets(text);
+    if (!isValid) return match;
+
+    // 检查是否是引用式链接
+    const refMatch = link && link.match(/^\[(.+?)\]$/);
+    if (refMatch) {
+      // 是引用式链接，返回原始匹配供后续处理
       return match;
     }
 
-    if (refType === 'url') {
-      const { isValid, coreText, extraLeadingChar } = this.checkBrackets(text);
-      if (!isValid) return match;
-      attrs = title && title.trim() !== '' ? ` title="${_e(title.replace(/["']/g, ''))}"` : '';
-      if (target) {
-        attrs += ` target="${target.replace(/{target\s*=\s*(.*?)}/, '$1')}"`;
-      } else if (this.target) {
-        attrs += ` ${this.target}`;
+    // 处理target
+    if (target) {
+      attrs += ` target="${target.replace(/{target\s*=\s*(.*?)}/, '$1')}"`;
+    } else if (this.target) {
+      attrs += ` ${this.target}`;
+    }
+
+    let processedURL = link.trim().replace(/~1D/g, '~D');
+    const processedText = coreText.replace(/~1D/g, '~D');
+
+    // 处理title：如果URL中包含引号括起来的部分，作为title
+    const titleMatch = processedURL.match(/^(.*?)(?:\s+["'](.+?)["'])?$/);
+    if (titleMatch) {
+      processedURL = titleMatch[1]; // 实际的URL
+      if (titleMatch[2]) {
+        // 如果有title
+        attrs += ` title="${_e(titleMatch[2])}"`;
       }
-      let processedURL = link.trim().replace(/~1D/g, '~D'); // 还原替换的$符号
-      const processedText = coreText.replace(/~1D/g, '~D'); // 还原替换的$符号
-      // text可能是html标签，依赖htmlBlock进行处理
-      if (isValidScheme(processedURL)) {
-        processedURL = this.$engine.urlProcessor(processedURL, 'link');
-        processedURL = encodeURIOnce(processedURL);
-        return `${leadingChar + extraLeadingChar}<a href="${UrlCache.set(processedURL)}" ${
-          this.rel
-        } ${attrs}>${processedText}</a>`;
-      }
+    }
+
+    // 检查URL协议是否安全
+    if (!isValidScheme(processedURL)) {
       return `${leadingChar + extraLeadingChar}<span>${text}</span>`;
     }
-    // should never happen
-    return match;
+
+    // 处理URL
+    processedURL = this.$engine.urlProcessor(processedURL, 'link');
+
+    // URL编码，但不编码#和其后的内容
+    if (processedURL.includes('#')) {
+      const [baseURL, hash] = processedURL.split('#', 2);
+      processedURL = `${encodeURIOnce(baseURL)}#${hash}`;
+    } else {
+      processedURL = encodeURIOnce(processedURL);
+    }
+
+    return `${leadingChar + extraLeadingChar}<a href="${UrlCache.set(processedURL)}" ${
+      this.rel
+    } ${attrs}>${processedText}</a>`;
   }
 
   toStdMarkdown(match) {
@@ -123,37 +143,20 @@ export default class Link extends SyntaxBase {
   }
 
   rule() {
-    // (?<protocol>\\w+:)\\/\\/
     const ret = {
-      // lookbehind启用分组是为了和不兼容lookbehind的场景共用一个回调
       begin: isLookbehindSupported() ? '((?<!\\\\))' : '(^|[^\\\\])',
       content: [
-        '\\[([^\\n]*?)\\]', // ?<text>
-        '[ \\t]*', // any spaces
-        `${
-          '(?:' +
-          '\\(' +
-          /**
-           * allow double quotes
-           * e.g.
-           * [link](") ⭕️ valid
-           * [link]("") ⭕️ valid
-           * [link](()) ⭕️ valid
-           * [link](" ") ❌ invalid
-           */
-          '((?:[^\\s()]*\\([^\\s()]*\\)[^\\s()]*)+|[^\\s)]+)' + // ?<link> url
-          '(?:[ \\t]((?:".*?")|(?:\'.*?\')))?' + // ?<title> optional
-          '\\)' +
-          '|' + // or
-          '\\[('
-        }${NOT_ALL_WHITE_SPACES_INLINE})\\]` + // ?<ref> global ref
-          ')',
-        '(\\{target\\s*=\\s*(_blank|_parent|_self|_top)\\})?',
+        // 1. 链接文本部分：匹配方括号内的任意字符，包括嵌套的方括号
+        '\\[((?:\\[[^\\]]*\\]|[^\\]])*?)\\]',
+
+        // 2. 链接部分：匹配圆括号内的任意字符，包括方括号
+        '\\(([^\\(\\)]*(?:\\([^\\(\\)]*\\)[^\\(\\)]*)*?)\\)',
+
+        // 3. target部分：可选的target设置
+        '(?:\\{target\\s*=\\s*([^\\}]+)\\})?',
       ].join(''),
       end: '',
     };
-    // let ret = {begin:'((^|[^\\\\])\\*\\*|([\\s]|^)__)',
-    // end:'(\\*\\*([\\s\\S]|$)|__([\\s]|$))', content:'([^\\n]+?)'};
     ret.reg = compileRegExp(ret, 'g');
     return ret;
   }
