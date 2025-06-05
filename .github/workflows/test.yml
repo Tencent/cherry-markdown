@@ -21,6 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           yarn install
+          yarn playwright install   
 
       - name: Test
         run: yarn test
