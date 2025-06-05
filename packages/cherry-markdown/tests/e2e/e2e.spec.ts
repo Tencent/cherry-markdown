@@ -24,17 +24,12 @@ describe('E2E', () => {
   });
   describe('examples', () => {
     beforeEach(async () => {
-    //  // 启用计时器模拟
-    // vi.useFakeTimers()
-    // // 设置系统时间为固定日期（2023年1月1日）
-    // vi.setSystemTime(new Date(2023, 0, 1))
       browser = await chromium.launch({
         headless: true, // 设置为 false 可以看到浏览器界面
       });
     });
     afterEach(async () => {
       await browser.close();
-      // vi.useRealTimers();
     });
 
     htmlFiles.forEach((file) => {
