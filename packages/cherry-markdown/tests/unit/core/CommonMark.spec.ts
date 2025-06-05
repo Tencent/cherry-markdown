@@ -1,6 +1,6 @@
 import { describe, expect, vi, test, beforeEach, it } from 'vitest';
 import { diff } from '@vitest/utils/diff';
-import CherryEngine from '../../src/index.engine.core';
+import CherryEngine from '../../../src/index.engine.core';
 import suites from '../suites/commonmark.spec.json';
 
 const cherryEngine = new CherryEngine({

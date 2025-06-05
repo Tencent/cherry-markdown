@@ -1,4 +1,4 @@
-const { default: CherryEngine } = require('../dist/cherry-markdown.engine.core');
+const { default: CherryEngine } = require('../../dist/cherry-markdown.engine.core');
 const fs = require('fs');
 const path = require('path');
 

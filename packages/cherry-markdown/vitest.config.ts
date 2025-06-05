@@ -7,13 +7,8 @@ export default defineConfig({
         },
     },
     test: {
-        testTransformMode: {
-            web: ['\\.[jt]sx$'],
-        },
+        testTimeout: 60000, 
         globals: true,
-        environment: 'jsdom', // Use jsdom for browser-like tests
-        coverage: {
-            reporter: ['text', 'json', 'html'], // Optional: Add coverage reports
-        },
+        environment: 'jsdom'
     },
 })

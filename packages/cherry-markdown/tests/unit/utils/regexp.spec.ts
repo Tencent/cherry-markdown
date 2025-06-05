@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { URL_INLINE_NO_SLASH } from '../../src/utils/regexp';
+import { URL_INLINE_NO_SLASH } from '../../../src/utils/regexp';
 
 describe('utils/regexp', () => {
   it('ip address', () => {

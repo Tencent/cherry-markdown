@@ -1,0 +1,1245 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`E2E > examples > ai_chat.html 1`] = `
+"
+  <div class="dialog j-dialog">
+  </div>
+  <div class="one-msg j-one-msg">
+    <div class="avator">
+      AI
+    </div>
+    <div class="chat-one-msg"></div>
+  </div>
+  <div class="buttons">
+    <div class="button j-button">
+      获取消息（剩余<span class="j-button-tips">6</span>条消息）
+    </div>
+    <div class="status">
+      <input class="j-status-input status-input" type="checkbox" checked="">开启流式适配
+    </div>
+  </div>
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+  <script src="./assets/scripts/ai-chat-demo.js"></script>
+
+
+
+"
+`;
+
+exports[`E2E > examples > api.html 1`] = `
+"
+  <div class="apis" onclick="dealClick">
+    <h1>Cherry API</h1>
+    <div class="one-api">
+      <h2 class="one-api__name">setMarkdown(content:string, keepCursor = false)</h2>
+      <p class="one-api__desc">设置内容，setValue(content:string, keepCursor = false)有同样的功能<br>keepCursor = true 更新内容的时候保持光标位置</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.setMarkdown("输入内容");
+setTimeout(()=&gt;{cherryObj.setMarkdown("输11111111111内容3223",1);},5000);
+</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">insert(content:string, isSelect = false, anchor = false, focus = true)</h2>
+      <p class="one-api__desc">插入内容<br>isSelect=true 选中刚插入的内容<br>anchor=false 在光标处插入内容，anchor=[1,3] 在第2行第4个字符处插入内容</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.insert("在光标处插入内容");
+cherryObj.insert("在第二行插入内容，并选中插入的内容", true, [1,0]);
+</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">getMarkdown()</h2>
+      <p class="one-api__desc">获取markdown内容</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">alert(cherryObj.getMarkdown());
+console.log(cherryObj.getMarkdown());</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">getHtml()</h2>
+      <p class="one-api__desc">获取渲染后的html内容</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">alert(cherryObj.getHtml());
+console.log(cherryObj.getHtml());</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">destroy()</h2>
+      <p class="one-api__desc">销毁函数</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.destroy();</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">resetToolbar(type:string, toolbar:array)</h2>
+      <p class="one-api__desc">重置工具栏<br>type 修改工具栏的类型 {'toolbar'|'toolbarRight'|'sidebar'|'bubble'|'float'|'toc'}<br>toolbar 工具栏配置</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="5">cherryObj.resetToolbar('toolbar', ['bold', 'table']);
+cherryObj.resetToolbar('toolbarRight', ['fullScreen', 'togglePreview', 'export', 'wordCount']);
+cherryObj.resetToolbar('toc', true);
+</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">export(type:string)</h2>
+      <p class="one-api__desc">导出预览区域的内容，type：{'pdf'|'img'}</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="5">if(confirm('导出pdf')) {
+  cherryObj.export();
+}else if(confirm('导出长图')) {
+  cherryObj.export('img');
+}</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">switchModel(model:string)</h2>
+      <p class="one-api__desc">
+        切换模式：{'edit&amp;preview'|'editOnly'|'previewOnly'}
+      </p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="7">if(confirm('只读模式')) {
+  cherryObj.switchModel('previewOnly');
+}else if(confirm('纯编辑模式')) {
+  cherryObj.switchModel('editOnly');
+}else if(confirm('双栏编辑模式')) {
+  cherryObj.switchModel('edit&amp;preview');
+}</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">getToc()</h2>
+      <p class="one-api__desc">获取由标题组成的目录</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">alert(cherryObj.getToc());
+console.log(cherryObj.getToc());</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">getCodeMirror()</h2>
+      <p class="one-api__desc">获取左侧编辑器实例</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">alert(cherryObj.getCodeMirror());
+console.log(cherryObj.getCodeMirror());</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">getPreviewer()</h2>
+      <p class="one-api__desc">获取右侧预览区对象实例</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">alert(cherryObj.getPreviewer());
+console.log(cherryObj.getPreviewer());</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">Previewer.scrollToId(id:string, behavior:{'smooth'|'instant'|'auto'})</h2>
+      <p class="one-api__desc">滚动到对应id的元素位置<br>id 可以为带#号hash，也可以是id值<br>behavior: smooth(默认) 平滑滚动；instant 立即滚动；auto 跟随浏览器默认行为</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">// cherryObj.previewer.scrollToId('#gettoc'); 两种写法都可以
+cherryObj.previewer.scrollToId('gettoc');</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">Previewer.scrollToTop(scrollTop:number, behavior:{'auto'|'smooth'|'instant'})</h2>
+      <p class="one-api__desc">滚动到对应位置<br>scrollTop 滚动距离<br>behavior: auto(默认) 跟随浏览器默认行为；smooth 平滑滚动；instant 立即滚动</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.previewer.scrollToTop(3000);</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">setLocale(locale:string)</h2>
+      <p class="one-api__desc">修改语言<br>系统默认支持：zh_CN | en_US | ru_RU</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.setLocale('en_US');</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">setTheme(theme:string)</h2>
+      <p class="one-api__desc">修改主题</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.setTheme('dark');</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">setCodeBlockTheme(theme:string)</h2>
+      <p class="one-api__desc">修改代码块主题</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.setCodeBlockTheme('one-dark');</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toggleToc(focusModel:{'full'|'pure'|''})</h2>
+      <p class="one-api__desc">修改右侧悬浮目录的状态</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="5">cherryObj.toggleToc(); // 切换状态
+cherryObj.toggleToc('full'); // 强制切换到全屏状态
+cherryObj.toggleToc('pure'); // 强制切换到极简状态</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">refreshPreviewer()</h2>
+      <p class="one-api__desc">强制重新渲染预览区域</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.refreshPreviewer();</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">clearFlowSessionCursor()</h2>
+      <p class="one-api__desc">清空流程会话中添加的虚拟光标</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.clearFlowSessionCursor();</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <br>
+    <hr>
+
+    <h1>Cherry.engine API</h1>
+
+    <div class="one-api">
+      <h2 class="one-api__name">engine.makeHtml(markdown:string, returnType:string = 'string')</h2>
+      <p class="one-api__desc">将markdown字符串渲染成Html<br>returnType='string'：返回html字符串<br>returnType='object'：返回HTMLCollection</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">alert(cherryObj.engine.makeHtml('This is \`inline code\`'));
+console.log(cherryObj.engine.makeHtml('This is \`inline code\`'));</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">engine.makeMarkdown(html:string)</h2>
+      <p class="one-api__desc">将html字符串渲染成markdown</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="4">var html = \`&lt;p&gt;This is &lt;code&gt;inline code&lt;/code&gt;&lt;/p&gt;\`;
+alert(cherryObj.engine.makeMarkdown(html));
+console.log(cherryObj.engine.makeMarkdown(html));</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <br>
+    <hr>
+
+    <h1>Cherry.toolbar.toolbarHandlers API</h1>
+    <p><strong>注：</strong>要调用 toolbarHandlers 的API，需要先在<code>cherry.config.toolbars</code>的“toolbar|toolbarRight|sidebar|bubble|float”中的其中一项里配置上对应的工具栏</p>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.bold()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入加粗语法</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.toolbar.toolbarHandlers.bold()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.italic()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入斜体语法</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.toolbar.toolbarHandlers.italic()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.strikethrough()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入删除线语法</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.toolbar.toolbarHandlers.strikethrough()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.size(fontSize: int)</h2>
+      <p class="one-api__desc">向cherry编辑器中插入字体大小语法</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.toolbar.toolbarHandlers.size(28)</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.color(param:string)</h2>
+      <p class="one-api__desc">
+        向cherry编辑器中插入字体颜色或字体背景色语法
+        </p><table class="cherry-api-table">
+          <thead>
+            <tr>
+              <th style="width: 400px;">param</th>
+              <th>效果</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>'color: #c2255c'</td>
+              <td>字体颜色</td>
+            </tr>
+            <tr>
+              <td>'background-color: #c2255c'</td>
+              <td>字体背景颜色</td>
+            </tr>
+          </tbody>
+        </table>
+      <p></p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.toolbar.toolbarHandlers.color('color: #3582fb')</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.header(level:int)</h2>
+      <p class="one-api__desc">向cherry编辑器中插入标题语法</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="3">cherryObj.toolbar.toolbarHandlers.header(1)
+cherryObj.toolbar.toolbarHandlers.header(2)
+cherryObj.toolbar.toolbarHandlers.header(4)</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.quote()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入引用语法</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="2">cherryObj.toolbar.toolbarHandlers.quote()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.panel(param:string)</h2>
+      <p class="one-api__desc">
+        向cherry编辑器中插入对齐方式或信息面板语法
+        </p><table class="cherry-api-table">
+          <thead>
+            <tr>
+              <th style="width: 400px;">param</th>
+              <th>效果</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>'left'</td>
+              <td>左对齐</td>
+            </tr>
+            <tr>
+              <td>'center'</td>
+              <td>居中对齐</td>
+            </tr>
+            <tr>
+              <td>'right'</td>
+              <td>右对齐</td>
+            </tr>
+            <tr>
+              <td>'primary'</td>
+              <td>首选项</td>
+            </tr>
+            <tr>
+              <td>'info'</td>
+              <td>一般信息</td>
+            </tr>
+            <tr>
+              <td>'warning'</td>
+              <td>警告</td>
+            </tr>
+            <tr>
+              <td>'danger'</td>
+              <td>危险</td>
+            </tr>
+            <tr>
+              <td>'success'</td>
+              <td>成功</td>
+            </tr>
+          </tbody>
+        </table>
+      <p></p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.toolbar.toolbarHandlers.panel('success')</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.list(type:string)</h2>
+      <p class="one-api__desc">
+        向cherry编辑器中插入有序、无序列表或者checklist语法
+      </p><table class="cherry-api-table">
+        <thead>
+          <tr>
+            <th>level</th>
+            <th>效果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>'1'</td>
+            <td>ol 列表</td>
+          </tr>
+          <tr>
+            <td>'2'</td>
+            <td>ul 列表</td>
+          </tr>
+          <tr>
+            <td>'3'</td>
+            <td>checklist</td>
+          </tr>
+        </tbody>
+      </table>
+      <p></p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="7">if(confirm('有序列表')) {
+  cherryObj.toolbar.toolbarHandlers.list(1);
+}else if(confirm('无序列表')) {
+  cherryObj.toolbar.toolbarHandlers.list('2');
+}else if(confirm('checklist')) {
+  cherryObj.toolbar.toolbarHandlers.list(3);
+}</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.insert(type:string)</h2>
+      <p class="one-api__desc">
+        向cherry编辑器中插入特定语法：
+      </p><table class="cherry-api-table">
+        <thead>
+          <tr>
+            <th>type</th>
+            <th>效果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>'hr'</td>
+            <td>删除线</td>
+          </tr>
+          <tr>
+            <td>'br'</td>
+            <td>强制换行</td>
+          </tr>
+          <tr>
+            <td>'code'</td>
+            <td>代码块</td>
+          </tr>
+          <tr>
+            <td>'formula'</td>
+            <td>行内公式</td>
+          </tr>
+          <tr>
+            <td>'checklist'</td>
+            <td>检查项</td>
+          </tr>
+          <tr>
+            <td>'toc'</td>
+            <td>目录</td>
+          </tr>
+          <tr>
+            <td>'link'</td>
+            <td>超链接</td>
+          </tr>
+          <tr>
+            <td>'normal-table'</td>
+            <td>插入3行5列的表格</td>
+          </tr>
+          <tr>
+            <td>'normal-table-row*col'</td>
+            <td>如<code>normal-table-2*4</code>插入2行(包含表头是3行)4列的表格</td>
+          </tr>
+        </tbody>
+      </table>
+      <p></p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="7">if(confirm('插入3*4的表格')) {
+  cherryObj.toolbar.toolbarHandlers.insert('normal-table-3*4');
+}else if(confirm('插入checklist')) {
+  cherryObj.toolbar.toolbarHandlers.insert('checklist');
+}</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.image()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入图片文件</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.toolbar.toolbarHandlers.image()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.video()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入视频文件</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.toolbar.toolbarHandlers.video()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.audio()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入音频文件</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.toolbar.toolbarHandlers.audio()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.pdf()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入PDF文件</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.toolbar.toolbarHandlers.pdf()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.word()</h2>
+      <p class="one-api__desc">向cherry编辑器中插入Word文件</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容">cherryObj.toolbar.toolbarHandlers.word()</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">toolbar.toolbarHandlers.graph(type:string)</h2>
+      <p class="one-api__desc">
+        向cherry编辑器中插入画图语法
+      </p><table class="cherry-api-table">
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>效果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>'1'</td>
+            <td>流程图</td>
+          </tr>
+          <tr>
+            <td>'2'</td>
+            <td>时序图</td>
+          </tr>
+          <tr>
+            <td>'3'</td>
+            <td>状态图</td>
+          </tr>
+          <tr>
+            <td>'4'</td>
+            <td>类图</td>
+          </tr>
+          <tr>
+            <td>'5'</td>
+            <td>饼图</td>
+          </tr>
+          <tr>
+            <td>'6'</td>
+            <td>甘特图</td>
+          </tr>
+        </tbody>
+      </table>
+      <p></p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="3">cherryObj.toolbar.toolbarHandlers.graph(1)
+cherryObj.toolbar.toolbarHandlers.graph('2')
+cherryObj.toolbar.toolbarHandlers.graph(4)</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="markdown"></div>
+
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.js"></script>
+  <!--<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>-->
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+  <script src="./assets/scripts/api-demo.js"></script>
+
+
+
+"
+`;
+
+exports[`E2E > examples > basic.html 1`] = `
+"
+  <div id="markdown"></div>
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+
+<script>
+var config = {
+  id: 'markdown',
+  value: '',
+  callback: {
+    afterChange: function(md, html) {
+      console.log('change');
+    }
+  },
+};
+var sourceCode = document.documentElement.outerHTML;
+var cherry = new Cherry(config);
+cherry.setValue(\`##源码如下：\\n\\\`\\\`\\\` html\\n\${sourceCode}\\n\\\`\\\`\\\`\`);
+</script>
+
+"
+`;
+
+exports[`E2E > examples > chatgpt.html 1`] = `
+"
+    <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%"></div>
+    <div id="markdown"></div>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.js"></script>
+    <!--<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>-->
+    <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+    <script src="./assets/scripts/pinyin/pinyin_dist.js"></script>
+    <script src="./assets/scripts/chatgpt-demo.js"></script>
+  
+
+"
+`;
+
+exports[`E2E > examples > drawio_demo.html 1`] = `"<center style="margin-top:10%;">Error loading resource files. Please check browser console.</center>"`;
+
+exports[`E2E > examples > h5.html 1`] = `
+"
+  <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%;"></div>
+  <div id="markdown"></div>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.js"></script>
+  <!--<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>-->
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+  <script src="./assets/scripts/h5-demo.js"></script>
+
+
+
+"
+`;
+
+exports[`E2E > examples > head_num.html 1`] = `
+"
+  <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%;"></div>
+  <div id="markdown"></div>
+  <textarea id="demo-val"># 例子
+&gt; [Github 地址](https://github.com/Tencent/cherry-markdown){target=_blank}
+
+- [basic](index.html){target=_blank}
+- [H5](h5.html){target=_blank}
+- [多实例](multiple.html){target=_blank}
+- [无 toolbar](notoolbar.html){target=_blank}
+- [纯预览模式](preview_only.html){target=_blank}
+- [注入](xss.html){target=_blank}
+- [API](api.html){target=_blank}
+- [图片所见即所得编辑尺寸](img.html){target=_blank}
+- [标题自动序号](head_num.html){target=_blank}
+
+[toc]
+
+# 实现
+\`\`\` javascript
+&lt;script&gt;
+  var cherry = new Cherry({
+    id: 'markdown',
+    previewer: {
+      // head-num 表示启用标题自动序号
+      className: 'cherry-markdown head-num'
+    },
+    value: document.getElementById("demo-val").value,
+  });
+&lt;/script&gt;
+\`\`\`
+
+# head1
+## head2
+## 字体样式
+**说明**
+- 使用\`*(或_)\` 和 \`**(或__)\` 表示*斜体*和 __粗体__
+- 使用 \`/\` 表示 /下划线/ ,使用\`~~\` 表示~~删除线~~
+- 使用\`^(或^^)\`表示^上标^或^^下标^^
+- 使用 ! 号+数字 表示字体 !24 大!  !12 小! [^专有语法提醒]
+- 使用两个(三个)!号+RGB颜色 表示!!#ff0000 字体颜色!!(!!!#f9cb9c 背景颜色!!!)[^专有语法提醒]
+
+## 超链接
+**说明**
+- 使用 \`[描述](URL)\` 为文字增加外链接
+- 使用\`&lt;URL&gt;\`插入一个链接
+- URL会自动转成链接
+
+## 列表
+### 无序列表
+**说明**
+- 在行首使用 *，+，- 表示无序列表
+
+### 有序列表
+**说明**
+- 在行首使用数字、字母、汉字和点表示有序列表
+
+### head3
+### head3
+# head1
+## head2
+### head3
+#### head4
+##### head5
+
+
+</textarea>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>-->
+<script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+<script>
+  var cherry = new Cherry({
+    id: 'markdown',
+    engine: {
+      syntax: {
+        header: {
+          anchorStyle: 'autonumber',
+        },
+        toc: {
+          showAutoNumber: true
+        }
+      }
+    },
+    toolbars: {
+      showAutoNumber: true
+    },
+    value: document.getElementById("demo-val").value,
+  });
+</script>
+
+
+"
+`;
+
+exports[`E2E > examples > img.html 1`] = `
+"
+  <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%;"></div>
+  <div id="markdown"></div>
+  <script>
+    markdownSample = \`## 点击预览区的图片来修改图片尺寸
+
+![wysiwyg#80%#B](assets/images/feature_image_wysiwyg.gif)
+标准图片  ![一条dog#100px](assets/images/demo-dog.png)
+![bubble menu](assets/images/feature_font.png)
+![copy and paste](assets/images/feature_copy.gif)
+![图片尺寸](assets/images/feature_image_size.png)
+![表格图表](assets/images/feature_table_chart.png)
+![字体样式](assets/images/feature_font.png)
+![html转md](assets/images/feature_copy.gif)
+![br](assets/images/feature_br.gif)
+![br](assets/images/feature_cursor.gif)
+![wysiwyg](assets/images/feature_image_wysiwyg.gif)
+![wysiwyg](assets/images/feature_export.png)
+![wysiwyg](assets/images/feature_myers.png)
+![wysiwyg](assets/images/feature_vdom.gif)
+**效果**
+标准图片  ![一条dog#B](assets/images/demo-dog.png)
+设置图片大小(相对大小&绝对大小)  ![一条dog#10%#50px](assets/images/demo-dog.png)
+设置图片对齐方式：
+**左对齐**
+![一条dog#auto#100px#left#border#radius](assets/images/demo-dog.png)
+**居中**
+![一条dog#auto#100px#center#shadow#B](assets/images/demo-dog.png)
+**右对齐**
+![一条dog#auto#100px#right#B#R#S](assets/images/demo-dog.png)
+**浮动左对齐**
+![一条dog#auto#100px#float-left#border#shadow#radius](assets/images/demo-dog.png)
+开心也是一天，不开心也是一天
+这样就过了两天，汪
+**效果**
+标准图片  ![一条dog#100px#R](assets/images/demo-dog.png)
+设置图片大小(相对大小&绝对大小)  ![一条dog#10%#50px](assets/images/demo-dog.png)
+设置图片对齐方式：
+**左对齐**
+![一条dog#auto#100px#left](assets/images/demo-dog.png)
+**居中**
+![一条dog#auto#100px#center](assets/images/demo-dog.png)
+**右对齐**
+![一条dog#auto#100px#right](assets/images/demo-dog.png)
+**浮动左对齐**
+![一条dog#auto#100px#float-left](assets/images/demo-dog.png)
+开心也是一天，不开心也是一天
+这样就过了两天，汪
+**效果**
+标准图片  ![一条dog#100px](assets/images/demo-dog.png)
+设置图片大小(相对大小&绝对大小)  ![一条dog#10%#50px](assets/images/demo-dog.png)
+设置图片对齐方式：
+**左对齐**
+![一条dog#auto#100px#left](assets/images/demo-dog.png)
+**居中**
+![一条dog#auto#100px#center](assets/images/demo-dog.png)
+**右对齐**
+![一条dog#auto#100px#right](assets/images/demo-dog.png)
+**浮动左对齐**
+![一条dog#auto#100px#float-left](assets/images/demo-dog.png)
+开心也是一天，不开心也是一天
+这样就过了两天，汪
+
+# 例子
+> [Github 地址](https://github.com/Tencent/cherry-markdown){target=_blank}
+
+- [basic](index.html){target=_blank}
+- [H5](h5.html){target=_blank}
+- [多实例](multiple.html){target=_blank}
+- [无 toolbar](notoolbar.html){target=_blank}
+- [纯预览模式](preview_only.html){target=_blank}
+- [注入](xss.html){target=_blank}
+- [API](api.html){target=_blank}
+- [图片所见即所得编辑尺寸](img.html){target=_blank}
+- [标题自动序号](head_num.html){target=_blank}
+  \`;
+  </script>
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+  <script>
+    var cherry = new Cherry({
+      id: 'markdown',
+      toolbars: {
+        toolbar: ['bold', 'italic', 'strikethrough', '|', 'header', 'list', 'graph']
+      },
+      editor: {
+        height: '70%'
+      },
+      previewer: {
+        lazyLoadImg: {
+        // 加载图片时如果需要展示loading图，则配置loading图的地址
+        loadingImgPath: '',
+        // 同一时间最多有几个图片请求，最大同时加载6张图片
+        maxNumPerTime: 2,
+        // 不进行懒加载处理的图片数量，如果为0，即所有图片都进行懒加载处理， 如果设置为-1，则所有图片都不进行懒加载处理
+        noLoadImgNum: 3,
+        // 首次自动加载几张图片（不论图片是否滚动到视野内），autoLoadImgNum = -1 表示会自动加载完所有图片
+        autoLoadImgNum: 2,
+        // 针对加载失败的图片 或 beforeLoadOneImgCallback 返回false 的图片，最多尝试加载几次，为了防止死循环，最多5次。以图片的src为纬度统计重试次数
+        maxTryTimesPerSrc: 2,
+        // 加载一张图片之前的回调函数，函数return false 会终止加载操作
+        beforeLoadOneImgCallback: (img) => {return true;},
+        // 加载一张图片失败之后的回调函数
+        failLoadOneImgCallback: (img) => {},
+        // 加载一张图片之后的回调函数，如果图片加载失败，则不会回调该函数
+        afterLoadOneImgCallback: (img) => {},
+        // 加载完所有图片后调用的回调函数
+        afterLoadAllImgCallback: () => {alert('all img lond done')},
+      },
+      },
+      value: markdownSample,
+    });
+  </script>
+
+
+
+"
+`;
+
+exports[`E2E > examples > index.html 1`] = `
+"
+  <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%;"></div>
+  <div id="markdown"></div>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.js"></script>
+  <!--<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>-->
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+  <script src="./assets/scripts/pinyin/pinyin_dist.js"></script>
+  <script src="./assets/scripts/index-demo.js"></script>
+
+
+
+"
+`;
+
+exports[`E2E > examples > mermaid.html 1`] = `
+"
+  <div id="markdown"></div>
+<textarea id="md-source">## 引入cherry并使用自己的[mermaid](https://mermaid.js.org/){target=_blank}
+\`\`\`html
+&lt;script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"&gt;&lt;/script&gt;
+&lt;script src="yourPath/cherry-markdown.core.js"&gt;&lt;/script&gt;
+&lt;script src="yourPath/addons/cherry-code-block-mermaid-plugin.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+Cherry.usePlugin(CherryCodeBlockMermaidPlugin, {
+  mermaid: window.mermaid,
+  mermaidAPI: window.mermaid,
+});
+var cherryEditor = new Cherry({id: 'markdown'});
+&lt;/script&gt;
+\`\`\`
+
+## 效果
+&gt; 可以使用对应版本mermaid的语法
+
+- 思维导图：
+\`\`\`mermaid
+mindmap
+  root((mindmap))
+    Origins
+      Long history
+      ::icon(fa fa-book)
+      Popularisation
+        British popular psychology author Tony Buzan
+    Research
+      On effectiveness&lt;br/&gt;and features
+      On Automatic creation
+        Uses
+            Creative techniques
+            Strategic planning
+            Argument mapping
+    Tools
+      Pen and paper
+      Mermaid
+\`\`\`
+- 统计图
+\`\`\`mermaid
+    xychart-beta
+    title "Sales Revenue"
+    x-axis [jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec]
+    y-axis "Revenue (in $)" 4000 --&gt; 11000
+    bar [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]
+    line [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]
+\`\`\`
+- 计划
+\`\`\`mermaid
+journey
+    title My working day
+    section Go to work
+      Make tea: 5: Me
+      Go upstairs: 3: Me
+      Do work: 1: Me, Cat
+    section Go home
+      Go downstairs: 5: Me
+      Sit down: 3: Me
+\`\`\`
+</textarea>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"></script>
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.core.js"></script>
+  <script src="../packages/cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin.js"></script>
+
+<script>
+Cherry.usePlugin(CherryCodeBlockMermaidPlugin, {
+  mermaid: window.mermaid,
+  mermaidAPI: window.mermaid,
+});
+var config = {
+  id: 'markdown',
+  engine: {
+    syntax: {
+      codeBlock: {
+        changeLang: false,
+      }
+    }
+  }
+};
+var cherry = new Cherry(config);
+cherry.setValue(document.getElementById('md-source').value);
+</script>
+
+"
+`;
+
+exports[`E2E > examples > multiple.html 1`] = `
+"
+  <div style="height: 200px;font-size:20px;background-color: #FFF;text-align: center;">
+    <h1>Cherry Markdown Editor</h1>
+  </div>
+  <div id="markdown1"></div>
+  <div style="height: 200px;font-size:20px;background-color: #FFF;text-align: center;">
+    <h1>Cherry Markdown Editor</h1>
+  </div>
+  <div id="markdown2"></div>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.js"></script>
+  <!--<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>-->
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+  <script src="./assets/scripts/multiple-demo.js"></script>
+
+
+
+"
+`;
+
+exports[`E2E > examples > notoolbar.html 1`] = `
+"
+  <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%;"></div>
+  <div id="markdown"></div>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.js"></script>
+  <!--<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>-->
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+  <script src="./assets/scripts/notoolbar-demo.js"></script>
+
+
+
+"
+`;
+
+exports[`E2E > examples > preview_only.html 1`] = `
+"
+  <h1>纯预览页面标题</h1>
+  <div class="info">
+    <span>作者：Cherry</span>
+    <span>时间：2024-06-20</span>
+  </div>
+  <hr>
+  <br>
+  <div id="markdown"></div>
+
+  <div class="footer info">
+    <hr>
+    <a href="https://github.com/Tencent/cherry-markdown" title="关注我们">
+      <svg height="32" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="32" data-view-component="true" class="octicon octicon-mark-github v-align-middle color-fg-default">
+          <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
+      </svg>
+    </a>
+    &nbsp;&nbsp;
+    <span>这里是页面底部</span>
+  </div>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.js"></script>
+  <!--<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>-->
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+  <script src="https://fengyuanchen.github.io/viewerjs/js/viewer.js"></script>
+  <script src="./assets/scripts/preview-demo.js"></script>
+
+
+
+"
+`;
+
+exports[`E2E > examples > suggester.html 1`] = `
+"
+  <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%;"></div>
+  <div id="markdown"></div>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.js"></script>
+  <!--<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>-->
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+  <script src="./assets/scripts/suggester-demo.js"></script>
+
+
+
+"
+`;
+
+exports[`E2E > examples > table.html 1`] = `
+"
+  <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%;"></div>
+  <div id="markdown"></div>
+  <script>
+    markdownSample = \`## 预览区域表格编辑
+
+![wysiwyg#80%](assets/images/feature_table_wysiwyg.gif)
+
+- dd
+- ddd
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 33332
+
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 33333
+
+- dd
+- ddd
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 33334
+
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 33335
+
+- dd
+- ddd
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 33336
+
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 33337
+
+- dd
+- ddd
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 33338
+
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 33339
+
+- dd
+- ddd
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+
+## 333310
+
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+|计算机|￥1600|5|
+|手机机|￥12|50|
+  \`;
+  </script>
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+  <script>
+    var cherry = new Cherry({
+      id: 'markdown',
+      toolbars: {
+        toolbar: ['bold', 'italic', 'strikethrough', '|', 'header', 'list', 'graph']
+      },
+      editor: {
+        height: '70%'
+      },
+      value: markdownSample,
+    });
+  </script>
+
+
+
+"
+`;
+
+exports[`E2E > examples > test.html 1`] = `
+"
+    <app-root class="ng-isolate-scope">
+            <h1>Hello, World!</h1>
+            <p>Welcome to my Angular app.</p>
+          </app-root>
+
+    <script>
+      angular.module('myApp', [])
+        .component('appRoot', {
+          template: \`
+            <h1>Hello, World!</h1>
+            <p>Welcome to my Angular app.</p>
+          \`
+        });
+
+      angular.bootstrap(document, ['myApp']);
+    </script>
+  
+
+"
+`;
+
+exports[`E2E > examples > vim.html 1`] = `
+"
+  <div id="markdown"></div>
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+
+<script>
+var config = {
+  id: 'markdown',
+  value: '',
+  editor: {
+    keyMap: 'vim',
+  },
+  callback: {
+    afterChange: function(md, html) {
+      console.log('change');
+    }
+  },
+};
+var sourceCode = document.documentElement.outerHTML;
+var cherry = new Cherry(config);
+cherry.setValue(\`## 移动光标\\n- h j k l 上 下 左 右\\n- w 跳到下一个字首，按标点或单词分割\\n- W 跳到下一个字首，长跳，如end-of-line被认为是一个字\\n- e 跳到下一个字尾\\n- E 跳到下一个字尾，长跳\\n- b 跳到上一个字\\n- B 跳到上一个字，长跳\\n- ^ 跳至行首的第一个字符\\n- gg 跳至文首\\n- G 调至文尾\\n- 5gg/5G 调至第5行\\n## 删除复制\\n- dd 删除光标所在行\\n- dw 删除一个字(word)\\n- d/D 删除到行末\\n- x 删除当前字符\\n- X 删除前一个字符\\n## 插入模式\\n- i 从当前光标处进入插入模式\\n- I 进入插入模式，并置光标于行首\\n- a 追加模式，置光标于当前光标之后\\n- A 追加模式，置光标于行末\\n- o 在当前行之下新加一行，并进入插入模式\\n- O 在当前行之上新加一行，并进入插入模式\\n- Esc 退出插入模式\\n## 更多\\n查看[更多](https://codemirror.net/5/keymap/vim.js)\\n\`);
+</script>
+
+"
+`;
+
+exports[`E2E > examples > xss.html 1`] = `
+"
+  <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%;"></div>
+  <div id="markdown"></div>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.js"></script>
+  <!--<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>-->
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+  <script src="./assets/scripts/xss-demo.js"></script>
+
+
+
+"
+`;
