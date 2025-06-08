@@ -93,9 +93,12 @@ export default class Link extends SyntaxBase {
       if (isValidScheme(processedURL)) {
         processedURL = this.$engine.urlProcessor(processedURL, 'link');
         processedURL = encodeURIOnce(processedURL);
+        const customAttrs =
+          // @ts-ignore
+          this.$engine.$cherry.options.engine.syntax.link.attrRender(processedText, processedURL) ?? '';
         return `${leadingChar + extraLeadingChar}<a href="${UrlCache.set(processedURL)}" ${
-          this.rel
-        } ${attrs}>${processedText}</a>`;
+          typeof customAttrs === 'string' ? customAttrs : ''
+        } ${this.rel} ${attrs}>${processedText}</a>`;
       }
       return `${leadingChar + extraLeadingChar}<span>${text}</span>`;
     }

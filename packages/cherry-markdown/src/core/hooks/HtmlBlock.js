@@ -154,6 +154,8 @@ export default class HtmlBlock extends ParagraphBase {
       ALLOW_UNKNOWN_PROTOCOLS: true,
       ADD_ATTR: ['target'],
     };
+    const { htmlAttrWhiteList } = this.$engine.$cherry.options.engine.global;
+    config.ADD_ATTR = config.ADD_ATTR.concat(htmlAttrWhiteList?.split(/[;,|]/) ?? []);
     if (this.htmlWhiteListAppend !== false) {
       config.ADD_TAGS = this.htmlWhiteList;
       if (this.htmlWhiteListAppend.test('style') || this.htmlWhiteListAppend.test('ALL')) {
