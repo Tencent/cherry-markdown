@@ -243,6 +243,12 @@ export interface CherryEngineOptions {
        */
     htmlBlackList?: string,
     /**
+       * 额外允许渲染的html标签的属性
+       * 标签以英文竖线分隔，如：htmlAttrWhiteList: 'part|onmouseover|my-attr'
+       * 默认为空，默认允许渲染的html标签属性见 https://github.com/cure53/DOMPurify/blob/main/src/attrs.ts
+       */
+    htmlAttrWhiteList?: string,
+    /**
        * 适配流式会话的场景，开启后将具备以下特性：
        * 1. 代码块自动闭合，相当于强制 `engine.syntax.codeBlock.selfClosing=true`
        * 2. 文章末尾的段横线标题语法（`\n-`）失效
@@ -271,6 +277,8 @@ export interface CherryEngineOptions {
       target?: '_blank' | '',
       /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
       rel?: '_blank' | 'nofollow' | '',
+      /** 自定义<a>标签的属性，默认为空 */
+      attrRender?: (text: string, href: string) => string,
     },
     autoLink?: false | {
       /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
@@ -281,6 +289,8 @@ export interface CherryEngineOptions {
       enableShortLink?: boolean,
       /** 短链接长度 默认:20 */
       shortLinkLength?: number,
+      /** 自定义<a>标签的属性，默认为空 */
+      attrRender?: (text: string, href: string) => string,
     },
     list?: false | {
       listNested?: boolean, // 同级列表类型转换后变为子级

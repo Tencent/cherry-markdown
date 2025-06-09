@@ -226,8 +226,11 @@ export default class AutoLink extends SyntaxBase {
     const safeUri = encodeURIOnce(processedURL);
     const displayUri = $e(linkText);
     const additionalAttrs = [this.target, this.rel].filter(Boolean).join(' ');
-    return `<a href="${AutoLink.escapePreservedSymbol(safeUri)}" title="${AutoLink.escapePreservedSymbol(
-      $e(url),
-    )}" ${additionalAttrs}>${AutoLink.escapePreservedSymbol(displayUri)}</a>`;
+    const customAttrs =
+      // @ts-ignore
+      this.$engine.$cherry.options.engine.syntax.autoLink.attrRender(processedURL, processedURL) ?? '';
+    return `<a href="${AutoLink.escapePreservedSymbol(safeUri)}" title="${AutoLink.escapePreservedSymbol($e(url))}" ${
+      typeof customAttrs === 'string' ? customAttrs : ''
+    }  ${additionalAttrs}>${AutoLink.escapePreservedSymbol(displayUri)}</a>`;
   }
 }
