@@ -190,6 +190,12 @@ const defaultConfig = {
        */
       htmlBlackList: '',
       /**
+       * 额外允许渲染的html标签的属性
+       * 标签以英文竖线分隔，如：htmlAttrWhiteList: 'part|onmouseover|my-attr'
+       * 默认为空，默认允许渲染的html标签属性见 https://github.com/cure53/DOMPurify/blob/main/src/attrs.ts
+       */
+      htmlAttrWhiteList: '',
+      /**
        * 适配流式会话的场景，开启后将具备以下特性：
        * - cherry渲染频率从50ms/次提升到10ms/次
        * - 代码块自动闭合，相当于强制 `engine.syntax.codeBlock.selfClosing=true`
@@ -221,6 +227,10 @@ const defaultConfig = {
         target: '',
         /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
         rel: '',
+        /** 自定义<a>标签的属性，默认为空 */
+        attrRender: (text, href) => {
+          return '';
+        },
       },
       autoLink: {
         /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
@@ -231,6 +241,10 @@ const defaultConfig = {
         enableShortLink: false,
         /** 短链接长度 */
         shortLinkLength: 20,
+        /** 自定义<a>标签的属性，默认为空 */
+        attrRender: (text, href) => {
+          return '';
+        },
       },
       list: {
         listNested: false, // 同级列表类型转换后变为子级

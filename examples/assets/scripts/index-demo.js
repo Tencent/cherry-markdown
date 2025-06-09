@@ -111,8 +111,14 @@ var basicConfig = {
         console.log(`url-processor`, url, srcType);
         return url;
       },
+      htmlAttrWhiteList: 'part|slot',
     },
     syntax: {
+      link: {
+        attrRender: (text, href) => {
+          return ``;
+        },
+      },
       image: {
         videoWrapper: (link, type, defaultWrapper) => {
           console.log(type);
@@ -128,6 +134,9 @@ var basicConfig = {
         enableShortLink: true,
         /** 短链接长度 */
         shortLinkLength: 20,
+        attrRender: (text, href) => {
+          return ``;
+        },
       },
       codeBlock: {
         theme: 'twilight',
