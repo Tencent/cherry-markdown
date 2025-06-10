@@ -1147,11 +1147,7 @@ export default class Previewer {
    * @param {string} [fileName] 导出文件名
    */
   export(type = 'pdf', fileName = '') {
-    let name = fileName;
-    if (!fileName) {
-      const { innerText } = this.getDomContainer();
-      name = /^\s*([^\s][^\n]*)\n/.test(innerText) ? innerText.match(/^\s*([^\s][^\n]*)\n/)[1] : 'cherry-export';
-    }
+    const name = fileName ? fileName : this.getFirstLineText('cherry-export');
     if (type === 'pdf') {
       exportPDF(this.getDomContainer(), name);
     } else if (type === 'screenShot' || type === 'img') {
@@ -1161,5 +1157,10 @@ export default class Previewer {
     } else if (type === 'html') {
       exportHTMLFile(this.getValue(), name);
     }
+  }
+
+  getFirstLineText(defaultText = '') {
+    const { innerText } = this.getDomContainer();
+    return /^\s*([^\s][^\n]*)\n/.test(innerText) ? innerText.match(/^\s*([^\s][^\n]*)\n/)[1] : defaultText;
   }
 }
