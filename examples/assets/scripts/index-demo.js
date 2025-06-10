@@ -271,7 +271,7 @@ var basicConfig = {
       'ul',
       'checklist',
       'panel',
-      'justify',
+      'align',
       'detail',
       '|',
       'formula',

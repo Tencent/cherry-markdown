@@ -13,34 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Panel from './Panel';
-import { getPanelRule } from '@/utils/regexp';
+import Align from './Align';
 /**
  * 插入对齐方式
+ * @deprecated 名字起错了，请使用 Align
  */
-export default class Justify extends Panel {
+export default class Justify extends Align {
   constructor($cherry) {
     super($cherry);
     this.setName('justify', 'justify');
-    this.panelRule = getPanelRule().reg;
-    const { locale } = this.$cherry;
-    this.subMenuConfig = [
-      {
-        iconName: 'justifyLeft',
-        name: locale?.justifyLeft ?? '左对齐',
-        onclick: this.bindSubClick.bind(this, 'left'),
-      },
-      {
-        iconName: 'justifyCenter',
-        name: locale?.justifyCenter ?? '居中',
-        onclick: this.bindSubClick.bind(this, 'center'),
-      },
-      {
-        iconName: 'justifyRight',
-        name: locale?.justifyRight ?? '右对齐',
-        onclick: this.bindSubClick.bind(this, 'right'),
-      },
-    ];
   }
 
   $getTitle() {

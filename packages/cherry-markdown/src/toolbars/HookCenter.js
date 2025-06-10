@@ -70,6 +70,7 @@ import MobilePreview from './hooks/MobilePreview';
 import Copy from './hooks/Copy';
 import Panel from './hooks/Panel';
 import Justify from './hooks/Justify';
+import Align from './hooks/Align';
 import Detail from './hooks/Detail';
 import DrawIo from './hooks/DrawIo';
 import Publish from './hooks/Publish';
@@ -132,6 +133,7 @@ const HookList = {
   file: File,
   panel: Panel,
   justify: Justify,
+  align: Align,
   detail: Detail,
   drawIo: DrawIo,
   wordCount: WordCount,
