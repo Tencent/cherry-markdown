@@ -20,6 +20,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.ch-icon-align:before { content: "\EA80" }
 .ch-icon-list:before { content: "\EA03" }
 .ch-icon-check:before { content: "\EA04" }
 .ch-icon-square:before { content: "\EA09" }
@@ -116,3 +117,7 @@
 .ch-icon-keyboard:before { content: "\EA79" }
 .ch-icon-command:before { content: "\EA7A" }
 .ch-icon-search:before { content: "\EA7B" }
+.ch-icon-alignCenter:before { content: "\EA7C" }
+.ch-icon-alignJustify:before { content: "\EA7D" }
+.ch-icon-alignLeft:before { content: "\EA7E" }
+.ch-icon-alignRight:before { content: "\EA7F" }

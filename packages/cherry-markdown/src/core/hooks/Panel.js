@@ -35,8 +35,8 @@ export default class Panel extends ParagraphBase {
 
   constructor(options) {
     super({ needCache: true });
-    const { enableJustify = true, enablePanel = true } = options.config;
-    this.enableJustify = enableJustify;
+    const { enableJustify = false, enableAlign = false, enablePanel = true } = options.config;
+    this.enableAlign = enableJustify || enableAlign;
     this.enablePanel = enablePanel;
     this.initBrReg(options.globalConfig.classicBr);
   }
@@ -47,7 +47,7 @@ export default class Panel extends ParagraphBase {
       if (!this.enablePanel && /primary|info|warning|danger|success/i.test(type)) {
         return match;
       }
-      if (!this.enableJustify && /(left|right|center)/i.test(type)) {
+      if (!this.enableAlign && /(left|right|center|justify)/i.test(type)) {
         return match;
       }
       const lineCount = this.getLineCount(match, preLines);
@@ -67,7 +67,7 @@ export default class Panel extends ParagraphBase {
   }
 
   $getClassByType(type) {
-    if (/(left|right|center)/i.test(type)) {
+    if (/(left|right|center|justify)/i.test(type)) {
       return `cherry-text-align cherry-text-align__${type}`;
     }
     return `cherry-panel cherry-panel__${type}`;
@@ -82,7 +82,7 @@ export default class Panel extends ParagraphBase {
       className: '',
     };
     ret.className = this.$getClassByType(ret.type);
-    if (/(left|right|center)/i.test(ret.type)) {
+    if (/(left|right|center|justify)/i.test(ret.type)) {
       ret.appendStyle = `style="text-align:${ret.type};"`;
     }
     ret.title = `<div class="cherry-panel--title ${ret.title ? 'cherry-panel--title__not-empty' : ''}">${
@@ -144,6 +144,9 @@ export default class Panel extends ParagraphBase {
       case 'left':
       case 'l':
         return 'left';
+      case 'justify':
+      case 'j':
+        return 'justify';
       default:
         return 'primary';
     }
