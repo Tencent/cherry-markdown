@@ -421,10 +421,14 @@ export interface CherryEngineOptions {
       filterStyle?: boolean,
     },
     panel?: false | {
-      // 是否支持对齐语法
-      enableJustify: boolean,
+      /** 是否支持对齐语法
+       * @deprecated 请使用enableAlign
+       */
+      enableJustify?: boolean,
+      /** 是否支持对齐语法 */
+      enableAlign?: boolean,
       // 是否支持信息面板语法
-      enablePanel: boolean,
+      enablePanel?: boolean,
     },
     footnote?: false | {
       /**
