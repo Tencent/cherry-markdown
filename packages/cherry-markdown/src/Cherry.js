@@ -1027,6 +1027,29 @@ export default class Cherry extends CherryStatic {
   }
 
   /**
+   * 获取第一行文本
+   * @param {string} defaultText 默认文本
+   * @returns {string} 第一行文本
+   */
+  getFirstLineText(defaultText = '') {
+    let innerText = '';
+    // 如果预览区域显示，则获取预览区域的文本
+    if (this.status.previewer === 'show') {
+      innerText = this.previewer.getDomContainer().innerText;
+    } else {
+      const { html } = this.previewer.options.previewerCache;
+      // 如果预览区有缓存（首次初始化的时候没有缓存），则获取缓存的html
+      if (html) {
+        innerText = html.replace(/<\/[^>]+>/g, '\n').replace(/<[^>]+>/g, '');
+      } else {
+        // 去掉Markdown中的语法
+        innerText = this.getValue().replace(/[#*|$>`]/g, '');
+      }
+    }
+    return /^\s*([^\s][^\n]*)\n/.test(innerText) ? innerText.match(/^\s*([^\s][^\n]*)\n/)[1] : defaultText;
+  }
+
+  /**
    * 修改主题
    * @param {string} theme option.themeSettings.themeList 里的className
    */
