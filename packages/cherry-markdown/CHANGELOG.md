@@ -1,5 +1,17 @@
 # Change Log
 
+## 0.9.4
+
+### Patch Changes
+
+- feat: #1196 增加配置可以控制是否支持 panel 语法和对齐语法 [@sunsonliu](https://github.com/sunsonliu)([#1197](https://github.com/Tencent/cherry-markdown/pull/1197))([`ca907c3`](https://github.com/Tencent/cherry-markdown/commit/ca907c340d81a75b544a75088c10022d2fcda676))
+- feat: 增加获取第一行非空文本内容的 api [@sunsonliu](https://github.com/sunsonliu)([#1212](https://github.com/Tencent/cherry-markdown/pull/1212))([`b1a2d66`](https://github.com/Tencent/cherry-markdown/commit/b1a2d6666a8f09ea0797a7a58a1ceeeb4898fcf0))
+- chore: jest migrate to vitest [@liweijie0812](https://github.com/liweijie0812)([#1189](https://github.com/Tencent/cherry-markdown/pull/1189))([`e9295ac`](https://github.com/Tencent/cherry-markdown/commit/e9295ac8632c985039bb845266ddcfca164466fb))
+- feat: #1208 对齐方式增加两端对齐 [@sunsonliu](https://github.com/sunsonliu)([#1210](https://github.com/Tencent/cherry-markdown/pull/1210))([`8fc4c9b`](https://github.com/Tencent/cherry-markdown/commit/8fc4c9ba8af08f7b0b3ed00bd2f49dee418f9975))
+- feat: #1202 代码块自定义按钮回调函数增加第四个参数 [@sunsonliu](https://github.com/sunsonliu)([#1203](https://github.com/Tencent/cherry-markdown/pull/1203))([`81b25c5`](https://github.com/Tencent/cherry-markdown/commit/81b25c57d2cda103e31507773958b0a43f9468e8))
+- feat: #1206 新增 html 标签属性白名单配置能力，新增自定义超链接属性配置能力 [@sunsonliu](https://github.com/sunsonliu)([#1207](https://github.com/Tencent/cherry-markdown/pull/1207))([`15bfa13`](https://github.com/Tencent/cherry-markdown/commit/15bfa133bc6c55e8feff2b1630bc680610aa2778))
+- chore: 升级 dompurify 组件至 `@^3.2.6` [@sunsonliu](https://github.com/sunsonliu)([#1198](https://github.com/Tencent/cherry-markdown/pull/1198))([`9281ed7`](https://github.com/Tencent/cherry-markdown/commit/9281ed7e3269d0984034e683fe00b018a27fc2a0))
+
 ## 0.9.3
 
 ### Patch Changes
