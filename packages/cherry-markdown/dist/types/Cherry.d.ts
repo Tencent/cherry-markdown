@@ -111,6 +111,11 @@ export default class Cherry extends CherryStatic {
             justifyLeft: string;
             justifyCenter: string;
             justifyRight: string;
+            align: string;
+            alignLeft: string;
+            alignCenter: string;
+            alignRight: string;
+            alignJustify: string;
             publish: string;
             fontColor: string;
             fontBgColor: string;
@@ -146,10 +151,6 @@ export default class Cherry extends CherryStatic {
             shortcutStatic10: string;
             shortcutStatic11: string;
             shortcutStatic12: string;
-            /**
-             * @property
-             * @type {string} 实例ID
-             */
             shortcutStatic13: string;
             shortcutStatic14: string;
             shortcutStatic15: string;
@@ -239,6 +240,11 @@ export default class Cherry extends CherryStatic {
             justifyLeft: string;
             justifyCenter: string;
             justifyRight: string;
+            align: string;
+            alignLeft: string;
+            alignCenter: string;
+            alignRight: string;
+            alignJustify: string;
             publish: string;
             fontColor: string;
             fontBgColor: string;
@@ -263,7 +269,10 @@ export default class Cherry extends CherryStatic {
             moveCol: string;
             shortcutStaticTitle: string;
             shortcutStatic1: string;
-            shortcutStatic2: string;
+            shortcutStatic2: string; /**
+             * @property
+             * @type {string} 实例ID
+             */
             shortcutStatic3: string;
             shortcutStatic4: string;
             shortcutStatic5: string;
@@ -278,10 +287,7 @@ export default class Cherry extends CherryStatic {
             shortcutStatic14: string;
             shortcutStatic15: string;
             shortcutStatic16: string;
-            shortcutStatic17: string; /**
-             * 初始化工具栏、编辑区、预览区等
-             * @private
-             */
+            shortcutStatic17: string;
             shortcutStatic18: string;
             leftMouseButton: string;
             disableShortcut: string;
@@ -371,6 +377,11 @@ export default class Cherry extends CherryStatic {
             justifyLeft: string;
             justifyCenter: string;
             justifyRight: string;
+            align: string;
+            alignLeft: string;
+            alignCenter: string;
+            alignRight: string;
+            alignJustify: string;
             publish: string;
             fontColor: string;
             fontBgColor: string;
@@ -666,6 +677,12 @@ export default class Cherry extends CherryStatic {
      * @param {string} [fileName] 导出文件名(默认为当前第一行内容|'cherry-export')
      */
     public export(type?: 'pdf' | 'img' | 'markdown' | 'html', fileName?: string): void;
+    /**
+     * 获取第一行文本
+     * @param {string} defaultText 默认文本
+     * @returns {string} 第一行文本
+     */
+    getFirstLineText(defaultText?: string): string;
     /**
      * 修改主题
      * @param {string} theme option.themeSettings.themeList 里的className

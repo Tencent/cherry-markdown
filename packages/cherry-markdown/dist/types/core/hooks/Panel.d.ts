@@ -13,6 +13,8 @@
  */
 export default class Panel extends ParagraphBase {
     constructor(options: any);
+    enableAlign: any;
+    enablePanel: any;
     $getClassByType(type: any): string;
     $getPanelInfo(name: any, str: any, sentenceMakeFunc: any): {
         type: string;
@@ -22,7 +24,7 @@ export default class Panel extends ParagraphBase {
         className: string;
     };
     $getTitle(name: any): any;
-    $getTargetType(name: any): "center" | "left" | "right" | "success" | "primary" | "info" | "warning" | "danger";
+    $getTargetType(name: any): "center" | "left" | "right" | "success" | "justify" | "primary" | "info" | "warning" | "danger";
     rule(): any;
 }
 import ParagraphBase from "@/core/ParagraphBase";

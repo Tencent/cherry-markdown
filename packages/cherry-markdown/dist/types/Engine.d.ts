@@ -19,6 +19,7 @@ export default class Engine {
         urlProcessor?: (url: string, srcType: "link" | "audio" | "video" | "image" | "autolink", callback?: any) => string;
         htmlWhiteList?: string;
         htmlBlackList?: string;
+        htmlAttrWhiteList?: string;
         flowSessionContext?: boolean;
         flowSessionCursor?: string;
     };

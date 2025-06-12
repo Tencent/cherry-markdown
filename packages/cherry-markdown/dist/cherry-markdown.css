@@ -534,6 +534,10 @@ span.CodeMirror-selectedtext {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.ch-icon-align:before {
+  content: "\ea80";
+}
+
 .ch-icon-list:before {
   content: "\ea03";
 }
@@ -916,6 +920,22 @@ span.CodeMirror-selectedtext {
 
 .ch-icon-search:before {
   content: "\ea7b";
+}
+
+.ch-icon-alignCenter:before {
+  content: "\ea7c";
+}
+
+.ch-icon-alignJustify:before {
+  content: "\ea7d";
+}
+
+.ch-icon-alignLeft:before {
+  content: "\ea7e";
+}
+
+.ch-icon-alignRight:before {
+  content: "\ea7f";
 }
 
 .cherry-markdown {

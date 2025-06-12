@@ -1,2 +1,2 @@
-export const sanitizer: createDOMPurify.DOMPurifyI;
+export const sanitizer: createDOMPurify.DOMPurify;
 import createDOMPurify from "dompurify";

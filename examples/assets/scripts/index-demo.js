@@ -111,8 +111,14 @@ var basicConfig = {
         console.log(`url-processor`, url, srcType);
         return url;
       },
+      htmlAttrWhiteList: 'part|slot',
     },
     syntax: {
+      link: {
+        attrRender: (text, href) => {
+          return ``;
+        },
+      },
       image: {
         videoWrapper: (link, type, defaultWrapper) => {
           console.log(type);
@@ -128,6 +134,9 @@ var basicConfig = {
         enableShortLink: true,
         /** 短链接长度 */
         shortLinkLength: 20,
+        attrRender: (text, href) => {
+          return ``;
+        },
       },
       codeBlock: {
         theme: 'twilight',
@@ -137,8 +146,8 @@ var basicConfig = {
         editCode: true,
         changeLang: true,
         customBtns: [
-          { html: '自定义按钮1', onClick: (event, code, lang)=>{console.log(`【${lang}】: ${code}`);} },
-          { html: '自定义按钮2', onClick: (event, code, lang)=>{console.log(`【${lang}】: ${code}`);} },
+          { html: '自定义按钮1', onClick: (event, code, lang, dom)=>{console.log(`【${lang}】: ${code}`);console.log(dom);} },
+          { html: '自定义按钮2', onClick: (event, code, lang, dom)=>{console.log(`【${lang}】: ${code}`);console.log(dom);} },
         ],
       },
       table: {
@@ -171,6 +180,13 @@ var basicConfig = {
       // 'header': {
       //   strict: false
       // }
+      
+      panel: {
+        // 是否支持对齐语法
+        enableJustify: true,
+        // 是否支持信息面板语法
+        enablePanel: true,
+      },
       footnote: {
         /**
          * 脚注标号的配置
@@ -255,7 +271,7 @@ var basicConfig = {
       'ul',
       'checklist',
       'panel',
-      'justify',
+      'align',
       'detail',
       '|',
       'formula',

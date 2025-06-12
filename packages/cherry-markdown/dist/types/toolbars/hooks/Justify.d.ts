@@ -1,12 +1,7 @@
 /**
  * 插入对齐方式
+ * @deprecated 名字起错了，请使用 Align
  */
-export default class Justify extends Panel {
-    subMenuConfig: {
-        iconName: string;
-        name: any;
-        onclick: any;
-    }[];
-    $getTitle(): string;
+export default class Justify extends Align {
 }
-import Panel from "./Panel";
+import Align from "./Align";

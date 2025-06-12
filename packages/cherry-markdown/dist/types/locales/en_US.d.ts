@@ -74,6 +74,11 @@ declare const _default: {
     justifyLeft: string;
     justifyCenter: string;
     justifyRight: string;
+    align: string;
+    alignLeft: string;
+    alignCenter: string;
+    alignRight: string;
+    alignJustify: string;
     publish: string;
     fontColor: string;
     fontBgColor: string;
