@@ -14,7 +14,9 @@
 	var bundle = mxResources.getDefaultBundle(mxLanguage);
 	
 	// Fixes possible asynchronous requests
-	mxUtils.getAll([bundle, './drawio_demo/theme/default.xml'], function(xhr)
+  // 使用相对于HTML文件的正确路径
+  var themeFile = './assets/drawio_lib/default.xml';
+  mxUtils.getAll([bundle, themeFile], function (xhr)
 	{
 		// Adds bundle text to resources
 		mxResources.parse(xhr[0].getText());
