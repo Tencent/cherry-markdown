@@ -1,0 +1,132 @@
+// 一级 CSS 变量：基础效果变量
+// 基于现有 variable.scss 中的 SCSS 变量转换而来
+
+:root {
+  /* ========== 色彩系统 ========== */
+  // 主要色彩
+  // TODO: 色彩在想怎么处理，因为有些主题有用到多个色彩系列，有些没有用到
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3582fb; // 对应 $linkColor
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+  
+  // 中性色彩系统 
+  --color-white: #ffffff;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+  --color-black: #000000;
+  
+  // 语义色彩
+  --color-success: #10b981;
+  --color-warning: #ffaf21; // 对应 $warnColor
+  --color-error: #f85353;   // 对应 $errorColor
+  --color-info: #3582fb;    // 对应 $linkColor
+  
+  // 特殊色彩
+  --color-full-width: #d71616; // 对应 $fullWidthColor
+  --color-link-hover: #056bad; // 对应 $linkHoverColor
+  
+  /* ========== 尺寸系统 ========== */
+  // 间距
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;       // 对应 $elementLittleGap
+  --spacing-lg: 16px;       // 对应 $elementGap  
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --spacing-3xl: 48px;
+  
+  // 圆角
+  --radius-none: 0;
+  --radius-sm: 2px;
+  --radius-md: 3px;         // 对应 $borderRadius
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 12px;
+  --radius-full: 9999px;
+
+  // 阴影
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 0 10px rgba(128, 145, 165, 0.2); // 对应 $shadow
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  
+  /* ========== 字体系统 ========== */
+  --font-family-sans: "Helvetica Neue", Arial, "Hiragino Sans GB", "STHeiti", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif; // 对应 $fontFamily
+  --font-family-mono: 'Menlo', 'Liberation Mono', 'Consolas', 'DejaVu Sans Mono', 'Ubuntu Mono', 'Courier New', 'andale mono', 'lucida console', monospace; // 对应 $monospaceFont
+  
+  // 字体大小
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;     // 对应 $toolbarFontSize
+  --font-size-md: 16px;     // 对应 $fontSize
+  --font-size-lg: 18px;     // 对应 $fontSizeLarge
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+  
+  // 行高
+  --line-height-none: 1;
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625; // 接近 27px/16px ≈ 1.6875，对应 $lineHeight
+  --line-height-loose: 2;
+  
+  // 字重
+  --font-weight-thin: 100;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+  
+  /* ========== 边框系统 ========== */
+  // 边框宽度
+  --border-width-0: 0px;
+  --border-width-1: 1px;
+  --border-width-2: 2px;
+  --border-width-4: 4px;
+  --border-width-8: 8px;
+  
+  /* ========== 高度尺寸 ========== */
+  // 组件高度
+  --height-toolbar: 48px;   // 对应 $toolbarHeight
+  --height-input: 32px;
+  --height-button: 36px;
+  --height-bubble-min: 35px;
+  
+  /* ========== 透明度 ========== */
+  --opacity-0: 0;
+  --opacity-25: 0.25;
+  --opacity-50: 0.5;
+  --opacity-75: 0.75;
+  --opacity-90: 0.9;
+  --opacity-95: 0.95;
+  --opacity-100: 1;
+  
+  /* ========== Z-index 层级 ========== */
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1020;
+  --z-index-fixed: 1030;
+  --z-index-modal-backdrop: 1040;
+  --z-index-modal: 1050;
+  --z-index-popover: 1060;
+  --z-index-tooltip: 1070;
+}

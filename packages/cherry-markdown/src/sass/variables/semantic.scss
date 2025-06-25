@@ -1,0 +1,231 @@
+// 二级 CSS 变量：语义化界面变量
+// 基于现有组件和样式需求，映射到一级变量
+
+:root {
+  /* ========== 基础色彩映射 ========== */
+  // 从现有 variable.scss 映射的基础色彩
+  --base-font-color: #3f4a56;      // 对应 $fontColor
+  --base-border-color: #dfe6ee;    // 对应 $borderColor
+  --base-editor-bg: #ffffff;       // 对应 $editorBg
+  --base-preview-bg: #ffffff;      // 对应 $previewBg
+  
+  /* ========== 工具栏相关 ========== */
+  --toolbar-bg-light: var(--color-white);              // 对应 $toolbarBgLight
+  --toolbar-bg-dark: #20304b;                          // 对应 $toolbarBgDark
+  --toolbar-border: var(--base-border-color);
+  --toolbar-height: var(--height-toolbar);
+  --toolbar-padding: var(--spacing-md);
+  --toolbar-font-size: var(--font-size-sm);            // 对应 $toolbarFontSize
+  --toolbar-radius: var(--radius-md);
+  --toolbar-shadow-light: var(--shadow-md);            // 对应 $toolbarShadowLight
+  --toolbar-shadow-dark: var(--shadow-md);             // 对应 $toolbarShadowDark
+  --toolbar-split-color: var(--base-border-color);     // 对应 $toolbarSplitColor
+  
+  // 工具栏按钮 - 亮色主题
+  --toolbar-btn-color-light: #3f4a56;                  // 对应 $toolbarBtnColorLight
+  --toolbar-btn-bg-light: transparent;                 // 对应 $toolbarBtnBgLight
+  --toolbar-btn-hover-color-light: #5d9bfc;           // 对应 $toolbarBtnHoverColorLight
+  --toolbar-btn-hover-bg-light: #ebf3ff;              // 对应 $toolbarBtnBgHoverLight
+  --toolbar-btn-disabled-light: #ccc;                  // 对应 $toolbarBtnDisabledLight
+  
+  // 工具栏按钮 - 暗色主题
+  --toolbar-btn-color-dark: #d7e6fe;                   // 对应 $toolbarBtnColorDark
+  --toolbar-btn-bg-dark: transparent;                  // 对应 $toolbarBtnBgDark
+  --toolbar-btn-hover-color-dark: #fff;               // 对应 $toolbarBtnHoverColorDark
+  --toolbar-btn-hover-bg-dark: rgba(255, 255, 255, 0.1); // 对应 $toolbarBtnBgHoverDark
+  --toolbar-btn-disabled-dark: #ccc;                   // 对应 $toolbarBtnDisabledDark
+  
+  --toolbar-btn-radius: var(--radius-sm);
+  --toolbar-btn-padding: var(--spacing-sm) var(--spacing-md);
+  
+  /* ========== 编辑器相关 ========== */
+  --editor-bg: var(--base-editor-bg);
+  --editor-color: var(--base-font-color);
+  --editor-border: var(--base-border-color);
+  --editor-font-family: var(--font-family-sans);
+  --editor-font-size: var(--font-size-md);
+  --editor-line-height: var(--line-height-relaxed);
+  
+  // 编辑器主题色彩
+  --editor-header-color: var(--base-font-color);       // 对应 $editorHeaderColor
+  --editor-comment-color: var(--color-primary-500);    // 对应 $editorCommentColor
+  --editor-quote-color: var(--color-primary-500);      // 对应 $editorQuoteColor
+  --editor-string-color: var(--base-font-color);       // 对应 $editorStringColor
+  --editor-link-color: var(--color-primary-500);       // 对应 $editorLinkColor
+  --editor-url-bg-color: #d7e6fe;                      // 对应 $editorUrlBgColor
+  --editor-keyword-color: var(--base-font-color);      // 对应 $editorKeywordColor
+  
+  --editor-selection-bg: var(--color-primary-100);
+  --editor-cursor-color: var(--color-primary-500);
+  --editor-line-number-color: var(--color-gray-400);
+  --editor-active-line-bg: var(--color-gray-50);
+  
+  /* ========== 预览器相关 ========== */
+  --previewer-bg: var(--base-preview-bg);
+  --previewer-color: var(--base-font-color);
+  --previewer-border: var(--base-border-color);
+  --previewer-padding: var(--spacing-lg);
+  --previewer-font-family: var(--font-family-sans);
+  
+  /* ========== Markdown 元素样式 ========== */
+  // 标题
+  --md-heading-color: var(--base-font-color);
+  --md-heading-font-weight: var(--font-weight-bold);
+  --md-heading-margin-top: var(--spacing-xl);
+  --md-heading-margin-bottom: var(--spacing-md);
+  --md-heading-font-family: var(--font-family-sans);
+  
+  // 副标题
+  --md-subtitle-color: #6d6e6f;                        // 对应 $subTitle
+  
+  // 段落
+  --md-paragraph-color: var(--base-font-color);
+  --md-paragraph-line-height: var(--line-height-relaxed);
+  --md-paragraph-margin-bottom: var(--spacing-md);
+  --md-paragraph-font-size: var(--font-size-md);
+  
+  // 链接
+  --md-link-color: var(--color-primary-500);           // 对应 $linkColor
+  --md-link-hover-color: var(--color-link-hover);      // 对应 $linkHoverColor
+  --md-link-decoration: underline;
+  
+  // 行内代码
+  --md-inline-code-color: var(--color-error);          // 对应 $codeColor
+  --md-inline-code-bg: #e5e5e5;                        // 对应 $codeBackground
+  --md-inline-code-padding: 2px var(--spacing-xs);
+  --md-inline-code-radius: var(--radius-sm);
+  --md-inline-code-font-size: 0.875em;
+  --md-inline-code-font-family: var(--font-family-mono);
+  
+  // 代码块
+  --md-code-block-bg: #00212b;                         // 对应 $codeBlockBg
+  --md-code-block-color: var(--color-gray-100);
+  --md-code-block-padding: var(--spacing-md);
+  --md-code-block-radius: var(--radius-md);
+  --md-code-block-border: var(--color-gray-700);
+  --md-code-block-font-family: var(--font-family-mono);
+  --md-code-block-font-size: var(--font-size-sm);
+  
+  // 引用
+  --md-blockquote-bg: rgba(102, 128, 153, 0.05);       // 对应 $quoteBackground
+  --md-blockquote-border: #D6DBDF;                     // 对应 $quoteBorderColor
+  --md-blockquote-color: var(--md-subtitle-color);     // 对应 $quoteColor
+  --md-blockquote-padding: var(--spacing-md);
+  --md-blockquote-border-width: var(--border-width-4);
+  --md-blockquote-font-style: italic;
+  
+  // 表格
+  --md-table-border: var(--base-border-color);
+  --md-table-header-bg: var(--color-gray-50);
+  --md-table-header-color: var(--base-font-color);
+  --md-table-row-hover-bg: var(--color-gray-50);
+  --md-table-cell-padding: var(--spacing-sm) var(--spacing-md);
+  --md-table-border-width: var(--border-width-1);
+  
+  // 列表
+  --md-list-margin-bottom: var(--spacing-md);
+  --md-list-item-margin-bottom: var(--spacing-xs);
+  --md-list-padding-left: var(--spacing-xl);
+  
+  // 分割线
+  --md-hr-border: var(--base-border-color);
+  --md-hr-margin: var(--spacing-xl) 0;
+  --md-hr-border-width: var(--border-width-1);
+  
+  /* ========== 浮动菜单 ========== */
+  --float-menu-bg: var(--color-white);
+  --float-menu-border: var(--base-border-color);
+  --float-menu-shadow: var(--shadow-lg);
+  --float-menu-radius: var(--radius-md);
+  --float-menu-padding: var(--spacing-sm);
+  --float-menu-z-index: var(--z-index-dropdown);
+  
+  /* ========== 气泡提示 ========== */
+  --bubble-bg: var(--color-white);
+  --bubble-border: var(--base-border-color);
+  --bubble-shadow: var(--shadow-md);
+  --bubble-radius: var(--radius-md);
+  --bubble-padding: var(--spacing-sm) var(--spacing-md);
+  --bubble-min-height: var(--height-bubble-min);
+  --bubble-z-index: var(--z-index-popover);
+  
+  /* ========== 下拉菜单 ========== */
+  --dropdown-bg: var(--color-white);
+  --dropdown-border: var(--base-border-color);
+  --dropdown-shadow: var(--shadow-lg);
+  --dropdown-radius: var(--radius-md);
+  --dropdown-padding: var(--spacing-xs) 0;
+  --dropdown-z-index: var(--z-index-dropdown);
+  
+  --dropdown-item-padding: var(--spacing-sm) var(--spacing-md);
+  --dropdown-item-hover-bg: var(--color-gray-50);
+  --dropdown-item-hover-color: var(--base-font-color);
+  --dropdown-item-active-bg: var(--color-primary-100);
+  --dropdown-item-active-color: var(--color-primary-700);
+  
+  /* ========== 侧边栏 ========== */
+  --sidebar-bg: var(--color-white);
+  --sidebar-border: var(--base-border-color);
+  --sidebar-shadow: var(--shadow-md);
+  --sidebar-width: 240px;
+  --sidebar-z-index: var(--z-index-fixed);
+  
+  /* ========== 滚动条 ========== */
+  --scrollbar-width: 8px;
+  --scrollbar-track-bg: var(--color-gray-100);
+  --scrollbar-thumb-bg: var(--color-gray-300);
+  --scrollbar-thumb-hover-bg: var(--color-gray-400);
+  --scrollbar-radius: var(--radius-full);
+  
+  /* ========== 输入框 ========== */
+  --input-bg: var(--color-white);
+  --input-border: var(--base-border-color);
+  --input-color: var(--base-font-color);
+  --input-placeholder-color: var(--color-gray-400);
+  --input-focus-border: var(--color-primary-500);
+  --input-focus-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  --input-radius: var(--radius-md);
+  --input-padding: var(--spacing-sm) var(--spacing-md);
+  --input-font-size: var(--font-size-md);
+  --input-height: var(--height-input);
+  
+  /* ========== 按钮 ========== */
+  --button-primary-bg: var(--color-primary-500);
+  --button-primary-color: var(--color-white);
+  --button-primary-hover-bg: var(--color-primary-600);
+  --button-primary-active-bg: var(--color-primary-700);
+  
+  --button-secondary-bg: var(--color-gray-100);
+  --button-secondary-color: var(--color-gray-700);
+  --button-secondary-hover-bg: var(--color-gray-200);
+  --button-secondary-active-bg: var(--color-gray-300);
+  
+  --button-danger-bg: var(--color-error);
+  --button-danger-color: var(--color-white);
+  --button-danger-hover-bg: #dc2626;
+  --button-danger-active-bg: #b91c1c;
+  
+  --button-radius: var(--radius-md);
+  --button-padding: var(--spacing-sm) var(--spacing-lg);
+  --button-font-size: var(--font-size-md);
+  --button-font-weight: var(--font-weight-medium);
+  --button-height: var(--height-button);
+  
+  /* ========== 全宽标识 ========== */
+  --full-width-color: var(--color-full-width);         // 对应 $fullWidthColor
+  
+  /* ========== 状态色彩 ========== */
+  --success-color: var(--color-success);
+  --warning-color: var(--color-warning);               // 对应 $warnColor
+  --error-color: var(--color-error);                   // 对应 $errorColor
+  --info-color: var(--color-info);
+  
+  /* ========== 动画 ========== */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+  
+  --transition-colors: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+  --transition-shadow: box-shadow 150ms ease;
+  --transition-transform: transform 150ms ease;
+}
