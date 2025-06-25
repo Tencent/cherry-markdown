@@ -1,4 +1,4 @@
-@import './variable.scss';
+@import './variables/index.scss';
 @import './base.scss';
 @import './ch-icon.scss';
 @import './markdown.scss';
@@ -9,8 +9,8 @@
 @import './components/shortcut_key_config.scss';
 
 @mixin cherryFont {
-  font-family: $fontFamily;
-  font-size: $fontSize;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-md);
 }
 
 // 主要布局控制，可以不合并进下面的区块
@@ -26,8 +26,8 @@
 
   .cherry-editor,
   .cherry-previewer {
-    max-height: calc(100% - #{$toolbarHeight});
-    min-height: calc(100% - #{$toolbarHeight});
+    max-height: calc(100% - var(--height-toolbar));
+    min-height: calc(100% - var(--height-toolbar));
   }
 
   .CodeMirror {
@@ -51,10 +51,10 @@
 
 .cherry {
   @include cherryFont;
-  line-height: $lineHeight;
-  color: $fontColor;
-  background: $editorBg;
-  box-shadow: $shadow;
+  line-height: var(--line-height-relaxed);
+  color: var(--base-font-color);
+  background: var(--base-editor-bg);
+  box-shadow: var(--shadow-md);
 
   .ch-icon {
     vertical-align: middle;
@@ -99,18 +99,18 @@
     top: 40px;
     left: 40px;
     border-collapse: separate;
-    box-shadow: $shadow;
+    box-shadow: var(--shadow-md);
     padding: 4px;
-    border-radius: $borderRadius;
+    border-radius: var(--radius-md);
     width: auto;
     height: auto;
 
     &-item {
       padding: 7px;
-      border: 1px solid $borderColor;
+      border: 1px solid var(--base-border-color);
 
       &.active {
-        background-color: $toolbarBtnBgHoverLight;
+        background-color: var(--toolbar-btn-hover-bg-light);
       }
     }
   }
@@ -120,7 +120,7 @@
       border-color: rgba(255, 255, 255, 0.2);
 
       &.active {
-        background-color: $toolbarBtnColorDark;
+        background-color: var(--toolbar-btn-color-dark);
       }
     }
   }
@@ -131,7 +131,7 @@
   width: 130px;
   min-height: 40px;
   background: #fff;
-  //border: 1px solid $borderColor;
+  //border: 1px solid var(--base-border-color);
   box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.5);
   margin-left: -60px;
   z-index: 13;
@@ -149,12 +149,12 @@
     box-sizing: border-box;
 
     &:hover {
-      background: $toolbarBtnBgHoverLight;
-      color: $toolbarBtnHoverColorLight;
+      background: var(--toolbar-btn-hover-bg-light);
+      color: var(--toolbar-btn-hover-color-light);
     }
     &__selected {
-      background: $toolbarBtnBgHoverLight;
-      color: $toolbarBtnHoverColorLight;
+      background: var(--toolbar-btn-hover-bg-light);
+      color: var(--toolbar-btn-hover-color-light);
     }
 
     .ch-icon {
@@ -163,19 +163,19 @@
   }
 
   [data-toolbar-theme='dark'] & {
-    background: $toolbarBgDark;
+    background: var(--toolbar-bg-dark);
 
     .cherry-dropdown-item {
-      background: $toolbarBtnBgDark;
-      color: $toolbarBtnColorDark;
+      background: var(--toolbar-btn-bg-dark);
+      color: var(--toolbar-btn-color-dark);
 
       &:hover {
-        background: $toolbarBtnBgHoverDark;
-        color: $toolbarBtnHoverColorDark;
+        background: var(--toolbar-btn-hover-bg-dark);
+        color: var(--toolbar-btn-hover-color-dark);
       }
       &__selected {
-        background: $toolbarBtnBgHoverDark;
-        color: $toolbarBtnHoverColorLight;
+        background: var(--toolbar-btn-hover-bg-dark);
+        color: var(--toolbar-btn-hover-color-light);
       }
     }
   }
@@ -187,15 +187,15 @@
   align-items: baseline;
   justify-content: space-between;
   padding: 0 20px;
-  min-height: $toolbarHeight;
-  font-size: $toolbarFontSize;
+  min-height: var(--height-toolbar);
+  font-size: var(--font-size-sm);
   line-height: 2.8;
   flex-basis: 100%;
   box-sizing: border-box;
   z-index: 2;
   user-select: none;
-  box-shadow: $toolbarShadowLight;
-  background: $toolbarBgLight;
+  box-shadow: var(--toolbar-shadow-light);
+  background: var(--toolbar-bg-light);
   overflow: hidden;
   .icon-loading {
     &.loading {
@@ -219,16 +219,16 @@
   }
 
   [data-toolbar-theme='dark'] & {
-    background: $toolbarBgDark;
-    box-shadow: $toolbarShadowDark;
+    background: var(--toolbar-bg-dark);
+    box-shadow: var(--toolbar-shadow-dark);
 
     .cherry-toolbar-button {
-      color: $toolbarBtnColorDark;
-      background: $toolbarBtnBgDark;
+      color: var(--toolbar-btn-color-dark);
+      background: var(--toolbar-btn-bg-dark);
 
       &:hover {
-        color: $toolbarBtnHoverColorDark;
-        background: $toolbarBtnBgHoverDark;
+        color: var(--toolbar-btn-hover-color-dark);
+        background: var(--toolbar-btn-hover-bg-dark);
       }
     }
   }
@@ -237,7 +237,7 @@
   .toolbar-right {
     display: flex;
     align-items: center;
-    min-height: $toolbarHeight;
+    min-height: var(--height-toolbar);
     flex-wrap: wrap;
     flex: 1;
   }
@@ -269,7 +269,7 @@
     padding: 0 12px;
     // margin: 4px 0;
     height: 38px;
-    color: $toolbarBtnColorLight;
+    color: var(--toolbar-btn-color-light);
     background: transparent;
     border: 1px solid transparent;
     -webkit-transition: background-color ease-in-out 0.15s, color ease-in-out 0.15s, border-color ease-in-out 0.15s;
@@ -278,8 +278,8 @@
     font-style: normal;
 
     &:hover {
-      color: $toolbarBtnHoverColorLight;
-      background: $toolbarBtnBgHoverLight;
+      color: var(--toolbar-btn-hover-color-light);
+      background: var(--toolbar-btn-hover-bg-light);
     }
 
     &.cherry-toolbar-split {
@@ -288,14 +288,14 @@
       padding: 0;
       margin: 9.5px 4px;
       border: 1px solid transparent;
-      border-left: 1px solid $toolbarSplitColor;
+      border-left: 1px solid var(--toolbar-split-color);
       pointer-events: none;
       overflow: hidden;
       opacity: 0.5;
     }
 
     &.disabled {
-      color: $toolbarBtnDisabledLight;
+      color: var(--toolbar-btn-disabled-light);
     }
   }
 }
@@ -364,9 +364,9 @@
   position: absolute;
   left: 30px;
   margin-left: 60px;
-  height: $lineHeight;
-  line-height: $lineHeight;
-  border-radius: $borderRadius;
+  height: var(--line-height-relaxed);
+  line-height: var(--line-height-relaxed);
+  border-radius: var(--radius-md);
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -376,10 +376,10 @@
     float: left;
     padding: 0 9px;
     margin: 0;
-    height: $lineHeight;
-    line-height: $lineHeight;
+    height: var(--line-height-relaxed);
+    line-height: var(--line-height-relaxed);
     font-size: 14px;
-    color: $fontColor;
+    color: var(--base-font-color);
     overflow: hidden;
     vertical-align: middle;
     text-align: center;
@@ -388,7 +388,7 @@
     font-style: normal;
 
     &.cherry-toolbar-split {
-      border-left: 1px solid $borderColor;
+      border-left: 1px solid var(--base-border-color);
       width: 0;
       padding: 0;
       overflow: hidden;
@@ -404,7 +404,7 @@
       background: rgba(0, 0, 0, 0.05);
 
       .ch-icon {
-        color: $toolbarBtnColorLight;
+        color: var(--toolbar-btn-color-light);
       }
     }
   }
@@ -466,14 +466,14 @@
   }
 
   .CodeMirror {
-    font-family: $fontFamily;
-    background: $editorBg;
-    color: $fontColor;
+    font-family: var(--font-family-sans);
+    background: var(--base-editor-bg);
+    color: var(--base-font-color);
 
     // codemirror 依赖隐藏的 textarea 计算行高，这里将字体大小设置为行高，避免输入法遮挡内容
     // Fixed https://github.com/Tencent/cherry-markdown/issues/82
     textarea {
-      font-size: $lineHeight;
+      font-size: var(--line-height-relaxed);
     }
   }
 
@@ -496,53 +496,53 @@
   }
 
   .cm-s-default .cm-header {
-    color: $editorHeaderColor;
+    color: var(--editor-header-color);
   }
 
   .cm-s-default .cm-string {
-    color: $editorStringColor;
+    color: var(--editor-string-color);
   }
 
   .cm-s-default .cm-comment {
-    color: $editorCommentColor;
-    font-family: $monospaceFont;
+    color: var(--editor-comment-color);
+    font-family: var(--font-family-mono);
     font-size: 0.9em;
   }
 
   .cm-s-default .cm-whitespace,
   .cm-tab {
-    font-family: $monospaceFont;
+    font-family: var(--font-family-mono);
     font-size: 0.9em;
   }
 
   .cm-s-default .cm-quote {
-    color: $editorQuoteColor;
+    color: var(--editor-quote-color);
   }
 
   .cm-s-default .cm-link {
-    color: $editorLinkColor;
+    color: var(--editor-link-color);
   }
 
   .cm-s-default .cm-url {
-    background: $editorUrlBgColor;
-    font-family: $monospaceFont;
+    background: var(--editor-url-bg-color);
+    font-family: var(--font-family-mono);
     font-size: 0.9em;
   }
 
   .cm-s-default .cm-variable-2 {
-    color: $editorV2Color;
+    color: var(--editor-v2-color);
   }
 
   .cm-s-default .cm-variable-3 {
-    color: $editorV3Color;
+    color: var(--editor-v3-color);
   }
 
   .cm-s-default .cm-keyword {
-    color: $editorKeywordColor;
+    color: var(--editor-keyword-color);
   }
 
   .cm-s-default .cm-fullWidth {
-    color: $fullWidthColor;
+    color: var(--color-full-width);
     z-index: 3;
     cursor: pointer;
   }
@@ -756,10 +756,11 @@
   border-left: 2px solid #ebedee;
   width: 50%;
   box-sizing: border-box;
-  background-color: $previewBg;
+  background-color: var(--base-preview-bg);
   min-height: auto;
   overflow-y: auto;
   -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 
   .cherry-mobile-previewer-content {
     width: 375px;
@@ -844,7 +845,7 @@
   padding: 5px 10px;
   z-index: 6;
   background: #fff;
-  box-shadow: $shadow;
+  box-shadow: var(--shadow-md);
 
   h3 {
     font-size: 12px;
@@ -853,7 +854,7 @@
   }
 
   [data-toolbar-theme='dark'] & h3 {
-    color: $toolbarBtnColorDark;
+    color: var(--toolbar-btn-color-dark);
   }
 
   .cherry-color-text {
