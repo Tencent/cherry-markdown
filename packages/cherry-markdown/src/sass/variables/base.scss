@@ -3,42 +3,15 @@
 
 :root {
   /* ========== 色彩系统 ========== */
-  // 主要色彩
-  // TODO: 色彩在想怎么处理，因为有些主题有用到多个色彩系列，有些没有用到
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-200: #bfdbfe;
-  --color-primary-300: #93c5fd;
-  --color-primary-400: #60a5fa;
-  --color-primary-500: #3582fb; // 对应 $linkColor
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
-  --color-primary-800: #1e40af;
-  --color-primary-900: #1e3a8a;
-  
-  // 中性色彩系统 
-  --color-white: #ffffff;
-  --color-gray-50: #f9fafb;
-  --color-gray-100: #f3f4f6;
-  --color-gray-200: #e5e7eb;
-  --color-gray-300: #d1d5db;
-  --color-gray-400: #9ca3af;
-  --color-gray-500: #6b7280;
-  --color-gray-600: #4b5563;
-  --color-gray-700: #374151;
-  --color-gray-800: #1f2937;
-  --color-gray-900: #111827;
-  --color-black: #000000;
-  
   // 语义色彩
-  --color-success: #10b981;
-  --color-warning: #ffaf21; // 对应 $warnColor
-  --color-error: #f85353;   // 对应 $errorColor
-  --color-info: #3582fb;    // 对应 $linkColor
+  --color-success: var(--oc-green-6);
+  --color-warning: var(--oc-yellow-6);  // 对应 $warnColor
+  --color-error: var(--oc-red-6);       // 对应 $errorColor
+  --color-info: var(--oc-blue-6);       // 对应 $linkColor
   
   // 特殊色彩
-  --color-full-width: #d71616; // 对应 $fullWidthColor
-  --color-link-hover: #056bad; // 对应 $linkHoverColor
+  --color-full-width: var(--oc-red-7); // 对应 $fullWidthColor
+  --color-link-hover: var(--oc-blue-8); // 对应 $linkHoverColor
   
   /* ========== 尺寸系统 ========== */
   // 间距

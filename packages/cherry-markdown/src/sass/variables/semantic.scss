@@ -10,7 +10,7 @@
   --base-preview-bg: #ffffff;      // 对应 $previewBg
   
   /* ========== 工具栏相关 ========== */
-  --toolbar-bg-light: var(--color-white);              // 对应 $toolbarBgLight
+  --toolbar-bg-light: var(--oc-white);                 // 对应 $toolbarBgLight
   --toolbar-bg-dark: #20304b;                          // 对应 $toolbarBgDark
   --toolbar-border: var(--base-border-color);
   --toolbar-height: var(--height-toolbar);
@@ -48,17 +48,17 @@
   
   // 编辑器主题色彩
   --editor-header-color: var(--base-font-color);       // 对应 $editorHeaderColor
-  --editor-comment-color: var(--color-primary-500);    // 对应 $editorCommentColor
-  --editor-quote-color: var(--color-primary-500);      // 对应 $editorQuoteColor
+  --editor-comment-color: var(--oc-blue-6);            // 对应 $editorCommentColor
+  --editor-quote-color: var(--oc-blue-6);              // 对应 $editorQuoteColor
   --editor-string-color: var(--base-font-color);       // 对应 $editorStringColor
-  --editor-link-color: var(--color-primary-500);       // 对应 $editorLinkColor
+  --editor-link-color: var(--oc-blue-6);               // 对应 $editorLinkColor
   --editor-url-bg-color: #d7e6fe;                      // 对应 $editorUrlBgColor
   --editor-keyword-color: var(--base-font-color);      // 对应 $editorKeywordColor
   
-  --editor-selection-bg: var(--color-primary-100);
-  --editor-cursor-color: var(--color-primary-500);
-  --editor-line-number-color: var(--color-gray-400);
-  --editor-active-line-bg: var(--color-gray-50);
+  --editor-selection-bg: var(--oc-blue-1);
+  --editor-cursor-color: var(--oc-blue-6);
+  --editor-line-number-color: var(--oc-gray-4);
+  --editor-active-line-bg: var(--oc-gray-0);
   
   /* ========== 预览器相关 ========== */
   --previewer-bg: var(--base-preview-bg);
@@ -85,7 +85,7 @@
   --md-paragraph-font-size: var(--font-size-md);
   
   // 链接
-  --md-link-color: var(--color-primary-500);           // 对应 $linkColor
+  --md-link-color: var(--oc-blue-6);                   // 对应 $linkColor
   --md-link-hover-color: var(--color-link-hover);      // 对应 $linkHoverColor
   --md-link-decoration: underline;
   
@@ -99,10 +99,10 @@
   
   // 代码块
   --md-code-block-bg: #00212b;                         // 对应 $codeBlockBg
-  --md-code-block-color: var(--color-gray-100);
+  --md-code-block-color: var(--oc-gray-1);
   --md-code-block-padding: var(--spacing-md);
   --md-code-block-radius: var(--radius-md);
-  --md-code-block-border: var(--color-gray-700);
+  --md-code-block-border: var(--oc-gray-7);
   --md-code-block-font-family: var(--font-family-mono);
   --md-code-block-font-size: var(--font-size-sm);
   
@@ -116,9 +116,9 @@
   
   // 表格
   --md-table-border: var(--base-border-color);
-  --md-table-header-bg: var(--color-gray-50);
+  --md-table-header-bg: var(--oc-gray-0);
   --md-table-header-color: var(--base-font-color);
-  --md-table-row-hover-bg: var(--color-gray-50);
+  --md-table-row-hover-bg: var(--oc-gray-0);
   --md-table-cell-padding: var(--spacing-sm) var(--spacing-md);
   --md-table-border-width: var(--border-width-1);
   
@@ -133,7 +133,7 @@
   --md-hr-border-width: var(--border-width-1);
   
   /* ========== 浮动菜单 ========== */
-  --float-menu-bg: var(--color-white);
+  --float-menu-bg: var(--oc-white);
   --float-menu-border: var(--base-border-color);
   --float-menu-shadow: var(--shadow-lg);
   --float-menu-radius: var(--radius-md);
@@ -141,7 +141,7 @@
   --float-menu-z-index: var(--z-index-dropdown);
   
   /* ========== 气泡提示 ========== */
-  --bubble-bg: var(--color-white);
+  --bubble-bg: var(--oc-white);
   --bubble-border: var(--base-border-color);
   --bubble-shadow: var(--shadow-md);
   --bubble-radius: var(--radius-md);
@@ -150,7 +150,7 @@
   --bubble-z-index: var(--z-index-popover);
   
   /* ========== 下拉菜单 ========== */
-  --dropdown-bg: var(--color-white);
+  --dropdown-bg: var(--oc-white);
   --dropdown-border: var(--base-border-color);
   --dropdown-shadow: var(--shadow-lg);
   --dropdown-radius: var(--radius-md);
@@ -158,13 +158,13 @@
   --dropdown-z-index: var(--z-index-dropdown);
   
   --dropdown-item-padding: var(--spacing-sm) var(--spacing-md);
-  --dropdown-item-hover-bg: var(--color-gray-50);
+  --dropdown-item-hover-bg: var(--oc-gray-0);
   --dropdown-item-hover-color: var(--base-font-color);
-  --dropdown-item-active-bg: var(--color-primary-100);
-  --dropdown-item-active-color: var(--color-primary-700);
+  --dropdown-item-active-bg: var(--oc-blue-1);
+  --dropdown-item-active-color: var(--oc-blue-7);
   
   /* ========== 侧边栏 ========== */
-  --sidebar-bg: var(--color-white);
+  --sidebar-bg: var(--oc-white);
   --sidebar-border: var(--base-border-color);
   --sidebar-shadow: var(--shadow-md);
   --sidebar-width: 240px;
@@ -172,17 +172,17 @@
   
   /* ========== 滚动条 ========== */
   --scrollbar-width: 8px;
-  --scrollbar-track-bg: var(--color-gray-100);
-  --scrollbar-thumb-bg: var(--color-gray-300);
-  --scrollbar-thumb-hover-bg: var(--color-gray-400);
+  --scrollbar-track-bg: var(--oc-gray-1);
+  --scrollbar-thumb-bg: var(--oc-gray-3);
+  --scrollbar-thumb-hover-bg: var(--oc-gray-4);
   --scrollbar-radius: var(--radius-full);
   
   /* ========== 输入框 ========== */
-  --input-bg: var(--color-white);
+  --input-bg: var(--oc-white);
   --input-border: var(--base-border-color);
   --input-color: var(--base-font-color);
-  --input-placeholder-color: var(--color-gray-400);
-  --input-focus-border: var(--color-primary-500);
+  --input-placeholder-color: var(--oc-gray-4);
+  --input-focus-border: var(--oc-blue-6);
   --input-focus-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   --input-radius: var(--radius-md);
   --input-padding: var(--spacing-sm) var(--spacing-md);
@@ -190,18 +190,18 @@
   --input-height: var(--height-input);
   
   /* ========== 按钮 ========== */
-  --button-primary-bg: var(--color-primary-500);
-  --button-primary-color: var(--color-white);
-  --button-primary-hover-bg: var(--color-primary-600);
-  --button-primary-active-bg: var(--color-primary-700);
+  --button-primary-bg: var(--oc-blue-6);
+  --button-primary-color: var(--oc-white);
+  --button-primary-hover-bg: var(--oc-blue-7);
+  --button-primary-active-bg: var(--oc-blue-8);
   
-  --button-secondary-bg: var(--color-gray-100);
-  --button-secondary-color: var(--color-gray-700);
-  --button-secondary-hover-bg: var(--color-gray-200);
-  --button-secondary-active-bg: var(--color-gray-300);
+  --button-secondary-bg: var(--oc-gray-1);
+  --button-secondary-color: var(--oc-gray-7);
+  --button-secondary-hover-bg: var(--oc-gray-2);
+  --button-secondary-active-bg: var(--oc-gray-3);
   
   --button-danger-bg: var(--color-error);
-  --button-danger-color: var(--color-white);
+  --button-danger-color: var(--oc-white);
   --button-danger-hover-bg: #dc2626;
   --button-danger-active-bg: #b91c1c;
   
@@ -213,12 +213,6 @@
   
   /* ========== 全宽标识 ========== */
   --full-width-color: var(--color-full-width);         // 对应 $fullWidthColor
-  
-  /* ========== 状态色彩 ========== */
-  --success-color: var(--color-success);
-  --warning-color: var(--color-warning);               // 对应 $warnColor
-  --error-color: var(--color-error);                   // 对应 $errorColor
-  --info-color: var(--color-info);
   
   /* ========== 动画 ========== */
   --transition-fast: 150ms ease;
