@@ -1,63 +1,63 @@
-@import '../variable.scss';
+/*
+ * 清新主题
+ */
 
-/** 色值可以参考：https://yeun.github.io/open-color/ */
-
-$GREEN0: #ebfbee;
-$GREEN1: #d3f9d8;
-$GREEN2: #b2f2bb;
-$GREEN3: #8ce99a;
-$GREEN4: #69db7c;
-$GREEN5: #51cf66;
-$GREEN6: #40c057;
-$GREEN7: #37b24d;
-$GREEN8: #2f9e44;
-$GREEN9: #2b8a3e;
-
-/** 工具栏样式 */
-$toolbarBg: #FFF;
-$toolbarBtnColor: $GREEN9;
-$toolbarBtnBgHover: $GREEN5;
-$toolbarBtnHoverColor: $GREEN0;
-$toolbarColorItemHoverBorderColor: $GREEN9;
-$sidebarShadow: $shadow;
-/** 编辑区域样式 */
-$editorBg: #FFF;
-$editorColor: $GREEN9;
-$editorSelectedBg: $GREEN2;
-$editorUrlBg: $GREEN0;
-$editorCursorColor: $GREEN9;
-$editorImportantColor: $GREEN7;
-$editorCodeColor: $GREEN6;
-/** 预览区域样式 */
-$previewBg: $GREEN0;
-$previewMobileBgColor: #FFF;
-/** markdown样式 */
-$mdColor: $editorColor;
-$mdHeaderColor: $editorImportantColor;
-$mdLineColor: $GREEN8;
-$mdAColor: $editorCodeColor;
-$mdAHoverColor: $editorImportantColor;
-$mdInlineCodeColor: $editorCodeColor;
-$mdInlineCodeBg: $GREEN1;
-$mdBlockquoteBg: $GREEN1;
-/** 编辑器样式 */
 .cherry.theme__green {
+  /* 基础色彩变量覆盖 */
+  --primary-color: var(--oc-green-9);
+  --background-color: #ffffff;
+  --surface-color: #ffffff;
+  --border-color: var(--oc-green-8);
+  --text-color: var(--oc-green-9);
+  --text-secondary: var(--oc-green-6);
+  --link-color: var(--oc-green-6);
+  --link-hover-color: var(--oc-green-7);
+  
+  /* 语义化变量覆盖 */
+  --base-font-color: var(--oc-green-9);
+  --base-editor-bg: #ffffff;
+  --base-preview-bg: var(--oc-green-0);
+  --base-border-color: var(--oc-green-8);
+  
+  /* 工具栏相关变量 */
+  --toolbar-bg-light: #ffffff;
+  --toolbar-bg-dark: #ffffff;
+  --toolbar-btn-color-light: var(--oc-green-9);
+  --toolbar-btn-color-dark: var(--oc-green-9);
+  --toolbar-btn-bg-dark: transparent;
+  --toolbar-btn-hover-bg-light: var(--oc-green-5);
+  --toolbar-btn-hover-bg-dark: var(--oc-green-5);
+  --toolbar-btn-hover-color-light: var(--oc-green-0);
+  --toolbar-btn-hover-color-dark: var(--oc-green-0);
+  --toolbar-split-color: var(--oc-green-8);
+  
+  /* 编辑器相关变量 */
+  --editor-header-color: var(--oc-green-7);
+  --editor-string-color: var(--oc-green-6);
+  --editor-comment-color: var(--oc-green-6);
+  --editor-quote-color: var(--oc-green-9);
+  --editor-link-color: var(--oc-green-6);
+  --editor-url-bg-color: var(--oc-green-0);
+  --editor-v2-color: var(--oc-green-9);
+  --editor-v3-color: var(--oc-green-7);
+  --editor-keyword-color: var(--oc-green-6);
+  --color-full-width: var(--oc-green-6);
   
   /** 顶部按钮, 选中文字时弹出的按钮, 光标focus到空行时联想出的按钮, 侧边栏按钮 */
   .cherry-toolbar, .cherry-floatmenu, .cherry-bubble, .cherry-sidebar {
-    background: $toolbarBg;
-    border-color: $toolbarBg;
+    background: var(--toolbar-bg-light);
+    border-color: var(--toolbar-bg-light);
     .cherry-toolbar-button {
-      color: $toolbarBtnColor;
+      color: var(--toolbar-btn-color-light);
       i {
-        color: $toolbarBtnColor;
+        color: var(--toolbar-btn-color-light);
       }
       &:hover {
-        background-color: $toolbarBtnBgHover;
-        color: $toolbarBtnHoverColor !important;
-        border-color: $toolbarBg;
+        background-color: var(--toolbar-btn-hover-bg-light);
+        color: var(--toolbar-btn-hover-color-light) !important;
+        border-color: var(--toolbar-bg-light);
         i {
-          color: $toolbarBtnHoverColor !important;
+          color: var(--toolbar-btn-hover-color-light) !important;
         }
       }
     }
@@ -65,48 +65,48 @@ $mdBlockquoteBg: $GREEN1;
 
   /** 二级菜单 */
   .cherry-dropdown {
-    background: $toolbarBg;
+    background: var(--toolbar-bg-light);
     .cherry-dropdown-item {
-      color: $toolbarBtnColor;
+      color: var(--toolbar-btn-color-light);
       // 选中子菜单高亮
       &__selected {
-        background-color: $toolbarBtnBgHover;
-        color: $toolbarBtnHoverColor;
+        background-color: var(--toolbar-btn-hover-bg-light);
+        color: var(--toolbar-btn-hover-color-light);
       }
       &:hover {
-        background-color: $toolbarBtnBgHover;
-        color: $toolbarBtnHoverColor;
+        background-color: var(--toolbar-btn-hover-bg-light);
+        color: var(--toolbar-btn-hover-color-light);
       }
     }
     /** 选择颜色的按钮 */
     &.cherry-color-wrap {
       /** 色盘的标题 */
       h3 {
-        color: $toolbarBtnColor;
+        color: var(--toolbar-btn-color-light);
       }
       /** 色盘里的每一个色块 */
       .cherry-color-item {
         // width: 15px;
         // border: none;
-        border-color: $toolbarBtnBgHover;
+        border-color: var(--toolbar-btn-hover-bg-light);
         &:hover {
-          border-color: $toolbarColorItemHoverBorderColor;
+          border-color: var(--primary-color);
         }
       }
     }
     /** 选择表格的按钮 */
     .cherry-insert-table-menu-item {
-      border-color: $toolbarBtnBgHover;
+      border-color: var(--toolbar-btn-hover-bg-light);
     }
   }
 
   /** 选中文字时弹出的按钮 */
   .cherry-bubble {
     .cherry-bubble-bottom {
-      border-top-color: $toolbarBg;
+      border-top-color: var(--toolbar-bg-light);
     }
     .cherry-bubble-top {
-      border-bottom-color: $toolbarBg;
+      border-bottom-color: var(--toolbar-bg-light);
     }
     /** 粘贴HTML内容时弹出的选择按钮 */
     &.cherry-switch-paste {
@@ -115,49 +115,49 @@ $mdBlockquoteBg: $GREEN1;
   }
 
   .cherry-editor {
-    background-color: $editorBg;
+    background-color: var(--base-editor-bg);
     .CodeMirror {
-      background-color: $editorBg;
+      background-color: var(--base-editor-bg);
       .CodeMirror-cursor {
-        border-left: 1px solid $editorCursorColor;
+        border-left: 1px solid var(--primary-color);
       }
       .CodeMirror-scroll {
         span, .cm-variable-2, .cm-string, .cm-strong, .cm-em, .cm-meta {
-          color: $editorColor;
+          color: var(--base-font-color);
         }
         .cm-image-marker, .cm-quote, .cm-header, .cm-atom {
-          color: $editorImportantColor;
+          color: var(--editor-header-color);
         }
         .cm-url {
-          background-color: $editorUrlBg;
+          background-color: var(--editor-url-bg-color);
         }
         .cm-comment, .cm-url {
-          color: $editorCodeColor;
+          color: var(--editor-comment-color);
         }
       }
       .CodeMirror-selected {
-        background-color: $editorSelectedBg;
+        background-color: var(--oc-green-2);
       }
     }
   }
 
   .cherry-sidebar {
-    box-shadow: $sidebarShadow;
+    box-shadow: var(--shadow-md);
   }
 
   .cherry-previewer {
-    background-color: $previewBg;
+    background-color: var(--base-preview-bg);
     .cherry-mobile-previewer-content {
-      background-color: $previewMobileBgColor;
+      background-color: var(--base-editor-bg);
     }
   }
 
   .cherry-previewer-table-content-handler {
     .cherry-previewer-table-content-handler__input {
       textarea {
-        background-color: $editorBg;
-        color: $editorColor;
-        outline-color: $editorImportantColor;
+        background-color: var(--base-editor-bg);
+        color: var(--base-font-color);
+        outline-color: var(--editor-header-color);
       }
     }
   }
@@ -165,15 +165,15 @@ $mdBlockquoteBg: $GREEN1;
 }
 /** 预览区域样式 */
 .cherry-markdown.theme__green {
-  color: $mdColor;
-  background-color: $previewBg;
+  color: var(--base-font-color);
+  background-color: var(--base-preview-bg);
 
   p, div {
   
   }
 
   h1, h2, h3, h4, h5 {
-    color: $mdHeaderColor;
+    color: var(--editor-header-color);
     text-align: center;
     margin-bottom: 35px;
   }
@@ -251,17 +251,17 @@ $mdBlockquoteBg: $GREEN1;
 
 
   blockquote {
-    color: $mdColor;
-    background-color: $mdBlockquoteBg;
-    border-color: $mdLineColor;
+    color: var(--base-font-color);
+    background-color: var(--oc-green-1);
+    border-color: var(--base-border-color);
   }
   
   a {
     text-decoration: none;
-    color: $mdAColor;
+    color: var(--link-color);
     &:hover {
       text-decoration: underline;
-      color: $mdAHoverColor;
+      color: var(--link-hover-color);
     }
   }
   
@@ -282,11 +282,11 @@ $mdBlockquoteBg: $GREEN1;
   }
 
   sub {
-
+  
   }
   
   hr {
-    border-color: $mdLineColor;
+    border-color: var(--base-border-color);
   }
   
   img {
@@ -303,9 +303,9 @@ $mdBlockquoteBg: $GREEN1;
   
   /** 行内代码 */
   code:not([class]) {
-    background-color: $mdInlineCodeBg;
-    color: $mdInlineCodeColor;
-    border: 1px solid $mdLineColor;
+    background-color: var(--oc-green-1);
+    color: var(--editor-string-color);
+    border: 1px solid var(--base-border-color);
   }
   
   /** 
@@ -319,12 +319,12 @@ $mdBlockquoteBg: $GREEN1;
   * 表格
   */
   table, .cherry-table {
-    color: $mdColor;
+    color: var(--base-font-color);
     th {
-      background-color: $mdInlineCodeBg;
+      background-color: var(--oc-green-1);
     }
     tr, th, td {
-      border-color: $mdLineColor;
+      border-color: var(--base-border-color);
     }
   }
 
@@ -338,13 +338,13 @@ $mdBlockquoteBg: $GREEN1;
   
   /** 脚注 */
   .footnote {
-    border-color: $mdLineColor;
+    border-color: var(--base-border-color);
     .footnote-title {
-      background-color: $mdInlineCodeBg;
+      background-color: var(--oc-green-1);
     }
     .one-footnote {
-      color: $mdColor;
-      border-color: $mdLineColor;
+      color: var(--base-font-color);
+      border-color: var(--base-border-color);
       a.footnote-ref {
         padding: 5px;
       }
@@ -363,7 +363,7 @@ $mdBlockquoteBg: $GREEN1;
 
     /** 目录 */
   .toc {
-    border-bottom: 1px solid $mdLineColor;
+    border-bottom: 1px solid var(--base-border-color);
     padding-bottom: 15px;
     margin-bottom: 30px;
     .toc-title {
@@ -371,7 +371,7 @@ $mdBlockquoteBg: $GREEN1;
       padding-bottom: 15px;
       margin-top: 30px;
       margin-bottom: 15px;
-      border-bottom: 1px solid $mdLineColor;
+      border-bottom: 1px solid var(--base-border-color);
     }
     .toc-li {
       border: none;
@@ -385,9 +385,9 @@ $mdBlockquoteBg: $GREEN1;
 
       }
       a {
-        color: $mdColor;
+        color: var(--base-font-color);
         &:hover {
-          color: $mdAHoverColor;
+          color: var(--link-hover-color);
         }
       }
     }
