@@ -239,9 +239,6 @@
     border-radius: 6px;
   }
 
-  // 适配历史文章样式
-  @import 'prettyprint/prettyprint.scss';
-
   div[data-type='codeBlock'] {
     display: inline-block;
     width: 100%;

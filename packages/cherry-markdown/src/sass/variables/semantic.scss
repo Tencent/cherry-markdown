@@ -106,18 +106,6 @@
   --md-code-block-font-family: var(--font-family-mono);
   --md-code-block-font-size: var(--font-size-sm);
   
-  // 代码语法高亮
-  --syntax-comment-color: var(--oc-gray-5);            // 注释颜色
-  --syntax-type-color: var(--oc-blue-4);               // 类型名称
-  --syntax-literal-color: var(--oc-orange-4);          // 字面值
-  --syntax-punctuation-color: var(--oc-gray-4);        // 标点符号
-  --syntax-tag-color: var(--oc-red-4);                 // 标签名
-  --syntax-attribute-name-color: var(--oc-orange-4);   // 属性名
-  --syntax-attribute-value-color: var(--oc-teal-4);    // 属性值
-  --syntax-declaration-color: var(--oc-orange-4);      // 声明
-  --syntax-variable-color: var(--oc-red-4);            // 变量名
-  --syntax-function-color: var(--oc-blue-4);           // 函数名
-  
   // 引用
   --md-blockquote-bg: rgba(102, 128, 153, 0.05);       // 对应 $quoteBackground
   --md-blockquote-border: #D6DBDF;                     // 对应 $quoteBorderColor
