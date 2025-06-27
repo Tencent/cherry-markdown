@@ -1,7 +1,3 @@
-@import '../variable';
-
-$bubble-min-height: 35px;
-
 .cherry-bubble {
   position: absolute;
 
@@ -10,17 +6,17 @@ $bubble-min-height: 35px;
   justify-content: flex-start;
   flex-wrap: wrap;
 
-  font-size: 14px;
+  font-size: var(--font-size-sm);
 
   // min-height for overflow wrap
-  min-height: $bubble-min-height;
+  min-height: var(--bubble-min-height);
   min-width: 50px;
 
-  border: 1px solid $borderColor;
-  background-color: #fff;
-  box-shadow: 0 2px 15px -5px rgba(0, 0, 0, 0.5);
-  border-radius: $borderRadius;
-  z-index: 8;
+  border: var(--border-width-1) solid var(--bubble-border);
+  background-color: var(--bubble-bg);
+  box-shadow: var(--bubble-shadow);
+  border-radius: var(--bubble-radius);
+  z-index: var(--bubble-z-index);
 
   &.cherry-bubble--centered {
     left: 50%;
@@ -44,13 +40,13 @@ $bubble-min-height: 35px;
   .cherry-bubble-top {
     top: 0;
     transform: translateY(-100%);
-    border-bottom: 8px solid #fff;
+    border-bottom: 8px solid var(--bubble-bg);
   }
 
   .cherry-bubble-bottom {
     bottom: 0;
     transform: translateY(100%);
-    border-top: 8px solid #fff;
+    border-top: 8px solid var(--bubble-bg);
   }
 
   .cherry-toolbar-button {
@@ -58,47 +54,47 @@ $bubble-min-height: 35px;
     align-items: center;
     justify-content: center;
     // FIXME: remove fixed height
-    height: $bubble-min-height;
+    height: var(--bubble-min-height);
 
-    // line-height: ($bubble-min-height - 2px); // border 2px
+    // line-height: (var(--bubble-min-height) - 2px); // border 2px
     cursor: pointer;
     user-select: none;
 
     &:hover {
-      border-color: $borderColor;
-      background-color: rgba(89, 128, 166, 0.05);
+      border-color: var(--toolbar-border);
+      background-color: var(--toolbar-btn-hover-bg-light);
     }
 
     &.cherry-toolbar-split {
       height: 65%;
-      min-height: (0.65 * $bubble-min-height);
+      min-height: calc(0.65 * var(--bubble-min-height));
     }
   }
 
   [data-toolbar-theme='dark'] & {
-    border-color: $toolbarBgDark;
-    background: $toolbarBgDark;
+    border-color: var(--toolbar-bg-dark);
+    background: var(--toolbar-bg-dark);
 
     .cherry-toolbar-button {
-      color: $toolbarBtnColorDark;
-      background: $toolbarBtnBgDark;
+      color: var(--toolbar-btn-color-dark);
+      background: var(--toolbar-btn-bg-dark);
 
       &:hover {
-        color: $toolbarBtnHoverColorDark;
-        background: $toolbarBtnBgHoverDark;
+        color: var(--toolbar-btn-hover-color-dark);
+        background: var(--toolbar-btn-hover-bg-dark);
       }
     }
 
     .cherry-bubble-top {
-      border-bottom-color: $toolbarBgDark;
+      border-bottom-color: var(--toolbar-bg-dark);
     }
 
     .cherry-bubble-bottom {
-      border-top-color: $toolbarBgDark;
+      border-top-color: var(--toolbar-bg-dark);
     }
 
     .cherry-toolbar-button:hover {
-      border-color: $toolbarBgDark;
+      border-color: var(--toolbar-bg-dark);
     }
   }
 }
@@ -113,8 +109,8 @@ $bubble-min-height: 35px;
     left: 0;
     top: 0;
     opacity: 0.3;
-    background-color: $toolbarBtnHoverColorLight;
-    border-radius: 2px;
+    background-color: var(--toolbar-btn-hover-color-light);
+    border-radius: var(--radius-sm);
     transition: all 0.3s;
   }
   .cherry-toolbar-button {
@@ -129,18 +125,18 @@ $bubble-min-height: 35px;
   }
   &[data-type='text'] {
     .cherry-text-btn {
-      color: $toolbarBtnColorLight;
+      color: var(--toolbar-btn-color-light);
     }
     .cherry-md-btn {
-      color: $toolbarBtnHoverColorLight;
+      color: var(--toolbar-btn-hover-color-light);
     }
   }
   &[data-type='md'] {
     .cherry-md-btn {
-      color: $toolbarBtnColorLight;
+      color: var(--toolbar-btn-color-light);
     }
     .cherry-text-btn {
-      color: $toolbarBtnHoverColorLight;
+      color: var(--toolbar-btn-hover-color-light);
     }
     .switch-btn--bg {
       left: 50%;
@@ -148,22 +144,22 @@ $bubble-min-height: 35px;
   }
   [data-toolbar-theme='dark'] & {
     .switch-btn--bg {
-      background-color: $toolbarBtnHoverColorDark;
+      background-color: var(--toolbar-btn-hover-color-dark);
     }
     &[data-type='text'] {
       .cherry-text-btn {
-        color: $toolbarBtnColorDark;
+        color: var(--toolbar-btn-color-dark);
       }
       .cherry-md-btn {
-        color: $toolbarBtnHoverColorDark;
+        color: var(--toolbar-btn-hover-color-dark);
       }
     }
     &[data-type='md'] {
       .cherry-md-btn {
-        color: $toolbarBtnColorDark;
+        color: var(--toolbar-btn-color-dark);
       }
       .cherry-text-btn {
-        color: $toolbarBtnHoverColorDark;
+        color: var(--toolbar-btn-hover-color-dark);
       }
       .switch-btn--bg {
         left: 50%;
