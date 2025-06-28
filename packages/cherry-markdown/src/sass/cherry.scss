@@ -299,6 +299,37 @@
       color: var(--toolbar-btn-disabled-light);
     }
   }
+
+  // 工具栏按钮通用样式结构
+  .cherry-toolbar,
+  .cherry-floatmenu,
+  .cherry-bubble,
+  .cherry-sidebar {
+    background: var(--toolbar-bg-light, var(--toolbar-bg-dark));
+    border-color: var(--toolbar-bg-light, var(--toolbar-bg-dark));
+
+    .cherry-toolbar-button {
+      color: var(--toolbar-btn-color-light, var(--toolbar-btn-color-dark));
+
+      i {
+        color: var(--toolbar-btn-color-light, var(--toolbar-btn-color-dark));
+      }
+
+      &:hover {
+        background-color: var(--toolbar-btn-hover-bg-light, var(--toolbar-btn-hover-bg-dark));
+        color: var(--toolbar-btn-hover-color-light, var(--toolbar-btn-hover-color-dark)) !important;
+        border-color: var(--toolbar-bg-light, var(--toolbar-bg-dark));
+
+        i {
+          color: var(--toolbar-btn-hover-color-light, var(--toolbar-btn-hover-color-dark)) !important;
+        }
+      }
+    }
+  }
+
+  .cherry-sidebar {
+    box-shadow: var(--sidebar-shadow);
+  }
 }
 
 .cherry {

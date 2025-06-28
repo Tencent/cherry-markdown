@@ -43,34 +43,6 @@
   --editor-keyword-color: rgb(255, 203, 107);
   --color-full-width: rgb(255, 203, 107);
 
-  /** 顶部按钮, 选中文字时弹出的按钮, 光标focus到空行时联想出的按钮, 侧边栏按钮 */
-  .cherry-toolbar,
-  .cherry-floatmenu,
-  .cherry-bubble,
-  .cherry-sidebar {
-    background: var(--toolbar-bg-dark);
-    border-color: var(--toolbar-bg-dark);
-
-    .cherry-toolbar-button {
-      color: var(--toolbar-btn-color-dark);
-
-      &:hover {
-        background-color: var(--toolbar-btn-hover-bg-dark);
-        color: var(--toolbar-btn-hover-color-dark) !important;
-        border-color: var(--toolbar-bg-dark);
-
-        i {
-          color: var(--toolbar-btn-hover-color-dark) !important;
-        }
-      }
-    }
-  }
-
-  /** 二级菜单 */
-  .cherry-sidebar {
-    box-shadow: var(--shadow-md);
-  }
-
   /* 目录区域样式 */
   .cherry-flex-toc {
     &:hover {
@@ -213,36 +185,6 @@
   h4,
   h5 {
     color: var(--editor-header-color);
-  }
-
-  ul {
-    &.cherry-list__upper-roman {
-      list-style: upper-roman;
-    }
-
-    &.cherry-list__lower-alpha {
-      list-style: lower-alpha;
-    }
-
-    &.cherry-list__lower-greek {
-      list-style: lower-greek;
-    }
-
-    &.cherry-list__cjk-ideographic {
-      list-style: cjk-ideographic;
-    }
-
-    &.cherry-list__circle {
-      list-style: circle;
-    }
-
-    &.cherry-list__square {
-      list-style: square;
-    }
-
-    &.cherry-list__default {
-      background-color: var(--preview-bg-color);
-    }
   }
 
   blockquote {

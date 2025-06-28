@@ -57,29 +57,6 @@
   --md-inline-code-bg: var(--oc-violet-1);
   --md-blockquote-bg: var(--oc-violet-1);
 
-  /** 顶部按钮, 选中文字时弹出的按钮, 光标focus到空行时联想出的按钮, 侧边栏按钮 */
-  .cherry-toolbar,
-  .cherry-floatmenu,
-  .cherry-bubble,
-  .cherry-sidebar {
-    background: var(--toolbar-bg-dark);
-    border-color: var(--toolbar-bg-dark);
-
-    .cherry-toolbar-button {
-      color: var(--toolbar-btn-color-dark);
-
-      &:hover {
-        background-color: var(--toolbar-btn-hover-bg-dark);
-        color: var(--toolbar-btn-hover-color-dark) !important;
-        border-color: var(--toolbar-bg-dark);
-
-        i {
-          color: var(--toolbar-btn-hover-color-dark) !important;
-        }
-      }
-    }
-  }
-
   /* 颜色选择器 */
   .cherry-color-wrap .cherry-color-item:hover {
     border-color: var(--oc-violet-9);

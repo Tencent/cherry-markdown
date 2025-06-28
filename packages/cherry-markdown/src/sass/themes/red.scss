@@ -47,40 +47,9 @@
   /* 侧边栏阴影 */
   --sidebar-shadow: 0 0 10px var(--oc-pink-2);
 
-  /** 顶部按钮, 选中文字时弹出的按钮, 光标focus到空行时联想出的按钮, 侧边栏按钮 */
-  .cherry-toolbar,
-  .cherry-floatmenu,
-  .cherry-bubble,
-  .cherry-sidebar {
-    background: var(--toolbar-bg-light);
-    border-color: var(--toolbar-bg-light);
-
-    .cherry-toolbar-button {
-      color: var(--toolbar-btn-color-light);
-
-      i {
-        color: var(--toolbar-btn-color-light);
-      }
-
-      &:hover {
-        background-color: var(--toolbar-btn-hover-bg-light);
-        color: var(--toolbar-btn-hover-color-light) !important;
-        border-color: var(--toolbar-bg-light);
-
-        i {
-          color: var(--toolbar-btn-hover-color-light) !important;
-        }
-      }
-    }
-  }
-
   /* 编辑器选中背景色 */
   .cherry-editor .CodeMirror .CodeMirror-selected {
     background-color: var(--oc-pink-2);
-  }
-
-  .cherry-sidebar {
-    box-shadow: var(--sidebar-shadow);
   }
 
 }
