@@ -137,7 +137,7 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     /** 文件上传回调 */
     fileUpload?: CherryFileUploadHandler;
     /** 多文件上传回调 */
-    fileUploadMulti?: CherryFileUploadHandler;
+    fileUploadMulti?: CherryFileUploadMultiHandler;
     /** 编辑器内容改变并完成渲染后触发 */
     afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */
@@ -721,6 +721,24 @@ export interface CherryFileUploadHandler {
     ) => void): void;
 }
 
+export interface CherryFileUploadMultiHandler {
+  /**
+   * @param files 用户上传的文件对象数组
+   * @param callback 回调函数，接收最终的文件url
+   */
+  (files: File[],
+    /**
+     * @param params.name 回填的alt信息
+     * @param params.poster 封面图片地址（视频的场景下生效）
+     * @param params.isBorder 是否有边框样式（图片场景下生效）
+     * @param params.isShadow 是否有阴影样式（图片场景下生效）
+     * @param params.isRadius 是否有圆角样式（图片场景下生效）
+     * @param params.width 设置宽度，可以是像素、也可以是百分比（图片、视频场景下生效）
+     * @param params.height 设置高度，可以是像素、也可以是百分比（图片、视频场景下生效）
+     */
+    callback: (url: string, params?: { name?: string, poster?: string, isBorder?: boolean, isShadow?: boolean, isRadius?: boolean; width?: string, height?: string }
+    ) => void): void;
+}
 
 type ShortcutKeyMapStruct = {
   /**
