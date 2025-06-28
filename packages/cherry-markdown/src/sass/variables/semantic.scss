@@ -3,42 +3,42 @@
 
 :root {
   /* ========== 基础色彩映射 ========== */
-  --base-font-color: #3f4a56;      // 对应 $fontColor
-  --base-border-color: #dfe6ee;    // 对应 $borderColor
-  --base-editor-bg: #ffffff;       // 对应 $editorBg
-  --base-preview-bg: #ffffff;      // 对应 $previewBg
-  
+  --base-font-color: #3f4a56;
+  --base-border-color: #dfe6ee;
+  --base-editor-bg: #ffffff;
+  --base-preview-bg: #ffffff;
+
   /* ========== 工具栏相关 ========== */
-  --toolbar-bg-light: var(--oc-white);                 // 对应 $toolbarBgLight
-  --toolbar-bg-dark: #20304b;                          // 对应 $toolbarBgDark
+  --toolbar-bg-light: var(--oc-white);
+  --toolbar-bg-dark: #20304b;
   --toolbar-border: var(--base-border-color);
   --toolbar-height: var(--height-toolbar);
   --toolbar-padding: var(--spacing-md);
-  --toolbar-font-size: var(--font-size-sm);            // 对应 $toolbarFontSize
+  --toolbar-font-size: var(--font-size-sm);
   --toolbar-radius: var(--radius-md);
-  --toolbar-shadow-light: var(--shadow-md);            // 对应 $toolbarShadowLight
-  --toolbar-shadow-dark: var(--shadow-md);             // 对应 $toolbarShadowDark
-  --toolbar-split-color: var(--base-border-color);     // 对应 $toolbarSplitColor
+  --toolbar-shadow-light: var(--shadow-md);
+  --toolbar-shadow-dark: var(--shadow-md);
+  --toolbar-split-color: var(--base-border-color);
   
   // 工具栏按钮 - 亮色主题
-  --toolbar-btn-color-light: #3f4a56;                  // 对应 $toolbarBtnColorLight
-  --toolbar-btn-bg-light: transparent;                 // 对应 $toolbarBtnBgLight
-  --toolbar-btn-hover-color-light: #5d9bfc;           // 对应 $toolbarBtnHoverColorLight
-  --toolbar-btn-hover-bg-light: #ebf3ff;              // 对应 $toolbarBtnBgHoverLight
-  --toolbar-btn-disabled-light: #ccc;                  // 对应 $toolbarBtnDisabledLight
+  --toolbar-btn-color-light: #3f4a56;
+  --toolbar-btn-bg-light: transparent;
+  --toolbar-btn-hover-color-light: #5d9bfc;
+  --toolbar-btn-hover-bg-light: #ebf3ff;
+  --toolbar-btn-disabled-light: #ccc;
   
   // 工具栏按钮 - 暗色主题
-  --toolbar-btn-color-dark: #d7e6fe;                   // 对应 $toolbarBtnColorDark
-  --toolbar-btn-bg-dark: transparent;                  // 对应 $toolbarBtnBgDark
-  --toolbar-btn-hover-color-dark: #fff;               // 对应 $toolbarBtnHoverColorDark
-  --toolbar-btn-hover-bg-dark: rgba(255, 255, 255, 0.1); // 对应 $toolbarBtnBgHoverDark
-  --toolbar-btn-disabled-dark: #ccc;                   // 对应 $toolbarBtnDisabledDark
+  --toolbar-btn-color-dark: #d7e6fe;
+  --toolbar-btn-bg-dark: transparent;
+  --toolbar-btn-hover-color-dark: #fff;
+  --toolbar-btn-hover-bg-dark: rgba(255, 255, 255, 0.1);
+  --toolbar-btn-disabled-dark: #ccc;
   
   --toolbar-btn-radius: var(--radius-sm);
   --toolbar-btn-padding: var(--spacing-sm) var(--spacing-md);
   
   /* ========== 编辑器相关 ========== */
-  --editor-bg: var(--base-editor-bg);
+  //  ---base-editor-bg 编辑器背景颜色
   --editor-color: var(--base-font-color);
   --editor-border: var(--base-border-color);
   --editor-font-family: var(--font-family-sans);
@@ -46,13 +46,13 @@
   --editor-line-height: var(--line-height-relaxed);
   
   // 编辑器主题色彩
-  --editor-header-color: var(--base-font-color);       // 对应 $editorHeaderColor
-  --editor-comment-color: var(--oc-blue-6);            // 对应 $editorCommentColor
-  --editor-quote-color: var(--oc-blue-6);              // 对应 $editorQuoteColor
-  --editor-string-color: var(--base-font-color);       // 对应 $editorStringColor
-  --editor-link-color: var(--oc-blue-6);               // 对应 $editorLinkColor
-  --editor-url-bg-color: #d7e6fe;                      // 对应 $editorUrlBgColor
-  --editor-keyword-color: var(--base-font-color);      // 对应 $editorKeywordColor
+  --editor-header-color: var(--base-font-color);
+  --editor-comment-color: var(--oc-blue-6);
+  --editor-quote-color: var(--oc-blue-6);
+  --editor-string-color: var(--base-font-color);
+  --editor-link-color: var(--oc-blue-6);
+  --editor-url-bg-color: #d7e6fe;
+  --editor-keyword-color: var(--base-font-color);
   
   --editor-selection-bg: var(--oc-blue-1);
   --editor-cursor-color: var(--oc-blue-6);
@@ -60,11 +60,11 @@
   --editor-active-line-bg: var(--oc-gray-0);
   
   /* ========== 预览器相关 ========== */
+  // --base-editor-bg 预览器背景颜色
   --previewer-color: var(--base-font-color);
   --previewer-border: var(--base-border-color);
   --previewer-padding: var(--spacing-lg);
   --previewer-font-family: var(--font-family-sans);
-  --preview-bg-color: var(--base-preview-bg);
   --preview-mobile-bg-color: var(--base-preview-bg);
   
   /* ========== Markdown 元素样式 ========== */
@@ -76,7 +76,7 @@
   --md-heading-font-family: var(--font-family-sans);
   
   // 副标题
-  --md-subtitle-color: #6d6e6f;                        // 对应 $subTitle
+  --md-subtitle-color: #6d6e6f;
   
   // 段落
   --md-paragraph-color: var(--base-font-color);
@@ -85,20 +85,20 @@
   --md-paragraph-font-size: var(--font-size-md);
   
   // 链接
-  --md-link-color: var(--oc-blue-6);                   // 对应 $linkColor
-  --md-link-hover-color: var(--color-link-hover);      // 对应 $linkHoverColor
+  --md-link-color: var(--oc-blue-6);
+  --md-link-hover-color: var(--color-link-hover);
   --md-link-decoration: underline;
   
   // 行内代码
-  --md-inline-code-color: var(--color-error);          // 对应 $codeColor
-  --md-inline-code-bg: #e5e5e5;                        // 对应 $codeBackground
+  --md-inline-code-color: var(--color-error);
+  --md-inline-code-bg: #e5e5e5;
   --md-inline-code-padding: 2px var(--spacing-xs);
   --md-inline-code-radius: var(--radius-sm);
   --md-inline-code-font-size: 0.875em;
   --md-inline-code-font-family: var(--font-family-mono);
   
   // 代码块
-  --md-code-block-bg: #00212b;                         // 对应 $codeBlockBg
+  --md-code-block-bg: #00212b;
   --md-code-block-color: var(--oc-gray-1);
   --md-code-block-padding: var(--spacing-md);
   --md-code-block-radius: var(--radius-md);
@@ -107,9 +107,9 @@
   --md-code-block-font-size: var(--font-size-sm);
   
   // 引用
-  --md-blockquote-bg: rgba(102, 128, 153, 0.05);       // 对应 $quoteBackground
-  --md-blockquote-border: #D6DBDF;                     // 对应 $quoteBorderColor
-  --md-blockquote-color: var(--md-subtitle-color);     // 对应 $quoteColor
+  --md-blockquote-bg: rgba(102, 128, 153, 0.05);
+  --md-blockquote-border: #D6DBDF;
+  --md-blockquote-color: var(--md-subtitle-color);
   --md-blockquote-padding: var(--spacing-md);
   --md-blockquote-border-width: var(--border-width-4);
   --md-blockquote-font-style: italic;
@@ -212,7 +212,7 @@
   --button-height: var(--height-button);
   
   /* ========== 全宽标识 ========== */
-  --full-width-color: var(--color-full-width);         // 对应 $fullWidthColor
+  --full-width-color: var(--color-full-width);
   
   /* ========== 动画 ========== */
   --transition-fast: 150ms ease;

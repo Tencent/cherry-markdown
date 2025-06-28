@@ -5,20 +5,20 @@
   /* ========== 色彩系统 ========== */
   // 语义色彩
   --color-success: var(--oc-green-6);
-  --color-warning: var(--oc-yellow-6);  // 对应 $warnColor
-  --color-error: var(--oc-red-6);       // 对应 $errorColor
-  --color-info: var(--oc-blue-6);       // 对应 $linkColor
-  
+  --color-warning: var(--oc-yellow-6);
+  --color-error: var(--oc-red-6);
+  --color-info: var(--oc-blue-6);
+
   // 特殊色彩
-  --color-full-width: var(--oc-red-7); // 对应 $fullWidthColor
-  --color-link-hover: var(--oc-blue-8); // 对应 $linkHoverColor
+  --color-full-width: var(--oc-red-7);
+  --color-link-hover: var(--oc-blue-8);
   
   /* ========== 尺寸系统 ========== */
   // 间距
   --spacing-xs: 4px;
   --spacing-sm: 8px;
-  --spacing-md: 12px;       // 对应 $elementLittleGap
-  --spacing-lg: 16px;       // 对应 $elementGap  
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
   --spacing-xl: 24px;
   --spacing-2xl: 32px;
   --spacing-3xl: 48px;
@@ -26,7 +26,7 @@
   // 圆角
   --radius-none: 0;
   --radius-sm: 2px;
-  --radius-md: 3px;         // 对应 $borderRadius
+  --radius-md: 3px;
   --radius-lg: 6px;
   --radius-xl: 8px;
   --radius-2xl: 12px;
@@ -35,19 +35,19 @@
   // 阴影
   --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 0 10px rgba(128, 145, 165, 0.2); // 对应 $shadow
+  --shadow-md: 0 0 10px rgba(128, 145, 165, 0.2);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   
   /* ========== 字体系统 ========== */
-  --font-family-sans: "Helvetica Neue", Arial, "Hiragino Sans GB", "STHeiti", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif; // 对应 $fontFamily
-  --font-family-mono: 'Menlo', 'Liberation Mono', 'Consolas', 'DejaVu Sans Mono', 'Ubuntu Mono', 'Courier New', 'andale mono', 'lucida console', monospace; // 对应 $monospaceFont
+  --font-family-sans: "Helvetica Neue", Arial, "Hiragino Sans GB", "STHeiti", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+  --font-family-mono: 'Menlo', 'Liberation Mono', 'Consolas', 'DejaVu Sans Mono', 'Ubuntu Mono', 'Courier New', 'andale mono', 'lucida console', monospace;
   
   // 字体大小
   --font-size-xs: 12px;
-  --font-size-sm: 14px;     // 对应 $toolbarFontSize
-  --font-size-md: 16px;     // 对应 $fontSize
-  --font-size-lg: 18px;     // 对应 $fontSizeLarge
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
   --font-size-xl: 20px;
   --font-size-2xl: 24px;
   --font-size-3xl: 30px;
@@ -57,7 +57,7 @@
   --line-height-tight: 1.25;
   --line-height-snug: 1.375;
   --line-height-normal: 1.5;
-  --line-height-relaxed: 1.625; // 接近 27px/16px ≈ 1.6875，对应 $lineHeight
+  --line-height-relaxed: 1.625;
   --line-height-loose: 2;
   
   // 字重
@@ -80,7 +80,7 @@
   
   /* ========== 高度尺寸 ========== */
   // 组件高度
-  --height-toolbar: 48px;   // 对应 $toolbarHeight
+  --height-toolbar: 48px;
   --height-input: 32px;
   --height-button: 36px;
   --height-bubble-min: 35px;

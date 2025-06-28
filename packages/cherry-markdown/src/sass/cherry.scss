@@ -632,7 +632,7 @@
 .cherry {
   &[class*="theme__"] {
     .cherry-previewer {
-      background-color: var(--preview-bg-color);
+      background-color: var(--base-preview-bg);
 
       .cherry-mobile-previewer-content {
         background-color: var(--base-preview-mobile-bg);
@@ -859,7 +859,7 @@
   border-left: 2px solid #ebedee;
   width: 50%;
   box-sizing: border-box;
-  background-color: var(--preview-bg-color);
+  background-color: var(--base-preview-bg);
   min-height: auto;
   overflow-y: auto;
   -webkit-print-color-adjust: exact;

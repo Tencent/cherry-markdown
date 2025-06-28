@@ -3,21 +3,10 @@
  */
 
 .cherry.theme__red {
-  /* 基础色彩变量覆盖 */
-  --primary-color: var(--oc-pink-9);
-  --background-color: var(--oc-pink-0);
-  --surface-color: var(--oc-pink-1);
-  --border-color: var(--oc-pink-8);
-  --text-color: var(--oc-pink-9);
-  --text-secondary: var(--oc-pink-5);
-  --link-color: var(--oc-pink-5);
-  --link-hover-color: var(--oc-pink-7);
-
-  /* 语义化变量覆盖 */
+  /* 基础色彩 */
   --base-font-color: var(--oc-pink-9);
   --base-editor-bg: var(--oc-pink-0);
-  --preview-bg-color: var(--oc-pink-0);
-  --base-preview-mobile-bg: var(--oc-pink-0);
+  --base-preview-bg: var(--oc-pink-0);
   --base-border-color: var(--oc-pink-8);
 
   /* 工具栏相关变量 */
@@ -57,7 +46,7 @@
 /** 预览区域样式 */
 .cherry-markdown.theme__red {
   color: var(--base-font-color);
-  background-color: var(--preview-bg-color);
+  background-color: var(--base-preview-bg);
 
   h1,
   h2,
@@ -79,11 +68,11 @@
 
   a {
     text-decoration: none;
-    color: var(--link-color);
+    color: var(--oc-pink-5);
 
     &:hover {
       text-decoration: underline;
-      color: var(--link-hover-color);
+      color: var(--oc-pink-7);
     }
   }
 
@@ -124,7 +113,7 @@
         color: var(--base-font-color);
 
         &:hover {
-          color: var(--link-hover-color);
+          color: var(--oc-pink-7);
         }
       }
     }

@@ -3,20 +3,11 @@
  */
 
 .cherry.theme__dark {
-  /* 基础色彩变量覆盖 */
+  /* 基础色彩 */
   --primary-color: rgb(247, 133, 83);
-  --background-color: rgb(37, 37, 38);
-  --surface-color: rgb(60, 60, 60);
-  --border-color: rgb(105, 105, 105);
-  --text-color: rgb(200, 200, 200);
-  --text-secondary: rgb(255, 203, 107);
-  --link-color: rgb(255, 203, 107);
-  --link-hover-color: rgb(247, 133, 83);
-
-  /* 语义化变量覆盖 */
   --base-font-color: rgb(200, 200, 200);
   --base-editor-bg: rgb(37, 37, 38);
-  --preview-bg-color: rgb(51, 51, 51);
+  --base-preview-bg: rgb(51, 51, 51);
   --base-border-color: rgb(105, 105, 105);
 
   /* 工具栏相关变量 */
@@ -177,7 +168,7 @@
 /** 预览区域样式 */
 .cherry-markdown.theme__dark {
   color: var(--base-font-color);
-  background-color: var(--preview-bg-color);
+  background-color: var(--base-preview-bg);
 
   h1,
   h2,
@@ -193,10 +184,10 @@
 
   a {
     text-decoration: none;
-    color: var(--link-color);
+    color: rgb(255, 203, 107);
 
     &:hover {
-      color: var(--link-hover-color);
+      color: rgb(247, 133, 83);
     }
   }
 
@@ -264,7 +255,7 @@
         color: var(--base-font-color);
 
         &:hover {
-          color: var(--link-hover-color);
+          color: rgb(247, 133, 83);
         }
       }
     }
@@ -276,7 +267,7 @@
       path,
       rect,
       line {
-        stroke: var(--link-color) !important;
+        stroke: rgb(255, 203, 107) !important;
       }
 
       text {
@@ -308,7 +299,7 @@
     }
 
     100% {
-      background-color: var(--preview-bg-color);
+      background-color: var(--base-preview-bg);
     }
   }
 

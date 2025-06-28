@@ -5,18 +5,9 @@
 .cherry.theme__violet {
   /* 基础色彩变量覆盖 */
   --primary-color: var(--oc-violet-9);
-  --background-color: #ffffff;
-  --surface-color: #ffffff;
-  --border-color: var(--oc-violet-8);
-  --text-color: var(--oc-violet-9);
-  --text-secondary: var(--oc-violet-6);
-  --link-color: var(--oc-violet-6);
-  --link-hover-color: var(--oc-violet-7);
-
-  /* 语义化变量覆盖 */
   --base-font-color: var(--oc-violet-9);
   --base-editor-bg: #ffffff;
-  --preview-bg-color: #ffffff;
+  --base-preview-bg: #ffffff;
   --base-border-color: var(--oc-violet-8);
 
   /* 工具栏相关变量 */
@@ -42,10 +33,6 @@
   --editor-v3-color: var(--oc-violet-7);
   --editor-keyword-color: var(--oc-violet-6);
   --color-full-width: var(--oc-violet-6);
-
-  /* 预览器相关变量 */
-  --preview-bg-color: #ffffff;
-  --preview-mobile-bg-color: #ffffff;
 
   /* Markdown 相关变量 */
   --md-color: var(--oc-violet-9);
@@ -82,7 +69,7 @@
 /** 预览区域样式 */
 .cherry-markdown.theme__violet {
   color: var(--md-color);
-  background-color: var(--preview-bg-color);
+  background-color: var(--base-preview-bg);
 
   h1,
   h2,

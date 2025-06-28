@@ -3,20 +3,11 @@
  */
 
 .cherry.theme__green {
-  /* 基础色彩变量覆盖 */
+  /* 基础色彩 */
   --primary-color: var(--oc-green-9);
-  --background-color: #ffffff;
-  --surface-color: #ffffff;
-  --border-color: var(--oc-green-8);
-  --text-color: var(--oc-green-9);
-  --text-secondary: var(--oc-green-6);
-  --link-color: var(--oc-green-6);
-  --link-hover-color: var(--oc-green-7);
-
-  /* 语义化变量覆盖 */
   --base-font-color: var(--oc-green-9);
   --base-editor-bg: #ffffff;
-  --preview-bg-color: var(--oc-green-0);
+  --base-preview-bg: var(--oc-green-0);
   --base-border-color: var(--oc-green-8);
 
   /* 工具栏相关变量 */
@@ -43,7 +34,7 @@
   --editor-keyword-color: var(--oc-green-6);
   --color-full-width: var(--oc-green-6);
 
-  /* CodeMirror 选中背景色 */
+  /* 编辑器选中背景色 */
   .cherry-editor .CodeMirror .CodeMirror-selected {
     background-color: var(--oc-green-2);
   }
@@ -52,7 +43,7 @@
 /** 预览区域样式 */
 .cherry-markdown.theme__green {
   color: var(--base-font-color);
-  background-color: var(--preview-bg-color);
+  background-color: var(--base-preview-bg);
 
   h1,
   h2,
@@ -72,11 +63,11 @@
 
   a {
     text-decoration: none;
-    color: var(--link-color);
+    color: var(--oc-green-6);
 
     &:hover {
       text-decoration: underline;
-      color: var(--link-hover-color);
+      color: var(--oc-green-7);
     }
   }
 
@@ -148,7 +139,7 @@
         color: var(--base-font-color);
 
         &:hover {
-          color: var(--link-hover-color);
+          color: var(--oc-green-7);
         }
       }
     }
