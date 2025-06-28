@@ -3,7 +3,6 @@
 
 :root {
   /* ========== 基础色彩映射 ========== */
-  // 从现有 variable.scss 映射的基础色彩
   --base-font-color: #3f4a56;      // 对应 $fontColor
   --base-border-color: #dfe6ee;    // 对应 $borderColor
   --base-editor-bg: #ffffff;       // 对应 $editorBg
@@ -61,11 +60,12 @@
   --editor-active-line-bg: var(--oc-gray-0);
   
   /* ========== 预览器相关 ========== */
-  --previewer-bg: var(--base-preview-bg);
   --previewer-color: var(--base-font-color);
   --previewer-border: var(--base-border-color);
   --previewer-padding: var(--spacing-lg);
   --previewer-font-family: var(--font-family-sans);
+  --preview-bg-color: var(--base-preview-bg);
+  --preview-mobile-bg-color: var(--base-preview-bg);
   
   /* ========== Markdown 元素样式 ========== */
   // 标题

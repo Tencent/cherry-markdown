@@ -16,7 +16,8 @@
   /* 语义化变量覆盖 */
   --base-font-color: var(--oc-pink-9);
   --base-editor-bg: var(--oc-pink-0);
-  --base-preview-bg: var(--oc-pink-0);
+  --preview-bg-color: var(--oc-pink-0);
+  --base-preview-mobile-bg: var(--oc-pink-0);
   --base-border-color: var(--oc-pink-8);
 
   /* 工具栏相关变量 */
@@ -82,30 +83,12 @@
     box-shadow: var(--sidebar-shadow);
   }
 
-  .cherry-previewer {
-    background-color: var(--base-preview-bg);
-
-    .cherry-mobile-previewer-content {
-      background-color: var(--base-editor-bg);
-    }
-  }
-
-  .cherry-previewer-table-content-handler {
-    .cherry-previewer-table-content-handler__input {
-      textarea {
-        background-color: var(--base-editor-bg);
-        color: var(--base-font-color);
-        outline-color: var(--editor-header-color);
-      }
-    }
-  }
-
 }
 
 /** 预览区域样式 */
 .cherry-markdown.theme__red {
   color: var(--base-font-color);
-  background-color: var(--base-preview-bg);
+  background-color: var(--preview-bg-color);
 
   h1,
   h2,

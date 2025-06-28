@@ -17,7 +17,7 @@
   /* 语义化变量覆盖 */
   --base-font-color: var(--oc-indigo-8);
   --base-editor-bg: var(--oc-violet-0);
-  --base-preview-bg: var(--oc-violet-0);
+  --preview-bg-color: var(--oc-violet-0);
   --base-border-color: var(--oc-indigo-4);
 
   /* 工具栏相关变量 */
@@ -45,10 +45,6 @@
   --editor-cursor-color: var(--oc-indigo-8);
   --editor-selected-bg: var(--oc-violet-2);
   --color-full-width: var(--oc-indigo-5);
-
-  /* 预览器相关变量 */
-  --preview-bg-color: var(--oc-violet-0);
-  --preview-mobile-bg-color: var(--oc-violet-0);
 
   /* Markdown 相关变量 */
   --md-color: var(--oc-indigo-8);
@@ -101,23 +97,6 @@
     box-shadow: var(--sidebar-shadow);
   }
 
-  .cherry-previewer {
-    background-color: var(--preview-bg-color);
-
-    .cherry-mobile-previewer-content {
-      background-color: var(--preview-mobile-bg-color);
-    }
-  }
-
-  .cherry-previewer-table-content-handler {
-    .cherry-previewer-table-content-handler__input {
-      textarea {
-        background-color: var(--base-editor-bg);
-        color: var(--base-font-color);
-        outline-color: var(--editor-header-color);
-      }
-    }
-  }
 }
 
 /** 预览区域样式 */

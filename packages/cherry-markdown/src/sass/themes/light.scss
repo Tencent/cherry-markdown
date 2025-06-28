@@ -16,7 +16,7 @@
   /* 语义化变量覆盖 */
   --base-font-color: var(--oc-gray-8);
   --base-editor-bg: var(--oc-white);
-  --base-preview-bg: var(--oc-white);
+  --preview-bg-color: var(--oc-white);
   --base-border-color: var(--oc-blue-5);
 
   /* 工具栏相关变量 */
@@ -91,23 +91,6 @@
     box-shadow: var(--shadow);
   }
 
-  .cherry-previewer {
-    background-color: var(--preview-bg-color);
-
-    .cherry-mobile-previewer-content {
-      background-color: var(--preview-mobile-bg-color);
-    }
-  }
-
-  .cherry-previewer-table-content-handler {
-    .cherry-previewer-table-content-handler__input {
-      textarea {
-        background-color: var(--base-editor-bg);
-        color: var(--base-font-color);
-        outline-color: var(--editor-header-color);
-      }
-    }
-  }
 }
 
 /** 预览区域样式 */
