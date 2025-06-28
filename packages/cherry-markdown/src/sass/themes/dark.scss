@@ -12,13 +12,13 @@
   --text-secondary: rgb(255, 203, 107);
   --link-color: rgb(255, 203, 107);
   --link-hover-color: rgb(247, 133, 83);
-  
+
   /* 语义化变量覆盖 */
   --base-font-color: rgb(200, 200, 200);
   --base-editor-bg: rgb(37, 37, 38);
   --base-preview-bg: rgb(51, 51, 51);
   --base-border-color: rgb(105, 105, 105);
-  
+
   /* 工具栏相关变量 */
   --toolbar-bg-light: rgb(60, 60, 60);
   --toolbar-bg-dark: rgb(60, 60, 60);
@@ -30,7 +30,7 @@
   --toolbar-btn-hover-color-light: rgb(255, 255, 255);
   --toolbar-btn-hover-color-dark: rgb(255, 255, 255);
   --toolbar-split-color: rgb(105, 105, 105);
-  
+
   /* 编辑器相关变量 */
   --editor-header-color: rgb(247, 133, 83);
   --editor-string-color: rgb(255, 203, 107);
@@ -42,17 +42,23 @@
   --editor-v3-color: rgb(247, 133, 83);
   --editor-keyword-color: rgb(255, 203, 107);
   --color-full-width: rgb(255, 203, 107);
-  
+
   /** 顶部按钮, 选中文字时弹出的按钮, 光标focus到空行时联想出的按钮, 侧边栏按钮 */
-  .cherry-toolbar, .cherry-floatmenu, .cherry-bubble, .cherry-sidebar {
+  .cherry-toolbar,
+  .cherry-floatmenu,
+  .cherry-bubble,
+  .cherry-sidebar {
     background: var(--toolbar-bg-dark);
     border-color: var(--toolbar-bg-dark);
+
     .cherry-toolbar-button {
       color: var(--toolbar-btn-color-dark);
+
       &:hover {
         background-color: var(--toolbar-btn-hover-bg-dark);
         color: var(--toolbar-btn-hover-color-dark) !important;
         border-color: var(--toolbar-bg-dark);
+
         i {
           color: var(--toolbar-btn-hover-color-dark) !important;
         }
@@ -61,77 +67,44 @@
   }
 
   /** 二级菜单 */
-  .cherry-dropdown {
-    background: var(--toolbar-bg-dark);
-    .cherry-dropdown-item {
-      color: var(--toolbar-btn-color-dark);
-      // 选中子菜单高亮 
-      &__selected {
-        background-color: var(--toolbar-btn-hover-bg-dark);
-        color: var(--toolbar-btn-hover-color-dark);
-      }
-      &:hover {
-        background-color: var(--toolbar-btn-hover-bg-dark);
-        color: var(--toolbar-btn-hover-color-dark);
-      }
-    }
-    /** 选择颜色的按钮 */
-    &.cherry-color-wrap {
-      /** 色盘的标题 */
-      h3 {
-        color: var(--toolbar-btn-color-dark);
-      }
-      /** 色盘里的每一个色块 */
-      .cherry-color-item {
-        // width: 15px;
-        // border: none;
-        border-color: var(--toolbar-btn-hover-bg-dark);
-        &:hover {
-          border-color: var(--primary-color);
-        }
-      }
-    }
-    /** 选择表格的按钮 */
-    .cherry-insert-table-menu-item {
-      border-color: var(--toolbar-btn-hover-bg-dark);
-    }
-  }
-
-  /** 选中文字时弹出的按钮 */
-  .cherry-bubble {
-    .cherry-bubble-bottom {
-      border-top-color: var(--toolbar-bg-dark);
-    }
-    .cherry-bubble-top {
-      border-bottom-color: var(--toolbar-bg-dark);
-    }
-    /** 粘贴HTML内容时弹出的选择按钮 */
-    &.cherry-switch-paste {
-    
-    }
-  }
-
   .cherry-editor {
     background-color: var(--base-editor-bg);
+
     .CodeMirror {
       background-color: var(--base-editor-bg);
+
       .CodeMirror-cursor {
-        border-left: 1px solid rgb(255,255,255);
+        border-left: 1px solid rgb(255, 255, 255);
       }
+
       .CodeMirror-scroll {
-        span, .cm-variable-2, .cm-string, .cm-strong, .cm-em, .cm-meta {
+
+        span,
+        .cm-variable-2,
+        .cm-string,
+        .cm-strong,
+        .cm-em,
+        .cm-meta {
           color: var(--base-font-color);
         }
-        .cm-image-marker, .cm-quote, .cm-header, .cm-atom {
+
+        .cm-image-marker,
+        .cm-quote,
+        .cm-header,
+        .cm-atom {
           color: var(--editor-header-color);
         }
+
         .cm-url {
           background-color: var(--editor-url-bg-color);
         }
-        .cm-comment, .cm-url {
+
+        .cm-comment,
+        .cm-url {
           color: var(--editor-comment-color);
         }
       }
+
       .CodeMirror-selected {
         background-color: var(--toolbar-btn-hover-bg-dark);
       }
@@ -144,6 +117,7 @@
 
   .cherry-previewer {
     background-color: var(--base-preview-bg);
+
     .cherry-mobile-previewer-content {
       background-color: var(--base-editor-bg);
     }
@@ -158,12 +132,14 @@
       }
     }
   }
+
   /* 目录区域样式 */
   .cherry-flex-toc {
     &:hover {
       background-color: #d0cece;
       width: 260px;
     }
+
     .cherry-toc-head {
       i {
         &:hover {
@@ -171,13 +147,16 @@
         }
       }
     }
+
     .cherry-toc-list {
       .cherry-toc-one-a {
         border-left-color: rgb(247, 133, 83, 0.3);
+
         &.current {
           border-left-color: rgb(255, 100, 33);
           color: rgb(255, 100, 33);
         }
+
         &:hover {
           border-left-color: rgb(247, 162, 14);
           color: rgb(255, 100, 33);
@@ -192,22 +171,28 @@
       background: #ffffff00;
       box-shadow: none;
       border-radius: 0;
+
       .cherry-toc-head {
         height: 25px;
         border-bottom: 1px dashed #33333300;
+
         .cherry-toc-title {
           display: none;
         }
+
         .ch-icon-chevronsRight {
           display: none;
         }
+
         .ch-icon-chevronsLeft {
           display: inline;
           color: rgb(255, 100, 33);
         }
       }
+
       .cherry-toc-list {
         padding-left: 7px;
+
         .cherry-toc-one-a {
           overflow: hidden;
           width: 0;
@@ -221,43 +206,53 @@
     &.auto-num {
       .cherry-toc-list {
         counter-reset: toclevel1;
-  
+
         .cherry-toc-one-a__1 {
           counter-reset: toclevel2;
         }
+
         .cherry-toc-one-a__2 {
           counter-reset: toclevel3;
         }
+
         .cherry-toc-one-a__3 {
           counter-reset: toclevel4;
         }
+
         .cherry-toc-one-a__4 {
           counter-reset: toclevel5;
         }
+
         .cherry-toc-one-a__5 {
           counter-reset: toclevel6;
         }
+
         .cherry-toc-one-a__1:before {
           counter-increment: toclevel1;
           content: counter(toclevel1) '. ';
         }
+
         .cherry-toc-one-a__2:before {
           counter-increment: toclevel2;
           content: counter(toclevel1) '.' counter(toclevel2) '. ';
         }
+
         .cherry-toc-one-a__3:before {
           counter-increment: toclevel3;
           content: counter(toclevel1) '.' counter(toclevel2) '.' counter(toclevel3) '. ';
         }
+
         .cherry-toc-one-a__4:before {
           counter-increment: toclevel4;
           content: counter(toclevel1) '.' counter(toclevel2) '.' counter(toclevel3) '.' counter(toclevel4) '. ';
         }
+
         .cherry-toc-one-a__5:before {
           counter-increment: toclevel5;
           content: counter(toclevel1) '.' counter(toclevel2) '.' counter(toclevel3) '.' counter(toclevel4) '.'
             counter(toclevel5) '. ';
         }
+
         .cherry-toc-one-a__6:before {
           counter-increment: toclevel5;
           content: counter(toclevel1) '.' counter(toclevel2) '.' counter(toclevel3) '.' counter(toclevel4) '.'
@@ -268,67 +263,43 @@
   }
 
 }
+
 /** 预览区域样式 */
 .cherry-markdown.theme__dark {
   color: var(--base-font-color);
   background-color: var(--base-preview-bg);
 
-  p, div {
 
-  }
 
-  h1, h2, h3, h4, h5 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
     color: var(--editor-header-color);
   }
-  
-  h1 {
-    
-  }
-  
-  h2 {
-    
-  }
-  
-  h3 {
-    
-  }
 
-  h4 {
-
-  }
-
-  h5 {
-
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    /** 标题前面的锚点或序号 */
-    .anchor {
-
-    }
-  }
-  
   ul {
     &.cherry-list__upper-roman {
       list-style: upper-roman;
     }
-  
+
     &.cherry-list__lower-alpha {
       list-style: lower-alpha;
     }
-  
+
     &.cherry-list__lower-greek {
       list-style: lower-greek;
     }
-  
+
     &.cherry-list__cjk-ideographic {
       list-style: cjk-ideographic;
     }
-  
+
     &.cherry-list__circle {
       list-style: circle;
     }
-  
+
     &.cherry-list__square {
       list-style: square;
     }
@@ -336,133 +307,74 @@
     &.cherry-list__default {
       background-color: var(--base-preview-bg);
     }
-
-    /** checklist 模式，未勾选时 */
-    .ch-icon-square {
-
-    }
-    /** checklist 模式，勾选时 */
-    .ch-icon-check {
-
-    }
-  }
-  
-  ol {
-    li {
-      
-    }
   }
 
 
   blockquote {
     color: var(--base-font-color);
   }
-  
+
   a {
     text-decoration: none;
     color: var(--link-color);
+
     &:hover {
       color: var(--link-hover-color);
     }
   }
-  
-  strong {
-    
-  }
-  
-  em {
-    
-  }
-  
-  del {
-    
-  }
 
-  sup {
 
-  }
 
-  sub {
-
-  }
-  
-  hr {
-    border-color: var(--base-border-color);
-  }
-  
-  img {
-    
-  }
-
-  video {
-
-  }
-
-  audio {
-
-  }
-  
   /** 行内代码 */
   code:not([class]) {
     background-color: var(--editor-url-bg-color);
     color: var(--editor-string-color);
     border: 1px solid var(--base-border-color);
   }
-  
-  /** 
-  * 代码块
-  */
-  pre code {
-    
-  }
-  
+
+
+
   /** 
   * 表格
   */
-  table, .cherry-table {
+  table,
+  .cherry-table {
     color: var(--base-font-color);
+
     th {
       background-color: var(--editor-url-bg-color);
     }
-    tr, th, td {
+
+    tr,
+    th,
+    td {
       border-color: var(--base-border-color);
     }
   }
 
-  /** 可以理解为上下结构的音标，下部是文字，上部是对应的拼音 */
-  ruby {
-    /** 上部的拼音 */
-    rt {
 
-    }
-  }
-  
+
   /** 脚注 */
   .footnote {
     border-color: var(--base-border-color);
+
     .footnote-title {
       background-color: var(--editor-url-bg-color);
     }
+
     .one-footnote {
       color: var(--base-font-color);
       border-color: var(--base-border-color);
+
       a.footnote-ref {
         padding: 5px;
       }
     }
   }
-  
-  /** 行间公式 */
-  .Cherry-InlineMath {
-    
-  }
-  
-  /** 段落公式 */
-  .Cherry-Math {
-  
-  }
 
-    /** 目录 */
+
+
+  /** 目录 */
   .toc {
     border: 1px solid var(--base-border-color);
     margin-top: 15px;
@@ -474,20 +386,14 @@
       margin-bottom: 15px;
       border-bottom: 1px solid var(--base-border-color);
     }
+
     .toc-li {
       border: none;
       padding: 0 20px;
-      .level-1 {
 
-      }
-      .level-2 {
-
-      }
-      .level-3 {
-
-      }
       a {
         color: var(--base-font-color);
+
         &:hover {
           color: var(--link-hover-color);
         }
@@ -497,18 +403,25 @@
 
   figure {
     svg {
-      path, rect, line {
+
+      path,
+      rect,
+      line {
         stroke: var(--link-color) !important;
       }
+
       text {
         fill: rgb(250, 160, 0) !important;
         stroke: none !important;
       }
+
       tspan {
         fill: rgb(250, 160, 0) !important;
       }
+
       circle {
         fill: rgb(236, 236, 255) !important;
+
         &.state-start {
           fill: rgb(250, 160, 0) !important;
         }
@@ -517,10 +430,19 @@
   }
 
   @keyframes changeBgColorDark {
-    0% { background-color: rgb(78 76 76); }
-    60% { background-color: rgb(78 76 76); }
-    100% { background-color: var(--base-preview-bg); }
+    0% {
+      background-color: rgb(78 76 76);
+    }
+
+    60% {
+      background-color: rgb(78 76 76);
+    }
+
+    100% {
+      background-color: var(--base-preview-bg);
+    }
   }
+
   .cherry-highlight-line {
     animation: changeBgColorDark 3s;
   }

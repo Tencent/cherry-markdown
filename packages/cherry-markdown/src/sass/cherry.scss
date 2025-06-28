@@ -130,7 +130,7 @@
   position: absolute;
   width: 130px;
   min-height: 40px;
-  background: #fff;
+  background: var(--toolbar-bg-light);
   //border: 1px solid var(--base-border-color);
   box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.5);
   margin-left: -60px;
@@ -147,6 +147,7 @@
     font-style: normal;
     cursor: pointer;
     box-sizing: border-box;
+    color: var(--toolbar-btn-color-light);
 
     &:hover {
       background: var(--toolbar-btn-hover-bg-light);
@@ -844,17 +845,30 @@
   width: auto;
   padding: 5px 10px;
   z-index: 6;
-  background: #fff;
+  background: var(--toolbar-bg-light);
   box-shadow: var(--shadow-md);
 
   h3 {
     font-size: 12px;
     margin: 0px;
     font-weight: 400;
+    color: var(--toolbar-btn-color-light);
   }
 
-  [data-toolbar-theme='dark'] & h3 {
-    color: var(--toolbar-btn-color-dark);
+  [data-toolbar-theme='dark'] & {
+    background: var(--toolbar-bg-dark);
+    
+    h3 {
+      color: var(--toolbar-btn-color-dark);
+    }
+    
+    .cherry-color-item {
+      border-color: var(--toolbar-btn-hover-bg-dark);
+      
+      &:hover {
+        border-color: var(--primary-color);
+      }
+    }
   }
 
   .cherry-color-text {
@@ -873,11 +887,11 @@
     float: left;
     width: 14px;
     height: 14px;
-    border: 1px solid #fff;
+    border: 1px solid var(--toolbar-btn-hover-bg-light);
     cursor: pointer;
 
     &:hover {
-      border: 1px solid #000;
+      border-color: var(--primary-color);
     }
   }
 }
