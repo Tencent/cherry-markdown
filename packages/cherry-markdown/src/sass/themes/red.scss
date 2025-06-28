@@ -146,7 +146,17 @@
   color: var(--base-font-color);
   background-color: var(--base-preview-bg);
 
-
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    color: var(--editor-header-color);
+    text-align: center;
+    border-bottom: 1px dashed var(--base-border-color);
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+  }
 
   ul {
     &.cherry-list__upper-roman {
@@ -172,68 +182,62 @@
     &.cherry-list__square {
       list-style: square;
     }
+  }
 
-    blockquote {
-      color: var(--base-font-color);
+  blockquote {
+    color: var(--base-font-color);
+    background-color: var(--oc-pink-1);
+    border-color: var(--base-border-color);
+  }
+
+  a {
+    text-decoration: none;
+    color: var(--link-color);
+
+    &:hover {
+      text-decoration: underline;
+      color: var(--link-hover-color);
+    }
+  }
+
+  /** 表格 */
+  table,
+  .cherry-table {
+    color: var(--base-font-color);
+
+    th {
       background-color: var(--oc-pink-1);
+    }
+
+    tr,
+    th,
+    td {
       border-color: var(--base-border-color);
     }
+  }
 
-    a {
-      text-decoration: none;
-      color: var(--link-color);
+  /** 目录 */
+  .toc {
+    border-bottom: 1px solid var(--base-border-color);
+    padding-bottom: 15px;
+    margin-bottom: 30px;
 
-      &:hover {
-        text-decoration: underline;
-        color: var(--link-hover-color);
-      }
-    }
-
-
-
-    /** 
-  * 表格
-  */
-    table,
-    .cherry-table {
-      color: var(--base-font-color);
-
-      th {
-        background-color: var(--oc-pink-1);
-      }
-
-      tr,
-      th,
-      td {
-        border-color: var(--base-border-color);
-      }
-    }
-
-
-
-    /** 目录 */
-    .toc {
-      border-bottom: 1px solid var(--base-border-color);
+    .toc-title {
+      text-align: center;
       padding-bottom: 15px;
-      margin-bottom: 30px;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid var(--base-border-color);
+    }
 
-      .toc-title {
-        text-align: center;
-        padding-bottom: 15px;
-        margin-top: 30px;
-        margin-bottom: 15px;
-        border-bottom: 1px solid var(--base-border-color);
-      }
+    .toc-li {
+      border: none;
 
-      .toc-li {
-        border: none;
+      a {
+        color: var(--base-font-color);
 
-        a {
-          color: var(--base-font-color);
-
-          &:hover {
-            color: var(--link-hover-color);
-          }
+        &:hover {
+          color: var(--link-hover-color);
         }
       }
     }
