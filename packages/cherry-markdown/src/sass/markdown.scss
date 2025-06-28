@@ -1,5 +1,3 @@
-@import './variable.scss';
-
 .cherry-markdown {
   word-break: break-all;
   h1,
@@ -46,14 +44,14 @@
   .h6 .small {
     font-weight: normal;
     line-height: 1;
-    color: #999;
+    color: var(--oc-gray-5);
   }
 
   h1,
   h2,
   h3 {
     margin-top: 30px;
-    margin-bottom: $elementGap;
+    margin-bottom: var(--spacing-lg);
   }
 
   h1 small,
@@ -68,8 +66,8 @@
   h4,
   h5,
   h6 {
-    margin-top: $elementLittleGap;
-    margin-bottom: $elementLittleGap;
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
   }
 
   h4 small,
@@ -119,7 +117,7 @@
   ul,
   ol {
     padding-left: 24px;
-    margin-bottom: $elementGap;
+    margin-bottom: var(--spacing-lg);
 
     ul,
     ol {
@@ -144,18 +142,18 @@
   hr {
     height: 0;
     border: 0;
-    border-top: 1px solid $borderColor;
-    margin: $elementGap 0;
+    border-top: 1px solid var(--base-border-color);
+    margin: var(--spacing-lg) 0;
     box-sizing: content-box;
     overflow: visible;
   }
 
   kbd {
-    border: 1px solid $borderColor;
+    border: 1px solid var(--base-border-color);
     border-radius: 4px;
     padding: 1px 2px;
     box-sizing: border-box;
-    box-shadow: inset 0px -1px $borderColor;
+    box-shadow: inset 0px -1px var(--base-border-color);
     font-size: 0.85rem;
   }
 
@@ -163,21 +161,21 @@
     border-collapse: collapse;
     th,
     td {
-      border: 1px solid $borderColor;
+      border: 1px solid var(--base-border-color);
       padding: 0.2em 0.4em;
       min-width: 100px;
     }
     th {
-      background-color: #eee;
+      background-color: var(--md-table-header-bg);
     }
   }
 
   .link-quote {
-    color: $linkColor;
+    color: var(--md-link-color);
   }
 
   a {
-    color: $linkColor;
+    color: var(--md-link-color);
     position: relative;
     text-decoration: none;
 
@@ -193,7 +191,7 @@
     }
 
     &:hover {
-      color: $linkHoverColor;
+      color: var(--md-link-hover-color);
     }
   }
 
@@ -217,14 +215,14 @@
   pre,
   blockquote,
   table {
-    margin: 0 0 $elementGap;
+    margin: 0 0 var(--spacing-lg);
   }
 
   blockquote {
-    color: $quoteColor;
+    color: var(--md-blockquote-color);
     padding: 10px 15px;
-    border-left: 10px solid $quoteBorderColor;
-    background: $quoteBackground;
+    border-left: 10px solid var(--md-blockquote-border);
+    background: var(--md-blockquote-bg);
     p, blockquote, table, pre, ul, ol{
       margin: 0;
     }
@@ -281,12 +279,12 @@
     padding: 0.1em;
     border-radius: 0.3em;
     white-space: normal;
-    color: #f85353;
-    background-color: #e5e5e5;
+    color: var(--md-inline-code-color);
+    background-color: var(--md-inline-code-bg);
 
     [data-inline-code-theme='black'] & {
-      color: #3f4a56;
-      background-color: #e5e5e5;
+      color: var(--base-font-color);
+      background-color: var(--md-inline-code-bg);
     }
   }
 
@@ -302,7 +300,7 @@
   }
 
   .toc {
-    margin-bottom: $elementGap;
+    margin-bottom: var(--spacing-lg);
     padding-left: 0;
 
     .toc-title {
@@ -311,15 +309,15 @@
     }
 
     .toc-li {
-      border-bottom: 1px ridge $borderColor;
+      border-bottom: 1px ridge var(--base-border-color);
       list-style: none;
 
       a {
         text-decoration: none;
-        color: $fontColor;
+        color: var(--base-font-color);
 
         &:hover {
-          color: $linkHoverColor;
+          color: var(--md-link-hover-color);
         }
       }
     }
@@ -388,19 +386,19 @@
     .footnote-title {
       font-size: 20px;
       margin-top: -38px;
-      background-color: $editorBg;
+      background-color: var(--base-editor-bg);
       width: 60px;
-      margin-bottom: $elementGap;
+      margin-bottom: var(--spacing-lg);
     }
 
     padding-top: 20px;
-    border-top: 1px solid $borderColor;
+    border-top: 1px solid var(--base-border-color);
     margin-top: 50px;
 
     .one-footnote {
-      color: $subTitle;
-      margin-bottom: $elementGap;
-      border-bottom: 1px dotted $borderColor;
+      color: var(--md-subtitle-color);
+      margin-bottom: var(--spacing-lg);
+      border-bottom: 1px dotted var(--base-border-color);
     }
   }
 
@@ -410,7 +408,7 @@
     .cherry-table {
       th,
       td {
-        border: 1px solid $borderColor;
+        border: 1px solid var(--base-border-color);
         padding: 0.2em 0.4em;
         min-width: 100px;
       }
