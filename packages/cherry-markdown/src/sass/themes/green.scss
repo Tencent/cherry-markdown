@@ -70,48 +70,9 @@
     }
   }
 
-  .cherry-editor {
-    background-color: var(--base-editor-bg);
-
-    .CodeMirror {
-      background-color: var(--base-editor-bg);
-
-      .CodeMirror-cursor {
-        border-left: 1px solid var(--primary-color);
-      }
-
-      .CodeMirror-scroll {
-
-        span,
-        .cm-variable-2,
-        .cm-string,
-        .cm-strong,
-        .cm-em,
-        .cm-meta {
-          color: var(--base-font-color);
-        }
-
-        .cm-image-marker,
-        .cm-quote,
-        .cm-header,
-        .cm-atom {
-          color: var(--editor-header-color);
-        }
-
-        .cm-url {
-          background-color: var(--editor-url-bg-color);
-        }
-
-        .cm-comment,
-        .cm-url {
-          color: var(--editor-comment-color);
-        }
-      }
-
-      .CodeMirror-selected {
-        background-color: var(--oc-green-2);
-      }
-    }
+  /* CodeMirror 选中背景色 */
+  .cherry-editor .CodeMirror .CodeMirror-selected {
+    background-color: var(--oc-green-2);
   }
 
   .cherry-sidebar {
@@ -135,7 +96,6 @@
       }
     }
   }
-
 }
 
 /** 预览区域样式 */
@@ -177,12 +137,7 @@
     &.cherry-list__square {
       list-style: square;
     }
-
-
   }
-
-
-
 
   blockquote {
     color: var(--base-font-color);
@@ -200,13 +155,9 @@
     }
   }
 
-
-
   hr {
     border-color: var(--base-border-color);
   }
-
-
 
   /** 行内代码 */
   code:not([class]) {
@@ -214,8 +165,6 @@
     color: var(--editor-string-color);
     border: 1px solid var(--base-border-color);
   }
-
-
 
   /** 
   * 表格
@@ -235,8 +184,6 @@
     }
   }
 
-
-
   /** 脚注 */
   .footnote {
     border-color: var(--base-border-color);
@@ -254,8 +201,6 @@
       }
     }
   }
-
-
 
   /** 目录 */
   .toc {

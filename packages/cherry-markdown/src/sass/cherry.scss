@@ -549,6 +549,54 @@
   }
 }
 
+// 编辑器主题通用样式结构
+.cherry {
+  &[class*="theme__"] {
+    .cherry-editor {
+      background-color: var(--base-editor-bg);
+
+      .CodeMirror {
+        background-color: var(--base-editor-bg);
+
+        .CodeMirror-cursor {
+          border-left: 1px solid var(--primary-color);
+        }
+
+        .CodeMirror-scroll {
+          span,
+          .cm-variable-2,
+          .cm-string,
+          .cm-strong,
+          .cm-em,
+          .cm-meta {
+            color: var(--base-font-color);
+          }
+
+          .cm-image-marker,
+          .cm-quote,
+          .cm-header,
+          .cm-atom {
+            color: var(--editor-header-color);
+          }
+
+          .cm-url {
+            background-color: var(--editor-url-bg-color);
+          }
+
+          .cm-comment,
+          .cm-url {
+            color: var(--editor-comment-color);
+          }
+        }
+
+        .CodeMirror-selected {
+          background-color: var(--editor-selection-bg);
+        }
+      }
+    }
+  }
+}
+
 .cherry-drag {
   width: 15px;
   cursor: ew-resize;
