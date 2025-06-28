@@ -123,32 +123,6 @@
     color: var(--md-header-color);
   }
 
-  ul {
-    &.cherry-list__upper-roman {
-      list-style: upper-roman;
-    }
-
-    &.cherry-list__lower-alpha {
-      list-style: lower-alpha;
-    }
-
-    &.cherry-list__lower-greek {
-      list-style: lower-greek;
-    }
-
-    &.cherry-list__cjk-ideographic {
-      list-style: cjk-ideographic;
-    }
-
-    &.cherry-list__circle {
-      list-style: circle;
-    }
-
-    &.cherry-list__square {
-      list-style: square;
-    }
-  }
-
   blockquote {
     color: var(--md-color);
     background-color: var(--md-blockquote-bg);

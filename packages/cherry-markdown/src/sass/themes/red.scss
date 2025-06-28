@@ -73,48 +73,9 @@
     }
   }
 
-  .cherry-editor {
-    background-color: var(--base-editor-bg);
-
-    .CodeMirror {
-      background-color: var(--base-editor-bg);
-
-      .CodeMirror-cursor {
-        border-left: 1px solid var(--primary-color);
-      }
-
-      .CodeMirror-scroll {
-
-        span,
-        .cm-variable-2,
-        .cm-string,
-        .cm-strong,
-        .cm-em,
-        .cm-meta {
-          color: var(--base-font-color);
-        }
-
-        .cm-image-marker,
-        .cm-quote,
-        .cm-header,
-        .cm-atom {
-          color: var(--editor-header-color);
-        }
-
-        .cm-url {
-          background-color: var(--editor-url-bg-color);
-        }
-
-        .cm-comment,
-        .cm-url {
-          color: var(--editor-comment-color);
-        }
-      }
-
-      .CodeMirror-selected {
-        background-color: var(--oc-pink-2);
-      }
-    }
+  /* 编辑器选中背景色 */
+  .cherry-editor .CodeMirror .CodeMirror-selected {
+    background-color: var(--oc-pink-2);
   }
 
   .cherry-sidebar {
@@ -156,32 +117,6 @@
     border-bottom: 1px dashed var(--base-border-color);
     padding-bottom: 15px;
     margin-bottom: 25px;
-  }
-
-  ul {
-    &.cherry-list__upper-roman {
-      list-style: upper-roman;
-    }
-
-    &.cherry-list__lower-greek {
-      list-style: lower-greek;
-    }
-
-    &.cherry-list__lower-alpha {
-      list-style: lower-alpha;
-    }
-
-    &.cherry-list__cjk-ideographic {
-      list-style: cjk-ideographic;
-    }
-
-    &.cherry-list__circle {
-      list-style: circle;
-    }
-
-    &.cherry-list__square {
-      list-style: square;
-    }
   }
 
   blockquote {
