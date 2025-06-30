@@ -34,7 +34,7 @@
   --editor-v3-color: var(--oc-indigo-6);
   --editor-keyword-color: var(--oc-indigo-5);
   --editor-cursor-color: var(--oc-indigo-8);
-  --editor-selected-bg: var(--oc-violet-2);
+  --editor-selection-bg: var(--oc-violet-2);
   --color-full-width: var(--oc-indigo-5);
 
   /* Markdown 相关变量 */
@@ -57,7 +57,7 @@
 
   /* 编辑器选中背景色 */
   .cherry-editor .CodeMirror .CodeMirror-selected {
-    background-color: var(--editor-selected-bg);
+    background-color: var(--editor-selection-bg);
   }
 }
 

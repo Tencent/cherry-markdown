@@ -4,6 +4,7 @@
 
 .cherry.theme__red {
   /* 基础色彩 */
+  --primary-color: var(--oc-pink-7);
   --base-font-color: var(--oc-pink-9);
   --base-editor-bg: var(--oc-pink-0);
   --base-preview-bg: var(--oc-pink-0);
@@ -31,16 +32,11 @@
   --editor-v2-color: var(--oc-pink-9);
   --editor-v3-color: var(--oc-pink-7);
   --editor-keyword-color: var(--oc-pink-5);
+  --editor-selection-bg: var(--oc-pink-2);
   --color-full-width: var(--oc-pink-5);
 
   /* 侧边栏阴影 */
   --sidebar-shadow: 0 0 10px var(--oc-pink-2);
-
-  /* 编辑器选中背景色 */
-  .cherry-editor .CodeMirror .CodeMirror-selected {
-    background-color: var(--oc-pink-2);
-  }
-
 }
 
 /** 预览区域样式 */

@@ -4,29 +4,76 @@
 
 /** 编辑器样式 */
 .cherry.theme__default {
-  
+  /* 基础色彩变量覆盖 */
+  --primary-color: #3582fb;
+  --base-font-color: #3f4a56;
+  --base-editor-bg: #ffffff;
+  --base-preview-bg: #ffffff;
+  --base-preview-mobile-bg: #ffffff;
+  --base-border-color: #dfe6ee;
+
+  /* 工具栏相关变量 */
+  --toolbar-bg-light: var(--oc-white);
+  --toolbar-bg-dark: #20304b;
+  --toolbar-btn-color-light: #3f4a56;
+  --toolbar-btn-color-dark: #d7e6fe;
+  --toolbar-btn-bg-dark: transparent;
+  --toolbar-btn-hover-bg-light: #ebf3ff;
+  --toolbar-btn-hover-bg-dark: rgba(255, 255, 255, 0.1);
+  --toolbar-btn-hover-color-light: #5d9bfc;
+  --toolbar-btn-hover-color-dark: #fff;
+  --toolbar-split-color: var(--base-border-color);
+
+  /* 编辑器相关变量 */
+  --editor-header-color: #3582fb;
+  --editor-string-color: #3f4a56;
+  --editor-comment-color: #3582fb;
+  --editor-quote-color: #3f4a56;
+  --editor-link-color: #3582fb;
+  --editor-url-bg-color: #d7e6fe;
+  --editor-v2-color: #3f4a56;
+  --editor-v3-color: #3582fb;
+  --editor-keyword-color: #3f4a56;
+  --editor-cursor-color: #3582fb;
+  --editor-selection-bg: #ebf3ff;
+  --color-full-width: #3582fb;
+
+  /* Markdown 相关变量 */
+  --md-color: #3f4a56;
+  --md-header-color: #3f4a56;
+  --md-line-color: #dfe6ee;
+  --md-a-color: #3582fb;
+  --md-a-hover-color: #5d9bfc;
+  --md-inline-code-color: #e74c3c;
+  --md-inline-code-bg: #e5e5e5;
+  --md-blockquote-bg: rgba(102, 128, 153, 0.05);
+
   .cherry-toolbar {
-    
+    /* 工具栏相关样式 */
   }
 
   /** 二级菜单 */
   .cherry-dropdown {
     .cherry-dropdown-item {
+
       /** 图标 */
       i {
-
+        /* 图标相关样式 */
       }
     }
+
     /** 选择颜色的按钮 */
     &.cherry-color-wrap {
       .cherry-color-text {
+
         /** 色盘的标题 */
         h3 {
-
+          /* 色盘标题样式 */
         }
+
         /** 色盘里的每一个色块 */
         .cherry-color-item {
-
+          /* 色块样式 */
         }
       }
     }
@@ -37,192 +84,137 @@
 
     /** 粘贴HTML内容时弹出的选择按钮 */
     &.cherry-switch-paste {
-  
+      /* 粘贴按钮样式 */
     }
   }
-
 
   /** 光标focus到空行时联想出的按钮 */
   .cherry-floatmenu {
-
+    /* 浮动菜单样式 */
   }
 
   .cherry-editor {
-
+    /* 编辑器相关样式 */
   }
 
   .cherry-sidebar {
-
+    /* 侧边栏相关样式 */
   }
 
 }
+
 /** 预览区域样式 */
 .cherry-markdown.theme__default {
-
-  p, div {
+  /* 预览区域样式示例 */
   
-  }
-  
-  h1 {
-    
-  }
-  
-  h2 {
-    
-  }
-  
-  h3 {
-    
-  }
+  p,
+  div {}
 
-  h4 {
+  h1 {}
 
-  }
+  h2 {}
 
-  h5 {
+  h3 {}
 
-  }
+  h4 {}
 
-  h1, h2, h3, h4, h5, h6 {
+  h5 {}
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     /** 标题前面的锚点或序号 */
-    .anchor {
-
-    }
+    .anchor {}
   }
-  
+
   /** checklist 模式，未勾选时 */
-    .ch-icon-square {
+  .ch-icon-square {}
 
-    }
-    /** checklist 模式，勾选时 */
-    .ch-icon-check {
+  /** checklist 模式，勾选时 */
+  .ch-icon-check {}
 
-    }
-  }
-  
-  ol {
-    li {
-      
-    }
-  }
+  blockquote {}
 
-
-  blockquote {
-  
-  }
-  
   a {
-    
-  }
-  
-  strong {
-    
-  }
-  
-  em {
-    
-  }
-  
-  del {
-    
+    &:hover {}
   }
 
-  sup {
+  strong {}
 
-  }
+  em {}
 
-  sub {
+  del {}
 
-  }
-  
-  hr {
-    
-  }
-  
-  img {
-    
-  }
+  sup {}
 
-  video {
+  sub {}
 
-  }
+  hr {}
 
-  audio {
+  img {}
 
-  }
-  
+  video {}
+
+  audio {}
+
   /** 行内代码 */
-  code:not([class]) {
-    
-  }
-  
+  code:not([class]) {}
+
   /** 
-  * 代码块
-  */
-  pre code {
-    
-  }
-  
+   * 代码块
+   */
+  pre code {}
+
   /** 
-  * 表格
-  */
-  table {
-    tr {
-  
-    }
-    th {
-  
-    }
-    td {
-  
-    }
+   * 表格
+   */
+  table,
+  .cherry-table {
+    tr {}
+
+    th {}
+
+    td {}
   }
 
   /** 可以理解为上下结构的音标，下部是文字，上部是对应的拼音 */
   ruby {
     /** 上部的拼音 */
-    rt {
-
-    }
+    rt {}
   }
-  
+
   /** 脚注 */
   .footnote {
-    .footnote-title {
-  
-    }
+    .footnote-title {}
+
     .one-footnote {
-      a.footnote-ref {
-  
-      }
+      a.footnote-ref {}
     }
   }
-  
+
   /** 行间公式 */
-  .Cherry-InlineMath {
-    
-  }
-  
+  .Cherry-InlineMath {}
+
   /** 段落公式 */
-  .Cherry-Math {
-  
-  }
+  .Cherry-Math {}
 
-    /** 目录 */
+  /** 目录 */
   .toc {
-    .toc-title {
+    .toc-title {}
 
-    }
     .toc-li {
-      .level-1 {
+      .level-1 {}
 
-      }
-      .level-2 {
+      .level-2 {}
 
-      }
-      .level-3 {
-
-      }
+      .level-3 {}
     }
   }
+}
+
+ol {
+  li {}
 }

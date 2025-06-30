@@ -8,6 +8,7 @@
   --base-font-color: var(--oc-green-9);
   --base-editor-bg: #ffffff;
   --base-preview-bg: var(--oc-green-0);
+  --preview-mobile-bg-color: #ffffff;
   --base-border-color: var(--oc-green-8);
 
   /* 工具栏相关变量 */
@@ -32,12 +33,8 @@
   --editor-v2-color: var(--oc-green-9);
   --editor-v3-color: var(--oc-green-7);
   --editor-keyword-color: var(--oc-green-6);
+  --editor-selection-bg: var(--oc-green-2);
   --color-full-width: var(--oc-green-6);
-
-  /* 编辑器选中背景色 */
-  .cherry-editor .CodeMirror .CodeMirror-selected {
-    background-color: var(--oc-green-2);
-  }
 }
 
 /** 预览区域样式 */

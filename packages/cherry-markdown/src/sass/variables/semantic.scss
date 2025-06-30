@@ -61,11 +61,11 @@
   
   /* ========== 预览器相关 ========== */
   // --base-editor-bg 预览器背景颜色
+  --preview-mobile-bg-color: var(--base-preview-bg);
   --previewer-color: var(--base-font-color);
   --previewer-border: var(--base-border-color);
   --previewer-padding: var(--spacing-lg);
   --previewer-font-family: var(--font-family-sans);
-  --preview-mobile-bg-color: var(--base-preview-bg);
   
   /* ========== Markdown 元素样式 ========== */
   // 标题

@@ -628,29 +628,6 @@
   }
 }
 
-// 预览器主题通用样式结构
-.cherry {
-  &[class*="theme__"] {
-    .cherry-previewer {
-      background-color: var(--base-preview-bg);
-
-      .cherry-mobile-previewer-content {
-        background-color: var(--base-preview-mobile-bg);
-      }
-    }
-
-    .cherry-previewer-table-content-handler {
-      .cherry-previewer-table-content-handler__input {
-        textarea {
-          background-color: var(--base-editor-bg);
-          color: var(--base-font-color);
-          outline-color: var(--editor-header-color);
-        }
-      }
-    }
-  }
-}
-
 .cherry-drag {
   width: 15px;
   cursor: ew-resize;
