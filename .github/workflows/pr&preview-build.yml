@@ -28,7 +28,7 @@ jobs:
       - run: yarn build
 
       - run: |
-            mkdir -p playground/packages/cherry-markdown/dist
+            mkdir -p playground/packages/cherry-markdown
             cp -r packages/cherry-markdown/dist playground/packages/cherry-markdown
             cp -r examples/assets playground
             cp examples/*.html playground
