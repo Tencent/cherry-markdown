@@ -1,6 +1,6 @@
 // @ts-nocheck
 /**
- * Copyright (C) 2021 THL A29 Limited, a Tencent company.
+ * Copyright (C) 2021 Tencent.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
