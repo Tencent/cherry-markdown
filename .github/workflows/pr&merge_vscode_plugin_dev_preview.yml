@@ -3,7 +3,7 @@ name: PR Merge VscodePlugin Dev Preview
 on:
   pull_request_target:
     types: [closed]
-    paths: 
+    paths:
       - "packages/vscodePlugin/**"
 
 permissions:
@@ -14,7 +14,7 @@ permissions:
 jobs:
   vscodePlugin-preview:
     # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
-    if: github.repository == 'Tencent/cherry-markdown' &&github.event.pull_request.merged == true
+    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,9 +34,8 @@ jobs:
           jq '.name = "cherry-markdown-core"' package.json > temp.json && mv temp.json package.json
 
           cd ../vscodePlugin
-          jq '.name = "cherry-markdown-dev"' package.json > temp.json && mv temp.json package.json
-          jq --arg sha "$(git rev-parse --short HEAD)" '.version = "0.0.1-\($sha)"' package.json > temp.json && mv temp.json package.json
           jq '.dependencies["cherry-markdown"] = .dependencies["cherry-markdown-core"] | del(.dependencies["cherry-markdown"])' package.json > temp.json && mv temp.json package.json
+          jq '.name = "cherry-markdown"' package.json > temp.json && mv temp.json package.json
 
       - name: Build VSCode Plugin
         run: |
@@ -45,12 +44,20 @@ jobs:
           yarn build
           yarn build:vscodePlugin
 
+          # 验证 .vsix 文件是否生成
+          if [ ! -f ./packages/vscodePlugin/*.vsix ]; then
+            echo "Error: .vsix file not found"
+            exit 1
+          fi
+
       - name: Upload Files
         id: upload-artifact
         uses: actions/upload-artifact@v4
         with:
           name: cherry-markdown_vscode_plugin_${{ github.sha }}
           path: ./packages/vscodePlugin/*.vsix
+          retention-days: 60
+
       - name: Artifact Commit
         run: |
           echo "Artifact URL: ${{ steps.upload-artifact.outputs.artifact-url }}"
@@ -58,14 +65,13 @@ jobs:
       - name: Extract package info
         id: extract-package
         run: |
-          $name = node -p "require('./packages/vscodePlugin/package.json').name"
-          $version = node -p "require('./packages/vscodePlugin/package.json').version"
-          "name=$name" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        shell: pwsh
+          name=$(node -p "require('./packages/vscodePlugin/package.json').name")
+          version=$(node -p "require('./packages/vscodePlugin/package.json').version")
+          echo "name=$name" >> $GITHUB_OUTPUT
+          echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Post Artifact URL to PR
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         env:
           ARTIFACT_URL: ${{ steps.upload-artifact.outputs.artifact-url }}
           NAME: ${{ steps.extract-package.outputs.name }}
