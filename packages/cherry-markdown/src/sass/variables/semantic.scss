@@ -7,6 +7,46 @@
   --base-border-color: #dfe6ee;
   --base-editor-bg: #ffffff;
   --base-preview-bg: #ffffff;
+  
+  /* ========== 主题色彩系统 ========== */
+  --theme-primary: #3582fb;
+  --theme-primary-hover: #2b6ef0;
+  --theme-primary-active: #1f5de8;
+  --theme-primary-bg: rgba(53, 130, 251, 0.53);
+  --theme-primary-bg-light: rgba(53, 130, 251, 0.1);
+  --theme-primary-transparent: rgba(53, 130, 251, 0);
+  
+  /* ========== 基础背景色 ========== */
+  --bg-white: #ffffff;
+  --bg-light-gray: #f8f9fa;
+  --bg-medium-gray: #e2e6ea;
+  --bg-border-light: #dae0e5;
+  --bg-content: #ebecf2;
+  --bg-highlight: #ffffcc88;
+  --bg-highlight-transparent: #ffffcc00;
+  --bg-transparent: #ffffff00;
+  
+  /* ========== 文本层级颜色 ========== */
+  --text-primary: #212529;        // 主要文本（标题、正文内容）
+  --text-secondary: #6c757d;      // 次要文本（副标题、说明文字）
+  --text-muted: #868e96;          // 弱化文本（占位符、禁用状态）
+  
+  /* ========== 边框层级颜色 ========== */
+  --border-light: #f8f9fa;        // 轻边框（分割线、浅色边框）
+  --border-medium: rgba(0, 0, 0, 0.15);  // 中等边框（卡片边框、弹窗边框）
+  --border-table: rgb(233, 236, 239);    // 表格边框（数据展示边框）
+  
+  /* ========== 系统状态颜色 ========== */
+  --status-success: var(--oc-green-6);    // 成功状态
+  --status-warning: var(--oc-yellow-6);   // 警告状态  
+  --status-error: var(--oc-red-6);        // 错误状态
+  --status-info: var(--oc-blue-6);        // 信息状态
+  
+  /* ========== 危险操作颜色 ========== */
+  --danger-primary: rgba(255, 77, 79, 1);     // 危险操作主色（删除按钮）
+  --danger-hover: rgba(255, 77, 79, 0.8);     // 危险操作悬停
+  --danger-light: rgba(255, 77, 79, 0.5);     // 危险操作浅色（图标）
+  --danger-transparent: rgba(255, 77, 79, 0); // 危险操作透明
 
   /* ========== 工具栏相关 ========== */
   --toolbar-bg-light: var(--oc-white);
@@ -90,7 +130,7 @@
   --md-link-decoration: underline;
   
   // 行内代码
-  --md-inline-code-color: var(--color-error);
+  --md-inline-code-color: var(--status-error);
   --md-inline-code-bg: #e5e5e5;
   --md-inline-code-padding: 2px var(--spacing-xs);
   --md-inline-code-radius: var(--radius-sm);
@@ -139,6 +179,59 @@
   --float-menu-radius: var(--radius-md);
   --float-menu-padding: var(--spacing-sm);
   --float-menu-z-index: var(--z-index-dropdown);
+  
+  /* ========== 公式插入器 ========== */
+  --formula-popup-bg: var(--bg-white);
+  --formula-popup-border: var(--border-light);
+  --formula-popup-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  --formula-popup-radius: 10px;
+  --formula-popup-z-index: 9999999;
+  
+  --formula-tab-border: var(--bg-white);
+  --formula-tab-border-active: #000;
+  --formula-tab-radius: 5px;
+  
+  --formula-item-bg: var(--bg-light-gray);
+  --formula-item-border: var(--bg-light-gray);
+  --formula-item-hover-bg: var(--bg-medium-gray);
+  --formula-item-hover-border: var(--bg-border-light);
+  --formula-item-radius: 5px;
+  
+  --formula-category-border: var(--border-table);
+  --formula-func-bg: var(--bg-white);
+  --formula-func-border: var(--border-medium);
+  
+  --formula-btn-hover-color: var(--theme-primary);
+  --formula-btn-bg: var(--bg-content);
+  --formula-btn-border: var(--border-light);
+  
+  /* ========== 预览器交互 ========== */
+  --previewer-bg: var(--bg-white);
+  --previewer-handler-shadow: rgba(0, 0, 0, 0.05) 0px 3px 14px 2px, rgba(0, 0, 0, 0.06) 0px 8px 10px 1px, rgba(0, 0, 0, 0.1) 0px 5px 5px -3px, rgba(0, 0, 0, 0.08) 0px 0.5px 0px 0px inset, rgba(0, 0, 0, 0.08) 0.5px 0px 0px 0px inset, rgba(0, 0, 0, 0.08) 0px -0.5px 0px 0px inset, rgba(0, 0, 0, 0.08) -0.5px 0px 0px 0px inset;
+  
+  --previewer-img-handler-border: var(--theme-primary);
+  --previewer-img-handler-shadow: 0 1px 4px 0 rgba(20,81,154, 0.5);
+  --previewer-img-point-bg: var(--theme-primary);
+  --previewer-img-point-border: var(--bg-white);
+  --previewer-img-point-shadow: 0px 2px 2px 0px rgba(20,81,154,0.5);
+  
+  --previewer-table-outline: var(--theme-primary);
+  --previewer-table-symbol-color: var(--theme-primary);
+  --previewer-table-symbol-bg: var(--bg-transparent);
+  --previewer-table-symbol-border: var(--theme-primary-transparent);
+  --previewer-table-symbol-hover-bg: var(--theme-primary-bg);
+  --previewer-table-symbol-hover-color: var(--bg-white);
+  
+  --previewer-table-delete-color: var(--danger-light);
+  --previewer-table-delete-bg: var(--danger-transparent);
+  --previewer-table-delete-border: var(--danger-transparent);
+  --previewer-table-delete-hover-color: var(--bg-white);
+  --previewer-table-delete-hover-bg: var(--danger-primary);
+  --previewer-table-delete-hover-border: var(--danger-primary);
+  
+  --previewer-highlight-start: var(--bg-highlight);
+  --previewer-highlight-mid: var(--bg-highlight);
+  --previewer-highlight-end: var(--bg-highlight-transparent);
   
   /* ========== 气泡提示 ========== */
   --bubble-bg: var(--oc-white);
@@ -200,7 +293,7 @@
   --button-secondary-hover-bg: var(--oc-gray-2);
   --button-secondary-active-bg: var(--oc-gray-3);
   
-  --button-danger-bg: var(--color-error);
+  --button-danger-bg: var(--status-error);
   --button-danger-color: var(--oc-white);
   --button-danger-hover-bg: #dc2626;
   --button-danger-active-bg: #b91c1c;
