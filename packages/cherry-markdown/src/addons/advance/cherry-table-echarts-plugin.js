@@ -1,10 +1,10 @@
 /**
  * Tencent is pleased to support the open source community by making CherryMarkdown available.
  *
- * Copyright (C) 2021 THL A29 Limited, a Tencent company. All rights reserved.
- * The below software in this distribution may have been modified by THL A29 Limited ("Tencent Modifications").
+ * Copyright (C) 2021 Tencent. All rights reserved.
+ * The below software in this distribution may have been modified by Tencent ("Tencent Modifications").
  *
- * All Tencent Modifications are Copyright (C) THL A29 Limited.
+ * All Tencent Modifications are Copyright (C) Tencent.
  *
  * CherryMarkdown is licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
