@@ -21,14 +21,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
+
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'yarn'
+          cache: "yarn"
+
       - name: Install dependencies
         run: |
           yarn install
+
       - name: Eslint
         run: yarn lint:cherry-markdown:ci
+
+      - name: Test
+        run: yarn test
+
       - name: Build
         run: yarn build

@@ -27,12 +27,12 @@ export default class AutoLink extends SyntaxBase {
     return text.replace(/_/g, '&#x5f;').replace(/\*/g, '&#x2a;');
   };
 
-  constructor({ config, globalConfig }) {
+  constructor({ config, _globalConfig }) {
     super({ config });
     this.enableShortLink = !!config.enableShortLink;
     this.shortLinkLength = config.shortLinkLength;
-    // eslint-disable-next-line no-nested-ternary
-    this.target = config.target ? `target="${config.target}"` : !!config.openNewPage ? 'target="_blank"' : '';
+
+    this.target = config.target ? `target="${config.target}"` : config.openNewPage ? 'target="_blank"' : '';
     this.rel = config.rel ? `rel="${config.rel}"` : '';
   }
 
@@ -99,7 +99,7 @@ export default class AutoLink extends SyntaxBase {
     return false;
   }
 
-  makeHtml(str, sentenceMakeFunc) {
+  makeHtml(str, _sentenceMakeFunc) {
     if (!(this.test(str) && (EMAIL_INLINE.test(str) || URL_INLINE_NO_SLASH.test(str)))) {
       return str;
     }
@@ -168,6 +168,7 @@ export default class AutoLink extends SyntaxBase {
             // 其他非法
             return match;
           }
+          break;
         default:
           // 协议头不为空时的非法URL
           if (!URL.test(address)) {

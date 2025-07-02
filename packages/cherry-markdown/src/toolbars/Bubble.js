@@ -161,15 +161,15 @@ export default class Bubble extends Toolbar {
   }
 
   addSelectionChangeListener() {
-    this.options.editor.addListener('change', (codemirror) => {
+    this.options.editor.addListener('change', (_codemirror) => {
       // 当编辑区内容变更时自动隐藏bubble工具栏
       this.hideBubble();
     });
-    this.options.editor.addListener('refresh', (codemirror) => {
+    this.options.editor.addListener('refresh', (_codemirror) => {
       // 当编辑区内容刷新时自动隐藏bubble工具栏
       this.hideBubble();
     });
-    this.options.editor.addListener('scroll', (codemirror) => {
+    this.options.editor.addListener('scroll', (_codemirror) => {
       // 当编辑区滚动时，需要实时同步bubble工具栏的位置
       this.updatePositionWhenScroll();
     });

@@ -20,7 +20,7 @@ import { escapeHTMLSpecialChar } from '@/utils/sanitize';
 export default class FrontMatter extends ParagraphBase {
   static HOOK_NAME = 'frontMatter';
 
-  constructor(options) {
+  constructor(_options) {
     super({ needCache: true });
   }
 
@@ -32,7 +32,7 @@ export default class FrontMatter extends ParagraphBase {
       try {
         // 优先按 JSON 格式解析
         frontmatter = JSON.parse(content.trim());
-      } catch (error) {
+      } catch {
         // 按 k:v[\nk:v]* 格式解析
         const lines = content.trim().split('\n');
         frontmatter = {};
@@ -63,7 +63,7 @@ export default class FrontMatter extends ParagraphBase {
     });
   }
 
-  makeHtml(str, sentenceMakeFunc) {
+  makeHtml(str, _sentenceMakeFunc) {
     return str;
   }
 

@@ -31,10 +31,10 @@ export default class H1 extends MenuBase {
   /**
    * 响应点击事件
    * @param {string} selection 被用户选中的文本内容
-   * @param {string} shortKey 快捷键参数，本函数不处理这个参数
+   * @param {string} _shortKey 快捷键参数，本函数不处理这个参数
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
-  onClick(selection, shortKey = '') {
+  onClick(selection, _shortKey = '') {
     let $selection = getSelection(this.editor.editor, selection, 'line', true) || this.locale.h1;
     const header = '#';
     if (!this.isSelections && !this.$testIsHead($selection)) {

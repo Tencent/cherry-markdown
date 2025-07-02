@@ -27,7 +27,7 @@ const DEFAULT_OPTIONS = {
 };
 
 export default class EChartsTableEngine {
-  static install(cherryOptions, ...args) {
+  static install(cherryOptions, ..._args) {
     if (typeof window === 'undefined') {
       console.warn('echarts-table-engine only works in browser.');
       mergeWith(cherryOptions, {

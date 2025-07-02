@@ -13,10 +13,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'yarn'
+          cache: "yarn"
 
       - name: Install dependencies
         run: yarn
+
+      - name: Eslint
+        run: yarn lint:cherry-markdown:ci
+
+      - name: Test
+        run: yarn test
+
       - name: Build package
         run: yarn build
       - name: Publish preview package

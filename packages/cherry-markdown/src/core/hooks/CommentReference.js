@@ -29,7 +29,7 @@ import UrlCache from '@/UrlCache';
 export default class CommentReference extends ParagraphBase {
   static HOOK_NAME = 'commentReference';
 
-  constructor({ externals, config }) {
+  constructor({ _externals, _config }) {
     super();
     this.commentCache = {};
   }
@@ -73,7 +73,7 @@ export default class CommentReference extends ParagraphBase {
     return $str;
   }
 
-  makeHtml(str, sentenceMakeFunc) {
+  makeHtml(str, _sentenceMakeFunc) {
     return str;
   }
 

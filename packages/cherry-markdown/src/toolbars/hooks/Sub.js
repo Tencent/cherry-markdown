@@ -31,10 +31,10 @@ export default class Sub extends MenuBase {
   /**
    *
    * @param {string} selection 被用户选中的文本内容
-   * @param {string} shortKey 快捷键参数，本函数不处理这个参数
+   * @param {string} _shortKey 快捷键参数，本函数不处理这个参数
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
-  onClick(selection, shortKey = '') {
+  onClick(selection, _shortKey = '') {
     let $selection = getSelection(this.editor.editor, selection) || this.locale.sub;
     // 如果选中的内容里有下标的语法，则认为是要去掉下标语法
     if (!this.isSelections && !this.$testIsSub($selection)) {

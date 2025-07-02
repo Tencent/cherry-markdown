@@ -103,10 +103,10 @@ export default class MenuBase {
      * @type {'absolute' | 'fixed' | 'sidebar'}
      */
     this.positionModel = 'absolute';
-    // eslint-disable-next-line no-underscore-dangle
+
     if (typeof this._onClick === 'function') {
       Logger.warn('`MenuBase._onClick` is deprecated. Override `fire` instead');
-      // eslint-disable-next-line no-underscore-dangle
+
       this.fire = this._onClick;
     }
     /**
@@ -445,11 +445,11 @@ export default class MenuBase {
    * 反转子菜单点击事件参数顺序
    * @deprecated
    */
-  bindSubClick(shortcut, selection) {
+  bindSubClick(shortcut, _selection) {
     return this.fire(null, shortcut);
   }
 
-  onClick(selection, shortcut, callback) {
+  onClick(selection, _shortcut, _callback) {
     return selection;
   }
 
@@ -560,10 +560,10 @@ export default class MenuBase {
 
   /**
    * 绑定子菜单点击事件
-   * @param {HTMLDivElement} subMenuDomPanel
+   * @param {HTMLDivElement} _subMenuDomPanel
    * @returns {number} 当前激活的子菜单索引
    */
-  getActiveSubMenuIndex(subMenuDomPanel) {
+  getActiveSubMenuIndex(_subMenuDomPanel) {
     return -1;
   }
 }

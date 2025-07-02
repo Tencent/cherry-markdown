@@ -92,9 +92,9 @@ export default class Copy extends MenuBase {
   /**
    * 响应点击事件
    * 该按钮不会引发编辑区域的内容改动，所以不用处理用户在编辑区域的选中内容
-   * @param {Event} e 点击事件
+   * @param {Event} _e 点击事件
    */
-  onClick(e) {
+  onClick(_e) {
     this.toggleLoading();
     const inlineCodeTheme = document.querySelector('.cherry').getAttribute('data-inline-code-theme');
     const codeBlockTheme = document.querySelector('.cherry').getAttribute('data-code-block-theme');

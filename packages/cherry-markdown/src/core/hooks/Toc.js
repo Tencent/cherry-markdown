@@ -47,7 +47,7 @@ export default class Toc extends ParagraphBase {
   /** 是否显示自增序号 */
   showAutoNumber = false;
 
-  constructor({ externals, config }) {
+  constructor({ _externals, config }) {
     super({ needCache: true });
     Object.keys(defaultOptions).forEach((key) => {
       this[key] = config[key] || defaultOptions[key];
@@ -59,7 +59,7 @@ export default class Toc extends ParagraphBase {
     if (this.test($str, 'extend')) {
       // TODO: fix this error
       // @ts-expect-error
-      $str = $str.replace(this.RULE.extend.reg, (match, lines, toc) => {
+      $str = $str.replace(this.RULE.extend.reg, (match, lines, _toc) => {
         if (!this.allowMultiToc && !this.isFirstTocToken) {
           // 需要补齐非捕获的\n，以及第一个分组中的\n
           return `\n${lines}${emptyLinePlaceholder}`;
@@ -72,7 +72,7 @@ export default class Toc extends ParagraphBase {
     if (this.test($str, 'standard')) {
       // TODO: fix this error
       // @ts-expect-error
-      $str = $str.replace(this.RULE.standard.reg, (match, lines, toc) => {
+      $str = $str.replace(this.RULE.standard.reg, (match, lines, _toc) => {
         if (!this.allowMultiToc && !this.isFirstTocToken) {
           // 需要补齐非捕获的\n，以及第一个分组中的\n
           return `\n${lines}${emptyLinePlaceholder}`;

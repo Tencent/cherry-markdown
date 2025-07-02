@@ -419,7 +419,7 @@ export default class PreviewerBubble {
     }
   }
 
-  $onChange(e) {
+  $onChange(_e) {
     return;
   }
 
@@ -581,7 +581,7 @@ export default class PreviewerBubble {
    * @param {string} trigger 触发方式
    * @param {HTMLParagraphElement} target 用户触发的列表dom
    */
-  $showListPreviewerBubbles(trigger, target, options = {}) {
+  $showListPreviewerBubbles(trigger, target, _options = {}) {
     this.$createPreviewerBubbles(trigger, 'list-hover-handler');
     const listHandler = new ListHandler(trigger, target, this.bubble[trigger], this.previewerDom, this.editor);
     this.bubbleHandler[trigger] = listHandler;

@@ -65,6 +65,6 @@ export class CherryStatic {
 
   // for type check only
   // TODO: fix this error
-  // eslint-disable-next-line no-useless-constructor
-  constructor(...args) {}
+
+  constructor(..._args) {}
 }

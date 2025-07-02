@@ -37,9 +37,9 @@ export default class Search extends MenuBase {
   /**
    * 响应点击事件
    * @param {string} selection 被用户选中的文本内容
-   * @param {string} shortKey 快捷键参数，本函数不处理这个参数
+   * @param {string} _shortKey 快捷键参数，本函数不处理这个参数
    */
-  onClick(selection, shortKey = '') {
+  onClick(selection, _shortKey = '') {
     if (!this.searchBoxInit) {
       this.searchBoxInit = true;
       this.searchBox.init(this.$cherry.editor.editor);

@@ -103,7 +103,7 @@ const options = {
     // TODO: 重构抽出为独立的插件
     {
       name: 'dist-types',
-      generateBundle(options, bundle, isWrite) {
+      generateBundle(options, bundle, _isWrite) {
         const bundles = Object.keys(bundle);
         bundles.forEach((fileName) => {
           if (!fileName.endsWith('.js')) {

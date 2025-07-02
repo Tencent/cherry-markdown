@@ -171,7 +171,7 @@ const imgSizeHandler = {
   $isResizing() {
     return this.mouseResize.resize;
   },
-  dealScroll(event) {
+  dealScroll(_event) {
     const position = this.getImgPosition();
     if (this.butsLayout.style.marginTop !== position.top - this.buts.position.top) {
       this.butsLayout.style.marginTop = `${position.top - this.buts.position.top}px`;
@@ -196,7 +196,7 @@ const imgSizeHandler = {
     this.mouseResize.name = point.getAttribute('data-name');
     this.previewerDom.classList.add('doing-resize-img');
   },
-  resizeStop(event, buts, editor, menu) {
+  resizeStop(_event, _buts, _editor, _menu) {
     if (!this.$isResizing()) {
       return false;
     }
@@ -209,7 +209,7 @@ const imgSizeHandler = {
     this.previewerDom.classList.remove('doing-resize-img');
     this.change();
   },
-  resizeWorking(event, buts) {
+  resizeWorking(event, _buts) {
     if (!this.$isResizing()) {
       return;
     }

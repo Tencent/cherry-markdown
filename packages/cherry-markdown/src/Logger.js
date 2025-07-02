@@ -18,7 +18,7 @@
 const Logger = new Proxy(
   {},
   {
-    get(target, prop, receiver) {
+    get(target, prop, _receiver) {
       // @ts-ignore
       if (BUILD_ENV !== 'production' && typeof console !== 'undefined' && prop in console) {
         return console[prop];

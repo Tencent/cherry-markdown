@@ -44,9 +44,9 @@
     "check-bundle": "es-check es5 dist/cherry-markdown.js dist/cherry-markdown.min.js",
     "test": "vitest",
     "test:update": "vitest -u",
-    "lint": "eslint --ignore-path ../../.eslintignore --plugin file-progress --rule \"file-progress/activate: 1\" --ext .js .",
-    "lint:fix": "eslint --ignore-path ../../.eslintignore --plugin file-progress --rule \"file-progress/activate: 1\" --ext .js . --fix",
-    "lint:ci": "eslint --ignore-path ../../.eslintignore --max-warnings=0 --ext .js .",
+    "lint": "eslint --plugin file-progress --rule \"file-progress/activate: 1\" --ext .js .",
+    "lint:fix": "eslint --plugin file-progress --rule \"file-progress/activate: 1\" --ext .js . --fix",
+    "lint:ci": "eslint --max-warnings=0 --ext .js .",
     "examples": "serve -p 3000 ."
   },
   "keywords": [

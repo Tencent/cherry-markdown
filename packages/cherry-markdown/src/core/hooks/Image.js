@@ -23,7 +23,7 @@ import UrlCache from '@/UrlCache';
 export default class Image extends SyntaxBase {
   static HOOK_NAME = 'image';
 
-  constructor({ config, globalConfig }) {
+  constructor({ config, _globalConfig }) {
     super(null);
     this.config = config;
     // TODO: URL Validator
@@ -105,7 +105,7 @@ export default class Image extends SyntaxBase {
     return match;
   }
 
-  toMediaHtml(match, leadingChar, mediaType, alt, link, title, ref, posterWrap, poster, ...args) {
+  toMediaHtml(match, leadingChar, mediaType, alt, link, title, ref, posterWrap, poster, ..._args) {
     if (!/(video|audio)/.test(mediaType)) {
       return match;
     }

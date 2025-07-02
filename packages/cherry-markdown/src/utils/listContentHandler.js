@@ -39,7 +39,7 @@ export default class ListHandler {
    * @param {HTMLDivElement} previewerDom 预览器dom
    * @param {import('../Editor').default} editor 编辑器实例
    */
-  constructor(trigger, target, container, previewerDom, editor, options = {}) {
+  constructor(trigger, target, container, previewerDom, editor, _options = {}) {
     this.trigger = trigger;
     this.target = target;
     this.container = container;
@@ -56,9 +56,9 @@ export default class ListHandler {
   /**
    * 触发事件
    * @param {string} type 事件类型
-   * @param {Event} event 事件对象
+   * @param {Event} _event 事件对象
    */
-  emit(type, event) {
+  emit(type, _event) {
     switch (type) {
       case 'remove':
         return this.remove();
@@ -108,7 +108,7 @@ export default class ListHandler {
         const [, indent, identifier, checkbox, content] = regRes;
         if (contentsLiCount === targetLiIdx && indent !== undefined) {
           targetLine = lineIdx;
-          // eslint-disable-next-line prefer-destructuring
+
           targetContent.push(content); // 这里只取一个没必要解构
           targetCh = lineContent.indexOf(content);
           // 1. 这种需要特殊处理，需要跳过一个空格位，否则层级会错乱

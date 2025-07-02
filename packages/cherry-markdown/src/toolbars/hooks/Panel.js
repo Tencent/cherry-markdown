@@ -61,7 +61,7 @@ export default class Panel extends MenuBase {
   $getNameFromStr(str) {
     let ret = false;
     this.panelRule.lastIndex = 0;
-    str.replace(this.panelRule, (match, preLines, name, content) => {
+    str.replace(this.panelRule, (match, preLines, name, _content) => {
       const $name = /\s/.test(name.trim()) ? name.trim().replace(/\s.*$/, '') : name;
       ret = $name ? $name.trim().toLowerCase() : '';
       return match;
@@ -71,7 +71,7 @@ export default class Panel extends MenuBase {
 
   $getTitle(str) {
     this.panelRule.lastIndex = 0;
-    str.replace(this.panelRule, (match, preLines, name, content) => {
+    str.replace(this.panelRule, (match, preLines, name, _content) => {
       const $name = name.trim();
       return /\s/.test($name) ? $name.replace(/[^\s]+\s/, '') : '';
     });

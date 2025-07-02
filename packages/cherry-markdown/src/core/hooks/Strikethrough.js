@@ -43,7 +43,7 @@ export default class Strikethrough extends SyntaxBase {
   rule({ config } = { config: undefined }) {
     /** @type {import('~types/syntax').BasicHookRegexpRule} */
     let ret = /** @type {any} */ ({});
-    if (!!config.needWhitespace) {
+    if (config.needWhitespace) {
       ret = { ...ret, begin: '(^|[\\s])\\~T\\~T', end: '\\~T\\~T(?=\\s|$)', content: '([\\w\\W]+?)' };
     } else {
       ret = { ...ret, begin: '(^|[^\\\\])\\~T\\~T', end: '\\~T\\~T', content: '([\\w\\W]+?)' };

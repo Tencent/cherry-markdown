@@ -44,7 +44,7 @@ gulp.task('default', function (done) {
   async.parallel(
     [
       function handleGlyphs(cb) {
-        iconStream.on('glyphs', function (glyphs, options) {
+        iconStream.on('glyphs', function (glyphs, _options) {
           gulp
             .src('src/sass/icon_template.scss')
             .pipe(

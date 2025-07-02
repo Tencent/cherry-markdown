@@ -3,7 +3,7 @@ name: PR Merge cherry-markdown Dev NPM Preview
 on:
   pull_request_target:
     types: [closed]
-    paths: 
+    paths:
       - "packages/cherry-markdown/**"
 
 permissions:
@@ -60,7 +60,18 @@ jobs:
       - name: Install and build
         working-directory: ./packages/cherry-markdown
         run: yarn install && yarn build
-      
+
+      - name: Eslint
+        run: yarn lint:cherry-markdown:ci
+
+      - name: Test
+        run: yarn test
+
+      - name: Copy README and LICENSE files
+        run: |
+          cp README*.md packages/cherry-markdown/
+          cp LICENSE packages/cherry-markdown/
+
       - name: npm publish
         working-directory: ./packages/cherry-markdown
         run: npm publish

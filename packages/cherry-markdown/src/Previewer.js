@@ -97,11 +97,11 @@ export default class Previewer {
         // 针对加载失败的图片 或 beforeLoadOneImgCallback 返回false 的图片，最多尝试加载几次，为了防止死循环，最多5次。以图片的src为纬度统计重试次数
         maxTryTimesPerSrc: 2,
         // 加载一张图片之前的回调函数，函数return false 会终止加载操作
-        beforeLoadOneImgCallback: (img) => {},
+        beforeLoadOneImgCallback: (_img) => {},
         // 加载一张图片失败之后的回调函数
-        failLoadOneImgCallback: (img) => {},
+        failLoadOneImgCallback: (_img) => {},
         // 加载一张图片之后的回调函数，如果图片加载失败，则不会回调该函数
-        afterLoadOneImgCallback: (img) => {},
+        afterLoadOneImgCallback: (_img) => {},
         // 加载完所有图片后调用的回调函数
         afterLoadAllImgCallback: () => {},
       },
@@ -659,7 +659,7 @@ export default class Previewer {
             if (!hasUpdate) {
               this.$updateDom(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
             }
-          } catch (e) {
+          } catch {
             domContainer.insertBefore(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
             domContainer.removeChild(oldContent[change.oldIndex].dom);
           }
@@ -781,7 +781,7 @@ export default class Previewer {
     this.$cherry.$event.emit('editorClose');
   }
 
-  editOnly(dealToolbar = false) {
+  editOnly(_dealToolbar = false) {
     this.$dealEditAndPreviewOnly(true);
     this.cleanHtmlCache();
     this.$cherry.$event.emit('previewerClose');
@@ -806,7 +806,7 @@ export default class Previewer {
     this.$cherry.clearFloatPreviewer();
   }
 
-  recoverPreviewer(dealToolbar = false) {
+  recoverPreviewer(_dealToolbar = false) {
     this.options.previewerDom.classList.remove('cherry-previewer--hidden');
     this.options.virtualDragLineDom.classList.remove('cherry-drag--hidden');
     this.editor.options.editorDom.classList.remove('cherry-editor--full');

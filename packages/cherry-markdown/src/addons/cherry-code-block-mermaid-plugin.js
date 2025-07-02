@@ -152,7 +152,7 @@ export default class MermaidCodeEngine {
       } else {
         svgHtml = injectSvgFallback(svgCode);
       }
-    } catch (e) {
+    } catch {
       svgHtml = injectSvgFallback(svgCode);
     }
     return svgHtml;
@@ -167,7 +167,7 @@ export default class MermaidCodeEngine {
     return html;
   }
 
-  syncRender(graphId, src, sign, $engine) {
+  syncRender(graphId, src, _sign, _$engine) {
     let html;
     try {
       this.mermaidAPIRefs.render(

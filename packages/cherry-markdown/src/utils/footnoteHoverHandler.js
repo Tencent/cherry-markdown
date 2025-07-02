@@ -37,7 +37,7 @@ export default class FootnoteHoverHandler {
     this.bubbleConfig = bubbleConfig;
   }
 
-  emit(type, event = {}, callback = () => {}) {
+  emit(type, _event = {}, _callback = () => {}) {
     switch (type) {
       case 'remove':
         return this.$remove();
@@ -75,7 +75,7 @@ export default class FootnoteHoverHandler {
     this.bubbleCard.content =
       this.previewerDom.querySelector(`.one-footnote[data-index="${this.bubbleCard.refNum}"]`).innerHTML ?? '';
     const previewClassName = this.previewerDom.className ?? '';
-    const themeClass = /theme__[^\s]+/.test(previewClassName) ? previewClassName.match(/theme__[^\s]+/)[0] ?? '' : '';
+    const themeClass = /theme__[^\s]+/.test(previewClassName) ? (previewClassName.match(/theme__[^\s]+/)[0] ?? '') : '';
     this.container.className = `${this.container.className.replace(/(^|\s)theme__[^\s]+/g, '')} ${themeClass}`;
     const customContent =
       this.bubbleConfig?.render(

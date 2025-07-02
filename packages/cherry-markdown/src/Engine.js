@@ -143,7 +143,7 @@ export default class Engine {
           }
           $expectInstance(hook);
           hooksConfig.push(hook);
-        } catch (e) {
+        } catch {
           throw new Error('the hook does not correctly inherit');
         }
       }

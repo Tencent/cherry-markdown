@@ -34,7 +34,7 @@ export default class InlineMath extends ParagraphBase {
   constructor({ config }) {
     super({ needCache: true });
     // 非浏览器环境下配置为 node
-    this.engine = isBrowser() ? config.engine ?? 'MathJax' : 'node';
+    this.engine = isBrowser() ? (config.engine ?? 'MathJax') : 'node';
   }
 
   toHtml(wholeMatch, leadingChar, m1) {
@@ -69,7 +69,7 @@ export default class InlineMath extends ParagraphBase {
   beforeMakeHtml(str) {
     let $str = str;
     // 格里处理行内公式，让一个td里的行内公式语法生效，让跨td的行内公式语法失效
-    $str = $str.replace(getTableRule(true), (whole, ...args) => {
+    $str = $str.replace(getTableRule(true), (whole, ..._args) => {
       return whole
         .split('|')
         .map((oneTd) => {

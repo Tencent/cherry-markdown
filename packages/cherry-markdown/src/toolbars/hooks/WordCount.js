@@ -31,7 +31,7 @@ export default class wordCount extends MenuBase {
    * @param {string} selection 被用户选中的文本内容
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
-  onClick(selection, shortKey = '') {
+  onClick(selection, _shortKey = '') {
     const span = this.$cherry.wrapperDom.querySelector('.cherry-toolbar-button.cherry-toolbar-wordCount');
     // 首次点击时添加监听器
     if (this.countState === 0) {

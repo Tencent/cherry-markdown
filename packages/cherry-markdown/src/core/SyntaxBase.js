@@ -113,10 +113,10 @@ export default class SyntaxBase {
 
   /**
    *
-   * @param {KeyboardEvent} e 触发事件
-   * @param {*} str
+   * @param {KeyboardEvent} _e 触发事件
+   * @param {*} _str
    */
-  onKeyDown(e, str) {}
+  onKeyDown(_e, _str) {}
 
   getOnKeyDown() {
     return this.onKeyDown || false;
@@ -181,10 +181,10 @@ export default class SyntaxBase {
 
   /**
    *
-   * @param {Partial<EditorConfig>} editorConfig
+   * @param {Partial<EditorConfig>} _editorConfig
    * @returns {HookRegexpRule}
    */
-  rule(editorConfig) {
+  rule(_editorConfig) {
     return { begin: '', end: '', content: '', reg: new RegExp('') };
   }
 
