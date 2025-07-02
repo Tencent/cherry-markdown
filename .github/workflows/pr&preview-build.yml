@@ -25,6 +25,12 @@ jobs:
 
       - run: yarn install
 
+      - name: Eslint
+        run: yarn lint:cherry-markdown:ci
+
+      - name: Test
+        run: yarn test
+
       - run: yarn build
 
       - run: |

@@ -29,7 +29,7 @@ export default class Export extends MenuBase {
     ];
   }
 
-  onClick(shortKey = '', type) {
+  onClick(_shortKey = '', type) {
     if (document.querySelector('.cherry-dropdown[name=export]')) {
       /** @type {HTMLElement}*/ (document.querySelector('.cherry-dropdown[name=export]')).style.display = 'none';
     }

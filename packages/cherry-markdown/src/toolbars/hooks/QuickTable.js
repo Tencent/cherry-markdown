@@ -28,10 +28,10 @@ export default class QuickTable extends MenuBase {
   /**
    * 响应点击事件
    * @param {string} selection 编辑器里选中的内容
-   * @param {string} shortKey 本函数不处理快捷键
+   * @param {string} _shortKey 本函数不处理快捷键
    * @returns
    */
-  onClick(selection, shortKey = '') {
+  onClick(selection, _shortKey = '') {
     // TODO：可以尝试解析下selection里的内容，按\s、\t区分列，按\n区分行
     return (
       `${selection}| LeftAlignedCol | CenterAlignedCol | RightAlignedCol |\n` +

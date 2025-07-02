@@ -73,7 +73,7 @@ const dialog = {
       dom.style.top = `${top}px`;
     };
 
-    const handleMouseUp = function (e) {
+    const handleMouseUp = function (_e) {
       head.style.cursor = 'grab';
       body.style.pointerEvents = null;
 
@@ -120,6 +120,8 @@ const dialog = {
           // @ts-ignore
           this.onSubmit(event.data.value);
           this.close();
+          break;
+
         case 'ready':
           this.onReady();
       }

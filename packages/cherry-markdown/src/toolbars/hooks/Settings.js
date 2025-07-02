@@ -129,10 +129,10 @@ export default class Settings extends MenuBase {
    * 响应点击事件
    * @param {string} selection 编辑区选中的内容
    * @param {string} shortKey 快捷键
-   * @param {Function} [callback] 回调函数
+   * @param {Function} [_callback] 回调函数
    * @returns
    */
-  onClick(selection, shortKey = '', callback) {
+  onClick(selection, shortKey = '', _callback) {
     // eslint-disable-next-line no-param-reassign
     shortKey = this.matchShortcutKey(shortKey);
     if (shortKey === 'classicBr') {

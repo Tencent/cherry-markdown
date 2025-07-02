@@ -35,7 +35,7 @@ export default class Toc {
     this.timer = setTimeout(() => {
       this.updateTocList();
     }, 300);
-    this.editor.on('change', (codemirror, evt) => {
+    this.editor.on('change', (_codemirror, _evt) => {
       clearTimeout(this.timer);
       this.timer = setTimeout(() => {
         this.updateTocList();
@@ -118,11 +118,11 @@ export default class Toc {
         }
       }
     });
-    this.tocClose.addEventListener('click', (e) => {
+    this.tocClose.addEventListener('click', (_e) => {
       this.$switchModel('pure');
       this.setModelToLocalStorage('pure');
     });
-    this.tocOpen.addEventListener('click', (e) => {
+    this.tocOpen.addEventListener('click', (_e) => {
       this.$switchModel('full');
       this.setModelToLocalStorage('full');
     });
@@ -131,7 +131,7 @@ export default class Toc {
         this.$switchModel(this.model);
       });
     }
-    this.editor.on('scroll', (codemirror, evt) => {
+    this.editor.on('scroll', (_codemirror, _evt) => {
       this.updateTocList(true);
     });
     const scrollDom = this.$cherry.previewer.getDomCanScroll();
@@ -160,7 +160,7 @@ export default class Toc {
       if (model === 'pure') {
         const { height } = this.tocListDom.getBoundingClientRect();
         const minHeight = Math.floor((height - list.length * 3) / list.length);
-        // eslint-disable-next-line no-nested-ternary
+
         targetHeight = minHeight < 3 ? 3 : minHeight > 10 ? 10 : minHeight;
       }
       for (let i = 0; i < list.length; i++) {

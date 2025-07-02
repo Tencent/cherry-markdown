@@ -97,13 +97,13 @@ const pasteHelper = {
     } else {
       return true;
     }
-    this.codemirror.on('beforeSelectionChange', (codemirror, info) => {
+    this.codemirror.on('beforeSelectionChange', (_codemirror, _info) => {
       this.hideBubble();
     });
-    this.codemirror.on('beforeChange', (codemirror, info) => {
+    this.codemirror.on('beforeChange', (_codemirror, _info) => {
       this.hideBubble();
     });
-    this.codemirror.on('scroll', (codemirror) => {
+    this.codemirror.on('scroll', (_codemirror) => {
       this.updatePositionWhenScroll();
     });
   },
@@ -200,7 +200,7 @@ const pasteHelper = {
     this.switchText.addEventListener('click', this.switchTextClick.bind(this));
   },
 
-  switchMDClick(event) {
+  switchMDClick(_event) {
     this.setTypeToLocalStorage('md');
     if (this.bubbleDom.getAttribute('data-type') === 'md') {
       return;
@@ -212,7 +212,7 @@ const pasteHelper = {
     this.showBubble();
     this.noHide = false;
   },
-  switchTextClick(event) {
+  switchTextClick(_event) {
     this.setTypeToLocalStorage('text');
     if (this.bubbleDom.getAttribute('data-type') === 'text') {
       return;

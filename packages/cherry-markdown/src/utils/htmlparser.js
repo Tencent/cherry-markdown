@@ -353,7 +353,7 @@ const htmlParser = {
      * @param {string} str 需要回填的字符串
      * @returns {string} str
      */
-    imgParser(obj, str) {
+    imgParser(obj, _str) {
       if (obj.attrs && obj.attrs['data-control'] === 'tapd-graph') {
         return this.formatEngine.convertGraph(obj.attrs.title, obj.attrs.src, obj.attrs['data-origin-xml'], obj);
       }
@@ -763,7 +763,7 @@ const htmlParser = {
               }
             }
           });
-        } catch (error) {
+        } catch {
           // console.log('error', error)
         }
       }

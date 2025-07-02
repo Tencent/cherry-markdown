@@ -15,13 +15,21 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
-        run: |
-          yarn
-          yarn build
+        run: yarn
+
+      - name: Eslint
+        run: yarn lint:cherry-markdown:ci
+
+      - name: Test
+        run: yarn test
+
+      - name: Build
+        run: yarn build
 
       - name: Publish cherry-markdown
         run: |
           cp README*.md packages/cherry-markdown/
+          cp LICENSE  packages/cherry-markdown/
            
           cd packages/cherry-markdown
           npm publish --access public

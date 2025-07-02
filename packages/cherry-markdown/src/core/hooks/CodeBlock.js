@@ -29,7 +29,7 @@ export default class CodeBlock extends ParagraphBase {
   static HOOK_NAME = 'codeBlock';
   static inlineCodeCache = {};
 
-  constructor({ externals, config }) {
+  constructor({ _externals, config }) {
     super({ needCache: true });
     CodeBlock.inlineCodeCache = {};
     this.codeCache = {};
@@ -190,9 +190,9 @@ export default class CodeBlock extends ParagraphBase {
    * 预处理代码块
    * @param {string} match
    * @param {string} leadingContent
-   * @param {string} code
+   * @param {string} _code
    */
-  computeLines(match, leadingContent, code) {
+  computeLines(match, leadingContent, _code) {
     const leadingSpaces = leadingContent;
     const lines = this.getLineCount(match, leadingSpaces);
     const sign = this.$engine.hash(match.replace(/^\n+/, '') + lines);
@@ -370,7 +370,7 @@ export default class CodeBlock extends ParagraphBase {
     return str;
   }
 
-  beforeMakeHtml(str, sentenceMakeFunc, markdownParams) {
+  beforeMakeHtml(str, _sentenceMakeFunc, _markdownParams) {
     let $str = str;
 
     if (this.selfClosing || this.$engine.$cherry.options.engine.global.flowSessionContext) {
@@ -441,7 +441,7 @@ export default class CodeBlock extends ParagraphBase {
       return addBlockQuoteSignToResult(result);
     });
     // 表格里处理行内代码，让一个td里的行内代码语法生效，让跨td的行内代码语法失效
-    $str = $str.replace(getTableRule(true), (whole, ...args) => {
+    $str = $str.replace(getTableRule(true), (whole, ..._args) => {
       return whole
         .split('|')
         .map((oneTd) => {
@@ -500,7 +500,7 @@ export default class CodeBlock extends ParagraphBase {
     return getCodeBlockRule();
   }
 
-  mounted(dom) {
+  mounted(_dom) {
     // prettyPrint.prettyPrint();
   }
 }

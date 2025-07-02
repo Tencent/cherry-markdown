@@ -320,7 +320,7 @@ class SuggesterPanel {
         };
       } else if (typeof extraKeys[key] === 'string') {
         const command = extraKeys[key];
-        extraKeys[key] = (codemirror) => {
+        extraKeys[key] = (_codemirror) => {
           if (this.cursorMove) {
             this.editor.editor.execCommand(command);
 
@@ -333,7 +333,7 @@ class SuggesterPanel {
 
     this.editor.editor.setOption('extraKeys', extraKeys);
 
-    this.editor.editor.on('scroll', (codemirror, evt) => {
+    this.editor.editor.on('scroll', (_codemirror, _evt) => {
       if (!this.searchCache) {
         return;
       }
@@ -394,7 +394,7 @@ class SuggesterPanel {
   updatePanel(suggestList) {
     this.tryCreatePanel();
     let defaultValue = suggestList
-      .map((suggest, idx) => {
+      .map((suggest, _idx) => {
         if (typeof suggest === 'object' && suggest !== null) {
           let renderContent = suggest.label;
           if (suggest?.icon) {
@@ -448,14 +448,14 @@ class SuggesterPanel {
 
     // Change this to div.childNodes to support multiple top-level nodes
     const frag = document.createDocumentFragment();
-    Array.prototype.map.call(this.template.childNodes, (item, idx) => {
+    Array.prototype.map.call(this.template.childNodes, (item, _idx) => {
       frag.appendChild(item);
     });
     return frag;
   }
 
   // 面板重定位
-  relocatePanel(codemirror) {
+  relocatePanel(_codemirror) {
     // 找到光标位置来确定候选框位置
     let $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
     // 当editor选中某一内容时，".CodeMirror-cursor"会消失，此时通过定位".selected"来确定候选框位置
@@ -513,7 +513,7 @@ class SuggesterPanel {
    * @param {number} idx 选择的结果索引
    * @param {KeyboardEvent} evt 键盘事件
    */
-  pasteSelectResult(idx, evt) {
+  pasteSelectResult(idx, _evt) {
     if (!this.cursorTo || this.cursorTo === this.cursorFrom) {
       this.cursorTo = JSON.parse(JSON.stringify(this.cursorFrom));
     }

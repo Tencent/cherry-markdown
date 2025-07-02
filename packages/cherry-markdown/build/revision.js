@@ -29,7 +29,7 @@ try {
   // [, currentBranch] = branchRegexp.exec(branch);
   [, currentRev] = shortHEADRegexp.exec(head);
 } catch (e) {
-  console.warn('failed to get git revision.');
+  console.warn('failed to get git revision.', e);
 }
 
 process.env.BUILD_VERSION = PackageInfo.version;

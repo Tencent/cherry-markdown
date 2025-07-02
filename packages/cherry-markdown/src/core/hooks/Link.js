@@ -22,10 +22,10 @@ import UrlCache from '@/UrlCache';
 export default class Link extends SyntaxBase {
   static HOOK_NAME = 'link';
 
-  constructor({ config, globalConfig }) {
+  constructor({ config, _globalConfig }) {
     super({ config });
-    // eslint-disable-next-line no-nested-ternary
-    this.target = config.target ? `target="${config.target}"` : !!config.openNewPage ? 'target="_blank"' : '';
+
+    this.target = config.target ? `target="${config.target}"` : config.openNewPage ? 'target="_blank"' : '';
     this.rel = config.rel ? `rel="${config.rel}"` : '';
   }
 

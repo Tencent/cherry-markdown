@@ -181,7 +181,7 @@ export default class TableHandler {
     const tableCodes = [];
     this.codeMirror
       .getValue()
-      .replace(this.codeBlockReg, (whole, ...args) => {
+      .replace(this.codeBlockReg, (whole, ..._args) => {
         // 先把代码块里的表格语法关键字干掉
         return whole.replace(/\|/g, '.');
       })
@@ -442,7 +442,7 @@ export default class TableHandler {
           tdNode.draggable = false;
           tdNode.parentNode.style.backgroundColor = '';
         });
-        sortSymbol.addEventListener('mousedown', (e) => {
+        sortSymbol.addEventListener('mousedown', (_e) => {
           this.$setSelection(this.tableEditor.info.tableIndex, 'table');
           this.$dragLine();
         });
@@ -471,7 +471,7 @@ export default class TableHandler {
           const index = Array.from(tdNode.parentNode.children).indexOf(tdNode);
           highLightTrDom.forEach((tr) => (tr.children[index].style.backgroundColor = ''));
         });
-        sortSymbol.addEventListener('mousedown', (e) => {
+        sortSymbol.addEventListener('mousedown', (_e) => {
           this.$setSelection(this.tableEditor.info.tableIndex, 'table');
           this.$dragCol();
         });
@@ -774,7 +774,7 @@ export default class TableHandler {
     function handleDrop(event) {
       event.preventDefault();
       const tdIndex = Array.from(event.target.parentElement.childNodes).indexOf(event.target);
-      const newLines = lines.map((line, index) => {
+      const newLines = lines.map((line, _index) => {
         const cells = line
           .split('|')
           .map((item) => (item === '' ? 'CHERRY_MARKDOWN_PENDING_TEXT_FOR_EMPTY_CELL' : item))

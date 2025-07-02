@@ -19,10 +19,10 @@ const callbacks = {
   /**
    * 全局的URL处理器
    * @param {string} url 来源url
-   * @param {'image'|'audio'|'video'|'autolink'|'link'} srcType 来源类型
+   * @param {'image'|'audio'|'video'|'autolink'|'link'} _srcType 来源类型
    * @returns
    */
-  urlProcessor: (url, srcType) => url,
+  urlProcessor: (url, _srcType) => url,
   fileUpload(file, callback) {
     if (/video/i.test(file.type)) {
       callback('images/demo-dog.png', {
@@ -108,10 +108,10 @@ const callbacks = {
       callback(results);
     });
   },
-  afterChange: (text, html) => {},
-  afterInit: (text, html) => {},
+  afterChange: (_text, _html) => {},
+  afterInit: (_text, _html) => {},
   beforeImageMounted: (srcProp, src) => ({ srcProp, src }),
-  onClickPreview: (event) => {},
+  onClickPreview: (_event) => {},
   onExpandCode: (event, code) => {
     // 收起代码块
     return code;
@@ -122,13 +122,13 @@ const callbacks = {
   },
   /**
    * 粘贴时触发
-   * @param {ClipboardEvent['clipboardData']} clipboardData
-   * @param {object} cherry
+   * @param {ClipboardEvent['clipboardData']} _clipboardData
+   * @param {object} _cherry
    * @returns
    *    false: 走cherry粘贴的默认逻辑
    *    string: 直接粘贴的内容
    */
-  onPaste: (clipboardData, cherry) => {
+  onPaste: (_clipboardData, _cherry) => {
     return false;
   },
   onCopyCode: (event, code) => {
@@ -228,7 +228,7 @@ const defaultConfig = {
         /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
         rel: '',
         /** 自定义<a>标签的属性，默认为空 */
-        attrRender: (text, href) => {
+        attrRender: (_text, _href) => {
           return '';
         },
       },
@@ -242,7 +242,7 @@ const defaultConfig = {
         /** 短链接长度 */
         shortLinkLength: 20,
         /** 自定义<a>标签的属性，默认为空 */
-        attrRender: (text, href) => {
+        attrRender: (_text, _href) => {
           return '';
         },
       },
@@ -385,9 +385,9 @@ const defaultConfig = {
         refNumber: {
           appendClass: '', // 添加到引用序号的类名
           // 脚注标号的内容
-          render: (refNum, refTitle) => `[${refNum}]`,
+          render: (refNum, _refTitle) => `[${refNum}]`,
           // 点击标号时回调
-          clickRefNumberCallback: (event, refNum, refTitle, content) => {
+          clickRefNumberCallback: (_event, _refNum, _refTitle, _content) => {
             return true;
           },
         },
@@ -617,12 +617,15 @@ const defaultConfig = {
     // 当编辑区内容有实际变化时触发
     afterChange: callbacks.afterChange,
     afterInit: callbacks.afterInit,
-    focus: ({ e, cherry }) => {},
-    blur: ({ e, cherry }) => {},
-    selectionChange: ({ selections, lastSelections, info }) => {},
-    afterChangeLocale: (locale) => {},
-    changeMainTheme: (theme) => {},
-    changeCodeBlockTheme: (theme) => {},
+    // @ts-ignore
+    focus: ({ _e, _cherry }) => {},
+    // @ts-ignore
+    blur: ({ _e, _cherry }) => {},
+    // @ts-ignore
+    selectionChange: ({ _selections, _lastSelections, _info }) => {},
+    afterChangeLocale: (_locale) => {},
+    changeMainTheme: (_theme) => {},
+    changeCodeBlockTheme: (_theme) => {},
   },
   previewer: {
     dom: false,
@@ -652,13 +655,13 @@ const defaultConfig = {
       // 针对加载失败的图片 或 beforeLoadOneImgCallback 返回false 的图片，最多尝试加载几次，为了防止死循环，最多5次。以图片的src为纬度统计重试次数
       maxTryTimesPerSrc: 2,
       // 加载一张图片之前的回调函数，函数return false 会终止加载操作
-      beforeLoadOneImgCallback: (img) => {
+      beforeLoadOneImgCallback: (_img) => {
         return true;
       },
       // 加载一张图片失败之后的回调函数
-      failLoadOneImgCallback: (img) => {},
+      failLoadOneImgCallback: (_img) => {},
       // 加载一张图片之后的回调函数，如果图片加载失败，则不会回调该函数
-      afterLoadOneImgCallback: (img) => {},
+      afterLoadOneImgCallback: (_img) => {},
       // 加载完所有图片后调用的回调函数
       afterLoadAllImgCallback: () => {},
     },

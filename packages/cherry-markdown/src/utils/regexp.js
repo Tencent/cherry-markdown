@@ -26,8 +26,9 @@ export function isLookbehindSupported() {
   try {
     new RegExp('(?<=.)');
     return true;
-  } catch (ignore) {}
-  return false;
+  } catch {
+    return false;
+  }
 }
 
 export const HORIZONTAL_WHITESPACE = '[ \\t\\u00a0]';

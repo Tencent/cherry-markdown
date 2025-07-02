@@ -44,7 +44,7 @@ export default class Formula extends MenuBase {
    * @param {string} selection 被用户选中的文本内容
    * @returns {boolean} 回填到编辑器光标位置/选中文本区域的内容
    */
-  onClick(selection, shortKey = '') {
+  onClick(selection, _shortKey = '') {
     if (this.subBubbleFormulaMenu.isHide() || !this.hasCacheOnce()) {
       const pos = this.dom.getBoundingClientRect();
       this.subBubbleFormulaMenu.dom.style.left = `${pos.left + pos.width}px`;

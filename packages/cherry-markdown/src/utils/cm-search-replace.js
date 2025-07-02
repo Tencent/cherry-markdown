@@ -424,7 +424,8 @@ export default class SearchBox {
     const cursor = cm.getCursor(position);
     const searchCursor = cm.getSearchCursor(val, cursor, !caseSensitive);
 
-    (next = searchCursor.findNext.bind(searchCursor)), (prev = searchCursor.findPrevious.bind(searchCursor));
+    next = searchCursor.findNext.bind(searchCursor);
+    prev = searchCursor.findPrevious.bind(searchCursor);
 
     if (o.backwards && !prev()) {
       is = next();
@@ -588,7 +589,10 @@ export default class SearchBox {
     if (isRE) {
       try {
         $query = new RegExp(isRE[1], isRE[2].indexOf('i') === -1 ? '' : 'i');
-      } catch (e) {} // Not a regular expression after all, do a string search
+      } catch {
+        /* empty */
+      }
+      // Not a regular expression after all, do a string search
     } else {
       $query = this.parseString(query);
     }

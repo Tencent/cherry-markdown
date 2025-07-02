@@ -79,7 +79,7 @@ export default class Emoji extends SyntaxBase {
     // TODO: URL Validator
   }
 
-  makeHtml(str, sentenceMakeFunc) {
+  makeHtml(str, _sentenceMakeFunc) {
     if (!this.test(str)) {
       return str;
     }

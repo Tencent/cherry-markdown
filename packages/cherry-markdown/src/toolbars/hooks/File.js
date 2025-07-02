@@ -29,7 +29,7 @@ export default class File extends MenuBase {
    * @param {string} selection 被用户选中的文本内容
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
-  onClick(selection, shortKey = '') {
+  onClick(selection, _shortKey = '') {
     const accept = this.$cherry.options?.fileTypeLimitMap?.file ?? '*';
     const multiple = this.$cherry?.options.multipleFileSelection?.file ?? false;
     if (multiple) {

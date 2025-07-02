@@ -574,7 +574,7 @@ export default class Editor {
 
     this.domWidth = this.getEditorDom().offsetWidth;
     // 监听编辑器宽度变化
-    const resizeObserver = new ResizeObserver((entries) => {
+    const resizeObserver = new ResizeObserver((_entries) => {
       if (this.getEditorDom().offsetWidth !== this.domWidth && this.$cherry.status.editor === 'show') {
         this.domWidth = this.getEditorDom().offsetWidth;
         this.editor.refresh();

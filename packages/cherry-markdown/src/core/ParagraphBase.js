@@ -119,7 +119,7 @@ export default class ParagraphBase extends SyntaxBase {
       .replace(this.removeNewlinesBetweenTags, '</$1>\r$2<$3$4'); // replace \n to \r
   }
 
-  toHtml(str, sentenceMakeFunc) {
+  toHtml(str, _sentenceMakeFunc) {
     return str;
   }
 
@@ -324,7 +324,7 @@ export default class ParagraphBase extends SyntaxBase {
     // console.log('base mounted');
   }
 
-  signWithCache(html) {
+  signWithCache(_html) {
     return false;
   }
 }

@@ -29,10 +29,10 @@ export default class Ol extends MenuBase {
   /**
    *
    * @param {string} selection 被用户选中的文本内容
-   * @param {string} shortKey 快捷键参数，本函数不处理这个参数
+   * @param {string} _shortKey 快捷键参数，本函数不处理这个参数
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
-  onClick(selection, shortKey = '') {
+  onClick(selection, _shortKey = '') {
     const $selection = getSelection(this.editor.editor, selection, 'line', true) || 'Item 1\n    Item 1.1\nItem 2';
     const [before] = $selection.match(/^\n*/);
     const [after] = $selection.match(/\n*$/);
