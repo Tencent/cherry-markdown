@@ -1,7 +1,7 @@
 const babel = require('@rollup/plugin-babel').default;
 const resolve = require('@rollup/plugin-node-resolve');
 const commonjs = require('@rollup/plugin-commonjs');
-const eslint = require('@rollup/plugin-eslint');
+// const eslint = require('@rollup/plugin-eslint');
 const alias = require('@rollup/plugin-alias');
 const json = require('@rollup/plugin-json');
 const typescript = require('rollup-plugin-typescript2');
@@ -51,9 +51,10 @@ function buildAddons(entries) {
     const addonBundle = await rollup.rollup({
       input: fullEntryPath,
       plugins: [
-        eslint({
-          exclude: ['**/node_modules/**', 'src/sass/**', 'src/libs/**'],
-        }),
+        // 这里因为升级 eslint 导致 eslint 配置文件和之前不一致，先 ignore 后续再处理
+        // eslint({
+        //   exclude: ['**/node_modules/**', 'src/sass/**', 'src/libs/**'],
+        // }),
         json(),
         // envReplacePlugin(),
         alias({

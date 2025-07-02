@@ -17,7 +17,7 @@ import path from 'path';
 import babel from '@rollup/plugin-babel';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import eslint from '@rollup/plugin-eslint';
+// import eslint from '@rollup/plugin-eslint';
 import alias from '@rollup/plugin-alias';
 import json from '@rollup/plugin-json';
 import envReplacePlugin from './env';
@@ -56,9 +56,10 @@ const options = {
     manualChunks: () => 'cherry',
   },
   plugins: [
-    eslint({
-      exclude: ['**/node_modules/**', 'src/libs/**'],
-    }),
+    // 这里因为升级 eslint 导致 eslint 配置文件和之前不一致，先 ignore 后续再处理
+    // eslint({
+    //   exclude: ['**/node_modules/**', 'src/libs/**'],
+    // }),
     json(),
     envReplacePlugin(),
     alias(aliasPluginOptions),
