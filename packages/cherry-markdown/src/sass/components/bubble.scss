@@ -32,21 +32,21 @@
     width: 0;
     height: 0;
 
-    margin-left: -8px;
-    border-left: 8px solid rgba(0, 0, 0, 0);
-    border-right: 8px solid rgba(0, 0, 0, 0);
+    margin-left: calc(-1 * var(--spacing-sm));
+    border-left: var(--spacing-sm) solid rgba(0, 0, 0, 0);
+    border-right: var(--spacing-sm) solid rgba(0, 0, 0, 0);
   }
 
   .cherry-bubble-top {
     top: 0;
     transform: translateY(-100%);
-    border-bottom: 8px solid var(--bubble-bg);
+    border-bottom: var(--spacing-sm) solid var(--bubble-bg);
   }
 
   .cherry-bubble-bottom {
     bottom: 0;
     transform: translateY(100%);
-    border-top: 8px solid var(--bubble-bg);
+    border-top: var(--spacing-sm) solid var(--bubble-bg);
   }
 
   .cherry-toolbar-button {

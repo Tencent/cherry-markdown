@@ -118,9 +118,9 @@
       justify-content: center;
       position: absolute;
       color: var(--previewer-table-symbol-color);
-      width: 12px;
-      height: 12px;
-      line-height: 12px;
+      width: var(--previewer-table-symbol-size);
+      height: var(--previewer-table-symbol-size);
+      line-height: var(--previewer-table-symbol-size);
       border: 1px solid var(--previewer-table-symbol-border);
       background-color: var(--previewer-table-symbol-bg);
       border-radius: 3px;
@@ -137,10 +137,10 @@
       justify-content: center;
       position: absolute;
       color: var(--previewer-table-symbol-color);
-      width: 12px;
-      height: 12px;
+      width: var(--previewer-table-symbol-size);
+      height: var(--previewer-table-symbol-size);
       padding: 5px 0;
-      line-height: 12px;
+      line-height: var(--previewer-table-symbol-size);
       border: 1px solid var(--previewer-table-symbol-border);
       background-color: var(--previewer-table-symbol-bg);
       border-radius: 3px;
@@ -161,8 +161,8 @@
       color: var(--previewer-table-delete-color);
       width: 25px;
       height: 15px;
-      font-size: 12px;
-      line-height: 12px;
+      font-size: var(--font-size-xs);
+      line-height: var(--font-size-xs);
       border: 1px solid var(--previewer-table-delete-border);
       border-radius: 3px;
       background-color: var(--previewer-table-delete-bg);
