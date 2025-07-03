@@ -124,8 +124,6 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     codeBlockTheme: string,
     /** 行内代码主题，只有 red 和 black 两个主题 */
     inlineCodeTheme: 'red' | 'black',
-    /** 工具栏主题，只有 light 和 dark 两个主题，优先级低于 mainTheme */
-    toolbarTheme: 'light' | 'dark',
   }
   callback: {
     /**

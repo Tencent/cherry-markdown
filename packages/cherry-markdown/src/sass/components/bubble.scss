@@ -55,6 +55,8 @@
     justify-content: center;
     // FIXME: remove fixed height
     height: var(--bubble-min-height);
+    color: var(--toolbar-btn-color);
+    background: var(--toolbar-btn-bg);
 
     // line-height: (var(--bubble-min-height) - 2px); // border 2px
     cursor: pointer;
@@ -62,39 +64,13 @@
 
     &:hover {
       border-color: var(--toolbar-border);
-      background-color: var(--toolbar-btn-hover-bg-light);
+      background-color: var(--toolbar-btn-hover-bg);
+      color: var(--toolbar-btn-hover-color);
     }
 
     &.cherry-toolbar-split {
       height: 65%;
       min-height: calc(0.65 * var(--bubble-min-height));
-    }
-  }
-
-  [data-toolbar-theme='dark'] & {
-    border-color: var(--toolbar-bg-dark);
-    background: var(--toolbar-bg-dark);
-
-    .cherry-toolbar-button {
-      color: var(--toolbar-btn-color-dark);
-      background: var(--toolbar-btn-bg-dark);
-
-      &:hover {
-        color: var(--toolbar-btn-hover-color-dark);
-        background: var(--toolbar-btn-hover-bg-dark);
-      }
-    }
-
-    .cherry-bubble-top {
-      border-bottom-color: var(--toolbar-bg-dark);
-    }
-
-    .cherry-bubble-bottom {
-      border-top-color: var(--toolbar-bg-dark);
-    }
-
-    .cherry-toolbar-button:hover {
-      border-color: var(--toolbar-bg-dark);
     }
   }
 }
@@ -109,7 +85,7 @@
     left: 0;
     top: 0;
     opacity: 0.3;
-    background-color: var(--toolbar-btn-hover-color-light);
+    background-color: var(--toolbar-btn-hover-color);
     border-radius: var(--radius-sm);
     transition: all 0.3s;
   }
@@ -125,45 +101,21 @@
   }
   &[data-type='text'] {
     .cherry-text-btn {
-      color: var(--toolbar-btn-color-light);
+      color: var(--toolbar-btn-color);
     }
     .cherry-md-btn {
-      color: var(--toolbar-btn-hover-color-light);
+      color: var(--toolbar-btn-hover-color);
     }
   }
   &[data-type='md'] {
     .cherry-md-btn {
-      color: var(--toolbar-btn-color-light);
+      color: var(--toolbar-btn-color);
     }
     .cherry-text-btn {
-      color: var(--toolbar-btn-hover-color-light);
+      color: var(--toolbar-btn-hover-color);
     }
     .switch-btn--bg {
       left: 50%;
-    }
-  }
-  [data-toolbar-theme='dark'] & {
-    .switch-btn--bg {
-      background-color: var(--toolbar-btn-hover-color-dark);
-    }
-    &[data-type='text'] {
-      .cherry-text-btn {
-        color: var(--toolbar-btn-color-dark);
-      }
-      .cherry-md-btn {
-        color: var(--toolbar-btn-hover-color-dark);
-      }
-    }
-    &[data-type='md'] {
-      .cherry-md-btn {
-        color: var(--toolbar-btn-color-dark);
-      }
-      .cherry-text-btn {
-        color: var(--toolbar-btn-hover-color-dark);
-      }
-      .switch-btn--bg {
-        left: 50%;
-      }
     }
   }
 }

@@ -49,30 +49,21 @@
   --danger-transparent: rgba(255, 77, 79, 0); // 危险操作透明
 
   /* ========== 工具栏相关 ========== */
-  --toolbar-bg-light: var(--oc-white);
-  --toolbar-bg-dark: #20304b;
+  --toolbar-bg: var(--oc-white);
   --toolbar-border: var(--base-border-color);
   --toolbar-height: var(--height-toolbar);
   --toolbar-padding: var(--spacing-md);
   --toolbar-font-size: var(--font-size-sm);
   --toolbar-radius: var(--radius-md);
-  --toolbar-shadow-light: var(--shadow-md);
-  --toolbar-shadow-dark: var(--shadow-md);
+  --toolbar-shadow: var(--shadow-md);
   --toolbar-split-color: var(--base-border-color);
   
-  // 工具栏按钮 - 亮色主题
-  --toolbar-btn-color-light: #3f4a56;
-  --toolbar-btn-bg-light: transparent;
-  --toolbar-btn-hover-color-light: #5d9bfc;
-  --toolbar-btn-hover-bg-light: #ebf3ff;
-  --toolbar-btn-disabled-light: #ccc;
-  
-  // 工具栏按钮 - 暗色主题
-  --toolbar-btn-color-dark: #d7e6fe;
-  --toolbar-btn-bg-dark: transparent;
-  --toolbar-btn-hover-color-dark: #fff;
-  --toolbar-btn-hover-bg-dark: rgba(255, 255, 255, 0.1);
-  --toolbar-btn-disabled-dark: #ccc;
+  // 工具栏按钮
+  --toolbar-btn-color: #3f4a56;
+  --toolbar-btn-bg: transparent;
+  --toolbar-btn-hover-color: #5d9bfc;
+  --toolbar-btn-hover-bg: #ebf3ff;
+  --toolbar-btn-disabled: #ccc;
   
   --toolbar-btn-radius: var(--radius-sm);
   --toolbar-btn-padding: var(--spacing-sm) var(--spacing-md);
@@ -172,14 +163,6 @@
   --md-hr-margin: var(--spacing-xl) 0;
   --md-hr-border-width: var(--border-width-1);
   
-  /* ========== 浮动菜单 ========== */
-  --float-menu-bg: var(--oc-white);
-  --float-menu-border: var(--base-border-color);
-  --float-menu-shadow: var(--shadow-lg);
-  --float-menu-radius: var(--radius-md);
-  --float-menu-padding: var(--spacing-sm);
-  --float-menu-z-index: var(--z-index-dropdown);
-  
   /* ========== 公式插入器 ========== */
   --formula-popup-bg: var(--bg-white);
   --formula-popup-border: var(--border-light);
@@ -207,7 +190,7 @@
   
   /* ========== 预览器交互 ========== */
   --previewer-bg: var(--bg-white);
-  --previewer-handler-shadow: rgba(0, 0, 0, 0.05) 0px 3px 14px 2px, rgba(0, 0, 0, 0.06) 0px 8px 10px 1px, rgba(0, 0, 0, 0.1) 0px 5px 5px -3px, rgba(0, 0, 0, 0.08) 0px 0.5px 0px 0px inset, rgba(0, 0, 0, 0.08) 0.5px 0px 0px 0px inset, rgba(0, 0, 0, 0.08) 0px -0.5px 0px 0px inset, rgba(0, 0, 0, 0.08) -0.5px 0px 0px 0px inset;
+  --previewer-handler-shadow: var(--shadow-lg);
   
   --previewer-img-handler-border: var(--theme-primary);
   --previewer-img-handler-shadow: 0 1px 4px 0 rgba(20,81,154, 0.5);
@@ -243,7 +226,7 @@
   --bubble-min-height: var(--height-bubble-min);
   --bubble-z-index: var(--z-index-popover);
   
-  /* ========== 下拉菜单 ========== */
+  /* ========== 工具栏的下拉菜单 ========== */
   --dropdown-bg: var(--oc-white);
   --dropdown-border: var(--base-border-color);
   --dropdown-shadow: var(--shadow-lg);

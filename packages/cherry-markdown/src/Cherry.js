@@ -552,7 +552,6 @@ export default class Cherry extends CherryStatic {
    */
   createWrapper() {
     let mainTheme = '';
-    let toolbarTheme = '';
     let inlineCodeTheme = '';
     let codeBlockTheme = '';
     if (testHasLocal(this.nameSpace, 'theme')) {
@@ -561,11 +560,6 @@ export default class Cherry extends CherryStatic {
       mainTheme = this.options.themeSettings.mainTheme;
       mainTheme = mainTheme.replace(/theme__/g, '');
       mainTheme = `theme__${mainTheme}`;
-    }
-    if (typeof this.options.toolbars.theme === 'string') {
-      toolbarTheme = this.options.toolbars.theme === 'dark' ? 'dark' : 'light';
-    } else {
-      toolbarTheme = this.options.themeSettings.toolbarTheme === 'dark' ? 'dark' : 'light';
     }
     // @ts-ignore
     if (typeof this.options.engine.syntax.inlineCode.theme === 'string') {
@@ -588,7 +582,6 @@ export default class Cherry extends CherryStatic {
     // @ts-ignore
     const codeWrap = getCodeWrapFromLocal(this.nameSpace, this.options.engine.syntax.codeBlock.wrap);
     const wrapperDom = createElement('div', ['cherry', 'clearfix', mainTheme].join(' '), {
-      'data-toolbarTheme': toolbarTheme,
       'data-inlineCodeTheme': inlineCodeTheme,
       'data-codeBlockTheme': codeBlockTheme,
       'data-codeWrap': codeWrap === 'wrap' ? 'wrap' : 'nowrap',

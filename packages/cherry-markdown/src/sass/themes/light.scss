@@ -16,15 +16,10 @@
   --text-muted: var(--oc-blue-4);
 
   /* ========== 工具栏相关变量 ========== */
-  --toolbar-bg-light: var(--oc-white);
-  --toolbar-bg-dark: var(--oc-white);
-  --toolbar-btn-color-light: var(--oc-gray-8);
-  --toolbar-btn-color-dark: var(--oc-gray-8);
-
-  --toolbar-btn-hover-bg-light: var(--primary-color);
-  --toolbar-btn-hover-bg-dark: var(--primary-color);
-  --toolbar-btn-hover-color-light: var(--oc-white);
-  --toolbar-btn-hover-color-dark: var(--oc-white);
+  --toolbar-bg: var(--oc-white);
+  --toolbar-btn-color: var(--oc-gray-8);
+  --toolbar-btn-hover-bg: var(--primary-color);
+  --toolbar-btn-hover-color: var(--oc-white);
   --toolbar-split-color: var(--oc-blue-5);
 
   /* ========== 编辑器相关变量 ========== */

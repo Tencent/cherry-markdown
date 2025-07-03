@@ -17,16 +17,11 @@
   --text-muted: var(--oc-gray-6);
 
   /* ========== 工具栏相关变量 ========== */
-  --toolbar-bg-light: var(--oc-white);
-  --toolbar-bg-dark: var(--oc-gray-8);
-  --toolbar-btn-color-light: var(--oc-gray-7);
-  --toolbar-btn-color-dark: var(--oc-blue-1);
-
-  --toolbar-btn-hover-bg-light: var(--oc-blue-0);
-  --toolbar-btn-hover-bg-dark: rgba(255, 255, 255, 0.1);
-  --toolbar-btn-hover-color-light: var(--oc-blue-4);
-  --toolbar-btn-hover-color-dark: var(--oc-white);
-  --toolbar-split-color: var(--base-border-color);
+  --toolbar-bg: #1E314B;
+  --toolbar-btn-color: var(--oc-gray-4);
+  --toolbar-btn-hover-bg: var(--oc-blue-0);
+  --toolbar-btn-hover-color: var(--oc-blue-4);
+  --toolbar-split-color: var(--oc-blue-5);
 
   /* ========== 编辑器相关变量 ========== */
   --editor-header-color: var(--primary-color);
