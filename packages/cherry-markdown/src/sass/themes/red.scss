@@ -20,7 +20,7 @@
   --toolbar-bg-dark: var(--oc-pink-1);
   --toolbar-btn-color-light: var(--oc-pink-8);
   --toolbar-btn-color-dark: var(--oc-pink-8);
-  --toolbar-btn-bg-dark: transparent;
+
   --toolbar-btn-hover-bg-light: var(--oc-pink-5);
   --toolbar-btn-hover-bg-dark: var(--oc-pink-5);
   --toolbar-btn-hover-color-light: var(--oc-pink-0);
@@ -57,9 +57,6 @@
 
 /** 预览区域样式 */
 .cherry-markdown.theme__red {
-  color: var(--md-paragraph-color);
-  background-color: var(--base-preview-bg);
-
   h1,
   h2,
   h3,
@@ -70,38 +67,6 @@
     border-bottom: 1px dashed var(--md-hr-border);
     padding-bottom: 15px;
     margin-bottom: 25px;
-  }
-
-  blockquote {
-    color: var(--md-paragraph-color);
-    background-color: var(--md-blockquote-bg);
-    border-color: var(--md-hr-border);
-  }
-
-  a {
-    text-decoration: none;
-    color: var(--md-link-color);
-
-    &:hover {
-      text-decoration: underline;
-      color: var(--md-link-hover-color);
-    }
-  }
-
-  /** 表格 */
-  table,
-  .cherry-table {
-    color: var(--md-paragraph-color);
-
-    th {
-      background-color: var(--md-inline-code-bg);
-    }
-
-    tr,
-    th,
-    td {
-      border-color: var(--md-table-border);
-    }
   }
 
   /** 目录 */
@@ -116,18 +81,6 @@
       margin-top: 30px;
       margin-bottom: 15px;
       border-bottom: 1px solid var(--md-hr-border);
-    }
-
-    .toc-li {
-      border: none;
-
-      a {
-        color: var(--md-paragraph-color);
-
-        &:hover {
-          color: var(--md-link-hover-color);
-        }
-      }
     }
   }
 }
