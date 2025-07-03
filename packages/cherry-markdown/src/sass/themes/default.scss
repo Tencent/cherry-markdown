@@ -6,6 +6,8 @@
 .cherry.theme__default {
   /* ========== 基础色彩变量覆盖 ========== */
   --primary-color: var(--oc-blue-6);
+  @include theme-variables();
+  
   --base-font-color: var(--oc-gray-7);
   --base-editor-bg: var(--oc-white);
   --base-preview-bg: var(--oc-white);
@@ -33,7 +35,6 @@
   --editor-v2-color: var(--oc-gray-7);
   --editor-v3-color: var(--primary-color);
   --editor-keyword-color: var(--oc-gray-7);
-  --editor-cursor-color: var(--primary-color);
   --editor-selection-bg: var(--oc-blue-0);
   --color-full-width: var(--primary-color);
 
@@ -47,7 +48,6 @@
   --md-blockquote-bg: rgba(134, 142, 150, 0.05);
   --md-hr-border: var(--oc-gray-3);
   --md-table-border: var(--oc-gray-3);
-
 }
 
 /** 预览区域样式 */

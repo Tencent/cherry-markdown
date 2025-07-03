@@ -5,6 +5,8 @@
 .cherry.theme__violet {
   /* ========== 基础色彩变量覆盖 ========== */
   --primary-color: var(--oc-violet-9);
+  @include theme-variables();
+
   --base-font-color: var(--primary-color);
   --base-editor-bg: var(--oc-white);
   --base-preview-bg: var(--oc-white);
@@ -45,23 +47,6 @@
   --md-blockquote-bg: var(--oc-violet-1);
   --md-hr-border: var(--oc-violet-8);
   --md-table-border: var(--oc-violet-8);
-
-  /* 颜色选择器 */
-  .cherry-color-wrap .cherry-color-item:hover {
-    border-color: var(--oc-violet-9);
-  }
-
-  /* 编辑器光标和选中背景色 */
-  .cherry-editor .CodeMirror {
-    .CodeMirror-cursor {
-      border-left: 1px solid var(--oc-violet-9);
-    }
-  }
-
-  .cherry-sidebar {
-    box-shadow: var(--shadow);
-  }
-
 }
 
 /** 预览区域样式 */

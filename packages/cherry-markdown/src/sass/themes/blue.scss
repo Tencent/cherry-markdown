@@ -5,6 +5,8 @@
 .cherry.theme__blue {
   /* ========== 基础色彩变量覆盖 ========== */
   --primary-color: var(--oc-indigo-6);
+  @include theme-variables();
+
   --base-font-color: var(--oc-indigo-8);
   --base-editor-bg: var(--oc-violet-0);
   --base-preview-bg: var(--oc-violet-0);
@@ -32,7 +34,6 @@
   --editor-v2-color: var(--oc-indigo-8);
   --editor-v3-color: var(--primary-color);
   --editor-keyword-color: var(--oc-indigo-5);
-  --editor-cursor-color: var(--oc-indigo-8);
   --editor-selection-bg: var(--oc-violet-2);
   --color-full-width: var(--oc-indigo-5);
 
@@ -46,19 +47,6 @@
   --md-blockquote-bg: var(--oc-violet-1);
   --md-hr-border: var(--oc-indigo-4);
   --md-table-border: var(--oc-indigo-4);
-
-  /* ========== 自定义阴影 ========== */
-  --sidebar-shadow: 0 0 12px var(--oc-indigo-2);
-
-  /* 颜色选择器 */
-  .cherry-color-wrap .cherry-color-item:hover {
-    border-color: var(--oc-indigo-9);
-  }
-
-  /* 编辑器选中背景色 */
-  .cherry-editor .CodeMirror .CodeMirror-selected {
-    background-color: var(--editor-selection-bg);
-  }
 }
 
 /** 预览区域样式 */
@@ -68,7 +56,6 @@
   h3,
   h4,
   h5 {
-    color: var(--md-heading-color);
     text-align: center;
     border-bottom: 1px dashed var(--md-hr-border);
     padding-bottom: 15px;

@@ -5,6 +5,8 @@
 .cherry.theme__dark {
   /* ========== 基础色彩变量覆盖 ========== */
   --primary-color: var(--oc-orange-5);
+  @include theme-variables();
+  
   --base-font-color: var(--oc-gray-4);
   --base-editor-bg: var(--oc-gray-9);
   --base-preview-bg: var(--oc-gray-8);

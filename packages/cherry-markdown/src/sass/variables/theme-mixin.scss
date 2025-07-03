@@ -1,0 +1,6 @@
+// 主题辅助 mixin
+// 用于统一管理依赖 primary-color 的变量
+
+@mixin theme-variables() {
+  --editor-cursor-color: var(--primary-color);
+}

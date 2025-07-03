@@ -560,7 +560,7 @@
         background-color: var(--base-editor-bg);
 
         .CodeMirror-cursor {
-          border-left: 1px solid var(--primary-color);
+          border-left: 1px solid var(--editor-cursor-color);
         }
 
         .CodeMirror-scroll {

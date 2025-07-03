@@ -69,13 +69,6 @@
   
   /* ========== 编辑器相关 ========== */
   //  ---base-editor-bg 编辑器背景颜色
-  --editor-color: var(--base-font-color);
-  --editor-border: var(--base-border-color);
-  --editor-font-family: var(--font-family-sans);
-  --editor-font-size: var(--font-size-md);
-  --editor-line-height: var(--line-height-relaxed);
-  
-  // 编辑器主题色彩
   --editor-header-color: var(--base-font-color);
   --editor-comment-color: var(--oc-blue-6);
   --editor-quote-color: var(--oc-blue-6);
@@ -85,7 +78,6 @@
   --editor-keyword-color: var(--base-font-color);
   
   --editor-selection-bg: var(--oc-blue-1);
-  --editor-cursor-color: var(--oc-blue-6);
   --editor-line-number-color: var(--oc-gray-4);
   --editor-active-line-bg: var(--oc-gray-0);
   

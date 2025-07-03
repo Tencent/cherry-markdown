@@ -5,6 +5,8 @@
 .cherry.theme__light {
   /* ========== 基础色彩变量覆盖 ========== */
   --primary-color: var(--oc-blue-6);
+  @include theme-variables();
+
   --base-font-color: var(--oc-gray-8);
   --base-editor-bg: var(--oc-white);
   --base-preview-bg: var(--oc-white);
@@ -32,7 +34,6 @@
   --editor-v2-color: var(--oc-gray-8);
   --editor-v3-color: var(--primary-color);
   --editor-keyword-color: var(--oc-blue-4);
-  --editor-cursor-color: var(--oc-black);
   --editor-selection-bg: var(--oc-blue-2);
   --color-full-width: var(--oc-blue-4);
 
@@ -46,9 +47,4 @@
   --md-blockquote-bg: var(--oc-blue-0);
   --md-hr-border: var(--oc-blue-5);
   --md-table-border: var(--oc-blue-5);
-
-  /* 颜色选择器 */
-  .cherry-color-wrap .cherry-color-item:hover {
-    border-color: var(--oc-orange-5);
-  }
 }

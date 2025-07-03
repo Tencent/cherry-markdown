@@ -5,6 +5,8 @@
 .cherry.theme__green {
   /* ========== 基础色彩变量覆盖 ========== */
   --primary-color: var(--oc-green-9);
+  @include theme-variables();
+  
   --base-font-color: var(--primary-color);
   --base-editor-bg: var(--oc-white);
   --base-preview-bg: var(--oc-green-0);
