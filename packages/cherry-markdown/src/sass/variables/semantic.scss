@@ -52,9 +52,9 @@
   --toolbar-bg: var(--oc-white);
   --toolbar-border: var(--base-border-color);
   --toolbar-height: var(--height-toolbar);
-  --toolbar-padding: var(--spacing-md);
+  --toolbar-padding: 0 var(--spacing-xl);
   --toolbar-font-size: var(--font-size-sm);
-  --toolbar-radius: var(--radius-md);
+  --toolbar-radius: none;
   --toolbar-shadow: var(--shadow-md);
   --toolbar-split-color: var(--base-border-color);
   
@@ -64,9 +64,8 @@
   --toolbar-btn-hover-color: #5d9bfc;
   --toolbar-btn-hover-bg: #ebf3ff;
   --toolbar-btn-disabled: #ccc;
-  
-  --toolbar-btn-radius: var(--radius-sm);
-  --toolbar-btn-padding: var(--spacing-sm) var(--spacing-md);
+  --toolbar-btn-radius: var(--radius-md);
+  --toolbar-btn-padding: 0 var(--spacing-md);
   
   /* ========== 编辑器相关 ========== */
   //  ---base-editor-bg 编辑器背景颜色

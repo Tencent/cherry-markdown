@@ -160,9 +160,9 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding: 0 20px;
-  min-height: var(--height-toolbar);
-  font-size: var(--font-size-sm);
+  padding: var(--toolbar-padding);
+  min-height: var(--toolbar-height);
+  font-size: var(--toolbar-font-size);
   line-height: 2.8;
   flex-basis: 100%;
   box-sizing: border-box;
@@ -170,6 +170,7 @@
   user-select: none;
   box-shadow: var(--toolbar-shadow);
   background: var(--toolbar-bg);
+  border-radius: var(--toolbar-radius);
   overflow: hidden;
   .icon-loading {
     &.loading {
@@ -186,8 +187,8 @@
       margin-left: 2px;
       margin-top: -2px;
       border-radius: 50%;
-      border: 2px solid #000;
-      border-color: #000 transparent #000 transparent;
+      border: 2px solid var(--toolbar-btn-color);
+      border-color: var(--toolbar-btn-color) transparent var(--toolbar-btn-color) transparent;
       animation: loading 1.2s linear infinite;
     }
   }
@@ -196,19 +197,19 @@
   .toolbar-right {
     display: flex;
     align-items: center;
-    min-height: var(--height-toolbar);
+    min-height: var(--toolbar-height);
     flex-wrap: wrap;
     flex: 1;
   }
 
   .toolbar-left {
-    margin-right: 20px;
+    margin-right: var(--toolbar-padding);
   }
 
   .toolbar-right {
     flex: 0 1 auto;
     flex-direction: row-reverse;
-    margin-left: 10px;
+    margin-left: calc(var(--toolbar-padding) / 2);
     box-sizing: border-box;
     min-height: 0;
   }
@@ -225,14 +226,15 @@
 
   &-button {
     float: left;
-    padding: 0 var(--spacing-md);
+    padding: var(--toolbar-btn-padding);
     // margin: 4px 0;
     height: 38px;
     color: var(--toolbar-btn-color);
-    background: transparent;
+    background: var(--toolbar-btn-bg);
     border: 1px solid transparent;
-    -webkit-transition: background-color ease-in-out 0.15s, color ease-in-out 0.15s, border-color ease-in-out 0.15s;
-    transition: background-color ease-in-out 0.15s, color ease-in-out 0.15s, border-color ease-in-out 0.15s;
+    border-radius: var(--toolbar-btn-radius);
+    -webkit-transition: var(--transition-colors);
+    transition: var(--transition-colors);
     cursor: pointer;
     font-style: normal;
 
@@ -264,7 +266,7 @@
   .cherry-bubble,
   .cherry-sidebar {
     background: var(--toolbar-bg);
-    border-color: var(--toolbar-bg);
+    border-color: var(--toolbar-border);
 
     .cherry-toolbar-button {
       color: var(--toolbar-btn-color);
@@ -276,7 +278,7 @@
       &:hover {
         background-color: var(--toolbar-btn-hover-bg);
         color: var(--toolbar-btn-hover-color) !important;
-        border-color: var(--toolbar-bg);
+        border-color: var(--toolbar-border);
 
         i {
           color: var(--toolbar-btn-hover-color) !important;
@@ -305,12 +307,18 @@
   bottom: 0;
   overflow: hidden;
 
+  // 侧边栏按钮 非顶部工具栏
   .cherry-toolbar-button {
     height: 30px;
-    padding: 3px 12px 0 6px;
+    padding: 0 6px;
+    color: var(--toolbar-btn-color);
+    background: var(--toolbar-btn-bg);
+    border-radius: var(--toolbar-btn-radius);
+    transition: var(--transition-colors);
 
     &:hover {
-      background: transparent;
+      background: var(--toolbar-btn-hover-bg);
+      color: var(--toolbar-btn-hover-color);
     }
 
     .icon-loading {
@@ -328,8 +336,8 @@
         margin-left: 2px;
         margin-top: -2px;
         border-radius: 50%;
-        border: 2px solid #000;
-        border-color: #000 transparent #000 transparent;
+        border: 2px solid var(--toolbar-btn-color);
+        border-color: var(--toolbar-btn-color) transparent var(--toolbar-btn-color) transparent;
         animation: loading 1.2s linear infinite;
       }
     }
@@ -364,21 +372,24 @@
 
   .cherry-toolbar-button {
     float: left;
-    padding: 0 9px;
+    padding: var(--toolbar-btn-padding);
     margin: 0;
     height: var(--line-height-relaxed);
     line-height: var(--line-height-relaxed);
-    font-size: var(--font-size-sm);
-    color: var(--base-font-color);
+    font-size: var(--toolbar-font-size);
+    color: var(--toolbar-btn-color);
+    background: var(--toolbar-btn-bg);
+    border-radius: var(--toolbar-btn-radius);
     overflow: hidden;
     vertical-align: middle;
     text-align: center;
     border: 0;
     cursor: pointer;
     font-style: normal;
+    transition: var(--transition-colors);
 
     &.cherry-toolbar-split {
-      border-left: 1px solid var(--base-border-color);
+      border-left: 1px solid var(--toolbar-split-color);
       width: 0;
       padding: 0;
       overflow: hidden;
@@ -386,15 +397,16 @@
     }
 
     .ch-icon {
-      color: #aaa;
+      color: var(--toolbar-btn-color);
       font-size: var(--font-size-xs);
     }
 
     &:hover {
-      background: rgba(0, 0, 0, 0.05);
+      background: var(--toolbar-btn-hover-bg);
+      color: var(--toolbar-btn-hover-color);
 
       .ch-icon {
-        color: var(--toolbar-btn-color);
+        color: var(--toolbar-btn-hover-color);
       }
     }
   }

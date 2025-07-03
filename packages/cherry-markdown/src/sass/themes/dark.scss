@@ -120,14 +120,6 @@
 
 /** 预览区域样式 */
 .cherry-markdown.theme__dark {
-  h1,
-  h2,
-  h3,
-  h4,
-  h5 {
-    color: var(--md-heading-color);
-  }
-
   /** 目录 */
   .toc {
     border: 1px solid var(--md-hr-border);
