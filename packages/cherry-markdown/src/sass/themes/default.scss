@@ -4,109 +4,60 @@
 
 /** 编辑器样式 */
 .cherry.theme__default {
-  /* 基础色彩变量覆盖 */
-  --primary-color: #3582fb;
-  --base-font-color: #3f4a56;
-  --base-editor-bg: #ffffff;
-  --base-preview-bg: #ffffff;
-  --base-preview-mobile-bg: #ffffff;
-  --base-border-color: #dfe6ee;
+  /* ========== 基础色彩变量覆盖 ========== */
+  --primary-color: var(--oc-blue-6);
+  --base-font-color: var(--oc-gray-7);
+  --base-editor-bg: var(--oc-white);
+  --base-preview-bg: var(--oc-white);
+  --base-border-color: var(--oc-gray-3);
 
-  /* 工具栏相关变量 */
+  /* ========== 文本层级颜色 ========== */
+  --text-primary: var(--oc-gray-7);
+  --text-secondary: var(--oc-gray-6);
+  --text-muted: var(--oc-gray-6);
+
+  /* ========== 工具栏相关变量 ========== */
   --toolbar-bg-light: var(--oc-white);
-  --toolbar-bg-dark: #20304b;
-  --toolbar-btn-color-light: #3f4a56;
-  --toolbar-btn-color-dark: #d7e6fe;
-  --toolbar-btn-bg-dark: transparent;
-  --toolbar-btn-hover-bg-light: #ebf3ff;
+  --toolbar-bg-dark: var(--oc-gray-8);
+  --toolbar-btn-color-light: var(--oc-gray-7);
+  --toolbar-btn-color-dark: var(--oc-blue-1);
+
+  --toolbar-btn-hover-bg-light: var(--oc-blue-0);
   --toolbar-btn-hover-bg-dark: rgba(255, 255, 255, 0.1);
-  --toolbar-btn-hover-color-light: #5d9bfc;
-  --toolbar-btn-hover-color-dark: #fff;
+  --toolbar-btn-hover-color-light: var(--oc-blue-4);
+  --toolbar-btn-hover-color-dark: var(--oc-white);
   --toolbar-split-color: var(--base-border-color);
 
-  /* 编辑器相关变量 */
-  --editor-header-color: #3582fb;
-  --editor-string-color: #3f4a56;
-  --editor-comment-color: #3582fb;
-  --editor-quote-color: #3f4a56;
-  --editor-link-color: #3582fb;
-  --editor-url-bg-color: #d7e6fe;
-  --editor-v2-color: #3f4a56;
-  --editor-v3-color: #3582fb;
-  --editor-keyword-color: #3f4a56;
-  --editor-cursor-color: #3582fb;
-  --editor-selection-bg: #ebf3ff;
-  --color-full-width: #3582fb;
+  /* ========== 编辑器相关变量 ========== */
+  --editor-header-color: var(--primary-color);
+  --editor-string-color: var(--oc-gray-7);
+  --editor-comment-color: var(--primary-color);
+  --editor-quote-color: var(--oc-gray-7);
+  --editor-link-color: var(--primary-color);
+  --editor-url-bg-color: var(--oc-blue-1);
+  --editor-v2-color: var(--oc-gray-7);
+  --editor-v3-color: var(--primary-color);
+  --editor-keyword-color: var(--oc-gray-7);
+  --editor-cursor-color: var(--primary-color);
+  --editor-selection-bg: var(--oc-blue-0);
+  --color-full-width: var(--primary-color);
 
-  /* Markdown 相关变量 */
-  --md-color: #3f4a56;
-  --md-header-color: #3f4a56;
-  --md-line-color: #dfe6ee;
-  --md-a-color: #3582fb;
-  --md-a-hover-color: #5d9bfc;
-  --md-inline-code-color: #e74c3c;
-  --md-inline-code-bg: #e5e5e5;
-  --md-blockquote-bg: rgba(102, 128, 153, 0.05);
-
-  .cherry-toolbar {
-    /* 工具栏相关样式 */
-  }
-
-  /** 二级菜单 */
-  .cherry-dropdown {
-    .cherry-dropdown-item {
-
-      /** 图标 */
-      i {
-        /* 图标相关样式 */
-      }
-    }
-
-    /** 选择颜色的按钮 */
-    &.cherry-color-wrap {
-      .cherry-color-text {
-
-        /** 色盘的标题 */
-        h3 {
-          /* 色盘标题样式 */
-        }
-
-        /** 色盘里的每一个色块 */
-        .cherry-color-item {
-          /* 色块样式 */
-        }
-      }
-    }
-  }
-
-  /** 选中文字时弹出的按钮 */
-  .cherry-bubble {
-
-    /** 粘贴HTML内容时弹出的选择按钮 */
-    &.cherry-switch-paste {
-      /* 粘贴按钮样式 */
-    }
-  }
-
-  /** 光标focus到空行时联想出的按钮 */
-  .cherry-floatmenu {
-    /* 浮动菜单样式 */
-  }
-
-  .cherry-editor {
-    /* 编辑器相关样式 */
-  }
-
-  .cherry-sidebar {
-    /* 侧边栏相关样式 */
-  }
+  /* ========== Markdown 相关变量 ========== */
+  --md-heading-color: var(--oc-gray-7);
+  --md-paragraph-color: var(--oc-gray-7);
+  --md-link-color: var(--primary-color);
+  --md-link-hover-color: var(--oc-blue-4);
+  --md-inline-code-color: var(--oc-red-7);
+  --md-inline-code-bg: var(--oc-gray-2);
+  --md-blockquote-bg: rgba(134, 142, 150, 0.05);
+  --md-hr-border: var(--oc-gray-3);
+  --md-table-border: var(--oc-gray-3);
 
 }
 
 /** 预览区域样式 */
 .cherry-markdown.theme__default {
-  /* 预览区域样式示例 */
-  
+
   p,
   div {}
 

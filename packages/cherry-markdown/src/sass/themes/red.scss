@@ -3,14 +3,19 @@
  */
 
 .cherry.theme__red {
-  /* 基础色彩 */
+  /* ========== 基础色彩变量覆盖 ========== */
   --primary-color: var(--oc-pink-7);
   --base-font-color: var(--oc-pink-9);
   --base-editor-bg: var(--oc-pink-0);
   --base-preview-bg: var(--oc-pink-0);
   --base-border-color: var(--oc-pink-8);
 
-  /* 工具栏相关变量 */
+  /* ========== 文本层级颜色 ========== */
+  --text-primary: var(--oc-pink-9);
+  --text-secondary: var(--primary-color);
+  --text-muted: var(--oc-pink-5);
+
+  /* ========== 工具栏相关变量 ========== */
   --toolbar-bg-light: var(--oc-pink-1);
   --toolbar-bg-dark: var(--oc-pink-1);
   --toolbar-btn-color-light: var(--oc-pink-8);
@@ -22,26 +27,37 @@
   --toolbar-btn-hover-color-dark: var(--oc-pink-0);
   --toolbar-split-color: var(--oc-pink-8);
 
-  /* 编辑器相关变量 */
-  --editor-header-color: var(--oc-pink-7);
+  /* ========== 编辑器相关变量 ========== */
+  --editor-header-color: var(--primary-color);
   --editor-string-color: var(--oc-pink-5);
   --editor-comment-color: var(--oc-pink-5);
   --editor-quote-color: var(--oc-pink-9);
   --editor-link-color: var(--oc-pink-5);
   --editor-url-bg-color: var(--oc-pink-1);
   --editor-v2-color: var(--oc-pink-9);
-  --editor-v3-color: var(--oc-pink-7);
+  --editor-v3-color: var(--primary-color);
   --editor-keyword-color: var(--oc-pink-5);
   --editor-selection-bg: var(--oc-pink-2);
   --color-full-width: var(--oc-pink-5);
 
-  /* 侧边栏阴影 */
+  /* ========== Markdown 相关变量 ========== */
+  --md-heading-color: var(--primary-color);
+  --md-paragraph-color: var(--oc-pink-9);
+  --md-link-color: var(--oc-pink-5);
+  --md-link-hover-color: var(--primary-color);
+  --md-inline-code-color: var(--oc-pink-5);
+  --md-inline-code-bg: var(--oc-pink-1);
+  --md-blockquote-bg: var(--oc-pink-1);
+  --md-hr-border: var(--oc-pink-8);
+  --md-table-border: var(--oc-pink-8);
+
+  /* ========== 侧边栏阴影 ========== */
   --sidebar-shadow: 0 0 10px var(--oc-pink-2);
 }
 
 /** 预览区域样式 */
 .cherry-markdown.theme__red {
-  color: var(--base-font-color);
+  color: var(--md-paragraph-color);
   background-color: var(--base-preview-bg);
 
   h1,
@@ -49,48 +65,48 @@
   h3,
   h4,
   h5 {
-    color: var(--editor-header-color);
+    color: var(--md-heading-color);
     text-align: center;
-    border-bottom: 1px dashed var(--base-border-color);
+    border-bottom: 1px dashed var(--md-hr-border);
     padding-bottom: 15px;
     margin-bottom: 25px;
   }
 
   blockquote {
-    color: var(--base-font-color);
-    background-color: var(--oc-pink-1);
-    border-color: var(--base-border-color);
+    color: var(--md-paragraph-color);
+    background-color: var(--md-blockquote-bg);
+    border-color: var(--md-hr-border);
   }
 
   a {
     text-decoration: none;
-    color: var(--oc-pink-5);
+    color: var(--md-link-color);
 
     &:hover {
       text-decoration: underline;
-      color: var(--oc-pink-7);
+      color: var(--md-link-hover-color);
     }
   }
 
   /** 表格 */
   table,
   .cherry-table {
-    color: var(--base-font-color);
+    color: var(--md-paragraph-color);
 
     th {
-      background-color: var(--oc-pink-1);
+      background-color: var(--md-inline-code-bg);
     }
 
     tr,
     th,
     td {
-      border-color: var(--base-border-color);
+      border-color: var(--md-table-border);
     }
   }
 
   /** 目录 */
   .toc {
-    border-bottom: 1px solid var(--base-border-color);
+    border-bottom: 1px solid var(--md-hr-border);
     padding-bottom: 15px;
     margin-bottom: 30px;
 
@@ -99,17 +115,17 @@
       padding-bottom: 15px;
       margin-top: 30px;
       margin-bottom: 15px;
-      border-bottom: 1px solid var(--base-border-color);
+      border-bottom: 1px solid var(--md-hr-border);
     }
 
     .toc-li {
       border: none;
 
       a {
-        color: var(--base-font-color);
+        color: var(--md-paragraph-color);
 
         &:hover {
-          color: var(--oc-pink-7);
+          color: var(--md-link-hover-color);
         }
       }
     }
