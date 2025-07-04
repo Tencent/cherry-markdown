@@ -1015,6 +1015,7 @@
     .cherry-toc-title {
       font-size: var(--font-size-md);
       font-weight: bold;
+      color: var(--primary-color);
       padding-left: 5px;
     }
     .ch-icon-chevronsLeft {
@@ -1054,13 +1055,9 @@
       word-break: break-all;
       text-overflow: ellipsis;
       cursor: pointer;
-      &.current {
-        border-left-color: #3582fb;
-        color: #3582fb;
-      }
-      &:hover {
-        border-left-color: #3582fbaa;
-        color: #3582fbaa;
+      &:hover, &.current {
+        border-left-color: var(--primary-color);
+        color: var(--primary-color);
       }
     }
     .cherry-toc-one-a__1 {

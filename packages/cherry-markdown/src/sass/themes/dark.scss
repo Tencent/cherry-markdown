@@ -5,7 +5,7 @@
 .cherry.theme__dark {
   /* ========== 基础色彩变量覆盖 ========== */
   --primary-color: var(--oc-orange-5);
-  --secondary-color: var(--oc-yellow-3);
+  --secondary-color: #513838;
 
   --base-font-color: var(--oc-gray-4);
   --base-editor-bg: var(--oc-gray-9);
@@ -30,6 +30,11 @@
   --editor-v3-color: var(--primary-color);
   --editor-keyword-color: var(--oc-yellow-3);
   --editor-selection-bg: rgba(134, 142, 150, 0.8);
+
+  --dropdown-item-hover-bg: var(--secondary-color);
+  --dropdown-item-hover-color: var(--base-font-color);
+  --dropdown-item-active-bg: var(--secondary-color);
+  --dropdown-item-active-color: var(--primary-color);
 
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: var(--oc-orange-5);
