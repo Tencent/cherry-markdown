@@ -176,6 +176,7 @@
   user-select: none;
   box-shadow: var(--toolbar-shadow);
   background: var(--toolbar-bg);
+  border-color: var(--toolbar-border);
   border-radius: var(--toolbar-radius);
   overflow: hidden;
   .icon-loading {
@@ -247,6 +248,15 @@
     &:hover {
       color: var(--toolbar-btn-hover-color);
       background: var(--toolbar-btn-hover-bg);
+      border-color: var(--toolbar-border);
+
+      i {
+        color: var(--toolbar-btn-hover-color) !important;
+      }
+    }
+
+    i {
+      color: var(--toolbar-btn-color);
     }
 
     &.cherry-toolbar-split {
@@ -263,33 +273,6 @@
 
     &.disabled {
       color: var(--toolbar-btn-disabled);
-    }
-  }
-
-  // 工具栏按钮通用样式结构
-  .cherry-toolbar,
-  .cherry-floatmenu,
-  .cherry-bubble,
-  .cherry-sidebar {
-    background: var(--toolbar-bg);
-    border-color: var(--toolbar-border);
-
-    .cherry-toolbar-button {
-      color: var(--toolbar-btn-color);
-
-      i {
-        color: var(--toolbar-btn-color);
-      }
-
-      &:hover {
-        background-color: var(--toolbar-btn-hover-bg);
-        color: var(--toolbar-btn-hover-color) !important;
-        border-color: var(--toolbar-border);
-
-        i {
-          color: var(--toolbar-btn-hover-color) !important;
-        }
-      }
     }
   }
 
@@ -312,6 +295,9 @@
   z-index: 11;
   bottom: 0;
   overflow: hidden;
+  background: var(--toolbar-bg);
+  border-color: var(--toolbar-border);
+  box-shadow: var(--shadow-md);
 
   // 侧边栏按钮 非顶部工具栏
   .cherry-toolbar-button {
@@ -375,6 +361,8 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  background: var(--toolbar-bg);
+  border-color: var(--toolbar-border);
 
   .cherry-toolbar-button {
     float: left;
@@ -410,10 +398,19 @@
     &:hover {
       background: var(--toolbar-btn-hover-bg);
       color: var(--toolbar-btn-hover-color);
+      border-color: var(--toolbar-border);
 
       .ch-icon {
         color: var(--toolbar-btn-hover-color);
       }
+
+      i {
+        color: var(--toolbar-btn-hover-color) !important;
+      }
+    }
+
+    i {
+      color: var(--toolbar-btn-color);
     }
   }
 }
@@ -425,6 +422,7 @@
   width: 50%;
   box-sizing: border-box;
   overflow: hidden;
+  background-color: var(--base-editor-bg);
 
   &.cherry-editor--full {
     width: 100%;
@@ -475,13 +473,48 @@
 
   .CodeMirror {
     font-family: var(--font-family-sans);
-    background: var(--base-editor-bg);
+    background-color: var(--base-editor-bg);
     color: var(--base-font-color);
 
     // codemirror 依赖隐藏的 textarea 计算行高，这里将字体大小设置为行高，避免输入法遮挡内容
     // Fixed https://github.com/Tencent/cherry-markdown/issues/82
     textarea {
       font-size: var(--md-paragraph-line-height);
+    }
+
+    .CodeMirror-cursor {
+      border-left: 1px solid var(--editor-cursor-color);
+    }
+
+    .CodeMirror-selected {
+      background-color: var(--editor-selection-bg);
+    }
+
+    .CodeMirror-scroll {
+      span,
+      .cm-variable-2,
+      .cm-string,
+      .cm-strong,
+      .cm-em,
+      .cm-meta {
+        color: var(--base-font-color);
+      }
+
+      .cm-image-marker,
+      .cm-quote,
+      .cm-header,
+      .cm-atom {
+        color: var(--editor-header-color);
+      }
+
+      .cm-url {
+        background-color: var(--editor-url-bg-color);
+      }
+
+      .cm-comment,
+      .cm-url {
+        color: var(--editor-comment-color);
+      }
     }
   }
 
@@ -553,54 +586,6 @@
     color: var(--full-width-color) !important;
     z-index: 3;
     cursor: pointer;
-  }
-}
-
-// 编辑器主题通用样式
-.cherry {
-  &[class*="theme__"] {
-    .cherry-editor {
-      background-color: var(--base-editor-bg);
-
-      .CodeMirror {
-        background-color: var(--base-editor-bg);
-
-        .CodeMirror-cursor {
-          border-left: 1px solid var(--editor-cursor-color);
-        }
-
-        .CodeMirror-scroll {
-          span,
-          .cm-variable-2,
-          .cm-string,
-          .cm-strong,
-          .cm-em,
-          .cm-meta {
-            color: var(--base-font-color);
-          }
-
-          .cm-image-marker,
-          .cm-quote,
-          .cm-header,
-          .cm-atom {
-            color: var(--editor-header-color);
-          }
-
-          .cm-url {
-            background-color: var(--editor-url-bg-color);
-          }
-
-          .cm-comment,
-          .cm-url {
-            color: var(--editor-comment-color);
-          }
-        }
-
-        .CodeMirror-selected {
-          background-color: var(--editor-selection-bg);
-        }
-      }
-    }
   }
 }
 

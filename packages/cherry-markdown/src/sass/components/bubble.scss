@@ -13,7 +13,8 @@
   min-width: 50px;
 
   border: var(--border-width-1) solid var(--bubble-border);
-  background-color: var(--bubble-bg);
+  background: var(--toolbar-bg);
+  border-color: var(--toolbar-border);
   box-shadow: var(--bubble-shadow);
   border-radius: var(--bubble-radius);
   z-index: var(--bubble-z-index);
@@ -63,10 +64,18 @@
     cursor: pointer;
     user-select: none;
 
+    i {
+      color: var(--toolbar-btn-color);
+    }
+
     &:hover {
       border-color: var(--toolbar-border);
       background-color: var(--toolbar-btn-hover-bg);
       color: var(--toolbar-btn-hover-color);
+
+      i {
+        color: var(--toolbar-btn-hover-color) !important;
+      }
     }
 
     &.cherry-toolbar-split {
