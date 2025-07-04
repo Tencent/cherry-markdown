@@ -5,7 +5,6 @@
 .cherry.theme__violet {
   /* ========== 基础色彩变量覆盖 ========== */
   --primary-color: var(--oc-violet-9);
-  @include theme-variables();
 
   --base-font-color: var(--primary-color);
   --base-editor-bg: var(--oc-white);

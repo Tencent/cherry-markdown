@@ -17,6 +17,7 @@
   box-shadow: var(--bubble-shadow);
   border-radius: var(--bubble-radius);
   z-index: var(--bubble-z-index);
+  padding: var(--bubble-padding);
 
   &.cherry-bubble--centered {
     left: 50%;
