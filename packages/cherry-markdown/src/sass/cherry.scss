@@ -120,37 +120,43 @@
   position: absolute;
   width: 130px;
   min-height: 40px;
-  background: var(--toolbar-bg);
-  //border: 1px solid var(--base-border-color);
-  box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.5);
+  background: var(--dropdown-bg);
+  border: 1px solid var(--dropdown-border);
+  box-shadow: var(--dropdown-shadow);
+  padding: var(--dropdown-padding);
+  border-radius: var(--dropdown-radius);
   margin-left: -60px;
   z-index: 13;
 
   &-item {
-    width: 100%;
-    padding: 0 15px;
+    width: calc(100% - 8px);
+    padding: var(--dropdown-item-padding);
     text-align: left;
-    display: inline-block;
-    height: 36px;
-    line-height: 36px;
+    display: block;
+    min-height: var(--dropdown-item-height);
+    line-height: var(--line-height-relaxed);
     font-size: var(--font-size-sm);
     font-style: normal;
     cursor: pointer;
     box-sizing: border-box;
     color: var(--toolbar-btn-color);
     background: var(--toolbar-btn-bg);
+    border-radius: var(--dropdown-item-radius);
+    margin: 2px 4px;
+    transition: var(--transition-colors);
 
     &:hover {
-      background: var(--toolbar-btn-hover-bg);
-      color: var(--toolbar-btn-hover-color);
+      background: var(--dropdown-item-hover-bg);
+      color: var(--dropdown-item-hover-color);
     }
     &__selected {
-      background: var(--toolbar-btn-hover-bg);
-      color: var(--toolbar-btn-hover-color);
+      background: var(--dropdown-item-active-bg);
+      color: var(--dropdown-item-active-color);
     }
 
     .ch-icon {
-      margin-right: 10px;
+      margin-right: 8px;
+      vertical-align: middle;
     }
   }
 }
@@ -372,14 +378,14 @@
 
   .cherry-toolbar-button {
     float: left;
-    padding: var(--toolbar-btn-padding);
+    padding: 0 var(--spacing-sm);
     margin: 0;
     height: var(--line-height-relaxed);
     line-height: var(--line-height-relaxed);
     font-size: var(--toolbar-font-size);
     color: var(--toolbar-btn-color);
     background: var(--toolbar-btn-bg);
-    border-radius: var(--toolbar-btn-radius);
+    border-radius: var(--radius-xs);
     overflow: hidden;
     vertical-align: middle;
     text-align: center;

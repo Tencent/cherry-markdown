@@ -5,10 +5,11 @@
 .cherry.theme__green {
   /* ========== 基础色彩变量覆盖 ========== */
   --primary-color: var(--oc-green-9);
-  
+  --secondary-color: var(--oc-green-0);
+
   --base-font-color: var(--primary-color);
   --base-editor-bg: var(--oc-white);
-  --base-preview-bg: var(--oc-green-0);
+  --base-preview-bg: var(--secondary-color);
   --base-border-color: var(--oc-green-8);
 
   /* ========== 文本层级颜色 ========== */
@@ -20,7 +21,7 @@
   --toolbar-bg: var(--oc-white);
   --toolbar-btn-color: var(--primary-color);
   --toolbar-btn-hover-bg: var(--oc-green-5);
-  --toolbar-btn-hover-color: var(--oc-green-0);
+  --toolbar-btn-hover-color: var(--secondary-color);
   --toolbar-split-color: var(--oc-green-8);
 
   /* ========== 编辑器相关变量 ========== */
@@ -29,7 +30,7 @@
   --editor-comment-color: var(--oc-green-6);
   --editor-quote-color: var(--primary-color);
   --editor-link-color: var(--oc-green-6);
-  --editor-url-bg-color: var(--oc-green-0);
+  --editor-url-bg-color: var(--secondary-color);
   --editor-v2-color: var(--primary-color);
   --editor-v3-color: var(--oc-green-7);
   --editor-keyword-color: var(--oc-green-6);
