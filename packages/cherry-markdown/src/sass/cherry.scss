@@ -176,7 +176,6 @@
   user-select: none;
   box-shadow: var(--toolbar-shadow);
   background: var(--toolbar-bg);
-  border-color: var(--toolbar-border);
   border-radius: var(--toolbar-radius);
   overflow: hidden;
   .icon-loading {
@@ -248,15 +247,6 @@
     &:hover {
       color: var(--toolbar-btn-hover-color);
       background: var(--toolbar-btn-hover-bg);
-      border-color: var(--toolbar-border);
-
-      i {
-        color: var(--toolbar-btn-hover-color) !important;
-      }
-    }
-
-    i {
-      color: var(--toolbar-btn-color);
     }
 
     &.cherry-toolbar-split {
@@ -273,6 +263,33 @@
 
     &.disabled {
       color: var(--toolbar-btn-disabled);
+    }
+  }
+
+  // 工具栏按钮通用样式结构
+  .cherry-toolbar,
+  .cherry-floatmenu,
+  .cherry-bubble,
+  .cherry-sidebar {
+    background: var(--toolbar-bg);
+    border-color: var(--toolbar-border);
+
+    .cherry-toolbar-button {
+      color: var(--toolbar-btn-color);
+
+      i {
+        color: var(--toolbar-btn-color);
+      }
+
+      &:hover {
+        background-color: var(--toolbar-btn-hover-bg);
+        color: var(--toolbar-btn-hover-color) !important;
+        border-color: var(--toolbar-border);
+
+        i {
+          color: var(--toolbar-btn-hover-color) !important;
+        }
+      }
     }
   }
 
@@ -295,9 +312,6 @@
   z-index: 11;
   bottom: 0;
   overflow: hidden;
-  background: var(--toolbar-bg);
-  border-color: var(--toolbar-border);
-  box-shadow: var(--shadow-md);
 
   // 侧边栏按钮 非顶部工具栏
   .cherry-toolbar-button {
@@ -361,8 +375,6 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  background: var(--toolbar-bg);
-  border-color: var(--toolbar-border);
 
   .cherry-toolbar-button {
     float: left;
@@ -398,19 +410,10 @@
     &:hover {
       background: var(--toolbar-btn-hover-bg);
       color: var(--toolbar-btn-hover-color);
-      border-color: var(--toolbar-border);
 
       .ch-icon {
         color: var(--toolbar-btn-hover-color);
       }
-
-      i {
-        color: var(--toolbar-btn-hover-color) !important;
-      }
-    }
-
-    i {
-      color: var(--toolbar-btn-color);
     }
   }
 }
