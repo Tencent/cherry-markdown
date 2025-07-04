@@ -4,6 +4,7 @@
 .cherry {
   /* ========== 基础色彩映射 ========== */
   --base-font-color: #3f4a56;
+  --base-sub-font-color: #6d6e6f;
   --base-border-color: #dfe6ee;
   --base-editor-bg: #ffffff;
   --base-preview-bg: #ffffff;
@@ -44,6 +45,7 @@
   --dropdown-radius: var(--radius-xl);
   --dropdown-padding: var(--spacing-xs) 0;
   
+  // 下拉菜单项
   --dropdown-item-height: var(--height-button);
   --dropdown-item-radius: var(--dropdown-radius);
   --dropdown-item-padding: var(--spacing-sm) var(--spacing-md);
@@ -69,6 +71,8 @@
   --editor-string-color: var(--base-font-color);
   --editor-link-color: var(--oc-blue-6);
   --editor-url-bg-color: #d7e6fe;
+  --editor-v2-color: var(--primary-color);
+  --editor-v3-color: var(--secondary-color);
   --editor-keyword-color: var(--base-font-color);
   --editor-cursor-color: var(--primary-color);
   --editor-selection-bg: var(--oc-blue-1);
@@ -86,122 +90,27 @@
   /* ========== Markdown 元素样式 ========== */
   // 标题
   --md-heading-color: var(--base-font-color);
-  --md-heading-font-weight: var(--font-weight-bold);
-  --md-heading-margin-top: var(--spacing-xl);
-  --md-heading-margin-bottom: var(--spacing-md);
-  --md-heading-font-family: var(--font-family-sans);
-  
-  // 副标题
-  --md-subtitle-color: #6d6e6f;
   
   // 段落
   --md-paragraph-color: var(--base-font-color);
   --md-paragraph-line-height: var(--line-height-relaxed);
-  --md-paragraph-margin-bottom: var(--spacing-md);
-  --md-paragraph-font-size: var(--font-size-md);
   
   // 链接
   --md-link-color: var(--oc-blue-6);
   --md-link-hover-color: var(--color-link-hover);
-  --md-link-decoration: underline;
   
   // 行内代码
   --md-inline-code-color: var(--color-error);
   --md-inline-code-bg: #e5e5e5;
-  --md-inline-code-padding: 2px var(--spacing-xs);
-  --md-inline-code-radius: var(--radius-sm);
-  --md-inline-code-font-size: 0.875em;
-  --md-inline-code-font-family: var(--font-family-mono);
-  
-  // 代码块
-  --md-code-block-bg: #00212b;
-  --md-code-block-color: var(--oc-gray-1);
-  --md-code-block-padding: var(--spacing-md);
-  --md-code-block-radius: var(--radius-md);
-  --md-code-block-border: var(--oc-gray-7);
-  --md-code-block-font-family: var(--font-family-mono);
-  --md-code-block-font-size: var(--font-size-sm);
   
   // 引用
   --md-blockquote-bg: rgba(102, 128, 153, 0.05);
   --md-blockquote-border: #D6DBDF;
-  --md-blockquote-color: var(--md-subtitle-color);
-  --md-blockquote-padding: var(--spacing-md);
-  --md-blockquote-border-width: var(--border-width-4);
-  --md-blockquote-font-style: italic;
+  --md-blockquote-color: var(--base-sub-font-color);
   
   // 表格
   --md-table-border: var(--base-border-color);
-  --md-table-header-bg: var(--oc-gray-0);
-  --md-table-header-color: var(--base-font-color);
-  --md-table-row-hover-bg: var(--oc-gray-0);
-  --md-table-cell-padding: var(--spacing-sm) var(--spacing-md);
-  --md-table-border-width: var(--border-width-1);
-  
-  // 列表
-  --md-list-margin-bottom: var(--spacing-md);
-  --md-list-item-margin-bottom: var(--spacing-xs);
-  --md-list-padding-left: var(--spacing-xl);
   
   // 分割线
   --md-hr-border: var(--base-border-color);
-  --md-hr-margin: var(--spacing-xl) 0;
-  --md-hr-border-width: var(--border-width-1);
-  
-  /* ========== 侧边栏 ========== */
-  --sidebar-bg: var(--oc-white);
-  --sidebar-border: var(--base-border-color);
-  --sidebar-shadow: var(--shadow-md);
-  --sidebar-width: 240px;
-  --sidebar-z-index: var(--z-index-fixed);
-  
-  /* ========== 滚动条 ========== */
-  --scrollbar-width: 8px;
-  --scrollbar-track-bg: var(--oc-gray-1);
-  --scrollbar-thumb-bg: var(--oc-gray-3);
-  --scrollbar-thumb-hover-bg: var(--oc-gray-4);
-  --scrollbar-radius: var(--radius-full);
-  
-  /* ========== 输入框 ========== */
-  --input-bg: var(--oc-white);
-  --input-border: var(--base-border-color);
-  --input-color: var(--base-font-color);
-  --input-placeholder-color: var(--oc-gray-4);
-  --input-focus-border: var(--oc-blue-6);
-  --input-focus-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  --input-radius: var(--radius-md);
-  --input-padding: var(--spacing-sm) var(--spacing-md);
-  --input-font-size: var(--font-size-md);
-  --input-height: var(--height-input);
-  
-  /* ========== 按钮 ========== */
-  --button-primary-bg: var(--oc-blue-6);
-  --button-primary-color: var(--oc-white);
-  --button-primary-hover-bg: var(--oc-blue-7);
-  --button-primary-active-bg: var(--oc-blue-8);
-  
-  --button-secondary-bg: var(--oc-gray-1);
-  --button-secondary-color: var(--oc-gray-7);
-  --button-secondary-hover-bg: var(--oc-gray-2);
-  --button-secondary-active-bg: var(--oc-gray-3);
-  
-  --button-danger-bg: var(--color-error);
-  --button-danger-color: var(--oc-white);
-  --button-danger-hover-bg: #dc2626;
-  --button-danger-active-bg: #b91c1c;
-  
-  --button-radius: var(--radius-md);
-  --button-padding: var(--spacing-sm) var(--spacing-lg);
-  --button-font-size: var(--font-size-md);
-  --button-font-weight: var(--font-weight-medium);
-  --button-height: var(--height-button);
-  
-  /* ========== 动画 ========== */
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-  --transition-slow: 350ms ease;
-  
-  --transition-colors: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
-  --transition-shadow: box-shadow 150ms ease;
-  --transition-transform: transform 150ms ease;
 }

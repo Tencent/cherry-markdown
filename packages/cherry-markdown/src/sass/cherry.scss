@@ -143,7 +143,7 @@
     background: var(--toolbar-btn-bg);
     border-radius: var(--dropdown-item-radius);
     margin: 2px 4px;
-    transition: var(--transition-colors);
+    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
 
     &:hover {
       background: var(--dropdown-item-hover-bg);
@@ -239,8 +239,8 @@
     background: var(--toolbar-btn-bg);
     border: 1px solid transparent;
     border-radius: var(--toolbar-btn-radius);
-    -webkit-transition: var(--transition-colors);
-    transition: var(--transition-colors);
+    -webkit-transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
     cursor: pointer;
     font-style: normal;
 
@@ -294,7 +294,7 @@
   }
 
   .cherry-sidebar {
-    box-shadow: var(--sidebar-shadow);
+    box-shadow: var(--shadow-md);
   }
 }
 
@@ -320,7 +320,7 @@
     color: var(--toolbar-btn-color);
     background: var(--toolbar-btn-bg);
     border-radius: var(--toolbar-btn-radius);
-    transition: var(--transition-colors);
+    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
 
     &:hover {
       background: var(--toolbar-btn-hover-bg);
@@ -392,7 +392,7 @@
     border: 0;
     cursor: pointer;
     font-style: normal;
-    transition: var(--transition-colors);
+    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
 
     &.cherry-toolbar-split {
       border-left: 1px solid var(--toolbar-split-color);
