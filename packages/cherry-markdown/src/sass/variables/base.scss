@@ -2,16 +2,6 @@
 // 基于现有 variable.scss 中的 SCSS 变量转换而来
 
 :root {
-  /* ========== 色彩系统 ========== */
-  // 语义色彩
-  --color-success: var(--oc-green-6);
-  --color-warning: var(--oc-yellow-6);
-  --color-error: var(--oc-red-6);
-  --color-info: var(--oc-blue-6);
-
-  // 特殊色彩
-  --color-full-width: var(--oc-red-7);
-  --color-link-hover: var(--oc-blue-8);
   
   /* ========== 尺寸系统 ========== */
   // 间距

@@ -16,16 +16,16 @@
     padding: 10px;
     border-radius: 5px;
     z-index: 11;
-    box-shadow: var(--previewer-handler-shadow);
-    background: var(--previewer-bg);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    background: var(--oc-white);
   }
   .footnote.hidden {
     display: none;
   }
   .cherry-previewer-img-size-handler {
     position:absolute;
-    box-shadow: var(--previewer-img-handler-shadow);
-    border:1px solid var(--previewer-img-handler-border);
+    box-shadow: 0 1px 4px 0 rgba(20,81,154, 0.5);
+    border:1px solid var(--primary-color);
     box-sizing: content-box;
     pointer-events:none;
     .cherry-previewer-img-size-handler__points {
@@ -35,10 +35,10 @@
       margin-top: -7px;
       margin-left: -7px;
       border-radius: 9px;
-      background: var(--previewer-img-point-bg);
-      border: 2px solid var(--previewer-img-point-border);
+      background: var(--primary-color);
+      border: 2px solid var(--oc-white);
       box-sizing: content-box;
-      box-shadow: var(--previewer-img-point-shadow);
+      box-shadow: 0px 2px 2px 0px rgba(20,81,154,0.5);
       pointer-events:all;
     }
     .cherry-previewer-img-size-handler__background {
@@ -90,7 +90,7 @@
         border: 0;
         box-sizing: border-box;
         resize: none;
-        outline: 1px solid var(--previewer-table-outline);
+        outline: 1px solid var(--primary-color);
         word-break: break-all;
       }
     }
@@ -117,18 +117,18 @@
       display: flex;
       justify-content: center;
       position: absolute;
-      color: var(--previewer-table-symbol-color);
-      width: var(--previewer-table-symbol-size);
-      height: var(--previewer-table-symbol-size);
-      line-height: var(--previewer-table-symbol-size);
-      border: 1px solid var(--previewer-table-symbol-border);
-      background-color: var(--previewer-table-symbol-bg);
+      color: var(--primary-color);
+      width: 12px;
+      height: 12px;
+      line-height: 12px;
+      border: 1px solid rgba(53, 130, 251, 0);
+      background-color: transparent;
       border-radius: 3px;
       cursor: pointer;
       transition: all 0.3s;
       &:hover {
-        background-color: var(--previewer-table-symbol-hover-bg);
-        color: var(--previewer-table-symbol-hover-color);
+        background-color: rgba(53, 130, 251, 0.53);
+        color: var(--oc-white);
       }
     }
     &__sort {
@@ -136,20 +136,20 @@
       display: flex;
       justify-content: center;
       position: absolute;
-      color: var(--previewer-table-symbol-color);
-      width: var(--previewer-table-symbol-size);
-      height: var(--previewer-table-symbol-size);
+      color: var(--primary-color);
+      width: 12px;
+      height: 12px;
       padding: 5px 0;
-      line-height: var(--previewer-table-symbol-size);
-      border: 1px solid var(--previewer-table-symbol-border);
-      background-color: var(--previewer-table-symbol-bg);
+      line-height: 12px;
+      border: 1px solid rgba(53, 130, 251, 0);
+      background-color: transparent;
       border-radius: 3px;
       cursor: pointer;
       transition: all 0.3s;
       &:hover {
-        background-color: var(--previewer-table-symbol-hover-bg);
-        border-color: var(--previewer-table-symbol-hover-bg);
-        color: var(--previewer-table-symbol-hover-color);
+        background-color: rgba(53, 130, 251, 0.53);
+        border-color: rgba(53, 130, 251, 0.53);
+        color: var(--oc-white);
       }
       &[data-type='ColUp'], &[data-type='ColDown'] {
         padding: 0 5px;
@@ -158,21 +158,21 @@
     &__delete {
       pointer-events: auto;
       position: absolute;
-      color: var(--previewer-table-delete-color);
+      color: var(--color-error);
       width: 25px;
       height: 15px;
       font-size: var(--font-size-xs);
       line-height: var(--font-size-xs);
-      border: 1px solid var(--previewer-table-delete-border);
+      border: 1px solid var(--color-error);
       border-radius: 3px;
-      background-color: var(--previewer-table-delete-bg);
-      color: var(--previewer-table-delete-color);
+      background-color: transparent;
+      color: var(--color-error);
       cursor: pointer;
       transition: all 0.3s;
       &:hover {
-        background-color: var(--previewer-table-delete-hover-bg);
-        border-color: var(--previewer-table-delete-hover-border);
-        color: var(--previewer-table-delete-hover-color);
+        background-color: var(--color-error);
+        border-color: var(--color-error);
+        color: var(--oc-white);
       }
       &[data-type='left'], &[data-type='right'] {
         padding: 0;
@@ -182,9 +182,9 @@
     }
   }
   @keyframes changeBgColor {
-    0% { background-color: var(--previewer-highlight-start); }
-    60% { background-color: var(--previewer-highlight-mid); }
-    100% { background-color: var(--previewer-highlight-end); }
+    0% { background-color: #ffffcc88; }
+    60% { background-color: #ffffcc88; }
+    100% { background-color: #ffffcc00; }
   }
   .cherry-highlight-line {
     animation: changeBgColor 3s;

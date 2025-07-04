@@ -51,7 +51,7 @@
 
 .cherry {
   @include cherryFont;
-  line-height: var(--line-height-relaxed);
+  line-height: var(--md-paragraph-line-height);
   color: var(--base-font-color);
   background: var(--base-editor-bg);
   box-shadow: var(--shadow-md);
@@ -481,7 +481,7 @@
     // codemirror 依赖隐藏的 textarea 计算行高，这里将字体大小设置为行高，避免输入法遮挡内容
     // Fixed https://github.com/Tencent/cherry-markdown/issues/82
     textarea {
-      font-size: var(--line-height-relaxed);
+      font-size: var(--md-paragraph-line-height);
     }
   }
 
@@ -550,7 +550,7 @@
   }
 
   .cm-s-default .cm-fullWidth {
-    color: var(--color-full-width);
+    color: var(--full-width-color) !important;
     z-index: 3;
     cursor: pointer;
   }
