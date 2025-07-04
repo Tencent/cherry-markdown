@@ -93,6 +93,26 @@
   --opacity-95: 0.95;
   --opacity-100: 1;
   
+  /* ========== 毛玻璃效果 ========== */
+  // 毛玻璃模糊度
+  --blur-none: 0;
+  --blur-sm: 4px;
+  --blur-md: 8px;
+  --blur-lg: 12px;
+  --blur-xl: 16px;
+  --blur-2xl: 24px;
+  --blur-3xl: 40px;
+  
+  // 毛玻璃背景色
+  --glass-bg-white: rgba(255, 255, 255, 0.8);
+  --glass-bg-gray: rgba(248, 250, 252, 0.8);
+  --glass-bg-dark: rgba(51, 65, 85, 0.8);
+  --glass-bg-black: rgba(0, 0, 0, 0.8);
+
+  // 毛玻璃边框
+  --glass-border-light: rgba(255, 255, 255, 0.2);
+  --glass-border-dark: rgba(255, 255, 255, 0.1);
+
   /* ========== Z-index 层级 ========== */
   --z-index-dropdown: 1000;
   --z-index-sticky: 1020;
