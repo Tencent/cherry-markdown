@@ -9,7 +9,7 @@
 
   --base-font-color: var(--oc-gray-4);
   --base-editor-bg: var(--oc-gray-9);
-  --base-preview-bg: var(--oc-gray-8);
+  --base-previewer-bg: var(--oc-gray-8);
   --base-border-color: var(--oc-gray-5);
 
   /* ========== 工具栏相关变量 ========== */
@@ -177,7 +177,7 @@
     }
 
     100% {
-      background-color: var(--base-preview-bg);
+      background-color: var(--base-previewer-bg);
     }
   }
 

@@ -9,7 +9,7 @@
 
   --base-font-color: var(--primary-color);
   --base-editor-bg: var(--oc-white);
-  --base-preview-bg: var(--secondary-color);
+  --base-previewer-bg: var(--secondary-color);
   --base-border-color: var(--oc-green-8);
 
   /* ========== 工具栏相关变量 ========== */
@@ -30,6 +30,9 @@
   --editor-v3-color: var(--oc-green-7);
   --editor-keyword-color: var(--oc-green-6);
   --editor-selection-bg: var(--oc-green-2);
+
+  /* ========== 预览器相关变量 ========== */
+  --previewer-mobile-bg: var(--oc-white);
 
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: var(--oc-green-7);

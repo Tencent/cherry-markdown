@@ -7,7 +7,7 @@
   --base-sub-font-color: #6d6e6f;
   --base-border-color: #dfe6ee;
   --base-editor-bg: #ffffff;
-  --base-preview-bg: #ffffff;
+  --base-previewer-bg: #ffffff;
   
   /* ========== 主题色彩系统 ========== */
   --primary-color: #3582fb;
@@ -80,12 +80,8 @@
   --editor-active-line-bg: var(--oc-gray-0);
   
   /* ========== 预览器相关 ========== */
-  // --base-editor-bg 预览器背景颜色
-  --preview-mobile-bg-color: var(--base-preview-bg);
-  --previewer-color: var(--base-font-color);
-  --previewer-border: var(--base-border-color);
-  --previewer-padding: var(--spacing-lg);
-  --previewer-font-family: var(--font-family-sans);
+  // --base-previewer-bg 预览器背景颜色
+  --previewer-mobile-bg: var(--base-previewer-bg);
   
   /* ========== Markdown 元素样式 ========== */
   // 标题
