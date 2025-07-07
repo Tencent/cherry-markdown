@@ -417,7 +417,6 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     mainTheme: 'light',
     codeBlockTheme: 'default',
     inlineCodeTheme: 'red', // red or black
-    toolbarTheme: 'dark', // light or dark 优先级低于mainTheme
   },
   // 预览页面不需要绑定事件
   isPreviewOnly: false,
