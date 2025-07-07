@@ -75,7 +75,7 @@
     }
   }
   .shortcut-panel-title, .shortcut-panel-settings {
-    font-size: 14px;
+    font-size: var(--font-size-sm);
     padding: 10px 15px;
     background-color: #eee; 
     // border-bottom: 1px solid #888;
@@ -83,7 +83,7 @@
   }
   .shortcut-panel-settings {
     padding: 10px 15px;
-    font-size: 12px;
+    font-size: var(--font-size-xs);
     cursor: pointer;
     user-select: none;
     border-bottom: 1px solid #aaa;

@@ -1,255 +1,160 @@
-@import '../variable.scss';
+/*
+ * 默认主题
+ */
 
 /** 编辑器样式 */
 .cherry.theme__default {
+  /* ========== 基础色彩变量覆盖 ========== */
+  --primary-color: var(--oc-blue-6);
+  --secondary-color: var(--oc-blue-0);
   
-  .cherry-toolbar {
-    
-  }
+  --base-font-color: var(--oc-gray-7);
+  --base-editor-bg: var(--oc-white);
+  --base-previewer-bg: var(--oc-white);
+  --base-border-color: var(--oc-gray-3);
 
-  /** 二级菜单 */
-  .cherry-dropdown {
-    .cherry-dropdown-item {
-      /** 图标 */
-      i {
+  /* ========== 工具栏相关变量 ========== */
+  --toolbar-bg: #1E314B;
+  --toolbar-btn-color: var(--oc-gray-4);
+  --toolbar-btn-hover-bg: var(--oc-gray-2);
+  --toolbar-btn-hover-color: var(--oc-blue-4);
+  --toolbar-split-color: var(--oc-blue-5);
 
-      }
-    }
-    /** 选择颜色的按钮 */
-    &.cherry-color-wrap {
-      .cherry-color-text {
-        /** 色盘的标题 */
-        h3 {
+  /* ========== 编辑器相关变量 ========== */
+  --editor-header-color: var(--primary-color);
+  --editor-string-color: var(--oc-gray-7);
+  --editor-comment-color: var(--primary-color);
+  --editor-quote-color: var(--oc-gray-7);
+  --editor-link-color: var(--primary-color);
+  --editor-url-bg-color: var(--oc-blue-1);
+  --editor-v2-color: var(--oc-gray-7);
+  --editor-v3-color: var(--primary-color);
+  --editor-keyword-color: var(--oc-gray-7);
+  --editor-selection-bg: var(--oc-blue-0);
 
-        }
-        /** 色盘里的每一个色块 */
-        .cherry-color-item {
-
-        }
-      }
-    }
-  }
-
-  /** 选中文字时弹出的按钮 */
-  .cherry-bubble {
-
-    /** 粘贴HTML内容时弹出的选择按钮 */
-    &.cherry-switch-paste {
-  
-    }
-  }
-
-
-  /** 光标focus到空行时联想出的按钮 */
-  .cherry-floatmenu {
-
-  }
-
-  .cherry-editor {
-
-  }
-
-  .cherry-sidebar {
-
-  }
-
+  /* ========== Markdown 相关变量 ========== */
+  --md-heading-color: var(--oc-gray-7);
+  --md-paragraph-color: var(--oc-gray-7);
+  --md-link-color: var(--primary-color);
+  --md-link-hover-color: var(--oc-blue-4);
+  --md-inline-code-color: var(--oc-red-7);
+  --md-inline-code-bg: var(--oc-gray-2);
+  --md-blockquote-bg: rgba(134, 142, 150, 0.05);
+  --md-hr-border: var(--oc-gray-3);
+  --md-table-border: var(--oc-gray-3);
 }
+
 /** 预览区域样式 */
 .cherry-markdown.theme__default {
 
-  p, div {
-  
-  }
-  
-  h1 {
-    
-  }
-  
-  h2 {
-    
-  }
-  
-  h3 {
-    
-  }
+  p,
+  div {}
 
-  h4 {
+  h1 {}
 
-  }
+  h2 {}
 
-  h5 {
+  h3 {}
 
-  }
+  h4 {}
 
-  h1, h2, h3, h4, h5, h6 {
+  h5 {}
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     /** 标题前面的锚点或序号 */
-    .anchor {
-
-    }
-  }
-  
-  ul {
-    &.cherry-list__upper-roman {
-      list-style: upper-roman;
-    }
-  
-    &.cherry-list__lower-alpha {
-      list-style: lower-alpha;
-    }
-  
-    &.cherry-list__lower-greek {
-      list-style: lower-greek;
-    }
-  
-    &.cherry-list__cjk-ideographic {
-      list-style: cjk-ideographic;
-    }
-  
-    &.cherry-list__circle {
-      list-style: circle;
-    }
-  
-    &.cherry-list__square {
-      list-style: square;
-    }
-
-    &.cherry-list__default {
-
-    }
-
-    /** checklist 模式，未勾选时 */
-    .ch-icon-square {
-
-    }
-    /** checklist 模式，勾选时 */
-    .ch-icon-check {
-
-    }
-  }
-  
-  ol {
-    li {
-      
-    }
+    .anchor {}
   }
 
+  /** checklist 模式，未勾选时 */
+  .ch-icon-square {}
 
-  blockquote {
-  
-  }
-  
+  /** checklist 模式，勾选时 */
+  .ch-icon-check {}
+
+  blockquote {}
+
   a {
-    
-  }
-  
-  strong {
-    
-  }
-  
-  em {
-    
-  }
-  
-  del {
-    
+    &:hover {}
   }
 
-  sup {
+  strong {}
 
-  }
+  em {}
 
-  sub {
+  del {}
 
-  }
-  
-  hr {
-    
-  }
-  
-  img {
-    
-  }
+  sup {}
 
-  video {
+  sub {}
 
-  }
+  hr {}
 
-  audio {
+  img {}
 
-  }
-  
+  video {}
+
+  audio {}
+
   /** 行内代码 */
-  code:not([class]) {
-    
-  }
-  
+  code:not([class]) {}
+
   /** 
-  * 代码块
-  */
-  pre code {
-    
-  }
-  
+   * 代码块
+   */
+  pre code {}
+
   /** 
-  * 表格
-  */
-  table {
-    tr {
-  
-    }
-    th {
-  
-    }
-    td {
-  
-    }
+   * 表格
+   */
+  table,
+  .cherry-table {
+    tr {}
+
+    th {}
+
+    td {}
   }
 
   /** 可以理解为上下结构的音标，下部是文字，上部是对应的拼音 */
   ruby {
     /** 上部的拼音 */
-    rt {
-
-    }
+    rt {}
   }
-  
+
   /** 脚注 */
   .footnote {
-    .footnote-title {
-  
-    }
+    .footnote-title {}
+
     .one-footnote {
-      a.footnote-ref {
-  
-      }
+      a.footnote-ref {}
     }
   }
-  
+
   /** 行间公式 */
-  .Cherry-InlineMath {
-    
-  }
-  
+  .Cherry-InlineMath {}
+
   /** 段落公式 */
-  .Cherry-Math {
-  
-  }
+  .Cherry-Math {}
 
-    /** 目录 */
+  /** 目录 */
   .toc {
-    .toc-title {
+    .toc-title {}
 
-    }
     .toc-li {
-      .level-1 {
+      .level-1 {}
 
-      }
-      .level-2 {
+      .level-2 {}
 
-      }
-      .level-3 {
-
-      }
+      .level-3 {}
     }
   }
+}
+
+ol {
+  li {}
 }

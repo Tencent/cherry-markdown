@@ -1,4 +1,4 @@
-@import './variable.scss';
+@import './variables/index.scss';
 @import './base.scss';
 @import './ch-icon.scss';
 @import './markdown.scss';
@@ -9,8 +9,8 @@
 @import './components/shortcut_key_config.scss';
 
 @mixin cherryFont {
-  font-family: $fontFamily;
-  font-size: $fontSize;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-md);
 }
 
 // 主要布局控制，可以不合并进下面的区块
@@ -26,8 +26,8 @@
 
   .cherry-editor,
   .cherry-previewer {
-    max-height: calc(100% - #{$toolbarHeight});
-    min-height: calc(100% - #{$toolbarHeight});
+    max-height: calc(100% - var(--height-toolbar));
+    min-height: calc(100% - var(--height-toolbar));
   }
 
   .CodeMirror {
@@ -51,10 +51,10 @@
 
 .cherry {
   @include cherryFont;
-  line-height: $lineHeight;
-  color: $fontColor;
-  background: $editorBg;
-  box-shadow: $shadow;
+  line-height: var(--md-paragraph-line-height);
+  color: var(--base-font-color);
+  background: var(--base-editor-bg);
+  box-shadow: var(--shadow-md);
 
   .ch-icon {
     vertical-align: middle;
@@ -99,28 +99,18 @@
     top: 40px;
     left: 40px;
     border-collapse: separate;
-    box-shadow: $shadow;
+    box-shadow: var(--shadow-md);
     padding: 4px;
-    border-radius: $borderRadius;
+    border-radius: var(--radius-md);
     width: auto;
     height: auto;
 
     &-item {
       padding: 7px;
-      border: 1px solid $borderColor;
+      border: 1px solid var(--base-border-color);
 
       &.active {
-        background-color: $toolbarBtnBgHoverLight;
-      }
-    }
-  }
-
-  &[data-toolbar-theme='dark'] {
-    .cherry-insert-table-menu-item {
-      border-color: rgba(255, 255, 255, 0.2);
-
-      &.active {
-        background-color: $toolbarBtnColorDark;
+        background-color: var(--toolbar-btn-hover-bg);
       }
     }
   }
@@ -130,53 +120,43 @@
   position: absolute;
   width: 130px;
   min-height: 40px;
-  background: #fff;
-  //border: 1px solid $borderColor;
-  box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.5);
+  background: var(--dropdown-bg);
+  border: 1px solid var(--dropdown-border);
+  box-shadow: var(--dropdown-shadow);
+  padding: var(--dropdown-padding);
+  border-radius: var(--dropdown-radius);
   margin-left: -60px;
   z-index: 13;
 
   &-item {
-    width: 100%;
-    padding: 0 15px;
+    width: calc(100% - 8px);
+    padding: var(--dropdown-item-padding);
     text-align: left;
-    display: inline-block;
-    height: 36px;
-    line-height: 36px;
-    font-size: 14px;
+    display: block;
+    min-height: var(--dropdown-item-height);
+    line-height: var(--line-height-relaxed);
+    font-size: var(--font-size-sm);
     font-style: normal;
     cursor: pointer;
     box-sizing: border-box;
+    color: var(--toolbar-btn-color);
+    background: var(--toolbar-btn-bg);
+    border-radius: var(--dropdown-item-radius);
+    margin: 2px 4px;
+    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
 
     &:hover {
-      background: $toolbarBtnBgHoverLight;
-      color: $toolbarBtnHoverColorLight;
+      background: var(--dropdown-item-hover-bg);
+      color: var(--dropdown-item-hover-color);
     }
     &__selected {
-      background: $toolbarBtnBgHoverLight;
-      color: $toolbarBtnHoverColorLight;
+      background: var(--dropdown-item-active-bg);
+      color: var(--dropdown-item-active-color);
     }
 
     .ch-icon {
-      margin-right: 10px;
-    }
-  }
-
-  [data-toolbar-theme='dark'] & {
-    background: $toolbarBgDark;
-
-    .cherry-dropdown-item {
-      background: $toolbarBtnBgDark;
-      color: $toolbarBtnColorDark;
-
-      &:hover {
-        background: $toolbarBtnBgHoverDark;
-        color: $toolbarBtnHoverColorDark;
-      }
-      &__selected {
-        background: $toolbarBtnBgHoverDark;
-        color: $toolbarBtnHoverColorLight;
-      }
+      margin-right: 8px;
+      vertical-align: middle;
     }
   }
 }
@@ -186,50 +166,36 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding: 0 20px;
-  min-height: $toolbarHeight;
-  font-size: $toolbarFontSize;
+  padding: var(--toolbar-padding);
+  min-height: var(--toolbar-height);
+  font-size: var(--toolbar-font-size);
   line-height: 2.8;
   flex-basis: 100%;
   box-sizing: border-box;
   z-index: 2;
   user-select: none;
-  box-shadow: $toolbarShadowLight;
-  background: $toolbarBgLight;
+  box-shadow: var(--toolbar-shadow);
+  background: var(--toolbar-bg);
+  border-radius: var(--toolbar-radius);
   overflow: hidden;
   .icon-loading {
     &.loading {
       display: inline-block;
-      width: 8px;
-      height: 8px;
+      width: var(--spacing-sm);
+      height: var(--spacing-sm);
     }
 
     &.loading:after {
       content: ' ';
       display: block;
-      width: 8px;
-      height: 8px;
+      width: var(--spacing-sm);
+      height: var(--spacing-sm);
       margin-left: 2px;
       margin-top: -2px;
       border-radius: 50%;
-      border: 2px solid #000;
-      border-color: #000 transparent #000 transparent;
+      border: 2px solid var(--toolbar-btn-color);
+      border-color: var(--toolbar-btn-color) transparent var(--toolbar-btn-color) transparent;
       animation: loading 1.2s linear infinite;
-    }
-  }
-
-  [data-toolbar-theme='dark'] & {
-    background: $toolbarBgDark;
-    box-shadow: $toolbarShadowDark;
-
-    .cherry-toolbar-button {
-      color: $toolbarBtnColorDark;
-      background: $toolbarBtnBgDark;
-
-      &:hover {
-        color: $toolbarBtnHoverColorDark;
-        background: $toolbarBtnBgHoverDark;
-      }
     }
   }
 
@@ -237,19 +203,19 @@
   .toolbar-right {
     display: flex;
     align-items: center;
-    min-height: $toolbarHeight;
+    min-height: var(--toolbar-height);
     flex-wrap: wrap;
     flex: 1;
   }
 
   .toolbar-left {
-    margin-right: 20px;
+    margin-right: var(--toolbar-padding);
   }
 
   .toolbar-right {
     flex: 0 1 auto;
     flex-direction: row-reverse;
-    margin-left: 10px;
+    margin-left: calc(var(--toolbar-padding) / 2);
     box-sizing: border-box;
     min-height: 0;
   }
@@ -266,20 +232,21 @@
 
   &-button {
     float: left;
-    padding: 0 12px;
+    padding: var(--toolbar-btn-padding);
     // margin: 4px 0;
     height: 38px;
-    color: $toolbarBtnColorLight;
-    background: transparent;
+    color: var(--toolbar-btn-color);
+    background: var(--toolbar-btn-bg);
     border: 1px solid transparent;
-    -webkit-transition: background-color ease-in-out 0.15s, color ease-in-out 0.15s, border-color ease-in-out 0.15s;
-    transition: background-color ease-in-out 0.15s, color ease-in-out 0.15s, border-color ease-in-out 0.15s;
+    border-radius: var(--toolbar-btn-radius);
+    -webkit-transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
     cursor: pointer;
     font-style: normal;
 
     &:hover {
-      color: $toolbarBtnHoverColorLight;
-      background: $toolbarBtnBgHoverLight;
+      color: var(--toolbar-btn-hover-color);
+      background: var(--toolbar-btn-hover-bg);
     }
 
     &.cherry-toolbar-split {
@@ -288,15 +255,46 @@
       padding: 0;
       margin: 9.5px 4px;
       border: 1px solid transparent;
-      border-left: 1px solid $toolbarSplitColor;
+      border-left: 1px solid var(--toolbar-split-color);
       pointer-events: none;
       overflow: hidden;
       opacity: 0.5;
     }
 
     &.disabled {
-      color: $toolbarBtnDisabledLight;
+      color: var(--toolbar-btn-disabled);
     }
+  }
+
+  // 工具栏按钮通用样式结构
+  .cherry-toolbar,
+  .cherry-floatmenu,
+  .cherry-bubble,
+  .cherry-sidebar {
+    background: var(--toolbar-bg);
+    border-color: var(--toolbar-border);
+
+    .cherry-toolbar-button {
+      color: var(--toolbar-btn-color);
+
+      i {
+        color: var(--toolbar-btn-color);
+      }
+
+      &:hover {
+        background-color: var(--toolbar-btn-hover-bg);
+        color: var(--toolbar-btn-hover-color) !important;
+        border-color: var(--toolbar-border);
+
+        i {
+          color: var(--toolbar-btn-hover-color) !important;
+        }
+      }
+    }
+  }
+
+  .cherry-sidebar {
+    box-shadow: var(--shadow-md);
   }
 }
 
@@ -315,12 +313,18 @@
   bottom: 0;
   overflow: hidden;
 
+  // 侧边栏按钮 非顶部工具栏
   .cherry-toolbar-button {
     height: 30px;
-    padding: 3px 12px 0 6px;
+    padding: 0 6px;
+    color: var(--toolbar-btn-color);
+    background: var(--toolbar-btn-bg);
+    border-radius: var(--toolbar-btn-radius);
+    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
 
     &:hover {
-      background: transparent;
+      background: var(--toolbar-btn-hover-bg);
+      color: var(--toolbar-btn-hover-color);
     }
 
     .icon-loading {
@@ -338,8 +342,8 @@
         margin-left: 2px;
         margin-top: -2px;
         border-radius: 50%;
-        border: 2px solid #000;
-        border-color: #000 transparent #000 transparent;
+        border: 2px solid var(--toolbar-btn-color);
+        border-color: var(--toolbar-btn-color) transparent var(--toolbar-btn-color) transparent;
         animation: loading 1.2s linear infinite;
       }
     }
@@ -364,9 +368,9 @@
   position: absolute;
   left: 30px;
   margin-left: 60px;
-  height: $lineHeight;
-  line-height: $lineHeight;
-  border-radius: $borderRadius;
+  height: var(--line-height-relaxed);
+  line-height: var(--line-height-relaxed);
+  border-radius: var(--radius-md);
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -374,21 +378,24 @@
 
   .cherry-toolbar-button {
     float: left;
-    padding: 0 9px;
+    padding: 0 var(--spacing-sm);
     margin: 0;
-    height: $lineHeight;
-    line-height: $lineHeight;
-    font-size: 14px;
-    color: $fontColor;
+    height: var(--line-height-relaxed);
+    line-height: var(--line-height-relaxed);
+    font-size: var(--toolbar-font-size);
+    color: var(--toolbar-btn-color);
+    background: var(--toolbar-btn-bg);
+    border-radius: var(--radius-xs);
     overflow: hidden;
     vertical-align: middle;
     text-align: center;
     border: 0;
     cursor: pointer;
     font-style: normal;
+    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
 
     &.cherry-toolbar-split {
-      border-left: 1px solid $borderColor;
+      border-left: 1px solid var(--toolbar-split-color);
       width: 0;
       padding: 0;
       overflow: hidden;
@@ -396,15 +403,16 @@
     }
 
     .ch-icon {
-      color: #aaa;
-      font-size: 12px;
+      color: var(--toolbar-btn-color);
+      font-size: var(--font-size-xs);
     }
 
     &:hover {
-      background: rgba(0, 0, 0, 0.05);
+      background: var(--toolbar-btn-hover-bg);
+      color: var(--toolbar-btn-hover-color);
 
       .ch-icon {
-        color: $toolbarBtnColorLight;
+        color: var(--toolbar-btn-hover-color);
       }
     }
   }
@@ -417,6 +425,7 @@
   width: 50%;
   box-sizing: border-box;
   overflow: hidden;
+  background-color: var(--base-editor-bg);
 
   &.cherry-editor--full {
     width: 100%;
@@ -466,14 +475,49 @@
   }
 
   .CodeMirror {
-    font-family: $fontFamily;
-    background: $editorBg;
-    color: $fontColor;
+    font-family: var(--font-family-sans);
+    background-color: var(--base-editor-bg);
+    color: var(--base-font-color);
 
     // codemirror 依赖隐藏的 textarea 计算行高，这里将字体大小设置为行高，避免输入法遮挡内容
     // Fixed https://github.com/Tencent/cherry-markdown/issues/82
     textarea {
-      font-size: $lineHeight;
+      font-size: var(--md-paragraph-line-height);
+    }
+
+    .CodeMirror-cursor {
+      border-left: 1px solid var(--editor-cursor-color);
+    }
+
+    .CodeMirror-selected {
+      background-color: var(--editor-selection-bg);
+    }
+
+    .CodeMirror-scroll {
+      span,
+      .cm-variable-2,
+      .cm-string,
+      .cm-strong,
+      .cm-em,
+      .cm-meta {
+        color: var(--base-font-color);
+      }
+
+      .cm-image-marker,
+      .cm-quote,
+      .cm-header,
+      .cm-atom {
+        color: var(--editor-header-color);
+      }
+
+      .cm-url {
+        background-color: var(--editor-url-bg-color);
+      }
+
+      .cm-comment,
+      .cm-url {
+        color: var(--editor-comment-color);
+      }
     }
   }
 
@@ -491,58 +535,58 @@
       white-space: nowrap;
       vertical-align: bottom;
       color: darkmagenta !important;
-      font-size: 12px !important;
+      font-size: var(--font-size-xs) !important;
     }
   }
 
   .cm-s-default .cm-header {
-    color: $editorHeaderColor;
+    color: var(--editor-header-color);
   }
 
   .cm-s-default .cm-string {
-    color: $editorStringColor;
+    color: var(--editor-string-color);
   }
 
   .cm-s-default .cm-comment {
-    color: $editorCommentColor;
-    font-family: $monospaceFont;
+    color: var(--editor-comment-color);
+    font-family: var(--font-family-mono);
     font-size: 0.9em;
   }
 
   .cm-s-default .cm-whitespace,
   .cm-tab {
-    font-family: $monospaceFont;
+    font-family: var(--font-family-mono);
     font-size: 0.9em;
   }
 
   .cm-s-default .cm-quote {
-    color: $editorQuoteColor;
+    color: var(--editor-quote-color);
   }
 
   .cm-s-default .cm-link {
-    color: $editorLinkColor;
+    color: var(--editor-link-color);
   }
 
   .cm-s-default .cm-url {
-    background: $editorUrlBgColor;
-    font-family: $monospaceFont;
+    background: var(--editor-url-bg-color);
+    font-family: var(--font-family-mono);
     font-size: 0.9em;
   }
 
   .cm-s-default .cm-variable-2 {
-    color: $editorV2Color;
+    color: var(--editor-v2-color);
   }
 
   .cm-s-default .cm-variable-3 {
-    color: $editorV3Color;
+    color: var(--editor-v3-color);
   }
 
   .cm-s-default .cm-keyword {
-    color: $editorKeywordColor;
+    color: var(--editor-keyword-color);
   }
 
   .cm-s-default .cm-fullWidth {
-    color: $fullWidthColor;
+    color: var(--full-width-color) !important;
     z-index: 3;
     cursor: pointer;
   }
@@ -740,7 +784,7 @@
 
     .float-previewer-title{
       user-select: none;
-      font-size: 16px;
+      font-size: var(--font-size-md);
       color: #333;
       font-weight: bold;
     }
@@ -756,10 +800,11 @@
   border-left: 2px solid #ebedee;
   width: 50%;
   box-sizing: border-box;
-  background-color: $previewBg;
+  background-color: var(--base-previewer-bg);
   min-height: auto;
   overflow-y: auto;
   -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 
   .cherry-mobile-previewer-content {
     width: 375px;
@@ -769,6 +814,7 @@
     overflow-y: scroll;
     box-shadow: 0 0 60px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
+    background-color: var(--previewer-mobile-bg);
   }
 
   &.cherry-previewer--hidden {
@@ -843,17 +889,14 @@
   width: auto;
   padding: 5px 10px;
   z-index: 6;
-  background: #fff;
-  box-shadow: $shadow;
+  background: var(--toolbar-bg);
+  box-shadow: var(--shadow-md);
 
   h3 {
-    font-size: 12px;
+    font-size: var(--font-size-xs);
     margin: 0px;
     font-weight: 400;
-  }
-
-  [data-toolbar-theme='dark'] & h3 {
-    color: $toolbarBtnColorDark;
+    color: var(--toolbar-btn-color);
   }
 
   .cherry-color-text {
@@ -872,11 +915,11 @@
     float: left;
     width: 14px;
     height: 14px;
-    border: 1px solid #fff;
+    border: 1px solid var(--toolbar-btn-hover-bg);
     cursor: pointer;
 
     &:hover {
-      border: 1px solid #000;
+      border-color: var(--primary-color);
     }
   }
 }
@@ -959,8 +1002,9 @@
     border-bottom: 1px dashed #33333333;
     padding: 5px;
     .cherry-toc-title {
-      font-size: 16px;
+      font-size: var(--font-size-md);
       font-weight: bold;
+      color: var(--primary-color);
       padding-left: 5px;
     }
     .ch-icon-chevronsLeft {
@@ -1000,13 +1044,9 @@
       word-break: break-all;
       text-overflow: ellipsis;
       cursor: pointer;
-      &.current {
-        border-left-color: #3582fb;
-        color: #3582fb;
-      }
-      &:hover {
-        border-left-color: #3582fbaa;
-        color: #3582fbaa;
+      &:hover, &.current {
+        border-left-color: var(--primary-color);
+        color: var(--primary-color);
       }
     }
     .cherry-toc-one-a__1 {

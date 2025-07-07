@@ -1,0 +1,112 @@
+// 二级 CSS 变量：语义化界面变量
+// 基于现有组件和样式需求，映射到一级变量
+
+.cherry {
+  /* ========== 基础色彩映射 ========== */
+  --base-font-color: #3f4a56;
+  --base-sub-font-color: #6d6e6f;
+  --base-border-color: #dfe6ee;
+  --base-editor-bg: #ffffff;
+  --base-previewer-bg: #ffffff;
+  
+  /* ========== 主题色彩系统 ========== */
+  --primary-color: #3582fb;
+  --secondary-color: #f0f4ff;
+  
+  /* ========== 系统状态颜色 ========== */
+  --color-success: var(--oc-green-6);
+  --color-warning: var(--oc-yellow-6);
+  --color-error: var(--oc-red-6);
+  --color-info: var(--oc-blue-6);
+
+  /* ========== 工具栏相关 ========== */
+  --toolbar-bg: var(--oc-white);
+  --toolbar-border: var(--base-border-color);
+  --toolbar-height: var(--height-toolbar);
+  --toolbar-padding: 0 var(--spacing-xl);
+  --toolbar-font-size: var(--font-size-sm);
+  --toolbar-radius: none;
+  --toolbar-shadow: var(--shadow-md);
+  --toolbar-split-color: var(--base-border-color);
+  
+  // 工具栏按钮
+  --toolbar-btn-color: #3f4a56;
+  --toolbar-btn-bg: transparent;
+  --toolbar-btn-hover-color: #5d9bfc;
+  --toolbar-btn-hover-bg: #ebf3ff;
+  --toolbar-btn-disabled: #ccc;
+  --toolbar-btn-radius: var(--radius-lg);
+  --toolbar-btn-padding: 0 var(--spacing-md);
+
+  /* ========== 工具栏的下拉菜单 ========== */
+  --dropdown-bg: var(--toolbar-bg);
+  --dropdown-border: var(--base-border-color);
+  --dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --dropdown-radius: var(--radius-xl);
+  --dropdown-padding: var(--spacing-xs) 0;
+  
+  // 下拉菜单项
+  --dropdown-item-height: var(--height-button);
+  --dropdown-item-radius: var(--dropdown-radius);
+  --dropdown-item-padding: var(--spacing-sm) var(--spacing-md);
+  --dropdown-item-hover-bg: var(--oc-gray-2);
+  --dropdown-item-hover-color: var(--base-font-color);
+  --dropdown-item-active-bg: var(--secondary-color);
+  --dropdown-item-active-color: var(--primary-color);
+
+  /* ========== 编辑气泡 ========== */
+  --bubble-bg: var(--toolbar-bg);
+  --bubble-border: var(--base-border-color);
+  --bubble-shadow: var(--shadow-md);
+  --bubble-radius: var(--radius-lg);
+  --bubble-padding: var(--spacing-xs);
+  --bubble-min-height: var(--height-button);
+  --bubble-z-index: var(--z-index-popover);
+  
+  /* ========== 编辑器相关 ========== */
+  //  ---base-editor-bg 编辑器背景颜色
+  --editor-header-color: var(--base-font-color);
+  --editor-comment-color: var(--oc-blue-6);
+  --editor-quote-color: var(--oc-blue-6);
+  --editor-string-color: var(--base-font-color);
+  --editor-link-color: var(--oc-blue-6);
+  --editor-url-bg-color: #d7e6fe;
+  --editor-v2-color: var(--primary-color);
+  --editor-v3-color: var(--secondary-color);
+  --editor-keyword-color: var(--base-font-color);
+  --editor-cursor-color: var(--primary-color);
+  --editor-selection-bg: var(--oc-blue-1);
+  --editor-line-number-color: var(--oc-gray-4);
+  --editor-active-line-bg: var(--oc-gray-0);
+  
+  /* ========== 预览器相关 ========== */
+  // --base-previewer-bg 预览器背景颜色
+  --previewer-mobile-bg: var(--base-previewer-bg);
+  
+  /* ========== Markdown 元素样式 ========== */
+  // 标题
+  --md-heading-color: var(--base-font-color);
+  
+  // 段落
+  --md-paragraph-color: var(--base-font-color);
+  --md-paragraph-line-height: var(--line-height-relaxed);
+  
+  // 链接
+  --md-link-color: var(--oc-blue-6);
+  --md-link-hover-color: var(--color-link-hover);
+  
+  // 行内代码
+  --md-inline-code-color: var(--color-error);
+  --md-inline-code-bg: #e5e5e5;
+  
+  // 引用
+  --md-blockquote-bg: rgba(102, 128, 153, 0.05);
+  --md-blockquote-border: #D6DBDF;
+  --md-blockquote-color: var(--base-sub-font-color);
+  
+  // 表格
+  --md-table-border: var(--base-border-color);
+  
+  // 分割线
+  --md-hr-border: var(--base-border-color);
+}

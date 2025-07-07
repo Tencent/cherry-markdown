@@ -1,7 +1,7 @@
-@import './variable.scss';
-
 .cherry-markdown {
   word-break: break-all;
+  color: var(--md-paragraph-color);
+  background-color: var(--base-previewer-bg);
   h1,
   h2,
   h3,
@@ -17,7 +17,7 @@
     font-family: inherit;
     font-weight: 700;
     line-height: 1.1;
-    color: inherit;
+    color: var(--md-heading-color);
   }
 
   h1 small,
@@ -46,14 +46,14 @@
   .h6 .small {
     font-weight: normal;
     line-height: 1;
-    color: #999;
+    color: var(--oc-gray-5);
   }
 
   h1,
   h2,
   h3 {
     margin-top: 30px;
-    margin-bottom: $elementGap;
+    margin-bottom: var(--spacing-lg);
   }
 
   h1 small,
@@ -68,8 +68,8 @@
   h4,
   h5,
   h6 {
-    margin-top: $elementLittleGap;
-    margin-bottom: $elementLittleGap;
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
   }
 
   h4 small,
@@ -118,8 +118,8 @@
 
   ul,
   ol {
-    padding-left: 24px;
-    margin-bottom: $elementGap;
+    padding-left: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
 
     ul,
     ol {
@@ -144,40 +144,41 @@
   hr {
     height: 0;
     border: 0;
-    border-top: 1px solid $borderColor;
-    margin: $elementGap 0;
+    border-top: 1px solid var(--md-hr-border);
+    margin: var(--spacing-lg) 0;
     box-sizing: content-box;
     overflow: visible;
   }
 
   kbd {
-    border: 1px solid $borderColor;
+    border: 1px solid var(--base-border-color);
     border-radius: 4px;
     padding: 1px 2px;
     box-sizing: border-box;
-    box-shadow: inset 0px -1px $borderColor;
+    box-shadow: inset 0px -1px var(--base-border-color);
     font-size: 0.85rem;
   }
 
   table {
     border-collapse: collapse;
+    color: var(--md-paragraph-color);
     th,
     td {
-      border: 1px solid $borderColor;
+      border: 1px solid var(--md-table-border);
       padding: 0.2em 0.4em;
       min-width: 100px;
     }
     th {
-      background-color: #eee;
+      background-color: var(--md-inline-code-bg);
     }
   }
 
   .link-quote {
-    color: $linkColor;
+    color: var(--md-link-color);
   }
 
   a {
-    color: $linkColor;
+    color: var(--md-link-color);
     position: relative;
     text-decoration: none;
 
@@ -186,14 +187,15 @@
 
       &::after {
         content: '\EA10';
-        font-size: 12px;
+        font-size: var(--font-size-xs);
         font-family: 'ch-icon';
         margin: 0 2px;
       }
     }
 
     &:hover {
-      color: $linkHoverColor;
+      text-decoration: underline;
+      color: var(--md-link-hover-color);
     }
   }
 
@@ -217,21 +219,21 @@
   pre,
   blockquote,
   table {
-    margin: 0 0 $elementGap;
+    margin: 0 0 var(--spacing-lg);
   }
 
   blockquote {
-    color: $quoteColor;
+    color: var(--md-paragraph-color);
     padding: 10px 15px;
-    border-left: 10px solid $quoteBorderColor;
-    background: $quoteBackground;
+    border-left: 10px solid var(--md-hr-border);
+    background: var(--md-blockquote-bg);
     p, blockquote, table, pre, ul, ol{
       margin: 0;
     }
   }
 
   pre {
-    padding: 16px;
+    padding: var(--spacing-lg);
     overflow: auto;
     font-size: 85%;
     line-height: 1.45;
@@ -239,16 +241,13 @@
     border-radius: 6px;
   }
 
-  // 适配历史文章样式
-  @import 'prettyprint/prettyprint.scss';
-
   div[data-type='codeBlock'] {
     display: inline-block;
     width: 100%;
     box-sizing: border-box;
     border-radius: 2px;
-    margin-bottom: 16px;
-    font-size: 14px;
+    margin-bottom: var(--spacing-lg);
+    font-size: var(--font-size-sm);
     overflow-x: auto;
 
     & > pre {
@@ -284,12 +283,13 @@
     padding: 0.1em;
     border-radius: 0.3em;
     white-space: normal;
-    color: #f85353;
-    background-color: #e5e5e5;
+    color: var(--md-inline-code-color);
+    background-color: var(--md-inline-code-bg);
+    border: 1px solid var(--md-hr-border);
 
     [data-inline-code-theme='black'] & {
-      color: #3f4a56;
-      background-color: #e5e5e5;
+      color: var(--base-font-color);
+      background-color: var(--md-inline-code-bg);
     }
   }
 
@@ -305,24 +305,24 @@
   }
 
   .toc {
-    margin-bottom: $elementGap;
+    margin-bottom: var(--spacing-lg);
     padding-left: 0;
 
     .toc-title {
-      font-size: 24px;
+      font-size: var(--font-size-2xl);
       margin-bottom: 5px;
     }
 
     .toc-li {
-      border-bottom: 1px ridge $borderColor;
+      border: none;
       list-style: none;
 
       a {
         text-decoration: none;
-        color: $fontColor;
+        color: var(--md-paragraph-color);
 
         &:hover {
-          color: $linkHoverColor;
+          color: var(--md-link-hover-color);
         }
       }
     }
@@ -391,19 +391,23 @@
     .footnote-title {
       font-size: 20px;
       margin-top: -38px;
-      background-color: $editorBg;
+      background-color: var(--md-inline-code-bg);
       width: 60px;
-      margin-bottom: $elementGap;
+      margin-bottom: var(--spacing-lg);
     }
 
     padding-top: 20px;
-    border-top: 1px solid $borderColor;
+    border-top: 1px solid var(--md-hr-border);
     margin-top: 50px;
 
     .one-footnote {
-      color: $subTitle;
-      margin-bottom: $elementGap;
-      border-bottom: 1px dotted $borderColor;
+      color: var(--md-paragraph-color);
+      margin-bottom: var(--spacing-lg);
+      border-bottom: 1px dotted var(--md-hr-border);
+
+      a.footnote-ref {
+        padding: 5px;
+      }
     }
   }
 
@@ -413,12 +417,13 @@
     .cherry-table {
       th,
       td {
-        border: 1px solid $borderColor;
+        border: 1px solid var(--md-table-border);
         padding: 0.2em 0.4em;
         min-width: 100px;
       }
       th {
         white-space: nowrap;
+        background-color: var(--md-inline-code-bg);
       }
     }
   }
@@ -504,6 +509,17 @@
   }
 }
 
+// 表格编辑器
+.cherry[class*="theme__"] .cherry-previewer-table-content-handler {
+  .cherry-previewer-table-content-handler__input {
+    textarea {
+      background-color: var(--base-editor-bg);
+      color: var(--base-font-color);
+      outline-color: var(--editor-header-color);
+    }
+  }
+}
+
 div[data-type='codeBlock'] {
   @import 'prism/tomorrow-night';
 
@@ -555,7 +571,7 @@ div[data-type='codeBlock'] {
 .cherry-detail {
   details {
     background: #f8f9faaa;
-    border-radius: 8px;
+    border-radius: var(--radius-xl);
     overflow: hidden;
     margin-bottom: 10px;
     summary {
@@ -563,7 +579,7 @@ div[data-type='codeBlock'] {
       padding: 5px 10px;
       background-color: #6c757d;
       color: #fff;
-      border-radius: 8px;
+      border-radius: var(--radius-xl);
     }
     .cherry-detail-body {
       padding: 15px 25px 0 25px;
@@ -572,7 +588,7 @@ div[data-type='codeBlock'] {
 }
 
 .cherry-detail__multiple {
-  border-radius: 8px;
+  border-radius: var(--radius-xl);
   overflow: hidden;
   details {
     margin-bottom: 1px;
@@ -600,7 +616,7 @@ div[data-type='codeBlock'] {
 .cherry-panel {
   margin: 10px 0;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: var(--radius-xl);
   box-sizing: border-box;
   border: 0.5px solid;
   .cherry-panel--title {
@@ -608,7 +624,7 @@ div[data-type='codeBlock'] {
     padding: 5px 20px;
     &.cherry-panel--title__not-empty::before {
       font-family: 'ch-icon';
-      margin: 0 12px 0 -6px;
+      margin: 0 var(--spacing-md) 0 -6px;
       vertical-align: bottom;
     }
   }

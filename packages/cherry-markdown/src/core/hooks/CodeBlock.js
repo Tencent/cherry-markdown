@@ -499,8 +499,4 @@ export default class CodeBlock extends ParagraphBase {
   rule() {
     return getCodeBlockRule();
   }
-
-  mounted(dom) {
-    // prettyPrint.prettyPrint();
-  }
 }
