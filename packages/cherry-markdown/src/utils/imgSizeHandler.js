@@ -195,6 +195,13 @@ const imgSizeHandler = {
     this.mouseResize.resize = true;
     this.mouseResize.name = point.getAttribute('data-name');
     this.previewerDom.classList.add('doing-resize-img');
+
+    // 禁用图片拖拽功能，避免误触
+    this.originalDraggable = this.img.draggable;
+    this.img.draggable = false;
+    // 添加样式防止图片被选中
+    this.img.style.userSelect = 'none';
+    this.img.style.webkitUserSelect = 'none';
   },
   resizeStop(event, buts, editor, menu) {
     if (!this.$isResizing()) {
@@ -207,6 +214,13 @@ const imgSizeHandler = {
     this.updateBubbleButs();
     this.mouseResize.resize = false;
     this.previewerDom.classList.remove('doing-resize-img');
+
+    // 恢复图片拖拽功能
+    this.img.draggable = this.originalDraggable !== undefined ? this.originalDraggable : true;
+    // 恢复图片选中样式
+    this.img.style.userSelect = '';
+    this.img.style.webkitUserSelect = '';
+
     this.change();
   },
   resizeWorking(event, buts) {
