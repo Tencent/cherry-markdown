@@ -5,8 +5,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>draw.io demo</title>
-    <link rel="stylesheet" href="./assets/drawio_lib/grapheditor.css">
-    <!-- <link rel="stylesheet" href="https://jgraph.github.io/drawio/src/main/webapp/mxgraph/css/common.css"> -->
+  <link rel="stylesheet" href="./assets/drawio_lib/grapheditor.css">
+  <!-- 手动加载mxgraph的CSS文件，避免mxClient.js中的路径问题 -->
+  <link rel="stylesheet" href="./assets/mxgraph/css/common.css">
+  <!-- 配置draw.io的全局变量，在Init.js加载之前设置 -->
+  <script>
+    // 设置正确的路径配置，覆盖Init.js中的默认值
+    window.EXPORT_URL = './assets/drawio_lib';
+    window.SAVE_URL = './assets/drawio_lib';
+    window.OPEN_URL = './assets/drawio_lib';
+    window.RESOURCES_PATH = './assets/drawio_lib/resources';
+    window.STENCIL_PATH = './assets/drawio_lib/image/stencils';
+    window.IMAGE_PATH = './assets/drawio_lib/image';
+    window.STYLE_PATH = './assets/drawio_lib/src/css';
+    window.CSS_PATH = './assets/drawio_lib/src/css';
+    window.OPEN_FORM = './assets/drawio_lib';
+    window.mxBasePath = './assets/drawio_lib/src';
+
+    // 禁用mxClient.js自动加载CSS，因为我们手动加载了
+    window.mxLoadStylesheets = false;
+  </script>
 </head>
 
 <!-- geEditor 是draw.io需要的class -->
