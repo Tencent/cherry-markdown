@@ -264,13 +264,8 @@ const imgSizeHandler = {
     } else if (alignment === 'right') {
       // 右对齐：left 偏移量等于宽度的变化量，以保持右侧边缘不动
       this.buts.style.left = originalLeft - deltaWidth;
-    } else {
-      // 左对齐 (left): 只有在拖拽左侧控制点时，才需要移动 left
-      if (this.mouseResize.name.toLowerCase().includes('left')) {
-        this.buts.style.left = originalLeft + changeX;
-      }
-      // 拖拽右侧控制点时，左侧位置保持不变
     }
+    // 左对齐 (left): 均不需要移动 left
 
     this.updateBubbleButs();
     this.change();
