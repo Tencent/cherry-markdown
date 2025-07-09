@@ -58,7 +58,6 @@ const imgSizeHandler = {
           rightMiddle: { name: '12', left: 0, top: 0 },
         },
       },
-      imgSrc: this.img.src,
       style: {
         width: this.img.width,
         height: this.img.height,
@@ -109,10 +108,6 @@ const imgSizeHandler = {
       return this.updateBubbleButs();
     }
     this.butsLayout = this.container;
-    this.butsImg = document.createElement('div');
-    this.butsImg.className = 'cherry-previewer-img-size-handler__background';
-    this.butsImg.style.backgroundImage = `url(${this.buts.imgSrc})`;
-    this.butsLayout.appendChild(this.butsImg);
 
     this.butsPoints = {};
     Object.keys(this.buts.points.arr).forEach((index) => {
@@ -199,9 +194,6 @@ const imgSizeHandler = {
     // 禁用图片拖拽功能，避免误触
     this.originalDraggable = this.img.draggable;
     this.img.draggable = false;
-    // 添加样式防止图片被选中
-    this.img.style.userSelect = 'none';
-    this.img.style.webkitUserSelect = 'none';
   },
   resizeStop(event, buts, editor, menu) {
     if (!this.$isResizing()) {
@@ -217,10 +209,6 @@ const imgSizeHandler = {
 
     // 恢复图片拖拽功能
     this.img.draggable = this.originalDraggable !== undefined ? this.originalDraggable : true;
-    // 恢复图片选中样式
-    this.img.style.userSelect = '';
-    this.img.style.webkitUserSelect = '';
-
     this.change();
   },
   resizeWorking(event, buts) {
