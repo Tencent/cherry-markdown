@@ -16,12 +16,17 @@
 /**
  * 用于在图片四周画出调整图片尺寸的边框
  */
+import imgAltHelper from './image.js';
+
 const imgSizeHandler = {
   mouseResize: {},
   getImgPosition() {
     const position = this.img.getBoundingClientRect();
     const editorPosition = this.previewerDom.parentNode.getBoundingClientRect();
     const padding = parseFloat(this.img.style.padding) || 0;
+    const alt = this.img.getAttribute('alt') || '';
+    const alignment = imgAltHelper.$getAlignment(alt);
+
     return {
       bottom: position.bottom - editorPosition.bottom,
       top: position.top - editorPosition.top + padding * 1.5,
@@ -31,6 +36,7 @@ const imgSizeHandler = {
       left: position.left - editorPosition.left + padding * 1.5,
       x: position.x - editorPosition.x,
       y: position.y - editorPosition.y,
+      alignment,
     };
   },
   initBubbleButtons() {
@@ -58,7 +64,6 @@ const imgSizeHandler = {
           rightMiddle: { name: '12', left: 0, top: 0 },
         },
       },
-      imgSrc: this.img.src,
       style: {
         width: this.img.width,
         height: this.img.height,
@@ -109,10 +114,6 @@ const imgSizeHandler = {
       return this.updateBubbleButs();
     }
     this.butsLayout = this.container;
-    this.butsImg = document.createElement('div');
-    this.butsImg.className = 'cherry-previewer-img-size-handler__background';
-    this.butsImg.style.backgroundImage = `url(${this.buts.imgSrc})`;
-    this.butsLayout.appendChild(this.butsImg);
 
     this.butsPoints = {};
     Object.keys(this.buts.points.arr).forEach((index) => {
@@ -195,6 +196,10 @@ const imgSizeHandler = {
     this.mouseResize.resize = true;
     this.mouseResize.name = point.getAttribute('data-name');
     this.previewerDom.classList.add('doing-resize-img');
+
+    // 禁用图片拖拽功能，避免误触
+    this.originalDraggable = this.img.draggable;
+    this.img.draggable = false;
   },
   resizeStop(event, buts, editor, menu) {
     if (!this.$isResizing()) {
@@ -207,7 +212,11 @@ const imgSizeHandler = {
     this.updateBubbleButs();
     this.mouseResize.resize = false;
     this.previewerDom.classList.remove('doing-resize-img');
+
+    // 恢复图片拖拽功能
+    this.img.draggable = this.originalDraggable !== undefined ? this.originalDraggable : true;
     this.change();
+    this.updatePosition();
   },
   resizeWorking(event, buts) {
     if (!this.$isResizing()) {
@@ -215,13 +224,16 @@ const imgSizeHandler = {
     }
     const changeX = event.clientX - this.mouseResize.left;
     const changeY = event.clientY - this.mouseResize.top;
+    const { position: originalPosition } = this.buts;
+    const { width: originalWidth, left: originalLeft, alignment } = originalPosition;
+
     let change = {};
     switch (this.mouseResize.name) {
       case 'leftTop':
       case 'leftBottom':
       case 'leftMiddle':
         change = this.$getChange(changeX, changeY, 'x');
-        this.buts.style.width = this.buts.position.width - change.changeX;
+        this.buts.style.width = originalWidth - change.changeX;
         if (this.mouseResize.name !== 'leftMiddle') {
           this.buts.style.height = this.buts.position.height - change.changeY;
         }
@@ -230,7 +242,7 @@ const imgSizeHandler = {
       case 'rightBottom':
       case 'rightMiddle':
         change = this.$getChange(changeX, changeY, 'x');
-        this.buts.style.width = this.buts.position.width + change.changeX;
+        this.buts.style.width = originalWidth + change.changeX;
         if (this.mouseResize.name !== 'rightMiddle') {
           this.buts.style.height = this.buts.position.height + change.changeY;
         }
@@ -244,6 +256,17 @@ const imgSizeHandler = {
         this.buts.style.height = this.buts.position.height + change.changeY;
         break;
     }
+    const deltaWidth = this.buts.style.width - originalWidth;
+
+    if (alignment === 'center') {
+      // 居中对齐：left 偏移量是宽度变化量的一半
+      this.buts.style.left = originalLeft - deltaWidth / 2;
+    } else if (alignment === 'right') {
+      // 右对齐：left 偏移量等于宽度的变化量，以保持右侧边缘不动
+      this.buts.style.left = originalLeft - deltaWidth;
+    }
+    // 左对齐 (left): 均不需要移动 left
+
     this.updateBubbleButs();
     this.change();
   },
