@@ -59,17 +59,22 @@
     overflow-y: scroll;
 
     .cherry-insert-formula-categary {
-      width: 130px;
-      &:not(:first-child) {
-        margin-top: 10px;
-      }
+        width: 130px;
+        position: relative;
+        &:not(:first-child) {
+          margin-top: 10px;
+        }
+        &:hover .cherry-insert-formula-categary__func {
+          display: block;
+        }
 
       .cherry-insert-formula-categary__func {
         min-width: 200px;
         height: 260px;
         position: absolute;
-        left: 255px;
+        left: 100%;
         top: 0;
+        margin-left: -1px;
         z-index: 100;
         padding: 20px 10px;
         background-color: var(--base-editor-bg);
@@ -108,9 +113,7 @@
           }
         }
 
-        &:hover {
-          display: block;
-        }
+
       }
 
       .cherry-insert-formula-categary__btn {

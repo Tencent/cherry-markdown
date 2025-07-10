@@ -73,6 +73,26 @@ export default class BubbleFormula {
             },
           ],
         },
+        commonSymbols: {
+          title: '常用符号',
+          formulas: [
+            {
+              name: '二元计算符 Binary operations',
+              img: '',
+              latex: '',
+            },
+            {
+              name: '',
+              img: '<svg xmlns="http://www.w3.org/2000/svg" width="1.76ex" height="1.09ex" viewBox="0 -491 778 482" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" style=""><defs><path id="MJX-42-TEX-N-D7" d="M630 29Q630 9 609 9Q604 9 587 25T493 118L389 222L284 117Q178 13 175 11Q171 9 168 9Q160 9 154 15T147 29Q147 36 161 51T255 146L359 250L255 354Q174 435 161 449T147 471Q147 480 153 485T168 490Q173 490 175 489Q178 487 284 383L389 278L493 382Q570 459 587 475T609 491Q630 491 630 471Q630 464 620 453T522 355L418 250L522 145Q606 61 618 48T630 29Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="matrix(1 0 0 -1 0 0)"><g data-mml-node="math"><g data-mml-node="mo"><use xlink:href="#MJX-42-TEX-N-D7"></use></g></g></g></svg>',
+              latex: '\times',
+            },
+            {
+              name: '',
+              img: '<svg xmlns="http://www.w3.org/2000/svg" width="1.76ex" height="1.296ex" viewBox="0 -537 778 573" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" style=""><defs><path id="MJX-50-TEX-N-F7" d="M318 466Q318 500 339 518T386 537Q418 537 438 517T458 466Q458 438 440 417T388 396Q355 396 337 417T318 466ZM56 237T56 250T70 270H706Q721 262 721 250T706 230H70Q56 237 56 250ZM318 34Q318 68 339 86T386 105Q418 105 438 85T458 34Q458 6 440 -15T388 -36Q355 -36 337 -15T318 34Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="matrix(1 0 0 -1 0 0)"><g data-mml-node="math"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mo"><use xlink:href="#MJX-50-TEX-N-F7"></use></g></g></g></g></svg>',
+              latex: '\\div',
+            },
+          ],
+        },
         limit: {
           title: '极限对数',
           formulas: [
