@@ -916,9 +916,8 @@
     float: left;
     width: 14px;
     height: 14px;
-    border: 1px solid var(--toolbar-btn-hover-bg);
+    border: 1px solid var(--toolbar-bg);
     cursor: pointer;
-
     &:hover {
       border-color: var(--primary-color);
     }
