@@ -21,7 +21,7 @@
     width: 100px;
     height: 100%;
     list-style: none;
-    padding: 0;
+    padding: 10px 0 0 10px;
     margin: 0;
     margin-right: 10px;
     .cherry-insert-formula-tab {
@@ -29,6 +29,7 @@
       height: 30px;
       text-align: center;
       border: 1px solid var(--base-border-color);
+      border-radius: 5px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -63,6 +64,9 @@
         position: relative;
         &:not(:first-child) {
           margin-top: 10px;
+          .cherry-insert-formula-categary__func {
+            top: -10px;
+          }
         }
         &:hover .cherry-insert-formula-categary__func {
           display: block;
@@ -73,19 +77,18 @@
         height: 260px;
         position: absolute;
         left: 100%;
-        top: 0;
-        margin-left: -1px;
         z-index: 100;
-        padding: 20px 10px;
+        padding: 0 15px 15px 15px;
         background-color: var(--base-editor-bg);
-        border-left: 1px solid var(--base-border-color);
+        border: none;
+          box-shadow: none;
         display: none;
         overflow-y: scroll;
 
         .cherry-insert-formula-categary__func-categary {
           border-top: 1px solid var(--base-border-color);
           border-bottom: 1px solid var(--base-border-color);
-          margin-bottom: 10px;
+          margin-bottom: 8px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -97,7 +100,7 @@
           display: inline-block;
           text-align: center;
           background-color: var(--toolbar-btn-hover-bg);
-          margin: 2px;
+          margin: 4px;
           padding: 2px;
           vertical-align: middle;
           line-height: 30px;
