@@ -5,10 +5,10 @@
   display: flex;
   position: fixed !important;
   z-index: 9999999;
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0.5rem 1rem var(--shadow-color);
   box-sizing: border-box;
   border-radius: 10px;
-  background-color: var(--oc-white) !important;
+  background-color: var(--base-editor-bg) !important;
   overflow: hidden;
 
   .cherry-insert-formula-more {
@@ -28,7 +28,7 @@
       width: 100%;
       height: 30px;
       text-align: center;
-      border: 1px solid var(--oc-white);
+      border: 1px solid var(--base-border-color);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -46,8 +46,8 @@
     }
 
     .cherry-insert-formula-tab.active {
-      color: black;
-      border: 1px solid #000;
+      color: var(--base-font-color);
+      border: 1px solid var(--primary-color);
       border-radius: 5px;
     }
   }
@@ -72,7 +72,7 @@
         top: 0;
         z-index: 100;
         padding: 20px 10px;
-        background-color: var(--oc-white);
+        background-color: var(--base-editor-bg);
         border-left: 1px solid var(--base-border-color);
         display: none;
         overflow-y: scroll;
@@ -88,20 +88,20 @@
 
         .cherry-insert-formula-categary__func-item {
           cursor: pointer;
-          border: 1px solid var(--oc-white);
+          border: 1px solid var(--base-border-color);
           display: inline-block;
           text-align: center;
-          background-color: var(--oc-white);
+          background-color: var(--toolbar-btn-hover-bg);
           margin: 2px;
           padding: 2px;
           vertical-align: middle;
           line-height: 30px;
-          border-color: var(--oc-white);
+          border-color: var(--toolbar-btn-hover-bg);
           border-radius: 5px;
 
           &:hover {
-            border-color: var(--oc-white);
-            background-color: var(--oc-white);
+            border-color: var(--toolbar-btn-hover-bg);
+            background-color: var(--toolbar-bg);
           }
           svg, img {
             pointer-events: none;
@@ -145,7 +145,7 @@
 
       .btn-light {
         color: var(--base-font-color);
-        background-color: var(--oc-white);
+        background-color: var(--base-editor-bg);
         border-color: var(--base-border-color);
       }
     }
