@@ -308,8 +308,21 @@ export default class Editor {
     }
     let html = clipboardData.getData('Text/Html');
     const { items } = clipboardData;
-    // 清空注释
-    html = html.replace(/<!--[^>]+>/g, '');
+
+    // 优先处理来自 Word 等应用的粘贴内容
+    // 有效的内容通常由 StartFragment 和 EndFragment 标记包裹。
+    const startFragment = '<!--StartFragment-->';
+    const endFragment = '<!--EndFragment-->';
+    if (html.includes(startFragment)) {
+      const startIndex = html.indexOf(startFragment) + startFragment.length;
+      const endIndex = html.indexOf(endFragment);
+
+      if (endIndex > startIndex) {
+        html = html.substring(startIndex, endIndex);
+      }
+    } else {
+      html = html.replace(/<!--[^>]+>/g, '');
+    }
     /**
      * 处理“右键复制图片”场景
      * 在这种场景下，我们希望粘贴进来的图片可以走文件上传逻辑，所以当检测到这种场景后，我们会清空html
