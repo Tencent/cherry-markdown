@@ -43,7 +43,7 @@ const imgAltHelper = {
    * @returns {{extendStyles:string, extendClasses:string}}
    */
   processExtendStyleInAlt(alt) {
-    let extendStyles = imgAltHelper.$getAlignment(alt);
+    let extendStyles = imgAltHelper.$getAlignmentStyle(alt);
     let extendClasses = '';
     const info = alt.match(/#(border|shadow|radius|B|S|R)/g);
     if (info) {
@@ -71,17 +71,26 @@ const imgAltHelper = {
   },
 
   /**
-   * 从alt中提取对齐方式信息
+   * 从alt中提取对齐方式名称
    * @param {string} alt
    * @returns {string}
    */
   $getAlignment(alt) {
     const styleRegex = /#(center|right|left|float-right|float-left)/i;
-    const info = alt.match(styleRegex);
-    if (!info) {
+    const match = alt.match(styleRegex);
+    return match ? match[1] : '';
+  },
+
+  /**
+   * 从alt中提取对齐方式样式信息
+   * @param {string} alt
+   * @returns {string}
+   */
+  $getAlignmentStyle(alt) {
+    const alignment = this.$getAlignment(alt);
+    if (!alignment) {
       return '';
     }
-    const [, alignment] = info;
     switch (alignment) {
       case 'center':
         return 'transform:translateX(-50%);margin-left:50%;display:block;';
@@ -93,6 +102,8 @@ const imgAltHelper = {
         return 'float:right;transform:translateX(0);margin-left:0;display:block;';
       case 'float-left':
         return 'float:left;transform:translateX(0);margin-left:0;display:block;';
+      default:
+        return '';
     }
   },
 };
