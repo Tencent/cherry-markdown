@@ -1,21 +1,3 @@
-/**
- * Draw.io integration for Cherry Markdown
- * 
- * This file handles the initialization and communication between the Draw.io editor
- * and the Cherry Markdown editor through postMessage.
- * 
- * Path issues fixed:
- * 1. Corrected the path to the theme XML file
- * 2. Added fallback for language resources
- * 3. Enhanced error handling for resource loading
- * 
- * Usage:
- * 1. Include all required Draw.io scripts in the HTML file
- * 2. Include this script after all Draw.io scripts
- * 3. The editor will initialize automatically and post a 'ready' message to the parent window
- * 4. Use postMessage to communicate with the editor (see addPostMessageListener function)
- */
-
 // Extends EditorUi to update I/O action states based on availability of backend
 (function()
 {
