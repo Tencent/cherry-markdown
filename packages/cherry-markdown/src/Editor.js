@@ -308,7 +308,12 @@ export default class Editor {
     }
     let html = clipboardData.getData('Text/Html');
     const { items } = clipboardData;
-    // 清空注释
+
+    // 优先处理来自 Word 等应用的粘贴内容
+    // 有效的内容通常由 StartFragment 和 EndFragment 标记包裹。
+    html = html.replace(/^[\s\S]*<!--StartFragment-->|<!--EndFragment-->[\s\S]*$/g, '');
+
+    // 删除其他无关的注释
     html = html.replace(/<!--[^>]+>/g, '');
     /**
      * 处理“右键复制图片”场景
