@@ -16,24 +16,18 @@
 // 主要布局控制，可以不合并进下面的区块
 .cherry {
   display: flex;
-  flex-direction: column;
+  flex-flow: row wrap;
   align-items: stretch;
+  align-content: flex-start;
   height: 100%;
   min-height: 60px;
   position: relative;
   // overflow: hidden;
 
-  .cherry-content {
-    display: flex;
-    flex: 1;
-    min-height: 0;
-  }
-
   .cherry-editor,
   .cherry-previewer {
-    flex: 1;
-    min-height: 0;
-    max-height: none;
+    max-height: calc(100% - var(--height-toolbar));
+    min-height: calc(100% - var(--height-toolbar));
   }
 
   .CodeMirror {
@@ -173,10 +167,9 @@
   align-items: baseline;
   justify-content: space-between;
   padding: var(--toolbar-padding);
-  min-height: var(--toolbar-height);
   font-size: var(--toolbar-font-size);
   line-height: 2.8;
-  flex-shrink: 0;
+  flex-basis: 100%;
   box-sizing: border-box;
   z-index: 2;
   user-select: none;
@@ -209,7 +202,6 @@
   .toolbar-right {
     display: flex;
     align-items: center;
-    min-height: var(--toolbar-height);
     flex-wrap: wrap;
     flex: 1;
   }

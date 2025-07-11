@@ -149,6 +149,12 @@ export default class Previewer {
     });
     // 开始监听元素
     resizeObserver.observe(this.$cherry.wrapperDom);
+
+    const toolbarObserver = new ResizeObserver(() => {
+      const toolbarHeight = this.$cherry.toolbar.options.dom.offsetHeight;
+      this.$cherry.wrapperDom.style.setProperty('--height-toolbar', `${toolbarHeight}px`);
+    });
+    toolbarObserver.observe(this.$cherry.toolbar.options.dom);
   }
 
   subMenusPositionChange() {
