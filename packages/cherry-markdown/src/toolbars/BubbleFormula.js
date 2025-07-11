@@ -256,6 +256,37 @@ export default class BubbleFormula {
     this.dom
       .querySelectorAll('.cherry-insert-formula-categary__func-item')
       ?.forEach((element) => element?.addEventListener('click', this.handleClickFormulaSelect.bind(this)));
+
+    // 公式分类菜单悬浮控制
+    this.dom.querySelectorAll('.cherry-insert-formula-categary').forEach((categary) => {
+      const funcPanel = categary.querySelector('.cherry-insert-formula-categary__func');
+      let hideTimer = null;
+
+      categary.addEventListener('mouseenter', () => {
+        clearTimeout(hideTimer);
+        // 隐藏所有其他
+        this.dom.querySelectorAll('.cherry-insert-formula-categary__func').forEach(panel => {
+          if (panel !== funcPanel) panel.classList.remove('active');
+        });
+        funcPanel.classList.add('active');
+      });
+
+      categary.addEventListener('mouseleave', () => {
+        hideTimer = setTimeout(() => {
+          funcPanel.classList.remove('active');
+        }, 200);
+      });
+
+      funcPanel.addEventListener('mouseenter', () => {
+        clearTimeout(hideTimer);
+        funcPanel.classList.add('active');
+      });
+      funcPanel.addEventListener('mouseleave', () => {
+        hideTimer = setTimeout(() => {
+          funcPanel.classList.remove('active');
+        }, 200);
+      });
+    });
   }
 
   /**

@@ -1,21 +1,23 @@
 .cherry-insert-formula-wrappler {
   width: 610px !important; // 覆盖默认.cherry-dropdown样式
-  height: 300px !important;
+  height: 350px !important;
   padding: 15px;
   display: flex;
   position: fixed !important;
   z-index: var(--z-index-popover);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
   border-radius: var(--radius-lg);
   color: var(--toolbar-btn-color);
   background-color: var(--dropdown-bg, var(--base-previewer-bg)) !important;
   overflow: hidden;
   font-family: var(--font-family-sans);
+  backdrop-filter: blur(8px);
 
   .cherry-insert-formula-more {
     position: absolute;
-    bottom: 0;
+    bottom: 10px;
+    left: 15px;
     font-size: var(--font-size-xs);
     color: var(--toolbar-btn-color);
 
@@ -23,10 +25,13 @@
       color: var(--primary-color);
       text-decoration: none;
       transition: all 0.3s ease;
+      padding: 3px 6px;
+      border-radius: 4px;
 
       &:hover {
         color: var(--dropdown-item-hover-color);
         background-color: var(--dropdown-item-hover-bg);
+        text-decoration: underline;
       }
     }
   }
@@ -37,13 +42,13 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    margin-right: 10px;
+    margin-right: 12px;
 
     .cherry-insert-formula-tab {
       width: 100%;
-      height: 30px;
+      height: 32px;
       text-align: center;
-      border: var(--border-width-1) solid var(--dropdown-bg, var(--base-previewer-bg));
+      border: var(--border-width-1) solid transparent;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -51,6 +56,8 @@
       cursor: pointer;
       color: var(--toolbar-btn-color);
       transition: all 0.3s ease;
+      border-radius: 5px;
+      font-weight: 500;
 
       &:hover {
         color: var(--dropdown-item-hover-color);
@@ -66,7 +73,7 @@
       }
 
       &:not(:first-child) {
-        margin-top: 10px;
+        margin-top: 8px;
       }
     }
 
@@ -75,6 +82,7 @@
       border: var(--border-width-1) solid var(--primary-color);
       background: var(--toolbar-btn-hover-bg);
       border-radius: var(--radius-md);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
     }
   }
 
@@ -82,41 +90,50 @@
     height: 100%;
     flex: 1;
     display: none;
-    overflow-y: scroll;
+    overflow-y: auto;
     position: relative;
+    border-radius: 6px;
+    padding-right: 5px;
 
     .cherry-insert-formula-categary {
-      width: 130px;
+      width: 120px;
       position: relative;
 
       &:not(:first-child) {
-        margin-top: 10px;
+        margin-top: 8px;
       }
 
       .cherry-insert-formula-categary__func {
-        min-width: 200px;
-        height: 260px;
+        min-width: 250px;
+        max-width: 350px;
+        height: 280px;
         position: absolute;
-        left: 130px;
+        left: 125px;
         top: 0;
         z-index: 100;
-        padding: 20px 10px;
+        padding: 15px 12px;
         background-color: var(--dropdown-bg, var(--base-previewer-bg));
         border-left: var(--border-width-1) solid var(--base-border-color);
+        border-radius: 6px;
         display: none;
-        overflow-y: scroll;
+        overflow-y: auto;
+        overflow-x: auto;
         transition: opacity 0.3s ease, transform 0.3s ease;
         opacity: 0;
         transform: translateX(-5px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
         .cherry-insert-formula-categary__func-categary {
           border-top: var(--border-width-1) solid var(--base-border-color);
           border-bottom: var(--border-width-1) solid var(--base-border-color);
           margin-bottom: 10px;
+          padding: 3px 0;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
           color: var(--toolbar-btn-color);
+          font-weight: 600;
+          font-size: 0.95em;
         }
 
         .cherry-insert-formula-categary__func-item {
@@ -126,33 +143,46 @@
           text-align: center;
           background-color: var(--dropdown-bg, var(--base-previewer-bg));
           margin: 2px;
-          padding: 2px;
+          padding: 4px 6px;
           vertical-align: middle;
-          line-height: 30px;
+          line-height: 28px;
           border-color: var(--dropdown-bg, var(--base-previewer-bg));
           border-radius: var(--radius-md);
           color: var(--toolbar-btn-color);
           transition: all 0.25s ease;
+          max-width: 320px;
+          white-space: normal;
+          word-break: break-word;
 
           &:hover {
             color: var(--dropdown-item-hover-color);
             background-color: var(--dropdown-item-hover-bg);
             border-color: var(--primary-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
           }
 
           &.selected {
             color: var(--dropdown-item-active-color, var(--primary-color));
             background-color: var(--dropdown-item-active-bg, var(--secondary-color));
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
           }
 
           svg,
           img {
             pointer-events: none;
+            max-width: 100%;
+            height: auto;
           }
         }
       }
 
-      &:hover .cherry-insert-formula-categary__func {
+      .cherry-insert-formula-categary__func {
+        display: none;
+        opacity: 0;
+        transform: translateX(-5px);
+        transition: opacity 0.3s, transform 0.3s;
+      }
+      .cherry-insert-formula-categary__func.active {
         display: block;
         opacity: 1;
         transform: translateX(0);
@@ -161,29 +191,34 @@
       .cherry-insert-formula-categary__btn {
         cursor: pointer;
         display: inline-block;
-        font-weight: var(--font-weight-normal);
+        font-weight: 500;
         text-align: center;
         vertical-align: middle;
         user-select: none;
         background-color: var(--dropdown-bg, var(--base-previewer-bg));
         border: var(--border-width-1) solid var(--base-border-color);
-        padding: 0.375rem 0.75rem;
+        padding: 0.375rem 0.625rem;
+        margin-top: 6px;
+        margin-bottom: 6px;
         font-size: var(--font-size-md);
         line-height: var(--line-height-normal);
-        border-radius: var(--radius-md);
+        border-radius: 6px;
         width: 100%;
         color: var(--toolbar-btn-color);
         transition: all 0.3s ease;
+        letter-spacing: 0.01em;
 
         &>img {
           width: 100%;
           height: 60%;
+          max-width: 100%;
         }
 
         &:hover {
           color: var(--dropdown-item-hover-color);
           background-color: var(--dropdown-item-hover-bg);
           border-color: var(--primary-color);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
         }
       }
 
