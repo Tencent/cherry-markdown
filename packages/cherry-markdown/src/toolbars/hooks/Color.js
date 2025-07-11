@@ -80,14 +80,9 @@ export default class Color extends MenuBase {
       }
       if (this.$testIsColor(type, $selection)) {
         const reg = new RegExp(`(^\\s*${end})([^\\s]+) ([\\s\\S]+${end}\\s*$)`, 'gm');
-        let needClean = true;
         const tmp = $selection.replace(reg, (w, m1, m2, m3) => {
-          needClean = needClean ? m2 === color : false;
           return `${m1}${color} ${m3}`;
         });
-        if (needClean) {
-          return $selection.replace(reg, '$3').replace(/!+\s*$/gm, '');
-        }
         this.registerAfterClickCb(() => {
           this.setLessSelection(begin, end);
         });
@@ -132,6 +127,13 @@ class BubbleColor {
   constructor($cherry) {
     this.editor = $cherry.editor;
     this.$cherry = $cherry;
+    this.currentColor = '#ff0000';
+    this.currentType = 'text';
+    this.currentHue = 0;
+    this.currentSaturation = 1;
+    this.currentBrightness = 1;
+    this.isDragging = '';
+    this.recentColors = this.getRecentColors();
     this.init();
     this.initAction();
   }
@@ -139,72 +141,175 @@ class BubbleColor {
   /**
    * 定义调色盘每个色块的颜色值
    */
-  colorStack = [
-    '#000000',
-    '#444444',
-    '#666666',
-    '#999999',
-    '#cccccc',
-    '#eeeeee',
-    '#f3f3f3',
-    '#ffffff',
-    '#ff0000',
-    '#ff9900',
-    '#ffff00',
-    '#00ff00',
-    '#00ffff',
-    '#0000ff',
-    '#9900ff',
-    '#ff00ff',
-    '#f4cccc',
-    '#fce5cd',
-    '#fff2cc',
-    '#d9ead3',
-    '#d0e0e3',
-    '#cfe2f3',
-    '#d9d2e9',
-    '#ead1dc',
-    '#ea9999',
-    '#f9cb9c',
-    '#ffe599',
-    '#b6d7a8',
-    '#a2c4c9',
-    '#9fc5e8',
-    '#b4a7d6',
-    '#d5a6bd',
-    '#e06666',
-    '#f6b26b',
-    '#ffd966',
-    '#93c47d',
-    '#76a5af',
-    '#6fa8dc',
-    '#8e7cc3',
-    '#c27ba0',
-    '#cc0000',
-    '#e69138',
-    '#f1c232',
-    '#6aa84f',
-    '#45818e',
-    '#3d85c6',
-    '#674ea7',
-    '#a64d79',
-    '#990000',
-    '#b45f06',
-    '#bf9000',
-    '#38761d',
-    '#134f5c',
-    '#0b5394',
-    '#351c75',
-    '#741b47',
-    '#660000',
-    '#783f04',
-    '#7f6000',
-    '#274e13',
-    '#0c343d',
-    '#073763',
-    '#20124d',
-    '#4c1130',
+  presetColors = [
+    // 蓝色系
+    ['#e6f3ff', '#cce7ff', '#99d6ff', '#66c5ff', '#33b4ff', '#0099ff', '#0080e6', '#0066cc', '#004d99', '#003366'],
+    // 红色系
+    ['#ffe6e6', '#ffcccc', '#ff9999', '#ff6666', '#ff3333', '#ff0000', '#e60000', '#cc0000', '#990000', '#660000'],
+    // 橙色系
+    ['#fff2e6', '#ffe6cc', '#ffcc99', '#ffb366', '#ff9933', '#ff8000', '#e6730d', '#cc6600', '#995500', '#663300'],
+    // 绿色系
+    ['#e6ffe6', '#ccffcc', '#99ff99', '#66ff66', '#33ff33', '#00ff00', '#00e600', '#00cc00', '#009900', '#006600'],
   ];
+
+  /**
+   * 获取最近使用的颜色
+   */
+  getRecentColors() {
+    try {
+      return JSON.parse(localStorage.getItem('cherry-recent-colors') || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * 保存最近使用的颜色
+   */
+  saveRecentColor(color) {
+    if (!color || color === '#000000') return;
+
+    this.recentColors = [color, ...this.recentColors.filter((c) => c !== color)].slice(0, 6);
+    localStorage.setItem('cherry-recent-colors', JSON.stringify(this.recentColors));
+  }
+
+  /**
+   * 16进制转RGB
+   */
+  hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : null;
+  }
+
+  /**
+   * RGB转16进制
+   */
+  rgbToHex(r, g, b) {
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+  }
+
+  /**
+   * RGB转HSV
+   */
+  rgbToHsv(red, green, blue) {
+    const r = red / 255;
+    const g = green / 255;
+    const b = blue / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const diff = max - min;
+
+    let h = 0;
+    const s = max === 0 ? 0 : diff / max;
+    const v = max;
+
+    if (diff !== 0) {
+      switch (max) {
+        case r:
+          h = ((g - b) / diff + (g < b ? 6 : 0)) / 6;
+          break;
+        case g:
+          h = ((b - r) / diff + 2) / 6;
+          break;
+        case b:
+          h = ((r - g) / diff + 4) / 6;
+          break;
+      }
+    }
+
+    return { h: h * 360, s, v };
+  }
+
+  /**
+   * HSV转RGB
+   */
+  hsvToRgb(h, s, v) {
+    const c = v * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = v - c;
+    let r;
+    let g;
+    let b;
+
+    if (h >= 0 && h < 60) {
+      r = c;
+      g = x;
+      b = 0;
+    } else if (h >= 60 && h < 120) {
+      r = x;
+      g = c;
+      b = 0;
+    } else if (h >= 120 && h < 180) {
+      r = 0;
+      g = c;
+      b = x;
+    } else if (h >= 180 && h < 240) {
+      r = 0;
+      g = x;
+      b = c;
+    } else if (h >= 240 && h < 300) {
+      r = x;
+      g = 0;
+      b = c;
+    } else {
+      r = c;
+      g = 0;
+      b = x;
+    }
+
+    return {
+      r: Math.round((r + m) * 255),
+      g: Math.round((g + m) * 255),
+      b: Math.round((b + m) * 255),
+    };
+  }
+
+  /**
+   * 更新色相条背景
+   */
+  updateHueBackground() {
+    const saturationEl = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-saturation'));
+    if (saturationEl) {
+      const hueColor = this.hsvToRgb(this.currentHue, 1, 1);
+      const hueHex = this.rgbToHex(hueColor.r, hueColor.g, hueColor.b);
+      saturationEl.parentElement.style.background = `linear-gradient(to right, ${hueHex} 0%, ${hueHex} 100%)`;
+    }
+  }
+
+  /**
+   * 更新颜色指针位置
+   */
+  updatePointers() {
+    const pointer = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-pointer'));
+    const huePointer = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-hue-pointer'));
+
+    if (pointer) {
+      pointer.style.left = `${this.currentSaturation * 100}%`;
+      pointer.style.top = `${(1 - this.currentBrightness) * 100}%`;
+    }
+
+    if (huePointer) {
+      huePointer.style.left = `${(this.currentHue / 360) * 100}%`;
+    }
+  }
+
+  /**
+   * 从HSV值更新当前颜色
+   */
+  updateColorFromHsv() {
+    const rgb = this.hsvToRgb(this.currentHue, this.currentSaturation, this.currentBrightness);
+    this.currentColor = this.rgbToHex(rgb.r, rgb.g, rgb.b);
+    this.updateColorDisplay(this.currentColor);
+    this.updateHueBackground();
+    this.updatePointers();
+  }
 
   /**
    * 用来暂存选中的内容
@@ -214,33 +319,89 @@ class BubbleColor {
     this.selection = selection;
   }
 
-  getFontColorDom(title) {
-    const colorStackDOM = this.colorStack
+  /**
+   * 创建颜色选择器主体区域
+   */
+  createColorPicker() {
+    return `
+      <div class="cherry-color-picker">
+        <div class="cherry-color-main" style="background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);">
+          <div class="cherry-color-saturation" style="background: linear-gradient(to top, #000 0%, transparent 100%), linear-gradient(to right, #fff 0%, transparent 100%);">
+            <div class="cherry-color-pointer" style="left: 100%; top: 0%;"></div>
+          </div>
+        </div>
+        <div class="cherry-color-hue">
+          <div class="cherry-color-hue-pointer" style="left: 0%;"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * 创建最近使用颜色区域
+   */
+  createRecentColors() {
+    const createColorItem = (color, isEmpty = false) =>
+      `<div class="cherry-color-item ${isEmpty ? 'cherry-color-recent-empty' : 'cherry-color-recent-item'}" 
+           ${!isEmpty ? `data-color="${color}" style="background-color: ${color};"` : ''}></div>`;
+
+    const recentColorsHTML = this.recentColors.map((color) => createColorItem(color)).join('');
+    const emptyHTML = Array(Math.max(0, 6 - this.recentColors.length))
+      .fill(createColorItem('', true))
+      .join('');
+
+    return `
+      <div class="cherry-color-recent">
+        <div class="cherry-color-section-title">最近使用颜色</div>
+        <div class="cherry-color-recent-grid">
+          ${recentColorsHTML}${emptyHTML}
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * 创建预设颜色区域
+   */
+  createPresetColors() {
+    const presetsHTML = this.presetColors
       .map(
-        (color) =>
-          `<span class="cherry-color-item cherry-color-item__${color.replace(
-            '#',
-            '',
-          )}" unselectable="on" data-val="${color}"
-                  style="background-color:${color}"></span>`,
+        (row) =>
+          `<div class="cherry-color-preset-row">
+          ${row
+            .map(
+              (color) =>
+                `<div class="cherry-color-item cherry-color-preset-item" data-color="${color}" style="background-color: ${color};"></div>`,
+            )
+            .join('')}
+        </div>`,
       )
       .join('');
-    return `<h3>${title}</h3>${colorStackDOM}`;
+
+    return `
+      <div class="cherry-color-presets">
+        <div class="cherry-color-section-title">系统预设颜色</div>
+        <div class="cherry-color-preset-grid">
+          ${presetsHTML}
+        </div>
+      </div>
+    `;
   }
 
   getDom() {
     const $colorWrap = document.createElement('div');
     $colorWrap.classList.add('cherry-color-wrap');
     $colorWrap.classList.add('cherry-dropdown');
-    const $textWrap = document.createElement('div');
-    $textWrap.classList.add('cherry-color-text');
-    $textWrap.innerHTML = this.getFontColorDom(this.$cherry.locale.fontColor);
-    $colorWrap.appendChild($textWrap);
 
-    const $bgWrap = document.createElement('div');
-    $bgWrap.classList.add('cherry-color-bg');
-    $bgWrap.innerHTML = this.getFontColorDom(this.$cherry.locale.fontBgColor);
-    $colorWrap.appendChild($bgWrap);
+    $colorWrap.innerHTML = `
+      <div class="cherry-color-tabs">
+        <div class="cherry-color-tab active" data-type="text">文字</div>
+        <div class="cherry-color-tab" data-type="background">背景</div>
+      </div>
+      ${this.createColorPicker()}
+      ${this.createRecentColors()}
+      ${this.createPresetColors()}
+    `;
 
     return $colorWrap;
   }
@@ -263,22 +424,149 @@ class BubbleColor {
     return `!!!${this.colorValue} ${this.selection}!!!`;
   }
 
+  /**
+   * 更新颜色显示
+   */
+  updateColorDisplay(color) {
+    this.currentColor = color;
+  }
+
+  /**
+   * 从颜色选择器获取颜色
+   */
+  getColorFromPicker(e) {
+    const saturationEl = this.dom.querySelector('.cherry-color-saturation');
+    if (!saturationEl) return this.currentColor;
+
+    const rect = saturationEl.getBoundingClientRect();
+    const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+    const y = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+
+    this.currentSaturation = x / rect.width;
+    this.currentBrightness = 1 - y / rect.height;
+
+    this.updateColorFromHsv();
+    return this.currentColor;
+  }
+
+  /**
+   * 从色相条获取色相值
+   */
+  getHueFromPicker(e) {
+    const hueEl = this.dom.querySelector('.cherry-color-hue');
+    if (!hueEl) return this.currentColor;
+
+    const rect = hueEl.getBoundingClientRect();
+    const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+
+    this.currentHue = (x / rect.width) * 360;
+    this.updateColorFromHsv();
+    return this.currentColor;
+  }
+
+  /**
+   * 设置颜色并更新HSV值
+   */
+  setColor(color) {
+    this.currentColor = color;
+    const rgb = this.hexToRgb(color);
+    if (rgb) {
+      const hsv = this.rgbToHsv(rgb.r, rgb.g, rgb.b);
+      this.currentHue = hsv.h;
+      this.currentSaturation = hsv.s;
+      this.currentBrightness = hsv.v;
+      this.updateColorDisplay(color);
+      this.updateHueBackground();
+      this.updatePointers();
+    }
+  }
+
+  /**
+   * 更新颜色选择并触发事件
+   */
+  updateColorSelection(color) {
+    this.colorValue = color;
+    this.type = this.currentType;
+    this.$color.setCacheOnce({ type: this.type, color: this.colorValue });
+    this.$color.fire(null);
+  }
+
   initAction() {
-    // const self = this;
-    this.dom.addEventListener(
-      'click',
-      (evt) => {
-        const { target } = /** @type {MouseEvent & {target:HTMLElement}}*/ (evt);
-        this.colorValue = target.getAttribute('data-val');
-        if (!this.colorValue) {
-          return false;
+    this.dom.addEventListener('mousedown', (evt) => {
+      const { target } = /** @type {MouseEvent & {target:HTMLElement}}*/ (evt);
+
+      // 颜色选择器
+      if (
+        target.classList.contains('cherry-color-saturation') ||
+        target.classList.contains('cherry-color-pointer') ||
+        target.closest('.cherry-color-saturation')
+      ) {
+        this.isDragging = 'saturation';
+        const color = this.getColorFromPicker(evt);
+        this.updateColorSelection(color);
+        evt.preventDefault();
+        return;
+      }
+
+      // 色相条
+      if (
+        target.classList.contains('cherry-color-hue') ||
+        target.classList.contains('cherry-color-hue-pointer') ||
+        target.closest('.cherry-color-hue')
+      ) {
+        this.isDragging = 'hue';
+        const color = this.getHueFromPicker(evt);
+        this.updateColorSelection(color);
+        evt.preventDefault();
+        return;
+      }
+    });
+
+    // 鼠标移动：更新颜色选择
+    document.addEventListener('mousemove', (evt) => {
+      if (this.isDragging === 'saturation') {
+        const color = this.getColorFromPicker(evt);
+        this.updateColorSelection(color);
+        evt.preventDefault();
+      } else if (this.isDragging === 'hue') {
+        const color = this.getHueFromPicker(evt);
+        this.updateColorSelection(color);
+        evt.preventDefault();
+      }
+    });
+
+    // 鼠标松开
+    document.addEventListener('mouseup', () => {
+      if (this.isDragging) {
+        this.isDragging = '';
+      }
+    });
+
+    this.dom.addEventListener('click', (evt) => {
+      const { target } = /** @type {MouseEvent & {target:HTMLElement}}*/ (evt);
+
+      // 标签页切换
+      if (target.classList.contains('cherry-color-tab')) {
+        this.dom.querySelectorAll('.cherry-color-tab').forEach((tab) => tab.classList.remove('active'));
+        target.classList.add('active');
+        this.currentType = target.dataset.type;
+        return;
+      }
+
+      // 预设颜色点击
+      if (
+        target.classList.contains('cherry-color-preset-item') ||
+        target.classList.contains('cherry-color-recent-item')
+      ) {
+        const { color } = target.dataset;
+        if (color) {
+          this.setColor(color);
+          this.updateColorSelection(color);
+          this.saveRecentColor(color);
         }
-        this.type = target.closest('.cherry-color-text') ? 'text' : 'bg';
-        this.$color.setCacheOnce({ type: this.type, color: this.colorValue });
-        this.$color.fire(null);
-      },
-      false,
-    );
+        return;
+      }
+    });
   }
 
   /**
@@ -290,9 +578,32 @@ class BubbleColor {
       this.dom.style.display = 'none';
       return;
     }
+
     this.dom.style.left = `${left}px`;
     this.dom.style.top = `${top}px`;
     this.dom.style.display = 'block';
     this.$color = $color;
+
+    this.setColor(this.currentColor);
+    this.updateRecentColorsDisplay();
+  }
+
+  /**
+   * 更新最近使用颜色的显示
+   */
+  updateRecentColorsDisplay() {
+    const recentGrid = this.dom.querySelector('.cherry-color-recent-grid');
+    if (!recentGrid) return;
+
+    const createColorItem = (color, isEmpty = false) =>
+      `<div class="cherry-color-item ${isEmpty ? 'cherry-color-recent-empty' : 'cherry-color-recent-item'}" 
+           ${!isEmpty ? `data-color="${color}" style="background-color: ${color};"` : ''}></div>`;
+
+    const recentColorsHTML = this.recentColors.map((color) => createColorItem(color)).join('');
+    const emptyHTML = Array(Math.max(0, 6 - this.recentColors.length))
+      .fill(createColorItem('', true))
+      .join('');
+
+    recentGrid.innerHTML = `${recentColorsHTML}${emptyHTML}`;
   }
 }
