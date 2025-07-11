@@ -183,13 +183,19 @@ export default class Cherry extends CherryStatic {
 
     const wrapperFragment = document.createDocumentFragment();
     wrapperFragment.appendChild(this.toolbar.options.dom);
-    wrapperFragment.appendChild(editor.options.editorDom);
+
+    const contentContainer = document.createElement('div');
+    contentContainer.className = 'cherry-content';
+
+    contentContainer.appendChild(editor.options.editorDom);
     if (!this.options.previewer.dom) {
-      wrapperFragment.appendChild(previewer.options.previewerDom);
+      contentContainer.appendChild(previewer.options.previewerDom);
     }
-    wrapperFragment.appendChild(previewer.options.virtualDragLineDom);
-    wrapperFragment.appendChild(previewer.options.editorMaskDom);
-    wrapperFragment.appendChild(previewer.options.previewerMaskDom);
+    contentContainer.appendChild(previewer.options.virtualDragLineDom);
+    contentContainer.appendChild(previewer.options.editorMaskDom);
+    contentContainer.appendChild(previewer.options.previewerMaskDom);
+
+    wrapperFragment.appendChild(contentContainer);
 
     wrapperDom.appendChild(wrapperFragment);
     this.wrapperDom = wrapperDom;
