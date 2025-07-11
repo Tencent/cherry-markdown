@@ -368,22 +368,18 @@ fetch('./assets/markdown/basic.md').then((response) => response.text()).then((va
 
 
 document.addEventListener('click', function(e) {
-  // 只处理 checklist 的点击
   const icon = e.target.closest('.ch-icon');
   if (!icon) return;
 
-  // 延迟一点点，等 Cherry 切换 class 或替换 DOM
   setTimeout(() => {
-    // 重新获取最新的 .ch-icon-check
     const check = icon.parentNode.querySelector('.ch-icon-check');
     if (check) {
-      check.classList.remove('animating'); // 先移除，确保能重新触发动画
-      // 强制重绘
+      check.classList.remove('animating'); 
       void check.offsetWidth;
       check.classList.add('animating');
       setTimeout(() => {
         check.classList.remove('animating');
       }, 400);
     }
-  }, 10); // 10ms 延迟，确保 DOM 已更新
+  }, 10); 
 });

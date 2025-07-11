@@ -13,24 +13,22 @@
   transition: border-color 0.2s, background 0.2s;
   background: none;
   overflow: visible;
-  border: 2px solid #ccc; /* 默认灰色边框 */
+  border: 2px solid #ccc; 
 }
 
-/* 1. 未点击时：空心圆 */
 .ch-icon-square {
   background: none;
   border: 2px solid #ccc;
 }
+
 .ch-icon-square::before {
-  display: none; /* 无勾 */
+  display: none; 
 }
 
-/* 2. 悬浮未点击：边框变主题色 */
 .ch-icon-square:hover {
   border-color: var(--primary-color, #3182f6);
 }
 
-/* 3. 点击后：蓝色圆背景+烟花+白色勾 */
 .ch-icon-check {
   background: var(--primary-color, #3182f6);
   border: 2px solid var(--primary-color, #3182f6);
@@ -38,6 +36,7 @@
   position: relative;
   overflow: visible;
 }
+
 .ch-icon-check::before {
   content: "";
   display: block;
@@ -52,7 +51,6 @@
   z-index: 2;
 }
 
-/* 4. 点击后鼠标移开：灰色背景+白色勾 */
 .ch-icon-check:not(:hover) {
   background: #ccc;
   border: 2px solid #ccc;
@@ -69,6 +67,7 @@
   pointer-events: none;
   display: none;
 }
+
 .ch-icon-check.animating::after {
   display: block;
   box-shadow:
@@ -105,7 +104,6 @@
   100% { transform: scale(1); opacity: 1; }
 }
 
-/** 编辑器样式 */
 .cherry.theme__default {
   /* ========== 基础色彩变量覆盖 ========== */
   --primary-color: var(--oc-blue-6);
