@@ -99,7 +99,7 @@
           border: 1px solid var(--base-border-color);
           display: inline-block;
           text-align: center;
-          background-color: var(--toolbar-btn-hover-bg);
+          background-color: var(--base-editor-bg);
           margin: 4px;
           padding: 2px;
           vertical-align: middle;
@@ -109,7 +109,7 @@
 
           &:hover {
             border-color: var(--toolbar-btn-hover-bg);
-            background-color: var(--toolbar-bg);
+            background-color: var(--toolbar-btn-hover-bg);
           }
           svg, img {
             pointer-events: none;
