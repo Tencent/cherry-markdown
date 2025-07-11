@@ -31,8 +31,8 @@
   --editor-keyword-color: var(--oc-yellow-3);
   --editor-selection-bg: rgba(134, 142, 150, 0.8);
 
-  --dropdown-item-hover-bg: var(--secondary-color);
-  --dropdown-item-hover-color: var(--base-font-color);
+  --dropdown-item-hover-bg: var(--oc-gray-9);
+  --dropdown-item-hover-color: var(--oc-orange-5);
   --dropdown-item-active-bg: var(--secondary-color);
   --dropdown-item-active-color: var(--primary-color);
 
@@ -116,6 +116,13 @@
         }
       }
     }
+  }
+}
+
+/** 快捷键配置面板样式 */
+.cherry-shortcut-key-config-panel-wrapper {
+  .shortcut-panel-title, .shortcut-panel-settings {
+    color: var(--oc-gray-9);
   }
 }
 
