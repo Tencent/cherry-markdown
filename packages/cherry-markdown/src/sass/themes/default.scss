@@ -1,6 +1,109 @@
 /*
  * 默认主题
  */
+ .ch-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.2s, background 0.2s;
+  background: none;
+  overflow: visible;
+  border: 2px solid #ccc; /* 默认灰色边框 */
+}
+
+/* 1. 未点击时：空心圆 */
+.ch-icon-square {
+  background: none;
+  border: 2px solid #ccc;
+}
+.ch-icon-square::before {
+  display: none; /* 无勾 */
+}
+
+/* 2. 悬浮未点击：边框变主题色 */
+.ch-icon-square:hover {
+  border-color: var(--primary-color, #3182f6);
+}
+
+/* 3. 点击后：蓝色圆背景+烟花+白色勾 */
+.ch-icon-check {
+  background: var(--primary-color, #3182f6);
+  border: 2px solid var(--primary-color, #3182f6);
+  animation: checklist-check-pop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: visible;
+}
+.ch-icon-check::before {
+  content: "";
+  display: block;
+  width: 7px;
+  height: 4px;
+  border-left: 1.6px solid #fff;
+  border-bottom: 1.6px solid #fff;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -60%) rotate(-45deg);
+  z-index: 2;
+}
+
+/* 4. 点击后鼠标移开：灰色背景+白色勾 */
+.ch-icon-check:not(:hover) {
+  background: #ccc;
+  border: 2px solid #ccc;
+}
+
+.ch-icon-check::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  z-index: 1;
+  pointer-events: none;
+  display: none;
+}
+.ch-icon-check.animating::after {
+  display: block;
+  box-shadow:
+    0 -12px 0 2px rgba(49,130,246,0.7),
+    8.5px -8.5px 0 2px rgba(49,130,246,0.7),
+    12px 0 0 2px rgba(49,130,246,0.7),
+    8.5px 8.5px 0 2px rgba(49,130,246,0.7),
+    0 12px 0 2px rgba(49,130,246,0.7),
+    -8.5px 8.5px 0 2px rgba(49,130,246,0.7),
+    -12px 0 0 2px rgba(49,130,246,0.7),
+    -8.5px -8.5px 0 2px rgba(49,130,246,0.7);
+  transform: translate(-50%, -50%) scale(0.5);
+  opacity: 1;
+  animation: checklist-firework 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes checklist-firework {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.4);
+  }
+}
+@keyframes checklist-check-pop {
+  0% { transform: scale(0.8); opacity: 0.7; }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
 
 /** 编辑器样式 */
 .cherry.theme__default {
