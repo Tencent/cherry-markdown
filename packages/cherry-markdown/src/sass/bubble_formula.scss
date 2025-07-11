@@ -114,6 +114,7 @@
         padding: 15px 12px;
         background-color: var(--dropdown-bg, var(--base-previewer-bg));
         border-left: var(--border-width-1) solid var(--base-border-color);
+        border-right: var(--border-width-1) solid var(--base-border-color);
         border-radius: 6px;
         display: none;
         overflow-y: auto;
