@@ -301,8 +301,11 @@ class BubbleColor {
 
     $colorWrap.innerHTML = `
       <div class="cherry-color-tabs">
-        <div class="cherry-color-tab active" data-type="text">文字</div>
-        <div class="cherry-color-tab" data-type="background">背景</div>
+        <div class="cherry-color-tab-group">
+          <div class="cherry-color-tab active" data-type="text">文字</div>
+          <div class="cherry-color-tab" data-type="background">背景</div>
+        </div>
+        <div class="cherry-color-clear">清除颜色</div>
       </div>
       ${this.createColorPicker()}
       ${this.createRecentColors()}

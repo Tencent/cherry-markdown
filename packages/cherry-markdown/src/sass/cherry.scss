@@ -898,20 +898,28 @@
 
   .cherry-color-tabs {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 16px;
-    background: var(--border-color);
-    border-radius: 6px;
-    padding: 2px;
+
+    .cherry-color-tab-group {
+      display: flex;
+      background: var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 2px;
+      width: auto;
+      min-width: 120px;
+    }
 
     .cherry-color-tab {
-      flex: 1;
       padding: 8px 12px;
       text-align: center;
       font-size: 12px;
       color: var(--toolbar-btn-color);
       cursor: pointer;
-      border-radius: var(--radius-xl);
+      border-radius: var(--radius-md);
       transition: all 0.2s;
+      white-space: nowrap;
 
       &.active {
         background: var(--dropdown-item-active-bg);
@@ -919,6 +927,21 @@
       }
 
       &:hover:not(.active) {
+        background-color: var(--dropdown-item-hover-bg);
+        color: var(--dropdown-item-hover-color);
+      }
+    }
+
+    .cherry-color-clear {
+      font-size: 12px;
+      color: var(--toolbar-btn-color);
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: all 0.2s;
+      white-space: nowrap;
+
+      &:hover {
         background-color: var(--dropdown-item-hover-bg);
         color: var(--dropdown-item-hover-color);
       }
