@@ -63,6 +63,10 @@ export default class Color extends MenuBase {
       return;
     }
 
+    // 定位调色盘应该出现的位置
+    // 该按钮可能出现在顶部工具栏，
+    // 也可能出现在选中文字时出现的bubble工具栏，
+    // 也可能出现在新行出现的float工具栏
     let top = 0;
     let left = 0;
     if (event.target.closest('.cherry-bubble')) {
