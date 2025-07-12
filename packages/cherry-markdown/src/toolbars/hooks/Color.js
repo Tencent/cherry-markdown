@@ -188,16 +188,25 @@ class BubbleColor {
     ['#fff2e6', '#ffe6cc', '#ffcc99', '#ffb366', '#ff9933', '#ff8000', '#e6730d', '#cc6600', '#995500', '#663300'],
     // 绿色系
     ['#e6ffe6', '#ccffcc', '#99ff99', '#66ff66', '#33ff33', '#00ff00', '#00e600', '#00cc00', '#009900', '#006600'],
+    // 灰色系
+    ['#fafafa', '#f5f5f5', '#e5e5e5', '#d4d4d4', '#a3a3a3', '#737373', '#525252', '#404040', '#262626', '#171717'],
   ];
 
   constructor($cherry) {
     this.editor = $cherry.editor;
     this.$cherry = $cherry;
+
+    // 当前选中的颜色（十六进制格式）
     this.currentColor = '#ff0000';
+    // 当前操作类型：'text' 或 'background'
     this.currentType = 'text';
-    this.currentHue = 0;
-    this.currentSaturation = 1;
-    this.currentBrightness = 1;
+
+    // HSV色彩空间的三个分量
+    this.currentHue = 0; // 色相（0-360度）
+    this.currentSaturation = 1; // 饱和度（0-1）
+    this.currentBrightness = 1; // 明度（0-1）
+
+    // 当前是否正在拖拽操作，可能的值：'saturation'（饱和度/明度区域）、'hue'（色相条）、''（无拖拽）
     this.isDragging = '';
     this.recentColors = this.getRecentColors();
     this.init();
@@ -303,29 +312,32 @@ class BubbleColor {
   }
 
   initAction() {
+    // 鼠标按下事件：开始颜色选择或拖拽操作
     this.dom.addEventListener('mousedown', (evt) => {
       const { target } = /** @type {MouseEvent & {target:HTMLElement}}*/ (evt);
 
-      // 颜色选择器
+      // 检测是否点击了饱和度/明度选择区域
       if (
         target.classList.contains('cherry-color-saturation') ||
         target.classList.contains('cherry-color-pointer') ||
         target.closest('.cherry-color-saturation')
       ) {
         this.isDragging = 'saturation';
+        // 根据点击位置计算颜色值
         const color = this.getColorFromPicker(evt);
         this.updateColorSelection(color);
         evt.preventDefault();
         return;
       }
 
-      // 色相条
+      // 检测是否点击了色相选择条
       if (
         target.classList.contains('cherry-color-hue') ||
         target.classList.contains('cherry-color-hue-pointer') ||
         target.closest('.cherry-color-hue')
       ) {
         this.isDragging = 'hue';
+        // 根据点击位置计算色相值
         const color = this.getHueFromPicker(evt);
         this.updateColorSelection(color);
         evt.preventDefault();
@@ -333,29 +345,33 @@ class BubbleColor {
       }
     });
 
-    // 鼠标移动：更新颜色选择
+    // 鼠标移动事件：处理拖拽过程中的颜色更新
     document.addEventListener('mousemove', (evt) => {
       if (this.isDragging === 'saturation') {
+        // 拖拽饱和度/明度区域时实时更新颜色
         const color = this.getColorFromPicker(evt);
         this.updateColorSelection(color);
         evt.preventDefault();
       } else if (this.isDragging === 'hue') {
+        // 拖拽色相条时实时更新颜色
         const color = this.getHueFromPicker(evt);
         this.updateColorSelection(color);
         evt.preventDefault();
       }
     });
 
-    // 鼠标松开
+    // 鼠标松开事件：结束拖拽操作
     document.addEventListener('mouseup', () => {
       if (this.isDragging) {
         this.isDragging = '';
       }
     });
 
+    // 点击事件：处理选项卡切换、清除颜色、颜色选择等操作
     this.dom.addEventListener('click', (evt) => {
       const { target } = /** @type {MouseEvent & {target:HTMLElement}}*/ (evt);
 
+      // 切换文字/背景颜色选项卡
       if (target.classList.contains('cherry-color-tab')) {
         this.dom.querySelectorAll('.cherry-color-tab').forEach((tab) => tab.classList.remove('active'));
         target.classList.add('active');
@@ -363,6 +379,7 @@ class BubbleColor {
         return;
       }
 
+      // 清除颜色按钮
       if (target.classList.contains('cherry-color-clear')) {
         this.$color.setCacheOnce({ type: 'clear' });
         this.$color.fire(null);
@@ -388,8 +405,8 @@ class BubbleColor {
    * 在对应的坐标展示/关闭调色盘
    * @param {{left?: number, top?: number, $color?: object, forceHide?: boolean}} options
    */
-  toggle({ left, top, $color, forceHide = false }) {
-    const isVisible = this.dom.style.display?.length > 0 && this.dom.style.display !== 'none';
+  toggle({ left, top, $color, forceHide = false } = {}) {
+    const isVisible = this.dom.style.display !== 'none' && this.dom.style.display !== '';
 
     if (forceHide || isVisible) {
       this.dom.style.display = 'none';
@@ -414,10 +431,13 @@ class BubbleColor {
     this.currentColor = color;
     const rgb = hexToRgb(color);
     if (rgb) {
+      // 将RGB转换为HSV色彩空间，便于在颜色选择器中定位
       const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
-      this.currentHue = hsv.h;
-      this.currentSaturation = hsv.s;
-      this.currentBrightness = hsv.v;
+      this.currentHue = hsv.h; // 色相：0-360度
+      this.currentSaturation = hsv.s; // 饱和度：0-1
+      this.currentBrightness = hsv.v; // 明度：0-1
+
+      // 更新界面显示
       this.updateColorDisplay(color);
       this.updateHueBackground();
       this.updatePointers();
@@ -437,44 +457,60 @@ class BubbleColor {
 
   /**
    * 从颜色选择器获取颜色
+   * 根据鼠标在饱和度/明度区域的位置计算对应的颜色值
+   * @param {MouseEvent} e 鼠标事件，用于获取点击位置
+   * @returns {string} 计算得到的十六进制颜色值
    */
   getColorFromPicker(e) {
     const saturationEl = this.dom.querySelector('.cherry-color-saturation');
     if (!saturationEl) return this.currentColor;
 
+    // 获取饱和度/明度选择区域的位置和尺寸
     const rect = saturationEl.getBoundingClientRect();
+    // 计算鼠标在区域内的相对位置，并限制在有效范围内
     const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
     const y = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
 
+    // 将位置转换为饱和度和明度值
+    // x轴代表饱和度：左边是0（白色），右边是1（纯色）
     this.currentSaturation = x / rect.width;
+    // y轴代表明度：上面是1（亮），下面是0（暗）
     this.currentBrightness = 1 - y / rect.height;
 
+    // 根据新的HSV值计算颜色
     this.updateColorFromHsv();
     return this.currentColor;
   }
 
   /**
    * 从色相条获取色相值
+   * 根据鼠标在色相条上的位置计算对应的色相值
+   * @param {MouseEvent} e 鼠标事件，用于获取点击位置
+   * @returns {string} 计算得到的十六进制颜色值
    */
   getHueFromPicker(e) {
     const hueEl = this.dom.querySelector('.cherry-color-hue');
     if (!hueEl) return this.currentColor;
 
+    // 获取色相条的位置和尺寸
     const rect = hueEl.getBoundingClientRect();
+    // 计算鼠标在色相条上的相对位置，并限制在有效范围内
     const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
 
+    // 将位置转换为色相值：0度到360度的范围
     this.currentHue = (x / rect.width) * 360;
+
+    // 根据新的色相值重新计算颜色
     this.updateColorFromHsv();
     return this.currentColor;
   }
 
   /**
-   * 更新颜色选择并触发事件
+   * 更新颜色选择
    */
   updateColorSelection(color) {
-    this.colorValue = color;
     const typeKey = this.currentType === 'text' ? 'text' : 'background-color';
-    this.$color.setCacheOnce({ type: typeKey, color: this.colorValue });
+    this.$color.setCacheOnce({ type: typeKey, color });
     this.$color.fire(null);
   }
 
@@ -497,11 +533,15 @@ class BubbleColor {
     const huePointer = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-hue-pointer'));
 
     if (pointer) {
+      // 饱和度/明度区域的指针位置
+      // 水平位置代表饱和度：0%（左）到100%（右）
       pointer.style.left = `${this.currentSaturation * 100}%`;
+      // 垂直位置代表明度：0%（上，亮）到100%（下，暗）
       pointer.style.top = `${(1 - this.currentBrightness) * 100}%`;
     }
 
     if (huePointer) {
+      // 色相条指针位置：0%（左，0度）到100%（右，360度）
       huePointer.style.left = `${(this.currentHue / 360) * 100}%`;
     }
   }
@@ -541,19 +581,16 @@ class BubbleColor {
    * 获取最近使用的颜色
    */
   getRecentColors() {
-    try {
-      return JSON.parse(localStorage.getItem('cherry-recent-colors') || '[]');
-    } catch {
-      return [];
-    }
+    return JSON.parse(localStorage.getItem('cherry-recent-colors') || '[]');
   }
 
   /**
    * 保存最近使用的颜色
    */
   saveRecentColor(color) {
-    if (!color || color === '#000000') return;
+    if (!color) return;
 
+    // 将新颜色添加到列表开头，移除已存在的相同颜色，并限制为最多6个
     this.recentColors = [color, ...this.recentColors.filter((c) => c !== color)].slice(0, 6);
     localStorage.setItem('cherry-recent-colors', JSON.stringify(this.recentColors));
   }
