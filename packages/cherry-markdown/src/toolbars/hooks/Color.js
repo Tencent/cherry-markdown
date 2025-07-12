@@ -195,6 +195,7 @@ class BubbleColor {
   constructor($cherry) {
     this.editor = $cherry.editor;
     this.$cherry = $cherry;
+    this.locale = $cherry.locale;
 
     // 当前选中的颜色（十六进制格式）
     this.currentColor = '#ff0000';
@@ -226,10 +227,10 @@ class BubbleColor {
     $colorWrap.innerHTML = `
       <div class="cherry-color-tabs">
         <div class="cherry-color-tab-group">
-          <div class="cherry-color-tab active" data-type="text">文字</div>
-          <div class="cherry-color-tab" data-type="background">背景</div>
+          <div class="cherry-color-tab active" data-type="text">${this.locale.colorPickerText}</div>
+          <div class="cherry-color-tab" data-type="background">${this.locale.colorPickerBackground}</div>
         </div>
-        <div class="cherry-color-clear">清除颜色</div>
+        <div class="cherry-color-clear">${this.locale.colorPickerClear}</div>
       </div>
       ${this.createColorPicker()}
       ${this.createRecentColors()}
@@ -275,7 +276,7 @@ class BubbleColor {
 
     return `
       <div class="cherry-color-recent">
-        <div class="cherry-color-section-title">最近使用颜色</div>
+        <div class="cherry-color-section-title">${this.locale.colorPickerRecentColors}</div>
         <div class="cherry-color-recent-grid">
           ${recentColorsHTML}${emptyHTML}
         </div>
@@ -303,7 +304,7 @@ class BubbleColor {
 
     return `
       <div class="cherry-color-presets">
-        <div class="cherry-color-section-title">系统预设颜色</div>
+        <div class="cherry-color-section-title">${this.locale.colorPickerPresetColors}</div>
         <div class="cherry-color-preset-grid">
           ${presetsHTML}
         </div>
