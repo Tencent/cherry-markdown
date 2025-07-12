@@ -233,8 +233,11 @@ class BubbleColor {
             <div class="cherry-color-pointer" style="left: 100%; top: 0%;"></div>
           </div>
         </div>
-        <div class="cherry-color-hue">
-          <div class="cherry-color-hue-pointer" style="left: 0%;"></div>
+        <div class="cherry-color-hue-container">
+          <div class="cherry-color-hue">
+            <div class="cherry-color-hue-pointer" style="left: 0%;"></div>
+          </div>
+          <div class="cherry-color-preview" style="background-color: #ff0000;"></div>
         </div>
       </div>
     `;
@@ -332,6 +335,10 @@ class BubbleColor {
    */
   updateColorDisplay(color) {
     this.currentColor = color;
+    const previewEl = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-preview'));
+    if (previewEl) {
+      previewEl.style.backgroundColor = color;
+    }
   }
 
   /**
