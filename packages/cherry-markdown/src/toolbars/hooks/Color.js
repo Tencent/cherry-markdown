@@ -15,6 +15,7 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import { getSelection } from '@/utils/selection';
+import { hexToRgb, hsvToRgb, rgbToHex, rgbToHsv } from '@/utils/color';
 /**
  * 插入字体颜色或者字体背景颜色的按钮
  */
@@ -174,111 +175,13 @@ class BubbleColor {
   }
 
   /**
-   * 16进制转RGB
-   */
-  hexToRgb(hex) {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result
-      ? {
-          r: parseInt(result[1], 16),
-          g: parseInt(result[2], 16),
-          b: parseInt(result[3], 16),
-        }
-      : null;
-  }
-
-  /**
-   * RGB转16进制
-   */
-  rgbToHex(r, g, b) {
-    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
-  }
-
-  /**
-   * RGB转HSV
-   */
-  rgbToHsv(red, green, blue) {
-    const r = red / 255;
-    const g = green / 255;
-    const b = blue / 255;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    const diff = max - min;
-
-    let h = 0;
-    const s = max === 0 ? 0 : diff / max;
-    const v = max;
-
-    if (diff !== 0) {
-      switch (max) {
-        case r:
-          h = ((g - b) / diff + (g < b ? 6 : 0)) / 6;
-          break;
-        case g:
-          h = ((b - r) / diff + 2) / 6;
-          break;
-        case b:
-          h = ((r - g) / diff + 4) / 6;
-          break;
-      }
-    }
-
-    return { h: h * 360, s, v };
-  }
-
-  /**
-   * HSV转RGB
-   */
-  hsvToRgb(h, s, v) {
-    const c = v * s;
-    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-    const m = v - c;
-    let r;
-    let g;
-    let b;
-
-    if (h >= 0 && h < 60) {
-      r = c;
-      g = x;
-      b = 0;
-    } else if (h >= 60 && h < 120) {
-      r = x;
-      g = c;
-      b = 0;
-    } else if (h >= 120 && h < 180) {
-      r = 0;
-      g = c;
-      b = x;
-    } else if (h >= 180 && h < 240) {
-      r = 0;
-      g = x;
-      b = c;
-    } else if (h >= 240 && h < 300) {
-      r = x;
-      g = 0;
-      b = c;
-    } else {
-      r = c;
-      g = 0;
-      b = x;
-    }
-
-    return {
-      r: Math.round((r + m) * 255),
-      g: Math.round((g + m) * 255),
-      b: Math.round((b + m) * 255),
-    };
-  }
-
-  /**
    * 更新色相条背景
    */
   updateHueBackground() {
     const saturationEl = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-saturation'));
     if (saturationEl) {
-      const hueColor = this.hsvToRgb(this.currentHue, 1, 1);
-      const hueHex = this.rgbToHex(hueColor.r, hueColor.g, hueColor.b);
+      const hueColor = hsvToRgb(this.currentHue, 1, 1);
+      const hueHex = rgbToHex(hueColor.r, hueColor.g, hueColor.b);
       saturationEl.parentElement.style.background = `linear-gradient(to right, ${hueHex} 0%, ${hueHex} 100%)`;
     }
   }
@@ -304,8 +207,8 @@ class BubbleColor {
    * 从HSV值更新当前颜色
    */
   updateColorFromHsv() {
-    const rgb = this.hsvToRgb(this.currentHue, this.currentSaturation, this.currentBrightness);
-    this.currentColor = this.rgbToHex(rgb.r, rgb.g, rgb.b);
+    const rgb = hsvToRgb(this.currentHue, this.currentSaturation, this.currentBrightness);
+    this.currentColor = rgbToHex(rgb.r, rgb.g, rgb.b);
     this.updateColorDisplay(this.currentColor);
     this.updateHueBackground();
     this.updatePointers();
@@ -469,9 +372,9 @@ class BubbleColor {
    */
   setColor(color) {
     this.currentColor = color;
-    const rgb = this.hexToRgb(color);
+    const rgb = hexToRgb(color);
     if (rgb) {
-      const hsv = this.rgbToHsv(rgb.r, rgb.g, rgb.b);
+      const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
       this.currentHue = hsv.h;
       this.currentSaturation = hsv.s;
       this.currentBrightness = hsv.v;
