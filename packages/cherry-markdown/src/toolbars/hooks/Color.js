@@ -16,6 +16,7 @@
 import MenuBase from '@/toolbars/MenuBase';
 import { getSelection } from '@/utils/selection';
 import { hexToRgb, hsvToRgb, rgbToHex, rgbToHsv } from '@/utils/color';
+
 /**
  * 插入字体颜色或者字体背景颜色的按钮
  */
@@ -27,13 +28,71 @@ export default class Color extends MenuBase {
     this.bubbleColor = new BubbleColor($cherry);
   }
 
-  $testIsColor(type, selection) {
-    const textReg = /^\s*!![^\s]+ [\s\S]+!!\s*$/;
-    const bgReg = /^\s*!!![^\s]+ [\s\S]+!!!\s*$/;
-    if (type === 'text') {
-      return textReg.test(selection) && !bgReg.test(selection);
+  /**
+   * 解析颜色语法
+   * @param {string} selection 选中的文本
+   * @returns {{textColor: string|null, bgColor: string|null, text: string}}
+   */
+  parseAppliedColors(selection) {
+    // 复合样式1：!!textcolor !!!bgcolor text!!!!!
+    const combinedTextOuter = /^\s*!!([#\w]+)\s+!!!([#\w]+)\s+([\s\S]+?)\s*!!!!!\s*$/;
+    const combinedTextOuterMatch = selection.match(combinedTextOuter);
+    if (combinedTextOuterMatch) {
+      const [, textColor, bgColor, text] = combinedTextOuterMatch;
+      return { textColor, bgColor, text };
     }
-    return bgReg.test(selection);
+
+    // 复合样式2：!!!bgcolor !!textcolor text!!!!!
+    const combinedBgOuter = /^\s*!!!([#\w]+)\s+!!([#\w]+)\s+([\s\S]+?)\s*!!!!!\s*$/;
+    const combinedBgOuterMatch = selection.match(combinedBgOuter);
+    if (combinedBgOuterMatch) {
+      const [, bgColor, textColor, text] = combinedBgOuterMatch;
+      return { bgColor, textColor, text };
+    }
+
+    // 仅背景颜色：!!!bgcolor text!!!
+    const bgOnly = /^\s*!!!([#\w]+)\s+([\s\S]+?)\s*!!!\s*$/;
+    const bgOnlyMatch = selection.match(bgOnly);
+    if (bgOnlyMatch) {
+      const [, bgColor, text] = bgOnlyMatch;
+      return { bgColor, textColor: null, text };
+    }
+
+    // 仅文字颜色：!!textcolor text!!
+    const textOnly = /^\s*!!([#\w]+)\s+([\s\S]+?)\s*!!\s*$/;
+    const textOnlyMatch = selection.match(textOnly);
+    if (textOnlyMatch) {
+      const [, textColor, text] = textOnlyMatch;
+      return { textColor, bgColor: null, text };
+    }
+
+    // 如果都没有匹配，则返回原始文本和null颜色
+    return {
+      textColor: null,
+      bgColor: null,
+      text: selection,
+    };
+  }
+
+  /**
+   * 根据传入的颜色构建最终的样式字符串
+   * @param {string|null} textColor 文字颜色
+   * @param {string|null} bgColor 背景颜色
+   * @param {string} text 文本内容
+   * @returns {string}
+   */
+  buildStyleString(textColor, bgColor, text) {
+    if (!text) return '';
+    let styledText = text;
+
+    if (bgColor) {
+      styledText = `!!!${bgColor} ${styledText}!!!`;
+    }
+    if (textColor) {
+      styledText = `!!${textColor} ${styledText}!!`;
+    }
+
+    return styledText;
   }
 
   $testIsShortKey(shortKey) {
@@ -58,46 +117,38 @@ export default class Color extends MenuBase {
   /**
    * 响应点击事件
    * @param {string} selection 被用户选中的文本内容
-   * @param {string} shortKey 快捷键参数，color: #000000 | background-color: #000000
-   * @param {Event & {target:HTMLElement}} event 点击事件，用来从被点击的调色盘中获得对应的颜色
-   * @returns 回填到编辑器光标位置/选中文本区域的内容
+   * @param {string} shortKey 快捷键参数
+   * @param {Event & {target:HTMLElement}} event 点击事件
+   * @returns {string | undefined}
    */
   onClick(selection, shortKey = '', event) {
     if (this.hasCacheOnce() || this.$testIsShortKey(shortKey)) {
-      let $selection = getSelection(this.editor.editor, selection) || this.locale.color;
-      // @ts-ignore
-      const { type, color } = this.$getTypeAndColor(shortKey);
-      const begin = type === 'text' ? `!!${color} ` : `!!!${color} `;
-      const end = type === 'text' ? '!!' : '!!!';
-      if (!this.isSelections && !this.$testIsColor(type, $selection)) {
-        this.getMoreSelection(begin, end, () => {
-          const newSelection = this.editor.editor.getSelection();
-          if (this.$testIsColor(type, newSelection)) {
-            $selection = newSelection;
-            return true;
-          }
-          return false;
-        });
+      const $selection = getSelection(this.editor.editor, selection) || this.locale.color;
+
+      const colorInfo = this.$getTypeAndColor(shortKey);
+
+      if (typeof colorInfo === 'object' && colorInfo) {
+        if (colorInfo.type === 'clear') {
+          this.bubbleColor.toggle({ forceHide: true });
+          if (!$selection) return '';
+          const { text } = this.parseAppliedColors($selection);
+          return text;
+        }
+
+        const { type, color } = colorInfo;
+        const applied = this.parseAppliedColors($selection);
+
+        if (type === 'text') {
+          applied.textColor = color;
+        } else if (type === 'background-color') {
+          applied.bgColor = color;
+        }
+
+        return this.buildStyleString(applied.textColor, applied.bgColor, applied.text);
       }
-      if (this.$testIsColor(type, $selection)) {
-        const reg = new RegExp(`(^\\s*${end})([^\\s]+) ([\\s\\S]+${end}\\s*$)`, 'gm');
-        const tmp = $selection.replace(reg, (w, m1, m2, m3) => {
-          return `${m1}${color} ${m3}`;
-        });
-        this.registerAfterClickCb(() => {
-          this.setLessSelection(begin, end);
-        });
-        return tmp;
-      }
-      this.registerAfterClickCb(() => {
-        this.setLessSelection(begin, end);
-      });
-      return `${begin}${$selection}${end}`;
+      return;
     }
-    // 定位调色盘应该出现的位置
-    // 该按钮可能出现在顶部工具栏，
-    // 也可能出现在选中文字时出现的bubble工具栏，
-    // 也可能出现在新行出现的float工具栏
+
     let top = 0;
     let left = 0;
     if (event.target.closest('.cherry-bubble')) {
@@ -320,19 +371,6 @@ class BubbleColor {
     this.editor.options.wrapperDom.appendChild(this.dom);
   }
 
-  onClick() {
-    if (this.type === 'text') {
-      if (/^!!#\S+ [\s\S]+?!!/.test(this.selection)) {
-        return this.selection.replace(/^!!#\S+ ([\s\S]+?)!!/, `!!${this.colorValue} $1!!`);
-      }
-      return `!!${this.colorValue} ${this.selection}!!`;
-    }
-    if (/^!!!#\S+ [\s\S]+?!!!/.test(this.selection)) {
-      return this.selection.replace(/^!!!#\S+ ([\s\S]+?)!!!/, `!!!${this.colorValue} $1!!!`);
-    }
-    return `!!!${this.colorValue} ${this.selection}!!!`;
-  }
-
   /**
    * 更新颜色显示
    */
@@ -399,8 +437,8 @@ class BubbleColor {
    */
   updateColorSelection(color) {
     this.colorValue = color;
-    this.type = this.currentType;
-    this.$color.setCacheOnce({ type: this.type, color: this.colorValue });
+    const typeKey = this.currentType === 'text' ? 'text' : 'background-color';
+    this.$color.setCacheOnce({ type: typeKey, color: this.colorValue });
     this.$color.fire(null);
   }
 
@@ -458,7 +496,6 @@ class BubbleColor {
     this.dom.addEventListener('click', (evt) => {
       const { target } = /** @type {MouseEvent & {target:HTMLElement}}*/ (evt);
 
-      // 标签页切换
       if (target.classList.contains('cherry-color-tab')) {
         this.dom.querySelectorAll('.cherry-color-tab').forEach((tab) => tab.classList.remove('active'));
         target.classList.add('active');
@@ -484,21 +521,25 @@ class BubbleColor {
 
   /**
    * 在对应的坐标展示/关闭调色盘
-   * @param {Object} 坐标
+   * @param {{left?: number, top?: number, $color?: object, forceHide?: boolean}} options
    */
-  toggle({ left, top, $color }) {
-    if (this.dom.style.display?.length > 0 && this.dom.style.display !== 'none') {
+  toggle({ left, top, $color, forceHide = false }) {
+    const isVisible = this.dom.style.display?.length > 0 && this.dom.style.display !== 'none';
+
+    if (forceHide || isVisible) {
       this.dom.style.display = 'none';
       return;
     }
 
-    this.dom.style.left = `${left}px`;
-    this.dom.style.top = `${top}px`;
-    this.dom.style.display = 'block';
-    this.$color = $color;
+    if (typeof left === 'number' && typeof top === 'number' && $color) {
+      this.dom.style.left = `${left}px`;
+      this.dom.style.top = `${top}px`;
+      this.dom.style.display = 'block';
+      this.$color = $color;
 
-    this.setColor(this.currentColor);
-    this.updateRecentColorsDisplay();
+      this.setColor(this.currentColor);
+      this.updateRecentColorsDisplay();
+    }
   }
 
   /**
