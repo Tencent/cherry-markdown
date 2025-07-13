@@ -43,6 +43,14 @@
   --md-blockquote-bg: var(--oc-violet-1);
   --md-hr-border: var(--oc-indigo-4);
   --md-table-border: var(--oc-indigo-4);
+
+    /* ===== 悬浮目录栏专属变量 ===== */
+  --toc-bg: rgba(235, 245, 255, 0.75);
+  --toc-hover-bg: rgba(245, 250, 255, 0.95);
+  --toc-font-color: var(--base-font-color);
+  --toc-shadow: 0 4px 12px rgba(80, 160, 255, 0.15);
+  --toc-hover-shadow: 0 8px 24px rgba(80, 160, 255, 0.25);
+  --toc-blur: blur(8px);
 }
 
 /** 预览区域样式 */

@@ -985,19 +985,29 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  background: #ffffff33;
   margin-right: 8px;
   box-sizing: border-box;
   user-select: none;
-  box-shadow: 0px 5px 11px #33333333;
+  box-shadow: var(--toc-shadow,0 4px 12px rgba(0,0,0,0.08));
   border-radius: 10px;
-  transition: all 0.3s;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 0.6;
+
+  background-color: var(--toc-bg, rgba(255, 255, 255, 0.5));
+  backdrop-filter: blur(8px);
+  color: var(--base-font-color, #333);
+
   &.cherry-flex-toc__fixed {
     position: fixed;
   }
+  
   &:hover {
-    background-color: #fff;
+    opacity: 1;
+    background-color: var(--toc-hover-bg,var(--toc-bg));
     width: 260px;
+    border-radius: 10px;
+    box-shadow: var(--toc-hover-shadow,0 6px 12px rgba(0, 0, 0, 0.15));
+    backdrop-filter: blur(0px);
   }
   .cherry-toc-head {
     border-bottom: 1px dashed #33333333;
@@ -1025,6 +1035,16 @@
         color: #3582fb;
       }
     }
+    &.collapsed {
+    transform: scale(0) translate(100%, -100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &.expanded {
+    transform: scale(1) translate(0, 0);
+    opacity: 1;
+  }
   }
   .cherry-toc-list {
     overflow-y: auto;
@@ -1045,10 +1065,35 @@
       word-break: break-all;
       text-overflow: ellipsis;
       cursor: pointer;
+      position: relative;
       &:hover, &.current {
         border-left-color: var(--primary-color);
         color: var(--primary-color);
       }
+      .tooltip {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    transform: translateY(-50%);
+    background-color: var(--toc-hover-bg, rgba(245, 245, 255, 0.95));
+    color: var(--toc-font-color, #333);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 14px;
+    white-space: nowrap;
+    box-shadow: var(--toc-hover-shadow, 0 4px 12px rgba(0, 0, 0, 0.1));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 100;
+    margin-left: 8px;
+  }
+
+  &:hover .tooltip {
+    opacity: 1;
+    pointer-events: auto;
+  } 
     }
     .cherry-toc-one-a__1 {
       font-weight: bold;
@@ -1145,6 +1190,40 @@
       }
     }
   }
+  .cherry-flex-toc__item {
+  position: relative;
+  padding: 5px;
+  cursor: pointer;
+
+  &:hover .tooltip {
+    opacity: 1;
+    pointer-events: auto;
+    display: block;
+  }
+
+  .tooltip {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    transform: translateY(-50%);
+    background-color: var(--toc-hover-bg, rgba(255, 255, 255, 0.9));
+    color: var(--toc-font-color, #333);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    white-space: nowrap;
+    max-width: 240px;
+    box-shadow: var(--toc-hover-shadow, 4px 12px rgba(0, 0, 0, 0.15));
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 999;
+  }
+
+  &:hover .tooltip {
+    opacity: 1;
+  }
+}
 }
 
 /** 引入自带的主题 */
