@@ -73,7 +73,7 @@ export default class ChatGpt extends MenuBase {
      * @type {(type: string, input: string) => Promise<import('openai').ChatCompletion>}
      */
     this.queryCompletion = async (type, input) => {
-      return await this.openai.chat.completions.create(
+      return this.openai.chat.completions.create(
         {
           // 后续可能添加一个模型选择
           model: 'gpt-4o',
