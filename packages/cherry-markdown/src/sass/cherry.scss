@@ -479,6 +479,20 @@
   }
 }
 
+// 高亮命中的文字样式
+.cherry {
+  --seraching-highlight-color: rgba(252, 195, 25, 0.5);
+
+  // 暗黑主题下改成蓝色背景以增大区分度
+  &.theme__dark {
+    --seraching-highlight-color: rgba(77, 171, 247, 0.4);
+  }
+
+  .cm-searching {
+    background-color: var(--seraching-highlight-color);
+  }
+}
+
 .cherry-sidebar {
   width: 30px;
   position: absolute;
