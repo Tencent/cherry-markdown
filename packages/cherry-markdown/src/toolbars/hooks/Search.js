@@ -30,7 +30,7 @@ export default class Search extends MenuBase {
         aliasName: $cherry.locale[this.name],
       },
     };
-    this.searchBox = new SearchBox();
+    this.searchBox = new SearchBox(this.$cherry);
     this.searchBoxInit = false;
   }
 

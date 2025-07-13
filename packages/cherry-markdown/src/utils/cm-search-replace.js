@@ -22,6 +22,13 @@
 // }
 
 export default class SearchBox {
+  /**
+   * @param {object} $cherry Cherry实例
+   */
+  constructor($cherry) {
+    this.$cherry = $cherry;
+  }
+
   init(cm) {
     this.cm = cm;
     const el = this.addHtml();
@@ -34,6 +41,8 @@ export default class SearchBox {
     // @ts-ignore
     this.element.style.display = 'none';
     // this.bindKeys();
+
+    this.addEventListeners();
 
     this.commands = {
       toggleRegexpMode: () => {
@@ -79,6 +88,20 @@ export default class SearchBox {
 
     this.replaceInput.addEventListener('focus', () => {
       this.activeInput = this.replaceInput;
+    });
+  }
+
+  // 监听预览区域是否隐藏
+  addEventListeners() {
+    const searchElement = /** @type {HTMLElement} */ (this.element);
+    this.$cherry.$event.on('togglePreviewHidden', (state) => {
+      if (state) {
+        // 预览区域隐藏（悬浮），增大搜索框右侧间距，避免与侧边栏重叠
+        searchElement.style.right = '48px';
+      } else {
+        // 预览区域固定在右侧，取消右侧增大的边距
+        searchElement.style.right = '';
+      }
     });
   }
 
