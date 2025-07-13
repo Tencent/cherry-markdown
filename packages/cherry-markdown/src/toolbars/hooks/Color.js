@@ -442,10 +442,9 @@ class BubbleColor {
   }
 
   /**
-   * 处理选项卡切换
+   * 处理文字颜色/背景颜色切换
    */
   handleTabSwitch(target) {
-    // 对于querySelectorAll，我们需要单独处理，因为缓存机制主要针对单个元素
     this.dom.querySelectorAll('.cherry-color-tab').forEach((tab) => tab.classList.remove('active'));
     target.classList.add('active');
     this.currentType = target.dataset.type;
@@ -482,7 +481,6 @@ class BubbleColor {
 
     if (forceHide || isVisible) {
       this.dom.style.display = 'none';
-      // 隐藏时清理元素缓存，释放内存
       this.clearElementCache();
       return;
     }
@@ -518,6 +516,7 @@ class BubbleColor {
    */
   updateColorDisplay(color) {
     this.currentColor = color;
+    // 预览区域和色相条指示点的颜色
     const previewEl = /** @type {HTMLElement} */ (this.getElement('.cherry-color-preview'));
     const previewHuePointer = /** @type {HTMLElement} */ (this.getElement('.cherry-color-hue-pointer'));
     previewHuePointer.style.backgroundColor = color;
@@ -601,13 +600,13 @@ class BubbleColor {
     // 饱和度/明度区域的指针位置
     // 水平位置代表饱和度：0%（左）到100%（右）
     pointer.style.left = `${this.currentSaturation * 100}%`;
-    // 垂直位置代表明度：0%（上，亮）到100%（下，暗）
+    // 垂直位置代表明度：0%（上）到100%（下）
     pointer.style.top = `${(1 - this.currentBrightness) * 100}%`;
 
     // 色相条指针位置：映射到有效区域（7px到width-7px）
     const hueEl = this.getElement('.cherry-color-hue');
     const rect = hueEl.getBoundingClientRect();
-    const effectiveWidth = rect.width - 14; // 减去两端各7px
+    const effectiveWidth = rect.width - 14; // 减去两端各7px（指示点半径）
     const position = 7 + (this.currentHue / 360) * effectiveWidth;
     huePointer.style.left = `${position}px`;
   }
