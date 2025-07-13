@@ -359,6 +359,10 @@ class BubbleColor {
 
     // 鼠标松开事件：结束拖拽操作
     document.addEventListener('mouseup', () => {
+      // 在鼠标松开时，如果之前正在取色，则保存当前颜色为最近使用颜色
+      if (this.isDragging) {
+        this.saveRecentColor(this.currentColor);
+      }
       this.isDragging = '';
     });
   }
@@ -439,6 +443,7 @@ class BubbleColor {
     if (color) {
       this.setColor(color);
       this.updateColorSelection(color);
+      this.saveRecentColor(color);
     }
   }
 
@@ -454,10 +459,6 @@ class BubbleColor {
     const isVisible = this.dom.style.display !== 'none' && this.dom.style.display !== '';
 
     if (forceHide || isVisible) {
-      // 在关闭调色盘时，保存当前颜色到最近使用颜色列表，但在因为清除颜色而关闭时不保存
-      if (!forceHide) {
-        this.saveRecentColor(this.currentColor);
-      }
       this.dom.style.display = 'none';
       return;
     }
