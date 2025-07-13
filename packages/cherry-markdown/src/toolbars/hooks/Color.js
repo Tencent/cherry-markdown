@@ -79,13 +79,23 @@ export default class Color extends MenuBase {
    * @returns {{left: number, top: number}} 位置坐标
    */
   calculatePickerPosition(event) {
-    const bubbleEl = /** @type {HTMLElement}*/ (event.target.closest('.cherry-bubble'));
-    const bubbleRect = bubbleEl.getBoundingClientRect();
-    const colorEl = /** @type {HTMLElement}*/ (event.target.closest('.cherry-toolbar-color'));
+    const bubbleEl = /** @type {HTMLElement} */ (event.target.closest('.cherry-bubble'));
+    const colorEl = /** @type {HTMLElement} */ (event.target.closest('.cherry-toolbar-color'));
+
+    if (bubbleEl) {
+      const bubbleRect = bubbleEl.getBoundingClientRect();
+      return {
+        top: bubbleRect.top + bubbleEl.offsetHeight + 8,
+        left: Math.max(64, colorEl.offsetLeft + bubbleRect.left),
+        // 64px: 防止调色盘超出页面左侧
+      };
+    }
+
+    // 如果不在气泡菜单中，使用颜色按钮的位置
+    const colorRect = colorEl.getBoundingClientRect();
     return {
-      top: bubbleRect.top + bubbleEl.offsetHeight + 8,
-      left: Math.max(64, colorEl.offsetLeft + bubbleRect.left),
-      // 64px: 防止调色盘超出页面左侧
+      top: colorRect.top + colorEl.offsetHeight,
+      left: colorRect.left,
     };
   }
 
@@ -332,7 +342,7 @@ class BubbleColor {
   setupMouseInteractions() {
     // 鼠标按下事件：开始颜色选择或拖拽操作
     this.dom.addEventListener('mousedown', (evt) => {
-      const { target } = /** @type {MouseEvent & {target:HTMLElement}}*/ (evt);
+      const { target } = evt;
 
       if (this.isColorPickerElement(target, 'saturation')) {
         this.handleColorInteraction(evt, 'saturation');
@@ -385,7 +395,7 @@ class BubbleColor {
    */
   setupClickHandlers() {
     this.dom.addEventListener('click', (evt) => {
-      const { target } = /** @type {MouseEvent & {target:HTMLElement}}*/ (evt);
+      const target = /** @type {HTMLElement} */ (evt.target);
 
       // 切换文字/背景颜色选项卡
       if (target.classList.contains('cherry-color-tab')) {
@@ -452,15 +462,13 @@ class BubbleColor {
       return;
     }
 
-    if (typeof left === 'number' && typeof top === 'number' && $color) {
-      this.dom.style.left = `${left}px`;
-      this.dom.style.top = `${top}px`;
-      this.dom.style.display = 'block';
-      this.$color = $color;
+    this.dom.style.left = `${left}px`;
+    this.dom.style.top = `${top}px`;
+    this.dom.style.display = 'block';
+    this.$color = $color;
 
-      this.setColor(this.currentColor);
-      this.updateRecentColorsDisplay();
-    }
+    this.setColor(this.currentColor);
+    this.updateRecentColorsDisplay();
   }
 
   /**
@@ -485,8 +493,8 @@ class BubbleColor {
    */
   updateColorDisplay(color) {
     this.currentColor = color;
-    const previewEl = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-preview'));
-    const previewHuePointer = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-hue-pointer'));
+    const previewEl = /** @type {HTMLElement} */ (this.dom.querySelector('.cherry-color-preview'));
+    const previewHuePointer = /** @type {HTMLElement} */ (this.dom.querySelector('.cherry-color-hue-pointer'));
     previewHuePointer.style.backgroundColor = color;
     previewEl.style.backgroundColor = color;
     this.updateHueBackground();
@@ -562,8 +570,8 @@ class BubbleColor {
    * 更新颜色指针位置
    */
   updatePointers() {
-    const pointer = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-pointer'));
-    const huePointer = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-hue-pointer'));
+    const pointer = /** @type {HTMLElement} */ (this.dom.querySelector('.cherry-color-pointer'));
+    const huePointer = /** @type {HTMLElement} */ (this.dom.querySelector('.cherry-color-hue-pointer'));
 
     // 饱和度/明度区域的指针位置
     // 水平位置代表饱和度：0%（左）到100%（右）
@@ -583,7 +591,7 @@ class BubbleColor {
    * 更新色相条背景
    */
   updateHueBackground() {
-    const saturationEl = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-saturation'));
+    const saturationEl = this.dom.querySelector('.cherry-color-saturation');
     const hueColor = hsvToRgb(this.currentHue, 1, 1);
     const hueHex = rgbToHex(hueColor.r, hueColor.g, hueColor.b);
     saturationEl.parentElement.style.background = `linear-gradient(to right, ${hueHex} 0%, ${hueHex} 100%)`;
