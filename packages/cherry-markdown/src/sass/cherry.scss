@@ -905,10 +905,9 @@
     .cherry-color-tab-group {
       display: flex;
       background: var(--border-color);
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-lg);
       padding: 2px;
       width: auto;
-      min-width: 120px;
     }
 
     .cherry-color-tab {
@@ -917,7 +916,7 @@
       font-size: 12px;
       color: var(--toolbar-btn-color);
       cursor: pointer;
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-lg);
       transition: all 0.2s;
       white-space: nowrap;
 
@@ -937,7 +936,7 @@
       color: var(--toolbar-btn-color);
       cursor: pointer;
       padding: 8px 12px;
-      border-radius: 4px;
+      border-radius: var(--radius-lg);
       transition: all 0.2s;
       white-space: nowrap;
 
@@ -972,7 +971,6 @@
           height: 14px;
           border: 2px solid white;
           border-radius: 50%;
-          box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3);
           transform: translate(-50%, -50%);
           pointer-events: none;
           z-index: 2;
@@ -991,7 +989,7 @@
       flex: 1;
       height: 14px;
       border-radius: 7px;
-      background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+      background: linear-gradient(to right, #ff0000 7px, #ffff00 calc(17% + 7px), #00ff00 calc(33% + 7px), #00ffff calc(50% + 7px), #0000ff calc(67% + 7px), #ff00ff calc(83% + 7px), #ff0000 calc(100% - 7px));
       position: relative;
       cursor: pointer;
       user-select: none;
@@ -999,13 +997,12 @@
       .cherry-color-hue-pointer {
         position: absolute;
         top: 50%;
-        width: 6px;
-        height: 18px;
-        background: white;
-        border: 1px solid rgba(0, 0, 0, 0.5);
-        border-radius: 3px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        width: 14px;
+        height: 14px;
+        border: 2px solid white;
+        border-radius: 50%;
         transform: translate(-50%, -50%);
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         pointer-events: none;
         z-index: 2;
       }
@@ -1067,12 +1064,11 @@
     width: 24px;
     height: 24px;
     border-radius: 4px;
-    border: 1px solid var(--border-color);
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: transform 0.1s;
 
     &:hover {
-      transform: scale(1.1);
+      transform: scale(1.15);
       z-index: 1;
       position: relative;
     }

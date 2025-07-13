@@ -80,21 +80,12 @@ export default class Color extends MenuBase {
    */
   calculatePickerPosition(event) {
     const bubbleEl = /** @type {HTMLElement}*/ (event.target.closest('.cherry-bubble'));
-
-    if (bubbleEl) {
-      const bubbleRect = bubbleEl.getBoundingClientRect();
-      const colorEl = /** @type {HTMLElement}*/ (event.target.closest('.cherry-toolbar-color'));
-      return {
-        top: bubbleRect.top + bubbleEl.offsetHeight,
-        left: colorEl.offsetLeft + bubbleRect.left,
-      };
-    }
-
+    const bubbleRect = bubbleEl.getBoundingClientRect();
     const colorEl = /** @type {HTMLElement}*/ (event.target.closest('.cherry-toolbar-color'));
-    const colorRect = colorEl.getBoundingClientRect();
     return {
-      top: colorRect.top + colorEl.offsetHeight,
-      left: colorRect.left,
+      top: bubbleRect.top + bubbleEl.offsetHeight + 8,
+      left: Math.max(64, colorEl.offsetLeft + bubbleRect.left),
+      // 64px: 防止调色盘超出页面左侧
     };
   }
 
@@ -440,11 +431,9 @@ class BubbleColor {
    */
   handleColorItemClick(target) {
     const { color } = target.dataset;
-    if (color) {
-      this.setColor(color);
-      this.updateColorSelection(color);
-      this.saveRecentColor(color);
-    }
+    this.setColor(color);
+    this.updateColorSelection(color);
+    this.saveRecentColor(color);
   }
 
   /**
@@ -480,16 +469,14 @@ class BubbleColor {
   setColor(color) {
     this.currentColor = color;
     const rgb = hexToRgb(color);
-    if (rgb) {
-      // 将RGB转换为HSV色彩空间，便于在颜色选择器中定位
-      const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
-      this.currentHue = hsv.h; // 色相：0-360度
-      this.currentSaturation = hsv.s; // 饱和度：0-1
-      this.currentBrightness = hsv.v; // 明度：0-1
+    // 将RGB转换为HSV色彩空间，便于在颜色选择器中定位
+    const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+    this.currentHue = hsv.h; // 色相：0-360度
+    this.currentSaturation = hsv.s; // 饱和度：0-1
+    this.currentBrightness = hsv.v; // 明度：0-1
 
-      // 更新界面显示
-      this.updateColorDisplay(color);
-    }
+    // 更新界面显示
+    this.updateColorDisplay(color);
   }
 
   /**
@@ -499,9 +486,9 @@ class BubbleColor {
   updateColorDisplay(color) {
     this.currentColor = color;
     const previewEl = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-preview'));
-    if (previewEl) {
-      previewEl.style.backgroundColor = color;
-    }
+    const previewHuePointer = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-hue-pointer'));
+    previewHuePointer.style.backgroundColor = color;
+    previewEl.style.backgroundColor = color;
     this.updateHueBackground();
     this.updatePointers();
   }
@@ -523,8 +510,6 @@ class BubbleColor {
    */
   getColorFromPicker(e) {
     const saturationEl = this.dom.querySelector('.cherry-color-saturation');
-    if (!saturationEl) return this.currentColor;
-
     // 获取饱和度/明度选择区域的位置和尺寸
     const rect = saturationEl.getBoundingClientRect();
     // 计算鼠标在区域内的相对位置，并限制在有效范围内
@@ -550,15 +535,14 @@ class BubbleColor {
    */
   getHueFromPicker(e) {
     const hueEl = this.dom.querySelector('.cherry-color-hue');
-    if (!hueEl) return this.currentColor;
-
     // 获取色相条的位置和尺寸
     const rect = hueEl.getBoundingClientRect();
+    // 下面的 7px 都是中间指示点带来的偏移量
     // 计算鼠标在色相条上的相对位置，并限制在有效范围内
-    const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+    const x = Math.max(7, Math.min(rect.width - 7, e.clientX - rect.left));
 
-    // 将位置转换为色相值：0度到360度的范围
-    this.currentHue = (x / rect.width) * 360;
+    // 将位置转换为色相值：0度到360度的范围，映射到有效区域
+    this.currentHue = ((x - 7) / (rect.width - 14)) * 360;
 
     // 根据新的色相值重新计算颜色
     this.updateColorFromHsv();
@@ -581,18 +565,18 @@ class BubbleColor {
     const pointer = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-pointer'));
     const huePointer = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-hue-pointer'));
 
-    if (pointer) {
-      // 饱和度/明度区域的指针位置
-      // 水平位置代表饱和度：0%（左）到100%（右）
-      pointer.style.left = `${this.currentSaturation * 100}%`;
-      // 垂直位置代表明度：0%（上，亮）到100%（下，暗）
-      pointer.style.top = `${(1 - this.currentBrightness) * 100}%`;
-    }
+    // 饱和度/明度区域的指针位置
+    // 水平位置代表饱和度：0%（左）到100%（右）
+    pointer.style.left = `${this.currentSaturation * 100}%`;
+    // 垂直位置代表明度：0%（上，亮）到100%（下，暗）
+    pointer.style.top = `${(1 - this.currentBrightness) * 100}%`;
 
-    if (huePointer) {
-      // 色相条指针位置：0%（左，0度）到100%（右，360度）
-      huePointer.style.left = `${(this.currentHue / 360) * 100}%`;
-    }
+    // 色相条指针位置：映射到有效区域（7px到width-7px）
+    const hueEl = this.dom.querySelector('.cherry-color-hue');
+    const rect = hueEl.getBoundingClientRect();
+    const effectiveWidth = rect.width - 14; // 减去两端各7px
+    const position = 7 + (this.currentHue / 360) * effectiveWidth;
+    huePointer.style.left = `${position}px`;
   }
 
   /**
@@ -600,11 +584,9 @@ class BubbleColor {
    */
   updateHueBackground() {
     const saturationEl = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-saturation'));
-    if (saturationEl) {
-      const hueColor = hsvToRgb(this.currentHue, 1, 1);
-      const hueHex = rgbToHex(hueColor.r, hueColor.g, hueColor.b);
-      saturationEl.parentElement.style.background = `linear-gradient(to right, ${hueHex} 0%, ${hueHex} 100%)`;
-    }
+    const hueColor = hsvToRgb(this.currentHue, 1, 1);
+    const hueHex = rgbToHex(hueColor.r, hueColor.g, hueColor.b);
+    saturationEl.parentElement.style.background = `linear-gradient(to right, ${hueHex} 0%, ${hueHex} 100%)`;
   }
 
   /**
@@ -612,8 +594,6 @@ class BubbleColor {
    */
   updateRecentColorsDisplay() {
     const recentGrid = this.dom.querySelector('.cherry-color-recent-grid');
-    if (!recentGrid) return;
-
     const recentColorsHTML = this.recentColors.map((color) => this.createColorItem(color)).join('');
     const emptyHTML = Array(Math.max(0, 6 - this.recentColors.length))
       .fill(this.createColorItem('', true))
@@ -633,8 +613,6 @@ class BubbleColor {
    * 保存最近使用的颜色
    */
   saveRecentColor(color) {
-    if (!color) return;
-
     // 将新颜色添加到列表开头，移除已存在的相同颜色，并限制为最多6个
     this.recentColors = [color, ...this.recentColors.filter((c) => c !== color)].slice(0, 6);
     localStorage.setItem('cherry-recent-colors', JSON.stringify(this.recentColors));
