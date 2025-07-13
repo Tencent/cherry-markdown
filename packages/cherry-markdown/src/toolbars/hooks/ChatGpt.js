@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import openAI from 'openai';
+import OpenAI from 'openai';
 
 const FUNC_MAP = {
   COMPLEMENT: 'complement',
@@ -26,10 +26,20 @@ const FUNC_MAP = {
  * 本功能依赖[Mermaid.js](https://mermaid-js.github.io)组件，请保证调用CherryMarkdown前已加载mermaid.js组件
  */
 export default class ChatGpt extends MenuBase {
+  /**
+   * @param {*} $cherry
+   */
   constructor($cherry) {
     super($cherry);
     this.setName('chatgpt', 'chatgpt');
     this.noIcon = true;
+
+    /** @type {OpenAI | null} */
+    this.openai = null;
+
+    /** @type {{ host: string; port: string } | undefined} */
+    this.proxy = undefined;
+
     this.subMenuConfig = [
       // 续写
       {
@@ -47,12 +57,7 @@ export default class ChatGpt extends MenuBase {
     const { apiKey = '', proxy: { host = '', port = '' } = {}, ignoreError } = this.$cherry.options.openai || {};
     // 设置apiKey
     if (apiKey) {
-      const openai = new openAI.OpenAIApi(
-        new openAI.Configuration({
-          apiKey,
-        }),
-      );
-      this.openai = openai;
+      this.openai = new OpenAI({ apiKey });
     }
     // 设置http proxy
     if (host && port) {
@@ -62,6 +67,39 @@ export default class ChatGpt extends MenuBase {
       };
     }
     this.ignoreError = ignoreError;
+
+    /**
+     * 私有方法：查询 OpenAI API
+     * @type {(type: string, input: string) => Promise<import('openai').ChatCompletion>}
+     */
+    this.queryCompletion = async (type, input) => {
+      return await this.openai.chat.completions.create(
+        {
+          // 后续可能添加一个模型选择
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'user',
+              content: generatePromptMap[type](input, this.$cherry.options.locale || ''),
+            },
+          ],
+          // temperature: 0.6,
+          // max_tokens: 500,
+        },
+        {
+          proxy: this.proxy,
+        },
+      );
+    };
+
+    /**
+     * 查询映射
+     * @type {Record<string, (input: string) => Promise<import('openai').ChatCompletion>>}
+     */
+    this.queryMap = {
+      [FUNC_MAP.COMPLEMENT]: async (input) => await this.queryCompletion(FUNC_MAP.COMPLEMENT, input),
+      [FUNC_MAP.SUMMARY]: async (input) => await this.queryCompletion(FUNC_MAP.SUMMARY, input),
+    };
   }
 
   getSubMenuConfig() {
@@ -109,7 +147,7 @@ export default class ChatGpt extends MenuBase {
    * @param {string} name
    * @param {string} selection
    */
-  queryOpenAIApi(name, selection) {
+  async queryOpenAIApi(name, selection) {
     if (!this.openai) {
       return;
     }
@@ -123,8 +161,7 @@ export default class ChatGpt extends MenuBase {
     this.button.innerText = '';
     // const that = this;
     const inputText = selection || this.$cherry.editor.editor.getValue();
-    queryMap[name]
-      .apply(this, [inputText])
+    await this.queryMap[name](inputText)
       .then((res) => this.concatText(selection, res.data?.choices?.[0]?.message?.content || ''))
       .catch((res) => {
         // 请求失败处理，两种方案
@@ -150,33 +187,5 @@ const generatePromptMap = {
       return `请总结以下文字: ${text}`;
     }
     return `summary the following text: ${text}`;
-  },
-};
-
-function queryCompletion(type, input) {
-  return this.openai.createChatCompletion(
-    {
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'user',
-          content: generatePromptMap[type](input, this.$cherry.options.locale || ''),
-        },
-      ],
-      // temperature: 0.6,
-      // max_tokens: 500,
-    },
-    {
-      proxy: this.proxy,
-    },
-  );
-}
-
-const queryMap = {
-  [FUNC_MAP.COMPLEMENT](input) {
-    return queryCompletion.apply(this, [FUNC_MAP.COMPLEMENT, input]);
-  },
-  [FUNC_MAP.SUMMARY](input) {
-    return queryCompletion.apply(this, [FUNC_MAP.SUMMARY, input]);
   },
 };
