@@ -43,6 +43,7 @@ export default class Color extends MenuBase {
 
       if (typeof colorInfo === 'object' && colorInfo) {
         if (colorInfo.type === 'clear') {
+          // 清除颜色时强制隐藏调色盘
           this.bubbleColor.toggle({ forceHide: true });
           if (!$selection) return '';
           const { text } = this.parseAppliedColors($selection);
@@ -63,30 +64,38 @@ export default class Color extends MenuBase {
       return;
     }
 
-    // 定位调色盘应该出现的位置
-    // 该按钮可能出现在顶部工具栏，
-    // 也可能出现在选中文字时出现的bubble工具栏，
-    // 也可能出现在新行出现的float工具栏
-    let top = 0;
-    let left = 0;
-    if (event.target.closest('.cherry-bubble')) {
-      const $colorDom = /** @type {HTMLElement}*/ (event.target.closest('.cherry-bubble'));
-      const clientRect = $colorDom.getBoundingClientRect();
-      top = clientRect.top + $colorDom.offsetHeight;
-      left = /** @type {HTMLElement}*/ (event.target.closest('.cherry-toolbar-color')).offsetLeft + clientRect.left;
-    } else {
-      const $colorDom = /** @type {HTMLElement}*/ (event.target.closest('.cherry-toolbar-color'));
-      const clientRect = $colorDom.getBoundingClientRect();
-      top = clientRect.top + $colorDom.offsetHeight;
-      left = clientRect.left;
-    }
+    const position = this.calculatePickerPosition(event);
     this.updateMarkdown = false;
     // 【TODO】需要增加getMoreSelection的逻辑
     this.bubbleColor.toggle({
-      left,
-      top,
+      ...position,
       $color: this,
     });
+  }
+
+  /**
+   * 计算调色盘应该显示的位置
+   * @param {Event & {target:HTMLElement}} event 点击事件
+   * @returns {{left: number, top: number}} 位置坐标
+   */
+  calculatePickerPosition(event) {
+    const bubbleEl = /** @type {HTMLElement}*/ (event.target.closest('.cherry-bubble'));
+
+    if (bubbleEl) {
+      const bubbleRect = bubbleEl.getBoundingClientRect();
+      const colorEl = /** @type {HTMLElement}*/ (event.target.closest('.cherry-toolbar-color'));
+      return {
+        top: bubbleRect.top + bubbleEl.offsetHeight,
+        left: colorEl.offsetLeft + bubbleRect.left,
+      };
+    }
+
+    const colorEl = /** @type {HTMLElement}*/ (event.target.closest('.cherry-toolbar-color'));
+    const colorRect = colorEl.getBoundingClientRect();
+    return {
+      top: colorRect.top + colorEl.offsetHeight,
+      left: colorRect.left,
+    };
   }
 
   /**
@@ -95,36 +104,35 @@ export default class Color extends MenuBase {
    * @returns {{textColor: string|null, bgColor: string|null, text: string}}
    */
   parseAppliedColors(selection) {
-    // 复合样式1：!!textcolor !!!bgcolor text!!!!!
-    const combinedTextOuter = /^\s*!!([#\w]+)\s+!!!([#\w]+)\s+([\s\S]+?)\s*!!!!!\s*$/;
-    const combinedTextOuterMatch = selection.match(combinedTextOuter);
-    if (combinedTextOuterMatch) {
-      const [, textColor, bgColor, text] = combinedTextOuterMatch;
-      return { textColor, bgColor, text };
-    }
+    // 颜色语法匹配规则
+    const patterns = [
+      // 复合样式1：!!textcolor !!!bgcolor text!!!!!
+      {
+        regex: /^\s*!!([#\w]+)\s+!!!([#\w]+)\s+([\s\S]+?)\s*!!!!!\s*$/,
+        map: (m) => ({ textColor: m[1], bgColor: m[2], text: m[3] }),
+      },
+      // 复合样式2：!!!bgcolor !!textcolor text!!!!!
+      {
+        regex: /^\s*!!!([#\w]+)\s+!!([#\w]+)\s+([\s\S]+?)\s*!!!!!\s*$/,
+        map: (m) => ({ bgColor: m[1], textColor: m[2], text: m[3] }),
+      },
+      // 仅背景颜色：!!!bgcolor text!!!
+      {
+        regex: /^\s*!!!([#\w]+)\s+([\s\S]+?)\s*!!!\s*$/,
+        map: (m) => ({ bgColor: m[1], textColor: null, text: m[2] }),
+      },
+      // 仅文字颜色：!!textcolor text!!
+      {
+        regex: /^\s*!!([#\w]+)\s+([\s\S]+?)\s*!!\s*$/,
+        map: (m) => ({ textColor: m[1], bgColor: null, text: m[2] }),
+      },
+    ];
 
-    // 复合样式2：!!!bgcolor !!textcolor text!!!!!
-    const combinedBgOuter = /^\s*!!!([#\w]+)\s+!!([#\w]+)\s+([\s\S]+?)\s*!!!!!\s*$/;
-    const combinedBgOuterMatch = selection.match(combinedBgOuter);
-    if (combinedBgOuterMatch) {
-      const [, bgColor, textColor, text] = combinedBgOuterMatch;
-      return { bgColor, textColor, text };
-    }
-
-    // 仅背景颜色：!!!bgcolor text!!!
-    const bgOnly = /^\s*!!!([#\w]+)\s+([\s\S]+?)\s*!!!\s*$/;
-    const bgOnlyMatch = selection.match(bgOnly);
-    if (bgOnlyMatch) {
-      const [, bgColor, text] = bgOnlyMatch;
-      return { bgColor, textColor: null, text };
-    }
-
-    // 仅文字颜色：!!textcolor text!!
-    const textOnly = /^\s*!!([#\w]+)\s+([\s\S]+?)\s*!!\s*$/;
-    const textOnlyMatch = selection.match(textOnly);
-    if (textOnlyMatch) {
-      const [, textColor, text] = textOnlyMatch;
-      return { textColor, bgColor: null, text };
+    for (const { regex, map } of patterns) {
+      const match = selection.match(regex);
+      if (match) {
+        return map(match);
+      }
     }
 
     // 如果都没有匹配，则返回原始文本和null颜色
@@ -266,16 +274,25 @@ class BubbleColor {
   }
 
   /**
+   * 创建颜色项的通用方法
+   * @param {string} color 颜色值
+   * @param {boolean} isEmpty 是否为空项
+   * @param {string} itemClass 项目类名
+   * @returns {string} HTML字符串
+   */
+  createColorItem(color, isEmpty = false, itemClass = 'cherry-color-item') {
+    const emptyClass = isEmpty ? 'cherry-color-recent-empty' : 'cherry-color-recent-item';
+    const dataAttr = !isEmpty ? `data-color="${color}" style="background-color: ${color};"` : '';
+    return `<div class="${itemClass} ${emptyClass}" ${dataAttr}></div>`;
+  }
+
+  /**
    * 创建最近使用颜色区域
    */
   createRecentColors() {
-    const createColorItem = (color, isEmpty = false) =>
-      `<div class="cherry-color-item ${isEmpty ? 'cherry-color-recent-empty' : 'cherry-color-recent-item'}" 
-           ${!isEmpty ? `data-color="${color}" style="background-color: ${color};"` : ''}></div>`;
-
-    const recentColorsHTML = this.recentColors.map((color) => createColorItem(color)).join('');
+    const recentColorsHTML = this.recentColors.map((color) => this.createColorItem(color)).join('');
     const emptyHTML = Array(Math.max(0, 6 - this.recentColors.length))
-      .fill(createColorItem('', true))
+      .fill(this.createColorItem('', true))
       .join('');
 
     return `
@@ -297,10 +314,7 @@ class BubbleColor {
         (row) =>
           `<div class="cherry-color-preset-row">
           ${row
-            .map(
-              (color) =>
-                `<div class="cherry-color-item cherry-color-preset-item" data-color="${color}" style="background-color: ${color};"></div>`,
-            )
+            .map((color) => this.createColorItem(color, false, 'cherry-color-item cherry-color-preset-item'))
             .join('')}
         </div>`,
       )
@@ -317,103 +331,133 @@ class BubbleColor {
   }
 
   initAction() {
+    this.setupMouseInteractions();
+    this.setupClickHandlers();
+  }
+
+  /**
+   * 设置鼠标交互事件
+   */
+  setupMouseInteractions() {
     // 鼠标按下事件：开始颜色选择或拖拽操作
     this.dom.addEventListener('mousedown', (evt) => {
       const { target } = /** @type {MouseEvent & {target:HTMLElement}}*/ (evt);
 
-      // 检测是否点击了饱和度/明度选择区域
-      if (
-        target.classList.contains('cherry-color-saturation') ||
-        target.classList.contains('cherry-color-pointer') ||
-        target.closest('.cherry-color-saturation')
-      ) {
-        this.isDragging = 'saturation';
-        // 根据点击位置计算颜色值
-        const color = this.getColorFromPicker(evt);
-        this.updateColorSelection(color);
-        evt.preventDefault();
-        return;
-      }
-
-      // 检测是否点击了色相选择条
-      if (
-        target.classList.contains('cherry-color-hue') ||
-        target.classList.contains('cherry-color-hue-pointer') ||
-        target.closest('.cherry-color-hue')
-      ) {
-        this.isDragging = 'hue';
-        // 根据点击位置计算色相值
-        const color = this.getHueFromPicker(evt);
-        this.updateColorSelection(color);
-        evt.preventDefault();
-        return;
+      if (this.isColorPickerElement(target, 'saturation')) {
+        this.handleColorInteraction(evt, 'saturation');
+      } else if (this.isColorPickerElement(target, 'hue')) {
+        this.handleColorInteraction(evt, 'hue');
       }
     });
 
     // 鼠标移动事件：处理拖拽过程中的颜色更新
     document.addEventListener('mousemove', (evt) => {
-      if (this.isDragging === 'saturation') {
-        // 拖拽饱和度/明度区域时实时更新颜色
-        const color = this.getColorFromPicker(evt);
-        this.updateColorSelection(color);
-        evt.preventDefault();
-      } else if (this.isDragging === 'hue') {
-        // 拖拽色相条时实时更新颜色
-        const color = this.getHueFromPicker(evt);
-        this.updateColorSelection(color);
-        evt.preventDefault();
+      if (this.isDragging) {
+        this.handleColorInteraction(evt, this.isDragging);
       }
     });
 
     // 鼠标松开事件：结束拖拽操作
     document.addEventListener('mouseup', () => {
-      if (this.isDragging) {
-        this.isDragging = '';
-      }
+      this.isDragging = '';
     });
+  }
 
-    // 点击事件：处理选项卡切换、清除颜色、颜色选择等操作
+  /**
+   * 检查元素是否属于颜色选择器的特定区域
+   */
+  isColorPickerElement(target, type) {
+    const selectors = {
+      saturation: ['.cherry-color-saturation', '.cherry-color-pointer'],
+      hue: ['.cherry-color-hue', '.cherry-color-hue-pointer'],
+    };
+
+    return selectors[type].some((selector) => target.classList.contains(selector.slice(1)) || target.closest(selector));
+  }
+
+  /**
+   * 处理颜色交互（点击或拖拽）
+   */
+  handleColorInteraction(evt, type) {
+    this.isDragging = type;
+    const color = type === 'saturation' ? this.getColorFromPicker(evt) : this.getHueFromPicker(evt);
+    this.updateColorSelection(color);
+    evt.preventDefault();
+  }
+
+  /**
+   * 设置点击事件处理器
+   */
+  setupClickHandlers() {
     this.dom.addEventListener('click', (evt) => {
       const { target } = /** @type {MouseEvent & {target:HTMLElement}}*/ (evt);
 
       // 切换文字/背景颜色选项卡
       if (target.classList.contains('cherry-color-tab')) {
-        this.dom.querySelectorAll('.cherry-color-tab').forEach((tab) => tab.classList.remove('active'));
-        target.classList.add('active');
-        this.currentType = target.dataset.type;
+        this.handleTabSwitch(target);
         return;
       }
 
       // 清除颜色按钮
       if (target.classList.contains('cherry-color-clear')) {
-        this.$color.setCacheOnce({ type: 'clear' });
-        this.$color.fire(null);
+        this.handleClearColor();
         return;
       }
 
+      // 颜色项点击
       if (
         target.classList.contains('cherry-color-preset-item') ||
         target.classList.contains('cherry-color-recent-item')
       ) {
-        const { color } = target.dataset;
-        if (color) {
-          this.setColor(color);
-          this.updateColorSelection(color);
-          this.saveRecentColor(color);
-        }
-        return;
+        this.handleColorItemClick(target);
       }
     });
   }
 
   /**
+   * 处理选项卡切换
+   */
+  handleTabSwitch(target) {
+    this.dom.querySelectorAll('.cherry-color-tab').forEach((tab) => tab.classList.remove('active'));
+    target.classList.add('active');
+    this.currentType = target.dataset.type;
+  }
+
+  /**
+   * 处理清除颜色
+   */
+  handleClearColor() {
+    this.$color.setCacheOnce({ type: 'clear' });
+    this.$color.fire(null);
+  }
+
+  /**
+   * 处理颜色项点击
+   */
+  handleColorItemClick(target) {
+    const { color } = target.dataset;
+    if (color) {
+      this.setColor(color);
+      this.updateColorSelection(color);
+    }
+  }
+
+  /**
    * 在对应的坐标展示/关闭调色盘
-   * @param {{left?: number, top?: number, $color?: object, forceHide?: boolean}} options
+   * @param {object} [options={}]
+   * @param {number} [options.left] 调色盘显示的左边距位置（像素）
+   * @param {number} [options.top] 调色盘显示的上边距位置（像素）
+   * @param {object} [options.$color] 颜色组件实例的引用
+   * @param {boolean} [options.forceHide=false] 强制隐藏调色盘。主要用于清除颜色操作后强制关闭面板
    */
   toggle({ left, top, $color, forceHide = false } = {}) {
     const isVisible = this.dom.style.display !== 'none' && this.dom.style.display !== '';
 
     if (forceHide || isVisible) {
+      // 在关闭调色盘时，保存当前颜色到最近使用颜色列表，但在因为清除颜色而关闭时不保存
+      if (!forceHide) {
+        this.saveRecentColor(this.currentColor);
+      }
       this.dom.style.display = 'none';
       return;
     }
@@ -444,9 +488,21 @@ class BubbleColor {
 
       // 更新界面显示
       this.updateColorDisplay(color);
-      this.updateHueBackground();
-      this.updatePointers();
     }
+  }
+
+  /**
+   * 更新颜色相关的所有显示元素
+   * @param {string} color 颜色值
+   */
+  updateColorDisplay(color) {
+    this.currentColor = color;
+    const previewEl = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-preview'));
+    if (previewEl) {
+      previewEl.style.backgroundColor = color;
+    }
+    this.updateHueBackground();
+    this.updatePointers();
   }
 
   /**
@@ -456,8 +512,6 @@ class BubbleColor {
     const rgb = hsvToRgb(this.currentHue, this.currentSaturation, this.currentBrightness);
     this.currentColor = rgbToHex(rgb.r, rgb.g, rgb.b);
     this.updateColorDisplay(this.currentColor);
-    this.updateHueBackground();
-    this.updatePointers();
   }
 
   /**
@@ -520,17 +574,6 @@ class BubbleColor {
   }
 
   /**
-   * 更新颜色显示
-   */
-  updateColorDisplay(color) {
-    this.currentColor = color;
-    const previewEl = /** @type {HTMLElement}*/ (this.dom.querySelector('.cherry-color-preview'));
-    if (previewEl) {
-      previewEl.style.backgroundColor = color;
-    }
-  }
-
-  /**
    * 更新颜色指针位置
    */
   updatePointers() {
@@ -570,13 +613,9 @@ class BubbleColor {
     const recentGrid = this.dom.querySelector('.cherry-color-recent-grid');
     if (!recentGrid) return;
 
-    const createColorItem = (color, isEmpty = false) =>
-      `<div class="cherry-color-item ${isEmpty ? 'cherry-color-recent-empty' : 'cherry-color-recent-item'}" 
-           ${!isEmpty ? `data-color="${color}" style="background-color: ${color};"` : ''}></div>`;
-
-    const recentColorsHTML = this.recentColors.map((color) => createColorItem(color)).join('');
+    const recentColorsHTML = this.recentColors.map((color) => this.createColorItem(color)).join('');
     const emptyHTML = Array(Math.max(0, 6 - this.recentColors.length))
-      .fill(createColorItem('', true))
+      .fill(this.createColorItem('', true))
       .join('');
 
     recentGrid.innerHTML = `${recentColorsHTML}${emptyHTML}`;
