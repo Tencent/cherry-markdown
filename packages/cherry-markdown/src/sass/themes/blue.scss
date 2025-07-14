@@ -72,4 +72,142 @@
       border-bottom: 1px solid var(--md-hr-border);
     }
   }
+
+  /** 手风琴样式优化 */
+  .cherry-detail {
+    details {
+      background: linear-gradient(145deg, var(--oc-violet-0), var(--oc-violet-1));
+      border: 1px solid var(--oc-indigo-2);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 16px;
+      overflow: hidden;
+
+      &:hover {
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.12);
+        transform: translateY(-2px);
+      }
+
+      summary {
+        background: linear-gradient(135deg, var(--oc-indigo-6), var(--oc-indigo-7));
+        color: var(--oc-white);
+        padding: 16px 24px;
+        border-radius: 11px 11px 0 0;
+        cursor: pointer;
+        font-weight: 600;
+        letter-spacing: 0.025em;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 4px;
+          background: linear-gradient(to bottom, var(--oc-violet-4), var(--oc-violet-6));
+          transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        &:hover {
+          background: linear-gradient(135deg, var(--oc-indigo-5), var(--oc-indigo-6));
+          padding-left: 28px;
+          
+          &::before {
+            width: 8px;
+          }
+        }
+
+        &::marker {
+          content: '';
+        }
+
+        &::after {
+          content: '▼';
+          position: absolute;
+          right: 20px;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 12px;
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+      }
+
+      &[open] {
+        summary {
+          border-radius: 11px 11px 0 0;
+          
+          &::after {
+            transform: translateY(-50%) rotate(180deg);
+          }
+        }
+      }
+
+      .cherry-detail-body {
+        padding: 24px 28px 20px 28px;
+        background: var(--oc-violet-0);
+        border-top: 1px solid var(--oc-indigo-1);
+        color: var(--oc-indigo-8);
+        line-height: 1.6;
+
+        > *:first-child {
+          margin-top: 0;
+        }
+
+        > *:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+
+  /** 多级手风琴样式优化 */
+  .cherry-detail__multiple {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
+    background: var(--oc-violet-0);
+    border: 1px solid var(--oc-indigo-2);
+
+    details {
+      margin-bottom: 0;
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--oc-indigo-1);
+      box-shadow: none;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      summary {
+        border-radius: 0;
+        background: linear-gradient(135deg, var(--oc-indigo-5), var(--oc-indigo-6));
+        
+        &::before {
+          width: 3px;
+        }
+        
+        &:hover {
+          background: linear-gradient(135deg, var(--oc-indigo-4), var(--oc-indigo-5));
+          
+          &::before {
+            width: 6px;
+          }
+        }
+      }
+
+      .cherry-detail-body {
+        border-top: 1px solid var(--oc-indigo-1);
+        background: var(--oc-violet-0);
+      }
+    }
+  }
 }
