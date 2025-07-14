@@ -1066,6 +1066,7 @@
     border-radius: 4px;
     cursor: pointer;
     transition: transform 0.1s;
+    border: 1px solid var(--dropdown-border);
 
     &:hover {
       transform: scale(1.15);
