@@ -77,46 +77,32 @@
 }
 
 .cherry-switch-paste {
-  .switch-btn--bg {
-    position: absolute;
-    width: 50%;
-    height: 100%;
-    box-sizing: border-box;
-    z-index: -1;
-    left: 0;
-    top: 0;
-    opacity: 0.3;
-    background-color: var(--toolbar-btn-hover-color);
-    border-radius: var(--radius-sm);
-    transition: all 0.3s;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   .cherry-toolbar-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 80px;
     text-align: center;
+    cursor: pointer;
+    user-select: none;
+    color: var(--toolbar-btn-color);
+    background: var(--toolbar-btn-bg);
+    border-radius: var(--dropdown-radius);
+    border: none;
+    transition: background 0.2s, color 0.2s;
+
     &:hover {
-      border-color: transparent;
+      background-color: var(--dropdown-item-hover-bg);
+      color: var(--dropdown-item-hover-color);
     }
-  }
-  &[data-type='text'] {
-    .cherry-text-btn {
-      color: var(--toolbar-btn-color);
-    }
-    .cherry-md-btn {
-      color: var(--toolbar-btn-hover-color);
-    }
-  }
-  &[data-type='md'] {
-    .cherry-md-btn {
-      color: var(--toolbar-btn-color);
-    }
-    .cherry-text-btn {
-      color: var(--toolbar-btn-hover-color);
-    }
-    .switch-btn--bg {
-      left: 50%;
+
+    &.active {
+      background-color: var(--dropdown-item-active-bg);
+      color: var(--dropdown-item-active-color);
     }
   }
 }
