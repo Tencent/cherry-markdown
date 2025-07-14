@@ -109,4 +109,40 @@
   
   // 分割线
   --md-hr-border: var(--base-border-color);
+  
+  /* ========== 手风琴组件样式 ========== */
+  // 手风琴容器
+  --accordion-bg: var(--base-previewer-bg);
+  --accordion-border: var(--base-border-color);
+  --accordion-radius: var(--radius-xl);
+  --accordion-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --accordion-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.12);
+  --accordion-margin: var(--spacing-lg);
+  --accordion-padding: var(--spacing-xl) var(--spacing-2xl);
+  
+  // 手风琴标题
+  --accordion-summary-bg: var(--primary-color);
+  --accordion-summary-color: var(--oc-white);
+  --accordion-summary-hover-bg: var(--primary-color);
+  --accordion-summary-padding: var(--spacing-lg) var(--spacing-xl);
+  --accordion-summary-font-weight: 600;
+  --accordion-summary-letter-spacing: 0.025em;
+  
+  // 手风琴左侧装饰条
+  --accordion-accent-color: var(--secondary-color);
+  --accordion-accent-width: 4px;
+  --accordion-accent-width-hover: 8px;
+  
+  // 手风琴内容区域
+  --accordion-body-bg: var(--base-previewer-bg);
+  --accordion-body-color: var(--base-font-color);
+  --accordion-body-border: var(--base-border-color);
+  --accordion-body-padding: var(--spacing-xl) var(--spacing-2xl) var(--spacing-lg) var(--spacing-2xl);
+  --accordion-body-line-height: var(--line-height-relaxed);
+  
+  // 多级手风琴
+  --accordion-multiple-border: var(--base-border-color);
+  --accordion-multiple-item-border: var(--base-border-color);
+  --accordion-multiple-accent-width: 3px;
+  --accordion-multiple-accent-width-hover: 6px;
 }
