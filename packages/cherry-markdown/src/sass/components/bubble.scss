@@ -24,30 +24,37 @@
     transform: translateX(-50%);
   }
 
-  // triangle
+  // triangle（菱形箭头实现）
+  // 不同于常见的边框三角的技巧，为了其应用边框颜色，采用了旋转菱形的方式实现
   .cherry-bubble-top,
   .cherry-bubble-bottom {
     position: absolute;
     left: 50%;
-
-    width: 0;
-    height: 0;
-
-    margin-left: calc(-1 * var(--spacing-sm));
-    border-left: var(--spacing-sm) solid rgba(0, 0, 0, 0);
-    border-right: var(--spacing-sm) solid rgba(0, 0, 0, 0);
+    width: 12px;
+    height: 12px;
+    margin-left: -6px;
+    background: var(--bubble-bg);
+    box-sizing: border-box;
+    z-index: 1;
+    pointer-events: none;
   }
 
   .cherry-bubble-top {
     top: 0;
-    transform: translateY(-100%);
-    border-bottom: var(--spacing-sm) solid var(--bubble-bg);
+    transform: translateY(-50%) rotate(45deg);
+    border-top: var(--border-width-1) solid var(--bubble-border);
+    border-left: var(--border-width-1) solid var(--bubble-border);
+    border-right: var(--border-width-1) solid transparent;
+    border-bottom: var(--border-width-1) solid transparent;
   }
 
   .cherry-bubble-bottom {
     bottom: 0;
-    transform: translateY(100%);
-    border-top: var(--spacing-sm) solid var(--bubble-bg);
+    transform: translateY(50%) rotate(45deg);
+    border-bottom: var(--border-width-1) solid var(--bubble-border);
+    border-right: var(--border-width-1) solid var(--bubble-border);
+    border-top: var(--border-width-1) solid transparent;
+    border-left: var(--border-width-1) solid transparent;
   }
 
   .cherry-toolbar-button {
