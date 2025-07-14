@@ -33,7 +33,10 @@ $mdSvgTextColor: rgb(250, 160, 0);
 .cherry.theme__dark {
   
   /** 顶部按钮, 选中文字时弹出的按钮, 光标focus到空行时联想出的按钮, 侧边栏按钮 */
-  .cherry-toolbar, .cherry-floatmenu, .cherry-bubble, .cherry-sidebar {
+  .cherry-toolbar,
+  .cherry-floatmenu,
+  .cherry-bubble,
+  .cherry-sidebar {
     background: $toolbarBg;
     border-color: $toolbarBg;
     .cherry-toolbar-button {
@@ -147,6 +150,55 @@ $mdSvgTextColor: rgb(250, 160, 0);
       }
     }
   }
+
+    .cherry-code-block-custom-btn,
+  .cherry-copy-code-block,
+  .cherry-unExpand-code-block,
+  .cherry-edit-code-block,
+  .cherry-expand-code-block {
+    color: $toolbarBtnColor;
+    background-color: $toolbarBg;
+    border-color: $toolbarBtnColor;
+
+    &:hover {
+      color: $toolbarBtnHoverColor;
+      background-color: $toolbarBtnBgHover;
+      border-color: $toolbarBtnHoverColor;
+    }
+  }
+
+  .cherry-code-preview-lang-select {
+    color: $toolbarBtnColor;
+    background-color: $toolbarBg;
+    border: 1px solid $toolbarBtnColor;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 12px;
+
+    &:focus,
+    &:focus-visible {
+      outline: none;
+      border-color: $toolbarBtnColor;
+      box-shadow: 0 0 0 2px rgba($toolbarBtnColor, 0.4);
+    }
+  }
+  
+  .cherry-mask-code-block {
+    background-image: linear-gradient(-180deg, rgba($editorBg, 0) 0%, $editorBg 100%);
+    .expand-btn {
+      color: $toolbarBtnColor;
+      background-color: $toolbarBg;
+      border-color: $toolbarBtnColor;
+
+      &:hover {
+        color: $toolbarBtnHoverColor;
+        background-color: $toolbarBtnBgHover;
+        border-color: $toolbarBtnHoverColor;
+      }
+    }
+  }
+
   /* 目录区域样式 */
   .cherry-flex-toc {
     &:hover {

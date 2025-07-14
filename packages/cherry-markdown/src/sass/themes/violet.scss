@@ -196,7 +196,54 @@ $mdBlockquoteBg: $VIOLET1;
       }
     }
   }
+  /** 代码块按键样式 */
+  .cherry-code-block-custom-btn,
+  .cherry-copy-code-block,
+  .cherry-unExpand-code-block,
+  .cherry-edit-code-block,
+  .cherry-expand-code-block {
+    color: $toolbarBtnColor;               // $VIOLET9
+    background-color: $toolbarBg;          // #FFF
+    border-color: $toolbarBtnColor;
 
+    &:hover {
+      color: $toolbarBtnHoverColor;        // $VIOLET0
+      background-color: $toolbarBtnBgHover; // $VIOLET5
+      border-color: $toolbarBtnHoverColor;
+    }
+  }
+  /** 代码块语言选择下拉框样式 */
+  .cherry-code-preview-lang-select {
+    color: $toolbarBtnColor;
+    background-color: $toolbarBg;
+    border: 1px solid $toolbarBtnColor;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 12px;
+
+    &:focus,
+    &:focus-visible {
+      outline: none;
+      border-color: $toolbarBtnColor;
+      box-shadow: 0 0 0 2px rgba($toolbarBtnColor, 0.3);
+    }
+  }
+
+  .cherry-mask-code-block {
+    background-image: linear-gradient(-180deg, rgba(#ffffff, 0) 0%, #ffffff 100%);
+    .expand-btn {
+      color: $toolbarBtnColor;               // $VIOLET9
+      background-color: $toolbarBg;          // #FFF
+      border-color: $toolbarBtnColor;
+
+      &:hover {
+        color: $toolbarBtnHoverColor;        // $VIOLET0
+        background-color: $toolbarBtnBgHover; // $VIOLET5
+        border-color: $toolbarBtnHoverColor;
+      }
+    }
+  }
 }
 
 /** 预览区域样式 */

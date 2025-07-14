@@ -29,3 +29,15 @@ packages/**/yarn.lock
 
 # config
 examples/cherry-markdown-publish/src/common/config/*.yaml
+.vs/VSWorkspaceState.json
+.vs/slnx.sqlite
+.vs/ProjectSettings.json
+.vs/cherry-markdown/copilot-chat/eae7d9c5/sessions/d44e2205-6297-444f-af13-f3d4c7d1cf5c
+.vs/cherry-markdown/CopilotIndices/17.14.794.21998/CodeChunks.db
+.vs/cherry-markdown/v17/DocumentLayout.backup.json
+.vs/cherry-markdown/v17/workspaceFileList.bin
+examples/table.html
+.vs/cherry-markdown/v17/DocumentLayout.json
+.vs/cherry-markdown/FileContentIndex/e3ca6902-5d47-4216-b39b-811f8de97a5d.vsidx
+.vs/cherry-markdown/CopilotIndices/17.14.794.21998/SemanticSymbols.db
+.vs/cherry-markdown/v17/.wsuo
