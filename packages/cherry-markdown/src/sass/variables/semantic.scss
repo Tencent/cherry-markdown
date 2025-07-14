@@ -22,8 +22,7 @@
   /* ========== 工具栏相关 ========== */
   --toolbar-bg: var(--oc-white);
   --toolbar-border: var(--base-border-color);
-  --toolbar-height: var(--height-toolbar);
-  --toolbar-padding: 0 var(--spacing-xl);
+  --toolbar-padding: var(--spacing-xs) var(--spacing-xl);
   --toolbar-font-size: var(--font-size-sm);
   --toolbar-radius: none;
   --toolbar-shadow: var(--shadow-md);
