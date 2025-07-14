@@ -30,7 +30,6 @@
   --editor-v3-color: var(--primary-color);
   --editor-keyword-color: var(--oc-blue-4);
   --editor-selection-bg: var(--oc-blue-2);
-  
 
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: var(--primary-color);
@@ -42,4 +41,122 @@
   --md-blockquote-bg: var(--oc-blue-0);
   --md-hr-border: var(--oc-blue-5);
   --md-table-border: var(--oc-blue-5);
+}
+
+.cherry-markdown.theme__light {
+  /** Cherry Panel - 明亮主题：简洁明快边框卡片 */
+  .cherry-panel {
+    background-color: var(--oc-violet-0);
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 6px 20px rgba(139, 69, 195, 0.12);
+
+    .cherry-panel--title {
+      background-color: var(--oc-violet-1);
+      color: var(--oc-violet-9);
+      border-radius: 16px 16px 0 0;
+      border-bottom: none;
+    }
+
+    .cherry-panel--body {
+      background-color: var(--oc-white);
+      color: var(--oc-violet-9);
+      border-radius: 0 0 16px 16px;
+    }
+  }
+
+  .cherry-panel__primary {
+    background-color: var(--oc-violet-0);
+    box-shadow: 0 6px 20px rgba(139, 69, 195, 0.18);
+
+    .cherry-panel--title {
+      background-color: var(--oc-violet-3);
+      color: var(--oc-violet-9);
+      
+      &.cherry-panel--title__not-empty::before {
+        content: '\EA6A';
+      }
+    }
+
+    .cherry-panel--body {
+      background-color: var(--oc-violet-0);
+      color: var(--oc-violet-8);
+    }
+  }
+
+  .cherry-panel__info {
+    background-color: var(--oc-indigo-0);
+    box-shadow: 0 6px 20px rgba(92, 95, 208, 0.12);
+
+    .cherry-panel--title {
+      background-color: var(--oc-indigo-2);
+      color: var(--oc-indigo-9);
+      
+      &.cherry-panel--title__not-empty::before {
+        content: '\EA69';
+      }
+    }
+
+    .cherry-panel--body {
+      background-color: var(--oc-indigo-0);
+      color: var(--oc-indigo-8);
+    }
+  }
+
+  .cherry-panel__warning {
+    background-color: var(--oc-yellow-0);
+    box-shadow: 0 6px 20px rgba(255, 212, 59, 0.12);
+
+    .cherry-panel--title {
+      background-color: var(--oc-yellow-2);
+      color: var(--oc-yellow-9);
+      
+      &.cherry-panel--title__not-empty::before {
+        content: '\EA6B';
+      }
+    }
+
+    .cherry-panel--body {
+      background-color: var(--oc-yellow-0);
+      color: var(--oc-yellow-8);
+    }
+  }
+
+  .cherry-panel__danger {
+    background-color: var(--oc-grape-0);
+    box-shadow: 0 6px 20px rgba(174, 62, 201, 0.12);
+
+    .cherry-panel--title {
+      background-color: var(--oc-grape-2);
+      color: var(--oc-grape-9);
+      
+      &.cherry-panel--title__not-empty::before {
+        content: '\EA68';
+      }
+    }
+
+    .cherry-panel--body {
+      background-color: var(--oc-grape-0);
+      color: var(--oc-grape-8);
+    }
+  }
+
+  .cherry-panel__success {
+    background-color: var(--oc-teal-0);
+    box-shadow: 0 6px 20px rgba(18, 184, 134, 0.12);
+
+    .cherry-panel--title {
+      background-color: var(--oc-teal-2);
+      color: var(--oc-teal-9);
+      
+      &.cherry-panel--title__not-empty::before {
+        content: '\EA67';
+      }
+    }
+
+    .cherry-panel--body {
+      background-color: var(--oc-teal-0);
+      color: var(--oc-teal-8);
+    }
+  }
 }

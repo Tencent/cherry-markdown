@@ -192,4 +192,125 @@
     animation: changeBgColorDark 3s;
   }
 
+  /** Cherry Panel - 暗黑优雅主题：柔和渐变卡片 */
+  .cherry-panel {
+    background: linear-gradient(145deg, #2a2a2a 0%, #1e1e1e 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(109, 40, 217, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(10px);
+
+    .cherry-panel--title {
+      background: linear-gradient(145deg, #333333 0%, #2a2a2a 100%);
+      color: var(--oc-gray-1);
+      border-radius: 16px 16px 0 0;
+      border-bottom: 1px solid rgba(109, 40, 217, 0.15);
+    }
+
+    .cherry-panel--body {
+      background: linear-gradient(145deg, #242424 0%, #1e1e1e 100%);
+      color: var(--oc-gray-2);
+      border-radius: 0 0 16px 16px;
+    }
+  }
+
+  .cherry-panel__primary {
+    background: linear-gradient(145deg, rgba(109, 40, 217, 0.08) 0%, rgba(67, 56, 202, 0.08) 100%);
+    border-color: rgba(109, 40, 217, 0.3);
+    box-shadow: 0 8px 32px rgba(109, 40, 217, 0.15);
+
+    .cherry-panel--title {
+      background: linear-gradient(145deg, rgba(109, 40, 217, 0.3) 0%, rgba(67, 56, 202, 0.3) 100%);
+      color: var(--oc-violet-2);
+      
+      &.cherry-panel--title__not-empty::before {
+        content: '\EA6A';
+      }
+    }
+
+    .cherry-panel--body {
+      background: linear-gradient(145deg, rgba(109, 40, 217, 0.05) 0%, rgba(67, 56, 202, 0.05) 100%);
+      color: var(--oc-violet-3);
+    }
+  }
+
+  .cherry-panel__info {
+    background: linear-gradient(145deg, rgba(34, 184, 207, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%);
+    border-color: rgba(34, 184, 207, 0.3);
+    box-shadow: 0 8px 32px rgba(34, 184, 207, 0.15);
+
+    .cherry-panel--title {
+      background: linear-gradient(145deg, rgba(34, 184, 207, 0.3) 0%, rgba(59, 130, 246, 0.3) 100%);
+      color: var(--oc-cyan-2);
+      
+      &.cherry-panel--title__not-empty::before {
+        content: '\EA69';
+      }
+    }
+
+    .cherry-panel--body {
+      background: linear-gradient(145deg, rgba(34, 184, 207, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+      color: var(--oc-cyan-3);
+    }
+  }
+
+  .cherry-panel__warning {
+    background: linear-gradient(145deg, rgba(255, 193, 7, 0.08) 0%, rgba(251, 191, 36, 0.08) 100%);
+    border-color: rgba(255, 193, 7, 0.3);
+    box-shadow: 0 8px 32px rgba(255, 193, 7, 0.15);
+
+    .cherry-panel--title {
+      background: linear-gradient(145deg, rgba(255, 193, 7, 0.3) 0%, rgba(251, 191, 36, 0.3) 100%);
+      color: var(--oc-yellow-2);
+      
+      &.cherry-panel--title__not-empty::before {
+        content: '\EA6B';
+      }
+    }
+
+    .cherry-panel--body {
+      background: linear-gradient(145deg, rgba(255, 193, 7, 0.05) 0%, rgba(251, 191, 36, 0.05) 100%);
+      color: var(--oc-yellow-3);
+    }
+  }
+
+  .cherry-panel__danger {
+    background: linear-gradient(145deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 127, 0.08) 100%);
+    border-color: rgba(239, 68, 68, 0.3);
+    box-shadow: 0 8px 32px rgba(239, 68, 68, 0.15);
+
+    .cherry-panel--title {
+      background: linear-gradient(145deg, rgba(239, 68, 68, 0.3) 0%, rgba(220, 38, 127, 0.3) 100%);
+      color: var(--oc-red-2);
+      
+      &.cherry-panel--title__not-empty::before {
+        content: '\EA68';
+      }
+    }
+
+    .cherry-panel--body {
+      background: linear-gradient(145deg, rgba(239, 68, 68, 0.05) 0%, rgba(220, 38, 127, 0.05) 100%);
+      color: var(--oc-red-3);
+    }
+  }
+
+  .cherry-panel__success {
+    background: linear-gradient(145deg, rgba(34, 197, 94, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);
+    border-color: rgba(34, 197, 94, 0.3);
+    box-shadow: 0 8px 32px rgba(34, 197, 94, 0.15);
+
+    .cherry-panel--title {
+      background: linear-gradient(145deg, rgba(34, 197, 94, 0.3) 0%, rgba(16, 185, 129, 0.3) 100%);
+      color: var(--oc-green-2);
+      
+      &.cherry-panel--title__not-empty::before {
+        content: '\EA67';
+      }
+    }
+
+    .cherry-panel--body {
+      background: linear-gradient(145deg, rgba(34, 197, 94, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+      color: var(--oc-green-3);
+    }
+  }
 }

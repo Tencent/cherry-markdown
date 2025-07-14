@@ -71,4 +71,120 @@
       border-bottom: 1px solid var(--md-hr-border);
     }
   }
+
+  /** Cherry Panel - 绿色主题：自然清新圆角卡片 */
+  .cherry-panel {
+    background-color: var(--oc-green-0);
+    border-radius: 12px;
+    border: 1px solid var(--oc-green-2);
+    box-shadow: 0 3px 12px rgba(64, 192, 87, 0.15);
+
+    .cherry-panel--title {
+      background-color: var(--oc-green-1);
+      color: var(--oc-green-9);
+      border-radius: 10px 10px 0 0;
+      border-bottom: 1px solid var(--oc-green-3);
+    }
+
+    .cherry-panel--body {
+      background-color: var(--oc-white);
+      color: var(--oc-green-9);
+      border-radius: 0 0 10px 10px;
+    }
+  }
+
+  .cherry-panel__primary {
+    border-color: var(--oc-green-4);
+    box-shadow: 0 3px 12px rgba(64, 192, 87, 0.25);
+
+    .cherry-panel--title {
+      background-color: var(--oc-green-3);
+      color: var(--oc-green-9);
+      
+      &.cherry-panel--title__not-empty::before {
+        content: '\EA6A';
+      }
+    }
+
+    .cherry-panel--body {
+      background-color: var(--oc-green-0);
+      color: var(--oc-green-8);
+    }
+  }
+
+  .cherry-panel__info {
+    border-color: var(--oc-cyan-4);
+    box-shadow: 0 3px 12px rgba(9, 196, 244, 0.15);
+
+    .cherry-panel--title {
+      background-color: var(--oc-cyan-2);
+      color: var(--oc-cyan-9);
+      
+      &.cherry-panel--title__not-empty::before {
+        content: '\EA69';
+      }
+    }
+
+    .cherry-panel--body {
+      background-color: var(--oc-cyan-0);
+      color: var(--oc-cyan-8);
+    }
+  }
+
+  .cherry-panel__warning {
+    border-color: var(--oc-lime-4);
+    box-shadow: 0 3px 12px rgba(130, 201, 30, 0.15);
+
+    .cherry-panel--title {
+      background-color: var(--oc-lime-2);
+      color: var(--oc-lime-9);
+      
+      &.cherry-panel--title__not-empty::before {
+        content: '\EA6B';
+      }
+    }
+
+    .cherry-panel--body {
+      background-color: var(--oc-lime-0);
+      color: var(--oc-lime-8);
+    }
+  }
+
+  .cherry-panel__danger {
+    border-color: var(--oc-red-4);
+    box-shadow: 0 3px 12px rgba(250, 82, 82, 0.15);
+
+    .cherry-panel--title {
+      background-color: var(--oc-red-2);
+      color: var(--oc-red-9);
+      
+      &.cherry-panel--title__not-empty::before {
+        content: '\EA68';
+      }
+    }
+
+    .cherry-panel--body {
+      background-color: var(--oc-red-0);
+      color: var(--oc-red-8);
+    }
+  }
+
+  .cherry-panel__success {
+    border-color: var(--oc-green-5);
+    box-shadow: 0 3px 12px rgba(64, 192, 87, 0.3);
+
+    .cherry-panel--title {
+      background-color: var(--oc-green-4);
+      color: var(--oc-white);
+      
+      &.cherry-panel--title__not-empty::before {
+        content: '\EA67';
+      }
+    }
+
+    .cherry-panel--body {
+      background-color: var(--oc-green-0);
+      color: var(--oc-green-8);
+    }
+  }
 }
