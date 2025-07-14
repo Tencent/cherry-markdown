@@ -648,5 +648,6 @@ class BubbleColor {
     // 将新颜色添加到列表开头，移除已存在的相同颜色，并限制为最多6个
     this.recentColors = [color, ...this.recentColors.filter((c) => c !== color)].slice(0, 6);
     localStorage.setItem('cherry-recent-colors', JSON.stringify(this.recentColors));
+    this.updateRecentColorsDisplay(); // 每次保存后立即刷新显示
   }
 }
