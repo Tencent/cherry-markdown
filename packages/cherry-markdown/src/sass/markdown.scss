@@ -574,18 +574,18 @@ div[data-type='codeBlock'] {
     border: 1px solid var(--accordion-border);
     border-radius: var(--accordion-radius);
     box-shadow: var(--accordion-shadow);
-    margin-bottom: var(--accordion-margin);
+    margin-bottom: var(--spacing-md);
     transition: box-shadow 0.2s ease;
     overflow: hidden;
 
     &:hover {
-      box-shadow: var(--accordion-shadow-hover);
+      box-shadow: var(--accordion-shadow);
     }
 
     summary {
       background: var(--accordion-summary-bg);
       color: var(--accordion-summary-color);
-      padding: var(--accordion-summary-padding);
+      padding: var(--spacing-md) var(--spacing-lg);
       cursor: pointer;
       font-weight: 600;
       transition: background-color 0.2s ease;
@@ -620,7 +620,7 @@ div[data-type='codeBlock'] {
     }
 
     .cherry-detail-body {
-      padding: var(--accordion-body-padding);
+      padding: var(--spacing-lg);
       background: var(--accordion-body-bg);
       border-top: 1px solid var(--accordion-body-border);
       color: var(--accordion-body-color);

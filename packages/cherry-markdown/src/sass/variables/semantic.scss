@@ -115,19 +115,15 @@
   --accordion-bg: var(--base-previewer-bg);
   --accordion-border: var(--base-border-color);
   --accordion-radius: var(--radius-lg);
-  --accordion-shadow: var(--shadow-sm);
-  --accordion-shadow-hover: var(--shadow-md);
-  --accordion-margin: var(--spacing-md);
+  --accordion-shadow: var(--shadow-md);
   
   // 标题样式
   --accordion-summary-bg: var(--primary-color);
   --accordion-summary-color: var(--oc-white);
   --accordion-summary-hover-bg: var(--color-primary-hover);
-  --accordion-summary-padding: var(--spacing-md) var(--spacing-lg);
   
   // 内容区域
   --accordion-body-bg: var(--base-previewer-bg);
   --accordion-body-color: var(--base-font-color);
   --accordion-body-border: var(--base-border-color);
-  --accordion-body-padding: var(--spacing-lg);
 }
