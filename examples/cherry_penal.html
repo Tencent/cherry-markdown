@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cherry Editor - Markdown Editor</title>
+  <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css">
+  <link rel="Shortcut Icon" href="../logo/favicon.ico">
+  <style>
+    html {
+      height: 100%;
+    }
+    body {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+        margin: 0;
+        align-items: center;
+    }
+    h1 {
+        text-align: center; /* 确保文字本身居中 */
+        width: 100%; /* 让标题占满宽度 */
+        margin: 20px 0; /* 添加上下边距 */
+    }
+    #markdown {
+      margin: 0 auto;
+    }
+  </style>
+</head>
+
+<body>
+    <h1>信息栏</h1>
+    <div id="markdown"></div>
+    <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+</body>
+<script>
+var config = {
+    id: 'markdown',
+    value: '',
+    callback: {
+        afterChange: function(md, html) {
+        console.log('change');
+        }
+    },
+    toolbars: {
+        toolbarRight: ['fullScreen', '|', 'export', 'changeLocale', 'wordCount'],
+        sidebar: ['mobilePreview', 'copy', 'theme'],
+    },
+    themeSettings: {
+    mainTheme: 'light',
+    }
+  
+};
+var sourceCode = document.documentElement.outerHTML;
+var cherry = new Cherry(config);
+var str = '::: primary 标题\n内容\n\`\`\`\n\`\`\`\n:\:\:\n' 
+        + '::: info 标题\n内容\n:::\n' 
+        + '::: warning 标题\n内容\n:::\n' 
+        + '::: danger 标题\n内容\n:::\n' 
+        + '::: success 标题\n内容\n:::\n';
+cherry.setValue(str);
+</script>
+</html>

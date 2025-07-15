@@ -47,6 +47,23 @@
   --md-hr-border: var(--oc-gray-5);
   --md-table-border: var(--oc-gray-5);
 
+  /* ========== 信息面板 相关变量 ========== */
+  --panel-primary-bg: #2a3e45;
+  --panel-primary-color: #bed0eb;
+  --panel-primary-border-left: #508690;
+  --panel-info-bg: #302757;
+  --panel-info-color: #EDE7F6;
+  --panel-info-border-left: #775da8;
+  --panel-warning-bg: #2b240c;
+  --panel-warning-color: #FFF7E6;
+  --panel-warning-border-left: #998736;
+  --panel-danger-bg: #4e171c;
+  --panel-danger-color: #F6BBC1;
+  --panel-danger-border-left: #aa525b;
+  --panel-success-bg: #012004;
+  --panel-success-color: #e9fdf5;
+  --panel-success-border-left: #016F03;
+
   /* 目录区域样式 */
   .cherry-flex-toc {
     &:hover {

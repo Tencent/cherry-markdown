@@ -618,65 +618,80 @@ div[data-type='codeBlock'] {
   overflow: hidden;
   border-radius: var(--radius-xl);
   box-sizing: border-box;
-  border: 0.5px solid;
+  border-radius: 20px;
+  padding: 15px 5px 5px 5px;
   .cherry-panel--title {
-    color: #fff;
-    padding: 5px 20px;
+    padding: 10px 15px;
+    font-size: 20px;
     &.cherry-panel--title__not-empty::before {
+      font-weight: bold;
       font-family: 'ch-icon';
       margin: 0 var(--spacing-md) 0 -6px;
       vertical-align: bottom;
     }
   }
   .cherry-panel--body {
-    padding: 5px 20px;
+    font-size: 15px;
+    padding: 10px 15px;
+    overflow: hidden;
+  }
+  &:hover{
+    box-shadow: rgba(112, 120, 128, 0.2) 0 4px 6px;
   }
 }
 .cherry-panel__primary {
-  background-color: #cfe2ff;
-  color: #0a58ca;
+  background-color: var(--panel-primary-bg);
+  color: var(--panel-primary-color);
+  border-left: 15px solid var(--panel-primary-border-left);
   .cherry-panel--title {
-    background-color: #0d6dfe;
     &.cherry-panel--title__not-empty::before {
       content: '\EA6A';
     }
   }
+  .cherry-panel--body {
+      .cherry-code-expand{
+          // background-color: #86c8f1;
+        pre {
+          background-color: #d2dee6;
+        }
+    }
+  }
 }
 .cherry-panel__info {
-  background-color: #cff4fc;
-  color: #087990;
+  background-color: var(--panel-info-bg);
+  color: var(--panel-info-color);
+  border-left: 15px solid var(--panel-info-border-left);
   .cherry-panel--title {
-    background-color: #099cba;
     &.cherry-panel--title__not-empty::before {
       content: '\EA69';
     }
   }
 }
 .cherry-panel__warning {
-  background-color: #fff3cd;
-  color: #997404;
+  background-color: var(--panel-warning-bg);
+  color: var(--panel-warning-color);
+  border-left: 15px solid var(--panel-warning-border-left);
   .cherry-panel--title {
-    background-color: #b38806;
     &.cherry-panel--title__not-empty::before {
       content: '\EA6B';
     }
   }
 }
 .cherry-panel__danger {
-  background-color: #f8d7da;
-  color: #b02a37;
+  background-color: var(--panel-danger-bg);
+  color: var(--panel-danger-color);
+  border-left: 15px solid var(--panel-danger-border-left);
   .cherry-panel--title {
-    background-color: #dc3545;
     &.cherry-panel--title__not-empty::before {
       content: '\EA68';
     }
   }
 }
 .cherry-panel__success {
-  background-color: #d1e7dd;
-  color: #146c43;
+  background-color: var(--panel-success-bg);
+  color: var(--panel-success-color);
+  border-left: 15px solid var(--panel-success-border-left);
   .cherry-panel--title {
-    background-color: #198754;
     &.cherry-panel--title__not-empty::before {
       content: '\EA67';
     }

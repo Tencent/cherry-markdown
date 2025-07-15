@@ -43,6 +43,22 @@
   --md-blockquote-bg: var(--oc-violet-1);
   --md-hr-border: var(--oc-indigo-4);
   --md-table-border: var(--oc-indigo-4);
+  /* ========== 信息面板 相关变量 ========== */
+  --panel-primary-bg: #e9f7fc;
+  --panel-primary-color: #3A6CB7;
+  --panel-primary-border-left: #BDDFED;
+  --panel-info-bg: #EEEEFF;
+  --panel-info-color: #723AB7;
+  --panel-info-border-left: #CCCCFF;
+  --panel-warning-bg: #FFF7E6;
+  --panel-warning-color: #816306;
+  --panel-warning-border-left: #FAE2B0;
+  --panel-danger-bg: #FFF3F4;
+  --panel-danger-color: #b02a37;
+  --panel-danger-border-left: #F6BBC1;
+  --panel-success-bg: #e9fdf5;
+  --panel-success-color: #146c43;
+  --panel-success-border-left: #9fdac2;
 }
 
 /** 预览区域样式 */

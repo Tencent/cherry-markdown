@@ -144,7 +144,10 @@
     border-radius: var(--dropdown-item-radius);
     margin: 2px 4px;
     transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
-
+    &.show{
+      transform: scaleY(1);
+      opacity: 1;
+    }
     &:hover {
       background: var(--dropdown-item-hover-bg);
       color: var(--dropdown-item-hover-color);

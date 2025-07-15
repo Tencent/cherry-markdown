@@ -81,6 +81,23 @@
       cursor:e-resize;
     }
   }
+  .cherry-previewer-codeBlock-hover-handler{
+    .cherry-code-preview-lang-select { 
+      border:1px;
+      border-radius: 5px;
+      border-color: #3582fb;
+      padding: 4px 8px;
+      &:focus {
+        outline: none;
+        border-color: #4096ff; 
+        box-shadow: 0 0 0 2px rgba(64, 150, 255, 0.1); 
+      }
+      &:active{
+        border-color: #4096ff;
+        box-shadow: 0 0 0 2px rgba(64, 150, 255, 0.1);
+      }
+    }
+  }
   .cherry-previewer-table-content-handler {
     .cherry-previewer-table-content-handler__input {
       position: absolute;
@@ -98,7 +115,7 @@
   .cherry-previewer-codeBlock-content-handler {
     .cherry-previewer-codeBlock-content-handler__input {
       position: absolute;
-    }
+    }  
   }
   .cherry-previewer-table-hover-handler {
     position: absolute;

@@ -48,6 +48,7 @@
     "lint:fix": "eslint --ignore-path ../../.eslintignore --plugin file-progress --rule \"file-progress/activate: 1\" --ext .js . --fix",
     "lint:ci": "eslint --ignore-path ../../.eslintignore --max-warnings=0 --ext .js .",
     "examples": "serve -p 3000 ."
+    
   },
   "keywords": [
     "markdown"
@@ -74,6 +75,7 @@
     "@rollup/plugin-replace": "^2.3.1",
     "@rollup/plugin-terser": "^0.4.3",
     "@types/echarts": "4.9.15",
+    "@types/estree": "^1.0.8",
     "@types/glob": "^7.2.0",
     "@types/jsdom": "^16.2.13",
     "@types/lodash": "^4.14.170",
@@ -118,8 +120,8 @@
   },
   "dependencies": {
     "@types/codemirror": "^0.0.108",
-    "dompurify": "^3.2.6",
     "crypto-js": "^4.2.0",
+    "dompurify": "^3.2.6",
     "htmlparser2": "^10.0.0",
     "jsdom": "~19.0.0",
     "ws": "^8.18.0"
