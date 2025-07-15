@@ -155,6 +155,6 @@ export default {
   caseSensitiveSearch: '区分大小写搜索',
   wholeWordSearch: '全字匹配搜索',
   matchesFoundText: '处匹配',
-  toggleReplace: '切换替换',
+  toggleReplace: '展开/收起替换框',
   close: '关闭',
 };

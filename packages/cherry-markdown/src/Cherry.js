@@ -1091,6 +1091,7 @@ export default class Cherry extends CherryStatic {
     this.locale = this.locales[locale];
     this.$event.emit('afterChangeLocale', locale);
     this.resetToolbar('toolbar', this.options.toolbars.toolbar || []);
+    if (this.searchBoxInstance) this.searchBoxInstance.updateLocaleStrings();
     return true;
   }
 

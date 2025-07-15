@@ -42,6 +42,8 @@ export default class SearchBox {
     this.element.style.display = 'none';
     // this.bindKeys();
 
+    this.updateLocaleStrings(); // 初始化时更新语言字符串
+
     this.addEventListeners();
 
     this.commands = {
@@ -567,6 +569,33 @@ export default class SearchBox {
     }
     if (count === 0) {
       cm.setSelection({ ch: 0, line: 0 }, { ch: 0, line: 0 });
+    }
+  }
+
+  // 更新语言字符串
+  updateLocaleStrings() {
+    const { element, searchInput, replaceInput } = this;
+    if (element) {
+      const htmlElement = /** @type {HTMLElement} */ (element); // 对解构出的 element 进行类型断言
+      // 更新输入框placeholder
+      searchInput.setAttribute('placeholder', this.$cherry.locale.searchFor);
+      replaceInput.setAttribute('placeholder', this.$cherry.locale.replaceWith);
+      // 更新按钮title描述
+      htmlElement.querySelector('.ace_searchbtn_close').setAttribute('title', this.$cherry.locale.close);
+      htmlElement.querySelector('[action="findNext"]').setAttribute('title', this.$cherry.locale.nextMatch);
+      htmlElement.querySelector('[action="findPrev"]').setAttribute('title', this.$cherry.locale.previousMatch);
+      htmlElement.querySelector('[action="replaceAndFindNext"]').setAttribute('title', this.$cherry.locale.replace);
+      htmlElement.querySelector('[action="replaceAll"]').setAttribute('title', this.$cherry.locale.replaceAll);
+      htmlElement.querySelector('[action="toggleReplace"]').setAttribute('title', this.$cherry.locale.toggleReplace);
+      htmlElement.querySelector('[action="toggleRegexpMode"]').setAttribute('title', this.$cherry.locale.regExpSearch);
+      htmlElement
+        .querySelector('[action="toggleCaseSensitive"]')
+        .setAttribute('title', this.$cherry.locale.caseSensitiveSearch);
+      htmlElement
+        .querySelector('[action="toggleWholeWords"]')
+        .setAttribute('title', this.$cherry.locale.wholeWordSearch);
+      // 更新计数器文本
+      this.updateCount();
     }
   }
 }
