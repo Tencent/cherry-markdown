@@ -2,54 +2,6 @@
  * 默认主题
  */
 
-.ch-icon-check::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 0;
-  height: 0;
-  z-index: 1;
-  pointer-events: none;
-  display: none;
-}
-
-.ch-icon-check.animating::after {
-  display: block;
-  box-shadow:
-    0 -12px 0 2px rgba(49,130,246,0.7),
-    8.5px -8.5px 0 2px rgba(49,130,246,0.7),
-    12px 0 0 2px rgba(49,130,246,0.7),
-    8.5px 8.5px 0 2px rgba(49,130,246,0.7),
-    0 12px 0 2px rgba(49,130,246,0.7),
-    -8.5px 8.5px 0 2px rgba(49,130,246,0.7),
-    -12px 0 0 2px rgba(49,130,246,0.7),
-    -8.5px -8.5px 0 2px rgba(49,130,246,0.7);
-  transform: translate(-50%, -50%) scale(0.5);
-  opacity: 1;
-  animation: checklist-firework 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes checklist-firework {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(0.5);
-  }
-  60% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(1.4);
-  }
-}
-@keyframes checklist-check-pop {
-  0% { transform: scale(0.8); opacity: 0.7; }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); opacity: 1; }
-}
-
 .cherry.theme__default {
   /* ========== 基础色彩变量覆盖 ========== */
   --primary-color: var(--oc-blue-6);
@@ -59,6 +11,12 @@
   --base-editor-bg: var(--oc-white);
   --base-previewer-bg: var(--oc-white);
   --base-border-color: var(--oc-gray-3);
+
+  /* ========== 检查清单相关变量 ========== */
+  --checklist-firework-color: rgba(49, 130, 246, 0.7);
+  --checklist-check-color: var(--primary-color);
+  --checklist-square-color: var(--base-border-color);
+  --checklist-hover-bg: rgba(49, 130, 246, 0.1);
 
   /* ========== 工具栏相关变量 ========== */
   --toolbar-bg: #1E314B;
@@ -118,10 +76,18 @@
   }
 
   /** checklist 模式，未勾选时 */
-  .ch-icon-square {}
+  .ch-icon-square {
+    color: var(--checklist-square-color);
+    
+    &:hover {
+      color: var(--checklist-check-color);
+    }
+  }
 
   /** checklist 模式，勾选时 */
-  .ch-icon-check {}
+  .ch-icon-check {
+    color: var(--checklist-check-color);
+  }
 
   blockquote {}
 

@@ -29,55 +29,12 @@
   .h1 small,
   .h2 small,
   .h3 small,
-  .h4 small,
-  .h5 small,
-  .h6 small,
-  h1 .small,
-  h2 .small,
-  h3 .small,
-  h4 .small,
-  h5 .small,
-  h6 .small,
-  .h1 .small,
-  .h2 .small,
-  .h3 .small,
-  .h4 .small,
-  .h5 .small,
-  .h6 .small {
-    font-weight: normal;
-    line-height: 1;
-    color: var(--oc-gray-5);
-  }
-
-  h1,
-  h2,
-  h3 {
-    margin-top: 30px;
-    margin-bottom: var(--spacing-lg);
-  }
-
-  h1 small,
-  h2 small,
-  h3 small,
-  h1 .small,
-  h2 .small,
-  h3 .small {
-    font-size: 65%;
-  }
-
-  h4,
-  h5,
-  h6 {
-    margin-top: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
-  }
-
   h4 small,
   h5 small,
   h6 small,
   h4 .small,
-  h5 .small,
-  h6 .small {
+  h5 small,
+  h6 small {
     font-size: 75%;
   }
 
@@ -381,9 +338,116 @@
 
   .check-list-item {
     list-style: none;
-
+  
     .ch-icon {
       margin: 0 6px 0 -20px;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 3px;
+      
+      &:hover {
+        transform: scale(1.05);
+        background-color: var(--checklist-hover-bg, rgba(0, 0, 0, 0.05));
+      }
+      
+      // 勾选状态的入场动画
+      &.ch-icon-check {
+        animation: checklist-check-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        
+        // 烟花效果的伪元素 - 从复选框边缘开始绽放
+        &::after {
+          content: "";
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 0;
+          height: 0;
+          z-index: -1;
+          pointer-events: none;
+          opacity: 0;
+          transform: translate(-50%, -50%);
+          animation: checklist-firework 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+      }
+      
+      // 未勾选状态的动画
+      &.ch-icon-square {
+        animation: checklist-check-out 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        
+        &:active {
+          transform: scale(0.95);
+        }
+      }
+    }
+  }
+
+  // 动画关键帧
+  @keyframes checklist-check-in {
+    0% { 
+      transform: scale(0.8); 
+      opacity: 0.7; 
+    }
+    50% { 
+      transform: scale(1.1); 
+    }
+    100% { 
+      transform: scale(1); 
+      opacity: 1; 
+    }
+  }
+  
+  @keyframes checklist-check-out {
+    0% { 
+      transform: scale(1.1); 
+    }
+    100% { 
+      transform: scale(1); 
+    }
+  }
+  
+  @keyframes checklist-firework {
+    0% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(0.8);
+      box-shadow:
+        0 -10px 0 2px var(--checklist-firework-color, rgba(49,130,246,0.8)),
+        7px -7px 0 2px var(--checklist-firework-color, rgba(49,130,246,0.8)),
+        10px 0 0 2px var(--checklist-firework-color, rgba(49,130,246,0.8)),
+        7px 7px 0 2px var(--checklist-firework-color, rgba(49,130,246,0.8)),
+        0 10px 0 2px var(--checklist-firework-color, rgba(49,130,246,0.8)),
+        -7px 7px 0 2px var(--checklist-firework-color, rgba(49,130,246,0.8)),
+        -10px 0 0 2px var(--checklist-firework-color, rgba(49,130,246,0.8)),
+        -7px -7px 0 2px var(--checklist-firework-color, rgba(49,130,246,0.8));
+      animation: checklist-firework 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    60% {
+      opacity: 0.7;
+      transform: translate(-50%, -50%) scale(1.0);
+      box-shadow:
+        0 -16px 0 1.5px var(--checklist-firework-color, rgba(49,130,246,0.6)),
+        11px -11px 0 1.5px var(--checklist-firework-color, rgba(49,130,246,0.6)),
+        16px 0 0 1.5px var(--checklist-firework-color, rgba(49,130,246,0.6)),
+        11px 11px 0 1.5px var(--checklist-firework-color, rgba(49,130,246,0.6)),
+        0 16px 0 1.5px var(--checklist-firework-color, rgba(49,130,246,0.6)),
+        -11px 11px 0 1.5px var(--checklist-firework-color, rgba(49,130,246,0.6)),
+        -16px 0 0 1.5px var(--checklist-firework-color, rgba(49,130,246,0.6)),
+        -11px -11px 0 1.5px var(--checklist-firework-color, rgba(49,130,246,0.6));
+      animation: checklist-firework 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(1.2);
+      box-shadow:
+        0 -22px 0 1px var(--checklist-firework-color, rgba(49,130,246,0.3)),
+        15px -15px 0 1px var(--checklist-firework-color, rgba(49,130,246,0.3)),
+        22px 0 0 1px var(--checklist-firework-color, rgba(49,130,246,0.3)),
+        15px 15px 0 1px var(--checklist-firework-color, rgba(49,130,246,0.3)),
+        0 22px 0 1px var(--checklist-firework-color, rgba(49,130,246,0.3)),
+        -15px 15px 0 1px var(--checklist-firework-color, rgba(49,130,246,0.3)),
+        -22px 0 0 1px var(--checklist-firework-color, rgba(49,130,246,0.3)),
+        -15px -15px 0 1px var(--checklist-firework-color, rgba(49,130,246,0.3));
+      animation: checklist-firework 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
   }
 
