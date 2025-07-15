@@ -23,6 +23,10 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
+      - name: Lint code
+        working-directory: ./packages/cherry-markdown
+        run: yarn lint
+
       - name: Build project
         run: yarn build
 

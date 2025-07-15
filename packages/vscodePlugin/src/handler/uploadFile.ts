@@ -24,9 +24,7 @@ export interface UploadFileHandlerRes extends BackfillImage {
 export const uploadFileHandler = async (fileInfo: FileInfo) => {
   const { name = '', type = '', path = '' } = fileInfo;
 
-  const UploadType = vscode.workspace
-    .getConfiguration('cherryMarkdown')
-    .get<UploadType>('UploadType');
+  const UploadType = vscode.workspace.getConfiguration('cherryMarkdown').get<UploadType>('UploadType');
 
   const res: UploadFileHandlerRes = { name, url: '' };
 
@@ -60,10 +58,16 @@ export const uploadFileHandler = async (fileInfo: FileInfo) => {
       break;
     case 'PicGoServer':
       // eslint-disable-next-line no-case-declarations
-      const PicGoServer = vscode.workspace.getConfiguration('cherryMarkdown').get<string>('PicGoServer', 'http://127.0.0.1:36677/upload');
+      const PicGoServer = vscode.workspace
+        .getConfiguration('cherryMarkdown')
+        .get<string>('PicGoServer', 'http://127.0.0.1:36677/upload');
       // 请求PicGo服务
       // eslint-disable-next-line no-case-declarations
-      const upload = await axios.post<any, AxiosResponse<{ success: boolean; result: string[] }>, { list: string[] } >(PicGoServer, { list: [path] }, { headers: { 'Content-Type': 'application/json' } },);
+      const upload = await axios.post<any, AxiosResponse<{ success: boolean; result: string[] }>, { list: string[] }>(
+        PicGoServer,
+        { list: [path] },
+        { headers: { 'Content-Type': 'application/json' } },
+      );
       if (upload.data?.success !== true) {
         throw new Error('上传失败');
       } else {

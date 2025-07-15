@@ -1,4 +1,4 @@
-name: "Build VscodePlugin Release"
+name: 'Build VscodePlugin Release'
 
 on:
   workflow_call:
@@ -13,7 +13,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'yarn' 
+          cache: 'yarn'
 
       - name: Change Package Files
         run: |
@@ -27,12 +27,17 @@ jobs:
           cd ../vscodePlugin
           jq '.dependencies["cherry-markdown"] = .dependencies["cherry-markdown-core"] | del(.dependencies["cherry-markdown"])' package.json > temp.json && mv temp.json package.json
           jq '.name = "cherry-markdown"' package.json > temp.json && mv temp.json package.json
-  
 
       - name: Install and Build Dependencies
         run: |
           yarn global add vsce
           yarn --network-timeout 100000
+      - name: Lint code
+        working-directory: ./packages/vscodePlugin
+        run: yarn lint
+
+      - name: Build VSCode Plugin
+        run: |
           yarn build
           yarn build:vscodePlugin
 

@@ -44,9 +44,8 @@
     "check-bundle": "es-check es5 dist/cherry-markdown.js dist/cherry-markdown.min.js",
     "test": "vitest",
     "test:update": "vitest -u",
-    "lint": "eslint --ignore-path ../../.eslintignore --plugin file-progress --rule \"file-progress/activate: 1\" --ext .js .",
-    "lint:fix": "eslint --ignore-path ../../.eslintignore --plugin file-progress --rule \"file-progress/activate: 1\" --ext .js . --fix",
-    "lint:ci": "eslint --ignore-path ../../.eslintignore --max-warnings=0 --ext .js .",
+    "lint": "cd ../.. && npx prettier --check packages/cherry-markdown/src/**/*.js && npx eslint --ignore-path .eslintignore packages/cherry-markdown/src/**/*.js",
+    "lint:fix": "cd ../.. && npx prettier --write packages/cherry-markdown/src/**/*.js && npx eslint --ignore-path .eslintignore packages/cherry-markdown/src/**/*.js --fix",
     "examples": "serve -p 3000 ."
   },
   "keywords": [
@@ -77,7 +76,6 @@
     "@types/glob": "^7.2.0",
     "@types/jsdom": "^16.2.13",
     "@types/lodash": "^4.14.170",
-    "@types/mermaid": "^8.2.6",
     "@types/node": "^17.0.42",
     "@types/virtual-dom": "^2.1.0",
     "async": "^3.2.4",
@@ -134,6 +132,6 @@
     "glob-watcher": "6.0.0"
   },
   "optionalDependencies": {
-    "mermaid": "9.4.3"
+    "mermaid": "11.8.1"
   }
 }

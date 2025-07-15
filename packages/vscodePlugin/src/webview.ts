@@ -18,15 +18,31 @@ export function getWebviewContent(mdInfo: object, currentPanel: vscode.WebviewPa
   });
   const pageResourceUrlsMap = {
     'global-vars.js': currentPanel.webview.asWebviewUri(vscode.Uri.file(filePath)),
-    'index.css': currentPanel.webview.asWebviewUri(vscode.Uri.file(path.join(extensionPath, 'web-resources/index.css'))),
-    'cherry-markdown.css': currentPanel.webview.asWebviewUri(vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/cherry-markdown.min.css'))),
-    'cherry-markdown.js': currentPanel.webview.asWebviewUri(vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/cherry-markdown.min.js'))),
-    'scripts/pinyin/pinyin_dist.js': currentPanel.webview.asWebviewUri(vscode.Uri.file(path.join(extensionPath, 'web-resources/scripts/pinyin/pinyin_dist.js'))),
+    'index.css': currentPanel.webview.asWebviewUri(
+      vscode.Uri.file(path.join(extensionPath, 'web-resources/index.css')),
+    ),
+    'cherry-markdown.css': currentPanel.webview.asWebviewUri(
+      vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/cherry-markdown.min.css')),
+    ),
+    'cherry-markdown.js': currentPanel.webview.asWebviewUri(
+      vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/cherry-markdown.min.js')),
+    ),
+    'scripts/pinyin/pinyin_dist.js': currentPanel.webview.asWebviewUri(
+      vscode.Uri.file(path.join(extensionPath, 'web-resources/scripts/pinyin/pinyin_dist.js')),
+    ),
     'scripts/index.js': currentPanel.webview.asWebviewUri(vscode.Uri.file(path.join(extensionPath, 'dist/index.js'))),
-    'scripts/index.css': currentPanel.webview.asWebviewUri(vscode.Uri.file(path.join(extensionPath, 'web-resources/scripts/index.css'))),
-    'dist/fonts/ch-icon.woff': currentPanel.webview.asWebviewUri(vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/fonts/ch-icon.woff'))),
-    'dist/fonts/ch-icon.woff2': currentPanel.webview.asWebviewUri(vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/fonts/ch-icon.woff2'))),
-    'dist/fonts/ch-icon.ttf': currentPanel.webview.asWebviewUri(vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/fonts/ch-icon.ttf'))),
+    'scripts/index.css': currentPanel.webview.asWebviewUri(
+      vscode.Uri.file(path.join(extensionPath, 'web-resources/scripts/index.css')),
+    ),
+    'dist/fonts/ch-icon.woff': currentPanel.webview.asWebviewUri(
+      vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/fonts/ch-icon.woff')),
+    ),
+    'dist/fonts/ch-icon.woff2': currentPanel.webview.asWebviewUri(
+      vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/fonts/ch-icon.woff2')),
+    ),
+    'dist/fonts/ch-icon.ttf': currentPanel.webview.asWebviewUri(
+      vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/fonts/ch-icon.ttf')),
+    ),
   };
   return `<!DOCTYPE html>
   <html lang="en">
@@ -67,11 +83,16 @@ const getWebViewPath = (currentPanel: vscode.WebviewPanel): vscode.Uri => {
 
 const getActiveTextEditorPath = (currentPanel: vscode.WebviewPanel): vscode.Uri => {
   const editor = vscode.window.activeTextEditor;
-  const activeTextEditorPath = editor ? currentPanel.webview.asWebviewUri(editor.document.uri) : getWebViewPath(currentPanel);;
+  const activeTextEditorPath = editor
+    ? currentPanel.webview.asWebviewUri(editor.document.uri)
+    : getWebViewPath(currentPanel);
   return activeTextEditorPath;
 };
 
-function writeGlobalVarsToFile(extensionPath: string, globalVars: { baseResourcePath: vscode.Uri, activeTextEditorPath: vscode.Uri }): string {
+function writeGlobalVarsToFile(
+  extensionPath: string,
+  globalVars: { baseResourcePath: vscode.Uri; activeTextEditorPath: vscode.Uri },
+): string {
   const globalVarsContent = `
     window._baseResourcePath = "${globalVars.baseResourcePath}";
     window._activeTextEditorPath = "${globalVars.activeTextEditorPath}";

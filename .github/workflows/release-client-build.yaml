@@ -58,8 +58,16 @@ jobs:
       - name: Build Tauri
         run: |
           yarn --network-timeout 100000
+
+      - name: Lint code
+        working-directory: ./packages/client
+        run: yarn lint
+      
+      - name: Build Client
+        run: |
           yarn build
           yarn build:client ${{ matrix.args }}
+
 
       - name: Upload macOS Release Asset (aarch64-apple-darwin)
         if: matrix.platform == 'macos-latest' &&  matrix.target == 'aarch64-apple-darwin'

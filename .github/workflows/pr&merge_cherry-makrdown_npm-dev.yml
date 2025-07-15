@@ -3,8 +3,8 @@ name: PR Merge cherry-markdown Dev NPM Preview
 on:
   pull_request_target:
     types: [closed]
-    paths: 
-      - "packages/cherry-markdown/**"
+    paths:
+      - 'packages/cherry-markdown/**'
 
 permissions:
   contents: read
@@ -57,10 +57,19 @@ jobs:
           registry-url: https://registry.npmjs.org/
           cache: yarn
 
-      - name: Install and build
+      - name: Install dependencies
         working-directory: ./packages/cherry-markdown
-        run: yarn install && yarn build
-      
+        run: |
+          yarn install --frozen-lockfile --network-timeout 100000
+
+      - name: Lint code
+        working-directory: ./packages/cherry-markdown
+        run: yarn lint
+
+      - name: Build
+        working-directory: ./packages/cherry-markdown
+        run: yarn build
+
       - name: npm publish
         working-directory: ./packages/cherry-markdown
         run: npm publish
