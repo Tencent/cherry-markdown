@@ -570,49 +570,31 @@ div[data-type='codeBlock'] {
 
 .cherry-detail {
   details {
-    background: linear-gradient(145deg, var(--accordion-bg), rgba(255, 255, 255, 0.8));
+    background: var(--accordion-bg);
     border: 1px solid var(--accordion-border);
     border-radius: var(--accordion-radius);
     box-shadow: var(--accordion-shadow);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     margin-bottom: var(--accordion-margin);
+    transition: box-shadow 0.2s ease;
     overflow: hidden;
 
     &:hover {
       box-shadow: var(--accordion-shadow-hover);
-      transform: translateY(-2px);
     }
 
     summary {
       background: var(--accordion-summary-bg);
       color: var(--accordion-summary-color);
       padding: var(--accordion-summary-padding);
-      border-radius: calc(var(--accordion-radius) - 1px) calc(var(--accordion-radius) - 1px) 0 0;
       cursor: pointer;
-      font-weight: var(--accordion-summary-font-weight);
-      letter-spacing: var(--accordion-summary-letter-spacing);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 600;
+      transition: background-color 0.2s ease;
       position: relative;
       user-select: none;
-
-      &::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: var(--accordion-accent-width);
-        background: var(--accordion-accent-color);
-        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
+      border-radius: var(--accordion-radius) var(--accordion-radius) 0 0;
 
       &:hover {
         background: var(--accordion-summary-hover-bg);
-        padding-left: calc(var(--spacing-xl) + 4px);
-        
-        &::before {
-          width: var(--accordion-accent-width-hover);
-        }
       }
 
       &::marker {
@@ -622,22 +604,19 @@ div[data-type='codeBlock'] {
       &::after {
         content: '▼';
         position: absolute;
-        right: var(--spacing-lg);
+        right: var(--spacing-md);
         top: 50%;
         transform: translateY(-50%);
-        font-size: var(--font-size-xs);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: transform 0.2s ease;
       }
     }
 
-    &[open] {
-      summary {
-        border-radius: calc(var(--accordion-radius) - 1px) calc(var(--accordion-radius) - 1px) 0 0;
-        
-        &::after {
-          transform: translateY(-50%) rotate(180deg);
-        }
-      }
+    &[open] summary::after {
+      transform: translateY(-50%) rotate(180deg);
+    }
+
+    &:not([open]) summary {
+      border-radius: var(--accordion-radius);
     }
 
     .cherry-detail-body {
@@ -645,7 +624,8 @@ div[data-type='codeBlock'] {
       background: var(--accordion-body-bg);
       border-top: 1px solid var(--accordion-body-border);
       color: var(--accordion-body-color);
-      line-height: var(--accordion-body-line-height);
+      line-height: var(--line-height-relaxed);
+      border-radius: 0 0 var(--accordion-radius) var(--accordion-radius);
 
       > *:first-child {
         margin-top: 0;
@@ -660,47 +640,56 @@ div[data-type='codeBlock'] {
 
 .cherry-detail__multiple {
   border-radius: var(--accordion-radius);
-  overflow: hidden;
   box-shadow: var(--accordion-shadow);
-  background: var(--accordion-body-bg);
-  border: 1px solid var(--accordion-multiple-border);
+  background: var(--accordion-bg);
+  border: 1px solid var(--accordion-border);
+  overflow: hidden;
 
   details {
     margin-bottom: 0;
     border-radius: 0;
     border: none;
-    border-bottom: 1px solid var(--accordion-multiple-item-border);
+    border-bottom: 1px solid var(--accordion-body-border);
     box-shadow: none;
 
+    // 第一个手风琴项的标题有顶部圆角
+    &:first-child summary {
+      border-radius: var(--accordion-radius) var(--accordion-radius) 0 0;
+    }
+
+    // 最后一个手风琴项
     &:last-child {
       border-bottom: none;
+      
+      // 最后一个项目如果没有展开，底部有圆角
+      &:not([open]) summary {
+        border-radius: 0 0 var(--accordion-radius) var(--accordion-radius);
+      }
+      
+      // 最后一个项目展开时，标题变成直角
+      &[open] summary {
+        border-radius: 0;
+      }
+      
+      // 最后一个项目的内容区域底部有圆角
+      .cherry-detail-body {
+        border-radius: 0 0 var(--accordion-radius) var(--accordion-radius);
+      }
+    }
+
+    // 中间的项目保持直角
+    &:not(:first-child):not(:last-child) {
+      summary {
+        border-radius: 0;
+      }
+      
+      .cherry-detail-body {
+        border-radius: 0;
+      }
     }
 
     &:hover {
-      transform: none;
       box-shadow: none;
-    }
-
-    summary {
-      border-radius: 0;
-      background: var(--accordion-summary-bg);
-      
-      &::before {
-        width: var(--accordion-multiple-accent-width);
-      }
-      
-      &:hover {
-        background: var(--accordion-summary-hover-bg);
-        
-        &::before {
-          width: var(--accordion-multiple-accent-width-hover);
-        }
-      }
-    }
-
-    .cherry-detail-body {
-      border-top: 1px solid var(--accordion-body-border);
-      background: var(--accordion-body-bg);
     }
   }
 }

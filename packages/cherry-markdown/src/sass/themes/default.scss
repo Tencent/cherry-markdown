@@ -46,19 +46,15 @@
   /* ========== 手风琴组件变量覆盖 ========== */
   --accordion-bg: var(--oc-gray-0);
   --accordion-border: var(--oc-gray-3);
-  --accordion-shadow: 0 4px 12px rgba(107, 114, 128, 0.08);
-  --accordion-shadow-hover: 0 8px 25px rgba(107, 114, 128, 0.12);
+  --accordion-shadow: var(--shadow-sm);
+  --accordion-shadow-hover: var(--shadow-md);
   
-  --accordion-summary-bg: linear-gradient(135deg, var(--oc-gray-6), var(--oc-gray-7));
-  --accordion-summary-hover-bg: linear-gradient(135deg, var(--oc-gray-5), var(--oc-gray-6));
-  --accordion-accent-color: linear-gradient(to bottom, var(--oc-gray-4), var(--oc-gray-6));
+  --accordion-summary-bg: var(--oc-gray-6);
+  --accordion-summary-hover-bg: var(--oc-gray-5);
   
   --accordion-body-bg: var(--oc-gray-0);
   --accordion-body-border: var(--oc-gray-2);
   --accordion-body-color: var(--oc-gray-7);
-  
-  --accordion-multiple-border: var(--oc-gray-3);
-  --accordion-multiple-item-border: var(--oc-gray-2);
 }
 
 /** 预览区域样式 */

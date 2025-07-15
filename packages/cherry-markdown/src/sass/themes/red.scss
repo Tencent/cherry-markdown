@@ -3,7 +3,19 @@
  */
 
 .cherry.theme__red {
-  /* ========== 基础色彩变量覆盖 ========== */
+  /* ====  /* ========== 手风琴组件变量覆盖 ========== */
+  --accordion-bg: var(--oc-pink-0);
+  --accordion-border: var(--oc-pink-2);
+  --accordion-shadow: var(--shadow-sm);
+  --accordion-shadow-hover: var(--shadow-md);
+  
+  --accordion-summary-bg: var(--oc-pink-5);
+  --accordion-summary-hover-bg: var(--oc-pink-4);
+  
+  --accordion-body-bg: var(--oc-pink-0);
+  --accordion-body-border: var(--oc-pink-1);
+  --accordion-body-color: var(--oc-pink-9);
+  
   --primary-color: var(--oc-pink-7);
   --secondary-color: var(--oc-pink-0);
 
