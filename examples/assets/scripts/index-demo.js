@@ -365,21 +365,3 @@ fetch('./assets/markdown/basic.md').then((response) => response.text()).then((va
   var config = Object.assign({}, basicConfig, { value: value });
   window.cherry = new Cherry(config);
 });
-
-
-document.addEventListener('click', function(e) {
-  const icon = e.target.closest('.ch-icon');
-  if (!icon) return;
-
-  setTimeout(() => {
-    const check = icon.parentNode.querySelector('.ch-icon-check');
-    if (check) {
-      check.classList.remove('animating'); 
-      void check.offsetWidth;
-      check.classList.add('animating');
-      setTimeout(() => {
-        check.classList.remove('animating');
-      }, 400);
-    }
-  }, 10); 
-});

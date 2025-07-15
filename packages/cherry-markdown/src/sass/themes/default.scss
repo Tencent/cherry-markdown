@@ -1,60 +1,6 @@
 /*
  * 默认主题
  */
- .ch-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  cursor: pointer;
-  position: relative;
-  transition: border-color 0.2s, background 0.2s;
-  background: none;
-  overflow: visible;
-  border: 2px solid #ccc; 
-}
-
-.ch-icon-square {
-  background: none;
-  border: 2px solid #ccc;
-}
-
-.ch-icon-square::before {
-  display: none; 
-}
-
-.ch-icon-square:hover {
-  border-color: var(--primary-color, #3182f6);
-}
-
-.ch-icon-check {
-  background: var(--primary-color, #3182f6);
-  border: 2px solid var(--primary-color, #3182f6);
-  animation: checklist-check-pop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: visible;
-}
-
-.ch-icon-check::before {
-  content: "";
-  display: block;
-  width: 7px;
-  height: 4px;
-  border-left: 1.6px solid #fff;
-  border-bottom: 1.6px solid #fff;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -60%) rotate(-45deg);
-  z-index: 2;
-}
-
-.ch-icon-check:not(:hover) {
-  background: #ccc;
-  border: 2px solid #ccc;
-}
 
 .ch-icon-check::after {
   content: "";
