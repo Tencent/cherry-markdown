@@ -31,17 +31,17 @@ export default class Toc {
   }
 
   addTooltipsToTocItems() {
-  const items = document.querySelectorAll('.cherry-toc-one-a');
-  items.forEach(item => {
-    const title = item.textContent || item.getAttribute('data-title');
-    if (!title) return;
-    if (item.querySelector('.tooltip')) return; // 避免重复插入
+    const items = document.querySelectorAll('.cherry-toc-one-a');
+    items.forEach((item) => {
+      const title = item.textContent || item.getAttribute('data-title');
+      if (!title) return;
+      if (item.querySelector('.tooltip')) return; // 避免重复插入
 
-    const tooltip = document.createElement('div');
-    tooltip.className = 'tooltip';
-    tooltip.textContent = title;
-    item.appendChild(tooltip);
-  });
+      const tooltip = document.createElement('div');
+      tooltip.className = 'tooltip';
+      tooltip.textContent = title;
+      item.appendChild(tooltip);
+    });
   }
 
   init() {
