@@ -338,6 +338,7 @@
 
   .check-list-item {
     list-style: none;
+    transition: all 0.3s ease;
   
     .ch-icon {
       margin: 0 6px 0 -20px;
@@ -380,6 +381,50 @@
         }
       }
     }
+
+    // 勾选状态下的文本样式
+    &:has(.ch-icon-check) {
+      p {
+        color: var(--checklist-completed-text-color, #9ca3af);
+        text-decoration: line-through;
+        text-decoration-color: var(--checklist-completed-line-color, #d1d5db);
+        opacity: 0.7;
+        transition: all 0.3s ease;
+        padding: 2px 8px;
+        border-radius: 4px;
+        
+        // 为文本添加淡入动画
+        animation: checklist-text-complete 0.5s ease-out;
+      }
+    }
+
+      // 未勾选状态下的文本样式（确保清除勾选样式）
+    &:has(.ch-icon-square) {
+      p {
+        color: var(--md-paragraph-color);
+        text-decoration: none;
+        opacity: 1;
+        background: none;
+        transition: all 0.3s ease;
+      }
+    }
+
+    // 文本完成动画
+    @keyframes checklist-text-complete {
+      0% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      30% {
+        opacity: 0.5;
+        transform: translateX(2px);
+      }
+      100% {
+        opacity: 0.7;
+        transform: translateX(0);
+      }
+    }
+
   }
 
   // 动画关键帧
