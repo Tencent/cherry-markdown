@@ -585,7 +585,7 @@ div[data-type='codeBlock'] {
     summary {
       background: var(--accordion-summary-bg);
       color: var(--accordion-summary-color);
-      padding: var(--spacing-md) var(--spacing-lg);
+      padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) calc(var(--spacing-lg) + var(--spacing-xl));
       cursor: pointer;
       font-weight: 600;
       transition: background-color 0.2s ease;
@@ -601,17 +601,17 @@ div[data-type='codeBlock'] {
         content: '';
       }
 
-      &::after {
+      &::before {
         content: '▼';
         position: absolute;
-        right: var(--spacing-md);
+        left: var(--spacing-md);
         top: 50%;
         transform: translateY(-50%);
         transition: transform 0.2s ease;
       }
     }
 
-    &[open] summary::after {
+    &[open] summary::before {
       transform: translateY(-50%) rotate(180deg);
     }
 
