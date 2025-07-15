@@ -75,6 +75,11 @@ export default class Cherry extends CherryStatic {
      */
     this.options = mergeWith({}, defaultConfigCopy, options, customizer);
 
+    /** @type {import('./utils/cm-search-replace').default} SearchBox 实例 */
+    this.searchBoxInstance = null;
+    /** @type {boolean} 是否初始化SearchBox */
+    this.searchBoxInit = false;
+
     this.storageFloatPreviewerWrapData = {
       x: 50,
       y: 58,
