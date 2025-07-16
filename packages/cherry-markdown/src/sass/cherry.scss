@@ -167,7 +167,6 @@
   align-items: baseline;
   justify-content: space-between;
   padding: var(--toolbar-padding);
-  min-height: var(--toolbar-height);
   font-size: var(--toolbar-font-size);
   line-height: 2.8;
   flex-basis: 100%;
@@ -203,7 +202,6 @@
   .toolbar-right {
     display: flex;
     align-items: center;
-    min-height: var(--toolbar-height);
     flex-wrap: wrap;
     flex: 1;
   }
