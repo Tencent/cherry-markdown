@@ -84,9 +84,9 @@ export default {
   theme: '主题', // 导出长图
   panel: '面板', // 导出长图
   detail: '手风琴', // 手风琴
-  'H1 Heading': 'H1 一级标题',
-  'H2 Heading': 'H2 二级标题',
-  'H3 Heading': 'H3 三级标题',
+  heading1: '一级标题',
+  heading2: '二级标题',
+  heading3: '三级标题',
   complement: '续写',
   summary: '总结',
   justify: '对齐方式',
@@ -99,8 +99,11 @@ export default {
   alignRight: '右对齐',
   alignJustify: '两端对齐',
   publish: '发布',
-  fontColor: '文本颜色',
-  fontBgColor: '背景颜色',
+  colorPickerText: '文字',
+  colorPickerBackground: '背景',
+  colorPickerClear: '清除颜色',
+  colorPickerRecentColors: '最近使用颜色',
+  colorPickerPresetColors: '系统预设颜色',
   small: '小',
   medium: '中',
   large: '大',

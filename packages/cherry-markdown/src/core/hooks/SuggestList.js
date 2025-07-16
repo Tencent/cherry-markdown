@@ -35,56 +35,56 @@ export const suggesterKeywords = '/·￥、：“”【】（）《》`'.concat(
 const SystemSuggestList = [
   {
     icon: 'h1',
-    label: 'H1 Heading',
+    label: 'heading1',
     keyword: 'head1',
     value: '# ',
   },
   {
     icon: 'h2',
-    label: 'H2  Heading',
+    label: 'heading2',
     keyword: 'head2',
     value: '## ',
   },
   {
     icon: 'h3',
-    label: 'H3  Heading',
+    label: 'heading3',
     keyword: 'head3',
     value: '### ',
   },
   {
     icon: 'table',
-    label: 'Table',
+    label: 'table',
     keyword: 'table',
     value: '| Header | Header | Header |\n| --- | --- | --- |\n| Content | Content | Content |\n',
   },
   {
     icon: 'code',
-    label: 'Code',
+    label: 'code',
     keyword: 'code',
     value: '```\n\n```\n',
   },
   {
     icon: 'link',
-    label: 'Link',
+    label: 'link',
     keyword: 'link',
     value: `[title](https://url)`,
     selection: { from: 'title](https://url)'.length, to: '](https://url)'.length },
   },
   {
     icon: 'checklist',
-    label: 'Checklist',
+    label: 'checklist',
     keyword: 'checklist',
     value: `- [ ] item\n- [x] item`,
   },
   {
     icon: 'tips',
-    label: 'Panel',
+    label: 'panel',
     keyword: 'panel tips info warning danger success',
     value: `::: primary title\ncontent\n:::\n`,
   },
   {
     icon: 'insertFlow',
-    label: 'Detail',
+    label: 'detail',
     keyword: 'detail',
     value: `+++ 点击展开更多\n内容\n++- 默认展开\n内容\n++ 默认收起\n内容\n+++\n`,
   },
@@ -212,7 +212,7 @@ const MoreSuggestList = [
   },
   {
     icon: 'link',
-    label: 'Link',
+    label: 'link',
     keyword: '【】',
     value: `[title](https://url)`,
     selection: { from: 'title](https://url)'.length, to: '](https://url)'.length },
@@ -313,14 +313,15 @@ const CodeLangSuggestList = (() => {
 const OtherSuggestList = HalfWidthSuggestList.concat(MoreSuggestList).concat(CodeLangSuggestList);
 
 export function allSuggestList(keyword, locales) {
-  const systemSuggestList = [].concat(SystemSuggestList);
-  const otherSuggestList = [].concat(OtherSuggestList);
-  systemSuggestList.forEach((item) => {
-    item.label = locales[item.label] || item.label;
-  });
-  otherSuggestList.forEach((item) => {
-    item.label = locales[item.label] || item.label;
-  });
+  const systemSuggestList = SystemSuggestList.map((item) => ({
+    ...item,
+    label: locales[item.label] || item.label,
+  }));
+  const otherSuggestList = OtherSuggestList.map((item) => ({
+    ...item,
+    label: locales[item.label] || item.label,
+  }));
+
   if (keyword[0] === '/' || keyword[0] === '、' || addonsKeywords.includes(keyword[0])) {
     systemSuggestList.forEach((item) => {
       item.keyword = ''.concat(keyword[0], item.keyword);

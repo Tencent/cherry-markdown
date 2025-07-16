@@ -11,4 +11,4 @@ export const previewOnlySidebar = () => {
     pen.className = pen.className.replace('active', '');
     pen.innerHTML = '<i class="ch-icon ch-icon-pen"></i>';
   }
-}
+};
