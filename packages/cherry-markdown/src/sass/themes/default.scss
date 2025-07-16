@@ -13,14 +13,6 @@
   --base-previewer-bg: var(--oc-white);
   --base-border-color: var(--oc-gray-3);
 
-  /* ========== 工具栏相关变量 ========== */
-  --toolbar-bg: #1E314B;
-  --toolbar-btn-color: var(--oc-gray-4);
-  --toolbar-btn-hover-bg: var(--oc-gray-2);
-  --toolbar-btn-hover-color: var(--oc-blue-4);
-  --toolbar-split-color: var(--oc-blue-5);
-
-  /* ========== 编辑器相关变量 ========== */
   --editor-header-color: var(--primary-color);
   --editor-string-color: var(--oc-gray-7);
   --editor-comment-color: var(--primary-color);
@@ -143,7 +135,131 @@
 
   /** 目录 */
   .toc {
-    .toc-title {}
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(147, 51, 234, 0.03));
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 24px 0;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary-color), var(--oc-blue-4), var(--oc-purple-4));
+      border-radius: 16px 16px 0 0;
+    }
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.12);
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(147, 51, 234, 0.05));
+    }
+
+    .toc-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--md-heading-color);
+      margin-bottom: 16px;
+      text-align: center;
+      position: relative;
+      padding-bottom: 8px;
+      letter-spacing: 0.5px;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 30px;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-color), var(--oc-blue-4));
+        border-radius: 1px;
+      }
+    }
+
+    .toc-li {
+      margin: 4px 0;
+      transition: all 0.2s ease;
+
+      a {
+        display: block;
+        padding: 8px 14px;
+        border-radius: 6px;
+        text-decoration: none;
+        color: var(--md-paragraph-color);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        border-left: 2px solid transparent;
+        font-size: 0.9rem;
+        line-height: 1.4;
+
+        &:hover {
+          background: rgba(59, 130, 246, 0.06);
+          color: var(--primary-color);
+          border-left-color: var(--primary-color);
+          transform: translateX(3px);
+          box-shadow: 0 1px 4px rgba(59, 130, 246, 0.12);
+        }
+
+        &.level-1 {
+          font-weight: 600;
+          font-size: 1rem;
+          margin-left: 0;
+          padding: 10px 14px;
+        }
+
+        &.level-2 {
+          font-weight: 500;
+          font-size: 0.9rem;
+          margin-left: 16px;
+          opacity: 0.9;
+          padding: 7px 12px;
+        }
+
+        &.level-3 {
+          font-weight: 400;
+          font-size: 0.85rem;
+          margin-left: 32px;
+          opacity: 0.8;
+          padding: 6px 10px;
+        }
+
+        &.level-4 {
+          font-weight: 400;
+          font-size: 0.8rem;
+          margin-left: 48px;
+          opacity: 0.7;
+          padding: 5px 8px;
+        }
+
+        &.level-5 {
+          font-weight: 400;
+          font-size: 0.75rem;
+          margin-left: 64px;
+          opacity: 0.6;
+          padding: 4px 6px;
+        }
+
+        &.level-6 {
+          font-weight: 400;
+          font-size: 0.7rem;
+          margin-left: 80px;
+          opacity: 0.5;
+          padding: 3px 4px;
+        }
+      }
+    }
+  
+  .toc-title {}
 
     .toc-li {
       .level-1 {}
