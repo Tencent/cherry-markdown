@@ -43,3 +43,38 @@
   --md-hr-border: var(--oc-blue-5);
   --md-table-border: var(--oc-blue-5);
 }
+
+/** 预览区域样式 */
+.cherry-markdown.theme__light {
+  /** 目录 */
+  .toc {
+    // 主题特定的背景和边框
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(59, 130, 246, 0.08));
+    border: 1px solid rgba(37, 99, 235, 0.25);
+    box-shadow: 0 2px 12px rgba(37, 99, 235, 0.15), 0 1px 3px rgba(37, 99, 235, 0.1);
+
+    &::before {
+      background: linear-gradient(90deg, var(--oc-blue-6), var(--oc-blue-5), var(--oc-cyan-5));
+    }
+
+    &:hover {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(59, 130, 246, 0.12));
+      box-shadow: 0 4px 20px rgba(37, 99, 235, 0.2), 0 2px 6px rgba(37, 99, 235, 0.15);
+    }
+
+    .toc-title {
+      &::after {
+        background: linear-gradient(90deg, var(--oc-blue-6), var(--oc-blue-5));
+      }
+    }
+
+    .toc-li {
+      a {
+        &:hover {
+          background: rgba(37, 99, 235, 0.15);
+          box-shadow: 0 1px 4px rgba(37, 99, 235, 0.2);
+        }
+      }
+    }
+  }
+}

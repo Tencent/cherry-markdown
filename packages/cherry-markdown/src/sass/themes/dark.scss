@@ -123,19 +123,33 @@
 .cherry-markdown.theme__dark {
   /** 目录 */
   .toc {
-    border: 1px solid var(--md-hr-border);
-    margin-top: 15px;
-    margin-bottom: 15px;
-    margin-right: 15px;
+    // 主题特定的背景和边框
+    background: linear-gradient(135deg, rgba(251, 146, 60, 0.08), rgba(251, 191, 36, 0.08));
+    border: 1px solid rgba(251, 146, 60, 0.25);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.2);
+
+    &::before {
+      background: linear-gradient(90deg, var(--primary-color), var(--oc-orange-4), var(--oc-yellow-4));
+    }
+
+    &:hover {
+      background: linear-gradient(135deg, rgba(251, 146, 60, 0.12), rgba(251, 191, 36, 0.12));
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
 
     .toc-title {
-      padding: 15px;
-      margin-bottom: 15px;
-      border-bottom: 1px solid var(--md-hr-border);
+      &::after {
+        background: linear-gradient(90deg, var(--primary-color), var(--oc-orange-4));
+      }
     }
 
     .toc-li {
-      padding: 0 20px;
+      a {
+        &:hover {
+          background: rgba(251, 146, 60, 0.15);
+          box-shadow: 0 1px 4px rgba(251, 146, 60, 0.2);
+        }
+      }
     }
   }
 
