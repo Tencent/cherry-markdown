@@ -43,3 +43,281 @@
   --md-hr-border: var(--oc-blue-5);
   --md-table-border: var(--oc-blue-5);
 }
+
+/* ========== 搜索框样式 ========== */
+.cherry.theme__light {
+  .ace_search {
+    background: var(--search-bg);
+    border: 1px solid var(--search-border);
+    border-radius: 12px;
+    box-shadow: var(--search-shadow);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 12px;
+    max-width: 400px;
+    font-size: 13px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: searchBoxSlideIn 0.3s ease-out;
+
+    &.left {
+      border-radius: 0 12px 12px 0;
+      animation: searchBoxSlideInLeft 0.3s ease-out;
+    }
+
+    &.right {
+      border-radius: 12px 0 12px 12px;
+      animation: searchBoxSlideInRight 0.3s ease-out;
+    }
+  }
+
+  .ace_search_form, .ace_replace_form {
+    border: 1px solid var(--search-field-border);
+    border-radius: 8px;
+    background: var(--search-field-bg);
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+
+    &:focus-within {
+      border-color: var(--search-field-focus-border);
+      box-shadow: var(--search-field-focus-shadow);
+      transform: translateY(-1px);
+    }
+
+    &.ace_nomatch {
+      border-color: var(--oc-red-5);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+      animation: searchShake 0.4s ease-in-out;
+    }
+  }
+
+  .ace_search_field {
+    background: transparent;
+    border: none;
+    height: 36px;
+    padding: 0 12px;
+    font-size: 13px;
+    color: var(--base-font-color);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    transition: all 0.2s ease;
+
+    &::placeholder {
+      color: var(--oc-blue-4);
+      font-style: italic;
+    }
+
+    &:focus {
+      outline: none;
+      background: rgba(37, 99, 235, 0.02);
+    }
+  }
+
+  .ace_searchbtn, .ace_replacebtn {
+    background: var(--search-btn-bg);
+    border: none;
+    border-left: 1px solid var(--search-field-border);
+    height: 36px;
+    padding: 0 12px;
+    color: var(--search-btn-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background: var(--search-btn-hover-bg);
+      color: var(--search-btn-hover-color);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      background: var(--search-btn-active-bg);
+      color: var(--search-btn-active-color);
+      transform: translateY(0);
+    }
+
+    &:last-child {
+      border-radius: 0 7px 7px 0;
+    }
+
+    &:disabled {
+      background: var(--oc-blue-2);
+      color: var(--oc-blue-4);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+      transition: fill 0.2s ease;
+    }
+  }
+
+  .ace_searchbtn_close {
+    background: transparent;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    color: var(--oc-blue-5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 4px;
+
+    &:hover {
+      background: var(--search-close-hover-bg);
+      color: var(--search-close-hover-color);
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &::after {
+      content: "×";
+      font-size: 18px;
+      line-height: 1;
+    }
+  }
+
+  .ace_search_options {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .ace_search_counter {
+    color: var(--search-counter-color);
+    font-size: 12px;
+    padding: 4px 8px;
+    background: var(--oc-blue-1);
+    border-radius: 6px;
+    font-weight: 500;
+  }
+
+  .ace_button {
+    background: var(--search-btn-bg);
+    border: 1px solid var(--search-field-border);
+    border-radius: 6px;
+    color: var(--search-btn-color);
+    cursor: pointer;
+    padding: 6px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    user-select: none;
+
+    &:hover {
+      background: var(--search-btn-hover-bg);
+      color: var(--search-btn-hover-color);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      background: var(--search-btn-active-bg);
+      color: var(--search-btn-active-color);
+      transform: translateY(0);
+    }
+
+    &.replace_toggle {
+      background: var(--primary-color);
+      color: var(--oc-white);
+      border-color: var(--primary-color);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+
+      &:hover {
+        background: var(--oc-blue-7);
+        border-color: var(--oc-blue-7);
+      }
+    }
+  }
+
+  /* 搜索结果高亮样式 */
+  .ace_search_highlight {
+    background: var(--search-highlight-bg);
+    border: 1px solid var(--search-highlight-border);
+    border-radius: 3px;
+    animation: searchHighlightPulse 1s ease-in-out;
+  }
+
+  .ace_search_match {
+    background: var(--search-match-bg);
+    border-radius: 3px;
+    animation: searchMatchBlink 0.5s ease-in-out;
+  }
+
+  /* 动画效果 */
+  @keyframes searchBoxSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes searchBoxSlideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes searchBoxSlideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes searchShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+  }
+
+  @keyframes searchHighlightPulse {
+    0% { 
+      background: var(--search-highlight-bg);
+      transform: scale(1);
+    }
+    50% { 
+      background: var(--search-match-bg);
+      transform: scale(1.02);
+    }
+    100% { 
+      background: var(--search-highlight-bg);
+      transform: scale(1);
+    }
+  }
+
+  @keyframes searchMatchBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+}

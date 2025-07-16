@@ -182,11 +182,26 @@
     }
   }
   @keyframes changeBgColor {
-    0% { background-color: #ffffcc88; }
-    60% { background-color: #ffffcc88; }
-    100% { background-color: #ffffcc00; }
+    0% { 
+      background-color: var(--search-highlight-bg, #ffffcc88);
+      transform: scale(1);
+    }
+    30% { 
+      background-color: var(--search-match-bg, #ffffcc88);
+      transform: scale(1.01);
+    }
+    60% { 
+      background-color: var(--search-highlight-bg, #ffffcc88);
+      transform: scale(1);
+    }
+    100% { 
+      background-color: transparent;
+      transform: scale(1);
+    }
   }
   .cherry-highlight-line {
-    animation: changeBgColor 3s;
+    animation: changeBgColor 3s ease-in-out;
+    border-radius: 4px;
+    transition: all 0.3s ease;
   }
 }
