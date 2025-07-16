@@ -25,8 +25,8 @@ jobs:
         uses: changesets/action@v1
         with:
           version: yarn changeset-version
-          title: "chore: release"
-          commit: "chore: release"
+          title: 'chore: release'
+          commit: 'chore: release'
           publish: yarn changeset tag
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
@@ -40,7 +40,7 @@ jobs:
           # Debugging output
           echo "publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}"
           echo "clientVersion: $clientVersion"
- 
+
   build-core-release:
     needs: release
     if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"cherry-markdown"') }}

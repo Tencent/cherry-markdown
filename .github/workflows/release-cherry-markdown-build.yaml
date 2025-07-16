@@ -1,4 +1,4 @@
-name: "Build Cherry Markdown Release"
+name: 'Build Cherry Markdown Release'
 
 on:
   workflow_call:
@@ -12,7 +12,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          registry-url: "https://registry.npmjs.org"
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: |

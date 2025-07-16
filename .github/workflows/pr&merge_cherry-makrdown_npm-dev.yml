@@ -3,8 +3,8 @@ name: PR Merge cherry-markdown Dev NPM Preview
 on:
   pull_request_target:
     types: [closed]
-    paths: 
-      - "packages/cherry-markdown/**"
+    paths:
+      - 'packages/cherry-markdown/**'
 
 permissions:
   contents: read
@@ -60,7 +60,7 @@ jobs:
       - name: Install and build
         working-directory: ./packages/cherry-markdown
         run: yarn install && yarn build
-      
+
       - name: npm publish
         working-directory: ./packages/cherry-markdown
         run: npm publish
