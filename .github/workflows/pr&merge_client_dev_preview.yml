@@ -3,8 +3,8 @@ name: PR Merge Client Dev Preview
 on:
   pull_request_target:
     types: [closed]
-    paths: 
-      - "packages/client/**"
+    paths:
+      - 'packages/client/**'
 
 permissions:
   contents: read
@@ -12,7 +12,7 @@ permissions:
   actions: read
 
 jobs:
- client-preview:
+  client-preview:
     # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
     if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true
     runs-on: ${{ matrix.platform }}
@@ -22,13 +22,13 @@ jobs:
         include:
           - platform: macos-latest
             target: aarch64-apple-darwin
-            args: "--target aarch64-apple-darwin"
+            args: '--target aarch64-apple-darwin'
             path_patterns: |
               ./packages/clientsrc-tauri/target/**/release/bundle/dmg/*.dmg
               ./packages/clientsrc-tauri/target/**/release/bundle/macos/*.app
           - platform: macos-latest
             target: x86_64-apple-darwin
-            args: "--target x86_64-apple-darwin"
+            args: '--target x86_64-apple-darwin'
             path_patterns: |
               ./packages/clientsrc-tauri/target/**/release/bundle/dmg/*.dmg
               ./packages/clientsrc-tauri/target/**/release/bundle/macos/*.app
@@ -97,7 +97,7 @@ jobs:
           ARTIFACT_URL: ${{ steps.upload-artifact.outputs.artifact-url }}
           NAME: ${{ steps.extract-package.outputs.name }}
           VERSION: ${{ steps.extract-package.outputs.version }}
-          PLATFORM: ${{ matrix.platform }}  
+          PLATFORM: ${{ matrix.platform }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

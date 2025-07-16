@@ -1,4 +1,4 @@
-name: "Build Client Release"
+name: 'Build Client Release'
 
 on:
   workflow_call:
@@ -16,16 +16,16 @@ jobs:
         include:
           - platform: macos-latest
             target: aarch64-apple-darwin
-            args: "--target aarch64-apple-darwin"
+            args: '--target aarch64-apple-darwin'
           - platform: macos-latest
             target: x86_64-apple-darwin
-            args: "--target x86_64-apple-darwin"
+            args: '--target x86_64-apple-darwin'
           - platform: ubuntu-latest
-            target: ""
-            args: ""
+            target: ''
+            args: ''
           - platform: windows-latest
-            target: ""
-            args: ""
+            target: ''
+            args: ''
 
     runs-on: ${{ matrix.platform }}
 
@@ -67,16 +67,16 @@ jobs:
         with:
           files: |
             packages/client/src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
-          release-tag: "@cherry-markdown/client@${{ inputs.client_version }}"
+          release-tag: '@cherry-markdown/client@${{ inputs.client_version }}'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Upload macOS Release Asset (x86_64-apple-darwin)
         if: matrix.platform == 'macos-latest' &&  matrix.target == 'x86_64-apple-darwin'
         uses: AButler/upload-release-assets@v3.0
         with:
           files: |
             packages/client/src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*.dmg
-          release-tag: "@cherry-markdown/client@${{ inputs.client_version }}"
+          release-tag: '@cherry-markdown/client@${{ inputs.client_version }}'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Linux Release Asset
@@ -87,7 +87,7 @@ jobs:
             packages/client/src-tauri/target/release/bundle/deb/*.deb;
             packages/client/src-tauri/target/release/bundle/rpm/*.rpm;
             packages/client/src-tauri/target/release/bundle/appimage/*.AppImage
-          release-tag: "@cherry-markdown/client@${{ inputs.client_version }}"
+          release-tag: '@cherry-markdown/client@${{ inputs.client_version }}'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Windows Release Asset
@@ -97,5 +97,5 @@ jobs:
           files: |
             packages/client/src-tauri/target/release/bundle/msi/*.msi;
             packages/client/src-tauri/target/release/bundle/nsis/*.exe
-          release-tag: "@cherry-markdown/client@${{ inputs.client_version }}"
+          release-tag: '@cherry-markdown/client@${{ inputs.client_version }}'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
