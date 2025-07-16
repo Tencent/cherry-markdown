@@ -57,18 +57,9 @@ jobs:
           registry-url: https://registry.npmjs.org/
           cache: yarn
 
-      - name: Install dependencies
+      - name: Install and build
         working-directory: ./packages/cherry-markdown
-        run: |
-          yarn install --frozen-lockfile --network-timeout 100000
-
-      - name: Lint code
-        working-directory: ./packages/cherry-markdown
-        run: yarn lint
-
-      - name: Build
-        working-directory: ./packages/cherry-markdown
-        run: yarn build
+        run: yarn install && yarn build
 
       - name: npm publish
         working-directory: ./packages/cherry-markdown

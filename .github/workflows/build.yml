@@ -25,10 +25,13 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
+
       - name: Install dependencies
         run: |
-          yarn install
+          yarn
+
       - name: Eslint
         run: yarn lint:all
+
       - name: Build
         run: yarn build

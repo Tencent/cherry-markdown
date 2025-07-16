@@ -38,17 +38,10 @@ jobs:
           jq '.dependencies["cherry-markdown"] = .dependencies["cherry-markdown-core"] | del(.dependencies["cherry-markdown"])' package.json > temp.json && mv temp.json package.json
           jq '.name = "cherry-markdown"' package.json > temp.json && mv temp.json package.json
 
-      - name: Install dependencies
+      - name: Build VSCode Plugin
         run: |
           yarn global add vsce
           yarn --network-timeout 100000
-
-      - name: Lint code
-        working-directory: ./packages/vscodePlugin
-        run: yarn lint
-
-      - name: Build VSCode Plugin
-        run: |
           yarn build
           yarn build:vscodePlugin
 

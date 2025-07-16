@@ -17,13 +17,6 @@ jobs:
       - name: Install dependencies
         run: |
           yarn
-
-      - name: Lint code
-        working-directory: ./packages/cherry-markdown
-        run: yarn lint
-
-      - name: Build Cherry Markdown
-        run: |
           yarn build
 
       - name: Publish cherry-markdown
