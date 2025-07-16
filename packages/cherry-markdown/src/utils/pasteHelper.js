@@ -170,6 +170,8 @@ const pasteHelper = {
   initBubble() {
     if (this.bubbleDom) {
       this.bubbleDom.setAttribute('data-type', 'md');
+      this.switchMd?.classList.add('active');
+      this.switchText?.classList.remove('active');
       return true;
     }
     const dom = createElement('div', 'cherry-bubble cherry-bubble--centered cherry-switch-paste');
@@ -185,19 +187,25 @@ const pasteHelper = {
     });
     switchMd.innerText = 'Markdown';
 
-    const switchBG = createElement('span', 'switch-btn--bg');
-
     this.bubbleDom = dom;
     this.switchText = switchText;
     this.switchMd = switchMd;
-    this.switchBG = switchBG;
     this.bubbleDom.appendChild(switchText);
     this.bubbleDom.appendChild(switchMd);
-    this.bubbleDom.appendChild(switchBG);
     this.bubbleDom.setAttribute('data-type', 'md');
     this.codemirror.getWrapperElement().appendChild(this.bubbleDom);
     this.switchMd.addEventListener('click', this.switchMDClick.bind(this));
     this.switchText.addEventListener('click', this.switchTextClick.bind(this));
+
+    if (this.getTypeFromLocalStorage() === 'text') {
+      this.switchText.classList.add('active');
+      this.switchMd.classList.remove('active');
+      this.bubbleDom.setAttribute('data-type', 'text');
+    } else {
+      this.switchMd.classList.add('active');
+      this.switchText.classList.remove('active');
+      this.bubbleDom.setAttribute('data-type', 'md');
+    }
   },
 
   switchMDClick(event) {
@@ -210,6 +218,8 @@ const pasteHelper = {
     this.codemirror.doc.replaceSelection(this.md);
     this.setSelection();
     this.showBubble();
+    this.switchMd.classList.add('active');
+    this.switchText.classList.remove('active');
     this.noHide = false;
   },
   switchTextClick(event) {
@@ -222,6 +232,8 @@ const pasteHelper = {
     this.codemirror.doc.replaceSelection(this.html);
     this.setSelection();
     this.showBubble();
+    this.switchText.classList.add('active');
+    this.switchMd.classList.remove('active');
     this.noHide = false;
   },
 
