@@ -37,7 +37,6 @@ export function makeChecklist(text) {
     return `${pre}${checkHtml}`;
   });
 }
-
 // 缩进处理
 function handleIndent(str, node) {
   const indentRegex = /^(\t|[ ])/;

@@ -12,6 +12,15 @@
   --base-previewer-bg: var(--secondary-color);
   --base-border-color: var(--oc-green-8);
 
+  /* ========== 检查清单相关变量 ========== */
+  --checklist-firework-color: rgba(64, 184, 166, 0.7);
+  --checklist-check-color: var(--primary-color);
+  --checklist-square-color: var(--base-border-color);
+  --checklist-hover-bg: rgba(64, 184, 166, 0.1);
+  --checklist-completed-text-color: var(--oc-green-6);
+  --checklist-completed-line-color: var(--oc-green-5);
+  --checklist-completed-bg: rgba(64, 184, 166, 0.05);
+
   /* ========== 工具栏相关变量 ========== */
   --toolbar-bg: var(--oc-white);
   --toolbar-btn-color: var(--primary-color);
