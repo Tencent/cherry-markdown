@@ -48,21 +48,26 @@
   --md-table-border: var(--oc-gray-5);
 
   /* ========== 信息面板 相关变量 ========== */
-  --panel-primary-bg: #2a3e45;
-  --panel-primary-color: #bed0eb;
-  --panel-primary-border-left: #508690;
-  --panel-info-bg: #302757;
-  --panel-info-color: #EDE7F6;
-  --panel-info-border-left: #775da8;
-  --panel-warning-bg: #2b240c;
-  --panel-warning-color: #FFF7E6;
-  --panel-warning-border-left: #998736;
-  --panel-danger-bg: #4e171c;
-  --panel-danger-color: #F6BBC1;
-  --panel-danger-border-left: #aa525b;
-  --panel-success-bg: #012004;
-  --panel-success-color: #e9fdf5;
-  --panel-success-border-left: #016F03;
+  --panel-primary-bg: rgba(49, 53, 100, 0.5);
+  --panel-primary-color: #95a4bb;
+  --panel-primary-border-left: rgba(45, 45, 138, 0.7);
+  --panel-primary-shadow:rgba(67, 155, 199, 0.5);
+  --panel-info-bg: rgba(90, 57, 89, 0.5);
+  --panel-info-color: #9D646A;
+  --panel-info-border-left: rgba(99, 35, 107, 0.7);
+  --panel-info-shadow: rgba(208, 41, 230, 0.7);
+  --panel-warning-bg: rgba(93, 79, 38, 0.3);
+  --panel-warning-color:#BD8168;
+  --panel-warning-border-left: rgba(85, 62, 22, 0.7);
+  --panel-warning-shadow:  rgba(102, 102, 34, 0.6);
+  --panel-danger-bg:  rgba(97, 48, 48, 0.4);
+  --panel-danger-color: #b89296;
+  --panel-danger-border-left: rgba(138, 49, 67, 0.7);
+  --panel-danger-shadow: rgba(237, 26, 26, 0.5);
+  --panel-success-bg:  rgba(32, 75, 42, 0.5);
+  --panel-success-color: #89B583;
+  --panel-success-border-left: rgba(48, 93, 87, 0.75);
+  --panel-success-shadow: rgba(26, 237, 58, 0.5);
 
   /* 目录区域样式 */
   .cherry-flex-toc {
