@@ -660,12 +660,12 @@
     border-radius: 5px;
     transition: all 0.3s;
     z-index: 12;
-    color: #3582fb;
-    background-color: #d7e6fe;
+    color: var(--toolbar-btn-color);
+    background-color:var(--toolbar-bg);
     display: inline-block;
     &:hover {
-      color: #eee;
-      background-color: #3582fb;
+      color: var( --toolbar-btn-hover-color);
+      background-color: var(--toolbar-btn-hover-bg);
       border-color: #eee;
     }
   }
