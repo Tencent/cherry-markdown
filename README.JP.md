@@ -6,7 +6,12 @@
 
 日本語 | [English](./README.md) | [简体中文](./README.CN.md)
 
+## 紹介
+
+Cherry Markdown Editorは、Javascriptで書かれたMarkdownエディタです。Cherry Markdown Editorは、すぐに使える、軽量でシンプル、拡張が容易などの利点があります。ブラウザやサーバー（NodeJs）で動作します。
+
 ### ドキュメント
+
 - [初識cherry markdown 編集器](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)
 - [hello world](https://github.com/Tencent/cherry-markdown/wiki/hello-world)
 - [画像&ファイルアップロードインターフェースの設定](https://github.com/Tencent/cherry-markdown/wiki/%E9%85%8D%E7%BD%AE%E5%9B%BE%E7%89%87&%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E6%8E%A5%E5%8F%A3)
@@ -33,10 +38,6 @@
 - [ストリーム入力モード（AIチャートシナリオ）](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)
 
 -----
-
-## 紹介
-
-Cherry Markdown Editorは、Javascriptで書かれたMarkdownエディタです。Cherry Markdown Editorは、すぐに使える、軽量でシンプル、拡張が容易などの利点があります。ブラウザやサーバー（NodeJs）で動作します。
 
 ### **すぐに使える**
 
@@ -233,6 +234,7 @@ registerPlugin().then(() => {
 ```
 
 ## 設定
+
 `/src/Cherry.config.js`を参照するか、[こちら](https://github.com/Tencent/cherry-markdown/wiki/%E9%85%8D%E7%BD%AE%E9%A1%B9%E5%85%A8%E8%A7%A3)をクリックしてください。
 
 ## 例
@@ -240,14 +242,17 @@ registerPlugin().then(() => {
 詳細な例については[こちら](https://github.com/Tencent/cherry-markdown/wiki)をクリックしてください。
 
 ### クライアント
+
 開発中です。詳細は`/client/`ディレクトリを参照してください。
 
 ## 拡張
 
 ### カスタムシンタックス
+
 [こちら](https://github.com/Tencent/cherry-markdown/wiki/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E6%B3%95)をクリックしてください。
 
 ### カスタムツールバー
+
 [こちら](https://github.com/Tencent/cherry-markdown/wiki/%E8%B0%83%E6%95%B4%E5%B7%A5%E5%85%B7%E6%A0%8F)をクリックしてください。
 
 ## ユニットテスト
@@ -273,7 +278,7 @@ Jestはそのアサーション、非同期サポート、スナップショッ�
 
 この場合、Jestは`Cherry.makeHtml(" \tfoo\tbaz\t\tbim\n")`によって生成されたHTMLを期待される結果`"<pre><code>foo\tbaz\t \tbim\n</code></pre>\n"`と比較します。Cherry Markdownのマッチャーは`data-line`などのプライベート属性を無視しています。
 
-CommonMarkの仕様とスイートは次の場所から取得できます：https://spec.commonmark.org/ 。
+CommonMarkの仕様とスイートは次の場所から取得できます：[commonmark.org](https://spec.commonmark.org/) 。
 
 ### スナップショットテスト
 
@@ -291,4 +296,4 @@ CommonMarkの仕様とスイートは次の場所から取得できます：http
 
 ## ライセンス
 
-Apache-2.0
+[Apache-2.0](./LICENSE)
