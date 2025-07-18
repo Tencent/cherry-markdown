@@ -8,7 +8,7 @@
 
 ## 紹介
 
-Cherry Markdown Editorは、Javascriptで書かれたMarkdownエディタです。Cherry Markdown Editorは、すぐに使える、軽量でシンプル、拡張が容易などの利点があります。ブラウザやサーバー（NodeJs）で動作します。
+Cherry Markdown Writerは、Javascriptで書かれたMarkdownエディタです。Cherry Markdown Writerは、すぐに使える、軽量でシンプル、拡張が容易などの利点があります。ブラウザやサーバー（NodeJs）で動作します。
 
 ### ドキュメント
 
@@ -45,7 +45,7 @@ Cherry Markdown Editorは、Javascriptで書かれたMarkdownエディタです�
 
 ### **拡張が容易**
 
-Cherry Markdown Editorがサポートするシンタックスが開発者のニーズを満たさない場合、迅速に二次開発や機能拡張を行うことができます。同時に、Cherry Markdown Editorは純粋なJavaScriptで実装されるべきであり、angular、vue、reactなどのフレームワーク技術に依存すべきではありません。フレームワークはコンテナ環境を提供するだけです。
+Cherry Markdown Writerがサポートするシンタックスが開発者のニーズを満たさない場合、迅速に二次開発や機能拡張を行うことができます。同時に、Cherry Markdown Writerは純粋なJavaScriptで実装されるべきであり、angular、vue、reactなどのフレームワーク技術に依存すべきではありません。フレームワークはコンテナ環境を提供するだけです。
 
 ## 特徴
 
@@ -118,6 +118,84 @@ yarn add echarts@4.6.0
 ```
 
 ## クイックスタート
+
+### ライトバージョンの使用
+
+mermaidライブラリのサイズが大きいため、cherry-markdownではmermaidを含まないコアビルドパッケージを提供しています。以下の方法で使用できます。
+
+#### フルモード（UI付き）
+
+```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
+import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+  value: '# welcome to cherry editor!',
+});
+```
+
+#### エンジンモード（構文解析のみ）
+
+```javascript
+// Cherryエンジンコアをインポート
+import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core';
+const cherryEngineInstance = new CherryEngine();
+const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!');
+
+// --> <h1>welcome to cherry editor!</h1>
+```
+
+#### ⚠️ mermaidについて
+
+コアビルドにはmermaidが含まれていないため、必要な場合は手動でプラグインを追加してください。
+
+```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
+import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
+import CherryMermaidPlugin from 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin';
+import mermaid from 'mermaid';
+
+// Cherryインスタンス作成前にプラグインを登録
+Cherry.usePlugin(CherryMermaidPlugin, {
+  mermaid, // mermaidオブジェクトを渡す
+  // mermaidAPI: mermaid.mermaidAPI, // APIを直接渡すことも可能
+  // mermaidの設定もここで可能
+  // theme: 'neutral',
+  // sequence: { useMaxWidth: false, showSequenceNumbers: true }
+});
+
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+  value: '# welcome to cherry editor!',
+});
+```
+
+#### 動的インポート（推奨）
+
+webpackの動的インポートを使用する例:
+
+```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
+import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
+
+const registerPlugin = async () => {
+  const [{ default: CherryMermaidPlugin }, mermaid] = await Promise.all([
+    import('cherry-markdown/src/addons/cherry-code-block-mermaid-plugin'),
+    import('mermaid'),
+  ]);
+  Cherry.usePlugin(CherryMermaidPlugin, {
+    mermaid,
+  });
+};
+
+registerPlugin().then(() => {
+  // プラグイン登録後にCherryインスタンスを作成
+  const cherryInstance = new Cherry({
+    id: 'markdown-container',
+    value: '# welcome to cherry editor!',
+  });
+});
+```
 
 ### ブラウザ
 

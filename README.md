@@ -8,7 +8,7 @@ English | [简体中文](./README.CN.md) | [日本語](./README.JP.md)
 
 ## Introduction
 
-Cherry Markdown Editor is a Javascript Markdown editor. It has the advantages such as out-of-the-box, lightweight and easy to extend. It can run in browser or server(with NodeJs).
+Cherry Markdown Writer is a Javascript Markdown editor. It has the advantages such as out-of-the-box, lightweight and easy to extend. It can run in browser or server(with NodeJs).
 
 ### Document
 
@@ -46,7 +46,7 @@ Developer can call and instantiate Cherry Markdown Editor in a very simple way. 
 
 ### **Easy to extend**
 
-When the syntax that Cherry Markdown editor support can not meet your needs, secondary development or function extention can be carried out quickly. At the same time, Cherry Markdown editor should be implemented by pure JavaScript, and should not rely on framework technology such as angular, vue and react. Framework only provide a container environment.
+When the syntax that Cherry Markdown writer support can not meet your needs, secondary development or function extention can be carried out quickly. At the same time, Cherry Markdown writer should be implemented by pure JavaScript, and should not rely on framework technology such as angular, vue and react. Framework only provide a container environment.
 
 ## Feature
 
@@ -89,9 +89,9 @@ Cherry Markdown has a built-in security Hook, by filtering the whitelist and Dom
 
 Cherry Markdown has a variety of style themes to choose from.
 
-### Features show
+### Features Showcase
 
-click [here](https://github.com/Tencent/cherry-markdown/wiki/%E7%89%B9%E6%80%A7%E5%B1%95%E7%A4%BA-features) for more details
+Click to view feature demonstration [here](https://github.com/Tencent/cherry-markdown/wiki/%E7%89%B9%E6%80%A7%E5%B1%95%E7%A4%BA-features)
 
 ## Install
 

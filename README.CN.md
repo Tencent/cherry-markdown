@@ -91,7 +91,7 @@ Cherry Markdown 有多种样式主题选择
 
 ### 特性展示
 
-这里可以看到特性的简短的演示 [screenshot](https://github.com/Tencent/cherry-markdown/wiki/%E7%89%B9%E6%80%A7%E5%B1%95%E7%A4%BA-features)
+点击查看特性演示 [screenshot](https://github.com/Tencent/cherry-markdown/wiki/%E7%89%B9%E6%80%A7%E5%B1%95%E7%A4%BA-features)
 
 ## 安装
 
