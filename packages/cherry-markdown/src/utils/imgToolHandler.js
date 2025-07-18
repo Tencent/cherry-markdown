@@ -55,7 +55,7 @@ const imgToolHandler = {
       )}`;
       div.className = `img-tool-icon-button ${operation.active ? ' img-tool-icon-active' : ''}`;
       div.title = operation.text;
-      icon.addEventListener('click', (e) => {
+      div.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         operation.active = !operation.active;

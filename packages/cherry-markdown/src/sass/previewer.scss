@@ -81,41 +81,59 @@
       cursor:e-resize;
     }
   }
-  .cherry-previewer-img-tool-handler {
-    position:absolute;
-    box-shadow: 0 1px 4px 0 rgba(20,81,154, 0.5);
-    border:1px solid #3582fb;
-    box-sizing: content-box;
-    background-color: whitesmoke;
-    border-radius: 4px;
+.cherry-previewer-img-tool-handler {
+  position: absolute;
+  box-shadow: var(--img-tool-shadow, 0 1px 4px 0 rgba(20,81,154, 0.08));
+  border: 1px solid var(--img-tool-border, #3582fb);
+  box-sizing: content-box;
+  background-color: var(--img-tool-bg, #f8fafc);
+  border-radius: 6px;
+  display: flex;
+  padding: 2px 4px;
+  min-width: 0;
+  z-index: 20;
+  .img-tool-icon-button {
+    margin: 2.5px;
+    width: 32px;
+    height: 32px;
     display: flex;
-    padding: 2px;
-    .img-tool-icon-button {
-      margin: 2px;
-      width: 24px;
-      height: 24px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    transition: background-color 0.2s, box-shadow 0.2s, color 0.2s;
+    color: var(--img-tool-btn-color, #3b4252);
+    background: transparent;
+    border: 1.5px solid transparent;
+    box-shadow: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    &:hover {
+      background: var(--img-tool-btn-hover-bg, #e3eafc);
+      color: var(--img-tool-btn-hover-color, #2563eb);
     }
-    .img-tool-icon {
-      text-align: center;
-      cursor: pointer;
-    }
-    .img-tool-icon-active {
-      background-color: #ebf3ff;
-      color: #5d9bfc;
-    }
-    .img-tool-icon-border {
-      font-size: 18px;
-    }
-    .img-tool-icon-shadow {
-      font-size: 18px;
-    }
-    .img-tool-icon-radius {
-      font-size: 17px;
+    &.img-tool-icon-active {
+      background: var(--img-tool-active-bg, #e3eafc);
+      color: var(--img-tool-active-color, #2563eb);
+      box-shadow: 0 0 0 2px var(--img-tool-active-shadow, #b6d0fb);
+      border-color: var(--img-tool-active-border, #2563eb);
     }
   }
+  .img-tool-icon {
+    text-align: center;
+    font-size: 18px;
+    pointer-events: none;
+    user-select: none;
+  }
+  .img-tool-icon-border {
+    font-size: 18px;
+  }
+  .img-tool-icon-shadow {
+    font-size: 18px;
+  }
+  .img-tool-icon-radius {
+    font-size: 17px;
+  }
+}
   .cherry-previewer-table-content-handler {
     .cherry-previewer-table-content-handler__input {
       position: absolute;

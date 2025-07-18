@@ -3,6 +3,17 @@
  */
 
 .cherry.theme__blue {
+  /* ========== 图片工具栏相关变量 ========== */
+  --img-tool-bg: var(--oc-violet-0);
+  --img-tool-border: var(--oc-indigo-3);
+  --img-tool-shadow: 0 2px 8px 0 rgba(76,110,245,0.10);
+  --img-tool-btn-color: var(--oc-indigo-7);
+  --img-tool-btn-hover-bg: var(--oc-violet-2);
+  --img-tool-btn-hover-color: var(--oc-indigo-8);
+  --img-tool-active-bg: var(--oc-violet-3);
+  --img-tool-active-color: var(--oc-indigo-9);
+  --img-tool-active-border: var(--oc-indigo-6);
+  --img-tool-active-shadow: var(--oc-indigo-3);
   /* ========== 基础色彩变量覆盖 ========== */
   --primary-color: var(--oc-indigo-6);
   --secondary-color: var(--oc-violet-0);
