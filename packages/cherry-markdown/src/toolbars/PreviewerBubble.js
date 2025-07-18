@@ -559,7 +559,7 @@ export default class PreviewerBubble {
     const imgToolDiv = document.createElement('div');
     imgToolDiv.className = 'cherry-previewer-img-tool-handler';
     this.bubble.click.appendChild(imgToolDiv);
-    imgToolHandler.showBubble(htmlElement, imgToolDiv, this.previewerDom, event);
+    imgToolHandler.showBubble(htmlElement, imgToolDiv, this.previewerDom, event, this.previewer.$cherry.getLocales());
     imgToolHandler.bindChange(this.changeImgStyle.bind(this));
 
     // 订阅编辑器大小变化事件

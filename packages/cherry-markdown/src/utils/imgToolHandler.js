@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import locales from "@/locales";
+
 /**
  * 用于在图片被点击时弹出调整图片边框|阴影|圆角的工具栏
  */
@@ -34,13 +37,13 @@ const imgToolHandler = {
       y: position.y - editorPosition.y,
     };
   },
-  showBubble(img, container, previewerDom, event) {
+  showBubble(img, container, previewerDom, event,locale) {
     this.img = img;
     // console.log('event:', event);
     const operationList = [
-      { text: '边框', type: 'border', active: false },
-      { text: '阴影', type: 'shadow', active: false },
-      { text: '圆角', type: 'radius', active: false },
+      { text: locale.border, type: 'border', active: false },
+      { text: locale.shadow, type: 'shadow', active: false },
+      { text: locale.radius, type: 'radius', active: false },
     ];
     this.previewerDom = previewerDom;
     this.container = container;
