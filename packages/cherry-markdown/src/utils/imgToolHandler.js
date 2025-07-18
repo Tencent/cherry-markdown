@@ -36,7 +36,7 @@ const imgToolHandler = {
   },
   showBubble(img, container, previewerDom, event) {
     this.img = img;
-    console.log('event:', event);
+    // console.log('event:', event);
     const operationList = [
       { text: '边框', type: 'border', active: false },
       { text: '阴影', type: 'shadow', active: false },
@@ -44,6 +44,7 @@ const imgToolHandler = {
     ];
     this.previewerDom = previewerDom;
     this.container = container;
+    // console.log('imgToolHandler:', this.img, this.container, this.previewerDom);
     operationList.forEach((operation) => {
       operation.active = this.img.className.match(`cherry-img-${operation.type}`);
       const div = document.createElement('div');
@@ -63,8 +64,9 @@ const imgToolHandler = {
       });
       this.container.append(div);
     });
-    this.container.style.left = `${event.x}px`;
-    this.container.style.top = `${event.y}px`;
+    const previewerRect = this.previewerDom.parentNode.getBoundingClientRect();
+    this.container.style.left = `${event.x - previewerRect.left}px`;
+    this.container.style.top = `${event.y - previewerRect.top}px`;
 
     this.position = {
       ...this.getImgPosition(),
