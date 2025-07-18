@@ -20,6 +20,25 @@
   --toolbar-btn-hover-color: var(--oc-blue-4);
   --toolbar-split-color: var(--oc-blue-5);
 
+  /* ========== 代码块按钮相关变量 ========== */
+  --codeblock-btn-color: var(--oc-blue-6);
+  --codeblock-btn-bg: var(--oc-gray-1);
+  --codeblock-btn-border: var(--oc-blue-6);
+  --codeblock-btn-hover-color: var(--oc-gray-0);
+  --codeblock-btn-hover-bg: var(--oc-blue-6);
+  --codeblock-btn-hover-border: var(--oc-blue-4);
+
+  --codeblock-lang-select-bg: var(--oc-gray-0);
+  --codeblock-lang-select-color: var(--oc-blue-6);
+  --codeblock-lang-select-border: var(--oc-blue-4);
+
+  --codeblock-mask-bg: linear-gradient(-180deg, rgba(255,255,255,0) 0%, #fff 100%);
+  --codeblock-mask-btn-color: var(--oc-blue-6);
+  --codeblock-mask-btn-bg: var(--oc-blue-0);
+  --codeblock-mask-btn-hover-color: var(--oc-gray-0);
+  --codeblock-mask-btn-hover-bg: var(--oc-blue-6);
+  --codeblock-mask-btn-hover-border: var(--oc-gray-0);
+
   /* ========== 编辑器相关变量 ========== */
   --editor-header-color: var(--primary-color);
   --editor-string-color: var(--oc-gray-7);
