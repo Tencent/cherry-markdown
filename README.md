@@ -287,9 +287,9 @@ Call `yarn run test:snapshot` to run snapshot test. You can write snapshot suite
 
 Snapshot test runs slower. It should only be used to test Hooks that are error-prone and contain Cherry Markdown special syntax.
 
-## Contributing
+## Contribution Guidelines
 
-Welcome to join us to build a more powerful Markdown editor. Of course you can submit feature request to us. Please read [me](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8) before you working on it.
+Welcome to join us in building a powerful Markdown editor. You can also submit feature requests as issues. Before writing new features, you can learn about the [Introduction to cherry-markdown editor](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86-cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8). Please read the [Contribution Guidelines](https://github.com/Tencent/cherry-markdown/wiki/%E8%B4%A1%E7%8C%AE%E6%8C%87%E5%8D%97%20Contribution%20Guidelines) before making contributions.
 
 ## Stargazers over time
 

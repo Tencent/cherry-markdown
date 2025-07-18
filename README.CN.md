@@ -262,7 +262,6 @@ registerPlugin().then(() => {
 
 所有的配置基本都在/src/Cherry.config.js里进行了标注，具体[看这里](https://github.com/Tencent/cherry-markdown/wiki/%E9%85%8D%E7%BD%AE%E9%A1%B9%E5%85%A8%E8%A7%A3)
 
-
 ## 例子
 
 点击查看 [各种例子](https://github.com/Tencent/cherry-markdown/wiki)
@@ -315,9 +314,9 @@ CommonMark 规范及测试用例可参考：[commonmark.org](https://spec.common
 
 快照测试运行速度较慢，仅在易出错且包含 Cherry 特色语法的 Hook 上使用。
 
-## Contributing
+## 贡献指南
 
-欢迎加入我们打造强大的 Markdown 编辑器。当然你也可以给我们提交特性需求的 issue。 在写特性功能之前，你需要了解 [这些内容](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8#%E4%BB%8E%E5%BC%80%E5%A7%8B%E5%88%B0%E4%B8%8B%E7%8F%AD)
+欢迎加入我们打造强大的 Markdown 编辑器。当然你也可以给我们提交特性需求的 issue。 在写特性功能之前，你可以了解 [初识 cherry markdown 编辑器](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86-cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8), 提交贡献前请阅读 [贡献指南](https://github.com/Tencent/cherry-markdown/wiki/%E8%B4%A1%E7%8C%AE%E6%8C%87%E5%8D%97%20Contribution%20Guidelines)。
 
 ## License
 

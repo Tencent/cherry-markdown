@@ -364,9 +364,9 @@ CommonMarkの仕様とスイートは次の場所から取得できます：[com
 
 スナップショットテストは遅く実行されます。エラーが発生しやすく、Cherry Markdownの特別なシンタックスを含むフックをテストするためにのみ使用されるべきです。
 
-## 貢献
+## コントリビューションガイドライン
 
-より強力なMarkdownエディタを構築するために参加してください。もちろん、機能リクエストを提出することもできます。作業を始める前に[こちら](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)を読んでください。
+強力なMarkdownエディターの開発にぜひご参加ください。機能リクエストはissueとして提出することも可能です。新機能を実装する前に、[cherry-markdownエディターの紹介](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86-cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)をご覧いただけます。貢献を行う前に、[コントリビューションガイドライン](https://github.com/Tencent/cherry-markdown/wiki/%E8%B4%A1%E7%8C%AE%E6%8C%87%E5%8D%97%20Contribution%20Guidelines)をお読みください。
 
 ## Stargazers over time
 
