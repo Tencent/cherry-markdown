@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import locales from '@/locales';
-
 /**
  * 用于在图片被点击时弹出调整图片边框|阴影|圆角的工具栏
  */
@@ -53,16 +51,15 @@ const imgToolHandler = {
       const div = document.createElement('div');
       const icon = document.createElement('i');
       div.appendChild(icon);
-      icon.className = `img-tool-icon img-tool-icon-${operation.type} ch-icon ch-icon-imgTool${capitalizeFirstLetter(
-        operation.type,
-      )}`;
-      div.className = `img-tool-icon-button ${operation.active ? ' img-tool-icon-active' : ''}`;
+      icon.className = `img-tool-icon ch-icon ch-icon-imgTool${capitalizeFirstLetter(operation.type)}`;
+      div.className = `img-tool-button ${operation.active ? ' active' : ''}`;
       div.title = operation.text;
       div.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         operation.active = !operation.active;
-        div.className = `img-tool-icon-button ${operation.active ? ' img-tool-icon-active' : ''}`;
+        // 点击后，更新样式
+        div.className = `img-tool-button ${operation.active ? ' active' : ''}`;
         this.emitChange(this.img, operation.type);
       });
       this.container.append(div);

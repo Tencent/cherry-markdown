@@ -4,17 +4,6 @@
 
 /** 编辑器样式 */
 .cherry.theme__default {
-  /* ========== 图片工具栏相关变量 ========== */
-  --img-tool-bg: #f8fafc;
-  --img-tool-border: var(--oc-blue-3);
-  --img-tool-shadow: 0 2px 8px 0 rgba(53,130,251,0.10);
-  --img-tool-btn-color: var(--oc-gray-7);
-  --img-tool-btn-hover-bg: var(--oc-blue-1);
-  --img-tool-btn-hover-color: var(--oc-blue-7);
-  --img-tool-active-bg: var(--oc-blue-2);
-  --img-tool-active-color: var(--oc-blue-8);
-  --img-tool-active-border: var(--oc-blue-6);
-  --img-tool-active-shadow: var(--oc-blue-3);
   /* ========== 基础色彩变量覆盖 ========== */
   --primary-color: var(--oc-blue-6);
   --secondary-color: var(--oc-blue-0);
