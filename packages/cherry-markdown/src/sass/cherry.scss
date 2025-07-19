@@ -638,10 +638,10 @@
 
 .cherry-mask-code-block {
   width: 100%;
-  padding-top: 50px;
+  padding-top: 60px;
   opacity: 0;
   visibility: hidden;
-  background: var(--codeblock-mask-bg);
+  background: linear-gradient(-180deg, rgba(255, 255, 255, 0) 0%, var(--toolbar-bg) 80%);
   text-align: center;
   position: absolute;
   left: 0;
@@ -649,21 +649,33 @@
   bottom: 0.5em;
   z-index: 10;
   transition: opacity 0.4s, visibility 0.4s, background-color 0.3s, background-image 0.3s;
+
   .expand-btn {
-    width: 25px;
-    height: 25px;
-    border: 1px solid #ffffff00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;                // 占满整个掩膜区域
+    height: 100%;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    background: transparent;
+    border: none;
     cursor: pointer;
-    border-radius: 5px;
-    transition: all 0.3s;
     z-index: 12;
-    color: var(--codeblock-mask-btn-color);
-    background-color: var(--codeblock-mask-btn-bg);
-    display: inline-block;
-    &:hover {
-      color: var(--codeblock-mask-btn-hover-color);
-      background-color: var(--codeblock-mask-btn-hover-bg);
-      border-color: var(--codeblock-mask-btn-hover-border);
+
+    .ch-icon-expand {
+      font-size: 20px;
+      color: var(--toolbar-btn-color);
+      border-radius: 50%;
+      padding: 6px;
+      box-shadow: none;
+      transition: all 0.3s ease;
+    }
+
+    &:hover .ch-icon-expand {
+      color: var(--primary-color);
+      transform: scale(1.2);
     }
   }
 }
@@ -693,70 +705,74 @@
   * {
     pointer-events: all;
   }
+
   .cherry-code-block-custom-btn,
   .cherry-copy-code-block,
   .cherry-unExpand-code-block,
   .cherry-edit-code-block {
     position: relative;
     width: 25px;
-    text-align: center;
     height: 25px;
-    border: 1px solid var(--codeblock-btn-border);
+    text-align: center;
+    border: 1px solid var(--primary-color);
     cursor: pointer;
     float: right;
     top: 15px;
     border-radius: 5px;
-    // margin-left: -27px;
     transition: all 0.3s;
     z-index: 2;
-    color: var(--codeblock-btn-color);
-    background-color: var(--codeblock-btn-bg);
-    border-color: var(--codeblock-btn-border);
+    color: var(--toolbar-btn-color);
+    background-color: var(--toolbar-bg);
   }
   .cherry-code-block-custom-btn {
     width: auto;
   }
-  .cherry-expand-code-block{
+
+  .cherry-expand-code-block {
     position: absolute;
     width: 25px;
     text-align: center;
     height: 25px;
-    border: 1px solid var(--codeblock-btn-border);
+    border: 1px solid var(--primary-color);                    /* 替换自 --codeblock-btn-border */
     cursor: pointer;
     float: right;
     border-radius: 5px;
     margin-left: -27px;
     transition: all 0.3s;
     z-index: 2;
-    color: var(--codeblock-btn-color);
-    background-color: var(--codeblock-btn-bg);
-    border-color: var(--codeblock-btn-border);
+    color: var(--primary-color);                               /* 替换自 --codeblock-btn-color */
+    background-color: var(--toolbar-btn-hover-bg);             /* 替换自 --codeblock-btn-bg */
+    border-color: var(--primary-color);                        /* 替换自 --codeblock-btn-border */
   }
+
   .cherry-expand-code-block {
     top: 45px;
-    right:10px;
+    right: 10px;
   }
-  .cherry-unExpand-code-block{
+
+  .cherry-unExpand-code-block {
     z-index: 12;
     &.hidden {
       display: none;
     }
   }
+
   .cherry-code-block-custom-btn:hover,
   .cherry-copy-code-block:hover,
   .cherry-expand-code-block:hover,
   .cherry-unExpand-code-block:hover,
   .cherry-edit-code-block:hover {
-    color: var(--codeblock-btn-hover-color);
-    background-color: var(--codeblock-btn-hover-bg);
-    border-color: var(--codeblock-btn-hover-border);
+    color: var(--toolbar-btn-hover-color);                              /* 替换自 --codeblock-btn-hover-color */
+    background-color: var(--toolbar-btn-hover-bg);                    /* 替换自 --codeblock-btn-hover-bg */
+    border-color: var(--primary-color);                  /* 替换自 --codeblock-btn-hover-border */
   }
+
   .cherry-code-preview-lang-select {
     position: absolute;
     transform: translate(2px, -50%);
-    background: var(--codeblock-lang-select-bg, var(--codeblock-btn-bg));
-    color: var(--codeblock-lang-select-color, var(--codeblock-btn-color));
-    border: 1px solid var(--codeblock-lang-select-border, var(--codeblock-btn-border));
+    background: var(--toolbar-bg);               /* 替换自 --codeblock-lang-select-bg */
+    color: var(--toolbar-btn-color);                  /* 替换自 --codeblock-lang-select-color */
+    border: 1px solid var(--primary-color); /* 替换自 --codeblock-lang-select-border */
     border-radius: 4px;
     font-size: 12px;
     padding: 0 8px;

@@ -34,7 +34,7 @@ export default class MathBlock extends ParagraphBase {
   constructor({ config }) {
     super({ needCache: true });
     // 非浏览器环境下配置为 node
-    this.engine = isBrowser() ? (config.engine ?? 'MathJax') : 'node';
+    this.engine = isBrowser() ? config.engine ?? 'MathJax' : 'node';
   }
 
   toHtml(wholeMatch, lineSpace, leadingChar, content) {
