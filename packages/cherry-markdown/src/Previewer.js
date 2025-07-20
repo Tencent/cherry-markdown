@@ -726,7 +726,7 @@ export default class Previewer {
 
       try {
         this.$dealUpdate(domContainer, oldHtmlList, newHtmlList);
-        this.afterUpdate();
+        setTimeout(() => this.afterUpdate(), 100);
       } finally {
         // 延时释放同步滚动功能，在DOM更新完成后执行
         this.syncScrollLockTimer = window.setTimeout(() => {

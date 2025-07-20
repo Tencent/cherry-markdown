@@ -37,21 +37,25 @@ const imgToolHandler = {
   showBubble(img, container, previewerDom, event) {
     this.img = img;
     console.log('event:', event);
-    const operationList = [
+    this.previewerDom = previewerDom;
+    this.container = container;
+
+    const styleList = [
       { text: '边框', type: 'border', active: false },
       { text: '阴影', type: 'shadow', active: false },
       { text: '圆角', type: 'radius', active: false },
     ];
-    this.previewerDom = previewerDom;
-    this.container = container;
-    operationList.forEach((operation) => {
-      operation.active = this.img.className.match(`cherry-img-${operation.type}`);
+    const decoDiv = document.createElement('div');
+    decoDiv.className = 'img-tool-row';
+    this.container.append(decoDiv);
+    styleList.forEach((operation) => {
+      operation.active = this.img.className.match(`cherry-img-deco-${operation.type}`);
       const div = document.createElement('div');
       const icon = document.createElement('i');
       div.appendChild(icon);
-      icon.className = `img-tool-icon img-tool-icon-${operation.type} ch-icon ch-icon-imgTool${capitalizeFirstLetter(
-        operation.type,
-      )}`;
+      icon.className = `img-tool-icon img-tool-icon-deco-${
+        operation.type
+      } ch-icon ch-icon-imgDeco${capitalizeFirstLetter(operation.type)}`;
       div.className = `img-tool-icon-button ${operation.active ? ' img-tool-icon-active' : ''}`;
       div.title = operation.text;
       icon.addEventListener('click', (e) => {
@@ -61,8 +65,46 @@ const imgToolHandler = {
         div.className = `img-tool-icon-button ${operation.active ? ' img-tool-icon-active' : ''}`;
         this.emitChange(this.img, operation.type);
       });
-      this.container.append(div);
+      decoDiv.append(div);
     });
+
+    const alignList = [
+      { text: '左对齐', type: 'left' },
+      { text: '居中', type: 'center' },
+      { text: '右对齐', type: 'right' },
+      { text: '左浮动', type: 'float-left' },
+      { text: '右浮动', type: 'float-right' },
+    ];
+    const alignDiv = document.createElement('div');
+    alignDiv.className = 'img-tool-row';
+    this.container.append(alignDiv);
+    alignList.forEach((align, index) => {
+      align.active = this.img.className.match(`cherry-img-align-${align.type}`);
+      const div = document.createElement('div');
+      const icon = document.createElement('i');
+      align.div = div;
+      div.appendChild(icon);
+      icon.className = `img-tool-icon img-tool-icon-align-${align.type} ch-icon ch-icon-imgAlign${capitalizeLetter(
+        align.type,
+      )}`;
+      div.className = `img-tool-icon-button ${align.active ? ' img-tool-icon-active' : ''}`;
+      div.title = align.text;
+      icon.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        align.active = !align.active;
+        alignList.forEach((align1) => {
+          if (align1 !== align) {
+            align1.active = false;
+            align1.div.className = `img-tool-icon-button`;
+          }
+        });
+        div.className = `img-tool-icon-button ${align.active ? ' img-tool-icon-active' : ''}`;
+        this.emitChange(this.img, align.active ? align.type : 'clear-align');
+      });
+      alignDiv.append(div);
+    });
+
     this.container.style.left = `${event.x}px`;
     this.container.style.top = `${event.y}px`;
 
@@ -106,6 +148,14 @@ const imgToolHandler = {
   },
 };
 
+function capitalizeLetter(str) {
+  return str
+    ? str
+        .split('-')
+        .map((w) => capitalizeFirstLetter(w))
+        .join('')
+    : '';
+}
 function capitalizeFirstLetter(str) {
   return str ? str.replace(/^\w/, (c) => c.toUpperCase()) : '';
 }

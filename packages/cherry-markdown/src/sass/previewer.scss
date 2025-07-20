@@ -88,8 +88,10 @@
     box-sizing: content-box;
     background-color: whitesmoke;
     border-radius: 4px;
-    display: flex;
-    padding: 2px;
+    .img-tool-row {
+      display: flex;
+      padding: 2px;
+    }
     .img-tool-icon-button {
       margin: 2px;
       width: 24px;
@@ -106,13 +108,13 @@
       background-color: #ebf3ff;
       color: #5d9bfc;
     }
-    .img-tool-icon-border {
+    .img-tool-icon-deco-border {
       font-size: 18px;
     }
-    .img-tool-icon-shadow {
+    .img-tool-icon-deco-shadow {
       font-size: 18px;
     }
-    .img-tool-icon-radius {
+    .img-tool-icon-deco-radius {
       font-size: 17px;
     }
   }
