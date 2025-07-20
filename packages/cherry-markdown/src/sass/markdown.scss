@@ -379,11 +379,57 @@
     }
   }
 
+  // checklist
+  
   .check-list-item {
     list-style: none;
-
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border-color: #c3c9d0;
+    }
+    
+    &.completed {
+      background: #f8f9fa;
+      opacity: 0.8;
+    }
+  
     .ch-icon {
-      margin: 0 6px 0 -20px;
+      margin-right: 12px;
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      position: relative;
+      
+      &::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        color: #fff;
+        font-size: 12px;
+        font-weight: bold;
+        transition: transform 0.2s ease;
+      }
+      
+      &.checked {
+        background: #4CAF50;
+        border-color: #4CAF50;
+        
+        &::after {
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
     }
   }
 
@@ -680,5 +726,109 @@ div[data-type='codeBlock'] {
     &.cherry-panel--title__not-empty::before {
       content: '\EA67';
     }
+  }
+}
+@keyframes check-bounce {
+  0% { transform: scale(0.2); }
+  60% { transform: scale(1.2); }
+  80% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+// 火花扩散动画
+@keyframes spark-burst {
+  0% {
+    opacity: 1;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5) rotate(360deg);
+  }
+}
+
+// 涟漪扩散动画
+@keyframes ripple-expand {
+  0% {
+    opacity: 1;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+
+// 脉冲发光动画
+@keyframes pulse-glow {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+
+.ch-icon.ch-icon-check {
+  position: relative;
+  z-index: 1;
+  .ribbon-rays {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 36px;
+    height: 36px;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    background:
+      conic-gradient(
+        #2196f3 0deg 15deg, transparent 15deg 45deg,
+        #42a5f5 45deg 60deg, transparent 60deg 90deg,
+        #64b5f6 90deg 105deg, transparent 105deg 135deg,
+        #90caf9 135deg 150deg, transparent 150deg 180deg,
+        #1976d2 180deg 195deg, transparent 195deg 225deg,
+        #1565c0 225deg 240deg, transparent 240deg 270deg,
+        #0d47a1 270deg 285deg, transparent 285deg 315deg,
+        #82b1ff 315deg 330deg, transparent 330deg 360deg
+      );
+    border-radius: 50%;
+    opacity: 0.7;
+    animation: ribbon-rays-burst 0.5s cubic-bezier(.68,-0.55,.27,1.55);
+    -webkit-mask-image:
+      radial-gradient(circle at 50% 50%, transparent 0 40%, #000 60% 100%);
+    mask-image:
+      radial-gradient(circle at 50% 50%, transparent 0 40%, #000 60% 100%);
+  }
+}
+@keyframes ribbon-rays-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  60% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  80% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  100% {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) scale(1);
   }
 }
