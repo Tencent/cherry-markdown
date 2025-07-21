@@ -15,7 +15,6 @@
  */
 
 import imgSizeHandler from '@/utils/imgSizeHandler';
-import imgToolHandler from '@/utils/imgToolHandler';
 import TableHandler from '@/utils/tableContentHandler';
 import FootnoteHoverHandler from '@/utils/footnoteHoverHandler';
 import CodeHandler from '@/utils/codeBlockContentHandler';
@@ -377,7 +376,7 @@ export default class PreviewerBubble {
     switch (target.tagName) {
       case 'IMG':
         if (target instanceof HTMLImageElement) {
-          this.$showImgPreviewerBubbles(target, e);
+          this.$showImgPreviewerBubbles(target);
         }
         break;
       case 'TD':
@@ -541,27 +540,16 @@ export default class PreviewerBubble {
    * 为选中的图片增加操作工具栏
    * @param {HTMLImageElement} htmlElement 用户点击的图片dom
    */
-  $showImgPreviewerBubbles(htmlElement, event) {
-    this.$createPreviewerBubbles('click', 'img-handler');
+  $showImgPreviewerBubbles(htmlElement) {
+    this.$createPreviewerBubbles();
     const list = Array.from(this.previewerDom.querySelectorAll('img'));
     this.totalImgs = list.length;
     this.imgIndex = list.indexOf(htmlElement);
     if (!this.beginChangeImgValue(htmlElement)) {
       return { emit: () => {} };
     }
-
-    const imgSizeDiv = document.createElement('div');
-    imgSizeDiv.className = 'cherry-previewer-img-size-handler';
-    this.bubble.click.appendChild(imgSizeDiv);
-    imgSizeHandler.showBubble(htmlElement, imgSizeDiv, this.previewerDom);
-    imgSizeHandler.bindChange(this.changeImgSize.bind(this));
-
-    const imgToolDiv = document.createElement('div');
-    imgToolDiv.className = 'cherry-previewer-img-tool-handler';
-    this.bubble.click.appendChild(imgToolDiv);
-    imgToolHandler.showBubble(htmlElement, imgToolDiv, this.previewerDom, event, this.previewer.$cherry.getLocales());
-    imgToolHandler.bindChange(this.changeImgStyle.bind(this));
-
+    imgSizeHandler.showBubble(htmlElement, this.bubble.click, this.previewerDom);
+    imgSizeHandler.bindChange(this.changeImgValue.bind(this));
     // 订阅编辑器大小变化事件
     const updateHandler = imgSizeHandler.updatePosition.bind(imgSizeHandler);
     this.$cherry.$event.on('editor.size.change', updateHandler);
@@ -573,7 +561,6 @@ export default class PreviewerBubble {
       return originalRemove.call(imgSizeHandler);
     };
     this.bubbleHandler.click = imgSizeHandler;
-    this.bubbleHandler.imgTool = imgToolHandler;
   }
 
   /**
@@ -666,8 +653,8 @@ export default class PreviewerBubble {
       // 如果图片语法数量和预览区域的一样多
       // 暂时不需要考虑手动输入img标签的场景 和 引用图片的场景
       const totalValue = content.split(imgReg);
-      const imgAppendReg = /(#center|#right|#left|#float-right|#float-left|#border|#B|#shadow|#S|#radius|#R)/g;
-      const imgSizeReg = /^!\[.*?((?:(?:#[0-9]+(px|em|pt|pc|in|mm|cm|ex|%)|auto) *)+).*?\].*$/;
+      const imgAppendReg =
+        /^!\[.*?((?:#center|#right|#left|#float-right|#float-left|#border|#B|#shadow|#S|#radius|#R)+).*?\].*$/;
       let line = 0;
       let beginCh = 0;
       let endCh = 0;
@@ -677,8 +664,7 @@ export default class PreviewerBubble {
         if (targetString === contentImgs[testIndex]) {
           // 如果找到目标代码
           if (testIndex === this.imgIndex) {
-            this.imgAppend = imgAppendReg.test(targetString) ? targetString.match(imgAppendReg).join(' ') : false;
-            this.imgSize = imgSizeReg.test(targetString) ? targetString.replace(imgSizeReg, '$1') : false;
+            this.imgAppend = imgAppendReg.test(targetString) ? targetString.replace(imgAppendReg, '$1') : false;
             beginCh += targetString.replace(/^(!\[[^#\]]*).*$/, '$1').length;
             endCh = beginCh + targetString.replace(/^(!\[[^#\]]*)([^\]]*?)\].*$/, '$2').length;
             this.editor.editor.setSelection({ line, ch: beginCh }, { line, ch: endCh });
@@ -704,46 +690,12 @@ export default class PreviewerBubble {
    * @param {HTMLElement} htmlElement 被拖拽的图片标签
    * @param {Object} style 图片的属性（宽高、对齐方式）
    */
-  changeImgSize(htmlElement, style) {
-    this.imgSize = `#${Math.round(style.width)}px #${Math.round(style.height)}px`;
-    this.changeImgValue();
-  }
-
-  /**
-   * 修改图片样式时的回调
-   * @param {HTMLElement} htmlElement 被修改演示的图片标签
-   * @param {Object} type 图片的属性（边框、阴影、圆角）
-   */
-  changeImgStyle(htmlElement, type) {
-    const typeProp = {
-      border: { reg: /#(border|B) */g, v: 'B' },
-      shadow: { reg: /#(shadow|S) */g, v: 'S' },
-      radius: { reg: /#(radius|R) */g, v: 'R' },
-    };
-    const typeReg = typeProp[type].reg;
-    if (!this.imgAppend) {
-      this.imgAppend = '';
-    }
-    if (typeReg.test(this.imgAppend)) {
-      this.imgAppend = this.imgAppend.replaceAll(typeReg, '');
-    } else {
-      this.imgAppend += `#${typeProp[type].v}`;
-    }
-    this.changeImgValue();
-  }
-
-  changeImgValue() {
-    let newValue = '';
-    if (this.imgSize) {
-      newValue += this.imgSize;
-      if (this.imgAppend) {
-        newValue += ' ';
-      }
-    }
-    if (this.imgAppend) {
-      newValue += this.imgAppend;
-    }
-    this.editor.editor.replaceSelection(newValue, 'around');
+  changeImgValue(htmlElement, style) {
+    const append = this.imgAppend ? ` ${this.imgAppend}` : '';
+    this.editor.editor.replaceSelection(
+      `#${Math.round(style.width)}px #${Math.round(style.height)}px${append}`,
+      'around',
+    );
   }
 
   /**

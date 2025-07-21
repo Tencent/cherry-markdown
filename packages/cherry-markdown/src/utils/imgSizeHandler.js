@@ -98,8 +98,8 @@ const imgSizeHandler = {
         return this.dealScroll(event);
       case 'remove':
         return this.remove();
-      // case 'previewUpdate':
-      //   return this.previewUpdate(event);
+      case 'previewUpdate':
+        return this.previewUpdate(event);
     }
   },
   previewUpdate(callback) {

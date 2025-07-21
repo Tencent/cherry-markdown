@@ -147,7 +147,4 @@ export default {
   search: 'Поиск',
   autoWrap: 'Автоперенос строк',
   footnoteTitle: 'Сноска',
-  border: 'Рамка',
-  shadow: 'Тень',
-  radius: 'Скругление',
 };
