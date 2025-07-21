@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
  * 用于在图片被点击时弹出调整图片边框|阴影|圆角的工具栏
  */
@@ -34,36 +35,36 @@ const imgToolHandler = {
       y: position.y - editorPosition.y,
     };
   },
-  showBubble(img, container, previewerDom, event) {
+  showBubble(img, container, previewerDom, event, locale) {
     this.img = img;
-    console.log('event:', event);
+    // console.log('event:', event);
+    const decoList = [
+      { text: locale.border, type: 'border', active: false },
+      { text: locale.shadow, type: 'shadow', active: false },
+      { text: locale.radius, type: 'radius', active: false },
+    ];
     this.previewerDom = previewerDom;
     this.container = container;
 
-    const styleList = [
-      { text: '边框', type: 'border', active: false },
-      { text: '阴影', type: 'shadow', active: false },
-      { text: '圆角', type: 'radius', active: false },
-    ];
     const decoDiv = document.createElement('div');
     decoDiv.className = 'img-tool-row';
-    this.container.append(decoDiv);
-    styleList.forEach((operation) => {
-      operation.active = this.img.className.match(`cherry-img-deco-${operation.type}`);
+    this.container.appendChild(decoDiv);
+    // console.log('imgToolHandler:', this.img, this.container, this.previewerDom);
+    decoList.forEach((deco) => {
+      deco.active = this.img.className.match(`cherry-img-${deco.type}`);
       const div = document.createElement('div');
       const icon = document.createElement('i');
       div.appendChild(icon);
-      icon.className = `img-tool-icon img-tool-icon-deco-${
-        operation.type
-      } ch-icon ch-icon-imgDeco${capitalizeFirstLetter(operation.type)}`;
-      div.className = `img-tool-icon-button ${operation.active ? ' img-tool-icon-active' : ''}`;
-      div.title = operation.text;
-      icon.addEventListener('click', (e) => {
+      icon.className = `img-tool-icon ch-icon ch-icon-imgTool${capitalizeFirstLetter(deco.type)}`;
+      div.className = `img-tool-button ${deco.active ? ' active' : ''}`;
+      div.title = deco.text;
+      div.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        operation.active = !operation.active;
-        div.className = `img-tool-icon-button ${operation.active ? ' img-tool-icon-active' : ''}`;
-        this.emitChange(this.img, operation.type);
+        deco.active = !deco.active;
+        // 点击后，更新样式
+        div.className = `img-tool-button ${deco.active ? ' active' : ''}`;
+        this.emitChange(this.img, deco.type);
       });
       decoDiv.append(div);
     });
@@ -77,7 +78,7 @@ const imgToolHandler = {
     ];
     const alignDiv = document.createElement('div');
     alignDiv.className = 'img-tool-row';
-    this.container.append(alignDiv);
+    this.container.appendChild(alignDiv);
     alignList.forEach((align, index) => {
       align.active = this.img.className.match(`cherry-img-align-${align.type}`);
       const div = document.createElement('div');
@@ -105,8 +106,9 @@ const imgToolHandler = {
       alignDiv.append(div);
     });
 
-    this.container.style.left = `${event.x}px`;
-    this.container.style.top = `${event.y}px`;
+    const previewerRect = this.previewerDom.parentNode.getBoundingClientRect();
+    this.container.style.left = `${event.x - previewerRect.left}px`;
+    this.container.style.top = `${event.y - previewerRect.top}px`;
 
     this.position = {
       ...this.getImgPosition(),
