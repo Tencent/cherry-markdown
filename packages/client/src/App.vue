@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { cherryInstance } from './components/CherryMarkdown';
-import { listen } from "@tauri-apps/api/event";
-import { invoke } from "@tauri-apps/api/core";
+import { listen } from '@tauri-apps/api/event';
+import { invoke } from '@tauri-apps/api/core';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { useFileStore } from './store';
@@ -14,15 +14,19 @@ const fileStore = useFileStore();
 const newFile = () => {
   cherryMarkdown.setMarkdown('');
   fileStore.setCurrentFilePath('');
-}
+};
 
 const openFile = async () => {
   const path = await open({
-    multiple: false, directory: false, filters: [{
-      name: 'markdown',
-      extensions: ['md']
-    }]
-  })
+    multiple: false,
+    directory: false,
+    filters: [
+      {
+        name: 'markdown',
+        extensions: ['md'],
+      },
+    ],
+  });
 
   console.log(path);
   if (path === null) {
@@ -34,7 +38,7 @@ const openFile = async () => {
   cherryMarkdown.setMarkdown(markdown);
   cherryMarkdown.switchModel('previewOnly');
   previewOnlySidebar();
-}
+};
 
 const saveAsNewMarkdown = async () => {
   const markdown = cherryMarkdown.getMarkdown();
@@ -53,7 +57,7 @@ const saveAsNewMarkdown = async () => {
 
   fileStore.setCurrentFilePath(path);
   writeTextFile(path, markdown);
-}
+};
 
 const saveMarkdown = () => {
   const markdown = cherryMarkdown.getMarkdown();
@@ -63,14 +67,13 @@ const saveMarkdown = () => {
     return;
   }
   writeTextFile(fileStore.currentFilePath, markdown);
-}
-
+};
 
 onMounted(async () => {
   const cherryNoToolbar = document.querySelector('.cherry--no-toolbar');
   console.log(cherryNoToolbar, !cherryNoToolbar);
   await invoke('get_show_toolbar', { show: !cherryNoToolbar });
-})
+});
 
 listen('new_file', newFile);
 

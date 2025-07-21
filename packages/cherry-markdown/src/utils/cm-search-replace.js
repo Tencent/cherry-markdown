@@ -293,7 +293,7 @@ export default class SearchBox {
     const cursor = cm.getCursor(position);
     const searchCursor = cm.getSearchCursor(val, cursor, !caseSensitive);
 
-    (next = searchCursor.findNext.bind(searchCursor)), (prev = searchCursor.findPrevious.bind(searchCursor));
+    ((next = searchCursor.findNext.bind(searchCursor)), (prev = searchCursor.findPrevious.bind(searchCursor)));
 
     if (o.backwards && !prev()) {
       is = next();
