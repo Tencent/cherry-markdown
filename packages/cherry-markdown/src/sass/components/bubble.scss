@@ -100,7 +100,7 @@
     background: var(--toolbar-btn-bg);
     border-radius: var(--dropdown-radius);
     border: none;
-    transition: background 0.2s, color 0.2s;
+    transition: background-color 0.2s;
 
     &:hover {
       background-color: var(--dropdown-item-hover-bg);

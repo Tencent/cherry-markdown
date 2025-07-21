@@ -147,4 +147,7 @@ export default {
   search: 'Search',
   autoWrap: 'Auto Wrap',
   footnoteTitle: 'Footnote',
+  border: 'Border',
+  shadow: 'Shadow',
+  radius: 'Radius',
 };
