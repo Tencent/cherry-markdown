@@ -67,7 +67,7 @@ const imgToolHandler = {
       div.className = `img-tool-button ${operation.active ? ' active' : ''}`;
       div.title = operation.text;
       if (operation.type === 'align') {
-        icon.className = `img-tool-icon ch-icon ch-icon-imgTool${capitalizeFirstLetter(operation.subTypes[0].type)}`;
+        icon.className = `img-tool-icon ch-icon ch-icon-align`;
         div.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -77,6 +77,7 @@ const imgToolHandler = {
           // 点击样式按键，打开样式菜单
           this.showAlignMenu(div, operation);
         });
+        console.info('div:', div);
       } else {
         icon.className = `img-tool-icon ch-icon ch-icon-imgTool${capitalizeFirstLetter(operation.type)}`;
         div.addEventListener('click', (e) => {
