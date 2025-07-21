@@ -148,4 +148,7 @@ export default {
   search: '搜索',
   autoWrap: '自动换行',
   footnoteTitle: '脚注',
+  border: '边框',
+  shadow: '阴影',
+  radius: '圆角',
 };
