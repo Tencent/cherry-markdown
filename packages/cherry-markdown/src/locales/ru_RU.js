@@ -96,6 +96,8 @@ export default {
   alignCenter: 'В центре',
   alignRight: 'Выровнять вправо',
   alignJustify: 'Выровнять концы',
+  alignFloatLeft: 'Выровнять вправо',
+  alignFloatRight: 'Выровнять слева',
   publish: 'Публиковать',
   colorPickerText: 'Текст',
   colorPickerBackground: 'Фон',

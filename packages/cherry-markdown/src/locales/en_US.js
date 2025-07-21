@@ -96,6 +96,8 @@ export default {
   alignCenter: 'Align Center',
   alignRight: 'Align Right',
   alignJustify: 'Align Justify',
+  alignFloatLeft: 'Align Float Left',
+  alignFloatRight: 'Align Float Right',
   publish: 'Publish',
   colorPickerText: 'Text',
   colorPickerBackground: 'Background',

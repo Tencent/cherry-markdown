@@ -98,6 +98,8 @@ export default {
   alignCenter: '居中',
   alignRight: '右对齐',
   alignJustify: '两端对齐',
+  alignFloatLeft: '左浮动',
+  alignFloatRight: '右浮动',
   publish: '发布',
   colorPickerText: '文字',
   colorPickerBackground: '背景',
