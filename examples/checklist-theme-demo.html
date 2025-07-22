@@ -1,0 +1,161 @@
+// Tencent is pleased to support the open source community by making cherry-markdown available.
+//
+// Copyright (C) 2025 Tencent.  All rights reserved.
+//
+// cherry-markdown is licensed under the Apache License Version 2.0.
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Cherry Markdown Checklist 主题动效演示</title>
+  <link rel="stylesheet" href="../packages/cherry-markdown/dist/cherry-markdown.css">
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      background: var(--base-previewer-bg, #f8f9fa);
+      color: var(--md-paragraph-color, #222);
+      transition: background 0.3s, color 0.3s;
+    }
+    .theme-toggle {
+      margin-bottom: 24px;
+    }
+    .theme-toggle button {
+      margin-right: 12px;
+      padding: 6px 18px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .theme-toggle button.active {
+      background: #1976d2;
+      color: #fff;
+      border-color: #1976d2;
+    }
+    #markdown {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    /* checklist 蓝色水花射线动效 */
+    .cherry-markdown .ch-icon.ch-icon-check {
+      position: relative;
+      z-index: 1;
+    }
+    .cherry-markdown .ch-icon.ch-icon-check .ribbon-rays {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 36px;
+      height: 36px;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 0;
+      background:
+        conic-gradient(
+          #2196f3 0deg 15deg, transparent 15deg 45deg,
+          #42a5f5 45deg 60deg, transparent 60deg 90deg,
+          #64b5f6 90deg 105deg, transparent 105deg 135deg,
+          #90caf9 135deg 150deg, transparent 150deg 180deg,
+          #1976d2 180deg 195deg, transparent 195deg 225deg,
+          #1565c0 225deg 240deg, transparent 240deg 270deg,
+          #0d47a1 270deg 285deg, transparent 285deg 315deg,
+          #82b1ff 315deg 330deg, transparent 330deg 360deg
+        );
+      border-radius: 50%;
+      opacity: 0.7;
+      animation: ribbon-rays-burst 0.5s cubic-bezier(.68,-0.55,.27,1.55);
+      -webkit-mask-image:
+        radial-gradient(circle at 50% 50%, transparent 0 40%, #000 60% 100%);
+      mask-image:
+        radial-gradient(circle at 50% 50%, transparent 0 40%, #000 60% 100%);
+    }
+    @keyframes ribbon-rays-burst {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.2);
+      }
+      60% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+      }
+      80% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(0.9);
+      }
+      100% {
+        opacity: 0.7;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="theme-toggle">
+    <button data-theme="default" class="active">默认</button>
+    <button data-theme="dark">暗色</button>
+    <button data-theme="light">浅色</button>
+    <button data-theme="blue">蓝色</button>
+    <button data-theme="green">绿色</button>
+    <button data-theme="red">红色</button>
+    <button data-theme="violet">紫色</button>
+  </div>
+  <div id="markdown"></div>
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+  <script>
+    // 初始化 Cherry Markdown
+    var checklistDemo = `# Checklist 主题动效演示\n\n- [ ] 任务一（未完成）\n- [x] 任务二（已完成）\n- [ ] 任务三（未完成）\n- [x] 任务四（已完成）\n\n嵌套示例：\n- [ ] 一级未完成\n  - [x] 二级已完成\n  - [ ] 二级未完成\n- [x] 一级已完成\n`;
+    var cherry = new Cherry({
+      id: 'markdown',
+      value: checklistDemo,
+      editor: {
+        height: '400px',
+      },
+      theme: 'default',
+    });
+    // 主题切换
+    var themeMap = {
+      default: 'default',
+      dark: 'dark',
+      light: 'light',
+      blue: 'blue',
+      green: 'green',
+      red: 'red',
+      violet: 'violet',
+    };
+    document.querySelectorAll('.theme-toggle button').forEach(btn => {
+      btn.onclick = function() {
+        cherry.setTheme(themeMap[this.dataset.theme]);
+        document.querySelectorAll('.theme-toggle button').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      };
+    });
+    // checklist 动效重播：最终优化方案，首次渲染不触发，后续勾选才有动画
+    const checklistStateMap = new WeakMap();
+    let checklistFirstScan = true;
+    setInterval(function() {
+      document.querySelectorAll('.cherry-markdown .ch-icon').forEach(function(el) {
+        const prev = checklistStateMap.get(el);
+        const nowIsChecked = el.classList.contains('ch-icon-check');
+        const prevIsChecked = prev === 'check';
+        if (checklistFirstScan) {
+          checklistStateMap.set(el, nowIsChecked ? 'check' : 'square');
+          return;
+        }
+        if (!prevIsChecked && nowIsChecked) {
+          var span = document.createElement('span');
+          span.className = 'ribbon-rays';
+          el.appendChild(span);
+          span.addEventListener('animationend', function() {
+            span.remove();
+          });
+        }
+        checklistStateMap.set(el, nowIsChecked ? 'check' : 'square');
+      });
+      if (checklistFirstScan) checklistFirstScan = false;
+    }, 200);
+  </script>
+</body>
+</html> 
