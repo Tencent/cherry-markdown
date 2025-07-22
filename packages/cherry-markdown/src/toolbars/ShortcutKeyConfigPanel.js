@@ -2,25 +2,12 @@ import { mac } from 'codemirror/src/util/browser';
 import {
   getAllowedShortcutKey,
   keyStackIsModifierkeys,
-  ENTER_KEY,
-  BACKSPACE_KEY,
   keyStack2UniqueString,
   shortcutCode2Key,
-  keyStack2UnPlatformUniqueString,
   isEnableShortcutKey,
   setDisableShortcutKey,
   storageKeyMap,
 } from '@/utils/shortcutKey';
-import { createElement } from '@/utils/dom';
-/**
- * 隐藏输入框，展示快捷键配置项
- * @param {Element} inputWrapper
- * @param {HTMLElement} shortcutPanel
- */
-function hiddenInputWrapper(inputWrapper, shortcutPanel) {
-  inputWrapper.setAttribute('style', 'display: none;');
-  shortcutPanel.style.display = 'flex';
-}
 
 export default class ShortcutKeyConfigPanel {
   /**
@@ -33,108 +20,61 @@ export default class ShortcutKeyConfigPanel {
     this.shortcutUlId = this.shortcutUlClassName;
     this.shortcutConfigPanelKbdClassName = 'shortcut-key-config-panel-kbd';
     this.shortcutKeyboardKeyClassName = 'keyboard-key';
-    // 双击快捷键区域
-    this.handleDbClick = (/** @type {MouseEvent} */ e) => {
-      if (!isEnableShortcutKey(this.$cherry.nameSpace)) {
-        return;
-      }
+    this.activeTab = 'custom'; // 默认显示自定义快捷键的tab
+    this.editingItem = null; // 当前正在编辑的项
+    this.keyStack = []; // 当前编辑的快捷键栈
+    this.originalKeyStack = null; // 保存原始快捷键栈
+
+    this.handleTabClick = (/** @type {MouseEvent} */ e) => {
       if (e.target instanceof HTMLElement) {
-        if (
-          e.target.classList.contains(this.shortcutConfigPanelKbdClassName) ||
-          e.target.classList.contains(this.shortcutKeyboardKeyClassName)
-        ) {
-          const shortcutPanel = e.target.classList.contains(this.shortcutConfigPanelKbdClassName)
-            ? e.target
-            : e.target.parentElement;
-          // 隐藏展示快捷键的容器
-          shortcutPanel.style.display = 'none';
-          const inputWrapper = shortcutPanel.nextElementSibling;
-          // 显示输入框
-          inputWrapper.setAttribute('style', 'display: block;');
-          const inputElement = inputWrapper.querySelector('input');
-          const placeholder = [];
-          shortcutPanel.childNodes.forEach((element) => {
-            // @ts-ignore
-            placeholder.push(element.innerText);
-          });
-          inputElement.placeholder = placeholder.join('-');
-          // 获取焦点
-          inputElement.focus();
-          inputElement.onblur = () => {
-            hiddenInputWrapper(inputWrapper, shortcutPanel);
-            inputElement.value = '';
-          };
-          /** @type {string[]} 按下的快捷键栈 */
-          let keyStack = [];
-          inputElement.onkeydown = (/** @type {KeyboardEvent} */ e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (e.key === ENTER_KEY || e.key === BACKSPACE_KEY) {
-              if (e.key === ENTER_KEY) {
-                const { hookname = '' } = shortcutPanel.parentElement?.dataset ?? {};
-                const oldShortcutKeys = [];
-                for (let i = 0; i < shortcutPanel.children.length; i++) {
-                  /** @type {HTMLDivElement} */
-                  // @ts-ignore
-                  const element = shortcutPanel.children.item(i);
-                  const { code } = element.dataset ?? {};
-                  if (code) {
-                    oldShortcutKeys.push(code);
-                  }
-                }
-                // 防止修改
-                if (oldShortcutKeys.length === shortcutPanel.children.length) {
-                  // 旧的shortcutKey用于在更新时比较，删除旧值
-                  const oldShortcutKey = keyStack2UniqueString(oldShortcutKeys);
-                  if (hookname) {
-                    // 触发更新快捷键
-                    this.$cherry?.toolbar?.updateShortcutKeyMap(oldShortcutKey, keyStack2UniqueString(keyStack));
-                    // 取二者较大者
-                    const endIndex = Math.max(keyStack.length, shortcutPanel.children.length);
-                    // 更新界面展示的快捷键
-                    for (let i = 0; i < endIndex; i++) {
-                      const element = shortcutPanel.children.item(i);
-                      // 如果当前快捷键栈不存在了，说明新的快捷键个数比上一次少，则应该删除当前element
-                      if (!keyStack[i] && element) {
-                        element.remove();
-                        continue;
-                      }
-                      const matchRes = shortcutCode2Key(keyStack[i], mac);
-                      if (element) {
-                        element.setAttribute('title', matchRes.tip);
-                        element.textContent = matchRes.text;
-                        element.setAttribute('data-code', keyStack[i]);
-                      } else {
-                        const matchRes = shortcutCode2Key(keyStack[i], mac);
-                        const kbd = createElement('span', this.shortcutKeyboardKeyClassName, {
-                          title: matchRes.tip,
-                        });
-                        kbd.setAttribute('data-code', keyStack[i]);
-                        kbd.innerText = matchRes.text;
-                        shortcutPanel.appendChild(kbd);
-                      }
-                    }
-                  }
-                }
-                hiddenInputWrapper(inputWrapper, shortcutPanel);
-              } else {
-                if (keyStack.length === 0) {
-                  hiddenInputWrapper(inputWrapper, shortcutPanel);
-                }
-                // 退栈
-                keyStack.pop();
-                inputElement.value = keyStack2UnPlatformUniqueString(keyStack, mac);
-              }
-            } else {
-              keyStack = getAllowedShortcutKey(e);
-              if (!keyStackIsModifierkeys(keyStack) && Array.isArray(keyStack) && keyStack.length >= 2) {
-                inputElement.value = keyStack2UnPlatformUniqueString(keyStack, mac);
-              }
-            }
-          };
+        const tab = e.target.closest('.shortcut-tab');
+        if (tab instanceof HTMLElement) {
+          const tabId = tab.dataset.tab;
+          if (tabId) {
+            this.switchTab(tabId);
+          }
         }
       }
     };
+
+    this.handleEditBtnClick = (/** @type {MouseEvent} */ e, /** @type {HTMLElement} */ item) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // 如果有其他正在编辑的项，先取消编辑
+      if (this.editingItem && this.editingItem !== item) {
+        this.cancelEdit(this.editingItem);
+      }
+
+      // 开始编辑当前项
+      this.startEdit(item);
+    };
+
+    this.handleSaveBtnClick = (/** @type {MouseEvent} */ e, /** @type {HTMLElement} */ item) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.saveEdit(item);
+    };
+
+    this.handleCancelBtnClick = (/** @type {MouseEvent} */ e, /** @type {HTMLElement} */ item) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.cancelEdit(item);
+    };
+
+    this.handleKeyDown = (/** @type {KeyboardEvent} */ e) => {
+      if (!this.editingItem) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const newKeyStack = getAllowedShortcutKey(e);
+      if (!keyStackIsModifierkeys(newKeyStack) && Array.isArray(newKeyStack) && newKeyStack.length >= 2) {
+        this.keyStack = newKeyStack;
+        this.updateEditingKeys();
+      }
+    };
+
     this.clickSettingsDisableBtn = () => {
       if (!isEnableShortcutKey(this.$cherry.nameSpace)) {
         setDisableShortcutKey(this.$cherry.nameSpace, 'enable');
@@ -146,6 +86,7 @@ export default class ShortcutKeyConfigPanel {
         this.$cherry.editor.disableShortcut(true);
       }
     };
+
     this.clickSettingsRecoverBtn = () => {
       setDisableShortcutKey(this.$cherry.nameSpace, 'enable');
       this.dom.classList.remove('disable');
@@ -156,7 +97,132 @@ export default class ShortcutKeyConfigPanel {
       this.dom.innerHTML = this.generateShortcutKeyConfigPanelHtmlStr();
       this.show();
     };
+
     this.init();
+  }
+
+  /**
+   * 开始编辑快捷键
+   * @param {HTMLElement} item
+   */
+  startEdit(item) {
+    this.editingItem = item;
+    item.classList.add('editing');
+
+    // 获取并保存当前快捷键
+    const kbdContainer = item.querySelector(`.${this.shortcutConfigPanelKbdClassName}`);
+    if (kbdContainer) {
+      this.originalKeyStack = Array.from(kbdContainer.children)
+        .map((key) => {
+          if (key instanceof HTMLElement) {
+            return key.dataset.code || '';
+          }
+          return '';
+        })
+        .filter(Boolean);
+      this.keyStack = [...this.originalKeyStack];
+    }
+
+    // 添加键盘事件监听
+    document.addEventListener('keydown', this.handleKeyDown);
+  }
+
+  /**
+   * 取消编辑
+   * @param {HTMLElement} item
+   */
+  cancelEdit(item) {
+    item.classList.remove('editing');
+    if (this.editingItem === item) {
+      // 恢复原来的快捷键显示
+      const kbdContainer = item.querySelector(`.${this.shortcutConfigPanelKbdClassName}`);
+      if (kbdContainer && this.originalKeyStack) {
+        kbdContainer.innerHTML = this.originalKeyStack
+          .map((key) => {
+            const matchRes = shortcutCode2Key(key, mac);
+            return `<span class="${this.shortcutKeyboardKeyClassName}" title="${matchRes.tip}" data-code="${key}">${matchRes.text}</span>`;
+          })
+          .join('');
+      }
+      this.editingItem = null;
+      this.keyStack = [];
+      this.originalKeyStack = null;
+      document.removeEventListener('keydown', this.handleKeyDown);
+    }
+  }
+
+  /**
+   * 保存编辑
+   * @param {HTMLElement} item
+   */
+  saveEdit(item) {
+    if (!this.editingItem || !this.keyStack.length) return;
+
+    const kbdContainer = item.querySelector(`.${this.shortcutConfigPanelKbdClassName}`);
+    if (!kbdContainer) return;
+
+    const { hookname = '' } = item.dataset;
+
+    if (hookname) {
+      // 触发更新快捷键
+      this.$cherry?.toolbar?.updateShortcutKeyMap(
+        keyStack2UniqueString(this.originalKeyStack || []),
+        keyStack2UniqueString(this.keyStack),
+      );
+
+      // 更新界面
+      kbdContainer.innerHTML = this.keyStack
+        .map((key) => {
+          const matchRes = shortcutCode2Key(key, mac);
+          return `<span class="${this.shortcutKeyboardKeyClassName}" title="${matchRes.tip}" data-code="${key}">${matchRes.text}</span>`;
+        })
+        .join('');
+    }
+
+    this.editingItem = null;
+    this.keyStack = [];
+    this.originalKeyStack = null;
+    document.removeEventListener('keydown', this.handleKeyDown);
+    item.classList.remove('editing');
+  }
+
+  /**
+   * 更新编辑中的快捷键显示
+   */
+  updateEditingKeys() {
+    if (!this.editingItem) return;
+
+    const kbdContainer = this.editingItem.querySelector(`.${this.shortcutConfigPanelKbdClassName}`);
+    if (!kbdContainer) return;
+
+    kbdContainer.innerHTML = this.keyStack
+      .map((key) => {
+        const matchRes = shortcutCode2Key(key, mac);
+        return `<span class="${this.shortcutKeyboardKeyClassName}" title="${matchRes.tip}" data-code="${key}">${matchRes.text}</span>`;
+      })
+      .join('');
+  }
+
+  switchTab(tabId) {
+    this.activeTab = tabId;
+    const tabs = this.dom.querySelectorAll('.shortcut-tab');
+    const panels = this.dom.querySelectorAll('.shortcut-panel');
+
+    tabs.forEach((tab) => {
+      if (tab instanceof HTMLElement && tab.dataset.tab === tabId) {
+        tab.classList.add('active');
+      } else if (tab instanceof HTMLElement) {
+        tab.classList.remove('active');
+      }
+    });
+
+    panels.forEach((panel) => {
+      if (panel instanceof HTMLElement && panel.dataset.panel === tabId) {
+        panel.classList.add('active');
+      } else if (panel instanceof HTMLElement) {
+        panel.classList.remove('active');
+      }
+    });
   }
 
   init() {
@@ -189,22 +255,35 @@ export default class ShortcutKeyConfigPanel {
             .join(' ');
         }
         return `<li class="cherry-dropdown-item shortcut-key-item" data-hookname=${hookName} ${otherDataSet}>
-        <div class="shortcut-key-config-panel-name">${aliasName}</div>
-        <div class="${this.shortcutConfigPanelKbdClassName}">${key
-          ?.split('-')
-          .map((singalKey) => {
-            const matchRes = shortcutCode2Key(singalKey, mac);
-            const shortKey = matchRes ?? {
-              text: singalKey,
-              tip: singalKey,
-            };
-            return `<span class="${this.shortcutKeyboardKeyClassName}" title="${shortKey.tip}" data-code="${singalKey}">${shortKey.text}</span>`;
-          })
-          .join('')}</div>
-        <div style="display: none;" class="input-shortcut-wrapper"><input type="text" /></div>
-      </li>`;
+          <div class="shortcut-key-config-panel-name">${aliasName}</div>
+          <div class="shortcut-key-right">
+            <div class="${this.shortcutConfigPanelKbdClassName}">${key
+              ?.split('-')
+              .map((singalKey) => {
+                const matchRes = shortcutCode2Key(singalKey, mac);
+                const shortKey = matchRes ?? {
+                  text: singalKey,
+                  tip: singalKey,
+                };
+                return `<span class="${this.shortcutKeyboardKeyClassName}" title="${shortKey.tip}" data-code="${singalKey}">${shortKey.text}</span>`;
+              })
+              .join('')}</div>
+            <div class="edit-btn" title="${this.$cherry.locale.edit}">
+              <i class="ch-icon ch-icon-pen-fill"></i>
+            </div>
+            <div class="edit-actions">
+              <div class="action-btn save" title="${this.$cherry.locale.save}">
+                <i class="ch-icon ch-icon-ok"></i>
+              </div>
+              <div class="action-btn cancel" title="${this.$cherry.locale.cancel}">
+                <i class="ch-icon ch-icon-close"></i>
+              </div>
+            </div>
+          </div>
+        </li>`;
       })
       .join('');
+
     //   <div class="cherry-dropdown-item">
     //   <input type="checkbox" id="enableMacControl" name="enableMacControl" checked />
     //   <label for="enableMacControl">启用Mac平台的Control键</label>
@@ -219,9 +298,19 @@ export default class ShortcutKeyConfigPanel {
             this.$cherry.locale.recoverShortcut
           }</btn>
         </div>
-        <div class="shortcut-panel-title">${this.$cherry.locale.editShortcutKeyConfigTip}</div>
-        <ul class="${this.shortcutUlClassName}" id="${this.shortcutUlId}">${liStr}</ul>
-        ${this.$getStaticShortcut()}
+        <div class="shortcut-tabs">
+          <div class="shortcut-tab active" data-tab="custom">自定义快捷键</div>
+          <div class="shortcut-tab" data-tab="static">内置快捷键</div>
+        </div>
+        <div class="shortcut-panels">
+          <div class="shortcut-panel active" data-panel="custom">
+            <ul class="${this.shortcutUlClassName}" id="${this.shortcutUlId}">${liStr}</ul>
+          </div>
+          <div class="shortcut-panel" data-panel="static">
+            ${this.$getStaticShortcut()}
+          </div>
+        </div>
+        <div class="shortcut-panel-tips">${this.$cherry.locale.editShortcutKeyConfigTip} <i class="ch-icon ch-icon-pen-fill"></i></div>
       </div>`;
     return ulStr;
   }
@@ -258,29 +347,52 @@ export default class ShortcutKeyConfigPanel {
       li.push(`
         <li class="cherry-dropdown-item shortcut-key-item">
           <div class="shortcut-key-config-panel-name">${one.name}</div>
-          <div class="shortcut-key-config-panel-static">${one.key.replace(
-            /\+/g,
-            '<span class="shortcut-split">+</span>',
-          )}
+          <div class="shortcut-key-right-static">
+            <div class="${this.shortcutConfigPanelKbdClassName}">
+              ${one.key
+                .split('+')
+                .map((key) => {
+                  // 如果是鼠标左键，直接返回文本
+                  if (key === this.$cherry.locale.leftMouseButton) {
+                    return key;
+                  }
+                  return `<span class="${this.shortcutKeyboardKeyClassName}" title="${key}">${key}</span>`;
+                })
+                .join('')}
+            </div>
           </div>
         </li>
       `);
     }
-    return `<div class="shortcut-static">
-      <div class="shortcut-panel-title">${this.$cherry.locale.shortcutStaticTitle}</div>
-      <ul class="cherry-shortcut-key-config-panel-ul">${li.join('')}</ul>
-    </div>`;
+    return `<ul class="cherry-shortcut-key-config-panel-ul">${li.join('')}</ul>`;
   }
 
-  /**
-   * 显示快捷键配置面板
-   */
   show() {
     this.dom.style.removeProperty('display');
     const ulWrapper = this.dom.querySelector(`#${this.shortcutUlId}`);
     if (ulWrapper instanceof HTMLUListElement) {
-      // 监听双击
-      ulWrapper.addEventListener('dblclick', this.handleDbClick);
+      // 监听编辑按钮点击
+      const handleClick = (e) => {
+        if (e.target instanceof HTMLElement) {
+          const editBtn = e.target.closest('.edit-btn');
+          const saveBtn = e.target.closest('.action-btn.save');
+          const cancelBtn = e.target.closest('.action-btn.cancel');
+          const item = e.target.closest('.shortcut-key-item');
+
+          if (item instanceof HTMLElement) {
+            if (editBtn) {
+              this.handleEditBtnClick(e, item);
+            } else if (saveBtn) {
+              this.handleSaveBtnClick(e, item);
+            } else if (cancelBtn) {
+              this.handleCancelBtnClick(e, item);
+            }
+          }
+        }
+      };
+      ulWrapper.addEventListener('click', handleClick);
+      // 保存事件处理器引用以便后续移除
+      this.handleClick = handleClick;
     }
     const settingsDisableBtn = this.dom.querySelector('.j-shortcut-settings-disable-btn');
     if (settingsDisableBtn instanceof HTMLElement) {
@@ -290,14 +402,24 @@ export default class ShortcutKeyConfigPanel {
     if (settingsRecoverBtn instanceof HTMLElement) {
       settingsRecoverBtn.addEventListener('click', this.clickSettingsRecoverBtn);
     }
+    const tabs = this.dom.querySelector('.shortcut-tabs');
+    if (tabs instanceof HTMLElement) {
+      tabs.addEventListener('click', this.handleTabClick);
+    }
+    // 默认显示自定义快捷键tab
+    this.switchTab(this.activeTab);
   }
 
   hide() {
+    // 如果有正在编辑的项，取消编辑
+    if (this.editingItem) {
+      this.cancelEdit(this.editingItem);
+    }
+
     this.dom.style.display = 'none';
     const ulWrapper = this.dom.querySelector(`#${this.shortcutUlId}`);
-    if (ulWrapper instanceof HTMLUListElement) {
-      // 销毁时取消监听
-      ulWrapper.removeEventListener('dblclick', this.handleDbClick);
+    if (ulWrapper instanceof HTMLUListElement && this.handleClick) {
+      ulWrapper.removeEventListener('click', this.handleClick);
     }
     const settingsDisableBtn = this.dom.querySelector('.j-shortcut-settings-disable-btn');
     if (settingsDisableBtn instanceof HTMLElement) {
@@ -306,6 +428,10 @@ export default class ShortcutKeyConfigPanel {
     const settingsRecoverBtn = this.dom.querySelector('.j-shortcut-settings-recover-btn');
     if (settingsRecoverBtn instanceof HTMLElement) {
       settingsRecoverBtn.removeEventListener('click', this.clickSettingsRecoverBtn);
+    }
+    const tabs = this.dom.querySelector('.shortcut-tabs');
+    if (tabs instanceof HTMLElement) {
+      tabs.removeEventListener('click', this.handleTabClick);
     }
   }
 

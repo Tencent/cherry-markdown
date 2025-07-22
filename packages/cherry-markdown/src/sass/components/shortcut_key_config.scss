@@ -1,17 +1,58 @@
 .cherry-shortcut-key-config-panel-wrapper {
-  width: 250px !important;
-  height: 400px !important;
+  width: 280px !important;
+  height: 420px !important;
   .cherry-shortcut-key-config-panel-inner {
     width: 100%;
     height: 100%;
-    overflow: auto;
-    // 隐藏滚动条
-    &::-webkit-scrollbar {
-      display: none;
+    overflow: hidden;
+
+    .shortcut-tabs {
+      display: flex;
+      padding: 4px 10px;
+      gap: 10px;
+      margin-bottom: 6px;
+
+      .shortcut-tab {
+        flex: 1;
+        padding: 4px 10px;
+        border-radius: 4px;
+        text-align: center;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.2s;
+        user-select: none;
+
+        &:hover {
+          background-color: var(--dropdown-item-hover-bg);
+        }
+
+        &.active {
+          color: var(--primary-color);
+          background-color: var(--secondary-color);
+        }
+      }
     }
+
+    .shortcut-panels {
+      height: 310px;
+      overflow: auto;
+      // 隐藏滚动条
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      .shortcut-panel {
+        display: none;
+        &.active {
+          display: block;
+        }
+      }
+    }
+
     .shortcut-top {
       width: 100%;
     }
+
     .cherry-shortcut-key-config-panel-ul {
       // 去掉列表样式
       list-style: none;
@@ -23,87 +64,181 @@
         justify-content: space-between;
         height: auto;
         padding: 2px 15px;
-        border-top: 1px solid #eee;
         align-items: center;
-        .input-shortcut-wrapper {
-          width: 100px;
-          input {
-            width: 100%;
+        position: relative;
+
+        &.editing {
+          background-color: var(--dropdown-item-hover-bg);
+          .shortcut-key-config-panel-kbd {
+            border: 1px dashed var(--primary-color);
+            border-radius: 6px;
+            padding: 2px 4px;
+            background: var(--secondary-color);
+            transform: translateX(0) !important; // 编辑时不偏移
+          }
+          .edit-btn {
+            display: none;
+          }
+          .edit-actions {
+            display: flex;
           }
         }
+
         .shortcut-key-config-panel-name {
           max-width: 120px;
         }
+
+        .shortcut-key-right,
+        .shortcut-key-right-static {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
         .shortcut-key-config-panel-kbd {
           display: flex;
-          gap: 10px;
-          min-width: 120px;
+          gap: 2px;
           justify-content: right;
+          transition: all 0.2s ease;
+          align-items: center;
 
           .keyboard-key {
-            border-radius: 3px;
-            border-style: solid;
-            border-width: 1px;
-            display: inline-block;
-            font-size: 11px;
+            background-color: var(--dropdown-bg);
+            border: 1px solid #ccc;
+            border-bottom: 2px solid #b5b5b5;
+            border-radius: 6px;
+            // display: inline-block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
             margin: 0 2px;
             padding: 3px 5px;
             vertical-align: middle;
-            line-height: 20px;
-            margin: 4px;
+            line-height: 16px;
             min-width: 16px;
             text-align: center;
+            transition: all 0.15s ease;
+
+            &:hover {
+              background-color: var(--dropdown-item-hover-bg);
+              transform: translateY(-1px);
+            }
+          }
+        }
+
+        .edit-btn {
+          position: absolute;
+          right: 5px;
+          top: 50%;
+          transform: translateY(-50%);
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.2s ease;
+          cursor: pointer;
+          padding: 2px 4px;
+          border-radius: 4px;
+          color: var(--toolbar-btn-color);
+
+          &:hover {
+            color: var(--primary-color);
+          }
+        }
+
+        .edit-actions {
+          display: none;
+          gap: 4px;
+
+          .action-btn {
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            text-align: center;
+
+            .ch-icon {
+              margin-right: 0;
+            }
+
+            &.save {
+              color: var(--color-success);
+              &:hover {
+                background: #f6ffed;
+              }
+            }
+
+            &.cancel {
+              color: var(--color-error);
+              &:hover {
+                background: #fff2f0;
+              }
+            }
+          }
+        }
+
+        &:hover {
+          .shortcut-key-config-panel-kbd {
+            transform: translateX(-24px);
+          }
+
+          .shortcut-key-right-static {
+            .shortcut-key-config-panel-kbd {
+              transform: translateX(0); // 静态时，不偏移
+            }
+          }
+
+          .edit-btn {
+            opacity: 1;
+            visibility: visible;
           }
         }
       }
     }
   }
-  .shortcut-static {
-    .cherry-shortcut-key-config-panel-ul {
-      gap: 0;
-      .shortcut-key-item {
-        cursor: default;
-        .shortcut-key-config-panel-static {
-          display: flex;
-          gap: 3px;
-          min-width: 80px;
-          justify-content: right;
-          .shortcut-split {
-            color: #aaa;
-          }
-        }
-      }
-    }
-  }
-  .shortcut-panel-title, .shortcut-panel-settings {
-    font-size: var(--font-size-sm);
+
+  .shortcut-panel-tips {
+    font-size: var(--font-size-xs);
+    color: var(--text-color-secondary);
+    text-align: center;
     padding: 10px 15px;
-    background-color: #eee; 
-    // border-bottom: 1px solid #888;
-    // border-top: 1px solid #888;
+    user-select: none;
   }
+
   .shortcut-panel-settings {
     padding: 10px 15px;
     font-size: var(--font-size-xs);
     cursor: pointer;
     user-select: none;
-    border-bottom: 1px solid #aaa;
     justify-content: space-between;
     display: flex;
+
     .shortcut-settings-btn {
+      color: var(--toolbar-btn-color);
       height: auto;
       line-height: 1.2em;
       &:hover {
-        color: rgb(255, 77, 79);
+        color: var(--primary-color);
       }
     }
   }
   &.disable {
     .cherry-shortcut-key-config-panel-ul {
       opacity: 0.3;
+      .shortcut-key-item {
+        &:hover {
+          .shortcut-key-config-panel-kbd {
+            transform: translateX(0); // 禁用状态下不偏移
+          }
+          .edit-btn {
+            opacity: 0;
+            visibility: hidden; // 禁用状态下不显示编辑按钮
+          }
+        }
+      }
     }
     .j-shortcut-settings-disable-btn {
-      color: rgb(255, 77, 79);
+      color: var(--primary-color);
     }
   }
 }

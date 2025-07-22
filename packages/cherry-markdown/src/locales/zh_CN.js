@@ -112,7 +112,7 @@ export default {
   inlineCode: '行内代码',
   codeBlock: '代码块',
   shortcutKeySetting: '快捷键设置',
-  editShortcutKeyConfigTip: '双击快捷键区域编辑快捷键',
+  editShortcutKeyConfigTip: '点击快捷键区域编辑按钮编辑快捷键',
   wordCount: '字数统计',
   wordCountP: '段落',
   wordCountW: '单词',
