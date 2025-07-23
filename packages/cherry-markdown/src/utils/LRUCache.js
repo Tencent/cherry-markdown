@@ -33,16 +33,19 @@ export default class LRUCache {
    * @param {any} value 缓存值
    */
   set(key, value) {
-    // 如果已存在，先删除
+    // 如果键已存在，先删除（相当于更新位置）
     if (this.cache.has(key)) {
       this.cache.delete(key);
     }
-    // 如果达到容量上限，删除最久未使用的项（Map的第一项）
-    else if (this.cache.size >= this.capacity) {
-      const oldestKey = this.cache.keys().next().value;
-      this.cache.delete(oldestKey);
+
+    // 如果缓存已满，删除最旧的100个项（或者全部，如果少于100个）
+    if (this.cache.size >= this.capacity) {
+      const deleteCount = Math.min(100, this.cache.size);
+      const keys = Array.from(this.cache.keys()).slice(0, deleteCount);
+      keys.forEach((oldKey) => this.cache.delete(oldKey));
     }
-    // 添加新项到末尾
+
+    // 添加新项到缓存末尾
     this.cache.set(key, value);
   }
 
