@@ -28,6 +28,7 @@ import UrlCache from './UrlCache';
 import htmlParser from './utils/htmlparser';
 import { isBrowser } from './utils/env';
 import * as htmlparser2 from 'htmlparser2';
+import LRUCache from './utils/LRUCache';
 
 export default class Engine {
   /**
@@ -49,15 +50,16 @@ export default class Engine {
     this.hookCenter = new HookCenter(hooksConfig, markdownParams, cherry);
     this.hooks = this.hookCenter.getHookList();
     this.asyncRenderHandler = new AsyncRenderHandler(cherry);
-    this.hashCache = {};
-    this.hashStrMap = {};
-    this.cachedBigData = {};
+    // 使用LRU缓存替代普通对象
+    this.hashCache = new LRUCache(500); // 缓存最多500个渲染结果
+    this.hashStrMap = new LRUCache(2000); // 缓存最多2000个哈希值
+    this.cachedBigData = new LRUCache(100); // 缓存最多100个大数据项
+    this.urlProcessorMap = new LRUCache(200); // 缓存最多200个处理过的URL
     this.markdownParams = markdownParams;
     this.currentStrMd5 = [];
     this.globalConfig = markdownParams.engine.global;
     this.htmlWhiteListAppend = this.globalConfig.htmlWhiteList;
     this.htmlBlackList = this.globalConfig.htmlBlackList;
-    this.urlProcessorMap = {};
   }
 
   /**
@@ -72,7 +74,7 @@ export default class Engine {
     }
     this.timer = setTimeout(() => {
       this.$cherry.lastMarkdownText = '';
-      this.hashCache = {};
+      this.hashCache.clear();
       const markdownText = this.$cherry.editor.editor.getValue();
       const html = this.makeHtml(markdownText);
       this.$cherry.previewer.refresh(html);
@@ -85,17 +87,17 @@ export default class Engine {
 
   urlProcessor(url, srcType) {
     const key = `${srcType}_${url}`;
-    if (this.urlProcessorMap[key]) {
-      return this.urlProcessorMap[key];
+    if (this.urlProcessorMap.get(key)) {
+      return this.urlProcessorMap.get(key);
     }
     const ret = this.$cherry.options.callback.urlProcessor(url, srcType, (/** @type {string} */ newUrl) => {
       if (newUrl) {
-        if (!this.urlProcessorMap[key]) {
-          this.urlProcessorMap[key] = newUrl;
+        if (!this.urlProcessorMap.get(key)) {
+          this.urlProcessorMap.set(key, newUrl);
           this.reMakeHtml();
         }
       } else {
-        delete this.urlProcessorMap[key];
+        this.urlProcessorMap.delete(key);
       }
       return;
     });
@@ -302,26 +304,26 @@ export default class Engine {
    */
   hash(str) {
     // 当缓存队列比较大时，随机抛弃500个缓存
-    if (Object.keys(this.hashStrMap).length > 2000) {
-      const keys = Object.keys(this.hashStrMap).slice(0, 200);
-      keys.forEach((key) => delete this.hashStrMap[key]);
+    if (this.hashStrMap.size > 2000) {
+      const keys = Array.from(this.hashStrMap.keys()).slice(0, 200);
+      keys.forEach((key) => this.hashStrMap.delete(key));
     }
-    if (!this.hashStrMap[str]) {
-      this.hashStrMap[str] = CryptoJS.SHA256(str).toString();
+    if (!this.hashStrMap.get(str)) {
+      this.hashStrMap.set(str, CryptoJS.SHA256(str).toString());
     }
-    return this.hashStrMap[str];
+    return this.hashStrMap.get(str);
   }
 
   $checkCache(str, func) {
     const sign = this.hash(str);
-    if (typeof this.hashCache[sign] === 'undefined') {
-      this.hashCache[sign] = func(str);
+    if (!this.hashCache.get(sign)) {
+      this.hashCache.set(sign, func(str));
       if (BUILD_ENV !== 'production') {
         // 生产环境屏蔽
         Logger.log('markdown引擎渲染了：', str);
       }
     }
-    return { sign, html: this.hashCache[sign] };
+    return { sign, html: this.hashCache.get(sign) };
   }
 
   $dealParagraph(md) {
@@ -332,17 +334,17 @@ export default class Engine {
   $cacheBigData(md) {
     let $md = md.replace(imgBase64Reg, (whole, m1, m2) => {
       const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
-      this.cachedBigData[cacheKey] = m2;
+      this.cachedBigData.set(cacheKey, m2);
       return `${m1}${cacheKey})`;
     });
     $md = $md.replace(imgDrawioXmlReg, (whole, m1, m2) => {
       const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
-      this.cachedBigData[cacheKey] = m2;
+      this.cachedBigData.set(cacheKey, m2);
       return `${m1}${cacheKey}}`;
     });
     $md = $md.replace(longTextReg, (whole, m1, m2) => {
       const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
-      this.cachedBigData[cacheKey] = m2;
+      this.cachedBigData.set(cacheKey, m2);
       return `${m1}${cacheKey}}`;
     });
     return $md;
@@ -350,7 +352,7 @@ export default class Engine {
 
   $deCacheBigData(md) {
     return md.replace(/bigDataBegin[^\n]+?bigDataEnd/g, (whole) => {
-      return this.cachedBigData[whole];
+      return this.cachedBigData.get(whole);
     });
   }
 
