@@ -40,9 +40,15 @@ export default class LRUCache {
 
     // 如果缓存已满，删除最旧的100个项（或者全部，如果少于100个）
     if (this.cache.size >= this.capacity) {
+      const iterator = this.cache.keys();
       const deleteCount = Math.min(100, this.cache.size);
-      const keys = Array.from(this.cache.keys()).slice(0, deleteCount);
-      keys.forEach((oldKey) => this.cache.delete(oldKey));
+
+      for (let i = 0; i < deleteCount; i++) {
+        const result = iterator.next();
+        if (result.done) break;
+        const oldKey = result.value;
+        this.cache.delete(oldKey);
+      }
     }
 
     // 添加新项到缓存末尾
