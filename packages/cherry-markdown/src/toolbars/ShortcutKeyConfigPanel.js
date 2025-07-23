@@ -374,20 +374,20 @@ export default class ShortcutKeyConfigPanel {
           <div class="shortcut-key-config-panel-name">${aliasName}</div>
           <div class="shortcut-key-right">
             <div class="${this.shortcutConfigPanelKbdClassName}">${this.generateKeyboardCombination(
-          key.split('-'),
-          (singalKey) => {
-            const matchRes = shortcutCode2Key(singalKey, mac);
-            const shortKey = matchRes ?? {
-              text: singalKey,
-              tip: singalKey,
-            };
-            return this.generateKeyboardKeySpan({
-              title: shortKey.tip,
-              code: singalKey,
-              text: shortKey.text,
-            });
-          },
-        )}</div>
+              key.split('-'),
+              (singalKey) => {
+                const matchRes = shortcutCode2Key(singalKey, mac);
+                const shortKey = matchRes ?? {
+                  text: singalKey,
+                  tip: singalKey,
+                };
+                return this.generateKeyboardKeySpan({
+                  title: shortKey.tip,
+                  code: singalKey,
+                  text: shortKey.text,
+                });
+              },
+            )}</div>
             <div class="edit-btn" title="${this.$cherry.locale.edit}">
               <i class="ch-icon ch-icon-pen-fill"></i>
             </div>
