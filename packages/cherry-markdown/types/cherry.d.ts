@@ -294,7 +294,7 @@ export interface CherryEngineOptions {
       listNested?: boolean, // 同级列表类型转换后变为子级
       indentSpace?: number, // 默认2个空格缩进
     },
-    table: false | {
+    table?: false | {
       enableChart?: boolean,
       selfClosing?: boolean, // 自动闭合，为true时，当输入第一行table内容时，cherry会自动按表格进行解析
       // chartRenderEngine: EChartsTableEngine,
