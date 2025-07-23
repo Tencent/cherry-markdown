@@ -149,6 +149,14 @@ var basicConfig = {
           { html: '自定义按钮1', onClick: (event, code, lang, dom)=>{console.log(`【${lang}】: ${code}`);console.log(dom);} },
           { html: '自定义按钮2', onClick: (event, code, lang, dom)=>{console.log(`【${lang}】: ${code}`);console.log(dom);} },
         ],
+        customRenderer: {
+          // 特殊配置“all”，会应用于所有语言
+          // 'all': {
+          //   render: (src, sign, cherryEnding)=> {
+          //     return `<p class="my-render">${src}</p>`;
+          //   }
+          // }
+        }
       },
       table: {
         enableChart: true,
