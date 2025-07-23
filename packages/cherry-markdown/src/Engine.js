@@ -51,7 +51,7 @@ export default class Engine {
     this.hooks = this.hookCenter.getHookList();
     this.asyncRenderHandler = new AsyncRenderHandler(cherry);
     // 使用LRU缓存替代普通对象
-    this.hashCache = new LRUCache(500); // 缓存最多500个渲染结果
+    this.hashCache = new LRUCache(20000); // 缓存最多20000个渲染结果
     this.hashStrMap = new LRUCache(2000); // 缓存最多2000个哈希值
     this.cachedBigData = {};
     this.urlProcessorMap = {};
