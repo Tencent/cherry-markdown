@@ -202,7 +202,9 @@ export default class Toc {
         let tocHtml = '';
         let index = 0;
         tocList.map((item) => {
-          const text = item.text.replace(/<sup class="cherry-footnote-number">.*?<\/sup>/g, ''); // 去除脚注
+          const text = item.text
+            .replace(/<sup class="cherry-footnote-number">.*?<\/sup>/g, '')
+            .replace(/<a .+?<\/a>/g, '');
           const title = text.replace(/<[^>]+?>/g, '');
           tocHtml += `<a class="cherry-toc-one-a cherry-toc-one-a__${item.level > 5 ? 5 : item.level}"
             title="${title}"
