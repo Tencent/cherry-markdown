@@ -36,23 +36,23 @@ export default class Header extends MenuBase {
     this.shortcutKeyMap = {
       [`${CONTROL_KEY}-${getKeyCode(1)}`]: {
         hookName: this.name,
-        aliasName: this.$cherry.locale.h1,
+        aliasName: 'h1',
       },
       [`${CONTROL_KEY}-${getKeyCode(2)}`]: {
         hookName: this.name,
-        aliasName: this.$cherry.locale.h2,
+        aliasName: 'h2',
       },
       [`${CONTROL_KEY}-${getKeyCode(3)}`]: {
         hookName: this.name,
-        aliasName: this.$cherry.locale.h3,
+        aliasName: 'h3',
       },
       [`${CONTROL_KEY}-${getKeyCode(4)}`]: {
         hookName: this.name,
-        aliasName: this.$cherry.locale.h4,
+        aliasName: 'h4',
       },
       [`${CONTROL_KEY}-${getKeyCode(5)}`]: {
         hookName: this.name,
-        aliasName: this.$cherry.locale.h5,
+        aliasName: 'h5',
       },
     };
   }

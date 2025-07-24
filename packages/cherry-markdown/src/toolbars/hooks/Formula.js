@@ -34,7 +34,7 @@ export default class Formula extends MenuBase {
     this.shortcutKeyMap = {
       [`${CONTROL_KEY}-${getKeyCode('m')}`]: {
         hookName: this.name,
-        aliasName: this.$cherry.locale[this.name],
+        aliasName: this.name,
       },
     };
   }
