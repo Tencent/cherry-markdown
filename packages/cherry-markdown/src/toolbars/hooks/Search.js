@@ -27,7 +27,7 @@ export default class Search extends MenuBase {
     this.shortcutKeyMap = {
       [`${CONTROL_KEY}-${getKeyCode('f')}`]: {
         hookName: this.name,
-        aliasName: $cherry.locale[this.name],
+        aliasName: this.name,
       },
     };
     this.searchBox = new SearchBox();

@@ -28,7 +28,7 @@ export default class Underline extends MenuBase {
     this.shortcutKeyMap = {
       [`${CONTROL_KEY}-${getKeyCode('u')}`]: {
         hookName: this.name,
-        aliasName: this.$cherry.locale[this.name],
+        aliasName: this.name,
       },
     };
   }

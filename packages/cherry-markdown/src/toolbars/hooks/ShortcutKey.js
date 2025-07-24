@@ -29,7 +29,7 @@ export default class ShortcutKey extends MenuBase {
       [`${CONTROL_KEY}-${getKeyCode('0')}`]: {
         hookName: this.name,
         sub: 'toggleToolbar',
-        aliasName: this.$cherry.locale.hide,
+        aliasName: 'hide',
       },
     };
   }

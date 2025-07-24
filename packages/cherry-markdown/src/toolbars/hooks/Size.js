@@ -39,19 +39,19 @@ export default class Size extends MenuBase {
     this.shortcutKeyMap = {
       [`${ALT_KEY}-${getKeyCode(1)}`]: {
         hookName: this.name,
-        aliasName: `${this.$cherry.locale[this.name]}-${this.$cherry.locale.small}`,
+        aliasName: `${this.name}-small`,
       },
       [`${ALT_KEY}-${getKeyCode(2)}`]: {
         hookName: this.name,
-        aliasName: `${this.$cherry.locale[this.name]}-${this.$cherry.locale.medium}`,
+        aliasName: `${this.name}-medium`,
       },
       [`${ALT_KEY}-${getKeyCode(3)}`]: {
         hookName: this.name,
-        aliasName: `${this.$cherry.locale[this.name]}-${this.$cherry.locale.large}`,
+        aliasName: `${this.name}-large`,
       },
       [`${ALT_KEY}-${getKeyCode(4)}`]: {
         hookName: this.name,
-        aliasName: `${this.$cherry.locale[this.name]}-${this.$cherry.locale.superLarge}`,
+        aliasName: `${this.name}-superLarge`,
       },
     };
   }

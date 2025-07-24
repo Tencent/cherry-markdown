@@ -28,7 +28,7 @@ export default class Bold extends MenuBase {
     this.shortcutKeyMap = {
       [`${CONTROL_KEY}-${getKeyCode('b')}`]: {
         hookName: this.name,
-        aliasName: $cherry.locale[this.name],
+        aliasName: this.name,
       },
     };
   }
