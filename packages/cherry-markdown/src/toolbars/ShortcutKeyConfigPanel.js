@@ -104,7 +104,8 @@ export default class ShortcutKeyConfigPanel {
       if (this.editingItem) {
         this.cancelEdit(this.editingItem);
       }
-      if (!isEnableShortcutKey(this.$cherry.nameSpace)) {
+      const isEnabled = isEnableShortcutKey(this.$cherry.nameSpace);
+      if (!isEnabled) {
         setDisableShortcutKey(this.$cherry.nameSpace, 'enable');
         this.dom.classList.remove('disable');
         this.$cherry.editor.disableShortcut(false);
@@ -114,6 +115,13 @@ export default class ShortcutKeyConfigPanel {
         this.dom.classList.add('disable');
         this.$cherry.editor.disableShortcut(true);
         this.updateTipText();
+      }
+      // 更新按钮文本和图标
+      const disableBtn = this.dom.querySelector('.j-shortcut-settings-disable-btn');
+      if (disableBtn instanceof HTMLElement) {
+        disableBtn.innerHTML = `<i class="ch-icon ${
+          isEnabled ? 'ch-icon-command' : 'ch-icon-cherry-table-delete'
+        }"></i> ${isEnabled ? this.$cherry.locale.enableShortcut : this.$cherry.locale.disableShortcut}`;
       }
     };
 
@@ -421,8 +429,12 @@ export default class ShortcutKeyConfigPanel {
     const ulStr = `
       <div class="cherry-shortcut-key-config-panel-inner">
         <div class="shortcut-panel-settings">
-          <btn class="shortcut-settings-btn j-shortcut-settings-disable-btn"><i class="ch-icon ch-icon-cherry-table-delete"></i> ${
-            this.$cherry.locale.disableShortcut
+          <btn class="shortcut-settings-btn j-shortcut-settings-disable-btn"><i class="ch-icon ${
+            !isEnableShortcutKey(this.$cherry.nameSpace) ? 'ch-icon-command' : 'ch-icon-cherry-table-delete'
+          }"></i> ${
+            !isEnableShortcutKey(this.$cherry.nameSpace)
+              ? this.$cherry.locale.enableShortcut
+              : this.$cherry.locale.disableShortcut
           }</btn>
           <btn class="shortcut-settings-btn j-shortcut-settings-recover-btn"><i class="ch-icon ch-icon-undo"></i> ${
             this.$cherry.locale.recoverShortcut

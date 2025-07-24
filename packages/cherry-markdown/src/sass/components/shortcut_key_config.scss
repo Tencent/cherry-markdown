@@ -247,10 +247,13 @@
       cursor: pointer;
       justify-content: space-between;
       display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
 
       .shortcut-settings-btn {
         height: auto;
         line-height: 1.2em;
+        text-wrap: nowrap;
         @include hover-color;
       }
 
@@ -263,14 +266,23 @@
       .cherry-shortcut-key-config-panel-ul {
         opacity: 0.3;
 
-        .shortcut-key-item:hover {
-          .shortcut-key-config-panel-kbd {
-            transform: translateX(0); // 禁用状态下不偏移
-          }
+        .cherry-dropdown-item,
+        .shortcut-key-item {
+          cursor: default; // 设置默认鼠标指针
+          pointer-events: none; // 禁用所有鼠标事件
 
-          .edit-btn {
-            opacity: 0;
-            visibility: hidden; // 禁用状态下不显示编辑按钮
+          &:hover {
+            color: inherit; // 禁用hover时的文字颜色变化
+            background-color: transparent; // 禁用hover时的背景色变化
+
+            .shortcut-key-config-panel-kbd {
+              transform: translateX(0);
+            }
+
+            .edit-btn {
+              opacity: 0;
+              visibility: hidden; // 禁用状态下不显示编辑按钮
+            }
           }
         }
       }
