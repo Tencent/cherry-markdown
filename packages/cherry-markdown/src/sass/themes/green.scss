@@ -44,6 +44,10 @@
   --md-blockquote-bg: var(--oc-green-1);
   --md-hr-border: var(--oc-green-8);
   --md-table-border: var(--oc-green-8);
+  --md-toc-bg: var(--oc-white);
+  --md-toc-indicator-color: var(--oc-green-1);
+  --md-toc-link-hover-bg: var(--oc-green-0);
+  --md-toc-link-active-bg: var(--oc-green-1);
 }
 
 /** 预览区域样式 */
@@ -55,20 +59,5 @@
   h5 {
     text-align: center;
     margin-bottom: 35px;
-  }
-
-  /** 目录 */
-  .toc {
-    border-bottom: 1px solid var(--md-hr-border);
-    padding-bottom: 15px;
-    margin-bottom: 30px;
-
-    .toc-title {
-      text-align: center;
-      padding-bottom: 15px;
-      margin-top: 30px;
-      margin-bottom: 15px;
-      border-bottom: 1px solid var(--md-hr-border);
-    }
   }
 }

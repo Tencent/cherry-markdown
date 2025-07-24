@@ -46,6 +46,11 @@
   --md-blockquote-bg: rgba(102, 128, 153, 0.05);
   --md-hr-border: var(--oc-gray-5);
   --md-table-border: var(--oc-gray-5);
+  --md-toc-bg: var(--oc-gray-9);
+  --md-toc-border-color: var(--oc-gray-7);
+  --md-toc-indicator-color: var(--oc-gray-7);
+  --md-toc-link-hover-bg: var(--oc-gray-8);
+  --md-toc-link-active-bg: var(--oc-gray-7);
 
   /* 目录区域样式 */
   .cherry-flex-toc {
@@ -128,23 +133,6 @@
 
 /** 预览区域样式 */
 .cherry-markdown.theme__dark {
-  /** 目录 */
-  .toc {
-    border: 1px solid var(--md-hr-border);
-    margin-top: 15px;
-    margin-bottom: 15px;
-    margin-right: 15px;
-
-    .toc-title {
-      padding: 15px;
-      margin-bottom: 15px;
-      border-bottom: 1px solid var(--md-hr-border);
-    }
-
-    .toc-li {
-      padding: 0 20px;
-    }
-  }
 
   figure {
     svg {

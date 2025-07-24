@@ -108,4 +108,20 @@
   
   // 分割线
   --md-hr-border: var(--base-border-color);
+
+  // 目录 (TOC)
+  --md-toc-bg: var(--oc-gray-0);
+  --md-toc-border-color: var(--base-border-color);
+  --md-toc-radius: var(--radius-lg);
+  --md-toc-padding: var(--spacing-lg);
+  --md-toc-title-color: var(--md-heading-color);
+  --md-toc-link-hover-bg: var(--oc-gray-1);
+  --md-toc-link-active-bg: var(--oc-gray-2);
+  --md-toc-link-radius: var(--radius-md);
+  --md-toc-link-color: var(--md-paragraph-color);
+  --md-toc-link-hover-color: var(--md-link-hover-color);
+  --md-toc-indicator-width: var(--border-width-4); 
+  --md-toc-indicator-color: var(--oc-gray-3);
+  --md-toc-indicator-hover-color: var(--md-toc-link-hover-color);
+  --md-toc-indicator-gap: var(--spacing-lg);
 }

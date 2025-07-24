@@ -308,22 +308,53 @@
     margin-bottom: var(--spacing-lg);
     padding-left: 0;
 
+    // 容器样式
+    background-color: var(--md-toc-bg);
+    border: var(--border-width-1) solid var(--md-toc-border-color);
+    border-radius: var(--md-toc-radius);
+    padding: var(--md-toc-padding);
+
     .toc-title {
       font-size: var(--font-size-2xl);
-      margin-bottom: 5px;
+      margin-bottom: var(--spacing-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--md-toc-title-color);
     }
 
     .toc-li {
-      border: none;
       list-style: none;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      border-left: var(--md-toc-indicator-width) solid var(--md-toc-indicator-color);
+      padding-left: var(--md-toc-indicator-gap);
+      transition: border-color 50ms ease-out;
 
       a {
         text-decoration: none;
-        color: var(--md-paragraph-color);
+        color: var(--md-toc-link-color);
+        flex-grow: 1;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--md-toc-link-radius);
+        transition: color 50ms ease-out, background-color 50ms ease-out;
 
         &:hover {
-          color: var(--md-link-hover-color);
+          color: var(--md-toc-link-hover-color);
+          background-color: var(--md-toc-link-hover-bg);
         }
+
+        &:active {
+          background-color: var(--md-toc-link-active-bg);
+        }
+
+        &.level-1 {
+          font-weight: var(--font-weight-semibold);
+        }        
+      }
+
+      &:hover,
+      &:has(a:active) {
+        border-left-color: var(--md-toc-indicator-hover-color);
       }
     }
   }
