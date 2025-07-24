@@ -28,7 +28,7 @@ export default class Link extends MenuBase {
     this.shortcutKeyMap = {
       [`${CONTROL_KEY}-${getKeyCode('l')}`]: {
         hookName: this.name,
-        aliasName: this.$cherry.locale[this.name],
+        aliasName: this.name,
       },
     };
   }

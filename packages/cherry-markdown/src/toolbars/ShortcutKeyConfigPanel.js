@@ -356,6 +356,16 @@ export default class ShortcutKeyConfigPanel {
   }
 
   /**
+   * 获取快捷键的别名i18n
+   * @param {string} aliasName
+   * @returns {string} 别名
+   */
+  getAliasLocale(aliasName) {
+    const aliasNames = aliasName.split('-');
+    return aliasNames.map((name) => this.$cherry.locale[name] || name).join('-');
+  }
+
+  /**
    * 生成快捷键配置面板HTML字符串
    * @returns {string} 生成的HTML字符串
    */
@@ -371,7 +381,7 @@ export default class ShortcutKeyConfigPanel {
             .join(' ');
         }
         return `<li class="cherry-dropdown-item shortcut-key-item" data-hookname=${hookName} ${otherDataSet}>
-          <div class="shortcut-key-config-panel-name">${aliasName}</div>
+          <div class="shortcut-key-config-panel-name">${this.getAliasLocale(aliasName)}</div>
           <div class="shortcut-key-right">
             <div class="${this.shortcutConfigPanelKbdClassName}">${this.generateKeyboardCombination(
               key.split('-'),
