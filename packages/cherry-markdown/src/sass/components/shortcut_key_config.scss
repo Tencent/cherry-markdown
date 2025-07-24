@@ -132,6 +132,9 @@
           .shortcut-key-right-static {
             @include flex-center;
             gap: 8px;
+            flex-wrap: wrap;
+            flex: 1;
+            justify-content: flex-end;
           }
 
           .shortcut-key-config-panel-kbd {
