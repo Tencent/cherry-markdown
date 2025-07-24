@@ -112,7 +112,7 @@ export default {
   inlineCode: '行内代码',
   codeBlock: '代码块',
   shortcutKeySetting: '快捷键设置',
-  editShortcutKeyConfigTip: '点击快捷键区域的编辑按钮编辑快捷键',
+  editShortcutKeyConfigTip: '双击快捷键区域或点击编辑按钮编辑快捷键',
   editingShortcutKeyConfigTip: '按Enter键保存，Backspace键移除新增的键',
   staticShortcutTip: '内置快捷键不可修改',
   disabledShortcutTip: '当前快捷键已禁用',

@@ -55,6 +55,30 @@ export default class ShortcutKeyConfigPanel {
       this.startEdit(item);
     };
 
+    // 双击快捷键区域
+    this.handleDbClick = (/** @type {MouseEvent} */ e) => {
+      if (!(e.target instanceof HTMLElement)) return;
+      // 如果快捷键被禁用，不处理双击事件
+      if (!isEnableShortcutKey(this.$cherry.nameSpace)) {
+        return;
+      }
+      // 找到最近的快捷键项
+      const item = e.target.closest('.shortcut-key-item');
+      if (!(item instanceof HTMLElement)) {
+        return;
+      }
+      // 如果是静态快捷键，不处理双击事件
+      if (this.activeTab === 'static') {
+        return;
+      }
+      // 如果有其他正在编辑的项，先取消编辑
+      if (this.editingItem && this.editingItem !== item) {
+        this.cancelEdit(this.editingItem);
+      }
+      // 开始编辑当前项
+      this.startEdit(item);
+    };
+
     // 点击保存按钮
     this.handleSaveBtnClick = (/** @type {MouseEvent} */ e, /** @type {HTMLElement} */ item) => {
       e.preventDefault();
@@ -170,6 +194,17 @@ export default class ShortcutKeyConfigPanel {
 
     // 添加键盘事件监听
     document.addEventListener('keydown', this.handleKeyDown);
+
+    // 添加点击外部区域的事件监听
+    this.handleClickOutside = (/** @type {MouseEvent} */ e) => {
+      if (!(e.target instanceof HTMLElement)) return;
+      // 如果点击的不是编辑区域内的元素，取消编辑
+      const isClickInEditingItem = e.target.closest('.shortcut-key-item.editing');
+      if (!isClickInEditingItem) {
+        this.cancelEdit(item);
+      }
+    };
+    document.addEventListener('click', this.handleClickOutside);
   }
 
   /**
@@ -231,6 +266,11 @@ export default class ShortcutKeyConfigPanel {
       this.keyStack = [];
       this.originalKeyStack = null;
       document.removeEventListener('keydown', this.handleKeyDown);
+      // 移除点击外部区域的事件监听
+      if (this.handleClickOutside) {
+        document.removeEventListener('click', this.handleClickOutside);
+        this.handleClickOutside = null;
+      }
       this.updateTipText(this.activeTab === 'static' ? 'static' : 'default');
     }
   }
@@ -261,6 +301,11 @@ export default class ShortcutKeyConfigPanel {
     this.keyStack = [];
     this.originalKeyStack = null;
     document.removeEventListener('keydown', this.handleKeyDown);
+    // 移除点击外部区域的事件监听
+    if (this.handleClickOutside) {
+      document.removeEventListener('click', this.handleClickOutside);
+      this.handleClickOutside = null;
+    }
     item.classList.remove('editing');
     this.updateTipText(this.activeTab === 'static' ? 'static' : 'default');
   }
@@ -519,6 +564,8 @@ export default class ShortcutKeyConfigPanel {
     this.dom.style.removeProperty('display');
     const ulWrapper = this.dom.querySelector(`#${this.shortcutUlId}`);
     if (ulWrapper instanceof HTMLUListElement) {
+      // 监听双击事件
+      ulWrapper.addEventListener('dblclick', this.handleDbClick);
       // 监听编辑相关按钮的点击
       const handleClick = (/** @type {MouseEvent} */ e) => {
         if (e.target instanceof HTMLElement) {
@@ -571,6 +618,7 @@ export default class ShortcutKeyConfigPanel {
     const ulWrapper = this.dom.querySelector(`#${this.shortcutUlId}`);
     if (ulWrapper instanceof HTMLUListElement && this.handleClick) {
       // 销毁时取消监听
+      ulWrapper.removeEventListener('dblclick', this.handleDbClick);
       ulWrapper.removeEventListener('click', this.handleClick);
     }
     const settingsDisableBtn = this.dom.querySelector('.j-shortcut-settings-disable-btn');

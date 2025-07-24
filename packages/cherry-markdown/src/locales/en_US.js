@@ -111,7 +111,7 @@ export default {
   inlineCode: 'Inline Code',
   codeBlock: 'Code Block',
   shortcutKeySetting: 'Keyboard Shortcuts',
-  editShortcutKeyConfigTip: 'Click the edit button in the shortcut key area to edit shortcuts',
+  editShortcutKeyConfigTip: 'Double-click the shortcut key area or click the edit button to edit',
   editingShortcutKeyConfigTip: 'Press Enter to save, Backspace to remove the newly added key',
   staticShortcutTip: 'Built-in shortcuts cannot be modified',
   disabledShortcutTip: 'Shortcuts are currently disabled',
