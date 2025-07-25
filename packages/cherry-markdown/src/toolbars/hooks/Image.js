@@ -15,7 +15,7 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import { handleUpload, handleParams, handleUploadMulti } from '@/utils/file';
-import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
+import { CONTROL_KEY, META_KEY, getKeyCode } from '@/utils/shortcutKey';
 /**
  * 插入图片
  */
@@ -27,7 +27,7 @@ export default class Image extends MenuBase {
     super($cherry);
     this.setName('image', 'image');
     this.shortcutKeyMap = {
-      [`${CONTROL_KEY}-${getKeyCode('g')}`]: {
+      [`${this.isMac ? META_KEY : CONTROL_KEY}-${getKeyCode('g')}`]: {
         hookName: this.name,
         aliasName: this.name,
       },

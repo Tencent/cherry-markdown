@@ -1,9 +1,6 @@
-import { mac } from 'codemirror/src/util/browser';
-
 export const SHIFT_KEY = 'Shift';
 export const ALT_KEY = 'Alt';
-// mac的command(meta)键，windows的ctrl键
-export const CONTROL_KEY = mac ? 'Meta' : 'Control';
+export const CONTROL_KEY = 'Control';
 export const META_KEY = 'Meta';
 export const ENTER_KEY = 'Enter';
 export const ESCAPE_KEY = 'Escape';

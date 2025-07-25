@@ -18,6 +18,7 @@ import Logger from '@/Logger';
 import { escapeHTMLSpecialCharOnce as $e } from '@/utils/sanitize';
 import { createElement } from '@/utils/dom';
 import NestedError from '@/utils/error';
+import { mac } from 'codemirror/src/util/browser';
 
 /**
  * @typedef {Object} SubMenuConfigItem
@@ -114,6 +115,7 @@ export default class MenuBase {
      * @type {HookShortcutKeyMap}
      */
     this.shortcutKeyMap = {};
+    this.isMac = mac; // 当前是否为macOS平台
   }
 
   getSubMenuConfig() {

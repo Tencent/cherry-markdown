@@ -15,7 +15,7 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import { getSelection } from '@/utils/selection';
-import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
+import { CONTROL_KEY, META_KEY, getKeyCode } from '@/utils/shortcutKey';
 /**
  * 插入1级~5级标题
  */
@@ -34,23 +34,23 @@ export default class Header extends MenuBase {
       { iconName: 'h5', name: 'h5', onclick: this.bindSubClick.bind(this, '5') },
     ];
     this.shortcutKeyMap = {
-      [`${CONTROL_KEY}-${getKeyCode(1)}`]: {
+      [`${this.isMac ? META_KEY : CONTROL_KEY}-${getKeyCode(1)}`]: {
         hookName: this.name,
         aliasName: 'h1',
       },
-      [`${CONTROL_KEY}-${getKeyCode(2)}`]: {
+      [`${this.isMac ? META_KEY : CONTROL_KEY}-${getKeyCode(2)}`]: {
         hookName: this.name,
         aliasName: 'h2',
       },
-      [`${CONTROL_KEY}-${getKeyCode(3)}`]: {
+      [`${this.isMac ? META_KEY : CONTROL_KEY}-${getKeyCode(3)}`]: {
         hookName: this.name,
         aliasName: 'h3',
       },
-      [`${CONTROL_KEY}-${getKeyCode(4)}`]: {
+      [`${this.isMac ? META_KEY : CONTROL_KEY}-${getKeyCode(4)}`]: {
         hookName: this.name,
         aliasName: 'h4',
       },
-      [`${CONTROL_KEY}-${getKeyCode(5)}`]: {
+      [`${this.isMac ? META_KEY : CONTROL_KEY}-${getKeyCode(5)}`]: {
         hookName: this.name,
         aliasName: 'h5',
       },

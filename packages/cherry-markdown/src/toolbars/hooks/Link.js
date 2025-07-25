@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
+import { CONTROL_KEY, META_KEY, getKeyCode } from '@/utils/shortcutKey';
 /**
  * 插入超链接
  */
@@ -26,7 +26,7 @@ export default class Link extends MenuBase {
     super($cherry);
     this.setName('link', 'link');
     this.shortcutKeyMap = {
-      [`${CONTROL_KEY}-${getKeyCode('l')}`]: {
+      [`${this.isMac ? META_KEY : CONTROL_KEY}-${getKeyCode('l')}`]: {
         hookName: this.name,
         aliasName: this.name,
       },

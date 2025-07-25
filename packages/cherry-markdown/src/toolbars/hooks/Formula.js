@@ -15,8 +15,7 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import BubbleFormula from '../BubbleFormula';
-import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
-
+import { CONTROL_KEY, META_KEY, getKeyCode } from '@/utils/shortcutKey';
 /**
  * 插入行内公式
  * @see https://github.com/QianJianTech/LaTeXLive/blob/master/README.md
@@ -32,7 +31,7 @@ export default class Formula extends MenuBase {
     $cherry.editor.options.wrapperDom.appendChild(this.subBubbleFormulaMenu.dom);
     this.catchOnce = '';
     this.shortcutKeyMap = {
-      [`${CONTROL_KEY}-${getKeyCode('m')}`]: {
+      [`${this.isMac ? META_KEY : CONTROL_KEY}-${getKeyCode('m')}`]: {
         hookName: this.name,
         aliasName: this.name,
       },

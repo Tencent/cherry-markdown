@@ -15,7 +15,7 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import ShortcutKeyConfigPanel from '@/toolbars/ShortcutKeyConfigPanel';
-import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
+import { CONTROL_KEY, META_KEY, getKeyCode } from '@/utils/shortcutKey';
 /**
  * 快捷键配置
  */
@@ -26,7 +26,7 @@ export default class ShortcutKey extends MenuBase {
     this.updateMarkdown = false;
     this.disabledHideAllSubMenu = true;
     this.shortcutKeyMap = {
-      [`${CONTROL_KEY}-${getKeyCode('0')}`]: {
+      [`${this.isMac ? META_KEY : CONTROL_KEY}-${getKeyCode('0')}`]: {
         hookName: this.name,
         sub: 'toggleToolbar',
         aliasName: 'hide',
