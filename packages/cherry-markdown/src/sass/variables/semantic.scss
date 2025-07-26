@@ -108,4 +108,19 @@
   
   // 分割线
   --md-hr-border: var(--base-border-color);
+
+  // 检查清单
+  --md-checklist-unchecked-color: var(--oc-gray-6);
+  --md-checklist-hover-color: var(--primary-color);
+  --md-checklist-checked-color: var(--oc-gray-5);
+  --md-checklist-text-checked-color: var(--md-checklist-checked-color);
+  --md-checklist-checked-text-decoration: none;
+  --md-checklist-strikethrough-thickness: 1px;
+  --md-checklist-animation-duration: 250ms;
+  --md-checklist-sparkle-animation-duration: 500ms;
+  --md-checklist-sparkle-beam-angle: 6deg;
+  --md-checklist-sparkle-clearance: 0.5625em;
+  --md-checklist-sparkle-start-edge: 0.625em;
+  --md-checklist-sparkle-end-edge: 0.75em;
+  --md-checklist-sparkle-fade-point: 0.8125em;
 }

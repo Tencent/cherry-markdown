@@ -381,9 +381,128 @@
 
   .check-list-item {
     list-style: none;
+    --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
 
     .ch-icon {
       margin: 0 6px 0 -20px;
+      cursor: pointer;
+      display: inline-block;
+      position: relative;
+      transition:
+        color var(--md-checklist-animation-duration) var(--ease-out-quint),
+        transform var(--md-checklist-animation-duration) var(--ease-out-quint);
+
+      &.ch-icon-square {
+        color: var(--md-checklist-unchecked-color);
+      }
+      
+      &.ch-icon-check {
+        color: var(--md-checklist-checked-color);
+
+        // 火花动画伪元素
+        &::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 1.875em;
+          height: 1.875em;
+          transform: translate(-50%, -50%);
+          pointer-events: none;
+          opacity: 0;
+          
+          --_sparkle-width: var(--md-checklist-sparkle-beam-angle);
+          --_sparkle-main-color: color-mix(in srgb, var(--md-checklist-hover-color) 40%, transparent);
+
+          // 绘制8个方向的火花
+          background: conic-gradient(
+            from 0deg,
+            var(--_sparkle-main-color) calc(0deg - var(--_sparkle-width) / 2),
+            var(--_sparkle-main-color) calc(0deg + var(--_sparkle-width) / 2),
+            transparent calc(0deg + var(--_sparkle-width) / 2 + 0.1deg),
+            transparent calc(45deg - var(--_sparkle-width) / 2 - 0.1deg),
+            var(--md-checklist-hover-color) calc(45deg - var(--_sparkle-width) / 2),
+            var(--md-checklist-hover-color) calc(45deg + var(--_sparkle-width) / 2),
+            transparent calc(45deg + var(--_sparkle-width) / 2 + 0.1deg),
+            transparent calc(90deg - var(--_sparkle-width) / 2 - 0.1deg),
+            var(--_sparkle-main-color) calc(90deg - var(--_sparkle-width) / 2),
+            var(--_sparkle-main-color) calc(90deg + var(--_sparkle-width) / 2),
+            transparent calc(90deg + var(--_sparkle-width) / 2 + 0.1deg),
+            transparent calc(135deg - var(--_sparkle-width) / 2 - 0.1deg),
+            var(--md-checklist-hover-color) calc(135deg - var(--_sparkle-width) / 2),
+            var(--md-checklist-hover-color) calc(135deg + var(--_sparkle-width) / 2),
+            transparent calc(135deg + var(--_sparkle-width) / 2 + 0.1deg),
+            transparent calc(180deg - var(--_sparkle-width) / 2 - 0.1deg),
+            var(--_sparkle-main-color) calc(180deg - var(--_sparkle-width) / 2),
+            var(--_sparkle-main-color) calc(180deg + var(--_sparkle-width) / 2),
+            transparent calc(180deg + var(--_sparkle-width) / 2 + 0.1deg),
+            transparent calc(225deg - var(--_sparkle-width) / 2 - 0.1deg),
+            var(--md-checklist-hover-color) calc(225deg - var(--_sparkle-width) / 2),
+            var(--md-checklist-hover-color) calc(225deg + var(--_sparkle-width) / 2),
+            transparent calc(225deg + var(--_sparkle-width) / 2 + 0.1deg),
+            transparent calc(270deg - var(--_sparkle-width) / 2 - 0.1deg),
+            var(--_sparkle-main-color) calc(270deg - var(--_sparkle-width) / 2),
+            var(--_sparkle-main-color) calc(270deg + var(--_sparkle-width) / 2),
+            transparent calc(270deg + var(--_sparkle-width) / 2 + 0.1deg),
+            transparent calc(315deg - var(--_sparkle-width) / 2 - 0.1deg),
+            var(--md-checklist-hover-color) calc(315deg - var(--_sparkle-width) / 2),
+            var(--md-checklist-hover-color) calc(315deg + var(--_sparkle-width) / 2),
+            transparent calc(315deg + var(--_sparkle-width) / 2 + 0.1deg),
+            transparent 360deg
+          );
+          
+          // 控制火花的起始位置和长度
+          mask: radial-gradient(
+            transparent var(--md-checklist-sparkle-clearance),
+            white var(--md-checklist-sparkle-start-edge),
+            white var(--md-checklist-sparkle-end-edge),
+            transparent var(--md-checklist-sparkle-fade-point)
+          );
+
+          animation:
+            sparkle-expand
+            var(--md-checklist-sparkle-animation-duration)
+            var(--ease-out-quint)
+            forwards;
+        }
+      }
+
+      &:hover {
+        color: var(--md-checklist-hover-color);
+        transform: scale(1.1);
+      }
+
+      &:active {
+        transition-duration: 100ms;
+        transform: scale(0.95);
+      }
+    }
+
+    p {
+      transition: color var(--md-checklist-animation-duration) var(--ease-out-quint);
+      
+      &:has(.ch-icon-check) {
+        color: var(--md-checklist-text-checked-color);
+        text-decoration: var(--md-checklist-checked-text-decoration);
+        text-decoration-color: currentColor;
+        text-decoration-thickness: var(--md-checklist-strikethrough-thickness);
+      }
+    }
+  }
+  
+  @keyframes sparkle-expand {
+    0% {
+      transform: translate(-50%, -50%) scale(0.7);
+      opacity: 1;
+    }
+    80% {
+      transform: translate(-50%, -50%) scale(1.4);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1.6);
+      opacity: 0;
+      visibility: hidden;
     }
   }
 
