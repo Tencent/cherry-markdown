@@ -560,10 +560,12 @@ export default class PreviewerBubble {
     imgToolDiv.className = 'cherry-previewer-img-tool-handler';
     this.bubble.click.appendChild(imgToolDiv);
     imgToolHandler.showBubble(htmlElement, imgToolDiv, this.previewerDom, event, this.previewer.$cherry.getLocales());
-    imgToolHandler.bindChange(this.changeImgStyle.bind(this));
+    imgToolHandler.bindChange((htmlElement, type) => {
+      this.changeImgStyle(htmlElement, type);
+    });
 
     // 订阅编辑器大小变化事件
-    const updateHandler = imgSizeHandler.updatePosition.bind(imgSizeHandler);
+    const updateHandler = imgSizeHandler.updatePosition.bind(imgSizeHandler, imgToolHandler);
     this.$cherry.$event.on('editor.size.change', updateHandler);
     // 保存原始的remove方法
     const originalRemove = imgSizeHandler.remove;
@@ -667,7 +669,7 @@ export default class PreviewerBubble {
       // 暂时不需要考虑手动输入img标签的场景 和 引用图片的场景
       const totalValue = content.split(imgReg);
       const imgAppendReg = /(#center|#right|#left|#float-right|#float-left|#border|#B|#shadow|#S|#radius|#R)/g;
-      const imgSizeReg = /^!\[.*?((?:(?:#[0-9]+(px|em|pt|pc|in|mm|cm|ex|%)|auto) *)+).*?\].*$/;
+      const imgSizeReg = /^!\[.*?((?:#(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto) *)+).*?\].*$/;
       let line = 0;
       let beginCh = 0;
       let endCh = 0;
@@ -709,25 +711,69 @@ export default class PreviewerBubble {
     this.changeImgValue();
   }
 
+  // 合法的样式类型白名单
+  static get ALLOWED_STYLES() {
+    return {
+      // 对齐样式
+      align: {
+        left: true,
+        center: true,
+        right: true,
+        'float-left': true,
+        'float-right': true,
+        none: true,
+      },
+      // 普通样式
+      normal: {
+        border: { reg: /#(border|B) */g, v: 'B' },
+        shadow: { reg: /#(shadow|S) */g, v: 'S' },
+        radius: { reg: /#(radius|R) */g, v: 'R' },
+      },
+    };
+  }
+
   /**
    * 修改图片样式时的回调
    * @param {HTMLElement} htmlElement 被修改演示的图片标签
    * @param {Object} type 图片的属性（边框、阴影、圆角）
    */
   changeImgStyle(htmlElement, type) {
-    const typeProp = {
-      border: { reg: /#(border|B) */g, v: 'B' },
-      shadow: { reg: /#(shadow|S) */g, v: 'S' },
-      radius: { reg: /#(radius|R) */g, v: 'R' },
-    };
-    const typeReg = typeProp[type].reg;
     if (!this.imgAppend) {
       this.imgAppend = '';
     }
-    if (typeReg.test(this.imgAppend)) {
-      this.imgAppend = this.imgAppend.replaceAll(typeReg, '');
-    } else {
-      this.imgAppend += `#${typeProp[type].v}`;
+
+    // 处理对齐类型（互斥）
+    if (type.startsWith('align-')) {
+      const alignValue = type.replace('align-', '');
+
+      // 检查是否为合法对齐样式
+      if (!PreviewerBubble.ALLOWED_STYLES.align[alignValue]) {
+        console.warn(`Invalid align type: ${alignValue}`);
+        return;
+      }
+
+      // 清除所有对齐样式
+      const alignReg = /#(left|center|right|float-left|float-right|none) */g;
+      this.imgAppend = this.imgAppend.replaceAll(alignReg, '');
+
+      // none
+      if (alignValue !== 'none') {
+        this.imgAppend += `#${alignValue}`;
+      }
+    }
+    // 处理其他样式（可叠加）
+    else {
+      const style = PreviewerBubble.ALLOWED_STYLES.normal[type];
+      if (!style) {
+        console.warn(`Invalid style type: ${type}`);
+        return;
+      }
+
+      if (style.reg.test(this.imgAppend)) {
+        this.imgAppend = this.imgAppend.replaceAll(style.reg, '');
+      } else {
+        this.imgAppend += `#${style.v}`;
+      }
     }
     this.changeImgValue();
   }
