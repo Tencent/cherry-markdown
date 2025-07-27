@@ -15,7 +15,7 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import { getSelection } from '@/utils/selection';
-import { CONTROL_KEY, META_KEY, getKeyCode } from '@/utils/shortcutKey';
+import { getKeyCode, getPlatformControlKey } from '@/utils/shortcutKey';
 /**
  * 删除线的按钮
  */
@@ -27,7 +27,7 @@ export default class Strikethrough extends MenuBase {
     super($cherry);
     this.setName('strikethrough', 'strike');
     this.shortcutKeyMap = {
-      [`${this.isMac ? META_KEY : CONTROL_KEY}-${getKeyCode('d')}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode('d')}`]: {
         hookName: this.name,
         aliasName: this.name,
       },

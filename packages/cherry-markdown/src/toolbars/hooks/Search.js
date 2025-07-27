@@ -15,7 +15,7 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import SearchBox from '@/utils/cm-search-replace';
-import { CONTROL_KEY, META_KEY, getKeyCode } from '@/utils/shortcutKey';
+import { getKeyCode, getPlatformControlKey } from '@/utils/shortcutKey';
 /**
  * 搜索功能
  */
@@ -25,7 +25,7 @@ export default class Search extends MenuBase {
     this.setName('search', 'search');
     this.updateMarkdown = false;
     this.shortcutKeyMap = {
-      [`${this.isMac ? META_KEY : CONTROL_KEY}-${getKeyCode('f')}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode('f')}`]: {
         hookName: this.name,
         aliasName: this.name,
       },
