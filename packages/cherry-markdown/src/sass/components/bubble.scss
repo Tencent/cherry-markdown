@@ -35,7 +35,7 @@
     margin-left: -6px;
     background: var(--bubble-bg);
     box-sizing: border-box;
-    z-index: 1;
+    z-index: calc(var(--bubble-z-index) + 1);
     pointer-events: none;
   }
 
@@ -61,14 +61,15 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    // FIXME: remove fixed height
     height: var(--bubble-min-height);
     color: var(--toolbar-btn-color);
     background: var(--toolbar-btn-bg);
-
-    // line-height: (var(--bubble-min-height) - 2px); // border 2px
     cursor: pointer;
     user-select: none;
+    z-index: calc(var(--bubble-z-index) + 2);
+    // --bubble-z-index 底部 bubble
+    // --bubble-z-index + 1 .cherry-bubble-top 的指示器
+    // --bubble-z-index + 2 .cherry-toolbar-button
 
     &:hover {
       border-color: var(--toolbar-border);
