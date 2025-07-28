@@ -783,7 +783,6 @@ export default class Previewer {
 
   editOnly(dealToolbar = false) {
     this.$dealEditAndPreviewOnly(true);
-    this.cleanHtmlCache();
     this.$cherry.$event.emit('previewerClose');
     this.$cherry.$event.emit('editorOpen');
   }

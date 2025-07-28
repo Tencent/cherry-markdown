@@ -15,7 +15,7 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import SearchBox from '@/utils/cm-search-replace';
-import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
+import { getKeyCode, getPlatformControlKey } from '@/utils/shortcutKey';
 /**
  * 搜索功能
  */
@@ -25,13 +25,17 @@ export default class Search extends MenuBase {
     this.setName('search', 'search');
     this.updateMarkdown = false;
     this.shortcutKeyMap = {
-      [`${CONTROL_KEY}-${getKeyCode('f')}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode('f')}`]: {
         hookName: this.name,
         aliasName: this.name,
       },
     };
-    this.searchBox = new SearchBox();
-    this.searchBoxInit = false;
+
+    // 检查$cherry上是否已经存在searchBoxInstance实例和searchBoxInit
+    if (!this.$cherry.searchBoxInstance) {
+      this.$cherry.searchBoxInstance = new SearchBox(this.$cherry);
+      this.$cherry.searchBoxInit = false;
+    }
   }
 
   /**
@@ -40,14 +44,15 @@ export default class Search extends MenuBase {
    * @param {string} shortKey 快捷键参数，本函数不处理这个参数
    */
   onClick(selection, shortKey = '') {
-    if (!this.searchBoxInit) {
-      this.searchBoxInit = true;
-      this.searchBox.init(this.$cherry.editor.editor);
+    // 控制$cherry上的searchBoxInstance实例
+    if (!this.$cherry.searchBoxInit) {
+      this.$cherry.searchBoxInit = true;
+      this.$cherry.searchBoxInstance.init(this.$cherry.editor.editor);
     }
-    if (this.searchBox.isVisible()) {
-      this.searchBox.hide();
+    if (this.$cherry.searchBoxInstance.isVisible()) {
+      this.$cherry.searchBoxInstance.hide();
     } else {
-      this.searchBox.show(selection, true);
+      this.$cherry.searchBoxInstance.show(selection, true);
     }
   }
 }

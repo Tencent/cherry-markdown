@@ -45,6 +45,19 @@
   --md-toc-indicator-color: var(--oc-violet-1);
   --md-toc-link-hover-bg: var(--oc-violet-1);
   --md-toc-link-active-bg: var(--oc-violet-2);
+  
+  /* ========== 手风琴组件变量覆盖 ========== */
+  --accordion-bg: var(--oc-violet-0);
+  --accordion-border: var(--oc-violet-2);
+  --accordion-shadow: var(--shadow-sm);
+
+  
+  --accordion-summary-bg: var(--oc-violet-6);
+  --accordion-summary-hover-bg: var(--oc-violet-5);
+  
+  --accordion-body-bg: var(--oc-violet-0);
+  --accordion-body-border: var(--oc-violet-1);
+  --accordion-body-color: var(--primary-color);
 }
 
 /** 预览区域样式 */

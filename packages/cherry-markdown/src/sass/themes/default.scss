@@ -42,6 +42,19 @@
   --md-blockquote-bg: rgba(134, 142, 150, 0.05);
   --md-hr-border: var(--oc-gray-3);
   --md-table-border: var(--oc-gray-3);
+  
+  /* ========== 手风琴组件变量覆盖 ========== */
+  --accordion-bg: var(--oc-gray-0);
+  --accordion-border: var(--oc-gray-3);
+  --accordion-shadow: var(--shadow-sm);
+
+  
+  --accordion-summary-bg: var(--oc-gray-6);
+  --accordion-summary-hover-bg: var(--oc-gray-5);
+  
+  --accordion-body-bg: var(--oc-gray-0);
+  --accordion-body-border: var(--oc-gray-2);
+  --accordion-body-color: var(--oc-gray-7);
 }
 
 /** 预览区域样式 */
@@ -153,6 +166,7 @@
       .level-3 {}
     }
   }
+
 }
 
 ol {
