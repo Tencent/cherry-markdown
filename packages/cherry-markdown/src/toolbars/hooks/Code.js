@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
+import { getKeyCode, getPlatformControlKey } from '@/utils/shortcutKey';
 /**
  * 插入代码块的按钮
  */
@@ -26,8 +26,8 @@ export default class Code extends MenuBase {
     super($cherry);
     this.setName('codeBlock', 'codeBlock');
     this.shortcutKeyMap = {
-      [`${CONTROL_KEY}-${getKeyCode('k')}`]: {
-        hookName: this.name,
+      [`${getPlatformControlKey()}-${getKeyCode('k')}`]: {
+        hookName: 'code',
         aliasName: this.name,
       },
     };

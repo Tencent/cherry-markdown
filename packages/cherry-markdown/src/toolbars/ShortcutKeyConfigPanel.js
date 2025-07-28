@@ -208,20 +208,48 @@ export default class ShortcutKeyConfigPanel {
   }
 
   /**
+   * 处理单个按键，返回对应的 HTML 字符串
+   * @param {string} key 按键字符串
+   * @param {boolean} [withCode=true] 是否包含 data-code 属性
+   * @returns {string} 生成的 HTML 字符串
+   */
+  processKeyToSpan(key, withCode = true) {
+    // 如果是鼠标左键，直接返回文本
+    if (key === this.$cherry.locale.leftMouseButton) {
+      return key;
+    }
+
+    const matchRes = shortcutCode2Key(key, mac);
+    const shortKey = matchRes ?? {
+      text: key,
+      tip: key,
+    };
+
+    return this.generateKeyboardKeySpan({
+      title: shortKey.tip,
+      code: withCode ? key : undefined,
+      text: shortKey.text,
+    });
+  }
+
+  /**
+   * 将按键数组转换为带分隔符的 HTML 字符串
+   * @param {string[]} keys 按键数组
+   * @param {boolean} [withCode=true] 是否在按键 span 中包含 data-code 属性
+   * @returns {string} 生成的 HTML 字符串
+   */
+  processKeysToHtml(keys, withCode = true) {
+    return keys.map((key) => this.processKeyToSpan(key, withCode)).join('<span class="shortcut-split">+</span>');
+  }
+
+  /**
    * 更新快捷键显示内容
    * @param {HTMLElement} kbdContainer 快捷键容器元素
    * @param {string[]} keys 快捷键数组
    */
   updateKeyboardContainer(kbdContainer, keys) {
     if (!(kbdContainer instanceof HTMLElement)) return;
-    kbdContainer.innerHTML = this.generateKeyboardCombination(keys, (key) => {
-      const matchRes = shortcutCode2Key(key, mac);
-      return this.generateKeyboardKeySpan({
-        title: matchRes.tip,
-        code: key,
-        text: matchRes.text,
-      });
-    });
+    kbdContainer.innerHTML = this.processKeysToHtml(keys);
   }
 
   /**
@@ -399,16 +427,6 @@ export default class ShortcutKeyConfigPanel {
   }
 
   /**
-   * 生成快捷键组合的HTML字符串
-   * @param {string[]} keys 快捷键数组
-   * @param {(key: string) => string} keyGenerator 生成单个按键HTML的函数
-   * @returns {string} 生成的HTML字符串
-   */
-  generateKeyboardCombination(keys, keyGenerator) {
-    return keys.map(keyGenerator).join('<span class="shortcut-split">+</span>');
-  }
-
-  /**
    * 获取快捷键的别名i18n
    * @param {string} aliasName
    * @returns {string} 别名
@@ -436,21 +454,9 @@ export default class ShortcutKeyConfigPanel {
         return `<li class="cherry-dropdown-item shortcut-key-item" data-hookname=${hookName} ${otherDataSet}>
           <div class="shortcut-key-config-panel-name">${this.getAliasLocale(aliasName)}</div>
           <div class="shortcut-key-right">
-            <div class="${this.shortcutConfigPanelKbdClassName}">${this.generateKeyboardCombination(
-              key.split('-'),
-              (singalKey) => {
-                const matchRes = shortcutCode2Key(singalKey, mac);
-                const shortKey = matchRes ?? {
-                  text: singalKey,
-                  tip: singalKey,
-                };
-                return this.generateKeyboardKeySpan({
-                  title: shortKey.tip,
-                  code: singalKey,
-                  text: shortKey.text,
-                });
-              },
-            )}</div>
+            <div class="${this.shortcutConfigPanelKbdClassName}">
+              ${this.processKeysToHtml(key.split('-'))}
+            </div>
             <div class="edit-btn" title="${this.$cherry.locale.edit}">
               <i class="ch-icon ch-icon-pen-fill"></i>
             </div>
@@ -509,25 +515,45 @@ export default class ShortcutKeyConfigPanel {
     if (this.$cherry.options.editor.keyMap === 'vim') {
       return '';
     }
-    const list = [
-      { name: this.$cherry.locale.shortcutStatic1, key: 'Ctrl+[' },
-      { name: this.$cherry.locale.shortcutStatic2, key: 'Ctrl+]' },
-      { name: this.$cherry.locale.shortcutStatic3, key: 'Ctrl+Shift+D' },
-      { name: this.$cherry.locale.shortcutStatic4, key: 'Ctrl+Enter' },
-      { name: this.$cherry.locale.shortcutStatic5, key: 'Ctrl+Shift+Enter' },
-      { name: this.$cherry.locale.shortcutStatic6, key: 'Ctrl+Shift+↑' },
-      { name: this.$cherry.locale.shortcutStatic7, key: 'Ctrl+Shift+↓' },
-      { name: this.$cherry.locale.shortcutStatic8, key: 'Ctrl+Shift+K' },
-      { name: this.$cherry.locale.shortcutStatic9, key: 'Ctrl+Shift+←' },
-      { name: this.$cherry.locale.shortcutStatic10, key: 'Ctrl+Shift+→' },
-      { name: this.$cherry.locale.shortcutStatic11, key: 'Ctrl+Backspace' },
-      { name: this.$cherry.locale.shortcutStatic12, key: 'Ctrl+Shift+M' },
-      { name: this.$cherry.locale.shortcutStatic13, key: `Ctrl+${this.$cherry.locale.leftMouseButton}` },
-      { name: this.$cherry.locale.shortcutStatic14, key: 'Ctrl+Shift+L' },
+    const pcList = [
+      { name: this.$cherry.locale.shortcutStatic1, key: 'Control+[' },
+      { name: this.$cherry.locale.shortcutStatic2, key: 'Control+]' },
+      { name: this.$cherry.locale.shortcutStatic3, key: 'Control+Shift+D' },
+      { name: this.$cherry.locale.shortcutStatic4, key: 'Control+Enter' },
+      { name: this.$cherry.locale.shortcutStatic5, key: 'Control+Shift+Enter' },
+      { name: this.$cherry.locale.shortcutStatic6, key: 'Control+Shift+↑' },
+      { name: this.$cherry.locale.shortcutStatic7, key: 'Control+Shift+↓' },
+      { name: this.$cherry.locale.shortcutStatic8, key: 'Control+Shift+K' },
+      { name: this.$cherry.locale.shortcutStatic9, key: 'Control+Shift+←' },
+      { name: this.$cherry.locale.shortcutStatic10, key: 'Control+Shift+→' },
+      { name: this.$cherry.locale.shortcutStatic11, key: 'Control+Backspace' },
+      { name: this.$cherry.locale.shortcutStatic12, key: 'Control+Shift+M' },
+      { name: this.$cherry.locale.shortcutStatic13, key: `Control+${this.$cherry.locale.leftMouseButton}` },
+      { name: this.$cherry.locale.shortcutStatic14, key: 'Control+Shift+L' },
       { name: this.$cherry.locale.shortcutStatic16, key: 'Alt+F3' },
-      { name: this.$cherry.locale.shortcutStatic17, key: 'Ctrl+Z' },
-      { name: this.$cherry.locale.shortcutStatic18, key: 'Ctrl+Y' },
+      { name: this.$cherry.locale.shortcutStatic17, key: 'Control+Z' },
+      { name: this.$cherry.locale.shortcutStatic18, key: 'Control+Y' },
     ];
+    const macList = [
+      { name: this.$cherry.locale.shortcutStatic1, key: 'Meta+[' },
+      { name: this.$cherry.locale.shortcutStatic2, key: 'Meta+]' },
+      { name: this.$cherry.locale.shortcutStatic3, key: 'Meta+Shift+D' },
+      { name: this.$cherry.locale.shortcutStatic4, key: 'Meta+Enter' },
+      { name: this.$cherry.locale.shortcutStatic5, key: 'Meta+Shift+Enter' },
+      { name: this.$cherry.locale.shortcutStatic6, key: 'Control+Meta+↑' },
+      { name: this.$cherry.locale.shortcutStatic7, key: 'Control+Meta+↓' },
+      { name: this.$cherry.locale.shortcutStatic8, key: 'Control+Shift+K' },
+      { name: this.$cherry.locale.shortcutStatic9, key: 'Control+Shift+←' },
+      { name: this.$cherry.locale.shortcutStatic10, key: 'Control+Shift+→' },
+      { name: this.$cherry.locale.shortcutStatic11, key: 'Alt+Backspace' },
+      { name: this.$cherry.locale.shortcutStatic12, key: 'Meta+Shift+M' },
+      { name: this.$cherry.locale.shortcutStatic13, key: `Meta+${this.$cherry.locale.leftMouseButton}` },
+      { name: this.$cherry.locale.shortcutStatic14, key: 'Meta+Shift+L' },
+      { name: this.$cherry.locale.shortcutStatic16, key: 'Alt+F3' },
+      { name: this.$cherry.locale.shortcutStatic17, key: 'Meta+Z' },
+      { name: this.$cherry.locale.shortcutStatic18, key: 'Meta+Y' },
+    ];
+    const list = mac ? macList : pcList;
     const li = [];
     for (let i = 0; i < list.length; i++) {
       const one = list[i];
@@ -536,19 +562,7 @@ export default class ShortcutKeyConfigPanel {
           <div class="shortcut-key-config-panel-name">${one.name}</div>
           <div class="shortcut-key-right-static">
             <div class="${this.shortcutConfigPanelKbdClassName}">
-              ${one.key
-                .split('+')
-                .map((key) => {
-                  // 如果是鼠标左键，直接返回文本
-                  if (key === this.$cherry.locale.leftMouseButton) {
-                    return key;
-                  }
-                  return this.generateKeyboardKeySpan({
-                    title: key,
-                    text: key,
-                  });
-                })
-                .join('<span class="shortcut-split">+</span>')}
+              ${this.processKeysToHtml(one.key.split('+'), false)}
             </div>
           </div>
         </li>

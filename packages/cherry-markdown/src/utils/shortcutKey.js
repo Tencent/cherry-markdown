@@ -1,9 +1,7 @@
 import { mac } from 'codemirror/src/util/browser';
-
 export const SHIFT_KEY = 'Shift';
 export const ALT_KEY = 'Alt';
-// mac的command(meta)键，windows的ctrl键
-export const CONTROL_KEY = mac ? 'Meta' : 'Control';
+export const CONTROL_KEY = 'Control';
 export const META_KEY = 'Meta';
 export const ENTER_KEY = 'Enter';
 export const ESCAPE_KEY = 'Escape';
@@ -288,4 +286,12 @@ export const getKeyCode = (key) => {
   if (/[A-Z]/.test(upperCaseKey)) {
     return `Key${upperCaseKey}`;
   }
+};
+
+/**
+ * 获取平台对应的Control键，适用于需要使用跨平台Control键（mac下为Command，pc下为Ctrl）的场景
+ * @returns META_KEY, CONTROL_KEY
+ */
+export const getPlatformControlKey = () => {
+  return mac ? META_KEY : CONTROL_KEY;
 };

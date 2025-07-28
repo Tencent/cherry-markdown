@@ -15,7 +15,7 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import { getSelection } from '@/utils/selection';
-import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
+import { getKeyCode, getPlatformControlKey } from '@/utils/shortcutKey';
 /**
  * 插入1级~5级标题
  */
@@ -34,23 +34,23 @@ export default class Header extends MenuBase {
       { iconName: 'h5', name: 'h5', onclick: this.bindSubClick.bind(this, '5') },
     ];
     this.shortcutKeyMap = {
-      [`${CONTROL_KEY}-${getKeyCode(1)}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode(1)}`]: {
         hookName: this.name,
         aliasName: 'h1',
       },
-      [`${CONTROL_KEY}-${getKeyCode(2)}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode(2)}`]: {
         hookName: this.name,
         aliasName: 'h2',
       },
-      [`${CONTROL_KEY}-${getKeyCode(3)}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode(3)}`]: {
         hookName: this.name,
         aliasName: 'h3',
       },
-      [`${CONTROL_KEY}-${getKeyCode(4)}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode(4)}`]: {
         hookName: this.name,
         aliasName: 'h4',
       },
-      [`${CONTROL_KEY}-${getKeyCode(5)}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode(5)}`]: {
         hookName: this.name,
         aliasName: 'h5',
       },
