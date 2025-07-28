@@ -934,7 +934,11 @@ export default class Cherry extends CherryStatic {
       const markdownText = codemirror.getValue();
       this.lastMarkdownText = markdownText;
       const html = this.engine.makeHtml(markdownText);
-      this.previewer.update(html);
+      if (this.options.editor.defaultModel === 'editOnly') {
+        this.previewer.doHtmlCache(html);
+      } else {
+        this.previewer.update(html);
+      }
       this.$event.emit('afterInit', { markdownText, html });
     } catch (e) {
       throw new NestedError(e);
