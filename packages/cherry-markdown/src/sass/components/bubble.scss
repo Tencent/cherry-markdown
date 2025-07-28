@@ -8,8 +8,7 @@
 
   font-size: var(--font-size-sm);
 
-  // min-height for overflow wrap
-  min-height: var(--bubble-min-height);
+  min-height: var(--bubble-btn-height);
   min-width: 50px;
 
   border: var(--border-width-1) solid var(--bubble-border);
@@ -17,7 +16,7 @@
   box-shadow: var(--bubble-shadow);
   border-radius: var(--bubble-radius);
   z-index: var(--bubble-z-index);
-  padding: var(--bubble-padding);
+  padding: var(--spacing-xs);
 
   &.cherry-bubble--centered {
     left: 50%;
@@ -61,9 +60,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: var(--bubble-min-height);
+    height: var(--bubble-btn-height);
     color: var(--toolbar-btn-color);
     background: var(--toolbar-btn-bg);
+    padding: var(--bubble-padding);
     cursor: pointer;
     user-select: none;
     z-index: calc(var(--bubble-z-index) + 2);
@@ -79,7 +79,7 @@
 
     &.cherry-toolbar-split {
       height: 65%;
-      min-height: calc(0.65 * var(--bubble-min-height));
+      min-height: calc(0.65 * var(--bubble-btn-height));
     }
   }
 }

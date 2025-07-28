@@ -164,11 +164,12 @@
 .cherry-toolbar {
   position: relative;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   padding: var(--toolbar-padding);
   font-size: var(--toolbar-font-size);
   line-height: 2.8;
+  min-height: var(--toolbar-min-height);
   flex-basis: 100%;
   box-sizing: border-box;
   z-index: 2;
@@ -230,12 +231,10 @@
 
   &-button {
     float: left;
+    height: var(--toolbar-btn-height);
     padding: var(--toolbar-btn-padding);
-    // margin: 4px 0;
-    height: 38px;
     color: var(--toolbar-btn-color);
     background: var(--toolbar-btn-bg);
-    border: 1px solid transparent;
     border-radius: var(--toolbar-btn-radius);
     -webkit-transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
     transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
@@ -250,8 +249,8 @@
     &.cherry-toolbar-split {
       font-size: 0;
       height: 19px;
-      padding: 0;
-      margin: 9.5px 4px;
+      padding: 0 !important;
+      margin: 0px 4px;
       border: 1px solid transparent;
       border-left: 1px solid var(--toolbar-split-color);
       pointer-events: none;

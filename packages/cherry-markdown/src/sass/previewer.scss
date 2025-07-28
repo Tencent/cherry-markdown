@@ -90,10 +90,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--bubble-min-height);
-    height: var(--bubble-min-height);
-    min-width: var(--bubble-min-height);
-    min-height: var(--bubble-min-height);
+    width: var(--bubble-btn-height);
+    height: var(--bubble-btn-height);
+    min-width: var(--bubble-btn-height);
+    min-height: var(--bubble-btn-height);
     color: var(--toolbar-btn-color);
     background: var(--toolbar-btn-bg);
     border: var(--border-width-1) solid transparent;

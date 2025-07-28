@@ -27,7 +27,8 @@
   --toolbar-radius: none;
   --toolbar-shadow: var(--shadow-md);
   --toolbar-split-color: var(--base-border-color);
-  
+  --toolbar-min-height: 48px; // 单行工具栏的高度
+
   // 工具栏按钮
   --toolbar-btn-color: #3f4a56;
   --toolbar-btn-bg: transparent;
@@ -36,6 +37,7 @@
   --toolbar-btn-disabled: #ccc;
   --toolbar-btn-radius: var(--radius-lg);
   --toolbar-btn-padding: 0 var(--spacing-md);
+  --toolbar-btn-height: var(--height-button);
 
   /* ========== 工具栏的下拉菜单 ========== */
   --dropdown-bg: var(--toolbar-bg);
@@ -58,9 +60,9 @@
   --bubble-bg: var(--toolbar-bg);
   --bubble-border: var(--base-border-color);
   --bubble-shadow: var(--shadow-md);
-  --bubble-radius: var(--radius-lg);
-  --bubble-padding: var(--spacing-xs);
-  --bubble-min-height: var(--height-button);
+  --bubble-radius: var(--radius-xl);
+  --bubble-padding: var(--toolbar-btn-padding);
+  --bubble-btn-height: var(--height-button);
   --bubble-z-index: var(--z-index-popover);
   
   /* ========== 编辑器相关 ========== */
