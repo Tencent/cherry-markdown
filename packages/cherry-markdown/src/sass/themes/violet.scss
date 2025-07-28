@@ -56,16 +56,33 @@
 
   /** 目录 */
   .toc {
-    border-bottom: 1px solid var(--md-hr-border);
-    padding-bottom: 15px;
-    margin-bottom: 30px;
+      // 主题特定的背景和边框
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(168, 85, 247, 0.08));
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      box-shadow: 0 2px 12px rgba(139, 92, 246, 0.15), 0 1px 3px rgba(139, 92, 246, 0.1);
 
-    .toc-title {
-      text-align: center;
-      padding-bottom: 15px;
-      margin-top: 30px;
-      margin-bottom: 15px;
-      border-bottom: 1px solid var(--md-hr-border);
-    }
+      &::before {
+        background: linear-gradient(90deg, var(--oc-violet-6), var(--oc-violet-5), var(--oc-purple-5));
+      }
+
+      &:hover {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(168, 85, 247, 0.12));
+        box-shadow: 0 4px 20px rgba(139, 92, 246, 0.2), 0 2px 6px rgba(139, 92, 246, 0.15);
+      }
+
+      .toc-title {
+        &::after {
+          background: linear-gradient(90deg, var(--oc-violet-6), var(--oc-violet-5));
+        }
+      }
+
+      .toc-li {
+        a {
+          &:hover {
+            background: rgba(139, 92, 246, 0.15);
+            box-shadow: 0 1px 4px rgba(139, 92, 246, 0.2);
+          }
+        }
+      }
   }
 }

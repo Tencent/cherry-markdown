@@ -60,16 +60,33 @@
 
   /** 目录 */
   .toc {
-    border-bottom: 1px solid var(--md-hr-border);
-    padding-bottom: 15px;
-    margin-bottom: 30px;
+    // 主题特定的背景和边框
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.08), rgba(244, 114, 182, 0.08));
+    border: 1px solid rgba(236, 72, 153, 0.25);
+    box-shadow: 0 2px 12px rgba(236, 72, 153, 0.15), 0 1px 3px rgba(236, 72, 153, 0.1);
+
+    &::before {
+      background: linear-gradient(90deg, var(--oc-pink-7), var(--oc-pink-6), var(--oc-red-5));
+    }
+
+    &:hover {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(244, 114, 182, 0.12));
+      box-shadow: 0 4px 20px rgba(236, 72, 153, 0.2), 0 2px 6px rgba(236, 72, 153, 0.15);
+    }
 
     .toc-title {
-      text-align: center;
-      padding-bottom: 15px;
-      margin-top: 30px;
-      margin-bottom: 15px;
-      border-bottom: 1px solid var(--md-hr-border);
+      &::after {
+        background: linear-gradient(90deg, var(--oc-pink-7), var(--oc-pink-6));
+      }
+    }
+
+    .toc-li {
+      a {
+        &:hover {
+          background: rgba(236, 72, 153, 0.15);
+          box-shadow: 0 1px 4px rgba(236, 72, 153, 0.2);
+        }
+      }
     }
   }
 }
