@@ -656,19 +656,34 @@
     border-radius: 5px;
     transition: all 0.3s;
     z-index: 12;
-    color: #3582fb;
-    background-color: #d7e6fe;
+    color: var(--primary-color);
+    background-color:#fff;
     display: inline-block;
+
     &:hover {
       color: #eee;
-      background-color: #3582fb;
+      background-color: var(--primary-color);
       border-color: #eee;
+    }
+    animation: pulse 2s infinite alternate;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+    100% {
+      box-shadow: 0 0 15px var(--primary-color);
     }
   }
 }
 
+.cherry-code-expand{
+  transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1),ease; 
+}
 
 .cherry-code-unExpand{
+  transition-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06),ease;
   pre {
     height: 240px;
     overflow: hidden !important;
@@ -693,7 +708,7 @@
     width: 25px;
     text-align: center;
     height: 25px;
-    border: 1px solid #3582fb;
+    border: 1px solid var(--primary-color);
     cursor: pointer;
     float: right;
     top: 15px;
@@ -701,9 +716,9 @@
     // margin-left: -27px;
     transition: all 0.3s;
     z-index: 2;
-    color: #3582fb;
+    color: var(--primary-color);
     background-color: #eee;
-    border-color: #3582fb;
+    border-color: var(--primary-color);
   }
   .cherry-code-block-custom-btn {
     width: auto;
@@ -713,16 +728,16 @@
     width: 25px;
     text-align: center;
     height: 25px;
-    border: 1px solid #3582fb;
+    border: 1px solid var(--primary-color);
     cursor: pointer;
     float: right;
     border-radius: 5px;
     margin-left: -27px;
     transition: all 0.3s;
     z-index: 2;
-    color: #3582fb;
+    color: var(--primary-color);
     background-color: #eee;
-    border-color: #3582fb;
+    border-color: var(--primary-color);
   }
   .cherry-expand-code-block {
     top: 45px;
@@ -740,12 +755,40 @@
   .cherry-unExpand-code-block:hover,
   .cherry-edit-code-block:hover {
     color: #eee;
-    background-color: #3582fb;
+    background-color: var(--primary-color);
     border-color: #eee;
   }
   .cherry-code-preview-lang-select {
-    position: absolute;
-    transform: translate(2px, -50%);
+    position: fixed;
+    height: 32px;
+    font-size: inherit;
+    font-family: inherit;
+    border-radius: 4px;
+    padding: 0 12px;
+    box-sizing: content-box;
+    border: 1px solid var(--primary-color);
+    transform: translate(2px, -70%);
+  }
+  select {
+    outline: none;           
+    -webkit-tap-highlight-color: transparent; 
+    
+    option:checked{
+      // 仅适用于部分浏览器（如Firefox）
+      background: var(--primary-color) !important;
+    }
+    option:hover{
+      // 仅适用于部分浏览器（如Firefox）
+      background: var(--primary-color) !important;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--primary-color) !important;
+    }
+
+    &:focus {
+      border: 1px solid var(--primary-color);
+    }
   }
 }
 
@@ -859,7 +902,7 @@
     .cherry-expand-code-block,
     .cherry-unExpand-code-block,
     .cherry-edit-code-block {
-      background-color: #3582fb;
+      background-color: var(--primary-color);
     }
   }
 
