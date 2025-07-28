@@ -295,9 +295,198 @@
   }
 }
 
+// 搜索框样式
 .cherry {
+  // 默认主题采用亮色搜索框
+  &.theme__default {
+    --ace-serach-bg: var(--oc-white);
+    --ace-search-text-color: var(--base-font-color);
+  }
+
+  // 其它主题从toolbar和dropdown中取色
+  --ace-serach-bg: var(--dropdown-bg);
+  --ace-search-text-color: var(--toolbar-btn-color);
+
   .ace_search {
-    background: #fff;
+    background: var(--ace-serach-bg);
+    color: var(--ace-search-text-color);
+    border: var(--border-width-1) solid var(--dropdown-border);
+    border-radius: var(--radius-2xl);
+    max-width: 340px;
+    overflow: hidden;
+    box-shadow: var(--dropdown-shadow);
+    padding: var(--spacing-sm);
+    position: absolute;
+    top: var(--spacing-lg);
+    z-index: 99;
+    white-space: normal;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.left {
+      left: var(--spacing-lg);
+    }
+
+    &.right {
+      right: var(--spacing-lg);
+    }
+
+    .ace_search_form,
+    .ace_replace_form {
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xs);
+      border: 1.5px solid var(--oc-gray-3);
+      margin-bottom: var(--spacing-sm);
+      overflow: hidden;
+      margin-right: var(--spacing-2xl);
+      display: flex;
+      align-items: center;
+
+      &:focus-within {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px var(--secondary-color);
+      }
+
+      &.ace_nomatch {
+        border-color: var(--color-error);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+      }
+    }
+
+    .ace_search_field {
+      background: transparent;
+      color: var(--ace-search-text-color);
+      border: none;
+      box-sizing: border-box;
+      height: 22px;
+      outline: 0;
+      padding: var(--spacing-md) var(--spacing-sm);
+      width: 238px;
+
+      &::placeholder {
+        color: var(--oc-gray-5);
+      }
+    }
+
+    .ace_searchbtn,
+    .ace_replacebtn {
+      background: var(--ace-serach-bg);
+      color: var(--ace-search-text-color);
+      border: 0 none;
+      border-left: 1px solid var(--oc-gray-3);
+      cursor: pointer;
+      height: 24px;
+      width: 26px;
+      padding: 0 var(--spacing-xs);
+      margin: 0;
+      position: relative;
+      transition: all 0.15s ease;
+
+      &:hover {
+        background: var(--oc-gray-3);
+        color: var(--oc-gray-8);
+      }
+
+      &:last-child {
+        border-top-right-radius: var(--radius-md);
+        border-bottom-right-radius: var(--radius-md);
+      }
+    }
+
+    .ace_searchbtn:disabled {
+      background: none;
+      cursor: default;
+    }
+
+    .ace_searchbtn_close {
+      position: absolute;
+      top: var(--spacing-sm);
+      right: var(--spacing-sm);
+      background: none;
+      border: none;
+      color: var(--ace-search-text-color);
+      cursor: pointer;
+      padding: var(--spacing-xs);
+      border-radius: var(--radius-lg);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background: var(--oc-gray-3);
+        color: var(--oc-gray-8);
+        transform: scale(1.1);
+      }
+    }
+
+    .ace_button {
+      display: block;
+      border: 1px solid var(--oc-gray-3);
+      border-radius: var(--radius-lg);
+      color: var(--ace-search-text-color);
+      cursor: pointer;
+      font-weight: var(--font-weight-semibold);
+      user-select: none;
+      overflow: hidden;
+      opacity: var(--opacity-75);
+      box-sizing: border-box;
+      width: var(--spacing-xl);
+      height: var(--spacing-xl);
+      line-height: var(--spacing-xl);
+      border-radius: var(--radius-lg);
+      text-align: center;
+      transition: all 0.15s ease;
+
+      &:hover {
+        background: var(--oc-gray-3);
+        color: var(--oc-gray-8);
+        transform: translateY(-1px);
+        opacity: var(--opacity-100);
+      }
+
+      &.checked {
+        border-color: var(--primary-color);
+        background-color: var(--secondary-color);
+        color: var(--ace-search-text-color);
+        opacity: var(--opacity-100);
+      }
+    }
+
+    .ace_search_options {
+      clear: both;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: right;
+      user-select: none;
+    }
+
+    .ace_search_counter {
+      line-height: var(--spacing-xl);
+      padding: 0 var(--spacing-sm);
+    }
+
+    button svg,
+    path {
+      pointer-events: none;
+    }
+  }
+}
+
+// 高亮命中的文字样式
+.cherry {
+  --seraching-highlight-color: rgba(252, 195, 25, 0.5);
+
+  // 暗黑主题下改成蓝色背景以增大区分度
+  &.theme__dark {
+    --seraching-highlight-color: rgba(77, 171, 247, 0.4);
+  }
+
+  .cm-searching {
+    background-color: var(--seraching-highlight-color);
   }
 }
 
