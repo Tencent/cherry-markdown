@@ -139,8 +139,8 @@
     font-style: normal;
     cursor: pointer;
     box-sizing: border-box;
-    color: var(--toolbar-btn-color);
-    background: var(--toolbar-btn-bg);
+    color: var(--dropdown-item-color);
+    background: var(--dropdown-bg);
     border-radius: var(--dropdown-item-radius);
     margin: 2px 4px;
     transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
