@@ -70,8 +70,8 @@
   
   /* ========== 高度尺寸 ========== */
   // 组件高度
-  --height-toolbar: 48px;
-  --height-button: 36px;
+  --height-toolbar: 48px; // 不得更改，用于动态计算多行的工具栏高度
+  --height-button: 38px;
   
   /* ========== 透明度 ========== */
   --opacity-0: 0;
