@@ -73,7 +73,7 @@ export default class Toolbar {
    */
   toolbarHandlers = {};
 
-  constructor(options) {
+  constructor (options) {
     // 存储所有菜单的实例
     this.menus = {};
     // 存储所有快捷键的影射  {快捷键: 菜单名称}
@@ -98,28 +98,28 @@ export default class Toolbar {
     this.init();
   }
 
-  init() {
+  init () {
     this.$cherry.$event.on('cleanAllSubMenus', () => this.hideAllSubMenu());
   }
 
-  previewOnly() {
+  previewOnly () {
     this.options.dom.classList.add('preview-only');
     this.$cherry.wrapperDom.classList.add('cherry--no-toolbar');
     this.$cherry.$event.emit('toolbarHide');
   }
 
-  showToolbar() {
+  showToolbar () {
     this.options.dom.classList.remove('preview-only');
     this.$cherry.wrapperDom.classList.remove('cherry--no-toolbar');
     this.$cherry.$event.emit('toolbarShow');
   }
 
-  isHasLevel2Menu(name) {
+  isHasLevel2Menu (name) {
     // FIXME: return boolean
     return this.menus.level2MenusName[name];
   }
 
-  isHasConfigMenu(name) {
+  isHasConfigMenu (name) {
     // FIXME: return boolean
     return this.menus.hooks[name].subMenuConfig || [];
   }
@@ -129,16 +129,15 @@ export default class Toolbar {
    * @param {string} name
    * @returns {boolean} 是否有子菜单
    */
-  isHasSubMenu(name) {
+  isHasSubMenu (name) {
     return Boolean(this.isHasLevel2Menu(name) || this.isHasConfigMenu(name).length > 0);
   }
 
   /**
    * 根据配置画出来一级工具栏
    */
-  drawMenus() {
+  drawMenus () {
     const fragLeft = document.createDocumentFragment();
-
     this.menus.level1MenusName.forEach((name) => {
       const btn = this.menus.hooks[name].createBtn();
       if (typeof window === 'object' && 'onpointerup' in window) {
@@ -177,20 +176,20 @@ export default class Toolbar {
     this.appendMenusToDom(fragLeft);
   }
 
-  appendMenusToDom(menus) {
+  appendMenusToDom (menus) {
     const toolbarLeft = createElement('div', 'toolbar-left');
     toolbarLeft.appendChild(menus);
     this.options.dom.appendChild(toolbarLeft);
   }
 
-  setSubMenuPosition(menuObj, subMenuObj) {
+  setSubMenuPosition (menuObj, subMenuObj) {
     const pos = menuObj.getMenuPosition();
     subMenuObj.style.left = `${pos.left + pos.width / 2}px`;
     subMenuObj.style.top = `${pos.top + pos.height}px`;
     subMenuObj.style.position = menuObj.positionModel;
   }
 
-  drawSubMenus(name) {
+  drawSubMenus (name) {
     this.subMenus[name] = createElement('div', 'cherry-dropdown', { name });
     this.setSubMenuPosition(this.menus.hooks[name], this.subMenus[name]);
     // 如果有配置的二级菜单
@@ -224,7 +223,8 @@ export default class Toolbar {
   /**
    * 处理点击事件
    */
-  onClick(event, name, focusEvent = false) {
+  onClick (event, name, focusEvent = false) {
+    console.debug(`Toolbar#onClick: ${name}`);
     const menu = this.menus.hooks[name];
     if (!menu) {
       return;
@@ -251,14 +251,14 @@ export default class Toolbar {
    * 激活二级菜单添加选中颜色
    * @param {string} name
    */
-  activeSubMenuItem(name) {
+  activeSubMenuItem (name) {
     const subMenu = this.subMenus[name];
     const index = this.menus.hooks?.[name]?.getActiveSubMenuIndex(subMenu);
     subMenu?.querySelectorAll('.cherry-dropdown-item').forEach((item, i) => {
       item.classList.toggle('cherry-dropdown-item__selected', i === index);
     });
   }
-  updateSubMenuPosition() {
+  updateSubMenuPosition () {
     if (this.currentActiveSubMenu && this.subMenus[this.currentActiveSubMenu]) {
       this.setSubMenuPosition(this.menus.hooks[this.currentActiveSubMenu], this.subMenus[this.currentActiveSubMenu]);
     }
@@ -267,7 +267,7 @@ export default class Toolbar {
   /**
    * 展开/收起二级菜单
    */
-  toggleSubMenu(name) {
+  toggleSubMenu (name) {
     if (!this.subMenus[name]) {
       // 如果没有二级菜单，则先画出来，然后再显示
       this.hideAllSubMenu();
@@ -294,7 +294,7 @@ export default class Toolbar {
   /**
    * 隐藏所有的二级菜单
    */
-  hideAllSubMenu() {
+  hideAllSubMenu () {
     this.currentActiveSubMenu = null;
     this.$cherry.wrapperDom.querySelectorAll('.cherry-dropdown').forEach((dom) => {
       dom.style.display = 'none';
@@ -308,7 +308,7 @@ export default class Toolbar {
    *   this.shortcutKeyMap
    * @param {Toolbar} toolbarObj 工具栏对象
    */
-  collectMenuInfo(toolbarObj) {
+  collectMenuInfo (toolbarObj) {
     this.toolbarHandlers = Object.assign({}, this.toolbarHandlers, toolbarObj.toolbarHandlers);
     this.menus.hooks = Object.assign({}, toolbarObj.menus.hooks, this.menus.hooks);
     // 只有没设置自定义快捷键的时候才需要收集其他toolbar对象的快捷键配置
@@ -321,7 +321,7 @@ export default class Toolbar {
    * 收集快捷键
    * @param {boolean} useUserSettings 是否使用用户配置的快捷键
    */
-  collectShortcutKey(useUserSettings = true) {
+  collectShortcutKey (useUserSettings = true) {
     // 兼容旧版本配置
     if (
       this.$cherry.options.toolbars.shortcutKey &&
@@ -383,7 +383,7 @@ export default class Toolbar {
    * @param {string} oldShortcutKey 旧的快捷键
    * @param {string} newShortcutKey 新的快捷键
    */
-  updateShortcutKeyMap(oldShortcutKey, newShortcutKey) {
+  updateShortcutKeyMap (oldShortcutKey, newShortcutKey) {
     if (oldShortcutKey === newShortcutKey) {
       return false;
     }
@@ -399,7 +399,7 @@ export default class Toolbar {
     storageKeyMap(this.$cherry.nameSpace, this.shortcutKeyMap);
   }
 
-  collectToolbarHandler() {
+  collectToolbarHandler () {
     this.toolbarHandlers = this.menus.allMenusName.reduce((handlerMap, name) => {
       const menuHook = this.menus.hooks[name];
       if (!menuHook) {
@@ -422,7 +422,7 @@ export default class Toolbar {
    * @param {KeyboardEvent} evt keydown 事件
    * @returns {boolean} 是否有对应的快捷键
    */
-  matchShortcutKey(evt) {
+  matchShortcutKey (evt) {
     const onKeyStack = getAllowedShortcutKey(evt);
     const shortcutKey = keyStack2UniqueString(onKeyStack);
     return !!this.shortcutKeyMap?.[shortcutKey];
@@ -433,7 +433,7 @@ export default class Toolbar {
    * @param {KeyboardEvent} evt
    * @returns {boolean} 是否需要阻塞后续事件，true: 阻塞；false: 不阻塞
    */
-  fireShortcutKey(evt) {
+  fireShortcutKey (evt) {
     // 如果禁用了快捷键，则不再触发快捷键事件
     if (!isEnableShortcutKey(this.$cherry.nameSpace)) {
       return false;
