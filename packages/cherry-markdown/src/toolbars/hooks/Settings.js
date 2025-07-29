@@ -16,8 +16,7 @@
 import MenuBase from '@/toolbars/MenuBase';
 import { saveIsClassicBrToLocal, getIsClassicBrFromLocal, testKeyInLocal } from '@/utils/config';
 import ShortcutKeyConfigPanel from '@/toolbars/ShortcutKeyConfigPanel';
-import { CONTROL_KEY, getKeyCode, getStorageKeyMap } from '@/utils/shortcutKey';
-
+import { getKeyCode, getStorageKeyMap, getPlatformControlKey } from '@/utils/shortcutKey';
 /**
  * 设置按钮
  */
@@ -47,10 +46,10 @@ export default class Settings extends MenuBase {
     ];
     this.attachEventListeners();
     this.shortcutKeyMap = {
-      [`${CONTROL_KEY}-${getKeyCode('0')}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode('0')}`]: {
         hookName: this.name,
         sub: 'toggleToolbar',
-        aliasName: this.$cherry.locale.hide,
+        aliasName: 'hide',
       },
     };
     // this.shortcutKeyMaps = [

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
+import { getKeyCode, getPlatformControlKey } from '@/utils/shortcutKey';
 /**
  * 插入斜体的按钮
  */
@@ -26,9 +26,9 @@ export default class Italic extends MenuBase {
     super($cherry);
     this.setName('italic', 'italic');
     this.shortcutKeyMap = {
-      [`${CONTROL_KEY}-${getKeyCode('i')}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode('i')}`]: {
         hookName: this.name,
-        aliasName: this.$cherry.locale[this.name],
+        aliasName: this.name,
       },
     };
   }

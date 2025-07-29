@@ -100,7 +100,7 @@ export default class Bubble extends Toolbar {
       this.bubbleBottom.style.display = 'none';
     } else {
       // 反之出现在选中文本内容的上方
-      $top -= this.bubbleDom.offsetHeight + 2 * this.bubbleBottom.getBoundingClientRect().height;
+      $top -= this.bubbleDom.offsetHeight + this.bubbleBottom.getBoundingClientRect().height;
       this.bubbleTop.style.display = 'none';
       this.bubbleBottom.style.display = 'block';
     }

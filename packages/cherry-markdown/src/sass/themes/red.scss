@@ -3,7 +3,22 @@
  */
 
 .cherry.theme__red {
-  /* ========== 基础色彩变量覆盖 ========== */
+  /* ========== 手风琴组件变量覆盖 ========== */
+  --accordion-bg: var(--oc-pink-0);
+  --accordion-border: var(--oc-pink-2);
+  --accordion-shadow: 0 4px 12px rgba(244, 63, 94, 0.08);
+  
+  --accordion-summary-bg: linear-gradient(135deg, var(--oc-pink-6), var(--oc-pink-7));
+  --accordion-summary-hover-bg: linear-gradient(135deg, var(--oc-pink-5), var(--oc-pink-6));
+  --accordion-accent-color: linear-gradient(to bottom, var(--oc-pink-4), var(--oc-pink-6));
+  
+  --accordion-body-bg: var(--oc-pink-0);
+  --accordion-body-border: var(--oc-pink-1);
+  --accordion-body-color: var(--oc-pink-9);
+  
+  --accordion-multiple-border: var(--oc-pink-2);
+  --accordion-multiple-item-border: var(--oc-pink-1);
+  
   --primary-color: var(--oc-pink-7);
   --secondary-color: var(--oc-pink-0);
 
@@ -44,6 +59,11 @@
   --md-blockquote-bg: var(--oc-pink-1);
   --md-hr-border: var(--oc-pink-8);
   --md-table-border: var(--oc-pink-8);
+  --md-toc-bg: var(--oc-white);
+  --md-toc-border-color: var(--base-border-color);
+  --md-toc-indicator-color: var(--oc-pink-1);
+  --md-toc-link-hover-bg: var(--oc-pink-0);
+  --md-toc-link-active-bg: var(--oc-pink-1);
 }
 
 /** 预览区域样式 */
@@ -57,20 +77,5 @@
     border-bottom: 1px dashed var(--md-hr-border);
     padding-bottom: 15px;
     margin-bottom: 25px;
-  }
-
-  /** 目录 */
-  .toc {
-    border-bottom: 1px solid var(--md-hr-border);
-    padding-bottom: 15px;
-    margin-bottom: 30px;
-
-    .toc-title {
-      text-align: center;
-      padding-bottom: 15px;
-      margin-top: 30px;
-      margin-bottom: 15px;
-      border-bottom: 1px solid var(--md-hr-border);
-    }
   }
 }

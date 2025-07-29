@@ -427,7 +427,8 @@ export default class CodeBlock extends ParagraphBase {
       }
       [$code, $lang] = this.appendMermaid($code, $lang);
       // 自定义语言渲染，可覆盖内置的自定义语言逻辑
-      if (this.customLang.indexOf($lang.toLowerCase()) !== -1) {
+      $lang = this.formatLang($lang);
+      if (this.isInternalCustomLangCovered($lang)) {
         cacheCode = this.parseCustomLanguage($lang, $code, { lines, sign, match, addBlockQuoteSignToResult });
         if (cacheCode && cacheCode !== '') {
           this.$codeCache(sign, cacheCode);
@@ -458,6 +459,18 @@ export default class CodeBlock extends ParagraphBase {
     $str = this.$getIndentCodeBlock($str);
 
     return $str;
+  }
+
+  /**
+   * 格式化语言，如果配置了自定义语言“all”，则无脑替换成“all”
+   * @param {string} lang 语言
+   * @returns {string} 格式化后的语言
+   */
+  formatLang(lang) {
+    if (this.customLang.indexOf('all') !== -1) {
+      return 'all';
+    }
+    return lang;
   }
 
   makeInlineCode(str) {
