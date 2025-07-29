@@ -8,8 +8,7 @@
 
   font-size: var(--font-size-sm);
 
-  // min-height for overflow wrap
-  min-height: var(--bubble-min-height);
+  min-height: var(--bubble-btn-height);
   min-width: 50px;
 
   border: var(--border-width-1) solid var(--bubble-border);
@@ -17,51 +16,60 @@
   box-shadow: var(--bubble-shadow);
   border-radius: var(--bubble-radius);
   z-index: var(--bubble-z-index);
-  padding: var(--bubble-padding);
+  padding: var(--spacing-xs);
 
   &.cherry-bubble--centered {
     left: 50%;
     transform: translateX(-50%);
   }
 
-  // triangle
+  // triangle（菱形箭头实现）
+  // 不同于常见的边框三角的技巧，为了其应用边框颜色，采用了旋转菱形的方式实现
   .cherry-bubble-top,
   .cherry-bubble-bottom {
     position: absolute;
     left: 50%;
-
-    width: 0;
-    height: 0;
-
-    margin-left: calc(-1 * var(--spacing-sm));
-    border-left: var(--spacing-sm) solid rgba(0, 0, 0, 0);
-    border-right: var(--spacing-sm) solid rgba(0, 0, 0, 0);
+    width: 12px;
+    height: 12px;
+    margin-left: -6px;
+    background: var(--bubble-bg);
+    box-sizing: border-box;
+    z-index: calc(var(--bubble-z-index) + 1);
+    pointer-events: none;
   }
 
   .cherry-bubble-top {
     top: 0;
-    transform: translateY(-100%);
-    border-bottom: var(--spacing-sm) solid var(--bubble-bg);
+    transform: translateY(-50%) rotate(45deg);
+    border-top: var(--border-width-1) solid var(--bubble-border);
+    border-left: var(--border-width-1) solid var(--bubble-border);
+    border-right: var(--border-width-1) solid transparent;
+    border-bottom: var(--border-width-1) solid transparent;
   }
 
   .cherry-bubble-bottom {
     bottom: 0;
-    transform: translateY(100%);
-    border-top: var(--spacing-sm) solid var(--bubble-bg);
+    transform: translateY(50%) rotate(45deg);
+    border-bottom: var(--border-width-1) solid var(--bubble-border);
+    border-right: var(--border-width-1) solid var(--bubble-border);
+    border-top: var(--border-width-1) solid transparent;
+    border-left: var(--border-width-1) solid transparent;
   }
 
   .cherry-toolbar-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    // FIXME: remove fixed height
-    height: var(--bubble-min-height);
+    height: var(--bubble-btn-height);
     color: var(--toolbar-btn-color);
     background: var(--toolbar-btn-bg);
-
-    // line-height: (var(--bubble-min-height) - 2px); // border 2px
+    padding: var(--bubble-padding);
     cursor: pointer;
     user-select: none;
+    z-index: calc(var(--bubble-z-index) + 2);
+    // --bubble-z-index 底部 bubble
+    // --bubble-z-index + 1 .cherry-bubble-top 的指示器
+    // --bubble-z-index + 2 .cherry-toolbar-button
 
     &:hover {
       border-color: var(--toolbar-border);
@@ -71,52 +79,38 @@
 
     &.cherry-toolbar-split {
       height: 65%;
-      min-height: calc(0.65 * var(--bubble-min-height));
+      min-height: calc(0.65 * var(--bubble-btn-height));
     }
   }
 }
 
 .cherry-switch-paste {
-  .switch-btn--bg {
-    position: absolute;
-    width: 50%;
-    height: 100%;
-    box-sizing: border-box;
-    z-index: -1;
-    left: 0;
-    top: 0;
-    opacity: 0.3;
-    background-color: var(--toolbar-btn-hover-color);
-    border-radius: var(--radius-sm);
-    transition: all 0.3s;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   .cherry-toolbar-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 80px;
     text-align: center;
+    cursor: pointer;
+    user-select: none;
+    color: var(--toolbar-btn-color);
+    background: var(--toolbar-btn-bg);
+    border-radius: var(--dropdown-radius);
+    border: none;
+    transition: background-color 0.2s;
+
     &:hover {
-      border-color: transparent;
+      background-color: var(--dropdown-item-hover-bg);
+      color: var(--dropdown-item-hover-color);
     }
-  }
-  &[data-type='text'] {
-    .cherry-text-btn {
-      color: var(--toolbar-btn-color);
-    }
-    .cherry-md-btn {
-      color: var(--toolbar-btn-hover-color);
-    }
-  }
-  &[data-type='md'] {
-    .cherry-md-btn {
-      color: var(--toolbar-btn-color);
-    }
-    .cherry-text-btn {
-      color: var(--toolbar-btn-hover-color);
-    }
-    .switch-btn--bg {
-      left: 50%;
+
+    &.active {
+      background-color: var(--dropdown-item-active-bg);
+      color: var(--dropdown-item-active-color);
     }
   }
 }

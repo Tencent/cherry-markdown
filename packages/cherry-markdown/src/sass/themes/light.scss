@@ -17,6 +17,7 @@
   --toolbar-btn-color: var(--oc-gray-8);
   --toolbar-btn-hover-bg: var(--primary-color);
   --toolbar-btn-hover-color: var(--oc-white);
+  --toolbar-btn-active-bg: var(--primary-color);
   --toolbar-split-color: var(--oc-blue-5);
 
   /* ========== 编辑器相关变量 ========== */
@@ -42,4 +43,21 @@
   --md-blockquote-bg: var(--oc-blue-0);
   --md-hr-border: var(--oc-blue-5);
   --md-table-border: var(--oc-blue-5);
+  --md-toc-bg: var(--oc-blue-0);
+  --md-toc-indicator-color: var(--oc-blue-1);
+  --md-toc-link-hover-bg: var(--oc-blue-1);
+  --md-toc-link-active-bg: var(--oc-blue-2);
+  
+  /* ========== 手风琴组件变量覆盖 ========== */
+  --accordion-bg: var(--oc-blue-0);
+  --accordion-border: var(--oc-blue-2);
+  --accordion-shadow: var(--shadow-sm);
+
+  
+  --accordion-summary-bg: var(--oc-blue-5);
+  --accordion-summary-hover-bg: var(--oc-blue-4);
+  
+  --accordion-body-bg: var(--oc-blue-0);
+  --accordion-body-border: var(--oc-blue-1);
+  --accordion-body-color: var(--oc-gray-8);
 }

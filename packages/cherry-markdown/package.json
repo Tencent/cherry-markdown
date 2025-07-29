@@ -44,9 +44,8 @@
     "check-bundle": "es-check es5 dist/cherry-markdown.js dist/cherry-markdown.min.js",
     "test": "vitest",
     "test:update": "vitest -u",
-    "lint": "eslint --ignore-path ../../.eslintignore --plugin file-progress --rule \"file-progress/activate: 1\" --ext .js .",
-    "lint:fix": "eslint --ignore-path ../../.eslintignore --plugin file-progress --rule \"file-progress/activate: 1\" --ext .js . --fix",
-    "lint:ci": "eslint --ignore-path ../../.eslintignore --max-warnings=0 --ext .js .",
+    "lint": "cd ../.. && npx prettier --check packages/cherry-markdown/src/**/*.js && npx eslint --ignore-path .eslintignore packages/cherry-markdown/src/**/*.js",
+    "lint:fix": "cd ../.. && npx prettier --write packages/cherry-markdown/src/**/*.js && npx eslint --ignore-path .eslintignore packages/cherry-markdown/src/**/*.js --fix",
     "examples": "serve -p 3000 ."
   },
   "keywords": [
@@ -98,7 +97,7 @@
     "lodash": "^4.17.20",
     "mitt": "^3.0.0",
     "npm-run-all": "^4.1.5",
-    "openai": "^3.3.0",
+    "openai": "^5.9.0",
     "postcss": "^8.2.15",
     "prismjs": "^1.24.1",
     "replace-in-file": "^7.0.1",

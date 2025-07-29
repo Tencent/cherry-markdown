@@ -7,9 +7,9 @@ type CustomConfig = {
     CustomMenuType: {
       customMenu_fileUpload: any;
       customMenuChangeModule: any;
-    },
-  },
-}
+    };
+  };
+};
 
 const customMenu_fileUpload = Cherry.createMenuHook('文件上传', {
   iconName: '',
@@ -274,7 +274,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       'settings',
     ],
     toolbarRight: [],
-    sidebar: ['customMenuChangeModule','theme'],
+    sidebar: ['customMenuChangeModule', 'theme'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'table', 'code'], // array or false
     hiddenToolbar: [], // 不展示在编辑器中的工具栏，只使用工具栏的api和快捷键功能
@@ -287,8 +287,8 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     //   cssText: '', // 自定义样式
     // },
     customMenu: {
-      customMenu_fileUpload: customMenu_fileUpload,
-      customMenuChangeModule: customMenuChangeModule
+      customMenu_fileUpload,
+      customMenuChangeModule,
     },
     /**
      * 自定义快捷键
@@ -431,7 +431,6 @@ const cherryConfig: CherryOptions<CustomConfig> = {
   // cherry初始化后是否检查 location.hash 尝试滚动到对应位置
   autoScrollByHashAfterInit: false,
 };
-
 
 /**
  * @description cherryInstance

@@ -15,7 +15,7 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import { getSelection } from '@/utils/selection';
-import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
+import { getKeyCode, getPlatformControlKey } from '@/utils/shortcutKey';
 /**
  * 删除线的按钮
  */
@@ -27,9 +27,9 @@ export default class Strikethrough extends MenuBase {
     super($cherry);
     this.setName('strikethrough', 'strike');
     this.shortcutKeyMap = {
-      [`${CONTROL_KEY}-${getKeyCode('d')}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode('d')}`]: {
         hookName: this.name,
-        aliasName: this.$cherry.locale[this.name],
+        aliasName: this.name,
       },
     };
   }

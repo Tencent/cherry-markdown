@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
+import { getKeyCode, getPlatformControlKey } from '@/utils/shortcutKey';
 /**
  * 下划线按钮
  **/
@@ -26,9 +26,9 @@ export default class Underline extends MenuBase {
     super($cherry);
     this.setName('underline', 'underline');
     this.shortcutKeyMap = {
-      [`${CONTROL_KEY}-${getKeyCode('u')}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode('u')}`]: {
         hookName: this.name,
-        aliasName: this.$cherry.locale[this.name],
+        aliasName: this.name,
       },
     };
   }
