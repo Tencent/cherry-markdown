@@ -43,6 +43,11 @@
   --md-blockquote-bg: var(--oc-violet-1);
   --md-hr-border: var(--oc-indigo-4);
   --md-table-border: var(--oc-indigo-4);
+  --md-toc-bg: var(--oc-white);
+  --md-toc-border-color: var(--base-border-color);
+  --md-toc-indicator-color: var(--oc-indigo-1);
+  --md-toc-link-hover-bg: var(--oc-violet-0);
+  --md-toc-link-active-bg: var(--oc-violet-1);
   
   /* ========== 手风琴组件变量覆盖 ========== */
   --accordion-bg: var(--oc-violet-0);
@@ -70,20 +75,4 @@
     padding-bottom: 15px;
     margin-bottom: 25px;
   }
-
-  /** 目录 */
-  .toc {
-    border-bottom: 1px solid var(--md-hr-border);
-    padding-bottom: 15px;
-    margin-bottom: 30px;
-
-    .toc-title {
-      text-align: center;
-      padding-bottom: 15px;
-      margin-top: 30px;
-      margin-bottom: 15px;
-      border-bottom: 1px solid var(--md-hr-border);
-    }
-  }
-
 }
