@@ -95,7 +95,6 @@
         .shortcut-key-item {
           @include flex-center;
           justify-content: space-between;
-          border: 1px ridge var(--dropdown-item-hover-bg);
           height: auto;
           padding: 2px var(--shortcut-panel-padding-x);
           position: relative;
