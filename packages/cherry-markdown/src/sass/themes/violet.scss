@@ -42,6 +42,59 @@
   --md-blockquote-bg: var(--oc-violet-1);
   --md-hr-border: var(--oc-violet-8);
   --md-table-border: var(--oc-violet-8);
+
+  /* ========== Panel 相关变量 ========== */
+  --panel-border-radius: 4px;
+  --panel-bg: var(--oc-white);
+  --panel-border: 1px solid var(--oc-gray-2);
+  --panel-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --panel-title-bg: var(--oc-gray-1);
+  --panel-title-color: var(--oc-gray-8);
+  --panel-title-border-radius: 2px 2px 0 0;
+  --panel-title-border-bottom: 1px solid var(--oc-gray-3);
+  --panel-body-bg: var(--oc-white);
+  --panel-body-color: var(--oc-gray-8);
+  --panel-body-border-radius: 0 0 2px 2px;
+
+  /* Primary Panel */
+  --panel-primary-border-color: var(--oc-blue-5);
+  --panel-primary-title-bg: var(--oc-blue-1);
+  --panel-primary-title-color: var(--oc-blue-8);
+  --panel-primary-title-border-bottom: 1px solid var(--oc-blue-3);
+  --panel-primary-body-bg: var(--oc-blue-0);
+  --panel-primary-body-color: var(--oc-blue-9);
+
+  /* Info Panel */
+  --panel-info-border-color: var(--oc-cyan-5);
+  --panel-info-title-bg: var(--oc-cyan-1);
+  --panel-info-title-color: var(--oc-cyan-8);
+  --panel-info-title-border-bottom: 1px solid var(--oc-cyan-3);
+  --panel-info-body-bg: var(--oc-cyan-0);
+  --panel-info-body-color: var(--oc-cyan-9);
+
+  /* Warning Panel */
+  --panel-warning-border-color: var(--oc-yellow-5);
+  --panel-warning-title-bg: var(--oc-yellow-1);
+  --panel-warning-title-color: var(--oc-yellow-8);
+  --panel-warning-title-border-bottom: 1px solid var(--oc-yellow-3);
+  --panel-warning-body-bg: var(--oc-yellow-0);
+  --panel-warning-body-color: var(--oc-yellow-9);
+
+  /* Danger Panel */
+  --panel-danger-border-color: var(--oc-red-5);
+  --panel-danger-title-bg: var(--oc-red-1);
+  --panel-danger-title-color: var(--oc-red-8);
+  --panel-danger-title-border-bottom: 1px solid var(--oc-red-3);
+  --panel-danger-body-bg: var(--oc-red-0);
+  --panel-danger-body-color: var(--oc-red-9);
+
+  /* Success Panel */
+  --panel-success-border-color: var(--oc-green-5);
+  --panel-success-title-bg: var(--oc-green-1);
+  --panel-success-title-color: var(--oc-green-8);
+  --panel-success-title-border-bottom: 1px solid var(--oc-green-3);
+  --panel-success-body-bg: var(--oc-green-0);
+  --panel-success-body-color: var(--oc-green-9);
   --md-toc-bg: var(--oc-violet-0);
   --md-toc-indicator-color: var(--oc-violet-1);
   --md-toc-link-hover-bg: var(--oc-violet-1);

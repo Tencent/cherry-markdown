@@ -194,5 +194,63 @@
     animation: changeBgColorDark 1s;
   }
 
+  /* ========== Panel 相关变量 ========== */
+  --panel-border-radius: 16px;
+  --panel-bg: linear-gradient(145deg, #2a2a2a 0%, #1e1e1e 100%);
+  --panel-border: 1px solid rgba(109, 40, 217, 0.2);
+  --panel-box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --panel-backdrop-filter: blur(10px);
+  --panel-title-bg: linear-gradient(145deg, #333333 0%, #2a2a2a 100%);
+  --panel-title-color: var(--oc-gray-1);
+  --panel-title-border-radius: 16px 16px 0 0;
+  --panel-title-border-bottom: 1px solid rgba(109, 40, 217, 0.15);
+  --panel-body-bg: linear-gradient(145deg, #242424 0%, #1e1e1e 100%);
+  --panel-body-color: var(--oc-gray-2);
+  --panel-body-border-radius: 0 0 16px 16px;
+
+  /* Primary Panel */
+  --panel-primary-bg: linear-gradient(145deg, rgba(109, 40, 217, 0.08) 0%, rgba(67, 56, 202, 0.08) 100%);
+  --panel-primary-border-color: rgba(109, 40, 217, 0.3);
+  --panel-primary-box-shadow: 0 8px 32px rgba(109, 40, 217, 0.15);
+  --panel-primary-title-bg: linear-gradient(145deg, rgba(109, 40, 217, 0.3) 0%, rgba(67, 56, 202, 0.3) 100%);
+  --panel-primary-title-color: var(--oc-violet-2);
+  --panel-primary-body-bg: linear-gradient(145deg, rgba(109, 40, 217, 0.05) 0%, rgba(67, 56, 202, 0.05) 100%);
+  --panel-primary-body-color: var(--oc-violet-3);
+
+  /* Info Panel */
+  --panel-info-bg: linear-gradient(145deg, rgba(34, 184, 207, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%);
+  --panel-info-border-color: rgba(34, 184, 207, 0.3);
+  --panel-info-box-shadow: 0 8px 32px rgba(34, 184, 207, 0.15);
+  --panel-info-title-bg: linear-gradient(145deg, rgba(34, 184, 207, 0.3) 0%, rgba(59, 130, 246, 0.3) 100%);
+  --panel-info-title-color: var(--oc-cyan-2);
+  --panel-info-body-bg: linear-gradient(145deg, rgba(34, 184, 207, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+  --panel-info-body-color: var(--oc-cyan-3);
+
+  /* Warning Panel */
+  --panel-warning-bg: linear-gradient(145deg, rgba(255, 193, 7, 0.08) 0%, rgba(251, 191, 36, 0.08) 100%);
+  --panel-warning-border-color: rgba(255, 193, 7, 0.3);
+  --panel-warning-box-shadow: 0 8px 32px rgba(255, 193, 7, 0.15);
+  --panel-warning-title-bg: linear-gradient(145deg, rgba(255, 193, 7, 0.3) 0%, rgba(251, 191, 36, 0.3) 100%);
+  --panel-warning-title-color: var(--oc-yellow-2);
+  --panel-warning-body-bg: linear-gradient(145deg, rgba(255, 193, 7, 0.05) 0%, rgba(251, 191, 36, 0.05) 100%);
+  --panel-warning-body-color: var(--oc-yellow-3);
+
+  /* Danger Panel */
+  --panel-danger-bg: linear-gradient(145deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 127, 0.08) 100%);
+  --panel-danger-border-color: rgba(239, 68, 68, 0.3);
+  --panel-danger-box-shadow: 0 8px 32px rgba(239, 68, 68, 0.15);
+  --panel-danger-title-bg: linear-gradient(145deg, rgba(239, 68, 68, 0.3) 0%, rgba(220, 38, 127, 0.3) 100%);
+  --panel-danger-title-color: var(--oc-red-2);
+  --panel-danger-body-bg: linear-gradient(145deg, rgba(239, 68, 68, 0.05) 0%, rgba(220, 38, 127, 0.05) 100%);
+  --panel-danger-body-color: var(--oc-red-3);
+
+  /* Success Panel */
+  --panel-success-bg: linear-gradient(145deg, rgba(34, 197, 94, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);
+  --panel-success-border-color: rgba(34, 197, 94, 0.3);
+  --panel-success-box-shadow: 0 8px 32px rgba(34, 197, 94, 0.15);
+  --panel-success-title-bg: linear-gradient(145deg, rgba(34, 197, 94, 0.3) 0%, rgba(16, 185, 129, 0.3) 100%);
+  --panel-success-title-color: var(--oc-green-2);
+  --panel-success-body-bg: linear-gradient(145deg, rgba(34, 197, 94, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+  --panel-success-body-color: var(--oc-green-3);
 }
 
