@@ -43,6 +43,56 @@
   --md-blockquote-bg: var(--oc-violet-1);
   --md-hr-border: var(--oc-indigo-4);
   --md-table-border: var(--oc-indigo-4);
+
+  /* ========== Panel 相关变量 ========== */
+  --panel-border-radius: 0;
+  --panel-bg: transparent;
+  --panel-border: none;
+  --panel-box-shadow: none;
+  --panel-title-bg: transparent;
+  --panel-title-color: inherit;
+  --panel-body-bg: transparent;
+  --panel-body-color: inherit;
+
+  /* Primary Panel */
+  --panel-primary-border: none;
+  --panel-primary-border-color: transparent;
+  --panel-primary-title-bg: transparent;
+  --panel-primary-bg: transparent;
+  --panel-primary-title-color: var(--oc-blue-7);
+  --panel-primary-body-color: inherit;
+
+  /* Info Panel */
+  --panel-info-border: none;
+  --panel-info-border-color: transparent;
+  --panel-info-title-bg: transparent;
+  --panel-info-bg: transparent;
+  --panel-info-title-color: var(--oc-cyan-7);
+  --panel-info-body-color: inherit;
+
+  /* Warning Panel */
+  --panel-warning-border: none;
+  --panel-warning-border-color: transparent;
+  --panel-warning-title-bg: transparent;
+  --panel-warning-bg: transparent;
+  --panel-warning-title-color: var(--oc-yellow-7);
+  --panel-warning-body-color: inherit;
+
+  /* Danger Panel */
+  --panel-danger-border: none;
+  --panel-danger-border-color: transparent;
+  --panel-danger-title-bg: transparent;
+  --panel-danger-bg: transparent;
+  --panel-danger-title-color: var(--oc-pink-7);
+  --panel-danger-body-color: inherit;
+
+  /* Success Panel */
+  --panel-success-border: none;
+  --panel-success-border-color: transparent;
+  --panel-success-title-bg: transparent;
+  --panel-success-bg: transparent;
+  --panel-success-title-color: var(--oc-teal-7);
+  --panel-success-body-color: inherit;
 }
 
 /** 预览区域样式 */
@@ -73,81 +123,24 @@
     }
   }
 
-  /** 信息面板 */
-  .cherry-panel {
-    border-radius: 0;
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-
-    .cherry-panel--title {
-      background-color: transparent;
-      color: inherit;
-    }
-
-    .cherry-panel--body {
-      background-color: transparent;
-      color: inherit;
-    }
-  }
-
+  /** Blue主题特殊的panel样式 - 使用左边框 */
   .cherry-panel__primary {
     border-left: 4px solid var(--oc-blue-6);
-
-    .cherry-panel--title {
-      color: var(--oc-blue-7);
-      
-      &.cherry-panel--title__not-empty::before {
-        content: '\EA6A';
-      }
-    }
   }
 
   .cherry-panel__info {
     border-left: 4px solid var(--oc-cyan-6);
-
-    .cherry-panel--title {
-      color: var(--oc-cyan-7);
-      
-      &.cherry-panel--title__not-empty::before {
-        content: '\EA69';
-      }
-    }
   }
 
   .cherry-panel__warning {
     border-left: 4px solid var(--oc-yellow-6);
-
-    .cherry-panel--title {
-      color: var(--oc-yellow-7);
-      
-      &.cherry-panel--title__not-empty::before {
-        content: '\EA6B';
-      }
-    }
   }
 
   .cherry-panel__danger {
     border-left: 4px solid var(--oc-pink-6);
-
-    .cherry-panel--title {
-      color: var(--oc-pink-7);
-      
-      &.cherry-panel--title__not-empty::before {
-        content: '\EA68';
-      }
-    }
   }
 
   .cherry-panel__success {
     border-left: 4px solid var(--oc-teal-6);
-
-    .cherry-panel--title {
-      color: var(--oc-teal-7);
-      
-      &.cherry-panel--title__not-empty::before {
-        content: '\EA67';
-      }
-    }
   }
 }
