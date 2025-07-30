@@ -12,8 +12,8 @@
   .cherry-shortcut-key-config-panel-wrapper {
     background-color: var(--shortcut-key-config-panel-bg);
     color: var(--shortcut-key-config-panel-text-color);
-    width: 280px !important;
-    height: 420px !important;
+    width: 300px !important;
+    height: 518px !important;
 
     @mixin flex-center {
       display: flex;
@@ -54,6 +54,7 @@
           font-size: 12px;
           transition: var(--shortcut-panel-transition);
           user-select: none;
+          background-color: var(--dropdown-item-hover-bg);
 
           &:hover {
             background-color: var(--dropdown-item-hover-bg);
@@ -94,6 +95,7 @@
         .shortcut-key-item {
           @include flex-center;
           justify-content: space-between;
+          border: 1px ridge var(--dropdown-item-hover-bg);
           height: auto;
           padding: 2px var(--shortcut-panel-padding-x);
           position: relative;
@@ -244,6 +246,8 @@
       display: flex;
       flex-wrap: wrap;
       gap: 4px;
+      box-shadow: var(--accordion-shadow);
+      margin-bottom: 5px;
 
       .shortcut-settings-btn {
         height: auto;
