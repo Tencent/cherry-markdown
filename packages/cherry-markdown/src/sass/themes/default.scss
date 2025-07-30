@@ -8,7 +8,7 @@
   --primary-color: var(--oc-blue-6);
   --secondary-color: var(--oc-blue-0);
   
-  --base-font-color: var(--oc-gray-7);
+  --base-font-color: var(--oc-gray-4);
   --base-editor-bg: var(--oc-white);
   --base-previewer-bg: var(--oc-white);
   --base-border-color: var(--oc-gray-3);
@@ -18,6 +18,7 @@
   --toolbar-btn-color: var(--oc-gray-4);
   --toolbar-btn-hover-bg: var(--oc-gray-2);
   --toolbar-btn-hover-color: var(--oc-blue-4);
+  --toolbar-btn-active-bg:var(--oc-gray-5);
   --toolbar-split-color: var(--oc-blue-5);
 
   /* ========== 编辑器相关变量 ========== */
@@ -42,9 +43,19 @@
   --md-blockquote-bg: rgba(134, 142, 150, 0.05);
   --md-hr-border: var(--oc-gray-3);
   --md-table-border: var(--oc-gray-3);
+  
+  /* ========== 手风琴组件变量覆盖 ========== */
+  --accordion-bg: var(--oc-gray-0);
+  --accordion-border: var(--oc-gray-3);
+  --accordion-shadow: var(--shadow-sm);
 
-  /* ========== Panel 相关变量 ========== */
-  /* Default主题使用markdown.scss中的默认样式 */
+  
+  --accordion-summary-bg: var(--oc-gray-6);
+  --accordion-summary-hover-bg: var(--oc-gray-5);
+  
+  --accordion-body-bg: var(--oc-gray-0);
+  --accordion-body-border: var(--oc-gray-2);
+  --accordion-body-color: var(--oc-gray-7);
 }
 
 /** 预览区域样式 */
@@ -156,6 +167,7 @@
       .level-3 {}
     }
   }
+
 }
 
 ol {

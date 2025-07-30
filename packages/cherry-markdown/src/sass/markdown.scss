@@ -308,22 +308,53 @@
     margin-bottom: var(--spacing-lg);
     padding-left: 0;
 
+    // 容器样式
+    background-color: var(--md-toc-bg);
+    border: var(--border-width-1) solid var(--md-toc-border-color);
+    border-radius: var(--md-toc-radius);
+    padding: var(--md-toc-padding);
+
     .toc-title {
       font-size: var(--font-size-2xl);
-      margin-bottom: 5px;
+      margin-bottom: var(--spacing-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--md-toc-title-color);
     }
 
     .toc-li {
-      border: none;
       list-style: none;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      border-left: var(--md-toc-indicator-width) solid var(--md-toc-indicator-color);
+      padding-left: var(--md-toc-indicator-gap);
+      transition: border-color 50ms ease-out;
 
       a {
         text-decoration: none;
-        color: var(--md-paragraph-color);
+        color: var(--md-toc-link-color);
+        flex-grow: 1;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--md-toc-link-radius);
+        transition: color 50ms ease-out, background-color 50ms ease-out;
 
         &:hover {
-          color: var(--md-link-hover-color);
+          color: var(--md-toc-link-hover-color);
+          background-color: var(--md-toc-link-hover-bg);
         }
+
+        &:active {
+          background-color: var(--md-toc-link-active-bg);
+        }
+
+        &.level-1 {
+          font-weight: var(--font-weight-semibold);
+        }        
+      }
+
+      &:hover,
+      &:has(a:active) {
+        border-left-color: var(--md-toc-indicator-hover-color);
       }
     }
   }
@@ -570,32 +601,126 @@ div[data-type='codeBlock'] {
 
 .cherry-detail {
   details {
-    background: #f8f9faaa;
-    border-radius: var(--radius-xl);
+    background: var(--accordion-bg);
+    border: 1px solid var(--accordion-border);
+    border-radius: var(--accordion-radius);
+    box-shadow: var(--accordion-shadow);
+    margin-bottom: var(--spacing-md);
+    transition: box-shadow 0.2s ease;
     overflow: hidden;
-    margin-bottom: 10px;
-    summary {
-      user-select: none;
-      padding: 5px 10px;
-      background-color: #6c757d;
-      color: #fff;
-      border-radius: var(--radius-xl);
+
+    &:hover {
+      box-shadow: var(--accordion-shadow);
     }
+
+    summary {
+      background: var(--accordion-summary-bg);
+      color: var(--accordion-summary-color);
+      padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) calc(var(--spacing-lg) + var(--spacing-xl));
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.2s ease;
+      position: relative;
+      user-select: none;
+      border-radius: var(--accordion-radius) var(--accordion-radius) 0 0;
+
+      &:hover {
+        background: var(--accordion-summary-hover-bg);
+      }
+
+      &::marker {
+        content: '';
+      }
+
+      &::before {
+        content: '▼';
+        position: absolute;
+        left: var(--spacing-md);
+        top: 50%;
+        transform: translateY(-50%);
+        transition: transform 0.2s ease;
+      }
+    }
+
+    &[open] summary::before {
+      transform: translateY(-50%) rotate(180deg);
+    }
+
+    &:not([open]) summary {
+      border-radius: var(--accordion-radius);
+    }
+
     .cherry-detail-body {
-      padding: 15px 25px 0 25px;
+      padding: var(--spacing-lg);
+      background: var(--accordion-body-bg);
+      border-top: 1px solid var(--accordion-body-border);
+      color: var(--accordion-body-color);
+      line-height: var(--line-height-relaxed);
+      border-radius: 0 0 var(--accordion-radius) var(--accordion-radius);
+
+      > *:first-child {
+        margin-top: 0;
+      }
+
+      > *:last-child {
+        margin-bottom: 0;
+      }
     }
   }
 }
 
 .cherry-detail__multiple {
-  border-radius: var(--radius-xl);
+  border-radius: var(--accordion-radius);
+  box-shadow: var(--accordion-shadow);
+  background: var(--accordion-bg);
+  border: 1px solid var(--accordion-border);
   overflow: hidden;
+
   details {
-    margin-bottom: 1px;
+    margin-bottom: 0;
     border-radius: 0;
     border: none;
-    summary {
-      border-radius: 0;
+    border-bottom: 1px solid var(--accordion-body-border);
+    box-shadow: none;
+
+    // 第一个手风琴项的标题有顶部圆角
+    &:first-child summary {
+      border-radius: var(--accordion-radius) var(--accordion-radius) 0 0;
+    }
+
+    // 最后一个手风琴项
+    &:last-child {
+      border-bottom: none;
+      
+      // 最后一个项目如果没有展开，底部有圆角
+      &:not([open]) summary {
+        border-radius: 0 0 var(--accordion-radius) var(--accordion-radius);
+      }
+      
+      // 最后一个项目展开时，标题变成直角
+      &[open] summary {
+        border-radius: 0;
+      }
+      
+      // 最后一个项目的内容区域底部有圆角
+      .cherry-detail-body {
+        border-radius: 0 0 var(--accordion-radius) var(--accordion-radius);
+      }
+    }
+
+    // 中间的项目保持直角
+    &:not(:first-child):not(:last-child) {
+      summary {
+        border-radius: 0;
+      }
+      
+      .cherry-detail-body {
+        border-radius: 0;
+      }
+    }
+
+    &:hover {
+      box-shadow: none;
     }
   }
 }

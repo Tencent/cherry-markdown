@@ -17,6 +17,7 @@
   --toolbar-btn-color: var(--oc-gray-4);
   --toolbar-btn-hover-bg: var(--oc-gray-6);
   --toolbar-btn-hover-color: var(--oc-white);
+  --toolbar-btn-active-bg:var(--oc-gray-8);
   --toolbar-split-color: var(--oc-gray-5);
 
   /* ========== 编辑器相关变量 ========== */
@@ -46,6 +47,24 @@
   --md-blockquote-bg: rgba(102, 128, 153, 0.05);
   --md-hr-border: var(--oc-gray-5);
   --md-table-border: var(--oc-gray-5);
+  --md-toc-bg: var(--oc-gray-9);
+  --md-toc-border-color: var(--oc-gray-7);
+  --md-toc-indicator-color: var(--oc-gray-7);
+  --md-toc-link-hover-bg: var(--oc-gray-8);
+  --md-toc-link-active-bg: var(--oc-gray-7);
+  
+  /* ========== 手风琴组件变量覆盖 ========== */
+  --accordion-bg: var(--oc-gray-8);
+  --accordion-border: var(--oc-gray-6);
+  --accordion-shadow: var(--shadow-md);
+
+  
+  --accordion-summary-bg: var(--oc-orange-6);
+  --accordion-summary-hover-bg: var(--oc-orange-5);
+  
+  --accordion-body-bg: var(--oc-gray-7);
+  --accordion-body-border: var(--oc-gray-6);
+  --accordion-body-color: var(--oc-gray-4);
 
   /* 目录区域样式 */
   .cherry-flex-toc {
@@ -128,23 +147,6 @@
 
 /** 预览区域样式 */
 .cherry-markdown.theme__dark {
-  /** 目录 */
-  .toc {
-    border: 1px solid var(--md-hr-border);
-    margin-top: 15px;
-    margin-bottom: 15px;
-    margin-right: 15px;
-
-    .toc-title {
-      padding: 15px;
-      margin-bottom: 15px;
-      border-bottom: 1px solid var(--md-hr-border);
-    }
-
-    .toc-li {
-      padding: 0 20px;
-    }
-  }
 
   figure {
     svg {
@@ -251,3 +253,4 @@
   --panel-success-body-bg: linear-gradient(145deg, rgba(34, 197, 94, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
   --panel-success-body-color: var(--oc-green-3);
 }
+

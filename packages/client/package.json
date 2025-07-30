@@ -6,7 +6,9 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "lint": "cd ../.. && npx prettier --check packages/client/src/**/*.{ts,vue} && npx eslint packages/client/src/**/*.{ts,vue}",
+    "lint:fix": "cd ../.. && npx prettier --write packages/client/src/**/*.{ts,vue} && npx eslint packages/client/src/**/*.{ts,vue} --fix"
   },
   "dependencies": {
     "vue": "^3.5.13",

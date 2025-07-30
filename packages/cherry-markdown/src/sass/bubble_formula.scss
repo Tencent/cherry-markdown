@@ -5,10 +5,10 @@
   display: flex;
   position: fixed !important;
   z-index: 9999999;
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0.5rem 1rem var(--shadow-color);
   box-sizing: border-box;
   border-radius: 10px;
-  background-color: var(--oc-white) !important;
+  background-color: var(--base-editor-bg) !important;
   overflow: hidden;
 
   .cherry-insert-formula-more {
@@ -21,14 +21,15 @@
     width: 100px;
     height: 100%;
     list-style: none;
-    padding: 0;
+    padding: 10px 0 0 10px;
     margin: 0;
     margin-right: 10px;
     .cherry-insert-formula-tab {
       width: 100%;
       height: 30px;
       text-align: center;
-      border: 1px solid var(--oc-white);
+      border: 1px solid var(--base-border-color);
+      border-radius: 5px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -46,8 +47,8 @@
     }
 
     .cherry-insert-formula-tab.active {
-      color: black;
-      border: 1px solid #000;
+      color: var(--base-font-color);
+      border: 1px solid var(--primary-color);
       border-radius: 5px;
     }
   }
@@ -59,28 +60,35 @@
     overflow-y: scroll;
 
     .cherry-insert-formula-categary {
-      width: 130px;
-      &:not(:first-child) {
-        margin-top: 10px;
-      }
+        width: 130px;
+        position: relative;
+        &:not(:first-child) {
+          margin-top: 10px;
+          .cherry-insert-formula-categary__func {
+            top: -10px;
+          }
+        }
+        &:hover .cherry-insert-formula-categary__func {
+          display: block;
+        }
 
       .cherry-insert-formula-categary__func {
         min-width: 200px;
         height: 260px;
         position: absolute;
-        left: 255px;
-        top: 0;
+        left: 100%;
         z-index: 100;
-        padding: 20px 10px;
-        background-color: var(--oc-white);
-        border-left: 1px solid var(--base-border-color);
+        padding: 0 15px 15px 15px;
+        background-color: var(--base-editor-bg);
+        border: none;
+          box-shadow: none;
         display: none;
         overflow-y: scroll;
 
         .cherry-insert-formula-categary__func-categary {
           border-top: 1px solid var(--base-border-color);
           border-bottom: 1px solid var(--base-border-color);
-          margin-bottom: 10px;
+          margin-bottom: 8px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -88,29 +96,27 @@
 
         .cherry-insert-formula-categary__func-item {
           cursor: pointer;
-          border: 1px solid var(--oc-white);
+          border: 1px solid var(--base-border-color);
           display: inline-block;
           text-align: center;
-          background-color: var(--oc-white);
-          margin: 2px;
+          background-color: var(--base-editor-bg);
+          margin: 4px;
           padding: 2px;
           vertical-align: middle;
           line-height: 30px;
-          border-color: var(--oc-white);
+          border-color: var(--toolbar-btn-hover-bg);
           border-radius: 5px;
 
           &:hover {
-            border-color: var(--oc-white);
-            background-color: var(--oc-white);
+            border-color: var(--toolbar-btn-hover-bg);
+            background-color: var(--toolbar-btn-hover-bg);
           }
           svg, img {
             pointer-events: none;
           }
         }
 
-        &:hover {
-          display: block;
-        }
+
       }
 
       .cherry-insert-formula-categary__btn {
@@ -145,7 +151,7 @@
 
       .btn-light {
         color: var(--base-font-color);
-        background-color: var(--oc-white);
+        background-color: var(--base-editor-bg);
         border-color: var(--base-border-color);
       }
     }
