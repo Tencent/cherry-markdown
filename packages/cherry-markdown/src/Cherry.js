@@ -75,6 +75,11 @@ export default class Cherry extends CherryStatic {
      */
     this.options = mergeWith({}, defaultConfigCopy, options, customizer);
 
+    /** @type {import('./utils/cm-search-replace').default} SearchBox 实例 */
+    this.searchBoxInstance = null;
+    /** @type {boolean} 是否初始化SearchBox */
+    this.searchBoxInit = false;
+
     this.storageFloatPreviewerWrapData = {
       x: 50,
       y: 58,
@@ -934,7 +939,11 @@ export default class Cherry extends CherryStatic {
       const markdownText = codemirror.getValue();
       this.lastMarkdownText = markdownText;
       const html = this.engine.makeHtml(markdownText);
-      this.previewer.update(html);
+      if (this.options.editor.defaultModel === 'editOnly') {
+        this.previewer.doHtmlCache(html);
+      } else {
+        this.previewer.update(html);
+      }
       this.$event.emit('afterInit', { markdownText, html });
     } catch (e) {
       throw new NestedError(e);
@@ -1086,6 +1095,7 @@ export default class Cherry extends CherryStatic {
     this.locale = this.locales[locale];
     this.$event.emit('afterChangeLocale', locale);
     this.resetToolbar('toolbar', this.options.toolbars.toolbar || []);
+    if (this.searchBoxInstance) this.searchBoxInstance.updateLocaleStrings();
     return true;
   }
 

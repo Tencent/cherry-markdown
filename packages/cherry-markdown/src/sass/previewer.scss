@@ -17,7 +17,8 @@
     border-radius: 5px;
     z-index: 11;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    background: var(--oc-white);
+    background: var(--base-editor-bg);
+    border: 1px solid var(--base-border-color);
   }
   .footnote.hidden {
     display: none;
@@ -90,10 +91,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--bubble-min-height);
-    height: var(--bubble-min-height);
-    min-width: var(--bubble-min-height);
-    min-height: var(--bubble-min-height);
+    width: var(--bubble-btn-height);
+    height: var(--bubble-btn-height);
+    min-width: var(--bubble-btn-height);
+    min-height: var(--bubble-btn-height);
     color: var(--toolbar-btn-color);
     background: var(--toolbar-btn-bg);
     border: var(--border-width-1) solid transparent;
@@ -231,6 +232,6 @@
     100% { background-color: #ffffcc00; }
   }
   .cherry-highlight-line {
-    animation: changeBgColor 3s;
+    animation: changeBgColor 1s;
   }
 }

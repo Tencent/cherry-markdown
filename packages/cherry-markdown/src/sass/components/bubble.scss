@@ -8,8 +8,7 @@
 
   font-size: var(--font-size-sm);
 
-  // min-height for overflow wrap
-  min-height: var(--bubble-min-height);
+  min-height: var(--bubble-btn-height);
   min-width: 50px;
 
   border: var(--border-width-1) solid var(--bubble-border);
@@ -17,7 +16,7 @@
   box-shadow: var(--bubble-shadow);
   border-radius: var(--bubble-radius);
   z-index: var(--bubble-z-index);
-  padding: var(--bubble-padding);
+  padding: var(--spacing-xs);
 
   &.cherry-bubble--centered {
     left: 50%;
@@ -35,7 +34,7 @@
     margin-left: -6px;
     background: var(--bubble-bg);
     box-sizing: border-box;
-    z-index: 1;
+    z-index: calc(var(--bubble-z-index) + 1);
     pointer-events: none;
   }
 
@@ -61,14 +60,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    // FIXME: remove fixed height
-    height: var(--bubble-min-height);
+    height: var(--bubble-btn-height);
     color: var(--toolbar-btn-color);
     background: var(--toolbar-btn-bg);
-
-    // line-height: (var(--bubble-min-height) - 2px); // border 2px
+    padding: var(--bubble-padding);
     cursor: pointer;
     user-select: none;
+    z-index: calc(var(--bubble-z-index) + 2);
+    // --bubble-z-index 底部 bubble
+    // --bubble-z-index + 1 .cherry-bubble-top 的指示器
+    // --bubble-z-index + 2 .cherry-toolbar-button
 
     &:hover {
       border-color: var(--toolbar-border);
@@ -78,7 +79,7 @@
 
     &.cherry-toolbar-split {
       height: 65%;
-      min-height: calc(0.65 * var(--bubble-min-height));
+      min-height: calc(0.65 * var(--bubble-btn-height));
     }
   }
 }

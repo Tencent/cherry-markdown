@@ -1,13 +1,6 @@
 .cherry {
-  // 默认主题采用亮色背景
-  &.theme__default {
-    --shortcut-key-config-panel-bg: var(--oc-white);
-    --shortcut-key-config-panel-text-color: var(--base-font-color);
-  }
-
-  // 其它主题从toolbar和dropdown中取色
   --shortcut-key-config-panel-bg: var(--dropdown-bg);
-  --shortcut-key-config-panel-text-color: var(--toolbar-btn-color);
+  --shortcut-key-config-panel-text-color: var(--dropdown-item-color);
 
   // 快捷键面板通用样式变量
   --shortcut-panel-padding-x: 15px;
@@ -19,8 +12,8 @@
   .cherry-shortcut-key-config-panel-wrapper {
     background-color: var(--shortcut-key-config-panel-bg);
     color: var(--shortcut-key-config-panel-text-color);
-    width: 280px !important;
-    height: 420px !important;
+    width: 300px !important;
+    height: 518px !important;
 
     @mixin flex-center {
       display: flex;
@@ -61,9 +54,11 @@
           font-size: 12px;
           transition: var(--shortcut-panel-transition);
           user-select: none;
+          background-color: var(--dropdown-item-hover-bg);
 
           &:hover {
             background-color: var(--dropdown-item-hover-bg);
+            color: var(--dropdown-item-hover-color);
           }
 
           &.active {
@@ -176,7 +171,7 @@
             cursor: pointer;
             padding: 2px 4px;
             border-radius: var(--shortcut-panel-border-radius);
-            color: var(--shortcut-key-config-panel-text-color);
+            color: var(--dropdown-item-hover-color);
             @include hover-color;
           }
 
@@ -250,6 +245,8 @@
       display: flex;
       flex-wrap: wrap;
       gap: 4px;
+      box-shadow: var(--accordion-shadow);
+      margin-bottom: 5px;
 
       .shortcut-settings-btn {
         height: auto;

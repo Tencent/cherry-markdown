@@ -62,6 +62,8 @@ export default class TogglePreview extends MenuBase {
       icon.title = this.locale.previewClose;
     }
     this.$previewerHidden = state;
+    // 隐藏预览（悬浮）时，触发事件让搜索框做出响应
+    this.$cherry.$event.emit('togglePreviewHidden', state);
   }
 
   /**

@@ -17,6 +17,7 @@
   --toolbar-btn-color: var(--primary-color);
   --toolbar-btn-hover-bg: var(--oc-green-5);
   --toolbar-btn-hover-color: var(--secondary-color);
+  --toolbar-btn-active-bg:var(--oc-green-7);
   --toolbar-split-color: var(--oc-green-8);
 
   /* ========== 编辑器相关变量 ========== */
@@ -44,6 +45,76 @@
   --md-blockquote-bg: var(--oc-green-1);
   --md-hr-border: var(--oc-green-8);
   --md-table-border: var(--oc-green-8);
+
+  /* ========== Panel 相关变量 ========== */
+  --panel-border-radius: 12px;
+  --panel-bg: var(--oc-green-0);
+  --panel-border: 1px solid var(--oc-green-2);
+  --panel-box-shadow: 0 3px 12px rgba(64, 192, 87, 0.15);
+  --panel-title-bg: var(--oc-green-1);
+  --panel-title-color: var(--oc-green-9);
+  --panel-title-border-radius: 10px 10px 0 0;
+  --panel-title-border-bottom: 1px solid var(--oc-green-3);
+  --panel-body-bg: var(--oc-white);
+  --panel-body-color: var(--oc-green-9);
+  --panel-body-border-radius: 0 0 10px 10px;
+
+  /* Primary Panel */
+  --panel-primary-border-color: var(--oc-green-4);
+  --panel-primary-box-shadow: 0 3px 12px rgba(64, 192, 87, 0.25);
+  --panel-primary-title-bg: var(--oc-green-3);
+  --panel-primary-title-color: var(--oc-green-9);
+  --panel-primary-body-bg: var(--oc-green-0);
+  --panel-primary-body-color: var(--oc-green-8);
+
+  /* Info Panel */
+  --panel-info-border-color: var(--oc-cyan-4);
+  --panel-info-box-shadow: 0 3px 12px rgba(9, 196, 244, 0.15);
+  --panel-info-title-bg: var(--oc-cyan-2);
+  --panel-info-title-color: var(--oc-cyan-9);
+  --panel-info-body-bg: var(--oc-cyan-0);
+  --panel-info-body-color: var(--oc-cyan-8);
+
+  /* Warning Panel */
+  --panel-warning-border-color: var(--oc-lime-4);
+  --panel-warning-box-shadow: 0 3px 12px rgba(130, 201, 30, 0.15);
+  --panel-warning-title-bg: var(--oc-lime-2);
+  --panel-warning-title-color: var(--oc-lime-9);
+  --panel-warning-body-bg: var(--oc-lime-0);
+  --panel-warning-body-color: var(--oc-lime-8);
+
+  /* Danger Panel */
+  --panel-danger-border-color: var(--oc-red-4);
+  --panel-danger-box-shadow: 0 3px 12px rgba(250, 82, 82, 0.15);
+  --panel-danger-title-bg: var(--oc-red-2);
+  --panel-danger-title-color: var(--oc-red-9);
+  --panel-danger-body-bg: var(--oc-red-0);
+  --panel-danger-body-color: var(--oc-red-8);
+
+  /* Success Panel */
+  --panel-success-border-color: var(--oc-green-5);
+  --panel-success-box-shadow: 0 3px 12px rgba(64, 192, 87, 0.3);
+  --panel-success-title-bg: var(--oc-green-4);
+  --panel-success-title-color: var(--oc-white);
+  --panel-success-body-bg: var(--oc-green-0);
+  --panel-success-body-color: var(--oc-green-8);
+  --md-toc-bg: var(--oc-white);
+  --md-toc-indicator-color: var(--oc-green-1);
+  --md-toc-link-hover-bg: var(--oc-green-0);
+  --md-toc-link-active-bg: var(--oc-green-1);
+  
+  /* ========== 手风琴组件变量覆盖 ========== */
+  --accordion-bg: var(--oc-green-0);
+  --accordion-border: var(--oc-green-2);
+  --accordion-shadow: var(--shadow-sm);
+
+  
+  --accordion-summary-bg: var(--oc-green-6);
+  --accordion-summary-hover-bg: var(--oc-green-5);
+  
+  --accordion-body-bg: var(--oc-green-0);
+  --accordion-body-border: var(--oc-green-1);
+  --accordion-body-color: var(--primary-color);
 }
 
 /** 预览区域样式 */
@@ -55,20 +126,5 @@
   h5 {
     text-align: center;
     margin-bottom: 35px;
-  }
-
-  /** 目录 */
-  .toc {
-    border-bottom: 1px solid var(--md-hr-border);
-    padding-bottom: 15px;
-    margin-bottom: 30px;
-
-    .toc-title {
-      text-align: center;
-      padding-bottom: 15px;
-      margin-top: 30px;
-      margin-bottom: 15px;
-      border-bottom: 1px solid var(--md-hr-border);
-    }
   }
 }

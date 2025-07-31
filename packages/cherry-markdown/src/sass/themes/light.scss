@@ -17,6 +17,7 @@
   --toolbar-btn-color: var(--oc-gray-8);
   --toolbar-btn-hover-bg: var(--primary-color);
   --toolbar-btn-hover-color: var(--oc-white);
+  --toolbar-btn-active-bg: var(--primary-color);
   --toolbar-split-color: var(--oc-blue-5);
 
   /* ========== 编辑器相关变量 ========== */
@@ -30,7 +31,6 @@
   --editor-v3-color: var(--primary-color);
   --editor-keyword-color: var(--oc-blue-4);
   --editor-selection-bg: var(--oc-blue-2);
-  
 
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: var(--primary-color);
@@ -42,4 +42,76 @@
   --md-blockquote-bg: var(--oc-blue-0);
   --md-hr-border: var(--oc-blue-5);
   --md-table-border: var(--oc-blue-5);
+
+  /* ========== Panel 相关变量 ========== */
+  --panel-border-radius: 16px;
+  --panel-bg: var(--oc-violet-0);
+  --panel-border: none;
+  --panel-box-shadow: 0 6px 20px rgba(139, 69, 195, 0.12);
+  --panel-title-bg: var(--oc-violet-1);
+  --panel-title-color: var(--oc-violet-9);
+  --panel-title-border-radius: 16px 16px 0 0;
+  --panel-title-border-bottom: none;
+  --panel-body-bg: var(--oc-white);
+  --panel-body-color: var(--oc-violet-9);
+  --panel-body-border-radius: 0 0 16px 16px;
+
+  /* Primary Panel */
+  --panel-primary-bg: var(--oc-violet-0);
+  --panel-primary-box-shadow: 0 6px 20px rgba(139, 69, 195, 0.18);
+  --panel-primary-title-bg: var(--oc-violet-3);
+  --panel-primary-title-color: var(--oc-violet-9);
+  --panel-primary-body-bg: var(--oc-violet-0);
+  --panel-primary-body-color: var(--oc-violet-8);
+
+  /* Info Panel */
+  --panel-info-bg: var(--oc-indigo-0);
+  --panel-info-box-shadow: 0 6px 20px rgba(92, 95, 208, 0.12);
+  --panel-info-title-bg: var(--oc-indigo-2);
+  --panel-info-title-color: var(--oc-indigo-9);
+  --panel-info-body-bg: var(--oc-indigo-0);
+  --panel-info-body-color: var(--oc-indigo-8);
+
+  /* Warning Panel */
+  --panel-warning-bg: var(--oc-yellow-0);
+  --panel-warning-box-shadow: 0 6px 20px rgba(255, 212, 59, 0.12);
+  --panel-warning-title-bg: var(--oc-yellow-2);
+  --panel-warning-title-color: var(--oc-yellow-9);
+  --panel-warning-body-bg: var(--oc-yellow-0);
+  --panel-warning-body-color: var(--oc-yellow-8);
+
+  /* Danger Panel */
+  --panel-danger-bg: var(--oc-grape-0);
+  --panel-danger-box-shadow: 0 6px 20px rgba(174, 62, 201, 0.12);
+  --panel-danger-title-bg: var(--oc-grape-2);
+  --panel-danger-title-color: var(--oc-grape-9);
+  --panel-danger-body-bg: var(--oc-grape-0);
+  --panel-danger-body-color: var(--oc-grape-8);
+
+  /* Success Panel */
+  --panel-success-bg: var(--oc-teal-0);
+  --panel-success-box-shadow: 0 6px 20px rgba(18, 184, 134, 0.12);
+  --panel-success-title-bg: var(--oc-teal-2);
+  --panel-success-title-color: var(--oc-teal-9);
+  --panel-success-body-bg: var(--oc-teal-0);
+  --panel-success-body-color: var(--oc-teal-8);
+  --md-toc-bg: var(--oc-blue-0);
+  --md-toc-indicator-color: var(--oc-blue-1);
+  --md-toc-link-hover-bg: var(--oc-blue-1);
+  --md-toc-link-active-bg: var(--oc-blue-2);
+  
+  /* ========== 手风琴组件变量覆盖 ========== */
+  --accordion-bg: var(--oc-blue-0);
+  --accordion-border: var(--oc-blue-2);
+  --accordion-shadow: var(--shadow-sm);
+
+  
+  --accordion-summary-bg: var(--oc-blue-5);
+  --accordion-summary-hover-bg: var(--oc-blue-4);
+  
+  --accordion-body-bg: var(--oc-blue-0);
+  --accordion-body-border: var(--oc-blue-1);
+  --accordion-body-color: var(--oc-gray-8);
 }
+
+
