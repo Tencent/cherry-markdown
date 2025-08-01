@@ -27,6 +27,7 @@ export default class CodeTheme extends MenuBase {
     this.noIcon = true;
     this.subMenuConfig = [
       { noIcon: false, name: 'autoWrap', iconName: 'br', onclick: this.bindSubClick.bind(this, 'wrap') },
+      { noIcon: true, name: '|', onclick: () => {} },
       { noIcon: true, name: 'light', onclick: this.bindSubClick.bind(this, 'default') },
       { noIcon: true, name: 'dark', onclick: this.bindSubClick.bind(this, 'dark') },
       { noIcon: true, name: 'one light', onclick: this.bindSubClick.bind(this, 'one-light') },

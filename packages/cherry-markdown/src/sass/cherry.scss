@@ -159,6 +159,13 @@
       vertical-align: middle;
     }
   }
+
+  &-separator {
+    height: 1px;
+    background-color: var(--oc-gray-3);
+    margin: var(--spacing-xs) var(--spacing-sm);
+    opacity: 0.6;
+  }
 }
 
 .cherry-toolbar {

@@ -270,6 +270,11 @@ export default class MenuBase {
    * @param {SubMenuConfigItem} config 配置
    */
   createSubBtnByConfig(config) {
+    if (typeof config === 'object' && config.name === '|') {
+      const separator = createElement('div', 'cherry-dropdown-separator');
+      return separator;
+    }
+
     const { name, iconName, icon, onclick } = config;
     const span = createElement('span', 'cherry-dropdown-item', {
       title: this.locale[name] || $e(name),
