@@ -249,13 +249,21 @@ export default class Toolbar {
 
   /**
    * 激活二级菜单添加选中颜色
-   * @param {string} name
+   * @param {string|string[]} name 菜单名称或菜单名称数组
    */
   activeSubMenuItem(name) {
-    const subMenu = this.subMenus[name];
-    const index = this.menus.hooks?.[name]?.getActiveSubMenuIndex(subMenu);
-    subMenu?.querySelectorAll('.cherry-dropdown-item').forEach((item, i) => {
-      item.classList.toggle('cherry-dropdown-item__selected', i === index);
+    const names = Array.isArray(name) ? name : [name];
+
+    names.forEach((menuName) => {
+      const subMenu = this.subMenus[menuName];
+      if (!subMenu) return;
+
+      const indices = this.menus.hooks?.[menuName]?.getActiveSubMenuIndex(subMenu);
+      const activeIndices = Array.isArray(indices) ? indices : [indices];
+
+      subMenu.querySelectorAll('.cherry-dropdown-item').forEach((item, i) => {
+        item.classList.toggle('cherry-dropdown-item__selected', activeIndices.includes(i));
+      });
     });
   }
   updateSubMenuPosition() {

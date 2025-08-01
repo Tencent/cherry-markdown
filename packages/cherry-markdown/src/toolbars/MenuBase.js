@@ -566,7 +566,7 @@ export default class MenuBase {
   /**
    * 绑定子菜单点击事件
    * @param {HTMLDivElement} subMenuDomPanel
-   * @returns {number} 当前激活的子菜单索引
+   * @returns {number|number[]} 当前激活的子菜单索引或索引数组
    */
   getActiveSubMenuIndex(subMenuDomPanel) {
     return -1;

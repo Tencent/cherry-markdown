@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { changeCodeTheme } from '@/utils/config';
+import { changeCodeTheme, getCodeThemeFromLocal } from '@/utils/config';
 /**
  * 设置代码块的主题
  * 本功能依赖[prism组件](https://github.com/PrismJS/prism)
@@ -42,9 +42,44 @@ export default class CodeTheme extends MenuBase {
     ];
   }
 
+  /**
+   * 获取当前激活的子菜单索引
+   * @param {HTMLDivElement} subMenuDomPanel
+   * @returns {number|number[]} 当前激活的子菜单索引或索引数组
+   */
   getActiveSubMenuIndex(subMenuDomPanel) {
     const wrap = this.$cherry.getCodeWrap();
-    return wrap === 'wrap' ? 0 : -1;
+    const currentTheme = getCodeThemeFromLocal(this.$cherry.nameSpace);
+
+    // 获取当前主题在菜单中的索引
+    const themeIndexMap = {
+      default: 1,
+      dark: 2,
+      'one-light': 3,
+      'one-dark': 4,
+      'vs-light': 5,
+      'vs-dark': 6,
+      'solarized-light': 7,
+      'tomorrow-night': 8,
+      okaidia: 9,
+      twilight: 10,
+      coy: 11,
+    };
+
+    const activeIndices = [];
+
+    // 如果自动换行开启，添加索引0
+    if (wrap === 'wrap') {
+      activeIndices.push(0);
+    }
+
+    // 添加当前主题的索引
+    const themeIndex = themeIndexMap[currentTheme];
+    if (themeIndex !== undefined) {
+      activeIndices.push(themeIndex);
+    }
+
+    return activeIndices;
   }
 
   /**
@@ -61,6 +96,8 @@ export default class CodeTheme extends MenuBase {
       this.$cherry.setCodeWrap(newWrap);
       return;
     }
+
+    // 设置新的代码主题
     this.$cherry.$event.emit('changeCodeBlockTheme', codeTheme);
     changeCodeTheme(this.$cherry, codeTheme);
   }
