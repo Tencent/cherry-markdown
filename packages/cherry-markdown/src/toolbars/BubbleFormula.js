@@ -505,7 +505,7 @@ export default class BubbleFormula {
 
     // 是否显示 latexlive 外链
     const appendLatexLive = this.showLatexLive
-      ? `<div class="cherry-insert-formula-more"<a href="https://www.latexlive.com/" target="_blank">查看更多</a></div>`
+      ? `<div class="cherry-insert-formula-more"><a href="https://www.latexlive.com/" target="_blank">查看更多（LaTeXLive）</a></div>`
       : '';
 
     // 返回最终 HTML 字符串

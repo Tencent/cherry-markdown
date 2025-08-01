@@ -159,14 +159,13 @@
   // "快捷工具"：这边主要是符号一些比较小的 item
   // 等高，自动换行
   .cherry-formula-item-light {
-    height: 32px;
+    min-height: 32px;
     width: auto;
     padding: 0 12px;
     justify-content: center;
 
     svg,
     img {
-      height: 50%;
       width: auto;
     }
   }
