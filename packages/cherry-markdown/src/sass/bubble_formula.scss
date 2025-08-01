@@ -1,172 +1,216 @@
 .cherry-insert-formula-wrappler {
-  width: 610px !important; // 覆盖默认.cherry-dropdown样式
-  height: 300px !important;
-  padding: 15px;
+  // 覆盖默认.cherry-dropdown样式
+  width: 680px !important;
+  height: 420px !important;
+  padding: 0 !important;
   display: flex;
   position: fixed !important;
   z-index: 9999999;
-  box-shadow: 0 0.5rem 1rem var(--shadow-color);
+  box-shadow: var(--box-shadow-down);
   box-sizing: border-box;
-  border-radius: 10px;
-  background-color: var(--base-editor-bg) !important;
+  border-radius: 12px;
   overflow: hidden;
+  border: 1px solid var(--base-border-color);
 
-  .cherry-insert-formula-more {
-    position: absolute;
-    bottom: 0;
-    font-size: var(--font-size-xs);
-  }
-
-  .cherry-insert-formula-tabs {
-    width: 100px;
-    height: 100%;
+  ul {
     list-style: none;
-    padding: 10px 0 0 10px;
+    padding: 0;
     margin: 0;
-    margin-right: 10px;
-    .cherry-insert-formula-tab {
-      width: 100%;
-      height: 30px;
-      text-align: center;
-      border: 1px solid var(--base-border-color);
-      border-radius: 5px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      & > a {
-        display: block;
-        text-decoration: none;
-        user-select: none;
-        user-select: none;
-      }
-      &:not(:first-child) {
-        margin-top: 10px;
-      }
-    }
-
-    .cherry-insert-formula-tab.active {
-      color: var(--base-font-color);
-      border: 1px solid var(--primary-color);
-      border-radius: 5px;
-    }
   }
 
-  .cherry-insert-formula-select {
-    height: 100%;
-    flex: 1;
-    display: none;
-    overflow-y: scroll;
+  .cherry-formula-nav {
+    width: 120px;
+    flex-shrink: 0;
+    padding: 8px;
+    border-right: 1px solid var(--base-border-color);
 
-    .cherry-insert-formula-categary {
-        width: 130px;
-        position: relative;
-        &:not(:first-child) {
-          margin-top: 10px;
-          .cherry-insert-formula-categary__func {
-            top: -10px;
-          }
-        }
-        &:hover .cherry-insert-formula-categary__func {
-          display: block;
-        }
-
-      .cherry-insert-formula-categary__func {
-        min-width: 200px;
-        height: 260px;
-        position: absolute;
-        left: 100%;
-        z-index: 100;
-        padding: 0 15px 15px 15px;
-        background-color: var(--base-editor-bg);
-        border: none;
-          box-shadow: none;
-        display: none;
-        overflow-y: scroll;
-
-        .cherry-insert-formula-categary__func-categary {
-          border-top: 1px solid var(--base-border-color);
-          border-bottom: 1px solid var(--base-border-color);
-          margin-bottom: 8px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .cherry-insert-formula-categary__func-item {
-          cursor: pointer;
-          border: 1px solid var(--base-border-color);
-          display: inline-block;
-          text-align: center;
-          background-color: var(--base-editor-bg);
-          margin: 4px;
-          padding: 2px;
-          vertical-align: middle;
-          line-height: 30px;
-          border-color: var(--toolbar-btn-hover-bg);
-          border-radius: 5px;
-
-          &:hover {
-            border-color: var(--toolbar-btn-hover-bg);
-            background-color: var(--toolbar-btn-hover-bg);
-          }
-          svg, img {
-            pointer-events: none;
-          }
-        }
-
-
-      }
-
-      .cherry-insert-formula-categary__btn {
+    .cherry-formula-main-tabs {
+      .cherry-formula-main-tab {
+        padding: 10px 12px;
+        border-radius: 6px;
         cursor: pointer;
-        display: inline-block;
-        font-weight: 400;
-        text-align: center;
-        vertical-align: middle;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--base-font-color);
         user-select: none;
-        background-color: transparent;
-        border: 1px solid transparent;
-        padding: 0.375rem 0.75rem;
-        font-size: 1rem;
-        line-height: 1.5;
-        border-radius: 0.25rem;
-        width: 100%;
+        transition: background-color 0.2s ease, color 0.2s ease;
 
-        & > img {
-          width: 100%;
-          height: 60%;
+        &:not(:last-child) {
+          margin-bottom: 4px;
+        }
+
+        &.active {
+          background-color: var(--dropdown-item-active-bg);
+          color: var(--dropdown-item-active-color);
         }
 
         &:hover {
-          color: var(--primary-color);
+          background-color: var(--dropdown-item-hover-bg);
+          color: var(--dropdown-item-hover-color);
         }
-
-        &:hover + .cherry-insert-formula-categary__func {
-          float: left;
-          display: block;
-        }
-      }
-
-      .btn-light {
-        color: var(--base-font-color);
-        background-color: var(--base-editor-bg);
-        border-color: var(--base-border-color);
       }
     }
   }
 
-  .cherry-insert-formula-select.active {
-    display: block;
+  .cherry-formula-content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .cherry-formula-content {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+
+    &.active {
+      display: flex;
+    }
+  }
+
+  .cherry-formula-sub-nav {
+    padding: 8px 12px;
+    flex-shrink: 0;
+
+    .cherry-formula-sub-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      .cherry-formula-sub-tab {
+        padding: 6px 12px;
+        border-radius: 16px;
+        cursor: pointer;
+        font-size: 13px;
+        color: var(--base-font-color);
+        user-select: none;
+        transition: background-color 0.2s ease, color 0.2s ease;
+
+        &.active {
+          background-color: var(--dropdown-item-active-bg);
+          color: var(--dropdown-item-active-color);
+        }
+
+        &:hover {
+          background-color: var(--dropdown-item-hover-bg);
+          color: var(--dropdown-item-hover-color);
+        }
+      }
+    }
+  }
+
+  .cherry-formula-grid-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  .cherry-formula-grid {
+    display: none;
+
+    &.active {
+      display: block;
+    }
+  }
+
+  .cherry-formula-grid-group {
+    &:not(:last-child) {
+      margin-bottom: 20px;
+    }
+  }
+
+  .cherry-formula-grid-group-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--base-font-color);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--base-border-color);
+  }
+
+  .cherry-formula-grid-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  // Base styles for all items
+  .cherry-formula-item {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--oc-gray-4);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    background-color: var(--base-editor-bg);
+
+    &:hover {
+      background-color: var(--dropdown-item-hover-bg);
+      color: var(--dropdown-item-hover-color);
+    }
+
+    svg,
+    img {
+      pointer-events: none;
+    }
+  }
+
+  // "快捷工具"：这边主要是符号一些比较小的 item
+  // 等高，自动换行
+  .cherry-formula-item-light {
+    height: 32px;
+    width: auto;
+    padding: 0 12px;
+    justify-content: center;
+
+    svg,
+    img {
+      height: 50%;
+      width: auto;
+    }
+  }
+
+  // "公式模板"：这边主要是一些较大的公式
+  // 每行一个
+  .cherry-formula-item-large {
+    width: 100%;
+    height: auto;
+    min-height: 48px;
+    padding: 10px 12px;
+    justify-content: center;
+
+    svg,
+    img {
+      height: auto;
+      width: auto;
+      max-width: 100%;
+    }
+  }
+
+  .cherry-insert-formula-more {
+    position: absolute;
+    bottom: 8px;
+    left: 12px;
+    font-size: 12px;
+    color: var(--editor-comment-color);
+
+    a {
+      color: var(--primary-color);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 }
 
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
 
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }

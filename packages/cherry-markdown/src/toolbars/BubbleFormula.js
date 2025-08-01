@@ -413,121 +413,232 @@ export default class BubbleFormula {
     this.initEventListeners();
   }
 
+  /**
+   * 生成插入公式面板的 HTML 字符串
+   * @returns {string} HTML 字符串
+   */
   generateBubbleFormulaHtmlStr() {
+    // 获取一级菜单配置项
     const entries = Object.entries(this.formulaConfig || {});
-    const liStr = entries
+
+    // 左侧一级侧边栏 HTML
+    const mainNavStr = entries
       .map(
         ([menuKey, { title }], index) =>
-          `<li class="cherry-insert-formula-tab${
+          `<li class="cherry-formula-main-tab${
             index === 0 ? ' active' : ''
           }" data-name="${menuKey}"><span>${title}</span></li>`,
       )
       .join('');
-    const ulStr = `<ul class="cherry-insert-formula-tabs">${liStr}</ul>`;
-    const formulaSelect = entries
-      .map(([formulaMenuKey, formulaMenu], index) => {
-        const formulaMenuStr = Object.entries(formulaMenu?.subCategory || {})
-          ?.map(([subCategoryKey, subCategory]) => {
-            const formulaCategaryFuncInnerStr = subCategory?.formulas
-              ?.map((formula) => {
-                if (formula.latex === '') {
-                  return `<div class="cherry-insert-formula-categary__func-categary">${formula.name}</div>`;
+    const mainNav = `<nav class="cherry-formula-nav"><ul class="cherry-formula-main-tabs">${mainNavStr}</ul></nav>`;
+
+    // 右侧内容区
+    const contentAreaStr = entries
+      .map(([menuKey, menu], menuIndex) => {
+        // 获取二级菜单配置项
+        const subCategoryEntries = Object.entries(menu?.subCategory || {});
+
+        // 顶部二级侧边栏 HTML
+        const subNavStr = subCategoryEntries
+          .map(
+            ([subCategoryKey, { title }], subIndex) =>
+              `<li class="cherry-formula-sub-tab${
+                subIndex === 0 ? ' active' : ''
+              }" data-name="${subCategoryKey}"><span>${title}</span></li>`,
+          )
+          .join('');
+        const subNav = `<div class="cherry-formula-sub-nav"><ul class="cherry-formula-sub-tabs">${subNavStr}</ul></div>`;
+
+        // 判断公式项样式
+        // cherry-formula-item-light：快捷工具（较小的符号）
+        // cherry-formula-item-large：公式模板（较长的公式）
+        const itemClass = menuKey === 'template' ? 'cherry-formula-item-large' : 'cherry-formula-item-light';
+        // 公式网格区 HTML
+        const gridsStr = subCategoryEntries
+          .map(([subCategoryKey, subCategory], subIndex) => {
+            let groupHtml = '';
+            let inGroup = false;
+
+            // 按分组（latex 为空时为分组标题）组织公式
+            for (const formula of subCategory.formulas) {
+              if (formula.latex === '') {
+                // 新分组标题
+                if (inGroup) {
+                  groupHtml += `</div></div>`;
                 }
+                groupHtml += `<div class="cherry-formula-grid-group">
+                                <div class="cherry-formula-grid-group-title">${formula.name}</div>
+                                <div class="cherry-formula-grid-items">`;
+                inGroup = true;
+              } else {
+                if (!inGroup) {
+                  groupHtml += `<div class="cherry-formula-grid-group"><div class="cherry-formula-grid-items">`;
+                  inGroup = true;
+                }
+                // TODO：后续直接换成 SVG 文件，不要用直接放在上面的方式
                 const svgCode = formula.img || '';
-                return `<div class="cherry-insert-formula-categary__func-item ${
-                  formula.formulaClass ? formula.formulaClass : ''
-                }" data-formula-code="${formula.latex}">${svgCode || formula.name}</div>`;
-              })
-              .join('');
-            const formulaCategaryFuncStr = `<div class="cherry-insert-formula-categary__func no-scrollbar" data-name="${subCategoryKey}">${formulaCategaryFuncInnerStr}</div>`;
-            const formulaCategaryBtnStr = `<button class="cherry-toolbar-button cherry-insert-formula-categary__btn btn-light" data-name="${subCategoryKey}">${subCategory.title}</button>`;
-            return `<div class="cherry-insert-formula-categary" data-name="${subCategoryKey}" title="${subCategory.title}">${formulaCategaryBtnStr}${formulaCategaryFuncStr}</div>`;
+                groupHtml += `<div class="cherry-formula-item ${itemClass} ${
+                  formula.formulaClass || ''
+                }" data-formula-code="${formula.latex}" title="${formula.latex}">${svgCode || formula.name}</div>`;
+              }
+            }
+
+            if (inGroup) {
+              groupHtml += `</div></div>`;
+            }
+
+            return `<div class="cherry-formula-grid no-scrollbar${
+              subIndex === 0 ? ' active' : ''
+            }" data-grid-for="${subCategoryKey}">${groupHtml}</div>`;
           })
           .join('');
-        return `<div class="cherry-insert-formula-select formula-${formulaMenuKey} no-scrollbar${
-          index === 0 ? ' active' : ''
-        }" data-name="${formulaMenuKey}">${formulaMenuStr}</div>`;
+
+        const gridWrapper = `<div class="cherry-formula-grid-wrapper">${gridsStr}</div>`;
+
+        return `<div class="cherry-formula-content${
+          menuIndex === 0 ? ' active' : ''
+        }" data-content-for="${menuKey}">${subNav}${gridWrapper}</div>`;
       })
       .join('');
+
+    const contentWrapper = `<div class="cherry-formula-content-wrapper">${contentAreaStr}</div>`;
+
+    // 是否显示 latexlive 外链
     const appendLatexLive = this.showLatexLive
-      ? `<div class="cherry-insert-formula-more">查看更多：<a href="https://www.latexlive.com/" target="_blank">www.latexlive.com</a></div>`
+      ? `<div class="cherry-insert-formula-more"<a href="https://www.latexlive.com/" target="_blank">查看更多</a></div>`
       : '';
-    return `${ulStr}${formulaSelect}${appendLatexLive}`;
+
+    // 返回最终 HTML 字符串
+    return `${mainNav}${contentWrapper}${appendLatexLive}`;
   }
 
+  /**
+   * 初始化插入公式面板 DOM
+   */
   init() {
     if (Object.keys(this.formulaConfig).length) {
       this.dom = document.createElement('div');
-      this.dom.className = ['cherry-dropdown', 'cherry-insert-formula', 'cherry-insert-formula-wrappler'].join(' ');
+      this.dom.className = 'cherry-dropdown cherry-insert-formula-wrappler';
       this.dom.innerHTML = this.generateBubbleFormulaHtmlStr();
-      // 实例化后，将容器插入到富文本编辑器中，默认隐藏
       this.dom.style.display = 'none';
     }
   }
 
   /**
    * 显示插入公式面板
-   * @param {function(string): void} callback
+   * @param {function(string): void} callback 点击公式后的回调
    */
   show(callback) {
     this.dom.style.removeProperty('display');
     this.afterClick = callback;
   }
 
+  /**
+   * 隐藏插入公式面板
+   */
   hide() {
     this.dom.style.display = 'none';
   }
 
+  /**
+   * 判断面板是否显示
+   * @returns {boolean}
+   */
   isShow() {
     return this.dom.style.display === 'block';
   }
 
+  /**
+   * 判断面板是否隐藏
+   * @returns {boolean}
+   */
   isHide() {
     return this.dom.style.display === 'none';
   }
 
+  /**
+   * 初始化事件监听
+   */
   initEventListeners() {
-    this.dom
-      .querySelector('.cherry-insert-formula-tabs')
-      ?.addEventListener('click', this.handleClickFormulaTabs.bind(this));
-    this.dom
-      .querySelectorAll('.cherry-insert-formula-categary__func-item')
-      ?.forEach((element) => element?.addEventListener('click', this.handleClickFormulaSelect.bind(this)));
+    // 一级菜单点击事件
+    this.dom.querySelector('.cherry-formula-main-tabs')?.addEventListener('click', this.handleClickMainTabs.bind(this));
+
+    // 二级菜单点击事件（事件委托）
+    this.dom.querySelectorAll('.cherry-formula-sub-tabs').forEach((ul) => {
+      ul.addEventListener('click', this.handleClickSubTabs.bind(this));
+    });
+
+    // 公式项点击事件（事件委托）
+    this.dom.querySelectorAll('.cherry-formula-grid-wrapper').forEach((wrapper) => {
+      wrapper.addEventListener('click', this.handleClickFormulaSelect.bind(this));
+    });
   }
 
   /**
-   * 处理tabs点击事件
-   * @param {Event} evt
+   * 一级菜单点击事件处理
+   * @param {Event} evt 事件对象
    */
-  handleClickFormulaTabs(evt) {
+  handleClickMainTabs(evt) {
     evt.preventDefault();
     evt.stopPropagation();
     const { target } = evt;
-    // 只需要 li 和 span 标签的点击事件，过滤掉ul自身的点击事件
-    if (target instanceof HTMLLIElement || target instanceof HTMLSpanElement) {
-      /** @type {HTMLElement} */
-      const tab = target instanceof HTMLSpanElement ? target.parentElement : target;
-      const tabName = tab.dataset.name;
-      const select = document.querySelector(`.cherry-insert-formula-select[data-name=${tabName}]`);
-      const activeTab = document.querySelector('.cherry-insert-formula-tab.active');
-      const activeSelect = document.querySelector('.cherry-insert-formula-select.active');
-      activeTab?.classList.remove('active');
-      activeSelect?.classList.remove('active');
+    // 获取被点击的一级菜单 tab
+    const tab = /** @type {HTMLElement} */ (/** @type {Element} */ (target).closest('.cherry-formula-main-tab'));
+
+    if (tab && !tab.classList.contains('active')) {
+      const { name: tabName } = tab.dataset;
+      // 找到对应内容区
+      const content = this.dom.querySelector(`.cherry-formula-content[data-content-for="${tabName}"]`);
+
+      // 切换激活状态
+      this.dom.querySelector('.cherry-formula-main-tab.active')?.classList.remove('active');
+      this.dom.querySelector('.cherry-formula-content.active')?.classList.remove('active');
+
       tab.classList.add('active');
-      select.classList.add('active');
+      content?.classList.add('active');
     }
   }
 
   /**
-   * 处理二级分类点击事件
-   * @param {Event} evt
+   * 二级菜单点击事件处理
+   * @param {Event} evt 事件对象
+   */
+  handleClickSubTabs(evt) {
+    evt.preventDefault();
+    evt.stopPropagation();
+    const { target } = evt;
+    // 获取被点击的二级菜单 tab
+    const tab = /** @type {HTMLElement} */ (/** @type {Element} */ (target).closest('.cherry-formula-sub-tab'));
+
+    if (tab && !tab.classList.contains('active')) {
+      const { name: tabName } = tab.dataset;
+      // 找到当前内容区
+      const content = tab.closest('.cherry-formula-content');
+      // 找到对应的公式网格
+      const grid = content?.querySelector(`.cherry-formula-grid[data-grid-for="${tabName}"]`);
+
+      // 切换激活状态
+      content?.querySelector('.cherry-formula-sub-tab.active')?.classList.remove('active');
+      content?.querySelector('.cherry-formula-grid.active')?.classList.remove('active');
+
+      tab.classList.add('active');
+      grid?.classList.add('active');
+    }
+  }
+
+  /**
+   * 公式项点击事件处理
+   * @param {Event} evt 事件对象
    */
   handleClickFormulaSelect(evt) {
     evt.preventDefault();
     evt.stopPropagation();
     const { target } = evt;
-    if (target instanceof HTMLElement) {
-      const { formulaCode = '' } = target.dataset;
+    // 获取被点击的公式项
+    const item = /** @type {HTMLElement} */ (/** @type {Element} */ (target).closest('.cherry-formula-item'));
+
+    if (item) {
+      const { formulaCode = '' } = item.dataset;
       this.afterClick(formulaCode);
       this.hide();
     }
