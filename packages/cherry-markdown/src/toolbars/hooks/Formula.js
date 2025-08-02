@@ -46,8 +46,17 @@ export default class Formula extends MenuBase {
   onClick(selection, shortKey = '') {
     if (this.subBubbleFormulaMenu.isHide() || !this.hasCacheOnce()) {
       const pos = this.dom.getBoundingClientRect();
-      this.subBubbleFormulaMenu.dom.style.left = `${pos.left + pos.width}px`;
-      this.subBubbleFormulaMenu.dom.style.top = `${pos.top + pos.height}px`;
+      const menuDom = this.subBubbleFormulaMenu.dom;
+      // 计算弹窗宽度，防止超出右侧
+      const menuWidth = menuDom.offsetWidth || 680;
+      const pageWidth = document.documentElement.clientWidth;
+      let left = pos.left + pos.width;
+      if (left + menuWidth > pageWidth) {
+        left = pageWidth - menuWidth - 8;
+        if (left < 0) left = 0;
+      }
+      menuDom.style.left = `${left}px`;
+      menuDom.style.top = `${pos.top + pos.height}px`;
       this.subBubbleFormulaMenu.show((latex) => {
         const before = /\n/.test(latex)
           ? `${/\n$/.test(selection) ? selection : `${selection}\n`}$$`
