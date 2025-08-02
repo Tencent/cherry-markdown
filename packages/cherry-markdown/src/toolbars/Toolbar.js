@@ -185,7 +185,9 @@ export default class Toolbar {
 
   setSubMenuPosition(menuObj, subMenuObj) {
     const pos = menuObj.getMenuPosition();
-    subMenuObj.style.left = `${pos.left + pos.width / 2}px`;
+    // 115px: 避免下拉菜单超过侧边栏
+    const left = Math.min(pos.left + pos.width / 2, window.innerWidth - 115);
+    subMenuObj.style.left = `${left}px`;
     subMenuObj.style.top = `${pos.top + pos.height}px`;
     subMenuObj.style.position = menuObj.positionModel;
   }
