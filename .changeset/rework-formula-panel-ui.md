@@ -2,4 +2,8 @@
 "@cherry-markdown/cherry-markdown": patch
 ---
 
-feat: 重构公式面板的 HTML 结构，优化样式和交互体验
+refactor: 对公式面板的界面的重构
+
+feat: 公式面板增加“文本样式”页
+
+fix: 修复公式菜单位置计算，防止超出右侧边界
