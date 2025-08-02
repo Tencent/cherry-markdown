@@ -391,6 +391,181 @@ export default class BubbleFormula {
         },
       },
     },
+    font: {
+      title: '文本样式',
+      subCategory: {
+        color: {
+          title: '颜色',
+          formulas: [
+            {
+              name: '文本颜色',
+              img: '',
+              latex: '',
+            },
+            {
+              name: '蓝色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#1976D2" font-family="Arial, sans-serif">蓝色 Blue</text></svg>`,
+              latex: '{\\color{Blue} } ',
+            },
+            {
+              name: '棕色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#8D6E63" font-family="Arial, sans-serif">棕色 Brown</text></svg>`,
+              latex: '{\\color{Brown} } ',
+            },
+            {
+              name: '灰色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#757575" font-family="Arial, sans-serif">灰色 Gray</text></svg>`,
+              latex: '{\\color{Gray} } ',
+            },
+            {
+              name: '绿色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#388E3C" font-family="Arial, sans-serif">绿色 Green</text></svg>`,
+              latex: '{\\color{Green} } ',
+            },
+            {
+              name: '橙色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#FF9800" font-family="Arial, sans-serif">橙色 Orange</text></svg>`,
+              latex: '{\\color{Orange} } ',
+            },
+            {
+              name: '桃色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#FFAB91" font-family="Arial, sans-serif">桃色 Peach</text></svg>`,
+              latex: '{\\color{Peach} } ',
+            },
+            {
+              name: '紫色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#7B1FA2" font-family="Arial, sans-serif">紫色 Purple</text></svg>`,
+              latex: '{\\color{Purple} } ',
+            },
+            {
+              name: '红色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#D32F2F" font-family="Arial, sans-serif">红色 Red</text></svg>`,
+              latex: '{\\color{Red} } ',
+            },
+            {
+              name: '棕褐色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#D2B48C" font-family="Arial, sans-serif">棕褐色 Tan</text></svg>`,
+              latex: '{\\color{Tan} } ',
+            },
+            {
+              name: '紫罗兰色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#8E24AA" font-family="Arial, sans-serif">紫罗兰 Violet</text></svg>`,
+              latex: '{\\color{Violet} } ',
+            },
+            {
+              name: '黄色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#FBC02D" font-family="Arial, sans-serif">黄色 Yellow</text></svg>`,
+              latex: '{\\color{Yellow} } ',
+            },
+            {
+              name: '黑色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#000000" font-family="Arial, sans-serif">黑色 Black</text></svg>`,
+              latex: '{\\color[RGB]{0,0,0} } ',
+            },
+            {
+              name: '背景颜色',
+              img: '',
+              latex: '',
+            },
+            {
+              name: '蓝色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#E3F2FD"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#1976D2" font-family="Arial, sans-serif">蓝色 Blue</text></svg>`,
+              latex: '{\\colorbox{Blue}{ } } ',
+            },
+            {
+              name: '棕色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#EFEBE9"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#8D6E63" font-family="Arial, sans-serif">棕色 Brown</text></svg>`,
+              latex: '{\\colorbox{Brown}{ } } ',
+            },
+            {
+              name: '灰色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#F5F5F5"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#757575" font-family="Arial, sans-serif">灰色 Gray</text></svg>`,
+              latex: '{\\colorbox{Gray}{ } } ',
+            },
+            {
+              name: '绿色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#E8F5E8"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#388E3C" font-family="Arial, sans-serif">绿色 Green</text></svg>`,
+              latex: '{\\colorbox{Green}{ } } ',
+            },
+            {
+              name: '橙色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#FFF3E0"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#FF9800" font-family="Arial, sans-serif">橙色 Orange</text></svg>`,
+              latex: '{\\colorbox{Orange}{ } } ',
+            },
+            {
+              name: '桃色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#FFF8F5"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#FFAB91" font-family="Arial, sans-serif">桃色 Peach</text></svg>`,
+              latex: '{\\colorbox{Peach}{ } } ',
+            },
+            {
+              name: '紫色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#F3E5F5"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#7B1FA2" font-family="Arial, sans-serif">紫色 Purple</text></svg>`,
+              latex: '{\\colorbox{Purple}{ } } ',
+            },
+            {
+              name: '红色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#FFEBEE"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#D32F2F" font-family="Arial, sans-serif">红色 Red</text></svg>`,
+              latex: '{\\colorbox{Red}{ } } ',
+            },
+            {
+              name: '黄色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#FFFDE7"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#F57F17" font-family="Arial, sans-serif">黄色 Yellow</text></svg>`,
+              latex: '{\\colorbox{Yellow}{ } } ',
+            },
+            {
+              name: '白色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#424242" font-family="Arial, sans-serif">白色 White</text></svg>`,
+              latex: '{\\colorbox{White}{ } } ',
+            },
+          ],
+        },
+        fontSize: {
+          title: '字号',
+          formulas: [
+            {
+              name: '极小字体',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="8" fill="#333" font-family="Arial, sans-serif">tiny 极小</text></svg>`,
+              latex: '{\\tiny } ',
+            },
+            {
+              name: '脚本字体',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="10" fill="#333" font-family="Arial, sans-serif">script 脚本</text></svg>`,
+              latex: '{\\scriptsize } ',
+            },
+            {
+              name: '正常字体',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#333" font-family="Arial, sans-serif">normal 正常</text></svg>`,
+              latex: '{\\normalsize } ',
+            },
+            {
+              name: '大字体',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="15" fill="#333" font-family="Arial, sans-serif">large 大</text></svg>`,
+              latex: '{\\large } ',
+            },
+            {
+              name: '较大字体',
+              img: `<svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg"><text x="60" y="26" text-anchor="middle" font-size="17" fill="#333" font-family="Arial, sans-serif">Large 较大</text></svg>`,
+              latex: '{\\Large } ',
+            },
+            {
+              name: '很大字体',
+              img: `<svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg"><text x="60" y="27" text-anchor="middle" font-size="19" fill="#333" font-family="Arial, sans-serif">LARGE 很大</text></svg>`,
+              latex: '{\\LARGE } ',
+            },
+            {
+              name: '巨大字体',
+              img: `<svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg"><text x="60" y="28" text-anchor="middle" font-size="21" fill="#333" font-family="Arial, sans-serif">huge 巨大</text></svg>`,
+              latex: '{\\huge } ',
+            },
+            {
+              name: '超大字体',
+              img: `<svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg"><text x="60" y="29" text-anchor="middle" font-size="23" fill="#333" font-family="Arial, sans-serif">Huge 超大</text></svg>`,
+              latex: '{\\Huge } ',
+            },
+          ],
+        },
+      },
+    },
   };
 
   /**
@@ -413,121 +588,231 @@ export default class BubbleFormula {
     this.initEventListeners();
   }
 
+  /**
+   * 生成插入公式面板的 HTML 字符串
+   * @returns {string} HTML 字符串
+   */
   generateBubbleFormulaHtmlStr() {
+    // 获取一级菜单配置项
     const entries = Object.entries(this.formulaConfig || {});
-    const liStr = entries
+
+    // 是否显示 latexlive 外链
+    const appendLatexLive = this.showLatexLive
+      ? `<div class="cherry-insert-formula-more"><a href="https://www.latexlive.com/" target="_blank">查看更多 (LaTeXLive)</a></div>`
+      : '';
+
+    // 左侧一级侧边栏 HTML
+    const mainNavStr = entries
       .map(
         ([menuKey, { title }], index) =>
-          `<li class="cherry-insert-formula-tab${
+          `<li class="cherry-formula-main-tab${
             index === 0 ? ' active' : ''
           }" data-name="${menuKey}"><span>${title}</span></li>`,
       )
       .join('');
-    const ulStr = `<ul class="cherry-insert-formula-tabs">${liStr}</ul>`;
-    const formulaSelect = entries
-      .map(([formulaMenuKey, formulaMenu], index) => {
-        const formulaMenuStr = Object.entries(formulaMenu?.subCategory || {})
-          ?.map(([subCategoryKey, subCategory]) => {
-            const formulaCategaryFuncInnerStr = subCategory?.formulas
-              ?.map((formula) => {
-                if (formula.latex === '') {
-                  return `<div class="cherry-insert-formula-categary__func-categary">${formula.name}</div>`;
+    const mainNav = `<nav class="cherry-formula-nav"><ul class="cherry-formula-main-tabs">${mainNavStr}</ul>${appendLatexLive}</nav>`;
+
+    // 右侧内容区
+    const contentAreaStr = entries
+      .map(([menuKey, menu], menuIndex) => {
+        // 获取二级菜单配置项
+        const subCategoryEntries = Object.entries(menu?.subCategory || {});
+
+        // 顶部二级侧边栏 HTML
+        const subNavStr = subCategoryEntries
+          .map(
+            ([subCategoryKey, { title }], subIndex) =>
+              `<li class="cherry-formula-sub-tab${
+                subIndex === 0 ? ' active' : ''
+              }" data-name="${subCategoryKey}"><span>${title}</span></li>`,
+          )
+          .join('');
+        const subNav = `<div class="cherry-formula-sub-nav"><ul class="cherry-formula-sub-tabs">${subNavStr}</ul></div>`;
+
+        // 判断公式项样式
+        // cherry-formula-item-light：快捷工具（较小的符号）
+        // cherry-formula-item-large：公式模板（较长的公式）
+        const itemClass = menuKey === 'template' ? 'cherry-formula-item-large' : 'cherry-formula-item-light';
+        // 公式网格区 HTML
+        const gridsStr = subCategoryEntries
+          .map(([subCategoryKey, subCategory], subIndex) => {
+            let groupHtml = '';
+            let inGroup = false;
+
+            // 按分组（latex 为空时为分组标题）组织公式
+            for (const formula of subCategory.formulas) {
+              if (formula.latex === '') {
+                // 新分组标题
+                if (inGroup) {
+                  groupHtml += `</div></div>`;
+                }
+                groupHtml += `<div class="cherry-formula-grid-group">
+                                <div class="cherry-formula-grid-group-title">${formula.name}</div>
+                                <div class="cherry-formula-grid-items">`;
+                inGroup = true;
+              } else {
+                if (!inGroup) {
+                  groupHtml += `<div class="cherry-formula-grid-group"><div class="cherry-formula-grid-items">`;
+                  inGroup = true;
                 }
                 const svgCode = formula.img || '';
-                return `<div class="cherry-insert-formula-categary__func-item ${
-                  formula.formulaClass ? formula.formulaClass : ''
-                }" data-formula-code="${formula.latex}">${svgCode || formula.name}</div>`;
-              })
-              .join('');
-            const formulaCategaryFuncStr = `<div class="cherry-insert-formula-categary__func no-scrollbar" data-name="${subCategoryKey}">${formulaCategaryFuncInnerStr}</div>`;
-            const formulaCategaryBtnStr = `<button class="cherry-toolbar-button cherry-insert-formula-categary__btn btn-light" data-name="${subCategoryKey}">${subCategory.title}</button>`;
-            return `<div class="cherry-insert-formula-categary" data-name="${subCategoryKey}" title="${subCategory.title}">${formulaCategaryBtnStr}${formulaCategaryFuncStr}</div>`;
+                groupHtml += `<div class="cherry-formula-item ${itemClass} ${
+                  formula.formulaClass || ''
+                }" data-formula-code="${formula.latex}" title="${formula.latex}">${svgCode || formula.name}</div>`;
+              }
+            }
+
+            if (inGroup) {
+              groupHtml += `</div></div>`;
+            }
+
+            return `<div class="cherry-formula-grid no-scrollbar${
+              subIndex === 0 ? ' active' : ''
+            }" data-grid-for="${subCategoryKey}">${groupHtml}</div>`;
           })
           .join('');
-        return `<div class="cherry-insert-formula-select formula-${formulaMenuKey} no-scrollbar${
-          index === 0 ? ' active' : ''
-        }" data-name="${formulaMenuKey}">${formulaMenuStr}</div>`;
+
+        const gridWrapper = `<div class="cherry-formula-grid-wrapper">${gridsStr}</div>`;
+
+        return `<div class="cherry-formula-content${
+          menuIndex === 0 ? ' active' : ''
+        }" data-content-for="${menuKey}">${subNav}${gridWrapper}</div>`;
       })
       .join('');
-    const appendLatexLive = this.showLatexLive
-      ? `<div class="cherry-insert-formula-more">查看更多：<a href="https://www.latexlive.com/" target="_blank">www.latexlive.com</a></div>`
-      : '';
-    return `${ulStr}${formulaSelect}${appendLatexLive}`;
+
+    const contentWrapper = `<div class="cherry-formula-content-wrapper">${contentAreaStr}</div>`;
+
+    // 返回最终 HTML 字符串
+    return `${mainNav}${contentWrapper}`;
   }
 
+  /**
+   * 初始化插入公式面板 DOM
+   */
   init() {
     if (Object.keys(this.formulaConfig).length) {
       this.dom = document.createElement('div');
-      this.dom.className = ['cherry-dropdown', 'cherry-insert-formula', 'cherry-insert-formula-wrappler'].join(' ');
+      this.dom.className = 'cherry-dropdown cherry-insert-formula-wrappler';
       this.dom.innerHTML = this.generateBubbleFormulaHtmlStr();
-      // 实例化后，将容器插入到富文本编辑器中，默认隐藏
       this.dom.style.display = 'none';
     }
   }
 
   /**
    * 显示插入公式面板
-   * @param {function(string): void} callback
+   * @param {function(string): void} callback 点击公式后的回调
    */
   show(callback) {
     this.dom.style.removeProperty('display');
     this.afterClick = callback;
   }
 
+  /**
+   * 隐藏插入公式面板
+   */
   hide() {
     this.dom.style.display = 'none';
   }
 
+  /**
+   * 判断面板是否显示
+   * @returns {boolean}
+   */
   isShow() {
     return this.dom.style.display === 'block';
   }
 
+  /**
+   * 判断面板是否隐藏
+   * @returns {boolean}
+   */
   isHide() {
     return this.dom.style.display === 'none';
   }
 
+  /**
+   * 初始化事件监听
+   */
   initEventListeners() {
-    this.dom
-      .querySelector('.cherry-insert-formula-tabs')
-      ?.addEventListener('click', this.handleClickFormulaTabs.bind(this));
-    this.dom
-      .querySelectorAll('.cherry-insert-formula-categary__func-item')
-      ?.forEach((element) => element?.addEventListener('click', this.handleClickFormulaSelect.bind(this)));
+    // 一级菜单点击事件
+    this.dom.querySelector('.cherry-formula-main-tabs')?.addEventListener('click', this.handleClickMainTabs.bind(this));
+
+    // 二级菜单点击事件（事件委托）
+    this.dom.querySelectorAll('.cherry-formula-sub-tabs').forEach((ul) => {
+      ul.addEventListener('click', this.handleClickSubTabs.bind(this));
+    });
+
+    // 公式项点击事件（事件委托）
+    this.dom.querySelectorAll('.cherry-formula-grid-wrapper').forEach((wrapper) => {
+      wrapper.addEventListener('click', this.handleClickFormulaSelect.bind(this));
+    });
   }
 
   /**
-   * 处理tabs点击事件
-   * @param {Event} evt
+   * 一级菜单点击事件处理
+   * @param {Event} evt 事件对象
    */
-  handleClickFormulaTabs(evt) {
+  handleClickMainTabs(evt) {
     evt.preventDefault();
     evt.stopPropagation();
     const { target } = evt;
-    // 只需要 li 和 span 标签的点击事件，过滤掉ul自身的点击事件
-    if (target instanceof HTMLLIElement || target instanceof HTMLSpanElement) {
-      /** @type {HTMLElement} */
-      const tab = target instanceof HTMLSpanElement ? target.parentElement : target;
-      const tabName = tab.dataset.name;
-      const select = document.querySelector(`.cherry-insert-formula-select[data-name=${tabName}]`);
-      const activeTab = document.querySelector('.cherry-insert-formula-tab.active');
-      const activeSelect = document.querySelector('.cherry-insert-formula-select.active');
-      activeTab?.classList.remove('active');
-      activeSelect?.classList.remove('active');
+    // 获取被点击的一级菜单 tab
+    const tab = /** @type {HTMLElement} */ (/** @type {Element} */ (target).closest('.cherry-formula-main-tab'));
+
+    if (tab && !tab.classList.contains('active')) {
+      const { name: tabName } = tab.dataset;
+      // 找到对应内容区
+      const content = this.dom.querySelector(`.cherry-formula-content[data-content-for="${tabName}"]`);
+
+      // 切换激活状态
+      this.dom.querySelector('.cherry-formula-main-tab.active')?.classList.remove('active');
+      this.dom.querySelector('.cherry-formula-content.active')?.classList.remove('active');
+
       tab.classList.add('active');
-      select.classList.add('active');
+      content?.classList.add('active');
     }
   }
 
   /**
-   * 处理二级分类点击事件
-   * @param {Event} evt
+   * 二级菜单点击事件处理
+   * @param {Event} evt 事件对象
+   */
+  handleClickSubTabs(evt) {
+    evt.preventDefault();
+    evt.stopPropagation();
+    const { target } = evt;
+    // 获取被点击的二级菜单 tab
+    const tab = /** @type {HTMLElement} */ (/** @type {Element} */ (target).closest('.cherry-formula-sub-tab'));
+
+    if (tab && !tab.classList.contains('active')) {
+      const { name: tabName } = tab.dataset;
+      // 找到当前内容区
+      const content = tab.closest('.cherry-formula-content');
+      // 找到对应的公式网格
+      const grid = content?.querySelector(`.cherry-formula-grid[data-grid-for="${tabName}"]`);
+
+      // 切换激活状态
+      content?.querySelector('.cherry-formula-sub-tab.active')?.classList.remove('active');
+      content?.querySelector('.cherry-formula-grid.active')?.classList.remove('active');
+
+      tab.classList.add('active');
+      grid?.classList.add('active');
+    }
+  }
+
+  /**
+   * 公式项点击事件处理
+   * @param {Event} evt 事件对象
    */
   handleClickFormulaSelect(evt) {
     evt.preventDefault();
     evt.stopPropagation();
     const { target } = evt;
-    if (target instanceof HTMLElement) {
-      const { formulaCode = '' } = target.dataset;
+    // 获取被点击的公式项
+    const item = /** @type {HTMLElement} */ (/** @type {Element} */ (target).closest('.cherry-formula-item'));
+
+    if (item) {
+      const { formulaCode = '' } = item.dataset;
       this.afterClick(formulaCode);
       this.hide();
     }
