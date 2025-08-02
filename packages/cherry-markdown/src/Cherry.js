@@ -572,8 +572,8 @@ export default class Cherry extends CherryStatic {
       // 检查主题是否在可用主题列表中，如果不在则设为 default
       const availableThemes = this.options.themeSettings.themeList.map((theme) => theme.className);
       if (!availableThemes.includes(mainTheme)) {
-        mainTheme = 'default';
         console.log(`主题 "${mainTheme}" 不在可用主题列表中，已切换为默认主题`);
+        mainTheme = 'default';
       }
       mainTheme = `theme__${mainTheme}`;
     }
