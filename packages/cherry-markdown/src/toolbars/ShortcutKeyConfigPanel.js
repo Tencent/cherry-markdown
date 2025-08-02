@@ -454,9 +454,6 @@ export default class ShortcutKeyConfigPanel {
         return `<li class="cherry-dropdown-item shortcut-key-item" data-hookname=${hookName} ${otherDataSet}>
           <div class="shortcut-key-config-panel-name">${this.getAliasLocale(aliasName)}</div>
           <div class="shortcut-key-right">
-            <div class="${this.shortcutConfigPanelKbdClassName}">
-              ${this.processKeysToHtml(key.split('-'))}
-            </div>
             <div class="edit-btn" title="${this.$cherry.locale.edit}">
               <i class="ch-icon ch-icon-pen-fill"></i>
             </div>
@@ -467,6 +464,9 @@ export default class ShortcutKeyConfigPanel {
               <div class="action-btn cancel" title="${this.$cherry.locale.cancel}">
                 <i class="ch-icon ch-icon-close"></i>
               </div>
+            </div>
+            <div class="${this.shortcutConfigPanelKbdClassName}">
+              ${this.processKeysToHtml(key.split('-'))}
             </div>
           </div>
         </li>`;

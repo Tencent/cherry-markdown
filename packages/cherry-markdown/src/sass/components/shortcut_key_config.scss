@@ -94,11 +94,11 @@
         .cherry-dropdown-item,
         .shortcut-key-item {
           @include flex-center;
-          justify-content: space-between;
           height: auto;
           padding: 2px var(--shortcut-panel-padding-x);
           position: relative;
           color: var(--shortcut-key-config-panel-text-color);
+          justify-content: flex-start;
 
           &.editing {
             background-color: var(--dropdown-item-hover-bg);
@@ -127,17 +127,29 @@
           .shortcut-key-right,
           .shortcut-key-right-static {
             @include flex-center;
-            gap: 8px;
             flex-wrap: wrap;
             flex: 1;
             justify-content: flex-end;
+            position: relative;
+            flex-direction: row;
+          }
+
+          .edit-btn {
+            position: static;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--shortcut-panel-transition);
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: var(--shortcut-panel-border-radius);
+            color: var(--dropdown-item-hover-color);
+            @include hover-color;
           }
 
           .shortcut-key-config-panel-kbd {
             @include flex-center;
             gap: 2px;
             justify-content: right;
-            transition: var(--shortcut-panel-transition);
 
             .keyboard-key {
               @include flex-center;
@@ -160,22 +172,8 @@
             }
           }
 
-          .edit-btn {
-            position: absolute;
-            right: 5px;
-            top: 50%;
-            transform: translateY(-50%);
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--shortcut-panel-transition);
-            cursor: pointer;
-            padding: 2px 4px;
-            border-radius: var(--shortcut-panel-border-radius);
-            color: var(--dropdown-item-hover-color);
-            @include hover-color;
-          }
-
           .edit-actions {
+            margin-right: 4px;
             display: none;
             gap: 4px;
 
@@ -211,16 +209,6 @@
 
           &:hover {
             color: var(--dropdown-item-hover-color);
-
-            .shortcut-key-config-panel-kbd {
-              transform: translateX(-24px);
-            }
-
-            .shortcut-key-right-static {
-              .shortcut-key-config-panel-kbd {
-                transform: translateX(0); // 静态时，不偏移
-              }
-            }
 
             .edit-btn {
               opacity: 1;
