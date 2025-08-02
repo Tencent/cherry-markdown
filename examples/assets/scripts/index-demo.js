@@ -365,7 +365,7 @@ var basicConfig = {
   autoScrollByHashAfterInit: true,
   // locale: 'en_US',
   themeSettings: {
-    mainTheme: 'light',
+    mainTheme: 'default',
   },
 };
 
