@@ -159,6 +159,13 @@
       vertical-align: middle;
     }
   }
+
+  &-separator {
+    height: 1px;
+    background-color: var(--oc-gray-3);
+    margin: var(--spacing-xs) var(--spacing-sm);
+    opacity: 0.6;
+  }
 }
 
 .cherry-toolbar {
@@ -502,6 +509,7 @@
   // 侧边栏按钮 非顶部工具栏
   .cherry-toolbar-button {
     height: 30px;
+    width: 30px;
     padding: 0 6px;
     color: var(--toolbar-btn-color);
     background: var(--toolbar-btn-bg);
@@ -1152,7 +1160,7 @@
   position: fixed;
   width: 300px;
   padding: 16px;
-  z-index: 6;
+  z-index: 13; // 高于 .cherry-drag 防止误触
   background: var(--toolbar-bg);
   box-shadow: var(--shadow-md);
   border-radius: var(--dropdown-radius);

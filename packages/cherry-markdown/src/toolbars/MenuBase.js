@@ -270,6 +270,11 @@ export default class MenuBase {
    * @param {SubMenuConfigItem} config 配置
    */
   createSubBtnByConfig(config) {
+    if (typeof config === 'object' && config.name === '|') {
+      const separator = createElement('div', 'cherry-dropdown-separator');
+      return separator;
+    }
+
     const { name, iconName, icon, onclick } = config;
     const span = createElement('span', 'cherry-dropdown-item', {
       title: this.locale[name] || $e(name),
@@ -561,7 +566,7 @@ export default class MenuBase {
   /**
    * 绑定子菜单点击事件
    * @param {HTMLDivElement} subMenuDomPanel
-   * @returns {number} 当前激活的子菜单索引
+   * @returns {number|number[]} 当前激活的子菜单索引或索引数组
    */
   getActiveSubMenuIndex(subMenuDomPanel) {
     return -1;
