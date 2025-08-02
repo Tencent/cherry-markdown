@@ -421,6 +421,11 @@ export default class BubbleFormula {
     // 获取一级菜单配置项
     const entries = Object.entries(this.formulaConfig || {});
 
+    // 是否显示 latexlive 外链
+    const appendLatexLive = this.showLatexLive
+      ? `<div class="cherry-insert-formula-more"><a href="https://www.latexlive.com/" target="_blank">查看更多 (LaTeXLive)</a></div>`
+      : '';
+
     // 左侧一级侧边栏 HTML
     const mainNavStr = entries
       .map(
@@ -430,7 +435,7 @@ export default class BubbleFormula {
           }" data-name="${menuKey}"><span>${title}</span></li>`,
       )
       .join('');
-    const mainNav = `<nav class="cherry-formula-nav"><ul class="cherry-formula-main-tabs">${mainNavStr}</ul></nav>`;
+    const mainNav = `<nav class="cherry-formula-nav"><ul class="cherry-formula-main-tabs">${mainNavStr}</ul>${appendLatexLive}</nav>`;
 
     // 右侧内容区
     const contentAreaStr = entries
@@ -475,7 +480,6 @@ export default class BubbleFormula {
                   groupHtml += `<div class="cherry-formula-grid-group"><div class="cherry-formula-grid-items">`;
                   inGroup = true;
                 }
-                // TODO：后续直接换成 SVG 文件，不要用直接放在上面的方式
                 const svgCode = formula.img || '';
                 groupHtml += `<div class="cherry-formula-item ${itemClass} ${
                   formula.formulaClass || ''
@@ -503,13 +507,8 @@ export default class BubbleFormula {
 
     const contentWrapper = `<div class="cherry-formula-content-wrapper">${contentAreaStr}</div>`;
 
-    // 是否显示 latexlive 外链
-    const appendLatexLive = this.showLatexLive
-      ? `<div class="cherry-insert-formula-more"><a href="https://www.latexlive.com/" target="_blank">查看更多（LaTeXLive）</a></div>`
-      : '';
-
     // 返回最终 HTML 字符串
-    return `${mainNav}${contentWrapper}${appendLatexLive}`;
+    return `${mainNav}${contentWrapper}`;
   }
 
   /**
