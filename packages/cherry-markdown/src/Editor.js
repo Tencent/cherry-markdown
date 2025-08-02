@@ -39,7 +39,7 @@ import { addEvent } from './utils/event';
 import Logger from '@/Logger';
 import { handleFileUploadCallback } from '@/utils/file';
 import { createElement } from './utils/dom';
-import { longTextReg, base64Reg, imgDrawioXmlReg } from './utils/regexp';
+import { longTextReg, base64Reg, imgDrawioXmlReg, createUrlReg } from './utils/regexp';
 import { handleNewlineIndentList } from './utils/autoindent';
 
 /**
@@ -156,6 +156,9 @@ export default class Editor {
     this.formatBigData2Mark(base64Reg, 'cm-url base64');
     this.formatBigData2Mark(imgDrawioXmlReg, 'cm-url drawio');
     this.formatBigData2Mark(longTextReg, 'cm-url long-text');
+    if (this.$cherry.options.editor.maxUrlLength > 0) {
+      this.formatBigData2Mark(createUrlReg(this.$cherry.options.editor.maxUrlLength), 'cm-url url-truncated');
+    }
     this.formatFullWidthMark();
   };
 

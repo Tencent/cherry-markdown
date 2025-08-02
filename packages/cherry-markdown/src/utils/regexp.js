@@ -268,6 +268,41 @@ export const base64Reg = /(data:image\/[a-z]{1,10};base64,)([0-9a-zA-Z+/]+)/g;
 // 匹配内容非常多的单行文本，为了避免表格的场景，所以特意避免表格的识别
 export const longTextReg = /([^\n]{100})([^\n|`\s]{5900,})/g;
 
+/**
+ * 创建匹配markdown中URL链接的正则表达式
+ * @param {number} minLength 最小URL长度，超过此长度才会被缩略
+ * @returns {RegExp} 正则表达式对象
+ */
+export const createUrlReg = (minLength) => {
+  // 匹配Markdown格式的链接 [text](url)
+  const markdownLinkPattern = `(\\[[^\\n]*?\\]\\()([^)]{${minLength},})(\\))`;
+
+  // 匹配普通URL链接（包括http、https、ftp等协议）
+  const protocolUrlPattern = `(^|\\s|\\()((?:[a-z][a-z0-9+.-]{1,31}:(?:\\/\\/)?)[^\\s)]{${
+    minLength - 8
+  },})(?=\\s|\\)|$)`;
+
+  // 匹配无协议头但以www开头的URL
+  const wwwUrlPattern = `(^|\\s|\\()(www\\.[^\\s)]{${minLength - 4},})(?=\\s|\\)|$)`;
+
+  // 匹配绝对路径 (以/开头)
+  const absolutePathPattern = `(^|\\s|\\()(/[^\\s)]{${minLength - 1},})(?=\\s|\\)|$)`;
+
+  // 匹配相对路径 (包含/但不以/开头)
+  const relativePathPattern = `(^|\\s|\\()([^/\\s][^\\s)]*?/[^\\s)]{${minLength - 2},})(?=\\s|\\)|$)`;
+
+  // 组合所有模式
+  const combinedPattern = [
+    markdownLinkPattern,
+    protocolUrlPattern,
+    wwwUrlPattern,
+    absolutePathPattern,
+    relativePathPattern,
+  ].join('|');
+
+  return new RegExp(combinedPattern, 'g');
+};
+
 // 匹配图片{}里的data-xml属性
 export const imgDrawioXmlReg = /(!\[[^\n]*?\]\([^)]+\)\{[^}]* data-xml=)([^}]+)\}/g;
 
