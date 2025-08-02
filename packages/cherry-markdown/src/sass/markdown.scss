@@ -670,7 +670,8 @@ div[data-type='codeBlock'] {
 }
 
 .cherry-detail__multiple {
-  border-radius: var(--accordion-radius);
+  border-radius: calc(var(--accordion-radius) + 1px);
+  // 这边的 1px 是内外圆角需要用 1px 的间隔来消除内外圆角间隙
   box-shadow: var(--accordion-shadow);
   background: var(--accordion-bg);
   border: 1px solid var(--accordion-border);
