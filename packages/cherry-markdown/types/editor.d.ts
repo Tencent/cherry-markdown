@@ -27,7 +27,7 @@ interface EditorEventMap {
 type EditorDefaultCallback = () => void;
 export type EditorEventCallback<
   E = unknown,
-  K extends keyof EditorEventMap = keyof EditorEventMap
+  K extends keyof EditorEventMap = keyof EditorEventMap,
 > = E extends EditorEventMap[K]
   ? (event: E, codemirror: CodeMirror.Editor) => void
   : (codemirror: CodeMirror.Editor) => void;
