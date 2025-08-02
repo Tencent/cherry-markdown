@@ -1160,7 +1160,7 @@
   position: fixed;
   width: 300px;
   padding: 16px;
-  z-index: 6;
+  z-index: 13; // 高于 .cherry-drag 防止误触
   background: var(--toolbar-bg);
   box-shadow: var(--shadow-md);
   border-radius: var(--dropdown-radius);
