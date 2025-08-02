@@ -391,6 +391,181 @@ export default class BubbleFormula {
         },
       },
     },
+    font: {
+      title: '文本样式',
+      subCategory: {
+        color: {
+          title: '颜色',
+          formulas: [
+            {
+              name: '文本颜色',
+              img: '',
+              latex: '',
+            },
+            {
+              name: '蓝色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#1976D2" font-family="Arial, sans-serif">蓝色 Blue</text></svg>`,
+              latex: '{\\color{Blue} } ',
+            },
+            {
+              name: '棕色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#8D6E63" font-family="Arial, sans-serif">棕色 Brown</text></svg>`,
+              latex: '{\\color{Brown} } ',
+            },
+            {
+              name: '灰色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#757575" font-family="Arial, sans-serif">灰色 Gray</text></svg>`,
+              latex: '{\\color{Gray} } ',
+            },
+            {
+              name: '绿色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#388E3C" font-family="Arial, sans-serif">绿色 Green</text></svg>`,
+              latex: '{\\color{Green} } ',
+            },
+            {
+              name: '橙色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#FF9800" font-family="Arial, sans-serif">橙色 Orange</text></svg>`,
+              latex: '{\\color{Orange} } ',
+            },
+            {
+              name: '桃色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#FFAB91" font-family="Arial, sans-serif">桃色 Peach</text></svg>`,
+              latex: '{\\color{Peach} } ',
+            },
+            {
+              name: '紫色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#7B1FA2" font-family="Arial, sans-serif">紫色 Purple</text></svg>`,
+              latex: '{\\color{Purple} } ',
+            },
+            {
+              name: '红色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#D32F2F" font-family="Arial, sans-serif">红色 Red</text></svg>`,
+              latex: '{\\color{Red} } ',
+            },
+            {
+              name: '棕褐色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#D2B48C" font-family="Arial, sans-serif">棕褐色 Tan</text></svg>`,
+              latex: '{\\color{Tan} } ',
+            },
+            {
+              name: '紫罗兰色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#8E24AA" font-family="Arial, sans-serif">紫罗兰 Violet</text></svg>`,
+              latex: '{\\color{Violet} } ',
+            },
+            {
+              name: '黄色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#FBC02D" font-family="Arial, sans-serif">黄色 Yellow</text></svg>`,
+              latex: '{\\color{Yellow} } ',
+            },
+            {
+              name: '黑色文字',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#000000" font-family="Arial, sans-serif">黑色 Black</text></svg>`,
+              latex: '{\\color[RGB]{0,0,0} } ',
+            },
+            {
+              name: '背景颜色',
+              img: '',
+              latex: '',
+            },
+            {
+              name: '蓝色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#E3F2FD"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#1976D2" font-family="Arial, sans-serif">蓝色 Blue</text></svg>`,
+              latex: '{\\colorbox{Blue}{ } } ',
+            },
+            {
+              name: '棕色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#EFEBE9"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#8D6E63" font-family="Arial, sans-serif">棕色 Brown</text></svg>`,
+              latex: '{\\colorbox{Brown}{ } } ',
+            },
+            {
+              name: '灰色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#F5F5F5"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#757575" font-family="Arial, sans-serif">灰色 Gray</text></svg>`,
+              latex: '{\\colorbox{Gray}{ } } ',
+            },
+            {
+              name: '绿色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#E8F5E8"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#388E3C" font-family="Arial, sans-serif">绿色 Green</text></svg>`,
+              latex: '{\\colorbox{Green}{ } } ',
+            },
+            {
+              name: '橙色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#FFF3E0"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#FF9800" font-family="Arial, sans-serif">橙色 Orange</text></svg>`,
+              latex: '{\\colorbox{Orange}{ } } ',
+            },
+            {
+              name: '桃色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#FFF8F5"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#FFAB91" font-family="Arial, sans-serif">桃色 Peach</text></svg>`,
+              latex: '{\\colorbox{Peach}{ } } ',
+            },
+            {
+              name: '紫色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#F3E5F5"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#7B1FA2" font-family="Arial, sans-serif">紫色 Purple</text></svg>`,
+              latex: '{\\colorbox{Purple}{ } } ',
+            },
+            {
+              name: '红色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#FFEBEE"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#D32F2F" font-family="Arial, sans-serif">红色 Red</text></svg>`,
+              latex: '{\\colorbox{Red}{ } } ',
+            },
+            {
+              name: '黄色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#FFFDE7"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#F57F17" font-family="Arial, sans-serif">黄色 Yellow</text></svg>`,
+              latex: '{\\colorbox{Yellow}{ } } ',
+            },
+            {
+              name: '白色背景',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="20" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1"/><text x="40" y="15" text-anchor="middle" font-size="13" fill="#424242" font-family="Arial, sans-serif">白色 White</text></svg>`,
+              latex: '{\\colorbox{White}{ } } ',
+            },
+          ],
+        },
+        fontSize: {
+          title: '字号',
+          formulas: [
+            {
+              name: '极小字体',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="8" fill="#333" font-family="Arial, sans-serif">tiny 极小</text></svg>`,
+              latex: '{\\tiny } ',
+            },
+            {
+              name: '脚本字体',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="10" fill="#333" font-family="Arial, sans-serif">script 脚本</text></svg>`,
+              latex: '{\\scriptsize } ',
+            },
+            {
+              name: '正常字体',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="13" fill="#333" font-family="Arial, sans-serif">normal 正常</text></svg>`,
+              latex: '{\\normalsize } ',
+            },
+            {
+              name: '大字体',
+              img: `<svg width="80" height="20" viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg"><text x="40" y="15" text-anchor="middle" font-size="15" fill="#333" font-family="Arial, sans-serif">large 大</text></svg>`,
+              latex: '{\\large } ',
+            },
+            {
+              name: '较大字体',
+              img: `<svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg"><text x="60" y="26" text-anchor="middle" font-size="17" fill="#333" font-family="Arial, sans-serif">Large 较大</text></svg>`,
+              latex: '{\\Large } ',
+            },
+            {
+              name: '很大字体',
+              img: `<svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg"><text x="60" y="27" text-anchor="middle" font-size="19" fill="#333" font-family="Arial, sans-serif">LARGE 很大</text></svg>`,
+              latex: '{\\LARGE } ',
+            },
+            {
+              name: '巨大字体',
+              img: `<svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg"><text x="60" y="28" text-anchor="middle" font-size="21" fill="#333" font-family="Arial, sans-serif">huge 巨大</text></svg>`,
+              latex: '{\\huge } ',
+            },
+            {
+              name: '超大字体',
+              img: `<svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg"><text x="60" y="29" text-anchor="middle" font-size="23" fill="#333" font-family="Arial, sans-serif">Huge 超大</text></svg>`,
+              latex: '{\\Huge } ',
+            },
+          ],
+        },
+      },
+    },
   };
 
   /**
