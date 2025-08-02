@@ -603,7 +603,7 @@ div[data-type='codeBlock'] {
   details {
     background: var(--accordion-bg);
     border: 1px solid var(--accordion-border);
-    border-radius: var(--accordion-radius);
+    border-radius: calc(var(--accordion-radius) + 1px);
     box-shadow: var(--accordion-shadow);
     margin-bottom: var(--spacing-md);
     transition: box-shadow 0.2s ease;
