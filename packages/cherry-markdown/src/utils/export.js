@@ -50,12 +50,21 @@ const getReadyToExport = (previewDom, cb) => {
   // 强制去掉预览区的隐藏class
   cherryPreviewer.className = cherryPreviewer.className.replace('cherry-previewer--hidden', '');
   cherryPreviewer.style.width = '100%';
+  cherryPreviewer.style.height = 'auto';
+  cherryPreviewer.style.maxHeight = 'none';
   const mmls = cherryPreviewer.querySelectorAll('mjx-assistive-mml');
   // a fix for html2canvas
   mmls.forEach((e) => {
     if (e instanceof HTMLElement) e.style.setProperty('visibility', 'hidden');
   });
   const cherryWrapper = document.createElement('div');
+  const cherryInstance = previewDom.closest('.cherry');
+  if (cherryInstance) {
+    cherryWrapper.className = cherryInstance.className;
+  }
+  document.head.querySelectorAll('style, link[rel="stylesheet"]').forEach((style) => {
+    cherryWrapper.appendChild(style.cloneNode(true));
+  });
   cherryWrapper.appendChild(cherryPreviewer);
   const displayList = hideBodyChildren();
   document.body.appendChild(cherryWrapper);
