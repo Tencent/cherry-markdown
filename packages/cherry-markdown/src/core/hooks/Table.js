@@ -64,21 +64,26 @@ export default class Table extends ParagraphBase {
   }
 
   $parseChartOptions(cell) {
+    console.log('Parsing chart options for cell:', cell);
     // 初始化失败
     if (!this.chartRenderEngine) {
+      console.log('Chart render engine not available');
       return null;
     }
     const CHART_REGEX = /^[ ]*:(\w+):(?:[ ]*{(.*?)}[ ]*)?$/;
     if (!CHART_REGEX.test(cell)) {
+      console.log('Cell does not match chart regex:', cell);
       return null;
     }
     const match = cell.match(CHART_REGEX);
     const [, chartType, axisOptions] = match;
     const DEFAULT_AXIS_OPTIONS = ['x', 'y'];
-    return {
+    const result = {
       type: chartType,
       options: axisOptions ? axisOptions.split(/\s*,\s*/) : DEFAULT_AXIS_OPTIONS,
     };
+    console.log('Parsed chart options:', result);
+    return result;
   }
 
   $parseColumnAlignRules(row) {
