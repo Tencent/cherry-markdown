@@ -161,3 +161,27 @@ export function createElement(tagName, className = '', attributes = {}) {
   }
   return element;
 }
+
+export function loadScript(src, id) {
+  return new Promise((resolve, reject) => {
+    if (document.getElementById(id)) {
+      resolve();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+export function loadCSS(url, id) {
+  if (document.getElementById(id)) return; // 避免重复加载
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = url;
+  link.type = 'text/css';
+  document.head.appendChild(link);
+}

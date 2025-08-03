@@ -168,11 +168,15 @@ var basicConfig = {
         needWhitespace: false, // 是否必须有前后空格
       },
       mathBlock: {
-        engine: 'MathJax', // katex或MathJax
-        src: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js', // 如果使用MathJax plugins，则需要使用该url通过script标签引入
+        // engine: 'MathJax', // katex或MathJax
+        engine: 'katex', // katex或MathJax
+        // src: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js', // 如果使用MathJax plugins，则需要使用该url通过script标签引入
+        src: 'https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js', 
+        css: 'https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css', // 如果使用katex，则还需要引入css（如果是MathJax，则不需要）
       },
       inlineMath: {
-        engine: 'MathJax', // katex或MathJax
+        // engine: 'MathJax', // katex或MathJax
+        engine: 'katex', // katex或MathJax
       },
       emoji: {
         useUnicode: true,
@@ -360,6 +364,7 @@ var basicConfig = {
     defaultModel: 'edit&preview',
     showFullWidthMark: true, // 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》
     showSuggestList: true, // 是否显示联想框
+    maxUrlLength: 200, // url最大长度，超过则自动截断
   },
   // cherry初始化后是否检查 location.hash 尝试滚动到对应位置
   autoScrollByHashAfterInit: true,
