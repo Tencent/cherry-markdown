@@ -47,6 +47,8 @@ export default {
   table: 'Table',
   'line-table': 'Line Table',
   'bar-table': 'Bar Table',
+  'radar-table': 'Radar Table',
+  'map-table': 'Map Table',
   formula: 'Formula',
   insertFormula: 'Insert Formula',
   insertFlow: 'Insert Flow',
