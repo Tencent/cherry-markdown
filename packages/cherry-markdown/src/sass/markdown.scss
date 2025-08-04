@@ -308,22 +308,53 @@
     margin-bottom: var(--spacing-lg);
     padding-left: 0;
 
+    // 容器样式
+    background-color: var(--md-toc-bg);
+    border: var(--border-width-1) solid var(--md-toc-border-color);
+    border-radius: var(--md-toc-radius);
+    padding: var(--md-toc-padding);
+
     .toc-title {
       font-size: var(--font-size-2xl);
-      margin-bottom: 5px;
+      margin-bottom: var(--spacing-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--md-toc-title-color);
     }
 
     .toc-li {
-      border: none;
       list-style: none;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      border-left: var(--md-toc-indicator-width) solid var(--md-toc-indicator-color);
+      padding-left: var(--md-toc-indicator-gap);
+      transition: border-color 50ms ease-out;
 
       a {
         text-decoration: none;
-        color: var(--md-paragraph-color);
+        color: var(--md-toc-link-color);
+        flex-grow: 1;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--md-toc-link-radius);
+        transition: color 50ms ease-out, background-color 50ms ease-out;
 
         &:hover {
-          color: var(--md-link-hover-color);
+          color: var(--md-toc-link-hover-color);
+          background-color: var(--md-toc-link-hover-bg);
         }
+
+        &:active {
+          background-color: var(--md-toc-link-active-bg);
+        }
+
+        &.level-1 {
+          font-weight: var(--font-weight-semibold);
+        }        
+      }
+
+      &:hover,
+      &:has(a:active) {
+        border-left-color: var(--md-toc-indicator-hover-color);
       }
     }
   }
@@ -570,32 +601,127 @@ div[data-type='codeBlock'] {
 
 .cherry-detail {
   details {
-    background: #f8f9faaa;
-    border-radius: var(--radius-xl);
+    background: var(--accordion-bg);
+    border: 1px solid var(--accordion-border);
+    border-radius: calc(var(--accordion-radius) + 1px);
+    box-shadow: var(--accordion-shadow);
+    margin-bottom: var(--spacing-md);
+    transition: box-shadow 0.2s ease;
     overflow: hidden;
-    margin-bottom: 10px;
-    summary {
-      user-select: none;
-      padding: 5px 10px;
-      background-color: #6c757d;
-      color: #fff;
-      border-radius: var(--radius-xl);
+
+    &:hover {
+      box-shadow: var(--accordion-shadow);
     }
+
+    summary {
+      background: var(--accordion-summary-bg);
+      color: var(--accordion-summary-color);
+      padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) calc(var(--spacing-lg) + var(--spacing-xl));
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.2s ease;
+      position: relative;
+      user-select: none;
+      border-radius: var(--accordion-radius) var(--accordion-radius) 0 0;
+
+      &:hover {
+        background: var(--accordion-summary-hover-bg);
+      }
+
+      &::marker {
+        content: '';
+      }
+
+      &::before {
+        content: '▼';
+        position: absolute;
+        left: var(--spacing-md);
+        top: 50%;
+        transform: translateY(-50%);
+        transition: transform 0.2s ease;
+      }
+    }
+
+    &[open] summary::before {
+      transform: translateY(-50%) rotate(180deg);
+    }
+
+    &:not([open]) summary {
+      border-radius: var(--accordion-radius);
+    }
+
     .cherry-detail-body {
-      padding: 15px 25px 0 25px;
+      padding: var(--spacing-lg);
+      background: var(--accordion-body-bg);
+      border-top: 1px solid var(--accordion-body-border);
+      color: var(--accordion-body-color);
+      line-height: var(--line-height-relaxed);
+      border-radius: 0 0 var(--accordion-radius) var(--accordion-radius);
+
+      > *:first-child {
+        margin-top: 0;
+      }
+
+      > *:last-child {
+        margin-bottom: 0;
+      }
     }
   }
 }
 
 .cherry-detail__multiple {
-  border-radius: var(--radius-xl);
+  border-radius: calc(var(--accordion-radius) + 1px);
+  // 这边的 1px 是内外圆角需要用 1px 的间隔来消除内外圆角间隙
+  box-shadow: var(--accordion-shadow);
+  background: var(--accordion-bg);
+  border: 1px solid var(--accordion-border);
   overflow: hidden;
+
   details {
-    margin-bottom: 1px;
+    margin-bottom: 0;
     border-radius: 0;
     border: none;
-    summary {
-      border-radius: 0;
+    border-bottom: 1px solid var(--accordion-body-border);
+    box-shadow: none;
+
+    // 第一个手风琴项的标题有顶部圆角
+    &:first-child summary {
+      border-radius: var(--accordion-radius) var(--accordion-radius) 0 0;
+    }
+
+    // 最后一个手风琴项
+    &:last-child {
+      border-bottom: none;
+      
+      // 最后一个项目如果没有展开，底部有圆角
+      &:not([open]) summary {
+        border-radius: 0 0 var(--accordion-radius) var(--accordion-radius);
+      }
+      
+      // 最后一个项目展开时，标题变成直角
+      &[open] summary {
+        border-radius: 0;
+      }
+      
+      // 最后一个项目的内容区域底部有圆角
+      .cherry-detail-body {
+        border-radius: 0 0 var(--accordion-radius) var(--accordion-radius);
+      }
+    }
+
+    // 中间的项目保持直角
+    &:not(:first-child):not(:last-child) {
+      summary {
+        border-radius: 0;
+      }
+      
+      .cherry-detail-body {
+        border-radius: 0;
+      }
+    }
+
+    &:hover {
+      box-shadow: none;
     }
   }
 }
@@ -614,71 +740,104 @@ div[data-type='codeBlock'] {
 }
 
 .cherry-panel {
-  margin: 10px 0;
+  margin: var(--panel-margin, 10px 0);
   overflow: hidden;
-  border-radius: var(--radius-xl);
+  border-radius: var(--panel-border-radius, var(--radius-xl));
   box-sizing: border-box;
-  border: 0.5px solid;
+  border: var(--panel-border, 0.5px solid var(--panel-border-color, transparent));
+  background: var(--panel-bg, transparent);
+  box-shadow: var(--panel-box-shadow, none);
+  backdrop-filter: var(--panel-backdrop-filter, none);
+
   .cherry-panel--title {
-    color: #fff;
-    padding: 5px 20px;
+    color: var(--panel-title-color, #fff);
+    padding: var(--panel-title-padding, 5px 20px);
+    background: var(--panel-title-bg, transparent);
+    border-radius: var(--panel-title-border-radius, 0);
+    border-bottom: var(--panel-title-border-bottom, none);
+
     &.cherry-panel--title__not-empty::before {
       font-family: 'ch-icon';
       margin: 0 var(--spacing-md) 0 -6px;
       vertical-align: bottom;
+      content: var(--panel-icon, '');
     }
   }
+
   .cherry-panel--body {
-    padding: 5px 20px;
+    padding: var(--panel-body-padding, 5px 20px);
+    background: var(--panel-body-bg, transparent);
+    color: var(--panel-body-color, inherit);
+    border-radius: var(--panel-body-border-radius, 0);
   }
 }
+
 .cherry-panel__primary {
-  background-color: #cfe2ff;
-  color: #0a58ca;
-  .cherry-panel--title {
-    background-color: #0d6dfe;
-    &.cherry-panel--title__not-empty::before {
-      content: '\EA6A';
-    }
-  }
+  --panel-bg: var(--panel-primary-bg, #cfe2ff);
+  --panel-border-color: var(--panel-primary-border-color, transparent);
+  --panel-box-shadow: var(--panel-primary-box-shadow, none);
+  --panel-title-bg: var(--panel-primary-title-bg, #0d6dfe);
+  --panel-title-color: var(--panel-primary-title-color, #fff);
+  --panel-title-border-radius: var(--panel-primary-title-border-radius, 0);
+  --panel-title-border-bottom: var(--panel-primary-title-border-bottom, none);
+  --panel-body-bg: var(--panel-primary-body-bg, transparent);
+  --panel-body-color: var(--panel-primary-body-color, #0a58ca);
+  --panel-body-border-radius: var(--panel-primary-body-border-radius, 0);
+  --panel-icon: var(--panel-primary-icon, '\EA6A');
 }
+
 .cherry-panel__info {
-  background-color: #cff4fc;
-  color: #087990;
-  .cherry-panel--title {
-    background-color: #099cba;
-    &.cherry-panel--title__not-empty::before {
-      content: '\EA69';
-    }
-  }
+  --panel-bg: var(--panel-info-bg, #cff4fc);
+  --panel-border-color: var(--panel-info-border-color, transparent);
+  --panel-box-shadow: var(--panel-info-box-shadow, none);
+  --panel-title-bg: var(--panel-info-title-bg, #099cba);
+  --panel-title-color: var(--panel-info-title-color, #fff);
+  --panel-title-border-radius: var(--panel-info-title-border-radius, 0);
+  --panel-title-border-bottom: var(--panel-info-title-border-bottom, none);
+  --panel-body-bg: var(--panel-info-body-bg, transparent);
+  --panel-body-color: var(--panel-info-body-color, #087990);
+  --panel-body-border-radius: var(--panel-info-body-border-radius, 0);
+  --panel-icon: var(--panel-info-icon, '\EA69');
 }
+
 .cherry-panel__warning {
-  background-color: #fff3cd;
-  color: #997404;
-  .cherry-panel--title {
-    background-color: #b38806;
-    &.cherry-panel--title__not-empty::before {
-      content: '\EA6B';
-    }
-  }
+  --panel-bg: var(--panel-warning-bg, #fff3cd);
+  --panel-border-color: var(--panel-warning-border-color, transparent);
+  --panel-box-shadow: var(--panel-warning-box-shadow, none);
+  --panel-title-bg: var(--panel-warning-title-bg, #b38806);
+  --panel-title-color: var(--panel-warning-title-color, #fff);
+  --panel-title-border-radius: var(--panel-warning-title-border-radius, 0);
+  --panel-title-border-bottom: var(--panel-warning-title-border-bottom, none);
+  --panel-body-bg: var(--panel-warning-body-bg, transparent);
+  --panel-body-color: var(--panel-warning-body-color, #997404);
+  --panel-body-border-radius: var(--panel-warning-body-border-radius, 0);
+  --panel-icon: var(--panel-warning-icon, '\EA6B');
 }
+
 .cherry-panel__danger {
-  background-color: #f8d7da;
-  color: #b02a37;
-  .cherry-panel--title {
-    background-color: #dc3545;
-    &.cherry-panel--title__not-empty::before {
-      content: '\EA68';
-    }
-  }
+  --panel-bg: var(--panel-danger-bg, #f8d7da);
+  --panel-border-color: var(--panel-danger-border-color, transparent);
+  --panel-box-shadow: var(--panel-danger-box-shadow, none);
+  --panel-title-bg: var(--panel-danger-title-bg, #dc3545);
+  --panel-title-color: var(--panel-danger-title-color, #fff);
+  --panel-title-border-radius: var(--panel-danger-title-border-radius, 0);
+  --panel-title-border-bottom: var(--panel-danger-title-border-bottom, none);
+  --panel-body-bg: var(--panel-danger-body-bg, transparent);
+  --panel-body-color: var(--panel-danger-body-color, #b02a37);
+  --panel-body-border-radius: var(--panel-danger-body-border-radius, 0);
+  --panel-icon: var(--panel-danger-icon, '\EA68');
 }
+
 .cherry-panel__success {
-  background-color: #d1e7dd;
-  color: #146c43;
-  .cherry-panel--title {
-    background-color: #198754;
-    &.cherry-panel--title__not-empty::before {
-      content: '\EA67';
-    }
-  }
+  --panel-bg: var(--panel-success-bg, #d1e7dd);
+  --panel-border-color: var(--panel-success-border-color, transparent);
+  --panel-box-shadow: var(--panel-success-box-shadow, none);
+  --panel-title-bg: var(--panel-success-title-bg, #198754);
+  --panel-title-color: var(--panel-success-title-color, #fff);
+  --panel-title-border-radius: var(--panel-success-title-border-radius, 0);
+  --panel-title-border-bottom: var(--panel-success-title-border-bottom, none);
+  --panel-body-bg: var(--panel-success-body-bg, transparent);
+  --panel-body-color: var(--panel-success-body-color, #146c43);
+  --panel-body-border-radius: var(--panel-success-body-border-radius, 0);
+  --panel-icon: var(--panel-success-icon, '\EA67');
 }

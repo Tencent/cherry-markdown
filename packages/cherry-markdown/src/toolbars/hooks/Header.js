@@ -15,7 +15,7 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import { getSelection } from '@/utils/selection';
-import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
+import { getKeyCode, getPlatformControlKey } from '@/utils/shortcutKey';
 /**
  * 插入1级~5级标题
  */
@@ -34,25 +34,25 @@ export default class Header extends MenuBase {
       { iconName: 'h5', name: 'h5', onclick: this.bindSubClick.bind(this, '5') },
     ];
     this.shortcutKeyMap = {
-      [`${CONTROL_KEY}-${getKeyCode(1)}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode(1)}`]: {
         hookName: this.name,
-        aliasName: this.$cherry.locale.h1,
+        aliasName: 'h1',
       },
-      [`${CONTROL_KEY}-${getKeyCode(2)}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode(2)}`]: {
         hookName: this.name,
-        aliasName: this.$cherry.locale.h2,
+        aliasName: 'h2',
       },
-      [`${CONTROL_KEY}-${getKeyCode(3)}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode(3)}`]: {
         hookName: this.name,
-        aliasName: this.$cherry.locale.h3,
+        aliasName: 'h3',
       },
-      [`${CONTROL_KEY}-${getKeyCode(4)}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode(4)}`]: {
         hookName: this.name,
-        aliasName: this.$cherry.locale.h4,
+        aliasName: 'h4',
       },
-      [`${CONTROL_KEY}-${getKeyCode(5)}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode(5)}`]: {
         hookName: this.name,
-        aliasName: this.$cherry.locale.h5,
+        aliasName: 'h5',
       },
     };
   }
@@ -82,18 +82,19 @@ export default class Header extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    let $selection = getSelection(this.editor.editor, selection, 'line', true) || this.locale.header;
+    const $selection = getSelection(this.editor.editor, selection, 'line', true) || this.locale.header;
     const header = this.$getFlagStr(shortKey);
-    if (!this.isSelections && !this.$testIsHead($selection)) {
-      this.getMoreSelection('\n', '', () => {
-        const newSelection = this.editor.editor.getSelection();
-        const isHead = this.$testIsHead(newSelection);
-        if (isHead) {
-          $selection = newSelection;
-        }
-        return isHead;
-      });
-    }
+    // 注释下面的代码，因为选中标题绝对只有一行，所以不需要扩大选区
+    // if (!this.isSelections && !this.$testIsHead($selection)) {
+    //   this.getMoreSelection('\n', '', () => {
+    //     const newSelection = this.editor.editor.getSelection();
+    //     const isHead = this.$testIsHead(newSelection);
+    //     if (isHead) {
+    //       $selection = newSelection;
+    //     }
+    //     return isHead;
+    //   });
+    // }
     if (this.$testIsHead($selection)) {
       // 如果选中的内容里有标题语法，并且标记级别与目标一致，则去掉标题语法
       // 反之，修改标题级别与目标一致

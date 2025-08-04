@@ -77,7 +77,6 @@
           "enum": [
             "%theme.enum.default%",
             "%theme.enum.dark%",
-            "%theme.enum.light%",
             "%theme.enum.green%",
             "%theme.enum.red%"
           ],

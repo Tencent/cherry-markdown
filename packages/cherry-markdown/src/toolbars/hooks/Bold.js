@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { CONTROL_KEY, getKeyCode } from '@/utils/shortcutKey';
+import { getKeyCode, getPlatformControlKey } from '@/utils/shortcutKey';
 /**
  * 加粗按钮
  */
@@ -26,9 +26,9 @@ export default class Bold extends MenuBase {
     super($cherry);
     this.setName('bold', 'bold');
     this.shortcutKeyMap = {
-      [`${CONTROL_KEY}-${getKeyCode('b')}`]: {
+      [`${getPlatformControlKey()}-${getKeyCode('b')}`]: {
         hookName: this.name,
-        aliasName: $cherry.locale[this.name],
+        aliasName: this.name,
       },
     };
   }

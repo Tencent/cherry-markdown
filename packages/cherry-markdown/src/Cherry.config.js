@@ -329,6 +329,7 @@ const defaultConfig = {
       mathBlock: {
         engine: 'MathJax', // katex或MathJax
         src: '',
+        css: '', // 如果使用katex，则还需要引入css（如果是 MathJax，则不需要）
         plugins: true, // 默认加载插件
       },
       inlineMath: {
@@ -453,6 +454,7 @@ const defaultConfig = {
     keepDocumentScrollAfterInit: false, // 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置
     showFullWidthMark: true, // 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》
     showSuggestList: true, // 是否显示联想框
+    maxUrlLength: -1, // URL的最大长度，-1表示不限制，超过该长度的URL会显示省略号
   },
   toolbars: {
     /**
@@ -668,15 +670,14 @@ const defaultConfig = {
   themeSettings: {
     // 主题列表，用于切换主题
     themeList: [
-      { className: 'default', label: '默认' },
+      { className: 'default', label: '默认' }, // 曾用名：light 明亮
       { className: 'dark', label: '暗黑' },
-      { className: 'light', label: '明亮' },
       { className: 'green', label: '清新' },
       { className: 'red', label: '热情' },
       { className: 'violet', label: '淡雅' },
       { className: 'blue', label: '清幽' },
     ],
-    mainTheme: 'light',
+    mainTheme: 'default',
     codeBlockTheme: 'default',
     inlineCodeTheme: 'red', // red or black
   },

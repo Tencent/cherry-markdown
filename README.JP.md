@@ -6,7 +6,12 @@
 
 日本語 | [English](./README.md) | [简体中文](./README.CN.md)
 
+## 紹介
+
+Cherry Markdown Writerは、Javascriptで書かれたMarkdownエディタです。Cherry Markdown Writerは、すぐに使える、軽量でシンプル、拡張が容易などの利点があります。ブラウザやサーバー（NodeJs）で動作します。
+
 ### ドキュメント
+
 - [初識cherry markdown 編集器](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)
 - [hello world](https://github.com/Tencent/cherry-markdown/wiki/hello-world)
 - [画像&ファイルアップロードインターフェースの設定](https://github.com/Tencent/cherry-markdown/wiki/%E9%85%8D%E7%BD%AE%E5%9B%BE%E7%89%87&%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E6%8E%A5%E5%8F%A3)
@@ -34,17 +39,13 @@
 
 -----
 
-## 紹介
-
-Cherry Markdown Editorは、Javascriptで書かれたMarkdownエディタです。Cherry Markdown Editorは、すぐに使える、軽量でシンプル、拡張が容易などの利点があります。ブラウザやサーバー（NodeJs）で動作します。
-
 ### **すぐに使える**
 
 開発者は非常に簡単な方法でCherry Markdown Editorを呼び出してインスタンス化できます。インスタンス化されたエディタは、デフォルトでほとんどの一般的なMarkdownシンタックス（タイトル、目次、フローチャート、数式など）をサポートします。
 
 ### **拡張が容易**
 
-Cherry Markdown Editorがサポートするシンタックスが開発者のニーズを満たさない場合、迅速に二次開発や機能拡張を行うことができます。同時に、Cherry Markdown Editorは純粋なJavaScriptで実装されるべきであり、angular、vue、reactなどのフレームワーク技術に依存すべきではありません。フレームワークはコンテナ環境を提供するだけです。
+Cherry Markdown Writerがサポートするシンタックスが開発者のニーズを満たさない場合、迅速に二次開発や機能拡張を行うことができます。同時に、Cherry Markdown Writerは純粋なJavaScriptで実装されるべきであり、angular、vue、reactなどのフレームワーク技術に依存すべきではありません。フレームワークはコンテナ環境を提供するだけです。
 
 ## 特徴
 
@@ -117,6 +118,84 @@ yarn add echarts@4.6.0
 ```
 
 ## クイックスタート
+
+### ライトバージョンの使用
+
+mermaidライブラリのサイズが大きいため、cherry-markdownではmermaidを含まないコアビルドパッケージを提供しています。以下の方法で使用できます。
+
+#### フルモード（UI付き）
+
+```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
+import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+  value: '# welcome to cherry editor!',
+});
+```
+
+#### エンジンモード（構文解析のみ）
+
+```javascript
+// Cherryエンジンコアをインポート
+import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core';
+const cherryEngineInstance = new CherryEngine();
+const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!');
+
+// --> <h1>welcome to cherry editor!</h1>
+```
+
+#### ⚠️ mermaidについて
+
+コアビルドにはmermaidが含まれていないため、必要な場合は手動でプラグインを追加してください。
+
+```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
+import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
+import CherryMermaidPlugin from 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin';
+import mermaid from 'mermaid';
+
+// Cherryインスタンス作成前にプラグインを登録
+Cherry.usePlugin(CherryMermaidPlugin, {
+  mermaid, // mermaidオブジェクトを渡す
+  // mermaidAPI: mermaid.mermaidAPI, // APIを直接渡すことも可能
+  // mermaidの設定もここで可能
+  // theme: 'neutral',
+  // sequence: { useMaxWidth: false, showSequenceNumbers: true }
+});
+
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+  value: '# welcome to cherry editor!',
+});
+```
+
+#### 動的インポート（推奨）
+
+webpackの動的インポートを使用する例:
+
+```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
+import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
+
+const registerPlugin = async () => {
+  const [{ default: CherryMermaidPlugin }, mermaid] = await Promise.all([
+    import('cherry-markdown/src/addons/cherry-code-block-mermaid-plugin'),
+    import('mermaid'),
+  ]);
+  Cherry.usePlugin(CherryMermaidPlugin, {
+    mermaid,
+  });
+};
+
+registerPlugin().then(() => {
+  // プラグイン登録後にCherryインスタンスを作成
+  const cherryInstance = new Cherry({
+    id: 'markdown-container',
+    value: '# welcome to cherry editor!',
+  });
+});
+```
 
 ### ブラウザ
 
@@ -233,6 +312,7 @@ registerPlugin().then(() => {
 ```
 
 ## 設定
+
 `/src/Cherry.config.js`を参照するか、[こちら](https://github.com/Tencent/cherry-markdown/wiki/%E9%85%8D%E7%BD%AE%E9%A1%B9%E5%85%A8%E8%A7%A3)をクリックしてください。
 
 ## 例
@@ -240,14 +320,17 @@ registerPlugin().then(() => {
 詳細な例については[こちら](https://github.com/Tencent/cherry-markdown/wiki)をクリックしてください。
 
 ### クライアント
+
 開発中です。詳細は`/client/`ディレクトリを参照してください。
 
 ## 拡張
 
 ### カスタムシンタックス
+
 [こちら](https://github.com/Tencent/cherry-markdown/wiki/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E6%B3%95)をクリックしてください。
 
 ### カスタムツールバー
+
 [こちら](https://github.com/Tencent/cherry-markdown/wiki/%E8%B0%83%E6%95%B4%E5%B7%A5%E5%85%B7%E6%A0%8F)をクリックしてください。
 
 ## ユニットテスト
@@ -273,7 +356,7 @@ Jestはそのアサーション、非同期サポート、スナップショッ�
 
 この場合、Jestは`Cherry.makeHtml(" \tfoo\tbaz\t\tbim\n")`によって生成されたHTMLを期待される結果`"<pre><code>foo\tbaz\t \tbim\n</code></pre>\n"`と比較します。Cherry Markdownのマッチャーは`data-line`などのプライベート属性を無視しています。
 
-CommonMarkの仕様とスイートは次の場所から取得できます：https://spec.commonmark.org/ 。
+CommonMarkの仕様とスイートは次の場所から取得できます：[commonmark.org](https://spec.commonmark.org/) 。
 
 ### スナップショットテスト
 
@@ -281,9 +364,9 @@ CommonMarkの仕様とスイートは次の場所から取得できます：http
 
 スナップショットテストは遅く実行されます。エラーが発生しやすく、Cherry Markdownの特別なシンタックスを含むフックをテストするためにのみ使用されるべきです。
 
-## 貢献
+## コントリビューションガイドライン
 
-より強力なMarkdownエディタを構築するために参加してください。もちろん、機能リクエストを提出することもできます。作業を始める前に[こちら](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)を読んでください。
+強力なMarkdownエディターの開発にぜひご参加ください。機能リクエストはissueとして提出することも可能です。新機能を実装する前に、[cherry-markdownエディターの紹介](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86-cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)をご覧いただけます。貢献を行う前に、[コントリビューションガイドライン](https://github.com/Tencent/cherry-markdown/wiki/%E8%B4%A1%E7%8C%AE%E6%8C%87%E5%8D%97%20Contribution%20Guidelines)をお読みください。
 
 ## Stargazers over time
 
@@ -291,4 +374,4 @@ CommonMarkの仕様とスイートは次の場所から取得できます：http
 
 ## ライセンス
 
-Apache-2.0
+[Apache-2.0](./LICENSE)

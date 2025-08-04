@@ -22,7 +22,7 @@ import FloatMenu from './toolbars/FloatMenu';
 import Toolbar from './toolbars/Toolbar';
 import ToolbarRight from './toolbars/ToolbarRight';
 import Toc from './toolbars/Toc';
-import { createElement } from './utils/dom';
+import { createElement, loadScript, loadCSS } from './utils/dom';
 import Sidebar from './toolbars/Sidebar';
 import HiddenToolbar from './toolbars/HiddenToolbar';
 import {
@@ -75,6 +75,11 @@ export default class Cherry extends CherryStatic {
      */
     this.options = mergeWith({}, defaultConfigCopy, options, customizer);
 
+    /** @type {import('./utils/cm-search-replace').default} SearchBox 实例 */
+    this.searchBoxInstance = null;
+    /** @type {boolean} 是否初始化SearchBox */
+    this.searchBoxInit = false;
+
     this.storageFloatPreviewerWrapData = {
       x: 50,
       y: 58,
@@ -125,11 +130,32 @@ export default class Cherry extends CherryStatic {
     if (this.options.engine.global.flowSessionCursor === 'default') {
       this.options.engine.global.flowSessionCursor = '<span class="cherry-flow-session-cursor"></span>';
     }
-    /**
-     * @type {import('./Engine').default}
-     */
-    this.engine = new Engine(this.options, this);
-    this.init();
+
+    if (
+      // @ts-ignore
+      this.options.engine.syntax.mathBlock.engine === 'katex' &&
+      // @ts-ignore
+      this.options.engine.syntax.mathBlock.src &&
+      // @ts-ignore
+      !window.katex
+    ) {
+      // @ts-ignore
+      if (this.options.engine.syntax.mathBlock.css) {
+        // @ts-ignore
+        loadCSS(this.options.engine.syntax.mathBlock.css, 'katex-css');
+      }
+      // @ts-ignore
+      loadScript(this.options.engine.syntax.mathBlock.src, 'katex-js').then(() => {
+        this.engine = new Engine(this.options, this);
+        this.init();
+      });
+    } else {
+      /**
+       * @type {import('./Engine').default}
+       */
+      this.engine = new Engine(this.options, this);
+      this.init();
+    }
   }
 
   /**
@@ -564,6 +590,12 @@ export default class Cherry extends CherryStatic {
     } else {
       mainTheme = this.options.themeSettings.mainTheme;
       mainTheme = mainTheme.replace(/theme__/g, '');
+      // 检查主题是否在可用主题列表中，如果不在则设为 default
+      const availableThemes = this.options.themeSettings.themeList.map((theme) => theme.className);
+      if (!availableThemes.includes(mainTheme)) {
+        console.log(`主题 "${mainTheme}" 不在可用主题列表中，已切换为默认主题`);
+        mainTheme = 'default';
+      }
       mainTheme = `theme__${mainTheme}`;
     }
     // @ts-ignore
@@ -934,7 +966,11 @@ export default class Cherry extends CherryStatic {
       const markdownText = codemirror.getValue();
       this.lastMarkdownText = markdownText;
       const html = this.engine.makeHtml(markdownText);
-      this.previewer.update(html);
+      if (this.options.editor.defaultModel === 'editOnly') {
+        this.previewer.doHtmlCache(html);
+      } else {
+        this.previewer.update(html);
+      }
       this.$event.emit('afterInit', { markdownText, html });
     } catch (e) {
       throw new NestedError(e);
@@ -1086,6 +1122,7 @@ export default class Cherry extends CherryStatic {
     this.locale = this.locales[locale];
     this.$event.emit('afterChangeLocale', locale);
     this.resetToolbar('toolbar', this.options.toolbars.toolbar || []);
+    if (this.searchBoxInstance) this.searchBoxInstance.updateLocaleStrings();
     return true;
   }
 

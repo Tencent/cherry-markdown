@@ -408,13 +408,12 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     themeList: [
       { className: 'default', label: '默认' },
       { className: 'dark', label: '暗黑' },
-      { className: 'light', label: '明亮' },
       { className: 'green', label: '清新' },
       { className: 'red', label: '热情' },
       { className: 'violet', label: '淡雅' },
       { className: 'blue', label: '清幽' },
     ],
-    mainTheme: 'light',
+    mainTheme: 'default',
     codeBlockTheme: 'default',
     inlineCodeTheme: 'red', // red or black
   },

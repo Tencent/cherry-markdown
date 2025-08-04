@@ -543,15 +543,35 @@ export default class TableHandler {
   }
 
   /**
+   * 获取单元格对齐方式
+   * @param {*} cells 单元格数组
+   * @param {*} index 单元格索引
+   * @returns {string|false} 单元格对齐方式，如果是false则表示不生成对齐方式
+   */
+  $getTdAlign(cells, index, cellsIndex) {
+    if (index !== 1) {
+      return '';
+    }
+    if (typeof cells[cellsIndex] === 'string') {
+      return cells[cellsIndex];
+    }
+    return false;
+  }
+
+  /**
    * 添加上一列
    */
   $addLastCol() {
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
     const selection = this.codeMirror.getSelection();
     const lines = selection.split('\n');
+    const cellsIndex = this.tableEditor.info.tdIndex < 2 ? 1 : this.tableEditor.info.tdIndex - 1;
     const newLines = lines.map((line, index) => {
       const cells = line.split('|');
-      const replaceItem = 1 === index ? ':-:' : '';
+      const replaceItem = this.$getTdAlign(cells, index, cellsIndex);
+      if (replaceItem === false) {
+        return line;
+      }
       cells.splice(this.tableEditor.info.tdIndex + 1, 0, replaceItem);
       return cells.join('|');
     });
@@ -570,7 +590,10 @@ export default class TableHandler {
     const lines = selection.split('\n');
     const newLines = lines.map((line, index) => {
       const cells = line.split('|');
-      const replaceItem = 1 === index ? ':-:' : '';
+      const replaceItem = this.$getTdAlign(cells, index, this.tableEditor.info.tdIndex + 1);
+      if (replaceItem === false) {
+        return line;
+      }
       cells.splice(this.tableEditor.info.tdIndex + 2, 0, replaceItem);
       return cells.join('|');
     });
