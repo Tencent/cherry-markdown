@@ -137,25 +137,50 @@ export default class Engine {
       syntax.mathBlock.css && loadCSS(syntax.mathBlock.css, 'katex-css');
       if (syntax.mathBlock.src) {
         loadScript(syntax.mathBlock.src, 'katex-js').then(() => {
-          let rendered = false;
-          this.$cherry.previewer
-            .getDom()
-            .querySelectorAll('.cherry-katex-need-render')
-            .forEach((el) => {
-              const displayMode = el.classList.contains('Cherry-Math');
-              // @ts-ignore
-              el.innerHTML = window.katex.renderToString(el.innerText, {
-                throwOnError: false,
-                displayMode,
+          if (this.$cherry.previewer.isPreviewerHidden()) {
+            const cachedHtml = this.$cherry.previewer.options.previewerCache.html;
+            this.$cherry.previewer.options.previewerCache.html = cachedHtml
+              .replace(
+                /<div data-sign="([^"]+?)" class="Cherry-Math cherry-katex-need-render" ([^>]+? data-lines="[^"]+?")>([\s\S]+?)<\/div>/g,
+                (match, sign, attrs, content) => {
+                  console.log(content);
+                  // @ts-ignore
+                  const html = window.katex.renderToString(content, {
+                    throwOnError: false,
+                    displayMode: true,
+                  });
+                  this.asyncRenderHandler.done(`math-block-${sign}`);
+                  return `<div data-sign="${sign}" class="Cherry-Math" ${attrs}>${html}</div>`;
+                },
+              )
+              .replace(
+                /<span data-sign="([^"]+?)" class="Cherry-InlineMath cherry-katex-need-render" ([^>]+? data-lines="[^"]+?")>([\s\S]+?)<\/span>/g,
+                (match, sign, attrs, content) => {
+                  // @ts-ignore
+                  const html = window.katex.renderToString(content, {
+                    throwOnError: false,
+                    displayMode: false,
+                  });
+                  this.asyncRenderHandler.done(`math-inline-${sign}`);
+                  return `<span data-sign="${sign}" class="Cherry-InlineMath" ${attrs}>${html}</span>`;
+                },
+              );
+          } else {
+            this.$cherry.previewer
+              .getDom()
+              .querySelectorAll('.cherry-katex-need-render')
+              .forEach((el) => {
+                const displayMode = el.classList.contains('Cherry-Math');
+                // @ts-ignore
+                el.innerHTML = window.katex.renderToString(el.innerText, {
+                  throwOnError: false,
+                  displayMode,
+                });
+                const key = displayMode ? 'math-block' : 'math-inline';
+                const sign = el.getAttribute('data-sign');
+                this.asyncRenderHandler.done(`${key}-${sign}`);
+                el.classList.remove('cherry-katex-need-render');
               });
-              el.classList.remove('cherry-katex-need-render');
-              rendered = true;
-            });
-          if (rendered) {
-            // 触发异步渲染完成
-            this.asyncRenderHandler.originMd = this.$cherry.getMarkdown();
-            this.asyncRenderHandler.md = this.$cherry.getHtml();
-            this.asyncRenderHandler.handleAllCompleted();
           }
         });
       }
