@@ -21,12 +21,19 @@ export default class Export extends MenuBase {
     this.setName('export');
     this.noIcon = true;
     this.updateMarkdown = false;
-    this.subMenuConfig = [
-      { noIcon: true, name: 'exportToPdf', onclick: this.bindSubClick.bind(this, 'pdf') },
+
+    this.subMenuConfig = [];
+
+    // window.print 可用时 才显示 “导出 PDF” 方式
+    if (typeof window !== 'undefined' && typeof window.print === 'function') {
+      this.subMenuConfig.push({ noIcon: true, name: 'exportToPdf', onclick: this.bindSubClick.bind(this, 'pdf') });
+    }
+
+    this.subMenuConfig.push(
       { noIcon: true, name: 'exportScreenshot', onclick: this.bindSubClick.bind(this, 'screenShot') },
       { noIcon: true, name: 'exportMarkdownFile', onclick: this.bindSubClick.bind(this, 'markdown') },
       { noIcon: true, name: 'exportHTMLFile', onclick: this.bindSubClick.bind(this, 'html') },
-    ];
+    );
   }
 
   onClick(shortKey = '', type) {
