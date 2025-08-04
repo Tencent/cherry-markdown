@@ -545,6 +545,60 @@ $$
 | 用户B | 75 | 90 | 88 | 85 | 78 |
 | 用户C | 85 | 78 | 90 | 88 | 85 |
 
+**示例（地图表格）**
+
+默认地图数据源：
+```markdown
+| :map:{name,value} | 数值 |
+| :-: | :-: |
+| 北京 | 100 |
+| 上海 | 200 |
+| 广东 | 300 |
+| 四川 | 150 |
+| 江苏 | 250 |
+| 浙江 | 180 |
+```
+
+**效果**
+| :map:{name,value} | 数值 |
+| :-: | :-: |
+| 北京 | 100 |
+| 上海 | 200 |
+| 广东 | 300 |
+| 四川 | 150 |
+| 江苏 | 250 |
+| 浙江 | 180 |
+
+**自定义地图数据源：**
+```markdown
+<!-- mapDataSource: ./packages/cherry-markdown/src/addons/advance/maps/china.json -->
+| :map:{name,value} | 数值 |
+| :-: | :-: |
+| 北京 | 120 |
+| 上海 | 280 |
+| 广东 | 350 |
+| 四川 | 180 |
+| 江苏 | 290 |
+| 浙江 | 220 |
+```
+
+**效果**
+<!-- mapDataSource: ./packages/cherry-markdown/src/addons/advance/maps/china.json -->
+| :map:{name,value} | 数值 |
+| :-: | :-: |
+| 北京 | 120 |
+| 上海 | 280 |
+| 广东 | 350 |
+| 四川 | 180 |
+| 江苏 | 290 |
+| 浙江 | 220 |
+
+**说明：**
+- 使用 `<!-- mapDataSource: your-map-data.json -->` 注释来指定自定义地图数据源
+- 支持相对路径和绝对URL
+- 如果不指定数据源，将使用系统默认的地图数据
+- 也可以通过 Cherry 配置中的 `toolbars.config.mapTable.sourceUrl` 全局配置数据源
+
 -----
 
 ## 流程图[^不通用提醒]

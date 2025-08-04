@@ -75,13 +75,16 @@ export default class EChartsTableEngine {
   }
 
   constructor(echartsOptions = {}) {
-    const { echarts, ...options } = echartsOptions;
+    const { echarts, cherryOptions, ...options } = echartsOptions;
     if (!echarts && !window.echarts) {
       throw new Error('table-echarts-plugin[init]: Package echarts not found.');
     }
     this.options = { ...DEFAULT_OPTIONS, ...(options || {}) };
     this.echartsRef = echarts || window.echarts; // echarts引用
     this.dom = null;
+
+    // 保存Cherry配置，用于获取地图数据源URL
+    this.cherryOptions = cherryOptions;
   }
 
   getInstance() {
@@ -135,8 +138,8 @@ export default class EChartsTableEngine {
     const htmlContent = `
       <div class="cherry-echarts-wrapper" 
            style="width: ${this.options.width}px; height: ${
-      this.options.height
-    }px; min-height: 300px; display: block; position: relative; border: 1px solid #ddd;" 
+             this.options.height
+           }px; min-height: 300px; display: block; position: relative; border: 1px solid #ddd;" 
            id="${chartId}"
            data-chart-type="${type}"
            data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"
@@ -385,8 +388,27 @@ export default class EChartsTableEngine {
   }
 
   renderMapChart(tableObject, options) {
-    // 先检查并加载地图数据
-    this.$loadChinaMapData();
+    console.log('开始渲染地图图表，选项:', options);
+    
+    // 检查options中是否有自定义地图数据源
+    if (options && options.mapDataSource) {
+      console.log('检测到自定义地图数据源:', options.mapDataSource);
+      
+      // 优先使用用户自定义的地图数据源
+      // 如果当前已经有china地图数据，先清除它以确保使用新数据
+      if (window.echarts && window.echarts.getMap('china')) {
+        console.log('清除现有地图数据以使用自定义地图数据源');
+      }
+      
+      // 立即开始加载自定义地图数据，这会覆盖默认地图数据
+      this.$loadCustomMapData(options.mapDataSource, true);
+    } else {
+      console.log('使用默认地图数据源');
+      // 只有在没有自定义数据源时才加载默认地图数据
+      this.$loadChinaMapData();
+    }
+    
+    // 立即返回地图图表配置
     return this.$renderMapChartCommon(tableObject, options);
   }
 
@@ -407,14 +429,24 @@ export default class EChartsTableEngine {
 
     console.log('正在加载中国地图数据...');
 
-    // 优先使用项目内的地图数据文件，然后使用在线备用数据源
-    const possiblePaths = [
-      '../packages/cherry-markdown/src/addons/advance/maps/china.json', // 从examples访问源代码中的地图文件
-      './packages/cherry-markdown/src/addons/advance/maps/china.json', // 从根目录访问
-      './src/addons/advance/maps/china.json', // 开发环境相对路径
-      'https://geo.datav.aliyun.com/areas_v3/bound/100000.json' // 在线备用数据源
+    // 获取配置中的地图数据源URL，如果没有配置则使用默认值
+    let possiblePaths = [
+      'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', // 在线高质量地图数据源（优先，已验证可用）
+      './assets/data/china.json', // 从examples目录访问本地备份文件
     ];
-    
+
+    // 如果有Cherry配置且配置了mapTable.sourceUrl，则使用配置的URL
+    if (
+      this.cherryOptions &&
+      this.cherryOptions.toolbars &&
+      this.cherryOptions.toolbars.config &&
+      this.cherryOptions.toolbars.config.mapTable &&
+      this.cherryOptions.toolbars.config.mapTable.sourceUrl
+    ) {
+      possiblePaths = this.cherryOptions.toolbars.config.mapTable.sourceUrl;
+      console.log('使用配置的地图数据源:', possiblePaths);
+    }
+
     this.$tryLoadMapDataFromPaths(possiblePaths, 0);
   }
 
@@ -423,20 +455,18 @@ export default class EChartsTableEngine {
    */
   $tryLoadMapDataFromPaths(paths, index) {
     if (index >= paths.length) {
-      console.error('所有地图数据源都加载失败，使用备用地图数据');
-      this.$loadFallbackMapData();
+      console.error('所有地图数据源都加载失败');
       return;
     }
 
     const url = paths[index];
     console.log(`尝试加载地图数据: ${url}`);
 
-    this.$fetchMapData(url)
-      .catch((error) => {
-        console.warn(`地图数据加载失败 (${url}):`, error.message);
-        // 尝试下一个路径
-        this.$tryLoadMapDataFromPaths(paths, index + 1);
-      });
+    this.$fetchMapData(url).catch((error) => {
+      console.warn(`地图数据加载失败 (${url}):`, error.message);
+      // 尝试下一个路径
+      this.$tryLoadMapDataFromPaths(paths, index + 1);
+    });
   }
 
   /**
@@ -462,55 +492,29 @@ export default class EChartsTableEngine {
   }
 
   /**
-   * 加载备用简化地图数据
+   * 加载自定义地图数据
+   * @param {string} mapUrl - 地图数据URL
+   * @param {boolean} forceReload - 是否强制重新加载
    */
-  $loadFallbackMapData() {
-    console.log('使用内置简化地图数据');
-    
-    // 简化的中国地图数据（仅包含主要省份轮廓）
-    const fallbackMapData = {
-      type: "FeatureCollection",
-      features: [
-        {
-          type: "Feature",
-          properties: { name: "北京市", cp: [116.407526, 39.90403] },
-          geometry: { type: "Polygon", coordinates: [[[116.24, 40.08], [116.71, 40.08], [116.71, 39.72], [116.24, 39.72], [116.24, 40.08]]] }
-        },
-        {
-          type: "Feature", 
-          properties: { name: "上海市", cp: [121.473701, 31.230416] },
-          geometry: { type: "Polygon", coordinates: [[[121.28, 31.38], [121.67, 31.38], [121.67, 31.08], [121.28, 31.08], [121.28, 31.38]]] }
-        },
-        {
-          type: "Feature",
-          properties: { name: "广东省", cp: [113.266531, 23.132191] },
-          geometry: { type: "Polygon", coordinates: [[[109.75, 25.51], [117.19, 25.51], [117.19, 20.22], [109.75, 20.22], [109.75, 25.51]]] }
-        },
-        {
-          type: "Feature",
-          properties: { name: "四川省", cp: [104.075931, 30.651652] },
-          geometry: { type: "Polygon", coordinates: [[[97.34, 34.32], [108.54, 34.32], [108.54, 26.04], [97.34, 26.04], [97.34, 34.32]]] }
-        },
-        {
-          type: "Feature",
-          properties: { name: "江苏省", cp: [118.762765, 32.061377] },
-          geometry: { type: "Polygon", coordinates: [[[116.36, 35.11], [121.95, 35.11], [121.95, 30.75], [116.36, 30.75], [116.36, 35.11]]] }
-        },
-        {
-          type: "Feature",
-          properties: { name: "浙江省", cp: [120.152793, 30.267447] },
-          geometry: { type: "Polygon", coordinates: [[[118.02, 31.17], [123.24, 31.17], [123.24, 27.04], [118.02, 27.04], [118.02, 31.17]]] }
-        }
-      ]
-    };
-
-    try {
-      window.echarts.registerMap('china', fallbackMapData);
-      console.log('备用地图数据注册成功');
-      this.$refreshMapCharts();
-    } catch (error) {
-      console.error('备用地图数据注册失败:', error);
+  $loadCustomMapData(mapUrl, forceReload = false) {
+    if (!mapUrl || mapUrl.trim() === '') {
+      console.warn('自定义地图数据URL为空，使用默认加载方法');
+      return;
     }
+
+    console.log(`正在加载用户自定义地图数据: ${mapUrl}${forceReload ? ' (强制重新加载)' : ''}`);
+
+    // 优先加载用户自定义的地图数据，覆盖任何已有的地图数据
+    this.$fetchMapData(mapUrl).then(() => {
+      console.log('用户自定义地图数据加载成功，正在刷新所有地图图表');
+      // 地图数据加载成功后，立即刷新页面中的所有地图图表
+      this.$refreshMapCharts();
+    }).catch((error) => {
+      console.warn(`用户自定义地图数据加载失败 (${mapUrl}):`, error.message);
+      console.warn('自定义地图数据加载失败，回退到默认地图数据');
+      // 如果用户自定义URL失败，回退到默认地图数据
+      this.$loadChinaMapData();
+    });
   }
 
   /**
@@ -571,7 +575,7 @@ export default class EChartsTableEngine {
     // 检查中国地图数据是否已注册
     if (!window.echarts.getMap('china')) {
       console.warn('中国地图数据未加载，正在尝试加载...');
-      
+
       // 异步加载地图数据
       this.$loadChinaMapData();
 
@@ -581,23 +585,25 @@ export default class EChartsTableEngine {
           text: '正在加载地图数据...',
           left: 'center',
           top: 'middle',
-          textStyle: { 
-            color: '#666', 
-            fontSize: 16 
+          textStyle: {
+            color: '#666',
+            fontSize: 16,
           },
         },
         graphic: {
-          elements: [{
-            type: 'text',
-            left: 'center',
-            top: '60%',
-            style: {
-              text: '如果长时间未显示，请检查网络连接',
-              font: '12px sans-serif',
-              fill: '#999'
-            }
-          }]
-        }
+          elements: [
+            {
+              type: 'text',
+              left: 'center',
+              top: '60%',
+              style: {
+                text: '如果长时间未显示，请检查网络连接',
+                font: '12px sans-serif',
+                fill: '#999',
+              },
+            },
+          ],
+        },
       };
     }
 
@@ -681,7 +687,7 @@ export default class EChartsTableEngine {
 
       return {
         name: standardName,
-        value: value,
+        value,
       };
     });
 
