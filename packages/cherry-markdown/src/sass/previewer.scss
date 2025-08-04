@@ -184,6 +184,7 @@
         color: var(--oc-white);
       }
     }
+    /* 排序按钮 */
     &__sort {
       pointer-events: auto;
       display: flex;
@@ -234,20 +235,29 @@
       }
     }
   }
-
- @keyframes changeHighlightLineBg {
-  0% {
-    background-color: var(--md-paragraph-highlight-line-bg);
+  .border-highlight {
+    --highlight-color: var(--oc-red-6);
+    --highlight-width: 2px;
+    transition: border-color 0.2s ease;
+    
+    &-top { 
+      border-top: var(--highlight-width) solid var(--highlight-color); 
+    }
+    &-bottom { 
+      border-bottom: var(--highlight-width) solid var(--highlight-color) 
+    }
+    &-left { 
+      border-left: var(--highlight-width) solid var(--highlight-color)
+    }
+    &-right { 
+      border-right: var(--highlight-width) solid var(--highlight-color)
+    }
   }
-
-  60% {
-    background-color: var(--md-paragraph-highlight-line-bg);
+  @keyframes changeBgColor {
+    0% { background-color: #ffffcc88; }
+    60% { background-color: #ffffcc88; }
+    100% { background-color: #ffffcc00; }
   }
-
-  100% {
-    background-color: var(--base-previewer-bg);
-  }
-}
   .cherry-highlight-line {
     animation: changeHighlightLineBg 1s;
   }

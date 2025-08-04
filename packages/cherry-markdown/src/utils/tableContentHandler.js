@@ -189,13 +189,14 @@ export default class TableHandler {
     const footnoteReg = /(^|\n)[ \t]*\[\^([^\]]+?)\]:[ \t]*([\s\S]+?)(?=\s*$|\n\n)/g;
     let footnoteMatch;
     while ((footnoteMatch = footnoteReg.exec(editorValue)) !== null) {
-      const start = footnoteMatch.index + footnoteMatch[1].length; // 去掉开头的换行符
+      const start = footnoteMatch.index;
       const end = footnoteMatch.index + footnoteMatch[0].length;
       footnoteRanges.push({
         start,
         end,
         id: footnoteMatch[2],
         content: footnoteMatch[3],
+        fullMatch: footnoteMatch[0], // 完整匹配
       });
     }
 
@@ -253,6 +254,7 @@ export default class TableHandler {
    * 支持cherry-table类的表格和原生HTML table标签
    */
   $collectTableDom() {
+    // const allTables = Array.from(this.previewerDom.querySelectorAll('table.cherry-table'));
     const tableNode = this.$getClosestNode(this.target, 'TABLE');
     if (tableNode === false) {
       return false;
@@ -273,7 +275,9 @@ export default class TableHandler {
        * 这里需要找到一个更好的方式来判断表格在编辑器中的顺序
        */
       allTables = footnoteTables;
+      
     }
+    
     const rowCells = Array.from(this.target.parentElement.childNodes).filter((child) => {
       // 计算列数
       return child.tagName && (child.tagName.toLowerCase() === 'td' || child.tagName.toLowerCase() === 'th');
@@ -291,8 +295,8 @@ export default class TableHandler {
       tdIndex,
       trIndex: Array.from(this.target.parentElement.parentElement.childNodes).indexOf(this.target.parentElement),
       isTHead: this.target.parentElement.parentElement.tagName !== 'TBODY',
-      totalTables: allTables.length,
-      tableIndex: allTables.indexOf(tableNode),
+      totalTables: allTables.length, // 我写的 totalTables: targetTables.length, // 使用分类后的数量
+      tableIndex: allTables.indexOf(tableNode), // 使用分类后的索引
       tableText: tableNode.textContent.replace(/[\s]/g, ''),
       columns,
       isHtmlTable, // 标记是否为HTML表格
