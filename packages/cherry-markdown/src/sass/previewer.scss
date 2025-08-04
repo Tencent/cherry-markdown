@@ -126,38 +126,6 @@
       border-bottom: var(--border-width-1) var(--toolbar-btn-color) dashed;
     }
 
-    .img-tool-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      min-width: 32px;
-      min-height: 32px;
-      color: var(--toolbar-btn-color);
-      background: var(--toolbar-btn-bg);
-      border: var(--border-width-1) solid transparent;
-      border-radius: var(--bubble-radius);
-      cursor: pointer;
-      user-select: none;
-      font-size: var(--font-size-md);
-      transition: color 150ms, background-color 150ms, border-color 150ms;
-      box-sizing: border-box;
-      padding: 0;
-      &:hover {
-        border-color: var(--toolbar-border);
-        background-color: var(--toolbar-btn-hover-bg);
-        color: var(--toolbar-btn-hover-color);
-      }
-      &.active {
-        background: var(--toolbar-btn-hover-bg);
-        color: var(--toolbar-btn-hover-color);
-        border-color: var(--toolbar-border);
-        box-shadow: 0 0 0 2px var(--primary-color);
-        z-index: 1;
-      }
-    }
-
     .img-tool-icon {
       font-size: 18px;
       pointer-events: none;
