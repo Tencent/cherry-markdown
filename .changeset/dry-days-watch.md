@@ -2,14 +2,18 @@
 'cherry-markdown': minor
 ---
 
-# #1268 预览区图片所见即所得编辑能力增加设置图片样式的功能 2
+feat: 图片样式编辑功能增强 - 支持对齐方式设置 (#1268)
 
-## 更新内容
-- feat: 增加对齐方式交互按钮到图片样式工具栏气泡中，支持修改左对齐、居中、右对齐、左浮动、右浮动
-- refactor: 将上一版的一些名称（imageStyle/imageAppend/imageTool）重命名为imageDecoration/imageDeco
-- feat: 新增对齐方式相关的一些图标文件
-- refactor: 恢复imageSizeHandler.js的previewUpdate事件响应，当对齐方式修改时imageSizeBubble对准图像
+## ✨ 新增特性
 
-## 遗留难题
-我希望当图片的对齐方式修改时imageSizeBubble在合适的时机自动对准，但是原生js中没有类似Vue中的nextTick的函数，我调研实验了2h无法实现在DOM刚完成渲染就执行回调，只能写死代码`setTimeout(() => this.afterUpdate(), 100);`。
+- **对齐方式控制**: 图片样式工具栏新增对齐方式交互按钮
+  - 支持左对齐、居中、右对齐
+  - 支持左浮动、右浮动
+- **图标资源**: 新增对齐方式相关的图标文件
 
+## ⚠️ 技术债务
+
+**DOM 渲染时机问题**:
+
+- **现状**: 使用 `setTimeout(() => this.afterUpdate(), 100)` 临时解决 DOM 更新后的回调时机
+- **原因**: 原生 JavaScript 缺少类似 Vue `nextTick` 的 DOM 更新后回调机制
