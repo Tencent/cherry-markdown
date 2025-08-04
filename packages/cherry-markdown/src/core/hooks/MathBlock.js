@@ -34,7 +34,7 @@ export default class MathBlock extends ParagraphBase {
   constructor({ config }) {
     super({ needCache: true });
     // 非浏览器环境下配置为 node
-    this.engine = isBrowser() ? (config.engine ?? 'MathJax') : 'node';
+    this.engine = isBrowser() ? config.engine ?? 'MathJax' : 'node';
   }
 
   toHtml(wholeMatch, lineSpace, leadingChar, content) {
@@ -62,12 +62,17 @@ export default class MathBlock extends ParagraphBase {
 
     if (this.engine === 'katex') {
       // katex渲染
-      const html = this.katex.renderToString($content, {
-        throwOnError: false,
-        displayMode: true,
-      });
-      result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
-            data-lines="${lines}">${html}</div>`;
+      if (!this.katex) {
+        result = `<div data-sign="${sign}" class="Cherry-Math cherry-katex-need-render" data-type="mathBlock"
+              data-lines="${lines}">${$content}</div>`;
+      } else {
+        const html = this.katex.renderToString($content, {
+          throwOnError: false,
+          displayMode: true,
+        });
+        result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
+              data-lines="${lines}">${html}</div>`;
+      }
     } else if (this.MathJax?.tex2svg) {
       // MathJax渲染
       const svg = getHTML(this.MathJax.tex2svg($content), true);

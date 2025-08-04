@@ -29,7 +29,7 @@ import htmlParser from './utils/htmlparser';
 import { isBrowser } from './utils/env';
 import * as htmlparser2 from 'htmlparser2';
 import LRUCache from './utils/LRUCache';
-import { loadScript } from './utils/dom';
+import { loadCSS, loadScript } from './utils/dom';
 
 export default class Engine {
   /**
@@ -121,13 +121,44 @@ export default class Engine {
     ) {
       return;
     }
-    // 已经加载过MathJax
-    if (externals.MathJax || window.MathJax) {
-      return;
-    }
     if (syntax.mathBlock.engine === 'MathJax' || syntax.inlineMath.engine === 'MathJax') {
+      // 已经加载过MathJax
+      if (externals.MathJax || window.MathJax) {
+        return;
+      }
       configureMathJax(plugins);
       loadScript(syntax.mathBlock.src ? syntax.mathBlock.src : syntax.inlineMath.src, 'mathjax-js');
+    }
+    if (syntax.mathBlock.engine === 'katex' || syntax.inlineMath.engine === 'katex') {
+      // @ts-ignore
+      if (window.katex) {
+        return;
+      }
+      syntax.mathBlock.css && loadCSS(syntax.mathBlock.css, 'katex-css');
+      if (syntax.mathBlock.src) {
+        loadScript(syntax.mathBlock.src, 'katex-js').then(() => {
+          let rendered = false;
+          this.$cherry.previewer
+            .getDom()
+            .querySelectorAll('.cherry-katex-need-render')
+            .forEach((el) => {
+              const displayMode = el.classList.contains('Cherry-Math');
+              // @ts-ignore
+              el.innerHTML = window.katex.renderToString(el.innerText, {
+                throwOnError: false,
+                displayMode,
+              });
+              el.classList.remove('cherry-katex-need-render');
+              rendered = true;
+            });
+          if (rendered) {
+            // 触发异步渲染完成
+            this.asyncRenderHandler.originMd = this.$cherry.getMarkdown();
+            this.asyncRenderHandler.md = this.$cherry.getHtml();
+            this.asyncRenderHandler.handleAllCompleted();
+          }
+        });
+      }
     }
   }
 
