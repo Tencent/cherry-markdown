@@ -22,7 +22,7 @@ import FloatMenu from './toolbars/FloatMenu';
 import Toolbar from './toolbars/Toolbar';
 import ToolbarRight from './toolbars/ToolbarRight';
 import Toc from './toolbars/Toc';
-import { createElement } from './utils/dom';
+import { createElement, loadScript, loadCSS } from './utils/dom';
 import Sidebar from './toolbars/Sidebar';
 import HiddenToolbar from './toolbars/HiddenToolbar';
 import {
@@ -130,11 +130,32 @@ export default class Cherry extends CherryStatic {
     if (this.options.engine.global.flowSessionCursor === 'default') {
       this.options.engine.global.flowSessionCursor = '<span class="cherry-flow-session-cursor"></span>';
     }
-    /**
-     * @type {import('./Engine').default}
-     */
-    this.engine = new Engine(this.options, this);
-    this.init();
+
+    if (
+      // @ts-ignore
+      this.options.engine.syntax.mathBlock.engine === 'katex' &&
+      // @ts-ignore
+      this.options.engine.syntax.mathBlock.src &&
+      // @ts-ignore
+      !window.katex
+    ) {
+      // @ts-ignore
+      if (this.options.engine.syntax.mathBlock.css) {
+        // @ts-ignore
+        loadCSS(this.options.engine.syntax.mathBlock.css, 'katex-css');
+      }
+      // @ts-ignore
+      loadScript(this.options.engine.syntax.mathBlock.src, 'katex-js').then(() => {
+        this.engine = new Engine(this.options, this);
+        this.init();
+      });
+    } else {
+      /**
+       * @type {import('./Engine').default}
+       */
+      this.engine = new Engine(this.options, this);
+      this.init();
+    }
   }
 
   /**

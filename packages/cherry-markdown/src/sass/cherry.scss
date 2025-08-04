@@ -733,6 +733,10 @@
       color: darkmagenta !important;
       font-size: var(--font-size-xs) !important;
     }
+
+    .url-truncated {
+      max-width: 200px;
+    }
   }
 
   .cm-s-default .cm-header {

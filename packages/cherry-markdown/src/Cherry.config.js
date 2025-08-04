@@ -329,6 +329,7 @@ const defaultConfig = {
       mathBlock: {
         engine: 'MathJax', // katex或MathJax
         src: '',
+        css: '', // 如果使用katex，则还需要引入css（如果是 MathJax，则不需要）
         plugins: true, // 默认加载插件
       },
       inlineMath: {
