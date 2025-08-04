@@ -571,7 +571,7 @@ $$
 
 **自定义地图数据源：**
 ```markdown
-<!-- mapDataSource: ./packages/cherry-markdown/src/addons/advance/maps/china.json -->
+<!-- mapDataSource: https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json -->
 | :map:{name,value} | 数值 |
 | :-: | :-: |
 | 北京 | 120 |
@@ -583,7 +583,7 @@ $$
 ```
 
 **效果**
-<!-- mapDataSource: ./packages/cherry-markdown/src/addons/advance/maps/china.json -->
+<!-- mapDataSource: https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json -->
 | :map:{name,value} | 数值 |
 | :-: | :-: |
 | 北京 | 120 |
