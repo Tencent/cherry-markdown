@@ -398,6 +398,7 @@ export interface CherryEngineOptions {
       | {
           engine?: 'katex' | 'MathJax'; // katex或MathJax
           src?: string;
+          css?: string;
           plugins?: boolean; // 加载插件
         };
     inlineMath?:
