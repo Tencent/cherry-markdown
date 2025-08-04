@@ -10,4 +10,16 @@
   .cherry-toolbar, .cherry-sidebar, .cherry-editor, .cherry-drag {
     display: none!important;
   }
+
+  body>*:not(.cherry-export-wrapper):not([class*="cherry-export-wrapper"]) {
+    display: none !important;
+  }
+
+  .cherry-export-wrapper,
+  [class*="cherry-export-wrapper"] {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
 }
