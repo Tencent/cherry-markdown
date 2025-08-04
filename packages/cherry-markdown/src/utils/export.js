@@ -16,63 +16,41 @@
 import html2canvas from 'html2canvas';
 
 /**
- * 先把body上的内容隐藏起来
- * @returns {Array} displayList 记录body子元素原始的显隐信息
- */
-const hideBodyChildren = () => {
-  const displayList = [];
-  /** @type {HTMLElement[]}*/ (Array.from(document.body.children)).forEach((dom, index) => {
-    displayList[index] = dom.style.display;
-    dom.style.display = 'none';
-  });
-  return displayList;
-};
-
-/**
- * 复原body上被隐藏的内容
- * @param {Array} displayList 记录body子元素原始的显隐信息
- */
-const undoHideBodyChildren = (displayList = []) => {
-  /** @type {HTMLElement[]}*/ (Array.from(document.body.children)).forEach((dom, index) => {
-    if (typeof displayList[index] !== 'undefined') {
-      dom.style.display = displayList[index];
-    }
-  });
-};
-
-/**
  * 将预览区域的内容放在body上准备后续导出操作
  * @param {HTMLElement} previewDom 预览区域的dom
  * @param {function} cb 准备好导出后开始执行导出操作
  */
 const getReadyToExport = (previewDom, cb) => {
   const cherryPreviewer = /** @type {HTMLElement}*/ (previewDom.cloneNode(true));
-  // 强制去掉预览区的隐藏class
+  // 当预览区被隐藏时，cherryPreviewer会有cherry-previewer--hidden类，此行用于恢复预览区
   cherryPreviewer.className = cherryPreviewer.className.replace('cherry-previewer--hidden', '');
+
   cherryPreviewer.style.width = '100%';
   cherryPreviewer.style.height = 'auto';
   cherryPreviewer.style.maxHeight = 'none';
+
   const mmls = cherryPreviewer.querySelectorAll('mjx-assistive-mml');
   // a fix for html2canvas
   mmls.forEach((e) => {
     if (e instanceof HTMLElement) e.style.setProperty('visibility', 'hidden');
   });
+
   const cherryWrapper = document.createElement('div');
+  cherryWrapper.className = 'cherry-export-wrapper';
+
+  // 复制主题相关的类名，确保CSS变量能够正确应用
   const cherryInstance = previewDom.closest('.cherry');
   if (cherryInstance) {
-    cherryWrapper.className = cherryInstance.className;
+    cherryWrapper.className = `${cherryWrapper.className} ${cherryInstance.className}`;
   }
-  document.head.querySelectorAll('style, link[rel="stylesheet"]').forEach((style) => {
-    cherryWrapper.appendChild(style.cloneNode(true));
-  });
+
   cherryWrapper.appendChild(cherryPreviewer);
-  const displayList = hideBodyChildren();
   document.body.appendChild(cherryWrapper);
+
   const bodyOverflow = document.body.style.overflow;
   document.body.style.overflow = 'visible';
   cb(cherryPreviewer, () => {
     cherryWrapper.remove();
-    undoHideBodyChildren(displayList);
     document.body.style.overflow = bodyOverflow;
   });
 };
@@ -100,6 +78,7 @@ const fileDownload = (downloadUrl, fileName) => {
 export function exportPDF(previewDom, fileName) {
   const oldTitle = document.title;
   document.title = fileName;
+
   getReadyToExport(previewDom, (/** @type {HTMLElement}*/ cherryPreviewer, /** @type {function}*/ thenFinish) => {
     // 强制展开所有代码块
     cherryPreviewer.innerHTML = cherryPreviewer.innerHTML.replace(
