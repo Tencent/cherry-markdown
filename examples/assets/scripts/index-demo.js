@@ -152,8 +152,8 @@ var basicConfig = {
         customRenderer: {
           // 特殊配置“all”，会应用于所有语言
           // 'all': {
-          //   render: (src, sign, cherryEnding)=> {
-          //     return `<p class="my-render">${src}</p>`;
+          //   render: (src, sign, cherryEnding, lang)=> {
+          //     return `<p class="my-render">lang:${lang};code:${src}</p>`;
           //   }
           // }
         }

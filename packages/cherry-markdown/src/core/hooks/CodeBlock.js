@@ -120,17 +120,22 @@ export default class CodeBlock extends ParagraphBase {
     const addContainer = (html) => {
       return `<${tag} data-sign="${props.sign}" data-type="${lang}" data-lines="${props.lines}">${html}</${tag}>`;
     };
-    const html = engine.render(codeSrc, props.sign, this.$engine, {
-      mermaidConfig: this.mermaid,
-      updateCache: (cacheCode) => {
-        this.$codeCache(props.sign, addContainer(cacheCode));
-        this.pushCache(addContainer(cacheCode), props.sign, props.lines);
-      },
-      fallback: () => {
-        const $code = this.$codeReplace(codeSrc, lang, props.sign, props.lines);
-        return $code;
-      },
-    });
+    let html = '';
+    if (lang === 'all') {
+      html = engine.render(codeSrc, props.sign, this.$engine, props.lang);
+    } else {
+      html = engine.render(codeSrc, props.sign, this.$engine, {
+        mermaidConfig: this.mermaid,
+        updateCache: (cacheCode) => {
+          this.$codeCache(props.sign, addContainer(cacheCode));
+          this.pushCache(addContainer(cacheCode), props.sign, props.lines);
+        },
+        fallback: () => {
+          const $code = this.$codeReplace(codeSrc, lang, props.sign, props.lines);
+          return $code;
+        },
+      });
+    }
     if (!html) {
       return false;
     }
@@ -427,9 +432,16 @@ export default class CodeBlock extends ParagraphBase {
       }
       [$code, $lang] = this.appendMermaid($code, $lang);
       // 自定义语言渲染，可覆盖内置的自定义语言逻辑
+      const $oldLang = $lang;
       $lang = this.formatLang($lang);
       if (this.isInternalCustomLangCovered($lang)) {
-        cacheCode = this.parseCustomLanguage($lang, $code, { lines, sign, match, addBlockQuoteSignToResult });
+        cacheCode = this.parseCustomLanguage($lang, $code, {
+          lines,
+          sign,
+          match,
+          addBlockQuoteSignToResult,
+          lang: $oldLang,
+        });
         if (cacheCode && cacheCode !== '') {
           this.$codeCache(sign, cacheCode);
           return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
