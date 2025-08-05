@@ -15,6 +15,7 @@
  */
 import ParagraphBase from '@/core/ParagraphBase';
 import { getTableRule } from '@/utils/regexp';
+import Logger from '@/Logger';
 
 const TABLE_LOOSE = 'loose';
 const TABLE_STRICT = 'strict';
@@ -66,15 +67,15 @@ export default class Table extends ParagraphBase {
   }
 
   $parseChartOptions(cell) {
-    console.log('Parsing chart options for cell:', cell);
+    Logger.log('Parsing chart options for cell:', cell);
     // 初始化失败
     if (!this.chartRenderEngine) {
-      console.log('Chart render engine not available');
+      Logger.log('Chart render engine not available');
       return null;
     }
     const CHART_REGEX = /^[ ]*:(\w+):(?:[ ]*{(.*?)}[ ]*)?$/;
     if (!CHART_REGEX.test(cell)) {
-      console.log('Cell does not match chart regex:', cell);
+      Logger.log('Cell does not match chart regex:', cell);
       return null;
     }
     const match = cell.match(CHART_REGEX);
@@ -84,7 +85,7 @@ export default class Table extends ParagraphBase {
       type: chartType,
       options: axisOptions ? axisOptions.split(/\s*,\s*/) : DEFAULT_AXIS_OPTIONS,
     };
-    console.log('Parsed chart options:', result);
+    Logger.log('Parsed chart options:', result);
     return result;
   }
 
@@ -183,7 +184,7 @@ export default class Table extends ParagraphBase {
       const match = originalStr.match(mapDataSourceRegex);
       if (match && match[1]) {
         const mapDataSource = match[1].trim();
-        console.log('从注释中检测到地图数据源:', mapDataSource);
+        Logger.log('从注释中检测到地图数据源:', mapDataSource);
         enhancedChartOptions = {
           ...chartOptions,
           options: {
@@ -193,8 +194,8 @@ export default class Table extends ParagraphBase {
         };
       } else {
         // 如果没有检测到自定义数据源，记录日志便于调试
-        console.log('未检测到自定义地图数据源，使用默认配置');
-        console.log('originalStr preview:', originalStr.substring(0, 200));
+        Logger.log('未检测到自定义地图数据源，使用默认配置');
+        Logger.log('originalStr preview:', originalStr.substring(0, 200));
       }
     }
     
