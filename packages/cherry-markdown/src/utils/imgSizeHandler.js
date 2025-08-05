@@ -83,6 +83,10 @@ const imgSizeHandler = {
     this.img = img;
     this.previewerDom = previewerDom;
     this.container = container;
+    this.reshowBubble();
+  },
+  reshowBubble() {
+    void this.img.transform;
     this.buts = this.initBubbleButtons();
     this.drawBubbleButs();
   },
@@ -98,16 +102,17 @@ const imgSizeHandler = {
         return this.dealScroll(event);
       case 'remove':
         return this.remove();
-      // case 'previewUpdate':
-      //   return this.previewUpdate(event);
+      case 'previewUpdate':
+        return this.previewUpdate(event);
     }
   },
   previewUpdate(callback) {
     if (this.$isResizing()) {
       return;
     }
-    this.remove();
-    callback();
+    this.reshowBubble();
+    // this.remove();
+    // callback();
   },
   drawBubbleButs() {
     if (this.butsLayout) {

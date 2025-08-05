@@ -43,31 +43,45 @@ const imgAltHelper = {
    * @returns {{extendStyles:string, extendClasses:string}}
    */
   processExtendStyleInAlt(alt) {
-    let extendStyles = imgAltHelper.$getAlignmentStyle(alt);
-    let extendClasses = '';
+    const result = {
+      extendStyles: '',
+      extendClasses: '',
+    };
+    this.$addDecorationStyle(result, alt);
+    this.$addAlignmentStyle(result, alt);
+
+    return result;
+  },
+
+  /**
+   * 从alt中提取装饰样式信息添加到 result 中
+   * @param result 返回结果
+   * @param alt
+   */
+  $addDecorationStyle(result, alt) {
+    console.log('update deco');
     const info = alt.match(/#(border|shadow|radius|B|S|R)/g);
     if (info) {
       for (let i = 0; i < info.length; i++) {
         switch (info[i]) {
           case '#border':
           case '#B':
-            extendStyles += 'border:1px solid #888888;padding: 2px;box-sizing: border-box;';
-            extendClasses += ' cherry-img-border';
+            result.extendStyles += 'border:1px solid #888888;padding: 2px;box-sizing: border-box;';
+            result.extendClasses += ' cherry-img-deco-border';
             break;
           case '#shadow':
           case '#S':
-            extendStyles += 'box-shadow:0 2px 15px -5px rgb(0 0 0 / 50%);';
-            extendClasses += ' cherry-img-shadow';
+            result.extendStyles += 'box-shadow:0 2px 15px -5px rgb(0 0 0 / 50%);';
+            result.extendClasses += ' cherry-img-deco-shadow';
             break;
           case '#radius':
           case '#R':
-            extendStyles += 'border-radius: 15px;';
-            extendClasses += ' cherry-img-radius';
+            result.extendStyles += 'border-radius: 15px;';
+            result.extendClasses += ' cherry-img-deco-radius';
             break;
         }
       }
     }
-    return { extendStyles, extendClasses };
   },
 
   /**
@@ -82,28 +96,38 @@ const imgAltHelper = {
   },
 
   /**
-   * 从alt中提取对齐方式样式信息
+   * 从alt中提取对齐方式样式信息添加到 result 中
+   * @param result 返回对象
    * @param {string} alt
-   * @returns {string}
    */
-  $getAlignmentStyle(alt) {
+  $addAlignmentStyle(result, alt) {
     const alignment = this.$getAlignment(alt);
     if (!alignment) {
-      return '';
+      return;
     }
     switch (alignment) {
       case 'center':
-        return 'transform:translateX(-50%);margin-left:50%;display:block;';
+        result.extendStyles += 'transform:translateX(-50%);margin-left:50%;display:block;';
+        result.extendClasses += ' cherry-img-align-center';
+        return;
       case 'right':
-        return 'transform:translateX(-100%);margin-left:100%;margin-right:-100%;display:block;';
+        result.extendStyles += 'transform:translateX(-100%);margin-left:100%;margin-right:-100%;display:block;';
+        result.extendClasses += ' cherry-img-align-right';
+        return;
       case 'left':
-        return 'transform:translateX(0);margin-left:0;display:block;';
+        result.extendStyles += 'transform:translateX(0);margin-left:0;display:block;';
+        result.extendClasses += ' cherry-img-align-left';
+        return;
       case 'float-right':
-        return 'float:right;transform:translateX(0);margin-left:0;display:block;';
+        result.extendStyles += 'float:right;transform:translateX(0);margin-left:0;display:block;';
+        result.extendClasses += ' cherry-img-align-float-left';
+        return;
       case 'float-left':
-        return 'float:left;transform:translateX(0);margin-left:0;display:block;';
+        result.extendStyles += 'float:left;transform:translateX(0);margin-left:0;display:block;';
+        result.extendClasses += ' cherry-img0align-float-right';
+        return;
       default:
-        return '';
+        return;
     }
   },
 };

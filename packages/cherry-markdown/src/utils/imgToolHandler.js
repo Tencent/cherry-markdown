@@ -37,33 +37,73 @@ const imgToolHandler = {
   },
   showBubble(img, container, previewerDom, event, locale) {
     this.img = img;
-    // console.log('event:', event);
-    const operationList = [
+
+    this.previewerDom = previewerDom;
+    this.container = container;
+
+    const decoList = [
       { text: locale.border, type: 'border', active: false },
       { text: locale.shadow, type: 'shadow', active: false },
       { text: locale.radius, type: 'radius', active: false },
     ];
-    this.previewerDom = previewerDom;
-    this.container = container;
-    // console.log('imgToolHandler:', this.img, this.container, this.previewerDom);
-    operationList.forEach((operation) => {
-      operation.active = this.img.className.match(`cherry-img-${operation.type}`);
+    const decoDiv = document.createElement('div');
+    decoDiv.className = 'img-tool-group img-tool-deco-group';
+    this.container.appendChild(decoDiv);
+    decoList.forEach((deco) => {
+      deco.active = this.img.className.match(`cherry-img-deco-${deco.type}`);
       const div = document.createElement('div');
       const icon = document.createElement('i');
       div.appendChild(icon);
-      icon.className = `img-tool-icon ch-icon ch-icon-imgTool${capitalizeFirstLetter(operation.type)}`;
-      div.className = `img-tool-button ${operation.active ? ' active' : ''}`;
-      div.title = operation.text;
+      icon.className = `img-tool-icon ch-icon ch-icon-imgDeco${capitalizeFirstLetter(deco.type)}`;
+      div.className = `img-tool-button ${deco.active ? ' active' : ''}`;
+      div.title = deco.text;
       div.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        operation.active = !operation.active;
+        deco.active = !deco.active;
         // 点击后，更新样式
-        div.className = `img-tool-button ${operation.active ? ' active' : ''}`;
-        this.emitChange(this.img, operation.type);
+        div.className = `img-tool-button ${deco.active ? ' active' : ''}`;
+        this.emitChange(this.img, deco.type);
       });
-      this.container.append(div);
+      decoDiv.append(div);
     });
+
+    const divider = document.createElement('div');
+    divider.className = 'img-tool-divider';
+    this.container.appendChild(divider);
+
+    const alignList = [
+      { text: locale.alignLeft, type: 'left' },
+      { text: locale.alignCenter, type: 'center' },
+      { text: locale.alignRight, type: 'right' },
+      { text: locale.alignFloatLeft, type: 'float-left' },
+      { text: locale.alignFloatRight, type: 'float-right' },
+    ];
+    const alignDiv = document.createElement('div');
+    alignDiv.className = 'img-tool-group';
+    this.container.appendChild(alignDiv);
+    alignList.forEach((align, index) => {
+      align.active = this.img.className.match(`cherry-img-align-${align.type}`);
+      const div = document.createElement('div');
+      const icon = document.createElement('i');
+      align.div = div;
+      div.appendChild(icon);
+      icon.className = `img-tool-icon ch-icon ch-icon-imgAlign${capitalizeLetter(align.type)}`;
+      div.className = `img-tool-button ${align.active ? ' active' : ''}`;
+      div.title = align.text;
+      div.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        align.active = !align.active;
+        alignList.forEach(
+          (align1) => align1 !== align && ((align1.active = false) || (align1.div.className = `img-tool-button`)),
+        );
+        div.className = `img-tool-button ${align.active ? ' active' : ''}`;
+        this.emitChange(this.img, align.active ? align.type : 'clear-align');
+      });
+      alignDiv.append(div);
+    });
+
     const previewerRect = this.previewerDom.parentNode.getBoundingClientRect();
     this.container.style.left = `${event.x - previewerRect.left}px`;
     this.container.style.top = `${event.y - previewerRect.top}px`;
@@ -108,6 +148,14 @@ const imgToolHandler = {
   },
 };
 
+function capitalizeLetter(str) {
+  return str
+    ? str
+        .split('-')
+        .map((w) => capitalizeFirstLetter(w))
+        .join('')
+    : '';
+}
 function capitalizeFirstLetter(str) {
   return str ? str.replace(/^\w/, (c) => c.toUpperCase()) : '';
 }
