@@ -83,9 +83,10 @@
     }
   }
   .cherry-previewer-img-tool-handler {
-  @extend .cherry-bubble;
-  gap: 6px;
-  padding: var(--bubble-padding);
+    @extend .cherry-bubble;
+    padding: var(--bubble-padding);
+    display: flex;
+    flex-direction: column;
 
   .img-tool-button {
     display: inline-flex;
@@ -119,12 +120,19 @@
     }
   }
 
-  .img-tool-icon {
-    font-size: 18px;
-    pointer-events: none;
-    user-select: none;
+    .img-tool-divider {
+      width: 100%;
+      margin: var(--border-width-4) 0;
+      height: var(--border-width-1);
+      border-bottom: var(--border-width-1) var(--toolbar-btn-color) dashed;
+    }
+
+    .img-tool-icon {
+      font-size: 18px;
+      pointer-events: none;
+      user-select: none;
+    }
   }
-}
 
   .cherry-previewer-table-content-handler {
     .cherry-previewer-table-content-handler__input {
