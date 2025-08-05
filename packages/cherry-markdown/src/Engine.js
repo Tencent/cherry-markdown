@@ -137,50 +137,41 @@ export default class Engine {
       syntax.mathBlock.css && loadCSS(syntax.mathBlock.css, 'katex-css');
       if (syntax.mathBlock.src) {
         loadScript(syntax.mathBlock.src, 'katex-js').then(() => {
-          if (this.$cherry.previewer.isPreviewerHidden()) {
-            const cachedHtml = this.$cherry.previewer.options.previewerCache.html;
-            this.$cherry.previewer.options.previewerCache.html = cachedHtml
-              .replace(
-                /<div data-sign="([^"]+?)" class="Cherry-Math cherry-katex-need-render" ([^>]+? data-lines="[^"]+?")>([\s\S]+?)<\/div>/g,
-                (match, sign, attrs, content) => {
-                  console.log(content);
-                  // @ts-ignore
-                  const html = window.katex.renderToString(content, {
-                    throwOnError: false,
-                    displayMode: true,
-                  });
-                  this.asyncRenderHandler.done(`math-block-${sign}`);
-                  return `<div data-sign="${sign}" class="Cherry-Math" ${attrs}>${html}</div>`;
-                },
-              )
-              .replace(
-                /<span data-sign="([^"]+?)" class="Cherry-InlineMath cherry-katex-need-render" ([^>]+? data-lines="[^"]+?")>([\s\S]+?)<\/span>/g,
-                (match, sign, attrs, content) => {
-                  // @ts-ignore
-                  const html = window.katex.renderToString(content, {
-                    throwOnError: false,
-                    displayMode: false,
-                  });
-                  this.asyncRenderHandler.done(`math-inline-${sign}`);
-                  return `<span data-sign="${sign}" class="Cherry-InlineMath" ${attrs}>${html}</span>`;
-                },
-              );
-          } else {
-            this.$cherry.previewer
-              .getDom()
-              .querySelectorAll('.cherry-katex-need-render')
-              .forEach((el) => {
-                const displayMode = el.classList.contains('Cherry-Math');
-                // @ts-ignore
-                el.innerHTML = window.katex.renderToString(el.innerText, {
-                  throwOnError: false,
-                  displayMode,
-                });
-                const key = displayMode ? 'math-block' : 'math-inline';
-                const sign = el.getAttribute('data-sign');
-                this.asyncRenderHandler.done(`${key}-${sign}`);
-                el.classList.remove('cherry-katex-need-render');
+          // 先更新预览区域
+          this.$cherry.previewer
+            .getDom()
+            .querySelectorAll('.cherry-katex-need-render')
+            .forEach((el) => {
+              const displayMode = el.classList.contains('Cherry-Math');
+              // @ts-ignore
+              el.innerHTML = window.katex.renderToString(el.innerText, {
+                throwOnError: false,
+                displayMode,
               });
+              el.classList.remove('cherry-katex-need-render');
+            });
+          // 再更新asyncRenderHandler里的md（实际为html）内容
+          const needDoneKeys = [];
+          this.asyncRenderHandler.md = this.asyncRenderHandler.md.replace(
+            /<(div|span) data-sign="([^"]+?)" class="([^"]+?) cherry-katex-need-render" ([^>]+? data-lines="[^"]+?")>([\s\S]+?)<\/\1>/g,
+            (match, domName, sign, className, attrs, content) => {
+              const displayMode = domName === 'div';
+              const key = domName === 'div' ? `math-block-${sign}` : `math-inline-${sign}`;
+              // @ts-ignore
+              const html = window.katex.renderToString(content, {
+                throwOnError: false,
+                displayMode,
+              });
+              needDoneKeys.push(key);
+              return `<${domName} data-sign="${sign}" class="${className}" ${attrs}>${html}</${domName}>`;
+            },
+          );
+          needDoneKeys.forEach((key) => {
+            this.asyncRenderHandler.done(key);
+          });
+          // 最后再更新预览区缓存的内容（当预览区隐藏的时候需要更新）
+          if (this.$cherry.previewer.isPreviewerHidden()) {
+            this.$cherry.previewer.options.previewerCache.html = this.asyncRenderHandler.md;
           }
         });
       }
