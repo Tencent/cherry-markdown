@@ -20,6 +20,28 @@
   --toolbar-btn-active-bg:var(--oc-gray-8);
   --toolbar-split-color: var(--oc-gray-5);
 
+  /* ========== 表格工具栏相关变量 ========== */
+  --table-menu-bg: linear-gradient(145deg, var(--oc-gray-8), var(--oc-gray-9));
+  --table-menu-border: 1px solid var(--oc-gray-6);
+  --table-menu-border-radius: 16px;
+  --table-menu-box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.3);
+  --table-menu-padding: 10px;
+  --table-menu-backdrop-filter: blur(16px);
+  
+  --table-menu-item-bg: linear-gradient(145deg, var(--oc-gray-7), var(--oc-gray-8));
+  --table-menu-item-border: 1px solid var(--oc-gray-6);
+  --table-menu-item-border-radius: 8px;
+  --table-menu-item-padding: 10px;
+  --table-menu-item-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  --table-menu-item-hover-bg: linear-gradient(145deg, var(--oc-gray-6), var(--oc-gray-7));
+  --table-menu-item-hover-border: 1px solid var(--oc-orange-4);
+  --table-menu-item-hover-shadow: 0 4px 16px rgba(255, 146, 43, 0.2);
+  
+  --table-menu-item-active-bg: linear-gradient(145deg, var(--oc-orange-6), var(--oc-orange-7));
+  --table-menu-item-active-border: 1px solid var(--oc-orange-5);
+  --table-menu-item-active-shadow: 0 6px 20px rgba(255, 146, 43, 0.35);
+
   /* ========== 编辑器相关变量 ========== */
   --editor-header-color: var(--primary-color);
   --editor-string-color: var(--oc-yellow-3);
@@ -252,5 +274,83 @@
   --panel-success-title-color: var(--oc-green-2);
   --panel-success-body-bg: linear-gradient(145deg, rgba(34, 197, 94, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
   --panel-success-body-color: var(--oc-green-3);
+}
+
+/* ========== 表格工具栏特殊样式 ========== */
+.cherry.theme__dark {
+  .cherry-insert-table-menu {
+    /* 添加霓虹发光效果 */
+    &::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, 
+        rgba(255, 146, 43, 0.4), 
+        rgba(255, 146, 43, 0.2), 
+        rgba(255, 146, 43, 0.4)
+      );
+      border-radius: inherit;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      animation: neonPulse 2s ease-in-out infinite alternate;
+    }
+
+    &:hover::before {
+      opacity: 1;
+    }
+
+    &-item {
+      /* 添加内部光效 */
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: radial-gradient(circle, rgba(255, 146, 43, 0.3) 0%, transparent 70%);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: all 0.4s ease;
+        pointer-events: none;
+      }
+
+      &:hover::after {
+        width: 120%;
+        height: 120%;
+      }
+
+      &.active::after {
+        width: 140%;
+        height: 140%;
+        background: radial-gradient(circle, rgba(255, 146, 43, 0.5) 0%, transparent 70%);
+        animation: activePulse 1.5s ease-in-out infinite;
+      }
+    }
+  }
+}
+
+@keyframes neonPulse {
+  0% {
+    box-shadow: 0 0 20px rgba(255, 146, 43, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 30px rgba(255, 146, 43, 0.6);
+  }
+}
+
+@keyframes activePulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.8;
+  }
 }
 

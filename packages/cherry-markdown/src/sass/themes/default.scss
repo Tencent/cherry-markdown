@@ -20,6 +20,28 @@
   --toolbar-btn-active-bg: var(--secondary-color);
   --toolbar-split-color: var(--oc-blue-5);
 
+  /* ========== 表格工具栏相关变量 ========== */
+  --table-menu-bg: var(--oc-white);
+  --table-menu-border: 1px solid var(--oc-blue-3);
+  --table-menu-border-radius: 12px;
+  --table-menu-box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
+  --table-menu-padding: 8px;
+  --table-menu-backdrop-filter: blur(12px);
+  
+  --table-menu-item-bg: var(--oc-white);
+  --table-menu-item-border: 1px solid var(--oc-blue-2);
+  --table-menu-item-border-radius: 6px;
+  --table-menu-item-padding: 8px;
+  --table-menu-item-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  --table-menu-item-hover-bg: var(--oc-blue-1);
+  --table-menu-item-hover-border: 1px solid var(--oc-blue-4);
+  --table-menu-item-hover-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  
+  --table-menu-item-active-bg: var(--oc-blue-2);
+  --table-menu-item-active-border: 1px solid var(--oc-blue-5);
+  --table-menu-item-active-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+
   /* ========== 编辑器相关变量 ========== */
   --editor-header-color: var(--primary-color);
   --editor-string-color: var(--oc-blue-4);
@@ -170,4 +192,56 @@
 
 ol {
   li {}
+}
+
+/* ========== 表格工具栏特殊样式 ========== */
+.cherry.theme__default {
+  .cherry-insert-table-menu {
+    /* 添加微妙的边框发光效果 */
+    &::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      right: -1px;
+      bottom: -1px;
+      background: linear-gradient(135deg, var(--oc-blue-4), var(--oc-blue-6));
+      border-radius: inherit;
+      z-index: -1;
+      opacity: 0.3;
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover::before {
+      opacity: 0.5;
+    }
+
+    &-item {
+      /* 添加内部光效 */
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: all 0.3s ease;
+        pointer-events: none;
+      }
+
+      &:hover::after {
+        width: 100%;
+        height: 100%;
+      }
+
+      &.active::after {
+        width: 120%;
+        height: 120%;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+      }
+    }
+  }
 }

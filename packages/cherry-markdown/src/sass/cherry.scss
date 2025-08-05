@@ -99,18 +99,59 @@
     top: 40px;
     left: 40px;
     border-collapse: separate;
-    box-shadow: var(--shadow-md);
-    padding: 4px;
-    border-radius: var(--radius-md);
+    background: var(--table-menu-bg, var(--dropdown-bg));
+    border: var(--table-menu-border, 1px solid var(--base-border-color));
+    box-shadow: var(--table-menu-box-shadow, var(--shadow-md));
+    padding: var(--table-menu-padding, 4px);
+    border-radius: var(--table-menu-border-radius, var(--radius-md));
     width: auto;
     height: auto;
+    backdrop-filter: var(--table-menu-backdrop-filter, none);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
     &-item {
-      padding: 7px;
-      border: 1px solid var(--base-border-color);
+      padding: var(--table-menu-item-padding, 7px);
+      background: var(--table-menu-item-bg, transparent);
+      border: var(--table-menu-item-border, 1px solid var(--base-border-color));
+      border-radius: var(--table-menu-item-border-radius, 4px);
+      transition: var(--table-menu-item-transition, all 0.2s ease);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
+      }
+
+      &:hover {
+        background: var(--table-menu-item-hover-bg, var(--toolbar-btn-hover-bg));
+        border: var(--table-menu-item-hover-border, 1px solid var(--base-border-color));
+        box-shadow: var(--table-menu-item-hover-shadow, 0 2px 8px rgba(0, 0, 0, 0.1));
+        transform: translateY(-1px);
+
+        &::before {
+          opacity: 1;
+        }
+      }
 
       &.active {
-        background-color: var(--toolbar-btn-hover-bg);
+        background: var(--table-menu-item-active-bg, var(--toolbar-btn-active-bg));
+        border: var(--table-menu-item-active-border, 1px solid var(--primary-color));
+        box-shadow: var(--table-menu-item-active-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
+        transform: translateY(-2px);
+
+        &::before {
+          opacity: 1;
+        }
       }
     }
   }
