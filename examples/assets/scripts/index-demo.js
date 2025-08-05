@@ -356,6 +356,9 @@ var basicConfig = {
     onClickPreview: (event) => {
       console.log("onClickPreview", event);
     },
+    afterAsyncRender: (md, html) => {
+      // console.log("afterAsyncRender", md, html);
+    },
   },
   editor: {
     id: 'cherry-text',
