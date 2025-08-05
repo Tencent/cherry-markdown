@@ -188,7 +188,10 @@ export default class MermaidCodeEngine {
     props.updateCache(html);
     const container = $engine.$cherry.wrapperDom || document.body;
     if (isBrowser()) {
-      container.querySelector(`[data-sign="${sign}"][data-type="codeBlock"]`).parentElement.innerHTML = html;
+      const placeholderList = container.querySelectorAll(`[data-sign="${sign}"][data-type="codeBlock"]`);
+      placeholderList?.forEach((placeholder) => {
+        placeholder.parentElement.innerHTML = html;
+      });
     }
     $engine.asyncRenderHandler.done(graphId, {
       replacer: (md) => {
