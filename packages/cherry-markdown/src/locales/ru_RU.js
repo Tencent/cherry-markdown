@@ -47,6 +47,8 @@ export default {
   table: 'Таблица',
   'line-table': 'Строки в таблице',
   'bar-table': 'Bar Table',
+  'radar-table': 'Radar Table',
+  'map-table': 'Map Table',
   lineTable: 'Строки в таблице',
   barTable: 'Bar Table',
   radarTable: 'Radar Table',
