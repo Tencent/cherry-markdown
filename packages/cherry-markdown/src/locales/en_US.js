@@ -80,6 +80,7 @@ export default {
   exportScreenshot: 'Screenshot',
   exportMarkdownFile: 'Export Markdown File',
   exportHTMLFile: 'Export preview HTML File',
+  exportWordFile: 'Export to Word',
   heading1: 'H1 Heading',
   heading2: 'H2 Heading',
   heading3: 'H3 Heading',

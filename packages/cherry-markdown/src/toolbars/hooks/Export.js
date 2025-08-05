@@ -33,6 +33,7 @@ export default class Export extends MenuBase {
       { noIcon: true, name: 'exportScreenshot', onclick: this.bindSubClick.bind(this, 'screenShot') },
       { noIcon: true, name: 'exportMarkdownFile', onclick: this.bindSubClick.bind(this, 'markdown') },
       { noIcon: true, name: 'exportHTMLFile', onclick: this.bindSubClick.bind(this, 'html') },
+      { noIcon: true, name: 'exportWordFile', onclick: this.bindSubClick.bind(this, 'word') },
     );
   }
 

@@ -80,6 +80,7 @@ export default {
   exportScreenshot: 'Скриншот',
   exportMarkdownFile: 'Экспорт файла Markdown',
   exportHTMLFile: 'Экспорт предварительного просмотра HTML-файла',
+  exportWordFile: 'Экспорт в Word',
   panel: 'Панель',
   detail: 'Аккордеон',
   heading1: 'H1 Заголовок',
