@@ -29,7 +29,7 @@ import htmlParser from './utils/htmlparser';
 import { isBrowser } from './utils/env';
 import * as htmlparser2 from 'htmlparser2';
 import LRUCache from './utils/LRUCache';
-import { loadScript } from './utils/dom';
+import { loadCSS, loadScript } from './utils/dom';
 
 export default class Engine {
   /**
@@ -121,13 +121,60 @@ export default class Engine {
     ) {
       return;
     }
-    // 已经加载过MathJax
-    if (externals.MathJax || window.MathJax) {
-      return;
-    }
     if (syntax.mathBlock.engine === 'MathJax' || syntax.inlineMath.engine === 'MathJax') {
+      // 已经加载过MathJax
+      if (externals.MathJax || window.MathJax) {
+        return;
+      }
       configureMathJax(plugins);
       loadScript(syntax.mathBlock.src ? syntax.mathBlock.src : syntax.inlineMath.src, 'mathjax-js');
+    }
+    if (syntax.mathBlock.engine === 'katex' || syntax.inlineMath.engine === 'katex') {
+      // @ts-ignore
+      if (window.katex) {
+        return;
+      }
+      syntax.mathBlock.css && loadCSS(syntax.mathBlock.css, 'katex-css');
+      if (syntax.mathBlock.src) {
+        loadScript(syntax.mathBlock.src, 'katex-js').then(() => {
+          // 先更新预览区域
+          this.$cherry.previewer
+            .getDom()
+            .querySelectorAll('.cherry-katex-need-render')
+            .forEach((el) => {
+              const displayMode = el.classList.contains('Cherry-Math');
+              // @ts-ignore
+              el.innerHTML = window.katex.renderToString(el.innerText, {
+                throwOnError: false,
+                displayMode,
+              });
+              el.classList.remove('cherry-katex-need-render');
+            });
+          // 再更新asyncRenderHandler里的md（实际为html）内容
+          const needDoneKeys = [];
+          this.asyncRenderHandler.md = this.asyncRenderHandler.md.replace(
+            /<(div|span) data-sign="([^"]+?)" class="([^"]+?) cherry-katex-need-render" ([^>]+? data-lines="[^"]+?")>([\s\S]+?)<\/\1>/g,
+            (match, domName, sign, className, attrs, content) => {
+              const displayMode = domName === 'div';
+              const key = domName === 'div' ? `math-block-${sign}` : `math-inline-${sign}`;
+              // @ts-ignore
+              const html = window.katex.renderToString(content, {
+                throwOnError: false,
+                displayMode,
+              });
+              needDoneKeys.push(key);
+              return `<${domName} data-sign="${sign}" class="${className}" ${attrs}>${html}</${domName}>`;
+            },
+          );
+          needDoneKeys.forEach((key) => {
+            this.asyncRenderHandler.done(key);
+          });
+          // 最后再更新预览区缓存的内容（当预览区隐藏的时候需要更新）
+          if (this.$cherry.previewer.isPreviewerHidden()) {
+            this.$cherry.previewer.options.previewerCache.html = this.asyncRenderHandler.md;
+          }
+        });
+      }
     }
   }
 
