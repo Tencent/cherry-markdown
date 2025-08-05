@@ -15,12 +15,12 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 /**
- * 插入柱状图图+表格
+ * 插入地图+表格
  */
-export default class BarTable extends MenuBase {
+export default class MapTable extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('barTable', 'table');
+    this.setName('mapTable', 'table');
   }
 
   /**
@@ -29,13 +29,16 @@ export default class BarTable extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    // 插入带折线图的表格
+    // 插入带地图的表格
     return `${selection}\n\n${[
-      '| :bar: {x,y} | a | b | c |',
-      '| :-: | :-: | :-: | :-: |',
-      '| x | 1 | 2 | 3 |',
-      '| y | 2 | 4 | 6 |',
-      '| z | 7 | 5 | 3 |',
+      '| :map:{name,value} | 数值 |',
+      '| :-: | :-: |',
+      '| 北京 | 120 |',
+      '| 上海 | 280 |',
+      '| 广东 | 350 |',
+      '| 四川 | 180 |',
+      '| 江苏 | 290 |',
+      '| 浙江 | 220 |',
     ].join('\n')}\n\n`;
   }
 }
