@@ -47,6 +47,13 @@ export default {
   table: '表格', // 表格
   'line-table': '折线表格', // 折线表格
   'bar-table': '柱状表格', // 柱状表格
+  'radar-table': '雷达表格', // 雷达表格
+  'map-table': '地图表格', // 地图表格
+  lineTable: '折线表格', // 折线表格
+  barTable: '柱状表格', // 柱状表格
+  radarTable: '雷达表格', // 雷达表格
+  mapTable: '地图表格', // 地图表格
+  proTable: '图表表格', // 图表表格
   formula: '公式', // 公式
   insertFormula: '公式', // 公式
   insertFlow: '流程图', // 流程图

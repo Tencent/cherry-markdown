@@ -683,6 +683,11 @@ export interface CherryToolbarConfig {
   /** 公式 */
   formula?: CherryFormulaToolbarOption;
   changeLocale?: CherryChangeLocaleToolbarOption[];
+  /** 地图表格配置 */
+  mapTable?: {
+    /** 地图数据源URL配置，支持多个路径，按优先级依次尝试 */
+    sourceUrl?: string[];
+  };
 }
 export interface CherryChangeLocaleToolbarOption {
   locale: string;
