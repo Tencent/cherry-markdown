@@ -408,6 +408,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     themeList: [
       { className: 'default', label: '默认' },
       { className: 'dark', label: '暗黑' },
+      { className: 'abyss', label: '深海' },
       { className: 'green', label: '清新' },
       { className: 'red', label: '热情' },
       { className: 'violet', label: '淡雅' },
