@@ -122,6 +122,12 @@ export default class EChartsTableEngine {
       case 'map':
         chartOption = this.renderMapChart(tableObject, options);
         break;
+      case 'heatmap':
+        chartOption = this.renderHeatmapChart(tableObject, options);
+        break;
+      case 'pie':
+        chartOption = this.renderPieChart(tableObject, options);
+        break;
       default:
         return '';
     }
@@ -138,8 +144,8 @@ export default class EChartsTableEngine {
     const htmlContent = `
       <div class="cherry-echarts-wrapper" 
            style="width: ${this.options.width}px; height: ${
-             this.options.height
-           }px; min-height: 300px; display: block; position: relative; border: 1px solid #ddd;" 
+      this.options.height
+    }px; min-height: 300px; display: block; position: relative; border: 1px solid #ddd;" 
            id="${chartId}"
            data-chart-type="${type}"
            data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"
@@ -199,6 +205,14 @@ export default class EChartsTableEngine {
 
   renderRadarChart(tableObject, options) {
     return this.$renderRadarChartCommon(tableObject, options);
+  }
+
+  renderHeatmapChart(tableObject, options) {
+    return this.$renderHeatmapChartCommon(tableObject, options);
+  }
+
+  renderPieChart(tableObject, options) {
+    return this.$renderPieChartCommon(tableObject, options);
   }
 
   $renderRadarChartCommon(tableObject, options) {
@@ -387,19 +401,198 @@ export default class EChartsTableEngine {
     return chartOptions;
   }
 
+  $renderHeatmapChartCommon(tableObject, options) {
+    console.log('Rendering heatmap chart:', tableObject);
+
+    // 构建热力图数据
+    const xAxisData = tableObject.header.slice(1); // 列标题作为x轴
+    const yAxisData = tableObject.rows.map((row) => row[0]); // 行标题作为y轴
+    const data = [];
+    // 构建热力图数据点 [x索引, y索引, 值]
+    tableObject.rows.forEach((row, yIndex) => {
+      row.slice(1).forEach((value, xIndex) => {
+        const numValue = parseFloat(value.replace(/,/g, '')) || 0;
+        data.push([xIndex, yIndex, numValue]);
+      });
+    });
+
+    // 计算数值范围用于颜色映射
+    const values = data.map((item) => item[2]);
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+
+    const chartOptions = {
+      backgroundColor: '#fff',
+      tooltip: {
+        position: 'top',
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        borderColor: '#999',
+        borderWidth: 1,
+        textStyle: {
+          color: '#fff',
+          fontSize: 12,
+        },
+        formatter(params) {
+          return `${yAxisData[params.data[1]]}<br/>${xAxisData[params.data[0]]}: <strong>${params.data[2]}</strong>`;
+        },
+        extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
+      },
+      grid: {
+        height: '50%',
+        top: '10%',
+        left: '10%',
+        right: '10%',
+      },
+      xAxis: {
+        type: 'category',
+        data: xAxisData,
+        splitArea: {
+          show: true,
+        },
+        axisLabel: {
+          fontSize: 12,
+        },
+      },
+      yAxis: {
+        type: 'category',
+        data: yAxisData,
+        splitArea: {
+          show: true,
+        },
+        axisLabel: {
+          fontSize: 12,
+        },
+      },
+      visualMap: {
+        min: minValue,
+        max: maxValue,
+        calculable: true,
+        orient: 'horizontal',
+        left: 'center',
+        bottom: '15%',
+        inRange: {
+          color: [
+            '#313695',
+            '#4575b4',
+            '#74add1',
+            '#abd9e9',
+            '#e0f3f8',
+            '#ffffcc',
+            '#fee090',
+            '#fdae61',
+            '#f46d43',
+            '#d73027',
+            '#a50026',
+          ],
+        },
+        textStyle: {
+          fontSize: 12,
+        },
+      },
+      series: [
+        {
+          name: '热力图数据',
+          type: 'heatmap',
+          data,
+          label: {
+            show: true,
+            fontSize: 10,
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowColor: 'rgba(0, 0, 0, 0.5)',
+            },
+          },
+          animation: true,
+          animationDuration: 1000,
+          animationEasing: 'cubicOut',
+        },
+      ],
+    };
+    return chartOptions;
+  }
+
+  $renderPieChartCommon(tableObject, options) {
+    console.log('Rendering pie chart:', tableObject);
+
+    // 构建饼图数据
+    const data = tableObject.rows.map((row) => ({
+      name: row[0],
+      value: parseFloat(row[1].replace(/,/g, '')) || 0,
+    }));
+
+    const chartOptions = {
+      backgroundColor: '#fff',
+      tooltip: {
+        trigger: 'item',
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        borderColor: '#999',
+        borderWidth: 1,
+        textStyle: {
+          color: '#fff',
+          fontSize: 12,
+        },
+        formatter: '{a} <br/>{b}: {c} ({d}%)',
+        extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
+      },
+      legend: {
+        orient: 'vertical',
+        left: 'left',
+        top: 'middle',
+        textStyle: {
+          fontSize: 12,
+        },
+      },
+      series: [
+        {
+          name: '数据分布',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          center: ['60%', '50%'],
+          avoidLabelOverlap: false,
+          label: {
+            show: false,
+            position: 'center',
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: '18',
+              fontWeight: 'bold',
+            },
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)',
+            },
+          },
+          labelLine: {
+            show: false,
+          },
+          data,
+          animation: true,
+          animationDuration: 1000,
+          animationEasing: 'cubicOut',
+        },
+      ],
+    };
+    return chartOptions;
+  }
+
   renderMapChart(tableObject, options) {
     console.log('开始渲染地图图表，选项:', options);
-    
+
     // 检查options中是否有自定义地图数据源
     if (options && options.mapDataSource) {
       console.log('检测到自定义地图数据源:', options.mapDataSource);
-      
+
       // 优先使用用户自定义的地图数据源
       // 如果当前已经有china地图数据，先清除它以确保使用新数据
       if (window.echarts && window.echarts.getMap('china')) {
         console.log('清除现有地图数据以使用自定义地图数据源');
       }
-      
+
       // 立即开始加载自定义地图数据，这会覆盖默认地图数据
       this.$loadCustomMapData(options.mapDataSource, true);
     } else {
@@ -407,7 +600,7 @@ export default class EChartsTableEngine {
       // 只有在没有自定义数据源时才加载默认地图数据
       this.$loadChinaMapData();
     }
-    
+
     // 立即返回地图图表配置
     return this.$renderMapChartCommon(tableObject, options);
   }
@@ -505,16 +698,18 @@ export default class EChartsTableEngine {
     console.log(`正在加载用户自定义地图数据: ${mapUrl}${forceReload ? ' (强制重新加载)' : ''}`);
 
     // 优先加载用户自定义的地图数据，覆盖任何已有的地图数据
-    this.$fetchMapData(mapUrl).then(() => {
-      console.log('用户自定义地图数据加载成功，正在刷新所有地图图表');
-      // 地图数据加载成功后，立即刷新页面中的所有地图图表
-      this.$refreshMapCharts();
-    }).catch((error) => {
-      console.warn(`用户自定义地图数据加载失败 (${mapUrl}):`, error.message);
-      console.warn('自定义地图数据加载失败，回退到默认地图数据');
-      // 如果用户自定义URL失败，回退到默认地图数据
-      this.$loadChinaMapData();
-    });
+    this.$fetchMapData(mapUrl)
+      .then(() => {
+        console.log('用户自定义地图数据加载成功，正在刷新所有地图图表');
+        // 地图数据加载成功后，立即刷新页面中的所有地图图表
+        this.$refreshMapCharts();
+      })
+      .catch((error) => {
+        console.warn(`用户自定义地图数据加载失败 (${mapUrl}):`, error.message);
+        console.warn('自定义地图数据加载失败，回退到默认地图数据');
+        // 如果用户自定义URL失败，回退到默认地图数据
+        this.$loadChinaMapData();
+      });
   }
 
   /**
