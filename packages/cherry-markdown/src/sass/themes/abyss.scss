@@ -10,7 +10,7 @@
   --base-font-color: #CECFCF;
   --base-editor-bg: #1E222A;
   --base-previewer-bg: #1E222A;
-  --base-border-color: var(--oc-blue-5);
+  --base-border-color: var(--primary-color);
 
   /* ========== 工具栏相关变量 ========== */
   --toolbar-bg: #181C24;
@@ -42,7 +42,7 @@
   --editor-v2-color: var(--oc-gray-8);
   --editor-v3-color: var(--primary-color);
   --editor-keyword-color: var(--oc-blue-4);
-  --editor-selection-bg: var(--oc-blue-2);
+  --editor-selection-bg: #636e87;
 
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: var(--primary-color);
@@ -59,6 +59,9 @@
   --md-toc-title-color: var(--primary-color);
   --md-toc-link-color: var(--primary-color);
   --md-toc-indicator-color: var(--primary-color);
+  --md-toc-link-hover-color: var(--secondary-color);
+  --md-toc-link-hover-bg: var(--primary-color);
+  --md-toc-indicator-hover-color: var(--primary-color);
 
   /* ========== 手风琴组件变量覆盖 ========== */
   --accordion-bg: #2A2F3B;
@@ -152,7 +155,7 @@
       }
 
       tspan {
-        fill: #333 !important;
+        fill: var(--primary-color) !important;
       }
 
       circle {
