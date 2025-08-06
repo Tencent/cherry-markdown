@@ -19,11 +19,18 @@
  */
 import { HOOKS_TYPE_LIST } from './core/SyntaxBase';
 import { createSyntaxHook, createMenuHook } from './Factory';
+import TapdTablePlugin from './addons/advance/cherry-tapd-table-plugin';
+import TapdHtmlTagPlugin from './addons/advance/cherry-tapd-html-tag-plugin';
+import TapdCheckListPlugin from './addons/advance/cherry-tapd-checklist-plugin';
 import { isBrowser } from './utils/env';
 
 const constants = { HOOKS_TYPE_LIST };
 
-const plugins = {};
+const plugins = {
+  TapdTablePlugin,
+  TapdHtmlTagPlugin,
+  TapdCheckListPlugin,
+};
 const nodeIgnorePlugin = [];
 
 if (!isBrowser()) {
@@ -38,6 +45,7 @@ export class CherryStatic {
   static createSyntaxHook = createSyntaxHook;
   static createMenuHook = createMenuHook;
   static constants = constants;
+  static plugins = plugins;
   static VERSION = VERSION;
   /**
    * @this {typeof import('./Cherry').default | typeof CherryStatic}
