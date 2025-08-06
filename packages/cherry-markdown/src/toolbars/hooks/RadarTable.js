@@ -15,12 +15,12 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 /**
- * 插入柱状图图+表格
+ * 插入雷达图+表格
  */
-export default class BarTable extends MenuBase {
+export default class RadarTable extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('barTable', 'table');
+    this.setName('radarTable', 'table');
   }
 
   /**
@@ -29,13 +29,13 @@ export default class BarTable extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    // 插入带折线图的表格
+    // 插入带雷达图的表格
     return `${selection}\n\n${[
-      '| :bar: {x,y} | a | b | c |',
-      '| :-: | :-: | :-: | :-: |',
-      '| x | 1 | 2 | 3 |',
-      '| y | 2 | 4 | 6 |',
-      '| z | 7 | 5 | 3 |',
+      '| :radar: {x,y} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |',
+      '| :-: | :-: | :-: | :-: | :-: | :-: |',
+      '| 用户A | 90 | 85 | 75 | 80 | 88 |',
+      '| 用户B | 75 | 90 | 88 | 85 | 78 |',
+      '| 用户C | 85 | 78 | 90 | 88 | 85 |',
     ].join('\n')}\n\n`;
   }
 }

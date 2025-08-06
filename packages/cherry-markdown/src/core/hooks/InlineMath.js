@@ -34,7 +34,7 @@ export default class InlineMath extends ParagraphBase {
   constructor({ config }) {
     super({ needCache: true });
     // 非浏览器环境下配置为 node
-    this.engine = isBrowser() ? (config.engine ?? 'MathJax') : 'node';
+    this.engine = isBrowser() ? config.engine ?? 'MathJax' : 'node';
   }
 
   toHtml(wholeMatch, leadingChar, m1) {
@@ -48,12 +48,17 @@ export default class InlineMath extends ParagraphBase {
     const $m1 = m1.replace(/\\~D/g, '$').replace(/\\~T/g, '~').replace(/~T/g, '~');
     // 既无MathJax又无katex时，原样输出
     let result = '';
-    if (this.engine === 'katex' && this.katex?.renderToString) {
+    if (this.engine === 'katex') {
       // katex渲染
-      const html = this.katex.renderToString($m1, {
-        throwOnError: false,
-      });
-      result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}">${html}</span>`;
+      if (!this.katex) {
+        result = `${leadingChar}<span data-sign="${sign}" class="Cherry-InlineMath cherry-katex-need-render" data-type="mathBlock" data-lines="${lines}">${$m1}</span>`;
+        this.$engine.asyncRenderHandler.add(`math-inline-${sign}`);
+      } else {
+        const html = this.katex.renderToString($m1, {
+          throwOnError: false,
+        });
+        result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}">${html}</span>`;
+      }
     } else if (this.MathJax?.tex2svg) {
       // MathJax渲染
       const svg = getHTML(this.MathJax.tex2svg($m1, { em: 12, ex: 6, display: false }), true);

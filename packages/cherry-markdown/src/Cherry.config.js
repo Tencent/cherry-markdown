@@ -540,6 +540,13 @@ const defaultConfig = {
         showLatexLive: true, // true: 显示 www.latexlive.com 外链； false：不显示
         templateConfig: false, // false: 使用默认模板
       },
+      mapTable: {
+        // 地图数据源URL配置，支持多个路径，按优先级依次尝试
+        sourceUrl: [
+          'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', // 在线高质量地图数据源（优先，已验证可用）
+          './assets/data/china.json', // 从examples目录访问本地备份文件
+        ],
+      },
       changeLocale: [
         {
           locale: 'zh_CN',
@@ -672,6 +679,7 @@ const defaultConfig = {
     themeList: [
       { className: 'default', label: '默认' }, // 曾用名：light 明亮
       { className: 'dark', label: '暗黑' },
+      { className: 'abyss', label: '深海' },
       { className: 'green', label: '清新' },
       { className: 'red', label: '热情' },
       { className: 'violet', label: '淡雅' },

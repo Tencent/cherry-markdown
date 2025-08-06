@@ -94,6 +94,8 @@ var customMenuTable = Cherry.createMenuHook('图表',  {
   subMenuConfig: [
     { noIcon: true, name: '折线图', onclick: (event)=>{cherry.insert('\n| :line:{x,y} | Header1 | Header2 | Header3 | Header4 |\n| ------ | ------ | ------ | ------ | ------ |\n| Sample1 | 11 | 11 | 4 | 33 |\n| Sample2 | 112 | 111 | 22 | 222 |\n| Sample3 | 333 | 142 | 311 | 11 |\n');} },
     { noIcon: true, name: '柱状图', onclick: (event)=>{cherry.insert('\n| :bar:{x,y} | Header1 | Header2 | Header3 | Header4 |\n| ------ | ------ | ------ | ------ | ------ |\n| Sample1 | 11 | 11 | 4 | 33 |\n| Sample2 | 112 | 111 | 22 | 222 |\n| Sample3 | 333 | 142 | 311 | 11 |\n');} },
+    { noIcon: true, name: '雷达图', onclick: (event)=>{cherry.insert('\n| :radar:{x,y} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |\n| ------ | ------ | ------ | ------ | ------ | ------ |\n| 用户A | 90 | 85 | 75 | 80 | 88 |\n| 用户B | 75 | 90 | 88 | 85 | 78 |\n| 用户C | 85 | 78 | 90 | 88 | 85 |\n');} },
+    { noIcon: true, name: '地图', onclick: (event)=>{cherry.insert('\n<!-- mapDataSource: https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json -->\n| :map:{name,value} | 数值 |\n| :-: | :-: |\n| 北京 | 100 |\n| 上海 | 200 |\n| 广东 | 300 |\n| 四川 | 150 |\n| 江苏 | 250 |\n| 浙江 | 180 |\n\n**说明：** 修改注释中的URL来自定义地图数据源\n');} },
   ]
 });
 
@@ -152,8 +154,8 @@ var basicConfig = {
         customRenderer: {
           // 特殊配置“all”，会应用于所有语言
           // 'all': {
-          //   render: (src, sign, cherryEnding)=> {
-          //     return `<p class="my-render">${src}</p>`;
+          //   render: (src, sign, cherryEnding, lang)=> {
+          //     return `<p class="my-render">lang:${lang};code:${src}</p>`;
           //   }
           // }
         }
@@ -168,15 +170,15 @@ var basicConfig = {
         needWhitespace: false, // 是否必须有前后空格
       },
       mathBlock: {
-        // engine: 'MathJax', // katex或MathJax
-        engine: 'katex', // katex或MathJax
-        // src: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js', // 如果使用MathJax plugins，则需要使用该url通过script标签引入
-        src: 'https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js', 
-        css: 'https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css', // 如果使用katex，则还需要引入css（如果是MathJax，则不需要）
+        engine: 'MathJax', // katex或MathJax
+        // engine: 'katex', // katex或MathJax
+        src: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js', // 如果使用MathJax plugins，则需要使用该url通过script标签引入
+        // src: 'https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js', 
+        // css: 'https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css', // 如果使用katex，则还需要引入css（如果是MathJax，则不需要）
       },
       inlineMath: {
-        // engine: 'MathJax', // katex或MathJax
-        engine: 'katex', // katex或MathJax
+        engine: 'MathJax', // katex或MathJax
+        // engine: 'katex', // katex或MathJax
       },
       emoji: {
         useUnicode: true,
@@ -328,20 +330,29 @@ var basicConfig = {
         },
       },
     },
-    // config: {
-    //   publish: [
-    //     {
-    //       name: '微信公众号',
-    //       key: 'wechat',
-    //       icon: `data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E  %3Cg fill='none'%3E    %3Cpath fill='%23FFF' d='M0 0h80v80H0z' opacity='0'/%3E    %3Cpath fill='%2307C160' d='M60.962 22.753c-7.601-2.567-18.054-2.99-27.845 4.49-5.423 4.539-9.56 10.715-10.675 18.567-2.958-3.098-5.025-7.995-5.58-11.706-.806-5.403.483-10.82 4.311-15.45C26.906 11.724 34.577 10 39.6 10c9.57.001 18.022 5.882 21.363 12.753zm7.64 11.78c7.516 9.754 5.441 24.73-5.1 32.852-2.618 2.018-5.67 3.198-8.651 4.024a26.067 26.067 0 0 0 5.668-9.54c4.613-13.806-2.868-28.821-16.708-33.536-.3-.102-.601-.191-.903-.282 9.348-3.467 19.704-1.292 25.694 6.482zM39.572 59.37c6.403 0 11.474-1.49 16.264-5.013-.124 1.993-.723 4.392-1.271 5.805-4.509 11.633-17.56 16.676-31.238 12.183C11.433 68.438 4.145 54.492 7.475 42.851c.893-3.12 1.805-5.26 3.518-7.953 1.028 7.504 5.7 14.803 12.511 19.448.518.35.872.932.901 1.605a2.4 2.4 0 0 1-.08.653l-1.143 5.19c-.052.243-.142.499-.13.752.023.56.495.997 1.053.973.22-.01.395-.1.576-.215l6.463-4.143c.486-.312 1.007-.513 1.587-.538a3.03 3.03 0 0 1 .742.067c1.96.438 3.996.68 6.1.68z'/%3E  %3C/g%3E%3C/svg%3E`,
-    //       serviceUrl: 'http://localhost:3001',
-    //       injectPayload: {
-    //         thumb_media_id: 'ft7IwCi1eukC6lRHzmkYuzeMmVXWbU3JoipysW2EZamblyucA67wdgbYTix4X377',
-    //         author: 'Cherry Markdown',
-    //       },
-    //     }
-    //   ],
-    // },
+    config: {
+      // 地图表格配置 - 支持自定义地图数据源URL
+      mapTable: {
+        sourceUrl: [
+          // 在线高质量地图数据源（优先，已验证可用）
+          'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
+          // 本地备用地图数据（从examples目录的相对路径）
+          './assets/data/china.json'
+        ]
+      },
+      // publish: [
+      //   {
+      //     name: '微信公众号',
+      //     key: 'wechat',
+      //     icon: `data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E  %3Cg fill='none'%3E    %3Cpath fill='%23FFF' d='M0 0h80v80H0z' opacity='0'/%3E    %3Cpath fill='%2307C160' d='M60.962 22.753c-7.601-2.567-18.054-2.99-27.845 4.49-5.423 4.539-9.56 10.715-10.675 18.567-2.958-3.098-5.025-7.995-5.58-11.706-.806-5.403.483-10.82 4.311-15.45C26.906 11.724 34.577 10 39.6 10c9.57.001 18.022 5.882 21.363 12.753zm7.64 11.78c7.516 9.754 5.441 24.73-5.1 32.852-2.618 2.018-5.67 3.198-8.651 4.024a26.067 26.067 0 0 0 5.668-9.54c4.613-13.806-2.868-28.821-16.708-33.536-.3-.102-.601-.191-.903-.282 9.348-3.467 19.704-1.292 25.694 6.482zM39.572 59.37c6.403 0 11.474-1.49 16.264-5.013-.124 1.993-.723 4.392-1.271 5.805-4.509 11.633-17.56 16.676-31.238 12.183C11.433 68.438 4.145 54.492 7.475 42.851c.893-3.12 1.805-5.26 3.518-7.953 1.028 7.504 5.7 14.803 12.511 19.448.518.35.872.932.901 1.605a2.4 2.4 0 0 1-.08.653l-1.143 5.19c-.052.243-.142.499-.13.752.023.56.495.997 1.053.973.22-.01.395-.1.576-.215l6.463-4.143c.486-.312 1.007-.513 1.587-.538a3.03 3.03 0 0 1 .742.067c1.96.438 3.996.68 6.1.68z'/%3E  %3C/g%3E%3C/svg%3E`,
+      //     serviceUrl: 'http://localhost:3001',
+      //     injectPayload: {
+      //       thumb_media_id: 'ft7IwCi1eukC6lRHzmkYuzeMmVXWbU3JoipysW2EZamblyucA67wdgbYTix4X377',
+      //       author: 'Cherry Markdown',
+      //     },
+      //   }
+      // ],
+    },
   },
   drawioIframeUrl: './drawio_demo.html',
   previewer: {
@@ -355,6 +366,9 @@ var basicConfig = {
     changeString2Pinyin: pinyin,
     onClickPreview: (event) => {
       console.log("onClickPreview", event);
+    },
+    afterAsyncRender: (md, html) => {
+      // console.log("afterAsyncRender", md, html);
     },
   },
   editor: {
