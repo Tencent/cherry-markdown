@@ -15,6 +15,7 @@
  */
 import ParagraphBase from '@/core/ParagraphBase';
 import { getTableRule } from '@/utils/regexp';
+import Logger from '@/Logger';
 
 const TABLE_LOOSE = 'loose';
 const TABLE_STRICT = 'strict';
@@ -22,7 +23,7 @@ const TABLE_STRICT = 'strict';
 export default class Table extends ParagraphBase {
   static HOOK_NAME = 'table';
 
-  constructor({ externals, config }) {
+  constructor({ externals, config, cherry }) {
     super({ needCache: true });
     const {
       enableChart,
@@ -47,6 +48,8 @@ export default class Table extends ParagraphBase {
           width: 500,
           height: 300,
           ...chartEngineOptions,
+          // 传递Cherry配置以供地图数据源使用
+          cherryOptions: cherry ? cherry.options : null,
         });
       } catch (error) {
         console.warn(error);
@@ -64,21 +67,26 @@ export default class Table extends ParagraphBase {
   }
 
   $parseChartOptions(cell) {
+    Logger.log('Parsing chart options for cell:', cell);
     // 初始化失败
     if (!this.chartRenderEngine) {
+      Logger.log('Chart render engine not available');
       return null;
     }
     const CHART_REGEX = /^[ ]*:(\w+):(?:[ ]*{(.*?)}[ ]*)?$/;
     if (!CHART_REGEX.test(cell)) {
+      Logger.log('Cell does not match chart regex:', cell);
       return null;
     }
     const match = cell.match(CHART_REGEX);
     const [, chartType, axisOptions] = match;
     const DEFAULT_AXIS_OPTIONS = ['x', 'y'];
-    return {
+    const result = {
       type: chartType,
       options: axisOptions ? axisOptions.split(/\s*,\s*/) : DEFAULT_AXIS_OPTIONS,
     };
+    Logger.log('Parsed chart options:', result);
+    return result;
   }
 
   $parseColumnAlignRules(row) {
@@ -98,7 +106,7 @@ export default class Table extends ParagraphBase {
     return { textAlignRules, COLUMN_ALIGN_MAP };
   }
 
-  $parseTable(lines, sentenceMakeFunc, dataLines) {
+  $parseTable(lines, sentenceMakeFunc, dataLines, originalStr = '') {
     let maxCol = 0;
     const rows = lines.map((line, index) => {
       const cols = line.replace(/\\\|/g, '~CS').split('|');
@@ -167,7 +175,31 @@ export default class Table extends ParagraphBase {
     if (!chartOptions) {
       return tableResult;
     }
-    const chart = this.chartRenderEngine.render(chartOptions.type, chartOptions.options, tableObject);
+    
+    // 检查是否有地图数据源注释（针对地图类型的图表）
+    let enhancedChartOptions = chartOptions;
+    if (chartOptions.type === 'map') {
+      // 在前面的内容中查找 mapDataSource 注释 - 支持更灵活的格式
+      const mapDataSourceRegex = /<!--[\s\S]*?mapDataSource:\s*([^\s>]+)[\s\S]*?-->/i;
+      const match = originalStr.match(mapDataSourceRegex);
+      if (match && match[1]) {
+        const mapDataSource = match[1].trim();
+        Logger.log('从注释中检测到地图数据源:', mapDataSource);
+        enhancedChartOptions = {
+          ...chartOptions,
+          options: {
+            ...chartOptions.options,
+            mapDataSource,
+          },
+        };
+      } else {
+        // 如果没有检测到自定义数据源，记录日志便于调试
+        Logger.log('未检测到自定义地图数据源，使用默认配置');
+        Logger.log('originalStr preview:', originalStr.substring(0, 200));
+      }
+    }
+    
+    const chart = this.chartRenderEngine.render(enhancedChartOptions.type, enhancedChartOptions.options, tableObject);
     const chartHtml = `<figure class="cherry-table-figure">${chart}</figure>`;
     const newSign = `${tableResult.sign}${chartOptionsSign}`;
     return {
@@ -240,7 +272,7 @@ export default class Table extends ParagraphBase {
           .trim()
           .split(/\n/)
           .map((line) => String(line).trim());
-        const { html: table, sign } = this.$parseTable(lines, sentenceMakeFunc, dataLines);
+        const { html: table, sign } = this.$parseTable(lines, sentenceMakeFunc, dataLines, $str);
         return this.getCacheWithSpace(this.pushCache(table, sign, dataLines), match);
       });
     }
@@ -254,7 +286,7 @@ export default class Table extends ParagraphBase {
           .trim()
           .split(/\n/)
           .map((line) => String(line).trim());
-        const { html: table, sign } = this.$parseTable(lines, sentenceMakeFunc, dataLines);
+        const { html: table, sign } = this.$parseTable(lines, sentenceMakeFunc, dataLines, $str);
         return this.getCacheWithSpace(this.pushCache(table, sign, dataLines), match);
       });
     }

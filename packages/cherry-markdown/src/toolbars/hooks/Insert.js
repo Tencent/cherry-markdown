@@ -159,6 +159,26 @@ export default class Insert extends MenuBase {
           '| y | 2 | 4 | 6 |',
           '| z | 7 | 5 | 3 |',
         ].join('\n')}\n\n`;
+      case 'map-table':
+        // 插入带地图的表格
+        return `${selection}\n\n${[
+          '| :map: {name,value} | 数值 |',
+          '| :-: | :-: |',
+          '| 北京 | 100 |',
+          '| 上海 | 200 |',
+          '| 广东 | 300 |',
+          '| 四川 | 150 |',
+          '| 湖南 | 120 |',
+        ].join('\n')}\n\n`;
+      case 'radar-table':
+        // 插入带雷达图的表格
+        return `${selection}\n\n${[
+          '| :radar: {x,y} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |',
+          '| :-: | :-: | :-: | :-: | :-: | :-: |',
+          '| 用户A | 90 | 85 | 75 | 80 | 88 |',
+          '| 用户B | 75 | 90 | 88 | 85 | 78 |',
+          '| 用户C | 85 | 78 | 90 | 88 | 85 |',
+        ].join('\n')}\n\n`;
       case 'headlessTable':
         // 插入没有表头的表格
         // 该表格语法是源于[TAPD](https://tapd.cn) wiki应用里的一种表格语法
