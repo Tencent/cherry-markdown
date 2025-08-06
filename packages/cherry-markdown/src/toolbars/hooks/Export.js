@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { supportsPrint } from '@/utils/export';
 
 export default class Export extends MenuBase {
   constructor($cherry) {
@@ -21,12 +22,18 @@ export default class Export extends MenuBase {
     this.setName('export');
     this.noIcon = true;
     this.updateMarkdown = false;
-    this.subMenuConfig = [
-      { noIcon: true, name: 'exportToPdf', onclick: this.bindSubClick.bind(this, 'pdf') },
+
+    const subMenuConfig = [];
+    if (supportsPrint()) {
+      subMenuConfig.push({ noIcon: true, name: 'exportToPdf', onclick: this.bindSubClick.bind(this, 'pdf') });
+    }
+    subMenuConfig.push(
+      { noIcon: true, name: 'exportToWord', onclick: this.bindSubClick.bind(this, 'word') },
       { noIcon: true, name: 'exportScreenshot', onclick: this.bindSubClick.bind(this, 'screenShot') },
       { noIcon: true, name: 'exportMarkdownFile', onclick: this.bindSubClick.bind(this, 'markdown') },
       { noIcon: true, name: 'exportHTMLFile', onclick: this.bindSubClick.bind(this, 'html') },
-    ];
+    );
+    this.subMenuConfig = subMenuConfig;
   }
 
   onClick(shortKey = '', type) {
