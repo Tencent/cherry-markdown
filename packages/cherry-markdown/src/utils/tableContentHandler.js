@@ -200,11 +200,21 @@ export default class TableHandler {
    * 获取预览区域被点击的table对象，并记录table的顺位
    */
   $collectTableDom() {
-    const list = Array.from(this.previewerDom.querySelectorAll('table.cherry-table'));
+    // 获取所有表格，但过滤掉脚注中的表格
+    const allTables = Array.from(this.previewerDom.querySelectorAll('table.cherry-table'));
+    const mainContentTables = allTables.filter(table => !this.$isNodeInFootnote(table));
+    
     const tableNode = this.$getClosestNode(this.target, 'TABLE');
     if (tableNode === false) {
       return false;
     }
+    
+    // 检查当前点击的表格是否在脚注中
+    if (this.$isNodeInFootnote(tableNode)) {
+      // 脚注中的表格暂不支持编辑
+      return false;
+    }
+    
     const columns = Array.from(this.target.parentElement.childNodes).filter((child) => {
       // 计算列数
       return child.tagName.toLowerCase() === 'td';
@@ -217,8 +227,8 @@ export default class TableHandler {
       tdIndex: Array.from(this.target.parentElement.childNodes).indexOf(this.target),
       trIndex: Array.from(this.target.parentElement.parentElement.childNodes).indexOf(this.target.parentElement),
       isTHead: this.target.parentElement.parentElement.tagName !== 'TBODY',
-      totalTables: list.length,
-      tableIndex: list.indexOf(tableNode),
+      totalTables: mainContentTables.length, // 只计算主内容中的表格
+      tableIndex: mainContentTables.indexOf(tableNode), // 在主内容表格中的索引
       tableText: tableNode.textContent.replace(/[\s]/g, ''),
       columns,
     };
@@ -382,6 +392,21 @@ export default class TableHandler {
     return this.$getClosestNode(node.parentNode, targetNodeName);
   }
 
+  /**
+   * 检查节点是否在脚注中
+   * @param {HTMLElement} node 要检查的节点
+   * @returns {boolean} 如果节点在脚注中返回true
+   */
+  $isNodeInFootnote(node) {
+    let current = node;
+    while (current && current.tagName !== "BODY") {
+      if (current.classList && current.classList.contains("one-footnote")) {
+        return true;
+      }
+      current = current.parentNode;
+    }
+    return false;
+  }
   /**
    * 绘制操作符号
    */
