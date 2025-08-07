@@ -138,8 +138,8 @@ export default class EChartsTableEngine {
     const htmlContent = `
       <div class="cherry-echarts-wrapper" 
            style="width: ${this.options.width}px; height: ${
-             this.options.height
-           }px; min-height: 300px; display: block; position: relative; border: 1px solid #ddd;" 
+      this.options.height
+    }px; min-height: 300px; display: block; position: relative; border: 1px solid #ddd;" 
            id="${chartId}"
            data-chart-type="${type}"
            data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"
@@ -236,7 +236,7 @@ export default class EChartsTableEngine {
     console.log('Radar indicator:', indicator);
     console.log('Radar seriesData:', seriesData);
 
-    const chartOptions = {
+    return {
       backgroundColor: '#fff',
       color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'],
       tooltip: {
@@ -384,22 +384,21 @@ export default class EChartsTableEngine {
         ],
       },
     };
-    return chartOptions;
   }
 
   renderMapChart(tableObject, options) {
     console.log('开始渲染地图图表，选项:', options);
-    
+
     // 检查options中是否有自定义地图数据源
     if (options && options.mapDataSource) {
       console.log('检测到自定义地图数据源:', options.mapDataSource);
-      
+
       // 优先使用用户自定义的地图数据源
       // 如果当前已经有china地图数据，先清除它以确保使用新数据
       if (window.echarts && window.echarts.getMap('china')) {
         console.log('清除现有地图数据以使用自定义地图数据源');
       }
-      
+
       // 立即开始加载自定义地图数据，这会覆盖默认地图数据
       this.$loadCustomMapData(options.mapDataSource, true);
     } else {
@@ -407,7 +406,7 @@ export default class EChartsTableEngine {
       // 只有在没有自定义数据源时才加载默认地图数据
       this.$loadChinaMapData();
     }
-    
+
     // 立即返回地图图表配置
     return this.$renderMapChartCommon(tableObject, options);
   }
@@ -505,16 +504,18 @@ export default class EChartsTableEngine {
     console.log(`正在加载用户自定义地图数据: ${mapUrl}${forceReload ? ' (强制重新加载)' : ''}`);
 
     // 优先加载用户自定义的地图数据，覆盖任何已有的地图数据
-    this.$fetchMapData(mapUrl).then(() => {
-      console.log('用户自定义地图数据加载成功，正在刷新所有地图图表');
-      // 地图数据加载成功后，立即刷新页面中的所有地图图表
-      this.$refreshMapCharts();
-    }).catch((error) => {
-      console.warn(`用户自定义地图数据加载失败 (${mapUrl}):`, error.message);
-      console.warn('自定义地图数据加载失败，回退到默认地图数据');
-      // 如果用户自定义URL失败，回退到默认地图数据
-      this.$loadChinaMapData();
-    });
+    this.$fetchMapData(mapUrl)
+      .then(() => {
+        console.log('用户自定义地图数据加载成功，正在刷新所有地图图表');
+        // 地图数据加载成功后，立即刷新页面中的所有地图图表
+        this.$refreshMapCharts();
+      })
+      .catch((error) => {
+        console.warn(`用户自定义地图数据加载失败 (${mapUrl}):`, error.message);
+        console.warn('自定义地图数据加载失败，回退到默认地图数据');
+        // 如果用户自定义URL失败，回退到默认地图数据
+        this.$loadChinaMapData();
+      });
   }
 
   /**
@@ -694,7 +695,7 @@ export default class EChartsTableEngine {
     console.log('Map data:', mapData);
 
     // 使用 ECharts 内置的中国地图
-    const chartOptions = {
+    return {
       backgroundColor: '#fff',
       title: {
         text: '地图数据分析',
@@ -792,7 +793,6 @@ export default class EChartsTableEngine {
         },
       },
     };
-    return chartOptions;
   }
 
   $renderChartCommon(tableObject, options, type) {
