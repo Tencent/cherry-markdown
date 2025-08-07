@@ -202,19 +202,19 @@ export default class TableHandler {
   $collectTableDom() {
     // 获取所有表格，但过滤掉脚注中的表格
     const allTables = Array.from(this.previewerDom.querySelectorAll('table.cherry-table'));
-    const mainContentTables = allTables.filter(table => !this.$isNodeInFootnote(table));
-    
+    const mainContentTables = allTables.filter((table) => !this.$isNodeInFootnote(table));
+
     const tableNode = this.$getClosestNode(this.target, 'TABLE');
     if (tableNode === false) {
       return false;
     }
-    
+
     // 检查当前点击的表格是否在脚注中
     if (this.$isNodeInFootnote(tableNode)) {
       // 脚注中的表格暂不支持编辑
       return false;
     }
-    
+
     const columns = Array.from(this.target.parentElement.childNodes).filter((child) => {
       // 计算列数
       return child.tagName.toLowerCase() === 'td';
@@ -399,11 +399,11 @@ export default class TableHandler {
    */
   $isNodeInFootnote(node) {
     let current = node;
-    while (current && current.tagName !== "BODY") {
-      if (current.classList && current.classList.contains("one-footnote")) {
+    while (current && current.tagName !== 'BODY') {
+      if (current.classList && current.classList.contains('one-footnote')) {
         return true;
       }
-      current = current.parentNode;
+      current = /** @type {HTMLElement} */ (current.parentNode);
     }
     return false;
   }
