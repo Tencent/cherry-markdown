@@ -91,13 +91,13 @@ export default class EChartsTableEngine {
     let chartOption = {};
     switch (type) {
       case 'bar':
-        chartOption = this.renderBarChart(tableObject, options);
+        chartOption = BarChartHandler.options(tableObject, options);
         break;
       case 'line':
-        chartOption = this.renderLineChart(tableObject, options);
+        chartOption = LineChartHandler.options(tableObject, options);
         break;
       case 'radar':
-        chartOption = this.renderRadarChart(tableObject, options);
+        chartOption = RadarChartHandler.options(tableObject, options);
         break;
       case 'map':
         chartOption = this.renderMapChart(tableObject, options);
@@ -167,203 +167,6 @@ export default class EChartsTableEngine {
     setTimeout(() => initChart(), 50);
 
     return htmlContent;
-  }
-
-  renderBarChart(tableObject, options) {
-    return this.$renderChartCommon(tableObject, options, 'bar');
-  }
-
-  renderLineChart(tableObject, options) {
-    return this.$renderChartCommon(tableObject, options, 'line');
-  }
-
-  renderRadarChart(tableObject, options) {
-    return this.$renderRadarChartCommon(tableObject, options);
-  }
-
-  $renderRadarChartCommon(tableObject, options) {
-    console.log('Rendering radar chart:', tableObject);
-
-    // 构建雷达图指标
-    const indicator = tableObject.header.slice(1).map((header) => {
-      const maxValue = Math.max(
-        ...tableObject.rows.map((row) => {
-          const index = tableObject.header.indexOf(header);
-          const value = parseFloat(row[index].replace(/,/g, '')) || 0;
-          return value;
-        }),
-      );
-      return {
-        name: header,
-        max: Math.ceil(maxValue * 1.2), // 设置最大值为数据最大值的1.2倍，向上取整
-      };
-    });
-
-    const seriesData = tableObject.rows.map((row, index) => ({
-      name: row[0],
-      value: row.slice(1).map((data) => parseFloat(data.replace(/,/g, '')) || 0),
-      areaStyle: {
-        opacity: 0.1 + index * 0.05, // 每个系列有不同的透明度
-      },
-      lineStyle: {
-        width: 2,
-      },
-      itemStyle: {
-        borderWidth: 2,
-      },
-    }));
-
-    console.log('Radar indicator:', indicator);
-    console.log('Radar seriesData:', seriesData);
-
-    return {
-      backgroundColor: '#fff',
-      color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'],
-      tooltip: {
-        trigger: 'item',
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        borderColor: '#999',
-        borderWidth: 1,
-        textStyle: {
-          color: '#fff',
-          fontSize: 12,
-        },
-        formatter(params) {
-          let result = `<div style="margin-bottom:4px;font-weight:bold;">${params.name}</div>`;
-          params.value.forEach(function (value, index) {
-            result += '<div style="margin:2px 0;">';
-            result += `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${params.color};"></span>`;
-            result += `<span style="font-weight:bold;">${indicator[index].name}</span>`;
-            result += `<span style="float:right;margin-left:20px;font-weight:bold;">${value}</span>`;
-            result += '</div>';
-          });
-          return result;
-        },
-        extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
-      },
-      legend: {
-        data: tableObject.rows.map((row) => row[0]),
-        orient: 'horizontal',
-        left: 'center',
-        top: 'bottom',
-        textStyle: {
-          fontSize: 12,
-        },
-        itemWidth: 12,
-        itemHeight: 12,
-        selectedMode: 'multiple',
-        selector: [
-          {
-            type: 'all',
-            title: '全选',
-          },
-          {
-            type: 'inverse',
-            title: '反选',
-          },
-        ],
-      },
-      toolbox: {
-        show: true,
-        orient: 'vertical',
-        left: 'right',
-        top: 'center',
-        feature: {
-          dataView: {
-            show: true,
-            readOnly: false,
-            title: '数据视图',
-            lang: ['数据视图', '关闭', '刷新'],
-          },
-          restore: { show: true, title: '重置' },
-          saveAsImage: {
-            show: true,
-            title: '保存为图片',
-            type: 'png',
-            backgroundColor: '#fff',
-          },
-        },
-        iconStyle: {
-          borderColor: '#999',
-        },
-        emphasis: {
-          iconStyle: {
-            borderColor: '#666',
-          },
-        },
-      },
-      radar: {
-        name: {
-          textStyle: {
-            color: '#333',
-            fontSize: 12,
-            fontWeight: 'bold',
-          },
-          formatter(name) {
-            return name.length > 6 ? `${name.substr(0, 6)}...` : name;
-          },
-        },
-        indicator,
-        radius: '60%',
-        center: ['50%', '50%'],
-        splitNumber: 5,
-        shape: 'polygon',
-        splitArea: {
-          areaStyle: {
-            color: [
-              'rgba(114, 172, 209, 0.2)',
-              'rgba(114, 172, 209, 0.4)',
-              'rgba(114, 172, 209, 0.6)',
-              'rgba(114, 172, 209, 0.8)',
-              'rgba(114, 172, 209, 1)',
-            ].reverse(),
-          },
-        },
-        axisLine: {
-          lineStyle: {
-            color: 'rgba(211, 253, 250, 0.8)',
-          },
-        },
-        splitLine: {
-          lineStyle: {
-            color: 'rgba(211, 253, 250, 0.8)',
-          },
-        },
-      },
-      series: [
-        {
-          name: '雷达图数据',
-          type: 'radar',
-          data: seriesData,
-          emphasis: {
-            lineStyle: {
-              width: 4,
-            },
-            areaStyle: {
-              opacity: 0.3,
-            },
-          },
-          animation: true,
-          animationDuration: 1000,
-          animationEasing: 'elasticOut',
-        },
-      ],
-      graphic: {
-        elements: [
-          {
-            type: 'text',
-            left: 'center',
-            top: '5%',
-            style: {
-              text: '雷达图分析',
-              fontSize: 16,
-              fontWeight: 'bold',
-              fill: '#333',
-            },
-          },
-        ],
-      },
-    };
   }
 
   renderMapChart(tableObject, options) {
@@ -588,318 +391,41 @@ export default class EChartsTableEngine {
       };
     }
 
-    // 省份名称映射表
-    const provinceNameMap = {
-      北京: '北京市',
-      天津: '天津市',
-      上海: '上海市',
-      重庆: '重庆市',
-      河北: '河北省',
-      山西: '山西省',
-      辽宁: '辽宁省',
-      吉林: '吉林省',
-      黑龙江: '黑龙江省',
-      江苏: '江苏省',
-      浙江: '浙江省',
-      安徽: '安徽省',
-      福建: '福建省',
-      江西: '江西省',
-      山东: '山东省',
-      河南: '河南省',
-      湖北: '湖北省',
-      湖南: '湖南省',
-      广东: '广东省',
-      海南: '海南省',
-      四川: '四川省',
-      贵州: '贵州省',
-      云南: '云南省',
-      陕西: '陕西省',
-      甘肃: '甘肃省',
-      青海: '青海省',
-      台湾: '台湾省',
-      内蒙古: '内蒙古自治区',
-      广西: '广西壮族自治区',
-      西藏: '西藏自治区',
-      宁夏: '宁夏回族自治区',
-      新疆: '新疆维吾尔自治区',
-      香港: '香港特别行政区',
-      澳门: '澳门特别行政区',
-    };
-
-    // 名称标准化函数
-    const normalizeProvinceName = (inputName) => {
-      // 移除可能的空格
-      const cleanName = inputName.trim();
-
-      // 直接匹配映射表
-      if (provinceNameMap[cleanName]) {
-        return provinceNameMap[cleanName];
-      }
-
-      // 如果输入已经是完整名称，直接返回
-      if (
-        cleanName.endsWith('市') ||
-        cleanName.endsWith('省') ||
-        cleanName.endsWith('自治区') ||
-        cleanName.endsWith('特别行政区')
-      ) {
-        return cleanName;
-      }
-
-      // 模糊匹配：查找包含输入名称的省份
-      for (const [shortName, fullName] of Object.entries(provinceNameMap)) {
-        if (fullName.includes(cleanName) || cleanName.includes(shortName)) {
-          return fullName;
-        }
-      }
-
-      // 如果都没匹配到，返回原名称
-      console.warn(`Province name not matched: ${inputName}`);
-      return cleanName;
-    };
-
-    // 构建地图数据，使用标准化的省份名称
-    const mapData = tableObject.rows.map((row) => {
-      const originalName = row[0];
-      const standardName = normalizeProvinceName(originalName);
-      const value = parseFloat(row[1].replace(/,/g, '')) || 0;
-
-      console.log(`Name mapping: "${originalName}" -> "${standardName}"`);
-
-      return {
-        name: standardName,
-        value,
-      };
-    });
-
-    console.log('Map data:', mapData);
-
-    // 使用 ECharts 内置的中国地图
-    return {
-      backgroundColor: '#fff',
-      title: {
-        text: '地图数据分析',
-        left: 'center',
-        top: '5%',
-        textStyle: {
-          fontSize: 16,
-          fontWeight: 'bold',
-          color: '#333',
-        },
-      },
-      tooltip: {
-        trigger: 'item',
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        borderColor: '#999',
-        borderWidth: 1,
-        textStyle: {
-          color: '#fff',
-          fontSize: 12,
-        },
-        formatter(params) {
-          return `${params.name}: ${params.value || 0}`;
-        },
-        extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
-      },
-      visualMap: {
-        min: Math.min(...mapData.map((item) => item.value)),
-        max: Math.max(...mapData.map((item) => item.value)),
-        left: 'left',
-        top: 'bottom',
-        text: ['高', '低'],
-        calculable: true,
-        inRange: {
-          color: ['#e0ffff', '#006edd'],
-        },
-        textStyle: {
-          fontSize: 12,
-        },
-      },
-      series: [
-        {
-          name: '地图数据',
-          type: 'map',
-          map: 'china',
-          roam: true,
-          label: {
-            show: true,
-            fontSize: 10,
-          },
-          emphasis: {
-            label: {
-              show: true,
-              fontSize: 12,
-              fontWeight: 'bold',
-            },
-            itemStyle: {
-              areaColor: '#ffefd5',
-            },
-          },
-          data: mapData,
-          itemStyle: {
-            areaColor: '#f5f5f5',
-            borderColor: '#999',
-            borderWidth: 0.5,
-          },
-        },
-      ],
-      toolbox: {
-        show: true,
-        orient: 'vertical',
-        left: 'right',
-        top: 'center',
-        feature: {
-          dataView: {
-            show: true,
-            readOnly: false,
-            title: '数据视图',
-            lang: ['数据视图', '关闭', '刷新'],
-          },
-          restore: { show: true, title: '重置' },
-          saveAsImage: {
-            show: true,
-            title: '保存为图片',
-            type: 'png',
-            backgroundColor: '#fff',
-          },
-        },
-        iconStyle: {
-          borderColor: '#999',
-        },
-        emphasis: {
-          iconStyle: {
-            borderColor: '#666',
-          },
-        },
-      },
-    };
+    return MapChartHandler.options(tableObject, options);
   }
 
-  $renderChartCommon(tableObject, options, type) {
-    console.log('Common chart rendering:', type, tableObject);
-
-    const baseSeries = {
-      bar: {
-        type: 'bar',
-        barWidth: '60%',
-        animation: true,
-        animationDuration: 1000,
-        animationEasing: 'elasticOut',
-        animationDelay(idx) {
-          return idx * 10;
-        },
-        name: '',
-        data: [],
-        emphasis: {
-          focus: 'series',
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)',
-          },
-        },
-        label: {
-          show: false,
-          position: 'top',
-          formatter: '{c}',
-        },
-      },
-      line: {
-        type: 'line',
-        animation: true,
-        animationDuration: 1000,
-        animationEasing: 'elasticOut',
-        animationDelay(idx) {
-          return idx * 10;
-        },
-        name: '',
-        data: [],
-        symbol: 'circle',
-        symbolSize: 8,
-        lineStyle: {
-          width: 3,
-          cap: 'round',
-          join: 'round',
-        },
-        itemStyle: {
-          borderWidth: 2,
-          borderColor: '#fff',
-        },
-        emphasis: {
-          focus: 'series',
-          lineStyle: {
-            width: 5,
-          },
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)',
-            borderWidth: 3,
-          },
-        },
-        smooth: 0.3,
-        markPoint: {
-          data: [
-            { type: 'max', name: '最大值' },
-            { type: 'min', name: '最小值' },
-          ],
-        },
-      },
-    };
-
-    if (!baseSeries[type]) {
-      return {};
+  onDestroy() {
+    if (!this.dom) {
+      return;
     }
+    this.echartsRef.dispose(this.dom);
+  }
+}
 
-    const dataSet = tableObject.rows.reduce(
-      (result, row) => {
-        console.log('Processing row:', row);
-        result.legend.data.push(row[0]);
-        result.series.push({
-          ...baseSeries[type],
-          name: row[0],
-          data: row.slice(1).map((data) => {
-            const num = parseFloat(data.replace(/,/g, ''));
-            console.log('Parsed data:', data, '->', num);
-            return num;
-          }),
-        });
-        return result;
-      },
-      {
-        legend: {
-          data: [],
-          type: 'scroll',
-          orient: 'horizontal',
-          left: 'center',
-          top: 'top',
-          textStyle: {
-            fontSize: 12,
-          },
-          itemWidth: 12,
-          itemHeight: 12,
-          selectedMode: 'multiple',
-          selector: [
-            {
-              type: 'all',
-              title: '全选',
-            },
-            {
-              type: 'inverse',
-              title: '反选',
-            },
-          ],
-        },
-        series: [],
-      },
-    );
-
-    const chartOptions = {
-      ...dataSet,
+const BaseChartHandler = {
+  calData(tableObject) {},
+  tooltipTrigger() {
+    return '';
+  },
+  tooltipFormatter(params) {
+    return '';
+  },
+  tooltipExtra() {
+    return {};
+  },
+  optionsExtra(tableObject, options) {
+    return {};
+  },
+  legendExtra(tableObject) {
+    return {};
+  },
+  options(tableObject, options) {
+    this.calData(tableObject);
+    return {
       backgroundColor: '#fff',
       color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'],
       tooltip: {
-        trigger: 'axis',
+        trigger: this.tooltipTrigger(),
         backgroundColor: 'rgba(0,0,0,0.8)',
         borderColor: '#999',
         borderWidth: 1,
@@ -907,26 +433,8 @@ export default class EChartsTableEngine {
           color: '#fff',
           fontSize: 12,
         },
-        axisPointer: {
-          type: type === 'line' ? 'cross' : 'shadow',
-          label: {
-            backgroundColor: '#6a7985',
-          },
-          crossStyle: {
-            color: '#999',
-          },
-        },
-        formatter(params) {
-          let result = `<div style="margin-bottom:4px;font-weight:bold;">${params[0].axisValueLabel}</div>`;
-          params.forEach(function (item, index) {
-            result += '<div style="margin:2px 0;">';
-            result += `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${item.color};"></span>`;
-            result += `<span style="font-weight:bold;">${item.seriesName}</span>`;
-            result += `<span style="float:right;margin-left:20px;font-weight:bold;">${item.value}</span>`;
-            result += '</div>';
-          });
-          return result;
-        },
+        ...this.tooltipExtra(),
+        formatter: this.tooltipFormatter.bind(this),
         extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
       },
       toolbox: {
@@ -935,21 +443,14 @@ export default class EChartsTableEngine {
         left: 'right',
         top: 'center',
         feature: {
-          mark: { show: true, title: '辅助线开关' },
-          dataView: {
-            show: true,
-            readOnly: false,
-            title: '数据视图',
-            lang: ['数据视图', '关闭', '刷新'],
-          },
-          magicType: {
-            show: true,
-            type: ['line', 'bar'],
-            title: {
-              line: '切换为折线图',
-              bar: '切换为柱状图',
-            },
-          },
+          // magicType: {
+          //   show: true,
+          //   type: ['line', 'bar'],
+          //   title: {
+          //     line: '切换为折线图',
+          //     bar: '切换为柱状图',
+          //   },
+          // },
           restore: { show: true, title: '重置' },
           saveAsImage: {
             show: true,
@@ -967,6 +468,99 @@ export default class EChartsTableEngine {
           },
         },
       },
+      legend: {
+        type: 'scroll',
+        orient: 'horizontal',
+        left: 'center',
+        textStyle: {
+          fontSize: 12,
+        },
+        itemWidth: 12,
+        itemHeight: 12,
+        selectedMode: 'multiple',
+        selector: [
+          {
+            type: 'all',
+            title: '全选',
+          },
+          {
+            type: 'inverse',
+            title: '反选',
+          },
+        ],
+        ...this.legendExtra(tableObject),
+      },
+      // brush: {
+      //   toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'],
+      //   xAxisIndex: 0,
+      // },
+      ...this.optionsExtra(tableObject, options),
+    };
+  },
+};
+
+const AxisBaseChartHandler = {
+  ...BaseChartHandler,
+  calData(tableObject) {
+    this.data = [];
+    this.series = [];
+    tableObject.rows.forEach((row) => {
+      console.log('Processing row:', row);
+      this.data.push(row[0]);
+      this.series.push({
+        ...this.seriesItemOption(),
+        name: row[0],
+        data: row.slice(1).map((data) => {
+          const num = parseFloat(data.replace(/,/g, ''));
+          console.log('Parsed data:', data, '->', num);
+          return num;
+        }),
+      });
+    });
+  },
+  tooltipTrigger() {
+    return 'axis';
+  },
+  tooltipFormatter(params) {
+    let result = `<div style="margin-bottom:4px;font-weight:bold;">${params[0].axisValueLabel}</div>`;
+    params.forEach(function (item, index) {
+      result += '<div style="margin:2px 0;">';
+      result += `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${item.color};"></span>`;
+      result += `<span style="font-weight:bold;">${item.seriesName}</span>`;
+      result += `<span style="float:right;margin-left:20px;font-weight:bold;">${item.value}</span>`;
+      result += '</div>';
+    });
+    return result;
+  },
+  tooltipAxisPointerType() {
+    return '';
+  },
+  tooltipExtra() {
+    return {
+      axisPointer: {
+        type: this.tooltipAxisPointerType(),
+        label: {
+          backgroundColor: '#6a7985',
+        },
+        crossStyle: {
+          color: '#999',
+        },
+      },
+    };
+  },
+  seriesItemOption() {
+    return {};
+  },
+  legendExtra(tableObject) {
+    return {
+      data: this.data,
+      type: 'scroll',
+      top: 'top',
+    };
+  },
+  optionsExtra(tableObject, options) {
+    return {
+      series: this.series,
       xAxis: {
         data: tableObject.header.slice(1),
         type: 'category',
@@ -1015,13 +609,6 @@ export default class EChartsTableEngine {
           color: '#333',
         },
       },
-      grid: {
-        containLabel: true,
-        left: '3%',
-        right: '8%',
-        bottom: '8%',
-        top: '15%',
-      },
       dataZoom: [
         {
           type: 'slider',
@@ -1049,20 +636,365 @@ export default class EChartsTableEngine {
           end: 100,
         },
       ],
-      brush: {
-        toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'],
-        xAxisIndex: 0,
+      grid: {
+        containLabel: true,
+        left: '3%',
+        right: '8%',
+        bottom: '8%',
+        top: '15%',
       },
     };
+  },
+};
 
-    console.log('Final chart options:', chartOptions);
-    return chartOptions;
+const NonAxisBaseChartHandler = {
+  ...BaseChartHandler,
+  tooltipTrigger() {
+    return 'item';
+  },
+};
+
+const LineChartHandler = {
+  ...AxisBaseChartHandler,
+  tooltipAxisPointerType() {
+    return 'cross';
+  },
+  seriesItemOption() {
+    return {
+      type: 'line',
+      animation: true,
+      animationDuration: 1000,
+      animationEasing: 'elasticOut',
+      animationDelay(idx) {
+        return idx * 10;
+      },
+      name: '',
+      data: [],
+      symbol: 'circle',
+      symbolSize: 8,
+      lineStyle: {
+        width: 3,
+        cap: 'round',
+        join: 'round',
+      },
+      itemStyle: {
+        borderWidth: 2,
+        borderColor: '#fff',
+      },
+      emphasis: {
+        focus: 'series',
+        lineStyle: {
+          width: 5,
+        },
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)',
+          borderWidth: 3,
+        },
+      },
+      smooth: 0.3,
+      markPoint: {
+        data: [
+          { type: 'max', name: '最大值' },
+          { type: 'min', name: '最小值' },
+        ],
+      },
+    };
+  },
+};
+
+const BarChartHandler = {
+  ...AxisBaseChartHandler,
+  tooltipAxisPointerType() {
+    return 'shadow';
+  },
+  seriesItemOption() {
+    return {
+      type: 'bar',
+      barWidth: '60%',
+      animation: true,
+      animationDuration: 1000,
+      animationEasing: 'elasticOut',
+      animationDelay(idx) {
+        return idx * 10;
+      },
+      name: '',
+      data: [],
+      emphasis: {
+        focus: 'series',
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)',
+        },
+      },
+      label: {
+        show: false,
+        position: 'top',
+        formatter: '{c}',
+      },
+    };
+  },
+};
+
+const RadarChartHandler = {
+  ...NonAxisBaseChartHandler,
+  calData(tableObject) {
+    this.indicator = tableObject.header.slice(1).map((header) => {
+      const maxValue = Math.max(
+        ...tableObject.rows.map((row) => {
+          const index = tableObject.header.indexOf(header);
+          return parseFloat(row[index].replace(/,/g, '')) || 0;
+        }),
+      );
+      return {
+        name: header,
+        max: Math.ceil(maxValue * 1.2), // 设置最大值为数据最大值的1.2倍，向上取整
+      };
+    });
+    this.seriesData = tableObject.rows.map((row, index) => ({
+      name: row[0],
+      value: row.slice(1).map((data) => parseFloat(data.replace(/,/g, '')) || 0),
+      areaStyle: {
+        opacity: 0.1 + index * 0.05, // 每个系列有不同的透明度
+      },
+      lineStyle: {
+        width: 2,
+      },
+      itemStyle: {
+        borderWidth: 2,
+      },
+    }));
+  },
+  legendExtra(tableObject) {
+    return {
+      data: tableObject.rows.map((row) => row[0]),
+      top: 'bottom',
+    };
+  },
+  optionsExtra(tableObject, options) {
+    return {
+      radar: {
+        name: {
+          textStyle: {
+            color: '#333',
+            fontSize: 12,
+            fontWeight: 'bold',
+          },
+          formatter(name) {
+            return name.length > 6 ? `${name.substr(0, 6)}...` : name;
+          },
+        },
+        indicator: this.indicator,
+        radius: '60%',
+        center: ['50%', '50%'],
+        splitNumber: 5,
+        shape: 'polygon',
+        splitArea: {
+          areaStyle: {
+            color: [
+              'rgba(114, 172, 209, 0.2)',
+              'rgba(114, 172, 209, 0.4)',
+              'rgba(114, 172, 209, 0.6)',
+              'rgba(114, 172, 209, 0.8)',
+              'rgba(114, 172, 209, 1)',
+            ].reverse(),
+          },
+        },
+        axisLine: {
+          lineStyle: {
+            color: 'rgba(211, 253, 250, 0.8)',
+          },
+        },
+        splitLine: {
+          lineStyle: {
+            color: 'rgba(211, 253, 250, 0.8)',
+          },
+        },
+      },
+      series: [
+        {
+          name: '雷达图数据',
+          type: 'radar',
+          data: this.seriesData,
+          emphasis: {
+            lineStyle: {
+              width: 4,
+            },
+            areaStyle: {
+              opacity: 0.3,
+            },
+          },
+          animation: true,
+          animationDuration: 1000,
+          animationEasing: 'elasticOut',
+        },
+      ],
+      graphic: {
+        elements: [
+          {
+            type: 'text',
+            left: 'center',
+            top: '5%',
+            style: {
+              // text: '雷达图分析',
+              fontSize: 16,
+              fontWeight: 'bold',
+              fill: '#333',
+            },
+          },
+        ],
+      },
+    };
+  },
+  tooltipFormatter(params) {
+    console.log('radar params:', params);
+    let result = `<div style="margin-bottom:4px;font-weight:bold;">${params.name}</div>`;
+    params.value.forEach((value, index) => {
+      result += '<div style="margin:2px 0;">';
+      result += `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${params.color};"></span>`;
+      result += `<span style="font-weight:bold;">${this.indicator[index].name}</span>`;
+      result += `<span style="float:right;margin-left:20px;font-weight:bold;">${value}</span>`;
+      result += '</div>';
+    });
+    return result;
+  },
+};
+
+const MapChartHandler = {
+  ...NonAxisBaseChartHandler,
+  calData(tableObject) {
+    this.mapData = tableObject.rows.map((row) => {
+      const originalName = row[0];
+      const standardName = normalizeProvinceName(originalName);
+      const value = parseFloat(row[1].replace(/,/g, '')) || 0;
+
+      console.log(`Name mapping: "${originalName}" -> "${standardName}"`);
+
+      return {
+        name: standardName,
+        value,
+      };
+    });
+  },
+  tooltipFormatter(params) {
+    return `${params.name}: ${params.value || 0}`;
+  },
+  optionsExtra() {
+    return {
+      visualMap: {
+        min: Math.min(...this.mapData.map((item) => item.value)),
+        max: Math.max(...this.mapData.map((item) => item.value)),
+        left: 'left',
+        top: 'bottom',
+        text: ['高', '低'],
+        calculable: true,
+        inRange: {
+          color: ['#e0ffff', '#006edd'],
+        },
+        textStyle: {
+          fontSize: 12,
+        },
+      },
+      series: [
+        {
+          name: '地图数据',
+          type: 'map',
+          map: 'china',
+          roam: true,
+          label: {
+            show: true,
+            fontSize: 10,
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 12,
+              fontWeight: 'bold',
+            },
+            itemStyle: {
+              areaColor: '#ffefd5',
+            },
+          },
+          data: this.mapData,
+          itemStyle: {
+            areaColor: '#f5f5f5',
+            borderColor: '#999',
+            borderWidth: 0.5,
+          },
+        },
+      ],
+    };
+  },
+};
+
+// 省份名称映射表
+const provinceNameMap = {
+  北京: '北京市',
+  天津: '天津市',
+  上海: '上海市',
+  重庆: '重庆市',
+  河北: '河北省',
+  山西: '山西省',
+  辽宁: '辽宁省',
+  吉林: '吉林省',
+  黑龙江: '黑龙江省',
+  江苏: '江苏省',
+  浙江: '浙江省',
+  安徽: '安徽省',
+  福建: '福建省',
+  江西: '江西省',
+  山东: '山东省',
+  河南: '河南省',
+  湖北: '湖北省',
+  湖南: '湖南省',
+  广东: '广东省',
+  海南: '海南省',
+  四川: '四川省',
+  贵州: '贵州省',
+  云南: '云南省',
+  陕西: '陕西省',
+  甘肃: '甘肃省',
+  青海: '青海省',
+  台湾: '台湾省',
+  内蒙古: '内蒙古自治区',
+  广西: '广西壮族自治区',
+  西藏: '西藏自治区',
+  宁夏: '宁夏回族自治区',
+  新疆: '新疆维吾尔自治区',
+  香港: '香港特别行政区',
+  澳门: '澳门特别行政区',
+};
+
+// 名称标准化函数
+const normalizeProvinceName = (inputName) => {
+  // 移除可能的空格
+  const cleanName = inputName.trim();
+
+  // 直接匹配映射表
+  if (provinceNameMap[cleanName]) {
+    return provinceNameMap[cleanName];
   }
 
-  onDestroy() {
-    if (!this.dom) {
-      return;
+  // 如果输入已经是完整名称，直接返回
+  if (
+    cleanName.endsWith('市') ||
+    cleanName.endsWith('省') ||
+    cleanName.endsWith('自治区') ||
+    cleanName.endsWith('特别行政区')
+  ) {
+    return cleanName;
+  }
+
+  // 模糊匹配：查找包含输入名称的省份
+  for (const [shortName, fullName] of Object.entries(provinceNameMap)) {
+    if (fullName.includes(cleanName) || cleanName.includes(shortName)) {
+      return fullName;
     }
-    this.echartsRef.dispose(this.dom);
   }
-}
+
+  // 如果都没匹配到，返回原名称
+  console.warn(`Province name not matched: ${inputName}`);
+  return cleanName;
+};
