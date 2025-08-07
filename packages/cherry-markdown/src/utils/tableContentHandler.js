@@ -354,19 +354,25 @@ export default class TableHandler {
     this.tableEditor.editorDom.inputDom.style.fontSize = tdStyle.fontSize || '16px';
     this.tableEditor.editorDom.inputDom.style.fontFamily = tdStyle.fontFamily;
     this.tableEditor.editorDom.inputDom.style.lineHeight = tdStyle.lineHeight;
-    this.tableEditor.editorDom.inputDom.style.padding = tdStyle.padding;
+    // 设置垂直居中的padding
+    const tdHeight = this.tableEditor.info.tdNode.offsetHeight;
+    const fontSize = parseInt(tdStyle.fontSize) || 16;
+    const verticalPadding = Math.max(0, (tdHeight - fontSize * 1.6) / 2);
+    this.tableEditor.editorDom.inputDom.style.paddingTop = `${verticalPadding}px`;
+    this.tableEditor.editorDom.inputDom.style.paddingBottom = `${verticalPadding}px`;
     // 左对齐的时候，paddingRight设置成0，反之paddingLeft设置成0
     if (/left/.test(tdStyle.textAlign)) {
+      this.tableEditor.editorDom.inputDom.style.paddingLeft = tdStyle.paddingLeft;
       this.tableEditor.editorDom.inputDom.style.paddingRight = '0px';
     }
     if (/right/.test(tdStyle.textAlign)) {
       this.tableEditor.editorDom.inputDom.style.paddingLeft = '0px';
+      this.tableEditor.editorDom.inputDom.style.paddingRight = tdStyle.paddingRight;
     }
     if (/center/.test(tdStyle.textAlign)) {
       this.tableEditor.editorDom.inputDom.style.paddingLeft = '0px';
       this.tableEditor.editorDom.inputDom.style.paddingRight = '0px';
     }
-    this.tableEditor.editorDom.inputDom.style.paddingBottom = '0px';
   }
 
   $getClosestNode(node, targetNodeName) {
