@@ -7,27 +7,7 @@
  * All Tencent Modifications are Copyright (C) Tencent.
  *
  * CherryMarkdown is licensed under the Apache License, Version 2.0 (the "License");
- * you may not          select: {
-            label: {
-              show: true,
-              color: '#fff',
-            },
-            itemStyle: {
-              areaColor: '#6495ED',
-            },
-          },
-          label: {
-            show: false,
-            fontSize: 10,
-            color: '#333',
-          },
-          itemStyle: {
-            borderColor: '#fff',
-            borderWidth: 0.5,
-            areaColor: '#ADD8E6',
-          },
-        },
-      ],t in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
