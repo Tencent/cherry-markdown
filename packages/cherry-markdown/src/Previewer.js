@@ -21,7 +21,7 @@ import { getBlockTopAndHeightWithMargin } from './utils/dom';
 import Logger from './Logger';
 // import locale from './utils/locale';
 import { addEvent, removeEvent } from './utils/event';
-import { exportPDF, exportScreenShot, exportMarkdownFile, exportHTMLFile } from './utils/export';
+import { exportPDF, exportScreenShot, exportMarkdownFile, exportHTMLFile, exportWordFile } from './utils/export';
 import PreviewerBubble from './toolbars/PreviewerBubble';
 import LazyLoadImg from '@/utils/lazyLoadImg';
 
@@ -647,7 +647,7 @@ export default class Previewer {
               oldContent[change.oldIndex].dom
                 .querySelector('.cherry-table-figure')
                 .replaceWith(newContent[change.newIndex].dom.querySelector('.cherry-table-figure'));
-              oldContent[change.oldIndex].dom.dataset.sign = newContent[change.oldIndex].dom.dataset.sign;
+              oldContent[change.oldIndex].dom.dataset.sign = newContent[change.newIndex].dom.dataset.sign;
               this.$updateDom(
                 newContent[change.newIndex].dom.querySelector('.cherry-table'),
                 oldContent[change.oldIndex].dom.querySelector('.cherry-table'),
@@ -1141,8 +1141,8 @@ export default class Previewer {
   /**
    * 导出预览区域内容
    * @public
-   * @param {'pdf' | 'img' | 'screenShot' | 'markdown' | 'html'} [type='pdf']
-   * 'pdf'：导出成pdf文件; 'img' | screenShot：导出成png图片; 'markdown'：导出成markdown文件; 'html'：导出成html文件;
+   * @param {'pdf' | 'img' | 'screenShot' | 'markdown' | 'html' | 'word'} [type='pdf']
+   * 'pdf'：导出成pdf文件; 'img' | screenShot：导出成png图片; 'markdown'：导出成markdown文件; 'html'：导出成html文件; 'word'：导出成word文件;
    * @param {string} [fileName] 导出文件名
    */
   export(type = 'pdf', fileName = '') {
@@ -1151,6 +1151,8 @@ export default class Previewer {
       exportPDF(this.getDomContainer(), name);
     } else if (type === 'screenShot' || type === 'img') {
       exportScreenShot(this.getDomContainer(), name);
+    } else if (type === 'word') {
+      exportWordFile(this.getDomContainer(), name);
     } else if (type === 'markdown') {
       exportMarkdownFile(this.$cherry.getMarkdown(), name);
     } else if (type === 'html') {
