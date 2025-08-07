@@ -120,17 +120,33 @@ export function exportScreenShot(previewDom, fileName) {
       /class="cherry-code-unExpand("| )/g,
       'class="cherry-code-expand$1',
     );
+
+    // 设置元素样式以确保完整渲染
+    cherryPreviewer.style.position = 'relative';
+    cherryPreviewer.style.overflow = 'visible';
+    cherryPreviewer.style.height = 'auto';
+    cherryPreviewer.style.maxHeight = 'none';
+
     html2canvas(cherryPreviewer, {
       allowTaint: true,
-      height: cherryPreviewer.clientHeight,
+      useCORS: true,
+      scale: 2, // 提高图片质量
+      height: cherryPreviewer.scrollHeight,
       width: cherryPreviewer.clientWidth,
       scrollY: 0,
       scrollX: 0,
-    }).then((canvas) => {
-      const imgData = canvas.toDataURL('image/jpeg');
-      fileDownload(imgData, fileName);
-      thenFinish();
-    });
+      logging: false,
+      backgroundColor: '#ffffff',
+    })
+      .then((canvas) => {
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        fileDownload(imgData, fileName);
+        thenFinish();
+      })
+      .catch((error) => {
+        console.error('导出长图失败:', error);
+        thenFinish();
+      });
   });
 }
 
@@ -175,12 +191,12 @@ export function exportWordFile(previewDom, fileName) {
   getReadyToExport(previewDom, (/** @type {HTMLElement}*/ cherryPreviewer, /** @type {function}*/ thenFinish) => {
     // 创建Word兼容的HTML内容
     const wordCompatibleHTML = createWordCompatibleHTML(cherryPreviewer, fileName);
-    
+
     // 使用Blob创建Word文件
     const blob = new Blob([wordCompatibleHTML], {
       type: 'application/msword;charset=utf-8',
     });
-    
+
     // 创建下载链接
     const aLink = document.createElement('a');
     aLink.style.display = 'none';
@@ -189,7 +205,7 @@ export function exportWordFile(previewDom, fileName) {
     document.body.appendChild(aLink);
     aLink.click();
     document.body.removeChild(aLink);
-    
+
     thenFinish();
   });
 }
@@ -198,19 +214,6 @@ export function exportWordFile(previewDom, fileName) {
  * 创建Word兼容的HTML内容
  */
 function createWordCompatibleHTML(cherryPreviewer, fileName) {
-  // 获取当前页面的样式
-  const styles = Array.from(document.styleSheets)
-    .map(styleSheet => {
-      try {
-        return Array.from(styleSheet.cssRules)
-          .map(rule => rule.cssText)
-          .join('\n');
-      } catch (e) {
-        return '';
-      }
-    })
-    .join('\n');
-
   // Word兼容的HTML模板
   return `
 <html xmlns:o='urn:schemas-microsoft-com:office:office' 
@@ -351,21 +354,23 @@ function createWordCompatibleHTML(cherryPreviewer, fileName) {
  * 清理HTML内容，使其更适合Word
  */
 function cleanHTMLForWord(html) {
-  return html
-    // 移除Cherry特有的类和属性
-    .replace(/class="cherry-[^"]*"/g, '')
-    .replace(/data-[^=]*="[^"]*"/g, '')
-    // 强制展开所有手风琴
-    .replace(/<details([^>]*)>/g, '<details$1 open>')
-    // 清理代码块，确保内容可见
-    .replace(/class="cherry-code-unExpand"/g, 'class="cherry-code-expand"')
-    // 移除多余的空行
-    .replace(/\n\s*\n\s*\n/g, '\n\n')
-    // 确保图片有alt属性
-    .replace(/<img([^>]*?)>/g, (match, attrs) => {
-      if (!attrs.includes('alt=')) {
-        return `<img${attrs} alt="图片">`;
-      }
-      return match;
-    });
+  return (
+    html
+      // 移除Cherry特有的类和属性
+      .replace(/class="cherry-[^"]*"/g, '')
+      .replace(/data-[^=]*="[^"]*"/g, '')
+      // 强制展开所有手风琴
+      .replace(/<details([^>]*)>/g, '<details$1 open>')
+      // 清理代码块，确保内容可见
+      .replace(/class="cherry-code-unExpand"/g, 'class="cherry-code-expand"')
+      // 移除多余的空行
+      .replace(/\n\s*\n\s*\n/g, '\n\n')
+      // 确保图片有alt属性
+      .replace(/<img([^>]*?)>/g, (match, attrs) => {
+        if (!attrs.includes('alt=')) {
+          return `<img${attrs} alt="图片">`;
+        }
+        return match;
+      })
+  );
 }
