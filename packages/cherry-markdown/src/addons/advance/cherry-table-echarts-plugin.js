@@ -163,6 +163,10 @@ export default class EChartsTableEngine {
           const myChart = this.echartsRef.init(container);
           console.log('Chart initialized successfully:', chartId);
           myChart.setOption(chartOption);
+          // 为热力图和饼图添加点击高亮效果
+          if (type === 'heatmap' || type === 'pie') {
+            this.addClickHighlightEffect(myChart, type);
+          }
         } catch (error) {
           console.error('Failed to render chart:', error);
           console.error('Chart options:', chartOption);
@@ -424,7 +428,7 @@ export default class EChartsTableEngine {
     const chartOptions = {
       backgroundColor: '#fff',
       tooltip: {
-        position: 'top',
+        trigger: 'item',
         backgroundColor: 'rgba(0,0,0,0.8)',
         borderColor: '#999',
         borderWidth: 1,
@@ -502,13 +506,52 @@ export default class EChartsTableEngine {
             itemStyle: {
               shadowBlur: 10,
               shadowColor: 'rgba(0, 0, 0, 0.5)',
+              borderWidth: 2,
+              borderColor: '#ff6b6b',
             },
           },
+          select: {
+            itemStyle: {
+              borderWidth: 2,
+              borderColor: '#ff6b6b',
+              opacity: 1,
+            },
+          },
+          selectedMode: 'single',
           animation: true,
           animationDuration: 1000,
           animationEasing: 'cubicOut',
         },
       ],
+      toolbox: {
+        show: true,
+        orient: 'vertical',
+        left: 'right',
+        top: 'bottom',
+        feature: {
+          dataView: {
+            show: true,
+            readOnly: false,
+            title: '数据视图',
+            lang: ['数据视图', '关闭', '刷新'],
+          },
+          restore: { show: true, title: '重置' },
+          saveAsImage: {
+            show: true,
+            title: '保存为图片',
+            type: 'png',
+            backgroundColor: '#fff',
+          },
+        },
+        iconStyle: {
+          borderColor: '#999',
+        },
+        emphasis: {
+          iconStyle: {
+            borderColor: '#666',
+          },
+        },
+      },
     };
     return chartOptions;
   }
@@ -549,7 +592,7 @@ export default class EChartsTableEngine {
           name: '数据分布',
           type: 'pie',
           radius: ['40%', '70%'],
-          center: ['60%', '50%'],
+          center: ['50%', '50%'],
           avoidLabelOverlap: false,
           label: {
             show: false,
@@ -565,8 +608,18 @@ export default class EChartsTableEngine {
               shadowBlur: 10,
               shadowOffsetX: 0,
               shadowColor: 'rgba(0, 0, 0, 0.5)',
+              borderWidth: 3,
+              borderColor: '#ff6b6b',
             },
           },
+          select: {
+            itemStyle: {
+              borderWidth: 3,
+              borderColor: '#ff6b6b',
+              opacity: 1,
+            },
+          },
+          selectedMode: 'single',
           labelLine: {
             show: false,
           },
@@ -576,6 +629,35 @@ export default class EChartsTableEngine {
           animationEasing: 'cubicOut',
         },
       ],
+      toolbox: {
+        show: true,
+        orient: 'vertical',
+        left: 'right',
+        top: 'center',
+        feature: {
+          dataView: {
+            show: true,
+            readOnly: false,
+            title: '数据视图',
+            lang: ['数据视图', '关闭', '刷新'],
+          },
+          restore: { show: true, title: '重置' },
+          saveAsImage: {
+            show: true,
+            title: '保存为图片',
+            type: 'png',
+            backgroundColor: '#fff',
+          },
+        },
+        iconStyle: {
+          borderColor: '#999',
+        },
+        emphasis: {
+          iconStyle: {
+            borderColor: '#666',
+          },
+        },
+      },
     };
     return chartOptions;
   }
@@ -1272,6 +1354,47 @@ export default class EChartsTableEngine {
 
     console.log('Final chart options:', chartOptions);
     return chartOptions;
+  }
+
+  // 添加点击高亮效果
+  addClickHighlightEffect(chartInstance, chartType) {
+    let selectedDataIndex = null;
+    chartInstance.on('click', (params) => {
+      console.log('Chart clicked:', params);
+      // 如果点击的是同一个数据项，则取消高亮
+      if (selectedDataIndex === params.dataIndex) {
+        selectedDataIndex = null;
+        this.clearHighlight(chartInstance, chartType);
+        return;
+      }
+      // 记录当前选中的数据项
+      selectedDataIndex = params.dataIndex;
+    });
+  }
+  // 清除高亮效果
+  clearHighlight(chartInstance, chartType) {
+    // 取消ECharts内置的高亮
+    chartInstance.dispatchAction({
+      type: 'downplay',
+      seriesIndex: 0,
+    });
+    // 恢复所有数据项的原始样式
+    const option = chartInstance.getOption();
+    const seriesData = option.series[0].data;
+    seriesData.forEach((item) => {
+      if (item.itemStyle) {
+        delete item.itemStyle.opacity;
+        delete item.itemStyle.borderWidth;
+        delete item.itemStyle.borderColor;
+      }
+    });
+    chartInstance.setOption({
+      series: [
+        {
+          data: seriesData,
+        },
+      ],
+    });
   }
 
   onDestroy() {
