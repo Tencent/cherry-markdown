@@ -1,27 +1,26 @@
 // 表格预览区工具栏增强样式
-// 针对 cherry-table-container 和 cherry-highlight-line 的现代化样式优化
 
 .cherry-table-container {
   position: relative;
   max-width: 100%;
   overflow-x: auto;
-  border-radius: var(--radius-lg, 8px);
-  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
-  background: var(--base-bg, #fff);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  background: var(--base-editor-bg);
+  transition: var(--shortcut-panel-transition, all 0.2s);
   padding: 0;
   margin: 0;
   
   // 悬浮效果
   &:hover {
-    box-shadow: var(--shadow-lg, 0 10px 25px rgba(0, 0, 0, 0.15));
+    box-shadow: var(--shadow-lg);
     transform: translateY(-1px);
   }
   
   // 高亮行动画效果增强
   &.cherry-highlight-line {
     animation: modernHighlight 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 0 0 2px var(--primary-color, #3582fb), var(--shadow-lg, 0 10px 25px rgba(0, 0, 0, 0.15));
+    box-shadow: 0 0 0 2px var(--primary-color), var(--shadow-lg);
   }
   
   // 表格样式优化
@@ -33,59 +32,49 @@
     margin: 0;
     
     th, td {
-      border: 1px solid var(--md-table-border, #e1e5e9);
-      padding: 16px 20px;
+      border: var(--border-width-1) solid var(--md-table-border);
+      padding: var(--spacing-lg) var(--spacing-xl);
       min-width: 120px;
       position: relative;
-      transition: all 0.2s ease;
+      transition: var(--shortcut-panel-transition, all 0.2s);
       vertical-align: middle;
-      line-height: 1.6;
+      line-height: var(--line-height-relaxed);
     }
     
     // 表头样式增强
     thead tr:first-child {
       th:first-child {
-        border-top-left-radius: var(--radius-md, 6px);
+        border-top-left-radius: var(--radius-md);
       }
       th:last-child {
-        border-top-right-radius: var(--radius-md, 6px);
+        border-top-right-radius: var(--radius-md);
       }
     }
     
     th {
       white-space: nowrap;
-      background: linear-gradient(135deg, 
-        var(--md-inline-code-bg, #f6f8fa) 0%, 
-        color-mix(in srgb, var(--md-inline-code-bg, #f6f8fa) 95%, var(--primary-color, #3582fb) 5%) 100%);
-      font-weight: 600;
-      font-size: 14px;
-      color: var(--base-font-color, #24292f);
-      border-bottom: 2px solid var(--primary-color, #3582fb);
-      height: 48px;
+      background: var(--secondary-color);
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-sm);
+      color: var(--primary-color);
+      border-bottom: var(--border-width-2) solid var(--primary-color);
+      height: var(--height-toolbar);
     }
     
     // 表格行样式
     tbody tr {
-      transition: all 0.2s ease;
-      
-      &:hover {
-        background: color-mix(in srgb, var(--primary-color, #3582fb) 5%, transparent);
-        
-        td {
-          border-color: var(--primary-color, #3582fb);
-        }
-      }
+      transition: var(--shortcut-panel-transition, all 0.2s);
       
       &:last-child {
         td {
-          border-bottom: 1px solid var(--md-table-border, #e1e5e9);
+          border-bottom: var(--border-width-1) solid var(--md-table-border);
           
           &:first-child {
-            border-bottom-left-radius: var(--radius-md, 6px);
+            border-bottom-left-radius: var(--radius-md);
           }
           
           &:last-child {
-            border-bottom-right-radius: var(--radius-md, 6px);
+            border-bottom-right-radius: var(--radius-md);
           }
         }
       }
@@ -93,9 +82,43 @@
     
     // 表格数据单元格
     td {
-      background: var(--base-bg, #fff);
-      font-size: 13px;
-      line-height: 1.8;
+      background: var(--base-editor-bg);
+      font-size: var(--font-size-xs);
+      line-height: var(--line-height-loose);
+      position: relative;
+      cursor: pointer;
+      color: var(--base-font-color);
+      
+      // 悬浮编辑提示 - 使用表格专用悬浮样式
+      &:hover {
+        background: var(--table-cell-hover-bg);
+        color: var(--dropdown-item-hover-color);
+        
+        &::after {
+          content: '点击编辑';
+          position: absolute;
+          top: 50%;
+          right: var(--spacing-sm);
+          transform: translateY(-50%);
+          font-size: var(--font-size-xs);
+          color: var(--primary-color);
+          opacity: var(--opacity-75);
+          pointer-events: none;
+          animation: editHintFadeIn 0.3s ease;
+        }
+      }
+      
+      // 编辑状态下的单元格 - 使用激活状态样式
+      &.editing {
+        background: var(--dropdown-item-active-bg) !important;
+        color: var(--dropdown-item-active-color) !important;
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 var(--border-width-2) var(--secondary-color);
+
+        &::after {
+          display: none;
+        }
+      }
       
       // 数字单元格右对齐
       &[data-type="number"] {
@@ -103,27 +126,39 @@
         font-variant-numeric: tabular-nums;
       }
     }
-  }
-
-  // ECharts 工具栏样式增强
-  .echarts-toolbox {
-    .echarts-toolbox-feature {
-      background: var(--toolbar-bg, #fff);
-      border: 1px solid var(--toolbar-border, #e1e5e9);
-      border-radius: var(--radius-sm, 4px);
-      box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
-      transition: all 0.2s ease;
+    
+    // 表头单元格悬浮效果
+    th {
+      cursor: pointer;
       
       &:hover {
-        background: var(--toolbar-btn-hover-bg, #f6f8fa);
-        border-color: var(--primary-color, #3582fb);
-        box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.15));
+        background: var(--dropdown-item-active-bg);
+        color: var(--dropdown-item-active-color);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm);
+      }
+    }
+  }
+
+  // ECharts 工具栏样式增强 - 参考工具栏按钮样式
+  .echarts-toolbox {
+    .echarts-toolbox-feature {
+      background: var(--toolbar-bg);
+      border: var(--border-width-1) solid var(--toolbar-border);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+      transition: var(--shortcut-panel-transition, all 0.2s);
+      
+      &:hover {
+        background: var(--toolbar-btn-hover-bg);
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-md);
         transform: translateY(-1px);
       }
       
       &:active {
         transform: translateY(0);
-        box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
+        box-shadow: var(--shadow-sm);
       }
     }
   }
@@ -145,112 +180,21 @@
   }
 }
 
-// 主题适配
-.cherry {
-  // 默认主题
-  &.theme__default {
-    .cherry-table-container {
-      --table-primary-color: #0969da;
-      --table-bg-hover: rgba(9, 105, 218, 0.05);
-      --table-border-hover: #0969da;
-    }
-  }
-  
-  // 暗色主题
-  &.theme__dark {
-    .cherry-table-container {
-      --table-primary-color: #58a6ff;
-      --table-bg-hover: rgba(88, 166, 255, 0.1);
-      --table-border-hover: #58a6ff;
-      
-      .cherry-table {
-        th {
-          background: linear-gradient(135deg, 
-            var(--md-inline-code-bg, #21262d) 0%, 
-            color-mix(in srgb, var(--md-inline-code-bg, #21262d) 95%, var(--table-primary-color) 5%) 100%);
-          color: #f0f6fc !important; // 增强表头文字对比度
-        }
-        
-        td {
-          color: #e6edf3 !important; // 增强表格内容文字对比度
-          background: var(--base-editor-bg, #0d1117) !important;
-        }
-        
-        tbody tr:hover {
-          background: var(--table-bg-hover);
-          
-          td {
-            border-color: var(--table-border-hover);
-            color: #ffffff !important; // 悬浮时进一步增强对比度
-          }
-        }
-      }
-    }
-  }
-  
-  // 深海主题
-  &.theme__abyss {
-    .cherry-table-container {
-      --table-primary-color: #8394AD;
-      --table-bg-hover: rgba(131, 148, 173, 0.15);
-      --table-border-hover: #8394AD;
-      
-      .cherry-table {
-        th {
-          background: linear-gradient(135deg, 
-            var(--md-inline-code-bg, #00203d) 0%, 
-            color-mix(in srgb, var(--md-inline-code-bg, #00203d) 95%, var(--table-primary-color) 5%) 100%);
-          color: #FFFFFF !important; // 深海主题表头使用白色文字
-          border-bottom-color: var(--table-primary-color);
-        }
-        
-        td {
-          color: #CECFCF !important; // 深海主题表格内容使用浅灰色文字
-          background: var(--base-editor-bg, #1E222A) !important;
-          border-color: var(--md-table-border, #8394AD);
-        }
-        
-        tbody tr:hover {
-          background: var(--table-bg-hover);
-          
-          td {
-            border-color: var(--table-border-hover);
-            color: #FFFFFF !important; // 悬浮时使用白色文字
-          }
-        }
-      }
-    }
-  }
-  
-  // 绿色主题
-  &.theme__green {
-    .cherry-table-container {
-      --table-primary-color: #2da44e;
-      --table-bg-hover: rgba(45, 164, 78, 0.05);
-      --table-border-hover: #2da44e;
-    }
-  }
-  
-  // 蓝色主题
-  &.theme__blue {
-    .cherry-table-container {
-      --table-primary-color: #0969da;
-      --table-bg-hover: rgba(9, 105, 218, 0.05);
-      --table-border-hover: #0969da;
-    }
-  }
-}
-
 // 响应式设计
 @media (max-width: 768px) {
   .cherry-table-container {
     border-radius: var(--radius-sm, 4px);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     
     .cherry-table {
+      min-width: 600px;
+      font-size: var(--font-size-sm);
+      
       th, td {
-        padding: 8px 12px;
+        padding: var(--spacing-sm) var(--spacing-md);
         min-width: 80px;
-        font-size: 12px;
+        white-space: nowrap;
       }
     }
   }
@@ -260,7 +204,7 @@
 @media print {
   .cherry-table-container {
     box-shadow: none;
-    border: 1px solid #000;
+    border: var(--border-width-1) solid #000;
     
     &:hover {
       transform: none;
@@ -270,6 +214,15 @@
     .cherry-table {
       th, td {
         border-color: #000;
+        background: white !important;
+        color: black !important;
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-xs) var(--spacing-sm);
+      }
+      
+      th {
+        background: #f0f0f0 !important;
+        font-weight: var(--font-weight-bold);
       }
     }
   }
@@ -280,11 +233,24 @@
   .cherry-table-container {
     .cherry-table {
       th, td {
-        border-width: 2px;
+        border-width: var(--border-width-2);
+        border-color: var(--high-contrast-border, #000);
       }
       
       th {
-        font-weight: 700;
+        background: var(--high-contrast-bg, #000);
+        color: var(--high-contrast-text, #fff);
+        font-weight: var(--font-weight-bold);
+      }
+      
+      td {
+        background: var(--high-contrast-content-bg, #fff);
+        color: var(--high-contrast-content-text, #000);
+      }
+      
+      td:hover {
+        background: var(--high-contrast-hover-bg, #f0f0f0);
+        border-color: var(--high-contrast-border, #000);
       }
     }
   }
@@ -321,10 +287,89 @@
   }
 }
 
+// 表格编辑交互动画
+@keyframes editBoxFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes editIndicatorPulse {
+  0%, 100% {
+    opacity: var(--opacity-60);
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes editHintFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(var(--spacing-sm));
+  }
+  to {
+    opacity: var(--opacity-70);
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+@keyframes tableEditHighlight {
+  0% {
+    background-color: var(--primary-color);
+    transform: scale(1.02);
+  }
+  50% {
+    background-color: var(--table-cell-hover-bg);
+    transform: scale(1.01);
+  }
+  100% {
+    background-color: transparent;
+    transform: scale(1);
+  }
+}
+
+@keyframes tableCellFocus {
+  0% {
+    box-shadow: 0 0 0 var(--border-width-2) var(--primary-color);
+  }
+  100% {
+    box-shadow: 0 0 0 var(--border-width-1) var(--primary-color);
+  }
+}
+
 // 表格编辑输入框样式优化
 .cherry-previewer-table-content-handler__input {
   display: table-cell;
   vertical-align: middle;
+  position: relative;
+  border-radius: var(--radius-sm);
+  background: var(--base-bg);
+  box-shadow: var(--shadow-md);
+  border: var(--border-width-2) solid var(--primary-color);
+  animation: editBoxFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  
+  // 编辑状态指示器
+  &::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+      var(--primary-color), 
+      color-mix(in srgb, var(--primary-color) 80%, var(--base-bg) 20%));
+    border-radius: var(--radius-sm);
+    z-index: -1;
+    animation: editIndicatorPulse 2s infinite;
+  }
   
   textarea {
     display: block;
@@ -335,30 +380,21 @@
     resize: none;
     outline: none;
     font-family: inherit;
-    font-size: inherit;
-    line-height: normal;
-    vertical-align: middle;
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
     box-sizing: border-box;
     color: inherit;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: calc(var(--radius-sm) - var(--border-width-2));
+    transition: var(--shortcut-panel-transition);
     
     &:focus {
-      outline: 2px solid var(--primary-color, #3582fb);
-      outline-offset: -2px;
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color, #3582fb) 20%, transparent);
+      background: color-mix(in srgb, var(--primary-color) 3%, transparent);
+      box-shadow: inset 0 0 0 var(--border-width-1) color-mix(in srgb, var(--primary-color) 30%, transparent);
     }
-  }
-}
-
-// 暗色和深海主题下的编辑输入框文字颜色
-.cherry.theme__dark,
-.cherry.theme__abyss {
-  .cherry-previewer-table-content-handler__input {
-    textarea {
-      color: #ffffff !important;
-      
-      &::placeholder {
-        color: rgba(255, 255, 255, 0.6) !important;
-      }
+    
+    &::selection {
+      background: color-mix(in srgb, var(--primary-color) 25%, transparent);
     }
   }
 }
