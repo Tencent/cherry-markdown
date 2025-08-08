@@ -7,27 +7,7 @@
  * All Tencent Modifications are Copyright (C) Tencent.
  *
  * CherryMarkdown is licensed under the Apache License, Version 2.0 (the "License");
- * you may not          select: {
-            label: {
-              show: true,
-              color: '#fff',
-            },
-            itemStyle: {
-              areaColor: '#6495ED',
-            },
-          },
-          label: {
-            show: false,
-            fontSize: 10,
-            color: '#333',
-          },
-          itemStyle: {
-            borderColor: '#fff',
-            borderWidth: 0.5,
-            areaColor: '#ADD8E6',
-          },
-        },
-      ],t in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -101,7 +81,7 @@ export default class EChartsTableEngine {
       // 监听窗口resize事件
       window.addEventListener('resize', () => {
         chart.resize();
-      });
+      }); // TODO 移除事件监听
     }
     return this.echartsRef.getInstanceByDom(this.dom);
   }
@@ -128,6 +108,9 @@ export default class EChartsTableEngine {
       case 'pie':
         chartOption = this.renderPieChart(tableObject, options);
         break;
+      case 'scatter':
+        chartOption = this.renderScatterChart(tableObject, options);
+        break;
       default:
         return '';
     }
@@ -144,8 +127,8 @@ export default class EChartsTableEngine {
     const htmlContent = `
       <div class="cherry-echarts-wrapper" 
            style="width: ${this.options.width}px; height: ${
-      this.options.height
-    }px; min-height: 300px; display: block; position: relative; border: 1px solid #ddd;" 
+             this.options.height
+           }px; min-height: 300px; display: block; position: relative; border: 1px solid #ddd;" 
            id="${chartId}"
            data-chart-type="${type}"
            data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"
@@ -217,6 +200,10 @@ export default class EChartsTableEngine {
 
   renderPieChart(tableObject, options) {
     return this.$renderPieChartCommon(tableObject, options);
+  }
+
+  renderScatterChart(tableObject, options) {
+    return this.$renderScatterChartCommon(tableObject, options);
   }
 
   $renderRadarChartCommon(tableObject, options) {
@@ -659,6 +646,114 @@ export default class EChartsTableEngine {
         },
       },
     };
+    return chartOptions;
+  }
+
+  $renderScatterChartCommon(tableObject, options) {
+    console.log('Rendering scatter chart:', tableObject);
+
+    // 解析散点数据：每一行代表一个点，格式为 [name, x, y, size?]
+    const hasSizeColumn = tableObject.header.length >= 4; // header: token + x + y + [size]
+
+    const parsedRows = tableObject.rows.map((row) => {
+      const x = parseFloat(String(row[1] || '').replace(/,/g, '')) || 0;
+      const y = parseFloat(String(row[2] || '').replace(/,/g, '')) || 0;
+      const size = hasSizeColumn ? parseFloat(String(row[3] || '').replace(/,/g, '')) : undefined;
+      return { name: row[0], x, y, size };
+    });
+
+    // 如果提供有 size 列，使用线性归一化（6~28）来控制点的显示大小
+    let minSize = Infinity;
+    let maxSize = -Infinity;
+    if (hasSizeColumn) {
+      parsedRows.forEach((r) => {
+        if (typeof r.size === 'number' && !Number.isNaN(r.size)) {
+          minSize = Math.min(minSize, r.size);
+          maxSize = Math.max(maxSize, r.size);
+        }
+      });
+      if (!Number.isFinite(minSize) || !Number.isFinite(maxSize)) {
+        minSize = 0;
+        maxSize = 0;
+      }
+    }
+
+    const data = parsedRows.map((r) => {
+      const item = { value: [r.x, r.y], name: r.name };
+      if (hasSizeColumn) {
+        if (maxSize === minSize) {
+          item.symbolSize = 12;
+        } else if (typeof r.size === 'number' && !Number.isNaN(r.size)) {
+          const t = (r.size - minSize) / (maxSize - minSize);
+          item.symbolSize = Math.round(6 + t * (28 - 6));
+        } else {
+          item.symbolSize = 10;
+        }
+      }
+      return item;
+    });
+
+    const chartOptions = {
+      backgroundColor: '#fff',
+      tooltip: {
+        trigger: 'item',
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        borderColor: '#999',
+        borderWidth: 1,
+        textStyle: { color: '#fff', fontSize: 12 },
+        formatter(params) {
+          const [x, y] = params.value || [];
+          return `${params.name}<br/>x: <strong>${x}</strong><br/>y: <strong>${y}</strong>`;
+        },
+        extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
+      },
+      toolbox: {
+        show: true,
+        orient: 'vertical',
+        left: 'right',
+        top: 'center',
+        feature: {
+          dataView: { show: true, readOnly: false, title: '数据视图', lang: ['数据视图', '关闭', '刷新'] },
+          restore: { show: true, title: '重置' },
+          saveAsImage: { show: true, title: '保存为图片', type: 'png', backgroundColor: '#fff' },
+        },
+        iconStyle: { borderColor: '#999' },
+        emphasis: { iconStyle: { borderColor: '#666' } },
+      },
+      grid: { containLabel: true, left: '8%', right: '8%', bottom: '8%', top: '12%' },
+      xAxis: {
+        type: 'value',
+        axisLine: { lineStyle: { color: '#333' } },
+        axisLabel: { color: '#333', fontSize: 11 },
+        splitLine: { lineStyle: { color: '#eee', type: 'dashed' } },
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: { lineStyle: { color: '#333' } },
+        axisLabel: { color: '#333', fontSize: 11 },
+        splitLine: { lineStyle: { color: '#eee', type: 'dashed' } },
+      },
+      series: [
+        {
+          name: '散点',
+          type: 'scatter',
+          data,
+          emphasis: {
+            focus: 'series',
+            itemStyle: {
+              shadowBlur: 10,
+              shadowColor: 'rgba(0,0,0,0.4)',
+              borderWidth: 2,
+              borderColor: '#ff6b6b',
+            },
+          },
+          animation: true,
+          animationDuration: 800,
+          animationEasing: 'cubicOut',
+        },
+      ],
+    };
+
     return chartOptions;
   }
 
