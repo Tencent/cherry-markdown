@@ -667,7 +667,8 @@ export default class PreviewerBubble {
       // 如果图片语法数量和预览区域的一样多
       // 暂时不需要考虑手动输入img标签的场景 和 引用图片的场景
       const totalValue = content.split(imgReg);
-      const imgAppendReg = /(#center|#right|#left|#float-right|#float-left|#border|#B|#shadow|#S|#radius|#R)/g;
+      const imgDecoReg = /(#border|#B|#shadow|#S|#radius|#R)/g;
+      const imgAlignReg = /(#center|#right|#left|#float-right|#float-left)/g;
       const imgSizeReg = /^!\[.*?((?:(?:#[0-9]+(px|em|pt|pc|in|mm|cm|ex|%)|auto) *)+).*?\].*$/;
       let line = 0;
       let beginCh = 0;
@@ -678,8 +679,9 @@ export default class PreviewerBubble {
         if (targetString === contentImgs[testIndex]) {
           // 如果找到目标代码
           if (testIndex === this.imgIndex) {
-            this.imgAppend = imgAppendReg.test(targetString) ? targetString.match(imgAppendReg).join(' ') : false;
-            this.imgSize = imgSizeReg.test(targetString) ? targetString.replace(imgSizeReg, '$1') : false;
+            this.imgDeco = imgDecoReg.test(targetString) ? targetString.match(imgDecoReg).join(' ') : '';
+            this.imgAlign = imgAlignReg.test(targetString) ? targetString.match(imgAlignReg).join(' ') : '';
+            this.imgSize = imgSizeReg.test(targetString) ? targetString.replace(imgSizeReg, '$1') : '';
             beginCh += targetString.replace(/^(!\[[^#\]]*).*$/, '$1').length;
             endCh = beginCh + targetString.replace(/^(!\[[^#\]]*)([^\]]*?)\].*$/, '$2').length;
             this.editor.editor.setSelection({ line, ch: beginCh }, { line, ch: endCh });
@@ -703,7 +705,7 @@ export default class PreviewerBubble {
   /**
    * 修改图片尺寸时的回调
    * @param {HTMLElement} htmlElement 被拖拽的图片标签
-   * @param {Object} style 图片的属性（宽高、对齐方式）
+   * @param {Object} style 图片的属性（宽高）
    */
   changeImgSize(htmlElement, style) {
     this.imgSize = `#${Math.round(style.width)}px #${Math.round(style.height)}px`;
@@ -713,38 +715,61 @@ export default class PreviewerBubble {
   /**
    * 修改图片样式时的回调
    * @param {HTMLElement} htmlElement 被修改演示的图片标签
-   * @param {Object} type 图片的属性（边框、阴影、圆角）
+   * @param {Object} type 图片的属性（边框、阴影、圆角、对齐方式）
    */
   changeImgStyle(htmlElement, type) {
+    switch (type) {
+      case 'border':
+      case 'shadow':
+      case 'radius':
+        this.changeImgDecorationStyle(htmlElement, type);
+        break;
+      case 'left':
+      case 'right':
+      case 'center':
+      case 'float-left':
+      case 'float-right':
+      case 'clear-align':
+        this.changeImgAlignmentStyle(htmlElement, type);
+        break;
+    }
+  }
+
+  /**
+   * 修改图片装饰样式
+   * @param {HTMLElement} htmlElement 被修改演示的图片标签
+   * @param {Object} type 图片的属性（边框、阴影、圆角）
+   */
+  changeImgDecorationStyle(htmlElement, type) {
     const typeProp = {
       border: { reg: /#(border|B) */g, v: 'B' },
       shadow: { reg: /#(shadow|S) */g, v: 'S' },
       radius: { reg: /#(radius|R) */g, v: 'R' },
     };
     const typeReg = typeProp[type].reg;
-    if (!this.imgAppend) {
-      this.imgAppend = '';
-    }
-    if (typeReg.test(this.imgAppend)) {
-      this.imgAppend = this.imgAppend.replaceAll(typeReg, '');
+    if (typeReg.test(this.imgDeco)) {
+      this.imgDeco = this.imgDeco.replaceAll(typeReg, '');
     } else {
-      this.imgAppend += `#${typeProp[type].v}`;
+      this.imgDeco += `#${typeProp[type].v}`;
     }
     this.changeImgValue();
   }
 
+  /**
+   * 修改图片装饰样式
+   * @param {HTMLElement} htmlElement 被修改演示的图片标签
+   * @param {Object} type 图片的属性（左对齐、居中、右对齐、左浮动、右浮动）
+   */
+  changeImgAlignmentStyle(htmlElement, type) {
+    this.imgAlign = type === 'clear-align' ? '' : `#${type}`;
+    this.changeImgValue();
+  }
+
   changeImgValue() {
-    let newValue = '';
-    if (this.imgSize) {
-      newValue += this.imgSize;
-      if (this.imgAppend) {
-        newValue += ' ';
-      }
-    }
-    if (this.imgAppend) {
-      newValue += this.imgAppend;
-    }
-    this.editor.editor.replaceSelection(newValue, 'around');
+    this.editor.editor.replaceSelection(
+      [this.imgSize, this.imgDeco, this.imgAlign].filter((v) => v).join(' '),
+      'around',
+    );
   }
 
   /**

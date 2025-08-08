@@ -47,6 +47,13 @@ export default {
   table: '表格', // 表格
   'line-table': '折线表格', // 折线表格
   'bar-table': '柱状表格', // 柱状表格
+  'radar-table': '雷达表格', // 雷达表格
+  'map-table': '地图表格', // 地图表格
+  lineTable: '折线表格', // 折线表格
+  barTable: '柱状表格', // 柱状表格
+  radarTable: '雷达表格', // 雷达表格
+  mapTable: '地图表格', // 地图表格
+  proTable: '图表表格', // 图表表格
   formula: '公式', // 公式
   insertFormula: '公式', // 公式
   insertFlow: '流程图', // 流程图
@@ -81,6 +88,7 @@ export default {
   exportScreenshot: '导出长图', // 导出长图
   exportMarkdownFile: '导出markdown', // 导出markdown文件
   exportHTMLFile: '导出html', // 导出预览区html文件
+  exportWordFile: '导出word', // 导出Word文件
   theme: '主题', // 导出长图
   panel: '面板', // 导出长图
   detail: '手风琴', // 手风琴
@@ -98,6 +106,8 @@ export default {
   alignCenter: '居中',
   alignRight: '右对齐',
   alignJustify: '两端对齐',
+  alignFloatLeft: '左浮动',
+  alignFloatRight: '右浮动',
   publish: '发布',
   colorPickerText: '文字',
   colorPickerBackground: '背景',

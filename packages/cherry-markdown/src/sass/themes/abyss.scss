@@ -1,0 +1,184 @@
+/*
+ * 深海主题
+ */
+
+.cherry.theme__abyss {
+  /* ========== 基础色彩变量覆盖 ========== */
+  --primary-color: #8394AD;
+  --secondary-color: #2C2E37;
+
+  --base-font-color: #CECFCF;
+  --base-editor-bg: #1E222A;
+  --base-previewer-bg: #1E222A;
+  --base-border-color: var(--primary-color);
+
+  /* ========== 工具栏相关变量 ========== */
+  --toolbar-bg: #181C24;
+  --toolbar-btn-color: #CECFCF;
+  --toolbar-btn-hover-bg: var(--secondary-color);
+  --toolbar-btn-hover-color: var(--primary-color);
+  --toolbar-btn-active-bg: var(--secondary-color);
+  --toolbar-split-color: var(--oc-blue-5);
+  --toolbar-shadow: none;
+
+  /* ========== 工具栏的下拉菜单 ========== */
+  --dropdown-bg: var(--toolbar-bg);
+  --dropdown-border: var(--base-border-color);
+  --dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --dropdown-radius: var(--radius-xl);
+  --dropdown-padding: var(--spacing-xs) 0;
+
+  // 下拉菜单项
+  --dropdown-item-hover-bg: var(--toolbar-btn-hover-bg);
+  --dropdown-item-color: var(--toolbar-btn-color);
+
+  /* ========== 编辑器相关变量 ========== */
+  --editor-header-color: var(--primary-color);
+  --editor-string-color: var(--oc-blue-4);
+  --editor-comment-color: #A8A8A9;
+  --editor-quote-color: var(--oc-gray-8);
+  --editor-link-color: var(--oc-blue-4);
+  --editor-url-bg-color: none;
+  --editor-v2-color: var(--oc-gray-8);
+  --editor-v3-color: var(--primary-color);
+  --editor-keyword-color: var(--oc-blue-4);
+  --editor-selection-bg: #636e87;
+
+  /* ========== Markdown 相关变量 ========== */
+  --md-heading-color: var(--primary-color);
+  --md-paragraph-color: var(--base-font-color);
+  --md-link-color: var(--oc-blue-4);
+  --md-link-hover-color: var(--primary-color);
+  --md-inline-code-color: var(--primary-color);
+  --md-inline-code-bg: #00203d;
+  --md-blockquote-bg: #2A2F3B;
+  --md-hr-border: var(--primary-color);
+  --md-table-border: var(--oc-blue-5);
+
+  --md-toc-bg: #2A2F3B;
+  --md-toc-title-color: var(--primary-color);
+  --md-toc-link-color: var(--primary-color);
+  --md-toc-indicator-color: var(--primary-color);
+  --md-toc-link-hover-color: var(--secondary-color);
+  --md-toc-link-hover-bg: var(--primary-color);
+  --md-toc-indicator-hover-color: var(--primary-color);
+
+  /* ========== 手风琴组件变量覆盖 ========== */
+  --accordion-bg: #2A2F3B;
+  --accordion-border: var(--oc-blue-5);
+  --accordion-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  --accordion-summary-bg: var(--secondary-color);
+  --accordion-summary-hover-bg: var(--toolbar-btn-hover-bg);
+
+  --accordion-body-bg: #2A2F3B;
+  --accordion-body-border: var(--oc-blue-5);
+  --accordion-body-color: var(--base-font-color);
+
+  /* ========== 其余单个组件 ========== */
+  --drag-border-color: #3a4453;
+
+    /* ========== Panel 相关变量 ========== */
+  --panel-border-radius: 16px;
+  --panel-bg: linear-gradient(145deg, #2a2a2a 0%, #1e1e1e 100%);
+  --panel-border: 1px solid rgba(109, 40, 217, 0.2);
+  --panel-box-shadow: none;
+  --panel-backdrop-filter: blur(10px);
+  --panel-title-bg: linear-gradient(145deg, #333333 0%, #2a2a2a 100%);
+  --panel-title-color: var(--oc-gray-1);
+  --panel-title-border-radius: 16px 16px 0 0;
+  --panel-title-border-bottom: 1px solid rgba(109, 40, 217, 0.15);
+  --panel-body-bg: linear-gradient(145deg, #242424 0%, #1e1e1e 100%);
+  --panel-body-color: var(--oc-gray-2);
+  --panel-body-border-radius: 0 0 16px 16px;
+
+  /* Primary Panel */
+  --panel-primary-bg: linear-gradient(145deg, rgba(109, 40, 217, 0.08) 0%, rgba(67, 56, 202, 0.08) 100%);
+  --panel-primary-border-color: rgba(109, 40, 217, 0.3);
+  --panel-primary-box-shadow: none;
+  --panel-primary-title-bg: linear-gradient(145deg, rgba(109, 40, 217, 0.3) 0%, rgba(67, 56, 202, 0.3) 100%);
+  --panel-primary-title-color: var(--oc-violet-2);
+  --panel-primary-body-bg: linear-gradient(145deg, rgba(109, 40, 217, 0.05) 0%, rgba(67, 56, 202, 0.05) 100%);
+  --panel-primary-body-color: var(--oc-violet-3);
+
+  /* Info Panel */
+  --panel-info-bg: linear-gradient(145deg, rgba(34, 184, 207, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%);
+  --panel-info-border-color: rgba(34, 184, 207, 0.3);
+  --panel-info-box-shadow: none;
+  --panel-info-title-bg: linear-gradient(145deg, rgba(34, 184, 207, 0.3) 0%, rgba(59, 130, 246, 0.3) 100%);
+  --panel-info-title-color: var(--oc-cyan-2);
+  --panel-info-body-bg: linear-gradient(145deg, rgba(34, 184, 207, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+  --panel-info-body-color: var(--oc-cyan-3);
+
+  /* Warning Panel */
+  --panel-warning-bg: linear-gradient(145deg, rgba(255, 193, 7, 0.08) 0%, rgba(251, 191, 36, 0.08) 100%);
+  --panel-warning-border-color: rgba(255, 193, 7, 0.3);
+  --panel-warning-box-shadow: none;
+  --panel-warning-title-bg: linear-gradient(145deg, rgba(255, 193, 7, 0.3) 0%, rgba(251, 191, 36, 0.3) 100%);
+  --panel-warning-title-color: var(--oc-yellow-2);
+  --panel-warning-body-bg: linear-gradient(145deg, rgba(255, 193, 7, 0.05) 0%, rgba(251, 191, 36, 0.05) 100%);
+  --panel-warning-body-color: var(--oc-yellow-3);
+
+  /* Danger Panel */
+  --panel-danger-bg: linear-gradient(145deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 127, 0.08) 100%);
+  --panel-danger-border-color: rgba(239, 68, 68, 0.3);
+  --panel-danger-box-shadow: none;
+  --panel-danger-title-bg: linear-gradient(145deg, rgba(239, 68, 68, 0.3) 0%, rgba(220, 38, 127, 0.3) 100%);
+  --panel-danger-title-color: var(--oc-red-2);
+  --panel-danger-body-bg: linear-gradient(145deg, rgba(239, 68, 68, 0.05) 0%, rgba(220, 38, 127, 0.05) 100%);
+  --panel-danger-body-color: var(--oc-red-3);
+
+  /* Success Panel */
+  --panel-success-bg: linear-gradient(145deg, rgba(34, 197, 94, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);
+  --panel-success-border-color: rgba(34, 197, 94, 0.3);
+  --panel-success-box-shadow: none;
+  --panel-success-title-bg: linear-gradient(145deg, rgba(34, 197, 94, 0.3) 0%, rgba(16, 185, 129, 0.3) 100%);
+  --panel-success-title-color: var(--oc-green-2);
+  --panel-success-body-bg: linear-gradient(145deg, rgba(34, 197, 94, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+  --panel-success-body-color: var(--oc-green-3);
+}
+
+.cherry-markdown.theme__abyss {
+
+  figure {
+    svg {
+
+      path,
+      rect,
+      line {
+        stroke: var(--primary-color) !important;
+      }
+
+      text {
+        fill: var(--primary-color) !important;
+        stroke: none !important;
+      }
+
+      tspan {
+        fill: var(--primary-color) !important;
+      }
+
+      circle {
+        fill: var(--oc-violet-0) !important;
+
+        &.state-start {
+          fill: var(--oc-white) !important;
+        }
+      }
+    }
+  }
+
+    @keyframes changeBgColor {
+      0% {
+        background-color: #ccddff50;
+      }
+  
+      60% {
+        background-color: #ccddff50;
+      }
+  
+      100% {
+        background-color: var(--base-previewer-bg);
+      }
+    }
+}
