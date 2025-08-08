@@ -27,6 +27,8 @@ export default class ProTable extends MenuBase {
       { iconName: 'barTable', name: 'barTable', onclick: this.bindSubClick.bind(this, 'barTable') },
       { iconName: 'radarTable', name: 'radarTable', onclick: this.bindSubClick.bind(this, 'radarTable') },
       { iconName: 'mapTable', name: 'mapTable', onclick: this.bindSubClick.bind(this, 'mapTable') },
+      { iconName: 'heatmapTable', name: 'heatmapTable', onclick: this.bindSubClick.bind(this, 'heatmapTable') },
+      { iconName: 'pieTable', name: 'pieTable', onclick: this.bindSubClick.bind(this, 'pieTable') },
     ];
   }
 
@@ -65,6 +67,10 @@ export default class ProTable extends MenuBase {
         return this.insertRadarTable(selection);
       case 'mapTable':
         return this.insertMapTable(selection);
+      case 'heatmapTable':
+        return this.insertHeatmapTable(selection);
+      case 'pieTable':
+        return this.insertPieTable(selection);
       default:
         return this.insertLineTable(selection);
     }
@@ -122,6 +128,35 @@ export default class ProTable extends MenuBase {
       '| 四川 | 180 |',
       '| 江苏 | 290 |',
       '| 浙江 | 220 |',
+    ].join('\n')}\n\n`;
+  }
+
+  /**
+   * 插入热力图表格
+   */
+  insertHeatmapTable(selection) {
+    return `${selection}\n\n${[
+      '| :heatmap:{x,y,value} | 周一 | 周二 | 周三 | 周四 | 周五 |',
+      '| :-: | :-: | :-: | :-: | :-: | :-: |',
+      '| 9:00 | 10 | 15 | 8 | 12 | 20 |',
+      '| 12:00 | 25 | 30 | 18 | 22 | 35 |',
+      '| 15:00 | 18 | 20 | 25 | 28 | 30 |',
+      '| 18:00 | 35 | 40 | 32 | 38 | 45 |',
+    ].join('\n')}\n\n`;
+  }
+
+  /**
+   * 插入饼图表格
+   */
+  insertPieTable(selection) {
+    return `${selection}\n\n${[
+      '| :pie:{name,value} | 数值 |',
+      '| :-: | :-: |',
+      '| 苹果 | 35 |',
+      '| 香蕉 | 25 |',
+      '| 橙子 | 20 |',
+      '| 葡萄 | 15 |',
+      '| 其他 | 5 |',
     ].join('\n')}\n\n`;
   }
 }
