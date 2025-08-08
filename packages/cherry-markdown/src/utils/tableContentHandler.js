@@ -176,11 +176,13 @@ export default class TableHandler {
 
   /**
    * 收集编辑器中的表格语法，并记录表格语法的开始的offset
+   * 支持markdown表格语法和HTML table标签
    */
   $collectTableCode() {
     const tableCodes = [];
-    this.codeMirror
-      .getValue()
+    const editorValue = this.codeMirror.getValue();
+    // 处理markdown表格语法
+    editorValue
       .replace(this.codeBlockReg, (whole, ...args) => {
         // 先把代码块里的表格语法关键字干掉
         return whole.replace(/\|/g, '.');
@@ -191,16 +193,25 @@ export default class TableHandler {
         tableCodes.push({
           code: match,
           offset: offsetBegin,
+          type: 'markdown',
         });
       });
+    // 处理HTML table标签
+    this.$collectHtmlTableCode(editorValue, tableCodes);
+    // 按offset排序，确保顺序正确
+    tableCodes.sort((a, b) => a.offset - b.offset);
     this.tableEditor.tableCodes = tableCodes;
   }
 
   /**
    * 获取预览区域被点击的table对象，并记录table的顺位
+   * 支持cherry-table类的表格和原生HTML table标签
    */
   $collectTableDom() {
-    const list = Array.from(this.previewerDom.querySelectorAll('table.cherry-table'));
+    // 获取所有表格，包括cherry-table和原生HTML table
+    const cherryTables = Array.from(this.previewerDom.querySelectorAll('table.cherry-table'));
+    const htmlTables = Array.from(this.previewerDom.querySelectorAll('table:not(.cherry-table)'));
+    const allTables = [...cherryTables, ...htmlTables];
     const tableNode = this.$getClosestNode(this.target, 'TABLE');
     if (tableNode === false) {
       return false;
@@ -210,6 +221,8 @@ export default class TableHandler {
       return child.tagName.toLowerCase() === 'td';
     }).length;
 
+    // 判断表格类型
+    const isHtmlTable = !tableNode.classList.contains('cherry-table');
     this.tableEditor.info = {
       tableNode,
       tdNode: this.target,
@@ -217,10 +230,13 @@ export default class TableHandler {
       tdIndex: Array.from(this.target.parentElement.childNodes).indexOf(this.target),
       trIndex: Array.from(this.target.parentElement.parentElement.childNodes).indexOf(this.target.parentElement),
       isTHead: this.target.parentElement.parentElement.tagName !== 'TBODY',
-      totalTables: list.length,
-      tableIndex: list.indexOf(tableNode),
+      totalTables: allTables.length,
+      tableIndex: allTables.indexOf(tableNode),
       tableText: tableNode.textContent.replace(/[\s]/g, ''),
       columns,
+      isHtmlTable, // 标记是否为HTML表格
+      cherryTableCount: cherryTables.length, // cherry表格数量
+      htmlTableCount: htmlTables.length, // HTML表格数量
     };
   }
 
@@ -235,12 +251,14 @@ export default class TableHandler {
     const whole = this.codeMirror.getValue();
     const selectTdInfo = this.tableEditor.info;
     const beginLine = whole.slice(0, tableCode.offset).match(/\n/g)?.length ?? 0;
-    const { preLine, preCh, plusCh, currentTd } = this.$getTdOffset(
-      tableCode.code,
-      selectTdInfo.isTHead,
-      selectTdInfo.trIndex,
-      selectTdInfo.tdIndex,
-    );
+    // 根据表格类型选择不同的处理方式
+    let offsetInfo;
+    if (tableCode.type === 'html') {
+      offsetInfo = this.$getHtmlTdOffset(tableCode.code, selectTdInfo.trIndex, selectTdInfo.tdIndex);
+    } else {
+      offsetInfo = this.$getTdOffset(tableCode.code, selectTdInfo.isTHead, selectTdInfo.trIndex, selectTdInfo.tdIndex);
+    }
+    const { preLine, preCh, plusCh, currentTd } = offsetInfo;
     if (type === 'table') {
       const endLine = beginLine + tableCode.code.match(/\n/g).length;
       const endCh = tableCode.code.match(/[^\n]+\n*$/)[0].length;
@@ -285,22 +303,135 @@ export default class TableHandler {
   }
 
   /**
+   * 获取HTML表格中对应单元格的偏移量
+   * @param {String} tableCode HTML表格代码
+   * @param {Number} trIndex 行索引
+   * @param {Number} tdIndex 列索引
+   */
+  $getHtmlTdOffset(tableCode, trIndex, tdIndex) {
+    const lines = tableCode.split(/\n/);
+    let currentLine = 0;
+    let currentChar = 0;
+    let foundTr = 0;
+    let foundTd = 0;
+    // 解析HTML表格，找到目标单元格的位置
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      // 查找<tr>标签
+      const trMatches = line.match(/<tr[^>]*>/gi);
+      if (trMatches) {
+        if (foundTr === trIndex) {
+          // 在目标行中查找<td>或<th>标签
+          const tdRegex = /<(td|th)[^>]*>([\s\S]*?)<\/(td|th)>/gi;
+          let tdMatch;
+          let searchPos = 0;
+          while ((tdMatch = tdRegex.exec(line)) !== null && foundTd <= tdIndex) {
+            if (foundTd === tdIndex) {
+              // 找到目标单元格
+              const cellContent = tdMatch[2] || '';
+              return {
+                preLine: i,
+                preCh: tdMatch.index + tdMatch[0].indexOf('>') + 1,
+                plusCh: cellContent.length,
+                currentTd: cellContent,
+              };
+            }
+            foundTd += 1;
+            searchPos = tdMatch.index + tdMatch[0].length;
+          }
+          break;
+        }
+        foundTr += 1;
+      }
+    }
+    // 如果没有找到，返回整个表格的选择
+    return {
+      preLine: 0,
+      preCh: 0,
+      plusCh: tableCode.length,
+      currentTd: '',
+    };
+  }
+
+  /**
    * 在编辑器里找到对应的表格源码，并让编辑器选中
+   * 支持markdown表格语法和HTML table标签的定位
    */
   $findTableInEditor() {
     this.$collectTableDom();
     this.$collectTableCode();
-    // 暂时不考虑代码块中包含表格、人为输入表格html语法、tapd特色表格语法的情况
-    // 也就是说，出现上述情况时，表格的所见即所得编辑功能失效
+    // 如果表格总数与代码中的表格数量不匹配，尝试智能匹配
     if (this.tableEditor.info.totalTables !== this.tableEditor.tableCodes.length) {
+      // 尝试基于表格内容进行匹配
+      const matchedIndex = this.$findTableByContent();
+      if (matchedIndex !== -1) {
+        this.$setSelection(matchedIndex, 'td', this.trigger === 'click');
+        return true;
+      }
       return false;
     }
     this.$setSelection(this.tableEditor.info.tableIndex, 'td', this.trigger === 'click');
+    return true;
   }
 
   $initReg() {
     this.tableReg = this.tableReg ? this.tableReg : getTableRule(true);
     this.codeBlockReg = this.codeBlockReg ? this.codeBlockReg : getCodeBlockRule().reg;
+    // HTML table标签的正则表达式
+    this.htmlTableReg = /<table[^>]*>[\s\S]*?<\/table>/gi;
+  }
+
+  /**
+   * 收集HTML table标签
+   */
+  $collectHtmlTableCode(editorValue, tableCodes) {
+    let match;
+    this.htmlTableReg.lastIndex = 0; // 重置正则表达式的lastIndex
+    while ((match = this.htmlTableReg.exec(editorValue)) !== null) {
+      tableCodes.push({
+        code: match[0],
+        offset: match.index,
+        type: 'html',
+      });
+    }
+  }
+
+  /**
+   * 基于表格内容进行智能匹配
+   */
+  $findTableByContent() {
+    const targetTableText = this.tableEditor.info.tableText;
+    // 遍历所有收集到的表格代码，寻找内容匹配的表格
+    for (let i = 0; i < this.tableEditor.tableCodes.length; i++) {
+      const tableCode = this.tableEditor.tableCodes[i];
+      let codeText = '';
+      if (tableCode.type === 'html') {
+        // 对于HTML表格，提取文本内容
+        codeText = this.$extractHtmlTableText(tableCode.code);
+      } else {
+        // 对于markdown表格，直接处理文本
+        codeText = tableCode.code.replace(/[\s|\-:]/g, '');
+      }
+      // 比较文本内容（去除空白字符）
+      if (codeText === targetTableText) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * 从HTML表格代码中提取纯文本内容
+   */
+  $extractHtmlTableText(htmlCode) {
+    // 创建临时DOM元素来解析HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlCode;
+    const table = tempDiv.querySelector('table');
+    if (table) {
+      return table.textContent.replace(/[\s]/g, '');
+    }
+    return '';
   }
 
   showBubble() {
