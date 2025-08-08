@@ -196,6 +196,21 @@ export default class TableHandler {
           type: 'markdown',
         });
       });
+    // 增强功能：处理引用语法中的表格
+    // 匹配引用块中的表格语法，支持多层嵌套引用
+    const blockquoteTableReg =
+      /(^|\n)(>\s*)+\|[^\n]+\|[^\n]*\n(>\s*)+\|\s*:?[-]+:?[^\n]*\n((>\s*)+\|[^\n]+\|[^\n]*\n?)*/gm;
+    let blockquoteMatch;
+    while ((blockquoteMatch = blockquoteTableReg.exec(editorValue)) !== null) {
+      const match = blockquoteMatch[0];
+      const offsetBegin = blockquoteMatch.index + (blockquoteMatch[1] ? blockquoteMatch[1].length : 0);
+      tableCodes.push({
+        code: match,
+        offset: offsetBegin,
+        type: 'blockquote-markdown',
+        isBlockquote: true,
+      });
+    }
     // 处理HTML table标签
     this.$collectHtmlTableCode(editorValue, tableCodes);
     // 按offset排序，确保顺序正确
@@ -255,6 +270,17 @@ export default class TableHandler {
     let offsetInfo;
     if (tableCode.type === 'html') {
       offsetInfo = this.$getHtmlTdOffset(tableCode.code, selectTdInfo.trIndex, selectTdInfo.tdIndex);
+    } else if (tableCode.type === 'blockquote-html') {
+      // 处理引用语法中的HTML表格
+      offsetInfo = this.$getBlockquoteHtmlTdOffset(tableCode.code, selectTdInfo.trIndex, selectTdInfo.tdIndex);
+    } else if (tableCode.type === 'blockquote-markdown') {
+      // 处理引用语法中的表格
+      offsetInfo = this.$getBlockquoteTdOffset(
+        tableCode.code,
+        selectTdInfo.isTHead,
+        selectTdInfo.trIndex,
+        selectTdInfo.tdIndex,
+      );
     } else {
       offsetInfo = this.$getTdOffset(tableCode.code, selectTdInfo.isTHead, selectTdInfo.trIndex, selectTdInfo.tdIndex);
     }
@@ -294,11 +320,59 @@ export default class TableHandler {
     for (let i = 0; i < targetTd; i++) {
       pre.push(tds[i]);
     }
+    // 计算单元格内容的实际位置（去除前后空格）
+    const trimmedContent = current.trim();
+    const leadingSpaces = current.match(/^\s*/)[0].length;
+    const basePreCh = needPlus1 ? pre.join('|').length + 1 : pre.join('|').length;
+    const actualPreCh = basePreCh + leadingSpaces;
     return {
       preLine: targetTr,
-      preCh: needPlus1 ? pre.join('|').length + 1 : pre.join('|').length,
-      plusCh: current.length,
-      currentTd: current,
+      preCh: actualPreCh,
+      plusCh: trimmedContent.length,
+      currentTd: trimmedContent,
+    };
+  }
+
+  /**
+   * 获取引用语法中表格对应单元格的偏移量
+   * @param {String} tableCode
+   * @param {Boolean} isTHead
+   * @param {Number} trIndex
+   * @param {Number} tdIndex
+   */
+  $getBlockquoteTdOffset(tableCode, isTHead, trIndex, tdIndex) {
+    const codes = tableCode.split(/\n/);
+    const targetTr = isTHead ? 0 : trIndex + 2;
+    // 处理引用语法，去除引用符号后分析表格结构
+    const originalLine = codes[targetTr];
+    const cleanLine = originalLine.replace(/^>\s*/, '');
+    const tds = cleanLine.split(/\|/);
+    const needPlus1 = /^\s*$/.test(tds[0]);
+    const targetTd = needPlus1 ? tdIndex + 1 : tdIndex;
+    const current = tds[targetTd];
+    // 计算引用符号的长度
+    const quoteMatch = originalLine.match(/^>\s*/);
+    const quoteLength = quoteMatch ? quoteMatch[0].length : 0;
+    // 计算目标单元格之前的字符数（包括管道符）
+    let preCh = quoteLength;
+    // 如果表格以|开头，需要先加上第一个管道符
+    if (needPlus1) {
+      preCh += 1; // 第一个管道符
+    }
+    // 计算目标单元格之前所有单元格的长度和管道符
+    for (let i = needPlus1 ? 1 : 0; i < targetTd; i++) {
+      preCh += tds[i].length;
+      preCh += 1; // 每个单元格后面的管道符
+    }
+    // 计算单元格内容的实际位置（去除前后空格）
+    const trimmedContent = current.trim();
+    const leadingSpaces = current.match(/^\s*/)[0].length;
+    const actualPreCh = preCh + leadingSpaces;
+    return {
+      preLine: targetTr,
+      preCh: actualPreCh,
+      plusCh: trimmedContent.length,
+      currentTd: trimmedContent,
     };
   }
 
@@ -379,6 +453,8 @@ export default class TableHandler {
     this.codeBlockReg = this.codeBlockReg ? this.codeBlockReg : getCodeBlockRule().reg;
     // HTML table标签的正则表达式
     this.htmlTableReg = /<table[^>]*>[\s\S]*?<\/table>/gi;
+    // 引用块中的HTML table标签的正则表达式（匹配每行都有引用符号的HTML表格）
+    this.blockquoteHtmlTableReg = /(^>\s*<table[\s\S]*?^>\s*<\/table>)/gim;
   }
 
   /**
@@ -392,6 +468,16 @@ export default class TableHandler {
         code: match[0],
         offset: match.index,
         type: 'html',
+      });
+    }
+    // 收集引用块中的HTML表格
+    this.blockquoteHtmlTableReg.lastIndex = 0;
+    while ((match = this.blockquoteHtmlTableReg.exec(editorValue)) !== null) {
+      tableCodes.push({
+        code: match[0],
+        offset: match.index,
+        type: 'blockquote-html',
+        isBlockquote: true,
       });
     }
   }
@@ -408,8 +494,17 @@ export default class TableHandler {
       if (tableCode.type === 'html') {
         // 对于HTML表格，提取文本内容
         codeText = this.$extractHtmlTableText(tableCode.code);
+      } else if (tableCode.type === 'blockquote-html') {
+        // 对于引用中的HTML表格，提取文本内容
+        const cleanHtml = tableCode.code.replace(/^>\s*/gm, '');
+        codeText = this.$extractHtmlTableText(cleanHtml);
+      } else if (tableCode.type === 'blockquote-markdown') {
+        // 对于引用中的markdown表格，需要去除引用符号
+        codeText = tableCode.code
+          .replace(/^>\s*/gm, '') // 去除行首的引用符号
+          .replace(/[\s|\-:]/g, ''); // 去除空白字符、表格分隔符等
       } else {
-        // 对于markdown表格，直接处理文本
+        // 对于普通markdown表格，直接处理文本
         codeText = tableCode.code.replace(/[\s|\-:]/g, '');
       }
       // 比较文本内容（去除空白字符）
@@ -432,6 +527,80 @@ export default class TableHandler {
       return table.textContent.replace(/[\s]/g, '');
     }
     return '';
+  }
+
+  /**
+   * 获取引用语法中HTML表格对应单元格的偏移量
+   * @param {String} tableCode 引用块中的HTML表格代码
+   * @param {Number} trIndex 行索引
+   * @param {Number} tdIndex 列索引
+   */
+  $getBlockquoteHtmlTdOffset(tableCode, trIndex, tdIndex) {
+    const lines = tableCode.split(/\n/);
+    let foundTr = 0;
+    let foundTd = 0;
+    // 将所有行的内容合并，去除引用符号，用于查找HTML标签
+    const cleanContent = lines.map((line) => line.replace(/^>\s*/, '')).join('\n');
+    // 查找所有<tr>标签
+    const trRegex = /<tr[^>]*>/gi;
+    let trMatch;
+    let trPositions = [];
+    while ((trMatch = trRegex.exec(cleanContent)) !== null) {
+      trPositions.push({
+        index: trMatch.index,
+        match: trMatch[0],
+      });
+    }
+    if (trIndex >= trPositions.length) {
+      return {
+        preLine: 0,
+        preCh: 0,
+        plusCh: tableCode.length,
+        currentTd: '',
+      };
+    }
+    // 从目标<tr>开始查找<td>或<th>标签
+    const targetTrStart = trPositions[trIndex].index;
+    const nextTrStart = trIndex + 1 < trPositions.length ? trPositions[trIndex + 1].index : cleanContent.length;
+    const trContent = cleanContent.substring(targetTrStart, nextTrStart);
+    const tdRegex = /<(td|th)[^>]*>([\s\S]*?)<\/(td|th)>/gi;
+    let tdMatch;
+    let currentTdIndex = 0;
+    while ((tdMatch = tdRegex.exec(trContent)) !== null) {
+      if (currentTdIndex === tdIndex) {
+        const cellContent = tdMatch[2] || '';
+        const absolutePosition = targetTrStart + tdMatch.index + tdMatch[0].indexOf('>') + 1;
+        // 将绝对位置转换为行列位置
+        let charCount = 0;
+        let targetLine = 0;
+        let targetCh = 0;
+        for (let i = 0; i < lines.length; i++) {
+          const cleanLine = lines[i].replace(/^>\s*/, '');
+          if (charCount + cleanLine.length + 1 > absolutePosition) {
+            targetLine = i;
+            const quoteMatch = lines[i].match(/^>\s*/);
+            const quoteLength = quoteMatch ? quoteMatch[0].length : 0;
+            targetCh = quoteLength + (absolutePosition - charCount);
+            break;
+          }
+          charCount += cleanLine.length + 1; // +1 for newline
+        }
+        return {
+          preLine: targetLine,
+          preCh: targetCh,
+          plusCh: cellContent.length,
+          currentTd: cellContent,
+        };
+      }
+      currentTdIndex += 1;
+    }
+    // 如果没有找到，返回整个表格的选择
+    return {
+      preLine: 0,
+      preCh: 0,
+      plusCh: tableCode.length,
+      currentTd: '',
+    };
   }
 
   showBubble() {
@@ -898,15 +1067,47 @@ export default class TableHandler {
     this.$setSelection(tableIndex, 'table');
     const selection = this.codeMirror.getSelection();
     const table = selection.split('\n');
-    const rows = table.map((row) => row.split('|').slice(1, -1));
-    rows.forEach((row) => {
-      if (tdIndex >= 0 && tdIndex < row.length) {
-        row.splice(tdIndex, 1);
-      }
-    });
-    const newTable = rows.map((row) => (row.length === 0 ? '' : `|${row.join('|')}|`));
-    const newText = newTable.join('\n');
-    this.codeMirror.replaceSelection(newText);
+    // 检查是否是引用语法中的表格
+    const isBlockquoteTable = table.some((row) => row.trim().startsWith('>'));
+    if (isBlockquoteTable) {
+      // 处理引用语法中的表格
+      const rows = table.map((row) => {
+        const trimmedRow = row.trim();
+        if (trimmedRow.startsWith('>')) {
+          // 提取引用符号和表格内容
+          const quoteMatch = trimmedRow.match(/^(>\s*)+/);
+          const quotePrefix = quoteMatch ? quoteMatch[0] : '> ';
+          const tableContent = trimmedRow.substring(quotePrefix.length);
+          const cells = tableContent.split('|').slice(1, -1);
+          return { quotePrefix, cells };
+        }
+        return { quotePrefix: '', cells: [] };
+      });
+      rows.forEach((row) => {
+        if (tdIndex >= 0 && tdIndex < row.cells.length) {
+          row.cells.splice(tdIndex, 1);
+        }
+      });
+      const newTable = rows.map((row) => {
+        if (row.cells.length === 0) {
+          return '';
+        }
+        return `${row.quotePrefix}|${row.cells.join('|')}|`;
+      });
+      const newText = newTable.join('\n');
+      this.codeMirror.replaceSelection(newText);
+    } else {
+      // 处理普通表格
+      const rows = table.map((row) => row.split('|').slice(1, -1));
+      rows.forEach((row) => {
+        if (tdIndex >= 0 && tdIndex < row.length) {
+          row.splice(tdIndex, 1);
+        }
+      });
+      const newTable = rows.map((row) => (row.length === 0 ? '' : `|${row.join('|')}|`));
+      const newText = newTable.join('\n');
+      this.codeMirror.replaceSelection(newText);
+    }
   }
 
   /**
