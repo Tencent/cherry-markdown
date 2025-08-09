@@ -453,6 +453,24 @@ export default class EChartsTableEngine {
   }
 }
 
+const TitleOptions = {
+  options(tableObject, options) {
+    return options.title
+      ? {
+          title: {
+            text: options.title,
+            left: 'center',
+            top: 'bottom',
+            textStyle: {
+              color: '#666',
+              fontSize: 16,
+            },
+          },
+        }
+      : {};
+  },
+};
+
 const BaseChartOptions = {
   components: [TitleOptions],
   options(tableObject, options) {
@@ -511,6 +529,7 @@ const LegendOptions = {
         type: 'scroll',
         orient: 'horizontal',
         left: 'center',
+        top: 'top',
         textStyle: {
           fontSize: 12,
         },
@@ -572,7 +591,6 @@ const AxisBaseChartOptions = {
       legend: {
         data,
         type: 'scroll',
-        top: 'top',
       },
       series,
       xAxis: {
@@ -800,7 +818,6 @@ const RadarChartOptions = {
       },
       legend: {
         data: tableObject.rows.map((row) => row[0]),
-        top: 'bottom',
       },
       radar: {
         name: {
