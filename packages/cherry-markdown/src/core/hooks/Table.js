@@ -79,13 +79,48 @@ export default class Table extends ParagraphBase {
       return null;
     }
     const match = cell.match(CHART_REGEX);
-    const [, chartType, axisOptions] = match;
+    const [, chartType, options] = match;
     const DEFAULT_AXIS_OPTIONS = ['x', 'y'];
     const result = {
       type: chartType,
-      options: axisOptions ? axisOptions.split(/\s*,\s*/) : DEFAULT_AXIS_OPTIONS,
+      options: options ? this.$parseProps(options) : {},
     };
     Logger.log('Parsed chart options:', result);
+    return result;
+  }
+
+  // 手动解析 "key: value, other: 123" 这样的字符串
+  $parseProps(str) {
+    const result = {};
+    // 匹配 key: value 对，支持无引号、有引号、数字等
+    const pairs = str
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const kvRegex = /^(\w+|\s*".*?"\s*|\s*'.*?'\s*)\s*:\s*(.+?)$/;
+
+    for (const pair of pairs) {
+      const kvMatch = pair.match(kvRegex);
+      if (kvMatch) {
+        const k = kvMatch[1].trim().replace(/^["']|["']$/g, ''); // 去除引号
+        let v = kvMatch[2].trim();
+
+        // 尝试转换数字
+        if (/^-?\d+(\.\d+)?$/.test(v)) {
+          v = Number(v);
+        } else if (v === 'true') {
+          v = true;
+        } else if (v === 'false') {
+          v = false;
+        } else {
+          v = v.replace(/^["']|["']$/g, ''); // 值也去引号
+        }
+
+        result[k] = v;
+      }
+    }
+
     return result;
   }
 
