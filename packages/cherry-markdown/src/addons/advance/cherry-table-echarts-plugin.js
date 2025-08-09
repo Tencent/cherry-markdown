@@ -19,7 +19,6 @@
  * limitations under the License.
  */
 import mergeWith from 'lodash/mergeWith';
-import _ from 'lodash';
 
 const DEFAULT_OPTIONS = {
   renderer: 'svg',
@@ -1201,17 +1200,15 @@ function generateOptions(handler, tableObject, options) {
     result = {};
   } else {
     result = generateOptions(handler.parents[0], tableObject, options);
-    for (const handler2 in handler.parents.slice(1)) {
-      deepMerge(result, generateOptions(handler2, tableObject, options), result);
-      // result = autoMergeDollarProps(result, generateOptions(handler2, tableObject, options));
+    for (const handler2 of handler.parents.slice(1)) {
+      deepMerge(result, generateOptions(handler2, tableObject, options));
     }
   }
-  deepMerge(result, handler.options(tableObject, options), result);
-  // result = autoMergeDollarProps(result, handler.options(tableObject, options));
+  deepMerge(result, handler.options(tableObject, options));
   return result;
 }
 
-function deepMerge(target, source, root) {
+function deepMerge(target, source) {
   for (const key of Object.keys(source)) {
     if (Object.prototype.hasOwnProperty.call(source, key)) {
       const keyList = key.split('.');
@@ -1224,18 +1221,14 @@ function deepMerge(target, source, root) {
       }
 
       const key3 = keyList[keyList.length - 1];
-      console.log('key3:', key3);
       if (Array.isArray(target2) && key3 === '$item') {
         // 如果是要给数组元素赋值。
         for (const item of target2) {
-          deepMerge(item, source[key], root);
+          deepMerge(item, source[key]);
         }
       } else if (typeof target2[key3] === 'object' && typeof source[key] === 'object') {
         // 如果目标对象在该属性上已经存在一个对象，并且源对象对应的属性也是一个对象，则递归合并。
-        deepMerge(target2[key3], source[key], root);
-      } else if (typeof source[key] === 'function') {
-        // 若是函数则绑定根对象。
-        target2[key3] = source[key].bind(root);
+        deepMerge(target2[key3], source[key]);
       } else {
         // 否则，直接覆盖或新增属性。
         target2[key3] = source[key];
@@ -1243,51 +1236,4 @@ function deepMerge(target, source, root) {
     }
   }
   return target;
-}
-
-function autoMergeDollarProps(target, source) {
-  const result = _.merge({}, target);
-
-  // 收集所有 $ 开头的路径
-  function collectDollarPaths(obj, path = '') {
-    const dollars = [];
-    for (const key in obj) {
-      if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
-
-      const currentPath = path ? `${path}.${key}` : key;
-      const value = obj[key];
-
-      if (key.startsWith('$') && typeof value === 'object' && value !== null) {
-        dollars.push({
-          dollarPath: currentPath,
-          arrayKey: key.slice(1),
-          arrayPath: currentPath.slice(1), // $series → series（同级）
-          value,
-        });
-      } else if (typeof value === 'object' && value !== null) {
-        dollars.push(...collectDollarPaths(value, currentPath));
-      }
-    }
-    return dollars;
-  }
-
-  const dollarRules = collectDollarPaths(source);
-
-  dollarRules.forEach((rule) => {
-    // 计算目标数组路径：把 $.a.$b.$seriesItem → a.b.series
-    const arrayPath = rule.dollarPath.slice(1); // 去掉 $
-    const array = _.get(result, arrayPath);
-
-    if (Array.isArray(array)) {
-      array.forEach((item) => {
-        _.merge(item, rule.value);
-      });
-    }
-  });
-
-  // 最后：将 source 普通属性合并（排除 $ 键）
-  const cleanSource = _.omitBy(source, (value, key) => key.startsWith('$'));
-  _.merge(result, cleanSource);
-
-  return result;
 }
