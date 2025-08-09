@@ -454,6 +454,7 @@ export default class EChartsTableEngine {
 }
 
 const BaseChartOptions = {
+  components: [TitleOptions],
   options(tableObject, options) {
     return {
       backgroundColor: '#fff',
@@ -532,7 +533,7 @@ const LegendOptions = {
 };
 
 const AxisBaseChartOptions = {
-  parents: [BaseChartOptions, LegendOptions],
+  components: [BaseChartOptions, LegendOptions],
   options(tableObject, options) {
     const data = [];
     const series = [];
@@ -661,7 +662,7 @@ const AxisBaseChartOptions = {
 };
 
 const NonAxisBaseChartOptions = {
-  parents: [BaseChartOptions],
+  components: [BaseChartOptions],
   options(tableObject, options) {
     return {
       'tooltip.trigger': 'item',
@@ -670,7 +671,7 @@ const NonAxisBaseChartOptions = {
 };
 
 const LineChartOptions = {
-  parents: [AxisBaseChartOptions, LegendOptions],
+  components: [AxisBaseChartOptions, LegendOptions],
   options(tableObject, options) {
     return {
       'tooltip.axisPointer.type': 'cross',
@@ -719,7 +720,7 @@ const LineChartOptions = {
 };
 
 const BarChartOptions = {
-  parents: [AxisBaseChartOptions],
+  components: [AxisBaseChartOptions],
   options(tableObject, options) {
     return {
       'tooltip.axisPointer.type': 'shadow',
@@ -756,7 +757,7 @@ const BarChartOptions = {
 };
 
 const RadarChartOptions = {
-  parents: [NonAxisBaseChartOptions, LegendOptions],
+  components: [NonAxisBaseChartOptions, LegendOptions],
   options(tableObject, options) {
     const indicator = tableObject.header.slice(1).map((header) => {
       const maxValue = Math.max(
@@ -877,7 +878,7 @@ const RadarChartOptions = {
 };
 
 const MapChartOptions = {
-  parents: [NonAxisBaseChartOptions],
+  components: [NonAxisBaseChartOptions],
   options(tableObject, options) {
     const mapData = tableObject.rows.map((row) => {
       const originalName = row[0];
@@ -1011,7 +1012,7 @@ const normalizeProvinceName = (inputName) => {
 };
 
 const HeatmapChartOptions = {
-  parents: [BaseChartOptions],
+  components: [BaseChartOptions],
   options(tableObject, options) {
     // 构建热力图数据
     const xAxisData = tableObject.header.slice(1); // 列标题作为x轴
@@ -1127,7 +1128,7 @@ const HeatmapChartOptions = {
 };
 
 const PieChartOptions = {
-  parents: [BaseChartOptions],
+  components: [BaseChartOptions],
   options(tableObject, options) {
     // 构建饼图数据
     const data = tableObject.rows.map((row) => ({
@@ -1196,11 +1197,11 @@ const PieChartOptions = {
 
 function generateOptions(handler, tableObject, options) {
   let result;
-  if (!handler.parents || handler.parents.length === 0) {
+  if (!handler.components || handler.components.length === 0) {
     result = {};
   } else {
-    result = generateOptions(handler.parents[0], tableObject, options);
-    for (const handler2 of handler.parents.slice(1)) {
+    result = generateOptions(handler.components[0], tableObject, options);
+    for (const handler2 of handler.components.slice(1)) {
       deepMerge(result, generateOptions(handler2, tableObject, options));
     }
   }
