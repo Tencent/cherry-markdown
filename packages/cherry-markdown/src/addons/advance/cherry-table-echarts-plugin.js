@@ -104,10 +104,10 @@ export default class EChartsTableEngine {
         chartOption = this.renderMapChart(tableObject, options);
         break;
       case 'heatmap':
-        chartOption = this.renderHeatmapChart(tableObject, options);
+        chartOption = generateOptions(HeatmapChartOptions, tableObject, options);
         break;
       case 'pie':
-        chartOption = this.renderPieChart(tableObject, options);
+        chartOption = generateOptions(PieChartOptions, tableObject, options);
         break;
       default:
         return '';
@@ -178,469 +178,6 @@ export default class EChartsTableEngine {
     setTimeout(() => initChart(), 50);
 
     return htmlContent;
-  }
-
-  renderBarChart(tableObject, options) {
-    return this.$renderChartCommon(tableObject, options, 'bar');
-  }
-
-  renderLineChart(tableObject, options) {
-    return this.$renderChartCommon(tableObject, options, 'line');
-  }
-
-  renderRadarChart(tableObject, options) {
-    return this.$renderRadarChartCommon(tableObject, options);
-  }
-
-  renderHeatmapChart(tableObject, options) {
-    return this.$renderHeatmapChartCommon(tableObject, options);
-  }
-
-  renderPieChart(tableObject, options) {
-    return this.$renderPieChartCommon(tableObject, options);
-  }
-
-  $renderRadarChartCommon(tableObject, options) {
-    console.log('Rendering radar chart:', tableObject);
-
-    // 构建雷达图指标
-    const indicator = tableObject.header.slice(1).map((header) => {
-      const maxValue = Math.max(
-        ...tableObject.rows.map((row) => {
-          const index = tableObject.header.indexOf(header);
-          const value = parseFloat(row[index].replace(/,/g, '')) || 0;
-          return value;
-        }),
-      );
-      return {
-        name: header,
-        max: Math.ceil(maxValue * 1.2), // 设置最大值为数据最大值的1.2倍，向上取整
-      };
-    });
-
-    const seriesData = tableObject.rows.map((row, index) => ({
-      name: row[0],
-      value: row.slice(1).map((data) => parseFloat(data.replace(/,/g, '')) || 0),
-      areaStyle: {
-        opacity: 0.1 + index * 0.05, // 每个系列有不同的透明度
-      },
-      lineStyle: {
-        width: 2,
-      },
-      itemStyle: {
-        borderWidth: 2,
-      },
-    }));
-
-    console.log('Radar indicator:', indicator);
-    console.log('Radar seriesData:', seriesData);
-
-    const chartOptions = {
-      backgroundColor: '#fff',
-      color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'],
-      tooltip: {
-        trigger: 'item',
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        borderColor: '#999',
-        borderWidth: 1,
-        textStyle: {
-          color: '#fff',
-          fontSize: 12,
-        },
-        formatter(params) {
-          let result = `<div style="margin-bottom:4px;font-weight:bold;">${params.name}</div>`;
-          params.value.forEach(function (value, index) {
-            result += '<div style="margin:2px 0;">';
-            result += `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${params.color};"></span>`;
-            result += `<span style="font-weight:bold;">${indicator[index].name}</span>`;
-            result += `<span style="float:right;margin-left:20px;font-weight:bold;">${value}</span>`;
-            result += '</div>';
-          });
-          return result;
-        },
-        extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
-      },
-      legend: {
-        data: tableObject.rows.map((row) => row[0]),
-        orient: 'horizontal',
-        left: 'center',
-        top: 'bottom',
-        textStyle: {
-          fontSize: 12,
-        },
-        itemWidth: 12,
-        itemHeight: 12,
-        selectedMode: 'multiple',
-        selector: [
-          {
-            type: 'all',
-            title: '全选',
-          },
-          {
-            type: 'inverse',
-            title: '反选',
-          },
-        ],
-      },
-      toolbox: {
-        show: true,
-        orient: 'vertical',
-        left: 'right',
-        top: 'center',
-        feature: {
-          dataView: {
-            show: true,
-            readOnly: false,
-            title: '数据视图',
-            lang: ['数据视图', '关闭', '刷新'],
-          },
-          restore: { show: true, title: '重置' },
-          saveAsImage: {
-            show: true,
-            title: '保存为图片',
-            type: 'png',
-            backgroundColor: '#fff',
-          },
-        },
-        iconStyle: {
-          borderColor: '#999',
-        },
-        emphasis: {
-          iconStyle: {
-            borderColor: '#666',
-          },
-        },
-      },
-      radar: {
-        name: {
-          textStyle: {
-            color: '#333',
-            fontSize: 12,
-            fontWeight: 'bold',
-          },
-          formatter(name) {
-            return name.length > 6 ? `${name.substr(0, 6)}...` : name;
-          },
-        },
-        indicator,
-        radius: '60%',
-        center: ['50%', '50%'],
-        splitNumber: 5,
-        shape: 'polygon',
-        splitArea: {
-          areaStyle: {
-            color: [
-              'rgba(114, 172, 209, 0.2)',
-              'rgba(114, 172, 209, 0.4)',
-              'rgba(114, 172, 209, 0.6)',
-              'rgba(114, 172, 209, 0.8)',
-              'rgba(114, 172, 209, 1)',
-            ].reverse(),
-          },
-        },
-        axisLine: {
-          lineStyle: {
-            color: 'rgba(211, 253, 250, 0.8)',
-          },
-        },
-        splitLine: {
-          lineStyle: {
-            color: 'rgba(211, 253, 250, 0.8)',
-          },
-        },
-      },
-      series: [
-        {
-          name: '雷达图数据',
-          type: 'radar',
-          data: seriesData,
-          emphasis: {
-            lineStyle: {
-              width: 4,
-            },
-            areaStyle: {
-              opacity: 0.3,
-            },
-          },
-          animation: true,
-          animationDuration: 1000,
-          animationEasing: 'elasticOut',
-        },
-      ],
-      graphic: {
-        elements: [
-          {
-            type: 'text',
-            left: 'center',
-            top: '5%',
-            style: {
-              text: '雷达图分析',
-              fontSize: 16,
-              fontWeight: 'bold',
-              fill: '#333',
-            },
-          },
-        ],
-      },
-    };
-    return chartOptions;
-  }
-
-  $renderHeatmapChartCommon(tableObject, options) {
-    console.log('Rendering heatmap chart:', tableObject);
-
-    // 构建热力图数据
-    const xAxisData = tableObject.header.slice(1); // 列标题作为x轴
-    const yAxisData = tableObject.rows.map((row) => row[0]); // 行标题作为y轴
-    const data = [];
-    // 构建热力图数据点 [x索引, y索引, 值]
-    tableObject.rows.forEach((row, yIndex) => {
-      row.slice(1).forEach((value, xIndex) => {
-        const numValue = parseFloat(value.replace(/,/g, '')) || 0;
-        data.push([xIndex, yIndex, numValue]);
-      });
-    });
-
-    // 计算数值范围用于颜色映射
-    const values = data.map((item) => item[2]);
-    const minValue = Math.min(...values);
-    const maxValue = Math.max(...values);
-
-    const chartOptions = {
-      backgroundColor: '#fff',
-      tooltip: {
-        trigger: 'item',
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        borderColor: '#999',
-        borderWidth: 1,
-        textStyle: {
-          color: '#fff',
-          fontSize: 12,
-        },
-        formatter(params) {
-          return `${yAxisData[params.data[1]]}<br/>${xAxisData[params.data[0]]}: <strong>${params.data[2]}</strong>`;
-        },
-        extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
-      },
-      grid: {
-        height: '50%',
-        top: '10%',
-        left: '10%',
-        right: '10%',
-      },
-      xAxis: {
-        type: 'category',
-        data: xAxisData,
-        splitArea: {
-          show: true,
-        },
-        axisLabel: {
-          fontSize: 12,
-        },
-      },
-      yAxis: {
-        type: 'category',
-        data: yAxisData,
-        splitArea: {
-          show: true,
-        },
-        axisLabel: {
-          fontSize: 12,
-        },
-      },
-      visualMap: {
-        min: minValue,
-        max: maxValue,
-        calculable: true,
-        orient: 'horizontal',
-        left: 'center',
-        bottom: '15%',
-        inRange: {
-          color: [
-            '#313695',
-            '#4575b4',
-            '#74add1',
-            '#abd9e9',
-            '#e0f3f8',
-            '#ffffcc',
-            '#fee090',
-            '#fdae61',
-            '#f46d43',
-            '#d73027',
-            '#a50026',
-          ],
-        },
-        textStyle: {
-          fontSize: 12,
-        },
-      },
-      series: [
-        {
-          name: '热力图数据',
-          type: 'heatmap',
-          data,
-          label: {
-            show: true,
-            fontSize: 10,
-          },
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowColor: 'rgba(0, 0, 0, 0.5)',
-              borderWidth: 2,
-              borderColor: '#ff6b6b',
-            },
-          },
-          select: {
-            itemStyle: {
-              borderWidth: 2,
-              borderColor: '#ff6b6b',
-              opacity: 1,
-            },
-          },
-          selectedMode: 'single',
-          animation: true,
-          animationDuration: 1000,
-          animationEasing: 'cubicOut',
-        },
-      ],
-      toolbox: {
-        show: true,
-        orient: 'vertical',
-        left: 'right',
-        top: 'bottom',
-        feature: {
-          dataView: {
-            show: true,
-            readOnly: false,
-            title: '数据视图',
-            lang: ['数据视图', '关闭', '刷新'],
-          },
-          restore: { show: true, title: '重置' },
-          saveAsImage: {
-            show: true,
-            title: '保存为图片',
-            type: 'png',
-            backgroundColor: '#fff',
-          },
-        },
-        iconStyle: {
-          borderColor: '#999',
-        },
-        emphasis: {
-          iconStyle: {
-            borderColor: '#666',
-          },
-        },
-      },
-    };
-    return chartOptions;
-  }
-
-  $renderPieChartCommon(tableObject, options) {
-    console.log('Rendering pie chart:', tableObject);
-
-    // 构建饼图数据
-    const data = tableObject.rows.map((row) => ({
-      name: row[0],
-      value: parseFloat(row[1].replace(/,/g, '')) || 0,
-    }));
-
-    const chartOptions = {
-      backgroundColor: '#fff',
-      tooltip: {
-        trigger: 'item',
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        borderColor: '#999',
-        borderWidth: 1,
-        textStyle: {
-          color: '#fff',
-          fontSize: 12,
-        },
-        formatter: '{a} <br/>{b}: {c} ({d}%)',
-        extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
-      },
-      legend: {
-        orient: 'vertical',
-        left: 'left',
-        top: 'middle',
-        textStyle: {
-          fontSize: 12,
-        },
-      },
-      series: [
-        {
-          name: '数据分布',
-          type: 'pie',
-          radius: ['40%', '70%'],
-          center: ['50%', '50%'],
-          avoidLabelOverlap: false,
-          label: {
-            show: false,
-            position: 'center',
-          },
-          emphasis: {
-            label: {
-              show: true,
-              fontSize: '18',
-              fontWeight: 'bold',
-            },
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)',
-              borderWidth: 3,
-              borderColor: '#ff6b6b',
-            },
-          },
-          select: {
-            itemStyle: {
-              borderWidth: 3,
-              borderColor: '#ff6b6b',
-              opacity: 1,
-            },
-          },
-          selectedMode: 'single',
-          labelLine: {
-            show: false,
-          },
-          data,
-          animation: true,
-          animationDuration: 1000,
-          animationEasing: 'cubicOut',
-        },
-      ],
-      toolbox: {
-        show: true,
-        orient: 'vertical',
-        left: 'right',
-        top: 'center',
-        feature: {
-          dataView: {
-            show: true,
-            readOnly: false,
-            title: '数据视图',
-            lang: ['数据视图', '关闭', '刷新'],
-          },
-          restore: { show: true, title: '重置' },
-          saveAsImage: {
-            show: true,
-            title: '保存为图片',
-            type: 'png',
-            backgroundColor: '#fff',
-          },
-        },
-        iconStyle: {
-          borderColor: '#999',
-        },
-        emphasis: {
-          iconStyle: {
-            borderColor: '#666',
-          },
-        },
-      },
-    };
-    return chartOptions;
   }
 
   renderMapChart(tableObject, options) {
@@ -1472,6 +1009,190 @@ const normalizeProvinceName = (inputName) => {
   // 如果都没匹配到，返回原名称
   console.warn(`Province name not matched: ${inputName}`);
   return cleanName;
+};
+
+const HeatmapChartOptions = {
+  parents: [BaseChartOptions],
+  options(tableObject, options) {
+    // 构建热力图数据
+    const xAxisData = tableObject.header.slice(1); // 列标题作为x轴
+    const yAxisData = tableObject.rows.map((row) => row[0]); // 行标题作为y轴
+    const data = [];
+    // 构建热力图数据点 [x索引, y索引, 值]
+    tableObject.rows.forEach((row, yIndex) => {
+      row.slice(1).forEach((value, xIndex) => {
+        const numValue = parseFloat(value.replace(/,/g, '')) || 0;
+        data.push([xIndex, yIndex, numValue]);
+      });
+    });
+
+    // 计算数值范围用于颜色映射
+    const values = data.map((item) => item[2]);
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+
+    return {
+      tooltip: {
+        trigger: 'item',
+        formatter(params) {
+          return `${yAxisData[params.data[1]]}<br/>${xAxisData[params.data[0]]}: <strong>${params.data[2]}</strong>`;
+        },
+      },
+      grid: {
+        height: '50%',
+        top: '10%',
+        left: '10%',
+        right: '10%',
+      },
+      xAxis: {
+        type: 'category',
+        data: xAxisData,
+        splitArea: {
+          show: true,
+        },
+        axisLabel: {
+          fontSize: 12,
+        },
+      },
+      yAxis: {
+        type: 'category',
+        data: yAxisData,
+        splitArea: {
+          show: true,
+        },
+        axisLabel: {
+          fontSize: 12,
+        },
+      },
+      visualMap: {
+        min: minValue,
+        max: maxValue,
+        calculable: true,
+        orient: 'horizontal',
+        left: 'center',
+        bottom: '15%',
+        inRange: {
+          color: [
+            '#313695',
+            '#4575b4',
+            '#74add1',
+            '#abd9e9',
+            '#e0f3f8',
+            '#ffffcc',
+            '#fee090',
+            '#fdae61',
+            '#f46d43',
+            '#d73027',
+            '#a50026',
+          ],
+        },
+        textStyle: {
+          fontSize: 12,
+        },
+      },
+      series: [
+        {
+          name: '热力图数据',
+          type: 'heatmap',
+          data,
+          label: {
+            show: true,
+            fontSize: 10,
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowColor: 'rgba(0, 0, 0, 0.5)',
+              borderWidth: 2,
+              borderColor: '#ff6b6b',
+            },
+          },
+          select: {
+            itemStyle: {
+              borderWidth: 2,
+              borderColor: '#ff6b6b',
+              opacity: 1,
+            },
+          },
+          selectedMode: 'single',
+          animation: true,
+          animationDuration: 1000,
+          animationEasing: 'cubicOut',
+        },
+      ],
+      toolbox: {
+        top: 'bottom',
+      },
+    };
+  },
+};
+
+const PieChartOptions = {
+  parents: [BaseChartOptions],
+  options(tableObject, options) {
+    // 构建饼图数据
+    const data = tableObject.rows.map((row) => ({
+      name: row[0],
+      value: parseFloat(row[1].replace(/,/g, '')) || 0,
+    }));
+
+    return {
+      tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b}: {c} ({d}%)',
+      },
+      legend: {
+        orient: 'vertical',
+        left: 'left',
+        top: 'middle',
+        textStyle: {
+          fontSize: 12,
+        },
+      },
+      series: [
+        {
+          name: '数据分布',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          center: ['50%', '50%'],
+          avoidLabelOverlap: false,
+          label: {
+            show: false,
+            position: 'center',
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: '18',
+              fontWeight: 'bold',
+            },
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)',
+              borderWidth: 3,
+              borderColor: '#ff6b6b',
+            },
+          },
+          select: {
+            itemStyle: {
+              borderWidth: 3,
+              borderColor: '#ff6b6b',
+              opacity: 1,
+            },
+          },
+          selectedMode: 'single',
+          labelLine: {
+            show: false,
+          },
+          data,
+          animation: true,
+          animationDuration: 1000,
+          animationEasing: 'cubicOut',
+        },
+      ],
+    };
+  },
 };
 
 function generateOptions(handler, tableObject, options) {
