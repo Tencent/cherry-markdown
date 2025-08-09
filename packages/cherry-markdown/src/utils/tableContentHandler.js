@@ -28,7 +28,7 @@ export default class TableHandler {
     editorDom: {}, // 编辑器容器
   };
 
-  constructor(trigger, target, container, previewerDom, codeMirror, tableElement, cherry) {
+  constructor (trigger, target, container, previewerDom, codeMirror, tableElement, cherry) {
     // 触发方式 click / hover
     this.trigger = trigger;
     this.target = target;
@@ -41,7 +41,7 @@ export default class TableHandler {
     this.$cherry = cherry;
   }
 
-  emit(type, event = {}, callback = () => {}) {
+  emit (type, event = {}, callback = () => {}) {
     switch (type) {
       case 'keyup':
         return this.trigger === 'click' && this.$onInputChange(event);
@@ -58,7 +58,7 @@ export default class TableHandler {
     }
   }
 
-  $tryRemoveMe(event, callback) {
+  $tryRemoveMe (event, callback) {
     if (!/textarea/i.test(event.target.tagName)) {
       this.$remove();
       callback();
@@ -68,7 +68,7 @@ export default class TableHandler {
   /**
    * 获取目标dom的位置信息和尺寸信息
    */
-  $getPosition(node = this.tableEditor.info.tdNode) {
+  $getPosition (node = this.tableEditor.info.tdNode) {
     const position = node.getBoundingClientRect();
     const editorPosition = this.previewerDom.parentNode.getBoundingClientRect();
     return {
@@ -80,7 +80,7 @@ export default class TableHandler {
     };
   }
 
-  setStyle(element, property, value) {
+  setStyle (element, property, value) {
     const info = element.getBoundingClientRect();
     if (info[property] !== value) {
       element.style[property] = value;
@@ -90,7 +90,7 @@ export default class TableHandler {
   /**
    * TODO: 这里是分别对文本框、操作符号和选项设置偏移，应该作为一个整体来设置
    */
-  $setInputOffset() {
+  $setInputOffset () {
     const tdInfo = this.$getPosition();
     const { inputDiv } = this.tableEditor.editorDom;
     // 设置文本框的偏移及大小
@@ -107,7 +107,7 @@ export default class TableHandler {
   /**
    * 刷新操作符位置
    */
-  $setSymbolOffset() {
+  $setSymbolOffset () {
     const container = this.tableEditor.editorDom.symbolContainer;
     const { tableNode, trNode, isTHead } = this.tableEditor.info;
     const tableInfo = this.$getPosition(tableNode);
@@ -161,7 +161,7 @@ export default class TableHandler {
   /**
    * 刷新定位
    */
-  $refreshPosition() {
+  $refreshPosition () {
     if (this.trigger === 'click') {
       this.$setInputOffset();
       return;
@@ -170,14 +170,14 @@ export default class TableHandler {
     this.$setDeleteButtonPosition();
   }
 
-  $remove() {
+  $remove () {
     this.tableEditor = { info: {}, tableCodes: [], editorDom: {} };
   }
 
   /**
    * 收集编辑器中的表格语法，并记录表格语法的开始的offset
    */
-  $collectTableCode() {
+  $collectTableCode () {
     const tableCodes = [];
     this.codeMirror
       .getValue()
@@ -199,7 +199,7 @@ export default class TableHandler {
   /**
    * 获取预览区域被点击的table对象，并记录table的顺位
    */
-  $collectTableDom() {
+  $collectTableDom () {
     const list = Array.from(this.previewerDom.querySelectorAll('table.cherry-table'));
     const tableNode = this.$getClosestNode(this.target, 'TABLE');
     if (tableNode === false) {
@@ -230,7 +230,7 @@ export default class TableHandler {
    * @param {String} type 'td': 当前单元格, 'table': 当前表格
    * @param {Boolean} select 是否选中编辑器中的代码
    */
-  $setSelection(index, type = 'table', select = true) {
+  $setSelection (index, type = 'table', select = true) {
     const tableCode = this.tableEditor.tableCodes[index];
     const whole = this.codeMirror.getValue();
     const selectTdInfo = this.tableEditor.info;
@@ -265,7 +265,7 @@ export default class TableHandler {
    * @param {Number} trIndex
    * @param {Number} tdIndex
    */
-  $getTdOffset(tableCode, isTHead, trIndex, tdIndex) {
+  $getTdOffset (tableCode, isTHead, trIndex, tdIndex) {
     const codes = tableCode.split(/\n/);
     const targetTr = isTHead ? 0 : trIndex + 2;
     const tds = codes[targetTr].split(/\|/);
@@ -287,7 +287,7 @@ export default class TableHandler {
   /**
    * 在编辑器里找到对应的表格源码，并让编辑器选中
    */
-  $findTableInEditor() {
+  $findTableInEditor () {
     this.$collectTableDom();
     this.$collectTableCode();
     // 暂时不考虑代码块中包含表格、人为输入表格html语法、tapd特色表格语法的情况
@@ -298,12 +298,12 @@ export default class TableHandler {
     this.$setSelection(this.tableEditor.info.tableIndex, 'td', this.trigger === 'click');
   }
 
-  $initReg() {
+  $initReg () {
     this.tableReg = this.tableReg ? this.tableReg : getTableRule(true);
     this.codeBlockReg = this.codeBlockReg ? this.codeBlockReg : getCodeBlockRule().reg;
   }
 
-  showBubble() {
+  showBubble () {
     if (this.trigger === 'click') {
       this.$drawEditor();
       return;
@@ -317,14 +317,14 @@ export default class TableHandler {
    * 判断是否处于编辑状态
    * @returns {boolean}
    */
-  $isEditing() {
+  $isEditing () {
     return this.tableEditor.editing;
   }
 
   /**
    * 把表格上的input单行文本框和操作符号画出来
    */
-  $drawEditor() {
+  $drawEditor () {
     const dom = document.createElement('div');
     dom.className = 'cherry-previewer-table-content-handler__input';
     const input = document.createElement('textarea');
@@ -337,7 +337,7 @@ export default class TableHandler {
     this.tableEditor.editorDom.inputDom.focus();
   }
 
-  $onInputChange(e) {
+  $onInputChange (e) {
     if (e.target.tagName !== 'TEXTAREA') {
       return;
     }
@@ -347,7 +347,7 @@ export default class TableHandler {
   /**
    * 更新编辑器的位置（尺寸和位置）
    */
-  $updateEditorPosition() {
+  $updateEditorPosition () {
     this.$setInputOffset();
     const tdStyle = getComputedStyle(this.tableEditor.info.tdNode);
     this.tableEditor.editorDom.inputDom.style.textAlign = tdStyle.textAlign || 'left';
@@ -369,7 +369,7 @@ export default class TableHandler {
     this.tableEditor.editorDom.inputDom.style.paddingBottom = '0px';
   }
 
-  $getClosestNode(node, targetNodeName) {
+  $getClosestNode (node, targetNodeName) {
     if (!node || !node.tagName) {
       return false;
     }
@@ -385,7 +385,7 @@ export default class TableHandler {
   /**
    * 绘制操作符号
    */
-  $drawSymbol() {
+  $drawSymbol () {
     const types = ['Last', 'Next'];
     const dirs = ['Row', 'Col'];
     const textDict = {
@@ -417,7 +417,7 @@ export default class TableHandler {
     this.container.appendChild(this.tableEditor.editorDom.symbolContainer);
     this.$setSymbolOffset();
   }
-  $drawSortSymbol() {
+  $drawSortSymbol () {
     // const types = ['RowLeft', 'RowRight', 'ColUp', 'ColDown']; // 不要底部的拖拽按钮了，貌似没啥用
     const types = ['RowLeft', 'RowRight', 'ColUp'];
 
@@ -435,12 +435,12 @@ export default class TableHandler {
           const { tdNode } = this.tableEditor.info;
           tdNode.draggable = true;
 
-          tdNode.parentNode.style.backgroundColor = 'rgb(206,226,248)';
+          tdNode.parentNode.classList.add('highlighted-row');
         });
         sortSymbol.addEventListener('mouseleave', () => {
           const { tdNode } = this.tableEditor.info;
           tdNode.draggable = false;
-          tdNode.parentNode.style.backgroundColor = '';
+          tdNode.parentNode.classList.remove('highlighted-row');
         });
         sortSymbol.addEventListener('mousedown', (e) => {
           this.$setSelection(this.tableEditor.info.tableIndex, 'table');
@@ -463,13 +463,13 @@ export default class TableHandler {
                 highLightTrDom.push(tr);
               });
             });
-          highLightTrDom.forEach((tr) => (tr.children[index].style.backgroundColor = 'rgb(206,226,248)'));
+          highLightTrDom.forEach((tr) => tr.children[index].classList.add('highlighted-row'));
         });
         sortSymbol.addEventListener('mouseleave', () => {
           const { tdNode } = this.tableEditor.info;
           tdNode.draggable = false;
           const index = Array.from(tdNode.parentNode.children).indexOf(tdNode);
-          highLightTrDom.forEach((tr) => (tr.children[index].style.backgroundColor = ''));
+          highLightTrDom.forEach((tr) => tr.children[index].classList.remove('highlighted-row'));
         });
         sortSymbol.addEventListener('mousedown', (e) => {
           this.$setSelection(this.tableEditor.info.tableIndex, 'table');
@@ -482,7 +482,7 @@ export default class TableHandler {
     this.container.appendChild(this.tableEditor.editorDom.sortContainer);
     this.$setSortSymbolsPosition();
   }
-  $setSortSymbolsPosition() {
+  $setSortSymbolsPosition () {
     const container = this.tableEditor.editorDom.sortContainer;
     const { tableNode, tdNode, isTHead } = this.tableEditor.info;
     const tableInfo = this.$getPosition(tableNode);
@@ -523,7 +523,7 @@ export default class TableHandler {
   /**
    * 添加上一行
    */
-  $addLastRow() {
+  $addLastRow () {
     const [{ line }] = this.tableEditor.info.selection;
     const newRow = `${'|'.repeat(this.tableEditor.info.columns)}\n`;
     this.codeMirror.replaceRange(newRow, { line, ch: 0 });
@@ -534,7 +534,7 @@ export default class TableHandler {
   /**
    * 添加下一行
    */
-  $addNextRow() {
+  $addNextRow () {
     const [, { line }] = this.tableEditor.info.selection;
     const newRow = `${'|'.repeat(this.tableEditor.info.columns)}\n`;
     this.codeMirror.replaceRange(newRow, { line: line + 1, ch: 0 });
@@ -548,7 +548,7 @@ export default class TableHandler {
    * @param {*} index 单元格索引
    * @returns {string|false} 单元格对齐方式，如果是false则表示不生成对齐方式
    */
-  $getTdAlign(cells, index, cellsIndex) {
+  $getTdAlign (cells, index, cellsIndex) {
     if (index !== 1) {
       return '';
     }
@@ -561,7 +561,7 @@ export default class TableHandler {
   /**
    * 添加上一列
    */
-  $addLastCol() {
+  $addLastCol () {
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
     const selection = this.codeMirror.getSelection();
     const lines = selection.split('\n');
@@ -584,7 +584,7 @@ export default class TableHandler {
   /**
    * 添加下一列
    */
-  $addNextCol() {
+  $addNextCol () {
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
     const selection = this.codeMirror.getSelection();
     const lines = selection.split('\n');
@@ -606,25 +606,36 @@ export default class TableHandler {
   /**
    * 高亮当前列
    */
-  $highlightColumn() {
-    const { tableNode, tdIndex } = this.tableEditor.info;
-    const { rows } = tableNode;
-    rows[0].cells[tdIndex].style.borderTop = '1px solid red';
-    rows[rows.length - 1].cells[tdIndex].style.borderBottom = '1px solid red';
-    for (let i = 0; i < rows.length; i++) {
-      const { cells } = rows[i];
-      if (cells[tdIndex]) {
-        if (tdIndex === 0) cells[tdIndex].style.borderLeft = '1px solid red';
-        else cells[tdIndex - 1].style.borderRight = '1px solid red';
-        cells[tdIndex].style.borderRight = '1px solid red';
+$highlightColumn() {
+  const { tableNode, tdIndex } = this.tableEditor.info;
+  const tBody = tableNode.tBodies[0];
+  if (!tBody) {
+    return;
+  }
+  const bodyRows = tBody.rows;
+  if (bodyRows.length === 0) {
+    return;
+  }
+  bodyRows[0].cells[tdIndex].style.borderTop = '1px solid red';
+  bodyRows[bodyRows.length - 1].cells[tdIndex].style.borderBottom = '1px solid red';
+  for (let i = 0; i < bodyRows.length; i++) {
+    const { cells } = bodyRows[i];
+    if (cells[tdIndex]) {
+      if (tdIndex === 0) {
+        cells[tdIndex].style.borderLeft = '1px solid red';
+      } else {
+        cells[tdIndex - 1].style.borderRight = '1px solid red';
       }
+      cells[tdIndex].style.borderRight = '1px solid red';
+      cells[tdIndex].classList.add('highlighted-error');
     }
   }
+}
 
   /**
    * 取消高亮当前列
    */
-  $cancelHighlightColumn() {
+  $cancelHighlightColumn () {
     const { tableNode, tdIndex } = this.tableEditor.info;
     if (tableNode) {
       const { rows } = tableNode;
@@ -633,6 +644,7 @@ export default class TableHandler {
         if (cells[tdIndex]) {
           if (tdIndex !== 0) cells[tdIndex - 1].style.border = '';
           cells[tdIndex].style.border = ''; // 恢复原始边框
+          cells[tdIndex].classList.remove('highlighted-error');
         }
       }
     }
@@ -641,24 +653,29 @@ export default class TableHandler {
   /**
    * 高亮当前行
    */
-  $highlightRow() {
+  $highlightRow () {
     this.$doHighlightRow('1px solid red');
   }
 
   /**
    * 取消高亮当前行
    */
-  $cancelHighlightRow() {
+  $cancelHighlightRow () {
     this.$doHighlightRow('');
   }
 
-  $doHighlightRow(style = '') {
+  $doHighlightRow (style = '') {
     const { trNode, tableNode } = this.tableEditor.info;
     const tds = trNode.cells;
     const preTds = trNode.previousElementSibling?.cells || tableNode.tHead.firstChild.cells;
     for (let i = 0; i < tds.length; i++) {
-      if (preTds[i]) preTds[i].style.borderBottom = style;
+      style != '' ? tds[0].classList.add('highlighted-error') : tds[0].classList.remove('highlighted-error');
+      if (preTds && preTds[i]) {
+        preTds[i].style.borderBottom = style;
+      }
       tds[i].style.borderBottom = style;
+      style != '' ? tds[i+1].classList.add('highlighted-error') : tds[i+1].classList.remove('highlighted-error');
+      
     }
     tds[0].style.borderLeft = style;
     tds[tds.length - 1].style.borderRight = style;
@@ -667,7 +684,7 @@ export default class TableHandler {
   /**
    * 添加删除按钮
    */
-  $drawDelete() {
+  $drawDelete () {
     const types = ['top', 'bottom', 'right'];
     const buttons = types.map((type) => [type]);
     const container = document.createElement('div');
@@ -710,7 +727,7 @@ export default class TableHandler {
   /**
    * 设置删除按钮的位置
    */
-  $setDeleteButtonPosition() {
+  $setDeleteButtonPosition () {
     const container = this.tableEditor.editorDom.deleteContainer;
     const { tableNode, tdNode, isTHead } = this.tableEditor.info;
     const tableInfo = this.$getPosition(tableNode);
@@ -743,7 +760,7 @@ export default class TableHandler {
   /**
    * 删除当前行
    */
-  $deleteCurrentRow() {
+  $deleteCurrentRow () {
     const { tableIndex, trIndex } = this.tableEditor.info;
     this.$setSelection(tableIndex, 'table');
     const selection = this.codeMirror.getSelection();
@@ -756,7 +773,7 @@ export default class TableHandler {
   /**
    * 删除当前列
    */
-  $deleteCurrentColumn() {
+  $deleteCurrentColumn () {
     const { tableIndex, tdIndex } = this.tableEditor.info;
     this.$setSelection(tableIndex, 'table');
     const selection = this.codeMirror.getSelection();
@@ -775,7 +792,7 @@ export default class TableHandler {
   /**
    * 拖拽列
    */
-  $dragCol() {
+  $dragCol () {
     const oldTdIndex = this.tableEditor.info.tdIndex;
     const thNode = this.target.parentElement;
     const lines = this.codeMirror.getSelection().split(/\n/);
@@ -783,18 +800,18 @@ export default class TableHandler {
     const that = this;
     tdNode.setAttribute('draggable', true);
 
-    function handleDragLeave(event) {
+    function handleDragLeave (event) {
       that.setStyle(event.target, 'border', '1px solid #dfe6ee');
     }
 
-    function handleDragOver(event) {
+    function handleDragOver (event) {
       event.preventDefault();
       const tdIndex = Array.from(event.target.parentElement.childNodes).indexOf(event.target);
       that.$dragSymbol(event.target, oldTdIndex, tdIndex, 'Col');
       thNode.setAttribute('draggable', false);
     }
 
-    function handleDrop(event) {
+    function handleDrop (event) {
       event.preventDefault();
       const tdIndex = Array.from(event.target.parentElement.childNodes).indexOf(event.target);
       const newLines = lines.map((line, index) => {
@@ -822,7 +839,7 @@ export default class TableHandler {
   /**
    * 拖拽行
    */
-  $dragLine() {
+  $dragLine () {
     const { trNode } = this.tableEditor.info;
     trNode.setAttribute('draggable', true);
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
@@ -831,11 +848,11 @@ export default class TableHandler {
     const lines = this.codeMirror.getSelection().split(/\n/);
     const that = this;
 
-    function handleDragLeave(event) {
+    function handleDragLeave (event) {
       that.setStyle(event.target.parentElement, 'border', '1px solid #dfe6ee');
     }
 
-    function handleDragOver(event) {
+    function handleDragOver (event) {
       event.preventDefault();
       const trIndex =
         Array.from(event.target.parentElement.parentElement.childNodes).indexOf(event.target.parentElement) + 2;
@@ -843,7 +860,7 @@ export default class TableHandler {
       trNode.setAttribute('draggable', false);
     }
 
-    function handleDrop(event) {
+    function handleDrop (event) {
       event.preventDefault();
       const trIndex =
         Array.from(event.target.parentElement.parentElement.childNodes).indexOf(event.target.parentElement) + 2;
@@ -863,7 +880,7 @@ export default class TableHandler {
     tBody.addEventListener('drop', handleDrop, { once: true });
   }
 
-  $dragSymbol(objTarget, oldIndex, index, type) {
+  $dragSymbol (objTarget, oldIndex, index, type) {
     const { target } = this;
     if (target !== objTarget && oldIndex !== index) {
       if ((target.tagName === 'TH' || target.tagName === 'TD') && type === 'Col') {
@@ -886,7 +903,7 @@ export default class TableHandler {
     }
   }
 
-  $operateLines(oldIndex, index, lines) {
+  $operateLines (oldIndex, index, lines) {
     if (oldIndex < index) {
       lines.splice(index + 1, 0, lines[oldIndex]);
       lines.splice(oldIndex, 1);

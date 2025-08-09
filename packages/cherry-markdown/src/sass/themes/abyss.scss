@@ -4,17 +4,17 @@
 
 .cherry.theme__abyss {
   /* ========== 基础色彩变量覆盖 ========== */
-  --primary-color: #8394AD;
-  --secondary-color: #2C2E37;
+  --primary-color: #8394ad;
+  --secondary-color: #2c2e37;
 
-  --base-font-color: #CECFCF;
-  --base-editor-bg: #1E222A;
-  --base-previewer-bg: #1E222A;
+  --base-font-color: #cecfcf;
+  --base-editor-bg: #1e222a;
+  --base-previewer-bg: #1e222a;
   --base-border-color: var(--primary-color);
 
   /* ========== 工具栏相关变量 ========== */
-  --toolbar-bg: #181C24;
-  --toolbar-btn-color: #CECFCF;
+  --toolbar-bg: #181c24;
+  --toolbar-btn-color: #cecfcf;
   --toolbar-btn-hover-bg: var(--secondary-color);
   --toolbar-btn-hover-color: var(--primary-color);
   --toolbar-btn-active-bg: var(--secondary-color);
@@ -35,7 +35,7 @@
   /* ========== 编辑器相关变量 ========== */
   --editor-header-color: var(--primary-color);
   --editor-string-color: var(--oc-blue-4);
-  --editor-comment-color: #A8A8A9;
+  --editor-comment-color: #a8a8a9;
   --editor-quote-color: var(--oc-gray-8);
   --editor-link-color: var(--oc-blue-4);
   --editor-url-bg-color: none;
@@ -51,11 +51,16 @@
   --md-link-hover-color: var(--primary-color);
   --md-inline-code-color: var(--primary-color);
   --md-inline-code-bg: #00203d;
-  --md-blockquote-bg: #2A2F3B;
+  --md-blockquote-bg: #2a2f3b;
   --md-hr-border: var(--primary-color);
   --md-table-border: var(--oc-blue-5);
+  --md-table-shadow-bg: var(--oc-blue-2);
+  --md-table-hover-bg: var(--oc-blue-1);
+  --md-table-border-radius: 8px;
+  --md-table-toolbar-blur: blur(12px);
+  --md-header-base: #0a0c10;
 
-  --md-toc-bg: #2A2F3B;
+  --md-toc-bg: #2a2f3b;
   --md-toc-title-color: var(--primary-color);
   --md-toc-link-color: var(--primary-color);
   --md-toc-indicator-color: var(--primary-color);
@@ -64,21 +69,21 @@
   --md-toc-indicator-hover-color: var(--primary-color);
 
   /* ========== 手风琴组件变量覆盖 ========== */
-  --accordion-bg: #2A2F3B;
+  --accordion-bg: #2a2f3b;
   --accordion-border: var(--oc-blue-5);
   --accordion-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
   --accordion-summary-bg: var(--secondary-color);
   --accordion-summary-hover-bg: var(--toolbar-btn-hover-bg);
 
-  --accordion-body-bg: #2A2F3B;
+  --accordion-body-bg: #2a2f3b;
   --accordion-body-border: var(--oc-blue-5);
   --accordion-body-color: var(--base-font-color);
 
   /* ========== 其余单个组件 ========== */
   --drag-border-color: #3a4453;
 
-    /* ========== Panel 相关变量 ========== */
+  /* ========== Panel 相关变量 ========== */
   --panel-border-radius: 16px;
   --panel-bg: linear-gradient(145deg, #2a2a2a 0%, #1e1e1e 100%);
   --panel-border: 1px solid rgba(109, 40, 217, 0.2);
@@ -139,10 +144,8 @@
 }
 
 .cherry-markdown.theme__abyss {
-
   figure {
     svg {
-
       path,
       rect,
       line {
@@ -168,17 +171,17 @@
     }
   }
 
-    @keyframes changeBgColor {
-      0% {
-        background-color: #ccddff50;
-      }
-  
-      60% {
-        background-color: #ccddff50;
-      }
-  
-      100% {
-        background-color: var(--base-previewer-bg);
-      }
+  @keyframes changeBgColor {
+    0% {
+      background-color: #ccddff50;
     }
+
+    60% {
+      background-color: #ccddff50;
+    }
+
+    100% {
+      background-color: var(--base-previewer-bg);
+    }
+  }
 }
