@@ -19,6 +19,7 @@
  * limitations under the License.
  */
 import mergeWith from 'lodash/mergeWith';
+import _ from 'lodash';
 
 const DEFAULT_OPTIONS = {
   renderer: 'svg',
@@ -91,13 +92,13 @@ export default class EChartsTableEngine {
     let chartOption = {};
     switch (type) {
       case 'bar':
-        chartOption = BarChartHandler.options(tableObject, options);
+        chartOption = generateOptions(BarChartOptions, tableObject, options);
         break;
       case 'line':
-        chartOption = LineChartHandler.options(tableObject, options);
+        chartOption = generateOptions(LineChartOptions, tableObject, options);
         break;
       case 'radar':
-        chartOption = RadarChartHandler.options(tableObject, options);
+        chartOption = generateOptions(RadarChartOptions, tableObject, options);
         break;
       case 'map':
         chartOption = this.renderMapChart(tableObject, options);
@@ -391,7 +392,7 @@ export default class EChartsTableEngine {
       };
     }
 
-    return MapChartHandler.options(tableObject, options);
+    return generateOptions(MapChartOptions, tableObject, options);
   }
 
   onDestroy() {
@@ -402,30 +403,12 @@ export default class EChartsTableEngine {
   }
 }
 
-const BaseChartHandler = {
-  calData(tableObject) {},
-  tooltipTrigger() {
-    return '';
-  },
-  tooltipFormatter(params) {
-    return '';
-  },
-  tooltipExtra() {
-    return {};
-  },
-  optionsExtra(tableObject, options) {
-    return {};
-  },
-  legendExtra(tableObject) {
-    return {};
-  },
+const BaseChartOptions = {
   options(tableObject, options) {
-    this.calData(tableObject);
     return {
       backgroundColor: '#fff',
       color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'],
       tooltip: {
-        trigger: this.tooltipTrigger(),
         backgroundColor: 'rgba(0,0,0,0.8)',
         borderColor: '#999',
         borderWidth: 1,
@@ -433,8 +416,6 @@ const BaseChartHandler = {
           color: '#fff',
           fontSize: 12,
         },
-        ...this.tooltipExtra(),
-        formatter: this.tooltipFormatter.bind(this),
         extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
       },
       toolbox: {
@@ -488,79 +469,58 @@ const BaseChartHandler = {
             title: '反选',
           },
         ],
-        ...this.legendExtra(tableObject),
       },
       // brush: {
       //   toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'],
       //   xAxisIndex: 0,
       // },
-      ...this.optionsExtra(tableObject, options),
     };
   },
 };
 
-const AxisBaseChartHandler = {
-  ...BaseChartHandler,
-  calData(tableObject) {
-    this.data = [];
-    this.series = [];
+const AxisBaseChartOptions = {
+  parents: [BaseChartOptions],
+  options(tableObject, options) {
+    const data = [];
+    const series = [];
     tableObject.rows.forEach((row) => {
       console.log('Processing row:', row);
-      this.data.push(row[0]);
-      this.series.push({
-        ...this.seriesItemOption(),
+      data.push(row[0]);
+      series.push({
         name: row[0],
-        data: row.slice(1).map((data) => {
-          const num = parseFloat(data.replace(/,/g, ''));
-          console.log('Parsed data:', data, '->', num);
-          return num;
-        }),
+        data: row.slice(1).map((data) => parseFloat(data.replace(/,/g, ''))),
       });
     });
-  },
-  tooltipTrigger() {
-    return 'axis';
-  },
-  tooltipFormatter(params) {
-    let result = `<div style="margin-bottom:4px;font-weight:bold;">${params[0].axisValueLabel}</div>`;
-    params.forEach(function (item, index) {
-      result += '<div style="margin:2px 0;">';
-      result += `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${item.color};"></span>`;
-      result += `<span style="font-weight:bold;">${item.seriesName}</span>`;
-      result += `<span style="float:right;margin-left:20px;font-weight:bold;">${item.value}</span>`;
-      result += '</div>';
-    });
-    return result;
-  },
-  tooltipAxisPointerType() {
-    return '';
-  },
-  tooltipExtra() {
+
     return {
-      axisPointer: {
-        type: this.tooltipAxisPointerType(),
-        label: {
-          backgroundColor: '#6a7985',
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          label: {
+            backgroundColor: '#6a7985',
+          },
+          crossStyle: {
+            color: '#999',
+          },
         },
-        crossStyle: {
-          color: '#999',
+        formatter(params) {
+          let result = `<div style="margin-bottom:4px;font-weight:bold;">${params[0].axisValueLabel}</div>`;
+          params.forEach(function (item, index) {
+            result += '<div style="margin:2px 0;">';
+            result += `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${item.color};"></span>`;
+            result += `<span style="font-weight:bold;">${item.seriesName}</span>`;
+            result += `<span style="float:right;margin-left:20px;font-weight:bold;">${item.value}</span>`;
+            result += '</div>';
+          });
+          return result;
         },
       },
-    };
-  },
-  seriesItemOption() {
-    return {};
-  },
-  legendExtra(tableObject) {
-    return {
-      data: this.data,
-      type: 'scroll',
-      top: 'top',
-    };
-  },
-  optionsExtra(tableObject, options) {
-    return {
-      series: this.series,
+      legend: {
+        data,
+        type: 'scroll',
+        top: 'top',
+      },
+      series,
       xAxis: {
         data: tableObject.header.slice(1),
         type: 'category',
@@ -647,101 +607,108 @@ const AxisBaseChartHandler = {
   },
 };
 
-const NonAxisBaseChartHandler = {
-  ...BaseChartHandler,
-  tooltipTrigger() {
-    return 'item';
+const NonAxisBaseChartOptions = {
+  parents: [BaseChartOptions],
+  options(tableObject, options) {
+    return {
+      'tooltip.trigger': 'item',
+    };
   },
 };
 
-const LineChartHandler = {
-  ...AxisBaseChartHandler,
-  tooltipAxisPointerType() {
-    return 'cross';
-  },
-  seriesItemOption() {
+const LineChartOptions = {
+  parents: [AxisBaseChartOptions],
+  options(tableObject, options) {
     return {
-      type: 'line',
-      animation: true,
-      animationDuration: 1000,
-      animationEasing: 'elasticOut',
-      animationDelay(idx) {
-        return idx * 10;
-      },
-      name: '',
-      data: [],
-      symbol: 'circle',
-      symbolSize: 8,
-      lineStyle: {
-        width: 3,
-        cap: 'round',
-        join: 'round',
-      },
-      itemStyle: {
-        borderWidth: 2,
-        borderColor: '#fff',
-      },
-      emphasis: {
-        focus: 'series',
+      'tooltip.axisPointer.type': 'cross',
+      // tooltip: {
+      //   axisPointer: {
+      //     type: 'cross',
+      //   },
+      // },
+      // 'tooltip.axisPointer.type': 'axis',
+      // $series:
+      'series.$item': {
+        type: 'line',
+        animation: true,
+        animationDuration: 1000,
+        animationEasing: 'elasticOut',
+        animationDelay(idx) {
+          return idx * 10;
+        },
+        data: [],
+        symbol: 'circle',
+        symbolSize: 8,
         lineStyle: {
-          width: 5,
+          width: 3,
+          cap: 'round',
+          join: 'round',
         },
         itemStyle: {
-          shadowBlur: 10,
-          shadowOffsetX: 0,
-          shadowColor: 'rgba(0, 0, 0, 0.5)',
-          borderWidth: 3,
+          borderWidth: 2,
+          borderColor: '#fff',
         },
-      },
-      smooth: 0.3,
-      markPoint: {
-        data: [
-          { type: 'max', name: '最大值' },
-          { type: 'min', name: '最小值' },
-        ],
+        emphasis: {
+          focus: 'series',
+          lineStyle: {
+            width: 5,
+          },
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)',
+            borderWidth: 3,
+          },
+        },
+        smooth: 0.3,
+        markPoint: {
+          data: [
+            { type: 'max', name: '最大值' },
+            { type: 'min', name: '最小值' },
+          ],
+        },
       },
     };
   },
 };
 
-const BarChartHandler = {
-  ...AxisBaseChartHandler,
-  tooltipAxisPointerType() {
-    return 'shadow';
-  },
-  seriesItemOption() {
+const BarChartOptions = {
+  parents: [AxisBaseChartOptions],
+  options(tableObject, options) {
     return {
-      type: 'bar',
-      barWidth: '60%',
-      animation: true,
-      animationDuration: 1000,
-      animationEasing: 'elasticOut',
-      animationDelay(idx) {
-        return idx * 10;
-      },
-      name: '',
-      data: [],
-      emphasis: {
-        focus: 'series',
-        itemStyle: {
-          shadowBlur: 10,
-          shadowOffsetX: 0,
-          shadowColor: 'rgba(0, 0, 0, 0.5)',
+      'tooltip.axisPointer.type': 'shadow',
+      'series.$item': {
+        type: 'bar',
+        barWidth: '60%',
+        animation: true,
+        animationDuration: 1000,
+        animationEasing: 'elasticOut',
+        animationDelay(idx) {
+          return idx * 10;
         },
-      },
-      label: {
-        show: false,
-        position: 'top',
-        formatter: '{c}',
+        data: [],
+        emphasis: {
+          focus: 'series',
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)',
+          },
+        },
+        label: {
+          show: false,
+          position: 'top',
+          formatter: '{c}',
+        },
       },
     };
   },
 };
 
-const RadarChartHandler = {
-  ...NonAxisBaseChartHandler,
-  calData(tableObject) {
-    this.indicator = tableObject.header.slice(1).map((header) => {
+const RadarChartOptions = {
+  parents: [NonAxisBaseChartOptions],
+  options(tableObject, options) {
+    const indicator = tableObject.header.slice(1).map((header) => {
       const maxValue = Math.max(
         ...tableObject.rows.map((row) => {
           const index = tableObject.header.indexOf(header);
@@ -753,7 +720,7 @@ const RadarChartHandler = {
         max: Math.ceil(maxValue * 1.2), // 设置最大值为数据最大值的1.2倍，向上取整
       };
     });
-    this.seriesData = tableObject.rows.map((row, index) => ({
+    const seriesData = tableObject.rows.map((row, index) => ({
       name: row[0],
       value: row.slice(1).map((data) => parseFloat(data.replace(/,/g, '')) || 0),
       areaStyle: {
@@ -766,15 +733,24 @@ const RadarChartHandler = {
         borderWidth: 2,
       },
     }));
-  },
-  legendExtra(tableObject) {
+
     return {
-      data: tableObject.rows.map((row) => row[0]),
-      top: 'bottom',
-    };
-  },
-  optionsExtra(tableObject, options) {
-    return {
+      'tooltip.formatter'(params) {
+        console.log('radar params:', params);
+        let result = `<div style="margin-bottom:4px;font-weight:bold;">${params.name}</div>`;
+        params.value.forEach((value, index) => {
+          result += '<div style="margin:2px 0;">';
+          result += `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${params.color};"></span>`;
+          result += `<span style="font-weight:bold;">${indicator[index].name}</span>`;
+          result += `<span style="float:right;margin-left:20px;font-weight:bold;">${value}</span>`;
+          result += '</div>';
+        });
+        return result;
+      },
+      legend: {
+        data: tableObject.rows.map((row) => row[0]),
+        top: 'bottom',
+      },
       radar: {
         name: {
           textStyle: {
@@ -786,7 +762,7 @@ const RadarChartHandler = {
             return name.length > 6 ? `${name.substr(0, 6)}...` : name;
           },
         },
-        indicator: this.indicator,
+        indicator,
         radius: '60%',
         center: ['50%', '50%'],
         splitNumber: 5,
@@ -817,7 +793,7 @@ const RadarChartHandler = {
         {
           name: '雷达图数据',
           type: 'radar',
-          data: this.seriesData,
+          data: seriesData,
           emphasis: {
             lineStyle: {
               width: 4,
@@ -848,24 +824,12 @@ const RadarChartHandler = {
       },
     };
   },
-  tooltipFormatter(params) {
-    console.log('radar params:', params);
-    let result = `<div style="margin-bottom:4px;font-weight:bold;">${params.name}</div>`;
-    params.value.forEach((value, index) => {
-      result += '<div style="margin:2px 0;">';
-      result += `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${params.color};"></span>`;
-      result += `<span style="font-weight:bold;">${this.indicator[index].name}</span>`;
-      result += `<span style="float:right;margin-left:20px;font-weight:bold;">${value}</span>`;
-      result += '</div>';
-    });
-    return result;
-  },
 };
 
-const MapChartHandler = {
-  ...NonAxisBaseChartHandler,
-  calData(tableObject) {
-    this.mapData = tableObject.rows.map((row) => {
+const MapChartOptions = {
+  parents: [NonAxisBaseChartOptions],
+  options(tableObject, options) {
+    const mapData = tableObject.rows.map((row) => {
       const originalName = row[0];
       const standardName = normalizeProvinceName(originalName);
       const value = parseFloat(row[1].replace(/,/g, '')) || 0;
@@ -877,15 +841,12 @@ const MapChartHandler = {
         value,
       };
     });
-  },
-  tooltipFormatter(params) {
-    return `${params.name}: ${params.value || 0}`;
-  },
-  optionsExtra() {
+
     return {
+      'tooltip.formatter': (params) => `${params.name}: ${params.value || 0}`,
       visualMap: {
-        min: Math.min(...this.mapData.map((item) => item.value)),
-        max: Math.max(...this.mapData.map((item) => item.value)),
+        min: Math.min(...mapData.map((item) => item.value)),
+        max: Math.max(...mapData.map((item) => item.value)),
         left: 'left',
         top: 'bottom',
         text: ['高', '低'],
@@ -917,7 +878,7 @@ const MapChartHandler = {
               areaColor: '#ffefd5',
             },
           },
-          data: this.mapData,
+          data: mapData,
           itemStyle: {
             areaColor: '#f5f5f5',
             borderColor: '#999',
@@ -998,3 +959,100 @@ const normalizeProvinceName = (inputName) => {
   console.warn(`Province name not matched: ${inputName}`);
   return cleanName;
 };
+
+function generateOptions(handler, tableObject, options) {
+  let result;
+  if (!handler.parents || handler.parents.length === 0) {
+    result = {};
+  } else {
+    result = generateOptions(handler.parents[0], tableObject, options);
+    for (const handler2 in handler.parents.slice(1)) {
+      deepMerge(result, generateOptions(handler2, tableObject, options), result);
+      // result = autoMergeDollarProps(result, generateOptions(handler2, tableObject, options));
+    }
+  }
+  deepMerge(result, handler.options(tableObject, options), result);
+  // result = autoMergeDollarProps(result, handler.options(tableObject, options));
+  return result;
+}
+
+function deepMerge(target, source, root) {
+  for (const key of Object.keys(source)) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      const keyList = key.split('.');
+      let target2 = target;
+      for (const key2 of keyList.slice(0, -1)) {
+        if (typeof target2[key2] !== 'object' || target2[key2] === null || target2[key2] === undefined) {
+          target2[key2] = {};
+        }
+        target2 = target2[key2];
+      }
+
+      const key3 = keyList[keyList.length - 1];
+      console.log('key3:', key3);
+      if (Array.isArray(target2) && key3 === '$item') {
+        // 如果是要给数组元素赋值。
+        for (const item of target2) {
+          deepMerge(item, source[key], root);
+        }
+      } else if (typeof target2[key3] === 'object' && typeof source[key] === 'object') {
+        // 如果目标对象在该属性上已经存在一个对象，并且源对象对应的属性也是一个对象，则递归合并。
+        deepMerge(target2[key3], source[key], root);
+      } else if (typeof source[key] === 'function') {
+        // 若是函数则绑定根对象。
+        target2[key3] = source[key].bind(root);
+      } else {
+        // 否则，直接覆盖或新增属性。
+        target2[key3] = source[key];
+      }
+    }
+  }
+  return target;
+}
+
+function autoMergeDollarProps(target, source) {
+  const result = _.merge({}, target);
+
+  // 收集所有 $ 开头的路径
+  function collectDollarPaths(obj, path = '') {
+    const dollars = [];
+    for (const key in obj) {
+      if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
+
+      const currentPath = path ? `${path}.${key}` : key;
+      const value = obj[key];
+
+      if (key.startsWith('$') && typeof value === 'object' && value !== null) {
+        dollars.push({
+          dollarPath: currentPath,
+          arrayKey: key.slice(1),
+          arrayPath: currentPath.slice(1), // $series → series（同级）
+          value,
+        });
+      } else if (typeof value === 'object' && value !== null) {
+        dollars.push(...collectDollarPaths(value, currentPath));
+      }
+    }
+    return dollars;
+  }
+
+  const dollarRules = collectDollarPaths(source);
+
+  dollarRules.forEach((rule) => {
+    // 计算目标数组路径：把 $.a.$b.$seriesItem → a.b.series
+    const arrayPath = rule.dollarPath.slice(1); // 去掉 $
+    const array = _.get(result, arrayPath);
+
+    if (Array.isArray(array)) {
+      array.forEach((item) => {
+        _.merge(item, rule.value);
+      });
+    }
+  });
+
+  // 最后：将 source 普通属性合并（排除 $ 键）
+  const cleanSource = _.omitBy(source, (value, key) => key.startsWith('$'));
+  _.merge(result, cleanSource);
+
+  return result;
+}
