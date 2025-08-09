@@ -5,9 +5,9 @@
   max-width: 100%;
   overflow-x: auto;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
   background: var(--base-editor-bg);
   transition: var(--shortcut-panel-transition, all 0.2s);
+  box-shadow: 0 0 0 2px var(--primary-color), var(--shadow-lg);
   padding: 0;
   margin: 0;
   
@@ -15,14 +15,9 @@
   &:hover {
     box-shadow: var(--shadow-lg);
     transform: translateY(-1px);
-  }
-  
-  // 高亮行动画效果增强
-  &.cherry-highlight-line {
-    animation: modernHighlight 1.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 0 0 2px var(--primary-color), var(--shadow-lg);
   }
-  
+
   // 表格样式优化
   .cherry-table {
     width: 100%;
@@ -30,10 +25,12 @@
     border-spacing: 0;
     background: transparent;
     margin: 0;
+    border-radius: var(--radius-lg) !important;
+    overflow: hidden;
     
     th, td {
       border: var(--border-width-1) solid var(--md-table-border);
-      padding: var(--spacing-lg) var(--spacing-xl);
+      padding: 0;
       min-width: 120px;
       position: relative;
       transition: var(--shortcut-panel-transition, all 0.2s);
@@ -41,13 +38,25 @@
       line-height: var(--line-height-relaxed);
     }
     
+    // 移除内部边框以避免与外边框冲突
+    th:first-child, td:first-child {
+      border-left: none;
+    }
+    
+    th:last-child, td:last-child {
+      border-right: none;
+    }
+    
     // 表头样式增强
     thead tr:first-child {
+      th {
+        border-top: none;
+      }
       th:first-child {
-        border-top-left-radius: var(--radius-md);
+        border-top-left-radius: var(--radius-lg);
       }
       th:last-child {
-        border-top-right-radius: var(--radius-md);
+        border-top-right-radius: var(--radius-lg);
       }
     }
     
@@ -67,14 +76,14 @@
       
       &:last-child {
         td {
-          border-bottom: var(--border-width-1) solid var(--md-table-border);
+          border-bottom: none;
           
           &:first-child {
-            border-bottom-left-radius: var(--radius-md);
+            border-bottom-left-radius: var(--radius-lg);
           }
           
           &:last-child {
-            border-bottom-right-radius: var(--radius-md);
+            border-bottom-right-radius: var(--radius-lg);
           }
         }
       }
@@ -263,10 +272,6 @@
     
     &:hover {
       transform: none;
-    }
-    
-    &.cherry-highlight-line {
-      animation: none;
     }
     
     .cherry-table {
