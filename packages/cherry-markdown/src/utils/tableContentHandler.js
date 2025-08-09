@@ -343,15 +343,34 @@ export default class TableHandler {
   $getBlockquoteTdOffset(tableCode, isTHead, trIndex, tdIndex) {
     const codes = tableCode.split(/\n/);
     const targetTr = isTHead ? 0 : trIndex + 2;
-    // 处理引用语法，去除引用符号后分析表格结构
-    const originalLine = codes[targetTr];
-    const cleanLine = originalLine.replace(/^>\s*/, '');
-    const tds = cleanLine.split(/\|/);
+    if (targetTr >= codes.length) {
+      console.error('Debug: targetTr out of bounds:', targetTr, 'codes.length:', codes.length);
+      return { preLine: 0, preCh: 0, plusCh: 0, currentTd: '' };
+    }
+    // 获取下一行的内容和引用符号
+    const nextLineIndex = targetTr + 1;
+    let originalLine, cleanLine, tds, quoteMatch;
+    if (nextLineIndex < codes.length) {
+      // 使用下一行的数据
+      originalLine = codes[nextLineIndex];
+      quoteMatch = originalLine.match(/^>\s*/);
+      cleanLine = originalLine.replace(/^>\s*/, '');
+      tds = cleanLine.split(/\|/);
+    } else {
+      // 如果没有下一行，使用当前行的数据
+      originalLine = codes[targetTr];
+      quoteMatch = originalLine.match(/^>\s*/);
+      cleanLine = originalLine.replace(/^>\s*/, '');
+      tds = cleanLine.split(/\|/);
+    }
     const needPlus1 = /^\s*$/.test(tds[0]);
     const targetTd = needPlus1 ? tdIndex + 1 : tdIndex;
+    if (targetTd >= tds.length) {
+      console.error('Debug: targetTd out of bounds:', targetTd, 'tds.length:', tds.length);
+      return { preLine: targetTr, preCh: 0, plusCh: 0, currentTd: '' };
+    }
     const current = tds[targetTd];
     // 计算引用符号的长度
-    const quoteMatch = originalLine.match(/^>\s*/);
     const quoteLength = quoteMatch ? quoteMatch[0].length : 0;
     // 计算目标单元格之前的字符数（包括管道符）
     let preCh = quoteLength;
@@ -368,12 +387,13 @@ export default class TableHandler {
     const trimmedContent = current.trim();
     const leadingSpaces = current.match(/^\s*/)[0].length;
     const actualPreCh = preCh + leadingSpaces;
-    return {
-      preLine: targetTr,
+    const result = {
+      preLine: (nextLineIndex < codes.length ? nextLineIndex : targetTr) - 1,
       preCh: actualPreCh,
       plusCh: trimmedContent.length,
       currentTd: trimmedContent,
     };
+    return result;
   }
 
   /**
