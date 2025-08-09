@@ -499,6 +499,13 @@ const BaseChartOptions = {
           },
         },
       },
+    };
+  },
+};
+
+const LegendOptions = {
+  options(tableObject, options) {
+    return {
       legend: {
         type: 'scroll',
         orient: 'horizontal',
@@ -520,16 +527,12 @@ const BaseChartOptions = {
           },
         ],
       },
-      // brush: {
-      //   toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'],
-      //   xAxisIndex: 0,
-      // },
     };
   },
 };
 
 const AxisBaseChartOptions = {
-  parents: [BaseChartOptions],
+  parents: [BaseChartOptions, LegendOptions],
   options(tableObject, options) {
     const data = [];
     const series = [];
@@ -667,17 +670,10 @@ const NonAxisBaseChartOptions = {
 };
 
 const LineChartOptions = {
-  parents: [AxisBaseChartOptions],
+  parents: [AxisBaseChartOptions, LegendOptions],
   options(tableObject, options) {
     return {
       'tooltip.axisPointer.type': 'cross',
-      // tooltip: {
-      //   axisPointer: {
-      //     type: 'cross',
-      //   },
-      // },
-      // 'tooltip.axisPointer.type': 'axis',
-      // $series:
       'series.$item': {
         type: 'line',
         animation: true,
@@ -751,12 +747,16 @@ const BarChartOptions = {
           formatter: '{c}',
         },
       },
+      brush: {
+        toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'],
+        xAxisIndex: 0,
+      },
     };
   },
 };
 
 const RadarChartOptions = {
-  parents: [NonAxisBaseChartOptions],
+  parents: [NonAxisBaseChartOptions, LegendOptions],
   options(tableObject, options) {
     const indicator = tableObject.header.slice(1).map((header) => {
       const maxValue = Math.max(
