@@ -127,10 +127,23 @@ export default class PreviewerBubble {
 
   /**
    * 是否为由cherry生成的表格，且不是简单表格
+   * 现在也支持 HTML 表格语法
    * @param {HTMLElement} element
-   * @returns {boolean}
+   * @returns {boolean|HTMLElement}
    */
   isCherryTable(element) {
+    // 首先检查是否是直接的表格元素
+    const table = this.$getClosestNode(element, 'TABLE');
+    if (table !== false) {
+      // 引用里的表格先不支持所见即所得编辑
+      if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
+        return false;
+      }
+      // 如果是表格元素，直接返回表格本身
+      return table;
+    }
+    
+    // 原有的逻辑，检查 cherry-table-container
     const container = this.$getClosestNode(element, 'DIV');
     if (container === false) {
       return false;

@@ -81,6 +81,10 @@ export default class TableHandler {
   }
 
   setStyle(element, property, value) {
+    // 检查 element 是否存在
+    if (!element || !element.getBoundingClientRect) {
+      return;
+    }
     const info = element.getBoundingClientRect();
     if (info[property] !== value) {
       element.style[property] = value;
@@ -91,8 +95,14 @@ export default class TableHandler {
    * TODO: 这里是分别对文本框、操作符号和选项设置偏移，应该作为一个整体来设置
    */
   $setInputOffset() {
-    const tdInfo = this.$getPosition();
     const { inputDiv } = this.tableEditor.editorDom;
+    
+    // 如果没有输入框（比如 HTML 表格），则跳过
+    if (!inputDiv) {
+      return;
+    }
+    
+    const tdInfo = this.$getPosition();
     // 设置文本框的偏移及大小
     this.setStyle(inputDiv, 'width', `${tdInfo.width}px`);
     this.setStyle(inputDiv, 'height', `${tdInfo.height}px`);
@@ -162,6 +172,15 @@ export default class TableHandler {
    * 刷新定位
    */
   $refreshPosition() {
+    // 检查当前表格类型，HTML 表格不需要刷新位置
+    const tableCode = this.tableEditor.tableCodes?.[this.tableEditor.info?.tableIndex];
+    const isHtmlTable = tableCode && tableCode.type === 'html';
+    
+    if (isHtmlTable) {
+      // HTML 表格不需要刷新位置，直接返回
+      return;
+    }
+    
     if (this.trigger === 'click') {
       this.$setInputOffset();
       return;
@@ -176,38 +195,80 @@ export default class TableHandler {
 
   /**
    * 收集编辑器中的表格语法，并记录表格语法的开始的offset
+   * 支持 Markdown 表格和 HTML 表格语法，按文档顺序收集
    */
   $collectTableCode() {
     const tableCodes = [];
-    this.codeMirror
-      .getValue()
-      .replace(this.codeBlockReg, (whole, ...args) => {
-        // 先把代码块里的表格语法关键字干掉
-        return whole.replace(/\|/g, '.');
-      })
-      .replace(this.tableReg, function (whole, ...args) {
-        const match = whole.replace(/^\n*/, '');
-        const offsetBegin = args[args.length - 2] + whole.match(/^\n*/)[0].length;
-        tableCodes.push({
-          code: match,
-          offset: offsetBegin,
-        });
+    const value = this.codeMirror.getValue();
+    
+    // 创建一个处理过的版本，排除代码块中的内容
+    const processedValue = value.replace(this.codeBlockReg, (whole, ...args) => {
+      // 把代码块里的表格语法关键字干掉，但保持字符串长度不变
+      return whole.replace(/\|/g, '.').replace(/<table[\s\S]*?<\/table>/gi, (match) => '.'.repeat(match.length));
+    });
+
+    // 收集所有表格（Markdown 和 HTML），按位置顺序
+    const allMatches = [];
+
+    // 收集 Markdown 表格
+    processedValue.replace(this.tableReg, function (whole, ...args) {
+      const match = whole.replace(/^\n*/, '');
+      const offsetBegin = args[args.length - 2] + whole.match(/^\n*/)[0].length;
+      allMatches.push({
+        code: match,
+        offset: offsetBegin,
+        type: 'markdown'
       });
-    this.tableEditor.tableCodes = tableCodes;
+      return whole;
+    });
+
+    // 收集 HTML 表格
+    value.replace(this.htmlTableReg, (whole, ...args) => {
+      // 对于没有捕获组的正则，参数结构是: (match, offset, string)
+      const offset = args[args.length - 2]; // 倒数第二个参数是offset
+      
+      // 检查是否在代码块中
+      let inCodeBlock = false;
+      value.replace(this.codeBlockReg, (codeWhole, ...codeArgs) => {
+        const codeOffset = codeArgs[codeArgs.length - 2]; // 同样修正
+        const codeEnd = codeOffset + codeWhole.length;
+        if (offset >= codeOffset && offset < codeEnd) {
+          inCodeBlock = true;
+        }
+        return codeWhole;
+      });
+      
+      // 如果不在代码块中，则添加到表格列表
+      if (!inCodeBlock) {
+        allMatches.push({
+          code: whole,
+          offset,
+          type: 'html'
+        });
+      }
+      return whole;
+    });
+
+    // 按偏移量排序以保持文档中的实际顺序
+    allMatches.sort((a, b) => a.offset - b.offset);
+    
+    this.tableEditor.tableCodes = allMatches;
   }
 
   /**
    * 获取预览区域被点击的table对象，并记录table的顺位
+   * 统一按照文档顺序收集所有表格（包括 Markdown 和 HTML 表格）
    */
   $collectTableDom() {
-    const list = Array.from(this.previewerDom.querySelectorAll('table.cherry-table'));
+    // 收集所有表格，包含 HTML 表格和 Markdown 表格
+    const list = Array.from(this.previewerDom.querySelectorAll('table'));
     const tableNode = this.$getClosestNode(this.target, 'TABLE');
     if (tableNode === false) {
       return false;
     }
     const columns = Array.from(this.target.parentElement.childNodes).filter((child) => {
-      // 计算列数
-      return child.tagName.toLowerCase() === 'td';
+      // 计算列数，只计算元素节点，排除文本节点
+      return child.tagName && (child.tagName.toLowerCase() === 'td' || child.tagName.toLowerCase() === 'th');
     }).length;
 
     this.tableEditor.info = {
@@ -227,35 +288,160 @@ export default class TableHandler {
   /**
    * 选中对应单元格、所在行、所在列的内容
    * @param {Number} index
-   * @param {String} type 'td': 当前单元格, 'table': 当前表格
+   * @param {String} type 'td': 当前单元格, 'table': 当前表格, 'cell': HTML表格单元格
    * @param {Boolean} select 是否选中编辑器中的代码
    */
   $setSelection(index, type = 'table', select = true) {
     const tableCode = this.tableEditor.tableCodes[index];
+    if (!tableCode) {
+      console.warn('找不到对应的表格代码');
+      return;
+    }
+    
     const whole = this.codeMirror.getValue();
     const selectTdInfo = this.tableEditor.info;
     const beginLine = whole.slice(0, tableCode.offset).match(/\n/g)?.length ?? 0;
-    const { preLine, preCh, plusCh, currentTd } = this.$getTdOffset(
-      tableCode.code,
-      selectTdInfo.isTHead,
-      selectTdInfo.trIndex,
-      selectTdInfo.tdIndex,
-    );
-    if (type === 'table') {
-      const endLine = beginLine + tableCode.code.match(/\n/g).length;
-      const endCh = tableCode.code.match(/[^\n]+\n*$/)[0].length;
-      this.tableEditor.info.selection = [
-        { line: beginLine, ch: 0 },
-        { line: endLine, ch: endCh },
-      ];
+    
+    // 根据表格类型使用不同的处理逻辑
+    if (tableCode.type === 'html') {
+      if (type === 'cell') {
+        // HTML 表格单元格级别的定位
+        const cellPosition = this.$getHtmlTableCellPosition(tableCode.code, selectTdInfo);
+        if (cellPosition) {
+          // 定位到具体的单元格内容
+          const cellStartLine = beginLine + cellPosition.line;
+          const cellStartCh = cellPosition.start;
+          const cellEndCh = cellPosition.end;
+          
+          this.tableEditor.info.selection = [
+            { line: cellStartLine, ch: cellStartCh },
+            { line: cellStartLine, ch: cellEndCh },
+          ];
+          this.tableEditor.info.code = cellPosition.content;
+        } else {
+          // 如果无法解析单元格位置，则选择整个表格
+          const lines = tableCode.code.split('\n');
+          const endLine = beginLine + lines.length - 1;
+          const endCh = lines[lines.length - 1].length;
+          
+          this.tableEditor.info.selection = [
+            { line: beginLine, ch: 0 },
+            { line: endLine, ch: endCh },
+          ];
+          this.tableEditor.info.code = tableCode.code;
+        }
+      } else {
+        // HTML 表格整体选择
+        const lines = tableCode.code.split('\n');
+        const endLine = beginLine + lines.length - 1;
+        const endCh = lines[lines.length - 1].length;
+        
+        this.tableEditor.info.selection = [
+          { line: beginLine, ch: 0 },
+          { line: endLine, ch: endCh },
+        ];
+        this.tableEditor.info.code = tableCode.code;
+      }
     } else {
-      this.tableEditor.info.selection = [
-        { line: beginLine + preLine, ch: preCh },
-        { line: beginLine + preLine, ch: preCh + plusCh },
-      ];
+      // Markdown 表格的原有处理逻辑
+      const { preLine, preCh, plusCh, currentTd } = this.$getTdOffset(
+        tableCode.code,
+        selectTdInfo.isTHead,
+        selectTdInfo.trIndex,
+        selectTdInfo.tdIndex,
+      );
+      if (type === 'table') {
+        const endLine = beginLine + tableCode.code.match(/\n/g).length;
+        const endCh = tableCode.code.match(/[^\n]+\n*$/)[0].length;
+        this.tableEditor.info.selection = [
+          { line: beginLine, ch: 0 },
+          { line: endLine, ch: endCh },
+        ];
+      } else {
+        this.tableEditor.info.selection = [
+          { line: beginLine + preLine, ch: preCh },
+          { line: beginLine + preLine, ch: preCh + plusCh },
+        ];
+      }
+      this.tableEditor.info.code = currentTd;
     }
+    
     select && this.codeMirror.setSelection(...this.tableEditor.info.selection);
-    this.tableEditor.info.code = currentTd;
+  }
+
+  /**
+   * 获取HTML表格中具体单元格的位置信息
+   * @param {String} htmlTableCode HTML表格代码
+   * @param {Object} selectTdInfo 选中的单元格信息
+   * @returns {Object|null} 单元格位置信息
+   */
+  $getHtmlTableCellPosition(htmlTableCode, selectTdInfo) {
+    try {
+      // 获取当前点击的单元格DOM元素
+      const targetCell = selectTdInfo.tdNode;
+      const cellContent = targetCell.textContent.trim();
+      
+      // 如果单元格内容为空，返回null使用默认选择
+      if (!cellContent) {
+        return null;
+      }
+      
+      const lines = htmlTableCode.split('\n');
+      
+      // 在HTML代码中搜索包含此内容的行
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        
+        // 检查这行是否包含目标单元格的内容
+        if (line.includes(cellContent)) {
+          // 查找内容在行中的位置
+          const contentIndex = line.indexOf(cellContent);
+          if (contentIndex !== -1) {
+            return {
+              line: i,
+              start: contentIndex,
+              end: contentIndex + cellContent.length,
+              content: cellContent
+            };
+          }
+        }
+      }
+      
+      // 如果没找到精确匹配，尝试模糊匹配（处理HTML实体等情况）
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        
+        // 检查是否是td或th标签行
+        if ((line.includes('<td') || line.includes('<th')) && 
+            (line.includes('</td>') || line.includes('</th>'))) {
+          
+          // 提取标签内的文本内容
+          const tagMatch = line.match(/<(td|th)[^>]*>(.*?)<\/(td|th)>/i);
+          if (tagMatch) {
+            const tagContent = tagMatch[2].replace(/<[^>]*>/g, '').trim();
+            
+            // 如果内容匹配
+            if (tagContent === cellContent) {
+              const fullMatch = tagMatch[0];
+              const matchStart = line.indexOf(fullMatch);
+              const contentStart = matchStart + tagMatch[0].indexOf(tagMatch[2]);
+              
+              return {
+                line: i,
+                start: contentStart,
+                end: contentStart + tagMatch[2].length,
+                content: tagMatch[2]
+              };
+            }
+          }
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.warn('解析HTML表格单元格位置时出错:', error);
+      return null;
+    }
   }
 
   /**
@@ -290,24 +476,49 @@ export default class TableHandler {
   $findTableInEditor() {
     this.$collectTableDom();
     this.$collectTableCode();
-    // 暂时不考虑代码块中包含表格、人为输入表格html语法、tapd特色表格语法的情况
-    // 也就是说，出现上述情况时，表格的所见即所得编辑功能失效
+    
+    // 现在支持 HTML 表格语法的情况
     if (this.tableEditor.info.totalTables !== this.tableEditor.tableCodes.length) {
+      console.warn('预览区表格数量与编辑区表格数量不匹配');
       return false;
     }
-    this.$setSelection(this.tableEditor.info.tableIndex, 'td', this.trigger === 'click');
+    
+    if (this.tableEditor.info.tableIndex === -1) {
+      console.warn('无法找到当前表格在预览区的索引');
+      return false;
+    }
+    
+    // 检查表格类型，决定选择策略
+    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    const selectionType = (tableCode && tableCode.type === 'html') ? 'cell' : 'table';
+    
+    this.$setSelection(this.tableEditor.info.tableIndex, selectionType, this.trigger === 'click');
   }
 
   $initReg() {
     this.tableReg = this.tableReg ? this.tableReg : getTableRule(true);
     this.codeBlockReg = this.codeBlockReg ? this.codeBlockReg : getCodeBlockRule().reg;
+    // HTML表格的正则表达式，匹配从<table>到</table>的完整结构
+    this.htmlTableReg = this.htmlTableReg ? this.htmlTableReg : /<table[\s\S]*?<\/table>/gi;
   }
 
   showBubble() {
+    // 检查当前表格类型，决定显示哪些操作按钮
+    const tableCode = this.tableEditor.tableCodes?.[this.tableEditor.info.tableIndex];
+    const isHtmlTable = tableCode && tableCode.type === 'html';
+    
+    if (isHtmlTable) {
+      // HTML 表格只进行代码定位，不显示任何编辑界面
+      console.info('HTML 表格仅支持代码定位功能');
+      return;
+    }
+    
     if (this.trigger === 'click') {
       this.$drawEditor();
       return;
     }
+    
+    // Markdown 表格显示完整的操作按钮
     this.$drawSymbol();
     this.$drawSortSymbol();
     this.$drawDelete();
@@ -524,6 +735,15 @@ export default class TableHandler {
    * 添加上一行
    */
   $addLastRow() {
+    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    
+    // 如果是 HTML 表格，暂时不支持编辑操作
+    if (tableCode && tableCode.type === 'html') {
+      console.warn('HTML 表格暂不支持添加行操作');
+      return;
+    }
+    
+    // Markdown 表格的处理逻辑
     const [{ line }] = this.tableEditor.info.selection;
     const newRow = `${'|'.repeat(this.tableEditor.info.columns)}\n`;
     this.codeMirror.replaceRange(newRow, { line, ch: 0 });
@@ -535,6 +755,15 @@ export default class TableHandler {
    * 添加下一行
    */
   $addNextRow() {
+    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    
+    // 如果是 HTML 表格，暂时不支持编辑操作
+    if (tableCode && tableCode.type === 'html') {
+      console.warn('HTML 表格暂不支持添加行操作');
+      return;
+    }
+    
+    // Markdown 表格的处理逻辑
     const [, { line }] = this.tableEditor.info.selection;
     const newRow = `${'|'.repeat(this.tableEditor.info.columns)}\n`;
     this.codeMirror.replaceRange(newRow, { line: line + 1, ch: 0 });
@@ -562,6 +791,15 @@ export default class TableHandler {
    * 添加上一列
    */
   $addLastCol() {
+    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    
+    // 如果是 HTML 表格，暂时不支持编辑操作
+    if (tableCode && tableCode.type === 'html') {
+      console.warn('HTML 表格暂不支持添加列操作');
+      return;
+    }
+    
+    // Markdown 表格的处理逻辑
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
     const selection = this.codeMirror.getSelection();
     const lines = selection.split('\n');
@@ -585,6 +823,15 @@ export default class TableHandler {
    * 添加下一列
    */
   $addNextCol() {
+    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    
+    // 如果是 HTML 表格，暂时不支持编辑操作
+    if (tableCode && tableCode.type === 'html') {
+      console.warn('HTML 表格暂不支持添加列操作');
+      return;
+    }
+    
+    // Markdown 表格的处理逻辑
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
     const selection = this.codeMirror.getSelection();
     const lines = selection.split('\n');
@@ -744,6 +991,15 @@ export default class TableHandler {
    * 删除当前行
    */
   $deleteCurrentRow() {
+    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    
+    // 如果是 HTML 表格，暂时不支持编辑操作
+    if (tableCode && tableCode.type === 'html') {
+      console.warn('HTML 表格暂不支持删除行操作');
+      return;
+    }
+    
+    // Markdown 表格的处理逻辑
     const { tableIndex, trIndex } = this.tableEditor.info;
     this.$setSelection(tableIndex, 'table');
     const selection = this.codeMirror.getSelection();
@@ -757,6 +1013,15 @@ export default class TableHandler {
    * 删除当前列
    */
   $deleteCurrentColumn() {
+    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    
+    // 如果是 HTML 表格，暂时不支持编辑操作
+    if (tableCode && tableCode.type === 'html') {
+      console.warn('HTML 表格暂不支持删除列操作');
+      return;
+    }
+    
+    // Markdown 表格的处理逻辑
     const { tableIndex, tdIndex } = this.tableEditor.info;
     this.$setSelection(tableIndex, 'table');
     const selection = this.codeMirror.getSelection();
@@ -776,6 +1041,15 @@ export default class TableHandler {
    * 拖拽列
    */
   $dragCol() {
+    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    
+    // 如果是 HTML 表格，暂时不支持拖拽操作
+    if (tableCode && tableCode.type === 'html') {
+      console.warn('HTML 表格暂不支持拖拽列操作');
+      return;
+    }
+    
+    // Markdown 表格的处理逻辑
     const oldTdIndex = this.tableEditor.info.tdIndex;
     const thNode = this.target.parentElement;
     const lines = this.codeMirror.getSelection().split(/\n/);
@@ -823,6 +1097,15 @@ export default class TableHandler {
    * 拖拽行
    */
   $dragLine() {
+    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    
+    // 如果是 HTML 表格，暂时不支持拖拽操作
+    if (tableCode && tableCode.type === 'html') {
+      console.warn('HTML 表格暂不支持拖拽行操作');
+      return;
+    }
+    
+    // Markdown 表格的处理逻辑
     const { trNode } = this.tableEditor.info;
     trNode.setAttribute('draggable', true);
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
