@@ -173,7 +173,7 @@ export default class EChartsTableEngine {
         console.log(`Retrying chart initialization for ${chartId}, attempt: ${retryCount + 1}`);
         setTimeout(() => initChart(retryCount + 1), 100);
       } else {
-        console.error('Failed to find chart container after 10 retries:', chartId, !!this.echartsRef);
+        // console.error('Failed to find chart container after 10 retries:', chartId, !!this.echartsRef);
         const fallbackContainer = document.getElementById(chartId);
         if (fallbackContainer) {
           fallbackContainer.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">

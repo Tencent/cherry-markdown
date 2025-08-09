@@ -404,8 +404,8 @@ export default class TableHandler {
    */
   $getHtmlTdOffset(tableCode, trIndex, tdIndex) {
     const lines = tableCode.split(/\n/);
-    let currentLine = 0;
-    let currentChar = 0;
+    const currentLine = 0;
+    const currentChar = 0;
     let foundTr = 0;
     let foundTd = 0;
     // 解析HTML表格，找到目标单元格的位置
@@ -557,14 +557,14 @@ export default class TableHandler {
    */
   $getBlockquoteHtmlTdOffset(tableCode, trIndex, tdIndex) {
     const lines = tableCode.split(/\n/);
-    let foundTr = 0;
-    let foundTd = 0;
+    const foundTr = 0;
+    const foundTd = 0;
     // 将所有行的内容合并，去除引用符号，用于查找HTML标签
     const cleanContent = lines.map((line) => line.replace(/^>\s*/, '')).join('\n');
     // 查找所有<tr>标签
     const trRegex = /<tr[^>]*>/gi;
     let trMatch;
-    let trPositions = [];
+    const trPositions = [];
     while ((trMatch = trRegex.exec(cleanContent)) !== null) {
       trPositions.push({
         index: trMatch.index,
