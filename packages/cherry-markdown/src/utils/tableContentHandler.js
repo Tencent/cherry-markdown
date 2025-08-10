@@ -199,15 +199,18 @@ export default class TableHandler {
   /**
    * 获取预览区域被点击的table对象，并记录table的顺位
    */
+
+  getEditableTables () {
+    const allTables = Array.from(document.querySelectorAll('table.cherry-table'));
+    const editableTables = allTables.filter((table) => !this.$isElementInFootnote(table));
+    return editableTables;
+  }
   $collectTableDom () {
-    const Tables = Array.from(this.previewerDom.querySelectorAll('table.cherry-table'));
-    const list = Tables.filter((table) => !this.$isElementInFootnote(table));
+    const editableTables = this.getEditableTables(); // 调用新的公共函数
     const tableNode = this.$getClosestNode(this.target, 'TABLE');
-    if (tableNode === false) {
-      return false;
-    }
-    if (this.$isElementInFootnote(tableNode)) {
-      // 脚注中的表格暂不支持编辑
+
+    // 如果没找到表格，或者意外点到了脚注表格，则直接返回
+    if (!tableNode || this.$isElementInFootnote(tableNode)) {
       return false;
     }
     const columns = Array.from(this.target.parentElement.childNodes).filter((child) => {
@@ -222,43 +225,18 @@ export default class TableHandler {
       tdIndex: Array.from(this.target.parentElement.childNodes).indexOf(this.target),
       trIndex: Array.from(this.target.parentElement.parentElement.childNodes).indexOf(this.target.parentElement),
       isTHead: this.target.parentElement.parentElement.tagName !== 'TBODY',
-      totalTables: list.length,
-      tableIndex: list.indexOf(tableNode),
+      totalTables: editableTables.length,
+      tableIndex: editableTables.indexOf(tableNode),
       tableText: tableNode.textContent.replace(/[\s]/g, ''),
       columns,
     };
   }
 
-  //检查是否表格在脚注里，并且过滤掉
+
   $isElementInFootnote (element) {
-    const footnoteContainer = this.previewerDom.querySelector('.footnotes, .cherry-footnotes');
-    if (footnoteContainer && footnoteContainer.contains(element)) {
-      return true;
+    if (element && typeof element.closest === 'function') {
+      return element.closest('.one-footnote') !== null;
     }
-    let current = element;
-    while (current && current !== this.previewerDom) {
-      if (
-        current.classList?.contains('footnote') ||
-        current.classList?.contains('cherry-footnote') ||
-        current.classList?.contains('one-footnote') ||
-        current.hasAttribute('data-footnote') ||
-        current.hasAttribute('data-footnote-id')
-      ) {
-        return true;
-      }
-      current = current.parentElement;
-    }
-
-    while (current && current.tagName !== 'BODY') {
-      if (current.classList && current.classList.contains('one-footnote')) {
-        return true;
-      }
-      current =(current.parentNode);
-    }
-    if (element.classList?.contains('footnote-ref') || element.classList?.contains('cherry-footnote-ref')) {
-      return true;
-    }
-
     return false;
   }
 
