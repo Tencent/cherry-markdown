@@ -24,7 +24,8 @@ export default class TableHandler {
    */
   tableEditor = {
     info: {}, // 当前点击的预览区域table的相关信息
-    tableCodes: [], // 编辑器内所有的表格语法
+    mainTextCodes: [], // 正文中的表格语法
+    footnoteCodes: [], // 脚注中的表格语法
     editorDom: {}, // 编辑器容器
   };
 
@@ -169,11 +170,40 @@ export default class TableHandler {
   }
 
   /**
+   * 获取当前操作的表格代码对象
+   * @returns {Object|null} 表格代码对象
+   */
+  $getCurrentTableCode() {
+    const currentTableInfo = this.tableEditor.info;
+    
+    if (!currentTableInfo || currentTableInfo.tableIndex === undefined) {
+      return null;
+    }
+    
+    // 根据表格所在区域获取相应的表格代码
+    const isFootnoteTable = currentTableInfo.isFootnote;
+    const relevantTableCodes = isFootnoteTable ? this.tableEditor.footnoteCodes : this.tableEditor.mainTextCodes;
+    return relevantTableCodes[currentTableInfo.tableIndex] || null;
+  }
+
+  /**
+   * 替换markdown内容
+   * @param {boolean} isFootnote 是否是脚注表格
+   * @param {number} beginLine 开始行号
+   * @param {number} endLine 结束行号
+   * @param {string} newContent 新内容
+   */
+  $replaceMarkdown(isFootnote, beginLine, endLine, newContent) {
+    const startPos = { line: beginLine, ch: 0 };
+    const endPos = { line: endLine, ch: 0 };
+    this.codeMirror.replaceRange(newContent, startPos, endPos);
+  }
+
+  /**
    * 刷新定位
    */
   $refreshPosition() {
-    // 检查当前表格类型，HTML 表格不需要刷新位置
-    const tableCode = this.tableEditor.tableCodes?.[this.tableEditor.info?.tableIndex];
+    const tableCode = this.$getCurrentTableCode();
     const isHtmlTable = tableCode && tableCode.type === 'html';
     
     if (isHtmlTable) {
@@ -190,16 +220,38 @@ export default class TableHandler {
   }
 
   $remove() {
-    this.tableEditor = { info: {}, tableCodes: [], editorDom: {} };
+    this.tableEditor = { info: {}, mainTextCodes: [], footnoteCodes: [], editorDom: {} };
   }
 
   /**
    * 收集编辑器中的表格语法，并记录表格语法的开始的offset
-   * 支持 Markdown 表格和 HTML 表格语法，按文档顺序收集
+   * 支持 Markdown 表格和 HTML 表格语法，按正文和脚注分别存储
    */
   $collectTableCode() {
-    const tableCodes = [];
     const value = this.codeMirror.getValue();
+    
+    // 首先收集所有脚注的位置信息
+    // 使用与Footnote.js相同的正则表达式
+    const footnoteRanges = [];
+    const footnoteReg = /(^|\n)[ \t]*\[\^([^\]]+?)\]:\h*([\s\S]+?)(?=\s*$|\n\n)/g;
+    let footnoteMatch;
+    while ((footnoteMatch = footnoteReg.exec(value)) !== null) {
+      const start = footnoteMatch.index + footnoteMatch[1].length; // 去掉开头的换行符
+      const end = footnoteMatch.index + footnoteMatch[0].length;
+      footnoteRanges.push({ 
+        start, 
+        end,
+        id: footnoteMatch[2],
+        content: footnoteMatch[3] 
+      });
+    }
+    
+    console.log('检测到的脚注范围:', footnoteRanges);
+    
+    // 判断给定位置是否在脚注中
+    const isInFootnote = (offset) => {
+      return footnoteRanges.some(range => offset >= range.start && offset < range.end);
+    };
     
     // 创建一个处理过的版本，排除代码块中的内容
     const processedValue = value.replace(this.codeBlockReg, (whole, ...args) => {
@@ -207,30 +259,36 @@ export default class TableHandler {
       return whole.replace(/\|/g, '.').replace(/<table[\s\S]*?<\/table>/gi, (match) => '.'.repeat(match.length));
     });
 
-    // 收集所有表格（Markdown 和 HTML），按位置顺序
-    const allMatches = [];
+    // 收集所有表格（Markdown 和 HTML），按正文和脚注分别存储
+    const mainTextTables = [];
+    const footnoteTables = [];
 
     // 收集 Markdown 表格
     processedValue.replace(this.tableReg, function (whole, ...args) {
       const match = whole.replace(/^\n*/, '');
       const offsetBegin = args[args.length - 2] + whole.match(/^\n*/)[0].length;
-      allMatches.push({
+      const tableInfo = {
         code: match,
         offset: offsetBegin,
         type: 'markdown'
-      });
+      };
+      
+      if (isInFootnote(offsetBegin)) {
+        footnoteTables.push(tableInfo);
+      } else {
+        mainTextTables.push(tableInfo);
+      }
       return whole;
     });
 
     // 收集 HTML 表格
     value.replace(this.htmlTableReg, (whole, ...args) => {
-      // 对于没有捕获组的正则，参数结构是: (match, offset, string)
-      const offset = args[args.length - 2]; // 倒数第二个参数是offset
+      const offset = args[args.length - 2];
       
       // 检查是否在代码块中
       let inCodeBlock = false;
       value.replace(this.codeBlockReg, (codeWhole, ...codeArgs) => {
-        const codeOffset = codeArgs[codeArgs.length - 2]; // 同样修正
+        const codeOffset = codeArgs[codeArgs.length - 2];
         const codeEnd = codeOffset + codeWhole.length;
         if (offset >= codeOffset && offset < codeEnd) {
           inCodeBlock = true;
@@ -238,61 +296,165 @@ export default class TableHandler {
         return codeWhole;
       });
       
-      // 如果不在代码块中，则添加到表格列表
+      // 如果不在代码块中，则添加到相应的表格列表
       if (!inCodeBlock) {
-        allMatches.push({
+        const tableInfo = {
           code: whole,
           offset,
           type: 'html'
-        });
+        };
+        
+        if (isInFootnote(offset)) {
+          footnoteTables.push(tableInfo);
+        } else {
+          mainTextTables.push(tableInfo);
+        }
       }
       return whole;
     });
 
     // 按偏移量排序以保持文档中的实际顺序
-    allMatches.sort((a, b) => a.offset - b.offset);
+    mainTextTables.sort((a, b) => a.offset - b.offset);
+    footnoteTables.sort((a, b) => a.offset - b.offset);
     
-    this.tableEditor.tableCodes = allMatches;
+    console.log('收集到的表格:', {
+      mainTextTables: mainTextTables.length,
+      footnoteTables: footnoteTables.length,
+      details: {
+        mainText: mainTextTables.map(t => ({ type: t.type, preview: t.code.slice(0, 30) })),
+        footnote: footnoteTables.map(t => ({ type: t.type, preview: t.code.slice(0, 30) }))
+      }
+    });
+    
+    this.tableEditor.mainTextCodes = mainTextTables;
+    this.tableEditor.footnoteCodes = footnoteTables;
   }
 
   /**
    * 获取预览区域被点击的table对象，并记录table的顺位
-   * 统一按照文档顺序收集所有表格（包括 Markdown 和 HTML 表格）
+   * 使用新的索引策略：脚注表格根据 one-footnote 容器顺序，正文表格使用全局索引
    */
   $collectTableDom() {
-    // 收集所有表格，包含 HTML 表格和 Markdown 表格
-    const list = Array.from(this.previewerDom.querySelectorAll('table'));
     const tableNode = this.$getClosestNode(this.target, 'TABLE');
     if (tableNode === false) {
       return false;
     }
-    const columns = Array.from(this.target.parentElement.childNodes).filter((child) => {
-      // 计算列数，只计算元素节点，排除文本节点
-      return child.tagName && (child.tagName.toLowerCase() === 'td' || child.tagName.toLowerCase() === 'th');
-    }).length;
+    
+    // 判断当前点击的表格是否在脚注中
+    // 向上遍历DOM，查找是否有.one-footnote祖先节点
+    let footnoteContainer = null;
+    let currentElement = this.target;
+    
+    while (currentElement && currentElement !== this.previewerDom) {
+      if (currentElement.classList && currentElement.classList.contains('one-footnote')) {
+        footnoteContainer = currentElement;
+        break;
+      }
+      currentElement = currentElement.parentElement;
+    }
+    
+    const isInFootnote = footnoteContainer !== null;
+    
+    let tableIndex;
+    let totalTables;
+    
+    if (isInFootnote) {
+      // 脚注表格：统计当前脚注容器前面有多少个脚注容器包含表格
+      const allFootnoteContainers = Array.from(this.previewerDom.querySelectorAll('.one-footnote'));
+      const currentFootnoteIndex = allFootnoteContainers.indexOf(footnoteContainer);
+      
+      if (currentFootnoteIndex === -1) {
+        console.warn('无法找到当前脚注容器的索引');
+        return false;
+      }
+      
+      // 统计当前脚注容器前面的脚注容器中包含的表格数量
+      let tablesBeforeCurrentFootnote = 0;
+      for (let i = 0; i < currentFootnoteIndex; i++) {
+        tablesBeforeCurrentFootnote += allFootnoteContainers[i].querySelectorAll('table').length;
+      }
+      
+      // 在当前脚注容器中的表格索引
+      const tablesInCurrentFootnote = Array.from(footnoteContainer.querySelectorAll('table'));
+      const indexInCurrentFootnote = tablesInCurrentFootnote.indexOf(tableNode);
+      
+      if (indexInCurrentFootnote === -1) {
+        console.warn('无法找到表格在当前脚注容器中的索引');
+        return false;
+      }
+      
+      // 总的脚注表格索引
+      tableIndex = tablesBeforeCurrentFootnote + indexInCurrentFootnote;
+      
+      // 统计所有脚注中的表格总数
+      totalTables = this.previewerDom.querySelectorAll('.one-footnote table').length;
+    } else {
+      // 正文表格：排除脚注中的表格，获取正文区域的表格
+      const allTables = Array.from(this.previewerDom.querySelectorAll('table'));
+      const footnoteTableSet = new Set();
+      
+      // 收集所有脚注中的表格
+      const footnoteContainers = this.previewerDom.querySelectorAll('.one-footnote');
+      footnoteContainers.forEach(container => {
+        const footnoteTables = container.querySelectorAll('table');
+        footnoteTables.forEach(table => footnoteTableSet.add(table));
+      });
+      
+      // 过滤出正文区域的表格（不在脚注中的表格）
+      const mainTextTables = allTables.filter(table => !footnoteTableSet.has(table));
+      
+      tableIndex = mainTextTables.indexOf(tableNode);
+      totalTables = mainTextTables.length;
+    }
+    
+    if (tableIndex === -1) {
+      console.warn('无法找到当前表格在相应区域的索引', {
+        isInFootnote,
+        tableNode: tableNode.outerHTML.slice(0, 100),
+        totalTablesInArea: totalTables
+      });
+      return false;
+    }
+    
+    // 计算列数和单元格索引，只考虑td/th元素
+    const rowCells = Array.from(this.target.parentElement.children).filter(child => 
+      child.tagName && (child.tagName.toLowerCase() === 'td' || child.tagName.toLowerCase() === 'th')
+    );
+    
+    const columns = rowCells.length;
+    const tdIndex = rowCells.indexOf(this.target);
+    
+    // 计算行索引，只考虑tr元素
+    const tableRows = Array.from(this.target.parentElement.parentElement.children);
+    const trIndex = tableRows.indexOf(this.target.parentElement);
 
     this.tableEditor.info = {
       tableNode,
       tdNode: this.target,
       trNode: this.target.parentElement,
-      tdIndex: Array.from(this.target.parentElement.childNodes).indexOf(this.target),
-      trIndex: Array.from(this.target.parentElement.parentElement.childNodes).indexOf(this.target.parentElement),
+      tdIndex,
+      trIndex,
       isTHead: this.target.parentElement.parentElement.tagName !== 'TBODY',
-      totalTables: list.length,
-      tableIndex: list.indexOf(tableNode),
+      totalTables,
+      tableIndex,
       tableText: tableNode.textContent.replace(/[\s]/g, ''),
       columns,
+      isFootnote: isInFootnote,
     };
   }
 
   /**
    * 选中对应单元格、所在行、所在列的内容
-   * @param {Number} index
+   * @param {Number} index 表格在相应区域（正文或脚注）中的索引
    * @param {String} type 'td': 当前单元格, 'table': 当前表格, 'cell': HTML表格单元格
    * @param {Boolean} select 是否选中编辑器中的代码
+   * @param {Boolean} isFootnote 是否为脚注表格
    */
-  $setSelection(index, type = 'table', select = true) {
-    const tableCode = this.tableEditor.tableCodes[index];
+  $setSelection(index, type = 'table', select = true, isFootnote = false) {
+    // 根据表格位置选择相应的表格代码数组
+    const tableCodes = isFootnote ? this.tableEditor.footnoteCodes : this.tableEditor.mainTextCodes;
+    const tableCode = tableCodes[index];
+    
     if (!tableCode) {
       console.warn('找不到对应的表格代码');
       return;
@@ -475,24 +637,62 @@ export default class TableHandler {
    */
   $findTableInEditor() {
     this.$collectTableDom();
-    this.$collectTableCode();
     
-    // 现在支持 HTML 表格语法的情况
-    if (this.tableEditor.info.totalTables !== this.tableEditor.tableCodes.length) {
-      console.warn('预览区表格数量与编辑区表格数量不匹配');
+    // 如果DOM收集失败，直接返回
+    if (!this.tableEditor.info.tableNode) {
+      console.warn('DOM收集失败，无法定位表格');
       return false;
     }
     
-    if (this.tableEditor.info.tableIndex === -1) {
+    this.$collectTableCode();
+    
+    const currentTableInfo = this.tableEditor.info;
+    const isFootnoteTable = currentTableInfo.isFootnote;
+    
+    // 根据表格所在区域进行匹配验证
+    const relevantTableCodes = isFootnoteTable ? this.tableEditor.footnoteCodes : this.tableEditor.mainTextCodes;
+    
+    console.log('表格匹配调试信息:', {
+      isFootnoteTable,
+      预览区表格数量: currentTableInfo.totalTables,
+      编辑区表格数量: relevantTableCodes.length,
+      当前表格索引: currentTableInfo.tableIndex,
+      表格代码: relevantTableCodes.map((code, index) => ({
+        index,
+        type: code.type,
+        preview: code.code.slice(0, 50)
+      }))
+    });
+    
+    if (currentTableInfo.totalTables !== relevantTableCodes.length) {
+      console.warn(`${isFootnoteTable ? '脚注' : '正文'}区域表格数量不匹配: 预览区${currentTableInfo.totalTables}个，编辑区${relevantTableCodes.length}个`);
+      return false;
+    }
+    
+    if (currentTableInfo.tableIndex === -1) {
       console.warn('无法找到当前表格在预览区的索引');
       return false;
     }
     
-    // 检查表格类型，决定选择策略
-    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
-    const selectionType = (tableCode && tableCode.type === 'html') ? 'cell' : 'table';
+    // 获取对应的表格代码
+    const targetTableCode = relevantTableCodes[currentTableInfo.tableIndex];
+    if (!targetTableCode) {
+      console.warn('无法找到对应的表格代码');
+      return false;
+    }
     
-    this.$setSelection(this.tableEditor.info.tableIndex, selectionType, this.trigger === 'click');
+    // 检查表格类型，决定选择策略
+    let selectionType;
+    
+    if (targetTableCode.type === 'html') {
+      // HTML 表格选择单元格
+      selectionType = 'cell';
+    } else {
+      // Markdown 表格：点击时选择单元格，悬停时选择整个表格
+      selectionType = this.trigger === 'click' ? 'td' : 'table';
+    }
+    
+    this.$setSelection(currentTableInfo.tableIndex, selectionType, this.trigger === 'click', isFootnoteTable);
   }
 
   $initReg() {
@@ -504,7 +704,7 @@ export default class TableHandler {
 
   showBubble() {
     // 检查当前表格类型，决定显示哪些操作按钮
-    const tableCode = this.tableEditor.tableCodes?.[this.tableEditor.info.tableIndex];
+    const tableCode = this.$getCurrentTableCode();
     const isHtmlTable = tableCode && tableCode.type === 'html';
     
     if (isHtmlTable) {
@@ -735,7 +935,7 @@ export default class TableHandler {
    * 添加上一行
    */
   $addLastRow() {
-    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    const tableCode = this.$getCurrentTableCode();
     
     // 如果是 HTML 表格，暂时不支持编辑操作
     if (tableCode && tableCode.type === 'html') {
@@ -755,7 +955,7 @@ export default class TableHandler {
    * 添加下一行
    */
   $addNextRow() {
-    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    const tableCode = this.$getCurrentTableCode();
     
     // 如果是 HTML 表格，暂时不支持编辑操作
     if (tableCode && tableCode.type === 'html') {
@@ -791,7 +991,7 @@ export default class TableHandler {
    * 添加上一列
    */
   $addLastCol() {
-    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    const tableCode = this.$getCurrentTableCode();
     
     // 如果是 HTML 表格，暂时不支持编辑操作
     if (tableCode && tableCode.type === 'html') {
@@ -800,30 +1000,31 @@ export default class TableHandler {
     }
     
     // Markdown 表格的处理逻辑
-    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+    const currentTableInfo = this.tableEditor.info;
+    this.$setSelection(currentTableInfo.tableIndex, 'table', currentTableInfo.isFootnote);
     const selection = this.codeMirror.getSelection();
     const lines = selection.split('\n');
-    const cellsIndex = this.tableEditor.info.tdIndex < 2 ? 1 : this.tableEditor.info.tdIndex - 1;
+    const cellsIndex = currentTableInfo.tdIndex < 2 ? 1 : currentTableInfo.tdIndex - 1;
     const newLines = lines.map((line, index) => {
       const cells = line.split('|');
       const replaceItem = this.$getTdAlign(cells, index, cellsIndex);
       if (replaceItem === false) {
         return line;
       }
-      cells.splice(this.tableEditor.info.tdIndex + 1, 0, replaceItem);
+      cells.splice(currentTableInfo.tdIndex + 1, 0, replaceItem);
       return cells.join('|');
     });
     const newText = newLines.join('\n');
     this.codeMirror.replaceSelection(newText);
     this.$findTableInEditor();
-    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+    this.$setSelection(currentTableInfo.tableIndex, 'table', currentTableInfo.isFootnote);
   }
 
   /**
    * 添加下一列
    */
   $addNextCol() {
-    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    const tableCode = this.$getCurrentTableCode();
     
     // 如果是 HTML 表格，暂时不支持编辑操作
     if (tableCode && tableCode.type === 'html') {
@@ -832,22 +1033,23 @@ export default class TableHandler {
     }
     
     // Markdown 表格的处理逻辑
-    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+    const currentTableInfo = this.tableEditor.info;
+    this.$setSelection(currentTableInfo.tableIndex, 'table', currentTableInfo.isFootnote);
     const selection = this.codeMirror.getSelection();
     const lines = selection.split('\n');
     const newLines = lines.map((line, index) => {
       const cells = line.split('|');
-      const replaceItem = this.$getTdAlign(cells, index, this.tableEditor.info.tdIndex + 1);
+      const replaceItem = this.$getTdAlign(cells, index, currentTableInfo.tdIndex + 1);
       if (replaceItem === false) {
         return line;
       }
-      cells.splice(this.tableEditor.info.tdIndex + 2, 0, replaceItem);
+      cells.splice(currentTableInfo.tdIndex + 2, 0, replaceItem);
       return cells.join('|');
     });
     const newText = newLines.join('\n');
     this.codeMirror.replaceSelection(newText);
     this.$findTableInEditor();
-    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+    this.$setSelection(currentTableInfo.tableIndex, 'table', currentTableInfo.isFootnote);
   }
 
   /**
@@ -991,7 +1193,7 @@ export default class TableHandler {
    * 删除当前行
    */
   $deleteCurrentRow() {
-    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    const tableCode = this.$getCurrentTableCode();
     
     // 如果是 HTML 表格，暂时不支持编辑操作
     if (tableCode && tableCode.type === 'html') {
@@ -1000,8 +1202,8 @@ export default class TableHandler {
     }
     
     // Markdown 表格的处理逻辑
-    const { tableIndex, trIndex } = this.tableEditor.info;
-    this.$setSelection(tableIndex, 'table');
+    const { tableIndex, trIndex, isFootnote } = this.tableEditor.info;
+    this.$setSelection(tableIndex, 'table', isFootnote);
     const selection = this.codeMirror.getSelection();
     const table = selection.split('\n');
     table.splice(trIndex + 2, 1);
@@ -1013,7 +1215,7 @@ export default class TableHandler {
    * 删除当前列
    */
   $deleteCurrentColumn() {
-    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    const tableCode = this.$getCurrentTableCode();
     
     // 如果是 HTML 表格，暂时不支持编辑操作
     if (tableCode && tableCode.type === 'html') {
@@ -1022,8 +1224,8 @@ export default class TableHandler {
     }
     
     // Markdown 表格的处理逻辑
-    const { tableIndex, tdIndex } = this.tableEditor.info;
-    this.$setSelection(tableIndex, 'table');
+    const { tableIndex, tdIndex, isFootnote } = this.tableEditor.info;
+    this.$setSelection(tableIndex, 'table', isFootnote);
     const selection = this.codeMirror.getSelection();
     const table = selection.split('\n');
     const rows = table.map((row) => row.split('|').slice(1, -1));
@@ -1041,7 +1243,7 @@ export default class TableHandler {
    * 拖拽列
    */
   $dragCol() {
-    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    const tableCode = this.$getCurrentTableCode();
     
     // 如果是 HTML 表格，暂时不支持拖拽操作
     if (tableCode && tableCode.type === 'html') {
@@ -1050,10 +1252,11 @@ export default class TableHandler {
     }
     
     // Markdown 表格的处理逻辑
-    const oldTdIndex = this.tableEditor.info.tdIndex;
+    const currentTableInfo = this.tableEditor.info;
+    const oldTdIndex = currentTableInfo.tdIndex;
     const thNode = this.target.parentElement;
     const lines = this.codeMirror.getSelection().split(/\n/);
-    const { tdNode } = this.tableEditor.info;
+    const { tdNode } = currentTableInfo;
     const that = this;
     tdNode.setAttribute('draggable', true);
 
@@ -1082,7 +1285,7 @@ export default class TableHandler {
       that.codeMirror.replaceSelection(newText);
       that.setStyle(event.target, 'border', '1px solid #dfe6ee');
       that.$findTableInEditor();
-      that.$setSelection(that.tableEditor.info.tableIndex, 'table');
+      that.$setSelection(currentTableInfo.tableIndex, 'table', currentTableInfo.isFootnote);
 
       thNode.removeEventListener('dragleave', handleDragLeave);
       thNode.removeEventListener('dragover', handleDragOver);
@@ -1097,7 +1300,7 @@ export default class TableHandler {
    * 拖拽行
    */
   $dragLine() {
-    const tableCode = this.tableEditor.tableCodes[this.tableEditor.info.tableIndex];
+    const tableCode = this.$getCurrentTableCode();
     
     // 如果是 HTML 表格，暂时不支持拖拽操作
     if (tableCode && tableCode.type === 'html') {
@@ -1106,10 +1309,11 @@ export default class TableHandler {
     }
     
     // Markdown 表格的处理逻辑
-    const { trNode } = this.tableEditor.info;
+    const currentTableInfo = this.tableEditor.info;
+    const { trNode } = currentTableInfo;
     trNode.setAttribute('draggable', true);
-    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
-    const oldTrIndex = this.tableEditor.info.trIndex + 2;
+    this.$setSelection(currentTableInfo.tableIndex, 'table', currentTableInfo.isFootnote);
+    const oldTrIndex = currentTableInfo.trIndex + 2;
     const tBody = trNode.parentElement;
     const lines = this.codeMirror.getSelection().split(/\n/);
     const that = this;
@@ -1134,7 +1338,7 @@ export default class TableHandler {
       that.codeMirror.replaceSelection(newText);
 
       that.$findTableInEditor();
-      that.$setSelection(that.tableEditor.info.tableIndex, 'table');
+      that.$setSelection(currentTableInfo.tableIndex, 'table', currentTableInfo.isFootnote);
       that.setStyle(event.target.parentElement, 'border', '1px solid #dfe6ee');
 
       tBody.removeEventListener('dragleave', handleDragLeave);

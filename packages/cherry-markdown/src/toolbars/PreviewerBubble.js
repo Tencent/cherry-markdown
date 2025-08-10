@@ -502,6 +502,22 @@ export default class PreviewerBubble {
   }
 
   /**
+   * 检测表格是否在脚注中
+   * @param {HTMLElement} element 目标元素
+   * @returns {boolean} 是否在脚注中
+   */
+  $isTableInFootnote(element) {
+    let currentElement = element;
+    while (currentElement && currentElement !== this.previewerDom) {
+      if (currentElement.classList && currentElement.classList.contains('one-footnote')) {
+        return true;
+      }
+      currentElement = currentElement.parentElement;
+    }
+    return false;
+  }
+
+  /**
    * 为触发的table增加操作工具栏
    * @param {string} trigger 触发方式
    * @param {HTMLElement} htmlElement 用户触发的table dom
