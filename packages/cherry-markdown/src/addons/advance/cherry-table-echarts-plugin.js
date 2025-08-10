@@ -240,6 +240,7 @@ const BaseChartOptionsHandler = {
       backgroundColor: '#fff',
       color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'],
       tooltip: {
+        trigger: 'item',
         backgroundColor: 'rgba(0,0,0,0.8)',
         borderColor: '#999',
         borderWidth: 1,
@@ -313,7 +314,7 @@ const LegendOptionsHandler = {
   },
 };
 
-const AxisBaseChartOptionsHandler = {
+const AxisOptionsHandler = {
   components: [BaseChartOptionsHandler, LegendOptionsHandler],
   options(tableObject, options) {
     const data = [];
@@ -441,17 +442,8 @@ const AxisBaseChartOptionsHandler = {
   },
 };
 
-const NonAxisBaseChartOptionsHandler = {
-  components: [BaseChartOptionsHandler],
-  options(tableObject, options) {
-    return {
-      'tooltip.trigger': 'item',
-    };
-  },
-};
-
 const LineChartOptionsHandler = {
-  components: [AxisBaseChartOptionsHandler, LegendOptionsHandler],
+  components: [AxisOptionsHandler, LegendOptionsHandler],
   options(tableObject, options) {
     return {
       'tooltip.axisPointer.type': 'cross',
@@ -500,7 +492,7 @@ const LineChartOptionsHandler = {
 };
 
 const BarChartOptionsHandler = {
-  components: [AxisBaseChartOptionsHandler],
+  components: [AxisOptionsHandler],
   options(tableObject, options) {
     return {
       'tooltip.axisPointer.type': 'shadow',
@@ -537,7 +529,7 @@ const BarChartOptionsHandler = {
 };
 
 const RadarChartOptionsHandler = {
-  components: [NonAxisBaseChartOptionsHandler, LegendOptionsHandler],
+  components: [BaseChartOptionsHandler, LegendOptionsHandler],
   options(tableObject, options) {
     const indicator = tableObject.header.slice(1).map((header) => {
       const maxValue = Math.max(
@@ -705,7 +697,7 @@ const MapChartLoadingOptionsHandler = {
  * @type {{components: {components: [{components: [{options(*, *): {title: {top: string, left: string, text: *, textStyle: {color: string, fontSize: number}}}|{}}], options(*, *): {backgroundColor: string, color, tooltip: {backgroundColor: string, borderColor: string, borderWidth: number, extraCssText: string, textStyle: {color: string, fontSize: number}}, toolbox: {orient: string, top: string, feature: {saveAsImage: {backgroundColor: string, show: boolean, title: string, type: string}, restore: {show: boolean, title: string}}, left: string, show: boolean, emphasis: {iconStyle: {borderColor: string}}, iconStyle: {borderColor: string}}}}], options(*, *): {"tooltip.trigger": string}}[], options(*, *): {series: [{data: *, name: string, emphasis: {itemStyle: {areaColor: string}, label: {show: boolean, fontSize: number, fontWeight: string}}, itemStyle: {borderColor: string, areaColor: string, borderWidth: number}, label: {show: boolean, fontSize: number}, type: string, roam: boolean, map: *}], "tooltip.formatter": function(*): string, visualMap: {min: number, top: string, max: number, left: string, calculable: boolean, text: string[], textStyle: {fontSize: number}, inRange: {color: string[]}}}}}
  */
 const MapChartCompleteOptionsHandler = {
-  components: [NonAxisBaseChartOptionsHandler],
+  components: [BaseChartOptionsHandler],
   options(tableObject, options) {
     const mapData = tableObject.rows.map((row) => {
       const originalName = row[0];
@@ -961,7 +953,6 @@ const HeatmapChartOptionsHandler = {
 
     return {
       tooltip: {
-        trigger: 'item',
         formatter(params) {
           return `${yAxisData[params.data[1]]}<br/>${xAxisData[params.data[0]]}: <strong>${params.data[2]}</strong>`;
         },
@@ -1066,7 +1057,6 @@ const PieChartOptionsHandler = {
 
     return {
       tooltip: {
-        trigger: 'item',
         formatter: '{a} <br/>{b}: {c} ({d}%)',
       },
       legend: {
