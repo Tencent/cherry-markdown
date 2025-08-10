@@ -20,15 +20,17 @@ import MenuBase from '@/toolbars/MenuBase';
 export default class ProTable extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('proTable', 'proTable');
+    this.setName('proTable', 'insertChart');
+    this.noIcon = true;
+    this.localeName = $cherry.options.locale;
     /** @type {import('@/toolbars/MenuBase').SubMenuConfigItem[]} */
     this.subMenuConfig = [
-      { iconName: 'lineTable', name: 'lineTable', onclick: this.bindSubClick.bind(this, 'lineTable') },
-      { iconName: 'barTable', name: 'barTable', onclick: this.bindSubClick.bind(this, 'barTable') },
-      { iconName: 'radarTable', name: 'radarTable', onclick: this.bindSubClick.bind(this, 'radarTable') },
-      { iconName: 'mapTable', name: 'mapTable', onclick: this.bindSubClick.bind(this, 'mapTable') },
-      { iconName: 'heatmapTable', name: 'heatmapTable', onclick: this.bindSubClick.bind(this, 'heatmapTable') },
-      { iconName: 'pieTable', name: 'pieTable', onclick: this.bindSubClick.bind(this, 'pieTable') },
+      { iconName: 'insertLineChart', name: 'lineTable', onclick: this.bindSubClick.bind(this, 'lineTable') },
+      { iconName: 'insertBarChart', name: 'barTable', onclick: this.bindSubClick.bind(this, 'barTable') },
+      { iconName: 'insertRadarChart', name: 'radarTable', onclick: this.bindSubClick.bind(this, 'radarTable') },
+      { iconName: 'insertMapChart', name: 'mapTable', onclick: this.bindSubClick.bind(this, 'mapTable') },
+      { iconName: 'insertHeatmapChart', name: 'heatmapTable', onclick: this.bindSubClick.bind(this, 'heatmapTable') },
+      { iconName: 'insertPieChart', name: 'pieTable', onclick: this.bindSubClick.bind(this, 'pieTable') },
     ];
   }
 
