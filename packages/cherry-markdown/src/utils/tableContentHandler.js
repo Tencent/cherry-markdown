@@ -200,9 +200,14 @@ export default class TableHandler {
    * 获取预览区域被点击的table对象，并记录table的顺位
    */
   $collectTableDom () {
-    const list = Array.from(this.previewerDom.querySelectorAll('table.cherry-table'));
+    const Tables = Array.from(this.previewerDom.querySelectorAll('table.cherry-table'));
+    const list = Tables.filter((table) => !this.$isElementInFootnote(table));
     const tableNode = this.$getClosestNode(this.target, 'TABLE');
     if (tableNode === false) {
+      return false;
+    }
+    if (this.$isElementInFootnote(tableNode)) {
+      // 脚注中的表格暂不支持编辑
       return false;
     }
     const columns = Array.from(this.target.parentElement.childNodes).filter((child) => {
@@ -222,6 +227,39 @@ export default class TableHandler {
       tableText: tableNode.textContent.replace(/[\s]/g, ''),
       columns,
     };
+  }
+
+  //检查是否表格在脚注里，并且过滤掉
+  $isElementInFootnote (element) {
+    const footnoteContainer = this.previewerDom.querySelector('.footnotes, .cherry-footnotes');
+    if (footnoteContainer && footnoteContainer.contains(element)) {
+      return true;
+    }
+    let current = element;
+    while (current && current !== this.previewerDom) {
+      if (
+        current.classList?.contains('footnote') ||
+        current.classList?.contains('cherry-footnote') ||
+        current.classList?.contains('one-footnote') ||
+        current.hasAttribute('data-footnote') ||
+        current.hasAttribute('data-footnote-id')
+      ) {
+        return true;
+      }
+      current = current.parentElement;
+    }
+
+    while (current && current.tagName !== 'BODY') {
+      if (current.classList && current.classList.contains('one-footnote')) {
+        return true;
+      }
+      current =(current.parentNode);
+    }
+    if (element.classList?.contains('footnote-ref') || element.classList?.contains('cherry-footnote-ref')) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -606,31 +644,31 @@ export default class TableHandler {
   /**
    * 高亮当前列
    */
-$highlightColumn() {
-  const { tableNode, tdIndex } = this.tableEditor.info;
-  const tBody = tableNode.tBodies[0];
-  if (!tBody) {
-    return;
-  }
-  const bodyRows = tBody.rows;
-  if (bodyRows.length === 0) {
-    return;
-  }
-  bodyRows[0].cells[tdIndex].style.borderTop = '1px solid red';
-  bodyRows[bodyRows.length - 1].cells[tdIndex].style.borderBottom = '1px solid red';
-  for (let i = 0; i < bodyRows.length; i++) {
-    const { cells } = bodyRows[i];
-    if (cells[tdIndex]) {
-      if (tdIndex === 0) {
-        cells[tdIndex].style.borderLeft = '1px solid red';
-      } else {
-        cells[tdIndex - 1].style.borderRight = '1px solid red';
+  $highlightColumn () {
+    const { tableNode, tdIndex } = this.tableEditor.info;
+    const tBody = tableNode.tBodies[0];
+    if (!tBody) {
+      return;
+    }
+    const bodyRows = tBody.rows;
+    if (bodyRows.length === 0) {
+      return;
+    }
+    bodyRows[0].cells[tdIndex].style.borderTop = '1px solid red';
+    bodyRows[bodyRows.length - 1].cells[tdIndex].style.borderBottom = '1px solid red';
+    for (let i = 0; i < bodyRows.length; i++) {
+      const { cells } = bodyRows[i];
+      if (cells[tdIndex]) {
+        if (tdIndex === 0) {
+          cells[tdIndex].style.borderLeft = '1px solid red';
+        } else {
+          cells[tdIndex - 1].style.borderRight = '1px solid red';
+        }
+        cells[tdIndex].style.borderRight = '1px solid red';
+        cells[tdIndex].classList.add('highlighted-error');
       }
-      cells[tdIndex].style.borderRight = '1px solid red';
-      cells[tdIndex].classList.add('highlighted-error');
     }
   }
-}
 
   /**
    * 取消高亮当前列
@@ -674,8 +712,11 @@ $highlightColumn() {
         preTds[i].style.borderBottom = style;
       }
       tds[i].style.borderBottom = style;
-      style != '' ? tds[i+1].classList.add('highlighted-error') : tds[i+1].classList.remove('highlighted-error');
-      
+      if (tds[i + 1].classList) {
+        style != ''
+          ? tds[i + 1]?.classList.add('highlighted-error')
+          : tds[i + 1]?.classList.remove('highlighted-error');
+      }
     }
     tds[0].style.borderLeft = style;
     tds[tds.length - 1].style.borderRight = style;

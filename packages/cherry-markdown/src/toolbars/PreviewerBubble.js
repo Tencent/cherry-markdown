@@ -139,9 +139,10 @@ export default class PreviewerBubble {
       return false;
     }
     // 引用里的表格先不支持所见即所得编辑
-    if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
-      return false;
-    }
+    // if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
+    //   return false;
+    // }
+    //注释了这个引用的判断
     return container;
   }
 
