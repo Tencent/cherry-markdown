@@ -210,29 +210,30 @@ export default class Table extends ParagraphBase {
     if (!chartOptions) {
       return tableResult;
     }
+    // note: 下面的代码会导致局部的地图数据源配置影响全局的配置，导致所有地图显示相同的界面
     // 检查是否有地图数据源注释（针对地图类型的图表）
-    let enhancedChartOptions = chartOptions;
-    if (chartOptions.type === 'map') {
-      // 在前面的内容中查找 mapDataSource 注释 - 支持更灵活的格式
-      const mapDataSourceRegex = /<!--[\s\S]*?mapDataSource:\s*([^\s>]+)[\s\S]*?-->/i;
-      const match = originalStr.match(mapDataSourceRegex);
-      if (match && match[1]) {
-        const mapDataSource = match[1].trim();
-        Logger.log('从注释中检测到地图数据源:', mapDataSource);
-        enhancedChartOptions = {
-          ...chartOptions,
-          options: {
-            ...chartOptions.options,
-            mapDataSource,
-          },
-        };
-      } else {
-        // 如果没有检测到自定义数据源，记录日志便于调试
-        Logger.log('未检测到自定义地图数据源，使用默认配置');
-        Logger.log('originalStr preview:', originalStr.substring(0, 200));
-      }
-    }
-    const chart = this.chartRenderEngine.render(enhancedChartOptions.type, enhancedChartOptions.options, tableObject);
+    // let enhancedChartOptions = chartOptions;
+    // if (chartOptions.type === 'map') {
+    //   // 在前面的内容中查找 mapDataSource 注释 - 支持更灵活的格式
+    //   const mapDataSourceRegex = /<!--[\s\S]*?mapDataSource:\s*([^\s>]+)[\s\S]*?-->/i;
+    //   const match = originalStr.match(mapDataSourceRegex);
+    //   if (match && match[1]) {
+    //     const mapDataSource = match[1].trim();
+    //     Logger.log('从注释中检测到地图数据源:', mapDataSource);
+    //     enhancedChartOptions = {
+    //       ...chartOptions,
+    //       options: {
+    //         ...chartOptions.options,
+    //         mapDataSource,
+    //       },
+    //     };
+    //   } else {
+    //     // 如果没有检测到自定义数据源，记录日志便于调试
+    //     Logger.log('未检测到自定义地图数据源，使用默认配置');
+    //     Logger.log('originalStr preview:', originalStr.substring(0, 200));
+    //   }
+    // }
+    const chart = this.chartRenderEngine.render(chartOptions.type, chartOptions.options, tableObject);
     const chartHtml = `<figure class="cherry-table-figure">${chart}</figure>`;
     const newSign = `${tableResult.sign}${chartOptionsSign}`;
     return {
