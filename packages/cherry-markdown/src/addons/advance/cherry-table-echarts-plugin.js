@@ -88,30 +88,14 @@ export default class EChartsTableEngine {
 
   render(type, options, tableObject) {
     console.log('Rendering chart:', type, options, tableObject);
-    let chartOption = {};
-    switch (type) {
-      case 'bar':
-        chartOption = generateOptions(BarChartOptions, tableObject, options);
-        break;
-      case 'line':
-        chartOption = generateOptions(LineChartOptions, tableObject, options);
-        break;
-      case 'radar':
-        chartOption = generateOptions(RadarChartOptions, tableObject, options);
-        break;
-      case 'map':
-        chartOption = this.renderMapChart(tableObject, options);
-        break;
-      case 'heatmap':
-        chartOption = generateOptions(HeatmapChartOptions, tableObject, options);
-        break;
-      case 'pie':
-        chartOption = generateOptions(PieChartOptions, tableObject, options);
-        break;
-      default:
-        return '';
-    }
-    console.log('Chart options:', chartOption);
+    const handler = {
+      bar: BarChartOptionsHandler,
+      line: LineChartOptionsHandler,
+      radar: RadarChartOptionsHandler,
+      map: MapChartOptionsHandler,
+      heatmap: HeatmapChartOptionsHandler,
+      pie: PieChartOptionsHandler,
+    }[type];
 
     // 生成唯一ID和简化的配置数据
     const chartId = `chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -119,6 +103,8 @@ export default class EChartsTableEngine {
     // 序列化数据用于存储
     const tableDataStr = JSON.stringify(tableObject);
     const chartOptionsStr = JSON.stringify(options);
+
+    const chartOption = handler ? generateOptions(handler, tableObject, options) : {};
 
     // 创建一个包含所有必要信息的HTML结构
     const htmlContent = `
@@ -453,7 +439,7 @@ export default class EChartsTableEngine {
   }
 }
 
-const TitleOptions = {
+const TitleOptionsHandler = {
   options(tableObject, options) {
     return options.title
       ? {
@@ -472,7 +458,8 @@ const TitleOptions = {
 };
 
 const BaseChartOptions = {
-  components: [TitleOptions],
+const BaseChartOptionsHandler = {
+  components: [TitleOptionsHandler],
   options(tableObject, options) {
     return {
       backgroundColor: '#fff',
@@ -522,7 +509,7 @@ const BaseChartOptions = {
   },
 };
 
-const LegendOptions = {
+const LegendOptionsHandler = {
   options(tableObject, options) {
     return {
       legend: {
@@ -551,8 +538,8 @@ const LegendOptions = {
   },
 };
 
-const AxisBaseChartOptions = {
-  components: [BaseChartOptions, LegendOptions],
+const AxisBaseChartOptionsHandler = {
+  components: [BaseChartOptionsHandler, LegendOptionsHandler],
   options(tableObject, options) {
     const data = [];
     const series = [];
@@ -679,8 +666,8 @@ const AxisBaseChartOptions = {
   },
 };
 
-const NonAxisBaseChartOptions = {
-  components: [BaseChartOptions],
+const NonAxisBaseChartOptionsHandler = {
+  components: [BaseChartOptionsHandler],
   options(tableObject, options) {
     return {
       'tooltip.trigger': 'item',
@@ -688,8 +675,8 @@ const NonAxisBaseChartOptions = {
   },
 };
 
-const LineChartOptions = {
-  components: [AxisBaseChartOptions, LegendOptions],
+const LineChartOptionsHandler = {
+  components: [AxisBaseChartOptionsHandler, LegendOptionsHandler],
   options(tableObject, options) {
     return {
       'tooltip.axisPointer.type': 'cross',
@@ -737,8 +724,8 @@ const LineChartOptions = {
   },
 };
 
-const BarChartOptions = {
-  components: [AxisBaseChartOptions],
+const BarChartOptionsHandler = {
+  components: [AxisBaseChartOptionsHandler],
   options(tableObject, options) {
     return {
       'tooltip.axisPointer.type': 'shadow',
@@ -774,8 +761,8 @@ const BarChartOptions = {
   },
 };
 
-const RadarChartOptions = {
-  components: [NonAxisBaseChartOptions, LegendOptions],
+const RadarChartOptionsHandler = {
+  components: [NonAxisBaseChartOptionsHandler, LegendOptionsHandler],
   options(tableObject, options) {
     const indicator = tableObject.header.slice(1).map((header) => {
       const maxValue = Math.max(
@@ -894,8 +881,6 @@ const RadarChartOptions = {
   },
 };
 
-const MapChartOptions = {
-  components: [NonAxisBaseChartOptions],
   options(tableObject, options) {
     const mapData = tableObject.rows.map((row) => {
       const originalName = row[0];
@@ -958,6 +943,7 @@ const MapChartOptions = {
   },
 };
 
+const MapChartOptionsHandler = {
 // 省份名称映射表
 const provinceNameMap = {
   北京: '北京市',
@@ -1028,8 +1014,8 @@ const normalizeProvinceName = (inputName) => {
   return cleanName;
 };
 
-const HeatmapChartOptions = {
-  components: [BaseChartOptions],
+const HeatmapChartOptionsHandler = {
+  components: [BaseChartOptionsHandler],
   options(tableObject, options) {
     // 构建热力图数据
     const xAxisData = tableObject.header.slice(1); // 列标题作为x轴
@@ -1144,8 +1130,8 @@ const HeatmapChartOptions = {
   },
 };
 
-const PieChartOptions = {
-  components: [BaseChartOptions],
+const PieChartOptionsHandler = {
+  components: [BaseChartOptionsHandler],
   options(tableObject, options) {
     // 构建饼图数据
     const data = tableObject.rows.map((row) => ({
