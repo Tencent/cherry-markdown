@@ -99,11 +99,12 @@ export default class EChartsTableEngine {
 
     // 生成唯一ID和简化的配置数据
     const chartId = `chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
     // 序列化数据用于存储
     const tableDataStr = JSON.stringify(tableObject);
     const chartOptionsStr = JSON.stringify(options);
 
+    options.chartId = chartId;
+    options.engine = this;
     const chartOption = handler ? generateOptions(handler, tableObject, options) : {};
 
     // 创建一个包含所有必要信息的HTML结构
@@ -163,231 +164,6 @@ export default class EChartsTableEngine {
     setTimeout(() => initChart(), 50);
 
     return htmlContent;
-  }
-
-  renderMapChart(tableObject, options) {
-    console.log('开始渲染地图图表，选项:', options);
-
-    // 检查options中是否有自定义地图数据源
-    if (options && options.mapDataSource) {
-      console.log('检测到自定义地图数据源:', options.mapDataSource);
-
-      // 优先使用用户自定义的地图数据源
-      // 如果当前已经有china地图数据，先清除它以确保使用新数据
-      if (window.echarts && window.echarts.getMap('china')) {
-        console.log('清除现有地图数据以使用自定义地图数据源');
-      }
-
-      // 立即开始加载自定义地图数据，这会覆盖默认地图数据
-      this.$loadCustomMapData(options.mapDataSource, true);
-    } else {
-      console.log('使用默认地图数据源');
-      // 只有在没有自定义数据源时才加载默认地图数据
-      this.$loadChinaMapData();
-    }
-
-    // 立即返回地图图表配置
-    return this.$renderMapChartCommon(tableObject, options);
-  }
-
-  /**
-   * 加载中国地图数据
-   */
-  $loadChinaMapData() {
-    if (typeof window.echarts === 'undefined') {
-      console.error('ECharts 库未加载');
-      return;
-    }
-
-    // 检查地图数据是否已加载
-    if (window.echarts.getMap('china')) {
-      console.log('中国地图数据已存在');
-      return;
-    }
-
-    console.log('正在加载中国地图数据...');
-
-    // 获取配置中的地图数据源URL，如果没有配置则使用默认值
-    let possiblePaths = [
-      'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', // 在线高质量地图数据源（优先，已验证可用）
-      './assets/data/china.json', // 从examples目录访问本地备份文件
-    ];
-
-    // 如果有Cherry配置且配置了mapTable.sourceUrl，则使用配置的URL
-    if (
-      this.cherryOptions &&
-      this.cherryOptions.toolbars &&
-      this.cherryOptions.toolbars.config &&
-      this.cherryOptions.toolbars.config.mapTable &&
-      this.cherryOptions.toolbars.config.mapTable.sourceUrl
-    ) {
-      possiblePaths = this.cherryOptions.toolbars.config.mapTable.sourceUrl;
-      console.log('使用配置的地图数据源:', possiblePaths);
-    }
-
-    this.$tryLoadMapDataFromPaths(possiblePaths, 0);
-  }
-
-  /**
-   * 尝试从多个路径加载地图数据
-   */
-  $tryLoadMapDataFromPaths(paths, index) {
-    if (index >= paths.length) {
-      console.error('所有地图数据源都加载失败');
-      return;
-    }
-
-    const url = paths[index];
-    console.log(`尝试加载地图数据: ${url}`);
-
-    this.$fetchMapData(url).catch((error) => {
-      console.warn(`地图数据加载失败 (${url}):`, error.message);
-      // 尝试下一个路径
-      this.$tryLoadMapDataFromPaths(paths, index + 1);
-    });
-  }
-
-  /**
-   * 获取地图数据
-   */
-  $fetchMapData(url) {
-    return fetch(url)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status} for ${url}`);
-        }
-        return response.json();
-      })
-      .then((geoJson) => {
-        // 注册地图数据
-        window.echarts.registerMap('china', geoJson);
-        console.log(`中国地图数据加载成功！来源: ${url}`);
-
-        // 触发重新渲染已有的地图图表
-        this.$refreshMapCharts();
-        return geoJson;
-      });
-  }
-
-  /**
-   * 加载自定义地图数据
-   * @param {string} mapUrl - 地图数据URL
-   * @param {boolean} forceReload - 是否强制重新加载
-   */
-  $loadCustomMapData(mapUrl, forceReload = false) {
-    if (!mapUrl || mapUrl.trim() === '') {
-      console.warn('自定义地图数据URL为空，使用默认加载方法');
-      return;
-    }
-
-    console.log(`正在加载用户自定义地图数据: ${mapUrl}${forceReload ? ' (强制重新加载)' : ''}`);
-
-    // 优先加载用户自定义的地图数据，覆盖任何已有的地图数据
-    this.$fetchMapData(mapUrl)
-      .then(() => {
-        console.log('用户自定义地图数据加载成功，正在刷新所有地图图表');
-        // 地图数据加载成功后，立即刷新页面中的所有地图图表
-        this.$refreshMapCharts();
-      })
-      .catch((error) => {
-        console.warn(`用户自定义地图数据加载失败 (${mapUrl}):`, error.message);
-        console.warn('自定义地图数据加载失败，回退到默认地图数据');
-        // 如果用户自定义URL失败，回退到默认地图数据
-        this.$loadChinaMapData();
-      });
-  }
-
-  /**
-   * 刷新页面中的地图图表
-   */
-  $refreshMapCharts() {
-    // 查找页面中所有的地图图表容器，重新渲染
-    const mapContainers = document.querySelectorAll('[id^="chart-"][data-chart-type="map"]');
-    console.log('Found map containers to refresh:', mapContainers.length);
-
-    mapContainers.forEach((container) => {
-      const chartId = container.id;
-      console.log('Refreshing map chart:', chartId);
-
-      // 从 data 属性获取存储的表格数据
-      const tableDataStr = container.getAttribute('data-table-data');
-      const chartOptionsStr = container.getAttribute('data-chart-options');
-
-      if (tableDataStr && this.echartsRef) {
-        try {
-          const tableData = JSON.parse(tableDataStr);
-          const chartOptions = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
-
-          const chartOption = this.$renderMapChartCommon(tableData, chartOptions);
-          const existingChart = this.echartsRef.getInstanceByDom(container);
-
-          if (existingChart) {
-            existingChart.setOption(chartOption);
-            console.log('Map chart refreshed successfully:', chartId);
-          } else {
-            // 重新创建图表
-            const newChart = this.echartsRef.init(container);
-            newChart.setOption(chartOption);
-            console.log('Map chart recreated:', chartId);
-          }
-        } catch (error) {
-          console.error('Failed to refresh map chart:', chartId, error);
-        }
-      }
-    });
-  }
-
-  $renderMapChartCommon(tableObject, options) {
-    console.log('Rendering map chart:', tableObject);
-
-    // 检查 ECharts 是否可用
-    if (typeof window.echarts === 'undefined') {
-      console.error('ECharts 库未加载');
-      return {
-        title: {
-          text: '地图渲染失败: ECharts 库未加载',
-          left: 'center',
-          textStyle: { color: '#ff0000' },
-        },
-      };
-    }
-
-    // 检查中国地图数据是否已注册
-    if (!window.echarts.getMap('china')) {
-      console.warn('中国地图数据未加载，正在尝试加载...');
-
-      // 异步加载地图数据
-      this.$loadChinaMapData();
-
-      // 返回加载提示，稍后会被替换
-      return {
-        title: {
-          text: '正在加载地图数据...',
-          left: 'center',
-          top: 'middle',
-          textStyle: {
-            color: '#666',
-            fontSize: 16,
-          },
-        },
-        graphic: {
-          elements: [
-            {
-              type: 'text',
-              left: 'center',
-              top: '60%',
-              style: {
-                text: '如果长时间未显示，请检查网络连接',
-                font: '12px sans-serif',
-                fill: '#999',
-              },
-            },
-          ],
-        },
-      };
-    }
-
-    return generateOptions(MapChartOptions, tableObject, options);
   }
 
   // 添加点击高亮效果
@@ -457,7 +233,6 @@ const TitleOptionsHandler = {
   },
 };
 
-const BaseChartOptions = {
 const BaseChartOptionsHandler = {
   components: [TitleOptionsHandler],
   options(tableObject, options) {
@@ -881,6 +656,48 @@ const RadarChartOptionsHandler = {
   },
 };
 
+const MapChartLoadingOptionsHandler = {
+  options(tableObject, options) {
+    console.log('Rendering map chart:', tableObject);
+
+    return typeof window.echarts === 'undefined'
+      ? {
+          title: {
+            text: '地图渲染失败: ECharts 库未加载',
+            left: 'center',
+            textStyle: { color: '#ff0000' },
+          },
+        }
+      : {
+          title: {
+            text: '正在加载地图数据...',
+            left: 'center',
+            top: 'middle',
+            textStyle: {
+              color: '#666',
+              fontSize: 16,
+            },
+          },
+          graphic: {
+            elements: [
+              {
+                type: 'text',
+                left: 'center',
+                top: '60%',
+                style: {
+                  text: '如果长时间未显示，请检查网络连接',
+                  font: '12px sans-serif',
+                  fill: '#999',
+                },
+              },
+            ],
+          },
+        };
+  },
+};
+
+const MapChartCompleteOptionsHandler = {
+  components: [NonAxisBaseChartOptionsHandler],
   options(tableObject, options) {
     const mapData = tableObject.rows.map((row) => {
       const originalName = row[0];
@@ -915,7 +732,7 @@ const RadarChartOptionsHandler = {
         {
           name: '地图数据',
           type: 'map',
-          map: 'china',
+          map: options.mapDataSource,
           roam: true,
           label: {
             show: true,
@@ -944,6 +761,107 @@ const RadarChartOptionsHandler = {
 };
 
 const MapChartOptionsHandler = {
+  options(tableObject, options) {
+    this.$loadMapData(tableObject, options);
+    return generateOptions(MapChartLoadingOptionsHandler, tableObject, options);
+  },
+  /**
+   * 设置地图数据加载路径列表并尝试加载
+   */
+  $loadMapData(tableObject, options) {
+    let paths = [];
+    if (options && options.mapDataSource) {
+      paths.push(options.mapDataSource);
+    }
+    if (options?.engine?.cherryOptions?.toolbars?.config?.mapTable?.sourceUrl) {
+      paths = paths.concat(options.engine.cherryOptions.toolbars.config.mapTable.sourceUrl);
+    }
+    paths = paths.concat([
+      'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', // 在线高质量地图数据源（优先，已验证可用）
+      './assets/data/china.json', // 从examples目录访问本地备份文件
+    ]);
+    this.$tryLoadMapDataFromPaths(paths, 0, options);
+  },
+  /**
+   * 依次尝试从多个路径加载地图数据
+   */
+  $tryLoadMapDataFromPaths(paths, index, options) {
+    if (index >= paths.length) {
+      console.error('所有地图数据源都加载失败');
+      return;
+    }
+
+    const url = paths[index];
+    console.log(`尝试加载地图数据: ${url}`);
+
+    if (window.echarts.getMap(url)) {
+      this.$refreshMapChart(options.chartId, url, options.engine);
+      return;
+    }
+
+    this.$fetchMapData(url)
+      .then((geoJson) => {
+        // 注册地图数据
+        window.echarts.registerMap(url, geoJson);
+        console.log(`中国地图数据加载成功！来源: ${url}`);
+
+        // 触发重新渲染已有的地图图表
+        this.$refreshMapChart(options.chartId, url, options.engine);
+        return geoJson;
+      })
+      .catch((error) => {
+        console.warn(`地图数据加载失败 (${url}):`, error.message);
+        // 尝试下一个路径
+        this.$tryLoadMapDataFromPaths(paths, index + 1, options);
+      });
+  },
+  /**
+   * 获取地图数据
+   */
+  $fetchMapData(url) {
+    return fetch(url).then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status} for ${url}`);
+      }
+      return response.json();
+    });
+  },
+  /**
+   * 刷新页面中的地图图表
+   */
+  $refreshMapChart(chartId, url, engine) {
+    // 查找页面中对应的地图图表容器，重新渲染
+    const container = document.querySelector(`[id="${chartId}"][data-chart-type="map"]`);
+    // 从 data 属性获取存储的表格数据
+    const tableDataStr = container.getAttribute('data-table-data');
+    const chartOptionsStr = container.getAttribute('data-chart-options');
+
+    if (tableDataStr && engine.echartsRef) {
+      try {
+        const tableData = JSON.parse(tableDataStr);
+        const chartOptions = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
+        deepMerge(chartOptions, { mapDataSource: url });
+
+        const chartOption = generateOptions(MapChartCompleteOptionsHandler, tableData, chartOptions);
+        // deepMerge(chartOption, { 'series.$item': { map: url } });
+        const existingChart = engine.echartsRef.getInstanceByDom(container);
+
+        if (existingChart) {
+          existingChart.setOption(chartOption, true);
+          console.log('Map chart refreshed successfully:', chartId);
+        } else {
+          // 重新创建图表
+          const newChart = engine.echartsRef.init(container);
+          newChart.setOption(chartOption);
+          console.log('Map chart recreated:', chartId);
+        }
+      } catch (error) {
+        console.error('Failed to refresh map chart:', chartId, error);
+      }
+    }
+  },
+};
+
 // 省份名称映射表
 const provinceNameMap = {
   北京: '北京市',
