@@ -794,11 +794,6 @@ const MapChartOptionsHandler = {
     const url = paths[index];
     console.log(`尝试加载地图数据: ${url}`);
 
-    if (window.echarts.getMap(url)) {
-      this.$refreshMapChart(options.chartId, url, options.engine);
-      return;
-    }
-
     this.$fetchMapData(url)
       .then((geoJson) => {
         // 注册地图数据
