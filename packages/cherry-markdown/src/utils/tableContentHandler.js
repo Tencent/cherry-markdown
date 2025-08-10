@@ -234,7 +234,7 @@ export default class TableHandler {
 
     // 首先收集所有脚注的位置信息
     const footnoteRanges = [];
-    const footnoteReg = /(^|\n)[ \t]*\[\^([^\]]+?)\]:\h*([\s\S]+?)(?=\s*$|\n\n)/g;
+    const footnoteReg = /(^|\n)[ \t]*\[\^([^\]]+?)\]:[ \t]*([\s\S]+?)(?=\s*$|\n\n)/g;
     let footnoteMatch;
     while ((footnoteMatch = footnoteReg.exec(value)) !== null) {
       const start = footnoteMatch.index + footnoteMatch[1].length; // 去掉开头的换行符
@@ -969,7 +969,7 @@ export default class TableHandler {
       const lastLineContent = this.codeMirror.getLine(line) || '';
 
       // 在当前行末尾添加换行符和新行
-      this.codeMirror.replaceRange('\n' + newRow, { line, ch: lastLineContent.length });
+      this.codeMirror.replaceRange(`\n${newRow}`, { line, ch: lastLineContent.length });
     } else {
       // 不在文件末尾，正常在指定行添加
       this.codeMirror.replaceRange(newRow, { line: insertLine, ch: 0 });
