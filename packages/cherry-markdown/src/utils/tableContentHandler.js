@@ -163,7 +163,9 @@ export default class TableHandler {
       const oper = `${type}${dir}`;
       refreshMap[oper]();
       this.setStyle(node, 'display', isWithinBounds(node) ? '' : 'none');
-      if (isTHead && oper === 'LastRow') {
+
+      // 表头不显示添加行的按钮，因为可能会导致布局问题
+      if (isTHead && (oper === 'LastRow' || oper === 'NextRow')) {
         this.setStyle(node, 'display', 'none');
       }
     });
@@ -231,7 +233,6 @@ export default class TableHandler {
     const value = this.codeMirror.getValue();
     
     // 首先收集所有脚注的位置信息
-    // 使用与Footnote.js相同的正则表达式
     const footnoteRanges = [];
     const footnoteReg = /(^|\n)[ \t]*\[\^([^\]]+?)\]:\h*([\s\S]+?)(?=\s*$|\n\n)/g;
     let footnoteMatch;
@@ -245,8 +246,6 @@ export default class TableHandler {
         content: footnoteMatch[3] 
       });
     }
-    
-    console.log('检测到的脚注范围:', footnoteRanges);
     
     // 判断给定位置是否在脚注中
     const isInFootnote = (offset) => {
@@ -316,15 +315,6 @@ export default class TableHandler {
     // 按偏移量排序以保持文档中的实际顺序
     mainTextTables.sort((a, b) => a.offset - b.offset);
     footnoteTables.sort((a, b) => a.offset - b.offset);
-    
-    console.log('收集到的表格:', {
-      mainTextTables: mainTextTables.length,
-      footnoteTables: footnoteTables.length,
-      details: {
-        mainText: mainTextTables.map(t => ({ type: t.type, preview: t.code.slice(0, 30) })),
-        footnote: footnoteTables.map(t => ({ type: t.type, preview: t.code.slice(0, 30) }))
-      }
-    });
     
     this.tableEditor.mainTextCodes = mainTextTables;
     this.tableEditor.footnoteCodes = footnoteTables;
@@ -519,13 +509,14 @@ export default class TableHandler {
           { line: beginLine, ch: 0 },
           { line: endLine, ch: endCh },
         ];
+        this.tableEditor.info.code = tableCode.code;
       } else {
         this.tableEditor.info.selection = [
           { line: beginLine + preLine, ch: preCh },
           { line: beginLine + preLine, ch: preCh + plusCh },
         ];
+        this.tableEditor.info.code = currentTd;
       }
-      this.tableEditor.info.code = currentTd;
     }
     
     select && this.codeMirror.setSelection(...this.tableEditor.info.selection);
@@ -688,8 +679,7 @@ export default class TableHandler {
       // HTML 表格选择单元格
       selectionType = 'cell';
     } else {
-      // Markdown 表格：点击时选择单元格，悬停时选择整个表格
-      selectionType = this.trigger === 'click' ? 'td' : 'table';
+      selectionType = 'td';
     }
     
     this.$setSelection(currentTableInfo.tableIndex, selectionType, this.trigger === 'click', isFootnoteTable);
@@ -948,7 +938,7 @@ export default class TableHandler {
     const newRow = `${'|'.repeat(this.tableEditor.info.columns)}\n`;
     this.codeMirror.replaceRange(newRow, { line, ch: 0 });
     this.$findTableInEditor();
-    this.$setSelection(this.tableEditor.info.tableIndex, 'td');
+    this.$setSelection(this.tableEditor.info.tableIndex, 'table', true, this.tableEditor.info.isFootnote);
   }
 
   /**
@@ -965,10 +955,26 @@ export default class TableHandler {
     
     // Markdown 表格的处理逻辑
     const [, { line }] = this.tableEditor.info.selection;
+    // console.log('添加行:', line);
     const newRow = `${'|'.repeat(this.tableEditor.info.columns)}\n`;
-    this.codeMirror.replaceRange(newRow, { line: line + 1, ch: 0 });
+    
+    // 检查是否在文件末尾
+    const totalLines = this.codeMirror.lineCount();
+    const insertLine = line + 1;
+    
+    if (insertLine >= totalLines) {
+      // 在文件末尾添加行：确保表格最后一行后面有新行
+      const lastLineContent = this.codeMirror.getLine(line) || '';
+      
+      // 在当前行末尾添加换行符和新行
+      this.codeMirror.replaceRange('\n' + newRow, { line, ch: lastLineContent.length });
+    } else {
+      // 不在文件末尾，正常在指定行添加
+      this.codeMirror.replaceRange(newRow, { line: insertLine, ch: 0 });
+    }
+    
     this.$findTableInEditor();
-    this.$setSelection(this.tableEditor.info.tableIndex, 'td');
+    this.$setSelection(this.tableEditor.info.tableIndex, 'table', true, this.tableEditor.info.isFootnote);
   }
 
   /**
@@ -1001,7 +1007,7 @@ export default class TableHandler {
     
     // Markdown 表格的处理逻辑
     const currentTableInfo = this.tableEditor.info;
-    this.$setSelection(currentTableInfo.tableIndex, 'table', currentTableInfo.isFootnote);
+    this.$setSelection(currentTableInfo.tableIndex, 'table', true, currentTableInfo.isFootnote);
     const selection = this.codeMirror.getSelection();
     const lines = selection.split('\n');
     const cellsIndex = currentTableInfo.tdIndex < 2 ? 1 : currentTableInfo.tdIndex - 1;
@@ -1017,7 +1023,7 @@ export default class TableHandler {
     const newText = newLines.join('\n');
     this.codeMirror.replaceSelection(newText);
     this.$findTableInEditor();
-    this.$setSelection(currentTableInfo.tableIndex, 'table', currentTableInfo.isFootnote);
+    this.$setSelection(currentTableInfo.tableIndex, 'table', true, currentTableInfo.isFootnote);
   }
 
   /**
@@ -1034,7 +1040,7 @@ export default class TableHandler {
     
     // Markdown 表格的处理逻辑
     const currentTableInfo = this.tableEditor.info;
-    this.$setSelection(currentTableInfo.tableIndex, 'table', currentTableInfo.isFootnote);
+    this.$setSelection(currentTableInfo.tableIndex, 'table', true, currentTableInfo.isFootnote);
     const selection = this.codeMirror.getSelection();
     const lines = selection.split('\n');
     const newLines = lines.map((line, index) => {
@@ -1049,7 +1055,7 @@ export default class TableHandler {
     const newText = newLines.join('\n');
     this.codeMirror.replaceSelection(newText);
     this.$findTableInEditor();
-    this.$setSelection(currentTableInfo.tableIndex, 'table', currentTableInfo.isFootnote);
+    this.$setSelection(currentTableInfo.tableIndex, 'table', true, currentTableInfo.isFootnote);
   }
 
   /**
@@ -1203,7 +1209,7 @@ export default class TableHandler {
     
     // Markdown 表格的处理逻辑
     const { tableIndex, trIndex, isFootnote } = this.tableEditor.info;
-    this.$setSelection(tableIndex, 'table', isFootnote);
+    this.$setSelection(tableIndex, 'table', true, isFootnote);
     const selection = this.codeMirror.getSelection();
     const table = selection.split('\n');
     table.splice(trIndex + 2, 1);
@@ -1225,7 +1231,7 @@ export default class TableHandler {
     
     // Markdown 表格的处理逻辑
     const { tableIndex, tdIndex, isFootnote } = this.tableEditor.info;
-    this.$setSelection(tableIndex, 'table', isFootnote);
+    this.$setSelection(tableIndex, 'table', true, isFootnote);
     const selection = this.codeMirror.getSelection();
     const table = selection.split('\n');
     const rows = table.map((row) => row.split('|').slice(1, -1));
@@ -1253,6 +1259,7 @@ export default class TableHandler {
     
     // Markdown 表格的处理逻辑
     const currentTableInfo = this.tableEditor.info;
+    this.$setSelection(currentTableInfo.tableIndex, 'table', true, currentTableInfo.isFootnote);
     const oldTdIndex = currentTableInfo.tdIndex;
     const thNode = this.target.parentElement;
     const lines = this.codeMirror.getSelection().split(/\n/);
@@ -1285,7 +1292,7 @@ export default class TableHandler {
       that.codeMirror.replaceSelection(newText);
       that.setStyle(event.target, 'border', '1px solid #dfe6ee');
       that.$findTableInEditor();
-      that.$setSelection(currentTableInfo.tableIndex, 'table', currentTableInfo.isFootnote);
+      that.$setSelection(currentTableInfo.tableIndex, 'table', true, currentTableInfo.isFootnote);
 
       thNode.removeEventListener('dragleave', handleDragLeave);
       thNode.removeEventListener('dragover', handleDragOver);
@@ -1312,7 +1319,7 @@ export default class TableHandler {
     const currentTableInfo = this.tableEditor.info;
     const { trNode } = currentTableInfo;
     trNode.setAttribute('draggable', true);
-    this.$setSelection(currentTableInfo.tableIndex, 'table', currentTableInfo.isFootnote);
+    this.$setSelection(currentTableInfo.tableIndex, 'table', true, currentTableInfo.isFootnote);
     const oldTrIndex = currentTableInfo.trIndex + 2;
     const tBody = trNode.parentElement;
     const lines = this.codeMirror.getSelection().split(/\n/);
@@ -1338,7 +1345,7 @@ export default class TableHandler {
       that.codeMirror.replaceSelection(newText);
 
       that.$findTableInEditor();
-      that.$setSelection(currentTableInfo.tableIndex, 'table', currentTableInfo.isFootnote);
+      that.$setSelection(currentTableInfo.tableIndex, 'table', true, currentTableInfo.isFootnote);
       that.setStyle(event.target.parentElement, 'border', '1px solid #dfe6ee');
 
       tBody.removeEventListener('dragleave', handleDragLeave);

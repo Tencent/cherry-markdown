@@ -132,30 +132,24 @@ export default class PreviewerBubble {
    * @returns {boolean|HTMLElement}
    */
   isCherryTable(element) {
-    // 首先检查是否是直接的表格元素
+    // 获取最近的表格元素
     const table = this.$getClosestNode(element, 'TABLE');
-    if (table !== false) {
-      // 引用里的表格先不支持所见即所得编辑
-      if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
-        return false;
-      }
-      // 如果是表格元素，直接返回表格本身
-      return table;
+    if (!table) {
+      return false;
     }
     
-    // 原有的逻辑，检查 cherry-table-container
+    // 现在支持引用表格
+    // if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
+    //   return false;
+    // }
+    
+    // 排除简单表格
     const container = this.$getClosestNode(element, 'DIV');
-    if (container === false) {
+    if (container && /simple-table/.test(container.className)) {
       return false;
     }
-    if (/simple-table/.test(container.className) || !/cherry-table-container/.test(container.className)) {
-      return false;
-    }
-    // 引用里的表格先不支持所见即所得编辑
-    if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
-      return false;
-    }
-    return container;
+    
+    return table;
   }
 
   /**
