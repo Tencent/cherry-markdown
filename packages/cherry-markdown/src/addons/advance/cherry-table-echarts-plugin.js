@@ -648,10 +648,7 @@ const RadarChartOptionsHandler = {
   },
 };
 
-/**
- * 地图的默认配置
- * @type {{}}
- */
+// 地图的默认配置
 const MapChartLoadingOptionsHandler = {
   options(tableObject, options) {
     console.log('Rendering map chart:', tableObject);
@@ -692,10 +689,7 @@ const MapChartLoadingOptionsHandler = {
   },
 };
 
-/**
- * 地图的真正配置
- * @type {{}}
- */
+// 地图的真正配置
 const MapChartCompleteOptionsHandler = {
   components: [BaseChartOptionsHandler],
   options(tableObject, options) {
@@ -760,10 +754,7 @@ const MapChartCompleteOptionsHandler = {
   },
 };
 
-/**
- * 地图配置比较特殊，由于需要异步加载地图数据源，所以有两阶段的配置，同步返回默认配置，异步加载地图数据源后生成真正配置
- * @type {{}}
- */
+// 地图配置比较特殊，由于需要异步加载地图数据源，所以有两阶段的配置，同步返回默认配置，异步加载地图数据源后生成真正配置
 const MapChartOptionsHandler = {
   options(tableObject, options) {
     this.$loadMapData(tableObject, options);
