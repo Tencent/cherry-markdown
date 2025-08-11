@@ -20,6 +20,27 @@
  */
 import mergeWith from 'lodash/mergeWith';
 
+// 主题与常量集中管理
+const THEME = {
+  color: {
+    border: '#999',
+    borderHover: '#666',
+    text: '#333',
+    tooltipText: '#fff',
+    emphasis: '#ff6b6b',
+    lineSplit: '#eee',
+  },
+  shadow: {
+    color: 'rgba(0, 0, 0, 0.5)',
+    blur: 10,
+  },
+  fontSize: {
+    base: 12,
+    small: 10,
+    title: 16,
+  },
+};
+
 const DEFAULT_OPTIONS = {
   renderer: 'svg',
   width: 500,
@@ -65,6 +86,164 @@ export default class EChartsTableEngine {
 
     // 保存Cherry配置，用于获取地图数据源URL
     this.cherryOptions = cherryOptions;
+    this.resizeHandler = null;
+  }
+
+  // 公共构建器与工具方法
+  // 调色盘颜色，用于图表的配色
+  $palette() {
+    return ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'];
+  }
+  // 悬浮提示配置
+  $tooltip(overrides = {}) {
+    return {
+      backgroundColor: 'rgba(0,0,0,0.8)',
+      borderColor: THEME.color.border,
+      borderWidth: 1,
+      textStyle: { color: THEME.color.tooltipText, fontSize: THEME.fontSize.base },
+      extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
+      ...overrides,
+    };
+  }
+  // 工具栏配置
+  $toolbox(featureOverrides = {}, posOverrides = {}) {
+    return {
+      show: true,
+      orient: 'vertical',
+      left: posOverrides.left || 'right',
+      top: posOverrides.top || 'center',
+      feature: {
+        dataView: { show: true, readOnly: false, title: '数据视图', lang: ['数据视图', '关闭', '刷新'] },
+        restore: { show: true, title: '重置' },
+        saveAsImage: { show: true, title: '保存为图片', type: 'png', backgroundColor: '#fff' },
+        ...featureOverrides,
+      },
+      iconStyle: { borderColor: THEME.color.border },
+      emphasis: { iconStyle: { borderColor: THEME.color.borderHover } },
+    };
+  }
+  // 网格配置
+  $grid(overrides = {}) {
+    return { containLabel: true, left: '8%', right: '8%', bottom: '8%', top: '12%', ...overrides };
+  }
+  // 坐标轴配置
+  $axis(type = 'value', overrides = {}) {
+    return {
+      type,
+      axisLine: { lineStyle: { color: THEME.color.text } },
+      axisLabel: { color: THEME.color.text, fontSize: THEME.fontSize.base },
+      splitLine: { lineStyle: { color: THEME.color.lineSplit, type: 'dashed' } },
+      ...overrides,
+    };
+  }
+  // 图例配置
+  $legend(overrides = {}) {
+    return {
+      type: 'scroll',
+      orient: 'horizontal',
+      left: overrides.left || 'center',
+      top: overrides.top || 'top',
+      textStyle: { fontSize: THEME.fontSize.base },
+      itemWidth: 12,
+      itemHeight: 12,
+      selectedMode: 'multiple',
+      selector: [
+        { type: 'all', title: '全选' },
+        { type: 'inverse', title: '反选' },
+      ],
+      ...overrides,
+    };
+  }
+  // 数据缩放配置
+  $dataZoom(showSlider = true, overrides = {}) {
+    const base = [{ type: 'inside', xAxisIndex: [0], start: 0, end: 100 }];
+    if (showSlider) {
+      base.push({ type: 'slider', xAxisIndex: [0], bottom: '2%', start: 0, end: 100, height: 20 });
+    }
+    return base.map((z) => ({ ...z, ...overrides }));
+  }
+  // 数值解析，统一去逗号并保证为数字
+  $num(value) {
+    const n = parseFloat(String(value ?? '').replace(/,/g, ''));
+    return Number.isFinite(n) ? n : 0;
+  }
+  // 统一系列基础属性
+  $baseSeries(type, overrides = {}) {
+    const animation = {
+      animation: true,
+      animationDuration: 1000,
+      animationEasing: 'elasticOut',
+      animationDelay(idx) {
+        return idx * 10;
+      },
+    };
+    const base = {
+      name: '',
+      data: [],
+      emphasis: {
+        focus: 'series',
+        itemStyle: { shadowBlur: THEME.shadow.blur, shadowOffsetX: 0, shadowColor: THEME.shadow.color },
+      },
+    };
+    const dict = {
+      bar: {
+        type: 'bar',
+        label: { show: false, position: 'top', formatter: '{c}' },
+      },
+      line: {
+        type: 'line',
+        symbol: 'circle',
+        symbolSize: 8,
+        lineStyle: { width: 3, cap: 'round', join: 'round' },
+        itemStyle: { borderWidth: 2, borderColor: '#fff' },
+        smooth: 0.3,
+        markPoint: {
+          data: [
+            { type: 'max', name: '最大值' },
+            { type: 'min', name: '最小值' },
+          ],
+        },
+        emphasis: {
+          focus: 'series',
+          lineStyle: { width: 5 },
+          itemStyle: { borderWidth: 3 },
+        },
+      },
+      scatter: { type: 'scatter' },
+      radar: { type: 'radar' },
+      heatmap: { type: 'heatmap' },
+      pie: { type: 'pie' },
+    };
+    return { ...base, ...dict[type], ...animation, ...overrides };
+  }
+  // 获取带有颜色的指示器圆点HTML片段
+  $dot(color) {
+    return `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${color};"></span>`;
+  }
+  // 统一轴向tooltip文本
+  $tooltipAxisFormatter() {
+    return (params) => {
+      const header = params?.[0]?.axisValueLabel ?? '';
+      let result = `<div style="margin-bottom:4px;font-weight:bold;">${header}</div>`;
+      params.forEach((item) => {
+        result += '<div style="margin:2px 0;">';
+        result += `${this.$dot(item.color)}`;
+        result += `<span style="font-weight:bold;">${item.seriesName}</span>`;
+        result += `<span style="float:right;margin-left:20px;font-weight:bold;">${item.value}</span>`;
+        result += '</div>';
+      });
+      return result;
+    };
+  }
+  // 基础配置
+  $baseOption(overrides = {}) {
+    return {
+      aria: {
+        show: true,
+      },
+      color: this.$palette(),
+      ...overrides,
+    };
   }
 
   getInstance() {
@@ -79,9 +258,10 @@ export default class EChartsTableEngine {
 
       const chart = this.echartsRef.init(this.dom, null, this.options);
       // 监听窗口resize事件
-      window.addEventListener('resize', () => {
+      this.resizeHandler = () => {
         chart.resize();
-      }); // TODO 移除事件监听
+      };
+      window.addEventListener('resize', this.resizeHandler);
     }
     return this.echartsRef.getInstanceByDom(this.dom);
   }
@@ -141,24 +321,26 @@ export default class EChartsTableEngine {
     // 使用更可靠的容器等待机制
     const initChart = (retryCount = 0) => {
       const container = document.getElementById(chartId);
-      if (container && this.echartsRef) {
-        try {
-          const myChart = this.echartsRef.init(container);
-          console.log('Chart initialized successfully:', chartId);
-          myChart.setOption(chartOption);
-          // 为热力图和饼图添加点击高亮效果
-          if (type === 'heatmap' || type === 'pie') {
-            this.addClickHighlightEffect(myChart, type);
-          }
-        } catch (error) {
-          console.error('Failed to render chart:', error);
-          console.error('Chart options:', chartOption);
-          console.error('Container:', container);
-          if (container) {
-            container.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
-              图表渲染失败<br/>
-              <span style="font-size: 12px; color: #666;">错误: ${error.message}</span>
-            </div>`;
+      if (this.echartsRef) {
+        if (container) {
+          try {
+            const myChart = this.echartsRef.init(container);
+            console.log('Chart initialized successfully:', chartId);
+            myChart.setOption(chartOption);
+            // 为热力图和饼图添加点击高亮效果
+            if (type === 'heatmap' || type === 'pie') {
+              this.addClickHighlightEffect(myChart, type);
+            }
+          } catch (error) {
+            console.error('Failed to render chart:', error);
+            console.error('Chart options:', chartOption);
+            console.error('Container:', container);
+            if (container) {
+              container.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
+                图表渲染失败<br/>
+                <span style="font-size: 12px; color: #666;">错误: ${error.message}</span>
+              </div>`;
+            }
           }
         }
       } else if (retryCount < 10) {
@@ -214,7 +396,7 @@ export default class EChartsTableEngine {
       const maxValue = Math.max(
         ...tableObject.rows.map((row) => {
           const index = tableObject.header.indexOf(header);
-          const value = parseFloat(row[index].replace(/,/g, '')) || 0;
+          const value = this.$num(row[index]);
           return value;
         }),
       );
@@ -226,7 +408,7 @@ export default class EChartsTableEngine {
 
     const seriesData = tableObject.rows.map((row, index) => ({
       name: row[0],
-      value: row.slice(1).map((data) => parseFloat(data.replace(/,/g, '')) || 0),
+      value: row.slice(1).map((data) => this.$num(data)),
       areaStyle: {
         opacity: 0.1 + index * 0.05, // 每个系列有不同的透明度
       },
@@ -241,87 +423,27 @@ export default class EChartsTableEngine {
     console.log('Radar indicator:', indicator);
     console.log('Radar seriesData:', seriesData);
 
-    const chartOptions = {
-      backgroundColor: '#fff',
-      color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'],
-      tooltip: {
+    const chartOptions = this.$baseOption({
+      tooltip: this.$tooltip({
         trigger: 'item',
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        borderColor: '#999',
-        borderWidth: 1,
-        textStyle: {
-          color: '#fff',
-          fontSize: 12,
-        },
         formatter(params) {
-          let result = `<div style="margin-bottom:4px;font-weight:bold;">${params.name}</div>`;
+          let result = `<div style="margin-bottom:4px;font-weight:bold;"><span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${params.color};"></span>${params.name}</div>`;
           params.value.forEach(function (value, index) {
             result += '<div style="margin:2px 0;">';
-            result += `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${params.color};"></span>`;
             result += `<span style="font-weight:bold;">${indicator[index].name}</span>`;
             result += `<span style="float:right;margin-left:20px;font-weight:bold;">${value}</span>`;
             result += '</div>';
           });
           return result;
         },
-        extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
-      },
-      legend: {
-        data: tableObject.rows.map((row) => row[0]),
-        orient: 'horizontal',
-        left: 'center',
-        top: 'bottom',
-        textStyle: {
-          fontSize: 12,
-        },
-        itemWidth: 12,
-        itemHeight: 12,
-        selectedMode: 'multiple',
-        selector: [
-          {
-            type: 'all',
-            title: '全选',
-          },
-          {
-            type: 'inverse',
-            title: '反选',
-          },
-        ],
-      },
-      toolbox: {
-        show: true,
-        orient: 'vertical',
-        left: 'right',
-        top: 'center',
-        feature: {
-          dataView: {
-            show: true,
-            readOnly: false,
-            title: '数据视图',
-            lang: ['数据视图', '关闭', '刷新'],
-          },
-          restore: { show: true, title: '重置' },
-          saveAsImage: {
-            show: true,
-            title: '保存为图片',
-            type: 'png',
-            backgroundColor: '#fff',
-          },
-        },
-        iconStyle: {
-          borderColor: '#999',
-        },
-        emphasis: {
-          iconStyle: {
-            borderColor: '#666',
-          },
-        },
-      },
+      }),
+      legend: this.$legend({ data: tableObject.rows.map((row) => row[0]), top: 'bottom' }),
+      toolbox: this.$toolbox(),
       radar: {
         name: {
           textStyle: {
-            color: '#333',
-            fontSize: 12,
+            color: THEME.color.text,
+            fontSize: THEME.fontSize.base,
             fontWeight: 'bold',
           },
           formatter(name) {
@@ -356,22 +478,11 @@ export default class EChartsTableEngine {
         },
       },
       series: [
-        {
+        this.$baseSeries('radar', {
           name: '雷达图数据',
-          type: 'radar',
           data: seriesData,
-          emphasis: {
-            lineStyle: {
-              width: 4,
-            },
-            areaStyle: {
-              opacity: 0.3,
-            },
-          },
-          animation: true,
-          animationDuration: 1000,
-          animationEasing: 'elasticOut',
-        },
+          emphasis: { lineStyle: { width: 4 }, areaStyle: { opacity: 0.3 } },
+        }),
       ],
       graphic: {
         elements: [
@@ -383,12 +494,12 @@ export default class EChartsTableEngine {
               text: '雷达图分析',
               fontSize: 16,
               fontWeight: 'bold',
-              fill: '#333',
+              fill: THEME.color.text,
             },
           },
         ],
       },
-    };
+    });
     return chartOptions;
   }
 
@@ -402,7 +513,7 @@ export default class EChartsTableEngine {
     // 构建热力图数据点 [x索引, y索引, 值]
     tableObject.rows.forEach((row, yIndex) => {
       row.slice(1).forEach((value, xIndex) => {
-        const numValue = parseFloat(value.replace(/,/g, '')) || 0;
+        const numValue = this.$num(value);
         data.push([xIndex, yIndex, numValue]);
       });
     });
@@ -412,22 +523,13 @@ export default class EChartsTableEngine {
     const minValue = Math.min(...values);
     const maxValue = Math.max(...values);
 
-    const chartOptions = {
-      backgroundColor: '#fff',
-      tooltip: {
+    const chartOptions = this.$baseOption({
+      tooltip: this.$tooltip({
         trigger: 'item',
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        borderColor: '#999',
-        borderWidth: 1,
-        textStyle: {
-          color: '#fff',
-          fontSize: 12,
-        },
         formatter(params) {
           return `${yAxisData[params.data[1]]}<br/>${xAxisData[params.data[0]]}: <strong>${params.data[2]}</strong>`;
         },
-        extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
-      },
+      }),
       grid: {
         height: '50%',
         top: '10%',
@@ -441,7 +543,7 @@ export default class EChartsTableEngine {
           show: true,
         },
         axisLabel: {
-          fontSize: 12,
+          fontSize: THEME.fontSize.base,
         },
       },
       yAxis: {
@@ -451,7 +553,7 @@ export default class EChartsTableEngine {
           show: true,
         },
         axisLabel: {
-          fontSize: 12,
+          fontSize: THEME.fontSize.base,
         },
       },
       visualMap: {
@@ -477,69 +579,29 @@ export default class EChartsTableEngine {
           ],
         },
         textStyle: {
-          fontSize: 12,
+          fontSize: THEME.fontSize.base,
         },
       },
       series: [
-        {
+        this.$baseSeries('heatmap', {
           name: '热力图数据',
-          type: 'heatmap',
           data,
-          label: {
-            show: true,
-            fontSize: 10,
-          },
+          label: { show: true, fontSize: 10 },
           emphasis: {
             itemStyle: {
-              shadowBlur: 10,
-              shadowColor: 'rgba(0, 0, 0, 0.5)',
+              shadowBlur: THEME.shadow.blur,
+              shadowColor: THEME.shadow.color,
               borderWidth: 2,
-              borderColor: '#ff6b6b',
+              borderColor: THEME.color.emphasis,
             },
           },
-          select: {
-            itemStyle: {
-              borderWidth: 2,
-              borderColor: '#ff6b6b',
-              opacity: 1,
-            },
-          },
+          select: { itemStyle: { borderWidth: 2, borderColor: THEME.color.emphasis, opacity: 1 } },
           selectedMode: 'single',
-          animation: true,
-          animationDuration: 1000,
           animationEasing: 'cubicOut',
-        },
+        }),
       ],
-      toolbox: {
-        show: true,
-        orient: 'vertical',
-        left: 'right',
-        top: 'bottom',
-        feature: {
-          dataView: {
-            show: true,
-            readOnly: false,
-            title: '数据视图',
-            lang: ['数据视图', '关闭', '刷新'],
-          },
-          restore: { show: true, title: '重置' },
-          saveAsImage: {
-            show: true,
-            title: '保存为图片',
-            type: 'png',
-            backgroundColor: '#fff',
-          },
-        },
-        iconStyle: {
-          borderColor: '#999',
-        },
-        emphasis: {
-          iconStyle: {
-            borderColor: '#666',
-          },
-        },
-      },
-    };
+      toolbox: this.$toolbox({}, { top: 'bottom' }),
+    });
     return chartOptions;
   }
 
@@ -547,105 +609,37 @@ export default class EChartsTableEngine {
     console.log('Rendering pie chart:', tableObject);
 
     // 构建饼图数据
-    const data = tableObject.rows.map((row) => ({
-      name: row[0],
-      value: parseFloat(row[1].replace(/,/g, '')) || 0,
-    }));
+    const data = tableObject.rows.map((row) => ({ name: row[0], value: this.$num(row[1]) }));
 
-    const chartOptions = {
-      backgroundColor: '#fff',
-      tooltip: {
-        trigger: 'item',
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        borderColor: '#999',
-        borderWidth: 1,
-        textStyle: {
-          color: '#fff',
-          fontSize: 12,
-        },
-        formatter: '{a} <br/>{b}: {c} ({d}%)',
-        extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
-      },
-      legend: {
-        orient: 'vertical',
-        left: 'left',
-        top: 'middle',
-        textStyle: {
-          fontSize: 12,
-        },
-      },
+    const chartOptions = this.$baseOption({
+      tooltip: this.$tooltip({ trigger: 'item', formatter: '{a} <br/>{b}: {c} ({d}%)' }),
+      legend: this.$legend({ orient: 'vertical', left: 'left', top: 'middle' }),
       series: [
-        {
+        this.$baseSeries('pie', {
           name: '数据分布',
-          type: 'pie',
           radius: ['40%', '70%'],
           center: ['50%', '50%'],
           avoidLabelOverlap: false,
-          label: {
-            show: false,
-            position: 'center',
-          },
+          label: { show: false, position: 'center' },
           emphasis: {
-            label: {
-              show: true,
-              fontSize: '18',
-              fontWeight: 'bold',
-            },
+            label: { show: true, fontSize: '18', fontWeight: 'bold' },
             itemStyle: {
-              shadowBlur: 10,
+              shadowBlur: THEME.shadow.blur,
               shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)',
+              shadowColor: THEME.shadow.color,
               borderWidth: 3,
-              borderColor: '#ff6b6b',
+              borderColor: THEME.color.emphasis,
             },
           },
-          select: {
-            itemStyle: {
-              borderWidth: 3,
-              borderColor: '#ff6b6b',
-              opacity: 1,
-            },
-          },
+          select: { itemStyle: { borderWidth: 3, borderColor: THEME.color.emphasis, opacity: 1 } },
           selectedMode: 'single',
-          labelLine: {
-            show: false,
-          },
+          labelLine: { show: false },
           data,
-          animation: true,
-          animationDuration: 1000,
           animationEasing: 'cubicOut',
-        },
+        }),
       ],
-      toolbox: {
-        show: true,
-        orient: 'vertical',
-        left: 'right',
-        top: 'center',
-        feature: {
-          dataView: {
-            show: true,
-            readOnly: false,
-            title: '数据视图',
-            lang: ['数据视图', '关闭', '刷新'],
-          },
-          restore: { show: true, title: '重置' },
-          saveAsImage: {
-            show: true,
-            title: '保存为图片',
-            type: 'png',
-            backgroundColor: '#fff',
-          },
-        },
-        iconStyle: {
-          borderColor: '#999',
-        },
-        emphasis: {
-          iconStyle: {
-            borderColor: '#666',
-          },
-        },
-      },
-    };
+      toolbox: this.$toolbox(),
+    });
     return chartOptions;
   }
 
@@ -656,9 +650,9 @@ export default class EChartsTableEngine {
     const hasSizeColumn = tableObject.header.length >= 4; // header: token + x + y + [size]
 
     const parsedRows = tableObject.rows.map((row) => {
-      const x = parseFloat(String(row[1] || '').replace(/,/g, '')) || 0;
-      const y = parseFloat(String(row[2] || '').replace(/,/g, '')) || 0;
-      const size = hasSizeColumn ? parseFloat(String(row[3] || '').replace(/,/g, '')) : undefined;
+      const x = this.$num(row[1]);
+      const y = this.$num(row[2]);
+      const size = hasSizeColumn ? this.$num(row[3]) : undefined;
       return { name: row[0], x, y, size };
     });
 
@@ -693,66 +687,43 @@ export default class EChartsTableEngine {
       return item;
     });
 
-    const chartOptions = {
-      backgroundColor: '#fff',
-      tooltip: {
+    const chartOptions = this.$baseOption({
+      tooltip: this.$tooltip({
         trigger: 'item',
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        borderColor: '#999',
-        borderWidth: 1,
-        textStyle: { color: '#fff', fontSize: 12 },
         formatter(params) {
           const [x, y] = params.value || [];
           return `${params.name}<br/>x: <strong>${x}</strong><br/>y: <strong>${y}</strong>`;
         },
-        extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
-      },
-      toolbox: {
-        show: true,
-        orient: 'vertical',
-        left: 'right',
-        top: 'center',
-        feature: {
-          dataView: { show: true, readOnly: false, title: '数据视图', lang: ['数据视图', '关闭', '刷新'] },
-          restore: { show: true, title: '重置' },
-          saveAsImage: { show: true, title: '保存为图片', type: 'png', backgroundColor: '#fff' },
-        },
-        iconStyle: { borderColor: '#999' },
-        emphasis: { iconStyle: { borderColor: '#666' } },
-      },
-      grid: { containLabel: true, left: '8%', right: '8%', bottom: '8%', top: '12%' },
-      xAxis: {
-        type: 'value',
-        axisLine: { lineStyle: { color: '#333' } },
-        axisLabel: { color: '#333', fontSize: 11 },
-        splitLine: { lineStyle: { color: '#eee', type: 'dashed' } },
-      },
-      yAxis: {
-        type: 'value',
-        axisLine: { lineStyle: { color: '#333' } },
-        axisLabel: { color: '#333', fontSize: 11 },
-        splitLine: { lineStyle: { color: '#eee', type: 'dashed' } },
-      },
+      }),
+      toolbox: this.$toolbox(),
+      grid: this.$grid(),
+      xAxis: this.$axis('value'),
+      yAxis: this.$axis('value'),
       series: [
-        {
+        this.$baseSeries('scatter', {
           name: '散点',
-          type: 'scatter',
           data,
           emphasis: {
             focus: 'series',
             itemStyle: {
-              shadowBlur: 10,
-              shadowColor: 'rgba(0,0,0,0.4)',
+              shadowBlur: THEME.shadow.blur,
+              shadowColor: THEME.shadow.color,
               borderWidth: 2,
-              borderColor: '#ff6b6b',
+              borderColor: THEME.color.emphasis,
             },
           },
-          animation: true,
-          animationDuration: 800,
+          select: {
+            itemStyle: {
+              borderWidth: 2,
+              borderColor: THEME.color.emphasis,
+              opacity: 1,
+            },
+          },
+          selectedMode: 'single',
           animationEasing: 'cubicOut',
-        },
+        }),
       ],
-    };
+    });
 
     return chartOptions;
   }
@@ -1053,21 +1024,17 @@ export default class EChartsTableEngine {
     const mapData = tableObject.rows.map((row) => {
       const originalName = row[0];
       const standardName = normalizeProvinceName(originalName);
-      const value = parseFloat(row[1].replace(/,/g, '')) || 0;
+      const value = this.$num(row[1]);
 
       console.log(`Name mapping: "${originalName}" -> "${standardName}"`);
 
-      return {
-        name: standardName,
-        value,
-      };
+      return { name: standardName, value };
     });
 
     console.log('Map data:', mapData);
 
     // 使用 ECharts 内置的中国地图
-    const chartOptions = {
-      backgroundColor: '#fff',
+    const chartOptions = this.$baseOption({
       title: {
         text: '地图数据分析',
         left: 'center',
@@ -1075,23 +1042,15 @@ export default class EChartsTableEngine {
         textStyle: {
           fontSize: 16,
           fontWeight: 'bold',
-          color: '#333',
+          color: THEME.color.text,
         },
       },
-      tooltip: {
+      tooltip: this.$tooltip({
         trigger: 'item',
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        borderColor: '#999',
-        borderWidth: 1,
-        textStyle: {
-          color: '#fff',
-          fontSize: 12,
-        },
         formatter(params) {
           return `${params.name}: ${params.value || 0}`;
         },
-        extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
-      },
+      }),
       visualMap: {
         min: Math.min(...mapData.map((item) => item.value)),
         max: Math.max(...mapData.map((item) => item.value)),
@@ -1103,7 +1062,7 @@ export default class EChartsTableEngine {
           color: ['#e0ffff', '#006edd'],
         },
         textStyle: {
-          fontSize: 12,
+          fontSize: THEME.fontSize.base,
         },
       },
       series: [
@@ -1119,7 +1078,7 @@ export default class EChartsTableEngine {
           emphasis: {
             label: {
               show: true,
-              fontSize: 12,
+              fontSize: THEME.fontSize.base,
               fontWeight: 'bold',
             },
             itemStyle: {
@@ -1134,112 +1093,15 @@ export default class EChartsTableEngine {
           },
         },
       ],
-      toolbox: {
-        show: true,
-        orient: 'vertical',
-        left: 'right',
-        top: 'center',
-        feature: {
-          dataView: {
-            show: true,
-            readOnly: false,
-            title: '数据视图',
-            lang: ['数据视图', '关闭', '刷新'],
-          },
-          restore: { show: true, title: '重置' },
-          saveAsImage: {
-            show: true,
-            title: '保存为图片',
-            type: 'png',
-            backgroundColor: '#fff',
-          },
-        },
-        iconStyle: {
-          borderColor: '#999',
-        },
-        emphasis: {
-          iconStyle: {
-            borderColor: '#666',
-          },
-        },
-      },
-    };
+      toolbox: this.$toolbox(),
+    });
     return chartOptions;
   }
 
   $renderChartCommon(tableObject, options, type) {
     console.log('Common chart rendering:', type, tableObject);
 
-    const baseSeries = {
-      bar: {
-        type: 'bar',
-        barWidth: '60%',
-        animation: true,
-        animationDuration: 1000,
-        animationEasing: 'elasticOut',
-        animationDelay(idx) {
-          return idx * 10;
-        },
-        name: '',
-        data: [],
-        emphasis: {
-          focus: 'series',
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)',
-          },
-        },
-        label: {
-          show: false,
-          position: 'top',
-          formatter: '{c}',
-        },
-      },
-      line: {
-        type: 'line',
-        animation: true,
-        animationDuration: 1000,
-        animationEasing: 'elasticOut',
-        animationDelay(idx) {
-          return idx * 10;
-        },
-        name: '',
-        data: [],
-        symbol: 'circle',
-        symbolSize: 8,
-        lineStyle: {
-          width: 3,
-          cap: 'round',
-          join: 'round',
-        },
-        itemStyle: {
-          borderWidth: 2,
-          borderColor: '#fff',
-        },
-        emphasis: {
-          focus: 'series',
-          lineStyle: {
-            width: 5,
-          },
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)',
-            borderWidth: 3,
-          },
-        },
-        smooth: 0.3,
-        markPoint: {
-          data: [
-            { type: 'max', name: '最大值' },
-            { type: 'min', name: '最小值' },
-          ],
-        },
-      },
-    };
-
-    if (!baseSeries[type]) {
+    if (!['bar', 'line'].includes(type)) {
       return {};
     }
 
@@ -1248,10 +1110,10 @@ export default class EChartsTableEngine {
         console.log('Processing row:', row);
         result.legend.data.push(row[0]);
         result.series.push({
-          ...baseSeries[type],
+          ...this.$baseSeries(type),
           name: row[0],
           data: row.slice(1).map((data) => {
-            const num = parseFloat(data.replace(/,/g, ''));
+            const num = this.$num(data);
             console.log('Parsed data:', data, '->', num);
             return num;
           }),
@@ -1259,193 +1121,52 @@ export default class EChartsTableEngine {
         return result;
       },
       {
-        legend: {
-          data: [],
-          type: 'scroll',
-          orient: 'horizontal',
-          left: 'center',
-          top: 'top',
-          textStyle: {
-            fontSize: 12,
-          },
-          itemWidth: 12,
-          itemHeight: 12,
-          selectedMode: 'multiple',
-          selector: [
-            {
-              type: 'all',
-              title: '全选',
-            },
-            {
-              type: 'inverse',
-              title: '反选',
-            },
-          ],
-        },
+        legend: this.$legend({ data: [] }),
         series: [],
       },
     );
 
-    const chartOptions = {
+    const chartOptions = this.$baseOption({
       ...dataSet,
-      backgroundColor: '#fff',
-      color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'],
-      tooltip: {
+      tooltip: this.$tooltip({
         trigger: 'axis',
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        borderColor: '#999',
-        borderWidth: 1,
-        textStyle: {
-          color: '#fff',
-          fontSize: 12,
-        },
         axisPointer: {
           type: type === 'line' ? 'cross' : 'shadow',
-          label: {
-            backgroundColor: '#6a7985',
-          },
-          crossStyle: {
-            color: '#999',
-          },
+          label: { backgroundColor: '#6a7985' },
+          crossStyle: { color: '#999' },
         },
-        formatter(params) {
-          let result = `<div style="margin-bottom:4px;font-weight:bold;">${params[0].axisValueLabel}</div>`;
-          params.forEach(function (item, index) {
-            result += '<div style="margin:2px 0;">';
-            result += `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${item.color};"></span>`;
-            result += `<span style="font-weight:bold;">${item.seriesName}</span>`;
-            result += `<span style="float:right;margin-left:20px;font-weight:bold;">${item.value}</span>`;
-            result += '</div>';
-          });
-          return result;
-        },
-        extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
-      },
-      toolbox: {
-        show: true,
-        orient: 'vertical',
-        left: 'right',
-        top: 'center',
-        feature: {
-          mark: { show: true, title: '辅助线开关' },
-          dataView: {
-            show: true,
-            readOnly: false,
-            title: '数据视图',
-            lang: ['数据视图', '关闭', '刷新'],
-          },
-          magicType: {
-            show: true,
-            type: ['line', 'bar'],
-            title: {
-              line: '切换为折线图',
-              bar: '切换为柱状图',
-            },
-          },
-          restore: { show: true, title: '重置' },
-          saveAsImage: {
-            show: true,
-            title: '保存为图片',
-            type: 'png',
-            backgroundColor: '#fff',
-          },
-        },
-        iconStyle: {
-          borderColor: '#999',
-        },
-        emphasis: {
-          iconStyle: {
-            borderColor: '#666',
-          },
-        },
-      },
-      xAxis: {
+        formatter: this.$tooltipAxisFormatter(),
+      }),
+      toolbox: this.$toolbox({
+        mark: { show: true, title: '辅助线开关' },
+        magicType: { show: true, type: ['line', 'bar'], title: { line: '切换为折线图', bar: '切换为柱状图' } },
+      }),
+      xAxis: this.$axis('category', {
         data: tableObject.header.slice(1),
-        type: 'category',
-        axisLine: {
-          lineStyle: {
-            color: '#333',
-          },
-        },
+        axisTick: { alignWithLabel: true },
         axisLabel: {
-          color: '#333',
           rotate: tableObject.header.slice(1).some((h) => h.length > 4) ? 45 : 0,
           interval: 0,
-          fontSize: 11,
+          fontSize: THEME.fontSize.base,
+          color: THEME.color.text,
         },
-        axisTick: {
-          alignWithLabel: true,
-        },
-      },
-      yAxis: {
-        type: 'value',
+      }),
+      yAxis: this.$axis('value', {
         axisLabel: {
-          color: '#333',
-          fontSize: 11,
+          color: THEME.color.text,
+          fontSize: THEME.fontSize.base,
           formatter(value) {
-            if (value >= 1000000) {
-              return `${(value / 1000000).toFixed(1)}M`;
-            }
-            if (value >= 1000) {
-              return `${(value / 1000).toFixed(1)}K`;
-            }
+            if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+            if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
             return value;
           },
         },
-        axisLine: {
-          lineStyle: {
-            color: '#333',
-          },
-        },
-        splitLine: {
-          lineStyle: {
-            color: '#eee',
-            type: 'dashed',
-          },
-        },
-        nameTextStyle: {
-          color: '#333',
-        },
-      },
-      grid: {
-        containLabel: true,
-        left: '3%',
-        right: '8%',
-        bottom: '8%',
-        top: '15%',
-      },
-      dataZoom: [
-        {
-          type: 'slider',
-          show: tableObject.header.length > 8,
-          xAxisIndex: [0],
-          start: 0,
-          end: 100,
-          bottom: '2%',
-          height: 20,
-          handleIcon:
-            'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23.1h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
-          handleSize: '80%',
-          handleStyle: {
-            color: '#fff',
-            shadowBlur: 3,
-            shadowColor: 'rgba(0, 0, 0, 0.6)',
-            shadowOffsetX: 2,
-            shadowOffsetY: 2,
-          },
-        },
-        {
-          type: 'inside',
-          xAxisIndex: [0],
-          start: 0,
-          end: 100,
-        },
-      ],
-      brush: {
-        toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'],
-        xAxisIndex: 0,
-      },
-    };
+        nameTextStyle: { color: THEME.color.text },
+      }),
+      grid: this.$grid({ left: '3%', top: '15%' }),
+      dataZoom: this.$dataZoom(tableObject.header.length > 8, {}),
+      brush: { toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'], xAxisIndex: 0 },
+    });
 
     console.log('Final chart options:', chartOptions);
     return chartOptions;
@@ -1495,6 +1216,10 @@ export default class EChartsTableEngine {
   onDestroy() {
     if (!this.dom) {
       return;
+    }
+    if (this.resizeHandler) {
+      window.removeEventListener('resize', this.resizeHandler);
+      this.resizeHandler = null;
     }
     this.echartsRef.dispose(this.dom);
   }
