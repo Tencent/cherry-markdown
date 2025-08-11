@@ -117,7 +117,7 @@ export default class EChartsTableEngine {
       feature: {
         dataView: { show: true, readOnly: false, title: '数据视图', lang: ['数据视图', '关闭', '刷新'] },
         restore: { show: true, title: '重置' },
-        saveAsImage: { show: true, title: '保存为图片', type: 'png', backgroundColor: '#fff' },
+        saveAsImage: { show: true, title: '保存为图片', type: 'svg', backgroundColor: '#fff' }, // renderer 类型为svg，默认只支持输出svg
         ...featureOverrides,
       },
       iconStyle: { borderColor: THEME.color.border },
@@ -322,24 +322,26 @@ export default class EChartsTableEngine {
     // 使用更可靠的容器等待机制
     const initChart = (retryCount = 0) => {
       const container = document.getElementById(chartId);
-      if (container) {
-        try {
-          const myChart = this.getInstance(container);
-          console.log('Chart initialized successfully:', chartId);
-          myChart.setOption(chartOption);
-          // 为热力图和饼图添加点击高亮效果
-          if (type === 'heatmap' || type === 'pie') {
-            this.addClickHighlightEffect(myChart, type);
-          }
-        } catch (error) {
-          console.error('Failed to render chart:', error);
-          console.error('Chart options:', chartOption);
-          console.error('Container:', container);
-          if (container) {
-            container.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
-              图表渲染失败<br/>
-              <span style="font-size: 12px; color: #666;">错误: ${error.message}</span>
-            </div>`;
+      if (this.echartsRef) {
+        if (container) {
+          try {
+            const myChart = this.getInstance(container);
+            console.log('Chart initialized successfully:', chartId);
+            myChart.setOption(chartOption);
+            // 为热力图和饼图添加点击高亮效果
+            if (type === 'heatmap' || type === 'pie') {
+              this.addClickHighlightEffect(myChart, type);
+            }
+          } catch (error) {
+            console.error('Failed to render chart:', error);
+            console.error('Chart options:', chartOption);
+            console.error('Container:', container);
+            if (container) {
+              container.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
+                图表渲染失败<br/>
+                <span style="font-size: 12px; color: #666;">错误: ${error.message}</span>
+              </div>`;
+            }
           }
         }
       } else if (retryCount < 10) {
@@ -645,14 +647,31 @@ export default class EChartsTableEngine {
   $renderScatterChartCommon(tableObject, options) {
     console.log('Rendering scatter chart:', tableObject);
 
-    // 解析散点数据：每一行代表一个点，格式为 [name, x, y, size?]
-    const hasSizeColumn = tableObject.header.length >= 4; // header: token + x + y + [size]
+    // 支持两种形式：
+    // 1) 单系列：| :scatter:{name,x,y,size?} | X | Y | Size? |
+    // 2) 多系列：| :scatter:{group,name,x,y,size?} | X | Y | Size? | Series |
+    const headers = tableObject.header;
+    const findHeader = (candidates) =>
+      headers.findIndex((h, i) => i > 0 && candidates.some((c) => String(h).toLowerCase().includes(c)));
+    const xCol = findHeader(['x']);
+    const yCol = findHeader(['y']);
+    const sizeCol = findHeader(['size', '大小']);
+    let groupCol = findHeader(['series', 'group', '分组', '系列']);
+    // 如果列数达到 name,x,y,size,group 的长度，但没识别出来，则默认最后一列为分组
+    if (groupCol <= 0 && headers.length >= 5) {
+      groupCol = headers.length - 1;
+    }
 
+    const hasSizeColumn = sizeCol > 0;
+    const hasGroupColumn = groupCol > 0;
+
+    // 解析为统一对象
     const parsedRows = tableObject.rows.map((row) => {
-      const x = this.$num(row[1]);
-      const y = this.$num(row[2]);
-      const size = hasSizeColumn ? this.$num(row[3]) : undefined;
-      return { name: row[0], x, y, size };
+      const x = this.$num(row[xCol > 0 ? xCol : 1]);
+      const y = this.$num(row[yCol > 0 ? yCol : 2]);
+      const size = hasSizeColumn ? this.$num(row[sizeCol]) : undefined;
+      const seriesName = hasGroupColumn ? String(row[groupCol] ?? '').trim() || '系列1' : null;
+      return { name: row[0], x, y, size, seriesName };
     });
 
     // 如果提供有 size 列，使用线性归一化（6~28）来控制点的显示大小
@@ -671,36 +690,29 @@ export default class EChartsTableEngine {
       }
     }
 
-    const data = parsedRows.map((r) => {
-      const item = { value: [r.x, r.y], name: r.name };
-      if (hasSizeColumn) {
-        if (maxSize === minSize) {
-          item.symbolSize = 12;
-        } else if (typeof r.size === 'number' && !Number.isNaN(r.size)) {
-          const t = (r.size - minSize) / (maxSize - minSize);
-          item.symbolSize = Math.round(6 + t * (28 - 6));
-        } else {
-          item.symbolSize = 10;
+    // 构建 series 数据
+    let series = [];
+    if (hasGroupColumn) {
+      const groupMap = new Map();
+      parsedRows.forEach((r) => {
+        const item = { value: [r.x, r.y], name: r.name };
+        if (hasSizeColumn) {
+          if (maxSize === minSize) {
+            item.symbolSize = 12;
+          } else if (typeof r.size === 'number' && !Number.isNaN(r.size)) {
+            const t = (r.size - minSize) / (maxSize - minSize);
+            item.symbolSize = Math.round(6 + t * (28 - 6));
+          } else {
+            item.symbolSize = 10;
+          }
         }
-      }
-      return item;
-    });
-
-    const chartOptions = this.$baseOption({
-      tooltip: this.$tooltip({
-        trigger: 'item',
-        formatter(params) {
-          const [x, y] = params.value || [];
-          return `${params.name}<br/>x: <strong>${x}</strong><br/>y: <strong>${y}</strong>`;
-        },
-      }),
-      toolbox: this.$toolbox(),
-      grid: this.$grid(),
-      xAxis: this.$axis('value'),
-      yAxis: this.$axis('value'),
-      series: [
+        const key = r.seriesName;
+        if (!groupMap.has(key)) groupMap.set(key, []);
+        groupMap.get(key).push(item);
+      });
+      series = Array.from(groupMap.entries()).map(([name, data]) =>
         this.$baseSeries('scatter', {
-          name: '散点',
+          name,
           data,
           emphasis: {
             focus: 'series',
@@ -711,17 +723,55 @@ export default class EChartsTableEngine {
               borderColor: THEME.color.emphasis,
             },
           },
-          select: {
-            itemStyle: {
-              borderWidth: 2,
-              borderColor: THEME.color.emphasis,
-              opacity: 1,
-            },
-          },
+          select: { itemStyle: { borderWidth: 2, borderColor: THEME.color.emphasis, opacity: 1 } },
           selectedMode: 'single',
           animationEasing: 'cubicOut',
         }),
-      ],
+      );
+    } else {
+      const data = parsedRows.map((r) => {
+        const item = { value: [r.x, r.y], name: r.name };
+        if (hasSizeColumn) {
+          if (maxSize === minSize) item.symbolSize = 12;
+          else if (typeof r.size === 'number' && !Number.isNaN(r.size)) {
+            const t = (r.size - minSize) / (maxSize - minSize);
+            item.symbolSize = Math.round(6 + t * (28 - 6));
+          } else item.symbolSize = 10;
+        }
+        return item;
+      });
+      series = [
+        this.$baseSeries('scatter', {
+          name: '散点',
+          data,
+          emphasis: {
+            focus: 'series',
+            itemStyle: {
+              borderWidth: 2,
+              borderColor: THEME.color.emphasis,
+            },
+          },
+          select: { itemStyle: { borderWidth: 2, borderColor: THEME.color.emphasis, opacity: 1 } },
+          selectedMode: 'single',
+          animationEasing: 'cubicOut',
+        }),
+      ];
+    }
+
+    const chartOptions = this.$baseOption({
+      tooltip: this.$tooltip({
+        trigger: 'item',
+        formatter(params) {
+          const [x, y] = params.value || [];
+          return `${params.name}<br/>x: <strong>${x}</strong><br/>y: <strong>${y}</strong>`;
+        },
+      }),
+      legend: this.$legend(),
+      toolbox: this.$toolbox({ dataZoom: {} }),
+      grid: this.$grid(),
+      xAxis: this.$axis('value'),
+      yAxis: this.$axis('value'),
+      series,
     });
 
     return chartOptions;
