@@ -152,3 +152,6 @@ export function exportHTMLFile(HTMLText, fileName) {
   aLink.click();
   document.body.removeChild(aLink);
 }
+
+// Word 导出功能
+export { exportWordFile } from './exportWord';
