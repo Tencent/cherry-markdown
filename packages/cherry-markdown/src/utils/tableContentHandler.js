@@ -28,6 +28,7 @@ export default class TableHandler {
     editorDom: {}, // 编辑器容器
     mainTableCodes: [], // 正文表格代码
     footnoteTableCodes: [], // 脚注表格代码
+    blockquoteTableCodes: [], // 引用表格内的代码
   };
 
   constructor(trigger, target, container, previewerDom, codeMirror, tableElement, cherry) {
@@ -179,6 +180,7 @@ export default class TableHandler {
       editorDom: {},
       mainTableCodes: [],
       footnoteTableCodes: [],
+      blockquoteTableCodes: [],
     };
   }
 
@@ -200,21 +202,32 @@ export default class TableHandler {
         fullMatch: footnoteMatch[0], // 完整匹配
       });
     }
-    // 处理内容 只处理代码块，不处理脚注
-    const processedContent = content.replace(this.codeBlockReg, (whole) => {
-      return whole.replace(/\|/g, '.');
-    });
+    // 记录所有引用位置范围
+    const blockquoteRange = [];
+    const blockquoteRegex = /(^|\n)((?:[ \t]*>.*(?:\n|$))+)/g;
+    let blockquoteMatch;
+    while ((blockquoteMatch = blockquoteRegex.exec(content)) !== null) {
+      const full = blockquoteMatch[2];
+      const end = blockquoteMatch.index + blockquoteMatch[0].length;
+      const inner = full.replace(/^[ \t]*> ?/gm, '');
+      // 引用内容下，表格位置
+      blockquoteRange.push({
+        start: blockquoteMatch.index, // 引用块开始位置
+        end, // 引用块结束位置
+        content: inner, // 引用块内容，去掉>
+        fullMatch: full,
+      });
+    }
     // 根据表格类型，收集对应的代码
     if (this.tableEditor.info?.isInFootnote) {
       const footnoteTableCodes = [];
-
       footnoteRange.forEach((footnoteRange) => {
         const footnoteContent = footnoteRange.content.replace(this.codeBlockReg, (whole) => {
           return whole.replace(/\|/g, '.');
         });
         footnoteContent.replace(this.tableReg, (whole, ...args) => {
           const match = whole.replace(/^\n*/, '');
-          // 计算在原始内容的偏移
+          // 计算在原始内容的偏移 核心
           const relativeOffset = args[args.length - 2] + whole.match(/^\n*/)[0].length;
           const absoluteOffset =
             footnoteRange.start + (footnoteRange.fullMatch.length - footnoteRange.content.length) + relativeOffset;
@@ -228,16 +241,62 @@ export default class TableHandler {
       this.tableEditor.tableCodes = footnoteTableCodes;
       this.tableEditor.footnoteTableCodes = footnoteTableCodes;
       this.tableEditor.mainTableCodes = []; // 清空正文表格
+    } else if (this.tableEditor.info?.isInBlock) {
+      const blockquoteTableCodes = [];
+      blockquoteRange.forEach((range) => {
+        // > ## 2023-07-07
+        // > very interesting!!!
+        // >
+        // > |A|B|C|
+        // > |:-:|-:|:-
+        // > |D|E|B|
+        // > |F|G|H|
+        // > Hi baby!
+        // 获取里面的包含表格的代码
+        // 去掉引用符号后的表格内容 表格内的偏移值
+        let blockInnerTable = '';
+        range.content.match(this.tableReg).forEach((tableContent) => {
+          const match = tableContent.replace(/^\n*/, '');
+          blockInnerTable = match;
+        });
+        // 计算每一行|的偏移量
+        const blockContentLines = range.fullMatch.split('\n');
+        const tableLinesOffets = blockContentLines.map((line) => {
+          const firstPipeIndex = line.indexOf('|');
+          return {
+            line, // 这一行的内容
+            hasTable: firstPipeIndex >= 0,
+            firstPipeIndex: firstPipeIndex >= 0 ? firstPipeIndex : -1, // 这一行第一个|的位置, 包含>
+          };
+        });
+        // 表格在引用块内的偏移量 包括>
+        const fistTablePostion = range.fullMatch.indexOf('|');
+        const absoluteOffset = range.start + fistTablePostion;
+        blockquoteTableCodes.push({
+          code: blockInnerTable,
+          offset: absoluteOffset,
+          tableLinesOffets,
+        });
+      });
+      this.tableEditor.tableCodes = blockquoteTableCodes;
+      this.tableEditor.blockquoteTableCodes = blockquoteTableCodes;
+      this.tableEditor.mainTableCodes = [];
     } else {
       // 收集正文表格（排除脚注）
+      // 处理内容 只处理代码块，不处理其他特殊情况
+      const processedContent = content.replace(this.codeBlockReg, (whole) => {
+        return whole.replace(/\|/g, '.');
+      });
       const mainTableCodes = [];
       processedContent.replace(this.tableReg, (whole, ...args) => {
-        //去除前导换行符，得到表格内容
+        // 去除前导换行符，得到表格内容
         const match = whole.replace(/^\n*/, '');
         const offsetBegin = args[args.length - 2] + whole.match(/^\n*/)[0].length;
         const isInFootnote = footnoteRange.some((range) => offsetBegin >= range.start && offsetBegin < range.end);
-
-        if (!isInFootnote) {
+        const isInCodeBlock = blockquoteRange.some(
+          (codeBlock) => offsetBegin >= codeBlock.start && offsetBegin < codeBlock.end,
+        );
+        if (!isInFootnote && !isInCodeBlock) {
           mainTableCodes.push({
             code: match,
             offset: offsetBegin,
@@ -247,7 +306,6 @@ export default class TableHandler {
       this.tableEditor.tableCodes = mainTableCodes;
       this.tableEditor.mainTableCodes = mainTableCodes;
       this.tableEditor.footnoteTableCodes = [];
-
     }
   }
 
@@ -264,22 +322,32 @@ export default class TableHandler {
 
     // 判断表格类型
     const isInFootnote = !!tableNode.closest('.cherry-footnote, [class*="footnote"]');
-
+    const isInBlock = !!tableNode.closest('blockquote');
     // 分类收集表格
     const mainTables = [];
     const footnoteTables = [];
-
+    const blockTables = [];
     allTables.forEach((table) => {
       const footnoteContainer = table.closest('.cherry-footnote, [class*="footnote"]');
+      const blockContainer = table.closest('blockquote');
       if (footnoteContainer) {
         footnoteTables.push(table);
+      } else if (blockContainer) {
+        blockTables.push(table);
       } else {
         mainTables.push(table);
       }
     });
 
     // 据类型选择对应集合
-    const targetTables = isInFootnote ? footnoteTables : mainTables;
+    let targetTables;
+    if (isInFootnote) {
+      targetTables = footnoteTables;
+    } else if (isInBlock) {
+      targetTables = blockTables;
+    } else {
+      targetTables = mainTables;
+    }
     const tableIndex = targetTables.indexOf(tableNode);
 
     const columns = Array.from(this.target.parentElement.childNodes).filter((child) => {
@@ -299,6 +367,7 @@ export default class TableHandler {
       tableText: tableNode.textContent.replace(/[\s]/g, ''),
       columns,
       isInFootnote, // 保存表格类型标识
+      isInBlock,
     };
   }
 
@@ -314,7 +383,7 @@ export default class TableHandler {
       console.warn('表格代码不存在，索引:', index);
       return;
     }
-    const whole = this.codeMirror.getValue();
+    const whole = this.codeMirror.getValue(); // 全文内容
     const selectTdInfo = this.tableEditor.info;
     const beginLine = whole.slice(0, tableCode.offset).match(/\n/g)?.length ?? 0;
     const { preLine, preCh, plusCh, currentTd } = this.$getTdOffset(
@@ -322,10 +391,14 @@ export default class TableHandler {
       selectTdInfo.isTHead,
       selectTdInfo.trIndex,
       selectTdInfo.tdIndex,
+      selectTdInfo.isInBlock,
     );
     if (type === 'table') {
       const endLine = beginLine + tableCode.code.match(/\n/g).length;
-      const endCh = tableCode.code.match(/[^\n]+\n*$/)[0].length;
+      let endCh = tableCode.code.match(/[^\n]+\n*$/)[0].length;
+      if (tableCode.info.isInBlock) {
+        endCh += 2;
+      }
       this.tableEditor.info.selection = [
         { line: beginLine, ch: 0 },
         { line: endLine, ch: endCh },
@@ -346,8 +419,9 @@ export default class TableHandler {
    * @param {Boolean} isTHead
    * @param {Number} trIndex
    * @param {Number} tdIndex
+   * @param {Boolean} isInBlock
    */
-  $getTdOffset(tableCode, isTHead, trIndex, tdIndex) {
+  $getTdOffset(tableCode, isTHead, trIndex, tdIndex, isInBlock = false) {
     const codes = tableCode.split(/\n/);
     const targetTr = isTHead ? 0 : trIndex + 2;
     const tds = codes[targetTr].split(/\|/);
@@ -358,8 +432,19 @@ export default class TableHandler {
     for (let i = 0; i < targetTd; i++) {
       pre.push(tds[i]);
     }
+    if (isInBlock) {
+      // 加入> 的偏移量
+      const linseOffsets = 2;
+      return {
+        preLine: targetTr,
+        preCh: needPlus1 ? pre.join('|').length + 1 + linseOffsets : pre.join('|').length,
+        plusCh: current.length,
+        currentTd: current,
+      };
+    }
     return {
       preLine: targetTr,
+      // preCh表示从行首到当前单元格开头的总字符数
       preCh: needPlus1 ? pre.join('|').length + 1 : pre.join('|').length,
       plusCh: current.length,
       currentTd: current,
@@ -375,18 +460,10 @@ export default class TableHandler {
     this.$collectTableCode();
     // 暂时不考虑代码块中包含表格、人为输入表格html语法、tapd特色表格语法的情况
     // 也就是说，出现上述情况时，表格的所见即所得编辑功能失效
-
     // 改为警告而不是直接返回false，提高容错性
     if (this.tableEditor.info.totalTables !== this.tableEditor.tableCodes.length) {
-      console.warn('表格数量不匹配，尝试继续处理:', {
-        domTables: this.tableEditor.info.totalTables,
-        codeTables: this.tableEditor.tableCodes.length,
-        isFootnote: this.tableEditor.info.isInFootnote,
-      });
-
       // 安全索引处理
       const safeIndex = Math.min(this.tableEditor.info.tableIndex, this.tableEditor.tableCodes.length - 1);
-
       if (safeIndex >= 0) {
         this.$setSelection(safeIndex, 'td', this.trigger === 'click');
         return true;
@@ -511,7 +588,7 @@ export default class TableHandler {
         const { type, dir } = target.dataset;
         this[`$add${type}${dir}`]();
       });
-      // TODO 添加下划线 上面一个有效下面一个没有效果
+      // 添加下划线 上面一个有效 下面一个没有效果
       li.addEventListener('mouseover', (e) => {
         const { target } = e;
         if (!(target instanceof HTMLElement)) {
