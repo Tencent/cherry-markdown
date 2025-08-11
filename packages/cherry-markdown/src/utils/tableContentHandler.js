@@ -337,7 +337,10 @@ export default class TableHandler {
     const { preLine, preCh, plusCh, currentTd } = offsetInfo;
     if (type === 'table') {
       const endLine = beginLine + tableCode.code.match(/\n/g).length;
-      const endCh = tableCode.code.match(/[^\n]+\n*$/)[0].length;
+      let endCh = tableCode.code.match(/[^\n]+\n*$/)[0].length;
+      if (tableCode.info.isInBlock) {
+        endCh += 2;
+      }
       this.tableEditor.info.selection = [
         { line: beginLine, ch: 0 },
         { line: endLine, ch: endCh },
@@ -358,8 +361,9 @@ export default class TableHandler {
    * @param {Boolean} isTHead
    * @param {Number} trIndex
    * @param {Number} tdIndex
+   * @param {Boolean} isInBlock
    */
-  $getTdOffset(tableCode, isTHead, trIndex, tdIndex) {
+  $getTdOffset(tableCode, isTHead, trIndex, tdIndex, isInBlock = false) {
     const codes = tableCode.split(/\n/);
     const targetTr = isTHead ? 0 : trIndex + 2;
     const tds = codes[targetTr].split(/\|/);
@@ -786,6 +790,63 @@ export default class TableHandler {
         }
         const { type, dir } = target.dataset;
         this[`$add${type}${dir}`]();
+      });
+      // 添加下划线 上面一个有效 下面一个没有效果
+      li.addEventListener('mouseover', (e) => {
+        const { target } = e;
+        if (!(target instanceof HTMLElement)) {
+          return;
+        }
+        const currentRow = this.tableEditor.info.trNode;
+        const { tableNode, tdIndex } = this.tableEditor.info;
+        const { rows } = tableNode;
+        const tds = currentRow.querySelectorAll('td');
+        const dataType = target.getAttribute('data-type');
+        const dataDir = target.getAttribute('data-dir');
+        if (dataType === 'Last' && dataDir === 'Row') {
+          tds.forEach((td) => {
+            td.style.borderTop = '2px solid red';
+          });
+        } else if (dataType === 'Next' && dataDir === 'Row') {
+          tds.forEach((td) => {
+            td.style.borderBottom = '2px solid red';
+          });
+          // tds[0].style.borderTop = '1px solid red';
+        } else if (dataType === 'Last' && dataDir === 'Col') {
+          for (let i = 0; i < rows.length; i++) {
+            const { cells } = rows[i];
+            if (cells[tdIndex]) {
+              cells[tdIndex].style.borderLeft = '2px solid red';
+            }
+          }
+        } else if (dataType === 'Next' && dataDir === 'Col') {
+          for (let i = 0; i < rows.length; i++) {
+            const { cells } = rows[i];
+            if (cells[tdIndex]) {
+              cells[tdIndex].style.borderRight = '2px solid red';
+            }
+          }
+        }
+      });
+      // 取消边界
+      li.addEventListener('mouseout', (e) => {
+        const currentRow = this.tableEditor.info.trNode;
+        const tds = currentRow.querySelectorAll('td');
+        const { tableNode, tdIndex } = this.tableEditor.info;
+        const { rows } = tableNode;
+        tds.forEach((td) => {
+          td.style.borderBottom = '';
+          td.style.borderTop = '';
+          td.style.borderLeft = '';
+          td.style.borderRight = '';
+        });
+        for (let i = 0; i < rows.length; i++) {
+          const { cells } = rows[i];
+          if (cells[tdIndex]) {
+            cells[tdIndex].style.borderRight = '';
+            cells[tdIndex].style.borderLeft = '';
+          }
+        }
       });
       container.appendChild(li);
     }, true);
