@@ -73,7 +73,7 @@ export default class FootnoteHoverHandler {
     this.bubbleCard.refNum = this.target.getAttribute('data-index');
     this.bubbleCard.refTitle = this.target.getAttribute('data-key');
     this.bubbleCard.content =
-    this.previewerDom.querySelector(`.one-footnote[data-index="${this.bubbleCard.refNum}"]`).innerHTML ?? '';
+      this.previewerDom.querySelector(`.one-footnote[data-index="${this.bubbleCard.refNum}"]`).innerHTML ?? '';
     const previewClassName = this.previewerDom.className ?? '';
     const themeClass = /theme__[^\s]+/.test(previewClassName) ? (previewClassName.match(/theme__[^\s]+/)[0] ?? '') : '';
     this.container.className = `${this.container.className.replace(/(^|\s)theme__[^\s]+/g, '')} ${themeClass}`;
