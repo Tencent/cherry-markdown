@@ -650,7 +650,7 @@ const RadarChartOptionsHandler = {
 
 /**
  * 地图的默认配置
- * @type {{options(*, *): {title: {left: string, text: string, textStyle: {color: string}}}|{title: {top: string, left: string, text: string, textStyle: {color: string, fontSize: number}}, graphic: {elements: [{top: string, left: string, style: {text: string, fill: string, font: string}, type: string}]}}}}
+ * @type {{}}
  */
 const MapChartLoadingOptionsHandler = {
   options(tableObject, options) {
@@ -694,7 +694,7 @@ const MapChartLoadingOptionsHandler = {
 
 /**
  * 地图的真正配置
- * @type {{components: {components: [{components: [{options(*, *): {title: {top: string, left: string, text: *, textStyle: {color: string, fontSize: number}}}|{}}], options(*, *): {backgroundColor: string, color, tooltip: {backgroundColor: string, borderColor: string, borderWidth: number, extraCssText: string, textStyle: {color: string, fontSize: number}}, toolbox: {orient: string, top: string, feature: {saveAsImage: {backgroundColor: string, show: boolean, title: string, type: string}, restore: {show: boolean, title: string}}, left: string, show: boolean, emphasis: {iconStyle: {borderColor: string}}, iconStyle: {borderColor: string}}}}], options(*, *): {"tooltip.trigger": string}}[], options(*, *): {series: [{data: *, name: string, emphasis: {itemStyle: {areaColor: string}, label: {show: boolean, fontSize: number, fontWeight: string}}, itemStyle: {borderColor: string, areaColor: string, borderWidth: number}, label: {show: boolean, fontSize: number}, type: string, roam: boolean, map: *}], "tooltip.formatter": function(*): string, visualMap: {min: number, top: string, max: number, left: string, calculable: boolean, text: string[], textStyle: {fontSize: number}, inRange: {color: string[]}}}}}
+ * @type {{}}
  */
 const MapChartCompleteOptionsHandler = {
   components: [BaseChartOptionsHandler],
@@ -762,7 +762,7 @@ const MapChartCompleteOptionsHandler = {
 
 /**
  * 地图配置比较特殊，由于需要异步加载地图数据源，所以有两阶段的配置，同步返回默认配置，异步加载地图数据源后生成真正配置
- * @type {{$tryLoadMapDataFromPaths(*, *, *): void, options(*, *): {}, $fetchMapData(*): Promise<*>, $refreshMapChart(*, *, *): void, $loadMapData(*, *): void}}
+ * @type {{}}
  */
 const MapChartOptionsHandler = {
   options(tableObject, options) {
