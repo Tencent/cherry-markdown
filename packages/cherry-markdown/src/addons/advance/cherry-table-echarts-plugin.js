@@ -87,6 +87,8 @@ export default class EChartsTableEngine {
     // 保存Cherry配置，用于获取地图数据源URL
     this.cherryOptions = cherryOptions;
     this.resizeHandler = null;
+    // 统一管理实例
+    this.instances = new Set();
   }
 
   // 公共构建器与工具方法
@@ -143,7 +145,7 @@ export default class EChartsTableEngine {
       orient: 'horizontal',
       left: overrides.left || 'center',
       top: overrides.top || 'top',
-      textStyle: { fontSize: THEME.fontSize.base },
+      textStyle: { color: THEME.color.text, fontSize: THEME.fontSize.base },
       itemWidth: 12,
       itemHeight: 12,
       selectedMode: 'multiple',
@@ -246,22 +248,22 @@ export default class EChartsTableEngine {
     };
   }
 
-  getInstance() {
+  getInstance(container) {
+    // 如果传入具体容器，则优先对该容器进行实例化与复用
+    if (container) {
+      let chart = this.echartsRef.getInstanceByDom(container);
+      if (!chart) {
+        chart = this.echartsRef.init(container, null, this.options);
+        this.instances.add(chart);
+      }
+      return chart;
+    }
+
+    // 无容器时，创建一个内部容器
     if (!this.dom) {
       this.dom = document.createElement('div');
-      // 设置必要的样式和属性确保图表可见
-      this.dom.style.width = `${this.options.width}px`;
-      this.dom.style.height = `${this.options.height}px`;
-      this.dom.style.minHeight = '300px';
-      this.dom.style.display = 'block';
-      this.dom.style.position = 'relative';
-
       const chart = this.echartsRef.init(this.dom, null, this.options);
-      // 监听窗口resize事件
-      this.resizeHandler = () => {
-        chart.resize();
-      };
-      window.addEventListener('resize', this.resizeHandler);
+      this.instances.add(chart);
     }
     return this.echartsRef.getInstanceByDom(this.dom);
   }
@@ -308,12 +310,11 @@ export default class EChartsTableEngine {
       <div class="cherry-echarts-wrapper" 
            style="width: ${this.options.width}px; height: ${
              this.options.height
-           }px; min-height: 300px; display: block; position: relative; border: 1px solid #ddd;" 
+           }px; min-height: 300px; display: block; position: relative; border: 1px solid var(--md-table-border);" 
            id="${chartId}"
            data-chart-type="${type}"
            data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"
            data-chart-options="${chartOptionsStr.replace(/"/g, '&quot;')}">
-        <div class="chart-loading" style="text-align: center; line-height: 300px; color: #666;">正在加载图表...</div>
       </div>
     `;
 
@@ -321,26 +322,24 @@ export default class EChartsTableEngine {
     // 使用更可靠的容器等待机制
     const initChart = (retryCount = 0) => {
       const container = document.getElementById(chartId);
-      if (this.echartsRef) {
-        if (container) {
-          try {
-            const myChart = this.echartsRef.init(container);
-            console.log('Chart initialized successfully:', chartId);
-            myChart.setOption(chartOption);
-            // 为热力图和饼图添加点击高亮效果
-            if (type === 'heatmap' || type === 'pie') {
-              this.addClickHighlightEffect(myChart, type);
-            }
-          } catch (error) {
-            console.error('Failed to render chart:', error);
-            console.error('Chart options:', chartOption);
-            console.error('Container:', container);
-            if (container) {
-              container.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
-                图表渲染失败<br/>
-                <span style="font-size: 12px; color: #666;">错误: ${error.message}</span>
-              </div>`;
-            }
+      if (container) {
+        try {
+          const myChart = this.getInstance(container);
+          console.log('Chart initialized successfully:', chartId);
+          myChart.setOption(chartOption);
+          // 为热力图和饼图添加点击高亮效果
+          if (type === 'heatmap' || type === 'pie') {
+            this.addClickHighlightEffect(myChart, type);
+          }
+        } catch (error) {
+          console.error('Failed to render chart:', error);
+          console.error('Chart options:', chartOption);
+          console.error('Container:', container);
+          if (container) {
+            container.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
+              图表渲染失败<br/>
+              <span style="font-size: 12px; color: #666;">错误: ${error.message}</span>
+            </div>`;
           }
         }
       } else if (retryCount < 10) {
@@ -846,18 +845,12 @@ export default class EChartsTableEngine {
     console.log(`正在加载用户自定义地图数据: ${mapUrl}${forceReload ? ' (强制重新加载)' : ''}`);
 
     // 优先加载用户自定义的地图数据，覆盖任何已有的地图数据
-    this.$fetchMapData(mapUrl)
-      .then(() => {
-        console.log('用户自定义地图数据加载成功，正在刷新所有地图图表');
-        // 地图数据加载成功后，立即刷新页面中的所有地图图表
-        this.$refreshMapCharts();
-      })
-      .catch((error) => {
-        console.warn(`用户自定义地图数据加载失败 (${mapUrl}):`, error.message);
-        console.warn('自定义地图数据加载失败，回退到默认地图数据');
-        // 如果用户自定义URL失败，回退到默认地图数据
-        this.$loadChinaMapData();
-      });
+    this.$fetchMapData(mapUrl).catch((error) => {
+      console.warn(`用户自定义地图数据加载失败 (${mapUrl}):`, error.message);
+      console.warn('自定义地图数据加载失败，回退到默认地图数据');
+      // 如果用户自定义URL失败，回退到默认地图数据
+      this.$loadChinaMapData();
+    });
   }
 
   /**
@@ -889,7 +882,7 @@ export default class EChartsTableEngine {
             console.log('Map chart refreshed successfully:', chartId);
           } else {
             // 重新创建图表
-            const newChart = this.echartsRef.init(container);
+            const newChart = this.getInstance(container);
             newChart.setOption(chartOption);
             console.log('Map chart recreated:', chartId);
           }
@@ -1214,13 +1207,16 @@ export default class EChartsTableEngine {
   }
 
   onDestroy() {
-    if (!this.dom) {
-      return;
+    if (this.instances && this.instances.size > 0) {
+      this.instances.forEach((inst) => {
+        if (inst && !inst.isDisposed()) inst.dispose();
+      });
+      this.instances.clear();
     }
-    if (this.resizeHandler) {
-      window.removeEventListener('resize', this.resizeHandler);
-      this.resizeHandler = null;
+    if (this.dom) {
+      const inst = this.echartsRef.getInstanceByDom(this.dom);
+      if (inst && !inst.isDisposed()) inst.dispose();
+      this.dom = null;
     }
-    this.echartsRef.dispose(this.dom);
   }
 }
