@@ -31,10 +31,11 @@ export default class Br extends ParagraphBase {
       return str;
     }
     return str.replace(this.RULE.reg, (match, lines, index) => {
+      // 不确定为什么不处理开头的连续换行，先注释
       // 不处理全文开头的连续空行
-      if (index === 0) {
-        return match;
-      }
+      // if (index === 0) {
+      //   return match;
+      // }
       const lineCount = lines.match(/\n/g)?.length ?? 0;
       const sign = `br${lineCount}`;
       let html = '';
@@ -78,7 +79,7 @@ export default class Br extends ParagraphBase {
      * 匹配逻辑：
      * 开头必为一个换行符，所以后续只需要匹配至少两个空行即可生成一个换行，行数即content匹配到的换行符个数
      */
-    const ret = { begin: '(?:\\n)', end: '', content: '((?:\\h*\\n){2,})' };
+    const ret = { begin: '(?:^|\\n)', end: '', content: '((?:\\h*\\n){2,})' };
     ret.reg = compileRegExp(ret, 'g', true);
     return ret;
   }
