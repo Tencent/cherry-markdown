@@ -42,16 +42,17 @@ export default class ProTable extends MenuBase {
     return this.subMenuConfig;
   }
 
-  /**
-   * 绑定子菜单点击事件
-   * @param {string} type 图表类型
-   * @param {string} selection 编辑区选中的内容
-   * @param {boolean} [async] 是否异步
-   * @param {Function} [callback] 回调函数
-   */
-  bindSubClick(type, selection, async, callback) {
-    return this.onClick(selection, type);
-  }
+  // 重载之后就无法插入代码了，但是不知道这么做的目的，先注释掉。
+  // /**
+  //  * 绑定子菜单点击事件
+  //  * @param {string} type 图表类型
+  //  * @param {string} selection 编辑区选中的内容
+  //  * @param {boolean} [async] 是否异步
+  //  * @param {Function} [callback] 回调函数
+  //  */
+  // bindSubClick(type, selection, async, callback) {
+  //   return this.onClick(selection, type);
+  // }
 
   /**
    * 响应点击事件
