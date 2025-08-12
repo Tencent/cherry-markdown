@@ -83,29 +83,85 @@ export default class EChartsTableEngine {
 
     // 保存Cherry配置，用于获取地图数据源URL
     this.cherryOptions = cherryOptions;
-    this.resizeHandler = null;
     // 统一管理实例
     this.instances = new Set();
     // 主题监听器
     this.themeObservers = new Map();
     // 运行时主题（根据CSS变量动态生成）
     this.themeRuntime = null;
+    // 主题缓存：key 为主题名（default/dark/abyss等），值为 { echarts, runtime }
+    this.themeCache = new Map();
+
+    // DOM观察器与导出后的重建控制
+    this.domObservers = new Map();
+    this.rehydrateTimer = null;
   }
 
-  // 公共构建器与工具方法
-  // 调色盘颜色，用于图表的配色
-  $palette() {
-    return ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'];
+  /**
+   * 获取调色盘颜色，用于图表的配色
+   */
+  $palette(type = 'default') {
+    let palette = [];
+    switch (type) {
+      case 'default':
+        palette = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'];
+        break;
+      case 'radar':
+        palette = [
+          'rgba(114, 172, 209, 0.2)',
+          'rgba(114, 172, 209, 0.4)',
+          'rgba(114, 172, 209, 0.6)',
+          'rgba(114, 172, 209, 0.8)',
+          'rgba(114, 172, 209, 1)',
+        ];
+        break;
+      case 'heatmap':
+        palette = [
+          '#313695',
+          '#4575b4',
+          '#74add1',
+          '#abd9e9',
+          '#e0f3f8',
+          '#ffffcc',
+          '#fee090',
+          '#fdae61',
+          '#f46d43',
+          '#d73027',
+          '#a50026',
+        ];
+        break;
+      case 'map':
+        palette = ['#e0ffff', '#006edd'];
+        break;
+      default:
+        palette = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'];
+        break;
+    }
+    return palette;
   }
-  // 悬浮提示配置
+
+  /**
+   * 构建悬浮提示基础配置
+   */
   $tooltip(overrides = {}) {
     return {
       borderWidth: 1,
+      backgroundColor: this.$theme().color.tooltipBg,
+      borderColor: this.$theme().color.border,
+      textStyle: {
+        color: this.$theme().color.tooltipText,
+      },
       extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
       ...overrides,
     };
   }
-  // 工具栏配置
+
+  /**
+   * 构建工具栏配置
+   * @param {Object} [featureOverrides] feature 覆盖项
+   * @param {Object} [posOverrides] 位置覆盖项
+   * @returns {Object} toolbox 配置
+   */
   $toolbox(featureOverrides = {}, posOverrides = {}) {
     return {
       show: true,
@@ -115,18 +171,31 @@ export default class EChartsTableEngine {
       feature: {
         dataView: { show: true, readOnly: false, title: '数据视图', lang: ['数据视图', '关闭', '刷新'] },
         restore: { show: true, title: '重置' },
-        saveAsImage: { show: true, title: '保存为图片', type: 'svg', backgroundColor: '#fff' }, // renderer 类型为svg，默认只支持输出svg
+        saveAsImage: {
+          show: true,
+          title: '保存为图片',
+          type: this.options.renderer === 'svg' ? 'svg' : 'png', // renderer 类型为svg，默认只支持输出svg
+          backgroundColor: '#fff',
+        },
         ...featureOverrides,
       },
       iconStyle: { borderColor: this.$theme().color.border },
       emphasis: { iconStyle: { borderColor: this.$theme().color.borderHover } },
     };
   }
-  // 网格配置
+
+  /**
+   * 构建网格配置
+   * @param {Object} [overrides]
+   * @returns {Object}
+   */
   $grid(overrides = {}) {
     return { containLabel: true, left: '8%', right: '8%', bottom: '8%', top: '12%', ...overrides };
   }
-  // 坐标轴配置
+
+  /**
+   * 构建坐标轴配置
+   */
   $axis(type = 'value', overrides = {}) {
     return {
       type,
@@ -136,7 +205,10 @@ export default class EChartsTableEngine {
       ...overrides,
     };
   }
-  // 图例配置
+
+  /**
+   * 构建图例配置
+   */
   $legend(overrides = {}) {
     return {
       type: 'scroll',
@@ -155,7 +227,10 @@ export default class EChartsTableEngine {
       ...overrides,
     };
   }
-  // 数据缩放配置
+
+  /**
+   * 构建数据缩放配置
+   */
   $dataZoom(showSlider = true, overrides = {}) {
     const base = [{ type: 'inside', xAxisIndex: [0], start: 0, end: 100 }];
     if (showSlider) {
@@ -163,12 +238,20 @@ export default class EChartsTableEngine {
     }
     return base.map((z) => ({ ...z, ...overrides }));
   }
-  // 数值解析，统一去逗号并保证为数字
+
+  /**
+   * 数值解析
+   * @param {any} value 输入值
+   * @returns {number} 数字（无法解析则为 0）
+   */
   $num(value) {
     const n = parseFloat(String(value ?? '').replace(/,/g, ''));
     return Number.isFinite(n) ? n : 0;
   }
-  // 统一系列基础属性
+
+  /**
+   * 构建统一系列基础属性
+   */
   $baseSeries(type, overrides = {}) {
     const animation = {
       animation: true,
@@ -217,11 +300,17 @@ export default class EChartsTableEngine {
     };
     return { ...base, ...dict[type], ...animation, ...overrides };
   }
-  // 获取带有颜色的指示器圆点HTML片段
+
+  /**
+   * 获取带有颜色的指示器圆点HTML片段
+   */
   $dot(color) {
     return `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${color};"></span>`;
   }
-  // 统一轴向tooltip文本
+
+  /**
+   * 轴向 tooltip 文本格式化器
+   */
   $tooltipAxisFormatter() {
     return (params) => {
       const header = params?.[0]?.axisValueLabel ?? '';
@@ -236,22 +325,82 @@ export default class EChartsTableEngine {
       return result;
     };
   }
-  // 基础配置
+
+  /**
+   * 生成基础配置
+   */
   $baseOption(overrides = {}) {
     return {
       aria: {
         show: true,
       },
+      backgroundColor: this.$theme().color.backgroundColor,
       color: this.$palette(),
       ...overrides,
     };
   }
-  // 避免figure svg深色模式下的选择器影响ECharts，为svg额外添加类名标签
+
+  /**
+   * 为容器下的svg额外添加类名标签, 避免figure svg深色模式下的选择器影响ECharts
+   */
   $tagEchartsSvg(container) {
     const svg = container && container.querySelector && container.querySelector('svg');
     if (svg) svg.classList.add('echarts-svg');
   }
-  // 读取CSS变量
+
+  /**
+   * 销毁图表实例
+   */
+  destroyChart(target) {
+    let container = null;
+    let inst = null;
+
+    if (target && typeof target.getDom === 'function') {
+      inst = target;
+      container = inst.getDom && inst.getDom();
+    } else if (target instanceof Element) {
+      container = target;
+      inst = this.echartsRef.getInstanceByDom(container);
+    }
+
+    if (inst && !inst.isDisposed()) inst.dispose();
+    if (inst) this.instances.delete(inst);
+  }
+
+  /**
+   * 创建或复用图表实例
+   * @param {Element} container 容器元素
+   * @param {Object} [option] ECharts 配置
+   * @param {*} [type] 图表类型（用于附加交互等）
+   * @param {Object} [themeObj] 主题对象（不传则根据 CSS 变量计算）
+   * @returns {*}
+   */
+  createChart(container, option = {}, type, themeObj) {
+    if (!container) return null;
+    // 已存在实例直接返回，避免被观察器和延迟初始化同时触发导致重复初始化
+    const existed = this.echartsRef.getInstanceByDom(container);
+    if (existed && !existed.isDisposed()) return existed;
+    const root = container.closest('.cherry') || container.closest('.cherry-markdown') || this.$getCherryRoot();
+    const theme = themeObj || this.$buildEchartsThemeFromCss(root);
+
+    if (container.firstChild) container.innerHTML = '';
+
+    const chart = this.echartsRef.init(container, theme, this.options);
+    if (option && Object.keys(option).length) chart.setOption(option);
+
+    this.instances.add(chart);
+    this.$tagEchartsSvg(container);
+    this.$enableThemeObserver(container);
+    this.$enableChartsDomObserver(container);
+
+    if (type === 'heatmap' || type === 'pie') this.addClickHighlightEffect(chart, type);
+
+    return chart;
+  }
+
+  /**
+   * 读取 CSS 变量
+   */
   $readCssVar(el, name, fallback) {
     try {
       const v = getComputedStyle(el).getPropertyValue(name).trim();
@@ -260,9 +409,40 @@ export default class EChartsTableEngine {
       return fallback;
     }
   }
-  // 根据CSS变量构建ECharts主题对象，并同步内部运行时主题
+
+  /**
+   * 从 classList 中提取主题名 theme__xxx -> xxx
+   */
+  $extractThemeNameFromClassList(classList) {
+    try {
+      const arr = Array.from(classList || []);
+      const t = arr.find((c) => c.startsWith('theme__'));
+      return t ? t.replace('theme__', '') : 'default';
+    } catch (e) {
+      return 'default';
+    }
+  }
+
+  /**
+   * 基于容器所在根节点获取主题缓存 key
+   */
+  $themeCacheKey(rootEl) {
+    const root = rootEl || this.$getCherryRoot();
+    const host = root || document.body;
+    return this.$extractThemeNameFromClassList((host && host.classList) || []);
+  }
+
+  /**
+   * 基于CSS变量构建ECharts主题，并同步到运行时主题
+   */
   $buildEchartsThemeFromCss(rootEl) {
     const el = rootEl || this.$getCherryRoot();
+    const cacheKey = this.$themeCacheKey(el);
+    if (this.themeCache.has(cacheKey)) {
+      const cached = this.themeCache.get(cacheKey);
+      this.themeRuntime = cached.runtime;
+      return cached.echarts;
+    }
     const bg = this.$readCssVar(el, '--base-previewer-bg', this.$readCssVar(el, '--base-editor-bg', 'transparent'));
     const text = this.$readCssVar(el, '--base-font-color', THEME.color.text);
     const border = this.$readCssVar(el, '--md-table-border', THEME.color.border);
@@ -275,7 +455,7 @@ export default class EChartsTableEngine {
     })();
 
     // 更新运行时主题
-    this.themeRuntime = {
+    const runtime = {
       color: {
         border,
         borderHover: border,
@@ -289,9 +469,10 @@ export default class EChartsTableEngine {
       shadow: { ...THEME.shadow },
       fontSize: { ...THEME.fontSize },
     };
+    this.themeRuntime = runtime;
 
     // 返回echarts.init要传入的主题对象
-    return {
+    const echartsTheme = {
       backgroundColor: bg,
       textStyle: { color: text },
       title: { textStyle: { color: text } },
@@ -313,43 +494,78 @@ export default class EChartsTableEngine {
       },
       color: this.$palette(),
     };
+    this.themeCache.set(cacheKey, { echarts: echartsTheme, runtime });
+    return echartsTheme;
   }
-  // 获取当前运行时主题
+
+  /**
+   * 获取当前运行时主题
+   */
   $theme() {
     return this.themeRuntime || THEME;
   }
-  $getCherryRoot() {
+
+  /**
+   * 获取 Cherry 根容器
+   */
+  $getCherryRoot(container = null) {
+    if (container) {
+      const root = container.closest('.cherry') || container.closest('.cherry-markdown');
+      if (root) return root;
+    }
     return document.querySelector('.cherry') || document.querySelector('.cherry-markdown') || document.body;
   }
 
-  $detectThemeFrom(element) {
-    const root = this.$getCherryRoot();
-    const target = element || root;
-    if (!target) return 'default';
-    const cherryRoot = target.closest ? target.closest('.cherry') : null;
-    const classList = (cherryRoot ? cherryRoot.classList : root.classList) || {};
-    return classList.contains('theme__dark') || classList.contains('theme__abyss') ? 'dark' : 'default';
-  }
-
+  /**
+   * 启用主题变更观察器
+   */
   $enableThemeObserver(container) {
-    const root =
-      (container && (container.closest('.cherry') || container.closest('.cherry-markdown'))) || this.$getCherryRoot();
+    const root = this.$getCherryRoot(container);
     if (!root) return;
     if (this.themeObservers.has(root)) return;
     const observer = new MutationObserver(() => {
-      // 主题变化时，重建所有实例并应用最新CSS变量主题
+      const key = this.$themeCacheKey(root);
+      if (!this.themeCache.has(key)) this.$buildEchartsThemeFromCss(root);
       this.$applyThemeToAllInstances();
     });
     observer.observe(root, { attributes: true, attributeFilter: ['class'] });
     this.themeObservers.set(root, observer);
   }
 
+  /**
+   * 将主题应用到所有图表实例
+   */
   $applyThemeToAllInstances() {
+    // 读取/缓存最新主题
+    this.$buildEchartsThemeFromCss(this.$getCherryRoot());
     Array.from(this.instances).forEach((inst) => {
-      this.$recreateInstanceWithTheme(inst);
+      this.$setInstanceTheme(inst);
     });
   }
 
+  /**
+   * 优先通过 echartsInstance.setTheme 应用主题；
+   * @param {*} instance ECharts 实例
+   */
+  $setInstanceTheme(instance) {
+    if (!instance || typeof instance.getDom !== 'function') return;
+    const container = instance.getDom();
+    if (!container) return;
+    const root = this.$getCherryRoot(container);
+    // 更新/预取主题缓存并同步 runtime
+    const themeObj = this.$buildEchartsThemeFromCss(root);
+    if (typeof instance.setTheme === 'function') {
+      instance.setTheme(themeObj);
+      const option = this.$chartOptionsFromDataset(container) || {};
+      instance.setOption(option, true);
+      this.$tagEchartsSvg(container);
+      return;
+    }
+  }
+
+  /**
+   * 从容器 `data-*` 属性解析并生成 Option 图表配置
+   */
   $chartOptionsFromDataset(container) {
     const type = container.getAttribute('data-chart-type');
     const tableDataStr = container.getAttribute('data-table-data');
@@ -380,36 +596,14 @@ export default class EChartsTableEngine {
     return renderFn ? renderFn(tableData, chartOptions) : {};
   }
 
-  $recreateInstanceWithTheme(oldInstance) {
-    const container = oldInstance && typeof oldInstance.getDom === 'function' ? oldInstance.getDom() : null;
-    if (!container) return;
-    const type = container.getAttribute('data-chart-type');
-    const option = this.$chartOptionsFromDataset(container);
-
-    oldInstance.dispose();
-
-    this.instances.delete(oldInstance);
-    const root = container.closest('.cherry') || container.closest('.cherry-markdown') || this.$getCherryRoot();
-    const themeObj = this.$buildEchartsThemeFromCss(root);
-    const next = this.echartsRef.init(container, themeObj, this.options);
-    next.setOption(option || {});
-    this.$tagEchartsSvg(container);
-    if (type === 'heatmap' || type === 'pie') this.addClickHighlightEffect(next, type);
-    this.instances.add(next);
-  }
-
+  /**
+   * 获取或创建实例
+   */
   getInstance(container) {
     // 如果传入具体容器，则优先对该容器进行实例化与复用
     if (container) {
       let chart = this.echartsRef.getInstanceByDom(container);
-      if (!chart) {
-        const root = container.closest('.cherry') || container.closest('.cherry-markdown') || this.$getCherryRoot();
-        const themeObj = this.$buildEchartsThemeFromCss(root);
-        chart = this.echartsRef.init(container, themeObj, this.options);
-        this.instances.add(chart);
-        this.$tagEchartsSvg(container);
-        this.$enableThemeObserver(container);
-      }
+      if (!chart) chart = this.createChart(container);
       return chart;
     }
 
@@ -424,6 +618,81 @@ export default class EChartsTableEngine {
     return this.echartsRef.getInstanceByDom(this.dom);
   }
 
+  /**
+   * 启用图表容器 DOM 观察器（用于监听预览区DOM变更，导出流程中的 refresh 会触发重建）
+   * @param {Element} container 任一图表容器
+   * @returns {void}
+   */
+  $enableChartsDomObserver(container) {
+    const root = this.$getCherryRoot(container);
+    if (!root) return;
+    if (this.domObservers.has(root)) return;
+
+    const observer = new MutationObserver((mutations) => {
+      const addedContainers = new Set();
+      const removedContainers = new Set();
+      for (const m of mutations) {
+        if (m.type === 'childList') {
+          Array.from(m.addedNodes).forEach((n) => this.$collectEchartsWrappersFromNode(n, addedContainers));
+          Array.from(m.removedNodes).forEach((n) => this.$collectEchartsWrappersFromNode(n, removedContainers));
+        }
+      }
+      if (addedContainers.size || removedContainers.size) {
+        clearTimeout(this.rehydrateTimer);
+        this.rehydrateTimer = setTimeout(() => {
+          // 先处理移除的容器，清理实例
+          removedContainers.forEach((c) => {
+            if (!(c instanceof Element)) return;
+            this.destroyChart(c);
+          });
+          // 再对新增容器做定向重建
+          if (addedContainers.size) {
+            this.$rehydrateChartsForContainers(addedContainers, root);
+          }
+        }, 50);
+      }
+    });
+    observer.observe(root, { childList: true, subtree: true });
+    this.domObservers.set(root, observer);
+  }
+
+  /**
+   * 从节点收集 `.cherry-echarts-wrapper` 容器
+   */
+  $collectEchartsWrappersFromNode(node, set) {
+    if (!(node instanceof Element)) return;
+    if (node.classList && node.classList.contains('cherry-echarts-wrapper')) {
+      set.add(node);
+      return;
+    }
+    if (typeof node.querySelectorAll === 'function') {
+      const found = node.querySelectorAll('.cherry-echarts-wrapper');
+      if (found && found.length) Array.from(found).forEach((el) => set.add(el));
+    }
+  }
+
+  /**
+   * 定向重建一组容器对应的图表
+   */
+  $rehydrateChartsForContainers(containersSet, rootEl) {
+    const root = rootEl || this.$getCherryRoot();
+    const themeObj = this.$buildEchartsThemeFromCss(root);
+    containersSet.forEach((container) => {
+      if (!(container instanceof Element) || !container.isConnected) return;
+      const type = container.getAttribute('data-chart-type');
+      const option = this.$chartOptionsFromDataset(container);
+      try {
+        this.destroyChart(container);
+        this.createChart(container, option, type, themeObj);
+      } catch (e) {
+        Logger.warn('rehydrate (partial) chart failed:', e);
+      }
+    });
+  }
+
+  /**
+   * 渲染入口：将表格数据渲染为指定类型图表，并返回 HTML 容器片段
+   */
   render(type, options, tableObject) {
     Logger.log('Rendering chart:', type, options, tableObject);
     let chartOption = {};
@@ -474,49 +743,24 @@ export default class EChartsTableEngine {
       </div>
     `;
 
-    // 在DOM插入后立即初始化图表
-    // 使用更可靠的容器等待机制
-    const initChart = (retryCount = 0) => {
+    // 延迟到下一轮事件循环再执行；只重试一次
+    setTimeout(() => {
       const container = document.getElementById(chartId);
-      if (this.echartsRef) {
-        if (container) {
-          try {
-            const myChart = this.getInstance(container);
-            Logger.log('Chart initialized successfully:', chartId);
-            myChart.setOption(chartOption);
-            // 为热力图和饼图添加点击高亮效果
-            if (type === 'heatmap' || type === 'pie') {
-              this.addClickHighlightEffect(myChart, type);
-            }
-          } catch (error) {
-            Logger.error('Failed to render chart:', error);
-            Logger.error('Chart options:', chartOption);
-            Logger.error('Container:', container);
-            if (container) {
-              container.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
-                图表渲染失败<br/>
-                <span style="font-size: 12px; color: #666;">错误: ${error.message}</span>
-              </div>`;
-            }
-          }
-        }
-      } else if (retryCount < 10) {
-        // 最多重试10次，每次间隔100ms
-        Logger.log(`Retrying chart initialization for ${chartId}, attempt: ${retryCount + 1}`);
-        setTimeout(() => initChart(retryCount + 1), 100);
-      } else {
-        Logger.error('Failed to find chart container after 10 retries:', chartId, !!this.echartsRef);
-        const fallbackContainer = document.getElementById(chartId);
-        if (fallbackContainer) {
-          fallbackContainer.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
-            图表容器未找到<br/>
-            <span style="font-size: 12px; color: #666;">容器ID: ${chartId}</span>
-          </div>`;
-        }
+      if (!container || !this.echartsRef) return;
+      if (this.echartsRef.getInstanceByDom(container)) return;
+      try {
+        this.createChart(container, chartOption, type);
+        Logger.log('Chart initialized successfully:', chartId);
+      } catch (error) {
+        Logger.error('Failed to render chart:', error);
+        Logger.error('Chart options:', chartOption);
+        Logger.error('Container:', container);
+        container.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
+          图表渲染失败<br/>
+          <span style="font-size: 12px; color: #666;">错误: ${error.message}</span>
+        </div>`;
       }
-    };
-
-    setTimeout(() => initChart(), 50);
+    }, 50);
 
     return htmlContent;
   }
@@ -612,14 +856,11 @@ export default class EChartsTableEngine {
         shape: 'polygon',
         splitArea: {
           areaStyle: {
-            color: [
-              'rgba(114, 172, 209, 0.2)',
-              'rgba(114, 172, 209, 0.4)',
-              'rgba(114, 172, 209, 0.6)',
-              'rgba(114, 172, 209, 0.8)',
-              'rgba(114, 172, 209, 1)',
-            ].reverse(),
+            color: this.$palette('radar').reverse(),
           },
+        },
+        axisName: {
+          color: this.$theme().color.text,
         },
         axisLine: {
           lineStyle: {
@@ -685,26 +926,24 @@ export default class EChartsTableEngine {
           return `${yAxisData[params.data[1]]}<br/>${xAxisData[params.data[0]]}: <strong>${params.data[2]}</strong>`;
         },
       }),
-      grid: {
+      grid: this.$grid({
         height: '50%',
         top: '10%',
         left: '10%',
         right: '10%',
-      },
-      xAxis: {
-        type: 'category',
+      }),
+      xAxis: this.$axis('category', {
         data: xAxisData,
         splitArea: {
           show: true,
         },
-      },
-      yAxis: {
-        type: 'category',
+      }),
+      yAxis: this.$axis('category', {
         data: yAxisData,
         splitArea: {
           show: true,
         },
-      },
+      }),
       visualMap: {
         min: minValue,
         max: maxValue,
@@ -713,21 +952,10 @@ export default class EChartsTableEngine {
         left: 'center',
         bottom: '15%',
         inRange: {
-          color: [
-            '#313695',
-            '#4575b4',
-            '#74add1',
-            '#abd9e9',
-            '#e0f3f8',
-            '#ffffcc',
-            '#fee090',
-            '#fdae61',
-            '#f46d43',
-            '#d73027',
-            '#a50026',
-          ],
+          color: this.$palette('heatmap'),
         },
         textStyle: {
+          color: this.$theme().color.text,
           fontSize: this.$theme().fontSize.base,
         },
       },
@@ -1256,9 +1484,10 @@ export default class EChartsTableEngine {
         text: ['高', '低'],
         calculable: true,
         inRange: {
-          color: ['#e0ffff', '#006edd'],
+          color: this.$palette('map'),
         },
         textStyle: {
+          color: this.$theme().color.text,
           fontSize: this.$theme().fontSize.base,
         },
       },
@@ -1342,12 +1571,14 @@ export default class EChartsTableEngine {
         data: tableObject.header.slice(1),
         axisTick: { alignWithLabel: true },
         axisLabel: {
+          textStyle: { color: this.$theme().color.text },
           rotate: tableObject.header.slice(1).some((h) => h.length > 4) ? 45 : 0,
           interval: 0,
         },
       }),
       yAxis: this.$axis('value', {
         axisLabel: {
+          textStyle: { color: this.$theme().color.text },
           formatter(value) {
             if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
             if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
@@ -1357,7 +1588,7 @@ export default class EChartsTableEngine {
         nameTextStyle: { color: this.$theme().color.text },
       }),
       grid: this.$grid({ left: '3%', top: '15%' }),
-      dataZoom: this.$dataZoom(tableObject.header.length > 8, {}),
+      dataZoom: this.$dataZoom(tableObject.header.length > 8),
       brush: { toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'], xAxisIndex: 0 },
     });
 
@@ -1409,7 +1640,7 @@ export default class EChartsTableEngine {
   onDestroy() {
     if (this.instances && this.instances.size > 0) {
       this.instances.forEach((inst) => {
-        if (inst && !inst.isDisposed()) inst.dispose();
+        this.destroyChart(inst);
       });
       this.instances.clear();
     }
@@ -1418,6 +1649,16 @@ export default class EChartsTableEngine {
         observer.disconnect();
       });
       this.themeObservers.clear();
+    }
+    if (this.domObservers && this.domObservers.size) {
+      this.domObservers.forEach((observer) => {
+        observer.disconnect();
+      });
+      this.domObservers.clear();
+    }
+    if (this.rehydrateTimer) {
+      clearTimeout(this.rehydrateTimer);
+      this.rehydrateTimer = null;
     }
     if (this.dom) {
       const inst = this.echartsRef.getInstanceByDom(this.dom);
