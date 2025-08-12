@@ -26,7 +26,8 @@ const THEME = {
     border: '#999',
     borderHover: '#666',
     text: '#333',
-    tooltipText: '#fff',
+    tooltipText: '#333',
+    tooltipTextDark: '#ddd',
     emphasis: '#ff6b6b',
     lineSplit: '#eee',
   },
@@ -89,6 +90,10 @@ export default class EChartsTableEngine {
     this.resizeHandler = null;
     // 统一管理实例
     this.instances = new Set();
+    // 主题监听器
+    this.themeObservers = new Map();
+    // 运行时主题（根据CSS变量动态生成）
+    this.themeRuntime = null;
   }
 
   // 公共构建器与工具方法
@@ -99,10 +104,7 @@ export default class EChartsTableEngine {
   // 悬浮提示配置
   $tooltip(overrides = {}) {
     return {
-      backgroundColor: 'rgba(0,0,0,0.8)',
-      borderColor: THEME.color.border,
       borderWidth: 1,
-      textStyle: { color: THEME.color.tooltipText, fontSize: THEME.fontSize.base },
       extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
       ...overrides,
     };
@@ -120,8 +122,8 @@ export default class EChartsTableEngine {
         saveAsImage: { show: true, title: '保存为图片', type: 'svg', backgroundColor: '#fff' }, // renderer 类型为svg，默认只支持输出svg
         ...featureOverrides,
       },
-      iconStyle: { borderColor: THEME.color.border },
-      emphasis: { iconStyle: { borderColor: THEME.color.borderHover } },
+      iconStyle: { borderColor: this.$theme().color.border },
+      emphasis: { iconStyle: { borderColor: this.$theme().color.borderHover } },
     };
   }
   // 网格配置
@@ -132,9 +134,9 @@ export default class EChartsTableEngine {
   $axis(type = 'value', overrides = {}) {
     return {
       type,
-      axisLine: { lineStyle: { color: THEME.color.text } },
-      axisLabel: { color: THEME.color.text, fontSize: THEME.fontSize.base },
-      splitLine: { lineStyle: { color: THEME.color.lineSplit, type: 'dashed' } },
+      axisLine: { lineStyle: { color: this.$theme().color.text } },
+      axisLabel: { color: this.$theme().color.text, fontSize: this.$theme().fontSize.base },
+      splitLine: { lineStyle: { color: this.$theme().color.lineSplit, type: 'dashed' } },
       ...overrides,
     };
   }
@@ -145,7 +147,7 @@ export default class EChartsTableEngine {
       orient: 'horizontal',
       left: overrides.left || 'center',
       top: overrides.top || 'top',
-      textStyle: { color: THEME.color.text, fontSize: THEME.fontSize.base },
+      textStyle: { color: this.$theme().color.text, fontSize: this.$theme().fontSize.base },
       itemWidth: 12,
       itemHeight: 12,
       selectedMode: 'multiple',
@@ -153,6 +155,7 @@ export default class EChartsTableEngine {
         { type: 'all', title: '全选' },
         { type: 'inverse', title: '反选' },
       ],
+      selectorLabel: { color: this.$theme().color.text, borderColor: this.$theme().color.border },
       ...overrides,
     };
   }
@@ -184,7 +187,7 @@ export default class EChartsTableEngine {
       data: [],
       emphasis: {
         focus: 'series',
-        itemStyle: { shadowBlur: THEME.shadow.blur, shadowOffsetX: 0, shadowColor: THEME.shadow.color },
+        itemStyle: { shadowBlur: this.$theme().shadow.blur, shadowOffsetX: 0, shadowColor: this.$theme().shadow.color },
       },
     };
     const dict = {
@@ -247,14 +250,169 @@ export default class EChartsTableEngine {
       ...overrides,
     };
   }
+  // 避免figure svg深色模式下的选择器影响ECharts，为svg额外添加类名标签
+  $tagEchartsSvg(container) {
+    const svg = container && container.querySelector && container.querySelector('svg');
+    if (svg) svg.classList.add('echarts-svg');
+  }
+  // 读取CSS变量
+  $readCssVar(el, name, fallback) {
+    try {
+      const v = getComputedStyle(el).getPropertyValue(name).trim();
+      return v || fallback;
+    } catch (e) {
+      return fallback;
+    }
+  }
+  // 根据CSS变量构建ECharts主题对象，并同步内部运行时主题
+  $buildEchartsThemeFromCss(rootEl) {
+    const el = rootEl || this.$getCherryRoot();
+    const bg = this.$readCssVar(el, '--base-previewer-bg', this.$readCssVar(el, '--base-editor-bg', 'transparent'));
+    const text = this.$readCssVar(el, '--base-font-color', THEME.color.text);
+    const border = this.$readCssVar(el, '--md-table-border', THEME.color.border);
+    const split = this.$readCssVar(el, '--md-hr-border', THEME.color.border);
+
+    const isDarkLike = (() => {
+      const hexColor = String(bg || '').toLowerCase();
+      // 较深的背景可视作暗色
+      return hexColor.includes('#0') || hexColor.includes('#1') || hexColor.includes('#2') || hexColor.includes('#3');
+    })();
+
+    // 更新运行时主题
+    this.themeRuntime = {
+      color: {
+        border,
+        borderHover: border,
+        text,
+        tooltipText: isDarkLike ? THEME.color.tooltipTextDark : THEME.color.tooltipText,
+        lineSplit: split,
+        backgroundColor: bg,
+        tooltipBg: isDarkLike ? bg : 'white',
+        emphasis: THEME.color.emphasis,
+      },
+      shadow: { ...THEME.shadow },
+      fontSize: { ...THEME.fontSize },
+    };
+
+    // 返回echarts.init要传入的主题对象
+    return {
+      backgroundColor: bg,
+      textStyle: { color: text },
+      title: { textStyle: { color: text } },
+      legend: { textStyle: { color: text } },
+      tooltip: {
+        backgroundColor: this.$theme().color.tooltipBg,
+        borderColor: border,
+        textStyle: { color: this.$theme().color.tooltipText },
+      },
+      categoryAxis: {
+        axisLine: { lineStyle: { color: text } },
+        axisLabel: { color: text },
+        splitLine: { lineStyle: { color: split } },
+      },
+      valueAxis: {
+        axisLine: { lineStyle: { color: text } },
+        axisLabel: { color: text },
+        splitLine: { lineStyle: { color: split } },
+      },
+      color: this.$palette(),
+    };
+  }
+  // 获取当前运行时主题
+  $theme() {
+    return this.themeRuntime || THEME;
+  }
+  $getCherryRoot() {
+    return document.querySelector('.cherry') || document.querySelector('.cherry-markdown') || document.body;
+  }
+
+  $detectThemeFrom(element) {
+    const root = this.$getCherryRoot();
+    const target = element || root;
+    if (!target) return 'default';
+    const cherryRoot = target.closest ? target.closest('.cherry') : null;
+    const classList = (cherryRoot ? cherryRoot.classList : root.classList) || {};
+    return classList.contains('theme__dark') || classList.contains('theme__abyss') ? 'dark' : 'default';
+  }
+
+  $enableThemeObserver(container) {
+    const root =
+      (container && (container.closest('.cherry') || container.closest('.cherry-markdown'))) || this.$getCherryRoot();
+    if (!root) return;
+    if (this.themeObservers.has(root)) return;
+    const observer = new MutationObserver(() => {
+      // 主题变化时，重建所有实例并应用最新CSS变量主题
+      this.$applyThemeToAllInstances();
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+    this.themeObservers.set(root, observer);
+  }
+
+  $applyThemeToAllInstances() {
+    Array.from(this.instances).forEach((inst) => {
+      this.$recreateInstanceWithTheme(inst);
+    });
+  }
+
+  $chartOptionsFromDataset(container) {
+    const type = container.getAttribute('data-chart-type');
+    const tableDataStr = container.getAttribute('data-table-data');
+    const chartOptionsStr = container.getAttribute('data-chart-options');
+    let tableData = null;
+    let chartOptions = {};
+    try {
+      tableData = tableDataStr ? JSON.parse(tableDataStr) : null;
+    } catch (e) {
+      tableData = null;
+    }
+    try {
+      chartOptions = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
+    } catch (e) {
+      chartOptions = {};
+    }
+    if (!type || !tableData) return {};
+    const renderDict = {
+      bar: this.renderBarChart.bind(this),
+      line: this.renderLineChart.bind(this),
+      radar: this.renderRadarChart.bind(this),
+      map: this.renderMapChart.bind(this),
+      heatmap: this.renderHeatmapChart.bind(this),
+      pie: this.renderPieChart.bind(this),
+      scatter: this.renderScatterChart.bind(this),
+    };
+    const renderFn = renderDict[type];
+    return renderFn ? renderFn(tableData, chartOptions) : {};
+  }
+
+  $recreateInstanceWithTheme(oldInstance) {
+    const container = oldInstance && typeof oldInstance.getDom === 'function' ? oldInstance.getDom() : null;
+    if (!container) return;
+    const type = container.getAttribute('data-chart-type');
+    const option = this.$chartOptionsFromDataset(container);
+
+    oldInstance.dispose();
+
+    this.instances.delete(oldInstance);
+    const root = container.closest('.cherry') || container.closest('.cherry-markdown') || this.$getCherryRoot();
+    const themeObj = this.$buildEchartsThemeFromCss(root);
+    const next = this.echartsRef.init(container, themeObj, this.options);
+    next.setOption(option || {});
+    this.$tagEchartsSvg(container);
+    if (type === 'heatmap' || type === 'pie') this.addClickHighlightEffect(next, type);
+    this.instances.add(next);
+  }
 
   getInstance(container) {
     // 如果传入具体容器，则优先对该容器进行实例化与复用
     if (container) {
       let chart = this.echartsRef.getInstanceByDom(container);
       if (!chart) {
-        chart = this.echartsRef.init(container, null, this.options);
+        const root = container.closest('.cherry') || container.closest('.cherry-markdown') || this.$getCherryRoot();
+        const themeObj = this.$buildEchartsThemeFromCss(root);
+        chart = this.echartsRef.init(container, themeObj, this.options);
         this.instances.add(chart);
+        this.$tagEchartsSvg(container);
+        this.$enableThemeObserver(container);
       }
       return chart;
     }
@@ -262,7 +420,9 @@ export default class EChartsTableEngine {
     // 无容器时，创建一个内部容器
     if (!this.dom) {
       this.dom = document.createElement('div');
-      const chart = this.echartsRef.init(this.dom, null, this.options);
+      const root = this.$getCherryRoot();
+      const themeObj = this.$buildEchartsThemeFromCss(root);
+      const chart = this.echartsRef.init(this.dom, themeObj, this.options);
       this.instances.add(chart);
     }
     return this.echartsRef.getInstanceByDom(this.dom);
@@ -443,8 +603,6 @@ export default class EChartsTableEngine {
       radar: {
         name: {
           textStyle: {
-            color: THEME.color.text,
-            fontSize: THEME.fontSize.base,
             fontWeight: 'bold',
           },
           formatter(name) {
@@ -495,7 +653,7 @@ export default class EChartsTableEngine {
               text: '雷达图分析',
               fontSize: 16,
               fontWeight: 'bold',
-              fill: THEME.color.text,
+              fill: this.$theme().color.text,
             },
           },
         ],
@@ -543,18 +701,12 @@ export default class EChartsTableEngine {
         splitArea: {
           show: true,
         },
-        axisLabel: {
-          fontSize: THEME.fontSize.base,
-        },
       },
       yAxis: {
         type: 'category',
         data: yAxisData,
         splitArea: {
           show: true,
-        },
-        axisLabel: {
-          fontSize: THEME.fontSize.base,
         },
       },
       visualMap: {
@@ -580,7 +732,7 @@ export default class EChartsTableEngine {
           ],
         },
         textStyle: {
-          fontSize: THEME.fontSize.base,
+          fontSize: this.$theme().fontSize.base,
         },
       },
       series: [
@@ -590,13 +742,13 @@ export default class EChartsTableEngine {
           label: { show: true, fontSize: 10 },
           emphasis: {
             itemStyle: {
-              shadowBlur: THEME.shadow.blur,
-              shadowColor: THEME.shadow.color,
+              shadowBlur: this.$theme().shadow.blur,
+              shadowColor: this.$theme().shadow.color,
               borderWidth: 2,
-              borderColor: THEME.color.emphasis,
+              borderColor: this.$theme().color.emphasis,
             },
           },
-          select: { itemStyle: { borderWidth: 2, borderColor: THEME.color.emphasis, opacity: 1 } },
+          select: { itemStyle: { borderWidth: 2, borderColor: this.$theme().color.emphasis, opacity: 1 } },
           selectedMode: 'single',
           animationEasing: 'cubicOut',
         }),
@@ -625,14 +777,14 @@ export default class EChartsTableEngine {
           emphasis: {
             label: { show: true, fontSize: '18', fontWeight: 'bold' },
             itemStyle: {
-              shadowBlur: THEME.shadow.blur,
+              shadowBlur: this.$theme().shadow.blur,
               shadowOffsetX: 0,
-              shadowColor: THEME.shadow.color,
+              shadowColor: this.$theme().shadow.color,
               borderWidth: 3,
-              borderColor: THEME.color.emphasis,
+              borderColor: this.$theme().color.emphasis,
             },
           },
-          select: { itemStyle: { borderWidth: 3, borderColor: THEME.color.emphasis, opacity: 1 } },
+          select: { itemStyle: { borderWidth: 3, borderColor: this.$theme().color.emphasis, opacity: 1 } },
           selectedMode: 'single',
           labelLine: { show: false },
           data,
@@ -717,13 +869,13 @@ export default class EChartsTableEngine {
           emphasis: {
             focus: 'series',
             itemStyle: {
-              shadowBlur: THEME.shadow.blur,
-              shadowColor: THEME.shadow.color,
+              shadowBlur: this.$theme().shadow.blur,
+              shadowColor: this.$theme().shadow.color,
               borderWidth: 2,
-              borderColor: THEME.color.emphasis,
+              borderColor: this.$theme().color.emphasis,
             },
           },
-          select: { itemStyle: { borderWidth: 2, borderColor: THEME.color.emphasis, opacity: 1 } },
+          select: { itemStyle: { borderWidth: 2, borderColor: this.$theme().color.emphasis, opacity: 1 } },
           selectedMode: 'single',
           animationEasing: 'cubicOut',
         }),
@@ -748,10 +900,10 @@ export default class EChartsTableEngine {
             focus: 'series',
             itemStyle: {
               borderWidth: 2,
-              borderColor: THEME.color.emphasis,
+              borderColor: this.$theme().color.emphasis,
             },
           },
-          select: { itemStyle: { borderWidth: 2, borderColor: THEME.color.emphasis, opacity: 1 } },
+          select: { itemStyle: { borderWidth: 2, borderColor: this.$theme().color.emphasis, opacity: 1 } },
           selectedMode: 'single',
           animationEasing: 'cubicOut',
         }),
@@ -1085,7 +1237,7 @@ export default class EChartsTableEngine {
         textStyle: {
           fontSize: 16,
           fontWeight: 'bold',
-          color: THEME.color.text,
+          color: this.$theme().color.text,
         },
       },
       tooltip: this.$tooltip({
@@ -1105,7 +1257,7 @@ export default class EChartsTableEngine {
           color: ['#e0ffff', '#006edd'],
         },
         textStyle: {
-          fontSize: THEME.fontSize.base,
+          fontSize: this.$theme().fontSize.base,
         },
       },
       series: [
@@ -1121,7 +1273,7 @@ export default class EChartsTableEngine {
           emphasis: {
             label: {
               show: true,
-              fontSize: THEME.fontSize.base,
+              fontSize: this.$theme().fontSize.base,
               fontWeight: 'bold',
             },
             itemStyle: {
@@ -1190,21 +1342,17 @@ export default class EChartsTableEngine {
         axisLabel: {
           rotate: tableObject.header.slice(1).some((h) => h.length > 4) ? 45 : 0,
           interval: 0,
-          fontSize: THEME.fontSize.base,
-          color: THEME.color.text,
         },
       }),
       yAxis: this.$axis('value', {
         axisLabel: {
-          color: THEME.color.text,
-          fontSize: THEME.fontSize.base,
           formatter(value) {
             if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
             if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
             return value;
           },
         },
-        nameTextStyle: { color: THEME.color.text },
+        nameTextStyle: { color: this.$theme().color.text },
       }),
       grid: this.$grid({ left: '3%', top: '15%' }),
       dataZoom: this.$dataZoom(tableObject.header.length > 8, {}),
@@ -1262,6 +1410,12 @@ export default class EChartsTableEngine {
         if (inst && !inst.isDisposed()) inst.dispose();
       });
       this.instances.clear();
+    }
+    if (this.themeObservers && this.themeObservers.size) {
+      this.themeObservers.forEach((observer) => {
+        observer.disconnect();
+      });
+      this.themeObservers.clear();
     }
     if (this.dom) {
       const inst = this.echartsRef.getInstanceByDom(this.dom);
