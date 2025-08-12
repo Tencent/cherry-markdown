@@ -1,5 +1,151 @@
 # Change Log
 
+## 0.10.0
+
+### Minor Changes
+
+- feat: 图片样式编辑功能增强 - 支持对齐方式设置 (#1268)
+
+## ✨ 新增特性
+
+- **对齐方式控制**: 图片样式工具栏新增对齐方式交互按钮
+  - 支持左对齐、居中、右对齐
+  - 支持左浮动、右浮动
+- **图标资源**: 新增对齐方式相关的图标文件
+
+## ⚠️ 技术债务
+
+**DOM 渲染时机问题**:
+
+- **现状**: 使用 `setTimeout(() => this.afterUpdate(), 100)` 临时解决 DOM 更新后的回调时机
+- **原因**: 原生 JavaScript 缺少类似 Vue `nextTick` 的 DOM 更新后回调机制 [@Wei-Xiaoxing](https://github.com/Wei-Xiaoxing)([#1292](https://github.com/Tencent/cherry-markdown/pull/1292))([`9e9dfb5`](https://github.com/Tencent/cherry-markdown/commit/9e9dfb53df4040124f5814c6913af329a9830d69))
+- style: #1268 预览区图片所见即所得编辑能力增加设置图片样式的功能
+
+- 增加图片样式工具栏气泡，当前版本支持修改边框/阴影/圆角；
+- 允许图片样式工具栏气泡跟随页面滚动；
+- 修复 `PreviewerBubble.js` 中样式代码捕获不完整的问题，确保样式设置的准确性； [@Wei-Xiaoxing](https://github.com/Wei-Xiaoxing)([#1278](https://github.com/Tencent/cherry-markdown/pull/1278))([`0474c1a`](https://github.com/Tencent/cherry-markdown/commit/0474c1a8d2d170fd6c69bd55119ade907a73392a))
+- feat(theme): set light theme as new default [#1314](https://github.com/Tencent/cherry-markdown/issues/1314)
+
+### 破坏性更改 BREAKING CHANGES
+
+- **移除 `light` 主题**：原有的 `light` 主题已被移除
+- **默认主题变更**： `light` 作为新的默认主题
+- **主题列表更新**：可用主题列表中不再包含 `light` 选项
+
+### 影响范围 IMPACTS
+
+- 对于原本在配置项 `themeSettings.mainTheme` 中使用 `light` 主题的用户，由于该主题不存在，将会导致主题切换为 `default` 主题，也即是原先的 `light` 主题
+
+### 迁移指南 MIGRATION GUIDE
+
+- 如果您之前使用了 `light` 主题：
+  1. 由于 `light` 以不存在，主题会自动切换为 `default` 主题
+  2. （可选）你可以选择将配置中的 `mainTheme: 'light'` 更改为 `mainTheme: 'default'`
+- 如果您之前自定义配置了 `light` 主题：
+  1. 您可以直接把原先 `light.scss` 文件底部的配置项迁移到 `default.scss` 文件中
+  2. （可选）你可以选择将配置中的 `mainTheme: 'light'` 更改为 `mainTheme: 'default'`
+- 如果您之前自定义配置了 `default` 主题：
+  1. 您可以将原先 `default.scss` 文件底部的配置项迁移到新的 `default.scss` 文件中 [@Seeridia](https://github.com/Seeridia)([#1322](https://github.com/Tencent/cherry-markdown/pull/1322))([`8444130`](https://github.com/Tencent/cherry-markdown/commit/84441304159cdb3458c7a89cf872297e316c7cb0))
+- feat: 增加 `editor.maxUrlLength` 属性以控制 `url` 是否缩略 [@YFAnt](https://github.com/YFAnt)([#1320](https://github.com/Tencent/cherry-markdown/pull/1320))([`bc7a046`](https://github.com/Tencent/cherry-markdown/commit/bc7a0469e1cd38257084f356d2434ac3e3b394fb))
+- refactor: 重构主题 CSS 变量集成系统
+
+### 主要变更
+
+- **🎨 CSS 变量系统重构**: 完全重构了主题系统，引入现代化的 CSS 变量架构
+  - 新增 `variables/` 目录，包含基础效果变量、语义化界面变量和 Open Color 颜色系统
+  - 移除了传统的 SCSS 变量系统，提高主题切换性能和可维护性
+- **🔧 主题文件优化**: 重构所有主题文件，大幅简化代码
+  - 将硬编码颜色值替换为语义化 CSS 变量
+  - 统一设计令牌，提供更好的一致性
+- **🗑️ 移除废弃功能**:
+  - 移除工具栏主题配置（`toolbarTheme`），简化配置选项
+  - 清理不再使用的 `prettyprint` 相关样式
+
+- **🛠️ 开发体验改进**:
+  - 修复开发构建配置中的路径问题
+  - 优化样式监听和热更新机制
+  - 整理图标文件的 CSS 规则顺序
+
+### 向后兼容性
+
+本次重构保持了 API 的向后兼容性，现有用户代码无需修改即可正常工作。移除的 `toolbarTheme` 配置不会影响功能，主题切换仍然通过 `mainTheme` 配置进行。
+
+### 影响范围
+
+- 主题系统架构
+- CSS 样式组织结构
+- 开发构建流程
+- 类型定义文件 [@Seeridia](https://github.com/Seeridia)([#1235](https://github.com/Tencent/cherry-markdown/pull/1235))([`e688271`](https://github.com/Tencent/cherry-markdown/commit/e688271ddcd9678dcf561407579ed3e1b4629421))
+- fix: 修复快捷键栏中的内置快捷键的显示错误 #1305
+  **在 Mac 上进行自定义快捷键的用户（仅缓存的快捷键配置，配置项传递的快捷键不受影响）更新后，旧的自定义快捷键将失效，需要点击“恢复默认配置”来恢复正确的快捷键。** [@Aurora-N](https://github.com/Aurora-N)([#1309](https://github.com/Tencent/cherry-markdown/pull/1309))([`7439d42`](https://github.com/Tencent/cherry-markdown/commit/7439d42827c324a51c03ff84f15c4b13e30436f8))
+
+### Patch Changes
+
+- fix: #1299 增加自定义代码块语言配置 `all` [@sunsonliu](https://github.com/sunsonliu)([#1301](https://github.com/Tencent/cherry-markdown/pull/1301))([`4848b82`](https://github.com/Tencent/cherry-markdown/commit/4848b82f0af5da07ff58fab7b4eb80fa82d2a9d0))
+- chore: upgrade `eslint@8.x` and `prettier@3.x` [@RSS1102](https://github.com/RSS1102)([#1274](https://github.com/Tencent/cherry-markdown/pull/1274))([`489180c`](https://github.com/Tencent/cherry-markdown/commit/489180cbafa15cca368efc0a60450fd33b352bdd))
+- feat: 优化搜索框在各主题下的样式 [@Aurora-N](https://github.com/Aurora-N)([#1263](https://github.com/Tencent/cherry-markdown/pull/1263))([`1fc0b64`](https://github.com/Tencent/cherry-markdown/commit/1fc0b649339795323a72617dc72c198a4d90f92d))
+- style: 公式工具栏增强与优化：样式适配：优化公式工具栏在多主题下的样式表现，确保跨主题视觉一致性。
+  chore: 模板扩充:丰富公式工具栏模板库，新增常用符号，三角函数及常用公式如几何三角示例。 [@Lingchen111](https://github.com/Lingchen111)([#1256](https://github.com/Tencent/cherry-markdown/pull/1256))([`f928c5e`](https://github.com/Tencent/cherry-markdown/commit/f928c5e2d848d4690f3e6f2912e74a4da35e89cf))
+- fix: #1281 表格添加列时，列的对齐方式取左边列（如有）的对齐方式，否则取右侧列的对齐方式 [@sunsonliu](https://github.com/sunsonliu)([#1294](https://github.com/Tencent/cherry-markdown/pull/1294))([`2584eda`](https://github.com/Tencent/cherry-markdown/commit/2584eda7e4749654815774d7da113a594c7495e0))
+- style: 优化手风琴样式 [@xx2run0711](https://github.com/xx2run0711)([#1270](https://github.com/Tencent/cherry-markdown/pull/1270))([`50924e5`](https://github.com/Tencent/cherry-markdown/commit/50924e5c2705608565ad3f2b974a6a51ea855b97))
+- feat: 增强颜色选择器功能，改进界面 [@Seeridia](https://github.com/Seeridia)([#1258](https://github.com/Tencent/cherry-markdown/pull/1258))([`0416a3a`](https://github.com/Tencent/cherry-markdown/commit/0416a3a87798c83cb612c768148f0b6f46668a27))
+- fix: 修复 `editOnly` 模式 `getToc` 为空数组的问题 [@YFAnt](https://github.com/YFAnt)([#1313](https://github.com/Tencent/cherry-markdown/pull/1313))([`3fb95d4`](https://github.com/Tencent/cherry-markdown/commit/3fb95d49790a3adb4eea35f1f9c9d14afd45ee8f))
+- feat: 在「导出 docx」时，自动将 `mermaid` 和数学公式转换为图片并插入 [@Seeridia](https://github.com/Seeridia)([#1351](https://github.com/Tencent/cherry-markdown/pull/1351))([`240c2a8`](https://github.com/Tencent/cherry-markdown/commit/240c2a83815165be37ddba509199a7af9c5276b1))
+- feat: 添加深海主题及相关样式支持 [@Seeridia](https://github.com/Seeridia)([#1336](https://github.com/Tencent/cherry-markdown/pull/1336))([`27eb2f7`](https://github.com/Tencent/cherry-markdown/commit/27eb2f7db18e51c5545c08cc4364fe2ad61bea14))
+- feat: 添加导出 Word 文档的功能
+
+feat: 在 `window.print()` 不可用时，关闭导出 PDF 的功能 [@Seeridia](https://github.com/Seeridia)([#1334](https://github.com/Tencent/cherry-markdown/pull/1334))([`f418126`](https://github.com/Tencent/cherry-markdown/commit/f4181265e2596cf253d5fb8268f962f350080d01))
+
+- fix: 修复导出 `HTML` 和图片样式丢失的错误 [@Seeridia](https://github.com/Seeridia)([#1323](https://github.com/Tencent/cherry-markdown/pull/1323))([`fcd17a5`](https://github.com/Tencent/cherry-markdown/commit/fcd17a58286e1f9da21da4b252c4764856015615))
+- fix: 编辑图片尺寸时禁用图片拖拽功能以避免误触
+  fix: 为编辑器添加 `z-index` 以解决图片尺寸控制器的层级问题
+  feat: 更新图片对齐方式提取逻辑，改进图片定位逻辑，确保图片尺寸控制框定位正确 [@Seeridia](https://github.com/Seeridia)([#1249](https://github.com/Tencent/cherry-markdown/pull/1249))([`556da12`](https://github.com/Tencent/cherry-markdown/commit/556da127e91492ca077b1169da7f5261fe50d36e))
+- style: 优化粘贴处理逻辑以支持来自 Word 的内容 [@Seeridia](https://github.com/Seeridia)([#1251](https://github.com/Tencent/cherry-markdown/pull/1251))([`4df364a`](https://github.com/Tencent/cherry-markdown/commit/4df364a5ad0cff30841f8a52b25d7c886de80e43))
+- fix: 修复建议列表的国际化配置问题 [@Seeridia](https://github.com/Seeridia)([#1272](https://github.com/Tencent/cherry-markdown/pull/1272))([`030960d`](https://github.com/Tencent/cherry-markdown/commit/030960dca8b07658f5bef01b217e8b20195f5c3a))
+- fix: 修复工具栏的位置错误 [@Seeridia](https://github.com/Seeridia)([#1255](https://github.com/Tencent/cherry-markdown/pull/1255))([`50fd3be`](https://github.com/Tencent/cherry-markdown/commit/50fd3be213405414308f87fdd76821d36db59e0a))
+- feat:增强图表交互功能并添加雷达图和地图图表支持 [@ceilf6](https://github.com/ceilf6)([#1325](https://github.com/Tencent/cherry-markdown/pull/1325))([`2f8dada`](https://github.com/Tencent/cherry-markdown/commit/2f8dada195789110f7560af0a70c0a1dcd27d64c))
+- feat: engine.js add LRU [@YFAnt](https://github.com/YFAnt)([#1302](https://github.com/Tencent/cherry-markdown/pull/1302))([`c22731c`](https://github.com/Tencent/cherry-markdown/commit/c22731cf21a4805e356bbccd217f4b5ff5b28409))
+- fix: 修正 `fileUploadMulti` 类型声明（从 `File` 改为 `File[]`） [@Lingchen111](https://github.com/Lingchen111)([#1237](https://github.com/Tencent/cherry-markdown/pull/1237))([`ba2c6df`](https://github.com/Tencent/cherry-markdown/commit/ba2c6df0715498b9e2a60a5ea067e0b988f77080))
+- fix: #1280 修复选中标题选区被扩大的问题 [@sunsonliu](https://github.com/sunsonliu)([#1296](https://github.com/Tencent/cherry-markdown/pull/1296))([`f4cb828`](https://github.com/Tencent/cherry-markdown/commit/f4cb828dbf60506c36877e40bd9306b107aed7b3))
+- style: 优化目录语法在各主题下的样式
+
+主要变更如下：
+
+- 为目录增加了一个容器，从而与正文清晰分离
+
+- 在左侧新增了一条指示线，增强目录的整体感
+
+- 增强了交互反馈：在链接区域悬停和点击时，指示线高亮，链接区域出现背景变化；在缩进空格区域悬停时，仅指示线高亮
+
+- 为各个主题进行了配色精调
+
+- 其他：使链接占据更多空间，提升交互的便利性；为一级标题适当加粗，便于用户快速把握文档主干结构；适当调整了内间距；提取大部分可定制元素为语义化变量 [@yang-summer](https://github.com/yang-summer)([#1308](https://github.com/Tencent/cherry-markdown/pull/1308))([`ccd7524`](https://github.com/Tencent/cherry-markdown/commit/ccd7524f1f549c62de86fc54a4d3142dd6e20ccb))
+- feat: 为饼图和热力图添加交互式工具栏和高亮效果 [@ghost613bb](https://github.com/ghost613bb)([#1344](https://github.com/Tencent/cherry-markdown/pull/1344))([`19fc19b`](https://github.com/Tencent/cherry-markdown/commit/19fc19b9c8cf7095bb6542b901c2465a8ef6405e))
+- fix: 移除目录中脚注标记的 HTML 标签 #1305 [@Seeridia](https://github.com/Seeridia)([#1306](https://github.com/Tencent/cherry-markdown/pull/1306))([`1273e5e`](https://github.com/Tencent/cherry-markdown/commit/1273e5ea8e8c3d819950f4e84c6929acb0e4b764))
+- refactor: 对公式面板的界面的重构
+
+feat: 公式面板增加“文本样式”页
+
+fix: 修复公式菜单位置计算，防止超出右侧边界 [@Seeridia](https://github.com/Seeridia)([#1321](https://github.com/Tencent/cherry-markdown/pull/1321))([`5039a3e`](https://github.com/Tencent/cherry-markdown/commit/5039a3edc16d143d8dbb53fd63ae88d7b2bacec2))
+
+- feat: #1337 丰富三个组件（个性 checklist，html 标签，简单表格） [@sunsonliu](https://github.com/sunsonliu)([#1338](https://github.com/Tencent/cherry-markdown/pull/1338))([`015295c`](https://github.com/Tencent/cherry-markdown/commit/015295cfa53ab81f40f0665a6fc65b42fdc5fc4b))
+- style: 优化快捷键工具栏的交互和在各主题下的样式 [@Aurora-N](https://github.com/Aurora-N)([#1304](https://github.com/Tencent/cherry-markdown/pull/1304))([`bcb596b`](https://github.com/Tencent/cherry-markdown/commit/bcb596b056cfb8dddb9d5e826d2cd6a1b181973b))
+- chore: 更新 `OpenAI` 依赖至 `@5.9.0`，并优化相关代码实现 [@RSS1102](https://github.com/RSS1102)([#1266](https://github.com/Tencent/cherry-markdown/pull/1266))([`85c9789`](https://github.com/Tencent/cherry-markdown/commit/85c9789b0ad4af0d0748c5e91199fc00384f7f36))
+- fix: 简化样式设计，复用原有样式
+  feat: 补充了各语言下的工具栏按键详情
+  style: 优化图片工具栏在各个主题下样式
+  fix: 定位工具栏时，使用相对 `preview` 的坐标，而不是绝对坐标 [@Jiadezhende](https://github.com/Jiadezhende)([#1286](https://github.com/Tencent/cherry-markdown/pull/1286))([`3cec9c5`](https://github.com/Tencent/cherry-markdown/commit/3cec9c51cd8ddc09a88b476687866bbed2138be0))
+- feat: 更新快捷键配置面板的颜色变量，优化默认主题适配
+
+fix: 工具栏按钮的高度统一
+
+fix: 工具栏和气泡组件的按钮统一为正方形 [@Seeridia](https://github.com/Seeridia)([#1312](https://github.com/Tencent/cherry-markdown/pull/1312))([`7f629e8`](https://github.com/Tencent/cherry-markdown/commit/7f629e816d1086ef2be47b1f5aa4734e02a60897))
+
+- fix: UI组件样式适配与优化 [@Seeridia](https://github.com/Seeridia)([#1269](https://github.com/Tencent/cherry-markdown/pull/1269))([`dc095ba`](https://github.com/Tencent/cherry-markdown/commit/dc095ba8930cffaf5993794fea61fcf43ad6d956))
+- chore: update license to change Copyright [@sunsonliu](https://github.com/sunsonliu)([#1242](https://github.com/Tencent/cherry-markdown/pull/1242))([`348c4f4`](https://github.com/Tencent/cherry-markdown/commit/348c4f4138ff3d9fe784be693534f38ea99f3ea3))
+- feat: #1316 增加自动引入 `katex` 的机制 [@sunsonliu](https://github.com/sunsonliu)([#1324](https://github.com/Tencent/cherry-markdown/pull/1324))([`0f8fa2e`](https://github.com/Tencent/cherry-markdown/commit/0f8fa2e590b1f4f5a5a6402e2dfd398a0384d379))
+- feat: #1326 优化异步加载 `katex` 静态资源文件的逻辑 [@sunsonliu](https://github.com/sunsonliu)([#1329](https://github.com/Tencent/cherry-markdown/pull/1329))([`df6b5f0`](https://github.com/Tencent/cherry-markdown/commit/df6b5f097817bff4a0526e32e76a4c368b4899cd))
+
 ## 0.9.4
 
 ### Patch Changes
