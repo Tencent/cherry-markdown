@@ -353,14 +353,14 @@ export default class TableHandler {
     if (nextLineIndex < codes.length) {
       // 使用下一行的数据
       originalLine = codes[nextLineIndex];
-      quoteMatch = originalLine.match(/^>+\s*/);
-      cleanLine = originalLine.replace(/^>+\s*/, '');
+      quoteMatch = originalLine.match(/^(?:>+\s*)+/);
+      cleanLine = originalLine.replace(/^(?:>+\s*)+/, '');
       tds = cleanLine.split(/\|/);
     } else {
       // 如果没有下一行，使用当前行的数据
       originalLine = codes[targetTr];
-      quoteMatch = originalLine.match(/^>+\s*/);
-      cleanLine = originalLine.replace(/^>+\s*/, '');
+      quoteMatch = originalLine.match(/^(?:>+\s*)+/);
+      cleanLine = originalLine.replace(/^(?:>+\s*)+/, '');
       tds = cleanLine.split(/\|/);
     }
     const needPlus1 = /^\s*$/.test(tds[0]);
