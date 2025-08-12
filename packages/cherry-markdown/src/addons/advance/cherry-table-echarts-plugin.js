@@ -1,33 +1,8 @@
 /**
- * Tencent is pleased to support the open source community by making CherryMarkdown available.
+ * Copyright (C) 2021 Tencent.
  *
- * Copyright (C) 2021 Tencent. All rights reserved.
- * The below software in this distribution may have been modified by Tencent ("Tencent Modifications").
- *
- * All Tencent Modifications are Copyright (C) Tencent.
- *
- * CherryMarkdown is licensed under the Apache License, Version 2.0 (the "License");
- * you may not          select: {
-            label: {
-              show: true,
-              color: '#fff',
-            },
-            itemStyle: {
-              areaColor: '#6495ED',
-            },
-          },
-          label: {
-            show: false,
-            fontSize: 10,
-            color: '#333',
-          },
-          itemStyle: {
-            borderColor: '#fff',
-            borderWidth: 0.5,
-            areaColor: '#ADD8E6',
-          },
-        },
-      ],t in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -39,6 +14,7 @@
  * limitations under the License.
  */
 import mergeWith from 'lodash/mergeWith';
+import Logger from '@/Logger';
 
 const DEFAULT_OPTIONS = {
   renderer: 'svg',
@@ -49,7 +25,7 @@ const DEFAULT_OPTIONS = {
 export default class EChartsTableEngine {
   static install(cherryOptions, ...args) {
     if (typeof window === 'undefined') {
-      console.warn('echarts-table-engine only works in browser.');
+      Logger.warn('echarts-table-engine only works in browser.');
       mergeWith(cherryOptions, {
         engine: {
           syntax: {
@@ -107,7 +83,7 @@ export default class EChartsTableEngine {
   }
 
   render(type, options, tableObject) {
-    console.log('Rendering chart:', type, options, tableObject);
+    Logger.log('Rendering chart:', type, options, tableObject);
     let chartOption = {};
     switch (type) {
       case 'bar':
@@ -131,7 +107,7 @@ export default class EChartsTableEngine {
       default:
         return '';
     }
-    console.log('Chart options:', chartOption);
+    Logger.log('Chart options:', chartOption);
 
     // 生成唯一ID和简化的配置数据
     const chartId = `chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -144,8 +120,8 @@ export default class EChartsTableEngine {
     const htmlContent = `
       <div class="cherry-echarts-wrapper" 
            style="width: ${this.options.width}px; height: ${
-      this.options.height
-    }px; min-height: 300px; display: block; position: relative; border: 1px solid #ddd;" 
+             this.options.height
+           }px; min-height: 300px; display: block; position: relative; border: 1px solid #ddd;" 
            id="${chartId}"
            data-chart-type="${type}"
            data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"
@@ -161,16 +137,16 @@ export default class EChartsTableEngine {
       if (container && this.echartsRef) {
         try {
           const myChart = this.echartsRef.init(container);
-          console.log('Chart initialized successfully:', chartId);
+          Logger.log('Chart initialized successfully:', chartId);
           myChart.setOption(chartOption);
           // 为热力图和饼图添加点击高亮效果
           if (type === 'heatmap' || type === 'pie') {
             this.addClickHighlightEffect(myChart, type);
           }
         } catch (error) {
-          console.error('Failed to render chart:', error);
-          console.error('Chart options:', chartOption);
-          console.error('Container:', container);
+          Logger.error('Failed to render chart:', error);
+          Logger.error('Chart options:', chartOption);
+          Logger.error('Container:', container);
           if (container) {
             container.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
               图表渲染失败<br/>
@@ -180,10 +156,10 @@ export default class EChartsTableEngine {
         }
       } else if (retryCount < 10) {
         // 最多重试10次，每次间隔100ms
-        console.log(`Retrying chart initialization for ${chartId}, attempt: ${retryCount + 1}`);
+        Logger.log(`Retrying chart initialization for ${chartId}, attempt: ${retryCount + 1}`);
         setTimeout(() => initChart(retryCount + 1), 100);
       } else {
-        console.error('Failed to find chart container after 10 retries:', chartId, !!this.echartsRef);
+        Logger.error('Failed to find chart container after 10 retries:', chartId, !!this.echartsRef);
         const fallbackContainer = document.getElementById(chartId);
         if (fallbackContainer) {
           fallbackContainer.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
@@ -220,7 +196,7 @@ export default class EChartsTableEngine {
   }
 
   $renderRadarChartCommon(tableObject, options) {
-    console.log('Rendering radar chart:', tableObject);
+    Logger.log('Rendering radar chart:', tableObject);
 
     // 构建雷达图指标
     const indicator = tableObject.header.slice(1).map((header) => {
@@ -251,8 +227,8 @@ export default class EChartsTableEngine {
       },
     }));
 
-    console.log('Radar indicator:', indicator);
-    console.log('Radar seriesData:', seriesData);
+    Logger.log('Radar indicator:', indicator);
+    Logger.log('Radar seriesData:', seriesData);
 
     const chartOptions = {
       backgroundColor: '#fff',
@@ -406,7 +382,7 @@ export default class EChartsTableEngine {
   }
 
   $renderHeatmapChartCommon(tableObject, options) {
-    console.log('Rendering heatmap chart:', tableObject);
+    Logger.log('Rendering heatmap chart:', tableObject);
 
     // 构建热力图数据
     const xAxisData = tableObject.header.slice(1); // 列标题作为x轴
@@ -557,7 +533,7 @@ export default class EChartsTableEngine {
   }
 
   $renderPieChartCommon(tableObject, options) {
-    console.log('Rendering pie chart:', tableObject);
+    Logger.log('Rendering pie chart:', tableObject);
 
     // 构建饼图数据
     const data = tableObject.rows.map((row) => ({
@@ -663,22 +639,22 @@ export default class EChartsTableEngine {
   }
 
   renderMapChart(tableObject, options) {
-    console.log('开始渲染地图图表，选项:', options);
+    Logger.log('开始渲染地图图表，选项:', options);
 
     // 检查options中是否有自定义地图数据源
     if (options && options.mapDataSource) {
-      console.log('检测到自定义地图数据源:', options.mapDataSource);
+      Logger.log('检测到自定义地图数据源:', options.mapDataSource);
 
       // 优先使用用户自定义的地图数据源
       // 如果当前已经有china地图数据，先清除它以确保使用新数据
       if (window.echarts && window.echarts.getMap('china')) {
-        console.log('清除现有地图数据以使用自定义地图数据源');
+        Logger.log('清除现有地图数据以使用自定义地图数据源');
       }
 
       // 立即开始加载自定义地图数据，这会覆盖默认地图数据
       this.$loadCustomMapData(options.mapDataSource, true);
     } else {
-      console.log('使用默认地图数据源');
+      Logger.log('使用默认地图数据源');
       // 只有在没有自定义数据源时才加载默认地图数据
       this.$loadChinaMapData();
     }
@@ -692,17 +668,17 @@ export default class EChartsTableEngine {
    */
   $loadChinaMapData() {
     if (typeof window.echarts === 'undefined') {
-      console.error('ECharts 库未加载');
+      Logger.error('ECharts 库未加载');
       return;
     }
 
     // 检查地图数据是否已加载
     if (window.echarts.getMap('china')) {
-      console.log('中国地图数据已存在');
+      Logger.log('中国地图数据已存在');
       return;
     }
 
-    console.log('正在加载中国地图数据...');
+    Logger.log('正在加载中国地图数据...');
 
     // 获取配置中的地图数据源URL，如果没有配置则使用默认值
     let possiblePaths = [
@@ -719,7 +695,7 @@ export default class EChartsTableEngine {
       this.cherryOptions.toolbars.config.mapTable.sourceUrl
     ) {
       possiblePaths = this.cherryOptions.toolbars.config.mapTable.sourceUrl;
-      console.log('使用配置的地图数据源:', possiblePaths);
+      Logger.log('使用配置的地图数据源:', possiblePaths);
     }
 
     this.$tryLoadMapDataFromPaths(possiblePaths, 0);
@@ -730,15 +706,15 @@ export default class EChartsTableEngine {
    */
   $tryLoadMapDataFromPaths(paths, index) {
     if (index >= paths.length) {
-      console.error('所有地图数据源都加载失败');
+      Logger.error('所有地图数据源都加载失败');
       return;
     }
 
     const url = paths[index];
-    console.log(`尝试加载地图数据: ${url}`);
+    Logger.log(`尝试加载地图数据: ${url}`);
 
     this.$fetchMapData(url).catch((error) => {
-      console.warn(`地图数据加载失败 (${url}):`, error.message);
+      Logger.warn(`地图数据加载失败 (${url}):`, error.message);
       // 尝试下一个路径
       this.$tryLoadMapDataFromPaths(paths, index + 1);
     });
@@ -758,7 +734,7 @@ export default class EChartsTableEngine {
       .then((geoJson) => {
         // 注册地图数据
         window.echarts.registerMap('china', geoJson);
-        console.log(`中国地图数据加载成功！来源: ${url}`);
+        Logger.log(`中国地图数据加载成功！来源: ${url}`);
 
         // 触发重新渲染已有的地图图表
         this.$refreshMapCharts();
@@ -773,22 +749,22 @@ export default class EChartsTableEngine {
    */
   $loadCustomMapData(mapUrl, forceReload = false) {
     if (!mapUrl || mapUrl.trim() === '') {
-      console.warn('自定义地图数据URL为空，使用默认加载方法');
+      Logger.warn('自定义地图数据URL为空，使用默认加载方法');
       return;
     }
 
-    console.log(`正在加载用户自定义地图数据: ${mapUrl}${forceReload ? ' (强制重新加载)' : ''}`);
+    Logger.log(`正在加载用户自定义地图数据: ${mapUrl}${forceReload ? ' (强制重新加载)' : ''}`);
 
     // 优先加载用户自定义的地图数据，覆盖任何已有的地图数据
     this.$fetchMapData(mapUrl)
       .then(() => {
-        console.log('用户自定义地图数据加载成功，正在刷新所有地图图表');
+        Logger.log('用户自定义地图数据加载成功，正在刷新所有地图图表');
         // 地图数据加载成功后，立即刷新页面中的所有地图图表
         this.$refreshMapCharts();
       })
       .catch((error) => {
-        console.warn(`用户自定义地图数据加载失败 (${mapUrl}):`, error.message);
-        console.warn('自定义地图数据加载失败，回退到默认地图数据');
+        Logger.warn(`用户自定义地图数据加载失败 (${mapUrl}):`, error.message);
+        Logger.warn('自定义地图数据加载失败，回退到默认地图数据');
         // 如果用户自定义URL失败，回退到默认地图数据
         this.$loadChinaMapData();
       });
@@ -800,11 +776,11 @@ export default class EChartsTableEngine {
   $refreshMapCharts() {
     // 查找页面中所有的地图图表容器，重新渲染
     const mapContainers = document.querySelectorAll('[id^="chart-"][data-chart-type="map"]');
-    console.log('Found map containers to refresh:', mapContainers.length);
+    Logger.log('Found map containers to refresh:', mapContainers.length);
 
     mapContainers.forEach((container) => {
       const chartId = container.id;
-      console.log('Refreshing map chart:', chartId);
+      Logger.log('Refreshing map chart:', chartId);
 
       // 从 data 属性获取存储的表格数据
       const tableDataStr = container.getAttribute('data-table-data');
@@ -820,26 +796,26 @@ export default class EChartsTableEngine {
 
           if (existingChart) {
             existingChart.setOption(chartOption);
-            console.log('Map chart refreshed successfully:', chartId);
+            Logger.log('Map chart refreshed successfully:', chartId);
           } else {
             // 重新创建图表
             const newChart = this.echartsRef.init(container);
             newChart.setOption(chartOption);
-            console.log('Map chart recreated:', chartId);
+            Logger.log('Map chart recreated:', chartId);
           }
         } catch (error) {
-          console.error('Failed to refresh map chart:', chartId, error);
+          Logger.error('Failed to refresh map chart:', chartId, error);
         }
       }
     });
   }
 
   $renderMapChartCommon(tableObject, options) {
-    console.log('Rendering map chart:', tableObject);
+    Logger.log('Rendering map chart:', tableObject);
 
     // 检查 ECharts 是否可用
     if (typeof window.echarts === 'undefined') {
-      console.error('ECharts 库未加载');
+      Logger.error('ECharts 库未加载');
       return {
         title: {
           text: '地图渲染失败: ECharts 库未加载',
@@ -851,7 +827,7 @@ export default class EChartsTableEngine {
 
     // 检查中国地图数据是否已注册
     if (!window.echarts.getMap('china')) {
-      console.warn('中国地图数据未加载，正在尝试加载...');
+      Logger.warn('中国地图数据未加载，正在尝试加载...');
 
       // 异步加载地图数据
       this.$loadChinaMapData();
@@ -950,7 +926,7 @@ export default class EChartsTableEngine {
       }
 
       // 如果都没匹配到，返回原名称
-      console.warn(`Province name not matched: ${inputName}`);
+      Logger.warn(`Province name not matched: ${inputName}`);
       return cleanName;
     };
 
@@ -960,7 +936,7 @@ export default class EChartsTableEngine {
       const standardName = normalizeProvinceName(originalName);
       const value = parseFloat(row[1].replace(/,/g, '')) || 0;
 
-      console.log(`Name mapping: "${originalName}" -> "${standardName}"`);
+      Logger.log(`Name mapping: "${originalName}" -> "${standardName}"`);
 
       return {
         name: standardName,
@@ -968,7 +944,7 @@ export default class EChartsTableEngine {
       };
     });
 
-    console.log('Map data:', mapData);
+    Logger.log('Map data:', mapData);
 
     // 使用 ECharts 内置的中国地图
     const chartOptions = {
@@ -1073,7 +1049,7 @@ export default class EChartsTableEngine {
   }
 
   $renderChartCommon(tableObject, options, type) {
-    console.log('Common chart rendering:', type, tableObject);
+    Logger.log('Common chart rendering:', type, tableObject);
 
     const baseSeries = {
       bar: {
@@ -1150,14 +1126,14 @@ export default class EChartsTableEngine {
 
     const dataSet = tableObject.rows.reduce(
       (result, row) => {
-        console.log('Processing row:', row);
+        Logger.log('Processing row:', row);
         result.legend.data.push(row[0]);
         result.series.push({
           ...baseSeries[type],
           name: row[0],
           data: row.slice(1).map((data) => {
             const num = parseFloat(data.replace(/,/g, ''));
-            console.log('Parsed data:', data, '->', num);
+            Logger.log('Parsed data:', data, '->', num);
             return num;
           }),
         });
@@ -1352,7 +1328,7 @@ export default class EChartsTableEngine {
       },
     };
 
-    console.log('Final chart options:', chartOptions);
+    Logger.log('Final chart options:', chartOptions);
     return chartOptions;
   }
 
@@ -1360,7 +1336,7 @@ export default class EChartsTableEngine {
   addClickHighlightEffect(chartInstance, chartType) {
     let selectedDataIndex = null;
     chartInstance.on('click', (params) => {
-      console.log('Chart clicked:', params);
+      Logger.log('Chart clicked:', params);
       // 如果点击的是同一个数据项，则取消高亮
       if (selectedDataIndex === params.dataIndex) {
         selectedDataIndex = null;
