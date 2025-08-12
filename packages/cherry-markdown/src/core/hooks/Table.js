@@ -175,7 +175,6 @@ export default class Table extends ParagraphBase {
     if (!chartOptions) {
       return tableResult;
     }
-    
     // 检查是否有地图数据源注释（针对地图类型的图表）
     let enhancedChartOptions = chartOptions;
     if (chartOptions.type === 'map') {
@@ -198,7 +197,6 @@ export default class Table extends ParagraphBase {
         Logger.log('originalStr preview:', originalStr.substring(0, 200));
       }
     }
-    
     const chart = this.chartRenderEngine.render(enhancedChartOptions.type, enhancedChartOptions.options, tableObject);
     const chartHtml = `<figure class="cherry-table-figure">${chart}</figure>`;
     const newSign = `${tableResult.sign}${chartOptionsSign}`;
