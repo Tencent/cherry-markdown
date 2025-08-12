@@ -2,4 +2,4 @@
 'cherry-markdown': patch
 ---
 
-engine.js add LRU
+feat: engine.js add LRU
