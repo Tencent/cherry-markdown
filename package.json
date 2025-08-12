@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.0",
-    "@changesets/cli": "^2.27.12",
+    "@changesets/cli": "^2.29.5",
     "@cherry-markdown/changesets-changelog-github": "^0.0.1",
     "@commitlint/config-conventional": "^19.6.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
