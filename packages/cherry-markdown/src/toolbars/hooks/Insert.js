@@ -144,7 +144,7 @@ export default class Insert extends MenuBase {
       case 'line-table':
         // 插入带折线图的表格
         return `${selection}\n\n${[
-          '| :line: {x,y} | a | b | c |',
+          '| :line: {title: 折线图,} | a | b | c |',
           '| :-: | :-: | :-: | :-: |',
           '| x | 1 | 2 | 3 |',
           '| y | 2 | 4 | 6 |',
@@ -153,7 +153,7 @@ export default class Insert extends MenuBase {
       case 'bar-table':
         // 插入带柱状图的表格
         return `${selection}\n\n${[
-          '| :bar: {x,y} | a | b | c |',
+          '| :bar: {title: 柱状图,} | a | b | c |',
           '| :-: | :-: | :-: | :-: |',
           '| x | 1 | 2 | 3 |',
           '| y | 2 | 4 | 6 |',
@@ -162,7 +162,7 @@ export default class Insert extends MenuBase {
       case 'map-table':
         // 插入带地图的表格
         return `${selection}\n\n${[
-          '| :map: {name,value} | 数值 |',
+          '| :map: {title: 地图, mapDataSource: https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json,} | 数值 |',
           '| :-: | :-: |',
           '| 北京 | 100 |',
           '| 上海 | 200 |',
@@ -173,7 +173,7 @@ export default class Insert extends MenuBase {
       case 'radar-table':
         // 插入带雷达图的表格
         return `${selection}\n\n${[
-          '| :radar: {x,y} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |',
+          '| :radar: {title: 雷达图,} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |',
           '| :-: | :-: | :-: | :-: | :-: | :-: |',
           '| 用户A | 90 | 85 | 75 | 80 | 88 |',
           '| 用户B | 75 | 90 | 88 | 85 | 78 |',

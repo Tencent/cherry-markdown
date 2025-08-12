@@ -31,7 +31,7 @@ export default class MapTable extends MenuBase {
   onClick(selection, shortKey = '') {
     // 插入带地图的表格
     return `${selection}\n\n${[
-      '| :map:{name,value} | 数值 |',
+      '| :map:{title: 地图, mapDataSource: https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json,} | 数值 |',
       '| :-: | :-: |',
       '| 北京 | 120 |',
       '| 上海 | 280 |',
