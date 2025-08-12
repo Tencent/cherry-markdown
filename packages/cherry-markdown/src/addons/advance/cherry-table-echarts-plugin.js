@@ -808,7 +808,9 @@ const MapChartOptionsHandler = {
    * 获取地图数据
    */
   $fetchMapData(url) {
-    return fetch(url).then((response) => {
+    return fetch(url, {
+      referrerPolicy: 'no-referrer',
+    }).then((response) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status} for ${url}`);
       }
