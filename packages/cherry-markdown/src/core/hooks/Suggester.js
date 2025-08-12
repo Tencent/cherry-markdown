@@ -113,7 +113,7 @@ export default class Suggester extends SyntaxBase {
         suggestList(_word, callback) {
           // 将word全转成小写
           const word = _word.toLowerCase();
-          const systemSuggestList = allSuggestList(suggesterKeyword, that.$cherry.locale);
+          const systemSuggestList = allSuggestList(suggesterKeyword, that.$cherry.locale, that.config);
           // 加个空格就直接退出联想
           if (/^\s$/.test(word)) {
             callback(false);
