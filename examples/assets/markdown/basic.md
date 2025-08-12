@@ -583,7 +583,7 @@ $$
 
 默认地图数据源：
 ```markdown
-| :map:{title: 地图,} | 数值 |
+| :map:{title: 中国地图,} | 数值 |
 | :-: | :-: |
 | 北京 | 100 |
 | 上海 | 200 |
@@ -594,7 +594,7 @@ $$
 ```
 
 **效果**
-| :map:{title: 地图,} | 数值 |
+| :map:{title: 中国地图,} | 数值 |
 | :-: | :-: |
 | 北京 | 100 |
 | 上海 | 200 |
@@ -605,26 +605,25 @@ $$
 
 **自定义地图数据源：**
 ```markdown
-| :map:{title: 地图, mapDataSource: https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json,} | 数值 |
+| :map:{title: 北京地图, mapDataSource: https://geo.datav.aliyun.com/areas_v3/bound/110000_full.json,} | 数值 |
 | :-: | :-: |
-| 北京 | 120 |
-| 上海 | 280 |
-| 广东 | 350 |
-| 四川 | 180 |
-| 江苏 | 290 |
-| 浙江 | 220 |
+| 海淀区 | 120 |
+| 朝阳区 | 280 |
+| 丰台区 | 350 |
+| 顺义区 | 180 |
+| 密云区 | 290 |
+| 大兴区 | 220 |
 ```
 
 **效果**
-<!--  -->
-| :map:{title: 地图, mapDataSource: https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json,} | 数值 |
+| :map:{title: 北京地图, mapDataSource: https://geo.datav.aliyun.com/areas_v3/bound/110000_full.json,} | 数值 |
 | :-: | :-: |
-| 北京 | 120 |
-| 上海 | 280 |
-| 广东 | 350 |
-| 四川 | 180 |
-| 江苏 | 290 |
-| 浙江 | 220 |
+| 海淀区 | 120 |
+| 朝阳区 | 280 |
+| 丰台区 | 350 |
+| 顺义区 | 180 |
+| 密云区 | 290 |
+| 大兴区 | 220 |
 
 **说明：**
 - 使用 `<!-- mapDataSource: your-map-data.json -->` 注释来指定自定义地图数据源
