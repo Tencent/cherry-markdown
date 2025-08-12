@@ -2,7 +2,7 @@
 "cherry-markdown": minor
 ---
 
-重构主题 CSS 变量集成系统
+refactor: 重构主题 CSS 变量集成系统
 
 ### 主要变更
 

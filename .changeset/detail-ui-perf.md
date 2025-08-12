@@ -2,4 +2,4 @@
 'cherry-markdown': patch
 ---
 
-feat: 优化手风琴样式
+style: 优化手风琴样式
