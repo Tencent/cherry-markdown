@@ -5,6 +5,12 @@ export default class Theme extends MenuBase {
     constructor($cherry: any);
     subMenuConfig: any[];
     /**
+     * 绑定子菜单点击事件
+     * @param {HTMLDivElement} subMenuDomPanel
+     * @returns {number} 当前激活的子菜单索引
+     */
+    getActiveSubMenuIndex(subMenuDomPanel: HTMLDivElement): number;
+    /**
      * 响应点击事件
      * @param {string} selection 被用户选中的文本内容
      * @param {string} shortKey 快捷键参数

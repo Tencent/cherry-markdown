@@ -1,7 +1,8 @@
 export default class Table extends ParagraphBase {
-    constructor({ externals, config }: {
+    constructor({ externals, config, cherry }: {
         externals: any;
         config: any;
+        cherry: any;
     });
     chartRenderEngine: any;
     selfClosing: any;
@@ -18,7 +19,7 @@ export default class Table extends ParagraphBase {
             C: string;
         };
     };
-    $parseTable(lines: any, sentenceMakeFunc: any, dataLines: any): {
+    $parseTable(lines: any, sentenceMakeFunc: any, dataLines: any, originalStr?: string): {
         html: string;
         sign: string;
     };

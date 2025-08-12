@@ -4,6 +4,11 @@ export class CherryStatic {
     static constants: {
         HOOKS_TYPE_LIST: import("./core/SyntaxBase").HookTypesList;
     };
+    static plugins: {
+        TapdTablePlugin: typeof TapdTablePlugin;
+        TapdHtmlTagPlugin: typeof TapdHtmlTagPlugin;
+        TapdCheckListPlugin: typeof TapdCheckListPlugin;
+    };
     static VERSION: string;
     /**
      * @this {typeof import('./Cherry').default | typeof CherryStatic}
@@ -18,3 +23,6 @@ export class CherryStatic {
 }
 import { createSyntaxHook } from "./Factory";
 import { createMenuHook } from "./Factory";
+import TapdTablePlugin from "./addons/advance/cherry-tapd-table-plugin";
+import TapdHtmlTagPlugin from "./addons/advance/cherry-tapd-html-tag-plugin";
+import TapdCheckListPlugin from "./addons/advance/cherry-tapd-checklist-plugin";

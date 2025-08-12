@@ -80,6 +80,12 @@ export default class CodeBlock extends ParagraphBase {
     $recoverCodeInIndent(str: any): any;
     $dealUnclosingCode(str: any): any;
     beforeMakeHtml(str: any, sentenceMakeFunc: any, markdownParams: any): any;
+    /**
+     * 格式化语言，如果配置了自定义语言“all”，则无脑替换成“all”
+     * @param {string} lang 语言
+     * @returns {string} 格式化后的语言
+     */
+    formatLang(lang: string): string;
     makeInlineCode(str: any): any;
     makeHtml(str: any): any;
     $replaceSpecialChar(str: any): any;
@@ -89,6 +95,5 @@ export default class CodeBlock extends ParagraphBase {
         end: string;
         reg: RegExp;
     };
-    mounted(dom: any): void;
 }
 import ParagraphBase from "@/core/ParagraphBase";

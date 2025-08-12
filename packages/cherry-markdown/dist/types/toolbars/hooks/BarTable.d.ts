@@ -1,7 +1,7 @@
 /**
  * 插入柱状图图+表格
  */
-export default class BrTable extends MenuBase {
+export default class BarTable extends MenuBase {
     constructor($cherry: any);
     /**
      * 响应点击事件

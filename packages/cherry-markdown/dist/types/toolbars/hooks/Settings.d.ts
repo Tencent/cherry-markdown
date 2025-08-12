@@ -12,7 +12,7 @@ export default class Settings extends MenuBase {
         [x: string]: {
             hookName: string;
             sub: string;
-            aliasName: any;
+            aliasName: string;
         };
     };
     /**

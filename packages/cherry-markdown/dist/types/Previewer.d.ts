@@ -162,11 +162,11 @@ export default class Previewer {
     /**
      * 导出预览区域内容
      * @public
-     * @param {'pdf' | 'img' | 'screenShot' | 'markdown' | 'html'} [type='pdf']
-     * 'pdf'：导出成pdf文件; 'img' | screenShot：导出成png图片; 'markdown'：导出成markdown文件; 'html'：导出成html文件;
+     * @param {'pdf' | 'img' | 'screenShot' | 'markdown' | 'html' | 'word'} [type='pdf']
+     * 'pdf'：导出成pdf文件; 'img' | screenShot：导出成png图片; 'markdown'：导出成markdown文件; 'html'：导出成html文件; 'word'：导出到Word（复制到剪贴板）;
      * @param {string} [fileName] 导出文件名
      */
-    public export(type?: 'pdf' | 'img' | 'screenShot' | 'markdown' | 'html', fileName?: string): void;
+    public export(type?: 'pdf' | 'img' | 'screenShot' | 'markdown' | 'html' | 'word', fileName?: string): void;
 }
 import LazyLoadImg from "@/utils/lazyLoadImg";
 import PreviewerBubble from "./toolbars/PreviewerBubble";

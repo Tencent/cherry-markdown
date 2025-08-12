@@ -22,3 +22,4 @@ export function exportMarkdownFile(markdownText: string, fileName: string): void
  * @param {String} fileName 导出HTML文件名
  */
 export function exportHTMLFile(HTMLText: string, fileName: string): void;
+export { exportWordFile } from "./exportWord";

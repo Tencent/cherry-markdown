@@ -5,7 +5,7 @@ export default class Underline extends MenuBase {
     shortcutKeyMap: {
         [x: string]: {
             hookName: string;
-            aliasName: any;
+            aliasName: string;
         };
     };
     $testIsUnderline(selection: any): boolean;

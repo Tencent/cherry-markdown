@@ -529,6 +529,76 @@ $$
 | Sample2 | 112 | 111 | 22 | 222 |
 | Sample3 | 333 | 142 | 311 | 11 |
 
+**示例（雷达图）**
+```markdown
+| :radar:{x,y} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |
+| ------ | ------ | ------ | ------ | ------ | ------ |
+| 用户A | 90 | 85 | 75 | 80 | 88 |
+| 用户B | 75 | 90 | 88 | 85 | 78 |
+| 用户C | 85 | 78 | 90 | 88 | 85 |
+```
+
+**效果**
+| :radar:{x,y} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |
+| ------ | ------ | ------ | ------ | ------ | ------ |
+| 用户A | 90 | 85 | 75 | 80 | 88 |
+| 用户B | 75 | 90 | 88 | 85 | 78 |
+| 用户C | 85 | 78 | 90 | 88 | 85 |
+
+**示例（地图表格）**
+
+默认地图数据源：
+```markdown
+| :map:{name,value} | 数值 |
+| :-: | :-: |
+| 北京 | 100 |
+| 上海 | 200 |
+| 广东 | 300 |
+| 四川 | 150 |
+| 江苏 | 250 |
+| 浙江 | 180 |
+```
+
+**效果**
+| :map:{name,value} | 数值 |
+| :-: | :-: |
+| 北京 | 100 |
+| 上海 | 200 |
+| 广东 | 300 |
+| 四川 | 150 |
+| 江苏 | 250 |
+| 浙江 | 180 |
+
+**自定义地图数据源：**
+```markdown
+<!-- mapDataSource: https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json -->
+| :map:{name,value} | 数值 |
+| :-: | :-: |
+| 北京 | 120 |
+| 上海 | 280 |
+| 广东 | 350 |
+| 四川 | 180 |
+| 江苏 | 290 |
+| 浙江 | 220 |
+```
+
+**效果**
+<!-- mapDataSource: https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json -->
+| :map:{name,value} | 数值 |
+| :-: | :-: |
+| 北京 | 120 |
+| 上海 | 280 |
+| 广东 | 350 |
+| 四川 | 180 |
+| 江苏 | 290 |
+| 浙江 | 220 |
+
+**说明：**
+- 使用 `<!-- mapDataSource: your-map-data.json -->` 注释来指定自定义地图数据源
+- 支持相对路径和绝对URL
+- 如果不指定数据源，将使用系统默认的地图数据
+- 也可以通过 Cherry 配置中的 `toolbars.config.mapTable.sourceUrl` 全局配置数据源
+
 -----
 
 ## 流程图[^不通用提醒]
@@ -751,10 +821,10 @@ title 饼图
 /**
  * Tencent is pleased to support the open source community by making CherryMarkdown available.
  *
- * Copyright (C) 2021 THL A29 Limited, a Tencent company. All rights reserved.
- * The below software in this distribution may have been modified by THL A29 Limited ("Tencent Modifications").
+ * Copyright (C) 2021 Tencent. All rights reserved.
+ * The below software in this distribution may have been modified by Tencent ("Tencent Modifications").
  *
- * All Tencent Modifications are Copyright (C) THL A29 Limited.
+ * All Tencent Modifications are Copyright (C) Tencent.
  *
  * CherryMarkdown is licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

@@ -31,15 +31,39 @@ declare namespace imgAltHelper {
         extendClasses: string;
     };
     /**
-     * 从alt中提取对齐方式信息
+     * 从alt中提取装饰样式信息添加到 result 中
+     * @param result 返回结果
+     * @param alt
+     */
+    function $addDecorationStyle(result: any, alt: any): void;
+    /**
+     * 从alt中提取装饰样式信息添加到 result 中
+     * @param result 返回结果
+     * @param alt
+     */
+    function $addDecorationStyle(result: any, alt: any): void;
+    /**
+     * 从alt中提取对齐方式名称
      * @param {string} alt
      * @returns {string}
      */
     function $getAlignment(alt: string): string;
     /**
-     * 从alt中提取对齐方式信息
+     * 从alt中提取对齐方式名称
      * @param {string} alt
      * @returns {string}
      */
     function $getAlignment(alt: string): string;
+    /**
+     * 从alt中提取对齐方式样式信息添加到 result 中
+     * @param result 返回对象
+     * @param {string} alt
+     */
+    function $addAlignmentStyle(result: any, alt: string): void;
+    /**
+     * 从alt中提取对齐方式样式信息添加到 result 中
+     * @param result 返回对象
+     * @param {string} alt
+     */
+    function $addAlignmentStyle(result: any, alt: string): void;
 }

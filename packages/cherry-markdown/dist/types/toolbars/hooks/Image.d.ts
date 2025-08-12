@@ -5,7 +5,7 @@ export default class Image extends MenuBase {
     shortcutKeyMap: {
         [x: string]: {
             hookName: string;
-            aliasName: any;
+            aliasName: string;
         };
     };
     /**

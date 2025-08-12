@@ -6,7 +6,7 @@ export default class InlineCode extends MenuBase {
     shortcutKeyMap: {
         [x: string]: {
             hookName: string;
-            aliasName: any;
+            aliasName: string;
         };
     };
     /**

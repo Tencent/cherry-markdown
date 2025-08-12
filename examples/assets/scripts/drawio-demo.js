@@ -11,10 +11,10 @@
 	// Adds required resources (disables loading of fallback properties, this can only
 	// be used if we know that all keys are defined in the language specific file)
 	mxResources.loadDefaultBundle = false;
-	var bundle = mxResources.getDefaultBundle(mxLanguage);
+	var bundle = './assets/drawio_lib/resources/' + mxLanguage + '.txt';
 	
 	// Fixes possible asynchronous requests
-	mxUtils.getAll([bundle, './drawio_demo/theme/default.xml'], function(xhr)
+	mxUtils.getAll([bundle, './assets/drawio_lib/theme/default.xml'], function(xhr)
 	{
 		// Adds bundle text to resources
 		mxResources.parse(xhr[0].getText());

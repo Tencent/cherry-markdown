@@ -10,7 +10,7 @@ export default class Header extends MenuBase {
     shortcutKeyMap: {
         [x: string]: {
             hookName: string;
-            aliasName: any;
+            aliasName: string;
         };
     };
     getSubMenuConfig(): {

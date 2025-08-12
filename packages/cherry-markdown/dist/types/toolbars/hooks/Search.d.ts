@@ -6,11 +6,9 @@ export default class Search extends MenuBase {
     shortcutKeyMap: {
         [x: string]: {
             hookName: string;
-            aliasName: any;
+            aliasName: string;
         };
     };
-    searchBox: SearchBox;
-    searchBoxInit: boolean;
     /**
      * 响应点击事件
      * @param {string} selection 被用户选中的文本内容
@@ -19,4 +17,3 @@ export default class Search extends MenuBase {
     onClick(selection: string, shortKey?: string): void;
 }
 import MenuBase from "@/toolbars/MenuBase";
-import SearchBox from "@/utils/cm-search-replace";

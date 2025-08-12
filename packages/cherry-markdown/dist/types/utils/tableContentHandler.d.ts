@@ -110,6 +110,13 @@ export default class TableHandler {
      */
     $addNextRow(): void;
     /**
+     * 获取单元格对齐方式
+     * @param {*} cells 单元格数组
+     * @param {*} index 单元格索引
+     * @returns {string|false} 单元格对齐方式，如果是false则表示不生成对齐方式
+     */
+    $getTdAlign(cells: any, index: any, cellsIndex: any): string | false;
+    /**
      * 添加上一列
      */
     $addLastCol(): void;

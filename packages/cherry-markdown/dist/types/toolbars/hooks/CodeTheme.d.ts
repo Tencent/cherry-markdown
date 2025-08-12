@@ -15,7 +15,6 @@ export default class CodeTheme extends MenuBase {
         onclick: any;
         iconName?: undefined;
     })[];
-    getActiveSubMenuIndex(subMenuDomPanel: any): -1 | 0;
     /**
      * 响应点击事件
      * @param {string} shortKey 快捷键参数，本函数不处理这个参数

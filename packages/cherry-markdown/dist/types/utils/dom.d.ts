@@ -23,3 +23,5 @@ export function getHTML(who: any, deep: any): string;
  * @returns {HTMLElementTagNameMap[K]}
  */
 export function createElement<K extends keyof HTMLElementTagNameMap>(tagName: K, className?: string, attributes?: Record<string, string>): HTMLElementTagNameMap[K];
+export function loadScript(src: any, id: any): Promise<any>;
+export function loadCSS(url: any, id: any): void;

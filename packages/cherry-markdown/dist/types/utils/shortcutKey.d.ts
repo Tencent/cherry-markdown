@@ -1,28 +1,28 @@
 export const SHIFT_KEY: "Shift";
 export const ALT_KEY: "Alt";
-export const CONTROL_KEY: "Meta" | "Control";
+export const CONTROL_KEY: "Control";
 export const META_KEY: "Meta";
 export const ENTER_KEY: "Enter";
 export const ESCAPE_KEY: "Escape";
 export const BACKSPACE_KEY: "Backspace";
-export const shortKey2UnPlatformKey: {
-    [x: string]: (isMac: boolean) => {
+export namespace shortKey2UnPlatformKey {
+    function Shift(isMac: boolean): {
         text: string;
         tip: string;
     };
-    Shift: (isMac: boolean) => {
+    function Control(isMac: boolean): {
         text: string;
         tip: string;
     };
-    Alt: (isMac: boolean) => {
+    function Alt(isMac: boolean): {
         text: string;
         tip: string;
     };
-    Meta: (isMac: boolean) => {
+    function Meta(isMac: boolean): {
         text: string;
         tip: string;
     };
-};
+}
 export function getAllowedShortcutKey(event: KeyboardEvent, customForbiddenKeys?: string[]): string[];
 export function keyStackIsModifierkeys(keyStack: string[]): boolean;
 export function setDisableShortcutKey(nameSpace: any, value?: string): void;
@@ -36,3 +36,4 @@ export function shortcutCode2Key(code: string, isMac: boolean): {
 };
 export function keyStack2UnPlatformUniqueString(keyStack: string[], isMac: boolean): string;
 export function getKeyCode(key: string | number): string;
+export function getPlatformControlKey(): "Control" | "Meta";

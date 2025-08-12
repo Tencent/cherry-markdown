@@ -5,7 +5,7 @@ export default class Strikethrough extends MenuBase {
     shortcutKeyMap: {
         [x: string]: {
             hookName: string;
-            aliasName: any;
+            aliasName: string;
         };
     };
     $testIsStrike(selection: any): boolean;

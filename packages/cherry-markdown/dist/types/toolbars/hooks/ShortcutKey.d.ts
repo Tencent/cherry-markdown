@@ -8,7 +8,7 @@ export default class ShortcutKey extends MenuBase {
         [x: string]: {
             hookName: string;
             sub: string;
-            aliasName: any;
+            aliasName: string;
         };
     };
     hideOtherSubMenu(hideAllSubMenu: any): any;

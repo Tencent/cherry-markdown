@@ -9,9 +9,10 @@ export default class Engine {
     hookCenter: HookCenter;
     hooks: Record<import("../types/syntax").HookType, SyntaxBase[]>;
     asyncRenderHandler: AsyncRenderHandler;
-    hashCache: {};
-    hashStrMap: {};
+    hashCache: LRUCache;
+    hashStrMap: LRUCache;
     cachedBigData: {};
+    urlProcessorMap: {};
     markdownParams: Partial<Partial<import("../types/cherry")._CherryOptions<import("../types/cherry").CherryCustomOptions>>>;
     currentStrMd5: any[];
     globalConfig: {
@@ -25,7 +26,6 @@ export default class Engine {
     };
     htmlWhiteListAppend: string;
     htmlBlackList: string;
-    urlProcessorMap: {};
     /**
      * 重新生成html
      * 这是为urlProcessor支持异步回调函数而实现的重新生成html的方法
@@ -94,3 +94,4 @@ export default class Engine {
 import HookCenter from "./core/HookCenter";
 import SyntaxBase from "./core/SyntaxBase";
 import AsyncRenderHandler from "./utils/async-render-handler";
+import LRUCache from "./utils/LRUCache";

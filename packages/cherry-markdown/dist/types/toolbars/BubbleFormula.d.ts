@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2021 THL A29 Limited, a Tencent company.
+ * Copyright (C) 2021 Tencent.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,26 +53,52 @@ export default class BubbleFormula {
      * @param {string} latex
      */
     afterClick(latex: string): void;
+    /**
+     * 生成插入公式面板的 HTML 字符串
+     * @returns {string} HTML 字符串
+     */
     generateBubbleFormulaHtmlStr(): string;
+    /**
+     * 初始化插入公式面板 DOM
+     */
     init(): void;
     dom: HTMLDivElement;
     /**
      * 显示插入公式面板
-     * @param {function(string): void} callback
+     * @param {function(string): void} callback 点击公式后的回调
      */
     show(callback: (arg0: string) => void): void;
+    /**
+     * 隐藏插入公式面板
+     */
     hide(): void;
+    /**
+     * 判断面板是否显示
+     * @returns {boolean}
+     */
     isShow(): boolean;
+    /**
+     * 判断面板是否隐藏
+     * @returns {boolean}
+     */
     isHide(): boolean;
+    /**
+     * 初始化事件监听
+     */
     initEventListeners(): void;
     /**
-     * 处理tabs点击事件
-     * @param {Event} evt
+     * 一级菜单点击事件处理
+     * @param {Event} evt 事件对象
      */
-    handleClickFormulaTabs(evt: Event): void;
+    handleClickMainTabs(evt: Event): void;
     /**
-     * 处理二级分类点击事件
-     * @param {Event} evt
+     * 二级菜单点击事件处理
+     * @param {Event} evt 事件对象
+     */
+    handleClickSubTabs(evt: Event): void;
+    /**
+     * 公式项点击事件处理
+     * @param {Event} evt 事件对象
      */
     handleClickFormulaSelect(evt: Event): void;
 }

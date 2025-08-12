@@ -91,9 +91,9 @@ export default class Toolbar {
     onClick(event: any, name: any, focusEvent?: boolean): void;
     /**
      * 激活二级菜单添加选中颜色
-     * @param {string} name
+     * @param {string|string[]} name 菜单名称或菜单名称数组
      */
-    activeSubMenuItem(name: string): void;
+    activeSubMenuItem(name: string | string[]): void;
     updateSubMenuPosition(): void;
     /**
      * 展开/收起二级菜单

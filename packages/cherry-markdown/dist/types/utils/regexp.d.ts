@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2021 THL A29 Limited, a Tencent company.
+ * Copyright (C) 2021 Tencent.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +85,7 @@ export const LIST_CONTENT: RegExp;
 export const imgBase64Reg: RegExp;
 export const base64Reg: RegExp;
 export const longTextReg: RegExp;
+export function createUrlReg(minLength: number): [RegExp, RegExp];
 export const imgDrawioXmlReg: RegExp;
 /**
  * 匹配draw.io的图片语法

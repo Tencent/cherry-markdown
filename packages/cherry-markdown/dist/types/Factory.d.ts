@@ -57,7 +57,7 @@ export function createMenuHook(name: any, options: any): {
         getMenuPosition(): Pick<DOMRect, "height" | "width" | "left" | "top">;
         hide(): void;
         show(): void;
-        getActiveSubMenuIndex(subMenuDomPanel: HTMLDivElement): number;
+        getActiveSubMenuIndex(subMenuDomPanel: HTMLDivElement): number | number[];
     };
     getTargetParentByButton(dom: HTMLElement): HTMLElement;
 };
