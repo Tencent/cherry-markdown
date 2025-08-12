@@ -22,6 +22,7 @@
     },
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
   },
   "include": [
     "src/index.js",

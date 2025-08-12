@@ -138,10 +138,11 @@ export default class PreviewerBubble {
     if (/simple-table/.test(container.className) || !/cherry-table-container/.test(container.className)) {
       return false;
     }
+    // 移除引用里的表格编辑限制，现在支持在引用语法中编辑表格
     // 引用里的表格先不支持所见即所得编辑
-    if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
-      return false;
-    }
+    // if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
+    //   return false;
+    // }
     return container;
   }
 

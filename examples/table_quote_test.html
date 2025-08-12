@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>引用语法中的表格编辑测试</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    #markdown {
+      margin-top: 5%;
+      width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css">
+  <link rel="Shortcut Icon" href="./logo/favicon.ico">
+  <link rel="Shortcut Icon" href="../logo/favicon.ico">
+  <link rel="Bookmark" href="../logo/favicon.ico">
+</head>
+
+<body>
+  <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%;"></div>
+  <div id="markdown"></div>
+  <script>
+    markdownSample = `# 引用语法中的表格编辑测试
+
+## 普通表格（原本支持编辑）
+|项目（居中对齐）|价格（右对齐）|数量（左对齐）|
+|:-:|-:|:-|
+|计算机|￥1600|5|
+|手机|￥12|50|
+
+## 引用语法中的表格（现在应该支持编辑）
+
+> 这是一个引用块，包含表格：
+>
+> |商品名称|价格|库存|
+> |:-:|:-:|:-:|
+> |笔记本电脑|￥8000|10|
+> |鼠标|￥50|100|
+> |键盘|￥200|50|
+>
+> 上面的表格现在应该支持在预览区域进行编辑。
+
+## 嵌套引用中的表格
+
+> 外层引用
+>
+> > 内层引用，包含表格：
+> >
+> > |功能|状态|优先级|
+> > |:-:|:-:|:-:|
+> > |表格编辑|✅ 已实现|高|
+> > |代码块编辑|⏳ 待实现|中|
+> > |列表编辑|✅ 已实现|中|
+
+## 测试说明
+
+请尝试点击引用语法中的表格单元格，应该能够：
+1. 点击单元格进行内容编辑
+2. 使用悬停操作添加/删除行列
+3. 拖拽调整行列顺序
+
+修改前，引用中的表格无法编辑。修改后，应该和普通表格一样支持所见即所得编辑。
+  `;
+  </script>
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+  <script>
+    var cherry = new Cherry({
+      id: 'markdown',
+      toolbars: {
+        toolbar: ['bold', 'italic', 'strikethrough', '|', 'header', 'list', 'graph', 'table']
+      },
+      editor: {
+        height: '70%'
+      },
+      previewer: {
+        // 确保启用预览区域编辑能力
+        enablePreviewerBubble: true
+      },
+      value: markdownSample,
+    });
+  </script>
+</body>
+
+</html>
