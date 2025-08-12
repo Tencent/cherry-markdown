@@ -1,6 +1,4 @@
 /**
- * Tencent is pleased to support the open source community by making CherryMarkdown available.
- *
  * Copyright (C) 2021 Tencent. All rights reserved.
  * The below software in this distribution may have been modified by Tencent ("Tencent Modifications").
  *
@@ -19,6 +17,7 @@
  * limitations under the License.
  */
 import mergeWith from 'lodash/mergeWith';
+import Logger from '@/Logger';
 
 const DEFAULT_OPTIONS = {
   renderer: 'svg',
@@ -29,7 +28,7 @@ const DEFAULT_OPTIONS = {
 export default class EChartsTableEngine {
   static install(cherryOptions, ...args) {
     if (typeof window === 'undefined') {
-      console.warn('echarts-table-engine only works in browser.');
+      Logger.warn('echarts-table-engine only works in browser.');
       mergeWith(cherryOptions, {
         engine: {
           syntax: {
@@ -111,8 +110,8 @@ export default class EChartsTableEngine {
     const htmlContent = `
       <div class="cherry-echarts-wrapper" 
            style="width: ${this.options.width}px; height: ${
-      this.options.height
-    }px; min-height: 300px; display: block; position: relative; border: 1px solid #ddd;" 
+             this.options.height
+           }px; min-height: 300px; display: block; position: relative; border: 1px solid #ddd;" 
            id="${chartId}"
            data-chart-type="${type}"
            data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"
@@ -128,16 +127,16 @@ export default class EChartsTableEngine {
       if (container && this.echartsRef) {
         try {
           const myChart = this.echartsRef.init(container);
-          console.log('Chart initialized successfully:', chartId);
+          Logger.log('Chart initialized successfully:', chartId);
           myChart.setOption(chartOption);
           // 为热力图和饼图添加点击高亮效果
           if (type === 'heatmap' || type === 'pie') {
             this.addClickHighlightEffect(myChart, type);
           }
         } catch (error) {
-          console.error('Failed to render chart:', error);
-          console.error('Chart options:', chartOption);
-          console.error('Container:', container);
+          Logger.error('Failed to render chart:', error);
+          Logger.error('Chart options:', chartOption);
+          Logger.error('Container:', container);
           if (container) {
             container.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
               图表渲染失败<br/>
@@ -147,10 +146,10 @@ export default class EChartsTableEngine {
         }
       } else if (retryCount < 10) {
         // 最多重试10次，每次间隔100ms
-        console.log(`Retrying chart initialization for ${chartId}, attempt: ${retryCount + 1}`);
+        Logger.log(`Retrying chart initialization for ${chartId}, attempt: ${retryCount + 1}`);
         setTimeout(() => initChart(retryCount + 1), 100);
       } else {
-        console.error('Failed to find chart container after 10 retries:', chartId, !!this.echartsRef);
+        Logger.error('Failed to find chart container after 10 retries:', chartId, !!this.echartsRef);
         const fallbackContainer = document.getElementById(chartId);
         if (fallbackContainer) {
           fallbackContainer.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
@@ -698,7 +697,7 @@ const MapChartCompleteOptionsHandler = {
       const standardName = normalizeProvinceName(originalName);
       const value = parseFloat(row[1].replace(/,/g, '')) || 0;
 
-      console.log(`Name mapping: "${originalName}" -> "${standardName}"`);
+      Logger.log(`Name mapping: "${originalName}" -> "${standardName}"`);
 
       return {
         name: standardName,
