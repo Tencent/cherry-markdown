@@ -1,5 +1,5 @@
 ---
-"@cherry-markdown/cherry-markdown": patch
+"cherry-markdown": patch
 ---
 
 refactor: 对公式面板的界面的重构

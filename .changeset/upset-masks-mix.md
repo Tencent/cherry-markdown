@@ -3,4 +3,4 @@
 'cherry-markdown-vscode-plugin': patch
 ---
 
-update license
+chore: update license to change Copyright
