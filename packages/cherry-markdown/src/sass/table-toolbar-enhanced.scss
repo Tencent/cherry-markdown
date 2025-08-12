@@ -2,7 +2,6 @@
 
 .cherry-table-container {
   position: relative;
-  max-width: 100%;
   overflow-x: auto;
   border-radius: var(--radius-lg);
   background: var(--base-editor-bg);
@@ -31,11 +30,9 @@
     th, td {
       border: var(--border-width-1) solid var(--md-table-border);
       padding: 0;
-      min-width: 120px;
       position: relative;
       transition: var(--shortcut-panel-transition, all 0.2s);
       vertical-align: middle;
-      line-height: var(--line-height-relaxed);
     }
     
     // 移除内部边框以避免与外边框冲突
@@ -67,7 +64,6 @@
       font-size: var(--font-size-sm);
       color: var(--primary-color);
       border-bottom: var(--border-width-2) solid var(--primary-color);
-      height: var(--height-toolbar);
     }
     
     // 表格行样式
@@ -93,7 +89,6 @@
     td {
       background: var(--base-editor-bg);
       font-size: var(--font-size-xs);
-      line-height: var(--line-height-loose);
       position: relative;
       cursor: pointer;
       color: var(--base-font-color);
@@ -197,12 +192,10 @@
     -webkit-overflow-scrolling: touch;
     
     .cherry-table {
-      min-width: 600px;
       font-size: var(--font-size-sm);
       
       th, td {
         padding: var(--spacing-sm) var(--spacing-md);
-        min-width: 80px;
         white-space: nowrap;
       }
     }
@@ -386,7 +379,6 @@
     outline: none;
     font-family: inherit;
     font-size: var(--font-size-sm);
-    line-height: var(--line-height-relaxed);
     box-sizing: border-box;
     color: inherit;
     padding: var(--spacing-sm) var(--spacing-md);
