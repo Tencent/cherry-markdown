@@ -92,9 +92,8 @@ export default class EChartsTableEngine {
     // 主题缓存：key 为主题名（default/dark/abyss等），值为 { echarts, runtime }
     this.themeCache = new Map();
 
-    // DOM观察器与导出后的重建控制
-    this.domObservers = new Map();
-    this.rehydrateTimer = null;
+    // 导出完成事件监听器
+    this.exportObservers = new Map();
   }
 
   /**
@@ -103,9 +102,6 @@ export default class EChartsTableEngine {
   $palette(type = 'default') {
     let palette = [];
     switch (type) {
-      case 'default':
-        palette = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'];
-        break;
       case 'radar':
         palette = [
           'rgba(114, 172, 209, 0.2)',
@@ -391,7 +387,7 @@ export default class EChartsTableEngine {
     this.instances.add(chart);
     this.$tagEchartsSvg(container);
     this.$enableThemeObserver(container);
-    this.$enableChartsDomObserver(container);
+    this.$enableExportObserver(container);
 
     if (type === 'heatmap' || type === 'pie') this.addClickHighlightEffect(chart, type);
 
@@ -524,27 +520,17 @@ export default class EChartsTableEngine {
     if (!root) return;
     if (this.themeObservers.has(root)) return;
     const observer = new MutationObserver(() => {
-      const key = this.$themeCacheKey(root);
-      if (!this.themeCache.has(key)) this.$buildEchartsThemeFromCss(root);
-      this.$applyThemeToAllInstances();
+      this.$buildEchartsThemeFromCss(root);
+      Array.from(this.instances).forEach((inst) => {
+        this.$setInstanceTheme(inst);
+      });
     });
     observer.observe(root, { attributes: true, attributeFilter: ['class'] });
     this.themeObservers.set(root, observer);
   }
 
   /**
-   * 将主题应用到所有图表实例
-   */
-  $applyThemeToAllInstances() {
-    // 读取/缓存最新主题
-    this.$buildEchartsThemeFromCss(this.$getCherryRoot());
-    Array.from(this.instances).forEach((inst) => {
-      this.$setInstanceTheme(inst);
-    });
-  }
-
-  /**
-   * 优先通过 echartsInstance.setTheme 应用主题；
+   * 通过 echartsInstance.setOption 刷新主题
    * @param {*} instance ECharts 实例
    */
   $setInstanceTheme(instance) {
@@ -552,15 +538,14 @@ export default class EChartsTableEngine {
     const container = instance.getDom();
     if (!container) return;
     const root = this.$getCherryRoot(container);
-    // 更新/预取主题缓存并同步 runtime
-    const themeObj = this.$buildEchartsThemeFromCss(root);
-    if (typeof instance.setTheme === 'function') {
-      instance.setTheme(themeObj);
-      const option = this.$chartOptionsFromDataset(container) || {};
-      instance.setOption(option, true);
-      this.$tagEchartsSvg(container);
-      return;
-    }
+    // 从缓存读取主题对象
+    const cacheKey = this.$themeCacheKey(root);
+    const cached = this.themeCache.get(cacheKey);
+    const themeObj = cached && cached.echarts;
+    if (!themeObj) return;
+    const option = this.$chartOptionsFromDataset(container) || {};
+    instance.setOption(option, true);
+    this.$tagEchartsSvg(container);
   }
 
   /**
@@ -619,59 +604,6 @@ export default class EChartsTableEngine {
   }
 
   /**
-   * 启用图表容器 DOM 观察器（用于监听预览区DOM变更，导出流程中的 refresh 会触发重建）
-   * @param {Element} container 任一图表容器
-   * @returns {void}
-   */
-  $enableChartsDomObserver(container) {
-    const root = this.$getCherryRoot(container);
-    if (!root) return;
-    if (this.domObservers.has(root)) return;
-
-    const observer = new MutationObserver((mutations) => {
-      const addedContainers = new Set();
-      const removedContainers = new Set();
-      for (const m of mutations) {
-        if (m.type === 'childList') {
-          Array.from(m.addedNodes).forEach((n) => this.$collectEchartsWrappersFromNode(n, addedContainers));
-          Array.from(m.removedNodes).forEach((n) => this.$collectEchartsWrappersFromNode(n, removedContainers));
-        }
-      }
-      if (addedContainers.size || removedContainers.size) {
-        clearTimeout(this.rehydrateTimer);
-        this.rehydrateTimer = setTimeout(() => {
-          // 先处理移除的容器，清理实例
-          removedContainers.forEach((c) => {
-            if (!(c instanceof Element)) return;
-            this.destroyChart(c);
-          });
-          // 再对新增容器做定向重建
-          if (addedContainers.size) {
-            this.$rehydrateChartsForContainers(addedContainers, root);
-          }
-        }, 50);
-      }
-    });
-    observer.observe(root, { childList: true, subtree: true });
-    this.domObservers.set(root, observer);
-  }
-
-  /**
-   * 从节点收集 `.cherry-echarts-wrapper` 容器
-   */
-  $collectEchartsWrappersFromNode(node, set) {
-    if (!(node instanceof Element)) return;
-    if (node.classList && node.classList.contains('cherry-echarts-wrapper')) {
-      set.add(node);
-      return;
-    }
-    if (typeof node.querySelectorAll === 'function') {
-      const found = node.querySelectorAll('.cherry-echarts-wrapper');
-      if (found && found.length) Array.from(found).forEach((el) => set.add(el));
-    }
-  }
-
-  /**
    * 定向重建一组容器对应的图表
    */
   $rehydrateChartsForContainers(containersSet, rootEl) {
@@ -688,6 +620,29 @@ export default class EChartsTableEngine {
         Logger.warn('rehydrate (partial) chart failed:', e);
       }
     });
+  }
+
+  /**
+   * 启用导出完成事件观察器
+   * 一旦收到导出完成事件，则定向重建当前根容器下的所有图表容器
+   */
+  $enableExportObserver(container) {
+    const root = this.$getCherryRoot(container);
+    if (!root) return;
+    if (this.exportObservers.has(root)) return;
+    const handler = () => {
+      try {
+        const containersSet = new Set();
+        const found = root.querySelectorAll('.cherry-echarts-wrapper');
+        if (found && found.length) Array.from(found).forEach((el) => containersSet.add(el));
+        if (containersSet.size) this.$rehydrateChartsForContainers(containersSet, root);
+      } catch (e) {
+        Logger.warn('rehydrate after export failed:', e);
+      }
+    };
+    // 监听全局导出完成事件
+    window.addEventListener('cherry:export:done', handler);
+    this.exportObservers.set(root, handler);
   }
 
   /**
@@ -1650,15 +1605,11 @@ export default class EChartsTableEngine {
       });
       this.themeObservers.clear();
     }
-    if (this.domObservers && this.domObservers.size) {
-      this.domObservers.forEach((observer) => {
-        observer.disconnect();
+    if (this.exportObservers && this.exportObservers.size) {
+      this.exportObservers.forEach((handler) => {
+        window.removeEventListener('cherry:export:done', handler);
       });
-      this.domObservers.clear();
-    }
-    if (this.rehydrateTimer) {
-      clearTimeout(this.rehydrateTimer);
-      this.rehydrateTimer = null;
+      this.exportObservers.clear();
     }
     if (this.dom) {
       const inst = this.echartsRef.getInstanceByDom(this.dom);
