@@ -1,23 +1,24 @@
 # 例子
 
-> [Github 地址](https://github.com/Tencent/cherry-markdown){target=\_blank}
+> [Github 地址](https://github.com/Tencent/cherry-markdown){target=_blank}
 
-- [full model](index.html){target=\_blank}
-- [basic](basic.html){target=\_blank}
-- [H5](h5.html){target=\_blank}
-- [多实例](multiple.html){target=\_blank}
-- [无 toolbar](notoolbar.html){target=\_blank}
-- [纯预览模式](preview_only.html){target=\_blank}
-- [注入](xss.html){target=\_blank}
-- [API](api.html){target=\_blank}
-- [图片所见即所得编辑尺寸](img.html){target=\_blank}
-- [表格所见即所得编辑尺寸](table.html){target=\_blank}
-- [标题自动序号](head_num.html){target=\_blank}
-- [流式输入模式（AI chart场景）](ai_chat.html){target=\_blank}
-- [VIM 编辑模式](vim.html){target=\_blank}
-- [应用mermaid version 10版本以上](mermaid.html){target=\_blank}
+- [full model](index.html){target=_blank}
+- [basic](basic.html){target=_blank}
+- [H5](h5.html){target=_blank}
+- [多实例](multiple.html){target=_blank}
+- [无 toolbar](notoolbar.html){target=_blank}
+- [纯预览模式](preview_only.html){target=_blank}
+- [注入](xss.html){target=_blank}
+- [API](api.html){target=_blank}
+- [图片所见即所得编辑尺寸](img.html){target=_blank}
+- [表格所见即所得编辑尺寸](table.html){target=_blank}
+- [标题自动序号](head_num.html){target=_blank}
+- [流式输入模式（AI chart场景）](ai_chat.html){target=_blank}
+- [VIM 编辑模式](vim.html){target=_blank}
+- [应用mermaid version 10版本以上](mermaid.html){target=_blank}
 
-# Cherry Markdown { 简明手册 | jiǎn míng shǒu cè }
+
+# Cherry Markdown  { 简明手册 | jiǎn míng shǒu cè }
 
 [[toc]]
 
@@ -40,7 +41,7 @@
 ```markdown
 [!!#ff0000 红色超链接!!](http://www.qq.com)
 [!!#ffffff !!!#000000 黑底白字超链接!!!!!](http://www.qq.com)
-[新窗口打开](http://www.qq.com){target=\_blank}
+[新窗口打开](http://www.qq.com){target=_blank}
 鞋子 !32 特大号!
 大头 ^`儿子`^ 和小头 ^^`爸爸`^^
 爱在~~西元前~~**当下**
@@ -49,7 +50,7 @@
 **效果**
 [!!#ff0000 红色超链接!!](http://www.qq.com)
 [!!#ffffff !!!#000000 黑底白字超链接!!!!!](http://www.qq.com)
-[新窗口打开](http://www.qq.com){target=\_blank}
+[新窗口打开](http://www.qq.com){target=_blank}
 鞋子 !32 特大号!
 大头 ^`儿子`^ 和小头 ^^`爸爸`^^
 爱在~~西元前~~**当下**
@@ -109,11 +110,11 @@
   - 无序列表2.1
   - 无序列表2.2
 - 无序列表项 三
-  - 无序列表3.1`空心圆`
-  - 无序列表3.1
+  + 无序列表3.1`空心圆`
+  + 无序列表3.1
 - 无序列表四
-  - 无序列表4.1`实心方块`
-  - 无序列表4.2
+  * 无序列表4.1`实心方块`
+  * 无序列表4.2
 ```
 
 **效果**
@@ -142,34 +143,34 @@
 ```markdown
 1. 有序列表项 一`阿拉伯数字`
 1. 有序列表项 二
-   I. 有序列表项 2.1`罗马数字`
-   I. 有序列表项 2.2
-   I. 有序列表项 2.3
+  I. 有序列表项 2.1`罗马数字`
+  I. 有序列表项 2.2
+  I. 有序列表项 2.3
 1. 有序列表 三
-   a. 有序列表3.1`希腊字母`
-   a. 有序列表3.2
-   a. 有序列表3.3
+  a. 有序列表3.1`希腊字母`
+  a. 有序列表3.2
+  a. 有序列表3.3
 1. 有序列表 四
-   一. 有序列表4.1`中文数字`
-   一. 有序列表4.2
-   一. 有序列表4.3
+  一. 有序列表4.1`中文数字`
+  一. 有序列表4.2
+  一. 有序列表4.3
 ```
 
 **效果**
 
 1. 有序列表项 一`阿拉伯数字`
 1. 有序列表项 二
-   I. 有序列表项 2.1`罗马数字`
-   I. 有序列表项 2.2
-   I. 有序列表项 2.3
+  I. 有序列表项 2.1`罗马数字`
+  I. 有序列表项 2.2
+  I. 有序列表项 2.3
 1. 有序列表 三
-   a. 有序列表3.1`希腊字母`
-   a. 有序列表3.2
-   a. 有序列表3.3
+  a. 有序列表3.1`希腊字母`
+  a. 有序列表3.2
+  a. 有序列表3.3
 1. 有序列表 四
-   一. 有序列表4.1`中文数字`
-   一. 有序列表4.2
-   一. 有序列表4.3
+  一. 有序列表4.1`中文数字`
+  一. 有序列表4.2
+  一. 有序列表4.3
 
 ---
 
@@ -234,8 +235,8 @@
 **示例**
 
 ```markdown
-标准图片 ![一条dog#100px](assets/images/demo-dog.png)
-设置图片大小(相对大小&绝对大小) ![一条dog#10%#50px](assets/images/demo-dog.png)
+标准图片  ![一条dog#100px](assets/images/demo-dog.png)
+设置图片大小(相对大小&绝对大小)  ![一条dog#10%#50px](assets/images/demo-dog.png)
 设置图片对齐方式：
 **左对齐+边框**
 ![一条dog#auto#100px#left#border](assets/images/demo-dog.png)
@@ -250,8 +251,8 @@
 ```
 
 **效果**
-标准图片 ![一条dog#100px](assets/images/demo-dog.png)
-设置图片大小(相对大小&绝对大小) ![一条dog#10%#50px](assets/images/demo-dog.png)
+标准图片  ![一条dog#100px](assets/images/demo-dog.png)
+设置图片大小(相对大小&绝对大小)  ![一条dog#10%#50px](assets/images/demo-dog.png)
 设置图片对齐方式：
 **左对齐+边框**
 ![一条dog#auto#100px#left#border](assets/images/demo-dog.png)
@@ -431,10 +432,8 @@ document.write(fib(10));
 P(B|A)&=\frac{P(AB)}{P(A)}\\
 P(\overline{B}|A)&=1-P(B|A)=1-\frac{P(AB)}{P(A)}
 \end{aligned}
-
 $$
 行内公式： $e=mc^2$
-$$
 ```
 
 **效果**
@@ -968,4 +967,3 @@ title 饼图
 > CherryMarkdown利用virtual dom机制实现对预览区域需要变更的内容进行局部更新的功能，从而减少了浏览器Dom操作，提高了修改时预览内容更新的性能
 
 ![wysiwyg](assets/images/feature_vdom.gif)
-$$
