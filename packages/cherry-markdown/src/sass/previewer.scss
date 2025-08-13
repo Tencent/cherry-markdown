@@ -168,25 +168,32 @@
     &__symbol {
       pointer-events: auto;
       display: flex;
+      align-items: center;
       justify-content: center;
       position: absolute;
       color: var(--primary-color);
       width: 12px;
       height: 12px;
       line-height: 12px;
-      border: 1px solid rgba(53, 130, 251, 0);
-      background-color: transparent;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      background: rgba(var(--primary-color-rgb, 53, 130, 251), 0.08);
       border-radius: 3px;
       cursor: pointer;
       transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
       &:hover {
-        background-color: rgba(53, 130, 251, 0.53);
+        background: var(--primary-color);
         color: var(--oc-white);
+        transform: scale(1.15) translateY(-1px);
       }
     }
     &__sort {
       pointer-events: auto;
       display: flex;
+      align-items: center;
       justify-content: center;
       position: absolute;
       color: var(--primary-color);
@@ -194,15 +201,17 @@
       height: 12px;
       padding: 5px 0;
       line-height: 12px;
-      border: 1px solid rgba(53, 130, 251, 0);
-      background-color: transparent;
+      font-size: 10px;
+      border: 1px solid transparent;
+      background: rgba(var(--primary-color-rgb, 53, 130, 251), 0.08);
       border-radius: 3px;
       cursor: pointer;
       transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.1);
       &:hover {
-        background-color: rgba(53, 130, 251, 0.53);
-        border-color: rgba(53, 130, 251, 0.53);
+        background: var(--primary-color);
         color: var(--oc-white);
+        transform: scale(1.15) translateY(-1px);
       }
       &[data-type='ColUp'], &[data-type='ColDown'] {
         padding: 0 5px;
@@ -210,21 +219,25 @@
     }
     &__delete {
       pointer-events: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       position: absolute;
       color: var(--color-error);
       width: 25px;
       height: 15px;
       font-size: var(--font-size-xs);
+      font-weight: 600;
       line-height: var(--font-size-xs);
-      border: 1px solid var(--color-error);
+      border: 1px solid transparent;
       border-radius: 3px;
-      background-color: transparent;
-      color: var(--color-error);
+      background: rgba(var(--color-error, 220, 38, 127), 0.08);
       cursor: pointer;
       transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
       &:hover {
         background-color: var(--color-error);
-        border-color: var(--color-error);
         color: var(--oc-white);
       }
       &[data-type='left'], &[data-type='right'] {
