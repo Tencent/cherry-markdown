@@ -168,14 +168,14 @@ export default class ProTable extends MenuBase {
    */
   insertScatterTable(selection) {
     return `${selection}\n\n${[
-      '| :scatter: {name,x,y,size} | X | Y | Size |',
-      '| :-: | :-: | :-: | :-: |',
-      '| A | 10 | 20 | 5 |',
-      '| B | 15 | 35 | 8 |',
-      '| C | 30 | 12 | 3 |',
-      '| D | 66 | 25 | 5 |',
-      '| E | 80 | 35 | 8 |',
-      '| F | 99 | 12 | 3 |',
+      '| :scatter: {group,name,x,y,size} | X | Y | Size | Series |',
+      '| :-: | :-: | :-: | :-: | :-: |',
+      '| A1 | 10 | 20 | 5 | S1 |',
+      '| A2 | 15 | 35 | 8 | S1 |',
+      '| B1 | 30 | 12 | 3 | S2 |',
+      '| B2 | 25 | 28 | 6 | S2 |',
+      '| C1 | 50 | 40 | 9 | S3 |',
+      '| C2 | 60 | 55 | 7 | S3 |',
     ].join('\n')}\n\n`;
   }
 }
