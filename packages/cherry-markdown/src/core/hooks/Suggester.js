@@ -101,7 +101,7 @@ export default class Suggester extends SyntaxBase {
    * @param {SuggesterConfig} config
    */
   initConfig(config) {
-    let { suggester } = config;
+    let { suggester } = this.$cherry.options.editor.suggester || {};
 
     this.suggester = {};
     const defaultSuggest = [];
@@ -113,7 +113,11 @@ export default class Suggester extends SyntaxBase {
         suggestList(_word, callback) {
           // 将word全转成小写
           const word = _word.toLowerCase();
-          const systemSuggestList = allSuggestList(suggesterKeyword, that.$cherry.locale, that.config);
+          const systemSuggestList = allSuggestList(
+            suggesterKeyword,
+            that.$cherry.locale,
+            that.$cherry.options.editor.suggester,
+          );
           // 加个空格就直接退出联想
           if (/^\s$/.test(word)) {
             callback(false);
