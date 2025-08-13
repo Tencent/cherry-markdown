@@ -171,6 +171,11 @@ export default class TableHandler {
   }
 
   $remove() {
+    // 移除编辑状态的样式类
+    if (this.tableEditor.info.tdNode) {
+      this.tableEditor.info.tdNode.classList.remove('editing');
+    }
+    this.tableEditor.editing = false;
     this.tableEditor = { info: {}, tableCodes: [], editorDom: {} };
   }
 
@@ -335,6 +340,10 @@ export default class TableHandler {
     this.container.appendChild(this.tableEditor.editorDom.inputDiv);
     this.tableEditor.editorDom.inputDom.value = this.tableEditor.info.code.replace(/<br>/g, '\n');
     this.tableEditor.editorDom.inputDom.focus();
+    
+    // 给当前编辑的单元格添加editing类
+    this.tableEditor.info.tdNode.classList.add('editing');
+    this.tableEditor.editing = true;
   }
 
   $onInputChange(e) {

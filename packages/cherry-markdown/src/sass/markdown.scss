@@ -165,8 +165,26 @@
     th,
     td {
       border: 1px solid var(--md-table-border);
-      padding: 0.2em 0.4em;
+      padding: 0 0.4em;
       min-width: 100px;
+      position: relative;
+      cursor: pointer;
+      vertical-align: top;
+      
+      &:hover {
+        color: var(--dropdown-item-hover-color);
+        
+        &::after {
+          content: '点击编辑';
+          position: absolute;
+          top: -8%;
+          right: 2%;
+          font-size: 9px;
+          color: var(--primary-color);
+          opacity: var(--opacity-75);
+          animation: editHintFadeIn 0.3s ease;
+        }
+      }
     }
     th {
       background-color: var(--md-inline-code-bg);
