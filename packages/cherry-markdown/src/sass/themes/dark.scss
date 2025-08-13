@@ -149,7 +149,7 @@
 .cherry-markdown.theme__dark {
 
   figure {
-    svg {
+    svg:not(.echarts-svg) {
 
       path,
       rect,

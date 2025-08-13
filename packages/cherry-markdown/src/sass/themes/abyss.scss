@@ -141,7 +141,7 @@
 .cherry-markdown.theme__abyss {
 
   figure {
-    svg {
+    svg:not(.echarts-svg) {
 
       path,
       rect,
