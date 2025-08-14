@@ -79,13 +79,47 @@ export default class Table extends ParagraphBase {
       return null;
     }
     const match = cell.match(CHART_REGEX);
-    const [, chartType, axisOptions] = match;
-    const DEFAULT_AXIS_OPTIONS = ['x', 'y'];
+    const [, chartType, options] = match;
     const result = {
       type: chartType,
-      options: axisOptions ? axisOptions.split(/\s*,\s*/) : DEFAULT_AXIS_OPTIONS,
+      options: options ? this.$parseProps(options) : {},
     };
     Logger.log('Parsed chart options:', result);
+    return result;
+  }
+
+  // Parse "key: value, other: 123" style strings from PR #1349
+  $parseProps(str) {
+    const result = {};
+    // Match key: value pairs, support unquoted, quoted, numbers etc
+    const pairs = str
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const kvRegex = /^(\w+|\s*".*?"\s*|\s*'.*?'\s*)\s*:\s*(.+?)$/;
+
+    for (const pair of pairs) {
+      const kvMatch = pair.match(kvRegex);
+      if (kvMatch) {
+        const k = kvMatch[1].trim().replace(/^["']|["']$/g, ''); // Remove quotes
+        let v = kvMatch[2].trim();
+
+        // Try to convert numbers
+        if (/^-?\d+(\.\d+)?$/.test(v)) {
+          v = Number(v);
+        } else if (v === 'true') {
+          v = true;
+        } else if (v === 'false') {
+          v = false;
+        } else {
+          v = v.replace(/^["']|["']$/g, ''); // Remove quotes from values too
+        }
+
+        result[k] = v;
+      }
+    }
+
     return result;
   }
 
