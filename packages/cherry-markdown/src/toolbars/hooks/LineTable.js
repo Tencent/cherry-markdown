@@ -31,7 +31,7 @@ export default class LineTable extends MenuBase {
   onClick(selection, shortKey = '') {
     // 插入带折线图的表格
     return `${selection}\n\n${[
-      '| :line: {x,y} | a | b | c |',
+      '| :line: {title: 折线图,} | a | b | c |',
       '| :-: | :-: | :-: | :-: |',
       '| x | 1 | 2 | 3 |',
       '| y | 2 | 4 | 6 |',
