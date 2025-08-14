@@ -781,7 +781,8 @@ export default class Previewer {
     this.$cherry.$event.emit('editorClose');
   }
 
-  editOnly(dealToolbar = false) {
+  editOnly() {
+    this.doHtmlCache(this.getDomContainer().innerHTML);
     this.$dealEditAndPreviewOnly(true);
     this.$cherry.$event.emit('previewerClose');
     this.$cherry.$event.emit('editorOpen');

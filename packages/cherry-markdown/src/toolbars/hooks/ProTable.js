@@ -30,6 +30,7 @@ export default class ProTable extends MenuBase {
       { iconName: 'insertRadarChart', name: 'radarTable', onclick: this.bindSubClick.bind(this, 'radarTable') },
       { iconName: 'insertMapChart', name: 'mapTable', onclick: this.bindSubClick.bind(this, 'mapTable') },
       { iconName: 'insertHeatmapChart', name: 'heatmapTable', onclick: this.bindSubClick.bind(this, 'heatmapTable') },
+      { iconName: 'scatterTable', name: 'scatterTable', onclick: this.bindSubClick.bind(this, 'scatterTable') },
       { iconName: 'insertPieChart', name: 'pieTable', onclick: this.bindSubClick.bind(this, 'pieTable') },
     ];
   }
@@ -74,6 +75,8 @@ export default class ProTable extends MenuBase {
         return this.insertHeatmapTable(selection);
       case 'pieTable':
         return this.insertPieTable(selection);
+      case 'scatterTable':
+        return this.insertScatterTable(selection);
       default:
         return this.insertLineTable(selection);
     }
@@ -160,6 +163,22 @@ export default class ProTable extends MenuBase {
       '| 橙子 | 20 |',
       '| 葡萄 | 15 |',
       '| 其他 | 5 |',
+    ].join('\n')}\n\n`;
+  }
+
+  /**
+   * 插入散点图表格
+   */
+  insertScatterTable(selection) {
+    return `${selection}\n\n${[
+      '| :scatter: {group,name,x,y,size} | X | Y | Size | Series |',
+      '| :-: | :-: | :-: | :-: | :-: |',
+      '| A1 | 10 | 20 | 5 | S1 |',
+      '| A2 | 15 | 35 | 8 | S1 |',
+      '| B1 | 30 | 12 | 3 | S2 |',
+      '| B2 | 25 | 28 | 6 | S2 |',
+      '| C1 | 50 | 40 | 9 | S3 |',
+      '| C2 | 60 | 55 | 7 | S3 |',
     ].join('\n')}\n\n`;
   }
 }

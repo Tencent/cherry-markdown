@@ -294,6 +294,7 @@ const defaultConfig = {
          **/
         customBtns: [],
       },
+
       emoji: {
         useUnicode: true, // 是否使用unicode进行渲染
       },
@@ -455,6 +456,153 @@ const defaultConfig = {
     showFullWidthMark: true, // 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》
     showSuggestList: true, // 是否显示联想框
     maxUrlLength: -1, // URL的最大长度，-1表示不限制，超过该长度的URL会显示省略号
+    /**
+     * 输入联想配置
+     */
+    suggester: {
+      /**
+       * 方式1：完全覆盖默认的系统候选项
+       * 用法：替换所有默认的 /、、、` 等触发的候选项
+       */
+      // systemSuggestList: [
+      //   {
+      //     icon: 'h1',
+      //     label: 'heading1',
+      //     keyword: 'head1',
+      //     value: '# ',
+      //   },
+      //   {
+      //     icon: 'h2',
+      //     label: 'heading2',
+      //     keyword: 'head2',
+      //     value: '## ',
+      //   },
+      //   {
+      //     icon: 'table',
+      //     label: 'table',
+      //     keyword: 'table',
+      //     value: '| 列1 | 列2 | 列3 |\n| --- | --- | --- |\n| 内容1 | 内容2 | 内容3 |\n',
+      //   },
+      //   {
+      //     icon: 'code',
+      //     label: 'code',
+      //     keyword: 'code',
+      //     value: '```javascript\n\n```\n',
+      //     goTop: 2, // 插入后光标上移2行
+      //   },
+      //   {
+      //     icon: 'link',
+      //     label: 'link',
+      //     keyword: 'link',
+      //     value: '[链接文本](https://example.com)',
+      //     selection: { from: '[链接文本](https://example.com)'.length, to: '](https://example.com)'.length }, // 选中"链接文本"
+      //   },
+      // ],
+      /**
+       * 方式2：在默认系统候选项基础上追加
+       * 用法：保留所有默认项，额外增加自定义项
+       */
+      // extendSystemSuggestList: [
+      //   {
+      //     icon: 'pen',
+      //     label: 'template',
+      //     keyword: 'template temp',
+      //     value: '## 标题\n\n### 子标题\n\n内容...\n\n---\n\n**总结：**\n\n',
+      //     goTop: 6, // 插入后光标上移到内容位置
+      //   },
+      //   {
+      //     icon: 'insertFlow',
+      //     label: 'meeting',
+      //     keyword: 'meeting',
+      //     value: '## 会议记录\n\n**时间：** \n**参与人：** \n**议题：** \n\n### 讨论内容\n\n### 行动项\n- [ ] \n\n',
+      //   },
+      // ],
+      /**
+       * 方式3：自定义触发符联想（如 @用户、#话题、$变量等）
+       * 用法：输入"空格+触发符+文本"时显示动态候选项
+       * 触发示例：输入 " @张" 会调用 suggestList("张", callback)
+       */
+      // suggester: [
+      //   // @用户提及
+      //   {
+      //     keyword: '@',
+      //     suggestList(word, callback) {
+      //       const searchTerm = word.replace(/^@/, '');
+      //       // 模拟用户数据（实际项目中可以调用API）
+      //       const users = [
+      //         { id: 1, name: '张三', avatar: 'avatar1.jpg' },
+      //         { id: 2, name: '李四', avatar: 'avatar2.jpg' },
+      //         { id: 3, name: '王五', avatar: 'avatar3.jpg' },
+      //         { id: 4, name: '赵六', avatar: 'avatar4.jpg' },
+      //       ];
+      //       // 如果没有搜索词，显示所有用户
+      //       const filtered =
+      //         searchTerm === ''
+      //           ? users
+      //           : users.filter((user) => user.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      //       // 如果没有匹配项，关闭联想
+      //       if (filtered.length === 0) {
+      //         callback(false);
+      //         return;
+      //       }
+      //       // 返回候选项
+      //       const suggestions = filtered.map((user) => ({
+      //         label: user.name,
+      //         value: `@${user.name} `, // 插入的内容
+      //         icon: 'user', // 图标
+      //       }));
+      //       callback(suggestions);
+      //       // 异步示例：
+      //       // fetch(`/api/users?q=${encodeURIComponent(word)}`)
+      //       //   .then(response => response.json())
+      //       //   .then(users => {
+      //       //     callback(users.map(user => ({
+      //       //       label: user.name,
+      //       //       value: `@${user.name} `,
+      //       //     })));
+      //       //   })
+      //       //   .catch(() => callback(false));
+      //     },
+      //     // 可选：自定义候选面板的渲染
+      //     suggestListRender(list) {
+      //       // 返回自定义HTML或DOM元素，留空使用默认样式
+      //       return '';
+      //     },
+      //     // 可选：自定义行内回显样式
+      //     echo(value) {
+      //       // 返回空串使用默认高亮，返回false关闭回显
+      //       return '';
+      //     },
+      //   },
+      //   // $变量引用
+      //   {
+      //     keyword: '$',
+      //     suggestList(word, callback) {
+      //       const searchTerm = word.replace(/^\$/, '');
+      //       const variables = [
+      //         { name: 'API_URL', value: 'https://api.example.com', desc: 'API基础地址' },
+      //         { name: 'VERSION', value: '1.0.0', desc: '当前版本号' },
+      //         { name: 'DEBUG', value: 'true', desc: '调试模式' },
+      //       ];
+      //       // 如果没有搜索词，显示所有变量
+      //       const filtered =
+      //         searchTerm === ''
+      //           ? variables
+      //           : variables.filter((v) => v.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      //       if (filtered.length === 0) {
+      //         callback(false);
+      //         return;
+      //       }
+      //       const suggestions = filtered.map((variable) => ({
+      //         label: `${variable.name} - ${variable.desc}`,
+      //         value: `\`${variable.value}\``,
+      //         icon: 'code',
+      //       }));
+      //       callback(suggestions);
+      //     },
+      //   },
+      // ],
+    },
   },
   toolbars: {
     /**

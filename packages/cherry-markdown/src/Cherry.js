@@ -378,7 +378,7 @@ export default class Cherry extends CherryStatic {
     switch (model) {
       case 'edit&preview':
         if (this.previewer) {
-          this.previewer.editOnly(true);
+          this.previewer.editOnly();
           this.previewer.recoverPreviewer();
         }
         if (this.toolbar && showToolbar) {
@@ -392,7 +392,7 @@ export default class Cherry extends CherryStatic {
         break;
       case 'editOnly':
         if (!this.previewer.isPreviewerHidden()) {
-          this.previewer.editOnly(true);
+          this.previewer.editOnly();
         }
         if (this.toolbar && showToolbar) {
           this.toolbar.showToolbar();

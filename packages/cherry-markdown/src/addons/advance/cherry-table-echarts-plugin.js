@@ -1,10 +1,7 @@
 /**
- * Copyright (C) 2021 Tencent. All rights reserved.
- * The below software in this distribution may have been modified by Tencent ("Tencent Modifications").
+ * Copyright (C) 2021 Tencent.
  *
- * All Tencent Modifications are Copyright (C) Tencent.
- *
- * CherryMarkdown is licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -18,6 +15,28 @@
  */
 import mergeWith from 'lodash/mergeWith';
 import Logger from '@/Logger';
+
+// 主题与常量集中管理
+const THEME = {
+  color: {
+    border: '#999',
+    borderHover: '#666',
+    text: '#333',
+    tooltipText: '#333',
+    tooltipTextDark: '#ddd',
+    emphasis: '#ff6b6b',
+    lineSplit: '#eee',
+  },
+  shadow: {
+    color: 'rgba(0, 0, 0, 0.5)',
+    blur: 10,
+  },
+  fontSize: {
+    base: 12,
+    small: 10,
+    title: 16,
+  },
+};
 
 const DEFAULT_OPTIONS = {
   renderer: 'svg',
@@ -64,29 +83,573 @@ export default class EChartsTableEngine {
 
     // 保存Cherry配置，用于获取地图数据源URL
     this.cherryOptions = cherryOptions;
+    // 统一管理实例
+    this.instances = new Set();
+    // 主题监听器
+    this.themeObservers = new Map();
+    // 运行时主题（根据CSS变量动态生成）
+    this.themeRuntime = null;
+    // 主题缓存：key 为主题名（default/dark/abyss等），值为 { echarts, runtime }
+    this.themeCache = new Map();
+
+    // 导出完成事件监听器
+    this.exportObservers = new Map();
   }
 
-  getInstance() {
+  /**
+   * 获取调色盘颜色，用于图表的配色
+   */
+  $palette(type = 'default') {
+    let palette = [];
+    switch (type) {
+      case 'radar':
+        palette = [
+          'rgba(114, 172, 209, 0.2)',
+          'rgba(114, 172, 209, 0.4)',
+          'rgba(114, 172, 209, 0.6)',
+          'rgba(114, 172, 209, 0.8)',
+          'rgba(114, 172, 209, 1)',
+        ];
+        break;
+      case 'heatmap':
+        palette = [
+          '#313695',
+          '#4575b4',
+          '#74add1',
+          '#abd9e9',
+          '#e0f3f8',
+          '#ffffcc',
+          '#fee090',
+          '#fdae61',
+          '#f46d43',
+          '#d73027',
+          '#a50026',
+        ];
+        break;
+      case 'map':
+        palette = ['#e0ffff', '#006edd'];
+        break;
+      default:
+        palette = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'];
+        break;
+    }
+    return palette;
+  }
+
+  /**
+   * 构建悬浮提示基础配置
+   */
+  $tooltip(overrides = {}) {
+    return {
+      borderWidth: 1,
+      backgroundColor: this.$theme().color.tooltipBg,
+      borderColor: this.$theme().color.border,
+      textStyle: {
+        color: this.$theme().color.tooltipText,
+      },
+      extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
+      ...overrides,
+    };
+  }
+
+  /**
+   * 构建工具栏配置
+   * @param {Object} [featureOverrides] feature 覆盖项
+   * @param {Object} [posOverrides] 位置覆盖项
+   * @returns {Object} toolbox 配置
+   */
+  $toolbox(featureOverrides = {}, posOverrides = {}) {
+    return {
+      show: true,
+      orient: 'vertical',
+      left: posOverrides.left || 'right',
+      top: posOverrides.top || 'center',
+      feature: {
+        dataView: { show: true, readOnly: false, title: '数据视图', lang: ['数据视图', '关闭', '刷新'] },
+        restore: { show: true, title: '重置' },
+        saveAsImage: {
+          show: true,
+          title: '保存为图片',
+          type: this.options.renderer === 'svg' ? 'svg' : 'png', // renderer 类型为svg，默认只支持输出svg
+          backgroundColor: '#fff',
+        },
+        ...featureOverrides,
+      },
+      iconStyle: { borderColor: this.$theme().color.border },
+      emphasis: { iconStyle: { borderColor: this.$theme().color.borderHover } },
+    };
+  }
+
+  /**
+   * 构建网格配置
+   * @param {Object} [overrides]
+   * @returns {Object}
+   */
+  $grid(overrides = {}) {
+    return { containLabel: true, left: '8%', right: '8%', bottom: '8%', top: '12%', ...overrides };
+  }
+
+  /**
+   * 构建坐标轴配置
+   */
+  $axis(type = 'value', overrides = {}) {
+    return {
+      type,
+      axisLine: { lineStyle: { color: this.$theme().color.text } },
+      axisLabel: { color: this.$theme().color.text, fontSize: this.$theme().fontSize.base },
+      splitLine: { lineStyle: { color: this.$theme().color.lineSplit, type: 'dashed' } },
+      ...overrides,
+    };
+  }
+
+  /**
+   * 构建图例配置
+   */
+  $legend(overrides = {}) {
+    return {
+      type: 'scroll',
+      orient: 'horizontal',
+      left: overrides.left || 'center',
+      top: overrides.top || 'top',
+      textStyle: { color: this.$theme().color.text, fontSize: this.$theme().fontSize.base },
+      itemWidth: 12,
+      itemHeight: 12,
+      selectedMode: 'multiple',
+      selector: [
+        { type: 'all', title: '全选' },
+        { type: 'inverse', title: '反选' },
+      ],
+      selectorLabel: { color: this.$theme().color.text, borderColor: this.$theme().color.border },
+      ...overrides,
+    };
+  }
+
+  /**
+   * 构建数据缩放配置
+   */
+  $dataZoom(showSlider = true, overrides = {}) {
+    const base = [{ type: 'inside', xAxisIndex: [0], start: 0, end: 100 }];
+    if (showSlider) {
+      base.push({ type: 'slider', xAxisIndex: [0], bottom: '2%', start: 0, end: 100, height: 20 });
+    }
+    return base.map((z) => ({ ...z, ...overrides }));
+  }
+
+  /**
+   * 数值解析
+   * @param {any} value 输入值
+   * @returns {number} 数字（无法解析则为 0）
+   */
+  $num(value) {
+    const n = parseFloat(String(value ?? '').replace(/,/g, ''));
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  /**
+   * 构建统一系列基础属性
+   */
+  $baseSeries(type, overrides = {}) {
+    const animation = {
+      animation: true,
+      animationDuration: 1000,
+      animationEasing: 'elasticOut',
+      animationDelay(idx) {
+        return idx * 10;
+      },
+    };
+    const base = {
+      name: '',
+      data: [],
+      emphasis: {
+        focus: 'series',
+        itemStyle: { shadowBlur: this.$theme().shadow.blur, shadowOffsetX: 0, shadowColor: this.$theme().shadow.color },
+      },
+    };
+    const dict = {
+      bar: {
+        type: 'bar',
+        label: { show: false, position: 'top', formatter: '{c}' },
+      },
+      line: {
+        type: 'line',
+        symbol: 'circle',
+        symbolSize: 8,
+        lineStyle: { width: 3, cap: 'round', join: 'round' },
+        itemStyle: { borderWidth: 2, borderColor: '#fff' },
+        smooth: 0.3,
+        markPoint: {
+          data: [
+            { type: 'max', name: '最大值' },
+            { type: 'min', name: '最小值' },
+          ],
+        },
+        emphasis: {
+          focus: 'series',
+          lineStyle: { width: 5 },
+          itemStyle: { borderWidth: 3 },
+        },
+      },
+      scatter: { type: 'scatter' },
+      radar: { type: 'radar' },
+      heatmap: { type: 'heatmap' },
+      pie: { type: 'pie' },
+    };
+    return { ...base, ...dict[type], ...animation, ...overrides };
+  }
+
+  /**
+   * 获取带有颜色的指示器圆点HTML片段
+   */
+  $dot(color) {
+    return `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${color};"></span>`;
+  }
+
+  /**
+   * 轴向 tooltip 文本格式化器
+   */
+  $tooltipAxisFormatter() {
+    return (params) => {
+      const header = params?.[0]?.axisValueLabel ?? '';
+      let result = `<div style="margin-bottom:4px;font-weight:bold;">${header}</div>`;
+      params.forEach((item) => {
+        result += '<div style="margin:2px 0;">';
+        result += `${this.$dot(item.color)}`;
+        result += `<span style="font-weight:bold;">${item.seriesName}</span>`;
+        result += `<span style="float:right;margin-left:20px;font-weight:bold;">${item.value}</span>`;
+        result += '</div>';
+      });
+      return result;
+    };
+  }
+
+  /**
+   * 生成基础配置
+   */
+  $baseOption(overrides = {}) {
+    return {
+      aria: {
+        show: true,
+      },
+      backgroundColor: this.$theme().color.backgroundColor,
+      color: this.$palette(),
+      ...overrides,
+    };
+  }
+
+  /**
+   * 为容器下的svg额外添加类名标签, 避免figure svg深色模式下的选择器影响ECharts
+   */
+  $tagEchartsSvg(container) {
+    const svg = container && container.querySelector && container.querySelector('svg');
+    if (svg) svg.classList.add('echarts-svg');
+  }
+
+  /**
+   * 销毁图表实例
+   */
+  destroyChart(target) {
+    let container = null;
+    let inst = null;
+
+    if (target && typeof target.getDom === 'function') {
+      inst = target;
+      container = inst.getDom && inst.getDom();
+    } else if (target instanceof Element) {
+      container = target;
+      inst = this.echartsRef.getInstanceByDom(container);
+    }
+
+    if (inst && !inst.isDisposed()) inst.dispose();
+    if (inst) this.instances.delete(inst);
+  }
+
+  /**
+   * 创建或复用图表实例
+   * @param {Element} container 容器元素
+   * @param {Object} [option] ECharts 配置
+   * @param {*} [type] 图表类型（用于附加交互等）
+   * @param {Object} [themeObj] 主题对象（不传则根据 CSS 变量计算）
+   * @returns {*}
+   */
+  createChart(container, option = {}, type, themeObj) {
+    if (!container) return null;
+    // 已存在实例直接返回，避免被观察器和延迟初始化同时触发导致重复初始化
+    const existed = this.echartsRef.getInstanceByDom(container);
+    if (existed && !existed.isDisposed()) return existed;
+    const root = container.closest('.cherry') || container.closest('.cherry-markdown') || this.$getCherryRoot();
+    const theme = themeObj || this.$buildEchartsThemeFromCss(root);
+
+    if (container.firstChild) container.innerHTML = '';
+
+    const chart = this.echartsRef.init(container, theme, this.options);
+    if (option && Object.keys(option).length) chart.setOption(option);
+
+    this.instances.add(chart);
+    this.$tagEchartsSvg(container);
+    this.$enableThemeObserver(container);
+    this.$enableExportObserver(container);
+
+    if (type === 'heatmap' || type === 'pie') this.addClickHighlightEffect(chart, type);
+
+    return chart;
+  }
+
+  /**
+   * 读取 CSS 变量
+   */
+  $readCssVar(el, name, fallback) {
+    try {
+      const v = getComputedStyle(el).getPropertyValue(name).trim();
+      return v || fallback;
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  /**
+   * 从 classList 中提取主题名 theme__xxx -> xxx
+   */
+  $extractThemeNameFromClassList(classList) {
+    try {
+      const arr = Array.from(classList || []);
+      const t = arr.find((c) => c.startsWith('theme__'));
+      return t ? t.replace('theme__', '') : 'default';
+    } catch (e) {
+      return 'default';
+    }
+  }
+
+  /**
+   * 基于容器所在根节点获取主题缓存 key
+   */
+  $themeCacheKey(rootEl) {
+    const root = rootEl || this.$getCherryRoot();
+    const host = root || document.body;
+    return this.$extractThemeNameFromClassList((host && host.classList) || []);
+  }
+
+  /**
+   * 基于CSS变量构建ECharts主题，并同步到运行时主题
+   */
+  $buildEchartsThemeFromCss(rootEl) {
+    const el = rootEl || this.$getCherryRoot();
+    const cacheKey = this.$themeCacheKey(el);
+    if (this.themeCache.has(cacheKey)) {
+      const cached = this.themeCache.get(cacheKey);
+      this.themeRuntime = cached.runtime;
+      return cached.echarts;
+    }
+    const bg = this.$readCssVar(el, '--base-previewer-bg', this.$readCssVar(el, '--base-editor-bg', 'transparent'));
+    const text = this.$readCssVar(el, '--base-font-color', THEME.color.text);
+    const border = this.$readCssVar(el, '--md-table-border', THEME.color.border);
+    const split = this.$readCssVar(el, '--md-hr-border', THEME.color.border);
+
+    const isDarkLike = (() => {
+      const hexColor = String(bg || '').toLowerCase();
+      // 较深的背景可视作暗色
+      return hexColor.includes('#0') || hexColor.includes('#1') || hexColor.includes('#2') || hexColor.includes('#3');
+    })();
+
+    // 更新运行时主题
+    const runtime = {
+      color: {
+        border,
+        borderHover: border,
+        text,
+        tooltipText: isDarkLike ? THEME.color.tooltipTextDark : THEME.color.tooltipText,
+        lineSplit: split,
+        backgroundColor: bg,
+        tooltipBg: isDarkLike ? bg : 'white',
+        emphasis: THEME.color.emphasis,
+      },
+      shadow: { ...THEME.shadow },
+      fontSize: { ...THEME.fontSize },
+    };
+    this.themeRuntime = runtime;
+
+    // 返回echarts.init要传入的主题对象
+    const echartsTheme = {
+      backgroundColor: bg,
+      textStyle: { color: text },
+      title: { textStyle: { color: text } },
+      legend: { textStyle: { color: text } },
+      tooltip: {
+        backgroundColor: this.$theme().color.tooltipBg,
+        borderColor: border,
+        textStyle: { color: this.$theme().color.tooltipText },
+      },
+      categoryAxis: {
+        axisLine: { lineStyle: { color: text } },
+        axisLabel: { color: text },
+        splitLine: { lineStyle: { color: split } },
+      },
+      valueAxis: {
+        axisLine: { lineStyle: { color: text } },
+        axisLabel: { color: text },
+        splitLine: { lineStyle: { color: split } },
+      },
+      color: this.$palette(),
+    };
+    this.themeCache.set(cacheKey, { echarts: echartsTheme, runtime });
+    return echartsTheme;
+  }
+
+  /**
+   * 获取当前运行时主题
+   */
+  $theme() {
+    return this.themeRuntime || THEME;
+  }
+
+  /**
+   * 获取 Cherry 根容器
+   */
+  $getCherryRoot(container = null) {
+    if (container) {
+      const root = container.closest('.cherry') || container.closest('.cherry-markdown');
+      if (root) return root;
+    }
+    return document.querySelector('.cherry') || document.querySelector('.cherry-markdown') || document.body;
+  }
+
+  /**
+   * 启用主题变更观察器
+   */
+  $enableThemeObserver(container) {
+    const root = this.$getCherryRoot(container);
+    if (!root) return;
+    if (this.themeObservers.has(root)) return;
+    const observer = new MutationObserver(() => {
+      this.$buildEchartsThemeFromCss(root);
+      Array.from(this.instances).forEach((inst) => {
+        this.$setInstanceTheme(inst);
+      });
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+    this.themeObservers.set(root, observer);
+  }
+
+  /**
+   * 通过 echartsInstance.setOption 刷新主题
+   * @param {*} instance ECharts 实例
+   */
+  $setInstanceTheme(instance) {
+    if (!instance || typeof instance.getDom !== 'function') return;
+    const container = instance.getDom();
+    if (!container) return;
+    const root = this.$getCherryRoot(container);
+    // 从缓存读取主题对象
+    const cacheKey = this.$themeCacheKey(root);
+    const cached = this.themeCache.get(cacheKey);
+    const themeObj = cached && cached.echarts;
+    if (!themeObj) return;
+    const option = this.$chartOptionsFromDataset(container) || {};
+    instance.setOption(option, true);
+    this.$tagEchartsSvg(container);
+  }
+
+  /**
+   * 从容器 `data-*` 属性解析并生成 Option 图表配置
+   */
+  $chartOptionsFromDataset(container) {
+    const type = container.getAttribute('data-chart-type');
+    const tableDataStr = container.getAttribute('data-table-data');
+    const chartOptionsStr = container.getAttribute('data-chart-options');
+    let tableData = null;
+    let chartOptions = {};
+    try {
+      tableData = tableDataStr ? JSON.parse(tableDataStr) : null;
+    } catch (e) {
+      tableData = null;
+    }
+    try {
+      chartOptions = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
+    } catch (e) {
+      chartOptions = {};
+    }
+    if (!type || !tableData) return {};
+    const renderDict = {
+      bar: this.renderBarChart.bind(this),
+      line: this.renderLineChart.bind(this),
+      radar: this.renderRadarChart.bind(this),
+      map: this.renderMapChart.bind(this),
+      heatmap: this.renderHeatmapChart.bind(this),
+      pie: this.renderPieChart.bind(this),
+      scatter: this.renderScatterChart.bind(this),
+    };
+    const renderFn = renderDict[type];
+    return renderFn ? renderFn(tableData, chartOptions) : {};
+  }
+
+  /**
+   * 获取或创建实例
+   */
+  getInstance(container) {
+    // 如果传入具体容器，则优先对该容器进行实例化与复用
+    if (container) {
+      let chart = this.echartsRef.getInstanceByDom(container);
+      if (!chart) chart = this.createChart(container);
+      return chart;
+    }
+
+    // 无容器时，创建一个内部容器
     if (!this.dom) {
       this.dom = document.createElement('div');
-      // 设置必要的样式和属性确保图表可见
-      this.dom.style.width = `${this.options.width}px`;
-      this.dom.style.height = `${this.options.height}px`;
-      this.dom.style.minHeight = '300px';
-      this.dom.style.display = 'block';
-      this.dom.style.position = 'relative';
-
-      const chart = this.echartsRef.init(this.dom, null, this.options);
-      // 监听窗口resize事件
-      window.addEventListener('resize', () => {
-        chart.resize();
-      });
+      const root = this.$getCherryRoot();
+      const themeObj = this.$buildEchartsThemeFromCss(root);
+      const chart = this.echartsRef.init(this.dom, themeObj, this.options);
+      this.instances.add(chart);
     }
     return this.echartsRef.getInstanceByDom(this.dom);
   }
 
+  /**
+   * 定向重建一组容器对应的图表
+   */
+  $rehydrateChartsForContainers(containersSet, rootEl) {
+    const root = rootEl || this.$getCherryRoot();
+    const themeObj = this.$buildEchartsThemeFromCss(root);
+    containersSet.forEach((container) => {
+      if (!(container instanceof Element) || !container.isConnected) return;
+      const type = container.getAttribute('data-chart-type');
+      const option = this.$chartOptionsFromDataset(container);
+      try {
+        this.destroyChart(container);
+        this.createChart(container, option, type, themeObj);
+      } catch (e) {
+        Logger.warn('rehydrate (partial) chart failed:', e);
+      }
+    });
+  }
+
+  /**
+   * 启用导出完成事件观察器
+   * 一旦收到导出完成事件，则定向重建当前根容器下的所有图表容器
+   */
+  $enableExportObserver(container) {
+    const root = this.$getCherryRoot(container);
+    if (!root) return;
+    if (this.exportObservers.has(root)) return;
+    const handler = () => {
+      try {
+        const containersSet = new Set();
+        const found = root.querySelectorAll('.cherry-echarts-wrapper');
+        if (found && found.length) Array.from(found).forEach((el) => containersSet.add(el));
+        if (containersSet.size) this.$rehydrateChartsForContainers(containersSet, root);
+      } catch (e) {
+        Logger.warn('rehydrate after export failed:', e);
+      }
+    };
+    // 监听全局导出完成事件
+    window.addEventListener('cherry:export:done', handler);
+    this.exportObservers.set(root, handler);
+  }
+
+  /**
+   * 渲染入口：将表格数据渲染为指定类型图表，并返回 HTML 容器片段
+   */
   render(type, options, tableObject) {
-    console.log('Rendering chart:', type, options, tableObject);
+    Logger.log('Rendering chart:', type, options, tableObject);
     const handler = {
       bar: BarChartOptionsHandler,
       line: LineChartOptionsHandler,
@@ -94,6 +657,7 @@ export default class EChartsTableEngine {
       map: MapChartOptionsHandler,
       heatmap: HeatmapChartOptionsHandler,
       pie: PieChartOptionsHandler,
+      scatter: ScatterChartOptionsHandler,
     }[type];
 
     // 生成唯一ID和简化的配置数据
@@ -105,71 +669,881 @@ export default class EChartsTableEngine {
     options.chartId = chartId;
     options.engine = this;
     const chartOption = handler ? generateOptions(handler, tableObject, options) : {};
+    Logger.log('Chart options:', chartOption);
+
+
 
     // 创建一个包含所有必要信息的HTML结构
     const htmlContent = `
       <div class="cherry-echarts-wrapper" 
            style="width: ${this.options.width}px; height: ${
              this.options.height
-           }px; min-height: 300px; display: block; position: relative; border: 1px solid #ddd;" 
+           }px; min-height: 300px; display: block; position: relative; border: 1px solid var(--md-table-border);" 
            id="${chartId}"
            data-chart-type="${type}"
            data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"
            data-chart-options="${chartOptionsStr.replace(/"/g, '&quot;')}">
-        <div class="chart-loading" style="text-align: center; line-height: 300px; color: #666;">正在加载图表...</div>
       </div>
     `;
 
-    // 在DOM插入后立即初始化图表
-    // 使用更可靠的容器等待机制
-    const initChart = (retryCount = 0) => {
+    // 延迟到下一轮事件循环再执行；只重试一次
+    setTimeout(() => {
       const container = document.getElementById(chartId);
-      if (container && this.echartsRef) {
-        try {
-          const myChart = this.echartsRef.init(container);
-          Logger.log('Chart initialized successfully:', chartId);
-          myChart.setOption(chartOption);
-          // 为热力图和饼图添加点击高亮效果
-          if (type === 'heatmap' || type === 'pie') {
-            this.addClickHighlightEffect(myChart, type);
-          }
-        } catch (error) {
-          Logger.error('Failed to render chart:', error);
-          Logger.error('Chart options:', chartOption);
-          Logger.error('Container:', container);
-          if (container) {
-            container.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
-              图表渲染失败<br/>
-              <span style="font-size: 12px; color: #666;">错误: ${error.message}</span>
-            </div>`;
-          }
-        }
-      } else if (retryCount < 10) {
-        // 最多重试10次，每次间隔100ms
-        Logger.log(`Retrying chart initialization for ${chartId}, attempt: ${retryCount + 1}`);
-        setTimeout(() => initChart(retryCount + 1), 100);
-      } else {
-        Logger.error('Failed to find chart container after 10 retries:', chartId, !!this.echartsRef);
-        const fallbackContainer = document.getElementById(chartId);
-        if (fallbackContainer) {
-          fallbackContainer.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
-            图表容器未找到<br/>
-            <span style="font-size: 12px; color: #666;">容器ID: ${chartId}</span>
-          </div>`;
-        }
+      if (!container || !this.echartsRef) return;
+      if (this.echartsRef.getInstanceByDom(container)) return;
+      try {
+        this.createChart(container, chartOption, type);
+        Logger.log('Chart initialized successfully:', chartId);
+      } catch (error) {
+        Logger.error('Failed to render chart:', error);
+        Logger.error('Chart options:', chartOption);
+        Logger.error('Container:', container);
+        container.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
+          图表渲染失败<br/>
+          <span style="font-size: 12px; color: #666;">错误: ${error.message}</span>
+        </div>`;
       }
-    };
-
-    setTimeout(() => initChart(), 50);
+    }, 50);
 
     return htmlContent;
+  }
+
+  renderBarChart(tableObject, options) {
+    return this.$renderChartCommon(tableObject, options, 'bar');
+  }
+
+  renderLineChart(tableObject, options) {
+    return this.$renderChartCommon(tableObject, options, 'line');
+  }
+
+  renderRadarChart(tableObject, options) {
+    return this.$renderRadarChartCommon(tableObject, options);
+  }
+
+  renderHeatmapChart(tableObject, options) {
+    return this.$renderHeatmapChartCommon(tableObject, options);
+  }
+
+  renderPieChart(tableObject, options) {
+    return this.$renderPieChartCommon(tableObject, options);
+  }
+
+  renderScatterChart(tableObject, options) {
+    return this.$renderScatterChartCommon(tableObject, options);
+  }
+
+  $renderRadarChartCommon(tableObject, options) {
+    Logger.log('Rendering radar chart:', tableObject);
+
+    // 构建雷达图指标
+    const indicator = tableObject.header.slice(1).map((header) => {
+      const maxValue = Math.max(
+        ...tableObject.rows.map((row) => {
+          const index = tableObject.header.indexOf(header);
+          const value = this.$num(row[index]);
+          return value;
+        }),
+      );
+      return {
+        name: header,
+        max: Math.ceil(maxValue * 1.2), // 设置最大值为数据最大值的1.2倍，向上取整
+      };
+    });
+
+    const seriesData = tableObject.rows.map((row, index) => ({
+      name: row[0],
+      value: row.slice(1).map((data) => this.$num(data)),
+      areaStyle: {
+        opacity: 0.1 + index * 0.05, // 每个系列有不同的透明度
+      },
+      lineStyle: {
+        width: 2,
+      },
+      itemStyle: {
+        borderWidth: 2,
+      },
+    }));
+
+    Logger.log('Radar indicator:', indicator);
+    Logger.log('Radar seriesData:', seriesData);
+
+    const chartOptions = this.$baseOption({
+      tooltip: this.$tooltip({
+        trigger: 'item',
+        formatter(params) {
+          let result = `<div style="margin-bottom:4px;font-weight:bold;"><span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${params.color};"></span>${params.name}</div>`;
+          params.value.forEach(function (value, index) {
+            result += '<div style="margin:2px 0;">';
+            result += `<span style="font-weight:bold;">${indicator[index].name}</span>`;
+            result += `<span style="float:right;margin-left:20px;font-weight:bold;">${value}</span>`;
+            result += '</div>';
+          });
+          return result;
+        },
+      }),
+      legend: this.$legend({ data: tableObject.rows.map((row) => row[0]), top: 'bottom' }),
+      toolbox: this.$toolbox(),
+      radar: {
+        name: {
+          textStyle: {
+            fontWeight: 'bold',
+          },
+          formatter(name) {
+            return name.length > 6 ? `${name.substr(0, 6)}...` : name;
+          },
+        },
+        indicator,
+        radius: '60%',
+        center: ['50%', '50%'],
+        splitNumber: 5,
+        shape: 'polygon',
+        splitArea: {
+          areaStyle: {
+            color: this.$palette('radar').reverse(),
+          },
+        },
+        axisName: {
+          color: this.$theme().color.text,
+        },
+        axisLine: {
+          lineStyle: {
+            color: 'rgba(211, 253, 250, 0.8)',
+          },
+        },
+        splitLine: {
+          lineStyle: {
+            color: 'rgba(211, 253, 250, 0.8)',
+          },
+        },
+      },
+      series: [
+        this.$baseSeries('radar', {
+          name: '雷达图数据',
+          data: seriesData,
+          emphasis: { lineStyle: { width: 4 }, areaStyle: { opacity: 0.3 } },
+        }),
+      ],
+      graphic: {
+        elements: [
+          {
+            type: 'text',
+            left: 'center',
+            top: '5%',
+            style: {
+              text: '雷达图分析',
+              fontSize: 16,
+              fontWeight: 'bold',
+              fill: this.$theme().color.text,
+            },
+          },
+        ],
+      },
+    });
+    return chartOptions;
+  }
+
+  $renderHeatmapChartCommon(tableObject, options) {
+    Logger.log('Rendering heatmap chart:', tableObject);
+
+    // 构建热力图数据
+    const xAxisData = tableObject.header.slice(1); // 列标题作为x轴
+    const yAxisData = tableObject.rows.map((row) => row[0]); // 行标题作为y轴
+    const data = [];
+    // 构建热力图数据点 [x索引, y索引, 值]
+    tableObject.rows.forEach((row, yIndex) => {
+      row.slice(1).forEach((value, xIndex) => {
+        const numValue = this.$num(value);
+        data.push([xIndex, yIndex, numValue]);
+      });
+    });
+
+    // 计算数值范围用于颜色映射
+    const values = data.map((item) => item[2]);
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+
+    const chartOptions = this.$baseOption({
+      tooltip: this.$tooltip({
+        trigger: 'item',
+        formatter(params) {
+          return `${yAxisData[params.data[1]]}<br/>${xAxisData[params.data[0]]}: <strong>${params.data[2]}</strong>`;
+        },
+      }),
+      grid: this.$grid({
+        height: '50%',
+        top: '10%',
+        left: '10%',
+        right: '10%',
+      }),
+      xAxis: this.$axis('category', {
+        data: xAxisData,
+        splitArea: {
+          show: true,
+        },
+      }),
+      yAxis: this.$axis('category', {
+        data: yAxisData,
+        splitArea: {
+          show: true,
+        },
+      }),
+      visualMap: {
+        min: minValue,
+        max: maxValue,
+        calculable: true,
+        orient: 'horizontal',
+        left: 'center',
+        bottom: '15%',
+        inRange: {
+          color: this.$palette('heatmap'),
+        },
+        textStyle: {
+          color: this.$theme().color.text,
+          fontSize: this.$theme().fontSize.base,
+        },
+      },
+      series: [
+        this.$baseSeries('heatmap', {
+          name: '热力图数据',
+          data,
+          label: { show: true, fontSize: 10 },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: this.$theme().shadow.blur,
+              shadowColor: this.$theme().shadow.color,
+              borderWidth: 2,
+              borderColor: this.$theme().color.emphasis,
+            },
+          },
+          select: { itemStyle: { borderWidth: 2, borderColor: this.$theme().color.emphasis, opacity: 1 } },
+          selectedMode: 'single',
+          animationEasing: 'cubicOut',
+        }),
+      ],
+      toolbox: this.$toolbox({}, { top: 'bottom' }),
+    });
+    return chartOptions;
+  }
+
+  $renderPieChartCommon(tableObject, options) {
+    Logger.log('Rendering pie chart:', tableObject);
+
+    // 构建饼图数据
+    const data = tableObject.rows.map((row) => ({ name: row[0], value: this.$num(row[1]) }));
+
+    const chartOptions = this.$baseOption({
+      tooltip: this.$tooltip({ trigger: 'item', formatter: '{a} <br/>{b}: {c} ({d}%)' }),
+      legend: this.$legend({ orient: 'vertical', left: 'left', top: 'middle' }),
+      series: [
+        this.$baseSeries('pie', {
+          name: '数据分布',
+          radius: ['40%', '70%'],
+          center: ['50%', '50%'],
+          avoidLabelOverlap: false,
+          label: { show: false, position: 'center' },
+          emphasis: {
+            label: { show: true, fontSize: '18', fontWeight: 'bold' },
+            itemStyle: {
+              shadowBlur: this.$theme().shadow.blur,
+              shadowOffsetX: 0,
+              shadowColor: this.$theme().shadow.color,
+              borderWidth: 3,
+              borderColor: this.$theme().color.emphasis,
+            },
+          },
+          select: { itemStyle: { borderWidth: 3, borderColor: this.$theme().color.emphasis, opacity: 1 } },
+          selectedMode: 'single',
+          labelLine: { show: false },
+          data,
+          animationEasing: 'cubicOut',
+        }),
+      ],
+      toolbox: this.$toolbox(),
+    });
+    return chartOptions;
+  }
+
+  $renderScatterChartCommon(tableObject, options) {
+    Logger.log('Rendering scatter chart:', tableObject);
+
+    // 支持两种形式：
+    // 1) 单系列：| :scatter:{name,x,y,size?} | X | Y | Size? |
+    // 2) 多系列：| :scatter:{group,name,x,y,size?} | X | Y | Size? | Series |
+    const headers = tableObject.header;
+    const findHeader = (candidates) =>
+      headers.findIndex((h, i) => i > 0 && candidates.some((c) => String(h).toLowerCase().includes(c)));
+    const xCol = findHeader(['x']);
+    const yCol = findHeader(['y']);
+    const sizeCol = findHeader(['size', '大小']);
+    let groupCol = findHeader(['series', 'group', '分组', '系列']);
+    // 如果列数达到 name,x,y,size,group 的长度，但没识别出来，则默认最后一列为分组
+    if (groupCol <= 0 && headers.length >= 5) {
+      groupCol = headers.length - 1;
+    }
+
+    const hasSizeColumn = sizeCol > 0;
+    const hasGroupColumn = groupCol > 0;
+
+    // 解析为统一对象
+    const parsedRows = tableObject.rows.map((row) => {
+      const x = this.$num(row[xCol > 0 ? xCol : 1]);
+      const y = this.$num(row[yCol > 0 ? yCol : 2]);
+      const size = hasSizeColumn ? this.$num(row[sizeCol]) : undefined;
+      const seriesName = hasGroupColumn ? String(row[groupCol] ?? '').trim() || '系列1' : null;
+      return { name: row[0], x, y, size, seriesName };
+    });
+
+    // 如果提供有 size 列，使用线性归一化（6~28）来控制点的显示大小
+    let minSize = Infinity;
+    let maxSize = -Infinity;
+    if (hasSizeColumn) {
+      parsedRows.forEach((r) => {
+        if (typeof r.size === 'number' && !Number.isNaN(r.size)) {
+          minSize = Math.min(minSize, r.size);
+          maxSize = Math.max(maxSize, r.size);
+        }
+      });
+      if (!Number.isFinite(minSize) || !Number.isFinite(maxSize)) {
+        minSize = 0;
+        maxSize = 0;
+      }
+    }
+
+    // 构建 series 数据
+    let series = [];
+    if (hasGroupColumn) {
+      const groupMap = new Map();
+      parsedRows.forEach((r) => {
+        const item = { value: [r.x, r.y], name: r.name };
+        if (hasSizeColumn) {
+          if (maxSize === minSize) {
+            item.symbolSize = 12;
+          } else if (typeof r.size === 'number' && !Number.isNaN(r.size)) {
+            const t = (r.size - minSize) / (maxSize - minSize);
+            item.symbolSize = Math.round(6 + t * (28 - 6));
+          } else {
+            item.symbolSize = 10;
+          }
+        }
+        const key = r.seriesName;
+        if (!groupMap.has(key)) groupMap.set(key, []);
+        groupMap.get(key).push(item);
+      });
+      series = Array.from(groupMap.entries()).map(([name, data]) =>
+        this.$baseSeries('scatter', {
+          name,
+          data,
+          emphasis: {
+            focus: 'series',
+            itemStyle: {
+              shadowBlur: this.$theme().shadow.blur,
+              shadowColor: this.$theme().shadow.color,
+              borderWidth: 2,
+              borderColor: this.$theme().color.emphasis,
+            },
+          },
+          select: { itemStyle: { borderWidth: 2, borderColor: this.$theme().color.emphasis, opacity: 1 } },
+          selectedMode: 'single',
+          animationEasing: 'cubicOut',
+        }),
+      );
+    } else {
+      const data = parsedRows.map((r) => {
+        const item = { value: [r.x, r.y], name: r.name };
+        if (hasSizeColumn) {
+          if (maxSize === minSize) item.symbolSize = 12;
+          else if (typeof r.size === 'number' && !Number.isNaN(r.size)) {
+            const t = (r.size - minSize) / (maxSize - minSize);
+            item.symbolSize = Math.round(6 + t * (28 - 6));
+          } else item.symbolSize = 10;
+        }
+        return item;
+      });
+      series = [
+        this.$baseSeries('scatter', {
+          name: '散点',
+          data,
+          emphasis: {
+            focus: 'series',
+            itemStyle: {
+              borderWidth: 2,
+              borderColor: this.$theme().color.emphasis,
+            },
+          },
+          select: { itemStyle: { borderWidth: 2, borderColor: this.$theme().color.emphasis, opacity: 1 } },
+          selectedMode: 'single',
+          animationEasing: 'cubicOut',
+        }),
+      ];
+    }
+
+    const chartOptions = this.$baseOption({
+      tooltip: this.$tooltip({
+        trigger: 'item',
+        formatter(params) {
+          const [x, y] = params.value || [];
+          return `${params.name}<br/>x: <strong>${x}</strong><br/>y: <strong>${y}</strong>`;
+        },
+      }),
+      legend: this.$legend(),
+      toolbox: this.$toolbox({ dataZoom: {} }),
+      grid: this.$grid(),
+      xAxis: this.$axis('value'),
+      yAxis: this.$axis('value'),
+      series,
+    });
+
+    return chartOptions;
+  }
+
+  renderMapChart(tableObject, options) {
+    Logger.log('开始渲染地图图表，选项:', options);
+
+    // 检查options中是否有自定义地图数据源
+    if (options && options.mapDataSource) {
+      Logger.log('检测到自定义地图数据源:', options.mapDataSource);
+
+      // 优先使用用户自定义的地图数据源
+      // 如果当前已经有china地图数据，先清除它以确保使用新数据
+      if (window.echarts && window.echarts.getMap('china')) {
+        Logger.log('清除现有地图数据以使用自定义地图数据源');
+      }
+
+      // 立即开始加载自定义地图数据，这会覆盖默认地图数据
+      this.$loadCustomMapData(options.mapDataSource, true);
+    } else {
+      Logger.log('使用默认地图数据源');
+      // 只有在没有自定义数据源时才加载默认地图数据
+      this.$loadChinaMapData();
+    }
+
+    // 立即返回地图图表配置
+    return this.$renderMapChartCommon(tableObject, options);
+  }
+
+  /**
+   * 加载中国地图数据
+   */
+  $loadChinaMapData() {
+    if (typeof window.echarts === 'undefined') {
+      Logger.error('ECharts 库未加载');
+      return;
+    }
+
+    // 检查地图数据是否已加载
+    if (window.echarts.getMap('china')) {
+      Logger.log('中国地图数据已存在');
+      return;
+    }
+
+    Logger.log('正在加载中国地图数据...');
+
+    // 获取配置中的地图数据源URL，如果没有配置则使用默认值
+    let possiblePaths = [
+      'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', // 在线高质量地图数据源（优先，已验证可用）
+      './assets/data/china.json', // 从examples目录访问本地备份文件
+    ];
+
+    // 如果有Cherry配置且配置了mapTable.sourceUrl，则使用配置的URL
+    if (
+      this.cherryOptions &&
+      this.cherryOptions.toolbars &&
+      this.cherryOptions.toolbars.config &&
+      this.cherryOptions.toolbars.config.mapTable &&
+      this.cherryOptions.toolbars.config.mapTable.sourceUrl
+    ) {
+      possiblePaths = this.cherryOptions.toolbars.config.mapTable.sourceUrl;
+      Logger.log('使用配置的地图数据源:', possiblePaths);
+    }
+
+    this.$tryLoadMapDataFromPaths(possiblePaths, 0);
+  }
+
+  /**
+   * 尝试从多个路径加载地图数据
+   */
+  $tryLoadMapDataFromPaths(paths, index) {
+    if (index >= paths.length) {
+      Logger.error('所有地图数据源都加载失败');
+      return;
+    }
+
+    const url = paths[index];
+    Logger.log(`尝试加载地图数据: ${url}`);
+
+    this.$fetchMapData(url).catch((error) => {
+      Logger.warn(`地图数据加载失败 (${url}):`, error.message);
+      // 尝试下一个路径
+      this.$tryLoadMapDataFromPaths(paths, index + 1);
+    });
+  }
+
+  /**
+   * 获取地图数据
+   */
+  $fetchMapData(url) {
+    return fetch(url)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status} for ${url}`);
+        }
+        return response.json();
+      })
+      .then((geoJson) => {
+        // 注册地图数据
+        window.echarts.registerMap('china', geoJson);
+        Logger.log(`中国地图数据加载成功！来源: ${url}`);
+
+        // 触发重新渲染已有的地图图表
+        this.$refreshMapCharts();
+        return geoJson;
+      });
+  }
+
+  /**
+   * 加载自定义地图数据
+   * @param {string} mapUrl - 地图数据URL
+   * @param {boolean} forceReload - 是否强制重新加载
+   */
+  $loadCustomMapData(mapUrl, forceReload = false) {
+    if (!mapUrl || mapUrl.trim() === '') {
+      Logger.warn('自定义地图数据URL为空，使用默认加载方法');
+      return;
+    }
+
+    Logger.log(`正在加载用户自定义地图数据: ${mapUrl}${forceReload ? ' (强制重新加载)' : ''}`);
+
+    // 优先加载用户自定义的地图数据，覆盖任何已有的地图数据
+    this.$fetchMapData(mapUrl)
+      .then(() => {
+        Logger.log('用户自定义地图数据加载成功，正在刷新所有地图图表');
+        // 地图数据加载成功后，立即刷新页面中的所有地图图表
+        this.$refreshMapCharts();
+      })
+      .catch((error) => {
+        Logger.warn(`用户自定义地图数据加载失败 (${mapUrl}):`, error.message);
+        Logger.warn('自定义地图数据加载失败，回退到默认地图数据');
+        // 如果用户自定义URL失败，回退到默认地图数据
+        this.$loadChinaMapData();
+      });
+  }
+
+  /**
+   * 刷新页面中的地图图表
+   */
+  $refreshMapCharts() {
+    // 查找页面中所有的地图图表容器，重新渲染
+    const mapContainers = document.querySelectorAll('[id^="chart-"][data-chart-type="map"]');
+    Logger.log('Found map containers to refresh:', mapContainers.length);
+
+    mapContainers.forEach((container) => {
+      const chartId = container.id;
+      Logger.log('Refreshing map chart:', chartId);
+
+      // 从 data 属性获取存储的表格数据
+      const tableDataStr = container.getAttribute('data-table-data');
+      const chartOptionsStr = container.getAttribute('data-chart-options');
+
+      if (tableDataStr && this.echartsRef) {
+        try {
+          const tableData = JSON.parse(tableDataStr);
+          const chartOptions = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
+
+          const chartOption = this.$renderMapChartCommon(tableData, chartOptions);
+          const existingChart = this.echartsRef.getInstanceByDom(container);
+
+          if (existingChart) {
+            existingChart.setOption(chartOption);
+            Logger.log('Map chart refreshed successfully:', chartId);
+          } else {
+            // 重新创建图表
+            const newChart = this.getInstance(container);
+            newChart.setOption(chartOption);
+            Logger.log('Map chart recreated:', chartId);
+          }
+        } catch (error) {
+          Logger.error('Failed to refresh map chart:', chartId, error);
+        }
+      }
+    });
+  }
+
+  $renderMapChartCommon(tableObject, options) {
+    Logger.log('Rendering map chart:', tableObject);
+
+    // 检查 ECharts 是否可用
+    if (typeof window.echarts === 'undefined') {
+      Logger.error('ECharts 库未加载');
+      return {
+        title: {
+          text: '地图渲染失败: ECharts 库未加载',
+          left: 'center',
+          textStyle: { color: '#ff0000' },
+        },
+      };
+    }
+
+    // 检查中国地图数据是否已注册
+    if (!window.echarts.getMap('china')) {
+      Logger.warn('中国地图数据未加载，正在尝试加载...');
+
+      // 异步加载地图数据
+      this.$loadChinaMapData();
+
+      // 返回加载提示，稍后会被替换
+      return {
+        title: {
+          text: '正在加载地图数据...',
+          left: 'center',
+          top: 'middle',
+          textStyle: {
+            color: '#666',
+            fontSize: 16,
+          },
+        },
+        graphic: {
+          elements: [
+            {
+              type: 'text',
+              left: 'center',
+              top: '60%',
+              style: {
+                text: '如果长时间未显示，请检查网络连接',
+                font: '12px sans-serif',
+                fill: '#999',
+              },
+            },
+          ],
+        },
+      };
+    }
+
+    // 省份名称映射表
+    const provinceNameMap = {
+      北京: '北京市',
+      天津: '天津市',
+      上海: '上海市',
+      重庆: '重庆市',
+      河北: '河北省',
+      山西: '山西省',
+      辽宁: '辽宁省',
+      吉林: '吉林省',
+      黑龙江: '黑龙江省',
+      江苏: '江苏省',
+      浙江: '浙江省',
+      安徽: '安徽省',
+      福建: '福建省',
+      江西: '江西省',
+      山东: '山东省',
+      河南: '河南省',
+      湖北: '湖北省',
+      湖南: '湖南省',
+      广东: '广东省',
+      海南: '海南省',
+      四川: '四川省',
+      贵州: '贵州省',
+      云南: '云南省',
+      陕西: '陕西省',
+      甘肃: '甘肃省',
+      青海: '青海省',
+      台湾: '台湾省',
+      内蒙古: '内蒙古自治区',
+      广西: '广西壮族自治区',
+      西藏: '西藏自治区',
+      宁夏: '宁夏回族自治区',
+      新疆: '新疆维吾尔自治区',
+      香港: '香港特别行政区',
+      澳门: '澳门特别行政区',
+    };
+
+    // 名称标准化函数
+    const normalizeProvinceName = (inputName) => {
+      // 移除可能的空格
+      const cleanName = inputName.trim();
+
+      // 直接匹配映射表
+      if (provinceNameMap[cleanName]) {
+        return provinceNameMap[cleanName];
+      }
+
+      // 如果输入已经是完整名称，直接返回
+      if (
+        cleanName.endsWith('市') ||
+        cleanName.endsWith('省') ||
+        cleanName.endsWith('自治区') ||
+        cleanName.endsWith('特别行政区')
+      ) {
+        return cleanName;
+      }
+
+      // 模糊匹配：查找包含输入名称的省份
+      for (const [shortName, fullName] of Object.entries(provinceNameMap)) {
+        if (fullName.includes(cleanName) || cleanName.includes(shortName)) {
+          return fullName;
+        }
+      }
+
+      // 如果都没匹配到，返回原名称
+      Logger.warn(`Province name not matched: ${inputName}`);
+      return cleanName;
+    };
+
+    // 构建地图数据，使用标准化的省份名称
+    const mapData = tableObject.rows.map((row) => {
+      const originalName = row[0];
+      const standardName = normalizeProvinceName(originalName);
+      const value = this.$num(row[1]);
+
+      Logger.log(`Name mapping: "${originalName}" -> "${standardName}"`);
+
+      return { name: standardName, value };
+    });
+
+    Logger.log('Map data:', mapData);
+
+    // 使用 ECharts 内置的中国地图
+    const chartOptions = this.$baseOption({
+      title: {
+        text: '地图数据分析',
+        left: 'center',
+        top: '5%',
+        textStyle: {
+          fontSize: 16,
+          fontWeight: 'bold',
+          color: this.$theme().color.text,
+        },
+      },
+      tooltip: this.$tooltip({
+        trigger: 'item',
+        formatter(params) {
+          return `${params.name}: ${params.value || 0}`;
+        },
+      }),
+      visualMap: {
+        min: Math.min(...mapData.map((item) => item.value)),
+        max: Math.max(...mapData.map((item) => item.value)),
+        left: 'left',
+        top: 'bottom',
+        text: ['高', '低'],
+        calculable: true,
+        inRange: {
+          color: this.$palette('map'),
+        },
+        textStyle: {
+          color: this.$theme().color.text,
+          fontSize: this.$theme().fontSize.base,
+        },
+      },
+      series: [
+        {
+          name: '地图数据',
+          type: 'map',
+          map: 'china',
+          roam: true,
+          label: {
+            show: true,
+            fontSize: 10,
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: this.$theme().fontSize.base,
+              fontWeight: 'bold',
+            },
+            itemStyle: {
+              areaColor: '#ffefd5',
+            },
+          },
+          data: mapData,
+          itemStyle: {
+            areaColor: '#f5f5f5',
+            borderColor: '#999',
+            borderWidth: 0.5,
+          },
+        },
+      ],
+      toolbox: this.$toolbox(),
+    });
+    return chartOptions;
+  }
+
+  $renderChartCommon(tableObject, options, type) {
+    Logger.log('Common chart rendering:', type, tableObject);
+
+    if (!['bar', 'line'].includes(type)) {
+      return {};
+    }
+
+    const dataSet = tableObject.rows.reduce(
+      (result, row) => {
+        Logger.log('Processing row:', row);
+        result.legend.data.push(row[0]);
+        result.series.push({
+          ...this.$baseSeries(type),
+          name: row[0],
+          data: row.slice(1).map((data) => {
+            const num = this.$num(data);
+            Logger.log('Parsed data:', data, '->', num);
+            return num;
+          }),
+        });
+        return result;
+      },
+      {
+        legend: this.$legend({ data: [] }),
+        series: [],
+      },
+    );
+
+    const chartOptions = this.$baseOption({
+      ...dataSet,
+      tooltip: this.$tooltip({
+        trigger: 'axis',
+        axisPointer: {
+          type: type === 'line' ? 'cross' : 'shadow',
+          label: { backgroundColor: '#6a7985' },
+          crossStyle: { color: '#999' },
+        },
+        formatter: this.$tooltipAxisFormatter(),
+      }),
+      toolbox: this.$toolbox({
+        mark: { show: true, title: '辅助线开关' },
+        magicType: { show: true, type: ['line', 'bar'], title: { line: '切换为折线图', bar: '切换为柱状图' } },
+      }),
+      xAxis: this.$axis('category', {
+        data: tableObject.header.slice(1),
+        axisTick: { alignWithLabel: true },
+        axisLabel: {
+          textStyle: { color: this.$theme().color.text },
+          rotate: tableObject.header.slice(1).some((h) => h.length > 4) ? 45 : 0,
+          interval: 0,
+        },
+      }),
+      yAxis: this.$axis('value', {
+        axisLabel: {
+          textStyle: { color: this.$theme().color.text },
+          formatter(value) {
+            if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+            if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
+            return value;
+          },
+        },
+        nameTextStyle: { color: this.$theme().color.text },
+      }),
+      grid: this.$grid({ left: '3%', top: '15%' }),
+      dataZoom: this.$dataZoom(tableObject.header.length > 8),
+      brush: { toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'], xAxisIndex: 0 },
+    });
+
+    Logger.log('Final chart options:', chartOptions);
+    return chartOptions;
   }
 
   // 添加点击高亮效果
   addClickHighlightEffect(chartInstance, chartType) {
     let selectedDataIndex = null;
     chartInstance.on('click', (params) => {
-      console.log('Chart clicked:', params);
+      Logger.log('Chart clicked:', params);
       // 如果点击的是同一个数据项，则取消高亮
       if (selectedDataIndex === params.dataIndex) {
         selectedDataIndex = null;
@@ -207,13 +1581,33 @@ export default class EChartsTableEngine {
   }
 
   onDestroy() {
-    if (!this.dom) {
-      return;
+    if (this.instances && this.instances.size > 0) {
+      this.instances.forEach((inst) => {
+        this.destroyChart(inst);
+      });
+      this.instances.clear();
     }
-    this.echartsRef.dispose(this.dom);
+    if (this.themeObservers && this.themeObservers.size) {
+      this.themeObservers.forEach((observer) => {
+        observer.disconnect();
+      });
+      this.themeObservers.clear();
+    }
+    if (this.exportObservers && this.exportObservers.size) {
+      this.exportObservers.forEach((handler) => {
+        window.removeEventListener('cherry:export:done', handler);
+      });
+      this.exportObservers.clear();
+    }
+    if (this.dom) {
+      const inst = this.echartsRef.getInstanceByDom(this.dom);
+      if (inst && !inst.isDisposed()) inst.dispose();
+      this.dom = null;
+    }
   }
 }
 
+// Handler-based chart configuration system from PR #1349, enhanced with PR #1362 features
 const TitleOptionsHandler = {
   options(tableObject, options) {
     return options.title
@@ -235,9 +1629,10 @@ const TitleOptionsHandler = {
 const BaseChartOptionsHandler = {
   components: [TitleOptionsHandler],
   options(tableObject, options) {
+    const engine = options.engine;
     return {
       backgroundColor: '#fff',
-      color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'],
+      color: engine.$palette(),
       tooltip: {
         trigger: 'item',
         backgroundColor: 'rgba(0,0,0,0.8)',
@@ -249,66 +1644,16 @@ const BaseChartOptionsHandler = {
         },
         extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
       },
-      toolbox: {
-        show: true,
-        orient: 'vertical',
-        left: 'right',
-        top: 'center',
-        feature: {
-          // magicType: {
-          //   show: true,
-          //   type: ['line', 'bar'],
-          //   title: {
-          //     line: '切换为折线图',
-          //     bar: '切换为柱状图',
-          //   },
-          // },
-          restore: { show: true, title: '重置' },
-          saveAsImage: {
-            show: true,
-            title: '保存为图片',
-            type: 'png',
-            backgroundColor: '#fff',
-          },
-        },
-        iconStyle: {
-          borderColor: '#999',
-        },
-        emphasis: {
-          iconStyle: {
-            borderColor: '#666',
-          },
-        },
-      },
+      toolbox: engine.$toolbox(),
     };
   },
 };
 
 const LegendOptionsHandler = {
   options(tableObject, options) {
+    const engine = options.engine;
     return {
-      legend: {
-        type: 'scroll',
-        orient: 'horizontal',
-        left: 'center',
-        top: 'top',
-        textStyle: {
-          fontSize: 12,
-        },
-        itemWidth: 12,
-        itemHeight: 12,
-        selectedMode: 'multiple',
-        selector: [
-          {
-            type: 'all',
-            title: '全选',
-          },
-          {
-            type: 'inverse',
-            title: '反选',
-          },
-        ],
-      },
+      legend: engine.$legend({ data: tableObject.rows.map((row) => row[0]) }),
     };
   },
 };
@@ -316,6 +1661,7 @@ const LegendOptionsHandler = {
 const AxisOptionsHandler = {
   components: [BaseChartOptionsHandler, LegendOptionsHandler],
   options(tableObject, options) {
+    const engine = options.engine;
     const data = [];
     const series = [];
     tableObject.rows.forEach((row) => {
@@ -323,169 +1669,54 @@ const AxisOptionsHandler = {
       data.push(row[0]);
       series.push({
         name: row[0],
-        data: row.slice(1).map((data) => parseFloat(data.replace(/,/g, ''))),
+        data: row.slice(1).map((data) => engine.$num(data)),
       });
     });
 
     return {
-      tooltip: {
+      tooltip: engine.$tooltip({
         trigger: 'axis',
         axisPointer: {
-          label: {
-            backgroundColor: '#6a7985',
-          },
-          crossStyle: {
-            color: '#999',
-          },
+          label: { backgroundColor: '#6a7985' },
+          crossStyle: { color: '#999' },
         },
-        formatter(params) {
-          let result = `<div style="margin-bottom:4px;font-weight:bold;">${params[0].axisValueLabel}</div>`;
-          params.forEach(function (item, index) {
-            result += '<div style="margin:2px 0;">';
-            result += `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${item.color};"></span>`;
-            result += `<span style="font-weight:bold;">${item.seriesName}</span>`;
-            result += `<span style="float:right;margin-left:20px;font-weight:bold;">${item.value}</span>`;
-            result += '</div>';
-          });
-          return result;
-        },
-      },
-      legend: {
-        data,
-        type: 'scroll',
-      },
+        formatter: engine.$tooltipAxisFormatter(),
+      }),
+      legend: { data },
       series,
-      xAxis: {
+      xAxis: engine.$axis('category', {
         data: tableObject.header.slice(1),
-        type: 'category',
-        axisLine: {
-          lineStyle: {
-            color: '#333',
-          },
-        },
+        axisTick: { alignWithLabel: true },
         axisLabel: {
-          color: '#333',
+          textStyle: { color: engine.$theme().color.text },
           rotate: tableObject.header.slice(1).some((h) => h.length > 4) ? 45 : 0,
           interval: 0,
-          fontSize: 11,
         },
-        axisTick: {
-          alignWithLabel: true,
-        },
-      },
-      yAxis: {
-        type: 'value',
+      }),
+      yAxis: engine.$axis('value', {
         axisLabel: {
-          color: '#333',
-          fontSize: 11,
+          textStyle: { color: engine.$theme().color.text },
           formatter(value) {
-            if (value >= 1000000) {
-              return `${(value / 1000000).toFixed(1)}M`;
-            }
-            if (value >= 1000) {
-              return `${(value / 1000).toFixed(1)}K`;
-            }
+            if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+            if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
             return value;
           },
         },
-        axisLine: {
-          lineStyle: {
-            color: '#333',
-          },
-        },
-        splitLine: {
-          lineStyle: {
-            color: '#eee',
-            type: 'dashed',
-          },
-        },
-        nameTextStyle: {
-          color: '#333',
-        },
-      },
-      dataZoom: [
-        {
-          type: 'slider',
-          show: tableObject.header.length > 8,
-          xAxisIndex: [0],
-          start: 0,
-          end: 100,
-          bottom: '2%',
-          height: 20,
-          handleIcon:
-            'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23.1h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
-          handleSize: '80%',
-          handleStyle: {
-            color: '#fff',
-            shadowBlur: 3,
-            shadowColor: 'rgba(0, 0, 0, 0.6)',
-            shadowOffsetX: 2,
-            shadowOffsetY: 2,
-          },
-        },
-        {
-          type: 'inside',
-          xAxisIndex: [0],
-          start: 0,
-          end: 100,
-        },
-      ],
-      grid: {
-        containLabel: true,
-        left: '3%',
-        right: '8%',
-        bottom: '8%',
-        top: '15%',
-      },
+        nameTextStyle: { color: engine.$theme().color.text },
+      }),
+      grid: engine.$grid({ left: '3%', top: '15%' }),
+      dataZoom: engine.$dataZoom(tableObject.header.length > 8),
     };
   },
 };
 
 const LineChartOptionsHandler = {
-  components: [AxisOptionsHandler, LegendOptionsHandler],
+  components: [AxisOptionsHandler],
   options(tableObject, options) {
+    const engine = options.engine;
     return {
       'tooltip.axisPointer.type': 'cross',
-      'series.$item': {
-        type: 'line',
-        animation: true,
-        animationDuration: 1000,
-        animationEasing: 'elasticOut',
-        animationDelay(idx) {
-          return idx * 10;
-        },
-        data: [],
-        symbol: 'circle',
-        symbolSize: 8,
-        lineStyle: {
-          width: 3,
-          cap: 'round',
-          join: 'round',
-        },
-        itemStyle: {
-          borderWidth: 2,
-          borderColor: '#fff',
-        },
-        emphasis: {
-          focus: 'series',
-          lineStyle: {
-            width: 5,
-          },
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)',
-            borderWidth: 3,
-          },
-        },
-        smooth: 0.3,
-        markPoint: {
-          data: [
-            { type: 'max', name: '最大值' },
-            { type: 'min', name: '最小值' },
-          ],
-        },
-      },
+      'series.$item': engine.$baseSeries('line'),
     };
   },
 };
@@ -493,36 +1724,11 @@ const LineChartOptionsHandler = {
 const BarChartOptionsHandler = {
   components: [AxisOptionsHandler],
   options(tableObject, options) {
+    const engine = options.engine;
     return {
       'tooltip.axisPointer.type': 'shadow',
-      'series.$item': {
-        type: 'bar',
-        barWidth: '60%',
-        animation: true,
-        animationDuration: 1000,
-        animationEasing: 'elasticOut',
-        animationDelay(idx) {
-          return idx * 10;
-        },
-        data: [],
-        emphasis: {
-          focus: 'series',
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)',
-          },
-        },
-        label: {
-          show: false,
-          position: 'top',
-          formatter: '{c}',
-        },
-      },
-      brush: {
-        toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'],
-        xAxisIndex: 0,
-      },
+      'series.$item': engine.$baseSeries('bar', { barWidth: '60%' }),
+      brush: { toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'], xAxisIndex: 0 },
     };
   },
 };
@@ -530,124 +1736,296 @@ const BarChartOptionsHandler = {
 const RadarChartOptionsHandler = {
   components: [BaseChartOptionsHandler, LegendOptionsHandler],
   options(tableObject, options) {
+    const engine = options.engine;
     const indicator = tableObject.header.slice(1).map((header) => {
       const maxValue = Math.max(
         ...tableObject.rows.map((row) => {
           const index = tableObject.header.indexOf(header);
-          return parseFloat(row[index].replace(/,/g, '')) || 0;
+          return engine.$num(row[index]);
         }),
       );
       return {
         name: header,
-        max: Math.ceil(maxValue * 1.2), // 设置最大值为数据最大值的1.2倍，向上取整
+        max: Math.ceil(maxValue * 1.2),
       };
     });
+    
     const seriesData = tableObject.rows.map((row, index) => ({
       name: row[0],
-      value: row.slice(1).map((data) => parseFloat(data.replace(/,/g, '')) || 0),
-      areaStyle: {
-        opacity: 0.1 + index * 0.05, // 每个系列有不同的透明度
-      },
-      lineStyle: {
-        width: 2,
-      },
-      itemStyle: {
-        borderWidth: 2,
-      },
+      value: row.slice(1).map((data) => engine.$num(data)),
+      areaStyle: { opacity: 0.1 + index * 0.05 },
+      lineStyle: { width: 2 },
+      itemStyle: { borderWidth: 2 },
     }));
 
     return {
       'tooltip.formatter'(params) {
-        console.log('radar params:', params);
-        let result = `<div style="margin-bottom:4px;font-weight:bold;">${params.name}</div>`;
+        let result = `<div style="margin-bottom:4px;font-weight:bold;">${engine.$dot(params.color)}${params.name}</div>`;
         params.value.forEach((value, index) => {
           result += '<div style="margin:2px 0;">';
-          result += `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${params.color};"></span>`;
           result += `<span style="font-weight:bold;">${indicator[index].name}</span>`;
           result += `<span style="float:right;margin-left:20px;font-weight:bold;">${value}</span>`;
           result += '</div>';
         });
         return result;
       },
-      legend: {
-        data: tableObject.rows.map((row) => row[0]),
-      },
       radar: {
         name: {
-          textStyle: {
-            color: '#333',
-            fontSize: 12,
-            fontWeight: 'bold',
-          },
-          formatter(name) {
-            return name.length > 6 ? `${name.substr(0, 6)}...` : name;
-          },
+          textStyle: { color: engine.$theme().color.text, fontSize: 12, fontWeight: 'bold' },
+          formatter(name) { return name.length > 6 ? `${name.substr(0, 6)}...` : name; },
         },
         indicator,
         radius: '60%',
         center: ['50%', '50%'],
         splitNumber: 5,
         shape: 'polygon',
-        splitArea: {
-          areaStyle: {
-            color: [
-              'rgba(114, 172, 209, 0.2)',
-              'rgba(114, 172, 209, 0.4)',
-              'rgba(114, 172, 209, 0.6)',
-              'rgba(114, 172, 209, 0.8)',
-              'rgba(114, 172, 209, 1)',
-            ].reverse(),
-          },
-        },
-        axisLine: {
-          lineStyle: {
-            color: 'rgba(211, 253, 250, 0.8)',
-          },
-        },
-        splitLine: {
-          lineStyle: {
-            color: 'rgba(211, 253, 250, 0.8)',
-          },
-        },
+        splitArea: { areaStyle: { color: engine.$palette('radar').reverse() } },
+        axisName: { color: engine.$theme().color.text },
+        axisLine: { lineStyle: { color: 'rgba(211, 253, 250, 0.8)' } },
+        splitLine: { lineStyle: { color: 'rgba(211, 253, 250, 0.8)' } },
       },
       series: [
-        {
+        engine.$baseSeries('radar', {
           name: '雷达图数据',
-          type: 'radar',
           data: seriesData,
-          emphasis: {
-            lineStyle: {
-              width: 4,
-            },
-            areaStyle: {
-              opacity: 0.3,
-            },
-          },
-          animation: true,
-          animationDuration: 1000,
-          animationEasing: 'elasticOut',
-        },
+          emphasis: { lineStyle: { width: 4 }, areaStyle: { opacity: 0.3 } },
+        }),
       ],
-      graphic: {
-        elements: [
-          {
-            type: 'text',
-            left: 'center',
-            top: '5%',
-            style: {
-              // text: '雷达图分析',
-              fontSize: 16,
-              fontWeight: 'bold',
-              fill: '#333',
-            },
-          },
-        ],
-      },
     };
   },
 };
 
-// 地图的默认配置
+const HeatmapChartOptionsHandler = {
+  components: [BaseChartOptionsHandler],
+  options(tableObject, options) {
+    const engine = options.engine;
+    const xAxisData = tableObject.header.slice(1);
+    const yAxisData = tableObject.rows.map((row) => row[0]);
+    const data = [];
+    
+    tableObject.rows.forEach((row, yIndex) => {
+      row.slice(1).forEach((value, xIndex) => {
+        data.push([xIndex, yIndex, engine.$num(value)]);
+      });
+    });
+
+    const values = data.map((item) => item[2]);
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+
+    return {
+      tooltip: engine.$tooltip({
+        formatter(params) {
+          return `${yAxisData[params.data[1]]}<br/>${xAxisData[params.data[0]]}: <strong>${params.data[2]}</strong>`;
+        },
+      }),
+      grid: engine.$grid({ height: '50%', top: '10%', left: '10%', right: '10%' }),
+      xAxis: engine.$axis('category', { data: xAxisData, splitArea: { show: true } }),
+      yAxis: engine.$axis('category', { data: yAxisData, splitArea: { show: true } }),
+      visualMap: {
+        min: minValue,
+        max: maxValue,
+        calculable: true,
+        orient: 'horizontal',
+        left: 'center',
+        bottom: '15%',
+        inRange: { color: engine.$palette('heatmap') },
+        textStyle: { color: engine.$theme().color.text, fontSize: engine.$theme().fontSize.base },
+      },
+      series: [
+        engine.$baseSeries('heatmap', {
+          name: '热力图数据',
+          data,
+          label: { show: true, fontSize: 10 },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: engine.$theme().shadow.blur,
+              shadowColor: engine.$theme().shadow.color,
+              borderWidth: 2,
+              borderColor: engine.$theme().color.emphasis,
+            },
+          },
+          select: { itemStyle: { borderWidth: 2, borderColor: engine.$theme().color.emphasis, opacity: 1 } },
+          selectedMode: 'single',
+          animationEasing: 'cubicOut',
+        }),
+      ],
+      toolbox: engine.$toolbox({}, { top: 'bottom' }),
+    };
+  },
+};
+
+const PieChartOptionsHandler = {
+  components: [BaseChartOptionsHandler],
+  options(tableObject, options) {
+    const engine = options.engine;
+    const data = tableObject.rows.map((row) => ({ name: row[0], value: engine.$num(row[1]) }));
+
+    return {
+      tooltip: engine.$tooltip({ trigger: 'item', formatter: '{a} <br/>{b}: {c} ({d}%)' }),
+      legend: engine.$legend({ orient: 'vertical', left: 'left', top: 'middle' }),
+      series: [
+        engine.$baseSeries('pie', {
+          name: '数据分布',
+          radius: ['40%', '70%'],
+          center: ['50%', '50%'],
+          avoidLabelOverlap: false,
+          label: { show: false, position: 'center' },
+          emphasis: {
+            label: { show: true, fontSize: '18', fontWeight: 'bold' },
+            itemStyle: {
+              shadowBlur: engine.$theme().shadow.blur,
+              shadowOffsetX: 0,
+              shadowColor: engine.$theme().shadow.color,
+              borderWidth: 3,
+              borderColor: engine.$theme().color.emphasis,
+            },
+          },
+          select: { itemStyle: { borderWidth: 3, borderColor: engine.$theme().color.emphasis, opacity: 1 } },
+          selectedMode: 'single',
+          labelLine: { show: false },
+          data,
+          animationEasing: 'cubicOut',
+        }),
+      ],
+    };
+  },
+};
+
+// Scatter chart handler integrated from PR #1362
+const ScatterChartOptionsHandler = {
+  components: [BaseChartOptionsHandler],
+  options(tableObject, options) {
+    const engine = options.engine;
+    console.log('Rendering scatter chart:', tableObject);
+
+    // Support both forms from PR #1362:
+    // 1) Single series: | :scatter:{name,x,y,size?} | X | Y | Size? |
+    // 2) Multi series: | :scatter:{group,name,x,y,size?} | X | Y | Size? | Series |
+    const headers = tableObject.header;
+    const findHeader = (candidates) =>
+      headers.findIndex((h, i) => i > 0 && candidates.some((c) => String(h).toLowerCase().includes(c)));
+    const xCol = findHeader(['x']);
+    const yCol = findHeader(['y']);
+    const sizeCol = findHeader(['size', '大小']);
+    let groupCol = findHeader(['series', 'group', '分组', '系列']);
+    // If column count reaches name,x,y,size,group length but no group detected, default last column as group
+    if (groupCol <= 0 && headers.length >= 5) {
+      groupCol = headers.length - 1;
+    }
+
+    const hasSizeColumn = sizeCol > 0;
+    const hasGroupColumn = groupCol > 0;
+
+    // Parse into unified objects
+    const parsedRows = tableObject.rows.map((row) => {
+      const x = engine.$num(row[xCol > 0 ? xCol : 1]);
+      const y = engine.$num(row[yCol > 0 ? yCol : 2]);
+      const size = hasSizeColumn ? engine.$num(row[sizeCol]) : undefined;
+      const seriesName = hasGroupColumn ? String(row[groupCol] ?? '').trim() || '系列1' : null;
+      return { name: row[0], x, y, size, seriesName };
+    });
+
+    // If size column provided, use linear normalization (6~28) to control point display size
+    let minSize = Infinity;
+    let maxSize = -Infinity;
+    if (hasSizeColumn) {
+      parsedRows.forEach((r) => {
+        if (typeof r.size === 'number' && !Number.isNaN(r.size)) {
+          minSize = Math.min(minSize, r.size);
+          maxSize = Math.max(maxSize, r.size);
+        }
+      });
+      if (!Number.isFinite(minSize) || !Number.isFinite(maxSize)) {
+        minSize = 0;
+        maxSize = 0;
+      }
+    }
+
+    // Build series data
+    let series = [];
+    if (hasGroupColumn) {
+      const groupMap = new Map();
+      parsedRows.forEach((r) => {
+        const item = { value: [r.x, r.y], name: r.name };
+        if (hasSizeColumn) {
+          if (maxSize === minSize) {
+            item.symbolSize = 12;
+          } else if (typeof r.size === 'number' && !Number.isNaN(r.size)) {
+            const t = (r.size - minSize) / (maxSize - minSize);
+            item.symbolSize = Math.round(6 + t * (28 - 6));
+          } else {
+            item.symbolSize = 10;
+          }
+        }
+        const key = r.seriesName;
+        if (!groupMap.has(key)) groupMap.set(key, []);
+        groupMap.get(key).push(item);
+      });
+      series = Array.from(groupMap.entries()).map(([name, data]) =>
+        engine.$baseSeries('scatter', {
+          name,
+          data,
+          emphasis: {
+            focus: 'series',
+            itemStyle: {
+              shadowBlur: engine.$theme().shadow.blur,
+              shadowColor: engine.$theme().shadow.color,
+              borderWidth: 2,
+              borderColor: engine.$theme().color.emphasis,
+            },
+          },
+          select: { itemStyle: { borderWidth: 2, borderColor: engine.$theme().color.emphasis, opacity: 1 } },
+          selectedMode: 'single',
+          animationEasing: 'cubicOut',
+        }),
+      );
+    } else {
+      const data = parsedRows.map((r) => {
+        const item = { value: [r.x, r.y], name: r.name };
+        if (hasSizeColumn) {
+          if (maxSize === minSize) item.symbolSize = 12;
+          else if (typeof r.size === 'number' && !Number.isNaN(r.size)) {
+            const t = (r.size - minSize) / (maxSize - minSize);
+            item.symbolSize = Math.round(6 + t * (28 - 6));
+          } else item.symbolSize = 10;
+        }
+        return item;
+      });
+      series = [
+        engine.$baseSeries('scatter', {
+          name: '散点',
+          data,
+          emphasis: {
+            focus: 'series',
+            itemStyle: { borderWidth: 2, borderColor: engine.$theme().color.emphasis },
+          },
+          select: { itemStyle: { borderWidth: 2, borderColor: engine.$theme().color.emphasis, opacity: 1 } },
+          selectedMode: 'single',
+          animationEasing: 'cubicOut',
+        }),
+      ];
+    }
+
+    return {
+      tooltip: engine.$tooltip({
+        trigger: 'item',
+        formatter(params) {
+          const [x, y] = params.value || [];
+          return `${params.name}<br/>x: <strong>${x}</strong><br/>y: <strong>${y}</strong>`;
+        },
+      }),
+      legend: engine.$legend(),
+      toolbox: engine.$toolbox({ dataZoom: {} }),
+      grid: engine.$grid(),
+      xAxis: engine.$axis('value'),
+      yAxis: engine.$axis('value'),
+      series,
+    };
+  },
+};
+
+// Map chart handlers from PR #1349 with PR #1362 integration
 const MapChartLoadingOptionsHandler = {
   options(tableObject, options) {
     console.log('Rendering map chart:', tableObject);
@@ -665,10 +2043,7 @@ const MapChartLoadingOptionsHandler = {
             text: '正在加载地图数据...',
             left: 'center',
             top: 'middle',
-            textStyle: {
-              color: '#666',
-              fontSize: 16,
-            },
+            textStyle: { color: '#666', fontSize: 16 },
           },
           graphic: {
             elements: [
@@ -688,21 +2063,15 @@ const MapChartLoadingOptionsHandler = {
   },
 };
 
-// 地图的真正配置
 const MapChartCompleteOptionsHandler = {
   components: [BaseChartOptionsHandler],
   options(tableObject, options) {
+    const engine = options.engine;
     const mapData = tableObject.rows.map((row) => {
       const originalName = row[0];
       const standardName = normalizeProvinceName(originalName);
-      const value = parseFloat(row[1].replace(/,/g, '')) || 0;
-
-      Logger.log(`Name mapping: "${originalName}" -> "${standardName}"`);
-
-      return {
-        name: standardName,
-        value,
-      };
+      const value = engine.$num(row[1]);
+      return { name: standardName, value };
     });
 
     return {
@@ -714,38 +2083,27 @@ const MapChartCompleteOptionsHandler = {
         top: 'bottom',
         text: ['高', '低'],
         calculable: true,
-        inRange: {
-          color: ['#e0ffff', '#006edd'],
-        },
+        inRange: { color: engine.$palette('map') },
         textStyle: {
-          fontSize: 12,
+          color: engine.$theme().color.text,
+          fontSize: engine.$theme().fontSize.base,
         },
       },
       series: [
         {
           name: '地图数据',
           type: 'map',
-          map: options.mapDataSource,
+          map: options.mapDataSource || 'china',
           roam: true,
-          label: {
-            show: true,
-            fontSize: 10,
-          },
+          label: { show: true, fontSize: 12 },
+          data: mapData,
           emphasis: {
             label: {
               show: true,
-              fontSize: 12,
+              fontSize: engine.$theme().fontSize.base,
               fontWeight: 'bold',
             },
-            itemStyle: {
-              areaColor: '#ffefd5',
-            },
-          },
-          data: mapData,
-          itemStyle: {
-            areaColor: '#f5f5f5',
-            borderColor: '#999',
-            borderWidth: 0.5,
+            itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' },
           },
         },
       ],
@@ -753,15 +2111,11 @@ const MapChartCompleteOptionsHandler = {
   },
 };
 
-// 地图配置比较特殊，由于需要异步加载地图数据源，所以有两阶段的配置，同步返回默认配置，异步加载地图数据源后生成真正配置
 const MapChartOptionsHandler = {
   options(tableObject, options) {
     this.$loadMapData(tableObject, options);
     return generateOptions(MapChartLoadingOptionsHandler, tableObject, options);
   },
-  /**
-   * 设置地图数据加载路径列表并尝试加载
-   */
   $loadMapData(tableObject, options) {
     let paths = [];
     if (options && options.mapDataSource) {
@@ -771,14 +2125,11 @@ const MapChartOptionsHandler = {
       paths = paths.concat(options.engine.cherryOptions.toolbars.config.mapTable.sourceUrl);
     }
     paths = paths.concat([
-      'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', // 在线高质量地图数据源（优先，已验证可用）
-      './assets/data/china.json', // 从examples目录访问本地备份文件
+      'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
+      './assets/data/china.json',
     ]);
     this.$tryLoadMapDataFromPaths(paths, 0, options);
   },
-  /**
-   * 依次尝试从多个路径加载地图数据
-   */
   $tryLoadMapDataFromPaths(paths, index, options) {
     if (index >= paths.length) {
       console.error('所有地图数据源都加载失败');
@@ -790,40 +2141,26 @@ const MapChartOptionsHandler = {
 
     this.$fetchMapData(url)
       .then((geoJson) => {
-        // 注册地图数据
         window.echarts.registerMap(url, geoJson);
-        console.log(`中国地图数据加载成功！来源: ${url}`);
-
-        // 触发重新渲染已有的地图图表
+        console.log(`地图数据加载成功！来源: ${url}`);
         this.$refreshMapChart(options.chartId, url, options.engine);
         return geoJson;
       })
       .catch((error) => {
         console.warn(`地图数据加载失败 (${url}):`, error.message);
-        // 尝试下一个路径
         this.$tryLoadMapDataFromPaths(paths, index + 1, options);
       });
   },
-  /**
-   * 获取地图数据
-   */
   $fetchMapData(url) {
-    return fetch(url, {
-      referrerPolicy: 'no-referrer',
-    }).then((response) => {
+    return fetch(url, { referrerPolicy: 'no-referrer' }).then((response) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status} for ${url}`);
       }
       return response.json();
     });
   },
-  /**
-   * 刷新页面中的地图图表
-   */
   $refreshMapChart(chartId, url, engine) {
-    // 查找页面中对应的地图图表容器，重新渲染
     const container = document.querySelector(`[id="${chartId}"][data-chart-type="map"]`);
-    // 从 data 属性获取存储的表格数据
     const tableDataStr = container.getAttribute('data-table-data');
     const chartOptionsStr = container.getAttribute('data-chart-options');
 
@@ -834,14 +2171,12 @@ const MapChartOptionsHandler = {
         deepMerge(chartOptions, { mapDataSource: url });
 
         const chartOption = generateOptions(MapChartCompleteOptionsHandler, tableData, chartOptions);
-        // deepMerge(chartOption, { 'series.$item': { map: url } });
         const existingChart = engine.echartsRef.getInstanceByDom(container);
 
         if (existingChart) {
           existingChart.setOption(chartOption, true);
           console.log('Map chart refreshed successfully:', chartId);
         } else {
-          // 重新创建图表
           const newChart = engine.echartsRef.init(container);
           newChart.setOption(chartOption);
           console.log('Map chart recreated:', chartId);
@@ -853,7 +2188,7 @@ const MapChartOptionsHandler = {
   },
 };
 
-// 省份名称映射表
+// Province name mapping from PR #1349
 const provinceNameMap = {
   北京: '北京市',
   天津: '天津市',
@@ -891,17 +2226,9 @@ const provinceNameMap = {
   澳门: '澳门特别行政区',
 };
 
-// 名称标准化函数
 const normalizeProvinceName = (inputName) => {
-  // 移除可能的空格
   const cleanName = inputName.trim();
-
-  // 直接匹配映射表
-  if (provinceNameMap[cleanName]) {
-    return provinceNameMap[cleanName];
-  }
-
-  // 如果输入已经是完整名称，直接返回
+  if (provinceNameMap[cleanName]) return provinceNameMap[cleanName];
   if (
     cleanName.endsWith('市') ||
     cleanName.endsWith('省') ||
@@ -910,207 +2237,17 @@ const normalizeProvinceName = (inputName) => {
   ) {
     return cleanName;
   }
-
-  // 模糊匹配：查找包含输入名称的省份
   for (const [shortName, fullName] of Object.entries(provinceNameMap)) {
     if (fullName.includes(cleanName) || cleanName.includes(shortName)) {
       return fullName;
     }
   }
-
-  // 如果都没匹配到，返回原名称
   console.warn(`Province name not matched: ${inputName}`);
   return cleanName;
 };
 
-const HeatmapChartOptionsHandler = {
-  components: [BaseChartOptionsHandler],
-  options(tableObject, options) {
-    // 构建热力图数据
-    const xAxisData = tableObject.header.slice(1); // 列标题作为x轴
-    const yAxisData = tableObject.rows.map((row) => row[0]); // 行标题作为y轴
-    const data = [];
-    // 构建热力图数据点 [x索引, y索引, 值]
-    tableObject.rows.forEach((row, yIndex) => {
-      row.slice(1).forEach((value, xIndex) => {
-        const numValue = parseFloat(value.replace(/,/g, '')) || 0;
-        data.push([xIndex, yIndex, numValue]);
-      });
-    });
-
-    // 计算数值范围用于颜色映射
-    const values = data.map((item) => item[2]);
-    const minValue = Math.min(...values);
-    const maxValue = Math.max(...values);
-
-    return {
-      tooltip: {
-        formatter(params) {
-          return `${yAxisData[params.data[1]]}<br/>${xAxisData[params.data[0]]}: <strong>${params.data[2]}</strong>`;
-        },
-      },
-      grid: {
-        height: '50%',
-        top: '10%',
-        left: '10%',
-        right: '10%',
-      },
-      xAxis: {
-        type: 'category',
-        data: xAxisData,
-        splitArea: {
-          show: true,
-        },
-        axisLabel: {
-          fontSize: 12,
-        },
-      },
-      yAxis: {
-        type: 'category',
-        data: yAxisData,
-        splitArea: {
-          show: true,
-        },
-        axisLabel: {
-          fontSize: 12,
-        },
-      },
-      visualMap: {
-        min: minValue,
-        max: maxValue,
-        calculable: true,
-        orient: 'horizontal',
-        left: 'center',
-        bottom: '15%',
-        inRange: {
-          color: [
-            '#313695',
-            '#4575b4',
-            '#74add1',
-            '#abd9e9',
-            '#e0f3f8',
-            '#ffffcc',
-            '#fee090',
-            '#fdae61',
-            '#f46d43',
-            '#d73027',
-            '#a50026',
-          ],
-        },
-        textStyle: {
-          fontSize: 12,
-        },
-      },
-      series: [
-        {
-          name: '热力图数据',
-          type: 'heatmap',
-          data,
-          label: {
-            show: true,
-            fontSize: 10,
-          },
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowColor: 'rgba(0, 0, 0, 0.5)',
-              borderWidth: 2,
-              borderColor: '#ff6b6b',
-            },
-          },
-          select: {
-            itemStyle: {
-              borderWidth: 2,
-              borderColor: '#ff6b6b',
-              opacity: 1,
-            },
-          },
-          selectedMode: 'single',
-          animation: true,
-          animationDuration: 1000,
-          animationEasing: 'cubicOut',
-        },
-      ],
-      toolbox: {
-        top: 'bottom',
-      },
-    };
-  },
-};
-
-const PieChartOptionsHandler = {
-  components: [BaseChartOptionsHandler],
-  options(tableObject, options) {
-    // 构建饼图数据
-    const data = tableObject.rows.map((row) => ({
-      name: row[0],
-      value: parseFloat(row[1].replace(/,/g, '')) || 0,
-    }));
-
-    return {
-      tooltip: {
-        formatter: '{a} <br/>{b}: {c} ({d}%)',
-      },
-      legend: {
-        orient: 'vertical',
-        left: 'left',
-        top: 'middle',
-        textStyle: {
-          fontSize: 12,
-        },
-      },
-      series: [
-        {
-          name: '数据分布',
-          type: 'pie',
-          radius: ['40%', '70%'],
-          center: ['50%', '50%'],
-          avoidLabelOverlap: false,
-          label: {
-            show: false,
-            position: 'center',
-          },
-          emphasis: {
-            label: {
-              show: true,
-              fontSize: '18',
-              fontWeight: 'bold',
-            },
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)',
-              borderWidth: 3,
-              borderColor: '#ff6b6b',
-            },
-          },
-          select: {
-            itemStyle: {
-              borderWidth: 3,
-              borderColor: '#ff6b6b',
-              opacity: 1,
-            },
-          },
-          selectedMode: 'single',
-          labelLine: {
-            show: false,
-          },
-          data,
-          animation: true,
-          animationDuration: 1000,
-          animationEasing: 'cubicOut',
-        },
-      ],
-    };
-  },
-};
-
 /**
- * 生成图表配置，其中的 handler 的 components 中的值会被递归地注入到配置中
- * @param handler 配置的处理器
- * @param tableObject 表格参数
- * @param options 一些配置值，包括用户配置和地图所需的辅助属性
- * @returns {{}} 图表配置
+ * Generate chart options with handler composition from PR #1349
  */
 function generateOptions(handler, tableObject, options) {
   let result;
@@ -1127,10 +2264,7 @@ function generateOptions(handler, tableObject, options) {
 }
 
 /**
- * 深度合并，对于嵌套属性是添加而非替换，另外对列表属性做了适配
- * @param target 目标对象，本身会被修改
- * @param source 源对象
- * @returns {*} 目标对象
+ * Deep merge utility from PR #1349
  */
 function deepMerge(target, source) {
   for (const key of Object.keys(source)) {
@@ -1146,15 +2280,12 @@ function deepMerge(target, source) {
 
       const key3 = keyList[keyList.length - 1];
       if (Array.isArray(target2) && key3 === '$item') {
-        // 如果是要给数组元素赋值。
         for (const item of target2) {
           deepMerge(item, source[key]);
         }
       } else if (typeof target2[key3] === 'object' && typeof source[key] === 'object') {
-        // 如果目标对象在该属性上已经存在一个对象，并且源对象对应的属性也是一个对象，则递归合并。
         deepMerge(target2[key3], source[key]);
       } else {
-        // 否则，直接覆盖或新增属性。
         target2[key3] = source[key];
       }
     }
