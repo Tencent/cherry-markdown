@@ -176,7 +176,7 @@ var basicConfig = {
         engine: 'MathJax', // katex或MathJax
         // engine: 'katex', // katex或MathJax
         src: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js', // 如果使用MathJax plugins，则需要使用该url通过script标签引入
-        // src: 'https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js', 
+        // src: 'https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js',
         // css: 'https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css', // 如果使用katex，则还需要引入css（如果是MathJax，则不需要）
       },
       inlineMath: {
@@ -197,7 +197,7 @@ var basicConfig = {
       // 'header': {
       //   strict: false
       // }
-      
+
       panel: {
         // 是否支持对齐语法
         enableJustify: true,
@@ -296,7 +296,8 @@ var basicConfig = {
         insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'inlineCode', 'formula', 'toc', 'table', 'pdf', 'word', 'file'],
       },
       'graph',
-      'customMenuTable',
+      'proTable',
+      // 'customMenuTable',
       'togglePreview',
       'codeTheme',
       'search',

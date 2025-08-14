@@ -31,7 +31,7 @@ export default class RadarTable extends MenuBase {
   onClick(selection, shortKey = '') {
     // 插入带雷达图的表格
     return `${selection}\n\n${[
-      '| :radar: {x,y} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |',
+      '| :radar: {title: 雷达图,} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |',
       '| :-: | :-: | :-: | :-: | :-: | :-: |',
       '| 用户A | 90 | 85 | 75 | 80 | 88 |',
       '| 用户B | 75 | 90 | 88 | 85 | 78 |',

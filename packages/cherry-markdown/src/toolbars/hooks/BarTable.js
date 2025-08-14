@@ -29,9 +29,9 @@ export default class BarTable extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    // 插入带折线图的表格
+    // 插入带柱状图的表格
     return `${selection}\n\n${[
-      '| :bar: {x,y} | a | b | c |',
+      '| :bar: {title: 柱状图,} | a | b | c |',
       '| :-: | :-: | :-: | :-: |',
       '| x | 1 | 2 | 3 |',
       '| y | 2 | 4 | 6 |',
