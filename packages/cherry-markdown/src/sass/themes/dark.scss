@@ -154,7 +154,7 @@
 /** 预览区域样式 */
 .cherry-markdown.theme__dark {
   figure {
-    svg {
+    svg:not(.echarts-svg) {
       path,
       rect,
       line {
