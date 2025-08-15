@@ -506,6 +506,26 @@ export interface CherryEngineOptions {
   customSyntax?: Record<string, CustomSyntaxRegConfig['syntaxClass'] | CustomSyntaxRegConfig>;
 }
 
+export type SuggesterItem = {
+  icon?: string;
+  label: string;
+  keyword: string;
+  value: string | (() => string);
+  goLeft?: number;
+  goTop?: number;
+  selection?: { from: number; to: number };
+  exactMatch?: boolean;
+};
+
+export type SuggesterCallbackItem = {
+  icon?: string;
+  label: string;
+  value: string | (() => string);
+  goLeft?: number;
+  goTop?: number;
+  selection?: { from: number; to: number };
+};
+
 export type EditorMode =
   /** 仅编辑 */
   | 'editOnly'
@@ -543,6 +563,26 @@ export interface CherryEditorOptions {
   showSuggestList?: boolean;
   /** URL的最大长度，-1表示不限制，超过该长度的URL会显示省略号 */
   maxUrlLength?: number;
+  /**
+   * 输入联想配置
+   */
+  suggester?: {
+    /** 完全覆盖默认的系统候选项 */
+    systemSuggestList?: SuggesterItem[];
+    /** 在默认系统候选项基础上追加 */
+    extendSystemSuggestList?: SuggesterItem[];
+    /** 自定义联想（如 @ 等）列表 */
+    suggester?: Array<{
+      /** 获取候选列表 */
+      suggestList: (word: string, callback: (list: Array<string | SuggesterCallbackItem> | false) => void) => void;
+      /** 唤醒关键字，默认 '@' */
+      keyword?: string;
+      /** 自定义候选面板渲染 */
+      suggestListRender?: (valueArray: Array<string | SuggesterCallbackItem>) => string | Element | Element[];
+      /** 自定义回显，返回空串可使用默认回显；返回 false 关闭回显 */
+      echo?: ((value: string) => string) | false;
+    }>;
+  };
 }
 
 export type CherryLifecycle = (text: string, html: string) => void;

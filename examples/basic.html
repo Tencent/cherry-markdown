@@ -26,6 +26,7 @@
 
 <body>
   <div id="markdown"></div>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
   <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
 </body>
 <script>
@@ -37,6 +38,13 @@ var config = {
       console.log('change');
     }
   },
+  engine: {
+    syntax: {
+      table: {
+        enableChart: true,
+      },
+    }
+  }
 };
 var sourceCode = document.documentElement.outerHTML;
 var cherry = new Cherry(config);

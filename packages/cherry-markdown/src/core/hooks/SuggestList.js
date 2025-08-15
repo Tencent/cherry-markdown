@@ -312,8 +312,25 @@ const CodeLangSuggestList = (() => {
  */
 const OtherSuggestList = HalfWidthSuggestList.concat(MoreSuggestList).concat(CodeLangSuggestList);
 
-export function allSuggestList(keyword, locales) {
-  const systemSuggestList = SystemSuggestList.map((item) => ({
+export function allSuggestList(keyword, locales, suggesterConfig) {
+  // 支持通过 Cherry.config.js -> engine.syntax.suggester 注入系统候选项
+  // 优先级：config.systemSuggestList 覆盖默认 → 默认 + config.extendSystemSuggestList 追加
+  let effectiveSystemList = SystemSuggestList;
+  if (
+    suggesterConfig &&
+    Array.isArray(suggesterConfig.systemSuggestList) &&
+    suggesterConfig.systemSuggestList.length > 0
+  ) {
+    effectiveSystemList = suggesterConfig.systemSuggestList;
+  } else if (
+    suggesterConfig &&
+    Array.isArray(suggesterConfig.extendSystemSuggestList) &&
+    suggesterConfig.extendSystemSuggestList.length > 0
+  ) {
+    effectiveSystemList = SystemSuggestList.concat(suggesterConfig.extendSystemSuggestList);
+  }
+
+  const systemSuggestList = effectiveSystemList.map((item) => ({
     ...item,
     label: locales[item.label] || item.label,
   }));
