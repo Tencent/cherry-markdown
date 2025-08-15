@@ -127,19 +127,29 @@ export default class PreviewerBubble {
 
   /**
    * 是否为由cherry生成的表格，且不是简单表格
+   * 现在也支持 HTML 表格语法
    * @param {HTMLElement} element
-   * @returns {boolean}
+   * @returns {boolean|HTMLElement}
    */
   isCherryTable(element) {
+    // 获取最近的表格元素
+    const table = this.$getClosestNode(element, 'TABLE');
+    if (!table) {
+      return false;
+    }
+
+    // 引用里的表格不支持所见即所得编辑（维持原有限制）
+    if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
+      return false;
+    }
+
+    // 排除简单表格
     const container = this.$getClosestNode(element, 'DIV');
-    if (container === false) {
+    if (container && /simple-table/.test(container.className)) {
       return false;
     }
-    if (/simple-table/.test(container.className) || !/cherry-table-container/.test(container.className)) {
-      return false;
-    }
-    // 现在支持引用语法中的表格编辑
-    return true;
+
+    return table;
   }
 
   /**
