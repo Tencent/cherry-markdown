@@ -1108,7 +1108,6 @@ export default class EChartsTableEngine {
       if (window.echarts && window.echarts.getMap('china')) {
         Logger.log('清除现有地图数据以使用自定义地图数据源');
       }
-
       // 立即开始加载自定义地图数据，这会覆盖默认地图数据
       this.$loadCustomMapData(options.mapDataSource, true);
     } else {
@@ -1116,7 +1115,6 @@ export default class EChartsTableEngine {
       // 只有在没有自定义数据源时才加载默认地图数据
       this.$loadChinaMapData();
     }
-
     // 立即返回地图图表配置
     return this.$renderMapChartCommon(tableObject, options);
   }
