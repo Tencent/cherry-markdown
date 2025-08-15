@@ -184,6 +184,7 @@
         color: var(--oc-white);
       }
     }
+    /* 排序按钮 */
     &__sort {
       pointer-events: auto;
       display: flex;
@@ -232,6 +233,24 @@
         width: 18px;
         height: 18px;
       }
+    }
+  }
+  .border-highlight {
+    --highlight-color: var(--oc-red-6);
+    --highlight-width: 2px;
+    transition: border-color 0.2s ease;
+    
+    &-top { 
+      border-top: var(--highlight-width) solid var(--highlight-color); 
+    }
+    &-bottom { 
+      border-bottom: var(--highlight-width) solid var(--highlight-color) 
+    }
+    &-left { 
+      border-left: var(--highlight-width) solid var(--highlight-color)
+    }
+    &-right { 
+      border-right: var(--highlight-width) solid var(--highlight-color)
     }
   }
   @keyframes changeBgColor {

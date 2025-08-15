@@ -26,6 +26,9 @@ export default class TableHandler {
     info: {}, // 当前点击的预览区域table的相关信息
     tableCodes: [], // 编辑器内所有的表格语法
     editorDom: {}, // 编辑器容器
+    mainTableCodes: [], // 正文表格代码
+    footnoteTableCodes: [], // 脚注表格代码
+    blockquoteTableCodes: [], // 引用表格内的代码
   };
 
   constructor(trigger, target, container, previewerDom, codeMirror, tableElement, cherry) {
@@ -171,40 +174,182 @@ export default class TableHandler {
   }
 
   $remove() {
-    this.tableEditor = { info: {}, tableCodes: [], editorDom: {} };
+    this.tableEditor = {
+      info: {},
+      tableCodes: [],
+      editorDom: {},
+      mainTableCodes: [],
+      footnoteTableCodes: [],
+      blockquoteTableCodes: [],
+    };
   }
 
   /**
    * 收集编辑器中的表格语法，并记录表格语法的开始的offset
+   * 支持脚注表格的分类收集
    */
   $collectTableCode() {
-    const tableCodes = [];
-    this.codeMirror
-      .getValue()
-      .replace(this.codeBlockReg, (whole, ...args) => {
-        // 先把代码块里的表格语法关键字干掉
-        return whole.replace(/\|/g, '.');
-      })
-      .replace(this.tableReg, function (whole, ...args) {
-        const match = whole.replace(/^\n*/, '');
-        const offsetBegin = args[args.length - 2] + whole.match(/^\n*/)[0].length;
-        tableCodes.push({
-          code: match,
-          offset: offsetBegin,
+    const content = this.codeMirror.getValue();
+    // 记录所有脚注位置范围
+    const footnoteRange = [];
+    const footnoteRegex = /\[\^[^\]]+\]:\s*([^]*?)(?=\n\n|\[\^|\n*$)/g;
+    let footnoteMatch;
+    while ((footnoteMatch = footnoteRegex.exec(content)) !== null) {
+      footnoteRange.push({
+        start: footnoteMatch.index,
+        end: footnoteMatch.index + footnoteMatch[0].length,
+        content: footnoteMatch[1], // 脚注内容
+        fullMatch: footnoteMatch[0], // 完整匹配
+      });
+    }
+    // 记录所有引用位置范围
+    const blockquoteRange = [];
+    const blockquoteRegex = /(^|\n)((?:[ \t]*>.*(?:\n|$))+)/g;
+    let blockquoteMatch;
+    while ((blockquoteMatch = blockquoteRegex.exec(content)) !== null) {
+      const full = blockquoteMatch[2];
+      const end = blockquoteMatch.index + blockquoteMatch[0].length;
+      const inner = full.replace(/^[ \t]*> ?/gm, '');
+      // 引用内容下，表格位置
+      blockquoteRange.push({
+        start: blockquoteMatch.index, // 引用块开始位置
+        end, // 引用块结束位置
+        content: inner, // 引用块内容，去掉>
+        fullMatch: full,
+      });
+    }
+    // 根据表格类型，收集对应的代码
+    if (this.tableEditor.info?.isInFootnote) {
+      const footnoteTableCodes = [];
+      footnoteRange.forEach((footnoteRange) => {
+        const footnoteContent = footnoteRange.content.replace(this.codeBlockReg, (whole) => {
+          return whole.replace(/\|/g, '.');
+        });
+        footnoteContent.replace(this.tableReg, (whole, ...args) => {
+          const match = whole.replace(/^\n*/, '');
+          // 计算在原始内容的偏移 核心
+          const relativeOffset = args[args.length - 2] + whole.match(/^\n*/)[0].length;
+          const absoluteOffset =
+            footnoteRange.start + (footnoteRange.fullMatch.length - footnoteRange.content.length) + relativeOffset;
+          footnoteTableCodes.push({
+            code: match,
+            offset: absoluteOffset,
+          });
+          return whole;
         });
       });
-    this.tableEditor.tableCodes = tableCodes;
+      this.tableEditor.tableCodes = footnoteTableCodes;
+      this.tableEditor.footnoteTableCodes = footnoteTableCodes;
+      this.tableEditor.mainTableCodes = []; // 清空正文表格
+    } else if (this.tableEditor.info?.isInBlock) {
+      const blockquoteTableCodes = [];
+      blockquoteRange.forEach((range) => {
+        // > ## 2023-07-07
+        // > very interesting!!!
+        // >
+        // > |A|B|C|
+        // > |:-:|-:|:-
+        // > |D|E|B|
+        // > |F|G|H|
+        // > Hi baby!
+        // 获取里面的包含表格的代码
+        // 去掉引用符号后的表格内容 表格内的偏移值
+        let blockInnerTable = '';
+        range.content.match(this.tableReg).forEach((tableContent) => {
+          const match = tableContent.replace(/^\n*/, '');
+          blockInnerTable = match;
+        });
+        // 计算每一行|的偏移量
+        const blockContentLines = range.fullMatch.split('\n');
+        const tableLinesOffets = blockContentLines.map((line) => {
+          const firstPipeIndex = line.indexOf('|');
+          return {
+            line, // 这一行的内容
+            hasTable: firstPipeIndex >= 0,
+            firstPipeIndex: firstPipeIndex >= 0 ? firstPipeIndex : -1, // 这一行第一个|的位置, 包含>
+          };
+        });
+        // 表格在引用块内的偏移量 包括>
+        const fistTablePostion = range.fullMatch.indexOf('|');
+        const absoluteOffset = range.start + fistTablePostion;
+        blockquoteTableCodes.push({
+          code: blockInnerTable,
+          offset: absoluteOffset,
+          tableLinesOffets,
+        });
+      });
+      this.tableEditor.tableCodes = blockquoteTableCodes;
+      this.tableEditor.blockquoteTableCodes = blockquoteTableCodes;
+      this.tableEditor.mainTableCodes = [];
+    } else {
+      // 收集正文表格（排除脚注）
+      // 处理内容 只处理代码块，不处理其他特殊情况
+      const processedContent = content.replace(this.codeBlockReg, (whole) => {
+        return whole.replace(/\|/g, '.');
+      });
+      const mainTableCodes = [];
+      processedContent.replace(this.tableReg, (whole, ...args) => {
+        // 去除前导换行符，得到表格内容
+        const match = whole.replace(/^\n*/, '');
+        const offsetBegin = args[args.length - 2] + whole.match(/^\n*/)[0].length;
+        const isInFootnote = footnoteRange.some((range) => offsetBegin >= range.start && offsetBegin < range.end);
+        const isInCodeBlock = blockquoteRange.some(
+          (codeBlock) => offsetBegin >= codeBlock.start && offsetBegin < codeBlock.end,
+        );
+        if (!isInFootnote && !isInCodeBlock) {
+          mainTableCodes.push({
+            code: match,
+            offset: offsetBegin,
+          });
+        }
+      });
+      this.tableEditor.tableCodes = mainTableCodes;
+      this.tableEditor.mainTableCodes = mainTableCodes;
+      this.tableEditor.footnoteTableCodes = [];
+    }
   }
 
   /**
    * 获取预览区域被点击的table对象，并记录table的顺位
+   * 支持表格类型识别和分类统计
    */
   $collectTableDom() {
-    const list = Array.from(this.previewerDom.querySelectorAll('table.cherry-table'));
+    const allTables = Array.from(this.previewerDom.querySelectorAll('table.cherry-table'));
     const tableNode = this.$getClosestNode(this.target, 'TABLE');
     if (tableNode === false) {
       return false;
     }
+
+    // 判断表格类型
+    const isInFootnote = !!tableNode.closest('.cherry-footnote, [class*="footnote"]');
+    const isInBlock = !!tableNode.closest('blockquote');
+    // 分类收集表格
+    const mainTables = [];
+    const footnoteTables = [];
+    const blockTables = [];
+    allTables.forEach((table) => {
+      const footnoteContainer = table.closest('.cherry-footnote, [class*="footnote"]');
+      const blockContainer = table.closest('blockquote');
+      if (footnoteContainer) {
+        footnoteTables.push(table);
+      } else if (blockContainer) {
+        blockTables.push(table);
+      } else {
+        mainTables.push(table);
+      }
+    });
+
+    // 据类型选择对应集合
+    let targetTables;
+    if (isInFootnote) {
+      targetTables = footnoteTables;
+    } else if (isInBlock) {
+      targetTables = blockTables;
+    } else {
+      targetTables = mainTables;
+    }
+    const tableIndex = targetTables.indexOf(tableNode);
+
     const columns = Array.from(this.target.parentElement.childNodes).filter((child) => {
       // 计算列数
       return child.tagName.toLowerCase() === 'td';
@@ -217,10 +362,12 @@ export default class TableHandler {
       tdIndex: Array.from(this.target.parentElement.childNodes).indexOf(this.target),
       trIndex: Array.from(this.target.parentElement.parentElement.childNodes).indexOf(this.target.parentElement),
       isTHead: this.target.parentElement.parentElement.tagName !== 'TBODY',
-      totalTables: list.length,
-      tableIndex: list.indexOf(tableNode),
+      totalTables: targetTables.length, // 使用分类后的数量
+      tableIndex, // 使用分类后的索引
       tableText: tableNode.textContent.replace(/[\s]/g, ''),
       columns,
+      isInFootnote, // 保存表格类型标识
+      isInBlock,
     };
   }
 
@@ -232,7 +379,11 @@ export default class TableHandler {
    */
   $setSelection(index, type = 'table', select = true) {
     const tableCode = this.tableEditor.tableCodes[index];
-    const whole = this.codeMirror.getValue();
+    if (!tableCode) {
+      console.warn('表格代码不存在，索引:', index);
+      return;
+    }
+    const whole = this.codeMirror.getValue(); // 全文内容
     const selectTdInfo = this.tableEditor.info;
     const beginLine = whole.slice(0, tableCode.offset).match(/\n/g)?.length ?? 0;
     const { preLine, preCh, plusCh, currentTd } = this.$getTdOffset(
@@ -240,10 +391,14 @@ export default class TableHandler {
       selectTdInfo.isTHead,
       selectTdInfo.trIndex,
       selectTdInfo.tdIndex,
+      selectTdInfo.isInBlock,
     );
     if (type === 'table') {
       const endLine = beginLine + tableCode.code.match(/\n/g).length;
-      const endCh = tableCode.code.match(/[^\n]+\n*$/)[0].length;
+      let endCh = tableCode.code.match(/[^\n]+\n*$/)[0].length;
+      if (tableCode.info.isInBlock) {
+        endCh += 2;
+      }
       this.tableEditor.info.selection = [
         { line: beginLine, ch: 0 },
         { line: endLine, ch: endCh },
@@ -264,8 +419,9 @@ export default class TableHandler {
    * @param {Boolean} isTHead
    * @param {Number} trIndex
    * @param {Number} tdIndex
+   * @param {Boolean} isInBlock
    */
-  $getTdOffset(tableCode, isTHead, trIndex, tdIndex) {
+  $getTdOffset(tableCode, isTHead, trIndex, tdIndex, isInBlock = false) {
     const codes = tableCode.split(/\n/);
     const targetTr = isTHead ? 0 : trIndex + 2;
     const tds = codes[targetTr].split(/\|/);
@@ -276,8 +432,19 @@ export default class TableHandler {
     for (let i = 0; i < targetTd; i++) {
       pre.push(tds[i]);
     }
+    if (isInBlock) {
+      // 加入> 的偏移量
+      const linseOffsets = 2;
+      return {
+        preLine: targetTr,
+        preCh: needPlus1 ? pre.join('|').length + 1 + linseOffsets : pre.join('|').length,
+        plusCh: current.length,
+        currentTd: current,
+      };
+    }
     return {
       preLine: targetTr,
+      // preCh表示从行首到当前单元格开头的总字符数
       preCh: needPlus1 ? pre.join('|').length + 1 : pre.join('|').length,
       plusCh: current.length,
       currentTd: current,
@@ -286,16 +453,26 @@ export default class TableHandler {
 
   /**
    * 在编辑器里找到对应的表格源码，并让编辑器选中
+   * 支持脚注表格的精确匹配
    */
   $findTableInEditor() {
     this.$collectTableDom();
     this.$collectTableCode();
     // 暂时不考虑代码块中包含表格、人为输入表格html语法、tapd特色表格语法的情况
     // 也就是说，出现上述情况时，表格的所见即所得编辑功能失效
+    // 改为警告而不是直接返回false，提高容错性
     if (this.tableEditor.info.totalTables !== this.tableEditor.tableCodes.length) {
+      // 安全索引处理
+      const safeIndex = Math.min(this.tableEditor.info.tableIndex, this.tableEditor.tableCodes.length - 1);
+      if (safeIndex >= 0) {
+        this.$setSelection(safeIndex, 'td', this.trigger === 'click');
+        return true;
+      }
+
       return false;
     }
     this.$setSelection(this.tableEditor.info.tableIndex, 'td', this.trigger === 'click');
+    return true;
   }
 
   $initReg() {
@@ -411,12 +588,139 @@ export default class TableHandler {
         const { type, dir } = target.dataset;
         this[`$add${type}${dir}`]();
       });
+      // 添加下划线 上面一个有效 下面一个没有效果
+      li.addEventListener('mouseover', (e) => {
+        const { target } = e;
+        if (!(target instanceof HTMLElement)) {
+          return;
+        }
+        const currentRow = this.tableEditor.info.trNode;
+        const { tableNode, tdIndex } = this.tableEditor.info;
+        const { rows } = tableNode;
+        const tds = currentRow.querySelectorAll('td');
+        const dataType = target.getAttribute('data-type');
+        const dataDir = target.getAttribute('data-dir');
+        if (dataType === 'Last' && dataDir === 'Row') {
+          tds.forEach((td) => {
+            td.style.borderTop = '2px solid red';
+          });
+        } else if (dataType === 'Next' && dataDir === 'Row') {
+          tds.forEach((td) => {
+            td.style.borderBottom = '2px solid red';
+          });
+          // tds[0].style.borderTop = '1px solid red';
+        } else if (dataType === 'Last' && dataDir === 'Col') {
+          for (let i = 0; i < rows.length; i++) {
+            const { cells } = rows[i];
+            if (cells[tdIndex]) {
+              cells[tdIndex].style.borderLeft = '2px solid red';
+            }
+          }
+        } else if (dataType === 'Next' && dataDir === 'Col') {
+          for (let i = 0; i < rows.length; i++) {
+            const { cells } = rows[i];
+            if (cells[tdIndex]) {
+              cells[tdIndex].style.borderRight = '2px solid red';
+            }
+          }
+        }
+      });
+      // 取消边界
+      li.addEventListener('mouseout', (e) => {
+        const currentRow = this.tableEditor.info.trNode;
+        const tds = currentRow.querySelectorAll('td');
+        const { tableNode, tdIndex } = this.tableEditor.info;
+        const { rows } = tableNode;
+        tds.forEach((td) => {
+          td.style.borderBottom = '';
+          td.style.borderTop = '';
+          td.style.borderLeft = '';
+          td.style.borderRight = '';
+        });
+        for (let i = 0; i < rows.length; i++) {
+          const { cells } = rows[i];
+          if (cells[tdIndex]) {
+            cells[tdIndex].style.borderRight = '';
+            cells[tdIndex].style.borderLeft = '';
+          }
+        }
+      });
       container.appendChild(li);
     }, true);
     this.tableEditor.editorDom.symbolContainer = container;
     this.container.appendChild(this.tableEditor.editorDom.symbolContainer);
     this.$setSymbolOffset();
   }
+
+  /**
+   * 表格边界边框高亮
+   */
+  $handleBorderHighlight(type, dir) {
+    const { trNode, tdIndex } = this.tableEditor.info;
+    const tds = trNode.querySelectorAll('td');
+    const rows = this.tableEditor.info.trNode;
+    // 防抖 - 避免频繁触发
+    if (this.highlightTimer) {
+      clearTimeout(this.highlightTimer);
+    }
+    this.highlightTimer = setTimeout(() => {
+      // this.$clearAllBorders();
+      // 使用CSS类
+      if (type === 'Last' && dir === 'Row') {
+        tds.forEach((td) => td.classList.add('border-highlight-top'));
+      } else if (type === 'Next' && dir === 'Row') {
+        tds.forEach((td) => td.classList.add('border-highlight-bottom'));
+      } else if (type === 'Last' && dir === 'Col') {
+        this.$setBorderForColumn(rows, tdIndex, 'border-highlight-left');
+      } else if (type === 'Next' && dir === 'Col') {
+        this.$setBorderForColumn(rows, tdIndex, 'border-highlight-right');
+      }
+    }, 50);
+  }
+
+  $setBorderForElements(elements, property, value) {
+    elements.forEach((element) => {
+      element.style[property] = value;
+    });
+  }
+
+  // 设置列边框
+  $setBorderForColumn(rows, colIndex, className) {
+    rows.forEach((row) => {
+      const cell = row.cells[colIndex];
+      if (cell) {
+        cell.classList.add(className);
+      }
+    });
+  }
+
+  // 清除所有边框 暂时没有用到
+  $clearAllBorders() {
+    // 添加安全检查
+    if (!this.tableEditor.info || !this.tableEditor.info.trNode || !this.tableEditor.info.tableNode) {
+      return;
+    }
+    const { trNode, tableNode, tdIndex } = this.tableEditor.info;
+    const { rows } = tableNode;
+    const highlightClasses = [
+      'border-highlight-top',
+      'border-highlight-bottom',
+      'border-highlight-left',
+      'border-highlight-right',
+    ];
+    // 清除行边框
+    trNode.querySelectorAll('td').forEach((td) => {
+      td.classList.remove(...highlightClasses);
+    });
+    // 清除列边框
+    rows.forEach((row, rowIndex) => {
+      const cell = row?.cells?.[tdIndex];
+      if (cell) {
+        highlightClasses.forEach((cls) => cell.classList.remove(cls));
+      }
+    });
+  }
+
   $drawSortSymbol() {
     // const types = ['RowLeft', 'RowRight', 'ColUp', 'ColDown']; // 不要底部的拖拽按钮了，貌似没啥用
     const types = ['RowLeft', 'RowRight', 'ColUp'];
@@ -482,6 +786,7 @@ export default class TableHandler {
     this.container.appendChild(this.tableEditor.editorDom.sortContainer);
     this.$setSortSymbolsPosition();
   }
+
   $setSortSymbolsPosition() {
     const container = this.tableEditor.editorDom.sortContainer;
     const { tableNode, tdNode, isTHead } = this.tableEditor.info;
@@ -520,6 +825,7 @@ export default class TableHandler {
       }
     });
   }
+
   /**
    * 添加上一行
    */
@@ -617,6 +923,7 @@ export default class TableHandler {
         if (tdIndex === 0) cells[tdIndex].style.borderLeft = '1px solid red';
         else cells[tdIndex - 1].style.borderRight = '1px solid red';
         cells[tdIndex].style.borderRight = '1px solid red';
+        cells[tdIndex].style.backgroundColor = 'rgba(255, 100, 100, 0.1)';
       }
     }
   }
@@ -633,6 +940,7 @@ export default class TableHandler {
         if (cells[tdIndex]) {
           if (tdIndex !== 0) cells[tdIndex - 1].style.border = '';
           cells[tdIndex].style.border = ''; // 恢复原始边框
+          cells[tdIndex].style.backgroundColor = '';
         }
       }
     }
@@ -642,7 +950,7 @@ export default class TableHandler {
    * 高亮当前行
    */
   $highlightRow() {
-    this.$doHighlightRow('1px solid red');
+    this.$doHighlightRow('1px solid red', 'rgba(255, 100, 100, 0.1)');
   }
 
   /**
@@ -652,13 +960,18 @@ export default class TableHandler {
     this.$doHighlightRow('');
   }
 
-  $doHighlightRow(style = '') {
+  $doHighlightRow(style = '', backgroundColor = '') {
     const { trNode, tableNode } = this.tableEditor.info;
     const tds = trNode.cells;
     const preTds = trNode.previousElementSibling?.cells || tableNode.tHead.firstChild.cells;
     for (let i = 0; i < tds.length; i++) {
       if (preTds[i]) preTds[i].style.borderBottom = style;
       tds[i].style.borderBottom = style;
+      if (backgroundColor) {
+        tds[i].style.backgroundColor = backgroundColor;
+      } else {
+        tds[i].style.backgroundColor = '';
+      }
     }
     tds[0].style.borderLeft = style;
     tds[tds.length - 1].style.borderRight = style;
