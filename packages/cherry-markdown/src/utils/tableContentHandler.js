@@ -340,7 +340,6 @@ export default class TableHandler {
     this.container.appendChild(this.tableEditor.editorDom.inputDiv);
     this.tableEditor.editorDom.inputDom.value = this.tableEditor.info.code.replace(/<br>/g, '\n');
     this.tableEditor.editorDom.inputDom.focus();
-    
     // 给当前编辑的单元格添加editing类
     this.tableEditor.info.tdNode.classList.add('editing');
     this.tableEditor.editing = true;
