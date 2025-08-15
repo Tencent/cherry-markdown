@@ -142,7 +142,7 @@ export default class PreviewerBubble {
     // if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
     //   return false;
     // }
-    //注释了这个引用的判断
+    // 注释了这个引用的判断
     return container;
   }
 

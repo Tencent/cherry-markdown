@@ -684,13 +684,13 @@ export default class TableHandler {
     const tds = trNode.cells;
     const preTds = trNode.previousElementSibling?.cells || tableNode.tHead.firstChild.cells;
     for (let i = 0; i < tds.length; i++) {
-      style != '' ? tds[0].classList.add('highlighted-error') : tds[0].classList.remove('highlighted-error');
+      style !== '' ? tds[0].classList.add('highlighted-error') : tds[0].classList.remove('highlighted-error');
       if (preTds && preTds[i]) {
         preTds[i].style.borderBottom = style;
       }
       tds[i].style.borderBottom = style;
       if (tds[i + 1].classList) {
-        style != ''
+        style !== ''
           ? tds[i + 1]?.classList.add('highlighted-error')
           : tds[i + 1]?.classList.remove('highlighted-error');
       }
