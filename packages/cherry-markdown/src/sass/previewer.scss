@@ -234,12 +234,21 @@
       }
     }
   }
-  @keyframes changeBgColor {
-    0% { background-color: #ffffcc88; }
-    60% { background-color: #ffffcc88; }
-    100% { background-color: #ffffcc00; }
+
+ @keyframes changeHighlightLineBg {
+  0% {
+    background-color: var(--md-paragraph-highlight-line-bg);
   }
+
+  60% {
+    background-color: var(--md-paragraph-highlight-line-bg);
+  }
+
+  100% {
+    background-color: var(--base-previewer-bg);
+  }
+}
   .cherry-highlight-line {
-    animation: changeBgColor 1s;
+    animation: changeHighlightLineBg 1s;
   }
 }
