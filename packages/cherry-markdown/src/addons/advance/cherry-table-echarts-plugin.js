@@ -1402,12 +1402,7 @@ export default class EChartsTableEngine {
     // 使用 ECharts 内置的中国地图
     const chartOptions = this.$baseOption({
       title: {
-        text: '地图数据分析',
-        left: 'center',
-        top: '5%',
         textStyle: {
-          fontSize: 16,
-          fontWeight: 'bold',
           color: this.$theme().color.text,
         },
       },
@@ -1418,12 +1413,6 @@ export default class EChartsTableEngine {
         },
       }),
       visualMap: {
-        min: Math.min(...mapData.map((item) => item.value)),
-        max: Math.max(...mapData.map((item) => item.value)),
-        left: 'left',
-        top: 'bottom',
-        text: ['高', '低'],
-        calculable: true,
         inRange: {
           color: this.$palette('map'),
         },
@@ -1434,29 +1423,12 @@ export default class EChartsTableEngine {
       },
       series: [
         {
-          name: '地图数据',
-          type: 'map',
-          map: 'china',
-          roam: true,
-          label: {
-            show: true,
-            fontSize: 10,
-          },
           emphasis: {
             label: {
               show: true,
               fontSize: this.$theme().fontSize.base,
               fontWeight: 'bold',
             },
-            itemStyle: {
-              areaColor: '#ffefd5',
-            },
-          },
-          data: mapData,
-          itemStyle: {
-            areaColor: '#f5f5f5',
-            borderColor: '#999',
-            borderWidth: 0.5,
           },
         },
       ],
