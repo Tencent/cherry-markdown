@@ -20,16 +20,18 @@ import MenuBase from '@/toolbars/MenuBase';
 export default class ProTable extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('proTable', 'proTable');
+    this.setName('proTable', 'insertChart');
+    this.noIcon = true;
+    this.localeName = $cherry.options.locale;
     /** @type {import('@/toolbars/MenuBase').SubMenuConfigItem[]} */
     this.subMenuConfig = [
-      { iconName: 'lineTable', name: 'lineTable', onclick: this.bindSubClick.bind(this, 'lineTable') },
-      { iconName: 'barTable', name: 'barTable', onclick: this.bindSubClick.bind(this, 'barTable') },
-      { iconName: 'radarTable', name: 'radarTable', onclick: this.bindSubClick.bind(this, 'radarTable') },
-      { iconName: 'mapTable', name: 'mapTable', onclick: this.bindSubClick.bind(this, 'mapTable') },
-      { iconName: 'heatmapTable', name: 'heatmapTable', onclick: this.bindSubClick.bind(this, 'heatmapTable') },
+      { iconName: 'insertLineChart', name: 'lineTable', onclick: this.bindSubClick.bind(this, 'lineTable') },
+      { iconName: 'insertBarChart', name: 'barTable', onclick: this.bindSubClick.bind(this, 'barTable') },
+      { iconName: 'insertRadarChart', name: 'radarTable', onclick: this.bindSubClick.bind(this, 'radarTable') },
+      { iconName: 'insertMapChart', name: 'mapTable', onclick: this.bindSubClick.bind(this, 'mapTable') },
+      { iconName: 'insertHeatmapChart', name: 'heatmapTable', onclick: this.bindSubClick.bind(this, 'heatmapTable') },
       { iconName: 'scatterTable', name: 'scatterTable', onclick: this.bindSubClick.bind(this, 'scatterTable') },
-      { iconName: 'pieTable', name: 'pieTable', onclick: this.bindSubClick.bind(this, 'pieTable') },
+      { iconName: 'insertPieChart', name: 'pieTable', onclick: this.bindSubClick.bind(this, 'pieTable') },
     ];
   }
 
@@ -41,16 +43,17 @@ export default class ProTable extends MenuBase {
     return this.subMenuConfig;
   }
 
-  /**
-   * 绑定子菜单点击事件
-   * @param {string} type 图表类型
-   * @param {string} selection 编辑区选中的内容
-   * @param {boolean} [async] 是否异步
-   * @param {Function} [callback] 回调函数
-   */
-  bindSubClick(type, selection, async, callback) {
-    return this.onClick(selection, type);
-  }
+  // 重载之后就无法插入代码了，但是不知道这么做的目的，先注释掉。
+  // /**
+  //  * 绑定子菜单点击事件
+  //  * @param {string} type 图表类型
+  //  * @param {string} selection 编辑区选中的内容
+  //  * @param {boolean} [async] 是否异步
+  //  * @param {Function} [callback] 回调函数
+  //  */
+  // bindSubClick(type, selection, async, callback) {
+  //   return this.onClick(selection, type);
+  // }
 
   /**
    * 响应点击事件
@@ -84,7 +87,7 @@ export default class ProTable extends MenuBase {
    */
   insertLineTable(selection) {
     return `${selection}\n\n${[
-      '| :line: {x,y} | a | b | c |',
+      '| :line: {title: 折线图,} | a | b | c |',
       '| :-: | :-: | :-: | :-: |',
       '| x | 1 | 2 | 3 |',
       '| y | 2 | 4 | 6 |',
@@ -97,7 +100,7 @@ export default class ProTable extends MenuBase {
    */
   insertBarTable(selection) {
     return `${selection}\n\n${[
-      '| :bar: {x,y} | a | b | c |',
+      '| :bar: {title: 柱状图,} | a | b | c |',
       '| :-: | :-: | :-: | :-: |',
       '| x | 1 | 2 | 3 |',
       '| y | 2 | 4 | 6 |',
@@ -110,7 +113,7 @@ export default class ProTable extends MenuBase {
    */
   insertRadarTable(selection) {
     return `${selection}\n\n${[
-      '| :radar: {x,y} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |',
+      '| :radar: {title: 雷达图,} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |',
       '| :-: | :-: | :-: | :-: | :-: | :-: |',
       '| 用户A | 90 | 85 | 75 | 80 | 88 |',
       '| 用户B | 75 | 90 | 88 | 85 | 78 |',
@@ -123,7 +126,7 @@ export default class ProTable extends MenuBase {
    */
   insertMapTable(selection) {
     return `${selection}\n\n${[
-      '| :map:{name,value} | 数值 |',
+      '| :map:{title: 地图, mapDataSource: https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json,} | 数值 |',
       '| :-: | :-: |',
       '| 北京 | 120 |',
       '| 上海 | 280 |',
@@ -139,7 +142,7 @@ export default class ProTable extends MenuBase {
    */
   insertHeatmapTable(selection) {
     return `${selection}\n\n${[
-      '| :heatmap:{x,y,value} | 周一 | 周二 | 周三 | 周四 | 周五 |',
+      '| :heatmap:{title: 热力图,} | 周一 | 周二 | 周三 | 周四 | 周五 |',
       '| :-: | :-: | :-: | :-: | :-: | :-: |',
       '| 9:00 | 10 | 15 | 8 | 12 | 20 |',
       '| 12:00 | 25 | 30 | 18 | 22 | 35 |',
@@ -153,7 +156,7 @@ export default class ProTable extends MenuBase {
    */
   insertPieTable(selection) {
     return `${selection}\n\n${[
-      '| :pie:{name,value} | 数值 |',
+      '| :pie:{title: 饼图,} | 数值 |',
       '| :-: | :-: |',
       '| 苹果 | 35 |',
       '| 香蕉 | 25 |',

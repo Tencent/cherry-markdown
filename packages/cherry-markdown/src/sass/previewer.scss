@@ -224,6 +224,7 @@
     }
   }
 
+
   // Delete 按钮
   .cherry-previewer-table-hover-handler__delete {
     @include control-base;
@@ -280,8 +281,10 @@
     100% {
       background-color: #ffffcc00;
     }
+
   }
+}
   .cherry-highlight-line {
-    animation: changeBgColor 1s;
+    animation: changeHighlightLineBg 1s;
   }
 }

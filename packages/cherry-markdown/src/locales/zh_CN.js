@@ -53,7 +53,9 @@ export default {
   barTable: '柱状表格', // 柱状表格
   radarTable: '雷达表格', // 雷达表格
   mapTable: '地图表格', // 地图表格
-  proTable: '图表表格', // 图表表格
+  heatmapTable: '热力图表格', // 热力图表格
+  pieTable: '饼图表格', // 饼图表格
+  proTable: '图表', // 图表表格
   formula: '公式', // 公式
   insertFormula: '公式', // 公式
   insertFlow: '流程图', // 流程图
