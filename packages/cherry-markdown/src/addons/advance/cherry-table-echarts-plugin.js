@@ -137,50 +137,6 @@ export default class EChartsTableEngine {
   }
 
   /**
-   * 构建悬浮提示基础配置
-   */
-  $tooltip(overrides = {}) {
-    return {
-      borderWidth: 1,
-      backgroundColor: this.$theme().color.tooltipBg,
-      borderColor: this.$theme().color.border,
-      textStyle: {
-        color: this.$theme().color.tooltipText,
-      },
-      extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
-      ...overrides,
-    };
-  }
-
-  /**
-   * 构建工具栏配置
-   * @param {Object} [featureOverrides] feature 覆盖项
-   * @param {Object} [posOverrides] 位置覆盖项
-   * @returns {Object} toolbox 配置
-   */
-  $toolbox(featureOverrides = {}, posOverrides = {}) {
-    return {
-      show: true,
-      orient: 'vertical',
-      left: posOverrides.left || 'right',
-      top: posOverrides.top || 'center',
-      feature: {
-        dataView: { show: true, readOnly: false, title: '数据视图', lang: ['数据视图', '关闭', '刷新'] },
-        restore: { show: true, title: '重置' },
-        saveAsImage: {
-          show: true,
-          title: '保存为图片',
-          type: this.options.renderer === 'svg' ? 'svg' : 'png', // renderer 类型为svg，默认只支持输出svg
-          backgroundColor: '#fff',
-        },
-        ...featureOverrides,
-      },
-      iconStyle: { borderColor: this.$theme().color.border },
-      emphasis: { iconStyle: { borderColor: this.$theme().color.borderHover } },
-    };
-  }
-
-  /**
    * 构建网格配置
    * @param {Object} [overrides]
    * @returns {Object}
@@ -198,28 +154,6 @@ export default class EChartsTableEngine {
       axisLine: { lineStyle: { color: this.$theme().color.text } },
       axisLabel: { color: this.$theme().color.text, fontSize: this.$theme().fontSize.base },
       splitLine: { lineStyle: { color: this.$theme().color.lineSplit, type: 'dashed' } },
-      ...overrides,
-    };
-  }
-
-  /**
-   * 构建图例配置
-   */
-  $legend(overrides = {}) {
-    return {
-      type: 'scroll',
-      orient: 'horizontal',
-      left: overrides.left || 'center',
-      top: overrides.top || 'top',
-      textStyle: { color: this.$theme().color.text, fontSize: this.$theme().fontSize.base },
-      itemWidth: 12,
-      itemHeight: 12,
-      selectedMode: 'multiple',
-      selector: [
-        { type: 'all', title: '全选' },
-        { type: 'inverse', title: '反选' },
-      ],
-      selectorLabel: { color: this.$theme().color.text, borderColor: this.$theme().color.border },
       ...overrides,
     };
   }
@@ -302,38 +236,6 @@ export default class EChartsTableEngine {
    */
   $dot(color) {
     return `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${color};"></span>`;
-  }
-
-  /**
-   * 轴向 tooltip 文本格式化器
-   */
-  $tooltipAxisFormatter() {
-    return (params) => {
-      const header = params?.[0]?.axisValueLabel ?? '';
-      let result = `<div style="margin-bottom:4px;font-weight:bold;">${header}</div>`;
-      params.forEach((item) => {
-        result += '<div style="margin:2px 0;">';
-        result += `${this.$dot(item.color)}`;
-        result += `<span style="font-weight:bold;">${item.seriesName}</span>`;
-        result += `<span style="float:right;margin-left:20px;font-weight:bold;">${item.value}</span>`;
-        result += '</div>';
-      });
-      return result;
-    };
-  }
-
-  /**
-   * 生成基础配置
-   */
-  $baseOption(overrides = {}) {
-    return {
-      aria: {
-        show: true,
-      },
-      backgroundColor: this.$theme().color.backgroundColor,
-      color: this.$palette(),
-      ...overrides,
-    };
   }
 
   /**
@@ -768,20 +670,40 @@ const BaseChartOptionsHandler = {
   options(tableObject, options) {
     const { engine } = options;
     return {
-      backgroundColor: '#fff',
+      aria: {
+        show: true,
+      },
+      backgroundColor: engine.$theme().color.backgroundColor,
       color: engine.$palette(),
       tooltip: {
         trigger: 'item',
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        borderColor: '#999',
+        backgroundColor: engine.$theme().color.tooltipBg,
+        borderColor: engine.$theme().color.border,
         borderWidth: 1,
         textStyle: {
-          color: '#fff',
+          color: engine.$theme().color.tooltipText,
           fontSize: 12,
         },
         extraCssText: 'box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;',
       },
-      toolbox: engine.$toolbox(),
+      toolbox: {
+        show: true,
+        orient: 'vertical',
+        left: 'right',
+        top: 'center',
+        feature: {
+          dataView: { show: true, readOnly: false, title: '数据视图', lang: ['数据视图', '关闭', '刷新'] },
+          restore: { show: true, title: '重置' },
+          saveAsImage: {
+            show: true,
+            title: '保存为图片',
+            type: this.options.renderer === 'svg' ? 'svg' : 'png', // renderer 类型为svg，默认只支持输出svg
+            backgroundColor: '#fff',
+          },
+        },
+        iconStyle: { borderColor: engine.$theme().color.border },
+        emphasis: { iconStyle: { borderColor: engine.$theme().color.borderHover } },
+      },
     };
   },
 };
@@ -790,7 +712,22 @@ const LegendOptionsHandler = {
   options(tableObject, options) {
     const { engine } = options;
     return {
-      legend: engine.$legend({ data: tableObject.rows.map((row) => row[0]) }),
+      legend: {
+        type: 'scroll',
+        orient: 'horizontal',
+        left: 'center',
+        top: 'top',
+        textStyle: { color: engine.$theme().color.text, fontSize: engine.$theme().fontSize.base },
+        itemWidth: 12,
+        itemHeight: 12,
+        selectedMode: 'multiple',
+        selector: [
+          { type: 'all', title: '全选' },
+          { type: 'inverse', title: '反选' },
+        ],
+        selectorLabel: { color: engine.$theme().color.text, borderColor: engine.$theme().color.border },
+        data: tableObject.rows.map((row) => row[0]),
+      },
     };
   },
 };
@@ -811,14 +748,25 @@ const AxisOptionsHandler = {
     });
 
     return {
-      tooltip: engine.$tooltip({
+      tooltip: {
         trigger: 'axis',
         axisPointer: {
           label: { backgroundColor: '#6a7985' },
           crossStyle: { color: '#999' },
         },
-        formatter: engine.$tooltipAxisFormatter(),
-      }),
+        formatter: (params) => {
+          const header = params?.[0]?.axisValueLabel ?? '';
+          let result = `<div style="margin-bottom:4px;font-weight:bold;">${header}</div>`;
+          params.forEach((item) => {
+            result += '<div style="margin:2px 0;">';
+            result += `${engine.$dot(item.color)}`;
+            result += `<span style="font-weight:bold;">${item.seriesName}</span>`;
+            result += `<span style="float:right;margin-left:20px;font-weight:bold;">${item.value}</span>`;
+            result += '</div>';
+          });
+          return result;
+        },
+      },
       legend: { data },
       series,
       xAxis: engine.$axis('category', {
@@ -955,11 +903,9 @@ const HeatmapChartOptionsHandler = {
     const maxValue = Math.max(...values);
 
     return {
-      tooltip: engine.$tooltip({
-        formatter(params) {
-          return `${yAxisData[params.data[1]]}<br/>${xAxisData[params.data[0]]}: <strong>${params.data[2]}</strong>`;
-        },
-      }),
+      'tooltip.formatter'(params) {
+        return `${yAxisData[params.data[1]]}<br/>${xAxisData[params.data[0]]}: <strong>${params.data[2]}</strong>`;
+      },
       grid: engine.$grid({ height: '50%', top: '10%', left: '10%', right: '10%' }),
       xAxis: engine.$axis('category', { data: xAxisData, splitArea: { show: true } }),
       yAxis: engine.$axis('category', { data: yAxisData, splitArea: { show: true } }),
@@ -991,20 +937,20 @@ const HeatmapChartOptionsHandler = {
           animationEasing: 'cubicOut',
         }),
       ],
-      toolbox: engine.$toolbox({}, { top: 'bottom' }),
+      'toolbox.top': 'bottom',
     };
   },
 };
 
 const PieChartOptionsHandler = {
-  components: [BaseChartOptionsHandler],
+  components: [BaseChartOptionsHandler, LegendOptionsHandler],
   options(tableObject, options) {
     const { engine } = options;
     const data = tableObject.rows.map((row) => ({ name: row[0], value: engine.$num(row[1]) }));
 
     return {
-      tooltip: engine.$tooltip({ trigger: 'item', formatter: '{a} <br/>{b}: {c} ({d}%)' }),
-      legend: engine.$legend({ orient: 'vertical', left: 'left', top: 'middle' }),
+      tooltip: { trigger: 'item', formatter: '{a} <br/>{b}: {c} ({d}%)' },
+      legend: { orient: 'vertical', left: 'left', top: 'middle' },
       series: [
         engine.$baseSeries('pie', {
           name: '数据分布',
@@ -1035,7 +981,7 @@ const PieChartOptionsHandler = {
 
 // Scatter chart handler integrated from PR #1362
 const ScatterChartOptionsHandler = {
-  components: [BaseChartOptionsHandler],
+  components: [BaseChartOptionsHandler, LegendOptionsHandler],
   options(tableObject, options) {
     const { engine } = options;
     console.log('Rendering scatter chart:', tableObject);
@@ -1149,15 +1095,14 @@ const ScatterChartOptionsHandler = {
     }
 
     return {
-      tooltip: engine.$tooltip({
+      tooltip: {
         trigger: 'item',
         formatter(params) {
           const [x, y] = params.value || [];
           return `${params.name}<br/>x: <strong>${x}</strong><br/>y: <strong>${y}</strong>`;
         },
-      }),
-      legend: engine.$legend(),
-      toolbox: engine.$toolbox({ dataZoom: {} }),
+      },
+      'toolbox.feature.dataZoom': {},
       grid: engine.$grid(),
       xAxis: engine.$axis('value'),
       yAxis: engine.$axis('value'),
