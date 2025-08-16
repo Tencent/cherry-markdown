@@ -2167,6 +2167,7 @@ const MapChartOptionsHandler = {
       try {
         const tableData = JSON.parse(tableDataStr);
         const chartOptions = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
+        chartOptions.engine = engine;
         deepMerge(chartOptions, { mapDataSource: url });
 
         const chartOption = generateOptions(MapChartCompleteOptionsHandler, tableData, chartOptions);
