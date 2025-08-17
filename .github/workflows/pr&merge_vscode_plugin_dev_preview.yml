@@ -39,6 +39,18 @@ jobs:
           jq '.name = "CherryMarkdownTest"' package.json > temp.json && mv temp.json package.json
           jq '.displayName = "Cherry Markdown Test"' package.json > temp.json && mv temp.json package.json
           jq --arg sha "${GITHUB_SHA:0:7}" '.version = (.version + "-test-" + $sha)' package.json > temp.json && mv temp.json package.json
+          
+          # Create a simple preview README for the vscodePlugin package (used for test preview)
+          readme=$(cat <<'EOF'
+          仅为预览版本，详情请访问 [Cherry Markdown](https://github.com/Tencent/cherry-markdown)
+
+          ---
+
+          Preview only. For full details visit [Cherry Markdown](https://github.com/Tencent/cherry-markdown)
+          EOF
+                    )
+
+          echo "$readme" > README.md
 
       - name: Build VSCode Plugin
         run: |
