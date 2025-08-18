@@ -138,8 +138,11 @@ export default class PreviewerBubble {
       return false;
     }
 
-    // 现在支持引用表格
-
+    // 引用里的表格不支持所见即所得编辑（维持原有限制）
+    if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
+      return false;
+    }
+    
     // 排除简单表格
     const container = this.$getClosestNode(element, 'DIV');
     if (container && /simple-table/.test(container.className)) {
