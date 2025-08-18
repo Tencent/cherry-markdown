@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import Logger from '@/Logger';
 import { getTableRule, getCodeBlockRule } from '@/utils/regexp';
 
 /**
@@ -189,19 +190,6 @@ export default class TableHandler {
   }
 
   /**
-   * 替换markdown内容
-   * @param {boolean} isFootnote 是否是脚注表格
-   * @param {number} beginLine 开始行号
-   * @param {number} endLine 结束行号
-   * @param {string} newContent 新内容
-   */
-  $replaceMarkdown(isFootnote, beginLine, endLine, newContent) {
-    const startPos = { line: beginLine, ch: 0 };
-    const endPos = { line: endLine, ch: 0 };
-    this.codeMirror.replaceRange(newContent, startPos, endPos);
-  }
-
-  /**
    * 刷新定位
    */
   $refreshPosition() {
@@ -354,7 +342,7 @@ export default class TableHandler {
       const currentFootnoteIndex = allFootnoteContainers.indexOf(footnoteContainer);
 
       if (currentFootnoteIndex === -1) {
-        console.warn('无法找到当前脚注容器的索引');
+        Logger.warn('无法找到当前脚注容器的索引');
         return false;
       }
 
@@ -369,7 +357,7 @@ export default class TableHandler {
       const indexInCurrentFootnote = tablesInCurrentFootnote.indexOf(tableNode);
 
       if (indexInCurrentFootnote === -1) {
-        console.warn('无法找到表格在当前脚注容器中的索引');
+        Logger.warn('无法找到表格在当前脚注容器中的索引');
         return false;
       }
 
@@ -398,7 +386,7 @@ export default class TableHandler {
     }
 
     if (tableIndex === -1) {
-      console.warn('无法找到当前表格在相应区域的索引', {
+      Logger.warn('无法找到当前表格在相应区域的索引', {
         isInFootnote,
         tableNode: tableNode.outerHTML.slice(0, 100),
         totalTablesInArea: totalTables,
@@ -446,7 +434,7 @@ export default class TableHandler {
     const tableCode = tableCodes[index];
 
     if (!tableCode) {
-      console.warn('找不到对应的表格代码');
+      Logger.warn('找不到对应的表格代码');
       return;
     }
 
@@ -590,7 +578,7 @@ export default class TableHandler {
 
       return null;
     } catch (error) {
-      console.warn('解析HTML表格单元格位置时出错:', error);
+      Logger.warn('解析HTML表格单元格位置时出错:', error);
       return null;
     }
   }
@@ -629,7 +617,7 @@ export default class TableHandler {
 
     // 如果DOM收集失败，直接返回
     if (!this.tableEditor.info.tableNode) {
-      console.warn('DOM收集失败，无法定位表格');
+      Logger.warn('DOM收集失败，无法定位表格');
       return false;
     }
 
@@ -654,7 +642,7 @@ export default class TableHandler {
     });
 
     if (currentTableInfo.totalTables !== relevantTableCodes.length) {
-      console.warn(
+      Logger.warn(
         `${isFootnoteTable ? '脚注' : '正文'}区域表格数量不匹配: 预览区${currentTableInfo.totalTables}个，编辑区${
           relevantTableCodes.length
         }个`,
@@ -663,14 +651,14 @@ export default class TableHandler {
     }
 
     if (currentTableInfo.tableIndex === -1) {
-      console.warn('无法找到当前表格在预览区的索引');
+      Logger.warn('无法找到当前表格在预览区的索引');
       return false;
     }
 
     // 获取对应的表格代码
     const targetTableCode = relevantTableCodes[currentTableInfo.tableIndex];
     if (!targetTableCode) {
-      console.warn('无法找到对应的表格代码');
+      Logger.warn('无法找到对应的表格代码');
       return false;
     }
 
@@ -931,7 +919,7 @@ export default class TableHandler {
 
     // 如果是 HTML 表格，暂时不支持编辑操作
     if (tableCode && tableCode.type === 'html') {
-      console.warn('HTML 表格暂不支持添加行操作');
+      Logger.warn('HTML 表格暂不支持添加行操作');
       return;
     }
 
@@ -951,7 +939,7 @@ export default class TableHandler {
 
     // 如果是 HTML 表格，暂时不支持编辑操作
     if (tableCode && tableCode.type === 'html') {
-      console.warn('HTML 表格暂不支持添加行操作');
+      Logger.warn('HTML 表格暂不支持添加行操作');
       return;
     }
 
@@ -1003,7 +991,7 @@ export default class TableHandler {
 
     // 如果是 HTML 表格，暂时不支持编辑操作
     if (tableCode && tableCode.type === 'html') {
-      console.warn('HTML 表格暂不支持添加列操作');
+      Logger.warn('HTML 表格暂不支持添加列操作');
       return;
     }
 
@@ -1036,7 +1024,7 @@ export default class TableHandler {
 
     // 如果是 HTML 表格，暂时不支持编辑操作
     if (tableCode && tableCode.type === 'html') {
-      console.warn('HTML 表格暂不支持添加列操作');
+      Logger.warn('HTML 表格暂不支持添加列操作');
       return;
     }
 
@@ -1205,7 +1193,7 @@ export default class TableHandler {
 
     // 如果是 HTML 表格，暂时不支持编辑操作
     if (tableCode && tableCode.type === 'html') {
-      console.warn('HTML 表格暂不支持删除行操作');
+      Logger.warn('HTML 表格暂不支持删除行操作');
       return;
     }
 
@@ -1227,7 +1215,7 @@ export default class TableHandler {
 
     // 如果是 HTML 表格，暂时不支持编辑操作
     if (tableCode && tableCode.type === 'html') {
-      console.warn('HTML 表格暂不支持删除列操作');
+      Logger.warn('HTML 表格暂不支持删除列操作');
       return;
     }
 
@@ -1255,7 +1243,7 @@ export default class TableHandler {
 
     // 如果是 HTML 表格，暂时不支持拖拽操作
     if (tableCode && tableCode.type === 'html') {
-      console.warn('HTML 表格暂不支持拖拽列操作');
+      Logger.warn('HTML 表格暂不支持拖拽列操作');
       return;
     }
 
@@ -1313,7 +1301,7 @@ export default class TableHandler {
 
     // 如果是 HTML 表格，暂时不支持拖拽操作
     if (tableCode && tableCode.type === 'html') {
-      console.warn('HTML 表格暂不支持拖拽行操作');
+      Logger.warn('HTML 表格暂不支持拖拽行操作');
       return;
     }
 
