@@ -124,6 +124,10 @@ export default class ParagraphBase extends SyntaxBase {
   }
 
   makeHtml(str, sentenceMakeFunc) {
+    // 如果需要缓存，就默认不处理行内语法了
+    if (this.needCache) {
+      return str;
+    }
     return sentenceMakeFunc(str).html;
   }
 

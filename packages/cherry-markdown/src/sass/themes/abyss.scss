@@ -141,7 +141,7 @@
 .cherry-markdown.theme__abyss {
 
   figure {
-    svg {
+    svg:not(.echarts-svg) {
 
       path,
       rect,
@@ -167,18 +167,4 @@
       }
     }
   }
-
-    @keyframes changeBgColor {
-      0% {
-        background-color: #ccddff50;
-      }
-  
-      60% {
-        background-color: #ccddff50;
-      }
-  
-      100% {
-        background-color: var(--base-previewer-bg);
-      }
-    }
 }

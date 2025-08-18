@@ -52,7 +52,8 @@
   --md-toc-indicator-color: var(--oc-gray-7);
   --md-toc-link-hover-bg: var(--oc-gray-8);
   --md-toc-link-active-bg: var(--oc-gray-7);
-  
+  --md-paragraph-highlight-line-bg: var(--oc-gray-7);
+
   /* ========== 手风琴组件变量覆盖 ========== */
   --accordion-bg: var(--oc-gray-8);
   --accordion-border: var(--oc-gray-6);
@@ -149,7 +150,7 @@
 .cherry-markdown.theme__dark {
 
   figure {
-    svg {
+    svg:not(.echarts-svg) {
 
       path,
       rect,
@@ -173,20 +174,6 @@
           fill: var(--oc-yellow-6) !important;
         }
       }
-    }
-  }
-
-  @keyframes changeBgColorDark {
-    0% {
-      background-color: var(--oc-gray-6);
-    }
-
-    60% {
-      background-color: var(--oc-gray-6);
-    }
-
-    100% {
-      background-color: var(--base-previewer-bg);
     }
   }
 

@@ -101,7 +101,7 @@ export default class Suggester extends SyntaxBase {
    * @param {SuggesterConfig} config
    */
   initConfig(config) {
-    let { suggester } = config;
+    let { suggester } = this.$cherry.options.editor.suggester || {};
 
     this.suggester = {};
     const defaultSuggest = [];
@@ -113,7 +113,11 @@ export default class Suggester extends SyntaxBase {
         suggestList(_word, callback) {
           // 将word全转成小写
           const word = _word.toLowerCase();
-          const systemSuggestList = allSuggestList(suggesterKeyword, that.$cherry.locale);
+          const systemSuggestList = allSuggestList(
+            suggesterKeyword,
+            that.$cherry.locale,
+            that.$cherry.options.editor.suggester,
+          );
           // 加个空格就直接退出联想
           if (/^\s$/.test(word)) {
             callback(false);
@@ -240,6 +244,7 @@ class SuggesterPanel {
     this.cursorMove = true;
     this.suggesterConfig = {};
     this.$cherry = cherry;
+    this.panelPosition = 'below'; // 面板相对光标的显示位置（上方或下方）：'below' | 'above'
   }
 
   /**
@@ -371,6 +376,7 @@ class SuggesterPanel {
       this.$cherry.wrapperDom.appendChild(this.createDom(this.panelWrap));
       this.$suggesterPanel = this.$cherry.wrapperDom.querySelector('.cherry-suggester-panel');
     }
+
     this.updatePanel(items);
     this.$suggesterPanel.style.left = `${left}px`;
     this.$suggesterPanel.style.top = `${top}px`;
@@ -454,7 +460,10 @@ class SuggesterPanel {
     return frag;
   }
 
-  // 面板重定位
+  /**
+   * 面板重定位（滚动时调用，不进行边界判定）
+   * @param {CodeMirror} codemirror
+   */
   relocatePanel(codemirror) {
     // 找到光标位置来确定候选框位置
     let $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
@@ -465,10 +474,25 @@ class SuggesterPanel {
     if (!$cursor) {
       return false;
     }
+
     const editorDomRect = this.$cherry.wrapperDom.getBoundingClientRect();
-    const rect = $cursor.getBoundingClientRect();
-    const top = rect.top + rect.height + 5 - editorDomRect.top;
-    const left = rect.left - editorDomRect.left;
+    const cursorRect = $cursor.getBoundingClientRect();
+
+    const left = cursorRect.left - editorDomRect.left;
+    const cursorTop = cursorRect.top - editorDomRect.top;
+    const cursorHeight = cursorRect.height;
+
+    let top;
+
+    // 根据之前记录的位置关系计算新位置
+    if (this.panelPosition === 'below') {
+      top = cursorTop + cursorHeight + 5;
+    } else {
+      // 需要获取面板当前高度
+      const panelHeight = this.$suggesterPanel ? this.$suggesterPanel.offsetHeight : 380;
+      top = cursorTop - panelHeight - 5;
+    }
+
     this.showSuggesterPanel({ left, top, items: this.optionList });
   }
 
@@ -493,7 +517,77 @@ class SuggesterPanel {
     this.cursorFrom = from;
     this.keyword = keyword;
     this.searchCache = true;
-    this.relocatePanel(codemirror);
+
+    // 在下一帧进行首次定位和边界判定
+    requestAnimationFrame(() => {
+      this.relocatePanelWithBoundaryCheck();
+    });
+  }
+
+  /**
+   * 首次显示面板时进行边界判定（在下一帧执行）
+   */
+  relocatePanelWithBoundaryCheck() {
+    // 先创建并显示面板以获取实际高度（默认是 380px）
+    this.tryCreatePanel();
+    this.updatePanel(this.optionList);
+
+    this.$suggesterPanel.style.visibility = 'hidden';
+    this.$suggesterPanel.style.display = 'block';
+    this.$suggesterPanel.style.position = 'absolute';
+
+    const actualPanelHeight = this.$suggesterPanel.offsetHeight || 380;
+
+    let $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
+    if (!$cursor) {
+      $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-selected');
+    }
+    if (!$cursor) {
+      this.$suggesterPanel.style.display = 'none';
+      return false;
+    }
+
+    const editorDomRect = this.$cherry.wrapperDom.getBoundingClientRect();
+    const cursorRect = $cursor.getBoundingClientRect();
+
+    // 计算位置
+    const left = cursorRect.left - editorDomRect.left;
+    const cursorTop = cursorRect.top - editorDomRect.top;
+    const cursorHeight = cursorRect.height;
+    const cursorBottomInView = cursorTop + cursorHeight;
+
+    // 获取可用空间
+    const editorHeight = this.$cherry.wrapperDom.clientHeight;
+    const spaceBelow = editorHeight - cursorBottomInView;
+    const spaceAbove = cursorTop;
+
+    // 边界判定
+    let top;
+
+    if (spaceBelow >= actualPanelHeight + 10) {
+      // 下方空间足够
+      top = cursorBottomInView + 5;
+      this.panelPosition = 'below';
+    } else if (spaceAbove >= actualPanelHeight + 10) {
+      // 上方空间足够
+      top = cursorTop - actualPanelHeight - 5;
+      this.panelPosition = 'above';
+    } else {
+      // 两边都不够，选择空间较大的一边
+      if (spaceBelow > spaceAbove) {
+        top = cursorBottomInView + 5;
+        this.panelPosition = 'below';
+      } else {
+        top = Math.max(10, cursorTop - actualPanelHeight - 5);
+        this.panelPosition = 'above';
+      }
+    }
+
+    // 设置最终位置并显示
+    this.$suggesterPanel.style.left = `${left}px`;
+    this.$suggesterPanel.style.top = `${top}px`;
+    this.$suggesterPanel.style.visibility = 'visible';
+    this.$suggesterPanel.style.zIndex = '100';
   }
 
   // 关闭关联
@@ -506,6 +600,7 @@ class SuggesterPanel {
     this.searchCache = false;
     this.cursorMove = true;
     this.optionList = [];
+    this.panelPosition = 'below'; // 重置面板位置记录
   }
 
   /**

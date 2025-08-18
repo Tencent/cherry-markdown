@@ -21,12 +21,20 @@ export default class Export extends MenuBase {
     this.setName('export');
     this.noIcon = true;
     this.updateMarkdown = false;
-    this.subMenuConfig = [
-      { noIcon: true, name: 'exportToPdf', onclick: this.bindSubClick.bind(this, 'pdf') },
+
+    this.subMenuConfig = [];
+
+    // window.print 可用时 才显示 “导出 PDF” 方式
+    if (typeof window !== 'undefined' && typeof window.print === 'function') {
+      this.subMenuConfig.push({ noIcon: true, name: 'exportToPdf', onclick: this.bindSubClick.bind(this, 'pdf') });
+    }
+
+    this.subMenuConfig.push(
       { noIcon: true, name: 'exportScreenshot', onclick: this.bindSubClick.bind(this, 'screenShot') },
       { noIcon: true, name: 'exportMarkdownFile', onclick: this.bindSubClick.bind(this, 'markdown') },
       { noIcon: true, name: 'exportHTMLFile', onclick: this.bindSubClick.bind(this, 'html') },
-    ];
+      { noIcon: true, name: 'exportWordFile', onclick: this.bindSubClick.bind(this, 'word') },
+    );
   }
 
   onClick(shortKey = '', type) {
@@ -45,5 +53,10 @@ export default class Export extends MenuBase {
     html = previewer.lazyLoadImg.changeDataSrc2Src(html);
     previewer.refresh(html);
     previewer.export(type);
+    // 导出完成后，发送导出完成的信号
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      const ev = new CustomEvent('cherry:export:done', { detail: { type } });
+      window.dispatchEvent(ev);
+    }
   }
 }

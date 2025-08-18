@@ -21,7 +21,7 @@ import { getBlockTopAndHeightWithMargin } from './utils/dom';
 import Logger from './Logger';
 // import locale from './utils/locale';
 import { addEvent, removeEvent } from './utils/event';
-import { exportPDF, exportScreenShot, exportMarkdownFile, exportHTMLFile } from './utils/export';
+import { exportPDF, exportScreenShot, exportMarkdownFile, exportHTMLFile, exportWordFile } from './utils/export';
 import PreviewerBubble from './toolbars/PreviewerBubble';
 import LazyLoadImg from '@/utils/lazyLoadImg';
 
@@ -726,7 +726,7 @@ export default class Previewer {
 
       try {
         this.$dealUpdate(domContainer, oldHtmlList, newHtmlList);
-        setTimeout(() => this.afterUpdate(), 100);
+        this.afterUpdate();
       } finally {
         // 延时释放同步滚动功能，在DOM更新完成后执行
         this.syncScrollLockTimer = window.setTimeout(() => {
@@ -781,7 +781,8 @@ export default class Previewer {
     this.$cherry.$event.emit('editorClose');
   }
 
-  editOnly(dealToolbar = false) {
+  editOnly() {
+    this.doHtmlCache(this.getDomContainer().innerHTML);
     this.$dealEditAndPreviewOnly(true);
     this.$cherry.$event.emit('previewerClose');
     this.$cherry.$event.emit('editorOpen');
@@ -1141,8 +1142,8 @@ export default class Previewer {
   /**
    * 导出预览区域内容
    * @public
-   * @param {'pdf' | 'img' | 'screenShot' | 'markdown' | 'html'} [type='pdf']
-   * 'pdf'：导出成pdf文件; 'img' | screenShot：导出成png图片; 'markdown'：导出成markdown文件; 'html'：导出成html文件;
+   * @param {'pdf' | 'img' | 'screenShot' | 'markdown' | 'html' | 'word'} [type='pdf']
+   * 'pdf'：导出成pdf文件; 'img' | screenShot：导出成png图片; 'markdown'：导出成markdown文件; 'html'：导出成html文件; 'word'：导出到Word（复制到剪贴板）;
    * @param {string} [fileName] 导出文件名
    */
   export(type = 'pdf', fileName = '') {
@@ -1155,6 +1156,8 @@ export default class Previewer {
       exportMarkdownFile(this.$cherry.getMarkdown(), name);
     } else if (type === 'html') {
       exportHTMLFile(this.getValue(), name);
+    } else if (type === 'word') {
+      exportWordFile(this.getValue(), name);
     }
   }
 }

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import imgSizeHandler from './imgSizeHandler';
+
 /**
  * 用于在图片被点击时弹出调整图片边框|阴影|圆角的工具栏
  */
@@ -100,6 +102,11 @@ const imgToolHandler = {
         );
         div.className = `img-tool-button ${align.active ? ' active' : ''}`;
         this.emitChange(this.img, align.active ? align.type : 'clear-align');
+
+        imgSizeHandler.showBubble(this.img, this.container, this.previewerDom);
+        setTimeout(() => {
+          imgSizeHandler.updatePosition();
+        }, 150);
       });
       alignDiv.append(div);
     });

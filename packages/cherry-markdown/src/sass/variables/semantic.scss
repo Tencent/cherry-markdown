@@ -92,7 +92,8 @@
   // 段落
   --md-paragraph-color: var(--base-font-color);
   --md-paragraph-line-height: var(--line-height-relaxed);
-  
+  --md-paragraph-highlight-line-bg: var(--secondary-color);  // 当前编辑行高光背景色
+
   // 链接
   --md-link-color: var(--oc-blue-6);
   --md-link-hover-color: var(--color-link-hover);
