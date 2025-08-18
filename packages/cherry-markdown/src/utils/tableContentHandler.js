@@ -349,7 +349,10 @@ export default class TableHandler {
     }
     // 获取下一行的内容和引用符号
     const nextLineIndex = targetTr + 1;
-    let originalLine, cleanLine, tds, quoteMatch;
+    let originalLine;
+    let cleanLine;
+    let tds;
+    let quoteMatch;
     if (nextLineIndex < codes.length) {
       // 使用下一行的数据
       originalLine = codes[nextLineIndex];
@@ -404,8 +407,6 @@ export default class TableHandler {
    */
   $getHtmlTdOffset(tableCode, trIndex, tdIndex) {
     const lines = tableCode.split(/\n/);
-    const currentLine = 0;
-    const currentChar = 0;
     let foundTr = 0;
     let foundTd = 0;
     // 解析HTML表格，找到目标单元格的位置
@@ -418,7 +419,6 @@ export default class TableHandler {
           // 在目标行中查找<td>或<th>标签
           const tdRegex = /<(td|th)[^>]*>([\s\S]*?)<\/(td|th)>/gi;
           let tdMatch;
-          let searchPos = 0;
           while ((tdMatch = tdRegex.exec(line)) !== null && foundTd <= tdIndex) {
             if (foundTd === tdIndex) {
               // 找到目标单元格
@@ -431,7 +431,6 @@ export default class TableHandler {
               };
             }
             foundTd += 1;
-            searchPos = tdMatch.index + tdMatch[0].length;
           }
           break;
         }
@@ -557,8 +556,6 @@ export default class TableHandler {
    */
   $getBlockquoteHtmlTdOffset(tableCode, trIndex, tdIndex) {
     const lines = tableCode.split(/\n/);
-    const foundTr = 0;
-    const foundTd = 0;
     // 将所有行的内容合并，去除引用符号，用于查找HTML标签
     const cleanContent = lines.map((line) => line.replace(/^>\s*/, '')).join('\n');
     // 查找所有<tr>标签

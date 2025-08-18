@@ -21,10 +21,7 @@ module.exports = {
       files: ['**/*.ts', '**/*.tsx'],
       parser: '@typescript-eslint/parser',
       plugins: ['@typescript-eslint', 'prettier'],
-      extends: [
-        'eslint-config-tencent',
-        'plugin:prettier/recommended',
-      ],
+      extends: ['eslint-config-tencent', 'plugin:prettier/recommended'],
       rules: {
         'prettier/prettier': 'error',
         '@typescript-eslint/no-unused-vars': [
@@ -34,7 +31,7 @@ module.exports = {
           },
         ],
         'no-unused-vars': 'off',
-        'camelcase': 'off',
+        camelcase: 'off',
         'no-underscore-dangle': 'off',
       },
     },
@@ -47,13 +44,10 @@ module.exports = {
         sourceType: 'module',
       },
       plugins: ['@typescript-eslint', 'prettier'],
-      extends: [
-        'eslint-config-tencent',
-        'plugin:prettier/recommended',
-      ],
+      extends: ['eslint-config-tencent', 'plugin:prettier/recommended'],
       rules: {
         'prettier/prettier': 'error',
-        'camelcase': 'off',
+        camelcase: 'off',
         'no-underscore-dangle': 'off',
       },
     },
@@ -70,7 +64,7 @@ module.exports = {
     // quotes: ['error', 'single'],
     // semi: ['error', 'always'],
     'no-unused-vars': [
-      'warn',
+      'error',
       {
         args: 'none',
       },

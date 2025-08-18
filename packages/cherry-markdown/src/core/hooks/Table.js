@@ -80,7 +80,6 @@ export default class Table extends ParagraphBase {
     }
     const match = cell.match(CHART_REGEX);
     const [, chartType, options] = match;
-    const DEFAULT_AXIS_OPTIONS = ['x', 'y'];
     const result = {
       type: chartType,
       options: options ? this.$parseProps(options) : {},

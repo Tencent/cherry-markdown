@@ -21,17 +21,37 @@ module.exports = {
         // 待补充
       ],
     ],
-    'scope-enum': [
-      2,
-      'always',
-      [
-        'core', // cherry-markdown 项目
-        'client', // 客户端部分
-        'vscodePlugin', // VSCode 插件
-        'global', // Monorepo 结构(可省略)
-        'scripts', // 脚本
-        // 待补充
-      ],
-    ],
+    // 'scope-enum': [
+    //   2,
+    //   'always',
+    //   [
+    //     'core', // cherry-markdown 项目
+    //     'client', // 客户端部分
+    //     'vscodePlugin', // VSCode 插件
+    //     'global', // Monorepo 结构(可省略)
+    //     'scripts', // 脚本
+    //     // 待补充
+    //   ],
+    // ],
+    // 自定义规则：确保冒号后面有且只有一个空格
+    'header-format': [2, 'always'],
   },
+  plugins: [
+    {
+      rules: {
+        'header-format': (parsed) => {
+          const { raw } = parsed;
+          
+          // 简化规则，只检查冒号后面是否有且只有一个空格
+          const hasExactlyOneSpace = /^[a-zA-Z]+(\([a-zA-Z0-9_-]+\))?:\s[^\s]/.test(raw);
+          
+          if (!hasExactlyOneSpace) {
+            return [false, '冒号后面必须有且只有一个空格'];
+          }
+          
+          return [true];
+        }
+      }
+    }
+  ]
 };
