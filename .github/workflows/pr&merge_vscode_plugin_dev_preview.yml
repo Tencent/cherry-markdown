@@ -35,7 +35,7 @@ jobs:
 
           cd ../vscodePlugin
           jq --arg sha "${GITHUB_SHA:0:7}" '.version = (.version+$sha)' package.json > temp.json && mv temp.json package.json
-          jq '.dependencies["cherry-markdown"] = .dependencies["cherry-markdown-core"] | del(.dependencies["cherry-markdown"])' package.json > temp.json && mv temp.json package.json
+          jq '.dependencies["cherry-markdown-core"] = .dependencies["cherry-markdown"] | del(.dependencies["cherry-markdown"])' package.json > temp.json && mv temp.json package.json
           jq '.name = "cherry-markdown"' package.json > temp.json && mv temp.json package.json
           jq '.displayName = "Cherry Markdown Test"' package.json > temp.json && mv temp.json package.json
 
@@ -69,7 +69,7 @@ jobs:
           VSCE_PAT_PREVIEW: ${{ secrets.VSCE_PAT_PREVIEW }}
         run: |
           cd packages/vscodePlugin
-          vsce publish -p $VSCE_PAT_PREVIEW --no-dependencies --no-yarn
+          vsce publish -p $VSCE_PAT_PREVIEW --no-dependencies --no-yarn --pre-release
 
       - name: Extract package Info
         id: extract-package
