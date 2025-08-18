@@ -450,6 +450,20 @@ export default class EChartsTableEngine {
     this.$tagEchartsSvg(container);
   }
 
+  $generateChartOptions(type, tableObject, options) {
+    const handler = {
+      bar: BarChartOptionsHandler,
+      line: LineChartOptionsHandler,
+      radar: RadarChartOptionsHandler,
+      map: MapChartOptionsHandler,
+      heatmap: HeatmapChartOptionsHandler,
+      pie: PieChartOptionsHandler,
+      scatter: ScatterChartOptionsHandler,
+    }[type];
+    options.engine = this;
+    return handler ? generateOptions(handler, tableObject, options) : {};
+  }
+
   /**
    * 从容器 `data-*` 属性解析并生成 Option 图表配置
    */
@@ -470,9 +484,7 @@ export default class EChartsTableEngine {
       chartOptions = {};
     }
     if (!type || !tableData) return {};
-    const renderDict = {};
-    const renderFn = renderDict[type];
-    return renderFn ? renderFn(tableData, chartOptions) : {};
+    return this.$generateChartOptions(type, tableData, chartOptions);
   }
 
   /**
@@ -522,15 +534,6 @@ export default class EChartsTableEngine {
    */
   render(type, options, tableObject) {
     Logger.log('Rendering chart:', type, options, tableObject);
-    const handler = {
-      bar: BarChartOptionsHandler,
-      line: LineChartOptionsHandler,
-      radar: RadarChartOptionsHandler,
-      map: MapChartOptionsHandler,
-      heatmap: HeatmapChartOptionsHandler,
-      pie: PieChartOptionsHandler,
-      scatter: ScatterChartOptionsHandler,
-    }[type];
 
     // 生成唯一ID和简化的配置数据
     const chartId = `chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -539,8 +542,7 @@ export default class EChartsTableEngine {
     const chartOptionsStr = JSON.stringify(options);
 
     options.chartId = chartId;
-    options.engine = this;
-    const chartOption = handler ? generateOptions(handler, tableObject, options) : {};
+    const chartOption = this.$generateChartOptions(type, tableObject, options);
     Logger.log('Chart options:', chartOption);
 
     // 创建一个包含所有必要信息的HTML结构
