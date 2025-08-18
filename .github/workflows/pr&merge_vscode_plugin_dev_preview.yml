@@ -28,7 +28,7 @@ jobs:
       - name: Change Package Files
         run: |
           jq '."scripts"."build" = "yarn workspace cherry-markdown-core build"' package.json > temp.json && mv temp.json package.json
-          jq '."scripts"."build:vscodePlugin" = "yarn workspace cherry-markdown build"' package.json > temp.json && mv temp.json package.json
+          jq '."scripts"."build:vscodePlugin" = "yarn workspace cherry-markdown-pre build"' package.json > temp.json && mv temp.json package.json
 
           cd packages/cherry-markdown
           jq '.name = "cherry-markdown-core"' package.json > temp.json && mv temp.json package.json
@@ -36,7 +36,7 @@ jobs:
           cd ../vscodePlugin
           jq '(.version | split(".") | .[2] |= ((.[2]|tonumber)+1 | tostring)) | .version = join(".")' package.json > temp.json && mv temp.json package.json
           jq '.dependencies["cherry-markdown-core"] = .dependencies["cherry-markdown"] | del(.dependencies["cherry-markdown"])' package.json > temp.json && mv temp.json package.json
-          jq '.name = "cherry-markdown"' package.json > temp.json && mv temp.json package.json
+          jq '.name = "cherry-markdown-pre"' package.json > temp.json && mv temp.json package.json
           jq '.displayName = "Cherry Markdown Pre"' package.json > temp.json && mv temp.json package.json
           jq '.publisher = "cherry-markdown-test"' package.json > temp.json && mv temp.json package.json
 
