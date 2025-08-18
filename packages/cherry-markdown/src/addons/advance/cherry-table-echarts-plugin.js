@@ -697,7 +697,7 @@ const BaseChartOptionsHandler = {
           saveAsImage: {
             show: true,
             title: '保存为图片',
-            type: this.options.renderer === 'svg' ? 'svg' : 'png', // renderer 类型为svg，默认只支持输出svg
+            type: engine.options.renderer === 'svg' ? 'svg' : 'png', // renderer 类型为svg，默认只支持输出svg
             backgroundColor: '#fff',
           },
         },
