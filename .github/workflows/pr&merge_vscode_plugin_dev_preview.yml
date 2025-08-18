@@ -27,7 +27,6 @@ jobs:
 
       - name: Change Package Files
         run: |
-
           jq '."scripts"."build" = "yarn workspace cherry-markdown-core build"' package.json > temp.json && mv temp.json package.json
           jq '."scripts"."build:vscodePlugin" = "yarn workspace cherry-markdown build"' package.json > temp.json && mv temp.json package.json
 
@@ -36,7 +35,6 @@ jobs:
 
           cd ../vscodePlugin
           jq '.dependencies["cherry-markdown"] = .dependencies["cherry-markdown-core"]' package.json > temp.json && mv temp.json package.json
-          # jq 'del(.dependencies["cherry-markdown"])' package.json > temp.json && mv temp.json package.json
           jq '.name = "cherry-markdown"' package.json > temp.json && mv temp.json package.json
           jq '.displayName = "Cherry Markdown Test"' package.json > temp.json && mv temp.json package.json
           jq --arg sha "${GITHUB_SHA:0:7}" '.version = (.version + "-test-" + $sha)' package.json > temp.json && mv temp.json package.json
@@ -51,6 +49,13 @@ jobs:
                     )
 
           echo "$readme" > README.md
+
+      - name: Display Changed Package Files
+        run: |
+          cat package.json
+          cat packages/cherry-markdown/package.json
+          cat packages/vscodePlugin/package.json
+          cat packages/vscodePlugin/README.md
 
       - name: Build VSCode Plugin
         run: |
