@@ -748,17 +748,17 @@ export default class TableHandler {
     // 根据表格所在区域进行匹配验证
     const relevantTableCodes = isFootnoteTable ? this.tableEditor.footnoteCodes : this.tableEditor.mainTextCodes;
 
-    console.log('表格匹配调试信息:', {
-      isFootnoteTable,
-      预览区表格数量: currentTableInfo.totalTables,
-      编辑区表格数量: relevantTableCodes.length,
-      当前表格索引: currentTableInfo.tableIndex,
-      表格代码: relevantTableCodes.map((code, index) => ({
-        index,
-        type: code.type,
-        preview: code.code.slice(0, 50),
-      })),
-    });
+    // Logger.log('表格匹配调试信息:', {
+    //   isFootnoteTable,
+    //   预览区表格数量: currentTableInfo.totalTables,
+    //   编辑区表格数量: relevantTableCodes.length,
+    //   当前表格索引: currentTableInfo.tableIndex,
+    //   表格代码: relevantTableCodes.map((code, index) => ({
+    //     index,
+    //     type: code.type,
+    //     preview: code.code.slice(0, 50),
+    //   })),
+    // });
 
     if (currentTableInfo.totalTables !== relevantTableCodes.length) {
       Logger.warn(
@@ -1064,7 +1064,6 @@ export default class TableHandler {
 
     // Markdown 表格的处理逻辑
     const [, { line }] = this.tableEditor.info.selection;
-    // console.log('添加行:', line);
     const newRow = `${'|'.repeat(this.tableEditor.info.columns)}\n`;
 
     // 检查是否在文件末尾

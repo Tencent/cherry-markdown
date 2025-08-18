@@ -139,9 +139,6 @@ export default class PreviewerBubble {
     }
 
     // 现在支持引用表格
-    // if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
-    //   return false;
-    // }
 
     // 排除简单表格
     const container = this.$getClosestNode(element, 'DIV');
