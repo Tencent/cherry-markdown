@@ -34,7 +34,11 @@ jobs:
           jq '.name = "cherry-markdown-core"' package.json > temp.json && mv temp.json package.json
 
           cd ../vscodePlugin
-          jq '(.version | split(".") | .[2] |= ((.[2]|tonumber)+1 | tostring)) | .version = join(".")' package.json > temp.json && mv temp.json package.json
+          COMMITHASH=$(git rev-parse --short=6 HEAD)
+          COMMITHASH_DEC=$(printf "%d" 0x$COMMITHASH)
+          jq --arg ch "$COMMITHASH_DEC" '
+            (.version | split(".") | .[2] |= (. + $ch)) | .version = join(".")
+          ' package.json > temp.json && mv temp.json package.json
           jq '.dependencies["cherry-markdown-core"] = .dependencies["cherry-markdown"] | del(.dependencies["cherry-markdown"])' package.json > temp.json && mv temp.json package.json
           jq '.name = "cherry-markdown-pre"' package.json > temp.json && mv temp.json package.json
           jq '.displayName = "Cherry Markdown Pre"' package.json > temp.json && mv temp.json package.json
