@@ -349,7 +349,10 @@ export default class TableHandler {
     }
     // 获取下一行的内容和引用符号
     const nextLineIndex = targetTr + 1;
-    let originalLine, cleanLine, tds, quoteMatch;
+    let originalLine;
+    let cleanLine;
+    let tds;
+    let quoteMatch;
     if (nextLineIndex < codes.length) {
       // 使用下一行的数据
       originalLine = codes[nextLineIndex];
