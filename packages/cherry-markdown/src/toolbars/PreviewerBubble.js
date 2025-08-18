@@ -142,7 +142,7 @@ export default class PreviewerBubble {
     if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
       return false;
     }
-    
+
     // 排除简单表格
     const container = this.$getClosestNode(element, 'DIV');
     if (container && /simple-table/.test(container.className)) {
