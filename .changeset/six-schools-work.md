@@ -1,5 +1,5 @@
 ---
-'cherry-markdown': minor
+'cherry-markdown': patch
 ---
 
 refactor: 简化 cherry-table-echarts-plugin.js 代码
