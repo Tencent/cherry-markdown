@@ -138,11 +138,6 @@ export default class PreviewerBubble {
       return false;
     }
 
-    // 引用里的表格不支持所见即所得编辑（维持原有限制）
-    if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
-      return false;
-    }
-
     // 排除简单表格
     const container = this.$getClosestNode(element, 'DIV');
     if (container && /simple-table/.test(container.className)) {
@@ -493,22 +488,6 @@ export default class PreviewerBubble {
     );
     handler.showBubble();
     this.bubbleHandler[trigger] = handler;
-  }
-
-  /**
-   * 检测表格是否在脚注中
-   * @param {HTMLElement} element 目标元素
-   * @returns {boolean} 是否在脚注中
-   */
-  $isTableInFootnote(element) {
-    let currentElement = element;
-    while (currentElement && currentElement !== this.previewerDom) {
-      if (currentElement.classList && currentElement.classList.contains('one-footnote')) {
-        return true;
-      }
-      currentElement = currentElement.parentElement;
-    }
-    return false;
   }
 
   /**
