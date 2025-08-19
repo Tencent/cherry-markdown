@@ -383,6 +383,9 @@ var basicConfig = {
     showFullWidthMark: true, // 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》
     showSuggestList: true, // 是否显示联想框
     maxUrlLength: 200, // url最大长度，超过则自动截断
+    codemirror: {
+      placeholder: '输入文本或「/」开始编辑'
+    }
   },
   // cherry初始化后是否检查 location.hash 尝试滚动到对应位置
   autoScrollByHashAfterInit: true,
