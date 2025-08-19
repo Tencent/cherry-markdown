@@ -678,11 +678,7 @@ export default class EChartsTableEngine {
       <div class="cherry-echarts-wrapper" 
            style="width: ${this.options.width}px; height: ${
              this.options.height
-<<<<<<< HEAD
-           }px; min-height: 300px; display: block; position: relative; border: 1px solid #ddd;" 
-=======
            }px; min-height: 300px; display: block; position: relative; border: 1px solid var(--md-table-border);" 
->>>>>>> 1a84c2ac6c0f10a677e5ac171e81586a9a4c2894
            id="${chartId}"
            data-chart-type="${type}"
            data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"
