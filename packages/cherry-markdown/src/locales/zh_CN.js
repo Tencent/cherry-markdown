@@ -55,6 +55,7 @@ export default {
   mapTable: '地图表格', // 地图表格
   heatmapTable: '热力图表格', // 热力图表格
   pieTable: '饼图表格', // 饼图表格
+  scatterTable: '散点图表格', // 散点图表格
   proTable: '图表', // 图表表格
   formula: '公式', // 公式
   insertFormula: '公式', // 公式
