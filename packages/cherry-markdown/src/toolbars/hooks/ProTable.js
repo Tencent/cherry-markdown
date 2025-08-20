@@ -20,8 +20,7 @@ import MenuBase from '@/toolbars/MenuBase';
 export default class ProTable extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('proTable', 'insertChart');
-    this.noIcon = true;
+    this.setName('proTable', 'insertLineChart');
     this.localeName = $cherry.options.locale;
     /** @type {import('@/toolbars/MenuBase').SubMenuConfigItem[]} */
     this.subMenuConfig = [
@@ -30,7 +29,7 @@ export default class ProTable extends MenuBase {
       { iconName: 'insertRadarChart', name: 'radarTable', onclick: this.bindSubClick.bind(this, 'radarTable') },
       { iconName: 'insertMapChart', name: 'mapTable', onclick: this.bindSubClick.bind(this, 'mapTable') },
       { iconName: 'insertHeatmapChart', name: 'heatmapTable', onclick: this.bindSubClick.bind(this, 'heatmapTable') },
-      { iconName: 'scatterTable', name: 'scatterTable', onclick: this.bindSubClick.bind(this, 'scatterTable') },
+      { iconName: 'insertScatterChart', name: 'scatterTable', onclick: this.bindSubClick.bind(this, 'scatterTable') },
       { iconName: 'insertPieChart', name: 'pieTable', onclick: this.bindSubClick.bind(this, 'pieTable') },
     ];
   }
