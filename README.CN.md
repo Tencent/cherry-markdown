@@ -4,7 +4,7 @@
 
 [![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
 
-English | [简体中文](./README.CN.md) | [日本語](./README.JP.md)
+简体中文 | [English](./README.md) | [日本語](./README.JP.md)
 
 ## 介绍
 
@@ -37,6 +37,7 @@ Cherry Markdown Writer 是一款 Javascript Markdown 编辑器，具有开箱即
 - [标题自动序号](https://tencent.github.io/cherry-markdown/examples/head_num.html)
 - [流式输入模式（AI chart场景）](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)
 - [VIM 编辑模式](https://tencent.github.io/cherry-markdown/examples/vim.html)
+- [引用指定版本的Mermaid.js组件](https://tencent.github.io/cherry-markdown/examples/mermaid.html)
 
 -----
 
