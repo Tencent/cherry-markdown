@@ -671,8 +671,6 @@ export default class EChartsTableEngine {
     const chartOption = handler ? generateOptions(handler, tableObject, options) : {};
     Logger.log('Chart options:', chartOption);
 
-
-
     // 创建一个包含所有必要信息的HTML结构
     const htmlContent = `
       <div class="cherry-echarts-wrapper" 
@@ -1627,7 +1625,7 @@ const TitleOptionsHandler = {
 const BaseChartOptionsHandler = {
   components: [TitleOptionsHandler],
   options(tableObject, options) {
-    const engine = options.engine;
+    const { engine } = options;
     return {
       backgroundColor: '#fff',
       color: engine.$palette(),
@@ -1649,7 +1647,7 @@ const BaseChartOptionsHandler = {
 
 const LegendOptionsHandler = {
   options(tableObject, options) {
-    const engine = options.engine;
+    const { engine } = options;
     return {
       legend: engine.$legend({ data: tableObject.rows.map((row) => row[0]) }),
     };
@@ -1659,7 +1657,7 @@ const LegendOptionsHandler = {
 const AxisOptionsHandler = {
   components: [BaseChartOptionsHandler, LegendOptionsHandler],
   options(tableObject, options) {
-    const engine = options.engine;
+    const { engine } = options;
     const data = [];
     const series = [];
     tableObject.rows.forEach((row) => {
@@ -1711,7 +1709,7 @@ const AxisOptionsHandler = {
 const LineChartOptionsHandler = {
   components: [AxisOptionsHandler],
   options(tableObject, options) {
-    const engine = options.engine;
+    const { engine } = options;
     return {
       'tooltip.axisPointer.type': 'cross',
       'series.$item': engine.$baseSeries('line'),
@@ -1722,7 +1720,7 @@ const LineChartOptionsHandler = {
 const BarChartOptionsHandler = {
   components: [AxisOptionsHandler],
   options(tableObject, options) {
-    const engine = options.engine;
+    const { engine } = options;
     return {
       'tooltip.axisPointer.type': 'shadow',
       'series.$item': engine.$baseSeries('bar', { barWidth: '60%' }),
@@ -1734,7 +1732,7 @@ const BarChartOptionsHandler = {
 const RadarChartOptionsHandler = {
   components: [BaseChartOptionsHandler, LegendOptionsHandler],
   options(tableObject, options) {
-    const engine = options.engine;
+    const { engine } = options;
     const indicator = tableObject.header.slice(1).map((header) => {
       const maxValue = Math.max(
         ...tableObject.rows.map((row) => {
@@ -1747,7 +1745,7 @@ const RadarChartOptionsHandler = {
         max: Math.ceil(maxValue * 1.2),
       };
     });
-    
+
     const seriesData = tableObject.rows.map((row, index) => ({
       name: row[0],
       value: row.slice(1).map((data) => engine.$num(data)),
@@ -1770,7 +1768,9 @@ const RadarChartOptionsHandler = {
       radar: {
         name: {
           textStyle: { color: engine.$theme().color.text, fontSize: 12, fontWeight: 'bold' },
-          formatter(name) { return name.length > 6 ? `${name.substr(0, 6)}...` : name; },
+          formatter(name) {
+            return name.length > 6 ? `${name.substr(0, 6)}...` : name;
+          },
         },
         indicator,
         radius: '60%',
@@ -1796,11 +1796,11 @@ const RadarChartOptionsHandler = {
 const HeatmapChartOptionsHandler = {
   components: [BaseChartOptionsHandler],
   options(tableObject, options) {
-    const engine = options.engine;
+    const { engine } = options;
     const xAxisData = tableObject.header.slice(1);
     const yAxisData = tableObject.rows.map((row) => row[0]);
     const data = [];
-    
+
     tableObject.rows.forEach((row, yIndex) => {
       row.slice(1).forEach((value, xIndex) => {
         data.push([xIndex, yIndex, engine.$num(value)]);
@@ -1856,7 +1856,7 @@ const HeatmapChartOptionsHandler = {
 const PieChartOptionsHandler = {
   components: [BaseChartOptionsHandler],
   options(tableObject, options) {
-    const engine = options.engine;
+    const { engine } = options;
     const data = tableObject.rows.map((row) => ({ name: row[0], value: engine.$num(row[1]) }));
 
     return {
@@ -1894,7 +1894,7 @@ const PieChartOptionsHandler = {
 const ScatterChartOptionsHandler = {
   components: [BaseChartOptionsHandler],
   options(tableObject, options) {
-    const engine = options.engine;
+    const { engine } = options;
     console.log('Rendering scatter chart:', tableObject);
 
     // Support both forms from PR #1362:
@@ -2064,7 +2064,7 @@ const MapChartLoadingOptionsHandler = {
 const MapChartCompleteOptionsHandler = {
   components: [BaseChartOptionsHandler],
   options(tableObject, options) {
-    const engine = options.engine;
+    const { engine } = options;
     const mapData = tableObject.rows.map((row) => {
       const originalName = row[0];
       const standardName = normalizeProvinceName(originalName);
@@ -2122,10 +2122,7 @@ const MapChartOptionsHandler = {
     if (options?.engine?.cherryOptions?.toolbars?.config?.mapTable?.sourceUrl) {
       paths = paths.concat(options.engine.cherryOptions.toolbars.config.mapTable.sourceUrl);
     }
-    paths = paths.concat([
-      'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
-      './assets/data/china.json',
-    ]);
+    paths = paths.concat(['https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', './assets/data/china.json']);
     this.$tryLoadMapDataFromPaths(paths, 0, options);
   },
   $tryLoadMapDataFromPaths(paths, index, options) {
