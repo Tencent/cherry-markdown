@@ -42,6 +42,11 @@
   --md-blockquote-bg: var(--oc-blue-0);
   --md-hr-border: var(--oc-blue-5);
   --md-table-border: var(--oc-blue-5);
+  --md-table-shadow-bg: var(--oc-blue-2);
+  --md-table-hover-bg: var(--oc-blue-1);
+  --md-table-border-radius: 8px;
+  --md-table-toolbar-blur: blur(12px);
+  --md-header-base: #ffffff;
 
   /* ========== 手风琴组件变量覆盖 ========== */
   --accordion-bg: var(--oc-blue-0);
@@ -58,19 +63,24 @@
 
 /** 预览区域样式 */
 .cherry-markdown.theme__default {
-
   p,
-  div {}
+  div {
+  }
 
-  h1 {}
+  h1 {
+  }
 
-  h2 {}
+  h2 {
+  }
 
-  h3 {}
+  h3 {
+  }
 
-  h4 {}
+  h4 {
+  }
 
-  h5 {}
+  h5 {
+  }
 
   h1,
   h2,
@@ -79,95 +89,123 @@
   h5,
   h6 {
     /** 标题前面的锚点或序号 */
-    .anchor {}
+    .anchor {
+    }
   }
 
   /** checklist 模式，未勾选时 */
-  .ch-icon-square {}
-
-  /** checklist 模式，勾选时 */
-  .ch-icon-check {}
-
-  blockquote {}
-
-  a {
-    &:hover {}
+  .ch-icon-square {
   }
 
-  strong {}
+  /** checklist 模式，勾选时 */
+  .ch-icon-check {
+  }
 
-  em {}
+  blockquote {
+  }
 
-  del {}
+  a {
+    &:hover {
+    }
+  }
 
-  sup {}
+  strong {
+  }
 
-  sub {}
+  em {
+  }
 
-  hr {}
+  del {
+  }
 
-  img {}
+  sup {
+  }
 
-  video {}
+  sub {
+  }
 
-  audio {}
+  hr {
+  }
+
+  img {
+  }
+
+  video {
+  }
+
+  audio {
+  }
 
   /** 行内代码 */
-  code:not([class]) {}
+  code:not([class]) {
+  }
 
   /** 
    * 代码块
    */
-  pre code {}
+  pre code {
+  }
 
   /** 
    * 表格
    */
   table,
   .cherry-table {
-    tr {}
+    tr {
+    }
 
-    th {}
+    th {
+    }
 
-    td {}
+    td {
+    }
   }
 
   /** 可以理解为上下结构的音标，下部是文字，上部是对应的拼音 */
   ruby {
     /** 上部的拼音 */
-    rt {}
+    rt {
+    }
   }
 
   /** 脚注 */
   .footnote {
-    .footnote-title {}
+    .footnote-title {
+    }
 
     .one-footnote {
-      a.footnote-ref {}
+      a.footnote-ref {
+      }
     }
   }
 
   /** 行间公式 */
-  .Cherry-InlineMath {}
+  .Cherry-InlineMath {
+  }
 
   /** 段落公式 */
-  .Cherry-Math {}
+  .Cherry-Math {
+  }
 
   /** 目录 */
   .toc {
-    .toc-title {}
+    .toc-title {
+    }
 
     .toc-li {
-      .level-1 {}
+      .level-1 {
+      }
 
-      .level-2 {}
+      .level-2 {
+      }
 
-      .level-3 {}
+      .level-3 {
+      }
     }
   }
-
 }
 
 ol {
-  li {}
+  li {
+  }
 }
