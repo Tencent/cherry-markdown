@@ -1100,7 +1100,7 @@ const ScatterChartOptionsHandler = {
           return `${params.name}<br/>x: <strong>${x}</strong><br/>y: <strong>${y}</strong>`;
         },
       },
-      'toolbox.feature.dataZoom': {},
+      // 'toolbox.feature.dataZoom': {},
       grid: engine.$grid(),
       xAxis: engine.$axis('value'),
       yAxis: engine.$axis('value'),
