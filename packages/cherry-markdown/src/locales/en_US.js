@@ -63,6 +63,7 @@ export default {
   insertState: 'Insert State',
   insertClass: 'Insert Class',
   insertPie: 'Insert Pie',
+  scatterTable: 'Scatter Table',
   insertGantt: 'Insert Gantt',
   checklist: 'Checklist',
   ol: 'Ordered List',
