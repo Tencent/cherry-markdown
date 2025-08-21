@@ -49,12 +49,12 @@ export default {
   'bar-table': '柱状表格', // 柱状表格
   'radar-table': '雷达表格', // 雷达表格
   'map-table': '地图表格', // 地图表格
-  lineTable: '折线表格', // 折线表格
-  barTable: '柱状表格', // 柱状表格
-  radarTable: '雷达表格', // 雷达表格
-  mapTable: '地图表格', // 地图表格
-  heatmapTable: '热力图表格', // 热力图表格
-  pieTable: '饼图表格', // 饼图表格
+  lineTable: '折线图', // 折线表格
+  barTable: '柱状图', // 柱状表格
+  radarTable: '雷达图', // 雷达表格
+  mapTable: '地图', // 地图表格
+  heatmapTable: '热力图', // 热力图表格
+  pieTable: '饼图', // 饼图表格
   proTable: '图表', // 图表表格
   formula: '公式', // 公式
   insertFormula: '公式', // 公式
@@ -63,6 +63,7 @@ export default {
   insertState: '状态图', // 状态图
   insertClass: '类图', // 类图
   insertPie: '饼图', // 饼图
+  scatterTable: '散点图', // 散点图
   insertGantt: '甘特图', // 甘特图
   checklist: '清单', // 清单
   ol: '有序列表', // 有序列表
