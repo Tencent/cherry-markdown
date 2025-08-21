@@ -170,7 +170,7 @@ export default class ProTable extends MenuBase {
    */
   insertScatterTable(selection) {
     return `${selection}\n\n${[
-      '| :scatter: {group,name,x,y,size} | X | Y | Size | Series |',
+      '| :scatter: {title:散点图,group,name,x,y,size} | X | Y | Size | Series |',
       '| :-: | :-: | :-: | :-: | :-: |',
       '| A1 | 10 | 20 | 5 | S1 |',
       '| A2 | 15 | 35 | 8 | S1 |',
