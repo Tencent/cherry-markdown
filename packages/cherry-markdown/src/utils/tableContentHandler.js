@@ -254,7 +254,6 @@ export default class TableHandler {
    * 支持cherry-table类的表格和原生HTML table标签
    */
   $collectTableDom() {
-    // const allTables = Array.from(this.previewerDom.querySelectorAll('table.cherry-table'));
     const tableNode = this.$getClosestNode(this.target, 'TABLE');
     if (tableNode === false) {
       return false;
@@ -275,9 +274,8 @@ export default class TableHandler {
        * 这里需要找到一个更好的方式来判断表格在编辑器中的顺序
        */
       allTables = footnoteTables;
-      
     }
-    
+
     const rowCells = Array.from(this.target.parentElement.childNodes).filter((child) => {
       // 计算列数
       return child.tagName && (child.tagName.toLowerCase() === 'td' || child.tagName.toLowerCase() === 'th');
@@ -854,6 +852,76 @@ export default class TableHandler {
     this.container.appendChild(this.tableEditor.editorDom.symbolContainer);
     this.$setSymbolOffset();
   }
+
+  /**
+   * 表格边界边框高亮
+   */
+  $handleBorderHighlight(type, dir) {
+    const { trNode, tdIndex } = this.tableEditor.info;
+    const tds = trNode.querySelectorAll('td');
+    const rows = this.tableEditor.info.trNode;
+    // 防抖 - 避免频繁触发
+    if (this.highlightTimer) {
+      clearTimeout(this.highlightTimer);
+    }
+    this.highlightTimer = setTimeout(() => {
+      // this.$clearAllBorders();
+      // 使用CSS类
+      if (type === 'Last' && dir === 'Row') {
+        tds.forEach((td) => td.classList.add('border-highlight-top'));
+      } else if (type === 'Next' && dir === 'Row') {
+        tds.forEach((td) => td.classList.add('border-highlight-bottom'));
+      } else if (type === 'Last' && dir === 'Col') {
+        this.$setBorderForColumn(rows, tdIndex, 'border-highlight-left');
+      } else if (type === 'Next' && dir === 'Col') {
+        this.$setBorderForColumn(rows, tdIndex, 'border-highlight-right');
+      }
+    }, 50);
+  }
+
+  $setBorderForElements(elements, property, value) {
+    elements.forEach((element) => {
+      element.style[property] = value;
+    });
+  }
+
+  // 设置列边框
+  $setBorderForColumn(rows, colIndex, className) {
+    rows.forEach((row) => {
+      const cell = row.cells[colIndex];
+      if (cell) {
+        cell.classList.add(className);
+      }
+    });
+  }
+
+  // 清除所有边框 暂时没有用到
+  $clearAllBorders() {
+    // 添加安全检查
+    if (!this.tableEditor.info || !this.tableEditor.info.trNode || !this.tableEditor.info.tableNode) {
+      return;
+    }
+    const { trNode, tableNode, tdIndex } = this.tableEditor.info;
+    const { rows } = tableNode;
+    const highlightClasses = [
+      'border-highlight-top',
+      'border-highlight-bottom',
+      'border-highlight-left',
+      'border-highlight-right',
+    ];
+    // 清除行边框
+    trNode.querySelectorAll('td').forEach((td) => {
+      td.classList.remove(...highlightClasses);
+    });
+    // 清除列边框
+    rows.forEach((row, rowIndex) => {
+      const cell = row?.cells?.[tdIndex];
+      if (cell) {
+        highlightClasses.forEach((cls) => cell.classList.remove(cls));
+      }
+    });
+  }
+
   $drawSortSymbol() {
     // const types = ['RowLeft', 'RowRight', 'ColUp', 'ColDown']; // 不要底部的拖拽按钮了，貌似没啥用
     const types = ['RowLeft', 'RowRight', 'ColUp'];
@@ -919,6 +987,7 @@ export default class TableHandler {
     this.container.appendChild(this.tableEditor.editorDom.sortContainer);
     this.$setSortSymbolsPosition();
   }
+
   $setSortSymbolsPosition() {
     const container = this.tableEditor.editorDom.sortContainer;
     const { tableNode, tdNode, isTHead } = this.tableEditor.info;
@@ -957,6 +1026,7 @@ export default class TableHandler {
       }
     });
   }
+
   /**
    * 添加上一行
    */
@@ -1054,6 +1124,7 @@ export default class TableHandler {
         if (tdIndex === 0) cells[tdIndex].style.borderLeft = '1px solid red';
         else cells[tdIndex - 1].style.borderRight = '1px solid red';
         cells[tdIndex].style.borderRight = '1px solid red';
+        cells[tdIndex].style.backgroundColor = 'rgba(255, 100, 100, 0.1)';
       }
     }
   }
@@ -1070,6 +1141,7 @@ export default class TableHandler {
         if (cells[tdIndex]) {
           if (tdIndex !== 0) cells[tdIndex - 1].style.border = '';
           cells[tdIndex].style.border = ''; // 恢复原始边框
+          cells[tdIndex].style.backgroundColor = '';
         }
       }
     }
@@ -1079,7 +1151,7 @@ export default class TableHandler {
    * 高亮当前行
    */
   $highlightRow() {
-    this.$doHighlightRow('1px solid red');
+    this.$doHighlightRow('1px solid red', 'rgba(255, 100, 100, 0.1)');
   }
 
   /**
@@ -1089,13 +1161,18 @@ export default class TableHandler {
     this.$doHighlightRow('');
   }
 
-  $doHighlightRow(style = '') {
+  $doHighlightRow(style = '', backgroundColor = '') {
     const { trNode, tableNode } = this.tableEditor.info;
     const tds = trNode.cells;
     const preTds = trNode.previousElementSibling?.cells || tableNode.tHead.firstChild.cells;
     for (let i = 0; i < tds.length; i++) {
       if (preTds[i]) preTds[i].style.borderBottom = style;
       tds[i].style.borderBottom = style;
+      if (backgroundColor) {
+        tds[i].style.backgroundColor = backgroundColor;
+      } else {
+        tds[i].style.backgroundColor = '';
+      }
     }
     tds[0].style.borderLeft = style;
     tds[tds.length - 1].style.borderRight = style;
