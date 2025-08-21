@@ -810,7 +810,8 @@ const BarChartOptionsHandler = {
     const { engine } = options;
     return {
       'tooltip.axisPointer.type': 'shadow',
-      'series.$item': engine.$baseSeries('bar', { barWidth: '60%' }),
+      'series.$item': engine.$baseSeries('bar'),
+      // 'series.$item': engine.$baseSeries('bar', { barWidth: '60%' }),
       // brush: { toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'], xAxisIndex: 0 },
     };
   },
