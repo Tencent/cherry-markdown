@@ -1106,6 +1106,9 @@ const ScatterChartOptionsHandler = {
       xAxis: engine.$axis('value'),
       yAxis: engine.$axis('value'),
       series,
+      legend: {
+        data: series.map((s) => s.name),
+      },
     };
   },
 };
