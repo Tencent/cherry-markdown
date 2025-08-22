@@ -261,6 +261,7 @@ const defaultConfig = {
          * @deprecated 不再支持theme的配置，统一在`themeSettings.inlineCodeTheme`中配置
          */
         // theme: 'red',
+        showColor: true, // 是否在行内代码为颜色值时展示颜色指示
       },
       codeBlock: {
         // theme: 'dark', //  @deprecated 不再支持theme的配置，统一在`themeSettings.codeBlockTheme`中配置
