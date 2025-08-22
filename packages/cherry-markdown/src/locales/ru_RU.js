@@ -64,6 +64,7 @@ export default {
   insertState: 'Вставить State',
   insertClass: 'Вставить класс',
   insertPie: 'Вставить Pie',
+  scatterTable: 'таблица рассеяния',
   insertGantt: 'Вставить Gantt',
   checklist: 'Контрольный список',
   ol: 'Упорядоченный список',

@@ -20,8 +20,7 @@ import MenuBase from '@/toolbars/MenuBase';
 export default class ProTable extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('proTable', 'insertChart');
-    this.noIcon = true;
+    this.setName('proTable', 'insertLineChart');
     this.localeName = $cherry.options.locale;
     /** @type {import('@/toolbars/MenuBase').SubMenuConfigItem[]} */
     this.subMenuConfig = [

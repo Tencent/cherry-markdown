@@ -192,7 +192,7 @@ export default class EChartsTableEngine {
       },
     };
     const base = {
-      name: '',
+      // name: '',
       data: [],
       emphasis: {
         focus: 'series',
@@ -533,7 +533,7 @@ export default class EChartsTableEngine {
    * 渲染入口：将表格数据渲染为指定类型图表，并返回 HTML 容器片段
    */
   render(type, options, tableObject) {
-    Logger.log('Rendering chart:', type, options, tableObject);
+    // Logger.log('Rendering chart:', type, options, tableObject);
 
     // 生成唯一ID和简化的配置数据
     const chartId = `chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -543,7 +543,7 @@ export default class EChartsTableEngine {
 
     options.chartId = chartId;
     const chartOption = this.$generateChartOptions(type, tableObject, options);
-    Logger.log('Chart options:', chartOption);
+    // Logger.log('Chart options:', chartOption);
 
     // 创建一个包含所有必要信息的HTML结构
     const htmlContent = `
@@ -654,11 +654,11 @@ const TitleOptionsHandler = {
     return options.title
       ? {
           title: {
-            text: options.title,
+            text: options.title.replace(/\s*,\s*$/, ''),
             left: 'center',
             top: 'bottom',
             textStyle: {
-              color: '#666',
+              color: options.engine.$theme().color.tooltipText,
               fontSize: 16,
             },
           },
@@ -694,8 +694,8 @@ const BaseChartOptionsHandler = {
         left: 'right',
         top: 'center',
         feature: {
-          dataView: { show: true, readOnly: false, title: '数据视图', lang: ['数据视图', '关闭', '刷新'] },
-          restore: { show: true, title: '重置' },
+          // dataView: { show: true, readOnly: false, title: '数据视图', lang: ['数据视图', '关闭', '刷新'] },
+          // restore: { show: true, title: '重置' },
           saveAsImage: {
             show: true,
             title: '保存为图片',
@@ -723,10 +723,6 @@ const LegendOptionsHandler = {
         itemWidth: 12,
         itemHeight: 12,
         selectedMode: 'multiple',
-        selector: [
-          { type: 'all', title: '全选' },
-          { type: 'inverse', title: '反选' },
-        ],
         selectorLabel: { color: engine.$theme().color.text, borderColor: engine.$theme().color.border },
         data: tableObject.rows.map((row) => row[0]),
       },
@@ -741,7 +737,7 @@ const AxisOptionsHandler = {
     const data = [];
     const series = [];
     tableObject.rows.forEach((row) => {
-      console.log('Processing row:', row);
+      // console.log('Processing row:', row);
       data.push(row[0]);
       series.push({
         name: row[0],
@@ -814,8 +810,9 @@ const BarChartOptionsHandler = {
     const { engine } = options;
     return {
       'tooltip.axisPointer.type': 'shadow',
-      'series.$item': engine.$baseSeries('bar', { barWidth: '60%' }),
-      brush: { toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'], xAxisIndex: 0 },
+      'series.$item': engine.$baseSeries('bar'),
+      // 'series.$item': engine.$baseSeries('bar', { barWidth: '60%' }),
+      // brush: { toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'], xAxisIndex: 0 },
     };
   },
 };
@@ -986,7 +983,7 @@ const ScatterChartOptionsHandler = {
   components: [BaseChartOptionsHandler, LegendOptionsHandler],
   options(tableObject, options) {
     const { engine } = options;
-    console.log('Rendering scatter chart:', tableObject);
+    // console.log('Rendering scatter chart:', tableObject);
 
     // Support both forms from PR #1362:
     // 1) Single series: | :scatter:{name,x,y,size?} | X | Y | Size? |
@@ -1104,7 +1101,7 @@ const ScatterChartOptionsHandler = {
           return `${params.name}<br/>x: <strong>${x}</strong><br/>y: <strong>${y}</strong>`;
         },
       },
-      'toolbox.feature.dataZoom': {},
+      // 'toolbox.feature.dataZoom': {},
       grid: engine.$grid(),
       xAxis: engine.$axis('value'),
       yAxis: engine.$axis('value'),
@@ -1116,7 +1113,7 @@ const ScatterChartOptionsHandler = {
 // Map chart handlers from PR #1349 with PR #1362 integration
 const MapChartLoadingOptionsHandler = {
   options(tableObject, options) {
-    console.log('Rendering map chart:', tableObject);
+    // console.log('Rendering map chart:', tableObject);
 
     return typeof window.echarts === 'undefined'
       ? {
@@ -1217,22 +1214,22 @@ const MapChartOptionsHandler = {
   },
   $tryLoadMapDataFromPaths(paths, index, options) {
     if (index >= paths.length) {
-      console.error('所有地图数据源都加载失败');
+      // console.error('所有地图数据源都加载失败');
       return;
     }
 
     const url = paths[index];
-    console.log(`尝试加载地图数据: ${url}`);
+    // console.log(`尝试加载地图数据: ${url}`);
 
     this.$fetchMapData(url)
       .then((geoJson) => {
         window.echarts.registerMap(url, geoJson);
-        console.log(`地图数据加载成功！来源: ${url}`);
+        // console.log(`地图数据加载成功！来源: ${url}`);
         this.$refreshMapChart(options.chartId, url, options.engine);
         return geoJson;
       })
       .catch((error) => {
-        console.warn(`地图数据加载失败 (${url}):`, error.message);
+        // console.warn(`地图数据加载失败 (${url}):`, error.message);
         this.$tryLoadMapDataFromPaths(paths, index + 1, options);
       });
   },
@@ -1261,14 +1258,14 @@ const MapChartOptionsHandler = {
 
         if (existingChart) {
           existingChart.setOption(chartOption, true);
-          console.log('Map chart refreshed successfully:', chartId);
+          // console.log('Map chart refreshed successfully:', chartId);
         } else {
           const newChart = engine.echartsRef.init(container);
           newChart.setOption(chartOption);
-          console.log('Map chart recreated:', chartId);
+          // console.log('Map chart recreated:', chartId);
         }
       } catch (error) {
-        console.error('Failed to refresh map chart:', chartId, error);
+        // console.error('Failed to refresh map chart:', chartId, error);
       }
     }
   },
@@ -1328,7 +1325,7 @@ const normalizeProvinceName = (inputName) => {
       return fullName;
     }
   }
-  console.warn(`Province name not matched: ${inputName}`);
+  // console.warn(`Province name not matched: ${inputName}`);
   return cleanName;
 };
 

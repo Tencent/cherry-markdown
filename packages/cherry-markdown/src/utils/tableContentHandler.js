@@ -25,6 +25,7 @@ export default class TableHandler {
   tableEditor = {
     info: {}, // 当前点击的预览区域table的相关信息
     tableCodes: [], // 编辑器内所有的表格语法
+    footnoteTableCodes: [], // 编辑器内所有的脚注表格语法
     editorDom: {}, // 编辑器容器
   };
 
@@ -171,7 +172,7 @@ export default class TableHandler {
   }
 
   $remove() {
-    this.tableEditor = { info: {}, tableCodes: [], editorDom: {} };
+    this.tableEditor = { info: {}, tableCodes: [], editorDom: {}, footnoteTableCodes: [] };
   }
 
   /**
@@ -180,7 +181,29 @@ export default class TableHandler {
    */
   $collectTableCode() {
     const tableCodes = [];
+    const footnoteTableCodes = [];
     const editorValue = this.codeMirror.getValue();
+
+    // 首先收集所有脚注的位置信息
+    const footnoteRanges = [];
+    const footnoteReg = /(^|\n)[ \t]*\[\^([^\]]+?)\]:[ \t]*([\s\S]+?)(?=\s*$|\n\n)/g;
+    let footnoteMatch;
+    while ((footnoteMatch = footnoteReg.exec(editorValue)) !== null) {
+      const start = footnoteMatch.index + footnoteMatch[1].length; // 去掉开头的换行符
+      const end = footnoteMatch.index + footnoteMatch[0].length;
+      footnoteRanges.push({
+        start,
+        end,
+        id: footnoteMatch[2],
+        content: footnoteMatch[3],
+      });
+    }
+
+    // 判断给定位置是否在脚注中
+    const isInFootnote = (offset) => {
+      return footnoteRanges.some((range) => offset >= range.start && offset < range.end);
+    };
+
     // 处理markdown表格语法
     editorValue
       .replace(this.codeBlockReg, (whole, ...args) => {
@@ -190,11 +213,17 @@ export default class TableHandler {
       .replace(this.tableReg, function (whole, ...args) {
         const match = whole.replace(/^\n*/, '');
         const offsetBegin = args[args.length - 2] + whole.match(/^\n*/)[0].length;
-        tableCodes.push({
+        const info = {
           code: match,
           offset: offsetBegin,
           type: 'markdown',
-        });
+        };
+        if (isInFootnote(offsetBegin)) {
+          footnoteTableCodes.push(info);
+        } else {
+          tableCodes.push(info);
+        }
+        return whole.replace(/\|/g, '.');
       });
     // 增强功能：处理引用语法中的表格
     // 匹配引用块中的表格语法，支持多层嵌套引用
@@ -208,14 +237,15 @@ export default class TableHandler {
         code: match,
         offset: offsetBegin,
         type: 'blockquote-markdown',
-        isBlockquote: true,
       });
     }
     // 处理HTML table标签
-    this.$collectHtmlTableCode(editorValue, tableCodes);
+    this.$collectHtmlTableCode(editorValue, tableCodes, footnoteTableCodes, isInFootnote);
     // 按offset排序，确保顺序正确
     tableCodes.sort((a, b) => a.offset - b.offset);
+    footnoteTableCodes.sort((a, b) => a.offset - b.offset);
     this.tableEditor.tableCodes = tableCodes;
+    this.tableEditor.footnoteTableCodes = footnoteTableCodes;
   }
 
   /**
@@ -223,18 +253,34 @@ export default class TableHandler {
    * 支持cherry-table类的表格和原生HTML table标签
    */
   $collectTableDom() {
-    // 获取所有表格，包括cherry-table和原生HTML table
-    const cherryTables = Array.from(this.previewerDom.querySelectorAll('table.cherry-table'));
-    const htmlTables = Array.from(this.previewerDom.querySelectorAll('table:not(.cherry-table)'));
-    const allTables = [...cherryTables, ...htmlTables];
     const tableNode = this.$getClosestNode(this.target, 'TABLE');
     if (tableNode === false) {
       return false;
     }
-    const columns = Array.from(this.target.parentElement.childNodes).filter((child) => {
+    const footnoteTables = Array.from(this.previewerDom.querySelectorAll('div.one-footnote table'));
+    const isInFootnote = footnoteTables.includes(tableNode);
+    let allTables = [];
+    // 获取所有表格，包括cherry-table和原生HTML table
+    if (!isInFootnote) {
+      // 排除掉脚注中的表格
+      allTables = Array.from(this.previewerDom.querySelectorAll('table')).filter(
+        (table) => !footnoteTables.includes(table),
+      );
+    } else {
+      /**
+       * **TODO**:
+       * 这里认为脚注dom的顺序和编辑器中的顺序是一致的，但实际并不一定
+       * 这里需要找到一个更好的方式来判断表格在编辑器中的顺序
+       */
+      allTables = footnoteTables;
+    }
+    const rowCells = Array.from(this.target.parentElement.childNodes).filter((child) => {
       // 计算列数
-      return child.tagName.toLowerCase() === 'td';
-    }).length;
+      return child.tagName && (child.tagName.toLowerCase() === 'td' || child.tagName.toLowerCase() === 'th');
+    });
+
+    const columns = rowCells.length;
+    const tdIndex = rowCells.indexOf(this.target);
 
     // 判断表格类型
     const isHtmlTable = !tableNode.classList.contains('cherry-table');
@@ -242,7 +288,7 @@ export default class TableHandler {
       tableNode,
       tdNode: this.target,
       trNode: this.target.parentElement,
-      tdIndex: Array.from(this.target.parentElement.childNodes).indexOf(this.target),
+      tdIndex,
       trIndex: Array.from(this.target.parentElement.parentElement.childNodes).indexOf(this.target.parentElement),
       isTHead: this.target.parentElement.parentElement.tagName !== 'TBODY',
       totalTables: allTables.length,
@@ -250,8 +296,7 @@ export default class TableHandler {
       tableText: tableNode.textContent.replace(/[\s]/g, ''),
       columns,
       isHtmlTable, // 标记是否为HTML表格
-      cherryTableCount: cherryTables.length, // cherry表格数量
-      htmlTableCount: htmlTables.length, // HTML表格数量
+      isInFootnote,
     };
   }
 
@@ -262,9 +307,10 @@ export default class TableHandler {
    * @param {Boolean} select 是否选中编辑器中的代码
    */
   $setSelection(index, type = 'table', select = true) {
-    const tableCode = this.tableEditor.tableCodes[index];
-    const whole = this.codeMirror.getValue();
     const selectTdInfo = this.tableEditor.info;
+    const { isInFootnote } = selectTdInfo;
+    const tableCode = isInFootnote ? this.tableEditor.footnoteTableCodes[index] : this.tableEditor.tableCodes[index];
+    const whole = this.codeMirror.getValue();
     const beginLine = whole.slice(0, tableCode.offset).match(/\n/g)?.length ?? 0;
     // 根据表格类型选择不同的处理方式
     let offsetInfo;
@@ -406,6 +452,11 @@ export default class TableHandler {
    * @param {Number} tdIndex 列索引
    */
   $getHtmlTdOffset(tableCode, trIndex, tdIndex) {
+    /**
+     * **TODO**:
+     * 这里假设HTML表格的每一行都是完整的<tr>标签，没有跨行、所有html标签挤在一行的情况
+     * 如果有跨行的情况，需要修改这里的逻辑
+     */
     const lines = tableCode.split(/\n/);
     let foundTr = 0;
     let foundTd = 0;
@@ -479,15 +530,20 @@ export default class TableHandler {
   /**
    * 收集HTML table标签
    */
-  $collectHtmlTableCode(editorValue, tableCodes) {
+  $collectHtmlTableCode(editorValue, tableCodes, footnoteTableCodes, isInFootnote) {
     let match;
     this.htmlTableReg.lastIndex = 0; // 重置正则表达式的lastIndex
     while ((match = this.htmlTableReg.exec(editorValue)) !== null) {
-      tableCodes.push({
+      const info = {
         code: match[0],
         offset: match.index,
         type: 'html',
-      });
+      };
+      if (isInFootnote(match.index)) {
+        footnoteTableCodes.push(info);
+      } else {
+        tableCodes.push(info);
+      }
     }
     // 收集引用块中的HTML表格
     this.blockquoteHtmlTableReg.lastIndex = 0;
@@ -496,7 +552,6 @@ export default class TableHandler {
         code: match[0],
         offset: match.index,
         type: 'blockquote-html',
-        isBlockquote: true,
       });
     }
   }

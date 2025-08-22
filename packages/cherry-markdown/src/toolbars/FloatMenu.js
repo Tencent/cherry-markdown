@@ -78,8 +78,10 @@ export default class FloatMenu extends Toolbar {
       return false;
     }
     const computedLinesStyle = getComputedStyle(codeMirrorLines);
-    const codeWrapPaddingLeft = parseFloat(computedLinesStyle.paddingLeft);
-    const codeWrapPaddingTop = parseFloat(computedLinesStyle.paddingTop);
+    const parsedPaddingLeft = Number.parseFloat(computedLinesStyle.paddingLeft);
+    const parsedPaddingTop = Number.parseFloat(computedLinesStyle.paddingTop);
+    const codeWrapPaddingLeft = Number.isFinite(parsedPaddingLeft) ? parsedPaddingLeft : 0;
+    const codeWrapPaddingTop = Number.isFinite(parsedPaddingTop) ? parsedPaddingTop : 0;
     // const cursorHandle = codeMirror.getLineHandle(pos.line);
     // const verticalMiddle = cursorHandle.height * 1 / 2;
 
@@ -89,7 +91,25 @@ export default class FloatMenu extends Toolbar {
     }
     this.options.dom.style.display = 'inline-block';
     this.options.dom.style.left = `${codeWrapPaddingLeft}px`;
-    this.options.dom.style.top = `${this.getLineHeight(pos.line, codeMirror) + codeWrapPaddingTop}px`;
+
+    // 当配置 codemirror.placeholder 时，测量 placeholder 中文本的范围
+    // 将浮动工具栏定位到 placeholder 文本后面
+    const placeholderEl = codeMirrorLines.querySelector('.CodeMirror-placeholder');
+    const topOffset = this.getLineHeight(pos.line, codeMirror);
+    if (placeholderEl instanceof HTMLElement && placeholderEl.offsetParent !== null) {
+      const linesRect = codeMirrorLines.getBoundingClientRect();
+      const textNode = Array.from(placeholderEl.childNodes).find(
+        (n) => n.nodeType === Node.TEXT_NODE && n.nodeValue && n.nodeValue.trim() !== '',
+      );
+      const range = document.createRange();
+      range.setStart(textNode, 0);
+      range.setEnd(textNode, textNode.nodeValue.length);
+      const rects = range.getClientRects();
+      const lastRect = rects[rects.length - 1];
+      const placeholderRightRelative = Math.max(0, lastRect.right - linesRect.left);
+      this.options.dom.style.left = `${placeholderRightRelative + codeWrapPaddingLeft - 80}px`;
+    }
+    this.options.dom.style.top = `${topOffset + codeWrapPaddingTop}px`;
   }
 
   /**

@@ -864,10 +864,21 @@
     color: var(--toolbar-btn-color);
     background-color: var(--toolbar-bg);
     display: inline-block;
+
     &:hover {
       color: var(--toolbar-btn-hover-color);
       background-color: var(--toolbar-btn-hover-bg);
       border-color: #eee;
+    }
+    animation: pulse 2s infinite alternate;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+    100% {
+      box-shadow: 0 0 15px var(--primary-color);
     }
   }
 }
@@ -1136,7 +1147,7 @@
     .cherry-expand-code-block,
     .cherry-unExpand-code-block,
     .cherry-edit-code-block {
-      background-color: #3582fb;
+      background-color: var(--primary-color);
     }
   }
 

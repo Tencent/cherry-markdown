@@ -739,25 +739,48 @@ class SuggesterPanel {
 
       this.cursorMove = false;
 
-      const selectedItem =
-        this.$suggesterPanel.querySelector('.cherry-suggester-panel__item--selected') ||
-        this.$suggesterPanel.querySelector('.cherry-suggester-panel__item:last-child');
+      // 初始状态下
+      // - 按上键（38）选择最后一项
+      // - 按下键（40）选择第一项
+      const existingSelected = this.$suggesterPanel.querySelector('.cherry-suggester-panel__item--selected');
+      const hasSelected = !!existingSelected;
+      const selectedItem = existingSelected || null;
       let nextElement = null;
-      if (keyCode === 38 && !selectedItem.previousElementSibling) {
-        nextElement = this.$suggesterPanel.lastElementChild;
-        // codemirror.focus();
-      } else if (keyCode === 40 && !selectedItem.nextElementSibling) {
-        nextElement = this.$suggesterPanel.firstElementChild;
-        // codemirror.focus();
-      } else {
+
+      if (!hasSelected) {
         if (keyCode === 38) {
-          nextElement = selectedItem.previousElementSibling;
+          nextElement = this.$suggesterPanel.lastElementChild;
         } else if (keyCode === 40) {
-          nextElement = selectedItem.nextElementSibling;
+          nextElement = this.$suggesterPanel.firstElementChild;
+        }
+      } else {
+        if (keyCode === 38 && !selectedItem.previousElementSibling) {
+          nextElement = this.$suggesterPanel.lastElementChild;
+          // codemirror.focus();
+        } else if (keyCode === 40 && !selectedItem.nextElementSibling) {
+          nextElement = this.$suggesterPanel.firstElementChild;
+          // codemirror.focus();
+        } else {
+          if (keyCode === 38) {
+            nextElement = selectedItem.previousElementSibling;
+          } else if (keyCode === 40) {
+            nextElement = selectedItem.nextElementSibling;
+          }
+        }
+
+        // 已选中情况下 移除当前选中样式
+        if (selectedItem && selectedItem.classList) {
+          selectedItem.classList.remove('cherry-suggester-panel__item--selected');
         }
       }
 
-      selectedItem.classList.remove('cherry-suggester-panel__item--selected');
+      // 如果没有可选元素则退出
+      if (!nextElement) {
+        setTimeout(() => {
+          this.stopRelate();
+        }, 0);
+        return;
+      }
 
       nextElement.classList.add('cherry-suggester-panel__item--selected');
 

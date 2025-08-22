@@ -32,7 +32,7 @@ export function LoadMathModule() {
 
 export const configureMathJax = (usePlugins) => {
   if (!isBrowser()) {
-    console.log('mathjax disabled');
+    // console.log('mathjax disabled');
     return;
   }
   const plugins = usePlugins
