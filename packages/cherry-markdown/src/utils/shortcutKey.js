@@ -180,6 +180,15 @@ export const isEnableShortcutKey = (nameSpace) => {
 };
 
 /**
+ * 清空缓存快捷键映射
+ * @param {string} nameSpace cherry 的缓存命名空间
+ * @returns {void}
+ */
+export const clearStorageKeyMap = (nameSpace) => {
+  window.localStorage.removeItem(`${nameSpace}-cherry-shortcut-keymap`);
+};
+
+/**
  * 缓存快捷键映射
  * @param {string} nameSpace cherry 的缓存命名空间
  * @param {import('@/toolbars/MenuBase').HookShortcutKeyMap} keyMap 快捷键映射

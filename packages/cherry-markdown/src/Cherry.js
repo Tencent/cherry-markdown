@@ -41,6 +41,7 @@ import defaultConfig from './Cherry.config';
 import cloneDeep from 'lodash/cloneDeep';
 import Event from './Event';
 import locales from '@/locales/index';
+import Logger from '@/Logger';
 
 import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
@@ -573,7 +574,7 @@ export default class Cherry extends CherryStatic {
       // 检查主题是否在可用主题列表中，如果不在则设为 default
       const availableThemes = this.options.themeSettings.themeList.map((theme) => theme.className);
       if (!availableThemes.includes(mainTheme)) {
-        console.log(`主题 "${mainTheme}" 不在可用主题列表中，已切换为默认主题`);
+        Logger.log(`主题 "${mainTheme}" 不在可用主题列表中，已切换为默认主题`);
         mainTheme = 'default';
       }
       mainTheme = `theme__${mainTheme}`;
@@ -626,7 +627,7 @@ export default class Cherry extends CherryStatic {
       this.toolbarContainer = dom;
     }
     if (this.options.toolbars.shortcutKey && Object.keys(this.options.toolbars.shortcutKey).length > 0) {
-      console.warn(
+      Logger.warn(
         'options.shortcutKey is deprecated, please use shortcutKeySettings.shortcutKeyMap instead, get more info at https://github.com/Tencent/cherry-markdown/wiki',
       );
     }
