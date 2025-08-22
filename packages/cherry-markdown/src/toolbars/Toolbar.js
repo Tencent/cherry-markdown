@@ -357,7 +357,7 @@ export default class Toolbar {
         if (typeof this.menus.hooks[name].shortcutKeyMap === 'object' && this.menus.hooks[name].shortcutKeyMap) {
           Object.entries(this.menus.hooks[name].shortcutKeyMap).forEach(([key, value]) => {
             if (key in this.shortcutKeyMap) {
-              console.error(`The shortcut key ${key} is already registered`);
+              Logger.error(`The shortcut key ${key} is already registered`);
               return;
             }
             this.shortcutKeyMap[key] = value;
