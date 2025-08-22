@@ -59,7 +59,7 @@ const imgAltHelper = {
    * @param alt
    */
   $addDecorationStyle(result, alt) {
-    console.log('update deco');
+    // console.log('update deco');
     const info = alt.match(/#(border|shadow|radius|B|S|R)/g);
     if (info) {
       for (let i = 0; i < info.length; i++) {
