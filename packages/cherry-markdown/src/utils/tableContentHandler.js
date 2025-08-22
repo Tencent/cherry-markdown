@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import { getTableRule, getCodeBlockRule } from '@/utils/regexp';
-
 /**
  * 用于在表格上出现编辑区，并提供拖拽行列的功能
  */
@@ -293,8 +292,8 @@ export default class TableHandler {
       tdIndex,
       trIndex: Array.from(this.target.parentElement.parentElement.childNodes).indexOf(this.target.parentElement),
       isTHead: this.target.parentElement.parentElement.tagName !== 'TBODY',
-      totalTables: allTables.length, // 我写的 totalTables: targetTables.length, // 使用分类后的数量
-      tableIndex: allTables.indexOf(tableNode), // 使用分类后的索引
+      totalTables: allTables.length,
+      tableIndex: allTables.indexOf(tableNode),
       tableText: tableNode.textContent.replace(/[\s]/g, ''),
       columns,
       isHtmlTable, // 标记是否为HTML表格
@@ -335,10 +334,7 @@ export default class TableHandler {
     const { preLine, preCh, plusCh, currentTd } = offsetInfo;
     if (type === 'table') {
       const endLine = beginLine + tableCode.code.match(/\n/g).length;
-      let endCh = tableCode.code.match(/[^\n]+\n*$/)[0].length;
-      if (tableCode.info.isInBlock) {
-        endCh += 2;
-      }
+      const endCh = tableCode.code.match(/[^\n]+\n*$/)[0].length;
       this.tableEditor.info.selection = [
         { line: beginLine, ch: 0 },
         { line: endLine, ch: endCh },
@@ -789,62 +785,33 @@ export default class TableHandler {
         const { type, dir } = target.dataset;
         this[`$add${type}${dir}`]();
       });
-      // 添加下划线 上面一个有效 下面一个没有效果
       li.addEventListener('mouseover', (e) => {
         const { target } = e;
         if (!(target instanceof HTMLElement)) {
           return;
         }
         const currentRow = this.tableEditor.info.trNode;
-        const { tableNode, tdIndex } = this.tableEditor.info;
-        const { rows } = tableNode;
+        const { tdIndex } = this.tableEditor.info;
         const tds = currentRow.querySelectorAll('td');
         const dataType = target.getAttribute('data-type');
         const dataDir = target.getAttribute('data-dir');
         if (dataType === 'Last' && dataDir === 'Row') {
           tds.forEach((td) => {
-            td.style.borderTop = '2px solid red';
+            td.classList.add('table-highlight-border-add-top');
           });
         } else if (dataType === 'Next' && dataDir === 'Row') {
           tds.forEach((td) => {
-            td.style.borderBottom = '2px solid red';
+            td.classList.add('table-highlight-border-add-bottom');
           });
-          // tds[0].style.borderTop = '1px solid red';
         } else if (dataType === 'Last' && dataDir === 'Col') {
-          for (let i = 0; i < rows.length; i++) {
-            const { cells } = rows[i];
-            if (cells[tdIndex]) {
-              cells[tdIndex].style.borderLeft = '2px solid red';
-            }
-          }
+          this.$hightLightColumnCellsDOM(tdIndex, 'left');
         } else if (dataType === 'Next' && dataDir === 'Col') {
-          for (let i = 0; i < rows.length; i++) {
-            const { cells } = rows[i];
-            if (cells[tdIndex]) {
-              cells[tdIndex].style.borderRight = '2px solid red';
-            }
-          }
+          this.$hightLightColumnCellsDOM(tdIndex, 'right');
         }
       });
       // 取消边界
       li.addEventListener('mouseout', (e) => {
-        const currentRow = this.tableEditor.info.trNode;
-        const tds = currentRow.querySelectorAll('td');
-        const { tableNode, tdIndex } = this.tableEditor.info;
-        const { rows } = tableNode;
-        tds.forEach((td) => {
-          td.style.borderBottom = '';
-          td.style.borderTop = '';
-          td.style.borderLeft = '';
-          td.style.borderRight = '';
-        });
-        for (let i = 0; i < rows.length; i++) {
-          const { cells } = rows[i];
-          if (cells[tdIndex]) {
-            cells[tdIndex].style.borderRight = '';
-            cells[tdIndex].style.borderLeft = '';
-          }
-        }
+        this.$clearAllBorders();
       });
       container.appendChild(li);
     }, true);
@@ -853,73 +820,67 @@ export default class TableHandler {
     this.$setSymbolOffset();
   }
 
-  /**
-   * 表格边界边框高亮
-   */
-  $handleBorderHighlight(type, dir) {
-    const { trNode, tdIndex } = this.tableEditor.info;
-    const tds = trNode.querySelectorAll('td');
-    const rows = this.tableEditor.info.trNode;
-    // 防抖 - 避免频繁触发
-    if (this.highlightTimer) {
-      clearTimeout(this.highlightTimer);
-    }
-    this.highlightTimer = setTimeout(() => {
-      // this.$clearAllBorders();
-      // 使用CSS类
-      if (type === 'Last' && dir === 'Row') {
-        tds.forEach((td) => td.classList.add('border-highlight-top'));
-      } else if (type === 'Next' && dir === 'Row') {
-        tds.forEach((td) => td.classList.add('border-highlight-bottom'));
-      } else if (type === 'Last' && dir === 'Col') {
-        this.$setBorderForColumn(rows, tdIndex, 'border-highlight-left');
-      } else if (type === 'Next' && dir === 'Col') {
-        this.$setBorderForColumn(rows, tdIndex, 'border-highlight-right');
-      }
-    }, 50);
-  }
-
   $setBorderForElements(elements, property, value) {
     elements.forEach((element) => {
       element.style[property] = value;
     });
   }
 
-  // 设置列边框
-  $setBorderForColumn(rows, colIndex, className) {
-    rows.forEach((row) => {
-      const cell = row.cells[colIndex];
-      if (cell) {
-        cell.classList.add(className);
+  /**
+   * 高亮一列的单元格的单边框
+   * @param {number} columnIndex
+   * @param {string} position // left | right | top | bottom
+   * @returns
+   */
+  $hightLightColumnCellsDOM(columnIndex = this.tableEditor.info.tdIndex, position) {
+    // 获取当前操作的表格
+    const table = this.tableEditor.info.tableNode;
+    const rows = table.rows;
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].cells[columnIndex]) {
+        const cell = rows[i].cells[columnIndex];
+        if (position === 'left') {
+          cell.classList.add('table-highlight-border-add-left');
+        } else if (position === 'right') {
+          cell.classList.add('table-highlight-border-add-right');
+        } else if (position === 'top') {
+          cell.classList.add('table-highlight-border-add-top');
+        } else if (position === 'bottom') {
+          cell.classList.add('table-highlight-border-add-bottom');
+        }
       }
-    });
+    }
   }
 
-  // 清除所有边框 暂时没有用到
+  // 清除所有边框
   $clearAllBorders() {
     // 添加安全检查
     if (!this.tableEditor.info || !this.tableEditor.info.trNode || !this.tableEditor.info.tableNode) {
       return;
     }
-    const { trNode, tableNode, tdIndex } = this.tableEditor.info;
+    const { tableNode, tdIndex } = this.tableEditor.info;
     const { rows } = tableNode;
-    const highlightClasses = [
-      'border-highlight-top',
-      'border-highlight-bottom',
-      'border-highlight-left',
-      'border-highlight-right',
-    ];
-    // 清除行边框
-    trNode.querySelectorAll('td').forEach((td) => {
-      td.classList.remove(...highlightClasses);
+    const currentCell = this.tableEditor.info.trNode;
+    const tds = currentCell.querySelectorAll('td');
+    tds.forEach((td) => {
+      td.classList.remove(
+        'table-highlight-border-add-right',
+        'table-highlight-border-add-left',
+        'table-highlight-border-add-top',
+        'table-highlight-border-add-bottom',
+      );
     });
-    // 清除列边框
-    rows.forEach((row, rowIndex) => {
-      const cell = row?.cells?.[tdIndex];
-      if (cell) {
-        highlightClasses.forEach((cls) => cell.classList.remove(cls));
+    for (let i = 0; i < rows.length; i++) {
+      const { cells } = rows[i];
+      if (cells[tdIndex]) {
+        cells[tdIndex].classList.remove(
+          'table-highlight-border-add-right',
+          'table-highlight-border-add-left',
+          'table-highlight-border-add-top',
+          'table-highlight-border-add-bottom',
+        );
       }
-    });
+    }
   }
 
   $drawSortSymbol() {
@@ -939,13 +900,14 @@ export default class TableHandler {
         sortSymbol.addEventListener('mouseover', () => {
           const { tdNode } = this.tableEditor.info;
           tdNode.draggable = true;
-
-          tdNode.parentNode.style.backgroundColor = 'rgb(206,226,248)';
+          // tdNode.parentNode.style.backgroundColor = 'rgb(206,226,248)';
+          tdNode.parentNode.classList.add('table-sort-active');
         });
         sortSymbol.addEventListener('mouseleave', () => {
           const { tdNode } = this.tableEditor.info;
           tdNode.draggable = false;
-          tdNode.parentNode.style.backgroundColor = '';
+          // tdNode.parentNode.style.backgroundColor = '';
+          tdNode.parentNode.classList.remove('table-sort-active');
         });
         sortSymbol.addEventListener('mousedown', (e) => {
           this.$setSelection(this.tableEditor.info.tableIndex, 'table');
@@ -968,13 +930,13 @@ export default class TableHandler {
                 highLightTrDom.push(tr);
               });
             });
-          highLightTrDom.forEach((tr) => (tr.children[index].style.backgroundColor = 'rgb(206,226,248)'));
+          highLightTrDom.forEach((tr) => tr.children[index].classList.add('table-sort-active'));
         });
         sortSymbol.addEventListener('mouseleave', () => {
           const { tdNode } = this.tableEditor.info;
           tdNode.draggable = false;
           const index = Array.from(tdNode.parentNode.children).indexOf(tdNode);
-          highLightTrDom.forEach((tr) => (tr.children[index].style.backgroundColor = ''));
+          highLightTrDom.forEach((tr) => tr.children[index].classList.remove('table-sort-active'));
         });
         sortSymbol.addEventListener('mousedown', (e) => {
           this.$setSelection(this.tableEditor.info.tableIndex, 'table');
@@ -1246,9 +1208,9 @@ export default class TableHandler {
           this.setStyle(node, 'display', 'none');
         }
         this.setStyle(node, 'top', `${tdInfo.top - tableInfo.top + tdInfo.height / 2 - node.offsetHeight / 2}px`);
-        this.setStyle(node, `${type}`, `-${node.offsetWidth + 5}px`);
+        this.setStyle(node, `${type}`, `-${node.offsetWidth}px`);
       } else {
-        this.setStyle(node, `${type}`, `-${offset.outer}px`);
+        this.setStyle(node, `${type}`, `-${offset.outer + 5}px`);
         this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
       }
     });
@@ -1331,6 +1293,7 @@ export default class TableHandler {
 
     function handleDragLeave(event) {
       that.setStyle(event.target, 'border', '1px solid #dfe6ee');
+      that.$clearAllBorders();
     }
 
     function handleDragOver(event) {
@@ -1353,9 +1316,9 @@ export default class TableHandler {
       const newText = newLines.join('\n').replace(/CHERRY_MARKDOWN_PENDING_TEXT_FOR_EMPTY_CELL/g, '');
       that.codeMirror.replaceSelection(newText);
       that.setStyle(event.target, 'border', '1px solid #dfe6ee');
+      this.$clearAllBorders();
       that.$findTableInEditor();
       that.$setSelection(that.tableEditor.info.tableIndex, 'table');
-
       thNode.removeEventListener('dragleave', handleDragLeave);
       thNode.removeEventListener('dragover', handleDragOver);
     }
@@ -1379,6 +1342,7 @@ export default class TableHandler {
 
     function handleDragLeave(event) {
       that.setStyle(event.target.parentElement, 'border', '1px solid #dfe6ee');
+      this.$clearAllBorders();
     }
 
     function handleDragOver(event) {
@@ -1399,7 +1363,7 @@ export default class TableHandler {
       that.$findTableInEditor();
       that.$setSelection(that.tableEditor.info.tableIndex, 'table');
       that.setStyle(event.target.parentElement, 'border', '1px solid #dfe6ee');
-
+      this.$clearAllBorders();
       tBody.removeEventListener('dragleave', handleDragLeave);
       tBody.removeEventListener('dragover', handleDragOver);
     }
@@ -1416,22 +1380,24 @@ export default class TableHandler {
         if (oldIndex < index) {
           this.setStyle(objTarget, 'border', `1px solid #dfe6ee`);
           this.setStyle(objTarget, 'border-right', `2px solid #6897bb`);
+          this.$hightLightColumnCellsDOM(index, 'right');
         } else if (oldIndex > index) {
+          this.setStyle(objTarget, 'background', 'var(--md-table-sort-border)');
           this.setStyle(objTarget, 'border', `1px solid #dfe6ee`);
           this.setStyle(objTarget, 'border-left', `2px solid #6897bb`);
+          this.$hightLightColumnCellsDOM(index, 'left');
         }
       } else if (target.tagName === 'TD' && type === 'Line') {
         if (oldIndex < index) {
           this.setStyle(objTarget.parentElement, 'border', `1px solid #dfe6ee`);
-          this.setStyle(objTarget.parentElement, 'border-bottom', `2px solid #6897bb`);
+          objTarget.parentElement.classList.add('table-highlight-border-add-bottom');
         } else if (oldIndex > index) {
           this.setStyle(objTarget.parentElement, 'border', `1px solid #dfe6ee`);
-          this.setStyle(objTarget.parentElement, 'border-top', `2px solid #6897bb`);
+          objTarget.parentElement.classList.add('table-highlight-border-add-top');
         }
       }
     }
   }
-
   $operateLines(oldIndex, index, lines) {
     if (oldIndex < index) {
       lines.splice(index + 1, 0, lines[oldIndex]);

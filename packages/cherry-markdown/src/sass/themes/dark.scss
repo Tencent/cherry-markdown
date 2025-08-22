@@ -47,6 +47,11 @@
   --md-blockquote-bg: rgba(102, 128, 153, 0.05);
   --md-hr-border: var(--oc-gray-5);
   --md-table-border: var(--oc-gray-5);
+  /* ========== table 相关变量 ========== */
+  --md-table-border: var(--oc-gray-5);
+  --md-table-side-border-solid: var(--primary-color);
+  --md-table-sort-active-bg: rgba(141, 104, 51, 0.493);
+
   --md-toc-bg: var(--oc-gray-9);
   --md-toc-border-color: var(--oc-gray-7);
   --md-toc-indicator-color: var(--oc-gray-7);

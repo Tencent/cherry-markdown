@@ -262,3 +262,19 @@
     animation: changeHighlightLineBg 1s;
   }
 }
+//tableHandler使用的
+.table-highlight-border-add-left {
+  border-left: 2px solid var(--md-table-side-border-solid) !important
+}
+.table-highlight-border-add-right {
+  border-right: 2px solid var(--md-table-side-border-solid) !important;
+}
+.table-highlight-border-add-top {
+  border-top: 2px solid var(--md-table-side-border-solid) !important;
+}
+.table-highlight-border-add-bottom {
+  border-bottom: 2px solid var(--md-table-side-border-solid) !important;
+}
+.table-sort-active{
+  background-color: var(--md-table-sort-active-bg) !important;
+}
