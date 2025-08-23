@@ -50,6 +50,8 @@ export default class Table extends ParagraphBase {
           ...chartEngineOptions,
           // 传递Cherry配置以供地图数据源使用
           cherryOptions: cherry ? cherry.options : null,
+          // 传递Cherry实例以供事件监听使用
+          cherry,
         });
       } catch (error) {
         console.warn(error);

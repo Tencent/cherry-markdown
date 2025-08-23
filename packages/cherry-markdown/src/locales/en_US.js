@@ -55,7 +55,6 @@ export default {
   mapTable: 'Map Table',
   heatmapTable: 'Heatmap Table',
   pieTable: 'Pie Table',
-  scatterTable: 'Scatter Table',
   proTable: 'Chart',
   formula: 'Formula',
   insertFormula: 'Insert Formula',
@@ -185,4 +184,5 @@ export default {
   edit: 'Edit',
   save: 'Save',
   cancel: 'Cancel',
+  saveAsImage: 'Save as Image',
 };

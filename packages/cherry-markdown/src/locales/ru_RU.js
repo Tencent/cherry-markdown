@@ -55,7 +55,6 @@ export default {
   mapTable: 'таблица карты',
   heatmapTable: 'таблица тепловой карты',
   pieTable: 'стол для пирога',
-  scatterTable: 'Диаграмма рассеяния',
   proTable: 'диаграмма',
   formula: 'Формула',
   insertFormula: 'Вставить формулу',
@@ -185,4 +184,5 @@ export default {
   edit: 'Редактировать',
   save: 'Сохранить',
   cancel: 'Отмена',
+  saveAsImage: 'Сохранить как изображение',
 };

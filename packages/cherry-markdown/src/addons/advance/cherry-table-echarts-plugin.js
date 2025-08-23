@@ -73,7 +73,7 @@ export default class EChartsTableEngine {
   }
 
   constructor(echartsOptions = {}) {
-    const { echarts, cherryOptions, ...options } = echartsOptions;
+    const { echarts, cherryOptions, cherry, ...options } = echartsOptions;
     if (!echarts && !window.echarts) {
       throw new Error('table-echarts-plugin[init]: Package echarts not found.');
     }
@@ -83,6 +83,8 @@ export default class EChartsTableEngine {
 
     // 保存Cherry配置，用于获取地图数据源URL
     this.cherryOptions = cherryOptions;
+    // 保存Cherry实例，用于事件监听及i18n
+    this.cherry = cherry;
     // 统一管理实例
     this.instances = new Set();
     // 主题监听器
@@ -94,6 +96,9 @@ export default class EChartsTableEngine {
 
     // 导出完成事件监听器
     this.exportObservers = new Map();
+
+    // 监听语言变更事件
+    this.$enableLocaleObserver();
   }
 
   /**
@@ -507,6 +512,36 @@ export default class EChartsTableEngine {
   }
 
   /**
+   * 启用语言变更观察器
+   */
+  $enableLocaleObserver() {
+    // 如果有Cherry实例，通过其事件系统监听语言变更事件
+    if (this.cherry && this.cherry.$event) {
+      const handler = (locale) => {
+        Logger.log('EChartsTableEngine: locale changed to', locale);
+        // todo： 重设图表的locale
+        Array.from(this.instances).forEach((inst) => {
+          setTimeout(() => {
+            inst.setOption(
+              {
+                toolbox: {
+                  feature: {
+                    saveAsImage: {
+                      title: this.cherry.locale.saveAsImage,
+                    },
+                  },
+                },
+              },
+              false,
+            );
+          }, 0);
+        });
+      };
+      this.cherry.$event.on(this.cherry.$event.Events.afterChangeLocale, handler);
+    }
+  }
+
+  /**
    * 启用导出完成事件观察器
    * 一旦收到导出完成事件，则定向重建当前根容器下的所有图表容器
    */
@@ -698,7 +733,7 @@ const BaseChartOptionsHandler = {
           // restore: { show: true, title: '重置' },
           saveAsImage: {
             show: true,
-            title: '保存为图片',
+            title: engine.cherry.locale.saveAsImage,
             type: engine.options.renderer === 'svg' ? 'svg' : 'png', // renderer 类型为svg，默认只支持输出svg
             backgroundColor: '#fff',
           },
