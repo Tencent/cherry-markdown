@@ -275,20 +275,17 @@ export default class EChartsTableEngine {
    * @param {Element} container 容器元素
    * @param {Object} [option] ECharts 配置
    * @param {*} [type] 图表类型（用于附加交互等）
-   * @param {Object} [themeObj] 主题对象（不传则根据 CSS 变量计算）
    * @returns {*}
    */
-  createChart(container, option = {}, type, themeObj) {
+  createChart(container, option = {}, type) {
     if (!container) return null;
     // 已存在实例直接返回，避免被观察器和延迟初始化同时触发导致重复初始化
     const existed = this.echartsRef.getInstanceByDom(container);
     if (existed && !existed.isDisposed()) return existed;
-    const root = container.closest('.cherry') || container.closest('.cherry-markdown') || this.$getCherryRoot();
-    const theme = themeObj || this.$buildEchartsThemeFromCss(root);
 
     if (container.firstChild) container.innerHTML = '';
 
-    const chart = this.echartsRef.init(container, theme, this.options);
+    const chart = this.echartsRef.init(container, null, this.options);
     if (option && Object.keys(option).length) chart.setOption(option);
 
     this.instances.add(chart);
@@ -336,15 +333,16 @@ export default class EChartsTableEngine {
   }
 
   /**
-   * 基于CSS变量构建ECharts主题，并同步到运行时主题
+   * 基于CSS变量构建ECharts运行时主题
    */
   $buildEchartsThemeFromCss(rootEl) {
     const el = rootEl || this.$getCherryRoot();
     const cacheKey = this.$themeCacheKey(el);
     if (this.themeCache.has(cacheKey)) {
+      // 从缓存中获取运行时主题
       const cached = this.themeCache.get(cacheKey);
       this.themeRuntime = cached.runtime;
-      return cached.echarts;
+      return;
     }
     const bg = this.$readCssVar(el, '--base-previewer-bg', this.$readCssVar(el, '--base-editor-bg', 'transparent'));
     const text = this.$readCssVar(el, '--base-font-color', THEME.color.text);
@@ -372,33 +370,10 @@ export default class EChartsTableEngine {
       shadow: { ...THEME.shadow },
       fontSize: { ...THEME.fontSize },
     };
-    this.themeRuntime = runtime;
 
-    // 返回echarts.init要传入的主题对象
-    const echartsTheme = {
-      backgroundColor: bg,
-      textStyle: { color: text },
-      title: { textStyle: { color: text } },
-      legend: { textStyle: { color: text } },
-      tooltip: {
-        backgroundColor: this.$theme().color.tooltipBg,
-        borderColor: border,
-        textStyle: { color: this.$theme().color.tooltipText },
-      },
-      categoryAxis: {
-        axisLine: { lineStyle: { color: text } },
-        axisLabel: { color: text },
-        splitLine: { lineStyle: { color: split } },
-      },
-      valueAxis: {
-        axisLine: { lineStyle: { color: text } },
-        axisLabel: { color: text },
-        splitLine: { lineStyle: { color: split } },
-      },
-      color: this.$palette(),
-    };
-    this.themeCache.set(cacheKey, { echarts: echartsTheme, runtime });
-    return echartsTheme;
+    // 设置当前运行时主题与缓存
+    this.themeRuntime = runtime;
+    this.themeCache.set(cacheKey, { runtime });
   }
 
   /**
@@ -444,14 +419,8 @@ export default class EChartsTableEngine {
     if (!instance || typeof instance.getDom !== 'function') return;
     const container = instance.getDom();
     if (!container) return;
-    const root = this.$getCherryRoot(container);
-    // 从缓存读取主题对象
-    const cacheKey = this.$themeCacheKey(root);
-    const cached = this.themeCache.get(cacheKey);
-    const themeObj = cached && cached.echarts;
-    if (!themeObj) return;
     const option = this.$chartOptionsFromDataset(container) || {};
-    instance.setOption(option, true);
+    instance.setOption(option, false, true);
     this.$tagEchartsSvg(container);
   }
 
@@ -496,15 +465,13 @@ export default class EChartsTableEngine {
    * 定向重建一组容器对应的图表
    */
   $rehydrateChartsForContainers(containersSet, rootEl) {
-    const root = rootEl || this.$getCherryRoot();
-    const themeObj = this.$buildEchartsThemeFromCss(root);
     containersSet.forEach((container) => {
       if (!(container instanceof Element) || !container.isConnected) return;
       const type = container.getAttribute('data-chart-type');
       const option = this.$chartOptionsFromDataset(container);
       try {
         this.destroyChart(container);
-        this.createChart(container, option, type, themeObj);
+        this.createChart(container, option, type);
       } catch (e) {
         Logger.warn('rehydrate (partial) chart failed:', e);
       }
@@ -577,6 +544,7 @@ export default class EChartsTableEngine {
     const chartOptionsStr = JSON.stringify(options);
 
     options.chartId = chartId;
+    this.$buildEchartsThemeFromCss();
     const chartOption = this.$generateChartOptions(type, tableObject, options);
     // Logger.log('Chart options:', chartOption);
 
@@ -1295,7 +1263,7 @@ const MapChartOptionsHandler = {
         const existingChart = engine.echartsRef.getInstanceByDom(container);
 
         if (existingChart) {
-          existingChart.setOption(chartOption, true);
+          existingChart.setOption(chartOption, false, true);
           // console.log('Map chart refreshed successfully:', chartId);
         } else {
           const newChart = engine.echartsRef.init(container);
