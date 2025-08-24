@@ -1,20 +1,10 @@
-name: PR Merge VscodePlugin Dev Preview
+name: 'Build VscodePlugin Release PRE RELEASE'
 
 on:
-  pull_request_target:
-    types: [closed]
-    paths:
-      - 'packages/vscodePlugin/**'
-
-permissions:
-  contents: read
-  pull-requests: write
-  actions: read
+  workflow_call:
 
 jobs:
-  vscodePlugin-preview:
-    # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
-    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true
+  pre-vscode-plugin-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,8 +17,9 @@ jobs:
 
       - name: Change Package Files
         run: |
+
           jq '."scripts"."build" = "yarn workspace cherry-markdown-core build"' package.json > temp.json && mv temp.json package.json
-          jq '."scripts"."build:vscodePlugin" = "yarn workspace cherry-markdown-pre build"' package.json > temp.json && mv temp.json package.json
+          jq '."scripts"."build:vscodePlugin" = "yarn workspace cherry-markdown build"' package.json > temp.json && mv temp.json package.json
 
           cd packages/cherry-markdown
           jq '.name = "cherry-markdown-core"' package.json > temp.json && mv temp.json package.json
@@ -36,68 +27,26 @@ jobs:
           cd ../vscodePlugin
           COMMITHASH=$(git rev-parse --short=6 HEAD)
           COMMITHASH_DEC=$((16#$COMMITHASH))
+
           jq --arg ch "$COMMITHASH_DEC" '
             .version |= (split(".") as $s |
               if ($s|length) < 3 then ($s|join(".") + $ch)
               elif $s[2] == "0" then ($s[0:2]|join(".") + $ch)
               else ($s[0:2] + [($s[2] + $ch)] | join(".")) end
             )' package.json > temp.json && mv temp.json package.json
-          jq '.dependencies["cherry-markdown-core"] = .dependencies["cherry-markdown"] | del(.dependencies["cherry-markdown"])' package.json > temp.json && mv temp.json package.json
-          jq '.name = "cherry-markdown-pre"' package.json > temp.json && mv temp.json package.json
-          jq '.displayName = "Cherry Markdown Pre"' package.json > temp.json && mv temp.json package.json
-          jq '.publisher = "CherryMarkdownPre"' package.json > temp.json && mv temp.json package.json
+          jq '.dependencies["cherry-markdown"] = .dependencies["cherry-markdown-core"] | del(.dependencies["cherry-markdown"])' package.json > temp.json && mv temp.json package.json
+          jq '.name = "cherry-markdown"' package.json > temp.json && mv temp.json package.json
 
-          readme=$(cat <<'EOF'
-          仅为预览版本，详情请访问 [Cherry Markdown](https://github.com/Tencent/cherry-markdown)
-
-          ---
-
-          Preview only. For full details visit [Cherry Markdown](https://github.com/Tencent/cherry-markdown)
-          EOF
-                    )
-
-          echo "$readme" > README.md
-
-      - name: Display Changed Package Files
-        run: |
-          cat package.json
-          cat packages/cherry-markdown/package.json
-          cat packages/vscodePlugin/package.json
-          cat packages/vscodePlugin/README.md
-
-      - name: Build VSCode Plugin
+      - name: Install and Build Dependencies
         run: |
           yarn global add vsce
           yarn --network-timeout 100000
           yarn build
           yarn build:vscodePlugin
 
-      - name: Publish VSCode Plugin
+      - name: Publish VSCode Plugin PRE RELEASE
         env:
-          VSCE_PAT_PREVIEW: ${{ secrets.VSCE_PAT_PREVIEW }}
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
           cd packages/vscodePlugin
-          vsce publish -p $VSCE_PAT_PREVIEW --no-dependencies --no-yarn --pre-release
-
-      - name: Extract package Info
-        id: extract-package
-        run: |
-          name=$(node -p "require('./packages/vscodePlugin/package.json').name")
-          version=$(node -p "require('./packages/vscodePlugin/package.json').version")
-          echo "name=$name" >> $GITHUB_OUTPUT
-          echo "version=$version" >> $GITHUB_OUTPUT
-
-      - name: Post To PR
-        uses: actions/github-script@v7
-        env:
-          NAME: ${{ steps.extract-package.outputs.name }}
-          VERSION: ${{ steps.extract-package.outputs.version }}
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `📦 vscodePlugin 预览 (Preview) [${process.env.NAME}@${process.env.VERSION}](https://marketplace.visualstudio.com/items?itemName=CherryMarkdownPre.cherry-markdown-pre)`
-            });
+          vsce publish -p $VSCE_PAT --no-dependencies --no-yarn --pre-release
