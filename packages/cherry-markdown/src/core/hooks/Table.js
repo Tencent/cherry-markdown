@@ -98,7 +98,13 @@ export default class Table extends ParagraphBase {
     if (trimmedStr.startsWith('"')) {
       const jsonString = `{${trimmedStr}}`;
       try {
-        return JSON.parse(jsonString);
+        return JSON.parse(jsonString, (key, value) => {
+          // 安全检查：在解析过程中，如果遇到恶意键，则直接忽略它们。
+          if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+            return undefined;
+          }
+          return value;
+        });
       } catch (error) {
         Logger.error(
           'Invalid JSON format in chart options. Please check your syntax. Common errors include missing quotes on keys, using single quotes for strings, or a trailing comma.\n' +

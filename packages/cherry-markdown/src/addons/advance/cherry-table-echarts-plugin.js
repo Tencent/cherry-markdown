@@ -549,8 +549,8 @@ export default class EChartsTableEngine {
     const htmlContent = `
       <div class="cherry-echarts-wrapper" 
            style="width: ${this.options.width}px; height: ${
-             this.options.height
-           }px; min-height: 300px; display: block; position: relative; border: 1px solid var(--md-table-border);" 
+      this.options.height
+    }px; min-height: 300px; display: block; position: relative; border: 1px solid var(--md-table-border);" 
            id="${chartId}"
            data-chart-type="${type}"
            data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"
@@ -978,52 +978,102 @@ const PieChartOptionsHandler = {
   },
 };
 
-// Scatter chart handler integrated from PR #1362
 const ScatterChartOptionsHandler = {
   components: [BaseChartOptionsHandler, LegendOptionsHandler],
-  // 新的 options 函数
+
   options(tableObject, options) {
     const { engine } = options;
     let parsedRows = [];
     let hasSizeColumn = false;
     let hasGroupColumn = false;
     const mapping = options['cherry:mapping'];
-    // 步骤一：逻辑分叉
+    // 渐进式迁移，处理新旧两种语法
     if (mapping && typeof mapping === 'object') {
       // 新版显式映射逻辑
       const headers = tableObject.header;
 
-      // 1. 构建列名到索引的映射
+      // 构建列名到索引的映射
       const headerIndexMap = new Map();
       headers.forEach((header, index) => {
         headerIndexMap.set(header.trim(), index);
       });
 
-      // 2. 根据 cherry:mapping 查找各维度的列索引
-      const getColumnIndex = (dimensionName) => headerIndexMap.get(mapping[dimensionName]);
-      const xCol = getColumnIndex('x');
-      const yCol = getColumnIndex('y');
-      const sizeCol = getColumnIndex('size');
-      const groupCol = getColumnIndex('group') || getColumnIndex('series');
+      // 1. 初始化错误和警告收集器
+      const validation = {
+        fatalErrors: [],
+        warnings: [],
+        columnIndexMap: {},
+      };
+
+      // 2. 验证所有维度，并根据其重要性分类错误
+      const requiredDimensions = ['x', 'y'];
+      const optionalDimensions = ['size', 'group', 'series'];
+
+      // 检查必要维度是否在 mapping 中定义
+      for (const dim of requiredDimensions) {
+        if (!mapping[dim]) {
+          validation.fatalErrors.push(`Required dimension "${dim}" is not defined in "cherry:mapping".`);
+        }
+      }
+
+      // 收集更多错误信息
+      for (const [dimension, columnName] of Object.entries(mapping)) {
+        if (headerIndexMap.has(columnName)) {
+          validation.columnIndexMap[dimension] = headerIndexMap.get(columnName);
+        } else {
+          // 如果列名未找到
+          const errorMessage = `Mapping failed for dimension "${dimension}": Column "${columnName}" not found in table headers.`;
+          if (requiredDimensions.includes(dimension)) {
+            // 如果是必要维度，则为致命错误
+            validation.fatalErrors.push(errorMessage);
+          } else if (optionalDimensions.includes(dimension)) {
+            // 如果是可选维度，则为警告
+            validation.warnings.push(errorMessage);
+          }
+        }
+      }
+
+      // 3. 集中处理致命错误
+      if (validation.fatalErrors.length > 0) {
+        Logger.error(
+          'Failed to render scatter chart due to FATAL configuration errors in "cherry:mapping":\n' +
+            `- ${validation.fatalErrors.join('\n- ')}\n` +
+            `Available columns are: [${headers.slice(1).join(', ')}]`,
+        );
+        return { series: [] }; // 中断渲染
+      }
+
+      // 4. 集中处理警告 (不中断渲染)
+      if (validation.warnings.length > 0) {
+        Logger.warn(
+          'Scatter chart rendered with WARNINGS due to configuration issues in "cherry:mapping":\n' +
+            `- ${validation.warnings.join('\n- ')}\n` +
+            'These optional dimensions have been ignored.',
+        );
+      }
+
+      // 5. 安全地继续执行后续逻辑
+      const { columnIndexMap } = validation;
+      const xCol = columnIndexMap.x;
+      const yCol = columnIndexMap.y;
+      const sizeCol = columnIndexMap.size;
+      const groupCol = columnIndexMap.group || columnIndexMap.series;
 
       hasSizeColumn = typeof sizeCol === 'number';
       hasGroupColumn = typeof groupCol === 'number';
 
-      // 3. 遍历数据行，生成 parsedRows
-      parsedRows = tableObject.rows.map((row) => {
-        const x = typeof xCol === 'number' ? engine.$num(row[xCol]) : 0;
-        const y = typeof yCol === 'number' ? engine.$num(row[yCol]) : 0;
-        const size = hasSizeColumn ? engine.$num(row[sizeCol]) : undefined;
-        const seriesName = hasGroupColumn ? String(row[groupCol] ?? '').trim() || '系列1' : null;
-        return { name: row[0], x, y, size, seriesName };
-      });
+      parsedRows = tableObject.rows.map((row) => ({
+        name: row[0],
+        x: engine.$num(row[xCol]), // 此时 xCol 保证是一个有效的数字索引
+        y: engine.$num(row[yCol]), // 此时 yCol 保证是一个有效的数字索引
+        size: hasSizeColumn ? engine.$num(row[sizeCol]) : undefined,
+        seriesName: hasGroupColumn ? String(row[groupCol] ?? '').trim() || '系列1' : null,
+      }));
     } else {
-      // 否则，回退到旧版智能推断逻辑
-      // (将在步骤四中实现)
       // 回退到旧的智能推断逻辑
       Logger.warn(
         'DEPRECATION WARNING: The scatter chart syntax relying on header keywords is outdated and will be removed in a future version. Please use the "cherry:mapping" option for explicit mapping.\n' +
-          `e.g., Change '...| X | Y |' to '...{ "cherry:mapping": { "x": "X", "y": "Y" } }'.`,
+          `e.g., Change '{group,name,x,y,size}' to '{ "cherry:mapping": { "x": "X", "y": "Y" } }'`,
       );
 
       const headers = tableObject.header;
@@ -1066,7 +1116,6 @@ const ScatterChartOptionsHandler = {
       series,
     };
   },
-  // ... 其他辅助函数
   /**
    * @private
    * 辅助函数：根据解析好的数据行构建 ECharts series
@@ -1108,7 +1157,22 @@ const ScatterChartOptionsHandler = {
         groupMap.get(key).push(item);
       });
       series = Array.from(groupMap.entries()).map(([name, data]) =>
-        engine.$baseSeries('scatter', { name, data, /* ...样式 */ }),
+        engine.$baseSeries('scatter', {
+          name,
+          data,
+          emphasis: {
+            focus: 'series',
+            itemStyle: {
+              shadowBlur: engine.$theme().shadow.blur,
+              shadowColor: engine.$theme().shadow.color,
+              borderWidth: 2,
+              borderColor: engine.$theme().color.emphasis,
+            },
+          },
+          select: { itemStyle: { borderWidth: 2, borderColor: engine.$theme().color.emphasis, opacity: 1 } },
+          selectedMode: 'single',
+          animationEasing: 'cubicOut',
+        }),
       );
     } else {
       // 单系列逻辑
@@ -1123,7 +1187,19 @@ const ScatterChartOptionsHandler = {
         }
         return item;
       });
-      series = [engine.$baseSeries('scatter', { name: '散点', data, /* ...样式 */ })];
+      series = [
+        engine.$baseSeries('scatter', {
+          name: '散点',
+          data,
+          emphasis: {
+            focus: 'series',
+            itemStyle: { borderWidth: 2, borderColor: engine.$theme().color.emphasis },
+          },
+          select: { itemStyle: { borderWidth: 2, borderColor: engine.$theme().color.emphasis, opacity: 1 } },
+          selectedMode: 'single',
+          animationEasing: 'cubicOut',
+        }),
+      ];
     }
     return series;
   },
