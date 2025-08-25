@@ -1,10 +1,20 @@
-name: 'Build VscodePlugin Release PRE RELEASE'
+name: PR Merge VscodePlugin Dev Preview
 
 on:
-  workflow_call:
+  pull_request_target:
+    types: [closed]
+    paths:
+      - 'packages/vscodePlugin/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
 
 jobs:
-  pre-vscode-plugin-build:
+  vscodePlugin-preview:
+    # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
+    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -49,4 +59,5 @@ jobs:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
           cd packages/vscodePlugin
+          # 仅发布 vscode 插件预览版
           vsce publish -p $VSCE_PAT --no-dependencies --no-yarn --pre-release
