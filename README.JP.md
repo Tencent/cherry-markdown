@@ -368,6 +368,10 @@ CommonMarkの仕様とスイートは次の場所から取得できます：[com
 
 強力なMarkdownエディターの開発にぜひご参加ください。機能リクエストはissueとして提出することも可能です。新機能を実装する前に、[cherry-markdownエディターの紹介](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86-cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)をご覧いただけます。貢献を行う前に、[コントリビューションガイドライン](https://github.com/Tencent/cherry-markdown/wiki/%E8%B4%A1%E7%8C%AE%E6%8C%87%E5%8D%97%20Contribution%20Guidelines)をお読みください。
 
+<a href="https://openomy.com/Tencent/cherry-markdown" target="_blank" style="display: block; width: 100%;" align="center">
+  <img src="https://openomy.com/svg?repo=Tencent/cherry-markdown&chart=bubble&latestMonth=3" target="_blank" alt="貢献ランキング" style="display: block; width: 100%;" />
+</a>
+
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/Tencent/cherry-markdown.svg)](https://starchart.cc/Tencent/cherry-markdown)
