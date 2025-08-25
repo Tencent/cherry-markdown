@@ -1,7 +1,7 @@
 name: PR Merge VscodePlugin Dev Preview
 
 on:
-  pull_request_target:
+  pull_request:
     types: [closed]
     paths:
       - 'packages/vscodePlugin/**'
@@ -35,7 +35,7 @@ jobs:
           jq '.name = "cherry-markdown-core"' package.json > temp.json && mv temp.json package.json
 
           cd ../vscodePlugin
-          COMMITHASH=$(git rev-parse --short=6 HEAD)
+          COMMITHASH=$(git rev-parse --short=5 HEAD)
           COMMITHASH_DEC=$((16#$COMMITHASH))
 
           jq --arg ch "$COMMITHASH_DEC" '
