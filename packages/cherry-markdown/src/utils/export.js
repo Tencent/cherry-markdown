@@ -80,14 +80,23 @@ export function exportPDF(previewDom, fileName) {
   document.title = fileName;
 
   getReadyToExport(previewDom, (/** @type {HTMLElement}*/ cherryPreviewer, /** @type {function}*/ thenFinish) => {
+    // 开启导出专用样式开关，仅在导出流程中生效，避免常规打印误隐藏整页
+    const htmlEl = document.documentElement;
+    const hadExportOnly = htmlEl.classList.contains('cherry-export-only');
+    if (!hadExportOnly) htmlEl.classList.add('cherry-export-only');
     // 强制展开所有代码块
     cherryPreviewer.innerHTML = cherryPreviewer.innerHTML.replace(
       /class="cherry-code-unExpand("| )/g,
       'class="cherry-code-expand$1',
     );
-    window.print();
-    thenFinish();
-    document.title = oldTitle;
+    try {
+      window.print();
+    } finally {
+      thenFinish();
+      // 还原打印专用样式开关
+      if (!hadExportOnly) htmlEl.classList.remove('cherry-export-only');
+      document.title = oldTitle;
+    }
   });
 }
 
