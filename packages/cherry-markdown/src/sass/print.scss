@@ -1,25 +1,38 @@
 @media print {
-  img, figure, pre, table {
-    page-break-inside: avoid;
-  }
-  .cherry-previewer {
-    width: 100%!important;
-    max-height: none;
-    border-left: none!important;
-  }
-  .cherry-toolbar, .cherry-sidebar, .cherry-editor, .cherry-drag {
-    display: none!important;
-  }
+  /* 仅在开启 cherry-export-only 时启用以下打印样式，避免常规打印影响页面 */
+  html.cherry-export-only {
 
-  body>*:not(.cherry-export-wrapper):not([class*="cherry-export-wrapper"]) {
-    display: none !important;
-  }
+    img,
+    figure,
+    pre,
+    table {
+      page-break-inside: avoid;
+    }
 
-  .cherry-export-wrapper,
-  [class*="cherry-export-wrapper"] {
-    margin: 0 !important;
-    padding: 0 !important;
-    box-shadow: none !important;
-    border: none !important;
+    .cherry-previewer {
+      width: 100% !important;
+      max-height: none;
+      border-left: none !important;
+    }
+
+    .cherry-toolbar,
+    .cherry-sidebar,
+    .cherry-editor,
+    .cherry-drag {
+      display: none !important;
+    }
+
+    body>*:not(.cherry-export-wrapper):not([class*="cherry-export-wrapper"]) {
+      display: none !important;
+    }
+
+    .cherry-export-wrapper,
+    [class*="cherry-export-wrapper"] {
+      margin: 0 !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+      border: none !important;
+
+    }
   }
 }
