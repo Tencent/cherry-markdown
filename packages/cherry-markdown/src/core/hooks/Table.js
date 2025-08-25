@@ -73,7 +73,7 @@ export default class Table extends ParagraphBase {
       Logger.log('Chart render engine not available');
       return null;
     }
-    const CHART_REGEX = /^[ ]*:(\w+):(?:[ ]*{(.*?)}[ ]*)?$/;
+    const CHART_REGEX = /^:(\w+):(?:[ ]*{(.*?)}[ ]*)?$/;
     if (!CHART_REGEX.test(cell)) {
       Logger.log('Cell does not match chart regex:', cell);
       return null;
@@ -156,8 +156,7 @@ export default class Table extends ParagraphBase {
   $parseColumnAlignRules(row) {
     const COLUMN_ALIGN_MAP = { L: 'left', R: 'right', C: 'center' };
     const COLUMN_ALIGN_CACHE_SIGN = ['U', 'L', 'R', 'C']; // U for undefined
-    const textAlignRules = row.map((rule) => {
-      const $rule = rule.trim();
+    const textAlignRules = row.map(($rule) => {
       let index = 0;
       if (/^:/.test($rule)) {
         index += 1;
@@ -182,7 +181,7 @@ export default class Table extends ParagraphBase {
       }
       // 文本对齐相关列，不作为最多列数的参考依据
       index !== 1 && (maxCol = Math.max(maxCol, cols.length));
-      return cols;
+      return cols.map((col) => col.trim());
     });
     const { textAlignRules, COLUMN_ALIGN_MAP } = this.$parseColumnAlignRules(rows[1]);
     const tableObject = {
@@ -212,7 +211,7 @@ export default class Table extends ParagraphBase {
     const tableHeader = this.$extendColumns(rows[0], maxCol)
       .map((cell, col) => {
         tableObject.header.push(cell.replace(/~CS/g, '\\|'));
-        const { html: cellHtml } = sentenceMakeFunc(cell.replace(/~CS/g, '\\|').trim());
+        const { html: cellHtml } = sentenceMakeFunc(cell.replace(/~CS/g, '\\|'));
         // 前后补一个空格，否则自动链接会将缓存的内容全部收入链接内部
         return `~CTH${textAlignRules[col] || 'U'} ${cellHtml} ~CTH$`;
       })
@@ -226,7 +225,7 @@ export default class Table extends ParagraphBase {
         tableObject.rows[currentRowCountWithoutHeader] = [];
         const $extendedColumns = this.$extendColumns(row, maxCol).map((cell, col) => {
           tableObject.rows[currentRowCountWithoutHeader].push(cell.replace(/~CS/g, '\\|'));
-          const { html: cellHtml } = sentenceMakeFunc(cell.replace(/~CS/g, '\\|').trim());
+          const { html: cellHtml } = sentenceMakeFunc(cell.replace(/~CS/g, '\\|'));
           // 前后补一个空格，否则自动链接会将缓存的内容全部收入链接内部
           return `~CTD${textAlignRules[col] || 'U'} ${cellHtml} ~CTD$`;
         });
