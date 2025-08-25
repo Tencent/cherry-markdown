@@ -143,7 +143,7 @@ export default class Table extends ParagraphBase {
       if (Object.keys(result).length > 0) {
         Logger.warn(
           'DEPRECATION WARNING: The chart options syntax is outdated and will be removed in a future version. Please switch to standard JSON format.\n' +
-            `e.g., Change '{ title: 'My Chart', width: 500 }' to '{ "title": "My Chart", "width": 500 }'.\n` +
+            `e.g., Change '{ title: My Chart }' to '{ "title": "My Chart" }'.\n` +
             'Offending string:',
           str,
         );
@@ -262,7 +262,6 @@ export default class Table extends ParagraphBase {
     //     Logger.log('originalStr preview:', originalStr.substring(0, 200));
     //   }
     // }
-    console.log('tableObject: ', tableObject);
     const chart = this.chartRenderEngine.render(chartOptions.type, chartOptions.options, tableObject);
     const chartHtml = `<figure class="cherry-table-figure">${chart}</figure>`;
     const newSign = `${tableResult.sign}${chartOptionsSign}`;
@@ -336,14 +335,7 @@ export default class Table extends ParagraphBase {
           .trim()
           .split(/\n/)
           .map((line) => String(line).trim());
-        console.log('lines: ', lines);
-        console.log('sentenceMakeFunc: ', sentenceMakeFunc);
-        console.log('datalines: ', dataLines);
-        console.log('$str: ', $str);
         const { html: table, sign } = this.$parseTable(lines, sentenceMakeFunc, dataLines, $str);
-        console.log('table: ', table);
-        console.log('sign: ', sign);
-        console.log('match: ', match);
         return this.getCacheWithSpace(this.pushCache(table, sign, dataLines), match);
       });
     }
@@ -361,7 +353,6 @@ export default class Table extends ParagraphBase {
         return this.getCacheWithSpace(this.pushCache(table, sign, dataLines), match);
       });
     }
-    console.log('$makeHtml output $str: ', $str);
     return $str;
   }
 
