@@ -727,16 +727,40 @@ div[data-type='codeBlock'] {
   }
 }
 
+.cherry-text-align__left {
+  .cherry-table-figure {
+    display: flex;
+    justify-content: flex-start;
+  }
+}
+
 .cherry-text-align__center {
   table {
     margin-left: auto;
     margin-right: auto;
+  }
+
+  .cherry-table-figure {
+    display: flex;
+    justify-content: center;
   }
 }
 
 .cherry-text-align__right {
   table {
     margin-left: auto;
+  }
+
+  .cherry-table-figure {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.cherry-text-align__justify {
+  .cherry-table-figure {
+    display: flex;
+    justify-content: flex-start; // 对于单个块状元素，回退到默认的左对齐
   }
 }
 

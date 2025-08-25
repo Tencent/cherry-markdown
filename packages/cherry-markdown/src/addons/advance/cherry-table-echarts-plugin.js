@@ -549,8 +549,8 @@ export default class EChartsTableEngine {
     const htmlContent = `
       <div class="cherry-echarts-wrapper" 
            style="width: ${this.options.width}px; height: ${
-             this.options.height
-           }px; min-height: 300px; display: block; position: relative; border: 1px solid var(--md-table-border);" 
+      this.options.height
+    }px; min-height: 300px; display: block; position: relative; border: 1px solid var(--md-table-border);" 
            id="${chartId}"
            data-chart-type="${type}"
            data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"
@@ -978,41 +978,151 @@ const PieChartOptionsHandler = {
   },
 };
 
-// Scatter chart handler integrated from PR #1362
 const ScatterChartOptionsHandler = {
   components: [BaseChartOptionsHandler, LegendOptionsHandler],
+
   options(tableObject, options) {
     const { engine } = options;
-    // console.log('Rendering scatter chart:', tableObject);
+    let parsedRows = [];
+    let hasSizeColumn = false;
+    let hasGroupColumn = false;
+    const mapping = options['cherry:mapping'];
+    // 渐进式迁移，处理新旧两种语法
+    if (mapping && typeof mapping === 'object') {
+      // 新版显式映射逻辑
+      const headers = tableObject.header;
 
-    // Support both forms from PR #1362:
-    // 1) Single series: | :scatter:{name,x,y,size?} | X | Y | Size? |
-    // 2) Multi series: | :scatter:{group,name,x,y,size?} | X | Y | Size? | Series |
-    const headers = tableObject.header;
-    const findHeader = (candidates) =>
-      headers.findIndex((h, i) => i > 0 && candidates.some((c) => String(h).toLowerCase().includes(c)));
-    const xCol = findHeader(['x']);
-    const yCol = findHeader(['y']);
-    const sizeCol = findHeader(['size', '大小']);
-    let groupCol = findHeader(['series', 'group', '分组', '系列']);
-    // If column count reaches name,x,y,size,group length but no group detected, default last column as group
-    if (groupCol <= 0 && headers.length >= 5) {
-      groupCol = headers.length - 1;
+      // 构建列名到索引的映射
+      const headerIndexMap = new Map();
+      headers.forEach((header, index) => {
+        headerIndexMap.set(header.trim(), index);
+      });
+
+      // 1. 初始化错误和警告收集器
+      const validation = {
+        fatalErrors: [],
+        warnings: [],
+        columnIndexMap: {},
+      };
+
+      // 2. 验证所有维度，并根据其重要性分类错误
+      const requiredDimensions = ['x', 'y'];
+      const optionalDimensions = ['size', 'group', 'series'];
+
+      // 检查必要维度是否在 mapping 中定义
+      for (const dim of requiredDimensions) {
+        if (!mapping[dim]) {
+          validation.fatalErrors.push(`Required dimension "${dim}" is not defined in "cherry:mapping".`);
+        }
+      }
+
+      // 收集更多错误信息
+      for (const [dimension, columnName] of Object.entries(mapping)) {
+        if (headerIndexMap.has(columnName)) {
+          validation.columnIndexMap[dimension] = headerIndexMap.get(columnName);
+        } else {
+          // 如果列名未找到
+          const errorMessage = `Mapping failed for dimension "${dimension}": Column "${columnName}" not found in table headers.`;
+          if (requiredDimensions.includes(dimension)) {
+            // 如果是必要维度，则为致命错误
+            validation.fatalErrors.push(errorMessage);
+          } else if (optionalDimensions.includes(dimension)) {
+            // 如果是可选维度，则为警告
+            validation.warnings.push(errorMessage);
+          }
+        }
+      }
+
+      // 3. 集中处理致命错误
+      if (validation.fatalErrors.length > 0) {
+        Logger.error(
+          'Failed to render scatter chart due to FATAL configuration errors in "cherry:mapping":\n' +
+            `- ${validation.fatalErrors.join('\n- ')}\n` +
+            `Available columns are: [${headers.slice(1).join(', ')}]`,
+        );
+        return { series: [] }; // 中断渲染
+      }
+
+      // 4. 集中处理警告 (不中断渲染)
+      if (validation.warnings.length > 0) {
+        Logger.warn(
+          'Scatter chart rendered with WARNINGS due to configuration issues in "cherry:mapping":\n' +
+            `- ${validation.warnings.join('\n- ')}\n` +
+            'These optional dimensions have been ignored.',
+        );
+      }
+
+      // 5. 安全地继续执行后续逻辑
+      const { columnIndexMap } = validation;
+      const xCol = columnIndexMap.x;
+      const yCol = columnIndexMap.y;
+      const sizeCol = columnIndexMap.size;
+      const groupCol = columnIndexMap.group || columnIndexMap.series;
+
+      hasSizeColumn = typeof sizeCol === 'number';
+      hasGroupColumn = typeof groupCol === 'number';
+
+      parsedRows = tableObject.rows.map((row) => ({
+        name: row[0],
+        x: engine.$num(row[xCol]), // 此时 xCol 保证是一个有效的数字索引
+        y: engine.$num(row[yCol]), // 此时 yCol 保证是一个有效的数字索引
+        size: hasSizeColumn ? engine.$num(row[sizeCol]) : undefined,
+        seriesName: hasGroupColumn ? String(row[groupCol] ?? '').trim() || '系列1' : null,
+      }));
+    } else {
+      // 回退到旧的智能推断逻辑
+      Logger.warn(
+        'DEPRECATION WARNING: The scatter chart syntax relying on header keywords is outdated and will be removed in a future version. Please use the "cherry:mapping" option for explicit mapping.\n' +
+          `e.g., Change '{group,name,x,y,size}' to '{ "cherry:mapping": { "x": "X", "y": "Y", "size": "Size", "group": "Group" } }'`,
+      );
+
+      const headers = tableObject.header;
+      const findHeader = (candidates) =>
+        headers.findIndex((h, i) => i > 0 && candidates.some((c) => String(h).toLowerCase().includes(c)));
+
+      const xCol = findHeader(['x']);
+      const yCol = findHeader(['y']);
+      const sizeCol = findHeader(['size', '大小']);
+      let groupCol = findHeader(['series', 'group', '分组', '系列']);
+      if (groupCol <= 0 && headers.length >= 5) {
+        groupCol = headers.length - 1;
+      }
+
+      hasSizeColumn = sizeCol > 0;
+      hasGroupColumn = groupCol > 0;
+
+      parsedRows = tableObject.rows.map((row) => {
+        const x = engine.$num(row[xCol > 0 ? xCol : 1]);
+        const y = engine.$num(row[yCol > 0 ? yCol : 2]);
+        const size = hasSizeColumn ? engine.$num(row[sizeCol]) : undefined;
+        const seriesName = hasGroupColumn ? String(row[groupCol] ?? '').trim() || '系列1' : null;
+        return { name: row[0], x, y, size, seriesName };
+      });
     }
-
-    const hasSizeColumn = sizeCol > 0;
-    const hasGroupColumn = groupCol > 0;
-
-    // Parse into unified objects
-    const parsedRows = tableObject.rows.map((row) => {
-      const x = engine.$num(row[xCol > 0 ? xCol : 1]);
-      const y = engine.$num(row[yCol > 0 ? yCol : 2]);
-      const size = hasSizeColumn ? engine.$num(row[sizeCol]) : undefined;
-      const seriesName = hasGroupColumn ? String(row[groupCol] ?? '').trim() || '系列1' : null;
-      return { name: row[0], x, y, size, seriesName };
-    });
-
-    // If size column provided, use linear normalization (6~28) to control point display size
+    // 调用公共辅助函数来构建 series
+    const series = this.buildSeriesFromParsedRows(parsedRows, hasSizeColumn, hasGroupColumn, engine);
+    // 组装并返回最终的 ECharts 配置
+    return {
+      tooltip: {
+        trigger: 'item',
+        formatter(params) {
+          const [x, y] = params.value || [];
+          return `${params.name}<br/>x: <strong>${x}</strong><br/>y: <strong>${y}</strong>`;
+        },
+      },
+      grid: engine.$grid(),
+      xAxis: engine.$axis('value'),
+      yAxis: engine.$axis('value'),
+      series,
+    };
+  },
+  /**
+   * @private
+   * 辅助函数：根据解析好的数据行构建 ECharts series
+   */
+  buildSeriesFromParsedRows(parsedRows, hasSizeColumn, hasGroupColumn, engine) {
+    // 此处代码基本是从旧实现中完整迁移过来的，负责尺寸归一化和数据分组
+    // 1. 尺寸归一化
     let minSize = Infinity;
     let maxSize = -Infinity;
     if (hasSizeColumn) {
@@ -1028,21 +1138,19 @@ const ScatterChartOptionsHandler = {
       }
     }
 
-    // Build series data
+    // 2. 根据是否存在分组来构建 series
     let series = [];
     if (hasGroupColumn) {
+      // 多系列逻辑 (分组)
       const groupMap = new Map();
       parsedRows.forEach((r) => {
         const item = { value: [r.x, r.y], name: r.name };
         if (hasSizeColumn) {
-          if (maxSize === minSize) {
-            item.symbolSize = 12;
-          } else if (typeof r.size === 'number' && !Number.isNaN(r.size)) {
+          if (maxSize === minSize) item.symbolSize = 12;
+          else if (typeof r.size === 'number' && !Number.isNaN(r.size)) {
             const t = (r.size - minSize) / (maxSize - minSize);
             item.symbolSize = Math.round(6 + t * (28 - 6));
-          } else {
-            item.symbolSize = 10;
-          }
+          } else item.symbolSize = 10;
         }
         const key = r.seriesName;
         if (!groupMap.has(key)) groupMap.set(key, []);
@@ -1067,6 +1175,7 @@ const ScatterChartOptionsHandler = {
         }),
       );
     } else {
+      // 单系列逻辑
       const data = parsedRows.map((r) => {
         const item = { value: [r.x, r.y], name: r.name };
         if (hasSizeColumn) {
@@ -1092,21 +1201,7 @@ const ScatterChartOptionsHandler = {
         }),
       ];
     }
-
-    return {
-      tooltip: {
-        trigger: 'item',
-        formatter(params) {
-          const [x, y] = params.value || [];
-          return `${params.name}<br/>x: <strong>${x}</strong><br/>y: <strong>${y}</strong>`;
-        },
-      },
-      // 'toolbox.feature.dataZoom': {},
-      grid: engine.$grid(),
-      xAxis: engine.$axis('value'),
-      yAxis: engine.$axis('value'),
-      series,
-    };
+    return series;
   },
 };
 

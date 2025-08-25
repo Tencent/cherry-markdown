@@ -73,7 +73,7 @@ export default class Table extends ParagraphBase {
       Logger.log('Chart render engine not available');
       return null;
     }
-    const CHART_REGEX = /^[ ]*:(\w+):(?:[ ]*{(.*?)}[ ]*)?$/;
+    const CHART_REGEX = /^:(\w+):(?:[ ]*{(.*?)}[ ]*)?$/;
     if (!CHART_REGEX.test(cell)) {
       Logger.log('Cell does not match chart regex:', cell);
       return null;
@@ -88,46 +88,75 @@ export default class Table extends ParagraphBase {
     return result;
   }
 
-  // 手动解析 "key: value, other: 123" 这样的字符串
   $parseProps(str) {
-    const result = {};
-    // 匹配 key: value 对，支持无引号、有引号、数字等
-    const pairs = str
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    const kvRegex = /^(\w+|\s*".*?"\s*|\s*'.*?'\s*)\s*:\s*(.+?)$/;
-
-    for (const pair of pairs) {
-      const kvMatch = pair.match(kvRegex);
-      if (kvMatch) {
-        const k = kvMatch[1].trim().replace(/^["']|["']$/g, ''); // 去除引号
-        let v = kvMatch[2].trim();
-
-        // 尝试转换数字
-        if (/^-?\d+(\.\d+)?$/.test(v)) {
-          v = Number(v);
-        } else if (v === 'true') {
-          v = true;
-        } else if (v === 'false') {
-          v = false;
-        } else {
-          v = v.replace(/^["']|["']$/g, ''); // 值也去引号
-        }
-
-        result[k] = v;
-      }
+    if (!str || !str.trim()) {
+      return {};
     }
+    const trimmedStr = str.trim();
+    // 使用更强大的JSON格式，为实现渐进式迁移，通过启发式判断来选择解析方式。
+    // 如果内容以双引号开头，则认为用户希望编写JSON。
+    if (trimmedStr.startsWith('"')) {
+      const jsonString = `{${trimmedStr}}`;
+      try {
+        return JSON.parse(jsonString, (key, value) => {
+          // 安全检查：在解析过程中，如果遇到恶意键，则直接忽略它们。
+          if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+            return undefined;
+          }
+          return value;
+        });
+      } catch (error) {
+        Logger.error(
+          'Invalid JSON format in chart options. Please check your syntax. Common errors include missing quotes on keys, using single quotes for strings, or a trailing comma.\n' +
+            `Error: ${error.message}\n` +
+            'Attempted to parse:',
+          jsonString,
+        );
+        return {};
+      }
+    } else {
+      // 内容不以双引号开头，则假定用户使用旧格式。
+      // 使用旧的解析器进行解析，以保证向后兼容。
+      // 手动解析 "key: value, other: 123" 这样的字符串
+      const result = {};
+      // 匹配 key: value 对，支持无引号、有引号、数字等
+      const pairs = trimmedStr
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const kvRegex = /^(\w+|\s*".*?"\s*|\s*'.*?'\s*)\s*:\s*(.+?)$/;
+      for (const pair of pairs) {
+        const kvMatch = pair.match(kvRegex);
+        if (kvMatch) {
+          const k = kvMatch[1].trim().replace(/^["']|["']$/g, ''); // 去除引号
+          let v = kvMatch[2].trim();
+          // 尝试转换数字
+          if (/^-?\d+(\.\d+)?$/.test(v)) v = Number(v);
+          else if (v === 'true') v = true;
+          else if (v === 'false') v = false;
+          else v = v.replace(/^["']|["']$/g, ''); // 值也去引号
+          result[k] = v;
+        }
+      }
 
-    return result;
+      // 只要旧解析器成功解析出任何内容，就打印弃用警告。
+      if (Object.keys(result).length > 0) {
+        Logger.warn(
+          'DEPRECATION WARNING: The chart options syntax is outdated and will be removed in a future version. Please switch to standard JSON format.\n' +
+            `e.g., Change '{ title: My Chart }' to '{ "title": "My Chart" }'.\n` +
+            'Offending string:',
+          str,
+        );
+      }
+
+      return result;
+    }
   }
 
   $parseColumnAlignRules(row) {
     const COLUMN_ALIGN_MAP = { L: 'left', R: 'right', C: 'center' };
     const COLUMN_ALIGN_CACHE_SIGN = ['U', 'L', 'R', 'C']; // U for undefined
-    const textAlignRules = row.map((rule) => {
-      const $rule = rule.trim();
+    const textAlignRules = row.map(($rule) => {
       let index = 0;
       if (/^:/.test($rule)) {
         index += 1;
@@ -152,7 +181,7 @@ export default class Table extends ParagraphBase {
       }
       // 文本对齐相关列，不作为最多列数的参考依据
       index !== 1 && (maxCol = Math.max(maxCol, cols.length));
-      return cols;
+      return cols.map((col) => col.trim());
     });
     const { textAlignRules, COLUMN_ALIGN_MAP } = this.$parseColumnAlignRules(rows[1]);
     const tableObject = {
@@ -182,7 +211,7 @@ export default class Table extends ParagraphBase {
     const tableHeader = this.$extendColumns(rows[0], maxCol)
       .map((cell, col) => {
         tableObject.header.push(cell.replace(/~CS/g, '\\|'));
-        const { html: cellHtml } = sentenceMakeFunc(cell.replace(/~CS/g, '\\|').trim());
+        const { html: cellHtml } = sentenceMakeFunc(cell.replace(/~CS/g, '\\|'));
         // 前后补一个空格，否则自动链接会将缓存的内容全部收入链接内部
         return `~CTH${textAlignRules[col] || 'U'} ${cellHtml} ~CTH$`;
       })
@@ -196,7 +225,7 @@ export default class Table extends ParagraphBase {
         tableObject.rows[currentRowCountWithoutHeader] = [];
         const $extendedColumns = this.$extendColumns(row, maxCol).map((cell, col) => {
           tableObject.rows[currentRowCountWithoutHeader].push(cell.replace(/~CS/g, '\\|'));
-          const { html: cellHtml } = sentenceMakeFunc(cell.replace(/~CS/g, '\\|').trim());
+          const { html: cellHtml } = sentenceMakeFunc(cell.replace(/~CS/g, '\\|'));
           // 前后补一个空格，否则自动链接会将缓存的内容全部收入链接内部
           return `~CTD${textAlignRules[col] || 'U'} ${cellHtml} ~CTD$`;
         });
