@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -35,14 +37,32 @@ jobs:
           jq '.name = "cherry-markdown-core"' package.json > temp.json && mv temp.json package.json
 
           cd ../vscodePlugin
-          COMMITHASH=$(git rev-parse --short=5 HEAD)
-          COMMITHASH_DEC=$((16#$COMMITHASH))
+          # Prefer the merge commit SHA from the PR event; fall back to the PR head SHA.
+          # Use the first 5 hex chars (like the original) and convert to decimal.
+          # Prefer merge_commit_sha, then PR head SHA, then the workflow SHA as last resort.
+          COMMITHASH="${{ github.event.pull_request.merge_commit_sha || github.event.pull_request.head.sha || github.sha }}"
+          COMMITHASH_SHORT=${COMMITHASH:0:5}
+          if [ -z "$COMMITHASH_SHORT" ]; then
+            # If no short commit hash is available, use current time hhmmss as fallback
+            COMMITHASH_DEC=$(date +%H%M%S)
+          else
+            COMMITHASH_DEC=$((16#$COMMITHASH_SHORT))
+          fi
 
           jq --arg ch "$COMMITHASH_DEC" '
-            .version |= (split(".") as $s |
-              if ($s|length) < 3 then ($s|join(".") + $ch)
-              elif $s[2] == "0" then ($s[0:2]|join(".") + $ch)
-              else ($s[0:2] + [($s[2] + $ch)] | join(".")) end
+            .version |= (
+              split(".") as $s |
+              if ($s|length) < 3 then
+                error("package.json version must be in 'x.y.z' format")
+              else
+                # if existing patch is "0", replace with COMMITHASH_DEC (do not concat 0)
+                if $s[2] == "0" then
+                  ($s[0:2] + [$ch]) | join(".")
+                else
+                  # take existing patch (third segment), concat with COMMITHASH_DEC as string
+                  ($s[0:2] + [($s[2] + $ch)]) | join(".")
+                end
+              end
             )' package.json > temp.json && mv temp.json package.json
           jq '.dependencies["cherry-markdown"] = .dependencies["cherry-markdown-core"] | del(.dependencies["cherry-markdown"])' package.json > temp.json && mv temp.json package.json
           jq '.name = "cherry-markdown"' package.json > temp.json && mv temp.json package.json
@@ -61,3 +81,16 @@ jobs:
           cd packages/vscodePlugin
           # 仅发布 vscode 插件预览版
           vsce publish -p $VSCE_PAT --no-dependencies --no-yarn --pre-release
+
+      - name: Post Artifact URL to PR
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🔌 预览 (Preview): 体验 Cherry Markdown 预览版 [see: prerelease-extensions](https://code.visualstudio.com/api/working-with-extensions/publishing-extension?from_column=20423&from=20423#prerelease-extensions)`
+            });
+
