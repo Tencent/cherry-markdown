@@ -10,6 +10,7 @@ permissions:
   contents: read
   pull-requests: write
   actions: read
+  issues: write
 
 jobs:
   vscodePlugin-preview:
@@ -24,7 +25,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: '18.x'
           cache: 'yarn'
 
       - name: Change Package Files
@@ -37,34 +38,25 @@ jobs:
           jq '.name = "cherry-markdown-core"' package.json > temp.json && mv temp.json package.json
 
           cd ../vscodePlugin
-          # Prefer the merge commit SHA from the PR event; fall back to the PR head SHA.
-          # Use the first 5 hex chars (like the original) and convert to decimal.
-          # Prefer merge_commit_sha, then PR head SHA, then the workflow SHA as last resort.
-          COMMITHASH="${{ github.event.pull_request.merge_commit_sha || github.event.pull_request.head.sha || github.sha }}"
-          COMMITHASH_SHORT=${COMMITHASH:0:5}
-          if [ -z "$COMMITHASH_SHORT" ]; then
-            # If no short commit hash is available, use current time hhmmss as fallback
-            COMMITHASH_DEC=$(date +%H%M%S)
-          else
-            COMMITHASH_DEC=$((16#$COMMITHASH_SHORT))
-          fi
+          # Compact one-liner: strip leading zeros from MMDDHHMM, fallback to HHMMSS if empty
+          TIMESTAMP=$(t=$(date +%m%d%H%M | sed 's/^0*//'); [ -n "$t" ] && printf '%s' "$t" || date +%H%M%S)
 
-          jq --arg ch "$COMMITHASH_DEC" '
+          jq --arg ts "$TIMESTAMP" '
             .version |= (
               split(".") as $s |
               if ($s|length) < 3 then
-                error("package.json version must be in 'x.y.z' format")
+                error("package.json version must be in '\''x.y.z'\'' format")
               else
-                # if existing patch is "0", replace with COMMITHASH_DEC (do not concat 0)
+                # if existing patch is "0", replace with TIMESTAMP (remove the 0)
                 if $s[2] == "0" then
-                  ($s[0:2] + [$ch]) | join(".")
+                  ($s[0:2] + [$ts]) | join(".")
                 else
-                  # take existing patch (third segment), concat with COMMITHASH_DEC as string
-                  ($s[0:2] + [($s[2] + $ch)]) | join(".")
+                  # append TIMESTAMP to existing patch as string
+                  ($s[0:2] + [($s[2] + $ts)]) | join(".")
                 end
               end
             )' package.json > temp.json && mv temp.json package.json
-          jq '.dependencies["cherry-markdown"] = .dependencies["cherry-markdown-core"] | del(.dependencies["cherry-markdown"])' package.json > temp.json && mv temp.json package.json
+          jq '.dependencies["cherry-markdown-core"] = .dependencies["cherry-markdown"] | del(.dependencies["cherry-markdown"])' package.json > temp.json && mv temp.json package.json
           jq '.name = "cherry-markdown"' package.json > temp.json && mv temp.json package.json
 
       - name: Install and Build Dependencies

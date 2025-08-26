@@ -12,7 +12,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: '18.x'
           cache: 'yarn'
 
       - name: Change Package Files
@@ -25,7 +25,7 @@ jobs:
           jq '.name = "cherry-markdown-core"' package.json > temp.json && mv temp.json package.json
 
           cd ../vscodePlugin
-          jq '.dependencies["cherry-markdown"] = .dependencies["cherry-markdown-core"] | del(.dependencies["cherry-markdown"])' package.json > temp.json && mv temp.json package.json
+          jq '.dependencies["cherry-markdown-core"] = .dependencies["cherry-markdown"] | del(.dependencies["cherry-markdown"])' package.json > temp.json && mv temp.json package.json
           jq '.name = "cherry-markdown"' package.json > temp.json && mv temp.json package.json
 
       - name: Install and Build Dependencies
