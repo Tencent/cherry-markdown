@@ -18,15 +18,14 @@ jobs:
       - name: Change Package Files
         run: |
 
-          jq '."scripts"."build" = "yarn workspace cherry-markdown-core build"' package.json > temp.json && mv temp.json package.json
-          jq '."scripts"."build:vscodePlugin" = "yarn workspace cherry-markdown build"' package.json > temp.json && mv temp.json package.json
+          tmp=$(mktemp) && jq '.scripts["build"] = "yarn workspace cherry-markdown-core build" | .scripts["build:vscodePlugin"] = "yarn workspace cherry-markdown build"' package.json > "$tmp" && mv "$tmp" package.json
 
           cd packages/cherry-markdown
-          jq '.name = "cherry-markdown-core"' package.json > temp.json && mv temp.json package.json
+          tmp=$(mktemp) && jq '.name = "cherry-markdown-core"' package.json > "$tmp" && mv "$tmp" package.json
 
           cd ../vscodePlugin
-          jq '.dependencies["cherry-markdown-core"] = .dependencies["cherry-markdown"] | del(.dependencies["cherry-markdown"])' package.json > temp.json && mv temp.json package.json
-          jq '.name = "cherry-markdown"' package.json > temp.json && mv temp.json package.json
+          tmp=$(mktemp) && jq '.dependencies["cherry-markdown-core"] = .dependencies["cherry-markdown"] | del(.dependencies["cherry-markdown"])' package.json > "$tmp" && mv "$tmp" package.json
+          tmp=$(mktemp) && jq '.name = "cherry-markdown"' package.json > "$tmp" && mv "$tmp" package.json
 
       - name: Install and Build Dependencies
         run: |
