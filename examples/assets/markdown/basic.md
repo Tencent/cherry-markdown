@@ -496,10 +496,13 @@ $$
 ## 表格配图
 **说明**
 - 在通用表格语法的基础上，通过在首行首列单元格里写入关键字来同时生成表格和图表
+- 语法为 `| :图表类型:{配置项} | ... |`，配置项必须使用标准的JSON格式，例如 `{"title": "我的标题"}`
+- 对于散点图，需要使用 `cherry:mapping` 键名指定数据列与视觉维度的对应关系
+- 目前支持的通用配置为 `title`
 
 **示例（折线图）**
 ```markdown
-| :line:{title: 折线图,} | Header1 | Header2 | Header3 | Header4 |
+| :line:{"title": "折线图"} | Header1 | Header2 | Header3 | Header4 |
 | ------ | ------ | ------ | ------ | ------ |
 | Sample1 | 11 | 11 | 4 | 33 |
 | Sample2 | 112 | 111 | 22 | 222 |
@@ -507,7 +510,7 @@ $$
 ```
 
 **效果**
-| :line:{title: 折线图,} | Header1 | Header2 | Header3 | Header4 |
+| :line:{"title": "折线图"} | Header1 | Header2 | Header3 | Header4 |
 | ------ | ------ | ------ | ------ | ------ |
 | Sample1 | 11 | 11 | 4 | 33 |
 | Sample2 | 112 | 111 | 22 | 222 |
@@ -515,7 +518,7 @@ $$
 
 **示例（柱状图）**
 ```markdown
-| :bar:{title: 柱状图,} | Header1 | Header2 | Header3 | Header4 |
+| :bar:{"title": "柱状图"} | Header1 | Header2 | Header3 | Header4 |
 | ------ | ------ | ------ | ------ | ------ |
 | Sample1 | 11 | 11 | 4 | 33 |
 | Sample2 | 112 | 111 | 22 | 222 |
@@ -523,7 +526,7 @@ $$
 ```
 
 **效果**
-| :bar:{title: 柱状图,} | Header1 | Header2 | Header3 | Header4 |
+| :bar:{"title": "柱状图"} | Header1 | Header2 | Header3 | Header4 |
 | ------ | ------ | ------ | ------ | ------ |
 | Sample1 | 11 | 11 | 4 | 33 |
 | Sample2 | 112 | 111 | 22 | 222 |
@@ -531,7 +534,7 @@ $$
 
 **示例（热力图）**
 ```markdown
-| :heatmap:{title: 热力图,} | 周一 | 周二 | 周三 | 周四 | 周五 |
+| :heatmap:{"title": "热力图"} | 周一 | 周二 | 周三 | 周四 | 周五 |
 | ------ | ------ | ------ | ------ | ------ | ------ |
 | 上午 | 10 | 20 | 30 | 40 | 50 |
 | 下午 | 15 | 25 | 35 | 45 | 55 |
@@ -539,7 +542,7 @@ $$
 ```
 
 **效果**
-| :heatmap:{title: 热力图,} | 周一 | 周二 | 周三 | 周四 | 周五 |
+| :heatmap:{"title": "热力图"} | 周一 | 周二 | 周三 | 周四 | 周五 |
 | ------ | ------ | ------ | ------ | ------ | ------ |
 | 上午 | 10 | 20 | 30 | 40 | 50 |
 | 下午 | 15 | 25 | 35 | 45 | 55 |
@@ -547,7 +550,7 @@ $$
 
 **示例（饼图）**
 ```markdown
-| :pie:{title: 饼图,} | 数值 |
+| :pie:{"title": "饼图"} | 数值 |
 | ------ | ------ |
 | 苹果 | 40 |
 | 香蕉 | 30 |
@@ -556,7 +559,7 @@ $$
 ```
 
 **效果**
-| :pie:{title: 饼图,} | 数值 |
+| :pie:{"title": "饼图"} | 数值 |
 | ------ | ------ |
 | 苹果 | 40 |
 | 香蕉 | 30 |
@@ -565,7 +568,7 @@ $$
 
 **示例（雷达图）**
 ```markdown
-| :radar:{title: 雷达图,} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |
+| :radar:{"title": "雷达图"} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |
 | ------ | ------ | ------ | ------ | ------ | ------ |
 | 用户A | 90 | 85 | 75 | 80 | 88 |
 | 用户B | 75 | 90 | 88 | 85 | 78 |
@@ -573,7 +576,7 @@ $$
 ```
 
 **效果**
-| :radar:{title: 雷达图,} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |
+| :radar:{"title": "雷达图"} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |
 | ------ | ------ | ------ | ------ | ------ | ------ |
 | 用户A | 90 | 85 | 75 | 80 | 88 |
 | 用户B | 75 | 90 | 88 | 85 | 78 |
@@ -581,7 +584,7 @@ $$
 
 **示例（散点图，多组数据）**
 ```markdown
-| :scatter:{group,name,x,y,size} | X | Y | Size | Series |
+| :scatter:{"cherry:mapping": {"x": "X", "y": "Y", "size": "Size", "series": "Series"}} | X | Y | Size | Series |
 | ------ | ------ | ------ | ------ | ------ |
 | A1 | 10 | 20 | 5 | 组一 |
 | A2 | 15 | 25 | 10 | 组一 |
@@ -604,7 +607,7 @@ $$
 ```
 
 **效果**
-| :scatter:{group,name,x,y,size} | X | Y | Size | Series |
+| :scatter:{"cherry:mapping": {"x": "X", "y": "Y", "size": "Size", "series": "Series"}} | X | Y | Size | Series |
 | ------ | ------ | ------ | ------ | ------ |
 | A1 | 10 | 20 | 5 | 组一 |
 | A2 | 15 | 25 | 10 | 组一 |
@@ -629,7 +632,7 @@ $$
 
 默认地图数据源：
 ```markdown
-| :map:{title: 中国地图,} | 数值 |
+| :map:{"title": "中国地图"} | 数值 |
 | :-: | :-: |
 | 北京 | 100 |
 | 上海 | 200 |
@@ -640,7 +643,7 @@ $$
 ```
 
 **效果**
-| :map:{title: 中国地图,} | 数值 |
+| :map:{"title": "中国地图"} | 数值 |
 | :-: | :-: |
 | 北京 | 100 |
 | 上海 | 200 |
@@ -651,7 +654,7 @@ $$
 
 **自定义地图数据源：**
 ```markdown
-| :map:{title: 北京地图, mapDataSource: https://geo.datav.aliyun.com/areas_v3/bound/110000_full.json,} | 数值 |
+| :map:{"title": "北京地图", "mapDataSource": "https://geo.datav.aliyun.com/areas_v3/bound/110000_full.json"} | 数值 |
 | :-: | :-: |
 | 海淀区 | 120 |
 | 朝阳区 | 280 |
@@ -662,7 +665,7 @@ $$
 ```
 
 **效果**
-| :map:{title: 北京地图, mapDataSource: https://geo.datav.aliyun.com/areas_v3/bound/110000_full.json,} | 数值 |
+| :map:{"title": "北京地图", "mapDataSource": "https://geo.datav.aliyun.com/areas_v3/bound/110000_full.json"} | 数值 |
 | :-: | :-: |
 | 海淀区 | 120 |
 | 朝阳区 | 280 |
@@ -672,7 +675,7 @@ $$
 | 大兴区 | 220 |
 
 **说明：**
-- 使用 `<!-- mapDataSource: your-map-data.json -->` 注释来指定自定义地图数据源
+- 使用 `mapDataSource` 键名来指定自定义地图数据源
 - 支持相对路径和绝对URL
 - 如果不指定数据源，将使用系统默认的地图数据
 - 也可以通过 Cherry 配置中的 `toolbars.config.mapTable.sourceUrl` 全局配置数据源

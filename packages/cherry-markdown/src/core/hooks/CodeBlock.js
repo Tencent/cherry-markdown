@@ -29,7 +29,7 @@ export default class CodeBlock extends ParagraphBase {
   static HOOK_NAME = 'codeBlock';
   static inlineCodeCache = {};
 
-  constructor({ externals, config }) {
+  constructor({ externals, config, cherry }) {
     super({ needCache: true });
     CodeBlock.inlineCodeCache = {};
     this.codeCache = {};
@@ -52,6 +52,10 @@ export default class CodeBlock extends ParagraphBase {
     this.customHighlighter = config.highlighter;
     this.failedCleanCacheTimes = 0;
     this.codeTimer = null;
+    this.showInlineColor =
+      cherry?.options?.engine?.syntax?.inlineCode?.showColor !== undefined
+        ? cherry.options.engine.syntax.inlineCode.showColor
+        : true; // 是否在行内代码为颜色值时展示颜色指示
   }
 
   afterMakeHtml(html) {
@@ -496,7 +500,21 @@ export default class CodeBlock extends ParagraphBase {
         let $code = code.replace(/~~not~inlineCode/g, '\\`');
         $code = this.$replaceSpecialChar($code);
         $code = $code.replace(/\\/g, '\\\\');
-        const html = `<code>${escapeHTMLSpecialChar($code)}</code>`;
+
+        // 如果行内代码只有一个颜色值，则在code末尾追加一个颜色圆点
+        const trimmed = $code.trim();
+        const isHex = /^#([0-9a-fA-F]{6})$/i.test(trimmed);
+        const isRgb = /^rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)$/i.test(trimmed);
+        const isHsl = /^hsl\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%\s*\)$/i.test(trimmed);
+        const escaped = escapeHTMLSpecialChar($code);
+        let html = '';
+        if (this.showInlineColor && (isHex || isRgb || isHsl)) {
+          const color = trimmed;
+          html = `<code>${escaped}<span class="ch-inline-color" style="background:${color};"></span></code>`;
+        } else {
+          html = `<code>${escaped}</code>`;
+        }
+
         const sign = this.$engine.hash(html);
         CodeBlock.inlineCodeCache[sign] = html;
         return `~~CODE${sign}$`;
