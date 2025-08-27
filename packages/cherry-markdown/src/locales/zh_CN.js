@@ -125,6 +125,8 @@ export default {
   detailDefaultContent: '点击展开更多\n内容\n++- 默认展开\n内容\n++ 默认收起\n内容',
   inlineCode: '行内代码',
   codeBlock: '代码块',
+  inlineMath: '行内公式',
+  mathBlock: '块级公式',
   shortcutKeySetting: '快捷键设置',
   editShortcutKeyConfigTip: '双击快捷键区域或点击编辑按钮编辑快捷键',
   editingShortcutKeyConfigTip: '按Enter键保存，Backspace键移除新增的键',
