@@ -218,8 +218,8 @@ export default class EChartsTableEngine {
         smooth: 0.3,
         markPoint: {
           data: [
-            { type: 'max', name: '最大值' },
-            { type: 'min', name: '最小值' },
+            { type: 'max', name: this.cherry.locale.maxValue },
+            { type: 'min', name: this.cherry.locale.minValue },
           ],
         },
         emphasis: {
@@ -515,30 +515,31 @@ export default class EChartsTableEngine {
   }
 
   /**
+   * 重建根容器下的所有图表
+   */
+  $rebuildAllCharts(root) {
+    if (!root) return;
+    try {
+      const containersSet = new Set();
+      const found = root.querySelectorAll('.cherry-echarts-wrapper');
+      if (found && found.length) Array.from(found).forEach((el) => containersSet.add(el));
+      if (containersSet.size) this.$rehydrateChartsForContainers(containersSet, root);
+    } catch (e) {
+      Logger.warn('rehydrate charts failed:', e);
+    }
+  }
+
+  /**
    * 启用语言变更观察器
    */
   $enableLocaleObserver() {
     // 如果有Cherry实例，通过其事件系统监听语言变更事件
     if (this.cherry && this.cherry.$event) {
       const handler = (locale) => {
-        Logger.log('EChartsTableEngine: locale changed to', locale);
-        // todo： 重设图表的locale
-        Array.from(this.instances).forEach((inst) => {
-          setTimeout(() => {
-            inst.setOption(
-              {
-                toolbox: {
-                  feature: {
-                    saveAsImage: {
-                      title: this.cherry.locale.saveAsImage,
-                    },
-                  },
-                },
-              },
-              false,
-            );
-          }, 0);
-        });
+        setTimeout(() => {
+          const root = this.$getCherryRoot();
+          this.$rebuildAllCharts(root);
+        }, 0);
       };
       this.cherry.$event.on(this.cherry.$event.Events.afterChangeLocale, handler);
     }
@@ -553,14 +554,7 @@ export default class EChartsTableEngine {
     if (!root) return;
     if (this.exportObservers.has(root)) return;
     const handler = () => {
-      try {
-        const containersSet = new Set();
-        const found = root.querySelectorAll('.cherry-echarts-wrapper');
-        if (found && found.length) Array.from(found).forEach((el) => containersSet.add(el));
-        if (containersSet.size) this.$rehydrateChartsForContainers(containersSet, root);
-      } catch (e) {
-        Logger.warn('rehydrate after export failed:', e);
-      }
+      this.$rebuildAllCharts(root);
     };
     // 监听全局导出完成事件
     window.addEventListener('cherry:export:done', handler);
@@ -734,7 +728,7 @@ const BaseChartOptionsHandler = {
         show: true,
         orient: 'vertical',
         left: 'right',
-        top: 'center',
+        top: 'bottom',
         feature: {
           // dataView: { show: true, readOnly: false, title: '数据视图', lang: ['数据视图', '关闭', '刷新'] },
           // restore: { show: true, title: '重置' },
@@ -916,7 +910,7 @@ const RadarChartOptionsHandler = {
       },
       series: [
         engine.$baseSeries('radar', {
-          name: '雷达图数据',
+          name: engine.cherry.locale.radarData,
           data: seriesData,
           emphasis: { lineStyle: { width: 4 }, areaStyle: { opacity: 0.3 } },
         }),
@@ -945,7 +939,7 @@ const HeatmapChartOptionsHandler = {
 
     return {
       'tooltip.formatter'(params) {
-        return `${yAxisData[params.data[1]]}<br/>${xAxisData[params.data[0]]}: <strong>${params.data[2]}</strong>`;
+        return `${engine.$dot(params.color)}${yAxisData[params.data[1]]}<br/>${xAxisData[params.data[0]]}: <strong>${params.data[2]}</strong>`;
       },
       grid: engine.$grid({ height: '50%', top: '10%', left: '10%', right: '10%' }),
       xAxis: engine.$axis('category', { data: xAxisData, splitArea: { show: true } }),
@@ -962,7 +956,7 @@ const HeatmapChartOptionsHandler = {
       },
       series: [
         engine.$baseSeries('heatmap', {
-          name: '热力图数据',
+          name: engine.cherry.locale.heatmapData,
           data,
           label: { show: true, fontSize: 10 },
           emphasis: {
@@ -978,7 +972,6 @@ const HeatmapChartOptionsHandler = {
           animationEasing: 'cubicOut',
         }),
       ],
-      'toolbox.top': 'bottom',
     };
   },
 };
@@ -990,11 +983,15 @@ const PieChartOptionsHandler = {
     const data = tableObject.rows.map((row) => ({ name: row[0], value: engine.$num(row[1]) }));
 
     return {
-      tooltip: { trigger: 'item', formatter: '{a} <br/>{b}: {c} ({d}%)' },
+      tooltip: {
+        trigger: 'item',
+        formatter: (params) =>
+          `${engine.$dot(params.color)}${params.seriesName}<br/>${params.name}: ${params.value} (${params.percent}%)`,
+      },
       legend: { orient: 'vertical', left: 'left', top: 'middle' },
       series: [
         engine.$baseSeries('pie', {
-          name: '数据分布',
+          name: engine.cherry.locale.pieData,
           radius: ['40%', '70%'],
           center: ['50%', '50%'],
           avoidLabelOverlap: false,
@@ -1149,7 +1146,7 @@ const ScatterChartOptionsHandler = {
         trigger: 'item',
         formatter(params) {
           const [x, y] = params.value || [];
-          return `${params.name}<br/>x: <strong>${x}</strong><br/>y: <strong>${y}</strong>`;
+          return `${engine.$dot(params.color)}${params.seriesName} ${params.name}<br/>x: <strong>${x}</strong><br/>y: <strong>${y}</strong>`;
         },
       },
       grid: engine.$grid(),
@@ -1234,7 +1231,7 @@ const ScatterChartOptionsHandler = {
       });
       series = [
         engine.$baseSeries('scatter', {
-          name: '散点',
+          name: engine.cherry.locale.scatterData,
           data,
           emphasis: {
             focus: 'series',
@@ -1259,14 +1256,14 @@ const MapChartLoadingOptionsHandler = {
     return typeof window.echarts === 'undefined'
       ? {
           title: {
-            text: '地图渲染失败: ECharts 库未加载',
+            text: `${engine.cherry.locale.mapRenderError} : ${engine.cherry.locale.mapRenderErrorTip}`,
             left: 'center',
             textStyle: { color: '#ff0000' },
           },
         }
       : {
           title: {
-            text: '正在加载地图数据...',
+            text: `${engine.cherry.locale.mapChartLoading}...`,
             left: 'center',
             top: 'middle',
             textStyle: { color: engine.$theme().color.text, fontSize: engine.$theme().fontSize.title },
@@ -1278,7 +1275,7 @@ const MapChartLoadingOptionsHandler = {
                 left: 'center',
                 top: '60%',
                 style: {
-                  text: '如果长时间未显示，请检查网络连接',
+                  text: engine.cherry.locale.mapChartLoadingTip,
                   font: '12px sans-serif',
                   fill: engine.$theme().color.text,
                   opacity: 0.7,
@@ -1308,7 +1305,7 @@ const MapChartCompleteOptionsHandler = {
         max: Math.max(...mapData.map((item) => item.value)),
         left: 'left',
         top: 'bottom',
-        text: ['高', '低'],
+        text: [engine.cherry.locale.high, engine.cherry.locale.low],
         calculable: true,
         inRange: { color: engine.$palette('map') },
         textStyle: {
@@ -1318,7 +1315,7 @@ const MapChartCompleteOptionsHandler = {
       },
       series: [
         {
-          name: '地图数据',
+          name: engine.cherry.locale.mapData,
           type: 'map',
           map: options.mapDataSource || 'china',
           roam: true,
@@ -1343,10 +1340,10 @@ const MapChartFailureOptionsHandler = {
     const { engine } = options;
     return {
       title: {
-        text: '地图加载失败',
-        subtext: '请检查数据源或重新输入有效链接',
+        text: engine.cherry.locale.mapChartError,
+        subtext: engine.cherry.locale.mapChartErrorTip,
         left: 'center',
-        top: 'middle',
+        top: '40%',
         textStyle: {
           fontSize: engine.$theme().fontSize.title,
           color: engine.$theme().color.text,
@@ -1354,14 +1351,15 @@ const MapChartFailureOptionsHandler = {
         subtextStyle: {
           fontSize: engine.$theme().fontSize.base,
           color: engine.$theme().color.text,
+          opacity: 0.7,
         },
       },
       graphic: {
         type: 'text',
         left: 'center',
-        top: '70%',
+        top: '60%',
         style: {
-          text: '点击重新加载',
+          text: engine.cherry.locale.mapChartRetry,
           fontSize: engine.$theme().fontSize.base,
           fill: engine.$theme().color.primary,
           cursor: 'pointer',
@@ -1468,7 +1466,7 @@ const MapChartOptionsHandler = {
         return geoJson;
       })
       .catch((error) => {
-        Logger.warn(`地图数据加载失败 (${url}):`, error.message);
+        Logger.warn(`Map data loading failed (${url}):`, error.message);
         this.$handleMapLoadFailure(options);
       });
   },
