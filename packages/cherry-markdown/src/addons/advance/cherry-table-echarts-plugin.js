@@ -549,8 +549,8 @@ export default class EChartsTableEngine {
     const htmlContent = `
       <div class="cherry-echarts-wrapper" 
            style="width: ${this.options.width}px; height: ${
-      this.options.height
-    }px; min-height: 300px; display: block; position: relative; border: 1px solid var(--md-table-border);" 
+             this.options.height
+           }px; min-height: 300px; display: block; position: relative; border: 1px solid var(--md-table-border);" 
            id="${chartId}"
            data-chart-type="${type}"
            data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"
