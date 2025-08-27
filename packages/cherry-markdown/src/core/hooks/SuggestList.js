@@ -28,7 +28,7 @@ export const addonsKeywords = '#';
 /*
  * 预留联想词
  */
-export const suggesterKeywords = '/·￥、：“”【】（）《》`'.concat(addonsKeywords);
+export const suggesterKeywords = '/·、：“”【】（）《》`$¥￥'.concat(addonsKeywords);
 /*
  * 系统联想候选表，主要为'、'以及'、'的联想。
  */
@@ -245,6 +245,7 @@ const MoreSuggestList = [
     value: `《》`,
     goLeft: 1,
   },
+  // 行内代码 和 代码块
   {
     icon: 'FullWidth',
     label: '""',
@@ -271,6 +272,49 @@ const MoreSuggestList = [
     label: 'codeBlock',
     keyword: '`',
     value: '```\n\n```\n',
+    goTop: 2,
+  },
+  // 行内公式 和 块级公式
+  {
+    icon: 'FullWidth',
+    label: 'inlineMath',
+    keyword: '$',
+    value: '$$',
+    goLeft: 1,
+  },
+  {
+    icon: 'FullWidth',
+    label: 'mathBlock',
+    keyword: '$',
+    value: '$$\n\n$$\n',
+    goTop: 2,
+  },
+  {
+    icon: 'FullWidth',
+    label: 'inlineMath',
+    keyword: '¥',
+    value: '$$',
+    goLeft: 1,
+  },
+  {
+    icon: 'FullWidth',
+    label: 'mathBlock',
+    keyword: '¥',
+    value: '$$\n\n$$\n',
+    goTop: 2,
+  },
+  {
+    icon: 'FullWidth',
+    label: 'inlineMath',
+    keyword: '￥',
+    value: '$$',
+    goLeft: 1,
+  },
+  {
+    icon: 'FullWidth',
+    label: 'mathBlock',
+    keyword: '￥',
+    value: '$$\n\n$$\n',
     goTop: 2,
   },
 ];
