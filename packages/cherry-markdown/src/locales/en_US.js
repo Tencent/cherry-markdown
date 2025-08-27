@@ -123,6 +123,8 @@ export default {
     'Click to expand more\nContent\n++- Expand by default\nContent\n++ Collapse by default\nContent',
   inlineCode: 'Inline Code',
   codeBlock: 'Code Block',
+  inlineMath: 'Inline Math',
+  mathBlock: 'Math Block',
   shortcutKeySetting: 'Keyboard Shortcuts',
   editShortcutKeyConfigTip: 'Double-click the shortcut key area or click the edit button to edit',
   editingShortcutKeyConfigTip: 'Press Enter to save, Backspace to remove the newly added key',
