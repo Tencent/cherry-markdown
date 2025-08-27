@@ -252,6 +252,34 @@ export default class EChartsTableEngine {
   }
 
   /**
+   * 清理无效的图表实例（图表不在DOM中，但仍被this.instances保存，需要清理）
+   */
+  cleanupInvalidInstances() {
+    const instancesToRemove = [];
+    this.instances.forEach((instance) => {
+      // 检查实例是否已被销毁
+      if (instance.isDisposed && instance.isDisposed()) {
+        instancesToRemove.push(instance);
+        return;
+      }
+      // 检查DOM是否还存在于文档中
+      const dom = instance.getDom && instance.getDom();
+      if (!dom || !dom.isConnected) {
+        instancesToRemove.push(instance);
+      }
+    });
+
+    instancesToRemove.forEach((instance) => {
+      if (!instance.isDisposed()) instance.dispose();
+      this.instances.delete(instance);
+    });
+
+    if (instancesToRemove.length > 0) {
+      Logger.info(`Cleaned up ${instancesToRemove.length} invalid chart instances`);
+    }
+  }
+
+  /**
    * 销毁图表实例
    */
   destroyChart(target) {
@@ -268,6 +296,10 @@ export default class EChartsTableEngine {
 
     if (inst && !inst.isDisposed()) inst.dispose();
     if (inst) this.instances.delete(inst);
+    // 如果通过DOM元素无法获取到实例，但容器存在，则遍历instances查找并清理
+    if (!inst && container) {
+      this.cleanupInvalidInstances();
+    }
   }
 
   /**
@@ -344,6 +376,7 @@ export default class EChartsTableEngine {
       this.themeRuntime = cached.runtime;
       return;
     }
+    const primary = this.$readCssVar(el, '--primary-color', THEME.color.primary);
     const bg = this.$readCssVar(el, '--base-previewer-bg', this.$readCssVar(el, '--base-editor-bg', 'transparent'));
     const text = this.$readCssVar(el, '--base-font-color', THEME.color.text);
     const border = this.$readCssVar(el, '--md-table-border', THEME.color.border);
@@ -358,6 +391,7 @@ export default class EChartsTableEngine {
     // 更新运行时主题
     const runtime = {
       color: {
+        primary,
         border,
         borderHover: border,
         text,
@@ -445,6 +479,7 @@ export default class EChartsTableEngine {
     const type = container.getAttribute('data-chart-type');
     const tableDataStr = container.getAttribute('data-table-data');
     const chartOptionsStr = container.getAttribute('data-chart-options');
+    const chartId = container.getAttribute('id');
     let tableData = null;
     let chartOptions = {};
     try {
@@ -455,9 +490,10 @@ export default class EChartsTableEngine {
     try {
       chartOptions = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
     } catch (e) {
-      chartOptions = {};
+      chartOptions = { chartId };
     }
     if (!type || !tableData) return {};
+    chartOptions.chartId = chartId;
     return this.$generateChartOptions(type, tableData, chartOptions);
   }
 
@@ -578,6 +614,7 @@ export default class EChartsTableEngine {
           <span style="font-size: 12px; color: #666;">错误: ${error.message}</span>
         </div>`;
       }
+      this.cleanupInvalidInstances();
     }, 50);
 
     return htmlContent;
@@ -625,6 +662,8 @@ export default class EChartsTableEngine {
   }
 
   onDestroy() {
+    this.cleanupInvalidInstances();
+
     if (this.instances && this.instances.size > 0) {
       this.instances.forEach((inst) => {
         this.destroyChart(inst);
@@ -1214,6 +1253,7 @@ const ScatterChartOptionsHandler = {
 // Map chart handlers from PR #1349 with PR #1362 integration
 const MapChartLoadingOptionsHandler = {
   options(tableObject, options) {
+    const { engine } = options;
     // console.log('Rendering map chart:', tableObject);
 
     return typeof window.echarts === 'undefined'
@@ -1229,7 +1269,7 @@ const MapChartLoadingOptionsHandler = {
             text: '正在加载地图数据...',
             left: 'center',
             top: 'middle',
-            textStyle: { color: '#666', fontSize: 16 },
+            textStyle: { color: engine.$theme().color.text, fontSize: engine.$theme().fontSize.title },
           },
           graphic: {
             elements: [
@@ -1240,7 +1280,8 @@ const MapChartLoadingOptionsHandler = {
                 style: {
                   text: '如果长时间未显示，请检查网络连接',
                   font: '12px sans-serif',
-                  fill: '#999',
+                  fill: engine.$theme().color.text,
+                  opacity: 0.7,
                 },
               },
             ],
@@ -1281,7 +1322,7 @@ const MapChartCompleteOptionsHandler = {
           type: 'map',
           map: options.mapDataSource || 'china',
           roam: true,
-          label: { show: true, fontSize: 12 },
+          label: { show: true, fontSize: engine.$theme().fontSize.base },
           data: mapData,
           emphasis: {
             label: {
@@ -1297,12 +1338,91 @@ const MapChartCompleteOptionsHandler = {
   },
 };
 
+const MapChartFailureOptionsHandler = {
+  options(tableObject, options) {
+    const { engine } = options;
+    return {
+      title: {
+        text: '地图加载失败',
+        subtext: '请检查数据源或重新输入有效链接',
+        left: 'center',
+        top: 'middle',
+        textStyle: {
+          fontSize: engine.$theme().fontSize.title,
+          color: engine.$theme().color.text,
+        },
+        subtextStyle: {
+          fontSize: engine.$theme().fontSize.base,
+          color: engine.$theme().color.text,
+        },
+      },
+      graphic: {
+        type: 'text',
+        left: 'center',
+        top: '70%',
+        style: {
+          text: '点击重新加载',
+          fontSize: engine.$theme().fontSize.base,
+          fill: engine.$theme().color.primary,
+          cursor: 'pointer',
+        },
+        onclick: () => {
+          const container = document.querySelector(`[id="${options.chartId}"][data-chart-type="map"]`);
+          MapChartOptionsHandler.$showMapLoadingChart(container, options);
+          MapChartOptionsHandler.$loadMapData(null, options);
+        },
+      },
+    };
+  },
+};
+
 const MapChartOptionsHandler = {
   options(tableObject, options) {
+    // 获取当前用户指定的地图数据源
+    const userMapSource = options && options.mapDataSource ? options.mapDataSource : null;
+
+    // 如果之前是加载失败的状态，重置时直接回到加载失败的页面
+    const container = document.querySelector(`[id="${options.chartId}"][data-chart-type="map"]`);
+    if (container) {
+      const loadingStatus = container.getAttribute('data-map-status');
+      if (loadingStatus === 'failed') {
+        return generateOptions(MapChartFailureOptionsHandler, tableObject, options);
+      }
+    }
+
+    // 用户指定了新的地图数据源，检查是否与已注册的地图源匹配
+    if (userMapSource) {
+      if (window.echarts && window.echarts.getMap && window.echarts.getMap(userMapSource)) {
+        // 用户指定数据源已注册，直接使用
+        return generateOptions(MapChartCompleteOptionsHandler, tableObject, options);
+      }
+      this.$loadMapData(tableObject, options);
+      return generateOptions(MapChartLoadingOptionsHandler, tableObject, options);
+    }
+
+    // 未指定数据源，检查是否有默认的可用源
+    const possibleMapSources = this.$getAllPossibleMapSources(options);
+    let isMapRegistered = false;
+    let registeredMapSource = null;
+
+    for (const source of possibleMapSources) {
+      if (window.echarts && window.echarts.getMap && window.echarts.getMap(source)) {
+        isMapRegistered = true;
+        registeredMapSource = source;
+        break;
+      }
+    }
+
+    if (isMapRegistered) {
+      const updatedOptions = { ...options, mapDataSource: registeredMapSource };
+      return generateOptions(MapChartCompleteOptionsHandler, tableObject, updatedOptions);
+    }
+
+    // 地图数据未加载，启动加载流程并返回加载中的配置
     this.$loadMapData(tableObject, options);
     return generateOptions(MapChartLoadingOptionsHandler, tableObject, options);
   },
-  $loadMapData(tableObject, options) {
+  $getAllPossibleMapSources(options) {
     let paths = [];
     if (options && options.mapDataSource) {
       paths.push(options.mapDataSource);
@@ -1311,11 +1431,29 @@ const MapChartOptionsHandler = {
       paths = paths.concat(options.engine.cherryOptions.toolbars.config.mapTable.sourceUrl);
     }
     paths = paths.concat(['https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', './assets/data/china.json']);
+    return paths;
+  },
+  $loadMapData(tableObject, options) {
+    const paths = this.$getAllPossibleMapSources(options);
+
+    if (options && options.chartId) {
+      const container = document.querySelector(`[id="${options.chartId}"][data-chart-type="map"]`);
+      if (container) {
+        container.setAttribute('data-map-status', 'loading');
+      }
+    }
+
+    // 如果没有可用的数据源，直接显示错误页面
+    if (!paths || paths.length === 0) {
+      this.$handleMapLoadFailure(options);
+      return;
+    }
+
     this.$tryLoadMapDataFromPaths(paths, 0, options);
   },
   $tryLoadMapDataFromPaths(paths, index, options) {
     if (index >= paths.length) {
-      // console.error('所有地图数据源都加载失败');
+      this.$handleMapLoadFailure(options);
       return;
     }
 
@@ -1330,17 +1468,50 @@ const MapChartOptionsHandler = {
         return geoJson;
       })
       .catch((error) => {
-        // console.warn(`地图数据加载失败 (${url}):`, error.message);
-        this.$tryLoadMapDataFromPaths(paths, index + 1, options);
+        Logger.warn(`地图数据加载失败 (${url}):`, error.message);
+        this.$handleMapLoadFailure(options);
       });
   },
-  $fetchMapData(url) {
-    return fetch(url, { referrerPolicy: 'no-referrer' }).then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status} for ${url}`);
+  $handleMapLoadFailure(options) {
+    // 处理地图加载失败的情况
+    if (options && options.chartId) {
+      const container = document.querySelector(`[id="${options.chartId}"][data-chart-type="map"]`);
+      if (container) {
+        container.setAttribute('data-map-status', 'failed'); // 标记加载失败状态
+        this.$showMapErrorChart(container, options);
       }
-      return response.json();
-    });
+    }
+  },
+  $showMapLoadingChart(container, options) {
+    // 显示加载状态的图表
+    if (options.engine && options.engine.echartsRef) {
+      const loadingOption = generateOptions(MapChartLoadingOptionsHandler, null, options);
+      const existingChart = options.engine.echartsRef.getInstanceByDom(container);
+      if (existingChart) {
+        existingChart.setOption(loadingOption, true);
+      } else {
+        options.engine.createChart(container, loadingOption, 'map');
+      }
+    }
+  },
+  $showMapErrorChart(container, options) {
+    // 显示错误状态的图表
+    if (options.engine && options.engine.echartsRef) {
+      const errorOption = generateOptions(MapChartFailureOptionsHandler, null, options);
+      const existingChart = options.engine.echartsRef.getInstanceByDom(container);
+      if (existingChart) {
+        existingChart.setOption(errorOption, true);
+      } else {
+        options.engine.createChart(container, errorOption, 'map');
+      }
+    }
+  },
+  async $fetchMapData(url) {
+    const response = await fetch(url, { referrerPolicy: 'no-referrer' });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status} for ${url}`);
+    }
+    return await response.json();
   },
   $refreshMapChart(chartId, url, engine) {
     const container = document.querySelector(`[id="${chartId}"][data-chart-type="map"]`);
@@ -1358,13 +1529,13 @@ const MapChartOptionsHandler = {
         const existingChart = engine.echartsRef.getInstanceByDom(container);
 
         if (existingChart) {
-          existingChart.setOption(chartOption, false, true);
+          existingChart.clear();
+          existingChart.setOption(chartOption, true);
           // console.log('Map chart refreshed successfully:', chartId);
         } else {
-          const newChart = engine.echartsRef.init(container);
-          newChart.setOption(chartOption);
-          // console.log('Map chart recreated:', chartId);
+          engine.createChart(container, chartOption, 'map');
         }
+        container.setAttribute('data-map-status', 'success'); // 成功加载数据状态
       } catch (error) {
         // console.error('Failed to refresh map chart:', chartId, error);
       }
