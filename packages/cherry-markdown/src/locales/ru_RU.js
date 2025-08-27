@@ -54,6 +54,7 @@ export default {
   radarTable: 'радарный стол',
   mapTable: 'таблица карты',
   heatmapTable: 'таблица тепловой карты',
+  sankeyTable: 'Диаграмма Санки',
   pieTable: 'стол для пирога',
   proTable: 'диаграмма',
   formula: 'Формула',

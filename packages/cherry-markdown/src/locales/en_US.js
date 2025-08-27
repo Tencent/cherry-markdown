@@ -54,6 +54,7 @@ export default {
   radarTable: 'Radar Table',
   mapTable: 'Map Table',
   heatmapTable: 'Heatmap Table',
+  sankeyTable: 'Sankey Table',
   pieTable: 'Pie Table',
   proTable: 'Chart',
   formula: 'Formula',

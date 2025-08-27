@@ -31,6 +31,7 @@ export default class ProTable extends MenuBase {
       { iconName: 'insertHeatmapChart', name: 'heatmapTable', onclick: this.bindSubClick.bind(this, 'heatmapTable') },
       { iconName: 'insertScatterChart', name: 'scatterTable', onclick: this.bindSubClick.bind(this, 'scatterTable') },
       { iconName: 'insertPieChart', name: 'pieTable', onclick: this.bindSubClick.bind(this, 'pieTable') },
+      { iconName: 'insertSankeyChart', name: 'sankeyTable', onclick: this.bindSubClick.bind(this, 'sankeyTable') },
     ];
   }
 
@@ -76,6 +77,8 @@ export default class ProTable extends MenuBase {
         return this.insertPieTable(selection);
       case 'scatterTable':
         return this.insertScatterTable(selection);
+      case 'sankeyTable':
+        return this.insertSankeyTable(selection);
       default:
         return this.insertLineTable(selection);
     }
@@ -178,6 +181,22 @@ export default class ProTable extends MenuBase {
       '| B2 | 25 | 28 | 6 | S2 |',
       '| C1 | 50 | 40 | 9 | S3 |',
       '| C2 | 60 | 55 | 7 | S3 |',
+    ].join('\n')}\n\n`;
+  }
+
+  /**
+   * 插入桑基图表格
+   */
+  insertSankeyTable(selection) {
+    return `${selection}\n\n${[
+      `| :sankey:{"title": "${this.$cherry.locale.sankeyTable || '桑基图'}"} | Target | Value |`,
+      '| :-: | :-: | :-: |',
+      '| A | A1 | 5 |',
+      '| A | A2 | 3 |',
+      '| B | B1 | 8 |',
+      '| A | B1 | 3 |',
+      '| B1 | A1 | 1 |',
+      '| B1 | C | 2 |',
     ].join('\n')}\n\n`;
   }
 }

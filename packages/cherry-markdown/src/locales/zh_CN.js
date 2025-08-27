@@ -54,6 +54,7 @@ export default {
   radarTable: '雷达图', // 雷达表格
   mapTable: '地图', // 地图表格
   heatmapTable: '热力图', // 热力图表格
+  sankeyTable: '桑基图', // 桑基图表格
   pieTable: '饼图', // 饼图表格
   proTable: '图表', // 图表表格
   formula: '公式', // 公式

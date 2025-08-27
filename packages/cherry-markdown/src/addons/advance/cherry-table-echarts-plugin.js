@@ -131,6 +131,9 @@ export default class EChartsTableEngine {
           '#a50026',
         ];
         break;
+      case 'sankey':
+        palette = ['#5070dd', '#b6d634', '#505372', '#ff994d', '#0ca8df', '#ffd10a', '#fb628b', '#785db0', '#3fbe95'];
+        break;
       case 'map':
         palette = ['#e0ffff', '#006edd'];
         break;
@@ -232,6 +235,7 @@ export default class EChartsTableEngine {
       radar: { type: 'radar' },
       heatmap: { type: 'heatmap' },
       pie: { type: 'pie' },
+      sankey: { type: 'sankey' },
     };
     return { ...base, ...dict[type], ...animation, ...overrides };
   }
@@ -467,6 +471,7 @@ export default class EChartsTableEngine {
       heatmap: HeatmapChartOptionsHandler,
       pie: PieChartOptionsHandler,
       scatter: ScatterChartOptionsHandler,
+      sankey: SankeyChartOptionsHandler,
     }[type];
     options.engine = this;
     return handler ? generateOptions(handler, tableObject, options) : {};
@@ -1244,6 +1249,63 @@ const ScatterChartOptionsHandler = {
       ];
     }
     return series;
+  },
+};
+
+const SankeyChartOptionsHandler = {
+  components: [BaseChartOptionsHandler],
+  options(tableObject, options) {
+    const { engine } = options;
+
+    // 桑基图数据处理: | 源节点 | 目标节点 | 数值 |
+    const links = [];
+    const nodes = new Set();
+
+    tableObject.rows.forEach((row) => {
+      const source = String(row[0] || '').trim();
+      const target = String(row[1] || '').trim();
+      const value = engine.$num(row[2]);
+
+      if (source && target && value > 0) {
+        links.push({ source, target, value });
+        nodes.add(source);
+        nodes.add(target);
+      }
+    });
+
+    // 转换节点集合
+    const nodeArray = Array.from(nodes).map((name) => ({ name }));
+    console.log('nodeArray', nodeArray);
+
+    const res = {
+      tooltip: {
+        trigger: 'item',
+      },
+      series: [
+        engine.$baseSeries('sankey', {
+          layout: 'none',
+          emphasis: {
+            focus: 'adjacency',
+          },
+          data: nodeArray,
+          links,
+          orient: 'horizontal',
+          label: {
+            show: true,
+            position: 'right',
+            fontSize: engine.$theme().fontSize.base,
+            color: engine.$theme().color.text,
+          },
+          lineStyle: {
+            color: 'source',
+            curveness: 0.5,
+          },
+        }),
+      ],
+      color: engine.$palette('sankey'),
+    };
+    console.log('res', res);
+    return res;
   },
 };
 
