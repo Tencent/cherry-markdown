@@ -1,6 +1,6 @@
-# Cherry Markdown Writer
+<p align="center"><img src="logo/new_logo.png" alt="cherry logo" width="50%"/></p>
 
-![cherry logo](logo/new_logo.png)
+# Cherry Markdown Writer
 
 [![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
 
@@ -59,13 +59,8 @@ Cherry Markdown Writer 是一款 Javascript Markdown 编辑器，具有开箱即
 4. 字体背景色、上标与下标
 5. 插入清单（checklist）
 6. 插入音视频
-
-### 多种模式
-
-1. 实时预览（支持滚动同步）
-2. 仅预览模式
-3. 无工具栏模式（极简编辑）
-4. 移动端预览模式
+7. 流程图（mermaid）、公式（数学）
+8. 信息面板
 
 ### 功能特性
 
@@ -73,9 +68,16 @@ Cherry Markdown Writer 是一款 Javascript Markdown 编辑器，具有开箱即
 2. 经典换行与常规换行支持
 3. 多光标编辑
 4. 图片尺寸编辑
-5. 导出为图片或 PDF
-6. 浮动工具栏：在新行行首出现
-7. 气泡工具栏：选中文本时出现
+5. 表格编辑
+6. 根据表格内容生成图表（表格 -> 图表）
+7. 导出为图片或 PDF
+8. 浮动工具栏：在新行行首出现
+9. 气泡工具栏：选中文本时出现
+10. 设置快捷键
+11. 悬浮目录
+12. 主题切换
+13. 输入联想
+14. AI Chat场景流式输出场景特别支持
 
 ### 性能特性
 
@@ -110,14 +112,7 @@ npm install cherry-markdown --save
 
 如果需要启用 mermaid 绘图和表格转图表功能，需要同时安装 `mermaid` 与 `echarts`。
 
-目前推荐的插件版本为：`echarts@4.6.0` 与 `mermaid@9.4.3`。
-
-```bash
-# 安装 mermaid，启用 mermaid 绘图功能
-yarn add mermaid@9.4.3
-# 安装 echarts，启用表格转图表功能
-yarn add echarts@4.6.0
-```
+Cherry Markdown 内置了 mermaid，如果希望使用指定版本的 mermaid，可以参考 [wiki](https://github.com/Tencent/cherry-markdown/wiki/%E6%9E%84%E5%BB%BA%E4%BA%A7%E7%89%A9%E4%BB%8B%E7%BB%8D)
 
 ## 快速开始
 
