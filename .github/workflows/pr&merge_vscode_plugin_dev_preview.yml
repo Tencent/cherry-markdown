@@ -1,10 +1,9 @@
 name: PR Merge VscodePlugin Dev Preview
 
 on:
-  pull_request:
-    types: [closed]
-    paths:
-      - 'packages/vscodePlugin/**'
+  push:
+    branches:
+      - develop
 
 permissions:
   contents: read
@@ -71,7 +70,6 @@ jobs:
         run: |
           cd packages/vscodePlugin
           # 仅发布 vscode 插件预览版
-          vsce publish -p $VSCE_PAT --no-dependencies --no-yarn --pre-release
 
       - name: Post Artifact URL to PR
         uses: actions/github-script@v6
