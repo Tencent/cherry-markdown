@@ -1,6 +1,6 @@
-<p align="center"><img src="logo/new_logo.png" alt="cherry logo" width="50%"/></p>
-
 # Cherry Markdown Writer
+
+![cherry logo](logo/new_logo.png)
 
 [![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
 
@@ -280,11 +280,7 @@ registerPlugin().then(() => {
 
 ### 自定义工具栏
 
-cherry 支持五种工具栏位置，如下图所示：
-
-![cherry toolbar positions](https://github.com/Tencent/cherry-markdown/assets/998441/fecbc23c-5e85-4072-9dc5-8c71faa9d700)
-
-每个位置都可以扩展自定义工具按钮，详情见： [自定义工具栏按钮](https://github.com/Tencent/cherry-markdown/wiki/%E8%B0%83%E6%95%B4%E5%B7%A5%E5%85%B7%E6%A0%8F#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B7%A5%E5%85%B7%E6%A0%8F%E6%8C%89%E9%92%AE)
+cherry 支持五种工具栏位置，每个位置都可以扩展自定义工具按钮，详情见： [自定义工具栏按钮](https://github.com/Tencent/cherry-markdown/wiki/%E8%B0%83%E6%95%B4%E5%B7%A5%E5%85%B7%E6%A0%8F#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B7%A5%E5%85%B7%E6%A0%8F%E6%8C%89%E9%92%AE)。
 
 ## 单元测试
 
@@ -301,6 +297,6 @@ cherry 支持五种工具栏位置，如下图所示：
   <img src="https://openomy.com/svg?repo=Tencent/cherry-markdown&chart=bubble&latestMonth=3" target="_blank" alt="Contribution Leaderboard" style="display: block; width: 100%;" />
 </a>
 
-## 许可证
+## License
 
 [Apache-2.0](./LICENSE)

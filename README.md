@@ -1,5 +1,3 @@
-<p align="center"><img src="logo/new_logo.png" alt="cherry logo" width="50%"/></p>
-
 # Cherry Markdown Writer
 
 ![cherry logo](logo/new_logo.png)
@@ -282,11 +280,7 @@ See the custom syntax documentation: [Custom syntax docs](https://github.com/Ten
 
 ### Customize Toolbar
 
-Cherry supports five toolbar positions, as shown below:
-
-![cherry toolbar positions](https://github.com/Tencent/cherry-markdown/assets/998441/fecbc23c-5e85-4072-9dc5-8c71faa9d700)
-
-Each position can be extended with custom toolbar buttons. See the toolbar configuration documentation for details: [Customize toolbar buttons](https://github.com/Tencent/cherry-markdown/wiki/%E8%B0%83%E6%95%B4%E5%B7%A5%E5%85%B7%E6%A0%8F#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B7%A5%E5%85%B7%E6%A0%8F%E6%8C%89%E9%92%AE)
+Cherry supports five toolbar positions, each position can be extended with custom toolbar buttons. See the toolbar configuration documentation for details: [Customize toolbar buttons](https://github.com/Tencent/cherry-markdown/wiki/%E8%B0%83%E6%95%B4%E5%B7%A5%E5%85%B7%E6%A0%8F#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B7%A5%E5%85%B7%E6%A0%8F%E6%8C%89%E9%92%AE).
 
 ## Unit Test
 
