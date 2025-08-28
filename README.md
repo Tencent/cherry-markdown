@@ -2,9 +2,11 @@
 
 # Cherry Markdown Writer
 
+![cherry logo](logo/new_logo.png)
+
 [![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
 
-English | [简体中文](./README.CN.md) | [日本語](./README.JP.md)
+English | [简体中文](./README.CN.md)
 
 ## Introduction
 
@@ -16,8 +18,8 @@ Cherry Markdown Writer is a Javascript Markdown editor. It has the advantages su
 - [hello world](https://github.com/Tencent/cherry-markdown/wiki/hello-world)
 - [Configuring Image & File Upload Interfaces](https://github.com/Tencent/cherry-markdown/wiki/%E9%85%8D%E7%BD%AE%E5%9B%BE%E7%89%87&%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E6%8E%A5%E5%8F%A3)
 - [Adjusting the Toolbar](https://github.com/Tencent/cherry-markdown/wiki/%E8%B0%83%E6%95%B4%E5%B7%A5%E5%85%B7%E6%A0%8F)
-- [Custom Syntax](https://github.com/Tencent/cherry-markdown/wiki/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E6%B3%95)
 - [Comprehensive Configuration Options](https://github.com/Tencent/cherry-markdown/wiki/%E9%85%8D%E7%BD%AE%E9%A1%B9%E5%85%A8%E8%A7%A3)
+- [Custom Syntax](https://github.com/Tencent/cherry-markdown/wiki/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E6%B3%95)
 - [Configuring Themes](https://github.com/Tencent/cherry-markdown/wiki/%E9%85%8D%E7%BD%AE%E4%B8%BB%E9%A2%98)
 - [Extending Code Block Syntax](https://github.com/Tencent/cherry-markdown/wiki/%E6%89%A9%E5%B1%95%E4%BB%A3%E7%A0%81%E5%9D%97%E8%AF%AD%E6%B3%95)
 - [Events & Callbacks](https://github.com/Tencent/cherry-markdown/wiki/%E4%BA%8B%E4%BB%B6&%E5%9B%9E%E8%B0%83)
@@ -31,7 +33,7 @@ Cherry Markdown Writer is a Javascript Markdown editor. It has the advantages su
 - [Multiple Instances](https://tencent.github.io/cherry-markdown/examples/multiple.html)
 - [Editor Without Toolbar](https://tencent.github.io/cherry-markdown/examples/notoolbar.html)
 - [Pure Preview](https://tencent.github.io/cherry-markdown/examples/preview_only.html)
-- [XSS](https://tencent.github.io/cherry-markdown/examples/xss.html)（Not allowed by default）
+- [XSS](https://tencent.github.io/cherry-markdown/examples/xss.html) (Disabled by default; requires configuration to enable XSS)
 - [IMG WYSIWYG](https://tencent.github.io/cherry-markdown/examples/img.html)
 - [Table WYSIWYG](https://tencent.github.io/cherry-markdown/examples/table.html)
 - [Headers with Auto Num](https://tencent.github.io/cherry-markdown/examples/head_num.html)
@@ -92,7 +94,7 @@ Cherry Markdown has a variety of style themes to choose from.
 
 ### Features Showcase
 
-Click to view feature demonstration [here](https://github.com/Tencent/cherry-markdown/wiki/%E7%89%B9%E6%80%A7%E5%B1%95%E7%A4%BA-features)
+Click to view the features demonstration [Features demo](https://github.com/Tencent/cherry-markdown/wiki/%E7%89%B9%E6%80%A7%E5%B1%95%E7%A4%BA-features)
 
 ## Install
 
@@ -208,6 +210,31 @@ const cherryInstance = new Cherry({
 });
 ```
 
+From mermaid v10.0.0, the rendering logic changed from synchronous to asynchronous. After `afterChange` or `afterInit` events, mermaid code blocks are rendered as placeholders first, then rendered asynchronously and replaced.
+
+If you need to get the content after asynchronous rendering is finished, you can use the following example:
+
+```js
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+  // Use a template string to include the mermaid code block directly
+  value: `
+    ```mermaid
+    graph LR
+        A[Company] -->| Off work | B(Market)
+        B --> C{See<br>melon seller}
+        C -->|Yes| D[Buy a bun]
+        C -->|No| E[Buy one pound of buns]
+    ```
+  `,
+  callback: {
+    afterAsyncRender: (md, html) => {
+      // md is the markdown source, html is the rendered result
+    }
+  }
+});
+```
+
 ### Dynamic import
 
 **recommend** Using Dynamic import, the following is an example of webpack Dynamic import.
@@ -245,48 +272,25 @@ Click [here](https://github.com/Tencent/cherry-markdown/wiki) for more examples.
 
 ### Client
 
-Under development, please stay tuned or see `/client/`
+Under development, please stay tuned or see `/packages/client/`
 
 ## Extension
 
 ### Customize Syntax
 
-click [here](https://github.com/Tencent/cherry-markdown/wiki/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E6%B3%95)
+See the custom syntax documentation: [Custom syntax docs](https://github.com/Tencent/cherry-markdown/wiki/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E6%B3%95)
 
 ### Customize Toolbar
 
-click [here](https://github.com/Tencent/cherry-markdown/wiki/%E8%B0%83%E6%95%B4%E5%B7%A5%E5%85%B7%E6%A0%8F)
+Cherry supports five toolbar positions, as shown below:
+
+![cherry toolbar positions](https://github.com/Tencent/cherry-markdown/assets/998441/fecbc23c-5e85-4072-9dc5-8c71faa9d700)
+
+Each position can be extended with custom toolbar buttons. See the toolbar configuration documentation for details: [Customize toolbar buttons](https://github.com/Tencent/cherry-markdown/wiki/%E8%B0%83%E6%95%B4%E5%B7%A5%E5%85%B7%E6%A0%8F#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B7%A5%E5%85%B7%E6%A0%8F%E6%8C%89%E9%92%AE)
 
 ## Unit Test
 
-Jest is selected as a unit testing tool for its assertion, asynchronous support and snapshot. Unit test includes CommonMark test and snapshot test.
-
-### CommonMark Test
-
-Call `yarn run test:commonmark` to test the official CommonMark suites. This command runs fast.
-
-Suites are located in `test/suites/commonmark.spec.json`, for example:
-
-```json
-{
-  "markdown": " \tfoo\tbaz\t\tbim\n",
-  "html": "<pre><code>foo\tbaz\t\tbim\n</code></pre>\n",
-  "example": 2,
-  "start_line": 363,
-  "end_line": 368,
-  "section": "Tabs"
-},
-```
-
-In this case, Jest will compare the html generated by `Cherry.makeHtml(" \tfoo\tbaz\t\tbim\n")` with the expected result `"<pre><code>foo\tbaz\t \tbim\n</code></pre>\n"`. Cherry Markdown's matcher has ignored private attributes like `data-line`.
-
-CommonMark specifications and suites are from: [commonmark.org](https://spec.commonmark.org/).
-
-### Snapshot Test
-
-Call `yarn run test:snapshot` to run snapshot test. You can write snapshot suite like `test/core/hooks/List.spec.ts`. At the first time, a snapshot will be automatically generated. After that, Jest can compare the snapshot with the generated HTML. If you need to regenerate a snapshot, delete the old snapshot under `test/core/hooks/__snapshots__` and run this command again.
-
-Snapshot test runs slower. It should only be used to test Hooks that are error-prone and contain Cherry Markdown special syntax.
+`Vitest` has been added as a basic configuration, but the related test cases have not been fully tested. Welcome to submit rich test cases.
 
 ## Contribution Guidelines
 
