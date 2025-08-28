@@ -212,7 +212,7 @@ From mermaid v10.0.0, the rendering logic changed from synchronous to asynchrono
 
 If you need to get the content after asynchronous rendering is finished, you can use the following example:
 
-```js
+````js
 const cherryInstance = new Cherry({
   id: 'markdown-container',
   // Use a template string to include the mermaid code block directly
@@ -231,7 +231,7 @@ const cherryInstance = new Cherry({
     }
   }
 });
-```
+````
 
 ### Dynamic import
 
