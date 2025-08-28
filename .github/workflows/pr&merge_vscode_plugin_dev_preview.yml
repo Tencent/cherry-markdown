@@ -57,6 +57,12 @@ jobs:
           tmp=$(mktemp) && jq '.dependencies["cherry-markdown-core"] = .dependencies["cherry-markdown"] | del(.dependencies["cherry-markdown"])' package.json > "$tmp" && mv "$tmp" package.json
           tmp=$(mktemp) && jq '.name = "cherry-markdown"' package.json > "$tmp" && mv "$tmp" package.json
 
+      - name: cat package.json
+        run: |
+          cat package.json
+          cat packages/cherry-markdown/package.json
+          cat packages/vscodePlugin/package.json
+
       - name: Install and Build Dependencies
         run: |
           yarn global add vsce
