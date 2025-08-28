@@ -908,8 +908,10 @@ export default class TableHandler {
    */
   $addNextRow() {
     const [, { line }] = this.tableEditor.info.selection;
-    const newRow = `${'|'.repeat(this.tableEditor.info.columns)}\n`;
-    this.codeMirror.replaceRange(newRow, { line: line + 1, ch: 0 });
+    const { isTHead, columns } = this.tableEditor.info;
+    const newRow = `${'|'.repeat(columns)}\n`;
+    const insertLine = isTHead ? line + 2 : line + 1;
+    this.codeMirror.replaceRange(newRow, { line: insertLine, ch: 0 });
     this.$findTableInEditor();
     this.$setSelection(this.tableEditor.info.tableIndex, 'td');
   }
