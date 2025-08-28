@@ -1,4 +1,4 @@
-name: PR Merge VscodePlugin Dev Preview
+name: 'Publish VscodePlugin Dev Preview on PR Merge'
 
 on:
   pull_request:
@@ -13,22 +13,20 @@ permissions:
   issues: write
 
 jobs:
-  vscodePlugin-preview:
+  vscode-plugin-preview:
     # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
-    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true
+    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '20.x'
           cache: 'yarn'
 
-      - name: Change Package Files
+      - name: Prepare package.json for VSCode Plugin Preview
         run: |
 
           tmp=$(mktemp) && jq '.scripts["build"] = "yarn workspace cherry-markdown-core build" | .scripts["build:vscodePlugin"] = "yarn workspace cherry-markdown build"' package.json > "$tmp" && mv "$tmp" package.json
@@ -65,16 +63,16 @@ jobs:
           yarn build
           yarn build:vscodePlugin
 
-      - name: Publish VSCode Plugin PRE RELEASE
+      - name: Publish VSCode Plugin Preview
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
           cd packages/vscodePlugin
-          # 仅发布 vscode 插件预览版
+          # 发布 vscode 插件预览版
           vsce publish -p $VSCE_PAT --no-dependencies --no-yarn --pre-release
 
-      - name: Post Artifact URL to PR
-        uses: actions/github-script@v6
+      - name: Comment on PR with VSCode Plugin Preview Info
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -82,6 +80,6 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🔌 预览 (Preview): 体验 Cherry Markdown 预览版 [see: prerelease-extensions](https://code.visualstudio.com/api/working-with-extensions/publishing-extension?from_column=20423&from=20423#prerelease-extensions)`
+              body: `🔌 Preview Cherry Markdown Extensions [see: prerelease-extensions](https://code.visualstudio.com/api/working-with-extensions/publishing-extension?from_column=20423&from=20423#prerelease-extensions)`
             });
 
