@@ -3,7 +3,7 @@ name: PR Merge VscodePlugin Dev Preview
 on:
   push:
     branches:
-      - develop
+      - dev
 
 permissions:
   contents: read
