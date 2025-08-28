@@ -456,6 +456,14 @@
         white-space: nowrap;
         background-color: var(--md-inline-code-bg);
       }
+      .cherry-table-drag-bar{
+        top: 0;
+        right: 0;
+        width: 3px;
+        height: 100%;
+        background-color: var(--md-table-side-border-solid);
+        cursor: col-resize;
+      }
     }
   }
 
