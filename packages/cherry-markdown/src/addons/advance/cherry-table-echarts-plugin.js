@@ -19,13 +19,10 @@ import Logger from '@/Logger';
 // 主题与常量集中管理
 const THEME = {
   color: {
-    border: '#999',
-    borderHover: '#666',
-    text: '#333',
-    tooltipText: '#333',
+    tooltipTextLight: '#333',
     tooltipTextDark: '#ddd',
     emphasis: '#ff6b6b',
-    lineSplit: '#eee',
+    error: '#ff4d4f',
   },
   shadow: {
     color: 'rgba(0, 0, 0, 0.5)',
@@ -399,7 +396,7 @@ export default class EChartsTableEngine {
         border,
         borderHover: border,
         text,
-        tooltipText: isDarkLike ? THEME.color.tooltipTextDark : THEME.color.tooltipText,
+        tooltipText: isDarkLike ? THEME.color.tooltipTextDark : THEME.color.tooltipTextLight,
         lineSplit: split,
         backgroundColor: bg,
         tooltipBg: isDarkLike ? bg : 'white',
@@ -408,6 +405,8 @@ export default class EChartsTableEngine {
       shadow: { ...THEME.shadow },
       fontSize: { ...THEME.fontSize },
     };
+
+    mergeWith(runtime, THEME);
 
     // 设置当前运行时主题与缓存
     this.themeRuntime = runtime;
@@ -418,7 +417,7 @@ export default class EChartsTableEngine {
    * 获取当前运行时主题
    */
   $theme() {
-    return this.themeRuntime || THEME;
+    return this.themeRuntime;
   }
 
   /**
@@ -608,9 +607,9 @@ export default class EChartsTableEngine {
         Logger.error('Failed to render chart:', error);
         Logger.error('Chart options:', chartOption);
         Logger.error('Container:', container);
-        container.innerHTML = `<div style="text-align: center; line-height: 300px; color: red;">
-          图表渲染失败<br/>
-          <span style="font-size: 12px; color: #666;">错误: ${error.message}</span>
+        container.innerHTML = `<div style="text-align: center; color: red; transform: translateY(125px);">
+          <div style="font-size: ${this.$theme().fontSize.title}px; color: ${this.$theme().color.error};">${this.cherry.locale.chartRenderError}</div>
+          <div style="font-size: ${this.$theme().fontSize.base}px; color: ${this.$theme().color.text}; opacity: 0.7;">${error.message}</div>
         </div>`;
       }
       this.cleanupInvalidInstances();
@@ -812,14 +811,12 @@ const AxisOptionsHandler = {
         data: tableObject.header.slice(1),
         axisTick: { alignWithLabel: true },
         axisLabel: {
-          textStyle: { color: engine.$theme().color.text },
           rotate: tableObject.header.slice(1).some((h) => h.length > 4) ? 45 : 0,
           interval: 0,
         },
       }),
       yAxis: engine.$axis('value', {
         axisLabel: {
-          textStyle: { color: engine.$theme().color.text },
           formatter(value) {
             if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
             if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
@@ -1275,9 +1272,8 @@ const SankeyChartOptionsHandler = {
 
     // 转换节点集合
     const nodeArray = Array.from(nodes).map((name) => ({ name }));
-    console.log('nodeArray', nodeArray);
 
-    const res = {
+    return {
       tooltip: {
         trigger: 'item',
       },
@@ -1304,8 +1300,6 @@ const SankeyChartOptionsHandler = {
       ],
       color: engine.$palette('sankey'),
     };
-    console.log('res', res);
-    return res;
   },
 };
 
@@ -1318,9 +1312,9 @@ const MapChartLoadingOptionsHandler = {
     return typeof window.echarts === 'undefined'
       ? {
           title: {
-            text: `${engine.cherry.locale.mapRenderError} : ${engine.cherry.locale.mapRenderErrorTip}`,
+            text: `${engine.cherry.locale.chartRenderError} : ${engine.cherry.locale.chartLibraryNotLoadedTip}`,
             left: 'center',
-            textStyle: { color: '#ff0000' },
+            textStyle: { color: engine.$theme().color.error },
           },
         }
       : {
@@ -1389,7 +1383,7 @@ const MapChartCompleteOptionsHandler = {
               fontSize: engine.$theme().fontSize.base,
               fontWeight: 'bold',
             },
-            itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' },
+            itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: engine.$theme().shadow.color },
           },
         },
       ],
@@ -1408,7 +1402,7 @@ const MapChartFailureOptionsHandler = {
         top: '40%',
         textStyle: {
           fontSize: engine.$theme().fontSize.title,
-          color: engine.$theme().color.text,
+          color: engine.$theme().color.error,
         },
         subtextStyle: {
           fontSize: engine.$theme().fontSize.base,
@@ -1428,7 +1422,8 @@ const MapChartFailureOptionsHandler = {
         },
         onclick: () => {
           const container = document.querySelector(`[id="${options.chartId}"][data-chart-type="map"]`);
-          MapChartOptionsHandler.$showMapLoadingChart(container, options);
+          // 显示加载状态的图表
+          MapChartOptionsHandler.$showChartWithHandler(container, options, MapChartLoadingOptionsHandler);
           MapChartOptionsHandler.$loadMapData(null, options);
         },
       },
@@ -1538,31 +1533,25 @@ const MapChartOptionsHandler = {
       const container = document.querySelector(`[id="${options.chartId}"][data-chart-type="map"]`);
       if (container) {
         container.setAttribute('data-map-status', 'failed'); // 标记加载失败状态
-        this.$showMapErrorChart(container, options);
+        // 显示错误状态的图表
+        this.$showChartWithHandler(container, options, MapChartFailureOptionsHandler);
       }
     }
   },
-  $showMapLoadingChart(container, options) {
-    // 显示加载状态的图表
+  /**
+   * 通用图表状态显示方法
+   * @param {Element} container 容器元素
+   * @param {Object} options 配置选项
+   * @param {Object} handler 选项处理器
+   */
+  $showChartWithHandler(container, options, handler) {
     if (options.engine && options.engine.echartsRef) {
-      const loadingOption = generateOptions(MapChartLoadingOptionsHandler, null, options);
+      const chartOption = generateOptions(handler, null, options);
       const existingChart = options.engine.echartsRef.getInstanceByDom(container);
       if (existingChart) {
-        existingChart.setOption(loadingOption, true);
+        existingChart.setOption(chartOption, true);
       } else {
-        options.engine.createChart(container, loadingOption, 'map');
-      }
-    }
-  },
-  $showMapErrorChart(container, options) {
-    // 显示错误状态的图表
-    if (options.engine && options.engine.echartsRef) {
-      const errorOption = generateOptions(MapChartFailureOptionsHandler, null, options);
-      const existingChart = options.engine.echartsRef.getInstanceByDom(container);
-      if (existingChart) {
-        existingChart.setOption(errorOption, true);
-      } else {
-        options.engine.createChart(container, errorOption, 'map');
+        options.engine.createChart(container, chartOption, 'map');
       }
     }
   },
