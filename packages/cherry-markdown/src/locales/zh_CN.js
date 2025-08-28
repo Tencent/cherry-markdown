@@ -54,6 +54,7 @@ export default {
   radarTable: '雷达图', // 雷达表格
   mapTable: '地图', // 地图表格
   heatmapTable: '热力图', // 热力图表格
+  sankeyTable: '桑基图', // 桑基图表格
   pieTable: '饼图', // 饼图表格
   proTable: '图表', // 图表表格
   formula: '公式', // 公式
@@ -187,4 +188,21 @@ export default {
   edit: '编辑',
   save: '保存',
   cancel: '取消',
+  saveAsImage: '保存为图片',
+  mapChartLoading: '正在加载地图数据',
+  mapChartLoadingTip: '如果长时间未显示，请检查网络连接',
+  mapChartError: '地图数据加载失败',
+  mapChartErrorTip: '请检查数据源或网络链接',
+  mapChartRetry: '点击重新加载',
+  chartRenderError: '图表渲染失败',
+  chartLibraryNotLoadedTip: 'ECharts 图表库未加载',
+  radarData: '雷达图数据',
+  scatterData: '散点数据',
+  pieData: '数据分布',
+  heatmapData: '热力图数据',
+  mapData: '地图数据',
+  maxValue: '最大值',
+  minValue: '最小值',
+  high: '高',
+  low: '低',
 };

@@ -31,6 +31,7 @@ export default class ProTable extends MenuBase {
       { iconName: 'insertHeatmapChart', name: 'heatmapTable', onclick: this.bindSubClick.bind(this, 'heatmapTable') },
       { iconName: 'insertScatterChart', name: 'scatterTable', onclick: this.bindSubClick.bind(this, 'scatterTable') },
       { iconName: 'insertPieChart', name: 'pieTable', onclick: this.bindSubClick.bind(this, 'pieTable') },
+      { iconName: 'insertSankeyChart', name: 'sankeyTable', onclick: this.bindSubClick.bind(this, 'sankeyTable') },
     ];
   }
 
@@ -76,6 +77,8 @@ export default class ProTable extends MenuBase {
         return this.insertPieTable(selection);
       case 'scatterTable':
         return this.insertScatterTable(selection);
+      case 'sankeyTable':
+        return this.insertSankeyTable(selection);
       default:
         return this.insertLineTable(selection);
     }
@@ -86,7 +89,7 @@ export default class ProTable extends MenuBase {
    */
   insertLineTable(selection) {
     return `${selection}\n\n${[
-      '| :line: {"title": "折线图"} | a | b | c |',
+      `| :line: {"title": "${this.$cherry.locale.lineTable}"} | a | b | c |`,
       '| :-: | :-: | :-: | :-: |',
       '| x | 1 | 2 | 3 |',
       '| y | 2 | 4 | 6 |',
@@ -99,7 +102,7 @@ export default class ProTable extends MenuBase {
    */
   insertBarTable(selection) {
     return `${selection}\n\n${[
-      '| :bar: {"title": "柱状图"} | a | b | c |',
+      `| :bar: {"title": "${this.$cherry.locale.barTable}"} | a | b | c |`,
       '| :-: | :-: | :-: | :-: |',
       '| x | 1 | 2 | 3 |',
       '| y | 2 | 4 | 6 |',
@@ -112,7 +115,7 @@ export default class ProTable extends MenuBase {
    */
   insertRadarTable(selection) {
     return `${selection}\n\n${[
-      '| :radar: {"title": "雷达图"} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |',
+      `| :radar: {"title": "${this.$cherry.locale.radarTable}"} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |`,
       '| :-: | :-: | :-: | :-: | :-: | :-: |',
       '| 用户A | 90 | 85 | 75 | 80 | 88 |',
       '| 用户B | 75 | 90 | 88 | 85 | 78 |',
@@ -125,7 +128,7 @@ export default class ProTable extends MenuBase {
    */
   insertMapTable(selection) {
     return `${selection}\n\n${[
-      '| :map:{"title": "地图", "mapDataSource": "https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json"} | 数值 |',
+      `| :map:{"title": "${this.$cherry.locale.mapTable}", "mapDataSource": "https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json"} | 数值 |`,
       '| :-: | :-: |',
       '| 北京 | 120 |',
       '| 上海 | 280 |',
@@ -141,7 +144,7 @@ export default class ProTable extends MenuBase {
    */
   insertHeatmapTable(selection) {
     return `${selection}\n\n${[
-      '| :heatmap:{"title": "热力图"} | 周一 | 周二 | 周三 | 周四 | 周五 |',
+      `| :heatmap:{"title": "${this.$cherry.locale.heatmapTable}"} | 周一 | 周二 | 周三 | 周四 | 周五 |`,
       '| :-: | :-: | :-: | :-: | :-: | :-: |',
       '| 9:00 | 10 | 15 | 8 | 12 | 20 |',
       '| 12:00 | 25 | 30 | 18 | 22 | 35 |',
@@ -155,7 +158,7 @@ export default class ProTable extends MenuBase {
    */
   insertPieTable(selection) {
     return `${selection}\n\n${[
-      '| :pie:{"title": "饼图"} | 数值 |',
+      `| :pie:{"title": "${this.$cherry.locale.pieTable}"} | 数值 |`,
       '| :-: | :-: |',
       '| 苹果 | 35 |',
       '| 香蕉 | 25 |',
@@ -170,7 +173,7 @@ export default class ProTable extends MenuBase {
    */
   insertScatterTable(selection) {
     return `${selection}\n\n${[
-      '| :scatter: {"title":"散点图","cherry:mapping": {"x": "X", "y": "Y", "size": "Size", "series": "Series"}} | X | Y | Size | Series |',
+      `| :scatter:{"title": "${this.$cherry.locale.scatterTable}"} | X | Y | Size | Series |`,
       '| :-: | :-: | :-: | :-: | :-: |',
       '| A1 | 10 | 20 | 5 | S1 |',
       '| A2 | 15 | 35 | 8 | S1 |',
@@ -178,6 +181,22 @@ export default class ProTable extends MenuBase {
       '| B2 | 25 | 28 | 6 | S2 |',
       '| C1 | 50 | 40 | 9 | S3 |',
       '| C2 | 60 | 55 | 7 | S3 |',
+    ].join('\n')}\n\n`;
+  }
+
+  /**
+   * 插入桑基图表格
+   */
+  insertSankeyTable(selection) {
+    return `${selection}\n\n${[
+      `| :sankey:{"title": "${this.$cherry.locale.sankeyTable || '桑基图'}"} | Target | Value |`,
+      '| :-: | :-: | :-: |',
+      '| A | A1 | 5 |',
+      '| A | A2 | 3 |',
+      '| B | B1 | 8 |',
+      '| A | B1 | 3 |',
+      '| B1 | A1 | 1 |',
+      '| B1 | C | 2 |',
     ].join('\n')}\n\n`;
   }
 }
