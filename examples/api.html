@@ -78,9 +78,24 @@
       <h2 class="one-api__name">setMarkdown(content:string, keepCursor = false)</h2>
       <p class="one-api__desc">设置内容，setValue(content:string, keepCursor = false)有同样的功能<br>keepCursor = true 更新内容的时候保持光标位置</p>
       <div class="one-api__try">
-        <textarea id="setMarkdown" placeholder="输入内容">
-cherryObj.setMarkdown("输入内容");
-setTimeout(()=>{cherryObj.setMarkdown("输11111111111内容3223",1);},5000);
+        <textarea id="setMarkdown" placeholder="输入内容" rows="20">
+cherryObj.setMarkdown("输入内容\n5秒后会随机插入新内容，期间可以**继续输入**，文档内容更新时，光标相对位置不变");
+// 在字符串随机位置插入字符
+function insertStr(str) {
+  const md = cherryObj.getValue();
+  const index = Math.floor(Math.random() * md.length);
+  return md.slice(0, index) + str + md.slice(index);
+}
+setTimeout(() => cherryObj.setMarkdown(cherryObj.getValue().replace('5秒', '4秒'), 1), 1000);
+setTimeout(() => cherryObj.setMarkdown(cherryObj.getValue().replace('4秒', '3秒'), 1), 2000);
+setTimeout(() => cherryObj.setMarkdown(cherryObj.getValue().replace('3秒', '2秒'), 1), 3000);
+setTimeout(() => cherryObj.setMarkdown(cherryObj.getValue().replace('2秒', '1秒'), 1), 4000);
+setTimeout(() => cherryObj.setMarkdown(cherryObj.getValue().replace('1秒后会', '开始'), 1), 5000);
+setTimeout(() => cherryObj.setMarkdown(insertStr(' hello '), 1), 5000);
+setTimeout(() => cherryObj.setMarkdown(insertStr(' `world` '), 1), 6000);
+setTimeout(() => cherryObj.setMarkdown(insertStr(' hello '), 1), 7000);
+setTimeout(() => cherryObj.setMarkdown(insertStr(' \n# 测试\n '), 1), 8000);
+setTimeout(() => cherryObj.setMarkdown(insertStr(' \n| Header | Header | Header |\n| ------ | ------ | ------ |\n| Sample | Sample | Sample |\n| Sample | Sample | Sample |\n '), 1), 9000);
 </textarea>
         <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
       </div>
