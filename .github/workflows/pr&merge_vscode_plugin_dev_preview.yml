@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '20.x'
           cache: 'yarn'
 
       - name: Change Package Files
@@ -75,7 +75,7 @@ jobs:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
           cd packages/vscodePlugin
-          # 仅发布 vscode 插件预览版
+          # 仅发布 vscode 插件预览版·
 
       - name: Post Artifact URL to PR
         uses: actions/github-script@v6
