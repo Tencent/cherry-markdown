@@ -582,8 +582,29 @@ export default class EChartsTableEngine {
     const chartOption = this.$generateChartOptions(type, tableObject, options);
     // Logger.log('Chart options:', chartOption);
 
+    // HTML样式配置
+    const styleConfig = {
+      width: `${this.options.width}px`,
+      height: `${this.options.height}px`,
+      'min-height': '300px',
+      display: 'block',
+      position: 'relative',
+      border: '1px solid var(--md-table-border)',
+    };
+    const styleStr = Object.entries(styleConfig)
+      .map(([key, value]) => `${key}: ${value};`)
+      .join(' ');
+
     // 创建一个包含所有必要信息的HTML结构
-    const htmlContent = `<div class="cherry-echarts-wrapper" style="width: ${this.options.width}px; height: ${this.options.height}px; min-height: 300px; display: block; position: relative; border: 1px solid var(--md-table-border);" id="${chartId}" data-chart-type="${type}" data-table-data="${tableDataStr.replace(/"/g, '&quot;')}" data-chart-options="${chartOptionsStr.replace(/"/g, '&quot;')}"></div>`;
+    const htmlContent = [
+      `<div class="cherry-echarts-wrapper"`,
+      ` style="${styleStr}"`,
+      ` id="${chartId}"`,
+      ` data-chart-type="${type}"`,
+      ` data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"`,
+      ` data-chart-options="${chartOptionsStr.replace(/"/g, '&quot;')}">`,
+      `</div>`,
+    ].join('');
 
     // 延迟到下一轮事件循环再执行；只重试一次
     setTimeout(() => {
