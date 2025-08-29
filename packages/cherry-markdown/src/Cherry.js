@@ -497,8 +497,9 @@ export default class Cherry extends CherryStatic {
    */
   setValue(content, keepCursor = false) {
     if (keepCursor === false) {
-      return this.editor.editor.setValue(content);
+      this.editor.editor.setValue(content);
     }
+    const { top } = this.editor.editor.getScrollInfo();
     const codemirror = this.editor.editor;
     const old = this.getValue();
     const pos = codemirror.getDoc().indexFromPos(codemirror.getCursor());
@@ -507,6 +508,7 @@ export default class Cherry extends CherryStatic {
     const cursor = codemirror.getDoc().posFromIndex(newPos);
     codemirror.setCursor(cursor);
     this.editor.dealSpecialWords();
+    this.editor.editor.scrollTo(null, top);
   }
 
   /**
