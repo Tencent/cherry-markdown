@@ -1,4 +1,4 @@
-name: PR Merge Client Dev Preview
+name: 'Publish Client Dev Preview on PR Merge'
 
 on:
   pull_request_target:
@@ -14,7 +14,7 @@ permissions:
 jobs:
   client-preview:
     # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
-    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true
+    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
