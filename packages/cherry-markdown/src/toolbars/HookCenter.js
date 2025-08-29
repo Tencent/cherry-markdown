@@ -56,10 +56,6 @@ import Formula from './hooks/Formula';
 import Link from './hooks/Link';
 import Table from './hooks/Table';
 import Toc from './hooks/Toc';
-import LineTable from './hooks/LineTable';
-import BarTable from './hooks/BarTable';
-import RadarTable from './hooks/RadarTable';
-import MapTable from './hooks/MapTable';
 import ProTable from './hooks/ProTable';
 import Pdf from './hooks/Pdf';
 import File from './hooks/File';
@@ -127,10 +123,6 @@ const HookList = {
   link: Link,
   table: Table,
   toc: Toc,
-  lineTable: LineTable,
-  barTable: BarTable,
-  radarTable: RadarTable,
-  mapTable: MapTable,
   proTable: ProTable,
   pdf: Pdf,
   word: Word,

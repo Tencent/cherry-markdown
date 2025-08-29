@@ -9,6 +9,7 @@ import {
   isEnableShortcutKey,
   setDisableShortcutKey,
   storageKeyMap,
+  clearStorageKeyMap,
 } from '@/utils/shortcutKey';
 import { createElement } from '@/utils/dom';
 
@@ -163,6 +164,7 @@ export default class ShortcutKeyConfigPanel {
       this.dom.innerHTML = this.generateShortcutKeyConfigPanelHtmlStr();
       this.show();
       this.updateTipText(this.activeTab === 'static' ? 'static' : 'default');
+      clearStorageKeyMap(this.$cherry.nameSpace);
     };
 
     this.init();

@@ -49,12 +49,13 @@ export default {
   'bar-table': '柱状表格', // 柱状表格
   'radar-table': '雷达表格', // 雷达表格
   'map-table': '地图表格', // 地图表格
-  lineTable: '折线表格', // 折线表格
-  barTable: '柱状表格', // 柱状表格
-  radarTable: '雷达表格', // 雷达表格
-  mapTable: '地图表格', // 地图表格
-  heatmapTable: '热力图表格', // 热力图表格
-  pieTable: '饼图表格', // 饼图表格
+  lineTable: '折线图', // 折线表格
+  barTable: '柱状图', // 柱状表格
+  radarTable: '雷达图', // 雷达表格
+  mapTable: '地图', // 地图表格
+  heatmapTable: '热力图', // 热力图表格
+  sankeyTable: '桑基图', // 桑基图表格
+  pieTable: '饼图', // 饼图表格
   proTable: '图表', // 图表表格
   formula: '公式', // 公式
   insertFormula: '公式', // 公式
@@ -63,6 +64,7 @@ export default {
   insertState: '状态图', // 状态图
   insertClass: '类图', // 类图
   insertPie: '饼图', // 饼图
+  scatterTable: '散点图', // 散点图
   insertGantt: '甘特图', // 甘特图
   checklist: '清单', // 清单
   ol: '有序列表', // 有序列表
@@ -123,6 +125,8 @@ export default {
   detailDefaultContent: '点击展开更多\n内容\n++- 默认展开\n内容\n++ 默认收起\n内容',
   inlineCode: '行内代码',
   codeBlock: '代码块',
+  inlineMath: '行内公式',
+  mathBlock: '块级公式',
   shortcutKeySetting: '快捷键设置',
   editShortcutKeyConfigTip: '双击快捷键区域或点击编辑按钮编辑快捷键',
   editingShortcutKeyConfigTip: '按Enter键保存，Backspace键移除新增的键',
@@ -184,4 +188,21 @@ export default {
   edit: '编辑',
   save: '保存',
   cancel: '取消',
+  saveAsImage: '保存为图片',
+  mapChartLoading: '正在加载地图数据',
+  mapChartLoadingTip: '如果长时间未显示，请检查网络连接',
+  mapChartError: '地图数据加载失败',
+  mapChartErrorTip: '请检查数据源或网络链接',
+  mapChartRetry: '点击重新加载',
+  chartRenderError: '图表渲染失败',
+  chartLibraryNotLoadedTip: 'ECharts 图表库未加载',
+  radarData: '雷达图数据',
+  scatterData: '散点数据',
+  pieData: '数据分布',
+  heatmapData: '热力图数据',
+  mapData: '地图数据',
+  maxValue: '最大值',
+  minValue: '最小值',
+  high: '高',
+  low: '低',
 };

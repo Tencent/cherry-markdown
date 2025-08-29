@@ -1037,6 +1037,19 @@
   }
 }
 
+/* 行内代码颜色小圆点样式 */
+.ch-inline-color {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: 100%;
+  border: var(--primary-color) solid 1px;
+  margin-left: 0.2em;
+  box-sizing: border-box;
+}
+
 .float-previewer-wrap {
   position: fixed;
   right: 0;
