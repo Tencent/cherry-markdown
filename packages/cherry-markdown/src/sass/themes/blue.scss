@@ -43,7 +43,17 @@
   --md-inline-code-bg: var(--oc-violet-1);
   --md-blockquote-bg: var(--oc-violet-1);
   --md-hr-border: var(--oc-indigo-4);
-  --md-table-border: var(--oc-indigo-4);
+  /* ========== table 相关变量 ========== */
+  --md-table-border: var(--oc-blue-5);
+  --md-table-add-border: var(--oc-blue-9);
+  --md-table-delete-bg: var(--oc-violet-1);
+  --md-table-sort-active-bg: var(--oc-blue-5);
+  --md-table-sort-border: var(--oc-indigo-4);
+  /* ========== table 相关变量 ========== */
+  --md-table-border: var(--oc-blue-5);
+  --md-table-side-border-solid: var(--primary-color);
+  --md-table-sort-active-bg: rgba(184, 134, 253, 0.4);
+
   --md-paragraph-highlight-line-bg: var(--oc-violet-1);
 
   /* ========== Panel 相关变量 ========== */

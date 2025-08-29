@@ -53,7 +53,10 @@
   --md-inline-code-bg: #00203d;
   --md-blockquote-bg: #2A2F3B;
   --md-hr-border: var(--primary-color);
+  /* ========== table 相关变量 ========== */
   --md-table-border: var(--oc-blue-5);
+  --md-table-side-border-solid: var(--oc-blue-3);
+  --md-table-sort-active-bg: rgba(100, 203, 255, 0.4);
 
   --md-toc-bg: #2A2F3B;
   --md-toc-title-color: var(--primary-color);
