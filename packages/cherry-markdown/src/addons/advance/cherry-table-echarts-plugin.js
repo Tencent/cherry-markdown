@@ -583,17 +583,7 @@ export default class EChartsTableEngine {
     // Logger.log('Chart options:', chartOption);
 
     // 创建一个包含所有必要信息的HTML结构
-    const htmlContent = `
-      <div class="cherry-echarts-wrapper" 
-           style="width: ${this.options.width}px; height: ${
-             this.options.height
-           }px; min-height: 300px; display: block; position: relative; border: 1px solid var(--md-table-border);" 
-           id="${chartId}"
-           data-chart-type="${type}"
-           data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"
-           data-chart-options="${chartOptionsStr.replace(/"/g, '&quot;')}">
-      </div>
-    `;
+    const htmlContent = `<div class="cherry-echarts-wrapper" style="width: ${this.options.width}px; height: ${this.options.height}px; min-height: 300px; display: block; position: relative; border: 1px solid var(--md-table-border);" id="${chartId}" data-chart-type="${type}" data-table-data="${tableDataStr.replace(/"/g, '&quot;')}" data-chart-options="${chartOptionsStr.replace(/"/g, '&quot;')}"></div>`;
 
     // 延迟到下一轮事件循环再执行；只重试一次
     setTimeout(() => {
