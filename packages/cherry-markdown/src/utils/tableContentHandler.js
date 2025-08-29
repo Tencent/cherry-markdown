@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import { getTableRule, getCodeBlockRule } from '@/utils/regexp';
-
 /**
  * 用于在表格上出现编辑区，并提供拖拽行列的功能
  */
@@ -189,13 +188,14 @@ export default class TableHandler {
     const footnoteReg = /(^|\n)[ \t]*\[\^([^\]]+?)\]:[ \t]*([\s\S]+?)(?=\s*$|\n\n)/g;
     let footnoteMatch;
     while ((footnoteMatch = footnoteReg.exec(editorValue)) !== null) {
-      const start = footnoteMatch.index + footnoteMatch[1].length; // 去掉开头的换行符
+      const start = footnoteMatch.index;
       const end = footnoteMatch.index + footnoteMatch[0].length;
       footnoteRanges.push({
         start,
         end,
         id: footnoteMatch[2],
         content: footnoteMatch[3],
+        fullMatch: footnoteMatch[0], // 完整匹配
       });
     }
 
@@ -274,6 +274,7 @@ export default class TableHandler {
        */
       allTables = footnoteTables;
     }
+
     const rowCells = Array.from(this.target.parentElement.childNodes).filter((child) => {
       // 计算列数
       return child.tagName && (child.tagName.toLowerCase() === 'td' || child.tagName.toLowerCase() === 'th');
@@ -354,8 +355,9 @@ export default class TableHandler {
    * @param {Boolean} isTHead
    * @param {Number} trIndex
    * @param {Number} tdIndex
+   * @param {Boolean} isInBlock
    */
-  $getTdOffset(tableCode, isTHead, trIndex, tdIndex) {
+  $getTdOffset(tableCode, isTHead, trIndex, tdIndex, isInBlock = false) {
     const codes = tableCode.split(/\n/);
     const targetTr = isTHead ? 0 : trIndex + 2;
     const tds = codes[targetTr].split(/\|/);
@@ -683,6 +685,7 @@ export default class TableHandler {
     this.$drawSymbol();
     this.$drawSortSymbol();
     this.$drawDelete();
+    this.$drawColumnResize();
   }
 
   /**
@@ -783,12 +786,104 @@ export default class TableHandler {
         const { type, dir } = target.dataset;
         this[`$add${type}${dir}`]();
       });
+      li.addEventListener('mouseover', (e) => {
+        const { target } = e;
+        if (!(target instanceof HTMLElement)) {
+          return;
+        }
+        const currentRow = this.tableEditor.info.trNode;
+        const { tdIndex } = this.tableEditor.info;
+        const tds = currentRow.querySelectorAll('td');
+        const dataType = target.getAttribute('data-type');
+        const dataDir = target.getAttribute('data-dir');
+        if (dataType === 'Last' && dataDir === 'Row') {
+          tds.forEach((td) => {
+            td.classList.add('table-highlight-border-add-top');
+          });
+        } else if (dataType === 'Next' && dataDir === 'Row') {
+          tds.forEach((td) => {
+            td.classList.add('table-highlight-border-add-bottom');
+          });
+        } else if (dataType === 'Last' && dataDir === 'Col') {
+          this.$hightLightColumnCellsDOM(tdIndex, 'left');
+        } else if (dataType === 'Next' && dataDir === 'Col') {
+          this.$hightLightColumnCellsDOM(tdIndex, 'right');
+        }
+      });
+      // 取消边界
+      li.addEventListener('mouseout', (e) => {
+        this.$clearAllBorders();
+      });
       container.appendChild(li);
     }, true);
     this.tableEditor.editorDom.symbolContainer = container;
     this.container.appendChild(this.tableEditor.editorDom.symbolContainer);
     this.$setSymbolOffset();
   }
+
+  $setBorderForElements(elements, property, value) {
+    elements.forEach((element) => {
+      element.style[property] = value;
+    });
+  }
+
+  /**
+   * 高亮一列的单元格的单边框
+   * @param {number} columnIndex
+   * @param {string} position // left | right | top | bottom
+   * @returns
+   */
+  $hightLightColumnCellsDOM(columnIndex = this.tableEditor.info.tdIndex, position) {
+    // 获取当前操作的表格
+    const table = this.tableEditor.info.tableNode;
+    const rows = table.rows;
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].cells[columnIndex]) {
+        const cell = rows[i].cells[columnIndex];
+        if (position === 'left') {
+          cell.classList.add('table-highlight-border-add-left');
+        } else if (position === 'right') {
+          cell.classList.add('table-highlight-border-add-right');
+        } else if (position === 'top') {
+          cell.classList.add('table-highlight-border-add-top');
+        } else if (position === 'bottom') {
+          cell.classList.add('table-highlight-border-add-bottom');
+        }
+      }
+    }
+  }
+
+  // 清除所有边框
+  $clearAllBorders() {
+    // 添加安全检查
+    if (!this.tableEditor.info || !this.tableEditor.info.trNode || !this.tableEditor.info.tableNode) {
+      return;
+    }
+    const { tableNode, tdIndex } = this.tableEditor.info;
+    const { rows } = tableNode;
+    const currentCell = this.tableEditor.info.trNode;
+    const tds = currentCell.querySelectorAll('td');
+    tds.forEach((td) => {
+      td.classList.remove(
+        'table-highlight-border-add-right',
+        'table-highlight-border-add-left',
+        'table-highlight-border-add-top',
+        'table-highlight-border-add-bottom',
+      );
+    });
+    for (let i = 0; i < rows.length; i++) {
+      const { cells } = rows[i];
+      if (cells[tdIndex]) {
+        cells[tdIndex].classList.remove(
+          'table-highlight-border-add-right',
+          'table-highlight-border-add-left',
+          'table-highlight-border-add-top',
+          'table-highlight-border-add-bottom',
+        );
+      }
+    }
+  }
+
   $drawSortSymbol() {
     // const types = ['RowLeft', 'RowRight', 'ColUp', 'ColDown']; // 不要底部的拖拽按钮了，貌似没啥用
     const types = ['RowLeft', 'RowRight', 'ColUp'];
@@ -806,13 +901,12 @@ export default class TableHandler {
         sortSymbol.addEventListener('mouseover', () => {
           const { tdNode } = this.tableEditor.info;
           tdNode.draggable = true;
-
-          tdNode.parentNode.style.backgroundColor = 'rgb(206,226,248)';
+          tdNode.parentNode.classList.add('table-sort-active');
         });
         sortSymbol.addEventListener('mouseleave', () => {
           const { tdNode } = this.tableEditor.info;
           tdNode.draggable = false;
-          tdNode.parentNode.style.backgroundColor = '';
+          tdNode.parentNode.classList.remove('table-sort-active');
         });
         sortSymbol.addEventListener('mousedown', (e) => {
           this.$setSelection(this.tableEditor.info.tableIndex, 'table');
@@ -835,13 +929,13 @@ export default class TableHandler {
                 highLightTrDom.push(tr);
               });
             });
-          highLightTrDom.forEach((tr) => (tr.children[index].style.backgroundColor = 'rgb(206,226,248)'));
+          highLightTrDom.forEach((tr) => tr.children[index].classList.add('table-sort-active'));
         });
         sortSymbol.addEventListener('mouseleave', () => {
           const { tdNode } = this.tableEditor.info;
           tdNode.draggable = false;
           const index = Array.from(tdNode.parentNode.children).indexOf(tdNode);
-          highLightTrDom.forEach((tr) => (tr.children[index].style.backgroundColor = ''));
+          highLightTrDom.forEach((tr) => tr.children[index].classList.remove('table-sort-active'));
         });
         sortSymbol.addEventListener('mousedown', (e) => {
           this.$setSelection(this.tableEditor.info.tableIndex, 'table');
@@ -854,6 +948,7 @@ export default class TableHandler {
     this.container.appendChild(this.tableEditor.editorDom.sortContainer);
     this.$setSortSymbolsPosition();
   }
+
   $setSortSymbolsPosition() {
     const container = this.tableEditor.editorDom.sortContainer;
     const { tableNode, tdNode, isTHead } = this.tableEditor.info;
@@ -892,6 +987,7 @@ export default class TableHandler {
       }
     });
   }
+
   /**
    * 添加上一行
    */
@@ -989,6 +1085,7 @@ export default class TableHandler {
         if (tdIndex === 0) cells[tdIndex].style.borderLeft = '1px solid red';
         else cells[tdIndex - 1].style.borderRight = '1px solid red';
         cells[tdIndex].style.borderRight = '1px solid red';
+        cells[tdIndex].style.backgroundColor = 'rgba(255, 100, 100, 0.1)';
       }
     }
   }
@@ -1005,6 +1102,7 @@ export default class TableHandler {
         if (cells[tdIndex]) {
           if (tdIndex !== 0) cells[tdIndex - 1].style.border = '';
           cells[tdIndex].style.border = ''; // 恢复原始边框
+          cells[tdIndex].style.backgroundColor = '';
         }
       }
     }
@@ -1014,7 +1112,7 @@ export default class TableHandler {
    * 高亮当前行
    */
   $highlightRow() {
-    this.$doHighlightRow('1px solid red');
+    this.$doHighlightRow('1px solid red', 'rgba(255, 100, 100, 0.1)');
   }
 
   /**
@@ -1024,13 +1122,18 @@ export default class TableHandler {
     this.$doHighlightRow('');
   }
 
-  $doHighlightRow(style = '') {
+  $doHighlightRow(style = '', backgroundColor = '') {
     const { trNode, tableNode } = this.tableEditor.info;
     const tds = trNode.cells;
     const preTds = trNode.previousElementSibling?.cells || tableNode.tHead.firstChild.cells;
     for (let i = 0; i < tds.length; i++) {
       if (preTds[i]) preTds[i].style.borderBottom = style;
       tds[i].style.borderBottom = style;
+      if (backgroundColor) {
+        tds[i].style.backgroundColor = backgroundColor;
+      } else {
+        tds[i].style.backgroundColor = '';
+      }
     }
     tds[0].style.borderLeft = style;
     tds[tds.length - 1].style.borderRight = style;
@@ -1104,9 +1207,9 @@ export default class TableHandler {
           this.setStyle(node, 'display', 'none');
         }
         this.setStyle(node, 'top', `${tdInfo.top - tableInfo.top + tdInfo.height / 2 - node.offsetHeight / 2}px`);
-        this.setStyle(node, `${type}`, `-${node.offsetWidth + 5}px`);
+        this.setStyle(node, `${type}`, `-${node.offsetWidth}px`);
       } else {
-        this.setStyle(node, `${type}`, `-${offset.outer}px`);
+        this.setStyle(node, `${type}`, `-${offset.outer + 5}px`);
         this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
       }
     });
@@ -1177,6 +1280,84 @@ export default class TableHandler {
   }
 
   /**
+   * 绘制列宽调整
+   * @returns void
+   */
+  $drawColumnResize() {
+    const { tableNode } = this.tableEditor.info;
+    const box = this.tableEditor.info.tdNode;
+    const columns = this.tableEditor.info.columns;
+
+    if (!box) return; // 安全检查
+
+    let isDragging = false;
+    let startX = 0;
+    let startWidth = 0;
+
+    // 检查是否已有 dragBar，避免重复创建
+    const existingDragBar = box.querySelector('.cherry-table-drag-bar');
+    if (existingDragBar) return;
+
+    // 设置定位
+    box.style.position = 'relative';
+    // 创建 dragBar
+    const dragBar = document.createElement('div');
+    dragBar.className = 'cherry-table-drag-bar';
+    dragBar.style.position = 'absolute';
+    box.appendChild(dragBar);
+
+    box.addEventListener('mouseleave', () => {
+      if (!isDragging) cleanup(); // 没拖拽，就清理
+    });
+    // mousedown 拖拽开始
+    const handleMouseDown = (e) => {
+      isDragging = true;
+      startX = e.clientX;
+
+      startWidth = box.offsetWidth;
+      e.preventDefault();
+
+      // 立即绑定事件
+      document.addEventListener('mousemove', handleMouseMove, true);
+      document.addEventListener('mouseup', handleMouseUp, true);
+      document.addEventListener('mouseleave', handleMouseLeave, true);
+    };
+    // 移动
+    const handleMouseMove = (e) => {
+      if (!isDragging) return;
+      const delta = e.clientX - startX;
+      const width = Math.max(50, startWidth + delta); // 最小宽度 50px
+
+      box.style.width = `${width}px`;
+      // 更新表格总宽度
+      tableNode.style.width = `${width * columns}px`;
+    };
+    // 鼠标释放
+    const handleMouseUp = (e) => {
+      if (isDragging) {
+        isDragging = false;
+        cleanup();
+      }
+    };
+
+    const handleMouseLeave = (e) => {
+      if (isDragging && e.clientY <= 0) {
+        // 鼠标移出窗口（顶部以上），视为取消
+        cleanup();
+      }
+    };
+
+    // 清理函数：统一处理资源释放
+    const cleanup = () => {
+      document.removeEventListener('mousemove', handleMouseMove, true);
+      document.removeEventListener('mouseup', handleMouseUp, true);
+      document.removeEventListener('mouseleave', handleMouseLeave, true);
+      dragBar?.remove(); // 移除 dragBar
+    };
+
+    dragBar.addEventListener('mousedown', handleMouseDown);
+  }
+  /**
    * 拖拽列
    */
   $dragCol() {
@@ -1189,6 +1370,7 @@ export default class TableHandler {
 
     function handleDragLeave(event) {
       that.setStyle(event.target, 'border', '1px solid #dfe6ee');
+      that.$clearAllBorders();
     }
 
     function handleDragOver(event) {
@@ -1211,9 +1393,9 @@ export default class TableHandler {
       const newText = newLines.join('\n').replace(/CHERRY_MARKDOWN_PENDING_TEXT_FOR_EMPTY_CELL/g, '');
       that.codeMirror.replaceSelection(newText);
       that.setStyle(event.target, 'border', '1px solid #dfe6ee');
+      this.$clearAllBorders();
       that.$findTableInEditor();
       that.$setSelection(that.tableEditor.info.tableIndex, 'table');
-
       thNode.removeEventListener('dragleave', handleDragLeave);
       thNode.removeEventListener('dragover', handleDragOver);
     }
@@ -1237,6 +1419,7 @@ export default class TableHandler {
 
     function handleDragLeave(event) {
       that.setStyle(event.target.parentElement, 'border', '1px solid #dfe6ee');
+      this.$clearAllBorders();
     }
 
     function handleDragOver(event) {
@@ -1257,7 +1440,7 @@ export default class TableHandler {
       that.$findTableInEditor();
       that.$setSelection(that.tableEditor.info.tableIndex, 'table');
       that.setStyle(event.target.parentElement, 'border', '1px solid #dfe6ee');
-
+      this.$clearAllBorders();
       tBody.removeEventListener('dragleave', handleDragLeave);
       tBody.removeEventListener('dragover', handleDragOver);
     }
@@ -1274,22 +1457,24 @@ export default class TableHandler {
         if (oldIndex < index) {
           this.setStyle(objTarget, 'border', `1px solid #dfe6ee`);
           this.setStyle(objTarget, 'border-right', `2px solid #6897bb`);
+          this.$hightLightColumnCellsDOM(index, 'right');
         } else if (oldIndex > index) {
+          this.setStyle(objTarget, 'background', 'var(--md-table-sort-border)');
           this.setStyle(objTarget, 'border', `1px solid #dfe6ee`);
           this.setStyle(objTarget, 'border-left', `2px solid #6897bb`);
+          this.$hightLightColumnCellsDOM(index, 'left');
         }
       } else if (target.tagName === 'TD' && type === 'Line') {
         if (oldIndex < index) {
           this.setStyle(objTarget.parentElement, 'border', `1px solid #dfe6ee`);
-          this.setStyle(objTarget.parentElement, 'border-bottom', `2px solid #6897bb`);
+          objTarget.parentElement.classList.add('table-highlight-border-add-bottom');
         } else if (oldIndex > index) {
           this.setStyle(objTarget.parentElement, 'border', `1px solid #dfe6ee`);
-          this.setStyle(objTarget.parentElement, 'border-top', `2px solid #6897bb`);
+          objTarget.parentElement.classList.add('table-highlight-border-add-top');
         }
       }
     }
   }
-
   $operateLines(oldIndex, index, lines) {
     if (oldIndex < index) {
       lines.splice(index + 1, 0, lines[oldIndex]);
