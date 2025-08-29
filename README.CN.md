@@ -35,7 +35,7 @@ Cherry Markdown Writer 是一款 Javascript Markdown 编辑器，具有开箱即
 - [IMG WYSIWYG](https://tencent.github.io/cherry-markdown/examples/img.html)
 - [表格编辑](https://tencent.github.io/cherry-markdown/examples/table.html)
 - [自动编号标题](https://tencent.github.io/cherry-markdown/examples/head_num.html)
-- [流式输入模式（AI chart 场景）](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)
+- [流式输入模式（AI chat 场景）](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)
 - [VIM 编辑模式](https://tencent.github.io/cherry-markdown/examples/vim.html)
 - [使用自带或自定义的 Mermaid.js](https://tencent.github.io/cherry-markdown/examples/mermaid.html)
 
