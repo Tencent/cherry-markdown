@@ -112,11 +112,64 @@ const imgToolHandler = {
     });
 
     const previewerRect = this.previewerDom.parentNode.getBoundingClientRect();
-    this.container.style.left = `${event.x - previewerRect.left}px`;
-    this.container.style.top = `${event.y - previewerRect.top}px`;
+    const imgPosition = this.getImgPosition();
+
+    // 临时设置工具栏位置以获取其尺寸
+    this.container.style.visibility = 'hidden';
+    this.container.style.left = '0px';
+    this.container.style.top = '0px';
+
+    // 获取工具栏的尺寸
+    const toolbarRect = this.container.getBoundingClientRect();
+    const toolbarWidth = toolbarRect.width;
+    const toolbarHeight = toolbarRect.height;
+
+    // 恢复可见性
+    this.container.style.visibility = '';
+
+    // 计算鼠标位置相对于预览器的坐标
+    const mouseX = event.x - previewerRect.left;
+    const mouseY = event.y - previewerRect.top;
+
+    // 工具栏与图片边缘的间距
+    const padding = 8;
+
+    let finalLeft;
+    let finalTop;
+
+    if (imgPosition.width < toolbarWidth + padding * 2 || imgPosition.height < toolbarHeight + padding * 2) {
+      // 图片宽度或高度小于工具栏尺寸，工具栏放在图片下方居中
+      finalLeft = imgPosition.left + (imgPosition.width - toolbarWidth) / 2;
+      finalTop = imgPosition.top + imgPosition.height + padding;
+    } else {
+      // 图片宽度、高度足够，尝试将工具栏放在图片内部
+      finalTop = mouseY;
+
+      // 检查垂直方向是否超出图片边界
+      if (mouseY < imgPosition.top + padding) {
+        finalTop = imgPosition.top + padding;
+      } else if (mouseY + toolbarHeight > imgPosition.top + imgPosition.height - padding) {
+        finalTop = imgPosition.top + imgPosition.height - toolbarHeight - padding;
+      }
+
+      // 水平方向：从鼠标位置开始，如果超出右边界就左移
+      finalLeft = mouseX;
+      if (mouseX + toolbarWidth > imgPosition.left + imgPosition.width - padding) {
+        // 右边界超出，调整到图片右边界内
+        finalLeft = imgPosition.left + imgPosition.width - toolbarWidth - padding;
+      }
+
+      // 检查左边界
+      if (finalLeft < imgPosition.left + padding) {
+        finalLeft = imgPosition.left + padding;
+      }
+    }
+
+    this.container.style.left = `${finalLeft}px`;
+    this.container.style.top = `${finalTop}px`;
 
     this.position = {
-      ...this.getImgPosition(),
+      ...imgPosition,
     };
   },
   emit(type, event = {}) {
