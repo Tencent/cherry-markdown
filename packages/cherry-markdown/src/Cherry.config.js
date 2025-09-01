@@ -830,6 +830,7 @@ const defaultConfig = {
     themeList: [
       { className: 'default', label: '默认' }, // 曾用名：light 明亮
       { className: 'dark', label: '暗黑' },
+      { className: 'gray', label: '沉稳' },
       { className: 'abyss', label: '深海' },
       { className: 'green', label: '清新' },
       { className: 'red', label: '热情' },

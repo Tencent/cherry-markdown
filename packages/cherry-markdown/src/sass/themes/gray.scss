@@ -1,0 +1,24 @@
+/*
+ * 沉稳主题
+ */
+
+.cherry.theme__gray {
+  --primary-color: var(--oc-blue-6);
+  --secondary-color: var(--oc-blue-0);
+  --base-font-color: var(--oc-gray-7);
+  --base-editor-bg: var(--oc-white);
+  --base-previewer-bg: var(--oc-white);
+  --base-border-color: var(--oc-gray-3);
+  --md-heading-color: var(--oc-gray-7);
+  --md-paragraph-color: var(--oc-gray-7);
+  --md-link-color: var(--primary-color);
+  --md-link-hover-color: var(--oc-blue-4);
+  --md-inline-code-color: var(--oc-red-7);
+  --md-inline-code-bg: var(--oc-gray-2);
+  --md-blockquote-bg: rgba(134, 142, 150, 0.05);
+  --md-hr-border: var(--oc-gray-3);
+  --md-table-border: var(--oc-gray-3);
+  --accordion-summary-hover-bg: var(--oc-gray-3);
+  --accordion-summary-bg: var(--oc-gray-2);
+  --accordion-summary-color: var(--oc-gray-7);
+}
