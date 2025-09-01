@@ -112,11 +112,49 @@ const imgToolHandler = {
     });
 
     const previewerRect = this.previewerDom.parentNode.getBoundingClientRect();
-    this.container.style.left = `${event.x - previewerRect.left}px`;
-    this.container.style.top = `${event.y - previewerRect.top}px`;
+    const imgPosition = this.getImgPosition();
+
+    // 临时设置工具栏位置以获取其尺寸
+    this.container.style.visibility = 'hidden';
+    this.container.style.left = '0px';
+    this.container.style.top = '0px';
+
+    // 获取工具栏的尺寸
+    const toolbarRect = this.container.getBoundingClientRect();
+    const toolbarWidth = toolbarRect.width;
+    const toolbarHeight = toolbarRect.height;
+
+    // 恢复可见性
+    this.container.style.visibility = '';
+
+    // 计算鼠标位置相对于预览器的坐标
+    const mouseX = event.x - previewerRect.left;
+    const mouseY = event.y - previewerRect.top;
+
+    // 检查工具栏是否会超出图片边界
+    const wouldOverflowRight = mouseX + toolbarWidth > imgPosition.left + imgPosition.width;
+    const wouldOverflowBottom = mouseY + toolbarHeight > imgPosition.top + imgPosition.height;
+    const wouldOverflowLeft = mouseX < imgPosition.left;
+    const wouldOverflowTop = mouseY < imgPosition.top;
+
+    let finalLeft;
+    let finalTop;
+
+    if (wouldOverflowRight || wouldOverflowBottom || wouldOverflowLeft || wouldOverflowTop) {
+      // 工具栏会超出图片边界，将其放在图片正下方居中
+      finalLeft = imgPosition.left + (imgPosition.width - toolbarWidth) / 2;
+      finalTop = imgPosition.top + imgPosition.height + 5;
+    } else {
+      // 工具栏在图片内部，使用鼠标位置
+      finalLeft = mouseX;
+      finalTop = mouseY;
+    }
+
+    this.container.style.left = `${finalLeft}px`;
+    this.container.style.top = `${finalTop}px`;
 
     this.position = {
-      ...this.getImgPosition(),
+      ...imgPosition,
     };
   },
   emit(type, event = {}) {
