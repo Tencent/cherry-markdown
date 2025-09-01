@@ -42,7 +42,9 @@ export default class Image extends SyntaxBase {
     if (refType === 'url') {
       const extent = imgAltHelper.processExtendAttributesInAlt(alt);
       let { extendStyles: style, extendClasses: classes } = imgAltHelper.processExtendStyleInAlt(alt);
-      style = `style="${extent}${style}"`;
+      if (extent || style) {
+        style = `style="${extent}${style}"`;
+      }
       if (classes) {
         classes = ` class="${classes}" `;
       }
@@ -74,7 +76,9 @@ export default class Image extends SyntaxBase {
     if (refType === 'url') {
       const extent = imgAltHelper.processExtendAttributesInAlt(alt);
       let { extendStyles: style, extendClasses: classes } = imgAltHelper.processExtendStyleInAlt(alt);
-      style = `style="${extent}${style}"`;
+      if (extent || style) {
+        style = `style="${extent}${style}"`;
+      }
       if (classes) {
         classes = ` class="${classes}" `;
       }
