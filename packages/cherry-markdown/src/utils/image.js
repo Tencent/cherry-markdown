@@ -29,10 +29,10 @@ const imgAltHelper = {
     let extendAttrs = '';
     const [width, height] = info;
     if (width) {
-      extendAttrs = ` width="${width.replace(/[ #]*/g, '')}"`;
+      extendAttrs = `width:${width.replace(/[ #]*/g, '')};`;
     }
     if (height) {
-      extendAttrs += ` height="${height.replace(/[ #]*/g, '')}"`;
+      extendAttrs += `height:${height.replace(/[ #]*/g, '')};`;
     }
     return extendAttrs;
   },

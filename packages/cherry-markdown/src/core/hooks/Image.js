@@ -42,9 +42,7 @@ export default class Image extends SyntaxBase {
     if (refType === 'url') {
       const extent = imgAltHelper.processExtendAttributesInAlt(alt);
       let { extendStyles: style, extendClasses: classes } = imgAltHelper.processExtendStyleInAlt(alt);
-      if (style) {
-        style = ` style="${style}" `;
-      }
+      style = `style="${extent}${style}"`;
       if (classes) {
         classes = ` class="${classes}" `;
       }
@@ -56,7 +54,7 @@ export default class Image extends SyntaxBase {
       const processedURL = this.$engine.urlProcessor(link, type);
       const defaultWrapper = `<${type} src="${UrlCache.set(
         encodeURIOnce(processedURL),
-      )}"${attrs} ${extent} ${style} ${classes} controls="controls">${$e(alt || '')}</${type}>`;
+      )}"${attrs} ${style} ${classes} controls="controls">${$e(alt || '')}</${type}>`;
       return `${leadingChar}${
         this.config.videoWrapper ? this.config.videoWrapper(link, type, defaultWrapper) : defaultWrapper
       }`;
@@ -76,9 +74,7 @@ export default class Image extends SyntaxBase {
     if (refType === 'url') {
       const extent = imgAltHelper.processExtendAttributesInAlt(alt);
       let { extendStyles: style, extendClasses: classes } = imgAltHelper.processExtendStyleInAlt(alt);
-      if (style) {
-        style = ` style="${style}" `;
-      }
+      style = `style="${extent}${style}"`;
       if (classes) {
         classes = ` class="${classes}" `;
       }
@@ -99,7 +95,7 @@ export default class Image extends SyntaxBase {
         : '';
       return `${leadingChar}<img ${srcProp}="${UrlCache.set(
         encodeURIOnce(this.$engine.urlProcessor(srcValue, 'image')),
-      )}" ${extent} ${style} ${classes} alt="${$e(alt || '')}"${attrs} ${extendAttrStr}/>`;
+      )}" ${style} ${classes} alt="${$e(alt || '')}"${attrs} ${extendAttrStr}/>`;
     }
     // should never happen
     return match;
