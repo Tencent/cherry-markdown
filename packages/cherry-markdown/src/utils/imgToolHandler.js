@@ -137,12 +137,12 @@ const imgToolHandler = {
     let finalLeft;
     let finalTop;
 
-    if (imgPosition.width < toolbarWidth + padding * 2) {
-      // 图片宽度小于工具栏宽度，工具栏放在图片下方居中
+    if (imgPosition.width < toolbarWidth + padding * 2 || imgPosition.height < toolbarHeight + padding * 2) {
+      // 图片宽度或高度小于工具栏尺寸，工具栏放在图片下方居中
       finalLeft = imgPosition.left + (imgPosition.width - toolbarWidth) / 2;
       finalTop = imgPosition.top + imgPosition.height + padding;
     } else {
-      // 图片宽度足够，尝试将工具栏放在图片内部
+      // 图片宽度、高度足够，尝试将工具栏放在图片内部
       finalTop = mouseY;
 
       // 检查垂直方向是否超出图片边界
