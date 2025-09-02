@@ -127,7 +127,9 @@ export default class Engine {
         return;
       }
       configureMathJax(plugins);
-      loadScript(syntax.mathBlock.src ? syntax.mathBlock.src : syntax.inlineMath.src, 'mathjax-js');
+      if (syntax.mathBlock.src || syntax.inlineMath.src) {
+        loadScript(syntax.mathBlock.src ? syntax.mathBlock.src : syntax.inlineMath.src, 'mathjax-js');
+      }
     }
     if (syntax.mathBlock.engine === 'katex' || syntax.inlineMath.engine === 'katex') {
       // @ts-ignore
