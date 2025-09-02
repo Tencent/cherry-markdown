@@ -52,6 +52,8 @@ export default class CodeBlock extends ParagraphBase {
     this.customHighlighter = config.highlighter;
     this.failedCleanCacheTimes = 0;
     this.codeTimer = null;
+    this.needCleanFlowCursor =
+      cherry?.options?.engine?.global?.flowSessionContext && cherry?.options?.engine?.global?.flowSessionCursor;
     this.showInlineColor =
       cherry?.options?.engine?.syntax?.inlineCode?.showColor !== undefined
         ? cherry.options.engine.syntax.inlineCode.showColor
@@ -125,17 +127,18 @@ export default class CodeBlock extends ParagraphBase {
       return `<${tag} data-sign="${props.sign}" data-type="${lang}" data-lines="${props.lines}">${html}</${tag}>`;
     };
     let html = '';
+    const $codeSrc = this.needCleanFlowCursor ? codeSrc.replace(/CHERRYFLOWSESSIONCURSOR/, '') : codeSrc;
     if (lang === 'all') {
-      html = engine.render(codeSrc, props.sign, this.$engine, props.lang);
+      html = engine.render($codeSrc, props.sign, this.$engine, props.lang);
     } else {
-      html = engine.render(codeSrc, props.sign, this.$engine, {
+      html = engine.render($codeSrc, props.sign, this.$engine, {
         mermaidConfig: this.mermaid,
         updateCache: (cacheCode) => {
           this.$codeCache(props.sign, addContainer(cacheCode));
           this.pushCache(addContainer(cacheCode), props.sign, props.lines);
         },
         fallback: () => {
-          const $code = this.$codeReplace(codeSrc, lang, props.sign, props.lines);
+          const $code = this.$codeReplace($codeSrc, lang, props.sign, props.lines);
           return $code;
         },
       });
