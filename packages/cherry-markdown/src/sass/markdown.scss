@@ -565,6 +565,7 @@ div[data-type='codeBlock'] {
 
   div[data-code-wrap='wrap'] & code[class*=language-]{
     white-space: pre-wrap;
+    word-break: break-word;
   }
 
   [data-code-block-theme='default'] & {
