@@ -157,7 +157,7 @@
     position: absolute;
     pointer-events: none;
     z-index: 999;
-    &-container, &-sort-container, &-delete-container {
+    &-container, &-sort-container, &-delete-container, &-menu-container {
       position: absolute;
       height: 100%;
       width: 100%;
@@ -232,6 +232,86 @@
         padding: 0;
         width: 18px;
         height: 18px;
+      }
+    }
+    /* 菜单按钮 */
+    &__menu {
+      pointer-events: auto;
+      position: absolute;
+      color: var(--primary-color);
+      width: 25px;
+      height: 15px;
+      font-size: var(--font-size-xs);
+      line-height: var(--font-size-xs);
+      border: 1px solid var(--primary-color);
+      border-radius: 3px;
+      background-color: transparent;
+      cursor: pointer;
+      transition: all 0.3s;
+      &:hover {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: var(--oc-white);
+      }
+      &[data-type='left'], &[data-type='right'] {
+        padding: 0;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+  
+  /* 菜单气泡样式 */
+  .cherry-previewer-table-menu-bubble {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    
+    min-height: var(--bubble-btn-height);
+    min-width: var(--bubble-btn-height);
+    
+    border: var(--border-width-1) solid var(--bubble-border);
+    background-color: var(--bubble-bg);
+    box-shadow: var(--bubble-shadow);
+    border-radius: var(--bubble-radius);
+    z-index: var(--bubble-z-index);
+    padding: var(--spacing-xs);
+    gap: 2px;
+    
+    &.cherry-previewer-table-menu-bubble--hidden {
+      display: none;
+    }
+    
+    // 水平排列（列控制）
+    &.cherry-previewer-table-menu-bubble--horizontal {
+      flex-direction: row;
+    }
+    
+    // 垂直排列（行控制）
+    &.cherry-previewer-table-menu-bubble--vertical {
+      flex-direction: column;
+    }
+    
+    .cherry-previewer-table-menu-option {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--bubble-btn-height);
+      height: var(--bubble-btn-height);
+      cursor: pointer;
+      color: var(--base-font-color);
+      font-size: var(--font-size-sm);
+      transition: background-color 0.2s ease, color 0.2s ease;
+      border-radius: calc(var(--bubble-radius) - 2px);
+      
+      &:hover {
+        background-color: var(--toolbar-btn-hover-bg);
+        color: var(--toolbar-btn-hover-color);
+      }
+      
+      .ch-icon {
+        font-size: var(--font-size-sm);
       }
     }
   }

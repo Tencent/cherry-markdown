@@ -21,14 +21,15 @@ export default class TableHandler {
   /**
    * 用来存放所有的数据
    */
-  tableEditor = {
-    info: {}, // 当前点击的预览区域table的相关信息
-    tableCodes: [], // 编辑器内所有的表格语法
-    footnoteTableCodes: [], // 编辑器内所有的脚注表格语法
-    editorDom: {}, // 编辑器容器
-  };
+  tableEditor;
 
   constructor(trigger, target, container, previewerDom, codeMirror, tableElement, cherry) {
+    this.tableEditor = {
+      info: {}, // 当前点击的预览区域table的相关信息
+      tableCodes: [], // 编辑器内所有的表格语法
+      footnoteTableCodes: [], // 编辑器内所有的脚注表格语法
+      editorDom: {}, // 编辑器容器
+    };
     // 触发方式 click / hover
     this.trigger = trigger;
     this.target = target;
@@ -167,7 +168,7 @@ export default class TableHandler {
       return;
     }
     this.$setSymbolOffset();
-    this.$setDeleteButtonPosition();
+    this.$setMenuButtonPosition();
   }
 
   $remove() {
@@ -683,8 +684,7 @@ export default class TableHandler {
       return;
     }
     this.$drawSymbol();
-    this.$drawSortSymbol();
-    this.$drawDelete();
+    this.$drawMenu();
     this.$drawColumnResize();
   }
 
@@ -836,7 +836,7 @@ export default class TableHandler {
   $hightLightColumnCellsDOM(columnIndex = this.tableEditor.info.tdIndex, position) {
     // 获取当前操作的表格
     const table = this.tableEditor.info.tableNode;
-    const rows = table.rows;
+    const { rows } = table;
     for (let i = 0; i < rows.length; i++) {
       if (rows[i].cells[columnIndex]) {
         const cell = rows[i].cells[columnIndex];
@@ -853,137 +853,61 @@ export default class TableHandler {
     }
   }
 
-  // 清除所有边框
+  /**
+   * 清除所有高光效果（包括边框和背景）
+   */
   $clearAllBorders() {
-    // 添加安全检查
-    if (!this.tableEditor.info || !this.tableEditor.info.trNode || !this.tableEditor.info.tableNode) {
-      return;
-    }
-    const { tableNode, tdIndex } = this.tableEditor.info;
-    const { rows } = tableNode;
-    const currentCell = this.tableEditor.info.trNode;
-    const tds = currentCell.querySelectorAll('td');
-    tds.forEach((td) => {
-      td.classList.remove(
+    // 清除所有表格的高光效果
+    const allTables = document.querySelectorAll('table');
+    allTables.forEach((table) => {
+      this.$clearTableHighlights(table);
+    });
+  }
+
+  /**
+   * 清除指定表格的所有高光效果
+   * @param {HTMLTableElement} table - 表格元素
+   */
+  $clearTableHighlights(table) {
+    if (!table) return;
+
+    // 清除所有单元格的高光类
+    const allCells = table.querySelectorAll('td, th');
+    allCells.forEach((cell) => {
+      // 清除背景高光
+      cell.classList.remove('table-sort-active');
+
+      // 清除边框高光
+      cell.classList.remove(
         'table-highlight-border-add-right',
         'table-highlight-border-add-left',
         'table-highlight-border-add-top',
         'table-highlight-border-add-bottom',
       );
+
+      // 清除内联样式
+      if (cell instanceof HTMLElement) {
+        cell.style.border = '';
+        cell.style.borderLeft = '';
+        cell.style.borderRight = '';
+        cell.style.borderTop = '';
+        cell.style.borderBottom = '';
+        cell.style.background = '';
+      }
     });
-    for (let i = 0; i < rows.length; i++) {
-      const { cells } = rows[i];
-      if (cells[tdIndex]) {
-        cells[tdIndex].classList.remove(
-          'table-highlight-border-add-right',
-          'table-highlight-border-add-left',
-          'table-highlight-border-add-top',
-          'table-highlight-border-add-bottom',
-        );
-      }
-    }
-  }
 
-  $drawSortSymbol() {
-    // const types = ['RowLeft', 'RowRight', 'ColUp', 'ColDown']; // 不要底部的拖拽按钮了，貌似没啥用
-    const types = ['RowLeft', 'RowRight', 'ColUp'];
-
-    const container = document.createElement('ul');
-    container.className = 'cherry-previewer-table-hover-handler-sort-container';
-    types.forEach((type) => {
-      const sortSymbol = document.createElement('li');
-      sortSymbol.setAttribute('data-type', type);
-      sortSymbol.className = 'cherry-previewer-table-hover-handler__sort ch-icon';
-      sortSymbol.draggable = true;
-      if (type.startsWith('Row')) {
-        sortSymbol.title = this.$cherry.locale.moveRow;
-        sortSymbol.classList.add('ch-icon-swap-vert');
-        sortSymbol.addEventListener('mouseover', () => {
-          const { tdNode } = this.tableEditor.info;
-          tdNode.draggable = true;
-          tdNode.parentNode.classList.add('table-sort-active');
-        });
-        sortSymbol.addEventListener('mouseleave', () => {
-          const { tdNode } = this.tableEditor.info;
-          tdNode.draggable = false;
-          tdNode.parentNode.classList.remove('table-sort-active');
-        });
-        sortSymbol.addEventListener('mousedown', (e) => {
-          this.$setSelection(this.tableEditor.info.tableIndex, 'table');
-          this.$dragLine();
-        });
-      } else {
-        sortSymbol.title = this.$cherry.locale.moveCol;
-        sortSymbol.classList.add('ch-icon-swap');
-        const highLightTrDom = [];
-        sortSymbol.addEventListener('mouseover', () => {
-          const { tdNode } = this.tableEditor.info;
-          tdNode.draggable = true;
-
-          const index = Array.from(tdNode.parentNode.children).indexOf(tdNode);
-
-          Array.from(tdNode.parentNode.parentNode.parentNode.children)
-            .map((item) => item.children)
-            .forEach((item) => {
-              Array.from(item).forEach((tr) => {
-                highLightTrDom.push(tr);
-              });
-            });
-          highLightTrDom.forEach((tr) => tr.children[index].classList.add('table-sort-active'));
-        });
-        sortSymbol.addEventListener('mouseleave', () => {
-          const { tdNode } = this.tableEditor.info;
-          tdNode.draggable = false;
-          const index = Array.from(tdNode.parentNode.children).indexOf(tdNode);
-          highLightTrDom.forEach((tr) => tr.children[index].classList.remove('table-sort-active'));
-        });
-        sortSymbol.addEventListener('mousedown', (e) => {
-          this.$setSelection(this.tableEditor.info.tableIndex, 'table');
-          this.$dragCol();
-        });
-      }
-      container.appendChild(sortSymbol);
-    });
-    this.tableEditor.editorDom.sortContainer = container;
-    this.container.appendChild(this.tableEditor.editorDom.sortContainer);
-    this.$setSortSymbolsPosition();
-  }
-
-  $setSortSymbolsPosition() {
-    const container = this.tableEditor.editorDom.sortContainer;
-    const { tableNode, tdNode, isTHead } = this.tableEditor.info;
-    const tableInfo = this.$getPosition(tableNode);
-    const tdInfo = this.$getPosition(tdNode);
-
-    this.setStyle(this.container, 'width', `${tableInfo.width}px`);
-    this.setStyle(this.container, 'height', `${tableInfo.height}px`);
-    this.setStyle(this.container, 'top', `${tableInfo.top}px`);
-    this.setStyle(this.container, 'left', `${tableInfo.left}px`);
-
-    container.childNodes.forEach((node) => {
-      const { type } = node.dataset;
-
-      switch (type) {
-        case 'RowLeft':
-          this.setStyle(node, 'top', `${tdInfo.top - tableInfo.top + tdInfo.height / 2 - node.offsetHeight / 2}px`);
-          this.setStyle(node, 'left', `${-node.offsetWidth / 2}px`);
-          break;
-        case 'RowRight':
-          this.setStyle(node, 'top', `${tdInfo.top - tableInfo.top + tdInfo.height / 2 - node.offsetHeight / 2}px`);
-          this.setStyle(node, 'left', `${tableInfo.width - node.offsetWidth / 2}px`);
-          break;
-        case 'ColUp':
-          this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
-          this.setStyle(node, 'top', `${-node.offsetHeight / 2}px`);
-          break;
-        case 'ColDown':
-          this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
-          this.setStyle(node, 'top', `${tableInfo.height - node.offsetHeight / 2}px`);
-
-          break;
-      }
-      if (isTHead && type.startsWith('Row')) {
-        this.setStyle(node, 'display', 'none');
+    // 清除行的边框高光
+    const allRows = table.querySelectorAll('tr');
+    allRows.forEach((row) => {
+      row.classList.remove(
+        'table-highlight-border-add-right',
+        'table-highlight-border-add-left',
+        'table-highlight-border-add-top',
+        'table-highlight-border-add-bottom',
+      );
+      if (row instanceof HTMLElement) {
+        row.style.border = '';
+        row.style.background = '';
       }
     });
   }
@@ -1142,53 +1066,180 @@ export default class TableHandler {
   }
 
   /**
-   * 添加删除按钮
+   * 添加菜单按钮
    */
-  $drawDelete() {
+  $drawMenu() {
     const types = ['top', 'bottom', 'right'];
     const buttons = types.map((type) => [type]);
     const container = document.createElement('div');
-    container.className = 'cherry-previewer-table-hover-handler-delete-container';
+    container.className = 'cherry-previewer-table-hover-handler-menu-container';
     buttons.forEach(([type]) => {
       const button = document.createElement('button');
       button.setAttribute('type', 'button');
       button.setAttribute('data-type', type);
-      button.className = 'cherry-previewer-table-hover-handler__delete ch-icon ch-icon-cherry-table-delete';
-      if (/(right|left)/.test(type)) {
-        button.title = this.$cherry.locale.deleteRow;
-        button.addEventListener('click', () => {
-          this.$deleteCurrentRow();
-        });
-        button.addEventListener('mouseover', () => {
-          this.$highlightRow();
-        });
-        button.addEventListener('mouseout', () => {
-          this.$cancelHighlightRow();
-        });
-      } else {
-        button.title = this.$cherry.locale.deleteColumn;
-        button.addEventListener('click', () => {
-          this.$deleteCurrentColumn();
-        });
-        button.addEventListener('mouseover', () => {
-          this.$highlightColumn();
-        });
-        button.addEventListener('mouseout', () => {
-          this.$cancelHighlightColumn();
-        });
-      }
+      button.className = 'cherry-previewer-table-hover-handler__menu ch-icon ch-icon-menu';
+      button.title = '菜单';
+
+      // 创建菜单气泡
+      const menuBubble = this.$createMenuBubble(type);
+      button.appendChild(menuBubble);
+
+      // 点击显示/隐藏菜单
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.$toggleMenuBubble(button, menuBubble);
+      });
+
+      // 为菜单按钮添加拖拽功能
+      this.$addDragFunctionalityToMenuButton(button, type);
+
       container.appendChild(button);
     });
-    this.tableEditor.editorDom.deleteContainer = container;
-    this.container.appendChild(this.tableEditor.editorDom.deleteContainer);
-    this.$setDeleteButtonPosition();
+    this.tableEditor.editorDom.menuContainer = container;
+    this.container.appendChild(this.tableEditor.editorDom.menuContainer);
+    this.$setMenuButtonPosition();
   }
 
   /**
-   * 设置删除按钮的位置
+   * 为菜单按钮添加拖拽功能
+   * @param {HTMLElement} button - 菜单按钮元素
+   * @param {string} type - 按钮类型 ('top', 'bottom', 'right')
    */
-  $setDeleteButtonPosition() {
-    const container = this.tableEditor.editorDom.deleteContainer;
+  $addDragFunctionalityToMenuButton(button, type) {
+    if (type === 'right') {
+      this.$addRowDragFunctionality(button);
+    } else if (type === 'top' || type === 'bottom') {
+      this.$addColumnDragFunctionality(button);
+    }
+  }
+
+  /**
+   * 为按钮添加行拖拽功能
+   * @param {HTMLElement} button - 菜单按钮元素
+   */
+  $addRowDragFunctionality(button) {
+    button.draggable = true;
+    button.title = '拖拽移动行';
+
+    // 鼠标悬停时高亮当前行
+    button.addEventListener('mouseover', () => {
+      this.$highlightCurrentRow();
+    });
+
+    button.addEventListener('mouseleave', () => {
+      this.$unhighlightCurrentRow();
+    });
+
+    // 拖拽开始
+    button.addEventListener('mousedown', (e) => {
+      this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+      this.$dragLine();
+    });
+  }
+
+  /**
+   * 为按钮添加列拖拽功能
+   * @param {HTMLElement} button - 菜单按钮元素
+   */
+  $addColumnDragFunctionality(button) {
+    button.draggable = true;
+    button.title = '拖拽移动列';
+
+    const highLightTrDom = [];
+
+    // 鼠标悬停时高亮当前列
+    button.addEventListener('mouseover', () => {
+      this.$highlightCurrentColumn(highLightTrDom);
+    });
+
+    button.addEventListener('mouseleave', () => {
+      this.$unhighlightCurrentColumn(highLightTrDom);
+    });
+
+    // 拖拽开始
+    button.addEventListener('mousedown', (e) => {
+      this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+      this.$dragCol();
+    });
+  }
+
+  /**
+   * 高亮当前行
+   */
+  $highlightCurrentRow() {
+    const { tdNode } = this.tableEditor.info;
+    if (!tdNode) return;
+
+    this.$clearAllBorders();
+    tdNode.draggable = true;
+    tdNode.parentNode.classList.add('table-sort-active');
+  }
+
+  /**
+   * 取消高亮当前行
+   */
+  $unhighlightCurrentRow() {
+    const { tdNode } = this.tableEditor.info;
+    if (!tdNode) return;
+
+    tdNode.draggable = false;
+
+    // 清除所有高光效果
+    this.$clearAllBorders();
+  }
+
+  /**
+   * 高亮当前列
+   * @param {Array} highLightTrDom - 存储高亮元素的数组
+   */
+  $highlightCurrentColumn(highLightTrDom) {
+    const { tdNode } = this.tableEditor.info;
+    if (!tdNode) return;
+
+    this.$clearAllBorders();
+    tdNode.draggable = true;
+
+    const index = Array.from(tdNode.parentNode.children).indexOf(tdNode);
+    if (index === -1) return;
+
+    highLightTrDom.length = 0;
+
+    const tableNode = tdNode.closest('table');
+    if (!tableNode) return;
+
+    const allRows = tableNode.querySelectorAll('tr');
+    allRows.forEach((tr) => {
+      highLightTrDom.push(tr);
+    });
+
+    // 为当前列的所有单元格添加高亮
+    highLightTrDom.forEach((tr) => {
+      const cells = tr.querySelectorAll('td, th');
+      if (cells[index]) {
+        cells[index].classList.add('table-sort-active');
+      }
+    });
+  }
+
+  /**
+   * 取消高亮当前列
+   * @param {Array} highLightTrDom - 存储高亮元素的数组
+   */
+  $unhighlightCurrentColumn(highLightTrDom) {
+    const { tdNode } = this.tableEditor.info;
+    if (!tdNode) return;
+
+    tdNode.draggable = false;
+
+    // 清除所有高光效果
+    this.$clearAllBorders();
+  }
+
+  /**
+   * 设置菜单按钮的位置
+   */
+  $setMenuButtonPosition() {
+    const container = this.tableEditor.editorDom.menuContainer;
     const { tableNode, tdNode, isTHead } = this.tableEditor.info;
     const tableInfo = this.$getPosition(tableNode);
     const tdInfo = this.$getPosition(tdNode);
@@ -1198,11 +1249,11 @@ export default class TableHandler {
     this.setStyle(this.container, 'top', `${tableInfo.top}px`);
     this.setStyle(this.container, 'left', `${tableInfo.left}px`);
 
-    // 设置删除按钮位置
+    // 设置菜单按钮位置
     container.childNodes.forEach((node) => {
       const { type } = node.dataset;
       const offset = {
-        outer: 20,
+        outer: 5,
       };
       if (/(right|left)/.test(type)) {
         if (isTHead) {
@@ -1211,10 +1262,289 @@ export default class TableHandler {
         this.setStyle(node, 'top', `${tdInfo.top - tableInfo.top + tdInfo.height / 2 - node.offsetHeight / 2}px`);
         this.setStyle(node, `${type}`, `-${node.offsetWidth}px`);
       } else {
-        this.setStyle(node, `${type}`, `-${offset.outer + 5}px`);
+        this.setStyle(node, `${type}`, `-${offset.outer}px`);
         this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
       }
     });
+  }
+
+  /**
+   * 创建菜单气泡
+   */
+  $createMenuBubble(type) {
+    const bubble = document.createElement('div');
+    const isRowControl = /(right|left)/.test(type);
+    const bubbleClass = isRowControl
+      ? 'cherry-previewer-table-menu-bubble cherry-previewer-table-menu-bubble--vertical cherry-previewer-table-menu-bubble--hidden'
+      : 'cherry-previewer-table-menu-bubble cherry-previewer-table-menu-bubble--horizontal cherry-previewer-table-menu-bubble--hidden';
+
+    bubble.className = bubbleClass;
+
+    // 获取菜单配置
+    const menuConfig = this.$getMenuConfig(type);
+
+    // 创建菜单选项
+    menuConfig.forEach((config) => {
+      const option = this.$createMenuOption(config, type);
+      bubble.appendChild(option);
+    });
+
+    return bubble;
+  }
+
+  /**
+   * 获取表格菜单配置
+   */
+  $getMenuConfig(type) {
+    const isRowControl = /(right|left)/.test(type);
+
+    const baseConfig = [
+      {
+        id: 'delete',
+        icon: 'ch-icon-cherry-table-delete',
+        title: isRowControl ? this.$cherry.locale.deleteRow : this.$cherry.locale.deleteColumn,
+        action: isRowControl ? 'deleteRow' : 'deleteColumn',
+        highlight: isRowControl ? 'row' : 'column',
+        showIn: ['row', 'column'],
+      },
+      {
+        id: 'align-left',
+        icon: 'ch-icon-alignLeft',
+        title: '左对齐',
+        action: 'alignLeft',
+        showIn: ['column'],
+      },
+      {
+        id: 'align-center',
+        icon: 'ch-icon-alignCenter',
+        title: '居中',
+        action: 'alignCenter',
+        showIn: ['column'],
+      },
+      {
+        id: 'align-right',
+        icon: 'ch-icon-alignRight',
+        title: '右对齐',
+        action: 'alignRight',
+        showIn: ['column'],
+      },
+      {
+        id: 'insert-row-above',
+        icon: 'ch-icon-cherry-table-insert-top',
+        title: '在上方插入行',
+        action: 'insertRowAbove',
+        showIn: ['row'],
+      },
+      {
+        id: 'insert-row-below',
+        icon: 'ch-icon-cherry-table-insert-bottom',
+        title: '在下方插入行',
+        action: 'insertRowBelow',
+        showIn: ['row'],
+      },
+    ];
+
+    // 根据控制类型过滤菜单项
+    const currentControlType = isRowControl ? 'row' : 'column';
+    const filteredConfig = baseConfig.filter((config) => {
+      return config.showIn.includes(currentControlType);
+    });
+
+    return filteredConfig;
+
+    // 使用说明：
+    // showIn 配置选项：
+    // - ['row']: 只在行控制中显示（左右按钮）
+    // - ['column']: 只在列控制中显示（上下按钮）
+    // - ['row', 'column']: 在行控制和列控制中都显示
+    //
+    // 示例：添加新功能
+    // {
+    //   id: 'new-feature',
+    //   icon: 'ch-icon-new-feature',
+    //   title: '新功能',
+    //   action: 'newFeature',
+    //   showIn: ['row'] // 只在行控制中显示
+    // }
+  }
+
+  /**
+   * 创建菜单选项
+   */
+  $createMenuOption(config, type) {
+    const option = document.createElement('div');
+    option.className = 'cherry-previewer-table-menu-option';
+    option.setAttribute('data-action', config.action);
+    option.title = config.title;
+
+    const iconSpan = document.createElement('span');
+    iconSpan.className = `ch-icon ${config.icon}`;
+    option.appendChild(iconSpan);
+
+    option.addEventListener('click', () => {
+      this.$executeMenuAction(config.action, type);
+      this.$hideMenuBubble(option.closest('.cherry-previewer-table-menu-bubble'));
+    });
+
+    // 高亮事件
+    if (config.highlight) {
+      option.addEventListener('mouseover', () => {
+        this.$highlightElement(config.highlight);
+      });
+      option.addEventListener('mouseout', () => {
+        this.$cancelHighlightElement(config.highlight);
+      });
+    }
+
+    return option;
+  }
+
+  /**
+   * 执行菜单动作
+   */
+  $executeMenuAction(action, type) {
+    switch (action) {
+      case 'deleteRow':
+        this.$deleteCurrentRow();
+        break;
+      case 'deleteColumn':
+        this.$deleteCurrentColumn();
+        break;
+      case 'alignLeft':
+        this.$alignColumn('left');
+        break;
+      case 'alignCenter':
+        this.$alignColumn('center');
+        break;
+      case 'alignRight':
+        this.$alignColumn('right');
+        break;
+      case 'insertRowAbove':
+        this.$insertRow('above');
+        break;
+      case 'insertRowBelow':
+        this.$insertRow('below');
+        break;
+      case 'mergeCells':
+        this.$mergeCells();
+        break;
+      default:
+        console.warn(`Unknown menu action: ${action}`);
+    }
+  }
+
+  /**
+   * 高亮元素
+   */
+  $highlightElement(elementType) {
+    switch (elementType) {
+      case 'row':
+        this.$highlightRow();
+        break;
+      case 'column':
+        this.$highlightColumn();
+        break;
+      default:
+        console.warn(`Unknown highlight type: ${elementType}`);
+    }
+  }
+
+  /**
+   * 取消高亮元素
+   */
+  $cancelHighlightElement(elementType) {
+    switch (elementType) {
+      case 'row':
+        this.$cancelHighlightRow();
+        break;
+      case 'column':
+        this.$cancelHighlightColumn();
+        break;
+      default:
+        console.warn(`Unknown highlight type: ${elementType}`);
+    }
+  }
+
+  /**
+   * 列对齐方法（预留）
+   */
+  $alignColumn(alignment) {
+    // 这里可以实现列对齐功能
+    console.log(`Align column to ${alignment}`);
+    // TODO: 实现列对齐逻辑
+  }
+
+  /**
+   * 插入行方法（预留）
+   */
+  $insertRow(position) {
+    // 这里可以实现插入行功能
+    console.log(`Insert row ${position}`);
+    // TODO: 实现插入行逻辑
+  }
+
+  /**
+   * 合并单元格方法（预留）
+   */
+  $mergeCells() {
+    // 这里可以实现合并单元格功能
+    console.log('Merge cells');
+    // TODO: 实现合并单元格逻辑
+  }
+
+  /**
+   * 切换菜单气泡显示状态
+   */
+  $toggleMenuBubble(button, bubble) {
+    if (bubble.classList.contains('cherry-previewer-table-menu-bubble--hidden')) {
+      this.$showMenuBubble(button, bubble);
+    } else {
+      this.$hideMenuBubble(bubble);
+    }
+  }
+
+  /**
+   * 显示菜单气泡
+   */
+  $showMenuBubble(button, bubble) {
+    // 隐藏其他所有菜单气泡
+    const allBubbles = this.container.querySelectorAll('.cherry-previewer-table-menu-bubble');
+    allBubbles.forEach((b) => {
+      if (b !== bubble) {
+        b.classList.add('cherry-previewer-table-menu-bubble--hidden');
+      }
+    });
+
+    bubble.classList.remove('cherry-previewer-table-menu-bubble--hidden');
+
+    // 设置气泡位置
+    const { type } = button.dataset;
+    if (/(right|left)/.test(type)) {
+      bubble.style.top = '0px';
+      bubble.style.left = type === 'right' ? '100%' : '-100%';
+    } else {
+      bubble.style.top = type === 'top' ? '-100%' : '100%';
+      bubble.style.left = '50%';
+      bubble.style.transform = 'translateX(-50%)';
+    }
+
+    const closeMenuHandler = (e) => {
+      if (!bubble.contains(e.target) && !button.contains(e.target)) {
+        this.$hideMenuBubble(bubble);
+        document.removeEventListener('click', closeMenuHandler);
+      }
+    };
+
+    setTimeout(() => {
+      document.addEventListener('click', closeMenuHandler);
+    }, 0);
+  }
+
+  /**
+   * 隐藏菜单气泡
+   */
+  $hideMenuBubble(bubble) {
+    bubble.classList.add('cherry-previewer-table-menu-bubble--hidden');
   }
 
   /**
@@ -1288,7 +1618,7 @@ export default class TableHandler {
   $drawColumnResize() {
     const { tableNode } = this.tableEditor.info;
     const box = this.tableEditor.info.tdNode;
-    const columns = this.tableEditor.info.columns;
+    const { columns } = this.tableEditor.info;
 
     if (!box) return; // 安全检查
 
@@ -1368,10 +1698,13 @@ export default class TableHandler {
     const lines = this.codeMirror.getSelection().split(/\n/);
     const { tdNode } = this.tableEditor.info;
     const that = this;
-    tdNode.setAttribute('draggable', true);
+
+    // 确保只设置一次 draggable
+    if (!tdNode.hasAttribute('draggable')) {
+      tdNode.setAttribute('draggable', true);
+    }
 
     function handleDragLeave(event) {
-      that.setStyle(event.target, 'border', '1px solid #dfe6ee');
       that.$clearAllBorders();
     }
 
@@ -1385,21 +1718,49 @@ export default class TableHandler {
     function handleDrop(event) {
       event.preventDefault();
       const tdIndex = Array.from(event.target.parentElement.childNodes).indexOf(event.target);
+
+      // 检查是否是有效的拖拽操作
+      if (oldTdIndex === tdIndex) {
+        // 相同位置，不需要操作
+        that.$clearAllBorders();
+        cleanup();
+        return;
+      }
+
       const newLines = lines.map((line, index) => {
+        // 跳过空行
+        if (!line.trim()) return line;
+
         const cells = line
           .split('|')
           .map((item) => (item === '' ? 'CHERRY_MARKDOWN_PENDING_TEXT_FOR_EMPTY_CELL' : item))
           .slice(1, -1);
-        return `|${that.$operateLines(oldTdIndex, tdIndex, cells).join('|')}|`;
+
+        // 确保索引有效
+        if (oldTdIndex >= 0 && oldTdIndex < cells.length && tdIndex >= 0 && tdIndex < cells.length) {
+          return `|${that.$operateLines(oldTdIndex, tdIndex, cells).join('|')}|`;
+        }
+        return line;
       });
+
       const newText = newLines.join('\n').replace(/CHERRY_MARKDOWN_PENDING_TEXT_FOR_EMPTY_CELL/g, '');
+
+      // 替换选中的内容
       that.codeMirror.replaceSelection(newText);
-      that.setStyle(event.target, 'border', '1px solid #dfe6ee');
-      this.$clearAllBorders();
+      that.$clearAllBorders();
       that.$findTableInEditor();
       that.$setSelection(that.tableEditor.info.tableIndex, 'table');
+
+      cleanup();
+    }
+
+    function cleanup() {
       thNode.removeEventListener('dragleave', handleDragLeave);
       thNode.removeEventListener('dragover', handleDragOver);
+      thNode.removeEventListener('drop', handleDrop);
+      tdNode.removeAttribute('draggable');
+      // 确保清除所有高光
+      that.$clearAllBorders();
     }
 
     thNode.addEventListener('dragleave', handleDragLeave);
@@ -1412,7 +1773,12 @@ export default class TableHandler {
    */
   $dragLine() {
     const { trNode } = this.tableEditor.info;
-    trNode.setAttribute('draggable', true);
+
+    // 确保只设置一次 draggable
+    if (!trNode.hasAttribute('draggable')) {
+      trNode.setAttribute('draggable', true);
+    }
+
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
     const oldTrIndex = this.tableEditor.info.trIndex + 2;
     const tBody = trNode.parentElement;
@@ -1420,8 +1786,7 @@ export default class TableHandler {
     const that = this;
 
     function handleDragLeave(event) {
-      that.setStyle(event.target.parentElement, 'border', '1px solid #dfe6ee');
-      this.$clearAllBorders();
+      that.$clearAllBorders();
     }
 
     function handleDragOver(event) {
@@ -1436,15 +1801,31 @@ export default class TableHandler {
       event.preventDefault();
       const trIndex =
         Array.from(event.target.parentElement.parentElement.childNodes).indexOf(event.target.parentElement) + 2;
+
+      // 检查是否是有效的拖拽操作
+      if (oldTrIndex === trIndex) {
+        // 相同位置，不需要操作
+        that.$clearAllBorders();
+        cleanup();
+        return;
+      }
+
       const newText = that.$operateLines(oldTrIndex, trIndex, lines).join('\n');
       that.codeMirror.replaceSelection(newText);
 
       that.$findTableInEditor();
       that.$setSelection(that.tableEditor.info.tableIndex, 'table');
-      that.setStyle(event.target.parentElement, 'border', '1px solid #dfe6ee');
-      this.$clearAllBorders();
+      that.$clearAllBorders();
+
+      cleanup();
+    }
+
+    function cleanup() {
       tBody.removeEventListener('dragleave', handleDragLeave);
       tBody.removeEventListener('dragover', handleDragOver);
+      tBody.removeEventListener('drop', handleDrop);
+      trNode.removeAttribute('draggable');
+      that.$clearAllBorders();
     }
 
     tBody.addEventListener('dragleave', handleDragLeave);
@@ -1452,29 +1833,61 @@ export default class TableHandler {
     tBody.addEventListener('drop', handleDrop, { once: true });
   }
 
+  /**
+   * 拖拽过程中的视觉反馈
+   * @param {HTMLElement} objTarget - 目标元素
+   * @param {number} oldIndex - 原始索引
+   * @param {number} index - 新索引
+   * @param {string} type - 类型 ('Col' 或 'Line')
+   */
   $dragSymbol(objTarget, oldIndex, index, type) {
     const { target } = this;
     if (target !== objTarget && oldIndex !== index) {
       if ((target.tagName === 'TH' || target.tagName === 'TD') && type === 'Col') {
-        if (oldIndex < index) {
-          this.setStyle(objTarget, 'border', `1px solid #dfe6ee`);
-          this.setStyle(objTarget, 'border-right', `2px solid #6897bb`);
-          this.$hightLightColumnCellsDOM(index, 'right');
-        } else if (oldIndex > index) {
-          this.setStyle(objTarget, 'background', 'var(--md-table-sort-border)');
-          this.setStyle(objTarget, 'border', `1px solid #dfe6ee`);
-          this.setStyle(objTarget, 'border-left', `2px solid #6897bb`);
-          this.$hightLightColumnCellsDOM(index, 'left');
-        }
+        // 列拖拽的视觉反馈
+        this.$showColumnDragFeedback(objTarget, oldIndex, index);
       } else if (target.tagName === 'TD' && type === 'Line') {
-        if (oldIndex < index) {
-          this.setStyle(objTarget.parentElement, 'border', `1px solid #dfe6ee`);
-          objTarget.parentElement.classList.add('table-highlight-border-add-bottom');
-        } else if (oldIndex > index) {
-          this.setStyle(objTarget.parentElement, 'border', `1px solid #dfe6ee`);
-          objTarget.parentElement.classList.add('table-highlight-border-add-top');
-        }
+        // 行拖拽的视觉反馈
+        this.$showRowDragFeedback(objTarget, oldIndex, index);
       }
+    }
+  }
+
+  /**
+   * 显示列拖拽的视觉反馈
+   * @param {HTMLElement} objTarget - 目标元素
+   * @param {number} oldIndex - 原始索引
+   * @param {number} index - 新索引
+   */
+  $showColumnDragFeedback(objTarget, oldIndex, index) {
+    // 清除之前的高光
+    this.$clearAllBorders();
+
+    if (oldIndex < index) {
+      // 向右拖拽
+      this.$hightLightColumnCellsDOM(index, 'right');
+    } else if (oldIndex > index) {
+      // 向左拖拽
+      this.$hightLightColumnCellsDOM(index, 'left');
+    }
+  }
+
+  /**
+   * 显示行拖拽的视觉反馈
+   * @param {HTMLElement} objTarget - 目标元素
+   * @param {number} oldIndex - 原始索引
+   * @param {number} index - 新索引
+   */
+  $showRowDragFeedback(objTarget, oldIndex, index) {
+    // 清除之前的高光
+    this.$clearAllBorders();
+
+    if (oldIndex < index) {
+      // 向下拖拽
+      objTarget.parentElement.classList.add('table-highlight-border-add-bottom');
+    } else if (oldIndex > index) {
+      // 向上拖拽
+      objTarget.parentElement.classList.add('table-highlight-border-add-top');
     }
   }
   $operateLines(oldIndex, index, lines) {
