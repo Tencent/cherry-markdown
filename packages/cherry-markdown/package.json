@@ -132,6 +132,6 @@
     "glob-watcher": "6.0.0"
   },
   "optionalDependencies": {
-    "mermaid": "11.9.0"
+    "mermaid": "11.11.0"
   }
 }
