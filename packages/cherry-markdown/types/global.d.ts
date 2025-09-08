@@ -1,4 +1,5 @@
 import Mermaid from 'mermaid';
+import katex from 'katex';
 
 // for IE
 export {};
@@ -12,5 +13,6 @@ declare global {
     mermaidAPI?: typeof Mermaid['mermaidAPI'];
     echarts?: echarts.ECharts;
     MathJax?: any;
+    katex?: katex;
   }
 }
