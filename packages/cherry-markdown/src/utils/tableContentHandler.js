@@ -836,7 +836,7 @@ export default class TableHandler {
   $hightLightColumnCellsDOM(columnIndex = this.tableEditor.info.tdIndex, position) {
     // 获取当前操作的表格
     const table = this.tableEditor.info.tableNode;
-    const rows = table.rows;
+    const { rows } = table;
     for (let i = 0; i < rows.length; i++) {
       if (rows[i].cells[columnIndex]) {
         const cell = rows[i].cells[columnIndex];
@@ -1288,7 +1288,7 @@ export default class TableHandler {
   $drawColumnResize() {
     const { tableNode } = this.tableEditor.info;
     const box = this.tableEditor.info.tdNode;
-    const columns = this.tableEditor.info.columns;
+    const { columns } = this.tableEditor.info;
 
     if (!box) return; // 安全检查
 

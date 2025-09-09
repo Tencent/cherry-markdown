@@ -50,6 +50,10 @@ export default class SyntaxBase {
    */
   $engine;
   $locale;
+  /**
+   * @type {EditorConfig['externals']}
+   */
+  $externals;
 
   /**
    * @constructor
