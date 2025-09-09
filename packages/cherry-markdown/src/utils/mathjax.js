@@ -24,10 +24,9 @@ export function LoadMathModule() {
   if (!isBrowser()) {
     return;
   }
-  // @ts-ignore
-  this.katex = this.externals?.katex ?? window.katex;
-  // @ts-ignore
-  this.MathJax = this.externals?.MathJax ?? window.MathJax;
+  const self = /** @type {import('../core/SyntaxBase').default & { katex: any; MathJax: any }} */ (this);
+  self.katex = self.$externals?.katex ?? window.katex;
+  self.MathJax = self.$externals?.MathJax ?? window.MathJax;
 }
 
 export const configureMathJax = (usePlugins) => {
