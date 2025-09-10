@@ -26,13 +26,14 @@ const numeric = /[0-9]/;
 export default class Header extends ParagraphBase {
   static HOOK_NAME = 'header';
 
-  constructor({ externals, config } = { config: undefined, externals: undefined }) {
+  constructor({ externals, config, cherry } = { config: undefined, externals: undefined, cherry: undefined }) {
     super({ needCache: true });
     this.strict = config ? !!config.strict : true;
     this.RULE = this.rule();
     this.headerIDCache = [];
     this.headerIDCounter = {};
     this.config = config || {};
+    this.$cherry = cherry;
     // TODO: AllowCustomID
   }
 
@@ -91,8 +92,16 @@ export default class Header extends ParagraphBase {
   }
 
   $wrapHeader(text, level, dataLines, sentenceMakeFunc) {
+    let $text = text;
+    // 如果不支持连续空格，则需要trim
+    if (!this.$cherry?.options?.engine?.syntax?.space) {
+      $text = $text.trim();
+    } else {
+      // 去除首部第一个空格
+      $text = $text.replace(/^\s/, '');
+    }
     // 需要经过一次escape
-    const processedText = sentenceMakeFunc(text.trim());
+    const processedText = sentenceMakeFunc($text);
     let { html } = processedText;
     // TODO: allowCustomID开关
     // let htmlAttr = this.getAttributes(html);
