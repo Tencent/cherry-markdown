@@ -256,6 +256,7 @@ const defaultConfig = {
         // chartRenderEngine: EChartsTableEngine,
         // externals: ['echarts'],
       },
+      space: false,
       inlineCode: {
         /**
          * @deprecated 不再支持theme的配置，统一在`themeSettings.inlineCodeTheme`中配置
