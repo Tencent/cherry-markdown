@@ -1466,12 +1466,75 @@ export default class TableHandler {
   }
 
   /**
-   * 列对齐方法（预留）
+   * 列对齐方法
+   * @param {string} alignment - 对齐方式：'left', 'center', 'right'
    */
   $alignColumn(alignment) {
-    // 这里可以实现列对齐功能
-    console.log(`Align column to ${alignment}`);
-    // TODO: 实现列对齐逻辑
+    const { tableIndex, tdIndex } = this.tableEditor.info;
+    this.$setSelection(tableIndex, 'table');
+    const selection = this.codeMirror.getSelection();
+    const lines = selection.split('\n');
+
+    // 统一处理markdown表格（包括引用表格）
+    this.$alignColumnInMarkdownTable(lines, tdIndex, alignment);
+
+    this.$findTableInEditor();
+    this.$setSelection(tableIndex, 'table');
+  }
+
+  /**
+   * 在markdown表格中设置列对齐（支持普通表格和引用表格）
+   * @param {Array} lines - 表格行数组
+   * @param {number} columnIndex - 列索引
+   * @param {string} alignment - 对齐方式
+   */
+  $alignColumnInMarkdownTable(lines, columnIndex, alignment) {
+    if (lines.length < 2) return;
+
+    // 找到分隔符行（第二行）
+    const separatorLineIndex = 1;
+    const separatorLine = lines[separatorLineIndex];
+
+    // 检查是否是引用表格
+    const isBlockquoteTable = separatorLine.trim().startsWith('>');
+    let quotePrefix = '';
+    let tableContent = separatorLine;
+
+    if (isBlockquoteTable) {
+      const quoteMatch = separatorLine.match(/^(>\s*)+/);
+      quotePrefix = quoteMatch ? quoteMatch[0] : '> ';
+      tableContent = separatorLine.substring(quotePrefix.length);
+    }
+
+    const cells = tableContent.split('|').slice(1, -1);
+
+    if (columnIndex >= 0 && columnIndex < cells.length) {
+      let newSeparator;
+      switch (alignment) {
+        case 'left': // 左对齐
+          newSeparator = ':---';
+          break;
+        case 'center': // 居中
+          newSeparator = ':---:';
+          break;
+        case 'right': // 右对齐
+          newSeparator = '---:';
+          break;
+        default: // 默认(居中)
+          newSeparator = '---';
+      }
+
+      cells[columnIndex] = newSeparator;
+
+      if (isBlockquoteTable) {
+        lines[separatorLineIndex] = `${quotePrefix}|${cells.join('|')}|`;
+      } else {
+        lines[separatorLineIndex] = `|${cells.join('|')}|`;
+      }
+
+      const newText = lines.join('\n');
+      this.codeMirror.replaceSelection(newText);
+    }
   }
 
   /**
