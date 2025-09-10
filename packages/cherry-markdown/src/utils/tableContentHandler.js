@@ -1069,7 +1069,7 @@ export default class TableHandler {
    * 添加菜单按钮
    */
   $drawMenu() {
-    const types = ['top', 'bottom', 'right'];
+    const types = ['top', 'right'];
     const buttons = types.map((type) => [type]);
     const container = document.createElement('div');
     container.className = 'cherry-previewer-table-hover-handler-menu-container';
@@ -1103,12 +1103,12 @@ export default class TableHandler {
   /**
    * 为菜单按钮添加拖拽功能
    * @param {HTMLElement} button - 菜单按钮元素
-   * @param {string} type - 按钮类型 ('top', 'bottom', 'right')
+   * @param {string} type - 按钮类型 ('top', 'right')
    */
   $addDragFunctionalityToMenuButton(button, type) {
     if (type === 'right') {
       this.$addRowDragFunctionality(button);
-    } else if (type === 'top' || type === 'bottom') {
+    } else if (type === 'top') {
       this.$addColumnDragFunctionality(button);
     }
   }
@@ -1138,7 +1138,7 @@ export default class TableHandler {
   }
 
   /**
-   * 为按钮添加列拖拽功能
+   * 为顶部按钮添加列拖拽功能
    * @param {HTMLElement} button - 菜单按钮元素
    */
   $addColumnDragFunctionality(button) {
@@ -1255,14 +1255,14 @@ export default class TableHandler {
       const offset = {
         outer: 5,
       };
-      if (/(right|left)/.test(type)) {
+      if (type === 'right') {
         if (isTHead) {
           this.setStyle(node, 'display', 'none');
         }
         this.setStyle(node, 'top', `${tdInfo.top - tableInfo.top + tdInfo.height / 2 - node.offsetHeight / 2}px`);
-        this.setStyle(node, `${type}`, `-${node.offsetWidth}px`);
-      } else {
-        this.setStyle(node, `${type}`, `-${offset.outer}px`);
+        this.setStyle(node, 'right', `-${node.offsetWidth}px`);
+      } else if (type === 'top') {
+        this.setStyle(node, 'top', `-${offset.outer}px`);
         this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
       }
     });
@@ -1273,7 +1273,7 @@ export default class TableHandler {
    */
   $createMenuBubble(type) {
     const bubble = document.createElement('div');
-    const isRowControl = /(right|left)/.test(type);
+    const isRowControl = type === 'right';
     const bubbleClass = isRowControl
       ? 'cherry-previewer-table-menu-bubble cherry-previewer-table-menu-bubble--vertical cherry-previewer-table-menu-bubble--hidden'
       : 'cherry-previewer-table-menu-bubble cherry-previewer-table-menu-bubble--horizontal cherry-previewer-table-menu-bubble--hidden';
@@ -1296,7 +1296,7 @@ export default class TableHandler {
    * 获取表格菜单配置
    */
   $getMenuConfig(type) {
-    const isRowControl = /(right|left)/.test(type);
+    const isRowControl = type === 'right';
 
     const baseConfig = [
       {
@@ -1354,8 +1354,8 @@ export default class TableHandler {
 
     // 使用说明：
     // showIn 配置选项：
-    // - ['row']: 只在行控制中显示（左右按钮）
-    // - ['column']: 只在列控制中显示（上下按钮）
+    // - ['row']: 只在行控制中显示（右侧按钮）
+    // - ['column']: 只在列控制中显示（顶部按钮）
     // - ['row', 'column']: 在行控制和列控制中都显示
     //
     // 示例：添加新功能
@@ -1519,11 +1519,11 @@ export default class TableHandler {
 
     // 设置气泡位置
     const { type } = button.dataset;
-    if (/(right|left)/.test(type)) {
+    if (type === 'right') {
       bubble.style.top = '0px';
-      bubble.style.left = type === 'right' ? '100%' : '-100%';
-    } else {
-      bubble.style.top = type === 'top' ? '-100%' : '100%';
+      bubble.style.left = '100%';
+    } else if (type === 'top') {
+      bubble.style.top = '-100%';
       bubble.style.left = '50%';
       bubble.style.transform = 'translateX(-50%)';
     }
