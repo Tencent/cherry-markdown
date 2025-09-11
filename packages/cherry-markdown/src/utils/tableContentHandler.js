@@ -1260,7 +1260,7 @@ export default class TableHandler {
           this.setStyle(node, 'display', 'none');
         }
         this.setStyle(node, 'top', `${tdInfo.top - tableInfo.top + tdInfo.height / 2 - node.offsetHeight / 2}px`);
-        this.setStyle(node, 'right', `-${node.offsetWidth}px`);
+        this.setStyle(node, 'right', `-${node.offsetWidth / 2}px`);
       } else if (type === 'top') {
         this.setStyle(node, 'top', `-${offset.outer}px`);
         this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
@@ -1583,10 +1583,10 @@ export default class TableHandler {
     // 设置气泡位置
     const { type } = button.dataset;
     if (type === 'right') {
-      bubble.style.top = '0px';
-      bubble.style.left = '100%';
+      bubble.style.top = '-250%';
+      bubble.style.transform = 'translateY(-50%) rotate(-90deg)';
     } else if (type === 'top') {
-      bubble.style.top = '-100%';
+      bubble.style.top = '-450%';
       bubble.style.left = '50%';
       bubble.style.transform = 'translateX(-50%)';
     }
