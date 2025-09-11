@@ -153,8 +153,18 @@ export default class CodeBlock extends ParagraphBase {
   fillTag(lines) {
     const tagStack = []; // 存储未闭合标签
     return lines.map((rawLine) => {
+      console.log('rawLine', rawLine);
       if (!rawLine) return '';
       let line = rawLine;
+
+      const trailingSpacesMatch = rawLine.match(/^(.*\S)(\s+)$/);
+      if (trailingSpacesMatch) {
+        const [, content, spaces] = trailingSpacesMatch;
+        if (spaces.length === 1) {
+          line = content.trim(); // 只有一个空格时移除
+        }
+      }
+
       // 补全上一行未闭合标签
       while (tagStack.length) {
         const tag = tagStack.pop();
