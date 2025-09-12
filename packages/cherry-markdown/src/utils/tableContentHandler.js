@@ -916,6 +916,7 @@ export default class TableHandler {
    * 添加上一行
    */
   $addLastRow() {
+    this.$findTableInEditor();
     const [{ line }] = this.tableEditor.info.selection;
     const newRow = `${'|'.repeat(this.tableEditor.info.columns)}\n`;
     this.codeMirror.replaceRange(newRow, { line, ch: 0 });
@@ -927,6 +928,7 @@ export default class TableHandler {
    * 添加下一行
    */
   $addNextRow() {
+    this.$findTableInEditor();
     const [, { line }] = this.tableEditor.info.selection;
     const { isTHead, columns } = this.tableEditor.info;
     const newRow = `${'|'.repeat(columns)}\n`;
@@ -1328,20 +1330,20 @@ export default class TableHandler {
         action: 'alignRight',
         showIn: ['column'],
       },
-      {
-        id: 'insert-row-above',
-        icon: 'ch-icon-cherry-table-insert-top',
-        title: '在上方插入行',
-        action: 'insertRowAbove',
-        showIn: ['row'],
-      },
-      {
-        id: 'insert-row-below',
-        icon: 'ch-icon-cherry-table-insert-bottom',
-        title: '在下方插入行',
-        action: 'insertRowBelow',
-        showIn: ['row'],
-      },
+      // {
+      //   id: 'insert-row-above',
+      //   icon: 'ch-icon-cherry-table-insert-top',
+      //   title: '在上方插入行',
+      //   action: 'insertRowAbove',
+      //   showIn: ['row'],
+      // },
+      // {
+      //   id: 'insert-row-below',
+      //   icon: 'ch-icon-cherry-table-insert-bottom',
+      //   title: '在下方插入行',
+      //   action: 'insertRowBelow',
+      //   showIn: ['row'],
+      // },
     ];
 
     // 根据控制类型过滤菜单项
@@ -1420,10 +1422,10 @@ export default class TableHandler {
         this.$alignColumn('right');
         break;
       case 'insertRowAbove':
-        this.$insertRow('above');
+        this.$addLastRow();
         break;
       case 'insertRowBelow':
-        this.$insertRow('below');
+        this.$addNextRow();
         break;
       case 'mergeCells':
         this.$mergeCells();
@@ -1535,15 +1537,6 @@ export default class TableHandler {
       const newText = lines.join('\n');
       this.codeMirror.replaceSelection(newText);
     }
-  }
-
-  /**
-   * 插入行方法（预留）
-   */
-  $insertRow(position) {
-    // 这里可以实现插入行功能
-    console.log(`Insert row ${position}`);
-    // TODO: 实现插入行逻辑
   }
 
   /**
