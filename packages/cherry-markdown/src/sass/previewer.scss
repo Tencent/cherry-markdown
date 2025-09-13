@@ -244,6 +244,27 @@
       }
     }
   }
+
+  /* 表格行/列插入边界的高亮线 */
+  .cherry-previewer-table-boundary-trigger-line {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  .cherry-previewer-table-boundary-trigger-line--v {
+    top: 0;
+    bottom: 0;
+    width: 0;
+    border-left: 2px solid var(--primary-color);
+  }
+
+  .cherry-previewer-table-boundary-trigger-line--h {
+    left: 0;
+    right: 0;
+    height: 0;
+    border-top: 2px solid var(--primary-color);
+  }
   
   /* 菜单气泡样式 */
   .cherry-previewer-table-menu-bubble {
