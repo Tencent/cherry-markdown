@@ -1141,7 +1141,7 @@ export default class TableHandler {
    * 菜单按钮
    */
   $drawMenu() {
-    const types = ['top', 'right'];
+    const types = ['top', 'left'];
     const buttons = types.map((type) => [type]);
     const container = document.createElement('div');
     container.className = 'cherry-previewer-table-hover-handler-menu-container';
@@ -1175,10 +1175,10 @@ export default class TableHandler {
   /**
    * 为菜单按钮添加拖拽功能
    * @param {HTMLElement} button - 菜单按钮元素
-   * @param {string} type - 按钮类型 ('top', 'right')
+   * @param {string} type - 按钮类型 ('top', 'left')
    */
   $addDragFunctionalityToMenuButton(button, type) {
-    if (type === 'right') {
+    if (type === 'left') {
       this.$addRowDragFunctionality(button);
     } else if (type === 'top') {
       this.$addColumnDragFunctionality(button);
@@ -1195,11 +1195,11 @@ export default class TableHandler {
 
     // 鼠标悬停时高亮当前行
     button.addEventListener('mouseover', () => {
-      this.$highlightCurrentRow();
+      this.$applyRowHighlight(true);
     });
 
     button.addEventListener('mouseleave', () => {
-      this.$unhighlightCurrentRow();
+      this.$applyRowHighlight(false);
     });
 
     // 拖拽开始
@@ -1217,15 +1217,13 @@ export default class TableHandler {
     button.draggable = true;
     button.title = '拖拽移动列';
 
-    const highLightTrDom = [];
-
     // 鼠标悬停时高亮当前列
     button.addEventListener('mouseover', () => {
-      this.$highlightCurrentColumn(highLightTrDom);
+      this.$highlightCurrentColumn();
     });
 
     button.addEventListener('mouseleave', () => {
-      this.$unhighlightCurrentColumn(highLightTrDom);
+      this.$unhighlightCurrentColumn();
     });
 
     // 拖拽开始
@@ -1236,35 +1234,9 @@ export default class TableHandler {
   }
 
   /**
-   * 高亮当前行
-   */
-  $highlightCurrentRow() {
-    const { tdNode } = this.tableEditor.info;
-    if (!tdNode) return;
-
-    this.$clearAllBorders();
-    tdNode.draggable = true;
-    tdNode.parentNode.classList.add('table-sort-active');
-  }
-
-  /**
-   * 取消高亮当前行
-   */
-  $unhighlightCurrentRow() {
-    const { tdNode } = this.tableEditor.info;
-    if (!tdNode) return;
-
-    tdNode.draggable = false;
-
-    // 清除所有高光效果
-    this.$clearAllBorders();
-  }
-
-  /**
    * 高亮当前列
-   * @param {Array} highLightTrDom - 存储高亮元素的数组
    */
-  $highlightCurrentColumn(highLightTrDom) {
+  $highlightCurrentColumn() {
     const { tdNode } = this.tableEditor.info;
     if (!tdNode) return;
 
@@ -1274,30 +1246,23 @@ export default class TableHandler {
     const index = Array.from(tdNode.parentNode.children).indexOf(tdNode);
     if (index === -1) return;
 
-    highLightTrDom.length = 0;
-
     const tableNode = tdNode.closest('table');
     if (!tableNode) return;
 
     const allRows = tableNode.querySelectorAll('tr');
+    // 为当前列的所有单元格添加高亮类
     allRows.forEach((tr) => {
-      highLightTrDom.push(tr);
-    });
-
-    // 为当前列的所有单元格添加高亮
-    highLightTrDom.forEach((tr) => {
       const cells = tr.querySelectorAll('td, th');
       if (cells[index]) {
-        cells[index].classList.add('table-sort-active');
+        cells[index].classList.add('table-highlight-col');
       }
     });
   }
 
   /**
    * 取消高亮当前列
-   * @param {Array} highLightTrDom - 存储高亮元素的数组
    */
-  $unhighlightCurrentColumn(highLightTrDom) {
+  $unhighlightCurrentColumn() {
     const { tdNode } = this.tableEditor.info;
     if (!tdNode) return;
 
@@ -1311,11 +1276,10 @@ export default class TableHandler {
    * 清除所有高光效果（包括边框和背景）
    */
   $clearAllBorders() {
-    // 清除所有表格的高光效果
-    const allTables = document.querySelectorAll('table');
-    allTables.forEach((table) => {
+    const table = this.tableEditor.info?.tableNode;
+    if (table) {
       this.$clearTableHighlights(table);
-    });
+    }
   }
 
   /**
@@ -1329,14 +1293,14 @@ export default class TableHandler {
     const allCells = table.querySelectorAll('td, th');
     allCells.forEach((cell) => {
       // 清除背景高光
-      cell.classList.remove('table-sort-active');
+      cell.classList.remove('table-highlight-row', 'table-highlight-col');
 
       // 清除边框高光
       cell.classList.remove(
-        'table-highlight-border-add-right',
-        'table-highlight-border-add-left',
-        'table-highlight-border-add-top',
-        'table-highlight-border-add-bottom',
+        'table-highlight-border-reorder-right',
+        'table-highlight-border-reorder-left',
+        'table-highlight-border-reorder-top',
+        'table-highlight-border-reorder-bottom',
       );
 
       // 清除内联样式
@@ -1354,10 +1318,10 @@ export default class TableHandler {
     const allRows = table.querySelectorAll('tr');
     allRows.forEach((row) => {
       row.classList.remove(
-        'table-highlight-border-add-right',
-        'table-highlight-border-add-left',
-        'table-highlight-border-add-top',
-        'table-highlight-border-add-bottom',
+        'table-highlight-border-reorder-right',
+        'table-highlight-border-reorder-left',
+        'table-highlight-border-reorder-top',
+        'table-highlight-border-reorder-bottom',
       );
       if (row instanceof HTMLElement) {
         row.style.border = '';
@@ -1367,12 +1331,11 @@ export default class TableHandler {
   }
 
   /**
-   * 高亮一列的单元格的单边框
+   * 高亮一列单元格的指定边框
    * @param {number} columnIndex
-   * @param {string} position // left | right | top | bottom
-   * @returns
+   * @param {'left'|'right'|'top'|'bottom'} position
    */
-  $hightLightColumnCellsDOM(columnIndex = this.tableEditor.info.tdIndex, position) {
+  $highlightColumnCellsDom(columnIndex = this.tableEditor.info.tdIndex, position) {
     // 获取当前操作的表格
     const table = this.tableEditor.info.tableNode;
     const { rows } = table;
@@ -1380,13 +1343,13 @@ export default class TableHandler {
       if (rows[i].cells[columnIndex]) {
         const cell = rows[i].cells[columnIndex];
         if (position === 'left') {
-          cell.classList.add('table-highlight-border-add-left');
+          cell.classList.add('table-highlight-border-reorder-left');
         } else if (position === 'right') {
-          cell.classList.add('table-highlight-border-add-right');
+          cell.classList.add('table-highlight-border-reorder-right');
         } else if (position === 'top') {
-          cell.classList.add('table-highlight-border-add-top');
+          cell.classList.add('table-highlight-border-reorder-top');
         } else if (position === 'bottom') {
-          cell.classList.add('table-highlight-border-add-bottom');
+          cell.classList.add('table-highlight-border-reorder-bottom');
         }
       }
     }
@@ -1397,16 +1360,12 @@ export default class TableHandler {
    */
   $highlightColumn() {
     const { tableNode, tdIndex } = this.tableEditor.info;
+    if (!tableNode) return;
     const { rows } = tableNode;
-    rows[0].cells[tdIndex].style.borderTop = '1px solid red';
-    rows[rows.length - 1].cells[tdIndex].style.borderBottom = '1px solid red';
     for (let i = 0; i < rows.length; i++) {
-      const { cells } = rows[i];
-      if (cells[tdIndex]) {
-        if (tdIndex === 0) cells[tdIndex].style.borderLeft = '1px solid red';
-        else cells[tdIndex - 1].style.borderRight = '1px solid red';
-        cells[tdIndex].style.borderRight = '1px solid red';
-        cells[tdIndex].style.backgroundColor = 'rgba(255, 100, 100, 0.1)';
+      const cell = rows[i].cells[tdIndex];
+      if (cell) {
+        cell.classList.add('table-highlight-col');
       }
     }
   }
@@ -1416,15 +1375,12 @@ export default class TableHandler {
    */
   $cancelHighlightColumn() {
     const { tableNode, tdIndex } = this.tableEditor.info;
-    if (tableNode) {
-      const { rows } = tableNode;
-      for (let i = 0; i < rows.length; i++) {
-        const { cells } = rows[i];
-        if (cells[tdIndex]) {
-          if (tdIndex !== 0) cells[tdIndex - 1].style.border = '';
-          cells[tdIndex].style.border = ''; // 恢复原始边框
-          cells[tdIndex].style.backgroundColor = '';
-        }
+    if (!tableNode) return;
+    const { rows } = tableNode;
+    for (let i = 0; i < rows.length; i++) {
+      const cell = rows[i].cells[tdIndex];
+      if (cell) {
+        cell.classList.remove('table-highlight-col');
       }
     }
   }
@@ -1433,31 +1389,23 @@ export default class TableHandler {
    * 高亮当前行
    */
   $highlightRow() {
-    this.$doHighlightRow('1px solid red', 'rgba(255, 100, 100, 0.1)');
+    this.$applyRowHighlight(true);
   }
 
   /**
    * 取消高亮当前行
    */
   $cancelHighlightRow() {
-    this.$doHighlightRow('');
+    this.$applyRowHighlight(false);
   }
-
-  $doHighlightRow(style = '', backgroundColor = '') {
-    const { trNode, tableNode } = this.tableEditor.info;
+  $applyRowHighlight(add) {
+    const { trNode } = this.tableEditor.info;
+    if (!trNode) return;
     const tds = trNode.cells;
-    const preTds = trNode.previousElementSibling?.cells || tableNode.tHead.firstChild.cells;
     for (let i = 0; i < tds.length; i++) {
-      if (preTds[i]) preTds[i].style.borderBottom = style;
-      tds[i].style.borderBottom = style;
-      if (backgroundColor) {
-        tds[i].style.backgroundColor = backgroundColor;
-      } else {
-        tds[i].style.backgroundColor = '';
-      }
+      if (add) tds[i].classList.add('table-highlight-row');
+      else tds[i].classList.remove('table-highlight-row');
     }
-    tds[0].style.borderLeft = style;
-    tds[tds.length - 1].style.borderRight = style;
   }
 
   /**
@@ -1480,12 +1428,12 @@ export default class TableHandler {
       const offset = {
         outer: 5,
       };
-      if (type === 'right') {
+      if (type === 'left') {
         if (isTHead) {
           this.setStyle(node, 'display', 'none');
         }
         this.setStyle(node, 'top', `${tdInfo.top - tableInfo.top + tdInfo.height / 2 - node.offsetHeight / 2}px`);
-        this.setStyle(node, 'right', `-${node.offsetWidth / 2}px`);
+        this.setStyle(node, 'left', `-${node.offsetWidth / 2}px`);
       } else if (type === 'top') {
         this.setStyle(node, 'top', `-${offset.outer}px`);
         this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
@@ -1498,7 +1446,7 @@ export default class TableHandler {
    */
   $createMenuBubble(type) {
     const bubble = document.createElement('div');
-    const isRowControl = type === 'right';
+    const isRowControl = type === 'left';
     const bubbleClass = isRowControl
       ? 'cherry-previewer-table-menu-bubble cherry-previewer-table-menu-bubble--vertical cherry-previewer-table-menu-bubble--hidden'
       : 'cherry-previewer-table-menu-bubble cherry-previewer-table-menu-bubble--horizontal cherry-previewer-table-menu-bubble--hidden';
@@ -1521,7 +1469,7 @@ export default class TableHandler {
    * 获取表格菜单配置
    */
   $getMenuConfig(type) {
-    const isRowControl = type === 'right';
+    const isRowControl = type === 'left';
 
     const baseConfig = [
       {
@@ -1766,8 +1714,8 @@ export default class TableHandler {
 
     // 设置气泡位置
     const { type } = button.dataset;
-    if (type === 'right') {
-      bubble.style.top = '-250%';
+    if (type === 'left') {
+      bubble.style.top = '350%';
       bubble.style.transform = 'translateY(-50%) rotate(-90deg)';
     } else if (type === 'top') {
       bubble.style.top = '-450%';
@@ -2113,10 +2061,10 @@ export default class TableHandler {
 
     if (oldIndex < index) {
       // 向右拖拽
-      this.$hightLightColumnCellsDOM(index, 'right');
+      this.$highlightColumnCellsDom(index, 'right');
     } else if (oldIndex > index) {
       // 向左拖拽
-      this.$hightLightColumnCellsDOM(index, 'left');
+      this.$highlightColumnCellsDom(index, 'left');
     }
   }
 
@@ -2132,10 +2080,10 @@ export default class TableHandler {
 
     if (oldIndex < index) {
       // 向下拖拽
-      objTarget.parentElement.classList.add('table-highlight-border-add-bottom');
+      objTarget.parentElement.classList.add('table-highlight-border-reorder-bottom');
     } else if (oldIndex > index) {
       // 向上拖拽
-      objTarget.parentElement.classList.add('table-highlight-border-add-top');
+      objTarget.parentElement.classList.add('table-highlight-border-reorder-top');
     }
   }
 

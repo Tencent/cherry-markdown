@@ -157,7 +157,8 @@
     position: absolute;
     pointer-events: none;
     z-index: 999;
-    &-container, &-sort-container, &-delete-container, &-menu-container {
+
+    &-container, &-menu-container {
       position: absolute;
       height: 100%;
       width: 100%;
@@ -165,6 +166,8 @@
       margin: 0;
       list-style-type: none;
     }
+
+    /* 插入行/列的触发符号 */
     &__symbol {
       pointer-events: auto;
       display: flex;
@@ -180,33 +183,7 @@
       cursor: pointer;
       transition: all 0.3s;
       &:hover {
-        background-color: rgba(53, 130, 251, 0.53);
-        color: var(--oc-white);
-      }
-    }
-    /* 排序按钮 */
-    &__sort {
-      pointer-events: auto;
-      display: flex;
-      justify-content: center;
-      position: absolute;
-      color: var(--primary-color);
-      width: 12px;
-      height: 12px;
-      padding: 5px 0;
-      line-height: 12px;
-      border: 1px solid rgba(53, 130, 251, 0);
-      background-color: transparent;
-      border-radius: 3px;
-      cursor: pointer;
-      transition: all 0.3s;
-      &:hover {
-        background-color: rgba(53, 130, 251, 0.53);
-        border-color: rgba(53, 130, 251, 0.53);
-        color: var(--oc-white);
-      }
-      &[data-type='ColUp'], &[data-type='ColDown'] {
-        padding: 0 5px;
+        background-color: var(--secondary-color);
       }
     }
 
@@ -245,6 +222,19 @@
     }
   }
 
+  /* 表格行/列重排序的高亮线 */
+  .table-highlight-border-reorder {
+    &-left   { border-left: 2px solid var(--md-table-drag-bar-border-bg) !important; }
+    &-right  { border-right: 2px solid var(--md-table-drag-bar-border-bg) !important; }
+    &-top    { border-top: 2px solid var(--md-table-drag-bar-border-bg) !important; }
+    &-bottom { border-bottom: 2px solid var(--md-table-drag-bar-border-bg) !important; }
+  }
+
+  .table-highlight-col,
+  .table-highlight-row {
+    background-color: var(--md-table-sort-active-bg) !important;
+  }
+
   /* 表格行/列插入边界的高亮线 */
   .cherry-previewer-table-boundary-trigger-line {
     position: absolute;
@@ -265,7 +255,7 @@
     height: 0;
     border-top: 2px solid var(--primary-color);
   }
-  
+
   /* 菜单气泡样式 */
   .cherry-previewer-table-menu-bubble {
     position: absolute;
@@ -348,19 +338,5 @@
     animation: changeHighlightLineBg 1s;
   }
 }
-//tableHandler使用的
-.table-highlight-border-add-left {
-  border-left: 2px solid var(--md-table-side-border-solid) !important
-}
-.table-highlight-border-add-right {
-  border-right: 2px solid var(--md-table-side-border-solid) !important;
-}
-.table-highlight-border-add-top {
-  border-top: 2px solid var(--md-table-side-border-solid) !important;
-}
-.table-highlight-border-add-bottom {
-  border-bottom: 2px solid var(--md-table-side-border-solid) !important;
-}
-.table-sort-active{
-  background-color: var(--md-table-sort-active-bg) !important;
-}
+
+
