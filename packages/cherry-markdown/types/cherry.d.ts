@@ -307,6 +307,7 @@ export interface CherryEngineOptions {
           // chartRenderEngine: EChartsTableEngine,
           // externals: ['echarts'],
         };
+    space?: boolean;
     inlineCode?:
       | false
       | {

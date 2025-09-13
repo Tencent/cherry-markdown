@@ -35,18 +35,19 @@ export default class H2 extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    let $selection = getSelection(this.editor.editor, selection, 'line', true) || this.locale.h2;
+    const $selection = getSelection(this.editor.editor, selection, 'line', true) || this.locale.h2;
     const header = '##';
-    if (!this.isSelections && !this.$testIsHead($selection)) {
-      this.getMoreSelection('\n', '', () => {
-        const newSelection = this.editor.editor.getSelection();
-        const isHead = this.$testIsHead(newSelection);
-        if (isHead) {
-          $selection = newSelection;
-        }
-        return isHead;
-      });
-    }
+    // 注释下面的代码，因为选中标题绝对只有一行，所以不需要扩大选区
+    // if (!this.isSelections && !this.$testIsHead($selection)) {
+    //   this.getMoreSelection('\n', '', () => {
+    //     const newSelection = this.editor.editor.getSelection();
+    //     const isHead = this.$testIsHead(newSelection);
+    //     if (isHead) {
+    //       $selection = newSelection;
+    //     }
+    //     return isHead;
+    //   });
+    // }
     if (this.$testIsHead($selection)) {
       // 如果选中的内容里有标题语法，并且标记级别与目标一致，则去掉标题语法
       // 反之，修改标题级别与目标一致
