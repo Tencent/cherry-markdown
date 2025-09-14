@@ -102,22 +102,6 @@ export default class TableHandler {
   }
 
   /**
-   * 创建 DOM 元素的通用工具方法
-   * @param {string} tag - 标签名
-   * @param {string} className - CSS 类名
-   * @param {string} innerHTML - 内部 HTML 内容
-   * @param {Object} attributes - 其他属性
-   * @returns {HTMLElement}
-   */
-  $createElement(tag, className = '', innerHTML = '', attributes = {}) {
-    const element = document.createElement(tag);
-    if (className) element.className = className;
-    if (innerHTML) element.innerHTML = innerHTML;
-    Object.assign(element, attributes);
-    return element;
-  }
-
-  /**
    * TODO: 这里是分别对文本框、操作符号和选项设置偏移，应该作为一个整体来设置
    */
   $setInputOffset() {
@@ -998,36 +982,39 @@ export default class TableHandler {
     colSymbol.addEventListener('click', () => {
       const meta = this.tableEditor.editorDom.boundaryTriggerSymbol.col;
       if (meta.index === null || meta.index === undefined) return;
+
       const totalCols = this.tableEditor.info.columns;
       if (meta.index === 0) {
         this.tableEditor.info.tdIndex = -1;
-        this.$addNextCol();
       } else if (meta.index === totalCols) {
         this.tableEditor.info.tdIndex = totalCols - 1;
-        this.$addNextCol();
       } else {
         this.tableEditor.info.tdIndex = meta.index - 1;
-        this.$addNextCol();
       }
-      this.boundaryCache = null;
-      this.$findTableInEditor();
+
+      this.$insertCol();
+      this.$afterTableOperation();
     });
 
     // 行点击插入
     rowSymbol.addEventListener('click', () => {
       const meta = this.tableEditor.editorDom.boundaryTriggerSymbol.row;
       if (meta.index === null || meta.index === undefined) return;
+
       const body = this.tableEditor.info.tableNode.tBodies[0];
       const dataRowCount = body ? body.rows.length : 0;
+      let position;
+
       if (meta.index === 0) {
-        this.$insertRowAtTop();
+        position = 'top';
       } else if (meta.index === dataRowCount) {
-        this.$insertRowAtBottom();
+        position = 'bottom';
       } else {
-        this.$insertRowBetween(meta.index);
+        position = meta.index;
       }
-      this.boundaryCache = null;
-      this.$findTableInEditor();
+
+      this.$insertRow(position);
+      this.$afterTableOperation();
     });
   }
 
@@ -1045,96 +1032,70 @@ export default class TableHandler {
   }
 
   /**
-   * 在两行之间插入一行
-   * @param {number} boundaryIndex
+   * 执行表格操作后的通用清理工作
    */
-  $insertRowBetween(boundaryIndex) {
-    if (this.tableEditor.info.isHtmlTable) return;
-    const { tableIndex, columns } = this.tableEditor.info;
-    this.$setSelection(tableIndex, 'table');
-    const selection = this.codeMirror.getSelection();
-    const lines = selection.split('\n');
-    if (lines.length < 3) return;
-
-    const dataRowCount = lines.length - 2;
-    if (boundaryIndex < 1 || boundaryIndex >= dataRowCount) return;
-
-    const insertLine = 2 + boundaryIndex;
-    const newRow = `${'|'.repeat(columns)}\n`;
-
-    const [{ line: startLine }] = this.tableEditor.info.selection;
-    this.codeMirror.replaceRange(newRow, { line: startLine + insertLine, ch: 0 });
-
+  $afterTableOperation() {
+    this.boundaryCache = null;
     this.$findTableInEditor();
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
   }
 
   /**
-   * 在顶部插入一行
+   * 添加行
+   * @param {string|number} position - 插入位置：'top' | 'bottom' | number (中间插入的行索引)
    */
-  $insertRowAtTop() {
+  $insertRow(position) {
     if (this.tableEditor.info.isHtmlTable) return;
     const { tableIndex, columns } = this.tableEditor.info;
     this.$setSelection(tableIndex, 'table');
     const selection = this.codeMirror.getSelection();
     const lines = selection.split('\n');
     if (lines.length < 3) return;
-    const insertLine = 2;
-    const newRow = `${'|'.repeat(columns)}\n`;
-    const [{ line: startLine }] = this.tableEditor.info.selection;
-    this.codeMirror.replaceRange(newRow, { line: startLine + insertLine, ch: 0 });
-    this.$findTableInEditor();
-    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
-  }
 
-  /**
-   * 在底部追加一行
-   */
-  $insertRowAtBottom() {
-    if (this.tableEditor.info.isHtmlTable) return;
-    const { tableIndex, columns } = this.tableEditor.info;
-    this.$setSelection(tableIndex, 'table');
-    const selection = this.codeMirror.getSelection();
-    const lines = selection.split('\n');
-    if (lines.length < 3) return;
-    const newRow = `${'|'.repeat(columns)}\n`;
     const [{ line: startLine }] = this.tableEditor.info.selection;
-    const insertLine = startLine + lines.length;
+    const newRow = `${'|'.repeat(columns)}\n`;
+    let insertLine;
+
+    if (position === 'top') {
+      // 在顶部插入（标题行后）
+      insertLine = startLine + 2;
+    } else if (position === 'bottom') {
+      // 在底部插入
+      insertLine = startLine + lines.length;
+    } else if (typeof position === 'number') {
+      // 在中间插入
+      const dataRowCount = lines.length - 2;
+      if (position < 1 || position >= dataRowCount) return;
+      insertLine = startLine + 2 + position;
+    } else {
+      return;
+    }
+
     this.codeMirror.replaceRange(newRow, { line: insertLine, ch: 0 });
-    this.$findTableInEditor();
-    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+    this.$afterTableOperation();
   }
 
   /**
-   * 获取单元格对齐方式
-   * @param {*} cells 单元格数组
-   * @param {*} index 单元格索引
-   * @returns {string|false} 单元格对齐方式，如果是false则表示不生成对齐方式
+   * 添加列
    */
-  $getTdAlign(cells, index, cellsIndex) {
-    return index === 1 && typeof cells[cellsIndex] === 'string' ? cells[cellsIndex] : '';
-  }
-
-  /**
-   * 添加下一列
-   */
-  $addNextCol() {
+  $insertCol() {
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
     const selection = this.codeMirror.getSelection();
     const lines = selection.split('\n');
     const newLines = lines.map((line, index) => {
       const cells = line.split('|');
-      const replaceItem = this.$getTdAlign(cells, index, this.tableEditor.info.tdIndex + 1);
-      if (!replaceItem) {
-        return line;
+
+      if (index === 1) {
+        cells.splice(this.tableEditor.info.tdIndex + 2, 0, '------');
+        return cells.join('|');
       }
-      cells.splice(this.tableEditor.info.tdIndex + 2, 0, replaceItem);
+
+      cells.splice(this.tableEditor.info.tdIndex + 2, 0, '');
       return cells.join('|');
     });
     const newText = newLines.join('\n');
     this.codeMirror.replaceSelection(newText);
-    this.$findTableInEditor();
-    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+    this.$afterTableOperation();
   }
 
   /**
@@ -1596,8 +1557,7 @@ export default class TableHandler {
     // 统一处理markdown表格（包括引用表格）
     this.$alignColumnInMarkdownTable(lines, tdIndex, alignment);
 
-    this.$findTableInEditor();
-    this.$setSelection(tableIndex, 'table');
+    this.$afterTableOperation();
   }
 
   /**
@@ -1753,6 +1713,7 @@ export default class TableHandler {
     table.splice(trIndex + 2, 1);
     const newText = table.join('\n');
     this.codeMirror.replaceSelection(newText);
+    this.$afterTableOperation();
   }
 
   /**
@@ -1804,6 +1765,7 @@ export default class TableHandler {
       const newText = newTable.join('\n');
       this.codeMirror.replaceSelection(newText);
     }
+    this.$afterTableOperation();
   }
 
   /**
