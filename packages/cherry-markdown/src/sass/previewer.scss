@@ -224,10 +224,10 @@
 
   /* 表格行/列重排序的高亮线 */
   .table-highlight-border-reorder {
-    &-left   { border-left: 2px solid var(--md-table-drag-bar-border-bg) !important; }
-    &-right  { border-right: 2px solid var(--md-table-drag-bar-border-bg) !important; }
-    &-top    { border-top: 2px solid var(--md-table-drag-bar-border-bg) !important; }
-    &-bottom { border-bottom: 2px solid var(--md-table-drag-bar-border-bg) !important; }
+    &-left   { border-left: 2px solid var(--md-table-drag-border-bg) !important; }
+    &-right  { border-right: 2px solid var(--md-table-drag-border-bg) !important; }
+    &-top    { border-top: 2px solid var(--md-table-drag-border-bg) !important; }
+    &-bottom { border-bottom: 2px solid var(--md-table-drag-border-bg) !important; }
   }
 
   .table-highlight-col,

@@ -1806,6 +1806,8 @@ export default class TableHandler {
       startWidth = box.offsetWidth;
       e.preventDefault();
 
+      dragBar.classList.add('dragging');
+
       // 立即绑定事件
       document.addEventListener('mousemove', handleMouseMove, true);
       document.addEventListener('mouseup', handleMouseUp, true);
@@ -1841,6 +1843,7 @@ export default class TableHandler {
       document.removeEventListener('mousemove', handleMouseMove, true);
       document.removeEventListener('mouseup', handleMouseUp, true);
       document.removeEventListener('mouseleave', handleMouseLeave, true);
+      dragBar?.classList.remove('dragging');
       dragBar?.remove();
     };
 
