@@ -666,7 +666,6 @@ export default class TableHandler {
     }
     this.$drawSymbol();
     this.$drawMenu();
-    this.$drawColumnResize();
   }
 
   /**
@@ -1766,88 +1765,6 @@ export default class TableHandler {
       this.codeMirror.replaceSelection(newText);
     }
     this.$afterTableOperation();
-  }
-
-  /**
-   * 绘制列宽调整
-   * @returns void
-   */
-  $drawColumnResize() {
-    const { tableNode } = this.tableEditor.info;
-    const box = this.tableEditor.info.tdNode;
-    const { columns } = this.tableEditor.info;
-
-    if (!box) return; // 安全检查
-
-    let isDragging = false;
-    let startX = 0;
-    let startWidth = 0;
-
-    // 检查是否已有 dragBar，避免重复创建
-    const existingDragBar = box.querySelector('.cherry-table-drag-bar');
-    if (existingDragBar) return;
-
-    // 设置定位
-    box.style.position = 'relative';
-    // 创建 dragBar
-    const dragBar = document.createElement('div');
-    dragBar.className = 'cherry-table-drag-bar';
-    dragBar.style.position = 'absolute';
-    box.appendChild(dragBar);
-
-    box.addEventListener('mouseleave', () => {
-      if (!isDragging) cleanup(); // 没拖拽，就清理
-    });
-    // mousedown 拖拽开始
-    const handleMouseDown = (e) => {
-      isDragging = true;
-      startX = e.clientX;
-
-      startWidth = box.offsetWidth;
-      e.preventDefault();
-
-      dragBar.classList.add('dragging');
-
-      // 立即绑定事件
-      document.addEventListener('mousemove', handleMouseMove, true);
-      document.addEventListener('mouseup', handleMouseUp, true);
-      document.addEventListener('mouseleave', handleMouseLeave, true);
-    };
-    // 移动
-    const handleMouseMove = (e) => {
-      if (!isDragging) return;
-      const delta = e.clientX - startX;
-      const width = Math.max(50, startWidth + delta); // 最小宽度 50px
-
-      box.style.width = `${width}px`;
-      // 更新表格总宽度
-      tableNode.style.width = `${width * columns}px`;
-    };
-    // 鼠标释放
-    const handleMouseUp = (e) => {
-      if (isDragging) {
-        isDragging = false;
-        cleanup();
-      }
-    };
-
-    const handleMouseLeave = (e) => {
-      if (isDragging && e.clientY <= 0) {
-        // 鼠标移出窗口（顶部以上），视为取消
-        cleanup();
-      }
-    };
-
-    // 清理函数：统一处理资源释放
-    const cleanup = () => {
-      document.removeEventListener('mousemove', handleMouseMove, true);
-      document.removeEventListener('mouseup', handleMouseUp, true);
-      document.removeEventListener('mouseleave', handleMouseLeave, true);
-      dragBar?.classList.remove('dragging');
-      dragBar?.remove();
-    };
-
-    dragBar.addEventListener('mousedown', handleMouseDown);
   }
 
   /**

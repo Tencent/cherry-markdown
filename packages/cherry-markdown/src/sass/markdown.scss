@@ -457,23 +457,6 @@
         white-space: nowrap;
         background-color: var(--md-inline-code-bg);
       }
-      .cherry-table-drag-bar{
-        top: 0;
-        right: 0;
-        width: 3px;
-        height: 100%;
-        background-color: transparent;
-        cursor: col-resize;
-        transition: background-color 0.2s ease;
-        
-        &:hover {
-          background-color: var(--md-table-drag-border-bg);
-        }
-        
-        &.dragging {
-          background-color: var(--md-table-drag-border-bg);
-        }
-      }
     }
   }
 
