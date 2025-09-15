@@ -797,9 +797,9 @@ export default class TableHandler {
     const THRESHOLD = 6; // 鼠标到最近边界 <=6px 才显示
     const STICKY = 14; // 一旦锁定，允许在 14px 内平滑移动
     let activeCol = null; // 当前激活的列
-    let activeRows = [null, null]; // 当前激活的行
+    let activeRow = null; // 当前激活的行
     let plannedCol = null; // 计划插入的列
-    let plannedRows = [null, null]; // 计划插入的行
+    let plannedRow = null; // 计划插入的行
     let rafPending = false;
 
     const render = (tableRect) => {
@@ -821,31 +821,30 @@ export default class TableHandler {
         activeCol = null;
       }
       // 行（左侧和右侧）
-      rowSymbols.forEach((symbol, index) => {
-        const plannedRow = plannedRows[index];
-        if (plannedRow) {
-          const top = plannedRow.pos - tableRect.top - 6;
+      if (plannedRow) {
+        const top = plannedRow.pos - tableRect.top - 6;
+        rowSymbols.forEach((symbol, index) => {
           symbol.style.top = `${top}px`;
           symbol.style.left = index === 0 ? '-20px' : `${tableRect.width + 4}px`;
           symbol.style.display = '';
           this.tableEditor.editorDom.boundaryTriggerSymbol.rows[index].index = plannedRow.index;
-          activeRows[index] = plannedRow;
-        } else {
-          symbol.style.display = 'none';
-          this.tableEditor.editorDom.boundaryTriggerSymbol.rows[index].index = null;
-          activeRows[index] = null;
-        }
-      });
-
-      if (plannedRows[0]) {
-        hLine.style.top = `${plannedRows[0].pos - tableRect.top}px`;
+        });
+        activeRow = plannedRow;
+        hLine.style.top = `${plannedRow.pos - tableRect.top}px`;
         hLine.style.display = '';
       } else {
+        rowSymbols.forEach((symbol) => {
+          symbol.style.display = 'none';
+        });
+        this.tableEditor.editorDom.boundaryTriggerSymbol.rows.forEach((row) => {
+          row.index = null;
+        });
+        activeRow = null;
         hLine.style.display = 'none';
       }
 
       plannedCol = null;
-      plannedRows = [null, null];
+      plannedRow = null;
     };
 
     const requestRender = (tableRect) => {
@@ -910,7 +909,7 @@ export default class TableHandler {
       const tableRect = tableNode.getBoundingClientRect();
       const { clientX: x, clientY: y } = e;
       if (x < tableRect.left || x > tableRect.right || y < tableRect.top || y > tableRect.bottom) {
-        if (!activeCol && !activeRows.some((row) => row !== null)) {
+        if (!activeCol && !activeRow) {
           colSymbol.style.display = 'none';
           rowSymbols.forEach((symbol) => (symbol.style.display = 'none'));
           vLine.style.display = 'none';
@@ -940,24 +939,22 @@ export default class TableHandler {
         plannedCol = bestCol;
       }
 
-      // 行粘滞（左侧和右侧）
-      rowSymbols.forEach((symbol, index) => {
-        if (activeRows[index] && Math.abs(y - activeRows[index].pos) <= STICKY) {
-          plannedRows[index] = activeRows[index];
-        } else {
-          activeRows[index] = null;
-          let bestRow = null;
-          let bestRowDist = Infinity;
-          for (const b of rowBoundaries) {
-            const d = Math.abs(y - b.pos);
-            if (d <= THRESHOLD && d < bestRowDist) {
-              bestRowDist = d;
-              bestRow = b;
-            }
+      // 行粘滞
+      if (activeRow && Math.abs(y - activeRow.pos) <= STICKY) {
+        plannedRow = activeRow;
+      } else {
+        activeRow = null;
+        let bestRow = null;
+        let bestRowDist = Infinity;
+        for (const b of rowBoundaries) {
+          const d = Math.abs(y - b.pos);
+          if (d <= THRESHOLD && d < bestRowDist) {
+            bestRowDist = d;
+            bestRow = b;
           }
-          plannedRows[index] = bestRow;
         }
-      });
+        plannedRow = bestRow;
+      }
 
       requestRender(tableRect);
     };
@@ -996,7 +993,7 @@ export default class TableHandler {
         vLine.style.display = 'none';
         hLine.style.display = 'none';
         activeCol = null;
-        activeRows = [null, null];
+        activeRow = null;
       }
     };
     document.addEventListener('mousemove', globalMove, true);
