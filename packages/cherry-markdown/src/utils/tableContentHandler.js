@@ -1414,15 +1414,16 @@ export default class TableHandler {
       const { type } = node.dataset;
       const offset = {
         outer: 5,
+        border: 1,
       };
       if (type === 'left') {
         if (isTHead) {
           this.setStyle(node, 'display', 'none');
         }
         this.setStyle(node, 'top', `${tdInfo.top - tableInfo.top + tdInfo.height / 2 - node.offsetHeight / 2}px`);
-        this.setStyle(node, 'left', `-${node.offsetWidth / 2}px`);
+        this.setStyle(node, 'left', `-${(node.offsetWidth - offset.border) / 2}px`);
       } else if (type === 'top') {
-        this.setStyle(node, 'top', `-${offset.outer}px`);
+        this.setStyle(node, 'top', `-${offset.outer + offset.border}px`);
         this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
       }
     });

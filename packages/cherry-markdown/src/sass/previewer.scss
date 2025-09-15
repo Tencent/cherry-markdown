@@ -201,6 +201,7 @@
       border: 1px solid var(--md-table-operator-color);
       border-radius: 999px;
       background-color: var(--base-previewer-bg);
+      z-index: 1001; // 高于 cherry-previewer-table-boundary-trigger-line
       cursor: pointer;
       transition: all 0.3s;
 
