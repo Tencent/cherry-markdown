@@ -753,14 +753,27 @@ export default class TableHandler {
     colSymbol.innerHTML = '+';
     colSymbol.title = this.$cherry.locale.addCol || '+';
 
-    // 行符号
-    const rowSymbol = document.createElement('div');
-    rowSymbol.className =
+    // 行符号（左侧和右侧）
+    const rowSymbols = [];
+    const rowSymbolLeft = document.createElement('div');
+    rowSymbolLeft.className =
       'cherry-previewer-table-hover-handler__symbol cherry-previewer-table-hover-handler__symbol--boundary-trigger';
-    rowSymbol.style.position = 'absolute';
-    rowSymbol.style.display = 'none';
-    rowSymbol.innerHTML = '+';
-    rowSymbol.title = this.$cherry.locale.addRow || '+';
+    rowSymbolLeft.style.position = 'absolute';
+    rowSymbolLeft.style.display = 'none';
+    rowSymbolLeft.innerHTML = '+';
+    rowSymbolLeft.title = this.$cherry.locale.addRow || '+';
+    rowSymbolLeft.dataset.side = 'left';
+
+    const rowSymbolRight = document.createElement('div');
+    rowSymbolRight.className =
+      'cherry-previewer-table-hover-handler__symbol cherry-previewer-table-hover-handler__symbol--boundary-trigger';
+    rowSymbolRight.style.position = 'absolute';
+    rowSymbolRight.style.display = 'none';
+    rowSymbolRight.innerHTML = '+';
+    rowSymbolRight.title = this.$cherry.locale.addRow || '+';
+    rowSymbolRight.dataset.side = 'right';
+
+    rowSymbols.push(rowSymbolLeft, rowSymbolRight);
 
     const vLine = document.createElement('div');
     vLine.className = 'cherry-previewer-table-boundary-trigger-line cherry-previewer-table-boundary-trigger-line--v';
@@ -770,7 +783,7 @@ export default class TableHandler {
     hLine.style.display = 'none';
 
     container.appendChild(colSymbol);
-    container.appendChild(rowSymbol);
+    rowSymbols.forEach((symbol) => container.appendChild(symbol));
     container.appendChild(vLine);
     container.appendChild(hLine);
     this.tableEditor.editorDom.symbolContainer = container;
@@ -778,15 +791,15 @@ export default class TableHandler {
 
     this.tableEditor.editorDom.boundaryTriggerSymbol = {
       col: { el: colSymbol, index: null },
-      row: { el: rowSymbol, index: null },
+      rows: rowSymbols.map((symbol) => ({ el: symbol, index: null })),
     };
 
     const THRESHOLD = 6; // 鼠标到最近边界 <=6px 才显示
     const STICKY = 14; // 一旦锁定，允许在 14px 内平滑移动
     let activeCol = null; // 当前激活的列
-    let activeRow = null; // 当前激活的行
+    let activeRows = [null, null]; // 当前激活的行
     let plannedCol = null; // 计划插入的列
-    let plannedRow = null; // 计划插入的行
+    let plannedRows = [null, null]; // 计划插入的行
     let rafPending = false;
 
     const render = (tableRect) => {
@@ -807,24 +820,32 @@ export default class TableHandler {
         this.tableEditor.editorDom.boundaryTriggerSymbol.col.index = null;
         activeCol = null;
       }
-      // 行
-      if (plannedRow) {
-        const top = plannedRow.pos - tableRect.top - 6;
-        rowSymbol.style.top = `${top}px`;
-        rowSymbol.style.left = '-20px';
-        rowSymbol.style.display = '';
-        this.tableEditor.editorDom.boundaryTriggerSymbol.row.index = plannedRow.index;
-        hLine.style.top = `${plannedRow.pos - tableRect.top}px`;
+      // 行（左侧和右侧）
+      rowSymbols.forEach((symbol, index) => {
+        const plannedRow = plannedRows[index];
+        if (plannedRow) {
+          const top = plannedRow.pos - tableRect.top - 6;
+          symbol.style.top = `${top}px`;
+          symbol.style.left = index === 0 ? '-20px' : `${tableRect.width + 4}px`;
+          symbol.style.display = '';
+          this.tableEditor.editorDom.boundaryTriggerSymbol.rows[index].index = plannedRow.index;
+          activeRows[index] = plannedRow;
+        } else {
+          symbol.style.display = 'none';
+          this.tableEditor.editorDom.boundaryTriggerSymbol.rows[index].index = null;
+          activeRows[index] = null;
+        }
+      });
+
+      if (plannedRows[0]) {
+        hLine.style.top = `${plannedRows[0].pos - tableRect.top}px`;
         hLine.style.display = '';
-        activeRow = plannedRow;
       } else {
-        rowSymbol.style.display = 'none';
         hLine.style.display = 'none';
-        this.tableEditor.editorDom.boundaryTriggerSymbol.row.index = null;
-        activeRow = null;
       }
+
       plannedCol = null;
-      plannedRow = null;
+      plannedRows = [null, null];
     };
 
     const requestRender = (tableRect) => {
@@ -889,9 +910,9 @@ export default class TableHandler {
       const tableRect = tableNode.getBoundingClientRect();
       const { clientX: x, clientY: y } = e;
       if (x < tableRect.left || x > tableRect.right || y < tableRect.top || y > tableRect.bottom) {
-        if (!activeCol && !activeRow) {
+        if (!activeCol && !activeRows.some((row) => row !== null)) {
           colSymbol.style.display = 'none';
-          rowSymbol.style.display = 'none';
+          rowSymbols.forEach((symbol) => (symbol.style.display = 'none'));
           vLine.style.display = 'none';
           hLine.style.display = 'none';
         }
@@ -919,22 +940,24 @@ export default class TableHandler {
         plannedCol = bestCol;
       }
 
-      // 行粘滞
-      if (activeRow && Math.abs(y - activeRow.pos) <= STICKY) {
-        plannedRow = activeRow;
-      } else {
-        activeRow = null;
-        let bestRow = null;
-        let bestRowDist = Infinity;
-        for (const b of rowBoundaries) {
-          const d = Math.abs(y - b.pos);
-          if (d <= THRESHOLD && d < bestRowDist) {
-            bestRowDist = d;
-            bestRow = b;
+      // 行粘滞（左侧和右侧）
+      rowSymbols.forEach((symbol, index) => {
+        if (activeRows[index] && Math.abs(y - activeRows[index].pos) <= STICKY) {
+          plannedRows[index] = activeRows[index];
+        } else {
+          activeRows[index] = null;
+          let bestRow = null;
+          let bestRowDist = Infinity;
+          for (const b of rowBoundaries) {
+            const d = Math.abs(y - b.pos);
+            if (d <= THRESHOLD && d < bestRowDist) {
+              bestRowDist = d;
+              bestRow = b;
+            }
           }
+          plannedRows[index] = bestRow;
         }
-        plannedRow = bestRow;
-      }
+      });
 
       requestRender(tableRect);
     };
@@ -945,7 +968,8 @@ export default class TableHandler {
     this.$updateBoundaryTriggerPosition();
 
     const globalMove = (evt) => {
-      const anyVisible = colSymbol.style.display !== 'none' || rowSymbol.style.display !== 'none';
+      const anyVisible =
+        colSymbol.style.display !== 'none' || rowSymbols.some((symbol) => symbol.style.display !== 'none');
       if (!anyVisible) return;
       const padding = 60;
       const tableRect2 = tableNode.getBoundingClientRect();
@@ -965,13 +989,14 @@ export default class TableHandler {
           evt.clientY <= r.bottom + padding
         );
       };
-      if (!inSafe(colSymbol) && !inSafe(rowSymbol)) {
+      const isAnySymbolSafe = inSafe(colSymbol) || rowSymbols.some((symbol) => inSafe(symbol));
+      if (!isAnySymbolSafe) {
         colSymbol.style.display = 'none';
-        rowSymbol.style.display = 'none';
+        rowSymbols.forEach((symbol) => (symbol.style.display = 'none'));
         vLine.style.display = 'none';
         hLine.style.display = 'none';
         activeCol = null;
-        activeRow = null;
+        activeRows = [null, null];
       }
     };
     document.addEventListener('mousemove', globalMove, true);
@@ -995,25 +1020,27 @@ export default class TableHandler {
       this.$afterTableOperation();
     });
 
-    // 行点击插入
-    rowSymbol.addEventListener('click', () => {
-      const meta = this.tableEditor.editorDom.boundaryTriggerSymbol.row;
-      if (meta.index === null || meta.index === undefined) return;
+    // 行点击插入（左侧和右侧）
+    rowSymbols.forEach((symbol, index) => {
+      symbol.addEventListener('click', () => {
+        const meta = this.tableEditor.editorDom.boundaryTriggerSymbol.rows[index];
+        if (meta.index === null || meta.index === undefined) return;
 
-      const body = this.tableEditor.info.tableNode.tBodies[0];
-      const dataRowCount = body ? body.rows.length : 0;
-      let position;
+        const body = this.tableEditor.info.tableNode.tBodies[0];
+        const dataRowCount = body ? body.rows.length : 0;
+        let position;
 
-      if (meta.index === 0) {
-        position = 'top';
-      } else if (meta.index === dataRowCount) {
-        position = 'bottom';
-      } else {
-        position = meta.index;
-      }
+        if (meta.index === 0) {
+          position = 'top';
+        } else if (meta.index === dataRowCount) {
+          position = 'bottom';
+        } else {
+          position = meta.index;
+        }
 
-      this.$insertRow(position);
-      this.$afterTableOperation();
+        this.$insertRow(position);
+        this.$afterTableOperation();
+      });
     });
   }
 
