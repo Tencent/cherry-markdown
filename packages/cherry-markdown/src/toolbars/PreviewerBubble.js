@@ -94,6 +94,9 @@ export default class PreviewerBubble {
     );
     this.$cherry.$event.on('previewerClose', () => this.$removeAllPreviewerBubbles());
     this.previewer.options.afterUpdateCallBack.push(() => {
+      // 检查表格处理器是否需要重新创建
+      this.$checkAndRecreateTableHandlers();
+
       Object.values(this.bubbleHandler).forEach((handler) =>
         handler.emit('previewUpdate', () => this.$removeAllPreviewerBubbles()),
       );
@@ -456,6 +459,71 @@ export default class PreviewerBubble {
         value.emit('remove');
         delete this.bubbleHandler[key];
       });
+    if (Object.keys(this.bubbleHandler).length <= 0) {
+      this.previewer.$cherry.wrapperDom.style.overflow = this.oldWrapperDomOverflow || '';
+    }
+  }
+
+  /**
+   * 检查并重新创建表格处理器
+   * 当表格结构发生变化时，需要重新创建处理器以避免位置异常
+   */
+  $checkAndRecreateTableHandlers() {
+    // 检查所有表格处理器
+    Object.entries(this.bubbleHandler).forEach(([trigger, handler]) => {
+      if (handler instanceof TableHandler) {
+        // 检查表格是否仍然存在且有效
+        if (!this.$isTableHandlerValid(handler)) {
+          // 表格已不存在或无效，移除处理器
+          this.$removePreviewerBubble(trigger);
+        }
+      }
+    });
+  }
+
+  /**
+   * 检查表格处理器是否仍然有效
+   * @param {TableHandler} handler 表格处理器实例
+   * @returns {boolean} 是否有效
+   */
+  $isTableHandlerValid(handler) {
+    // 检查目标元素是否仍然存在
+    if (!handler.target || !document.contains(handler.target)) {
+      return false;
+    }
+
+    // 检查表格节点是否仍然存在
+    const tableNode = handler.$getClosestNode(handler.target, 'TABLE');
+    if (tableNode === false) {
+      return false;
+    }
+
+    // 检查表格是否仍然在预览区域中
+    if (!this.previewerDom.contains(tableNode)) {
+      return false;
+    }
+
+    // 检查表格是否有有效的内容
+    if (!tableNode.textContent || tableNode.textContent.trim() === '') {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * 移除指定的预览气泡
+   * @param {string} trigger 触发方式
+   */
+  $removePreviewerBubble(trigger) {
+    if (this.bubble[trigger]) {
+      this.bubble[trigger].remove();
+      delete this.bubble[trigger];
+    }
+    if (this.bubbleHandler[trigger]) {
+      this.bubbleHandler[trigger].emit('remove');
+      delete this.bubbleHandler[trigger];
+    }
     if (Object.keys(this.bubbleHandler).length <= 0) {
       this.previewer.$cherry.wrapperDom.style.overflow = this.oldWrapperDomOverflow || '';
     }

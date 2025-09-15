@@ -157,7 +157,8 @@
     position: absolute;
     pointer-events: none;
     z-index: 999;
-    &-container, &-sort-container, &-delete-container {
+
+    &-container, &-menu-container {
       position: absolute;
       height: 100%;
       width: 100%;
@@ -165,12 +166,14 @@
       margin: 0;
       list-style-type: none;
     }
+
+    /* 插入行/列的触发符号 */
     &__symbol {
       pointer-events: auto;
       display: flex;
       justify-content: center;
       position: absolute;
-      color: var(--primary-color);
+      color: var(--md-table-operator-color);
       width: 12px;
       height: 12px;
       line-height: 12px;
@@ -180,61 +183,134 @@
       cursor: pointer;
       transition: all 0.3s;
       &:hover {
-        background-color: rgba(53, 130, 251, 0.53);
-        color: var(--oc-white);
+        background-color: var(--secondary-color);
       }
     }
-    /* 排序按钮 */
-    &__sort {
+
+    /* 菜单按钮 */
+    &__menu {
       pointer-events: auto;
+      position: absolute;
       display: flex;
+      align-items: center;
       justify-content: center;
-      position: absolute;
-      color: var(--primary-color);
-      width: 12px;
-      height: 12px;
-      padding: 5px 0;
-      line-height: 12px;
-      border: 1px solid rgba(53, 130, 251, 0);
-      background-color: transparent;
-      border-radius: 3px;
-      cursor: pointer;
-      transition: all 0.3s;
-      &:hover {
-        background-color: rgba(53, 130, 251, 0.53);
-        border-color: rgba(53, 130, 251, 0.53);
-        color: var(--oc-white);
-      }
-      &[data-type='ColUp'], &[data-type='ColDown'] {
-        padding: 0 5px;
-      }
-    }
-    &__delete {
-      pointer-events: auto;
-      position: absolute;
-      color: var(--color-error);
+      color: var(--md-table-operator-color);
       width: 25px;
-      height: 15px;
+      height: 14px;
       font-size: var(--font-size-xs);
-      line-height: var(--font-size-xs);
-      border: 1px solid var(--color-error);
-      border-radius: 3px;
-      background-color: transparent;
-      color: var(--color-error);
+      border: 1px solid var(--md-table-operator-color);
+      border-radius: 999px;
+      background-color: var(--base-previewer-bg);
+      z-index: 1001; // 高于 cherry-previewer-table-boundary-trigger-line
       cursor: pointer;
       transition: all 0.3s;
+
       &:hover {
-        background-color: var(--color-error);
-        border-color: var(--color-error);
+        background-color: var(--md-table-operator-color);
         color: var(--oc-white);
       }
-      &[data-type='left'], &[data-type='right'] {
-        padding: 0;
-        width: 18px;
-        height: 18px;
+        
+      &[data-type='right'],
+      &[data-type='left'] {
+        transform: rotate(90deg);
+      }
+
+      .ch-icon {
+        line-height: 1;
+        vertical-align: baseline;
       }
     }
   }
+
+  /* 表格行/列重排序的高亮线 */
+  .table-highlight-border-reorder {
+    &-left   { border-left: 2px solid var(--md-table-drag-border-bg) !important; }
+    &-right  { border-right: 2px solid var(--md-table-drag-border-bg) !important; }
+    &-top    { border-top: 2px solid var(--md-table-drag-border-bg) !important; }
+    &-bottom { border-bottom: 2px solid var(--md-table-drag-border-bg) !important; }
+  }
+
+  .table-highlight-col,
+  .table-highlight-row {
+    background-color: var(--md-table-sort-active-bg) !important;
+  }
+
+  /* 表格行/列插入边界的高亮线 */
+  .cherry-previewer-table-boundary-trigger-line {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  .cherry-previewer-table-boundary-trigger-line--v {
+    top: 0;
+    bottom: 0;
+    width: 0;
+    border-left: 2px solid var(--md-table-operator-color);
+  }
+
+  .cherry-previewer-table-boundary-trigger-line--h {
+    left: 0;
+    right: 0;
+    height: 0;
+    border-top: 2px solid var(--md-table-operator-color);
+  }
+
+  /* 菜单气泡样式 */
+  .cherry-previewer-table-menu-bubble {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    
+    min-height: var(--bubble-btn-height);
+    min-width: var(--bubble-btn-height);
+    
+    border: var(--border-width-1) solid var(--bubble-border);
+    background-color: var(--bubble-bg);
+    box-shadow: var(--bubble-shadow);
+    border-radius: var(--bubble-radius);
+    z-index: var(--bubble-z-index);
+    padding: var(--spacing-xs);
+    gap: 2px;
+    
+    &.cherry-previewer-table-menu-bubble--hidden {
+      display: none;
+    }
+    
+    // 水平排列（列控制）
+    &.cherry-previewer-table-menu-bubble--horizontal {
+      flex-direction: row;
+    }
+    
+    // 垂直排列（行控制）
+    &.cherry-previewer-table-menu-bubble--vertical {
+      flex-direction: column;
+    }
+    
+    .cherry-previewer-table-menu-option {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--bubble-btn-height);
+      height: var(--bubble-btn-height);
+      cursor: pointer;
+      color: var(--base-font-color);
+      font-size: var(--font-size-sm);
+      transition: background-color 0.2s ease, color 0.2s ease;
+      border-radius: calc(var(--bubble-radius) - 2px);
+      
+      &:hover {
+        background-color: var(--toolbar-btn-hover-bg);
+        color: var(--toolbar-btn-hover-color);
+      }
+      
+      .ch-icon {
+        font-size: var(--font-size-sm);
+      }
+    }
+  }
+  
   .border-highlight {
     --highlight-color: var(--oc-red-6);
     --highlight-width: 2px;
@@ -262,19 +338,5 @@
     animation: changeHighlightLineBg 1s;
   }
 }
-//tableHandler使用的
-.table-highlight-border-add-left {
-  border-left: 2px solid var(--md-table-side-border-solid) !important
-}
-.table-highlight-border-add-right {
-  border-right: 2px solid var(--md-table-side-border-solid) !important;
-}
-.table-highlight-border-add-top {
-  border-top: 2px solid var(--md-table-side-border-solid) !important;
-}
-.table-highlight-border-add-bottom {
-  border-bottom: 2px solid var(--md-table-side-border-solid) !important;
-}
-.table-sort-active{
-  background-color: var(--md-table-sort-active-bg) !important;
-}
+
+

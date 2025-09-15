@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import { getTableRule, getCodeBlockRule } from '@/utils/regexp';
+
 /**
  * 用于在表格上出现编辑区，并提供拖拽行列的功能
  */
@@ -21,14 +22,15 @@ export default class TableHandler {
   /**
    * 用来存放所有的数据
    */
-  tableEditor = {
-    info: {}, // 当前点击的预览区域table的相关信息
-    tableCodes: [], // 编辑器内所有的表格语法
-    footnoteTableCodes: [], // 编辑器内所有的脚注表格语法
-    editorDom: {}, // 编辑器容器
-  };
+  tableEditor;
 
   constructor(trigger, target, container, previewerDom, codeMirror, tableElement, cherry) {
+    this.tableEditor = {
+      info: {}, // 当前点击的预览区域table的相关信息
+      tableCodes: [], // 编辑器内所有的表格语法
+      footnoteTableCodes: [], // 编辑器内所有的脚注表格语法
+      editorDom: {}, // 编辑器容器
+    };
     // 触发方式 click / hover
     this.trigger = trigger;
     this.target = target;
@@ -81,10 +83,22 @@ export default class TableHandler {
   }
 
   setStyle(element, property, value) {
-    const info = element.getBoundingClientRect();
-    if (info[property] !== value) {
-      element.style[property] = value;
+    element.style[property] = value;
+  }
+
+  /**
+   * 通用的边界检查方法
+   * @param {number} index - 要检查的索引
+   * @param {number} maxLength - 最大长度
+   * @param {string} context - 上下文信息（用于错误日志）
+   * @returns {boolean} 是否在有效范围内
+   */
+  $validateBounds(index, maxLength, context = '') {
+    if (index < 0 || index >= maxLength) {
+      console.error(`Index out of bounds in ${context}:`, index, 'max:', maxLength);
+      return false;
     }
+    return true;
   }
 
   /**
@@ -105,60 +119,6 @@ export default class TableHandler {
   }
 
   /**
-   * 刷新操作符位置
-   */
-  $setSymbolOffset() {
-    const container = this.tableEditor.editorDom.symbolContainer;
-    const { tableNode, trNode, isTHead } = this.tableEditor.info;
-    const tableInfo = this.$getPosition(tableNode);
-    const trInfo = this.$getPosition(trNode);
-    const tdInfo = this.$getPosition();
-    const previewerRect = this.previewerDom.getBoundingClientRect();
-    // 设置容器宽高
-    this.setStyle(this.container, 'width', `${tableInfo.width}px`);
-    this.setStyle(this.container, 'height', `${tableInfo.height}px`);
-    this.setStyle(this.container, 'top', `${tableInfo.top}px`);
-    this.setStyle(this.container, 'left', `${tableInfo.left}px`);
-
-    // 判断是否在预览区内
-    const isWithinBounds = (symbol) => {
-      const symbolRect = symbol.getBoundingClientRect();
-      const boundMap = {
-        top: [previewerRect.top, previewerRect.top + previewerRect.height - symbolRect.height],
-        left: [previewerRect.left, previewerRect.left + previewerRect.width - symbolRect.width],
-      };
-      return Object.entries(boundMap).every(([key, [min, max]]) => symbolRect[key] >= min && symbolRect[key] <= max);
-    };
-
-    // 设置操作符位置与控制显隐
-    container.childNodes.forEach((node) => {
-      const { index, type, dir } = node.dataset;
-      const propDict = {
-        Row: ['left', 'right'],
-        Col: ['top', 'bottom'],
-      };
-      const offset = {
-        outer: 20,
-        radius: 7,
-      };
-      this.setStyle(node, propDict[dir][index], `-${offset.outer}px`);
-      this.setStyle(node, 'display', '');
-      const refreshMap = {
-        LastRow: () => this.setStyle(node, 'top', `${trInfo.top - tableInfo.top - offset.radius}px`),
-        NextRow: () => this.setStyle(node, 'top', `${trInfo.top - tableInfo.top + trInfo.height - offset.radius}px`),
-        LastCol: () => this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left - offset.radius}px`),
-        NextCol: () => this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width - offset.radius}px`),
-      };
-      const oper = `${type}${dir}`;
-      refreshMap[oper]();
-      this.setStyle(node, 'display', isWithinBounds(node) ? '' : 'none');
-      if (isTHead && oper === 'LastRow') {
-        this.setStyle(node, 'display', 'none');
-      }
-    });
-  }
-
-  /**
    * 刷新定位
    */
   $refreshPosition() {
@@ -166,11 +126,35 @@ export default class TableHandler {
       this.$setInputOffset();
       return;
     }
-    this.$setSymbolOffset();
-    this.$setDeleteButtonPosition();
+    this.$updateBoundaryTriggerPosition();
+    if (this.tableEditor?.editorDom?.menuContainer) {
+      this.$setMenuButtonPosition();
+    }
   }
 
   $remove() {
+    // 清理插入行列事件
+    if (this.boundaryTableRef && this.boundaryMouseMoveHandlerRef) {
+      try {
+        this.boundaryTableRef.removeEventListener('mousemove', this.boundaryMouseMoveHandlerRef);
+      } catch (e) {}
+    }
+    if (this.boundaryGlobalMoveRef) {
+      try {
+        document.removeEventListener('mousemove', this.boundaryGlobalMoveRef, true);
+      } catch (e) {}
+    }
+    // 移除 添加行列符号
+    if (this.tableEditor?.editorDom?.symbolContainer?.parentNode) {
+      try {
+        this.tableEditor.editorDom.symbolContainer.parentNode.removeChild(this.tableEditor.editorDom.symbolContainer);
+      } catch (e) {}
+    }
+    // 清空边界缓存
+    this.boundaryCache = null;
+    this.boundaryTableRef = null;
+    this.boundaryMouseMoveHandlerRef = null;
+    this.boundaryGlobalMoveRef = null;
     this.tableEditor = { info: {}, tableCodes: [], editorDom: {}, footnoteTableCodes: [] };
   }
 
@@ -391,8 +375,7 @@ export default class TableHandler {
   $getBlockquoteTdOffset(tableCode, isTHead, trIndex, tdIndex) {
     const codes = tableCode.split(/\n/);
     const targetTr = isTHead ? 0 : trIndex + 2;
-    if (targetTr >= codes.length) {
-      console.error('Debug: targetTr out of bounds:', targetTr, 'codes.length:', codes.length);
+    if (!this.$validateBounds(targetTr, codes.length, 'getBlockquoteTdOffset targetTr')) {
       return { preLine: 0, preCh: 0, plusCh: 0, currentTd: '' };
     }
     // 获取下一行的内容和引用符号
@@ -416,8 +399,7 @@ export default class TableHandler {
     }
     const needPlus1 = /^\s*$/.test(tds[0]);
     const targetTd = needPlus1 ? tdIndex + 1 : tdIndex;
-    if (targetTd >= tds.length) {
-      console.error('Debug: targetTd out of bounds:', targetTd, 'tds.length:', tds.length);
+    if (!this.$validateBounds(targetTd, tds.length, 'getBlockquoteTdOffset targetTd')) {
       return { preLine: targetTr, preCh: 0, plusCh: 0, currentTd: '' };
     }
     const current = tds[targetTd];
@@ -683,17 +665,7 @@ export default class TableHandler {
       return;
     }
     this.$drawSymbol();
-    this.$drawSortSymbol();
-    this.$drawDelete();
-    this.$drawColumnResize();
-  }
-
-  /**
-   * 判断是否处于编辑状态
-   * @returns {boolean}
-   */
-  $isEditing() {
-    return this.tableEditor.editing;
+    this.$drawMenu();
   }
 
   /**
@@ -730,16 +702,20 @@ export default class TableHandler {
     this.tableEditor.editorDom.inputDom.style.fontFamily = tdStyle.fontFamily;
     this.tableEditor.editorDom.inputDom.style.lineHeight = tdStyle.lineHeight;
     this.tableEditor.editorDom.inputDom.style.padding = tdStyle.padding;
-    // 左对齐的时候，paddingRight设置成0，反之paddingLeft设置成0
-    if (/left/.test(tdStyle.textAlign)) {
-      this.tableEditor.editorDom.inputDom.style.paddingRight = '0px';
-    }
-    if (/right/.test(tdStyle.textAlign)) {
-      this.tableEditor.editorDom.inputDom.style.paddingLeft = '0px';
-    }
-    if (/center/.test(tdStyle.textAlign)) {
-      this.tableEditor.editorDom.inputDom.style.paddingLeft = '0px';
-      this.tableEditor.editorDom.inputDom.style.paddingRight = '0px';
+    // 根据对齐方式设置 padding
+    const alignmentStyles = {
+      left: { paddingRight: '0px' },
+      right: { paddingLeft: '0px' },
+      center: { paddingLeft: '0px', paddingRight: '0px' },
+    };
+
+    const textAlign = tdStyle.textAlign || '';
+    if (textAlign.includes('left')) {
+      Object.assign(this.tableEditor.editorDom.inputDom.style, alignmentStyles.left);
+    } else if (textAlign.includes('right')) {
+      Object.assign(this.tableEditor.editorDom.inputDom.style, alignmentStyles.right);
+    } else if (textAlign.includes('center')) {
+      Object.assign(this.tableEditor.editorDom.inputDom.style, alignmentStyles.center);
     }
     this.tableEditor.editorDom.inputDom.style.paddingBottom = '0px';
   }
@@ -758,82 +734,592 @@ export default class TableHandler {
   }
 
   /**
-   * 绘制操作符号
+   * 绘制插入行列操作符号
    */
   $drawSymbol() {
-    const types = ['Last', 'Next'];
-    const dirs = ['Row', 'Col'];
-    const textDict = {
-      Row: 'Row',
-      Col: 'Col',
-    };
-    const symbols = dirs.map((_, index) => types.map((type) => dirs.map((dir) => [`${index}`, type, dir]))).flat(2);
-    const container = document.createElement('ul');
-    container.className = 'cherry-previewer-table-hover-handler-container';
-    symbols.forEach(([index, type, dir]) => {
-      const li = document.createElement('li');
-      li.setAttribute('data-index', index);
-      li.setAttribute('data-type', type);
-      li.setAttribute('data-dir', dir);
-      li.className = 'cherry-previewer-table-hover-handler__symbol';
-      li.title = this.$cherry.locale[`add${textDict[dir]}`];
-      li.innerHTML = '+';
-      li.addEventListener('click', (e) => {
-        const { target } = e;
-        if (!(target instanceof HTMLElement)) {
-          return;
-        }
-        const { type, dir } = target.dataset;
-        this[`$add${type}${dir}`]();
-      });
-      li.addEventListener('mouseover', (e) => {
-        const { target } = e;
-        if (!(target instanceof HTMLElement)) {
-          return;
-        }
-        const currentRow = this.tableEditor.info.trNode;
-        const { tdIndex } = this.tableEditor.info;
-        const tds = currentRow.querySelectorAll('td');
-        const dataType = target.getAttribute('data-type');
-        const dataDir = target.getAttribute('data-dir');
-        if (dataType === 'Last' && dataDir === 'Row') {
-          tds.forEach((td) => {
-            td.classList.add('table-highlight-border-add-top');
-          });
-        } else if (dataType === 'Next' && dataDir === 'Row') {
-          tds.forEach((td) => {
-            td.classList.add('table-highlight-border-add-bottom');
-          });
-        } else if (dataType === 'Last' && dataDir === 'Col') {
-          this.$hightLightColumnCellsDOM(tdIndex, 'left');
-        } else if (dataType === 'Next' && dataDir === 'Col') {
-          this.$hightLightColumnCellsDOM(tdIndex, 'right');
-        }
-      });
-      // 取消边界
-      li.addEventListener('mouseout', (e) => {
-        this.$clearAllBorders();
-      });
-      container.appendChild(li);
-    }, true);
-    this.tableEditor.editorDom.symbolContainer = container;
-    this.container.appendChild(this.tableEditor.editorDom.symbolContainer);
-    this.$setSymbolOffset();
-  }
+    const { tableNode } = this.tableEditor.info;
+    if (!tableNode) return;
 
-  $setBorderForElements(elements, property, value) {
-    elements.forEach((element) => {
-      element.style[property] = value;
+    const container = document.createElement('div');
+    container.className =
+      'cherry-previewer-table-hover-handler-container cherry-previewer-table-hover-handler-container--boundary-trigger';
+
+    // 列符号
+    const colSymbol = document.createElement('div');
+    colSymbol.className =
+      'cherry-previewer-table-hover-handler__symbol cherry-previewer-table-hover-handler__symbol--boundary-trigger';
+    colSymbol.style.position = 'absolute';
+    colSymbol.style.display = 'none';
+    colSymbol.innerHTML = '+';
+    colSymbol.title = this.$cherry.locale.addCol || '+';
+
+    // 行符号（左侧和右侧）
+    const rowSymbols = [];
+    const rowSymbolLeft = document.createElement('div');
+    rowSymbolLeft.className =
+      'cherry-previewer-table-hover-handler__symbol cherry-previewer-table-hover-handler__symbol--boundary-trigger';
+    rowSymbolLeft.style.position = 'absolute';
+    rowSymbolLeft.style.display = 'none';
+    rowSymbolLeft.innerHTML = '+';
+    rowSymbolLeft.title = this.$cherry.locale.addRow || '+';
+    rowSymbolLeft.dataset.side = 'left';
+
+    const rowSymbolRight = document.createElement('div');
+    rowSymbolRight.className =
+      'cherry-previewer-table-hover-handler__symbol cherry-previewer-table-hover-handler__symbol--boundary-trigger';
+    rowSymbolRight.style.position = 'absolute';
+    rowSymbolRight.style.display = 'none';
+    rowSymbolRight.innerHTML = '+';
+    rowSymbolRight.title = this.$cherry.locale.addRow || '+';
+    rowSymbolRight.dataset.side = 'right';
+
+    rowSymbols.push(rowSymbolLeft, rowSymbolRight);
+
+    const vLine = document.createElement('div');
+    vLine.className = 'cherry-previewer-table-boundary-trigger-line cherry-previewer-table-boundary-trigger-line--v';
+    vLine.style.display = 'none';
+    const hLine = document.createElement('div');
+    hLine.className = 'cherry-previewer-table-boundary-trigger-line cherry-previewer-table-boundary-trigger-line--h';
+    hLine.style.display = 'none';
+
+    container.appendChild(colSymbol);
+    rowSymbols.forEach((symbol) => container.appendChild(symbol));
+    container.appendChild(vLine);
+    container.appendChild(hLine);
+    this.tableEditor.editorDom.symbolContainer = container;
+    this.container.appendChild(container);
+
+    this.tableEditor.editorDom.boundaryTriggerSymbol = {
+      col: { el: colSymbol, index: null },
+      rows: rowSymbols.map((symbol) => ({ el: symbol, index: null })),
+    };
+
+    const THRESHOLD = 6; // 鼠标到最近边界 <=6px 才显示
+    const STICKY = 14; // 一旦锁定，允许在 14px 内平滑移动
+    let activeCol = null; // 当前激活的列
+    let activeRow = null; // 当前激活的行
+    let plannedCol = null; // 计划插入的列
+    let plannedRow = null; // 计划插入的行
+    let rafPending = false;
+
+    const render = (tableRect) => {
+      if (!this.tableEditor?.editorDom?.boundaryTriggerSymbol) return;
+      // 列
+      if (plannedCol) {
+        const left = plannedCol.pos - tableRect.left - 6; // 6 为 + 添加按钮自身偏移
+        colSymbol.style.left = `${left}px`;
+        colSymbol.style.top = '-20px';
+        colSymbol.style.display = '';
+        this.tableEditor.editorDom.boundaryTriggerSymbol.col.index = plannedCol.index;
+        vLine.style.left = `${plannedCol.pos - tableRect.left}px`;
+        vLine.style.display = '';
+        activeCol = plannedCol;
+      } else {
+        colSymbol.style.display = 'none';
+        vLine.style.display = 'none';
+        this.tableEditor.editorDom.boundaryTriggerSymbol.col.index = null;
+        activeCol = null;
+      }
+      // 行（左侧和右侧）
+      if (plannedRow) {
+        const top = plannedRow.pos - tableRect.top - 6;
+        rowSymbols.forEach((symbol, index) => {
+          symbol.style.top = `${top}px`;
+          symbol.style.left = index === 0 ? '-20px' : `${tableRect.width + 4}px`;
+          symbol.style.display = '';
+          this.tableEditor.editorDom.boundaryTriggerSymbol.rows[index].index = plannedRow.index;
+        });
+        activeRow = plannedRow;
+        hLine.style.top = `${plannedRow.pos - tableRect.top}px`;
+        hLine.style.display = '';
+      } else {
+        rowSymbols.forEach((symbol) => {
+          symbol.style.display = 'none';
+        });
+        this.tableEditor.editorDom.boundaryTriggerSymbol.rows.forEach((row) => {
+          row.index = null;
+        });
+        activeRow = null;
+        hLine.style.display = 'none';
+      }
+
+      plannedCol = null;
+      plannedRow = null;
+    };
+
+    const requestRender = (tableRect) => {
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(() => {
+        rafPending = false;
+        render(tableRect);
+      });
+    };
+
+    const rebuildBoundariesIfNeeded = (tableRect, firstRow) => {
+      if (!this.boundaryCache) this.boundaryCache = {};
+      const currentBody = tableNode.tBodies[0];
+      const bodyRowCount = currentBody ? currentBody.rows.length : 0;
+      const needRebuild = (() => {
+        if (!this.boundaryCache.tableRect) return true;
+        const cache = this.boundaryCache;
+        if (cache.firstRowCellCount !== firstRow.cells.length) return true;
+        if (cache.rowCount !== bodyRowCount) return true;
+        if (cache.tableRect.width !== tableRect.width || cache.tableRect.height !== tableRect.height) return true;
+        if (cache.tableRect.top !== tableRect.top || cache.tableRect.left !== tableRect.left) return true;
+        return false;
+      })();
+      if (needRebuild) {
+        const colBoundaries = [];
+        const firstCellRect = firstRow.cells[0].getBoundingClientRect();
+        colBoundaries.push({ index: 0, pos: firstCellRect.left });
+        for (let i = 1; i < firstRow.cells.length; i++) {
+          const rect = firstRow.cells[i].getBoundingClientRect();
+          colBoundaries.push({ index: i, pos: rect.left });
+        }
+        const lastCellRect = firstRow.cells[firstRow.cells.length - 1].getBoundingClientRect();
+        colBoundaries.push({ index: firstRow.cells.length, pos: lastCellRect.right });
+
+        const rowBoundaries = [];
+        if (currentBody) {
+          const rows = Array.from(currentBody.rows);
+          if (rows.length) {
+            const firstBodyRect = rows[0].getBoundingClientRect();
+            rowBoundaries.push({ index: 0, pos: firstBodyRect.top });
+            for (let i = 1; i < rows.length; i++) {
+              const r = rows[i].getBoundingClientRect();
+              rowBoundaries.push({ index: i, pos: r.top });
+            }
+            const lastBodyRect = rows[rows.length - 1].getBoundingClientRect();
+            rowBoundaries.push({ index: rows.length, pos: lastBodyRect.bottom });
+          }
+        }
+        this.boundaryCache = {
+          tableRect: { top: tableRect.top, left: tableRect.left, width: tableRect.width, height: tableRect.height },
+          colBoundaries,
+          rowBoundaries,
+          firstRowCellCount: firstRow.cells.length,
+          rowCount: bodyRowCount,
+        };
+      }
+    };
+
+    const handler = (e) => {
+      this.$updateBoundaryTriggerPosition();
+      const tableRect = tableNode.getBoundingClientRect();
+      const { clientX: x, clientY: y } = e;
+      if (x < tableRect.left || x > tableRect.right || y < tableRect.top || y > tableRect.bottom) {
+        if (!activeCol && !activeRow) {
+          colSymbol.style.display = 'none';
+          rowSymbols.forEach((symbol) => (symbol.style.display = 'none'));
+          vLine.style.display = 'none';
+          hLine.style.display = 'none';
+        }
+        return;
+      }
+      const firstRow = tableNode.rows[0];
+      if (!firstRow) return;
+      rebuildBoundariesIfNeeded(tableRect, firstRow);
+      const { colBoundaries, rowBoundaries } = this.boundaryCache;
+
+      // 列粘滞
+      if (activeCol && Math.abs(x - activeCol.pos) <= STICKY) {
+        plannedCol = activeCol;
+      } else {
+        activeCol = null;
+        let bestCol = null;
+        let bestColDist = Infinity;
+        for (const b of colBoundaries) {
+          const d = Math.abs(x - b.pos);
+          if (d <= THRESHOLD && d < bestColDist) {
+            bestColDist = d;
+            bestCol = b;
+          }
+        }
+        plannedCol = bestCol;
+      }
+
+      // 行粘滞
+      if (activeRow && Math.abs(y - activeRow.pos) <= STICKY) {
+        plannedRow = activeRow;
+      } else {
+        activeRow = null;
+        let bestRow = null;
+        let bestRowDist = Infinity;
+        for (const b of rowBoundaries) {
+          const d = Math.abs(y - b.pos);
+          if (d <= THRESHOLD && d < bestRowDist) {
+            bestRowDist = d;
+            bestRow = b;
+          }
+        }
+        plannedRow = bestRow;
+      }
+
+      requestRender(tableRect);
+    };
+
+    tableNode.addEventListener('mousemove', handler);
+    this.boundaryMouseMoveHandlerRef = handler;
+    this.boundaryTableRef = tableNode;
+    this.$updateBoundaryTriggerPosition();
+
+    const globalMove = (evt) => {
+      const anyVisible =
+        colSymbol.style.display !== 'none' || rowSymbols.some((symbol) => symbol.style.display !== 'none');
+      if (!anyVisible) return;
+      const padding = 60;
+      const tableRect2 = tableNode.getBoundingClientRect();
+      const inTable =
+        evt.clientX >= tableRect2.left &&
+        evt.clientX <= tableRect2.right &&
+        evt.clientY >= tableRect2.top &&
+        evt.clientY <= tableRect2.bottom;
+      if (inTable) return;
+      const inSafe = (symbol) => {
+        if (symbol.style.display === 'none') return false;
+        const r = symbol.getBoundingClientRect();
+        return (
+          evt.clientX >= r.left - padding &&
+          evt.clientX <= r.right + padding &&
+          evt.clientY >= r.top - padding &&
+          evt.clientY <= r.bottom + padding
+        );
+      };
+      const isAnySymbolSafe = inSafe(colSymbol) || rowSymbols.some((symbol) => inSafe(symbol));
+      if (!isAnySymbolSafe) {
+        colSymbol.style.display = 'none';
+        rowSymbols.forEach((symbol) => (symbol.style.display = 'none'));
+        vLine.style.display = 'none';
+        hLine.style.display = 'none';
+        activeCol = null;
+        activeRow = null;
+      }
+    };
+    document.addEventListener('mousemove', globalMove, true);
+    this.boundaryGlobalMoveRef = globalMove;
+
+    // 列点击插入
+    colSymbol.addEventListener('click', () => {
+      const meta = this.tableEditor.editorDom.boundaryTriggerSymbol.col;
+      if (meta.index === null || meta.index === undefined) return;
+
+      const totalCols = this.tableEditor.info.columns;
+      if (meta.index === 0) {
+        this.tableEditor.info.tdIndex = -1;
+      } else if (meta.index === totalCols) {
+        this.tableEditor.info.tdIndex = totalCols - 1;
+      } else {
+        this.tableEditor.info.tdIndex = meta.index - 1;
+      }
+
+      this.$insertCol();
+      this.$afterTableOperation();
+    });
+
+    // 行点击插入（左侧和右侧）
+    rowSymbols.forEach((symbol, index) => {
+      symbol.addEventListener('click', () => {
+        const meta = this.tableEditor.editorDom.boundaryTriggerSymbol.rows[index];
+        if (meta.index === null || meta.index === undefined) return;
+
+        const body = this.tableEditor.info.tableNode.tBodies[0];
+        const dataRowCount = body ? body.rows.length : 0;
+        let position;
+
+        if (meta.index === 0) {
+          position = 'top';
+        } else if (meta.index === dataRowCount) {
+          position = 'bottom';
+        } else {
+          position = meta.index;
+        }
+
+        this.$insertRow(position);
+        this.$afterTableOperation();
+      });
     });
   }
 
   /**
-   * 高亮一列的单元格的单边框
-   * @param {number} columnIndex
-   * @param {string} position // left | right | top | bottom
-   * @returns
+   * 根据当前表格刷新 添加行列按钮 的位置
    */
-  $hightLightColumnCellsDOM(columnIndex = this.tableEditor.info.tdIndex, position) {
+  $updateBoundaryTriggerPosition() {
+    const { tableNode } = this.tableEditor.info;
+    if (!tableNode) return;
+    const tableInfo = this.$getPosition(tableNode);
+    this.setStyle(this.container, 'width', `${tableInfo.width}px`);
+    this.setStyle(this.container, 'height', `${tableInfo.height}px`);
+    this.setStyle(this.container, 'top', `${tableInfo.top}px`);
+    this.setStyle(this.container, 'left', `${tableInfo.left}px`);
+  }
+
+  /**
+   * 执行表格操作后的通用清理工作
+   */
+  $afterTableOperation() {
+    this.boundaryCache = null;
+    this.$findTableInEditor();
+    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+  }
+
+  /**
+   * 添加行
+   * @param {string|number} position - 插入位置：'top' | 'bottom' | number (中间插入的行索引)
+   */
+  $insertRow(position) {
+    if (this.tableEditor.info.isHtmlTable) return;
+    const { tableIndex, columns } = this.tableEditor.info;
+    this.$setSelection(tableIndex, 'table');
+    const selection = this.codeMirror.getSelection();
+    const lines = selection.split('\n');
+    if (lines.length < 3) return;
+
+    const [{ line: startLine }] = this.tableEditor.info.selection;
+    const newRow = `${'|'.repeat(columns)}\n`;
+    let insertLine;
+
+    if (position === 'top') {
+      // 在顶部插入（标题行后）
+      insertLine = startLine + 2;
+    } else if (position === 'bottom') {
+      // 在底部插入
+      insertLine = startLine + lines.length;
+    } else if (typeof position === 'number') {
+      // 在中间插入
+      const dataRowCount = lines.length - 2;
+      if (position < 1 || position >= dataRowCount) return;
+      insertLine = startLine + 2 + position;
+    } else {
+      return;
+    }
+
+    this.codeMirror.replaceRange(newRow, { line: insertLine, ch: 0 });
+    this.$afterTableOperation();
+  }
+
+  /**
+   * 添加列
+   */
+  $insertCol() {
+    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+    const selection = this.codeMirror.getSelection();
+    const lines = selection.split('\n');
+    const newLines = lines.map((line, index) => {
+      const cells = line.split('|');
+
+      if (index === 1) {
+        cells.splice(this.tableEditor.info.tdIndex + 2, 0, '------');
+        return cells.join('|');
+      }
+
+      cells.splice(this.tableEditor.info.tdIndex + 2, 0, '');
+      return cells.join('|');
+    });
+    const newText = newLines.join('\n');
+    this.codeMirror.replaceSelection(newText);
+    this.$afterTableOperation();
+  }
+
+  /**
+   * 菜单按钮
+   */
+  $drawMenu() {
+    const types = ['top', 'left'];
+    const buttons = types.map((type) => [type]);
+    const container = document.createElement('div');
+    container.className = 'cherry-previewer-table-hover-handler-menu-container';
+    buttons.forEach(([type]) => {
+      const button = document.createElement('button');
+      button.setAttribute('type', 'button');
+      button.setAttribute('data-type', type);
+      button.className = 'cherry-previewer-table-hover-handler__menu ch-icon ch-icon-menu';
+      button.title = '菜单';
+
+      // 创建菜单气泡
+      const menuBubble = this.$createMenuBubble(type);
+      button.appendChild(menuBubble);
+
+      // 点击显示/隐藏菜单
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.$toggleMenuBubble(button, menuBubble);
+      });
+
+      // 为菜单按钮添加拖拽功能
+      this.$addDragFunctionalityToMenuButton(button, type);
+
+      container.appendChild(button);
+    });
+    this.tableEditor.editorDom.menuContainer = container;
+    this.container.appendChild(this.tableEditor.editorDom.menuContainer);
+    this.$setMenuButtonPosition();
+  }
+
+  /**
+   * 为菜单按钮添加拖拽功能
+   * @param {HTMLElement} button - 菜单按钮元素
+   * @param {string} type - 按钮类型 ('top', 'left')
+   */
+  $addDragFunctionalityToMenuButton(button, type) {
+    if (type === 'left') {
+      this.$addRowDragFunctionality(button);
+    } else if (type === 'top') {
+      this.$addColumnDragFunctionality(button);
+    }
+  }
+
+  /**
+   * 为按钮添加行拖拽功能
+   * @param {HTMLElement} button - 菜单按钮元素
+   */
+  $addRowDragFunctionality(button) {
+    button.draggable = true;
+    button.title = '拖拽移动行';
+
+    // 鼠标悬停时高亮当前行
+    button.addEventListener('mouseover', () => {
+      this.$applyRowHighlight(true);
+    });
+
+    button.addEventListener('mouseleave', () => {
+      this.$applyRowHighlight(false);
+    });
+
+    // 拖拽开始
+    button.addEventListener('mousedown', (e) => {
+      this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+      this.$dragLine();
+    });
+  }
+
+  /**
+   * 为顶部按钮添加列拖拽功能
+   * @param {HTMLElement} button - 菜单按钮元素
+   */
+  $addColumnDragFunctionality(button) {
+    button.draggable = true;
+    button.title = '拖拽移动列';
+
+    // 鼠标悬停时高亮当前列
+    button.addEventListener('mouseover', () => {
+      this.$highlightCurrentColumn();
+    });
+
+    button.addEventListener('mouseleave', () => {
+      this.$unhighlightCurrentColumn();
+    });
+
+    // 拖拽开始
+    button.addEventListener('mousedown', (e) => {
+      this.$setSelection(this.tableEditor.info.tableIndex, 'table');
+      this.$dragCol();
+    });
+  }
+
+  /**
+   * 高亮当前列
+   */
+  $highlightCurrentColumn() {
+    const { tdNode } = this.tableEditor.info;
+    if (!tdNode) return;
+
+    this.$clearAllBorders();
+    tdNode.draggable = true;
+
+    const index = Array.from(tdNode.parentNode.children).indexOf(tdNode);
+    if (index === -1) return;
+
+    const tableNode = tdNode.closest('table');
+    if (!tableNode) return;
+
+    const allRows = tableNode.querySelectorAll('tr');
+    // 为当前列的所有单元格添加高亮类
+    allRows.forEach((tr) => {
+      const cells = tr.querySelectorAll('td, th');
+      if (cells[index]) {
+        cells[index].classList.add('table-highlight-col');
+      }
+    });
+  }
+
+  /**
+   * 取消高亮当前列
+   */
+  $unhighlightCurrentColumn() {
+    const { tdNode } = this.tableEditor.info;
+    if (!tdNode) return;
+
+    tdNode.draggable = false;
+
+    // 清除所有高光效果
+    this.$clearAllBorders();
+  }
+
+  /**
+   * 清除所有高光效果（包括边框和背景）
+   */
+  $clearAllBorders() {
+    const table = this.tableEditor.info?.tableNode;
+    if (table) {
+      this.$clearTableHighlights(table);
+    }
+  }
+
+  /**
+   * 清除指定表格的所有高光效果
+   * @param {HTMLTableElement} table - 表格元素
+   */
+  $clearTableHighlights(table) {
+    if (!table) return;
+
+    // 清除所有单元格的高光类
+    const allCells = table.querySelectorAll('td, th');
+    allCells.forEach((cell) => {
+      // 清除背景高光
+      cell.classList.remove('table-highlight-row', 'table-highlight-col');
+
+      // 清除边框高光
+      cell.classList.remove(
+        'table-highlight-border-reorder-right',
+        'table-highlight-border-reorder-left',
+        'table-highlight-border-reorder-top',
+        'table-highlight-border-reorder-bottom',
+      );
+
+      // 清除内联样式
+      if (cell instanceof HTMLElement) {
+        cell.style.border = '';
+        cell.style.borderLeft = '';
+        cell.style.borderRight = '';
+        cell.style.borderTop = '';
+        cell.style.borderBottom = '';
+        cell.style.background = '';
+      }
+    });
+
+    // 清除行的边框高光
+    const allRows = table.querySelectorAll('tr');
+    allRows.forEach((row) => {
+      row.classList.remove(
+        'table-highlight-border-reorder-right',
+        'table-highlight-border-reorder-left',
+        'table-highlight-border-reorder-top',
+        'table-highlight-border-reorder-bottom',
+      );
+      if (row instanceof HTMLElement) {
+        row.style.border = '';
+        row.style.background = '';
+      }
+    });
+  }
+
+  /**
+   * 高亮一列单元格的指定边框
+   * @param {number} columnIndex
+   * @param {'left'|'right'|'top'|'bottom'} position
+   */
+  $highlightColumnCellsDom(columnIndex = this.tableEditor.info.tdIndex, position) {
     // 获取当前操作的表格
     const table = this.tableEditor.info.tableNode;
     const { rows } = table;
@@ -841,236 +1327,16 @@ export default class TableHandler {
       if (rows[i].cells[columnIndex]) {
         const cell = rows[i].cells[columnIndex];
         if (position === 'left') {
-          cell.classList.add('table-highlight-border-add-left');
+          cell.classList.add('table-highlight-border-reorder-left');
         } else if (position === 'right') {
-          cell.classList.add('table-highlight-border-add-right');
+          cell.classList.add('table-highlight-border-reorder-right');
         } else if (position === 'top') {
-          cell.classList.add('table-highlight-border-add-top');
+          cell.classList.add('table-highlight-border-reorder-top');
         } else if (position === 'bottom') {
-          cell.classList.add('table-highlight-border-add-bottom');
+          cell.classList.add('table-highlight-border-reorder-bottom');
         }
       }
     }
-  }
-
-  // 清除所有边框
-  $clearAllBorders() {
-    // 添加安全检查
-    if (!this.tableEditor.info || !this.tableEditor.info.trNode || !this.tableEditor.info.tableNode) {
-      return;
-    }
-    const { tableNode, tdIndex } = this.tableEditor.info;
-    const { rows } = tableNode;
-    const currentCell = this.tableEditor.info.trNode;
-    const tds = currentCell.querySelectorAll('td');
-    tds.forEach((td) => {
-      td.classList.remove(
-        'table-highlight-border-add-right',
-        'table-highlight-border-add-left',
-        'table-highlight-border-add-top',
-        'table-highlight-border-add-bottom',
-      );
-    });
-    for (let i = 0; i < rows.length; i++) {
-      const { cells } = rows[i];
-      if (cells[tdIndex]) {
-        cells[tdIndex].classList.remove(
-          'table-highlight-border-add-right',
-          'table-highlight-border-add-left',
-          'table-highlight-border-add-top',
-          'table-highlight-border-add-bottom',
-        );
-      }
-    }
-  }
-
-  $drawSortSymbol() {
-    // const types = ['RowLeft', 'RowRight', 'ColUp', 'ColDown']; // 不要底部的拖拽按钮了，貌似没啥用
-    const types = ['RowLeft', 'RowRight', 'ColUp'];
-
-    const container = document.createElement('ul');
-    container.className = 'cherry-previewer-table-hover-handler-sort-container';
-    types.forEach((type) => {
-      const sortSymbol = document.createElement('li');
-      sortSymbol.setAttribute('data-type', type);
-      sortSymbol.className = 'cherry-previewer-table-hover-handler__sort ch-icon';
-      sortSymbol.draggable = true;
-      if (type.startsWith('Row')) {
-        sortSymbol.title = this.$cherry.locale.moveRow;
-        sortSymbol.classList.add('ch-icon-swap-vert');
-        sortSymbol.addEventListener('mouseover', () => {
-          const { tdNode } = this.tableEditor.info;
-          tdNode.draggable = true;
-          tdNode.parentNode.classList.add('table-sort-active');
-        });
-        sortSymbol.addEventListener('mouseleave', () => {
-          const { tdNode } = this.tableEditor.info;
-          tdNode.draggable = false;
-          tdNode.parentNode.classList.remove('table-sort-active');
-        });
-        sortSymbol.addEventListener('mousedown', (e) => {
-          this.$setSelection(this.tableEditor.info.tableIndex, 'table');
-          this.$dragLine();
-        });
-      } else {
-        sortSymbol.title = this.$cherry.locale.moveCol;
-        sortSymbol.classList.add('ch-icon-swap');
-        const highLightTrDom = [];
-        sortSymbol.addEventListener('mouseover', () => {
-          const { tdNode } = this.tableEditor.info;
-          tdNode.draggable = true;
-
-          const index = Array.from(tdNode.parentNode.children).indexOf(tdNode);
-
-          Array.from(tdNode.parentNode.parentNode.parentNode.children)
-            .map((item) => item.children)
-            .forEach((item) => {
-              Array.from(item).forEach((tr) => {
-                highLightTrDom.push(tr);
-              });
-            });
-          highLightTrDom.forEach((tr) => tr.children[index].classList.add('table-sort-active'));
-        });
-        sortSymbol.addEventListener('mouseleave', () => {
-          const { tdNode } = this.tableEditor.info;
-          tdNode.draggable = false;
-          const index = Array.from(tdNode.parentNode.children).indexOf(tdNode);
-          highLightTrDom.forEach((tr) => tr.children[index].classList.remove('table-sort-active'));
-        });
-        sortSymbol.addEventListener('mousedown', (e) => {
-          this.$setSelection(this.tableEditor.info.tableIndex, 'table');
-          this.$dragCol();
-        });
-      }
-      container.appendChild(sortSymbol);
-    });
-    this.tableEditor.editorDom.sortContainer = container;
-    this.container.appendChild(this.tableEditor.editorDom.sortContainer);
-    this.$setSortSymbolsPosition();
-  }
-
-  $setSortSymbolsPosition() {
-    const container = this.tableEditor.editorDom.sortContainer;
-    const { tableNode, tdNode, isTHead } = this.tableEditor.info;
-    const tableInfo = this.$getPosition(tableNode);
-    const tdInfo = this.$getPosition(tdNode);
-
-    this.setStyle(this.container, 'width', `${tableInfo.width}px`);
-    this.setStyle(this.container, 'height', `${tableInfo.height}px`);
-    this.setStyle(this.container, 'top', `${tableInfo.top}px`);
-    this.setStyle(this.container, 'left', `${tableInfo.left}px`);
-
-    container.childNodes.forEach((node) => {
-      const { type } = node.dataset;
-
-      switch (type) {
-        case 'RowLeft':
-          this.setStyle(node, 'top', `${tdInfo.top - tableInfo.top + tdInfo.height / 2 - node.offsetHeight / 2}px`);
-          this.setStyle(node, 'left', `${-node.offsetWidth / 2}px`);
-          break;
-        case 'RowRight':
-          this.setStyle(node, 'top', `${tdInfo.top - tableInfo.top + tdInfo.height / 2 - node.offsetHeight / 2}px`);
-          this.setStyle(node, 'left', `${tableInfo.width - node.offsetWidth / 2}px`);
-          break;
-        case 'ColUp':
-          this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
-          this.setStyle(node, 'top', `${-node.offsetHeight / 2}px`);
-          break;
-        case 'ColDown':
-          this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
-          this.setStyle(node, 'top', `${tableInfo.height - node.offsetHeight / 2}px`);
-
-          break;
-      }
-      if (isTHead && type.startsWith('Row')) {
-        this.setStyle(node, 'display', 'none');
-      }
-    });
-  }
-
-  /**
-   * 添加上一行
-   */
-  $addLastRow() {
-    const [{ line }] = this.tableEditor.info.selection;
-    const newRow = `${'|'.repeat(this.tableEditor.info.columns)}\n`;
-    this.codeMirror.replaceRange(newRow, { line, ch: 0 });
-    this.$findTableInEditor();
-    this.$setSelection(this.tableEditor.info.tableIndex, 'td');
-  }
-
-  /**
-   * 添加下一行
-   */
-  $addNextRow() {
-    const [, { line }] = this.tableEditor.info.selection;
-    const { isTHead, columns } = this.tableEditor.info;
-    const newRow = `${'|'.repeat(columns)}\n`;
-    const insertLine = isTHead ? line + 2 : line + 1;
-    this.codeMirror.replaceRange(newRow, { line: insertLine, ch: 0 });
-    this.$findTableInEditor();
-    this.$setSelection(this.tableEditor.info.tableIndex, 'td');
-  }
-
-  /**
-   * 获取单元格对齐方式
-   * @param {*} cells 单元格数组
-   * @param {*} index 单元格索引
-   * @returns {string|false} 单元格对齐方式，如果是false则表示不生成对齐方式
-   */
-  $getTdAlign(cells, index, cellsIndex) {
-    if (index !== 1) {
-      return '';
-    }
-    if (typeof cells[cellsIndex] === 'string') {
-      return cells[cellsIndex];
-    }
-    return false;
-  }
-
-  /**
-   * 添加上一列
-   */
-  $addLastCol() {
-    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
-    const selection = this.codeMirror.getSelection();
-    const lines = selection.split('\n');
-    const cellsIndex = this.tableEditor.info.tdIndex < 2 ? 1 : this.tableEditor.info.tdIndex - 1;
-    const newLines = lines.map((line, index) => {
-      const cells = line.split('|');
-      const replaceItem = this.$getTdAlign(cells, index, cellsIndex);
-      if (replaceItem === false) {
-        return line;
-      }
-      cells.splice(this.tableEditor.info.tdIndex + 1, 0, replaceItem);
-      return cells.join('|');
-    });
-    const newText = newLines.join('\n');
-    this.codeMirror.replaceSelection(newText);
-    this.$findTableInEditor();
-    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
-  }
-
-  /**
-   * 添加下一列
-   */
-  $addNextCol() {
-    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
-    const selection = this.codeMirror.getSelection();
-    const lines = selection.split('\n');
-    const newLines = lines.map((line, index) => {
-      const cells = line.split('|');
-      const replaceItem = this.$getTdAlign(cells, index, this.tableEditor.info.tdIndex + 1);
-      if (replaceItem === false) {
-        return line;
-      }
-      cells.splice(this.tableEditor.info.tdIndex + 2, 0, replaceItem);
-      return cells.join('|');
-    });
-    const newText = newLines.join('\n');
-    this.codeMirror.replaceSelection(newText);
-    this.$findTableInEditor();
-    this.$setSelection(this.tableEditor.info.tableIndex, 'table');
   }
 
   /**
@@ -1078,16 +1344,12 @@ export default class TableHandler {
    */
   $highlightColumn() {
     const { tableNode, tdIndex } = this.tableEditor.info;
+    if (!tableNode) return;
     const { rows } = tableNode;
-    rows[0].cells[tdIndex].style.borderTop = '1px solid red';
-    rows[rows.length - 1].cells[tdIndex].style.borderBottom = '1px solid red';
     for (let i = 0; i < rows.length; i++) {
-      const { cells } = rows[i];
-      if (cells[tdIndex]) {
-        if (tdIndex === 0) cells[tdIndex].style.borderLeft = '1px solid red';
-        else cells[tdIndex - 1].style.borderRight = '1px solid red';
-        cells[tdIndex].style.borderRight = '1px solid red';
-        cells[tdIndex].style.backgroundColor = 'rgba(255, 100, 100, 0.1)';
+      const cell = rows[i].cells[tdIndex];
+      if (cell) {
+        cell.classList.add('table-highlight-col');
       }
     }
   }
@@ -1097,15 +1359,12 @@ export default class TableHandler {
    */
   $cancelHighlightColumn() {
     const { tableNode, tdIndex } = this.tableEditor.info;
-    if (tableNode) {
-      const { rows } = tableNode;
-      for (let i = 0; i < rows.length; i++) {
-        const { cells } = rows[i];
-        if (cells[tdIndex]) {
-          if (tdIndex !== 0) cells[tdIndex - 1].style.border = '';
-          cells[tdIndex].style.border = ''; // 恢复原始边框
-          cells[tdIndex].style.backgroundColor = '';
-        }
+    if (!tableNode) return;
+    const { rows } = tableNode;
+    for (let i = 0; i < rows.length; i++) {
+      const cell = rows[i].cells[tdIndex];
+      if (cell) {
+        cell.classList.remove('table-highlight-col');
       }
     }
   }
@@ -1114,81 +1373,30 @@ export default class TableHandler {
    * 高亮当前行
    */
   $highlightRow() {
-    this.$doHighlightRow('1px solid red', 'rgba(255, 100, 100, 0.1)');
+    this.$applyRowHighlight(true);
   }
 
   /**
    * 取消高亮当前行
    */
   $cancelHighlightRow() {
-    this.$doHighlightRow('');
+    this.$applyRowHighlight(false);
   }
-
-  $doHighlightRow(style = '', backgroundColor = '') {
-    const { trNode, tableNode } = this.tableEditor.info;
+  $applyRowHighlight(add) {
+    const { trNode } = this.tableEditor.info;
+    if (!trNode) return;
     const tds = trNode.cells;
-    const preTds = trNode.previousElementSibling?.cells || tableNode.tHead.firstChild.cells;
     for (let i = 0; i < tds.length; i++) {
-      if (preTds[i]) preTds[i].style.borderBottom = style;
-      tds[i].style.borderBottom = style;
-      if (backgroundColor) {
-        tds[i].style.backgroundColor = backgroundColor;
-      } else {
-        tds[i].style.backgroundColor = '';
-      }
+      if (add) tds[i].classList.add('table-highlight-row');
+      else tds[i].classList.remove('table-highlight-row');
     }
-    tds[0].style.borderLeft = style;
-    tds[tds.length - 1].style.borderRight = style;
   }
 
   /**
-   * 添加删除按钮
+   * 设置菜单按钮的位置
    */
-  $drawDelete() {
-    const types = ['top', 'bottom', 'right'];
-    const buttons = types.map((type) => [type]);
-    const container = document.createElement('div');
-    container.className = 'cherry-previewer-table-hover-handler-delete-container';
-    buttons.forEach(([type]) => {
-      const button = document.createElement('button');
-      button.setAttribute('type', 'button');
-      button.setAttribute('data-type', type);
-      button.className = 'cherry-previewer-table-hover-handler__delete ch-icon ch-icon-cherry-table-delete';
-      if (/(right|left)/.test(type)) {
-        button.title = this.$cherry.locale.deleteRow;
-        button.addEventListener('click', () => {
-          this.$deleteCurrentRow();
-        });
-        button.addEventListener('mouseover', () => {
-          this.$highlightRow();
-        });
-        button.addEventListener('mouseout', () => {
-          this.$cancelHighlightRow();
-        });
-      } else {
-        button.title = this.$cherry.locale.deleteColumn;
-        button.addEventListener('click', () => {
-          this.$deleteCurrentColumn();
-        });
-        button.addEventListener('mouseover', () => {
-          this.$highlightColumn();
-        });
-        button.addEventListener('mouseout', () => {
-          this.$cancelHighlightColumn();
-        });
-      }
-      container.appendChild(button);
-    });
-    this.tableEditor.editorDom.deleteContainer = container;
-    this.container.appendChild(this.tableEditor.editorDom.deleteContainer);
-    this.$setDeleteButtonPosition();
-  }
-
-  /**
-   * 设置删除按钮的位置
-   */
-  $setDeleteButtonPosition() {
-    const container = this.tableEditor.editorDom.deleteContainer;
+  $setMenuButtonPosition() {
+    const container = this.tableEditor.editorDom.menuContainer;
     const { tableNode, tdNode, isTHead } = this.tableEditor.info;
     const tableInfo = this.$getPosition(tableNode);
     const tdInfo = this.$getPosition(tdNode);
@@ -1198,23 +1406,324 @@ export default class TableHandler {
     this.setStyle(this.container, 'top', `${tableInfo.top}px`);
     this.setStyle(this.container, 'left', `${tableInfo.left}px`);
 
-    // 设置删除按钮位置
+    // 设置菜单按钮位置
     container.childNodes.forEach((node) => {
       const { type } = node.dataset;
       const offset = {
-        outer: 20,
+        outer: 5,
+        border: 1,
       };
-      if (/(right|left)/.test(type)) {
+      if (type === 'left') {
         if (isTHead) {
           this.setStyle(node, 'display', 'none');
         }
         this.setStyle(node, 'top', `${tdInfo.top - tableInfo.top + tdInfo.height / 2 - node.offsetHeight / 2}px`);
-        this.setStyle(node, `${type}`, `-${node.offsetWidth}px`);
-      } else {
-        this.setStyle(node, `${type}`, `-${offset.outer + 5}px`);
+        this.setStyle(node, 'left', `-${(node.offsetWidth - offset.border) / 2}px`);
+      } else if (type === 'top') {
+        this.setStyle(node, 'top', `-${offset.outer + offset.border}px`);
         this.setStyle(node, 'left', `${tdInfo.left - tableInfo.left + tdInfo.width / 2 - node.offsetWidth / 2}px`);
       }
     });
+  }
+
+  /**
+   * 创建菜单气泡
+   */
+  $createMenuBubble(type) {
+    const bubble = document.createElement('div');
+    const isRowControl = type === 'left';
+    const bubbleClass = isRowControl
+      ? 'cherry-previewer-table-menu-bubble cherry-previewer-table-menu-bubble--vertical cherry-previewer-table-menu-bubble--hidden'
+      : 'cherry-previewer-table-menu-bubble cherry-previewer-table-menu-bubble--horizontal cherry-previewer-table-menu-bubble--hidden';
+
+    bubble.className = bubbleClass;
+
+    // 获取菜单配置
+    const menuConfig = this.$getMenuConfig(type);
+
+    // 创建菜单选项
+    menuConfig.forEach((config) => {
+      const option = this.$createMenuOption(config, type);
+      bubble.appendChild(option);
+    });
+
+    return bubble;
+  }
+
+  /**
+   * 获取表格菜单配置
+   */
+  $getMenuConfig(type) {
+    const isRowControl = type === 'left';
+
+    const baseConfig = [
+      {
+        id: 'delete',
+        icon: 'ch-icon-cherry-table-delete',
+        title: isRowControl ? this.$cherry.locale.deleteRow : this.$cherry.locale.deleteColumn,
+        action: isRowControl ? 'deleteRow' : 'deleteColumn',
+        highlight: isRowControl ? 'row' : 'column',
+        showIn: ['row', 'column'],
+      },
+      {
+        id: 'align-left',
+        icon: 'ch-icon-alignLeft',
+        title: '左对齐',
+        action: 'alignLeft',
+        showIn: ['column'],
+      },
+      {
+        id: 'align-center',
+        icon: 'ch-icon-alignCenter',
+        title: '居中',
+        action: 'alignCenter',
+        showIn: ['column'],
+      },
+      {
+        id: 'align-right',
+        icon: 'ch-icon-alignRight',
+        title: '右对齐',
+        action: 'alignRight',
+        showIn: ['column'],
+      },
+    ];
+
+    // 根据控制类型过滤菜单项
+    const currentControlType = isRowControl ? 'row' : 'column';
+    const filteredConfig = baseConfig.filter((config) => {
+      return config.showIn.includes(currentControlType);
+    });
+
+    return filteredConfig;
+
+    // 使用说明：
+    // showIn 配置选项：
+    // - ['row']: 只在行控制中显示（右侧按钮）
+    // - ['column']: 只在列控制中显示（顶部按钮）
+    // - ['row', 'column']: 在行控制和列控制中都显示
+    //
+    // 示例：添加新功能
+    // {
+    //   id: 'new-feature',
+    //   icon: 'ch-icon-new-feature',
+    //   title: '新功能',
+    //   action: 'newFeature',
+    //   showIn: ['row'] // 只在行控制中显示
+    // }
+  }
+
+  /**
+   * 创建菜单选项
+   */
+  $createMenuOption(config, type) {
+    const option = document.createElement('div');
+    option.className = 'cherry-previewer-table-menu-option';
+    option.setAttribute('data-action', config.action);
+    option.title = config.title;
+
+    const iconSpan = document.createElement('span');
+    iconSpan.className = `ch-icon ${config.icon}`;
+    option.appendChild(iconSpan);
+
+    option.addEventListener('click', () => {
+      this.$executeMenuAction(config.action, type);
+      this.$hideMenuBubble(option.closest('.cherry-previewer-table-menu-bubble'));
+    });
+
+    // 高亮事件
+    if (config.highlight) {
+      option.addEventListener('mouseover', () => {
+        this.$highlightElement(config.highlight);
+      });
+      option.addEventListener('mouseout', () => {
+        this.$cancelHighlightElement(config.highlight);
+      });
+    }
+
+    return option;
+  }
+
+  /**
+   * 执行菜单动作
+   */
+  $executeMenuAction(action, type) {
+    switch (action) {
+      case 'deleteRow':
+        this.$deleteCurrentRow();
+        break;
+      case 'deleteColumn':
+        this.$deleteCurrentColumn();
+        break;
+      case 'alignLeft':
+        this.$alignColumn('left');
+        break;
+      case 'alignCenter':
+        this.$alignColumn('center');
+        break;
+      case 'alignRight':
+        this.$alignColumn('right');
+        break;
+      default:
+        console.warn(`Unknown menu action: ${action}`);
+    }
+  }
+
+  /**
+   * 列对齐方法
+   * @param {string} alignment - 对齐方式：'left', 'center', 'right'
+   */
+  $alignColumn(alignment) {
+    const { tableIndex, tdIndex } = this.tableEditor.info;
+    this.$setSelection(tableIndex, 'table');
+    const selection = this.codeMirror.getSelection();
+    const lines = selection.split('\n');
+
+    // 统一处理markdown表格（包括引用表格）
+    this.$alignColumnInMarkdownTable(lines, tdIndex, alignment);
+
+    this.$afterTableOperation();
+  }
+
+  /**
+   * 在markdown表格中设置列对齐（支持普通表格和引用表格）
+   * @param {Array} lines - 表格行数组
+   * @param {number} columnIndex - 列索引
+   * @param {string} alignment - 对齐方式
+   */
+  $alignColumnInMarkdownTable(lines, columnIndex, alignment) {
+    if (lines.length < 2) return;
+
+    // 找到分隔符行（第二行）
+    const separatorLineIndex = 1;
+    const separatorLine = lines[separatorLineIndex];
+
+    // 检查是否是引用表格
+    const isBlockquoteTable = separatorLine.trim().startsWith('>');
+    let quotePrefix = '';
+    let tableContent = separatorLine;
+
+    if (isBlockquoteTable) {
+      const quoteMatch = separatorLine.match(/^(>\s*)+/);
+      quotePrefix = quoteMatch ? quoteMatch[0] : '> ';
+      tableContent = separatorLine.substring(quotePrefix.length);
+    }
+
+    const cells = tableContent.split('|').slice(1, -1);
+
+    if (columnIndex >= 0 && columnIndex < cells.length) {
+      let newSeparator;
+      switch (alignment) {
+        case 'left': // 左对齐
+          newSeparator = ':---';
+          break;
+        case 'center': // 居中
+          newSeparator = ':---:';
+          break;
+        case 'right': // 右对齐
+          newSeparator = '---:';
+          break;
+        default: // 默认(居中)
+          newSeparator = '---';
+      }
+
+      cells[columnIndex] = newSeparator;
+
+      if (isBlockquoteTable) {
+        lines[separatorLineIndex] = `${quotePrefix}|${cells.join('|')}|`;
+      } else {
+        lines[separatorLineIndex] = `|${cells.join('|')}|`;
+      }
+
+      const newText = lines.join('\n');
+      this.codeMirror.replaceSelection(newText);
+    }
+  }
+
+  /**
+   * 高亮元素
+   */
+  $highlightElement(elementType) {
+    switch (elementType) {
+      case 'row':
+        this.$highlightRow();
+        break;
+      case 'column':
+        this.$highlightColumn();
+        break;
+      default:
+        console.warn(`Unknown highlight type: ${elementType}`);
+    }
+  }
+
+  /**
+   * 取消高亮元素
+   */
+  $cancelHighlightElement(elementType) {
+    switch (elementType) {
+      case 'row':
+        this.$cancelHighlightRow();
+        break;
+      case 'column':
+        this.$cancelHighlightColumn();
+        break;
+      default:
+        console.warn(`Unknown highlight type: ${elementType}`);
+    }
+  }
+
+  /**
+   * 切换菜单气泡显示状态
+   */
+  $toggleMenuBubble(button, bubble) {
+    if (bubble.classList.contains('cherry-previewer-table-menu-bubble--hidden')) {
+      this.$showMenuBubble(button, bubble);
+    } else {
+      this.$hideMenuBubble(bubble);
+    }
+  }
+
+  /**
+   * 显示菜单气泡
+   */
+  $showMenuBubble(button, bubble) {
+    // 隐藏其他所有菜单气泡
+    const allBubbles = this.container.querySelectorAll('.cherry-previewer-table-menu-bubble');
+    allBubbles.forEach((b) => {
+      if (b !== bubble) {
+        b.classList.add('cherry-previewer-table-menu-bubble--hidden');
+      }
+    });
+
+    bubble.classList.remove('cherry-previewer-table-menu-bubble--hidden');
+
+    // 设置气泡位置
+    const { type } = button.dataset;
+    if (type === 'left') {
+      bubble.style.top = '350%';
+      bubble.style.transform = 'translateY(-50%) rotate(-90deg)';
+    } else if (type === 'top') {
+      bubble.style.top = '-450%';
+      bubble.style.left = '50%';
+      bubble.style.transform = 'translateX(-50%)';
+    }
+
+    const closeMenuHandler = (e) => {
+      if (!bubble.contains(e.target) && !button.contains(e.target)) {
+        this.$hideMenuBubble(bubble);
+        document.removeEventListener('click', closeMenuHandler);
+      }
+    };
+
+    setTimeout(() => {
+      document.addEventListener('click', closeMenuHandler);
+    }, 0);
+  }
+
+  /**
+   * 隐藏菜单气泡
+   */
+  $hideMenuBubble(bubble) {
+    bubble.classList.add('cherry-previewer-table-menu-bubble--hidden');
   }
 
   /**
@@ -1228,6 +1737,7 @@ export default class TableHandler {
     table.splice(trIndex + 2, 1);
     const newText = table.join('\n');
     this.codeMirror.replaceSelection(newText);
+    this.$afterTableOperation();
   }
 
   /**
@@ -1279,86 +1789,9 @@ export default class TableHandler {
       const newText = newTable.join('\n');
       this.codeMirror.replaceSelection(newText);
     }
+    this.$afterTableOperation();
   }
 
-  /**
-   * 绘制列宽调整
-   * @returns void
-   */
-  $drawColumnResize() {
-    const { tableNode } = this.tableEditor.info;
-    const box = this.tableEditor.info.tdNode;
-    const { columns } = this.tableEditor.info;
-
-    if (!box) return; // 安全检查
-
-    let isDragging = false;
-    let startX = 0;
-    let startWidth = 0;
-
-    // 检查是否已有 dragBar，避免重复创建
-    const existingDragBar = box.querySelector('.cherry-table-drag-bar');
-    if (existingDragBar) return;
-
-    // 设置定位
-    box.style.position = 'relative';
-    // 创建 dragBar
-    const dragBar = document.createElement('div');
-    dragBar.className = 'cherry-table-drag-bar';
-    dragBar.style.position = 'absolute';
-    box.appendChild(dragBar);
-
-    box.addEventListener('mouseleave', () => {
-      if (!isDragging) cleanup(); // 没拖拽，就清理
-    });
-    // mousedown 拖拽开始
-    const handleMouseDown = (e) => {
-      isDragging = true;
-      startX = e.clientX;
-
-      startWidth = box.offsetWidth;
-      e.preventDefault();
-
-      // 立即绑定事件
-      document.addEventListener('mousemove', handleMouseMove, true);
-      document.addEventListener('mouseup', handleMouseUp, true);
-      document.addEventListener('mouseleave', handleMouseLeave, true);
-    };
-    // 移动
-    const handleMouseMove = (e) => {
-      if (!isDragging) return;
-      const delta = e.clientX - startX;
-      const width = Math.max(50, startWidth + delta); // 最小宽度 50px
-
-      box.style.width = `${width}px`;
-      // 更新表格总宽度
-      tableNode.style.width = `${width * columns}px`;
-    };
-    // 鼠标释放
-    const handleMouseUp = (e) => {
-      if (isDragging) {
-        isDragging = false;
-        cleanup();
-      }
-    };
-
-    const handleMouseLeave = (e) => {
-      if (isDragging && e.clientY <= 0) {
-        // 鼠标移出窗口（顶部以上），视为取消
-        cleanup();
-      }
-    };
-
-    // 清理函数：统一处理资源释放
-    const cleanup = () => {
-      document.removeEventListener('mousemove', handleMouseMove, true);
-      document.removeEventListener('mouseup', handleMouseUp, true);
-      document.removeEventListener('mouseleave', handleMouseLeave, true);
-      dragBar?.remove(); // 移除 dragBar
-    };
-
-    dragBar.addEventListener('mousedown', handleMouseDown);
-  }
   /**
    * 拖拽列
    */
@@ -1368,10 +1801,13 @@ export default class TableHandler {
     const lines = this.codeMirror.getSelection().split(/\n/);
     const { tdNode } = this.tableEditor.info;
     const that = this;
-    tdNode.setAttribute('draggable', true);
+
+    // 确保只设置一次 draggable
+    if (!tdNode.hasAttribute('draggable')) {
+      tdNode.setAttribute('draggable', true);
+    }
 
     function handleDragLeave(event) {
-      that.setStyle(event.target, 'border', '1px solid #dfe6ee');
       that.$clearAllBorders();
     }
 
@@ -1385,21 +1821,49 @@ export default class TableHandler {
     function handleDrop(event) {
       event.preventDefault();
       const tdIndex = Array.from(event.target.parentElement.childNodes).indexOf(event.target);
+
+      // 检查是否是有效的拖拽操作
+      if (oldTdIndex === tdIndex) {
+        // 相同位置，不需要操作
+        that.$clearAllBorders();
+        cleanup();
+        return;
+      }
+
       const newLines = lines.map((line, index) => {
+        // 跳过空行
+        if (!line.trim()) return line;
+
         const cells = line
           .split('|')
           .map((item) => (item === '' ? 'CHERRY_MARKDOWN_PENDING_TEXT_FOR_EMPTY_CELL' : item))
           .slice(1, -1);
-        return `|${that.$operateLines(oldTdIndex, tdIndex, cells).join('|')}|`;
+
+        // 确保索引有效
+        if (oldTdIndex >= 0 && oldTdIndex < cells.length && tdIndex >= 0 && tdIndex < cells.length) {
+          return `|${that.$operateLines(oldTdIndex, tdIndex, cells).join('|')}|`;
+        }
+        return line;
       });
+
       const newText = newLines.join('\n').replace(/CHERRY_MARKDOWN_PENDING_TEXT_FOR_EMPTY_CELL/g, '');
+
+      // 替换选中的内容
       that.codeMirror.replaceSelection(newText);
-      that.setStyle(event.target, 'border', '1px solid #dfe6ee');
-      this.$clearAllBorders();
+      that.$clearAllBorders();
       that.$findTableInEditor();
       that.$setSelection(that.tableEditor.info.tableIndex, 'table');
+
+      cleanup();
+    }
+
+    function cleanup() {
       thNode.removeEventListener('dragleave', handleDragLeave);
       thNode.removeEventListener('dragover', handleDragOver);
+      thNode.removeEventListener('drop', handleDrop);
+      tdNode.removeAttribute('draggable');
+      // 确保清除所有高光
+      that.$clearAllBorders();
     }
 
     thNode.addEventListener('dragleave', handleDragLeave);
@@ -1412,7 +1876,12 @@ export default class TableHandler {
    */
   $dragLine() {
     const { trNode } = this.tableEditor.info;
-    trNode.setAttribute('draggable', true);
+
+    // 确保只设置一次 draggable
+    if (!trNode.hasAttribute('draggable')) {
+      trNode.setAttribute('draggable', true);
+    }
+
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
     const oldTrIndex = this.tableEditor.info.trIndex + 2;
     const tBody = trNode.parentElement;
@@ -1420,8 +1889,7 @@ export default class TableHandler {
     const that = this;
 
     function handleDragLeave(event) {
-      that.setStyle(event.target.parentElement, 'border', '1px solid #dfe6ee');
-      this.$clearAllBorders();
+      that.$clearAllBorders();
     }
 
     function handleDragOver(event) {
@@ -1436,15 +1904,31 @@ export default class TableHandler {
       event.preventDefault();
       const trIndex =
         Array.from(event.target.parentElement.parentElement.childNodes).indexOf(event.target.parentElement) + 2;
+
+      // 检查是否是有效的拖拽操作
+      if (oldTrIndex === trIndex) {
+        // 相同位置，不需要操作
+        that.$clearAllBorders();
+        cleanup();
+        return;
+      }
+
       const newText = that.$operateLines(oldTrIndex, trIndex, lines).join('\n');
       that.codeMirror.replaceSelection(newText);
 
       that.$findTableInEditor();
       that.$setSelection(that.tableEditor.info.tableIndex, 'table');
-      that.setStyle(event.target.parentElement, 'border', '1px solid #dfe6ee');
-      this.$clearAllBorders();
+      that.$clearAllBorders();
+
+      cleanup();
+    }
+
+    function cleanup() {
       tBody.removeEventListener('dragleave', handleDragLeave);
       tBody.removeEventListener('dragover', handleDragOver);
+      tBody.removeEventListener('drop', handleDrop);
+      trNode.removeAttribute('draggable');
+      that.$clearAllBorders();
     }
 
     tBody.addEventListener('dragleave', handleDragLeave);
@@ -1452,31 +1936,64 @@ export default class TableHandler {
     tBody.addEventListener('drop', handleDrop, { once: true });
   }
 
+  /**
+   * 拖拽过程中的视觉反馈
+   * @param {HTMLElement} objTarget - 目标元素
+   * @param {number} oldIndex - 原始索引
+   * @param {number} index - 新索引
+   * @param {string} type - 类型 ('Col' 或 'Line')
+   */
   $dragSymbol(objTarget, oldIndex, index, type) {
     const { target } = this;
     if (target !== objTarget && oldIndex !== index) {
       if ((target.tagName === 'TH' || target.tagName === 'TD') && type === 'Col') {
-        if (oldIndex < index) {
-          this.setStyle(objTarget, 'border', `1px solid #dfe6ee`);
-          this.setStyle(objTarget, 'border-right', `2px solid #6897bb`);
-          this.$hightLightColumnCellsDOM(index, 'right');
-        } else if (oldIndex > index) {
-          this.setStyle(objTarget, 'background', 'var(--md-table-sort-border)');
-          this.setStyle(objTarget, 'border', `1px solid #dfe6ee`);
-          this.setStyle(objTarget, 'border-left', `2px solid #6897bb`);
-          this.$hightLightColumnCellsDOM(index, 'left');
-        }
+        // 列拖拽的视觉反馈
+        this.$showColumnDragFeedback(objTarget, oldIndex, index);
       } else if (target.tagName === 'TD' && type === 'Line') {
-        if (oldIndex < index) {
-          this.setStyle(objTarget.parentElement, 'border', `1px solid #dfe6ee`);
-          objTarget.parentElement.classList.add('table-highlight-border-add-bottom');
-        } else if (oldIndex > index) {
-          this.setStyle(objTarget.parentElement, 'border', `1px solid #dfe6ee`);
-          objTarget.parentElement.classList.add('table-highlight-border-add-top');
-        }
+        // 行拖拽的视觉反馈
+        this.$showRowDragFeedback(objTarget, oldIndex, index);
       }
     }
   }
+
+  /**
+   * 显示列拖拽的视觉反馈
+   * @param {HTMLElement} objTarget - 目标元素
+   * @param {number} oldIndex - 原始索引
+   * @param {number} index - 新索引
+   */
+  $showColumnDragFeedback(objTarget, oldIndex, index) {
+    // 清除之前的高光
+    this.$clearAllBorders();
+
+    if (oldIndex < index) {
+      // 向右拖拽
+      this.$highlightColumnCellsDom(index, 'right');
+    } else if (oldIndex > index) {
+      // 向左拖拽
+      this.$highlightColumnCellsDom(index, 'left');
+    }
+  }
+
+  /**
+   * 显示行拖拽的视觉反馈
+   * @param {HTMLElement} objTarget - 目标元素
+   * @param {number} oldIndex - 原始索引
+   * @param {number} index - 新索引
+   */
+  $showRowDragFeedback(objTarget, oldIndex, index) {
+    // 清除之前的高光
+    this.$clearAllBorders();
+
+    if (oldIndex < index) {
+      // 向下拖拽
+      objTarget.parentElement.classList.add('table-highlight-border-reorder-bottom');
+    } else if (oldIndex > index) {
+      // 向上拖拽
+      objTarget.parentElement.classList.add('table-highlight-border-reorder-top');
+    }
+  }
+
   $operateLines(oldIndex, index, lines) {
     if (oldIndex < index) {
       lines.splice(index + 1, 0, lines[oldIndex]);
