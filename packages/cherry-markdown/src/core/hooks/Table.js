@@ -321,8 +321,9 @@ export default class Table extends ParagraphBase {
 
   makeHtml(str, sentenceMakeFunc) {
     let $str = str;
+    // 表格在流式输出下的适配
     if (this.$engine.$cherry.options.engine.global.flowSessionContext || this.selfClosing) {
-      if (/(^|^[^|][^\n]*\n|\n\n|\n[^|][^\n]*\n)\s*\|[^\n]+\n{0,1}[|:-\s]*\n*$/.test($str)) {
+      if (/(^|^(\s*[^|\s])[^\n]*\n|\n\n|\n(\s*[^|\s])[^\n]*\n)\s*\|[^\n]+\n{0,1}[|:-\s]*\n*$/.test($str)) {
         $str = `${$str.replace(/\n[|:-\s]*\n*$/, '')}\n|-|`;
       }
     }
