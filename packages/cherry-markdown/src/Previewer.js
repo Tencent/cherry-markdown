@@ -134,6 +134,9 @@ export default class Previewer {
     this.bindClick();
     this.onMouseDown();
     this.onSizeChange();
+    if (this.$cherry.options.previewer.isMobilePreview) {
+      this.changePreviewToMobile(true);
+    }
   }
 
   /**
@@ -1159,5 +1162,17 @@ export default class Previewer {
     } else if (type === 'word') {
       exportWordFile(this.getValue(), name);
     }
+  }
+
+  changePreviewToMobile(isMobile = true) {
+    // TODO：是否可以只通过修改外层class的方式来实现移动端预览效果的展示，而不是增加删除dom结构的方式
+    const previewerDom = this.getDomContainer();
+    if (isMobile) {
+      previewerDom.innerHTML = `<div class='cherry-mobile-previewer-content'>${previewerDom.innerHTML}</div>`;
+    } else {
+      // @ts-ignore
+      previewerDom.parentNode.innerHTML = previewerDom.innerHTML;
+    }
+    this.isMobilePreview = isMobile;
   }
 }
