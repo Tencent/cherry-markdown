@@ -31,14 +31,7 @@ export default class MobilePreview extends MenuBase {
    */
   onClick() {
     this.previewer.removeScroll();
-    // TODO：是否可以只通过修改外层class的方式来实现移动端预览效果的展示，而不是增加删除dom结构的方式
-    const previewerDom = this.previewer.getDomContainer();
-    if (this.previewer.isMobilePreview) {
-      previewerDom.parentNode.innerHTML = previewerDom.innerHTML;
-    } else {
-      previewerDom.innerHTML = `<div class='cherry-mobile-previewer-content'>${previewerDom.innerHTML}</div>`;
-    }
-    this.previewer.isMobilePreview = !this.previewer.isMobilePreview;
+    this.previewer.changePreviewToMobile(!this.previewer.isMobilePreview);
     this.previewer.bindScroll();
   }
 }
