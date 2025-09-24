@@ -201,7 +201,9 @@
 
   em {
     font-style: italic;
-    padding: 0 3px 0 0;
+    &.cherry-right-padding {
+      padding-right: 0.2em;
+    }
   }
 
   sup {
