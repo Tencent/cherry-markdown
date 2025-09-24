@@ -34,7 +34,12 @@ export default class Emphasis extends SyntaxBase {
       let prefix = '<strong>'.repeat(repeat);
       let suffix = '</strong>'.repeat(repeat);
       if (tagType === 'em') {
-        prefix += '<em>';
+        // 判断text的最后一个字符是否是中文
+        if (/[\u4e00-\u9fa5]$/.test(text)) {
+          prefix += '<em class="cherry-right-padding">';
+        } else {
+          prefix += '<em>';
+        }
         suffix = `</em>${suffix}`;
       }
       // 这里转义_是为了避免跨标签识别
