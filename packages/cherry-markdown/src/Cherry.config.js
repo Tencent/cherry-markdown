@@ -788,6 +788,8 @@ const defaultConfig = {
   previewer: {
     dom: false,
     className: 'cherry-markdown',
+    // 是否启用移动端预览
+    isMobilePreview: false,
     // 是否启用预览区域编辑能力（目前支持编辑图片尺寸、编辑表格内容）
     enablePreviewerBubble: true,
     floatWhenClosePreviewer: false,

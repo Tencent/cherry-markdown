@@ -592,6 +592,8 @@ export interface CherryPreviewerOptions {
   dom?: HTMLDivElement | false;
   /** 预览区域的DOM className */
   className?: string;
+  /** 是否是移动端预览 */
+  isMobilePreview?: boolean,
   enablePreviewerBubble?: boolean;
   floatWhenClosePreviewer?: boolean;
   // 配置图片懒加载的逻辑
