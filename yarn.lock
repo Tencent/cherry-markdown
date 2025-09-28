@@ -13217,6 +13217,20 @@ vite-node@3.1.3:
   optionalDependencies:
     fsevents "~2.3.3"
 
+vite@^6.0.0:
+  version "6.3.6"
+  resolved "https://registry.npmjs.org/vite/-/vite-6.3.6.tgz#69a976b64930750d40219fbc68c5200874d315c1"
+  integrity sha512-0msEVHJEScQbhkbVTb/4iHZdJ6SXp/AvxL2sjwYQFfBqleHtnCqv1J3sa9zbWz/6kW1m9Tfzn92vW+kZ1WV6QA==
+  dependencies:
+    esbuild "^0.25.0"
+    fdir "^6.4.4"
+    picomatch "^4.0.2"
+    postcss "^8.5.3"
+    rollup "^4.34.9"
+    tinyglobby "^0.2.13"
+  optionalDependencies:
+    fsevents "~2.3.3"
+
 vite@^6.0.3:
   version "6.2.3"
   resolved "https://registry.npmjs.org/vite/-/vite-6.2.3.tgz#249e92d32886981ab46bc1f049ac72abc6fa81e2"

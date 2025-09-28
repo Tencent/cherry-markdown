@@ -23,7 +23,8 @@
   ],
   "scripts": {
     "iconfont": "gulp",
-    "dev": "run-p watch:js watch:styles iconfont",
+    "dev": "run-p dev:vite watch:styles iconfont",
+    "dev:vite": "vite --config vite.config.ts",
     "watch:js": "cross-env NODE_ENV=development rollup -w --config build/dev.js",
     "watch:styles": "cross-env NODE_ENV=development rollup -w --config build/rollup.styles.config.js",
     "dev:js": "cross-env NODE_ENV=development HOT_RELOAD=false rollup --config build/dev.js",
@@ -103,6 +104,7 @@
     "replace-in-file": "^7.0.1",
     "rimraf": "^3.0.2",
     "rollup": "~2.79.1",
+    "vite": "^6.0.0",
     "rollup-plugin-livereload": "~2.0.5",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-scss": "^4.0.0",
