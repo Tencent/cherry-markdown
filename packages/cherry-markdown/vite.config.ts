@@ -4,6 +4,8 @@ import path from 'path';
 export default defineConfig({
   root: process.cwd(),
   base: '/',
+  // serve files from dist as static public assets in dev
+  publicDir: 'dist',
   resolve: {
     alias: [{ find: '@', replacement: path.resolve(__dirname, 'src') }],
   },
@@ -11,6 +13,11 @@ export default defineConfig({
     port: 5173,
     open: false,
     // serve from workspace root so index.html loads /packages/cherry-markdown/src
+    // allow serving files from the workspace (and dist) if Vite needs fs access
+    fs: {
+      // allow serving files from the package directory (dist) and workspace root
+      allow: [path.resolve(__dirname), path.resolve(__dirname, 'dist'), path.resolve(__dirname, '..', '..')],
+    },
   },
   build: {
     outDir: 'dist',

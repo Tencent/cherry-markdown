@@ -21,12 +21,11 @@
   "sideEffects": [
     "./dist/*.css"
   ],
-  "scripts": {
+  "scripts": { 
     "iconfont": "gulp",
-    "dev": "run-p dev:vite watch:styles iconfont",
     "dev:vite": "vite --config vite.config.ts",
-    "watch:js": "cross-env NODE_ENV=development rollup -w --config build/dev.js",
-    "watch:styles": "cross-env NODE_ENV=development rollup -w --config build/rollup.styles.config.js",
+  "dev:link-fonts:win": "powershell -Command \"if (-Not (Test-Path -Path src\\fonts)) { cmd /c mklink /J src\\fonts dist\\fonts } else { Write-Host 'src\\fonts already exists' }\"",
+  "dev:link-fonts:unix": "sh -c '[ -e src/fonts ] || ln -s ../../dist/fonts src/fonts'",
     "dev:js": "cross-env NODE_ENV=development HOT_RELOAD=false rollup --config build/dev.js",
     "dev:styles": "cross-env NODE_ENV=development rollup --config build/rollup.styles.config.js",
     "build": "run-s clean build:debug build:all build:cjs",

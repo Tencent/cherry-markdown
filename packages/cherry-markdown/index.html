@@ -3,24 +3,17 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>cherry-markdown (dev)</title>
+    <title>Cherry Markdown</title>
   </head>
   <body>
     <div id="cherry-markdown-root"></div>
     <!-- Vite will serve modules from /src (use relative path from this file) -->
     <script type="module">
-      // import styles so Vite processes SCSS in dev
       import './src/sass/index.scss';
       import Cherry from './src/index.js';
 
-      // create a simple demo instance for dev
-      const container = document.getElementById('cherry-markdown-root');
-      const el = document.createElement('div');
-      el.id = 'markdown-container';
-      container.appendChild(el);
-
       new Cherry({
-        id: 'markdown-container',
+        id: 'cherry-markdown-root',
         value: '# welcome to cherry editor!',
       });
     </script>

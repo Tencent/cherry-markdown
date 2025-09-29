@@ -12,6 +12,7 @@
     "packages/*"
   ],
   "scripts": {
+    "postinstall": "yarn workspace cherry-markdown run iconfont",
     "prepare": "husky",
     "changeset": "npx @changesets/cli",
     "changeset-version": "npx @changesets/cli version",
