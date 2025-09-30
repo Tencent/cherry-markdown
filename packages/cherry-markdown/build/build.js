@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import terser from '@rollup/plugin-terser';
-import baseConfig from './rollup.base.config';
+import baseConfig from './rollup.base.config.js';
 
 const terserPlugin = (options = {}) =>
   terser({

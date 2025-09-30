@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// import { readFileSync } from 'fs';
-import PackageInfo from '../package.json';
+// use fs to read package.json to avoid ESM JSON import assertion issues
+import { readFileSync } from 'fs';
 import { execSync } from 'child_process';
+const PackageInfo = JSON.parse(readFileSync(new URL('../package.json', import.meta.url)));
 
 // ref: https://gitlab.com/IvanSanchez/rollup-plugin-git-version/-/blob/master/src/version.mjs
 // const branchRegexp = /ref: .*\/(\w*)/;
