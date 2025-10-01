@@ -1,3 +1,6 @@
+import './pinyin/pinyin_dist';
+import  basicMd from '../markdown/basic.md?raw';
+
 /**
  * 自定义一个语法
  */
@@ -21,9 +24,9 @@ var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TY
  * 点第一次时，把选中的文字变成同时加粗和斜体
  * 保持光标选区不变，点第二次时，把加粗斜体的文字变成普通文本
  */
-var customMenuA = Cherry.createMenuHook('加粗斜体',  {
+var customMenuA = Cherry.createMenuHook('加粗斜体', {
   iconName: 'font',
-  onClick: function(selection) {
+  onClick: function (selection) {
     // 获取用户选中的文字，调用getSelection方法后，如果用户没有选中任何文字，会尝试获取光标所在位置的单词或句子
     let $selection = this.getSelection(selection) || '同时加粗斜体';
     // 如果是单选，并且选中内容的开始结束内没有加粗语法，则扩大选中范围
@@ -50,25 +53,26 @@ var customMenuA = Cherry.createMenuHook('加粗斜体',  {
       this.setLessSelection('***', '***');
     });
     return $selection.replace(/(^)([^\n]+)($)/gm, '$1***$2***$3');
-  }
+  },
 });
 /**
  * 定义一个空壳，用于自行规划cherry已有工具栏的层级结构
  */
-var customMenuB = Cherry.createMenuHook('实验室',  {
+var customMenuB = Cherry.createMenuHook('实验室', {
   icon: {
     type: 'svg',
-    content: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></svg>',
+    content:
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></svg>',
     iconStyle: 'width: 15px; height: 15px; vertical-align: middle;',
   },
 });
 /**
  * 定义一个自带二级菜单的工具栏
  */
-var customMenuC = Cherry.createMenuHook('帮助中心',  {
+var customMenuC = Cherry.createMenuHook('帮助中心', {
   iconName: 'question',
   onClick: (selection, type) => {
-    switch(type) {
+    switch (type) {
       case 'shortKey':
         return `${selection}快捷键看这里：https://codemirror.net/5/demo/sublime.html`;
       case 'github':
@@ -80,26 +84,100 @@ var customMenuC = Cherry.createMenuHook('帮助中心',  {
     }
   },
   subMenuConfig: [
-    { noIcon: true, name: '快捷键', onclick: (event)=>{cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'shortKey')} },
-    { noIcon: true, name: '联系我们', onclick: (event)=>{cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'github')} },
-    { noIcon: true, name: '更新日志', onclick: (event)=>{cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'release')} },
-  ]
+    {
+      noIcon: true,
+      name: '快捷键',
+      onclick: (event) => {
+        cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'shortKey');
+      },
+    },
+    {
+      noIcon: true,
+      name: '联系我们',
+      onclick: (event) => {
+        cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'github');
+      },
+    },
+    {
+      noIcon: true,
+      name: '更新日志',
+      onclick: (event) => {
+        cherry.toolbar.menus.hooks.customMenuCName.fire(null, 'release');
+      },
+    },
+  ],
 });
 
 /**
  * 定义带图表表格的按钮
  */
-var customMenuTable = Cherry.createMenuHook('图表',  {
+var customMenuTable = Cherry.createMenuHook('图表', {
   iconName: 'trendingUp',
   subMenuConfig: [
-    { noIcon: true, name: '折线图', onclick: (event)=>{cherry.insert('\n| :line:{"title": "折线图"} | Header1 | Header2 | Header3 | Header4 |\n| ------ | ------ | ------ | ------ | ------ |\n| Sample1 | 11 | 11 | 4 | 33 |\n| Sample2 | 112 | 111 | 22 | 222 |\n| Sample3 | 333 | 142 | 311 | 11 |\n');} },
-    { noIcon: true, name: '柱状图', onclick: (event)=>{cherry.insert('\n| :bar:{"title": "柱状图"} | Header1 | Header2 | Header3 | Header4 |\n| ------ | ------ | ------ | ------ | ------ |\n| Sample1 | 11 | 11 | 4 | 33 |\n| Sample2 | 112 | 111 | 22 | 222 |\n| Sample3 | 333 | 142 | 311 | 11 |\n');} },
-    { noIcon: true, name: '雷达图', onclick: (event)=>{cherry.insert('\n| :radar:{"title": "雷达图"} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |\n| ------ | ------ | ------ | ------ | ------ | ------ |\n| 用户A | 90 | 85 | 75 | 80 | 88 |\n| 用户B | 75 | 90 | 88 | 85 | 78 |\n| 用户C | 85 | 78 | 90 | 88 | 85 |\n');} },
-    { noIcon: true, name: '热力图', onclick: (event)=>{cherry.insert('\n| :heatmap:{"title": "热力图"} | 周一 | 周二 | 周三 | 周四 | 周五 |\n| ------ | ------ | ------ | ------ | ------ | ------ |\n| 上午 | 10 | 20 | 30 | 40 | 50 |\n| 下午 | 15 | 25 | 35 | 45 | 55 |\n| 晚上 | 5 | 15 | 25 | 35 | 45 |\n');} },
-    { noIcon: true, name: '饼图', onclick: (event)=>{cherry.insert('\n| :pie:{"title": "饼图"} | 数值 |\n| ------ | ------ |\n| 苹果 | 40 |\n| 香蕉 | 30 |\n| 橙子 | 20 |\n| 葡萄 | 10 |\n');} },
-    { noIcon: true, name: '散点图', onclick: (event)=>{cherry.insert('\n| :scatter:{"title": "散点图", "cherry:mapping": {"x": "X", "y": "Y", "size": "Size", "series": "Series"}} | X | Y | Size | Series |\n| ------ | ------ | ------ | ------ | ------ |\n| A1 | 10 | 20 | 5 | S1 |\n| A2 | 15 | 35 | 8 | S1 |\n| B1 | 30 | 12 | 3 | S2 |\n| B2 | 25 | 28 | 6 | S2 |\n| C1 | 50 | 40 | 9 | S3 |\n| C2 | 60 | 55 | 7 | S3 |\n');} },
-    { noIcon: true, name: '地图', onclick: (event)=>{cherry.insert('\n| :map:{"title": "地图", "mapDataSource": "https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json"} | 数值 |\n| :-: | :-: |\n| 北京 | 100 |\n| 上海 | 200 |\n| 广东 | 300 |\n| 四川 | 150 |\n| 江苏 | 250 |\n| 浙江 | 180 |\n\n**说明：** 修改mapDataSource的URL来自定义地图数据源\n');} },
-  ]
+    {
+      noIcon: true,
+      name: '折线图',
+      onclick: (event) => {
+        cherry.insert(
+          '\n| :line:{"title": "折线图"} | Header1 | Header2 | Header3 | Header4 |\n| ------ | ------ | ------ | ------ | ------ |\n| Sample1 | 11 | 11 | 4 | 33 |\n| Sample2 | 112 | 111 | 22 | 222 |\n| Sample3 | 333 | 142 | 311 | 11 |\n',
+        );
+      },
+    },
+    {
+      noIcon: true,
+      name: '柱状图',
+      onclick: (event) => {
+        cherry.insert(
+          '\n| :bar:{"title": "柱状图"} | Header1 | Header2 | Header3 | Header4 |\n| ------ | ------ | ------ | ------ | ------ |\n| Sample1 | 11 | 11 | 4 | 33 |\n| Sample2 | 112 | 111 | 22 | 222 |\n| Sample3 | 333 | 142 | 311 | 11 |\n',
+        );
+      },
+    },
+    {
+      noIcon: true,
+      name: '雷达图',
+      onclick: (event) => {
+        cherry.insert(
+          '\n| :radar:{"title": "雷达图"} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |\n| ------ | ------ | ------ | ------ | ------ | ------ |\n| 用户A | 90 | 85 | 75 | 80 | 88 |\n| 用户B | 75 | 90 | 88 | 85 | 78 |\n| 用户C | 85 | 78 | 90 | 88 | 85 |\n',
+        );
+      },
+    },
+    {
+      noIcon: true,
+      name: '热力图',
+      onclick: (event) => {
+        cherry.insert(
+          '\n| :heatmap:{"title": "热力图"} | 周一 | 周二 | 周三 | 周四 | 周五 |\n| ------ | ------ | ------ | ------ | ------ | ------ |\n| 上午 | 10 | 20 | 30 | 40 | 50 |\n| 下午 | 15 | 25 | 35 | 45 | 55 |\n| 晚上 | 5 | 15 | 25 | 35 | 45 |\n',
+        );
+      },
+    },
+    {
+      noIcon: true,
+      name: '饼图',
+      onclick: (event) => {
+        cherry.insert(
+          '\n| :pie:{"title": "饼图"} | 数值 |\n| ------ | ------ |\n| 苹果 | 40 |\n| 香蕉 | 30 |\n| 橙子 | 20 |\n| 葡萄 | 10 |\n',
+        );
+      },
+    },
+    {
+      noIcon: true,
+      name: '散点图',
+      onclick: (event) => {
+        cherry.insert(
+          '\n| :scatter:{"title": "散点图", "cherry:mapping": {"x": "X", "y": "Y", "size": "Size", "series": "Series"}} | X | Y | Size | Series |\n| ------ | ------ | ------ | ------ | ------ |\n| A1 | 10 | 20 | 5 | S1 |\n| A2 | 15 | 35 | 8 | S1 |\n| B1 | 30 | 12 | 3 | S2 |\n| B2 | 25 | 28 | 6 | S2 |\n| C1 | 50 | 40 | 9 | S3 |\n| C2 | 60 | 55 | 7 | S3 |\n',
+        );
+      },
+    },
+    {
+      noIcon: true,
+      name: '地图',
+      onclick: (event) => {
+        cherry.insert(
+          '\n| :map:{"title": "地图", "mapDataSource": "https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json"} | 数值 |\n| :-: | :-: |\n| 北京 | 100 |\n| 上海 | 200 |\n| 广东 | 300 |\n| 四川 | 150 |\n| 江苏 | 250 |\n| 浙江 | 180 |\n\n**说明：** 修改mapDataSource的URL来自定义地图数据源\n',
+        );
+      },
+    },
+  ],
 });
 
 var basicConfig = {
@@ -151,8 +229,20 @@ var basicConfig = {
         editCode: true,
         changeLang: true,
         customBtns: [
-          { html: '自定义按钮1', onClick: (event, code, lang, dom)=>{console.log(`【${lang}】: ${code}`);console.log(dom);} },
-          { html: '自定义按钮2', onClick: (event, code, lang, dom)=>{console.log(`【${lang}】: ${code}`);console.log(dom);} },
+          {
+            html: '自定义按钮1',
+            onClick: (event, code, lang, dom) => {
+              console.log(`【${lang}】: ${code}`);
+              console.log(dom);
+            },
+          },
+          {
+            html: '自定义按钮2',
+            onClick: (event, code, lang, dom) => {
+              console.log(`【${lang}】: ${code}`);
+              console.log(dom);
+            },
+          },
         ],
         customRenderer: {
           // 特殊配置“all”，会应用于所有语言
@@ -161,7 +251,7 @@ var basicConfig = {
           //     return `<p class="my-render">lang:${lang};code:${src}</p>`;
           //   }
           // }
-        }
+        },
       },
       table: {
         enableChart: true,
@@ -293,7 +383,22 @@ var basicConfig = {
       '|',
       'formula',
       {
-        insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'inlineCode', 'formula', 'toc', 'table', 'pdf', 'word', 'file'],
+        insert: [
+          'image',
+          'audio',
+          'video',
+          'link',
+          'hr',
+          'br',
+          'code',
+          'inlineCode',
+          'formula',
+          'toc',
+          'table',
+          'pdf',
+          'word',
+          'file',
+        ],
       },
       'graph',
       'proTable',
@@ -341,8 +446,8 @@ var basicConfig = {
           // 在线高质量地图数据源（优先，已验证可用）
           'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
           // 本地备用地图数据（从examples目录的相对路径）
-          './assets/data/china.json'
-        ]
+          './assets/data/china.json',
+        ],
       },
       // publish: [
       //   {
@@ -367,9 +472,8 @@ var basicConfig = {
   keydown: [],
   //extensions: [],
   callback: {
-    changeString2Pinyin: pinyin,
     onClickPreview: (event) => {
-      console.log("onClickPreview", event);
+      console.log('onClickPreview', event);
     },
     afterAsyncRender: (md, html) => {
       // console.log("afterAsyncRender", md, html);
@@ -384,8 +488,8 @@ var basicConfig = {
     showSuggestList: true, // 是否显示联想框
     maxUrlLength: 200, // url最大长度，超过则自动截断
     codemirror: {
-      placeholder: '输入文本或「/」开始编辑'
-    }
+      placeholder: '输入文本或「/」开始编辑',
+    },
   },
   // cherry初始化后是否检查 location.hash 尝试滚动到对应位置
   autoScrollByHashAfterInit: true,
@@ -395,7 +499,6 @@ var basicConfig = {
   },
 };
 
-fetch('./assets/markdown/basic.md').then((response) => response.text()).then((value) => {
-  var config = Object.assign({}, basicConfig, { value: value });
-  window.cherry = new Cherry(config);
-});
+// 在Vite中使用?raw导入的文件内容已经是字符串，无需通过fetch获取
+var config = Object.assign({}, basicConfig, { value: basicMd });
+window.cherry = new Cherry(config);
