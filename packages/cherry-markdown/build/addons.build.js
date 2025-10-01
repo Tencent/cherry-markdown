@@ -54,9 +54,15 @@ function buildAddons(entries) {
     const addonBundle = await _rollup({
       input: fullEntryPath,
       plugins: [
-        eslint({
-          exclude: ['**/node_modules/**', 'src/sass/**', 'src/libs/**'],
-        }),
+        ...(process.env.ENABLE_ESLINT === 'true'
+          ? [
+              eslint({
+                exclude: ['**/node_modules/**', 'src/sass/**', 'src/libs/**'],
+                throwOnError: false,
+                throwOnWarning: false,
+              }),
+            ]
+          : []),
         json(),
         // envReplacePlugin(),
         alias({
@@ -87,6 +93,16 @@ function buildAddons(entries) {
         babel({
           babelHelpers: 'runtime',
           exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5)/],
+          babelrc: false,
+          configFile: false,
+          presets: [['@babel/preset-env', { modules: false }]],
+          plugins: [
+            ['@babel/plugin-transform-runtime', { corejs: 3 }],
+            ['@babel/plugin-proposal-decorators', { legacy: true }],
+            '@babel/plugin-proposal-class-properties',
+            '@babel/plugin-proposal-nullish-coalescing-operator',
+            '@babel/plugin-proposal-optional-chaining',
+          ],
         }),
       ],
     });

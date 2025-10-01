@@ -13,21 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import path from 'path';
+import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import babel from '@rollup/plugin-babel';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import eslint from '@rollup/plugin-eslint';
 import alias from '@rollup/plugin-alias';
-import babelConfig from '../babel.config.js';
+import babelConfig from '../babel.config.mjs';
 import json from '@rollup/plugin-json';
 import envReplacePlugin from './env.js';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const PROJECT_ROOT_PATH = path.resolve(__dirname, '..');
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT_PATH = path.resolve(currentDir, '..');
 /** 构建目标是否 node */
 const IS_COMMONJS_BUILD = process.env.BUILD_TARGET === 'commonjs';
 
@@ -153,7 +152,8 @@ const options = {
       if (
         warning &&
         warning.code === 'CIRCULAR_DEPENDENCY' &&
-        (typeof warning.importer === 'string' && (warning.importer.includes('node_modules/juice') || warning.importer.includes('node_modules/d3-')))
+        typeof warning.importer === 'string' &&
+        (warning.importer.includes('node_modules/juice') || warning.importer.includes('node_modules/d3-'))
       ) {
         return;
       }
