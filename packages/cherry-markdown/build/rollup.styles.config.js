@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import scss from 'rollup-plugin-scss';
-import dartSass from 'sass';
+import * as dartSass from 'sass';
 // baseConfig not used in styles config
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
