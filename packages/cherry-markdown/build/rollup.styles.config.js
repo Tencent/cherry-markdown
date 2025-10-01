@@ -33,12 +33,6 @@ const createCleanupPlugin = () => ({
   },
 });
 
-const baseScssOptions = {
-  failOnError: true,
-  sass: dartSass,
-  includePaths: ['node_modules'],
-};
-
 const createStyleConfigs = ({ input, cssBaseName, outputBaseName, watch }) => {
   const configs = [
     {
@@ -49,7 +43,8 @@ const createStyleConfigs = ({ input, cssBaseName, outputBaseName, watch }) => {
       plugins: [
         scss({
           fileName: `${cssBaseName}.css`,
-          ...baseScssOptions,
+          failOnError: true,
+          sass: dartSass,
           ...(watch ? { watch } : {}),
         }),
         createCleanupPlugin(),
@@ -66,7 +61,8 @@ const createStyleConfigs = ({ input, cssBaseName, outputBaseName, watch }) => {
       plugins: [
         scss({
           fileName: `${cssBaseName}.min.css`,
-          ...baseScssOptions,
+          failOnError: true,
+          sass: dartSass,
           outputStyle: 'compressed',
         }),
         createCleanupPlugin(),
