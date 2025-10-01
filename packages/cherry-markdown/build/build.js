@@ -34,6 +34,15 @@ export default {
     {
       ...baseConfig.output,
       exports: 'named',
+      file: 'dist/cherry-markdown.js',
+      format: 'umd',
+      name: 'Cherry',
+      sourcemap: true,
+      compact: false,
+    },
+    {
+      ...baseConfig.output,
+      exports: 'named',
       file: 'dist/cherry-markdown.min.js',
       format: 'umd',
       name: 'Cherry',
