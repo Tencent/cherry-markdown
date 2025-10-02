@@ -1,8 +1,8 @@
-/* Minimal Babel config for build
- * Compatible with both CommonJS and ESM environments
+/* ESM Babel config for build tools
+ * This file is used by build tools that require ESM format
  */
 
-module.exports = {
+export default {
   presets: [['@babel/preset-env', { modules: false }]],
   env: { test: { presets: [['@babel/preset-env']] } },
   plugins: [

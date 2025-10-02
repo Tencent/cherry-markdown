@@ -15,7 +15,7 @@
  */
 import replace from '@rollup/plugin-replace';
 // add git revision into process.env
-import './revision';
+import './revision.js';
 
 const collectEnv = () => {
   if (!process.env) {

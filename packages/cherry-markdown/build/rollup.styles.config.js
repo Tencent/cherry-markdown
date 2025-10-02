@@ -14,71 +14,77 @@
  * limitations under the License.
  */
 import scss from 'rollup-plugin-scss';
-import dartSass from 'sass';
+import * as dartSass from 'sass';
+// baseConfig not used in styles config
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 /**
  * @type {import('rollup').RollupOptions}
  */
-const options = [
-  {
-    input: 'src/sass/index.scss',
-    output: {
-      file: 'dist/cherry-markdown.styles.js',
-    },
-    plugins: [
-      scss({
-        // Filename to write all styles to
-        fileName: IS_PRODUCTION ? 'cherry-markdown.min.css' : 'cherry-markdown.css',
+const createCleanupPlugin = () => ({
+  name: 'remove-non-asset-artifacts',
+  generateBundle: (option, bundle) => {
+    Object.keys(bundle).forEach((key) => {
+      if (bundle[key].type !== 'asset') {
+        delete bundle[key];
+      }
+    });
+  },
+});
 
-        // Determine if node process should be terminated on error (default: false)
-        failOnError: true,
-        ...(IS_PRODUCTION && {
-          outputStyle: 'compressed',
-        }),
-        sass: dartSass,
-        watch: ['src/sass'],
-      }),
-      {
-        generateBundle: (option, bundle) => {
-          // remove all non-asset files from bundle
-          Object.keys(bundle).forEach((key) => {
-            if (bundle[key].type !== 'asset') {
-              delete bundle[key];
-            }
-          });
-        },
+const createStyleConfigs = ({ input, cssBaseName, outputBaseName, watch }) => {
+  const configs = [
+    {
+      input,
+      output: {
+        file: `dist/${outputBaseName}.styles.js`,
       },
-    ],
-  },
-  {
-    input: 'src/sass/markdown_pure.scss',
-    output: {
-      file: 'dist/cherry-previewer.styles.js',
+      plugins: [
+        scss({
+          fileName: `${cssBaseName}.css`,
+          failOnError: true,
+          sass: dartSass,
+          ...(watch ? { watch } : {}),
+        }),
+        createCleanupPlugin(),
+      ],
     },
-    plugins: [
-      scss({
-        fileName: IS_PRODUCTION ? 'cherry-markdown.markdown.min.css' : 'cherry-markdown.markdown.css',
-        // node进程是否在错误时终止
-        failOnError: true,
-        ...(IS_PRODUCTION && {
+  ];
+
+  if (IS_PRODUCTION) {
+    configs.push({
+      input,
+      output: {
+        file: `dist/${outputBaseName}.styles.min.js`,
+      },
+      plugins: [
+        scss({
+          fileName: `${cssBaseName}.min.css`,
+          failOnError: true,
+          sass: dartSass,
           outputStyle: 'compressed',
         }),
-        sass: dartSass,
-      }),
-      {
-        generateBundle: (option, bundle) => {
-          // remove all non-asset files from bundle
-          Object.keys(bundle).forEach((key) => {
-            if (bundle[key].type !== 'asset') {
-              delete bundle[key];
-            }
-          });
-        },
-      },
-    ],
-  },
+        createCleanupPlugin(),
+      ],
+    });
+  }
+
+  return configs;
+};
+
+const options = [
+  ...createStyleConfigs({
+    input: 'src/sass/index.scss',
+    cssBaseName: 'cherry-markdown',
+    outputBaseName: 'cherry-markdown',
+    watch: ['src/sass'],
+  }),
+  ...createStyleConfigs({
+    input: 'src/sass/markdown_pure.scss',
+    cssBaseName: 'cherry-markdown.markdown',
+    outputBaseName: 'cherry-previewer',
+  }),
 ];
 
 export default options;
