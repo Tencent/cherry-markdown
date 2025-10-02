@@ -52,7 +52,7 @@
       // 使用 fetch 获取 markdown 文件内容
       const response = await fetch('../markdown/basic.md');
       const basicMd = await response.text();
-      import { basicConfig } from './assets/scripts/config/basicConfig.js';
+      import { basicConfig } from './assets/scripts/index-demo.js';
       // 在Vite中使用?raw导入的文件内容已经是字符串，无需通过fetch获取
       const config = Object.assign({}, basicConfig, { value: basicMd });
       window.cherry = new Cherry(config);
