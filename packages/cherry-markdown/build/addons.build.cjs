@@ -1,21 +1,18 @@
-import babel from '@rollup/plugin-babel';
-import resolve from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
-import eslint from '@rollup/plugin-eslint';
-import alias from '@rollup/plugin-alias';
-import json from '@rollup/plugin-json';
-import typescript from 'rollup-plugin-typescript2';
+const babel = require('@rollup/plugin-babel');
+const resolve = require('@rollup/plugin-node-resolve');
+const commonjs = require('@rollup/plugin-commonjs');
+const eslint = require('@rollup/plugin-eslint');
+const alias = require('@rollup/plugin-alias');
+const json = require('@rollup/plugin-json');
+const typescript = require('rollup-plugin-typescript2');
 
-import { resolve as _resolve, join, dirname, basename, extname } from 'path';
-import { mkdirSync, writeFileSync } from 'fs';
-import { fileURLToPath } from 'url';
+const { resolve: _resolve, join, dirname, basename, extname } = require('path');
+const { mkdirSync, writeFileSync } = require('fs');
 
-import glob from 'glob';
+const glob = require('glob');
 
-import { rollup as _rollup } from 'rollup';
-import terser from '@rollup/plugin-terser';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const { rollup: _rollup } = require('rollup');
+const terser = require('@rollup/plugin-terser');
 const PROJECT_ROOT_PATH = _resolve(__dirname, '../');
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
@@ -54,15 +51,9 @@ function buildAddons(entries) {
     const addonBundle = await _rollup({
       input: fullEntryPath,
       plugins: [
-        ...(process.env.ENABLE_ESLINT === 'true'
-          ? [
-              eslint({
-                exclude: ['**/node_modules/**', 'src/sass/**', 'src/libs/**'],
-                throwOnError: false,
-                throwOnWarning: false,
-              }),
-            ]
-          : []),
+        eslint({
+          exclude: ['**/node_modules/**', 'src/sass/**', 'src/libs/**'],
+        }),
         json(),
         // envReplacePlugin(),
         alias({
@@ -93,16 +84,6 @@ function buildAddons(entries) {
         babel({
           babelHelpers: 'runtime',
           exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5)/],
-          babelrc: false,
-          configFile: false,
-          presets: [['@babel/preset-env', { modules: false }]],
-          plugins: [
-            ['@babel/plugin-transform-runtime', { corejs: 3 }],
-            ['@babel/plugin-proposal-decorators', { legacy: true }],
-            '@babel/plugin-proposal-class-properties',
-            '@babel/plugin-proposal-nullish-coalescing-operator',
-            '@babel/plugin-proposal-optional-chaining',
-          ],
         }),
       ],
     });
@@ -130,3 +111,4 @@ function buildAddons(entries) {
     });
   });
 }
+

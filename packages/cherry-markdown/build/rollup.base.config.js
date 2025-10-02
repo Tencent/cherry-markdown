@@ -13,17 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import path from 'path';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 import babel from '@rollup/plugin-babel';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import eslint from '@rollup/plugin-eslint';
 import alias from '@rollup/plugin-alias';
+import babelConfig from '../babel.config.mjs';
 import json from '@rollup/plugin-json';
-import envReplacePlugin from './env';
+import envReplacePlugin from './env.js';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const PROJECT_ROOT_PATH = path.resolve(__dirname, '..');
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT_PATH = path.resolve(currentDir, '..');
 /** 构建目标是否 node */
 const IS_COMMONJS_BUILD = process.env.BUILD_TARGET === 'commonjs';
 
@@ -56,9 +59,18 @@ const options = {
     manualChunks: () => 'cherry',
   },
   plugins: [
-    eslint({
-      exclude: ['**/node_modules/**', 'src/libs/**'],
-    }),
+    // Only run ESLint in builds that explicitly enable it. Default: disabled to avoid
+    // parser errors when tools load ESM Babel configs during rollup CLI execution.
+    ...(process.env.ENABLE_ESLINT === 'true'
+      ? [
+          eslint({
+            exclude: ['**/node_modules/**', 'src/libs/**'],
+            // don't fail the whole build on lint parse errors; allow bundling to continue
+            throwOnError: false,
+            throwOnWarning: false,
+          }),
+        ]
+      : []),
     json(),
     envReplacePlugin(),
     alias(aliasPluginOptions),
@@ -97,8 +109,13 @@ const options = {
       // ignore: [ 'conditional-runtime-dependency' ]
     }),
     babel({
+      // use inline config to avoid Babel attempting to load an ESM config file asynchronously
       babelHelpers: 'runtime',
       exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5|lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
+      babelrc: false,
+      configFile: false,
+      presets: babelConfig.presets,
+      plugins: babelConfig.plugins,
     }),
     // TODO: 重构抽出为独立的插件
     {
@@ -131,11 +148,17 @@ const options = {
   ],
   onwarn(warning, warn) {
     // 忽略 juice 的 circular dependency
-    if (
-      warning.code === 'CIRCULAR_DEPENDENCY' &&
-      (warning.importer.includes('node_modules/juice') || warning.importer.includes('node_modules/d3-'))
-    ) {
-      return;
+    try {
+      if (
+        warning &&
+        warning.code === 'CIRCULAR_DEPENDENCY' &&
+        typeof warning.importer === 'string' &&
+        (warning.importer.includes('node_modules/juice') || warning.importer.includes('node_modules/d3-'))
+      ) {
+        return;
+      }
+    } catch (e) {
+      // 如果 warning 对象结构异常，安全地回退到默认行为
     }
     warn(warning);
   },

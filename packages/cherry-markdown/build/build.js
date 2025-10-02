@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import terser from '@rollup/plugin-terser';
-import baseConfig from './rollup.base.config';
+import baseConfig from './rollup.base.config.js';
 
 const terserPlugin = (options = {}) =>
   terser({
@@ -31,6 +31,15 @@ const terserPlugin = (options = {}) =>
 export default {
   ...baseConfig,
   output: [
+    {
+      ...baseConfig.output,
+      exports: 'named',
+      file: 'dist/cherry-markdown.js',
+      format: 'umd',
+      name: 'Cherry',
+      sourcemap: true,
+      compact: false,
+    },
     {
       ...baseConfig.output,
       exports: 'named',

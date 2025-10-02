@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-  <head>
+  <!-- <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cherry Editor - Markdown Editor</title>
@@ -29,15 +29,12 @@
         height: 100%;
       }
     </style>
-    <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css" />
     <link rel="Shortcut Icon" href="./logo/favicon.ico" />
-    <link rel="Shortcut Icon" href="../logo/favicon.ico" />
-    <link rel="Bookmark" href="../logo/favicon.ico" />
-    <link href="./assets/markdown/basic.md" rel="preload" as="fetch" crossorigin="anonymous" />
-  </head>
+    <link rel="Shortcut Icon" href="/logo/favicon.ico" />
+    <link rel="Bookmark" href="/logo/favicon.ico" />
+  </head> -->
 
   <body>
-    <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%"></div>
     <div id="markdown"></div>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
     <script
@@ -45,17 +42,22 @@
       integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
       crossorigin="anonymous"
     ></script>
-    <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
-    <script src="./assets/scripts/pinyin/pinyin_dist.js"></script>
-    <script type="module">
 
-      // 使用 fetch 获取 markdown 文件内容
-      const response = await fetch('./assets/markdown/basic.md');
-      const basicMd = await response.text();
-      import { basicConfig } from './assets/scripts/index-demo.js';
-      // 在Vite中使用?raw导入的文件内容已经是字符串，无需通过fetch获取
-      const config = Object.assign({}, basicConfig, { value: basicMd });
+    <script type="module">
+      import './src/sass/index.scss';
+      import Cherry from './src/index.js';
+      window.Cherry = Cherry;
+
+      // 使用Vite的?raw导入直接获取markdown文件内容
+      import basicMd from '../../examples/assets/markdown/basic.md?raw';
+      import { basicConfig } from '../../examples/assets/scripts/index-demo.js';
+
+      console.log('basicMd content:', basicMd.substring(0, 200) + '...');
+      console.log('basicMd length:', basicMd.length);
+      const config = Object.assign({}, basicConfig, { value: basicMd});
       window.cherry = new Cherry(config);
+
+      import '../../examples/assets/scripts/pinyin/pinyin_dist.js';
     </script>
   </body>
 </html>
