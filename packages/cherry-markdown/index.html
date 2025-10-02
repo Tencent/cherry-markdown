@@ -42,12 +42,22 @@
       integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
       crossorigin="anonymous"
     ></script>
+
     <script type="module">
       import './src/sass/index.scss';
       import Cherry from './src/index.js';
       window.Cherry = Cherry;
 
-      import '../../examples/assets/scripts/index-demo.js';
+      // 使用Vite的?raw导入直接获取markdown文件内容
+      import basicMd from '../../examples/assets/markdown/basic.md?raw';
+      import { basicConfig } from '../../examples/assets/scripts/index-demo.js';
+
+      console.log('basicMd content:', basicMd.substring(0, 200) + '...');
+      console.log('basicMd length:', basicMd.length);
+      const config = Object.assign({}, basicConfig, { value: basicMd});
+      window.cherry = new Cherry(config);
+
+      import '../../examples/assets/scripts/pinyin/pinyin_dist.js';
     </script>
   </body>
 </html>

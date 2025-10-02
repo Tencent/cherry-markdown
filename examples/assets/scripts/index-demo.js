@@ -1,5 +1,4 @@
-import './pinyin/pinyin_dist';
-import  basicMd from '../markdown/basic.md?raw';
+import './pinyin/pinyin_dist.js';
 
 /**
  * 自定义一个语法
@@ -499,6 +498,4 @@ var basicConfig = {
   },
 };
 
-// 在Vite中使用?raw导入的文件内容已经是字符串，无需通过fetch获取
-var config = Object.assign({}, basicConfig, { value: basicMd });
-window.cherry = new Cherry(config);
+export { basicConfig };
