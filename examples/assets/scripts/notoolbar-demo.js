@@ -1,4 +1,4 @@
-var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
+const CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
   makeHtml(str) {
     console.warn('custom hook', 'hello');
     return str;
@@ -14,7 +14,7 @@ var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TY
   },
 });
 
-var cherryConfig = {
+const noToolbarConfig = {
   id: 'markdown',
   externals: {
     echarts: window.echarts,
@@ -80,7 +80,4 @@ var cherryConfig = {
   //extensions: [],
 };
 
-fetch('./assets/markdown/basic.md').then((response) => response.text()).then((value) => {
-  var config = Object.assign({}, cherryConfig, { value: value });
-  window.cherry = new Cherry(config);
-});
+export { noToolbarConfig };

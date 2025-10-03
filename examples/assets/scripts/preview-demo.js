@@ -1,4 +1,4 @@
-var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
+const CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
   makeHtml(str) {
     console.warn('custom hook', 'hello');
     return str;
@@ -14,7 +14,7 @@ var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TY
   },
 });
 
-var cherryConfig = {
+const previewConfig = {
   id: 'markdown',
   externals: {
     echarts: window.echarts,
@@ -76,26 +76,30 @@ var cherryConfig = {
   },
   autoScrollByHashAfterInit: true,
   callback: {
-    onClickPreview: function(e) {
-      const {target} = e;
-      if(target.tagName === 'IMG') {
+    onClickPreview: function (e) {
+      const { target } = e;
+      if (target.tagName === 'IMG') {
         console.log('click img', target);
         const tmp = new Viewer(target, {
-            button: false,
-            navbar: false,
-            title: [1, (image, imageData) => `${image.alt.replace(/#.+$/, '')} (${imageData.naturalWidth} × ${imageData.naturalHeight})`],
-            hidden(){
-              tmp.destroy()
-            },
-          });
+          button: false,
+          navbar: false,
+          title: [
+            1,
+            (image, imageData) =>
+              `${image.alt.replace(/#.+$/, '')} (${imageData.naturalWidth} × ${imageData.naturalHeight})`,
+          ],
+          hidden() {
+            tmp.destroy();
+          },
+        });
         tmp.show();
       }
-    }
+    },
   },
   previewer: {
     // 自定义markdown预览区域class
     // className: 'markdown'
-    
+
     // 是否启用预览区域编辑能力（目前支持编辑图片尺寸、编辑表格内容）
     enablePreviewerBubble: false,
   },
@@ -103,7 +107,4 @@ var cherryConfig = {
   //extensions: [],
 };
 
-fetch('./assets/markdown/basic.md').then((response) => response.text()).then((value) => {
-  var config = Object.assign({}, cherryConfig, { value: value });
-  window.cherry = new Cherry(config);
-});
+export { previewConfig };
