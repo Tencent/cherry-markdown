@@ -43,7 +43,10 @@ export default defineConfig({
   base: '/',
   publicDir: 'dist',
   resolve: {
-    alias: [{ find: '@', replacement: path.resolve(__dirname, 'src') }],
+    alias: [
+      { find: '@', replacement: path.resolve(__dirname, 'src') },
+      { find: '@examples', replacement: path.resolve(__dirname, '../../examples') },
+    ],
   },
   server: {
     port: 5173,
@@ -60,6 +63,7 @@ export default defineConfig({
     'process.env.BUILD_VERSION': JSON.stringify(process.env.BUILD_VERSION || ''),
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
     BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'development'),
+    __EXAMPLES_PATH__: JSON.stringify(path.resolve(__dirname, '../../examples').replace(/\\/g, '/')),
   },
   plugins: [printLinks()],
 });

@@ -46,7 +46,7 @@
     <script type="module">
       // 使用 fetch 获取 markdown 文件内容
       const response = await fetch('./assets/markdown/index.md');
-      const basicMd = await response.text();
+      const indexMd = await response.text();
 
       window.cherry = new Cherry({
         id: 'markdown',
@@ -55,7 +55,7 @@
             htmlWhiteList: 'iframe|script|style',
           },
         },
-        value: basicMd,
+        value: indexMd,
       });
     </script>
   </body>

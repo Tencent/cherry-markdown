@@ -48,17 +48,17 @@
       import Cherry from './src/index.js';
       window.Cherry = Cherry;
 
-      import indexMd from '../../examples/assets/markdown/index.md?raw';
-      import imgMd from '../../examples/assets/markdown/img.md?raw';
-      import tableMd from '../../examples/assets/markdown/table.md?raw';
-      import headAutoNumMd from '../../examples/assets/markdown/head-auto-num.md?raw';
+      import indexMd from '@examples/assets/markdown/index.md?raw';
+      import imgMd from '@examples/assets/markdown/img.md?raw';
+      import tableMd from '@examples/assets/markdown/table.md?raw';
+      import headAutoNumMd from '@examples/assets/markdown/head-auto-num.md?raw';
 
-      import { basicConfig } from '../../examples/assets/scripts/index-demo.js';
-      import { h5Config } from '../../examples/assets/scripts/h5-demo.js';
-      import { multipleCherryConfig1, multipleCherryConfig2 } from '../../examples/assets/scripts/multiple-demo.js';
-      import { noToolbarConfig } from '../../examples/assets/scripts/notoolbar-demo.js';
-      import { previewConfig } from '../../examples/assets/scripts/preview-demo.js';
-      import { imgConfig } from '../../examples/assets/scripts/img-demo.js';
+      import { basicConfig } from '@examples/assets/scripts/index-demo.js';
+      import { h5Config } from '@examples/assets/scripts/h5-demo.js';
+      import { multipleCherryConfig1, multipleCherryConfig2 } from '@examples/assets/scripts/multiple-demo.js';
+      import { noToolbarConfig } from '@examples/assets/scripts/notoolbar-demo.js';
+      import { previewConfig } from '@examples/assets/scripts/preview-demo.js';
+      import { imgConfig } from '@examples/assets/scripts/img-demo.js';
       // import { aiChatScenario } from '../../examples/assets/scripts/ai-chat-demo.js';
 
       let CONFIG = '';
@@ -93,7 +93,16 @@
           };
           break;
         case '/img':
-          CONFIG = Object.assign({}, imgConfig, { value: imgMd });
+          CONFIG = Object.assign({}, imgConfig, {
+            value: imgMd,
+            callback: {
+              urlProcessor: (url,type) => {
+                if(type==='image'){
+                  return '/@fs/' + __EXAMPLES_PATH__ + '/' + url;
+                }
+              },
+            },
+          });
           break;
         case '/table':
           CONFIG = {
@@ -145,7 +154,7 @@
         window.cherry = new Cherry(CONFIG);
       }
 
-      import '../../examples/assets/scripts/pinyin/pinyin_dist.js';
+      import '@examples/assets/scripts/pinyin/pinyin_dist.js';
     </script>
   </body>
 </html>
