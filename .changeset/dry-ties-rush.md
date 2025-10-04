@@ -31,7 +31,7 @@ refactor: #1229 丰富图表的类型并增加图表交互
   - feat: 新增全局的图表菜单的配置
   - refactor: 替换 index-demo.js 对于图表菜单的调用
   - fix: 修复图表菜单无法插入代码的 bug
-- refactor: 调整basic.md
+- refactor: 调整index.md
   - feat: 增加热力图和饼图的示例和效果
   - refactor: 删除旧版的图表参数
   - feat: 每个图表增加标题的配置参数

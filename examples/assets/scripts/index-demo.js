@@ -179,7 +179,7 @@ var customMenuTable = Cherry.createMenuHook('图表', {
   ],
 });
 
-var basicConfig = {
+const basicConfig = {
   id: 'markdown',
   externals: {
     echarts: window.echarts,

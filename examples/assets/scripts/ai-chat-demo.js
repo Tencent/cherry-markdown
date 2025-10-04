@@ -1,4 +1,4 @@
-var cherryConfig = {
+const cherryConfig = {
   editor: {
     height: 'auto',
     defaultModel: 'previewOnly',
@@ -21,8 +21,8 @@ var cherryConfig = {
       },
       fontEmphasis: {
         selfClosing: false,
-      }
-    }
+      },
+    },
   },
   previewer: {
     enablePreviewerBubble: false,
@@ -50,29 +50,6 @@ let currentWordIndex = 0;
 let interval = 30;
 buttonTips.innerHTML = currentMsgIndex;
 
-
-document.querySelector('.j-status-input').addEventListener('change', function() {
-  interval = this.checked ? 30 : 50;
-  cherryConfig.engine.global.flowSessionContext = this.checked;
-  currentWordIndex = 0;
-  currentMsgIndex = msgList.length;
-  buttonTips.innerHTML = currentMsgIndex;
-  dialog.innerHTML = '';
-})
-button.addEventListener('click', function () {
-  if (printing || currentMsgIndex === 0) {
-    return;
-  }
-  const msg = msgTemplate.cloneNode(true);
-  msg.classList.remove('j-one-msg');
-  currentCherry = new Cherry(Object.assign({}, cherryConfig, { el: msg.querySelector('.chat-one-msg') }));
-  dialog.appendChild(msg);
-  beginPrint(msgList[msgList.length - currentMsgIndex]);
-  currentMsgIndex --;
-  buttonTips.innerHTML = currentMsgIndex;
-});
-
-
 function beginPrint(msg) {
   printing = true;
   setTimeout(function () {
@@ -89,3 +66,27 @@ function beginPrint(msg) {
   }, interval);
 }
 
+const aiChatScenario = () => {
+  document.querySelector('.j-status-input').addEventListener('change', function () {
+    interval = this.checked ? 30 : 50;
+    cherryConfig.engine.global.flowSessionContext = this.checked;
+    currentWordIndex = 0;
+    currentMsgIndex = msgList.length;
+    buttonTips.innerHTML = currentMsgIndex;
+    dialog.innerHTML = '';
+  });
+  button.addEventListener('click', function () {
+    if (printing || currentMsgIndex === 0) {
+      return;
+    }
+    const msg = msgTemplate.cloneNode(true);
+    msg.classList.remove('j-one-msg');
+    currentCherry = new Cherry(Object.assign({}, cherryConfig, { el: msg.querySelector('.chat-one-msg') }));
+    dialog.appendChild(msg);
+    beginPrint(msgList[msgList.length - currentMsgIndex]);
+    currentMsgIndex--;
+    buttonTips.innerHTML = currentMsgIndex;
+  });
+};
+
+export { aiChatScenario  };
