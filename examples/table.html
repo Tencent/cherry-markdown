@@ -29,7 +29,7 @@
     <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%"></div>
     <div id="markdown"></div>
     <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
-    <script>
+    <script type="module">
       const response = await fetch('./assets/markdown/table.md');
       const tableMd = await response.text();
       const cherry = new Cherry({
