@@ -33,6 +33,7 @@
     <link rel="Shortcut Icon" href="./logo/favicon.ico" />
     <link rel="Shortcut Icon" href="../logo/favicon.ico" />
     <link rel="Bookmark" href="../logo/favicon.ico" />
+    <link href="./assets/markdown/basic.md" rel="preload" />
   </head>
 
   <body>
@@ -47,7 +48,6 @@
     <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
     <script src="./assets/scripts/pinyin/pinyin_dist.js"></script>
     <script type="module">
-
       // 使用 fetch 获取 markdown 文件内容
       const response = await fetch('./assets/markdown/basic.md');
       const basicMd = await response.text();
