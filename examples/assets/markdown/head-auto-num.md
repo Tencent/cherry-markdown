@@ -1,0 +1,61 @@
+# 例子
+> [Github 地址](https://github.com/Tencent/cherry-markdown){target=_blank}
+
+- [basic](index.html){target=_blank}
+- [H5](h5.html){target=_blank}
+- [多实例](multiple.html){target=_blank}
+- [无 toolbar](notoolbar.html){target=_blank}
+- [纯预览模式](preview_only.html){target=_blank}
+- [注入](xss.html){target=_blank}
+- [API](api.html){target=_blank}
+- [图片所见即所得编辑尺寸](img.html){target=_blank}
+- [标题自动序号](head_num.html){target=_blank}
+
+[toc]
+
+# 实现
+``` javascript
+<script>
+  var cherry = new Cherry({
+    id: 'markdown',
+    previewer: {
+      // head-num 表示启用标题自动序号
+      className: 'cherry-markdown head-num'
+    },
+    value: document.getElementById("demo-val").value,
+  });
+</script>
+```
+
+# head1
+## head2
+## 字体样式
+**说明**
+- 使用`*(或_)` 和 `**(或__)` 表示*斜体*和 __粗体__
+- 使用 `/` 表示 /下划线/ ,使用`~~` 表示~~删除线~~
+- 使用`^(或^^)`表示^上标^或^^下标^^
+- 使用 ! 号+数字 表示字体 !24 大!  !12 小! [^专有语法提醒]
+- 使用两个(三个)!号+RGB颜色 表示!!#ff0000 字体颜色!!(!!!#f9cb9c 背景颜色!!!)[^专有语法提醒]
+
+## 超链接
+**说明**
+- 使用 `[描述](URL)` 为文字增加外链接
+- 使用`<URL>`插入一个链接
+- URL会自动转成链接
+
+## 列表
+### 无序列表
+**说明**
+- 在行首使用 *，+，- 表示无序列表
+
+### 有序列表
+**说明**
+- 在行首使用数字、字母、汉字和点表示有序列表
+
+### head3
+### head3
+# head1
+## head2
+### head3
+#### head4
+##### head5

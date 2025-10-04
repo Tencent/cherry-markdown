@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-  <!-- <head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cherry Editor - Markdown Editor</title>
@@ -32,7 +32,7 @@
     <link rel="Shortcut Icon" href="./logo/favicon.ico" />
     <link rel="Shortcut Icon" href="/logo/favicon.ico" />
     <link rel="Bookmark" href="/logo/favicon.ico" />
-  </head> -->
+  </head>
 
   <body>
     <div id="markdown"></div>
@@ -48,16 +48,113 @@
       import Cherry from './src/index.js';
       window.Cherry = Cherry;
 
-      // 使用Vite的?raw导入直接获取markdown文件内容
-      import basicMd from '../../examples/assets/markdown/basic.md?raw';
-      import { basicConfig } from '../../examples/assets/scripts/index-demo.js';
+      import indexMd from '@examples/assets/markdown/index.md?raw';
+      import imgMd from '@examples/assets/markdown/img.md?raw';
+      import tableMd from '@examples/assets/markdown/table.md?raw';
+      import headAutoNumMd from '@examples/assets/markdown/head-auto-num.md?raw';
 
-      console.log('basicMd content:', basicMd.substring(0, 200) + '...');
-      console.log('basicMd length:', basicMd.length);
-      const config = Object.assign({}, basicConfig, { value: basicMd});
-      window.cherry = new Cherry(config);
+      import { basicConfig } from '@examples/assets/scripts/index-demo.js';
+      import { h5Config } from '@examples/assets/scripts/h5-demo.js';
+      import { multipleCherryConfig1, multipleCherryConfig2 } from '@examples/assets/scripts/multiple-demo.js';
+      import { noToolbarConfig } from '@examples/assets/scripts/notoolbar-demo.js';
+      import { previewConfig } from '@examples/assets/scripts/preview-demo.js';
+      import { imgConfig } from '@examples/assets/scripts/img-demo.js';
+      // import { aiChatScenario } from '../../examples/assets/scripts/ai-chat-demo.js';
 
-      import '../../examples/assets/scripts/pinyin/pinyin_dist.js';
+      let CONFIG = '';
+
+      switch (window.location.pathname) {
+        case '/index':
+          CONFIG = Object.assign({}, basicConfig, { value: indexMd });
+          break;
+        case '/mobile':
+          CONFIG = Object.assign({}, h5Config, { value: indexMd });
+          break;
+        case '/multiple':
+          CONFIG = Object.assign({}, multipleCherryConfig1, { value: indexMd });
+          const CONFIG2 = Object.assign({}, multipleCherryConfig2, { value: indexMd });
+          window.cherry = new Cherry(CONFIG2);
+          break;
+        case '/editor-without-toolbar':
+          CONFIG = Object.assign({}, noToolbarConfig, { value: indexMd });
+          break;
+        case '/preview':
+          CONFIG = Object.assign({}, previewConfig, { value: indexMd });
+          break;
+        case '/xss':
+          CONFIG = {
+            id: 'markdown',
+            engine: {
+              global: {
+                htmlWhiteList: 'iframe|script|style',
+              },
+            },
+            value: indexMd,
+          };
+          break;
+        case '/img':
+          CONFIG = Object.assign({}, imgConfig, {
+            value: imgMd,
+            callback: {
+              urlProcessor: (url,type) => {
+                if(type==='image'){
+                  return '/@fs/' + __EXAMPLES_PATH__ + '/' + url;
+                }
+              },
+            },
+          });
+          break;
+        case '/table':
+          CONFIG = {
+            id: 'markdown',
+            toolbars: {
+              toolbar: ['bold', 'italic', 'strikethrough', '|', 'header', 'list', 'graph'],
+            },
+            editor: {
+              height: '70%',
+            },
+            value: tableMd,
+          };
+          break;
+        case '/header-with-auto-num':
+          CONFIG = {
+            id: 'markdown',
+            engine: {
+              syntax: {
+                header: {
+                  anchorStyle: 'autonumber',
+                },
+                toc: {
+                  showAutoNumber: true,
+                },
+              },
+            },
+            toolbars: {
+              showAutoNumber: true,
+            },
+            value: headAutoNumMd,
+          };
+          break;
+        case '/ai-chat-scenario':
+          // document.addEventListener('DOMContentLoaded', function () {
+          //   aiChatScenario();
+          // });
+          break;
+        case '/vim-editing-mode':
+          // CONFIG = '';
+          break;
+        case '/mermaid':
+          // CONFIG = '';
+          break;
+        default:
+          CONFIG = Object.assign({}, basicConfig, { value: indexMd });
+      }
+
+      if (window.location.pathname !== '/ai-chat-scenario') {
+        window.cherry = new Cherry(CONFIG);
+      }
+
+      import '@examples/assets/scripts/pinyin/pinyin_dist.js';
     </script>
   </body>
 </html>

@@ -14,7 +14,7 @@ var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TY
   },
 });
 
-var cherryConfig = {
+const h5Config = {
   id: 'markdown',
   externals: {
     echarts: window.echarts,
@@ -90,7 +90,4 @@ var cherryConfig = {
   //extensions: [],
 };
 
-fetch('./assets/markdown/basic.md').then((response) => response.text()).then((value) => {
-  var config = Object.assign({}, cherryConfig, { value: value });
-  window.cherry = new Cherry(config);
-});
+export { h5Config };

@@ -86,7 +86,10 @@
     </div>
   </div>
   <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
-  <script src="./assets/scripts/ai-chat-demo.js"></script>
+  <script type="module">
+    import {aiChatScenario} from './assets/scripts/ai-chat-demo.js';
+    aiChatScenario();
+  </script>
 </body>
 
 </html>
