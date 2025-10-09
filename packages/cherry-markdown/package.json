@@ -22,9 +22,9 @@
   "sideEffects": [
     "./dist/*.css"
   ],
-  "scripts": { 
-  "iconfont": "gulp",
-    "dev:vite": "vite --config vite.config.ts",
+  "scripts": {
+    "iconfont": "gulp",
+    "dev:vite": "vite",
     "build": "run-s clean build:all build:cjs",
     "build:all": "run-p iconfont build:styles build:types build:addons build:full build:core build:engine",
     "build:cjs": "run-p build:core-cjs build:engine-cjs",
@@ -33,8 +33,8 @@
     "build:core-cjs": "cross-env BUILD_TARGET=commonjs CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.core.config.js",
     "build:engine": "cross-env CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.engine.config.js",
     "build:engine-cjs": "cross-env BUILD_TARGET=commonjs CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.engine.config.js",
-  "build:addons": "node build/addons.build.js",
-  "build:types": "tsc --project tsconfig.json && node build/replacePaths.js",
+    "build:addons": "node build/addons.build.js",
+    "build:types": "tsc --project tsconfig.json && node build/replacePaths.js",
     "build:styles": "cross-env NODE_ENV=production rollup --config build/rollup.styles.config.js",
     "clean": "rimraf ./dist",
     "check-bundle": "es-check es5 dist/cherry-markdown.js dist/cherry-markdown.min.js",
