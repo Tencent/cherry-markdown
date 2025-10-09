@@ -29,7 +29,12 @@ jobs:
       - name: Prepare package.json for VSCode Plugin Preview
         run: |
 
-          tmp=$(mktemp) && jq '.scripts["build"] = "yarn workspace cherry-markdown-core build" | .scripts["build:vscodePlugin"] = "yarn workspace cherry-markdown build"' package.json > "$tmp" && mv "$tmp" package.json
+          tmp=$(mktemp)
+          jq '
+            .scripts["build"] = "yarn workspace cherry-markdown-core build" |
+            .scripts["build:vscodePlugin"] = "yarn workspace cherry-markdown build" |
+            .scripts["postinstall"] = "yarn workspace cherry-markdown-core run iconfont"
+          ' package.json > "$tmp" && mv "$tmp" package.json
 
           cd packages/cherry-markdown
           tmp=$(mktemp) && jq '.name = "cherry-markdown-core"' package.json > "$tmp" && mv "$tmp" package.json
