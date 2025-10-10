@@ -2,18 +2,20 @@ import { defineConfig } from 'vite';
 import path from 'path';
 
 const paths = [
-  '/index',
-  '/mobile',
-  '/multiple',
-  '/editor-without-toolbar',
-  '/preview',
-  '/xss',
-  '/img',
-  '/table',
-  '/header-with-auto-num',
-  // '/ai-chat-scenario',
-  // '/vim-editing-mode',
-  // '/mermaid',
+  '/index.html',
+  // '/basic.html',
+  '/h5.html',
+  '/multiple.html',
+  '/notoolbar.html',
+  '/preview_only.html',
+  '/xss.html',
+  // '/api.html',
+  '/img.html',
+  '/table.html',
+  '/head_num.html',
+  // '/ai_chat.html',
+  // '/vim.html',
+  // '/mermaid.html',
 ];
 
 function printLinks() {
