@@ -67,21 +67,21 @@
         case '/index':
           CONFIG = Object.assign({}, basicConfig, { value: indexMd });
           break;
-        case '/mobile':
+        case '/h5.html':
           CONFIG = Object.assign({}, h5Config, { value: indexMd });
           break;
-        case '/multiple':
+        case '/multiple.html':
           CONFIG = Object.assign({}, multipleCherryConfig1, { value: indexMd });
           const CONFIG2 = Object.assign({}, multipleCherryConfig2, { value: indexMd });
           window.cherry = new Cherry(CONFIG2);
           break;
-        case '/editor-without-toolbar':
+        case '/notoolbar.html':
           CONFIG = Object.assign({}, noToolbarConfig, { value: indexMd });
           break;
-        case '/preview':
+        case '/preview_only.html':
           CONFIG = Object.assign({}, previewConfig, { value: indexMd });
           break;
-        case '/xss':
+        case '/xss.html':
           CONFIG = {
             id: 'markdown',
             engine: {
@@ -92,7 +92,7 @@
             value: indexMd,
           };
           break;
-        case '/img':
+        case '/img.html':
           CONFIG = Object.assign({}, imgConfig, {
             value: imgMd,
             callback: {
@@ -104,7 +104,7 @@
             },
           });
           break;
-        case '/table':
+        case '/table.html':
           CONFIG = {
             id: 'markdown',
             toolbars: {
@@ -116,7 +116,7 @@
             value: tableMd,
           };
           break;
-        case '/header-with-auto-num':
+        case '/head_num.html':
           CONFIG = {
             id: 'markdown',
             engine: {
@@ -135,15 +135,15 @@
             value: headAutoNumMd,
           };
           break;
-        case '/ai-chat-scenario':
+        case '/ai_chat.html':
           // document.addEventListener('DOMContentLoaded', function () {
           //   aiChatScenario();
           // });
           break;
-        case '/vim-editing-mode':
+        case '/vim.html':
           // CONFIG = '';
           break;
-        case '/mermaid':
+        case '/mermaid.html':
           // CONFIG = '';
           break;
         default:
