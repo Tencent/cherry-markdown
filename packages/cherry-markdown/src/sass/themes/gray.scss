@@ -3,15 +3,15 @@
  */
 
 .cherry.theme__gray {
-  --primary-color: var(--oc-blue-6);
-  --secondary-color: var(--oc-blue-0);
+  --primary-color: var(--oc-gray-8);
+  --secondary-color: var(--oc-gray-3);
   --base-font-color: var(--oc-gray-7);
   --base-editor-bg: var(--oc-white);
   --base-previewer-bg: var(--oc-white);
-  --base-border-color: var(--oc-gray-3);
+  --base-border-color: var(--oc-gray-4);
   --md-heading-color: var(--oc-gray-7);
   --md-paragraph-color: var(--oc-gray-7);
-  --md-link-color: var(--primary-color);
+  --md-link-color: var(--oc-blue-4);
   --md-link-hover-color: var(--oc-blue-4);
   --md-inline-code-color: var(--oc-red-7);
   --md-inline-code-bg: var(--oc-gray-2);
@@ -24,4 +24,6 @@
   --accordion-summary-hover-bg: var(--oc-gray-3);
   --accordion-summary-bg: var(--oc-gray-2);
   --accordion-summary-color: var(--oc-gray-7);
+  --editor-url-bg-color: var(--oc-gray-2);
+  --accordion-shadow: none;
 }

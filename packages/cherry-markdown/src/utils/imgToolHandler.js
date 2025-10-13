@@ -57,14 +57,14 @@ const imgToolHandler = {
       const icon = document.createElement('i');
       div.appendChild(icon);
       icon.className = `img-tool-icon ch-icon ch-icon-imgDeco${capitalizeFirstLetter(deco.type)}`;
-      div.className = `img-tool-button ${deco.active ? ' active' : ''}`;
+      div.className = `img-tool-button${deco.active ? ' active' : ''}`;
       div.title = deco.text;
       div.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         deco.active = !deco.active;
         // 点击后，更新样式
-        div.className = `img-tool-button ${deco.active ? ' active' : ''}`;
+        div.className = `img-tool-button${deco.active ? ' active' : ''}`;
         this.emitChange(this.img, deco.type);
       });
       decoDiv.append(div);
@@ -91,7 +91,7 @@ const imgToolHandler = {
       align.div = div;
       div.appendChild(icon);
       icon.className = `img-tool-icon ch-icon ch-icon-imgAlign${capitalizeLetter(align.type)}`;
-      div.className = `img-tool-button ${align.active ? ' active' : ''}`;
+      div.className = `img-tool-button${align.active ? ' active' : ''}`;
       div.title = align.text;
       div.addEventListener('click', (e) => {
         e.preventDefault();
@@ -100,7 +100,7 @@ const imgToolHandler = {
         alignList.forEach(
           (align1) => align1 !== align && ((align1.active = false) || (align1.div.className = `img-tool-button`)),
         );
-        div.className = `img-tool-button ${align.active ? ' active' : ''}`;
+        div.className = `img-tool-button${align.active ? ' active' : ''}`;
         this.emitChange(this.img, align.active ? align.type : 'clear-align');
 
         imgSizeHandler.showBubble(this.img, this.container, this.previewerDom);

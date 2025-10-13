@@ -104,17 +104,9 @@
     }
 
     &.cherry-flex-toc__pure {
-      width: 30px;
-      height: calc(100% - 200px);
-      max-height: 600px;
-      background: transparent;
       box-shadow: none;
-      border-radius: 0;
 
       .cherry-toc-head {
-        height: 25px;
-        border-bottom: 1px dashed transparent;
-
         .cherry-toc-title {
           display: none;
         }

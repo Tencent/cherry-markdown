@@ -1,5 +1,4 @@
 // 一级 CSS 变量：基础效果变量
-// 基于现有 variable.scss 中的 SCSS 变量转换而来
 
 :root {
   
@@ -25,7 +24,7 @@
   // 阴影
   --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 0 10px rgba(128, 145, 165, 0.2);
+  --shadow-md: 0 0 20px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   

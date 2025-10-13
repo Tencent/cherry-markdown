@@ -32,8 +32,8 @@
   // 工具栏按钮
   --toolbar-btn-color: #3f4a56;
   --toolbar-btn-bg: transparent;
-  --toolbar-btn-hover-color: #5d9bfc;
-  --toolbar-btn-hover-bg: #ebf3ff;
+  --toolbar-btn-hover-color: var(--primary-color);
+  --toolbar-btn-hover-bg: var(--secondary-color);
   --toolbar-btn-disabled: #ccc;
   --toolbar-btn-radius: var(--radius-lg);
   --toolbar-btn-padding: 0 var(--spacing-md);
