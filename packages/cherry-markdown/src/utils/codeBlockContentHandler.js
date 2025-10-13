@@ -177,13 +177,13 @@ export default class CodeBlockHandler {
       });
     }
     // 第一行的按钮的right值
-    let oneLineBtnsRight = 10;
+    let oneLineBtnsRight = 0.5;
     if (editCode === 'true' && isEnableBubbleAndEditorShow) {
       // 添加编辑btn
       const editDom = document.createElement('div');
       editDom.className = 'cherry-edit-code-block';
       editDom.innerHTML = '<i class="ch-icon ch-icon-edit"></i>';
-      editDom.style.right = `${oneLineBtnsRight}px`;
+      editDom.style.right = `${oneLineBtnsRight}em`;
       this.container.appendChild(editDom);
       editDom.addEventListener('click', (e) => {
         e.preventDefault();
@@ -194,14 +194,14 @@ export default class CodeBlockHandler {
         this.parent.showCodeBlockPreviewerBubbles('click', this.target);
       });
       this.editDom = editDom;
-      oneLineBtnsRight += 8;
+      oneLineBtnsRight += 0.5;
     }
     if (copyCode === 'true') {
       // 添加复制btn
       const copyDom = document.createElement('div');
       copyDom.className = 'cherry-copy-code-block';
       copyDom.innerHTML = '<i class="ch-icon ch-icon-copy"></i>';
-      copyDom.style.right = `${oneLineBtnsRight}px`;
+      copyDom.style.right = `${oneLineBtnsRight}em`;
       this.container.appendChild(copyDom);
       copyDom.addEventListener('click', (e) => {
         e.preventDefault();
@@ -210,7 +210,7 @@ export default class CodeBlockHandler {
         this.$copyCodeBlock();
       });
       this.copyDom = copyDom;
-      oneLineBtnsRight += 8;
+      oneLineBtnsRight += 0.5;
     }
     const { customBtns } = this.$cherry.options.engine.syntax.codeBlock;
     if (customBtns) {
@@ -219,7 +219,7 @@ export default class CodeBlockHandler {
         const dom = document.createElement('div');
         dom.className = 'cherry-code-block-custom-btn';
         dom.innerHTML = btn.html;
-        dom.style.right = `${oneLineBtnsRight}px`;
+        dom.style.right = `${oneLineBtnsRight}em`;
         this.container.appendChild(dom);
         dom.addEventListener('click', (e) => {
           e.preventDefault();
@@ -229,7 +229,7 @@ export default class CodeBlockHandler {
           btn.onClick(e, codeContent, language, this.target);
         });
         this.codeBlockCustomBtns.push(dom);
-        oneLineBtnsRight += 8;
+        oneLineBtnsRight += 0.5;
       });
     }
     if (expandCode === 'true') {
@@ -239,7 +239,7 @@ export default class CodeBlockHandler {
       const unExpandDom = document.createElement('div');
       unExpandDom.className = 'cherry-unExpand-code-block';
       unExpandDom.innerHTML = '<i class="ch-icon ch-icon-unExpand"></i>';
-      unExpandDom.style.right = `${oneLineBtnsRight}px`;
+      unExpandDom.style.right = `${oneLineBtnsRight}em`;
       if (!isExpand || !maskDom) {
         unExpandDom.classList.add('hidden');
       }
@@ -251,7 +251,7 @@ export default class CodeBlockHandler {
         this.$expandCodeBlock(false, e);
       });
       this.unExpandDom = unExpandDom;
-      oneLineBtnsRight += 8;
+      oneLineBtnsRight += 0.5;
     }
   }
   // 隐藏所有按钮（切换语言、编辑、复制）
