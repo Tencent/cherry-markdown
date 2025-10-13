@@ -263,7 +263,7 @@ export default class MermaidCodeEngine {
          * 这里有赌的成分,流式输出场景，只有最后一个mermaid代码块在流式输出，随着最后一个mermaid流式输出，mermaid的渲染有概率会失败
          *  这里赌的是：
          *    1、只有一个mermaid代码块需要渲染
-         *    2、纯预览模式，非流式输出场景，所有mermaid都正常输出
+         *    2、纯预览模式，且流式输出场景，所有mermaid都正常输出
          */
         if (
           $engine.$cherry.options.engine.global.flowSessionContext &&
