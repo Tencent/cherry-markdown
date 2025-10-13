@@ -770,6 +770,20 @@ export default class Previewer {
       editorDom.classList.add('cherry-editor--hidden');
       previewerDom.classList.remove('cherry-previewer--hidden');
       editorDom.classList.remove('cherry-editor--full');
+      /**
+       * 如果是流式输出，并且没有开启预览区编辑，则需要移除不再需要的dom
+       *  这里针对流式输出的场景简单移除dom，是符合预期的
+       *  但这种精简dom的方案在需要switchModel时会有问题
+       */
+      if (this.$cherry.options.engine.global.flowSessionContext && !this.options.enablePreviewerBubble) {
+        editorDom.remove();
+        this.$cherry.toolbar.options.dom.remove();
+        this.$cherry.wrapperDom
+          .querySelectorAll(
+            '.cherry-dropdown,.cherry-drag,.cherry-editor-mask,.cherry-previewer-mask,.cherry-suggester-panel',
+          )
+          .forEach((dom) => dom.remove());
+      }
     }
     setTimeout(() => this.editor.editor.refresh(), 0);
   }
