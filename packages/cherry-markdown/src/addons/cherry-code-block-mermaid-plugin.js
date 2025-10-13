@@ -244,6 +244,10 @@ export default class MermaidCodeEngine {
         this.handleAsyncRenderDone(graphId, sign, $engine, props, html);
       })
       .catch(() => {
+        // 如果开启了流式渲染，则不需要回退
+        if ($engine.options.global.flowSessionContext) {
+          return props.fallback();
+        }
         // 渲染失败后，回退到源码
         const html = props.fallback();
         this.handleAsyncRenderDone(graphId, sign, $engine, props, html);
