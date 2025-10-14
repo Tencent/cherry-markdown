@@ -24,7 +24,6 @@
   /* ========== 工具栏的下拉菜单 ========== */
   --dropdown-bg: var(--toolbar-bg);
   --dropdown-border: var(--base-border-color);
-  --dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   --dropdown-radius: var(--radius-xl);
   --dropdown-padding: var(--spacing-xs) 0;
 
@@ -70,10 +69,8 @@
   --accordion-bg: #2A2F3B;
   --accordion-border: var(--oc-blue-5);
   --accordion-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-
   --accordion-summary-bg: var(--secondary-color);
   --accordion-summary-hover-bg: var(--toolbar-btn-hover-bg);
-
   --accordion-body-bg: #2A2F3B;
   --accordion-body-border: var(--oc-blue-5);
   --accordion-body-color: var(--base-font-color);

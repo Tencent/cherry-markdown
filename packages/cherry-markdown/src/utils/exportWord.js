@@ -205,7 +205,7 @@ function showExportWordTip() {
       border: 1px solid var(--base-border-color);
       border-radius: var(--radius-xl);
       padding: var(--spacing-lg);
-      box-shadow: var(--shadow-md);
+      box-shadow: var(--shadow-lg);
       z-index: 99999;
       max-width: 400px;
       text-align: center;

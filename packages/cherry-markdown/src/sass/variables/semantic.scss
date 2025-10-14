@@ -25,7 +25,7 @@
   --toolbar-padding: var(--spacing-xs) var(--spacing-xl);
   --toolbar-font-size: var(--font-size-sm);
   --toolbar-radius: none;
-  --toolbar-shadow: var(--shadow-md);
+  --toolbar-shadow: var(--shadow-sm);
   --toolbar-split-color: var(--base-border-color);
   --toolbar-min-height: 48px; // 单行工具栏的高度
 
@@ -42,7 +42,7 @@
   /* ========== 工具栏的下拉菜单 ========== */
   --dropdown-bg: var(--toolbar-bg);
   --dropdown-border: var(--base-border-color);
-  --dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --dropdown-shadow: var(--shadow-md);
   --dropdown-radius: var(--radius-xl);
   --dropdown-padding: var(--spacing-xs) 0;
   

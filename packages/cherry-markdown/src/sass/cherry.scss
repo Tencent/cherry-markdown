@@ -296,11 +296,7 @@
         }
       }
     }
-  }
-
-  .cherry-sidebar {
-    box-shadow: var(--shadow-md);
-  }
+        }
 }
 
 // 搜索框样式
@@ -1047,13 +1043,12 @@
   z-index: 100;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 0 60px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
   resize: both;
   min-width: 430px;
   min-height: 300px;
 
   &.float-previewer-dragging {
-    box-shadow: 0 0 60px rgba(0, 0, 0, 0.3);
 
     .float-previewer-header {
       cursor: grabbing;
@@ -1102,7 +1097,7 @@
     margin: 0 auto;
     padding: 25px 30px;
     overflow-y: scroll;
-    box-shadow: 0 0 60px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-lg);
     box-sizing: border-box;
     background-color: var(--previewer-mobile-bg);
   }
@@ -1180,10 +1175,6 @@
   width: 300px;
   padding: 16px;
   z-index: 13; // 高于 .cherry-drag 防止误触
-  background: var(--toolbar-bg);
-  box-shadow: var(--shadow-md);
-  border-radius: var(--dropdown-radius);
-  border: 1px solid var(--dropdown-border);
 
   .cherry-color-tabs {
     display: flex;
@@ -1459,7 +1450,7 @@
   margin-right: 8px;
   box-sizing: border-box;
   user-select: none;
-  box-shadow: 0px 5px 11px #33333333;
+  box-shadow: var(--shadow-md);
   border-radius: 10px;
   transition: all 0.3s;
   &.cherry-flex-toc__fixed {
