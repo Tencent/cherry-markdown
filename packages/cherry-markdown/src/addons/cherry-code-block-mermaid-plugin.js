@@ -77,6 +77,9 @@ export default class MermaidCodeEngine {
   options = DEFAULT_OPTIONS;
   dom = null;
   mermaidCanvas = null;
+  // 上次渲染的代码
+  lastRenderedCode = '';
+  needReturnLastRenderedCode = false;
 
   /**
    * @param {Object} mermaidOptions - Mermaid 配置选项
@@ -211,7 +214,17 @@ export default class MermaidCodeEngine {
         },
         this.mermaidCanvas,
       );
+      this.lastRenderedCode = html;
     } catch (e) {
+      /**
+       * 如果开启了流式渲染，当前有上次渲染结果时，使用上次渲染结果
+       * 这里有赌的成分
+       *  流式输出场景，只有最后一个mermaid代码块在流式输出，随着最后一个mermaid流式输出，mermaid的渲染有概率会失败
+       *  这里赌的是只有一个mermaid代码块需要渲染
+       */
+      if ($engine.$cherry.options.engine.global.flowSessionContext && this.lastRenderedCode) {
+        return this.lastRenderedCode;
+      }
       return e?.str;
     }
     return html;
@@ -241,13 +254,33 @@ export default class MermaidCodeEngine {
       .then(({ svg: svgCode }) => {
         // 渲染完成后，替换为渲染结果
         const html = this.processSvgCode(svgCode, graphId);
+        this.lastRenderedCode = html;
         this.handleAsyncRenderDone(graphId, sign, $engine, props, html);
       })
       .catch(() => {
-        // 渲染失败后，回退到源码
-        const html = props.fallback();
-        this.handleAsyncRenderDone(graphId, sign, $engine, props, html);
+        /**
+         * 如果开启了流式渲染，当前有上次渲染结果时，使用上次渲染结果
+         * 这里有赌的成分,流式输出场景，只有最后一个mermaid代码块在流式输出，随着最后一个mermaid流式输出，mermaid的渲染有概率会失败
+         *  这里赌的是：
+         *    1、只有一个mermaid代码块需要渲染
+         *    2、纯预览模式，且流式输出场景，所有mermaid都正常输出
+         */
+        if (
+          $engine.$cherry.options.engine.global.flowSessionContext &&
+          !!this.lastRenderedCode &&
+          $engine.$cherry.status.editor === 'hide'
+        ) {
+          this.needReturnLastRenderedCode = true;
+        } else {
+          // 渲染失败后，回退到源码
+          this.needReturnLastRenderedCode = false;
+          const html = props.fallback();
+          this.handleAsyncRenderDone(graphId, sign, $engine, props, html);
+        }
       });
+    if (this.needReturnLastRenderedCode) {
+      return this.lastRenderedCode;
+    }
     // 先渲染源码
     return props.fallback();
   }
