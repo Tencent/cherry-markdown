@@ -23,6 +23,7 @@ const previewConfig = {
   },
   engine: {
     global: {
+      flowSessionContext: false,
       urlProcessor(url, srcType) {
         console.log(`url-processor`, url, srcType);
         return url;
