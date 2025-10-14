@@ -49,7 +49,7 @@ const imgToolHandler = {
       { text: locale.radius, type: 'radius', active: false },
     ];
     const decoDiv = document.createElement('div');
-    decoDiv.className = 'img-tool-group img-tool-deco-group';
+    decoDiv.className = 'img-tool-group';
     this.container.appendChild(decoDiv);
     decoList.forEach((deco) => {
       deco.active = this.img.className.match(`cherry-img-deco-${deco.type}`);
