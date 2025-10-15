@@ -189,10 +189,6 @@ const basicConfig = {
   isPreviewOnly: false,
   engine: {
     global: {
-      urlProcessor(url, srcType) {
-        console.log(`url-processor`, url, srcType);
-        return url;
-      },
       htmlAttrWhiteList: 'part|slot',
     },
     syntax: {
@@ -476,6 +472,10 @@ const basicConfig = {
     },
     afterAsyncRender: (md, html) => {
       // console.log("afterAsyncRender", md, html);
+    },
+    urlProcessor(url, srcType) {
+      console.log(`url-processor`, url, srcType);
+      return url;
     },
   },
   editor: {
