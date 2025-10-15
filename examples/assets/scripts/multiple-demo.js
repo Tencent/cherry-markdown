@@ -95,6 +95,18 @@ const multipleCherryConfig1 = {
   },
   keydown: [],
   //extensions: [],
+  callback: {
+    onClickPreview: (event) => {
+      console.log('onClickPreview', event);
+    },
+    afterAsyncRender: (md, html) => {
+      // console.log("afterAsyncRender", md, html);
+    },
+    urlProcessor(url, srcType) {
+      console.log(`url-processor`, url, srcType);
+      return url;
+    },
+  },
 };
 
 const multipleCherryConfig2 = {
