@@ -486,7 +486,8 @@ export default class CodeBlock extends ParagraphBase {
    * @returns {string} 格式化后的语言
    */
   formatLang(lang) {
-    if (this.customLang.indexOf('all') !== -1) {
+    // 增加一个潜规则，即便配置了all，也不处理mermaid
+    if (this.customLang.indexOf('all') !== -1 && lang !== 'mermaid') {
       return 'all';
     }
     return lang;
