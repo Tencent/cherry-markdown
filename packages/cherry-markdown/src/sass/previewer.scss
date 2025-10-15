@@ -152,8 +152,7 @@
   }
   .cherry-previewer-table-hover-handler {
     position: absolute;
-    pointer-events: none;
-    z-index: 999;
+    pointer-events: none;    
 
     &-container, &-menu-container {
       position: absolute;
@@ -198,7 +197,6 @@
       border: 1px solid var(--md-table-operator-color);
       border-radius: 999px;
       background-color: var(--base-previewer-bg);
-      z-index: 1001; // 高于 cherry-previewer-table-boundary-trigger-line
       cursor: pointer;
       transition: all 0.3s;
 
@@ -236,7 +234,6 @@
   .cherry-previewer-table-boundary-trigger-line {
     position: absolute;
     pointer-events: none;
-    z-index: 1000;
   }
 
   .cherry-previewer-table-boundary-trigger-line--v {
