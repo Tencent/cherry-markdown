@@ -1,5 +1,4 @@
 // 一级 CSS 变量：基础效果变量
-// 基于现有 variable.scss 中的 SCSS 变量转换而来
 
 :root {
   
@@ -23,12 +22,10 @@
   --radius-full: 9999px;
 
   // 阴影
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 0 10px rgba(128, 145, 165, 0.2);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  
+  --shadow-sm: 0px 2px 6px rgba(0, 0, 0, 0.1); // 悬浮等的交互阴影
+  --shadow-md: 0px 4px 12px rgba(0, 0, 0, 0.15); // 下拉菜单、选择器等浮层阴影
+  --shadow-lg: 0px 12px 32px rgba(0, 0, 0, 0.1), 0px 8px 16px rgba(0, 0, 0, 0.05); // 模态框等大型浮层阴影
+
   /* ========== 字体系统 ========== */
   --font-family-sans: "Helvetica Neue", Arial, "Hiragino Sans GB", "STHeiti", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   --font-family-mono: 'Menlo', 'Liberation Mono', 'Consolas', 'DejaVu Sans Mono', 'Ubuntu Mono', 'Courier New', 'andale mono', 'lucida console', monospace;

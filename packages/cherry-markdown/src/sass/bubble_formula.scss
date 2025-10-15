@@ -5,12 +5,8 @@
   padding: 0 !important;
   display: flex;
   position: fixed !important;
-  z-index: 9999999;
-  box-shadow: var(--box-shadow-down);
   box-sizing: border-box;
-  border-radius: 12px;
   overflow: hidden;
-  border: 1px solid var(--base-border-color);
 
   ul {
     list-style: none;

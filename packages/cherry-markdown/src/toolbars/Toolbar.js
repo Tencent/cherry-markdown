@@ -289,10 +289,10 @@ export default class Toolbar {
     }
     if (this.subMenus[name].style.display === 'none') {
       // 如果是隐藏的，则先隐藏所有二级菜单，再显示当前二级菜单
+      this.activeSubMenuItem(name);
       this.hideAllSubMenu();
       this.subMenus[name].style.display = 'block';
       this.setSubMenuPosition(this.menus.hooks[name], this.subMenus[name]);
-      this.activeSubMenuItem(name);
       this.currentActiveSubMenu = name;
     } else {
       // 如果是显示的，则隐藏当前二级菜单

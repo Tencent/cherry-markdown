@@ -90,6 +90,22 @@ export default class Copy extends MenuBase {
   }
 
   /**
+   * 显示复制成功状态
+   */
+  showSuccess() {
+    if (!this.lastIconOuterHtml) {
+      this.lastIconOuterHtml = this.dom.lastElementChild.outerHTML;
+    }
+    this.dom.lastElementChild.outerHTML = '<i class="ch-icon ch-icon-ok"></i>';
+    setTimeout(() => {
+      if (this.lastIconOuterHtml) {
+        this.dom.lastElementChild.outerHTML = this.lastIconOuterHtml;
+        this.lastIconOuterHtml = '';
+      }
+    }, 1500);
+  }
+
+  /**
    * 响应点击事件
    * 该按钮不会引发编辑区域的内容改动，所以不用处理用户在编辑区域的选中内容
    * @param {Event} e 点击事件
@@ -111,6 +127,7 @@ export default class Copy extends MenuBase {
         </div>`,
       );
       this.toggleLoading();
+      this.showSuccess();
     });
   }
 }
