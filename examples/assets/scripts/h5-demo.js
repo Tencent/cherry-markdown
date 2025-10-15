@@ -88,6 +88,18 @@ const h5Config = {
   },
   keydown: [],
   //extensions: [],
+  callback: {
+    onClickPreview: (event) => {
+      console.log('onClickPreview', event);
+    },
+    afterAsyncRender: (md, html) => {
+      // console.log("afterAsyncRender", md, html);
+    },
+    urlProcessor(url, srcType) {
+      console.log(`url-processor`, url, srcType);
+      return url;
+    },
+  },
 };
 
 export { h5Config };
