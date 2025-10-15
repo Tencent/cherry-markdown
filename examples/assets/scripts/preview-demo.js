@@ -24,10 +24,6 @@ const previewConfig = {
   engine: {
     global: {
       flowSessionContext: false,
-      urlProcessor(url, srcType) {
-        console.log(`url-processor`, url, srcType);
-        return url;
-      },
     },
     syntax: {
       fontEmphasis: {
@@ -106,6 +102,10 @@ const previewConfig = {
   },
   keydown: [],
   //extensions: [],
+  urlProcessor(url, srcType) {
+    console.log(`url-processor`, url, srcType);
+    return url;
+  },
 };
 
 export { previewConfig };

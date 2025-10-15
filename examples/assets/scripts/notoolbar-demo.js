@@ -22,12 +22,7 @@ const noToolbarConfig = {
     MathJax: window.MathJax,
   },
   engine: {
-    global: {
-      urlProcessor(url, srcType) {
-        console.log(`url-processor`, url, srcType);
-        return url;
-      },
-    },
+    global: {},
     syntax: {
       fontEmphasis: {
         allowWhitespace: true, // 是否允许首尾空格
@@ -78,6 +73,10 @@ const noToolbarConfig = {
   },
   keydown: [],
   //extensions: [],
+  urlProcessor(url, srcType) {
+    console.log(`url-processor`, url, srcType);
+    return url;
+  },
 };
 
 export { noToolbarConfig };
