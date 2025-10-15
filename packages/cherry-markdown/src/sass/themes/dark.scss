@@ -62,8 +62,6 @@
   /* ========== 手风琴组件变量覆盖 ========== */
   --accordion-bg: var(--oc-gray-8);
   --accordion-border: var(--oc-gray-6);
-  --accordion-shadow: var(--shadow-md);
-
   
   --accordion-summary-bg: var(--oc-orange-6);
   --accordion-summary-hover-bg: var(--oc-orange-5);
@@ -104,17 +102,9 @@
     }
 
     &.cherry-flex-toc__pure {
-      width: 30px;
-      height: calc(100% - 200px);
-      max-height: 600px;
-      background: transparent;
       box-shadow: none;
-      border-radius: 0;
 
       .cherry-toc-head {
-        height: 25px;
-        border-bottom: 1px dashed transparent;
-
         .cherry-toc-title {
           display: none;
         }

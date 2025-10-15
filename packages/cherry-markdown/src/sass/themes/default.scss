@@ -15,7 +15,7 @@
   /* ========== 工具栏相关变量 ========== */
   --toolbar-bg: var(--oc-white);
   --toolbar-btn-color: var(--oc-gray-8);
-  --toolbar-btn-hover-bg: var(--secondary-color);
+  --toolbar-btn-hover-bg: var(--oc-gray-2);
   --toolbar-btn-hover-color: var(--primary-color);
   --toolbar-btn-active-bg: var(--secondary-color);
   --toolbar-split-color: var(--oc-blue-5);
@@ -49,7 +49,6 @@
   /* ========== 手风琴组件变量覆盖 ========== */
   --accordion-bg: var(--oc-blue-0);
   --accordion-border: var(--oc-blue-2);
-  --accordion-shadow: var(--shadow-sm);
 
   --accordion-summary-bg: var(--oc-blue-5);
   --accordion-summary-hover-bg: var(--oc-blue-4);

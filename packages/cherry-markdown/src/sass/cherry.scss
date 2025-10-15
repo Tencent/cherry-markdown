@@ -188,8 +188,6 @@
   .icon-loading {
     &.loading {
       display: inline-block;
-      width: var(--spacing-sm);
-      height: var(--spacing-sm);
     }
 
     &.loading:after {
@@ -203,6 +201,24 @@
       border: 2px solid var(--toolbar-btn-color);
       border-color: var(--toolbar-btn-color) transparent var(--toolbar-btn-color) transparent;
       animation: loading 1.2s linear infinite;
+    }
+    
+    &.success {
+      display: inline-block;
+    }
+
+    &.success:after {
+      content: "\ea46";
+      display: inline-block;
+      font-family: 'ch-icon' !important;
+      font-style: normal;
+      font-weight: normal;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-size: 16px;
+      color: var(--primary-color);
+      margin-left: 2px;
+      margin-top: -2px;
     }
   }
 
@@ -238,6 +254,9 @@
 
   &-button {
     float: left;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     height: var(--toolbar-btn-height);
     padding: var(--toolbar-btn-padding);
     color: var(--toolbar-btn-color);
@@ -295,11 +314,7 @@
         }
       }
     }
-  }
-
-  .cherry-sidebar {
-    box-shadow: var(--shadow-md);
-  }
+        }
 }
 
 // 搜索框样式
@@ -500,8 +515,9 @@
 .cherry-sidebar {
   width: 30px;
   position: absolute;
-  top: 48px;
-  right: 7px;
+  top: var(--height-toolbar);
+  padding-top: var(--spacing-xs);
+  right: 10px;
   z-index: 11;
   bottom: 0;
   overflow: hidden;
@@ -510,7 +526,7 @@
   .cherry-toolbar-button {
     height: 30px;
     width: 30px;
-    padding: 0 6px;
+    padding: 0px;
     color: var(--toolbar-btn-color);
     background: var(--toolbar-btn-bg);
     border-radius: var(--toolbar-btn-radius);
@@ -524,8 +540,6 @@
     .icon-loading {
       &.loading {
         display: inline-block;
-        width: 8px;
-        height: 8px;
       }
 
       &.loading:after {
@@ -536,8 +550,8 @@
         margin-left: 2px;
         margin-top: -2px;
         border-radius: 50%;
-        border: 2px solid var(--toolbar-btn-color);
-        border-color: var(--toolbar-btn-color) transparent var(--toolbar-btn-color) transparent;
+        border: 2px solid;
+        border-color: var(--toolbar-btn-color) transparent;
         animation: loading 1.2s linear infinite;
       }
     }
@@ -1047,13 +1061,12 @@
   z-index: 100;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 0 60px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
   resize: both;
   min-width: 430px;
   min-height: 300px;
 
   &.float-previewer-dragging {
-    box-shadow: 0 0 60px rgba(0, 0, 0, 0.3);
 
     .float-previewer-header {
       cursor: grabbing;
@@ -1102,7 +1115,7 @@
     margin: 0 auto;
     padding: 25px 30px;
     overflow-y: scroll;
-    box-shadow: 0 0 60px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-lg);
     box-sizing: border-box;
     background-color: var(--previewer-mobile-bg);
   }
@@ -1180,10 +1193,6 @@
   width: 300px;
   padding: 16px;
   z-index: 13; // 高于 .cherry-drag 防止误触
-  background: var(--toolbar-bg);
-  box-shadow: var(--shadow-md);
-  border-radius: var(--dropdown-radius);
-  border: 1px solid var(--dropdown-border);
 
   .cherry-color-tabs {
     display: flex;
@@ -1447,11 +1456,11 @@
 .cherry-flex-toc {
   z-index: 11;
   position: absolute;
-  width: 160px;
+  right: 0;
+  top: calc(var(--height-toolbar) + 120px);
   height: calc(100% - 220px);
   max-height: 600px;
-  right: 0;
-  top: 200px;
+  width: 160px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1459,7 +1468,7 @@
   margin-right: 8px;
   box-sizing: border-box;
   user-select: none;
-  box-shadow: 0px 5px 11px #33333333;
+  box-shadow: var(--shadow-md);
   border-radius: 10px;
   transition: all 0.3s;
   &.cherry-flex-toc__fixed {

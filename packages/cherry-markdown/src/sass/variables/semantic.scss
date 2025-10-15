@@ -25,15 +25,15 @@
   --toolbar-padding: var(--spacing-xs) var(--spacing-xl);
   --toolbar-font-size: var(--font-size-sm);
   --toolbar-radius: none;
-  --toolbar-shadow: var(--shadow-md);
+  --toolbar-shadow: var(--shadow-sm);
   --toolbar-split-color: var(--base-border-color);
   --toolbar-min-height: 48px; // 单行工具栏的高度
 
   // 工具栏按钮
   --toolbar-btn-color: #3f4a56;
   --toolbar-btn-bg: transparent;
-  --toolbar-btn-hover-color: #5d9bfc;
-  --toolbar-btn-hover-bg: #ebf3ff;
+  --toolbar-btn-hover-color: var(--primary-color);
+  --toolbar-btn-hover-bg: var(--secondary-color);
   --toolbar-btn-disabled: #ccc;
   --toolbar-btn-radius: var(--radius-lg);
   --toolbar-btn-padding: 0 var(--spacing-md);
@@ -42,7 +42,7 @@
   /* ========== 工具栏的下拉菜单 ========== */
   --dropdown-bg: var(--toolbar-bg);
   --dropdown-border: var(--base-border-color);
-  --dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --dropdown-shadow: var(--shadow-md);
   --dropdown-radius: var(--radius-xl);
   --dropdown-padding: var(--spacing-xs) 0;
   
