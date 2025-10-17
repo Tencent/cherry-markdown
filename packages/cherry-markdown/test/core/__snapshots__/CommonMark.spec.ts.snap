@@ -1556,17 +1556,17 @@ exports[`engine > CommonMark-227 1`] = `
 `;
 
 exports[`engine > CommonMark-228 1`] = `
-"<blockquote data-sign="ebbff555be2b4c637288febb98ed34e6da9eae5976cd72ab7ff6bf2f594b7fb4_3" data-lines="3"><i class="cherry-toc-in-blockquote ch-icon ch-icon-blockquote"></i><h1 data-in-blockquote="true" id="foo" data-sign="ebd83302ec640103d4d2ea42fd1d4a4f17f3f70187beeedd02f68b67d503a070" data-lines="1">Foo</h1><p data-sign="dfa31ebea254eb84f37c9575d26ea23d5edfb97eb4e8cd3579fcf868c2aea4b12" data-type="p" data-lines="2"> bar<br> baz</p></blockquote>
+"<blockquote data-sign="ebbff555be2b4c637288febb98ed34e6da9eae5976cd72ab7ff6bf2f594b7fb4_3" data-lines="3"><h1 data-in-blockquote="true" id="foo" data-sign="ebd83302ec640103d4d2ea42fd1d4a4f17f3f70187beeedd02f68b67d503a070" data-lines="1">Foo</h1><p data-sign="dfa31ebea254eb84f37c9575d26ea23d5edfb97eb4e8cd3579fcf868c2aea4b12" data-type="p" data-lines="2"> bar<br> baz</p></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-229 1`] = `
-"<blockquote data-sign="8191cadc42230c59d58cf1609da5d806474d27641ce48d4f549a00d64f839905_3" data-lines="3"><i class="cherry-toc-in-blockquote ch-icon ch-icon-blockquote"></i><h1 data-in-blockquote="true" id="foo" data-sign="ebd83302ec640103d4d2ea42fd1d4a4f17f3f70187beeedd02f68b67d503a070" data-lines="1">Foo</h1><p data-sign="7aa333959ab9e923137d7dc092903d042315b52ee9d0c69432bbffd05218f3f82" data-type="p" data-lines="2">bar<br> baz</p></blockquote>
+"<blockquote data-sign="8191cadc42230c59d58cf1609da5d806474d27641ce48d4f549a00d64f839905_3" data-lines="3"><h1 data-in-blockquote="true" id="foo" data-sign="ebd83302ec640103d4d2ea42fd1d4a4f17f3f70187beeedd02f68b67d503a070" data-lines="1">Foo</h1><p data-sign="7aa333959ab9e923137d7dc092903d042315b52ee9d0c69432bbffd05218f3f82" data-type="p" data-lines="2">bar<br> baz</p></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-230 1`] = `
-"<blockquote data-sign="e31d582ef97b14aaa2de5e9350cc1ebd5b9a2c0fa89ac779441bae4a4aa64e9d_3" data-lines="3"><i class="cherry-toc-in-blockquote ch-icon ch-icon-blockquote"></i><h1 data-in-blockquote="true" id="foo" data-sign="ebd83302ec640103d4d2ea42fd1d4a4f17f3f70187beeedd02f68b67d503a070" data-lines="1">Foo</h1><p data-sign="dfa31ebea254eb84f37c9575d26ea23d5edfb97eb4e8cd3579fcf868c2aea4b12" data-type="p" data-lines="2"> bar<br> baz</p></blockquote>
+"<blockquote data-sign="e31d582ef97b14aaa2de5e9350cc1ebd5b9a2c0fa89ac779441bae4a4aa64e9d_3" data-lines="3"><h1 data-in-blockquote="true" id="foo" data-sign="ebd83302ec640103d4d2ea42fd1d4a4f17f3f70187beeedd02f68b67d503a070" data-lines="1">Foo</h1><p data-sign="dfa31ebea254eb84f37c9575d26ea23d5edfb97eb4e8cd3579fcf868c2aea4b12" data-type="p" data-lines="2"> bar<br> baz</p></blockquote>
 "
 `;
 
@@ -1578,7 +1578,7 @@ exports[`engine > CommonMark-231 1`] = `
 `;
 
 exports[`engine > CommonMark-232 1`] = `
-"<blockquote data-sign="8424194285b6517d3a8c2af9d70470b2916d81b0d63aa225edd09128e70e0c3b_3" data-lines="3"><i class="cherry-toc-in-blockquote ch-icon ch-icon-blockquote"></i><h1 data-in-blockquote="true" id="foo" data-sign="ebd83302ec640103d4d2ea42fd1d4a4f17f3f70187beeedd02f68b67d503a070" data-lines="1">Foo</h1><p data-sign="9ceeaf3c13a269e89fc93df67fff6e98ef7bca7de0b6d87a72abcce0ae40efc42" data-type="p" data-lines="2"> bar<br>baz</p></blockquote>
+"<blockquote data-sign="8424194285b6517d3a8c2af9d70470b2916d81b0d63aa225edd09128e70e0c3b_3" data-lines="3"><h1 data-in-blockquote="true" id="foo" data-sign="ebd83302ec640103d4d2ea42fd1d4a4f17f3f70187beeedd02f68b67d503a070" data-lines="1">Foo</h1><p data-sign="9ceeaf3c13a269e89fc93df67fff6e98ef7bca7de0b6d87a72abcce0ae40efc42" data-type="p" data-lines="2"> bar<br>baz</p></blockquote>
 "
 `;
 
@@ -2057,12 +2057,12 @@ exports[`engine > CommonMark-319 1`] = `
 `;
 
 exports[`engine > CommonMark-320 1`] = `
-"<ul data-lines="4" data-sign="715249d4fefea2733c7996f3561a531a901b3b46eb918329c1fc0ebd380ed96b" class="cherry-list__square"><li class="cherry-list-item"><p>a<br></p><blockquote data-sign="bd0d102d73e61e9c766170c2377e509683b3238361e67d8ec73db2b35662ff73_2" data-lines="2"><p data-sign="cb6f0a6c7a3223ecb5693627eb3a534fcd5be2103408f78aa19b9c6a079aa8101" data-type="p" data-lines="1"> b</p>
+"<ul data-lines="4" data-sign="578af0093059f47d45e8b2b0c754ab0eb6447292c1665ca18717162a4867c955" class="cherry-list__square"><li class="cherry-list-item"><p>a<br></p><blockquote data-sign="bd0d102d73e61e9c766170c2377e509683b3238361e67d8ec73db2b35662ff73_2" data-lines="2"><p data-sign="cb6f0a6c7a3223ecb5693627eb3a534fcd5be2103408f78aa19b9c6a079aa8101" data-type="p" data-lines="1"> b</p>
 </blockquote><p></p></li><li class="cherry-list-item"><p>c</p></li></ul>"
 `;
 
 exports[`engine > CommonMark-321 1`] = `
-"<ul data-lines="6" data-sign="9873a201d00ff67629c1d569b8d69277fe2afb5ff6a8f8be85febfa7ce390681" class="cherry-list__default"><li class="cherry-list-item"><p>a<br></p><blockquote data-sign="d318bb4b981b3a527e184e3cabffc63c252de573498c7e49dc08100468a7f3a5_4" data-lines="4"><p data-sign="cb6f0a6c7a3223ecb5693627eb3a534fcd5be2103408f78aa19b9c6a079aa8101" data-type="p" data-lines="1"> b</p><div
+"<ul data-lines="6" data-sign="74d644dd151bc263f0a8533bfc3d596aadf1073b2c9553ad1be367b8f6d15f33" class="cherry-list__default"><li class="cherry-list-item"><p>a<br></p><blockquote data-sign="d318bb4b981b3a527e184e3cabffc63c252de573498c7e49dc08100468a7f3a5_4" data-lines="4"><p data-sign="cb6f0a6c7a3223ecb5693627eb3a534fcd5be2103408f78aa19b9c6a079aa8101" data-type="p" data-lines="1"> b</p><div
         data-sign="871927762fe6bbdb715f4f41caeb247b852c5507319ef6cc8b6c27c065eefdd9"
         data-type="codeBlock"
         data-lines="3" 
