@@ -489,6 +489,8 @@ export default class Engine {
     let $md = md;
     $md = this.$dealParagraph($md);
     $md = this.$fireHookAction($md, 'paragraph', 'afterMakeHtml', { before: 'blockquote' });
+    // 特殊处理，给引用里的header添加被引用的标识
+    $md = $md.replace(/(<h[1-6] )([^>]+?>)/g, '$1data-in-blockquote="true" $2');
     return $md;
   }
 
