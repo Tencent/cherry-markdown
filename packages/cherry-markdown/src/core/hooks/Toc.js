@@ -130,7 +130,7 @@ export default class Toc extends ParagraphBase {
    * @see https://github.com/vsch/flexmark-java/blob/master/flexmark-ext-toc/
    * src/main/java/com/vladsch/flexmark/ext/toc/TocUtils.java#L140-L227
    *
-   * @param {{ level:number; id:string; text:string }[]} nodeList 节点列表
+   * @param {{ level:number; id:string; text:string; isInBlockquote: boolean }[]} nodeList 节点列表
    * @returns {string}
    */
   $makeNestedToc(nodeList) {
