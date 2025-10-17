@@ -284,7 +284,7 @@ export default class CodeBlock extends ParagraphBase {
         data-copy-code="${this.copyCode}"
         data-expand-code="${this.expandCode}"
         data-change-lang="${this.changeLang}"
-        data-lang="${oldLang}"
+        data-lang="${lang}"
         style="position:relative"
         class="${needUnExpand ? 'cherry-code-unExpand' : 'cherry-code-expand'}"
       >
