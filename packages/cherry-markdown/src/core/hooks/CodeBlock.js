@@ -264,6 +264,7 @@ export default class CodeBlock extends ParagraphBase {
       lang = lang.replace(/\s*CHERRY_FLOW_SESSION_CURSOR/, '');
     }
     lang = lang.toLowerCase();
+    const oldLang = lang;
     if (this.customHighlighter) {
       // 平台自定义代码块样式
       cacheCode = this.customHighlighter(cacheCode, lang);
@@ -283,11 +284,11 @@ export default class CodeBlock extends ParagraphBase {
         data-copy-code="${this.copyCode}"
         data-expand-code="${this.expandCode}"
         data-change-lang="${this.changeLang}"
-        data-lang="${lang}"
+        data-lang="${oldLang}"
         style="position:relative"
         class="${needUnExpand ? 'cherry-code-unExpand' : 'cherry-code-expand'}"
       >
-      ${this.customWrapperRender(lang, cacheCode, codeHtml)}
+      ${this.customWrapperRender(oldLang, cacheCode, codeHtml)}
       `;
     if (needUnExpand) {
       cacheCode += `<div class="cherry-mask-code-block">
