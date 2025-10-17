@@ -15,7 +15,7 @@
  */
 
 import { svg2img, getSvgString } from '@/utils/svgUtils';
-import { copyTextByClipboard } from '@/utils/copy';
+import { copyToClip } from '@/utils/copy';
 import MathBlock from '@/core/hooks/MathBlock';
 
 export default class FormulaHandler {
@@ -173,11 +173,11 @@ export default class FormulaHandler {
           // 涉及到代码的操作
           if (this.target instanceof SVGSVGElement) {
             if (name === 'svgcode') {
-              copyTextByClipboard(getSvgString(this.target));
+              copyToClip(getSvgString(this.target));
             } else {
               const mathElement = this.target.parentElement.querySelector('math');
               mathElement.setAttribute('xmlns', 'http://www.w3.org/1998/Math/MathML');
-              copyTextByClipboard(mathElement.outerHTML);
+              copyToClip(undefined, mathElement.outerHTML);
             }
           }
           break;
@@ -206,7 +206,7 @@ export default class FormulaHandler {
                   window.MathJax?.texReset();
                   window.MathJax?.tex2mmlPromise?.(code, { display: true }).then((mml) => {
                     if (name === 'mathml') {
-                      copyTextByClipboard(mml);
+                      copyToClip(mml);
                     } else {
                       // TODO: docx
                     }
@@ -214,13 +214,13 @@ export default class FormulaHandler {
                 }
                 // TODO: other engine
               } else if (name === 'latex') {
-                copyTextByClipboard(code);
+                copyToClip(code);
               } else if (name === '$') {
-                copyTextByClipboard(`${name}${code}${name}`);
+                copyToClip(`${name}${code}${name}`);
               } else if (name === '$$') {
-                copyTextByClipboard(`${name}\n${code}\n${name}`);
+                copyToClip(`${name}\n${code}\n${name}`);
               } else if (name === '\\') {
-                copyTextByClipboard(`\\${code}`);
+                copyToClip(`\\${code}`);
               }
             }
           }

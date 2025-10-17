@@ -118,14 +118,19 @@ export default class Copy extends MenuBase {
     const html = this.previewer.isPreviewerHidden()
       ? this.previewer.options.previewerCache.html
       : this.previewer.getValue();
+
+    // 获取原始 Markdown 内容作为纯文本
+    const markdownText = this.$cherry.getMarkdown();
+
     // 将css样式以行内样式的形式插入到html内容里
-    this.adaptWechat(html).then((html) => {
-      copyToClip(
-        `${mathStyle + echartStyle + cherryStyle}
+    this.adaptWechat(html).then((adaptedHtml) => {
+      const htmlContent = `${mathStyle + echartStyle + cherryStyle}
         <div data-inline-code-theme="${inlineCodeTheme}" data-code-block-theme="${codeBlockTheme}">
-          <div class="cherry-markdown">${html}</div>
-        </div>`,
-      );
+          <div class="cherry-markdown">${adaptedHtml}</div>
+        </div>`;
+
+      // 传递 Markdown 作为纯文本，HTML 作为富文本
+      copyToClip(markdownText, htmlContent);
       this.toggleLoading();
       this.showSuccess();
     });
