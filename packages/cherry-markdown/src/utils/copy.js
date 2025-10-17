@@ -13,43 +13,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
  * 复制内容到剪贴板
- * @returns null
+ * @param {string} [text] - 可选的纯文本内容 (text/plain)
+ * @param {string} [html] - 可选的 HTML 内容 (text/html)
+ * @returns {Promise<void>}
+ * @throws {Error}
  */
-export function copyToClip(str) {
+export async function copyToClip(text, html) {
+  // 验证输入
+  if (!text && !html) {
+    throw new Error('没有提供任何内容进行复制');
+  }
+
+  if (navigator.clipboard && window.ClipboardItem) {
+    try {
+      /** @type {Record<string, Blob>} */
+      const clipboardItems = {};
+      if (text) {
+        clipboardItems['text/plain'] = new Blob([text], { type: 'text/plain' });
+      }
+      if (html) {
+        clipboardItems['text/html'] = new Blob([html], { type: 'text/html' });
+      }
+      await navigator.clipboard.write([new ClipboardItem(clipboardItems)]);
+      return;
+    } catch (err) {
+      // 如果 Clipboard API 失败，降级到 execCommand
+      console.warn('Clipboard API failed, falling back to execCommand:', err);
+    }
+  }
+
+  // 降级方案：使用 execCommand
   function listener(e) {
-    e.clipboardData.setData('text/html', str);
-    e.clipboardData.setData('text/plain', str);
+    if (text) {
+      e.clipboardData.setData('text/plain', text);
+    }
+    if (html) {
+      e.clipboardData.setData('text/html', html);
+    }
     e.preventDefault();
   }
+
   document.addEventListener('copy', listener);
-  document.execCommand('copy');
-  document.removeEventListener('copy', listener);
-}
-
-/**
- * 复制文本内容到剪贴板
- * @param {string} str 复制文本
- */
-export function copyByInput(str) {
-  const input = document.createElement('input');
-  input.value = str;
-  document.body.appendChild(input);
-  input.select();
-  document.execCommand('copy');
-  document.body.removeChild(input);
-}
-
-/**
- * 复制文本
- * @param {string} str 复制文本
- * @returns
- */
-export async function copyTextByClipboard(str) {
-  if (!navigator.clipboard) {
-    copyByInput(str);
-    return;
+  try {
+    const success = document.execCommand('copy');
+    if (!success) {
+      throw new Error('Copy command was unsuccessful');
+    }
+  } finally {
+    document.removeEventListener('copy', listener);
   }
-  return await navigator.clipboard.writeText(str);
 }
