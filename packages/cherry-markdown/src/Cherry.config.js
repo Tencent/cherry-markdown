@@ -276,6 +276,10 @@ const defaultConfig = {
         customRenderer: {
           // 自定义语法渲染器
         },
+        /** 自定义代码块的包裹渲染器 */
+        wrapperRender: (language, code, innerHTML) => {
+          return innerHTML;
+        },
         mermaid: {
           svg2img: false, // 是否将mermaid生成的画图变成img格式
         },

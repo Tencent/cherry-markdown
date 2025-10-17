@@ -52,6 +52,7 @@ export default class CodeBlock extends ParagraphBase {
     this.customHighlighter = config.highlighter;
     this.failedCleanCacheTimes = 0;
     this.codeTimer = null;
+    this.$cherry = cherry;
     this.needCleanFlowCursor =
       cherry?.options?.engine?.global?.flowSessionContext && cherry?.options?.engine?.global?.flowSessionCursor;
     this.showInlineColor =
@@ -273,6 +274,7 @@ export default class CodeBlock extends ParagraphBase {
       cacheCode = this.renderLineNumber(cacheCode);
     }
     const needUnExpand = this.expandCode && $code.match(/\n/g)?.length > 10; // 是否需要收起代码块
+    const codeHtml = `<pre class="language-${lang}">${this.wrapCode(cacheCode, lang)}</pre>`;
     cacheCode = `<div
         data-sign="${sign}"
         data-type="codeBlock"
@@ -285,7 +287,7 @@ export default class CodeBlock extends ParagraphBase {
         style="position:relative"
         class="${needUnExpand ? 'cherry-code-unExpand' : 'cherry-code-expand'}"
       >
-      <pre class="language-${lang}">${this.wrapCode(cacheCode, lang)}</pre>
+      ${this.customWrapperRender(lang, cacheCode, codeHtml)}
       `;
     if (needUnExpand) {
       cacheCode += `<div class="cherry-mask-code-block">
@@ -296,6 +298,14 @@ export default class CodeBlock extends ParagraphBase {
     }
     cacheCode += '</div>';
     return cacheCode;
+  }
+
+  customWrapperRender(lang, code, html) {
+    const customWrapperRender = this.$cherry.options.engine.syntax.codeBlock.wrapperRender ?? false;
+    if (typeof customWrapperRender === 'function') {
+      return customWrapperRender(lang, code, html);
+    }
+    return html;
   }
 
   /**
