@@ -247,9 +247,10 @@ export default class Toc extends ParagraphBase {
     const headerList = [];
     const headerRegex = /<h([1-6])([^>]*?) id="([^"]+?)"[^>]*?>(?:<a[^/]+?\/a>|)(.+?)<\/h\1>/g;
     let str2Hash = '';
-    $str.replace(headerRegex, (match, level, isInBlockquote, id, text) => {
+    $str.replace(headerRegex, (_, level, attrs, id, text) => {
       const $text = text.replace(/~fn#[0-9]+#/g, '');
-      headerList.push({ level: +level, id, text: $text, isInBlockquote: !!isInBlockquote });
+      const isInBlockquote = attrs.includes('data-in-blockquote="true"');
+      headerList.push({ level: +level, id, text: $text, isInBlockquote });
       str2Hash += `${level}${text}${isInBlockquote}`;
     });
     str2Hash = this.$engine.hash(str2Hash);

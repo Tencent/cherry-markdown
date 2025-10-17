@@ -483,9 +483,10 @@ export default class Cherry extends CherryStatic {
     const str = this.getHtml();
     /** @type {({level: number;id: string;text: string; isInBlockquote: boolean})[]} */
     const headerList = [];
-    const headerRegex = /<h([1-6])(.*?) id="([^"]+?)".*?>(.+?)<\/h[0-6]>/g;
-    str.replace(headerRegex, (match, level, isInBlockquote, id, text) => {
-      headerList.push({ level: +level, id, text: text.replace(/<a .+?<\/a>/, ''), isInBlockquote: !!isInBlockquote });
+    const headerRegex = /<h([1-6])([^>]*?) id="([^"]+?)"[^>]*?>(.+?)<\/h[0-6]>/g;
+    str.replace(headerRegex, (match, level, attrs, id, text) => {
+      const isInBlockquote = attrs.includes('data-in-blockquote="true"');
+      headerList.push({ level: +level, id, text: text.replace(/<a .+?<\/a>/, ''), isInBlockquote });
       return match;
     });
     return headerList;
