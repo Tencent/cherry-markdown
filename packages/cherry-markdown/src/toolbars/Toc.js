@@ -193,7 +193,8 @@ export default class Toc {
       const tocList = this.$cherry.getToc();
       let tocStr = '';
       tocList.map((item) => {
-        tocStr += item.text;
+        const { level, text, isInBlockquote } = item;
+        tocStr += `${level}${text}${isInBlockquote}`;
         return item;
       });
       tocStr = this.$cherry.engine.hash(tocStr);
@@ -202,15 +203,18 @@ export default class Toc {
         let tocHtml = '';
         let index = 0;
         tocList.map((item) => {
-          const text = item.text
-            .replace(/<sup class="cherry-footnote-number">.*?<\/sup>/g, '')
-            .replace(/<a .+?<\/a>/g, '');
-          const title = text.replace(/<[^>]+?>/g, '');
-          tocHtml += `<a class="cherry-toc-one-a cherry-toc-one-a__${item.level > 5 ? 5 : item.level}"
+          const { id, level, text, isInBlockquote } = item;
+          const $text = text.replace(/<sup class="cherry-footnote-number">.*?<\/sup>/g, '').replace(/<a .+?<\/a>/g, '');
+          const title = $text.replace(/<[^>]+?>/g, '');
+          const isInBlockquoteIcon = isInBlockquote
+            ? '<i class="cherry-toc-in-blockquote ch-icon ch-icon-blockquote"></i>'
+            : '';
+          tocHtml += `<a class="cherry-toc-one-a cherry-toc-one-a__${level > 5 ? 5 : level}"
             title="${title}"
             data-index="${index}"
-            data-id="#${item.id}"
-            >${text}</a>`;
+            data-id="#${id}"
+            data-in-blockquote="${isInBlockquoteIcon ? 'true' : 'false'}"
+            >${isInBlockquoteIcon} ${$text}</a>`;
           index += 1;
           return item;
         });

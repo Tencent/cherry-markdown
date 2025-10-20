@@ -334,6 +334,13 @@
       padding-left: var(--md-toc-indicator-gap);
       transition: border-color 50ms ease-out;
 
+      .cherry-toc-in-blockquote {
+        font-size: 0.6em;
+        margin-top: -0.4em;
+        padding: 0 0 0 var(--spacing-sm);
+        color: var(--md-toc-indicator-color);
+      }
+
       a {
         text-decoration: none;
         color: var(--md-toc-link-color);
