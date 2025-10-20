@@ -199,6 +199,7 @@
       background-color: var(--base-previewer-bg);
       cursor: pointer;
       transition: all 0.3s;
+      z-index: 1001;
 
       &:hover {
         background-color: var(--md-table-operator-color);
