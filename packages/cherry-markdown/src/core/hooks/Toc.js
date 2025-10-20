@@ -99,21 +99,24 @@ export default class Toc extends ParagraphBase {
 
   /**
    * 生成TOC节点HTML
-   * @param {{ level: number; id: string; text: string }} node Toc节点对象
+   * @param {{ level: number; id: string; text: string; isInBlockquote: boolean }} node Toc节点对象
    * @param {boolean} prependWhitespaceIndent 是否在文本前插入缩进空格
    * @param {boolean} [closeTag=true] 是否闭合标签
    * @returns {string}
    */
   $makeTocItem(node, prependWhitespaceIndent, closeTag = true) {
     let nodePrefix = '';
+    let isInBlockquotePrefix = '';
     if (prependWhitespaceIndent) {
       nodePrefix = this.$makeLevel(node.level);
     }
     const tocLink = this.linkProcessor(`#${node.id}`.replace(/safe_/g, '')); // transform header id to avoid being sanitized
+    if (node.isInBlockquote) {
+      isInBlockquotePrefix = `<i class="cherry-toc-in-blockquote ch-icon ch-icon-blockquote"></i>`;
+    }
+    const endTag = closeTag ? '</li>' : '';
     return `<li class="${this.tocNodeClass}${this.showAutoNumber ? ` toc-li-${node.level}` : ''}">
-    ${nodePrefix}<a href="${tocLink}" class="level-${node.level}" target="_self">${node.text}</a>${
-      closeTag ? '</li>' : ''
-    }`;
+    ${nodePrefix}${isInBlockquotePrefix}<a href="${tocLink}" class="level-${node.level}" target="_self">${node.text}</a>${endTag}`;
   }
 
   $makePlainToc(tocNodeList) {
@@ -127,7 +130,7 @@ export default class Toc extends ParagraphBase {
    * @see https://github.com/vsch/flexmark-java/blob/master/flexmark-ext-toc/
    * src/main/java/com/vladsch/flexmark/ext/toc/TocUtils.java#L140-L227
    *
-   * @param {{ level:number; id:string; text:string }[]} nodeList 节点列表
+   * @param {{ level:number; id:string; text:string; isInBlockquote: boolean }[]} nodeList 节点列表
    * @returns {string}
    */
   $makeNestedToc(nodeList) {
@@ -242,12 +245,13 @@ export default class Toc extends ParagraphBase {
   afterMakeHtml(str) {
     let $str = super.afterMakeHtml(str);
     const headerList = [];
-    const headerRegex = /<h([1-6])[^>]*? id="([^"]+?)"[^>]*?>(?:<a[^/]+?\/a>|)(.+?)<\/h\1>/g;
+    const headerRegex = /<h([1-6])([^>]*?) id="([^"]+?)"[^>]*?>(?:<a[^/]+?\/a>|)(.+?)<\/h\1>/g;
     let str2Hash = '';
-    $str.replace(headerRegex, (match, level, id, text) => {
+    $str.replace(headerRegex, (_, level, attrs, id, text) => {
       const $text = text.replace(/~fn#[0-9]+#/g, '');
-      headerList.push({ level: +level, id, text: $text });
-      str2Hash += `${level}${id}`;
+      const isInBlockquote = attrs.includes('data-in-blockquote="true"');
+      headerList.push({ level: +level, id, text: $text, isInBlockquote });
+      str2Hash += `${level}${text}${isInBlockquote}`;
     });
     str2Hash = this.$engine.hash(str2Hash);
     $str = $str.replace(/(?:^|\n)(\[\[|\[|【【)(toc|TOC)(\]\]|\]|】】)([<~])/, (match) =>
