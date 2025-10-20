@@ -38,7 +38,7 @@ Cherry Markdown Writer is a Javascript Markdown editor. It has the advantages su
 - [Stream Input Mode (AI chat scenario)](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)
 - [VIM Editing Mode](https://tencent.github.io/cherry-markdown/examples/vim.html)
 - [Utilize Your Own Mermaid.js](https://tencent.github.io/cherry-markdown/examples/mermaid.html)
-- [Custom Code Block Render](https://tencent.github.io/cherry-markdown/examples/custom_codeblock_wrapper.html)
+- [Custom Code Block Wrapper](https://tencent.github.io/cherry-markdown/examples/custom_codeblock_wrapper.html)
 
 -----
 
