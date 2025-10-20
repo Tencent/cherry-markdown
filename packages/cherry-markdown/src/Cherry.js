@@ -474,17 +474,19 @@ export default class Cherry extends CherryStatic {
    *  level: number;
    * id: string;
    * text: string;
+   * isInBlockquote: boolean;
    * }[]} HeaderList
    * 获取目录，目录由head1~6组成
    * @returns {HeaderList} 标题head数组
    */
   getToc() {
     const str = this.getHtml();
-    /** @type {({level: number;id: string;text: string})[]} */
+    /** @type {({level: number;id: string;text: string; isInBlockquote: boolean})[]} */
     const headerList = [];
-    const headerRegex = /<h([1-6]).*?id="([^"]+?)".*?>(.+?)<\/h[0-6]>/g;
-    str.replace(headerRegex, (match, level, id, text) => {
-      headerList.push({ level: +level, id, text: text.replace(/<a .+?<\/a>/, '') });
+    const headerRegex = /<h([1-6])([^>]*?) id="([^"]+?)"[^>]*?>(.+?)<\/h[0-6]>/g;
+    str.replace(headerRegex, (match, level, attrs, id, text) => {
+      const isInBlockquote = attrs.includes('data-in-blockquote="true"');
+      headerList.push({ level: +level, id, text: text.replace(/<a .+?<\/a>/, ''), isInBlockquote });
       return match;
     });
     return headerList;

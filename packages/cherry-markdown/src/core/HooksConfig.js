@@ -75,8 +75,8 @@ const hooksConfig = [
   Transfer,
   Br,
   Table,
-  Blockquote,
   Toc,
+  Blockquote,
   Header, // 处理标题, 传入strict属性严格要求ATX风格标题#后带空格
   Hr,
   List,

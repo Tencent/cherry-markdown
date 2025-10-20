@@ -1515,7 +1515,7 @@
       display: block;
       text-decoration: none;
       color: #000;
-      border-left: 5px solid #33333333;
+      border-left: 5px solid var(--md-toc-indicator-color);
       height: 28px;
       line-height: 28px;
       transition: all 0.3s;
@@ -1528,6 +1528,13 @@
       &.current {
         border-left-color: var(--primary-color);
         color: var(--primary-color);
+      }
+      .cherry-toc-in-blockquote {
+        font-size: 0.6em;
+        color: var(--md-toc-indicator-color);
+        display: inline-block;
+        margin-top: -0.4em;
+        vertical-align: top;
       }
     }
     .cherry-toc-one-a__1 {
