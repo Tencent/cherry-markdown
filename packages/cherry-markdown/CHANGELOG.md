@@ -1,5 +1,110 @@
 # Change Log
 
+## 0.10.1
+
+### Patch Changes
+
+- style: 调整图片工具面板的图标和样式
+  feat: 侧边栏工具 响应顶部工具栏高度
+  style: 优化侧边栏工具样式
+  style: 微调「沉稳」主题配色
+  fix: 修复显示二级菜单时的状态闪烁问题
+  fix: 表格控制器层级错误 [@Seeridia](https://github.com/Seeridia)([#1464](https://github.com/Tencent/cherry-markdown/pull/1464))([`513eeb0`](https://github.com/Tencent/cherry-markdown/commit/513eeb04ec4d8da39148dbed15a3b1421891b6c0))
+- fix: 调整建议面板位置以避免超出边界 [@Seeridia](https://github.com/Seeridia)([#1372](https://github.com/Tencent/cherry-markdown/pull/1372))([`6c4bb89`](https://github.com/Tencent/cherry-markdown/commit/6c4bb89a71b1386c3b165def51782cc85b383507))
+- fix(math): 修复 math `externals` 配置不起作用的问题 [@lyngai](https://github.com/lyngai)([#1437](https://github.com/Tencent/cherry-markdown/pull/1437))([`5909dcd`](https://github.com/Tencent/cherry-markdown/commit/5909dcd7084857f8c3105651fafc65438f26b5d9))
+- 修复地图图表的加载、显示、导出问题；微调图表样式；新增桑基图 [@Aurora-N](https://github.com/Aurora-N)([#1417](https://github.com/Tencent/cherry-markdown/pull/1417))([`630adc7`](https://github.com/Tencent/cherry-markdown/commit/630adc70b6a49a00c43697f4364a975a78604671))
+- feat: #1445 增加默认mobile模式的配置 [@sunsonliu](https://github.com/sunsonliu)([#1449](https://github.com/Tencent/cherry-markdown/pull/1449))([`69e9a9b`](https://github.com/Tencent/cherry-markdown/commit/69e9a9b144b0def931448aabd0f2a39485e30cb8))
+- style: 优化代码块工具栏的定位逻辑，从px改成em [@sunsonliu](https://github.com/sunsonliu)([#1459](https://github.com/Tencent/cherry-markdown/pull/1459))([`3bf6f5d`](https://github.com/Tencent/cherry-markdown/commit/3bf6f5da80336a023b470817e17559d609353e0f))
+- fix: #1442 优化斜体和正文中间有重叠的问题 [@sunsonliu](https://github.com/sunsonliu)([#1450](https://github.com/Tencent/cherry-markdown/pull/1450))([`057fd27`](https://github.com/Tencent/cherry-markdown/commit/057fd27b0e495a85a57ccbc367b8c2b1364e96b1))
+- improve codeblock preview toolbar ui [@YeXingKe](https://github.com/YeXingKe)([#1315](https://github.com/Tencent/cherry-markdown/pull/1315))([`c86824f`](https://github.com/Tencent/cherry-markdown/commit/c86824f5332be49c0d5b1d285ef82c21c65154fe))
+- chore: use `vite` for dev and `rollup` upgrade to `v4` [@RSS1102](https://github.com/RSS1102)([#1452](https://github.com/Tencent/cherry-markdown/pull/1452))([`64a3278`](https://github.com/Tencent/cherry-markdown/commit/64a3278ee324bb30576bfaab53832640a4d5694b))
+- refactor: #1229 丰富图表的类型并增加图表交互 [@Wei-Xiaoxing](https://github.com/Wei-Xiaoxing)([#1349](https://github.com/Tencent/cherry-markdown/pull/1349))([`c1c290f`](https://github.com/Tencent/cherry-markdown/commit/c1c290fbe159e4b2d2c0cd703b4f13e67ab6bb6c))
+- - refactor: 将图表的`options`配置格式更改为更加通用的 JSON 格式
+
+  - 采取渐进式迁移，如果失败则回退至旧的解析方案，并打印弃用警告
+
+- feat: 使散点图支持语义化的列标题, 增加一个特殊的键名 `cherry:mapping` 来指明映射关系
+  - 在解析 `cherry:mapping` 之后, 会首先对必要维度进行错误验证
+  - 采取渐进式迁移, 在不符合新指令格式时回退到旧的处理逻辑
+
+- fix: 使图表可以跟随表格的对齐方式
+
+- fix: 修复图表语法在省略花括号时不能尾随空格的问题
+  - 移除了相应的冗余代码
+
+- refactor: 根据新语法修改相应的示例代码和说明、工具栏相关代码 [@yang-summer](https://github.com/yang-summer)([#1409](https://github.com/Tencent/cherry-markdown/pull/1409))([`d4dc15b`](https://github.com/Tencent/cherry-markdown/commit/d4dc15b627d84cadf5394dc7c797b1812d3e8e2d))
+- feat: 添加 codemirror 的 placeholder 配置支持 [@Seeridia](https://github.com/Seeridia)([#1395](https://github.com/Tencent/cherry-markdown/pull/1395))([`04f5e62`](https://github.com/Tencent/cherry-markdown/commit/04f5e62958f35d5c3a1787e804a8598d6742aece))
+- feat: 添加行内代码颜色指示 [@Seeridia](https://github.com/Seeridia)([#1403](https://github.com/Tencent/cherry-markdown/pull/1403))([`ba30ff5`](https://github.com/Tencent/cherry-markdown/commit/ba30ff5bb6bd44d22f0cbcc0a7db63dee9c4d385))
+- feat: 支持输入联想功能配置，支持自定义候选项
+
+fix: 修复点击选定联想词导致光标失焦问题 [@Seeridia](https://github.com/Seeridia)([#1360](https://github.com/Tencent/cherry-markdown/pull/1360))([`9bee29a`](https://github.com/Tencent/cherry-markdown/commit/9bee29a1b9b3c2b4d34e7e08ccacfe63be4e4bfa))
+
+- feat: 添加行内公式和块级公式的联想建议支持 [@Seeridia](https://github.com/Seeridia)([#1410](https://github.com/Tencent/cherry-markdown/pull/1410))([`24971b5`](https://github.com/Tencent/cherry-markdown/commit/24971b5e7ca07d17138b8496fda90cf816426395))
+- fix: 添加导出专用样式开关，避免常规打印时误隐藏内容 [@Seeridia](https://github.com/Seeridia)([#1408](https://github.com/Tencent/cherry-markdown/pull/1408))([`4c32ac7`](https://github.com/Tencent/cherry-markdown/commit/4c32ac74e6e6de754f849f2e256be8354e56da33))
+- fix: 优化编辑行的高光效果
+
+fix: 改进图片尺寸 handler 的更新策略，防止编辑行的高光闪烁 [@Seeridia](https://github.com/Seeridia)([#1375](https://github.com/Tencent/cherry-markdown/pull/1375))([`172c702`](https://github.com/Tencent/cherry-markdown/commit/172c7020ce69a6e2a3da02b26f72ae8515a68e9e))
+
+- fix: 改进图片工具栏定位逻辑 [@Seeridia](https://github.com/Seeridia)([#1426](https://github.com/Tencent/cherry-markdown/pull/1426))([`a067f37`](https://github.com/Tencent/cherry-markdown/commit/a067f3792a08c4cfd871a8733f592f4b66d23640))
+- fix: 优化建议面板的键盘导航逻辑 [@Seeridia](https://github.com/Seeridia)([#1394](https://github.com/Tencent/cherry-markdown/pull/1394))([`ffe38b8`](https://github.com/Tencent/cherry-markdown/commit/ffe38b8f1fc5f73f424b850c189f1fbc35c9abee))
+- 修复表格倒数第二行行前空格导致解析出错 [@Seeridia](https://github.com/Seeridia)([#1447](https://github.com/Tencent/cherry-markdown/pull/1447))([`af30d00`](https://github.com/Tencent/cherry-markdown/commit/af30d00776a75b59ffac62881a68fe63ff8c43b0))
+- 图表类型增加散点图、图表适配各个主题样式、修复导出问题 [@Aurora-N](https://github.com/Aurora-N)([#1362](https://github.com/Tencent/cherry-markdown/pull/1362))([`92ebbc6`](https://github.com/Tencent/cherry-markdown/commit/92ebbc6f1ad42d8a5c86dc7d5796f27b9d160710))
+- fix: 修复在预览区的表头选择增加行时在分隔行上方插入的问题 [@yang-summer](https://github.com/yang-summer)([#1418](https://github.com/Tencent/cherry-markdown/pull/1418))([`136f455`](https://github.com/Tencent/cherry-markdown/commit/136f455da75df1b79c7ff44fa71a21fbcf6da19a))
+- fix: 修复配图表格在脚注显示异常的问题 [@Aurora-N](https://github.com/Aurora-N)([#1422](https://github.com/Tencent/cherry-markdown/pull/1422))([`d3140e2`](https://github.com/Tencent/cherry-markdown/commit/d3140e2fa4837f7100d93e4d0e81fd860c5a0882))
+- feat: #1443 在目录里特殊标记被引用的标题 [@sunsonliu](https://github.com/sunsonliu)([#1472](https://github.com/Tencent/cherry-markdown/pull/1472))([`b32783e`](https://github.com/Tencent/cherry-markdown/commit/b32783e6e142168ee776d760629096368b2ce192))
+- style: 增加“沉稳”主题 [@sunsonliu](https://github.com/sunsonliu)([#1425](https://github.com/Tencent/cherry-markdown/pull/1425))([`8d340ab`](https://github.com/Tencent/cherry-markdown/commit/8d340ab34802e8988dbccb46796ce2645e5e9a30))
+- refactor: 重构复制的相关逻辑
+
+## 变更说明
+
+本次重构主要优化了复制功能的实现，改进了剪贴板数据格式
+
+**之前：**
+
+- `text/html`: 预览区 HTML
+- `text/plain`: 预览区 HTML（与 `text/html` 相同）
+
+**现在：**
+
+- `text/html`: 预览区的富文本 HTML（包含样式）
+- `text/plain`: 原始 Markdown 文本
+
+这样的改进使得：
+
+- 粘贴到支持富文本的应用（如微信公众号、Word）时保留格式
+- 粘贴到纯文本编辑器时获得原始 Markdown 源码
+- 更符合用户的使用习惯和预期 [@Seeridia](https://github.com/Seeridia)([#1471](https://github.com/Tencent/cherry-markdown/pull/1471))([`5d0c02a`](https://github.com/Tencent/cherry-markdown/commit/5d0c02a8ddb5d7d944dc24edce2b2b00ccd648ed))
+- refactor(table): 重构表格交互（新增菜单气泡、边界插入、列宽拖拽、拖拽高亮重写、变量调整） [@Seeridia](https://github.com/Seeridia)([#1436](https://github.com/Tencent/cherry-markdown/pull/1436))([`a93564b`](https://github.com/Tencent/cherry-markdown/commit/a93564b44de8466777bc759c300d60dabc464a91))
+- feat: #1438 增加连续空格（默认不支持）语法和配置 [@sunsonliu](https://github.com/sunsonliu)([#1439](https://github.com/Tencent/cherry-markdown/pull/1439))([`a142b3b`](https://github.com/Tencent/cherry-markdown/commit/a142b3be2ff71e51da78fb9c1c806ca11873e37e))
+- refactor: 简化 cherry-table-echarts-plugin.js 代码
+
+- style: 代码格式化
+- fix: 修复地图无法显示的 bug
+- refactor: 删除重复的一套图表配置生成代码
+- refactor: 简化重复的部分图表配置组件代码 [@Wei-Xiaoxing](https://github.com/Wei-Xiaoxing)([#1382](https://github.com/Tencent/cherry-markdown/pull/1382))([`594577f`](https://github.com/Tencent/cherry-markdown/commit/594577f5d2a02486f18c39d87e06036cd247254a))
+- fix(mermaid): 修复 mermaid 在 shadow dom 中无法选中元素的问题 [@RSS1102](https://github.com/RSS1102)([#1460](https://github.com/Tencent/cherry-markdown/pull/1460))([`f9ed1ae`](https://github.com/Tencent/cherry-markdown/commit/f9ed1ae601bf69564c1d0b87e5cbd93ed28bed68))
+- feat: #1363 图片样式属性放到style属性里 [@sunsonliu](https://github.com/sunsonliu)([#1427](https://github.com/Tencent/cherry-markdown/pull/1427))([`0b9b429`](https://github.com/Tencent/cherry-markdown/commit/0b9b4298ee74bdbf6f21756b079d804f6e701712))
+- feat: #1202 增加代码块外层容器自定义能力 [@sunsonliu](https://github.com/sunsonliu)([#1473](https://github.com/Tencent/cherry-markdown/pull/1473))([`92d029d`](https://github.com/Tencent/cherry-markdown/commit/92d029d33ba3e7039c0c3b0a8b074343946c7f52))
+- fix: 自定义代码块语法 `all` 排除对于 `mermaid` 代码块的操作 [@sunsonliu](https://github.com/sunsonliu)([#1465](https://github.com/Tencent/cherry-markdown/pull/1465))([`19534f4`](https://github.com/Tencent/cherry-markdown/commit/19534f4624980ffcc5a9e5c70c48ca3081077b1f))
+- feat: 全面优化表格功能，支持多主题样式、预览区定位、HTML表格标签和引用表格编辑 [@ghost613bb](https://github.com/ghost613bb)([#1347](https://github.com/Tencent/cherry-markdown/pull/1347))([`3434053`](https://github.com/Tencent/cherry-markdown/commit/34340531bc643dd1affc7e602a4b80f5ee55d2bc))
+- fix: #1461 #1453 精简流式渲染场景的dom结构，并优化流式渲染场景mermaid的渲染失败时的处理逻辑
+
+#### 在流式输出模式下(`global.flowSessionContext=true`)
+
+1. 当只有一个 mermaid 渲染的时候，如果在编辑过程中出现 mermaid 渲染错误，他会保持渲染上次渲染成功 mermaid svg。
+2. 当有多个 mermaid 渲染的时候，当在第一次渲染的时候，如果后面的 mermaid 渲染错误，他会往上寻找直到寻找渲染成功的 mermaid svg 进行替换当前渲染错误的 mermaid。
+
+#### 在流式输出模式下(`global.flowSessionContext=true`) && 没有开启预览区编辑(`enablePreviewerBubble=false`)
+
+1. 并且没有开启预览区编辑，则需要移除不再需要的dom ,这里针对流式输出的场景简单移除dom，是符合预期的，但这种精简 dom 的方案在需要 switchModel 时会有问题。 [@sunsonliu](https://github.com/sunsonliu)([#1463](https://github.com/Tencent/cherry-markdown/pull/1463))([`c1c306b`](https://github.com/Tencent/cherry-markdown/commit/c1c306b4eed2b5dce14ffc10eee2ae8e3c001bf8))
+
+- feat: 修复表格相关语法漏洞，提升兼容性
+  优化根据预览区表格定位编辑区表格语法的逻辑，使支持用户输入的html table标签，支持点击单元格后定位编辑区代码，但不支持编辑；
+  兼容脚注里出现表格后，打乱预览区表格编辑逻辑的问题
+  双击预览区脚注中的表格可以定位到编辑区对应位置
+  兼容表格位于文件末尾时，编辑时格式出错的问题
+  删去表头的行添加按钮，因为可能导致表格格式出错。 [@Jiadezhende](https://github.com/Jiadezhende)([#1350](https://github.com/Tencent/cherry-markdown/pull/1350))([`dd3d953`](https://github.com/Tencent/cherry-markdown/commit/dd3d953140511db2fe0e7eae1d8fcd069497cd54))
+
 ## 0.10.1-alpha.0
 
 ### Patch Changes
