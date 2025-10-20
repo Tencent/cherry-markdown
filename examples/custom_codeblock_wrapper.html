@@ -186,8 +186,8 @@ var cherry = new Cherry(config);
 cherry.setValue('\n## 自定义json代码块的特殊渲染\n\n```json\n{\n"--oc-white": "#ffffff",\n"--oc-black": "#000000",\n"--oc-gray-0": "#f8f9fa",\n"--oc-gray-1": "#f1f3f5",\n"--oc-gray-2": "#e9ecef",\n"--oc-gray-3": "#dee2e6",\n"--oc-gray-4": "#ced4da",\n"--oc-gray-5": "#adb5bd",\n"--oc-gray-6": "#868e96",\n"--oc-gray-7": "#495057",\n"--oc-gray-8": "#343a40",\n"--oc-gray-9": "#212529"\n}\n```\n\n');
 // 绑定 body的点击事件，判断是否为 .j-switch 元素
 document.body.addEventListener('click', function(e) {
-  const target = e.target.parentElement;
-  if (target.classList.contains('j-switch')) {
+  const target = e.target.closest('.j-switch');
+  if (target) {
     const switcher = target.querySelector('.my-code-wrapper-switcher');
     const preview = target.parentElement.parentElement.querySelector('.my-code-wrapper-preview-content');
     const code = target.parentElement.parentElement.querySelector('.my-code-wrapper-content');
