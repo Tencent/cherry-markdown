@@ -276,7 +276,13 @@ const defaultConfig = {
         customRenderer: {
           // 自定义语法渲染器
         },
-        /** 自定义代码块的包裹渲染器 */
+        /**
+         * 自定义代码块的包裹渲染器
+         * @param {string} language - The language of the code block, normalized to lowercase (e.g., 'javascript', 'python').
+         * @param {string} code - The raw source string of the code block.
+         * @param {string} innerHTML - The default HTML string for the code block, typically a <pre> element.
+         * @returns {string} The HTML to render for the code block.
+         */
         wrapperRender: (language, code, innerHTML) => {
           return innerHTML;
         },
