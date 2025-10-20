@@ -333,6 +333,8 @@ export interface CherryEngineOptions {
           customRenderer?: {
             // 自定义语法渲染器
           };
+          /** 自定义代码块的包裹渲染器 */
+          wrapperRender?: (language: string, code: string, innerHTML: string) => string;
           mermaid?: {
             svg2img?: boolean; // 是否将mermaid生成的画图变成img格式
           };

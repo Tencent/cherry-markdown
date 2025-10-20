@@ -223,6 +223,9 @@ const basicConfig = {
         copyCode: true,
         editCode: true,
         changeLang: true,
+        wrapperRender: (lang, code, html) => {
+          return `<div class="custom-codeblock-wrapper language-${lang}" data-tips="可以自定义代码块外层容器">${html}</div>`;
+        },
         customBtns: [
           {
             html: '自定义按钮1',
