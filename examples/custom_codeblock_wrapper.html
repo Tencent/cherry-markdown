@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>自定义代码块外层容器 - Cherry Editor</title>
+  <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css">
+  <link rel="Shortcut Icon" href="../logo/favicon.ico">
+  <style>
+    html {
+      height: 100%;
+    }
+    body {
+      height: 100%;
+      overflow: hidden;
+      margin: 0;
+    }
+    #markdown {
+      min-width: 800px;
+      max-width: 2600px;
+      width: 70%;
+      margin: 0 auto;
+    }
+    .my-code-wrapper {
+      border: 2px solid #ebecef;
+      border-radius: 4px;
+      background-color: #ebecef;
+    }
+    .my-code-wrapper-header{
+      height: 45px;
+      line-height: 45px;
+    }
+    .my-code-wrapper-btn {
+      height: 35px;
+      line-height: 35px;
+      background-color: #dfe0e2;
+      border-radius: 8px;
+      position: absolute;
+      margin-top: 5px;
+    }
+    .my-code-wrapper-code, .my-code-wrapper-preview {
+      position: absolute;
+      text-align: center;
+      height: 30px;
+      line-height: 30px;
+      width: 60px;
+      box-sizing: border-box;
+      top: 2px;
+      z-index: 2;
+      background-color: transparent;
+      cursor: pointer;
+    }
+    .my-code-wrapper-preview {
+      left: 65px;
+    }
+    .my-code-wrapper-switch {
+      left: 10px;
+      width: 127px;
+    }
+    .my-code-wrapper-language {
+      right: 10px;
+      padding: 0 10px;
+    }
+    .my-code-wrapper-switcher {
+      position: absolute;
+      border-radius: 8px;
+      background-color: #FFF;
+      height: 30px;
+      left: 2px;
+      top: 2px;
+      width: 60px;
+      z-index: 1;
+      transition: left 0.3s;
+    }
+    .my-code-wrapper-switcher.active {
+      left: 65px;
+    }
+    .my-code-wrapper-content pre[class*=language-]{
+      border-radius: 0 !important;
+      margin: 0 !important;
+    }
+    .my-code-wrapper-preview-content {
+      background-color: #FFF;
+      padding: 10px;
+    }
+    .my-table {
+      min-width: 500px;
+    }
+    .my-table tr {
+      height: 38px;
+      text-align: center;
+    }
+    .my-table-i {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      display: inline-block;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="markdown"></div>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+</body>
+<script>
+var config = {
+  id: 'markdown',
+  value: '',
+  engine: {
+    syntax: {
+      codeBlock: {
+        wrap: true, // 超出长度是否换行，false则显示滚动条
+        lineNumber: true, // 默认显示行号
+        copyCode: false, // 是否显示“复制”按钮
+        editCode: false, // 是否显示“编辑”按钮
+        changeLang: false, // 是否显示“切换语言”按钮
+        expandCode: false, // 是否展开/收起代码块，当代码块行数大于10行时，会自动收起代码块
+        selfClosing: true, // 自动闭合，为true时，当md中有奇数个```时，会自动在md末尾追加一个```
+        /** 自定义代码块的包裹渲染器 */
+        wrapperRender: (language, code, innerHTML) => {
+          if (language === 'json') {
+            const wrapper = `
+              <div class="my-code-wrapper">
+                <div class="my-code-wrapper-header">
+                  <div class="my-code-wrapper-btn my-code-wrapper-switch j-switch">
+                    <div class="my-code-wrapper-code">代码</div>
+                    <div class="my-code-wrapper-preview">预览</div>
+                    <div class="my-code-wrapper-switcher"></div>
+                  </div>
+                  <div class="my-code-wrapper-btn my-code-wrapper-language">JSON</div>
+                </div>
+                <div class="my-code-wrapper-content">
+                  ${innerHTML}
+                </div>
+                <div class="my-code-wrapper-preview-content hidden">
+                  
+                </div>
+              </div>
+            `;
+            return wrapper;
+          }
+          return innerHTML;
+        },
+      }
+
+    }
+  },
+  toolbars: {
+    toolbar: [
+      'bold',
+      'italic',
+      'size',
+      '|',
+      'color',
+      'header',
+      '|',
+      'drawIo',
+      '|',
+      'ol',
+      'ul',
+      'checklist',
+      'panel',
+      'align',
+      'detail',
+      '|',
+      'formula',
+      'graph',
+      'proTable',
+      'codeTheme',
+      'search',
+      'shortcutKey',
+    ],
+  },
+  previewer: {
+    enablePreviewerBubble: false,
+  }
+};
+var sourceCode = document.documentElement.outerHTML;
+var cherry = new Cherry(config);
+cherry.setValue('\n## 自定义json代码块的特殊渲染\n\n```json\n{\n"--oc-white": "#ffffff",\n"--oc-black": "#000000",\n"--oc-gray-0": "#f8f9fa",\n"--oc-gray-1": "#f1f3f5",\n"--oc-gray-2": "#e9ecef",\n"--oc-gray-3": "#dee2e6",\n"--oc-gray-4": "#ced4da",\n"--oc-gray-5": "#adb5bd",\n"--oc-gray-6": "#868e96",\n"--oc-gray-7": "#495057",\n"--oc-gray-8": "#343a40",\n"--oc-gray-9": "#212529"\n}\n```\n\n');
+// 绑定 body的点击事件，判断是否为 .j-switch 元素
+document.body.addEventListener('click', function(e) {
+  const target = e.target.closest('.j-switch');
+  if (target) {
+    const switcher = target.querySelector('.my-code-wrapper-switcher');
+    const preview = target.parentElement.parentElement.querySelector('.my-code-wrapper-preview-content');
+    const code = target.parentElement.parentElement.querySelector('.my-code-wrapper-content');
+    if (switcher.classList.contains('active')) {
+      switcher.classList.remove('active');
+      preview.classList.add('hidden');
+      code.classList.remove('hidden');
+    } else {
+      switcher.classList.add('active');
+      preview.classList.remove('hidden');
+      code.classList.add('hidden');
+      const codeStr = code.innerText.replace(/\n/g, '');
+      const codeJson = JSON.parse(codeStr);
+      const thead = '<thead><tr><th>变量名</th><th>颜色值</th></tr></thead>';
+      let tbody = '';
+      for (let key in codeJson) {
+        tbody += `<tr><td>${key}</td><td><i class="my-table-i" style="background-color:${codeJson[key]};"></i></td></tr>`;
+      }
+      preview.innerHTML = `<table class="my-table">${thead}<tbody>${tbody}</tbody></table>`;
+    }
+  }
+});
+
+</script>
+</html>

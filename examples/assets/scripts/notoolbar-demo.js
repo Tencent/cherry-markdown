@@ -1,4 +1,4 @@
-var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
+const CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
   makeHtml(str) {
     console.warn('custom hook', 'hello');
     return str;
@@ -14,7 +14,7 @@ var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TY
   },
 });
 
-var cherryConfig = {
+const noToolbarConfig = {
   id: 'markdown',
   externals: {
     echarts: window.echarts,
@@ -22,12 +22,7 @@ var cherryConfig = {
     MathJax: window.MathJax,
   },
   engine: {
-    global: {
-      urlProcessor(url, srcType) {
-        console.log(`url-processor`, url, srcType);
-        return url;
-      },
-    },
+    global: {},
     syntax: {
       fontEmphasis: {
         allowWhitespace: true, // 是否允许首尾空格
@@ -78,9 +73,10 @@ var cherryConfig = {
   },
   keydown: [],
   //extensions: [],
+  urlProcessor(url, srcType) {
+    console.log(`url-processor`, url, srcType);
+    return url;
+  },
 };
 
-fetch('./assets/markdown/basic.md').then((response) => response.text()).then((value) => {
-  var config = Object.assign({}, cherryConfig, { value: value });
-  window.cherry = new Cherry(config);
-});
+export { noToolbarConfig };

@@ -1,4 +1,4 @@
-var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
+const CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
   makeHtml(str) {
     console.warn('custom hook', 'hello');
     return str;
@@ -14,7 +14,7 @@ var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TY
   },
 });
 
-var cherryConfig1 = {
+const multipleCherryConfig1 = {
   id: 'markdown1',
   externals: {
     echarts: window.echarts,
@@ -64,17 +64,17 @@ var cherryConfig1 = {
       'header',
       '|',
       'list',
-      'image', 
-      'audio', 
-      'video', 
-      'link', 
-      'hr', 
-      'br', 
-      'code', 
-      'formula', 
-      'toc', 
-      'table', 
-      'pdf', 
+      'image',
+      'audio',
+      'video',
+      'link',
+      'hr',
+      'br',
+      'code',
+      'formula',
+      'toc',
+      'table',
+      'pdf',
       'word',
       'graph',
     ],
@@ -95,9 +95,21 @@ var cherryConfig1 = {
   },
   keydown: [],
   //extensions: [],
+  callback: {
+    onClickPreview: (event) => {
+      console.log('onClickPreview', event);
+    },
+    afterAsyncRender: (md, html) => {
+      // console.log("afterAsyncRender", md, html);
+    },
+    urlProcessor(url, srcType) {
+      console.log(`url-processor`, url, srcType);
+      return url;
+    },
+  },
 };
 
-var cherryConfig2 = {
+const multipleCherryConfig2 = {
   id: 'markdown2',
   externals: {
     echarts: window.echarts,
@@ -149,7 +161,7 @@ var cherryConfig2 = {
       'graph',
       'fullScreen',
       'settings',
-      'export'
+      'export',
     ],
     toolbarRight: ['fullScreen'],
     sidebar: ['copy', 'mobilePreview', 'theme'],
@@ -170,11 +182,4 @@ var cherryConfig2 = {
   //extensions: [],
 };
 
-fetch('./assets/markdown/basic.md').then((response) => response.text()).then((value) => {
-  var config1 = Object.assign({}, cherryConfig1, { value: value });
-  window.cherry1 = new Cherry(config1);
-
-  // init with empty string for height test
-  var config2 = Object.assign({}, cherryConfig2, { value: '' });
-  window.cherry2 = new Cherry(config2);
-});
+export { multipleCherryConfig1, multipleCherryConfig2 };
