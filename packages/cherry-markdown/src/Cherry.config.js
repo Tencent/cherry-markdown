@@ -202,6 +202,7 @@ const defaultConfig = {
        * - 文章末尾的段横线标题语法（`\n-`）失效
        * - 表格语法自动闭合，相当于强制`engine.syntax.table.selfClosing=true`
        * - 加粗、斜体语法自动闭合，相当于强制`engine.syntax.fontEmphasis.selfClosing=true`
+       * - 脚注语法自动闭合，相当于强制`engine.syntax.footnote.selfClosing=true`
        *
        * 后续如果有新的需求，可提issue反馈
        */
@@ -393,6 +394,10 @@ const defaultConfig = {
         enablePanel: true,
       },
       footnote: {
+        /**
+         * 是否自动闭合
+         */
+        selfClosing: false,
         /**
          * 脚注标号的配置
          */

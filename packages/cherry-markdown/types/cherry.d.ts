@@ -465,6 +465,10 @@ export interface CherryEngineOptions {
       | false
       | {
           /**
+           * 是否自动闭合
+           */
+          selfClosing?: boolean;
+          /**
            * 脚注标号的配置
            */
           refNumber?: {
