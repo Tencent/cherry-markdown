@@ -19,9 +19,10 @@ import { compileRegExp } from '@/utils/regexp';
 export default class Footnote extends ParagraphBase {
   static HOOK_NAME = 'footnote';
 
-  constructor({ externals, config }) {
+  constructor({ externals, config, cherry }) {
     super();
     this.config = config;
+    this.$cherry = cherry;
     this.footnoteCache = {};
     this.footnoteMap = {}; // 角标缓存索引
     this.footnote = [];
@@ -100,22 +101,35 @@ export default class Footnote extends ParagraphBase {
     // 单行注释，TODO: 替换为引用
     // str = str.replace(/(^|\n)\[([^^][^\]]*?)\]:([^\n]+?)(?=$|\n)/g, '$1');
     let $str = str;
-    if (this.test($str)) {
-      $str = $str.replace(this.RULE.reg, (match, leading, key, content) => {
-        this.pushFootnoteCache(key, content);
-        const LF = match.match(/\n/g) || [];
-        return LF.join('');
-      });
-      // 替换实际引用
-      $str = $str.replace(/\[\^([^\]]+?)\](?!:)/g, (match, key) => {
-        const cache = this.getFootnoteCache(key);
-        if (cache) {
-          return this.pushFootNote(key, cache);
+    $str = $str.replace(this.RULE.reg, (match, leading, key, content) => {
+      this.pushFootnoteCache(key, content);
+      const LF = match.match(/\n/g) || [];
+      return LF.join('');
+    });
+    const unMatched = [];
+    // 替换实际引用
+    $str = $str.replace(/\[\^([^\]]+?)\](?!:)/g, (match, key) => {
+      const cache = this.getFootnoteCache(key);
+      if (cache) {
+        return this.pushFootNote(key, cache);
+      }
+      /**
+       * 自闭合模式下，未定义的角标也显示角标
+       */
+      if (this.config.selfClosing || this.$cherry.options.engine.global.flowSessionContext) {
+        const $key = key.replace(/"/g, "'");
+        if (unMatched.indexOf($key) === -1) {
+          unMatched.push($key);
         }
-        return match;
-      });
-      $str += this.formatFootNote();
-    }
+        const num = this.footnote.length + unMatched.indexOf($key) + 1;
+        const refNumberClass = this.config.refNumber?.appendClass || '';
+        const refNumberFinalClass = `footnote ${refNumberClass}`;
+        const refNumberContent = this.config.refNumber.render(num, $key) || `[${num}]`;
+        return `<sup class="cherry-footnote-number"><a href="#fn:${num}" id="fnref:${num}" class="${refNumberFinalClass}">${refNumberContent}</a></sup>`;
+      }
+      return match;
+    });
+    $str += this.formatFootNote();
     return $str;
   }
 
