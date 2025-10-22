@@ -108,24 +108,30 @@ export default class PreviewerBubble {
   /**
    * 判断是否为代码块
    * @param {HTMLElement} element
-   * @returns {boolean|HTMLElement}
+   * @returns {boolean|Element}
    */
   isCherryCodeBlock(element) {
+    if (!Element.prototype.closest) {
+      Element.prototype.closest = function (selector) {
+        let el = this;
+        while (el) {
+          if (el.matches(selector)) {
+            return el;
+          }
+          el = el.parentElement;
+        }
+        return null;
+      };
+    }
     // 引用里的代码块先不支持所见即所得编辑
     if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
       return false;
     }
-    if (element.nodeName === 'DIV' && element.dataset.type === 'codeBlock') {
-      return element;
-    }
-    const container = this.$getClosestNode(element, 'DIV');
-    if (container === false) {
+    const container = element.closest('div[data-type="codeBlock"]');
+    if (!container) {
       return false;
     }
-    if (container.dataset.type === 'codeBlock') {
-      return container;
-    }
-    return false;
+    return container;
   }
 
   /**
