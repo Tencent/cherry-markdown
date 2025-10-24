@@ -51,7 +51,7 @@ export default class InlineMath extends ParagraphBase {
     if (this.engine === 'katex') {
       // katex渲染
       if (!this.katex) {
-        result = `${leadingChar}<span data-sign="${sign}" class="Cherry-InlineMath cherry-katex-need-render" data-type="mathBlock" data-lines="${lines}">${$m1}</span>`;
+        result = `${leadingChar}<span data-sign="${sign}" class="Cherry-InlineMath cherry-katex-need-render" data-type="mathBlock" data-lines="${lines}" data-content="${encodeURI($m1)}"></span>`;
         this.$engine.asyncRenderHandler.add(`math-inline-${sign}`);
       } else {
         const html = this.katex.renderToString($m1, {
