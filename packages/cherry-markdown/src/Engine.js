@@ -145,8 +145,7 @@ export default class Engine {
             .querySelectorAll('.cherry-katex-need-render')
             .forEach((el) => {
               const displayMode = el.classList.contains('Cherry-Math');
-              // @ts-ignore
-              el.innerHTML = window.katex.renderToString(el.innerText, {
+              el.innerHTML = window.katex.renderToString(decodeURI(el.getAttribute('data-content')), {
                 throwOnError: false,
                 displayMode,
               });
@@ -155,12 +154,12 @@ export default class Engine {
           // 再更新asyncRenderHandler里的md（实际为html）内容
           const needDoneKeys = [];
           this.asyncRenderHandler.md = this.asyncRenderHandler.md.replace(
-            /<(div|span) data-sign="([^"]+?)" class="([^"]+?) cherry-katex-need-render" ([^>]+? data-lines="[^"]+?")>([\s\S]+?)<\/\1>/g,
+            /<(div|span) data-sign="([^"]+?)" class="([^"]+?) cherry-katex-need-render" ([^>]+? data-lines="[^"]+?") data-content="([\s\S]+?)"><\/\1>/g,
             (match, domName, sign, className, attrs, content) => {
               const displayMode = domName === 'div';
               const key = domName === 'div' ? `math-block-${sign}` : `math-inline-${sign}`;
               // @ts-ignore
-              const html = window.katex.renderToString(content, {
+              const html = window.katex.renderToString(decodeURI(content), {
                 throwOnError: false,
                 displayMode,
               });
