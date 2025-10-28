@@ -47,7 +47,9 @@ export default class CodeBlock extends ParagraphBase {
     this.INLINE_CODE_REGEX = /(`+)(.+?(?:\n.+?)*?)\1/g;
     if (config && config.customRenderer) {
       this.customLang = Object.keys(config.customRenderer).map((lang) => lang.toLowerCase());
-      this.customParser = { ...config.customRenderer };
+      Object.keys(config.customRenderer).forEach((lang) => {
+        this.customParser[lang.toLowerCase()] = config.customRenderer[lang];
+      });
     }
     this.customHighlighter = config.highlighter;
     this.failedCleanCacheTimes = 0;
@@ -441,7 +443,7 @@ export default class CodeBlock extends ParagraphBase {
       }
 
       // 未命中缓存，执行渲染
-      let $lang = lang.trim();
+      let $lang = lang.trim().toLowerCase();
       // 如果是公式关键字，则直接返回
       if (/^(math|katex|latex)$/i.test($lang) && !this.isInternalCustomLangCovered($lang)) {
         const prefix = match.match(/^\s*/g);
