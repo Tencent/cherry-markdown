@@ -245,7 +245,7 @@ const basicConfig = {
         customRenderer: {
           // 特殊配置“all”，会应用于所有语言
           // 'all': {
-          //   render: (src, sign, cherryEnding, lang)=> {
+          //   render: (src, sign, cherryEngine, lang)=> {
           //     return `<p class="my-render">lang:${lang};code:${src}</p>`;
           //   }
           // }
