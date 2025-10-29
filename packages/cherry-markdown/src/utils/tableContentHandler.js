@@ -354,7 +354,9 @@ export default class TableHandler {
     }
     // 计算单元格内容的实际位置（去除前后空格）
     const trimmedContent = current.trim();
-    const leadingSpaces = current.match(/^\s*/)[0].length;
+    // 当前单元格为空时，尝试选中单元格的“中间”位置
+    const leadingSpaces =
+      trimmedContent.length > 0 ? current.match(/^\s*/)[0].length : Math.floor(current.match(/^\s*/)[0].length / 2);
     const basePreCh = needPlus1 ? pre.join('|').length + 1 : pre.join('|').length;
     const actualPreCh = basePreCh + leadingSpaces;
     return {
@@ -1076,7 +1078,7 @@ export default class TableHandler {
     if (lines.length < 3) return;
 
     const [{ line: startLine }] = this.tableEditor.info.selection;
-    const newRow = `${'|'.repeat(columns)}\n`;
+    const newRow = `${'|  '.repeat(columns).replace(/  $/, '')}\n`;
     let insertLine;
 
     if (position === 'top') {
@@ -1113,7 +1115,7 @@ export default class TableHandler {
         return cells.join('|');
       }
 
-      cells.splice(this.tableEditor.info.tdIndex + 2, 0, '');
+      cells.splice(this.tableEditor.info.tdIndex + 2, 0, '  ');
       return cells.join('|');
     });
     const newText = newLines.join('\n');
