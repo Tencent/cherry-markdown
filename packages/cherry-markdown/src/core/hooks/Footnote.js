@@ -85,7 +85,7 @@ export default class Footnote extends ParagraphBase {
       )
       .join('');
     const sign = this.$engine.hash(html);
-    const title = this.config.refList?.title?.render() || this.$engine.$cherry.locale.footnoteTitle;
+    const title = this.config.refList?.title?.render() || (this.$engine?.$cherry?.locale?.footnoteTitle ?? 'title');
     const hiddenClass = this.config.refList ? '' : 'hidden';
     const footnoteClass = this.config.refList?.appendClass || '';
     const footnoteTitleClass = this.config.refList?.title?.appendClass || '';
