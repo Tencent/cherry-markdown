@@ -122,8 +122,10 @@ export default class HtmlBlock extends ParagraphBase {
       // 临时替换完整的HTML标签首尾为$#60;和$#62;，供下一步剔除损坏的HTML标签
       return wholeStr.replace(/</g, '$#60;').replace(/>/g, '$#62;');
     });
-    // 替换所有形如「<abcd」和「</abcd」的左尖括号
-    $str = $str.replace(/<(?=\/?(\w|\n|$))/g, '&#60;');
+    // 替换所有形如「<abcd」的左尖括号
+    $str = $str.replace(/<(?=(\w|\n|$))/g, '&#60;');
+    // 替换所有形如「</」的左尖括号
+    $str = $str.replace(/<\//g, '&#60;\/');
     // 还原被替换的尖括号
     $str = $str.replace(/\$#60;/g, '<').replace(/\$#62;/g, '>');
     // 针对 \< 和 \> 进行转义
