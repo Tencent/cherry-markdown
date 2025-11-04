@@ -363,10 +363,10 @@ export default class Table extends ParagraphBase {
   }
 
   /**
-   * TODO: fix type errors
-   * @returns
+   * Get table parsing rules
+   * @returns {Object} Table rules object with strict and loose modes
    */
   rule() {
-    return /** @type {any} */ (getTableRule());
+    return getTableRule(false);
   }
 }
