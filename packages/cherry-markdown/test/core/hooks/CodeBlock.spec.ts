@@ -21,10 +21,9 @@ describe('core/hooks/codeBlock', () => {
     ];
 
     cases.forEach((item) => {
-      let result = codeBlockHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
-      result = codeBlockHook.makeHtml(result, () => ({ html: result }));
-      result = codeBlockHook.afterMakeHtml(result);
-      expect(result.html).toMatch(item.expectedPattern);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = codeBlockHook.makeHtml(item.input, sentenceMakeFunc);
+      expect(result).toMatch(item.expectedPattern);
     });
   });
 
@@ -36,10 +35,9 @@ describe('core/hooks/codeBlock', () => {
     });
 
     const input = '```ts\ninterface User {\n  name: string;\n}\n```';
-    let result = codeBlockHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = codeBlockHook.makeHtml(result, () => ({ html: result }));
-      result = codeBlockHook.afterMakeHtml(result);
-    expect(result.html).toContain('language-ts');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = codeBlockHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('language-ts');
   });
 
   it('should handle code block without language', () => {
@@ -50,10 +48,9 @@ describe('core/hooks/codeBlock', () => {
     });
 
     const input = '```\nplain text code\n```';
-    let result = codeBlockHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = codeBlockHook.makeHtml(result, () => ({ html: result }));
-      result = codeBlockHook.afterMakeHtml(result);
-    expect(result.html).toContain('<pre><code');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = codeBlockHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('<pre><code');
   });
 
   it('should preserve code content', () => {
@@ -64,11 +61,10 @@ describe('core/hooks/codeBlock', () => {
     });
 
     const input = '```javascript\nconst message = "Hello, World!";\nconsole.log(message);\n```';
-    let result = codeBlockHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = codeBlockHook.makeHtml(result, () => ({ html: result }));
-      result = codeBlockHook.afterMakeHtml(result);
-    expect(result.html).toContain('const message');
-    expect(result.html).toContain('console.log');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = codeBlockHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('const message');
+    expect(result).toContain('console.log');
   });
 
   it('should handle code block with special characters', () => {
@@ -85,10 +81,9 @@ describe('core/hooks/codeBlock', () => {
     ];
 
     cases.forEach((input) => {
-      let result = codeBlockHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = codeBlockHook.makeHtml(result, () => ({ html: result }));
-      result = codeBlockHook.afterMakeHtml(result);
-      expect(result.html).toContain('<pre><code');
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = codeBlockHook.makeHtml(input, sentenceMakeFunc);
+      expect(result).toContain('<pre><code');
     });
   });
 
@@ -100,10 +95,9 @@ describe('core/hooks/codeBlock', () => {
     });
 
     const input = '```\nline 1\nline 2\nline 3\n```';
-    let result = codeBlockHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = codeBlockHook.makeHtml(result, () => ({ html: result }));
-      result = codeBlockHook.afterMakeHtml(result);
-    expect(result.html).toContain('<pre><code');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = codeBlockHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('<pre><code');
   });
 
   it('should handle code block with copy button', () => {
@@ -114,10 +108,9 @@ describe('core/hooks/codeBlock', () => {
     });
 
     const input = '```\ntest code\n```';
-    let result = codeBlockHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = codeBlockHook.makeHtml(result, () => ({ html: result }));
-      result = codeBlockHook.afterMakeHtml(result);
-    expect(result.html).toContain('<pre><code');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = codeBlockHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('<pre><code');
   });
 
   it('should handle indented code blocks', () => {
@@ -128,10 +121,9 @@ describe('core/hooks/codeBlock', () => {
     });
 
     const input = '    const x = 1;\n    const y = 2;';
-    let result = codeBlockHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = codeBlockHook.makeHtml(result, () => ({ html: result }));
-      result = codeBlockHook.afterMakeHtml(result);
-    expect(result.html).toContain('<pre><code');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = codeBlockHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('<pre><code');
   });
 
   it('should handle code block with tabs', () => {
@@ -142,10 +134,9 @@ describe('core/hooks/codeBlock', () => {
     });
 
     const input = '```\n\tconst x = 1;\n\ty = 2;\n```';
-    let result = codeBlockHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = codeBlockHook.makeHtml(result, () => ({ html: result }));
-      result = codeBlockHook.afterMakeHtml(result);
-    expect(result.html).toContain('<pre><code');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = codeBlockHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('<pre><code');
   });
 
   it('should handle code block with empty lines', () => {
@@ -156,12 +147,11 @@ describe('core/hooks/codeBlock', () => {
     });
 
     const input = '```\nline 1\n\nline 3\n\nline 5\n```';
-    let result = codeBlockHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = codeBlockHook.makeHtml(result, () => ({ html: result }));
-      result = codeBlockHook.afterMakeHtml(result);
-    expect(result.html).toContain('line 1');
-    expect(result.html).toContain('line 3');
-    expect(result.html).toContain('line 5');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = codeBlockHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('line 1');
+    expect(result).toContain('line 3');
+    expect(result).toContain('line 5');
   });
 
   it('should handle code block with backticks inside', () => {
@@ -172,10 +162,9 @@ describe('core/hooks/codeBlock', () => {
     });
 
     const input = '```\nconst str = `template literal`;\n```';
-    let result = codeBlockHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = codeBlockHook.makeHtml(result, () => ({ html: result }));
-      result = codeBlockHook.afterMakeHtml(result);
-    expect(result.html).toContain('template literal');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = codeBlockHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('template literal');
   });
 
   it('should handle code block with Unicode characters', () => {
@@ -186,10 +175,9 @@ describe('core/hooks/codeBlock', () => {
     });
 
     const input = '```javascript\nconst message = "你好世界";\n```';
-    let result = codeBlockHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = codeBlockHook.makeHtml(result, () => ({ html: result }));
-      result = codeBlockHook.afterMakeHtml(result);
-    expect(result.html).toContain('你好世界');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = codeBlockHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('你好世界');
   });
 
   it('should handle multiple code blocks', () => {
@@ -200,11 +188,10 @@ describe('core/hooks/codeBlock', () => {
     });
 
     const input = '```js\nconst a = 1;\n```\n\nSome text\n\n```python\nb = 2\n```';
-    let result = codeBlockHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = codeBlockHook.makeHtml(result, () => ({ html: result }));
-      result = codeBlockHook.afterMakeHtml(result);
-    expect(result.html).toContain('const a = 1');
-    expect(result.html).toContain('b = 2');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = codeBlockHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('const a = 1');
+    expect(result).toContain('b = 2');
   });
 
   it('should escape HTML in code', () => {
@@ -215,11 +202,9 @@ describe('core/hooks/codeBlock', () => {
     });
 
     const input = '```html\n<div>test</div>\n```';
-    let result = codeBlockHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = codeBlockHook.makeHtml(result, () => ({ html: result }));
-      result = codeBlockHook.afterMakeHtml(result);
-    // HTML should be escaped
-    expect(result.html).toContain('&lt;');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = codeBlockHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('&lt;');
   });
 
   it('should handle code block with language aliases', () => {
@@ -237,10 +222,9 @@ describe('core/hooks/codeBlock', () => {
     ];
 
     cases.forEach((input) => {
-      let result = codeBlockHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = codeBlockHook.makeHtml(result, () => ({ html: result }));
-      result = codeBlockHook.afterMakeHtml(result);
-      expect(result.html).toContain('<pre><code');
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = codeBlockHook.makeHtml(input, sentenceMakeFunc);
+      expect(result).toContain('<pre><code');
     });
   });
 });

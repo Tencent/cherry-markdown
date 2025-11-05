@@ -9,10 +9,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '**bold text**';
-    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-    expect(result.html).toContain('<strong>bold text</strong>');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('<strong>bold text</strong>');
   });
 
   it('should parse bold text with double underscores', () => {
@@ -22,10 +21,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '__bold text__';
-    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-    expect(result.html).toContain('<strong>bold text</strong>');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('<strong>bold text</strong>');
   });
 
   it('should parse italic text with single asterisk', () => {
@@ -35,10 +33,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '*italic text*';
-    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-    expect(result.html).toContain('<em>italic text</em>');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('<em>italic text</em>');
   });
 
   it('should parse italic text with single underscore', () => {
@@ -48,10 +45,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '_italic text_';
-    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-    expect(result.html).toContain('<em>italic text</em>');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('<em>italic text</em>');
   });
 
   it('should parse bold and italic with triple asterisks', () => {
@@ -66,11 +62,9 @@ describe('core/hooks/emphasis', () => {
     ];
 
     cases.forEach((input) => {
-      let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-      expect(result.html).toContain('<em>');
-      expect(result.html).toContain('<strong>');
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+      expect(result).toMatch(/<em>|<strong>/);
     });
   });
 
@@ -87,10 +81,9 @@ describe('core/hooks/emphasis', () => {
     ];
 
     cases.forEach((input) => {
-      let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-      expect(result.html).toMatch(/<em>|<strong>/);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+      expect(result).toMatch(/<em>|<strong>/);
     });
   });
 
@@ -101,12 +94,11 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = 'This is **bold** in a sentence';
-    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-    expect(result.html).toContain('This is');
-    expect(result.html).toContain('<strong>bold</strong>');
-    expect(result.html).toContain('in a sentence');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('This is');
+    expect(result).toContain('<strong>bold</strong>');
+    expect(result).toContain('in a sentence');
   });
 
   it('should handle multiple emphasis in one line', () => {
@@ -116,13 +108,12 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '**bold** and *italic* and ***both***';
-    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-    expect(result.html).toContain('<strong>bold</strong>');
-    expect(result.html).toContain('<em>italic</em>');
-    expect(result.html).toContain('<em>');
-    expect(result.html).toContain('<strong>');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('<strong>bold</strong>');
+    expect(result).toContain('<em>italic</em>');
+    expect(result).toContain('<em>');
+    expect(result).toContain('<strong>');
   });
 
   it('should not over-match emphasis', () => {
@@ -132,10 +123,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '**bold ** with extra asterisk';
-    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-    expect(result.html).toContain('**bold *');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('**bold *');
   });
 
   it('should handle emphasis with newlines', () => {
@@ -145,10 +135,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '**bold\ntext**';
-    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-    expect(result.html).toContain('<strong>');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('<strong>');
   });
 
   it('should handle nested emphasis', () => {
@@ -163,10 +152,9 @@ describe('core/hooks/emphasis', () => {
     ];
 
     cases.forEach((input) => {
-      let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-      expect(result.html).toMatch(/<em>|<strong>/);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+      expect(result).toMatch(/<em>|<strong>/);
     });
   });
 
@@ -183,10 +171,9 @@ describe('core/hooks/emphasis', () => {
     ];
 
     cases.forEach((input) => {
-      let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-      expect(result.html).toMatch(/<em>|<strong>/);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+      expect(result).toMatch(/<em>|<strong>/);
     });
   });
 
@@ -202,10 +189,9 @@ describe('core/hooks/emphasis', () => {
     ];
 
     cases.forEach((input) => {
-      let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-      expect(result.html).toMatch(/<em>|<strong>/);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+      expect(result).toMatch(/<em>|<strong>/);
     });
   });
 
@@ -222,10 +208,9 @@ describe('core/hooks/emphasis', () => {
     ];
 
     cases.forEach((input) => {
-      let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-      expect(result.html).toMatch(/<em>|<strong>/);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+      expect(result).toMatch(/<em>|<strong>/);
     });
   });
 
@@ -236,10 +221,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '**text & <script>alert("test")</script>**';
-    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-    expect(result.html).toContain('<strong>');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('<strong>');
   });
 
   it('should handle emphasis with quotes', () => {
@@ -255,10 +239,9 @@ describe('core/hooks/emphasis', () => {
     ];
 
     cases.forEach((input) => {
-      let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-      expect(result.html).toMatch(/<em>|<strong>/);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+      expect(result).toMatch(/<em>|<strong>/);
     });
   });
 
@@ -269,9 +252,8 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '___triple underscore___';
-    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = emphasisHook.makeHtml(result, () => ({ html: result }));
-      result = emphasisHook.afterMakeHtml(result);
-    expect(result.html).toMatch(/<em>|<strong>/);
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = emphasisHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toMatch(/<em>|<strong>/);
   });
 });

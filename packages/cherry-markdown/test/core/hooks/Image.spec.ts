@@ -20,10 +20,9 @@ describe('core/hooks/image', () => {
     ];
 
     cases.forEach((item) => {
-      let result = imageHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
-      result = imageHook.makeHtml(result, () => ({ html: result }));
-      result = imageHook.afterMakeHtml(result);
-      expect(result.html).toMatch(item.expectedPattern);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = imageHook.makeHtml(item.input, sentenceMakeFunc);
+      expect(result).toMatch(item.expectedPattern);
     });
   });
 
@@ -34,11 +33,10 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![alt text](image.png "Image Title")';
-    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = imageHook.makeHtml(result, () => ({ html: result }));
-      result = imageHook.afterMakeHtml(result);
-    expect(result.html).toMatch(/<img[^>]*src="image\.png"[^>]*alt="alt text"[^>]*>/);
-    expect(result.html).toContain('title="Image Title"');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = imageHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toMatch(/<img[^>]*src="image\.png"[^>]*alt="alt text"[^>]*>/);
+    expect(result).toContain('title="Image Title"');
   });
 
   it('should handle image with empty alt text', () => {
@@ -48,10 +46,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![](image.png)';
-    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = imageHook.makeHtml(result, () => ({ html: result }));
-      result = imageHook.afterMakeHtml(result);
-    expect(result.html).toMatch(/<img[^>]*src="image\.png"[^>]*>/);
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = imageHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toMatch(/<img[^>]*src="image\.png"[^>]*>/);
   });
 
   it('should handle reference-style images', () => {
@@ -72,10 +69,9 @@ describe('core/hooks/image', () => {
     ];
 
     cases.forEach((item) => {
-      let result = imageHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
-      result = imageHook.makeHtml(result, () => ({ html: result }));
-      result = imageHook.afterMakeHtml(result);
-      expect(result.html).toMatch(item.expectedPattern);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = imageHook.makeHtml(item.input, sentenceMakeFunc);
+      expect(result).toMatch(item.expectedPattern);
     });
   });
 
@@ -97,10 +93,9 @@ describe('core/hooks/image', () => {
     ];
 
     cases.forEach((item) => {
-      let result = imageHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
-      result = imageHook.makeHtml(result, () => ({ html: result }));
-      result = imageHook.afterMakeHtml(result);
-      expect(result.html).toMatch(item.expectedPattern);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = imageHook.makeHtml(item.input, sentenceMakeFunc);
+      expect(result).toMatch(item.expectedPattern);
     });
   });
 
@@ -111,10 +106,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![alt](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==)';
-    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = imageHook.makeHtml(result, () => ({ html: result }));
-      result = imageHook.afterMakeHtml(result);
-    expect(result.html).toContain('data:image/png');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = imageHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('data:image/png');
   });
 
   it('should handle relative paths', () => {
@@ -130,11 +124,10 @@ describe('core/hooks/image', () => {
     ];
 
     cases.forEach((input) => {
-      let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = imageHook.makeHtml(result, () => ({ html: result }));
-      result = imageHook.afterMakeHtml(result);
-      expect(result.html).toContain('<img');
-      expect(result.html).toContain('src=');
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = imageHook.makeHtml(input, sentenceMakeFunc);
+      expect(result).toContain('<img');
+      expect(result).toContain('src=');
     });
   });
 
@@ -151,10 +144,9 @@ describe('core/hooks/image', () => {
     ];
 
     cases.forEach((input) => {
-      let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = imageHook.makeHtml(result, () => ({ html: result }));
-      result = imageHook.afterMakeHtml(result);
-      expect(result.html).toMatch(/<img[^>]*>/);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = imageHook.makeHtml(input, sentenceMakeFunc);
+      expect(result).toMatch(/<img[^>]*>/);
     });
   });
 
@@ -165,11 +157,10 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![img1](1.png) and ![img2](2.png)';
-    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = imageHook.makeHtml(result, () => ({ html: result }));
-      result = imageHook.afterMakeHtml(result);
-    expect(result.html).toContain('1.png');
-    expect(result.html).toContain('2.png');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = imageHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('1.png');
+    expect(result).toContain('2.png');
   });
 
   it('should not treat ![]() with empty brackets as image', () => {
@@ -179,11 +170,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![]()';
-    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = imageHook.makeHtml(result, () => ({ html: result }));
-      result = imageHook.afterMakeHtml(result);
-    // This should be rendered as-is, not as an image
-    expect(result.html).toBe(input);
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = imageHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toBe(input);
   });
 
   it('should handle nested brackets in alt text', () => {
@@ -193,10 +182,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![alt [with] brackets](image.png)';
-    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = imageHook.makeHtml(result, () => ({ html: result }));
-      result = imageHook.afterMakeHtml(result);
-    expect(result.html).toMatch(/<img[^>]*src="image\.png"[^>]*>/);
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = imageHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toMatch(/<img[^>]*src="image\.png"[^>]*>/);
   });
 
   it('should handle image with code in alt text', () => {
@@ -206,10 +194,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![alt with `code`](image.png)';
-    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = imageHook.makeHtml(result, () => ({ html: result }));
-      result = imageHook.afterMakeHtml(result);
-    expect(result.html).toMatch(/<img[^>]*src="image\.png"[^>]*>/);
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = imageHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toMatch(/<img[^>]*src="image\.png"[^>]*>/);
   });
 
   it('should strip angle brackets for alt text', () => {
@@ -219,10 +206,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![<alt>](image.png)';
-    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = imageHook.makeHtml(result, () => ({ html: result }));
-      result = imageHook.afterMakeHtml(result);
-    expect(result.html).toContain('alt="&lt;alt&gt;"');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = imageHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('alt="&lt;alt&gt;"');
   });
 
   it('should handle images with uppercase file extensions', () => {
@@ -232,10 +218,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![alt](image.PNG)';
-    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = imageHook.makeHtml(result, () => ({ html: result }));
-      result = imageHook.afterMakeHtml(result);
-    expect(result.html).toMatch(/<img[^>]*src="image\.PNG"[^>]*>/);
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = imageHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toMatch(/<img[^>]*src="image\.PNG"[^>]*>/);
   });
 
   it('should handle image URLs with anchors', () => {
@@ -245,10 +230,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![alt](image.png#section)';
-    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = imageHook.makeHtml(result, () => ({ html: result }));
-      result = imageHook.afterMakeHtml(result);
-    expect(result.html).toContain('image.png#section');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = imageHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('image.png#section');
   });
 
   it('should escape quotes in alt text', () => {
@@ -263,10 +247,9 @@ describe('core/hooks/image', () => {
     ];
 
     cases.forEach((input) => {
-      let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = imageHook.makeHtml(result, () => ({ html: result }));
-      result = imageHook.afterMakeHtml(result);
-      expect(result.html).toMatch(/<img[^>]*>/);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = imageHook.makeHtml(input, sentenceMakeFunc);
+      expect(result).toMatch(/<img[^>]*>/);
     });
   });
 });

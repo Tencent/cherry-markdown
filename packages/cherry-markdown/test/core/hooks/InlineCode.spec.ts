@@ -9,7 +9,8 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = '`inline code`';
-    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = inlineCodeHook.makeHtml(input, sentenceMakeFunc);
       result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
       result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>inline code</code>');
@@ -22,7 +23,8 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = 'Use the `command` to run';
-    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = inlineCodeHook.makeHtml(input, sentenceMakeFunc);
       result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
       result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>command</code>');
@@ -40,7 +42,8 @@ describe('core/hooks/inlineCode', () => {
     ];
 
     cases.forEach((input) => {
-      let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = inlineCodeHook.makeHtml(input, sentenceMakeFunc);
       result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
       result = inlineCodeHook.afterMakeHtml(result);
       expect(result.html).toContain('<code>');
@@ -54,7 +57,8 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = '`  code with spaces  `';
-    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = inlineCodeHook.makeHtml(input, sentenceMakeFunc);
       result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
       result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>');
@@ -67,7 +71,8 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = '`<div>test</div>`';
-    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = inlineCodeHook.makeHtml(input, sentenceMakeFunc);
       result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
       result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('&lt;div&gt;');
@@ -87,7 +92,8 @@ describe('core/hooks/inlineCode', () => {
     ];
 
     cases.forEach((input) => {
-      let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = inlineCodeHook.makeHtml(input, sentenceMakeFunc);
       result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
       result = inlineCodeHook.afterMakeHtml(result);
       expect(result.html).toContain('<code>');
@@ -101,7 +107,8 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = '`code\nwith\nnewline`';
-    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = inlineCodeHook.makeHtml(input, sentenceMakeFunc);
       result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
       result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>');
@@ -114,7 +121,8 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = 'Use `cmd1` and then `cmd2` to run';
-    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = inlineCodeHook.makeHtml(input, sentenceMakeFunc);
       result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
       result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>cmd1</code>');
@@ -128,7 +136,8 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = '`\\`backslash\\``';
-    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = inlineCodeHook.makeHtml(input, sentenceMakeFunc);
       result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
       result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>');
@@ -141,7 +150,8 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = '`code` at start';
-    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = inlineCodeHook.makeHtml(input, sentenceMakeFunc);
       result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
       result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>code</code>');
@@ -154,7 +164,8 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = 'text at end `code`';
-    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = inlineCodeHook.makeHtml(input, sentenceMakeFunc);
       result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
       result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>code</code>');
@@ -173,7 +184,8 @@ describe('core/hooks/inlineCode', () => {
     ];
 
     cases.forEach((input) => {
-      let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = inlineCodeHook.makeHtml(input, sentenceMakeFunc);
       result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
       result = inlineCodeHook.afterMakeHtml(result);
       expect(result.html).toContain('<code>');
@@ -193,7 +205,8 @@ describe('core/hooks/inlineCode', () => {
     ];
 
     cases.forEach((input) => {
-      let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = inlineCodeHook.makeHtml(input, sentenceMakeFunc);
       result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
       result = inlineCodeHook.afterMakeHtml(result);
       expect(result.html).toContain('<code>');
@@ -207,7 +220,8 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = '``';
-    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = inlineCodeHook.makeHtml(input, sentenceMakeFunc);
       result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
       result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>');
@@ -226,7 +240,8 @@ describe('core/hooks/inlineCode', () => {
     ];
 
     cases.forEach((input) => {
-      let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = inlineCodeHook.makeHtml(input, sentenceMakeFunc);
       result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
       result = inlineCodeHook.afterMakeHtml(result);
       expect(result.html).toContain('<code>');
@@ -246,7 +261,8 @@ describe('core/hooks/inlineCode', () => {
     ];
 
     cases.forEach((input) => {
-      let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = inlineCodeHook.makeHtml(input, sentenceMakeFunc);
       result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
       result = inlineCodeHook.afterMakeHtml(result);
       expect(result.html).toContain('<code>');

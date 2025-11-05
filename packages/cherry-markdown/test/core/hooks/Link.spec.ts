@@ -20,10 +20,9 @@ describe('core/hooks/link', () => {
     ];
 
     cases.forEach((item) => {
-      let result = linkHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
-      result = linkHook.makeHtml(result, () => ({ html: result }));
-      result = linkHook.afterMakeHtml(result);
-      expect(result.html).toMatch(item.expectedPattern);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = linkHook.makeHtml(item.input, sentenceMakeFunc);
+      expect(result).toMatch(item.expectedPattern);
     });
   });
 
@@ -34,11 +33,10 @@ describe('core/hooks/link', () => {
     });
 
     const input = '[link](https://example.com "Link Title")';
-    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = linkHook.makeHtml(result, () => ({ html: result }));
-      result = linkHook.afterMakeHtml(result);
-    expect(result.html).toMatch(/<a[^>]*href="https:\/\/example\.com"[^>]*>/);
-    expect(result.html).toContain('title="Link Title"');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = linkHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toMatch(/<a[^>]*href="https:\/\/example\.com"[^>]*>/);
+    expect(result).toContain('title="Link Title"');
   });
 
   it('should handle reference-style links', () => {
@@ -59,10 +57,9 @@ describe('core/hooks/link', () => {
     ];
 
     cases.forEach((item) => {
-      let result = linkHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
-      result = linkHook.makeHtml(result, () => ({ html: result }));
-      result = linkHook.afterMakeHtml(result);
-      expect(result.html).toMatch(item.expectedPattern);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = linkHook.makeHtml(item.input, sentenceMakeFunc);
+      expect(result).toMatch(item.expectedPattern);
     });
   });
 
@@ -73,11 +70,10 @@ describe('core/hooks/link', () => {
     });
 
     const input = '[link with `code`](https://example.com)';
-    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = linkHook.makeHtml(result, () => ({ html: result }));
-      result = linkHook.afterMakeHtml(result);
-    expect(result.html).toMatch(/<a[^>]*href="https:\/\/example\.com"[^>]*>/);
-    expect(result.html).toContain('code');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = linkHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toMatch(/<a[^>]*href="https:\/\/example\.com"[^>]*>/);
+    expect(result).toContain('code');
   });
 
   it('should handle links with emphasis in link text', () => {
@@ -92,11 +88,10 @@ describe('core/hooks/link', () => {
     ];
 
     cases.forEach((input) => {
-      let result = linkHook.beforeMakeHtml(input, () => ({ html: item.input }));
-      result = linkHook.makeHtml(result, () => ({ html: result }));
-      result = linkHook.afterMakeHtml(result);
-      expect(result.html).toContain('<a');
-      expect(result.html).toContain('https://example.com');
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = linkHook.makeHtml(input, sentenceMakeFunc);
+      expect(result).toContain('<a');
+      expect(result).toContain('https://example.com');
     });
   });
 
@@ -113,11 +108,10 @@ describe('core/hooks/link', () => {
     ];
 
     cases.forEach((input) => {
-      let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = linkHook.makeHtml(result, () => ({ html: result }));
-      result = linkHook.afterMakeHtml(result);
-      expect(result.html).toContain('<a');
-      expect(result.html).toContain('href=');
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = linkHook.makeHtml(input, sentenceMakeFunc);
+      expect(result).toContain('<a');
+      expect(result).toContain('href=');
     });
   });
 
@@ -128,10 +122,9 @@ describe('core/hooks/link', () => {
     });
 
     const input = '<user@example.com>';
-    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = linkHook.makeHtml(result, () => ({ html: result }));
-      result = linkHook.afterMakeHtml(result);
-    expect(result.html).toContain('href="mailto:user@example.com"');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = linkHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('href="mailto:user@example.com"');
   });
 
   it('should handle links with special characters in URL', () => {
@@ -152,10 +145,9 @@ describe('core/hooks/link', () => {
     ];
 
     cases.forEach((item) => {
-      let result = linkHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
-      result = linkHook.makeHtml(result, () => ({ html: result }));
-      result = linkHook.afterMakeHtml(result);
-      expect(result.html).toMatch(item.expected);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = linkHook.makeHtml(item.input, sentenceMakeFunc);
+      expect(result).toMatch(item.expected);
     });
   });
 
@@ -166,10 +158,9 @@ describe('core/hooks/link', () => {
     });
 
     const input = '[search](https://google.com/search?q=markdown)';
-    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = linkHook.makeHtml(result, () => ({ html: result }));
-      result = linkHook.afterMakeHtml(result);
-    expect(result.html).toContain('href="https://google.com/search?q=markdown"');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = linkHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('href="https://google.com/search?q=markdown"');
   });
 
   it('should handle links with anchors', () => {
@@ -179,10 +170,9 @@ describe('core/hooks/link', () => {
     });
 
     const input = '[section](#section-name)';
-    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = linkHook.makeHtml(result, () => ({ html: result }));
-      result = linkHook.afterMakeHtml(result);
-    expect(result.html).toContain('href="#section-name"');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = linkHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('href="#section-name"');
   });
 
   it('should handle nested brackets in link text', () => {
@@ -192,10 +182,9 @@ describe('core/hooks/link', () => {
     });
 
     const input = '[link [with] brackets](https://example.com)';
-    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = linkHook.makeHtml(result, () => ({ html: result }));
-      result = linkHook.afterMakeHtml(result);
-    expect(result.html).toMatch(/<a[^>]*href="https:\/\/example\.com"[^>]*>/);
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = linkHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toMatch(/<a[^>]*href="https:\/\/example\.com"[^>]*>/);
   });
 
   it('should handle empty link text', () => {
@@ -205,10 +194,9 @@ describe('core/hooks/link', () => {
     });
 
     const input = '[](https://example.com)';
-    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = linkHook.makeHtml(result, () => ({ html: result }));
-      result = linkHook.afterMakeHtml(result);
-    expect(result.html).toContain('href="https://example.com"');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = linkHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('href="https://example.com"');
   });
 
   it('should handle automatic links', () => {
@@ -224,10 +212,9 @@ describe('core/hooks/link', () => {
     ];
 
     cases.forEach((input) => {
-      let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = linkHook.makeHtml(result, () => ({ html: result }));
-      result = linkHook.afterMakeHtml(result);
-      expect(result.html).toContain('<a');
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = linkHook.makeHtml(input, sentenceMakeFunc);
+      expect(result).toContain('<a');
     });
   });
 
@@ -238,10 +225,9 @@ describe('core/hooks/link', () => {
     });
 
     const input = '[<script>alert("test")</script>](https://example.com)';
-    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = linkHook.makeHtml(result, () => ({ html: result }));
-      result = linkHook.afterMakeHtml(result);
-    expect(result.html).toContain('href="https://example.com"');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = linkHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('href="https://example.com"');
   });
 
   it('should handle multiple links in one line', () => {
@@ -251,11 +237,10 @@ describe('core/hooks/link', () => {
     });
 
     const input = '[link1](https://example.com) and [link2](https://example.org)';
-    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = linkHook.makeHtml(result, () => ({ html: result }));
-      result = linkHook.afterMakeHtml(result);
-    expect(result.html).toContain('example.com');
-    expect(result.html).toContain('example.org');
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = linkHook.makeHtml(input, sentenceMakeFunc);
+    expect(result).toContain('example.com');
+    expect(result).toContain('example.org');
   });
 
   it('should handle footnote links', () => {
@@ -270,11 +255,9 @@ describe('core/hooks/link', () => {
     ];
 
     cases.forEach((input) => {
-      let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = linkHook.makeHtml(result, () => ({ html: result }));
-      result = linkHook.afterMakeHtml(result);
-      // Should not be treated as regular links
-      expect(result.html).toMatch(/<a|\[\^|\^/);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = linkHook.makeHtml(input, sentenceMakeFunc);
+      expect(result).toMatch(/<a|\[\^|\^/);
     });
   });
 });

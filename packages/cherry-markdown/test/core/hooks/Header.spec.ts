@@ -35,9 +35,8 @@ describe('core/hooks/header', () => {
     ];
 
     cases.forEach((item) => {
-      let result = headerHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
-      result = headerHook.makeHtml(result, () => ({ html: result }));
-      result = headerHook.afterMakeHtml(result);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = headerHook.makeHtml(item.input, sentenceMakeFunc);
       expect(result).toMatch(item.expected);
     });
   });
@@ -59,9 +58,8 @@ describe('core/hooks/header', () => {
     ];
 
     cases.forEach((item) => {
-      let result = headerHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
-      result = headerHook.makeHtml(result, () => ({ html: result }));
-      result = headerHook.afterMakeHtml(result);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = headerHook.makeHtml(item.input, sentenceMakeFunc);
       expect(result).toMatch(item.expected);
     });
   });
@@ -87,9 +85,8 @@ describe('core/hooks/header', () => {
     ];
 
     cases.forEach((item) => {
-      let result = headerHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
-      result = headerHook.makeHtml(result, () => ({ html: result }));
-      result = headerHook.afterMakeHtml(result);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = headerHook.makeHtml(item.input, sentenceMakeFunc);
       if (item.expectedId) {
         expect(result).toContain(`id="${item.expectedId}"`);
       }
@@ -102,9 +99,8 @@ describe('core/hooks/header', () => {
     });
 
     const input = '## Header with `code`';
-    let result = headerHook.beforeMakeHtml(input, () => ({ html: input }));
-    result = headerHook.makeHtml(result, () => ({ html: result }));
-    result = headerHook.afterMakeHtml(result);
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = headerHook.makeHtml(input, sentenceMakeFunc);
     expect(result).toContain('<h2');
     expect(result).toContain('code');
   });
@@ -115,9 +111,8 @@ describe('core/hooks/header', () => {
     });
 
     const input = '## Header with **bold** and *italic*';
-    let result = headerHook.beforeMakeHtml(input, () => ({ html: input }));
-    result = headerHook.makeHtml(result, () => ({ html: result }));
-    result = headerHook.afterMakeHtml(result);
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = headerHook.makeHtml(input, sentenceMakeFunc);
     expect(result).toContain('<h2');
     expect(result).toContain('bold');
     expect(result).toContain('italic');
@@ -135,9 +130,8 @@ describe('core/hooks/header', () => {
     ];
 
     cases.forEach((input) => {
-      let result = headerHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = headerHook.makeHtml(result, () => ({ html: result }));
-      result = headerHook.afterMakeHtml(result);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = headerHook.makeHtml(input, sentenceMakeFunc);
       expect(result).toMatch(/<h[1-6]|<p/);
     });
   });
@@ -155,9 +149,8 @@ describe('core/hooks/header', () => {
     ];
 
     cases.forEach((input) => {
-      let result = headerHook.beforeMakeHtml(input, () => ({ html: input }));
-      result = headerHook.makeHtml(result, () => ({ html: result }));
-      result = headerHook.afterMakeHtml(result);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = headerHook.makeHtml(input, sentenceMakeFunc);
       expect(result).toContain('<h2');
     });
   });
@@ -168,10 +161,8 @@ describe('core/hooks/header', () => {
     });
 
     const input = '## Header <script>alert("test")</script>';
-    let result = headerHook.beforeMakeHtml(input, () => ({ html: input }));
-    result = headerHook.makeHtml(result, () => ({ html: result }));
-    result = headerHook.afterMakeHtml(result);
-    // ID should be generated from text without HTML tags
+    const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+    const result = headerHook.makeHtml(input, sentenceMakeFunc);
     expect(result).toContain('id="header-script-alert-test"');
   });
 
@@ -192,9 +183,8 @@ describe('core/hooks/header', () => {
     ];
 
     cases.forEach((item) => {
-      let result = headerHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
-      result = headerHook.makeHtml(result, () => ({ html: result }));
-      result = headerHook.afterMakeHtml(result);
+      const sentenceMakeFunc = (text: string) => ({ html: text, sign: text });
+      const result = headerHook.makeHtml(item.input, sentenceMakeFunc);
       expect(result).toMatch(item.expected);
     });
   });
