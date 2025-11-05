@@ -173,7 +173,11 @@ export default class AutoLink extends SyntaxBase {
           if (!URL.test(address)) {
             return match;
           }
-          // TODO: Url Validator
+          // 添加协议白名单过滤，防止XSS攻击
+          const ALLOWED_PROTOCOLS = ['http:', 'https:', 'ftp:', 'mailto:'];
+          if (!ALLOWED_PROTOCOLS.includes($protocol)) {
+            return match;
+          }
           return `${prefix}${this.renderLink(`${$protocol}${address}`)}${suffix}`;
       }
       // this should never happen
