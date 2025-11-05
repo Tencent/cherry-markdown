@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add packages/cherry-markdown/test/core/hooks/*.spec.ts)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nrefactor: 测试改用三阶段模式\n\n之前没仔细看wiki，用错了测试方法。\n现在按beforeMakeHtml -> makeHtml -> afterMakeHtml三阶段改回来了。\n\n影响文件：Header.spec.ts, Image.spec.ts, Link.spec.ts, CodeBlock.spec.ts, Emphasis.spec.ts, InlineCode.spec.ts, Paragraph.spec.ts\n\n🤖 Generated with Claude Code\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push origin test/coverage-improvement)",
+      "Bash(git log --oneline -10 --no-walk --tags)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
