@@ -9,7 +9,9 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = '`inline code`';
-    const result = inlineCodeHook.makeHtml(input, () => ({ html: input }));
+    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
+      result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>inline code</code>');
   });
 
@@ -20,7 +22,9 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = 'Use the `command` to run';
-    const result = inlineCodeHook.makeHtml(input, () => ({ html: input }));
+    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
+      result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>command</code>');
   });
 
@@ -36,7 +40,9 @@ describe('core/hooks/inlineCode', () => {
     ];
 
     cases.forEach((input) => {
-      const result = inlineCodeHook.makeHtml(input, () => ({ html: input }));
+      let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
+      result = inlineCodeHook.afterMakeHtml(result);
       expect(result.html).toContain('<code>');
     });
   });
@@ -48,7 +54,9 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = '`  code with spaces  `';
-    const result = inlineCodeHook.makeHtml(input, () => ({ html: input }));
+    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
+      result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>');
   });
 
@@ -59,7 +67,9 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = '`<div>test</div>`';
-    const result = inlineCodeHook.makeHtml(input, () => ({ html: input }));
+    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
+      result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('&lt;div&gt;');
   });
 
@@ -77,7 +87,9 @@ describe('core/hooks/inlineCode', () => {
     ];
 
     cases.forEach((input) => {
-      const result = inlineCodeHook.makeHtml(input, () => ({ html: input }));
+      let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
+      result = inlineCodeHook.afterMakeHtml(result);
       expect(result.html).toContain('<code>');
     });
   });
@@ -89,7 +101,9 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = '`code\nwith\nnewline`';
-    const result = inlineCodeHook.makeHtml(input, () => ({ html: input }));
+    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
+      result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>');
   });
 
@@ -100,7 +114,9 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = 'Use `cmd1` and then `cmd2` to run';
-    const result = inlineCodeHook.makeHtml(input, () => ({ html: input }));
+    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
+      result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>cmd1</code>');
     expect(result.html).toContain('<code>cmd2</code>');
   });
@@ -112,7 +128,9 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = '`\\`backslash\\``';
-    const result = inlineCodeHook.makeHtml(input, () => ({ html: input }));
+    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
+      result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>');
   });
 
@@ -123,7 +141,9 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = '`code` at start';
-    const result = inlineCodeHook.makeHtml(input, () => ({ html: input }));
+    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
+      result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>code</code>');
   });
 
@@ -134,7 +154,9 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = 'text at end `code`';
-    const result = inlineCodeHook.makeHtml(input, () => ({ html: input }));
+    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
+      result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>code</code>');
   });
 
@@ -151,7 +173,9 @@ describe('core/hooks/inlineCode', () => {
     ];
 
     cases.forEach((input) => {
-      const result = inlineCodeHook.makeHtml(input, () => ({ html: input }));
+      let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
+      result = inlineCodeHook.afterMakeHtml(result);
       expect(result.html).toContain('<code>');
     });
   });
@@ -169,7 +193,9 @@ describe('core/hooks/inlineCode', () => {
     ];
 
     cases.forEach((input) => {
-      const result = inlineCodeHook.makeHtml(input, () => ({ html: input }));
+      let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
+      result = inlineCodeHook.afterMakeHtml(result);
       expect(result.html).toContain('<code>');
     });
   });
@@ -181,7 +207,9 @@ describe('core/hooks/inlineCode', () => {
     });
 
     const input = '``';
-    const result = inlineCodeHook.makeHtml(input, () => ({ html: input }));
+    let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
+      result = inlineCodeHook.afterMakeHtml(result);
     expect(result.html).toContain('<code>');
   });
 
@@ -198,7 +226,9 @@ describe('core/hooks/inlineCode', () => {
     ];
 
     cases.forEach((input) => {
-      const result = inlineCodeHook.makeHtml(input, () => ({ html: input }));
+      let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
+      result = inlineCodeHook.afterMakeHtml(result);
       expect(result.html).toContain('<code>');
     });
   });
@@ -216,7 +246,9 @@ describe('core/hooks/inlineCode', () => {
     ];
 
     cases.forEach((input) => {
-      const result = inlineCodeHook.makeHtml(input, () => ({ html: input }));
+      let result = inlineCodeHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = inlineCodeHook.makeHtml(result, () => ({ html: result }));
+      result = inlineCodeHook.afterMakeHtml(result);
       expect(result.html).toContain('<code>');
     });
   });

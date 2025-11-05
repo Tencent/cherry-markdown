@@ -9,7 +9,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'This is a simple paragraph';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
     expect(result.html).toContain('This is a simple paragraph');
   });
@@ -21,7 +23,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'First sentence. Second sentence. Third sentence.';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
     expect(result.html).toContain('First sentence');
     expect(result.html).toContain('Second sentence');
@@ -34,7 +38,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'This is **bold** and this is *italic*';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
     expect(result.html).toContain('<strong>bold</strong>');
     expect(result.html).toContain('<em>italic</em>');
@@ -47,7 +53,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'Use the `command` to run the code';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
     expect(result.html).toContain('<code>command</code>');
   });
@@ -59,7 +67,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'Click [here](https://example.com) for more info';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
     expect(result.html).toContain('<a href="https://example.com">');
   });
@@ -71,7 +81,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'This is an image: ![alt text](image.png)';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
     expect(result.html).toContain('<img');
   });
@@ -83,7 +95,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = '';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toBe(input);
   });
 
@@ -94,7 +108,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'Special chars: & < > " \' /';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
   });
 
@@ -105,7 +121,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'Chinese: 你好世界 Japanese: こんにちは Arabic: مرحبا';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
     expect(result.html).toContain('你好世界');
   });
@@ -117,7 +135,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'I love these emojis: 🚀 🎉 ✨ 😀 😍';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
     expect(result.html).toContain('🚀');
   });
@@ -129,7 +149,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'Line 1\nLine 2\nLine 3';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
   });
 
@@ -140,7 +162,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'Multiple     spaces    between    words';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
     expect(result.html).toContain('Multiple');
     expect(result.html).toContain('spaces');
@@ -153,7 +177,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'He said: "Hello, world!" and she replied: \'Hi there!\'';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
   });
 
@@ -164,7 +190,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'The equation is: $x = y + z$ and $a * b = c$';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
   });
 
@@ -175,7 +203,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'This is <strong>bold HTML</strong> inside paragraph';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
   });
 
@@ -186,7 +216,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'This paragraph contains a list:\n- Item 1\n- Item 2';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
   });
 
@@ -197,7 +229,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'This paragraph has a quote:\n> This is a blockquote';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
   });
 
@@ -208,7 +242,9 @@ describe('core/hooks/paragraph', () => {
     });
 
     const input = 'Line 1  \nLine 2';
-    const result = paragraphHook.makeHtml(input, () => ({ html: input }));
+    let result = paragraphHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = paragraphHook.makeHtml(result, () => ({ html: result }));
+      result = paragraphHook.afterMakeHtml(result);
     expect(result.html).toContain('<p>');
   });
 });

@@ -9,7 +9,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '**bold text**';
-    const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
     expect(result.html).toContain('<strong>bold text</strong>');
   });
 
@@ -20,7 +22,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '__bold text__';
-    const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
     expect(result.html).toContain('<strong>bold text</strong>');
   });
 
@@ -31,7 +35,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '*italic text*';
-    const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
     expect(result.html).toContain('<em>italic text</em>');
   });
 
@@ -42,7 +48,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '_italic text_';
-    const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
     expect(result.html).toContain('<em>italic text</em>');
   });
 
@@ -58,7 +66,9 @@ describe('core/hooks/emphasis', () => {
     ];
 
     cases.forEach((input) => {
-      const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+      let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
       expect(result.html).toContain('<em>');
       expect(result.html).toContain('<strong>');
     });
@@ -77,7 +87,9 @@ describe('core/hooks/emphasis', () => {
     ];
 
     cases.forEach((input) => {
-      const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+      let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
       expect(result.html).toMatch(/<em>|<strong>/);
     });
   });
@@ -89,7 +101,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = 'This is **bold** in a sentence';
-    const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
     expect(result.html).toContain('This is');
     expect(result.html).toContain('<strong>bold</strong>');
     expect(result.html).toContain('in a sentence');
@@ -102,7 +116,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '**bold** and *italic* and ***both***';
-    const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
     expect(result.html).toContain('<strong>bold</strong>');
     expect(result.html).toContain('<em>italic</em>');
     expect(result.html).toContain('<em>');
@@ -116,7 +132,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '**bold ** with extra asterisk';
-    const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
     expect(result.html).toContain('**bold *');
   });
 
@@ -127,7 +145,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '**bold\ntext**';
-    const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
     expect(result.html).toContain('<strong>');
   });
 
@@ -143,7 +163,9 @@ describe('core/hooks/emphasis', () => {
     ];
 
     cases.forEach((input) => {
-      const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+      let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
       expect(result.html).toMatch(/<em>|<strong>/);
     });
   });
@@ -161,7 +183,9 @@ describe('core/hooks/emphasis', () => {
     ];
 
     cases.forEach((input) => {
-      const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+      let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
       expect(result.html).toMatch(/<em>|<strong>/);
     });
   });
@@ -178,7 +202,9 @@ describe('core/hooks/emphasis', () => {
     ];
 
     cases.forEach((input) => {
-      const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+      let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
       expect(result.html).toMatch(/<em>|<strong>/);
     });
   });
@@ -196,7 +222,9 @@ describe('core/hooks/emphasis', () => {
     ];
 
     cases.forEach((input) => {
-      const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+      let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
       expect(result.html).toMatch(/<em>|<strong>/);
     });
   });
@@ -208,7 +236,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '**text & <script>alert("test")</script>**';
-    const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
     expect(result.html).toContain('<strong>');
   });
 
@@ -225,7 +255,9 @@ describe('core/hooks/emphasis', () => {
     ];
 
     cases.forEach((input) => {
-      const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+      let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
       expect(result.html).toMatch(/<em>|<strong>/);
     });
   });
@@ -237,7 +269,9 @@ describe('core/hooks/emphasis', () => {
     });
 
     const input = '___triple underscore___';
-    const result = emphasisHook.makeHtml(input, () => ({ html: input }));
+    let result = emphasisHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = emphasisHook.makeHtml(result, () => ({ html: result }));
+      result = emphasisHook.afterMakeHtml(result);
     expect(result.html).toMatch(/<em>|<strong>/);
   });
 });

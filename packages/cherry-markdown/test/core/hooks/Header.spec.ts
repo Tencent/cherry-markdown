@@ -35,8 +35,10 @@ describe('core/hooks/header', () => {
     ];
 
     cases.forEach((item) => {
-      const result = headerHook.makeHtml(item.input, () => ({ html: item.input }));
-      expect(result.html).toMatch(item.expected);
+      let result = headerHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
+      result = headerHook.makeHtml(result, () => ({ html: result }));
+      result = headerHook.afterMakeHtml(result);
+      expect(result).toMatch(item.expected);
     });
   });
 
@@ -57,8 +59,10 @@ describe('core/hooks/header', () => {
     ];
 
     cases.forEach((item) => {
-      const result = headerHook.makeHtml(item.input, () => ({ html: item.input }));
-      expect(result.html).toMatch(item.expected);
+      let result = headerHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
+      result = headerHook.makeHtml(result, () => ({ html: result }));
+      result = headerHook.afterMakeHtml(result);
+      expect(result).toMatch(item.expected);
     });
   });
 
@@ -83,9 +87,11 @@ describe('core/hooks/header', () => {
     ];
 
     cases.forEach((item) => {
-      const result = headerHook.makeHtml(item.input, () => ({ html: item.input }));
+      let result = headerHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
+      result = headerHook.makeHtml(result, () => ({ html: result }));
+      result = headerHook.afterMakeHtml(result);
       if (item.expectedId) {
-        expect(result.html).toContain(`id="${item.expectedId}"`);
+        expect(result).toContain(`id="${item.expectedId}"`);
       }
     });
   });
@@ -96,9 +102,11 @@ describe('core/hooks/header', () => {
     });
 
     const input = '## Header with `code`';
-    const result = headerHook.makeHtml(input, () => ({ html: input }));
-    expect(result.html).toContain('<h2');
-    expect(result.html).toContain('code');
+    let result = headerHook.beforeMakeHtml(input, () => ({ html: input }));
+    result = headerHook.makeHtml(result, () => ({ html: result }));
+    result = headerHook.afterMakeHtml(result);
+    expect(result).toContain('<h2');
+    expect(result).toContain('code');
   });
 
   it('should handle headers with emphasis', () => {
@@ -107,10 +115,12 @@ describe('core/hooks/header', () => {
     });
 
     const input = '## Header with **bold** and *italic*';
-    const result = headerHook.makeHtml(input, () => ({ html: input }));
-    expect(result.html).toContain('<h2');
-    expect(result.html).toContain('bold');
-    expect(result.html).toContain('italic');
+    let result = headerHook.beforeMakeHtml(input, () => ({ html: input }));
+    result = headerHook.makeHtml(result, () => ({ html: result }));
+    result = headerHook.afterMakeHtml(result);
+    expect(result).toContain('<h2');
+    expect(result).toContain('bold');
+    expect(result).toContain('italic');
   });
 
   it('should handle empty headers', () => {
@@ -125,8 +135,10 @@ describe('core/hooks/header', () => {
     ];
 
     cases.forEach((input) => {
-      const result = headerHook.makeHtml(input, () => ({ html: input }));
-      expect(result.html).toMatch(/<h[1-6]|<p/);
+      let result = headerHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = headerHook.makeHtml(result, () => ({ html: result }));
+      result = headerHook.afterMakeHtml(result);
+      expect(result).toMatch(/<h[1-6]|<p/);
     });
   });
 
@@ -143,8 +155,10 @@ describe('core/hooks/header', () => {
     ];
 
     cases.forEach((input) => {
-      const result = headerHook.makeHtml(input, () => ({ html: input }));
-      expect(result.html).toContain('<h2');
+      let result = headerHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = headerHook.makeHtml(result, () => ({ html: result }));
+      result = headerHook.afterMakeHtml(result);
+      expect(result).toContain('<h2');
     });
   });
 
@@ -154,9 +168,11 @@ describe('core/hooks/header', () => {
     });
 
     const input = '## Header <script>alert("test")</script>';
-    const result = headerHook.makeHtml(input, () => ({ html: input }));
+    let result = headerHook.beforeMakeHtml(input, () => ({ html: input }));
+    result = headerHook.makeHtml(result, () => ({ html: result }));
+    result = headerHook.afterMakeHtml(result);
     // ID should be generated from text without HTML tags
-    expect(result.html).toContain('id="header-script-alert-test"');
+    expect(result).toContain('id="header-script-alert-test"');
   });
 
   it('should handle closing hash marks', () => {
@@ -176,8 +192,10 @@ describe('core/hooks/header', () => {
     ];
 
     cases.forEach((item) => {
-      const result = headerHook.makeHtml(item.input, () => ({ html: item.input }));
-      expect(result.html).toMatch(item.expected);
+      let result = headerHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
+      result = headerHook.makeHtml(result, () => ({ html: result }));
+      result = headerHook.afterMakeHtml(result);
+      expect(result).toMatch(item.expected);
     });
   });
 

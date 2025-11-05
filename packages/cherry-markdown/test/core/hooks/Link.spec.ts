@@ -20,7 +20,9 @@ describe('core/hooks/link', () => {
     ];
 
     cases.forEach((item) => {
-      const result = linkHook.makeHtml(item.input, () => ({ html: item.input }));
+      let result = linkHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
+      result = linkHook.makeHtml(result, () => ({ html: result }));
+      result = linkHook.afterMakeHtml(result);
       expect(result.html).toMatch(item.expectedPattern);
     });
   });
@@ -32,7 +34,9 @@ describe('core/hooks/link', () => {
     });
 
     const input = '[link](https://example.com "Link Title")';
-    const result = linkHook.makeHtml(input, () => ({ html: input }));
+    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = linkHook.makeHtml(result, () => ({ html: result }));
+      result = linkHook.afterMakeHtml(result);
     expect(result.html).toMatch(/<a[^>]*href="https:\/\/example\.com"[^>]*>/);
     expect(result.html).toContain('title="Link Title"');
   });
@@ -55,7 +59,9 @@ describe('core/hooks/link', () => {
     ];
 
     cases.forEach((item) => {
-      const result = linkHook.makeHtml(item.input, () => ({ html: item.input }));
+      let result = linkHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
+      result = linkHook.makeHtml(result, () => ({ html: result }));
+      result = linkHook.afterMakeHtml(result);
       expect(result.html).toMatch(item.expectedPattern);
     });
   });
@@ -67,7 +73,9 @@ describe('core/hooks/link', () => {
     });
 
     const input = '[link with `code`](https://example.com)';
-    const result = linkHook.makeHtml(input, () => ({ html: input }));
+    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = linkHook.makeHtml(result, () => ({ html: result }));
+      result = linkHook.afterMakeHtml(result);
     expect(result.html).toMatch(/<a[^>]*href="https:\/\/example\.com"[^>]*>/);
     expect(result.html).toContain('code');
   });
@@ -84,7 +92,9 @@ describe('core/hooks/link', () => {
     ];
 
     cases.forEach((input) => {
-      const result = linkHook.makeHtml(input, () => ({ html: item.input }));
+      let result = linkHook.beforeMakeHtml(input, () => ({ html: item.input }));
+      result = linkHook.makeHtml(result, () => ({ html: result }));
+      result = linkHook.afterMakeHtml(result);
       expect(result.html).toContain('<a');
       expect(result.html).toContain('https://example.com');
     });
@@ -103,7 +113,9 @@ describe('core/hooks/link', () => {
     ];
 
     cases.forEach((input) => {
-      const result = linkHook.makeHtml(input, () => ({ html: input }));
+      let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = linkHook.makeHtml(result, () => ({ html: result }));
+      result = linkHook.afterMakeHtml(result);
       expect(result.html).toContain('<a');
       expect(result.html).toContain('href=');
     });
@@ -116,7 +128,9 @@ describe('core/hooks/link', () => {
     });
 
     const input = '<user@example.com>';
-    const result = linkHook.makeHtml(input, () => ({ html: input }));
+    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = linkHook.makeHtml(result, () => ({ html: result }));
+      result = linkHook.afterMakeHtml(result);
     expect(result.html).toContain('href="mailto:user@example.com"');
   });
 
@@ -138,7 +152,9 @@ describe('core/hooks/link', () => {
     ];
 
     cases.forEach((item) => {
-      const result = linkHook.makeHtml(item.input, () => ({ html: item.input }));
+      let result = linkHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
+      result = linkHook.makeHtml(result, () => ({ html: result }));
+      result = linkHook.afterMakeHtml(result);
       expect(result.html).toMatch(item.expected);
     });
   });
@@ -150,7 +166,9 @@ describe('core/hooks/link', () => {
     });
 
     const input = '[search](https://google.com/search?q=markdown)';
-    const result = linkHook.makeHtml(input, () => ({ html: input }));
+    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = linkHook.makeHtml(result, () => ({ html: result }));
+      result = linkHook.afterMakeHtml(result);
     expect(result.html).toContain('href="https://google.com/search?q=markdown"');
   });
 
@@ -161,7 +179,9 @@ describe('core/hooks/link', () => {
     });
 
     const input = '[section](#section-name)';
-    const result = linkHook.makeHtml(input, () => ({ html: input }));
+    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = linkHook.makeHtml(result, () => ({ html: result }));
+      result = linkHook.afterMakeHtml(result);
     expect(result.html).toContain('href="#section-name"');
   });
 
@@ -172,7 +192,9 @@ describe('core/hooks/link', () => {
     });
 
     const input = '[link [with] brackets](https://example.com)';
-    const result = linkHook.makeHtml(input, () => ({ html: input }));
+    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = linkHook.makeHtml(result, () => ({ html: result }));
+      result = linkHook.afterMakeHtml(result);
     expect(result.html).toMatch(/<a[^>]*href="https:\/\/example\.com"[^>]*>/);
   });
 
@@ -183,7 +205,9 @@ describe('core/hooks/link', () => {
     });
 
     const input = '[](https://example.com)';
-    const result = linkHook.makeHtml(input, () => ({ html: input }));
+    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = linkHook.makeHtml(result, () => ({ html: result }));
+      result = linkHook.afterMakeHtml(result);
     expect(result.html).toContain('href="https://example.com"');
   });
 
@@ -200,7 +224,9 @@ describe('core/hooks/link', () => {
     ];
 
     cases.forEach((input) => {
-      const result = linkHook.makeHtml(input, () => ({ html: input }));
+      let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = linkHook.makeHtml(result, () => ({ html: result }));
+      result = linkHook.afterMakeHtml(result);
       expect(result.html).toContain('<a');
     });
   });
@@ -212,7 +238,9 @@ describe('core/hooks/link', () => {
     });
 
     const input = '[<script>alert("test")</script>](https://example.com)';
-    const result = linkHook.makeHtml(input, () => ({ html: input }));
+    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = linkHook.makeHtml(result, () => ({ html: result }));
+      result = linkHook.afterMakeHtml(result);
     expect(result.html).toContain('href="https://example.com"');
   });
 
@@ -223,7 +251,9 @@ describe('core/hooks/link', () => {
     });
 
     const input = '[link1](https://example.com) and [link2](https://example.org)';
-    const result = linkHook.makeHtml(input, () => ({ html: input }));
+    let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = linkHook.makeHtml(result, () => ({ html: result }));
+      result = linkHook.afterMakeHtml(result);
     expect(result.html).toContain('example.com');
     expect(result.html).toContain('example.org');
   });
@@ -240,7 +270,9 @@ describe('core/hooks/link', () => {
     ];
 
     cases.forEach((input) => {
-      const result = linkHook.makeHtml(input, () => ({ html: input }));
+      let result = linkHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = linkHook.makeHtml(result, () => ({ html: result }));
+      result = linkHook.afterMakeHtml(result);
       // Should not be treated as regular links
       expect(result.html).toMatch(/<a|\[\^|\^/);
     });

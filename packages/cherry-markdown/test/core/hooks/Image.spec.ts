@@ -20,7 +20,9 @@ describe('core/hooks/image', () => {
     ];
 
     cases.forEach((item) => {
-      const result = imageHook.makeHtml(item.input, () => ({ html: item.input }));
+      let result = imageHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
+      result = imageHook.makeHtml(result, () => ({ html: result }));
+      result = imageHook.afterMakeHtml(result);
       expect(result.html).toMatch(item.expectedPattern);
     });
   });
@@ -32,7 +34,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![alt text](image.png "Image Title")';
-    const result = imageHook.makeHtml(input, () => ({ html: input }));
+    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = imageHook.makeHtml(result, () => ({ html: result }));
+      result = imageHook.afterMakeHtml(result);
     expect(result.html).toMatch(/<img[^>]*src="image\.png"[^>]*alt="alt text"[^>]*>/);
     expect(result.html).toContain('title="Image Title"');
   });
@@ -44,7 +48,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![](image.png)';
-    const result = imageHook.makeHtml(input, () => ({ html: input }));
+    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = imageHook.makeHtml(result, () => ({ html: result }));
+      result = imageHook.afterMakeHtml(result);
     expect(result.html).toMatch(/<img[^>]*src="image\.png"[^>]*>/);
   });
 
@@ -66,7 +72,9 @@ describe('core/hooks/image', () => {
     ];
 
     cases.forEach((item) => {
-      const result = imageHook.makeHtml(item.input, () => ({ html: item.input }));
+      let result = imageHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
+      result = imageHook.makeHtml(result, () => ({ html: result }));
+      result = imageHook.afterMakeHtml(result);
       expect(result.html).toMatch(item.expectedPattern);
     });
   });
@@ -89,7 +97,9 @@ describe('core/hooks/image', () => {
     ];
 
     cases.forEach((item) => {
-      const result = imageHook.makeHtml(item.input, () => ({ html: item.input }));
+      let result = imageHook.beforeMakeHtml(item.input, () => ({ html: item.input }));
+      result = imageHook.makeHtml(result, () => ({ html: result }));
+      result = imageHook.afterMakeHtml(result);
       expect(result.html).toMatch(item.expectedPattern);
     });
   });
@@ -101,7 +111,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![alt](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==)';
-    const result = imageHook.makeHtml(input, () => ({ html: input }));
+    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = imageHook.makeHtml(result, () => ({ html: result }));
+      result = imageHook.afterMakeHtml(result);
     expect(result.html).toContain('data:image/png');
   });
 
@@ -118,7 +130,9 @@ describe('core/hooks/image', () => {
     ];
 
     cases.forEach((input) => {
-      const result = imageHook.makeHtml(input, () => ({ html: input }));
+      let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = imageHook.makeHtml(result, () => ({ html: result }));
+      result = imageHook.afterMakeHtml(result);
       expect(result.html).toContain('<img');
       expect(result.html).toContain('src=');
     });
@@ -137,7 +151,9 @@ describe('core/hooks/image', () => {
     ];
 
     cases.forEach((input) => {
-      const result = imageHook.makeHtml(input, () => ({ html: input }));
+      let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = imageHook.makeHtml(result, () => ({ html: result }));
+      result = imageHook.afterMakeHtml(result);
       expect(result.html).toMatch(/<img[^>]*>/);
     });
   });
@@ -149,7 +165,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![img1](1.png) and ![img2](2.png)';
-    const result = imageHook.makeHtml(input, () => ({ html: input }));
+    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = imageHook.makeHtml(result, () => ({ html: result }));
+      result = imageHook.afterMakeHtml(result);
     expect(result.html).toContain('1.png');
     expect(result.html).toContain('2.png');
   });
@@ -161,7 +179,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![]()';
-    const result = imageHook.makeHtml(input, () => ({ html: input }));
+    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = imageHook.makeHtml(result, () => ({ html: result }));
+      result = imageHook.afterMakeHtml(result);
     // This should be rendered as-is, not as an image
     expect(result.html).toBe(input);
   });
@@ -173,7 +193,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![alt [with] brackets](image.png)';
-    const result = imageHook.makeHtml(input, () => ({ html: input }));
+    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = imageHook.makeHtml(result, () => ({ html: result }));
+      result = imageHook.afterMakeHtml(result);
     expect(result.html).toMatch(/<img[^>]*src="image\.png"[^>]*>/);
   });
 
@@ -184,7 +206,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![alt with `code`](image.png)';
-    const result = imageHook.makeHtml(input, () => ({ html: input }));
+    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = imageHook.makeHtml(result, () => ({ html: result }));
+      result = imageHook.afterMakeHtml(result);
     expect(result.html).toMatch(/<img[^>]*src="image\.png"[^>]*>/);
   });
 
@@ -195,7 +219,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![<alt>](image.png)';
-    const result = imageHook.makeHtml(input, () => ({ html: input }));
+    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = imageHook.makeHtml(result, () => ({ html: result }));
+      result = imageHook.afterMakeHtml(result);
     expect(result.html).toContain('alt="&lt;alt&gt;"');
   });
 
@@ -206,7 +232,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![alt](image.PNG)';
-    const result = imageHook.makeHtml(input, () => ({ html: input }));
+    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = imageHook.makeHtml(result, () => ({ html: result }));
+      result = imageHook.afterMakeHtml(result);
     expect(result.html).toMatch(/<img[^>]*src="image\.PNG"[^>]*>/);
   });
 
@@ -217,7 +245,9 @@ describe('core/hooks/image', () => {
     });
 
     const input = '![alt](image.png#section)';
-    const result = imageHook.makeHtml(input, () => ({ html: input }));
+    let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = imageHook.makeHtml(result, () => ({ html: result }));
+      result = imageHook.afterMakeHtml(result);
     expect(result.html).toContain('image.png#section');
   });
 
@@ -233,7 +263,9 @@ describe('core/hooks/image', () => {
     ];
 
     cases.forEach((input) => {
-      const result = imageHook.makeHtml(input, () => ({ html: input }));
+      let result = imageHook.beforeMakeHtml(input, () => ({ html: input }));
+      result = imageHook.makeHtml(result, () => ({ html: result }));
+      result = imageHook.afterMakeHtml(result);
       expect(result.html).toMatch(/<img[^>]*>/);
     });
   });
