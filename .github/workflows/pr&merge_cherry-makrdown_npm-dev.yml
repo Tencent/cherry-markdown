@@ -64,7 +64,7 @@ jobs:
 
       - name: npm publish
         working-directory: ./packages/cherry-markdown
-        run: npm publish 
+        run: npm publish
 
       - name: Post comments
         uses: actions/github-script@v7
