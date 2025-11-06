@@ -610,14 +610,21 @@ class SuggesterPanel {
    * @param {KeyboardEvent} evt 键盘事件
    */
   pasteSelectResult(idx, evt) {
-    if (!this.cursorTo || this.cursorTo === this.cursorFrom) {
-      this.cursorTo = JSON.parse(JSON.stringify(this.cursorFrom));
-    }
-    if (!this.cursorTo) {
+    const { cursorFrom } = this;
+    if (!cursorFrom) {
       return;
     }
-    this.cursorTo.ch += 1;
-    const { cursorFrom, cursorTo } = this; // 缓存光标位置
+    let cursorTo;
+    // 仅替换当前联想触发期间录入的字符，避免吞掉光标后的文本
+    // Reference: issue #1493 https://github.com/Tencent/cherry-markdown/issues/1493
+    const typedLength = Array.isArray(this.searchKeyCache) ? this.searchKeyCache.join('').length : 0;
+    if (typedLength > 0) {
+      cursorTo = { line: cursorFrom.line, ch: cursorFrom.ch + typedLength };
+    } else if (this.cursorTo) {
+      cursorTo = { line: this.cursorTo.line, ch: this.cursorTo.ch };
+    } else {
+      cursorTo = { line: cursorFrom.line, ch: cursorFrom.ch };
+    }
     if (this.optionList[idx]) {
       let result = '';
       if (
@@ -634,6 +641,13 @@ class SuggesterPanel {
         result = this.optionList[idx].value();
       } else {
         result = ` ${this.keyword}${this.optionList[idx]} `;
+      }
+      // 如果回填内容以空格结尾，同时光标位置后还有空格，则一并替换掉一个空格，避免残留双空格
+      if (result.endsWith(' ') && this.editor?.editor?.getLine && cursorTo && cursorTo.ch !== null) {
+        const lineText = this.editor.editor.getLine(cursorTo.line) || '';
+        if (lineText[cursorTo.ch] === ' ') {
+          cursorTo = { line: cursorTo.line, ch: cursorTo.ch + 1 };
+        }
       }
       // this.cursorTo.ch = this.cursorFrom.ch + result.length;
       if (result) {
