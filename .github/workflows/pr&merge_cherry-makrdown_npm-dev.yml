@@ -32,7 +32,7 @@ jobs:
         working-directory: ./packages/cherry-markdown
         run: |
           BASE_VERSION=$(jq -r .version package.json)
-          VERSION="${BASE_VERSION}-dev.$(date +'%Y%m%d%H%M').${{ env.COMMIT_SHORT_SHA }}"
+          VERSION="${BASE_VERSION}-$(date +'%Y%m%d%H%M').${{ env.COMMIT_SHORT_SHA }}"
           jq --arg name "@cherry-markdown/cherry-markdown-dev" \
              --arg version "$VERSION" \
              '.name = $name | .version = $version | del(.scripts.publish?)' package.json | sponge package.json
@@ -61,8 +61,6 @@ jobs:
       - name: Install and build
         working-directory: ./packages/cherry-markdown
         run: yarn install && yarn build
-
-      - run: npm i -g npm@latest
 
       - name: npm publish
         working-directory: ./packages/cherry-markdown
