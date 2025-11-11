@@ -799,7 +799,8 @@ export default class Previewer {
   }
 
   editOnly() {
-    this.doHtmlCache(this.getDomContainer().innerHTML);
+    const html = this.options.previewerCache.html ? this.options.previewerCache.html : this.getDomContainer().innerHTML;
+    this.doHtmlCache(html);
     this.$dealEditAndPreviewOnly(true);
     this.$cherry.$event.emit('previewerClose');
     this.$cherry.$event.emit('editorOpen');
