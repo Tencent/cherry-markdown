@@ -1,5 +1,14 @@
 # Change Log
 
+## 0.10.2
+
+### Patch Changes
+
+- fix: #1487 修复</没有被完全转义的情况 [@sunsonliu](https://github.com/sunsonliu)([#1489](https://github.com/Tencent/cherry-markdown/pull/1489))([`ce2e750`](https://github.com/Tencent/cherry-markdown/commit/ce2e750f9d704c8dcf5b3268e50b31b62e0514ba))
+- fix: #1493 联想词特定场景下吞掉触发符号后的文本 [@Seeridia](https://github.com/Seeridia)([#1494](https://github.com/Tencent/cherry-markdown/pull/1494))([`33107ee`](https://github.com/Tencent/cherry-markdown/commit/33107eee62f9456e28ee4773d2a3933ecb96c32e))
+- fix: #1497 修复editOnly模式初始化后，getHtml获取不到数据的问题 [@sunsonliu](https://github.com/sunsonliu)([#1498](https://github.com/Tencent/cherry-markdown/pull/1498))([`4a93428`](https://github.com/Tencent/cherry-markdown/commit/4a9342872732cbc520e93936e5f128e7c2c3de17))
+- feat: #1195 脚注支持自动闭合 [@sunsonliu](https://github.com/sunsonliu)([#1479](https://github.com/Tencent/cherry-markdown/pull/1479))([`e723f55`](https://github.com/Tencent/cherry-markdown/commit/e723f55ed8600c152c7ba409970270f19a3b903b))
+
 ## 0.10.1
 
 ### Patch Changes
