@@ -25,7 +25,6 @@ function printLinks() {
       server.httpServer?.once('listening', () => {
         const address = server.httpServer?.address();
         let port = 5173;
-        // 始终使用 localhost
         const host = 'localhost';
         if (typeof address === 'object' && address) {
           port = address.port || port;
