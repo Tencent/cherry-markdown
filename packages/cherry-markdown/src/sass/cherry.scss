@@ -751,6 +751,9 @@
     .url-truncated {
       max-width: 200px;
     }
+    .cm-invalidchar[title="\\\\u200b"] {
+      display: none;
+    }
   }
 
   .cm-s-default .cm-header {
