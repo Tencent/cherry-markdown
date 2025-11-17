@@ -1,10 +1,10 @@
-name: 'Publish Cherry-Markdown Dev Preview on PR Merge'
+name: "Publish Cherry-Markdown Dev Preview on PR Merge"
 
 on:
   pull_request_target:
     types: [closed]
     paths:
-      - 'packages/cherry-markdown/**'
+      - "packages/cherry-markdown/**"
 
 permissions:
   contents: read
@@ -24,6 +24,9 @@ jobs:
 
       - name: Get Merge Commit SHA
         run: echo "COMMIT_SHORT_SHA=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
+
+      - name: Get Commit Message
+        run: echo "COMMIT_MESSAGE=$(git log --oneline -1)" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: sudo apt-get install -y moreutils
@@ -49,6 +52,7 @@ jobs:
 
             This is a [development preview version](${PACKAGE_NAME}@${PACKAGE_VERSION}), do NOT use in production!  
 
+            变更 / Changes: ${{ env.COMMIT_MESSAGE }}
           EOF
 
       - name: Set up Node.js
@@ -64,7 +68,7 @@ jobs:
 
       - name: npm publish
         working-directory: ./packages/cherry-markdown
-        run: npm publish
+        run: npm publish --access=public --tag latest --provenance
 
       - name: Post comments
         uses: actions/github-script@v7
