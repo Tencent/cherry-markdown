@@ -1,8 +1,11 @@
 name: "Publish Cherry-Markdown Dev Preview on PR Merge"
 
 on:
-  push:
-    branches: [dev]
+  pull_request_target:
+    types: [closed]
+    paths:
+      - "packages/cherry-markdown/**"
+
 permissions:
   contents: read
   pull-requests: write
