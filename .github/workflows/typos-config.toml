@@ -1,0 +1,18 @@
+default.check-filename = true
+
+[default.extend-words]
+ths="ths"
+curren="curren"
+Automattic="Automattic"
+
+
+[files]
+extend-exclude = [
+    "CHANGELOG.md",
+    "packages/cherry-markdown/src/libs",
+    'packages/vscodePlugin/web-resources/scripts',
+    'examples/assets',
+    '__snapshots__',
+    'Emoji.config.js',
+    'commonmark.spec.json'
+]
