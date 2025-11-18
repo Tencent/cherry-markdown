@@ -1,10 +1,10 @@
-name: 'Publish Cherry-Markdown Dev Preview on PR Merge'
+name: "Publish Cherry-Markdown Dev Preview on PR Merge"
 
 on:
-  pull_request_target:
+  pull_request:
     types: [closed]
     paths:
-      - 'packages/cherry-markdown/**'
+      - "packages/cherry-markdown/**"
 
 permissions:
   contents: read
@@ -25,6 +25,9 @@ jobs:
       - name: Get Merge Commit SHA
         run: echo "COMMIT_SHORT_SHA=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
 
+      - name: Get Commit Message
+        run: echo "COMMIT_MESSAGE=$(git log --oneline -1)" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: sudo apt-get install -y moreutils
 
@@ -32,7 +35,7 @@ jobs:
         working-directory: ./packages/cherry-markdown
         run: |
           BASE_VERSION=$(jq -r .version package.json)
-          VERSION="${BASE_VERSION}-dev.$(date +'%Y%m%d%H%M').${{ env.COMMIT_SHORT_SHA }}"
+          VERSION="${BASE_VERSION}-$(date +'%Y%m%d%H%M').${{ env.COMMIT_SHORT_SHA }}"
           jq --arg name "@cherry-markdown/cherry-markdown-dev" \
              --arg version "$VERSION" \
              '.name = $name | .version = $version | del(.scripts.publish?)' package.json | sponge package.json
@@ -44,6 +47,8 @@ jobs:
         run: |
           cat <<-EOF > README.md
             **⚠️ 开发预览警告 / Development Preview Warning**
+
+            变更 / Changes: ${{ env.COMMIT_MESSAGE }}
 
             此版本为[临时测试版](${PACKAGE_NAME}@${PACKAGE_VERSION})，禁止在生产环境使用！  
 
@@ -62,11 +67,9 @@ jobs:
         working-directory: ./packages/cherry-markdown
         run: yarn install && yarn build
 
-      - run: npm i -g npm@latest
-
       - name: npm publish
         working-directory: ./packages/cherry-markdown
-        run: npm publish
+        run: npm publish --tag latest
 
       - name: Post comments
         uses: actions/github-script@v7
