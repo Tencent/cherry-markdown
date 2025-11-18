@@ -1,10 +1,10 @@
-name: 'Publish Cherry-Markdown Dev Preview on PR Merge'
+name: "Publish Cherry-Markdown Dev Preview on PR Merge"
 
 on:
   pull_request:
     types: [closed]
     paths:
-      - 'packages/cherry-markdown/**'
+      - "packages/cherry-markdown/**"
 
 permissions:
   contents: read
@@ -48,11 +48,12 @@ jobs:
           cat <<-EOF > README.md
             **⚠️ 开发预览警告 / Development Preview Warning**
 
+            变更 / Changes: ${{ env.COMMIT_MESSAGE }}
+
             此版本为[临时测试版](${PACKAGE_NAME}@${PACKAGE_VERSION})，禁止在生产环境使用！  
 
             This is a [development preview version](${PACKAGE_NAME}@${PACKAGE_VERSION}), do NOT use in production!  
-            
-            变更 / Changes: ${{ env.COMMIT_MESSAGE }}
+
           EOF
 
       - name: Set up Node.js
