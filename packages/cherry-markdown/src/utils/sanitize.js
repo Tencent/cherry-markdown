@@ -342,7 +342,7 @@ export function escapeHTMLEntitiesWithoutSemicolon(content) {
     if (
       isEmptyString(decimalCodePoint) ||
       match.indexOf(';') === -1 ||
-      decimalCodePoint.lenth > 7 ||
+      decimalCodePoint.length > 7 ||
       // Object.keys(htmlEntitiesMap).indexOf(+decimalCodePoint) === -1 ||
       !isValidStringCodePoint(decimalCodePoint)
     ) {
@@ -363,7 +363,7 @@ export function escapeHTMLEntitiesWithoutSemicolon(content) {
     if (
       isNaN(decimalCodePoint) ||
       match.indexOf(';') === -1 ||
-      hexCodePoint.lenth > 6 ||
+      hexCodePoint.length > 6 ||
       // Object.keys(htmlEntitiesMap).indexOf(decimalCodePoint) === -1
       !isValidStringCodePoint(hexCode)
     ) {
