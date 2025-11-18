@@ -321,16 +321,16 @@
 .cherry {
   // 默认主题采用亮色搜索框
   &.theme__default {
-    --ace-serach-bg: var(--oc-white);
+    --ace-search-bg: var(--oc-white);
     --ace-search-text-color: var(--base-font-color);
   }
 
   // 其它主题从toolbar和dropdown中取色
-  --ace-serach-bg: var(--dropdown-bg);
+  --ace-search-bg: var(--dropdown-bg);
   --ace-search-text-color: var(--toolbar-btn-color);
 
   .ace_search {
-    background: var(--ace-serach-bg);
+    background: var(--ace-search-bg);
     color: var(--ace-search-text-color);
     border: var(--border-width-1) solid var(--dropdown-border);
     border-radius: var(--radius-2xl);
@@ -394,7 +394,7 @@
 
     .ace_searchbtn,
     .ace_replacebtn {
-      background: var(--ace-serach-bg);
+      background: var(--ace-search-bg);
       color: var(--ace-search-text-color);
       border: 0 none;
       border-left: 1px solid var(--oc-gray-3);
@@ -500,15 +500,15 @@
 
 // 高亮命中的文字样式
 .cherry {
-  --seraching-highlight-color: rgba(252, 195, 25, 0.5);
+  --searching-highlight-color: rgba(252, 195, 25, 0.5);
 
   // 暗黑主题下改成蓝色背景以增大区分度
   &.theme__dark {
-    --seraching-highlight-color: rgba(77, 171, 247, 0.4);
+    --searching-highlight-color: rgba(77, 171, 247, 0.4);
   }
 
   .cm-searching {
-    background-color: var(--seraching-highlight-color);
+    background-color: var(--searching-highlight-color);
   }
 }
 

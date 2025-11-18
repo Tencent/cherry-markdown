@@ -28,7 +28,7 @@ export default class Emphasis extends SyntaxBase {
   }
 
   makeHtml(str, sentenceMakeFunc) {
-    const converAsterisk = function (match, leading, symbol, text) {
+    const convertAsterisk = function (match, leading, symbol, text) {
       const tagType = symbol.length % 2 === 1 ? 'em' : 'strong';
       const repeat = Math.floor(symbol.length / 2);
       let prefix = '<strong>'.repeat(repeat);
@@ -48,13 +48,13 @@ export default class Emphasis extends SyntaxBase {
     };
     let $str = str;
     if (this.allowWhitespace) {
-      $str = $str.replace(/(^[\s]*|\n[\s]*)(\*)([^\s*](?:.*?)(?:(?:\n.*?)*?))\*/g, converAsterisk);
-      $str = $str.replace(/(^[\s]*|\n[\s]*)(\*{2,})((?:.*?)(?:(?:\n.*?)*?))\2/g, converAsterisk);
-      $str = $str.replace(/([^\n*\\\s][ ]*)(\*+)((?:.*?)(?:(?:\n.*?)*?))\2/g, converAsterisk);
+      $str = $str.replace(/(^[\s]*|\n[\s]*)(\*)([^\s*](?:.*?)(?:(?:\n.*?)*?))\*/g, convertAsterisk);
+      $str = $str.replace(/(^[\s]*|\n[\s]*)(\*{2,})((?:.*?)(?:(?:\n.*?)*?))\2/g, convertAsterisk);
+      $str = $str.replace(/([^\n*\\\s][ ]*)(\*+)((?:.*?)(?:(?:\n.*?)*?))\2/g, convertAsterisk);
     } else {
       // TODO: fix this error
       // @ts-expect-error
-      $str = $str.replace(this.RULE.asterisk.reg, converAsterisk);
+      $str = $str.replace(this.RULE.asterisk.reg, convertAsterisk);
     }
 
     // TODO: fix this error

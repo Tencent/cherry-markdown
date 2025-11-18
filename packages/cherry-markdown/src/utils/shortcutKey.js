@@ -136,7 +136,7 @@ export const getAllowedShortcutKey = (event, customForbiddenKeys = []) => {
   if (!keyStack.includes(event.key)) {
     /**
      * 这里用 code 的原因在于要抹平不同浏览器对键值的不同处理，以及按下Shift键时key的表示不同
-     * shfit、alt 等调节性键，在按下时，key的值会不同，但code的值是相同的
+     * shift、alt 等调节性键，在按下时，key的值会不同，但code的值是相同的
      * @see https://developer.mozilla.org/zh-CN/docs/Web/API/KeyboardEvent/code
      */
     // 当前键是否是重复按下的

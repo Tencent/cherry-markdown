@@ -57,11 +57,11 @@ export default class ParagraphBase extends SyntaxBase {
    */
   $cleanParagraph(str) {
     // remove leading and trailing newlines
-    const trimedPar = str.replace(/^\n+/, '').replace(/\n+$/, '');
+    const trimmedPar = str.replace(/^\n+/, '').replace(/\n+$/, '');
     if (this.classicBr) {
-      return trimedPar;
+      return trimmedPar;
     }
-    const minifiedPar = this.joinRawHtml(trimedPar);
+    const minifiedPar = this.joinRawHtml(trimmedPar);
     return minifiedPar.replace(/\n/g, '<br>').replace(/\r/g, '\n'); // recover \n from \r
   }
 
