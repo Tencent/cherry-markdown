@@ -1,0 +1,101 @@
+name: "Publish Cherry-Markdown Dev Preview on PR Merge"
+
+on:
+  pull_request:
+    types: [closed]
+    paths:
+      - "packages/cherry-markdown/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  npm-preview:
+    # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
+    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get Merge Commit SHA
+        run: echo "COMMIT_SHORT_SHA=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
+
+      - name: Get Commit Message
+        run: echo "COMMIT_MESSAGE=$(git log --oneline -1)" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: sudo apt-get install -y moreutils
+
+      - name: Update package.json
+        working-directory: ./packages/cherry-markdown
+        run: |
+          BASE_VERSION=$(jq -r .version package.json)
+          VERSION="${BASE_VERSION}-$(date +'%Y%m%d%H%M').${{ env.COMMIT_SHORT_SHA }}"
+          jq --arg name "@cherry-markdown/cherry-markdown-dev" \
+             --arg version "$VERSION" \
+             '.name = $name | .version = $version | del(.scripts.publish?)' package.json | sponge package.json
+          echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "PACKAGE_NAME=@cherry-markdown/cherry-markdown-dev" >> $GITHUB_ENV
+
+      - name: Update README
+        working-directory: ./packages/cherry-markdown
+        run: |
+          cat <<-EOF > README.md
+            **⚠️ 开发预览警告 / Development Preview Warning**
+
+            变更 / Changes: ${{ env.COMMIT_MESSAGE }}
+
+            此版本为[临时测试版](${PACKAGE_NAME}@${PACKAGE_VERSION})，禁止在生产环境使用！  
+
+            This is a [development preview version](${PACKAGE_NAME}@${PACKAGE_VERSION}), do NOT use in production!  
+
+          EOF
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          registry-url: https://registry.npmjs.org/
+          cache: yarn
+
+      - name: Install and build
+        working-directory: ./packages/cherry-markdown
+        run: yarn install && yarn build
+
+      - name: npm publish
+        working-directory: ./packages/cherry-markdown
+        run: npm publish --tag latest
+
+      - name: Post comments
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const commentTemplate = `📦 **cherry-markdown dev preview published**
+              
+              ⚠️ **注意**: 此版本为开发预览版，禁止在生产环境使用！
+              > 此方式引用代码中仍然可以使用 \`cherry-markdown\` 包名，不需要修改现有的 import 语句
+              
+              ⚠️ **Note**: This version is a developer preview and should not be used in production environments!
+              > This way of referencing allows you to still use the package name \`cherry-markdown\`, no need to modify existing import statements
+              
+              **Install [NPM](https://www.npmjs.com/package/${process.env.PACKAGE_NAME}/v/${process.env.PACKAGE_VERSION}) with** :
+              \`\`\`bash
+              pnpm add cherry-markdown@npm:${process.env.PACKAGE_NAME}@${process.env.PACKAGE_VERSION}
+              \`\`\`
+              
+              \`\`\`bash
+              npm i cherry-markdown@npm:${process.env.PACKAGE_NAME}@${process.env.PACKAGE_VERSION}
+              \`\`\`
+              `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentTemplate
+            });
