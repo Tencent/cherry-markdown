@@ -123,11 +123,11 @@ export default class ParagraphBase extends SyntaxBase {
     return str;
   }
 
-  beforeMakeHtml(str, sentenceMakeFunc) {
+  beforeMakeHtml(str, sentenceMakeFunc = (md) => md) {
     return str;
   }
 
-  makeHtml(str, sentenceMakeFunc) {
+  makeHtml(str, sentenceMakeFunc = (md) => md) {
     // 如果需要缓存，就默认不处理行内语法了
     if (this.needCache) {
       return str;
@@ -135,7 +135,7 @@ export default class ParagraphBase extends SyntaxBase {
     return sentenceMakeFunc(str).html;
   }
 
-  afterMakeHtml(html, sentenceMakeFunc) {
+  afterMakeHtml(html, sentenceMakeFunc = (md) => md) {
     return this.restoreCache(html);
   }
 
