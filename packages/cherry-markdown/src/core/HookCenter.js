@@ -235,7 +235,7 @@ export default class HookCenter {
       hookName = HookClass.HOOK_NAME;
       // TODO: 需要考虑自定义 hook 配置的传入方式
       const config = syntax?.[hookName] || {};
-      instance = new HookClass({ externals, config, globalConfig: engine.global, cherry: $cherry });
+      instance = new HookClass({ externals, config, globalConfig: engine.global, cherry: $cherry, needCache: false });
       // @hack inject externals
       instance.$externals = externals;
       instance.afterInit(() => {
