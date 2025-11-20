@@ -123,6 +123,10 @@ jobs:
               }
               \`\`\`
 
+              在添加 overrides 之后，重新安装你的依赖并像往常一样启动你的开发服务器或构建你的项目即可，无需进一步的配置更改
+
+              After adding these overrides, reinstall your dependencies and start your development server or build your project as usual. No further configuration changes are required
+              
               `;
 
             github.rest.issues.createComment({
