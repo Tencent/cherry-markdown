@@ -264,12 +264,12 @@ export default class Engine {
       $str += '\n';
     }
     $str = this.$fireHookAction($str, 'sentence', 'beforeMakeHtml');
-    $str = this.$fireHookAction($str, 'paragraph', 'beforeMakeHtml');
+    $str = this.$fireHookAction($str, 'paragraph', 'beforeMakeHtml', this.$dealSentenceByCache.bind(this));
     return $str;
   }
 
   $afterMakeHtml(str) {
-    let $str = this.$fireHookAction(str, 'paragraph', 'afterMakeHtml');
+    let $str = this.$fireHookAction(str, 'paragraph', 'afterMakeHtml', this.$dealSentenceByCache.bind(this));
     // str = this._fireHookAction(str, 'sentence', 'afterMakeHtml');
     $str = $str.replace(/~D/g, '$');
     $str = $str.replace(/~T/g, '~');

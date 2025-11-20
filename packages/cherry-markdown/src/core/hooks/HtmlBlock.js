@@ -125,7 +125,7 @@ export default class HtmlBlock extends ParagraphBase {
     // 替换所有形如「<abcd」的左尖括号
     $str = $str.replace(/<(?=(\w|\n|$))/g, '&#60;');
     // 替换所有形如「</」的左尖括号
-    $str = $str.replace(/<\//g, '&#60;\/');
+    $str = $str.replace(/<\//g, '&#60;/');
     // 还原被替换的尖括号
     $str = $str.replace(/\$#60;/g, '<').replace(/\$#62;/g, '>');
     // 针对 \< 和 \> 进行转义
