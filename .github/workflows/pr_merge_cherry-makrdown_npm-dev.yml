@@ -87,10 +87,42 @@ jobs:
               \`\`\`bash
               pnpm add cherry-markdown@npm:${process.env.PACKAGE_NAME}@${process.env.PACKAGE_VERSION}
               \`\`\`
+
+               \`\`\`bash
+              yarn add cherry-markdown@npm:${process.env.PACKAGE_NAME}@${process.env.PACKAGE_VERSION}
+              \`\`\`
               
               \`\`\`bash
               npm i cherry-markdown@npm:${process.env.PACKAGE_NAME}@${process.env.PACKAGE_VERSION}
               \`\`\`
+
+              如果你使用了其他以 cherry-markdown 作为同等依赖（peer dependency）的元框架，你需要在 package.json 文件中覆盖 cherry-markdown 依赖，具体操作方式会因你使用的包管理器而略有不同
+
+              If you use a meta framework that has cherry-markdown as peer dependency, you have to override the cherry-markdown dependency in your package.json, which works slightly different depending on your package manager
+
+              \`\`\`json
+              # npm
+              {
+                "overrides": {
+                  "cherry-markdown": "npm:${process.env.PACKAGE_NAME}@${process.env.PACKAGE_VERSION}"
+                }
+              }
+              # yarn
+              {
+                "resolutions": {
+                  "cherry-markdown": "npm:${process.env.PACKAGE_NAME}@${process.env.PACKAGE_VERSION}"
+                }
+              }
+              # pnpm
+              {
+                "pnpm": {
+                  "overrides": {
+                    "cherry-markdown": "npm:${process.env.PACKAGE_NAME}@${process.env.PACKAGE_VERSION}"
+                  }
+                }
+              }
+              \`\`\`
+
               `;
 
             github.rest.issues.createComment({
