@@ -103,7 +103,7 @@ function isRegisteredCustomSyntaxClass(value) {
 export default class HookCenter {
   /**
    *
-   * @param {(typeof SyntaxBase)[]} hooksConfig
+   * @param {(typeof SyntaxBase | typeof ParagraphBase)[]} hooksConfig
    * @param {CherryOptions} editorConfig
    */
   constructor(hooksConfig, editorConfig, cherry) {
@@ -135,7 +135,7 @@ export default class HookCenter {
     hooksConfig.forEach(
       /**
        *
-       * @param {typeof SyntaxBase} HookClass
+       * @param {typeof SyntaxBase | typeof ParagraphBase} HookClass
        * @param {number} index
        */
       (HookClass, index) => {
@@ -158,7 +158,7 @@ export default class HookCenter {
     hookNames.forEach((hookName) => {
       /** @type {number} */
       let result;
-      /** @type {typeof SyntaxBase} */
+      /** @type {typeof SyntaxBase | typeof ParagraphBase} */
       let HookClass;
       const customHookConfig = {};
       const hookClassOrConfig = customHooks[hookName];
@@ -201,7 +201,7 @@ export default class HookCenter {
 
   /**
    *
-   * @param {((...args: any[]) => any) | typeof SyntaxBase} HookClass
+   * @param {((...args: any[]) => any) | typeof SyntaxBase | typeof ParagraphBase} HookClass
    * @param {CherryOptions} editorConfig
    * @param {Omit<CustomSyntaxRegConfig, 'syntaxClass'>} [customHookConfig]
    * @returns
