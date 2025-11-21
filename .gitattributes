@@ -12,5 +12,3 @@
 *.woff binary
 *.woff2 binary
 *.ico binary
-
-dist/** filter=lfs diff=lfs merge=lfs -text
