@@ -43,7 +43,7 @@ export default class Pdf extends MenuBase {
           this.registerAfterClickCb(() => {
             this.setLessSelection(begin, end);
           });
-          const finalName = params.name ? params.name : name;
+          const finalName = params && params.name ? params.name : 'file';
           res += `${begin}${finalName}${end}\n`;
         }
         return res;
@@ -64,7 +64,7 @@ export default class Pdf extends MenuBase {
       this.registerAfterClickCb(() => {
         this.setLessSelection(begin, end);
       });
-      const finalName = params.name ? params.name : name;
+      const finalName = params && params.name ? params.name : name;
       return `${begin}${finalName}${end}`;
     }
     // 插入图片，调用上传文件逻辑

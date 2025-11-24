@@ -49,7 +49,9 @@ const callbacks = {
       };
       reader.readAsDataURL(file);
     } else {
-      callback('images/demo-dog.png');
+      callback('images/demo-dog.png', {
+        name: `${file.name.replace(/\.[^.]+$/, '')}`,
+      });
     }
   },
   fileUploadMulti(files, callback) {
@@ -99,7 +101,7 @@ const callbacks = {
             },
           });
         } else {
-          resolve('images/demo-dog.png');
+          resolve({ url: 'images/demo-dog.png', params: file });
         }
       });
       promises.push(promise);

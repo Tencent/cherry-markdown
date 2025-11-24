@@ -1101,21 +1101,58 @@ export default class TableHandler {
   }
 
   /**
+   * 获取单元格对齐方式
+   * @param {*} cells 单元格数组
+   * @param {*} index 单元格索引
+   * @returns {string} 单元格对齐方式，如果是false则表示不生成对齐方式
+   */
+  $getTdAlign(cells, index, cellsIndex) {
+    if (index !== 1) {
+      return '  ';
+    }
+    const cellsIndexNum = cellsIndex < 0 ? 0 : cellsIndex;
+    if (typeof cells[cellsIndexNum] === 'string') {
+      return cells[cellsIndexNum];
+    }
+    return ' ------ ';
+  }
+
+  /**
    * 添加列
+   * 有两种风格的表格，需要分别处理
+   * 风格一（type1）：
+   * | Header | Header | Header | Header |
+   * |:---|:---:|---:| ------ |
+   * | Sample | Sample | Sample | Sample |
+   * | Sample | Sample | Sample | Sample |
+   * | Sample | Sample | Sample | Sample |
+   * 风格二（type2）：
+   * Header | Header | Header
+   * ------ | ------ | ------
+   * Sample |111e | Sample
+   * Sample | Sample | Sample
    */
   $insertCol() {
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
     const selection = this.codeMirror.getSelection();
     const lines = selection.split('\n');
     const newLines = lines.map((line, index) => {
+      const tableType = /^\s*\|/.test(line) ? 'type1' : 'type2';
       const cells = line.split('|');
-
-      if (index === 1) {
-        cells.splice(this.tableEditor.info.tdIndex + 2, 0, '------');
-        return cells.join('|');
+      let preTdIndex = 0;
+      let currentTdIndex = 0;
+      if (tableType === 'type1') {
+        preTdIndex = this.tableEditor.info.tdIndex + 1;
+        preTdIndex = preTdIndex < 1 ? 1 : preTdIndex;
+        const cellsIndex = this.tableEditor.info.tdIndex + 2;
+        currentTdIndex = cellsIndex < 1 ? 1 : cellsIndex;
+      } else {
+        preTdIndex = this.tableEditor.info.tdIndex;
+        const cellsIndex = this.tableEditor.info.tdIndex + 1;
+        currentTdIndex = cellsIndex < 0 ? 0 : cellsIndex;
       }
-
-      cells.splice(this.tableEditor.info.tdIndex + 2, 0, '  ');
+      const replaceItem = this.$getTdAlign(cells, index, preTdIndex);
+      cells.splice(currentTdIndex, 0, replaceItem);
       return cells.join('|');
     });
     const newText = newLines.join('\n');
