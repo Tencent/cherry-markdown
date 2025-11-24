@@ -214,9 +214,10 @@ export default class Engine {
     $str = $str.replace(/\$/g, '~D');
     $str = $str.replace(/\r\n/g, '\n'); // DOS to Unix
     $str = $str.replace(/\r/g, '\n'); // Mac to Unix
+    // 自动补全最后一行的加粗、斜体语法
     if (
-      // @ts-ignore
-      this.$cherry.options.engine.syntax.fontEmphasis.selfClosing ||
+      (!!this.$cherry.options.engine.syntax.fontEmphasis &&
+        this.$cherry.options.engine.syntax.fontEmphasis.selfClosing) ||
       this.$cherry.options.engine.global.flowSessionContext
     ) {
       // 自动补全最后一行的加粗、斜体语法
@@ -257,6 +258,56 @@ export default class Engine {
           return `${begin}${content.replace(/Σ\*CONTENT\*TMP/g, '*')}${begin}`;
         });
       }
+    }
+    // 自动补全最后一行的图片、音频、视频语法
+    if (
+      (!!this.$cherry.options.engine.syntax.image && this.$cherry.options.engine.syntax.image.selfClosing) ||
+      this.$cherry.options.engine.global.flowSessionContext
+    ) {
+      const selfClosingLoadingImgPath =
+        !!this.$cherry.options.engine.syntax.image && this.$cherry.options.engine.syntax.image.selfClosingLoadingImgPath
+          ? this.$cherry.options.engine.syntax.image.selfClosingLoadingImgPath
+          : '';
+      // 写了闭合中括号，但括号没闭合的情况
+      $str = $str.replace(/([^[]*?)!(video|audio|)\[([^\n\]]*)\]\(([^)]*)$/, (whole, before, type, content, url) => {
+        if (type.toLowerCase === 'video') {
+          return `${before}<video src="${url}"></video>`;
+        }
+        if (type.toLowerCase === 'audio') {
+          return `${before}<audio src="${url}"></audio>`;
+        }
+        return `${before}<img src="${selfClosingLoadingImgPath}"/>`;
+      });
+
+      // 只写了中括号的情况
+      $str = $str.replace(/([^[]*?)!(video|audio|)\[([^\n\]]*)\]{0,1}$/, (whole, before, type, content) => {
+        if (type.toLowerCase === 'video') {
+          return `${before}<video src></video>`;
+        }
+        if (type.toLowerCase === 'audio') {
+          return `${before}<audio src></audio>`;
+        }
+        if (!!selfClosingLoadingImgPath) {
+          return `${before}<img src/>`;
+        }
+        return `${before}<img src="${selfClosingLoadingImgPath}"/>`;
+      });
+    }
+
+    // 自动补全最后一行的链接语法
+    if (
+      (!!this.$cherry.options.engine.syntax.link && this.$cherry.options.engine.syntax.link?.selfClosing) ||
+      this.$cherry.options.engine.global.flowSessionContext
+    ) {
+      // 写了闭合中括号，但括号没闭合的情况
+      $str = $str.replace(/([^[]*?)\[([^\n\]]*)\]\(([^)]*)$/, (whole, before, content, url) => {
+        return `${before}<a href="${url}">${content}</a>`;
+      });
+
+      // 只写了中括号的情况
+      $str = $str.replace(/([^[]*?)\[([^\n\]]*)\]{0,1}$/, (whole, before, content) => {
+        return `${before}<a href>${content}</a>`;
+      });
     }
     // 避免正则性能问题，如/.+\n/.test(' '.repeat(99999)), 回溯次数过多
     // 参考文章：http://www.alloyteam.com/2019/07/13574/

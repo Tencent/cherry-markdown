@@ -149,6 +149,7 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     onPaste?: (clipboardData: ClipboardEvent['clipboardData'], cherry: Cherry) => string | boolean;
     onExpandCode?: (e: MouseEvent, code: string) => string;
     onUnExpandCode?: (e: MouseEvent, code: string) => string;
+    onClickToc?: (e: MouseEvent, hash: string) => boolean;
   };
   event: {
     focus?: ({ e: MouseEvent, cherry: Cherry }) => void;
@@ -278,6 +279,7 @@ export interface CherryEngineOptions {
           rel?: '_blank' | 'nofollow' | '';
           /** 自定义<a>标签的属性，默认为空 */
           attrRender?: (text: string, href: string) => string;
+          selfClosing?: boolean;
         };
     autoLink?:
       | false
@@ -292,6 +294,12 @@ export interface CherryEngineOptions {
           shortLinkLength?: number;
           /** 自定义<a>标签的属性，默认为空 */
           attrRender?: (text: string, href: string) => string;
+        };
+    image?:
+      | false
+      | {
+          selfClosing?: boolean; // 自动闭合
+          selfClosingLoadingImgPath?: string; // 触发自动闭合时加载loading图片的路径
         };
     list?:
       | false
@@ -403,12 +411,14 @@ export interface CherryEngineOptions {
           src?: string;
           css?: string;
           plugins?: boolean; // 加载插件
+          selfClosing?: boolean; // 自动闭合
         };
     inlineMath?:
       | false
       | {
           engine?: 'katex' | 'MathJax'; // katex或MathJax
           src?: string;
+          selfClosing?: boolean; // 自动闭合
         };
     toc?:
       | false
@@ -438,6 +448,7 @@ export interface CherryEngineOptions {
            *      #head ⭕️ valid
            */
           strict?: boolean;
+          selfClosing?: boolean; // 自动闭合
         };
     htmlBlock?:
       | false

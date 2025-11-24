@@ -22,6 +22,16 @@ const cherryConfig = {
       fontEmphasis: {
         selfClosing: false,
       },
+      header: {
+        selfClosing: false,
+      },
+      link: {
+        selfClosing: false,
+      },
+      image: {
+        selfClosing: false,
+        selfClosingLoadingImgPath: 'assets/images/loading.gif',
+      },
     },
   },
   previewer: {
@@ -31,12 +41,12 @@ const cherryConfig = {
 };
 
 const msgList = [
-  '在流式输出的情况下cherry提供了更快的渲染频率（最快每**10ms渲染一次**）\n在关闭流式输出时，cherry的渲染频率为最快**50ms渲染一次**。',
-  '在流式输出的情况下输出**加粗文字时，cherry会自动补全加粗文字**。\n在流式输出的情况下输出*斜体文字时，cherry会自动补全斜体文字*。',
-  '在流式输出的情况下，文字会一个一个的输出到页面上\n在输出**代码块**时，cherry会自动补全代码块：\n```\nalert("hello world");\nalert("hello world");\n```\n代码块输出结束了。',
-  '在流式输出的情况下输出**无序列表**的时候，cherry会自动修复无序列表的内容，使内容在输出时不会命中标题语法：\n- 无序列表第一行\n- 无序列表第二行\n- 无序列表第三行\n\n无序列表结束了。\n用短横线命中标题\n--\n标题结束了。',
-  '在流式输出的情况下输出**表格**时，在输出第一行表格内容后，cherry自动补全表格的第二行：\n|项目（居中对齐）|价格（右对齐）|数量（左对齐）|\n|:-:|-:|:-|\n|计算机|￥1600|5|\n|手机机|￥12|50|\n表格输出结束了。',
-  '输出比较丰富的富媒体内容：\n## 时序图\n\n```mermaid\nsequenceDiagram\nautonumber\nA-->A: 文本1\nA->>B: 文本2\nloop 循环1\nloop 循环2\nA->B: 文本3\nend\nloop 循环3\nB -->>A: 文本4\nend\nB -->> B: 文本5\nend\n```\n\n## 字体样式\n\n**说明**\n\n- 使用`*(或_)` 和 `**(或__)` 表示*斜体*和 **粗体**\n- 使用 `/` 表示 /下划线/ ,使用`~~` 表示~~删除线~~\n- 使用`^(或^^)`表示^上标^或^^下标^^\n- 使用 ! 号+数字 表示字体 !24 大! !12 小! [^专有语法提醒]\n- 使用两个(三个)!号+RGB 颜色 表示!!#ff0000 字体颜色!!(!!!#f9cb9c 背景颜色!!!)[^专有语法提醒]\n\n**示例**\n\n```markdown\n[!!#ff0000 红色超链接!!](http://www.qq.com)\n[!!#ffffff !!!#000000 黑底白字超链接!!!!!](http://www.qq.com)\n[新窗口打开](http://www.qq.com){target=_blank}\n鞋子 !32 特大号!\n大头 ^`儿子`^ 和小头 ^^`爸爸`^^\n爱在~~西元前~~**当下**\n```\n\n**效果**\n[!!#ff0000 红色超链接!!](http://www.qq.com)\n[!!#ffffff !!!#000000 黑底白字超链接!!!!!](http://www.qq.com)\n[新窗口打开](http://www.qq.com){target=_blank}\n鞋子 !32 特大号!\n大头 ^`儿子`^ 和小头 ^^`爸爸`^^\n爱在~~西元前~~**当下**\n\n---\n\n## 标题设置\n\n**说明**\n\n- 在文字下方加 === 可使上一行文字变成一级标题\n- 在文字下方加 --- 可使上一行文字变成二级标题\n- 在行首加井号（#）表示不同级别的标题，例如：# H1, ##H2, ###H3\n\n---\n## 信息面板\n\n**说明**\n使用连续三个冒号`:::`和关键字（`[primary | info | warning | danger | success]`）来声明\n\n```markdown\n:::primary // [primary | info | warning | danger | success] 标题\n内容\n:::\n```\n\n**效果**\n:::p 标题\n内容\n:::\n:::success\n内容\n:::\n\n',
+  '## 提升渲染频率并支持虚拟光标\n在流式输出的情况下cherry提供了更快的渲染频率（最快每**10ms渲染一次**）\n在关闭流式输出时，cherry的渲染频率为最快**50ms渲染一次**。',
+  '## 稳定输出加粗斜体\n在流式输出的情况下输出**加粗文字时，cherry会自动补全加粗文字**。\n在流式输出的情况下输出*斜体文字时，cherry会自动补全斜体文字*。## 稳定输出代码块\n在流式输出的情况下，文字会一个一个的输出到页面上\n在输出**代码块**时，cherry会自动补全代码块：\n```\nalert("hello world");\nalert("hello world");\n```\n代码块输出结束了。',
+  '## 稳定输出超链接、图片、视频\n项目地址为：[Github 地址](https://github.com/Tencent/cherry-markdown)\n输出图片时不会漏出源码，如：![dogs #200px#B#S#R](assets/images/demo-dog.png)',
+  '## 稳定输出无序列表\n在流式输出的情况下输出**无序列表**的时候，cherry会自动修复无序列表的内容，使内容在输出时不会命中标题语法：\n- 无序列表第一行\n- 无序列表第二行\n- 无序列表第三行\n\n无序列表结束了。\n用短横线命中标题\n--\n标题结束了。',
+  '## 稳定输出表格\n在流式输出的情况下输出**表格**时，在输出第一行表格内容后，cherry自动补全表格的第二行：\n|项目（居中对齐）|价格（右对齐）|数量（左对齐）|\n|:-:|-:|:-|\n|计算机|￥1600|5|\n|手机机|￥12|50|\n表格输出结束了。',
+  '## 稳定输出mermaid图形、脚注等\n输出比较丰富的富媒体内容：\n## 时序图\n\n```mermaid\nsequenceDiagram\nautonumber\nA-->A: 文本1\nA->>B: 文本2\nloop 循环1\nloop 循环2\nA->B: 文本3\nend\nloop 循环3\nB -->>A: 文本4\nend\nB -->> B: 文本5\nend\n```\n\n## 字体样式\n\n**说明**\n\n- 使用`*(或_)` 和 `**(或__)` 表示*斜体*和 **粗体**\n- 使用 `/` 表示 /下划线/ ,使用`~~` 表示~~删除线~~\n- 使用`^(或^^)`表示^上标^或^^下标^^\n- 使用 ! 号+数字 表示字体 !24 大! !12 小! [^专有语法提醒]\n- 使用两个(三个)!号+RGB 颜色 表示!!#ff0000 字体颜色!!(!!!#f9cb9c 背景颜色!!!)[^专有语法提醒]\n\n**示例**\n\n```markdown\n[!!#ff0000 红色超链接!!](http://www.qq.com)\n[!!#ffffff !!!#000000 黑底白字超链接!!!!!](http://www.qq.com)\n[新窗口打开](http://www.qq.com){target=_blank}\n鞋子 !32 特大号!\n大头 ^`儿子`^ 和小头 ^^`爸爸`^^\n爱在~~西元前~~**当下**\n```\n\n**效果**\n[!!#ff0000 红色超链接!!](http://www.qq.com)\n[!!#ffffff !!!#000000 黑底白字超链接!!!!!](http://www.qq.com)\n[新窗口打开](http://www.qq.com){target=_blank}\n鞋子 !32 特大号!\n大头 ^`儿子`^ 和小头 ^^`爸爸`^^\n爱在~~西元前~~**当下**\n\n---\n\n## 标题设置\n\n**说明**\n\n- 在文字下方加 === 可使上一行文字变成一级标题\n- 在文字下方加 --- 可使上一行文字变成二级标题\n- 在行首加井号（#）表示不同级别的标题，例如：# H1, ##H2, ###H3\n\n---\n## 信息面板\n\n**说明**\n使用连续三个冒号`:::`和关键字（`[primary | info | warning | danger | success]`）来声明\n\n```markdown\n:::primary // [primary | info | warning | danger | success] 标题\n内容\n:::\n```\n\n**效果**\n:::p 标题\n内容\n:::\n:::success\n内容\n:::\n\n',
 ];
 
 const dialog = document.querySelector('.j-dialog');
