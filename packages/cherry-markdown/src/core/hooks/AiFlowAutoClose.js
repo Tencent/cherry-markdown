@@ -159,8 +159,8 @@ export default class AiFlowAutoClose extends ParagraphBase {
     const lastN = /\n$/.test(str) ? '\n' : '';
     let $str = str.replace(/\n$/, '');
     // 判断是否有虚拟光标
-    const flowCursor = /CHERRYFLOWSESSIONCURSOR/.test($str) ? 'CHERRYFLOWSESSIONCURSOR' : '';
-    $str = $str.replace(/CHERRYFLOWSESSIONCURSOR/g, '');
+    const flowCursor = /CHERRYFLOWSESSIONCURSOR$/.test($str) ? 'CHERRYFLOWSESSIONCURSOR' : '';
+    $str = $str.replace(/CHERRYFLOWSESSIONCURSOR$/g, '');
     // 自动补全最后一行的加粗、斜体语法
     $str = this.$dealEmphasis($str);
     // 自动补全最后一行的图片、音频、视频语法
