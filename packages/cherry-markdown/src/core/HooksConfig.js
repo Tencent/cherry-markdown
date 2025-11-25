@@ -51,6 +51,7 @@ import Panel from './hooks/Panel';
 import Detail from './hooks/Detail';
 import FrontMatter from './hooks/FrontMatter';
 import Space from './hooks/Space';
+import AiFlowAutoClose from './hooks/AiFlowAutoClose';
 /**
  * 引擎各语法的配置
  * 主要决定支持哪些语法，以及各语法的执行顺序
@@ -69,6 +70,7 @@ const hooksConfig = [
    */
   InlineMath,
   MathBlock,
+  AiFlowAutoClose,
   HtmlBlock,
   Footnote,
   CommentReference,

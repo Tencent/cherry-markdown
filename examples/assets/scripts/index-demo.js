@@ -190,6 +190,8 @@ const basicConfig = {
   engine: {
     global: {
       htmlAttrWhiteList: 'part|slot',
+      flowSessionContext: false,
+      // flowSessionCursor: 'default'
     },
     syntax: {
       link: {

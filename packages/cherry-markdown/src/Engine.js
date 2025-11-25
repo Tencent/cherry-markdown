@@ -214,50 +214,6 @@ export default class Engine {
     $str = $str.replace(/\$/g, '~D');
     $str = $str.replace(/\r\n/g, '\n'); // DOS to Unix
     $str = $str.replace(/\r/g, '\n'); // Mac to Unix
-    if (
-      // @ts-ignore
-      this.$cherry.options.engine.syntax.fontEmphasis.selfClosing ||
-      this.$cherry.options.engine.global.flowSessionContext
-    ) {
-      // 自动补全最后一行的加粗、斜体语法
-      if (/(^|\n)[^\n]*\*{1,3}[^\n]+$/.test($str) && $str.match(/(^|\n)([^\n]+)$/)) {
-        // 处理公式里有*号的情况
-        $str = $str.replace(/(~D{1,2})([^\n]+?)\1/g, (match, begin, content) => {
-          return `${begin}${content.replace(/\*/g, 'Σ*CONTENT*TMP')}${begin}`;
-        });
-        const lastLineStr = $str.match(/(^|\n)([^\n]+)$/)[2].split(/(\*{1,3})/g);
-        const emphasis = [];
-        for (let i = 0; i < lastLineStr.length; i++) {
-          // 判断是否命中无序列表语法（用* 也可表示无序列表）
-          if (i === 1 && lastLineStr[i] === '*' && lastLineStr[i + 1] && /^\s+/.test(lastLineStr[i + 1])) {
-            continue;
-          }
-          if (/\*{1,3}/.test(lastLineStr[i])) {
-            const current = lastLineStr[i];
-            if (emphasis.length <= 0) {
-              emphasis.push(current);
-            } else {
-              if (emphasis[emphasis.length - 1] === current) {
-                emphasis.pop();
-              } else {
-                emphasis.push(current);
-              }
-            }
-          }
-        }
-        // 只剩一个未配对的，表示最后没有*
-        if (emphasis.length === 1) {
-          $str = $str.replace(/(\*{1,3})(\s*)([^*\n]+?)$/, '$1$2$3$2$1');
-        }
-        // 剩两个未配对的，表示最后有未配对的*
-        if (emphasis.length === 2) {
-          $str = $str.replace(/(\*{1,3})(\s*)([^*\n]+?)\*{0,2}$/, '$1$2$3$2$1');
-        }
-        $str = $str.replace(/(~D{1,2})([^\n]+?)\1/g, (match, begin, content) => {
-          return `${begin}${content.replace(/Σ\*CONTENT\*TMP/g, '*')}${begin}`;
-        });
-      }
-    }
     // 避免正则性能问题，如/.+\n/.test(' '.repeat(99999)), 回溯次数过多
     // 参考文章：http://www.alloyteam.com/2019/07/13574/
     if ($str[$str.length - 1] !== '\n') {

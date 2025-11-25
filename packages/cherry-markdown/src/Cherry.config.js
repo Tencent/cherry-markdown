@@ -205,10 +205,16 @@ const defaultConfig = {
        * - 表格语法自动闭合，相当于强制`engine.syntax.table.selfClosing=true`
        * - 加粗、斜体语法自动闭合，相当于强制`engine.syntax.fontEmphasis.selfClosing=true`
        * - 脚注语法自动闭合，相当于强制`engine.syntax.footnote.selfClosing=true`
+       * - mermaid画图自动纠错，相当于当mermaid因不完全的语法导致执行失败时，cherry会自动用上次mermaid执行成功的数据进行渲染
+       * - 标题自动闭合，相当于强制`engine.syntax.header.selfClosing=true`
+       * - 超链接自动闭合，相当于强制`engine.syntax.link.selfClosing=true`
+       * - 图片、视频、音频语法自动闭合，相当于强制`engine.syntax.image.selfClosing=true`
+       * // TODO:
+       * - 公式（行内公式和段落公式）自动闭合，相当于强制`engine.syntax.mathBlock.selfClosing=true` && `engine.syntax.inlineMath.selfClosing=true`
        *
        * 后续如果有新的需求，可提issue反馈
        */
-      flowSessionContext: true,
+      flowSessionContext: false,
       /**
        * 流式会话时，在最后位置增加一个类似光标的dom
        * - 'default'：用cherry提供的默认样式
@@ -234,6 +240,7 @@ const defaultConfig = {
         attrRender: (text, href) => {
           return '';
         },
+        selfClosing: false, // 自动闭合，为true时
       },
       autoLink: {
         /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
@@ -248,6 +255,10 @@ const defaultConfig = {
         attrRender: (text, href) => {
           return '';
         },
+      },
+      image: {
+        selfClosing: false, // 自动闭合
+        selfClosingLoadingImgPath: '', // 触发自动闭合时加载loading图片的路径
       },
       list: {
         listNested: false, // 同级列表类型转换后变为子级
@@ -343,12 +354,14 @@ const defaultConfig = {
         needWhitespace: false,
       },
       mathBlock: {
+        selfClosing: false,
         engine: 'MathJax', // katex或MathJax
         src: '',
         css: '', // 如果使用katex，则还需要引入css（如果是 MathJax，则不需要）
         plugins: true, // 默认加载插件
       },
       inlineMath: {
+        selfClosing: false,
         engine: 'MathJax', // katex或MathJax
         src: '',
       },
@@ -366,6 +379,10 @@ const defaultConfig = {
          *  - none          标题没有锚点
          */
         anchorStyle: 'default',
+        /**
+         * 是否自动闭合
+         */
+        selfClosing: true,
         /**
          * 是否开启严格模式
          *    true：严格模式
@@ -790,6 +807,9 @@ const defaultConfig = {
      *    string: 直接粘贴的内容
      */
     onPaste: callbacks.onPaste,
+    onClickToc: (e, hash) => {
+      return true;
+    },
   },
   event: {
     // 当编辑区内容有实际变化时触发
