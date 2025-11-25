@@ -214,6 +214,9 @@ export default class Engine {
     $str = $str.replace(/\$/g, '~D');
     $str = $str.replace(/\r\n/g, '\n'); // DOS to Unix
     $str = $str.replace(/\r/g, '\n'); // Mac to Unix
+    // 判断是否有虚拟光标
+    const flowCursor = /CHERRYFLOWSESSIONCURSOR/.test($str) ? 'CHERRYFLOWSESSIONCURSOR' : '';
+    $str = $str.replace(/CHERRYFLOWSESSIONCURSOR/g, '');
     // 自动补全最后一行的加粗、斜体语法
     if (
       (!!this.$cherry.options.engine.syntax.fontEmphasis &&
@@ -271,26 +274,26 @@ export default class Engine {
       // 写了闭合中括号，但括号没闭合的情况
       $str = $str.replace(/([^[]*?)!(video|audio|)\[([^\n\]]*)\]\(([^)]*)$/, (whole, before, type, content, url) => {
         if (type.toLowerCase === 'video') {
-          return `${before}<video src="${url}"></video>`;
+          return `${before}<video src="${url}"></video>${flowCursor}`;
         }
         if (type.toLowerCase === 'audio') {
-          return `${before}<audio src="${url}"></audio>`;
+          return `${before}<audio src="${url}"></audio>${flowCursor}`;
         }
-        return `${before}<img src="${selfClosingLoadingImgPath}"/>`;
+        return `${before}<img src="${selfClosingLoadingImgPath}"/>${flowCursor}`;
       });
 
       // 只写了中括号的情况
       $str = $str.replace(/([^[]*?)!(video|audio|)\[([^\n\]]*)\]{0,1}$/, (whole, before, type, content) => {
         if (type.toLowerCase === 'video') {
-          return `${before}<video src></video>`;
+          return `${before}<video src></video>${flowCursor}`;
         }
         if (type.toLowerCase === 'audio') {
-          return `${before}<audio src></audio>`;
+          return `${before}<audio src></audio>${flowCursor}`;
         }
         if (!!selfClosingLoadingImgPath) {
-          return `${before}<img src/>`;
+          return `${before}<img src/>${flowCursor}`;
         }
-        return `${before}<img src="${selfClosingLoadingImgPath}"/>`;
+        return `${before}<img src="${selfClosingLoadingImgPath}"/>${flowCursor}`;
       });
     }
 
@@ -301,14 +304,15 @@ export default class Engine {
     ) {
       // 写了闭合中括号，但括号没闭合的情况
       $str = $str.replace(/([^[]*?)\[([^\n\]]*)\]\(([^)]*)$/, (whole, before, content, url) => {
-        return `${before}<a href="${url}">${content}</a>`;
+        return `${before}<a href="${url}">${content}</a>${flowCursor}`;
       });
 
       // 只写了中括号的情况
       $str = $str.replace(/([^[]*?)\[([^\n\]]*)\]{0,1}$/, (whole, before, content) => {
-        return `${before}<a href>${content}</a>`;
+        return `${before}<a href>${content}</a>${flowCursor}`;
       });
     }
+    $str = $str + flowCursor;
     // 避免正则性能问题，如/.+\n/.test(' '.repeat(99999)), 回溯次数过多
     // 参考文章：http://www.alloyteam.com/2019/07/13574/
     if ($str[$str.length - 1] !== '\n') {

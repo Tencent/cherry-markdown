@@ -149,6 +149,7 @@ export default class Header extends ParagraphBase {
       // 适配流式会话的场景，文章末尾的段横线标题语法（`\n-`）失效
       $str = $str.replace(/(\n\s*-{1,})\s*$/, '$1 ');
       // 对文章末尾的#进行隐藏
+      $str = $str.replace(/(^\s*|\n\s*)#{1,}\s*CHERRYFLOWSESSIONCURSOR\s*$/, '$1CHERRYFLOWSESSIONCURSOR');
       $str = $str.replace(/(^\s*|\n\s*)#{1,}\s*$/, '$1');
     }
     // atx 优先
