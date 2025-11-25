@@ -32,7 +32,7 @@ const cherryConfig = {
       image: {
         selfClosing: false,
         selfClosingRender: (type, name, url) => {
-          if (type === 'image') {
+          if (type === 'img') {
             return `<img style="width:30px;height:30px;border-radius:15px;" src="assets/images/loading.gif" alt="${name}" />`;
           }
           return '';

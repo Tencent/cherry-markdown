@@ -93,42 +93,17 @@ export default class AiFlowAutoClose extends ParagraphBase {
       !!this.$cherry.options.engine.syntax.image && this.$cherry.options.engine.syntax.image.selfClosingRender
         ? this.$cherry.options.engine.syntax.image.selfClosingRender
         : false;
-    // 写了闭合中括号，但括号没闭合的情况
-    $str = $str.replace(/([^[]*?)!(video|audio|)\[([^\n\]]*)\]\(([^)]*)$/, (whole, before, type, content, url) => {
+    $str = $str.replace(/([^[]*?)!(video|audio|)\[([^\n\]]*?)(\]|\]\([^)]*|)$/, (whole, before, type, content, url) => {
       let ret = '';
+      const targetType = /(video|audio)/.test(type) ? type : 'img';
       if (typeof selfClosingRender === 'function') {
-        const targetType = /(video|audio)/.test(type) ? type : 'image';
-        ret = selfClosingRender(targetType, content, url);
+        const urlFix = url ? url.replace(/^\(/, '') : '';
+        ret = selfClosingRender(targetType, content, urlFix);
       }
       if (ret) {
-        return ret;
+        return `${before}${ret}`;
       }
-      if (type.toLowerCase === 'video') {
-        return `${before}<video src></video>`;
-      }
-      if (type.toLowerCase === 'audio') {
-        return `${before}<audio src></audio>`;
-      }
-      return `${before}<img src/>`;
-    });
-
-    // 只写了中括号的情况
-    $str = $str.replace(/([^[]*?)!(video|audio|)\[([^\n\]]*)\]{0,1}$/, (whole, before, type, content) => {
-      let ret = '';
-      if (typeof selfClosingRender === 'function') {
-        const targetType = /(video|audio)/.test(type) ? type : 'image';
-        ret = selfClosingRender(targetType, content, '');
-      }
-      if (ret) {
-        return ret;
-      }
-      if (type.toLowerCase === 'video') {
-        return `${before}<video src></video>`;
-      }
-      if (type.toLowerCase === 'audio') {
-        return `${before}<audio src></audio>`;
-      }
-      return `${before}<img src/>`;
+      return `${before}<${targetType} src></${targetType}>`;
     });
     return $str;
   }
@@ -143,14 +118,9 @@ export default class AiFlowAutoClose extends ParagraphBase {
       return str;
     }
     let $str = str;
-    // 写了闭合中括号，但括号没闭合的情况
-    $str = $str.replace(/([^[]*?)\[([^\n\]]*)\]\(([^)]*)$/, (whole, before, content, url) => {
-      return `${before}<a href="${url}">${content}</a>`;
-    });
-
-    // 只写了中括号的情况
-    $str = $str.replace(/([^[]*?)\[([^\n\]]*)\]{0,1}$/, (whole, before, content) => {
-      return `${before}<a href>${content}</a>`;
+    $str = $str.replace(/([^[]*?)\[([^\n\]]*?)(\]|\]\([^)]*|)$/, (whole, before, content, url) => {
+      const urlFix = url ? url.replace(/^(\]|\]\()/, '') : '';
+      return `${before}<a href="${urlFix}">${content}</a>`;
     });
     return $str;
   }
