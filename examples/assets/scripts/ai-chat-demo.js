@@ -31,7 +31,12 @@ const cherryConfig = {
       },
       image: {
         selfClosing: false,
-        selfClosingLoadingImgPath: 'assets/images/loading.gif',
+        selfClosingRender: (type, name, url) => {
+          if (type === 'image') {
+            return `<img style="width:80px;height:80px" src="assets/images/loading.gif" alt="${name}" />`;
+          }
+          return '';
+        },
       },
     },
   },

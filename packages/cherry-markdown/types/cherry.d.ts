@@ -299,7 +299,7 @@ export interface CherryEngineOptions {
       | false
       | {
           selfClosing?: boolean; // 自动闭合
-          selfClosingLoadingImgPath?: string; // 触发自动闭合时加载loading图片的路径
+          selfClosingRender?: (type: string, name: string, url: string) => string; // 触发自动闭合时调用的渲染器，为空则使用默认渲染器
         };
     list?:
       | false

@@ -89,33 +89,46 @@ export default class AiFlowAutoClose extends ParagraphBase {
       return str;
     }
     let $str = str;
-    const selfClosingLoadingImgPath =
-      !!this.$cherry.options.engine.syntax.image && this.$cherry.options.engine.syntax.image.selfClosingLoadingImgPath
-        ? this.$cherry.options.engine.syntax.image.selfClosingLoadingImgPath
-        : '';
+    const selfClosingRender =
+      !!this.$cherry.options.engine.syntax.image && this.$cherry.options.engine.syntax.image.selfClosingRender
+        ? this.$cherry.options.engine.syntax.image.selfClosingRender
+        : false;
     // 写了闭合中括号，但括号没闭合的情况
     $str = $str.replace(/([^[]*?)!(video|audio|)\[([^\n\]]*)\]\(([^)]*)$/, (whole, before, type, content, url) => {
-      if (type.toLowerCase === 'video') {
-        return `${before}<video src="${url}"></video>`;
+      let ret = '';
+      if (typeof selfClosingRender === 'function') {
+        const targetType = /(video|audio)/.test(type) ? type : 'image';
+        ret = selfClosingRender(targetType, content, url);
       }
-      if (type.toLowerCase === 'audio') {
-        return `${before}<audio src="${url}"></audio>`;
+      if (ret) {
+        return ret;
       }
-      return `${before}<img src="${selfClosingLoadingImgPath}"/>`;
-    });
-
-    // 只写了中括号的情况
-    $str = $str.replace(/([^[]*?)!(video|audio|)\[([^\n\]]*)\]{0,1}$/, (whole, before, type, content) => {
       if (type.toLowerCase === 'video') {
         return `${before}<video src></video>`;
       }
       if (type.toLowerCase === 'audio') {
         return `${before}<audio src></audio>`;
       }
-      if (!!selfClosingLoadingImgPath) {
-        return `${before}<img src/>`;
+      return `${before}<img src/>`;
+    });
+
+    // 只写了中括号的情况
+    $str = $str.replace(/([^[]*?)!(video|audio|)\[([^\n\]]*)\]{0,1}$/, (whole, before, type, content) => {
+      let ret = '';
+      if (typeof selfClosingRender === 'function') {
+        const targetType = /(video|audio)/.test(type) ? type : 'image';
+        ret = selfClosingRender(targetType, content, '');
       }
-      return `${before}<img src="${selfClosingLoadingImgPath}"/>`;
+      if (ret) {
+        return ret;
+      }
+      if (type.toLowerCase === 'video') {
+        return `${before}<video src></video>`;
+      }
+      if (type.toLowerCase === 'audio') {
+        return `${before}<audio src></audio>`;
+      }
+      return `${before}<img src/>`;
     });
     return $str;
   }

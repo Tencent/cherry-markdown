@@ -258,7 +258,7 @@ const defaultConfig = {
       },
       image: {
         selfClosing: false, // 自动闭合
-        selfClosingLoadingImgPath: '', // 触发自动闭合时加载loading图片的路径
+        selfClosingRender: (type, name, url) => '', // 触发自动闭合时调用的渲染器，为空则使用默认渲染器
       },
       list: {
         listNested: false, // 同级列表类型转换后变为子级
