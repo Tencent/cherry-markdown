@@ -214,7 +214,7 @@ const defaultConfig = {
        *
        * 后续如果有新的需求，可提issue反馈
        */
-      flowSessionContext: true,
+      flowSessionContext: false,
       /**
        * 流式会话时，在最后位置增加一个类似光标的dom
        * - 'default'：用cherry提供的默认样式
@@ -382,7 +382,7 @@ const defaultConfig = {
         /**
          * 是否自动闭合
          */
-        selfClosing: false,
+        selfClosing: true,
         /**
          * 是否开启严格模式
          *    true：严格模式
