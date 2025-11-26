@@ -13,7 +13,7 @@ const paths = [
   '/img.html',
   '/table.html',
   '/head_num.html',
-  // '/ai_chat.html',
+  '/ai_chat.html',
   // '/vim.html',
   // '/mermaid.html',
 ];
