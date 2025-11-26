@@ -59,19 +59,28 @@
       import { noToolbarConfig } from '@examples/assets/scripts/notoolbar-demo.js';
       import { previewConfig } from '@examples/assets/scripts/preview-demo.js';
       import { imgConfig } from '@examples/assets/scripts/img-demo.js';
-      // import { aiChatScenario } from '../../examples/assets/scripts/ai-chat-demo.js';
+      import { aiChatScenario } from '@examples/assets/scripts/ai-chat-demo.js';
 
       const devCompatibleConfig = {
         callback: {
           urlProcessor: (url, type) => {
-            // 兼容本地文件加载
-            console.log('加载图片', '/@fs/' + __EXAMPLES_PATH__ + '/' + url);
+
+            console.log('urlProcessor', url, type);
+            if (type!=='image') return url;
+
+            // 协议（http/https）或协议相对 // 或 data: 等直接返回
+            if (/^(https?:)?\/\//i.test(url) || /^data:/i.test(url) || url.startsWith('/')) {
+              return url;
+            }
+
+            // 相对路径：拼接本地示例路径
+            console.log('加载本地图片', '/@fs/' + __EXAMPLES_PATH__ + '/' + url);
             return '/@fs/' + __EXAMPLES_PATH__ + '/' + url;
           },
         },
       };
 
-      let CONFIG = '';
+      let CONFIG ={};
 
       switch (window.location.pathname) {
         case '/':
@@ -138,9 +147,9 @@
           };
           break;
         case '/ai_chat.html':
-          // document.addEventListener('DOMContentLoaded', function () {
-          //   aiChatScenario();
-          // });
+          document.addEventListener('DOMContentLoaded', function () {
+            aiChatScenario(devCompatibleConfig);
+          });
           break;
         case '/vim.html':
           // CONFIG = '';
@@ -152,7 +161,7 @@
           CONFIG = Object.assign({}, basicConfig, { value: indexMd });
       }
 
-      if (window.location.pathname !== '/ai-chat-scenario') {
+      if (window.location.pathname !== '/ai_chat.html') {
         window.cherry = new Cherry(CONFIG);
       }
 
