@@ -137,7 +137,7 @@ function ensureChatDemoDom() {
 
     /* 控制区 */
     .controls {
-      margin: 24px auto 80px;
+      margin: 24px auto 20px;
       display: flex;
       gap: 12px;
       align-items: center;
@@ -196,6 +196,23 @@ function ensureChatDemoDom() {
       background: #f8f9fb;
       box-sizing: border-box;
     }
+    .custom-input {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      width: 60%;
+      min-width: 500px;
+    }
+    .custom-textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      box-sizing: border-box;
+    }
   `;
   // 合并额外样式
   const finalCss = css + wrapperExtraCss;
@@ -234,6 +251,10 @@ function ensureChatDemoDom() {
         <label class="status" for="j-status-input">
           <input id="j-status-input" class="j-status-input status-input" type="checkbox" checked aria-checked="true"> 开启流式适配
         </label>
+      </div>
+      <div class="custom-input">
+        <textarea class="custom-textarea j-custom-textarea" placeholder="请输入您想要流式打印的Markdown内容..."></textarea>
+        <div class="button custom-button j-custom-button">流式打印自定义内容</div>
       </div>
     `;
     document.body.appendChild(wrapper);
@@ -317,6 +338,41 @@ const aiChatScenario = (devCompatibleConfig) => {
     beginPrint(msgList[msgList.length - currentMsgIndex]);
     currentMsgIndex--;
     buttonTips.innerHTML = currentMsgIndex;
+  });
+
+  // 自定义输入功能
+  const customTextarea = document.querySelector('.j-custom-textarea');
+  const customButton = document.querySelector('.j-custom-button');
+  
+  customButton.addEventListener('click', function () {
+    if (printing) {
+      return;
+    }
+    
+    const customContent = customTextarea.value.trim();
+    if (!customContent) {
+      alert('请输入要流式打印的内容');
+      return;
+    }
+    
+    const msg = msgTemplate.cloneNode(true);
+    msg.classList.remove('j-one-msg');
+    currentCherry = new Cherry(
+      Object.assign(cherryConfig, { el: msg.querySelector('.chat-one-msg') }, devCompatibleConfig),
+    );
+    dialog.appendChild(msg);
+    
+    // 自动滚动到最新消息
+    try {
+      dialog.scrollTop = dialog.scrollHeight;
+    } catch (e) {
+      // ignore
+    }
+    
+    beginPrint(customContent);
+    
+    // 清空输入框
+    // customTextarea.value = '';
   });
 };
 
