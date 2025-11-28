@@ -39,7 +39,7 @@ export default class AiFlowAutoClose extends ParagraphBase {
     }
     let $str = str;
     // 自动补全最后一行的加粗、斜体语法
-    if (/(^|\n)[^\n]*\*{1,3}[^\n]+$/.test($str) && $str.match(/(^|\n)([^\n]+)$/)) {
+    if (/(^|\n)[^\n]*\*{1,3}[^\n]*$/.test($str) && $str.match(/(^|\n)([^\n]+)$/)) {
       // 处理公式里有*号的情况
       $str = $str.replace(/(~D{1,2})([^\n]+?)\1/g, (match, begin, content) => {
         return `${begin}${content.replace(/\*/g, 'Σ*CONTENT*TMP')}${begin}`;
@@ -66,7 +66,12 @@ export default class AiFlowAutoClose extends ParagraphBase {
       }
       // 只剩一个未配对的，表示最后没有*
       if (emphasis.length === 1) {
-        $str = $str.replace(/(\*{1,3})(\s*)([^*\n]+?)$/, '$1$2$3$2$1');
+        // 如果最后是*，则去掉
+        if (/\*\s*$/.test($str)) {
+          $str = $str.replace(/\*+\s*$/, '');
+        } else {
+          $str = $str.replace(/(\*{1,3})(\s*)([^*\n]+?)$/, '$1$2$3$2$1');
+        }
       }
       // 剩两个未配对的，表示最后有未配对的*
       if (emphasis.length === 2) {

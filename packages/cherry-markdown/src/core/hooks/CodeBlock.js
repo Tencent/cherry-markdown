@@ -541,8 +541,11 @@ export default class CodeBlock extends ParagraphBase {
       });
       $str = $str.replace(/~~not~inlineCode/g, '\\`');
     }
+    /**
+     * 处理行内代码块自动补全
+     * 注意：表格里的行内代码块暂【不支持】自动补全
+     */
     if (needAutoClose) {
-      // 处理行内代码块自动补全
       if (
         this.$cherry.options.engine.syntax.inlineCode.selfClosing ||
         this.$cherry.options.engine.global.flowSessionContext
@@ -550,7 +553,11 @@ export default class CodeBlock extends ParagraphBase {
         let hasAutoClose = false;
         $str = $str.replace(/(^|\n)([^\n]+)(\n$)/, (match, prefix, content, suffix) => {
           let $content = content.replace(/\\`/g, '~~not~inlineCode').replace(/`+$/, '');
-          hasAutoClose = /(`+)([^`]+)$/.test($content);
+          hasAutoClose = /(`+)([^`]+)$/.test($content) && !/(`+)([^`]*~~CODE[^`]+)$/.test($content);
+          if (!hasAutoClose) {
+            $content = $content.replace(/~~not~inlineCode/g, '\\`');
+            return `${prefix}${$content}${suffix}`;
+          }
           $content = $content.replace(/(`+)([^`]+)$/, '$1$2$1').replace(/~~not~inlineCode/g, '\\`');
           return `${prefix}${$content}${suffix}`;
         });
