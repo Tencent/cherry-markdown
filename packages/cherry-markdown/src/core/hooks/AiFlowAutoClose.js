@@ -89,33 +89,21 @@ export default class AiFlowAutoClose extends ParagraphBase {
       return str;
     }
     let $str = str;
-    const selfClosingLoadingImgPath =
-      !!this.$cherry.options.engine.syntax.image && this.$cherry.options.engine.syntax.image.selfClosingLoadingImgPath
-        ? this.$cherry.options.engine.syntax.image.selfClosingLoadingImgPath
-        : '';
-    // 写了闭合中括号，但括号没闭合的情况
-    $str = $str.replace(/([^[]*?)!(video|audio|)\[([^\n\]]*)\]\(([^)]*)$/, (whole, before, type, content, url) => {
-      if (type.toLowerCase === 'video') {
-        return `${before}<video src="${url}"></video>`;
+    const selfClosingRender =
+      !!this.$cherry.options.engine.syntax.image && this.$cherry.options.engine.syntax.image.selfClosingRender
+        ? this.$cherry.options.engine.syntax.image.selfClosingRender
+        : false;
+    $str = $str.replace(/([^[]*?)!(video|audio|)\[([^\n\]]*?)(\]|\]\([^)]*|)$/, (whole, before, type, content, url) => {
+      let ret = '';
+      const targetType = /(video|audio)/.test(type) ? type : 'img';
+      if (typeof selfClosingRender === 'function') {
+        const urlFix = url ? url.replace(/^\(/, '') : '';
+        ret = selfClosingRender(targetType, content, urlFix);
       }
-      if (type.toLowerCase === 'audio') {
-        return `${before}<audio src="${url}"></audio>`;
+      if (ret) {
+        return `${before}${ret}`;
       }
-      return `${before}<img src="${selfClosingLoadingImgPath}"/>`;
-    });
-
-    // 只写了中括号的情况
-    $str = $str.replace(/([^[]*?)!(video|audio|)\[([^\n\]]*)\]{0,1}$/, (whole, before, type, content) => {
-      if (type.toLowerCase === 'video') {
-        return `${before}<video src></video>`;
-      }
-      if (type.toLowerCase === 'audio') {
-        return `${before}<audio src></audio>`;
-      }
-      if (!!selfClosingLoadingImgPath) {
-        return `${before}<img src/>`;
-      }
-      return `${before}<img src="${selfClosingLoadingImgPath}"/>`;
+      return `${before}<${targetType} src></${targetType}>`;
     });
     return $str;
   }
@@ -130,14 +118,9 @@ export default class AiFlowAutoClose extends ParagraphBase {
       return str;
     }
     let $str = str;
-    // 写了闭合中括号，但括号没闭合的情况
-    $str = $str.replace(/([^[]*?)\[([^\n\]]*)\]\(([^)]*)$/, (whole, before, content, url) => {
-      return `${before}<a href="${url}">${content}</a>`;
-    });
-
-    // 只写了中括号的情况
-    $str = $str.replace(/([^[]*?)\[([^\n\]]*)\]{0,1}$/, (whole, before, content) => {
-      return `${before}<a href>${content}</a>`;
+    $str = $str.replace(/([^[]*?)\[([^\n\]]*?)(\]|\]\([^)]*|)$/, (whole, before, content, url) => {
+      const urlFix = url ? url.replace(/^(\]|\]\()/, '') : '';
+      return `${before}<a href="${urlFix}">${content}</a>`;
     });
     return $str;
   }
@@ -146,8 +129,8 @@ export default class AiFlowAutoClose extends ParagraphBase {
     const lastN = /\n$/.test(str) ? '\n' : '';
     let $str = str.replace(/\n$/, '');
     // 判断是否有虚拟光标
-    const flowCursor = /CHERRYFLOWSESSIONCURSOR/.test($str) ? 'CHERRYFLOWSESSIONCURSOR' : '';
-    $str = $str.replace(/CHERRYFLOWSESSIONCURSOR/g, '');
+    const flowCursor = /CHERRYFLOWSESSIONCURSOR$/.test($str) ? 'CHERRYFLOWSESSIONCURSOR' : '';
+    $str = $str.replace(/CHERRYFLOWSESSIONCURSOR$/g, '');
     // 自动补全最后一行的加粗、斜体语法
     $str = this.$dealEmphasis($str);
     // 自动补全最后一行的图片、音频、视频语法
