@@ -277,6 +277,7 @@ const defaultConfig = {
          */
         // theme: 'red',
         showColor: true, // 是否在行内代码为颜色值时展示颜色指示
+        selfClosing: false, // 自动闭合，为true时，会尝试补全最后一行的行内代码
       },
       codeBlock: {
         // theme: 'dark', //  @deprecated 不再支持theme的配置，统一在`themeSettings.codeBlockTheme`中配置
