@@ -13,6 +13,9 @@ const cherryConfig = {
       codeBlock: {
         selfClosing: false,
       },
+      inlineCode: {
+        selfClosing: false,
+      },
       header: {
         anchorStyle: 'none',
       },
@@ -48,8 +51,8 @@ const cherryConfig = {
 
 const msgList = [
   '### 提升渲染频率并支持虚拟光标\n在流式输出的情况下cherry提供了更快的渲染频率（最快每**10ms渲染一次**）\n在关闭流式输出时，cherry的渲染频率为最快**50ms渲染一次**。',
-  '### 稳定输出加粗斜体\n在流式输出的情况下输出**加粗文字时，cherry会自动补全加粗文字**。\n在流式输出的情况下输出*斜体文字时，cherry会自动补全斜体文字*。\n### 稳定输出代码块\n在流式输出的情况下，文字会一个一个的输出到页面上\n在输出**代码块**时，cherry会自动补全代码块：\n```\nalert("hello world");\nalert("hello world");\n```\n代码块输出结束了。',
-  '### 稳定输出超链接、图片、视频\n输出超链接时不会漏出源码，如：[项目Github 地址](https://github.com/Tencent/cherry-markdown)\n输出图片时不会漏出源码，如：![dogs #200px#B#S#R](assets/images/demo-dog.png)',
+  '### 稳定输出加粗斜体\n在流式输出的情况下输出**加粗文字时，cherry会自动补全加粗文字**。\n在流式输出的情况下输出*斜体文字时，cherry会自动补全斜体文字*。\n### 稳定输出代码块\n在流式输出的情况下，文字会一个一个的输出到页面上\n在输出**代码块**时，cherry会自动补全代码块：\n```\nalert("hello world");\nalert("hello world");\n```\n代码块输出结束了。\n在输出**行内代码**时，cherry会自动补全行内代码：`alert("hello world");`',
+  '### 稳定输出超链接、图片、视频\n输出超链接时不会漏出源码，如：[项目Github 地址](https://github.com/Tencent/cherry-markdown)，地址输出结束。\n输出图片时不会漏出源码，如：![dogs #200px#B#S#R](assets/images/demo-dog.png)，图片输出结束。',
   '### 稳定输出无序列表\n在流式输出的情况下输出**无序列表**的时候，cherry会自动修复无序列表的内容，使内容在输出时不会命中标题语法：\n- 无序列表第一行\n- 无序列表第二行\n- 无序列表第三行\n\n无序列表结束了。\n用短横线命中标题\n--\n标题结束了。',
   '### 稳定输出表格\n在流式输出的情况下输出**表格**时，在输出第一行表格内容后，cherry自动补全表格的第二行：\n|项目（居中对齐）|价格（右对齐）|数量（左对齐）|\n|:-:|-:|:-|\n|计算机|￥1600|5|\n|手机机|￥12|50|\n表格输出结束了。',
   '### 稳定输出mermaid图形、脚注等\n输出比较丰富的富媒体内容：\n#### 时序图\n\n```mermaid\ngraph LR\n    A[公司] -->| 下 班 | B(菜市场)\n    B --> C{看见<br>卖西瓜的}\n    C -->|Yes| D[买一个包子]\n    C -->|No| E[买一斤包子]\n```\n\n#### 字体样式\n\n**说明**\n\n- 使用`*(或_)` 和 `**(或__)` 表示*斜体*和 **粗体**\n- 使用 `/` 表示 /下划线/ ,使用`~~` 表示~~删除线~~\n- 使用`^(或^^)`表示^上标^或^^下标^^\n- 使用 ! 号+数字 表示字体 !24 大! !12 小! [^专有语法提醒]\n- 使用两个(三个)!号+RGB 颜色 表示!!#ff0000 字体颜色!!(!!!#f9cb9c 背景颜色!!!)[^专有语法提醒]\n\n**示例**\n\n```markdown\n[!!#ff0000 红色超链接!!](http://www.qq.com)\n[!!#ffffff !!!#000000 黑底白字超链接!!!!!](http://www.qq.com)\n[新窗口打开](http://www.qq.com){target=_blank}\n鞋子 !32 特大号!\n大头 ^`儿子`^ 和小头 ^^`爸爸`^^\n爱在~~西元前~~**当下**\n```\n\n**效果**\n[!!#ff0000 红色超链接!!](http://www.qq.com)\n[!!#ffffff !!!#000000 黑底白字超链接!!!!!](http://www.qq.com)\n[新窗口打开](http://www.qq.com){target=_blank}\n鞋子 !32 特大号!\n大头 ^`儿子`^ 和小头 ^^`爸爸`^^\n爱在~~西元前~~**当下**\n\n---\n\n#### 标题设置\n\n**说明**\n\n- 在文字下方加 === 可使上一行文字变成一级标题\n- 在文字下方加 --- 可使上一行文字变成二级标题\n- 在行首加井号（#）表示不同级别的标题，例如：# H1, ##H2, ###H3\n\n---\n#### 信息面板\n\n**说明**\n使用连续三个冒号`:::`和关键字（`[primary | info | warning | danger | success]`）来声明\n\n```markdown\n:::primary // [primary | info | warning | danger | success] 标题\n内容\n:::\n```\n\n**效果**\n:::p 标题\n内容\n:::\n:::success\n内容\n:::\n\n',
@@ -134,7 +137,7 @@ function ensureChatDemoDom() {
 
     /* 控制区 */
     .controls {
-      margin: 24px auto 80px;
+      margin: 24px auto 20px;
       display: flex;
       gap: 12px;
       align-items: center;
@@ -193,6 +196,23 @@ function ensureChatDemoDom() {
       background: #f8f9fb;
       box-sizing: border-box;
     }
+    .custom-input {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      width: 60%;
+      min-width: 500px;
+    }
+    .custom-textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      box-sizing: border-box;
+    }
   `;
   // 合并额外样式
   const finalCss = css + wrapperExtraCss;
@@ -231,6 +251,10 @@ function ensureChatDemoDom() {
         <label class="status" for="j-status-input">
           <input id="j-status-input" class="j-status-input status-input" type="checkbox" checked aria-checked="true"> 开启流式适配
         </label>
+      </div>
+      <div class="custom-input">
+        <textarea class="custom-textarea j-custom-textarea" placeholder="请输入您想要流式打印的Markdown内容..."></textarea>
+        <div class="button custom-button j-custom-button">流式打印自定义内容</div>
       </div>
     `;
     document.body.appendChild(wrapper);
@@ -314,6 +338,41 @@ const aiChatScenario = (devCompatibleConfig) => {
     beginPrint(msgList[msgList.length - currentMsgIndex]);
     currentMsgIndex--;
     buttonTips.innerHTML = currentMsgIndex;
+  });
+
+  // 自定义输入功能
+  const customTextarea = document.querySelector('.j-custom-textarea');
+  const customButton = document.querySelector('.j-custom-button');
+  
+  customButton.addEventListener('click', function () {
+    if (printing) {
+      return;
+    }
+    
+    const customContent = customTextarea.value.trim();
+    if (!customContent) {
+      alert('请输入要流式打印的内容');
+      return;
+    }
+    
+    const msg = msgTemplate.cloneNode(true);
+    msg.classList.remove('j-one-msg');
+    currentCherry = new Cherry(
+      Object.assign(cherryConfig, { el: msg.querySelector('.chat-one-msg') }, devCompatibleConfig),
+    );
+    dialog.appendChild(msg);
+    
+    // 自动滚动到最新消息
+    try {
+      dialog.scrollTop = dialog.scrollHeight;
+    } catch (e) {
+      // ignore
+    }
+    
+    beginPrint(customContent);
+    
+    // 清空输入框
+    // customTextarea.value = '';
   });
 };
 

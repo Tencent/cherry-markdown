@@ -323,6 +323,10 @@ export interface CherryEngineOptions {
            * @deprecated 不再支持theme的配置，统一在`themeSettings.inlineCodeTheme`中配置
            */
           // theme: 'red',
+          /** 是否在行内代码为颜色值时展示颜色指示 */
+          showColor?: boolean;
+          /** 是否自动闭合 为true时，会尝试补全最后一行的行内代码*/
+          selfClosing?: boolean;
         };
     codeBlock?:
       | false

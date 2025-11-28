@@ -398,7 +398,8 @@ export default class CodeBlock extends ParagraphBase {
   beforeMakeHtml(str, sentenceMakeFunc, markdownParams) {
     let $str = str;
 
-    if (this.selfClosing || this.$engine.$cherry.options.engine.global.flowSessionContext) {
+    // 处理段落代码块自动闭合
+    if (this.selfClosing || this.$cherry.options.engine.global.flowSessionContext) {
       $str = this.$dealUnclosingCode($str);
     }
 
@@ -479,14 +480,14 @@ export default class CodeBlock extends ParagraphBase {
         .replace(/\\\|/g, '~CHERRYNormalLine')
         .split('|')
         .map((oneTd) => {
-          return this.makeInlineCode(oneTd).replace('~CHERRYNormalLine', '\\|');
+          return this.makeInlineCode(oneTd, false).replace('~CHERRYNormalLine', '\\|');
         })
         .join('|')
         .replace(/`/g, '\\`');
     });
     // 为了避免InlineCode被HtmlBlock转义，需要在这里提前缓存
     // InlineBlock只需要在afterMakeHtml还原即可
-    $str = this.makeInlineCode($str);
+    $str = this.makeInlineCode($str, true);
 
     // 处理缩进代码块
     $str = this.$getIndentCodeBlock($str);
@@ -507,7 +508,7 @@ export default class CodeBlock extends ParagraphBase {
     return lang;
   }
 
-  makeInlineCode(str) {
+  makeInlineCode(str, needAutoClose = true) {
     let $str = str;
     if (this.INLINE_CODE_REGEX.test($str)) {
       $str = $str.replace(/\\`/g, '~~not~inlineCode');
@@ -539,6 +540,31 @@ export default class CodeBlock extends ParagraphBase {
         return `~~CODE${sign}$`;
       });
       $str = $str.replace(/~~not~inlineCode/g, '\\`');
+    }
+    /**
+     * 处理行内代码块自动补全
+     * 注意：表格里的行内代码块暂【不支持】自动补全
+     */
+    if (needAutoClose) {
+      if (
+        this.$cherry.options.engine.syntax.inlineCode.selfClosing ||
+        this.$cherry.options.engine.global.flowSessionContext
+      ) {
+        let hasAutoClose = false;
+        $str = $str.replace(/(^|\n)([^\n]+)(\n$)/, (match, prefix, content, suffix) => {
+          let $content = content.replace(/\\`/g, '~~not~inlineCode').replace(/`+$/, '');
+          hasAutoClose = /(`+)([^`]+)$/.test($content) && !/(`+)([^`]*~~CODE[^`]+)$/.test($content);
+          if (!hasAutoClose) {
+            $content = $content.replace(/~~not~inlineCode/g, '\\`');
+            return `${prefix}${$content}${suffix}`;
+          }
+          $content = $content.replace(/(`+)([^`]+)$/, '$1$2$1').replace(/~~not~inlineCode/g, '\\`');
+          return `${prefix}${$content}${suffix}`;
+        });
+        if (hasAutoClose) {
+          $str = this.makeInlineCode($str, false);
+        }
+      }
     }
     return $str;
   }
