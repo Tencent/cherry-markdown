@@ -476,9 +476,10 @@ export default class CodeBlock extends ParagraphBase {
     // 表格里处理行内代码，让一个td里的行内代码语法生效，让跨td的行内代码语法失效
     $str = $str.replace(getTableRule(true), (whole, ...args) => {
       return whole
+        .replace(/\\\|/g, '~CHERRYNormalLine')
         .split('|')
         .map((oneTd) => {
-          return this.makeInlineCode(oneTd);
+          return this.makeInlineCode(oneTd).replace('~CHERRYNormalLine', '\\|');
         })
         .join('|')
         .replace(/`/g, '\\`');
@@ -516,6 +517,7 @@ export default class CodeBlock extends ParagraphBase {
         }
         let $code = code.replace(/~~not~inlineCode/g, '\\`');
         $code = this.$replaceSpecialChar($code);
+        $code = $code.replace('~CHERRYNormalLine', '|');
         $code = $code.replace(/\\/g, '\\\\');
 
         // 如果行内代码只有一个颜色值，则在code末尾追加一个颜色圆点
