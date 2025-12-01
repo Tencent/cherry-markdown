@@ -84,7 +84,7 @@ function ensureChatDemoDom() {
     .ai-chat-wrapper { box-sizing: border-box; }
 
     .dialog {
-      padding: calc(var(--ai-gap) * 1.5);
+      padding: 0 0 0 42px;
       width: 100%;
       max-width: var(--ai-max-width);
       box-sizing: border-box;
