@@ -31,10 +31,12 @@ export default class MathBlock extends ParagraphBase {
   katex;
   MathJax;
 
-  constructor({ config }) {
+  constructor({ config, cherry }) {
     super({ needCache: true });
     // 非浏览器环境下配置为 node
     this.engine = isBrowser() ? (config.engine ?? 'MathJax') : 'node';
+    this.$cherry = cherry;
+    this.lastCode = '';
   }
 
   toHtml(wholeMatch, lineSpace, leadingChar, content) {
@@ -66,16 +68,28 @@ export default class MathBlock extends ParagraphBase {
         result = `<div data-sign="${sign}" class="Cherry-Math cherry-katex-need-render" data-type="mathBlock" data-lines="${lines}" data-content="${encodeURI($content)}"></div>`;
         this.$engine.asyncRenderHandler.add(`math-block-${sign}`);
       } else {
-        const html = this.katex.renderToString($content, {
+        let html = this.katex.renderToString($content, {
           throwOnError: false,
           displayMode: true,
         });
+        if (this.isSelfClosing()) {
+          if (/class="katex-error"/.test(html) && this.lastCode) {
+            html = this.lastCode;
+          }
+          this.lastCode = html;
+        }
         result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
               data-lines="${lines}">${html}</div>`;
       }
     } else if (this.MathJax?.tex2svg) {
       // MathJax渲染
-      const svg = getHTML(this.MathJax.tex2svg($content), true);
+      let svg = getHTML(this.MathJax.tex2svg($content), true);
+      if (this.isSelfClosing()) {
+        if (/data-mml-node="merror"/.test(svg) && this.lastCode) {
+          svg = this.lastCode;
+        }
+        this.lastCode = svg;
+      }
       result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
             data-lines="${lines}">${svg}</div>`;
     } else {
@@ -86,11 +100,38 @@ export default class MathBlock extends ParagraphBase {
     return leadingChar + this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
   }
 
-  beforeMakeHtml(str) {
+  isSelfClosing() {
+    return (
+      (this.$cherry.options.engine.syntax.mathBlock && this.$cherry.options.engine.syntax.mathBlock.selfClosing) ||
+      this.$cherry.options.engine.global.flowSessionContext
+    );
+  }
+
+  $dealUnclosingMath(str) {
+    let $str = str.replace(/(^|[^\\])(~D|~D~D)(CHERRYFLOWSESSIONCURSOR\n*|\n*)$/, '$1$3');
+    if (/(^|[^\\])~D~D/.test($str)) {
+      $str = $str.replace(/(CHERRYFLOWSESSIONCURSOR\n*|\n*)$/, '~D~D$1');
+    }
+    return $str;
+  }
+
+  makeMath(str) {
     if (isLookbehindSupported()) {
       return str.replace(this.RULE.reg, this.toHtml.bind(this));
     }
     return replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this), true, 1);
+  }
+
+  beforeMakeHtml(str) {
+    let $str = this.makeMath(str);
+    if (this.isSelfClosing()) {
+      const $oldStr = $str;
+      $str = this.$dealUnclosingMath($str);
+      if ($oldStr !== $str) {
+        $str = this.makeMath($str);
+      }
+    }
+    return $str;
   }
 
   makeHtml(str) {
