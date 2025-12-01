@@ -71,6 +71,8 @@ function ensureChatDemoDom() {
 
     html, body {
       margin: 0;
+      margin-left: auto;
+      margin-right: auto;
       padding: 0;
       overflow: auto;
       background: var(--ai-bg);
