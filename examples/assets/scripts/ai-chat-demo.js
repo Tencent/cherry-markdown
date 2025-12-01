@@ -203,6 +203,8 @@ function ensureChatDemoDom() {
       margin-bottom: 10px;
       width: 60%;
       min-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .custom-textarea {
       width: 100%;
