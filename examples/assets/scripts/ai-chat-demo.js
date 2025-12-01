@@ -71,6 +71,8 @@ function ensureChatDemoDom() {
 
     html, body {
       margin: 0;
+      margin-left: auto;
+      margin-right: auto;
       padding: 0;
       overflow: auto;
       background: var(--ai-bg);
@@ -82,7 +84,7 @@ function ensureChatDemoDom() {
     .ai-chat-wrapper { box-sizing: border-box; }
 
     .dialog {
-      padding: calc(var(--ai-gap) * 1.5);
+      padding: 0 0 0 42px;
       width: 100%;
       max-width: var(--ai-max-width);
       box-sizing: border-box;
@@ -201,6 +203,8 @@ function ensureChatDemoDom() {
       margin-bottom: 10px;
       width: 60%;
       min-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .custom-textarea {
       width: 100%;
