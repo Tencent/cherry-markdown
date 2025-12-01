@@ -31,10 +31,12 @@ export default class InlineMath extends ParagraphBase {
   katex;
   MathJax;
 
-  constructor({ config }) {
+  constructor({ config, cherry }) {
     super({ needCache: true });
     // 非浏览器环境下配置为 node
     this.engine = isBrowser() ? (config.engine ?? 'MathJax') : 'node';
+    this.$cherry = cherry;
+    this.lastCode = '';
   }
 
   toHtml(wholeMatch, leadingChar, m1) {
@@ -54,14 +56,26 @@ export default class InlineMath extends ParagraphBase {
         result = `${leadingChar}<span data-sign="${sign}" class="Cherry-InlineMath cherry-katex-need-render" data-type="mathBlock" data-lines="${lines}" data-content="${encodeURI($m1)}"></span>`;
         this.$engine.asyncRenderHandler.add(`math-inline-${sign}`);
       } else {
-        const html = this.katex.renderToString($m1, {
+        let html = this.katex.renderToString($m1, {
           throwOnError: false,
         });
+        if (this.isSelfClosing()) {
+          if (/class="katex-error"/.test(html) && this.lastCode) {
+            html = this.lastCode;
+          }
+          this.lastCode = html;
+        }
         result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}">${html}</span>`;
       }
     } else if (this.MathJax?.tex2svg) {
       // MathJax渲染
-      const svg = getHTML(this.MathJax.tex2svg($m1, { em: 12, ex: 6, display: false }), true);
+      let svg = getHTML(this.MathJax.tex2svg($m1, { em: 12, ex: 6, display: false }), true);
+      if (this.isSelfClosing()) {
+        if (/data-mml-node="merror"/.test(svg) && this.lastCode) {
+          svg = this.lastCode;
+        }
+        this.lastCode = svg;
+      }
       result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}">${svg}</span>`;
     } else {
       result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock"
@@ -69,6 +83,22 @@ export default class InlineMath extends ParagraphBase {
     }
 
     return this.pushCache(result, ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX + sign);
+  }
+
+  isSelfClosing() {
+    return (
+      (this.$cherry.options.engine.syntax.inlineMath && this.$cherry.options.engine.syntax.inlineMath.selfClosing) ||
+      this.$cherry.options.engine.global.flowSessionContext
+    );
+  }
+
+  $dealUnclosingMath(str) {
+    let $str = str.replace(/(^|[^\\])(~D)(CHERRYFLOWSESSIONCURSOR\n*|\n*)$/, '$1$3');
+    const $strWithOutBlockMath = $str.replace(/(^|[^\\])~D~D/g, '');
+    if (/(^|[^\\])~D/.test($strWithOutBlockMath)) {
+      $str = $str.replace(/(CHERRYFLOWSESSIONCURSOR\n*|\n*)$/, '~D$1');
+    }
+    return $str;
   }
 
   beforeMakeHtml(str) {
@@ -84,7 +114,15 @@ export default class InlineMath extends ParagraphBase {
         .replace(/\\~D/g, '~D') // 出现反斜杠的情况（如/$e=m^2$）会导致多一个反斜杠，这里替换掉
         .replace(/~D/g, '\\~D');
     });
-    return this.makeInlineMath($str);
+    $str = this.makeInlineMath($str);
+    if (this.isSelfClosing()) {
+      const $oldStr = $str;
+      $str = this.$dealUnclosingMath($str);
+      if ($oldStr !== $str) {
+        $str = this.makeInlineMath($str);
+      }
+    }
+    return $str;
   }
 
   makeInlineMath(str) {
