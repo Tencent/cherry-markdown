@@ -105,7 +105,7 @@ export default class Engine {
       }
       return;
     });
-    if (ret) {
+    if (ret && ret !== originUrl) {
       return ret;
     }
     return url;
