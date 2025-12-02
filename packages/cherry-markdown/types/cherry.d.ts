@@ -463,6 +463,8 @@ export interface CherryEngineOptions {
            *    false：不过滤style属性
            */
           filterStyle?: boolean;
+          /** 是否去掉</xxx>标签后面的连续换行符 */
+          removeTrailingNewline?: boolean;
         };
     panel?:
       | false
