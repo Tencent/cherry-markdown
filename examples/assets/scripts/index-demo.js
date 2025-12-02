@@ -278,9 +278,9 @@ const basicConfig = {
         customResourceURL: 'https://github.githubassets.com/images/icons/emoji/unicode/${code}.png?v8',
         upperCase: false,
       },
-      // htmlBlock: {
-      //   filterStyle: true,
-      // }
+      htmlBlock: {
+        removeTrailingNewline: true,
+      },
       // toc: {
       //     tocStyle: 'nested'
       // }

@@ -402,6 +402,8 @@ const defaultConfig = {
          *    false：不过滤style属性
          */
         filterStyle: false,
+        /** 是否去掉</xxx>标签后面的连续换行符 */
+        removeTrailingNewline: false,
       },
       panel: {
         /** 是否支持对齐语法
