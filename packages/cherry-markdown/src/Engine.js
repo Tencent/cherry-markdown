@@ -92,7 +92,9 @@ export default class Engine {
     if (this.urlProcessorMap[key]) {
       return this.urlProcessorMap[key];
     }
-    const ret = this.$cherry.options.callback.urlProcessor(url, srcType, (/** @type {string} */ newUrl) => {
+    let originUrl = this.dealAfterMakeHtml(url);
+    originUrl = originUrl.replace(/&amp;/g, '&');
+    const ret = this.$cherry.options.callback.urlProcessor(originUrl, srcType, (/** @type {string} */ newUrl) => {
       if (newUrl) {
         if (!this.urlProcessorMap[key]) {
           this.urlProcessorMap[key] = newUrl;
@@ -103,7 +105,7 @@ export default class Engine {
       }
       return;
     });
-    if (ret) {
+    if (ret && ret !== originUrl) {
       return ret;
     }
     return url;
@@ -224,10 +226,8 @@ export default class Engine {
     return $str;
   }
 
-  $afterMakeHtml(str) {
-    let $str = this.$fireHookAction(str, 'paragraph', 'afterMakeHtml', this.$dealSentenceByCache.bind(this));
-    // str = this._fireHookAction(str, 'sentence', 'afterMakeHtml');
-    $str = $str.replace(/~D/g, '$');
+  dealAfterMakeHtml(str) {
+    let $str = str.replace(/~D/g, '$');
     $str = $str.replace(/~T/g, '~');
     $str = $str.replace(/\\<\//g, '\\ </');
     $str = $str
@@ -241,6 +241,13 @@ export default class Engine {
       .replace(/\\&(?!(amp|lt|gt|quot|apos);)/, () => '&amp;');
     $str = $str.replace(/\\ <\//g, '\\</');
     $str = $str.replace(/id="safe_(?=.*?")/g, 'id="'); // transform header id to avoid being sanitized
+    return $str;
+  }
+
+  $afterMakeHtml(str) {
+    let $str = this.$fireHookAction(str, 'paragraph', 'afterMakeHtml', this.$dealSentenceByCache.bind(this));
+    // str = this._fireHookAction(str, 'sentence', 'afterMakeHtml');
+    $str = this.dealAfterMakeHtml($str);
     $str = UrlCache.restoreAll($str);
     return $str;
   }
