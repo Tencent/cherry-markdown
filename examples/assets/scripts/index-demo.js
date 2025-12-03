@@ -279,7 +279,7 @@ const basicConfig = {
         upperCase: false,
       },
       htmlBlock: {
-        removeTrailingNewline: true,
+        removeTrailingNewline: false,
       },
       // toc: {
       //     tocStyle: 'nested'

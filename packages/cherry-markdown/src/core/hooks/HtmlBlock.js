@@ -142,7 +142,7 @@ export default class HtmlBlock extends ParagraphBase {
     }
     // 对于闭合标签</xxx>后的连续换行符，替换为一个换行符
     if (this.removeTrailingNewline) {
-      $str = $str.replace(/(<\/[^>]+>)\n{2,}/g, '$1\n');
+      $str = $str.replace(/(<\/[^>\n]+>)\s*\n\s*\n+/g, '$1\n');
     }
     return $str;
   }
