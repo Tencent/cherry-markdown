@@ -98,7 +98,7 @@ export default class AiFlowAutoClose extends ParagraphBase {
       !!this.$cherry.options.engine.syntax.image && this.$cherry.options.engine.syntax.image.selfClosingRender
         ? this.$cherry.options.engine.syntax.image.selfClosingRender
         : false;
-    $str = $str.replace(/([^[]*?)!(video|audio|)\[([^\n\]]*?)(\]|\]\([^)]*|)$/, (whole, before, type, content, url) => {
+    $str = $str.replace(/([^[]*?)!(video|audio|)\[([^\n\]]*?)(\]\([^)]*|\]|)$/, (whole, before, type, content, url) => {
       let ret = '';
       const targetType = /(video|audio)/.test(type) ? type : 'img';
       if (typeof selfClosingRender === 'function') {
@@ -122,28 +122,24 @@ export default class AiFlowAutoClose extends ParagraphBase {
     } else {
       return str;
     }
-    let $str = str;
-    $str = $str.replace(/([^[]*?)\[([^\n\]]*?)(\]|\]\([^)]*|)$/, (whole, before, content, url) => {
-      const urlFix = url ? url.replace(/^(\]|\]\()/, '') : '';
+    return str.replace(/([^[]*?)\[([^\n\]]*?)(\]\([^)]*|\]|)$/, (whole, before, content, url) => {
+      const urlFix = url ? url.replace(/^(\]\(|\])/, '') : '';
       return `${before}<a href="${urlFix}">${content}</a>`;
     });
-    return $str;
   }
 
   makeHtml(str, sentenceMakeFunc) {
     const lastN = /\n$/.test(str) ? '\n' : '';
     let $str = str.replace(/\n$/, '');
     // 判断是否有虚拟光标
-    const flowCursor = /CHERRYFLOWSESSIONCURSOR$/.test($str) ? 'CHERRYFLOWSESSIONCURSOR' : '';
-    $str = $str.replace(/CHERRYFLOWSESSIONCURSOR$/g, '');
+    const flowCursor = /CHERRYFLOWSESSIONCURSOR([*_~^]*)$/.test($str) ? 'CHERRYFLOWSESSIONCURSOR' : '';
+    $str = $str.replace(/CHERRYFLOWSESSIONCURSOR([*_~^]*)$/g, '$1');
     // 自动补全最后一行的加粗、斜体语法
     $str = this.$dealEmphasis($str);
     // 自动补全最后一行的图片、音频、视频语法
     $str = this.dealMedia($str);
     // 自动补全最后一行的链接语法
     $str = this.dealLink($str);
-    // 避免正则性能问题，如/.+\n/.test(' '.repeat(99999)), 回溯次数过多
-    // 参考文章：http://www.alloyteam.com/2019/07/13574/
     $str = $str + flowCursor + lastN;
     return $str;
   }
