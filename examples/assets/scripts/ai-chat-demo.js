@@ -5,7 +5,7 @@ const cherryConfig = {
   },
   engine: {
     global: {
-      // 开启流式模式 （默认 true）
+      // 开启流式模式
       flowSessionContext: true,
       flowSessionCursor: 'default',
     },
@@ -59,12 +59,11 @@ const cherryConfig = {
   previewer: {
     enablePreviewerBubble: false,
   },
-  isPreviewOnly: true,
 };
 
 const msgList = [
-  '### 提升渲染频率并支持虚拟光标\n在流式输出的情况下cherry提供了更快的渲染频率（最快每**10ms渲染一次**）\n在关闭流式输出时，cherry的渲染频率为最快**50ms渲染一次**。',
-  '### 稳定输出加粗斜体\n在流式输出的情况下输出**加粗文字时，cherry会自动补全加粗文字**。\n在流式输出的情况下输出*斜体文字时，cherry会自动补全斜体文字*。\n### 稳定输出代码块\n在流式输出的情况下，文字会一个一个的输出到页面上\n在输出**代码块**时，cherry会自动补全代码块：\n```\nalert("hello world");\nalert("hello world");\n```\n代码块输出结束了。\n在输出**行内代码**时，cherry会自动补全行内代码：`alert("hello world");`',
+  '### 概述\n通过以下方式打开Cherry Markdown的流式渲染能力和虚拟光标：\n```javascript\nconst cherry = new Cherry({\n  editor: {\n    height: "auto",\n    // 纯预览模式\n    defaultModel: "previewOnly",\n  },\n  engine: {\n    global: {\n      // 开启流式渲染模式\n      flowSessionContext: true,\n      /**\n       * 流式会话时，在最后位置增加一个类似光标的dom\n       * - "default"：用cherry提供的默认样式\n       * - ""：不增加任何dom\n       * - "<span class="custom-cursor"></span>": 自定义的dom\n       */\n      flowSessionCursor: "default",\n    },\n  },\n  previewer: {\n    // 关闭预览区的编辑功能\n    enablePreviewerBubble: false,\n  },\n});\n```\n开启流式渲染后，cherry会对以下语法进行自动补全，避免出现Markdown源码，以达到在流式输出过程中**稳定输出**的效果：\n- 标题\n- 加粗、斜体\n- 超链接\n- 图片、音视频\n- 行内代码块\n- 段落代码块\n- 行内公式\n- 段落公式\n- 无序列表\n- 表格\n- mermaid画图\n- 脚注\n\n',
+  '### 提升渲染频率\n在流式输出的情况下cherry提供了更快的渲染频率（最快每**10ms渲染一次**）\n在关闭流式输出时，cherry的渲染频率为最快**50ms渲染一次**。\n### 稳定输出加粗斜体\n在流式输出的情况下输出**加粗文字时，cherry会自动补全加粗文字**。\n在流式输出的情况下输出*斜体文字时，cherry会自动补全斜体文字*。\n### 稳定输出代码块\n在流式输出的情况下，文字会一个一个的输出到页面上\n在输出**代码块**时，cherry会自动补全代码块：\n```\nalert("hello world");\nalert("hello world");\n```\n代码块输出结束了。\n在输出**行内代码**时，cherry会自动补全行内代码：`alert("hello world");`',
   '### 稳定输出公式\n在流式输出的情况下可稳定输出行内公式如：$(a+b)^2=a^2+2ab+b^2$ 行内公式输出结束\n也可以稳定输出段落公式如：$$(a+b)^2=a^2+2ab+b^2$$  段落公式输出结束\n### 稳定输出超链接、图片、视频\n输出超链接时不会漏出源码，如：[项目Github 地址](https://github.com/Tencent/cherry-markdown)，地址输出结束。\n输出图片时不会漏出源码，如：![dogs #200px#B#S#R](assets/images/demo-dog.png)，图片输出结束。',
   '### 稳定输出表格\n在流式输出的情况下输出**表格**时，在输出第一行表格内容后，cherry自动补全表格的第二行：\n|项目（居中对齐）|价格（右对齐）|数量（左对齐）|\n|:-:|-:|:-|\n|计算机|￥1600|5|\n|手机机|￥12|50|\n表格输出结束了。',
   '### 稳定输出无序列表\n在流式输出的情况下输出**无序列表**的时候，cherry会自动修复无序列表的内容，使内容在输出时不会命中标题语法：\n- 无序列表第一行\n- 无序列表第二行\n- 无序列表第三行\n\n无序列表结束了。\n用短横线命中标题\n--\n标题结束了。',
