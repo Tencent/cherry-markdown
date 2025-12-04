@@ -1,5 +1,20 @@
 # Change Log
 
+## 0.10.3
+
+### Patch Changes
+
+- feat: 行内代码块也支持自动补全 [@sunsonliu](https://github.com/sunsonliu)([#1529](https://github.com/Tencent/cherry-markdown/pull/1529))([`58fcdca`](https://github.com/Tencent/cherry-markdown/commit/58fcdca9a388baea4289f047d6e38d20099c80f8))
+- feat: beforeMakeHtml和afterMakeHtml 支持传入行内语法解析器（第二个参数） [@sunsonliu](https://github.com/sunsonliu)([`cc1fd51`](https://github.com/Tencent/cherry-markdown/commit/cc1fd513d4bc647b006343387b401d4109af17dd))
+- fix: 修复urlProcessor没有传入原始url的问题 [@sunsonliu](https://github.com/sunsonliu)([#1532](https://github.com/Tencent/cherry-markdown/pull/1532))([`22435ce`](https://github.com/Tencent/cherry-markdown/commit/22435ce2d6db82c089c29cc957abc01b726053bf))
+- fix: #1500 修复空白换行显示问题 [@RSS1102](https://github.com/RSS1102)([`24ee322`](https://github.com/Tencent/cherry-markdown/commit/24ee322816b623921d0fe93565ce4029868dbe62))
+- fix: #1523 修复html dom被连续换行截断的问题 [@sunsonliu](https://github.com/sunsonliu)([#1533](https://github.com/Tencent/cherry-markdown/pull/1533))([`45d4590`](https://github.com/Tencent/cherry-markdown/commit/45d4590c8026060f215030d32d4c538f19fb1e6d))
+- fix: #1516 添加列时尝试继承左边列的对齐方式；处理上传文件时有报错的情况 [@sunsonliu](https://github.com/sunsonliu)([#1520](https://github.com/Tencent/cherry-markdown/pull/1520))([`f3934b5`](https://github.com/Tencent/cherry-markdown/commit/f3934b5f01ea0447ece286128bd75de3ec048bc6))
+- fix: #1079 修复表格中的代码块 无法使用 | 符号 [@sunsonliu](https://github.com/sunsonliu)([#1528](https://github.com/Tencent/cherry-markdown/pull/1528))([`f330756`](https://github.com/Tencent/cherry-markdown/commit/f3307568dfc86391e8848c419f5f73a8dd3d1542))
+- feat: 增加图片、音视频、语法自动闭合时配置自定义占位 [@sunsonliu](https://github.com/sunsonliu)([#1524](https://github.com/Tencent/cherry-markdown/pull/1524))([`c09b8db`](https://github.com/Tencent/cherry-markdown/commit/c09b8db609fac0dcde1ae71d5cf1b60e85affb29))
+- feat: #1521 流式输出场景支持超链接、图片、标题等语法自动闭合 [@sunsonliu](https://github.com/sunsonliu)([#1522](https://github.com/Tencent/cherry-markdown/pull/1522))([`e85b986`](https://github.com/Tencent/cherry-markdown/commit/e85b986558baa8edbcd962b669fd755912bb9d66))
+- feat: 公式支持自动闭合 [@sunsonliu](https://github.com/sunsonliu)([#1531](https://github.com/Tencent/cherry-markdown/pull/1531))([`b91f569`](https://github.com/Tencent/cherry-markdown/commit/b91f56982ef4da851f04049ee2d5c49d4870d0aa))
+
 ## 0.10.2
 
 ### Patch Changes
