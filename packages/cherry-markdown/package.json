@@ -1,7 +1,7 @@
 {
   "name": "cherry-markdown",
   "license": "Apache-2.0",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "type": "module",
   "description": "a new markdown editor",
   "repository": {
