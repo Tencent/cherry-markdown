@@ -25,8 +25,8 @@ jobs:
         uses: changesets/action@v1
         with:
           version: yarn changeset-version
-          title: 'chore: release'
-          commit: 'chore: release'
+          title: "chore: release"
+          commit: "chore: release"
           publish: yarn changeset tag
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
@@ -59,3 +59,20 @@ jobs:
     if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"cherry-markdown-vscode-plugin"') }}
     uses: ./.github/workflows/release-vscode-plugin-build.yaml
     secrets: inherit
+
+  # 强制同步 main 到 dev,以 main 为准,覆盖 dev 的所有内容
+  sync-main-to-dev:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.BOT_TOKEN }}
+
+      - name: Sync main to dev
+        run: |
+          git fetch origin dev
+          git checkout -B dev origin/main
+          git push origin dev --force
