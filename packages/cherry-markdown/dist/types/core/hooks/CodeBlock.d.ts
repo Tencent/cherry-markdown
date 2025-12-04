@@ -24,6 +24,7 @@ export default class CodeBlock extends ParagraphBase {
     $cherry: any;
     needCleanFlowCursor: any;
     showInlineColor: any;
+    afterMakeHtml(html: any): any;
     $resetCache(): void;
     $codeReplace($codeSrc: any, $lang: any, sign: any, lines: any): any;
     $codeCache(sign: any, str: any): any;
@@ -91,7 +92,7 @@ export default class CodeBlock extends ParagraphBase {
      * @returns {string} 格式化后的语言
      */
     formatLang(lang: string): string;
-    makeInlineCode(str: any): any;
+    makeInlineCode(str: any, needAutoClose?: boolean): any;
     makeHtml(str: any): any;
     $replaceSpecialChar(str: any): any;
     rule(): {

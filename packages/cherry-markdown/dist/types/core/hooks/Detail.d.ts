@@ -10,6 +10,7 @@
  */
 export default class Detail extends ParagraphBase {
     constructor();
+    makeHtml(str: any, sentenceMakeFunc: any): any;
     $getDetailInfo(isOpen: any, title: any, str: any, sentenceMakeFunc: any): {
         type: string;
         html: string;

@@ -7,6 +7,7 @@
  */
 export default class TapdHtmlTagPlugin extends ParagraphBase {
     constructor();
+    makeHtml(html: any, sentenceMakeFunc: any): any;
     rule(): {
         reg: RegExp;
     };

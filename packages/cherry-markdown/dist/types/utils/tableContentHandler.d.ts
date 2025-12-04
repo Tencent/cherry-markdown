@@ -195,7 +195,26 @@ export default class TableHandler {
      */
     $insertRow(position: string | number): void;
     /**
+     * 获取单元格对齐方式
+     * @param {*} cells 单元格数组
+     * @param {*} index 单元格索引
+     * @returns {string} 单元格对齐方式，如果是false则表示不生成对齐方式
+     */
+    $getTdAlign(cells: any, index: any, cellsIndex: any): string;
+    /**
      * 添加列
+     * 有两种风格的表格，需要分别处理
+     * 风格一（type1）：
+     * | Header | Header | Header | Header |
+     * |:---|:---:|---:| ------ |
+     * | Sample | Sample | Sample | Sample |
+     * | Sample | Sample | Sample | Sample |
+     * | Sample | Sample | Sample | Sample |
+     * 风格二（type2）：
+     * Header | Header | Header
+     * ------ | ------ | ------
+     * Sample |111e | Sample
+     * Sample | Sample | Sample
      */
     $insertCol(): void;
     /**

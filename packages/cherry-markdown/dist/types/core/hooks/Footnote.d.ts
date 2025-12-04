@@ -16,6 +16,8 @@ export default class Footnote extends ParagraphBase {
     getFootNote(): any[];
     formatFootNote(): string;
     beforeMakeHtml(str: any): any;
+    makeHtml(str: any, sentenceMakeFunc: any): any;
+    afterMakeHtml(str: any): any;
     rule(): {
         begin: string;
         content: string;

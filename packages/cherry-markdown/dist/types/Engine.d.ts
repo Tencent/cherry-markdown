@@ -39,6 +39,7 @@ export default class Engine {
     $prepareMakeHtml(md: any): void;
     $completeMakeHtml(md: any): void;
     $beforeMakeHtml(str: any): any;
+    dealAfterMakeHtml(str: any): any;
     $afterMakeHtml(str: any): any;
     $dealSentenceByCache(md: any): {
         sign: string;

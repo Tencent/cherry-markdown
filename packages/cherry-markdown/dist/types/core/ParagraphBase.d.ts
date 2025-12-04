@@ -28,8 +28,18 @@ export default class ParagraphBase extends SyntaxBase {
      */
     joinRawHtml(textContainsHtml: string): string;
     toHtml(str: any, sentenceMakeFunc: any): any;
-    makeHtml(str: any, sentenceMakeFunc: any): any;
-    afterMakeHtml(html: any): any;
+    beforeMakeHtml(str: any, sentenceMakeFunc?: (md: any) => {
+        sign: string;
+        html: any;
+    }): any;
+    makeHtml(str: any, sentenceMakeFunc?: (md: any) => {
+        sign: string;
+        html: any;
+    }): any;
+    afterMakeHtml(str: any, sentenceMakeFunc?: (md: any) => {
+        sign: string;
+        html: any;
+    }): any;
     isContainsCache(str: any, fullMatch: any): boolean;
     /**
      *

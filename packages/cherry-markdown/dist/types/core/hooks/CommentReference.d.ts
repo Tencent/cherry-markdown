@@ -18,6 +18,7 @@ export default class CommentReference extends ParagraphBase {
     pushCommentReferenceCache(key: any, cache: any): void;
     getCommentReferenceCache(key: any): any;
     beforeMakeHtml(str: any): any;
+    makeHtml(str: any, sentenceMakeFunc: any): any;
     afterMakeHtml(str: any): string;
     rule(): {
         begin: string;

@@ -15,6 +15,7 @@ export default class Panel extends ParagraphBase {
     constructor(options: any);
     enableAlign: any;
     enablePanel: any;
+    makeHtml(str: any, sentenceMakeFunc: any): any;
     $getClassByType(type: any): string;
     $getPanelInfo(name: any, str: any, sentenceMakeFunc: any): {
         type: string;

@@ -4,10 +4,10 @@
 export default class HookCenter {
     /**
      *
-     * @param {(typeof SyntaxBase)[]} hooksConfig
+     * @param {(typeof SyntaxBase | typeof ParagraphBase)[]} hooksConfig
      * @param {CherryOptions} editorConfig
      */
-    constructor(hooksConfig: (typeof SyntaxBase)[], editorConfig: CherryOptions, cherry: any);
+    constructor(hooksConfig: (typeof SyntaxBase | typeof ParagraphBase)[], editorConfig: CherryOptions, cherry: any);
     $locale: any;
     $cherry: any;
     /**
@@ -40,12 +40,12 @@ export default class HookCenter {
     }>;
     /**
      *
-     * @param {((...args: any[]) => any) | typeof SyntaxBase} HookClass
+     * @param {((...args: any[]) => any) | typeof SyntaxBase | typeof ParagraphBase} HookClass
      * @param {CherryOptions} editorConfig
      * @param {Omit<CustomSyntaxRegConfig, 'syntaxClass'>} [customHookConfig]
      * @returns
      */
-    register(HookClass: typeof SyntaxBase | ((...args: any[]) => any), editorConfig: Partial<import("~types/cherry")._CherryOptions<import("~types/cherry").CherryCustomOptions>>, customHookConfig?: Omit<CustomSyntaxRegConfig, 'syntaxClass'>): -1 | -2;
+    register(HookClass: typeof ParagraphBase | typeof SyntaxBase | ((...args: any[]) => any), editorConfig: Partial<import("~types/cherry")._CherryOptions<import("~types/cherry").CherryCustomOptions>>, customHookConfig?: Omit<CustomSyntaxRegConfig, 'syntaxClass'>): -1 | -2;
 }
 export type CherryOptions = import('~types/cherry').CherryOptions;
 export type CherryEngineOptions = import('~types/cherry').CherryEngineOptions;

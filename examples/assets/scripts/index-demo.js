@@ -190,6 +190,8 @@ const basicConfig = {
   engine: {
     global: {
       htmlAttrWhiteList: 'part|slot',
+      flowSessionContext: false,
+      // flowSessionCursor: 'default'
     },
     syntax: {
       link: {
@@ -276,9 +278,9 @@ const basicConfig = {
         customResourceURL: 'https://github.githubassets.com/images/icons/emoji/unicode/${code}.png?v8',
         upperCase: false,
       },
-      // htmlBlock: {
-      //   filterStyle: true,
-      // }
+      htmlBlock: {
+        removeTrailingNewline: false,
+      },
       // toc: {
       //     tocStyle: 'nested'
       // }

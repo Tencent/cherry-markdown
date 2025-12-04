@@ -28,6 +28,8 @@ export default class Header extends ParagraphBase {
     };
     $getAnchor(anchorID: any): string;
     beforeMakeHtml(str: any): any;
+    makeHtml(str: any, sentenceMakeFunc: any): any;
+    afterMakeHtml(html: any): any;
     test(str: any, flavor: any): any;
     /**
      * TODO: fix type errors, prefer use `rules` for multiple spec instead

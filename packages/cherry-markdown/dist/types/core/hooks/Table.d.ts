@@ -34,6 +34,7 @@ export default class Table extends ParagraphBase {
         html: string;
         sign: string;
     };
+    makeHtml(str: any, sentenceMakeFunc: any): any;
     test(str: any, flavor: any): any;
     /**
      * TODO: fix type errors
