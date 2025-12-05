@@ -50,6 +50,23 @@ Cherry Markdown Writer 是一款 Javascript Markdown 编辑器，具有开箱即
 
 当 Cherry Markdown 编辑器默认支持的语法无法满足需求时，可以进行二次开发或功能扩展。Cherry 基于纯 JavaScript 实现，不依赖 Angular、Vue、React 等框架（框架仅作为容器环境）。
 
+### 流式渲染
+
+开启流式渲染后，cherry会对以下语法进行**自动补全**，避免出现Markdown源码，以达到在流式输出过程中稳定输出的效果（[demo](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)）：
+
+- 标题
+- 加粗、斜体
+- 超链接
+- 图片、音视频
+- 行内代码块
+- 段落代码块
+- 行内公式
+- 段落公式
+- 无序列表
+- 表格
+- mermaid画图
+- 脚注
+
 ## 功能
 
 ### 语法功能
