@@ -35,7 +35,7 @@ Cherry Markdown Writer is a Javascript Markdown editor. It has the advantages su
 - [IMG WYSIWYG](https://tencent.github.io/cherry-markdown/examples/img.html)
 - [Table WYSIWYG](https://tencent.github.io/cherry-markdown/examples/table.html)
 - [Headers with Auto Num](https://tencent.github.io/cherry-markdown/examples/head_num.html)
-- [Stream Input Mode (AI chat scenario)](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)
+- [Streaming rendering Mode (AI chat scenario)](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)
 - [VIM Editing Mode](https://tencent.github.io/cherry-markdown/examples/vim.html)
 - [Utilize Your Own Mermaid.js](https://tencent.github.io/cherry-markdown/examples/mermaid.html)
 - [Custom Code Block Wrapper](https://tencent.github.io/cherry-markdown/examples/custom_codeblock_wrapper.html)
@@ -49,6 +49,22 @@ Developer can call and instantiate Cherry Markdown Editor in a very simple way. 
 ### **Easy to extend**
 
 When the syntax that Cherry Markdown writer support can not meet your needs, secondary development or function extension can be carried out quickly. At the same time, Cherry Markdown writer should be implemented by pure JavaScript, and should not rely on framework technology such as angular, vue and react. Framework only provide a container environment.
+
+### Incremental / Progressive / Streaming rendering
+
+After enabling streaming rendering, Cherry will automatically complete the following syntax elements to avoid exposing Markdown source code, ensuring stable output during the streaming process([demo](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)):
+- Headings
+- Bold and italic text
+- Hyperlinks
+- Images and audio/video
+- Inline code blocks
+- Block code blocks
+- Inline formulas
+- Block formulas
+- Unordered lists
+- Tables
+- Mermaid diagrams
+- Footnotes
 
 ## Feature
 
