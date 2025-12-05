@@ -11,6 +11,6 @@
             target_url: https://github.com/Tencent/cherry-markdown.git
             auth_type: https
             username: ${CHERRY_MARKDOWN_USERNAME}
-            password: ${CHERRY_MARKDOWN_GITHUB_BLOG_TOKEN}
+            password: ${CHERRY_MARKDOWN_GITHUB_TOKEN}
             insecure_skip_verify: true
             timeout: 300
