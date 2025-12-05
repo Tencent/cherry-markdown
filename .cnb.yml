@@ -14,3 +14,16 @@
             password: ${CHERRY_MARKDOWN_GITHUB_TOKEN}
             insecure_skip_verify: true
             timeout: 300
+$:            
+  vscode:
+    - docker:
+        build: .cnb/Dockerfile
+        volumes:
+          - node_modules:cow
+      services:
+        - vscode
+        - docker
+      stages:
+        - name: install dependencies
+          script: 
+          - yarn install             
