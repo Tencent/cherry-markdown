@@ -19,6 +19,8 @@ $:
     - docker:
         image: docker.cnb.cool/tencent/cherry-markdown/cherry-markdown
         # build: .cnb/Dockerfile
+        volumes:
+          - node_modules
       services:
         - vscode
         - docker
