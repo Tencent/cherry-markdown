@@ -1,0 +1,21 @@
+# .github/workflows/sync-cnb.yml
+
+name: Sync to CNB
+on: [push]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Sync to CNB Repository
+        uses: docker://tencentcom/git-sync
+        env:
+          PLUGIN_TARGET_URL: "https://cnb.cool/tencent/cherry-markdown/cherry-markdown.git"
+          PLUGIN_AUTH_TYPE: "https"
+          PLUGIN_USERNAME: "cnb"
+          PLUGIN_PASSWORD: ${{ secrets.CHERRY_MARKDOWN_CNB_SYNC_GITHUB }}
+          PLUGIN_FORCE: "true"

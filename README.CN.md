@@ -2,7 +2,7 @@
 
 # Cherry Markdown Writer
 
-[![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
+[![cnb 云原生开发](./logo/cnb-badge.svg)](https://cnb.cool/tencent/cherry-markdown/cherry-markdown) [![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
 
 简体中文 | [English](./README.md)
 
