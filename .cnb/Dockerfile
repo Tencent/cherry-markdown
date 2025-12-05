@@ -1,4 +1,4 @@
-FROM node:22
+FROM node:18
 
 RUN curl -fsSL https://code-server.dev/install.sh | sh \
   && code-server --install-extension cnbcool.cnb-welcome \
