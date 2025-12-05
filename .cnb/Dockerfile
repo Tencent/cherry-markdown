@@ -4,6 +4,7 @@ RUN curl -fsSL https://code-server.dev/install.sh | sh \
   && code-server --install-extension cnbcool.cnb-welcome \
   && code-server --install-extension redhat.vscode-yaml \
   && code-server --install-extension dbaeumer.vscode-eslint \
+  && code-server --install-extension esbenp.prettier-vscode \
   && code-server --install-extension waderyan.gitblame \
   && code-server --install-extension mhutchie.git-graph \
   && code-server --install-extension donjayamanne.githistory \
