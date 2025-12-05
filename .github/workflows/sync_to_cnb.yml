@@ -1,10 +1,13 @@
 # .github/workflows/sync-cnb.yml
 
 name: Sync to CNB
-on: [push]
+on: 
+ - push
+ - delete
+
 
 jobs:
-  sync:
+  sync-push:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,3 +22,14 @@ jobs:
           PLUGIN_USERNAME: "cnb"
           PLUGIN_PASSWORD: ${{ secrets.CHERRY_MARKDOWN_CNB_SYNC_GITHUB }}
           PLUGIN_FORCE: "true"
+
+  sync-delete-branch:
+    if: ${{ github.repository == 'Tencent/cherry-markdown' && github.event_name == 'delete' && github.event.ref_type == 'branch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: TDesignOteam//tdesign-pr-trigger-action@develop
+        with:
+          repo: 'tencent/cherry-markdown/cherry-markdown'
+          token: ${{ secrets.CHERRY_MARKDOWN_CNB_SYNC_GITHUB }}
+          branch: ${{ github.event.ref }}
+          trigger: '/delete-cnb-branch'   
