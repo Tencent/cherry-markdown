@@ -2,7 +2,7 @@
 "**":
   push:
     - imports:
-        - https://cnb.cool/tencent/cherry-markdown/cherry-markdown-secret/-/edit/main/secret.yml
+        - https://cnb.cool/tencent/cherry-markdown/cherry-markdown-secret/-/blob/main/secret.yml
       stages:
         # cnb 同步代码到 github 仓库 https://cnb.cool/cnb/plugins/tencentcom/git-sync#%E4%BB%8E-cnb-%E5%90%8C%E6%AD%A5%E5%88%B0-github
         - name: sync to github
