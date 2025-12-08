@@ -22,9 +22,9 @@ import { changeCodeTheme, getCodeThemeFromLocal } from '@/utils/config';
 export default class CodeTheme extends MenuBase {
   constructor($cherry) {
     super($cherry);
-    this.setName('codeTheme');
+    this.setName('codeTheme', 'code-theme');
     this.updateMarkdown = false;
-    this.noIcon = true;
+    this.noIcon = false;
     this.subMenuConfig = [
       { noIcon: false, name: 'autoWrap', iconName: 'br', onclick: this.bindSubClick.bind(this, 'wrap') },
       { noIcon: true, name: '|', onclick: () => {} },
