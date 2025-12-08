@@ -71,7 +71,6 @@ const saveMarkdown = () => {
 
 onMounted(async () => {
   const cherryNoToolbar = document.querySelector('.cherry--no-toolbar');
-  console.log(cherryNoToolbar, !cherryNoToolbar);
   await invoke('get_show_toolbar', { show: !cherryNoToolbar });
 });
 
@@ -88,7 +87,6 @@ listen('save_as', async () => saveAsNewMarkdown());
 
 listen('toggle_toolbar', async () => {
   const cherryNoToolbar = document.querySelector('.cherry--no-toolbar');
-  console.log(cherryNoToolbar, !cherryNoToolbar);
   await invoke('get_show_toolbar', { show: !!cherryNoToolbar });
   cherryMarkdown.toolbar.toolbarHandlers.settings('toggleToolbar');
 });

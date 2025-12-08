@@ -1,6 +1,31 @@
 import Cherry from 'cherry-markdown';
 import { CherryOptions } from 'cherry-markdown/types/cherry';
 import { previewOnlySidebar } from '../utils';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+import '../utils/pinyin/pinyin_dist.js';
+
+/**
+ * ECharts优化导入 - 使用命名空间导入替代默认导入
+ * 优点：
+ * 1. 更好的TypeScript类型支持
+ * 2. 避免版本兼容性问题
+ * 3. 支持按需导入echarts功能
+ */
+import * as echarts from 'echarts';
+
+/**
+ * ECharts类型兼容性处理
+ * 由于cherry-markdown可能期望特定版本的echarts类型，
+ * 这里定义兼容性接口确保类型安全
+ */
+interface EChartsInstance {
+  init: (dom: HTMLElement, theme?: string, opts?: any) => any;
+  [key: string]: any;
+}
+
+// 确保echarts实例的类型兼容性
+const echartsInstance: EChartsInstance = echarts as any;
 
 type CustomConfig = {
   CustomToolbar: {
@@ -11,32 +36,12 @@ type CustomConfig = {
   };
 };
 
-const customMenu_fileUpload = Cherry.createMenuHook('文件上传', {
-  iconName: '',
-});
-
-const customMenuChangeModule = Cherry.createMenuHook('编辑', {
-  iconName: 'pen',
-  onClick() {
-    const markdownPreviewOnly = document.querySelector('.markdown-preview-only');
-    if (markdownPreviewOnly) {
-      markdownPreviewOnly.classList.remove('markdown-preview-only');
-      cherryInstance().switchModel('edit&preview');
-      const cherryToolbarPen = document.querySelector('.cherry-toolbar-pen');
-      if (cherryToolbarPen) {
-        cherryToolbarPen.className = `${cherryToolbarPen.className} active`;
-        cherryToolbarPen.innerHTML = '<i class="ch-icon ch-icon-pen-fill"></i>';
-      }
-    } else {
-      previewOnlySidebar();
-    }
-  },
-});
-
 const cherryConfig: CherryOptions<CustomConfig> = {
   // 第三方包
   externals: {
     // externals
+    katex,
+    echarts: echartsInstance,
   },
   // chatGpt的openai配置
   openai: {
@@ -48,178 +53,128 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     ignoreError: false, // 是否忽略请求失败，默认忽略
   },
   // 解析引擎配置
-  // engine: {
-  //   // 全局配置
-  //   global: {
-  //     // 是否启用经典换行逻辑
-  //     // true：一个换行会被忽略，两个以上连续换行会分割成段落，
-  //     // false： 一个换行会转成<br>，两个连续换行会分割成段落，三个以上连续换行会转成<br>并分割段落
-  //     classicBr: false,
-  //     /**
-  //      * 额外允许渲染的html标签
-  //      * 标签以英文竖线分隔，如：htmlWhiteList: 'iframe|script|style'
-  //      * 默认为空，默认允许渲染的html见src/utils/sanitize.js whiteList 属性
-  //      * 需要注意：
-  //      *    - 启用iframe、script等标签后，会产生xss注入，请根据实际场景判断是否需要启用
-  //      *    - 一般编辑权限可控的场景（如api文档系统）可以允许iframe、script等标签
-  //      */
-  //     htmlWhiteList: '',
-  //     /**
-  //      * 适配流式会话的场景，开启后将具备以下特性：
-  //      * - cherry渲染频率从50ms/次提升到10ms/次
-  //      * - 代码块自动闭合，相当于强制 `engine.syntax.codeBlock.selfClosing=true`
-  //      * - 文章末尾的段横线标题语法（`\n-`）失效
-  //      * - 表格语法自动闭合，相当于强制`engine.syntax.table.selfClosing=true`
-  //      * - 加粗、斜体语法自动闭合，相当于强制`engine.syntax.fontEmphasis.selfClosing=true`
-  //      *
-  //      * 后续如果有新的需求，可提issue反馈
-  //      */
-  //     flowSessionContext: true,
-  //   },
-  //   // 内置语法配置
-  //   syntax: {
-  //     // 语法开关
-  //     // 'hookName': false,
-  //     // 语法配置
-  //     // 'hookName': {
-  //     //
-  //     // }
-  //     link: {
-  //       /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
-  //       target: '',
-  //       /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
-  //       rel: '',
-  //     },
-  //     autoLink: {
-  //       /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
-  //       target: '',
-  //       /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
-  //       rel: '',
-  //       /** 是否开启短链接 */
-  //       enableShortLink: true,
-  //       /** 短链接长度 */
-  //       shortLinkLength: 20,
-  //     },
-  //     list: {
-  //       listNested: false, // 同级列表类型转换后变为子级
-  //       indentSpace: 2, // 默认2个空格缩进
-  //     },
-  //     table: {
-  //       enableChart: false,
-  //       selfClosing: false, // 自动闭合，为true时，当输入第一行table内容时，cherry会自动按表格进行解析
-  //       // chartRenderEngine: EChartsTableEngine,
-  //       // externals: ['echarts'],
-  //     },
-  //     inlineCode: {
-  //       /**
-  //        * @deprecated 不再支持theme的配置，统一在`themeSettings.inlineCodeTheme`中配置
-  //        */
-  //       // theme: 'red',
-  //     },
-  //     codeBlock: {
-  //       /**
-  //        * @deprecated 不再支持theme的配置，统一在`themeSettings.codeBlockTheme`中配置
-  //        */
-  //       // theme: 'dark', // 默认为深色主题
-  //       wrap: true, // 超出长度是否换行，false则显示滚动条
-  //       lineNumber: true, // 默认显示行号
-  //       copyCode: true, // 是否显示“复制”按钮
-  //       editCode: true, // 是否显示“编辑”按钮
-  //       changeLang: true, // 是否显示“切换语言”按钮
-  //       expandCode: false, // 是否展开/收起代码块，当代码块行数大于10行时，会自动收起代码块
-  //       selfClosing: true, // 自动闭合，为true时，当md中有奇数个```时，会自动在md末尾追加一个```
-  //       customRenderer: {
-  //         // 自定义语法渲染器
-  //       },
-  //       mermaid: {
-  //         svg2img: false, // 是否将mermaid生成的画图变成img格式
-  //       },
-  //       /**
-  //        * indentedCodeBlock是缩进代码块是否启用的开关
-  //        *
-  //        *    在6.X之前的版本中默认不支持该语法。
-  //        *    因为cherry的开发团队认为该语法太丑了（容易误触）
-  //        *    开发团队希望用```代码块语法来彻底取代该语法
-  //        *    但在后续的沟通中，开发团队发现在某些场景下该语法有更好的显示效果
-  //        *    因此开发团队在6.X版本中才引入了该语法
-  //        *    已经引用6.x以下版本的业务如果想做到用户无感知升级，可以去掉该语法：
-  //        *        indentedCodeBlock：false
-  //        */
-  //       indentedCodeBlock: true,
-  //     },
-  //     emoji: {
-  //       useUnicode: true, // 是否使用unicode进行渲染
-  //     },
-  //     fontEmphasis: {
-  //       /**
-  //        * 是否允许首尾空格
-  //        * 首尾、前后的定义： 语法前**语法首+内容+语法尾**语法后
-  //        * 例：
-  //        *    true:
-  //        *           __ hello __  ====>   <strong> hello </strong>
-  //        *           __hello__    ====>   <strong>hello</strong>
-  //        *    false:
-  //        *           __ hello __  ====>   <em>_ hello _</em>
-  //        *           __hello__    ====>   <strong>hello</strong>
-  //        */
-  //       allowWhitespace: false,
-  //       selfClosing: false, // 自动闭合，为true时，当输入**XXX时，会自动在末尾追加**
-  //     },
-  //     strikethrough: {
-  //       /**
-  //        * 是否必须有前后空格
-  //        * 首尾、前后的定义： 语法前**语法首+内容+语法尾**语法后
-  //        * 例：
-  //        *    true:
-  //        *            hello wor~~l~~d     ====>   hello wor~~l~~d
-  //        *            hello wor ~~l~~ d   ====>   hello wor <del>l</del> d
-  //        *    false:
-  //        *            hello wor~~l~~d     ====>   hello wor<del>l</del>d
-  //        *            hello wor ~~l~~ d     ====>   hello wor <del>l</del> d
-  //        */
-  //       needWhitespace: false,
-  //     },
-  //     mathBlock: {
-  //       engine: 'MathJax', // katex或MathJax
-  //       src: '',
-  //       plugins: true, // 默认加载插件
-  //     },
-  //     inlineMath: {
-  //       engine: 'MathJax', // katex或MathJax
-  //       src: '',
-  //     },
-  //     toc: {
-  //       /** 默认只渲染一个目录 */
-  //       allowMultiToc: false,
-  //       /** 是否显示自增序号 */
-  //       showAutoNumber: false,
-  //     },
-  //     header: {
-  //       /**
-  //        * 标题的样式：
-  //        *  - default       默认样式，标题前面有锚点
-  //        *  - autonumber    标题前面有自增序号锚点
-  //        *  - none          标题没有锚点
-  //        */
-  //       anchorStyle: 'default',
-  //     },
-  //   },
-  // },
+  engine: {
+    // 全局配置
+    global: {
+      // 是否启用经典换行逻辑
+      // true：一个换行会被忽略，两个以上连续换行会分割成段落，
+      // false： 一个换行会转成<br>，两个连续换行会分割成段落，三个以上连续换行会转成<br>并分割段落
+      classicBr: false,
+    },
+    // 内置语法配置
+    syntax: {
+      link: {
+        /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
+        target: '_blank',
+        /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
+        rel: '',
+      },
+      autoLink: {
+        /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
+        target: '_blank',
+        /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
+        rel: '',
+        /** 是否开启短链接 */
+        enableShortLink: true,
+        /** 短链接长度 */
+        shortLinkLength: 20,
+      },
+      table: {
+        enableChart: true,
+        selfClosing: true, // 自动闭合，为true时，当输入第一行table内容时，cherry会自动按表格进行解析
+      },
+      codeBlock: {
+        wrap: true, // 超出长度是否换行，false则显示滚动条
+        lineNumber: true, // 默认显示行号
+        copyCode: true, // 是否显示“复制”按钮
+        editCode: true, // 是否显示“编辑”按钮
+        changeLang: true, // 是否显示“切换语言”按钮
+        expandCode: true, // 是否展开/收起代码块，当代码块行数大于10行时，会自动收起代码块
+        selfClosing: true, // 自动闭合，为true时，当md中有奇数个```时，会自动在md末尾追加一个```
+        mermaid: {
+          svg2img: false, // 是否将mermaid生成的画图变成img格式
+        },
+        /**
+         * indentedCodeBlock是缩进代码块是否启用的开关
+         *
+         *    在6.X之前的版本中默认不支持该语法。
+         *    因为cherry的开发团队认为该语法太丑了（容易误触）
+         *    开发团队希望用```代码块语法来彻底取代该语法
+         *    但在后续的沟通中，开发团队发现在某些场景下该语法有更好的显示效果
+         *    因此开发团队在6.X版本中才引入了该语法
+         *    已经引用6.x以下版本的业务如果想做到用户无感知升级，可以去掉该语法：
+         *        indentedCodeBlock：false
+         */
+        indentedCodeBlock: false,
+      },
+      emoji: {
+        useUnicode: true, // 是否使用unicode进行渲染
+      },
+      fontEmphasis: {
+        /**
+         * 是否允许首尾空格
+         * 首尾、前后的定义： 语法前**语法首+内容+语法尾**语法后
+         * 例：
+         *    true:
+         *           __ hello __  ====>   <strong> hello </strong>
+         *           __hello__    ====>   <strong>hello</strong>
+         *    false:
+         *           __ hello __  ====>   <em>_ hello _</em>
+         *           __hello__    ====>   <strong>hello</strong>
+         */
+        allowWhitespace: false,
+        selfClosing: false, // 自动闭合，为true时，当输入**XXX时，会自动在末尾追加**
+      },
+      strikethrough: {
+        /**
+         * 是否必须有前后空格
+         * 首尾、前后的定义： 语法前**语法首+内容+语法尾**语法后
+         * 例：
+         *    true:
+         *            hello wor~~l~~d     ====>   hello wor~~l~~d
+         *            hello wor ~~l~~ d   ====>   hello wor <del>l</del> d
+         *    false:
+         *            hello wor~~l~~d     ====>   hello wor<del>l</del>d
+         *            hello wor ~~l~~ d     ====>   hello wor <del>l</del> d
+         */
+        needWhitespace: false,
+      },
+      mathBlock: {
+        engine: 'katex', // katex或MathJax
+        src: '',
+      },
+      inlineMath: {
+        engine: 'katex', // katex或MathJax
+        src: '',
+      },
+      toc: {
+        /** 默认只渲染一个目录 */
+        allowMultiToc: false,
+        /** 是否显示自增序号 */
+        showAutoNumber: false,
+      },
+      header: {
+        /**
+         * 标题的样式：
+         *  - default       默认样式，标题前面有锚点
+         *  - autonumber    标题前面有自增序号锚点
+         *  - none          标题没有锚点
+         */
+        anchorStyle: 'none',
+      },
+    },
+  },
   editor: {
     id: 'code', // textarea 的id属性值
     name: 'code', // textarea 的name属性值
     autoSave2Textarea: false, // 是否自动将编辑区的内容回写到textarea里
-    /**
-     * @deprecated 不再支持theme的配置，废弃该功能，统一由`themeSettings.mainTheme`配置
-     */
-    // theme: 'default',
     // 编辑器的高度，默认100%，如果挂载点存在内联设置的height则以内联样式为主
     height: '100%',
     // defaultModel 编辑器初始化后的默认模式，一共有三种模式：1、双栏编辑预览模式；2、纯编辑模式；3、预览模式
     // edit&preview: 双栏编辑预览模式
     // editOnly: 纯编辑模式（没有预览，可通过toolbar切换成双栏或预览模式）
     // previewOnly: 预览模式（没有编辑框，toolbar只显示“返回编辑”按钮，可通过toolbar切换成编辑模式）
-    defaultModel: 'editOnly',
+    defaultModel: 'edit&preview',
     // 粘贴时是否自动将html转成markdown
     convertWhenPaste: true,
     // 快捷键风格，目前仅支持 sublime 和 vim
@@ -227,117 +182,84 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     codemirror: {
       // 是否自动focus 默认为true
       autofocus: true,
+      placeholder: '输入文本或「/」开始编辑',
     },
     writingStyle: 'normal', // 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal
     keepDocumentScrollAfterInit: false, // 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置
     showFullWidthMark: true, // 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》
     showSuggestList: true, // 是否显示联想框
+    maxUrlLength: 200, // url最大长度，超过则自动截断
   },
   toolbars: {
-    /**
-     * @deprecated 不再支持theme的配置，统一在`themeSettings.toolbarTheme`中配置
-     */
-    // theme: 'dark', // light or dark
-    showToolbar: true, // false：不展示顶部工具栏； true：展示工具栏; toolbars.showToolbar=false 与 toolbars.toolbar=false 等效
     toolbar: [
       'bold',
       'italic',
-      'strikethrough',
+      {
+        strikethrough: ['strikethrough', 'underline', 'sub', 'sup', 'ruby'],
+      },
+      'size',
       '|',
       'color',
       'header',
-      'ruby',
+      // '|',
+      // 'drawIo',
       '|',
-      'list',
+      'ol',
+      'ul',
+      'checklist',
       'panel',
+      'align',
       'detail',
+      '|',
       {
-        customMenu_fileUpload: [
-          'image',
-          'audio',
-          'video',
-          'link',
+        insert: [
+          // 'image',
+          // 'audio',
+          // 'video',
+          // 'link',
           'hr',
           'br',
           'code',
-          'formula',
+          'inlineCode',
+          // 'formula',
           'toc',
           'table',
-          'line-table',
-          'bar-table',
-          'pdf',
-          'word',
+          // 'pdf',
+          // 'word',
+          // 'file',
         ],
       },
+      'formula',
+      'image',
       'graph',
-      'export',
-      'settings',
+      'proTable',
+      '|',
+      'search',
+      'shortcutKey',
+      'togglePreview',
     ],
-    toolbarRight: [],
-    sidebar: ['customMenuChangeModule', 'theme'],
-    bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
-    float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'table', 'code'], // array or false
-    hiddenToolbar: [], // 不展示在编辑器中的工具栏，只使用工具栏的api和快捷键功能
-    toc: false, // 不展示悬浮目录
-    // toc: {
-    //   updateLocationHash: false, // 要不要更新URL的hash
-    //   defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
-    //   showAutoNumber: false, // 是否显示自增序号
-    //   position: 'absolute', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
-    //   cssText: '', // 自定义样式
-    // },
-    customMenu: {
-      customMenu_fileUpload,
-      customMenuChangeModule,
+    toolbarRight: ['export', 'changeLocale', '|', 'wordCount'],
+    bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
+    sidebar: ['mobilePreview', 'copy', 'theme', 'codeTheme'],
+    toc: {
+      updateLocationHash: false, // 要不要更新URL的hash
+      defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
     },
-    /**
-     * 自定义快捷键
-     * @deprecated 请使用`shortcutKeySettings`
-     */
-    shortcutKey: {
-      // 'Alt-1': 'header',
-      // 'Alt-2': 'header',
-      // 'Ctrl-b': 'bold',
-      // 'Ctrl-Alt-m': 'formula',
-    },
-    shortcutKeySettings: {
-      /** 是否替换已有的快捷键, true: 替换默认快捷键； false： 会追加到默认快捷键里，相同的shortcutKey会覆盖默认的 */
-      isReplace: false,
-      shortcutKeyMap: {
-        // 'Alt-Digit1': {
-        //   hookName: 'header',
-        //   aliasName: '标题',
-        // },
-        // 'Control-Shift-KeyB': {
-        //   hookName: 'bold',
-        //   aliasName: '加粗',
-        // },
-      },
-    },
-    // 一些按钮的配置信息
+    customMenu: {},
     config: {
-      formula: {
-        showLatexLive: true, // true: 显示 www.latexlive.com 外链； false：不显示
-        templateConfig: false, // false: 使用默认模板
+      // 地图表格配置 - 支持自定义地图数据源URL
+      mapTable: {
+        sourceUrl: [
+          // 在线高质量地图数据源（优先，已验证可用）
+          'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
+          // 本地备用地图数据
+          '../utils/data/china.json',
+        ],
       },
-      changeLocale: [
-        {
-          locale: 'zh_CN',
-          name: '中文',
-        },
-        {
-          locale: 'en_US',
-          name: 'English',
-        },
-        {
-          locale: 'ru_RU',
-          name: 'Русский',
-        },
-      ],
     },
   },
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
-  drawioIframeUrl: '',
+  drawioIframeUrl: '../utils/drawio/drawio_demo.html',
   // drawio iframe的样式
   drawioIframeStyle: 'border: none;',
   /**
@@ -401,13 +323,18 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       // afterLoadAllImgCallback: () => { },
     },
   },
+  callback: {
+    // 把中文变成拼音的回调，当然也可以把中文变成英文、英文变成中文
+    changeString2Pinyin: pinyin,
+  },
   /** 定义cherry缓存的作用范围，相同nameSpace的实例共享localStorage缓存 */
   nameSpace: 'cherry',
   themeSettings: {
     // 主题列表，用于切换主题
     themeList: [
-      { className: 'default', label: '默认' },
+      { className: 'default', label: '默认' }, // 曾用名：light 明亮
       { className: 'dark', label: '暗黑' },
+      { className: 'gray', label: '沉稳' },
       { className: 'abyss', label: '深海' },
       { className: 'green', label: '清新' },
       { className: 'red', label: '热情' },

@@ -61,7 +61,8 @@ pub fn window_menu(app: &mut App) -> Result<(), tauri::Error> {
             .build()?;
 
     let menu = MenuBuilder::new(handle)
-        .items(&[&file_menu, &language_menu, &setting_menu])
+        .items(&[&file_menu])
+        // .items(&[&file_menu, &language_menu, &setting_menu])
         .build()?;
 
     app.set_menu(menu)?;
