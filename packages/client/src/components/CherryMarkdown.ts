@@ -36,7 +36,12 @@ type CustomConfig = {
   };
 };
 
+const customMenuChangeModule = Cherry.createMenuHook('编辑', {
+  iconName: 'pen',
+});
+
 const cherryConfig: CherryOptions<CustomConfig> = {
+  id: 'markdown-editor',
   // 第三方包
   externals: {
     // externals
@@ -181,7 +186,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     keyMap: 'sublime',
     codemirror: {
       // 是否自动focus 默认为true
-      autofocus: true,
+      autofocus: false,
       placeholder: '输入文本或「/」开始编辑',
     },
     writingStyle: 'normal', // 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal
@@ -240,12 +245,15 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     ],
     toolbarRight: ['export', 'changeLocale', '|', 'wordCount'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
-    sidebar: ['mobilePreview', 'copy', 'theme', 'codeTheme'],
+    sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'theme'],
+    // sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'theme', 'codeTheme'],
     toc: {
       updateLocationHash: false, // 要不要更新URL的hash
       defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
     },
-    customMenu: {},
+    customMenu: {
+      customMenuChangeModule
+    },
     config: {
       // 地图表格配置 - 支持自定义地图数据源URL
       mapTable: {
@@ -342,7 +350,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       { className: 'blue', label: '清幽' },
     ],
     mainTheme: 'default',
-    codeBlockTheme: 'default',
+    codeBlockTheme: 'twilight',
     inlineCodeTheme: 'red', // red or black
   },
   // 预览页面不需要绑定事件
@@ -350,7 +358,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
   // 预览区域跟随编辑器光标自动滚动
   autoScrollByCursor: true,
   // 外层容器不存在时，是否强制输出到body上
-  forceAppend: true,
+  forceAppend: false,
   // The locale Cherry is going to use. Locales live in /src/locales/
   locale: 'zh_CN',
   // Supplementary locales
@@ -363,12 +371,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
  * @description cherryInstance
  */
 export const cherryInstance = (() => {
-  let _cherryInstance: Cherry | null = null;
-
   return () => {
-    if (!_cherryInstance) {
-      _cherryInstance = new Cherry(cherryConfig);
-    }
-    return _cherryInstance;
+    return new Cherry(cherryConfig);
   };
 })();
