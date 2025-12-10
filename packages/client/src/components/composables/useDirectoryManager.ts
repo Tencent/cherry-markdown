@@ -45,8 +45,42 @@ export function useDirectoryManager(
     }
   };
 
+  // 从localStorage加载保存的最近目录列表
+  const loadRecentDirectoriesFromStorage = (): DirectoryNode[] => {
+    try {
+      const savedDirectories = localStorage.getItem('cherry-markdown-recent-directories');
+      if (savedDirectories) {
+        const parsedDirectories = JSON.parse(savedDirectories);
+        return parsedDirectories.map((dir: any) => ({
+          ...dir,
+          expanded: directoryExpansionState.value.get(dir.path) || false
+        }));
+      }
+    } catch (error) {
+      console.warn('加载最近目录列表失败:', error);
+    }
+    return [];
+  };
+
+  // 保存最近目录列表到localStorage
+  const saveRecentDirectoriesToStorage = () => {
+    try {
+      // 只保存目录的基本信息，不保存children数据
+      const directoriesToSave = recentDirectories.value.map(dir => ({
+        path: dir.path,
+        name: dir.name,
+        type: dir.type,
+        expanded: dir.expanded
+      }));
+      localStorage.setItem('cherry-markdown-recent-directories', JSON.stringify(directoriesToSave));
+    } catch (error) {
+      console.warn('保存最近目录列表失败:', error);
+    }
+  };
+
   // 初始化时从localStorage加载状态
   directoryExpansionState.value = loadExpansionStateFromStorage();
+  recentDirectories.value = loadRecentDirectoriesFromStorage();
 
   /**
    * 合并相似目录路径
@@ -187,7 +221,15 @@ export function useDirectoryManager(
         })
       );
       
-      recentDirectories.value = directoryResults.filter(Boolean) as DirectoryNode[];
+      // 合并从localStorage加载的目录和从最近文件提取的目录
+      const storedDirectories = recentDirectories.value.filter(storedDir => 
+        !directoryResults.some(newDir => newDir && newDir.path === storedDir.path)
+      );
+      
+      recentDirectories.value = [
+        ...directoryResults.filter(Boolean) as DirectoryNode[],
+        ...storedDirectories
+      ].slice(0, 10); // 限制最多10个目录
       
       // 为每个目录加载文件列表
       await Promise.all(
@@ -200,6 +242,9 @@ export function useDirectoryManager(
           }
         })
       );
+      
+      // 保存更新后的目录列表
+      saveRecentDirectoriesToStorage();
       
     } catch (error) {
       console.error('获取目录列表失败:', error);
@@ -239,7 +284,14 @@ export function useDirectoryManager(
           newDir.children = loadResult.data;
         }
         
+        // 添加到目录列表开头，并限制最大数量
         recentDirectories.value.unshift(newDir);
+        if (recentDirectories.value.length > 10) {
+          recentDirectories.value = recentDirectories.value.slice(0, 10);
+        }
+        
+        // 保存到localStorage
+        saveRecentDirectoriesToStorage();
       }
       
     } catch (error) {
@@ -273,6 +325,9 @@ export function useDirectoryManager(
         }
       }
     });
+    
+    // 保存更新后的目录列表
+    saveRecentDirectoriesToStorage();
   };
 
   return {
