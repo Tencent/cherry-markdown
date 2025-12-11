@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
 dist
+preview-dist
 
 # local env files
 .env.local
