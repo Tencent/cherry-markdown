@@ -272,7 +272,7 @@ listen('toggle_toolbar', toggleToolbar);
 }
 
 .file-manager-sidebar.sidebar-collapsed {
-  width: 60px;
+  width: 50px;
 }
 
 .editor-container {

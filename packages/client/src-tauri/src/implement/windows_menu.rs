@@ -60,10 +60,10 @@ pub fn window_menu(app: &mut App) -> Result<(), tauri::Error> {
             .item(&toggle_toolbar)
             .build()?;
 
-    let menu = MenuBuilder::new(handle)
-        .items(&[&file_menu])
-        // .items(&[&file_menu, &language_menu, &setting_menu])
-        .build()?;
+    // let menu = MenuBuilder::new(handle)
+    //     .items(&[&file_menu])
+    //     // .items(&[&file_menu, &language_menu, &setting_menu])
+    //     .build()?;
 
     // app.set_menu(menu)?;
 

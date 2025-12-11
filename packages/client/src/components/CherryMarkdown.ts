@@ -259,9 +259,9 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       mapTable: {
         sourceUrl: [
           // 在线高质量地图数据源（优先，已验证可用）
-          'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
+          // 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
           // 本地备用地图数据
-          '../utils/data/china.json',
+          './public/data/china.json',
         ],
       },
     },
