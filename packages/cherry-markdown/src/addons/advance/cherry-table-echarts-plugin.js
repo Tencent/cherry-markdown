@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import mergeWith from 'lodash/mergeWith';
+import mergeWith from 'lodash-es/mergeWith';
 import Logger from '@/Logger';
 
 // 主题与常量集中管理
