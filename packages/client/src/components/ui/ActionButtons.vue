@@ -34,7 +34,7 @@ defineEmits<{
 <style scoped>
 .action-buttons {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 8px;
   padding: 16px;
   background: white;
@@ -54,6 +54,7 @@ defineEmits<{
   color: #495057;
   font-size: 14px;
   font-weight: 500;
+  flex: 1;
 }
 
 .action-btn:hover {

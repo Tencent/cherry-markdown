@@ -87,7 +87,7 @@ defineEmits<{
 }
 
 .directory-content {
-  height: calc(100vh - 360px);
+  height: calc(100vh - 260px);
   overflow-y: auto;
 }
 </style>
