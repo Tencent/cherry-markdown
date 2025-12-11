@@ -38,9 +38,26 @@ export default class CommentReference extends ParagraphBase {
     this.commentCache = {};
   }
 
+  /**
+   * 去除包裹 url 的尖括号
+   * @param {string} wrappedUrl
+   */
+  unwrapUrl(wrappedUrl) {
+    const url = wrappedUrl.trim();
+    // 原始的尖括号
+    if (url.startsWith('<') && url.endsWith('>')) {
+      return url.slice(1, -1);
+    }
+    // 被转义保护的尖括号
+    if (url.startsWith('&#60;') && url.endsWith('&#62;')) {
+      return url.slice(5, -5);
+    }
+    return url;
+  }
+
   pushCommentReferenceCache(key, cache) {
     const [url, ...args] = cache.split(/[ ]+/g);
-    const innerUrl = UrlCache.set(url);
+    const innerUrl = UrlCache.set(this.unwrapUrl(url));
     this.commentCache[`${key}`.toLowerCase()] = [innerUrl, ...args].join(' ');
   }
 
@@ -48,6 +65,11 @@ export default class CommentReference extends ParagraphBase {
     return this.commentCache[`${key}`.toLowerCase()] || null;
   }
 
+  /**
+   *
+   * @param {string} str
+   * @returns
+   */
   beforeMakeHtml(str) {
     let $str = str;
     if (this.test($str)) {
@@ -57,7 +79,7 @@ export default class CommentReference extends ParagraphBase {
         return lineFeeds.join('');
       });
       // 替换实际引用
-      const refRegex = /(\[[^\]\n]+?\])?(?:\[([^\]\n]+?)\])/g; // 匹配[xxx][ref]形式的内容，不严格大小写
+      const refRegex = /(\[[^\]]*?\])?(?:\[([^\]\n]+?)\])/g; // 匹配[xxx][ref]形式的内容，不严格大小写
       $str = $str.replace(refRegex, (match, leadingContent, key) => {
         const cache = this.getCommentReferenceCache(key);
         if (cache) {

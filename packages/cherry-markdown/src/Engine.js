@@ -19,7 +19,7 @@ import NestedError, { $expectTarget, $expectInherit, $expectInstance } from './u
 import CryptoJS from 'crypto-js';
 import SyntaxBase from './core/SyntaxBase';
 import ParagraphBase from './core/ParagraphBase';
-import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg } from './utils/regexp';
+import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg, base64Reg } from './utils/regexp';
 import { escapeHTMLSpecialChar } from './utils/sanitize';
 import Logger from './Logger';
 import { configureMathJax } from './utils/mathjax';
@@ -343,7 +343,12 @@ export default class Engine {
 
   // 缓存大文本数据，用以提升渲染性能
   $cacheBigData(md) {
-    let $md = md.replace(imgBase64Reg, (whole, m1, m2) => {
+    let $md = md.replace(base64Reg, (dataUri) => {
+      const cacheKey = `data:cherry/cache;sha256,${this.hash(dataUri)}`;
+      this.cachedBigData[cacheKey] = dataUri;
+      return cacheKey;
+    });
+    $md = $md.replace(imgBase64Reg, (whole, m1, m2) => {
       const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
       this.cachedBigData[cacheKey] = m2;
       return `${m1}${cacheKey})`;
@@ -361,10 +366,17 @@ export default class Engine {
     return $md;
   }
 
+  /**
+   * @param {string} md
+   */
   $deCacheBigData(md) {
-    return md.replace(/bigDataBegin[^\n]+?bigDataEnd/g, (whole) => {
-      return this.cachedBigData[whole];
-    });
+    return md
+      .replace(/data:cherry\/cache;sha256,[0-9a-f]+/g, (cacheUri) => {
+        return this.cachedBigData[cacheUri];
+      })
+      .replace(/bigDataBegin[^\n]+?bigDataEnd/g, (whole) => {
+        return this.cachedBigData[whole];
+      });
   }
 
   /**

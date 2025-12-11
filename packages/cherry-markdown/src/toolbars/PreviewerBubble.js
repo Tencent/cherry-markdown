@@ -246,11 +246,11 @@ export default class PreviewerBubble {
     let targetCh = -1;
     contents.forEach((lineContent, lineIdx) => {
       const tmp = lineContent.trim(); // 去掉句首的空格和制表符
-      if (tmp.startsWith('- [ ]') || tmp.startsWith('- [x]')) {
+      if (/^-\s+\[[ x]\]/i.test(tmp)) {
         // 如果是个checkbox
         if (editorCheckboxCount === this.checkboxIdx) {
           targetLine = lineIdx;
-          targetCh = lineContent.indexOf('- [') + 3;
+          targetCh = lineContent.indexOf('[') + 1;
         }
         editorCheckboxCount += 1;
       }
