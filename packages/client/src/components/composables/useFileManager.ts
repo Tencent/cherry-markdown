@@ -1,21 +1,18 @@
-import { ref, computed, type Ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, type Ref } from 'vue';
 import type { FileInfo, ContextMenuState, FileStore } from '../types';
 import {
   createNewFile as createNewFileUtil,
   openExistingFile as openExistingFileUtil,
   readFileContent,
   formatTimestamp,
-  debounce
+  debounce,
 } from '../fileUtils';
 import { openPath } from '@tauri-apps/plugin-opener';
 
 /**
  * 文件管理composable
  */
-export function useFileManager(
-  fileStore: FileStore,
-  folderManagerRef: Ref<any>
-) {
+export function useFileManager(fileStore: FileStore, folderManagerRef: Ref<any>) {
   // 响应式数据
   const sortedRecentFiles = computed(() => fileStore.sortedRecentFiles);
   const currentFilePath = computed(() => fileStore.currentFilePath);
@@ -52,7 +49,7 @@ export function useFileManager(
     visible: false,
     x: 0,
     y: 0,
-    file: null
+    file: null,
   });
 
   // 切换目录管理展开状态
@@ -60,7 +57,7 @@ export function useFileManager(
     directoryManagerExpanded.value = !directoryManagerExpanded.value;
     // 保存状态到localStorage
     saveDirectoryManagerExpandedState(directoryManagerExpanded.value);
-    
+
     if (directoryManagerExpanded.value) {
       recentFilesExpanded.value = false;
     }
@@ -149,7 +146,7 @@ export function useFileManager(
 
   // 检查文件是否在目录管理中
   const checkFileInDirectoryManager = async (filePath: string): Promise<boolean> => {
-    console.log(folderManagerRef)
+    console.log(folderManagerRef);
     if (!folderManagerRef.value) return false;
     try {
       // 获取目录管理中的目录列表
@@ -210,8 +207,8 @@ export function useFileManager(
   const openInExplorer = async (filePath: string): Promise<void> => {
     try {
       // 从文件路径中提取目录路径
-      const directoryPath = filePath.replace(/\\\\/g, '/').replace(/\/[^\/]*$/, '');
-      
+      const directoryPath = filePath.replace(/\\\\/g, '/').replace(/\/[^\\/]*$/, '');
+
       // 使用Tauri opener插件打开文件夹
       await openPath(directoryPath);
       hideContextMenu();
@@ -230,28 +227,28 @@ export function useFileManager(
   // 显示右键菜单
   const showContextMenu = (event: MouseEvent, file: FileInfo | any): void => {
     event.preventDefault();
-    
+
     // 如果已经有右键菜单显示，先关闭它
     if (contextMenu.value.visible) {
       hideContextMenu();
     }
-    
+
     // 将DirectoryNode转换为FileInfo格式
     const fileInfo: FileInfo = {
       path: file.path,
       name: file.name,
       lastAccessed: file.lastModified || Date.now(),
       size: file.size,
-      type: file.type
+      type: file.type,
     };
-    
+
     contextMenu.value = {
       visible: true,
       x: event.clientX,
       y: event.clientY,
-      file: fileInfo
+      file: fileInfo,
     };
-    
+
     // 添加全局点击监听器，点击其他地方时关闭菜单
     setTimeout(() => {
       document.addEventListener('click', handleGlobalClick, { once: true });
@@ -261,7 +258,7 @@ export function useFileManager(
   // 处理全局点击事件
   const handleGlobalClick = (event: MouseEvent): void => {
     if (!contextMenu.value.visible) return;
-    
+
     // 检查点击是否在右键菜单内部
     const contextMenuElement = document.querySelector('.context-menu');
     if (contextMenuElement && !contextMenuElement.contains(event.target as Node)) {
@@ -307,6 +304,6 @@ export function useFileManager(
     showContextMenu,
     hideContextMenu,
     formatTime,
-    debouncedOpenFile
+    debouncedOpenFile,
   };
 }
