@@ -258,10 +258,10 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       // 地图表格配置 - 支持自定义地图数据源URL
       mapTable: {
         sourceUrl: [
-          // 在线高质量地图数据源（优先，已验证可用）
-          // 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
-          // 本地备用地图数据
-          './public/data/china.json',
+          // 在线高质量地图数据源（优先）
+          'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
+          // 本地备用地图数据（公共资源目录）
+          '/data/china.json',
         ],
       },
     },

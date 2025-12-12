@@ -8,6 +8,21 @@ import {
   openDirectoryDialog,
 } from '../fileUtils';
 
+// 常量定义
+const MAX_DIRECTORY_COUNT = 10; // 最大目录数量
+const STORAGE_KEY_EXPANSION_STATE = 'cherry-markdown-directory-expansion-state';
+const STORAGE_KEY_RECENT_DIRECTORIES = 'cherry-markdown-recent-directories';
+
+/**
+ * 标准化路径分隔符为正斜杠
+ */
+const normalizePath = (path: string): string => path.replace(/\\/g, '/');
+
+/**
+ * 检查路径是否为绝对路径
+ */
+const isAbsolutePath = (path: string): boolean => path.includes('/') || path.includes('\\');
+
 /**
  * 目录管理composable
  */
@@ -18,58 +33,78 @@ export function useDirectoryManager(fileStore: FileStore, emit: (event: string, 
   // 存储目录展开状态的Map
   const directoryExpansionState = ref(new Map<string, boolean>());
 
-  // 从localStorage加载保存的目录展开状态
+  /**
+   * 从localStorage加载保存的目录展开状态
+   */
   const loadExpansionStateFromStorage = (): Map<string, boolean> => {
     try {
-      const savedState = localStorage.getItem('cherry-markdown-directory-expansion-state');
-      if (savedState) {
-        const parsedState = JSON.parse(savedState);
-        return new Map(Object.entries(parsedState));
+      const savedState = localStorage.getItem(STORAGE_KEY_EXPANSION_STATE);
+      if (!savedState) return new Map();
+
+      const parsedState = JSON.parse(savedState);
+      if (typeof parsedState !== 'object' || parsedState === null) {
+        console.warn('目录展开状态数据格式错误');
+        return new Map();
       }
+      return new Map(Object.entries(parsedState));
     } catch (error) {
       console.warn('加载目录展开状态失败:', error);
+      return new Map();
     }
-    return new Map();
   };
 
-  // 保存目录展开状态到localStorage
-  const saveExpansionStateToStorage = () => {
+  /**
+   * 保存目录展开状态到localStorage
+   */
+  const saveExpansionStateToStorage = (): void => {
     try {
       const stateObject = Object.fromEntries(directoryExpansionState.value);
-      localStorage.setItem('cherry-markdown-directory-expansion-state', JSON.stringify(stateObject));
+      localStorage.setItem(STORAGE_KEY_EXPANSION_STATE, JSON.stringify(stateObject));
     } catch (error) {
       console.warn('保存目录展开状态失败:', error);
     }
   };
 
-  // 从localStorage加载保存的最近目录列表
+  /**
+   * 从localStorage加载保存的最近目录列表
+   */
   const loadRecentDirectoriesFromStorage = (): DirectoryNode[] => {
     try {
-      const savedDirectories = localStorage.getItem('cherry-markdown-recent-directories');
-      if (savedDirectories) {
-        const parsedDirectories = JSON.parse(savedDirectories);
-        return parsedDirectories.map((dir: any) => ({
+      const savedDirectories = localStorage.getItem(STORAGE_KEY_RECENT_DIRECTORIES);
+      if (!savedDirectories) return [];
+
+      const parsedDirectories = JSON.parse(savedDirectories);
+      if (!Array.isArray(parsedDirectories)) {
+        console.warn('最近目录列表数据格式错误');
+        return [];
+      }
+
+      return parsedDirectories
+        .filter((dir) => dir && typeof dir.path === 'string')
+        .map((dir) => ({
           ...dir,
           expanded: directoryExpansionState.value.get(dir.path) || false,
+          children: [],
         }));
-      }
     } catch (error) {
       console.warn('加载最近目录列表失败:', error);
+      return [];
     }
-    return [];
   };
 
-  // 保存最近目录列表到localStorage
-  const saveRecentDirectoriesToStorage = () => {
+  /**
+   * 保存最近目录列表到localStorage
+   * 只保存目录的基本信息，不保存children数据
+   */
+  const saveRecentDirectoriesToStorage = (): void => {
     try {
-      // 只保存目录的基本信息，不保存children数据
       const directoriesToSave = recentDirectories.value.map((dir) => ({
         path: dir.path,
         name: dir.name,
         type: dir.type,
         expanded: dir.expanded,
       }));
-      localStorage.setItem('cherry-markdown-recent-directories', JSON.stringify(directoriesToSave));
+      localStorage.setItem(STORAGE_KEY_RECENT_DIRECTORIES, JSON.stringify(directoriesToSave));
     } catch (error) {
       console.warn('保存最近目录列表失败:', error);
     }
@@ -82,65 +117,61 @@ export function useDirectoryManager(fileStore: FileStore, emit: (event: string, 
   /**
    * 合并相似目录路径
    * 例如：将 D:\A\doc, doc, D:\A\doc\dir 合并为 D:\A\doc
+   * 
+   * 算法逻辑：
+   * 1. 分离绝对路径和相对路径
+   * 2. 按路径长度从短到长排序（父目录优先）
+   * 3. 对于每个路径，检查是否已有父路径存在
+   * 4. 对于相对路径，检查是否已有对应的绝对路径
    */
   const mergeSimilarDirectories = (directories: string[]): string[] => {
-    const mergedDirectories = new Set<string>();
+    if (directories.length === 0) return [];
+    if (directories.length === 1) return directories;
 
-    // 按路径长度排序，从长到短
-    const sortedDirs = [...directories].sort((a, b) => b.length - a.length);
-
-    // 收集所有相对路径
+    // 分离并标准化路径
+    const absolutePaths = new Map<string, string>(); // normalized -> original
     const relativePaths = new Set<string>();
-    const absolutePaths = new Set<string>();
 
-    // 先分类路径
     directories.forEach((dir) => {
-      if (dir.includes('/') || dir.includes('\\')) {
-        absolutePaths.add(dir);
+      if (isAbsolutePath(dir)) {
+        const normalized = normalizePath(dir);
+        if (!absolutePaths.has(normalized)) {
+          absolutePaths.set(normalized, dir);
+        }
       } else {
         relativePaths.add(dir);
       }
     });
 
-    for (const dirPath of sortedDirs) {
-      let shouldAdd = true;
+    // 处理绝对路径：按长度排序，保留最短的父目录
+    const sortedAbsolutePaths = Array.from(absolutePaths.keys())
+      .sort((a, b) => a.length - b.length);
 
-      // 检查当前目录是否已经是其他目录的子目录
-      for (const existingDir of mergedDirectories) {
-        // 标准化路径分隔符进行比较
-        const normalizedDirPath = dirPath.replace(/\\/g, '/');
-        const normalizedExistingDir = existingDir.replace(/\\/g, '/');
-
-        // 使用路径分隔符进行更精确的匹配
-        if (normalizedDirPath.startsWith(`${normalizedExistingDir}/`) || normalizedDirPath === normalizedExistingDir) {
-          shouldAdd = false;
+    const mergedAbsolutePaths = new Set<string>();
+    for (const path of sortedAbsolutePaths) {
+      // 检查是否已有父目录
+      let hasParent = false;
+      for (const existingPath of mergedAbsolutePaths) {
+        if (path.startsWith(`${existingPath}/`)) {
+          hasParent = true;
           break;
         }
-
-        // 检查当前目录是否是现有目录的父目录
-        if (normalizedExistingDir.startsWith(`${normalizedDirPath}/`) || normalizedExistingDir === normalizedDirPath) {
-          // 如果现有目录是当前目录的子目录，移除现有目录
-          mergedDirectories.delete(existingDir);
-        }
       }
 
-      // 对于相对路径，检查是否已有包含该相对路径的绝对路径
-      if (shouldAdd && !dirPath.includes('/') && !dirPath.includes('\\')) {
-        for (const absolutePath of absolutePaths) {
-          const normalizedAbsolutePath = absolutePath.replace(/\\/g, '/');
-          if (normalizedAbsolutePath.endsWith(`/${dirPath}`) || normalizedAbsolutePath.includes(`/${dirPath}/`)) {
-            shouldAdd = false;
-            break;
-          }
-        }
-      }
-
-      if (shouldAdd) {
-        mergedDirectories.add(dirPath);
+      if (!hasParent) {
+        mergedAbsolutePaths.add(absolutePaths.get(path)!);
       }
     }
 
-    return Array.from(mergedDirectories);
+    // 处理相对路径：排除已有对应绝对路径的相对路径
+    const mergedRelativePaths = Array.from(relativePaths).filter((relPath) => {
+      return !Array.from(mergedAbsolutePaths).some((absPath) => {
+        const normalized = normalizePath(absPath);
+        return normalized.endsWith(`/${relPath}`) || normalized.includes(`/${relPath}/`);
+      });
+    });
+
+    return [...mergedAbsolutePaths, ...mergedRelativePaths];
   };
 
   // 切换目录展开状态
@@ -176,69 +207,58 @@ export function useDirectoryManager(fileStore: FileStore, emit: (event: string, 
     }
   };
 
-  // 获取最近访问的目录列表
+  /**
+   * 获取最近访问的目录列表
+   */
   const getRecentDirectories = async (): Promise<void> => {
     try {
-      // 从store中获取最近文件列表
-      const recentFiles = fileStore.sortedRecentFiles;
-
-      // 从最近访问的文件中提取目录路径
+      // 从最近文件中提取目录路径
       const directories = new Set<string>();
-
-      recentFiles.forEach((file) => {
+      fileStore.sortedRecentFiles.forEach((file) => {
         const dirPath = extractDirectoryPath(file.path);
-        if (dirPath) {
-          directories.add(dirPath);
-        }
+        if (dirPath) directories.add(dirPath);
       });
 
-      // 合并相似目录
-      const mergedDirectories = mergeSimilarDirectories(Array.from(directories));
+      // 合并相似目录并限制数量
+      const mergedDirectories = mergeSimilarDirectories(Array.from(directories))
+        .slice(0, MAX_DIRECTORY_COUNT);
 
-      // 检查目录是否存在并获取目录信息
-      const directoryList = mergedDirectories.slice(0, 10); // 最多显示10个目录
-
+      // 验证目录存在性并创建目录节点
       const directoryResults = await Promise.all(
-        directoryList.map(async (dirPath) => {
+        mergedDirectories.map(async (dirPath) => {
           const dirExists = await checkPathExists(dirPath);
           if (!dirExists) return null;
 
-          const dirName = extractFileName(dirPath);
-
-          // 从Map中恢复展开状态，如果没有记录则默认为false
-          const expanded = directoryExpansionState.value.get(dirPath) || false;
-
           return {
             path: dirPath,
-            name: dirName,
+            name: extractFileName(dirPath),
             type: 'directory' as const,
-            expanded: expanded,
+            expanded: directoryExpansionState.value.get(dirPath) || false,
             children: [] as DirectoryNode[],
           };
         }),
       );
 
-      // 合并从localStorage加载的目录和从最近文件提取的目录
+      // 合并从localStorage加载的目录和新提取的目录
+      const validDirectories = directoryResults.filter(Boolean) as DirectoryNode[];
       const storedDirectories = recentDirectories.value.filter(
-        (storedDir) => !directoryResults.some((newDir) => newDir && newDir.path === storedDir.path),
+        (storedDir) => !validDirectories.some((newDir) => newDir.path === storedDir.path),
       );
 
-      recentDirectories.value = [...(directoryResults.filter(Boolean) as DirectoryNode[]), ...storedDirectories].slice(
-        0,
-        10,
-      ); // 限制最多10个目录
+      recentDirectories.value = [...validDirectories, ...storedDirectories]
+        .slice(0, MAX_DIRECTORY_COUNT);
 
-      // 为每个目录加载文件列表
-      await Promise.all(
-        recentDirectories.value.map(async (dir) => {
-          if (dir.expanded) {
-            const result = await loadDirectoryStructure(dir.path, 1);
-            if (result.success && result.data) {
-              dir.children = result.data;
-            }
+      // 为已展开的目录加载文件列表
+      const loadPromises = recentDirectories.value
+        .filter((dir) => dir.expanded)
+        .map(async (dir) => {
+          const result = await loadDirectoryStructure(dir.path, 1);
+          if (result.success && result.data) {
+            dir.children = result.data;
           }
-        }),
-      );
+        });
+
+      await Promise.all(loadPromises);
 
       // 保存更新后的目录列表
       saveRecentDirectoriesToStorage();
@@ -247,7 +267,9 @@ export function useDirectoryManager(fileStore: FileStore, emit: (event: string, 
     }
   };
 
-  // 打开目录
+  /**
+   * 打开目录对话框并添加到列表
+   */
   const openDirectory = async (): Promise<void> => {
     try {
       const result = await openDirectoryDialog();
@@ -258,37 +280,36 @@ export function useDirectoryManager(fileStore: FileStore, emit: (event: string, 
       // 检查目录是否已经在列表中
       const existingDir = recentDirectories.value.find((dir) => dir.path === dirPath);
       if (existingDir) {
+        // 如果已存在，切换展开状态
         await toggleDirectory(dirPath);
-      } else {
-        // 添加到目录列表并展开
-        const dirName = extractFileName(dirPath);
-        const newDir: DirectoryNode = {
-          path: dirPath,
-          name: dirName,
-          type: 'directory',
-          expanded: true,
-          children: [],
-        };
-
-        // 保存展开状态
-        directoryExpansionState.value.set(dirPath, true);
-        saveExpansionStateToStorage();
-
-        // 加载目录结构
-        const loadResult = await loadDirectoryStructure(dirPath, 1);
-        if (loadResult.success && loadResult.data) {
-          newDir.children = loadResult.data;
-        }
-
-        // 添加到目录列表开头，并限制最大数量
-        recentDirectories.value.unshift(newDir);
-        if (recentDirectories.value.length > 10) {
-          recentDirectories.value = recentDirectories.value.slice(0, 10);
-        }
-
-        // 保存到localStorage
-        saveRecentDirectoriesToStorage();
+        return;
       }
+
+      // 创建新目录节点
+      const newDir: DirectoryNode = {
+        path: dirPath,
+        name: extractFileName(dirPath),
+        type: 'directory',
+        expanded: true,
+        children: [],
+      };
+
+      // 保存展开状态
+      directoryExpansionState.value.set(dirPath, true);
+      saveExpansionStateToStorage();
+
+      // 加载目录结构
+      const loadResult = await loadDirectoryStructure(dirPath, 1);
+      if (loadResult.success && loadResult.data) {
+        newDir.children = loadResult.data;
+      }
+
+      // 添加到目录列表开头并限制数量
+      recentDirectories.value = [newDir, ...recentDirectories.value]
+        .slice(0, MAX_DIRECTORY_COUNT);
+
+      // 保存到localStorage
+      saveRecentDirectoriesToStorage();
     } catch (error) {
       console.error('打开目录失败:', error);
     }

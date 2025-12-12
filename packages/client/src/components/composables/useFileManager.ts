@@ -9,6 +9,10 @@ import {
 } from '../fileUtils';
 import { openPath } from '@tauri-apps/plugin-opener';
 
+// 常量定义
+const STORAGE_KEY_DIRECTORY_MANAGER_EXPANDED = 'cherry-markdown-directory-manager-expanded';
+const DEFAULT_DIRECTORY_MANAGER_EXPANDED = true;
+
 /**
  * 文件管理composable
  */
@@ -18,24 +22,30 @@ export function useFileManager(fileStore: FileStore, folderManagerRef: Ref<any>)
   const currentFilePath = computed(() => fileStore.currentFilePath);
   const lastOpenedFile = computed(() => fileStore.lastOpenedFile);
 
-  // 从localStorage加载目录管理展开状态
+  /**
+   * 从localStorage加载目录管理展开状态
+   */
   const loadDirectoryManagerExpandedState = (): boolean => {
     try {
-      const savedState = localStorage.getItem('cherry-markdown-directory-manager-expanded');
-      if (savedState !== null) {
-        return JSON.parse(savedState);
+      const savedState = localStorage.getItem(STORAGE_KEY_DIRECTORY_MANAGER_EXPANDED);
+      if (savedState === null) {
+        return DEFAULT_DIRECTORY_MANAGER_EXPANDED;
       }
+      
+      const parsed = JSON.parse(savedState);
+      return typeof parsed === 'boolean' ? parsed : DEFAULT_DIRECTORY_MANAGER_EXPANDED;
     } catch (error) {
       console.warn('加载目录管理展开状态失败:', error);
+      return DEFAULT_DIRECTORY_MANAGER_EXPANDED;
     }
-    // 默认展开目录管理区域
-    return true;
   };
 
-  // 保存目录管理展开状态到localStorage
-  const saveDirectoryManagerExpandedState = (expanded: boolean) => {
+  /**
+   * 保存目录管理展开状态到localStorage
+   */
+  const saveDirectoryManagerExpandedState = (expanded: boolean): void => {
     try {
-      localStorage.setItem('cherry-markdown-directory-manager-expanded', JSON.stringify(expanded));
+      localStorage.setItem(STORAGE_KEY_DIRECTORY_MANAGER_EXPANDED, JSON.stringify(expanded));
     } catch (error) {
       console.warn('保存目录管理展开状态失败:', error);
     }

@@ -245,29 +245,36 @@ export const formatFileSize = (bytes: number): string => {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 };
 
-// 格式化时间戳
+/**
+ * 格式化时间戳为相对时间或绝对日期
+ */
 export const formatTimestamp = (timestamp: number): string => {
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diff = now.getTime() - timestamp;
+  const now = Date.now();
+  const diff = now - timestamp;
 
-  if (diff < 60000) {
-    // 1分钟内
+  // 时间常量（毫秒）
+  const MINUTE = 60 * 1000;
+  const HOUR = 60 * MINUTE;
+  const DAY = 24 * HOUR;
+  const WEEK = 7 * DAY;
+
+  if (diff < MINUTE) {
     return '刚刚';
   }
-  if (diff < 3600000) {
-    // 1小时内
-    return `${Math.floor(diff / 60000)}分钟前`;
+  
+  if (diff < HOUR) {
+    return `${Math.floor(diff / MINUTE)}分钟前`;
   }
-  if (diff < 86400000) {
-    // 1天内
-    return `${Math.floor(diff / 3600000)}小时前`;
+  
+  if (diff < DAY) {
+    return `${Math.floor(diff / HOUR)}小时前`;
   }
-  if (diff < 604800000) {
-    // 1周内
-    return `${Math.floor(diff / 86400000)}天前`;
+  
+  if (diff < WEEK) {
+    return `${Math.floor(diff / DAY)}天前`;
   }
-  return date.toLocaleDateString();
+  
+  return new Date(timestamp).toLocaleDateString();
 };
 
 // 验证文件路径
