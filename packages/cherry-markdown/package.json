@@ -108,7 +108,7 @@
     "standard-version": "^9.3.2",
     "typescript": "4.7.2",
     "virtual-dom": "^2.1.1",
-    "vite": "^6.0.0"
+    "vite": "^6.4.1"
   },
   "dependencies": {
     "@types/codemirror": "^0.0.108",
