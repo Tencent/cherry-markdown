@@ -89,6 +89,7 @@ function buildAddons(entries) {
           extensions: ['.js'], // Default: [ '.js' ]
           ignoreGlobal: false, // Default: false
           sourceMap: !IS_PRODUCTION, // Default: true
+          esmExternals: false, // 确保 UMD 格式正确处理 CommonJS
         }),
         babel({
           babelHelpers: 'runtime',
