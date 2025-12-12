@@ -5,6 +5,7 @@ import eslint from '@rollup/plugin-eslint';
 import alias from '@rollup/plugin-alias';
 import json from '@rollup/plugin-json';
 import typescript from 'rollup-plugin-typescript2';
+import envReplacePlugin from './env.js';
 
 import { resolve as _resolve, join, dirname, basename, extname } from 'path';
 import { mkdirSync, writeFileSync } from 'fs';
@@ -63,7 +64,7 @@ async function buildAddons(entries) {
           ]
         : []),
       json(),
-      // envReplacePlugin(),
+      envReplacePlugin(),
       alias({
         entries: [
           {
