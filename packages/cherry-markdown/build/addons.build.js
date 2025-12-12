@@ -24,11 +24,11 @@ glob(
   {
     cwd: PROJECT_ROOT_PATH,
   },
-  (error, matches) => {
+  async (error, matches) => {
     if (error) {
       throw error;
     }
-    buildAddons(matches);
+    await buildAddons(matches);
   },
 );
 
@@ -36,8 +36,8 @@ glob(
  *
  * @param {string[]} entries
  */
-function buildAddons(entries) {
-  entries.forEach(async (entry) => {
+async function buildAddons(entries) {
+  for (const entry of entries) {
     const fullEntryPath = _resolve(PROJECT_ROOT_PATH, entry);
 
     const outputFileName = fullEntryPath.replace(_resolve(PROJECT_ROOT_PATH, 'src/addons/'), '');
@@ -51,83 +51,183 @@ function buildAddons(entries) {
       .map((segment) => segment.replace(/^./, (char) => char.toUpperCase()))
       .join('');
 
-    const addonBundle = await _rollup({
-      input: fullEntryPath,
-      plugins: [
-        ...(process.env.ENABLE_ESLINT === 'true'
-          ? [
-              eslint({
-                exclude: ['**/node_modules/**', 'src/sass/**', 'src/libs/**'],
-                throwOnError: false,
-                throwOnWarning: false,
-              }),
-            ]
-          : []),
-        json(),
-        // envReplacePlugin(),
-        alias({
-          entries: [
-            {
-              find: '@',
-              replacement: _resolve(PROJECT_ROOT_PATH, 'src'),
-            },
-          ],
-        }),
-        resolve({
-          browser: true,
-        }),
-        typescript({
-          include: ['*.js', '*.ts'],
-          tsconfig: _resolve(PROJECT_ROOT_PATH, 'tsconfig.addons.json'),
-          tsconfigOverride: {
-            include: [fullEntryPath], // FIXME: 临时方案确保不会重复生成其他插件的 d.ts
-            // outDir: declarationDir,
+    // 创建基础插件配置
+    const basePlugins = [
+      ...(process.env.ENABLE_ESLINT === 'true'
+        ? [
+            eslint({
+              exclude: ['**/node_modules/**', 'src/sass/**', 'src/libs/**'],
+              throwOnError: false,
+              throwOnWarning: false,
+            }),
+          ]
+        : []),
+      json(),
+      // envReplacePlugin(),
+      alias({
+        entries: [
+          {
+            find: '@',
+            replacement: _resolve(PROJECT_ROOT_PATH, 'src'),
           },
-        }),
-        commonjs({
-          include: [/node_modules/, /src[\\/]libs/], // Default: undefined
-          extensions: ['.js'], // Default: [ '.js' ]
-          ignoreGlobal: false, // Default: false
-          sourceMap: !IS_PRODUCTION, // Default: true
-          esmExternals: false, // 确保 UMD 格式正确处理 CommonJS
-        }),
-        babel({
-          babelHelpers: 'runtime',
-          exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5)/],
-          babelrc: false,
-          configFile: false,
-          presets: [['@babel/preset-env', { modules: false }]],
-          plugins: [
-            ['@babel/plugin-transform-runtime', { corejs: 3 }],
-            ['@babel/plugin-proposal-decorators', { legacy: true }],
-            '@babel/plugin-proposal-class-properties',
-            '@babel/plugin-proposal-nullish-coalescing-operator',
-            '@babel/plugin-proposal-optional-chaining',
-          ],
-        }),
-      ],
-    });
+        ],
+      }),
+      resolve({
+        browser: true,
+      }),
+      typescript({
+        include: ['*.js', '*.ts'],
+        tsconfig: _resolve(PROJECT_ROOT_PATH, 'tsconfig.addons.json'),
+        tsconfigOverride: {
+          include: [fullEntryPath], // FIXME: 临时方案确保不会重复生成其他插件的 d.ts
+          // outDir: declarationDir,
+        },
+      }),
+    ];
 
-    console.log('[addons build] generating bundle %s', outputFile);
+    // 构建输出格式配置
+    const formats = [
+      {
+        format: 'umd',
+        file: outputFile,
+        name: camelCaseModuleName,
+        plugins: [
+          ...basePlugins,
+          commonjs({
+            include: [/node_modules/, /src[\\/]libs/], // Default: undefined
+            extensions: ['.js'], // Default: [ '.js' ]
+            ignoreGlobal: false, // Default: false
+            sourceMap: !IS_PRODUCTION, // Default: true
+            esmExternals: false, // 确保 UMD 格式正确处理 CommonJS
+          }),
+          babel({
+            babelHelpers: 'runtime',
+            exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5)/],
+            babelrc: false,
+            configFile: false,
+            presets: [['@babel/preset-env', { modules: false }]],
+            plugins: [
+              ['@babel/plugin-transform-runtime', { corejs: 3 }],
+              ['@babel/plugin-proposal-decorators', { legacy: true }],
+              '@babel/plugin-proposal-class-properties',
+              '@babel/plugin-proposal-nullish-coalescing-operator',
+              '@babel/plugin-proposal-optional-chaining',
+            ],
+          }),
+          terser(),
+        ],
+      },
+      {
+        format: 'es',
+        file: outputFile.replace('.js', '.esm.js'),
+        plugins: [
+          ...basePlugins,
+          commonjs({
+            include: [/node_modules/, /src[\\/]libs/], // Default: undefined
+            extensions: ['.js'], // Default: [ '.js' ]
+            ignoreGlobal: false, // Default: false
+            sourceMap: !IS_PRODUCTION, // Default: true
+            esmExternals: true, // ESM 格式应该使用 ES 模块外部依赖
+          }),
+          babel({
+            babelHelpers: 'runtime',
+            exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5)/],
+            babelrc: false,
+            configFile: false,
+            presets: [['@babel/preset-env', { modules: false }]],
+            plugins: [
+              ['@babel/plugin-transform-runtime', { corejs: 3 }],
+              ['@babel/plugin-proposal-decorators', { legacy: true }],
+              '@babel/plugin-proposal-class-properties',
+              '@babel/plugin-proposal-nullish-coalescing-operator',
+              '@babel/plugin-proposal-optional-chaining',
+            ],
+          }),
+          terser(),
+        ],
+      },
+    ];
 
-    // generate code and a sourcemap
-    const { output: outputs } = await addonBundle.generate({
-      // dir: declarationDir,
-      file: outputFile,
-      format: 'umd',
-      name: camelCaseModuleName,
-      plugins: [terser()],
-    });
+    // 生成多种格式的输出
+    for (const formatConfig of formats) {
+      console.log('[addons build] generating %s bundle %s', formatConfig.format, formatConfig.file);
+
+      const rollupConfig = {
+        input: fullEntryPath,
+        plugins: formatConfig.plugins,
+      };
+
+      const addonBundle = await _rollup(rollupConfig);
+      const { output: outputs } = await addonBundle.generate({
+        format: formatConfig.format,
+        file: formatConfig.file,
+        name: formatConfig.name,
+      });
+
+      // 写入文件
+      outputs.forEach((output) => {
+        const fileNameOnly = basename(output.fileName);
+        const targetDir = dirname(formatConfig.file);
+        const targetPath = join(targetDir, fileNameOnly);
+        
+        console.log('[addons build] writing %s %s', output.type, targetPath);
+        mkdirSync(targetDir, {
+          recursive: true,
+        });
+        writeFileSync(targetPath, output.code || output.source || '', { encoding: 'utf-8' });
+      });
+    }
 
     // TODO: ts declaration 生成的目录不符合预期，以下为临时处理方案
-    outputs.forEach((output) => {
-      const fileNameOnly = basename(output.fileName);
-      const targetPath = join(declarationDir, fileNameOnly);
-      console.log('[addons build] writing %s %s', output.type, targetPath);
-      mkdirSync(declarationDir, {
-        recursive: true,
+    // 生成 TypeScript 声明文件（只生成一次，使用基础配置）
+    try {
+      const declarationRollupConfig = {
+        input: fullEntryPath,
+        plugins: [
+          ...basePlugins,
+          commonjs({
+            include: [/node_modules/, /src[\\/]libs/],
+            extensions: ['.js'],
+            ignoreGlobal: false,
+            sourceMap: !IS_PRODUCTION,
+            esmExternals: false,
+          }),
+          babel({
+            babelHelpers: 'runtime',
+            exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5)/],
+            babelrc: false,
+            configFile: false,
+            presets: [['@babel/preset-env', { modules: false }]],
+            plugins: [
+              ['@babel/plugin-transform-runtime', { corejs: 3 }],
+              ['@babel/plugin-proposal-decorators', { legacy: true }],
+              '@babel/plugin-proposal-class-properties',
+              '@babel/plugin-proposal-nullish-coalescing-operator',
+              '@babel/plugin-proposal-optional-chaining',
+            ],
+          }),
+        ],
+      };
+
+      const declarationBundle = await _rollup(declarationRollupConfig);
+      const { output: declarationOutputs } = await declarationBundle.generate({
+        format: 'es',
+        dir: declarationDir,
       });
-      writeFileSync(targetPath, output.code || output.source || '', { encoding: 'utf-8' });
-    });
-  });
+
+      declarationOutputs.forEach((output) => {
+        if (output.fileName.endsWith('.d.ts')) {
+          const fileNameOnly = basename(output.fileName);
+          const targetPath = join(declarationDir, fileNameOnly);
+          console.log('[addons build] writing declaration %s', targetPath);
+          mkdirSync(declarationDir, {
+            recursive: true,
+          });
+          writeFileSync(targetPath, output.code || output.source || '', { encoding: 'utf-8' });
+        }
+      });
+    } catch (error) {
+      console.warn('[addons build] TypeScript declaration generation failed:', error.message);
+    }
+  }
 }
