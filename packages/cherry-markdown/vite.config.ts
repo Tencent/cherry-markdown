@@ -40,6 +40,28 @@ function printLinks() {
   };
 }
 
+function spaFallback() {
+  return {
+    name: 'spa-fallback',
+    transformIndexHtml: (html: string, ctx: { path: string; filename?: string; server?: any }) => {
+      const path = ctx.path;
+      // 如果是配置的路径之一，注入脚本设置原始路径
+      // 优化的路径匹配逻辑
+      const isExactMatch = paths.includes(path);
+      const isPathWithoutHtmlMatch = path.endsWith('.html') && paths.includes(path.slice(0, -5));
+      const matchedPath = isExactMatch || isPathWithoutHtmlMatch ? (isExactMatch ? path : path.slice(0, -5)) : null;
+
+      if (matchedPath && matchedPath !== '/index.html') {
+        // 转义路径中的特殊字符以防止XSS注入
+        const escapedPath = matchedPath.replace(/['"\\]/g, '\\$&');
+        const script = `<script>window.__ORIGINAL_PATH__ = '${escapedPath}';</script>`;
+        return html.replace('</head>', `${script}\n  </head>`);
+      }
+      return html;
+    },
+  };
+}
+
 export default defineConfig({
   root: process.cwd(),
   base: '/',
@@ -51,8 +73,10 @@ export default defineConfig({
     ],
   },
   server: {
+    host: '0.0.0.0',
     port: 5173,
     open: false,
+    allowedHosts: true,
     fs: {
       allow: [path.resolve(__dirname), path.resolve(__dirname, 'dist'), path.resolve(__dirname, '..', '..')],
     },
@@ -67,5 +91,5 @@ export default defineConfig({
     BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'development'),
     __EXAMPLES_PATH__: JSON.stringify(path.resolve(__dirname, '../../examples').replace(/\\/g, '/')),
   },
-  plugins: [printLinks()],
+  plugins: [spaFallback(), printLinks()],
 });

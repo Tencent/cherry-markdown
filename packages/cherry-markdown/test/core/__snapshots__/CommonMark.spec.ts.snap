@@ -1360,7 +1360,7 @@ exports[`engine > CommonMark-192 1`] = `
 `;
 
 exports[`engine > CommonMark-193 1`] = `
-"<p data-sign="c748929db636b086c31f362ad2f999f6257bb59351aa714a748ec92ec7769b383" data-type="p" data-lines="3">      /url  <br>           'the title'  </p><p data-sign="3c65f714b4d72f614794b9c1dc97a9cb988e5bd7a6981a79e63700f04f901b8b2" data-type="p" data-lines="2">[foo](cherry-inner://e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 )</p>
+"<p data-sign="c748929db636b086c31f362ad2f999f6257bb59351aa714a748ec92ec7769b383" data-type="p" data-lines="3">      /url  <br>           'the title'  </p><p data-sign="3c65f714b4d72f614794b9c1dc97a9cb988e5bd7a6981a79e63700f04f901b8b2" data-type="p" data-lines="2">[foo]( )</p>
 "
 `;
 
@@ -1395,7 +1395,7 @@ exports[`engine > CommonMark-199 1`] = `
 `;
 
 exports[`engine > CommonMark-200 1`] = `
-"<p data-sign="901a805d3b4da566f815e5f755cc0781c4da142101080d8d5db1f7fb9ef0971b1" data-type="p" data-lines="1"><a href="&#60;&#62;">foo</a></p>
+"<p data-sign="710f04ae6827e964349ae1ce3cc82a5088ee94ab7a10d615a82f3ac2c94631a21" data-type="p" data-lines="1"><a href="">foo</a></p>
 "
 `;
 

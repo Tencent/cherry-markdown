@@ -77,7 +77,10 @@
 
       let CONFIG ={};
 
-      switch (window.location.pathname) {
+      // 使用注入的原始路径或当前路径
+      const currentPath = window.__ORIGINAL_PATH__ || window.location.pathname;
+
+      switch (currentPath) {
         case '/':
           CONFIG = Object.assign({}, basicConfig, { value: indexMd, ...devCompatibleConfig });
           break;
