@@ -11,7 +11,7 @@
         <RefreshIcon :size="14" />
       </button>
     </div>
-    
+
     <div class="directory-content" v-if="expanded">
       <slot></slot>
     </div>

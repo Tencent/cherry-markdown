@@ -117,7 +117,7 @@ export function useDirectoryManager(fileStore: FileStore, emit: (event: string, 
   /**
    * 合并相似目录路径
    * 例如：将 D:\A\doc, doc, D:\A\doc\dir 合并为 D:\A\doc
-   * 
+   *
    * 算法逻辑：
    * 1. 分离绝对路径和相对路径
    * 2. 按路径长度从短到长排序（父目录优先）
@@ -144,8 +144,7 @@ export function useDirectoryManager(fileStore: FileStore, emit: (event: string, 
     });
 
     // 处理绝对路径：按长度排序，保留最短的父目录
-    const sortedAbsolutePaths = Array.from(absolutePaths.keys())
-      .sort((a, b) => a.length - b.length);
+    const sortedAbsolutePaths = Array.from(absolutePaths.keys()).sort((a, b) => a.length - b.length);
 
     const mergedAbsolutePaths = new Set<string>();
     for (const path of sortedAbsolutePaths) {
@@ -220,8 +219,7 @@ export function useDirectoryManager(fileStore: FileStore, emit: (event: string, 
       });
 
       // 合并相似目录并限制数量
-      const mergedDirectories = mergeSimilarDirectories(Array.from(directories))
-        .slice(0, MAX_DIRECTORY_COUNT);
+      const mergedDirectories = mergeSimilarDirectories(Array.from(directories)).slice(0, MAX_DIRECTORY_COUNT);
 
       // 验证目录存在性并创建目录节点
       const directoryResults = await Promise.all(
@@ -245,16 +243,18 @@ export function useDirectoryManager(fileStore: FileStore, emit: (event: string, 
         (storedDir) => !validDirectories.some((newDir) => newDir.path === storedDir.path),
       );
 
-      recentDirectories.value = [...validDirectories, ...storedDirectories]
-        .slice(0, MAX_DIRECTORY_COUNT);
+      recentDirectories.value = [...validDirectories, ...storedDirectories].slice(0, MAX_DIRECTORY_COUNT);
 
       // 为已展开的目录加载文件列表
       const loadPromises = recentDirectories.value
         .filter((dir) => dir.expanded)
-        .map(async (dir) => {
-          const result = await loadDirectoryStructure(dir.path, 1);
+        .map(async (currentDir) => {
+          const result = await loadDirectoryStructure(currentDir.path, 1);
           if (result.success && result.data) {
-            dir.children = result.data;
+            const updatedDir = recentDirectories.value.find((dir) => dir.path === currentDir.path);
+            if (updatedDir) {
+              updatedDir.children = result.data;
+            }
           }
         });
 
@@ -305,8 +305,7 @@ export function useDirectoryManager(fileStore: FileStore, emit: (event: string, 
       }
 
       // 添加到目录列表开头并限制数量
-      recentDirectories.value = [newDir, ...recentDirectories.value]
-        .slice(0, MAX_DIRECTORY_COUNT);
+      recentDirectories.value = [newDir, ...recentDirectories.value].slice(0, MAX_DIRECTORY_COUNT);
 
       // 保存到localStorage
       saveRecentDirectoriesToStorage();
@@ -327,15 +326,21 @@ export function useDirectoryManager(fileStore: FileStore, emit: (event: string, 
     await getRecentDirectories();
 
     // 恢复之前保存的展开状态
-    recentDirectories.value.forEach((dir) => {
-      const savedState = currentExpansionState.get(dir.path);
+    recentDirectories.value.forEach((currentDir) => {
+      const savedState = currentExpansionState.get(currentDir.path);
       if (savedState !== undefined) {
-        dir.expanded = savedState;
+        const updatableDir = recentDirectories.value.find((d) => d.path === currentDir.path);
+        if (updatableDir) {
+          updatableDir.expanded = savedState;
+        }
         // 如果目录是展开的，加载文件列表
-        if (dir.expanded && dir.children && dir.children.length === 0) {
-          loadDirectoryStructure(dir.path, 1).then((result) => {
+        if (savedState && currentDir.children && currentDir.children.length === 0) {
+          loadDirectoryStructure(currentDir.path, 1).then((result) => {
             if (result.success && result.data) {
-              dir.children = result.data;
+              const updatedDir = recentDirectories.value.find((d) => d.path === currentDir.path);
+              if (updatedDir) {
+                updatedDir.children = result.data;
+              }
             }
           });
         }

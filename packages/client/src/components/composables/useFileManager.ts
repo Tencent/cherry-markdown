@@ -31,7 +31,7 @@ export function useFileManager(fileStore: FileStore, folderManagerRef: Ref<any>)
       if (savedState === null) {
         return DEFAULT_DIRECTORY_MANAGER_EXPANDED;
       }
-      
+
       const parsed = JSON.parse(savedState);
       return typeof parsed === 'boolean' ? parsed : DEFAULT_DIRECTORY_MANAGER_EXPANDED;
     } catch (error) {
@@ -154,31 +154,6 @@ export function useFileManager(fileStore: FileStore, folderManagerRef: Ref<any>)
     }
   };
 
-  // 检查文件是否在目录管理中
-  const checkFileInDirectoryManager = async (filePath: string): Promise<boolean> => {
-    console.log(folderManagerRef);
-    if (!folderManagerRef.value) return false;
-    try {
-      // 获取目录管理中的目录列表
-      const directories = await folderManagerRef.value.getRecentDirectories();
-      if (!directories || directories.length === 0) return false;
-      // 标准化文件路径
-      const normalizedFilePath = filePath.replace(/\\\\/g, '/');
-      // 检查文件是否在任何一个目录中
-      for (const dir of directories) {
-        const normalizedDirPath = dir.path.replace(/\\\\/g, '/');
-        // 检查文件路径是否以目录路径开头（考虑路径分隔符）
-        if (normalizedFilePath.startsWith(`${normalizedDirPath}/`) || normalizedFilePath === normalizedDirPath) {
-          return true;
-        }
-      }
-      return false;
-    } catch (error) {
-      console.error('检查文件是否在目录管理中失败:', error);
-      return false;
-    }
-  };
-
   // 处理FolderManager的open-file事件
   const handleOpenFile = (filePath: string, fromDirectoryManager: boolean): void => {
     openFile(filePath, fromDirectoryManager);
@@ -193,8 +168,9 @@ export function useFileManager(fileStore: FileStore, folderManagerRef: Ref<any>)
 
   // 清空最近文件列表
   const clearRecentFiles = (): void => {
-    fileStore.recentFiles = [];
-    refreshDirectories();
+    const storeInstance = fileStore;
+    storeInstance.recentFiles = [];
+    void refreshDirectories();
   };
 
   // 从最近文件中移除

@@ -1,13 +1,6 @@
 import { readDir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { open, save } from '@tauri-apps/plugin-dialog';
-import type {
-  DirectoryNode,
-  FileInfo,
-  FileFilter,
-  DialogOptions,
-  FileOperationResult,
-  DirectoryStructureResult,
-} from './types';
+import type { DirectoryNode, FileInfo, FileOperationResult, DirectoryStructureResult } from './types';
 
 // 常量定义
 export const SUPPORTED_FILE_EXTENSIONS = ['md', 'markdown', 'text', 'txt'];
@@ -242,7 +235,7 @@ export const formatFileSize = (bytes: number): string => {
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+  return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 };
 
 /**
@@ -261,19 +254,19 @@ export const formatTimestamp = (timestamp: number): string => {
   if (diff < MINUTE) {
     return '刚刚';
   }
-  
+
   if (diff < HOUR) {
     return `${Math.floor(diff / MINUTE)}分钟前`;
   }
-  
+
   if (diff < DAY) {
     return `${Math.floor(diff / HOUR)}小时前`;
   }
-  
+
   if (diff < WEEK) {
     return `${Math.floor(diff / DAY)}天前`;
   }
-  
+
   return new Date(timestamp).toLocaleDateString();
 };
 

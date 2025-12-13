@@ -103,7 +103,7 @@ export interface FileStore {
   recentFiles: FileInfo[];
   lastOpenedFile: FileInfo | null;
   sortedRecentFiles: FileInfo[];
-  
+
   toggleSidebar(): void;
   setCurrentFilePath(filePath: string): void;
   addRecentFile(filePath: string): void;

@@ -11,7 +11,7 @@
           :current-file-path="currentFilePath"
           @toggle-directory="toggleDirectory"
           @open-file="handleOpenFile"
-          @context-menu="(event, file) => $emit('context-menu', event, file)"
+          @context-menu="(_event, _file) => $emit('context-menu', _event, _file)"
         />
 
         <div v-if="recentDirectories.length === 0" class="empty-state">暂无访问过的目录</div>
@@ -28,8 +28,8 @@ import { useDirectoryManager } from './composables/useDirectoryManager';
 
 // 定义组件事件
 const emit = defineEmits<{
-  (e: 'open-file', filePath: string, fromDirectoryManager: boolean): void;
-  (e: 'context-menu', event: MouseEvent, file: any): void;
+  (_e: 'open-file', _filePath: string, _fromDirectoryManager: boolean): void;
+  (_e: 'context-menu', _event: MouseEvent, _file: any): void;
 }>();
 
 // 使用文件存储
@@ -39,13 +39,8 @@ const fileStore = useFileStore();
 const currentFilePath = computed(() => fileStore.currentFilePath);
 
 // 使用目录管理composable
-const {
-  recentDirectories,
-  toggleDirectory,
-  openDirectory,
-  refreshDirectories,
-  getRecentDirectories,
-} = useDirectoryManager(fileStore, emit);
+const { recentDirectories, toggleDirectory, openDirectory, refreshDirectories, getRecentDirectories } =
+  useDirectoryManager(fileStore, emit);
 
 // 在setup阶段立即初始化目录列表，确保窗口打开时就恢复状态
 getRecentDirectories();
@@ -58,8 +53,9 @@ const handleOpenFile = (filePath: string) => {
 /**
  * 展开所有父目录
  * 根据文件路径递归展开目标目录下的所有父级目录
+ * 注：当前未使用，保留用于未来功能扩展
  */
-const expandAllParentDirectories = async (filePath: string, targetDir: any): Promise<void> => {
+const _expandAllParentDirectories = async (filePath: string, targetDir: any): Promise<void> => {
   const normalizedFilePath = filePath.replace(/\\/g, '/');
   const normalizedTargetPath = targetDir.path.replace(/\\/g, '/');
 
@@ -93,9 +89,7 @@ const expandAllParentDirectories = async (filePath: string, targetDir: any): Pro
       return;
     }
 
-    const childDir = node.children.find(
-      (child: any) => child.type === 'directory' && child.name === currentPart
-    );
+    const childDir = node.children.find((child: any) => child.type === 'directory' && child.name === currentPart);
 
     if (!childDir) {
       return;

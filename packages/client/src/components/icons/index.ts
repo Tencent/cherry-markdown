@@ -17,7 +17,7 @@ export const ICON_SIZES = {
   SMALL: 12,
   MEDIUM: 16,
   LARGE: 20,
-  XLARGE: 24
+  XLARGE: 24,
 } as const;
 
 // 图标颜色常量
@@ -28,5 +28,5 @@ export const ICON_COLORS = {
   SUCCESS: '#28a745',
   DANGER: '#dc3545',
   WARNING: '#ffc107',
-  INFO: '#17a2b8'
+  INFO: '#17a2b8',
 } as const;

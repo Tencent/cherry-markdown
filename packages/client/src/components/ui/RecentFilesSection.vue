@@ -9,10 +9,10 @@
       </div>
       <button class="clear-btn" @click="$emit('clear')" title="清空列表">×</button>
     </div>
-    
+
     <div class="file-list" v-if="expanded">
-      <div 
-        v-for="file in files" 
+      <div
+        v-for="file in files"
         :key="file.path"
         class="file-item"
         :class="{ active: file.path === currentFilePath }"
@@ -27,10 +27,8 @@
           <div class="file-time">{{ formatTime(file.lastAccessed) }}</div>
         </div>
       </div>
-      
-      <div v-if="files.length === 0" class="empty-state">
-        暂无最近访问的文件
-      </div>
+
+      <div v-if="files.length === 0" class="empty-state">暂无最近访问的文件</div>
     </div>
   </div>
 </template>

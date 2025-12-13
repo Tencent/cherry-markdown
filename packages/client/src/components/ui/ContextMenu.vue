@@ -1,9 +1,5 @@
 <template>
-  <div 
-    class="context-menu"
-    :style="{ left: x + 'px', top: y + 'px' }"
-    @click.stop
-  >
+  <div class="context-menu" :style="{ left: x + 'px', top: y + 'px' }" @click.stop>
     <div v-if="menuType === 'recent'" class="menu-item" @click="$emit('remove', file?.path || '')">从列表中移除</div>
     <div class="menu-item" @click="$emit('copy-path', file?.path || '')">复制文件路径</div>
     <div class="menu-item" @click="$emit('open-in-explorer', file?.path || '')">在资源管理器中打开</div>

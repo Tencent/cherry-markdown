@@ -1,35 +1,28 @@
 <template>
   <div class="file-manager" :class="{ 'sidebar-collapsed': fileStore.sidebarCollapsed }">
     <!-- 侧边栏头部 -->
-    <SidebarHeader 
-      :collapsed="fileStore.sidebarCollapsed"
-      @toggle="toggleSidebar"
-    />
-    
+    <SidebarHeader :collapsed="fileStore.sidebarCollapsed" @toggle="toggleSidebar" />
+
     <!-- 功能按钮区域 -->
-    <ActionButtons 
+    <ActionButtons
       v-if="!fileStore.sidebarCollapsed"
       @create-file="createNewFile"
       @open-file="openExistingFile"
       @open-directory="openDirectory"
     />
-    
+
     <!-- 目录管理 -->
-    <DirectorySection 
+    <DirectorySection
       v-if="!fileStore.sidebarCollapsed"
       :expanded="directoryManagerExpanded"
       @toggle="toggleDirectoryManager"
       @refresh="refreshDirectories"
     >
-      <FolderManager 
-        ref="folderManagerRef"
-        @open-file="handleOpenFile"
-        @context-menu="showContextMenu"
-      />
+      <FolderManager ref="folderManagerRef" @open-file="handleOpenFile" @context-menu="showContextMenu" />
     </DirectorySection>
-    
+
     <!-- 最近文件列表 -->
-    <RecentFilesSection 
+    <RecentFilesSection
       v-if="!fileStore.sidebarCollapsed"
       :expanded="recentFilesExpanded"
       :files="sortedRecentFiles"
@@ -39,9 +32,9 @@
       @open-file="openFile"
       @context-menu="showContextMenu"
     />
-    
+
     <!-- 右键菜单 -->
-    <ContextMenu 
+    <ContextMenu
       v-if="contextMenu.visible"
       :x="contextMenu.x"
       :y="contextMenu.y"
@@ -73,7 +66,6 @@ const folderManagerRef = ref<InstanceType<typeof FolderManager>>();
 const {
   sortedRecentFiles,
   currentFilePath,
-  lastOpenedFile,
   recentFilesExpanded,
   directoryManagerExpanded,
   contextMenu,
@@ -91,19 +83,19 @@ const {
   copyFilePath,
   openInExplorer,
   showContextMenu,
-  hideContextMenu
+  hideContextMenu,
 } = useFileManager(fileStore, folderManagerRef);
 
 // 获取菜单类型
 const getMenuType = (file: any): 'directory' | 'recent' => {
   // 通过检查文件对象的结构来判断来源
   // 目录管理中的文件通常有更完整的DirectoryNode结构
-  
+
   // 如果文件有type属性且为'file'或'directory'，说明来自目录管理
   if (file?.type && (file.type === 'file' || file.type === 'directory')) {
     return 'directory';
   }
-  
+
   // 如果文件在最近访问列表中，说明来自最近访问列表
   const isInRecentFiles = fileStore.recentFiles.some((recentFile: any) => recentFile.path === file?.path);
   return isInRecentFiles ? 'recent' : 'directory';

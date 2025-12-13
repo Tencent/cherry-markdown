@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { cherryInstance } from './components/CherryMarkdown';
-import { listen } from '@tauri-apps/api/event';
+import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { useFileStore } from './store';
-import { previewOnlySidebar } from './utils';
 import { onMounted, onUnmounted } from 'vue';
 import FileManager from './components/FileManager.vue';
 
@@ -22,6 +21,7 @@ let cherryMarkdown = cherryInstance();
 const fileStore = useFileStore();
 const appWindow = getCurrentWindow();
 let needDealAfterChange = false;
+const unlistenFns: UnlistenFn[] = [];
 
 // ========== 窗口标题管理 ==========
 const updateTitle = async (path: string | null): Promise<void> => {
@@ -36,11 +36,11 @@ const updateTitle = async (path: string | null): Promise<void> => {
 };
 
 // ========== 文件操作函数 ==========
-const newFile = (): void => {
+const newFile = async (): Promise<void> => {
   needDealAfterChange = false;
   cherryMarkdown.setMarkdown('');
   fileStore.setCurrentFilePath('');
-  updateTitle(null);
+  await updateTitle(null);
 };
 
 const openFile = async (): Promise<FileOperationResult> => {
@@ -65,11 +65,11 @@ const openFile = async (): Promise<FileOperationResult> => {
     cherryMarkdown.setMarkdown(markdown);
     fileStore.setCurrentFilePath(path);
     switchToPreviewOnly();
-    
+
     // 添加到最近访问列表
     fileStore.addRecentFile(path);
     await updateTitle(path);
-    
+
     return { success: true, path };
   } catch (error) {
     console.error('打开文件失败:', error);
@@ -97,7 +97,7 @@ const saveAsNewMarkdown = async (): Promise<FileOperationResult> => {
     fileStore.setCurrentFilePath(path);
     fileStore.addRecentFile(path);
     await updateTitle(path);
-    
+
     return { success: true, path };
   } catch (error) {
     console.error('另存为失败:', error);
@@ -124,7 +124,7 @@ const saveMarkdown = async (): Promise<FileOperationResult> => {
 // ========== 编辑器模式管理 ==========
 const switchToPreviewOnly = (): void => {
   cherryMarkdown.wrapperDom.classList.add('markdown-preview-only');
-  
+
   // 隐藏编辑按钮
   const pen = cherryMarkdown.wrapperDom.querySelector('.cherry-toolbar-pen');
   if (pen) {
@@ -143,21 +143,21 @@ const switchToEdit = (): void => {
   cherryMarkdown.previewer.options.enablePreviewerBubble = true;
 };
 
-const dealAfterChange = (markdown: string, html: string): void => {
+const dealAfterChange = (): void => {
   if (!needDealAfterChange) {
     needDealAfterChange = true;
     return;
   }
-  
+
   // 自动保存功能
   if (fileStore.currentFilePath) {
-    saveMarkdown();
+    void saveMarkdown();
   }
-}
+};
 
 const handleEditButtonClick = (): void => {
   const pen = cherryMarkdown.wrapperDom.querySelector('.cherry-toolbar-pen');
-  
+
   if (pen) {
     if (cherryMarkdown.wrapperDom.classList.contains('markdown-preview-only')) {
       switchToEdit();
@@ -187,18 +187,14 @@ const restoreLastOpenedFile = async (): Promise<void> => {
 };
 
 // ========== 事件处理函数 ==========
-const handleOpenFileFromSidebar = (event: Event): void => {
+const handleOpenFileFromSidebar = async (event: Event): Promise<void> => {
   const customEvent = event as CustomEvent;
   const { filePath, content } = customEvent.detail;
   needDealAfterChange = false;
   cherryMarkdown.setMarkdown(content);
   fileStore.setCurrentFilePath(filePath);
   switchToPreviewOnly();
-  updateTitle(filePath);
-};
-
-const toggleSidebar = (): void => {
-  fileStore.toggleSidebar();
+  await updateTitle(filePath);
 };
 
 // ========== 工具栏管理 ==========
@@ -208,16 +204,28 @@ const toggleToolbar = async (): Promise<void> => {
   cherryMarkdown.toolbar.toolbarHandlers.settings('toggleToolbar');
 };
 
+const registerTauriEvents = async (): Promise<void> => {
+  const unlisteners = await Promise.all([
+    listen('new_file', newFile),
+    listen('open_file', openFile),
+    listen('save', saveMarkdown),
+    listen('save_as', saveAsNewMarkdown),
+    listen('toggle_toolbar', toggleToolbar),
+  ]);
+  unlistenFns.push(...unlisteners);
+};
+
 // ========== 生命周期钩子 ==========
 onMounted(async () => {
   // 初始化工具栏状态
   const cherryNoToolbar = document.querySelector('.cherry--no-toolbar');
   await invoke('get_show_toolbar', { show: !cherryNoToolbar });
   cherryMarkdown = cherryInstance();
-  
+  await registerTauriEvents();
+
   // 添加事件监听器
   window.addEventListener('open-file-from-sidebar', handleOpenFileFromSidebar);
-  
+
   // 设置编辑按钮事件监听
   setTimeout(() => {
     const pen = cherryMarkdown.wrapperDom.querySelector('.cherry-toolbar-pen');
@@ -226,7 +234,7 @@ onMounted(async () => {
       pen.addEventListener('click', handleEditButtonClick);
     }
   }, 100);
-  
+
   // 自动恢复上次打开的文件
   await restoreLastOpenedFile();
   cherryMarkdown.on('afterChange', dealAfterChange);
@@ -235,14 +243,8 @@ onMounted(async () => {
 onUnmounted(() => {
   // 清理事件监听器
   window.removeEventListener('open-file-from-sidebar', handleOpenFileFromSidebar);
+  unlistenFns.forEach((unlisten) => unlisten());
 });
-
-// ========== Tauri 事件监听 ==========
-listen('new_file', newFile);
-listen('open_file', openFile);
-listen('save', saveMarkdown);
-listen('save_as', saveAsNewMarkdown);
-listen('toggle_toolbar', toggleToolbar);
 </script>
 
 <template>
@@ -293,13 +295,13 @@ listen('toggle_toolbar', toggleToolbar);
   border-radius: 4px;
   padding: 8px;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
 }
 
 .sidebar-toggle-btn:hover {
   background: #f5f5f5;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 #markdown-editor {

@@ -1,6 +1,5 @@
 import Cherry from 'cherry-markdown';
 import { CherryOptions } from 'cherry-markdown/types/cherry';
-import { previewOnlySidebar } from '../utils';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import '../utils/pinyin/pinyin_dist.js';
@@ -252,7 +251,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
     },
     customMenu: {
-      customMenuChangeModule
+      customMenuChangeModule,
     },
     config: {
       // 地图表格配置 - 支持自定义地图数据源URL
@@ -333,7 +332,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
   },
   callback: {
     // 把中文变成拼音的回调，当然也可以把中文变成英文、英文变成中文
-    changeString2Pinyin: pinyin,
+    changeString2Pinyin: (window as any).pinyin || ((text: string) => text),
   },
   /** 定义cherry缓存的作用范围，相同nameSpace的实例共享localStorage缓存 */
   nameSpace: 'cherry',

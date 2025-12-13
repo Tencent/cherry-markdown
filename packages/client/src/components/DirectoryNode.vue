@@ -11,7 +11,7 @@
           <ArrowIcon :size="12" :direction="node.expanded ? 'down' : 'right'" />
         </div>
       </div>
-      
+
       <!-- 递归渲染子节点 -->
       <div v-if="node.expanded" class="directory-children">
         <DirectoryNode
@@ -20,15 +20,21 @@
           :node="child"
           :depth="depth + 1"
           :current-file-path="currentFilePath"
-          @toggle-directory="$emit('toggle-directory', $event, child)"
-          @open-file="$emit('open-file', $event)"
-          @context-menu="(event, file) => $emit('context-menu', event, file)"
+          @toggle-directory="(_dir, _node) => $emit('toggle-directory', _dir, _node)"
+          @open-file="(_path) => $emit('open-file', _path)"
+          @context-menu="(_event, _file) => $emit('context-menu', _event, _file)"
         />
       </div>
     </div>
-    
+
     <!-- 文件项 -->
-    <div v-else class="file-item" :class="{ active: node.path === currentFilePath }" @click="openFile" @contextmenu="$emit('context-menu', $event, node)">
+    <div
+      v-else
+      class="file-item"
+      :class="{ active: node.path === currentFilePath }"
+      @click="openFile"
+      @contextmenu.prevent="(_event) => $emit('context-menu', _event, node)"
+    >
       <div class="file-icon">
         <FileIcon :size="14" />
       </div>
@@ -50,9 +56,9 @@ interface Props {
 
 // 定义组件事件
 interface Emits {
-  (e: 'toggle-directory', dirPath: string, node: DirectoryNodeType): void;
-  (e: 'open-file', filePath: string): void;
-  (e: 'context-menu', event: MouseEvent, file: DirectoryNodeType): void;
+  (_e: 'toggle-directory', _dirPath: string, _node: DirectoryNodeType): void;
+  (_e: 'open-file', _filePath: string): void;
+  (_e: 'context-menu', _event: MouseEvent, _file: DirectoryNodeType): void;
 }
 
 const props = defineProps<Props>();
