@@ -2,7 +2,8 @@ import Cherry from 'cherry-markdown';
 import { CherryOptions } from 'cherry-markdown/types/cherry';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
-import '../utils/pinyin/pinyin_dist.js';
+
+import { pinyin } from 'pinyin';
 
 /**
  * ECharts优化导入 - 使用命名空间导入替代默认导入
@@ -25,6 +26,8 @@ interface EChartsInstance {
 
 // 确保echarts实例的类型兼容性
 const echartsInstance: EChartsInstance = echarts as any;
+
+const toPinyin = (text: string) => pinyin(text, { style: pinyin.STYLE_TONE, heteronym: false }).flat().join(' ');
 
 type CustomConfig = {
   CustomToolbar: {
@@ -351,7 +354,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
   },
   callback: {
     // 把中文变成拼音的回调，当然也可以把中文变成英文、英文变成中文
-    changeString2Pinyin: (window as any).pinyin || ((text: string) => text),
+    changeString2Pinyin: toPinyin,
   },
   /** 定义cherry缓存的作用范围，相同nameSpace的实例共享localStorage缓存 */
   nameSpace: 'cherry',
