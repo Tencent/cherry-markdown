@@ -12,7 +12,7 @@
       </div>
       <span class="btn-text">打开文件</span>
     </button>
-    <button class="action-btn" @click="$emit('open-directory')">
+    <button class="action-btn disabled" :disabled="true" title="暂未开放">
       <div class="btn-icon">
         <FolderIcon :size="16" />
       </div>
@@ -55,6 +55,12 @@ defineEmits<{
   font-size: 14px;
   font-weight: 500;
   flex: 1;
+}
+
+.action-btn.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 .action-btn:hover {

@@ -11,16 +11,6 @@
       @open-directory="openDirectory"
     />
 
-    <!-- 目录管理 -->
-    <DirectorySection
-      v-if="!fileStore.sidebarCollapsed"
-      :expanded="directoryManagerExpanded"
-      @toggle="toggleDirectoryManager"
-      @refresh="refreshDirectories"
-    >
-      <FolderManager ref="folderManagerRef" @open-file="handleOpenFile" @context-menu="showContextMenu" />
-    </DirectorySection>
-
     <!-- 最近文件列表 -->
     <RecentFilesSection
       v-if="!fileStore.sidebarCollapsed"
@@ -32,6 +22,16 @@
       @open-file="openFile"
       @context-menu="showContextMenu"
     />
+
+    <!-- 目录管理 -->
+    <DirectorySection
+      v-if="!fileStore.sidebarCollapsed"
+      :expanded="directoryManagerExpanded"
+      @toggle="toggleDirectoryManager"
+      @refresh="refreshDirectories"
+    >
+      <FolderManager ref="folderManagerRef" @open-file="handleOpenFile" @context-menu="showContextMenu" />
+    </DirectorySection>
 
     <!-- 右键菜单 -->
     <ContextMenu

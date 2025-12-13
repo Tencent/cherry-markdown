@@ -40,7 +40,7 @@ const currentFilePath = computed(() => fileStore.currentFilePath);
 
 // 使用目录管理composable
 const { recentDirectories, toggleDirectory, openDirectory, refreshDirectories, getRecentDirectories } =
-  useDirectoryManager(fileStore, emit);
+  useDirectoryManager(fileStore);
 
 // 在setup阶段立即初始化目录列表，确保窗口打开时就恢复状态
 getRecentDirectories();
@@ -48,63 +48,6 @@ getRecentDirectories();
 // 处理文件打开
 const handleOpenFile = (filePath: string) => {
   emit('open-file', filePath, true);
-};
-
-/**
- * 展开所有父目录
- * 根据文件路径递归展开目标目录下的所有父级目录
- * 注：当前未使用，保留用于未来功能扩展
- */
-const _expandAllParentDirectories = async (filePath: string, targetDir: any): Promise<void> => {
-  const normalizedFilePath = filePath.replace(/\\/g, '/');
-  const normalizedTargetPath = targetDir.path.replace(/\\/g, '/');
-
-  // 验证文件是否在目标目录下
-  if (!normalizedFilePath.startsWith(normalizedTargetPath)) {
-    return;
-  }
-
-  // 提取相对路径并分割为路径部分
-  const relativePath = normalizedFilePath.slice(normalizedTargetPath.length + 1);
-  const pathParts = relativePath.split('/').filter((part) => part.trim());
-
-  // 文件直接在目标目录下，无需展开子目录
-  if (pathParts.length <= 1) {
-    return;
-  }
-
-  /**
-   * 递归展开路径中的所有目录
-   */
-  const expandPath = async (node: any, remainingParts: string[]): Promise<void> => {
-    // 最后一部分是文件名，不需要展开
-    if (remainingParts.length <= 1) {
-      return;
-    }
-
-    const [currentPart, ...nextParts] = remainingParts;
-
-    // 在子节点中查找匹配的目录
-    if (!node.children) {
-      return;
-    }
-
-    const childDir = node.children.find((child: any) => child.type === 'directory' && child.name === currentPart);
-
-    if (!childDir) {
-      return;
-    }
-
-    // 展开子目录（如果未展开）
-    if (!childDir.expanded) {
-      await toggleDirectory(childDir.path, childDir);
-    }
-
-    // 递归展开下一级
-    await expandPath(childDir, nextParts);
-  };
-
-  await expandPath(targetDir, pathParts);
 };
 
 // 暴露方法给父组件

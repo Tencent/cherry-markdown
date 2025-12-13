@@ -31,12 +31,30 @@ type CustomConfig = {
     CustomMenuType: {
       customMenu_fileUpload: any;
       customMenuChangeModule: any;
+      customSave: any;
     };
   };
 };
 
 const customMenuChangeModule = Cherry.createMenuHook('编辑', {
   iconName: 'pen',
+});
+
+const customSave = Cherry.createMenuHook('save', {
+  icon: {
+    type: 'svg',
+    iconStyle: 'width:16px;height:16px;',
+    content:
+      '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M5 3.5h8.5l1.5 1.5V16.5H5z" /><path d="M7 3.5v5h6V3.5" /><path d="M7 14.5h6" /></svg>',
+  },
+  onClick() {
+    this.updateMarkdown = false;
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      const markdown = this.$cherry?.getMarkdown?.() ?? '';
+      const event = new CustomEvent('cherry:request-save', { detail: { markdown } });
+      window.dispatchEvent(event);
+    }
+  },
 });
 
 const cherryConfig: CherryOptions<CustomConfig> = {
@@ -212,7 +230,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       'ul',
       'checklist',
       'panel',
-      'align',
+      // 'align',
       'detail',
       '|',
       {
@@ -224,7 +242,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
           'hr',
           'br',
           'code',
-          'inlineCode',
+          // 'inlineCode',
           // 'formula',
           'toc',
           'table',
@@ -236,13 +254,13 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       'formula',
       'image',
       'graph',
-      'proTable',
+      // 'proTable',
       '|',
-      'search',
-      'shortcutKey',
+      // 'search',
+      // 'shortcutKey',
       'togglePreview',
     ],
-    toolbarRight: ['export', 'changeLocale', '|', 'wordCount'],
+    toolbarRight: ['customSave', 'export', '|', 'wordCount'] as any[],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
     sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'theme'],
     // sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'theme', 'codeTheme'],
@@ -252,6 +270,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     },
     customMenu: {
       customMenuChangeModule,
+      customSave,
     },
     config: {
       // 地图表格配置 - 支持自定义地图数据源URL

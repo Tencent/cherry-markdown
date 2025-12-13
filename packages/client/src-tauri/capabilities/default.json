@@ -8,6 +8,8 @@
     "opener:default",
     "dialog:default",
     "core:window:allow-set-title",
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-unregister",
     
     "fs:allow-read-text-file",
     "fs:allow-write-text-file",

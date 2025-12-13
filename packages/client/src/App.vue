@@ -5,6 +5,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
+import { register, unregister } from '@tauri-apps/plugin-global-shortcut';
 import { useFileStore } from './store';
 import { onMounted, onUnmounted } from 'vue';
 import FileManager from './components/FileManager.vue';
@@ -22,25 +23,33 @@ const fileStore = useFileStore();
 const appWindow = getCurrentWindow();
 let needDealAfterChange = false;
 const unlistenFns: UnlistenFn[] = [];
+let hasUnsavedChanges = false;
+
+// 暴露未保存更改的检查函数供外部使用
+const checkUnsavedChanges = (): boolean => {
+  return hasUnsavedChanges;
+};
 
 // ========== 窗口标题管理 ==========
-const updateTitle = async (path: string | null): Promise<void> => {
+const updateTitle = async (path: string | null, unsaved: boolean = false): Promise<void> => {
   let fileName = '';
   if (path) {
     // 从路径中提取文件名
-    const pathParts = path.split(/[\\/]/);
+    const pathParts = path.split(/[\\\\/]/);
     fileName = pathParts[pathParts.length - 1];
   }
-  const title = path ? `${fileName} - Cherry Markdown` : 'Cherry Markdown';
+  const unsavedIndicator = unsaved ? '● ' : '';
+  const title = path ? `${unsavedIndicator}${fileName} - Cherry Markdown` : 'Cherry Markdown';
   await appWindow.setTitle(title);
 };
 
 // ========== 文件操作函数 ==========
 const newFile = async (): Promise<void> => {
   needDealAfterChange = false;
+  hasUnsavedChanges = false;
   cherryMarkdown.setMarkdown('');
   fileStore.setCurrentFilePath('');
-  await updateTitle(null);
+  await updateTitle(null, false);
 };
 
 const openFile = async (): Promise<FileOperationResult> => {
@@ -62,13 +71,13 @@ const openFile = async (): Promise<FileOperationResult> => {
 
     const markdown = await readTextFile(path);
     needDealAfterChange = false;
+    hasUnsavedChanges = false;
     cherryMarkdown.setMarkdown(markdown);
     fileStore.setCurrentFilePath(path);
-    switchToPreviewOnly();
 
     // 添加到最近访问列表
     fileStore.addRecentFile(path);
-    await updateTitle(path);
+    await updateTitle(path, false);
 
     return { success: true, path };
   } catch (error) {
@@ -96,7 +105,8 @@ const saveAsNewMarkdown = async (): Promise<FileOperationResult> => {
     await writeTextFile(path, markdown);
     fileStore.setCurrentFilePath(path);
     fileStore.addRecentFile(path);
-    await updateTitle(path);
+    hasUnsavedChanges = false;
+    await updateTitle(path, false);
 
     return { success: true, path };
   } catch (error) {
@@ -114,6 +124,8 @@ const saveMarkdown = async (): Promise<FileOperationResult> => {
     }
 
     await writeTextFile(fileStore.currentFilePath, markdown);
+    hasUnsavedChanges = false;
+    await updateTitle(fileStore.currentFilePath, false);
     return { success: true, path: fileStore.currentFilePath };
   } catch (error) {
     console.error('保存文件失败:', error);
@@ -149,9 +161,10 @@ const dealAfterChange = (): void => {
     return;
   }
 
-  // 自动保存功能
+  // 标记为有未保存的更改，不进行自动保存
+  hasUnsavedChanges = true;
   if (fileStore.currentFilePath) {
-    void saveMarkdown();
+    void updateTitle(fileStore.currentFilePath, true);
   }
 };
 
@@ -173,15 +186,15 @@ const restoreLastOpenedFile = async (): Promise<void> => {
     try {
       const markdown = await readTextFile(fileStore.currentFilePath);
       needDealAfterChange = false;
+      hasUnsavedChanges = false;
       cherryMarkdown.setMarkdown(markdown);
-      switchToPreviewOnly();
       console.log('成功恢复上次打开的文件:', fileStore.currentFilePath);
-      await updateTitle(fileStore.currentFilePath);
+      await updateTitle(fileStore.currentFilePath, false);
     } catch (error) {
       console.warn('恢复上次打开的文件失败:', error);
       // 如果文件不存在或无法访问，清除当前文件路径
       fileStore.setCurrentFilePath(null);
-      await updateTitle(null);
+      await updateTitle(null, false);
     }
   }
 };
@@ -191,10 +204,17 @@ const handleOpenFileFromSidebar = async (event: Event): Promise<void> => {
   const customEvent = event as CustomEvent;
   const { filePath, content } = customEvent.detail;
   needDealAfterChange = false;
+  hasUnsavedChanges = false;
   cherryMarkdown.setMarkdown(content);
   fileStore.setCurrentFilePath(filePath);
-  switchToPreviewOnly();
-  await updateTitle(filePath);
+  await updateTitle(filePath, false);
+};
+
+const handleSaveFromToolbar = async (): Promise<void> => {
+  const result = await saveMarkdown();
+  if (!result.success && result.error) {
+    console.warn('保存失败:', result.error);
+  }
 };
 
 // ========== 工具栏管理 ==========
@@ -202,6 +222,28 @@ const toggleToolbar = async (): Promise<void> => {
   const cherryNoToolbar = document.querySelector('.cherry--no-toolbar');
   await invoke('get_show_toolbar', { show: !!cherryNoToolbar });
   cherryMarkdown.toolbar.toolbarHandlers.settings('toggleToolbar');
+};
+
+// ========== 键盘快捷键处理 ==========
+const registerSaveShortcut = async (): Promise<void> => {
+  try {
+    // 注册 Ctrl+S 保存快捷键
+    await register('CommandOrControl+S', async () => {
+      if (fileStore.currentFilePath || hasUnsavedChanges) {
+        await saveMarkdown();
+      }
+    });
+  } catch (error) {
+    console.warn('注册保存快捷键失败:', error);
+  }
+};
+
+const unregisterSaveShortcut = async (): Promise<void> => {
+  try {
+    await unregister('CommandOrControl+S');
+  } catch (error) {
+    console.warn('注销保存快捷键失败:', error);
+  }
 };
 
 const registerTauriEvents = async (): Promise<void> => {
@@ -217,6 +259,9 @@ const registerTauriEvents = async (): Promise<void> => {
 
 // ========== 生命周期钩子 ==========
 onMounted(async () => {
+  // 暴露 checkUnsavedChanges 给 window，以便外部可以使用
+  (window as any).checkUnsavedChanges = checkUnsavedChanges;
+
   // 初始化工具栏状态
   const cherryNoToolbar = document.querySelector('.cherry--no-toolbar');
   await invoke('get_show_toolbar', { show: !cherryNoToolbar });
@@ -225,6 +270,10 @@ onMounted(async () => {
 
   // 添加事件监听器
   window.addEventListener('open-file-from-sidebar', handleOpenFileFromSidebar);
+  window.addEventListener('cherry:request-save', handleSaveFromToolbar);
+
+  // 注册全局保存快捷键
+  await registerSaveShortcut();
 
   // 设置编辑按钮事件监听
   setTimeout(() => {
@@ -240,9 +289,14 @@ onMounted(async () => {
   cherryMarkdown.on('afterChange', dealAfterChange);
 });
 
-onUnmounted(() => {
+onUnmounted(async () => {
   // 清理事件监听器
   window.removeEventListener('open-file-from-sidebar', handleOpenFileFromSidebar);
+  window.removeEventListener('cherry:request-save', handleSaveFromToolbar);
+
+  // 注销全局保存快捷键
+  await unregisterSaveShortcut();
+
   unlistenFns.forEach((unlisten) => unlisten());
 });
 </script>

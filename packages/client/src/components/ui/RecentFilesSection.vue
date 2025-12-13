@@ -59,9 +59,8 @@ const formatTime = (timestamp: number): string => {
 
 <style scoped>
 .recent-files-section {
-  flex: 1;
-  padding: 16px;
-  overflow-y: auto;
+  background: white;
+  border-bottom: 1px solid #e9ecef;
   user-select: none;
 }
 
@@ -69,7 +68,8 @@ const formatTime = (timestamp: number): string => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f3f4;
   cursor: pointer;
 }
 
@@ -116,6 +116,7 @@ const formatTime = (timestamp: number): string => {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  padding: 0 16px 16px 16px;
 }
 
 .file-item {

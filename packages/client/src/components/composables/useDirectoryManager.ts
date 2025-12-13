@@ -26,7 +26,7 @@ const isAbsolutePath = (path: string): boolean => path.includes('/') || path.inc
 /**
  * 目录管理composable
  */
-export function useDirectoryManager(fileStore: FileStore, emit: (event: string, ...args: any[]) => void) {
+export function useDirectoryManager(fileStore: FileStore) {
   // 目录管理相关数据
   const recentDirectories = ref<DirectoryNode[]>([]);
 
