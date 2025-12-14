@@ -17,6 +17,7 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .setup(|app| {
             let _ = implement::windows_menu::window_menu(app);
             let _ = implement::system_tray::system_tray_menu(app);
