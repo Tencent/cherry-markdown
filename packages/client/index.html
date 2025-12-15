@@ -11,11 +11,23 @@
       display: none;
     }
 
-    .markdown-preview-only .cherry-sidebar {
+    .cherry-highlight-line {
+      background-color: var(--base-previewer-bg) !important;
+    }
+
+    .cherry-toolbar-pen.active {
+      color: var(--bubble-border) !important;
+    }
+
+    .cherry-sidebar {
       display: block !important;
       top: 0 !important;
-      padding-top: 33px !important;
+      padding-top: 52px !important;
       height: auto !important;
+    }
+
+    .cherry-flex-toc {
+      top: 216px !important;
     }
 
     .markdown-preview-only .cherry-editor {
@@ -27,12 +39,17 @@
       max-height: 100% !important;
       display: block !important;
     }
+
+    body {
+      border-top: 1px dashed #00000033;
+    }
   </style>
   <style>
     body {
       margin: 0;
       padding: 0;
       height: 100vh;
+      overflow: hidden;
     }
   </style>
 </head>

@@ -29,4 +29,9 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+  // 添加optimizeDeps配置来解决katex依赖优化问题
+  optimizeDeps: {
+    include: ['katex', 'echarts'],
+    exclude: ['cherry-markdown'],
+  },
 }));
