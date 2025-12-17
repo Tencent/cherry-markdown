@@ -21,4 +21,4 @@ jobs:
         run: yarn build
       - name: Publish preview package
         run: |
-          npx pkg-pr-new publish './packages/cherry-markdown'
+          npx pkg-pr-new publish './packages/cherry-markdown' --compact --packageManager=pnpm,npm,yarn
