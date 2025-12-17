@@ -1,5 +1,9 @@
 name: 'Build Cherry Markdown Release'
 
+permissions:
+  contents: read
+  id-token: write
+
 on:
   workflow_call:
 jobs:
@@ -25,6 +29,3 @@ jobs:
            
           cd packages/cherry-markdown
           npm publish --access public
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
