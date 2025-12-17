@@ -20,6 +20,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.ch-icon-code-theme:before { content: "\EA95" }
 .ch-icon-list:before { content: "\EA03" }
 .ch-icon-check:before { content: "\EA04" }
 .ch-icon-square:before { content: "\EA09" }
@@ -138,3 +139,4 @@
 .ch-icon-insertScatterChart:before { content: "\EA90" }
 .ch-icon-insertSankeyChart:before { content: "\EA91" }
 .ch-icon-menu:before { content: "\EA92" }
+.ch-icon-main-theme:before { content: "\EA94" }
