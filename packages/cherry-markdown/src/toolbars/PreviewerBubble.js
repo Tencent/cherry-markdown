@@ -339,8 +339,11 @@ export default class PreviewerBubble {
         }
         // 如果点击的是脚注
         if (target instanceof Element && target.nodeName === 'A' && /(footnote|footnote-ref)/.test(target.className)) {
-          // @ts-ignore
-          if (this.previewer.$cherry.options.engine?.syntax?.footnote?.refNumber?.clickRefNumberCallback) {
+          if (
+            target.classList.contains('footnote') &&
+            // @ts-ignore
+            this.previewer.$cherry.options.engine?.syntax?.footnote?.refNumber?.clickRefNumberCallback
+          ) {
             const refNum = target.getAttribute('data-index');
             const refTitle = target.getAttribute('data-key');
             const content =
