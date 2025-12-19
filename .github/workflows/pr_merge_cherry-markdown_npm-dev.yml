@@ -67,7 +67,9 @@ jobs:
         working-directory: ./packages/cherry-markdown
         run: yarn install && yarn build
 
-      - run: npm install -g npm@latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
 
       - name: npm publish
         working-directory: ./packages/cherry-markdown
