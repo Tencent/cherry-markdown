@@ -23,7 +23,9 @@ jobs:
           yarn
           yarn build
 
-      - run: npm install -g npm@latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
 
       - name: Publish cherry-markdown
         run: |
