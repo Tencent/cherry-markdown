@@ -404,7 +404,6 @@ const basicConfig = {
       'proTable',
       // 'customMenuTable',
       'togglePreview',
-      'codeTheme',
       'search',
       'shortcutKey',
       {
@@ -414,7 +413,7 @@ const basicConfig = {
     ],
     toolbarRight: ['fullScreen', '|', 'export', 'changeLocale', 'wordCount'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
-    sidebar: ['mobilePreview', 'copy', 'theme'],
+    sidebar: ['mobilePreview', 'copy', 'theme', 'codeTheme'],
     toc: {
       // updateLocationHash: false, // 要不要更新URL的hash
       defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
