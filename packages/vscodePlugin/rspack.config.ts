@@ -76,7 +76,6 @@ const webviewConfig: Configuration = {
             parser: {
               syntax: 'ecmascript',
             },
-            target: 'es2015',
           },
           env: {
             targets: '> 0.25%, not dead',
