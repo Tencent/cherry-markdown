@@ -167,9 +167,9 @@
   "scripts": {
     "build": "vsce package",
     "vscode:prepublish": "npm run package",
-    "compile": "webpack",
-    "watch": "webpack --watch",
-    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile": "rspack",
+    "watch": "rspack --watch",
+    "package": "rspack --mode production --devtool hidden-source-map",
     "test-compile": "tsc -p ./",
     "test-watch": "tsc -watch -p ./",
     "pretest": "npm run test-compile && npm run lint",
@@ -178,17 +178,14 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.12",
-    "@babel/preset-env": "^7.20.2",
+    "@rspack/cli": "^1.5.3",
+    "@rspack/core": "^1.5.3",
     "@types/glob": "^7.1.3",
     "@types/node": "14.x",
     "@types/vscode": "^1.58.0",
-    "babel-loader": "^9.1.2",
     "glob": "^7.1.7",
     "mocha": "^8.4.0",
-    "ts-loader": "^9.2.2",
-    "webpack": "^5.38.1",
-    "webpack-cli": "^4.7.0"
+    "typescript": "^5.0.0"
   },
   "dependencies": {
     "@types/mathjax": "0.0.37",
