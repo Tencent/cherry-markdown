@@ -30,7 +30,9 @@ export function getWebviewContent(mdInfo: object, currentPanel: vscode.WebviewPa
     'scripts/pinyin/pinyin_dist.js': currentPanel.webview.asWebviewUri(
       vscode.Uri.file(path.join(extensionPath, 'web-resources/scripts/pinyin/pinyin_dist.js')),
     ),
-    'scripts/index.js': currentPanel.webview.asWebviewUri(vscode.Uri.file(path.join(extensionPath, 'web-resources', 'dist', 'index.js'))),
+    'scripts/index.js': currentPanel.webview.asWebviewUri(
+      vscode.Uri.file(path.join(extensionPath, 'web-resources', 'dist', 'index.js')),
+    ),
     'scripts/index.css': currentPanel.webview.asWebviewUri(
       vscode.Uri.file(path.join(extensionPath, 'web-resources/scripts/index.css')),
     ),
