@@ -96,6 +96,7 @@ async function buildAddons(entries) {
           ...basePlugins,
           commonjs({
             include: [/node_modules/, /src[\\/]libs/], // Default: undefined
+            exclude: [/node_modules[\\/](lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
             extensions: ['.js'], // Default: [ '.js' ]
             ignoreGlobal: false, // Default: false
             sourceMap: !IS_PRODUCTION, // Default: true
@@ -103,7 +104,9 @@ async function buildAddons(entries) {
           }),
           babel({
             babelHelpers: 'runtime',
-            exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5)/],
+            exclude: [
+              /node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5|lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/,
+            ],
             babelrc: false,
             configFile: false,
             presets: [['@babel/preset-env', { modules: false }]],
@@ -125,6 +128,7 @@ async function buildAddons(entries) {
           ...basePlugins,
           commonjs({
             include: [/node_modules/, /src[\\/]libs/], // Default: undefined
+            exclude: [/node_modules[\\/](lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
             extensions: ['.js'], // Default: [ '.js' ]
             ignoreGlobal: false, // Default: false
             sourceMap: !IS_PRODUCTION, // Default: true
@@ -132,7 +136,9 @@ async function buildAddons(entries) {
           }),
           babel({
             babelHelpers: 'runtime',
-            exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5)/],
+            exclude: [
+              /node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5|lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/,
+            ],
             babelrc: false,
             configFile: false,
             presets: [['@babel/preset-env', { modules: false }]],
@@ -188,6 +194,7 @@ async function buildAddons(entries) {
           ...basePlugins,
           commonjs({
             include: [/node_modules/, /src[\\/]libs/],
+            exclude: [/node_modules[\\/](lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
             extensions: ['.js'],
             ignoreGlobal: false,
             sourceMap: !IS_PRODUCTION,
@@ -195,7 +202,9 @@ async function buildAddons(entries) {
           }),
           babel({
             babelHelpers: 'runtime',
-            exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5)/],
+            exclude: [
+              /node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5|lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/,
+            ],
             babelrc: false,
             configFile: false,
             presets: [['@babel/preset-env', { modules: false }]],
