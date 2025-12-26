@@ -165,7 +165,7 @@ export default class Settings extends MenuBase {
         return;
       }
       if (this.editor.previewer.isPreviewerHidden()) {
-        this.editor.previewer.recoverPreviewer(true);
+        this.editor.previewer.editAndPreview();
       } else {
         this.editor.previewer.editOnly(true);
       }
