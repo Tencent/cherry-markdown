@@ -25,9 +25,11 @@
   "customUploader.description": "配置自定义上传器以将图像、视频或音频上传到你的服务器。",
   "picGoServer.description": "配置 PicGo 服务器以将图像、视频或音频上传到 PicGo。",
   "backfillImageProps.enum.isBorder": "边框",
+  "backfillImageProps.enum.isNotBorder": "无边框",
   "backfillImageProps.enum.isShadow": "阴影",
   "backfillImageProps.enum.isRadius": "圆角",
   "backfillImageProps.enumDescriptions.isBorder": "为图像添加边框",
+  "backfillImageProps.enumDescriptions.isNotBorder": "不为图像添加边框",
   "backfillImageProps.enumDescriptions.isShadow": "为图像添加阴影",
   "backfillImageProps.enumDescriptions.isRadius": "为图像添加圆角",
   "backfillImageProps.description": "cherry-markdown 的图像修饰选项 — 可通过配置为图像添加边框、阴影或圆角。"

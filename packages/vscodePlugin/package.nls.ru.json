@@ -25,9 +25,11 @@
   "customUploader.description": "Настройте пользовательский загрузчик, чтобы отправлять изображения, видео или аудио на ваш сервер.",
   "picGoServer.description": "Настройте сервер PicGo для загрузки изображений, видео или аудио на PicGo.",
   "backfillImageProps.enum.isBorder": "Граница",
+  "backfillImageProps.enum.isNotBorder": "Без границы",
   "backfillImageProps.enum.isShadow": "Тень",
   "backfillImageProps.enum.isRadius": "Скруглённые углы",
   "backfillImageProps.enumDescriptions.isBorder": "Добавить границу к изображению",
+  "backfillImageProps.enumDescriptions.isNotBorder": "Не добавлять границу к изображению",
   "backfillImageProps.enumDescriptions.isShadow": "Добавить тень к изображению",
   "backfillImageProps.enumDescriptions.isRadius": "Добавить скруглённые углы к изображению",
   "backfillImageProps.description": "Параметры оформления изображений в Cherry Markdown — настройте границы, тени и скругления для изображений."

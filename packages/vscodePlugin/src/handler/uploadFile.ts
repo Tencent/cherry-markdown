@@ -1,11 +1,5 @@
 import * as vscode from 'vscode';
-import {
-  UploadType,
-  // eslint-disable-next-line no-unused-vars
-  // CustomUploader,
-  BackfillImageProps,
-  BackfillImage,
-} from '../types';
+import { UploadType, CustomUploader, BackfillImageProps, BackfillImage } from '../types';
 import axios, { AxiosResponse } from 'axios';
 
 export interface FileInfo {
@@ -37,24 +31,68 @@ export const uploadFileHandler = async (fileInfo: FileInfo) => {
 
   switch (UploadType) {
     case 'CustomUploader':
-      // const CustomUploader = vscode.workspace
-      //   .getConfiguration('cherryMarkdown')
-      //   .get<CustomUploader>('CustomUploader');
+      // 读取自定义上传配置并执行上传
+      const CustomUploader = vscode.workspace
+        .getConfiguration('cherryMarkdown')
+        .get<CustomUploader>('CustomUploader');
 
-      // if (CustomUploader?.enable !== true) {
-      //   vscode.window.showInformationMessage('请完善自定义上传配置');
-      //   throw new Error('请完善自定义上传配置');
-      // }
-      // if (/^(http|https):\/\//.test(CustomUploader.url) == false) {
-      //   vscode.window.showInformationMessage('自定义上传地址格式不正确');
-      //   throw new Error('自定义上传地址格式不正确');
-      // }
-      // const file = await vscode.workspace.fs.readFile(vscode.Uri.file(path));
-      // // 将file上传到自定义的地址
-      // // 这里涉及到一些上传服务需要签名校验，并且响应体格式不一致，这里要再讨论
-      // const customUpload = await axios.post(CustomUploader.url, file);
-      vscode.window.showInformationMessage('自定义上传暂未开发');
-      throw new Error('自定义上传暂未开发');
+      if (!CustomUploader || CustomUploader.enable !== true) {
+        vscode.window.showInformationMessage('请完善自定义上传配置');
+        throw new Error('请完善自定义上传配置');
+      }
+      if (/^(http|https):\/\//.test(CustomUploader.url) === false) {
+        vscode.window.showInformationMessage('自定义上传地址格式不正确');
+        throw new Error('自定义上传地址格式不正确');
+      }
+
+      // 读取文件内容
+      const file = await vscode.workspace.fs.readFile(vscode.Uri.file(path));
+
+      // 准备 headers（允许用户在配置中填写 headers 对象）
+      const userHeaders = (CustomUploader.headers && typeof CustomUploader.headers === 'object') ? CustomUploader.headers : {};
+      const headers: Record<string, string> = { ...userHeaders } as Record<string, string>;
+
+      if (!headers['Content-Type'] && !headers['content-type']) {
+        headers['Content-Type'] = 'application/octet-stream';
+      }
+      // 为接收方提供文件名信息
+      if (!headers['X-File-Name'] && !headers['x-file-name']) {
+        headers['X-File-Name'] = name;
+      }
+
+      // 发送二进制数据到自定义上传地址
+      try {
+        const customUpload = await axios.post(CustomUploader.url, file, { headers, responseType: 'json' });
+        const data = customUpload.data;
+        // 支持多种常见返回结构
+        if (!data) {
+          throw new Error('Empty response from uploader');
+        }
+        if (typeof data === 'string') {
+          res.url = data;
+        } else if (data.url) {
+          res.url = data.url;
+        } else if (data.result && Array.isArray(data.result) && data.result[0]) {
+          res.url = data.result[0];
+        } else if (data.data && typeof data.data === 'string') {
+          res.url = data.data;
+        } else if (data.data && data.data.url) {
+          res.url = data.data.url;
+        } else {
+          // 尝试从第一层对象里抓取第一个看起来像 url 的字段
+          const firstUrl = Object.values(data).find((v) => typeof v === 'string' && /^(http|data:image)/.test(v));
+          if (typeof firstUrl === 'string') {
+            res.url = firstUrl;
+          }
+        }
+
+        if (!res.url) {
+          throw new Error('无法从上传响应中解析出 URL');
+        }
+      } catch (err: any) {
+        vscode.window.showErrorMessage(`自定义上传失败：${err?.message || err}`);
+        throw err;
+      }
       break;
     case 'PicGoServer':
       // eslint-disable-next-line no-case-declarations

@@ -148,12 +148,14 @@
             "type": "string",
             "enum": [
               "%backfillImageProps.enum.isBorder%",
+              "%backfillImageProps.enum.isNotBorder%",
               "%backfillImageProps.enum.isShadow%",
               "%backfillImageProps.enum.isRadius%"
             ],
             "description": "Select multiple items",
             "enumDescriptions": [
               "%backfillImageProps.enumDescriptions.isBorder%",
+              "%backfillImageProps.enumDescriptions.isNotBorder%",
               "%backfillImageProps.enumDescriptions.isShadow%",
               "%backfillImageProps.enumDescriptions.isRadius%"
             ]

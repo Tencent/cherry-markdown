@@ -25,9 +25,11 @@
   "customUploader.description": "Configure a custom uploader to send images, videos, or audio to your own server.",
   "picGoServer.description": "Configure a PicGo server to upload images, videos, or audio to PicGo.",
   "backfillImageProps.enum.isBorder": "Border",
+  "backfillImageProps.enum.isNotBorder": "No border",
   "backfillImageProps.enum.isShadow": "Shadow",
   "backfillImageProps.enum.isRadius": "Rounded corners",
   "backfillImageProps.enumDescriptions.isBorder": "Apply a border to the image",
+  "backfillImageProps.enumDescriptions.isNotBorder": "Do not apply a border to the image",
   "backfillImageProps.enumDescriptions.isShadow": "Apply a shadow to the image",
   "backfillImageProps.enumDescriptions.isRadius": "Apply rounded corners to the image",
   "backfillImageProps.description": "Image backfill properties for Cherry Markdown — configure borders, shadows, or rounded corners for images."

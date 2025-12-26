@@ -46,22 +46,34 @@ const extensionConfig: Configuration = {
       },
     ],
   },
+  optimization: {
+    minimize: isProduction,
+    splitChunks: {
+      chunks: 'all',
+    },
+  },
+  performance: {
+    hints: isProduction ? 'warning' : false,
+  },
 };
 
 // Webview 配置 (浏览器环境)
+const argv = process.argv.join(' ');
+const isProduction = argv.includes('--mode production') || process.env.RSPACK_BUILD_MODE === 'production' || process.env.NODE_ENV === 'production';
 const webviewConfig: Configuration = {
   target: 'web',
-  mode: 'none',
+  mode: isProduction ? 'production' : 'development',
   entry: {
     index: './web-resources/scripts/index.js',
   },
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    // 输出到 web-resources/dist 以便 webview 直接加载
+    path: path.resolve(__dirname, 'web-resources', 'dist'),
     filename: '[name].js',
     libraryTarget: 'umd',
     clean: false,
   },
-  devtool: 'nosources-source-map',
+  devtool: isProduction ? 'hidden-source-map' : 'source-map',
   resolve: {
     extensions: ['.ts', '.js'],
   },
