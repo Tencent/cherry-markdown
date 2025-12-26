@@ -30,7 +30,9 @@ export function getWebviewContent(mdInfo: object, currentPanel: vscode.WebviewPa
     'scripts/pinyin/pinyin_dist.js': currentPanel.webview.asWebviewUri(
       vscode.Uri.file(path.join(extensionPath, 'web-resources/scripts/pinyin/pinyin_dist.js')),
     ),
-    'scripts/index.js': currentPanel.webview.asWebviewUri(vscode.Uri.file(path.join(extensionPath, 'dist/index.js'))),
+    'scripts/index.js': currentPanel.webview.asWebviewUri(
+      vscode.Uri.file(path.join(extensionPath, 'web-resources', 'dist', 'index.js')),
+    ),
     'scripts/index.css': currentPanel.webview.asWebviewUri(
       vscode.Uri.file(path.join(extensionPath, 'web-resources/scripts/index.css')),
     ),
@@ -56,10 +58,9 @@ content="default-src 'none'; img-src ${currentPanel.webview.cspSource} https: ht
   }; style-src ${currentPanel.webview.cspSource}; font-src ${currentPanel.webview.cspSource};"
 />
     <title>Cherry Editor - Markdown Editor</title>
-    <link rel="preload" as="font" href="${pageResourceUrlsMap['dist/fonts/ch-icon.woff']}">
-    <link rel="preload" as="font" href="${pageResourceUrlsMap['dist/fonts/ch-icon.woff2']}">
-    <link rel="font" href="${pageResourceUrlsMap['dist/fonts/ch-icon.ttf']}">
-    <link rel="preload" as="font" crossorigin href="${pageResourceUrlsMap['dist/fonts/ch-icon.ttf']}">
+    <link rel="preload" as="font" href="${pageResourceUrlsMap['dist/fonts/ch-icon.woff']}" crossorigin="anonymous">
+    <link rel="preload" as="font" href="${pageResourceUrlsMap['dist/fonts/ch-icon.woff2']}" crossorigin="anonymous">
+    <link rel="preload" as="font" href="${pageResourceUrlsMap['dist/fonts/ch-icon.ttf']}" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="${pageResourceUrlsMap['cherry-markdown.css']}">
     <link rel="stylesheet" type="text/css" href="${pageResourceUrlsMap['index.css']}">
     <link rel="stylesheet" type="text/css" href="${pageResourceUrlsMap['scripts/index.css']}">
