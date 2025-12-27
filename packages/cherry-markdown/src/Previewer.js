@@ -244,7 +244,7 @@ export default class Previewer {
     this.editor.options.editorDom.style.width = $editorPercentage;
     this.options.previewerDom.style.width = $previewerPercentage;
 
-    this.syncVirtualLayoutFromReal();
+    setTimeout(() => this.syncVirtualLayoutFromReal(), 0);
   }
 
   syncVirtualLayoutFromReal() {
@@ -356,6 +356,7 @@ export default class Previewer {
       const editorLeft = this.editor.options.editorDom.getBoundingClientRect().left;
       const editorRight = mouseUpEvent.clientX;
       const layout = this.calculateRealLayout(editorRight - editorLeft);
+      this.options.previewerCache.layout = layout;
       this.setRealLayout(layout.editorPercentage, layout.previewerPercentage);
       // 去掉蒙层和虚拟拖动条
       this.editor.options.editorDom.classList.remove('no-select');
@@ -743,20 +744,7 @@ export default class Previewer {
   }
 
   $dealEditAndPreviewOnly(isEditOnly = true) {
-    let fullEditorLayout = {
-      editorPercentage: '0%',
-      previewerPercentage: '100%',
-    };
-    if (isEditOnly) {
-      fullEditorLayout = {
-        editorPercentage: '100%',
-        previewerPercentage: '0%',
-      };
-    }
-    const editorWidth = this.editor.options.editorDom.getBoundingClientRect().width;
-    const layout = this.calculateRealLayout(editorWidth);
-    this.options.previewerCache.layout = layout;
-    this.setRealLayout(fullEditorLayout.editorPercentage, fullEditorLayout.previewerPercentage);
+    this.$removeModelClass();
     this.options.virtualDragLineDom.classList.add('cherry-drag--hidden');
     const { previewerDom } = this.options;
     const { editorDom } = this.editor.options;
@@ -785,6 +773,17 @@ export default class Previewer {
           .forEach((dom) => dom.remove());
       }
     }
+    let fullEditorLayout = {
+      editorPercentage: '0%',
+      previewerPercentage: '100%',
+    };
+    if (isEditOnly) {
+      fullEditorLayout = {
+        editorPercentage: '100%',
+        previewerPercentage: '0%',
+      };
+    }
+    this.setRealLayout(fullEditorLayout.editorPercentage, fullEditorLayout.previewerPercentage);
     setTimeout(() => this.editor.editor.refresh(), 0);
   }
 
@@ -799,8 +798,6 @@ export default class Previewer {
   }
 
   editOnly() {
-    const html = this.options.previewerCache.html ? this.options.previewerCache.html : this.getDomContainer().innerHTML;
-    this.doHtmlCache(html);
     this.$dealEditAndPreviewOnly(true);
     this.$cherry.$event.emit('previewerClose');
     this.$cherry.$event.emit('editorOpen');
@@ -811,30 +808,39 @@ export default class Previewer {
       editorPercentage: '100%',
       previewerPercentage: '100%',
     };
-    const editorWidth = this.editor.options.editorDom.getBoundingClientRect().width;
-    const layout = this.calculateRealLayout(editorWidth);
-    this.options.previewerCache.layout = layout;
     this.setRealLayout(fullEditorLayout.editorPercentage, fullEditorLayout.previewerPercentage);
     this.options.virtualDragLineDom.classList.add('cherry-drag--hidden');
     this.$cherry.createFloatPreviewer();
   }
 
   recoverFloatPreviewer() {
-    this.recoverPreviewer(true);
+    this.editAndPreview();
     this.$cherry.clearFloatPreviewer();
   }
 
-  recoverPreviewer(dealToolbar = false) {
-    this.options.previewerDom.classList.remove('cherry-previewer--hidden');
+  /**
+   * @deprecated use editAndPreview instead
+   */
+  recoverPreviewer() {
+    this.editAndPreview();
+  }
+
+  $removeModelClass() {
+    this.editor.options.editorDom.classList.remove('cherry-editor--hidden', 'cherry-editor--full');
+    this.options.previewerDom.classList.remove('cherry-previewer--hidden', 'cherry-preview--full');
     this.options.virtualDragLineDom.classList.remove('cherry-drag--hidden');
-    this.editor.options.editorDom.classList.remove('cherry-editor--full');
+  }
+
+  // 切换成双栏模式
+  editAndPreview() {
+    this.$removeModelClass();
     // 恢复现场
     const { layout } = this.options.previewerCache;
-    this.setRealLayout(layout.editorPercentage, layout.previewerPercentage);
+    const { editorPercentage = '50%', previewerPercentage = '50%' } = layout;
+    this.setRealLayout(editorPercentage, previewerPercentage);
     if (this.options.previewerCache.htmlChanged) {
       this.update(this.options.previewerCache.html);
     }
-    this.cleanHtmlCache();
 
     this.$cherry.$event.emit('previewerOpen');
     this.$cherry.$event.emit('editorOpen');
@@ -850,7 +856,6 @@ export default class Previewer {
   cleanHtmlCache() {
     this.options.previewerCache.html = '';
     this.options.previewerCache.htmlChanged = false;
-    this.options.previewerCache.layout = {};
   }
 
   afterUpdate() {
