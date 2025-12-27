@@ -29,7 +29,12 @@ glob(
     if (error) {
       throw error;
     }
-    await buildAddons(matches);
+    try {
+      await buildAddons(matches);
+    } catch (err) {
+      console.error('[addons build] buildAddons failed:', err);
+      process.exit(1);
+    }
   },
 );
 
@@ -38,7 +43,9 @@ glob(
  * @param {string[]} entries
  */
 async function buildAddons(entries) {
-  for (const entry of entries) {
+  const ENABLE_PARALLEL = process.env.ENABLE_PARALLEL === 'true';
+
+  async function buildOne(entry) {
     const fullEntryPath = _resolve(PROJECT_ROOT_PATH, entry);
 
     const outputFileName = fullEntryPath.replace(_resolve(PROJECT_ROOT_PATH, 'src/addons/'), '');
@@ -81,7 +88,10 @@ async function buildAddons(entries) {
         tsconfig: _resolve(PROJECT_ROOT_PATH, 'tsconfig.addons.json'),
         tsconfigOverride: {
           include: [fullEntryPath], // FIXME: 临时方案确保不会重复生成其他插件的 d.ts
-          // outDir: declarationDir,
+          compilerOptions: {
+            declaration: true,
+            outDir: declarationDir,
+          },
         },
       }),
     ];
@@ -118,7 +128,7 @@ async function buildAddons(entries) {
               '@babel/plugin-proposal-optional-chaining',
             ],
           }),
-          terser(),
+          ...(IS_PRODUCTION ? [terser()] : []),
         ],
       },
       {
@@ -150,7 +160,7 @@ async function buildAddons(entries) {
               '@babel/plugin-proposal-optional-chaining',
             ],
           }),
-          terser(),
+          ...(IS_PRODUCTION ? [terser()] : []),
         ],
       },
     ];
@@ -238,6 +248,14 @@ async function buildAddons(entries) {
       });
     } catch (error) {
       console.warn('[addons build] TypeScript declaration generation failed:', error.message);
+    }
+  }
+
+  if (ENABLE_PARALLEL) {
+    await Promise.all(entries.map((entry) => buildOne(entry)));
+  } else {
+    for (const entry of entries) {
+      await buildOne(entry);
     }
   }
 }
