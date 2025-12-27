@@ -32,11 +32,10 @@ const collectEnv = () => {
   return obj;
 };
 
-const replacePlugin = replace({
-  preventAssignment: false,
-  exclude: [/node_modules[\\/]mermaid/, 'src/libs/**', 'src/sass/**'],
-  BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'production'),
-  ...collectEnv(),
-});
-
-export default () => replacePlugin;
+export default () =>
+  replace({
+    preventAssignment: false,
+    exclude: [/node_modules[\\/]mermaid/, 'src/libs/**', 'src/sass/**'],
+    BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'production'),
+    ...collectEnv(),
+  });
