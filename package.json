@@ -35,6 +35,7 @@
     "@commitlint/config-conventional": "^19.6.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "@types/node": "^20.10.6",
     "commitlint": "^19.6.1",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.5",
