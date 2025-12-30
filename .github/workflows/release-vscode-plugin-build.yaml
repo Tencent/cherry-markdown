@@ -41,4 +41,4 @@ jobs:
         run: |
           cd packages/vscodePlugin
           vsce publish -p $VSCE_PAT --no-dependencies --no-yarn
-          npx ovsx publish -p $OVSX_PAT --yarn
+          npx ovsx publish -p $OVSX_PAT --no-dependencies --no-yarn
