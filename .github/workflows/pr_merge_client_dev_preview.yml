@@ -5,11 +5,13 @@ on:
     types: [closed]
     paths:
       - 'packages/client/**'
+      - 'packages/cherry-markdown/**'
 
 permissions:
   contents: read
   pull-requests: write
   actions: read
+  issues: write
 
 jobs:
   client-preview:
@@ -78,32 +80,52 @@ jobs:
         with:
           name: cherry-markdown_client_${{ matrix.platform }}
           path: ${{ matrix.path_patterns }}
+
       - name: Artifact Commit
         run: |
           echo "Artifact URL: ${{ steps.upload-artifact.outputs.artifact-url }}"
 
-      - name: Extract package info
-        id: extract-package
-        run: |
-          $name = node -p "require('./packages/client/package.json').name"
-          $version = node -p "require('./packages/client/package.json').version"
-          "name=$name" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        shell: pwsh
-
-      - name: Post Artifact URL to PR
+  post-preview-comment:
+    needs: client-preview
+    runs-on: ubuntu-latest
+    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
+    steps:
+      - name: Post single aggregated comment
         uses: actions/github-script@v6
-        env:
-          ARTIFACT_URL: ${{ steps.upload-artifact.outputs.artifact-url }}
-          NAME: ${{ steps.extract-package.outputs.name }}
-          VERSION: ${{ steps.extract-package.outputs.version }}
-          PLATFORM: ${{ matrix.platform }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.issues.createComment({
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const runId = context.runId;
+            const res = await github.rest.actions.listWorkflowRunArtifacts({ owner, repo, run_id: runId });
+            const artifacts = res.data.artifacts || [];
+            if (artifacts.length === 0) {
+              console.log('No artifacts found for this run');
+              return;
+            }
+            const groups = {};
+            for (const a of artifacts) {
+              let key = 'Other';
+              if (a.name.includes('macos-latest')) key = 'macOS (arm64)';
+              else if (a.name.includes('windows-latest')) key = 'Windows';
+              else if (a.name.includes('ubuntu-latest')) key = 'Linux';
+              groups[key] = groups[key] || [];
+              groups[key].push(a);
+            }
+            let body = '💻 预览 (Preview)\\n\\n';
+            for (const [platform, items] of Object.entries(groups)) {
+              body += `- ${platform}\\n`;
+              for (const it of items) {
+                const url = it.archive_download_url || '';
+                body += `  - [${it.name}](${url})\\n`;
+              }
+              body += '\\n';
+            }
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `📦 预览 (Preview) [${process.env.NAME}_${process.env.PLATFORM}@${process.env.VERSION}](${process.env.ARTIFACT_URL})`
+              owner: owner,
+              repo: repo,
+              body: body
             });
+
