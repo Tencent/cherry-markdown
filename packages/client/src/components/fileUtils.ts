@@ -1,6 +1,6 @@
 import { readDir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { open, save } from '@tauri-apps/plugin-dialog';
-import type { DirectoryNode, FileInfo, FileOperationResult, DirectoryStructureResult } from './types';
+import type { DirectoryNode, FileOperationResult, DirectoryStructureResult } from './types';
 
 // 常量定义
 export const SUPPORTED_FILE_EXTENSIONS = ['md', 'markdown', 'text', 'txt'];
@@ -27,30 +27,6 @@ export const checkPathExists = async (path: string): Promise<boolean> => {
 export const isSupportedFile = (fileName: string): boolean => {
   const fileExtension = fileName.split('.').pop()?.toLowerCase();
   return SUPPORTED_FILE_EXTENSIONS.includes(fileExtension || '');
-};
-
-// 检查目录是否包含目标文件（递归检查）
-export const checkDirectoryHasTargetFiles = async (dirPath: string): Promise<boolean> => {
-  try {
-    const entries = await readDir(dirPath);
-
-    // 检查当前目录是否有目标文件
-    const hasFiles = entries.some((entry) => !entry.isDirectory && isSupportedFile(entry.name || ''));
-
-    if (hasFiles) return true;
-
-    // 递归检查子目录
-    const subdirectories = entries.filter((entry) => entry.isDirectory);
-    for (const dir of subdirectories) {
-      const subDirPath = `${dirPath}/${dir.name}`;
-      const subHasFiles = await checkDirectoryHasTargetFiles(subDirPath);
-      if (subHasFiles) return true;
-    }
-
-    return false;
-  } catch (error) {
-    return false;
-  }
 };
 
 // 递归加载目录结构（可配置最大深度，包含所有子目录与文件）
@@ -211,20 +187,6 @@ export const readFileContent = async (filePath: string): Promise<FileOperationRe
   }
 };
 
-// 写入文件内容
-export const writeFileContent = async (filePath: string, content: string): Promise<FileOperationResult> => {
-  try {
-    await writeTextFile(filePath, content);
-    return { success: true };
-  } catch (error) {
-    console.error('写入文件失败:', error);
-    return {
-      success: false,
-      error: `写入文件失败: ${error instanceof Error ? error.message : String(error)}`,
-    };
-  }
-};
-
 // 从文件路径中提取目录路径
 export const extractDirectoryPath = (filePath: string): string => {
   const lastSlashIndex = filePath.lastIndexOf('/');
@@ -235,17 +197,6 @@ export const extractDirectoryPath = (filePath: string): string => {
 export const extractFileName = (filePath: string): string => {
   const lastSlashIndex = filePath.lastIndexOf('/');
   return lastSlashIndex !== -1 ? filePath.substring(lastSlashIndex + 1) : filePath;
-};
-
-// 格式化文件大小
-export const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 B';
-
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 };
 
 /**
@@ -280,35 +231,6 @@ export const formatTimestamp = (timestamp: number): string => {
   return new Date(timestamp).toLocaleDateString();
 };
 
-// 验证文件路径
-export const validateFilePath = (filePath: string): boolean => {
-  if (!filePath) return false;
-
-  // 基本路径验证
-  const validPathRegex = /^[a-zA-Z0-9/._-]+$/;
-  if (!validPathRegex.test(filePath)) return false;
-
-  // 检查文件扩展名
-  return isSupportedFile(filePath);
-};
-
-// 获取文件信息
-export const getFileInfo = async (filePath: string): Promise<FileInfo | null> => {
-  try {
-    const exists = await checkPathExists(filePath);
-    if (!exists) return null;
-
-    return {
-      path: filePath,
-      name: extractFileName(filePath),
-      lastAccessed: Date.now(),
-    };
-  } catch (error) {
-    console.error('获取文件信息失败:', error);
-    return null;
-  }
-};
-
 // 防抖函数
 export const debounce = <T extends (...args: any[]) => any>(
   func: T,
@@ -319,21 +241,5 @@ export const debounce = <T extends (...args: any[]) => any>(
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
-  };
-};
-
-// 节流函数
-export const throttle = <T extends (...args: any[]) => any>(
-  func: T,
-  limit: number,
-): ((...args: Parameters<T>) => void) => {
-  let inThrottle: boolean;
-
-  return (...args: Parameters<T>) => {
-    if (!inThrottle) {
-      func(...args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
-    }
   };
 };

@@ -1,13 +1,7 @@
 import { ref, computed, type Ref } from 'vue';
 import type { FileInfo, ContextMenuState } from '../types';
 import type { useFileStore as useFileStoreType } from '../../store/modal/file';
-import {
-  createNewFile as createNewFileUtil,
-  openExistingFile as openExistingFileUtil,
-  readFileContent,
-  formatTimestamp,
-  debounce,
-} from '../fileUtils';
+import { openExistingFile as openExistingFileUtil, readFileContent, formatTimestamp } from '../fileUtils';
 import { openPath, revealItemInDir } from '@tauri-apps/plugin-opener';
 
 // 常量定义
@@ -76,29 +70,9 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
     }
   };
 
-  // 切换最近文件展开状态
-  const toggleRecentFiles = (): void => {
-    recentFilesExpanded.value = !recentFilesExpanded.value;
-    if (recentFilesExpanded.value) {
-      directoryManagerExpanded.value = false;
-      // 保存状态到localStorage
-      saveDirectoryManagerExpandedState(false);
-    }
-  };
-
   // 切换侧边栏
   const toggleSidebar = (): void => {
     fileStore.toggleSidebar();
-  };
-
-  // 创建新文件
-  const createNewFile = async (): Promise<void> => {
-    const result = await createNewFileUtil();
-    if (result.success && result.data) {
-      await openFile(result.data);
-    } else if (result.error) {
-      console.error('创建新文件失败:', result.error);
-    }
   };
 
   // 打开现有文件
@@ -173,13 +147,6 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
     if (folderManagerRef.value) {
       await folderManagerRef.value.refreshDirectories();
     }
-  };
-
-  // 清空最近文件列表
-  const clearRecentFiles = (): void => {
-    const storeInstance = fileStore;
-    storeInstance.recentFiles = [];
-    void refreshDirectories();
   };
 
   // 从最近文件中移除
@@ -280,9 +247,6 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
     return formatTimestamp(timestamp);
   };
 
-  // 防抖处理文件操作
-  const debouncedOpenFile = debounce(openFile, 300);
-
   return {
     sortedRecentFiles,
     currentFilePath,
@@ -291,21 +255,17 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
     directoryManagerExpanded,
     contextMenu,
     toggleDirectoryManager,
-    toggleRecentFiles,
     toggleSidebar,
-    createNewFile,
     openExistingFile,
     openDirectory,
     openFile,
     handleOpenFile,
     refreshDirectories,
-    clearRecentFiles,
     removeFromRecent,
     copyFilePath,
     openInExplorer,
     showContextMenu,
     hideContextMenu,
     formatTime,
-    debouncedOpenFile,
   };
 }
