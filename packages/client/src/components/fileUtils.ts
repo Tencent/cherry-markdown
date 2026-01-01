@@ -5,8 +5,13 @@ import type { DirectoryNode, FileInfo, FileOperationResult, DirectoryStructureRe
 // 常量定义
 export const SUPPORTED_FILE_EXTENSIONS = ['md', 'markdown', 'text', 'txt'];
 export const MAX_RECENT_FILES = 50;
-export const MAX_DIRECTORY_DEPTH = 4;
+export const MAX_DIRECTORY_DEPTH = 8;
 export const DEFAULT_FILE_CONTENT = '# 新文档\n\n开始编写你的内容...';
+
+const joinPath = (base: string, name: string): string => {
+  const trimmed = base.replace(/[\\/]+$/, '');
+  return `${trimmed}/${name}`;
+};
 
 // 检查路径是否存在
 export const checkPathExists = async (path: string): Promise<boolean> => {
@@ -48,9 +53,13 @@ export const checkDirectoryHasTargetFiles = async (dirPath: string): Promise<boo
   }
 };
 
-// 递归加载目录结构
-export const loadDirectoryStructure = async (dirPath: string, depth: number = 0): Promise<DirectoryStructureResult> => {
-  if (depth > MAX_DIRECTORY_DEPTH) {
+// 递归加载目录结构（可配置最大深度，包含所有子目录与文件）
+export const loadDirectoryStructure = async (
+  dirPath: string,
+  depth: number = 0,
+  maxDepth: number = MAX_DIRECTORY_DEPTH,
+): Promise<DirectoryStructureResult> => {
+  if (depth > maxDepth) {
     return { success: true, data: [] };
   }
 
@@ -59,33 +68,32 @@ export const loadDirectoryStructure = async (dirPath: string, depth: number = 0)
 
     const children: DirectoryNode[] = [];
 
-    // 处理子目录
-    const subdirectories = entries.filter((entry) => entry.isDirectory);
-    for (const dir of subdirectories) {
-      const subDirPath = `${dirPath}/${dir.name}`;
-      const hasTargetFiles = await checkDirectoryHasTargetFiles(subDirPath);
+    for (const entry of entries) {
+      const fullPath = entry.path || joinPath(dirPath, entry.name || '');
 
-      if (hasTargetFiles) {
-        children.push({
-          path: subDirPath,
-          name: dir.name || '',
+      if (entry.isDirectory) {
+        const node: DirectoryNode = {
+          path: fullPath,
+          name: entry.name || '',
           type: 'directory',
           expanded: false,
           children: [],
+        };
+
+        // 递归预取子节点
+        const nested = await loadDirectoryStructure(fullPath, depth + 1, maxDepth);
+        if (nested.success && nested.data) {
+          node.children = nested.data;
+        }
+        children.push(node);
+      } else {
+        children.push({
+          path: fullPath,
+          name: entry.name || '',
+          type: 'file',
         });
       }
     }
-
-    // 处理文件
-    const files = entries.filter((entry) => !entry.isDirectory && isSupportedFile(entry.name || ''));
-
-    files.forEach((file) => {
-      children.push({
-        path: `${dirPath}/${file.name}`,
-        name: file.name || '',
-        type: 'file',
-      });
-    });
 
     // 按类型和名称排序
     children.sort((a, b) => {

@@ -1,17 +1,12 @@
 import { ref } from 'vue';
 import type { DirectoryNode, FileStore } from '../types';
-import {
-  checkPathExists,
-  loadDirectoryStructure,
-  extractDirectoryPath,
-  extractFileName,
-  openDirectoryDialog,
-} from '../fileUtils';
+import { checkPathExists, loadDirectoryStructure, extractDirectoryPath, extractFileName, openDirectoryDialog } from '../fileUtils';
 
 // 常量定义
 const MAX_DIRECTORY_COUNT = 10; // 最大目录数量
 const STORAGE_KEY_EXPANSION_STATE = 'cherry-markdown-directory-expansion-state';
 const STORAGE_KEY_RECENT_DIRECTORIES = 'cherry-markdown-recent-directories';
+const FULL_TREE_DEPTH = 64;
 
 /**
  * 标准化路径分隔符为正斜杠
@@ -196,9 +191,8 @@ export function useDirectoryManager(fileStore: FileStore) {
     saveExpansionStateToStorage();
 
     if (directory.expanded) {
-      // 如果展开且没有子节点数据，加载子节点
       if (!directory.children || directory.children.length === 0) {
-        const result = await loadDirectoryStructure(dirPath, 1);
+        const result = await loadDirectoryStructure(dirPath, 1, FULL_TREE_DEPTH);
         if (result.success && result.data) {
           directory.children = result.data;
         }
@@ -249,7 +243,7 @@ export function useDirectoryManager(fileStore: FileStore) {
       const loadPromises = recentDirectories.value
         .filter((dir) => dir.expanded)
         .map(async (currentDir) => {
-          const result = await loadDirectoryStructure(currentDir.path, 1);
+          const result = await loadDirectoryStructure(currentDir.path, 1, FULL_TREE_DEPTH);
           if (result.success && result.data) {
             const updatedDir = recentDirectories.value.find((dir) => dir.path === currentDir.path);
             if (updatedDir) {
@@ -299,7 +293,7 @@ export function useDirectoryManager(fileStore: FileStore) {
       saveExpansionStateToStorage();
 
       // 加载目录结构
-      const loadResult = await loadDirectoryStructure(dirPath, 1);
+      const loadResult = await loadDirectoryStructure(dirPath, 1, FULL_TREE_DEPTH);
       if (loadResult.success && loadResult.data) {
         newDir.children = loadResult.data;
       }
@@ -335,7 +329,7 @@ export function useDirectoryManager(fileStore: FileStore) {
         }
         // 如果目录是展开的，加载文件列表
         if (savedState && currentDir.children && currentDir.children.length === 0) {
-          loadDirectoryStructure(currentDir.path, 1).then((result) => {
+          loadDirectoryStructure(currentDir.path, 1, FULL_TREE_DEPTH).then((result) => {
             if (result.success && result.data) {
               const updatedDir = recentDirectories.value.find((d) => d.path === currentDir.path);
               if (updatedDir) {

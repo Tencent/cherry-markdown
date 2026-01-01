@@ -8,7 +8,7 @@ import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { register, unregister } from '@tauri-apps/plugin-global-shortcut';
 import { useFileStore } from './store';
 import { onMounted, onUnmounted } from 'vue';
-import FileManager from './components/FileManager.vue';
+import SidePanelManager from './components/SidePanelManager.vue';
 
 // 类型定义
 interface FileOperationResult {
@@ -303,7 +303,7 @@ onUnmounted(async () => {
 
 <template>
   <div class="app-container">
-    <FileManager class="file-manager-sidebar" />
+    <SidePanelManager />
     <div class="editor-container">
       <div id="markdown-editor"></div>
     </div>
@@ -318,44 +318,12 @@ onUnmounted(async () => {
   overflow: hidden;
 }
 
-.file-manager-sidebar {
-  flex-shrink: 0;
-  width: 300px;
-  height: 100%;
-  border-right: 1px solid #e0e0e0;
-  background-color: #f8f9fa;
-  transition: width 0.3s ease;
-}
-
-.file-manager-sidebar.sidebar-collapsed {
-  width: 50px;
-}
-
 .editor-container {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
   position: relative;
-}
-
-.sidebar-toggle-btn {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 10;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 8px;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-}
-
-.sidebar-toggle-btn:hover {
-  background: #f5f5f5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 #markdown-editor {
