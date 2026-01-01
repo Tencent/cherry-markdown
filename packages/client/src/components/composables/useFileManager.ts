@@ -1,5 +1,6 @@
 import { ref, computed, type Ref } from 'vue';
-import type { FileInfo, ContextMenuState, FileStore } from '../types';
+import type { FileInfo, ContextMenuState } from '../types';
+import type { useFileStore as useFileStoreType } from '../../store/modal/file';
 import {
   createNewFile as createNewFileUtil,
   openExistingFile as openExistingFileUtil,
@@ -7,7 +8,7 @@ import {
   formatTimestamp,
   debounce,
 } from '../fileUtils';
-import { openPath } from '@tauri-apps/plugin-opener';
+import { openPath, revealItemInDir } from '@tauri-apps/plugin-opener';
 
 // 常量定义
 const STORAGE_KEY_DIRECTORY_MANAGER_EXPANDED = 'cherry-markdown-directory-manager-expanded';
@@ -16,7 +17,9 @@ const DEFAULT_DIRECTORY_MANAGER_EXPANDED = true;
 /**
  * 文件管理composable
  */
-export function useFileManager(fileStore: FileStore, folderManagerRef: Ref<any>) {
+type FileStoreInstance = ReturnType<typeof useFileStoreType>;
+
+export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: Ref<any>) {
   // 响应式数据
   const sortedRecentFiles = computed(() => fileStore.sortedRecentFiles);
   const currentFilePath = computed(() => fileStore.currentFilePath);
@@ -198,10 +201,17 @@ export function useFileManager(fileStore: FileStore, folderManagerRef: Ref<any>)
   // 在资源管理器中打开文件
   const openInExplorer = async (filePath: string): Promise<void> => {
     try {
-      // 从文件路径中提取目录路径
-      const directoryPath = filePath.replace(/\\\\/g, '/').replace(/\/[^\\/]*$/, '');
+      const directoryPath = filePath.replace(/\\/g, '/').replace(/\/[^\\/]*$/, '');
 
-      // 使用Tauri opener插件打开文件夹
+      // 优先尝试直接在资源管理器定位文件
+      try {
+        await revealItemInDir(filePath);
+        hideContextMenu();
+        return;
+      } catch (_) {
+        // fallback: 打开所在目录
+      }
+
       await openPath(directoryPath);
       hideContextMenu();
     } catch (error) {

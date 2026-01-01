@@ -17,8 +17,7 @@
       :x="contextMenu.x"
       :y="contextMenu.y"
       :file="contextMenu.file"
-      :menu-type="getMenuType(contextMenu.file)"
-      @remove="removeFromRecent"
+      menu-type='directory'
       @copy-path="copyFilePath"
       @open-in-explorer="openInExplorer"
       @close="hideContextMenu"
@@ -27,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useFileStore } from '../store';
 import FolderManager from './FolderManager.vue';
 import ActionButtons from './ui/ActionButtons.vue';
@@ -45,7 +44,6 @@ const {
   toggleDirectoryManager,
   openExistingFile,
   openDirectory,
-  openFile,
   handleOpenFile,
   refreshDirectories,
   copyFilePath,
@@ -54,14 +52,6 @@ const {
   hideContextMenu,
 } = useFileManager(fileStore, folderManagerRef);
 
-// 获取菜单类型
-const getMenuType = (file: any): 'directory' | 'recent' => {
-  return 'directory';
-};
-
-onMounted(() => {
-  console.log('FileManager组件已挂载 - 目录管理区域状态:', directoryManagerExpanded.value);
-});
 </script>
 
 <style scoped>

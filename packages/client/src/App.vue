@@ -24,6 +24,9 @@ const appWindow = getCurrentWindow();
 let needDealAfterChange = false;
 const unlistenFns: UnlistenFn[] = [];
 let hasUnsavedChanges = false;
+const preventNativeContextMenu = (event: Event): void => {
+  event.preventDefault();
+};
 
 // 暴露未保存更改的检查函数供外部使用
 const checkUnsavedChanges = (): boolean => {
@@ -264,6 +267,9 @@ onMounted(async () => {
   // 暴露 checkUnsavedChanges 给 window，以便外部可以使用
   (window as any).checkUnsavedChanges = checkUnsavedChanges;
 
+  // 禁用 Tauri 默认右键菜单（防止原生“查看页面元素”）
+  document.addEventListener('contextmenu', preventNativeContextMenu);
+
   // 初始化工具栏状态
   const cherryNoToolbar = document.querySelector('.cherry--no-toolbar');
   await invoke('get_show_toolbar', { show: !cherryNoToolbar });
@@ -295,6 +301,7 @@ onUnmounted(async () => {
   // 清理事件监听器
   window.removeEventListener('open-file-from-sidebar', handleOpenFileFromSidebar);
   window.removeEventListener('cherry:request-save', handleSaveFromToolbar);
+  document.removeEventListener('contextmenu', preventNativeContextMenu);
 
   // 注销全局保存快捷键
   await unregisterSaveShortcut();

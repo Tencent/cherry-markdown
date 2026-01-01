@@ -8,14 +8,27 @@
         :key="file.path"
         :class="{ active: file.path === currentFilePath }"
         @click="openRecent(file.path)"
+        @contextmenu.prevent="showMenu($event, file)"
         :title="file.path"
       >
         <div class="file-row">
           <span class="file-name">{{ file.name }}</span>
-          <span class="file-time">{{ formatTime(file.lastSaved ?? file.lastOpened) }}</span>
+          <span class="file-time">{{ formatTime(file.lastSaved ?? file.lastOpened ?? file.lastAccessed) }}</span>
         </div>
       </li>
     </ul>
+
+    <ContextMenu
+      v-if="contextMenu.visible"
+      :x="contextMenu.x"
+      :y="contextMenu.y"
+      :file="contextMenu.file"
+      menu-type="recent"
+      @remove="remove"
+      @copy-path="copyFilePath"
+      @open-in-explorer="openInExplorer"
+      @close="hideMenu"
+    />
   </div>
 </template>
 
@@ -23,13 +36,24 @@
 import { ref } from 'vue';
 import { useFileStore } from '../store';
 import { useFileManager } from './composables/useFileManager';
+import { formatTimestamp } from './fileUtils';
+import ContextMenu from './ui/ContextMenu.vue';
 
 const fileStore = useFileStore();
 const folderManagerRef = ref(null);
 
-import { formatTimestamp } from './fileUtils';
-
-const { sortedRecentFiles, currentFilePath, openExistingFile, openFile } = useFileManager(fileStore, folderManagerRef);
+const {
+  sortedRecentFiles,
+  currentFilePath,
+  openExistingFile,
+  openFile,
+  openInExplorer,
+  copyFilePath,
+  removeFromRecent,
+  contextMenu,
+  showContextMenu,
+  hideContextMenu,
+} = useFileManager(fileStore, folderManagerRef);
 
 const openRecentFile = async (): Promise<void> => {
   await openExistingFile();
@@ -40,6 +64,17 @@ const openRecent = async (filePath: string): Promise<void> => {
 };
 
 const formatTime = (time: number): string => formatTimestamp(time);
+
+const showMenu = (event: MouseEvent, file: any): void => {
+  showContextMenu(event, file);
+};
+
+const hideMenu = (): void => hideContextMenu();
+
+const remove = (filePath: string): void => {
+  removeFromRecent(filePath);
+  hideMenu();
+};
 
 defineExpose({ openRecentFile });
 </script>

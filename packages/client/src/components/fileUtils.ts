@@ -69,7 +69,7 @@ export const loadDirectoryStructure = async (
     const children: DirectoryNode[] = [];
 
     for (const entry of entries) {
-      const fullPath = entry.path || joinPath(dirPath, entry.name || '');
+      const fullPath = joinPath(dirPath, entry.name || '');
 
       if (entry.isDirectory) {
         const node: DirectoryNode = {

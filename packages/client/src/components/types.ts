@@ -3,6 +3,8 @@ export interface FileInfo {
   path: string;
   name: string;
   lastAccessed: number;
+  lastOpened?: number;
+  lastSaved?: number | null;
   size?: number;
   type?: string;
 }

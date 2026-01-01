@@ -1,11 +1,8 @@
 import { defineStore } from 'pinia';
 
-interface RecentFile {
-  path: string;
-  name: string;
-  lastOpened: number;
-  lastSaved?: number | null;
-}
+import type { FileInfo } from '../../components/types';
+
+interface RecentFile extends FileInfo {}
 
 interface FileState {
   currentFilePath: string | null;
@@ -57,9 +54,14 @@ export const useFileStore = defineStore('file', {
     const savedState = loadFromStorage();
     const lastOpenedFile = localStorage.getItem(STORAGE_KEYS.LAST_OPENED_FILE);
 
+    const recentFiles = (savedState.recentFiles || []).map((file) => ({
+      ...file,
+      lastAccessed: file.lastAccessed ?? file.lastSaved ?? file.lastOpened ?? Date.now(),
+    }));
+
     return {
       currentFilePath: lastOpenedFile || savedState.currentFilePath || null,
-      recentFiles: savedState.recentFiles || [],
+      recentFiles,
       sidebarCollapsed: savedState.sidebarCollapsed || false,
     };
   },
@@ -69,8 +71,8 @@ export const useFileStore = defineStore('file', {
       return state.recentFiles
         .slice()
         .sort((a, b) => {
-          const timeA = a.lastSaved ?? a.lastOpened;
-          const timeB = b.lastSaved ?? b.lastOpened;
+          const timeA = a.lastSaved ?? a.lastOpened ?? a.lastAccessed;
+          const timeB = b.lastSaved ?? b.lastOpened ?? b.lastAccessed;
           return timeB - timeA;
         });
     },
@@ -78,7 +80,9 @@ export const useFileStore = defineStore('file', {
     // 获取最后打开的文件（按时间排序的第一个文件）
     lastOpenedFile: (state) => {
       if (state.recentFiles.length === 0) return null;
-      return state.recentFiles.slice().sort((a, b) => b.lastAccessed - a.lastAccessed)[0];
+      return state.recentFiles
+        .slice()
+        .sort((a, b) => (b.lastAccessed ?? 0) - (a.lastAccessed ?? 0))[0];
     },
   },
 
@@ -98,12 +102,14 @@ export const useFileStore = defineStore('file', {
       if (existingIndex >= 0) {
         // 更新访问时间
         this.recentFiles[existingIndex].lastOpened = now;
+        this.recentFiles[existingIndex].lastAccessed = now;
       } else {
         // 添加新文件
         this.recentFiles.push({
           path: filePath,
           name: fileName,
           lastOpened: now,
+          lastAccessed: now,
           lastSaved: null,
         });
       }
@@ -114,7 +120,9 @@ export const useFileStore = defineStore('file', {
     markSaved(filePath: string) {
       const existingIndex = this.recentFiles.findIndex((file) => file.path === filePath);
       if (existingIndex >= 0) {
-        this.recentFiles[existingIndex].lastSaved = Date.now();
+        const now = Date.now();
+        this.recentFiles[existingIndex].lastSaved = now;
+        this.recentFiles[existingIndex].lastAccessed = now;
         this.saveState();
       }
     },
