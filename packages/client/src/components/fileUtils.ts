@@ -87,11 +87,13 @@ export const loadDirectoryStructure = async (
         }
         children.push(node);
       } else {
-        children.push({
-          path: fullPath,
-          name: entry.name || '',
-          type: 'file',
-        });
+        if (isSupportedFile(entry.name || '')) {
+          children.push({
+            path: fullPath,
+            name: entry.name || '',
+            type: 'file',
+          });
+        }
       }
     }
 

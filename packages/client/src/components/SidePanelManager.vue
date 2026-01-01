@@ -65,8 +65,8 @@ interface PanelDefinition {
 const ACTIVE_PANEL_KEY = 'cherry-sidebar-active-panel';
 
 const panels = shallowRef<PanelDefinition[]>([
-  { id: 'explorer', label: '资源管理器', icon: FolderIcon, component: ExplorerPanel },
   { id: 'recent', label: '最近文件', icon: FileIcon, component: RecentPanel },
+  { id: 'explorer', label: '资源管理器', icon: FolderIcon, component: ExplorerPanel },
 ]);
 
 const fileStore = useFileStore();
@@ -90,6 +90,12 @@ const ensureExpanded = (): void => {
 };
 
 const selectPanel = (panelId: string): void => {
+  if (panelId === activePanelId.value) {
+    // 再次点击当前图标则收起/展开侧边栏
+    fileStore.toggleSidebar();
+    return;
+  }
+
   activePanelId.value = panelId;
   localStorage.setItem(ACTIVE_PANEL_KEY, panelId);
   ensureExpanded();
@@ -116,14 +122,14 @@ const triggerOpenRecentFile = (): void => {
 .side-panel {
   display: flex;
   height: 100vh;
-  width: 340px;
+  width: 404px; /* 64 (bar) + 340 (panel) */
   background: #f4f6fb;
   border-right: 1px solid #dfe3ea;
   transition: width 0.25s ease;
 }
 
 .side-panel.collapsed {
-  width: 72px;
+  width: 64px;
 }
 
 .activity-bar {
@@ -171,8 +177,8 @@ const triggerOpenRecentFile = (): void => {
   border-left: 1px solid #dfe3ea;
 }
 
-.panel-surface.collapsed {
-  pointer-events: none;
+.side-panel.collapsed .panel-surface {
+  display: none;
 }
 
 .panel-header {

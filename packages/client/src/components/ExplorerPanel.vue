@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useFileStore } from '../store';
+import { useFileStore, useDirectoryStore } from '../store';
 import DirectoryTree from './DirectoryTree.vue';
 import ContextMenu from './ui/ContextMenu.vue';
 import { openDirectoryDialog, loadDirectoryStructure } from './fileUtils';
@@ -40,6 +40,7 @@ import type { DirectoryNode } from './types';
 import { useFileManager } from './composables/useFileManager';
 
 const fileStore = useFileStore();
+const directoryStore = useDirectoryStore();
 const nodes = ref<DirectoryNode[]>([]);
 const currentDirPath = ref<string | null>(null);
 const loading = ref(false);
@@ -67,6 +68,8 @@ const loadTree = async (dirPath: string): Promise<void> => {
     if (tree.success && tree.data) {
       currentDirPath.value = dirPath;
       nodes.value = tree.data;
+      directoryStore.setCurrent(dirPath);
+      directoryStore.upsertDirectory(dirPath, true);
     }
   } finally {
     loading.value = false;
@@ -75,6 +78,7 @@ const loadTree = async (dirPath: string): Promise<void> => {
 
 const toggleDirectory = (_dirPath: string, node: DirectoryNode): void => {
   node.expanded = !node.expanded;
+  directoryStore.setExpanded(node.path, node.expanded ?? false);
 };
 
 const openFile = async (filePath: string): Promise<void> => {
@@ -83,6 +87,15 @@ const openFile = async (filePath: string): Promise<void> => {
 
 // 暴露给父组件（SidePanelManager）
 defineExpose({ openDirectory });
+
+// 恢复上次打开的目录
+const restore = async () => {
+  if (directoryStore.currentPath) {
+    await loadTree(directoryStore.currentPath);
+  }
+};
+
+void restore();
 </script>
 
 <style scoped>
