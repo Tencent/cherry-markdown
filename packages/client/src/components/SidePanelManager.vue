@@ -27,6 +27,14 @@
             打开目录
           </button>
           <button
+            v-if="activePanelId === 'recent'"
+            class="header-action"
+            title="打开文件"
+            @click="triggerOpenRecentFile"
+          >
+            打开文件
+          </button>
+          <button
             class="header-toggle"
             :title="isCollapsed ? '展开侧边栏' : '折叠侧边栏'"
             @click="toggleCollapse"
@@ -94,6 +102,12 @@ const toggleCollapse = (): void => {
 const triggerOpenDirectory = (): void => {
   if (activePanelId.value === 'explorer' && (panelRef.value as any)?.openDirectory) {
     (panelRef.value as any).openDirectory();
+  }
+};
+
+const triggerOpenRecentFile = (): void => {
+  if (activePanelId.value === 'recent' && (panelRef.value as any)?.openRecentFile) {
+    (panelRef.value as any).openRecentFile();
   }
 };
 </script>

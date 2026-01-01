@@ -105,6 +105,7 @@ const saveAsNewMarkdown = async (): Promise<FileOperationResult> => {
     await writeTextFile(path, markdown);
     fileStore.setCurrentFilePath(path);
     fileStore.addRecentFile(path);
+    fileStore.markSaved(path);
     hasUnsavedChanges = false;
     await updateTitle(path, false);
 
@@ -124,6 +125,7 @@ const saveMarkdown = async (): Promise<FileOperationResult> => {
     }
 
     await writeTextFile(fileStore.currentFilePath, markdown);
+    fileStore.markSaved(fileStore.currentFilePath);
     hasUnsavedChanges = false;
     await updateTitle(fileStore.currentFilePath, false);
     return { success: true, path: fileStore.currentFilePath };

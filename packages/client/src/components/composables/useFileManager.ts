@@ -120,7 +120,11 @@ export function useFileManager(fileStore: FileStore, folderManagerRef: Ref<any>)
   };
 
   // 打开文件
-  const openFile = async (filePath: string, fromDirectoryManager: boolean = false): Promise<void> => {
+  const openFile = async (
+    filePath: string,
+    fromDirectoryManager: boolean = false,
+    bumpRecent: boolean = true,
+  ): Promise<void> => {
     try {
       const result = await readFileContent(filePath);
       if (result.success && result.data) {
@@ -132,8 +136,10 @@ export function useFileManager(fileStore: FileStore, folderManagerRef: Ref<any>)
         );
         // 更新当前文件路径
         fileStore.setCurrentFilePath(filePath);
-        // 添加到最近访问列表
-        fileStore.addRecentFile(filePath);
+        // 添加到最近访问列表（可选）
+        if (bumpRecent) {
+          fileStore.addRecentFile(filePath);
+        }
 
         if (fromDirectoryManager) {
           // 如果从目录管理打开文件，始终展开目录管理区域
