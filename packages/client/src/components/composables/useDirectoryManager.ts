@@ -1,6 +1,12 @@
 import { ref } from 'vue';
 import type { DirectoryNode, FileStore } from '../types';
-import { checkPathExists, loadDirectoryStructure, extractDirectoryPath, extractFileName, openDirectoryDialog } from '../fileUtils';
+import {
+  checkPathExists,
+  loadDirectoryStructure,
+  extractDirectoryPath,
+  extractFileName,
+  openDirectoryDialog,
+} from '../fileUtils';
 import { useDirectoryStore } from '../../store';
 
 // 常量定义

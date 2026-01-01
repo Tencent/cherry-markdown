@@ -34,11 +34,7 @@
           >
             打开文件
           </button>
-          <button
-            class="header-toggle"
-            :title="isCollapsed ? '展开侧边栏' : '折叠侧边栏'"
-            @click="toggleCollapse"
-          >
+          <button class="header-toggle" :title="isCollapsed ? '展开侧边栏' : '折叠侧边栏'" @click="toggleCollapse">
             <ArrowIcon :size="14" :direction="isCollapsed ? 'right' : 'left'" />
           </button>
         </div>

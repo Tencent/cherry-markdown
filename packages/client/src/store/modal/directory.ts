@@ -19,10 +19,12 @@ const loadItemsFromStorage = (): DirectoryCacheItem[] => {
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed)) {
-        return parsed.filter((x) => x && typeof x.path === 'string').map((x) => ({
-          path: x.path as string,
-          expanded: Boolean(x.expanded),
-        }));
+        return parsed
+          .filter((x) => x && typeof x.path === 'string')
+          .map((x) => ({
+            path: x.path as string,
+            expanded: Boolean(x.expanded),
+          }));
       }
     }
   } catch (error) {

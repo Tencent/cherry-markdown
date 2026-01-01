@@ -68,21 +68,17 @@ export const useFileStore = defineStore('file', {
 
   getters: {
     sortedRecentFiles: (state) => {
-      return state.recentFiles
-        .slice()
-        .sort((a, b) => {
-          const timeA = a.lastSaved ?? a.lastOpened ?? a.lastAccessed;
-          const timeB = b.lastSaved ?? b.lastOpened ?? b.lastAccessed;
-          return timeB - timeA;
-        });
+      return state.recentFiles.slice().sort((a, b) => {
+        const timeA = a.lastSaved ?? a.lastOpened ?? a.lastAccessed;
+        const timeB = b.lastSaved ?? b.lastOpened ?? b.lastAccessed;
+        return timeB - timeA;
+      });
     },
 
     // 获取最后打开的文件（按时间排序的第一个文件）
     lastOpenedFile: (state) => {
       if (state.recentFiles.length === 0) return null;
-      return state.recentFiles
-        .slice()
-        .sort((a, b) => (b.lastAccessed ?? 0) - (a.lastAccessed ?? 0))[0];
+      return state.recentFiles.slice().sort((a, b) => (b.lastAccessed ?? 0) - (a.lastAccessed ?? 0))[0];
     },
   },
 

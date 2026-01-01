@@ -17,7 +17,7 @@
       :x="contextMenu.x"
       :y="contextMenu.y"
       :file="contextMenu.file"
-      menu-type='directory'
+      menu-type="directory"
       @copy-path="copyFilePath"
       @open-in-explorer="openInExplorer"
       @close="hideContextMenu"
@@ -51,7 +51,6 @@ const {
   showContextMenu,
   hideContextMenu,
 } = useFileManager(fileStore, folderManagerRef);
-
 </script>
 
 <style scoped>
@@ -65,5 +64,4 @@ const {
   flex-direction: column;
   position: relative;
 }
-
 </style>
