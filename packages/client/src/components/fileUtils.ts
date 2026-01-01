@@ -1,12 +1,7 @@
 import { readDir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import type { DirectoryNode, FileOperationResult, DirectoryStructureResult } from './types';
-
-// 常量定义
-export const SUPPORTED_FILE_EXTENSIONS = ['md', 'markdown', 'text', 'txt'];
-export const MAX_RECENT_FILES = 50;
-export const MAX_DIRECTORY_DEPTH = 8;
-export const DEFAULT_FILE_CONTENT = '# 新文档\n\n开始编写你的内容...';
+import { SUPPORTED_FILE_EXTENSIONS, MAX_DIRECTORY_DEPTH, DEFAULT_FILE_CONTENT } from '../constants/files';
 
 const joinPath = (base: string, name: string): string => {
   const trimmed = base.replace(/[\\/]+$/, '');

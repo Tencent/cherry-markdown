@@ -4,6 +4,7 @@ import katex from 'katex';
 import 'katex/dist/katex.min.css';
 
 import { pinyin } from 'pinyin';
+import { WINDOW_EVENTS } from '../constants/events';
 
 /**
  * ECharts优化导入 - 使用命名空间导入替代默认导入
@@ -54,7 +55,7 @@ const customSave = Cherry.createMenuHook('save', {
     this.updateMarkdown = false;
     if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
       const markdown = this.$cherry?.getMarkdown?.() ?? '';
-      const event = new CustomEvent('cherry:request-save', { detail: { markdown } });
+      const event = new CustomEvent(WINDOW_EVENTS.REQUEST_SAVE, { detail: { markdown } });
       window.dispatchEvent(event);
     }
   },

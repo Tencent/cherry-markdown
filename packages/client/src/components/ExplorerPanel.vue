@@ -77,9 +77,12 @@ const loadTree = async (dirPath: string): Promise<void> => {
 };
 
 const toggleDirectory = (_dirPath: string, node: DirectoryNode): void => {
-  const expanded = !node.expanded;
-  node.expanded = expanded;
-  directoryStore.setExpanded(node.path, expanded ?? false);
+  const expanded = !(node.expanded ?? false);
+  const index = nodes.value.findIndex((item) => item.path === node.path);
+  if (index !== -1) {
+    nodes.value[index] = { ...nodes.value[index], expanded };
+  }
+  directoryStore.setExpanded(node.path, expanded);
 };
 
 const openFile = async (filePath: string): Promise<void> => {

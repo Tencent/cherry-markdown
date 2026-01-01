@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { cherryInstance } from './components/CherryMarkdown';
-import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { open, save } from '@tauri-apps/plugin-dialog';
@@ -9,21 +8,17 @@ import { register, unregister } from '@tauri-apps/plugin-global-shortcut';
 import { useFileStore } from './store';
 import { onMounted, onUnmounted } from 'vue';
 import SidePanelManager from './components/SidePanelManager.vue';
-
-// 类型定义
-interface FileOperationResult {
-  success: boolean;
-  error?: string;
-  path?: string;
-}
+import type { FileOperationResult } from './components/types';
+import { useAppEvents } from './components/composables/useAppEvents';
+import { notifyError } from './utils/notifications';
 
 // 响应式数据
 let cherryMarkdown = cherryInstance();
 const fileStore = useFileStore();
 const appWindow = getCurrentWindow();
 let needDealAfterChange = false;
-const unlistenFns: UnlistenFn[] = [];
 let hasUnsavedChanges = false;
+let unlistenCloseRequested: (() => void) | undefined;
 const preventNativeContextMenu = (event: Event): void => {
   event.preventDefault();
 };
@@ -31,6 +26,16 @@ const preventNativeContextMenu = (event: Event): void => {
 // 暴露未保存更改的检查函数供外部使用
 const checkUnsavedChanges = (): boolean => {
   return hasUnsavedChanges;
+};
+
+const confirmProceedWhenUnsaved = async (): Promise<boolean> => {
+  if (!hasUnsavedChanges) return true;
+
+  if (typeof window !== 'undefined' && typeof window.confirm === 'function') {
+    return window.confirm('检测到未保存的更改，继续操作将丢失未保存内容，是否继续？');
+  }
+
+  return true;
 };
 
 // ========== 窗口标题管理 ==========
@@ -48,6 +53,7 @@ const updateTitle = async (path: string | null, unsaved: boolean = false): Promi
 
 // ========== 文件操作函数 ==========
 const newFile = async (): Promise<void> => {
+  if (!(await confirmProceedWhenUnsaved())) return;
   needDealAfterChange = false;
   hasUnsavedChanges = false;
   cherryMarkdown.setMarkdown('');
@@ -56,6 +62,10 @@ const newFile = async (): Promise<void> => {
 };
 
 const openFile = async (): Promise<FileOperationResult> => {
+  if (!(await confirmProceedWhenUnsaved())) {
+    return { success: false, error: '已取消：存在未保存的更改' };
+  }
+
   try {
     const path = await open({
       multiple: false,
@@ -84,7 +94,8 @@ const openFile = async (): Promise<FileOperationResult> => {
 
     return { success: true, path };
   } catch (error) {
-    console.error('打开文件失败:', error);
+    const message = `打开文件失败: ${error instanceof Error ? error.message : '未知错误'}`;
+    notifyError(message);
     return { success: false, error: error instanceof Error ? error.message : '未知错误' };
   }
 };
@@ -114,7 +125,8 @@ const saveAsNewMarkdown = async (): Promise<FileOperationResult> => {
 
     return { success: true, path };
   } catch (error) {
-    console.error('另存为失败:', error);
+    const message = `另存为失败: ${error instanceof Error ? error.message : '未知错误'}`;
+    notifyError(message);
     return { success: false, error: error instanceof Error ? error.message : '未知错误' };
   }
 };
@@ -133,7 +145,8 @@ const saveMarkdown = async (): Promise<FileOperationResult> => {
     await updateTitle(fileStore.currentFilePath, false);
     return { success: true, path: fileStore.currentFilePath };
   } catch (error) {
-    console.error('保存文件失败:', error);
+    const message = `保存文件失败: ${error instanceof Error ? error.message : '未知错误'}`;
+    notifyError(message);
     return { success: false, error: error instanceof Error ? error.message : '未知错误' };
   }
 };
@@ -197,7 +210,8 @@ const restoreLastOpenedFile = async (): Promise<void> => {
       await updateTitle(fileStore.currentFilePath, false);
     } catch (error) {
       console.warn('恢复上次打开的文件失败:', error);
-      // 如果文件不存在或无法访问，清除当前文件路径
+      // 如果文件不存在或无法访问，清除当前文件路径并从最近记录移除
+      fileStore.removeRecentFile(fileStore.currentFilePath);
       fileStore.setCurrentFilePath(null);
       await updateTitle(null, false);
     }
@@ -208,6 +222,7 @@ const restoreLastOpenedFile = async (): Promise<void> => {
 const handleOpenFileFromSidebar = async (event: Event): Promise<void> => {
   const customEvent = event as CustomEvent;
   const { filePath, content } = customEvent.detail;
+  if (!(await confirmProceedWhenUnsaved())) return;
   needDealAfterChange = false;
   hasUnsavedChanges = false;
   cherryMarkdown.setMarkdown(content);
@@ -218,7 +233,7 @@ const handleOpenFileFromSidebar = async (event: Event): Promise<void> => {
 const handleSaveFromToolbar = async (): Promise<void> => {
   const result = await saveMarkdown();
   if (!result.success && result.error) {
-    console.warn('保存失败:', result.error);
+    notifyError(`保存失败: ${result.error}`);
   }
 };
 
@@ -251,16 +266,17 @@ const unregisterSaveShortcut = async (): Promise<void> => {
   }
 };
 
-const registerTauriEvents = async (): Promise<void> => {
-  const unlisteners = await Promise.all([
-    listen('new_file', newFile),
-    listen('open_file', openFile),
-    listen('save', saveMarkdown),
-    listen('save_as', saveAsNewMarkdown),
-    listen('toggle_toolbar', toggleToolbar),
-  ]);
-  unlistenFns.push(...unlisteners);
-};
+const appEvents = useAppEvents({
+  onOpenFileFromSidebar: handleOpenFileFromSidebar,
+  onRequestSave: handleSaveFromToolbar,
+  tauriHandlers: {
+    onNewFile: newFile,
+    onOpenFile: openFile,
+    onSave: saveMarkdown,
+    onSaveAs: saveAsNewMarkdown,
+    onToggleToolbar: toggleToolbar,
+  },
+});
 
 // ========== 生命周期钩子 ==========
 onMounted(async () => {
@@ -274,11 +290,16 @@ onMounted(async () => {
   const cherryNoToolbar = document.querySelector('.cherry--no-toolbar');
   await invoke('get_show_toolbar', { show: !cherryNoToolbar });
   cherryMarkdown = cherryInstance();
-  await registerTauriEvents();
+  appEvents.registerWindowEvents();
+  await appEvents.registerTauriEvents();
 
-  // 添加事件监听器
-  window.addEventListener('open-file-from-sidebar', handleOpenFileFromSidebar);
-  window.addEventListener('cherry:request-save', handleSaveFromToolbar);
+  // 窗口关闭防护
+  unlistenCloseRequested = await appWindow.onCloseRequested(async (event) => {
+    const canClose = await confirmProceedWhenUnsaved();
+    if (!canClose) {
+      event.preventDefault();
+    }
+  });
 
   // 注册全局保存快捷键
   await registerSaveShortcut();
@@ -298,15 +319,14 @@ onMounted(async () => {
 });
 
 onUnmounted(async () => {
-  // 清理事件监听器
-  window.removeEventListener('open-file-from-sidebar', handleOpenFileFromSidebar);
-  window.removeEventListener('cherry:request-save', handleSaveFromToolbar);
   document.removeEventListener('contextmenu', preventNativeContextMenu);
+  if (unlistenCloseRequested) {
+    unlistenCloseRequested();
+  }
 
   // 注销全局保存快捷键
   await unregisterSaveShortcut();
-
-  unlistenFns.forEach((unlisten) => unlisten());
+  await appEvents.cleanupAll();
 });
 </script>
 

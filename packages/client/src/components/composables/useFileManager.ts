@@ -1,8 +1,11 @@
 import { ref, computed, type Ref } from 'vue';
-import type { FileInfo, ContextMenuState } from '../types';
+import type { FileInfo, DirectoryNode } from '../types';
 import type { useFileStore as useFileStoreType } from '../../store/modal/file';
 import { openExistingFile as openExistingFileUtil, readFileContent, formatTimestamp } from '../fileUtils';
 import { openPath, revealItemInDir } from '@tauri-apps/plugin-opener';
+import { useContextMenu } from './useContextMenu';
+import { WINDOW_EVENTS } from '../../constants/events';
+import { notifyError, notifyInfo } from '../../utils/notifications';
 
 // 常量定义
 const STORAGE_KEY_DIRECTORY_MANAGER_EXPANDED = 'cherry-markdown-directory-manager-expanded';
@@ -52,13 +55,6 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
   const recentFilesExpanded = ref(false);
   const directoryManagerExpanded = ref(loadDirectoryManagerExpandedState());
 
-  const contextMenu = ref<ContextMenuState>({
-    visible: false,
-    x: 0,
-    y: 0,
-    file: null,
-  });
-
   // 切换目录管理展开状态
   const toggleDirectoryManager = (): void => {
     directoryManagerExpanded.value = !directoryManagerExpanded.value;
@@ -81,7 +77,7 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
     if (result.success && result.data) {
       await openFile(result.data);
     } else if (result.error) {
-      console.error('打开文件失败:', result.error);
+      notifyError(`打开文件失败: ${result.error}`);
     }
   };
 
@@ -92,7 +88,7 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
         await folderManagerRef.value.openDirectory();
       }
     } catch (error) {
-      console.error('打开目录失败:', error);
+      notifyError(`打开目录失败: ${error instanceof Error ? error.message : '未知错误'}`);
     }
   };
 
@@ -107,7 +103,7 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
       if (result.success && result.data) {
         // 通过自定义事件传递文件内容到App.vue
         window.dispatchEvent(
-          new CustomEvent('open-file-from-sidebar', {
+          new CustomEvent(WINDOW_EVENTS.OPEN_FILE_FROM_SIDEBAR, {
             detail: { filePath, content: result.data },
           }),
         );
@@ -130,10 +126,10 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
           saveDirectoryManagerExpandedState(false);
         }
       } else {
-        console.error('读取文件失败:', result.error);
+        notifyError(`读取文件失败: ${result.error}`);
       }
     } catch (error) {
-      console.error('打开文件失败:', error);
+      notifyError(`打开文件失败: ${error instanceof Error ? error.message : '未知错误'}`);
     }
   };
 
@@ -161,7 +157,7 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
       await navigator.clipboard.writeText(filePath);
       hideContextMenu();
     } catch (error) {
-      console.error('复制文件路径失败:', error);
+      notifyError(`复制文件路径失败: ${error instanceof Error ? error.message : '未知错误'}`);
     }
   };
 
@@ -182,65 +178,27 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
       await openPath(directoryPath);
       hideContextMenu();
     } catch (error) {
-      console.error('打开资源管理器失败:', error);
+      notifyError(`打开资源管理器失败: ${error instanceof Error ? error.message : '未知错误'}`);
       // 备选方案：复制文件路径到剪贴板
       try {
         await navigator.clipboard.writeText(filePath);
-        alert(`无法打开，已复制文件路径到剪贴板: ${filePath}`);
+        notifyInfo(`无法打开，已复制文件路径到剪贴板: ${filePath}`);
       } catch (clipboardError) {
-        console.error('复制文件路径失败:', clipboardError);
+        notifyError(`复制文件路径失败: ${clipboardError instanceof Error ? clipboardError.message : '未知错误'}`);
       }
     }
   };
 
   // 显示右键菜单
-  const showContextMenu = (event: MouseEvent, file: FileInfo | any): void => {
-    event.preventDefault();
+  const mapToFileInfo = (file: FileInfo | DirectoryNode): FileInfo => ({
+    path: file.path,
+    name: file.name,
+    lastAccessed: 'lastAccessed' in file && file.lastAccessed ? file.lastAccessed : Date.now(),
+    size: 'size' in file ? file.size : undefined,
+    type: 'type' in file ? file.type : undefined,
+  });
 
-    // 如果已经有右键菜单显示，先关闭它
-    if (contextMenu.value.visible) {
-      hideContextMenu();
-    }
-
-    // 将DirectoryNode转换为FileInfo格式
-    const fileInfo: FileInfo = {
-      path: file.path,
-      name: file.name,
-      lastAccessed: file.lastModified || Date.now(),
-      size: file.size,
-      type: file.type,
-    };
-
-    contextMenu.value = {
-      visible: true,
-      x: event.clientX,
-      y: event.clientY,
-      file: fileInfo,
-    };
-
-    // 添加全局点击监听器，点击其他地方时关闭菜单
-    setTimeout(() => {
-      document.addEventListener('click', handleGlobalClick, { once: true });
-    }, 0);
-  };
-
-  // 处理全局点击事件
-  const handleGlobalClick = (event: MouseEvent): void => {
-    if (!contextMenu.value.visible) return;
-
-    // 检查点击是否在右键菜单内部
-    const contextMenuElement = document.querySelector('.context-menu');
-    if (contextMenuElement && !contextMenuElement.contains(event.target as Node)) {
-      hideContextMenu();
-    }
-  };
-
-  // 隐藏右键菜单
-  const hideContextMenu = (): void => {
-    contextMenu.value.visible = false;
-    // 移除全局点击监听器
-    document.removeEventListener('click', handleGlobalClick);
-  };
+  const { contextMenu, showContextMenu, hideContextMenu } = useContextMenu(mapToFileInfo);
 
   // 格式化时间
   const formatTime = (timestamp: number): string => {

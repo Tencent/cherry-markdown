@@ -8,20 +8,11 @@ import {
   openDirectoryDialog,
 } from '../fileUtils';
 import { useDirectoryStore } from '../../store';
+import { mergeSimilarDirectories } from '../../utils/path';
 
 // 常量定义
 const MAX_DIRECTORY_COUNT = 10; // 最大目录数量
 const FULL_TREE_DEPTH = 64;
-
-/**
- * 标准化路径分隔符为正斜杠
- */
-const normalizePath = (path: string): string => path.replace(/\\/g, '/');
-
-/**
- * 检查路径是否为绝对路径
- */
-const isAbsolutePath = (path: string): boolean => path.includes('/') || path.includes('\\');
 
 /**
  * 目录管理composable
@@ -42,55 +33,6 @@ export function useDirectoryManager(fileStore: FileStore) {
    * 3. 对于每个路径，检查是否已有父路径存在
    * 4. 对于相对路径，检查是否已有对应的绝对路径
    */
-  const mergeSimilarDirectories = (directories: string[]): string[] => {
-    if (directories.length === 0) return [];
-    if (directories.length === 1) return directories;
-
-    // 分离并标准化路径
-    const absolutePaths = new Map<string, string>(); // normalized -> original
-    const relativePaths = new Set<string>();
-
-    directories.forEach((dir) => {
-      if (isAbsolutePath(dir)) {
-        const normalized = normalizePath(dir);
-        if (!absolutePaths.has(normalized)) {
-          absolutePaths.set(normalized, dir);
-        }
-      } else {
-        relativePaths.add(dir);
-      }
-    });
-
-    // 处理绝对路径：按长度排序，保留最短的父目录
-    const sortedAbsolutePaths = Array.from(absolutePaths.keys()).sort((a, b) => a.length - b.length);
-
-    const mergedAbsolutePaths = new Set<string>();
-    for (const path of sortedAbsolutePaths) {
-      // 检查是否已有父目录
-      let hasParent = false;
-      for (const existingPath of mergedAbsolutePaths) {
-        if (path.startsWith(`${existingPath}/`)) {
-          hasParent = true;
-          break;
-        }
-      }
-
-      if (!hasParent) {
-        mergedAbsolutePaths.add(absolutePaths.get(path)!);
-      }
-    }
-
-    // 处理相对路径：排除已有对应绝对路径的相对路径
-    const mergedRelativePaths = Array.from(relativePaths).filter((relPath) => {
-      return !Array.from(mergedAbsolutePaths).some((absPath) => {
-        const normalized = normalizePath(absPath);
-        return normalized.endsWith(`/${relPath}`) || normalized.includes(`/${relPath}/`);
-      });
-    });
-
-    return [...mergedAbsolutePaths, ...mergedRelativePaths];
-  };
-
   // 切换目录展开状态
   const toggleDirectory = async (dirPath: string, node?: DirectoryNode): Promise<void> => {
     let directory: DirectoryNode | undefined;
