@@ -1800,10 +1800,7 @@ export default class Editor {
    */
   getSelections() {
     if (!this.editor) return [];
-    // 兼容 CM6Adapter,获取真正的 EditorView
-    /** @type {import('@codemirror/view').EditorView} */
-    // @ts-ignore - this.editor 是 CM6Adapter，它有 view 属性
-    const view = this.editor.view || this.editor;
+    const { view } = this.editor;
     const selections = view.state.selection.ranges.map((range) => view.state.doc.sliceString(range.from, range.to));
     return selections;
   }
@@ -1814,10 +1811,7 @@ export default class Editor {
    */
   getSelection() {
     if (!this.editor) return '';
-    // 兼容 CM6Adapter,获取真正的 EditorView
-    /** @type {import('@codemirror/view').EditorView} */
-    // @ts-ignore - this.editor 是 CM6Adapter，它有 view 属性
-    const view = this.editor.view || this.editor;
+    const { view } = this.editor;
     const selection = view.state.selection.main;
     return view.state.doc.sliceString(selection.from, selection.to);
   }
