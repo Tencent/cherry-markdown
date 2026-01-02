@@ -15,14 +15,14 @@
  */
 
 // 可选依赖的类型声明
+import { EditorView, ViewUpdate } from '@codemirror/view';
+import { EditorState } from '@codemirror/state';
+import Cherry from '../src/Cherry.js';
+import { EditorMode, CherryToolbarsOptions } from './cherry.js';
 declare module '@replit/codemirror-vim' {
   import { Extension } from '@codemirror/state';
   export function vim(): Extension;
 }
-import { EditorView, ViewUpdate } from '@codemirror/view';
-import { EditorState } from '@codemirror/state';
-import Cherry from '../src/Cherry.js';
-import { EditorMode } from './cherry.js';
 
 /**
  * CodeMirror 6 适配器
@@ -216,7 +216,7 @@ export type EditorConfiguration = {
   autoSave2Textarea?: boolean; // 是否自动将编辑区的内容回写到textarea里
   editorDom: HTMLElement;
   wrapperDom: HTMLElement;
-  toolbars: Record<string, ToolbarMenuConfig | boolean>;
+  toolbars: Record<string, ToolbarMenuConfig | boolean> | CherryToolbarsOptions;
   value?: string;
   convertWhenPaste?: boolean;
   keyMap?: 'sublime' | 'vim'; // 快捷键风格，目前仅支持 sublime 和 vim
