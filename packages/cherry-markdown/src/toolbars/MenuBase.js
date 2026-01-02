@@ -340,10 +340,7 @@ export default class MenuBase {
    * @param {string[]} replacements 替换文本数组
    */
   $replaceSelectionsWithCursor(replacements) {
-    const editorView = this.editor.editor;
-    /** @type {import('@codemirror/view').EditorView} */
-    // @ts-ignore - editorView 可能是 CM6Adapter，它有 view 属性
-    const view = editorView.view || editorView;
+    const { view } = this.editor.editor;
     const { state } = view;
     const { selection } = state;
     const changes = [];
@@ -386,10 +383,7 @@ export default class MenuBase {
    * 获取当前选择区域的range (完全兼容版本)
    */
   $getSelectionRange() {
-    const editorView = this.editor.editor;
-    /** @type {import('@codemirror/view').EditorView} */
-    // @ts-ignore - editorView 可能是 CM6Adapter，它有 view 属性
-    const view = editorView.view || editorView;
+    const { view } = this.editor.editor;
     const { state } = view;
     const { selection, doc } = state;
     const { main: selectionMain } = selection;
@@ -438,10 +432,7 @@ export default class MenuBase {
    * @param {String} lessAfter
    */
   setLessSelection(lessBefore, lessAfter) {
-    const editorView = this.editor.editor;
-    /** @type {import('@codemirror/view').EditorView} */
-    // @ts-ignore - editorView 可能是 CM6Adapter，它有 view 属性
-    const cm = editorView.view || editorView;
+    const { view: cm } = this.editor.editor;
     const { begin, end } = this.$getSelectionRange();
 
     // 计算 lessBefore 的偏移量
@@ -487,9 +478,7 @@ export default class MenuBase {
    */
   getMoreSelection(appendBefore = '', appendAfter = '', cb) {
     const editorView = this.editor.editor;
-    /** @type {import('@codemirror/view').EditorView} */
-    // @ts-ignore - editorView 可能是 CM6Adapter，它有 view 属性
-    const view = editorView.view || editorView;
+    const { view } = editorView;
     const { state } = view;
     const { selection, doc } = state;
     const { main: selectionMain } = selection;
@@ -553,10 +542,7 @@ export default class MenuBase {
    * @returns {string}
    */
   getSelection(selection, type = 'word', focus = false) {
-    const editorView = this.editor.editor;
-    /** @type {import('@codemirror/view').EditorView} */
-    // @ts-ignore - editorView 可能是 CM6Adapter，它有 view 属性
-    const view = editorView.view || editorView;
+    const { view } = this.editor.editor;
     // 多光标模式下不做处理
     if (this.isSelections) {
       return selection;

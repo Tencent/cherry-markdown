@@ -13,19 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { EditorView, ViewUpdate, Decoration } from '@codemirror/view';
-import { EditorState, EditorSelection } from '@codemirror/state';
+
+// 可选依赖的类型声明
+declare module '@replit/codemirror-vim' {
+  import { Extension } from '@codemirror/state';
+  export function vim(): Extension;
+}
+import { EditorView, ViewUpdate } from '@codemirror/view';
+import { EditorState } from '@codemirror/state';
 import Cherry from '../src/Cherry.js';
 import { EditorMode } from './cherry.js';
 
 /**
- * CodeMirror 6 适配器 - 提供与 CodeMirror 5 兼容的 API
+ * CodeMirror 6 适配器
  */
 export interface CM6Adapter {
   /** 底层 EditorView 实例 */
   view: EditorView;
   /** 事件处理器映射 */
-  eventHandlers: Map<string, Function[]>;
+  eventHandlers: Map<string, Array<(...args: unknown[]) => void>>;
   /** 上次搜索结果 */
   lastSearchResult: { from: number; to: number } | null;
 
@@ -69,9 +75,7 @@ export interface CM6Adapter {
   lineAndChToPos(line: number | { line: number; ch: number }, ch?: number): number;
 
   // 坐标操作
-  cursorCoords(where?: { line: number; ch: number }, mode?: string): { left: number; top: number; bottom: number };
-  charCoords(pos: { line: number; ch: number }, mode?: string): { left: number; top: number; bottom: number };
-  coordsChar(coords: { x: number; y: number }): { line: number; ch: number };
+  cursorCoords(where?: { line: number; ch: number }): { left: number; top: number; bottom: number };
 
   // 滚动操作
   scrollTo(x: number | null, y: number | null): void;
@@ -84,7 +88,6 @@ export interface CM6Adapter {
     clientHeight: number;
     clientWidth: number;
   };
-  lineAtHeight(height: number, mode?: string): number;
 
   // DOM 操作
   getWrapperElement(): HTMLElement;
@@ -93,8 +96,11 @@ export interface CM6Adapter {
   focus(): void;
 
   // 选项操作
-  setOption(option: string, value: any): void;
-  getOption(option: string): any;
+  setOption(option: 'value' | 'keyMap' | string, value: string | boolean | object): void;
+  getOption(option: 'readOnly' | 'disableInput' | 'value' | string): string | boolean | object | null;
+
+  // 键盘映射
+  setKeyMap(mode: 'sublime' | 'vim'): Promise<void>;
 
   // 搜索操作
   setSearchQuery(query: string, caseSensitive?: boolean, isRegex?: boolean): void;
@@ -124,12 +130,6 @@ export interface CM6Adapter {
     className?: string;
     clear?(): void;
   }>;
-  getAllMarks(): Array<{
-    from: { line: number; ch: number };
-    to: { line: number; ch: number };
-    className?: string;
-    clear(): void;
-  }>;
 
   // 搜索游标
   getSearchCursor(
@@ -150,22 +150,29 @@ export interface CM6Adapter {
     };
   };
 
-  // 其他
-  findWordAt(pos: { line: number; ch: number }): {
-    anchor: { line: number; ch: number };
-    head: { line: number; ch: number };
-  };
-
-  // 事件
-  on(event: string, handler: Function): void;
-  emit(event: string, ...args: any[]): void;
-
-  // 命令
-  execCommand(command: string): void;
-  save(): void;
-  getLineHandle(line: number): { height: number };
+  // 事件 - 支持类型安全的事件监听
+  on<K extends keyof CM6AdapterEventMap>(event: K, handler: CM6AdapterEventMap[K]): void;
+  on(event: string, handler: (...args: unknown[]) => void): void;
+  emit<K extends keyof CM6AdapterEventMap>(event: K, ...args: Parameters<CM6AdapterEventMap[K]>): void;
+  emit(event: string, ...args: unknown[]): void;
 }
 
+/** CM6Adapter 内部事件映射 */
+interface CM6AdapterEventMap {
+  blur: (event: Event) => void;
+  focus: (event: Event) => void;
+  change: () => void;
+  scroll: () => void;
+  paste: (event: ClipboardEvent) => void;
+  mousedown: (event: MouseEvent) => void;
+  keydown: (event: KeyboardEvent) => void;
+  keyup: (event: KeyboardEvent) => void;
+  cursorActivity: () => void;
+  beforeChange: (editor: CM6Adapter) => void;
+  drop: (event: DragEvent) => void;
+}
+
+/** Editor 配置回调事件映射 */
 interface EditorEventMap {
   onBlur: ViewUpdate;
   onFocus: ViewUpdate;
@@ -173,11 +180,10 @@ interface EditorEventMap {
   onPaste: ClipboardEvent;
 }
 
-type EditorDefaultCallback = () => void;
-export type EditorEventCallback<
-  E = unknown,
-  K extends keyof EditorEventMap = keyof EditorEventMap,
-> = E extends EditorEventMap[K] ? (event: E, codemirror: CM6Adapter) => void : (codemirror: CM6Adapter) => void;
+export type EditorEventCallback<K extends keyof EditorEventMap> = (
+  event: EditorEventMap[K],
+  codemirror: CM6Adapter,
+) => void;
 
 type EditorPasteEventHandler = (
   event: ClipboardEvent,
@@ -185,27 +191,47 @@ type EditorPasteEventHandler = (
   codemirror: CM6Adapter,
 ) => void;
 
+/** 工具栏菜单项配置 */
+interface ToolbarMenuConfig {
+  iconName?: string;
+  onClick?: () => void;
+  [key: string]: string | boolean | number | ((...args: unknown[]) => void) | undefined;
+}
+
+/**
+ * Cherry 编辑器配置
+ */
+interface CherryEditorConfig {
+  /** 是否显示行号 */
+  lineNumbers?: boolean;
+  /** 占位符文本 */
+  placeholder?: string;
+  /** 是否自动聚焦 */
+  autofocus?: boolean;
+}
+
 export type EditorConfiguration = {
   id?: string; // textarea 的id属性值
   name?: string; // textarea 的name属性值
   autoSave2Textarea?: boolean; // 是否自动将编辑区的内容回写到textarea里
   editorDom: HTMLElement;
   wrapperDom: HTMLElement;
-  toolbars: any;
+  toolbars: Record<string, ToolbarMenuConfig | boolean>;
   value?: string;
   convertWhenPaste?: boolean;
   keyMap?: 'sublime' | 'vim'; // 快捷键风格，目前仅支持 sublime 和 vim
   keepDocumentScrollAfterInit?: boolean;
-  /** 是否高亮全角符号 ·|￥|、|：|"|"|【|】|（|）|《|》 */
+  /** 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》 */
   showFullWidthMark?: boolean;
   /** 是否显示联想框 */
   showSuggestList?: boolean;
-  codemirror: any; // CodeMirror v6 配置对象
-  onKeydown: EditorEventCallback<EditorEventMap['onKeydown']>;
-  onFocus: EditorEventCallback<EditorEventMap['onFocus']>;
-  onBlur: EditorEventCallback<EditorEventMap['onBlur']>;
-  onPaste: EditorEventCallback<EditorEventMap['onPaste']>;
-  onChange: (update: ViewUpdate, codemirror: CM6Adapter) => void;
+  /** Cherry 编辑器配置 */
+  codemirror: CherryEditorConfig;
+  onKeydown: EditorEventCallback<'onKeydown'>;
+  onFocus: EditorEventCallback<'onFocus'>;
+  onBlur: EditorEventCallback<'onBlur'>;
+  onPaste: EditorEventCallback<'onPaste'>;
+  onChange: (update: ViewUpdate | null, codemirror: CM6Adapter) => void;
   onScroll: (editorView: EditorView) => void;
   handlePaste?: EditorPasteEventHandler;
   /** 预览区域跟随编辑器光标自动滚动 */

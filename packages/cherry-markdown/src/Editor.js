@@ -15,7 +15,7 @@
  */
 // @ts-check
 import { EditorView, keymap, placeholder, lineNumbers, Decoration, WidgetType } from '@codemirror/view';
-import { EditorState, StateEffect, StateField, EditorSelection, Transaction } from '@codemirror/state';
+import { EditorState, StateEffect, StateField, EditorSelection, Transaction, Compartment } from '@codemirror/state';
 import { markdown } from '@codemirror/lang-markdown';
 import { search, searchKeymap, SearchQuery } from '@codemirror/search';
 import { history, historyKeymap, defaultKeymap, indentWithTab } from '@codemirror/commands';
@@ -32,8 +32,8 @@ import { addEvent } from './utils/event';
 import { handleNewlineIndentList } from './utils/autoindent';
 
 /**
- * 自定义语法高亮器 - 将 Lezer tags 映射为 CM5 风格的 cm-* 类名
- * 用于保持与 CodeMirror 5 的样式兼容性
+ * 自定义语法高亮器 - 将 Lezer tags 映射为 cm-* 类名
+ * 用于保持样式兼容性
  */
 const cherryHighlighter = tagHighlighter([
   // 字符串相关
@@ -153,9 +153,8 @@ const cherryHighlighter = tagHighlighter([
 
 /**
  * @typedef {import('~types/editor').EditorConfiguration} EditorConfiguration
- * @typedef {import('~types/editor').EditorEventCallback} EditorEventCallback
+ * @typedef {import('~types/editor').EditorEventCallback<keyof import('~types/editor').EditorEventMap>} EditorEventCallback
  * @typedef {import('~types/editor').CM6Adapter} CM6AdapterType
- * @typedef {import('codemirror')} CodeMirror
  */
 
 /**
@@ -165,6 +164,32 @@ const cherryHighlighter = tagHighlighter([
  * @property {Decoration} [decoration]
  * @property {Object} [options]
  */
+
+// 创建用于动态切换 keymap 的 Compartment
+const keymapCompartment = new Compartment();
+// 创建用于 vim 模式的 Compartment
+const vimCompartment = new Compartment();
+
+// vim 模块缓存
+let vimModule = null;
+
+/**
+ * 动态加载 vim 模块
+ * @returns {Promise<any>} vim 模块
+ */
+async function loadVimModule() {
+  if (vimModule) {
+    return vimModule;
+  }
+  try {
+    // 动态导入 @replit/codemirror-vim
+    vimModule = await import('@replit/codemirror-vim');
+    return vimModule;
+  } catch (e) {
+    console.error('Failed to load @replit/codemirror-vim. Please install it: npm install @replit/codemirror-vim');
+    throw e;
+  }
+}
 
 // 创建搜索高亮效果 - 用于添加 cm-searching 类
 /** @type {import('@codemirror/state').StateEffectType<import('@codemirror/view').DecorationSet>} */
@@ -190,7 +215,7 @@ const searchHighlightField = StateField.define({
 });
 
 /**
- * CodeMirror 6 适配器 - 提供与 CodeMirror 5 兼容的 API
+ * CodeMirror 6 适配器
  * @implements {CM6AdapterType}
  */
 class CM6Adapter {
@@ -298,7 +323,6 @@ class CM6Adapter {
       return {
         anchor,
         head,
-        // CM5 兼容: 判断选区是否为空
         empty: () => range.from === range.to,
       };
     });
@@ -331,7 +355,7 @@ class CM6Adapter {
     });
   }
 
-  // 获取文档对象(兼容性)
+  // 获取文档对象
   getDoc() {
     return this;
   }
@@ -355,22 +379,11 @@ class CM6Adapter {
   }
 
   // 光标坐标
-  cursorCoords(where, mode = 'page') {
+  cursorCoords(where) {
     const pos = where ? this.lineAndChToPos(where.line, where.ch) : this.view.state.selection.main.head;
     const coords = this.view.coordsAtPos(pos);
     if (!coords) return { left: 0, top: 0, bottom: 0 };
-    return mode === 'local' ? coords : coords;
-  }
-
-  // 字符坐标
-  charCoords(pos, mode = 'page') {
-    return this.cursorCoords(pos, mode);
-  }
-
-  // 坐标转字符位置
-  coordsChar(coords) {
-    const pos = this.view.posAtCoords(coords);
-    return pos ? this.posToLineAndCh(pos) : { line: 0, ch: 0 };
+    return coords;
   }
 
   // 滚动到指定位置
@@ -403,13 +416,6 @@ class CM6Adapter {
     };
   }
 
-  // 获取行高度位置的行号
-  lineAtHeight(height, mode = 'page') {
-    const pos = this.view.posAtCoords({ x: 0, y: height });
-    if (!pos) return 0;
-    return this.view.state.doc.lineAt(pos).number - 1;
-  }
-
   // 获取包装元素
   getWrapperElement() {
     return this.view.dom;
@@ -432,24 +438,48 @@ class CM6Adapter {
 
   // 设置选项
   setOption(option, value) {
-    // CodeMirror 6 的选项通过 reconfigure 设置
-    // 这里只处理常用的选项
     switch (option) {
       case 'value':
         this.setValue(value);
         break;
       case 'keyMap':
-        // keyMap 的切换需要重新配置
-        console.warn('keyMap switching not fully implemented in CM6');
+        // 动态切换 keyMap
+        this.setKeyMap(value);
         break;
       default:
-        console.warn(`Option ${option} not supported in CM6 adapter`);
+        // 静默忽略不支持的选项，避免过多警告
+        break;
+    }
+  }
+
+  /**
+   * 设置键盘映射模式
+   * @param {'sublime' | 'vim'} mode 键盘映射模式
+   * @returns {Promise<void>}
+   */
+  async setKeyMap(mode) {
+    if (mode === 'vim') {
+      try {
+        const vimMod = await loadVimModule();
+        this.view.dispatch({
+          effects: vimCompartment.reconfigure(vimMod.vim()),
+        });
+        this.currentKeyMap = 'vim';
+      } catch (e) {
+        console.warn('Vim mode not available. Using sublime mode instead.');
+        this.currentKeyMap = 'sublime';
+      }
+    } else {
+      // sublime 或 default 模式：禁用 vim
+      this.view.dispatch({
+        effects: vimCompartment.reconfigure([]),
+      });
+      this.currentKeyMap = 'sublime';
     }
   }
 
   // 获取选项
   getOption(option) {
-    // CodeMirror 6 中获取选项的方式不同
     switch (option) {
       case 'readOnly':
         return this.view.state.readOnly || false;
@@ -457,11 +487,8 @@ class CM6Adapter {
         return this.view.state.readOnly || false;
       case 'value':
         return this.getValue();
-      case 'extraKeys':
-        // 返回空对象而不是 null,避免代码尝试访问属性时出错
-        return {};
       default:
-        console.warn(`Option ${option} not supported in CM6 adapter`);
+        // 静默返回 null，避免过多警告
         return null;
     }
   }
@@ -581,54 +608,6 @@ class CM6Adapter {
     return result;
   }
 
-  // 获取所有标记
-  getAllMarks() {
-    const marks = this.view.state.field(markField, false);
-    if (!marks) return [];
-
-    const result = [];
-    const iter = marks.iter();
-    while (iter.value) {
-      result.push({
-        from: this.posToLineAndCh(iter.from),
-        to: this.posToLineAndCh(iter.to),
-        className: iter.value.spec?.class || '',
-        clear: () => {
-          this.view.dispatch({
-            effects: removeMark.of({ from: iter.from, to: iter.to }),
-          });
-        },
-      });
-      iter.next();
-    }
-    return result;
-  }
-
-  // 查找单词
-  findWordAt(pos) {
-    const position = this.lineAndChToPos(pos.line, pos.ch);
-    const line = this.view.state.doc.lineAt(position);
-    const { text } = line;
-    const ch = position - line.from;
-
-    // 简单的单词边界检测
-    let start = ch;
-    let end = ch;
-    const wordRe = /\w/;
-
-    while (start > 0 && wordRe.test(text[start - 1])) {
-      start -= 1;
-    }
-    while (end < text.length && wordRe.test(text[end])) {
-      end += 1;
-    }
-
-    return {
-      anchor: { line: pos.line, ch: start },
-      head: { line: pos.line, ch: end },
-    };
-  }
-
   // 获取搜索游标
   getSearchCursor(query, pos, caseFold) {
     const searchQuery = new SearchQuery({
@@ -663,7 +642,6 @@ class CM6Adapter {
         currentPos = result.value.to;
         this.lastSearchResult = result.value;
 
-        // 返回匹配的文本数组(兼容 CM5)
         const matched = doc.sliceString(result.value.from, result.value.to);
         const matchArr = query instanceof RegExp ? matched.match(query) : [matched];
         return matchArr || false;
@@ -675,7 +653,6 @@ class CM6Adapter {
         currentPos = prevMatch.from;
         this.lastSearchResult = prevMatch;
 
-        // 返回匹配的文本数组(兼容 CM5)
         const matched = doc.sliceString(prevMatch.from, prevMatch.to);
         const matchResult = query instanceof RegExp ? matched.match(query) : [matched];
         return matchResult || false;
@@ -713,10 +690,9 @@ class CM6Adapter {
   emit(event, ...args) {
     const handlers = this.eventHandlers.get(event);
     if (handlers) {
-      // 特殊处理 change 事件,转换为 CM5 兼容格式
+      // 特殊处理 change 事件
       if (event === 'change' && args[0]?.changes) {
         const update = args[0];
-        // 将 CM6 的 update 对象转换为 CM5 的 change 对象
         update.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
           // 使用 startState 来转换位置,避免访问可能已失效的当前状态
           const fromLine = update.startState.doc.lineAt(fromA);
@@ -738,7 +714,6 @@ class CM6Adapter {
             }
           }
 
-          // CM5 兼容的 change 对象
           const changeObj = {
             from,
             to,
@@ -753,24 +728,6 @@ class CM6Adapter {
         handlers.forEach((handler) => handler(this, ...args));
       }
     }
-  }
-
-  // 执行命令
-  execCommand(command) {
-    // 处理常用命令
-    console.warn(`Command ${command} not implemented in CM6 adapter`);
-  }
-
-  // 保存到 textarea (兼容)
-  save() {
-    // CM6 不需要这个功能
-  }
-
-  // 获取行句柄
-  getLineHandle(line) {
-    return {
-      height: 20, // 默认行高
-    };
   }
 }
 
@@ -833,38 +790,12 @@ export default class Editor {
       wrapperDom: null,
       autoScrollByCursor: true,
       convertWhenPaste: true,
-      keyMap: 'sublime',
+      keyMap: 'sublime', // 快捷键风格: sublime | vim
       showFullWidthMark: true,
       showSuggestList: true,
       codemirror: {
-        lineNumbers: false, // 显示行数
-        cursorHeight: 0.85, // 光标高度，0.85好看一些
-        indentUnit: 4, // 缩进单位为4
-        tabSize: 4, // 一个tab转换成的空格数量
-        // styleActiveLine: false, // 当前行背景高亮
-        // matchBrackets: true, // 括号匹配
-        // mode: 'gfm', // 从markdown模式改成gfm模式，以使用默认高亮规则
-        mode: {
-          name: 'yaml-frontmatter', // yaml-frontmatter在gfm的基础上增加了对yaml的支持
-          base: {
-            name: 'gfm',
-            gitHubSpice: false, // 修复github风格的markdown语法高亮，见[issue#925](https://github.com/Tencent/cherry-markdown/issues/925)
-          },
-        },
-        lineWrapping: true, // 自动换行
-        indentWithTabs: true, // 缩进用tab表示
-        autofocus: true,
-        theme: 'default',
-        autoCloseTags: true, // 输入html标签时自动补充闭合标签
-        extraKeys: {
-          Enter: handleNewlineIndentList,
-        }, // 增加markdown回车自动补全
-        matchTags: { bothTags: true }, // 自动高亮选中的闭合html标签
-        placeholder: '',
-        // 设置为 contenteditable 对输入法定位更友好
-        // 但已知会影响某些悬浮菜单的定位，如粘贴选择文本或markdown模式的菜单
-        // inputStyle: 'contenteditable',
-        keyMap: 'sublime',
+        lineNumbers: false, // 显示行号
+        placeholder: '', // 占位符文本
       },
       toolbars: {},
       onKeydown() {},
@@ -884,12 +815,17 @@ export default class Editor {
     };
     this.disableScrollListener = false;
 
+    // 保存默认的 keymap 配置，用于禁用/启用快捷键
+    /** @type {import('@codemirror/view').KeyBinding[]} */
+    this.defaultKeymap = [];
+    /** @type {boolean} */
+    this.shortcutDisabled = false;
+
     const { codemirror, ...restOptions } = options;
     if (codemirror) {
       Object.assign(this.options.codemirror, codemirror);
     }
     Object.assign(this.options, restOptions);
-    this.options.codemirror.keyMap = this.options.keyMap;
     this.$cherry = this.options.$cherry;
   }
 
@@ -904,9 +840,24 @@ export default class Editor {
    * @param {boolean} disable 是否禁用快捷键
    */
   disableShortcut = (disable = true) => {
-    // CodeMirror 6 中快捷键通过 keymap 扩展管理
-    // 这里需要重新配置编辑器的 keymap
-    console.warn('disableShortcut needs to be reimplemented for CodeMirror 6');
+    if (!this.editor || !this.editor.view) {
+      return;
+    }
+
+    const { view } = this.editor;
+    this.shortcutDisabled = disable;
+
+    if (disable) {
+      // 禁用快捷键：使用空的 keymap
+      view.dispatch({
+        effects: keymapCompartment.reconfigure([]),
+      });
+    } else {
+      // 启用快捷键：恢复默认 keymap
+      view.dispatch({
+        effects: keymapCompartment.reconfigure(keymap.of(this.defaultKeymap)),
+      });
+    }
   };
 
   /**
@@ -1025,7 +976,7 @@ export default class Editor {
       // 获取目标字符的位置信息
       const rect = target.getBoundingClientRect();
       // 由于是单个字符，肯定在同一行，获取字符在编辑器中的起止位置
-      // 使用CodeMirror 6的API获取点击字符的文档位置
+      // 获取点击字符的文档位置
       const editorRect = editorView.scrollDOM.getBoundingClientRect();
       const x = rect.left - editorRect.left;
       const y = rect.top - editorRect.top;
@@ -1045,7 +996,6 @@ export default class Editor {
         scrollIntoView: true,
       });
       // 替换为对应的半角符号
-      // 使用CodeMirror 6的dispatch方法替换选中文本
       const replacementText = target.innerText
         .replace('·', '`')
         .replace('￥', '$')
@@ -1079,12 +1029,12 @@ export default class Editor {
   /**
    * 处理键盘弹起事件（keyup），用于高亮预览区对应的行
    * @param {KeyboardEvent} e - 键盘事件对象
-   * @param {EditorView} editorView - CodeMirror 6 编辑器实例
+   * @param {EditorView} editorView - 编辑器实例
    */
   onKeyup = (e, editorView) => {
     // 获取当前主选区的起始位置
     const pos = editorView.state.selection.main.head;
-    // 获取当前行号（CodeMirror 6的lineAt返回的number为1起始）
+    // 获取当前行号（lineAt 返回的 number 为 1 起始）
     const line = editorView.state.doc.lineAt(pos).number;
     // 高亮预览区对应的行（行号从1开始）
     this.previewer.highlightLine(line);
@@ -1116,7 +1066,7 @@ export default class Editor {
     const onPasteRet = this.$cherry.options.callback.onPaste(clipboardData, this.$cherry);
     if (onPasteRet !== false && typeof onPasteRet === 'string') {
       event.preventDefault();
-      // 使用 CodeMirror 6 API 替换选中内容
+      // 替换选中内容
       editorView.dispatch({
         changes: {
           from: editorView.state.selection.main.from,
@@ -1161,7 +1111,7 @@ export default class Editor {
             return;
           }
           const mdStr = `${this.fileUploadCount > 1 ? '\n' : ''}${handleFileUploadCallback(url, params, file)}`;
-          // 使用 CodeMirror 6 API 插入内容
+          // 插入内容
           editorView.dispatch({
             changes: {
               from: editorView.state.selection.main.from,
@@ -1191,7 +1141,7 @@ export default class Editor {
         ch: selection.from - editorView.state.doc.lineAt(selection.from).from,
       };
 
-      // 使用 CodeMirror 6 API 替换选中内容
+      // 替换选中内容
       editorView.dispatch({
         changes: {
           from: selection.from,
@@ -1227,7 +1177,7 @@ export default class Editor {
     }
     const currentTop = scroller.scrollTop;
     const targetLineBlock = editorView.lineBlockAtHeight(currentTop);
-    const targetLine = editorView.state.doc.lineAt(targetLineBlock.from).number - 1; // CM6中行号从1开始，转换为0
+    const targetLine = editorView.state.doc.lineAt(targetLineBlock.from).number - 1; // 行号从 1 开始，转换为 0
     //
     const lineHeight = targetLineBlock.height;
     const lineTop = targetLineBlock.top;
@@ -1239,32 +1189,27 @@ export default class Editor {
 
   /**
    *
-   * @param {EditorView | CM6AdapterType} editorView - 当前的CodeMirror实例
+   * @param {EditorView} editorView - 当前的CodeMirror实例
    * @param {MouseEvent} evt
    */
   onMouseDown = (editorView, evt) => {
     // 鼠标按下时，清除所有子菜单（如Bubble工具栏等），
     this.$cherry.$event.emit('cleanAllSubMenus'); // Bubble中处理需要考虑太多，直接在编辑器中处理可包括Bubble中所有情况，因为产生Bubble的前提是光标在编辑器中 add by ufec
 
-    // 适配 CM6Adapter
-    /** @type {EditorView} */
-    // @ts-ignore - editorView 可能是 CM6Adapter，它有 view 属性
-    const view = editorView.view || editorView;
-
     // 验证坐标值是否有效
     if (!Number.isFinite(evt.clientX) || !Number.isFinite(evt.clientY)) {
       return;
     }
 
-    const clickPos = view.posAtCoords({ x: evt.clientX, y: evt.clientY });
+    const clickPos = editorView.posAtCoords({ x: evt.clientX, y: evt.clientY });
     if (clickPos === null) {
       return;
     }
-    const line = view.state.doc.lineAt(clickPos);
+    const line = editorView.state.doc.lineAt(clickPos);
     const targetLine = line.number - 1;
-    const top = Math.abs(evt.y - view.scrollDOM.getBoundingClientRect().y);
+    const top = Math.abs(evt.y - editorView.scrollDOM.getBoundingClientRect().y);
     this.previewer.scrollToLineNumWithOffset(targetLine + 1, top);
-    this.toHalfWidth(view, evt);
+    this.toHalfWidth(editorView, evt);
   };
 
   /**
@@ -1284,7 +1229,25 @@ export default class Editor {
       throw new Error('The specific element is not a textarea.');
     }
 
-    // 创建 CodeMirror 6 编辑器
+    // 保存默认 keymap 配置
+    this.defaultKeymap = [
+      ...defaultKeymap,
+      ...historyKeymap,
+      ...closeBracketsKeymap,
+      ...searchKeymap,
+      indentWithTab,
+      {
+        key: 'Enter',
+        run: (view) => {
+          // 调用自动缩进处理
+          const adapter = new CM6Adapter(view);
+          handleNewlineIndentList(adapter);
+          return true;
+        },
+      },
+    ];
+
+    // 创建编辑器
     const extensions = [
       syntaxHighlighting(cherryHighlighter),
       // 基础扩展
@@ -1300,23 +1263,11 @@ export default class Editor {
       // 条件性添加行号
       ...(this.options.codemirror.lineNumbers ? [lineNumbers()] : []),
 
-      // 键盘映射
-      keymap.of([
-        ...defaultKeymap,
-        ...historyKeymap,
-        ...closeBracketsKeymap,
-        ...searchKeymap,
-        indentWithTab,
-        {
-          key: 'Enter',
-          run: (view) => {
-            // 调用自动缩进处理
-            const adapter = new CM6Adapter(view);
-            handleNewlineIndentList(adapter);
-            return true;
-          },
-        },
-      ]),
+      // 键盘映射（使用 Compartment 以支持动态切换）
+      keymapCompartment.of(keymap.of(this.defaultKeymap)),
+
+      // Vim 模式（使用 Compartment 以支持动态切换）
+      vimCompartment.of([]),
 
       // 自动换行
       EditorView.lineWrapping,
@@ -1366,14 +1317,6 @@ export default class Editor {
               isUserInteraction = true;
             }
           }
-
-          console.log('Editor selectionChange:', {
-            isUserInteraction,
-            transactions: update.transactions.map((tr) => ({
-              hasUserEvent: tr.annotation(Transaction.userEvent),
-              isSelectUserEvent: tr.isUserEvent('select'),
-            })),
-          });
 
           this.$cherry.$event.emit('beforeSelectionChange', {
             selection: { from: selection.from, to: selection.to },
@@ -1437,29 +1380,6 @@ export default class Editor {
 
     // 创建适配器
     const editor = new CM6Adapter(view);
-    // 以下逻辑是针对\t等空白字符的处理，似乎已经不需要了，先注释掉，等有反馈了再考虑加回来
-    // editor.addOverlay({
-    //   name: 'invisibles',
-    //   token: function nextToken(stream) {
-    //     let tokenClass;
-    //     let spaces = 0;
-    //     let peek = stream.peek() === ' ';
-    //     if (peek) {
-    //       while (peek && spaces < Number.MAX_VALUE) {
-    //         spaces += 1;
-    //         stream.next();
-    //         peek = stream.peek() === ' ';
-    //       }
-    //       tokenClass = `whitespace whitespace-${spaces}`;
-    //     } else {
-    //       while (!stream.eol()) {
-    //         stream.next();
-    //       }
-    //       tokenClass = '';
-    //     }
-    //     return tokenClass;
-    //   },
-    // });
     this.previewer = previewer;
     this.editor = editor;
 
@@ -1519,6 +1439,16 @@ export default class Editor {
 
     if (this.options.writingStyle !== 'normal') {
       this.initWritingStyle();
+    }
+
+    // 初始化 keyMap 模式
+    if (this.options.keyMap === 'vim') {
+      editor.setKeyMap('vim');
+    }
+
+    // 根据配置自动聚焦
+    if (this.options.codemirror.autofocus) {
+      editor.focus();
     }
   }
 
@@ -1623,13 +1553,14 @@ export default class Editor {
   }
 
   /**
-   *
+   * 添加事件监听器
    * @param {string} event 事件名
    * @param {EditorEventCallback} callback 回调函数
    */
   addListener(event, callback) {
-    // TODO: CodeMirror 6 需要重新配置键盘映射
-    // this.editor.on(event, callback);
+    if (this.editor) {
+      this.editor.on(event, callback);
+    }
   }
 
   /**

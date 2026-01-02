@@ -115,13 +115,12 @@ export default class Toolbar {
   }
 
   isHasLevel2Menu(name) {
-    // FIXME: return boolean
-    return this.menus.level2MenusName[name];
+    return Boolean(this.menus.level2MenusName[name]);
   }
 
   isHasConfigMenu(name) {
-    // FIXME: return boolean
-    return this.menus.hooks[name].subMenuConfig || [];
+    const config = this.menus.hooks[name]?.subMenuConfig;
+    return Array.isArray(config) && config.length > 0;
   }
 
   /**

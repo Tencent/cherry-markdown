@@ -436,7 +436,6 @@ export default class Cherry extends CherryStatic {
    * @returns markdown源码内容
    */
   getValue() {
-    // @ts-ignore - CM6Adapter 有 view 属性
     return this.editor.editor.getValue();
   }
 
