@@ -1,11 +1,11 @@
-name: 'Publish Client Dev Preview on PR Merge'
+name: "Publish Client Dev Preview on PR Merge"
 
 on:
   pull_request_target:
     types: [closed]
     paths:
-      - 'packages/client/**'
-      - 'packages/cherry-markdown/**'
+      - "packages/client/**"
+      - "packages/cherry-markdown/**"
 
 permissions:
   contents: read
@@ -24,16 +24,16 @@ jobs:
         include:
           - platform: macos-latest
             target: aarch64-apple-darwin
-            args: '--target aarch64-apple-darwin'
+            args: "--target aarch64-apple-darwin"
             path_patterns: |
-              ./packages/clientsrc-tauri/target/**/release/bundle/dmg/*.dmg
-              ./packages/clientsrc-tauri/target/**/release/bundle/macos/*.app
+              ./packages/client/src-tauri/target/**/release/bundle/dmg/*.dmg
+              ./packages/client/src-tauri/target/**/release/bundle/macos/*.app
           - platform: macos-latest
             target: x86_64-apple-darwin
-            args: '--target x86_64-apple-darwin'
+            args: "--target x86_64-apple-darwin"
             path_patterns: |
-              ./packages/clientsrc-tauri/target/**/release/bundle/dmg/*.dmg
-              ./packages/clientsrc-tauri/target/**/release/bundle/macos/*.app
+              ./packages/client/src-tauri/target/**/release/bundle/dmg/*.dmg
+              ./packages/client/src-tauri/target/**/release/bundle/macos/*.app
           - platform: windows-latest
             path_patterns: |
               ./packages/client/src-tauri/target/**/release/bundle/msi/*.msi
@@ -50,7 +50,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'yarn'
+          cache: "yarn"
 
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -74,58 +74,105 @@ jobs:
           yarn build
           yarn build:client ${{ matrix.args }}
 
+      - name: Create File List
+        shell: bash
+        run: |
+          mkdir -p ./artifact-info
+          find ./packages/client/src-tauri/target \( -type f -o -type d \) \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.app" \) -exec basename {} \; > ./artifact-info/files.txt
+          if [ ! -s ./artifact-info/files.txt ]; then
+            echo "No build artifacts found!" > ./artifact-info/files.txt
+          fi
+          echo "Platform: ${{ matrix.platform }}" >> ./artifact-info/info.txt
+          echo "Target: ${{ matrix.target }}" >> ./artifact-info/info.txt
+
       - name: Upload Files
-        id: upload-artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cherry-markdown_client_${{ matrix.platform }}
+          name: cherry-markdown_client_${{ matrix.platform }}_${{ matrix.target || 'default' }}
           path: ${{ matrix.path_patterns }}
 
-      - name: Artifact Commit
-        run: |
-          echo "Artifact URL: ${{ steps.upload-artifact.outputs.artifact-url }}"
+      - name: Upload File List
+        uses: actions/upload-artifact@v4
+        with:
+          name: file-list_${{ matrix.platform }}_${{ matrix.target || 'default' }}
+          path: ./artifact-info/
 
   post-preview-comment:
     needs: client-preview
     runs-on: ubuntu-latest
     if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
     steps:
+      - name: Download All File Lists
+        uses: actions/download-artifact@v4
+        with:
+          pattern: file-list_*
+          path: ./file-lists
+
       - name: Post single aggregated comment
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const fs = require('fs');
+            const path = require('path');
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const runId = context.runId;
-            const res = await github.rest.actions.listWorkflowRunArtifacts({ owner, repo, run_id: runId });
-            const artifacts = res.data.artifacts || [];
-            if (artifacts.length === 0) {
-              console.log('No artifacts found for this run');
-              return;
-            }
-            const groups = {};
-            for (const a of artifacts) {
-              let key = 'Other';
-              if (a.name.includes('macos-latest')) key = 'macOS (arm64)';
-              else if (a.name.includes('windows-latest')) key = 'Windows';
-              else if (a.name.includes('ubuntu-latest')) key = 'Linux';
-              groups[key] = groups[key] || [];
-              groups[key].push(a);
-            }
-            let body = '💻 预览 (Preview)\\n\\n';
-            for (const [platform, items] of Object.entries(groups)) {
-              body += `- ${platform}\\n`;
-              for (const it of items) {
-                const url = it.archive_download_url || '';
-                body += `  - [${it.name}](${url})\\n`;
+            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
+
+            // Read file lists
+            const fileListsDir = './file-lists';
+            const groups = {
+              'macOS (Apple Silicon/arm64)': [],
+              'macOS (Intel/x86_64)': [],
+              'Windows': [],
+              'Linux': []
+            };
+
+            // Process downloaded file lists
+            if (fs.existsSync(fileListsDir)) {
+              const dirs = fs.readdirSync(fileListsDir);
+              for (const dir of dirs) {
+                const filesPath = path.join(fileListsDir, dir, 'files.txt');
+                const infoPath = path.join(fileListsDir, dir, 'info.txt');
+                
+                if (fs.existsSync(filesPath) && fs.existsSync(infoPath)) {
+                  const files = fs.readFileSync(filesPath, 'utf8').trim().split('\n').filter(f => f);
+                  const info = fs.readFileSync(infoPath, 'utf8');
+                  
+                  let groupKey = 'Other';
+                  if (info.includes('aarch64-apple-darwin')) groupKey = 'macOS (Apple Silicon/arm64)';
+                  else if (info.includes('x86_64-apple-darwin')) groupKey = 'macOS (Intel/x86_64)';
+                  else if (info.includes('windows-latest')) groupKey = 'Windows';
+                  else if (info.includes('ubuntu-latest')) groupKey = 'Linux';
+                  
+                  groups[groupKey].push(...files);
+                }
               }
-              body += '\\n';
             }
+
+            let body = '💻 **客户端预览构建已完成** (Client Preview Build Completed)\\n\\n';
+            body += `📦 [查看并下载所有构建产物](${runUrl})\\n\\n`;
+
+            const hasAnyFiles = Object.values(groups).some(files => files.length > 0);
+            if (!hasAnyFiles) {
+              body += '⚠️ 未找到构建产物，请检查构建日志。\\n';
+            } else {
+              body += '## 可下载的安装包\\n\\n';
+              for (const [platform, files] of Object.entries(groups)) {
+                if (files.length > 0) {
+                  body += `### ${platform}\\n`;
+                  for (const file of files) {
+                    body += `- \`${file}\`\\n`;
+                  }
+                  body += '\\n';
+                }
+              }
+            }
+
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: owner,
               repo: repo,
               body: body
             });
-
