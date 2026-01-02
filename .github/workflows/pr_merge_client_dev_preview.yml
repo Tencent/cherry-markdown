@@ -87,13 +87,13 @@ jobs:
       - name: Upload Files
         uses: actions/upload-artifact@v4
         with:
-          name: cherry-markdown_client_${{ matrix.platform }}_${{ matrix.target || 'default' }}
+          name: cherry-markdown_client_${{ matrix.platform }}_${{ matrix.target }}
           path: ${{ matrix.path_patterns }}
 
       - name: Upload File List
         uses: actions/upload-artifact@v4
         with:
-          name: file-list_${{ matrix.platform }}_${{ matrix.target || 'default' }}
+          name: file-list_${{ matrix.platform }}_${{ matrix.target }}
           path: ./artifact-info/
 
   post-preview-comment:
@@ -125,7 +125,8 @@ jobs:
               'macOS (Apple Silicon/arm64)': [],
               'macOS (Intel/x86_64)': [],
               'Windows': [],
-              'Linux': []
+              'Linux': [],
+              'Other': []
             };
 
             // Process downloaded file lists
