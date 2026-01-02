@@ -35,7 +35,7 @@ export default class Ruby extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    let $selection = getSelection(this.editor.editor, selection) || '拼音';
+    let $selection = getSelection(this.editor.editor.view, selection) || '拼音';
     // 如果选中的文本中已经有ruby语法了，则去掉该语法
     if (!this.isSelections && !this.$testIsRuby($selection)) {
       this.getMoreSelection(' { ', ' } ', () => {

@@ -30,6 +30,6 @@ export default class Redo extends MenuBase {
    */
   onClick() {
     // CodeMirror 6 中重做通过 commands 扩展实现
-    redo(this.editor.editor);
+    redo(this.editor.editor.view);
   }
 }

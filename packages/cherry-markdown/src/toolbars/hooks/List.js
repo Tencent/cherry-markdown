@@ -42,7 +42,7 @@ export default class List extends MenuBase {
    */
   onClick(selection, shortKey = '') {
     const listType = [null, 'ol', 'ul', 'checklist']; // 下标1, 2, 3生效
-    const $selection = getSelection(this.editor.editor, selection, 'line', true);
+    const $selection = getSelection(this.editor.editor.view, selection, 'line', true);
     const [before] = $selection.match(/^\n*/);
     const [after] = $selection.match(/\n*$/);
     const type = listType[shortKey] ? listType[shortKey] : shortKey;

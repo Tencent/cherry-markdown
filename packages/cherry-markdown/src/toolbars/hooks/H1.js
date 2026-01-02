@@ -35,7 +35,7 @@ export default class H1 extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    const $selection = getSelection(this.editor.editor, selection, 'line', true) || this.locale.h1;
+    const $selection = getSelection(this.editor.editor.view, selection, 'line', true) || this.locale.h1;
     const header = '#';
     console.log('onClick - h1', { selection, shortKey, $selection, testIsHead: this.$testIsHead($selection) });
     // 注释下面的代码，因为选中标题绝对只有一行，所以不需要扩大选区

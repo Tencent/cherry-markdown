@@ -27,6 +27,6 @@ export default class Undo extends MenuBase {
 
   onClick() {
     // CodeMirror 6 中撤销通过 commands 扩展实现
-    undo(this.editor.editor);
+    undo(this.editor.editor.view);
   }
 }

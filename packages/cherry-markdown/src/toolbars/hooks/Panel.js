@@ -85,7 +85,7 @@ export default class Panel extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    let $selection = getSelection(this.editor.editor, selection, 'line', true) || '内容';
+    let $selection = getSelection(this.editor.editor.view, selection, 'line', true) || '内容';
     let currentName = this.$getNameFromStr($selection);
     let title = this.$getTitle($selection);
     if (currentName === false) {
