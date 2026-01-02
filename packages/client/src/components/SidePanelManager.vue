@@ -1,17 +1,22 @@
 <template>
   <div class="side-panel" :class="{ collapsed: isCollapsed }">
     <nav class="activity-bar">
-      <button
-        v-for="panel in panels"
-        :key="panel.id"
-        class="activity-btn"
-        :class="{ active: panel.id === activePanelId }"
-        :title="panel.label"
-        @click="selectPanel(panel.id)"
-      >
-        <component :is="panel.icon" :size="18" />
-        <span class="sr-only">{{ panel.label }}</span>
-      </button>
+      <div class="activity-buttons">
+        <button
+          v-for="panel in panels"
+          :key="panel.id"
+          class="activity-btn"
+          :class="{ active: panel.id === activePanelId }"
+          :title="panel.label"
+          @click="selectPanel(panel.id)"
+        >
+          <component :is="panel.icon" :size="18" />
+          <span class="sr-only">{{ panel.label }}</span>
+        </button>
+      </div>
+      <div class="version-info">
+        <span class="version-text">v{{ version }}</span>
+      </div>
     </nav>
 
     <section class="panel-surface" :class="{ collapsed: isCollapsed }">
@@ -50,6 +55,9 @@ import ExplorerPanel from './ExplorerPanel.vue';
 import RecentPanel from './RecentPanel.vue';
 import { FolderIcon, FileIcon, ArrowIcon } from './icons';
 import { useFileStore } from '../store';
+
+// 导入 package.json 中的版本信息
+const version = __APP_VERSION__;
 
 interface PanelDefinition {
   id: string;
@@ -137,6 +145,14 @@ const triggerOpenRecentFile = (): void => {
   align-items: center;
   gap: 8px;
   padding: 12px 0;
+  justify-content: space-between;
+}
+
+.activity-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
 }
 
 .activity-btn {
@@ -162,6 +178,19 @@ const triggerOpenRecentFile = (): void => {
   background: #2d3442;
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.version-info {
+  padding: 8px 0;
+  text-align: center;
+}
+
+.version-text {
+  font-size: 10px;
+  color: #7a8294;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+  line-height: 1.2;
 }
 
 .panel-surface {
