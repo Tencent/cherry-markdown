@@ -6,11 +6,14 @@ import { open, save } from '@tauri-apps/plugin-dialog';
 import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { register, unregister } from '@tauri-apps/plugin-global-shortcut';
 import { useFileStore } from './store';
-import { onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import SidePanelManager from './components/SidePanelManager.vue';
+import ToastContainer from './components/ui/ToastContainer.vue';
+import UnsavedChangesDialog, { type UnsavedDialogResult } from './components/ui/UnsavedChangesDialog.vue';
 import type { FileOperationResult } from './components/types';
-import { useAppEvents } from './components/composables/useAppEvents';
-import { notifyError } from './utils/notifications';
+import { useAppEvents, type OpenFileFromSidebarEvent } from './components/composables/useAppEvents';
+import { notifyError, notifySuccess } from './utils/notifications';
+import { MESSAGES, DIALOGS } from './constants/i18n';
 
 // 响应式数据
 let cherryMarkdown = cherryInstance();
@@ -19,6 +22,13 @@ const appWindow = getCurrentWindow();
 let needDealAfterChange = false;
 let hasUnsavedChanges = false;
 let unlistenCloseRequested: (() => void) | undefined;
+
+// 加载状态（防止重复点击）
+const isLoading = ref(false);
+
+// 未保存对话框状态
+const showUnsavedDialog = ref(false);
+let unsavedDialogResolve: ((_result: UnsavedDialogResult) => void) | null = null;
 const preventNativeContextMenu = (event: Event): void => {
   event.preventDefault();
 };
@@ -28,14 +38,45 @@ const checkUnsavedChanges = (): boolean => {
   return hasUnsavedChanges;
 };
 
+/**
+ * 显示三选项未保存对话框
+ * @returns 'save' | 'discard' | 'cancel'
+ */
+const showUnsavedConfirmDialog = (): Promise<UnsavedDialogResult> => {
+  return new Promise((resolve) => {
+    unsavedDialogResolve = resolve;
+    showUnsavedDialog.value = true;
+  });
+};
+
+const handleUnsavedDialogClose = (_result: UnsavedDialogResult): void => {
+  showUnsavedDialog.value = false;
+  if (unsavedDialogResolve) {
+    unsavedDialogResolve(_result);
+    unsavedDialogResolve = null;
+  }
+};
+
+/**
+ * 统一的未保存更改确认逻辑
+ * @returns true 表示可以继续操作，false 表示取消
+ */
 const confirmProceedWhenUnsaved = async (): Promise<boolean> => {
   if (!hasUnsavedChanges) return true;
 
-  if (typeof window !== 'undefined' && typeof window.confirm === 'function') {
-    return window.confirm('检测到未保存的更改，继续操作将丢失未保存内容，是否继续？');
-  }
+  const result = await showUnsavedConfirmDialog();
 
-  return true;
+  if (result === 'save') {
+    // 保存并继续：只执行保存，不继续后续操作（不销毁当前内容）
+    await saveMarkdown();
+    return false;
+  }
+  if (result === 'discard') {
+    // 放弃更改，继续操作
+    return true;
+  }
+  // 取消操作
+  return false;
 };
 
 // ========== 窗口标题管理 ==========
@@ -62,10 +103,12 @@ const newFile = async (): Promise<void> => {
 };
 
 const openFile = async (): Promise<FileOperationResult> => {
+  if (isLoading.value) return { success: false, error: DIALOGS.CANCELLED_UNSAVED };
   if (!(await confirmProceedWhenUnsaved())) {
-    return { success: false, error: '已取消：存在未保存的更改' };
+    return { success: false, error: DIALOGS.CANCELLED_UNSAVED };
   }
 
+  isLoading.value = true;
   try {
     const path = await open({
       multiple: false,
@@ -79,7 +122,7 @@ const openFile = async (): Promise<FileOperationResult> => {
     });
 
     if (path === null) {
-      return { success: false, error: '用户取消选择文件' };
+      return { success: false, error: MESSAGES.FILE.USER_CANCELLED_SELECT };
     }
 
     const markdown = await readTextFile(path);
@@ -94,13 +137,17 @@ const openFile = async (): Promise<FileOperationResult> => {
 
     return { success: true, path };
   } catch (error) {
-    const message = `打开文件失败: ${error instanceof Error ? error.message : '未知错误'}`;
+    const message = `${MESSAGES.FILE.OPEN_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`;
     notifyError(message);
-    return { success: false, error: error instanceof Error ? error.message : '未知错误' };
+    return { success: false, error: error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR };
+  } finally {
+    isLoading.value = false;
   }
 };
 
 const saveAsNewMarkdown = async (): Promise<FileOperationResult> => {
+  if (isLoading.value) return { success: false, error: MESSAGES.FILE.USER_CANCELLED };
+  isLoading.value = true;
   try {
     const markdown = cherryMarkdown.getMarkdown();
     const path = await save({
@@ -113,7 +160,7 @@ const saveAsNewMarkdown = async (): Promise<FileOperationResult> => {
     });
 
     if (!path) {
-      return { success: false, error: '用户取消保存' };
+      return { success: false, error: MESSAGES.FILE.USER_CANCELLED_SAVE };
     }
 
     await writeTextFile(path, markdown);
@@ -122,12 +169,15 @@ const saveAsNewMarkdown = async (): Promise<FileOperationResult> => {
     fileStore.markSaved(path);
     hasUnsavedChanges = false;
     await updateTitle(path, false);
+    notifySuccess(MESSAGES.FILE.SAVE_AS_SUCCESS);
 
     return { success: true, path };
   } catch (error) {
-    const message = `另存为失败: ${error instanceof Error ? error.message : '未知错误'}`;
+    const message = `${MESSAGES.FILE.SAVE_AS_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`;
     notifyError(message);
-    return { success: false, error: error instanceof Error ? error.message : '未知错误' };
+    return { success: false, error: error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR };
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -143,11 +193,12 @@ const saveMarkdown = async (): Promise<FileOperationResult> => {
     fileStore.markSaved(fileStore.currentFilePath);
     hasUnsavedChanges = false;
     await updateTitle(fileStore.currentFilePath, false);
+    notifySuccess(MESSAGES.FILE.SAVE_SUCCESS);
     return { success: true, path: fileStore.currentFilePath };
   } catch (error) {
-    const message = `保存文件失败: ${error instanceof Error ? error.message : '未知错误'}`;
+    const message = `${MESSAGES.FILE.SAVE_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`;
     notifyError(message);
-    return { success: false, error: error instanceof Error ? error.message : '未知错误' };
+    return { success: false, error: error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR };
   }
 };
 
@@ -219,9 +270,8 @@ const restoreLastOpenedFile = async (): Promise<void> => {
 };
 
 // ========== 事件处理函数 ==========
-const handleOpenFileFromSidebar = async (event: Event): Promise<void> => {
-  const customEvent = event as CustomEvent;
-  const { filePath, content } = customEvent.detail;
+const handleOpenFileFromSidebar = async (event: OpenFileFromSidebarEvent): Promise<void> => {
+  const { filePath, content } = event.detail;
   if (!(await confirmProceedWhenUnsaved())) return;
   needDealAfterChange = false;
   hasUnsavedChanges = false;
@@ -233,7 +283,7 @@ const handleOpenFileFromSidebar = async (event: Event): Promise<void> => {
 const handleSaveFromToolbar = async (): Promise<void> => {
   const result = await saveMarkdown();
   if (!result.success && result.error) {
-    notifyError(`保存失败: ${result.error}`);
+    notifyError(`${MESSAGES.FILE.SAVE_FAILED}: ${result.error}`);
   }
 };
 
@@ -336,6 +386,8 @@ onUnmounted(async () => {
     <div class="editor-container">
       <div id="markdown-editor"></div>
     </div>
+    <ToastContainer />
+    <UnsavedChangesDialog :visible="showUnsavedDialog" @close="handleUnsavedDialogClose" />
   </div>
 </template>
 

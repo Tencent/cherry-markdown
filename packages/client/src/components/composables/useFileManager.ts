@@ -5,7 +5,8 @@ import { openExistingFile as openExistingFileUtil, readFileContent, formatTimest
 import { openPath, revealItemInDir } from '@tauri-apps/plugin-opener';
 import { useContextMenu } from './useContextMenu';
 import { WINDOW_EVENTS } from '../../constants/events';
-import { notifyError, notifyInfo } from '../../utils/notifications';
+import { notifyError, notifyInfo, notifySuccess } from '../../utils/notifications';
+import { MESSAGES } from '../../constants/i18n';
 
 // 常量定义
 const STORAGE_KEY_DIRECTORY_MANAGER_EXPANDED = 'cherry-markdown-directory-manager-expanded';
@@ -54,6 +55,7 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
   // 组件状态
   const recentFilesExpanded = ref(false);
   const directoryManagerExpanded = ref(loadDirectoryManagerExpandedState());
+  const isLoading = ref(false);
 
   // 切换目录管理展开状态
   const toggleDirectoryManager = (): void => {
@@ -73,22 +75,34 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
 
   // 打开现有文件
   const openExistingFile = async (): Promise<void> => {
-    const result = await openExistingFileUtil();
-    if (result.success && result.data) {
-      await openFile(result.data);
-    } else if (result.error) {
-      notifyError(`打开文件失败: ${result.error}`);
+    if (isLoading.value) return;
+    isLoading.value = true;
+    try {
+      const result = await openExistingFileUtil();
+      if (result.success && result.data) {
+        await openFile(result.data);
+      } else if (result.error) {
+        notifyError(`${MESSAGES.FILE.OPEN_FAILED}: ${result.error}`);
+      }
+    } finally {
+      isLoading.value = false;
     }
   };
 
   // 打开目录
   const openDirectory = async (): Promise<void> => {
+    if (isLoading.value) return;
+    isLoading.value = true;
     try {
       if (folderManagerRef.value) {
         await folderManagerRef.value.openDirectory();
       }
     } catch (error) {
-      notifyError(`打开目录失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      notifyError(
+        `${MESSAGES.DIRECTORY.OPEN_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`,
+      );
+    } finally {
+      isLoading.value = false;
     }
   };
 
@@ -126,10 +140,10 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
           saveDirectoryManagerExpandedState(false);
         }
       } else {
-        notifyError(`读取文件失败: ${result.error}`);
+        notifyError(`${MESSAGES.FILE.READ_FAILED}: ${result.error}`);
       }
     } catch (error) {
-      notifyError(`打开文件失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      notifyError(`${MESSAGES.FILE.OPEN_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`);
     }
   };
 
@@ -147,17 +161,27 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
 
   // 从最近文件中移除
   const removeFromRecent = (filePath: string): void => {
-    fileStore.removeRecentFile(filePath);
-    refreshDirectories();
+    try {
+      fileStore.removeRecentFile(filePath);
+      notifySuccess(MESSAGES.FILE_MANAGEMENT.REMOVE_SUCCESS);
+      void refreshDirectories();
+    } catch (error) {
+      notifyError(
+        `${MESSAGES.FILE_MANAGEMENT.REMOVE_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`,
+      );
+    }
   };
 
   // 复制文件路径
   const copyFilePath = async (filePath: string): Promise<void> => {
     try {
       await navigator.clipboard.writeText(filePath);
+      notifyInfo(MESSAGES.CLIPBOARD.COPY_PATH_SUCCESS);
       hideContextMenu();
     } catch (error) {
-      notifyError(`复制文件路径失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      notifyError(
+        `${MESSAGES.CLIPBOARD.COPY_PATH_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`,
+      );
     }
   };
 
@@ -178,13 +202,17 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
       await openPath(directoryPath);
       hideContextMenu();
     } catch (error) {
-      notifyError(`打开资源管理器失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      notifyError(
+        `${MESSAGES.EXPLORER.OPEN_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`,
+      );
       // 备选方案：复制文件路径到剪贴板
       try {
         await navigator.clipboard.writeText(filePath);
-        notifyInfo(`无法打开，已复制文件路径到剪贴板: ${filePath}`);
+        notifyInfo(`${MESSAGES.CLIPBOARD.COPY_PATH_FALLBACK}: ${filePath}`);
       } catch (clipboardError) {
-        notifyError(`复制文件路径失败: ${clipboardError instanceof Error ? clipboardError.message : '未知错误'}`);
+        notifyError(
+          `${MESSAGES.CLIPBOARD.COPY_PATH_FAILED}: ${clipboardError instanceof Error ? clipboardError.message : MESSAGES.UNKNOWN_ERROR}`,
+        );
       }
     }
   };
@@ -212,6 +240,7 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
     recentFilesExpanded,
     directoryManagerExpanded,
     contextMenu,
+    isLoading,
     toggleDirectoryManager,
     toggleSidebar,
     openExistingFile,

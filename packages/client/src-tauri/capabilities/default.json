@@ -10,6 +10,8 @@
     "opener:allow-reveal-item-in-dir",
     "dialog:default",
     "core:window:allow-set-title",
+    "core:window:allow-close",
+    "core:window:allow-destroy",
     "global-shortcut:allow-register",
     "global-shortcut:allow-unregister",
     
