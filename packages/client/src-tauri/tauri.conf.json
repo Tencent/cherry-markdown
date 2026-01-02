@@ -17,7 +17,6 @@
         "url": "index.html",
         "width": 1600,
         "height": 800,
-        "titleBarStyle": "Overlay",
         "decorations": true
       }
     ],
