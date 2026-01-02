@@ -17,7 +17,7 @@
 import { EditorView, keymap, placeholder, lineNumbers, Decoration, WidgetType } from '@codemirror/view';
 import { EditorState, StateEffect, StateField, EditorSelection, Transaction } from '@codemirror/state';
 import { markdown } from '@codemirror/lang-markdown';
-import { search, searchKeymap, SearchQuery, setSearchQuery } from '@codemirror/search';
+import { search, searchKeymap, SearchQuery } from '@codemirror/search';
 import { history, historyKeymap, defaultKeymap, indentWithTab } from '@codemirror/commands';
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import { syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language';
@@ -175,16 +175,16 @@ const searchHighlightField = StateField.define({
   create() {
     return Decoration.none;
   },
-  update(decorations, tr) {
-    decorations = decorations.map(tr.changes);
+  update(currentDecorations, tr) {
+    let updatedDecorations = currentDecorations.map(tr.changes);
 
     for (const effect of tr.effects) {
       if (effect.is(setSearchHighlightEffect)) {
-        decorations = effect.value;
+        updatedDecorations = effect.value;
       }
     }
 
-    return decorations;
+    return updatedDecorations;
   },
   provide: (f) => EditorView.decorations.from(f),
 });
@@ -196,7 +196,8 @@ const searchHighlightField = StateField.define({
 class CM6Adapter {
   constructor(view) {
     this.view = view;
-    this._eventHandlers = new Map();
+    this.eventHandlers = new Map();
+    this.lastSearchResult = null;
   }
 
   // 代理属性 - 直接访问底层 EditorView 的属性
@@ -282,7 +283,10 @@ class CM6Adapter {
   // 设置选区
   setSelection(from, to) {
     const fromPos = typeof from === 'object' ? this.lineAndChToPos(from.line, from.ch) : from;
-    const toPos = to ? (typeof to === 'object' ? this.lineAndChToPos(to.line, to.ch) : to) : fromPos;
+    let toPos = fromPos;
+    if (to) {
+      toPos = typeof to === 'object' ? this.lineAndChToPos(to.line, to.ch) : to;
+    }
     this.view.dispatch({ selection: { anchor: fromPos, head: toPos } });
   }
 
@@ -339,13 +343,15 @@ class CM6Adapter {
   }
 
   // 位置转换: {line, ch} -> pos
-  lineAndChToPos(line, ch) {
-    if (typeof line === 'object') {
-      ch = line.ch;
-      line = line.line;
+  lineAndChToPos(lineParam, chParam) {
+    let lineNum = lineParam;
+    let chNum = chParam;
+    if (typeof lineParam === 'object') {
+      chNum = lineParam.ch;
+      lineNum = lineParam.line;
     }
-    const lineObj = this.view.state.doc.line(line + 1);
-    return lineObj.from + Math.min(ch, lineObj.length);
+    const lineObj = this.view.state.doc.line(lineNum + 1);
+    return lineObj.from + Math.min(chNum, lineObj.length);
   }
 
   // 光标坐标
@@ -502,7 +508,7 @@ class CM6Adapter {
 
       // 防止无限循环（当匹配空字符串时）
       if (match[0].length === 0) {
-        searchRe.lastIndex++;
+        searchRe.lastIndex += 1;
       }
     }
 
@@ -610,8 +616,12 @@ class CM6Adapter {
     let end = ch;
     const wordRe = /\w/;
 
-    while (start > 0 && wordRe.test(text[start - 1])) start--;
-    while (end < text.length && wordRe.test(text[end])) end++;
+    while (start > 0 && wordRe.test(text[start - 1])) {
+      start -= 1;
+    }
+    while (end < text.length && wordRe.test(text[end])) {
+      end += 1;
+    }
 
     return {
       anchor: { line: pos.line, ch: start },
@@ -651,41 +661,41 @@ class CM6Adapter {
         if (result.done) return false;
 
         currentPos = result.value.to;
-        this._lastSearchResult = result.value;
+        this.lastSearchResult = result.value;
 
         // 返回匹配的文本数组(兼容 CM5)
         const matched = doc.sliceString(result.value.from, result.value.to);
-        const match = query instanceof RegExp ? matched.match(query) : [matched];
-        return match || false;
+        const matchArr = query instanceof RegExp ? matched.match(query) : [matched];
+        return matchArr || false;
       },
       findPrevious: () => {
-        const match = findPreviousMatch(currentPos);
-        if (!match) return false;
+        const prevMatch = findPreviousMatch(currentPos);
+        if (!prevMatch) return false;
 
-        currentPos = match.from;
-        this._lastSearchResult = match;
+        currentPos = prevMatch.from;
+        this.lastSearchResult = prevMatch;
 
         // 返回匹配的文本数组(兼容 CM5)
-        const matched = doc.sliceString(match.from, match.to);
+        const matched = doc.sliceString(prevMatch.from, prevMatch.to);
         const matchResult = query instanceof RegExp ? matched.match(query) : [matched];
         return matchResult || false;
       },
       from: () => {
-        if (!this._lastSearchResult) return null;
-        return this.posToLineAndCh(this._lastSearchResult.from);
+        if (!this.lastSearchResult) return null;
+        return this.posToLineAndCh(this.lastSearchResult.from);
       },
       to: () => {
-        if (!this._lastSearchResult) return null;
-        return this.posToLineAndCh(this._lastSearchResult.to);
+        if (!this.lastSearchResult) return null;
+        return this.posToLineAndCh(this.lastSearchResult.to);
       },
       matches: (reverse, start) => {
         // 返回当前匹配的位置信息
-        if (!this._lastSearchResult) {
+        if (!this.lastSearchResult) {
           return { from: start, to: start };
         }
         return {
-          from: this.posToLineAndCh(this._lastSearchResult.from),
-          to: this.posToLineAndCh(this._lastSearchResult.to),
+          from: this.posToLineAndCh(this.lastSearchResult.from),
+          to: this.posToLineAndCh(this.lastSearchResult.to),
         };
       },
     };
@@ -693,15 +703,15 @@ class CM6Adapter {
 
   // 事件监听
   on(event, handler) {
-    if (!this._eventHandlers.has(event)) {
-      this._eventHandlers.set(event, []);
+    if (!this.eventHandlers.has(event)) {
+      this.eventHandlers.set(event, []);
     }
-    this._eventHandlers.get(event).push(handler);
+    this.eventHandlers.get(event).push(handler);
   }
 
   // 触发事件
-  _emit(event, ...args) {
-    const handlers = this._eventHandlers.get(event);
+  emit(event, ...args) {
+    const handlers = this.eventHandlers.get(event);
     if (handlers) {
       // 特殊处理 change 事件,转换为 CM5 兼容格式
       if (event === 'change' && args[0]?.changes) {
@@ -786,20 +796,20 @@ const markField = StateField.define({
   create() {
     return Decoration.none;
   },
-  update(marks, tr) {
-    marks = marks.map(tr.changes);
+  update(currentMarks, tr) {
+    let updatedMarks = currentMarks.map(tr.changes);
     for (const effect of tr.effects) {
       if (effect.is(addMark) && effect.value) {
-        marks = marks.update({
+        updatedMarks = updatedMarks.update({
           add: [effect.value.decoration.range(effect.value.from, effect.value.to)],
         });
       } else if (effect.is(removeMark) && effect.value) {
-        marks = marks.update({
+        updatedMarks = updatedMarks.update({
           filter: (from, to) => from !== effect.value.from || to !== effect.value.to,
         });
       }
     }
-    return marks;
+    return updatedMarks;
   },
   provide: (f) => EditorView.decorations.from(f),
 });
@@ -1324,8 +1334,8 @@ export default class Editor {
         if (!adapter) return;
 
         if (update.docChanged) {
-          adapter._emit('change', update);
-          adapter._emit('beforeChange', adapter);
+          adapter.emit('change', update);
+          adapter.emit('beforeChange', adapter);
         }
         if (update.selectionSet) {
           // 触发 beforeSelectionChange 事件,供 FloatMenu 和 Bubble 使用
@@ -1369,42 +1379,42 @@ export default class Editor {
             selection: { from: selection.from, to: selection.to },
             isUserInteraction,
           });
-          adapter._emit('cursorActivity');
+          adapter.emit('cursorActivity');
         }
       }),
 
       // DOM 事件处理
       EditorView.domEventHandlers({
-        keydown: (event, view) => {
-          if (this.editor) this.editor._emit('keydown', event);
+        keydown: () => {
+          if (this.editor) this.editor.emit('keydown', event);
           return false;
         },
-        keyup: (event, view) => {
-          if (this.editor) this.editor._emit('keyup', event);
+        keyup: () => {
+          if (this.editor) this.editor.emit('keyup', event);
           return false;
         },
-        mousedown: (event, view) => {
-          if (this.editor) this.editor._emit('mousedown', event);
+        mousedown: () => {
+          if (this.editor) this.editor.emit('mousedown', event);
           return false;
         },
-        paste: (event, view) => {
-          if (this.editor) this.editor._emit('paste', event);
+        paste: () => {
+          if (this.editor) this.editor.emit('paste', event);
           return false;
         },
-        drop: (event, view) => {
-          if (this.editor) this.editor._emit('drop', event);
+        drop: () => {
+          if (this.editor) this.editor.emit('drop', event);
           return false;
         },
-        focus: (event, view) => {
-          if (this.editor) this.editor._emit('focus', event);
+        focus: () => {
+          if (this.editor) this.editor.emit('focus', event);
           return false;
         },
-        blur: (event, view) => {
-          if (this.editor) this.editor._emit('blur', event);
+        blur: () => {
+          if (this.editor) this.editor.emit('blur', event);
           return false;
         },
-        scroll: (event, view) => {
-          if (this.editor) this.editor._emit('scroll');
+        scroll: () => {
+          if (this.editor) this.editor.emit('scroll');
           return false;
         },
       }),
@@ -1659,13 +1669,24 @@ export default class Editor {
     Array.from(Array(sheet.cssRules.length)).forEach(() => sheet.deleteRule(0));
 
     if (writingStyle === 'focus') {
+      // 获取编辑器容器的位置
       const editorDomRect = this.getEditorDom().getBoundingClientRect();
-      // CodeMirror 6 中需要重新实现光标位置获取
-      // 这里需要使用新的 API 来获取光标坐标
-      console.warn('Focus writing style needs to be reimplemented for CodeMirror 6');
-      // 临时使用固定值
-      const topHeight = 100;
-      const bottomHeight = 100;
+      // 获取光标位置
+      const { view } = this.editor;
+      const cursorPos = view.state.selection.main.head;
+      const cursorCoords = view.coordsAtPos(cursorPos);
+
+      let topHeight = 0;
+      let bottomHeight = 0;
+
+      if (cursorCoords) {
+        // 计算光标上方的高度（从编辑器顶部到光标位置）
+        topHeight = cursorCoords.top - editorDomRect.top;
+        // 计算光标下方的高度（从光标位置到编辑器底部）
+        // 使用 cursorCoords.bottom 来考虑光标/行的高度
+        bottomHeight = editorDomRect.bottom - cursorCoords.bottom;
+      }
+
       sheet.insertRule(`.${className}::before { height: ${topHeight > 0 ? topHeight : 0}px; }`, 0);
       sheet.insertRule(`.${className}::after { height: ${bottomHeight > 0 ? bottomHeight : 0}px; }`, 0);
     }

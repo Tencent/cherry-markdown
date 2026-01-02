@@ -522,12 +522,13 @@ export default class SearchBox {
     state.queryText = query;
     state.query = this.parseQuery(query);
 
-    // CodeMirror 6: 使用搜索插件的 setSearchQuery 触发搭索高亮
-    if (cm.view && cm.view.state) {
+    // CodeMirror 6: 使用 CM6Adapter 的 setSearchQuery 触发搜索高亮
+    if (cm.setSearchQuery) {
       try {
-        // 即使无法使用 setSearchQuery，也不会变徙
+        cm.setSearchQuery(query, caseSensitive, this.regExpOption?.checked);
       } catch (e) {
         // 如果 setSearchQuery 不可用，则跳过
+        console.warn('setSearchQuery failed:', e);
       }
     }
   }
@@ -567,11 +568,12 @@ export default class SearchBox {
 
   clearSearch(cm) {
     // CodeMirror 6: 清除搜索高亮
-    if (cm.view && cm.view.state) {
+    if (cm.clearSearchQuery) {
       try {
-        // 即使无法使用 clearSearchQuery，也不会变徙
+        cm.clearSearchQuery();
       } catch (e) {
         // 如果 clearSearchQuery 不可用，则跳过
+        console.warn('clearSearchQuery failed:', e);
       }
     }
 

@@ -25,8 +25,10 @@ export interface CM6Adapter {
   /** 底层 EditorView 实例 */
   view: EditorView;
   /** 事件处理器映射 */
-  _eventHandlers: Map<string, Function[]>;
-  
+  eventHandlers: Map<string, Function[]>;
+  /** 上次搜索结果 */
+  lastSearchResult: { from: number; to: number } | null;
+
   // 代理属性 - 直接访问底层 EditorView 的属性
   /** 代理到 view.state */
   readonly state: EditorState;
@@ -40,7 +42,7 @@ export interface CM6Adapter {
   posAtCoords: EditorView['posAtCoords'];
   /** 代理到 view.lineBlockAt */
   lineBlockAt: EditorView['lineBlockAt'];
-  
+
   // 基本操作
   getValue(): string;
   setValue(value: string): void;
@@ -48,29 +50,29 @@ export interface CM6Adapter {
   getSelections(): string[];
   replaceSelection(text: string, select?: string): void;
   replaceSelections(texts: string[], select?: string): void;
-  
+
   // 光标操作
   getCursor(type?: 'head' | 'anchor'): { line: number; ch: number };
   setCursor(line: number, ch: number): void;
   setSelection(from: { line: number; ch: number } | number, to?: { line: number; ch: number } | number): void;
   listSelections(): Array<{ anchor: { line: number; ch: number }; head: { line: number; ch: number } }>;
-  
+
   // 行操作
   getLine(line: number): string;
   lineCount(): number;
   getRange(from: { line: number; ch: number }, to: { line: number; ch: number }): string;
   replaceRange(text: string, from: { line: number; ch: number }, to?: { line: number; ch: number }): void;
-  
+
   // 文档操作
   getDoc(): CM6Adapter;
   posToLineAndCh(pos: number): { line: number; ch: number };
   lineAndChToPos(line: number | { line: number; ch: number }, ch?: number): number;
-  
+
   // 坐标操作
   cursorCoords(where?: { line: number; ch: number }, mode?: string): { left: number; top: number; bottom: number };
   charCoords(pos: { line: number; ch: number }, mode?: string): { left: number; top: number; bottom: number };
   coordsChar(coords: { x: number; y: number }): { line: number; ch: number };
-  
+
   // 滚动操作
   scrollTo(x: number | null, y: number | null): void;
   scrollIntoView(pos: { line: number; ch: number }): void;
@@ -83,33 +85,40 @@ export interface CM6Adapter {
     clientWidth: number;
   };
   lineAtHeight(height: number, mode?: string): number;
-  
+
   // DOM 操作
   getWrapperElement(): HTMLElement;
   getScrollerElement(): HTMLElement;
   refresh(): void;
   focus(): void;
-  
+
   // 选项操作
   setOption(option: string, value: any): void;
   getOption(option: string): any;
-  
+
   // 搜索操作
   setSearchQuery(query: string, caseSensitive?: boolean, isRegex?: boolean): void;
   clearSearchQuery(): void;
-  
+
   // 标记操作
-  markText(from: { line: number; ch: number }, to: { line: number; ch: number }, options: {
-    className?: string;
-    title?: string;
-    replacedWith?: HTMLElement;
-    atomic?: boolean;
-  }): {
+  markText(
+    from: { line: number; ch: number },
+    to: { line: number; ch: number },
+    options: {
+      className?: string;
+      title?: string;
+      replacedWith?: HTMLElement;
+      atomic?: boolean;
+    },
+  ): {
     clear(): void;
     find(): { from: { line: number; ch: number }; to: { line: number; ch: number } };
     className?: string;
   };
-  findMarks(from: { line: number; ch: number }, to: { line: number; ch: number }): Array<{
+  findMarks(
+    from: { line: number; ch: number },
+    to: { line: number; ch: number },
+  ): Array<{
     from: { line: number; ch: number };
     to: { line: number; ch: number };
     className?: string;
@@ -121,29 +130,36 @@ export interface CM6Adapter {
     className?: string;
     clear(): void;
   }>;
-  
+
   // 搜索游标
-  getSearchCursor(query: string | RegExp, pos?: { line: number; ch: number }, caseFold?: boolean): {
+  getSearchCursor(
+    query: string | RegExp,
+    pos?: { line: number; ch: number },
+    caseFold?: boolean,
+  ): {
     findNext(): string[] | false;
     findPrevious(): string[] | false;
     from(): { line: number; ch: number } | null;
     to(): { line: number; ch: number } | null;
-    matches(reverse: boolean, start: { line: number; ch: number }): {
+    matches(
+      reverse: boolean,
+      start: { line: number; ch: number },
+    ): {
       from: { line: number; ch: number };
       to: { line: number; ch: number };
     };
   };
-  
+
   // 其他
   findWordAt(pos: { line: number; ch: number }): {
     anchor: { line: number; ch: number };
     head: { line: number; ch: number };
   };
-  
+
   // 事件
   on(event: string, handler: Function): void;
-  _emit(event: string, ...args: any[]): void;
-  
+  emit(event: string, ...args: any[]): void;
+
   // 命令
   execCommand(command: string): void;
   save(): void;
@@ -161,9 +177,7 @@ type EditorDefaultCallback = () => void;
 export type EditorEventCallback<
   E = unknown,
   K extends keyof EditorEventMap = keyof EditorEventMap,
-> = E extends EditorEventMap[K]
-  ? (event: E, codemirror: CM6Adapter) => void
-  : (codemirror: CM6Adapter) => void;
+> = E extends EditorEventMap[K] ? (event: E, codemirror: CM6Adapter) => void : (codemirror: CM6Adapter) => void;
 
 type EditorPasteEventHandler = (
   event: ClipboardEvent,
