@@ -65,9 +65,8 @@ export default class Insert extends MenuBase {
           // 默认返回超链接
           code = `[${file.name}](${url})`;
         }
-        // 替换选中区域
-        // @ts-ignore
-        this.$cherry.$cherry.doc.replaceSelection(code);
+        // 替换选中区域 - CodeMirror 6
+        this.$cherry.editor.editor.replaceSelection(code);
       });
     });
     input.click();

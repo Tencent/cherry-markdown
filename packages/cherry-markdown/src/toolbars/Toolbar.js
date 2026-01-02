@@ -102,30 +102,16 @@ export default class Toolbar {
     this.$cherry.$event.on('cleanAllSubMenus', () => this.hideAllSubMenu());
   }
 
-  /**
-   * @deprecated use showOrHideToolbar
-   */
   previewOnly() {
-    this.showOrHideToolbar(false);
+    this.options.dom.classList.add('preview-only');
+    this.$cherry.wrapperDom.classList.add('cherry--no-toolbar');
+    this.$cherry.$event.emit('toolbarHide');
   }
 
-  /**
-   * @deprecated use showOrHideToolbar
-   */
   showToolbar() {
-    this.showOrHideToolbar(true);
-  }
-
-  showOrHideToolbar(isShow = true) {
-    if (isShow) {
-      this.options.dom.classList.remove('preview-only');
-      this.$cherry.wrapperDom.classList.remove('cherry--no-toolbar');
-      this.$cherry.$event.emit('toolbarShow');
-    } else {
-      this.options.dom.classList.add('preview-only');
-      this.$cherry.wrapperDom.classList.add('cherry--no-toolbar');
-      this.$cherry.$event.emit('toolbarHide');
-    }
+    this.options.dom.classList.remove('preview-only');
+    this.$cherry.wrapperDom.classList.remove('cherry--no-toolbar');
+    this.$cherry.$event.emit('toolbarShow');
   }
 
   isHasLevel2Menu(name) {

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { redo } from '@codemirror/commands';
 /**
- * 撤销/重做 里的“重做”按键
+ * 撤销/重做 里的"重做"按键
  * 依赖codemirror的undo接口
  */
 export default class Redo extends MenuBase {
@@ -28,6 +29,7 @@ export default class Redo extends MenuBase {
    * 直接调用codemirror的redo方法就好了
    */
   onClick() {
-    this.editor.editor.redo();
+    // CodeMirror 6 中重做通过 commands 扩展实现
+    redo(this.editor.editor);
   }
 }

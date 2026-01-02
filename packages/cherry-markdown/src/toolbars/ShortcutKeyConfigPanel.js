@@ -1,4 +1,3 @@
-import { mac } from 'codemirror/src/util/browser';
 import {
   getAllowedShortcutKey,
   keyStackIsModifierkeys,
@@ -10,6 +9,7 @@ import {
   setDisableShortcutKey,
   storageKeyMap,
   clearStorageKeyMap,
+  mac,
 } from '@/utils/shortcutKey';
 import { createElement } from '@/utils/dom';
 

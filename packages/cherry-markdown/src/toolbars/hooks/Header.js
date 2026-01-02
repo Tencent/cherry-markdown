@@ -87,7 +87,8 @@ export default class Header extends MenuBase {
     // 注释下面的代码，因为选中标题绝对只有一行，所以不需要扩大选区
     // if (!this.isSelections && !this.$testIsHead($selection)) {
     //   this.getMoreSelection('\n', '', () => {
-    //     const newSelection = this.editor.editor.getSelection();
+    //     const { from, to } = this.editor.editor.state.selection.main;
+    //     const newSelection = this.editor.editor.state.doc.sliceString(from, to);
     //     const isHead = this.$testIsHead(newSelection);
     //     if (isHead) {
     //       $selection = newSelection;

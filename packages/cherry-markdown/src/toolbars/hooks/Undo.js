@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { undo } from '@codemirror/commands';
 /**
  * 撤销回退按钮，点击后触发编辑器的undo操作
  * 依赖codemirror的undo接口
@@ -25,6 +26,7 @@ export default class Undo extends MenuBase {
   }
 
   onClick() {
-    this.editor.editor.undo();
+    // CodeMirror 6 中撤销通过 commands 扩展实现
+    undo(this.editor.editor);
   }
 }

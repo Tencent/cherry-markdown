@@ -52,7 +52,8 @@ export default class Strikethrough extends MenuBase {
     // 如果被选中的文本中包含删除线语法，则去掉删除线语法
     if (!this.isSelections && !this.$testIsStrike($selection)) {
       this.getMoreSelection(`${space}~~`, `~~${space}`, () => {
-        const newSelection = this.editor.editor.getSelection();
+        const { from, to } = this.editor.editor.view.state.selection.main;
+        const newSelection = this.editor.editor.view.state.doc.sliceString(from, to);
         const isStrike = this.$testIsStrike(newSelection);
         if (isStrike) {
           $selection = newSelection;

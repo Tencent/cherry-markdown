@@ -35,7 +35,8 @@ export default class Toc {
     this.timer = setTimeout(() => {
       this.updateTocList();
     }, 300);
-    this.editor.on('change', (codemirror, evt) => {
+    // 使用 Cherry 的事件系统替代 CodeMirror 5 的 on 方法
+    this.$cherry.$event.on('afterChange', () => {
       clearTimeout(this.timer);
       this.timer = setTimeout(() => {
         this.updateTocList();
@@ -131,7 +132,8 @@ export default class Toc {
         this.$switchModel(this.model);
       });
     }
-    this.editor.on('scroll', (codemirror, evt) => {
+    // 使用 Cherry 的事件系统替代 CodeMirror 5 的 on 方法
+    this.$cherry.$event.on('onScroll', () => {
       this.updateTocList(true);
     });
     const scrollDom = this.$cherry.previewer.getDomCanScroll();

@@ -37,10 +37,12 @@ export default class H1 extends MenuBase {
   onClick(selection, shortKey = '') {
     const $selection = getSelection(this.editor.editor, selection, 'line', true) || this.locale.h1;
     const header = '#';
+    console.log('onClick - h1', { selection, shortKey, $selection, testIsHead: this.$testIsHead($selection) });
     // 注释下面的代码，因为选中标题绝对只有一行，所以不需要扩大选区
     // if (!this.isSelections && !this.$testIsHead($selection)) {
     //   this.getMoreSelection('\n', '', () => {
-    //     const newSelection = this.editor.editor.getSelection();
+    //     const { from, to } = this.editor.editor.state.selection.main;
+    //     const newSelection = this.editor.editor.state.doc.sliceString(from, to);
     //     const isHead = this.$testIsHead(newSelection);
     //     if (isHead) {
     //       $selection = newSelection;

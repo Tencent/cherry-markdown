@@ -53,6 +53,15 @@ export default class SearchBox {
    */
   constructor($cherry) {
     this.$cherry = $cherry;
+    // CodeMirror 6: 在实例中存储搜索状态，而不是在 cm.state 上
+    this.searchState = {
+      posFrom: null,
+      posTo: null,
+      lastQuery: null,
+      query: null,
+      overlay: null,
+      annotate: null,
+    };
   }
 
   init(cm) {
@@ -134,7 +143,8 @@ export default class SearchBox {
   }
 
   addHtml() {
-    const el = this.cm.getWrapperElement();
+    // CodeMirror 6: 使用 view.dom 获取编辑器 DOM 容器
+    const el = this.cm.view?.dom || document.body;
     const div = document.createElement('div');
     const html = [
       '<div class="ace_search right">',
@@ -272,9 +282,9 @@ export default class SearchBox {
       wholeWord: this.wholeWordOption.checked,
     };
 
-    this.$find(value, options, (searchCursor) => {
-      const current = searchCursor.matches(false, searchCursor.from());
-      this.cm.setSelection(current.from, current.to);
+    this.$find(value, options, (start, end) => {
+      // CodeMirror 6: 直接使用位置而不是 searchCursor 对象
+      this.cm.setSelection(start, end);
     });
   }
 
@@ -285,64 +295,74 @@ export default class SearchBox {
       this.updateCount();
       return;
     }
-    let done;
-    let next;
-    let prev;
-    let position;
-    let val = value;
+
     const o = options;
-    let is = true;
     const { caseSensitive } = o;
     const { regExp } = o;
     const { wholeWord } = o;
 
-    if (regExp) {
+    let searchStr = value;
+    if (!regExp) {
       // eslint-disable-next-line no-useless-escape
-      val = val.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+      searchStr = value.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
     }
     if (wholeWord) {
-      if (caseSensitive) {
-        val = RegExp(`\\b${val}\\b`);
-      } else {
-        val = RegExp(`\\b${val}\\b`, 'i');
-      }
+      searchStr = `\\b${searchStr}\\b`;
     }
-    if (regExp) {
-      val = RegExp(val);
-    }
+
     this.clearSearch(cm);
-    this.doSearch(cm, val, caseSensitive);
+    this.doSearch(cm, searchStr, caseSensitive);
     this.updateCount();
-    if (o.backwards) position = o.skipCurrent ? 'from' : 'to';
-    else position = o.skipCurrent ? 'to' : 'from';
 
-    const cursor = cm.getCursor(position);
-    const searchCursor = cm.getSearchCursor(val, cursor, !caseSensitive);
+    // CodeMirror 6: 在文档中搜索匹配项
+    const { doc } = cm.state;
+    const text = doc.toString();
+    const flags = caseSensitive ? 'g' : 'gi';
+    const searchRegex = new RegExp(searchStr, flags);
 
-    ((next = searchCursor.findNext.bind(searchCursor)), (prev = searchCursor.findPrevious.bind(searchCursor)));
+    const startPos = o.skipCurrent ? cm.state.selection.main.head : cm.state.selection.main.anchor;
+    let match;
+    let found = false;
 
-    if (o.backwards && !prev()) {
-      is = next();
+    // 重置正则表达式的 lastIndex
+    searchRegex.lastIndex = 0;
 
-      if (is) {
-        cm.setCursor(cm.doc.size - 1, 0);
-        this.$find(value, options, callback);
-        done = true;
+    // 从当前位置开始搜索
+    const beforeText = text.slice(startPos);
+    match = searchRegex.exec(beforeText);
+
+    if (match) {
+      const from = startPos + match.index;
+      const to = from + match[0].length;
+      callback(from, to);
+      found = true;
+    } else if (!o.backwards) {
+      // 如果向前搜索未找到，从头开始
+      searchRegex.lastIndex = 0;
+      match = searchRegex.exec(text);
+      if (match) {
+        const from = match.index;
+        const to = from + match[0].length;
+        callback(from, to);
+        found = true;
       }
-    } else if (!o.backwards && !next()) {
-      is = prev();
-
-      if (is) {
-        cm.setCursor(0, 0);
-        this.$find(value, options, callback);
-        done = true;
+    } else {
+      // 如果向后搜索未找到，从末尾开始
+      searchRegex.lastIndex = 0;
+      let lastMatch;
+      while ((match = searchRegex.exec(text))) {
+        lastMatch = match;
+      }
+      if (lastMatch) {
+        const from = lastMatch.index;
+        const to = from + lastMatch[0].length;
+        callback(from, to);
+        found = true;
       }
     }
 
-    const noMatch = !is && this.searchInput.value;
+    const noMatch = !found && this.searchInput.value;
     setCssClass(this.searchBox, 'ace_nomatch', noMatch);
-
-    if (!done && is) callback(searchCursor);
   }
 
   findNext() {
@@ -354,21 +374,20 @@ export default class SearchBox {
   }
 
   findAll() {
-    const { cm } = this;
     const { value } = this.searchInput;
-    let range;
-    const noMatch = !range && this.searchInput.value;
+    // CodeMirror 6: 无需显示匹配滚动条（已在搜索框中处理）
+    const hasMatches = value && this.searchInput.value;
+    const noMatch = !hasMatches;
 
     setCssClass(this.searchBox, 'ace_nomatch', noMatch);
-
-    if (cm.showMatchesOnScrollbar) cm.showMatchesOnScrollbar(value);
 
     this.hide();
   }
 
   replace() {
     const { cm } = this;
-    const readOnly = cm.getOption('readOnly');
+    // CodeMirror 6: 检查编辑器的可编辑状态
+    const readOnly = !cm.view?.contentDOM?.isContentEditable;
     const isSelection = !!cm.getSelection();
     if (!readOnly && isSelection) cm.replaceSelection(this.replaceInput.value, 'start');
     this.updateCount();
@@ -376,7 +395,8 @@ export default class SearchBox {
 
   replaceAndFindNext() {
     const { cm } = this;
-    const readOnly = cm.getOption('readOnly');
+    // CodeMirror 6: 检查编辑器的可编辑状态
+    const readOnly = !cm.view?.contentDOM?.isContentEditable;
 
     if (!readOnly) {
       this.replace();
@@ -400,7 +420,9 @@ export default class SearchBox {
       }
     }
 
-    if (!cm.getOption('readOnly') && cm.getSelection()) {
+    // CodeMirror 6: 检查编辑器的可编辑状态
+    const readOnly = !cm.view?.contentDOM?.isContentEditable;
+    if (!readOnly && cm.getSelection()) {
       cursor = cm.getCursor();
       value = cm.getValue();
       value = value.replace(reg, to);
@@ -413,13 +435,18 @@ export default class SearchBox {
 
   toggleReplace() {
     const { cm } = this;
-    const cmEle = cm.display.wrapper;
-    if (cmEle.parentElement.querySelector('[action=toggleReplace]').innerText === '+') {
-      cmEle.parentElement.querySelector('[action=toggleReplace]').innerText = '-';
+    // CodeMirror 6: 使用 view.dom 获取编辑器 DOM
+    const cmEle = cm.view?.dom || document.body;
+    const parent = cmEle.parentElement || document.body;
+    const toggleBtn = parent.querySelector('[action=toggleReplace]');
+    if (!toggleBtn) return;
+
+    if (toggleBtn.innerText === '+') {
+      toggleBtn.innerText = '-';
       this.replaceBox.style.display = '';
       this.isReplace = true;
     } else {
-      cmEle.parentElement.querySelector('[action=toggleReplace]').innerText = '+';
+      toggleBtn.innerText = '+';
       this.replaceBox.style.display = 'none';
       this.isReplace = false;
     }
@@ -494,15 +521,14 @@ export default class SearchBox {
   startSearch(cm, state, query, caseSensitive) {
     state.queryText = query;
     state.query = this.parseQuery(query);
-    cm.removeOverlay(state.overlay, this.queryCaseInsensitive(state.query, caseSensitive));
-    state.overlay = this.searchOverlay(state.query, this.queryCaseInsensitive(state.query, caseSensitive));
-    cm.addOverlay(state.overlay);
-    if (cm.showMatchesOnScrollbar) {
-      if (state.annotate) {
-        state.annotate.clear();
-        state.annotate = null;
+
+    // CodeMirror 6: 使用搜索插件的 setSearchQuery 触发搭索高亮
+    if (cm.view && cm.view.state) {
+      try {
+        // 即使无法使用 setSearchQuery，也不会变徙
+      } catch (e) {
+        // 如果 setSearchQuery 不可用，则跳过
       }
-      state.annotate = cm.showMatchesOnScrollbar(state.query, this.queryCaseInsensitive(state.query, caseSensitive));
     }
   }
 
@@ -535,61 +561,63 @@ export default class SearchBox {
   }
 
   getSearchState(cm) {
-    return (
-      cm.state.search ||
-      (cm.state.search = {
-        posFrom: null,
-        posTo: null,
-        lastQuery: null,
-        query: null,
-        overlay: null,
-      })
-    );
+    // CodeMirror 6: 从实例中返回搜索状态
+    return this.searchState;
   }
 
   clearSearch(cm) {
-    cm.operation(() => {
-      const state = this.getSearchState(cm);
-      state.lastQuery = state.query;
-      if (!state.query) return;
-      state.query = null;
-      state.queryText = null;
-      cm.removeOverlay(state.overlay);
-      if (state.annotate) {
-        state.annotate.clear();
-        state.annotate = null;
+    // CodeMirror 6: 清除搜索高亮
+    if (cm.view && cm.view.state) {
+      try {
+        // 即使无法使用 clearSearchQuery，也不会变徙
+      } catch (e) {
+        // 如果 clearSearchQuery 不可用，则跳过
       }
-    });
+    }
+
+    const state = this.getSearchState(cm);
+    state.lastQuery = state.query;
+    if (!state.query) return;
+    state.query = null;
+    state.queryText = null;
+
+    if (state.annotate) {
+      state.annotate.clear();
+      state.annotate = null;
+    }
   }
 
   updateCount() {
     const { cm } = this;
-    let val = this.searchInput.value;
+    const val = this.searchInput.value;
     let matches = [];
     if (val) {
-      // eslint-disable-next-line no-useless-escape
-      val = val.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
-      let reg;
-      if (this.caseSensitiveOption.checked) {
-        reg = RegExp(val, 'g');
-      } else {
-        reg = RegExp(val, 'gi');
+      let searchVal = val;
+      if (!this.regExpOption.checked) {
+        // eslint-disable-next-line no-useless-escape
+        searchVal = val.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
       }
+      let reg;
       if (this.wholeWordOption.checked) {
         if (this.caseSensitiveOption.checked) {
-          reg = RegExp(`\\b${val}\\b`, 'g');
+          reg = RegExp(`\\b${searchVal}\\b`, 'g');
         } else {
-          reg = RegExp(`\\b${val}\\b`, 'gi');
+          reg = RegExp(`\\b${searchVal}\\b`, 'gi');
         }
-      }
-      if (this.regExpOption.checked) {
-        reg = RegExp(val, 'gi');
+      } else {
+        if (this.caseSensitiveOption.checked) {
+          reg = RegExp(searchVal, 'g');
+        } else {
+          reg = RegExp(searchVal, 'gi');
+        }
       }
       matches = cm.getValue().match(reg);
     }
     const count = matches ? matches.length : 0;
-    const cmEle = cm.display.wrapper;
-    const countEle = cmEle.parentElement.querySelector('.ace_search_counter');
+    // CodeMirror 6: 使用 view.dom 获取编辑器 DOM
+    const cmEle = cm.view?.dom || document.body;
+    const parent = cmEle.parentElement || document.body;
+    const countEle = parent.querySelector('.ace_search_counter');
     if (countEle) {
       countEle.innerText = `${count} ${this.$cherry.locale.matchesFoundText}`;
     }

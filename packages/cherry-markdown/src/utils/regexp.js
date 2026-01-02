@@ -174,7 +174,7 @@ export function getCodeBlockRule() {
      */
     begin: /(?:^|\n)(\n*((?:>[\t ]*)*)(?:[^\S\n]*))(`{3,})([^`]*?)\n/,
     content: /([\w\W]*?)/, // '([\\w\\W]*?)',
-    end: /[^\S\n]*\3[ \t]*(?=$|\n+)/, // '\\s*```[ \\t]*(?=$|\\n+)',
+    end: /[^\S\n]*`{3,}[ \t]*(?=$|\n+)/, // '\\s*```[ \\t]*(?=$|\\n+)',
     reg: new RegExp(''),
   };
   codeBlock.reg = new RegExp(codeBlock.begin.source + codeBlock.content.source + codeBlock.end.source, 'g');

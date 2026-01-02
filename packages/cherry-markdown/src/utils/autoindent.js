@@ -15,17 +15,21 @@
  */
 
 /**
- * @param {CodeMirror.Editor} cm
+ * CodeMirror 6: 处理回车时的列表自动缩进
+ * @param {import('~types/editor').CM6Adapter} cm
  */
 export function handleNewlineIndentList(cm) {
-  if (handleCherryList(cm)) return;
-  cm.execCommand('newlineAndIndentContinueMarkdownList');
+  if (handleCherryList(cm)) return true;
+  // CodeMirror 6: 默认插入换行
+  cm.replaceSelection('\n');
+  return true;
 }
 
 function handleCherryList(cm) {
   const cherryListRE = /^(\s*)([I一二三四五六七八九十]+)\.(\s+)/;
   const cherryListEmptyRE = /^(\s*)([I一二三四五六七八九十]+)\.(\s+)$/;
-  if (cm.getOption('disableInput')) return false;
+  // CodeMirror 6: 检查是否只读
+  if (cm.getOption('readOnly')) return false;
   const ranges = cm.listSelections();
   const replacements = [];
   for (let i = 0; i < ranges.length; i++) {
