@@ -35,7 +35,6 @@ export default class Sidebar extends Toolbar {
         // 高度为 0 时保持默认 120px，不覆盖
         if (height > 0) {
           this.$cherry.wrapperDom.style.setProperty('--sidebar-list-height', `${height}px`);
-          console.log('--sidebar-list-height:', height);
         }
       }, 0);
     }
