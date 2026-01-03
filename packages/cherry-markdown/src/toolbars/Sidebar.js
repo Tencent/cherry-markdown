@@ -30,11 +30,14 @@ export default class Sidebar extends Toolbar {
     this.options.dom.appendChild(list);
     // 将侧栏列表高度写入 CSS 变量，便于定位
     if (typeof document !== 'undefined') {
-      const height = list.scrollHeight;
-      // 高度为 0 时保持默认 120px，不覆盖
-      if (height > 0) {
-        document.documentElement.style.setProperty('--sidebar-list-height', `${height}px`);
-      }
+      setTimeout(() => {
+        const height = list.scrollHeight;
+        // 高度为 0 时保持默认 120px，不覆盖
+        if (height > 0) {
+          this.$cherry.wrapperDom.style.setProperty('--sidebar-list-height', `${height}px`);
+          console.log('--sidebar-list-height:', height);
+        }
+      }, 0);
     }
   }
 
