@@ -24,7 +24,18 @@ export default class Sidebar extends Toolbar {
   //   super(options);
   // }
   appendMenusToDom(menus) {
-    this.options.dom.appendChild(menus);
+    const list = document.createElement('div');
+    list.className = 'cherry-sidebar-list';
+    list.appendChild(menus);
+    this.options.dom.appendChild(list);
+    // 将侧栏列表高度写入 CSS 变量，便于定位
+    if (typeof document !== 'undefined') {
+      const height = list.scrollHeight;
+      // 高度为 0 时保持默认 120px，不覆盖
+      if (height > 0) {
+        document.documentElement.style.setProperty('--sidebar-list-height', `${height}px`);
+      }
+    }
   }
 
   init() {
