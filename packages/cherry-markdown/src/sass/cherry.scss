@@ -522,6 +522,13 @@
   bottom: 0;
   overflow: hidden;
 
+  .cherry-sidebar-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+  }
+
   // 侧边栏按钮 非顶部工具栏
   .cherry-toolbar-button {
     height: 30px;
@@ -1460,7 +1467,7 @@
   z-index: 11;
   position: absolute;
   right: 0;
-  top: calc(var(--height-toolbar) + 120px);
+  top: calc(var(--height-toolbar) + var(--sidebar-list-height));
   height: calc(100% - 220px);
   max-height: 600px;
   width: 160px;
