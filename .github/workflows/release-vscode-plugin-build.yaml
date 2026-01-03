@@ -37,6 +37,8 @@ jobs:
       - name: Publish VSCode Plugin
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
         run: |
           cd packages/vscodePlugin
           vsce publish -p $VSCE_PAT --no-dependencies --no-yarn
+          npx ovsx publish -p $OVSX_PAT --no-dependencies --no-yarn
