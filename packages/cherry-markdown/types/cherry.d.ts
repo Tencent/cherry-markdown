@@ -574,7 +574,7 @@ export interface CherryEditorOptions {
   convertWhenPaste?: boolean;
   /** 快捷键风格，目前仅支持 sublime 和 vim */
   keyMap?: 'sublime' | 'vim';
-  /** 透传给codemirror的配置项 */
+  /** 透传给 codemirror V6 的配置项 */
   codemirror?: object;
   /** 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal */
   writingStyle?: string;

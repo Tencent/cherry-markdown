@@ -449,10 +449,10 @@ export default class Cherry extends CherryStatic {
 
   /**
    * 获取CodeMirror 实例
-   * @returns { CM6AdapterType } CodeMirror 6 适配器实例
+   * @returns { EditorView } CodeMirror 6 适配器实例
    */
   getCodeMirror() {
-    return this.editor.editor;
+    return this.editor.editor.view;
   }
 
   /**
