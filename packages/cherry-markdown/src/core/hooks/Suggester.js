@@ -22,7 +22,6 @@
 import escapeRegExp from 'lodash/escapeRegExp';
 import SyntaxBase from '@/core/SyntaxBase';
 import { allSuggestList, suggesterKeywords } from '@/core/hooks/SuggestList';
-import { Pass } from 'codemirror/src/util/misc';
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import { isBrowser } from '@/utils/env';
@@ -260,7 +259,8 @@ class SuggesterPanel {
   panelWrap = `<div class="cherry-suggester-panel"></div>`;
 
   hasEditor() {
-    return !!this.editor && !!this.editor.editor.display && !!this.editor.editor.display.wrapper;
+    // CodeMirror 6: 使用 view 属性检查编辑器是否存在
+    return !!this.editor && !!this.editor.editor && !!this.editor.editor.view;
   }
 
   /**
@@ -280,6 +280,7 @@ class SuggesterPanel {
       return;
     }
     let keyAction = false;
+    // CodeMirror 6: 使用适配器的 on 方法监听事件
     this.editor.editor.on('change', (codemirror, evt) => {
       keyAction = true;
       this.onCodeMirrorChange(codemirror, evt);
@@ -300,43 +301,8 @@ class SuggesterPanel {
       keyAction = false;
     });
 
-    const extraKeys = this.editor.editor.getOption('extraKeys');
-    const decorateKeys = ['Up', 'Down', 'Enter'];
-    decorateKeys.forEach((key) => {
-      if (typeof extraKeys[key] === 'function') {
-        const proxyTarget = extraKeys[key];
-        extraKeys[key] = (codemirror) => {
-          if (this.cursorMove) {
-            const res = proxyTarget.call(codemirror, codemirror);
-
-            if (res) {
-              return res;
-            }
-            // logic to decide whether to move up or not
-            // return Pass.toString();
-          }
-        };
-      } else if (!extraKeys[key]) {
-        extraKeys[key] = () => {
-          if (this.cursorMove) {
-            // logic to decide whether to move up or not
-            return Pass.toString();
-          }
-        };
-      } else if (typeof extraKeys[key] === 'string') {
-        const command = extraKeys[key];
-        extraKeys[key] = (codemirror) => {
-          if (this.cursorMove) {
-            this.editor.editor.execCommand(command);
-
-            // logic to decide whether to move up or not
-            // return Pass.toString();
-          }
-        };
-      }
-    });
-
-    this.editor.editor.setOption('extraKeys', extraKeys);
+    // CodeMirror 6: 不再使用 getOption/setOption('extraKeys')
+    // 快捷键已在 Editor.js 中通过 keymap 扩展配置
 
     this.editor.editor.on('scroll', (codemirror, evt) => {
       if (!this.searchCache) {
@@ -356,7 +322,7 @@ class SuggesterPanel {
       (evt) => {
         const idx = isChildNode(this.$suggesterPanel, evt.target);
         if (idx > -1) {
-          this.editor.editor.focus();
+          this.editor.editor.view.focus();
           this.pasteSelectResult(idx);
         }
         this.stopRelate();
@@ -466,22 +432,24 @@ class SuggesterPanel {
    * @param {CodeMirror} codemirror
    */
   relocatePanel(codemirror) {
-    // 找到光标位置来确定候选框位置
-    let $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
-    // 当editor选中某一内容时，".CodeMirror-cursor"会消失，此时通过定位".selected"来确定候选框位置
-    if (!$cursor) {
-      $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-selected');
+    // CodeMirror 6: 使用 coordsAtPos 获取光标位置
+    const editorView = this.editor?.editor?.view;
+    if (!editorView) {
+      return false;
     }
-    if (!$cursor) {
+
+    const cursorPos = editorView.state.selection.main.head;
+    const cursorCoords = editorView.coordsAtPos(cursorPos);
+
+    if (!cursorCoords) {
       return false;
     }
 
     const editorDomRect = this.$cherry.wrapperDom.getBoundingClientRect();
-    const cursorRect = $cursor.getBoundingClientRect();
 
-    const left = cursorRect.left - editorDomRect.left;
-    const cursorTop = cursorRect.top - editorDomRect.top;
-    const cursorHeight = cursorRect.height;
+    const left = cursorCoords.left - editorDomRect.left;
+    const cursorTop = cursorCoords.top - editorDomRect.top;
+    const cursorHeight = cursorCoords.bottom - cursorCoords.top;
 
     let top;
 
@@ -503,13 +471,18 @@ class SuggesterPanel {
    * @returns {{ left: number, top: number }}
    */
   getCursorPos(codemirror) {
-    const $cursor = document.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
-    if (!$cursor) return null;
-    const pos = codemirror.getCursor();
-    const lineHeight = codemirror.lineInfo(pos.line).handle.height;
-    const rect = $cursor.getBoundingClientRect();
-    const top = rect.top + lineHeight;
-    const { left } = rect;
+    // CodeMirror 6: 使用 coordsAtPos 获取光标位置
+    const editorView = this.editor?.editor?.view;
+    if (!editorView) return null;
+
+    const cursorPos = editorView.state.selection.main.head;
+    const cursorCoords = editorView.coordsAtPos(cursorPos);
+
+    if (!cursorCoords) return null;
+
+    const lineHeight = cursorCoords.bottom - cursorCoords.top;
+    const top = cursorCoords.top + lineHeight;
+    const { left } = cursorCoords;
     return { left, top };
   }
 
@@ -539,22 +512,31 @@ class SuggesterPanel {
 
     const actualPanelHeight = this.$suggesterPanel.offsetHeight || 380;
 
-    let $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
-    if (!$cursor) {
-      $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-selected');
+    // CodeMirror 6: 光标在编辑器 view.dom 内部
+    // 需要从编辑器实例获取光标位置，而不是通过 DOM 查询
+    const editorView = this.editor?.editor?.view;
+    if (!editorView) {
+      console.log('[Suggester] No editor view found');
+      this.$suggesterPanel.style.display = 'none';
+      return false;
     }
-    if (!$cursor) {
+
+    // 使用 CM6 的 coordsAtPos 获取光标位置
+    const cursorPos = editorView.state.selection.main.head;
+    const cursorCoords = editorView.coordsAtPos(cursorPos);
+
+    if (!cursorCoords) {
+      console.log('[Suggester] No cursor coords found');
       this.$suggesterPanel.style.display = 'none';
       return false;
     }
 
     const editorDomRect = this.$cherry.wrapperDom.getBoundingClientRect();
-    const cursorRect = $cursor.getBoundingClientRect();
 
-    // 计算位置
-    const left = cursorRect.left - editorDomRect.left;
-    const cursorTop = cursorRect.top - editorDomRect.top;
-    const cursorHeight = cursorRect.height;
+    // 计算位置 - 使用 CM6 的 coordsAtPos 返回的坐标
+    const left = cursorCoords.left - editorDomRect.left;
+    const cursorTop = cursorCoords.top - editorDomRect.top;
+    const cursorHeight = cursorCoords.bottom - cursorCoords.top;
     const cursorBottomInView = cursorTop + cursorHeight;
 
     // 获取可用空间

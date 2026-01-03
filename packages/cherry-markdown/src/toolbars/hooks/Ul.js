@@ -33,7 +33,7 @@ export default class Ul extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    const $selection = getSelection(this.editor.editor, selection, 'line', true) || 'Item 1\n    Item 1.1\nItem 2';
+    const $selection = getSelection(this.editor.editor.view, selection, 'line', true) || 'Item 1\n    Item 1.1\nItem 2';
     const [before] = $selection.match(/^\n*/);
     const [after] = $selection.match(/\n*$/);
     return `${before}${getListFromStr($selection, 'ul')}${after}`;

@@ -30,8 +30,34 @@
     min-height: calc(100% - var(--height-toolbar));
   }
 
-  .CodeMirror {
+  .ͼ1.cm-focused {
+    outline: none !important;
+  }
+
+  .cm-editor {
+    width: 100%;
     height: 100%;
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-md);
+    line-height: var(--md-paragraph-line-height);
+
+    .cm-scroller {
+      font-family: inherit;
+      line-height: inherit;
+    }
+
+    .cm-content {
+      width: 100%;
+      padding: 15px 34px;
+      word-break: break-all;
+      white-space: pre-wrap;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+
+    .cm-line {
+      font-family: inherit;
+    }
   }
 
   &.cherry--no-toolbar {
@@ -143,7 +169,10 @@
     background: var(--dropdown-bg);
     border-radius: var(--dropdown-item-radius);
     margin: 2px 4px;
-    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      border-color 150ms ease;
 
     &:hover {
       background: var(--dropdown-item-hover-bg);
@@ -262,8 +291,14 @@
     color: var(--toolbar-btn-color);
     background: var(--toolbar-btn-bg);
     border-radius: var(--toolbar-btn-radius);
-    -webkit-transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
-    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+    -webkit-transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      border-color 150ms ease;
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      border-color 150ms ease;
     cursor: pointer;
     font-style: normal;
 
@@ -530,7 +565,10 @@
     color: var(--toolbar-btn-color);
     background: var(--toolbar-btn-bg);
     border-radius: var(--toolbar-btn-radius);
-    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      border-color 150ms ease;
 
     &:hover {
       background: var(--toolbar-btn-hover-bg);
@@ -600,7 +638,10 @@
     border: 0;
     cursor: pointer;
     font-style: normal;
-    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      border-color 150ms ease;
 
     &.cherry-toolbar-split {
       border-left: 1px solid var(--toolbar-split-color);
@@ -624,6 +665,10 @@
       }
     }
   }
+}
+
+#cherry-text {
+  display: none !important;
 }
 
 .cherry-editor {
@@ -669,7 +714,7 @@
       }
     }
     &--typewriter {
-      .CodeMirror-lines {
+      .cm-lineWrapping {
         position: relative;
         &::before {
           content: '';
@@ -683,7 +728,7 @@
     }
   }
 
-  .CodeMirror {
+  .cm-editor {
     font-family: var(--font-family-sans);
     background-color: var(--base-editor-bg);
     color: var(--base-font-color);
@@ -702,7 +747,7 @@
       background-color: var(--editor-selection-bg);
     }
 
-    .CodeMirror-scroll {
+    .cm-scroller {
       span,
       .cm-variable-2,
       .cm-string,
@@ -730,7 +775,7 @@
     }
   }
 
-  .CodeMirror-lines {
+  .cm-lineWrapping {
     padding: 15px 34px;
 
     // 对draw.io的xml数据，和图片里base64格式的数据限定最大宽度
@@ -756,53 +801,67 @@
     }
   }
 
-  .cm-s-default .cm-header {
+  .cm-editor .cm-header {
     color: var(--editor-header-color);
   }
 
-  .cm-s-default .cm-string {
+  .cm-editor .cm-string {
     color: var(--editor-string-color);
   }
 
-  .cm-s-default .cm-comment {
+  .cm-editor .cm-comment {
     color: var(--editor-comment-color);
     font-family: var(--font-family-mono);
     font-size: 0.9em;
   }
 
-  .cm-s-default .cm-whitespace,
+  .cm-editor .cm-whitespace,
   .cm-tab {
     font-family: var(--font-family-mono);
     font-size: 0.9em;
   }
 
-  .cm-s-default .cm-quote {
+  .cm-editor .cm-quote {
     color: var(--editor-quote-color);
   }
 
-  .cm-s-default .cm-link {
+  .cm-editor .cm-link {
+    text-decoration: underline;
     color: var(--editor-link-color);
   }
 
-  .cm-s-default .cm-url {
+  .cm-editor .cm-header {
+    text-decoration: none;
+  }
+
+  .cm-editor .cm-url {
     background: var(--editor-url-bg-color);
     font-family: var(--font-family-mono);
     font-size: 0.9em;
+    text-decoration: none;
   }
 
-  .cm-s-default .cm-variable-2 {
+  .cm-editor .cm-url-bracket {
+    color: #3b82f6;
+    font-weight: bold;
+    background-color: rgba(59, 130, 246, 0.1);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+
+  .cm-editor .cm-variable-2 {
     color: var(--editor-v2-color);
   }
 
-  .cm-s-default .cm-variable-3 {
+  .cm-editor .cm-variable-3 {
     color: var(--editor-v3-color);
   }
 
-  .cm-s-default .cm-keyword {
+  .cm-editor .cm-keyword {
     color: var(--editor-keyword-color);
   }
 
-  .cm-s-default .cm-fullWidth {
+  .cm-editor .cm-fullWidth {
     color: var(--full-width-color) !important;
     z-index: 3;
     cursor: pointer;
@@ -857,7 +916,13 @@
 .cherry-mask-code-block {
   width: 100%;
   padding-top: 50px;
-  background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0)), to(var(--toolbar-bg)));
+  background-image: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    from(rgba(255, 255, 255, 0)),
+    to(var(--toolbar-bg))
+  );
   background-image: linear-gradient(-180deg, rgba(255, 255, 255, 0) 0%, var(--toolbar-bg) 100%);
   text-align: center;
   position: absolute;
@@ -867,7 +932,9 @@
   z-index: 10;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.7s ease-in-out, height 0.7s ease-in-out;
+  transition:
+    opacity 0.7s ease-in-out,
+    height 0.7s ease-in-out;
   //伪类方便添加动画，使用visibility和opacity来显示和隐藏
 
   .expand-btn {
@@ -965,7 +1032,11 @@
   .cherry-unExpand-code-block,
   .cherry-edit-code-block {
     cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+    transition:
+      background-color 0.2s ease,
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      color 0.2s ease;
     transform: translateY(0);
     outline: none;
   }
@@ -998,7 +1069,9 @@
   .cherry-expand-code-block:focus-visible,
   .cherry-unExpand-code-block:focus-visible,
   .cherry-edit-code-block:focus-visible {
-    box-shadow: 0 0 0 2px var(--base-previewer-bg), 0 0 0 4px var(--primary-color);
+    box-shadow:
+      0 0 0 2px var(--base-previewer-bg),
+      0 0 0 4px var(--primary-color);
   }
 
   .cherry-code-preview-lang-select {
@@ -1012,7 +1085,9 @@
     border-radius: 6px;
     padding: 5px 36px 5px 12px;
     cursor: pointer;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition:
+      border-color 0.15s ease-in-out,
+      box-shadow 0.15s ease-in-out;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23495057' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 12px center;
@@ -1022,7 +1097,9 @@
   .cherry-code-preview-lang-select:focus {
     border-color: var(--primary-color);
     outline: 0;
-    box-shadow: 0 0 0 2px var(--base-previewer-bg), 0 0 0 4px var(--primary-color);
+    box-shadow:
+      0 0 0 2px var(--base-previewer-bg),
+      0 0 0 4px var(--primary-color);
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23495057' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 11 6-6 6 6'/%3e%3c/svg%3e");
   }
 
@@ -1034,8 +1111,8 @@
   }
 
   .cherry-code-preview-lang-select option:hover {
-    background-color: var(--toolbar-btn-hover-bg); 
-    color: var(--toolbar-btn-hover-color); 
+    background-color: var(--toolbar-btn-hover-bg);
+    color: var(--toolbar-btn-hover-color);
   }
   .cherry-code-preview-lang-select:disabled {
     background-color: var(--base-border-color);
@@ -1419,7 +1496,10 @@
     border-radius: var(--dropdown-item-radius);
     font-size: var(--font-size-sm);
     margin: 2px 4px;
-    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      border-color 150ms ease;
     display: flex;
     align-items: center;
 

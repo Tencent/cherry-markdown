@@ -65,9 +65,8 @@ export default class Insert extends MenuBase {
           // 默认返回超链接
           code = `[${file.name}](${url})`;
         }
-        // 替换选中区域
-        // @ts-ignore
-        this.$cherry.$cherry.doc.replaceSelection(code);
+        // 替换选中区域 - CodeMirror 6
+        this.$cherry.editor.editor.replaceSelection(code);
       });
     });
     input.click();
@@ -93,7 +92,7 @@ export default class Insert extends MenuBase {
       const text = `${selection}\n\n|${headerText}\n|${controlText}${rowText.repeat(row)}\n\n`;
       return text;
     }
-    const $selection = getSelection(this.editor.editor, selection);
+    const $selection = getSelection(this.editor.editor.view, selection);
     switch (shortKey) {
       case 'hr':
         // 插入分割线

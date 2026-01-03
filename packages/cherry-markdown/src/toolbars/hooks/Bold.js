@@ -50,10 +50,13 @@ export default class Bold extends MenuBase {
    */
   onClick(selection, shortKey = '') {
     let $selection = this.getSelection(selection) || this.locale.bold;
+    console.log('$selection', $selection, this.isSelections);
     // 如果是单选，并且选中内容的开始结束内没有加粗语法，则扩大选中范围
     if (!this.isSelections && !this.$testIsBold($selection)) {
       this.getMoreSelection('**', '**', () => {
-        const newSelection = this.editor.editor.getSelection();
+        const { from, to } = this.editor.editor.view.state.selection.main;
+        const newSelection = this.editor.editor.view.state.doc.sliceString(from, to);
+        console.log('newSelectionText', newSelection);
         const isBold = this.$testIsBold(newSelection);
         if (isBold) {
           $selection = newSelection;

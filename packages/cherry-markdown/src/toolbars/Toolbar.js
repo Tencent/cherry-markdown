@@ -102,40 +102,24 @@ export default class Toolbar {
     this.$cherry.$event.on('cleanAllSubMenus', () => this.hideAllSubMenu());
   }
 
-  /**
-   * @deprecated use showOrHideToolbar
-   */
   previewOnly() {
-    this.showOrHideToolbar(false);
+    this.options.dom.classList.add('preview-only');
+    this.$cherry.wrapperDom.classList.add('cherry--no-toolbar');
+    this.$cherry.$event.emit('toolbarHide');
   }
 
-  /**
-   * @deprecated use showOrHideToolbar
-   */
   showToolbar() {
-    this.showOrHideToolbar(true);
+    this.options.dom.classList.remove('preview-only');
+    this.$cherry.wrapperDom.classList.remove('cherry--no-toolbar');
+    this.$cherry.$event.emit('toolbarShow');
   }
 
-  showOrHideToolbar(isShow = true) {
-    if (isShow) {
-      this.options.dom.classList.remove('preview-only');
-      this.$cherry.wrapperDom.classList.remove('cherry--no-toolbar');
-      this.$cherry.$event.emit('toolbarShow');
-    } else {
-      this.options.dom.classList.add('preview-only');
-      this.$cherry.wrapperDom.classList.add('cherry--no-toolbar');
-      this.$cherry.$event.emit('toolbarHide');
-    }
-  }
-
-  isHasLevel2Menu(name) {
-    // FIXME: return boolean
+  level2MenuList(name) {
     return this.menus.level2MenusName[name];
   }
 
-  isHasConfigMenu(name) {
-    // FIXME: return boolean
-    return this.menus.hooks[name].subMenuConfig || [];
+  hasConfigMenuList(name) {
+    return this.menus.hooks[name]?.subMenuConfig;
   }
 
   /**
@@ -144,7 +128,7 @@ export default class Toolbar {
    * @returns {boolean} 是否有子菜单
    */
   isHasSubMenu(name) {
-    return Boolean(this.isHasLevel2Menu(name) || this.isHasConfigMenu(name).length > 0);
+    return Boolean(this.level2MenuList(name) || this.hasConfigMenuList(name).length > 0);
   }
 
   /**
@@ -210,7 +194,7 @@ export default class Toolbar {
     this.subMenus[name] = createElement('div', 'cherry-dropdown', { name });
     this.setSubMenuPosition(this.menus.hooks[name], this.subMenus[name]);
     // 如果有配置的二级菜单
-    const level2MenusName = this.isHasLevel2Menu(name);
+    const level2MenusName = this.level2MenuList(name);
     if (level2MenusName) {
       level2MenusName.forEach((level2Name) => {
         const subMenu = this.menus.hooks[level2Name];
@@ -224,7 +208,7 @@ export default class Toolbar {
       });
     }
     // 兼容旧版本配置的二级菜单
-    const subMenuConfig = this.isHasConfigMenu(name);
+    const subMenuConfig = this.hasConfigMenuList(name);
     if (subMenuConfig.length > 0) {
       subMenuConfig.forEach((config) => {
         const btn = this.menus.hooks[name].createSubBtnByConfig(config);

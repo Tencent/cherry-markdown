@@ -46,9 +46,8 @@ export function handleUploadMulti(editor, type = 'image', accept = '*', callback
         const { url } = file;
         code += `${handleType(type, file, url)}/n`;
       }
-      // 替换选中区域
-      // @ts-ignore
-      editor.editor.doc.replaceSelection(code);
+      // 替换选中区域 - CodeMirror 6
+      editor.editor.replaceSelection(code);
     });
   });
   input.click();
@@ -81,9 +80,8 @@ export function handleUpload(editor, type = 'image', accept = '*', callback = nu
       }
       let code = '';
       code = handleType(type, file, url);
-      // 替换选中区域
-      // @ts-ignore
-      editor.editor.doc.replaceSelection(code);
+      // 替换选中区域 - CodeMirror 6
+      editor.editor.replaceSelection(code);
     });
   });
   input.click();

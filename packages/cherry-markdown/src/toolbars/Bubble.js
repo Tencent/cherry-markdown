@@ -48,7 +48,7 @@ export default class Bubble extends Toolbar {
     this.bubbleDom = this.options.dom;
     this.editorDom = this.options.editor.getEditorDom();
     this.initBubbleDom();
-    this.editorDom.querySelector('.CodeMirror').appendChild(this.bubbleDom);
+    this.editorDom.querySelector('.cm-editor').appendChild(this.bubbleDom);
     Object.entries(this.shortcutKeyMap).forEach(([key, value]) => {
       this.$cherry.toolbar.shortcutKeyMap[key] = value;
     });
@@ -63,7 +63,13 @@ export default class Bubble extends Toolbar {
    * @returns {number} 编辑区域的滚动区域
    */
   getScrollTop() {
-    return this.options.editor.editor.getScrollInfo().top;
+    const editorAdapter = this.options.editor.editor;
+    if (!editorAdapter) {
+      return 0;
+    }
+    // 兼容 CM6Adapter,获取真正的 EditorView
+    const view = editorAdapter.view || editorAdapter;
+    return view.scrollDOM ? view.scrollDOM.scrollTop : 0;
   }
 
   /**
@@ -87,7 +93,7 @@ export default class Bubble extends Toolbar {
       this.bubbleDom.style.marginTop = '0';
       this.bubbleDom.dataset.scrollTop = String(this.getScrollTop());
     }
-    const positionLimit = this.editorDom.querySelector('.CodeMirror-lines').firstChild.getBoundingClientRect();
+    const positionLimit = this.editorDom.querySelector('.cm-lineWrapping').firstChild.getBoundingClientRect();
     const editorPosition = this.editorDom.getBoundingClientRect();
     const minLeft = positionLimit.left - editorPosition.left;
     const maxLeft = positionLimit.width + minLeft;
@@ -161,73 +167,96 @@ export default class Bubble extends Toolbar {
   }
 
   addSelectionChangeListener() {
-    this.options.editor.addListener('change', (codemirror) => {
+    this.$cherry.$event.on('afterChange', () => {
       // 当编辑区内容变更时自动隐藏bubble工具栏
       this.hideBubble();
     });
-    this.options.editor.addListener('refresh', (codemirror) => {
+    this.options.editor.addListener('refresh', () => {
       // 当编辑区内容刷新时自动隐藏bubble工具栏
       this.hideBubble();
     });
-    this.options.editor.addListener('scroll', (codemirror) => {
+    this.$cherry.$event.on('onScroll', () => {
       // 当编辑区滚动时，需要实时同步bubble工具栏的位置
       this.updatePositionWhenScroll();
     });
-    this.options.editor.addListener('beforeSelectionChange', (codemirror, info) => {
+    this.$cherry.$event.on('beforeSelectionChange', ({ selection, isUserInteraction }) => {
+      const { from, to } = selection;
       setTimeout(() => {
-        const selections = codemirror.getSelections();
+        const editorAdapter = this.options.editor.editor;
+        if (!editorAdapter) {
+          return;
+        }
+        // 兼容 CM6Adapter,获取真正的 EditorView
+        const view = editorAdapter.view || editorAdapter;
+        const editorState = view.state;
+        const selections = editorState.selection.ranges.map((range) =>
+          editorState.doc.sliceString(range.from, range.to),
+        );
         const selectionStr = selections.join('');
         if (selectionStr !== this.lastSelectionsStr && (selectionStr || this.lastSelectionsStr)) {
           this.lastSelections = !this.lastSelections ? [] : this.lastSelections;
-          this.$cherry.$event.emit('selectionChange', { selections, lastSelections: this.lastSelections, info });
+          this.$cherry.$event.emit('selectionChange', { selections, lastSelections: this.lastSelections });
           this.lastSelections = selections;
           this.lastSelectionsStr = selectionStr;
         }
       }, 10);
       // 当编辑区选中内容改变时，需要展示/隐藏bubble工具栏，并计算工具栏位置
-      if (info.origin !== '*mouse' && (info.origin !== null || typeof info.origin === 'undefined')) {
+      // 如果是用户手动选中，则展示bubble工具栏，如果是自动选中，则不需要展示
+      if (!isUserInteraction) {
         return true;
       }
-      if (!info.ranges[0]) {
-        return true;
-      }
-      const anchor = info.ranges[0].anchor.line * 1000000 + info.ranges[0].anchor.ch;
-      const head = info.ranges[0].head.line * 1000000 + info.ranges[0].head.ch;
+      const { anchor, head } = selection;
       let direction = 'asc';
       if (anchor > head) {
         direction = 'desc';
       }
       setTimeout(() => {
-        const selections = codemirror.getSelections();
-        if (selections.join('').length <= 0) {
+        if (Math.abs(from - to) === 0) {
           this.hideBubble();
           return;
         }
-        const selectedObjs = codemirror.getWrapperElement().getElementsByClassName('CodeMirror-selected');
-        const editorPosition = this.editorDom.getBoundingClientRect();
-        let width = 0;
-        let top = 0;
-        if (typeof selectedObjs !== 'object' || selectedObjs.length <= 0) {
-          this.hideBubble();
-          return;
-        }
-        for (let key = 0; key < selectedObjs.length; key++) {
-          const one = selectedObjs[key];
-          const position = one.getBoundingClientRect();
-          const targetTop = position.top - editorPosition.top;
-          if (direction === 'asc') {
-            if (targetTop >= top) {
-              top = targetTop;
-              width = position.left - editorPosition.left + position.width / 2;
+        try {
+          const editorAdapter = this.options.editor.editor;
+          if (!editorAdapter) {
+            this.hideBubble();
+            return;
+          }
+          // 兼容 CM6Adapter,获取真正的 EditorView
+          const editorView = editorAdapter.view || editorAdapter;
+
+          const fromCoords = editorView.coordsAtPos(from);
+          const toCoords = editorView.coordsAtPos(to);
+
+          if (!fromCoords || !toCoords) {
+            this.hideBubble();
+            return;
+          }
+
+          const editorPosition = this.editorDom.getBoundingClientRect();
+
+          let top;
+          let width;
+
+          const isMultiLine = fromCoords.top !== toCoords.top;
+
+          if (isMultiLine) {
+            if (direction === 'asc') {
+              top = toCoords.top - editorPosition.top;
+              width = toCoords.left - editorPosition.left + (toCoords.right - toCoords.left) / 2;
+            } else {
+              top = fromCoords.top - editorPosition.top;
+              width = fromCoords.left - editorPosition.left + (fromCoords.right - fromCoords.left) / 2;
             }
           } else {
-            if (targetTop <= top || top <= 0) {
-              top = targetTop;
-              width = position.left - editorPosition.left + position.width / 2;
-            }
+            top = fromCoords.top - editorPosition.top;
+            width = fromCoords.left - editorPosition.left + (toCoords.left - fromCoords.left) / 2;
           }
+
+          this.showBubble(top, width);
+        } catch (error) {
+          console.warn('Error calculating bubble position:', error);
+          this.hideBubble();
         }
-        this.showBubble(top, width);
       }, 10);
     });
   }

@@ -81,31 +81,35 @@ const pasteHelper = {
    * 在编辑器中自动选中刚刚粘贴的内容
    */
   setSelection() {
-    const { /* sticky, xRel, */ ...end } = this.codemirror.getCursor();
+    const end = this.codemirror.getCursor();
     const begin = this.currentCursor;
     this.codemirror.setSelection(begin, end);
   },
   /**
    * 绑定事件
-   * 当编辑器选中区域改变、内容改变时，隐藏切换按钮
-   * 当编辑器滚动时，实时更新切换按钮的位置
+   * 当编辑器选中区域改变、内容改变时、滚动时处理气泡位置
+   * CodeMirror 6: 使用适配器的事件监听
    * @returns null
    */
   bindListener() {
     if (!this.hasBindListener) {
       this.hasBindListener = true;
+
+      // 使用 CM6 适配器的 on 方法监听事件
+      this.codemirror.on('change', () => {
+        this.hideBubble();
+      });
+
+      this.codemirror.on('cursorActivity', () => {
+        this.hideBubble();
+      });
+
+      this.codemirror.on('scroll', () => {
+        this.updatePositionWhenScroll();
+      });
     } else {
       return true;
     }
-    this.codemirror.on('beforeSelectionChange', (codemirror, info) => {
-      this.hideBubble();
-    });
-    this.codemirror.on('beforeChange', (codemirror, info) => {
-      this.hideBubble();
-    });
-    this.codemirror.on('scroll', (codemirror) => {
-      this.updatePositionWhenScroll();
-    });
   },
 
   isHidden() {
@@ -142,7 +146,8 @@ const pasteHelper = {
   },
 
   getScrollTop() {
-    return this.codemirror.getScrollInfo().top;
+    // CodeMirror 6: 从 scrollDOM 获取滚动位置
+    return this.codemirror.scrollDOM?.scrollTop || 0;
   },
 
   showBubble() {
@@ -154,8 +159,11 @@ const pasteHelper = {
     }
     /**
      * @type {HTMLDivElement}
+     * CodeMirror 6: 使用 view.dom 获取编辑器 DOM 元素
      */
-    const codemirrorWrapper = this.codemirror.getWrapperElement();
+    const codemirrorWrapper = this.codemirror.view?.dom || this.codemirror.scrollDOM?.parentElement;
+    if (!codemirrorWrapper) return;
+
     const maxTop = codemirrorWrapper.clientHeight - this.bubbleDom.getBoundingClientRect().height - SAFE_AREA_MARGIN;
 
     if (top > maxTop) {
@@ -193,7 +201,11 @@ const pasteHelper = {
     this.bubbleDom.appendChild(switchText);
     this.bubbleDom.appendChild(switchMd);
     this.bubbleDom.setAttribute('data-type', 'md');
-    this.codemirror.getWrapperElement().appendChild(this.bubbleDom);
+    // CodeMirror 6: 使用 view.dom 或 scrollDOM 获取编辑器容器
+    const editorContainer = this.codemirror.view?.dom || this.codemirror.scrollDOM?.parentElement;
+    if (editorContainer) {
+      editorContainer.appendChild(this.bubbleDom);
+    }
     this.switchMd.addEventListener('click', this.switchMDClick.bind(this));
     this.switchText.addEventListener('click', this.switchTextClick.bind(this));
 
@@ -215,7 +227,8 @@ const pasteHelper = {
     }
     this.noHide = true;
     this.bubbleDom.setAttribute('data-type', 'md');
-    this.codemirror.doc.replaceSelection(this.md);
+    // CodeMirror 6: 使用 replaceSelection 替代 doc.replaceSelection
+    this.codemirror.replaceSelection(this.md);
     this.setSelection();
     this.showBubble();
     this.switchMd.classList.add('active');
@@ -229,7 +242,8 @@ const pasteHelper = {
     }
     this.noHide = true;
     this.bubbleDom.setAttribute('data-type', 'text');
-    this.codemirror.doc.replaceSelection(this.html);
+    // CodeMirror 6: 使用 replaceSelection 替代 doc.replaceSelection
+    this.codemirror.replaceSelection(this.html);
     this.setSelection();
     this.showBubble();
     this.switchText.classList.add('active');
@@ -238,7 +252,15 @@ const pasteHelper = {
   },
 
   getLastSelectedPosition() {
-    const selectedObjs = Array.from(this.codemirror.getWrapperElement().getElementsByClassName('CodeMirror-selected'));
+    // CodeMirror 6: 选中的元素类名为 cm-selectionBackground
+    const editorContainer = this.codemirror.view?.dom || this.codemirror.scrollDOM?.parentElement;
+    if (!editorContainer) {
+      this.hideBubble();
+      return {};
+    }
+
+    const selectedObjs = Array.from(editorContainer.getElementsByClassName('cm-selectionBackground') || []);
+
     let width = 0;
     let top = 0;
     if (selectedObjs.length <= 0) {

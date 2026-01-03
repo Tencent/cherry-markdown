@@ -15,6 +15,7 @@
  */
 
 import { getValueWithoutCode, LIST_CONTENT } from '@/utils/regexp';
+import { Transaction } from '@codemirror/state';
 
 export default class ListHandler {
   /** @type{HTMLElement} */
@@ -22,11 +23,11 @@ export default class ListHandler {
 
   regList = LIST_CONTENT;
 
-  /** @type{Array.<import('codemirror').Position>} */
+  /** @type{Array.<number>} */
   range = [];
 
-  /** @type{import('codemirror').Position} */
-  position = { line: 0, ch: 0 };
+  /** @type{number} */
+  position = 0;
 
   input = false;
 
@@ -75,8 +76,11 @@ export default class ListHandler {
     this.target.removeAttribute('contenteditable');
     this.target.removeEventListener('input', this.handleEditablesInputBinded, false);
     this.target.removeEventListener('focusout', this.handleEditablesUnfocusBinded, false);
-    const cursor = this.editor.editor.getCursor(); // 获取光标位置
-    this.editor.editor.setSelection(cursor, cursor); // 取消选中
+    const cursor = this.editor.editor.view.state.selection.main.head; // 获取光标位置
+    this.editor.editor.view.dispatch({
+      selection: { anchor: cursor, head: cursor },
+      annotations: Transaction.userEvent.of('list.edit'),
+    }); // 取消选中
   }
 
   setSelection() {
@@ -85,7 +89,8 @@ export default class ListHandler {
     if (targetLiIdx === -1) {
       return; // 没有找到li
     }
-    const contents = getValueWithoutCode(this?.editor.editor.getValue())?.split('\n') ?? [];
+    const { doc } = this.editor.editor.view.state;
+    const contents = getValueWithoutCode(doc.toString())?.split('\n') ?? [];
     let contentsLiCount = 0; // 编辑器中是列表的数量
     let targetLine = -1; // 行
     let targetCh = -1; // 列
@@ -125,14 +130,18 @@ export default class ListHandler {
         targetContent.push(lineContent);
       }
     }
-    const from = { line: targetLine, ch: targetCh };
-    const to = {
-      line: targetLine + targetContent.length - 1,
-      ch: targetCh + targetContent[targetContent.length - 1]?.length,
-    };
-    this.editor.editor.setSelection(from, to);
-    this.range = [from, to];
-    this.position = this.editor.editor.getCursor(); // 输入就获取光标位置，防止后面点到编辑器dom的时候光标位置不对
+
+    // 将行列位置转换为绝对位置
+    const fromPos = doc.line(targetLine + 1).from + targetCh;
+    const toLineEnd = targetLine + targetContent.length;
+    const toPos = doc.line(toLineEnd).from + targetCh + (targetContent[targetContent.length - 1]?.length || 0);
+
+    this.editor.editor.view.dispatch({
+      selection: { anchor: fromPos, head: toPos },
+      annotations: Transaction.userEvent.of('list.edit'),
+    });
+    this.range = [fromPos, toPos];
+    this.position = this.editor.editor.view.state.selection.main.head; // 输入就获取光标位置，防止后面点到编辑器dom的时候光标位置不对
   }
 
   /**
@@ -167,7 +176,10 @@ export default class ListHandler {
             : event.target.innerHTML.replace(/<span class="ch-icon ch-icon-(square|check)"><\/span>/, '');
           const md = this.editor.$cherry.engine.makeMarkdown(replaceHtml);
           const [from, to] = this.range;
-          this.editor.editor.replaceRange(md, from, to);
+          this.editor.editor.view.dispatch({
+            changes: { from, to, insert: md },
+            annotations: Transaction.userEvent.of('list.edit'),
+          });
         }
         this.isCheckbox = false;
         this.input = false;
@@ -188,12 +200,13 @@ export default class ListHandler {
       // @ts-ignore
       splitInnerText = event.target.innerText.split('\n');
     }
-    // 只有第一段是换行，后面的换行都应该认为是另一行
+    // 只有第一段是换行,后面的换行都应该认为是另一行
     const [before, ...after] = splitInnerText;
     // 获取当前光标位置
-    const cursor = this.editor.editor.getCursor();
-    // 获取光标行的内容
-    const lineContent = this.editor.editor.getLine(cursor.line);
+    const cursor = this.editor.editor.view.state.selection.main.head;
+    const { doc } = this.editor.editor.view.state;
+    const cursorLine = doc.lineAt(cursor);
+    const lineContent = cursorLine.text;
     const regRes = this.regList.exec(lineContent);
     let insertContent = '\n- ';
     if (regRes !== null) {
@@ -201,27 +214,27 @@ export default class ListHandler {
       insertContent = `\n${regRes[1]}${regRes[2]?.replace('[x]', '[ ] ')}`;
     }
     insertContent += after?.join('') ?? '';
-    // 把当前行内容剪掉
-    this.editor.editor.replaceRange(
-      before,
-      {
-        line: cursor.line,
-        ch: regRes[2]?.length ?? 0,
+
+    // 计算替换范围
+    const lineStart = cursorLine.from;
+    const replaceFrom = lineStart + (regRes[2]?.length ?? 0);
+    const replaceTo = lineStart + lineContent.length;
+
+    // 执行替换操作
+    this.editor.editor.view.dispatch({
+      changes: [
+        { from: replaceFrom, to: replaceTo, insert: before },
+        { from: replaceTo, insert: insertContent },
+      ],
+      selection: {
+        anchor: replaceTo + insertContent.length,
+        head: replaceTo + insertContent.length,
       },
-      {
-        line: cursor.line,
-        ch: lineContent.length,
-      },
-    );
-    // 在当前行的末尾插入一个换行符，这会创建一个新行
-    this.editor.editor.replaceRange(insertContent, {
-      line: cursor.line,
-      ch: lineContent.length,
+      annotations: Transaction.userEvent.of('list.edit'),
     });
-    // 将光标移动到新行
-    this.editor.editor.setCursor({ line: cursor.line + 1, ch: insertContent.length + 1 });
+
     // 将光标聚焦到编辑器上
-    this.editor.editor.focus();
+    this.editor.editor.view.focus();
     this.remove();
   }
 }

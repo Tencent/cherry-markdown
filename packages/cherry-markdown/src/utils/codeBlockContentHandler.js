@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 import { getCodeBlockRule } from '@/utils/regexp';
-import codemirror from 'codemirror';
+import { EditorView, lineNumbers, keymap } from '@codemirror/view';
+import { EditorState } from '@codemirror/state';
+import { defaultKeymap, indentWithTab } from '@codemirror/commands';
 import { getCodePreviewLangSelectElement } from '@/utils/code-preview-language-setting';
 import { copyToClip } from '@/utils/copy';
-import 'codemirror/keymap/sublime';
 
 export default class CodeBlockHandler {
   /**
@@ -279,34 +280,35 @@ export default class CodeBlockHandler {
   $drawEditor() {
     const dom = document.createElement('div');
     dom.className = 'cherry-previewer-codeBlock-content-handler__input';
-    const input = document.createElement('textarea');
-    input.id = 'codeMirrorEditor';
-    dom.appendChild(input);
-    const editorInstance = codemirror.fromTextArea(input, {
-      mode: '',
-      theme: 'default',
-      scrollbarStyle: 'null', // 取消滚动动画
-      lineNumbers: true, // 显示行号
-      autofocus: true, // 自动对焦
-      lineWrapping: true, // 自动换行
-      cursorHeight: 0.85, // 光标高度，0.85好看一些
-      indentUnit: 4, // 缩进单位为4
-      tabSize: 4, // 一个tab转换成的空格数量
-      keyMap: 'sublime',
-    });
+
+    // 创建 CodeMirror 6 编辑器
     const editor = this.codeMirror;
-    editorInstance.on('change', () => {
-      editor.replaceSelection(editorInstance.getValue(), 'around');
+    const extensions = [
+      lineNumbers(),
+      EditorView.lineWrapping,
+      keymap.of([...defaultKeymap, indentWithTab]),
+      EditorView.updateListener.of((update) => {
+        if (update.docChanged) {
+          editor.replaceSelection(update.state.doc.toString(), 'around');
+        }
+      }),
+    ];
+
+    const state = EditorState.create({
+      doc: this.codeMirror.getSelection(),
+      extensions,
     });
+
+    const view = new EditorView({
+      state,
+      parent: dom,
+    });
+
     this.codeBlockEditor.editorDom.inputDiv = dom;
-    this.codeBlockEditor.editorDom.inputDom = editorInstance;
+    this.codeBlockEditor.editorDom.inputDom = view;
     this.$updateEditorPosition();
     this.container.appendChild(this.codeBlockEditor.editorDom.inputDiv);
-    this.codeBlockEditor.editorDom.inputDom.focus();
-    this.codeBlockEditor.editorDom.inputDom.refresh();
-    editorInstance.setValue(this.codeMirror.getSelection());
-    // 去掉下面的逻辑，因为在代码块比较高时，强制让光标定位在最后会让页面出现跳跃的情况
-    // editorInstance.setCursor(Number.MAX_VALUE, Number.MAX_VALUE); // 指针设置至CodeBlock末尾
+    view.focus();
   }
 
   /**
@@ -364,12 +366,12 @@ export default class CodeBlockHandler {
   }
 
   /**
-   * 更新编辑器的位置（尺寸和位置）
+   * 更新编辑器的位置(尺寸和位置)
    */
   $updateEditorPosition() {
     this.$setInputOffset();
     const spanStyle = getComputedStyle(this.codeBlockEditor.info.codeBlockNode);
-    const editorWrapper = this.codeBlockEditor.editorDom.inputDom.getWrapperElement();
+    const editorWrapper = this.codeBlockEditor.editorDom.inputDom.dom;
     this.setStyle(editorWrapper, 'fontSize', spanStyle.fontSize || '16px');
     this.setStyle(editorWrapper, 'fontFamily', spanStyle.fontFamily);
     this.setStyle(editorWrapper, 'lineHeight', '1.8em');

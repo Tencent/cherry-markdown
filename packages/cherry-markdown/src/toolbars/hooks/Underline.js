@@ -48,7 +48,8 @@ export default class Underline extends MenuBase {
     // 如果选中的内容里有下划线语法，则认为是要去掉下划线语法
     if (!this.isSelections && !this.$testIsUnderline($selection)) {
       this.getMoreSelection(' /', '/ ', () => {
-        const newSelection = this.editor.editor.getSelection();
+        const { from, to } = this.editor.editor.view.state.selection.main;
+        const newSelection = this.editor.editor.view.state.doc.sliceString(from, to);
         const isUnderline = this.$testIsUnderline(newSelection);
         if (isUnderline) {
           $selection = newSelection;
