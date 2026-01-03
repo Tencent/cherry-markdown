@@ -7,112 +7,21 @@ import {
   extractFileName,
   openDirectoryDialog,
 } from '../fileUtils';
+import { useDirectoryStore } from '../../store';
+import { mergeSimilarDirectories } from '../../utils/path';
 
 // 常量定义
 const MAX_DIRECTORY_COUNT = 10; // 最大目录数量
-const STORAGE_KEY_EXPANSION_STATE = 'cherry-markdown-directory-expansion-state';
-const STORAGE_KEY_RECENT_DIRECTORIES = 'cherry-markdown-recent-directories';
-
-/**
- * 标准化路径分隔符为正斜杠
- */
-const normalizePath = (path: string): string => path.replace(/\\/g, '/');
-
-/**
- * 检查路径是否为绝对路径
- */
-const isAbsolutePath = (path: string): boolean => path.includes('/') || path.includes('\\');
+const FULL_TREE_DEPTH = 64;
 
 /**
  * 目录管理composable
  */
 export function useDirectoryManager(fileStore: FileStore) {
+  const directoryStore = useDirectoryStore();
+
   // 目录管理相关数据
   const recentDirectories = ref<DirectoryNode[]>([]);
-
-  // 存储目录展开状态的Map
-  const directoryExpansionState = ref(new Map<string, boolean>());
-
-  /**
-   * 从localStorage加载保存的目录展开状态
-   */
-  const loadExpansionStateFromStorage = (): Map<string, boolean> => {
-    try {
-      const savedState = localStorage.getItem(STORAGE_KEY_EXPANSION_STATE);
-      if (!savedState) return new Map();
-
-      const parsedState = JSON.parse(savedState);
-      if (typeof parsedState !== 'object' || parsedState === null) {
-        console.warn('目录展开状态数据格式错误');
-        return new Map();
-      }
-      return new Map(Object.entries(parsedState));
-    } catch (error) {
-      console.warn('加载目录展开状态失败:', error);
-      return new Map();
-    }
-  };
-
-  /**
-   * 保存目录展开状态到localStorage
-   */
-  const saveExpansionStateToStorage = (): void => {
-    try {
-      const stateObject = Object.fromEntries(directoryExpansionState.value);
-      localStorage.setItem(STORAGE_KEY_EXPANSION_STATE, JSON.stringify(stateObject));
-    } catch (error) {
-      console.warn('保存目录展开状态失败:', error);
-    }
-  };
-
-  /**
-   * 从localStorage加载保存的最近目录列表
-   */
-  const loadRecentDirectoriesFromStorage = (): DirectoryNode[] => {
-    try {
-      const savedDirectories = localStorage.getItem(STORAGE_KEY_RECENT_DIRECTORIES);
-      if (!savedDirectories) return [];
-
-      const parsedDirectories = JSON.parse(savedDirectories);
-      if (!Array.isArray(parsedDirectories)) {
-        console.warn('最近目录列表数据格式错误');
-        return [];
-      }
-
-      return parsedDirectories
-        .filter((dir) => dir && typeof dir.path === 'string')
-        .map((dir) => ({
-          ...dir,
-          expanded: directoryExpansionState.value.get(dir.path) || false,
-          children: [],
-        }));
-    } catch (error) {
-      console.warn('加载最近目录列表失败:', error);
-      return [];
-    }
-  };
-
-  /**
-   * 保存最近目录列表到localStorage
-   * 只保存目录的基本信息，不保存children数据
-   */
-  const saveRecentDirectoriesToStorage = (): void => {
-    try {
-      const directoriesToSave = recentDirectories.value.map((dir) => ({
-        path: dir.path,
-        name: dir.name,
-        type: dir.type,
-        expanded: dir.expanded,
-      }));
-      localStorage.setItem(STORAGE_KEY_RECENT_DIRECTORIES, JSON.stringify(directoriesToSave));
-    } catch (error) {
-      console.warn('保存最近目录列表失败:', error);
-    }
-  };
-
-  // 初始化时从localStorage加载状态
-  directoryExpansionState.value = loadExpansionStateFromStorage();
-  recentDirectories.value = loadRecentDirectoriesFromStorage();
 
   /**
    * 合并相似目录路径
@@ -124,55 +33,6 @@ export function useDirectoryManager(fileStore: FileStore) {
    * 3. 对于每个路径，检查是否已有父路径存在
    * 4. 对于相对路径，检查是否已有对应的绝对路径
    */
-  const mergeSimilarDirectories = (directories: string[]): string[] => {
-    if (directories.length === 0) return [];
-    if (directories.length === 1) return directories;
-
-    // 分离并标准化路径
-    const absolutePaths = new Map<string, string>(); // normalized -> original
-    const relativePaths = new Set<string>();
-
-    directories.forEach((dir) => {
-      if (isAbsolutePath(dir)) {
-        const normalized = normalizePath(dir);
-        if (!absolutePaths.has(normalized)) {
-          absolutePaths.set(normalized, dir);
-        }
-      } else {
-        relativePaths.add(dir);
-      }
-    });
-
-    // 处理绝对路径：按长度排序，保留最短的父目录
-    const sortedAbsolutePaths = Array.from(absolutePaths.keys()).sort((a, b) => a.length - b.length);
-
-    const mergedAbsolutePaths = new Set<string>();
-    for (const path of sortedAbsolutePaths) {
-      // 检查是否已有父目录
-      let hasParent = false;
-      for (const existingPath of mergedAbsolutePaths) {
-        if (path.startsWith(`${existingPath}/`)) {
-          hasParent = true;
-          break;
-        }
-      }
-
-      if (!hasParent) {
-        mergedAbsolutePaths.add(absolutePaths.get(path)!);
-      }
-    }
-
-    // 处理相对路径：排除已有对应绝对路径的相对路径
-    const mergedRelativePaths = Array.from(relativePaths).filter((relPath) => {
-      return !Array.from(mergedAbsolutePaths).some((absPath) => {
-        const normalized = normalizePath(absPath);
-        return normalized.endsWith(`/${relPath}`) || normalized.includes(`/${relPath}/`);
-      });
-    });
-
-    return [...mergedAbsolutePaths, ...mergedRelativePaths];
-  };
-
   // 切换目录展开状态
   const toggleDirectory = async (dirPath: string, node?: DirectoryNode): Promise<void> => {
     let directory: DirectoryNode | undefined;
@@ -188,17 +48,11 @@ export function useDirectoryManager(fileStore: FileStore) {
     if (!directory) return;
 
     directory.expanded = !directory.expanded;
-
-    // 保存展开状态到Map
-    directoryExpansionState.value.set(dirPath, directory.expanded);
-
-    // 保存状态到localStorage
-    saveExpansionStateToStorage();
+    directoryStore.setExpanded(dirPath, directory.expanded);
 
     if (directory.expanded) {
-      // 如果展开且没有子节点数据，加载子节点
       if (!directory.children || directory.children.length === 0) {
-        const result = await loadDirectoryStructure(dirPath, 1);
+        const result = await loadDirectoryStructure(dirPath, 1, FULL_TREE_DEPTH);
         if (result.success && result.data) {
           directory.children = result.data;
         }
@@ -227,29 +81,37 @@ export function useDirectoryManager(fileStore: FileStore) {
           const dirExists = await checkPathExists(dirPath);
           if (!dirExists) return null;
 
+          const cached = directoryStore.items.find((it) => it.path === dirPath);
           return {
             path: dirPath,
             name: extractFileName(dirPath),
             type: 'directory' as const,
-            expanded: directoryExpansionState.value.get(dirPath) || false,
+            expanded: cached?.expanded ?? false,
             children: [] as DirectoryNode[],
           };
         }),
       );
 
-      // 合并从localStorage加载的目录和新提取的目录
       const validDirectories = directoryResults.filter(Boolean) as DirectoryNode[];
-      const storedDirectories = recentDirectories.value.filter(
-        (storedDir) => !validDirectories.some((newDir) => newDir.path === storedDir.path),
-      );
 
-      recentDirectories.value = [...validDirectories, ...storedDirectories].slice(0, MAX_DIRECTORY_COUNT);
+      // 结合 pinia 缓存（确保缓存的目录也能恢复）
+      const cachedOnly = directoryStore.items
+        .filter((item) => !validDirectories.some((dir) => dir.path === item.path))
+        .map((item) => ({
+          path: item.path,
+          name: extractFileName(item.path),
+          type: 'directory' as const,
+          expanded: item.expanded,
+          children: [] as DirectoryNode[],
+        }));
+
+      recentDirectories.value = [...validDirectories, ...cachedOnly].slice(0, MAX_DIRECTORY_COUNT);
 
       // 为已展开的目录加载文件列表
       const loadPromises = recentDirectories.value
         .filter((dir) => dir.expanded)
         .map(async (currentDir) => {
-          const result = await loadDirectoryStructure(currentDir.path, 1);
+          const result = await loadDirectoryStructure(currentDir.path, 1, FULL_TREE_DEPTH);
           if (result.success && result.data) {
             const updatedDir = recentDirectories.value.find((dir) => dir.path === currentDir.path);
             if (updatedDir) {
@@ -260,8 +122,9 @@ export function useDirectoryManager(fileStore: FileStore) {
 
       await Promise.all(loadPromises);
 
-      // 保存更新后的目录列表
-      saveRecentDirectoriesToStorage();
+      directoryStore.setItems(
+        recentDirectories.value.map((dir) => ({ path: dir.path, expanded: dir.expanded ?? false })),
+      );
     } catch (error) {
       console.error('获取目录列表失败:', error);
     }
@@ -294,21 +157,19 @@ export function useDirectoryManager(fileStore: FileStore) {
         children: [],
       };
 
-      // 保存展开状态
-      directoryExpansionState.value.set(dirPath, true);
-      saveExpansionStateToStorage();
+      directoryStore.upsertDirectory(dirPath, true);
 
       // 加载目录结构
-      const loadResult = await loadDirectoryStructure(dirPath, 1);
+      const loadResult = await loadDirectoryStructure(dirPath, 1, FULL_TREE_DEPTH);
       if (loadResult.success && loadResult.data) {
         newDir.children = loadResult.data;
       }
 
       // 添加到目录列表开头并限制数量
       recentDirectories.value = [newDir, ...recentDirectories.value].slice(0, MAX_DIRECTORY_COUNT);
-
-      // 保存到localStorage
-      saveRecentDirectoriesToStorage();
+      directoryStore.setItems(
+        recentDirectories.value.map((dir) => ({ path: dir.path, expanded: dir.expanded ?? false })),
+      );
     } catch (error) {
       console.error('打开目录失败:', error);
     }
@@ -335,7 +196,7 @@ export function useDirectoryManager(fileStore: FileStore) {
         }
         // 如果目录是展开的，加载文件列表
         if (savedState && currentDir.children && currentDir.children.length === 0) {
-          loadDirectoryStructure(currentDir.path, 1).then((result) => {
+          loadDirectoryStructure(currentDir.path, 1, FULL_TREE_DEPTH).then((result) => {
             if (result.success && result.data) {
               const updatedDir = recentDirectories.value.find((d) => d.path === currentDir.path);
               if (updatedDir) {
@@ -347,13 +208,13 @@ export function useDirectoryManager(fileStore: FileStore) {
       }
     });
 
-    // 保存更新后的目录列表
-    saveRecentDirectoriesToStorage();
+    directoryStore.setItems(
+      recentDirectories.value.map((dir) => ({ path: dir.path, expanded: dir.expanded ?? false })),
+    );
   };
 
   return {
     recentDirectories,
-    directoryExpansionState,
     toggleDirectory,
     openDirectory,
     refreshDirectories,

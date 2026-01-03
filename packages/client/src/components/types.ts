@@ -3,6 +3,8 @@ export interface FileInfo {
   path: string;
   name: string;
   lastAccessed: number;
+  lastOpened?: number;
+  lastSaved?: number | null;
   size?: number;
   type?: string;
 }
@@ -50,6 +52,7 @@ export interface FileOperationResult {
   success: boolean;
   error?: string;
   data?: any;
+  path?: string;
 }
 
 // 文件读取选项类型
@@ -117,14 +120,10 @@ export interface DirectoryStructureResult {
   data?: DirectoryNode[];
 }
 
-export interface FileOperationResult {
-  success: boolean;
-  error?: string;
-  data?: any;
-}
-
-// 常量定义
-export const SUPPORTED_FILE_EXTENSIONS = ['md', 'markdown', 'text', 'txt'];
-export const MAX_RECENT_FILES = 50;
-export const MAX_DIRECTORY_DEPTH = 4;
-export const DEFAULT_FILE_CONTENT = '# 新文档\n\n开始编写你的内容...';
+// 常量定义统一从 constants 中导出
+export {
+  SUPPORTED_FILE_EXTENSIONS,
+  MAX_RECENT_FILES,
+  MAX_DIRECTORY_DEPTH,
+  DEFAULT_FILE_CONTENT,
+} from '../constants/files';
