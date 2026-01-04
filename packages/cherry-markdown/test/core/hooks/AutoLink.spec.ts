@@ -298,4 +298,142 @@ describe('core/hooks/autolink', () => {
       expect(result).toBe(item.expected);
     });
   });
+
+  it('escapePreservedSymbol', () => {
+    const cases = [
+      // 基础下划线测试
+      {
+        input: 'https://example.com',
+        expected: 'https://example.com',
+      },
+      {
+        input: 'https://example_test.com',
+        expected: 'https://example&#x5f;test.com',
+      },
+      {
+        input: 'https://example.com/path_with_underscore',
+        expected: 'https://example.com/path&#x5f;with&#x5f;underscore',
+      },
+      // 基础星号测试
+      {
+        input: 'https://example*test.com',
+        expected: 'https://example&#x2a;test.com',
+      },
+      {
+        input: 'https://example.com/*path*',
+        expected: 'https://example.com/&#x2a;path&#x2a;',
+      },
+      // 混合下划线和星号
+      {
+        input: 'https://example_test*star.com',
+        expected: 'https://example&#x5f;test&#x2a;star.com',
+      },
+      {
+        input: 'https://example.com/path_*_test',
+        expected: 'https://example.com/path&#x5f;&#x2a;&#x5f;test',
+      },
+      // 多个连续的下划线或星号
+      {
+        input: 'https://example__test.com',
+        expected: 'https://example&#x5f;&#x5f;test.com',
+      },
+      {
+        input: 'https://example**test.com',
+        expected: 'https://example&#x2a;&#x2a;test.com',
+      },
+      {
+        input: 'https://example.com/path___test',
+        expected: 'https://example.com/path&#x5f;&#x5f;&#x5f;test',
+      },
+      // 空字符串
+      {
+        input: '',
+        expected: '',
+      },
+      // 不含下划线和星号的普通URL
+      {
+        input: 'https://example.com',
+        expected: 'https://example.com',
+      },
+      {
+        input: 'https://www.example.com/path/to/resource',
+        expected: 'https://www.example.com/path/to/resource',
+      },
+      // 仅包含下划线
+      {
+        input: '_',
+        expected: '&#x5f;',
+      },
+      {
+        input: '___',
+        expected: '&#x5f;&#x5f;&#x5f;',
+      },
+      // 仅包含星号
+      {
+        input: '*',
+        expected: '&#x2a;',
+      },
+      {
+        input: '***',
+        expected: '&#x2a;&#x2a;&#x2a;',
+      },
+      // URL中的常见模式
+      {
+        input: 'https://example.com/api_v1/users',
+        expected: 'https://example.com/api&#x5f;v1/users',
+      },
+      {
+        input: 'https://example.com/user_name/profile',
+        expected: 'https://example.com/user&#x5f;name/profile',
+      },
+      {
+        input: 'https://example.com/image_*_thumb.jpg',
+        expected: 'https://example.com/image&#x5f;&#x2a;&#x5f;thumb.jpg',
+      },
+      // 复杂的URL结构
+      {
+        input: 'https://sub_domain.example.com/path_to_resource/file_name_v2.js',
+        expected: 'https://sub&#x5f;domain.example.com/path&#x5f;to&#x5f;resource/file&#x5f;name&#x5f;v2.js',
+      },
+      // 邮箱中的下划线和星号
+      {
+        input: 'user_name@example.com',
+        expected: 'user&#x5f;name@example.com',
+      },
+      {
+        input: 'user*test@example.com',
+        expected: 'user&#x2a;test@example.com',
+      },
+      // 边界情况：URL开头或结尾
+      {
+        input: '_https://example.com',
+        expected: '&#x5f;https://example.com',
+      },
+      {
+        input: 'https://example.com_',
+        expected: 'https://example.com&#x5f;',
+      },
+      {
+        input: '*https://example.com',
+        expected: '&#x2a;https://example.com',
+      },
+      {
+        input: 'https://example.com*',
+        expected: 'https://example.com&#x2a;',
+      },
+      // URL参数中的下划线
+      {
+        input: 'https://example.com?param_name=value',
+        expected: 'https://example.com?param&#x5f;name=value',
+      },
+      {
+        input: 'https://example.com?name=value&other_param=test',
+        expected: 'https://example.com?name=value&other&#x5f;param=test',
+      },
+    ];
+    cases.forEach((item) => {
+      const result = AutoLink.escapePreservedSymbol(item.input);
+      expect(result).toBe(item.expected);
+    });
+  });
 });
