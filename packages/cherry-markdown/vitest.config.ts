@@ -13,6 +13,9 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom', // Use jsdom for browser-like tests
     coverage: {
+      enabled: true,
+      include: ['src/**/*.js'],
+      exclude: ['src/libs', 'src/locales'],
       reporter: ['text', 'json', 'html'], // Optional: Add coverage reports
     },
   },
