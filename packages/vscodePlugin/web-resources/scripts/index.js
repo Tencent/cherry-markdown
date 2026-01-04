@@ -1,5 +1,5 @@
-import 'mathjax/es5/tex-svg.js';
-import { toPng } from 'html-to-image';
+// Heavy modules are loaded on demand to reduce initial bundle size
+// MathJax and html-to-image are dynamically imported when needed
 
 // import md5 from 'md5';
 
@@ -13,7 +13,7 @@ const customMenuChangeModule = Cherry.createMenuHook('编辑', {
     if (window.isDisableEdit) {
       vscode.postMessage({
         type: 'tips',
-        data: 'can\'t edit presently  当前文档已失焦点，编辑后无法保存',
+        data: "can't edit presently  当前文档已失焦点，编辑后无法保存",
       });
       return selection;
     }
@@ -42,30 +42,27 @@ const customMenuFont = Cherry.createMenuHook('字体样式', {
 const customMenuExport = Cherry.createMenuHook('保存', {
   iconName: 'export',
   subMenuConfig: [
-    { noIcon: true, name: '保存为 PNG', onclick: () => {
-      const cherrymarkdown = document.querySelector('.cherry-previewer');
-      if (!cherrymarkdown) {
-        vscode.postMessage({
-          type: 'export-png',
-          data: 'export-fail',
-        });
-      }
-      toPng(cherrymarkdown)
-        .then((dataUrl) => {
-          console.log(dataUrl);
-          vscode.postMessage({
-            type: 'export-png',
-            data: dataUrl,
-          });
-        })
-        .catch((error) => {
+    {
+      noIcon: true,
+      name: '保存为 PNG',
+      onclick: async () => {
+        const cherrymarkdown = document.querySelector('.cherry-previewer');
+        if (!cherrymarkdown) {
+          vscode.postMessage({ type: 'export-png', data: 'export-fail' });
+          return;
+        }
+        try {
+          const mod = await import(/* webpackChunkName: "html-to-image" */ 'html-to-image');
+          const toPng = mod.toPng || (mod.default && mod.default.toPng);
+          if (!toPng) throw new Error('html-to-image unavailable');
+          const dataUrl = await toPng(cherrymarkdown);
+          vscode.postMessage({ type: 'export-png', data: dataUrl });
+        } catch (error) {
           console.error('toPng error:', error);
-          vscode.postMessage({
-            type: 'export-png',
-            data: 'export-fail',
-          });
-        });
-    } },
+          vscode.postMessage({ type: 'export-png', data: 'export-fail' });
+        }
+      },
+    },
   ],
 });
 
@@ -87,7 +84,6 @@ const customMenuExport = Cherry.createMenuHook('保存', {
 //     } },
 //   ],
 // });
-
 
 /** 处理 a 链接跳转问题 */
 const onClickLink = (e, target) => {
@@ -165,14 +161,7 @@ const basicConfig = {
     toolbar: [
       'bold',
       {
-        customMenuFont: [
-          'italic',
-          'strikethrough',
-          'underline',
-          'sub',
-          'sup',
-          'ruby',
-        ],
+        customMenuFont: ['italic', 'strikethrough', 'underline', 'sub', 'sup', 'ruby'],
       },
       'size',
       'color',
@@ -203,26 +192,8 @@ const basicConfig = {
       // 'graph',
       'togglePreview',
     ],
-    bubble: [
-      'bold',
-      'italic',
-      'underline',
-      'strikethrough',
-      'sub',
-      'sup',
-      'quote',
-      'ruby',
-      '|',
-      'size',
-      'color',
-    ], // array or false
-    sidebar: [
-      'customMenuChangeModule',
-      'mobilePreview',
-      'copy',
-      'theme',
-      'customMenuExport',
-    ],
+    bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
+    sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'theme', 'customMenuExport'],
     customMenu: {
       customMenuChangeModule,
       customMenuFont,
@@ -311,7 +282,7 @@ const basicConfig = {
         case 'A':
           onClickLink(e, target);
           break;
-      };
+      }
     },
   },
 };
@@ -350,6 +321,8 @@ const mdInfo = JSON.parse(document.getElementById('markdown-info').value);
 const locale = languageIdentifiers[mdInfo.vscodeLanguage] || 'zh_CN';
 
 const config = Object.assign({}, basicConfig, { value: mdInfo.text, locale });
+// 异步加载 MathJax（如果需要），以便拆分包体积但不阻塞初始化
+import(/* webpackChunkName: "mathjax" */ 'mathjax/es5/tex-svg.js').catch(() => {});
 // eslint-disable-next-line new-cap, no-undef
 const cherry = new Cherry(config);
 // eslint-disable-next-line no-undef
@@ -389,10 +362,7 @@ cherry.previewer.getDom().addEventListener('scroll', () => {
     postScrollMessage(0);
     return true;
   }
-  if (
-    domContainer.scrollTop + domContainer.offsetHeight
-    > domContainer.scrollHeight
-  ) {
+  if (domContainer.scrollTop + domContainer.offsetHeight > domContainer.scrollHeight) {
     postScrollMessage(-1);
     return true;
   }
@@ -418,11 +388,7 @@ cherry.previewer.getDom().addEventListener('scroll', () => {
   // 获取观察点处最近的markdown元素
   let mdElement = targetElement.closest('[data-sign]');
   // 由于新增脚注，内部容器也有可能存在data-sign，所以需要循环往父级找
-  while (
-    mdElement
-    && mdElement.parentElement
-    && mdElement.parentElement !== domContainer
-  ) {
+  while (mdElement && mdElement.parentElement && mdElement.parentElement !== domContainer) {
     mdElement = mdElement.parentElement.closest('[data-sign]');
   }
   if (!mdElement) {
@@ -503,7 +469,30 @@ window.addEventListener('message', (e) => {
       break;
     case 'upload-file-callback': {
       const { url, ...rest } = data;
+      // 调用 Cherry 编辑器的回调以完成回填
       window.uploadFileCallback(url, rest);
+      // 根据回填参数应用图片样式（isNotBorder / isBorder / isShadow / isRadius）
+      try {
+        const previewDom = cherry.previewer.getDom();
+        const imgs = previewDom.querySelectorAll(`img[src="${url}"]`);
+        imgs.forEach((img) => {
+          // 清理之前的样式类
+          img.classList.remove('ch-image-border', 'ch-image-no-border', 'ch-image-shadow', 'ch-image-radius');
+          if (rest.isNotBorder) {
+            img.classList.add('ch-image-no-border');
+          } else if (rest.isBorder) {
+            img.classList.add('ch-image-border');
+          }
+          if (rest.isShadow) {
+            img.classList.add('ch-image-shadow');
+          }
+          if (rest.isRadius) {
+            img.classList.add('ch-image-radius');
+          }
+        });
+      } catch (e) {
+        // 忽略前端样式应用中的错误
+      }
       break;
     }
   }
@@ -521,9 +510,7 @@ function elementsFromPoint(x, y) {
     return document.elementsFromPoint(x, y);
   }
 
-  if (
-    typeof (/** @type {any}*/ (document).msElementsFromPoint) === 'function'
-  ) {
+  if (typeof (/** @type {any}*/ (document).msElementsFromPoint) === 'function') {
     const nodeList = /** @type {any}*/ (document).msElementsFromPoint(x, y);
     return nodeList !== null ? Array.from(nodeList) : nodeList;
   }
@@ -532,9 +519,7 @@ function elementsFromPoint(x, y) {
   /** @type {HTMLElement} */
   let ele;
   do {
-    const currentElement = /** @type {HTMLElement} */ (
-      document.elementFromPoint(x, y)
-    );
+    const currentElement = /** @type {HTMLElement} */ (document.elementFromPoint(x, y));
     if (ele !== currentElement) {
       ele = currentElement;
       elements.push(ele);

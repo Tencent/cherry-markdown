@@ -1,13 +1,12 @@
 import { ref, computed, type Ref } from 'vue';
-import type { FileInfo, ContextMenuState, FileStore } from '../types';
-import {
-  createNewFile as createNewFileUtil,
-  openExistingFile as openExistingFileUtil,
-  readFileContent,
-  formatTimestamp,
-  debounce,
-} from '../fileUtils';
-import { openPath } from '@tauri-apps/plugin-opener';
+import type { FileInfo, DirectoryNode } from '../types';
+import type { useFileStore as useFileStoreType } from '../../store/modal/file';
+import { openExistingFile as openExistingFileUtil, readFileContent, formatTimestamp } from '../fileUtils';
+import { openPath, revealItemInDir } from '@tauri-apps/plugin-opener';
+import { useContextMenu } from './useContextMenu';
+import { WINDOW_EVENTS } from '../../constants/events';
+import { notifyError, notifyInfo, notifySuccess } from '../../utils/notifications';
+import { MESSAGES } from '../../constants/i18n';
 
 // 常量定义
 const STORAGE_KEY_DIRECTORY_MANAGER_EXPANDED = 'cherry-markdown-directory-manager-expanded';
@@ -16,7 +15,9 @@ const DEFAULT_DIRECTORY_MANAGER_EXPANDED = true;
 /**
  * 文件管理composable
  */
-export function useFileManager(fileStore: FileStore, folderManagerRef: Ref<any>) {
+type FileStoreInstance = ReturnType<typeof useFileStoreType>;
+
+export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: Ref<any>) {
   // 响应式数据
   const sortedRecentFiles = computed(() => fileStore.sortedRecentFiles);
   const currentFilePath = computed(() => fileStore.currentFilePath);
@@ -54,13 +55,7 @@ export function useFileManager(fileStore: FileStore, folderManagerRef: Ref<any>)
   // 组件状态
   const recentFilesExpanded = ref(false);
   const directoryManagerExpanded = ref(loadDirectoryManagerExpandedState());
-
-  const contextMenu = ref<ContextMenuState>({
-    visible: false,
-    x: 0,
-    y: 0,
-    file: null,
-  });
+  const isLoading = ref(false);
 
   // 切换目录管理展开状态
   const toggleDirectoryManager = (): void => {
@@ -73,67 +68,65 @@ export function useFileManager(fileStore: FileStore, folderManagerRef: Ref<any>)
     }
   };
 
-  // 切换最近文件展开状态
-  const toggleRecentFiles = (): void => {
-    recentFilesExpanded.value = !recentFilesExpanded.value;
-    if (recentFilesExpanded.value) {
-      directoryManagerExpanded.value = false;
-      // 保存状态到localStorage
-      saveDirectoryManagerExpandedState(false);
-    }
-  };
-
   // 切换侧边栏
   const toggleSidebar = (): void => {
     fileStore.toggleSidebar();
   };
 
-  // 创建新文件
-  const createNewFile = async (): Promise<void> => {
-    const result = await createNewFileUtil();
-    if (result.success && result.data) {
-      await openFile(result.data);
-    } else if (result.error) {
-      console.error('创建新文件失败:', result.error);
-    }
-  };
-
   // 打开现有文件
   const openExistingFile = async (): Promise<void> => {
-    const result = await openExistingFileUtil();
-    if (result.success && result.data) {
-      await openFile(result.data);
-    } else if (result.error) {
-      console.error('打开文件失败:', result.error);
+    if (isLoading.value) return;
+    isLoading.value = true;
+    try {
+      const result = await openExistingFileUtil();
+      if (result.success && result.data) {
+        await openFile(result.data);
+      } else if (result.error) {
+        notifyError(`${MESSAGES.FILE.OPEN_FAILED}: ${result.error}`);
+      }
+    } finally {
+      isLoading.value = false;
     }
   };
 
   // 打开目录
   const openDirectory = async (): Promise<void> => {
+    if (isLoading.value) return;
+    isLoading.value = true;
     try {
       if (folderManagerRef.value) {
         await folderManagerRef.value.openDirectory();
       }
     } catch (error) {
-      console.error('打开目录失败:', error);
+      notifyError(
+        `${MESSAGES.DIRECTORY.OPEN_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`,
+      );
+    } finally {
+      isLoading.value = false;
     }
   };
 
   // 打开文件
-  const openFile = async (filePath: string, fromDirectoryManager: boolean = false): Promise<void> => {
+  const openFile = async (
+    filePath: string,
+    fromDirectoryManager: boolean = false,
+    bumpRecent: boolean = true,
+  ): Promise<void> => {
     try {
       const result = await readFileContent(filePath);
       if (result.success && result.data) {
         // 通过自定义事件传递文件内容到App.vue
         window.dispatchEvent(
-          new CustomEvent('open-file-from-sidebar', {
+          new CustomEvent(WINDOW_EVENTS.OPEN_FILE_FROM_SIDEBAR, {
             detail: { filePath, content: result.data },
           }),
         );
         // 更新当前文件路径
         fileStore.setCurrentFilePath(filePath);
-        // 添加到最近访问列表
-        fileStore.addRecentFile(filePath);
+        // 添加到最近访问列表（可选）
+        if (bumpRecent) {
+          fileStore.addRecentFile(filePath);
+        }
 
         if (fromDirectoryManager) {
           // 如果从目录管理打开文件，始终展开目录管理区域
@@ -147,10 +140,10 @@ export function useFileManager(fileStore: FileStore, folderManagerRef: Ref<any>)
           saveDirectoryManagerExpandedState(false);
         }
       } else {
-        console.error('读取文件失败:', result.error);
+        notifyError(`${MESSAGES.FILE.READ_FAILED}: ${result.error}`);
       }
     } catch (error) {
-      console.error('打开文件失败:', error);
+      notifyError(`${MESSAGES.FILE.OPEN_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`);
     }
   };
 
@@ -166,106 +159,79 @@ export function useFileManager(fileStore: FileStore, folderManagerRef: Ref<any>)
     }
   };
 
-  // 清空最近文件列表
-  const clearRecentFiles = (): void => {
-    const storeInstance = fileStore;
-    storeInstance.recentFiles = [];
-    void refreshDirectories();
-  };
-
   // 从最近文件中移除
   const removeFromRecent = (filePath: string): void => {
-    fileStore.removeRecentFile(filePath);
-    refreshDirectories();
+    try {
+      fileStore.removeRecentFile(filePath);
+      notifySuccess(MESSAGES.FILE_MANAGEMENT.REMOVE_SUCCESS);
+      void refreshDirectories();
+    } catch (error) {
+      notifyError(
+        `${MESSAGES.FILE_MANAGEMENT.REMOVE_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`,
+      );
+    }
   };
 
   // 复制文件路径
   const copyFilePath = async (filePath: string): Promise<void> => {
     try {
       await navigator.clipboard.writeText(filePath);
+      notifyInfo(MESSAGES.CLIPBOARD.COPY_PATH_SUCCESS);
       hideContextMenu();
     } catch (error) {
-      console.error('复制文件路径失败:', error);
+      notifyError(
+        `${MESSAGES.CLIPBOARD.COPY_PATH_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`,
+      );
     }
   };
 
   // 在资源管理器中打开文件
   const openInExplorer = async (filePath: string): Promise<void> => {
     try {
-      // 从文件路径中提取目录路径
-      const directoryPath = filePath.replace(/\\\\/g, '/').replace(/\/[^\\/]*$/, '');
+      const directoryPath = filePath.replace(/\\/g, '/').replace(/\/[^\\/]*$/, '');
 
-      // 使用Tauri opener插件打开文件夹
+      // 优先尝试直接在资源管理器定位文件
+      try {
+        await revealItemInDir(filePath);
+        hideContextMenu();
+        return;
+      } catch (_) {
+        // fallback: 打开所在目录
+      }
+
       await openPath(directoryPath);
       hideContextMenu();
     } catch (error) {
-      console.error('打开资源管理器失败:', error);
+      notifyError(
+        `${MESSAGES.EXPLORER.OPEN_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`,
+      );
       // 备选方案：复制文件路径到剪贴板
       try {
         await navigator.clipboard.writeText(filePath);
-        alert(`无法打开，已复制文件路径到剪贴板: ${filePath}`);
+        notifyInfo(`${MESSAGES.CLIPBOARD.COPY_PATH_FALLBACK}: ${filePath}`);
       } catch (clipboardError) {
-        console.error('复制文件路径失败:', clipboardError);
+        notifyError(
+          `${MESSAGES.CLIPBOARD.COPY_PATH_FAILED}: ${clipboardError instanceof Error ? clipboardError.message : MESSAGES.UNKNOWN_ERROR}`,
+        );
       }
     }
   };
 
   // 显示右键菜单
-  const showContextMenu = (event: MouseEvent, file: FileInfo | any): void => {
-    event.preventDefault();
+  const mapToFileInfo = (file: FileInfo | DirectoryNode): FileInfo => ({
+    path: file.path,
+    name: file.name,
+    lastAccessed: 'lastAccessed' in file && file.lastAccessed ? file.lastAccessed : Date.now(),
+    size: 'size' in file ? file.size : undefined,
+    type: 'type' in file ? file.type : undefined,
+  });
 
-    // 如果已经有右键菜单显示，先关闭它
-    if (contextMenu.value.visible) {
-      hideContextMenu();
-    }
-
-    // 将DirectoryNode转换为FileInfo格式
-    const fileInfo: FileInfo = {
-      path: file.path,
-      name: file.name,
-      lastAccessed: file.lastModified || Date.now(),
-      size: file.size,
-      type: file.type,
-    };
-
-    contextMenu.value = {
-      visible: true,
-      x: event.clientX,
-      y: event.clientY,
-      file: fileInfo,
-    };
-
-    // 添加全局点击监听器，点击其他地方时关闭菜单
-    setTimeout(() => {
-      document.addEventListener('click', handleGlobalClick, { once: true });
-    }, 0);
-  };
-
-  // 处理全局点击事件
-  const handleGlobalClick = (event: MouseEvent): void => {
-    if (!contextMenu.value.visible) return;
-
-    // 检查点击是否在右键菜单内部
-    const contextMenuElement = document.querySelector('.context-menu');
-    if (contextMenuElement && !contextMenuElement.contains(event.target as Node)) {
-      hideContextMenu();
-    }
-  };
-
-  // 隐藏右键菜单
-  const hideContextMenu = (): void => {
-    contextMenu.value.visible = false;
-    // 移除全局点击监听器
-    document.removeEventListener('click', handleGlobalClick);
-  };
+  const { contextMenu, showContextMenu, hideContextMenu } = useContextMenu(mapToFileInfo);
 
   // 格式化时间
   const formatTime = (timestamp: number): string => {
     return formatTimestamp(timestamp);
   };
-
-  // 防抖处理文件操作
-  const debouncedOpenFile = debounce(openFile, 300);
 
   return {
     sortedRecentFiles,
@@ -274,22 +240,19 @@ export function useFileManager(fileStore: FileStore, folderManagerRef: Ref<any>)
     recentFilesExpanded,
     directoryManagerExpanded,
     contextMenu,
+    isLoading,
     toggleDirectoryManager,
-    toggleRecentFiles,
     toggleSidebar,
-    createNewFile,
     openExistingFile,
     openDirectory,
     openFile,
     handleOpenFile,
     refreshDirectories,
-    clearRecentFiles,
     removeFromRecent,
     copyFilePath,
     openInExplorer,
     showContextMenu,
     hideContextMenu,
     formatTime,
-    debouncedOpenFile,
   };
 }

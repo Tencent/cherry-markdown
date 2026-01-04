@@ -1,13 +1,18 @@
 <template>
   <div class="context-menu" :style="{ left: x + 'px', top: y + 'px' }" @click.stop>
-    <div v-if="menuType === 'recent'" class="menu-item" @click="$emit('remove', file?.path || '')">从列表中移除</div>
-    <div class="menu-item" @click="$emit('copy-path', file?.path || '')">复制文件路径</div>
-    <div class="menu-item" @click="$emit('open-in-explorer', file?.path || '')">在资源管理器中打开</div>
+    <ContextMenuList
+      :file="file"
+      :menu-type="menuType"
+      @remove="$emit('remove', $event)"
+      @copy-path="$emit('copy-path', $event)"
+      @open-in-explorer="$emit('open-in-explorer', $event)"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import type { FileInfo } from '../types';
+import ContextMenuList from './ContextMenuList.vue';
 
 defineProps<{
   x: number;
@@ -33,26 +38,5 @@ defineEmits<{
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   min-width: 140px;
-}
-
-.menu-item {
-  padding: 8px 12px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  color: #495057;
-}
-
-.menu-item:hover {
-  background: #f8f9fa;
-  color: #007bff;
-}
-
-.menu-item:first-child {
-  border-radius: 6px 6px 0 0;
-}
-
-.menu-item:last-child {
-  border-radius: 0 0 6px 6px;
 }
 </style>

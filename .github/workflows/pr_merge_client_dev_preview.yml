@@ -1,15 +1,17 @@
-name: 'Publish Client Dev Preview on PR Merge'
+name: "Publish Client Dev Preview on PR Merge"
 
 on:
   pull_request_target:
     types: [closed]
     paths:
-      - 'packages/client/**'
+      - "packages/client/**"
+      - "packages/cherry-markdown/**"
 
 permissions:
   contents: read
   pull-requests: write
   actions: read
+  issues: write
 
 jobs:
   client-preview:
@@ -22,21 +24,23 @@ jobs:
         include:
           - platform: macos-latest
             target: aarch64-apple-darwin
-            args: '--target aarch64-apple-darwin'
+            args: "--target aarch64-apple-darwin"
             path_patterns: |
-              ./packages/clientsrc-tauri/target/**/release/bundle/dmg/*.dmg
-              ./packages/clientsrc-tauri/target/**/release/bundle/macos/*.app
+              ./packages/client/src-tauri/target/**/release/bundle/dmg/*.dmg
+              ./packages/client/src-tauri/target/**/release/bundle/macos/*.app
           - platform: macos-latest
             target: x86_64-apple-darwin
-            args: '--target x86_64-apple-darwin'
+            args: "--target x86_64-apple-darwin"
             path_patterns: |
-              ./packages/clientsrc-tauri/target/**/release/bundle/dmg/*.dmg
-              ./packages/clientsrc-tauri/target/**/release/bundle/macos/*.app
+              ./packages/client/src-tauri/target/**/release/bundle/dmg/*.dmg
+              ./packages/client/src-tauri/target/**/release/bundle/macos/*.app
           - platform: windows-latest
+            target: x86_64-pc-windows-msvc
             path_patterns: |
               ./packages/client/src-tauri/target/**/release/bundle/msi/*.msi
               ./packages/client/src-tauri/target/**/release/bundle/nsis/*.exe
           - platform: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
             path_patterns: |
               ./packages/client/src-tauri/target/**/release/bundle/appimage/*.AppImage
               ./packages/client/src-tauri/target/**/release/bundle/deb/*.deb
@@ -48,17 +52,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'yarn'
+          cache: "yarn"
 
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           target: ${{ matrix.target }}
           toolchain: stable
-
-      - name: Ensure x86_64 Target is Installed
-        if: matrix.target == 'x86_64-apple-darwin'
-        run: rustup target add x86_64-apple-darwin
 
       - name: Install Linux Dependencies
         if: matrix.platform == 'ubuntu-latest'
@@ -70,40 +70,109 @@ jobs:
         run: |
           yarn --network-timeout 100000
           yarn build
-          yarn build:client ${{ matrix.args }}
+          yarn build:client ${{ matrix.args || '' }}
+
+      - name: Create File List
+        shell: bash
+        run: |
+          mkdir -p ./artifact-info
+          find ./packages/client/src-tauri/target -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" \) -exec basename {} \; > ./artifact-info/files.txt
+          find ./packages/client/src-tauri/target -type d -name "*.app" -exec basename {} \; >> ./artifact-info/files.txt
+          if [ ! -s ./artifact-info/files.txt ]; then
+            echo "No build artifacts found!" > ./artifact-info/files.txt
+          fi
+          echo "Platform: ${{ matrix.platform }}" >> ./artifact-info/info.txt
+          echo "Target: ${{ matrix.target }}" >> ./artifact-info/info.txt
 
       - name: Upload Files
-        id: upload-artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cherry-markdown_client_${{ matrix.platform }}
+          name: cherry-markdown_client_${{ matrix.platform }}_${{ matrix.target }}
           path: ${{ matrix.path_patterns }}
-      - name: Artifact Commit
-        run: |
-          echo "Artifact URL: ${{ steps.upload-artifact.outputs.artifact-url }}"
 
-      - name: Extract package info
-        id: extract-package
-        run: |
-          $name = node -p "require('./packages/client/package.json').name"
-          $version = node -p "require('./packages/client/package.json').version"
-          "name=$name" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        shell: pwsh
+      - name: Upload File List
+        uses: actions/upload-artifact@v4
+        with:
+          name: file-list_${{ matrix.platform }}_${{ matrix.target }}
+          path: ./artifact-info/
 
-      - name: Post Artifact URL to PR
-        uses: actions/github-script@v6
-        env:
-          ARTIFACT_URL: ${{ steps.upload-artifact.outputs.artifact-url }}
-          NAME: ${{ steps.extract-package.outputs.name }}
-          VERSION: ${{ steps.extract-package.outputs.version }}
-          PLATFORM: ${{ matrix.platform }}
+  post-preview-comment:
+    needs: client-preview
+    runs-on: ubuntu-latest
+    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
+    steps:
+      - name: Download All File Lists
+        uses: actions/download-artifact@v4
+        with:
+          pattern: file-list_*
+          path: ./file-lists
+
+      - name: Post single aggregated comment
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.issues.createComment({
+            const fs = require('fs');
+            const path = require('path');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const runId = context.runId;
+            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
+
+            // Read file lists
+            const fileListsDir = './file-lists';
+            const groups = {
+              'macOS (Apple Silicon/arm64)': [],
+              'macOS (Intel/x86_64)': [],
+              'Windows': [],
+              'Linux': [],
+              'Other': []
+            };
+
+            // Process downloaded file lists
+            if (fs.existsSync(fileListsDir)) {
+              const dirs = fs.readdirSync(fileListsDir);
+              for (const dir of dirs) {
+                const filesPath = path.join(fileListsDir, dir, 'files.txt');
+                const infoPath = path.join(fileListsDir, dir, 'info.txt');
+                
+                if (fs.existsSync(filesPath) && fs.existsSync(infoPath)) {
+                  const files = fs.readFileSync(filesPath, 'utf8').trim().split('\n').filter(f => f);
+                  const info = fs.readFileSync(infoPath, 'utf8');
+                  
+                  let groupKey = 'Other';
+                  if (info.includes('aarch64-apple-darwin')) groupKey = 'macOS (Apple Silicon/arm64)';
+                  else if (info.includes('x86_64-apple-darwin')) groupKey = 'macOS (Intel/x86_64)';
+                  else if (info.includes('windows-latest')) groupKey = 'Windows';
+                  else if (info.includes('ubuntu-latest')) groupKey = 'Linux';
+                  
+                  groups[groupKey].push(...files);
+                }
+              }
+            }
+
+            let body = '💻 **客户端预览构建已完成** (Client Preview Build Completed)\n\n';
+            body += `📦 [查看并下载所有构建产物](${runUrl})\n\n`;
+
+            const hasAnyFiles = Object.values(groups).some(files => files.length > 0);
+            if (!hasAnyFiles) {
+              body += '⚠️ 未找到构建产物，请检查构建日志。\n';
+            } else {
+              body += '## 可下载的安装包\n\n';
+              for (const [platform, files] of Object.entries(groups)) {
+                if (files.length > 0) {
+                  body += `### ${platform}\n`;
+                  for (const file of files) {
+                    body += `- \`${file}\`\n`;
+                  }
+                  body += '\n';
+                }
+              }
+            }
+
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `📦 预览 (Preview) [${process.env.NAME}_${process.env.PLATFORM}@${process.env.VERSION}](${process.env.ARTIFACT_URL})`
+              owner: owner,
+              repo: repo,
+              body: body
             });
