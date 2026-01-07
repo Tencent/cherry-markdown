@@ -436,4 +436,595 @@ describe('core/hooks/autolink', () => {
       expect(result).toBe(item.expected);
     });
   });
+
+
+
+  it('makeHtml - 测试带协议的非法URL', () => {
+    const autoLinkHookWithEngine = new AutoLink({
+      config: {},
+      globalConfig: {},
+    }) as any;
+    // 模拟引擎对象
+    autoLinkHookWithEngine.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    autoLinkHookWithEngine.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 非法的URL - 不以//开头，不符合URL.test规则
+    const result = autoLinkHookWithEngine.makeHtml('http:invalid-url');
+    // 非法URL应该原样返回
+    expect(result).toBe('http:invalid-url');
+  });
+
+  it('makeHtml - 测试默认返回值分支', () => {
+    const autoLinkHookWithEngine = new AutoLink({
+      config: {},
+      globalConfig: {},
+    }) as any;
+    // 模拟引擎对象
+    autoLinkHookWithEngine.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    // 模拟cherry对象
+    autoLinkHookWithEngine.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 测试一个会走到默认返回分支的情况
+    // 这需要触发所有其他分支都不匹配的情况
+    const result = autoLinkHookWithEngine.makeHtml('test@@example.com');
+    // 非法格式应该原样返回
+    expect(result).toBe('test@@example.com');
+  });
+
+  it('renderLink - 测试enableShortLink功能', () => {
+    const autoLinkShort = new AutoLink({
+      config: {
+        enableShortLink: true,
+        shortLinkLength: 15,
+      },
+      globalConfig: {},
+    }) as any;
+    autoLinkShort.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    autoLinkShort.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 长URL应该被截断
+    const longUrl = 'https://www.example.com/very/long/path/to/resource';
+    const result = autoLinkShort.renderLink(longUrl);
+    // 应该显示前15个字符（去掉协议头）+ ...
+    expect(result).toContain('www.example.com...');
+    expect(result).toContain('title=');
+    expect(result).toContain('href=');
+  });
+
+  it('renderLink - 测试短链接不显示省略号', () => {
+    const autoLinkShort = new AutoLink({
+      config: {
+        enableShortLink: true,
+        shortLinkLength: 30,
+      },
+      globalConfig: {},
+    }) as any;
+    autoLinkShort.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    autoLinkShort.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 短URL不应该被截断
+    const shortUrl = 'https://example.com';
+    const result = autoLinkShort.renderLink(shortUrl);
+    expect(result).toContain('example.com');
+    expect(result).not.toContain('...');
+  });
+
+  it('makeHtml - 测试空地址或不合法地址', () => {
+    const hook = new AutoLink({
+      config: {},
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 不被尖括号包裹，不带协议头，且不以www.开头
+    const result = hook.makeHtml('example.com');
+    expect(result).toBe('example.com');
+  });
+
+  it('makeHtml - 测试javascript:协议', () => {
+    const hook = new AutoLink({
+      config: {},
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // javascript:协议应该被忽略
+    const result = hook.makeHtml('<javascript:void(0)>');
+    expect(result).toBe('<javascript:void(0)>');
+  });
+
+  it('makeHtml - 测试mailto:协议但非法邮箱', () => {
+    const hook = new AutoLink({
+      config: {},
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 非法邮箱地址
+    const result = hook.makeHtml('mailto:not-a-valid-email');
+    expect(result).toBe('mailto:not-a-valid-email');
+  });
+
+  it('makeHtml - 测试协议为空且为邮箱', () => {
+    const hook = new AutoLink({
+      config: {},
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 协议为空，但地址是邮箱
+    const result = hook.makeHtml('test@example.com');
+    expect(result).toContain('test@example.com');
+  });
+
+  it('makeHtml - 测试协议为空且为无协议头URL', () => {
+    const hook = new AutoLink({
+      config: {},
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 协议为空，地址不以斜杠开头
+    const result = hook.makeHtml('www.example.com');
+    expect(result).toContain('www.example.com');
+  });
+
+  it('makeHtml - 测试协议为空且被<>包裹的邮箱', () => {
+    const hook = new AutoLink({
+      config: {},
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 被<>包裹的邮箱
+    const result = hook.makeHtml('<test@example.com>');
+    expect(result).toContain('href="mailto:');
+    expect(result).toContain('test@example.com');
+  });
+
+  it('makeHtml - 测试协议为空且被<>包裹的URL', () => {
+    const hook = new AutoLink({
+      config: {},
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 被<>包裹的完整URL
+    const result = hook.makeHtml('<https://example.com>');
+    expect(result).toContain('href="https://example.com"');
+    expect(result).toContain('https://example.com');
+  });
+
+  it('makeHtml - 测试协议为空且被<>包裹的URL - URL_NO_SLASH', () => {
+    const hook = new AutoLink({
+      config: {},
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 被<>包裹的完整URL会触发URL.test(address)，返回true
+    const result = hook.makeHtml('<https://example.com/path>');
+    expect(result).toContain('href="https://example.com/path"');
+    expect(result).toContain('https://example.com/path');
+  });
+
+  it('makeHtml - 测试协议为空且被<>包裹的无协议头URL会返回原字符串', () => {
+    const hook = new AutoLink({
+      config: {},
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 被<>包裹的无协议头URL - 实际上不会被转换，因为www.example.com不符合URL.test()或URL_NO_SLASH.test()
+    // 因为URL_INLINE_NO_SLASH不包含在尖括号内的完整匹配
+    // 所以这会返回原字符串，覆盖行183
+    const result = hook.makeHtml('<www.example.com>');
+    expect(result).toBe('<www.example.com>');
+  });
+
+  it('makeHtml - 测试协议不为空的合法URL', () => {
+    const hook = new AutoLink({
+      config: {},
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 带协议的合法URL
+    const result = hook.makeHtml('<https://example.com/path>');
+    expect(result).toContain('href="https://example.com/path"');
+    expect(result).toContain('https://example.com/path');
+  });
+
+  it('makeHtml - 测试带协议的URL不被<>包裹', () => {
+    const hook = new AutoLink({
+      config: {},
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 不被<>包裹的带协议URL
+    const result = hook.makeHtml('https://example.com/path');
+    expect(result).toContain('href="https://example.com/path"');
+    expect(result).toContain('https://example.com/path');
+  });
+
+  it('renderLink - 测试不启用短链接时使用完整URL', () => {
+    const hook = new AutoLink({
+      config: {
+        enableShortLink: false,
+      },
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 不启用短链接，应该显示完整URL
+    const longUrl = 'https://www.example.com/very/long/path/to/resource';
+    const result = hook.renderLink(longUrl);
+    expect(result).toContain('https://www.example.com/very/long/path/to/resource');
+    expect(result).not.toContain('...');
+  });
+
+  it('renderLink - 测试自定义链接文本', () => {
+    const hook = new AutoLink({
+      config: {
+        enableShortLink: true,
+        shortLinkLength: 15,
+      },
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 传入自定义文本参数，应该使用自定义文本而不是URL
+    const url = 'https://example.com/very/long/path';
+    const customText = 'Click Here';
+    const result = hook.renderLink(url, customText);
+    expect(result).toContain('>Click Here<');
+    expect(result).not.toContain('...');
+  });
+
+  it('makeHtml - 测试target和rel属性', () => {
+    const hook = new AutoLink({
+      config: {
+        target: '_self',
+        rel: 'nofollow',
+      },
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    const result = hook.makeHtml('https://example.com');
+    expect(result).toContain('target="_self"');
+    expect(result).toContain('rel="nofollow"');
+  });
+
+  it('makeHtml - 测试openNewPage配置', () => {
+    const hook = new AutoLink({
+      config: {
+        openNewPage: true,
+      },
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    const result = hook.makeHtml('https://example.com');
+    expect(result).toContain('target="_blank"');
+  });
+
+  it('makeHtml - 测试attrRender返回自定义属性', () => {
+    const hook = new AutoLink({
+      config: {},
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (url: string, _text: string) => `data-url="${url}" class="custom-link"`,
+            },
+          },
+        },
+      },
+    };
+
+    const result = hook.makeHtml('https://example.com');
+    expect(result).toContain('data-url="https://example.com"');
+    expect(result).toContain('class="custom-link"');
+  });
+
+  it('makeHtml - 测试更多带协议的非法URL', () => {
+    const hook = new AutoLink({
+      config: {},
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 测试带邮箱地址的http协议
+    const result1 = hook.makeHtml('http://user@example.com');
+    expect(result1).toContain('user@example.com');
+  });
+
+  it('makeHtml - 测试URL_NO_SLASH.test(address)失败的情况', () => {
+    const hook = new AutoLink({
+      config: {},
+      globalConfig: {},
+    }) as any;
+    hook.$engine = {
+      urlProcessor: (url: string) => url,
+    };
+    hook.$engine.$cherry = {
+      options: {
+        engine: {
+          syntax: {
+            autoLink: {
+              attrRender: (_url: string, _text: string) => '',
+            },
+          },
+        },
+      },
+    };
+
+    // 以斜杠开头的地址，不符合URL_NO_SLASH
+    const result = hook.makeHtml('example.com/path');
+    expect(result).toBe('example.com/path');
+  });
 });
