@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  $expectTarget,
-  $expectInherit,
-  $expectInstance,
-} from '../../src/utils/error';
-import NestedError from '../../src/utils/error';
+import { $expectTarget, $expectInherit, $expectInstance, default as NestedError } from '../../src/utils/error';
 
 class TestClass {}
 class ParentClass {}
@@ -57,11 +52,7 @@ describe('utils/error', () => {
     });
 
     it('非实例检测抛出异常', () => {
-      const cases = [
-        [undefined],
-        ['test'],
-        [123],
-      ];
+      const cases = [[undefined], ['test'], [123]];
       cases.forEach(([value]) => {
         expect(() => $expectInstance(value as any)).toThrow('the hook must be a instance, not a class');
       });
