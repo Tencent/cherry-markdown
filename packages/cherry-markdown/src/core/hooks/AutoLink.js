@@ -90,7 +90,7 @@ export default class AutoLink extends SyntaxBase {
    * @param {number} linkLength
    */
   isLinkInATag(str, index, linkLength) {
-    const aTagRegex = /<a.*>[^<]*<\/a>/g;
+    const aTagRegex = /<a\s+[^>]*>[^<]*<\/a>/gi;
     let match;
     while ((match = aTagRegex.exec(str)) !== null) {
       // 搜索范围超过了字符串匹配到的位置
