@@ -14,7 +14,7 @@ export default defineConfig({
     environment: 'jsdom', // Use jsdom for browser-like tests
     coverage: {
       enabled: true,
-      include: ['src/core/**/*.js'],
+      include: ['src/core/**/*.js', 'src/utlis/*.js'],
       reporter: ['text', 'json', 'html'], // Optional: Add coverage reports
     },
   },
