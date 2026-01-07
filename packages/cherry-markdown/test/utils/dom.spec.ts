@@ -1,11 +1,5 @@
-import { describe, expect, it, beforeEach, vi } from 'vitest';
-import {
-  getBlockTopAndHeightWithMargin,
-  getHTML,
-  createElement,
-  loadScript,
-  loadCSS,
-} from '../../src/utils/dom';
+import { describe, expect, it, beforeEach } from 'vitest';
+import { getBlockTopAndHeightWithMargin, getHTML, createElement, loadScript, loadCSS } from '../../src/utils/dom';
 
 describe('utils/dom', () => {
   describe('getBlockTopAndHeightWithMargin', () => {
@@ -109,9 +103,9 @@ describe('utils/dom', () => {
         ['div', 'DIV'],
         ['span', 'SPAN'],
         ['button', 'BUTTON'],
-      ];
+      ] as const;
       cases.forEach(([tag, expected]) => {
-        expect(createElement(tag).tagName).toBe(expected);
+        expect(createElement(tag as any).tagName).toBe(expected);
       });
     });
   });

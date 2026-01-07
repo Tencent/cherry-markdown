@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, afterEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { getSvgString, downloadSvg } from '../../src/utils/svgUtils';
 
 describe('utils/svgUtils', () => {

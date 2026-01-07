@@ -221,7 +221,7 @@ describe('AsyncRenderHandler 工具函数', () => {
       handler.handleSyncRenderStart('test');
       handler.handleSyncRenderCompleted('original');
       handler.add('sign1');
-      const replacer = (md) => md + ' updated';
+      const replacer = (md) => `${md} updated`;
       handler.done('sign1', { replacer });
       expect(handler.md).toBe('original updated');
       expect(callback).toHaveBeenCalledWith('test', 'original updated');

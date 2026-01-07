@@ -74,11 +74,7 @@ describe('file 工具函数', () => {
 
     it('处理带封面的视频', () => {
       const file = new File(['content'], 'test.mp4', { type: 'video/mp4' });
-      const result = handleFileUploadCallback(
-        'https://example.com/video.mp4',
-        { poster: 'poster.jpg' },
-        file
-      );
+      const result = handleFileUploadCallback('https://example.com/video.mp4', { poster: 'poster.jpg' }, file);
       expect(result).toContain('{poster=poster.jpg}');
     });
 

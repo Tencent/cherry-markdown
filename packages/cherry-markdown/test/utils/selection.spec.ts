@@ -44,9 +44,7 @@ describe('selection 工具函数', () => {
 
     it('处理 anchor 在 head 后面的情况 (line 类型)', () => {
       const cm = createCMMock({
-        listSelections: vi.fn(() => [
-          { anchor: { line: 0, ch: 5 }, head: { line: 0, ch: 0 } },
-        ]),
+        listSelections: vi.fn(() => [{ anchor: { line: 0, ch: 5 }, head: { line: 0, ch: 0 } }]),
       });
       getSelection(cm, '', 'line', true);
       expect(cm.setSelection).toHaveBeenCalled();
@@ -54,9 +52,7 @@ describe('selection 工具函数', () => {
 
     it('处理 anchor.line > head.line 的情况', () => {
       const cm = createCMMock({
-        listSelections: vi.fn(() => [
-          { anchor: { line: 2, ch: 0 }, head: { line: 0, ch: 5 } },
-        ]),
+        listSelections: vi.fn(() => [{ anchor: { line: 2, ch: 0 }, head: { line: 0, ch: 5 } }]),
       });
       getSelection(cm, '', 'line', true);
       expect(cm.setSelection).toHaveBeenCalled();

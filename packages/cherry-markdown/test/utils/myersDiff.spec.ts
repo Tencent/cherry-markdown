@@ -57,11 +57,7 @@ describe('myersDiff 工具函数', () => {
 
     it('使用自定义比较函数', () => {
       const getElement = (obj: { id: number }[], index: number) => obj[index].id;
-      const diff = new MyersDiff(
-        [{ id: 1 }, { id: 2 }, { id: 3 }],
-        [{ id: 1 }, { id: 2 }, { id: 3 }],
-        getElement
-      );
+      const diff = new MyersDiff([{ id: 1 }, { id: 2 }, { id: 3 }], [{ id: 1 }, { id: 2 }, { id: 3 }], getElement);
       const result = diff.doDiff();
       expect(result).toEqual([]);
     });

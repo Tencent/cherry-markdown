@@ -357,9 +357,7 @@ describe('shortcutKey 工具函数', () => {
     });
 
     it('非数组参数抛出错误', () => {
-      expect(() => keyStack2UnPlatformUniqueString('not-array' as any, false)).toThrow(
-        'keyStack must be a array'
-      );
+      expect(() => keyStack2UnPlatformUniqueString('not-array' as any, false)).toThrow('keyStack must be a array');
     });
   });
 

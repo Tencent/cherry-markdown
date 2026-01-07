@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  hexToRgb,
-  rgbToHex,
-  rgbToHsv,
-  hsvToRgb,
-} from '../../src/utils/color';
+import { hexToRgb, rgbToHex, rgbToHsv, hsvToRgb } from '../../src/utils/color';
 
 describe('utils/color', () => {
   describe('hexToRgb', () => {
@@ -62,7 +57,7 @@ describe('utils/color', () => {
         [[255, 255, 0], { h: 60, s: 1, v: 1 }],
       ];
       cases.forEach(([rgb, expected]) => {
-        expect(rgbToHsv(rgb[0], rgb[1], rgb[2])).toEqual(expected);
+        expect(rgbToHsv(rgb[0] as number, rgb[1] as number, rgb[2] as number)).toEqual(expected);
       });
     });
 
@@ -73,7 +68,7 @@ describe('utils/color', () => {
         [[255, 255, 255], { h: 0, s: 0, v: 1 }],
       ];
       cases.forEach(([rgb, expected]) => {
-        expect(rgbToHsv(rgb[0], rgb[1], rgb[2])).toEqual(expected);
+        expect(rgbToHsv(rgb[0] as number, rgb[1] as number, rgb[2] as number)).toEqual(expected);
       });
     });
   });
@@ -88,7 +83,7 @@ describe('utils/color', () => {
         [[300, 1, 1], { r: 255, g: 0, b: 255 }],
       ];
       cases.forEach(([hsv, expected]) => {
-        expect(hsvToRgb(hsv[0], hsv[1], hsv[2])).toEqual(expected);
+        expect(hsvToRgb(hsv[0] as number, hsv[1] as number, hsv[2] as number)).toEqual(expected);
       });
     });
 
@@ -99,7 +94,7 @@ describe('utils/color', () => {
         [[0, 0, 1], { r: 255, g: 255, b: 255 }],
       ];
       cases.forEach(([hsv, expected]) => {
-        expect(hsvToRgb(hsv[0], hsv[1], hsv[2])).toEqual(expected);
+        expect(hsvToRgb(hsv[0] as number, hsv[1] as number, hsv[2] as number)).toEqual(expected);
       });
     });
 

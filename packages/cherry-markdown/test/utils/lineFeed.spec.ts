@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  prependLineFeedForParagraph,
-  calculateLinesOfParagraph,
-} from '../../src/utils/lineFeed';
+import { prependLineFeedForParagraph, calculateLinesOfParagraph } from '../../src/utils/lineFeed';
 
 describe('utils/lineFeed', () => {
   describe('prependLineFeedForParagraph', () => {
