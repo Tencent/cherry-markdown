@@ -49,8 +49,9 @@ function handleCherryList(cm) {
       replacements[i] = '\n';
     } else {
       const indent = match[1];
+      const bullet = match[2];
       const after = match[3];
-      replacements[i] = `\n${indent}I.${after}`;
+      replacements[i] = `\n${indent}${bullet}.${after}`;
     }
   }
   cm.replaceSelections(replacements);
