@@ -7,12 +7,19 @@ describe('utils/copy', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock document.execCommand
-    originalExecCommand = document.execCommand;
-    document.execCommand = vi.fn(() => true) as any;
+    originalExecCommand = (global as any).document.execCommand;
+    (global as any).document.execCommand = vi.fn(() => true);
+  });
+
+  afterEach(() => {
+    (global as any).document.execCommand = originalExecCommand;
   });
 
   afterEach(() => {
     document.execCommand = originalExecCommand;
+    document.addEventListener = originalAddEventListener;
+    // Cleanup any added event listeners
+    removeListeners.forEach(fn => fn());
   });
 
   describe('copyToClip', () => {
@@ -26,17 +33,20 @@ describe('utils/copy', () => {
     it('仅复制文本', async () => {
       const text = 'test content';
       await expect(copyToClip(text)).resolves.not.toThrow();
+      expect(document.execCommand).toHaveBeenCalledWith('copy');
     });
 
     it('仅复制HTML', async () => {
       const html = '<p>test content</p>';
       await expect(copyToClip(undefined, html)).resolves.not.toThrow();
+      expect(document.execCommand).toHaveBeenCalledWith('copy');
     });
 
     it('同时复制文本和HTML', async () => {
       const text = 'test content';
       const html = '<p>test content</p>';
       await expect(copyToClip(text, html)).resolves.not.toThrow();
+      expect(document.execCommand).toHaveBeenCalledWith('copy');
     });
   });
 });
