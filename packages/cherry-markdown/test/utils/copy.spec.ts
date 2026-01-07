@@ -3,23 +3,31 @@ import { copyToClip } from '../../src/utils/copy';
 
 describe('utils/copy', () => {
   let originalExecCommand: any;
+  let originalAddEventListener: any;
+  let originalRemoveEventListener: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Mock document.execCommand
-    originalExecCommand = (global as any).document.execCommand;
-    (global as any).document.execCommand = vi.fn(() => true);
-  });
+    // Save originals
+    originalExecCommand = document.execCommand;
+    originalAddEventListener = document.addEventListener;
+    originalRemoveEventListener = document.removeEventListener;
 
-  afterEach(() => {
-    (global as any).document.execCommand = originalExecCommand;
+    // Mock document.execCommand
+    document.execCommand = vi.fn(() => true);
+    // Mock addEventListener to actually store and call listeners
+    document.addEventListener = vi.fn((event: string, listener: any) => {
+      // Just store the listener, we'll trigger it manually if needed
+      return listener;
+    });
+    // Mock removeEventListener
+    document.removeEventListener = vi.fn();
   });
 
   afterEach(() => {
     document.execCommand = originalExecCommand;
     document.addEventListener = originalAddEventListener;
-    // Cleanup any added event listeners
-    removeListeners.forEach(fn => fn());
+    document.removeEventListener = originalRemoveEventListener;
   });
 
   describe('copyToClip', () => {
@@ -34,12 +42,16 @@ describe('utils/copy', () => {
       const text = 'test content';
       await expect(copyToClip(text)).resolves.not.toThrow();
       expect(document.execCommand).toHaveBeenCalledWith('copy');
+      expect(document.addEventListener).toHaveBeenCalledWith('copy', expect.any(Function));
+      expect(document.removeEventListener).toHaveBeenCalledWith('copy', expect.any(Function));
     });
 
     it('仅复制HTML', async () => {
       const html = '<p>test content</p>';
       await expect(copyToClip(undefined, html)).resolves.not.toThrow();
       expect(document.execCommand).toHaveBeenCalledWith('copy');
+      expect(document.addEventListener).toHaveBeenCalledWith('copy', expect.any(Function));
+      expect(document.removeEventListener).toHaveBeenCalledWith('copy', expect.any(Function));
     });
 
     it('同时复制文本和HTML', async () => {
@@ -47,6 +59,8 @@ describe('utils/copy', () => {
       const html = '<p>test content</p>';
       await expect(copyToClip(text, html)).resolves.not.toThrow();
       expect(document.execCommand).toHaveBeenCalledWith('copy');
+      expect(document.addEventListener).toHaveBeenCalledWith('copy', expect.any(Function));
+      expect(document.removeEventListener).toHaveBeenCalledWith('copy', expect.any(Function));
     });
   });
 });
