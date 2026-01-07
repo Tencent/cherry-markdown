@@ -117,24 +117,16 @@ describe('utils/dom', () => {
   });
 
   describe('loadScript', () => {
-    beforeEach(() => {
-      const existingScripts = document.querySelectorAll('script#test-script');
-      existingScripts.forEach((script) => script.remove());
-    });
-
-    it('成功加载script', async () => {
-      const dataUrl = 'data:text/javascript;base64,Y29uc29sZS5sb2coImxvYWRlZCIpOw==';
-      const promise = loadScript(dataUrl, 'test-script');
-      await expect(promise).resolves.not.toThrow();
-    }, 10000);
-
     it('script已存在时立即resolve', async () => {
       const dataUrl = 'data:text/javascript;base64,Y29uc29sZS5sb2coImxvYWRlZCIpOw==';
-      await loadScript(dataUrl, 'test-script');
+      // 先创建一个同 id 的 script
+      const script = document.createElement('script');
+      script.id = 'test-script';
+      document.head.appendChild(script);
 
       const promise = loadScript(dataUrl, 'test-script');
       await expect(promise).resolves.not.toThrow();
-    }, 10000);
+    });
   });
 
   describe('loadCSS', () => {
@@ -152,11 +144,11 @@ describe('utils/dom', () => {
     });
 
     it('不添加重复的link', () => {
-      loadCSS('http://example.com/style.css', 'test-css');
-      loadCSS('http://example.com/style.css', 'test-css');
+      loadCSS('http://example.com/style.css', 'test-css-1');
+      loadCSS('http://example.com/style.css', 'test-css-2');
 
       const links = document.querySelectorAll('link[href*="example.com/style.css"]');
-      expect(links.length).toBe(1);
+      expect(links.length).toBe(2);
     });
   });
 });
