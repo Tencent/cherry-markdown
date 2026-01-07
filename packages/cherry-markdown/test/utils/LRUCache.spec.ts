@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, beforeEach } from 'vitest';
 import LRUCache from '../../src/utils/LRUCache';
 
 describe('utils/LRUCache', () => {
@@ -6,6 +6,14 @@ describe('utils/LRUCache', () => {
 
   beforeEach(() => {
     cache = new LRUCache(3);
+  });
+
+  describe('constructor', () => {
+    it('should initialize with given capacity', () => {
+      const newCache = new LRUCache(5);
+      expect(newCache.capacity).toBe(5);
+      expect(newCache.size).toBe(0);
+    });
   });
 
   describe('get', () => {
@@ -52,7 +60,7 @@ describe('utils/LRUCache', () => {
       cache.set('key1', 'value1');
       cache.set('key2', 'value2');
       cache.set('key3', 'value3');
-      cache.set('key4', 'value4'); // should delete all 100 items (which is all 3) before adding key4
+      cache.set('key4', 'value4'); // should delete all 3 before adding key4
 
       expect(cache.get('key1')).toBeUndefined();
       expect(cache.get('key2')).toBeUndefined();
@@ -72,6 +80,42 @@ describe('utils/LRUCache', () => {
       expect(cache.get('key2')).toBeUndefined();
       expect(cache.get('key3')).toBeUndefined();
       expect(cache.get('key4')).toBe('value4');
+    });
+
+    it('should delete all entries when adding at capacity', () => {
+      cache.set('key1', 'value1');
+      cache.set('key2', 'value2');
+      cache.set('key3', 'value3');
+      expect(cache.size).toBe(3);
+
+      cache.set('key4', 'value4');
+      expect(cache.size).toBe(1);
+      expect(cache.get('key4')).toBe('value4');
+    });
+
+    it('should handle case when cache becomes empty during deletion', () => {
+      const smallCache = new LRUCache(1);
+      smallCache.set('key1', 'value1');
+      smallCache.set('key2', 'value2'); // deletes key1 and adds key2
+      expect(smallCache.size).toBe(1);
+      expect(smallCache.get('key2')).toBe('value2');
+    });
+
+    it('should handle large capacity with many entries', () => {
+      const largeCache = new LRUCache(150);
+      // Add 150 entries
+      for (let i = 0; i < 150; i++) {
+        largeCache.set(`key${i}`, `value${i}`);
+      }
+      expect(largeCache.size).toBe(150);
+
+      // Adding 151st should delete first 100
+      largeCache.set('key150', 'value150');
+      expect(largeCache.size).toBe(51);
+      expect(largeCache.get('key0')).toBeUndefined();
+      expect(largeCache.get('key50')).toBeUndefined();
+      expect(largeCache.get('key99')).toBeUndefined();
+      expect(largeCache.get('key100')).toBeDefined();
     });
   });
 

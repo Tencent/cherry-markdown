@@ -85,6 +85,7 @@ describe('utils/color', () => {
         [[120, 1, 1], { r: 0, g: 255, b: 0 }],
         [[240, 1, 1], { r: 0, g: 0, b: 255 }],
         [[60, 1, 1], { r: 255, g: 255, b: 0 }],
+        [[300, 1, 1], { r: 255, g: 0, b: 255 }],
       ];
       cases.forEach(([hsv, expected]) => {
         expect(hsvToRgb(hsv[0], hsv[1], hsv[2])).toEqual(expected);
@@ -107,6 +108,11 @@ describe('utils/color', () => {
       const hsv = rgbToHsv(original.r, original.g, original.b);
       const converted = hsvToRgb(hsv.h, hsv.s, hsv.v);
       expect(converted).toEqual(original);
+    });
+
+    it('处理hue值大于300的情况', () => {
+      expect(hsvToRgb(300, 1, 1)).toEqual({ r: 255, g: 0, b: 255 });
+      expect(hsvToRgb(330, 1, 1)).toEqual({ r: 255, g: 0, b: 128 });
     });
   });
 });

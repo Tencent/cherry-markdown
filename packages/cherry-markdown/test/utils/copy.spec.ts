@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { copyToClip } from '../../src/utils/copy';
 
 describe('utils/copy', () => {
