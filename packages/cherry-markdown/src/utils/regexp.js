@@ -26,7 +26,7 @@ export function isLookbehindSupported() {
   try {
     new RegExp('(?<=.)');
     return true;
-  } catch (ignore) {}
+  } catch (ignore) { }
   return false;
 }
 
@@ -83,27 +83,27 @@ export const EMAIL = new RegExp(`^${EMAIL_INLINE.source}$`);
 // [USERNAME[:PASSWORD]@](IP|HOST)[:PORT][/SOURCE_PATH?QUERY_PARAMS#HASH]
 export const URL_INLINE_NO_SLASH = new RegExp(
   '' + // 针对eslint的特殊处理
-    '(?:\\S+(?::\\S*)?@)?' +
-    '(?:' +
-    // IP address exclusion
-    // IP address dotted notation octets
-    // excludes loopback network 0.0.0.0
-    // excludes reserved space >= 224.0.0.0
-    // excludes network & broadcast addresses
-    // (first & last IP address of each class)
-    '(?:1\\d\\d|2[01]\\d|22[0-3]|[1-9]\\d?)' +
-    '(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}' +
-    '(?:\\.(?:1\\d\\d|2[0-4]\\d|25[0-4]|[1-9]\\d?))' +
-    '|' +
-    // host & domain names, may end with dot
-    '(?![-_])(?:[-\\w\\xa1-\\xff]{0,63}[^-_]\\.)+' +
-    // TLD identifier name, may end with dot
-    '(?:[a-zA-Z\\xa1-\\xff]{2,}\\.?)' +
-    ')' +
-    // port number (optional)
-    '(?::\\d{2,5})?' +
-    // resource path (optional)
-    '(?:[/?#][^\\s<>\\x00-\\x1f"\\(\\)]*)?',
+  '(?:\\S+(?::\\S*)?@)?' +
+  '(?:' +
+  // IP address exclusion
+  // IP address dotted notation octets
+  // excludes loopback network 0.0.0.0
+  // excludes reserved space >= 224.0.0.0
+  // excludes network & broadcast addresses
+  // (first & last IP address of each class)
+  '(?:1\\d\\d|2[01]\\d|22[0-3]|[1-9]\\d?)' +
+  '(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}' +
+  '(?:\\.(?:1\\d\\d|2[0-4]\\d|25[0-4]|[1-9]\\d?))' +
+  '|' +
+  // host & domain names, may end with dot
+  '(?![-_])(?:[-\\w\\xa1-\\xff]{0,63}[^-_]\\.)+' +
+  // TLD identifier name, may end with dot
+  '(?:[a-zA-Z\\xa1-\\xff]{2,}\\.?)' +
+  ')' +
+  // port number (optional)
+  '(?::\\d{2,5})?' +
+  // resource path (optional)
+  '(?:[/?#][^\\s<>\\x00-\\x1f"\\(\\)]*)?',
 );
 export const URL_INLINE = new RegExp(
   // eslint特殊处理

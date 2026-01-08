@@ -244,9 +244,13 @@ export default class PreviewerBubble {
     // [ ]中的空格，或者[x]中的x的位置
     let targetLine = -1;
     let targetCh = -1;
+    let inCodeBlock = false;
     contents.forEach((lineContent, lineIdx) => {
-      const tmp = lineContent.trim(); // 去掉句首的空格和制表符
-      if (/^-\s+\[[ x]\]/i.test(tmp)) {
+      const content = lineContent.trim(); // 去掉句首的空格和制表符
+      if (/^```+/.test(content) || /^~~~+/.test(content)) {
+        inCodeBlock = !inCodeBlock;
+      }
+      if (/^-\s+\[[ x]\]/i.test(content) && !inCodeBlock) {
         // 如果是个checkbox
         if (editorCheckboxCount === this.checkboxIdx) {
           targetLine = lineIdx;
@@ -623,7 +627,7 @@ export default class PreviewerBubble {
     this.totalImgs = list.length;
     this.imgIndex = list.indexOf(htmlElement);
     if (!this.beginChangeImgValue(htmlElement)) {
-      return { emit: () => {} };
+      return { emit: () => { } };
     }
 
     const imgSizeDiv = document.createElement('div');
@@ -867,7 +871,7 @@ export default class PreviewerBubble {
     }
   }
 
-  $showBorderBubbles() {}
+  $showBorderBubbles() { }
 
-  $showBtnBubbles() {}
+  $showBtnBubbles() { }
 }

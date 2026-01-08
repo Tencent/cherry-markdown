@@ -349,9 +349,115 @@ export default class CodeBlock extends ParagraphBase {
     if (!this.indentedCodeBlock) {
       return str;
     }
-    return str.replace(this.$getIndentedCodeReg(), (match) => {
-      return match.replace(/`/g, '~~~IndentCode');
-    });
+
+    function countLeadingSpaces(line) {
+      let indent = 0;
+      for (const char of line) {
+        if (char === ' ') {
+          indent += 1;
+        } else if (char === '\t') {
+          indent += 4;
+        } else {
+          break;
+        }
+      }
+      return indent;
+    }
+
+    const LineType = {
+      None: 0,
+      Empty: 1,
+      Blank: 2,
+      IndentCode: 3,
+      Fence: 4,
+      List: 5,
+    };
+
+    const lines = str.split('\n');
+    let inFence = false;
+    let inList = false;
+    let inIndentCode = false;
+    // let indentCodeSize = 0;
+    let indentOffset = 0;
+    const indents = Array(lines.length).fill(0);
+    const marks = Array(lines.length).fill(-1);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+
+      const rawIndent = countLeadingSpaces(line); // origin indent
+      indents[i] = rawIndent;
+
+      if (/^[ ]{0,3}(```+|~~~+)/.test(line)) {
+        inFence = !inFence;
+        marks[i] = LineType.Fence;
+        continue;
+      }
+
+      if (inFence) {
+        marks[i] = LineType.Fence;
+        continue;
+      }
+
+      const isEmptyLine = line === '';
+      const isBlankLine = trimmed === '';
+
+      const prevType = i > 0 ? marks[i - 1] : LineType.None;
+
+      const isListMarker = /^(-|\+|\*|\d+\.)\s/.test(trimmed);
+
+      if (isListMarker) {
+        marks[i] = LineType.List;
+        // this affects indent of children
+        indentOffset = rawIndent;
+        continue;
+      }
+
+      // Effective indent after subtracting any list offset:
+      const effectiveIndent = Math.max(0, rawIndent - indentOffset);
+
+      if (!inIndentCode) {
+        // enter indent code
+        if ((prevType === LineType.Blank || prevType === LineType.Empty) && effectiveIndent >= 4) {
+          inIndentCode = true;
+          marks[i] = LineType.IndentCode;
+          continue;
+        }
+
+        // Normal non-code line
+        if (isEmptyLine) {
+          marks[i] = LineType.Empty;
+        } else if (isBlankLine) {
+          marks[i] = LineType.Blank;
+        } else {
+          marks[i] = LineType.None;
+        }
+        continue;
+      }
+
+      // inIndentCode
+      if (isBlankLine || effectiveIndent >= 4) {
+        marks[i] = LineType.IndentCode;
+        continue;
+      }
+
+      // not blank line, indent < 4, break indent code
+      inIndentCode = false;
+      if (isEmptyLine) {
+        marks[i] = LineType.Empty;
+      } else if (isBlankLine) {
+        marks[i] = LineType.Blank;
+      } else {
+        marks[i] = LineType.None;
+      }
+    }
+
+    console.log(marks);
+
+    return str;
+    // return str.replace(this.$getIndentedCodeReg(), (match) => {
+    //   return match.replace(/`/g, '~~~IndentCode');
+    // });
   }
 
   /**
