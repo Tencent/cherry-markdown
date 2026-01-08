@@ -32,8 +32,8 @@ export default class Sidebar extends Toolbar {
     if (typeof document !== 'undefined' && typeof ResizeObserver !== 'undefined') {
       const observer = new ResizeObserver(() => {
         const height = list.scrollHeight;
-        // 高度为 0 时保持默认 120px，不覆盖
-        if (height > 0) {
+        // 高度小于 40 时保持默认 120px，不覆盖
+        if (height > 40) {
           this.$cherry.wrapperDom.style.setProperty('--sidebar-list-height', `${height}px`);
         }
       });
