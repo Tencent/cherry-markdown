@@ -307,10 +307,34 @@ jobs:
               body += `\n> 📋 版本: \`${version}\` | ⏰ 产物保留 7 天 | [查看所有构建产物](${runUrl})\n`;
             }
 
-            // 创建评论
-            await github.rest.issues.createComment({
+            // 查找现有的 Cherry-Markdown Client 预览构建评论
+            const { data: comments } = await github.rest.issues.listComments({
               issue_number: context.issue.number,
               owner: owner,
-              repo: repo,
-              body: body
+              repo: repo
             });
+
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('💻 Cherry-Markdown Client 预览构建')
+            );
+
+            if (botComment) {
+              // 更新现有评论
+              await github.rest.issues.updateComment({
+                comment_id: botComment.id,
+                owner: owner,
+                repo: repo,
+                body: body
+              });
+              console.log(`Updated existing comment: ${botComment.id}`);
+            } else {
+              // 创建新评论
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: owner,
+                repo: repo,
+                body: body
+              });
+              console.log('Created new comment');
+            }
