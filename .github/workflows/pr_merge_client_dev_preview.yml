@@ -1,10 +1,8 @@
 name: 'Publish Client Dev Preview on PR Merge'
 
 on:
-  # pull_request_target:
-  #   types: [closed]
-  pull_request:
-    types: [opened, synchronize, reopened]
+  pull_request_target:
+    types: [closed]
     branches:
       - dev
     paths:
@@ -25,7 +23,7 @@ permissions:
 jobs:
   client-preview:
     # 不需要在 fork 仓库的pr中运行, 仅当 pr 合并时运行
-    # if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
+    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
     name: client-${{ matrix.platform_name }}-${{ matrix.arch }}
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 60
@@ -76,7 +74,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: packages/client/src-tauri -> target
-          save-if: false  # PR Preview 只读(main)缓存，不保存新缓存
+          save-if: false # PR Preview 只读(main)缓存，不保存新缓存
 
       - name: Install Linux Dependencies
         if: matrix.platform == 'ubuntu-latest'
@@ -262,7 +260,7 @@ jobs:
             }
 
             // 生成评论内容
-            let body = '## 🚀 Cherry-Markdown 客户端预览构建已完成\n\n';
+            let body = '## 💻 Cherry-Markdown Client 预览构建已完成\n\n';
 
             if (buildInfos.length === 0) {
               body += '> ⚠️ 未找到构建产物，请检查构建日志。\n\n';
@@ -308,7 +306,7 @@ jobs:
                 }
               }
               
-              body += `\n> 📋 版本: \`${version}\` | [查看所有构建产物](${runUrl})\n`;
+              body += `\n> 📋 版本: \`${version}\` | ⏰ 产物保留 7 天 | [查看所有构建产物](${runUrl})\n`;
             }
 
             // 创建评论
