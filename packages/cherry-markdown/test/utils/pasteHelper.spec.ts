@@ -15,44 +15,39 @@ describe('pasteHelper 工具函数', () => {
   });
 
   describe('getTypeFromLocalStorage', () => {
-    it('默认返回 md', () => {
+    it('从 localStorage 获取类型', () => {
       // @ts-ignore
-      localStorage.getItem.mockReturnValueOnce(null);
-      // @ts-ignore
-      const result = pasteHelper.getTypeFromLocalStorage();
-      expect(result).toBe('md');
-    });
-
-    it('返回缓存的值', () => {
-      // @ts-ignore
-      localStorage.getItem.mockReturnValueOnce('text');
-      // @ts-ignore
-      const result = pasteHelper.getTypeFromLocalStorage();
-      expect(result).toBe('text');
+      const cases = [
+        [null, 'md'],
+        ['text', 'text'],
+        [undefined, 'md'],
+      ];
+      cases.forEach(([returnValue, expected]) => {
+        // @ts-ignore
+        localStorage.getItem.mockReturnValueOnce(returnValue);
+        // @ts-ignore
+        const result = pasteHelper.getTypeFromLocalStorage();
+        expect(result).toBe(expected);
+      });
     });
 
     it('localStorage 不存在时返回 md', () => {
       // @ts-ignore
       global.localStorage = undefined;
       // @ts-ignore
-      const result = pasteHelper.getTypeFromLocalStorage();
-      expect(result).toBe('md');
+      expect(pasteHelper.getTypeFromLocalStorage()).toBe('md');
     });
   });
 
   describe('setTypeToLocalStorage', () => {
-    it('设置粘贴类型为 text', () => {
-      // @ts-ignore
-      pasteHelper.setTypeToLocalStorage('text');
-      // @ts-ignore
-      expect(localStorage.setItem).toHaveBeenCalledWith('cherry-paste-type', 'text');
-    });
-
-    it('设置粘贴类型为 md', () => {
-      // @ts-ignore
-      pasteHelper.setTypeToLocalStorage('md');
-      // @ts-ignore
-      expect(localStorage.setItem).toHaveBeenCalledWith('cherry-paste-type', 'md');
+    it('设置粘贴类型', () => {
+      const cases = ['text', 'md'];
+      cases.forEach((type) => {
+        // @ts-ignore
+        pasteHelper.setTypeToLocalStorage(type);
+        // @ts-ignore
+        expect(localStorage.setItem).toHaveBeenCalledWith('cherry-paste-type', type);
+      });
     });
 
     it('localStorage 不存在时不设置', () => {
@@ -94,16 +89,16 @@ describe('pasteHelper 工具函数', () => {
   });
 
   describe('isHidden', () => {
-    it('气泡隐藏时返回 true', () => {
-      // @ts-ignore
-      pasteHelper.bubbleDom = { style: { display: 'none' } };
-      expect(pasteHelper.isHidden()).toBe(true);
-    });
-
-    it('气泡显示时返回 false', () => {
-      // @ts-ignore
-      pasteHelper.bubbleDom = { style: { display: 'block' } };
-      expect(pasteHelper.isHidden()).toBe(false);
+    it('检查气泡隐藏状态', () => {
+      const cases = [
+        ['none', true],
+        ['block', false],
+      ];
+      cases.forEach(([display, expected]) => {
+        // @ts-ignore
+        pasteHelper.bubbleDom = { style: { display } };
+        expect(pasteHelper.isHidden()).toBe(expected);
+      });
     });
   });
 

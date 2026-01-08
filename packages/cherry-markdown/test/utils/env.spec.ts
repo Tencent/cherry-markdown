@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import { isBrowser } from '../../src/utils/env';
 
 describe('utils/env', () => {
@@ -13,15 +13,17 @@ describe('utils/env', () => {
   });
 
   describe('isBrowser', () => {
-    it('should return true in browser environment', () => {
-      // In test environment (jsdom), window is defined
+    it('检测浏览器环境', () => {
+      // 测试环境(jsdom)中，window已定义
       expect(isBrowser()).toBe(true);
-    });
 
-    it('should return false in non-browser environment', () => {
-      // @ts-expect-error - Simulating non-browser environment
+      // @ts-expect-error - 模拟非浏览器环境
       delete global.window;
       expect(isBrowser()).toBe(false);
+
+      // 恢复window
+      global.window = originalWindow;
+      expect(isBrowser()).toBe(true);
     });
   });
 });

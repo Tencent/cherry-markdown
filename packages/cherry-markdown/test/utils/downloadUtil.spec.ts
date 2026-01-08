@@ -21,7 +21,7 @@ describe('utils/downloadUtil', () => {
   });
 
   describe('downloadByATag', () => {
-    it('创建带正确属性的anchor元素', () => {
+    it('创建anchor元素下载文件', () => {
       downloadByATag('http://example.com/file.txt', 'file.txt');
       expect(document.createElement).toHaveBeenCalledWith('a');
       expect(mockElement.href).toBe('http://example.com/file.txt');

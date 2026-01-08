@@ -35,46 +35,33 @@ describe('export 工具函数', () => {
 
   describe('exportMarkdownFile', () => {
     it('创建并下载 markdown 文件', () => {
-      exportMarkdownFile('# Hello World', 'test');
-      expect(document.createElement).toHaveBeenCalledWith('a');
-      // @ts-ignore
-      expect(URL.createObjectURL).toHaveBeenCalled();
-    });
-
-    it('处理空内容', () => {
-      exportMarkdownFile('', 'empty');
-      expect(document.createElement).toHaveBeenCalledWith('a');
-    });
-
-    it('处理包含特殊字符的内容', () => {
-      exportMarkdownFile('Test: 中文 `code` **bold**', 'special');
-      expect(document.createElement).toHaveBeenCalledWith('a');
+      const cases = [
+        ['# Hello World', 'test'],
+        ['', 'empty'],
+        ['Test: 中文 `code` **bold**', 'special'],
+      ];
+      cases.forEach(([content, filename]) => {
+        exportMarkdownFile(content as string, filename as string);
+        expect(document.createElement).toHaveBeenCalledWith('a');
+        // @ts-ignore
+        expect(URL.createObjectURL).toHaveBeenCalled();
+      });
     });
   });
 
   describe('exportHTMLFile', () => {
     it('创建并下载 HTML 文件', () => {
-      exportHTMLFile('<h1>Hello</h1>', 'test');
-      expect(document.createElement).toHaveBeenCalledWith('a');
-      // @ts-ignore
-      expect(URL.createObjectURL).toHaveBeenCalled();
-    });
-
-    it('处理空 HTML', () => {
-      exportHTMLFile('', 'empty');
-      expect(document.createElement).toHaveBeenCalledWith('a');
-    });
-
-    it('处理复杂 HTML', () => {
-      const html = `
-        <!DOCTYPE html>
-        <html>
-        <head><title>Test</title></head>
-        <body><h1>Content</h1></body>
-        </html>
-      `;
-      exportHTMLFile(html, 'complete');
-      expect(document.createElement).toHaveBeenCalledWith('a');
+      const cases = [
+        ['<h1>Hello</h1>', 'test'],
+        ['', 'empty'],
+        [`<!DOCTYPE html><html><head><title>Test</title></head><body><h1>Content</h1></body></html>`, 'complete'],
+      ];
+      cases.forEach(([content, filename]) => {
+        exportHTMLFile(content as string, filename as string);
+        expect(document.createElement).toHaveBeenCalledWith('a');
+        // @ts-ignore
+        expect(URL.createObjectURL).toHaveBeenCalled();
+      });
     });
   });
 

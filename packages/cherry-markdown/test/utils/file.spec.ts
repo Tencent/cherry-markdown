@@ -4,88 +4,55 @@ import { handleParams, handleFileUploadCallback } from '../../src/utils/file';
 describe('file 工具函数', () => {
   describe('handleParams', () => {
     it('空参数返回空字符串', () => {
-      const result = handleParams(undefined);
-      expect(result).toBe('');
+      expect(handleParams(undefined)).toBe('');
     });
 
-    it('处理无边框参数', () => {
-      const result = handleParams({ isBorder: true });
-      expect(result).toBe('#B');
-    });
-
-    it('处理无阴影参数', () => {
-      const result = handleParams({ isShadow: true });
-      expect(result).toBe('#S');
-    });
-
-    it('处理无圆角参数', () => {
-      const result = handleParams({ isRadius: true });
-      expect(result).toBe('#R');
-    });
-
-    it('处理宽度参数', () => {
-      const result = handleParams({ width: '100px' });
-      expect(result).toBe('#100px');
-    });
-
-    it('处理高度参数（没有宽度时添加 #auto）', () => {
-      const result = handleParams({ height: '200px' });
-      expect(result).toBe('#auto #200px');
-    });
-
-    it('同时有宽度和高度', () => {
-      const result = handleParams({ width: '100px', height: '200px' });
-      expect(result).toBe('#100px #200px');
+    it('处理单个参数', () => {
+      const cases = [
+        [{ isBorder: true }, '#B'],
+        [{ isShadow: true }, '#S'],
+        [{ isRadius: true }, '#R'],
+        [{ width: '100px' }, '#100px'],
+        [{ height: '200px' }, '#auto #200px'],
+      ];
+      cases.forEach(([params, expected]) => {
+        expect(handleParams(params as any)).toBe(expected);
+      });
     });
 
     it('组合多个参数', () => {
-      const result = handleParams({ isBorder: true, isShadow: true, width: '50%' });
-      expect(result).toBe('#B #S #50%');
-    });
-
-    it('组合所有参数', () => {
-      const result = handleParams({
-        isBorder: true,
-        isShadow: true,
-        isRadius: true,
-        width: '100px',
-        height: '200px',
+      const cases = [
+        [{ isBorder: true, isShadow: true, width: '50%' }, '#B #S #50%'],
+        [{ width: '100px', height: '200px' }, '#100px #200px'],
+        [{ isBorder: true, isShadow: true, isRadius: true, width: '100px', height: '200px' }, '#B #S #R #100px #200px'],
+      ];
+      cases.forEach(([params, expected]) => {
+        expect(handleParams(params as any)).toBe(expected);
       });
-      expect(result).toBe('#B #S #R #100px #200px');
     });
   });
 
   describe('handleFileUploadCallback', () => {
-    it('处理图片文件', () => {
-      const file = new File(['content'], 'test.jpg', { type: 'image/jpeg' });
-      const result = handleFileUploadCallback('https://example.com/image.jpg', {}, file);
-      expect(result).toContain('!');
-      expect(result).toContain('test.jpg');
-      expect(result).toContain('https://example.com/image.jpg');
+    it('处理媒体文件', () => {
+      const cases = [
+        // 图片
+        [new File(['content'], 'test.jpg', { type: 'image/jpeg' }), 'https://example.com/image.jpg', {}, ['!', 'test.jpg', 'https://example.com/image.jpg']],
+        // 视频
+        [new File(['content'], 'test.mp4', { type: 'video/mp4' }), 'https://example.com/video.mp4', {}, ['!video', 'test.mp4', 'https://example.com/video.mp4']],
+        // 带封面的视频
+        [new File(['content'], 'test.mp4', { type: 'video/mp4' }), 'https://example.com/video.mp4', { poster: 'poster.jpg' }, ['{poster=poster.jpg}']],
+        // 音频
+        [new File(['content'], 'test.mp3', { type: 'audio/mpeg' }), 'https://example.com/audio.mp3', {}, ['!audio', 'test.mp3', 'https://example.com/audio.mp3']],
+      ];
+      cases.forEach(([file, url, options, contains]) => {
+        const result = handleFileUploadCallback(url as string, options as any, file as File);
+        (contains as string[]).forEach((str) => {
+          expect(result).toContain(str);
+        });
+      });
     });
 
-    it('处理视频文件', () => {
-      const file = new File(['content'], 'test.mp4', { type: 'video/mp4' });
-      const result = handleFileUploadCallback('https://example.com/video.mp4', {}, file);
-      expect(result).toContain('!video');
-      expect(result).toContain('test.mp4');
-      expect(result).toContain('https://example.com/video.mp4');
-    });
-
-    it('处理带封面的视频', () => {
-      const file = new File(['content'], 'test.mp4', { type: 'video/mp4' });
-      const result = handleFileUploadCallback('https://example.com/video.mp4', { poster: 'poster.jpg' }, file);
-      expect(result).toContain('{poster=poster.jpg}');
-    });
-
-    it('处理音频文件', () => {
-      const file = new File(['content'], 'test.mp3', { type: 'audio/mpeg' });
-      const result = handleFileUploadCallback('https://example.com/audio.mp3', {}, file);
-      expect(result).toContain('!audio');
-      expect(result).toContain('test.mp3');
-    });
-
-    it('使用自定义文件名', () => {
+    it('处理自定义文件名', () => {
       const file = new File(['content'], 'original.jpg', { type: 'image/jpeg' });
       const result = handleFileUploadCallback('url.jpg', { name: 'custom.jpg' }, file);
       expect(result).toContain('custom.jpg');

@@ -11,20 +11,18 @@ describe('utils/event', () => {
   });
 
   describe('addEvent', () => {
-    it('使用addEventListener添加事件监听', () => {
-      const result = addEvent(element, 'click', handler);
-      expect(result).toBe(true);
-
-      element.click();
-      expect(handler).toHaveBeenCalledTimes(1);
-    });
-
-    it('带useCapture标志添加事件监听', () => {
-      const result = addEvent(element, 'click', handler, true);
-      expect(result).toBe(true);
-
-      element.click();
-      expect(handler).toHaveBeenCalledTimes(1);
+    it('添加事件监听', () => {
+      const cases = [
+        ['click', handler, false],
+        ['click', handler, true],
+      ];
+      cases.forEach(([event, h, useCapture], index) => {
+        const testElement = document.createElement('div');
+        const testHandler = vi.fn();
+        expect(addEvent(testElement, event as string, testHandler as any, useCapture as boolean)).toBe(true);
+        testElement.click();
+        expect(testHandler).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('添加多个事件监听', () => {
@@ -44,34 +42,27 @@ describe('utils/event', () => {
       addEvent(element, 'mouseout', handler);
       addEvent(element, 'keydown', handler);
 
-      const mouseoverEvent = new MouseEvent('mouseover');
-      element.dispatchEvent(mouseoverEvent);
-
-      const mouseoutEvent = new MouseEvent('mouseout');
-      element.dispatchEvent(mouseoutEvent);
-
-      const keydownEvent = new KeyboardEvent('keydown');
-      element.dispatchEvent(keydownEvent);
+      element.dispatchEvent(new MouseEvent('mouseover'));
+      element.dispatchEvent(new MouseEvent('mouseout'));
+      element.dispatchEvent(new KeyboardEvent('keydown'));
 
       expect(handler).toHaveBeenCalledTimes(3);
     });
   });
 
   describe('removeEvent', () => {
-    it('使用removeEventListener移除事件监听', () => {
-      addEvent(element, 'click', handler);
-      removeEvent(element, 'click', handler);
+    it('移除事件监听', () => {
+      const cases = [
+        [handler, false],
+        [handler, true],
+      ];
+      cases.forEach(([h, useCapture]) => {
+        addEvent(element, 'click', h as any, useCapture as boolean);
+        removeEvent(element, 'click', h as any, useCapture as boolean);
 
-      element.click();
-      expect(handler).not.toHaveBeenCalled();
-    });
-
-    it('带useCapture标志移除事件监听', () => {
-      addEvent(element, 'click', handler, true);
-      removeEvent(element, 'click', handler, true);
-
-      element.click();
-      expect(handler).not.toHaveBeenCalled();
+        element.click();
+        expect(h).not.toHaveBeenCalled();
+      });
     });
 
     it('仅移除指定的处理函数', () => {
