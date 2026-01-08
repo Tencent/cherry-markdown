@@ -1,12 +1,16 @@
-name: "Publish Client Dev Preview on PR Merge"
+name: 'Publish Client Dev Preview on PR Merge'
 
 on:
-  pull_request_target:
-    types: [closed]
+  # pull_request_target:
+  #   types: [closed]
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - dev
     paths:
-      - "packages/client/**"
-      - "packages/cherry-markdown/**"
-      - "!packages/cherry-markdown/test/**"
+      - 'packages/client/**'
+      - 'packages/cherry-markdown/**'
+      - '!packages/cherry-markdown/test/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
@@ -20,20 +24,20 @@ permissions:
 
 jobs:
   client-preview:
-    # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
-    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
+    # 不需要在 fork 仓库的pr中运行, 仅当 pr 合并时运行
+    # if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 60
     strategy:
       fail-fast: false
-      max-parallel: 4  # 显式设置最大并行数
+      max-parallel: 4 # 显式设置最大并行数
       matrix:
         include:
           - platform: macos-latest
             target: aarch64-apple-darwin
             platform_name: macos
             arch: arm64
-            args: "--target aarch64-apple-darwin"
+            args: '--target aarch64-apple-darwin'
             # 精确匹配 target 目录下的产物
             path_patterns: |
               ./packages/client/src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
@@ -42,7 +46,7 @@ jobs:
             target: x86_64-apple-darwin
             platform_name: macos
             arch: x64
-            args: "--target x86_64-apple-darwin"
+            args: '--target x86_64-apple-darwin'
             path_patterns: |
               ./packages/client/src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*.dmg
               ./packages/client/src-tauri/target/x86_64-apple-darwin/release/bundle/macos/*.app
@@ -64,13 +68,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: "yarn"
+          cache: 'yarn'
 
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -107,33 +111,33 @@ jobs:
         shell: bash
         run: |
           mkdir -p ./artifact-info
-          
+
           # 获取版本号和构建信息
           VERSION="${{ steps.version.outputs.version }}"
           PLATFORM="${{ matrix.platform_name }}"
           ARCH="${{ matrix.arch }}"
           TARGET="${{ matrix.target }}"
           ARTIFACT_NAME="cherry-markdown-client-$VERSION-$PLATFORM-$ARCH"
-          
+
           # 创建产物信息文件
           echo "version=$VERSION" > ./artifact-info/build-info.txt
           echo "platform=$PLATFORM" >> ./artifact-info/build-info.txt
           echo "arch=$ARCH" >> ./artifact-info/build-info.txt
           echo "target=$TARGET" >> ./artifact-info/build-info.txt
           echo "artifact_name=$ARTIFACT_NAME" >> ./artifact-info/build-info.txt
-          
+
           # 精确查找对应 target 目录下的构建产物
           TARGET_DIR="./packages/client/src-tauri/target/$TARGET/release/bundle"
-          
+
           if [ -d "$TARGET_DIR" ]; then
             find "$TARGET_DIR" -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" \) -exec basename {} \; > ./artifact-info/files.txt
             find "$TARGET_DIR" -type d -name "*.app" -exec basename {} \; >> ./artifact-info/files.txt
           fi
-          
+
           if [ ! -s ./artifact-info/files.txt ]; then
             echo "No cherry-markdown build artifacts found!" > ./artifact-info/files.txt
           fi
-          
+
           # 输出调试信息
           echo "Build Info:"
           cat ./artifact-info/build-info.txt
@@ -146,7 +150,7 @@ jobs:
           name: cherry-markdown-client-${{ steps.version.outputs.version }}-${{ matrix.platform_name }}-${{ matrix.arch }}
           path: ${{ matrix.path_patterns }}
           retention-days: 30
-          if-no-files-found: warn
+          if-no-files-found: error
 
       - name: Upload Artifact Info
         uses: actions/upload-artifact@v4
@@ -158,7 +162,7 @@ jobs:
   post-preview-comment:
     needs: client-preview
     runs-on: ubuntu-latest
-    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
+    if: github.repository == 'Tencent/cherry-markdown'
     steps:
       - name: Download All Artifact Info
         uses: actions/download-artifact@v4
@@ -237,7 +241,7 @@ jobs:
 
             // 生成评论内容
             let body = '## 🚀 Cherry-Markdown 客户端预览构建已完成\n\n';
-            
+
             if (artifacts.length === 0) {
               body += '> ⚠️ 未找到构建产物，请检查构建日志。\n\n';
               body += `[查看构建详情](${runUrl})\n`;
