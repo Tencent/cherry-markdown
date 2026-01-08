@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "cherry-markdown",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "identifier": "com.cherry-markdown.app",
   "build": {
     "beforeDevCommand": "yarn dev",
@@ -17,12 +17,11 @@
         "url": "index.html",
         "width": 1600,
         "height": 800,
-        "titleBarStyle": "Overlay",
         "decorations": true
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:;"
     }
   },
   "bundle": {

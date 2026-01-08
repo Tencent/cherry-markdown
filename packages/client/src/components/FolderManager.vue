@@ -2,20 +2,16 @@
   <div class="folder-manager">
     <!-- 目录管理 -->
     <div class="directory-manager">
-      <div class="directory-tree">
-        <DirectoryNode
-          v-for="dir in recentDirectories"
-          :key="dir.path"
-          :node="dir"
-          :depth="0"
-          :current-file-path="currentFilePath"
-          @toggle-directory="toggleDirectory"
-          @open-file="handleOpenFile"
-          @context-menu="(_event, _file) => $emit('context-menu', _event, _file)"
-        />
+      <DirectoryTree
+        class="directory-tree"
+        :nodes="recentDirectories"
+        :current-file-path="currentFilePath"
+        @toggle-directory="toggleDirectory"
+        @open-file="handleOpenFile"
+        @context-menu="(_event, _file) => $emit('context-menu', _event, _file)"
+      />
 
-        <div v-if="recentDirectories.length === 0" class="empty-state">暂无访问过的目录</div>
-      </div>
+      <div v-if="recentDirectories.length === 0" class="empty-state">暂无访问过的目录</div>
     </div>
   </div>
 </template>
@@ -23,8 +19,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useFileStore } from '../store';
-import DirectoryNode from './DirectoryNode.vue';
 import { useDirectoryManager } from './composables/useDirectoryManager';
+import DirectoryTree from './DirectoryTree.vue';
 
 // 定义组件事件
 const emit = defineEmits<{
