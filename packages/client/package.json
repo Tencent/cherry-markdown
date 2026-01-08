@@ -3,10 +3,10 @@
   "version": "0.2.1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
+    "dev": "npx node ./scripts/sync-version.js && vite",
+    "build": "npx node ./scripts/sync-version.js && vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "tauri": "tauri",
+    "version:sync": "node ./scripts/sync-version.js",
     "lint": "cd ../.. && npx prettier --check packages/client/src/**/*.{ts,vue} && npx eslint packages/client/src/**/*.{ts,vue}",
     "lint:fix": "cd ../.. && npx prettier --write packages/client/src/**/*.{ts,vue} && npx eslint packages/client/src/**/*.{ts,vue} --fix"
   },
@@ -20,13 +20,13 @@
     "echarts": "^6.0.0",
     "katex": "^0.16.27",
     "pinyin": "^4.0.0",
-    "pinia": "^2.2.4",
+    "pinia": "^3.0.4",
     "vue": "^3.5.13"
   },
   "devDependencies": {
     "@tauri-apps/cli": "2.2.5",
     "@vitejs/plugin-vue": "^5.2.1",
-    "vite": "^6.0.3",
-    "vue-tsc": "^2.1.10"
+    "vite": "^6.4.1",
+    "vue-tsc": "^3.2.2"
   }
 }
