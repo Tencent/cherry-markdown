@@ -3,8 +3,6 @@ name: 'Publish Client Dev Preview on PR Merge'
 on:
   pull_request_target:
     types: [closed]
-    branches:
-      - dev
     paths:
       - 'packages/client/**'
       - 'packages/cherry-markdown/**'
