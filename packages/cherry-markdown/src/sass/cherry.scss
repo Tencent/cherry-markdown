@@ -222,7 +222,7 @@
   padding: var(--toolbar-padding);
   font-size: var(--toolbar-font-size);
   line-height: 2.8;
-  min-height: var(--toolbar-min-height);
+  min-height: var(--height-toolbar);
   flex-basis: 100%;
   box-sizing: border-box;
   z-index: 2;
@@ -573,6 +573,13 @@
   z-index: 11;
   bottom: 0;
   overflow: hidden;
+
+  .cherry-sidebar-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+  }
 
   // 侧边栏按钮 非顶部工具栏
   .cherry-toolbar-button {
@@ -1557,7 +1564,7 @@
   z-index: 11;
   position: absolute;
   right: 0;
-  top: calc(var(--height-toolbar) + 120px);
+  top: calc(var(--height-toolbar) + var(--sidebar-list-height));
   height: calc(100% - 220px);
   max-height: 600px;
   width: 160px;
