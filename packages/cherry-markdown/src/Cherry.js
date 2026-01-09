@@ -252,6 +252,7 @@ export default class Cherry extends CherryStatic {
     this.$event.on('editorOpen', () => {
       this.status.editor = 'show';
     });
+
     this.$event.on('editor.size.change', () => {
       // 更新工具栏高度CSS变量
       const toolbarHeight = this.shouldRenderToolbarDom ? this.toolbar.options.dom.offsetHeight : 0;

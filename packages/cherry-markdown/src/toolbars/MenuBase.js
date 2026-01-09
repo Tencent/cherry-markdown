@@ -557,6 +557,10 @@ export default class MenuBase {
    */
   static getTargetParentByButton(dom) {
     let parent = dom.parentElement;
+    // unwrap sidebar list wrapper to preserve position detection
+    if (parent && parent.classList.contains('cherry-sidebar-list')) {
+      parent = parent.parentElement;
+    }
     if (/toolbar-(left|right)/.test(parent.className)) {
       parent = parent.parentElement;
     }
