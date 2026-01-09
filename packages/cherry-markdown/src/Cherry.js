@@ -238,11 +238,6 @@ export default class Cherry extends CherryStatic {
     this.$event.on('editorOpen', () => {
       this.status.editor = 'show';
     });
-    this.$event.on('editor.size.change', () => {
-      // 更新工具栏高度CSS变量
-      const toolbarHeight = this.toolbar.options.dom.offsetHeight;
-      this.wrapperDom.style.setProperty('--height-toolbar', `${toolbarHeight}px`);
-    });
 
     // 切换模式，有纯预览模式、纯编辑模式、双栏编辑模式
     this.switchModel(this.options.editor.defaultModel, this.options.toolbars.showToolbar);
