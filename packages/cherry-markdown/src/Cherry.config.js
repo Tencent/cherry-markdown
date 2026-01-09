@@ -650,7 +650,7 @@ const defaultConfig = {
      * @deprecated 不再支持theme的配置，统一在`themeSettings.toolbarTheme`中配置
      */
     // theme: 'dark', // light or dark
-    showToolbar: true, // false：不展示顶部工具栏； true：展示工具栏; toolbars.showToolbar=false 与 toolbars.toolbar=false 等效
+    showToolbar: true, // false：不展示顶部工具栏和侧边栏； true：展示工具栏; toolbars.showToolbar=false 与 toolbars.toolbar=false 等效
     toolbar: [
       'bold',
       'italic',
@@ -690,7 +690,8 @@ const defaultConfig = {
     sidebar: false,
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'table', 'code'], // array or false
-    hiddenToolbar: [], // 不展示在编辑器中的工具栏，只使用工具栏的api和快捷键功能
+    hiddenToolbar: [], // @deprecated 请使用 registerHeadlessToolbars 代替
+    registerHeadlessToolbars: [], // 不展示在编辑器中的工具栏，只使用工具栏的 api 和快捷键功能
     toc: false, // 不展示悬浮目录
     // toc: {
     //   updateLocationHash: false, // 要不要更新URL的hash

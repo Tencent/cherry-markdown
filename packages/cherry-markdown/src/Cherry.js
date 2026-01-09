@@ -709,11 +709,14 @@ export default class Cherry extends CherryStatic {
   }
 
   createHiddenToolbar() {
-    if (this.options.toolbars.hiddenToolbar) {
-      $expectTarget(this.options.toolbars.hiddenToolbar, Array);
+    // registerHeadlessToolbars 优先级高于 hiddenToolbar
+    const headlessToolbars =
+      this.options.toolbars.registerHeadlessToolbars || this.options.toolbars.hiddenToolbar;
+    if (headlessToolbars) {
+      $expectTarget(headlessToolbars, Array);
       this.hiddenToolbar = new HiddenToolbar({
         $cherry: this,
-        buttonConfig: this.options.toolbars.hiddenToolbar,
+        buttonConfig: headlessToolbars,
         customMenu: this.options.toolbars.customMenu,
       });
       this.toolbar.collectMenuInfo(this.hiddenToolbar);

@@ -1,13 +1,74 @@
 import CodeMirror from 'codemirror';
 import SyntaxBase from '../src/core/SyntaxBase';
-import { FormulaMenu } from '@/toolbars/BubbleFormula';
+
+/**
+ * 公式菜单项类型
+ * @see BubbleFormula.js 中的 FormulaMenu typedef
+ */
+export interface FormulaMenu {
+  [key: string]: {
+    [key: string]: string;
+  };
+}
+
+/**
+ * HTML 标准 `<a>` 标签的 target 属性有效值
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#target MDN - HTML anchor target}
+ *
+ * | 值 | 描述 |
+ * |---|---|
+ * | `_blank` | 在新窗口/新标签页中打开链接 |
+ * | `_self` | 在当前窗口/标签页中打开链接（默认行为） |
+ * | `_parent` | 在父框架中打开链接（用于 iframe 嵌套场景） |
+ * | `_top` | 在最顶层窗口中打开链接，跳出所有 iframe 嵌套 |
+ */
+export type AnchorTargetValue = '_blank' | '_parent' | '_self' | '_top';
+
+/**
+ * HTML 标准 `<a>` 标签的 rel 属性有效值
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel MDN - HTML rel attribute}
+ *
+ * | 值 | 描述 |
+ * |---|---|
+ * | `alternate` | 当前文档的替代版本（翻译、PDF 等） |
+ * | `author` | 指向作者信息页面 |
+ * | `bookmark` | 最近祖先文章的永久链接 |
+ * | `external` | 外部链接，不属于当前站点 |
+ * | `help` | 上下文相关的帮助页面 |
+ * | `license` | 内容的版权许可协议 |
+ * | `next` | 系列文档中的下一篇 |
+ * | `nofollow` | 告诉搜索引擎不追踪此链接 |
+ * | `noopener` | 阻止新窗口通过 window.opener 访问原窗口 |
+ * | `noreferrer` | 不发送 Referer 头，同时包含 noopener 效果 |
+ * | `opener` | 允许新窗口访问原窗口（与 noopener 相反） |
+ * | `prev` | 系列文档中的上一篇 |
+ * | `privacy-policy` | 隐私政策页面 |
+ * | `search` | 搜索页面 |
+ * | `tag` | 描述文档标签/关键词的页面 |
+ */
+export type AnchorRelValue =
+  | 'alternate'
+  | 'author'
+  | 'bookmark'
+  | 'external'
+  | 'help'
+  | 'license'
+  | 'next'
+  | 'nofollow'
+  | 'noopener'
+  | 'noreferrer'
+  | 'opener'
+  | 'prev'
+  | 'privacy-policy'
+  | 'search'
+  | 'tag';
 
 export interface CherryExternalsOptions {
   [key: string]: any;
 }
 
 /**
- * 自定义toolbar键名[key]
+ * 自定义 toolbar 键名 [key]
  */
 export interface CustomMenuType {
   [key: string]: any;
@@ -73,9 +134,9 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
   editor: CherryEditorOptions;
   /** 工具栏区域配置 */
   toolbars: CherryToolbarsOptions<T['CustomToolbar']> | undefined;
-  // 打开draw.io编辑页的url，如果为空则drawio按钮失效
+  // 打开 draw.io 编辑页的 url，如果为空则 drawio 按钮失效
   drawioIframeUrl: string;
-  // drawio iframe的样式
+  // drawio iframe 的样式
   drawioIframeStyle: string;
   /** 文件上传回调 */
   fileUpload: CherryFileUploadHandler;
@@ -97,27 +158,27 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     pdf: boolean;
     file: boolean;
   };
-  /** 定义cherry缓存的作用范围，相同nameSpace的实例共享localStorage缓存 */
+  /** 定义 cherry 缓存的作用范围，相同 nameSpace 的实例共享 localStorage 缓存 */
   nameSpace: string;
   /**
    * 有哪些主题，第三方可以自行扩展主题
-   * @deprecated 不再支持theme的配置，统一在`themeSettings.themeList`中配置
+   * @deprecated 不再支持 theme 的配置，统一在 `themeSettings.themeList` 中配置
    */
   theme: { className: string; label: string }[];
   /**
-   * 定义主题的作用范围，相同themeNameSpace的实例共享主题配置
-   * @deprecated 不再支持themeNameSpace的配置，统一在`nameSpace`中配置
+   * 定义主题的作用范围，相同 themeNameSpace 的实例共享主题配置
+   * @deprecated 不再支持 themeNameSpace 的配置，统一在 `nameSpace` 中配置
    */
   themeNameSpace: string;
   themeSettings: {
     /** 主题列表，用于切换主题 */
     themeList: {
-      /** 主题对应的class名 */
+      /** 主题对应的 class 名 */
       className: string;
       /** 主题名称 */
       label: string;
     }[];
-    /** cherry主题，控制工具栏、编辑区、预览区的样式 */
+    /** cherry 主题，控制工具栏、编辑区、预览区的样式 */
     mainTheme: string;
     /** 代码块主题 */
     codeBlockTheme: string;
@@ -126,8 +187,8 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
   };
   callback: {
     /**
-     * 全局的URL处理器，返回值将填充到编辑区域
-     * @param url 来源url
+     * 全局的 URL 处理器，返回值将填充到编辑区域
+     * @param url 来源 url
      * @param srcType 来源类型
      */
     urlProcessor?: (url: string, srcType: 'image' | 'audio' | 'video' | 'autolink' | 'link', callback?: any) => string;
@@ -152,8 +213,8 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     onClickToc?: (e: MouseEvent, hash: string) => boolean;
   };
   event: {
-    focus?: ({ e: MouseEvent, cherry: Cherry }) => void;
-    blur?: ({ e: MouseEvent, cherry: Cherry }) => void;
+    focus?: (params: { e: Event; cherry: Cherry }) => void;
+    blur?: (params: { e: Event; cherry: Cherry }) => void;
     /** 编辑器内容改变并完成渲染后触发 */
     afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */
@@ -161,7 +222,12 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     /** 编辑器完成所有异步渲染后触发 */
     afterAsyncRender?: CherryLifecycle;
     /** 编辑器选区变化时触发 */
-    selectionChange?: ({ selections: [], lastSelections: [], info }) => void;
+    selectionChange?: (params: {
+      selections: string[];
+      lastSelections: string[];
+      // CodeMirror.EditorSelectionChange
+      info: any;
+    }) => void;
     /** 变更语言时触发 */
     afterChangeLocale?: (locale: string) => void;
     /** 变更主题时触发 */
@@ -177,11 +243,11 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
   autoScrollByCursor: boolean;
   /** 外层容器不存在时，是否强制输出到body上 */
   forceAppend: boolean;
-  /** cherry初始化后是否检查 location.hash 尝试滚动到对应位置 */
+  /** cherry 初始化后是否检查 location.hash 尝试滚动到对应位置 */
   autoScrollByHashAfterInit: boolean;
-  /** 挂载DOM节点ID，引擎模式下不生效 */
+  /** 挂载 DOM 节点 ID，引擎模式下不生效 */
   id?: string;
-  /** 挂载DOM节点，引擎模式下不生效 */
+  /** 挂载 DOM 节点，引擎模式下不生效 */
   el?: HTMLElement;
   /** 初始内容，引擎模式下不生效 */
   value: string;
@@ -197,13 +263,13 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
  *  自定义语法注册配置
  */
 export interface CustomSyntaxRegConfig {
-  /** 语法class */
+  /** 语法 class */
   syntaxClass: typeof SyntaxBase;
-  /** 在某个hook前执行，填入hookName */
+  /** 在某个 hook 前执行，填入 hookName */
   before?: string;
-  /** 在某个hook后执行，填入hookName */
+  /** 在某个 hook 后执行，填入 hookName */
   after?: string;
-  /** 强制覆盖同名hook */
+  /** 强制覆盖同名 hook */
   force?: boolean;
 }
 
@@ -217,33 +283,33 @@ export interface CherryEngineOptions {
      */
     classicBr?: boolean;
     /**
-     * 全局的URL处理器，返回值将填充到编辑区域
-     * @param url 来源url
+     * 全局的 URL 处理器，返回值将填充到编辑区域
+     * @param url 来源 url
      * @param srcType 来源类型
      */
     urlProcessor?: (url: string, srcType: 'image' | 'audio' | 'video' | 'autolink' | 'link', callback?: any) => string;
     /**
-     * 额外允许渲染的html标签
+     * 额外允许渲染的 html 标签
      * 标签以英文竖线分隔，如：htmlWhiteList: 'iframe|script|style'
-     * 默认为空，默认允许渲染的html见src/utils/sanitize.js whiteList 属性
+     * 默认为空，默认允许渲染的 html 见 src/utils/sanitize.js whiteList 属性
      * 需要注意：
-     *    - 启用iframe、script等标签后，会产生xss注入，请根据实际场景判断是否需要启用
-     *    - 一般编辑权限可控的场景（如api文档系统）可以允许iframe、script等标签
+     *    - 启用 iframe、script 等标签后，会产生 xss 注入，请根据实际场景判断是否需要启用
+     *    - 一般编辑权限可控的场景（如 api 文档系统）可以允许 iframe、script 等标签
      */
     htmlWhiteList?: string;
     /**
-     * html黑名单，优先级高于htmlWhiteList
+     * html 黑名单，优先级高于 htmlWhiteList
      * 标签以英文竖线分隔，如：htmlBlackList: 'div|span'
-     * 默认为空，表示不禁止渲染任何html标签
+     * 默认为空，表示不禁止渲染任何 html 标签
      * 需要注意：
-     *    - 启用htmlBlackList后，将禁止渲染htmlBlackList里配置的标签
-     *    - 如果要禁用所有html标签，可配置htmlBlackList: '*'
+     *    - 启用 htmlBlackList 后，将禁止渲染 htmlBlackList 里配置的标签
+     *    - 如果要禁用所有 html 标签，可配置 htmlBlackList: '*'
      */
     htmlBlackList?: string;
     /**
-     * 额外允许渲染的html标签的属性
+     * 额外允许渲染的 html 标签的属性
      * 标签以英文竖线分隔，如：htmlAttrWhiteList: 'part|onmouseover|my-attr'
-     * 默认为空，默认允许渲染的html标签属性见 https://github.com/cure53/DOMPurify/blob/main/src/attrs.ts
+     * 默认为空，默认允许渲染的 html 标签属性见 https://github.com/cure53/DOMPurify/blob/main/src/attrs.ts
      */
     htmlAttrWhiteList?: string;
     /**
@@ -255,10 +321,10 @@ export interface CherryEngineOptions {
      */
     flowSessionContext?: boolean;
     /**
-     * 流式会话时，在最后位置增加一个类似光标的dom
-     * - 'default'：用cherry提供的默认样式
-     * - ''：不增加任何dom
-     * - '<span class="custom-cursor"></span>': 自定义的dom
+     * 流式会话时，在最后位置增加一个类似光标的 dom
+     * - 'default'：用 cherry 提供的默认样式
+     * - ''：不增加任何 dom
+     * - '<span class="custom-cursor"></span>': 自定义的 dom
      */
     flowSessionCursor?: string;
   };
@@ -273,26 +339,50 @@ export interface CherryEngineOptions {
     link?:
       | false
       | {
-          /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
-          target?: '_blank' | '';
-          /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
-          rel?: '_blank' | 'nofollow' | '';
-          /** 自定义<a>标签的属性，默认为空 */
+          /**
+           * 生成的<a>标签追加target属性的默认值
+           * - 支持标准HTML target属性值：`_blank`、`_parent`、`_self`、`_top`
+           * - 空字符串或不设置表示不追加target属性，此时会根据 `openNewPage` 配置决定是否添加 `target="_blank"`
+           * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#target MDN - HTML anchor target}
+           */
+          target?: AnchorTargetValue | '';
+          /**
+           * 生成的<a>标签追加rel属性的默认值
+           * - 支持标准HTML rel属性值，如：`nofollow`、`noopener`、`noreferrer` 等
+           * - 空字符串或不设置表示不追加rel属性
+           * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel MDN - HTML rel attribute}
+           */
+          rel?: AnchorRelValue | '';
+          /** 是否在新窗口打开链接，当 target 未设置时生效 */
+          openNewPage?: boolean;
+          /** 自定义 <a> 标签的属性，默认为空 */
           attrRender?: (text: string, href: string) => string;
           selfClosing?: boolean;
         };
     autoLink?:
       | false
       | {
-          /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
-          target?: '_blank' | '';
-          /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
-          rel?: '_blank' | 'nofollow' | '';
-          /** 是否开启短链接 默认:true */
+          /**
+           * 生成的<a>标签追加target属性的默认值
+           * - 支持标准HTML target属性值：`_blank`、`_parent`、`_self`、`_top`
+           * - 空字符串或不设置表示不追加target属性，此时会根据 `openNewPage` 配置决定是否添加 `target="_blank"`
+           * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#target MDN - HTML anchor target}
+           */
+          target?: AnchorTargetValue | '';
+          /**
+           * 生成的<a>标签追加rel属性的默认值
+           * - 支持标准HTML rel属性值，如：`nofollow`、`noopener`、`noreferrer` 等
+           * - 空字符串或不设置表示不追加rel属性
+           * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel MDN - HTML rel attribute}
+           */
+          rel?: AnchorRelValue | '';
+          /** 是否在新窗口打开链接，当 target 未设置时生效 */
+          openNewPage?: boolean;
+          /** 是否开启短链接 默认:false */
           enableShortLink?: boolean;
           /** 短链接长度 默认:20 */
           shortLinkLength?: number;
-          /** 自定义<a>标签的属性，默认为空 */
+          /** 自定义 <a> 标签的属性，默认为空 */
           attrRender?: (text: string, href: string) => string;
         };
     image?:
@@ -305,13 +395,13 @@ export interface CherryEngineOptions {
       | false
       | {
           listNested?: boolean; // 同级列表类型转换后变为子级
-          indentSpace?: number; // 默认2个空格缩进
+          indentSpace?: number; // 默认 2 个空格缩进
         };
     table?:
       | false
       | {
           enableChart?: boolean;
-          selfClosing?: boolean; // 自动闭合，为true时，当输入第一行table内容时，cherry会自动按表格进行解析
+          selfClosing?: boolean; // 自动闭合，为 true 时，当输入第一行 table 内容时，cherry 会自动按表格进行解析
           // chartRenderEngine: EChartsTableEngine,
           // externals: ['echarts'],
         };
@@ -320,45 +410,45 @@ export interface CherryEngineOptions {
       | false
       | {
           /**
-           * @deprecated 不再支持theme的配置，统一在`themeSettings.inlineCodeTheme`中配置
+           * @deprecated 不再支持 theme 的配置，统一在 `themeSettings.inlineCodeTheme` 中配置
            */
           // theme: 'red',
           /** 是否在行内代码为颜色值时展示颜色指示 */
           showColor?: boolean;
-          /** 是否自动闭合 为true时，会尝试补全最后一行的行内代码*/
+          /** 是否自动闭合 为 true 时，会尝试补全最后一行的行内代码*/
           selfClosing?: boolean;
         };
     codeBlock?:
       | false
       | {
           /**
-           * @deprecated 不再支持theme的配置，统一在`themeSettings.codeBlockTheme`中配置
+           * @deprecated 不再支持 theme 的配置，统一在 `themeSettings.codeBlockTheme` 中配置
            */
           // theme: 'dark', // 默认为深色主题
-          wrap?: boolean; // 超出长度是否换行，false则显示滚动条
+          wrap?: boolean; // 超出长度是否换行，false 则显示滚动条
           lineNumber?: boolean; // 默认显示行号
-          copyCode?: boolean; // 是否显示“复制”按钮
-          editCode?: boolean; // 是否显示“编辑”按钮
-          changeLang?: boolean; // 是否显示“切换语言”按钮
-          expandCode?: boolean; // 是否展开/收起代码块，当代码块行数大于10行时，会自动收起代码块
-          selfClosing?: boolean; // 自动闭合，为true时，当md中有奇数个```时，会自动在md末尾追加一个```
+          copyCode?: boolean; // 是否显示"复制"按钮
+          editCode?: boolean; // 是否显示"编辑"按钮
+          changeLang?: boolean; // 是否显示"切换语言"按钮
+          expandCode?: boolean; // 是否展开/收起代码块，当代码块行数大于 10 行时，会自动收起代码块
+          selfClosing?: boolean; // 自动闭合，为 true 时，当 md 中有奇数个```时，会自动在 md 末尾追加一个```
           customRenderer?: {
             // 自定义语法渲染器
           };
           /** 自定义代码块的包裹渲染器 */
           wrapperRender?: (language: string, code: string, innerHTML: string) => string;
           mermaid?: {
-            svg2img?: boolean; // 是否将mermaid生成的画图变成img格式
+            svg2img?: boolean; // 是否将 mermaid 生成的画图变成 img 格式
           };
           /**
-           * indentedCodeBlock是缩进代码块是否启用的开关
+           * indentedCodeBlock 是缩进代码块是否启用的开关
            *
-           *    在6.X之前的版本中默认不支持该语法。
-           *    因为cherry的开发团队认为该语法太丑了（容易误触）
+           *    在 6.X 之前的版本中默认不支持该语法。
+           *    因为 cherry 的开发团队认为该语法太丑了（容易误触）
            *    开发团队希望用```代码块语法来彻底取代该语法
            *    但在后续的沟通中，开发团队发现在某些场景下该语法有更好的显示效果
-           *    因此开发团队在6.X版本中才引入了该语法
-           *    已经引用6.x以下版本的业务如果想做到用户无感知升级，可以去掉该语法：
+           *    因此开发团队在 6.X 版本中才引入了该语法
+           *    已经引用 6.x 以下版本的业务如果想做到用户无感知升级，可以去掉该语法：
            *        indentedCodeBlock：false
            */
           indentedCodeBlock?: boolean;
@@ -366,14 +456,14 @@ export interface CherryEngineOptions {
            * 自定义按钮，出现在代码块右上角
            **/
           customBtns?: {
-            html: '';
-            onClick: (event: MouseEvent, code: string, language: string) => {};
+            html: string;
+            onClick: (event: MouseEvent, code: string, language: string) => void;
           }[];
         };
     emoji?:
       | false
       | {
-          useUnicode?: boolean; // 是否使用unicode进行渲染
+          useUnicode?: boolean; // 是否使用 unicode 进行渲染
         };
     fontEmphasis?:
       | false
@@ -390,7 +480,7 @@ export interface CherryEngineOptions {
            *           __hello__    ====>   <strong>hello</strong>
            */
           allowWhitespace?: boolean;
-          selfClosing?: boolean; // 自动闭合，为true时，当输入**XXX时，会自动在末尾追加**
+          selfClosing?: boolean; // 自动闭合，为 true 时，当输入**XXX 时，会自动在末尾追加**
         };
     strikethrough?:
       | false
@@ -411,7 +501,7 @@ export interface CherryEngineOptions {
     mathBlock?:
       | false
       | {
-          engine?: 'katex' | 'MathJax'; // katex或MathJax
+          engine?: 'katex' | 'MathJax'; // katex 或 MathJax
           src?: string;
           css?: string;
           plugins?: boolean; // 加载插件
@@ -420,7 +510,7 @@ export interface CherryEngineOptions {
     inlineMath?:
       | false
       | {
-          engine?: 'katex' | 'MathJax'; // katex或MathJax
+          engine?: 'katex' | 'MathJax'; // katex 或 MathJax
           src?: string;
           selfClosing?: boolean; // 自动闭合
         };
@@ -491,7 +581,7 @@ export interface CherryEngineOptions {
           refNumber?: {
             appendClass?: string; // 添加到引用序号的类名
             render?: (refNum: number, refTitle: string) => string; // 脚注标号的内容
-            clickRefNumberCallback?: (event: MouseEvent, refNum: number, refTitle: string, content: string) => boolean; // 点击标号时回调，如果返回false，则不再执行cherry的默认动作
+            clickRefNumberCallback?: (event: MouseEvent, refNum: number, refTitle: string, content: string) => boolean; // 点击标号时回调，如果返回 false，则不再执行 cherry 的默认动作
           };
           /**
            * 脚注列表的配置
@@ -515,8 +605,8 @@ export interface CherryEngineOptions {
                 };
               };
           /**
-           * hover到脚注标号时，显示一个卡片
-           *  - false: 不响应hover事件
+           * hover 到脚注标号时，显示一个卡片
+           *  - false: 不响应 hover 事件
            */
           bubbleCard?:
             | false
@@ -559,33 +649,33 @@ export type EditorMode =
   | 'edit&preview';
 
 export interface CherryEditorOptions {
-  id?: string; // textarea 的id属性值
-  name?: string; // textarea 的name属性值
-  autoSave2Textarea?: boolean; // 是否自动将编辑区的内容回写到textarea里
+  id?: string; // textarea 的 id 属性值
+  name?: string; // textarea 的 name 属性值
+  autoSave2Textarea?: boolean; // 是否自动将编辑区的内容回写到 textarea 里
   /**
-   * @deprecated 不再支持theme的配置，废弃该功能，统一由`themeSettings.mainTheme`配置
+   * @deprecated 不再支持 theme 的配置，废弃该功能，统一由 `themeSettings.mainTheme` 配置
    */
   theme?: string;
-  /** 编辑器的高度，默认100%，如果挂载点存在内联设置的height则以内联样式为主 */
+  /** 编辑器的高度，默认 100%，如果挂载点存在内联设置的 height 则以内联样式为主 */
   height?: string;
   /** 编辑器初始化后的模式 */
   defaultModel?: EditorMode;
-  /** 粘贴时是否自动将html转成markdown */
+  /** 粘贴时是否自动将 html 转成 markdown */
   convertWhenPaste?: boolean;
   /** 快捷键风格，目前仅支持 sublime 和 vim */
   keyMap?: 'sublime' | 'vim';
-  /** 透传给codemirror的配置项 */
-  codemirror?: object;
-  /** 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal */
-  writingStyle?: string;
+  /** 透传给 codemirror 的配置项 */
+  codemirror?: CodeMirror.EditorConfiguration;
+  /** 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认 normal */
+  writingStyle?: 'normal' | 'typewriter' | 'focus';
   editor?: CodeMirror.Editor;
-  /** 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置 */
+  /** 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到 cherry 初始化的位置 */
   keepDocumentScrollAfterInit?: boolean;
-  /** 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》 */
+  /** 是否高亮全角符号 ·|￥|、|：|"|"|【|】|（|）|《|》 */
   showFullWidthMark?: boolean;
   /** 是否显示联想框 */
   showSuggestList?: boolean;
-  /** URL的最大长度，-1表示不限制，超过该长度的URL会显示省略号 */
+  /** URL 的最大长度，-1 表示不限制，超过该长度的 URL 会显示省略号 */
   maxUrlLength?: number;
   /**
    * 输入联想配置
@@ -613,25 +703,25 @@ export type CherryLifecycle = (text: string, html: string) => void;
 
 export interface CherryPreviewerOptions {
   dom?: HTMLDivElement | false;
-  /** 预览区域的DOM className */
+  /** 预览区域的 DOM className */
   className?: string;
   /** 是否是移动端预览 */
-  isMobilePreview?: boolean,
+  isMobilePreview?: boolean;
   enablePreviewerBubble?: boolean;
   floatWhenClosePreviewer?: boolean;
   // 配置图片懒加载的逻辑
   lazyLoadImg?: {
-    // 加载图片时如果需要展示loaing图，则配置loading图的地址
+    // 加载图片时如果需要展示 loading 图，则配置 loading 图的地址
     loadingImgPath?: string;
-    // 同一时间最多有几个图片请求，最大同时加载6张图片
+    // 同一时间最多有几个图片请求，最大同时加载 6 张图片
     maxNumPerTime?: 1 | 2 | 3 | 4 | 5 | 6;
-    // 不进行懒加载处理的图片数量，如果为0，即所有图片都进行懒加载处理， 如果设置为-1，则所有图片都不进行懒加载处理
+    // 不进行懒加载处理的图片数量，如果为 0，即所有图片都进行懒加载处理， 如果设置为 -1，则所有图片都不进行懒加载处理
     noLoadImgNum?: number;
     // 首次自动加载几张图片（不论图片是否滚动到视野内），autoLoadImgNum = -1 表示会自动加载完所有图片
-    autoLoadImgNum?: -1 | number;
-    // 针对加载失败的图片 或 beforeLoadOneImgCallback 返回false 的图片，最多尝试加载几次，为了防止死循环，最多5次。以图片的src为纬度统计重试次数
+    autoLoadImgNum?: number;
+    // 针对加载失败的图片 或 beforeLoadOneImgCallback 返回 false 的图片，最多尝试加载几次，为了防止死循环，最多 5 次。以图片的 src 为纬度统计重试次数
     maxTryTimesPerSrc?: 0 | 1 | 2 | 3 | 4 | 5;
-    // 加载一张图片之前的回调函数，函数return false 会终止加载操作
+    // 加载一张图片之前的回调函数，函数 return false 会终止加载操作
     beforeLoadOneImgCallback?: (img: HTMLImageElement) => void | boolean;
     // 加载一张图片失败之后的回调函数
     failLoadOneImgCallback?: (img: HTMLImageElement) => void;
@@ -761,7 +851,7 @@ export interface CherryChangeLocaleToolbarOption {
 }
 export interface CherryToolbarsOptions<F extends CherryToolbarsCustomType = CherryToolbarsCustomType> {
   /**
-   * @deprecated 不再支持theme的配置，统一在`themeSettings.toolbarTheme`中配置
+   * @deprecated 不再支持 theme 的配置，统一在 `themeSettings.toolbarTheme` 中配置
    */
   theme?: 'light' | 'dark';
   toolbar?:
@@ -777,43 +867,56 @@ export interface CherryToolbarsOptions<F extends CherryToolbarsCustomType = Cher
           }
       )[]
     | false;
-  toolbarRight?: (CherryDefaultBubbleToolbar | CherryDefaultToolbar)[] | false;
+  toolbarRight?: (CherryToolbarSeparator | CherryDefaultToolbar | keyof Partial<F['CustomMenuType']>)[] | false;
   /** 是否展示悬浮目录 */
   toc?:
     | false
     | {
-        /** 要不要更新URL的hash */
+        /** 要不要更新 URL 的 hash */
         updateLocationHash?: boolean;
         /** pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题 */
         defaultModel?: 'pure' | 'full';
         /** 是否显示自增序号 */
         showAutoNumber?: boolean;
-        /** 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed */
+        /** 悬浮目录的悬浮方式。当滚动条在 cherry 内部时，用 absolute；当滚动条在 cherry 外部时，用 fixed */
         position?: 'absolute' | 'fixed';
         /** 额外样式 */
         cssText?: string;
       };
-  /** 不展示在编辑器中的工具栏，只使用工具栏的api和快捷键功能 */
-  hiddenToolbar?: any[];
-  /** 是否展示顶部工具栏 */
+  /**
+   * @deprecated 请使用 `registerHeadlessToolbars` 代替
+   * @description 不展示在编辑器中的工具栏，只使用工具栏的 api 和 快捷键功能 */
+  hiddenToolbar?: (CherryToolbarSeparator | CherryDefaultToolbar | keyof Partial<F['CustomMenuType']>)[];
+  /** 不展示在编辑器中的工具栏，只使用工具栏的 api 和 快捷键功能 */
+  registerHeadlessToolbars?: (CherryToolbarSeparator | CherryDefaultToolbar | keyof Partial<F['CustomMenuType']>)[];
+  /** 是否展示顶部工具栏和侧边栏 */
   showToolbar?: boolean;
   /** 侧边栏配置 */
-  sidebar?: any[] | false;
+  sidebar?: (CherryToolbarSeparator | CherryDefaultToolbar | keyof Partial<F['CustomMenuType']>)[] | false;
   /** 选中悬停菜单配置 */
-  bubble?: any[] | false;
+  bubble?:
+    | (
+        | CherryToolbarSeparator
+        | CherryDefaultBubbleToolbar
+        | CherryDefaultToolbar
+        | keyof Partial<F['CustomMenuType']>
+      )[]
+    | false;
   /** 新行悬停菜单配置 */
-  float?: any[] | false;
+  float?:
+    | (CherryToolbarSeparator | CherryDefaultFloatToolbar | CherryDefaultToolbar | keyof Partial<F['CustomMenuType']>)[]
+    | false;
   customMenu?: Record<string, any>;
   /**
    * 自定义快捷键
    * @deprecated 请使用`shortcutKeySettings`
    */
-  shortcutKey?: Object | false;
+  shortcutKey?: object | false;
   /**
    * 自定义快捷键
    */
   shortcutKeySettings?: {
-    /** 是否替换已有的快捷键, true: 替换默认快捷键； false： 会追加到默认快捷键里，相同的shortcutKey会覆盖默认的 */
+    /** 是否替换已有的快捷键, true: 替换默认快捷键； false： 会追加到默认快捷键里，相同的 shortcutKey 会覆盖默认的 */
     isReplace?: boolean;
     shortcutKeyMap?: { [shortcutKey: string]: ShortcutKeyMapStruct };
   };
@@ -855,37 +958,41 @@ export interface CherryFileUploadHandler {
 export interface CherryFileUploadMultiHandler {
   /**
    * @param files 用户上传的文件对象数组
-   * @param callback 回调函数，接收最终的文件url
+   * @param callback 回调函数，接收最终的文件信息数组
    */
   (
     files: File[],
     /**
-     * @param params.name 回填的alt信息
-     * @param params.poster 封面图片地址（视频的场景下生效）
-     * @param params.isBorder 是否有边框样式（图片场景下生效）
-     * @param params.isShadow 是否有阴影样式（图片场景下生效）
-     * @param params.isRadius 是否有圆角样式（图片场景下生效）
-     * @param params.width 设置宽度，可以是像素、也可以是百分比（图片、视频场景下生效）
-     * @param params.height 设置高度，可以是像素、也可以是百分比（图片、视频场景下生效）
+     * @param results 文件上传结果数组
+     * @param results[].url 文件url
+     * @param results[].params.name 回填的alt信息
+     * @param results[].params.poster 封面图片地址（视频的场景下生效）
+     * @param results[].params.isBorder 是否有边框样式（图片场景下生效）
+     * @param results[].params.isShadow 是否有阴影样式（图片场景下生效）
+     * @param results[].params.isRadius 是否有圆角样式（图片场景下生效）
+     * @param results[].params.width 设置宽度，可以是像素、也可以是百分比（图片、视频场景下生效）
+     * @param results[].params.height 设置高度，可以是像素、也可以是百分比（图片、视频场景下生效）
      */
     callback: (
-      url: string,
-      params?: {
-        name?: string;
-        poster?: string;
-        isBorder?: boolean;
-        isShadow?: boolean;
-        isRadius?: boolean;
-        width?: string;
-        height?: string;
-      },
+      results: Array<{
+        url: string;
+        params?: {
+          name?: string;
+          poster?: string;
+          isBorder?: boolean;
+          isShadow?: boolean;
+          isRadius?: boolean;
+          width?: string;
+          height?: string;
+        };
+      }>,
     ) => void,
   ): void;
 }
 
 type ShortcutKeyMapStruct = {
   /**
-   * 原始hook
+   * 原始 hook
    */
   hookName: string;
   /**
@@ -895,7 +1002,7 @@ type ShortcutKeyMapStruct = {
   /**
    * 其他扩展字段
    * 如果存在则会赋值给 data-[fieldName]=value 存储记录
-   * @summary 切记不要使用驼峰，因为dataset 会全部转成全小写，除非你在取值的时候能记住，否则永远不要这么做
+   * @summary 切记不要使用驼峰，因为 dataset 会全部转成全小写，除非你在取值的时候能记住，否则永远不要这么做
    */
   [x: string]: string | number;
 };
