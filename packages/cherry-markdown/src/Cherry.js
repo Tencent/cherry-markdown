@@ -179,17 +179,31 @@ export default class Cherry extends CherryStatic {
     if (this.options.toolbars.showToolbar === false || this.options.toolbars.toolbar === false) {
       // 即便配置了不展示工具栏，也要让工具栏加载对应的语法hook
       wrapperDom.classList.add('cherry--no-toolbar');
-      this.options.toolbars.toolbar = this.options.toolbars.toolbar
-        ? this.options.toolbars.toolbar
-        : this.defaultToolbar;
     }
+    // 确保各工具栏配置是数组，如果是 false 或其他 falsy 值则使用空数组
+    ['toolbar', 'toolbarRight', 'bubble', 'sidebar', 'float'].forEach((key) => {
+      if (!Array.isArray(this.options.toolbars?.[key])) {
+        this.options.toolbars[key] = [];
+      }
+    });
+
     $expectTarget(this.options.toolbars.toolbar, Array);
+
+    // 判断是否需要渲染工具栏 DOM
+    const hasToolbarItems = (config) => !config || (Array.isArray(config) && config.length > 0);
+    this.shouldRenderToolbarDom =
+      hasToolbarItems(this.options.toolbars.toolbar) || hasToolbarItems(this.options.toolbars.toolbarRight);
+
     // 创建顶部工具栏
     this.createToolbar();
     this.createToolbarRight();
 
     const wrapperFragment = document.createDocumentFragment();
-    wrapperFragment.appendChild(this.toolbar.options.dom);
+
+    // 只有当需要渲染工具栏时才添加工具栏 DOM
+    if (this.shouldRenderToolbarDom) {
+      wrapperFragment.appendChild(this.toolbar.options.dom);
+    }
     wrapperFragment.appendChild(editor.options.editorDom);
     if (!this.options.previewer.dom) {
       wrapperFragment.appendChild(previewer.options.previewerDom);
@@ -240,7 +254,7 @@ export default class Cherry extends CherryStatic {
     });
     this.$event.on('editor.size.change', () => {
       // 更新工具栏高度CSS变量
-      const toolbarHeight = this.toolbar.options.dom.offsetHeight;
+      const toolbarHeight = this.shouldRenderToolbarDom ? this.toolbar.options.dom.offsetHeight : 0;
       this.wrapperDom.style.setProperty('--height-toolbar', `${toolbarHeight}px`);
     });
 
