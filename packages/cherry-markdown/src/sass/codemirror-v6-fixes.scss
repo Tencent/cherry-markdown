@@ -1,0 +1,30 @@
+// CodeMirror v6 样式补充
+.cherry {
+  .cm-editor .cm-cursor {
+    border-left: 2px solid var(--editor-cursor-color);
+  }
+  
+  &.cm-focused .cm-editor .cm-cursor {
+    border-left-color: var(--editor-cursor-color);
+  }
+  
+  .cm-editor .cm-gutter {
+    border-right: 1px solid var(--base-border-color);
+    background-color: var(--base-editor-bg);
+  }
+  
+  .cm-editor .cm-lineNumbers {
+    color: var(--editor-line-number-color);
+    padding: 0 8px 0 4px;
+    font-family: var(--font-family-mono);
+    font-size: 0.9em;
+  }
+  
+  .cm-editor .cm-activeLineGutter {
+    background-color: var(--editor-active-line-bg);
+  }
+  
+  .cm-editor .cm-searching {
+    background-color: var(--searching-highlight-color, rgba(252, 195, 25, 0.5));
+  }
+}
