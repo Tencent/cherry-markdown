@@ -1,5 +1,23 @@
 # Change Log
 
+## 0.11.0-alpha.0
+
+### Minor Changes
+
+- 3a1f53f: refactor: 升级编辑器至 `Codemirror@6` 并优化相关功能
+
+### Patch Changes
+
+- f5e01e9: fix: #1570 修复点击脚注列表里的标号时有js报错的问题
+- 68017a4: chore:`@types/node` 升级为 `@20.10.6`
+- b559a2a: chore: 将 release build 的 Node 版本设置为 `18.x`
+- 755dd8c: fix: 优化拖拽预览区宽度的逻辑，使其更稳定
+- c15f54f: style: 增加主题和代码块主题的图标
+- 5d2d0be: fix: 修复表格同一个单元格内无法连续输入\|的问题
+- 2478d68: fix: 移除工具栏高度动态更新逻辑，简化任务栏高度变量管理
+- e069033: feat(sidebar): 添加侧边栏列表样式和动态高度支持
+- a275692: fix: image syntax compatibility, Fixes #1554
+
 ## 0.10.3
 
 ### Patch Changes
