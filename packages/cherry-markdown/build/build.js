@@ -16,14 +16,12 @@
 import terser from '@rollup/plugin-terser';
 import baseConfig from './rollup.base.config.js';
 
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
 const terserPlugin = (options = {}) =>
   terser({
-    output: {
-      comments: false,
-    },
-    compress: {
-      pure_funcs: ['console.log', 'console.info'],
-    },
+    output: { comments: false },
+    compress: { pure_funcs: ['console.log', 'console.info'] },
     ecma: 5,
     ...options,
   });
@@ -34,35 +32,22 @@ export default {
     {
       ...baseConfig.output,
       exports: 'named',
-      file: 'dist/cherry-markdown.js',
+      file: 'dist/cherry-markdown.umd.js',
       format: 'umd',
       name: 'Cherry',
       sourcemap: true,
-      compact: false,
+      compact: true,
+      plugins: IS_PRODUCTION ? [terserPlugin()] : [],
     },
     {
       ...baseConfig.output,
       exports: 'named',
-      file: 'dist/cherry-markdown.min.js',
-      format: 'umd',
-      name: 'Cherry',
-      sourcemap: false,
-      compact: true,
-      plugins: [terserPlugin()],
-    },
-    {
-      ...baseConfig.output,
       file: 'dist/cherry-markdown.esm.js',
       format: 'esm',
       name: 'Cherry',
-      sourcemap: false,
+      sourcemap: true,
       compact: true,
-      plugins: [
-        terserPlugin({
-          module: true,
-          ecma: 2015,
-        }),
-      ],
+      plugins: IS_PRODUCTION ? [terserPlugin({ module: true, ecma: 2015 })] : [],
     },
   ],
 };

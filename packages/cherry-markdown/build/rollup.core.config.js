@@ -16,48 +16,49 @@
 import terser from '@rollup/plugin-terser';
 import baseConfig from './rollup.base.config.js';
 
+
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const terserPlugin = (options = {}) =>
   terser({
-    output: {
-      comments: false,
-    },
-    compress: {
-      pure_funcs: ['console.log', 'console.info'],
-    },
+    output: { comments: false },
+    compress: { pure_funcs: ['console.log', 'console.info'] },
     ecma: 5,
     ...options,
   });
 
+const umdOutputConfig = {
+  ...baseConfig.output,
+  exports: 'named',
+  file: 'dist/cherry-markdown.core.umd.js',
+  format: 'umd',
+  name: 'Cherry',
+  sourcemap: true,
+  compact: true,
+  plugins: IS_PRODUCTION ? [terserPlugin()] : [],
+  manualChunks: () => 'main',
+};
+
+const esmOutputConfig = {
+  ...baseConfig.output,
+  exports: 'named',
+  file: 'dist/cherry-markdown.core.esm.js',
+  format: 'esm',
+  name: 'Cherry',
+  sourcemap: true,
+  compact: true,
+  plugins: IS_PRODUCTION ? [terserPlugin({ module: true, ecma: 2015 })] : [],
+  manualChunks: () => 'main',
+};
+
 const options = {
   ...baseConfig,
   input: 'src/index.core.js',
-  output: {
-    ...baseConfig.output,
-    exports: 'named',
-    file: 'dist/cherry-markdown.core.js',
-    format: 'umd',
-    name: 'Cherry',
-    sourcemap: false,
-    compact: true,
-    plugins: [terserPlugin()],
-    manualChunks: () => 'main',
-  },
+  output: [umdOutputConfig, esmOutputConfig],
 };
 
 if (!Array.isArray(options.external)) {
   options.external = [];
 }
 options.external.push('mermaid');
-
-/** 构建目标是否 node */
-const IS_COMMONJS_BUILD = process.env.BUILD_TARGET === 'commonjs';
-
-if (IS_COMMONJS_BUILD) {
-  options.output = {
-    ...options.output,
-    file: options.output.file.replace(/\.js$/, '.common.js'),
-    format: 'cjs',
-  };
-}
 
 export default options;

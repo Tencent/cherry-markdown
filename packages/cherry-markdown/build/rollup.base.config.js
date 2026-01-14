@@ -27,8 +27,6 @@ import envReplacePlugin from './env.js';
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT_PATH = path.resolve(currentDir, '..');
-/** 构建目标是否 node */
-const IS_COMMONJS_BUILD = process.env.BUILD_TARGET === 'commonjs';
 
 const aliasPluginOptions = {
   entries: [
@@ -38,13 +36,6 @@ const aliasPluginOptions = {
     },
   ],
 };
-
-if (IS_COMMONJS_BUILD) {
-  aliasPluginOptions.entries.unshift({
-    find: '@/Sanitizer',
-    replacement: path.resolve(PROJECT_ROOT_PATH, 'src', 'Sanitizer.node.js'),
-  });
-}
 
 /**
  * @type {import('rollup').RollupOptions}

@@ -33,8 +33,9 @@ const createCleanupPlugin = () => ({
   },
 });
 
+// 只输出生产环境压缩版和开发环境普通版
 const createStyleConfigs = ({ input, cssBaseName, outputBaseName, watch }) => {
-  const configs = [
+  return [
     {
       input,
       output: {
@@ -46,31 +47,12 @@ const createStyleConfigs = ({ input, cssBaseName, outputBaseName, watch }) => {
           failOnError: true,
           sass: dartSass,
           ...(watch ? { watch } : {}),
+          outputStyle: IS_PRODUCTION ? 'compressed' : 'expanded',
         }),
         createCleanupPlugin(),
       ],
     },
   ];
-
-  if (IS_PRODUCTION) {
-    configs.push({
-      input,
-      output: {
-        file: `dist/${outputBaseName}.styles.min.js`,
-      },
-      plugins: [
-        scss({
-          fileName: `${cssBaseName}.min.css`,
-          failOnError: true,
-          sass: dartSass,
-          outputStyle: 'compressed',
-        }),
-        createCleanupPlugin(),
-      ],
-    });
-  }
-
-  return configs;
 };
 
 const options = [

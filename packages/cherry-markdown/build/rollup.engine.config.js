@@ -19,14 +19,12 @@ import baseConfig from './rollup.base.config.js';
 // TODO: 新增完整版引擎构建, 目前引擎构建仅支持核心构建
 const isCoreBuild = process.env.CORE_BUILD === 'true';
 
+
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const terserPlugin = (options = {}) =>
   terser({
-    output: {
-      comments: false,
-    },
-    compress: {
-      pure_funcs: ['console.log', 'console.info'],
-    },
+    output: { comments: false },
+    compress: { pure_funcs: ['console.log', 'console.info'] },
     ecma: 5,
     ...options,
   });
@@ -34,12 +32,12 @@ const terserPlugin = (options = {}) =>
 const umdOutputConfig = {
   ...baseConfig.output,
   exports: 'named',
-  file: isCoreBuild ? 'dist/cherry-markdown.engine.core.js' : 'dist/cherry-markdown.engine.js',
+  file: isCoreBuild ? 'dist/cherry-markdown.engine.core.umd.js' : 'dist/cherry-markdown.engine.umd.js',
   format: 'umd',
   name: 'CherryEngine',
-  sourcemap: false,
+  sourcemap: true,
   compact: true,
-  plugins: [terserPlugin()],
+  plugins: IS_PRODUCTION ? [terserPlugin()] : [],
 };
 
 const esmOutputConfig = {
@@ -47,14 +45,9 @@ const esmOutputConfig = {
   file: isCoreBuild ? 'dist/cherry-markdown.engine.core.esm.js' : 'dist/cherry-markdown.engine.esm.js',
   format: 'esm',
   name: 'CherryEngine',
-  sourcemap: false,
+  sourcemap: true,
   compact: true,
-  plugins: [
-    terserPlugin({
-      module: true,
-      ecma: 2015,
-    }),
-  ],
+  plugins: IS_PRODUCTION ? [terserPlugin({ module: true, ecma: 2015 })] : [],
 };
 
 const options = {
@@ -67,16 +60,5 @@ if (!Array.isArray(options.external)) {
   options.external = [];
 }
 options.external.push('mermaid');
-
-/** 构建目标是否 node */
-const IS_COMMONJS_BUILD = process.env.BUILD_TARGET === 'commonjs';
-
-if (IS_COMMONJS_BUILD) {
-  options.output = {
-    ...umdOutputConfig,
-    file: umdOutputConfig.file.replace(/\.js$/, '.common.js'),
-    format: 'cjs',
-  };
-}
 
 export default options;
