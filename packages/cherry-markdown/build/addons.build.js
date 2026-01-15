@@ -3,18 +3,17 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import alias from '@rollup/plugin-alias';
 import json from '@rollup/plugin-json';
-import typescript from 'rollup-plugin-typescript2';
 import { resolve as _resolve, join, dirname, basename, extname } from 'path';
 import { mkdirSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import glob from 'glob';
 import { rollup as _rollup } from 'rollup';
-import terser from '@rollup/plugin-terser';
+import { createTerserPlugin } from './terser.config.js';
 import os from 'os';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const PROJECT_ROOT_PATH = _resolve(__dirname, '../');
+const currentFilePath = fileURLToPath(import.meta.url);
+const currentDir = dirname(currentFilePath);
+const PROJECT_ROOT_PATH = _resolve(currentDir, '../');
 const CPU_COUNT = os.cpus().length;
 
 glob(
@@ -67,6 +66,10 @@ async function buildAddon(entry) {
     .map((segment) => segment.replace(/^./, (char) => char.toUpperCase()))
     .join('');
 
+  // 创建 terser 插件（UMD 和 ESM 使用不同配置）
+  const terserUMD = createTerserPlugin({ isESM: false });
+  const terserESM = createTerserPlugin({ isESM: true });
+
   const basePlugins = [
     json(),
     alias({
@@ -78,25 +81,15 @@ async function buildAddon(entry) {
       ],
     }),
     resolve({ browser: true }),
-    typescript({
-      include: ['*.js', '*.ts'],
-      tsconfig: _resolve(PROJECT_ROOT_PATH, 'tsconfig.addons.json'),
-      tsconfigOverride: {
-        include: [fullEntryPath],
-        outDir: join(PROJECT_ROOT_PATH, 'dist/addons/types'),
-      },
-      useTsconfigDeclarationDir: true,
-      clean: true,
-    }),
     commonjs({
-      include: [/node_modules/, /src\/libs/],
+      include: [/node_modules/, /src[\\/]libs/],
       extensions: ['.js'],
       ignoreGlobal: false,
       sourceMap: false,
     }),
     babel({
       babelHelpers: 'runtime',
-      exclude: /node_modules\/(?!(codemirror\/src|parse5))/,
+      exclude: /node_modules[\\/](?!(codemirror[\\/]src|parse5))/,
       babelrc: false,
       configFile: false,
       presets: [['@babel/preset-env', { modules: false }]],
@@ -108,8 +101,6 @@ async function buildAddon(entry) {
         '@babel/plugin-proposal-optional-chaining',
       ],
     }),
-    // 始终压缩
-    terser(),
   ];
 
   // 输出 UMD 和 ESM 两种格式
@@ -127,6 +118,7 @@ async function buildAddon(entry) {
       format: 'umd',
       name: camelCaseModuleName,
       sourcemap: true,
+      plugins: [terserUMD],
     });
     await writeOutputs(umdOutputs, outputDir);
 
@@ -137,6 +129,7 @@ async function buildAddon(entry) {
       file: esmFile,
       format: 'es',
       sourcemap: true,
+      plugins: [terserESM],
     });
     await writeOutputs(esmOutputs, outputDir);
   } finally {

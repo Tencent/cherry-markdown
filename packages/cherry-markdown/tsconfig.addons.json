@@ -1,22 +1,25 @@
 {
   "compilerOptions": {
-    // "noEmit": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "baseUrl": ".",
     "allowJs": true,
-    "checkJs": true,
+    "checkJs": false,
     "declaration": true,
-    "emitDeclarationOnly": false,
-    "outDir": "dist/addons",
-    "target": "ES5",
+    "emitDeclarationOnly": true,
+    "outDir": "dist/addons/types",
+    "target": "ES2015",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "skipLibCheck": true,
     "paths": {
-      "@/libs/*": ["src/libs/*"]
-    },
+      "@/*": ["src/*"],
+      "@/libs/*": ["src/libs/*"],
+      "~types/*": ["types/*"]
+    }
   },
-  // 按需引入addons，尽量不引入编辑器代码
   "include": [
-    "src/addons/**/*-plugin.js",
+    "src/addons/**/*-plugin.js"
   ],
   "files": [
     "types/codemirror.d.ts",

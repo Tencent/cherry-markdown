@@ -13,16 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import terser from '@rollup/plugin-terser';
 import baseConfig from './rollup.base.config.js';
-
-const terserPlugin = (options = {}) =>
-  terser({
-    output: { comments: false },
-    compress: { pure_funcs: ['console.log', 'console.info'] },
-    ecma: 5,
-    ...options,
-  });
+import { terserUMD, terserESM } from './terser.config.js';
 
 const umdOutputConfig = {
   ...baseConfig.output,
@@ -32,7 +24,7 @@ const umdOutputConfig = {
   name: 'Cherry',
   sourcemap: true,
   compact: true,
-  plugins: [terserPlugin()],
+  plugins: [terserUMD],
   manualChunks: () => 'main',
 };
 
@@ -44,7 +36,7 @@ const esmOutputConfig = {
   name: 'Cherry',
   sourcemap: true,
   compact: true,
-  plugins: [terserPlugin({ module: true, ecma: 2015 })],
+  plugins: [terserESM],
   manualChunks: () => 'main',
 };
 

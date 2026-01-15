@@ -49,6 +49,12 @@ const options = {
     // disable code splitting
     manualChunks: () => 'cherry',
   },
+  // 优化：启用 treeshake 配置
+  treeshake: {
+    moduleSideEffects: 'no-external',
+    propertyReadSideEffects: false,
+    tryCatchDeoptimization: false,
+  },
   plugins: [
     // Only run ESLint in builds that explicitly enable it. Default: disabled to avoid
     // parser errors when tools load ESM Babel configs during rollup CLI execution.
@@ -66,18 +72,16 @@ const options = {
     envReplacePlugin(),
     alias(aliasPluginOptions),
     resolve({
-      // ignoreGlobal: false,
       browser: true,
+      // 优化：优先使用 ESM 模块
+      preferBuiltins: false,
+      mainFields: ['module', 'browser', 'main'],
     }),
     commonjs({
       // non-CommonJS modules will be ignored, but you can also
       // specifically include/exclude files
       include: [/node_modules/, /src[\\/]libs/], // Default: undefined
       exclude: [/node_modules[\\/](lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
-      // exclude: [/src\/(?!libs)/],
-      // exclude: [ 'node_modules/foo/**', 'node_modules/bar/**' ],  // Default: undefined
-      // these values can also be regular expressions
-      // include: /node_modules/
 
       // search for files other than .js files (must already
       // be transpiled by a previous plugin!)
@@ -89,15 +93,8 @@ const options = {
       // if false then skip sourceMap generation for CommonJS modules
       sourceMap: !IS_PRODUCTION, // Default: true
 
-      // explicitly specify unresolvable named exports
-      // (see below for more details)
-      // namedExports: { 'react': ['createElement', 'Component' ] },  // Default: undefined
-
-      // sometimes you have to leave require statements
-      // unconverted. Pass an array containing the IDs
-      // or a `id => boolean` function. Only use this
-      // option if you know what you're doing!
-      // ignore: [ 'conditional-runtime-dependency' ]
+      // 优化：忽略动态 require
+      ignoreDynamicRequires: true,
     }),
     babel({
       // use inline config to avoid Babel attempting to load an ESM config file asynchronously
