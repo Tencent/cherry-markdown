@@ -16,8 +16,6 @@
 import terser from '@rollup/plugin-terser';
 import baseConfig from './rollup.base.config.js';
 
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-
 const terserPlugin = (options = {}) =>
   terser({
     output: { comments: false },
@@ -29,16 +27,18 @@ const terserPlugin = (options = {}) =>
 export default {
   ...baseConfig,
   output: [
+    // UMD 格式（压缩）
     {
       ...baseConfig.output,
       exports: 'named',
-      file: 'dist/cherry-markdown.umd.js',
+      file: 'dist/cherry-markdown.js',
       format: 'umd',
       name: 'Cherry',
       sourcemap: true,
       compact: true,
-      plugins: IS_PRODUCTION ? [terserPlugin()] : [],
+      plugins: [terserPlugin()],
     },
+    // ESM 格式（压缩）
     {
       ...baseConfig.output,
       exports: 'named',
@@ -47,7 +47,7 @@ export default {
       name: 'Cherry',
       sourcemap: true,
       compact: true,
-      plugins: IS_PRODUCTION ? [terserPlugin({ module: true, ecma: 2015 })] : [],
+      plugins: [terserPlugin({ module: true, ecma: 2015 })],
     },
   ],
 };

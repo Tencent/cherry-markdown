@@ -8,7 +8,7 @@
     "type": "git",
     "url": "git+https://github.com/Tencent/cherry-markdown.git"
   },
-  "main": "./dist/cherry-markdown.umd.js",
+  "main": "./dist/cherry-markdown.js",
   "module": "./dist/cherry-markdown.esm.js",
   "style": "./dist/cherry-markdown.css",
   "types": "./dist/types/index.d.ts",

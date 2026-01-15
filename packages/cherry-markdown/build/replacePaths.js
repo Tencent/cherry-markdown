@@ -1,4 +1,5 @@
-const replaceInFile = require('replace-in-file');
+import pkg from 'replace-in-file';
+const { replaceInFile } = pkg;
 
 async function replacePaths() {
   try {

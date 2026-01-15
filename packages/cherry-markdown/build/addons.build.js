@@ -15,7 +15,6 @@ import os from 'os';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT_PATH = _resolve(__dirname, '../');
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const CPU_COUNT = os.cpus().length;
 
 glob(
@@ -93,7 +92,7 @@ async function buildAddon(entry) {
       include: [/node_modules/, /src\/libs/],
       extensions: ['.js'],
       ignoreGlobal: false,
-      sourceMap: !IS_PRODUCTION,
+      sourceMap: false,
     }),
     babel({
       babelHelpers: 'runtime',
@@ -109,43 +108,39 @@ async function buildAddon(entry) {
         '@babel/plugin-proposal-optional-chaining',
       ],
     }),
+    // 始终压缩
+    terser(),
   ];
 
-  // UMD
-  let umdBundle;
+  // 输出 UMD 和 ESM 两种格式
+  let bundle;
   try {
-    umdBundle = await _rollup({
+    bundle = await _rollup({
       input: fullEntryPath,
-      plugins: [...basePlugins, IS_PRODUCTION ? terser() : null].filter(Boolean),
+      plugins: basePlugins,
     });
-    const umdFile = join(PROJECT_ROOT_PATH, 'dist/addons', outputFileName.replace(/\.js$/, '.umd.js'));
-    const { output: umdOutputs } = await umdBundle.generate({
+
+    // UMD 格式 (.js)
+    const umdFile = join(PROJECT_ROOT_PATH, 'dist/addons', outputFileName);
+    const { output: umdOutputs } = await bundle.generate({
       file: umdFile,
       format: 'umd',
       name: camelCaseModuleName,
       sourcemap: true,
     });
     await writeOutputs(umdOutputs, outputDir);
-  } finally {
-    if (umdBundle) await umdBundle.close();
-  }
 
-  // ESM
-  let esmBundle;
-  try {
-    esmBundle = await _rollup({
-      input: fullEntryPath,
-      plugins: [...basePlugins, IS_PRODUCTION ? terser({ module: true, ecma: 2015 }) : null].filter(Boolean),
-    });
-    const esmFile = join(PROJECT_ROOT_PATH, 'dist/addons', outputFileName.replace(/\.js$/, '.esm.js'));
-    const { output: esmOutputs } = await esmBundle.generate({
+    // ESM 格式 (.esm.js)
+    const esmFileName = outputFileName.replace(inputFileExt, '.esm.js');
+    const esmFile = join(PROJECT_ROOT_PATH, 'dist/addons', esmFileName);
+    const { output: esmOutputs } = await bundle.generate({
       file: esmFile,
-      format: 'esm',
+      format: 'es',
       sourcemap: true,
     });
     await writeOutputs(esmOutputs, outputDir);
   } finally {
-    if (esmBundle) await esmBundle.close();
+    if (bundle) await bundle.close();
   }
 }
 
