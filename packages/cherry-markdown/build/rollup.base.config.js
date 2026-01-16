@@ -99,7 +99,9 @@ const options = {
     babel({
       // use inline config to avoid Babel attempting to load an ESM config file asynchronously
       babelHelpers: 'runtime',
-      exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5|lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
+      // 默认转译所有代码（包括 node_modules 和 src/libs），确保 ES5 兼容性
+      // 仅排除 core-js（polyfill 本身不需要转译）
+      exclude: [/node_modules[\\/]core-js/],
       babelrc: false,
       configFile: false,
       presets: babelConfig.presets,
@@ -153,5 +155,16 @@ const options = {
   external: ['jsdom'],
   // external: ['echarts']
 };
+
+/**
+ * ES5 兼容性修复插件：将 catch{} (ES2019 optional catch binding) 转换为 catch(_){}
+ * 需要在 terser 之后执行，因为 terser 可能会生成 catch{} 语法
+ */
+export const es5CatchFixPlugin = () => ({
+  name: 'es5-catch-fix',
+  renderChunk(code) {
+    return code.replace(/\bcatch\s*\{\}/g, 'catch(_){}');
+  },
+});
 
 export default options;

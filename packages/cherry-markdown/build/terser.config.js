@@ -33,7 +33,7 @@ export function createTerserPlugin(options = {}) {
 
     // 输出选项
     format: {
-      ecma: isESM ? 2018 : 5,
+      ecma: 5, // 始终使用 ES5 输出语法，避免 shorthand properties 等 ES6 语法
       comments: false, // 移除所有注释
       ascii_only: true, // 避免编码问题
       wrap_iife: !isESM, // UMD 包裹 IIFE
