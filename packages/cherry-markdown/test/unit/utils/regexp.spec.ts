@@ -1,5 +1,9 @@
+/**
+ * regexp.js 单元测试
+ * 测试正则表达式工具函数
+ */
 import { describe, expect, it } from 'vitest';
-import { URL_INLINE_NO_SLASH } from '../../src/utils/regexp';
+import { URL_INLINE_NO_SLASH } from '../../../src/utils/regexp';
 
 describe('utils/regexp', () => {
   it('ip address', () => {
