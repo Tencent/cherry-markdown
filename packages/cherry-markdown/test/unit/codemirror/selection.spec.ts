@@ -3,6 +3,8 @@
  * 测试 CodeMirror 选区相关功能
  *
  * 这些测试记录了 CodeMirror 5 的行为，用于升级到 CodeMirror 6 时的回归测试
+ *
+ * @vitest-environment jsdom
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { getSelection } from '../../../src/utils/selection';

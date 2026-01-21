@@ -21,6 +21,25 @@ export interface MockLineHandle {
   text: string;
 }
 
+export interface MockSearchCursor {
+  findNext: ReturnType<typeof vi.fn>;
+  findPrevious: ReturnType<typeof vi.fn>;
+  from: ReturnType<typeof vi.fn>;
+  to: ReturnType<typeof vi.fn>;
+  replace: ReturnType<typeof vi.fn>;
+  matches: ReturnType<typeof vi.fn>;
+}
+
+export interface MockSearchState {
+  posFrom: MockPosition | null;
+  posTo: MockPosition | null;
+  lastQuery: string | RegExp | null;
+  query: string | RegExp | null;
+  queryText: string | null;
+  overlay: any;
+  annotate: any;
+}
+
 /**
  * 创建一个 CodeMirror Editor 的 Mock 实例
  * @param initialValue 初始文本内容
@@ -32,6 +51,8 @@ export function createCodeMirrorMock(initialValue: string = '') {
   let selections: MockRange[] = [{ anchor: { line: 0, ch: 0 }, head: { line: 0, ch: 0 } }];
   const marks: any[] = [];
   const options: Record<string, any> = {};
+  const overlays: any[] = [];
+  const state: { search?: MockSearchState } = {};
 
   const getLines = () => value.split('\n');
 
@@ -211,44 +232,121 @@ export function createCodeMirrorMock(initialValue: string = '') {
     getAllMarks: vi.fn(() => [...marks]),
 
     // 搜索
-    getSearchCursor: vi.fn((query: RegExp | string) => {
+    getSearchCursor: vi.fn((query: RegExp | string, startPos?: MockPosition) => {
       const matches: Array<{ from: MockPosition; to: MockPosition; match: RegExpExecArray | null }> = [];
       const lines = getLines();
-      const regex = typeof query === 'string' ? new RegExp(query, 'g') : new RegExp(query.source, 'g');
+
+      // 安全处理 query
+      let regex: RegExp;
+      try {
+        if (typeof query === 'string') {
+          regex = query ? new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g') : /(?!)/g;
+        } else if (query instanceof RegExp) {
+          regex = new RegExp(query.source, query.flags.includes('g') ? query.flags : `${query.flags}g`);
+        } else {
+          regex = /(?!)/g;
+        }
+      } catch {
+        regex = /(?!)/g;
+      }
 
       lines.forEach((line, lineNum) => {
         let match;
+        regex.lastIndex = 0; // 重置 lastIndex
         while ((match = regex.exec(line)) !== null) {
           matches.push({
             from: { line: lineNum, ch: match.index },
             to: { line: lineNum, ch: match.index + match[0].length },
             match,
           });
+          // 防止空匹配导致无限循环
+          if (match[0].length === 0) break;
         }
       });
 
       let currentIndex = -1;
 
-      return {
+      const searchCursor = {
         findNext: vi.fn(() => {
           currentIndex += 1;
-          if (currentIndex < matches.length) {
+          if (currentIndex >= 0 && currentIndex < matches.length) {
             return matches[currentIndex].match;
           }
+          currentIndex = matches.length; // 防止越界
           return false;
         }),
         findPrevious: vi.fn(() => {
+          // 如果还没开始搜索，从末尾开始
+          if (currentIndex < 0) {
+            currentIndex = matches.length;
+          }
           currentIndex -= 1;
-          if (currentIndex >= 0) {
+          if (currentIndex >= 0 && currentIndex < matches.length) {
             return matches[currentIndex].match;
           }
+          currentIndex = -1; // 防止越界
           return false;
         }),
         from: vi.fn(() => (currentIndex >= 0 && currentIndex < matches.length ? matches[currentIndex].from : null)),
         to: vi.fn(() => (currentIndex >= 0 && currentIndex < matches.length ? matches[currentIndex].to : null)),
-        replace: vi.fn(),
+        replace: vi.fn((text: string) => {
+          if (currentIndex >= 0 && currentIndex < matches.length) {
+            const m = matches[currentIndex];
+            mock.replaceRange(text, m.from, m.to);
+          }
+        }),
+        matches: vi.fn((reverse: boolean, pos: MockPosition) => {
+          if (currentIndex >= 0 && currentIndex < matches.length) {
+            return {
+              from: matches[currentIndex].from,
+              to: matches[currentIndex].to,
+            };
+          }
+          return null;
+        }),
       };
+
+      return searchCursor;
     }),
+
+    // Overlay (用于搜索高亮)
+    addOverlay: vi.fn((overlay: any) => {
+      overlays.push(overlay);
+    }),
+    removeOverlay: vi.fn((overlay: any) => {
+      const idx = overlays.indexOf(overlay);
+      if (idx >= 0) overlays.splice(idx, 1);
+    }),
+
+    // 显示滚动条匹配
+    showMatchesOnScrollbar: vi.fn(() => ({
+      clear: vi.fn(),
+    })),
+
+    // operation 包装
+    operation: vi.fn((fn: () => void) => fn()),
+
+    // state 用于搜索状态
+    state,
+
+    // display wrapper (用于 SearchBox) - 延迟创建，避免内存泄漏
+    display: {
+      _wrapper: null as HTMLElement | null,
+      get wrapper(): HTMLElement {
+        if (!this._wrapper) {
+          this._wrapper = document.createElement('div');
+          this._wrapper.className = 'CodeMirror';
+          const parent = document.createElement('div');
+          parent.appendChild(this._wrapper);
+        }
+        return this._wrapper;
+      },
+    },
+
+    // doc size
+    doc: {
+      size: getLines().length,
+    },
 
     // 滚动
     getScrollInfo: vi.fn(() => ({
@@ -280,13 +378,26 @@ export function createCodeMirrorMock(initialValue: string = '') {
     })),
     lineAtHeight: vi.fn((height: number, mode?: string) => Math.floor(height / 20)),
 
-    // DOM
-    getWrapperElement: vi.fn(() => document.createElement('div')),
-    getInputField: vi.fn(() => document.createElement('textarea')),
+    // DOM - 缓存元素，避免重复创建
+    _wrapperElement: null as HTMLElement | null,
+    _inputField: null as HTMLElement | null,
+    getWrapperElement: vi.fn(function (this: any) {
+      if (!this._wrapperElement) {
+        this._wrapperElement = document.createElement('div');
+      }
+      return this._wrapperElement;
+    }),
+    getInputField: vi.fn(function (this: any) {
+      if (!this._inputField) {
+        this._inputField = document.createElement('textarea');
+      }
+      return this._inputField;
+    }),
 
     // 事件
     on: vi.fn(),
     off: vi.fn(),
+
 
     // Focus
     focus: vi.fn(),
@@ -306,6 +417,32 @@ export function createCodeMirrorMock(initialValue: string = '') {
 
     // 保存
     save: vi.fn(),
+
+    /**
+     * 清理资源，防止内存泄漏
+     * 应在每个测试的 afterEach 中调用
+     */
+    destroy: () => {
+      // 清理 DOM 元素
+      if (mock._wrapperElement?.parentNode) {
+        mock._wrapperElement.parentNode.removeChild(mock._wrapperElement);
+      }
+      mock._wrapperElement = null;
+      if (mock._inputField?.parentNode) {
+        mock._inputField.parentNode.removeChild(mock._inputField);
+      }
+      mock._inputField = null;
+      if (mock.display._wrapper?.parentNode) {
+        mock.display._wrapper.parentNode.removeChild(mock.display._wrapper);
+      }
+      mock.display._wrapper = null;
+      // 清理标记
+      marks.length = 0;
+      overlays.length = 0;
+      // 重置状态
+      value = '';
+      selections.length = 0;
+    },
   };
 
   return mock;
@@ -340,6 +477,8 @@ export function createKeyboardEventMock(options: {
  * 创建 Cherry 实例的 Mock
  */
 export function createCherryMock() {
+  const eventHandlers: Record<string, Function[]> = {};
+
   return {
     getInstanceId: vi.fn(() => 'test-instance'),
     status: {
@@ -356,18 +495,62 @@ export function createCherryMock() {
     },
     $event: {
       emit: vi.fn(),
+      on: vi.fn((event: string, handler: Function) => {
+        if (!eventHandlers[event]) {
+          eventHandlers[event] = [];
+        }
+        eventHandlers[event].push(handler);
+      }),
+      off: vi.fn(),
     },
     engine: {
       makeMarkdown: vi.fn((html: string) => html),
     },
     locale: {
+      // 基础
       addRow: '添加行',
       addCol: '添加列',
       deleteRow: '删除行',
       deleteColumn: '删除列',
+      // 搜索替换相关
+      close: '关闭',
+      searchFor: '搜索',
+      replaceWith: '替换为',
+      nextMatch: '下一个',
+      previousMatch: '上一个',
+      replace: '替换',
+      replaceAll: '全部替换',
+      toggleReplace: '切换替换',
+      regExpSearch: '正则表达式',
+      caseSensitiveSearch: '区分大小写',
+      wholeWordSearch: '全字匹配',
+      matchesFoundText: '个匹配',
+      // 工具栏相关
+      bold: '粗体',
+      italic: '斜体',
+      strikethrough: '删除线',
+      underline: '下划线',
+      sub: '下标',
+      sup: '上标',
+      color: '颜色',
+      header: '标题',
+      list: '列表',
+      insert: '插入',
     },
+    editor: null as any, // 将在测试中设置
+  };
+}
+
+/**
+ * 创建 MenuBase 测试用的 Editor Mock
+ */
+export function createEditorMock(initialValue: string = '') {
+  const cmMock = createCodeMirrorMock(initialValue);
+  return {
+    editor: cmMock,
   };
 }
 
 export type CodeMirrorMock = ReturnType<typeof createCodeMirrorMock>;
 export type CherryMock = ReturnType<typeof createCherryMock>;
+export type EditorMock = ReturnType<typeof createEditorMock>;

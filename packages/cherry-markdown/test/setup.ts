@@ -2,7 +2,10 @@
  * Vitest 测试环境设置文件
  * 用于设置 CodeMirror 相关测试所需的全局配置和 Mock
  */
-import { beforeEach, vi } from 'vitest';
+import { beforeEach, afterEach, vi } from 'vitest';
+
+// 设置 BUILD_ENV 全局变量（Logger 依赖）
+(global as any).BUILD_ENV = 'test';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -58,4 +61,18 @@ global.ResizeObserver = ResizeObserverMock;
 beforeEach(() => {
   vi.clearAllMocks();
   localStorageMock.clear();
+});
+
+/**
+ * 全局清理：在每个测试后清理 DOM 泄漏
+ * 这可以防止 jsdom 环境中的内存累积
+ */
+afterEach(() => {
+  // 清理动态创建的 DOM 元素
+  const body = document.body;
+  while (body.firstChild) {
+    body.removeChild(body.firstChild);
+  }
+  // 清理 head 中动态添加的样式
+  document.querySelectorAll('style[data-test]').forEach((el) => el.remove());
 });

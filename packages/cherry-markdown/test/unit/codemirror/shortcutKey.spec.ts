@@ -3,6 +3,8 @@
  * 测试快捷键相关功能
  *
  * 这些测试记录了快捷键处理的行为，对于升级 CodeMirror 6 时保持快捷键一致性很重要
+ *
+ * @vitest-environment jsdom
  */
 import { describe, it, expect, vi } from 'vitest';
 import {

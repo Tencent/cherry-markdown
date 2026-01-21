@@ -3,6 +3,8 @@
  * 测试 Markdown 列表自动缩进功能
  *
  * 这些测试记录了自动缩进的行为，对于升级 CodeMirror 6 时保持列表编辑体验一致性很重要
+ *
+ * @vitest-environment jsdom
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { handleNewlineIndentList } from '../../../src/utils/autoindent';
