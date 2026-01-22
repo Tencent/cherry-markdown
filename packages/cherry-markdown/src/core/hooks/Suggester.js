@@ -699,30 +699,6 @@ class SuggesterPanel {
   onCodeMirrorChange(codemirror, evt) {
     const { text, from, to, origin } = evt;
     const changeValue = text.length === 1 ? text[0] : '';
-    // 【新增】处理 ``` 关键字的回车键特殊逻辑
-    if (origin === '+input' ) {
-      const cursor = codemirror.getCursor();
-      const lineContent = codemirror.getLine(cursor.line - 1); // 上一行内容
-
-      // 检查是否以 ``` 开头（代码块开始标记）
-      if (/^[\s]*```/.test(lineContent)) {
-
-        const language = lineContent.replace(/^[\s]*```\s*/, ''); // 提取语言标识符
-        const cursorFrom = { line: 0, ch: 0 }; // 需要计算实际的起始位置
-
-        // 构建完整的代码块结构
-        const codeBlock = `\`\`\`${language}\n\n\`\`\`\n`;
-
-        // 替换原来的 ``` 语言为完整的代码块
-        codemirror.replaceRange(codeBlock, { line: cursor.line - 1, ch: 0 }, { line: cursor.line, ch: 0 });
-
-        // 将光标移动到代码块内部（第二行开始位置）
-        codemirror.setCursor(cursor.line, language.length + 4);
-
-        this.stopRelate(); // 停止联想
-        return; // 不继续执行后续逻辑
-      }
-    }
     // 首次输入命中关键词的时候开启联想
     if (!this.enableRelate() && this.suggesterConfig[changeValue]) {
       this.startRelate(codemirror, changeValue, from);
@@ -751,6 +727,31 @@ class SuggesterPanel {
           this.optionList = !res || !res.length ? [] : res;
           this.updatePanel(this.optionList);
         });
+      }
+    }
+    // 处理 ``` 关键字的回车键特殊逻辑
+    if (origin === '+input' && changeValue === '' ) {
+      const cursor = codemirror.getCursor();
+      const lineContent = codemirror.getLine(cursor.line - 1); // 上一行内容
+      const nextLineContent = codemirror.getLine(cursor.line + 1); // 当前行（也就是按回车后新行的内容）
+
+      // Logger.debug('[CodeBlock]', '[onCodeMirrorChange]', 'lineContent', lineContent)
+      // Logger.debug('[CodeBlock]', '[onCodeMirrorChange]', 'nextLineContent', nextLineContent)
+      // 这样可以避免在已展开的代码块内部重复触发
+      //如果相隔超过一行就不要管了，继续重新生成
+      const backtickMatch = lineContent.match(/^[\s]*(```+)/);
+      if (/^[\s]*```[^\s]/.test(lineContent) && !/^[\s]*```\s*$/.test(nextLineContent)) {
+        const language = lineContent.replace(/^[\s]*```\s*/, '');
+        const backticks = backtickMatch[1]; // 获取实际输入的 ``` 数量，如 ``` 或 ````
+
+        const codeBlock = `\`\`\`${language}\n\n${backticks}`;
+        codemirror.replaceRange(codeBlock, { line: cursor.line - 1, ch: 0 }, { line: cursor.line, ch: 0 });
+
+        // 将光标移动到代码块内部
+        codemirror.setCursor(cursor.line, language.length + 4);
+
+        this.stopRelate();
+        return;
       }
     }
   }

@@ -18,7 +18,6 @@ import Prism from 'prismjs';
 import { escapeHTMLSpecialChar } from '@/utils/sanitize';
 import { getTableRule, getCodeBlockRule } from '@/utils/regexp';
 import { prependLineFeedForParagraph } from '@/utils/lineFeed';
-import Logger from '@/Logger';
 Prism.manual = true;
 
 const CUSTOM_WRAPPER = {
@@ -131,6 +130,23 @@ export default class CodeBlock extends ParagraphBase {
     };
     let html = '';
     const $codeSrc = this.needCleanFlowCursor ? codeSrc.replace(/CHERRYFLOWSESSIONCURSOR/, '') : codeSrc;
+    // 对于 mermaid 返回占位符
+    if (lang === 'mermaid' && /^```mermaid(?:\n*```|\n*)$/.test(props.match)) {
+      // 不显示代码块
+      const placeholder = `<div class="mermaid-loading">Mermaid 图表渲染中...</div>`;
+      engine.render($codeSrc, props.sign, this.$engine, {
+        mermaidConfig: this.mermaid,
+        updateCache: (cacheCode) => {
+          this.$codeCache(props.sign, addContainer(cacheCode));
+          this.pushCache(addContainer(cacheCode), props.sign, props.lines);
+        },
+        fallback: () => {
+          const $code = this.$codeReplace($codeSrc, lang, props.sign, props.lines);
+          return $code;
+        },
+      });
+      return addContainer(placeholder);
+    }
     if (lang === 'all') {
       html = engine.render($codeSrc, props.sign, this.$engine, props.lang);
     } else {
@@ -272,32 +288,40 @@ export default class CodeBlock extends ParagraphBase {
       cacheCode = this.customHighlighter(cacheCode, lang);
     } else {
       // 默认使用 prism 渲染代码块
-      if (!lang || !Prism.languages[lang]) lang = 'javascript'; // 如果没有写语言，默认用 js 样式渲染
-      cacheCode = Prism.highlight(cacheCode, Prism.languages[lang], lang);
-      cacheCode = this.renderLineNumber(cacheCode);
+      // 如果没有写语言，默认用 js 样式渲染；但如果写了 Prism 不支持的语言，保留原始语言
+      if (!lang) {
+        lang = 'javascript';
+      } else if (!Prism.languages[lang]) {
+        // 对于 Prism 不支持的语言，保留原始语言标识符，但不进行语法高亮
+        lang = oldLang; // 使用原始语言标识符
+        cacheCode = escapeHTMLSpecialChar($code); // 不进行语法高亮，只进行 HTML 转义
+      } else {
+        cacheCode = Prism.highlight(cacheCode, Prism.languages[lang], lang);
+        cacheCode = this.renderLineNumber(cacheCode);
+      }
     }
     const needUnExpand = this.expandCode && $code.match(/\n/g)?.length > 10; // 是否需要收起代码块
     const codeHtml = `<pre class="language-${lang}">${this.wrapCode(cacheCode, lang)}</pre>`;
     cacheCode = `<div
-        data-sign="${sign}"
-        data-type="codeBlock"
-        data-lines="${lines}" 
-        data-edit-code="${this.editCode}" 
-        data-copy-code="${this.copyCode}"
-        data-expand-code="${this.expandCode}"
-        data-change-lang="${this.changeLang}"
-        data-lang="${lang}"
-        style="position:relative"
-        class="${needUnExpand ? 'cherry-code-unExpand' : 'cherry-code-expand'}"
-      >
-      ${this.customWrapperRender(oldLang, cacheCode, codeHtml)}
-      `;
+      data-sign="${sign}"
+      data-type="codeBlock"
+      data-lines="${lines}" 
+      data-edit-code="${this.editCode}" 
+      data-copy-code="${this.copyCode}"
+      data-expand-code="${this.expandCode}"
+      data-change-lang="${this.changeLang}"
+      data-lang="${lang}"
+      style="position:relative"
+      class="${needUnExpand ? 'cherry-code-unExpand' : 'cherry-code-expand'}"
+    >
+    ${this.customWrapperRender(oldLang, cacheCode, codeHtml)}
+    `;
     if (needUnExpand) {
       cacheCode += `<div class="cherry-mask-code-block">
-        <div class="expand-btn ">
-          <i class="ch-icon ch-icon-expand"></i>
-        </div>
-      </div>`;
+      <div class="expand-btn ">
+        <i class="ch-icon ch-icon-expand"></i>
+      </div>
+    </div>`;
     }
     cacheCode += '</div>';
     return cacheCode;
