@@ -728,28 +728,45 @@ class SuggesterPanel {
           this.updatePanel(this.optionList);
         });
       }
-    }
+    } 
     // 处理 ``` 关键字的回车键特殊逻辑
-    if (origin === '+input' && changeValue === '' ) {
+    if (origin === '+input' && changeValue === '') {
       const cursor = codemirror.getCursor();
       const lineContent = codemirror.getLine(cursor.line - 1); // 上一行内容
-      const nextLineContent = codemirror.getLine(cursor.line + 1); // 当前行（也就是按回车后新行的内容）
 
-      // Logger.debug('[CodeBlock]', '[onCodeMirrorChange]', 'lineContent', lineContent)
-      // Logger.debug('[CodeBlock]', '[onCodeMirrorChange]', 'nextLineContent', nextLineContent)
-      // 这样可以避免在已展开的代码块内部重复触发
-      //如果相隔超过一行就不要管了，继续重新生成
-      const backtickMatch = lineContent.match(/^[\s]*(```+)/);
-      if (/^[\s]*```[^\s]/.test(lineContent) && !/^[\s]*```\s*$/.test(nextLineContent)) {
-        const language = lineContent.replace(/^[\s]*```\s*/, '');
-        const backticks = backtickMatch[1]; // 获取实际输入的 ``` 数量，如 ``` 或 ````
+      // 检查上一行是否是代码块开始标记（三个以上反引号 + 可选语言）
+      const backtickMatch = lineContent.match(/^[\s]*(`{3,})[^\s]*/);
+      if (backtickMatch) {
+        const backticks = backtickMatch[1]; // 获取实际输入的反引号数量
+        const language = lineContent.replace(/^[\s]*`{3,}\s*/, ''); // 获取语言部分
 
-        const codeBlock = `\`\`\`${language}\n\n${backticks}`;
-        codemirror.replaceRange(codeBlock, { line: cursor.line - 1, ch: 0 }, { line: cursor.line, ch: 0 });
+        // 统计整个文档中代码块开始和结束标记的数量
+        let codeBlockStarts = 0;
+        let codeBlockEnds = 0;
+        const totalLines = codemirror.lineCount();
 
-        // 将光标移动到代码块内部
-        codemirror.setCursor(cursor.line, language.length + 4);
+        for (let i = 0; i < totalLines; i++) {
+          const lineText = codemirror.getLine(i);
 
+          // 检查是否为代码块开始标记（三个以上反引号开头，且后面有非空白字符）
+          if (/^\s*`{3,}[^\s]/.test(lineText)) {
+            codeBlockStarts++;
+          }
+          // 检查是否为代码块结束标记（三个以上反引号开头，后面只有空白）
+          else if (/^\s*`{3,}\s*$/.test(lineText)) {
+            codeBlockEnds++;
+          }
+        }
+        // 是否存在未闭合的代码块
+        const hasUnclosedCodeBlockBefore = (codeBlockStarts + codeBlockEnds) % 2 === 1;
+        // Logger.log('hasUnclosedCodeBlockBefore', hasUnclosedCodeBlockBefore);
+
+        if (hasUnclosedCodeBlockBefore) {
+          // 存在未闭合，应该补全整个代码块结构
+          const codeBlock = `${backticks}${language}\n\n${backticks}`;
+          codemirror.replaceRange(codeBlock, { line: cursor.line - 1, ch: 0 }, { line: cursor.line, ch: 0 });
+          codemirror.setCursor(cursor.line, language.length + backticks.length + 1);
+        } 
         this.stopRelate();
         return;
       }

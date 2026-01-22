@@ -18,6 +18,7 @@ import Prism from 'prismjs';
 import { escapeHTMLSpecialChar } from '@/utils/sanitize';
 import { getTableRule, getCodeBlockRule } from '@/utils/regexp';
 import { prependLineFeedForParagraph } from '@/utils/lineFeed';
+import Logger from '@/Logger';
 Prism.manual = true;
 
 const CUSTOM_WRAPPER = {
@@ -130,23 +131,6 @@ export default class CodeBlock extends ParagraphBase {
     };
     let html = '';
     const $codeSrc = this.needCleanFlowCursor ? codeSrc.replace(/CHERRYFLOWSESSIONCURSOR/, '') : codeSrc;
-    // 对于 mermaid 返回占位符
-    if (lang === 'mermaid' && /^```mermaid(?:\n*```|\n*)$/.test(props.match)) {
-      // 不显示代码块
-      const placeholder = `<div class="mermaid-loading">Mermaid 图表渲染中...</div>`;
-      engine.render($codeSrc, props.sign, this.$engine, {
-        mermaidConfig: this.mermaid,
-        updateCache: (cacheCode) => {
-          this.$codeCache(props.sign, addContainer(cacheCode));
-          this.pushCache(addContainer(cacheCode), props.sign, props.lines);
-        },
-        fallback: () => {
-          const $code = this.$codeReplace($codeSrc, lang, props.sign, props.lines);
-          return $code;
-        },
-      });
-      return addContainer(placeholder);
-    }
     if (lang === 'all') {
       html = engine.render($codeSrc, props.sign, this.$engine, props.lang);
     } else {
@@ -288,15 +272,20 @@ export default class CodeBlock extends ParagraphBase {
       cacheCode = this.customHighlighter(cacheCode, lang);
     } else {
       // 默认使用 prism 渲染代码块
-       // 如果没有写语言，默认用 js 样式渲染；但如果写了 Prism 不支持的语言，保留原始语言
       if (!lang) {
         lang = 'javascript';
-      } else if (!Prism.languages[lang]) {
-        // 对于 Prism 不支持的语言，保留原始语言标识符，但不进行语法高亮
-        lang = oldLang; // 使用原始语言标识符
-        cacheCode = escapeHTMLSpecialChar($code); // 不进行语法高亮，只进行 HTML 转义
-      } else {
+      }
+
+      // 如果 Prism 支持该语言，则进行高亮
+      if (Prism.languages[lang]) {
         cacheCode = Prism.highlight(cacheCode, Prism.languages[lang], lang);
+      } else {
+        // Prism 不支持的语言，只进行 HTML 转义，保留原始语言标识符
+        cacheCode = escapeHTMLSpecialChar(cacheCode);
+      }
+
+      // 如果需要显示行号，则渲染行号
+      if (this.lineNumber) {
         cacheCode = this.renderLineNumber(cacheCode);
       }
     }
@@ -390,9 +379,50 @@ export default class CodeBlock extends ParagraphBase {
     });
   }
 
+
+  //现在这里要做的只是把 mermaid 的排除逻辑放进来 ? r 然后其他的就不要管了，尽量不要影响其他功能
+  $dealUnclosingCode(str) {
+    const codes = str.match(
+      /(?:^|\n)(\n*((?:>[\t ]*)*)(?:[^\S\n]*))(`{3,})([^`]*?)(?=CHERRY_FLOW_SESSION_CURSOR|$|\n)/g,
+    );
+    if (!codes || codes.length <= 0) {
+      return str;
+    }
+    // 在流式输出模式下，如果有未闭合的代码块，不输出任何内容
+    if (this.$cherry.options.engine.global.flowSessionContext) {
+      // 流式输出时，不自动闭合代码块，也不输出占位符
+      // 只有当代码块完全确定时才输出
+      return str;
+    }
+    // 剔除异常的数据
+    let codeBegin = false;
+    const $codes = codes.filter((value) => {
+      if (codeBegin === false) {
+        codeBegin = true;
+        return true;
+      }
+      if (/```[^`\s]+/.test(value)) {
+        return false;
+      }
+      codeBegin = false;
+      return true;
+    });
+    Logger.log($codes.length % 2 === 1)
+    // 如果有奇数个代码块关键字，则进行自动闭合
+    if ($codes.length % 2 === 1) {
+      const lastCode = $codes[$codes.length - 1].replace(/(`)[^`]+$/, '$1').replace(/\n+/, '');
+      const $str = str.replace(/\n+$/, '').replace(/\n`{1,2}$/, '');
+      return `${$str}\n${lastCode}\n`;
+    }
+    return str;
+  }
+
   beforeMakeHtml(str, sentenceMakeFunc, markdownParams) {
     let $str = str;
-
+    // 处理段落代码块自动闭合
+    if (this.selfClosing || this.$cherry.options.engine.global.flowSessionContext) {
+      $str = this.$dealUnclosingCode($str);
+    }
     // 预处理缩进代码块
     $str = this.$replaceCodeInIndent($str);
 
