@@ -18,7 +18,7 @@ import Prism from 'prismjs';
 import { escapeHTMLSpecialChar } from '@/utils/sanitize';
 import { getTableRule, getCodeBlockRule } from '@/utils/regexp';
 import { prependLineFeedForParagraph } from '@/utils/lineFeed';
-
+import Logger from '@/Logger';
 Prism.manual = true;
 
 const CUSTOM_WRAPPER = {
@@ -41,8 +41,8 @@ export default class CodeBlock extends ParagraphBase {
     this.expandCode = config.expandCode; // 是否显示“展开”按钮
     this.editCode = config.editCode; // 是否显示“编辑”按钮
     this.changeLang = config.changeLang; // 是否显示“切换语言”按钮
-    this.selfClosing = config.selfClosing; // 自动闭合，为true时，当md中有奇数个```时，会自动在md末尾追加一个```
-    this.mermaid = config.mermaid; // mermaid的配置，目前仅支持格式设置，svg2img=true 展示成图片，false 展示成svg
+    this.selfClosing = config.selfClosing; // 自动闭合，为 true 时，当 md 中有奇数个```时，会自动在 md 末尾追加一个```
+    this.mermaid = config.mermaid; // mermaid 的配置，目前仅支持格式设置，svg2img=true 展示成图片，false 展示成 svg
     this.indentedCodeBlock = typeof config.indentedCodeBlock === 'undefined' ? true : config.indentedCodeBlock; // 是否支持缩进代码块
     this.INLINE_CODE_REGEX = /(`+)(.+?(?:\n.+?)*?)\1/g;
     if (config && config.customRenderer) {
@@ -83,7 +83,7 @@ export default class CodeBlock extends ParagraphBase {
 
   $resetCache() {
     if (this.codeCacheList.length > 100) {
-      // 如果缓存超过100条，则清空最早的缓存
+      // 如果缓存超过 100 条，则清空最早的缓存
       for (let i = 0; i < this.codeCacheList.length - 100; i++) {
         delete this.codeCache[this.codeCacheList[i]];
       }
@@ -218,7 +218,7 @@ export default class CodeBlock extends ParagraphBase {
   }
 
   /**
-   * 补齐用codeBlock承载的mermaid
+   * 补齐用 codeBlock 承载的 mermaid
    * @param {string} $code
    * @param {string} $lang
    */
@@ -235,7 +235,7 @@ export default class CodeBlock extends ParagraphBase {
       lang = 'mermaid';
     }
     if (lang === 'mermaid') {
-      // 8.4.8版本兼容8.5.2版本的语法
+      // 8.4.8 版本兼容 8.5.2 版本的语法
       code = code.replace(/(^[\s]*)stateDiagram-v2\n/, '$1stateDiagram\n');
       // code = code.replace(/(^[\s]*)sequenceDiagram[ \t]*\n[\s]*autonumber[ \t]*\n/, '$1sequenceDiagram\n');
     }
@@ -271,8 +271,8 @@ export default class CodeBlock extends ParagraphBase {
       // 平台自定义代码块样式
       cacheCode = this.customHighlighter(cacheCode, lang);
     } else {
-      // 默认使用prism渲染代码块
-      if (!lang || !Prism.languages[lang]) lang = 'javascript'; // 如果没有写语言，默认用js样式渲染
+      // 默认使用 prism 渲染代码块
+      if (!lang || !Prism.languages[lang]) lang = 'javascript'; // 如果没有写语言，默认用 js 样式渲染
       cacheCode = Prism.highlight(cacheCode, Prism.languages[lang], lang);
       cacheCode = this.renderLineNumber(cacheCode);
     }
@@ -366,42 +366,8 @@ export default class CodeBlock extends ParagraphBase {
     });
   }
 
-  $dealUnclosingCode(str) {
-    const codes = str.match(
-      /(?:^|\n)(\n*((?:>[\t ]*)*)(?:[^\S\n]*))(`{3,})([^`]*?)(?=CHERRY_FLOW_SESSION_CURSOR|$|\n)/g,
-    );
-    if (!codes || codes.length <= 0) {
-      return str;
-    }
-    // 剔除异常的数据
-    let codeBegin = false;
-    const $codes = codes.filter((value) => {
-      if (codeBegin === false) {
-        codeBegin = true;
-        return true;
-      }
-      if (/```[^`\s]+/.test(value)) {
-        return false;
-      }
-      codeBegin = false;
-      return true;
-    });
-    // 如果有奇数个代码块关键字，则进行自动闭合
-    if ($codes.length % 2 === 1) {
-      const lastCode = $codes[$codes.length - 1].replace(/(`)[^`]+$/, '$1').replace(/\n+/, '');
-      const $str = str.replace(/\n+$/, '').replace(/\n`{1,2}$/, '');
-      return `${$str}\n${lastCode}\n`;
-    }
-    return str;
-  }
-
   beforeMakeHtml(str, sentenceMakeFunc, markdownParams) {
     let $str = str;
-
-    // 处理段落代码块自动闭合
-    if (this.selfClosing || this.$cherry.options.engine.global.flowSessionContext) {
-      $str = this.$dealUnclosingCode($str);
-    }
 
     // 预处理缩进代码块
     $str = this.$replaceCodeInIndent($str);
@@ -418,7 +384,7 @@ export default class CodeBlock extends ParagraphBase {
       }
       let $code = code;
       const { sign, lines } = this.computeLines(match, leadingContent, code);
-      // 从缓存中获取html
+      // 从缓存中获取 html
       let cacheCode = this.$codeCache(sign);
       if (cacheCode && cacheCode !== '') {
         // 别忘了把 ">"（引用块）加回来
@@ -448,7 +414,7 @@ export default class CodeBlock extends ParagraphBase {
       // 如果是公式关键字，则直接返回
       if (/^(math|katex|latex)$/i.test($lang) && !this.isInternalCustomLangCovered($lang)) {
         const prefix = match.match(/^\s*/g);
-        // ~D为经编辑器中间转义后的$，code结尾包含结束```前的所有换行符，所以不需要补换行
+        // ~D 为经编辑器中间转义后的$，code 结尾包含结束```前的所有换行符，所以不需要补换行
         return `${prefix}~D~D\n${$code}~D~D`; // 提供公式语法供公式钩子解析
       }
       [$code, $lang] = this.appendMermaid($code, $lang);
@@ -467,14 +433,14 @@ export default class CodeBlock extends ParagraphBase {
           this.$codeCache(sign, cacheCode);
           return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
         }
-        // 渲染出错则按正常code进行渲染
+        // 渲染出错则按正常 code 进行渲染
       }
       // $code = this.$replaceSpecialChar($code);
       cacheCode = this.$codeReplace($code, $lang, sign, lines);
       const result = this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
       return addBlockQuoteSignToResult(result);
     });
-    // 表格里处理行内代码，让一个td里的行内代码语法生效，让跨td的行内代码语法失效
+    // 表格里处理行内代码，让一个 td 里的行内代码语法生效，让跨 td 的行内代码语法失效
     $str = $str.replace(getTableRule(true), (whole, ...args) => {
       return whole
         .replace(/\\\|/g, '~CHERRYNormalLine')
@@ -485,8 +451,8 @@ export default class CodeBlock extends ParagraphBase {
         .join('|')
         .replace(/`/g, '\\`');
     });
-    // 为了避免InlineCode被HtmlBlock转义，需要在这里提前缓存
-    // InlineBlock只需要在afterMakeHtml还原即可
+    // 为了避免 InlineCode 被 HtmlBlock 转义，需要在这里提前缓存
+    // InlineBlock 只需要在 afterMakeHtml 还原即可
     $str = this.makeInlineCode($str, true);
 
     // 处理缩进代码块
@@ -501,7 +467,7 @@ export default class CodeBlock extends ParagraphBase {
    * @returns {string} 格式化后的语言
    */
   formatLang(lang) {
-    // 增加一个潜规则，即便配置了all，也不处理mermaid
+    // 增加一个潜规则，即便配置了 all，也不处理 mermaid
     if (this.customLang.indexOf('all') !== -1 && lang !== 'mermaid') {
       return 'all';
     }
@@ -521,7 +487,7 @@ export default class CodeBlock extends ParagraphBase {
         $code = $code.replace(/~CHERRYNormalLine/g, '|');
         $code = $code.replace(/\\/g, '\\\\');
 
-        // 如果行内代码只有一个颜色值，则在code末尾追加一个颜色圆点
+        // 如果行内代码只有一个颜色值，则在 code 末尾追加一个颜色圆点
         const trimmed = $code.trim();
         const isHex = /^#([0-9a-fA-F]{6})$/i.test(trimmed);
         const isRgb = /^rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)$/i.test(trimmed);
