@@ -288,7 +288,7 @@ export default class CodeBlock extends ParagraphBase {
       cacheCode = this.customHighlighter(cacheCode, lang);
     } else {
       // 默认使用 prism 渲染代码块
-      // 如果没有写语言，默认用 js 样式渲染；但如果写了 Prism 不支持的语言，保留原始语言
+       // 如果没有写语言，默认用 js 样式渲染；但如果写了 Prism 不支持的语言，保留原始语言
       if (!lang) {
         lang = 'javascript';
       } else if (!Prism.languages[lang]) {
