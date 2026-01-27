@@ -1,5 +1,3 @@
-import './pinyin/pinyin_dist.js';
-
 /**
  * 自定义一个语法
  */
@@ -471,6 +469,7 @@ const basicConfig = {
   keydown: [],
   //extensions: [],
   callback: {
+    changeString2Pinyin: pinyin,
     onClickPreview: (event) => {
       console.log('onClickPreview', event);
     },
