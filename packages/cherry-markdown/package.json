@@ -12,6 +12,56 @@
   "module": "./dist/cherry-markdown.esm.js",
   "style": "./dist/cherry-markdown.css",
   "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/cherry-markdown.esm.js",
+      "require": "./dist/cherry-markdown.js",
+      "default": "./dist/cherry-markdown.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./cherry-markdown.core": {
+      "import": "./dist/cherry-markdown.core.esm.js",
+      "require": "./dist/cherry-markdown.core.js",
+      "default": "./dist/cherry-markdown.core.js",
+      "types": "./dist/types/index.core.d.ts"
+    },
+    "./cherry-markdown.engine": {
+      "import": "./dist/cherry-markdown.engine.esm.js",
+      "require": "./dist/cherry-markdown.engine.js",
+      "default": "./dist/cherry-markdown.engine.js"
+    },
+    "./addons/cherry-code-block-mermaid-plugin": {
+      "import": "./dist/addons/cherry-code-block-mermaid-plugin.esm.js",
+      "require": "./dist/addons/cherry-code-block-mermaid-plugin.js",
+      "default": "./dist/addons/cherry-code-block-mermaid-plugin.js"
+    },
+    "./addons/cherry-code-block-plantuml-plugin": {
+      "import": "./dist/addons/cherry-code-block-plantuml-plugin.esm.js",
+      "require": "./dist/addons/cherry-code-block-plantuml-plugin.js",
+      "default": "./dist/addons/cherry-code-block-plantuml-plugin.js"
+    },
+    "./addons/advance/cherry-table-echarts-plugin": {
+      "import": "./dist/addons/advance/cherry-table-echarts-plugin.esm.js",
+      "require": "./dist/addons/advance/cherry-table-echarts-plugin.js",
+      "default": "./dist/addons/advance/cherry-table-echarts-plugin.js"
+    },
+    "./addons/advance/cherry-tapd-checklist-plugin": {
+      "import": "./dist/addons/advance/cherry-tapd-checklist-plugin.esm.js",
+      "require": "./dist/addons/advance/cherry-tapd-checklist-plugin.js",
+      "default": "./dist/addons/advance/cherry-tapd-checklist-plugin.js"
+    },
+    "./addons/advance/cherry-tapd-html-tag-plugin": {
+      "import": "./dist/addons/advance/cherry-tapd-html-tag-plugin.esm.js",
+      "require": "./dist/addons/advance/cherry-tapd-html-tag-plugin.js",
+      "default": "./dist/addons/advance/cherry-tapd-html-tag-plugin.js"
+    },
+    "./addons/advance/cherry-tapd-table-plugin": {
+      "import": "./dist/addons/advance/cherry-tapd-table-plugin.esm.js",
+      "require": "./dist/addons/advance/cherry-tapd-table-plugin.js",
+      "default": "./dist/addons/advance/cherry-tapd-table-plugin.js"
+    },
+    "./style.css": "./dist/cherry-markdown.css"
+  },
   "directories": {
     "example": "examples"
   },
