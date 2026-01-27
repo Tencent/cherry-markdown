@@ -41,6 +41,8 @@
     <script type="module">
       import './src/sass/index.scss';
       import Cherry from './src/index.js';
+      import '@examples/assets/scripts/pinyin/pinyin_dist.js';
+
       window.Cherry = Cherry;
 
       import indexMd from '@examples/assets/markdown/index.md?raw';
@@ -59,9 +61,8 @@
       const devCompatibleConfig = {
         callback: {
           urlProcessor: (url, type) => {
-
             console.log('urlProcessor', url, type);
-            if (type!=='image') return url;
+            if (type !== 'image') return url;
 
             // 协议（http/https）或协议相对 // 或 data: 等直接返回
             if (/^(https?:)?\/\//i.test(url) || /^data:/i.test(url) || url.startsWith('/')) {
@@ -75,7 +76,7 @@
         },
       };
 
-      let CONFIG ={};
+      let CONFIG = {};
 
       // 使用注入的原始路径或当前路径
       const currentPath = window.__ORIGINAL_PATH__ || window.location.pathname;
@@ -162,8 +163,6 @@
       if (window.location.pathname !== '/ai_chat.html') {
         window.cherry = new Cherry(CONFIG);
       }
-
-      import '@examples/assets/scripts/pinyin/pinyin_dist.js';
     </script>
   </body>
 </html>
