@@ -28,15 +28,10 @@
       "require": "./dist/cherry-markdown.engine.js",
       "types": "./dist/types/index.engine.d.ts"
     },
-    "./addons/cherry-code-block-mermaid-plugin": {
-      "import": "./dist/addons/cherry-code-block-mermaid-plugin.esm.js",
-      "require": "./dist/addons/cherry-code-block-mermaid-plugin.js",
-      "types": "./dist/addons/types/cherry-code-block-mermaid-plugin.d.ts"
-    },
-    "./addons/cherry-code-block-plantuml-plugin": {
-      "import": "./dist/addons/cherry-code-block-plantuml-plugin.esm.js",
-      "require": "./dist/addons/cherry-code-block-plantuml-plugin.js",
-      "types": "./dist/addons/types/cherry-code-block-plantuml-plugin.d.ts"
+    "./style.css": {
+      "import": "./dist/cherry-markdown.css",
+      "require": "./dist/cherry-markdown.css",
+      "default": "./dist/cherry-markdown.css"
     },
     "./addons/advance/cherry-table-echarts-plugin": {
       "import": "./dist/addons/advance/cherry-table-echarts-plugin.esm.js",
@@ -57,6 +52,16 @@
       "import": "./dist/addons/advance/cherry-tapd-table-plugin.esm.js",
       "require": "./dist/addons/advance/cherry-tapd-table-plugin.js",
       "types": "./dist/addons/types/advance/cherry-tapd-table-plugin.d.ts"
+    },
+    "./addons/cherry-code-block-mermaid-plugin": {
+      "import": "./dist/addons/cherry-code-block-mermaid-plugin.esm.js",
+      "require": "./dist/addons/cherry-code-block-mermaid-plugin.js",
+      "types": "./dist/addons/types/cherry-code-block-mermaid-plugin.d.ts"
+    },
+    "./addons/cherry-code-block-plantuml-plugin": {
+      "import": "./dist/addons/cherry-code-block-plantuml-plugin.esm.js",
+      "require": "./dist/addons/cherry-code-block-plantuml-plugin.js",
+      "types": "./dist/addons/types/cherry-code-block-plantuml-plugin.d.ts"
     }
   },
   "directories": {

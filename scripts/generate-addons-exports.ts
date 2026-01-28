@@ -1,6 +1,6 @@
 /**
  * 自动生成插件 exports 配置
- * 扫描 src/addons 目录，自动生成插件的条件导出配置（ESM、UMD 和类型声明）
+ * 扫描 src/addons 目录，自动生成插件的条件 package.json 导出配置（ESM、UMD 和类型声明）
  */
 import * as path from 'path';
 import * as fs from 'fs';
