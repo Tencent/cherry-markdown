@@ -163,7 +163,7 @@ const cherryInstance = new Cherry({
 ### Node
 
 ```javascript
-const { default: CherryEngine } = require('cherry-markdown/dist/cherry-markdown.engine.core.common');
+const { default: CherryEngine } = require('cherry-markdown/dist/cherry-markdown.engine.core');
 const cherryEngineInstance = new CherryEngine();
 const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!');
 ```
