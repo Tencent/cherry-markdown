@@ -27,21 +27,17 @@ export function createTerserPlugin(options = {}) {
       drop_debugger: true,
       drop_console: false, // 保留 console.warn/error
       pure_getters: true,
-      unsafe_arrows: isESM,
-      unsafe_methods: isESM,
+      // 禁用不安全优化，避免对象初始化时为 undefined 导致运行时错误
+      unsafe_arrows: false,
+      unsafe_methods: false,
     },
 
     // 输出选项
     format: {
-      ecma: 5, // 始终使用 ES5 输出语法，避免 shorthand properties 等 ES6 语法
-      comments: false, // 移除所有注释
-      ascii_only: true, // 避免编码问题
-      wrap_iife: !isESM, // UMD 包裹 IIFE
-    },
-
-    // Mangle 选项
-    mangle: {
-      safari10: !isESM, // UMD 需要兼容旧浏览器
+      ecma: 5,
+      comments: false,
+      ascii_only: true,
+      wrap_iife: !isESM,
     },
 
     // ESM 特定优化
