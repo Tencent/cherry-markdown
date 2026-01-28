@@ -24,11 +24,12 @@
       "types": "./dist/types/index.core.d.ts"
     },
     "./cherry-markdown.engine": {
-      "import": "./dist/cherry-markdown.engine.esm.js",
-      "require": "./dist/cherry-markdown.engine.js",
-      "types": "./dist/types/index.engine.d.ts"
+      "import": "./dist/cherry-markdown.engine.core.esm.js",
+      "require": "./dist/cherry-markdown.engine.core.js",
+      "types": "./dist/types/index.engine.core.d.ts"
     },
     "./dist/cherry-markdown.css": "./dist/cherry-markdown.css",
+    "./dist/cherry-markdown.markdown.css": "./dist/cherry-markdown.markdown.css",
     "./addons/advance/cherry-table-echarts-plugin": {
       "import": "./dist/addons/advance/cherry-table-echarts-plugin.esm.js",
       "require": "./dist/addons/advance/cherry-table-echarts-plugin.js",
