@@ -1,18 +1,12 @@
 <template>
   <div class="action-buttons">
-    <button class="action-btn" v-if="false" @click="$emit('create-file')">
-      <div class="btn-icon">
-        <AddIcon :size="16" />
-      </div>
-      <span class="btn-text">新建文件</span>
-    </button>
     <button class="action-btn" @click="$emit('open-file')">
       <div class="btn-icon">
         <FileIcon :size="16" />
       </div>
       <span class="btn-text">打开文件</span>
     </button>
-    <button class="action-btn disabled" :disabled="true" title="暂未开放">
+    <button class="action-btn" @click="$emit('open-directory')">
       <div class="btn-icon">
         <FolderIcon :size="16" />
       </div>
@@ -22,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { AddIcon, FileIcon, FolderIcon } from '../icons';
+import { FileIcon, FolderIcon } from '../icons';
 
 defineEmits<{
   'create-file': [];

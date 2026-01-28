@@ -92,7 +92,7 @@ export default class Engine {
     if (this.urlProcessorMap[key]) {
       return this.urlProcessorMap[key];
     }
-    let originUrl = this.dealAfterMakeHtml(url);
+    let originUrl = this.$decodeReservedKeywords(url);
     originUrl = originUrl.replace(/&amp;/g, '&');
     const ret = this.$cherry.options.callback.urlProcessor(originUrl, srcType, (/** @type {string} */ newUrl) => {
       if (newUrl) {
@@ -212,8 +212,7 @@ export default class Engine {
   }
 
   $beforeMakeHtml(str) {
-    let $str = str.replace(/~/g, '~T');
-    $str = $str.replace(/\$/g, '~D');
+    let $str = this.$encodeReservedKeywords(str);
     $str = $str.replace(/\r\n/g, '\n'); // DOS to Unix
     $str = $str.replace(/\r/g, '\n'); // Mac to Unix
     // 避免正则性能问题，如/.+\n/.test(' '.repeat(99999)), 回溯次数过多
@@ -227,9 +226,7 @@ export default class Engine {
   }
 
   dealAfterMakeHtml(str) {
-    let $str = str.replace(/~D/g, '$');
-    $str = $str.replace(/~T/g, '~');
-    $str = $str.replace(/\\<\//g, '\\ </');
+    let $str = str.replace(/\\<\//g, '\\ </');
     $str = $str
       .replace(new RegExp(`\\\\(${PUNCTUATION})`, 'g'), (match, escapeChar) => {
         if (escapeChar === '&') {
@@ -244,11 +241,22 @@ export default class Engine {
     return $str;
   }
 
+  // 替换预留关键字
+  $encodeReservedKeywords(str) {
+    return str.replace(/~/g, '~T').replace(/\$/g, '~D');
+  }
+
+  // 还原预留关键字
+  $decodeReservedKeywords(str) {
+    return str.replace(/~D/g, '$').replace(/~T/g, '~');
+  }
+
   $afterMakeHtml(str) {
     let $str = this.$fireHookAction(str, 'paragraph', 'afterMakeHtml', this.$dealSentenceByCache.bind(this));
     // str = this._fireHookAction(str, 'sentence', 'afterMakeHtml');
     $str = this.dealAfterMakeHtml($str);
     $str = UrlCache.restoreAll($str);
+    $str = this.$decodeReservedKeywords($str);
     return $str;
   }
 

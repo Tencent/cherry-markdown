@@ -480,7 +480,7 @@ export default class CodeBlock extends ParagraphBase {
         .replace(/\\\|/g, '~CHERRYNormalLine')
         .split('|')
         .map((oneTd) => {
-          return this.makeInlineCode(oneTd, false).replace('~CHERRYNormalLine', '\\|');
+          return this.makeInlineCode(oneTd, false).replace(/~CHERRYNormalLine/g, '\\|');
         })
         .join('|')
         .replace(/`/g, '\\`');
@@ -518,7 +518,7 @@ export default class CodeBlock extends ParagraphBase {
         }
         let $code = code.replace(/~~not~inlineCode/g, '\\`');
         $code = this.$replaceSpecialChar($code);
-        $code = $code.replace('~CHERRYNormalLine', '|');
+        $code = $code.replace(/~CHERRYNormalLine/g, '|');
         $code = $code.replace(/\\/g, '\\\\');
 
         // 如果行内代码只有一个颜色值，则在code末尾追加一个颜色圆点

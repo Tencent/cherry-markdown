@@ -224,9 +224,10 @@ const pasteHelper = {
   },
   switchTextClick(event) {
     this.setTypeToLocalStorage('text');
-    if (this.bubbleDom.getAttribute('data-type') === 'text') {
-      return;
-    }
+    // 由于默认是粘贴md，当记忆text的时候，会先转md再转text，所以这里的判断会有问题，不想再套娃解决了，直接注释掉
+    // if (this.bubbleDom.getAttribute('data-type') === 'text') {
+    //   return;
+    // }
     this.noHide = true;
     this.bubbleDom.setAttribute('data-type', 'text');
     this.codemirror.doc.replaceSelection(this.html);

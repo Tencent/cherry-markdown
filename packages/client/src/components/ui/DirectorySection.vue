@@ -3,6 +3,7 @@
     <div class="section-header">
       <div class="section-title-container" @click="$emit('toggle')">
         <span class="section-title">目录管理</span>
+        <span v-if="subtitle" class="section-subtitle">{{ subtitle }}</span>
         <div class="expand-arrow" :class="{ expanded: expanded }">
           <ArrowIcon :size="12" :direction="expanded ? 'down' : 'right'" />
         </div>
@@ -23,6 +24,7 @@ import { ArrowIcon, RefreshIcon } from '../icons';
 
 defineProps<{
   expanded: boolean;
+  subtitle?: string;
 }>();
 
 defineEmits<{

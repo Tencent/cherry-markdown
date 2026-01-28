@@ -12,6 +12,7 @@
     // "outFile": "types/cherry-markdown.d.ts",
     "outDir": "dist/types",
     "target": "ES5",
+    "skipLibCheck": true,
     "paths": {
       "@/*": [
         "src/*"

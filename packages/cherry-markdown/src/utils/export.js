@@ -123,7 +123,7 @@ export function exportScreenShot(previewDom, fileName) {
       scrollY: 0,
       scrollX: 0,
     }).then((canvas) => {
-      const imgData = canvas.toDataURL('image/jpeg');
+      const imgData = canvas.toDataURL('image/png');
       fileDownload(imgData, fileName);
       thenFinish();
     });
