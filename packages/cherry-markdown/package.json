@@ -28,11 +28,7 @@
       "require": "./dist/cherry-markdown.engine.js",
       "types": "./dist/types/index.engine.d.ts"
     },
-    "./style.css": {
-      "import": "./dist/cherry-markdown.css",
-      "require": "./dist/cherry-markdown.css",
-      "default": "./dist/cherry-markdown.css"
-    },
+    "./dist/cherry-markdown.css": "./dist/cherry-markdown.css",
     "./addons/advance/cherry-table-echarts-plugin": {
       "import": "./dist/addons/advance/cherry-table-echarts-plugin.esm.js",
       "require": "./dist/addons/advance/cherry-table-echarts-plugin.js",
