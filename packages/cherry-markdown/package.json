@@ -28,8 +28,6 @@
       "require": "./dist/cherry-markdown.engine.core.js",
       "types": "./dist/types/index.engine.core.d.ts"
     },
-    "./dist/cherry-markdown.css": "./dist/cherry-markdown.css",
-    "./dist/cherry-markdown.markdown.css": "./dist/cherry-markdown.markdown.css",
     "./addons/advance/cherry-table-echarts-plugin": {
       "import": "./dist/addons/advance/cherry-table-echarts-plugin.esm.js",
       "require": "./dist/addons/advance/cherry-table-echarts-plugin.js",
@@ -59,7 +57,8 @@
       "import": "./dist/addons/cherry-code-block-plantuml-plugin.esm.js",
       "require": "./dist/addons/cherry-code-block-plantuml-plugin.js",
       "types": "./dist/addons/types/cherry-code-block-plantuml-plugin.d.ts"
-    }
+    },
+    "./dist/*": "./dist/*"
   },
   "directories": {
     "example": "examples"

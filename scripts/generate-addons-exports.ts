@@ -85,13 +85,7 @@ function updatePackageExports() {
   const newExports: Record<string, any> = {};
 
   // 保留非插件的导出配置
-  const reservedKeys = [
-    '.',
-    './cherry-markdown.core',
-    './cherry-markdown.engine',
-    './dist/cherry-markdown.css',
-    './dist/cherry-markdown.markdown.css',
-  ];
+  const reservedKeys = ['.', './cherry-markdown.core', './cherry-markdown.engine'];
   for (const key of reservedKeys) {
     if (existingExports[key]) {
       newExports[key] = existingExports[key];
@@ -100,6 +94,10 @@ function updatePackageExports() {
 
   // 添加插件导出
   Object.assign(newExports, addonsExports);
+
+  // 添加通配符配置，支持 dist 目录下所有文件的直接导出
+  // 这样用户可以导入 dist 目录下的任何文件，无需为每个插件单独配置重定向
+  newExports['./dist/*'] = './dist/*';
 
   // 更新 package.json
   packageJson.exports = newExports;
