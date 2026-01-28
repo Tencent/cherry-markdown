@@ -28,6 +28,7 @@
     "src/index.js",
     "src/index.core.js",
     "src/index.engine.js",
+    "src/index.engine.core.js"
   ],
   "exclude": [
     "**/node_modules/**",

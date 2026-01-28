@@ -30,4 +30,19 @@ Cherry.usePlugin(PlantUMLCodeEngine, {});
 Cherry.usePlugin(EChartsTableEngine);
 
 export * from './index.core';
+
+// 导出核心版
+export { default as core } from './index.core';
+
+// 导出引擎版
+export { default as engine } from './index.engine.core';
+
+// 导出插件
+export { default as MermaidPlugin } from '@/addons/cherry-code-block-mermaid-plugin';
+export { default as PlantUMLPlugin } from '@/addons/cherry-code-block-plantuml-plugin';
+export { default as EChartsTablePlugin } from '@/addons/advance/cherry-table-echarts-plugin';
+export { default as TapdCheckListPlugin } from '@/addons/advance/cherry-tapd-checklist-plugin';
+export { default as TapdHtmlTagPlugin } from '@/addons/advance/cherry-tapd-html-tag-plugin';
+export { default as TapdTablePlugin } from '@/addons/advance/cherry-tapd-table-plugin';
+
 export default Cherry;
