@@ -85,7 +85,13 @@ function updatePackageExports() {
   const newExports: Record<string, any> = {};
 
   // 保留非插件的导出配置
-  const reservedKeys = ['.', './cherry-markdown.core', './cherry-markdown.engine'];
+  const reservedKeys = [
+    '.',
+    './cherry-markdown.core',
+    './cherry-markdown.engine',
+    './dist/cherry-markdown.css',
+    './dist/cherry-markdown.markdown.css',
+  ];
   for (const key of reservedKeys) {
     if (existingExports[key]) {
       newExports[key] = existingExports[key];
