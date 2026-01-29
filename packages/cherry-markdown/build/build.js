@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import baseConfig, { es5CatchFixPlugin } from './rollup.base.config.js';
+import baseConfig from './rollup.base.config.js';
 import { terserUMD, terserESM } from './terser.config.js';
 
 export default {
@@ -28,7 +28,7 @@ export default {
       name: 'Cherry',
       sourcemap: true,
       compact: true,
-      plugins: [terserUMD, es5CatchFixPlugin()],
+      plugins: [terserUMD],
     },
     // ESM 格式
     {
@@ -39,7 +39,7 @@ export default {
       name: 'Cherry',
       sourcemap: true,
       compact: true,
-      plugins: [terserESM, es5CatchFixPlugin()],
+      plugins: [terserESM],
     },
   ],
 };

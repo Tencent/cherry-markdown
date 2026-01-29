@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import baseConfig, { es5CatchFixPlugin } from './rollup.base.config.js';
+import baseConfig from './rollup.base.config.js';
 import { terserUMD, terserESM } from './terser.config.js';
 
 const umdOutputConfig = {
@@ -24,7 +24,7 @@ const umdOutputConfig = {
   name: 'Cherry',
   sourcemap: true,
   compact: true,
-  plugins: [terserUMD, es5CatchFixPlugin()],
+  plugins: [terserUMD],
   manualChunks: () => 'main',
 };
 
@@ -36,7 +36,7 @@ const esmOutputConfig = {
   name: 'Cherry',
   sourcemap: true,
   compact: true,
-  plugins: [terserESM, es5CatchFixPlugin()],
+  plugins: [terserESM],
   manualChunks: () => 'main',
 };
 

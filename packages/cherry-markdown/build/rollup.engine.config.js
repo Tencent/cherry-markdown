@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import baseConfig, { es5CatchFixPlugin } from './rollup.base.config.js';
+import baseConfig from './rollup.base.config.js';
 import { terserUMD, terserESM } from './terser.config.js';
 
 // TODO: 新增完整版引擎构建, 目前引擎构建仅支持核心构建
@@ -27,7 +27,7 @@ const umdOutputConfig = {
   name: 'CherryEngine',
   sourcemap: true,
   compact: true,
-  plugins: [terserUMD, es5CatchFixPlugin()],
+  plugins: [terserUMD],
 };
 
 const esmOutputConfig = {
@@ -37,7 +37,7 @@ const esmOutputConfig = {
   name: 'CherryEngine',
   sourcemap: true,
   compact: true,
-  plugins: [terserESM, es5CatchFixPlugin()],
+  plugins: [terserESM],
 };
 
 const options = {

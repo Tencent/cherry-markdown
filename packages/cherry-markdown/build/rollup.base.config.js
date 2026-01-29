@@ -156,15 +156,4 @@ const options = {
   // external: ['echarts']
 };
 
-/**
- * ES5 兼容性修复插件：将 catch{} (ES2019 optional catch binding) 转换为 catch(_){}
- * 需要在 terser 之后执行，因为 terser 可能会生成 catch{} 语法
- */
-export const es5CatchFixPlugin = () => ({
-  name: 'es5-catch-fix',
-  renderChunk(code) {
-    return code.replace(/\bcatch\s*\{\}/g, 'catch(_){}');
-  },
-});
-
 export default options;
