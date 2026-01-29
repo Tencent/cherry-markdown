@@ -14,9 +14,9 @@
   "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/cherry-markdown.esm.js",
-      "require": "./dist/cherry-markdown.js",
-      "types": "./dist/types/index.d.ts"
+      "require": "./dist/cherry-markdown.js"
     },
     "./dist/*": "./dist/*"
   },

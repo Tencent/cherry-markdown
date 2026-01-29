@@ -34,7 +34,7 @@ const umdOutputConfig = {
   file: 'dist/cherry-markdown.stream.js',
   format: 'umd',
   name: 'Cherry',
-  sourcemap: false,
+  sourcemap: true,
   compact: true,
   plugins: [terserPlugin()],
   globals: {
@@ -49,7 +49,7 @@ const esmOutputConfig = {
   file: 'dist/cherry-markdown.stream.esm.js',
   format: 'esm',
   name: 'Cherry',
-  sourcemap: false,
+  sourcemap: true,
   compact: true,
   plugins: [
     terserPlugin({
@@ -61,7 +61,7 @@ const esmOutputConfig = {
 
 const options = {
   ...baseConfig,
-  input: 'src/index.stream.core.js',
+  input: 'src/index.stream.js',
   output: [umdOutputConfig, esmOutputConfig],
 };
 
@@ -72,16 +72,5 @@ if (!Array.isArray(options.external)) {
 options.external.push('mermaid');
 options.external.push('codemirror');
 options.external.push(/^codemirror\/.*/); // 排除所有codemirror子模块
-
-/** 构建目标是否 node */
-const IS_COMMONJS_BUILD = process.env.BUILD_TARGET === 'commonjs';
-
-if (IS_COMMONJS_BUILD) {
-  options.output = {
-    ...umdOutputConfig,
-    file: umdOutputConfig.file.replace(/\.js$/, '.common.js'),
-    format: 'cjs',
-  };
-}
 
 export default options;

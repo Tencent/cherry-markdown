@@ -5,7 +5,7 @@
     "experimentalDecorators": true,
     "baseUrl": ".",
     "allowJs": true,
-    "checkJs": true,
+    "checkJs": false,
     "declaration": true,
     "declarationDir": "dist/types",
     "emitDeclarationOnly": true,
@@ -28,12 +28,14 @@
     "src/index.js",
     "src/index.core.js",
     "src/index.engine.js",
-    "src/index.engine.core.js"
+    "src/index.engine.core.js",
+    "src/index.stream.js"
   ],
   "exclude": [
     "**/node_modules/**",
     "src/libs/**/*",
-    "dist"
+    "dist",
+    "src/CherryStream.js"
   ],
   "files": [
     "types/codemirror.d.ts",

@@ -139,9 +139,9 @@ Cherry Markdown has built-in mermaid, if you want to use a specified version of 
 #### UMD
 
 ```html
-<link href="cherry-editor.min.css" />
+<link href="cherry-editor.css" />
 <div id="markdown-container"></div>
-<script src="cherry-editor.min.js"></script>
+<script src="cherry-editor.js"></script>
 <script>
   new Cherry({
     id: 'markdown-container',
@@ -150,7 +150,7 @@ Cherry Markdown has built-in mermaid, if you want to use a specified version of 
 </script>
 ```
 
-#### ESM
+#### ESM - Full Version
 
 ```javascript
 import 'cherry-markdown/dist/cherry-markdown.css';
@@ -161,10 +161,21 @@ const cherryInstance = new Cherry({
 });
 ```
 
+#### ESM - Stream Rendering Version (for AI Chat scenarios)
+
+```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
+import { stream } from 'cherry-markdown';
+const cherryInstance = new stream({
+  id: 'markdown-container',
+  value: '# welcome to cherry editor!',
+});
+```
+
 ### Node
 
 ```javascript
-const { default: CherryEngine } = require('cherry-markdown/dist/cherry-markdown.engine.core');
+const { engine: CherryEngine } = require('cherry-markdown');
 const cherryEngineInstance = new CherryEngine();
 const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!');
 ```
@@ -177,8 +188,8 @@ Because the size of the mermaid library is very large, the cherry build product 
 
 ```javascript
 import 'cherry-markdown/dist/cherry-markdown.css';
-import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
-const cherryInstance = new Cherry({
+import { core as CherryCore } from 'cherry-markdown';
+const cherryInstance = new CherryCore({
   id: 'markdown-container',
   value: '# welcome to cherry editor!',
 });
@@ -189,7 +200,7 @@ const cherryInstance = new Cherry({
 ```javascript
 // Import Cherry engine core construction
 // Engine configuration items are the same as Cherry configuration items, the following document content only introduces the Cherry core package
-import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core';
+import { engine as CherryEngine } from 'cherry-markdown';
 const cherryEngineInstance = new CherryEngine();
 const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!');
 
@@ -202,12 +213,11 @@ The core build package does not contain mermaid dependency, should import relate
 
 ```javascript
 import 'cherry-markdown/dist/cherry-markdown.css';
-import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
-import CherryMermaidPlugin from 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin';
+import { core as CherryCore, MermaidPlugin } from 'cherry-markdown';
 import mermaid from 'mermaid';
 
 // Plug-in registration must be done before Cherry is instantiated
-Cherry.usePlugin(CherryMermaidPlugin, {
+CherryCore.usePlugin(MermaidPlugin, {
   mermaid, // pass in mermaid object
   // mermaidAPI: mermaid.mermaidAPI, // Can also be passed in mermaid API
   // At the same time, you can configure mermaid's behavior here, please refer to the official mermaid document
@@ -215,7 +225,7 @@ Cherry.usePlugin(CherryMermaidPlugin, {
   // sequence: { useMaxWidth: false, showSequenceNumbers: true }
 });
 
-const cherryInstance = new Cherry({
+const cherryInstance = new CherryCore({
   id: 'markdown-container',
   value: '# welcome to cherry editor!',
 });
@@ -252,14 +262,14 @@ Cherry provides a build package optimized for streaming output scenarios. This p
 
 ```javascript
 import 'cherry-markdown/dist/cherry-markdown.css';
-import Cherry from 'cherry-markdown/dist/cherry-markdown.stream';
+import { stream as CherryStream } from 'cherry-markdown';
 
 // The stream build does not include the following dependencies by default,
 // which can be loaded on demand:
 // - mermaid (flowcharts)
 // - CodeMirror (code editor)
 
-const cherryInstance = new Cherry({
+const cherryInstance = new CherryStream({
   id: 'markdown-container',
 });
 
@@ -270,17 +280,16 @@ cherryInstance.setMarkdown('# welcome to cherry editor!');
 
 ```javascript
 import 'cherry-markdown/dist/cherry-markdown.css';
-import Cherry from 'cherry-markdown/dist/cherry-markdown.stream';
-import CherryMermaidPlugin from 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin';
+import { stream as CherryStream, MermaidPlugin } from 'cherry-markdown';
 import mermaid from 'mermaid';
 
 // Plugin registration must be done before Cherry is instantiated
-Cherry.usePlugin(CherryMermaidPlugin, {
+CherryStream.usePlugin(MermaidPlugin, {
   mermaid,
   mermaidAPI: mermaid,
 });
 
-const cherryInstance = new Cherry({
+const cherryInstance = new CherryStream({
   id: 'markdown-container',
 });
 ```
@@ -301,21 +310,20 @@ const cherryInstance = new Cherry({
 
 ```javascript
 import 'cherry-markdown/dist/cherry-markdown.css';
-import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
+import { core as CherryCore, MermaidPlugin } from 'cherry-markdown';
 
 const registerPlugin = async () => {
-  const [{ default: CherryMermaidPlugin }, mermaid] = await Promise.all([
-    import('cherry-markdown/src/addons/cherry-code-block-mermaid-plugin'),
+  const [mermaid] = await Promise.all([
     import('mermaid'),
   ]);
-  Cherry.usePlugin(CherryMermaidPlugin, {
+  CherryCore.usePlugin(MermaidPlugin, {
     mermaid, // pass in mermaid object
   });
 };
 
 registerPlugin().then(() => {
   //  Plug-in registration must be done before Cherry is instantiated
-  const cherryInstance = new Cherry({
+  const cherryInstance = new CherryCore({
     id: 'markdown-container',
     value: '# welcome to cherry editor!',
   });

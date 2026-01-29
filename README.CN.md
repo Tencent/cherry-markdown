@@ -140,9 +140,9 @@ Cherry Markdown 内置了 mermaid，如果希望使用指定版本的 mermaid，
 #### UMD
 
 ```html
-<link href="cherry-editor.min.css" />
+<link href="cherry-editor.css" />
 <div id="markdown-container"></div>
-<script src="cherry-editor.min.js"></script>
+<script src="cherry-editor.js"></script>
 <script>
   new Cherry({
     id: 'markdown-container',
@@ -151,7 +151,7 @@ Cherry Markdown 内置了 mermaid，如果希望使用指定版本的 mermaid，
 </script>
 ```
 
-#### ESM
+#### ESM - 完整版
 
 ```javascript
 import 'cherry-markdown/dist/cherry-markdown.css';
@@ -162,10 +162,21 @@ const cherryInstance = new Cherry({
 });
 ```
 
+#### ESM - 流式渲染版（适用于 AI Chat 场景）
+
+```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
+import { stream } from 'cherry-markdown';
+const cherryInstance = new stream({
+  id: 'markdown-container',
+  value: '# welcome to cherry editor!',
+});
+```
+
 ### Node
 
 ```javascript
-const { default: CherryEngine } = require('cherry-markdown/dist/cherry-markdown.engine.core');
+const { engine: CherryEngine } = require('cherry-markdown');
 const cherryEngineInstance = new CherryEngine();
 const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!');
 ```
@@ -178,8 +189,8 @@ const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!')
 
 ```javascript
 import 'cherry-markdown/dist/cherry-markdown.css';
-import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
-const cherryInstance = new Cherry({
+import { core as CherryCore } from 'cherry-markdown';
+const cherryInstance = new CherryCore({
   id: 'markdown-container',
   value: '# welcome to cherry editor!',
 });
@@ -190,7 +201,7 @@ const cherryInstance = new Cherry({
 ```javascript
 // 导入 Cherry 引擎核心构建包
 // 引擎的配置项与 Cherry 相同，以下内容仅介绍 Cherry 核心包的用法
-import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core';
+import { engine as CherryEngine } from 'cherry-markdown';
 const cherryEngineInstance = new CherryEngine();
 const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!');
 
@@ -203,12 +214,11 @@ const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!')
 
 ```javascript
 import 'cherry-markdown/dist/cherry-markdown.css';
-import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
-import CherryMermaidPlugin from 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin';
+import { core as CherryCore, MermaidPlugin } from 'cherry-markdown';
 import mermaid from 'mermaid';
 
 // 插件注册必须在 Cherry 实例化之前完成
-Cherry.usePlugin(CherryMermaidPlugin, {
+CherryCore.usePlugin(MermaidPlugin, {
   mermaid, // 传入 mermaid 对象
   // mermaidAPI: mermaid.mermaidAPI, // 也可以传入 mermaid API
   // 同时可以在这里配置 mermaid 的行为，参考 mermaid 官方文档
@@ -216,7 +226,7 @@ Cherry.usePlugin(CherryMermaidPlugin, {
   // sequence: { useMaxWidth: false, showSequenceNumbers: true }
 });
 
-const cherryInstance = new Cherry({
+const cherryInstance = new CherryCore({
   id: 'markdown-container',
   value: '# welcome to cherry editor!',
 });
@@ -253,13 +263,13 @@ Cherry 提供了专为流式输出场景优化的构建包，该包不包含 mer
 
 ```javascript
 import 'cherry-markdown/dist/cherry-markdown.css';
-import Cherry from 'cherry-markdown/dist/cherry-markdown.stream';
+import { stream as CherryStream } from 'cherry-markdown';
 
 // 流式输出包默认不包含以下依赖，可按需加载：
 // - mermaid（流程图）
 // - CodeMirror（代码编辑器）
 
-const cherryInstance = new Cherry({
+const cherryInstance = new CherryStream({
   id: 'markdown-container',
 });
 
@@ -270,17 +280,16 @@ cherryInstance.setMarkdown('# welcome to cherry editor!');
 
 ```javascript
 import 'cherry-markdown/dist/cherry-markdown.css';
-import Cherry from 'cherry-markdown/dist/cherry-markdown.stream';
-import CherryMermaidPlugin from 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin';
+import { stream as CherryStream, MermaidPlugin } from 'cherry-markdown';
 import mermaid from 'mermaid';
 
 // 插件注册必须在 Cherry 实例化之前完成
-Cherry.usePlugin(CherryMermaidPlugin, {
+CherryStream.usePlugin(MermaidPlugin, {
   mermaid,
   mermaidAPI: mermaid,
 });
 
-const cherryInstance = new Cherry({
+const cherryInstance = new CherryStream({
   id: 'markdown-container',
 });
 ```
@@ -301,21 +310,20 @@ const cherryInstance = new Cherry({
 
 ```javascript
 import 'cherry-markdown/dist/cherry-markdown.css';
-import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
+import { core as CherryCore, MermaidPlugin } from 'cherry-markdown';
 
 const registerPlugin = async () => {
-  const [{ default: CherryMermaidPlugin }, mermaid] = await Promise.all([
-    import('cherry-markdown/src/addons/cherry-code-block-mermaid-plugin'),
+  const [mermaid] = await Promise.all([
     import('mermaid'),
   ]);
-  Cherry.usePlugin(CherryMermaidPlugin, {
+  CherryCore.usePlugin(MermaidPlugin, {
     mermaid, // 传入mermaid引用
   });
 };
 
 registerPlugin().then(() => {
   // 插件注册必须在 Cherry 实例化之前完成
-  const cherryInstance = new Cherry({
+  const cherryInstance = new CherryCore({
     id: 'markdown-container',
     value: '# welcome to cherry editor!',
   });

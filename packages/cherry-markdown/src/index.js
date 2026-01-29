@@ -37,6 +37,9 @@ export { default as core } from './index.core';
 // 导出引擎版
 export { default as engine } from './index.engine.core';
 
+// 导出流式渲染版
+export { default as stream } from './index.stream';
+
 // 导出插件
 export { default as MermaidPlugin } from '@/addons/cherry-code-block-mermaid-plugin';
 export { default as PlantUMLPlugin } from '@/addons/cherry-code-block-plantuml-plugin';
