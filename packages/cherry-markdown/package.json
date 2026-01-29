@@ -46,8 +46,8 @@
     "check-bundle": "es-check es5 dist/cherry-markdown.js && es-check es6 --module dist/cherry-markdown.esm.js",
     "test": "vitest",
     "test:update": "vitest -u",
-    "lint": "cd ../.. && yarn dlx prettier --check packages/cherry-markdown/src/**/*.js && yarn dlx eslint --ignore-path .eslintignore packages/cherry-markdown/src/**/*.js",
-    "lint:fix": "cd ../.. && yarn dlx prettier --write packages/cherry-markdown/src/**/*.js && yarn dlx eslint --ignore-path .eslintignore packages/cherry-markdown/src/**/*.js --fix"
+    "lint": "cd ../.. && npx prettier --check packages/cherry-markdown/src/**/*.js && npx eslint --ignore-path .eslintignore packages/cherry-markdown/src/**/*.js",
+    "lint:fix": "cd ../.. && npx prettier --write packages/cherry-markdown/src/**/*.js && npx eslint --ignore-path .eslintignore packages/cherry-markdown/src/**/*.js --fix"
   },
   "keywords": [
     "markdown"
