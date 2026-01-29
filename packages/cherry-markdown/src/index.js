@@ -13,22 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Cherry from './index.core';
-import MermaidCodeEngine from '@/addons/cherry-code-block-mermaid-plugin';
-import PlantUMLCodeEngine from '@/addons/cherry-code-block-plantuml-plugin';
-import EChartsTableEngine from '@/addons/advance/cherry-table-echarts-plugin';
-import mermaid from 'mermaid';
-
-const mermaidAPI = mermaid?.mermaidAPI;
-Cherry.usePlugin(MermaidCodeEngine, {
-  mermaid,
-  mermaidAPI,
-  theme: 'default',
-  sequence: { useMaxWidth: false },
-});
-Cherry.usePlugin(PlantUMLCodeEngine, {});
-Cherry.usePlugin(EChartsTableEngine);
-
 export * from './index.core';
 
 // 导出核心版
@@ -48,4 +32,5 @@ export { default as TapdCheckListPlugin } from '@/addons/advance/cherry-tapd-che
 export { default as TapdHtmlTagPlugin } from '@/addons/advance/cherry-tapd-html-tag-plugin';
 export { default as TapdTablePlugin } from '@/addons/advance/cherry-tapd-table-plugin';
 
-export default Cherry;
+// 默认导出使用带 mermaid 的版本
+export { default } from './index.cherry';
