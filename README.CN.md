@@ -36,6 +36,7 @@ Cherry Markdown Writer 是一款 Javascript Markdown 编辑器，具有开箱即
 - [表格编辑](https://tencent.github.io/cherry-markdown/examples/table.html)
 - [自动编号标题](https://tencent.github.io/cherry-markdown/examples/head_num.html)
 - [流式输入模式（AI chat 场景）](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)
+- [流式输入模式 - 可选插件懒加载](https://tencent.github.io/cherry-markdown/examples/ai_chat_stream.html)
 - [VIM 编辑模式](https://tencent.github.io/cherry-markdown/examples/vim.html)
 - [使用自带或自定义的 Mermaid.js](https://tencent.github.io/cherry-markdown/examples/mermaid.html)
 - [自定义代码块外层容器](https://tencent.github.io/cherry-markdown/examples/custom_codeblock_wrapper.html)
@@ -246,6 +247,54 @@ const cherryInstance = new Cherry({
 });
 ````
 
+### 流式输出包（Stream Build）
+
+Cherry 提供了专为流式输出场景优化的构建包，该包不包含 mermaid、CodeMirror 等大型依赖，可实现按需懒加载，非常适合 AI Chat 等场景。
+
+```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
+import Cherry from 'cherry-markdown/dist/cherry-markdown.stream';
+
+// 流式输出包默认不包含以下依赖，可按需加载：
+// - mermaid（流程图）
+// - CodeMirror（代码编辑器）
+
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+});
+
+cherryInstance.setMarkdown('# welcome to cherry editor!');
+```
+
+#### 为流式输出包加载 Mermaid 插件
+
+```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
+import Cherry from 'cherry-markdown/dist/cherry-markdown.stream';
+import CherryMermaidPlugin from 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin';
+import mermaid from 'mermaid';
+
+// 插件注册必须在 Cherry 实例化之前完成
+Cherry.usePlugin(CherryMermaidPlugin, {
+  mermaid,
+  mermaidAPI: mermaid,
+});
+
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+});
+```
+
+#### 流式输出包与核心包的区别
+
+| 构建包     | 文件                        | 包含 Mermaid | 包含 CodeMirror | 适用场景         |
+| ---------- | --------------------------- | ------------ | --------------- | ---------------- |
+| 完整包     | `cherry-markdown.js`        | ✅            | ✅               | 通用场景         |
+| 核心包     | `cherry-markdown.core.js`   | ❌            | ✅               | 不需要 Mermaid   |
+| 流式输出包 | `cherry-markdown.stream.js` | ❌            | ❌               | AI Chat 流式输出 |
+
+> 注意：MathJax/KaTeX 为外部依赖，通过 CDN 动态加载，不包含在任何构建包中。
+
 ### 异步加载
 
 强烈推荐使用动态引入（Dynamic import），下面给出 webpack 动态引入的示例。
@@ -268,7 +317,6 @@ registerPlugin().then(() => {
   // 插件注册必须在 Cherry 实例化之前完成
   const cherryInstance = new Cherry({
     id: 'markdown-container',
-    value: '# welcome to cherry editor!',
   });
 });
 ```
