@@ -36,6 +36,7 @@ Cherry Markdown Writer is a Javascript Markdown editor. It has the advantages su
 - [Table WYSIWYG](https://tencent.github.io/cherry-markdown/examples/table.html)
 - [Headers with Auto Num](https://tencent.github.io/cherry-markdown/examples/head_num.html)
 - [Streaming rendering Mode (AI chat scenario)](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)
+- [Streaming Mode - Lazy Loading Plugins](https://tencent.github.io/cherry-markdown/examples/ai_chat_stream.html)
 - [VIM Editing Mode](https://tencent.github.io/cherry-markdown/examples/vim.html)
 - [Utilize Your Own Mermaid.js](https://tencent.github.io/cherry-markdown/examples/mermaid.html)
 - [Custom Code Block Wrapper](https://tencent.github.io/cherry-markdown/examples/custom_codeblock_wrapper.html)
@@ -244,6 +245,55 @@ const cherryInstance = new Cherry({
   }
 });
 ````
+
+### Stream Build
+
+Cherry provides a build package optimized for streaming output scenarios. This package does not include large dependencies like mermaid or CodeMirror, enabling on-demand lazy loading. It is ideal for AI Chat and similar scenarios.
+
+```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
+import Cherry from 'cherry-markdown/dist/cherry-markdown.stream';
+
+// The stream build does not include the following dependencies by default,
+// which can be loaded on demand:
+// - mermaid (flowcharts)
+// - CodeMirror (code editor)
+
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+});
+
+cherryInstance.setMarkdown('# welcome to cherry editor!');
+```
+
+#### Loading Mermaid Plugin for Stream Build
+
+```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
+import Cherry from 'cherry-markdown/dist/cherry-markdown.stream';
+import CherryMermaidPlugin from 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin';
+import mermaid from 'mermaid';
+
+// Plugin registration must be done before Cherry is instantiated
+Cherry.usePlugin(CherryMermaidPlugin, {
+  mermaid,
+  mermaidAPI: mermaid,
+});
+
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+});
+```
+
+#### Differences Between Stream Build and Core Build
+
+| Build  | File                        | Mermaid | CodeMirror | Use Case          |
+| ------ | --------------------------- | ------- | ---------- | ----------------- |
+| Full   | `cherry-markdown.js`        | ✅       | ✅          | General purpose   |
+| Core   | `cherry-markdown.core.js`   | ❌       | ✅          | Without Mermaid   |
+| Stream | `cherry-markdown.stream.js` | ❌       | ❌          | AI Chat streaming |
+
+> Note: MathJax/KaTeX are external dependencies loaded dynamically via CDN and are not included in any build package.
 
 ### Dynamic import
 
