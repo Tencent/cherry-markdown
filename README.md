@@ -317,6 +317,7 @@ registerPlugin().then(() => {
   //  Plug-in registration must be done before Cherry is instantiated
   const cherryInstance = new Cherry({
     id: 'markdown-container',
+    value: '# welcome to cherry editor!',
   });
 });
 ```

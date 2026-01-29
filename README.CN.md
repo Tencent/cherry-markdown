@@ -317,6 +317,7 @@ registerPlugin().then(() => {
   // 插件注册必须在 Cherry 实例化之前完成
   const cherryInstance = new Cherry({
     id: 'markdown-container',
+    value: '# welcome to cherry editor!',
   });
 });
 ```
