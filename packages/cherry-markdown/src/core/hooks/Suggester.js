@@ -276,7 +276,7 @@ class SuggesterPanel {
   }
 
   bindEvent() {
-    if (!this.editor.options.showSuggestList) {
+    if (!this.editor?.options?.showSuggestList) {
       return;
     }
     let keyAction = false;
