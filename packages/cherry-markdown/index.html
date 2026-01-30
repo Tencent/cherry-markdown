@@ -83,22 +83,27 @@
 
       switch (currentPath) {
         case '/':
-          CONFIG = Object.assign({}, basicConfig, { value: indexMd, ...devCompatibleConfig });
+          basicConfig.callback.urlProcessor = devCompatibleConfig.callback.urlProcessor;
+          CONFIG = Object.assign({}, basicConfig, { value: indexMd });
           break;
         case '/h5.html':
-          CONFIG = Object.assign({}, h5Config, { value: indexMd, ...devCompatibleConfig });
+          h5Config.callback.urlProcessor = devCompatibleConfig.callback.urlProcessor;
+          CONFIG = Object.assign({}, h5Config, { value: indexMd });
           break;
         case '/multiple.html':
-          CONFIG = Object.assign({}, multipleCherryConfig1, { value: indexMd, ...devCompatibleConfig });
+          multipleCherryConfig1.callback.urlProcessor = devCompatibleConfig.callback.urlProcessor;
+          CONFIG = Object.assign({}, multipleCherryConfig1, { value: indexMd });
 
           const CONFIG2 = Object.assign({}, multipleCherryConfig2, { value: indexMd, ...devCompatibleConfig });
           window.cherry = new Cherry(CONFIG2);
           break;
         case '/notoolbar.html':
-          CONFIG = Object.assign({}, noToolbarConfig, { value: indexMd, ...devCompatibleConfig });
+          noToolbarConfig.callback.urlProcessor = devCompatibleConfig.callback.urlProcessor;
+          CONFIG = Object.assign({}, noToolbarConfig, { value: indexMd });
           break;
         case '/preview_only.html':
-          CONFIG = Object.assign({}, previewConfig, { value: indexMd, ...devCompatibleConfig });
+          previewConfig.callback.urlProcessor = devCompatibleConfig.callback.urlProcessor;
+          CONFIG = Object.assign({}, previewConfig, { value: indexMd });
           break;
         case '/xss.html':
           CONFIG = {
@@ -112,7 +117,8 @@
           };
           break;
         case '/img.html':
-          CONFIG = Object.assign({}, imgConfig, { value: imgMd, ...devCompatibleConfig });
+          imgConfig.callback.urlProcessor = devCompatibleConfig.callback.urlProcessor;
+          CONFIG = Object.assign({}, imgConfig, { value: imgMd });
           break;
         case '/table.html':
           CONFIG = {

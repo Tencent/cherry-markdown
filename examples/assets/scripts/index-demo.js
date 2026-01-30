@@ -480,6 +480,16 @@ const basicConfig = {
       console.log(`url-processor`, url, srcType);
       return url;
     },
+    // onPaste: (clipboardData, cherry, callback) => {
+    //   setTimeout(() => {
+    //     callback({
+    //       html: '<span>hello <strong>world</strong> !</span>',
+    //       htmlText: 'hello world !',
+    //       mdText: '',
+    //     });
+    //   }, 1000)
+    //   return '<<正在处理中...>>';
+    // },
   },
   editor: {
     id: 'cherry-text',

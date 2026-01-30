@@ -27,18 +27,16 @@ const pasteHelper = {
   /**
    * 核心方法，粘贴后展示切换按钮
    * 只有粘贴html时才会出现切换按钮
-   * @param {Object} currentCursor 当前的光标位置
    * @param {Object} editor 编辑器对象
    * @param {string} html html里的纯文本内容
    * @param {string} md html对应的markdown源码
    * @returns
    */
-  showSwitchBtnAfterPasteHtml($cherry, currentCursor, editor, html, md) {
+  showSwitchBtnAfterPasteHtml(locale, editor, html, md) {
     if (html.trim() === md.trim()) {
       return;
     }
-    this.init($cherry, currentCursor, editor, html, md);
-    this.setSelection();
+    this.init(locale, editor, html, md);
     this.bindListener();
     this.initBubble();
     this.showBubble();
@@ -48,13 +46,11 @@ const pasteHelper = {
     }
   },
 
-  init($cherry, currentCursor, editor, html, md) {
-    this.$cherry = $cherry;
+  init(locale, editor, html, md) {
     this.html = html;
     this.md = md;
     this.codemirror = editor;
-    this.currentCursor = currentCursor;
-    this.locale = $cherry.locale;
+    this.locale = locale;
   },
 
   /**
@@ -77,14 +73,6 @@ const pasteHelper = {
     localStorage.setItem('cherry-paste-type', type);
   },
 
-  /**
-   * 在编辑器中自动选中刚刚粘贴的内容
-   */
-  setSelection() {
-    const { /* sticky, xRel, */ ...end } = this.codemirror.getCursor();
-    const begin = this.currentCursor;
-    this.codemirror.setSelection(begin, end);
-  },
   /**
    * 绑定事件
    * 当编辑器选中区域改变、内容改变时，隐藏切换按钮
@@ -215,8 +203,7 @@ const pasteHelper = {
     }
     this.noHide = true;
     this.bubbleDom.setAttribute('data-type', 'md');
-    this.codemirror.doc.replaceSelection(this.md);
-    this.setSelection();
+    this.codemirror.doc.replaceSelection(this.md, 'around');
     this.showBubble();
     this.switchMd.classList.add('active');
     this.switchText.classList.remove('active');
@@ -230,8 +217,7 @@ const pasteHelper = {
     // }
     this.noHide = true;
     this.bubbleDom.setAttribute('data-type', 'text');
-    this.codemirror.doc.replaceSelection(this.html);
-    this.setSelection();
+    this.codemirror.doc.replaceSelection(this.html, 'around');
     this.showBubble();
     this.switchText.classList.add('active');
     this.switchMd.classList.remove('active');
