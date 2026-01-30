@@ -16,30 +16,55 @@
 import baseConfig from './rollup.base.config.js';
 import { terserUMD, terserESM } from './terser.config.js';
 
-export default {
-  ...baseConfig,
-  output: [
-    // UMD 格式
-    {
-      ...baseConfig.output,
-      exports: 'named',
-      file: 'dist/cherry-markdown.js',
-      format: 'umd',
-      name: 'Cherry',
-      sourcemap: true,
-      compact: true,
-      plugins: [terserUMD],
-    },
-    // ESM 格式
-    {
-      ...baseConfig.output,
-      exports: 'named',
-      file: 'dist/cherry-markdown.esm.js',
-      format: 'esm',
-      name: 'Cherry',
-      sourcemap: true,
-      compact: true,
-      plugins: [terserESM],
-    },
-  ],
+// 明确列出需要的插件，避免使用扩展运算符，保持正确的插件顺序
+const basePlugins = [
+  baseConfig.plugins.find((p) => p.name === 'json'),
+  baseConfig.plugins.find((p) => p.name === 'replace'),
+  baseConfig.plugins.find((p) => p.name === 'alias'),
+  baseConfig.plugins.find((p) => p.name === 'resolve'),
+  baseConfig.plugins.find((p) => p.name === 'commonjs'),
+  baseConfig.plugins.find((p) => p.name === 'babel'),
+  baseConfig.plugins.find((p) => p.name === 'dist-types'),
+].filter(Boolean);
+
+const umdPlugins = [...basePlugins, terserUMD];
+const esmPlugins = [...basePlugins, terserESM];
+
+// UMD 配置 - 单文件输出
+const umdConfig = {
+  input: 'src/index.js',
+  output: {
+    exports: 'named',
+    file: 'dist/cherry-markdown.js',
+    format: 'umd',
+    name: 'Cherry',
+    sourcemap: true,
+    compact: true,
+  },
+  plugins: umdPlugins,
+  treeshake: baseConfig.treeshake,
+  onwarn: baseConfig.onwarn,
+  external: baseConfig.external,
 };
+
+// ESM 配置 - 代码分割优化
+const esmConfig = {
+  input: 'src/index.js',
+  output: {
+    exports: 'named',
+    dir: 'dist',
+    entryFileNames: 'cherry-markdown.esm.js',
+    chunkFileNames: '[name]-[hash].esm.js',
+    format: 'esm',
+    name: 'Cherry',
+    sourcemap: true,
+    compact: true,
+  },
+  plugins: esmPlugins,
+  treeshake: baseConfig.treeshake,
+  onwarn: baseConfig.onwarn,
+  external: baseConfig.external,
+};
+
+// 导出配置数组
+export default [umdConfig, esmConfig];

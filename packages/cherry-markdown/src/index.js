@@ -13,24 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './index.core';
+import Cherry from './index.core';
+import MermaidCodeEngine from '@/addons/cherry-code-block-mermaid-plugin';
+import PlantUMLCodeEngine from '@/addons/cherry-code-block-plantuml-plugin';
+import EChartsTableEngine from '@/addons/advance/cherry-table-echarts-plugin';
+import mermaid from 'mermaid';
 
-// 导出核心版
-export { default as core } from './index.core';
+const mermaidAPI = mermaid?.mermaidAPI;
 
-// 导出引擎版
-export { default as engine } from './index.engine.core';
+// 初始化 mermaid 插件
+Cherry.usePlugin(MermaidCodeEngine, {
+  mermaid,
+  mermaidAPI,
+  theme: 'default',
+  sequence: { useMaxWidth: false },
+});
+Cherry.usePlugin(PlantUMLCodeEngine, {});
+Cherry.usePlugin(EChartsTableEngine);
 
-// 导出流式渲染版
-export { default as stream } from './index.stream';
-
-// 导出插件
-export { default as MermaidPlugin } from '@/addons/cherry-code-block-mermaid-plugin';
-export { default as PlantUMLPlugin } from '@/addons/cherry-code-block-plantuml-plugin';
-export { default as EChartsTablePlugin } from '@/addons/advance/cherry-table-echarts-plugin';
-export { default as TapdCheckListPlugin } from '@/addons/advance/cherry-tapd-checklist-plugin';
-export { default as TapdHtmlTagPlugin } from '@/addons/advance/cherry-tapd-html-tag-plugin';
-export { default as TapdTablePlugin } from '@/addons/advance/cherry-tapd-table-plugin';
-
-// 默认导出使用带 mermaid 的版本
-export { default } from './index.cherry';
+// 默认导出完整版（带 mermaid 等插件）
+export default Cherry;

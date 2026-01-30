@@ -19,36 +19,56 @@ import { terserUMD, terserESM } from './terser.config.js';
 // TODO: 新增完整版引擎构建, 目前引擎构建仅支持核心构建
 const isCoreBuild = process.env.CORE_BUILD === 'true';
 
-const umdOutputConfig = {
-  ...baseConfig.output,
+// 明确列出需要的插件，避免使用扩展运算符，保持正确的插件顺序
+const basePlugins = [
+  baseConfig.plugins.find(p => p.name === 'json'),
+  baseConfig.plugins.find(p => p.name === 'replace'),
+  baseConfig.plugins.find(p => p.name === 'alias'),
+  baseConfig.plugins.find(p => p.name === 'resolve'),
+  baseConfig.plugins.find(p => p.name === 'commonjs'),
+  baseConfig.plugins.find(p => p.name === 'babel'),
+  baseConfig.plugins.find(p => p.name === 'dist-types'),
+].filter(Boolean);
+
+const umdPlugins = [...basePlugins, terserUMD];
+const esmPlugins = [...basePlugins, terserESM];
+
+const umdOutputConfig = Object.assign(Object.create(null), {
   exports: 'named',
   file: isCoreBuild ? 'dist/cherry-markdown.engine.core.js' : 'dist/cherry-markdown.engine.js',
   format: 'umd',
   name: 'CherryEngine',
   sourcemap: true,
   compact: true,
-  plugins: [terserUMD],
-};
+});
 
-const esmOutputConfig = {
-  ...baseConfig.output,
-  file: isCoreBuild ? 'dist/cherry-markdown.engine.core.esm.js' : 'dist/cherry-markdown.engine.esm.js',
+const esmOutputConfig = Object.assign(Object.create(null), {
+  exports: 'named',
+  dir: 'dist',
+  entryFileNames: isCoreBuild ? 'cherry-markdown.engine.core.esm.js' : 'cherry-markdown.engine.esm.js',
+  chunkFileNames: 'engine-[hash].esm.js',
   format: 'esm',
   name: 'CherryEngine',
   sourcemap: true,
   compact: true,
-  plugins: [terserESM],
-};
+});
 
-const options = {
-  ...baseConfig,
+const umdConfig = {
   input: isCoreBuild ? 'src/index.engine.core.js' : 'src/index.engine.js',
-  output: [umdOutputConfig, esmOutputConfig],
+  output: umdOutputConfig,
+  plugins: umdPlugins,
+  treeshake: baseConfig.treeshake,
+  onwarn: baseConfig.onwarn,
+  external: [...(baseConfig.external || []), 'mermaid'],
 };
 
-if (!Array.isArray(options.external)) {
-  options.external = [];
-}
-options.external.push('mermaid');
+const esmConfig = {
+  input: isCoreBuild ? 'src/index.engine.core.js' : 'src/index.engine.js',
+  output: esmOutputConfig,
+  plugins: esmPlugins,
+  treeshake: baseConfig.treeshake,
+  onwarn: baseConfig.onwarn,
+  external: [...(baseConfig.external || []), 'mermaid'],
+};
 
-export default options;
+export default [umdConfig, esmConfig];

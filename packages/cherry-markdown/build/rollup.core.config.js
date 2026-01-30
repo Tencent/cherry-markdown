@@ -16,39 +16,56 @@
 import baseConfig from './rollup.base.config.js';
 import { terserUMD, terserESM } from './terser.config.js';
 
-const umdOutputConfig = {
-  ...baseConfig.output,
+// 明确列出需要的插件，避免使用扩展运算符，保持正确的插件顺序
+const basePlugins = [
+  baseConfig.plugins.find((p) => p.name === 'json'),
+  baseConfig.plugins.find((p) => p.name === 'replace'),
+  baseConfig.plugins.find((p) => p.name === 'alias'),
+  baseConfig.plugins.find((p) => p.name === 'resolve'),
+  baseConfig.plugins.find((p) => p.name === 'commonjs'),
+  baseConfig.plugins.find((p) => p.name === 'babel'),
+  baseConfig.plugins.find((p) => p.name === 'dist-types'),
+].filter(Boolean);
+
+const umdPlugins = [...basePlugins, terserUMD];
+const esmPlugins = [...basePlugins, terserESM];
+
+const umdOutputConfig = Object.assign(Object.create(null), {
   exports: 'named',
   file: 'dist/cherry-markdown.core.js',
   format: 'umd',
   name: 'Cherry',
   sourcemap: true,
   compact: true,
-  plugins: [terserUMD],
-  manualChunks: () => 'main',
-};
+});
 
-const esmOutputConfig = {
-  ...baseConfig.output,
+const esmOutputConfig = Object.assign(Object.create(null), {
   exports: 'named',
-  file: 'dist/cherry-markdown.core.esm.js',
+  dir: 'dist',
+  entryFileNames: 'cherry-markdown.core.esm.js',
+  chunkFileNames: 'core-[hash].esm.js',
   format: 'esm',
   name: 'Cherry',
   sourcemap: true,
   compact: true,
-  plugins: [terserESM],
-  manualChunks: () => 'main',
-};
+});
 
-const options = {
-  ...baseConfig,
+const umdConfig = {
   input: 'src/index.core.js',
-  output: [umdOutputConfig, esmOutputConfig],
+  output: umdOutputConfig,
+  plugins: umdPlugins,
+  treeshake: baseConfig.treeshake,
+  onwarn: baseConfig.onwarn,
+  external: [...(baseConfig.external || []), 'mermaid'],
 };
 
-if (!Array.isArray(options.external)) {
-  options.external = [];
-}
-options.external.push('mermaid');
+const esmConfig = {
+  input: 'src/index.core.js',
+  output: esmOutputConfig,
+  plugins: esmPlugins,
+  treeshake: baseConfig.treeshake,
+  onwarn: baseConfig.onwarn,
+  external: [...(baseConfig.external || []), 'mermaid'],
+};
 
-export default options;
+export default [umdConfig, esmConfig];

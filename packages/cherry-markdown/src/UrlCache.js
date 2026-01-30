@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import CryptoJS from 'crypto-js';
+import * as CryptoJS from 'crypto-js';
 
 let urlCache = {};
 const cherryInnerLinkRegex = /^cherry-inner:\/\/([0-9a-f]+)$/i;

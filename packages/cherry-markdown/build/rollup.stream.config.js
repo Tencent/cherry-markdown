@@ -15,6 +15,8 @@
  */
 import terser from '@rollup/plugin-terser';
 import baseConfig from './rollup.base.config.js';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 
 const terserPlugin = (options = {}) =>
   terser({
@@ -28,49 +30,99 @@ const terserPlugin = (options = {}) =>
     ...options,
   });
 
-const umdOutputConfig = {
-  ...baseConfig.output,
+// 明确列出需要的插件，避免使用扩展运算符，保持正确的插件顺序
+const basePlugins = [
+  baseConfig.plugins.find((p) => p.name === 'json'),
+  baseConfig.plugins.find((p) => p.name === 'replace'),
+  baseConfig.plugins.find((p) => p.name === 'alias'),
+  // 自定义 resolve 插件，确保 prismjs 组件能被正确打包
+  resolve({
+    browser: true,
+    preferBuiltins: false,
+    mainFields: ['module', 'browser', 'main'],
+    exportConditions: ['default', 'module'],
+    resolveOnly: [],
+  }),
+  // 自定义 commonjs 插件，确保 prismjs 组件被正确转换
+  commonjs({
+    include: [/node_modules/, /src[\\/]libs/],
+    exclude: [/node_modules[\\/](lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
+    extensions: ['.js'],
+    ignoreGlobal: false,
+    sourceMap: false,
+    ignoreDynamicRequires: true,
+  }),
+  baseConfig.plugins.find((p) => p.name === 'babel'),
+  baseConfig.plugins.find((p) => p.name === 'dist-types'),
+].filter(Boolean);
+
+const umdPlugins = [...basePlugins, terserPlugin()];
+const esmPlugins = [...basePlugins, terserPlugin({ module: true, ecma: 2015 })];
+
+const umdOutputConfig = Object.assign(Object.create(null), {
   exports: 'named',
   file: 'dist/cherry-markdown.stream.js',
   format: 'umd',
   name: 'Cherry',
   sourcemap: true,
   compact: true,
-  plugins: [terserPlugin()],
+  inlineDynamicImports: true,
   globals: {
     mermaid: 'mermaid',
     codemirror: 'CodeMirror',
     'codemirror/src/util/misc': 'CodeMirror',
+    prism: 'Prism',
   },
-};
+});
 
-const esmOutputConfig = {
-  ...baseConfig.output,
-  file: 'dist/cherry-markdown.stream.esm.js',
+const esmOutputConfig = Object.assign(Object.create(null), {
+  exports: 'named',
+  dir: 'dist',
+  entryFileNames: 'cherry-markdown.stream.esm.js',
+  chunkFileNames: 'stream-[hash].esm.js',
   format: 'esm',
   name: 'Cherry',
   sourcemap: true,
   compact: true,
-  plugins: [
-    terserPlugin({
-      module: true,
-      ecma: 2015,
-    }),
-  ],
-};
+  interop: 'auto',
+  inlineDynamicImports: true,
+});
 
-const options = {
-  ...baseConfig,
+const streamExternal = [
+  ...(baseConfig.external || []),
+  'mermaid',
+  'codemirror',
+  /^codemirror\/.*/,
+  'echarts',
+  // codemirror 的类型导入和工具模块
+  'codemirror/src/util/misc',
+  'codemirror/src/util/browser',
+];
+
+const umdConfig = {
   input: 'src/index.stream.js',
-  output: [umdOutputConfig, esmOutputConfig],
+  output: umdOutputConfig,
+  plugins: umdPlugins,
+  treeshake: {
+    moduleSideEffects: 'no-external',
+    propertyReadSideEffects: false,
+    tryCatchDeoptimization: false,
+  },
+  onwarn: baseConfig.onwarn,
+  external: streamExternal,
 };
 
-if (!Array.isArray(options.external)) {
-  options.external = [];
-}
-// 流式渲染包不需要mermaid和codemirror
-options.external.push('mermaid');
-options.external.push('codemirror');
-options.external.push(/^codemirror\/.*/); // 排除所有codemirror子模块
+const esmConfig = {
+  input: 'src/index.stream.js',
+  output: esmOutputConfig,
+  plugins: esmPlugins,
+  treeshake: {
+    moduleSideEffects: 'no-external',
+    propertyReadSideEffects: false,
+    tryCatchDeoptimization: false,
+  },
+  onwarn: baseConfig.onwarn,
+  external: streamExternal,
+};
 
-export default options;
+export default [umdConfig, esmConfig];

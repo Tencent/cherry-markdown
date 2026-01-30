@@ -46,14 +46,28 @@ const options = {
     globals: {
       jsdom: 'jsdom',
     },
-    // disable code splitting
-    manualChunks: () => 'cherry',
   },
-  // 优化：启用 treeshake 配置
+  // Tree-shake 配置 - 平衡优化和兼容性
   treeshake: {
-    moduleSideEffects: 'no-external',
-    propertyReadSideEffects: false,
-    tryCatchDeoptimization: false,
+    // 只标记明确的副作用模块
+    moduleSideEffects: (id) => {
+      // CSS 文件有副作用
+      if (id.endsWith('.css')) return true;
+      // 对第三方库保持保守，避免错误 tree-shake
+      if (id.includes('node_modules/')) {
+        // crypto-js、mermaid、echarts 等库在 tree-shake 时会出问题
+        if (id.includes('crypto-js') || id.includes('mermaid') || id.includes('echarts')) {
+          return true;
+        }
+        // prismjs 及其组件有副作用（将语言注册到 Prism.languages）
+        if (id.includes('prismjs')) {
+          return true;
+        }
+      }
+      return false;
+    },
+    // 禁用属性读取副作用检查，确保 Prism.languages 赋值不被优化掉
+    propertyReadSideEffects: true,
   },
   plugins: [
     // Only run ESLint in builds that explicitly enable it. Default: disabled to avoid
@@ -117,11 +131,29 @@ const options = {
             return;
           }
           const file = bundle[fileName];
+
+          // 只为入口文件生成类型声明
+          if (!file.isEntry) {
+            return;
+          }
+
           const fileBaseName = fileName.replace(/\.js$/, '');
+
+          // 获取 facadeModuleId，如果不存在则跳过
+          if (!file.facadeModuleId) {
+            return;
+          }
+
           const entryFileName = file.facadeModuleId.split(/[/\\]/).pop();
           const entryFileBase = entryFileName.replace(/\.js$/, '');
-          const namedExports = file.exports.filter((name) => name !== 'default');
-          const defaultName = options.name;
+
+          // 确保 file.exports 是数组
+          const exports = Array.isArray(file.exports) ? file.exports : [];
+          const namedExports = exports.filter((name) => name !== 'default');
+
+          // 使用 options.name 或 file.name
+          const defaultName = options?.name || file?.name || 'Cherry';
+
           const source = [
             `import ${defaultName}, { ${namedExports.join(', ')} } from "./types/${entryFileBase}";`,
             `export { ${namedExports.join(', ')} };`,
@@ -137,7 +169,7 @@ const options = {
     },
   ],
   onwarn(warning, warn) {
-    // 忽略 juice 的 circular dependency
+    // 忽略 juice 和 d3 的 circular dependency
     try {
       if (
         warning &&
@@ -145,6 +177,26 @@ const options = {
         typeof warning.importer === 'string' &&
         (warning.importer.includes('node_modules/juice') || warning.importer.includes('node_modules/d3-'))
       ) {
+        return;
+      }
+
+      // 忽略 Babel helper 的未使用导入警告（这是 Babel 转译的正常行为）
+      // 使用更宽松的匹配，因为 warning.message 可能是对象
+      const messageStr = warning.message ? String(warning.message) : warning.exporter ? warning.exporter : '';
+
+      if (
+        warning &&
+        messageStr &&
+        (messageStr.includes('readOnlyError') ||
+          messageStr.includes('assertThisInitialized') ||
+          messageStr.includes('objectDestructuringEmpty') ||
+          messageStr.includes('@babel/runtime'))
+      ) {
+        return;
+      }
+
+      // 忽略全局变量名称警告（UMD 构建中常见的无害警告）
+      if (warning && warning.code === 'MISSING_GLOBAL_NAME') {
         return;
       }
     } catch (e) {

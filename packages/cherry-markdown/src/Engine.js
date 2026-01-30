@@ -16,7 +16,7 @@
 import HookCenter from './core/HookCenter';
 import hooksConfig from './core/HooksConfig';
 import NestedError, { $expectTarget, $expectInherit, $expectInstance } from './utils/error';
-import CryptoJS from 'crypto-js';
+import * as CryptoJS from 'crypto-js';
 import SyntaxBase from './core/SyntaxBase';
 import ParagraphBase from './core/ParagraphBase';
 import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg, base64Reg } from './utils/regexp';
