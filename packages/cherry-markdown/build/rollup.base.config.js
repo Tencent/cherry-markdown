@@ -107,34 +107,6 @@ const options = {
       presets: babelConfig.presets,
       plugins: babelConfig.plugins,
     }),
-    // TODO: 重构抽出为独立的插件
-    {
-      name: 'dist-types',
-      generateBundle(options, bundle, isWrite) {
-        const bundles = Object.keys(bundle);
-        bundles.forEach((fileName) => {
-          if (!fileName.endsWith('.js')) {
-            return;
-          }
-          const file = bundle[fileName];
-          const fileBaseName = fileName.replace(/\.js$/, '');
-          const entryFileName = file.facadeModuleId.split(/[/\\]/).pop();
-          const entryFileBase = entryFileName.replace(/\.js$/, '');
-          const namedExports = file.exports.filter((name) => name !== 'default');
-          const defaultName = options.name;
-          const source = [
-            `import ${defaultName}, { ${namedExports.join(', ')} } from "./types/${entryFileBase}";`,
-            `export { ${namedExports.join(', ')} };`,
-            `export default ${defaultName};`,
-          ].join('\n');
-          this.emitFile({
-            type: 'asset',
-            fileName: `${fileBaseName}.d.ts`,
-            source,
-          });
-        });
-      },
-    },
   ],
   onwarn(warning, warn) {
     // 忽略 juice 的 circular dependency

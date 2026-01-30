@@ -22,7 +22,7 @@ export default {
     // UMD 格式
     {
       ...baseConfig.output,
-      exports: 'named',
+      exports: 'default',
       file: 'dist/cherry-markdown.js',
       format: 'umd',
       name: 'Cherry',
@@ -33,7 +33,7 @@ export default {
     // ESM 格式
     {
       ...baseConfig.output,
-      exports: 'named',
+      exports: 'default',
       file: 'dist/cherry-markdown.esm.js',
       format: 'esm',
       name: 'Cherry',
