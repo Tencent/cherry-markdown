@@ -494,7 +494,7 @@ const basicConfig = {
   editor: {
     id: 'cherry-text',
     name: 'cherry-text',
-    autoSave2Textarea: true,
+    autoSave2Textarea: false,
     defaultModel: 'edit&preview',
     showFullWidthMark: true, // 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》
     showSuggestList: true, // 是否显示联想框

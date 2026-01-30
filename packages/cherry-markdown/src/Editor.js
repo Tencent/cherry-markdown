@@ -164,9 +164,19 @@ export default class Editor {
       const end = { line: targetLine, ch: targetChTo };
       return { bigString, begin, end, id };
     });
+
+    /**
+     * 如果编辑器行数超过10000，则不再处理
+     * 增加这个逻辑是为了避免性能问题，当超过1w行时，formatBigData2Mark耗费的性能会明显增加。后续在优化后可以去掉这个降级逻辑
+     * 允许降级的理由：超过1w行的md基本已经不关心base64等数据是否缩略展示了
+     */
+    if (this.editor.lineCount() > 10000) {
+      return;
+    }
     this.formatBigData2Mark(base64Reg, 'cm-url base64');
     this.formatBigData2Mark(imgDrawioXmlReg, 'cm-url drawio');
-    this.formatBigData2Mark(longTextReg, 'cm-url long-text');
+    // 长文本替换的正则性能太差，先注释掉
+    // this.formatBigData2Mark(longTextReg, 'cm-url long-text');
     if (this.$cherry.options.editor.maxUrlLength > 10) {
       const [protocolUrlPattern, wwwUrlPattern] = createUrlReg(this.$cherry.options.editor.maxUrlLength);
       this.formatBigData2Mark(protocolUrlPattern, 'cm-url url-truncated');
@@ -612,7 +622,14 @@ export default class Editor {
       this.onCursorActivity();
     });
     editor.on('beforeChange', (codemirror) => {
-      this.selectAll = this.editor.getValue() === codemirror.getSelection();
+      // 判断是否是全选
+      const { line: toLine, ch: toCh } = this.editor.getCursor('to');
+      const { line: fromLine, ch: fromCh } = this.editor.getCursor('from');
+      this.selectAll =
+        fromLine === 0 &&
+        fromCh === 0 &&
+        toLine === this.editor.lineCount() - 1 &&
+        toCh === this.editor.getLine(toLine).length;
     });
 
     addEvent(
