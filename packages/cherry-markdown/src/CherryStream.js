@@ -33,6 +33,7 @@ import locales from '@/locales/index';
 
 import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
+import hooksConfig from './core/hooks-config/stream';
 
 /**
  * @typedef {import('~types/cherry').CherryOptions} CherryOptions
@@ -78,6 +79,19 @@ export default class CherryStream extends CherryStatic {
     this.options.editor.defaultModel = 'previewOnly';
     this.options.toolbars.showToolbar = false;
 
+    // Stream 模式下禁用 mermaid，避免引入 mermaid 依赖
+    if (!this.options.engine || !this.options.engine.syntax) {
+      this.options.engine = {};
+    }
+    if (!this.options.engine.syntax) {
+      this.options.engine.syntax = {};
+    }
+    if (!this.options.engine.syntax.codeBlock) {
+      this.options.engine.syntax.codeBlock = {};
+    }
+    // 设置 mermaid 为 false，禁用 mermaid 功能
+    this.options.engine.syntax.codeBlock.mermaid = false;
+
     this.locales = locales;
     if (this.options.locales) {
       this.locales = {
@@ -118,7 +132,7 @@ export default class CherryStream extends CherryStatic {
     /**
      * @type {import('./Engine').default}
      */
-    this.engine = new Engine(this.options, this);
+    this.engine = new Engine(this.options, this, hooksConfig);
     this.init();
   }
 

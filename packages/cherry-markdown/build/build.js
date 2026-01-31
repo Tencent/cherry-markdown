@@ -13,24 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import terser from '@rollup/plugin-terser';
 import baseConfig from './rollup.base.config.js';
-
-const terserPlugin = (options = {}) =>
-  terser({
-    output: {
-      comments: false,
-    },
-    compress: {
-      pure_funcs: ['console.log', 'console.info'],
-    },
-    ecma: 5,
-    ...options,
-  });
+import { terserUMD, terserESM } from './terser.config.js';
 
 export default {
   ...baseConfig,
   output: [
+    // UMD 格式
     {
       ...baseConfig.output,
       exports: 'named',
@@ -38,31 +27,29 @@ export default {
       format: 'umd',
       name: 'Cherry',
       sourcemap: true,
-      compact: false,
+      compact: true,
+      plugins: [terserUMD],
+      // UMD 使用 manualChunks 合并为单个文件
+      manualChunks: () => 'cherry',
+      // 指定全局变量名
+      globals: {
+        ...baseConfig.output.globals,
+        codemirror: 'CodeMirror',
+      },
     },
+    // ESM 格式 - 使用 dir 而不是 file，因为移除了 manualChunks
     {
       ...baseConfig.output,
       exports: 'named',
-      file: 'dist/cherry-markdown.min.js',
-      format: 'umd',
-      name: 'Cherry',
-      sourcemap: false,
-      compact: true,
-      plugins: [terserPlugin()],
-    },
-    {
-      ...baseConfig.output,
-      file: 'dist/cherry-markdown.esm.js',
+      dir: 'dist',
+      entryFileNames: 'cherry-markdown.esm.js',
       format: 'esm',
       name: 'Cherry',
-      sourcemap: false,
+      sourcemap: true,
       compact: true,
-      plugins: [
-        terserPlugin({
-          module: true,
-          ecma: 2015,
-        }),
-      ],
+      plugins: [terserESM],
+      // 内联动态导入，保持单个文件
+      inlineDynamicImports: true,
     },
   ],
 };

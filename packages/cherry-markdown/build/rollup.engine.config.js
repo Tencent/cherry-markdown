@@ -13,23 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import terser from '@rollup/plugin-terser';
 import baseConfig from './rollup.base.config.js';
+import { terserUMD, terserESM } from './terser.config.js';
 
 // TODO: 新增完整版引擎构建, 目前引擎构建仅支持核心构建
 const isCoreBuild = process.env.CORE_BUILD === 'true';
-
-const terserPlugin = (options = {}) =>
-  terser({
-    output: {
-      comments: false,
-    },
-    compress: {
-      pure_funcs: ['console.log', 'console.info'],
-    },
-    ecma: 5,
-    ...options,
-  });
 
 const umdOutputConfig = {
   ...baseConfig.output,
@@ -37,24 +25,30 @@ const umdOutputConfig = {
   file: isCoreBuild ? 'dist/cherry-markdown.engine.core.js' : 'dist/cherry-markdown.engine.js',
   format: 'umd',
   name: 'CherryEngine',
-  sourcemap: false,
+  sourcemap: true,
   compact: true,
-  plugins: [terserPlugin()],
+  plugins: [terserUMD],
+  // UMD 使用 manualChunks 合并为单个文件
+  manualChunks: () => 'main',
+  // 指定全局变量名
+  globals: {
+    ...baseConfig.output.globals,
+    codemirror: 'CodeMirror',
+  },
 };
 
 const esmOutputConfig = {
   ...baseConfig.output,
-  file: isCoreBuild ? 'dist/cherry-markdown.engine.core.esm.js' : 'dist/cherry-markdown.engine.esm.js',
+  dir: 'dist',
+  entryFileNames: isCoreBuild ? 'cherry-markdown.engine.core.esm.js' : 'cherry-markdown.engine.esm.js',
   format: 'esm',
   name: 'CherryEngine',
-  sourcemap: false,
+  sourcemap: true,
   compact: true,
-  plugins: [
-    terserPlugin({
-      module: true,
-      ecma: 2015,
-    }),
-  ],
+  plugins: [terserESM],
+  // ESM 不使用 manualChunks，启用 tree-shaking
+  // 内联动态导入，保持单个文件
+  inlineDynamicImports: true,
 };
 
 const options = {
@@ -67,16 +61,5 @@ if (!Array.isArray(options.external)) {
   options.external = [];
 }
 options.external.push('mermaid');
-
-/** 构建目标是否 node */
-const IS_COMMONJS_BUILD = process.env.BUILD_TARGET === 'commonjs';
-
-if (IS_COMMONJS_BUILD) {
-  options.output = {
-    ...umdOutputConfig,
-    file: umdOutputConfig.file.replace(/\.js$/, '.common.js'),
-    format: 'cjs',
-  };
-}
 
 export default options;

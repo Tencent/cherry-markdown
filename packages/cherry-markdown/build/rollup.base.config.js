@@ -27,8 +27,6 @@ import envReplacePlugin from './env.js';
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT_PATH = path.resolve(currentDir, '..');
-/** 构建目标是否 node */
-const IS_COMMONJS_BUILD = process.env.BUILD_TARGET === 'commonjs';
 
 const aliasPluginOptions = {
   entries: [
@@ -39,13 +37,6 @@ const aliasPluginOptions = {
   ],
 };
 
-if (IS_COMMONJS_BUILD) {
-  aliasPluginOptions.entries.unshift({
-    find: '@/Sanitizer',
-    replacement: path.resolve(PROJECT_ROOT_PATH, 'src', 'Sanitizer.node.js'),
-  });
-}
-
 /**
  * @type {import('rollup').RollupOptions}
  */
@@ -55,8 +46,16 @@ const options = {
     globals: {
       jsdom: 'jsdom',
     },
-    // disable code splitting
-    manualChunks: () => 'cherry',
+    // 移除 manualChunks 以启用 tree-shaking
+    // UMD 构建可以在各具体配置中添加 manualChunks
+  },
+  // 优化：启用 treeshake 配置，支持更激进的分析
+  treeshake: {
+    moduleSideEffects: 'no-external',
+    propertyReadSideEffects: false,
+    tryCatchDeoptimization: false,
+    // 标记无副作用的函数属性
+    unknownSideEffectsForCall: false,
   },
   plugins: [
     // Only run ESLint in builds that explicitly enable it. Default: disabled to avoid
@@ -75,18 +74,16 @@ const options = {
     envReplacePlugin(),
     alias(aliasPluginOptions),
     resolve({
-      // ignoreGlobal: false,
       browser: true,
+      // 优化：优先使用 ESM 模块
+      preferBuiltins: false,
+      mainFields: ['module', 'browser', 'main'],
     }),
     commonjs({
       // non-CommonJS modules will be ignored, but you can also
       // specifically include/exclude files
       include: [/node_modules/, /src[\\/]libs/], // Default: undefined
       exclude: [/node_modules[\\/](lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
-      // exclude: [/src\/(?!libs)/],
-      // exclude: [ 'node_modules/foo/**', 'node_modules/bar/**' ],  // Default: undefined
-      // these values can also be regular expressions
-      // include: /node_modules/
 
       // search for files other than .js files (must already
       // be transpiled by a previous plugin!)
@@ -98,53 +95,20 @@ const options = {
       // if false then skip sourceMap generation for CommonJS modules
       sourceMap: !IS_PRODUCTION, // Default: true
 
-      // explicitly specify unresolvable named exports
-      // (see below for more details)
-      // namedExports: { 'react': ['createElement', 'Component' ] },  // Default: undefined
-
-      // sometimes you have to leave require statements
-      // unconverted. Pass an array containing the IDs
-      // or a `id => boolean` function. Only use this
-      // option if you know what you're doing!
-      // ignore: [ 'conditional-runtime-dependency' ]
+      // 优化：忽略动态 require
+      ignoreDynamicRequires: true,
     }),
     babel({
       // use inline config to avoid Babel attempting to load an ESM config file asynchronously
       babelHelpers: 'runtime',
-      exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5|lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
+      // 默认转译所有代码（包括 node_modules 和 src/libs），确保 ES5 兼容性
+      // 仅排除 core-js（polyfill 本身不需要转译）
+      exclude: [/node_modules[\\/]core-js/],
       babelrc: false,
       configFile: false,
       presets: babelConfig.presets,
       plugins: babelConfig.plugins,
     }),
-    // TODO: 重构抽出为独立的插件
-    {
-      name: 'dist-types',
-      generateBundle(options, bundle, isWrite) {
-        const bundles = Object.keys(bundle);
-        bundles.forEach((fileName) => {
-          if (!fileName.endsWith('.js')) {
-            return;
-          }
-          const file = bundle[fileName];
-          const fileBaseName = fileName.replace(/\.js$/, '');
-          const entryFileName = file.facadeModuleId.split(/[/\\]/).pop();
-          const entryFileBase = entryFileName.replace(/\.js$/, '');
-          const namedExports = file.exports.filter((name) => name !== 'default');
-          const defaultName = options.name;
-          const source = [
-            `import ${defaultName}, { ${namedExports.join(', ')} } from "./types/${entryFileBase}";`,
-            `export { ${namedExports.join(', ')} };`,
-            `export default ${defaultName};`,
-          ].join('\n');
-          this.emitFile({
-            type: 'asset',
-            fileName: `${fileBaseName}.d.ts`,
-            source,
-          });
-        });
-      },
-    },
   ],
   onwarn(warning, warn) {
     // 忽略 juice 的 circular dependency

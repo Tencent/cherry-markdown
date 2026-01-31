@@ -15,9 +15,6 @@
  */
 import scss from 'rollup-plugin-scss';
 import * as dartSass from 'sass';
-// baseConfig not used in styles config
-
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 /**
  * @type {import('rollup').RollupOptions}
@@ -33,8 +30,9 @@ const createCleanupPlugin = () => ({
   },
 });
 
+// 只输出压缩版样式
 const createStyleConfigs = ({ input, cssBaseName, outputBaseName, watch }) => {
-  const configs = [
+  return [
     {
       input,
       output: {
@@ -46,31 +44,17 @@ const createStyleConfigs = ({ input, cssBaseName, outputBaseName, watch }) => {
           failOnError: true,
           sass: dartSass,
           ...(watch ? { watch } : {}),
-        }),
-        createCleanupPlugin(),
-      ],
-    },
-  ];
-
-  if (IS_PRODUCTION) {
-    configs.push({
-      input,
-      output: {
-        file: `dist/${outputBaseName}.styles.min.js`,
-      },
-      plugins: [
-        scss({
-          fileName: `${cssBaseName}.min.css`,
-          failOnError: true,
-          sass: dartSass,
           outputStyle: 'compressed',
         }),
         createCleanupPlugin(),
       ],
-    });
-  }
-
-  return configs;
+      onwarn(warning, warn) {
+        // 过滤空 chunk 警告
+        if (warning.code === 'EMPTY_BUNDLE') return;
+        warn(warning);
+      },
+    },
+  ];
 };
 
 const options = [

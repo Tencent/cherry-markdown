@@ -13,51 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import terser from '@rollup/plugin-terser';
 import baseConfig from './rollup.base.config.js';
+import { terserUMD, terserESM } from './terser.config.js';
 
-const terserPlugin = (options = {}) =>
-  terser({
-    output: {
-      comments: false,
-    },
-    compress: {
-      pure_funcs: ['console.log', 'console.info'],
-    },
-    ecma: 5,
-    ...options,
-  });
+const umdOutputConfig = {
+  ...baseConfig.output,
+  exports: 'named',
+  file: 'dist/cherry-markdown.core.js',
+  format: 'umd',
+  name: 'Cherry',
+  sourcemap: true,
+  compact: true,
+  plugins: [terserUMD],
+  // UMD 使用 manualChunks 合并为单个文件
+  manualChunks: () => 'main',
+  // 指定全局变量名
+  globals: {
+    ...baseConfig.output.globals,
+    codemirror: 'CodeMirror',
+  },
+};
+
+const esmOutputConfig = {
+  ...baseConfig.output,
+  exports: 'named',
+  dir: 'dist',
+  entryFileNames: 'cherry-markdown.core.esm.js',
+  format: 'esm',
+  name: 'Cherry',
+  sourcemap: true,
+  compact: true,
+  plugins: [terserESM],
+  // ESM 不使用 manualChunks，启用 tree-shaking
+  // 内联动态导入，保持单个文件
+  inlineDynamicImports: true,
+};
 
 const options = {
   ...baseConfig,
   input: 'src/index.core.js',
-  output: {
-    ...baseConfig.output,
-    exports: 'named',
-    file: 'dist/cherry-markdown.core.js',
-    format: 'umd',
-    name: 'Cherry',
-    sourcemap: false,
-    compact: true,
-    plugins: [terserPlugin()],
-    manualChunks: () => 'main',
-  },
+  output: [umdOutputConfig, esmOutputConfig],
 };
 
 if (!Array.isArray(options.external)) {
   options.external = [];
 }
 options.external.push('mermaid');
-
-/** 构建目标是否 node */
-const IS_COMMONJS_BUILD = process.env.BUILD_TARGET === 'commonjs';
-
-if (IS_COMMONJS_BUILD) {
-  options.output = {
-    ...options.output,
-    file: options.output.file.replace(/\.js$/, '.common.js'),
-    format: 'cjs',
-  };
-}
 
 export default options;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 import HookCenter from './core/HookCenter';
-import hooksConfig from './core/HooksConfig';
+// 默认导入完整版 HooksConfig
+// 注意：Stream 版本通过 CherryStream 传入 customHooksConfig 来覆盖
+import hooksConfig from './core/hooks-config';
 import NestedError, { $expectTarget, $expectInherit, $expectInstance } from './utils/error';
 import CryptoJS from 'crypto-js';
 import SyntaxBase from './core/SyntaxBase';
@@ -36,8 +38,9 @@ export default class Engine {
    *
    * @param {Partial<import('./Cherry').CherryOptions>} markdownParams 初始化Cherry时传入的选项
    * @param {import('./Cherry').default} cherry Cherry实例
+   * @param {(typeof SyntaxBase | typeof ParagraphBase)[]} [customHooksConfig] 自定义的hooks配置（可选）
    */
-  constructor(markdownParams, cherry) {
+  constructor(markdownParams, cherry, customHooksConfig) {
     this.$cherry = cherry;
     // Deprecated
     Object.defineProperty(this, '_cherry', {
@@ -48,7 +51,9 @@ export default class Engine {
     });
     this.initMath(markdownParams);
     this.$configInit(markdownParams);
-    this.hookCenter = new HookCenter(hooksConfig, markdownParams, cherry);
+    // 使用传入的 hooksConfig，如果没有传入则使用默认配置
+    const actualHooksConfig = customHooksConfig || hooksConfig;
+    this.hookCenter = new HookCenter(actualHooksConfig, markdownParams, cherry);
     this.hooks = this.hookCenter.getHookList();
     this.asyncRenderHandler = new AsyncRenderHandler(cherry);
     // 使用LRU缓存替代普通对象

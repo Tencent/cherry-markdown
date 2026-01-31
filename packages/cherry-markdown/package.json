@@ -8,10 +8,18 @@
     "type": "git",
     "url": "git+https://github.com/Tencent/cherry-markdown.git"
   },
-  "main": "./dist/cherry-markdown.min.js",
+  "main": "./dist/cherry-markdown.js",
   "module": "./dist/cherry-markdown.esm.js",
-  "style": "./dist/cherry-markdown.min.css",
+  "style": "./dist/cherry-markdown.css",
   "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/cherry-markdown.esm.js",
+      "require": "./dist/cherry-markdown.js"
+    },
+    "./dist/*": "./dist/*"
+  },
   "directories": {
     "example": "examples"
   },
@@ -20,31 +28,29 @@
     "types"
   ],
   "sideEffects": [
-    "./dist/*.css"
+    "./dist/*.css",
+    "src/libs/**/*.js",
+    "src/theme/*.js",
+    "**/*.scss"
   ],
   "scripts": {
     "iconfont": "gulp",
     "dev:vite": "vite",
-    "build": "run-s clean build:all build:cjs",
+    "build": "run-s clean build:all",
     "build:all": "run-p iconfont build:styles build:types build:addons build:full build:core build:engine build:stream",
-    "build:cjs": "run-p build:core-cjs build:engine-cjs build:stream-cjs",
     "build:full": "cross-env NODE_ENV=production rollup --config build/build.js",
     "build:core": "cross-env CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.core.config.js",
-    "build:core-cjs": "cross-env BUILD_TARGET=commonjs CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.core.config.js",
     "build:engine": "cross-env CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.engine.config.js",
-    "build:engine-cjs": "cross-env BUILD_TARGET=commonjs CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.engine.config.js",
     "build:stream": "cross-env NODE_ENV=production rollup --config build/rollup.stream.config.js",
-    "build:stream-cjs": "cross-env BUILD_TARGET=commonjs NODE_ENV=production rollup --config build/rollup.stream.config.js",
     "build:addons": "node build/addons.build.js",
     "build:types": "tsc --project tsconfig.json && node build/replacePaths.js",
     "build:styles": "cross-env NODE_ENV=production rollup --config build/rollup.styles.config.js",
     "clean": "rimraf ./dist",
-    "check-bundle": "es-check es5 dist/cherry-markdown.js dist/cherry-markdown.min.js",
+    "check-bundle": "es-check es5 dist/cherry-markdown.js && es-check es6 --module dist/cherry-markdown.esm.js",
     "test": "vitest",
     "test:update": "vitest -u",
     "lint": "cd ../.. && npx prettier --check packages/cherry-markdown/src/**/*.js && npx eslint --ignore-path .eslintignore packages/cherry-markdown/src/**/*.js",
-    "lint:fix": "cd ../.. && npx prettier --write packages/cherry-markdown/src/**/*.js && npx eslint --ignore-path .eslintignore packages/cherry-markdown/src/**/*.js --fix",
-    "examples": "serve -p 3000 ."
+    "lint:fix": "cd ../.. && npx prettier --write packages/cherry-markdown/src/**/*.js && npx eslint --ignore-path .eslintignore packages/cherry-markdown/src/**/*.js --fix"
   },
   "keywords": [
     "markdown"
@@ -56,6 +62,7 @@
     "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/plugin-proposal-decorators": "^7.14.5",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.12.1",
+    "@babel/plugin-proposal-optional-catch-binding": "^7.18.6",
     "@babel/plugin-proposal-optional-chaining": "^7.12.7",
     "@babel/plugin-transform-runtime": "^7.12.10",
     "@babel/preset-env": "^7.7.1",
