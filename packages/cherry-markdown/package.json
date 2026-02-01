@@ -18,6 +18,14 @@
       "import": "./dist/cherry-markdown.esm.js",
       "require": "./dist/cherry-markdown.js"
     },
+    "./dist/cherry-markdown.stream.esm.js": {
+      "types": "./dist/types/cherry-stream.d.ts",
+      "import": "./dist/cherry-markdown.stream.esm.js"
+    },
+    "./dist/cherry-markdown.stream.js": {
+      "types": "./dist/types/cherry-stream.d.ts",
+      "require": "./dist/cherry-markdown.stream.js"
+    },
     "./dist/*": "./dist/*"
   },
   "directories": {
@@ -42,6 +50,7 @@
     "build:addons": "node build/addons.build.js",
     "build:types": "tsc --project tsconfig.json && node build/replacePaths.js",
     "build:styles": "cross-env NODE_ENV=production rollup --config build/rollup.styles.config.js",
+    "verify:stream": "node scripts/verify-stream-config.js",
     "clean": "rimraf ./dist",
     "check-bundle": "es-check es5 dist/cherry-markdown.js && es-check es6 --module dist/cherry-markdown.esm.js",
     "test": "vitest",
