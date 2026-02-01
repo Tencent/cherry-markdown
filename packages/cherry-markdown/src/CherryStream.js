@@ -77,6 +77,8 @@ export default class CherryStream extends CherryStatic {
     this.options.isPreviewOnly = true;
     this.options.editor.defaultModel = 'previewOnly';
     this.options.toolbars.showToolbar = false;
+    // Stream 版本禁用 PreviewerBubble，避免引入 codemirror
+    this.options.previewer.enablePreviewerBubble = false;
 
     this.locales = locales;
     if (this.options.locales) {

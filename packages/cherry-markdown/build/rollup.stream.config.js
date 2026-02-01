@@ -30,7 +30,6 @@ import commonjs from '@rollup/plugin-commonjs';
 import alias from '@rollup/plugin-alias';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fs from 'fs';
 
 const terserPlugin = (options = {}) =>
   terser({
@@ -47,8 +46,8 @@ const terserPlugin = (options = {}) =>
 // 自定义插件：拦截 core/HooksConfig 导入，重定向到 stream 版本
 const hooksConfigInterceptPlugin = {
   name: 'hooks-config-intercept',
-  
-  resolveId(source, importer) {
+
+  resolveId(source) {
     // 拦截 HooksConfig 导入
     if (source === './core/HooksConfig' || source.endsWith('/core/HooksConfig')) {
       console.log('[hooks-config-intercept] Redirecting HooksConfig to stream version');
@@ -61,37 +60,82 @@ const hooksConfigInterceptPlugin = {
   },
 };
 
+// 自定义插件：强制标记 codemirror 相关模块为外部依赖
+const codemirrorExternalPlugin = {
+  name: 'codemirror-external',
+
+  resolveId(source) {
+    // 拦截所有 codemirror 相关的导入，强制标记为外部依赖
+    if (source === 'codemirror' || source.startsWith('codemirror/')) {
+      console.log(`[codemirror-external] Marking "${source}" as external`);
+      // 直接返回外部依赖标记，确保 rollup 不会尝试 bundle 这个模块
+      return { id: source, external: true };
+    }
+    return null;
+  },
+};
+
+// 自定义插件：移除 PreviewerBubble 相关代码，避免引入 codemirror
+const removePreviewerBubblePlugin = {
+  name: 'remove-previewer-bubble',
+
+  transform(code, id) {
+    // 只处理 Previewer.js 文件
+    if (!id.endsWith('Previewer.js')) {
+      return null;
+    }
+
+    console.log('[remove-previewer-bubble] Removing PreviewerBubble from Previewer.js');
+
+    // 移除 PreviewerBubble 的导入语句
+    let modifiedCode = code.replace(
+      /import\s+PreviewerBubble\s+from\s+['"]\.\/toolbars\/PreviewerBubble['"];?\s*/,
+      '// PreviewerBubble removed in stream build\n',
+    );
+
+    // 将 $initPreviewerBubble 方法改为空实现
+    modifiedCode = modifiedCode.replace(
+      /\$initPreviewerBubble\(\)\s*\{[^}]*this\.previewerBubble\s*=\s*new\s+PreviewerBubble\([^)]*\);?\s*\}/,
+      '$initPreviewerBubble() {\n    // PreviewerBubble disabled in stream build\n  }',
+    );
+
+    return {
+      code: modifiedCode,
+      map: null,
+    };
+  },
+};
+
 // 明确列出需要的插件
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const srcPath = path.resolve(__dirname, '../src');
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+const srcPath = path.resolve(dirname, '../src');
 
 const basePlugins = [
-  hooksConfigInterceptPlugin,  // 优先级最高，拦截 HooksConfig 导入
+  codemirrorExternalPlugin, // 最高优先级：强制标记 codemirror 为外部依赖
+  hooksConfigInterceptPlugin, // 拦截 HooksConfig 导入，重定向到 stream 版本
+  removePreviewerBubblePlugin, // 移除 PreviewerBubble，避免引入 codemirror
   baseConfig.plugins.find((p) => p.name === 'json'),
   baseConfig.plugins.find((p) => p.name === 'replace'),
   // 添加 alias 插件以解析 @/ 别名
   alias({
-    entries: [
-      { find: '@', replacement: srcPath },
-    ],
+    entries: [{ find: '@', replacement: srcPath }],
   }),
   resolve({
     browser: true,
     preferBuiltins: false,
-    mainFields: ['module', 'browser', 'main'],
+    mainFields: ['module', 'jsnext:main', 'browser', 'main'],
     exportConditions: ['default', 'module'],
-    resolveOnly: [],
   }),
   commonjs({
     include: [/node_modules/, /src[\\/]libs/],
-    exclude: [/node_modules[\\/](lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
+    exclude: [/node_modules[\\/](lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es|codemirror)/],
     extensions: ['.js'],
     ignoreGlobal: false,
     sourceMap: false,
     ignoreDynamicRequires: true,
   }),
   baseConfig.plugins.find((p) => p.name === 'babel'),
-  baseConfig.plugins.find((p) => p.name === 'dist-types'),
+  // Stream 构建不使用 dist-types 插件，避免生成不准确的类型声明
 ].filter(Boolean);
 
 const umdPlugins = [...basePlugins, terserPlugin()];
@@ -122,6 +166,7 @@ const esmOutputConfig = {
   compact: true,
   interop: 'auto',
   inlineDynamicImports: false,
+  preserveEntrySignatures: 'allow-extension',
 };
 
 const streamExternal = [
@@ -130,6 +175,8 @@ const streamExternal = [
   'codemirror',
   /^codemirror\/.*/,
   'echarts',
+  'prismjs',
+  /^prismjs\/components\/.*/,
 ];
 
 /**
@@ -138,7 +185,10 @@ const streamExternal = [
  */
 const umdConfig = {
   input: 'src/index.stream.js',
-  output: umdOutputConfig,
+  output: {
+    ...umdOutputConfig,
+    inlineDynamicImports: true, // 内联动态导入，避免生成额外的chunk
+  },
   plugins: umdPlugins,
   external: streamExternal,
   cache: true, // 启用缓存加速重新构建
@@ -147,6 +197,7 @@ const umdConfig = {
     moduleSideEffects: 'no-external',
     propertyReadSideEffects: false,
     tryCatchDeoptimization: false,
+    preset: 'recommended',
   },
   onwarn: baseConfig.onwarn,
 };
@@ -155,22 +206,27 @@ const umdConfig = {
  * ESM 配置 - 用于模块化导入，支持 tree-shaking
  * 特点：
  * - 保留 ES6 模块语法，让消费者的打包工具进行 tree-shaking
- * - inlineDynamicImports: false 允许代码分割，支持更好的 tree-shaking
+ * - inlineDynamicImports: true 暂时内联动态导入，确保构建成功
  * - 对应用消费者的打包工具配置提出的要求更低
  */
 const esmConfig = {
   input: 'src/index.stream.js',
-  output: esmOutputConfig,
+  output: {
+    ...esmOutputConfig,
+    inlineDynamicImports: true, // 内联动态导入，避免生成额外的chunk
+  },
   plugins: esmPlugins,
   external: streamExternal,
   cache: true, // 启用缓存加速重新构建
   maxParallelFileOps: 20, // 并行处理优化
   treeshake: {
     // 关键：'no-external' 意味着只对非外部模块进行副作用分析
-    // 这样 Suggester.js 中的 codemirror 导入会被正确处理
+    // 这样 codemirror 导入会被正确处理为外部依赖，不会被 bundle
     moduleSideEffects: 'no-external',
     propertyReadSideEffects: false,
     tryCatchDeoptimization: false,
+    // 确保删除未使用的代码
+    preset: 'recommended',
   },
   onwarn: baseConfig.onwarn,
 };
