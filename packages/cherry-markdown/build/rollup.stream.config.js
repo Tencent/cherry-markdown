@@ -175,8 +175,6 @@ const streamExternal = [
   'codemirror',
   /^codemirror\/.*/,
   'echarts',
-  'prismjs',
-  /^prismjs\/components\/.*/,
 ];
 
 /**
