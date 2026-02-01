@@ -54,18 +54,26 @@ const umdConfig = {
   input: 'src/index.core.js',
   output: umdOutputConfig,
   plugins: umdPlugins,
-  treeshake: baseConfig.treeshake,
+  treeshake: {
+    moduleSideEffects: 'no-external',
+    propertyReadSideEffects: false,
+    tryCatchDeoptimization: false,
+  },
   onwarn: baseConfig.onwarn,
-  external: [...(baseConfig.external || []), 'mermaid'],
+  external: ['mermaid', 'codemirror', /^codemirror\/.*/],
 };
 
 const esmConfig = {
   input: 'src/index.core.js',
   output: esmOutputConfig,
   plugins: esmPlugins,
-  treeshake: baseConfig.treeshake,
+  treeshake: {
+    moduleSideEffects: 'no-external',
+    propertyReadSideEffects: false,
+    tryCatchDeoptimization: false,
+  },
   onwarn: baseConfig.onwarn,
-  external: [...(baseConfig.external || []), 'mermaid'],
+  external: ['mermaid', 'codemirror', /^codemirror\/.*/],
 };
 
 export default [umdConfig, esmConfig];

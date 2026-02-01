@@ -57,18 +57,26 @@ const umdConfig = {
   input: isCoreBuild ? 'src/index.engine.core.js' : 'src/index.engine.js',
   output: umdOutputConfig,
   plugins: umdPlugins,
-  treeshake: baseConfig.treeshake,
+  treeshake: {
+    moduleSideEffects: 'no-external',
+    propertyReadSideEffects: false,
+    tryCatchDeoptimization: false,
+  },
   onwarn: baseConfig.onwarn,
-  external: [...(baseConfig.external || []), 'mermaid'],
+  external: ['mermaid', 'codemirror', /^codemirror\/.*/, 'echarts'],
 };
 
 const esmConfig = {
   input: isCoreBuild ? 'src/index.engine.core.js' : 'src/index.engine.js',
   output: esmOutputConfig,
   plugins: esmPlugins,
-  treeshake: baseConfig.treeshake,
+  treeshake: {
+    moduleSideEffects: 'no-external',
+    propertyReadSideEffects: false,
+    tryCatchDeoptimization: false,
+  },
   onwarn: baseConfig.onwarn,
-  external: [...(baseConfig.external || []), 'mermaid'],
+  external: ['mermaid', 'codemirror', /^codemirror\/.*/, 'echarts'],
 };
 
 export default [umdConfig, esmConfig];

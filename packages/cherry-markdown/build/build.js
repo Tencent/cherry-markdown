@@ -30,7 +30,10 @@ const basePlugins = [
 const umdPlugins = [...basePlugins, terserUMD];
 const esmPlugins = [...basePlugins, terserESM];
 
-// UMD 配置 - 单文件输出
+/**
+ * UMD 配置 - 单文件输出
+ * 特点：完整打包，包含所有依赖（codemirror、mermaid、echarts）
+ */
 const umdConfig = {
   input: 'src/index.js',
   output: {
@@ -40,6 +43,7 @@ const umdConfig = {
     name: 'Cherry',
     sourcemap: true,
     compact: true,
+    inlineDynamicImports: true,
   },
   plugins: umdPlugins,
   treeshake: baseConfig.treeshake,
@@ -47,7 +51,10 @@ const umdConfig = {
   external: baseConfig.external,
 };
 
-// ESM 配置 - 代码分割优化
+/**
+ * ESM 配置 - 代码分割优化
+ * 特点：保留 ES6 模块语法支持 tree-shaking，允许消费者按需引入
+ */
 const esmConfig = {
   input: 'src/index.js',
   output: {
@@ -59,6 +66,8 @@ const esmConfig = {
     name: 'Cherry',
     sourcemap: true,
     compact: true,
+    interop: 'auto',
+    inlineDynamicImports: false,
   },
   plugins: esmPlugins,
   treeshake: baseConfig.treeshake,
