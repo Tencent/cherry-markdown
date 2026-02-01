@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// import Bold from './hooks/Bold';
-// import Italic from './hooks/Italic';
-// import Underline from './hooks/Underline';
+
+/**
+ * Stream 版本的 Hooks 配置
+ * 相比完整版本（HooksConfig.js），移除了 Suggester（编辑器功能）
+ * 仅保留预览相关的 Hooks
+ */
+
 import Color from './hooks/Color';
 import BackgroundColor from './hooks/BackgroundColor';
 import Size from './hooks/Size';
@@ -45,7 +49,7 @@ import HtmlBlock from './hooks/HtmlBlock';
 import Emoji from './hooks/Emoji';
 import Underline from './hooks/Underline';
 import HighLight from './hooks/HighLight';
-import Suggester from './hooks/Suggester';
+// import Suggester from './hooks/Suggester'; // ❌ Stream 版本中排除 Suggester（编辑器功能）
 import Ruby from './hooks/Ruby';
 import Panel from './hooks/Panel';
 import Detail from './hooks/Detail';
@@ -54,21 +58,16 @@ import Space from './hooks/Space';
 import AiFlowAutoClose from './hooks/AiFlowAutoClose';
 
 /**
- * 引擎各语法的配置
- * 主要决定支持哪些语法，以及各语法的执行顺序
+ * Stream 版本的 Hooks 配置
+ * 与 HooksConfig.js 相比，移除了 Suggester
+ * 这样可以完全避免引入 codemirror 依赖
+ * 🔷 STREAM_VERSION_MARKER_001 - 此标记表示正在使用流式版本配置
  */
 const hooksConfig = [
   // 段落级 Hook
-  // 引擎会按当前排序顺序执行beforeMake、makeHtml方法
-  // 引擎会按当前排序逆序执行afterMake方法
   FrontMatter,
   CodeBlock,
   InlineCode,
-  /**
-   * 理论上行内公式（InlineMath）应该在段落公式（MathBlock）的后面，否则行内公式会破坏段落公式的渲染
-   * 但实际交换顺序后，发现没啥问题，还顺带解决了[这个issue #1090](https://github.com/Tencent/cherry-markdown/issues/1090)的问题
-   * 没问题的原因是对于段落公式（比如$$(a+b)^2=a^2+2ab+b^2$$），行内公式的确会命中，会识别出来两个'$$'，所以无事发生
-   */
   InlineMath,
   MathBlock,
   AiFlowAutoClose,
@@ -80,15 +79,14 @@ const hooksConfig = [
   Table,
   Toc,
   Blockquote,
-  Header, // 处理标题, 传入strict属性严格要求ATX风格标题#后带空格
+  Header,
   Hr,
   List,
   Detail,
   Panel,
-  Paragraph, // 普通段落
+  Paragraph,
 
   // 行内Hook
-  // 引擎会按当前顺序执行makeHtml方法
   Emoji,
   Image,
   Link,
@@ -103,7 +101,7 @@ const hooksConfig = [
   Strikethrough,
   Underline,
   HighLight,
-  Suggester,
+  // Suggester, // ❌ 已排除
   Space,
 ];
 

@@ -19,20 +19,18 @@
  *
  * 特点：
  * 1. 排除 codemirror、mermaid、echarts 等大型依赖
- * 2. 提供 UMD 和 ESM 两种格式
- * 3. ESM 支持消费者的 tree-shaking
- *
- * Tree-shaking 最佳实践：
- * - ESM 版本保留 ES6 模块语法，由消费方的打包工具处理
- * - 使用 external 配置排除 codemirror 等依赖，自动去除相关代码
- * - Suggester.js 等仅编辑器使用的模块会被自动 tree-shake
- * - 消费者需要确保自己的打包工具开启了 tree-shaking（默认情况下 Webpack5+ 已开启）
+ * 2. 使用 HooksConfig.stream.js（不含 Suggester）从源头避免 codemirror 导入
+ * 3. 提供 UMD 和 ESM 两种格式，ESM 支持消费者的 tree-shaking
  */
 
 import terser from '@rollup/plugin-terser';
 import baseConfig from './rollup.base.config.js';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import alias from '@rollup/plugin-alias';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const terserPlugin = (options = {}) =>
   terser({
@@ -46,12 +44,37 @@ const terserPlugin = (options = {}) =>
     ...options,
   });
 
-// 明确列出需要的插件，避免使用扩展运算符，保持正确的插件顺序
+// 自定义插件：拦截 core/HooksConfig 导入，重定向到 stream 版本
+const hooksConfigInterceptPlugin = {
+  name: 'hooks-config-intercept',
+  
+  resolveId(source, importer) {
+    // 拦截 HooksConfig 导入
+    if (source === './core/HooksConfig' || source.endsWith('/core/HooksConfig')) {
+      console.log('[hooks-config-intercept] Redirecting HooksConfig to stream version');
+      const currentDir = path.dirname(fileURLToPath(import.meta.url));
+      // 返回实际的 HooksConfig.stream.js 文件路径
+      const streamPath = path.resolve(currentDir, '../src/core/HooksConfig.stream.js');
+      return streamPath;
+    }
+    return null;
+  },
+};
+
+// 明确列出需要的插件
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const srcPath = path.resolve(__dirname, '../src');
+
 const basePlugins = [
+  hooksConfigInterceptPlugin,  // 优先级最高，拦截 HooksConfig 导入
   baseConfig.plugins.find((p) => p.name === 'json'),
   baseConfig.plugins.find((p) => p.name === 'replace'),
-  baseConfig.plugins.find((p) => p.name === 'alias'),
-  // 自定义 resolve 插件，确保 prismjs 组件能被正确打包
+  // 添加 alias 插件以解析 @/ 别名
+  alias({
+    entries: [
+      { find: '@', replacement: srcPath },
+    ],
+  }),
   resolve({
     browser: true,
     preferBuiltins: false,
@@ -59,7 +82,6 @@ const basePlugins = [
     exportConditions: ['default', 'module'],
     resolveOnly: [],
   }),
-  // 自定义 commonjs 插件，确保 prismjs 组件被正确转换
   commonjs({
     include: [/node_modules/, /src[\\/]libs/],
     exclude: [/node_modules[\\/](lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
@@ -119,6 +141,8 @@ const umdConfig = {
   output: umdOutputConfig,
   plugins: umdPlugins,
   external: streamExternal,
+  cache: true, // 启用缓存加速重新构建
+  maxParallelFileOps: 20, // 并行处理优化
   treeshake: {
     moduleSideEffects: 'no-external',
     propertyReadSideEffects: false,
@@ -139,6 +163,8 @@ const esmConfig = {
   output: esmOutputConfig,
   plugins: esmPlugins,
   external: streamExternal,
+  cache: true, // 启用缓存加速重新构建
+  maxParallelFileOps: 20, // 并行处理优化
   treeshake: {
     // 关键：'no-external' 意味着只对非外部模块进行副作用分析
     // 这样 Suggester.js 中的 codemirror 导入会被正确处理

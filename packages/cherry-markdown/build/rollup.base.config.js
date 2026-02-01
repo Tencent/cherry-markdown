@@ -47,6 +47,12 @@ const options = {
       jsdom: 'jsdom',
     },
   },
+  // 性能优化：启用缓存加速二次构建
+  cache: true,
+  
+  // 并行处理优化
+  maxParallelFileOps: 20,
+  
   // Tree-shake 配置 - 平衡优化和兼容性
   treeshake: {
     // 只标记明确的副作用模块
@@ -90,6 +96,10 @@ const options = {
       // 优化：优先使用 ESM 模块
       preferBuiltins: false,
       mainFields: ['module', 'browser', 'main'],
+      // 去重依赖，避免重复打包
+      dedupe: ['lodash', 'lodash-es'],
+      // 扩展解析
+      extensions: ['.mjs', '.js', '.json', '.node'],
     }),
     commonjs({
       // non-CommonJS modules will be ignored, but you can also
@@ -109,6 +119,15 @@ const options = {
 
       // 优化：忽略动态 require
       ignoreDynamicRequires: true,
+      
+      // 性能优化：严格模式检查
+      strictRequires: 'auto',
+      
+      // 默认导出模式
+      defaultIsModuleExports: 'auto',
+      
+      // 要求语义
+      requireReturnsDefault: 'auto',
     }),
     babel({
       // use inline config to avoid Babel attempting to load an ESM config file asynchronously

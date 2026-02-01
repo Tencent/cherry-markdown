@@ -46,6 +46,8 @@ const umdConfig = {
     inlineDynamicImports: true,
   },
   plugins: umdPlugins,
+  cache: true, // 启用缓存加速重新构建
+  maxParallelFileOps: 20, // 并行处理优化
   treeshake: baseConfig.treeshake,
   onwarn: baseConfig.onwarn,
   external: baseConfig.external,
@@ -68,8 +70,23 @@ const esmConfig = {
     compact: true,
     interop: 'auto',
     inlineDynamicImports: false,
+    // 性能优化：自动代码分割
+    manualChunks(id) {
+      // 将 node_modules 中的依赖分离到 vendor chunk
+      if (id.includes('node_modules')) {
+        // 大型库单独分割
+        if (id.includes('codemirror')) return 'vendor-codemirror';
+        if (id.includes('mermaid')) return 'vendor-mermaid';
+        if (id.includes('echarts')) return 'vendor-echarts';
+        if (id.includes('prismjs')) return 'vendor-prism';
+        // 其他依赖
+        return 'vendor';
+      }
+    },
   },
   plugins: esmPlugins,
+  cache: true, // 启用缓存加速重新构建
+  maxParallelFileOps: 20, // 并行处理优化
   treeshake: baseConfig.treeshake,
   onwarn: baseConfig.onwarn,
   external: baseConfig.external,

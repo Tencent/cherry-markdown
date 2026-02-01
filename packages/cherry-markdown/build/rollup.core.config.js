@@ -54,6 +54,8 @@ const umdConfig = {
   input: 'src/index.core.js',
   output: umdOutputConfig,
   plugins: umdPlugins,
+  cache: true, // 启用缓存
+  maxParallelFileOps: 20,
   treeshake: {
     moduleSideEffects: 'no-external',
     propertyReadSideEffects: false,
@@ -67,6 +69,8 @@ const esmConfig = {
   input: 'src/index.core.js',
   output: esmOutputConfig,
   plugins: esmPlugins,
+  cache: true, // 启用缓存
+  maxParallelFileOps: 20,
   treeshake: {
     moduleSideEffects: 'no-external',
     propertyReadSideEffects: false,
