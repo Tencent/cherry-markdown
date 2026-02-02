@@ -39,7 +39,7 @@ import { addEvent } from './utils/event';
 import Logger from '@/Logger';
 import { handleFileUploadCallback } from '@/utils/file';
 import { createElement } from './utils/dom';
-import { longTextReg, base64Reg, imgDrawioXmlReg, createUrlReg } from './utils/regexp';
+import { longTextReg, base64Reg, imgDrawioXmlReg, createUrlReg, pasteWrapperReg } from './utils/regexp';
 import { handleNewlineIndentList } from './utils/autoindent';
 
 /**
@@ -153,6 +153,17 @@ export default class Editor {
     if (this.$cherry.status.editor === 'hide') {
       return;
     }
+    this.formatBigData2Mark(pasteWrapperReg, 'cm-url paste-wrapper', (target, oneSearch) => {
+      const whole = oneSearch[0] ?? '';
+      const id = oneSearch[1] ?? '';
+      const bigString = oneSearch[2] ?? '';
+      const targetChFrom = target.ch;
+      const targetChTo = targetChFrom + whole.length;
+      const targetLine = target.line;
+      const begin = { line: targetLine, ch: targetChFrom };
+      const end = { line: targetLine, ch: targetChTo };
+      return { bigString, begin, end, id };
+    });
     this.formatBigData2Mark(base64Reg, 'cm-url base64');
     this.formatBigData2Mark(imgDrawioXmlReg, 'cm-url drawio');
     this.formatBigData2Mark(longTextReg, 'cm-url long-text');
@@ -168,8 +179,22 @@ export default class Editor {
    * 把大字符串变成省略号
    * @param {*} reg 正则
    * @param {*} className 利用codemirror的MarkText生成的新元素的class
+   * @param {function} getBeginEnd 获取begin和end的函数
    */
-  formatBigData2Mark = (reg, className) => {
+  formatBigData2Mark = (
+    reg,
+    className,
+    getBeginEnd = (target, oneSearch) => {
+      const bigString = oneSearch[2] ?? '';
+      const targetChFrom = target.ch + oneSearch[1]?.length;
+      const targetChTo = targetChFrom + bigString.length;
+      const targetLine = target.line;
+      const begin = { line: targetLine, ch: targetChFrom };
+      const end = { line: targetLine, ch: targetChTo };
+      const id = '';
+      return { bigString, begin, end, id };
+    },
+  ) => {
     const codemirror = this.editor;
     const searcher = codemirror.getSearchCursor(reg);
 
@@ -179,17 +204,12 @@ export default class Editor {
       if (!target) {
         continue;
       }
-      const bigString = oneSearch[2] ?? '';
-      const targetChFrom = target.ch + oneSearch[1]?.length;
-      const targetChTo = targetChFrom + bigString.length;
-      const targetLine = target.line;
-      const begin = { line: targetLine, ch: targetChFrom };
-      const end = { line: targetLine, ch: targetChTo };
+      const { bigString, begin, end, id } = getBeginEnd(target, oneSearch);
       // 如果所在区域已经有mark了，则不再增加mark
       if (codemirror.findMarks(begin, end).length > 0) {
         continue;
       }
-      const newSpan = createElement('span', `cm-string ${className}`, { title: bigString });
+      const newSpan = createElement('span', `cm-string ${className}`, { title: bigString, 'data-id': id });
       newSpan.textContent = bigString;
       codemirror.markText(begin, end, { replacedWith: newSpan, atomic: true });
     }
@@ -285,32 +305,72 @@ export default class Editor {
   /**
    *
    * @param {ClipboardEvent} e
-   * @param {CodeMirror.Editor} codemirror
    */
-  onPaste(e, codemirror) {
+  onPaste(e) {
     let { clipboardData } = e;
-    if (clipboardData) {
-      this.handlePaste(e, clipboardData, codemirror);
-    } else {
+    if (!clipboardData) {
       ({ clipboardData } = window);
-      this.handlePaste(e, clipboardData, codemirror);
     }
+    const needHandlePaste = this.handleThirdPaste(e, clipboardData);
+    if (needHandlePaste) {
+      this.handlePaste(e, clipboardData);
+    }
+  }
+
+  onPasteCallback({ html, htmlText, mdText }) {
+    // @ts-ignore
+    const { randomId, _this } = this;
+    const allMarks = _this.editor.getAllMarks();
+    for (let i = 0; i < allMarks.length; i++) {
+      const mark = allMarks[i];
+      const span = mark.widgetNode.querySelector(`.paste-wrapper[data-id="${randomId}"]`);
+      if (span) {
+        const { from, to } = mark.find();
+        mark.clear();
+        _this.editor.setSelection(from, to);
+        if (mdText) {
+          _this.editor.replaceSelection(mdText, 'end');
+        } else {
+          _this.formatHtml2MdWhenPaste(null, html, htmlText);
+        }
+        break;
+      }
+    }
+  }
+
+  /**
+   * 调用第三方的粘贴回调
+   * @returns {boolean} true: 需要继续处理粘贴内容，false: 不需要继续处理粘贴内容
+   */
+  handleThirdPaste(event, clipboardData) {
+    // 生成一个随机id，用于有可能的异步回调
+    const randomId = `cherry-paste-${Math.random().toString(36).slice(2)}${new Date().getTime()}`;
+    const onPasteRet = this.$cherry.options.callback.onPaste(
+      clipboardData,
+      this.$cherry,
+      this.onPasteCallback.bind({ randomId, _this: this }),
+    );
+    if (onPasteRet !== false && typeof onPasteRet === 'string') {
+      event.preventDefault();
+      // 是否命中语法糖
+      if (/^<<[\s\S]+>>$/.test(onPasteRet)) {
+        const newText = `{{${randomId}|${onPasteRet.replace(/^<<([\s\S]+)>>$/, (whole, $1) => `<<${$1.replace(/[<>]/g, '')}>>`)}}}`;
+        this.editor.replaceSelection(newText);
+      } else {
+        this.editor.replaceSelection(onPasteRet, 'around');
+      }
+      return false;
+    }
+    return true;
   }
 
   /**
    *
    * @param {ClipboardEvent} event
    * @param {ClipboardEvent['clipboardData']} clipboardData
-   * @param {CodeMirror.Editor} codemirror
    * @returns {boolean | void}
    */
-  handlePaste(event, clipboardData, codemirror) {
-    const onPasteRet = this.$cherry.options.callback.onPaste(clipboardData, this.$cherry);
-    if (onPasteRet !== false && typeof onPasteRet === 'string') {
-      event.preventDefault();
-      codemirror.replaceSelection(onPasteRet);
-      return;
-    }
+  handlePaste(event, clipboardData) {
     let html = clipboardData.getData('Text/Html');
     const { items } = clipboardData;
 
@@ -331,7 +391,6 @@ export default class Editor {
     ) {
       html = '';
     }
-    const codemirrorDoc = codemirror.getDoc();
     this.fileUploadCount = 0;
     // 只要有html内容，就不处理剪切板里的其他内容，这么做的后果是粘贴excel内容时，只会粘贴html内容，不会把excel对应的截图粘进来
     for (let i = 0; !html && i < items.length; i++) {
@@ -346,14 +405,14 @@ export default class Editor {
             return;
           }
           const mdStr = `${this.fileUploadCount > 1 ? '\n' : ''}${handleFileUploadCallback(url, params, file)}`;
-          codemirrorDoc.replaceSelection(mdStr);
+          this.editor.replaceSelection(mdStr, 'end');
           // if (this.pasterHtml) {
           //   // 如果同时粘贴了html内容和文件内容，则在文件上传完成后强制让光标处于非选中状态，以防止自动选中的html内容被文件内容替换掉
           //   const { line, ch } = codemirror.getCursor();
           //   codemirror.setSelection({ line, ch }, { line, ch });
-          //   codemirrorDoc.replaceSelection(mdStr, 'end');
+          //   this.editor.replaceSelection(mdStr, 'end');
           // } else {
-          //   codemirrorDoc.replaceSelection(mdStr);
+          //   this.editor.replaceSelection(mdStr);
           // }
         });
         event.preventDefault();
@@ -365,23 +424,22 @@ export default class Editor {
     if (!html || !this.options.convertWhenPaste) {
       return true;
     }
+    this.formatHtml2MdWhenPaste(event, html, htmlText);
+  }
 
+  formatHtml2MdWhenPaste(event, html, htmlText) {
     let divObj = document.createElement('DIV');
     divObj.innerHTML = html;
-    html = divObj.innerHTML;
-    const mdText = htmlParser.run(html);
+    const mdText = htmlParser.run(divObj.innerHTML);
     if (typeof mdText === 'string' && mdText.trim().length > 0) {
-      const range = codemirror.listSelections();
-      if (codemirror.getSelections().length <= 1 && range[0] && range[0].anchor) {
-        const currentCursor = {};
-        currentCursor.line = range[0].anchor.line;
-        currentCursor.ch = range[0].anchor.ch;
-        codemirrorDoc.replaceSelection(mdText);
-        pasteHelper.showSwitchBtnAfterPasteHtml(this.$cherry, currentCursor, codemirror, htmlText, mdText);
+      const range = this.editor.listSelections();
+      if (this.editor.getSelections().length <= 1 && range[0] && range[0].anchor) {
+        this.editor.replaceSelection(mdText, 'around');
+        pasteHelper.showSwitchBtnAfterPasteHtml(this.$cherry.locale, this.editor, htmlText, mdText);
       } else {
-        codemirrorDoc.replaceSelection(mdText);
+        this.editor.replaceSelection(mdText, 'around');
       }
-      event.preventDefault();
+      event && event.preventDefault();
     }
     divObj = null;
   }
@@ -505,7 +563,7 @@ export default class Editor {
     });
 
     editor.on('paste', (codemirror, evt) => {
-      this.options.onPaste.call(this, evt, codemirror);
+      this.options.onPaste.call(this, evt);
     });
 
     if (this.options.autoScrollByCursor) {
@@ -537,7 +595,7 @@ export default class Editor {
               const mdStr = handleFileUploadCallback(url, params, file);
               // 当批量上传文件时，每个被插入的文件中间需要加个换行，但单个上传文件的时候不需要加换行
               const insertValue = i > 0 ? `\n${mdStr} ` : `${mdStr} `;
-              codemirror.replaceSelection(insertValue);
+              codemirror.replaceSelection(insertValue, 'end');
               this.dealSpecialWords();
             });
           }

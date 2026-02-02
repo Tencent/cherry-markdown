@@ -259,6 +259,8 @@ export function getDetailRule() {
   return ret;
 }
 
+export const pasteWrapperReg = /{{(cherry-paste-[^|\n]+?)\|<<([^>]+?)>>}}/g;
+
 // 匹配图片URL里的base64，[name](data:image/png;base64,xxx) 和 ![alt](data:image/png;base64,xxx) 这两种形式的都处理
 export const imgBase64Reg = /(\[[^\n]*?\]\(data:image\/[a-z]{1,10};base64,)([^)]+)\)/g;
 
