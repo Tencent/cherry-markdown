@@ -67,8 +67,8 @@ const options = {
       }
 
       // 对特定第三方库保持保守，避免错误 tree-shake
-      // crypto-js、mermaid、echarts 等库在 tree-shake 时会出问题
-      if (id.includes('crypto-js') || id.includes('mermaid') || id.includes('echarts')) {
+      // crypto-js、mermaid、echarts、codemirror 等库在 tree-shake 时会出问题
+      if (id.includes('crypto-js') || id.includes('mermaid') || id.includes('echarts') || id.includes('codemirror')) {
         return true;
       }
       // prismjs 及其组件有副作用（将语言注册到 Prism.languages）
