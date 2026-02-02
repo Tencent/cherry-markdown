@@ -135,7 +135,7 @@ const basePlugins = [
     ignoreDynamicRequires: true,
   }),
   baseConfig.plugins.find((p) => p.name === 'babel'),
-  // Stream 构建不使用 dist-types 插件，避免生成不准确的类型声明
+  baseConfig.plugins.find((p) => p.name === 'dist-types'), // 添加 dist-types 插件以生成类型声明
 ].filter(Boolean);
 
 const umdPlugins = [...basePlugins, terserPlugin()];
@@ -145,7 +145,7 @@ const umdOutputConfig = {
   exports: 'named',
   file: 'dist/cherry-markdown.stream.js',
   format: 'umd',
-  name: 'Cherry',
+  name: 'CherryStream',
   sourcemap: true,
   compact: true,
   inlineDynamicImports: true,
@@ -162,6 +162,7 @@ const esmOutputConfig = {
   exports: 'named',
   file: 'dist/cherry-markdown.stream.esm.js',
   format: 'esm',
+  name: 'CherryStream',
   sourcemap: true,
   compact: true,
   interop: 'auto',

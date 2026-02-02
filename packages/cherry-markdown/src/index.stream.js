@@ -13,22 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Import Prism first to ensure it's initialized before importing language components
-import Prism from 'prismjs';
-// Import Prism language components AFTER importing Prism
-// 这些模块会自动注册语言到 Prism.languages
-import 'prismjs/components/prism-core';
-import 'prismjs/components/prism-clike';
-import 'prismjs/components/prism-markup';
-import 'prismjs/components/prism-javascript';
-import 'prismjs/components/prism-css';
 
 import CherryStream from './CherryStream';
-
-// in browser
-if (typeof window !== 'undefined') {
-  // @ts-ignore
-  window.Cherry = CherryStream;
-}
 
 export default CherryStream;
