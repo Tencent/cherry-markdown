@@ -67,12 +67,28 @@ const options = {
       }
 
       // 对特定第三方库保持保守，避免错误 tree-shake
-      // crypto-js、mermaid、echarts、codemirror 等库在 tree-shake 时会出问题
-      if (id.includes('crypto-js') || id.includes('mermaid') || id.includes('echarts') || id.includes('codemirror')) {
+      // 这些库在 tree-shake 时经常出问题，包括：
+      // - crypto-js: 加密库，有复杂的依赖关系
+      // - mermaid: 图表库，动态注册机制
+      // - echarts: 图表库，大量动态属性访问
+      // - codemirror: 编辑器库，插件系统和动态调用
+      // - prismjs: 代码高亮库，语言注册机制
+      // - lodash: 工具库，部分函数有副作用
+      // - htmlparser2/dompurify: HTML解析库，可能有内部状态
+      if (id.includes('crypto-js') ||
+          id.includes('mermaid') ||
+          id.includes('echarts') ||
+          id.includes('codemirror') ||
+          id.includes('prismjs') ||
+          id.includes('lodash') ||
+          id.includes('htmlparser2') ||
+          id.includes('dompurify') ||
+          id.includes('jsdom')) {
         return true;
       }
-      // prismjs 及其组件有副作用（将语言注册到 Prism.languages）
-      if (id.includes('prismjs')) {
+
+      // src/libs 目录中的第三方库（mermaidAPI、rawdeflate 等）
+      if (id.includes('/src/libs/')) {
         return true;
       }
 
@@ -81,6 +97,10 @@ const options = {
     },
     // 禁用属性读取副作用检查，确保 Prism.languages 赋值不被优化掉
     propertyReadSideEffects: true,
+    // 保守的策略：禁用 tryCatchDeoptimization，避免复杂的错误处理逻辑被优化
+    tryCatchDeoptimization: false,
+    // 保留更多未使用的导出，以提高兼容性
+    unknownGlobalSideEffects: false,
   },
   plugins: [
     // Only run ESLint in builds that explicitly enable it. Default: disabled to avoid
