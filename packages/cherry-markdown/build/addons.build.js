@@ -21,9 +21,16 @@ glob(
   {
     cwd: PROJECT_ROOT_PATH,
   },
-  async (error, matches) => {
-    if (error) throw error;
-    await buildAddonsParallel(matches);
+  (error, matches) => {
+    if (error) {
+      console.error('[addons build] glob failed:', error);
+      process.exitCode = 1;
+      return;
+    }
+    buildAddonsParallel(matches).catch((buildError) => {
+      console.error('[addons build] Failed to build addons:', buildError);
+      process.exitCode = 1;
+    });
   },
 );
 

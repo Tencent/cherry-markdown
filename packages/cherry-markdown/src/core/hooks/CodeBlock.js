@@ -25,6 +25,10 @@ import 'prismjs/components/prism-markup';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/components/prism-css';
 
+// 禁用 Prism 的自动高亮模式，避免与手动 Prism.highlight() 重复执行
+// 这样可以避免性能问题和双重高亮
+Prism.manual = true;
+
 import { escapeHTMLSpecialChar } from '@/utils/sanitize';
 import { getTableRule, getCodeBlockRule } from '@/utils/regexp';
 import { prependLineFeedForParagraph } from '@/utils/lineFeed';

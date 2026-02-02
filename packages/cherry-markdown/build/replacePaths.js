@@ -3,18 +3,19 @@ const { replaceInFile } = pkg;
 
 async function replacePaths() {
   try {
-    const results = await Promise.all([
-      replaceInFile({
-        files: 'dist/types/**/*.d.ts',
-        from: /~types\//g,
-        to: '../../types/',
-      }),
-      replaceInFile({
-        files: 'dist/types/**/*.d.ts',
-        from: /@\/addons\//g,
-        to: './addons/',
-      }),
-    ]);
+    const results = [];
+    const firstResults = await replaceInFile({
+      files: 'dist/types/**/*.d.ts',
+      from: /~types\//g,
+      to: '../../types/',
+    });
+    results.push(...firstResults);
+    const secondResults = await replaceInFile({
+      files: 'dist/types/**/*.d.ts',
+      from: /@\/addons\//g,
+      to: './addons/',
+    });
+    results.push(...secondResults);
     for (const result of results) {
       if (result.hasChanged) {
         console.log(result);

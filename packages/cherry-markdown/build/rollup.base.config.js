@@ -62,7 +62,7 @@ const options = {
 
       // 源代码模块默认有副作用，避免错误 tree-shake
       // 源代码不在 node_modules 中
-      if (!id.includes('node_modules')) {
+      if (!/node_modules[\\/]/.test(id)) {
         return true;
       }
 
@@ -235,3 +235,29 @@ const options = {
 };
 
 export default options;
+
+/**
+ * 从 baseConfig 中提取基础插件
+ * @param {string} name - 插件名称
+ * @returns {object} 插件实例
+ * @throws {Error} 如果插件未找到
+ */
+export function getBasePlugin(name) {
+  const plugin = options.plugins.find((p) => p.name === name);
+  if (!plugin) {
+    throw new Error(
+      `Required Rollup plugin '${name}' not found in baseConfig.plugins. Please check the plugin configuration in rollup.base.config.js`
+    );
+  }
+  return plugin;
+}
+
+/**
+ * 获取常用的基础插件集合
+ * @returns {Array} 基础插件数组
+ */
+export function getBasePlugins() {
+  const pluginNames = ['json', 'replace', 'alias', 'node-resolve', 'commonjs', 'babel', 'dist-types'];
+  return pluginNames.map((name) => getBasePlugin(name)).filter(Boolean);
+}
+

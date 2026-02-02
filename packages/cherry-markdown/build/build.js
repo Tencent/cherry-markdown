@@ -13,19 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import baseConfig from './rollup.base.config.js';
+import baseConfig, { getBasePlugins } from './rollup.base.config.js';
 import { terserUMD, terserESM } from './terser.config.js';
 
-// 明确列出需要的插件，避免使用扩展运算符，保持正确的插件顺序
-const basePlugins = [
-  baseConfig.plugins.find((p) => p.name === 'json'),
-  baseConfig.plugins.find((p) => p.name === 'replace'),
-  baseConfig.plugins.find((p) => p.name === 'alias'),
-  baseConfig.plugins.find((p) => p.name === 'resolve'),
-  baseConfig.plugins.find((p) => p.name === 'commonjs'),
-  baseConfig.plugins.find((p) => p.name === 'babel'),
-  baseConfig.plugins.find((p) => p.name === 'dist-types'),
-].filter(Boolean);
+// 使用统一的插件提取函数
+const basePlugins = getBasePlugins();
 
 const umdPlugins = [...basePlugins, terserUMD];
 const esmPlugins = [...basePlugins, terserESM];
