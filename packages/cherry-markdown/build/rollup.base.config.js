@@ -61,7 +61,7 @@ const options = {
       if (id.endsWith('.css')) return true;
 
       // 源代码模块默认有副作用，避免错误 tree-shake
-      // 源代码不在 node_modules 中
+      // 注意：package.json 的 sideEffects 字段也会被考虑
       if (!/node_modules[\\/]/.test(id)) {
         return true;
       }
@@ -132,9 +132,6 @@ const options = {
 
       // 默认导出模式
       defaultIsModuleExports: 'auto',
-
-      // 要求语义
-      requireReturnsDefault: 'auto',
     }),
     babel({
       // use inline config to avoid Babel attempting to load an ESM config file asynchronously

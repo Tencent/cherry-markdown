@@ -28,7 +28,11 @@
     "types"
   ],
   "sideEffects": [
-    "./dist/*.css"
+    "./dist/*.css",
+    "./src/CherryStatic.js",
+    "./src/Factory.js",
+    "./src/Cherry.js",
+    "./src/addons/**/*"
   ],
   "scripts": {
     "iconfont": "gulp",

@@ -64,8 +64,6 @@ const esmConfig = {
     interop: 'auto',
     // ESM 格式支持代码分割，可以禁用 inlineDynamicImports
     inlineDynamicImports: false,
-    // 保留导出符号的完整性，确保静态属性不被优化掉
-    preserveEntrySignatures: 'strict',
     // 性能优化：自动代码分割
     manualChunks(id) {
       // 将 node_modules 中的依赖分离到 vendor chunk
