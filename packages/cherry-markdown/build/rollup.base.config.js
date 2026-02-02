@@ -75,15 +75,17 @@ const options = {
       // - prismjs: 代码高亮库，语言注册机制
       // - lodash: 工具库，部分函数有副作用
       // - htmlparser2/dompurify: HTML解析库，可能有内部状态
-      if (id.includes('crypto-js') ||
-          id.includes('mermaid') ||
-          id.includes('echarts') ||
-          id.includes('codemirror') ||
-          id.includes('prismjs') ||
-          id.includes('lodash') ||
-          id.includes('htmlparser2') ||
-          id.includes('dompurify') ||
-          id.includes('jsdom')) {
+      if (
+        id.includes('crypto-js') ||
+        id.includes('mermaid') ||
+        id.includes('echarts') ||
+        id.includes('codemirror') ||
+        id.includes('prismjs') ||
+        id.includes('lodash') ||
+        id.includes('htmlparser2') ||
+        id.includes('dompurify') ||
+        id.includes('jsdom')
+      ) {
         return true;
       }
 
@@ -263,7 +265,7 @@ export function getBasePlugin(name) {
   const plugin = options.plugins.find((p) => p.name === name);
   if (!plugin) {
     throw new Error(
-      `Required Rollup plugin '${name}' not found in baseConfig.plugins. Please check the plugin configuration in rollup.base.config.js`
+      `Required Rollup plugin '${name}' not found in baseConfig.plugins. Please check the plugin configuration in rollup.base.config.js`,
     );
   }
   return plugin;
@@ -277,4 +279,3 @@ export function getBasePlugins() {
   const pluginNames = ['json', 'replace', 'alias', 'node-resolve', 'commonjs', 'babel', 'dist-types'];
   return pluginNames.map((name) => getBasePlugin(name)).filter(Boolean);
 }
-
