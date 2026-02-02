@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 import ParagraphBase from '@/core/ParagraphBase';
-// Import Prism first to ensure it's initialized before importing language components
+// 先导入 Prism 核心（必须在注册语言之前导入）
 import Prism from 'prismjs';
-// Import Prism language components AFTER importing Prism
-// 这些模块会自动注册语言到 Prism.languages
+// 导入 Prism 语言组件
+// 注意：这些模块有副作用 - 它们会将语言注册到 Prism.languages 中
+// 必须单独导入，因为 Prism 核心包不包含任何语言定义
 import 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-markup';
@@ -280,21 +281,8 @@ export default class CodeBlock extends ParagraphBase {
     } else {
       // 默认使用prism渲染代码块
       if (!lang || !Prism.languages[lang]) lang = 'javascript'; // 如果没有写语言，默认用js样式渲染
-
-      // 确保语言组件已加载
-      if (!Prism.languages[lang]) {
-        console.warn(`Prism language "${lang}" is not available. Available languages:`, Object.keys(Prism.languages));
-        // 尝试使用 javascript 作为备用
-        lang = 'javascript';
-      }
-
-      // 再次检查，如果 javascript 也不存在，则使用纯文本
-      if (!Prism.languages[lang]) {
-        cacheCode = cacheCode;
-      } else {
-        cacheCode = Prism.highlight(cacheCode, Prism.languages[lang], lang);
-        cacheCode = this.renderLineNumber(cacheCode);
-      }
+      cacheCode = Prism.highlight(cacheCode, Prism.languages[lang], lang);
+      cacheCode = this.renderLineNumber(cacheCode);
     }
     const needUnExpand = this.expandCode && $code.match(/\n/g)?.length > 10; // 是否需要收起代码块
     const codeHtml = `<pre class="language-${lang}">${this.wrapCode(cacheCode, lang)}</pre>`;

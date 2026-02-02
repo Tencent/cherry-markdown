@@ -22,12 +22,10 @@
 import escapeRegExp from 'lodash/escapeRegExp';
 import SyntaxBase from '@/core/SyntaxBase';
 import { allSuggestList, suggesterKeywords } from '@/core/hooks/SuggestList';
+import { Pass } from 'codemirror/src/util/misc';
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import { isBrowser } from '@/utils/env';
-
-// 导入 CodeMirror Pass（仅在完整版本中使用）
-import { Pass } from 'codemirror/src/util/misc';
 
 /**
  * @typedef {import('codemirror')} CodeMirror
