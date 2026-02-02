@@ -1,3 +1,5 @@
+import Cherry from '../../packages/cherry-markdown/dist/cherry-markdown.stream.esm.js';
+
 // 插件配置
 const pluginConfig = {
   mermaid: {
