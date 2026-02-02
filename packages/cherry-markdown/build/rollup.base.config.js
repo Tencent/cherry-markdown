@@ -49,27 +49,34 @@ const options = {
   },
   // 性能优化：启用缓存加速二次构建
   cache: true,
-  
+
   // 并行处理优化
   maxParallelFileOps: 20,
-  
+
   // Tree-shake 配置 - 平衡优化和兼容性
   treeshake: {
-    // 只标记明确的副作用模块
+    // 标记模块副作用
     moduleSideEffects: (id) => {
       // CSS 文件有副作用
       if (id.endsWith('.css')) return true;
-      // 对第三方库保持保守，避免错误 tree-shake
-      if (id.includes('node_modules/')) {
-        // crypto-js、mermaid、echarts 等库在 tree-shake 时会出问题
-        if (id.includes('crypto-js') || id.includes('mermaid') || id.includes('echarts')) {
-          return true;
-        }
-        // prismjs 及其组件有副作用（将语言注册到 Prism.languages）
-        if (id.includes('prismjs')) {
-          return true;
-        }
+
+      // 源代码模块默认有副作用，避免错误 tree-shake
+      // 源代码不在 node_modules 中
+      if (!id.includes('node_modules')) {
+        return true;
       }
+
+      // 对特定第三方库保持保守，避免错误 tree-shake
+      // crypto-js、mermaid、echarts 等库在 tree-shake 时会出问题
+      if (id.includes('crypto-js') || id.includes('mermaid') || id.includes('echarts')) {
+        return true;
+      }
+      // prismjs 及其组件有副作用（将语言注册到 Prism.languages）
+      if (id.includes('prismjs')) {
+        return true;
+      }
+
+      // 其他 node_modules 可以安全地 tree-shake
       return false;
     },
     // 禁用属性读取副作用检查，确保 Prism.languages 赋值不被优化掉
@@ -119,13 +126,13 @@ const options = {
 
       // 优化：忽略动态 require
       ignoreDynamicRequires: true,
-      
+
       // 性能优化：严格模式检查
       strictRequires: 'auto',
-      
+
       // 默认导出模式
       defaultIsModuleExports: 'auto',
-      
+
       // 要求语义
       requireReturnsDefault: 'auto',
     }),
