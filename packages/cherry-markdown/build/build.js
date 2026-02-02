@@ -35,9 +35,8 @@ const umdConfig = {
     name: 'Cherry',
     sourcemap: true,
     compact: true,
-    // 禁用 inlineDynamicImports 以避免类定义外的代码被 tree shaking 优化掉
-    // 这对于静态属性（如 Cherry.constants）的保留是必要的
-    inlineDynamicImports: false,
+    // UMD 格式不支持代码分割，必须内联所有动态导入
+    inlineDynamicImports: true,
   },
   plugins: umdPlugins,
   cache: true, // 启用缓存加速重新构建
@@ -63,13 +62,14 @@ const esmConfig = {
     sourcemap: true,
     compact: true,
     interop: 'auto',
+    // ESM 格式支持代码分割，可以禁用 inlineDynamicImports
     inlineDynamicImports: false,
     // 保留导出符号的完整性，确保静态属性不被优化掉
     preserveEntrySignatures: 'strict',
     // 性能优化：自动代码分割
     manualChunks(id) {
       // 将 node_modules 中的依赖分离到 vendor chunk
-      if (id.includes('node_modules')) {
+      if (/node_modules[\\/]/.test(id)) {
         // 大型库单独分割
         if (id.includes('codemirror')) return 'vendor-codemirror';
         if (id.includes('mermaid')) return 'vendor-mermaid';
