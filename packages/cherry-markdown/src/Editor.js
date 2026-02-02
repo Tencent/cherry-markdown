@@ -116,11 +116,15 @@ export default class Editor {
     this.animation = {};
     this.selectAll = false;
     const { codemirror, ...restOptions } = options;
+    // 合并配置选项
+    Object.assign(this.options, restOptions);
     if (codemirror) {
       Object.assign(this.options.codemirror, codemirror);
     }
-    Object.assign(this.options, restOptions);
-    this.options.codemirror.keyMap = this.options.keyMap;
+    // 确保 codemirror.keyMap 存在，默认使用顶层的 keyMap
+    if (this.options.codemirror.keyMap === undefined || this.options.codemirror.keyMap === null) {
+      this.options.codemirror.keyMap = this.options.keyMap;
+    }
     this.$cherry = this.options.$cherry;
     this.instanceId = this.$cherry.getInstanceId();
   }
