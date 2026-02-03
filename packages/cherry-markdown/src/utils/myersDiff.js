@@ -19,7 +19,7 @@
  * 参考文献: http://www.xmailserver.org/diff2.pdf
  */
 
-import Logger from '@/Logger';
+// import Logger from '@/Logger';
 
 export default class MyersDiff {
   constructor(newObj, oldObj, getElement) {

@@ -39,7 +39,7 @@ import { addEvent } from './utils/event';
 import Logger from '@/Logger';
 import { handleFileUploadCallback } from '@/utils/file';
 import { createElement } from './utils/dom';
-import { longTextReg, base64Reg, imgDrawioXmlReg, createUrlReg, pasteWrapperReg } from './utils/regexp';
+import { base64Reg, imgDrawioXmlReg, createUrlReg, pasteWrapperReg } from './utils/regexp';
 import { handleNewlineIndentList } from './utils/autoindent';
 
 /**
