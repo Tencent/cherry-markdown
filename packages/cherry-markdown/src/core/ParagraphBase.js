@@ -38,6 +38,35 @@ export default class ParagraphBase extends SyntaxBase {
       cacheCounter += 1;
     }
     this.failedResetCacheTimes = 0;
+    this.cacheData = {};
+    this.cacheDataMap = [];
+  }
+
+  /**
+   * 缓存数据，并返回缓存数据，当缓存大于maxKeys时，会删除removeKeys个缓存
+   * @param {string} key 缓存的key
+   * @param {function} getValueByKey 用于获取缓存数据的回调函数
+   * @param {number} maxKeys 最大缓存数
+   * @param {number} removeKeys 每次删除的缓存数
+   * @returns {any}
+   */
+  cacheAndGetData(key, getValueByKey, maxKeys, removeKeys) {
+    if (!this.cacheData[key]) {
+      /**
+       * 缓存太多时，清空最近插入的一些缓存
+       *  - 为什么是“最近的”，主要考虑流式输出场景
+       */
+      if (this.cacheDataMap.length > maxKeys) {
+        const removed = this.cacheDataMap.splice(removeKeys);
+        removed.forEach((item) => {
+          delete this.cacheData[item];
+        });
+      }
+      // 调用行内语法，获得段落的签名和对应html内容
+      this.cacheData[key] = getValueByKey(key);
+      this.cacheDataMap.push(key);
+    }
+    return this.cacheData[key];
   }
 
   initBrReg(classicBr = false) {

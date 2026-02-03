@@ -301,7 +301,13 @@ export default class Engine {
             canContinue = false;
           }
         }
-        return oneHook[action](newMd, actionArgs, this.markdownParams);
+        // const time = Date.now();
+        const ret = oneHook[action](newMd, actionArgs, this.markdownParams);
+        // const cost = Date.now() - time;
+        // if (cost > 50) {
+        //   console.log(`hook ${oneHook.getName()} ${action} cost ${Date.now() - time}ms`);
+        // }
+        return ret;
       }, $md);
     } catch (e) {
       throw new NestedError(e);
@@ -316,13 +322,17 @@ export default class Engine {
     return this.hash(str);
   }
 
+  sha256(str) {
+    return CryptoJS.SHA256(str).toString();
+  }
+
   /**
    * 计算哈希值
    * @param {String} str 被计算的字符串
    * @returns {String} 哈希值
    */
   hash(str) {
-    // 当缓存队列比较大时，随机抛弃500个缓存
+    // 当缓存队列比较大时，随机抛弃一些缓存
     if (this.hashStrMap.size > 2000) {
       const keys = Array.from(this.hashStrMap.keys()).slice(0, 200);
       keys.forEach((key) => this.hashStrMap.delete(key));
@@ -366,11 +376,18 @@ export default class Engine {
       this.cachedBigData[cacheKey] = m2;
       return `${m1}${cacheKey}}`;
     });
-    $md = $md.replace(longTextReg, (whole, m1, m2) => {
-      const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
-      this.cachedBigData[cacheKey] = m2;
-      return `${m1}${cacheKey}}`;
-    });
+
+    const tmpArr = $md.split(/\n/);
+    for (let i = 0; i < tmpArr.length; i++) {
+      if (tmpArr[i].length > 6000) {
+        tmpArr[i] = tmpArr[i].replace(longTextReg, (whole) => {
+          const cacheKey = `bigDataBegin${this.hash(whole)}bigDataEnd`;
+          this.cachedBigData[cacheKey] = whole;
+          return cacheKey;
+        });
+      }
+    }
+    $md = tmpArr.join('\n');
     $md = $md.replace(pasteWrapperReg, '');
     return $md;
   }
