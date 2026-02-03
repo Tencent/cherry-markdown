@@ -1123,10 +1123,10 @@ const ScatterChartOptionsHandler = {
       }));
     } else {
       // 回退到旧的智能推断逻辑
-      Logger.warn(
-        'DEPRECATION WARNING: The scatter chart syntax relying on header keywords is outdated and will be removed in a future version. Please use the "cherry:mapping" option for explicit mapping.\n' +
-          `e.g., Change '{group,name,x,y,size}' to '{ "cherry:mapping": { "x": "X", "y": "Y", "size": "Size", "group": "Group" } }'`,
-      );
+      // Logger.warn(
+      //   'DEPRECATION WARNING: The scatter chart syntax relying on header keywords is outdated and will be removed in a future version. Please use the "cherry:mapping" option for explicit mapping.\n' +
+      //     `e.g., Change '{group,name,x,y,size}' to '{ "cherry:mapping": { "x": "X", "y": "Y", "size": "Size", "group": "Group" } }'`,
+      // );
 
       const headers = tableObject.header;
       const findHeader = (candidates) =>

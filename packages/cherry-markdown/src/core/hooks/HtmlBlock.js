@@ -45,8 +45,6 @@ export default class HtmlBlock extends ParagraphBase {
     super({ needCache: true });
     this.filterStyle = config.filterStyle || false;
     this.removeTrailingNewline = config.removeTrailingNewline || false;
-    this.cacheData = {};
-    this.cacheDataMap = [];
   }
 
   // ref: http://www.vfmd.org/vfmd-spec/specification/#procedure-for-detecting-automatic-links
@@ -229,21 +227,9 @@ export default class HtmlBlock extends ParagraphBase {
       const ret = [];
       for (let i = 0; i < $strArr.length; i += batch) {
         const batchStr = $strArr.slice(i, i + batch).join('\n');
-        if (!this.cacheData[batchStr]) {
-          /**
-           * 缓存太多时，清空最近插入的一些缓存
-           *  - 为什么是“最近的”，主要考虑流式输出场景
-           */
-          if (this.cacheDataMap.length > maxCacheLength) {
-            const removed = this.cacheDataMap.splice(0, 10);
-            removed.forEach((key) => {
-              delete this.cacheData[key];
-            });
-          }
-          this.cacheData[batchStr] = sanitizer.sanitize(batchStr, config);
-          this.cacheDataMap.push(batchStr);
-        }
-        ret.push(this.cacheData[batchStr]);
+        ret.push(
+          this.cacheAndGetData(batchStr, (batchStr) => sanitizer.sanitize(batchStr, config), maxCacheLength, -10),
+        );
       }
       return ret.join('\n');
     }

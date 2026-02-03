@@ -446,7 +446,7 @@ export default class Previewer {
     const domContainer = this.getDomContainer();
     onScroll = () => {
       if (this.applyingDomChanges) {
-        Logger.log(new Date(), 'sync scroll locked');
+        // Logger.log(new Date(), 'sync scroll locked');
         return;
       }
       if (this.disableScrollListener) {
@@ -707,7 +707,7 @@ export default class Previewer {
       if (newHtmlList.list.length && oldHtmlList.list.length) {
         const myersDiff = new MyersDiff(newHtmlList.list, oldHtmlList.list, (obj, index) => obj[index].sign);
         const res = myersDiff.doDiff();
-        Logger.log(res);
+        // Logger.log(res);
         this.$dealWithMyersDiffResult(res, oldHtmlList.list, newHtmlList.list, domContainer);
       } else if (newHtmlList.list.length && !oldHtmlList.list.length) {
         // 全新增

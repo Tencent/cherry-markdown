@@ -133,12 +133,12 @@ export default class MyersDiff {
    * 组装出返回值
    */
   assembleResult(snakes, newObj, oldObj) {
-    const grayColor = 'color: gray';
-    const redColor = 'color: red';
-    const greenColor = 'color: green';
-    const blueColor = 'color: blue';
-    let consoleStr = '';
-    const args = [];
+    // const grayColor = 'color: gray';
+    // const redColor = 'color: red';
+    // const greenColor = 'color: green';
+    // const blueColor = 'color: blue';
+    // let consoleStr = '';
+    // const args = [];
     let yOffset = 0;
     const result = []; // 返回的操作集
     let change = {}; // 本次操作
@@ -149,8 +149,8 @@ export default class MyersDiff {
 
       if (index === 0 && snake.xStart !== 0) {
         for (let j = 0; j < snake.xStart; j++) {
-          consoleStr += `%c${this.getElement(oldObj, j)}, `;
-          args.push(grayColor);
+          // consoleStr += `%c${this.getElement(oldObj, j)}, `;
+          // args.push(grayColor);
           yOffset += 1;
         }
       }
@@ -168,8 +168,8 @@ export default class MyersDiff {
         }
         result.push(change);
         lastChange = change;
-        consoleStr += `%c${this.getElement(oldObj, snake.xStart)}, `;
-        args.push(redColor);
+        // consoleStr += `%c${this.getElement(oldObj, snake.xStart)}, `;
+        // args.push(redColor);
         currentPos = snake.xMid;
       } else {
         // 添加
@@ -187,25 +187,25 @@ export default class MyersDiff {
             oldIndex: firstDeleteChange.oldIndex, // 合并时,更新目标定位连续删除块中的首个元素
             newIndex: yOffset,
           };
-          args.push(blueColor);
+          // args.push(blueColor);
         } else {
-          args.push(greenColor);
+          // args.push(greenColor);
         }
         firstDeleteChange = {};
         result.push(change);
         lastChange = change;
-        consoleStr += `%c${this.getElement(newObj, yOffset)}, `;
+        // consoleStr += `%c${this.getElement(newObj, yOffset)}, `;
         yOffset += 1;
       }
 
       // 不变
       for (let i = 0; i < snake.xEnd - currentPos; i++) {
-        consoleStr += `%c${this.getElement(oldObj, currentPos + i)}, `;
-        args.push(grayColor);
+        // consoleStr += `%c${this.getElement(oldObj, currentPos + i)}, `;
+        // args.push(grayColor);
         yOffset += 1;
       }
     });
-    Logger.log(consoleStr, ...args);
+    // Logger.log(consoleStr, ...args);
     return result;
   }
 }

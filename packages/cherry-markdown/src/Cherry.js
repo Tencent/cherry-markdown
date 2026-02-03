@@ -948,7 +948,9 @@ export default class Cherry extends CherryStatic {
         clearTimeout(this.timer);
         this.timer = null;
       }
-      const interval = this.options.engine.global.flowSessionContext ? 10 : 50;
+      let interval = this.options.engine.global.flowSessionContext ? 10 : 50;
+      // 每多100行，增加1ms的延迟
+      interval += this.editor.editor.lineCount() / 100;
       this.timer = setTimeout(() => {
         const markdownText = codemirror.getValue();
         if (markdownText !== this.lastMarkdownText) {
