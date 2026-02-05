@@ -34,6 +34,7 @@ export default class Toc {
     this.drawDom();
     this.timer = setTimeout(() => {
       this.updateTocList();
+      this.$switchModel(this.model);
     }, 300);
     this.editor.on('change', (codemirror, evt) => {
       clearTimeout(this.timer);
@@ -186,6 +187,21 @@ export default class Toc {
     return this.$getClosestNode(node.parentNode, targetNodeName);
   }
 
+  makeHtmlStringToNode(newHtml) {
+    let tmpDiv = null;
+    if (typeof window.DOMParser !== 'undefined') {
+      // 如果支持DOMParser，则使用DOMParser将html字符串转成对应的HtmlElement
+      // 使用DOMParser是为了防止newHtml里的图片等资源自动加载
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(newHtml, 'text/html');
+      tmpDiv = doc.querySelector('body');
+    } else {
+      tmpDiv = document.createElement('div');
+      tmpDiv.innerHTML = newHtml;
+    }
+    return tmpDiv ? tmpDiv.firstChild : null;
+  }
+
   updateTocList(onlyScroll = false) {
     if (onlyScroll === true) {
       // do nothing
@@ -200,7 +216,6 @@ export default class Toc {
       tocStr = this.$cherry.engine.hash(tocStr);
       if (this.tocStr !== tocStr) {
         this.tocStr = tocStr;
-        let tocHtml = '';
         let index = 0;
         tocList.map((item) => {
           const { id, level, text, isInBlockquote } = item;
@@ -209,16 +224,34 @@ export default class Toc {
           const isInBlockquoteIcon = isInBlockquote
             ? '<i class="cherry-toc-in-blockquote ch-icon ch-icon-blockquote"></i>'
             : '';
-          tocHtml += `<a class="cherry-toc-one-a cherry-toc-one-a__${level > 5 ? 5 : level}"
+          const tmpA = `<a class="cherry-toc-one-a cherry-toc-one-a__${level > 5 ? 5 : level}"
             title="${title}"
             data-index="${index}"
             data-id="#${id}"
             data-in-blockquote="${isInBlockquoteIcon ? 'true' : 'false'}"
             >${isInBlockquoteIcon} ${$text}</a>`;
+          const tmpANode = this.makeHtmlStringToNode(tmpA);
+          if (!tmpANode) {
+            return item;
+          }
+          if (this.tocListDom.children[index]) {
+            const targetNode = this.tocListDom.children[index];
+            // @ts-ignore
+            tmpANode.setAttribute('style', targetNode.getAttribute('style'));
+            if (targetNode.classList.contains('current')) {
+              // @ts-ignore
+              tmpANode.classList.add('current');
+            }
+            // 如果两个节点相同，则什么也不做
+            if (!targetNode.isEqualNode(tmpANode)) {
+              targetNode.replaceWith(tmpANode);
+            }
+          } else {
+            this.tocListDom.appendChild(tmpANode);
+          }
           index += 1;
           return item;
         });
-        this.tocListDom.innerHTML = tocHtml;
       }
     }
     // 处理当前标题的高亮
