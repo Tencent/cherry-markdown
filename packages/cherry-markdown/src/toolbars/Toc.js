@@ -253,8 +253,9 @@ export default class Toc {
           return item;
         });
         // 删除多余的节点
-        for (let i = index; i < this.tocListDom.children.length; i++) {
-          this.tocListDom.children[i].remove();
+        const maxLength = this.tocListDom.children.length;
+        for (let i = index; i < maxLength; i++) {
+          this.tocListDom.children[index]?.remove();
         }
       }
     }
