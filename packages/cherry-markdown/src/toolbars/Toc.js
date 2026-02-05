@@ -252,6 +252,10 @@ export default class Toc {
           index += 1;
           return item;
         });
+        // 删除多余的节点
+        for (let i = index; i < this.tocListDom.children.length; i++) {
+          this.tocListDom.children[i].remove();
+        }
       }
     }
     // 处理当前标题的高亮
