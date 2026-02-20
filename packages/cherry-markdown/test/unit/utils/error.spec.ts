@@ -185,7 +185,7 @@ describe('error.js', () => {
 
     it('可以被 try-catch 捕获', () => {
       const cause = new Error('cause');
-      
+
       expect(() => {
         throw new NestedError('thrown error', cause);
       }).toThrow(NestedError);

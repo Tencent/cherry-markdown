@@ -6,7 +6,7 @@
  *
  * @vitest-environment jsdom
  */
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 // ============================================================================
 // 编辑器适配器接口定义
@@ -117,13 +117,13 @@ export function createMockEditorAdapter(initialValue = ''): IEditorAdapter {
       const startCh = sel.anchor.line < sel.head.line ? sel.anchor.ch : sel.head.ch;
       const endCh = sel.anchor.line > sel.head.line ? sel.anchor.ch : sel.head.ch;
 
-      for (let i = startLine; i <= endLine; i++) {
+      for (let i = startLine; i <= endLine; i += 1) {
         if (i === startLine) {
           result += lines[i].substring(startCh);
         } else if (i === endLine) {
-          result += '\n' + lines[i].substring(0, endCh);
+          result += `\n${lines[i].substring(0, endCh)}`;
         } else {
-          result += '\n' + lines[i];
+          result += `\n${lines[i]}`;
         }
       }
       return result;
@@ -219,10 +219,10 @@ export function createMockEditorAdapter(initialValue = ''): IEditorAdapter {
       let end = pos.ch;
 
       while (start > 0 && /\w/.test(line[start - 1])) {
-        start--;
+        start -= 1;
       }
       while (end < line.length && /\w/.test(line[end])) {
-        end++;
+        end += 1;
       }
 
       return {

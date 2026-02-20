@@ -13,11 +13,6 @@ describe('Undo 撤销功能', () => {
 
   beforeEach(() => {
     cmMock = createCodeMirrorMock();
-    // 添加 undo/redo 方法
-    cmMock.undo = vi.fn();
-    cmMock.redo = vi.fn();
-    cmMock.historySize = vi.fn();
-    cmMock.clearHistory = vi.fn();
   });
 
   afterEach(() => {
@@ -67,9 +62,6 @@ describe('Redo 重做功能', () => {
 
   beforeEach(() => {
     cmMock = createCodeMirrorMock();
-    cmMock.undo = vi.fn();
-    cmMock.redo = vi.fn();
-    cmMock.historySize = vi.fn();
   });
 
   afterEach(() => {
@@ -153,13 +145,14 @@ describe('Toc 目录导航功能', () => {
   describe('getSearchCursor - 标题搜索', () => {
     it('应该使用 getSearchCursor 查找标题', () => {
       // 模拟标题正则匹配
-      const headingRegex = /(?:^|\n)\n*((?:[ \t\u00a0]*#{1,6}).+?|(?:[ \t\u00a0]*.+)\n(?:[ \t\u00a0]*[=]+|[-]+))(?=$|\n)/g;
+      const headingRegex =
+        /(?:^|\n)\n*((?:[ \t\u00a0]*#{1,6}).+?|(?:[ \t\u00a0]*.+)\n(?:[ \t\u00a0]*[=]+|[-]+))(?=$|\n)/g;
       const mockSearchCursor = {
         findNext: vi.fn().mockReturnValue(true),
         from: vi.fn().mockReturnValue({ line: 5, ch: 0 }),
         to: vi.fn().mockReturnValue({ line: 5, ch: 10 }),
       };
-      cmMock.getSearchCursor.mockReturnValue(mockSearchCursor);
+      cmMock.getSearchCursor.mockReturnValue(mockSearchCursor as ReturnType<typeof cmMock.getSearchCursor>);
 
       const cursor = cmMock.getSearchCursor(headingRegex);
       expect(cursor).toBeDefined();
@@ -168,20 +161,21 @@ describe('Toc 目录导航功能', () => {
 
     it('应该遍历所有标题', () => {
       const mockSearchCursor = {
-        findNext: vi.fn()
-          .mockReturnValueOnce(true)  // 第一个标题
-          .mockReturnValueOnce(true)  // 第二个标题
-          .mockReturnValueOnce(true)  // 第三个标题
+        findNext: vi
+          .fn()
+          .mockReturnValueOnce(true) // 第一个标题
+          .mockReturnValueOnce(true) // 第二个标题
+          .mockReturnValueOnce(true) // 第三个标题
           .mockReturnValueOnce(false), // 没有更多
         from: vi.fn().mockReturnValue({ line: 0, ch: 0 }),
         to: vi.fn().mockReturnValue({ line: 0, ch: 10 }),
       };
-      cmMock.getSearchCursor.mockReturnValue(mockSearchCursor);
+      cmMock.getSearchCursor.mockReturnValue(mockSearchCursor as ReturnType<typeof cmMock.getSearchCursor>);
 
       const cursor = cmMock.getSearchCursor(/# .+/g);
       let count = 0;
       while (cursor.findNext()) {
-        count++;
+        count += 1;
       }
       expect(count).toBe(3);
     });
@@ -197,7 +191,7 @@ describe('Toc 目录导航功能', () => {
       const mockSearchCursor = {
         findNext: vi.fn().mockImplementation(() => {
           if (callIndex < positions.length) {
-            callIndex++;
+            callIndex += 1;
             return true;
           }
           return false;
@@ -207,7 +201,7 @@ describe('Toc 目录导航功能', () => {
           return positions[callIndex - 1];
         }),
       };
-      cmMock.getSearchCursor.mockReturnValue(mockSearchCursor);
+      cmMock.getSearchCursor.mockReturnValue(mockSearchCursor as ReturnType<typeof cmMock.getSearchCursor>);
 
       const cursor = cmMock.getSearchCursor(/# .+/g);
       const targetIndex = 1; // 找第二个标题 (index=1)
@@ -216,7 +210,7 @@ describe('Toc 目录导航功能', () => {
         cursor.findNext();
       }
       const target = cursor.from();
-      expect(target.line).toBe(10); // 第二个标题在 line 10
+      expect(target!.line).toBe(10); // 第二个标题在 line 10
     });
   });
 
@@ -273,7 +267,7 @@ describe('Toc 目录导航功能', () => {
         findNext: vi.fn().mockReturnValue(true),
         from: vi.fn().mockReturnValue({ line: 15, ch: 0 }),
       };
-      cmMock.getSearchCursor.mockReturnValue(mockSearchCursor);
+      cmMock.getSearchCursor.mockReturnValue(mockSearchCursor as ReturnType<typeof cmMock.getSearchCursor>);
 
       const cursor = cmMock.getSearchCursor(/# .+/g);
       for (let i = 0; i <= index; i++) {
@@ -282,7 +276,7 @@ describe('Toc 目录导航功能', () => {
       const target = cursor.from();
 
       // 验证定位调用
-      cmMock.scrollIntoView({ line: target.line, ch: 0 });
+      cmMock.scrollIntoView({ line: target!.line, ch: 0 });
       expect(cmMock.scrollIntoView).toHaveBeenCalledWith({ line: 15, ch: 0 });
     });
   });
@@ -405,9 +399,7 @@ describe('Toc 目录导航功能', () => {
 
     it('应该渲染引用块图标', () => {
       const isInBlockquote = true;
-      const icon = isInBlockquote
-        ? '<i class="cherry-toc-in-blockquote ch-icon ch-icon-blockquote"></i>'
-        : '';
+      const icon = isInBlockquote ? '<i class="cherry-toc-in-blockquote ch-icon ch-icon-blockquote"></i>' : '';
 
       expect(icon).toContain('cherry-toc-in-blockquote');
       expect(icon).toContain('ch-icon-blockquote');
@@ -436,9 +428,6 @@ describe('历史记录边界情况', () => {
 
   beforeEach(() => {
     cmMock = createCodeMirrorMock();
-    cmMock.undo = vi.fn();
-    cmMock.redo = vi.fn();
-    cmMock.historySize = vi.fn();
   });
 
   afterEach(() => {
@@ -481,15 +470,6 @@ describe('getDoc 文档对象', () => {
 
   describe('eachLine - 行遍历', () => {
     it('应该遍历指定范围的行', () => {
-      const mockDoc = {
-        eachLine: vi.fn((start: number, end: number, callback: (line: { height: number }) => void) => {
-          for (let i = start; i < end; i++) {
-            callback({ height: 20 });
-          }
-        }),
-      };
-      cmMock.getDoc.mockReturnValue(mockDoc);
-
       const doc = cmMock.getDoc();
       let totalHeight = 0;
       doc.eachLine(0, 5, (line: { height: number }) => {
@@ -514,7 +494,7 @@ describe('位置定位辅助功能', () => {
 
   describe('lineInfo - 行信息', () => {
     it('应该获取行的详细信息', () => {
-      cmMock.lineInfo = vi.fn().mockReturnValue({
+      cmMock.lineInfo.mockReturnValue({
         line: 5,
         handle: { height: 22, text: '# Heading' },
         text: '# Heading',
@@ -547,7 +527,7 @@ describe('位置定位辅助功能', () => {
 
   describe('heightAtLine - 行高度计算', () => {
     it('应该计算到指定行的累计高度', () => {
-      cmMock.heightAtLine = vi.fn().mockReturnValue(120);
+      cmMock.heightAtLine.mockReturnValue(120);
       const height = cmMock.heightAtLine(5, 'local');
       expect(height).toBe(120);
     });

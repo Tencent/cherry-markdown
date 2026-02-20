@@ -167,7 +167,7 @@ describe('utils/regexp', () => {
 
   describe('getTableRule', () => {
     it('返回 strict 和 loose 两种规则', () => {
-      const rules = getTableRule(false);
+      const rules = getTableRule(false) as unknown as { strict: { begin: string; content: string; end: string; reg: RegExp }; loose: { begin: string; content: string; end: string; reg: RegExp } };
       expect(rules).toHaveProperty('strict');
       expect(rules).toHaveProperty('loose');
       expect(rules.strict).toHaveProperty('reg');
@@ -180,7 +180,7 @@ describe('utils/regexp', () => {
     });
 
     it('strict 规则匹配标准表格', () => {
-      const rules = getTableRule(false);
+      const rules = getTableRule(false) as unknown as { strict: { reg: RegExp }; loose: { reg: RegExp } };
       const table = `
 | Header1 | Header2 |
 |---------|---------|
@@ -189,7 +189,7 @@ describe('utils/regexp', () => {
     });
 
     it('loose 规则匹配简化表格', () => {
-      const rules = getTableRule(false);
+      const rules = getTableRule(false) as unknown as { strict: { reg: RegExp }; loose: { reg: RegExp } };
       const table = `
 Header1 | Header2
 --------|--------

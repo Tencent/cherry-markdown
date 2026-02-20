@@ -144,10 +144,7 @@ describe('搜索替换功能 (cm-search-replace.js)', () => {
 
       // 验证 API 调用正确
       expect(cmMock.replaceSelection).toHaveBeenCalledWith('Hi');
-      expect(cmMock.setSelection).toHaveBeenCalledWith(
-        { line: 0, ch: 0 },
-        { line: 0, ch: 5 }
-      );
+      expect(cmMock.setSelection).toHaveBeenCalledWith({ line: 0, ch: 0 }, { line: 0, ch: 5 });
     });
 
     it('应该在搜索匹配后选中并替换', () => {
@@ -285,7 +282,9 @@ describe('搜索替换功能 (cm-search-replace.js)', () => {
       const mockStream = {
         pos: 0,
         string: 'Hello World',
-        skipToEnd: vi.fn(() => { mockStream.pos = mockStream.string.length; }),
+        skipToEnd: vi.fn(() => {
+          mockStream.pos = mockStream.string.length;
+        }),
       };
 
       const result = overlay.token(mockStream);
@@ -463,13 +462,9 @@ describe('搜索替换功能 (cm-search-replace.js)', () => {
 
       let query: RegExp;
       if (options.wholeWord) {
-        query = options.caseSensitive
-          ? new RegExp(`\\b${value}\\b`)
-          : new RegExp(`\\b${value}\\b`, 'i');
+        query = options.caseSensitive ? new RegExp(`\\b${value}\\b`) : new RegExp(`\\b${value}\\b`, 'i');
       } else {
-        query = options.caseSensitive
-          ? new RegExp(value)
-          : new RegExp(value, 'i');
+        query = options.caseSensitive ? new RegExp(value) : new RegExp(value, 'i');
       }
 
       expect(query.test('hello')).toBe(true);
@@ -546,10 +541,7 @@ describe('搜索替换功能 (cm-search-replace.js)', () => {
         cmMock.setSelection({ ch: 0, line: 0 }, { ch: 0, line: 0 });
       }
 
-      expect(cmMock.setSelection).toHaveBeenCalledWith(
-        { ch: 0, line: 0 },
-        { ch: 0, line: 0 }
-      );
+      expect(cmMock.setSelection).toHaveBeenCalledWith({ ch: 0, line: 0 }, { ch: 0, line: 0 });
     });
   });
 

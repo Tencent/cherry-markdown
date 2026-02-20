@@ -30,7 +30,7 @@ describe('dom.js', () => {
 
     it('空元素', () => {
       const div = document.createElement('div');
-      
+
       const shallow = getHTML(div, false);
       expect(shallow).toBe('<div></div>');
 
@@ -170,12 +170,12 @@ describe('dom.js', () => {
 
     it('创建 script 元素', async () => {
       const promise = loadScript('https://example.com/script.js', 'test-script-1');
-      
+
       // 模拟脚本加载完成
       const script = document.querySelector('script[src="https://example.com/script.js"]') as HTMLScriptElement;
       expect(script).toBeTruthy();
       expect(script.async).toBe(true);
-      
+
       // 触发 onload
       if (script.onload) {
         script.onload(new Event('load'));
@@ -199,12 +199,12 @@ describe('dom.js', () => {
 
     it('加载失败时 reject', async () => {
       const promise = loadScript('https://example.com/fail.js', 'test-script-fail');
-      
+
       const script = document.querySelector('script[src="https://example.com/fail.js"]') as HTMLScriptElement;
       if (script.onerror) {
         (script.onerror as any)(new Event('error'));
       }
-      
+
       await expect(promise).rejects.toBeDefined();
     });
   });

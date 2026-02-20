@@ -6,7 +6,7 @@
  *
  * @vitest-environment jsdom
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createCodeMirrorMock, createCherryMock } from '../../__mocks__/codemirror.mock';
 import { longTextReg, base64Reg, imgDrawioXmlReg, createUrlReg } from '../../../src/utils/regexp';
 
@@ -46,10 +46,8 @@ describe('Editor.js 核心方法', () => {
       cmMock = createCodeMirrorMock(drawioContent);
 
       const searcher = cmMock.getSearchCursor(imgDrawioXmlReg);
-      let hasMatch = false;
       let match = searcher.findNext();
       while (match) {
-        hasMatch = true;
         match = searcher.findNext();
       }
 
@@ -72,8 +70,8 @@ describe('Editor.js 核心方法', () => {
       const maxUrlLength = 50;
       const [protocolUrlPattern, wwwUrlPattern] = createUrlReg(maxUrlLength);
 
-      // 超长 URL
-      const longUrl = `https://example.com/${'path/'.repeat(20)}`;
+      // 超长 URL - 验证正则可以被创建
+      const _longUrl = `https://example.com/${'path/'.repeat(20)}`;
 
       // 验证 URL 正则模式
       expect(protocolUrlPattern).toBeInstanceOf(RegExp);
@@ -140,7 +138,7 @@ describe('Editor.js 核心方法', () => {
 
       let count = 0;
       while (searcher.findNext()) {
-        count++;
+        count += 1;
       }
 
       // 文本中包含 ：【】 三个全角符号
@@ -167,9 +165,13 @@ describe('Editor.js 核心方法', () => {
       cmMock = createCodeMirrorMock(testContent);
 
       // 创建一个标记
-      const mark = cmMock.markText({ line: 0, ch: 0 }, { line: 0, ch: 6 }, {
-        className: 'cm-fullWidth',
-      });
+      const mark = cmMock.markText(
+        { line: 0, ch: 0 },
+        { line: 0, ch: 6 },
+        {
+          className: 'cm-fullWidth',
+        },
+      );
 
       // 获取所有标记
       const allMarks = cmMock.getAllMarks();
@@ -247,7 +249,7 @@ describe('Editor.js 核心方法', () => {
   describe('handlePaste - 粘贴处理', () => {
     it('应该处理自定义 onPaste 回调返回的字符串', () => {
       const pasteContent = '粘贴的内容';
-      cherryMock.options.callback.onPaste = vi.fn(() => pasteContent);
+      cherryMock.options.callback.onPaste = vi.fn(() => pasteContent) as any;
 
       const clipboardData = {
         getData: vi.fn(() => ''),
@@ -298,11 +300,14 @@ describe('Editor.js 核心方法', () => {
 
     it('应该处理文件上传回调', () => {
       const file = new File([''], 'test.png', { type: 'image/png' });
-      const uploadCallback = vi.fn((url, params) => {
+      const uploadCallback = vi.fn((url) => {
         expect(typeof url).toBe('string');
       });
 
-      cherryMock.options.callback.fileUpload = vi.fn((file, callback) => {
+      cherryMock.options.callback.fileUpload = vi.fn((_file, callback) => {
+        if (!callback) {
+          throw new Error('fileUpload callback is required');
+        }
         callback('https://example.com/image.png', { name: 'test.png' });
       });
 

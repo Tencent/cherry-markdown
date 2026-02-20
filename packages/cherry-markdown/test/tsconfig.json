@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "checkJs": false,
+    "strict": false,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "jsx": "react",
+    "baseUrl": "..",
+    "paths": {
+      "@/*": ["src/*"],
+      "~types/*": ["types/*"]
+    },
+    "types": ["vitest/globals"]
+  },
+  "include": [
+    "./**/*.ts",
+    "./**/*.spec.ts",
+    "../src/**/*.js",
+    "../src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

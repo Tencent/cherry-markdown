@@ -1,6 +1,6 @@
 import List from '../../../src/core/hooks/List';
 import CryptoJS from 'crypto-js';
-import { describe, it } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 const cases: string[] = [];
 cases[0] = `

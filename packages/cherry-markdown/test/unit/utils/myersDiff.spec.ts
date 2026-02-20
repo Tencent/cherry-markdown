@@ -82,8 +82,14 @@ describe('utils/myersDiff', () => {
 
   describe('自定义比较函数', () => {
     it('使用对象属性比较', () => {
-      const oldArr = [{ id: 1, name: 'a' }, { id: 2, name: 'b' }];
-      const newArr = [{ id: 1, name: 'a' }, { id: 3, name: 'c' }];
+      const oldArr = [
+        { id: 1, name: 'a' },
+        { id: 2, name: 'b' },
+      ];
+      const newArr = [
+        { id: 1, name: 'a' },
+        { id: 3, name: 'c' },
+      ];
 
       const diff = new MyersDiff(newArr, oldArr, (obj, index) => obj[index].id);
       const result = diff.doDiff();

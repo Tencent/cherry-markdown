@@ -105,10 +105,7 @@ describe('内容处理器 - CodeMirror 交互', () => {
 
         cmMock.replaceRange(newRow, { line: insertLine, ch: 0 });
 
-        expect(cmMock.replaceRange).toHaveBeenCalledWith(
-          newRow,
-          { line: insertLine, ch: 0 }
-        );
+        expect(cmMock.replaceRange).toHaveBeenCalledWith(newRow, { line: insertLine, ch: 0 });
       });
 
       it('应该插入新列', () => {
@@ -147,7 +144,7 @@ describe('内容处理器 - CodeMirror 交互', () => {
         const lines = value.split('\n');
         const columnToDelete = 1; // 删除第二列
 
-        const newLines = lines.map(line => {
+        const newLines = lines.map((line) => {
           const cells = line.split('|').slice(1, -1);
           if (columnToDelete >= 0 && columnToDelete < cells.length) {
             cells.splice(columnToDelete, 1);
@@ -294,14 +291,16 @@ describe('内容处理器 - CodeMirror 交互', () => {
 
     describe('列表识别', () => {
       it('应该识别无序列表', () => {
-        const listReg = /^(\s*)([-*+]|\d+[.)]\s|[a-z][.)]\s|[ivxIVX]+[.)]\s|[零一二三四五六七八九十百千]+[、)]\s)(\[[ x]\]\s)?(.*)$/;
+        const listReg =
+          /^(\s*)([-*+]|\d+[.)]\s|[a-z][.)]\s|[ivxIVX]+[.)]\s|[零一二三四五六七八九十百千]+[、)]\s)(\[[ x]\]\s)?(.*)$/;
         const line = '- Item 1';
 
         expect(listReg.test(line)).toBe(true);
       });
 
       it('应该识别有序列表', () => {
-        const listReg = /^(\s*)([-*+]|\d+[.)]\s|[a-z][.)]\s|[ivxIVX]+[.)]\s|[零一二三四五六七八九十百千]+[、)]\s)(\[[ x]\]\s)?(.*)$/;
+        const listReg =
+          /^(\s*)([-*+]|\d+[.)]\s|[a-z][.)]\s|[ivxIVX]+[.)]\s|[零一二三四五六七八九十百千]+[、)]\s)(\[[ x]\]\s)?(.*)$/;
         const line = '1. Item 1';
 
         expect(listReg.test(line)).toBe(true);
@@ -409,11 +408,7 @@ describe('内容处理器 - CodeMirror 交互', () => {
 
     describe('缩进处理', () => {
       it('应该识别列表项的缩进级别', () => {
-        const lines = [
-          '- Item 1',
-          '  - Sub item 1',
-          '    - Sub sub item',
-        ];
+        const lines = ['- Item 1', '  - Sub item 1', '    - Sub sub item'];
 
         const getIndentLevel = (line: string) => {
           const match = line.match(/^(\s*)/);
@@ -559,7 +554,7 @@ describe('内容处理器 - CodeMirror 交互', () => {
       it('应该处理多选区', () => {
         const selections = cmMock.listSelections();
 
-        selections.forEach(sel => {
+        selections.forEach((sel) => {
           expect(sel).toHaveProperty('anchor');
           expect(sel).toHaveProperty('head');
         });

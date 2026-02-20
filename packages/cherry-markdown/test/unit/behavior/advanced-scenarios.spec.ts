@@ -50,11 +50,6 @@ describe('嵌套格式处理', () => {
   const isBold = (text: string) => /^\*\*[\s\S]+\*\*$/.test(text.trim());
 
   /**
-   * 检测文本是否已斜体
-   */
-  const isItalic = (text: string) => /^\*[^*][\s\S]*[^*]\*$/.test(text.trim());
-
-  /**
    * 添加加粗
    */
   const addBold = (text: string) => `**${text}**`;
@@ -63,16 +58,6 @@ describe('嵌套格式处理', () => {
    * 添加斜体
    */
   const addItalic = (text: string) => `*${text}*`;
-
-  /**
-   * 移除加粗
-   */
-  const removeBold = (text: string) => text.replace(/^\*\*([\s\S]+)\*\*$/, '$1');
-
-  /**
-   * 移除斜体
-   */
-  const removeItalic = (text: string) => text.replace(/^\*([^*][\s\S]*[^*])\*$/, '$1');
 
   it('先加粗再斜体', () => {
     const text = 'hello';

@@ -158,7 +158,7 @@ export const headerTransform = {
       // 移除标题
       return text.replace(/^#{1,6}\s+/, '');
     }
-    const prefix = '#'.repeat(level) + ' ';
+    const prefix = `${'#'.repeat(level)} `;
     // 先移除现有标题标记，再添加新的
     const cleanText = text.replace(/^#{1,6}\s+/, '');
     return prefix + cleanText;

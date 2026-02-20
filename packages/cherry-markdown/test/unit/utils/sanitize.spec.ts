@@ -41,9 +41,7 @@ describe('utils/sanitize', () => {
     });
 
     it('复合测试', () => {
-      expect(escapeHTMLSpecialChar('<a href="test">link</a>')).toBe(
-        '&lt;a href=&quot;test&quot;&gt;link&lt;/a&gt;'
-      );
+      expect(escapeHTMLSpecialChar('<a href="test">link</a>')).toBe('&lt;a href=&quot;test&quot;&gt;link&lt;/a&gt;');
     });
   });
 

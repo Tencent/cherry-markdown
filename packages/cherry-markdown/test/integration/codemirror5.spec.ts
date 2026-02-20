@@ -45,9 +45,24 @@ describe('CodeMirror5 集成测试', () => {
   });
 
   afterEach(() => {
+    // 重要：销毁 CM5 实例以防止内存泄露
+    if (cm && isRealCM && typeof cm.toTextArea === 'function') {
+      try {
+        cm.toTextArea();
+      } catch (e) {
+        // 忽略销毁时的错误
+      }
+    }
+    cm = null;
+
+    // 清理容器
     if (container && container.parentNode) {
       container.parentNode.removeChild(container);
     }
+    container = null as any;
+
+    // 清理所有 timer，防止内存泄漏
+    vi.clearAllTimers();
   });
 
   /**
@@ -241,7 +256,7 @@ describe('CodeMirror5 集成测试', () => {
         cm.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 12 });
 
         const selection = cm.getSelection();
-        cm.replaceSelection('```javascript\n' + selection + '\n```');
+        cm.replaceSelection(`\`\`\`javascript\n${selection}\n\`\`\``);
 
         expect(cm.getValue()).toBe('```javascript\nconst x = 1;\n```');
       });

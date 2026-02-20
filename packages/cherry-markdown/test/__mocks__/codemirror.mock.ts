@@ -319,7 +319,7 @@ export function createCodeMirrorMock(initialValue: string = '') {
     }),
 
     // 显示滚动条匹配
-    showMatchesOnScrollbar: vi.fn(() => ({
+    showMatchesOnScrollbar: vi.fn((_query: string | RegExp, _options?: boolean) => ({
       clear: vi.fn(),
     })),
 
@@ -398,10 +398,28 @@ export function createCodeMirrorMock(initialValue: string = '') {
     on: vi.fn(),
     off: vi.fn(),
 
-
     // Focus
     focus: vi.fn(),
     hasFocus: vi.fn(() => true),
+
+    // 历史记录 (undo/redo)
+    undo: vi.fn(),
+    redo: vi.fn(),
+    historySize: vi.fn(() => ({ undo: 0, redo: 0 })),
+    clearHistory: vi.fn(),
+
+    // 行信息
+    lineInfo: vi.fn((line: number) => ({
+      line,
+      handle: { height: 20, text: getLines()[line] || '' },
+      text: getLines()[line] || '',
+      gutterMarkers: null,
+      textClass: null,
+      bgClass: null,
+      wrapClass: null,
+      widgets: null,
+    })),
+    heightAtLine: vi.fn((line: number, _mode?: string) => line * 20),
 
     // Doc
     getDoc: vi.fn(() => ({
@@ -410,6 +428,11 @@ export function createCodeMirrorMock(initialValue: string = '') {
         value = v;
       },
       replaceSelection: mock.replaceSelection,
+      eachLine: (start: number, end: number, callback: (line: { height: number }) => void) => {
+        for (let i = start; i < end; i++) {
+          callback({ height: 20 });
+        }
+      },
     })),
 
     // 刷新
@@ -486,8 +509,8 @@ export function createCherryMock() {
     },
     options: {
       callback: {
-        onPaste: vi.fn(() => false),
-        fileUpload: vi.fn(),
+        onPaste: vi.fn((_clipboardData?: any, _editor?: any) => false),
+        fileUpload: vi.fn((_file: File, _callback: Function) => {}),
       },
       editor: {
         maxUrlLength: 100,

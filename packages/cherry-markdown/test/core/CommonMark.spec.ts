@@ -22,7 +22,7 @@ const cleanHTML = (raw) => {
   html = html.replace(/\s*<br \/>\s*/gm, '\n');
   html = html.replace(/(?<=>)\n(?=<)/gm, '');
   // 清理属性
-  html = html.replace(/(?<=<)([^\/\s>]+)[^<]*?(?=>)/gm, (match, tag) => tag);
+  html = html.replace(/(?<=<)([^/\s>]+)[^<]*?(?=>)/gm, (match, tag) => tag);
   // 清理首尾的多余空格
   html = html.trim();
   return html;
@@ -57,10 +57,9 @@ describe('engine', () => {
     vi.stubGlobal('BUILD_ENV', 'production');
   });
   it.each(suites)('CommonMark-$example', (item) => {
-     // @ts-ignore
-    const cherryHtml=cherryEngine.makeHtml(item.markdown)
-   
-     expect(cherryHtml).toMatchSnapshot();
+    // @ts-ignore
+    const cherryHtml = cherryEngine.makeHtml(item.markdown);
+
+    expect(cherryHtml).toMatchSnapshot();
   });
- 
 });

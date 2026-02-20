@@ -6,7 +6,7 @@
  * 测试 MenuBase.js、Bubble.js、FloatMenu.js、Suggester.js 与 CodeMirror 的交互
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createCodeMirrorMock, createCherryMock } from '../../__mocks__/codemirror.mock';
+import { createCodeMirrorMock } from '../../__mocks__/codemirror.mock';
 
 describe('MenuBase 工具栏与编辑器交互', () => {
   let cmMock: ReturnType<typeof createCodeMirrorMock>;
@@ -50,34 +50,28 @@ describe('MenuBase 工具栏与编辑器交互', () => {
     });
 
     it('应该支持多选区替换', () => {
-      cmMock.replaceSelections(['**text1**', '**text2**'], 'around');
-      expect(cmMock.replaceSelections).toHaveBeenCalledWith(['**text1**', '**text2**'], 'around');
+      cmMock.replaceSelections(['**text1**', '**text2**']);
+      expect(cmMock.replaceSelections).toHaveBeenCalledWith(['**text1**', '**text2**']);
     });
   });
 
   describe('listSelections - 选区范围', () => {
     it('应该返回选区的 anchor 和 head', () => {
-      cmMock.listSelections.mockReturnValue([
-        { anchor: { line: 0, ch: 0 }, head: { line: 0, ch: 10 } },
-      ]);
+      cmMock.listSelections.mockReturnValue([{ anchor: { line: 0, ch: 0 }, head: { line: 0, ch: 10 } }]);
       const selections = cmMock.listSelections();
       expect(selections[0].anchor).toEqual({ line: 0, ch: 0 });
       expect(selections[0].head).toEqual({ line: 0, ch: 10 });
     });
 
     it('应该处理跨行选区', () => {
-      cmMock.listSelections.mockReturnValue([
-        { anchor: { line: 0, ch: 5 }, head: { line: 2, ch: 10 } },
-      ]);
+      cmMock.listSelections.mockReturnValue([{ anchor: { line: 0, ch: 5 }, head: { line: 2, ch: 10 } }]);
       const selections = cmMock.listSelections();
       expect(selections[0].anchor.line).toBe(0);
       expect(selections[0].head.line).toBe(2);
     });
 
     it('应该处理反向选区 (head 在 anchor 之前)', () => {
-      cmMock.listSelections.mockReturnValue([
-        { anchor: { line: 2, ch: 10 }, head: { line: 0, ch: 5 } },
-      ]);
+      cmMock.listSelections.mockReturnValue([{ anchor: { line: 2, ch: 10 }, head: { line: 0, ch: 5 } }]);
       const selections = cmMock.listSelections();
       // 反向选区：anchor 在后，head 在前
       expect(selections[0].anchor.line).toBeGreaterThan(selections[0].head.line);
@@ -142,8 +136,8 @@ describe('MenuBase 工具栏与编辑器交互', () => {
       cmMock.getSelections.mockReturnValue(['text1', 'text2']);
       const selections = cmMock.getSelections();
       const results = selections.map((s: string) => `**${s}**`);
-      cmMock.replaceSelections(results, 'around');
-      expect(cmMock.replaceSelections).toHaveBeenCalledWith(['**text1**', '**text2**'], 'around');
+      cmMock.replaceSelections(results);
+      expect(cmMock.replaceSelections).toHaveBeenCalledWith(['**text1**', '**text2**']);
     });
   });
 });
@@ -179,7 +173,14 @@ describe('Bubble 浮动菜单', () => {
 
   describe('getScrollTop - 滚动位置', () => {
     it('应该获取编辑器滚动位置', () => {
-      cmMock.getScrollInfo.mockReturnValue({ top: 100, left: 0, height: 500, width: 800 });
+      cmMock.getScrollInfo.mockReturnValue({
+        top: 100,
+        left: 0,
+        height: 500,
+        width: 800,
+        clientWidth: 780,
+        clientHeight: 580,
+      });
       const scrollInfo = cmMock.getScrollInfo();
       expect(scrollInfo.top).toBe(100);
     });
@@ -187,14 +188,14 @@ describe('Bubble 浮动菜单', () => {
 
   describe('charCoords - 坐标转换', () => {
     it('应该获取字符的屏幕坐标', () => {
-      cmMock.charCoords.mockReturnValue({ left: 100, top: 50, bottom: 70 });
+      cmMock.charCoords.mockReturnValue({ left: 100, top: 50, right: 108, bottom: 70 });
       const coords = cmMock.charCoords({ line: 0, ch: 5 }, 'local');
       expect(coords.left).toBe(100);
       expect(coords.top).toBe(50);
     });
 
     it('应该支持不同坐标系 (local/page/window)', () => {
-      cmMock.charCoords.mockReturnValue({ left: 150, top: 200, bottom: 220 });
+      cmMock.charCoords.mockReturnValue({ left: 150, top: 200, right: 158, bottom: 220 });
       const coords = cmMock.charCoords({ line: 1, ch: 10 }, 'page');
       expect(coords).toHaveProperty('left');
       expect(coords).toHaveProperty('top');
@@ -486,8 +487,8 @@ describe('Suggester 建议列表', () => {
       const cursor = cmMock.getCursor();
       const goLeft = 5;
       const newCh = cursor.ch - goLeft;
-      cmMock.setCursor(cursor.line, newCh);
-      expect(cmMock.setCursor).toHaveBeenCalledWith(0, 15);
+      cmMock.setCursor({ line: cursor.line, ch: newCh });
+      expect(cmMock.setCursor).toHaveBeenCalledWith({ line: 0, ch: 15 });
     });
 
     it('应该支持 goTop 上移光标', () => {
@@ -495,8 +496,8 @@ describe('Suggester 建议列表', () => {
       const cursor = cmMock.getCursor();
       const goTop = 2;
       const newLine = cursor.line - goTop;
-      cmMock.setCursor(newLine, cursor.ch);
-      expect(cmMock.setCursor).toHaveBeenCalledWith(3, 10);
+      cmMock.setCursor({ line: newLine, ch: cursor.ch });
+      expect(cmMock.setCursor).toHaveBeenCalledWith({ line: 3, ch: 10 });
     });
   });
 
@@ -604,14 +605,14 @@ describe('坐标系转换', () => {
 
   describe('charCoords', () => {
     it('应该支持 local 坐标系', () => {
-      cmMock.charCoords.mockReturnValue({ left: 50, top: 100, bottom: 120 });
+      cmMock.charCoords.mockReturnValue({ left: 50, top: 100, right: 58, bottom: 120 });
       const coords = cmMock.charCoords({ line: 0, ch: 0 }, 'local');
       expect(coords).toHaveProperty('left');
       expect(coords).toHaveProperty('top');
     });
 
     it('应该支持 page 坐标系', () => {
-      cmMock.charCoords.mockReturnValue({ left: 150, top: 300, bottom: 320 });
+      cmMock.charCoords.mockReturnValue({ left: 150, top: 300, right: 158, bottom: 320 });
       const coords = cmMock.charCoords({ line: 0, ch: 0 }, 'page');
       expect(coords.left).toBe(150);
       expect(coords.top).toBe(300);
@@ -713,7 +714,7 @@ describe('DOM 操作', () => {
 
   describe('getScrollerElement', () => {
     it('应该返回滚动容器元素', () => {
-      const scroller = document.querySelector('.CodeMirror-scroll');
+      const scroller = document.querySelector('.CodeMirror-scroll') as HTMLElement;
       cmMock.getScrollerElement.mockReturnValue(scroller);
       expect(cmMock.getScrollerElement()).toBe(scroller);
     });
@@ -721,8 +722,8 @@ describe('DOM 操作', () => {
 
   describe('display.wrapper', () => {
     it('应该访问 display.wrapper', () => {
-      const wrapper = document.querySelector('.CodeMirror');
-      cmMock.display = { wrapper };
+      const wrapper = document.querySelector('.CodeMirror') as HTMLElement;
+      cmMock.display._wrapper = wrapper;
       expect(cmMock.display.wrapper).toBe(wrapper);
     });
   });

@@ -28,5 +28,9 @@ pnpm-lock.yaml
 
 packages/**/yarn.lock
 
+# Playwright
+playwright-report
+test-results
+
 # config
 examples/cherry-markdown-publish/src/common/config/*.yaml
