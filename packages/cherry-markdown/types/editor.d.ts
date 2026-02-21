@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import CodeMirror from 'codemirror';
 import Cherry from '../src/Cherry.js';
 import { EditorMode } from './cherry.js';
 
@@ -29,13 +28,13 @@ export type EditorEventCallback<
   E = unknown,
   K extends keyof EditorEventMap = keyof EditorEventMap,
 > = E extends EditorEventMap[K]
-  ? (event: E, codemirror: CodeMirror.Editor) => void
-  : (codemirror: CodeMirror.Editor) => void;
+  ? (event: E, editor: any) => void
+  : (editor: any) => void;
 
 type EditorPasteEventHandler = (
   event: ClipboardEvent,
   clipboardData: ClipboardEvent['clipboardData'],
-  codemirror: CodeMirror.Editor,
+  editor: any,
 ) => void;
 
 export type EditorConfiguration = {
@@ -49,16 +48,16 @@ export type EditorConfiguration = {
   convertWhenPaste?: boolean;
   keyMap?: 'sublime' | 'vim'; // 快捷键风格，目前仅支持 sublime 和 vim
   keepDocumentScrollAfterInit?: boolean;
-  /** 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》 */
+  /** 是否高亮全角符号 ·|￥|、|：|"|"|【|】|（|）|《|》 */
   showFullWidthMark?: boolean;
   /** 是否显示联想框 */
   showSuggestList?: boolean;
-  codemirror: CodeMirror.EditorConfiguration;
+  codemirror: Record<string, any>;
   onKeydown: EditorEventCallback<EditorEventMap['onKeydown']>;
   onFocus: EditorEventCallback<EditorEventMap['onFocus']>;
   onBlur: EditorEventCallback<EditorEventMap['onBlur']>;
   onPaste: EditorEventCallback<EditorEventMap['onPaste']>;
-  onChange: (changeList: CodeMirror.EditorChangeLinkedList, codemirror: CodeMirror.Editor) => void;
+  onChange: (changeList: any, editor: any) => void;
   onScroll: EditorEventCallback;
   handlePaste?: EditorPasteEventHandler;
   /** 预览区域跟随编辑器光标自动滚动 */

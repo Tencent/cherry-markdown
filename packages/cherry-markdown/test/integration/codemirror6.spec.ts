@@ -40,29 +40,8 @@ async function initRealCM6(
   container: HTMLElement,
   options: Record<string, any> = {},
 ): Promise<IEditorAdapterExtended | null> {
-  // TODO: 实现真实的 CM6 适配器
-  // 示例代码结构：
-  // import { EditorView, basicSetup } from 'codemirror';
-  // import { markdown } from '@codemirror/lang-markdown';
-  // import { history, undoDepth, redoDepth } from '@codemirror/commands';
-  // import { search, SearchCursor } from '@codemirror/search';
-  //
-  // const view = new EditorView({
-  //   doc: options.value || '',
-  //   extensions: [
-  //     basicSetup,
-  //     markdown(),
-  //     history(),
-  //     search({ top: true }),
-  //     // ... 其他扩展
-  //   ],
-  //   parent: container,
-  // });
-  //
-  // return createCM6Adapter(view);
-
-  console.warn('CM6 adapter not implemented yet');
-  return null;
+  const { CM6Adapter } = await import('../../src/adapters/CM6Adapter');
+  return new CM6Adapter(container, { value: options.value || '', ...options }) as unknown as IEditorAdapterExtended;
 }
 
 // ============================================================================
@@ -73,7 +52,7 @@ async function initRealCM6(
  * 是否使用真实 CM6 实例
  * 设置为 true 后需要实现 initRealCM6
  */
-const USE_REAL_CM6 = false;
+const USE_REAL_CM6 = true;
 
 // ============================================================================
 // CodeMirror 6 集成测试（与 CM5 测试结构相同）

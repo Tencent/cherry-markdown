@@ -22,10 +22,10 @@ export default class ListHandler {
 
   regList = LIST_CONTENT;
 
-  /** @type{Array.<import('codemirror').Position>} */
+  /** @type{Array.<{line: number, ch: number}>} */
   range = [];
 
-  /** @type{import('codemirror').Position} */
+  /** @type{{line: number, ch: number}} */
   position = { line: 0, ch: 0 };
 
   input = false;

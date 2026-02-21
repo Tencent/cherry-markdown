@@ -14,25 +14,6 @@
  * limitations under the License.
  */
 // @ts-check
-import codemirror from 'codemirror';
-// import 'codemirror/mode/markdown/markdown';
-import 'codemirror/mode/gfm/gfm'; // https://codemirror.net/mode/gfm/index.html
-import 'codemirror/mode/yaml-frontmatter/yaml-frontmatter'; // https://codemirror.net/5/mode/yaml-frontmatter/index.html
-// import 'codemirror/mode/xml/xml';
-import 'codemirror/addon/edit/continuelist';
-import 'codemirror/addon/edit/closetag';
-import 'codemirror/addon/fold/xml-fold';
-import 'codemirror/addon/edit/matchtags';
-import 'codemirror/addon/display/placeholder';
-import 'codemirror/keymap/sublime';
-import 'codemirror/keymap/vim';
-
-// import 'cm-search-replace/src/search';
-import 'codemirror/addon/search/searchcursor';
-import 'codemirror/addon/scroll/annotatescrollbar';
-import 'codemirror/addon/search/matchesonscrollbar';
-// import 'codemirror/addon/selection/active-line';
-// import 'codemirror/addon/edit/matchbrackets';
 import htmlParser from '@/utils/htmlparser';
 import pasteHelper from '@/utils/pasteHelper';
 import { addEvent } from './utils/event';
@@ -41,11 +22,11 @@ import { handleFileUploadCallback } from '@/utils/file';
 import { createElement } from './utils/dom';
 import { longTextReg, base64Reg, imgDrawioXmlReg, createUrlReg } from './utils/regexp';
 import { handleNewlineIndentList } from './utils/autoindent';
+import { CM6Adapter } from './adapters/CM6Adapter';
 
 /**
  * @typedef {import('~types/editor').EditorConfiguration} EditorConfiguration
  * @typedef {import('~types/editor').EditorEventCallback} EditorEventCallback
- * @typedef {import('codemirror')} CodeMirror
  */
 
 /** @type {import('~types/editor')} */
@@ -130,11 +111,8 @@ export default class Editor {
    * @param {boolean} disable 是否禁用快捷键
    */
   disableShortcut = (disable = true) => {
-    if (disable) {
-      this.editor.setOption('keyMap', 'default');
-    } else {
-      this.editor.setOption('keyMap', this.options.keyMap);
-    }
+    // CM6 通过 setOption 适配器方法处理
+    this.editor.setOption('keyMap', disable ? 'default' : this.options.keyMap);
   };
 
   /**
@@ -331,7 +309,8 @@ export default class Editor {
     ) {
       html = '';
     }
-    const codemirrorDoc = codemirror.getDoc();
+    // CM6Adapter 的 getDoc() 返回自身，直接使用 codemirror 即可
+    const codemirrorDoc = codemirror;
     this.fileUploadCount = 0;
     // 只要有html内容，就不处理剪切板里的其他内容，这么做的后果是粘贴excel内容时，只会粘贴html内容，不会把excel对应的截图粘进来
     for (let i = 0; !html && i < items.length; i++) {
@@ -445,35 +424,23 @@ export default class Editor {
     if (!(textArea instanceof HTMLTextAreaElement)) {
       throw new Error('The specific element is not a textarea.');
     }
-    const editor = codemirror.fromTextArea(textArea, this.options.codemirror);
-    // 以下逻辑是针对\t等空白字符的处理，似乎已经不需要了，先注释掉，等有反馈了再考虑加回来
-    // editor.addOverlay({
-    //   name: 'invisibles',
-    //   token: function nextToken(stream) {
-    //     let tokenClass;
-    //     let spaces = 0;
-    //     let peek = stream.peek() === ' ';
-    //     if (peek) {
-    //       while (peek && spaces < Number.MAX_VALUE) {
-    //         spaces += 1;
-    //         stream.next();
-    //         peek = stream.peek() === ' ';
-    //       }
-    //       tokenClass = `whitespace whitespace-${spaces}`;
-    //     } else {
-    //       while (!stream.eol()) {
-    //         stream.next();
-    //       }
-    //       tokenClass = '';
-    //     }
-    //     return tokenClass;
-    //   },
-    // });
+
+    // 创建 CM6 容器
+    const container = document.createElement('div');
+    container.className = 'CodeMirror';
+    textArea.parentNode?.insertBefore(container, textArea);
+    textArea.style.display = 'none';
+    this.textArea = textArea;
+
+    const editor = new CM6Adapter(container, {
+      value: textArea.value || '',
+    });
+
     this.previewer = previewer;
     this.disableScrollListener = false;
 
     if (this.options.value) {
-      editor.setOption('value', this.options.value);
+      editor.setValue(this.options.value);
     }
 
     editor.on('blur', (codemirror, evt) => {
@@ -490,9 +457,7 @@ export default class Editor {
       this.options.onChange(evt, codemirror);
       this.dealSpecialWords();
       if (this.options.autoSave2Textarea) {
-        // @ts-ignore
-        // 将codemirror里的内容回写到textarea里
-        codemirror.save();
+        textArea.value = editor.getValue();
       }
     });
 
@@ -572,7 +537,7 @@ export default class Editor {
 
     /**
      * @property
-     * @type {CodeMirror.Editor}
+     * @type {CM6Adapter}
      */
     this.editor = editor;
 
@@ -735,8 +700,8 @@ export default class Editor {
     if (writingStyle === 'typewriter') {
       // 编辑器顶/底部填充的空白高度 (用于内容不足时使光标所在行滚动到编辑器中央)
       const height = this.editor.getScrollInfo().clientHeight / 2;
-      sheet.insertRule(`.${className} .CodeMirror-lines::before { height: ${height}px; }`, 0);
-      sheet.insertRule(`.${className} .CodeMirror-lines::after { height: ${height}px; }`, 0);
+      sheet.insertRule(`.${className} .cm-content::before { height: ${height}px; }`, 0);
+      sheet.insertRule(`.${className} .cm-content::after { height: ${height}px; }`, 0);
       this.editor.scrollTo(null, this.editor.cursorCoords(null, 'local').top - height);
     }
   }
@@ -753,6 +718,6 @@ export default class Editor {
    * 设置编辑器值
    */
   setValue(value = '') {
-    this.editor.setOption('value', value);
+    this.editor.setValue(value);
   }
 }

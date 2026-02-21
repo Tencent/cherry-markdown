@@ -83,7 +83,7 @@ function buildAddons(entries) {
         }),
         babel({
           babelHelpers: 'runtime',
-          exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5)/],
+          exclude: [/node_modules[\\/](?!parse5)/],
         }),
       ],
     });

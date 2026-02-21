@@ -473,5 +473,59 @@ test.describe('Cherry Markdown 视觉回归测试', () => {
       const editor = getEditorContainer(page);
       await expect(editor).toHaveScreenshot('syntax-highlight-code.png');
     });
+
+    test('Markdown 语法高亮 — 引用块中的链接', async ({ page }) => {
+      // 这个测试专门验证 CM5 和 CM6 对引用块中链接的渲染一致性
+      // CM5: > 是 cm-quote 颜色，链接是 cm-link 颜色，URL 是 cm-url 颜色
+      // CM6: 需要确保相同的颜色分布
+      await setEditorContent(page, [
+        '> [Github 地址](https://github.com/Tencent/cherry-markdown){target=_blank}',
+        '',
+        '> 普通引用文字',
+        '',
+        '> 引用中的 [链接](https://example.com) 和 **加粗**',
+      ].join('\n'));
+
+      await focusEditor(page);
+      await page.waitForTimeout(300);
+
+      const editor = getEditorContainer(page);
+      await expect(editor).toHaveScreenshot('syntax-highlight-blockquote-link.png');
+    });
+
+    test('Markdown 语法高亮 — 链接', async ({ page }) => {
+      await setEditorContent(page, [
+        '[普通链接](https://example.com)',
+        '',
+        '[带标题的链接](https://example.com "链接标题")',
+        '',
+        '<https://auto.link.com>',
+        '',
+        '文字中的 [内嵌链接](https://example.com) 效果',
+      ].join('\n'));
+
+      await focusEditor(page);
+      await page.waitForTimeout(300);
+
+      const editor = getEditorContainer(page);
+      await expect(editor).toHaveScreenshot('syntax-highlight-links.png');
+    });
+
+    test('Markdown 语法高亮 — 列表', async ({ page }) => {
+      await setEditorContent(page, [
+        '- 无序列表项 1',
+        '- 无序列表项 2',
+        '  - 嵌套项',
+        '',
+        '1. 有序列表项 1',
+        '2. 有序列表项 2',
+      ].join('\n'));
+
+      await focusEditor(page);
+      await page.waitForTimeout(300);
+
+      const editor = getEditorContainer(page);
+      await expect(editor).toHaveScreenshot('syntax-highlight-lists.png');
+    });
   });
 });

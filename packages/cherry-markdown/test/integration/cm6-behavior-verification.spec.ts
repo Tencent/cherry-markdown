@@ -18,19 +18,18 @@ import type { IEditorAdapterExtended } from '../unit/behavior/editor-adapter-ext
 
 /**
  * 设置为 true 后需要实现真实的 CM6 适配器
- * 当前使用 Mock 编辑器进行测试
+ * 当前使用真实 CM6 编辑器进行测试
  */
-const USE_REAL_CM6 = false;
+const USE_REAL_CM6 = true;
 
 /**
  * 初始化编辑器
- * 根据 USE_REAL_CM6 配置使用真实 CM6 或 Mock
+ * 使用真实 CM6 适配器
  */
 async function initEditor(_container: HTMLElement): Promise<IEditorAdapterExtended | null> {
   if (USE_REAL_CM6) {
-    // TODO: 实现真实的 CM6 适配器
-    console.warn('CM6 adapter not implemented yet');
-    return null;
+    const { CM6Adapter } = await import('../../src/adapters/CM6Adapter');
+    return new CM6Adapter(_container, { value: '' }) as unknown as IEditorAdapterExtended;
   }
   // 使用 Mock 编辑器
   const { createExtendedMockEditorAdapter } = await import('../unit/behavior/editor-adapter-extended.spec');
@@ -53,6 +52,10 @@ describe('CodeMirror 6 行为验证测试', () => {
   });
 
   afterEach(async () => {
+    // 销毁 CM6 编辑器
+    if (editor && typeof (editor as any).destroy === 'function') {
+      (editor as any).destroy();
+    }
     // 清理容器
     if (container && container.parentNode) {
       container.parentNode.removeChild(container);

@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as CodeMirror from 'codemirror';
 
-declare module 'codemirror' {
-  interface LineHandle {
-    height: number;
-  }
+/**
+ * CM6Adapter 兼容类型定义
+ * 取代原先的 CodeMirror 5 类型扩展
+ */
+export interface LineHandle {
+  height: number;
+  text: string;
 }

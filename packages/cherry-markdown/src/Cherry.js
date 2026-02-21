@@ -919,7 +919,7 @@ export default class Cherry extends CherryStatic {
 
   /**
    * @private
-   * @param {import('codemirror').Editor} codemirror
+   * @param {*} codemirror
    */
   initText(codemirror) {
     try {
@@ -940,7 +940,7 @@ export default class Cherry extends CherryStatic {
   /**
    * @private
    * @param {Event} _evt
-   * @param {import('codemirror').Editor} codemirror
+   * @param {*} codemirror
    */
   editText(_evt, codemirror) {
     try {

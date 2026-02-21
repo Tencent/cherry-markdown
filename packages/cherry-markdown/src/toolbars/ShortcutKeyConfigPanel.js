@@ -1,4 +1,5 @@
-import { mac } from 'codemirror/src/util/browser';
+// 检测是否为 Mac 平台
+const mac = typeof navigator !== 'undefined' && /Mac/.test(navigator.platform);
 import {
   getAllowedShortcutKey,
   keyStackIsModifierkeys,

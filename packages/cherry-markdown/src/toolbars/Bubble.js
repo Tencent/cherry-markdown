@@ -87,7 +87,9 @@ export default class Bubble extends Toolbar {
       this.bubbleDom.style.marginTop = '0';
       this.bubbleDom.dataset.scrollTop = String(this.getScrollTop());
     }
-    const positionLimit = this.editorDom.querySelector('.CodeMirror-lines').firstChild.getBoundingClientRect();
+    const positionLimit = this.editorDom.querySelector('.cm-content')?.getBoundingClientRect()
+      || this.editorDom.querySelector('.CodeMirror-lines')?.firstChild?.getBoundingClientRect()
+      || this.editorDom.getBoundingClientRect();
     const editorPosition = this.editorDom.getBoundingClientRect();
     const minLeft = positionLimit.left - editorPosition.left;
     const maxLeft = positionLimit.width + minLeft;
@@ -203,16 +205,18 @@ export default class Bubble extends Toolbar {
           this.hideBubble();
           return;
         }
-        const selectedObjs = codemirror.getWrapperElement().getElementsByClassName('CodeMirror-selected');
+        const selectedObjs = codemirror.getWrapperElement().getElementsByClassName('cm-selectionBackground');
+        // CM5 fallback
+        const finalSelectedObjs = selectedObjs.length > 0 ? selectedObjs : codemirror.getWrapperElement().getElementsByClassName('CodeMirror-selected');
         const editorPosition = this.editorDom.getBoundingClientRect();
         let width = 0;
         let top = 0;
-        if (typeof selectedObjs !== 'object' || selectedObjs.length <= 0) {
+        if (typeof finalSelectedObjs !== 'object' || finalSelectedObjs.length <= 0) {
           this.hideBubble();
           return;
         }
-        for (let key = 0; key < selectedObjs.length; key++) {
-          const one = selectedObjs[key];
+        for (let key = 0; key < finalSelectedObjs.length; key++) {
+          const one = finalSelectedObjs[key];
           const position = one.getBoundingClientRect();
           const targetTop = position.top - editorPosition.top;
           if (direction === 'asc') {

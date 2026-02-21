@@ -70,15 +70,30 @@
   
   /* ========== 编辑器相关 ========== */
   //  ---base-editor-bg 编辑器背景颜色
-  --editor-header-color: var(--base-font-color);
-  --editor-comment-color: var(--oc-blue-6);
-  --editor-quote-color: var(--oc-blue-6);
-  --editor-string-color: var(--base-font-color);
-  --editor-link-color: var(--oc-blue-6);
+  // 以下颜色与线上 Cherry Markdown 的实际样式保持一致
+  --editor-header-color: var(--base-font-color);   // 线上: #3f4a56
+  --editor-comment-color: var(--oc-blue-6);        // 线上: #228be6
+  --editor-quote-color: var(--oc-blue-6);          // 线上: #228be6
+  --editor-string-color: var(--base-font-color);   // 线上: #3f4a56
+  --editor-string2-color: var(--base-font-color);  // 线上: #3f4a56
+  --editor-link-color: var(--oc-blue-6);           // 线上: #228be6
   --editor-url-bg-color: #d7e6fe;
-  --editor-v2-color: var(--primary-color);
-  --editor-v3-color: var(--secondary-color);
-  --editor-keyword-color: var(--base-font-color);
+  --editor-v2-color: var(--primary-color);         // 线上: #3582fb
+  --editor-v3-color: var(--secondary-color);       // 线上: #f0f4ff
+  --editor-keyword-color: var(--base-font-color);  // 线上: #3f4a56
+  --editor-atom-color: var(--base-font-color);     // 线上: #3f4a56
+  --editor-number-color: var(--base-font-color);   // 线上: #3f4a56
+  --editor-def-color: var(--base-font-color);      // 线上: #3f4a56
+  --editor-meta-color: var(--base-font-color);     // 线上: #3f4a56
+  --editor-qualifier-color: var(--base-font-color);// 线上: #3f4a56
+  --editor-builtin-color: var(--base-font-color);  // 线上: #3f4a56
+  --editor-bracket-color: var(--base-font-color);  // 线上: #3f4a56
+  --editor-tag-color: var(--base-font-color);      // 线上: #3f4a56
+  --editor-attribute-color: var(--base-font-color);// 线上: #3f4a56
+  --editor-hr-color: var(--base-font-color);       // 线上: #3f4a56
+  --editor-error-color: #f00;                      // 错误保持红色
+  --editor-negative-color: #d44;                   // 负数保持红色
+  --editor-positive-color: #292;                   // 正数保持绿色
   --editor-cursor-color: var(--primary-color);
   --editor-selection-bg: var(--oc-blue-1);
   --editor-line-number-color: var(--oc-gray-4);

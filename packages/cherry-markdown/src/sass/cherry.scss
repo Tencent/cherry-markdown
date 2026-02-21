@@ -510,6 +510,11 @@
   .cm-searching {
     background-color: var(--searching-highlight-color);
   }
+
+  // CM6 搜索高亮（CM6 使用 .cm-searchMatch 替代 CM5 的 .cm-searching）
+  .cm-searchMatch {
+    background-color: var(--searching-highlight-color);
+  }
 }
 
 .cherry-sidebar {
@@ -676,7 +681,20 @@
       }
     }
     &--typewriter {
+      // CM5 打字机模式
       .CodeMirror-lines {
+        position: relative;
+        &::before {
+          content: '';
+          display: block;
+        }
+        &::after {
+          content: '';
+          display: block;
+        }
+      }
+      // CM6 打字机模式（对应 CM5 的 .CodeMirror-lines）
+      .cm-content {
         position: relative;
         &::before {
           content: '';
@@ -690,7 +708,12 @@
     }
   }
 
+  // ========== CodeMirror 编辑器样式（兼容 CM5 & CM6） ==========
+
   .CodeMirror {
+    // CM5 的 codemirror.css 提供的基础样式（CM6 不再自动注入这些）
+    position: relative;
+    overflow: hidden;
     font-family: var(--font-family-sans);
     background-color: var(--base-editor-bg);
     color: var(--base-font-color);
@@ -701,12 +724,42 @@
       font-size: var(--md-paragraph-line-height);
     }
 
+    // CM5 光标
     .CodeMirror-cursor {
       border-left: 1px solid var(--editor-cursor-color);
     }
 
+    // CM6 光标
+    .cm-cursor,
+    .cm-dropCursor {
+      border-left: 1px solid var(--editor-cursor-color) !important;
+    }
+
+    // CM5 选区
     .CodeMirror-selected {
       background-color: var(--editor-selection-bg);
+    }
+
+    // CM6 选区
+    .cm-selectionBackground {
+      background-color: var(--editor-selection-bg) !important;
+    }
+
+    // CM6：覆盖 @codemirror/view 内置的 monospace 字体和行高
+    .cm-scroller {
+      font-family: var(--font-family-sans) !important;
+      line-height: inherit !important;
+    }
+
+    // CM6 编辑器根元素
+    .cm-editor {
+      background-color: var(--base-editor-bg);
+      color: var(--base-font-color);
+      height: 100% !important;
+
+      &.cm-focused {
+        outline: none !important;
+      }
     }
 
     .CodeMirror-scroll {
@@ -735,8 +788,31 @@
         color: var(--editor-comment-color);
       }
     }
+
+    // CM6 内容区域样式（对应 CM5 的 .CodeMirror-scroll）
+    // 注意：CM6 使用 HighlightStyle 动态生成的 class 名进行语法高亮，
+    // 不能用 `span` 选择器覆盖所有 span 的颜色，否则会覆盖语法高亮。
+    // 默认文本颜色通过 .cm-editor { color } 继承。
+    .cm-scroller {
+      .cm-image-marker,
+      .cm-quote,
+      .cm-header,
+      .cm-atom {
+        color: var(--editor-header-color);
+      }
+
+      .cm-url {
+        background-color: var(--editor-url-bg-color);
+      }
+
+      .cm-comment,
+      .cm-url {
+        color: var(--editor-comment-color);
+      }
+    }
   }
 
+  // CM5 内容区域 padding
   .CodeMirror-lines {
     padding: 15px 34px;
 
@@ -763,12 +839,72 @@
     }
   }
 
+  // CM6 内容区域 padding（对应 CM5 的 .CodeMirror-lines）
+  .cm-content {
+    padding: 15px 34px;
+
+    .long-text,
+    .drawio,
+    .base64,
+    .url-truncated {
+      display: inline-block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 80px;
+      white-space: nowrap;
+      vertical-align: bottom;
+      color: darkmagenta !important;
+      font-size: var(--font-size-xs) !important;
+    }
+
+    .url-truncated {
+      max-width: 200px;
+    }
+
+    .cm-invalidchar[title="\\\\u200b"] {
+      display: none;
+    }
+  }
+
+  // CM6 行内容：与 CM5 的 .CodeMirror-line padding: 0 4px 保持一致
+  .cm-line {
+    padding: 0 4px !important;
+  }
+
+  // CM6 gutters 样式（隐藏——CM5 在 lineNumbers:false 时无 gutters）
+  .cm-gutters {
+    display: none !important;
+  }
+
   .cm-s-default .cm-header {
     color: var(--editor-header-color);
   }
 
+  // 粗体 - CM5: .cm-strong → font-weight: bold
+  .cm-s-default .cm-strong,
+  .cm-strong {
+    font-weight: bold;
+  }
+
+  // 斜体 - CM5: .cm-em → font-style: italic
+  .cm-s-default .cm-em,
+  .cm-em {
+    font-style: italic;
+  }
+
+  // 删除线 - CM5: .cm-strikethrough → text-decoration: line-through
+  .cm-s-default .cm-strikethrough,
+  .cm-strikethrough {
+    text-decoration: line-through;
+  }
+
   .cm-s-default .cm-string {
     color: var(--editor-string-color);
+  }
+
+  // 字符串2 - CM5: .cm-string-2 → #f50
+  .cm-s-default .cm-string-2 {
+    color: var(--editor-string2-color);
   }
 
   .cm-s-default .cm-comment {
@@ -789,6 +925,7 @@
 
   .cm-s-default .cm-link {
     color: var(--editor-link-color);
+    text-decoration: underline;
   }
 
   .cm-s-default .cm-url {
@@ -809,7 +946,82 @@
     color: var(--editor-keyword-color);
   }
 
+  // 原子 - CM5: .cm-atom → #219
+  .cm-s-default .cm-atom {
+    color: var(--editor-atom-color);
+  }
+
+  // 数字 - CM5: .cm-number → #164
+  .cm-s-default .cm-number {
+    color: var(--editor-number-color);
+  }
+
+  // 定义 - CM5: .cm-def → #00f
+  .cm-s-default .cm-def {
+    color: var(--editor-def-color);
+  }
+
+  // 元数据 - CM5: .cm-meta → #555
+  .cm-s-default .cm-meta {
+    color: var(--editor-meta-color);
+  }
+
+  // 限定符 - CM5: .cm-qualifier → #555
+  .cm-s-default .cm-qualifier {
+    color: var(--editor-qualifier-color);
+  }
+
+  // 内置函数 - CM5: .cm-builtin → #30a
+  .cm-s-default .cm-builtin {
+    color: var(--editor-builtin-color);
+  }
+
+  // 括号 - CM5: .cm-bracket → #997
+  .cm-s-default .cm-bracket {
+    color: var(--editor-bracket-color);
+  }
+
+  // 标签 - CM5: .cm-tag → #170
+  .cm-s-default .cm-tag {
+    color: var(--editor-tag-color);
+  }
+
+  // 属性 - CM5: .cm-attribute → #00c
+  .cm-s-default .cm-attribute {
+    color: var(--editor-attribute-color);
+  }
+
+  // 水平线 - CM5: .cm-hr → #999
+  .cm-s-default .cm-hr {
+    color: var(--editor-hr-color);
+  }
+
+  // 错误 - CM5: .cm-error → #f00
+  .cm-s-default .cm-error {
+    color: var(--editor-error-color);
+  }
+
+  // 负数 - CM5: .cm-negative → #d44
+  .cm-s-default .cm-negative,
+  .cm-negative {
+    color: var(--editor-negative-color);
+  }
+
+  // 正数 - CM5: .cm-positive → #292
+  .cm-s-default .cm-positive,
+  .cm-positive {
+    color: var(--editor-positive-color);
+  }
+
+  // CM5 fullWidth 规则
   .cm-s-default .cm-fullWidth {
+    color: var(--full-width-color) !important;
+    z-index: 3;
+    cursor: pointer;
+  }
+
+  // CM6 fullWidth 规则（CM6 无 .cm-s-default 容器）
+  .cm-editor .cm-fullWidth {
     color: var(--full-width-color) !important;
     z-index: 3;
     cursor: pointer;

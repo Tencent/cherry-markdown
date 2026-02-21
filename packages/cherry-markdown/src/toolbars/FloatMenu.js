@@ -25,7 +25,10 @@ export default class FloatMenu extends Toolbar {
   init() {
     this.editor = this.$cherry.editor;
     this.editorDom = this.editor.getEditorDom();
-    this.editorDom.querySelector('.CodeMirror-scroll').appendChild(this.options.dom);
+    const scrollContainer = this.editorDom.querySelector('.cm-scroller') || this.editorDom.querySelector('.CodeMirror-scroll');
+    if (scrollContainer) {
+      scrollContainer.appendChild(this.options.dom);
+    }
     this.initAction();
     Object.entries(this.shortcutKeyMap).forEach(([key, value]) => {
       this.$cherry.toolbar.shortcutKeyMap[key] = value;
@@ -73,7 +76,7 @@ export default class FloatMenu extends Toolbar {
    */
   cursorActivity(evt, codeMirror) {
     const pos = codeMirror.getCursor();
-    const codeMirrorLines = document.querySelector('.cherry-editor .CodeMirror-lines');
+    const codeMirrorLines = document.querySelector('.cherry-editor .cm-content') || document.querySelector('.cherry-editor .CodeMirror-lines');
     if (!codeMirrorLines) {
       return false;
     }
@@ -94,7 +97,7 @@ export default class FloatMenu extends Toolbar {
 
     // 当配置 codemirror.placeholder 时，测量 placeholder 中文本的范围
     // 将浮动工具栏定位到 placeholder 文本后面
-    const placeholderEl = codeMirrorLines.querySelector('.CodeMirror-placeholder');
+    const placeholderEl = codeMirrorLines?.querySelector('.cm-placeholder') || codeMirrorLines?.querySelector('.CodeMirror-placeholder');
     const topOffset = this.getLineHeight(pos.line, codeMirror);
     if (placeholderEl instanceof HTMLElement && placeholderEl.offsetParent !== null) {
       const linesRect = codeMirrorLines.getBoundingClientRect();

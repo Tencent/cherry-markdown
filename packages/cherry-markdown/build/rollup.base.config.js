@@ -77,6 +77,7 @@ const options = {
     resolve({
       // ignoreGlobal: false,
       browser: true,
+      extensions: ['.mjs', '.js', '.ts', '.json'],
     }),
     commonjs({
       // non-CommonJS modules will be ignored, but you can also
@@ -90,7 +91,7 @@ const options = {
 
       // search for files other than .js files (must already
       // be transpiled by a previous plugin!)
-      extensions: ['.js'], // Default: [ '.js' ]
+      extensions: ['.js', '.ts'], // Default: [ '.js' ]
 
       // if true then uses of `global` won't be dealt with by this plugin
       ignoreGlobal: false, // Default: false
@@ -111,10 +112,11 @@ const options = {
     babel({
       // use inline config to avoid Babel attempting to load an ESM config file asynchronously
       babelHelpers: 'runtime',
-      exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5|lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
+      extensions: ['.js', '.ts'],
+      exclude: [/node_modules[\\/](?!parse5|lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
       babelrc: false,
       configFile: false,
-      presets: babelConfig.presets,
+      presets: [...babelConfig.presets, '@babel/preset-typescript'],
       plugins: babelConfig.plugins,
     }),
     // TODO: 重构抽出为独立的插件

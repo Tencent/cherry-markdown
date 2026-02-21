@@ -22,14 +22,11 @@
 import escapeRegExp from 'lodash/escapeRegExp';
 import SyntaxBase from '@/core/SyntaxBase';
 import { allSuggestList, suggesterKeywords } from '@/core/hooks/SuggestList';
-import { Pass } from 'codemirror/src/util/misc';
+// CM6 兼容：Pass 在 CM5 中用于指示键映射应传递给下一个处理器
+const Pass = { toString: () => 'CodeMirror.Pass' };
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import { isBrowser } from '@/utils/env';
-
-/**
- * @typedef {import('codemirror')} CodeMirror
- */
 
 /**
  * @typedef { Object } SuggestListItemObject 推荐列表项对象
@@ -466,11 +463,13 @@ class SuggesterPanel {
    * @param {CodeMirror} codemirror
    */
   relocatePanel(codemirror) {
-    // 找到光标位置来确定候选框位置
-    let $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
-    // 当editor选中某一内容时，".CodeMirror-cursor"会消失，此时通过定位".selected"来确定候选框位置
+    // 找到光标位置来确定候选框位置（兼容 CM5/CM6 DOM 结构）
+    let $cursor = this.$cherry.wrapperDom.querySelector('.cm-cursor')
+      || this.$cherry.wrapperDom.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
+    // 当editor选中某一内容时，cursor 可能不可见，通过定位选区来确定候选框位置
     if (!$cursor) {
-      $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-selected');
+      $cursor = this.$cherry.wrapperDom.querySelector('.cm-selectionBackground')
+        || this.$cherry.wrapperDom.querySelector('.CodeMirror-selected');
     }
     if (!$cursor) {
       return false;
@@ -503,10 +502,11 @@ class SuggesterPanel {
    * @returns {{ left: number, top: number }}
    */
   getCursorPos(codemirror) {
-    const $cursor = document.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
+    const $cursor = document.querySelector('.cm-cursor') || document.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
     if (!$cursor) return null;
     const pos = codemirror.getCursor();
-    const lineHeight = codemirror.lineInfo(pos.line).handle.height;
+    const lineHandle = codemirror.getLineHandle(pos.line);
+    const lineHeight = lineHandle ? lineHandle.height : 20;
     const rect = $cursor.getBoundingClientRect();
     const top = rect.top + lineHeight;
     const { left } = rect;
@@ -539,9 +539,11 @@ class SuggesterPanel {
 
     const actualPanelHeight = this.$suggesterPanel.offsetHeight || 380;
 
-    let $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
+    let $cursor = this.$cherry.wrapperDom.querySelector('.cm-cursor')
+      || this.$cherry.wrapperDom.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
     if (!$cursor) {
-      $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-selected');
+      $cursor = this.$cherry.wrapperDom.querySelector('.cm-selectionBackground')
+        || this.$cherry.wrapperDom.querySelector('.CodeMirror-selected');
     }
     if (!$cursor) {
       this.$suggesterPanel.style.display = 'none';

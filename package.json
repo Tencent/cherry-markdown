@@ -23,7 +23,7 @@
     "build:client": "yarn workspace @cherry-markdown/client tauri build",
     "build:vscodePlugin": "yarn workspace cherry-markdown-vscode-plugin build",
     "example:react": "yarn workspace @cherry-markdown/react_demo dev",
-     "test": "yarn workspace cherry-markdown test:all",
+    "test": "yarn workspace cherry-markdown test:all",
     "test:unit": "yarn workspace cherry-markdown test",
     "test:visual": "yarn workspace cherry-markdown test:visual",
     "test:visual:update": "yarn workspace cherry-markdown test:visual:update",
@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.0",
+    "@babel/preset-typescript": "^7.28.5",
     "@changesets/cli": "^2.29.5",
     "@cherry-markdown/changesets-changelog-github": "^0.0.1",
     "@commitlint/config-conventional": "^19.6.0",

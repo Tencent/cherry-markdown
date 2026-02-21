@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 import { getCodeBlockRule } from '@/utils/regexp';
-import codemirror from 'codemirror';
+import { CM6Adapter } from '@/adapters/CM6Adapter';
 import { getCodePreviewLangSelectElement } from '@/utils/code-preview-language-setting';
 import { copyToClip } from '@/utils/copy';
-import 'codemirror/keymap/sublime';
 
 export default class CodeBlockHandler {
   /**
@@ -279,20 +278,11 @@ export default class CodeBlockHandler {
   $drawEditor() {
     const dom = document.createElement('div');
     dom.className = 'cherry-previewer-codeBlock-content-handler__input';
-    const input = document.createElement('textarea');
-    input.id = 'codeMirrorEditor';
-    dom.appendChild(input);
-    const editorInstance = codemirror.fromTextArea(input, {
-      mode: '',
-      theme: 'default',
-      scrollbarStyle: 'null', // 取消滚动动画
-      lineNumbers: true, // 显示行号
-      autofocus: true, // 自动对焦
-      lineWrapping: true, // 自动换行
-      cursorHeight: 0.85, // 光标高度，0.85好看一些
-      indentUnit: 4, // 缩进单位为4
-      tabSize: 4, // 一个tab转换成的空格数量
-      keyMap: 'sublime',
+    const container = document.createElement('div');
+    container.id = 'codeMirrorEditor';
+    dom.appendChild(container);
+    const editorInstance = new CM6Adapter(container, {
+      value: '',
     });
     const editor = this.codeMirror;
     editorInstance.on('change', () => {
