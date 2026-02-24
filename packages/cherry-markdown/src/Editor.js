@@ -202,8 +202,7 @@ export default class Editor {
       }
       const from = { line: target.line, ch: target.ch };
       const to = { line: target.line, ch: target.ch + 1 };
-      // 当没有标记时再进行标记，判断textMaker的className必须为"cm-fullWidth"，
-      // 因为cm的addon里会引入className: "CodeMirror-composing"的textMaker干扰判断
+      // 当没有标记时再进行标记
       const existMarksLength = editor.findMarks(from, to).filter((item) => {
         return item.className === 'cm-fullWidth';
       });
@@ -309,7 +308,6 @@ export default class Editor {
     ) {
       html = '';
     }
-    // CM6Adapter 的 getDoc() 返回自身，直接使用 codemirror 即可
     const codemirrorDoc = codemirror;
     this.fileUploadCount = 0;
     // 只要有html内容，就不处理剪切板里的其他内容，这么做的后果是粘贴excel内容时，只会粘贴html内容，不会把excel对应的截图粘进来
@@ -425,9 +423,9 @@ export default class Editor {
       throw new Error('The specific element is not a textarea.');
     }
 
-    // 创建 CM6 容器
+    // 创建编辑器容器
     const container = document.createElement('div');
-    container.className = 'CodeMirror';
+    container.className = 'cherry-editor-inner';
     textArea.parentNode?.insertBefore(container, textArea);
     textArea.style.display = 'none';
     this.textArea = textArea;

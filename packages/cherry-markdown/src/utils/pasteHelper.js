@@ -238,8 +238,9 @@ const pasteHelper = {
   },
 
   getLastSelectedPosition() {
-    const cm6Selected = Array.from(this.codemirror.getWrapperElement().getElementsByClassName('cm-selectionBackground'));
-    const selectedObjs = cm6Selected.length > 0 ? cm6Selected : Array.from(this.codemirror.getWrapperElement().getElementsByClassName('CodeMirror-selected'));
+    const selectedObjs = Array.from(
+      this.codemirror.getWrapperElement().getElementsByClassName('cm-selectionBackground'),
+    );
     let width = 0;
     let top = 0;
     if (selectedObjs.length <= 0) {

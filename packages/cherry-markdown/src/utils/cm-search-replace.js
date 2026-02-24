@@ -413,7 +413,7 @@ export default class SearchBox {
 
   toggleReplace() {
     const { cm } = this;
-    const cmEle = cm.display.wrapper;
+    const cmEle = cm.getWrapperElement();
     if (cmEle.parentElement.querySelector('[action=toggleReplace]').innerText === '+') {
       cmEle.parentElement.querySelector('[action=toggleReplace]').innerText = '-';
       this.replaceBox.style.display = '';
@@ -588,7 +588,7 @@ export default class SearchBox {
       matches = cm.getValue().match(reg);
     }
     const count = matches ? matches.length : 0;
-    const cmEle = cm.display.wrapper;
+    const cmEle = cm.getWrapperElement();
     const countEle = cmEle.parentElement.querySelector('.ace_search_counter');
     if (countEle) {
       countEle.innerText = `${count} ${this.$cherry.locale.matchesFoundText}`;

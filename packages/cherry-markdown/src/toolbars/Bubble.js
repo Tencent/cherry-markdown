@@ -48,7 +48,7 @@ export default class Bubble extends Toolbar {
     this.bubbleDom = this.options.dom;
     this.editorDom = this.options.editor.getEditorDom();
     this.initBubbleDom();
-    this.editorDom.querySelector('.CodeMirror').appendChild(this.bubbleDom);
+    this.editorDom.querySelector('.cm-editor').appendChild(this.bubbleDom);
     Object.entries(this.shortcutKeyMap).forEach(([key, value]) => {
       this.$cherry.toolbar.shortcutKeyMap[key] = value;
     });
@@ -88,7 +88,6 @@ export default class Bubble extends Toolbar {
       this.bubbleDom.dataset.scrollTop = String(this.getScrollTop());
     }
     const positionLimit = this.editorDom.querySelector('.cm-content')?.getBoundingClientRect()
-      || this.editorDom.querySelector('.CodeMirror-lines')?.firstChild?.getBoundingClientRect()
       || this.editorDom.getBoundingClientRect();
     const editorPosition = this.editorDom.getBoundingClientRect();
     const minLeft = positionLimit.left - editorPosition.left;
@@ -186,19 +185,21 @@ export default class Bubble extends Toolbar {
           this.lastSelectionsStr = selectionStr;
         }
       }, 10);
-      // 当编辑区选中内容改变时，需要展示/隐藏bubble工具栏，并计算工具栏位置
-      if (info.origin !== '*mouse' && (info.origin !== null || typeof info.origin === 'undefined')) {
-        return true;
-      }
+
+      // 没有选中内容时隐藏 bubble
       if (!info.ranges[0]) {
-        return true;
+        this.hideBubble();
+        return;
       }
+
+      // 计算选中方向和位置
       const anchor = info.ranges[0].anchor.line * 1000000 + info.ranges[0].anchor.ch;
       const head = info.ranges[0].head.line * 1000000 + info.ranges[0].head.ch;
       let direction = 'asc';
       if (anchor > head) {
         direction = 'desc';
       }
+
       setTimeout(() => {
         const selections = codemirror.getSelections();
         if (selections.join('').length <= 0) {
@@ -206,17 +207,15 @@ export default class Bubble extends Toolbar {
           return;
         }
         const selectedObjs = codemirror.getWrapperElement().getElementsByClassName('cm-selectionBackground');
-        // CM5 fallback
-        const finalSelectedObjs = selectedObjs.length > 0 ? selectedObjs : codemirror.getWrapperElement().getElementsByClassName('CodeMirror-selected');
         const editorPosition = this.editorDom.getBoundingClientRect();
         let width = 0;
         let top = 0;
-        if (typeof finalSelectedObjs !== 'object' || finalSelectedObjs.length <= 0) {
+        if (!selectedObjs || selectedObjs.length <= 0) {
           this.hideBubble();
           return;
         }
-        for (let key = 0; key < finalSelectedObjs.length; key++) {
-          const one = finalSelectedObjs[key];
+        for (let key = 0; key < selectedObjs.length; key++) {
+          const one = selectedObjs[key];
           const position = one.getBoundingClientRect();
           const targetTop = position.top - editorPosition.top;
           if (direction === 'asc') {

@@ -30,7 +30,7 @@
     min-height: calc(100% - var(--height-toolbar));
   }
 
-  .CodeMirror {
+  .cherry-editor {
     height: 100%;
   }
 
@@ -681,19 +681,7 @@
       }
     }
     &--typewriter {
-      // CM5 打字机模式
-      .CodeMirror-lines {
-        position: relative;
-        &::before {
-          content: '';
-          display: block;
-        }
-        &::after {
-          content: '';
-          display: block;
-        }
-      }
-      // CM6 打字机模式（对应 CM5 的 .CodeMirror-lines）
+      // 打字机模式
       .cm-content {
         position: relative;
         &::before {
@@ -708,138 +696,90 @@
     }
   }
 
-  // ========== CodeMirror 编辑器样式（兼容 CM5 & CM6） ==========
+  // ========== 编辑器样式 ==========
 
-  .CodeMirror {
-    // CM5 的 codemirror.css 提供的基础样式（CM6 不再自动注入这些）
+  // 内层编辑器容器（CM6 实例挂载点）
+  .cherry-editor-inner {
     position: relative;
+    height: 100%;
     overflow: hidden;
     font-family: var(--font-family-sans);
     background-color: var(--base-editor-bg);
     color: var(--base-font-color);
+  }
 
-    // codemirror 依赖隐藏的 textarea 计算行高，这里将字体大小设置为行高，避免输入法遮挡内容
-    // Fixed https://github.com/Tencent/cherry-markdown/issues/82
-    textarea {
-      font-size: var(--md-paragraph-line-height);
+  // 光标
+  .cm-cursor,
+  .cm-dropCursor {
+    border-left: 1px solid var(--editor-cursor-color) !important;
+  }
+
+  // 选区
+  .cm-selectionBackground {
+    background-color: var(--editor-selection-bg) !important;
+  }
+
+  // 覆盖 @codemirror/view 内置的 monospace 字体和行高
+  // CM6 滚动容器（对应 CM5 的 .CodeMirror-scroll）
+  .cm-scroller {
+    font-family: var(--font-family-sans) !important;
+    line-height: inherit !important;
+    overflow: auto !important;
+    // 确保滚动条样式生效
+    &::-webkit-scrollbar {
+      height: 7px;
+      width: 7px;
+      background: transparent;
+    }
+    &::-webkit-scrollbar:hover {
+      background: rgba(128, 128, 128, 0.1);
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #d3d7da;
+      border-radius: 6px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.6);
+    }
+    &::-webkit-scrollbar-corner {
+      background: transparent;
     }
 
-    // CM5 光标
-    .CodeMirror-cursor {
-      border-left: 1px solid var(--editor-cursor-color);
+    // CM6 内容区域样式
+    .cm-image-marker,
+    .cm-quote,
+    .cm-header,
+    .cm-atom {
+      color: var(--editor-header-color);
     }
 
-    // CM6 光标
-    .cm-cursor,
-    .cm-dropCursor {
-      border-left: 1px solid var(--editor-cursor-color) !important;
-    }
-
-    // CM5 选区
-    .CodeMirror-selected {
-      background-color: var(--editor-selection-bg);
-    }
-
-    // CM6 选区
-    .cm-selectionBackground {
-      background-color: var(--editor-selection-bg) !important;
-    }
-
-    // CM6：覆盖 @codemirror/view 内置的 monospace 字体和行高
-    .cm-scroller {
-      font-family: var(--font-family-sans) !important;
-      line-height: inherit !important;
-    }
-
-    // CM6 编辑器根元素
-    .cm-editor {
-      background-color: var(--base-editor-bg);
+    .cm-link {
       color: var(--base-font-color);
-      height: 100% !important;
-
-      &.cm-focused {
-        outline: none !important;
-      }
+      text-decoration: none;
     }
 
-    .CodeMirror-scroll {
-      span,
-      .cm-variable-2,
-      .cm-string,
-      .cm-strong,
-      .cm-em,
-      .cm-meta {
-        color: var(--base-font-color);
-      }
-
-      .cm-image-marker,
-      .cm-quote,
-      .cm-header,
-      .cm-atom {
-        color: var(--editor-header-color);
-      }
-
-      .cm-url {
-        background-color: var(--editor-url-bg-color);
-      }
-
-      .cm-comment,
-      .cm-url {
-        color: var(--editor-comment-color);
-      }
+    .cm-url {
+      background-color: var(--editor-url-bg-color);
     }
 
-    // CM6 内容区域样式（对应 CM5 的 .CodeMirror-scroll）
-    // 注意：CM6 使用 HighlightStyle 动态生成的 class 名进行语法高亮，
-    // 不能用 `span` 选择器覆盖所有 span 的颜色，否则会覆盖语法高亮。
-    // 默认文本颜色通过 .cm-editor { color } 继承。
-    .cm-scroller {
-      .cm-image-marker,
-      .cm-quote,
-      .cm-header,
-      .cm-atom {
-        color: var(--editor-header-color);
-      }
-
-      .cm-url {
-        background-color: var(--editor-url-bg-color);
-      }
-
-      .cm-comment,
-      .cm-url {
-        color: var(--editor-comment-color);
-      }
+    .cm-comment,
+    .cm-url {
+      color: var(--editor-comment-color);
     }
   }
 
-  // CM5 内容区域 padding
-  .CodeMirror-lines {
-    padding: 15px 34px;
+  // 编辑器根元素
+  .cm-editor {
+    background-color: var(--base-editor-bg);
+    color: var(--base-font-color);
+    height: 100% !important;
 
-    // 对draw.io的xml数据，和图片里base64格式的数据限定最大宽度
-    .long-text,
-    .drawio,
-    .base64,
-    .url-truncated {
-      display: inline-block;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 80px;
-      white-space: nowrap;
-      vertical-align: bottom;
-      color: darkmagenta !important;
-      font-size: var(--font-size-xs) !important;
-    }
-
-    .url-truncated {
-      max-width: 200px;
-    }
-    .cm-invalidchar[title="\\\\u200b"] {
-      display: none;
+    &.cm-focused {
+      outline: none !important;
     }
   }
 
-  // CM6 内容区域 padding（对应 CM5 的 .CodeMirror-lines）
+  // 内容区域 padding
   .cm-content {
     padding: 15px 34px;
 
@@ -866,12 +806,12 @@
     }
   }
 
-  // CM6 行内容：与 CM5 的 .CodeMirror-line padding: 0 4px 保持一致
+  // 行内容
   .cm-line {
     padding: 0 4px !important;
   }
 
-  // CM6 gutters 样式（隐藏——CM5 在 lineNumbers:false 时无 gutters）
+  // gutters 样式（隐藏）
   .cm-gutters {
     display: none !important;
   }
@@ -880,19 +820,19 @@
     color: var(--editor-header-color);
   }
 
-  // 粗体 - CM5: .cm-strong → font-weight: bold
+  // 粗体
   .cm-s-default .cm-strong,
   .cm-strong {
     font-weight: bold;
   }
 
-  // 斜体 - CM5: .cm-em → font-style: italic
+  // 斜体
   .cm-s-default .cm-em,
   .cm-em {
     font-style: italic;
   }
 
-  // 删除线 - CM5: .cm-strikethrough → text-decoration: line-through
+  // 删除线
   .cm-s-default .cm-strikethrough,
   .cm-strikethrough {
     text-decoration: line-through;
@@ -924,14 +864,20 @@
   }
 
   .cm-s-default .cm-link {
-    color: var(--editor-link-color);
-    text-decoration: underline;
+    color: var(--base-font-color);
+    text-decoration: none;
   }
 
   .cm-s-default .cm-url {
     background: var(--editor-url-bg-color);
     font-family: var(--font-family-mono);
     font-size: 0.9em;
+  }
+
+  // 确保代码块内的链接不被渲染为链接颜色（CM5 兼容）
+  .cm-s-default .cm-monospace .cm-link {
+    color: var(--base-font-color) !important;
+    text-decoration: none !important;
   }
 
   .cm-s-default .cm-variable-2 {

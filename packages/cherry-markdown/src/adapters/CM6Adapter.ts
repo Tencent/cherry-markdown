@@ -2,21 +2,42 @@
  * CodeMirror 6 适配器
  *
  * 将 CodeMirror 6 实例包装成 IEditorAdapterExtended 接口
- * 用于与现有 Cherry Markdown 代码兼容
+ * 用于与 Cherry Markdown 代码集成
  *
- * CM5 → CM6 关键映射：
- * - 行号：CM5 从 0 开始，CM6 从 1 开始
- * - 位置：CM5 使用 {line, ch}，CM6 使用偏移量
- * - 事件：CM6 使用 updateListener 替代 on/off
- * - 标记：CM6 使用 Decoration 系统
+ * cspell:ignore keymap lezer contenteditable
+ *
+ * 行号说明：
+ * - 接口使用 0-based 行号（从 0 开始）
+ * - CM6 内部使用 1-based 行号（从 1 开始）
+ * - 适配器自动处理转换
  */
 
-import { EditorView, keymap, drawSelection, dropCursor, highlightSpecialChars, rectangularSelection, crosshairCursor, Decoration, WidgetType } from '@codemirror/view';
-import { EditorState, EditorSelection, RangeSet, Extension, Facet, StateEffect, Transaction, Text } from '@codemirror/state';
-import { defaultKeymap, history, historyKeymap, indentWithTab, undo, redo, undoDepth, redoDepth, isolateHistory } from '@codemirror/commands';
+import {
+  EditorView,
+  keymap,
+  drawSelection,
+  dropCursor,
+  highlightSpecialChars,
+  rectangularSelection,
+  crosshairCursor,
+  Decoration,
+  WidgetType,
+} from '@codemirror/view';
+import { EditorState, EditorSelection, Extension, Facet, StateEffect, Text, StateField } from '@codemirror/state';
+import {
+  defaultKeymap,
+  history,
+  historyKeymap,
+  indentWithTab,
+  undo,
+  redo,
+  undoDepth,
+  redoDepth,
+  isolateHistory,
+} from '@codemirror/commands';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
-import { GFM, Strikethrough } from '@lezer/markdown';
-import { search, SearchCursor as CM6SearchCursor, highlightSelectionMatches } from '@codemirror/search';
+import { GFM, Strikethrough, InlineParser } from '@lezer/markdown';
+import { search, highlightSelectionMatches } from '@codemirror/search';
 import { bracketMatching, indentOnInput, syntaxHighlighting, HighlightStyle } from '@codemirror/language';
 import { tags as t } from '@lezer/highlight';
 import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
@@ -76,6 +97,7 @@ export interface ITextMarker {
   clear(): void;
   find(): { from: Position; to: Position } | null;
   options?: MarkTextOptions;
+  className?: string;
 }
 
 export interface MarkTextOptions {
@@ -118,7 +140,10 @@ export interface IEditorAdapterExtended {
   scrollTo(x: number | null, y: number | null): void;
   scrollIntoView(pos: Position | null): void;
   charCoords(pos: Position, mode?: 'local' | 'global'): { left: number; top: number; bottom: number };
-  cursorCoords(where?: 'start' | 'end' | null, mode?: 'local' | 'global'): { left: number; top: number; bottom: number };
+  cursorCoords(
+    where?: 'start' | 'end' | null,
+    mode?: 'local' | 'global',
+  ): { left: number; top: number; bottom: number };
   coordsChar(coords: { left: number; top: number }): Position;
   focus(): void;
   hasFocus(): boolean;
@@ -137,7 +162,7 @@ export interface IEditorAdapterExtended {
   getLineHandle(line: number): { height: number; text: string };
   eachLine(start: number, end: number, callback: (lineHandle: { height: number; text: string }) => void): void;
   refresh(): void;
-  // CM5 兼容
+  operation(fn: () => void): void;
   addOverlay?(overlay: any): void;
   removeOverlay?(overlay: any): void;
   showMatchesOnScrollbar?: any;
@@ -145,6 +170,40 @@ export interface IEditorAdapterExtended {
   doc?: IEditorAdapterExtended;
   trigger?(eventName: string, ...args: any[]): void;
 }
+
+// ============================================================================
+// Cherry 扩展语法解析器
+// ============================================================================
+
+/**
+ * 支持链接属性扩展语法 {target=_blank}
+ * 在链接后面紧跟 {...} 属性语法
+ */
+const LinkAttributeParser: InlineParser = {
+  name: 'linkAttribute',
+  parse: (cx, next, pos) => {
+    // 只在 '{' 后面解析
+    if (next !== 123 /* '{' */) return -1;
+
+    // 检查前面是否有链接
+    const text = cx.text.slice(pos);
+    const match = /^\{([^}]+)\}/.exec(text);
+    if (!match) return -1;
+
+    // 创建属性节点
+    const endPos = pos + match[0].length;
+    cx.addElement(cx.elt('LinkAttribute', pos, endPos));
+    return endPos;
+  },
+};
+
+/**
+ * Cherry Markdown 扩展语法
+ */
+const CherryMarkdownExtension = {
+  defineNodes: [{ name: 'LinkAttribute', style: t.processingInstruction }],
+  parseInline: [LinkAttributeParser],
+};
 
 // ============================================================================
 // Cherry 主题语法高亮样式
@@ -156,36 +215,17 @@ export interface IEditorAdapterExtended {
  */
 const cherryHighlightStyle = HighlightStyle.define([
   // ============================================================================
-  // 与线上 Cherry Markdown (CM5) 的实际渲染效果保持一致
-  //
-  // CM5 对 "> [Github 地址](url){target=_blank}" 的渲染：
-  //   > → cm-quote → --editor-header-color
-  //   (空格) → span → --base-font-color
-  //   [Github 地址] → cm-link → --editor-link-color + underline
-  //   (url) → cm-string cm-url → --editor-comment-color + bg
-  //   {target=_blank} → span → --base-font-color
-  //
-  // CM6 的差异：
-  //   - "Blockquote/..." 会给整个引用块内容加 quote tag（CM5 只给 ">" 加 cm-quote）
-  //   - "QuoteMark" 被映射到 processingInstruction（而不是 quote）
-  //   - "Link/..." 会给链接内容加 link tag
-  //   - "LinkMark" ([, ]) 被映射到 processingInstruction
-  //
-  // 解决方案：
-  //   - 不给 processingInstruction 设置颜色，让它继承父元素颜色
-  //   - 把 link、url 放在 quote 之后，确保优先级高于 quote
+  // Cherry Markdown 语法高亮样式
+  // 使用 CSS 变量支持主题切换
   // ============================================================================
 
   // ---- 第 1 层：不设颜色的 tag ----
   // 处理指令（#, **, *, ~~, `, [, ], (, ), >, - 等标记符号）
   // 不设置颜色，让标记符号继承其所在语法元素的颜色
-  // 这样 > 继承 quote 颜色，[, ] 继承 link 颜色，(, ) 继承 url 颜色
   { tag: t.processingInstruction },
 
   // ---- 第 2 层：通用基础颜色 ----
-  // 普通文本 - CM5: .CodeMirror-scroll span → --base-font-color
   { tag: t.content, color: 'var(--base-font-color)' },
-  // 字符串 - CM5: .CodeMirror-scroll .cm-string → --base-font-color
   { tag: t.string, color: 'var(--editor-string-color)' },
   // 关键字
   { tag: t.keyword, color: 'var(--editor-keyword-color)' },
@@ -229,28 +269,43 @@ const cherryHighlightStyle = HighlightStyle.define([
   { tag: t.heading, color: 'var(--editor-header-color)', fontWeight: 'bold' },
 
   // ---- 第 4 层：引用块 ----
-  // CM5: .CodeMirror-scroll .cm-quote → --editor-header-color
-  // CM6 的 Blockquote/... 会给整个引用块加 quote tag
-  // 放在 link/url 之前，这样引用块内的 link/url 可以覆盖 quote 样式
   { tag: t.quote, color: 'var(--editor-header-color)' },
 
   // 标签名（代码块语言标识）
   { tag: t.labelName, color: 'var(--editor-comment-color)' },
 
   // ---- 第 5 层：链接（优先级高于 quote）----
-  // CM5: .cm-s-default .cm-link → --editor-link-color + underline
-  // 在引用块内，链接文字应该保持 link 样式
-  { tag: t.link, color: 'var(--editor-link-color)', textDecoration: 'underline' },
+  // 在编辑模式下，仅有 [text] 不应显示为链接颜色
+  // 但 Lezer markdown 解析器会将其标记为 link
+  // 因此我们在编辑模式下将 link 显示为普通颜色
+  // 真正的链接（[text](url)）的渲染应该在预览端处理
+  { tag: t.link, color: 'var(--base-font-color)', textDecoration: 'none' },
 
   // ---- 第 6 层：URL（优先级高于 quote 和 link）----
-  // CM5: .CodeMirror-scroll .cm-url → --editor-comment-color + bg
-  { tag: t.url, color: 'var(--editor-comment-color)', backgroundColor: 'var(--editor-url-bg-color)', fontFamily: 'var(--font-family-mono)', fontSize: '0.9em' },
+  {
+    tag: t.url,
+    color: 'var(--editor-comment-color)',
+    backgroundColor: 'var(--editor-url-bg-color)',
+    fontFamily: 'var(--font-family-mono)',
+    fontSize: '0.9em',
+  },
 
   // ---- 第 7 层：注释和代码（最高优先级）----
   { tag: t.comment, color: 'var(--editor-comment-color)', fontFamily: 'var(--font-family-mono)', fontSize: '0.9em' },
-  { tag: t.lineComment, color: 'var(--editor-comment-color)', fontFamily: 'var(--font-family-mono)', fontSize: '0.9em' },
-  { tag: t.blockComment, color: 'var(--editor-comment-color)', fontFamily: 'var(--font-family-mono)', fontSize: '0.9em' },
-  { tag: t.monospace, color: 'var(--editor-comment-color)', fontFamily: 'var(--font-family-mono)', fontSize: '0.9em' },
+  {
+    tag: t.lineComment,
+    color: 'var(--editor-comment-color)',
+    fontFamily: 'var(--font-family-mono)',
+    fontSize: '0.9em',
+  },
+  {
+    tag: t.blockComment,
+    color: 'var(--editor-comment-color)',
+    fontFamily: 'var(--font-family-mono)',
+    fontSize: '0.9em',
+  },
+  // monospace（代码块）：使用正常字体颜色，优先级最高以覆盖所有其他样式
+  { tag: t.monospace, color: 'var(--base-font-color)', fontFamily: 'var(--font-family-mono)', fontSize: '0.9em' },
 
   // 错误
   { tag: t.invalid, color: 'var(--editor-error-color)' },
@@ -261,22 +316,22 @@ const cherryHighlightStyle = HighlightStyle.define([
 // ============================================================================
 
 /**
- * CM5 位置 {line, ch} 转 CM6 偏移量
- * 注意：CM5 行号从 0 开始，CM6 从 1 开始
+ * 位置 {line, ch} 转偏移量
+ * 注意：接口使用 0-based 行号，CM6 内部使用 1-based 行号
  */
 function posToOffset(doc: Text, pos: Position): number {
-  const lineNum = Math.max(1, Math.min(pos.line + 1, doc.lines)); // CM5 line 0 → CM6 line 1
+  const lineNum = Math.max(1, Math.min(pos.line + 1, doc.lines));
   const line = doc.line(lineNum);
   return Math.max(line.from, Math.min(line.from + pos.ch, line.to));
 }
 
 /**
- * CM6 偏移量转 CM5 位置 {line, ch}
+ * 偏移量转位置 {line, ch}
  */
 function offsetToPos(doc: Text, offset: number): Position {
   const line = doc.lineAt(offset);
   return {
-    line: line.number - 1, // CM6 line 1 → CM5 line 0
+    line: line.number - 1,
     ch: offset - line.from,
   };
 }
@@ -290,10 +345,12 @@ function offsetToPos(doc: Text, offset: number): Position {
  */
 interface EventState {
   handlers: Map<EditorEventType, Set<EditorEventHandler>>;
+  // 存储 DOM 事件监听器引用，用于解绑
+  domListeners: Map<string, Map<EditorEventHandler, (e: Event) => void>>;
 }
 
 const eventHandlersFacet = Facet.define<EventState, EventState>({
-  combine: (values) => values[0] || { handlers: new Map() },
+  combine: (values) => values[0] || { handlers: new Map(), domListeners: new Map() },
 });
 
 /**
@@ -302,10 +359,10 @@ const eventHandlersFacet = Facet.define<EventState, EventState>({
 function createEventListenerExtension(adapter: CM6Adapter): Extension {
   return EditorView.updateListener.of((update) => {
     const state = update.state.facet(eventHandlersFacet);
-    const handlers = state.handlers;
-    
+    const { handlers } = state;
+
     if (update.docChanged) {
-      // beforeChange 事件（CM5 兼容）
+      // beforeChange 事件
       const beforeChangeHandlers = handlers.get('beforeChange' as EditorEventType);
       if (beforeChangeHandlers) {
         beforeChangeHandlers.forEach((handler) => handler(adapter));
@@ -313,19 +370,16 @@ function createEventListenerExtension(adapter: CM6Adapter): Extension {
 
       const changeHandlers = handlers.get('change');
       if (changeHandlers) {
-        // 构造 CM5 兼容的 changeObj：{ text, from, to, origin }
-        // CM5 中 text 是插入文本按行分割的数组，from/to 是 {line, ch} 格式
-        const doc = update.state.doc;
+        // 构造 changeObj：{ text, from, to, origin }
         const prevDoc = update.startState.doc;
-        
+
         update.transactions.forEach((tr) => {
           if (tr.docChanged) {
-            tr.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
+            tr.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
               const fromPos = offsetToPos(prevDoc, fromA);
               const toPos = offsetToPos(prevDoc, toA);
               const insertedText = inserted.toString();
               const textLines = insertedText.split('\n');
-              // origin: CM5 用 '+input', '+delete', 'paste' 等
               const isUserInput = tr.isUserEvent('input');
               const isDelete = tr.isUserEvent('delete');
               const isPaste = tr.isUserEvent('input.paste');
@@ -333,7 +387,7 @@ function createEventListenerExtension(adapter: CM6Adapter): Extension {
               if (isPaste) origin = 'paste';
               else if (isDelete) origin = '+delete';
               else if (isUserInput) origin = '+input';
-              
+
               const changeObj = {
                 text: textLines,
                 from: fromPos,
@@ -347,27 +401,22 @@ function createEventListenerExtension(adapter: CM6Adapter): Extension {
         });
       }
     }
-    
+
     if (update.selectionSet) {
       const cursorHandlers = handlers.get('cursorActivity');
       if (cursorHandlers) {
         cursorHandlers.forEach((handler) => handler(adapter));
       }
 
-      // beforeSelectionChange 事件（CM5 兼容）
-      // CM5 中此事件在选区变化前触发，CM6 中在变化后触发，但参数格式兼容
+      // beforeSelectionChange 事件
       const beforeSelHandlers = handlers.get('beforeSelectionChange' as EditorEventType);
       if (beforeSelHandlers) {
-        const doc = update.state.doc;
+        const { doc } = update.state;
         const ranges = update.state.selection.ranges.map((r) => ({
           anchor: offsetToPos(doc, r.anchor),
           head: offsetToPos(doc, r.head),
         }));
-        // origin: 用于区分鼠标选区和键盘选区
-        // CM5 中 origin 是 '*mouse' | '+input' | '+move' 等
-        const hasMouseTransaction = update.transactions.some(
-          (tr) => tr.isUserEvent('select.pointer')
-        );
+        const hasMouseTransaction = update.transactions.some((tr) => tr.isUserEvent('select.pointer'));
         const info = {
           ranges,
           origin: hasMouseTransaction ? '*mouse' : null,
@@ -398,6 +447,50 @@ interface TextMark {
 }
 
 // ============================================================================
+// 动态装饰管理 (用于 markText)
+// ============================================================================
+
+interface MarkDecoration {
+  id: number;
+  from: number;
+  to: number;
+  decoration: Decoration;
+}
+
+const addMarkEffect = StateEffect.define<MarkDecoration>();
+const removeMarkEffect = StateEffect.define<number>();
+
+/**
+ * 创建动态装饰状态字段
+ */
+function createMarkDecorationsField() {
+  return StateField.define<MarkDecoration[]>({
+    create: () => [],
+    update: (markList, tr) => {
+      let marks = markList.map((m) => ({
+        ...m,
+        from: tr.changes.mapPos(m.from),
+        to: tr.changes.mapPos(m.to),
+      }));
+      for (const e of tr.effects) {
+        if (e.is(addMarkEffect)) {
+          marks.push(e.value);
+        } else if (e.is(removeMarkEffect)) {
+          marks = marks.filter((m) => m.id !== e.value);
+        }
+      }
+      return marks;
+    },
+    provide: (f) =>
+      EditorView.decorations.from(f, (marks) =>
+        marks.length > 0
+          ? Decoration.set(marks.sort((a, b) => a.from - b.from).map((m) => m.decoration.range(m.from, m.to)))
+          : Decoration.none,
+      ),
+  });
+}
+
+// ============================================================================
 // CM6 适配器实现
 // ============================================================================
 
@@ -407,14 +500,11 @@ export class CM6Adapter implements IEditorAdapterExtended {
   private marks: Map<number, TextMark> = new Map();
   private markIdCounter = 0;
   private options: Record<string, any> = {};
+  private markDecorationsField = createMarkDecorationsField();
 
   constructor(container: HTMLElement, options: Record<string, any> = {}) {
-    // 初始化 extraKeys（CM5 兼容），确保 Suggester 等模块可以安全访问
-    if (!options.extraKeys) {
-      options.extraKeys = {};
-    }
     this.options = options;
-    this.eventState = { handlers: new Map() };
+    this.eventState = { handlers: new Map(), domListeners: new Map() };
 
     this.view = new EditorView({
       parent: container,
@@ -444,14 +534,14 @@ export class CM6Adapter implements IEditorAdapterExtended {
       autocompletion(),
       rectangularSelection(),
       crosshairCursor(),
-      
+
       // 搜索功能
       search({ top: true }),
       highlightSelectionMatches(),
-      
-      // 语言支持（含 GFM 扩展：删除线、表格等）
-      markdown({ base: markdownLanguage, extensions: [GFM, Strikethrough] }),
-      
+
+      // 语言支持（含 GFM 扩展：删除线、表格等，以及 Cherry 扩展语法）
+      markdown({ base: markdownLanguage, extensions: [GFM, Strikethrough, CherryMarkdownExtension] }),
+
       // 键位映射
       keymap.of([
         ...closeBracketsKeymap,
@@ -461,14 +551,17 @@ export class CM6Adapter implements IEditorAdapterExtended {
         indentWithTab,
         ...historyKeymap,
       ]),
-      
+
       // 事件系统
       eventHandlersFacet.of(this.eventState),
       createEventListenerExtension(this),
-      
+
       // 行包装
       EditorView.lineWrapping,
-      
+
+      // 动态装饰管理 (用于 markText)
+      this.markDecorationsField,
+
       // Cherry 主题覆盖
       // 注意：EditorView.theme() 生成 scoped class（如 .ͼ1f），specificity 高于普通 CSS
       // 因此必须在 JS 端设置 CM6 默认样式会覆盖的关键属性
@@ -489,7 +582,7 @@ export class CM6Adapter implements IEditorAdapterExtended {
   }
 
   setValue(value: string): void {
-    const doc = this.view.state.doc;
+    const { doc } = this.view.state;
     this.view.dispatch({
       changes: { from: 0, to: doc.length, insert: value },
       annotations: isolateHistory.of('full'),
@@ -497,8 +590,8 @@ export class CM6Adapter implements IEditorAdapterExtended {
   }
 
   getLine(lineNum: number): string {
-    const doc = this.view.state.doc;
-    const lineIndex = lineNum + 1; // CM5 line 0 → CM6 line 1
+    const { doc } = this.view.state;
+    const lineIndex = lineNum + 1; // 0-based 转 1-based
     if (lineIndex < 1 || lineIndex > doc.lines) {
       return '';
     }
@@ -514,14 +607,14 @@ export class CM6Adapter implements IEditorAdapterExtended {
   }
 
   getRange(from: Position, to: Position): string {
-    const doc = this.view.state.doc;
+    const { doc } = this.view.state;
     const startOffset = posToOffset(doc, from);
     const endOffset = posToOffset(doc, to);
     return doc.sliceString(startOffset, endOffset);
   }
 
   replaceRange(text: string, from: Position, to?: Position, _origin?: string): void {
-    const doc = this.view.state.doc;
+    const { doc } = this.view.state;
     const startOffset = posToOffset(doc, from);
     const endOffset = to ? posToOffset(doc, to) : startOffset;
     this.view.dispatch({
@@ -533,8 +626,8 @@ export class CM6Adapter implements IEditorAdapterExtended {
 
   getCursor(pos?: 'start' | 'end' | 'head' | 'anchor'): Position {
     const sel = this.view.state.selection;
-    const main = sel.main;
-    
+    const { main } = sel;
+
     if (pos === 'anchor') {
       return offsetToPos(this.view.state.doc, main.anchor);
     }
@@ -548,14 +641,18 @@ export class CM6Adapter implements IEditorAdapterExtended {
     return offsetToPos(this.view.state.doc, main.head);
   }
 
-  setCursor(pos: Position | number, ch?: number, _options?: { bias?: number; origin?: string; scroll?: boolean }): void {
+  setCursor(
+    pos: Position | number,
+    ch?: number,
+    _options?: { bias?: number; origin?: string; scroll?: boolean },
+  ): void {
     let targetPos: Position;
     if (typeof pos === 'number') {
       targetPos = { line: pos, ch: ch ?? 0 };
     } else {
       targetPos = pos;
     }
-    
+
     const offset = posToOffset(this.view.state.doc, targetPos);
     this.view.dispatch({
       selection: { anchor: offset, head: offset },
@@ -571,16 +668,18 @@ export class CM6Adapter implements IEditorAdapterExtended {
   }
 
   getSelections(): string[] {
-    return this.view.state.selection.ranges.map((range) => 
-      this.view.state.doc.sliceString(range.from, range.to)
-    );
+    return this.view.state.selection.ranges.map((range) => this.view.state.doc.sliceString(range.from, range.to));
   }
 
-  setSelection(anchor: Position, head?: Position, _options?: { bias?: number; origin?: string; scroll?: boolean }): void {
-    const doc = this.view.state.doc;
+  setSelection(
+    anchor: Position,
+    head?: Position,
+    _options?: { bias?: number; origin?: string; scroll?: boolean },
+  ): void {
+    const { doc } = this.view.state;
     const anchorOffset = posToOffset(doc, anchor);
     const headOffset = head ? posToOffset(doc, head) : anchorOffset;
-    
+
     this.view.dispatch({
       selection: { anchor: anchorOffset, head: headOffset },
       scrollIntoView: true,
@@ -588,19 +687,16 @@ export class CM6Adapter implements IEditorAdapterExtended {
   }
 
   setSelections(ranges: SelectionRange[], primary?: number): void {
-    const doc = this.view.state.doc;
-    const selRanges = ranges.map((r) => EditorSelection.range(
-      posToOffset(doc, r.anchor),
-      posToOffset(doc, r.head)
-    ));
-    
+    const { doc } = this.view.state;
+    const selRanges = ranges.map((r) => EditorSelection.range(posToOffset(doc, r.anchor), posToOffset(doc, r.head)));
+
     this.view.dispatch({
       selection: EditorSelection.create(selRanges, primary ?? 0),
     });
   }
 
   listSelections(): SelectionRange[] {
-    const doc = this.view.state.doc;
+    const { doc } = this.view.state;
     return this.view.state.selection.ranges.map((range) => ({
       anchor: offsetToPos(doc, range.anchor),
       head: offsetToPos(doc, range.head),
@@ -609,8 +705,8 @@ export class CM6Adapter implements IEditorAdapterExtended {
 
   replaceSelection(text: string, collapse?: 'around' | 'start' | 'end'): void {
     const sel = this.view.state.selection.main;
-    const from = sel.from;
-    const to = sel.to;
+    const { from } = sel;
+    const { to } = sel;
     let selection: { anchor: number; head?: number };
 
     if (collapse === 'around') {
@@ -630,18 +726,48 @@ export class CM6Adapter implements IEditorAdapterExtended {
     });
   }
 
-  replaceSelections(texts: string[]): void {
+  replaceSelections(texts: string[], collapse?: 'around' | 'start' | 'end'): void {
+    const { ranges } = this.view.state.selection;
     const changes: Array<{ from: number; to: number; insert: string }> = [];
-    
-    this.view.state.selection.ranges.forEach((range, i) => {
+    const newRanges: Array<{ anchor: number; head: number }> = [];
+    let offset = 0;
+
+    ranges.forEach((range, i) => {
+      const text = texts[i] || '';
+      const insertLength = text.length;
+      const deleteLength = range.to - range.from;
+
       changes.push({
         from: range.from,
         to: range.to,
-        insert: texts[i] || '',
+        insert: text,
       });
+
+      // 计算新选区位置（考虑前面 changes 的偏移）
+      const adjustedFrom = range.from + offset;
+      let anchor: number;
+      let head: number;
+
+      if (collapse === 'around') {
+        anchor = adjustedFrom;
+        head = adjustedFrom + insertLength;
+      } else if (collapse === 'start') {
+        anchor = adjustedFrom;
+        head = adjustedFrom;
+      } else {
+        // 默认 'end'
+        anchor = adjustedFrom + insertLength;
+        head = adjustedFrom + insertLength;
+      }
+
+      newRanges.push({ anchor, head });
+      offset += insertLength - deleteLength;
     });
-    
-    this.view.dispatch({ changes });
+
+    this.view.dispatch({
+      changes,
+      selection: EditorSelection.create(newRanges.map((r) => EditorSelection.range(r.anchor, r.head))),
+    });
   }
 
   somethingSelected(): boolean {
@@ -650,23 +776,23 @@ export class CM6Adapter implements IEditorAdapterExtended {
   }
 
   findWordAt(pos: Position): SelectionRange {
-    const doc = this.view.state.doc;
+    const { doc } = this.view.state;
     const offset = posToOffset(doc, pos);
     const line = doc.lineAt(offset);
-    const text = line.text;
+    const { text } = line;
     const lineOffset = offset - line.from;
-    
+
     // 查找单词边界
     let start = lineOffset;
     let end = lineOffset;
-    
+
     while (start > 0 && /\w/.test(text[start - 1])) {
-      start--;
+      start -= 1;
     }
     while (end < text.length && /\w/.test(text[end])) {
-      end++;
+      end += 1;
     }
-    
+
     return {
       anchor: { line: line.number - 1, ch: start },
       head: { line: line.number - 1, ch: end },
@@ -681,41 +807,38 @@ export class CM6Adapter implements IEditorAdapterExtended {
       this.eventState.handlers.set(evtName as EditorEventType, new Set());
     }
     this.eventState.handlers.get(evtName as EditorEventType)!.add(handler);
-    
-    // DOM 事件特殊处理：将 CM5 风格的事件注册映射到 CM6 的 DOM 事件
-    switch (evtName) {
-      case 'focus':
-        this.view.contentDOM.addEventListener('focus', (e) => handler(this, e));
-        break;
-      case 'blur':
-        this.view.contentDOM.addEventListener('blur', (e) => handler(this, e));
-        break;
-      case 'scroll':
-        this.view.scrollDOM.addEventListener('scroll', (e) => handler(this, e));
-        break;
-      case 'keydown':
-        this.view.contentDOM.addEventListener('keydown', (e) => handler(this, e));
-        break;
-      case 'keyup':
-        this.view.contentDOM.addEventListener('keyup', (e) => handler(this, e));
-        break;
-      case 'paste':
-        this.view.contentDOM.addEventListener('paste', (e) => handler(this, e));
-        break;
-      case 'mousedown':
-        this.view.contentDOM.addEventListener('mousedown', (e) => handler(this, e));
-        break;
-      case 'drop':
-        this.view.contentDOM.addEventListener('drop', (e) => handler(this, e));
-        break;
-      // change, cursorActivity, beforeChange 通过 updateListener 处理
-      default:
-        break;
+
+    // DOM 事件特殊处理
+    const domEvents = ['focus', 'blur', 'scroll', 'keydown', 'keyup', 'paste', 'mousedown', 'drop'];
+    if (domEvents.includes(evtName)) {
+      const domHandler = (e: Event) => handler(this, e);
+
+      // 存储监听器引用
+      if (!this.eventState.domListeners.has(evtName)) {
+        this.eventState.domListeners.set(evtName, new Map());
+      }
+      this.eventState.domListeners.get(evtName)!.set(handler, domHandler);
+
+      // 添加事件监听
+      const target = evtName === 'scroll' ? this.view.scrollDOM : this.view.contentDOM;
+      target.addEventListener(evtName, domHandler);
     }
   }
 
   off(eventName: EditorEventType | string, handler: EditorEventHandler): void {
-    this.eventState.handlers.get(eventName as EditorEventType)?.delete(handler);
+    const evtName = eventName as string;
+    this.eventState.handlers.get(evtName as EditorEventType)?.delete(handler);
+
+    // 移除 DOM 事件监听器
+    const domListenersMap = this.eventState.domListeners.get(evtName);
+    if (domListenersMap) {
+      const domHandler = domListenersMap.get(handler);
+      if (domHandler) {
+        const target = evtName === 'scroll' ? this.view.scrollDOM : this.view.contentDOM;
+        target.removeEventListener(evtName, domHandler);
+        domListenersMap.delete(handler);
+      }
+    }
   }
 
   trigger(_eventName: string, ..._args: any[]): void {
@@ -743,11 +866,13 @@ export class CM6Adapter implements IEditorAdapterExtended {
     // CM6 清除历史：通过重建带有当前内容但无历史的编辑器状态
     const currentContent = this.view.state.doc.toString();
     const currentSelection = this.view.state.selection;
-    this.view.setState(EditorState.create({
-      doc: currentContent,
-      selection: currentSelection,
-      extensions: this.getBaseExtensions(),
-    }));
+    this.view.setState(
+      EditorState.create({
+        doc: currentContent,
+        selection: currentSelection,
+        extensions: this.getBaseExtensions(),
+      }),
+    );
   }
 
   // ============ 搜索功能 ============
@@ -756,17 +881,34 @@ export class CM6Adapter implements IEditorAdapterExtended {
     const adapter = this;
     let currentMatch: { from: number; to: number } | null = null;
     let searchOffset = start ? posToOffset(adapter.view.state.doc, start) : 0;
-    
+    // 缓存所有匹配，避免重复扫描
+    let cachedMatches: Array<{ from: number; to: number }> | null = null;
+
     const getSearchRegex = () => {
       if (typeof query === 'string') {
         return new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
       }
-      return new RegExp(query.source, query.flags.includes('g') ? query.flags : query.flags + 'g');
+      return new RegExp(query.source, query.flags.includes('g') ? query.flags : `${query.flags}g`);
+    };
+
+    const getAllMatches = (text: string, regex: RegExp): Array<{ from: number; to: number }> => {
+      if (cachedMatches) return cachedMatches;
+      const matches: Array<{ from: number; to: number }> = [];
+      // 创建正则表达式副本，避免修改原参数
+      const searchRegex = new RegExp(regex.source, regex.flags);
+      searchRegex.lastIndex = 0;
+      let match: RegExpExecArray | null;
+      while ((match = searchRegex.exec(text)) !== null) {
+        matches.push({ from: match.index, to: match.index + match[0].length });
+        if (match[0].length === 0) searchRegex.lastIndex += 1;
+      }
+      cachedMatches = matches;
+      return matches;
     };
 
     return {
       findNext: () => {
-        const doc = adapter.view.state.doc;
+        const { doc } = adapter.view.state;
         const text = doc.toString();
         const regex = getSearchRegex();
         regex.lastIndex = searchOffset;
@@ -781,42 +923,48 @@ export class CM6Adapter implements IEditorAdapterExtended {
       },
 
       findPrevious: () => {
-        const doc = adapter.view.state.doc;
+        const { doc } = adapter.view.state;
         const text = doc.toString();
         const regex = getSearchRegex();
-        const allMatches: Array<{ from: number; to: number }> = [];
-        let match;
-        regex.lastIndex = 0;
-        
-        while ((match = regex.exec(text)) !== null) {
-          allMatches.push({ from: match.index, to: match.index + match[0].length });
-          if (match[0].length === 0) regex.lastIndex++;
-        }
-        
+        // 使用缓存避免重复扫描
+        const allMatches = getAllMatches(text, regex);
+
         const currentFrom = currentMatch?.from ?? searchOffset;
-        for (let i = allMatches.length - 1; i >= 0; i--) {
-          if (allMatches[i].from < currentFrom) {
-            currentMatch = allMatches[i];
-            searchOffset = allMatches[i].from;
-            return true;
+        // 二分查找优化：找到第一个小于 currentFrom 的匹配
+        let left = 0;
+        let right = allMatches.length - 1;
+        let result = -1;
+
+        while (left <= right) {
+          const mid = Math.floor((left + right) / 2);
+          if (allMatches[mid].from < currentFrom) {
+            result = mid;
+            left = mid + 1;
+          } else {
+            right = mid - 1;
           }
+        }
+
+        if (result >= 0) {
+          currentMatch = allMatches[result];
+          searchOffset = allMatches[result].from;
+          return true;
         }
         currentMatch = null;
         return false;
       },
 
-      from: () => currentMatch ? offsetToPos(adapter.view.state.doc, currentMatch.from) : null,
+      from: () => (currentMatch ? offsetToPos(adapter.view.state.doc, currentMatch.from) : null),
 
-      to: () => currentMatch ? offsetToPos(adapter.view.state.doc, currentMatch.to) : null,
+      to: () => (currentMatch ? offsetToPos(adapter.view.state.doc, currentMatch.to) : null),
 
       replace: (text: string) => {
         if (currentMatch) {
-          const oldLength = currentMatch.to - currentMatch.from;
           adapter.view.dispatch({
             changes: { from: currentMatch.from, to: currentMatch.to, insert: text },
           });
-          // 替换后调整搜索偏移量：在替换文本之后继续搜索
-          const delta = text.length - oldLength;
+          // 替换后清除缓存，因为文档已变化
+          cachedMatches = null;
           searchOffset = currentMatch.from + text.length;
           currentMatch = null;
         }
@@ -826,11 +974,22 @@ export class CM6Adapter implements IEditorAdapterExtended {
 
   // ============ 文本标记 ============
 
+  /**
+   * 从 StateField 获取 mark 的实时位置
+   */
+  private getMarkPosition(markId: number): { from: number; to: number } | null {
+    const decorations = this.view.state.field(this.markDecorationsField);
+    const mark = decorations.find((d) => d.id === markId);
+    if (!mark) return null;
+    return { from: mark.from, to: mark.to };
+  }
+
   markText(from: Position, to: Position, options?: MarkTextOptions): ITextMarker {
-    const doc = this.view.state.doc;
+    const { doc } = this.view.state;
     const fromOffset = posToOffset(doc, from);
     const toOffset = posToOffset(doc, to);
-    const id = ++this.markIdCounter;
+    this.markIdCounter += 1;
+    const id = this.markIdCounter;
 
     const mark: TextMark = {
       id,
@@ -845,74 +1004,115 @@ export class CM6Adapter implements IEditorAdapterExtended {
     if (options?.className) {
       const decoration = Decoration.mark({ class: options.className });
       this.view.dispatch({
-        effects: StateEffect.appendConfig.of(
-          EditorView.decorations.of(
-            RangeSet.of([decoration.range(fromOffset, toOffset)])
-          )
-        ),
+        effects: addMarkEffect.of({ id, from: fromOffset, to: toOffset, decoration }),
       });
     }
 
+    // 如果有 replacedWith，添加 widget 装饰
+    if (options?.replacedWith) {
+      const widget = Decoration.widget({
+        widget: new (class extends WidgetType {
+          toDOM() {
+            return options.replacedWith!;
+          }
+        })(),
+        side: 0,
+      });
+      this.view.dispatch({
+        effects: addMarkEffect.of({ id, from: fromOffset, to: toOffset, decoration: widget }),
+      });
+    }
+
+    const adapter = this;
     return {
-      clear: () => {
-        this.marks.delete(id);
+      clear() {
+        adapter.marks.delete(id);
+        adapter.view.dispatch({
+          effects: removeMarkEffect.of(id),
+        });
       },
-      find: () => {
-        const m = this.marks.get(id);
-        if (!m) return null;
+      find() {
+        // 从 StateField 获取实时位置
+        const pos = adapter.getMarkPosition(id);
+        if (!pos) return null;
         return {
-          from: offsetToPos(this.view.state.doc, m.from),
-          to: offsetToPos(this.view.state.doc, m.to),
+          from: offsetToPos(adapter.view.state.doc, pos.from),
+          to: offsetToPos(adapter.view.state.doc, pos.to),
         };
       },
       options,
+      className: options?.className,
     };
   }
 
   findMarks(from: Position, to: Position): ITextMarker[] {
-    const doc = this.view.state.doc;
+    const { doc } = this.view.state;
     const fromOffset = posToOffset(doc, from);
     const toOffset = posToOffset(doc, to);
-    
+
     const result: ITextMarker[] = [];
-    
+    const adapter = this;
+
     this.marks.forEach((mark, id) => {
-      if (mark.from >= fromOffset && mark.to <= toOffset) {
+      // 使用实时位置进行匹配
+      const pos = adapter.getMarkPosition(id);
+      if (pos && pos.from >= fromOffset && pos.to <= toOffset) {
         result.push({
-          clear: () => this.marks.delete(id),
-          find: () => ({
-            from: offsetToPos(this.view.state.doc, mark.from),
-            to: offsetToPos(this.view.state.doc, mark.to),
-          }),
+          clear() {
+            adapter.marks.delete(id);
+            adapter.view.dispatch({
+              effects: removeMarkEffect.of(id),
+            });
+          },
+          find: () => {
+            const currentPos = adapter.getMarkPosition(id);
+            if (!currentPos) return null;
+            return {
+              from: offsetToPos(adapter.view.state.doc, currentPos.from),
+              to: offsetToPos(adapter.view.state.doc, currentPos.to),
+            };
+          },
           options: mark.options,
+          className: mark.options?.className,
         });
       }
     });
-    
+
     return result;
   }
 
   getAllMarks(): ITextMarker[] {
     const result: ITextMarker[] = [];
-    
+    const adapter = this;
+
     this.marks.forEach((mark, id) => {
       result.push({
-        clear: () => this.marks.delete(id),
-        find: () => ({
-          from: offsetToPos(this.view.state.doc, mark.from),
-          to: offsetToPos(this.view.state.doc, mark.to),
-        }),
+        clear() {
+          adapter.marks.delete(id);
+          adapter.view.dispatch({
+            effects: removeMarkEffect.of(id),
+          });
+        },
+        find: () => {
+          const pos = adapter.getMarkPosition(id);
+          if (!pos) return null;
+          return {
+            from: offsetToPos(adapter.view.state.doc, pos.from),
+            to: offsetToPos(adapter.view.state.doc, pos.to),
+          };
+        },
         options: mark.options,
+        className: mark.options?.className,
       });
     });
-    
+
     return result;
   }
 
   // ============ 滚动功能 ============
 
   getScrollInfo(): ScrollInfo {
-    const scrollDOM = this.view.scrollDOM;
+    const { scrollDOM } = this.view;
     return {
       top: scrollDOM.scrollTop,
       left: scrollDOM.scrollLeft,
@@ -932,17 +1132,18 @@ export class CM6Adapter implements IEditorAdapterExtended {
     }
   }
 
-  scrollIntoView(pos: Position | null): void {
+  scrollIntoView(pos?: Position | null): void {
     if (pos) {
+      // 滚动到指定位置
       const offset = posToOffset(this.view.state.doc, pos);
       this.view.dispatch({
         effects: EditorView.scrollIntoView(offset),
       });
     } else {
-      // CM5 兼容：scrollIntoView(null) 滚动到当前光标位置
-      const head = this.view.state.selection.main.head;
+      // 滚动到当前选区（包含整个选区范围）
+      const sel = this.view.state.selection.main;
       this.view.dispatch({
-        effects: EditorView.scrollIntoView(head),
+        effects: EditorView.scrollIntoView(sel),
       });
     }
   }
@@ -954,8 +1155,10 @@ export class CM6Adapter implements IEditorAdapterExtended {
    */
   private safeCoords(offset: number): { left: number; top: number; bottom: number } {
     try {
-      if (typeof this.view.coordsAt === 'function') {
-        const coords = this.view.coordsAt(offset);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const viewAny = this.view as any;
+      if (typeof viewAny.coordsAt === 'function') {
+        const coords = viewAny.coordsAt(offset);
         if (coords) {
           return { left: coords.left, top: coords.top, bottom: coords.bottom };
         }
@@ -964,7 +1167,7 @@ export class CM6Adapter implements IEditorAdapterExtended {
       // jsdom 或无渲染环境
     }
     // 基于行号的估算值（每行 20px）
-    const doc = this.view.state.doc;
+    const { doc } = this.view.state;
     const line = doc.lineAt(offset);
     const lineHeight = 20;
     const top = (line.number - 1) * lineHeight;
@@ -977,10 +1180,13 @@ export class CM6Adapter implements IEditorAdapterExtended {
     return this.safeCoords(offset);
   }
 
-  cursorCoords(where?: 'start' | 'end' | null, _mode?: 'local' | 'global'): { left: number; top: number; bottom: number } {
+  cursorCoords(
+    where?: 'start' | 'end' | null,
+    _mode?: 'local' | 'global',
+  ): { left: number; top: number; bottom: number } {
     const sel = this.view.state.selection.main;
     let offset: number;
-    
+
     if (where === 'start') {
       offset = Math.min(sel.from, sel.to);
     } else if (where === 'end') {
@@ -988,7 +1194,7 @@ export class CM6Adapter implements IEditorAdapterExtended {
     } else {
       offset = sel.head;
     }
-    
+
     return this.safeCoords(offset);
   }
 
@@ -1008,7 +1214,7 @@ export class CM6Adapter implements IEditorAdapterExtended {
     const charWidth = 8;
     const line = Math.max(0, Math.floor(coords.top / lineHeight));
     const ch = Math.max(0, Math.floor(coords.left / charWidth));
-    const doc = this.view.state.doc;
+    const { doc } = this.view.state;
     const safeLineNum = Math.min(line, doc.lines - 1);
     const docLine = doc.line(safeLineNum + 1);
     const safeCh = Math.min(ch, docLine.length);
@@ -1046,46 +1252,28 @@ export class CM6Adapter implements IEditorAdapterExtended {
     return this.options[key];
   }
 
-  // ============ CM5 兼容方法 ============
+  // ============ 兼容方法 ============
 
-  /**
-   * CM5 addOverlay 兼容（搜索高亮在 CM6 中通过内置 search 扩展实现）
-   */
   addOverlay(_overlay: any): void {
-    // CM6 不使用 overlay 机制，搜索高亮由内置 search 扩展处理
+    // 搜索高亮由内置 search 扩展处理
   }
 
-  /**
-   * CM5 removeOverlay 兼容
-   */
   removeOverlay(_overlay: any): void {
-    // CM6 不使用 overlay 机制
+    // 搜索高亮由内置 search 扩展处理
   }
 
-  /**
-   * CM5 showMatchesOnScrollbar 兼容
-   */
   showMatchesOnScrollbar?: any = undefined;
 
-  /**
-   * CM5 save 兼容：将内容写回 textarea（如果存在）
-   */
   save(): void {
-    // CM6 不需要 save，内容通过事件同步
+    // 内容通过事件同步
   }
 
   // ============ 文档操作 ============
 
-  /**
-   * 返回文档对象（CM5 兼容，返回自身）
-   */
   getDoc(): IEditorAdapterExtended {
     return this;
   }
 
-  /**
-   * CM5 兼容：editor.doc 属性
-   */
   get doc(): IEditorAdapterExtended {
     return this;
   }
@@ -1094,12 +1282,13 @@ export class CM6Adapter implements IEditorAdapterExtended {
 
   execCommand(name: string): void {
     switch (name) {
-      case 'selectAll':
-        const doc = this.view.state.doc;
+      case 'selectAll': {
+        const { doc } = this.view.state;
         this.view.dispatch({
           selection: { anchor: 0, head: doc.length },
         });
         break;
+      }
       case 'undo':
         this.undo();
         break;
@@ -1129,14 +1318,14 @@ export class CM6Adapter implements IEditorAdapterExtended {
 
   lineAtHeight(height: number, mode?: 'local' | 'page' | 'window'): number {
     let clientY: number;
-    
+
     if (mode === 'local' || !mode) {
       clientY = height;
     } else {
-      const scrollTop = this.view.scrollDOM.scrollTop;
+      const { scrollTop } = this.view.scrollDOM;
       clientY = height - this.view.dom.getBoundingClientRect().top + scrollTop;
     }
-    
+
     try {
       if (typeof this.view.posAtCoords === 'function') {
         const pos = this.view.posAtCoords({ x: 0, y: clientY });
@@ -1154,12 +1343,12 @@ export class CM6Adapter implements IEditorAdapterExtended {
   }
 
   getLineHandle(line: number): { height: number; text: string } {
-    const doc = this.view.state.doc;
+    const { doc } = this.view.state;
     const lineNum = Math.max(1, Math.min(line + 1, doc.lines));
     const docLine = doc.line(lineNum);
     const coords = this.safeCoords(docLine.from);
     const lineHeight = coords.bottom - coords.top;
-    
+
     return {
       height: lineHeight > 0 ? lineHeight : 20,
       text: docLine.text,
@@ -1169,24 +1358,29 @@ export class CM6Adapter implements IEditorAdapterExtended {
   // ============ 行遍历 ============
 
   eachLine(start: number, end: number, callback: (lineHandle: { height: number; text: string }) => void): void {
-    const doc = this.view.state.doc;
+    const { doc } = this.view.state;
     const safeStart = Math.max(0, start);
     const safeEnd = Math.min(end, doc.lines);
-    
+
     for (let i = safeStart; i < safeEnd; i++) {
       const lineHandle = this.getLineHandle(i);
       callback(lineHandle);
     }
   }
 
+  // ============ 批量操作 ============
+
+  operation(fn: () => void): void {
+    fn();
+  }
+
   // ============ 刷新 ============
 
   refresh(): void {
-    // CM6 不需要手动刷新，但可以触发重绘
     this.view.dispatch({
       effects: EditorView.scrollIntoView(this.view.state.selection.main.head),
     });
-    // 触发 refresh 事件（CM5 兼容），供 Bubble/FloatMenu 使用
+    // 触发 refresh 事件
     const refreshHandlers = this.eventState.handlers.get('refresh' as EditorEventType);
     if (refreshHandlers) {
       refreshHandlers.forEach((handler) => handler(this));
@@ -1214,25 +1408,26 @@ export function createCM6Adapter(container: HTMLElement, options: Record<string,
 
 /**
  * 从 textarea 创建 CM6 编辑器
- * 模拟 CM5 的 fromTextArea API
  */
 export function fromTextArea(textarea: HTMLTextAreaElement, options: Record<string, any> = {}): IEditorAdapterExtended {
   const container = document.createElement('div');
   container.className = 'cm-editor-container';
   textarea.parentNode?.insertBefore(container, textarea);
+  // eslint-disable-next-line no-param-reassign
   textarea.style.display = 'none';
-  
+
   const editorOptions = {
     ...options,
     value: textarea.value,
   };
-  
+
   const adapter = new CM6Adapter(container, editorOptions);
-  
+
   // 同步内容到原始 textarea
   adapter.on('change', () => {
+    // eslint-disable-next-line no-param-reassign
     textarea.value = adapter.getValue();
   });
-  
+
   return adapter;
 }

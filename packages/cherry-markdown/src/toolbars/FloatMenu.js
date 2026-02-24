@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 import Toolbar from './Toolbar';
+
+/**
+ * @typedef {import('@/adapters/CM6Adapter').IEditorAdapterExtended} IEditorAdapterExtended
+ */
+
 /**
  * 当光标处于编辑器新行起始位置时出现的浮动工具栏
  */
@@ -25,7 +30,7 @@ export default class FloatMenu extends Toolbar {
   init() {
     this.editor = this.$cherry.editor;
     this.editorDom = this.editor.getEditorDom();
-    const scrollContainer = this.editorDom.querySelector('.cm-scroller') || this.editorDom.querySelector('.CodeMirror-scroll');
+    const scrollContainer = this.editorDom.querySelector('.cm-scroller');
     if (scrollContainer) {
       scrollContainer.appendChild(this.options.dom);
     }
@@ -71,12 +76,12 @@ export default class FloatMenu extends Toolbar {
   /**
    * 当光标激活时触发，当光标处于行起始位置时展示float工具栏；反之隐藏
    * @param {Event} evt
-   * @param {CodeMirror.Editor} codeMirror
+   * @param {IEditorAdapterExtended} codeMirror
    * @returns
    */
   cursorActivity(evt, codeMirror) {
     const pos = codeMirror.getCursor();
-    const codeMirrorLines = document.querySelector('.cherry-editor .cm-content') || document.querySelector('.cherry-editor .CodeMirror-lines');
+    const codeMirrorLines = document.querySelector('.cherry-editor .cm-content');
     if (!codeMirrorLines) {
       return false;
     }
@@ -97,7 +102,7 @@ export default class FloatMenu extends Toolbar {
 
     // 当配置 codemirror.placeholder 时，测量 placeholder 中文本的范围
     // 将浮动工具栏定位到 placeholder 文本后面
-    const placeholderEl = codeMirrorLines?.querySelector('.cm-placeholder') || codeMirrorLines?.querySelector('.CodeMirror-placeholder');
+    const placeholderEl = codeMirrorLines?.querySelector('.cm-placeholder');
     const topOffset = this.getLineHeight(pos.line, codeMirror);
     if (placeholderEl instanceof HTMLElement && placeholderEl.offsetParent !== null) {
       const linesRect = codeMirrorLines.getBoundingClientRect();
@@ -119,7 +124,7 @@ export default class FloatMenu extends Toolbar {
    * 判断是否需要隐藏Float工具栏
    * 有选中内容，或者光标所在行有内容时隐藏float 工具栏
    * @param {number} line
-   * @param {CodeMirror.Editor} codeMirror
+   * @param {IEditorAdapterExtended} codeMirror
    * @returns {boolean} 是否需要隐藏float工具栏，true：需要隐藏
    */
   isHidden(line, codeMirror) {
@@ -140,7 +145,7 @@ export default class FloatMenu extends Toolbar {
   /**
    * 获取对应行的行高度，用来让float 工具栏在该行保持垂直居中
    * @param {number} line
-   * @param {CodeMirror.Editor} codeMirror
+   * @param {IEditorAdapterExtended} codeMirror
    * @returns
    */
   getLineHeight(line, codeMirror) {

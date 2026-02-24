@@ -22,8 +22,6 @@
 import escapeRegExp from 'lodash/escapeRegExp';
 import SyntaxBase from '@/core/SyntaxBase';
 import { allSuggestList, suggesterKeywords } from '@/core/hooks/SuggestList';
-// CM6 兼容：Pass 在 CM5 中用于指示键映射应传递给下一个处理器
-const Pass = { toString: () => 'CodeMirror.Pass' };
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import { isBrowser } from '@/utils/env';
@@ -257,7 +255,8 @@ class SuggesterPanel {
   panelWrap = `<div class="cherry-suggester-panel"></div>`;
 
   hasEditor() {
-    return !!this.editor && !!this.editor.editor.display && !!this.editor.editor.display.wrapper;
+    // CM6 兼容：检查 getWrapperElement 方法而非 display 属性
+    return !!this.editor && !!this.editor.editor && typeof this.editor.editor.getWrapperElement === 'function';
   }
 
   /**
@@ -296,44 +295,6 @@ class SuggesterPanel {
       }
       keyAction = false;
     });
-
-    const extraKeys = this.editor.editor.getOption('extraKeys');
-    const decorateKeys = ['Up', 'Down', 'Enter'];
-    decorateKeys.forEach((key) => {
-      if (typeof extraKeys[key] === 'function') {
-        const proxyTarget = extraKeys[key];
-        extraKeys[key] = (codemirror) => {
-          if (this.cursorMove) {
-            const res = proxyTarget.call(codemirror, codemirror);
-
-            if (res) {
-              return res;
-            }
-            // logic to decide whether to move up or not
-            // return Pass.toString();
-          }
-        };
-      } else if (!extraKeys[key]) {
-        extraKeys[key] = () => {
-          if (this.cursorMove) {
-            // logic to decide whether to move up or not
-            return Pass.toString();
-          }
-        };
-      } else if (typeof extraKeys[key] === 'string') {
-        const command = extraKeys[key];
-        extraKeys[key] = (codemirror) => {
-          if (this.cursorMove) {
-            this.editor.editor.execCommand(command);
-
-            // logic to decide whether to move up or not
-            // return Pass.toString();
-          }
-        };
-      }
-    });
-
-    this.editor.editor.setOption('extraKeys', extraKeys);
 
     this.editor.editor.on('scroll', (codemirror, evt) => {
       if (!this.searchCache) {
@@ -463,13 +424,11 @@ class SuggesterPanel {
    * @param {CodeMirror} codemirror
    */
   relocatePanel(codemirror) {
-    // 找到光标位置来确定候选框位置（兼容 CM5/CM6 DOM 结构）
-    let $cursor = this.$cherry.wrapperDom.querySelector('.cm-cursor')
-      || this.$cherry.wrapperDom.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
+    // 找到光标位置来确定候选框位置
+    let $cursor = this.$cherry.wrapperDom.querySelector('.cm-cursor');
     // 当editor选中某一内容时，cursor 可能不可见，通过定位选区来确定候选框位置
     if (!$cursor) {
-      $cursor = this.$cherry.wrapperDom.querySelector('.cm-selectionBackground')
-        || this.$cherry.wrapperDom.querySelector('.CodeMirror-selected');
+      $cursor = this.$cherry.wrapperDom.querySelector('.cm-selectionBackground');
     }
     if (!$cursor) {
       return false;
@@ -502,7 +461,7 @@ class SuggesterPanel {
    * @returns {{ left: number, top: number }}
    */
   getCursorPos(codemirror) {
-    const $cursor = document.querySelector('.cm-cursor') || document.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
+    const $cursor = document.querySelector('.cm-cursor');
     if (!$cursor) return null;
     const pos = codemirror.getCursor();
     const lineHandle = codemirror.getLineHandle(pos.line);
@@ -539,11 +498,9 @@ class SuggesterPanel {
 
     const actualPanelHeight = this.$suggesterPanel.offsetHeight || 380;
 
-    let $cursor = this.$cherry.wrapperDom.querySelector('.cm-cursor')
-      || this.$cherry.wrapperDom.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
+    let $cursor = this.$cherry.wrapperDom.querySelector('.cm-cursor');
     if (!$cursor) {
-      $cursor = this.$cherry.wrapperDom.querySelector('.cm-selectionBackground')
-        || this.$cherry.wrapperDom.querySelector('.CodeMirror-selected');
+      $cursor = this.$cherry.wrapperDom.querySelector('.cm-selectionBackground');
     }
     if (!$cursor) {
       this.$suggesterPanel.style.display = 'none';
@@ -753,6 +710,10 @@ class SuggesterPanel {
         }, 0);
         return;
       }
+
+      // CM6 兼容：阻止默认行为，防止光标移动
+      evt.preventDefault();
+      evt.stopPropagation();
 
       this.cursorMove = false;
 
