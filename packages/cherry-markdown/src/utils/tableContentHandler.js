@@ -37,10 +37,17 @@ export default class TableHandler {
     this.previewerDom = previewerDom;
     this.container = container;
     this.codeMirror = codeMirror;
-    this.$initReg();
-    this.$findTableInEditor();
     this.tableElement = tableElement;
     this.$cherry = cherry;
+
+    // 流式渲染场景下没有 codeMirror，跳过表格编辑功能初始化
+    if (!this.codeMirror) {
+      console.warn('TableHandler: codeMirror is not available, table editing is disabled');
+      return;
+    }
+
+    this.$initReg();
+    this.$findTableInEditor();
   }
 
   emit(type, event = {}, callback = () => {}) {

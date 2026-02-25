@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Cherry from './index.stream.core';
+import CherryStream from './CherryStream';
 
-// 完整版stream包可以按需引入mermaid等插件
-// import MermaidCodeEngine from './addons/cherry-code-block-mermaid-plugin';
-// import mermaid from 'mermaid';
-// const mermaidAPI = mermaid?.mermaidAPI;
-// Cherry.usePlugin(MermaidCodeEngine, {
-//   mermaid,
-//   mermaidAPI,
-//   theme: 'default',
-//   sequence: { useMaxWidth: false, showSequenceNumbers: true },
-// });
+import SyntaxHookBase from './core/SyntaxBase';
 
-export * from './index.stream.core';
-export default Cherry;
+// in browser
+if (typeof window !== 'undefined') {
+  // @ts-ignore
+  window.Cherry = CherryStream;
+}
+
+export { SyntaxHookBase };
+export default CherryStream;

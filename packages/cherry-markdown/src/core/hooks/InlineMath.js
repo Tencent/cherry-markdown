@@ -65,7 +65,7 @@ export default class InlineMath extends ParagraphBase {
           }
           this.lastCode = html;
         }
-        result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}">${html}</span>`;
+        result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}" data-content="${encodeURI($m1)}">${html}</span>`;
       }
     } else if (this.MathJax?.tex2svg) {
       // MathJax渲染
@@ -76,7 +76,7 @@ export default class InlineMath extends ParagraphBase {
         }
         this.lastCode = svg;
       }
-      result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}">${svg}</span>`;
+      result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}" data-content="${encodeURI($m1)}">${svg}</span>`;
     } else {
       result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock"
         data-lines="${lines}">$${escapeFormulaPunctuations(m1)}$</span>`;

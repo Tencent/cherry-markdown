@@ -14,10 +14,24 @@
  * limitations under the License.
  */
 import { getCodeBlockRule } from '@/utils/regexp';
-import codemirror from 'codemirror';
 import { getCodePreviewLangSelectElement } from '@/utils/code-preview-language-setting';
 import { copyToClip } from '@/utils/copy';
-import 'codemirror/keymap/sublime';
+
+// 使用条件导入，只在非 stream 环境下导入 codemirror
+// 动态导入在 UMD 格式下可能有问题，所以我们用这种方式
+let codemirror = null;
+
+async function loadCodeMirror() {
+  if (!codemirror) {
+    try {
+      codemirror = (await import('codemirror')).default;
+      await import('codemirror/keymap/sublime');
+    } catch (e) {
+      console.warn('CodeMirror not available:', e);
+    }
+  }
+  return codemirror;
+}
 
 export default class CodeBlockHandler {
   /**
@@ -37,6 +51,8 @@ export default class CodeBlockHandler {
     this.codeMirror = codeMirror;
     this.$cherry = parent.previewer.$cherry;
     this.parent = parent;
+    /** @type {boolean} 是否有编辑器（用于流式渲染场景的兼容） */
+    this.hasEditor = codeMirror !== null;
     this.$initReg();
   }
 
@@ -94,6 +110,11 @@ export default class CodeBlockHandler {
     };
   }
   $collectCodeBlockCode() {
+    // 无编辑器时跳过代码收集
+    if (!this.codeMirror) {
+      this.codeBlockEditor.codeBlockCodes = [];
+      return;
+    }
     const codeBlockCodes = [];
     this.codeMirror.getValue().replace(this.codeBlockReg, function (whole, ...args) {
       const match = whole.replace(/^\n*/, '');
@@ -108,6 +129,10 @@ export default class CodeBlockHandler {
     this.codeBlockEditor.codeBlockCodes = codeBlockCodes;
   }
   $setBlockSelection(index) {
+    // 无编辑器时跳过
+    if (!this.codeMirror) {
+      return;
+    }
     const codeBlockCode = this.codeBlockEditor.codeBlockCodes[index];
     const whole = this.codeMirror.getValue();
     const beginLine = whole.slice(0, codeBlockCode.offset).match(/\n/g)?.length ?? 0;
@@ -121,6 +146,10 @@ export default class CodeBlockHandler {
     this.codeMirror.setSelection(...this.codeBlockEditor.info.selection);
   }
   $setLangSelection(index) {
+    // 无编辑器时跳过
+    if (!this.codeMirror) {
+      return;
+    }
     const codeBlockCode = this.codeBlockEditor.codeBlockCodes[index];
     const whole = this.codeMirror.getValue();
     const beginLine = whole.slice(0, codeBlockCode.offset).match(/\n/g)?.length ?? 0;
@@ -138,25 +167,30 @@ export default class CodeBlockHandler {
     if (this.trigger === 'hover') {
       this.$showBtn(isEnableBubbleAndEditorShow);
     }
-    if (this.trigger === 'click') {
+    // click 触发编辑模式，需要有编辑器支持
+    if (this.trigger === 'click' && this.hasEditor) {
       this.$showContentEditor();
     }
     /**
      * 把代码块操作相关元素上的鼠标滚动事件同步到预览区
      */
-    this.container.addEventListener('wheel', (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      this.previewerDom.scrollTop += e.deltaY / 3; // 降低滚动的速度，懒得加动画了
-    });
+    this.container.addEventListener(
+      'wheel',
+      (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        this.previewerDom.scrollTop += e.deltaY / 3; // 降低滚动的速度，懒得加动画了
+      },
+      { passive: false },
+    );
   }
   /**
    * 展示代码块编辑区的编辑器
    */
-  $showContentEditor() {
+  async $showContentEditor() {
     this.editing = true;
     this.$findCodeInEditor();
-    this.$drawEditor();
+    await this.$drawEditor();
   }
   /**
    * 展示代码块区域的按钮
@@ -273,16 +307,25 @@ export default class CodeBlockHandler {
    * 切换代码块的语言
    */
   $changeLang(lang) {
+    // 无编辑器时跳过
+    if (!this.codeMirror) {
+      return;
+    }
     this.$findCodeInEditor(true);
     this.codeMirror.replaceSelection(lang, 'around');
   }
-  $drawEditor() {
+  async $drawEditor() {
+    // 无编辑器时跳过
+    if (!this.codeMirror) {
+      return;
+    }
+    const codemirrorModule = await loadCodeMirror();
     const dom = document.createElement('div');
     dom.className = 'cherry-previewer-codeBlock-content-handler__input';
     const input = document.createElement('textarea');
     input.id = 'codeMirrorEditor';
     dom.appendChild(input);
-    const editorInstance = codemirror.fromTextArea(input, {
+    const editorInstance = codemirrorModule.fromTextArea(input, {
       mode: '',
       theme: 'default',
       scrollbarStyle: 'null', // 取消滚动动画

@@ -22,10 +22,40 @@
 import escapeRegExp from 'lodash/escapeRegExp';
 import SyntaxBase from '@/core/SyntaxBase';
 import { allSuggestList, suggesterKeywords } from '@/core/hooks/SuggestList';
-import { Pass } from 'codemirror/src/util/misc';
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import { isBrowser } from '@/utils/env';
+
+// 使用动态导入避免在 stream 包中引入 codemirror
+let Pass = null;
+
+async function loadCodeMirrorPass() {
+  if (!Pass) {
+    try {
+      const codemirrorUtil = await import('codemirror/src/util/misc');
+      Pass = codemirrorUtil.Pass;
+    } catch (e) {
+      // 如果 stream 包中不存在 codemirror，使用一个替代值
+      Pass = { toString: () => 'Pass' };
+    }
+  }
+  return Pass;
+}
+
+// 在首次使用时加载
+loadCodeMirrorPass().catch(() => {
+  // 即使加载失败也设置一个默认值
+  Pass = { toString: () => 'Pass' };
+});
+
+// 获取 Pass 的同步包装器
+function getPass() {
+  if (!Pass) {
+    // 如果异步加载还未完成，返回一个临时值
+    return { toString: () => 'Pass' };
+  }
+  return Pass;
+}
 
 /**
  * @typedef {import('codemirror')} CodeMirror
@@ -320,7 +350,7 @@ class SuggesterPanel {
         extraKeys[key] = () => {
           if (this.cursorMove) {
             // logic to decide whether to move up or not
-            return Pass.toString();
+            return getPass().toString();
           }
         };
       } else if (typeof extraKeys[key] === 'string') {

@@ -27,8 +27,6 @@ import envReplacePlugin from './env.js';
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT_PATH = path.resolve(currentDir, '..');
-/** 构建目标是否 node */
-const IS_COMMONJS_BUILD = process.env.BUILD_TARGET === 'commonjs';
 
 const aliasPluginOptions = {
   entries: [
@@ -39,13 +37,6 @@ const aliasPluginOptions = {
   ],
 };
 
-if (IS_COMMONJS_BUILD) {
-  aliasPluginOptions.entries.unshift({
-    find: '@/Sanitizer',
-    replacement: path.resolve(PROJECT_ROOT_PATH, 'src', 'Sanitizer.node.js'),
-  });
-}
-
 /**
  * @type {import('rollup').RollupOptions}
  */
@@ -55,9 +46,9 @@ const options = {
     globals: {
       jsdom: 'jsdom',
     },
-    // disable code splitting
-    manualChunks: () => 'cherry',
   },
+  // 禁用 tree-shaking，保持最大兼容性
+  treeshake: false,
   plugins: [
     // Only run ESLint in builds that explicitly enable it. Default: disabled to avoid
     // parser errors when tools load ESM Babel configs during rollup CLI execution.
@@ -127,11 +118,17 @@ const options = {
             return;
           }
           const file = bundle[fileName];
+          // 安全检查：只处理入口文件
+          if (!file.isEntry || !file.facadeModuleId) {
+            return;
+          }
           const fileBaseName = fileName.replace(/\.js$/, '');
           const entryFileName = file.facadeModuleId.split(/[/\\]/).pop();
           const entryFileBase = entryFileName.replace(/\.js$/, '');
-          const namedExports = file.exports.filter((name) => name !== 'default');
-          const defaultName = options.name;
+          // 安全检查：确保 exports 是数组
+          const exports = Array.isArray(file.exports) ? file.exports : [];
+          const namedExports = exports.filter((name) => name !== 'default');
+          const defaultName = options.name || 'Cherry';
           const source = [
             `import ${defaultName}, { ${namedExports.join(', ')} } from "./types/${entryFileBase}";`,
             `export { ${namedExports.join(', ')} };`,

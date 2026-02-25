@@ -9,4 +9,4 @@ src/libs/*.js
 example-applications/**
 examples/**
 docs/**
-packages/cherry-markdown/src/libs/*
+packages/cherry-markdown/src/libs/*.js
