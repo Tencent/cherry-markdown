@@ -78,6 +78,7 @@ export default class CherryStream extends CherryStatic {
     this.options.editor.defaultModel = 'previewOnly';
     this.options.toolbars.showToolbar = false;
 
+    /** @type {Record<string, Record<string, string>>} */
     this.locales = locales;
     if (this.options.locales) {
       this.locales = {
@@ -87,6 +88,7 @@ export default class CherryStream extends CherryStatic {
     }
 
     // loading the locale
+    /** @type {Record<string, string>} */
     this.locale = this.locales[this.options.locale];
 
     if (typeof this.options.engine.global.urlProcessor === 'function') {
@@ -118,7 +120,7 @@ export default class CherryStream extends CherryStatic {
     /**
      * @type {import('./Engine').default}
      */
-    this.engine = new Engine(this.options, this);
+    this.engine = new Engine(this.options, /** @type {import('./Cherry').default} */ (/** @type {*} */ (this)));
     this.init();
   }
 
@@ -274,7 +276,7 @@ export default class CherryStream extends CherryStatic {
     }
 
     this.previewer = new Previewer({
-      $cherry: this,
+      $cherry: /** @type {import('./Cherry').default} */ (/** @type {*} */ (this)),
       previewerDom: previewer,
       value: this.options.value || '',
       isPreviewOnly: true,

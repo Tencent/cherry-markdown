@@ -30,6 +30,8 @@ const terserPlugin = (options = {}) =>
 
 export default {
   ...baseConfig,
+  // 禁用 tree-shaking，保持最大兼容性
+  treeshake: false,
   output: [
     {
       ...baseConfig.output,
@@ -39,24 +41,16 @@ export default {
       name: 'Cherry',
       sourcemap: true,
       compact: false,
+      inlineDynamicImports: true, // 禁用代码分割，强制内联所有动态导入
     },
     {
-      ...baseConfig.output,
       exports: 'named',
-      file: 'dist/cherry-markdown.min.js',
-      format: 'umd',
-      name: 'Cherry',
-      sourcemap: false,
-      compact: true,
-      plugins: [terserPlugin()],
-    },
-    {
-      ...baseConfig.output,
       file: 'dist/cherry-markdown.esm.js',
       format: 'esm',
       name: 'Cherry',
       sourcemap: false,
       compact: true,
+      inlineDynamicImports: true, // 禁用代码分割，强制内联所有动态导入
       plugins: [
         terserPlugin({
           module: true,

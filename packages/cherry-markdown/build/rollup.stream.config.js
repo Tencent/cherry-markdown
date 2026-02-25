@@ -16,6 +16,31 @@
 import terser from '@rollup/plugin-terser';
 import baseConfig from './rollup.base.config.js';
 
+/**
+ * 替换 codemirror 的动态导入为默认值，避免在构建时触发模块解析
+ */
+function replaceCodeMirrorImports() {
+  return {
+    name: 'replace-codemirror-imports',
+    transform(sourceCode, id) {
+      // 只在源文件中替换，跳过 node_modules
+      if (id.includes('node_modules')) {
+        return null;
+      }
+
+      // 将 codemirror 的动态导入替换为返回默认 Promise
+      // 使用正则替换 import() 语句，避免触发代码分割
+      let code = sourceCode;
+      code = code.replace(/import\s*\(\s*['"]codemirror['"]\s*\)/g, 'Promise.resolve({ default: {} })');
+      code = code.replace(
+        /import\s*\(\s*['"]codemirror\/[^'"]+['"]\s*\)/g,
+        'Promise.resolve({ default: { toString: function() { return "Pass"; } } })',
+      );
+      return { code };
+    },
+  };
+}
+
 const terserPlugin = (options = {}) =>
   terser({
     output: {
@@ -42,10 +67,11 @@ const umdOutputConfig = {
     codemirror: 'CodeMirror',
     'codemirror/src/util/misc': 'CodeMirror',
   },
+  manualChunks: undefined, // UMD 单文件输出不需要代码分割
 };
 
 const esmOutputConfig = {
-  ...baseConfig.output,
+  exports: 'named',
   file: 'dist/cherry-markdown.stream.esm.js',
   format: 'esm',
   name: 'Cherry',
@@ -61,27 +87,19 @@ const esmOutputConfig = {
 
 const options = {
   ...baseConfig,
-  input: 'src/index.stream.core.js',
+  // 禁用 tree-shaking，保持最大兼容性
+  treeshake: false,
+  input: 'src/index.stream.js',
   output: [umdOutputConfig, esmOutputConfig],
+  plugins: [...(baseConfig.plugins || []), replaceCodeMirrorImports()],
 };
 
-if (!Array.isArray(options.external)) {
-  options.external = [];
-}
-// 流式渲染包不需要mermaid和codemirror
-options.external.push('mermaid');
-options.external.push('codemirror');
-options.external.push(/^codemirror\/.*/); // 排除所有codemirror子模块
-
-/** 构建目标是否 node */
-const IS_COMMONJS_BUILD = process.env.BUILD_TARGET === 'commonjs';
-
-if (IS_COMMONJS_BUILD) {
-  options.output = {
-    ...umdOutputConfig,
-    file: umdOutputConfig.file.replace(/\.js$/, '.common.js'),
-    format: 'cjs',
-  };
-}
+// 合并 external 配置：保留 baseConfig 的 external（jsdom），并添加 stream 特有的
+options.external = [
+  ...(Array.isArray(baseConfig.external) ? baseConfig.external : []),
+  'mermaid',
+  'codemirror',
+  /^codemirror\/.*/, // 排除所有codemirror子模块
+];
 
 export default options;

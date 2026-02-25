@@ -79,7 +79,7 @@ export default class MathBlock extends ParagraphBase {
           this.lastCode = html;
         }
         result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
-              data-lines="${lines}">${html}</div>`;
+              data-lines="${lines}" data-content="${encodeURI($content)}">${html}</div>`;
       }
     } else if (this.MathJax?.tex2svg) {
       // MathJax渲染
@@ -91,7 +91,7 @@ export default class MathBlock extends ParagraphBase {
         this.lastCode = svg;
       }
       result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
-            data-lines="${lines}">${svg}</div>`;
+            data-lines="${lines}" data-content="${encodeURI($content)}">${svg}</div>`;
     } else {
       result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
       data-lines="${lines}">$$${escapeFormulaPunctuations(content)}$$</div>`;

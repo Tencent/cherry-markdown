@@ -26,14 +26,14 @@ export default class FormulaHandler {
    * @param {Element} target 目标dom
    * @param {HTMLDivElement} container bubble容器
    * @param {HTMLDivElement} previewerDom 预览器dom
-   * @param {import('../Editor').default} editor 编辑器实例
+   * @param {import('../Cherry').default} $cherry Cherry实例（流式渲染场景下不依赖 editor）
    */
-  constructor(trigger, target, container, previewerDom, editor) {
+  constructor(trigger, target, container, previewerDom, $cherry) {
     this.trigger = trigger;
     this.target = target;
     this.container = container;
     this.previewerDom = previewerDom;
-    this.editor = editor;
+    this.$cherry = $cherry;
   }
 
   /**
@@ -108,7 +108,7 @@ export default class FormulaHandler {
     bubbleContainer.id = 'formula-utils-bubble-container'; // 方便 namedItem 获取
     bubbleContainer.className = ['formula-utils-bubble-container'].join(' ');
     this.bubbleContainer = bubbleContainer;
-    this?.editor?.$cherry?.wrapperDom?.appendChild(bubbleContainer);
+    this.$cherry?.wrapperDom?.appendChild(bubbleContainer);
   }
 
   /**
@@ -117,7 +117,7 @@ export default class FormulaHandler {
    * @param {number} y
    */
   showBubble(x, y) {
-    const bubbleContainer = this?.editor?.$cherry?.wrapperDom?.children?.namedItem('formula-utils-bubble-container');
+    const bubbleContainer = this.$cherry?.wrapperDom?.children?.namedItem('formula-utils-bubble-container');
     const targetRect = this.target.getBoundingClientRect();
     if (bubbleContainer instanceof HTMLElement) {
       this.bubbleContainer = bubbleContainer;
@@ -128,19 +128,34 @@ export default class FormulaHandler {
     this.bubbleContainer.style.top = `${y || targetRect.top}px`;
     this.bubbleContainer.style.left = `${x || targetRect.left}px`;
     this.bubbleContainer.addEventListener('click', this.bubbleClickHandler.bind(this), { once: true });
-    this.collectFormulaCode();
   }
 
-  collectFormulaCode() {
-    const formulaCode = [];
-    // @ts-ignore
-    this.editor.editor.getValue().replace(/(\$+)\s*([\w\W]*?)\s*(\1)/g, (whole, start, content, end, offset) => {
-      formulaCode.push({
-        code: content,
-        offset,
-      });
-    });
-    this.formulaCode = formulaCode;
+  /**
+   * 从 DOM 的 data-content 属性获取 latex 源码
+   * @returns {string|null} latex 源码
+   */
+  getLatexFromDOM() {
+    // 找到公式容器元素（mjx-container 的父元素或者带有 data-content 属性的元素）
+    const mjxContainer = this.target.parentElement;
+    if (!mjxContainer) {
+      return null;
+    }
+
+    // 查找带有 data-content 属性的父元素
+    let element = mjxContainer;
+    while (element && !element.dataset?.content) {
+      element = element.parentElement;
+    }
+
+    if (element?.dataset?.content) {
+      try {
+        return decodeURI(element.dataset.content);
+      } catch (e) {
+        return element.dataset.content;
+      }
+    }
+
+    return null;
   }
 
   remove() {
@@ -187,21 +202,14 @@ export default class FormulaHandler {
         case 'latex':
         case 'mathml':
         case 'docx':
-          // 涉及到公式API的操作
+          // 涉及到公式API的操作：直接从 DOM data-content 属性获取 latex
           {
-            const allMjx = this.previewerDom.querySelectorAll('mjx-container');
-            let mjxIndex = -1;
-            allMjx.forEach((mjx, index) => {
-              if (mjx === this.target.parentElement) {
-                mjxIndex = index;
-              }
-            });
-            if (mjxIndex >= 0 && this.formulaCode[mjxIndex]) {
-              const { code } = this.formulaCode[mjxIndex];
+            const code = this.getLatexFromDOM();
+            if (code) {
               if (name === 'mathml' || name === 'docx') {
                 /** @type {MathBlock} */
                 // @ts-ignore
-                const hook = this.editor.$cherry.engine.hooks.paragraph.find((hook) => hook instanceof MathBlock);
+                const hook = this.$cherry?.engine?.hooks?.paragraph?.find((hook) => hook instanceof MathBlock);
                 if (hook && hook.engine === 'MathJax') {
                   window.MathJax?.texReset();
                   window.MathJax?.tex2mmlPromise?.(code, { display: true }).then((mml) => {

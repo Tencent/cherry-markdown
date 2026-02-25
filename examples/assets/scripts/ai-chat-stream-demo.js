@@ -93,7 +93,7 @@ async function loadPlugin(plugin) {
       await loadCSS(config.css, `${plugin}-css`);
     }
     await loadScript(config.src, `${plugin}-js`);
-    
+
     // mermaid 需要额外加载插件脚本
     if (plugin === 'mermaid' && config.pluginSrc) {
       await loadScript(config.pluginSrc, `${plugin}-plugin-js`);
@@ -170,7 +170,7 @@ function getCherryConfig() {
       // mermaid 通过 usePlugin 方式注册，不需要在这里配置
     },
     previewer: {
-      enablePreviewerBubble: false,
+      enablePreviewerBubble:  true,
     },
   };
 }
@@ -209,7 +209,7 @@ export function aiChatStreamScenario() {
       currentCherry.setMarkdown(currentText);
       try {
         dialog.scrollTop = dialog.scrollHeight;
-      } catch (e) { }
+      } catch (e) {}
       if (currentWordIndex < msg.length) {
         currentWordIndex++;
         setTimeout(step, interval);
@@ -222,7 +222,7 @@ export function aiChatStreamScenario() {
   }
 
   // 插件复选框事件
-  document.querySelectorAll('.j-plugin-checkbox').forEach(checkbox => {
+  document.querySelectorAll('.j-plugin-checkbox').forEach((checkbox) => {
     checkbox.addEventListener('change', async function () {
       const plugin = this.dataset.plugin;
 
@@ -274,7 +274,7 @@ export function aiChatStreamScenario() {
 
     try {
       dialog.scrollTop = dialog.scrollHeight;
-    } catch (e) { }
+    } catch (e) {}
 
     beginPrint(msgList[msgList.length - currentMsgIndex]);
     currentMsgIndex--;
@@ -306,7 +306,7 @@ export function aiChatStreamScenario() {
 
     try {
       dialog.scrollTop = dialog.scrollHeight;
-    } catch (e) { }
+    } catch (e) {}
 
     beginPrint(customContent);
   });

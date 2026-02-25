@@ -128,6 +128,7 @@ export default class Previewer {
     this.bindScroll();
     this.editor = editor;
     this.bindDrag();
+    // 异步初始化 PreviewerBubble
     this.$initPreviewerBubble();
     this.lazyLoadImg = new LazyLoadImg(this.options.lazyLoadImg, this);
     this.lazyLoadImg.doLazyLoad();
@@ -141,7 +142,10 @@ export default class Previewer {
 
   /**
    * 不依赖Editor的初始化方法，用于流式渲染场景
-   * 与init方法的区别：不需要editor参数，不绑定拖拽和滚动同步，不初始化PreviewerBubble
+   * 与init方法的区别：不需要editor参数，不绑定拖拽和滚动同步
+   * PreviewerBubble 始终初始化以保证基础的 click 事件监听和交互功能
+   * enablePreviewerBubble 配置只控制是否显示编辑工具栏（图片、表格等）
+   * 在无编辑器场景下，编辑相关功能（编辑代码、切换语言等）会自动禁用
    */
   initWithoutEditor() {
     /**
@@ -151,10 +155,9 @@ export default class Previewer {
      */
     this.disableScrollListener = false;
     this.editor = null;
-    // 流式渲染场景下，如果开启了预览区编辑功能才初始化PreviewerBubble
-    if (this.options.enablePreviewerBubble) {
-      this.$initPreviewerBubble();
-    }
+    // 始终初始化 PreviewerBubble，保证 click 事件监听和基础交互功能（代码块复制、展开等）
+    // enablePreviewerBubble 配置在 PreviewerBubble 内部控制是否显示编辑工具栏
+    this.$initPreviewerBubble();
     this.lazyLoadImg = new LazyLoadImg(this.options.lazyLoadImg, this);
     this.lazyLoadImg.doLazyLoad();
     this.bindClick();
