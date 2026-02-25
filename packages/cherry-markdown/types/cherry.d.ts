@@ -143,7 +143,8 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     afterAsyncRender?: CherryLifecycle;
     /** img 标签挂载前触发，可用于懒加载等场景 */
     beforeImageMounted?: (srcProp: string, src: string) => { srcProp: string; src: string };
-    onClickPreview?: (e: MouseEvent) => void;
+    /** 点击预览区域时触发，返回 false 可阻止后续处理 */
+    onClickPreview?: (e: MouseEvent) => void | false;
     onCopyCode?: (e: ClipboardEvent, code: string) => string | false;
     changeString2Pinyin?: (str: string) => string;
     onPaste?: (
@@ -620,7 +621,7 @@ export interface CherryPreviewerOptions {
   /** 预览区域的DOM className */
   className?: string;
   /** 是否是移动端预览 */
-  isMobilePreview?: boolean,
+  isMobilePreview?: boolean;
   enablePreviewerBubble?: boolean;
   floatWhenClosePreviewer?: boolean;
   // 配置图片懒加载的逻辑
