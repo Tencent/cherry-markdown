@@ -269,14 +269,11 @@ export default class PreviewerBubble {
    * @returns
    */
   $onClick(e) {
-    if (this.previewer.$cherry.options.callback.onClickPreview) {
-      // 如果有自定义的onClickPreview回调函数，则先执行
-      const ret = this.previewer.$cherry.options.callback.onClickPreview(e);
-      // @ts-ignore
-      if (ret === false) {
-        return ret;
-      }
+    // 如果有自定义的onClickPreview回调函数，则先执行；返回false时中断后续处理
+    if (this.previewer.$cherry.options.callback?.onClickPreview?.(e) === false) {
+      return false;
     }
+
     const { target } = e;
     if (!(target instanceof Element)) {
       return;
