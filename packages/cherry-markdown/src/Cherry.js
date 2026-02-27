@@ -409,7 +409,7 @@ export default class Cherry extends CherryStatic {
    * @returns markdown源码内容
    */
   getValue() {
-    return this.editor.editor.getValue();
+    return this.editor?.editor?.getValue() || '';
   }
 
   /**

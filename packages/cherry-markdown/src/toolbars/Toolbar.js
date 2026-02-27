@@ -186,6 +186,7 @@ export default class Toolbar {
         btn.classList.add('cherry-toolbar-dropdown');
       }
       fragLeft.appendChild(btn);
+      this.menus.hooks[name].afterInit(btn);
     });
 
     this.appendMenusToDom(fragLeft);

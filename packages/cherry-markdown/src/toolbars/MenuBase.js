@@ -211,6 +211,11 @@ export default class MenuBase {
   }
 
   /**
+   * 在创建菜单后执行的钩子
+   */
+  afterInit(btnDom) {}
+
+  /**
    * 创建一个一级菜单
    * @param {boolean} asSubMenu 是否以子菜单的形式创建
    */
