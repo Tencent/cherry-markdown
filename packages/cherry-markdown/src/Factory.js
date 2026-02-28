@@ -128,7 +128,7 @@ export function createSyntaxHook(name, type, options) {
 }
 
 export function createMenuHook(name, options) {
-  const optionsWhiteList = ['subMenuConfig', 'onClick', 'shortcutKeys', 'iconName', 'icon'];
+  const optionsWhiteList = ['subMenuConfig', 'onClick', 'shortcutKeys', 'iconName', 'icon', 'afterInit'];
   const propTypes = {
     subMenuConfig: Array,
     onClick: 'function',
@@ -143,6 +143,7 @@ export function createMenuHook(name, options) {
         iconClassName: ['string', 'undefined'],
       },
     ],
+    afterInit: 'function',
   };
   const filteredOptions = filterOptions(options, optionsWhiteList, propTypes);
   return class CustomMenu extends MenuBase {
@@ -158,6 +159,13 @@ export function createMenuHook(name, options) {
         this.setName(name, filteredOptions.iconName);
       }
       this.subMenuConfig = filteredOptions.subMenuConfig || [];
+    }
+
+    afterInit(...args) {
+      if (filteredOptions.afterInit) {
+        return filteredOptions.afterInit.apply(this, args);
+      }
+      return super.afterInit(...args);
     }
 
     onClick(...args) {
