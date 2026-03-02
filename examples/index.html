@@ -29,11 +29,9 @@
         height: 100%;
       }
     </style>
-    <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css" />
     <link rel="Shortcut Icon" href="./logo/favicon.ico" />
     <link rel="Shortcut Icon" href="../logo/favicon.ico" />
     <link rel="Bookmark" href="../logo/favicon.ico" />
-    <!-- <link href="./assets/markdown/index.md" rel="preload" /> -->
   </head>
 
   <body>
@@ -45,16 +43,14 @@
       integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
       crossorigin="anonymous"
     ></script>
-    <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
     <script src="./assets/scripts/pinyin/pinyin_dist.js"></script>
     <script type="module">
-      // 使用 fetch 获取 markdown 文件内容
-      const response = await fetch('./assets/markdown/index.md');
-      const basicMd = await response.text();
+      import { createCherry, loadMarkdown } from './assets/scripts/cherry-loader.js';
       import { basicConfig } from './assets/scripts/index-demo.js';
-      // 在Vite中使用?raw导入的文件内容已经是字符串，无需通过fetch获取
-      const config = Object.assign({}, basicConfig, { value: basicMd });
-      window.cherry = new Cherry(config);
+
+      const indexMd = await loadMarkdown('./assets/markdown/index.md');
+      const config = Object.assign({}, basicConfig, { value: indexMd });
+      await createCherry(config);
     </script>
   </body>
 </html>

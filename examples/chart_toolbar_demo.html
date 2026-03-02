@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cherry Markdown - 图表工具栏测试</title>
-    <link href="cherry-markdown.css" rel="stylesheet">
-    <script src="echarts.min.js"></script>
-    <script src="cherry-markdown.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
 </head>
 <body>
     <div id="cherry-markdown"></div>
 
-    <script>
+    <script type="module">
+        import { initCherry } from './assets/scripts/cherry-loader.js';
+
+        const Cherry = await initCherry();
         const cherryInstance = new Cherry({
             id: 'cherry-markdown',
             value: `# Cherry Markdown 图表工具栏测试

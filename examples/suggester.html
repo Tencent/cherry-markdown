@@ -26,7 +26,6 @@
       max-width: 100%;
     }
   </style>
-  <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css">
   <link rel="Shortcut Icon" href="./logo/favicon.ico">
   <link rel="Shortcut Icon" href="../logo/favicon.ico">
   <link rel="Bookmark" href="../logo/favicon.ico">
@@ -39,8 +38,14 @@
   <div id="markdown"></div>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.js"></script>
   <!--<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>-->
-  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
-  <script src="./assets/scripts/suggester-demo.js"></script>
+  <script type="module">
+    import { initCherry } from './assets/scripts/cherry-loader.js';
+    await initCherry();
+    // 动态加载 suggester-demo.js
+    const script = document.createElement('script');
+    script.src = './assets/scripts/suggester-demo.js';
+    document.body.appendChild(script);
+  </script>
 </body>
 
 </html>

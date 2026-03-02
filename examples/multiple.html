@@ -16,7 +16,6 @@
         height: 100%;
       }
     </style>
-    <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css" />
     <link rel="Shortcut Icon" href="./logo/favicon.ico" />
     <link rel="Shortcut Icon" href="../logo/favicon.ico" />
     <link rel="Bookmark" href="../logo/favicon.ico" />
@@ -39,18 +38,17 @@
     <div id="markdown2"></div>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.js"></script>
     <!--<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>-->
-    <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
     <script type="module">
-      // 使用 fetch 获取 markdown 文件内容
-      const response = await fetch('./assets/markdown/index.md');
-      const basicMd = await response.text();
+      import { initCherry, loadMarkdown } from './assets/scripts/cherry-loader.js';
       import { multipleCherryConfig1, multipleCherryConfig2 } from './assets/scripts/multiple-demo.js';
 
-      // 在Vite中使用?raw导入的文件内容已经是字符串，无需通过fetch获取
+      const Cherry = await initCherry();
+      const basicMd = await loadMarkdown('./assets/markdown/index.md');
+
       const config1 = Object.assign({}, multipleCherryConfig1, { value: basicMd });
-      window.cherry = new Cherry(config1);
+      window.cherry1 = new Cherry(config1);
       const config2 = Object.assign({}, multipleCherryConfig2, { value: '' });
-      window.cherry = new Cherry(config2);
+      window.cherry2 = new Cherry(config2);
     </script>
   </body>
 </html>

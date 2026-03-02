@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>流式输出md内容 - 插件懒加载</title>
-  <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css">
   <style>
     :root {
       --ai-bg: #f8f9fb;
@@ -290,8 +289,19 @@
     </div>
   </div>
 
-  <script src="../packages/cherry-markdown/dist/cherry-markdown.stream.js"></script>
   <script type="module">
+    // 开发模式：从源码导入 stream 版本；生产模式：从构建产物导入
+    let Cherry;
+
+    if (import.meta.env.DEV) {
+      const module = await import('@cherry-markdown/index.stream.js');
+      Cherry = module.default;
+      await import('@cherry-markdown/sass/index.scss');
+    } else {
+      await import('/cherry-markdown.stream.js');
+      Cherry = window.Cherry;
+    }
+
     import { aiChatStreamScenario } from './assets/scripts/ai-chat-stream-demo.js';
     aiChatStreamScenario();
   </script>

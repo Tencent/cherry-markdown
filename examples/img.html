@@ -19,7 +19,6 @@
         margin-right: auto;
       }
     </style>
-    <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css" />
     <link rel="Shortcut Icon" href="./logo/favicon.ico" />
     <link rel="Shortcut Icon" href="../logo/favicon.ico" />
     <link rel="Bookmark" href="../logo/favicon.ico" />
@@ -28,16 +27,13 @@
   <body>
     <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%"></div>
     <div id="markdown"></div>
-    <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
     <script type="module">
-         // 使用 fetch 获取 markdown 文件内容
-        const response = await fetch('./assets/markdown/img.md');
-        const imgMd = await response.text();
+      import { createCherry, loadMarkdown } from './assets/scripts/cherry-loader.js';
+      import { imgConfig } from './assets/scripts/img-demo.js';
 
-       import { imgConfig } from './assets/scripts/img-demo.js';
-      // 在Vite中使用?raw导入的文件内容已经是字符串，无需通过fetch获取
+      const imgMd = await loadMarkdown('./assets/markdown/img.md');
       const config = Object.assign({}, imgConfig, { value: imgMd });
-      window.cherry = new Cherry(config);
+      await createCherry(config);
     </script>
   </body>
 </html>

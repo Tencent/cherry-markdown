@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>自定义代码块外层容器 - Cherry Editor</title>
-  <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css">
   <link rel="Shortcut Icon" href="../logo/favicon.ico">
   <style>
     html {
@@ -106,10 +105,11 @@
 <body>
   <div id="markdown"></div>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
-  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
-</body>
-<script>
-var config = {
+  <script type="module">
+    import { initCherry } from './assets/scripts/cherry-loader.js';
+
+    const Cherry = await initCherry();
+    var config = {
   id: 'markdown',
   value: '',
   engine: {
@@ -210,6 +210,6 @@ document.body.addEventListener('click', function(e) {
     }
   }
 });
-
-</script>
+  </script>
+</body>
 </html>

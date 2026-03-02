@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>引入指定版本mermaid demo - Cherry Editor</title>
-  <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css">
   <link rel="Shortcut Icon" href="../logo/favicon.ico">
   <style>
     html {
@@ -87,25 +86,39 @@ journey
 ```
 </textarea>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"></script>
-  <script src="../packages/cherry-markdown/dist/cherry-markdown.core.js"></script>
-  <script src="../packages/cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin.js"></script>
-</body>
-<script>
-Cherry.usePlugin(CherryCodeBlockMermaidPlugin, {
-  mermaid: window.mermaid,
-  mermaidAPI: window.mermaid,
-});
-var config = {
-  id: 'markdown',
-  engine: {
-    syntax: {
-      codeBlock: {
-        changeLang: false,
-      }
+  <script type="module">
+    // 开发模式：从源码导入 core 版本；生产模式：从构建产物导入
+    let Cherry, CherryCodeBlockMermaidPlugin;
+
+    if (import.meta.env.DEV) {
+      const module = await import('@cherry-markdown/index.stream.core.js');
+      Cherry = module.default;
+      await import('@cherry-markdown/sass/index.scss');
+      // 插件需要从 addons 目录导入
+      const pluginModule = await import('@cherry-markdown/addons/cherry-code-block-mermaid-plugin');
+      CherryCodeBlockMermaidPlugin = pluginModule.default;
+    } else {
+      await import('/cherry-markdown.core.js');
+      await import('/addons/cherry-code-block-mermaid-plugin.js');
+      Cherry = window.Cherry;
+      CherryCodeBlockMermaidPlugin = window.CherryCodeBlockMermaidPlugin;
     }
-  }
-};
-var cherry = new Cherry(config);
-cherry.setValue(document.getElementById('md-source').value);
-</script>
+
+    Cherry.usePlugin(CherryCodeBlockMermaidPlugin, {
+      mermaid: window.mermaid,
+      mermaidAPI: window.mermaid,
+    });
+    var config = {
+      id: 'markdown',
+      engine: {
+        syntax: {
+          codeBlock: {
+            changeLang: false,
+          }
+        }
+      }
+    };
+    var cherry = new Cherry(config);
+    cherry.setValue(document.getElementById('md-source').value);
+  </script>
 </html>
