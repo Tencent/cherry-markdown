@@ -22,6 +22,10 @@ export function compileRegExp(obj, flags, allowExtendedFlags) {
   return new RegExp(source, flags || 'g');
 }
 
+export const mathBlockReg = isLookbehindSupported()
+  ? /(\s*)((?<!\\))~D~D\s*([\w\W]*?)(\s*)~D~D(?:\s{0,1})/g
+  : /(\s*)(^|[^\\])~D~D\s*([\w\W]*?)(\s*)~D~D(?:\s{0,1})/g;
+
 export function isLookbehindSupported() {
   try {
     new RegExp('(?<=.)');
