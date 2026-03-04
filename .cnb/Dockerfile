@@ -17,6 +17,7 @@ RUN curl -fsSL https://code-server.dev/install.sh | sh \
   && code-server --install-extension tencent-cloud.coding-copilot \
   && echo done
 
+RUN npm install -g @tencent-ai/codebuddy-code 
 
 ENV LANG=C.UTF-8
 ENV LANGUAGE=C.UTF-8
