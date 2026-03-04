@@ -678,7 +678,7 @@ export default class Previewer {
             // 处理表格包含图表的特殊场景
             let hasUpdate = false;
             if (
-              newContent[change.newIndex].dom.className === 'cherry-table-container' &&
+              newContent[change.newIndex].dom.className === 'cherry-table-wrapper' &&
               newContent[change.newIndex].dom.querySelector('.cherry-table-figure') &&
               oldContent[change.oldIndex].dom.querySelector('.cherry-table-figure')
             ) {

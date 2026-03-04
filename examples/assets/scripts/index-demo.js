@@ -409,7 +409,7 @@ const basicConfig = {
       },
       'customMenuCName',
     ],
-    toolbarRight: ['fullScreen', '|', 'export', 'changeLocale', 'wordCount'],
+    toolbarRight: ['fullScreen', '|', 'export', 'changeLocale', '|', 'wordCount', '|', 'cursorPosition'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
     sidebar: ['mobilePreview', 'copy', 'theme', 'codeTheme'],
     toc: {

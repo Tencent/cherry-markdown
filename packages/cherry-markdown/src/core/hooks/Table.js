@@ -313,8 +313,8 @@ export default class Table extends ParagraphBase {
       })
       .replace(/\\\|/g, '|'); // escape \|
     return {
-      html: `<div class="cherry-table-container" data-sign="${sign}${dataLines}" data-lines="${dataLines}">
-        <table class="cherry-table">${renderHtml}</table></div>`,
+      html: `<div class="cherry-table-wrapper" data-sign="${sign}${dataLines}" data-lines="${dataLines}">
+        <div class="cherry-table-container"><table class="cherry-table">${renderHtml}</table></div></div>`,
       sign,
     };
   }

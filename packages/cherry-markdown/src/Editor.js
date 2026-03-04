@@ -41,6 +41,7 @@ import { handleFileUploadCallback } from '@/utils/file';
 import { createElement } from './utils/dom';
 import { base64Reg, imgDrawioXmlReg, createUrlReg, pasteWrapperReg } from './utils/regexp';
 import { handleNewlineIndentList } from './utils/autoindent';
+import { getCodeBlockRule } from '@/utils/regexp';
 
 /**
  * @typedef {import('~types/editor').EditorConfiguration} EditorConfiguration
@@ -829,5 +830,59 @@ export default class Editor {
    */
   setValue(value = '') {
     this.editor.setOption('value', value);
+  }
+
+  /**
+   * 提供三种统计方式：
+   *  1. 字符数、单词数、行数
+   *  2. 段落数、图片、代码块
+   *  3. 中文数、英文单词数、数字数、符号数
+   */
+  wordCount(type) {
+    const markdown = this.$cherry.getMarkdown() || '';
+    switch (type) {
+      case 1: {
+        // 匹配中文和标点符号
+        const pattern =
+          /[\u4e00-\u9fa5]|[\u3001\u3002\uff01\uff0c\uff1b\uff1a\u201c\u201d\u2018\u2019\u300a\u300b\u3008\u3009\u3010\u3011\u300e\u300f\u300c\u300d\uff08\uff09\u2014\u2026\u2013\uff0e]/g;
+        // 统计字符数量，排除换行和空格
+        const characters = markdown.replace(/\n|\s/g, '').length;
+        // 统计中文和标点符号
+        const chineseWords = (markdown.match(pattern) || []).length;
+        // 统计英文单词
+        const englishWords = (markdown.match(/[a-zA-Z-]+/g) || []).length;
+        // 统计单词数量
+        const words = chineseWords + englishWords;
+        // 统计行数
+        const lines = markdown.split(/\n[\s\t\n]*/).length;
+        return { characters, words, lines };
+      }
+      case 2: {
+        const codeBlockReg = getCodeBlockRule().reg;
+        // 统计段落数量，使用至少两个连续换行符分割段落
+        const paragraphs = markdown.split(/\n{2,}/).filter((line) => line.trim() !== '').length;
+        // 统计代码块数量
+        const codeblocks = (markdown.match(codeBlockReg) || []).length;
+        const mdWithoutCode = markdown.replace(codeBlockReg, '\n');
+        // 统计图片数量
+        const images = (mdWithoutCode.match(/!\[[^\]]*\]\([^)]+\)/g) || []).length;
+        return { paragraphs, images, codeblocks };
+      }
+      case 3: {
+        // 统计中文数量（不包含中文符号）
+        const chineseWords = (markdown.match(/[\u4e00-\u9fa5]/g) || []).length;
+        // 统计英文单词数量
+        const englishWords = (markdown.match(/[a-zA-Z-]+/g) || []).length;
+        // 统计数字数量
+        const numbers = (markdown.match(/\d+/g) || []).length;
+        // 统计符号数量（包括中英文符号）
+        const symbols = (
+          markdown.match(
+            /[\u3001\u3002\uff01\uff0c\uff1b\uff1a\u201c\u201d\u2018\u2019\u300a\u300b\u3008\u3009\u3010\u3011\u300e\u300f\u300c\u300d\uff08\uff09\u2014\u2026\u2013\uff0e]/g,
+          ) || []
+        ).length;
+        return { chineseWords, englishWords, numbers, symbols };
+      }
+    }
   }
 }

@@ -17,7 +17,7 @@ import ParagraphBase from '@/core/ParagraphBase';
 import { escapeFormulaPunctuations, LoadMathModule } from '@/utils/mathjax';
 import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
-import { getTableRule, isLookbehindSupported } from '@/utils/regexp';
+import { getTableRule, isLookbehindSupported, mathBlockReg } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 
 /**
@@ -108,7 +108,8 @@ export default class InlineMath extends ParagraphBase {
       return whole
         .split('|')
         .map((oneTd) => {
-          return this.makeInlineMath(oneTd);
+          // 单元格里的段落公式直接替换成行内公式
+          return this.makeInlineMath(this.transformBlockMathToInlineMath(oneTd));
         })
         .join('|')
         .replace(/\\~D/g, '~D') // 出现反斜杠的情况（如/$e=m^2$）会导致多一个反斜杠，这里替换掉
@@ -123,6 +124,19 @@ export default class InlineMath extends ParagraphBase {
       }
     }
     return $str;
+  }
+
+  transformBlockMathToInlineMath(str) {
+    if (isLookbehindSupported()) {
+      return str.replace(mathBlockReg, '$1$2~D$3~D$4');
+    }
+    return replaceLookbehind(
+      str,
+      mathBlockReg,
+      (whole, match1, match2, match3, match4) => `${match1}${match2}~D${match3}~D${match4}`,
+      true,
+      1,
+    );
   }
 
   makeInlineMath(str) {
@@ -143,7 +157,7 @@ export default class InlineMath extends ParagraphBase {
     const ret = {
       begin: isLookbehindSupported() ? '((?<!\\\\))~D\\n?' : '(^|[^\\\\])~D\\n?',
       content: '(.*?)\\n?',
-      end: isLookbehindSupported() ? '((?<!\\\\))~D' : '[^\\\\]~D',
+      end: '(\\s*)~D(?:\\s{0,1})',
     };
     ret.reg = new RegExp(ret.begin + ret.content + ret.end, 'g');
     return ret;
