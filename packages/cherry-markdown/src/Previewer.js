@@ -127,6 +127,8 @@ export default class Previewer {
     this.disableScrollListener = false;
     this.bindScroll();
     this.editor = editor;
+    /** @type {typeof import('codemirror')|null} CodeMirror 模块（从 Editor 传递，stream 模式下为 null） */
+    this.codemirrorModule = editor?.constructor?.codemirrorModule ?? null;
     this.bindDrag();
     // 异步初始化 PreviewerBubble
     this.$initPreviewerBubble();
@@ -155,6 +157,8 @@ export default class Previewer {
      */
     this.disableScrollListener = false;
     this.editor = null;
+    // 流式渲染模式下没有 CodeMirror
+    this.codemirrorModule = null;
     // 始终初始化 PreviewerBubble，保证 click 事件监听和基础交互功能（代码块复制、展开等）
     // enablePreviewerBubble 配置在 PreviewerBubble 内部控制是否显示编辑工具栏
     this.$initPreviewerBubble();
