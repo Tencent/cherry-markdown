@@ -634,6 +634,8 @@ export default class PreviewerBubble {
     }
     this.$removeAllPreviewerBubbles('hover');
     this.$createPreviewerBubbles(trigger, `codeBlock-${trigger}-handler`);
+    // 从 Previewer 获取 CodeMirror 模块（由 Editor 传递，stream 模式下为 null）
+    const { codemirrorModule } = this.previewer;
     const handler = new CodeHandler(
       trigger,
       htmlElement,
@@ -641,6 +643,7 @@ export default class PreviewerBubble {
       this.previewerDom,
       this.editor?.editor ?? null,
       this,
+      codemirrorModule,
     );
     handler.showBubble(this.$isEnableBubbleAndEditorShow());
     this.bubbleHandler[trigger] = handler;

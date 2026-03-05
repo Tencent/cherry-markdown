@@ -17,22 +17,6 @@ import { getCodeBlockRule } from '@/utils/regexp';
 import { getCodePreviewLangSelectElement } from '@/utils/code-preview-language-setting';
 import { copyToClip } from '@/utils/copy';
 
-// 使用条件导入，只在非 stream 环境下导入 codemirror
-// 动态导入在 UMD 格式下可能有问题，所以我们用这种方式
-let codemirror = null;
-
-async function loadCodeMirror() {
-  if (!codemirror) {
-    try {
-      codemirror = (await import('codemirror')).default;
-      await import('codemirror/keymap/sublime');
-    } catch (e) {
-      console.warn('CodeMirror not available:', e);
-    }
-  }
-  return codemirror;
-}
-
 export default class CodeBlockHandler {
   /**
    * 用来存放所有的数据
@@ -42,17 +26,28 @@ export default class CodeBlockHandler {
     editorDom: {}, // 编辑器容器
   };
 
-  constructor(trigger, target, container, previewerDom, codeMirror, parent) {
-    // 触发方式 click / hover
+  /**
+   * @param {string} trigger 触发方式 click / hover
+   * @param {HTMLElement} target 代码块元素
+   * @param {HTMLDivElement} container 气泡容器
+   * @param {HTMLElement} previewerDom 预览区域 DOM
+   * @param {object|null} mainEditor 左侧主编辑器实例(编辑整个 Markdown 文档，stream 模式下为 null)
+   * @param {object} parent PreviewerBubble 实例
+   * @param {typeof import('codemirror')|null} codemirrorModule CodeMirror 模块（由调用方注入，stream 模式下为 null）
+   */
+  constructor(trigger, target, container, previewerDom, mainEditor, parent, codemirrorModule) {
     this.trigger = trigger;
     this.target = target;
     this.previewerDom = previewerDom;
     this.container = container;
-    this.codeMirror = codeMirror;
+    /** @type {object|null} 左侧主编辑器实例(编辑整个 Markdown 文档) */
+    this.mainEditor = mainEditor;
     this.$cherry = parent.previewer.$cherry;
     this.parent = parent;
     /** @type {boolean} 是否有编辑器（用于流式渲染场景的兼容） */
-    this.hasEditor = codeMirror !== null;
+    this.hasEditor = mainEditor !== null;
+    /** @type {typeof import('codemirror')|null} CodeMirror 模块（由调用方注入，为 null 时自动禁用编辑功能） */
+    this.codemirrorModule = codemirrorModule;
     this.$initReg();
   }
 
@@ -111,12 +106,12 @@ export default class CodeBlockHandler {
   }
   $collectCodeBlockCode() {
     // 无编辑器时跳过代码收集
-    if (!this.codeMirror) {
+    if (!this.mainEditor) {
       this.codeBlockEditor.codeBlockCodes = [];
       return;
     }
     const codeBlockCodes = [];
-    this.codeMirror.getValue().replace(this.codeBlockReg, function (whole, ...args) {
+    this.mainEditor.getValue().replace(this.codeBlockReg, function (whole, ...args) {
       const match = whole.replace(/^\n*/, '');
       const offsetBegin = args[args.length - 2] + whole.match(/^\n*/)[0].length;
       if (!match.startsWith('```mermaid')) {
@@ -130,11 +125,11 @@ export default class CodeBlockHandler {
   }
   $setBlockSelection(index) {
     // 无编辑器时跳过
-    if (!this.codeMirror) {
+    if (!this.mainEditor) {
       return;
     }
     const codeBlockCode = this.codeBlockEditor.codeBlockCodes[index];
-    const whole = this.codeMirror.getValue();
+    const whole = this.mainEditor.getValue();
     const beginLine = whole.slice(0, codeBlockCode.offset).match(/\n/g)?.length ?? 0;
     const endLine = beginLine + codeBlockCode.code.match(/\n/g).length;
     const endCh = codeBlockCode.code.slice(0, -3).match(/[^\n]+\n*$/)[0].length;
@@ -143,15 +138,15 @@ export default class CodeBlockHandler {
       { line: endLine - 1, ch: endCh },
       { line: beginLine + 1, ch: 0 },
     ];
-    this.codeMirror.setSelection(...this.codeBlockEditor.info.selection);
+    this.mainEditor.setSelection(...this.codeBlockEditor.info.selection);
   }
   $setLangSelection(index) {
     // 无编辑器时跳过
-    if (!this.codeMirror) {
+    if (!this.mainEditor) {
       return;
     }
     const codeBlockCode = this.codeBlockEditor.codeBlockCodes[index];
-    const whole = this.codeMirror.getValue();
+    const whole = this.mainEditor.getValue();
     const beginLine = whole.slice(0, codeBlockCode.offset).match(/\n/g)?.length ?? 0;
     const firstLine = codeBlockCode.code.match(/```\s*[^\n]+/)[0] ?? '```';
     const beginCh = 3;
@@ -160,7 +155,7 @@ export default class CodeBlockHandler {
       { line: beginLine, ch: beginCh },
       { line: beginLine, ch: endLine },
     ];
-    this.codeMirror.setSelection(...this.codeBlockEditor.info.selection);
+    this.mainEditor.setSelection(...this.codeBlockEditor.info.selection);
   }
   showBubble(isEnableBubbleAndEditorShow = true) {
     this.$updateContainerPosition();
@@ -187,10 +182,10 @@ export default class CodeBlockHandler {
   /**
    * 展示代码块编辑区的编辑器
    */
-  async $showContentEditor() {
+  $showContentEditor() {
     this.editing = true;
     this.$findCodeInEditor();
-    await this.$drawEditor();
+    this.$drawEditor();
   }
   /**
    * 展示代码块区域的按钮
@@ -207,7 +202,8 @@ export default class CodeBlockHandler {
         e.preventDefault();
         e.stopPropagation();
         this.parent.$removeAllPreviewerBubbles('click');
-        this.$changeLang(e.target.value || '');
+        const { target } = e;
+        this.$changeLang(/** @type {HTMLSelectElement} */ (target)?.value || '');
       });
     }
     // 第一行的按钮的right值
@@ -290,16 +286,16 @@ export default class CodeBlockHandler {
   }
   // 隐藏所有按钮（切换语言、编辑、复制）
   $hideAllBtn() {
-    if (this.changeLangDom?.style?.display) {
-      this.changeLangDom.style.display = 'none';
+    if (this.changeLangDom) {
+      /** @type {HTMLElement} */ (this.changeLangDom).style.display = 'none';
     }
-    if (this.editDom?.style?.display) {
+    if (this.editDom) {
       this.editDom.style.display = 'none';
     }
-    if (this.copyDom?.style?.display) {
+    if (this.copyDom) {
       this.copyDom.style.display = 'none';
     }
-    if (this.unExpandDom?.style?.display) {
+    if (this.unExpandDom) {
       this.unExpandDom.style.display = 'none';
     }
   }
@@ -308,24 +304,24 @@ export default class CodeBlockHandler {
    */
   $changeLang(lang) {
     // 无编辑器时跳过
-    if (!this.codeMirror) {
+    if (!this.mainEditor) {
       return;
     }
     this.$findCodeInEditor(true);
-    this.codeMirror.replaceSelection(lang, 'around');
+    this.mainEditor.replaceSelection(lang, 'around');
   }
-  async $drawEditor() {
-    // 无编辑器时跳过
-    if (!this.codeMirror) {
+  $drawEditor() {
+    // 无编辑器或无 CodeMirror 模块时跳过
+    if (!this.mainEditor || !this.codemirrorModule?.fromTextArea) {
       return;
     }
-    const codemirrorModule = await loadCodeMirror();
     const dom = document.createElement('div');
     dom.className = 'cherry-previewer-codeBlock-content-handler__input';
     const input = document.createElement('textarea');
     input.id = 'codeMirrorEditor';
     dom.appendChild(input);
-    const editorInstance = codemirrorModule.fromTextArea(input, {
+    /** @type {object} 代码块编辑器实例（从 fromTextArea 创建，用于编辑单个代码块） */
+    const codeBlockEditor = this.codemirrorModule.fromTextArea(input, {
       mode: '',
       theme: 'default',
       scrollbarStyle: 'null', // 取消滚动动画
@@ -337,19 +333,18 @@ export default class CodeBlockHandler {
       tabSize: 4, // 一个tab转换成的空格数量
       keyMap: 'sublime',
     });
-    const editor = this.codeMirror;
-    editorInstance.on('change', () => {
-      editor.replaceSelection(editorInstance.getValue(), 'around');
+    codeBlockEditor.on('change', () => {
+      this.mainEditor.replaceSelection(codeBlockEditor.getValue(), 'around');
     });
     this.codeBlockEditor.editorDom.inputDiv = dom;
-    this.codeBlockEditor.editorDom.inputDom = editorInstance;
+    this.codeBlockEditor.editorDom.inputDom = codeBlockEditor;
     this.$updateEditorPosition();
     this.container.appendChild(this.codeBlockEditor.editorDom.inputDiv);
     this.codeBlockEditor.editorDom.inputDom.focus();
     this.codeBlockEditor.editorDom.inputDom.refresh();
-    editorInstance.setValue(this.codeMirror.getSelection());
+    codeBlockEditor.setValue(this.mainEditor.getSelection());
     // 去掉下面的逻辑，因为在代码块比较高时，强制让光标定位在最后会让页面出现跳跃的情况
-    // editorInstance.setCursor(Number.MAX_VALUE, Number.MAX_VALUE); // 指针设置至CodeBlock末尾
+    // codeBlockEditor.setCursor(Number.MAX_VALUE, Number.MAX_VALUE); // 指针设置至CodeBlock末尾
   }
 
   /**
@@ -440,7 +435,7 @@ export default class CodeBlockHandler {
   $getPosition() {
     const node = this.codeBlockEditor.info.codeBlockNode;
     const position = node.getBoundingClientRect();
-    const editorPosition = this.previewerDom.parentNode.getBoundingClientRect();
+    const editorPosition = /** @type {Element} */ (this.previewerDom.parentNode).getBoundingClientRect();
     return {
       top: position.top - editorPosition.top,
       height: position.height,
