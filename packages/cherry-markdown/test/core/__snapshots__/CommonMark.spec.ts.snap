@@ -787,21 +787,9 @@ exports[`engine > CommonMark-123 1`] = `
 `;
 
 exports[`engine > CommonMark-124 1`] = `
-"<div
-        data-sign="aed8acd0d907b2d4e168f20021dfa9ae1a8574319b7e6048909ee71173b0f5cd"
-        data-type="codeBlock"
-        data-lines="4" 
-        data-edit-code="true" 
-        data-copy-code="true"
-        data-expand-code="false"
-        data-change-lang="true"
-        data-lang="javascript"
-        style="position:relative"
-        class="cherry-code-expand"
-      >
-      <pre class="language-javascript"><code class="language-javascript"><span class="code-line">aaa</span>
-<span class="code-line"><span class="token template-string"><span class="token template-punctuation string">\`</span><span class="token template-punctuation string">\`</span></span><span class="token template-string"><span class="token template-punctuation string">\`</span><span class="token string"></span></span></span></code></pre>
-      </div><p data-sign="341bc3f1b434f6d1f5d0fa7347d3a70f754a52ce92292c4ab0dad22cb0d3c32a1" data-type="p" data-lines="1">\`\`\`\`\`\`</p>
+"<p data-sign="5356c3c275167a75447833ddc8dde1b582e561bad07d6c5c8a1e3774cbfa516b1" data-type="p" data-lines="1"><code>\`\`
+aaa
+\`</code></p>
 "
 `;
 
@@ -1100,20 +1088,8 @@ exports[`engine > CommonMark-146 1`] = `
 `;
 
 exports[`engine > CommonMark-147 1`] = `
-"<div
-        data-sign="f11be2dd92768aa5923aefaa736e14e2231f747463c161ab8fd07e682bb6646a"
-        data-type="codeBlock"
-        data-lines="3" 
-        data-edit-code="true" 
-        data-copy-code="true"
-        data-expand-code="false"
-        data-change-lang="true"
-        data-lang="javascript"
-        style="position:relative"
-        class="cherry-code-expand"
-      >
-      <pre class="language-javascript"><code class="language-javascript"><span class="code-line"><span class="token template-string"><span class="token template-punctuation string">\`</span><span class="token template-punctuation string">\`</span></span>\` aaa</span></code></pre>
-      </div><p data-sign="f1b901847390b0ed7e374e7c1e464ec17b46a427c487a5ad6cbd2906405083d51" data-type="p" data-lines="1">\`\`\`</p>
+"<p data-sign="8c8ee4db3a5455cfc767d4d904b8c89599b0a497c0951aa221b95327f03346b41" data-type="p" data-lines="1"><code>\`
+\`</code> aaa</p>
 "
 `;
 

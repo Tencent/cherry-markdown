@@ -390,7 +390,13 @@ export default class CodeBlock extends ParagraphBase {
     if ($codes.length % 2 === 1) {
       const lastCode = $codes[$codes.length - 1].replace(/(`)[^`]+$/, '$1').replace(/\n+/, '');
       const $str = str.replace(/\n+$/, '').replace(/\n`{1,2}$/, '');
-      return `${$str}\n${lastCode}\n`;
+      return (
+        `${$str}\n${lastCode}\n`
+          // 如果自动闭合后代码块为空，则删除代码块
+          .replace(/\n`{3,}[^`\n]*\n\s*`{3,}\n$/g, '\n')
+          // 如果自动闭合的是mermaid图，则再判断第二行以后的内容是否为空，如果为空，则删除代码块
+          .replace(/\n`{3,}\s*mermaid\s*\n[^\n]+\n\s*`{3,}\n$/g, '\n')
+      );
     }
     return str;
   }
