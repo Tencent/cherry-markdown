@@ -219,6 +219,48 @@
     margin: var(--spacing-lg) 0;
   }
 
+  figure[data-type="mermaid"] {
+    overflow: hidden;
+    svg {
+      max-width: 100%;
+      height: auto;
+    }
+    // 当 figure 设置了自定义尺寸时，SVG 需要完全跟随容器缩放
+    &[style*="width"] svg {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    // mermaid 对齐样式
+    &.cherry-mermaid-align-center {
+      transform: translateX(-50%);
+      margin-left: 50%;
+      display: block;
+    }
+    &.cherry-mermaid-align-right {
+      transform: translateX(-100%);
+      margin-left: 100%;
+      margin-right: -100%;
+      display: block;
+    }
+    &.cherry-mermaid-align-left {
+      transform: translateX(0);
+      margin-left: 0;
+      display: block;
+    }
+    &.cherry-mermaid-align-float-left {
+      float: left;
+      transform: translateX(0);
+      margin-left: 0;
+      display: block;
+    }
+    &.cherry-mermaid-align-float-right {
+      float: right;
+      transform: translateX(0);
+      margin-left: 0;
+      display: block;
+    }
+  }
+
   p,
   pre,
   blockquote,

@@ -86,16 +86,17 @@ After enabling streaming rendering, Cherry will automatically complete the follo
 2. Classic & regular line break modes
 3. Multi-cursor editing
 4. Image size editing
-5. Table editing
-6. Table -> Chart (generate chart from table content)
-7. Export as image or PDF
-8. Floating toolbar: appears at the beginning of a new line
-9. Bubble toolbar: appears when text is selected
-10. Set shortcut keys
-11. Floating table of contents
-12. Theme switching
-13. Input suggestion (autocomplete)
-14. AI Chat scenario: stream-mode output supported
+5. Mermaid diagram size editing and alignment (drag to resize, support center/left/right/float alignment)
+6. Table editing
+7. Table -> Chart (generate chart from table content)
+8. Export as image or PDF
+9. Floating toolbar: appears at the beginning of a new line
+10. Bubble toolbar: appears when text is selected
+11. Set shortcut keys
+12. Floating table of contents
+13. Theme switching
+14. Input suggestion (autocomplete)
+15. AI Chat scenario: stream-mode output supported
 
 ### Performance Feature
 
