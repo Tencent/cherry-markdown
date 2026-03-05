@@ -221,9 +221,13 @@
 
   figure[data-type="mermaid"] {
     overflow: hidden;
+    // 让 figure 收缩到 SVG 内容宽度，使选择框贴合图表
+    width: fit-content;
+    max-width: 100%;
     svg {
       max-width: 100%;
       height: auto;
+      display: block;
     }
     // 当 figure 设置了自定义尺寸时，SVG 需要完全跟随容器缩放
     &[style*="width"] svg {
@@ -232,32 +236,26 @@
     }
     // mermaid 对齐样式
     &.cherry-mermaid-align-center {
-      transform: translateX(-50%);
-      margin-left: 50%;
-      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
     &.cherry-mermaid-align-right {
-      transform: translateX(-100%);
-      margin-left: 100%;
-      margin-right: -100%;
-      display: block;
+      margin-left: auto;
+      margin-right: 0;
     }
     &.cherry-mermaid-align-left {
-      transform: translateX(0);
       margin-left: 0;
-      display: block;
+      margin-right: auto;
     }
     &.cherry-mermaid-align-float-left {
       float: left;
-      transform: translateX(0);
       margin-left: 0;
-      display: block;
+      margin-right: var(--spacing-lg);
     }
     &.cherry-mermaid-align-float-right {
       float: right;
-      transform: translateX(0);
-      margin-left: 0;
-      display: block;
+      margin-left: var(--spacing-lg);
+      margin-right: 0;
     }
   }
 
