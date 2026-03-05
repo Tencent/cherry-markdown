@@ -6,7 +6,8 @@
   "description": "a new markdown editor",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Tencent/cherry-markdown.git"
+    "url": "git+https://github.com/Tencent/cherry-markdown.git",
+    "directory": "packages/cherry-markdown"
   },
   "main": "./dist/cherry-markdown.min.js",
   "module": "./dist/cherry-markdown.esm.js",
