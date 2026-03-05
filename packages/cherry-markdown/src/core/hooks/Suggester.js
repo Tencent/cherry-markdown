@@ -26,35 +26,21 @@ import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import { isBrowser } from '@/utils/env';
 
-// 使用动态导入避免在 stream 包中引入 codemirror
-let Pass = null;
+// 默认 Pass 对象，用于 CodeMirror extraKeys 返回值
+const DEFAULT_PASS = { toString: () => 'Pass' };
 
-async function loadCodeMirrorPass() {
-  if (!Pass) {
-    try {
-      const codemirrorUtil = await import('codemirror/src/util/misc');
-      Pass = codemirrorUtil.Pass;
-    } catch (e) {
-      // 如果 stream 包中不存在 codemirror，使用一个替代值
-      Pass = { toString: () => 'Pass' };
-    }
+/**
+ * 从 cherry 实例中获取 CodeMirror Pass 对象
+ * @param {import('../../Cherry').default} cherry - cherry 实例
+ * @returns {*} CodeMirror Pass 对象
+ */
+function getPass(cherry) {
+  // 优先从 codemirrorModule 中获取真实的 Pass 对象
+  if (cherry?.editor?.constructor?.codemirrorModule?.Pass) {
+    return cherry.editor.constructor.codemirrorModule.Pass;
   }
-  return Pass;
-}
-
-// 在首次使用时加载
-loadCodeMirrorPass().catch(() => {
-  // 即使加载失败也设置一个默认值
-  Pass = { toString: () => 'Pass' };
-});
-
-// 获取 Pass 的同步包装器
-function getPass() {
-  if (!Pass) {
-    // 如果异步加载还未完成，返回一个临时值
-    return { toString: () => 'Pass' };
-  }
-  return Pass;
+  // fallback 到默认值
+  return DEFAULT_PASS;
 }
 
 /**
@@ -350,7 +336,7 @@ class SuggesterPanel {
         extraKeys[key] = () => {
           if (this.cursorMove) {
             // logic to decide whether to move up or not
-            return getPass().toString();
+            return getPass(this.$cherry).toString();
           }
         };
       } else if (typeof extraKeys[key] === 'string') {
