@@ -36,6 +36,11 @@ export default class InlineMath extends ParagraphBase {
     // 非浏览器环境下配置为 node
     this.engine = isBrowser() ? (config.engine ?? 'MathJax') : 'node';
     this.$cherry = cherry;
+    /**
+     * 这里本意是用来存储「上一轮」成功渲染里的最后一个公式
+     * 但因为偷懒，存的是「上一次」成功渲染里的公式，所以这里有个大大的「TODO」
+     * 同时，mermaid渲染那里也有同样的问题，也有个大大的「TODO」
+     */
     this.lastCode = '';
   }
 
@@ -105,17 +110,27 @@ export default class InlineMath extends ParagraphBase {
     let $str = str;
     // 格里处理行内公式，让一个td里的行内公式语法生效，让跨td的行内公式语法失效
     $str = $str.replace(getTableRule(true), (whole, ...args) => {
-      return whole
-        .split('|')
-        .map((oneTd) => {
+      const arr = whole.split('|');
+      return arr
+        .map((oneTd, index) => {
           // 单元格里的段落公式直接替换成行内公式
-          return this.makeInlineMath(this.transformBlockMathToInlineMath(oneTd));
+          const tdContent = this.transformBlockMathToInlineMath(oneTd);
+          // 判断是否为最后一个td
+          if (index === arr.length - 1) {
+            return this.makeInlineMathWithSelfClosing(tdContent);
+          }
+          return this.makeInlineMath(tdContent);
         })
         .join('|')
         .replace(/\\~D/g, '~D') // 出现反斜杠的情况（如/$e=m^2$）会导致多一个反斜杠，这里替换掉
         .replace(/~D/g, '\\~D');
     });
-    $str = this.makeInlineMath($str);
+    $str = this.makeInlineMathWithSelfClosing($str);
+    return $str;
+  }
+
+  makeInlineMathWithSelfClosing(str) {
+    let $str = this.makeInlineMath(str);
     if (this.isSelfClosing()) {
       const $oldStr = $str;
       $str = this.$dealUnclosingMath($str);
