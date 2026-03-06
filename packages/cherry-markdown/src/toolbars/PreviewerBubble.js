@@ -923,7 +923,10 @@ export default class PreviewerBubble {
     imgToolDiv.className = 'cherry-previewer-img-tool-handler';
     this.bubble.click.appendChild(imgToolDiv);
     imgToolHandler.showBubble(
-      figureElement, imgToolDiv, this.previewerDom, event,
+      figureElement,
+      imgToolDiv,
+      this.previewerDom,
+      event,
       this.previewer.$cherry.getLocales(),
       { isMermaid: true },
     );
@@ -953,7 +956,6 @@ export default class PreviewerBubble {
       return false;
     }
 
-    const content = getValueWithoutCode(this.editor.editor.getValue());
     const rawContent = this.editor.editor.getValue();
     // 在编辑器原始内容中按顺序找到所有 mermaid 代码块
     const codeBlockReg = /(?:^|\n)(\n*(?:>[\t ]*)*(?:[^\S\n]*))(`{3,})([^`]*?)\n([\w\W]*?)\n\s*\2[ \t]*(?=$|\n)/g;
@@ -988,7 +990,8 @@ export default class PreviewerBubble {
       const fullLangLine = allLines[langLineNum] || '';
 
       // 匹配所有扩展参数（尺寸 + 对齐），如 "#400px #300px #center"
-      const extendRegex = /((?:\s*#(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto|center|right|left|float-right|float-left))+)\s*$/i;
+      const extendRegex =
+        /((?:\s*#(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto|center|right|left|float-right|float-left))+)\s*$/i;
       const extendMatch = fullLangLine.match(extendRegex);
 
       // 提取当前的尺寸和对齐信息

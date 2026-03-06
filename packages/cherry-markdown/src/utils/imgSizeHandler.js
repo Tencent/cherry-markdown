@@ -27,7 +27,9 @@ const imgSizeHandler = {
     let alignment = '';
     if (this.isMermaid) {
       // mermaid figure 的对齐信息从 class 中获取
-      const alignMatch = (this.img.className || '').match(/cherry-mermaid-align-(center|right|left|float-right|float-left)/);
+      const alignMatch = (this.img.className || '').match(
+        /cherry-mermaid-align-(center|right|left|float-right|float-left)/,
+      );
       alignment = alignMatch ? alignMatch[1] : '';
     } else {
       const alt = this.img.getAttribute('alt') || '';
@@ -81,8 +83,8 @@ const imgSizeHandler = {
         },
       },
       style: {
-        width: width,
-        height: height,
+        width,
+        height,
         left: position.left - 1,
         top: position.top - 1,
         marginTop: 0,
