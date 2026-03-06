@@ -19,6 +19,7 @@ import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
 import { getTableRule, isLookbehindSupported, mathBlockReg } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
+import { escapeHTMLSpecialChar } from '@/utils/sanitize';
 
 /**
  * 行内公式的语法
@@ -58,7 +59,7 @@ export default class InlineMath extends ParagraphBase {
     if (this.engine === 'katex') {
       // katex渲染
       if (!this.katex) {
-        result = `${leadingChar}<span data-sign="${sign}" class="Cherry-InlineMath cherry-katex-need-render" data-type="mathBlock" data-lines="${lines}" data-content="${encodeURI($m1)}"></span>`;
+        result = `${leadingChar}<span data-sign="${sign}" class="Cherry-InlineMath cherry-katex-need-render" data-type="mathBlock" data-lines="${lines}" data-content="${escapeHTMLSpecialChar($m1)}"></span>`;
         this.$engine.asyncRenderHandler.add(`math-inline-${sign}`);
       } else {
         let html = this.katex.renderToString($m1, {
@@ -70,7 +71,7 @@ export default class InlineMath extends ParagraphBase {
           }
           this.lastCode = html;
         }
-        result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}" data-content="${encodeURI($m1)}">${html}</span>`;
+        result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}" data-content="${escapeHTMLSpecialChar($m1)}">${html}</span>`;
       }
     } else if (this.MathJax?.tex2svg) {
       // MathJax渲染
@@ -81,7 +82,7 @@ export default class InlineMath extends ParagraphBase {
         }
         this.lastCode = svg;
       }
-      result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}" data-content="${encodeURI($m1)}">${svg}</span>`;
+      result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}" data-content="${escapeHTMLSpecialChar($m1)}">${svg}</span>`;
     } else {
       result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock"
         data-lines="${lines}">$${escapeFormulaPunctuations(m1)}$</span>`;

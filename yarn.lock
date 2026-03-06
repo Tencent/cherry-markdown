@@ -3916,6 +3916,20 @@ cheerio@1.0.0-rc.10:
     parse5-htmlparser2-tree-adapter "^6.0.1"
     tslib "^2.2.0"
 
+cherry-markdown@*:
+  version "0.10.3"
+  resolved "https://registry.npmjs.org/cherry-markdown/-/cherry-markdown-0.10.3.tgz#1be6489e13644b8410bcf9fcbcced7ce0303bf6b"
+  integrity sha512-lyrEO6QFhyBYDKSG7uoYLncqnszsm1zJFnxXh1j8D7FKB/7u0jft08sEzfoZ0OkcxaP8+aOUL8Ji9SpA75djVA==
+  dependencies:
+    "@types/codemirror" "^0.0.108"
+    crypto-js "^4.2.0"
+    dompurify "^3.2.6"
+    htmlparser2 "^10.0.0"
+    jsdom "~19.0.0"
+    ws "^8.18.0"
+  optionalDependencies:
+    mermaid "9.4.3"
+
 chokidar@3.5.1:
   version "3.5.1"
   resolved "https://registry.npmjs.org/chokidar/-/chokidar-3.5.1.tgz#ee9ce7bbebd2b79f49f304799d5468e31e14e68a"

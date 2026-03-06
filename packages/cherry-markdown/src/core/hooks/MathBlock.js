@@ -19,6 +19,7 @@ import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
+import { escapeHTMLSpecialChar } from '@/utils/sanitize';
 
 export default class MathBlock extends ParagraphBase {
   static HOOK_NAME = 'mathBlock';
@@ -65,7 +66,7 @@ export default class MathBlock extends ParagraphBase {
     if (this.engine === 'katex') {
       // katex渲染
       if (!this.katex) {
-        result = `<div data-sign="${sign}" class="Cherry-Math cherry-katex-need-render" data-type="mathBlock" data-lines="${lines}" data-content="${encodeURI($content)}"></div>`;
+        result = `<div data-sign="${sign}" class="Cherry-Math cherry-katex-need-render" data-type="mathBlock" data-lines="${lines}" data-content="${escapeHTMLSpecialChar($content)}"></div>`;
         this.$engine.asyncRenderHandler.add(`math-block-${sign}`);
       } else {
         let html = this.katex.renderToString($content, {
@@ -79,7 +80,7 @@ export default class MathBlock extends ParagraphBase {
           this.lastCode = html;
         }
         result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
-              data-lines="${lines}" data-content="${encodeURI($content)}">${html}</div>`;
+              data-lines="${lines}" data-content="${escapeHTMLSpecialChar($content)}">${html}</div>`;
       }
     } else if (this.MathJax?.tex2svg) {
       // MathJax渲染
@@ -91,7 +92,7 @@ export default class MathBlock extends ParagraphBase {
         this.lastCode = svg;
       }
       result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
-            data-lines="${lines}" data-content="${encodeURI($content)}">${svg}</div>`;
+            data-lines="${lines}" data-content="${escapeHTMLSpecialChar($content)}">${svg}</div>`;
     } else {
       result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
       data-lines="${lines}">$$${escapeFormulaPunctuations(content)}$$</div>`;

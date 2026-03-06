@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import pkg from 'replace-in-file';
-const { replaceInFile } = pkg;
+import { replaceInFile } from 'replace-in-file';
 
 async function replacePaths() {
   try {
