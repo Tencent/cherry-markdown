@@ -170,7 +170,7 @@ function getCherryConfig() {
       // mermaid 通过 usePlugin 方式注册，不需要在这里配置
     },
     previewer: {
-      enablePreviewerBubble:  true,
+      enablePreviewerBubble: true,
     },
   };
 }
