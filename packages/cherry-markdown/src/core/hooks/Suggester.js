@@ -27,7 +27,8 @@ import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import { isBrowser } from '@/utils/env';
 
 // 默认 Pass 对象，用于 CodeMirror extraKeys 返回值
-const DEFAULT_PASS = { toString: () => 'Pass' };
+// CodeMirror.Pass.toString() 返回 "CodeMirror.Pass"
+const DEFAULT_PASS = { toString: () => 'CodeMirror.Pass' };
 
 /**
  * 从 cherry 实例中获取 CodeMirror Pass 对象
@@ -36,10 +37,12 @@ const DEFAULT_PASS = { toString: () => 'Pass' };
  */
 function getPass(cherry) {
   // 优先从 codemirrorModule 中获取真实的 Pass 对象
-  if (cherry?.editor?.constructor?.codemirrorModule?.Pass) {
-    return cherry.editor.constructor.codemirrorModule.Pass;
+  // Editor.codemirrorModule 是静态属性,存储了导入的 CodeMirror 模块
+  const codemirrorModule = cherry?.editor?.constructor?.codemirrorModule;
+  if (codemirrorModule?.Pass) {
+    return codemirrorModule.Pass;
   }
-  // fallback 到默认值
+  // fallback 到默认值(toString() 返回 "CodeMirror.Pass" 以保持兼容性)
   return DEFAULT_PASS;
 }
 
