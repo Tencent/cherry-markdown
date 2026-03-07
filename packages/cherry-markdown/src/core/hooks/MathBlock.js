@@ -95,7 +95,7 @@ export default class MathBlock extends ParagraphBase {
             data-lines="${lines}" data-content="${escapeHTMLSpecialChar($content)}">${svg}</div>`;
     } else {
       result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
-      data-lines="${lines}">$$${escapeFormulaPunctuations(content)}$$</div>`;
+      data-lines="${lines}" data-content="${escapeHTMLSpecialChar($content)}">$$${escapeFormulaPunctuations(content)}$$</div>`;
     }
 
     return leadingChar + this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);

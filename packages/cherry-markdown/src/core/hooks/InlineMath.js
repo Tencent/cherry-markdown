@@ -85,7 +85,7 @@ export default class InlineMath extends ParagraphBase {
       result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}" data-content="${escapeHTMLSpecialChar($m1)}">${svg}</span>`;
     } else {
       result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock"
-        data-lines="${lines}">$${escapeFormulaPunctuations(m1)}$</span>`;
+        data-lines="${lines}" data-content="${escapeHTMLSpecialChar($m1)}">$${escapeFormulaPunctuations(m1)}$</span>`;
     }
 
     return this.pushCache(result, ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX + sign);
