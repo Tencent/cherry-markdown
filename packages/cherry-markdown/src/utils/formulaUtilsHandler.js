@@ -16,6 +16,7 @@
 
 import { svg2img, getSvgString } from '@/utils/svgUtils';
 import { copyToClip } from '@/utils/copy';
+import { unescapeHTMLSpecialChar } from '@/utils/sanitize';
 import MathBlock from '@/core/hooks/MathBlock';
 
 export default class FormulaHandler {
@@ -148,11 +149,7 @@ export default class FormulaHandler {
     }
 
     if (element?.dataset?.content) {
-      try {
-        return decodeURI(element.dataset.content);
-      } catch (e) {
-        return element.dataset.content;
-      }
+      return unescapeHTMLSpecialChar(element.dataset.content);
     }
 
     return null;
