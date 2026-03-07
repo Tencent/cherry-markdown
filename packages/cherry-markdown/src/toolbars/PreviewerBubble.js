@@ -398,7 +398,9 @@ export default class PreviewerBubble {
     // ========== 以下是只读交互功能，不受 enablePreviewerBubble 配置影响 ==========
     // 公式工具栏（输出图片/代码等是只读功能，不需要编辑器）
     if (target.tagName === 'svg' && target?.parentElement?.tagName === 'MJX-CONTAINER') {
+      this.$removeAllPreviewerBubbles('click'); // 先移除旧的 click bubble
       this.$showFormulaPreviewerBubbles('click', target, { x: e.pageX, y: e.pageY });
+      return; // 公式工具栏是只读功能，不需要进入编辑工具栏逻辑
     }
 
     // ========== 以下是编辑工具栏功能 ==========
