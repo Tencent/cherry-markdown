@@ -15,6 +15,7 @@
  */
 import mergeWith from 'lodash/mergeWith';
 import { isBrowser } from '@/utils/env';
+import Logger from '@/Logger';
 
 const CHART_TYPES = [
   'flowchart',
@@ -85,7 +86,7 @@ export default class MermaidCodeEngine {
    * @param {Object} mermaidOptions - Mermaid 配置选项
    * @param {Object} [mermaidOptions.mermaid] - mermaid 实例对象，如果未提供会尝试从 window.mermaid 获取
    * @param {Object} [mermaidOptions.mermaidAPI] - mermaidAPI 实例对象，如果未提供会尝试从 window.mermaidAPI 获取
-   * @param {string} [mermaidOptions.theme='default'] - 主题，可选值: 'default', 'dark', 'forest', 'neutral' 等
+   * @param {string} [mermaidOptions.theme='default'] - 主题，可选值：'default', 'dark', 'forest', 'neutral' 等
    * @param {string} [mermaidOptions.altFontFamily='sans-serif'] - 备用字体
    * @param {string} [mermaidOptions.fontFamily='sans-serif'] - 主字体
    * @param {string} [mermaidOptions.themeCSS] - 自定义主题 CSS 样式
@@ -151,7 +152,7 @@ export default class MermaidCodeEngine {
   }
 
   /**
-   * 转换svg为img，如果出错则直出svg
+   * 转换 svg 为 img，如果出错则直出 svg
    * @param {string} svgCode
    * @param {string} graphId
    * @returns {string}
@@ -164,7 +165,7 @@ export default class MermaidCodeEngine {
     try {
       const svgDoc = /** @type {XMLDocument} */ (domParser.parseFromString(svgCode, 'image/svg+xml'));
       const svgDom = /** @type {SVGSVGElement} */ (/** @type {any} */ (svgDoc.documentElement));
-      // tagName不是svg时，说明存在parse error
+      // tagName 不是 svg 时，说明存在 parse error
       if (svgDom.tagName.toLowerCase() === 'svg') {
         svgDom.style.maxWidth = '100%';
         svgDom.style.height = 'auto';
@@ -180,7 +181,7 @@ export default class MermaidCodeEngine {
         svgDom.getAttribute('height') === '100%' && svgDom.setAttribute('height', `${svgBox.height}`);
         // fix end
         svgHtml = svgDoc.documentElement.outerHTML;
-        // 屏蔽转img标签功能，如需要转换为img解除屏蔽即可
+        // 屏蔽转 img 标签功能，如需要转换为 img 解除屏蔽即可
         if (this.svg2img) {
           const dataUrl = `data:image/svg+xml,${encodeURIComponent(svgDoc.documentElement.outerHTML)}`;
           svgHtml = `<img class="svg-img" src="${dataUrl}" alt="${graphId}" />`;
@@ -219,8 +220,8 @@ export default class MermaidCodeEngine {
       /**
        * 如果开启了流式渲染，当前有上次渲染结果时，使用上次渲染结果
        * 这里有赌的成分
-       *  流式输出场景，只有最后一个mermaid代码块在流式输出，随着最后一个mermaid流式输出，mermaid的渲染有概率会失败
-       *  这里赌的是只有一个mermaid代码块需要渲染
+       *  流式输出场景，只有最后一个 mermaid 代码块在流式输出，随着最后一个 mermaid 流式输出，mermaid 的渲染有概率会失败
+       *  这里赌的是只有一个 mermaid 代码块需要渲染
        */
       if ($engine.$cherry.options.engine.global.flowSessionContext && this.lastRenderedCode) {
         return this.lastRenderedCode;
@@ -249,6 +250,7 @@ export default class MermaidCodeEngine {
 
   asyncRender(graphId, src, sign, $engine, props) {
     $engine.asyncRenderHandler.add(graphId);
+
     this.mermaidAPIRefs
       .render(graphId, src, this.mermaidCanvas)
       .then(({ svg: svgCode }) => {
@@ -260,10 +262,10 @@ export default class MermaidCodeEngine {
       .catch(() => {
         /**
          * 如果开启了流式渲染，当前有上次渲染结果时，使用上次渲染结果
-         * 这里有赌的成分,流式输出场景，只有最后一个mermaid代码块在流式输出，随着最后一个mermaid流式输出，mermaid的渲染有概率会失败
+         * 这里有赌的成分，流式输出场景，只有最后一个 mermaid 代码块在流式输出，随着最后一个 mermaid 流式输出，mermaid 的渲染有概率会失败
          *  这里赌的是：
-         *    1、只有一个mermaid代码块需要渲染
-         *    2、纯预览模式，且流式输出场景，所有mermaid都正常输出
+         *    1、只有一个 mermaid 代码块需要渲染
+         *    2、纯预览模式，且流式输出场景，所有 mermaid 都正常输出
          */
         if (
           $engine.$cherry.options.engine.global.flowSessionContext &&
@@ -278,22 +280,31 @@ export default class MermaidCodeEngine {
           this.handleAsyncRenderDone(graphId, sign, $engine, props, html);
         }
       });
+      Logger.log('Mermaid async render started:', { graphId, sign });
     if (this.needReturnLastRenderedCode) {
       return this.lastRenderedCode;
     }
-    // 先渲染源码
+    Logger.log('Mermaid async render done:', { graphId, sign });
+
+    // 【关键修改】在流式渲染模式下，不显示代码块，而是显示占位符
+    if ($engine.$cherry.options.engine.global.flowSessionContext) {
+      return `<div data-sign="${sign}" data-type="codeBlock" class="mermaid-loading">
+      <div class="mermaid-placeholder">Mermaid 图表渲染中...</div>
+    </div>`;
+    }
+
+    // 非流式模式下，先渲染源码
     return props.fallback();
   }
-
   render(src, sign, $engine, props = {}) {
     let $sign = sign;
     if (!$sign) {
       $sign = Math.round(Math.random() * 100000000);
     }
     this.mountMermaidCanvas($engine);
-    // 多实例的情况下相同的内容ID相同会导致mermaid渲染异常
-    // 需要通过添加时间戳使得多次渲染相同内容的图像ID唯一
-    // 图像渲染节流在CodeBlock Hook内部控制
+    // 多实例的情况下相同的内容 ID 相同会导致 mermaid 渲染异常
+    // 需要通过添加时间戳使得多次渲染相同内容的图像 ID 唯一
+    // 图像渲染节流在 CodeBlock Hook 内部控制
     const graphId = `mermaid-${sign}-${new Date().getTime()}`;
     this.svg2img = props.mermaidConfig?.svg2img ?? false;
     return this.isAsyncRenderVersion()

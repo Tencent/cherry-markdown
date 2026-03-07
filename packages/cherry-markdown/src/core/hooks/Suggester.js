@@ -26,6 +26,7 @@ import { Pass } from 'codemirror/src/util/misc';
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import { isBrowser } from '@/utils/env';
+import Logger from '@/Logger';
 
 /**
  * @typedef {import('codemirror')} CodeMirror
@@ -58,7 +59,7 @@ export default class Suggester extends SyntaxBase {
     /**
      * config.suggester 内容
      * [{
-     * 请求url
+     * 请求 url
       suggestList: '',
       唤醒关键字
       keyword: '@',
@@ -87,7 +88,7 @@ export default class Suggester extends SyntaxBase {
   }
 
   afterInit(callback) {
-    // node环境下直接跳过输入联想
+    // node 环境下直接跳过输入联想
     if (!isBrowser()) {
       return;
     }
@@ -111,7 +112,7 @@ export default class Suggester extends SyntaxBase {
       defaultSuggest.push({
         keyword: suggesterKeyword,
         suggestList(_word, callback) {
-          // 将word全转成小写
+          // 将 word 全转成小写
           const word = _word.toLowerCase();
           const systemSuggestList = allSuggestList(
             suggesterKeyword,
@@ -125,7 +126,7 @@ export default class Suggester extends SyntaxBase {
           }
           const keyword = word
             .replace(/\s+/g, '') // 删掉空格，避免产生不必要的空数组元素
-            .replace(new RegExp(`^${suggesterKeyword}`, 'g'), '') // 删掉word当中suggesterKeywords出现的字符
+            .replace(new RegExp(`^${suggesterKeyword}`, 'g'), '') // 删掉 word 当中 suggesterKeywords 出现的字符
             .replace(/^[#]+/, '#')
             .replace(/^[/]+/, '/')
             .split('')
@@ -166,7 +167,7 @@ export default class Suggester extends SyntaxBase {
       this.suggester[configItem.keyword] = configItem;
     });
 
-    // 反复初始化时， 缓存还在， dom 已更新情况
+    // 反复初始化时，缓存还在，dom 已更新情况
     if (this.suggesterPanel.hasEditor()) {
       this.suggesterPanel.editor = null;
     }
@@ -395,7 +396,7 @@ class SuggesterPanel {
   }
 
   /**
-   * 更新suggesterPanel
+   * 更新 suggesterPanel
    * @param {SuggestList} suggestList
    */
   updatePanel(suggestList) {
@@ -434,7 +435,7 @@ class SuggesterPanel {
   }
 
   /**
-   * 渲染suggesterPanel item
+   * 渲染 suggesterPanel item
    * @param {string} item 渲染内容
    * @param {boolean} selected 是否选中
    * @returns {string} html
@@ -468,7 +469,7 @@ class SuggesterPanel {
   relocatePanel(codemirror) {
     // 找到光标位置来确定候选框位置
     let $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
-    // 当editor选中某一内容时，".CodeMirror-cursor"会消失，此时通过定位".selected"来确定候选框位置
+    // 当 editor 选中某一内容时，".CodeMirror-cursor"会消失，此时通过定位".selected"来确定候选框位置
     if (!$cursor) {
       $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-selected');
     }
@@ -690,7 +691,7 @@ class SuggesterPanel {
   }
 
   /**
-   *  codeMirror change事件
+   *  codeMirror change 事件
    * @param {CodeMirror.Editor} codemirror
    * @param {CodeMirror.EditorChange} evt
    * @returns
@@ -698,7 +699,6 @@ class SuggesterPanel {
   onCodeMirrorChange(codemirror, evt) {
     const { text, from, to, origin } = evt;
     const changeValue = text.length === 1 ? text[0] : '';
-
     // 首次输入命中关键词的时候开启联想
     if (!this.enableRelate() && this.suggesterConfig[changeValue]) {
       this.startRelate(codemirror, changeValue, from);
@@ -716,9 +716,9 @@ class SuggesterPanel {
       }
       // 展示推荐列表
       if (typeof this.suggesterConfig[this.keyword]?.suggestList === 'function') {
-        // 请求api 返回结果拼凑
+        // 请求 api 返回结果拼凑
         this.suggesterConfig[this.keyword].suggestList(this.searchKeyCache.join(''), (res) => {
-          // 如果返回了false，则强制退出联想
+          // 如果返回了 false，则强制退出联想
           if (res === false) {
             this.stopRelate();
             return;
@@ -727,6 +727,48 @@ class SuggesterPanel {
           this.optionList = !res || !res.length ? [] : res;
           this.updatePanel(this.optionList);
         });
+      }
+    } 
+    // 处理 ``` 关键字的回车键特殊逻辑
+    if (origin === '+input' && changeValue === '') {
+      const cursor = codemirror.getCursor();
+      const lineContent = codemirror.getLine(cursor.line - 1); // 上一行内容
+
+      // 检查上一行是否是代码块开始标记（三个以上反引号 + 可选语言）
+      const backtickMatch = lineContent.match(/^[\s]*(`{3,})[^\s]*/);
+      if (backtickMatch) {
+        const backticks = backtickMatch[1]; // 获取实际输入的反引号数量
+        const language = lineContent.replace(/^[\s]*`{3,}\s*/, ''); // 获取语言部分
+
+        // 统计整个文档中代码块开始和结束标记的数量
+        let codeBlockStarts = 0;
+        let codeBlockEnds = 0;
+        const totalLines = codemirror.lineCount();
+
+        for (let i = 0; i < totalLines; i++) {
+          const lineText = codemirror.getLine(i);
+
+          // 检查是否为代码块开始标记（三个以上反引号开头，且后面有非空白字符）
+          if (/^\s*`{3,}[^\s]/.test(lineText)) {
+            codeBlockStarts++;
+          }
+          // 检查是否为代码块结束标记（三个以上反引号开头，后面只有空白）
+          else if (/^\s*`{3,}\s*$/.test(lineText)) {
+            codeBlockEnds++;
+          }
+        }
+        // 是否存在未闭合的代码块
+        const hasUnclosedCodeBlockBefore = (codeBlockStarts + codeBlockEnds) % 2 === 1;
+        // Logger.log('hasUnclosedCodeBlockBefore', hasUnclosedCodeBlockBefore);
+
+        if (hasUnclosedCodeBlockBefore) {
+          // 存在未闭合，应该补全整个代码块结构
+          const codeBlock = `${backticks}${language}\n\n${backticks}`;
+          codemirror.replaceRange(codeBlock, { line: cursor.line - 1, ch: 0 }, { line: cursor.line, ch: 0 });
+          codemirror.setCursor(cursor.line, language.length + backticks.length + 1);
+        } 
+        this.stopRelate();
+        return;
       }
     }
   }
@@ -805,9 +847,9 @@ class SuggesterPanel {
       const viewTop = this.$suggesterPanel.scrollTop;
       // 可视区域范围下端
       const viewBottom = viewTop + suggestPanelHeight;
-      // item的上端
+      // item 的上端
       const nextEleTop = nextElement.offsetTop;
-      // item高度
+      // item 高度
       const nextEleHeight = nextElement.offsetHeight;
       // 当前元素全部或部分在可视区域之外，就滚动
       if (nextEleTop < viewTop || nextEleTop + nextEleHeight > viewBottom) {
@@ -829,7 +871,7 @@ class SuggesterPanel {
         this.stopRelate();
       }, 0);
     } else if (keyCode === 27 || keyCode === 0x25 || keyCode === 0x27) {
-      // 按下esc或者←、→键的时候退出联想
+      // 按下 esc 或者←、→键的时候退出联想
       evt.stopPropagation();
       codemirror.focus();
       setTimeout(() => {
