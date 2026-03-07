@@ -50,15 +50,9 @@ const imgSizeHandler = {
   },
   initBubbleButtons() {
     const position = this.getImgPosition();
-    let width, height;
-    if (this.isMermaid) {
-      // mermaid figure 没有 .width 属性，使用 getBoundingClientRect 获取实际渲染尺寸
-      width = position.width || this.img.offsetWidth;
-      height = position.height || this.img.offsetHeight;
-    } else {
-      width = this.img.width;
-      height = this.img.height;
-    }
+    // mermaid figure 没有 .width 属性，使用 getBoundingClientRect 获取实际渲染尺寸
+    const width = this.isMermaid ? position.width || this.img.offsetWidth : this.img.width;
+    const height = this.isMermaid ? position.height || this.img.offsetHeight : this.img.height;
     return {
       points: {
         arr: [

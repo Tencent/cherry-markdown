@@ -128,8 +128,9 @@ export default class CodeBlock extends ParagraphBase {
     const tag = CUSTOM_WRAPPER[engine.constructor.TYPE] || 'div';
     const sizeStyle = props.mermaidSizeAttrs ? ` style="${props.mermaidSizeAttrs}"` : '';
     const alignClass = props.mermaidAlignClass ? ` class="${props.mermaidAlignClass}"` : '';
+    const escapedLang = escapeHTMLSpecialChar(lang);
     const addContainer = (html) => {
-      return `<${tag} data-sign="${props.sign}" data-type="${lang}" data-lines="${props.lines}"${sizeStyle}${alignClass}>${html}</${tag}>`;
+      return `<${tag} data-sign="${props.sign}" data-type="${escapedLang}" data-lines="${props.lines}"${sizeStyle}${alignClass}>${html}</${tag}>`;
     };
     let html = '';
     const $codeSrc = this.needCleanFlowCursor ? codeSrc.replace(/CHERRYFLOWSESSIONCURSOR/, '') : codeSrc;
@@ -226,20 +227,22 @@ export default class CodeBlock extends ParagraphBase {
    * @returns {{ lang: string, sizeAttrs: string, alignClass: string }} 解析后的语言名、尺寸样式和对齐class
    */
   parseMermaidSize(lang) {
-    const sizeRegex = /#([0-9]+(px|em|pt|pc|in|mm|cm|ex|%)|auto)/gi;
+    const sizeRegex = /#([0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)/gi;
     const alignRegex = /#(center|right|left|float-right|float-left)/i;
+    const allMarkersRegex = /#([0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto|center|right|left|float-right|float-left)/gi;
+
     const sizes = lang.match(sizeRegex);
     const alignMatch = lang.match(alignRegex);
-    const pureLang = lang.replace(sizeRegex, '').replace(alignRegex, '').trim();
+    const pureLang = lang.replace(allMarkersRegex, '').trim();
 
     let sizeAttrs = '';
-    if (sizes && sizes.length > 0) {
+    if (sizes?.length > 0) {
       const [width, height] = sizes;
       if (width) {
-        sizeAttrs = `width:${width.replace(/[ #]*/g, '')};`;
+        sizeAttrs = `width:${width.slice(1)};`;
       }
       if (height) {
-        sizeAttrs += `height:${height.replace(/[ #]*/g, '')};`;
+        sizeAttrs += `height:${height.slice(1)};`;
       }
     }
 
