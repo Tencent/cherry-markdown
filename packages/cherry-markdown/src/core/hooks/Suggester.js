@@ -331,15 +331,15 @@ class SuggesterPanel {
             if (res) {
               return res;
             }
-            // logic to decide whether to move up or not
-            // return Pass.toString();
+            // 原有 handler 未处理，返回 Pass 继续默认处理
+            return getPass(this.$cherry);
           }
         };
       } else if (!extraKeys[key]) {
         extraKeys[key] = () => {
           if (this.cursorMove) {
-            // logic to decide whether to move up or not
-            return getPass(this.$cherry).toString();
+            // 返回 Pass 对象表示"未处理，继续交给 CodeMirror 默认处理"
+            return getPass(this.$cherry);
           }
         };
       } else if (typeof extraKeys[key] === 'string') {
