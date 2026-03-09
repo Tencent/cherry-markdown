@@ -45,6 +45,13 @@ export default class ListHandler {
     this.container = container;
     this.previewerDom = previewerDom;
     this.editor = editor;
+
+    // 流式渲染场景下没有 editor，跳过列表编辑功能
+    if (!this.editor || !this.editor.editor) {
+      console.warn('ListHandler: editor is not available, list editing is disabled');
+      return;
+    }
+
     this.insertLineBreak = false; // 是否为插入换行符
     this.handleEditablesInputBinded = this.handleEditablesInput.bind(this); // 保证this指向正确以及能够正确移除事件
     this.handleEditablesUnfocusBinded = this.handleEditablesUnfocus.bind(this);
@@ -66,6 +73,11 @@ export default class ListHandler {
   }
 
   remove() {
+    // 无 editor 时跳过
+    if (!this.editor || !this.editor.editor) {
+      this.target.removeAttribute('contenteditable');
+      return;
+    }
     if (this.bubbleContainer) {
       this.bubbleContainer.style.display = 'none';
       if (this.bubbleContainer.children[0] instanceof HTMLTextAreaElement) {
@@ -80,6 +92,10 @@ export default class ListHandler {
   }
 
   setSelection() {
+    // 无 editor 时跳过
+    if (!this.editor || !this.editor.editor) {
+      return;
+    }
     const allLi = Array.from(this.previewerDom.querySelectorAll('li.cherry-list-item')); // 预览区域内所有的li
     const targetLiIdx = allLi.findIndex((li) => li === this.target.parentElement);
     if (targetLiIdx === -1) {

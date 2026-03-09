@@ -19,6 +19,7 @@ import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
+import { escapeHTMLSpecialChar } from '@/utils/sanitize';
 
 export default class MathBlock extends ParagraphBase {
   static HOOK_NAME = 'mathBlock';
