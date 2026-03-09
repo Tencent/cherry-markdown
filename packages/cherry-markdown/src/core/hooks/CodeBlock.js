@@ -126,8 +126,11 @@ export default class CodeBlock extends ParagraphBase {
       return false;
     }
     const tag = CUSTOM_WRAPPER[engine.constructor.TYPE] || 'div';
+    const sizeStyle = props.mermaidSizeAttrs ? ` style="${props.mermaidSizeAttrs}"` : '';
+    const alignClass = props.mermaidAlignClass ? ` class="${props.mermaidAlignClass}"` : '';
+    const escapedLang = escapeHTMLSpecialChar(lang);
     const addContainer = (html) => {
-      return `<${tag} data-sign="${props.sign}" data-type="${lang}" data-lines="${props.lines}">${html}</${tag}>`;
+      return `<${tag} data-sign="${props.sign}" data-type="${escapedLang}" data-lines="${props.lines}"${sizeStyle}${alignClass}>${html}</${tag}>`;
     };
     let html = '';
     const $codeSrc = this.needCleanFlowCursor ? codeSrc.replace(/CHERRYFLOWSESSIONCURSOR/, '') : codeSrc;
@@ -215,6 +218,36 @@ export default class CodeBlock extends ParagraphBase {
       sign,
       lines,
     };
+  }
+
+  /**
+   * 从代码块语言行中解析尺寸和对齐信息
+   * 支持语法: ```mermaid #300px #200px #center
+   * @param {string} lang 语言行文本
+   * @returns {{ lang: string, sizeAttrs: string, alignClass: string }} 解析后的语言名、尺寸样式和对齐class
+   */
+  parseMermaidSize(lang) {
+    const sizeRegex = /#([0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)/gi;
+    const alignRegex = /#(center|right|left|float-right|float-left)/i;
+    const allMarkersRegex = /#([0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto|center|right|left|float-right|float-left)/gi;
+
+    const sizes = lang.match(sizeRegex);
+    const alignMatch = lang.match(alignRegex);
+    const pureLang = lang.replace(allMarkersRegex, '').trim();
+
+    let sizeAttrs = '';
+    if (sizes?.length > 0) {
+      const [width, height] = sizes;
+      if (width) {
+        sizeAttrs = `width:${width.slice(1)};`;
+      }
+      if (height) {
+        sizeAttrs += `height:${height.slice(1)};`;
+      }
+    }
+
+    const alignClass = alignMatch ? `cherry-mermaid-align-${alignMatch[1]}` : '';
+    return { lang: pureLang, sizeAttrs, alignClass };
   }
 
   /**
@@ -451,6 +484,10 @@ export default class CodeBlock extends ParagraphBase {
 
       // 未命中缓存，执行渲染
       let $lang = lang.trim().toLowerCase();
+      // 从语言行中解析尺寸和对齐信息（如 mermaid #300px #200px #center）
+      const mermaidSizeInfo = this.parseMermaidSize($lang);
+      $lang = mermaidSizeInfo.lang;
+      const { sizeAttrs: mermaidSizeAttrs, alignClass: mermaidAlignClass } = mermaidSizeInfo;
       // 如果是公式关键字，则直接返回
       if (/^(math|katex|latex)$/i.test($lang) && !this.isInternalCustomLangCovered($lang)) {
         const prefix = match.match(/^\s*/g);
@@ -468,6 +505,8 @@ export default class CodeBlock extends ParagraphBase {
           match,
           addBlockQuoteSignToResult,
           lang: $oldLang,
+          mermaidSizeAttrs,
+          mermaidAlignClass,
         });
         if (cacheCode && cacheCode !== '') {
           this.$codeCache(sign, cacheCode);
