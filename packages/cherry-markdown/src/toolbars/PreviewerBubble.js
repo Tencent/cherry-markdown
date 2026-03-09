@@ -643,7 +643,6 @@ export default class PreviewerBubble {
       htmlElement,
       this.bubble[trigger],
       this.previewerDom,
-      this.editor?.editor ?? null,
       this,
       codemirrorModule,
     );
