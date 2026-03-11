@@ -101,7 +101,13 @@ export default class Suggester extends SyntaxBase {
    * @param {SuggesterConfig} config
    */
   initConfig(config) {
-    let { suggester } = this.$cherry.options.editor.suggester || {};
+    let suggester;
+    if (config.suggester) {
+      suggester = config.suggester;
+    } else {
+      suggester = this.$cherry.options.editor.suggester.suggester || {};
+    }
+
 
     this.suggester = {};
     const defaultSuggest = [];
