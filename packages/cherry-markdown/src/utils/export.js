@@ -58,13 +58,13 @@ const getReadyToExport = (previewDom, cb) => {
 /**
  * 下载文件
  * @param {String} downloadUrl 图片本地地址
- * @param {String} fileName 导出图片文件名
+ * @param {String} fileName 导出图片文件名（包含后缀）
  */
 const fileDownload = (downloadUrl, fileName) => {
   const aLink = document.createElement('a');
   aLink.style.display = 'none';
   aLink.href = downloadUrl;
-  aLink.download = `${fileName}.png`;
+  aLink.download = fileName;
   document.body.appendChild(aLink);
   aLink.click();
   document.body.removeChild(aLink);
@@ -122,11 +122,72 @@ export function exportScreenShot(previewDom, fileName) {
       width: cherryPreviewer.clientWidth,
       scrollY: 0,
       scrollX: 0,
+      logging: false,
+      ignoreElements: (element) => {
+        if (cherryPreviewer === element || cherryPreviewer.contains(element) || element.contains(cherryPreviewer)) {
+          return false;
+        }
+        const tagName = element.tagName?.toUpperCase();
+        if (tagName === 'HEAD' || tagName === 'STYLE' || tagName === 'LINK' || tagName === 'META') {
+          return false;
+        }
+        if (element.querySelector && element.querySelector('style, link')) {
+          return false;
+        }
+        return true;
+      },
     }).then((canvas) => {
       const imgData = canvas.toDataURL('image/png');
-      fileDownload(imgData, fileName);
+      fileDownload(imgData, `${fileName}.png`);
       thenFinish();
     });
+  });
+}
+
+/**
+ * 利用canvas将dom节点导出成图片
+ * @param {HTMLElement} dom 目标dom节点
+ * @param {String} fileName 导出图片文件名
+ * @param {Object} options 导出选项
+ */
+export function canvas2img(dom, fileName, options = {}) {
+  // 如果是png格式，则使用透明背景。反之获取dom所属的.cherry-previewer的背景色
+  const previewer = dom.closest('.cherry-previewer');
+  const { format = 'png' } = options;
+  const bg = format === 'png' ? 'transparent' : getComputedStyle(previewer).backgroundColor;
+  const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
+  html2canvas(dom, {
+    allowTaint: true,
+    backgroundColor: bg,
+    height: dom.clientHeight + 10,
+    width: dom.clientWidth + 10,
+    x: -5,
+    y: -5,
+    logging: false,
+    ignoreElements: (element) => {
+      // 保留目标节点及其子节点
+      if (dom === element || dom.contains(element)) {
+        return false;
+      }
+      // 保留目标节点的祖先节点（用于继承样式）
+      if (element.contains(dom)) {
+        return false;
+      }
+      const tagName = element.tagName?.toUpperCase();
+      // 保留 head 及其内部的样式表
+      if (tagName === 'HEAD' || tagName === 'STYLE' || tagName === 'LINK' || tagName === 'META') {
+        return false;
+      }
+      // 如果该节点内部包含 style 或 link 标签，也需要保留，以防丢失样式
+      if (element.querySelector && element.querySelector('style, link')) {
+        return false;
+      }
+      // 忽略其他所有节点，极大提升性能
+      return true;
+    },
+  }).then((canvas) => {
+    const imgData = canvas.toDataURL(mimeType);
+    fileDownload(imgData, `${fileName}.${format}`);
   });
 }
 
