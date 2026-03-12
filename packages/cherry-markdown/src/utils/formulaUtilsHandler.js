@@ -129,19 +129,6 @@ export default class FormulaHandler {
     this.bubbleContainer.style.top = `${y || targetRect.top}px`;
     this.bubbleContainer.style.left = `${x || targetRect.left}px`;
     this.bubbleContainer.addEventListener('click', this.bubbleClickHandler.bind(this), { once: true });
-    this.collectFormulaCode();
-  }
-
-  collectFormulaCode() {
-    const formulaCode = [];
-    // @ts-ignore
-    this.editor.editor.getValue().replace(/(\$+)\s*([\w\W]*?)\s*(\1)/g, (whole, start, content, end, offset) => {
-      formulaCode.push({
-        code: content,
-        offset,
-      });
-    });
-    this.formulaCode = formulaCode;
   }
 
   remove() {
@@ -160,6 +147,7 @@ export default class FormulaHandler {
     const { target } = e;
     if (target instanceof HTMLButtonElement) {
       const { name = '' } = target.dataset;
+      const formulaCode = this.getFormulaSource();
       switch (name) {
         case 'svg':
         case 'png':
@@ -208,58 +196,62 @@ export default class FormulaHandler {
         case 'mathml':
         case 'docx':
           // 涉及到公式API的操作
-          {
-            const allMathContainers = this.previewerDom.querySelectorAll('.Cherry-Math, .Cherry-InlineMath');
-            let mathIndex = -1;
-            allMathContainers.forEach((container, index) => {
-              if (container.contains(this.target)) {
-                mathIndex = index;
-              }
-            });
-            if (mathIndex >= 0 && this.formulaCode[mathIndex]) {
-              const { code } = this.formulaCode[mathIndex];
-              if (name === 'mathml' || name === 'docx') {
-                /** @type {MathBlock} */
-                // @ts-ignore
-                const hook = this.editor.$cherry.engine.hooks.paragraph.find((hook) => hook instanceof MathBlock);
-                if (hook && hook.engine === 'MathJax') {
-                  window.MathJax?.texReset();
-                  window.MathJax?.tex2mmlPromise?.(code, { display: true }).then((mml) => {
-                    if (name === 'mathml') {
-                      copyToClip(mml);
-                    } else {
-                      // TODO: docx
-                    }
+          if (formulaCode) {
+            if (name === 'mathml' || name === 'docx') {
+              /** @type {MathBlock} */
+              // @ts-ignore
+              const hook = this.editor.$cherry.engine.hooks.paragraph.find((hook) => hook instanceof MathBlock);
+              if (hook && hook.engine === 'MathJax') {
+                window.MathJax?.texReset();
+                window.MathJax?.tex2mmlPromise?.(formulaCode, { display: true }).then((mml) => {
+                  if (name === 'mathml') {
+                    copyToClip(mml);
+                  } else {
+                    // TODO: docx
+                  }
+                });
+              } else if (hook && hook.engine === 'katex') {
+                if (window.katex) {
+                  const html = window.katex.renderToString(formulaCode, {
+                    throwOnError: false,
+                    displayMode: true,
+                    output: 'mathml',
                   });
-                } else if (hook && hook.engine === 'katex') {
-                  if (window.katex) {
-                    const html = window.katex.renderToString(code, {
-                      throwOnError: false,
-                      displayMode: true,
-                      output: 'mathml',
-                    });
-                    if (name === 'mathml') {
-                      copyToClip(html);
-                    } else {
-                      // TODO: docx
-                    }
+                  if (name === 'mathml') {
+                    copyToClip(html);
+                  } else {
+                    // TODO: docx
                   }
                 }
-                // TODO: other engine
-              } else if (name === 'latex') {
-                copyToClip(code);
-              } else if (name === '$') {
-                copyToClip(`${name}${code}${name}`);
-              } else if (name === '$$') {
-                copyToClip(`${name}\n${code}\n${name}`);
-              } else if (name === '\\') {
-                copyToClip(`\\${code}`);
               }
+              // TODO: other engine
+            } else if (name === 'latex') {
+              copyToClip(formulaCode);
+            } else if (name === '$') {
+              copyToClip(`${name}${formulaCode}${name}`);
+            } else if (name === '$$') {
+              copyToClip(`${name}\n${formulaCode}\n${name}`);
+            } else if (name === '\\') {
+              copyToClip(`\\${formulaCode}`);
             }
           }
           break;
       }
     }
     this.remove();
+  }
+
+  getFormulaSource() {
+    const formulaContainer = this.target.closest('.Cherry-Math, .Cherry-InlineMath');
+    const encodedFormulaSource = formulaContainer instanceof HTMLElement ? formulaContainer.dataset.formulaSource : '';
+    if (!encodedFormulaSource) {
+      return '';
+    }
+    try {
+      // 源码写入 DOM 时做过 URL 编码，这里取出后恢复原文。
+      return decodeURIComponent(encodedFormulaSource);
+    } catch (err) {
+      return encodedFormulaSource;
+    }
   }
 }

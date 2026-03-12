@@ -61,11 +61,13 @@ export default class MathBlock extends ParagraphBase {
     // 既无MathJax又无katex时，原样输出
     let result = '';
     const $content = content.replace(/\\~D/g, '$').replace(/\\~T/g, '~').replace(/~T/g, '~');
+    // 保留一份源码到渲染节点上，供 formulaUtilsHandler 直接读取，避免再次对全文做正则解析。
+    const encodedFormulaSource = encodeURIComponent($content);
 
     if (this.engine === 'katex') {
       // katex渲染
       if (!this.katex) {
-        result = `<div data-sign="${sign}" class="Cherry-Math cherry-katex-need-render" data-type="mathBlock" data-lines="${lines}" data-content="${encodeURI($content)}"></div>`;
+        result = `<div data-sign="${sign}" class="Cherry-Math cherry-katex-need-render" data-type="mathBlock" data-lines="${lines}" data-content="${encodeURI($content)}" data-formula-source="${encodedFormulaSource}"></div>`;
         this.$engine.asyncRenderHandler.add(`math-block-${sign}`);
       } else {
         let html = this.katex.renderToString($content, {
@@ -79,7 +81,7 @@ export default class MathBlock extends ParagraphBase {
           this.lastCode = html;
         }
         result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
-              data-lines="${lines}">${html}</div>`;
+              data-lines="${lines}" data-formula-source="${encodedFormulaSource}">${html}</div>`;
       }
     } else if (this.MathJax?.tex2svg) {
       // MathJax渲染
@@ -91,10 +93,10 @@ export default class MathBlock extends ParagraphBase {
         this.lastCode = svg;
       }
       result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
-            data-lines="${lines}">${svg}</div>`;
+            data-lines="${lines}" data-formula-source="${encodedFormulaSource}">${svg}</div>`;
     } else {
       result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
-      data-lines="${lines}">$$${escapeFormulaPunctuations(content)}$$</div>`;
+      data-lines="${lines}" data-formula-source="${encodedFormulaSource}">$$${escapeFormulaPunctuations(content)}$$</div>`;
     }
 
     return leadingChar + this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
