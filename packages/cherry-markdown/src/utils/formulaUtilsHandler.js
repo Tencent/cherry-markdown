@@ -236,7 +236,7 @@ export default class FormulaHandler {
                     const html = window.katex.renderToString(code, {
                       throwOnError: false,
                       displayMode: true,
-                      output: 'mathml'
+                      output: 'mathml',
                     });
                     if (name === 'mathml') {
                       copyToClip(html);
