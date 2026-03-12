@@ -67,7 +67,7 @@ export default class MathBlock extends ParagraphBase {
     if (this.engine === 'katex') {
       // katex渲染
       if (!this.katex) {
-        result = `<div data-sign="${sign}" class="Cherry-Math cherry-katex-need-render" data-type="mathBlock" data-lines="${lines}" data-content="${encodeURI($content)}" data-formula-source="${encodedFormulaSource}"></div>`;
+        result = `<div data-sign="${sign}" class="Cherry-Math cherry-katex-need-render" data-type="mathBlock" data-formula-source="${encodedFormulaSource}" data-lines="${lines}" data-content="${encodeURIComponent($content)}"></div>`;
         this.$engine.asyncRenderHandler.add(`math-block-${sign}`);
       } else {
         let html = this.katex.renderToString($content, {
