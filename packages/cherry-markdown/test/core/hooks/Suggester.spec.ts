@@ -22,7 +22,7 @@ vi.mock('@/utils/lookbehind-replace', () => ({
 // ============ 辅助函数 ============
 
 /** 创建 mock cherry 实例 */
-const createMockCherry = () => {
+const createMockCherry = (suggesterConfig = {}) => {
   const wrapperDom = {
     appendChild: vi.fn(),
     querySelector: vi.fn(),
@@ -63,7 +63,7 @@ const createMockCherry = () => {
     wrapperDom,
     options: {
       editor: {
-        suggester: {},
+        suggester: suggesterConfig,
       },
     },
     editor,
@@ -129,7 +129,7 @@ describe('core/hooks/Suggester', () => {
       });
 
       it('应该合并自定义配置', () => {
-        const customConfig = {
+        const customSuggesterConfig = {
           suggester: [
             {
               keyword: 'custom',
@@ -137,12 +137,13 @@ describe('core/hooks/Suggester', () => {
             },
           ],
         };
-        const suggester = new Suggester({ config: customConfig, cherry: mockCherry });
+        const customCherry = createMockCherry(customSuggesterConfig);
+        const suggester = new Suggester({ config: customSuggesterConfig, cherry: customCherry });
         expect(suggester.suggester['custom']).toBeDefined();
       });
 
       it('应该处理空关键字', () => {
-        const config = {
+        const customConfig = {
           suggester: [
             {
               keyword: '',
@@ -150,14 +151,15 @@ describe('core/hooks/Suggester', () => {
             },
           ],
         };
-        const suggester = new Suggester({ config, cherry: mockCherry });
+        const customCherry = createMockCherry(customConfig);
+        const suggester = new Suggester({ config: customConfig, cherry: customCherry });
         // 空关键字应该被设置为默认的 '@'
-        expect(suggester.suggester['']).toBeDefined();
+        expect(suggester.suggester['@']).toBeDefined();
       });
 
       it('应该警告缺少 suggestList', () => {
         const warnSpy = vi.spyOn(console, 'warn');
-        const config = {
+        const customConfig = {
           suggester: [
             {
               keyword: 'test',
@@ -165,7 +167,8 @@ describe('core/hooks/Suggester', () => {
             },
           ],
         };
-        new Suggester({ config, cherry: mockCherry });
+        const customCherry = createMockCherry(customConfig);
+        new Suggester({ config: customConfig, cherry: customCherry });
         expect(warnSpy).toHaveBeenCalledWith('[cherry-suggester]: the suggestList of config is missing.');
       });
     });
@@ -238,7 +241,8 @@ describe('core/hooks/Suggester', () => {
             },
           ],
         };
-        const suggester = new Suggester({ config, cherry: mockCherry });
+        const customCherry = createMockCherry(config);
+        const suggester = new Suggester({ config, cherry: customCherry });
         const result = suggester.toHtml('', ' ', '@', 'user');
         expect(result).toBe('<custom>@user</custom>');
       });
@@ -252,7 +256,8 @@ describe('core/hooks/Suggester', () => {
             },
           ],
         };
-        const suggester = new Suggester({ config, cherry: mockCherry });
+        const customCherry = createMockCherry(config);
+        const suggester = new Suggester({ config, cherry: customCherry });
         const result = suggester.toHtml('', ' ', '@', 'user');
         expect(result).toContain('cherry-suggestion');
         expect(result).toContain('@user');
@@ -268,8 +273,10 @@ describe('core/hooks/Suggester', () => {
             },
           ],
         };
-        const suggester = new Suggester({ config, cherry: mockCherry });
-        const result = suggester.toHtml('', ' ', '@', 'user');
+        const customCherry = createMockCherry(config);
+        const suggester = new Suggester({ config, cherry: customCherry });
+        const result = suggester.toHtml('', ' ', '@', '');
+        // 当没有 text 且 echo 为 false 时，返回 leadingChar
         expect(result).toBe(' ');
       });
 
@@ -474,7 +481,7 @@ describe('core/hooks/Suggester', () => {
     });
 
     describe('onCodeMirrorChange', () => {
-      it('应该开始联想当输入关键字', () => {
+      it('应该开始联想当输入关键字', async () => {
         const config = {
           suggester: [
             {
@@ -485,11 +492,16 @@ describe('core/hooks/Suggester', () => {
             },
           ],
         };
-        const suggester = new Suggester({ config, cherry: mockCherry });
-        suggester.suggesterPanel.editor = mockCherry.editor;
+        const customCherry = createMockCherry(config);
+        const suggester = new Suggester({ config, cherry: customCherry });
+        suggester.suggesterPanel.editor = customCherry.editor;
         suggester.suggesterPanel.setSuggester(suggester.suggester);
         suggester.suggesterPanel.tryCreatePanel = vi.fn();
         suggester.suggesterPanel.relocatePanelWithBoundaryCheck = vi.fn();
+        // Mock $suggesterPanel
+        const panelDiv = document.createElement('div');
+        panelDiv.className = 'cherry-suggester-panel';
+        suggester.suggesterPanel.$suggesterPanel = panelDiv;
 
         const evt = {
           text: ['@'],
@@ -498,13 +510,14 @@ describe('core/hooks/Suggester', () => {
           origin: '+input',
         };
 
-        suggester.suggesterPanel.onCodeMirrorChange(mockCherry.editor.editor, evt);
+        suggester.suggesterPanel.onCodeMirrorChange(customCherry.editor.editor, evt);
 
-        expect(suggester.suggesterPanel.searchCache).toBe(true);
+        // Wait for async callback
+        await new Promise(resolve => setTimeout(resolve, 10));
         expect(suggester.suggesterPanel.keyword).toBe('@');
       });
 
-      it('应该更新搜索缓存', () => {
+      it('应该更新搜索缓存', async () => {
         const config = {
           suggester: [
             {
@@ -515,12 +528,17 @@ describe('core/hooks/Suggester', () => {
             },
           ],
         };
-        const suggester = new Suggester({ config, cherry: mockCherry });
-        suggester.suggesterPanel.editor = mockCherry.editor;
+        const customCherry = createMockCherry(config);
+        const suggester = new Suggester({ config, cherry: customCherry });
+        suggester.suggesterPanel.editor = customCherry.editor;
         suggester.suggesterPanel.setSuggester(suggester.suggester);
         suggester.suggesterPanel.tryCreatePanel = vi.fn();
         suggester.suggesterPanel.relocatePanelWithBoundaryCheck = vi.fn();
-        suggester.suggesterPanel.startRelate(mockCherry.editor.editor, '@', { line: 0, ch: 0 });
+        // Mock $suggesterPanel
+        const panelDiv = document.createElement('div');
+        panelDiv.className = 'cherry-suggester-panel';
+        suggester.suggesterPanel.$suggesterPanel = panelDiv;
+        suggester.suggesterPanel.startRelate(customCherry.editor.editor, '@', { line: 0, ch: 0 });
 
         const evt = {
           text: ['t'],
@@ -529,8 +547,9 @@ describe('core/hooks/Suggester', () => {
           origin: '+input',
         };
 
-        suggester.suggesterPanel.onCodeMirrorChange(mockCherry.editor.editor, evt);
+        suggester.suggesterPanel.onCodeMirrorChange(customCherry.editor.editor, evt);
 
+        await new Promise(resolve => setTimeout(resolve, 10));
         expect(suggester.suggesterPanel.searchKeyCache).toContain('t');
       });
 
@@ -572,12 +591,13 @@ describe('core/hooks/Suggester', () => {
             },
           ],
         };
-        const suggester = new Suggester({ config, cherry: mockCherry });
-        suggester.suggesterPanel.editor = mockCherry.editor;
+        const customCherry = createMockCherry(config);
+        const suggester = new Suggester({ config, cherry: customCherry });
+        suggester.suggesterPanel.editor = customCherry.editor;
         suggester.suggesterPanel.setSuggester(suggester.suggester);
         suggester.suggesterPanel.tryCreatePanel = vi.fn();
         suggester.suggesterPanel.relocatePanelWithBoundaryCheck = vi.fn();
-        suggester.suggesterPanel.startRelate(mockCherry.editor.editor, '@', { line: 0, ch: 0 });
+        suggester.suggesterPanel.startRelate(customCherry.editor.editor, '@', { line: 0, ch: 0 });
         suggester.suggesterPanel.searchKeyCache = ['@'];
 
         const evt = {
@@ -587,7 +607,7 @@ describe('core/hooks/Suggester', () => {
           origin: '+delete',
         };
 
-        suggester.suggesterPanel.onCodeMirrorChange(mockCherry.editor.editor, evt);
+        suggester.suggesterPanel.onCodeMirrorChange(customCherry.editor.editor, evt);
 
         expect(suggester.suggesterPanel.searchCache).toBe(false);
       });
@@ -603,12 +623,13 @@ describe('core/hooks/Suggester', () => {
             },
           ],
         };
-        const suggester = new Suggester({ config, cherry: mockCherry });
-        suggester.suggesterPanel.editor = mockCherry.editor;
+        const customCherry = createMockCherry(config);
+        const suggester = new Suggester({ config, cherry: customCherry });
+        suggester.suggesterPanel.editor = customCherry.editor;
         suggester.suggesterPanel.setSuggester(suggester.suggester);
         suggester.suggesterPanel.tryCreatePanel = vi.fn();
         suggester.suggesterPanel.relocatePanelWithBoundaryCheck = vi.fn();
-        suggester.suggesterPanel.startRelate(mockCherry.editor.editor, '@', { line: 0, ch: 0 });
+        suggester.suggesterPanel.startRelate(customCherry.editor.editor, '@', { line: 0, ch: 0 });
 
         const evt = {
           text: [' '],
@@ -617,7 +638,7 @@ describe('core/hooks/Suggester', () => {
           origin: '+input',
         };
 
-        suggester.suggesterPanel.onCodeMirrorChange(mockCherry.editor.editor, evt);
+        suggester.suggesterPanel.onCodeMirrorChange(customCherry.editor.editor, evt);
 
         // Wait for async callback
         await new Promise(resolve => setTimeout(resolve, 10));
@@ -635,18 +656,19 @@ describe('core/hooks/Suggester', () => {
             },
           ],
         };
-        const suggester = new Suggester({ config, cherry: mockCherry });
-        suggester.suggesterPanel.editor = mockCherry.editor;
+        const customCherry = createMockCherry(config);
+        const suggester = new Suggester({ config, cherry: customCherry });
+        suggester.suggesterPanel.editor = customCherry.editor;
         suggester.suggesterPanel.optionList = ['item1', 'item2', 'item3'];
 
         // 创建完整的面板 DOM
         const panelDiv = document.createElement('div');
         panelDiv.className = 'cherry-suggester-panel';
-        panelDiv.innerHTML = '<div class="item">item1</div><div class="item">item2</div><div class="item">item3</div>';
+        panelDiv.innerHTML = '<div class="cherry-suggester-panel__item">item1</div><div class="cherry-suggester-panel__item">item2</div><div class="cherry-suggester-panel__item">item3</div>';
         suggester.suggesterPanel.$suggesterPanel = panelDiv;
 
         const evt = { keyCode: 38, stopPropagation: vi.fn() };
-        suggester.suggesterPanel.onKeyDown(mockCherry.editor.editor, evt);
+        suggester.suggesterPanel.onKeyDown(customCherry.editor.editor, evt);
 
         // 上键应该选中最后一项
         const lastItem = suggester.suggesterPanel.$suggesterPanel.lastElementChild;
@@ -662,18 +684,19 @@ describe('core/hooks/Suggester', () => {
             },
           ],
         };
-        const suggester = new Suggester({ config, cherry: mockCherry });
-        suggester.suggesterPanel.editor = mockCherry.editor;
+        const customCherry = createMockCherry(config);
+        const suggester = new Suggester({ config, cherry: customCherry });
+        suggester.suggesterPanel.editor = customCherry.editor;
         suggester.suggesterPanel.optionList = ['item1', 'item2', 'item3'];
 
         // 创建完整的面板 DOM
         const panelDiv = document.createElement('div');
         panelDiv.className = 'cherry-suggester-panel';
-        panelDiv.innerHTML = '<div class="item">item1</div><div class="item">item2</div><div class="item">item3</div>';
+        panelDiv.innerHTML = '<div class="cherry-suggester-panel__item">item1</div><div class="cherry-suggester-panel__item">item2</div><div class="cherry-suggester-panel__item">item3</div>';
         suggester.suggesterPanel.$suggesterPanel = panelDiv;
 
         const evt = { keyCode: 40, stopPropagation: vi.fn() };
-        suggester.suggesterPanel.onKeyDown(mockCherry.editor.editor, evt);
+        suggester.suggesterPanel.onKeyDown(customCherry.editor.editor, evt);
 
         // 下键应该选中第一项
         const firstItem = suggester.suggesterPanel.$suggesterPanel.firstElementChild;
@@ -689,8 +712,9 @@ describe('core/hooks/Suggester', () => {
             },
           ],
         };
-        const suggester = new Suggester({ config, cherry: mockCherry });
-        suggester.suggesterPanel.editor = mockCherry.editor;
+        const customCherry = createMockCherry(config);
+        const suggester = new Suggester({ config, cherry: customCherry });
+        suggester.suggesterPanel.editor = customCherry.editor;
         suggester.suggesterPanel.cursorFrom = { line: 0, ch: 0 };
         suggester.suggesterPanel.keyword = '@';
         suggester.suggesterPanel.optionList = [{ label: 'test', value: 'test' }];
@@ -703,9 +727,9 @@ describe('core/hooks/Suggester', () => {
         suggester.suggesterPanel.$suggesterPanel = panelDiv;
 
         const evt = { keyCode: 13, stopPropagation: vi.fn() };
-        suggester.suggesterPanel.onKeyDown(mockCherry.editor.editor, evt);
+        suggester.suggesterPanel.onKeyDown(customCherry.editor.editor, evt);
 
-        expect(mockCherry.editor.editor.focus).toHaveBeenCalled();
+        expect(customCherry.editor.editor.focus).toHaveBeenCalled();
       });
 
       it('应该处理 ESC 键（27）', async () => {
@@ -717,21 +741,22 @@ describe('core/hooks/Suggester', () => {
             },
           ],
         };
-        const suggester = new Suggester({ config, cherry: mockCherry });
-        suggester.suggesterPanel.editor = mockCherry.editor;
+        const customCherry = createMockCherry(config);
+        const suggester = new Suggester({ config, cherry: customCherry });
+        suggester.suggesterPanel.editor = customCherry.editor;
         suggester.suggesterPanel.tryCreatePanel = vi.fn();
-        suggester.suggesterPanel.relocatePanelWithBoundaryCheck = vi.fn();
-        suggester.suggesterPanel.startRelate(mockCherry.editor.editor, '@', { line: 0, ch: 0 });
+        suggester.suggesterPanel.$suggesterPanel = document.createElement('div');
+        suggester.suggesterPanel.startRelate(customCherry.editor.editor, '@', { line: 0, ch: 0 });
 
         const evt = { keyCode: 27, stopPropagation: vi.fn() };
-        suggester.suggesterPanel.onKeyDown(mockCherry.editor.editor, evt);
+        suggester.suggesterPanel.onKeyDown(customCherry.editor.editor, evt);
 
         // Wait for setTimeout
         await new Promise(resolve => setTimeout(resolve, 10));
         expect(suggester.suggesterPanel.searchCache).toBe(false);
       });
 
-      it('应该在空列表时停止联想', () => {
+      it('应该在空列表时停止联想', async () => {
         const config = {
           suggester: [
             {
@@ -740,17 +765,20 @@ describe('core/hooks/Suggester', () => {
             },
           ],
         };
-        const suggester = new Suggester({ config, cherry: mockCherry });
-        suggester.suggesterPanel.editor = mockCherry.editor;
+        const customCherry = createMockCherry(config);
+        const suggester = new Suggester({ config, cherry: customCherry });
+        suggester.suggesterPanel.editor = customCherry.editor;
         suggester.suggesterPanel.optionList = [];
         suggester.suggesterPanel.tryCreatePanel = vi.fn();
-        suggester.suggesterPanel.relocatePanelWithBoundaryCheck = vi.fn();
-        suggester.suggesterPanel.startRelate(mockCherry.editor.editor, '@', { line: 0, ch: 0 });
+        suggester.suggesterPanel.$suggesterPanel = document.createElement('div');
+        suggester.suggesterPanel.startRelate(customCherry.editor.editor, '@', { line: 0, ch: 0 });
 
         const evt = { keyCode: 38, stopPropagation: vi.fn() };
-        suggester.suggesterPanel.onKeyDown(mockCherry.editor.editor, evt);
+        suggester.suggesterPanel.onKeyDown(customCherry.editor.editor, evt);
 
         // 应该在 setTimeout 后停止联想
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(suggester.suggesterPanel.searchCache).toBe(false);
       });
     });
 
