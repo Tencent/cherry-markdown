@@ -15,6 +15,7 @@
  */
 
 import { svg2img, getSvgString } from '@/utils/svgUtils';
+import { canvas2img } from '@/utils/export';
 import { copyToClip } from '@/utils/copy';
 import MathBlock from '@/core/hooks/MathBlock';
 
@@ -166,6 +167,15 @@ export default class FormulaHandler {
           // 涉及到图片的操作
           if (this.target instanceof SVGSVGElement) {
             svg2img(this.target, { format: name });
+          } else {
+            // 如果target不是svg元素，则使用canvas2img
+            // 特殊处理，如果是katex元素，则使用katex的math元素 as targetDom
+            const targetDom =
+              this.target.classList && this.target.classList.contains('katex')
+                ? this.target.querySelector('.katex-html .base')
+                : this.target;
+            // @ts-ignore
+            canvas2img(targetDom, 'formula', { format: name });
           }
           break;
         case 'html':
@@ -176,8 +186,18 @@ export default class FormulaHandler {
               copyToClip(getSvgString(this.target));
             } else {
               const mathElement = this.target.parentElement.querySelector('math');
-              mathElement.setAttribute('xmlns', 'http://www.w3.org/1998/Math/MathML');
-              copyToClip(undefined, mathElement.outerHTML);
+              if (mathElement) {
+                mathElement.setAttribute('xmlns', 'http://www.w3.org/1998/Math/MathML');
+                copyToClip(undefined, mathElement.outerHTML);
+              }
+            }
+          } else if (this.target.classList && this.target.classList.contains('katex')) {
+            if (name === 'html') {
+              const mathElement = this.target.querySelector('math');
+              if (mathElement) {
+                mathElement.setAttribute('xmlns', 'http://www.w3.org/1998/Math/MathML');
+                copyToClip(undefined, mathElement.outerHTML);
+              }
             }
           }
           break;
@@ -189,15 +209,15 @@ export default class FormulaHandler {
         case 'docx':
           // 涉及到公式API的操作
           {
-            const allMjx = this.previewerDom.querySelectorAll('mjx-container');
-            let mjxIndex = -1;
-            allMjx.forEach((mjx, index) => {
-              if (mjx === this.target.parentElement) {
-                mjxIndex = index;
+            const allMathContainers = this.previewerDom.querySelectorAll('.Cherry-Math, .Cherry-InlineMath');
+            let mathIndex = -1;
+            allMathContainers.forEach((container, index) => {
+              if (container.contains(this.target)) {
+                mathIndex = index;
               }
             });
-            if (mjxIndex >= 0 && this.formulaCode[mjxIndex]) {
-              const { code } = this.formulaCode[mjxIndex];
+            if (mathIndex >= 0 && this.formulaCode[mathIndex]) {
+              const { code } = this.formulaCode[mathIndex];
               if (name === 'mathml' || name === 'docx') {
                 /** @type {MathBlock} */
                 // @ts-ignore
@@ -211,6 +231,19 @@ export default class FormulaHandler {
                       // TODO: docx
                     }
                   });
+                } else if (hook && hook.engine === 'katex') {
+                  if (window.katex) {
+                    const html = window.katex.renderToString(code, {
+                      throwOnError: false,
+                      displayMode: true,
+                      output: 'mathml',
+                    });
+                    if (name === 'mathml') {
+                      copyToClip(html);
+                    } else {
+                      // TODO: docx
+                    }
+                  }
                 }
                 // TODO: other engine
               } else if (name === 'latex') {

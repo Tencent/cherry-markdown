@@ -439,6 +439,11 @@ export default class PreviewerBubble {
         const mermaidFigure = this.$getMermaidFigure(target);
         if (mermaidFigure) {
           this.$showMermaidPreviewerBubbles(mermaidFigure, e);
+        } else {
+          const katexNode = target.closest ? target.closest('.katex') : null;
+          if (katexNode) {
+            this.$showFormulaPreviewerBubbles('click', katexNode, { x: e.pageX, y: e.pageY });
+          }
         }
         break;
       }
