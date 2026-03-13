@@ -147,7 +147,7 @@ export default class Engine {
             .querySelectorAll('.cherry-katex-need-render')
             .forEach((el) => {
               const displayMode = el.classList.contains('Cherry-Math');
-              el.innerHTML = window.katex.renderToString(decodeURI(el.getAttribute('data-content')), {
+              el.innerHTML = window.katex.renderToString(decodeURIComponent(el.getAttribute('data-content')), {
                 throwOnError: false,
                 displayMode,
               });
@@ -161,7 +161,7 @@ export default class Engine {
               const displayMode = domName === 'div';
               const key = domName === 'div' ? `math-block-${sign}` : `math-inline-${sign}`;
               // @ts-ignore
-              const html = window.katex.renderToString(decodeURI(content), {
+              const html = window.katex.renderToString(decodeURIComponent(content), {
                 throwOnError: false,
                 displayMode,
               });
