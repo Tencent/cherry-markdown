@@ -33,11 +33,20 @@ export default class Audio extends MenuBase {
     // WYSIWYG 模式：上传后插入 Cherry 音频语法文本
     if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
       const accept = this.$cherry.options?.fileTypeLimitMap?.audio ?? '*';
-      handleUpload(this.editor, 'audio', accept, (name, url, params) => {
-        const finalName = params.name ? params.name : name;
-        this.$cherry.wysiwygEditor.insertText(`!audio[${finalName}](${url})`);
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = accept;
+      input.style.display = 'none';
+      input.addEventListener('change', (event) => {
+        // @ts-ignore
+        const [file] = event.target.files;
+        this.$cherry.options.callback.fileUpload(file, (url, params = {}) => {
+          if (typeof url !== 'string' || !url) return;
+          const finalName = params.name ? params.name : file.name;
+          this.$cherry.wysiwygEditor.insertText(`!audio[${finalName}](${url})`);
+        });
       });
-      this.updateMarkdown = false;
+      input.click();
       return false;
     }
     const accept = this.$cherry.options?.fileTypeLimitMap?.audio ?? '*';

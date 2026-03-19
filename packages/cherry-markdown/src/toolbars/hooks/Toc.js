@@ -32,7 +32,6 @@ export default class Toc extends MenuBase {
     // WYSIWYG 模式：插入 [[toc]] 文本
     if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
       this.$cherry.wysiwygEditor.insertText('\n[[toc]]\n');
-      this.updateMarkdown = false;
       return false;
     }
     // 插入目录

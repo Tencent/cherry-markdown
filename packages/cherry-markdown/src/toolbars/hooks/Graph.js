@@ -264,7 +264,6 @@ export default class Graph extends MenuBase {
         }
       }
       this.$cherry.wysiwygEditor.insertCodeBlock('mermaid', mermaidContent.join('\n'));
-      this.updateMarkdown = false;
       return false;
     }
 

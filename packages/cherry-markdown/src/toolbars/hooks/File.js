@@ -33,11 +33,20 @@ export default class File extends MenuBase {
     // WYSIWYG 模式：上传后插入标准链接
     if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
       const accept = this.$cherry.options?.fileTypeLimitMap?.file ?? '*';
-      handleUpload(this.editor, 'file', accept, (name, url, params) => {
-        const finalName = params.name ? params.name : name;
-        this.$cherry.wysiwygEditor.insertLink(finalName, url);
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = accept;
+      input.style.display = 'none';
+      input.addEventListener('change', (event) => {
+        // @ts-ignore
+        const [file] = event.target.files;
+        this.$cherry.options.callback.fileUpload(file, (url, params = {}) => {
+          if (typeof url !== 'string' || !url) return;
+          const finalName = params.name ? params.name : file.name;
+          this.$cherry.wysiwygEditor.insertLink(finalName, url);
+        });
       });
-      this.updateMarkdown = false;
+      input.click();
       return false;
     }
     const accept = this.$cherry.options?.fileTypeLimitMap?.file ?? '*';

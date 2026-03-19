@@ -35,7 +35,6 @@ export default class QuickTable extends MenuBase {
     // WYSIWYG 模式：插入标准表格
     if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
       this.$cherry.wysiwygEditor.insertTable(2, 3);
-      this.updateMarkdown = false;
       return false;
     }
     // TODO：可以尝试解析下selection里的内容，按\s、\t区分列，按\n区分行

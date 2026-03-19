@@ -67,7 +67,7 @@ export default class Insert extends MenuBase {
         }
         // 替换选中区域
         // @ts-ignore
-        this.$cherry.$cherry.doc.replaceSelection(code);
+        this.editor.editor.doc.replaceSelection(code);
       });
     });
     input.click();

@@ -46,8 +46,7 @@ export default class Image extends MenuBase {
       handleUpload(this.editor, 'image', accept, (name, url, params) => {
         this.$cherry.wysiwygEditor.insertImage({ src: url, alt: params.name || name });
       });
-      this.updateMarkdown = false;
-      return selection;
+      return false;
     }
 
     const accept = this.$cherry.options?.fileTypeLimitMap?.image ?? '*';
