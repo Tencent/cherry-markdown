@@ -402,6 +402,7 @@ const basicConfig = {
       'proTable',
       // 'customMenuTable',
       'togglePreview',
+      'switchWysiwyg',
       'search',
       'shortcutKey',
       {

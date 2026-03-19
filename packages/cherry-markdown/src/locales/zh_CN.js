@@ -76,6 +76,11 @@ export default {
   switchModel: '模式切换', // 模式切换
   switchPreview: '预览', // 预览
   switchEdit: '返回编辑', // 返回编辑
+  switchWysiwyg: '所见即所得', // 所见即所得
+  modelEditPreview: '双栏编辑', // 双栏编辑
+  modelEditOnly: '纯编辑', // 纯编辑
+  modelPreviewOnly: '纯预览', // 纯预览
+  modelWysiwyg: '所见即所得', // 所见即所得
   classicBr: '经典换行', // 经典换行
   normalBr: '常规换行', // 常规换行
   settings: '设置', // 设置

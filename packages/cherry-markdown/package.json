@@ -109,6 +109,8 @@
     "vite": "^6.4.1"
   },
   "dependencies": {
+    "@milkdown/crepe": "^7.19.0",
+    "@milkdown/kit": "^7.19.0",
     "@types/codemirror": "^0.0.108",
     "crypto-js": "^4.2.0",
     "dompurify": "^3.2.6",

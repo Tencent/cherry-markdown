@@ -834,6 +834,44 @@
   }
 }
 
+.cherry-wysiwyg {
+  flex: 1;
+  overflow: auto;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  box-sizing: border-box;
+
+  &.cherry-wysiwyg--hidden {
+    display: none;
+  }
+}
+
+.cherry-wysiwyg-switch-btn {
+  position: absolute;
+  top: 8px;
+  right: 48px;
+  z-index: 100;
+  padding: 4px 12px;
+  font-size: 13px;
+  color: #555;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover {
+    background: #e0e0e0;
+    color: #333;
+  }
+
+  &--hidden {
+    display: none;
+  }
+}
+
 .cherry-editor-mask {
   z-index: 10;
   position: absolute;

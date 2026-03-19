@@ -46,6 +46,7 @@ import Logger from '@/Logger';
 import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
 import { LIST_CONTENT } from '@/utils/regexp';
+import WysiwygEditor from './WysiwygEditor';
 
 /** @typedef {import('~types/cherry').CherryOptions} CherryOptions */
 export default class Cherry extends CherryStatic {
@@ -110,6 +111,7 @@ export default class Cherry extends CherryStatic {
       toolbar: 'show',
       previewer: 'show',
       editor: 'show',
+      wysiwyg: 'hide',
     };
 
     if (this.options.isPreviewOnly || this.options.editor.defaultModel === 'previewOnly') {
@@ -198,6 +200,10 @@ export default class Cherry extends CherryStatic {
     wrapperFragment.appendChild(previewer.options.editorMaskDom);
     wrapperFragment.appendChild(previewer.options.previewerMaskDom);
 
+    // 创建 WYSIWYG 编辑器容器（初始隐藏，懒加载 Milkdown）
+    this.wysiwygDom = createElement('div', 'cherry-wysiwyg cherry-wysiwyg--hidden');
+    wrapperFragment.appendChild(this.wysiwygDom);
+
     wrapperDom.appendChild(wrapperFragment);
     this.wrapperDom = wrapperDom;
     // 创建预览区域的侧边工具栏
@@ -276,6 +282,10 @@ export default class Cherry extends CherryStatic {
   }
 
   destroy() {
+    if (this.wysiwygEditor) {
+      this.wysiwygEditor.destroy();
+      this.wysiwygEditor = null;
+    }
     if (this.noMountEl) {
       this.cherryDom.remove();
     } else {
@@ -367,11 +377,24 @@ export default class Cherry extends CherryStatic {
 
   /**
    * 切换编辑模式
-   * @param {'edit&preview'|'editOnly'|'previewOnly'} [model=edit&preview] 模式类型
+   * @param {'edit&preview'|'editOnly'|'previewOnly'|'wysiwyg'} [model=edit&preview] 模式类型
    * 一般纯预览模式和纯编辑模式适合在屏幕较小的终端使用，比如手机移动端
+   * wysiwyg: 所见即所得模式，基于 Milkdown 实现，需要通过 usePlugin 注册 MilkdownWysiwygPlugin
    */
   switchModel(model = 'edit&preview', showToolbar = true) {
     let isShowToolbar = showToolbar;
+
+    // 如果当前处于 WYSIWYG 模式，切换回其他模式时需要同步内容
+    if (this.status.wysiwyg === 'show' && model !== 'wysiwyg') {
+      if (this.wysiwygEditor) {
+        const mdFromWysiwyg = this.wysiwygEditor.getValue();
+        this.editor.editor.setValue(mdFromWysiwyg);
+      }
+      this.wysiwygDom.classList.add('cherry-wysiwyg--hidden');
+      this.$hideWysiwygSwitchBtn();
+      this.status.wysiwyg = 'hide';
+    }
+
     switch (model) {
       case 'edit&preview':
         this.previewer.editAndPreview();
@@ -383,8 +406,82 @@ export default class Cherry extends CherryStatic {
         this.previewer.previewOnly();
         isShowToolbar = false;
         break;
+      case 'wysiwyg':
+        this.$switchToWysiwyg();
+        isShowToolbar = false;
+        break;
     }
     this.toolbar && this.toolbar.showOrHideToolbar(isShowToolbar);
+  }
+
+  /**
+   * 切换到所见即所得模式
+   * @private
+   */
+  async $switchToWysiwyg() {
+    if (!this.options.wysiwyg?.enabled) {
+      Logger.warn(
+        'WYSIWYG mode is not enabled. Use Cherry.usePlugin(MilkdownWysiwygPlugin, { Crepe }) before instantiation.',
+      );
+      return;
+    }
+
+    // 从 CodeMirror 获取当前内容
+    const markdown = this.editor.editor.getValue();
+
+    // 隐藏编辑区和预览区
+    this.editor.options.editorDom.classList.add('cherry-editor--hidden');
+    this.previewer.options.previewerDom.classList.add('cherry-previewer--hidden');
+    this.previewer.options.virtualDragLineDom.classList.add('cherry-drag--hidden');
+
+    // 显示 WYSIWYG 容器
+    this.wysiwygDom.classList.remove('cherry-wysiwyg--hidden');
+
+    // 懒初始化或更新内容
+    if (!this.wysiwygEditor) {
+      this.wysiwygEditor = new WysiwygEditor({
+        $cherry: this,
+        editorDom: this.wysiwygDom,
+        value: markdown,
+      });
+      await this.wysiwygEditor.init();
+    } else {
+      this.wysiwygEditor.setValue(markdown);
+    }
+
+    // 显示悬浮切换按钮
+    this.$showWysiwygSwitchBtn();
+
+    // 更新状态
+    this.status.wysiwyg = 'show';
+    this.$event.emit('editorClose');
+    this.$event.emit('previewerClose');
+  }
+
+  /**
+   * 显示 WYSIWYG 模式下的悬浮切换按钮
+   * @private
+   */
+  $showWysiwygSwitchBtn() {
+    if (!this.wysiwygSwitchBtn) {
+      this.wysiwygSwitchBtn = createElement('div', 'cherry-wysiwyg-switch-btn');
+      this.wysiwygSwitchBtn.textContent = this.locale.switchEdit || 'Source Edit';
+      this.wysiwygSwitchBtn.addEventListener('click', () => {
+        this.switchModel('edit&preview');
+      });
+      this.wrapperDom.appendChild(this.wysiwygSwitchBtn);
+    }
+    this.wysiwygSwitchBtn.classList.remove('cherry-wysiwyg-switch-btn--hidden');
+  }
+
+  /**
+   * 隐藏 WYSIWYG 模式下的悬浮切换按钮
+   * @private
+   */
+  $hideWysiwygSwitchBtn() {
+    if (this.wysiwygSwitchBtn) {
+      this.wysiwygSwitchBtn.classList.add('cherry-wysiwyg-switch-btn--hidden');
+    }
   }
 
   /**
@@ -409,6 +506,9 @@ export default class Cherry extends CherryStatic {
    * @returns markdown源码内容
    */
   getValue() {
+    if (this.status.wysiwyg === 'show' && this.wysiwygEditor) {
+      return this.wysiwygEditor.getValue();
+    }
     return this.editor?.editor?.getValue() || '';
   }
 
@@ -434,6 +534,15 @@ export default class Cherry extends CherryStatic {
    * @returns {string} html内容
    */
   getHtml(wrapTheme = true) {
+    if (this.status.wysiwyg === 'show' && this.wysiwygEditor) {
+      const markdown = this.wysiwygEditor.getValue();
+      const html = this.engine.makeHtml(markdown);
+      if (wrapTheme) {
+        const wrapperClassName = this.wrapperDom.className;
+        return `<div class="${wrapperClassName}">${html}</div>`;
+      }
+      return html;
+    }
     return this.previewer.getValue(wrapTheme);
   }
   /**
@@ -473,6 +582,10 @@ export default class Cherry extends CherryStatic {
    * @param {boolean} keepCursor 是否保持光标位置
    */
   setValue(content, keepCursor = false) {
+    if (this.status.wysiwyg === 'show' && this.wysiwygEditor) {
+      this.wysiwygEditor.setValue(content);
+      return;
+    }
     if (keepCursor === false) {
       this.editor.editor.setValue(content);
     }

@@ -477,10 +477,11 @@ const defaultConfig = {
     // theme: 'default',
     // 编辑器的高度，默认100%，如果挂载点存在内联设置的height则以内联样式为主
     height: '100%',
-    // defaultModel 编辑器初始化后的默认模式，一共有三种模式：1、双栏编辑预览模式；2、纯编辑模式；3、预览模式
+    // defaultModel 编辑器初始化后的默认模式：
     // edit&preview: 双栏编辑预览模式
     // editOnly: 纯编辑模式（没有预览，可通过toolbar切换成双栏或预览模式）
-    // previewOnly: 预览模式（没有编辑框，toolbar只显示“返回编辑”按钮，可通过toolbar切换成编辑模式）
+    // previewOnly: 预览模式（没有编辑框，toolbar只显示”返回编辑”按钮，可通过toolbar切换成编辑模式）
+    // wysiwyg: 所见即所得模式（基于Milkdown，需要先通过usePlugin注册MilkdownWysiwygPlugin）
     defaultModel: 'edit&preview',
     // 粘贴时是否自动将html转成markdown
     convertWhenPaste: true,
@@ -896,6 +897,10 @@ const defaultConfig = {
   locales: {},
   // cherry初始化后是否检查 location.hash 尝试滚动到对应位置
   autoScrollByHashAfterInit: false,
+  // 所见即所得模式配置，需要通过 Cherry.usePlugin(MilkdownWysiwygPlugin, { Crepe }) 启用
+  wysiwyg: {
+    enabled: false,
+  },
 };
 
 export default cloneDeep(defaultConfig);
