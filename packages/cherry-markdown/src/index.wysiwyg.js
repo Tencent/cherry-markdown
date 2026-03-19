@@ -17,10 +17,11 @@ import Cherry from './index.core';
 import MilkdownWysiwygPlugin from './addons/cherry-wysiwyg-milkdown-plugin';
 import { Crepe } from '@milkdown/crepe';
 import { replaceAll } from '@milkdown/kit/utils';
+import { createWysiwygCommandMap } from './wysiwyg/commandMap';
 import '@milkdown/crepe/theme/common/style.css';
 import '@milkdown/crepe/theme/frame.css';
 
-Cherry.usePlugin(MilkdownWysiwygPlugin, { Crepe, replaceAll });
+Cherry.usePlugin(MilkdownWysiwygPlugin, { Crepe, replaceAll, commandMap: createWysiwygCommandMap() });
 
 export { MilkdownWysiwygPlugin };
 export default Cherry;

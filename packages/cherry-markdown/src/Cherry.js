@@ -392,6 +392,7 @@ export default class Cherry extends CherryStatic {
       }
       this.wysiwygDom.classList.add('cherry-wysiwyg--hidden');
       this.$hideWysiwygSwitchBtn();
+      this.$toggleWysiwygToolbarButtons(true);
       this.status.wysiwyg = 'hide';
     }
 
@@ -408,7 +409,6 @@ export default class Cherry extends CherryStatic {
         break;
       case 'wysiwyg':
         this.$switchToWysiwyg();
-        isShowToolbar = false;
         break;
     }
     this.toolbar && this.toolbar.showOrHideToolbar(isShowToolbar);
@@ -449,8 +449,8 @@ export default class Cherry extends CherryStatic {
       this.wysiwygEditor.setValue(markdown);
     }
 
-    // 显示悬浮切换按钮
-    this.$showWysiwygSwitchBtn();
+    // 隐藏 WYSIWYG 模式下不支持的工具栏按钮
+    this.$toggleWysiwygToolbarButtons(false);
 
     // 更新状态
     this.status.wysiwyg = 'show';
@@ -481,6 +481,28 @@ export default class Cherry extends CherryStatic {
   $hideWysiwygSwitchBtn() {
     if (this.wysiwygSwitchBtn) {
       this.wysiwygSwitchBtn.classList.add('cherry-wysiwyg-switch-btn--hidden');
+    }
+  }
+
+  /**
+   * 在 WYSIWYG 模式下隐藏/显示不支持的工具栏按钮
+   * @param {boolean} show true 恢复显示，false 隐藏
+   * @private
+   */
+  $toggleWysiwygToolbarButtons(show) {
+    if (!this.toolbar?.menus?.hooks) return;
+    const unsupported = [
+      'color', 'size', 'ruby', 'panel', 'sup', 'sub', 'formula', 'detail',
+      'drawIo', 'graph', 'image', 'audio', 'video', 'file',
+      'table', 'quickTable', 'proTable', 'toc', 'br',
+      'mobilePreview', 'copy', 'switchModel', 'pdf', 'word', 'publish',
+      'insert', 'togglePreview', 'search',
+    ];
+    const hooks = this.toolbar.menus.hooks;
+    for (const name of unsupported) {
+      if (hooks[name]?.dom) {
+        hooks[name].dom.style.display = show ? '' : 'none';
+      }
     }
   }
 

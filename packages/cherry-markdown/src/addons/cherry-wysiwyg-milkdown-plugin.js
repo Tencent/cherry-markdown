@@ -26,9 +26,12 @@ export default class MilkdownWysiwygPlugin {
    * @param {object} options 插件选项
    * @param {import('@milkdown/crepe').Crepe} options.Crepe Milkdown Crepe 类引用
    * @param {Function} options.replaceAll Milkdown replaceAll 宏（来自 @milkdown/kit/utils）
+   * @param {object} [options.commandMap] Milkdown 命令映射表（来自 createWysiwygCommandMap()）
    * @param {object} [options.crepeOptions] 传递给 Crepe 构造函数的额外选项
    */
   static install(cherryOptions, options = {}) {
+    // commandMap 包含 Milkdown Slice 对象，不能被 lodash mergeWith 深度遍历，需要直接赋值
+    const commandMap = options.commandMap || null;
     mergeWith(cherryOptions, {
       wysiwyg: {
         enabled: true,
@@ -37,5 +40,6 @@ export default class MilkdownWysiwygPlugin {
         crepeOptions: options.crepeOptions || {},
       },
     });
+    cherryOptions.wysiwyg.commandMap = commandMap;
   }
 }

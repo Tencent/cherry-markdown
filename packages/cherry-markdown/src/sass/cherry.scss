@@ -25,7 +25,8 @@
   // overflow: hidden;
 
   .cherry-editor,
-  .cherry-previewer {
+  .cherry-previewer,
+  .cherry-wysiwyg {
     max-height: calc(100% - var(--height-toolbar));
     min-height: calc(100% - var(--height-toolbar));
   }
@@ -835,10 +836,8 @@
 }
 
 .cherry-wysiwyg {
-  flex: 1;
+  flex-basis: 100%;
   overflow: auto;
-  height: 100%;
-  width: 100%;
   position: relative;
   box-sizing: border-box;
 

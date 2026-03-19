@@ -307,6 +307,19 @@ export default class MenuBase {
   fire(event, shortKey = '') {
     event?.stopPropagation();
     if (typeof this.onClick === 'function') {
+      // WYSIWYG 模式：通过 Milkdown 命令执行
+      if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+        const handled = this.$cherry.wysiwygEditor.execCommand(this.name, shortKey);
+        if (handled) return;
+        // 未映射到 Milkdown 命令的按钮：如果不操作编辑器内容（updateMarkdown=false），
+        // 让它们走自己的 onClick（如模式切换、UI 操作等）
+        if (!this.updateMarkdown) {
+          this.onClick('', shortKey, event);
+          return;
+        }
+        // 其他未映射的编辑器命令在 WYSIWYG 模式下忽略
+        return;
+      }
       const selections = this.editor.editor.getSelections();
       // 判断是不是多选
       this.isSelections = selections.length > 1;

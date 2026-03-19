@@ -108,6 +108,45 @@ export default class WysiwygEditor {
   }
 
   /**
+   * 执行 Milkdown 命令（供 Cherry 工具栏按钮在 WYSIWYG 模式下调用）
+   * @param {string} buttonName Cherry 工具栏按钮名称
+   * @param {string} [shortKey] 子菜单传递的快捷键/参数
+   * @returns {boolean} 是否成功处理了命令
+   */
+  execCommand(buttonName, shortKey) {
+    if (!this.crepe || !this.initialized) return false;
+    const wysiwygConfig = this.$cherry.options.wysiwyg;
+    const map = wysiwygConfig?.commandMap;
+    if (!map) return false;
+
+    // 处理 undo/redo（ProseMirror history 命令，不走 commandsCtx）
+    if (map.prosemirrorCommands?.[buttonName]) {
+      try {
+        const view = this.crepe.editor.action((ctx) => ctx.get(map.editorViewCtx));
+        return map.prosemirrorCommands[buttonName](view) !== false;
+      } catch (e) {
+        Logger.warn(`WYSIWYG prosemirror command failed: ${buttonName}`, e);
+        return false;
+      }
+    }
+
+    // 处理标准 Milkdown 命令
+    const entry = map.commands?.[buttonName];
+    if (!entry) return false;
+
+    try {
+      return this.crepe.editor.action((ctx) => {
+        const commands = ctx.get(map.commandsCtx);
+        const payload = typeof entry.payload === 'function' ? entry.payload(shortKey) : entry.payload;
+        return commands.call(entry.cmd.key, payload);
+      });
+    } catch (e) {
+      Logger.warn(`WYSIWYG command failed: ${buttonName}`, e);
+      return false;
+    }
+  }
+
+  /**
    * 销毁 Milkdown 实例
    */
   destroy() {
