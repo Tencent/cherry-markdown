@@ -100,7 +100,10 @@ export default class Toc {
       }
       if (/cherry-toc-one-a/.test(a.className)) {
         const { id, index } = a.dataset;
-        if (this.$cherry.status.previewer === 'hide') {
+        if (this.$cherry.status.wysiwyg === 'show') {
+          // WYSIWYG 模式下，在 Milkdown 编辑器 DOM 中查找标题并滚动
+          this.$scrollToHeadInWysiwyg(+index);
+        } else if (this.$cherry.status.previewer === 'hide') {
           // editorOnly模式下，需要定位到编辑区对应位置
           const searcher = this.$cherry.editor.editor.getSearchCursor(
             /(?:^|\n)\n*((?:[ \t\u00a0]*#{1,6}).+?|(?:[ \t\u00a0]*.+)\n(?:[ \t\u00a0]*[=]+|[-]+))(?=$|\n)/g,
@@ -145,6 +148,45 @@ export default class Toc {
         this.updateTocList(true);
       });
     }
+    // WYSIWYG 模式下，监听内容变化以更新 TOC 列表
+    this.$cherry.$event.on('afterChange', () => {
+      if (this.$cherry.status.wysiwyg !== 'show') return;
+      clearTimeout(this.timer);
+      this.timer = setTimeout(() => {
+        this.updateTocList();
+        this.$switchModel(this.model);
+      }, 300);
+    });
+    // WYSIWYG 模式下，监听滚动以更新标题高亮
+    this.$cherry.$event.on('wysiwygScroll', () => {
+      if (this.$cherry.status.wysiwyg !== 'show') return;
+      this.updateTocList(true);
+    });
+  }
+
+  /**
+   * WYSIWYG 模式下，滚动到指定索引的标题
+   * @param {number} index 标题索引
+   */
+  $scrollToHeadInWysiwyg(index) {
+    const wysiwygDom = this.$cherry.wysiwygDom;
+    if (!wysiwygDom) return;
+    const headList = wysiwygDom.querySelectorAll('h1,h2,h3,h4,h5,h6');
+    const targetHead = headList[index];
+    if (targetHead) {
+      targetHead.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  /**
+   * 获取 WYSIWYG 模式下的可滚动容器
+   * @returns {HTMLElement|null}
+   */
+  $getWysiwygScrollDom() {
+    const wysiwygDom = this.$cherry.wysiwygDom;
+    if (!wysiwygDom) return null;
+    // Milkdown 的 ProseMirror 编辑器通常是可滚动的
+    return wysiwygDom.querySelector('.ProseMirror') || wysiwygDom;
   }
 
   $switchModel(model = 'pure') {
@@ -260,7 +302,30 @@ export default class Toc {
       }
     }
     // 处理当前标题的高亮
-    if (this.$cherry.status.previewer === 'hide') {
+    if (this.$cherry.status.wysiwyg === 'show') {
+      // WYSIWYG 模式下，从 Milkdown 编辑器 DOM 查找标题
+      const wysiwygDom = this.$cherry.wysiwygDom;
+      if (wysiwygDom) {
+        const scrollDom = this.$getWysiwygScrollDom() || wysiwygDom;
+        const minY = scrollDom.getBoundingClientRect().y;
+        const headList = wysiwygDom.querySelectorAll('h1,h2,h3,h4,h5,h6');
+        let index = 0;
+        for (; index < headList.length; index++) {
+          const { y } = headList[index].getBoundingClientRect();
+          if (y > minY + 20) {
+            break;
+          }
+        }
+        index = index > 0 ? index - 1 : index;
+        this.tocListDom.querySelectorAll('.cherry-toc-one-a').forEach((item, key) => {
+          if (key === index) {
+            item.classList.add('current');
+          } else {
+            item.classList.remove('current');
+          }
+        });
+      }
+    } else if (this.$cherry.status.previewer === 'hide') {
       // 似乎没有特别好的办法，先欠着
     } else {
       const scrollDom = this.$cherry.previewer.getDomCanScroll();

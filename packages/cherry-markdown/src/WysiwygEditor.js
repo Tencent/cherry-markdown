@@ -56,7 +56,7 @@ export default class WysiwygEditor {
 
     this.crepe = new CrepeClass({
       root: this.editorDom,
-      defaultValue: this.value,
+      defaultValue: WysiwygEditor.preprocessMarkdown(this.value),
       ...crepeOptions,
     });
 
@@ -71,10 +71,11 @@ export default class WysiwygEditor {
     // 注册内容变化监听
     this.crepe.on((listener) => {
       listener.markdownUpdated((ctx, markdown) => {
-        if (markdown !== this.lastMarkdownText) {
-          this.lastMarkdownText = markdown;
-          const html = this.$cherry.engine.makeHtml(markdown);
-          this.$cherry.$event.emit('afterChange', { markdownText: markdown, html });
+        const processed = WysiwygEditor.postprocessMarkdown(markdown);
+        if (processed !== this.lastMarkdownText) {
+          this.lastMarkdownText = processed;
+          const html = this.$cherry.engine.makeHtml(processed);
+          this.$cherry.$event.emit('afterChange', { markdownText: processed, html });
         }
       });
     });
@@ -88,6 +89,12 @@ export default class WysiwygEditor {
       this.$cherry.$event.emit('wysiwygSelectionChange');
     };
     document.addEventListener('selectionchange', this._onSelectionChange);
+
+    // 监听 WYSIWYG 区域滚动，通知 TOC 等组件更新高亮
+    this._onScroll = () => {
+      this.$cherry.$event.emit('wysiwygScroll');
+    };
+    this.editorDom.addEventListener('scroll', this._onScroll, true);
   }
 
   /**
@@ -98,7 +105,7 @@ export default class WysiwygEditor {
     if (!this.crepe || !this.initialized) {
       return this.value;
     }
-    return this.crepe.getMarkdown();
+    return WysiwygEditor.postprocessMarkdown(this.crepe.getMarkdown());
   }
 
   /**
@@ -108,10 +115,11 @@ export default class WysiwygEditor {
   setValue(markdown) {
     this.value = markdown;
     this.lastMarkdownText = markdown;
+    const processed = WysiwygEditor.preprocessMarkdown(markdown);
     if (this.crepe && this.initialized) {
       const { replaceAll } = this.$cherry.options.wysiwyg;
       if (typeof replaceAll === 'function') {
-        this.crepe.editor.action(replaceAll(markdown));
+        this.crepe.editor.action(replaceAll(processed));
       } else {
         Logger.warn('replaceAll not provided, recreating Crepe editor to update content.');
         this.destroy();
@@ -352,12 +360,79 @@ export default class WysiwygEditor {
   }
 
   /**
+   * 预处理 markdown，将 Cherry 特有语法转为 remark 兼容格式
+   * - 块级公式：将 `text$$` 拆分为 `text\n\n$$`（remark-math 要求 $$ 独占一行）
+   * @param {string} md
+   * @returns {string}
+   */
+  static preprocessMarkdown(md) {
+    // Split lines, process outside of code fences
+    const lines = md.split('\n');
+    const result = [];
+    let inCodeFence = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      // Track code fence state (``` or ~~~)
+      if (/^(`{3,}|~{3,})/.test(line.trimStart())) {
+        inCodeFence = !inCodeFence;
+        result.push(line);
+        continue;
+      }
+
+      if (inCodeFence) {
+        result.push(line);
+        continue;
+      }
+
+      // Opening $$: if line has text before $$ at end, split into two lines
+      // e.g. "块级公式：$$" → "块级公式：\n\n$$"
+      const openMatch = line.match(/^(.+?)\$\$\s*$/);
+      if (openMatch && openMatch[1].trim() !== '') {
+        result.push(openMatch[1]);
+        result.push('');
+        result.push('$$');
+        continue;
+      }
+
+      // Closing $$: if line has text after $$ at start, split
+      // e.g. "$$行内文字" → "$$\n\n行内文字"
+      const closeMatch = line.match(/^\$\$\s*(.+)$/);
+      if (closeMatch && closeMatch[1].trim() !== '') {
+        result.push('$$');
+        result.push('');
+        result.push(closeMatch[1]);
+        continue;
+      }
+
+      result.push(line);
+    }
+
+    return result.join('\n');
+  }
+
+  /**
+   * 后处理 markdown，将 remark 输出转回 Cherry 兼容格式
+   * 目前 Cherry 的 MathBlock 也支持标准格式（$$ 独占一行），无需转换
+   * @param {string} md
+   * @returns {string}
+   */
+  static postprocessMarkdown(md) {
+    return md;
+  }
+
+  /**
    * 销毁 Milkdown 实例
    */
   destroy() {
     if (this._onSelectionChange) {
       document.removeEventListener('selectionchange', this._onSelectionChange);
       this._onSelectionChange = null;
+    }
+    if (this._onScroll) {
+      this.editorDom.removeEventListener('scroll', this._onScroll, true);
+      this._onScroll = null;
     }
     if (this.crepe) {
       this.crepe.destroy();
