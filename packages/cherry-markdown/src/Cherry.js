@@ -492,11 +492,11 @@ export default class Cherry extends CherryStatic {
   $toggleWysiwygToolbarButtons(show) {
     if (!this.toolbar?.menus?.hooks) return;
     const unsupported = [
-      'color', 'size', 'ruby', 'panel', 'sup', 'sub', 'formula', 'detail',
-      'drawIo', 'graph', 'image', 'audio', 'video', 'file',
-      'table', 'quickTable', 'proTable', 'toc', 'br',
+      'color', 'size', 'ruby', 'panel', 'detail',
+      'drawIo', 'graph', 'audio', 'video', 'file',
+      'quickTable', 'proTable', 'toc',
       'mobilePreview', 'copy', 'switchModel', 'pdf', 'word', 'publish',
-      'insert', 'togglePreview', 'search',
+      'togglePreview', 'search',
     ];
     const hooks = this.toolbar.menus.hooks;
     for (const name of unsupported) {

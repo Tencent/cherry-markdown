@@ -80,6 +80,45 @@ export default class Insert extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '', callback) {
+    // WYSIWYG 模式：table/image/formula 需要特殊 UI 交互
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      if (shortKey === 'table') {
+        this.subBubbleTableMenu.dom.style.left = this.subMenu?.dom?.style?.left || '0px';
+        this.subBubbleTableMenu.dom.style.top = this.subMenu?.dom?.style?.top || '0px';
+        this.subBubbleTableMenu.show((row, col) => {
+          this.$cherry.wysiwygEditor.insertTable(row, col);
+        });
+        return;
+      }
+      if (shortKey === 'image') {
+        const accept = this.$cherry.options?.fileTypeLimitMap?.image ?? '*';
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = accept;
+        input.style.display = 'none';
+        input.addEventListener('change', (event) => {
+          const [file] = event.target.files;
+          this.$cherry.options.callback.fileUpload(file, (url) => {
+            if (typeof url === 'string' && url) {
+              this.$cherry.wysiwygEditor.insertImage({ src: url, alt: file.name });
+            }
+          });
+        });
+        input.click();
+        return;
+      }
+      if (shortKey === 'formula') {
+        // 公式插入：直接插入默认行内公式
+        this.$cherry.wysiwygEditor.insertFormula('e=mc^2', false);
+        return;
+      }
+      if (shortKey === 'checklist') {
+        this.$cherry.wysiwygEditor.execCommand('checklist');
+        return;
+      }
+      // hr/br/code/link 已由 ctxCommands.insert 处理，不会走到这里
+      return;
+    }
     if (/normal-table/.test(shortKey)) {
       // 如果是插入markdown标准表格
       // 根据shortKey获取想插入表格的行号和列号

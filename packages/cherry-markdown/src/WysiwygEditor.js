@@ -60,6 +60,14 @@ export default class WysiwygEditor {
       ...crepeOptions,
     });
 
+    // 注册自定义 WYSIWYG 插件 (sup/sub/underline/highlight marks)
+    const customPlugins = wysiwygConfig.customPlugins;
+    if (customPlugins && Array.isArray(customPlugins)) {
+      for (const plugin of customPlugins) {
+        this.crepe.editor.use(plugin);
+      }
+    }
+
     // 注册内容变化监听
     this.crepe.on((listener) => {
       listener.markdownUpdated((ctx, markdown) => {
@@ -119,7 +127,17 @@ export default class WysiwygEditor {
     const map = wysiwygConfig?.commandMap;
     if (!map) return false;
 
-    // 处理 undo/redo（ProseMirror history 命令，不走 commandsCtx）
+    // 需要完整 Milkdown ctx 的复杂命令（如 checklist）
+    if (map.ctxCommands?.[buttonName]) {
+      try {
+        return this.crepe.editor.action((ctx) => map.ctxCommands[buttonName](ctx, shortKey)) !== false;
+      } catch (e) {
+        Logger.warn(`WYSIWYG ctx command failed: ${buttonName}`, e);
+        return false;
+      }
+    }
+
+    // 处理 ProseMirror history 命令（不走 commandsCtx）
     if (map.prosemirrorCommands?.[buttonName]) {
       try {
         const view = this.crepe.editor.action((ctx) => ctx.get(map.editorViewCtx));
@@ -142,6 +160,87 @@ export default class WysiwygEditor {
       });
     } catch (e) {
       Logger.warn(`WYSIWYG command failed: ${buttonName}`, e);
+      return false;
+    }
+  }
+
+  /**
+   * 在 WYSIWYG 编辑器中插入表格
+   * @param {number} row 行数
+   * @param {number} col 列数
+   * @returns {boolean}
+   */
+  insertTable(row, col) {
+    if (!this.crepe || !this.initialized) return false;
+    const map = this.$cherry.options.wysiwyg?.commandMap;
+    if (!map?.commands?.table) return false;
+    try {
+      return this.crepe.editor.action((ctx) => {
+        const commands = ctx.get(map.commandsCtx);
+        return commands.call(map.commands.table.cmd.key, { row, col });
+      });
+    } catch (e) {
+      Logger.warn('WYSIWYG insertTable failed', e);
+      return false;
+    }
+  }
+
+  /**
+   * 在 WYSIWYG 编辑器中插入数学公式
+   * @param {string} latex LaTeX 公式内容
+   * @param {boolean} isBlock 是否为块级公式
+   * @returns {boolean}
+   */
+  insertFormula(latex, isBlock) {
+    if (!this.crepe || !this.initialized) return false;
+    const map = this.$cherry.options.wysiwyg?.commandMap;
+    if (!map) return false;
+    try {
+      return this.crepe.editor.action((ctx) => {
+        const view = ctx.get(map.editorViewCtx);
+        const { state, dispatch } = view;
+
+        if (isBlock) {
+          // 块级公式：插入 code_block，language 设为 LaTeX
+          const codeBlockType = state.schema.nodes.code_block;
+          if (!codeBlockType) return false;
+          const node = codeBlockType.create(
+            { language: 'LaTeX' },
+            latex ? state.schema.text(latex) : null,
+          );
+          dispatch(state.tr.replaceSelectionWith(node));
+          return true;
+        }
+
+        // 行内公式：插入 math_inline 节点
+        const mathInlineType = state.schema.nodes.math_inline;
+        if (!mathInlineType) return false;
+        const node = mathInlineType.create({ value: latex });
+        dispatch(state.tr.replaceSelectionWith(node));
+        return true;
+      }) !== false;
+    } catch (e) {
+      Logger.warn('WYSIWYG insertFormula failed', e);
+      return false;
+    }
+  }
+
+  /**
+   * 在 WYSIWYG 编辑器中插入图片
+   * @param {{ src: string, alt?: string, title?: string }} options
+   * @returns {boolean}
+   */
+  insertImage({ src, alt, title }) {
+    if (!this.crepe || !this.initialized) return false;
+    const map = this.$cherry.options.wysiwyg?.commandMap;
+    if (!map?.commands?.image) return false;
+    try {
+      return this.crepe.editor.action((ctx) => {
+        const commands = ctx.get(map.commandsCtx);
+        return commands.call(map.commands.image.cmd.key, { src, alt: alt || '', title: title || '' });
+      });
+    } catch (e) {
+      Logger.warn('WYSIWYG insertImage failed', e);
       return false;
     }
   }

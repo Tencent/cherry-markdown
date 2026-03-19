@@ -45,11 +45,12 @@
       import { Crepe } from '@milkdown/crepe';
       import { replaceAll } from '@milkdown/kit/utils';
       import { createWysiwygCommandMap } from './src/wysiwyg/commandMap.js';
+      import { getAllCustomMarkPlugins } from './src/wysiwyg/marks/index.js';
       import '@milkdown/crepe/theme/common/style.css';
       import '@milkdown/crepe/theme/frame.css';
       import '@examples/assets/scripts/pinyin/pinyin_dist.js';
 
-      Cherry.usePlugin(MilkdownWysiwygPlugin, { Crepe, replaceAll, commandMap: createWysiwygCommandMap() });
+      Cherry.usePlugin(MilkdownWysiwygPlugin, { Crepe, replaceAll, commandMap: createWysiwygCommandMap(), customPlugins: getAllCustomMarkPlugins() });
 
       window.Cherry = Cherry;
 

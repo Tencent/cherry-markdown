@@ -18,10 +18,16 @@ import MilkdownWysiwygPlugin from './addons/cherry-wysiwyg-milkdown-plugin';
 import { Crepe } from '@milkdown/crepe';
 import { replaceAll } from '@milkdown/kit/utils';
 import { createWysiwygCommandMap } from './wysiwyg/commandMap';
+import { getAllCustomMarkPlugins } from './wysiwyg/marks';
 import '@milkdown/crepe/theme/common/style.css';
 import '@milkdown/crepe/theme/frame.css';
 
-Cherry.usePlugin(MilkdownWysiwygPlugin, { Crepe, replaceAll, commandMap: createWysiwygCommandMap() });
+Cherry.usePlugin(MilkdownWysiwygPlugin, {
+  Crepe,
+  replaceAll,
+  commandMap: createWysiwygCommandMap(),
+  customPlugins: getAllCustomMarkPlugins(),
+});
 
 export { MilkdownWysiwygPlugin };
 export default Cherry;

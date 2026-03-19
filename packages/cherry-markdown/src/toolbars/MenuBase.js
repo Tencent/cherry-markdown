@@ -311,13 +311,9 @@ export default class MenuBase {
       if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
         const handled = this.$cherry.wysiwygEditor.execCommand(this.name, shortKey);
         if (handled) return;
-        // 未映射到 Milkdown 命令的按钮：如果不操作编辑器内容（updateMarkdown=false），
-        // 让它们走自己的 onClick（如模式切换、UI 操作等）
-        if (!this.updateMarkdown) {
-          this.onClick('', shortKey, event);
-          return;
-        }
-        // 其他未映射的编辑器命令在 WYSIWYG 模式下忽略
+        // execCommand 未处理：让 onClick 自己决定如何响应
+        // onClick 中可能有 WYSIWYG 专用逻辑（如 Insert/Table/Image/Formula 的特殊 UI 交互）
+        this.onClick('', shortKey, event);
         return;
       }
       const selections = this.editor.editor.getSelections();

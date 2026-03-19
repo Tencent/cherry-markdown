@@ -33,9 +33,20 @@ import {
   createCodeBlockCommand,
   insertHrCommand,
   toggleLinkCommand,
+  insertHardbreakCommand,
+  insertImageCommand,
+  listItemSchema,
+  wrapInBlockTypeCommand,
+  clearTextInCurrentBlockCommand,
 } from '@milkdown/kit/preset/commonmark';
-import { toggleStrikethroughCommand } from '@milkdown/kit/preset/gfm';
+import { toggleStrikethroughCommand, insertTableCommand } from '@milkdown/kit/preset/gfm';
 import { undo, redo } from '@milkdown/kit/prose/history';
+import {
+  toggleSuperscriptCommand,
+  toggleSubscriptCommand,
+  toggleUnderlineCommand,
+  toggleHighlightCommand,
+} from './marks';
 
 /**
  * 从 Header 按钮的 shortKey 中解析标题级别
@@ -60,6 +71,10 @@ export function createWysiwygCommandMap() {
       strikethrough: { cmd: toggleStrikethroughCommand },
       inlineCode: { cmd: toggleInlineCodeCommand },
       link: { cmd: toggleLinkCommand, payload: { href: '' } },
+      sup: { cmd: toggleSuperscriptCommand },
+      sub: { cmd: toggleSubscriptCommand },
+      underline: { cmd: toggleUnderlineCommand },
+      highlight: { cmd: toggleHighlightCommand },
 
       // 标题
       header: { cmd: wrapInHeadingCommand, payload: (shortKey) => parseHeadingLevel(shortKey) },
@@ -71,12 +86,75 @@ export function createWysiwygCommandMap() {
       ul: { cmd: wrapInBulletListCommand },
       ol: { cmd: wrapInOrderedListCommand },
       list: { cmd: wrapInBulletListCommand },
-      checklist: { cmd: wrapInBulletListCommand },
 
       // 块级元素
       quote: { cmd: wrapInBlockquoteCommand },
       code: { cmd: createCodeBlockCommand },
       hr: { cmd: insertHrCommand },
+      br: { cmd: insertHardbreakCommand },
+      table: { cmd: insertTableCommand },
+      image: { cmd: insertImageCommand },
+    },
+    // 需要 Milkdown ctx 的复杂命令（接收 ctx 和 shortKey 参数）
+    ctxCommands: {
+      // "插入"下拉菜单：根据 shortKey 路由到对应命令
+      insert: (ctx, shortKey) => {
+        const commands = ctx.get(commandsCtx);
+        switch (shortKey) {
+          case 'hr':
+            return commands.call(insertHrCommand.key);
+          case 'br':
+            return commands.call(insertHardbreakCommand.key);
+          case 'code':
+            return commands.call(createCodeBlockCommand.key);
+          case 'link':
+            return commands.call(toggleLinkCommand.key, { href: '' });
+          default:
+            // table/image/formula/checklist 等需要特殊 UI 交互，返回 false
+            return false;
+        }
+      },
+      checklist: (ctx) => {
+        const commands = ctx.get(commandsCtx);
+        const view = ctx.get(editorViewCtx);
+        const { state, dispatch } = view;
+        const { $from } = state.selection;
+
+        // 查找当前所在的 list_item
+        let listItemPos = null;
+        let listItemNode = null;
+        for (let d = $from.depth; d > 0; d--) {
+          const node = $from.node(d);
+          if (node.type.name === 'list_item') {
+            listItemPos = $from.before(d);
+            listItemNode = node;
+            break;
+          }
+        }
+
+        if (listItemNode) {
+          // 已经在列表中 — toggle checked attribute
+          const tr = state.tr;
+          if (listItemNode.attrs.checked != null) {
+            // 已经是 task list -> 转回普通列表
+            tr.setNodeMarkup(listItemPos, undefined, { ...listItemNode.attrs, checked: null });
+          } else {
+            // 普通列表 -> 转为 task list (unchecked)
+            tr.setNodeMarkup(listItemPos, undefined, { ...listItemNode.attrs, checked: false });
+          }
+          dispatch(tr);
+          return true;
+        }
+
+        // 不在列表中 — 通过 Milkdown 命令创建带 checked 属性的任务列表
+        const listItem = listItemSchema.type(ctx);
+        commands.call(clearTextInCurrentBlockCommand.key);
+        commands.call(wrapInBlockTypeCommand.key, {
+          nodeType: listItem,
+          attrs: { checked: false },
+        });
+        return true;
+      },
     },
     // undo/redo 使用 ProseMirror history 命令
     prosemirrorCommands: {

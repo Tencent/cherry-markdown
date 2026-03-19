@@ -30,8 +30,9 @@ export default class MilkdownWysiwygPlugin {
    * @param {object} [options.crepeOptions] 传递给 Crepe 构造函数的额外选项
    */
   static install(cherryOptions, options = {}) {
-    // commandMap 包含 Milkdown Slice 对象，不能被 lodash mergeWith 深度遍历，需要直接赋值
+    // commandMap 和 customPlugins 包含 Milkdown Slice 对象，不能被 lodash mergeWith 深度遍历，需要直接赋值
     const commandMap = options.commandMap || null;
+    const customPlugins = options.customPlugins || null;
     mergeWith(cherryOptions, {
       wysiwyg: {
         enabled: true,
@@ -41,5 +42,6 @@ export default class MilkdownWysiwygPlugin {
       },
     });
     cherryOptions.wysiwyg.commandMap = commandMap;
+    cherryOptions.wysiwyg.customPlugins = customPlugins;
   }
 }

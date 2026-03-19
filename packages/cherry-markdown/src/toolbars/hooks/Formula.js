@@ -43,21 +43,40 @@ export default class Formula extends MenuBase {
    * @param {string} selection 被用户选中的文本内容
    * @returns {boolean} 回填到编辑器光标位置/选中文本区域的内容
    */
+  /**
+   * 显示公式选择弹窗并定位
+   * @param {Function} onSelect 选择公式后的回调
+   */
+  showFormulaBubble(onSelect) {
+    const pos = this.dom.getBoundingClientRect();
+    const menuDom = this.subBubbleFormulaMenu.dom;
+    const menuWidth = menuDom.offsetWidth || 680;
+    const pageWidth = document.documentElement.clientWidth;
+    let left = pos.left + pos.width;
+    if (left + menuWidth > pageWidth) {
+      left = pageWidth - menuWidth - 8;
+      if (left < 0) left = 0;
+    }
+    menuDom.style.left = `${left}px`;
+    menuDom.style.top = `${pos.top + pos.height}px`;
+    this.subBubbleFormulaMenu.show(onSelect);
+  }
+
   onClick(selection, shortKey = '') {
-    if (this.subBubbleFormulaMenu.isHide() || !this.hasCacheOnce()) {
-      const pos = this.dom.getBoundingClientRect();
-      const menuDom = this.subBubbleFormulaMenu.dom;
-      // 计算弹窗宽度，防止超出右侧
-      const menuWidth = menuDom.offsetWidth || 680;
-      const pageWidth = document.documentElement.clientWidth;
-      let left = pos.left + pos.width;
-      if (left + menuWidth > pageWidth) {
-        left = pageWidth - menuWidth - 8;
-        if (left < 0) left = 0;
+    // WYSIWYG 模式：通过 WysiwygEditor.insertFormula 插入公式
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      if (this.subBubbleFormulaMenu.isHide()) {
+        this.showFormulaBubble((latex) => {
+          const isBlock = /\n/.test(latex);
+          this.$cherry.wysiwygEditor.insertFormula(latex, isBlock);
+        });
       }
-      menuDom.style.left = `${left}px`;
-      menuDom.style.top = `${pos.top + pos.height}px`;
-      this.subBubbleFormulaMenu.show((latex) => {
+      this.updateMarkdown = false;
+      return false;
+    }
+
+    if (this.subBubbleFormulaMenu.isHide() || !this.hasCacheOnce()) {
+      this.showFormulaBubble((latex) => {
         const before = /\n/.test(latex)
           ? `${/\n$/.test(selection) ? selection : `${selection}\n`}$$`
           : `${selection} $ `;
