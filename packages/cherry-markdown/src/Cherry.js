@@ -493,9 +493,8 @@ export default class Cherry extends CherryStatic {
     if (!this.toolbar?.menus?.hooks) return;
     const unsupported = [
       'color', 'size', 'ruby', 'panel', 'detail',
-      'drawIo', 'graph', 'audio', 'video', 'file',
-      'quickTable', 'proTable', 'toc',
-      'mobilePreview', 'copy', 'switchModel', 'pdf', 'word', 'publish',
+      'drawIo', 'proTable',
+      'mobilePreview', 'switchModel', 'publish',
       'togglePreview', 'search',
     ];
     const hooks = this.toolbar.menus.hooks;

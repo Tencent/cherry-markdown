@@ -30,6 +30,16 @@ export default class Video extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    // WYSIWYG 模式：上传后插入 Cherry 视频语法文本
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      const accept = this.$cherry.options?.fileTypeLimitMap?.video ?? '*';
+      handleUpload(this.editor, 'video', accept, (name, url, params) => {
+        const finalName = params.name ? params.name : name;
+        this.$cherry.wysiwygEditor.insertText(`!video[${finalName}](${url})`);
+      });
+      this.updateMarkdown = false;
+      return false;
+    }
     const accept = this.$cherry.options?.fileTypeLimitMap?.video ?? '*';
     const multiple = this.$cherry?.options.multipleFileSelection?.video ?? false;
     if (multiple) {

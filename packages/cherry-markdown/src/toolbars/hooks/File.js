@@ -30,6 +30,16 @@ export default class File extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    // WYSIWYG 模式：上传后插入标准链接
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      const accept = this.$cherry.options?.fileTypeLimitMap?.file ?? '*';
+      handleUpload(this.editor, 'file', accept, (name, url, params) => {
+        const finalName = params.name ? params.name : name;
+        this.$cherry.wysiwygEditor.insertLink(finalName, url);
+      });
+      this.updateMarkdown = false;
+      return false;
+    }
     const accept = this.$cherry.options?.fileTypeLimitMap?.file ?? '*';
     const multiple = this.$cherry?.options.multipleFileSelection?.file ?? false;
     if (multiple) {

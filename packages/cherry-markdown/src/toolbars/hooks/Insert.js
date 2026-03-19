@@ -73,6 +73,32 @@ export default class Insert extends MenuBase {
     input.click();
   }
   /**
+   * WYSIWYG 模式下的文件上传逻辑
+   * @param {string} type 上传文件的类型 audio|video|pdf|word
+   */
+  handleWysiwygUpload(type) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.style.display = 'none';
+    input.addEventListener('change', (event) => {
+      // @ts-ignore
+      const [file] = event.target.files;
+      this.$cherry.options.callback.fileUpload(file, (url) => {
+        if (typeof url !== 'string' || !url) return;
+        if (type === 'audio') {
+          this.$cherry.wysiwygEditor.insertText(`!audio[${file.name}](${url})`);
+        } else if (type === 'video') {
+          this.$cherry.wysiwygEditor.insertText(`!video[${file.name}](${url})`);
+        } else {
+          // pdf/word 使用标准链接
+          this.$cherry.wysiwygEditor.insertLink(file.name, url);
+        }
+      });
+    });
+    input.click();
+  }
+
+  /**
    * 响应点击事件
    * @param {string} selection 被用户选中的文本内容
    * @param {string} shortKey 快捷键参数
@@ -114,6 +140,63 @@ export default class Insert extends MenuBase {
       }
       if (shortKey === 'checklist') {
         this.$cherry.wysiwygEditor.execCommand('checklist');
+        return;
+      }
+      if (shortKey === 'toc') {
+        this.$cherry.wysiwygEditor.insertText('\n[[toc]]\n');
+        return;
+      }
+      if (shortKey === 'audio' || shortKey === 'video') {
+        this.handleWysiwygUpload(shortKey);
+        return;
+      }
+      if (shortKey === 'pdf' || shortKey === 'word') {
+        this.handleWysiwygUpload(shortKey);
+        return;
+      }
+      if (/^(line-table|bar-table|map-table|radar-table)$/.test(shortKey)) {
+        // 图表表格：以纯文本形式插入 Cherry 自定义语法
+        const templates = {
+          'line-table': [
+            '| :line: {title: 折线图,} | a | b | c |',
+            '| :-: | :-: | :-: | :-: |',
+            '| x | 1 | 2 | 3 |',
+            '| y | 2 | 4 | 6 |',
+            '| z | 7 | 5 | 3 |',
+          ].join('\n'),
+          'bar-table': [
+            '| :bar: {title: 柱状图,} | a | b | c |',
+            '| :-: | :-: | :-: | :-: |',
+            '| x | 1 | 2 | 3 |',
+            '| y | 2 | 4 | 6 |',
+            '| z | 7 | 5 | 3 |',
+          ].join('\n'),
+          'map-table': [
+            '| :map: {title: 地图, mapDataSource: https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json,} | 数值 |',
+            '| :-: | :-: |',
+            '| 北京 | 100 |',
+            '| 上海 | 200 |',
+            '| 广东 | 300 |',
+            '| 四川 | 150 |',
+            '| 湖南 | 120 |',
+          ].join('\n'),
+          'radar-table': [
+            '| :radar: {title: 雷达图,} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |',
+            '| :-: | :-: | :-: | :-: | :-: | :-: |',
+            '| 用户A | 90 | 85 | 75 | 80 | 88 |',
+            '| 用户B | 75 | 90 | 88 | 85 | 78 |',
+            '| 用户C | 85 | 78 | 90 | 88 | 85 |',
+          ].join('\n'),
+        };
+        this.$cherry.wysiwygEditor.insertText(`\n${templates[shortKey]}\n`);
+        return;
+      }
+      if (shortKey === 'headlessTable') {
+        this.subBubbleTableMenu.dom.style.left = this.subMenu?.dom?.style?.left || '0px';
+        this.subBubbleTableMenu.dom.style.top = this.subMenu?.dom?.style?.top || '0px';
+        this.subBubbleTableMenu.show((row, col) => {
+          this.$cherry.wysiwygEditor.insertTable(row, col);
+        });
         return;
       }
       // hr/br/code/link 已由 ctxCommands.insert 处理，不会走到这里

@@ -246,6 +246,83 @@ export default class WysiwygEditor {
   }
 
   /**
+   * 在 WYSIWYG 编辑器光标位置插入纯文本
+   * @param {string} text 要插入的文本
+   * @returns {boolean}
+   */
+  insertText(text) {
+    if (!this.crepe || !this.initialized) return false;
+    const map = this.$cherry.options.wysiwyg?.commandMap;
+    if (!map) return false;
+    try {
+      return this.crepe.editor.action((ctx) => {
+        const view = ctx.get(map.editorViewCtx);
+        const { state, dispatch } = view;
+        dispatch(state.tr.insertText(text));
+        return true;
+      }) !== false;
+    } catch (e) {
+      Logger.warn('WYSIWYG insertText failed', e);
+      return false;
+    }
+  }
+
+  /**
+   * 在 WYSIWYG 编辑器中插入带链接的文本
+   * @param {string} text 链接文本
+   * @param {string} href 链接地址
+   * @returns {boolean}
+   */
+  insertLink(text, href) {
+    if (!this.crepe || !this.initialized) return false;
+    const map = this.$cherry.options.wysiwyg?.commandMap;
+    if (!map) return false;
+    try {
+      return this.crepe.editor.action((ctx) => {
+        const view = ctx.get(map.editorViewCtx);
+        const { state, dispatch } = view;
+        const linkMark = state.schema.marks.link?.create({ href });
+        if (!linkMark) return false;
+        const textNode = state.schema.text(text, [linkMark]);
+        dispatch(state.tr.replaceSelectionWith(textNode, false));
+        return true;
+      }) !== false;
+    } catch (e) {
+      Logger.warn('WYSIWYG insertLink failed', e);
+      return false;
+    }
+  }
+
+  /**
+   * 在 WYSIWYG 编辑器中插入代码块
+   * @param {string} language 代码语言
+   * @param {string} content 代码内容
+   * @returns {boolean}
+   */
+  insertCodeBlock(language, content) {
+    if (!this.crepe || !this.initialized) return false;
+    const map = this.$cherry.options.wysiwyg?.commandMap;
+    if (!map) return false;
+    try {
+      return this.crepe.editor.action((ctx) => {
+        const view = ctx.get(map.editorViewCtx);
+        const { state, dispatch } = view;
+        const codeBlockType = state.schema.nodes.code_block;
+        if (!codeBlockType) return false;
+        const node = codeBlockType.create(
+          { language },
+          content ? state.schema.text(content) : null,
+        );
+        dispatch(state.tr.replaceSelectionWith(node));
+        return true;
+      }) !== false;
+    } catch (e) {
+      Logger.warn('WYSIWYG insertCodeBlock failed', e);
+      return false;
+    }
+  }
+
+  /**
    * 销毁 Milkdown 实例
    */
   destroy() {

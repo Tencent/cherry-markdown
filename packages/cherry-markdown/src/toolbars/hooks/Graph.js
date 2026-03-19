@@ -242,6 +242,32 @@ export default class Graph extends MenuBase {
     if (!type || !/^(flow|sequence|state|class|pie|gantt)$/.test(type)) {
       return;
     }
+
+    // WYSIWYG 模式：插入 mermaid 代码块
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      const sampleCode = this.$getSampleCode(type);
+      // 从 generateExample 生成的字符串中提取 mermaid 代码（去掉标题行和 fence 标记）
+      const lines = sampleCode.split('\n');
+      const mermaidContent = [];
+      let inFence = false;
+      for (const line of lines) {
+        if (line.startsWith('```mermaid')) {
+          inFence = true;
+          continue;
+        }
+        if (line.startsWith('```') && inFence) {
+          inFence = false;
+          continue;
+        }
+        if (inFence) {
+          mermaidContent.push(line);
+        }
+      }
+      this.$cherry.wysiwygEditor.insertCodeBlock('mermaid', mermaidContent.join('\n'));
+      this.updateMarkdown = false;
+      return false;
+    }
+
     this.registerAfterClickCb(() => {
       this.setLessSelection('\n\n\n\n\n', '\n\n');
     });

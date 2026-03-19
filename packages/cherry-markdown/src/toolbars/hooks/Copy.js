@@ -115,12 +115,17 @@ export default class Copy extends MenuBase {
     const inlineCodeTheme = document.querySelector('.cherry').getAttribute('data-inline-code-theme');
     const codeBlockTheme = document.querySelector('.cherry').getAttribute('data-code-block-theme');
     const { mathStyle, echartStyle, cherryStyle } = this.computeStyle();
-    const html = this.previewer.isPreviewerHidden()
-      ? this.previewer.options.previewerCache.html
-      : this.previewer.getValue();
 
-    // 获取原始 Markdown 内容作为纯文本
+    // WYSIWYG 模式：从 wysiwygEditor 获取 markdown，通过 engine 转 HTML
     const markdownText = this.$cherry.getMarkdown();
+    let html;
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      html = this.$cherry.engine.makeHtml(markdownText);
+    } else {
+      html = this.previewer.isPreviewerHidden()
+        ? this.previewer.options.previewerCache.html
+        : this.previewer.getValue();
+    }
 
     // 将css样式以行内样式的形式插入到html内容里
     this.adaptWechat(html).then((adaptedHtml) => {
