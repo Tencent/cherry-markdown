@@ -34,6 +34,8 @@ export default class WysiwygEditor {
     this.crepe = null;
     this.initialized = false;
     this.lastMarkdownText = '';
+    /** @type {Map<string, string>} processed URL → original URL */
+    this._urlReverseMap = new Map();
   }
 
   /**
@@ -56,7 +58,7 @@ export default class WysiwygEditor {
 
     this.crepe = new CrepeClass({
       root: this.editorDom,
-      defaultValue: WysiwygEditor.preprocessMarkdown(this.value),
+      defaultValue: this.preprocessMarkdown(this.value),
       ...crepeOptions,
     });
 
@@ -71,7 +73,7 @@ export default class WysiwygEditor {
     // 注册内容变化监听
     this.crepe.on((listener) => {
       listener.markdownUpdated((ctx, markdown) => {
-        const processed = WysiwygEditor.postprocessMarkdown(markdown);
+        const processed = this.postprocessMarkdown(markdown);
         if (processed !== this.lastMarkdownText) {
           this.lastMarkdownText = processed;
           const html = this.$cherry.engine.makeHtml(processed);
@@ -105,7 +107,7 @@ export default class WysiwygEditor {
     if (!this.crepe || !this.initialized) {
       return this.value;
     }
-    return WysiwygEditor.postprocessMarkdown(this.crepe.getMarkdown());
+    return this.postprocessMarkdown(this.crepe.getMarkdown());
   }
 
   /**
@@ -115,7 +117,7 @@ export default class WysiwygEditor {
   setValue(markdown) {
     this.value = markdown;
     this.lastMarkdownText = markdown;
-    const processed = WysiwygEditor.preprocessMarkdown(markdown);
+    const processed = this.preprocessMarkdown(markdown);
     if (this.crepe && this.initialized) {
       const { replaceAll } = this.$cherry.options.wysiwyg;
       if (typeof replaceAll === 'function') {
@@ -362,17 +364,76 @@ export default class WysiwygEditor {
   /**
    * 预处理 markdown，将 Cherry 特有语法转为 remark 兼容格式
    * - 块级公式：将 `text$$` 拆分为 `text\n\n$$`（remark-math 要求 $$ 独占一行）
+   * - 图片 URL：通过 urlProcessor 转换为可访问的路径
    * @param {string} md
    * @returns {string}
    */
-  static preprocessMarkdown(md) {
-    // Split lines, process outside of code fences
+  preprocessMarkdown(md) {
+    const urlProcessor = this.$cherry.options.callback?.urlProcessor;
+
+    // Process image URLs with urlProcessor
+    let processed = md;
+    if (typeof urlProcessor === 'function') {
+      this._urlReverseMap.clear();
+      // Match ![alt](url) or ![alt](url "title") outside code fences
+      processed = this._replaceOutsideCodeFence(processed, /!\[([^\]]*)\]\(([^)\s]+)([^)]*)\)/g, (match, alt, url, rest) => {
+        const newUrl = urlProcessor(url, 'image');
+        if (newUrl && newUrl !== url) {
+          this._urlReverseMap.set(newUrl, url);
+          return `![${alt}](${newUrl}${rest})`;
+        }
+        return match;
+      });
+    }
+
+    // Fix block math: split "text$$" into "text\n\n$$"
+    processed = this._replaceOutsideCodeFence(processed, null, null, (line) => {
+      // Opening $$: if line has text before $$ at end, split into two lines
+      const openMatch = line.match(/^(.+?)\$\$\s*$/);
+      if (openMatch && openMatch[1].trim() !== '') {
+        return [openMatch[1], '', '$$'];
+      }
+      // Closing $$: if line has text after $$ at start, split
+      const closeMatch = line.match(/^\$\$\s*(.+)$/);
+      if (closeMatch && closeMatch[1].trim() !== '') {
+        return ['$$', '', closeMatch[1]];
+      }
+      return null;
+    });
+
+    return processed;
+  }
+
+  /**
+   * 后处理 markdown，还原 urlProcessor 转换的图片 URL
+   * @param {string} md
+   * @returns {string}
+   */
+  postprocessMarkdown(md) {
+    if (this._urlReverseMap.size === 0) return md;
+    let result = md;
+    for (const [processed, original] of this._urlReverseMap) {
+      // Replace all occurrences of the processed URL back to original
+      result = result.split(processed).join(original);
+    }
+    return result;
+  }
+
+  /**
+   * 在代码块之外执行替换操作
+   * @param {string} md markdown 文本
+   * @param {RegExp|null} pattern 用于全文替换的正则（如图片 URL），在非代码块行上执行
+   * @param {Function|null} replacer pattern 的替换函数
+   * @param {Function|null} lineTransform 逐行变换函数，返回 string[] 表示拆分行，null 表示不变
+   * @returns {string}
+   */
+  _replaceOutsideCodeFence(md, pattern, replacer, lineTransform) {
     const lines = md.split('\n');
     const result = [];
     let inCodeFence = false;
 
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
+      let line = lines[i];
 
       // Track code fence state (``` or ~~~)
       if (/^(`{3,}|~{3,})/.test(line.trimStart())) {
@@ -386,40 +447,24 @@ export default class WysiwygEditor {
         continue;
       }
 
-      // Opening $$: if line has text before $$ at end, split into two lines
-      // e.g. "块级公式：$$" → "块级公式：\n\n$$"
-      const openMatch = line.match(/^(.+?)\$\$\s*$/);
-      if (openMatch && openMatch[1].trim() !== '') {
-        result.push(openMatch[1]);
-        result.push('');
-        result.push('$$');
-        continue;
+      // Apply regex pattern replacement
+      if (pattern && replacer) {
+        line = line.replace(pattern, replacer);
       }
 
-      // Closing $$: if line has text after $$ at start, split
-      // e.g. "$$行内文字" → "$$\n\n行内文字"
-      const closeMatch = line.match(/^\$\$\s*(.+)$/);
-      if (closeMatch && closeMatch[1].trim() !== '') {
-        result.push('$$');
-        result.push('');
-        result.push(closeMatch[1]);
-        continue;
+      // Apply line transform (e.g., splitting $$ lines)
+      if (lineTransform) {
+        const transformed = lineTransform(line);
+        if (transformed) {
+          result.push(...transformed);
+          continue;
+        }
       }
 
       result.push(line);
     }
 
     return result.join('\n');
-  }
-
-  /**
-   * 后处理 markdown，将 remark 输出转回 Cherry 兼容格式
-   * 目前 Cherry 的 MathBlock 也支持标准格式（$$ 独占一行），无需转换
-   * @param {string} md
-   * @returns {string}
-   */
-  static postprocessMarkdown(md) {
-    return md;
   }
 
   /**
