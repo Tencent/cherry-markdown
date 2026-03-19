@@ -81,6 +81,13 @@ export default class Size extends MenuBase {
   }
 
   onClick(selection, shortKey = '17') {
+    // WYSIWYG 模式：通过 Milkdown mark 命令应用字号
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      const size = this.$getSizeByShortKey(shortKey);
+      this.$cherry.wysiwygEditor.execCommand('size', size);
+      return false;
+    }
+
     const size = this.$getSizeByShortKey(shortKey);
     let $selection = getSelection(this.editor.editor, selection) || '字号';
     // 如果选中的内容里有字号语法，则直接去掉该语法

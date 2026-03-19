@@ -82,6 +82,12 @@ export default class WysiwygEditor {
     await this.crepe.create();
     this.initialized = true;
     this.lastMarkdownText = this.value;
+
+    // 监听选区变化，通知光标位置等 UI 组件
+    this._onSelectionChange = () => {
+      this.$cherry.$event.emit('wysiwygSelectionChange');
+    };
+    document.addEventListener('selectionchange', this._onSelectionChange);
   }
 
   /**
@@ -323,9 +329,36 @@ export default class WysiwygEditor {
   }
 
   /**
+   * 获取 WYSIWYG 编辑器中的光标位置信息
+   * @returns {{ line: number, ch: number, selected: number }}
+   */
+  getCursorInfo() {
+    if (!this.crepe || !this.initialized) return { line: 0, ch: 0, selected: 0 };
+    const map = this.$cherry.options.wysiwyg?.commandMap;
+    if (!map) return { line: 0, ch: 0, selected: 0 };
+    try {
+      return this.crepe.editor.action((ctx) => {
+        const view = ctx.get(map.editorViewCtx);
+        const { state } = view;
+        const { from, to, $from } = state.selection;
+        const line = $from.index(0) + 1;
+        const ch = $from.parentOffset;
+        const selected = to - from;
+        return { line, ch, selected };
+      });
+    } catch (e) {
+      return { line: 0, ch: 0, selected: 0 };
+    }
+  }
+
+  /**
    * 销毁 Milkdown 实例
    */
   destroy() {
+    if (this._onSelectionChange) {
+      document.removeEventListener('selectionchange', this._onSelectionChange);
+      this._onSelectionChange = null;
+    }
     if (this.crepe) {
       this.crepe.destroy();
       this.crepe = null;

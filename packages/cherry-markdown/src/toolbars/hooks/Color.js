@@ -36,6 +36,27 @@ export default class Color extends MenuBase {
    * @returns {string | undefined} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '', event) {
+    // WYSIWYG 模式：通过 Milkdown mark 命令应用颜色
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      if (this.hasCacheOnce() || this.$testIsShortKey(shortKey)) {
+        const colorInfo = this.$getTypeAndColor(shortKey);
+        if (typeof colorInfo === 'object' && colorInfo) {
+          if (colorInfo.type === 'clear') {
+            this.bubbleColor.toggle({ forceHide: true });
+            return false;
+          }
+          const { type, color } = colorInfo;
+          const typeKey = type === 'background-color' ? `background-color: ${color}` : `color: ${color}`;
+          this.$cherry.wysiwygEditor.execCommand('color', typeKey);
+        }
+        return false;
+      }
+      // 无 shortKey：显示调色盘
+      const position = this.calculatePickerPosition(event);
+      this.bubbleColor.toggle({ ...position, $color: this });
+      return false;
+    }
+
     if (this.hasCacheOnce() || this.$testIsShortKey(shortKey)) {
       const $selection = getSelection(this.editor.editor, selection) || this.locale.color;
 

@@ -46,6 +46,9 @@ import {
   toggleSubscriptCommand,
   toggleUnderlineCommand,
   toggleHighlightCommand,
+  toggleFontColorCommand,
+  toggleBgColorCommand,
+  toggleFontSizeCommand,
 } from './marks';
 
 /**
@@ -113,6 +116,23 @@ export function createWysiwygCommandMap() {
             // table/image/formula/checklist 等需要特殊 UI 交互，返回 false
             return false;
         }
+      },
+      // 颜色按钮：从 shortKey 中解析颜色类型和值
+      color: (ctx, shortKey) => {
+        if (!shortKey || !/(color|background-color)\s*:/.test(shortKey)) return false;
+        const commands = ctx.get(commandsCtx);
+        const isBg = /background-color\s*:/.test(shortKey);
+        const color = shortKey.replace(/(color|background-color)\s*:\s*([#0-9a-zA-Z]+).*$/, '$2').trim();
+        if (isBg) {
+          return commands.call(toggleBgColorCommand.key, color);
+        }
+        return commands.call(toggleFontColorCommand.key, color);
+      },
+      // 字号按钮：从 shortKey 中解析字号值
+      size: (ctx, shortKey) => {
+        if (!shortKey || !/^[0-9]+$/.test(shortKey)) return false;
+        const commands = ctx.get(commandsCtx);
+        return commands.call(toggleFontSizeCommand.key, shortKey);
       },
       checklist: (ctx) => {
         const commands = ctx.get(commandsCtx);

@@ -138,8 +138,12 @@ export default class ChatGpt extends MenuBase {
   concatText(selection, text) {
     this.button.className = this.button.className.replace('icon-loading loading', '');
     this.button.innerText = this.button.title;
-    this.editor?.editor?.replaceSelection(`${selection || ''} \n${text}`);
-    this.editor?.editor?.focus();
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      this.$cherry.wysiwygEditor.insertText(`${selection || ''} \n${text}`);
+    } else {
+      this.editor?.editor?.replaceSelection(`${selection || ''} \n${text}`);
+      this.editor?.editor?.focus();
+    }
   }
 
   /**
@@ -160,7 +164,7 @@ export default class ChatGpt extends MenuBase {
     this.button.className += ' icon-loading loading';
     this.button.innerText = '';
     // const that = this;
-    const inputText = selection || this.$cherry.editor.editor.getValue();
+    const inputText = selection || this.$cherry.getValue();
     await this.queryMap[name](inputText)
       .then((res) => this.concatText(selection, res.data?.choices?.[0]?.message?.content || ''))
       .catch((res) => {

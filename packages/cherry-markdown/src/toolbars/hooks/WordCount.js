@@ -60,18 +60,21 @@ export default class wordCount extends MenuBase {
 
     // 编辑区修改时延时触发字数统计，防止过于频繁
     let timeout = null;
+    const debouncedCount = () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      timeout = setTimeout(() => {
+        btnDom.dispatchEvent(this.countEvent);
+        timeout = null;
+      }, 500);
+    };
     setTimeout(() => {
-      this.$cherry.editor.editor.on('change', () => {
-        if (timeout) {
-          clearTimeout(timeout);
-        }
-        timeout = setTimeout(() => {
-          btnDom.dispatchEvent(this.countEvent);
-          timeout = null;
-        }, 500);
-      });
+      this.$cherry.editor.editor.on('change', debouncedCount);
       this.$dealEditorChange();
     }, 500);
+    // WYSIWYG 模式下 WysiwygEditor 也会 emit afterChange 事件
+    this.$cherry.$event.on('afterChange', debouncedCount);
   }
 
   /**

@@ -27,6 +27,11 @@ export default class CursorPosition extends MenuBase {
   }
 
   $updateCursorPosition() {
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      const { line, ch, selected } = this.$cherry.wysiwygEditor.getCursorInfo();
+      this.btnDom.innerHTML = `Ln ${line}, Col ${ch}${selected ? ` (${selected} selected)` : ''}`;
+      return;
+    }
     const { line, ch } = this.$cherry.editor?.editor?.getCursor() || { line: 0, ch: 0 };
     const selected = this.$cherry.editor?.editor?.getSelection() || '';
     this.btnDom.innerHTML = `Ln ${line}, Col ${ch}${selected ? ` (${selected.length} selected)` : ''}`;
@@ -43,5 +48,11 @@ export default class CursorPosition extends MenuBase {
         btnDom.dispatchEvent(this.countEvent);
       });
     }, 500);
+    // WYSIWYG 模式：监听选区变化事件更新光标位置
+    this.$cherry.$event.on('wysiwygSelectionChange', () => {
+      if (this.$cherry.status?.wysiwyg === 'show') {
+        btnDom.dispatchEvent(this.countEvent);
+      }
+    });
   }
 }

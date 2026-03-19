@@ -44,7 +44,11 @@ export default class Export extends MenuBase {
     // 强制刷新一下预览区域的内容
     const { previewer } = this.$cherry;
     let html = '';
-    if (previewer.isPreviewerHidden()) {
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      // WYSIWYG 模式：从 Milkdown 获取内容并通过 engine 渲染
+      const markdown = this.$cherry.wysiwygEditor.getValue();
+      html = this.$cherry.engine.makeHtml(markdown);
+    } else if (previewer.isPreviewerHidden()) {
       html = previewer.options.previewerCache.html;
     } else {
       html = previewer.getDomContainer().innerHTML;
