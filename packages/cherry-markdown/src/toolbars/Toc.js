@@ -174,7 +174,13 @@ export default class Toc {
     const headList = wysiwygDom.querySelectorAll('h1,h2,h3,h4,h5,h6');
     const targetHead = headList[index];
     if (targetHead) {
-      targetHead.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // 直接设置容器 scrollTop，避免 scrollIntoView 滚动整个页面导致工具栏消失
+      const containerRect = wysiwygDom.getBoundingClientRect();
+      const headRect = targetHead.getBoundingClientRect();
+      wysiwygDom.scrollTo({
+        top: wysiwygDom.scrollTop + (headRect.top - containerRect.top),
+        behavior: 'smooth',
+      });
     }
   }
 
