@@ -568,6 +568,19 @@ export default class WysiwygEditor {
     const mermaidAPI = mermaidEngine.mermaidAPIRefs;
     const isAsync = mermaidAPI.render.length <= 3;
 
+    // 自定义主题配置，在每次渲染前应用（避免被 Cherry 预览区渲染重置）
+    this._mermaidThemeConfig = {
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#30D158',
+        primaryTextColor: '#fff',
+        primaryBorderColor: '#28b84c',
+        lineColor: '#30D158',
+        secondaryColor: '#e8fbe9',
+        tertiaryColor: '#f0fff0',
+      },
+    };
+
     if (!crepeOptions.featureConfigs) crepeOptions.featureConfigs = {};
     const codeMirrorConfig = crepeOptions.featureConfigs['code-mirror'] || {};
     const existingRenderPreview = codeMirrorConfig.renderPreview;
@@ -624,6 +637,10 @@ export default class WysiwygEditor {
    * @returns {Promise<string>} 渲染后的 SVG HTML
    */
   async _renderMermaid(mermaidAPI, isAsync, content, id) {
+    // 每次渲染前重新应用主题，防止被其他 mermaid 渲染（如预览区）重置
+    if (this._mermaidThemeConfig) {
+      mermaidAPI.initialize(this._mermaidThemeConfig);
+    }
     const canvas = this._ensureMermaidCanvas();
     const graphId = `mermaid-wysiwyg-${id}-${Date.now()}`;
 
