@@ -28,6 +28,10 @@ export default class Redo extends MenuBase {
    * 直接调用codemirror的redo方法就好了
    */
   onClick() {
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      this.$cherry.wysiwygEditor.execCommand('redo');
+      return;
+    }
     this.editor.editor.redo();
   }
 }

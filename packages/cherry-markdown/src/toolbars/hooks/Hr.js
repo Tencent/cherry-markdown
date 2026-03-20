@@ -29,6 +29,10 @@ export default class Hr extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      this.$cherry.wysiwygEditor.execCommand('hr');
+      return false;
+    }
     // 插入分割线
     return `${selection}\n\n---\n`;
   }

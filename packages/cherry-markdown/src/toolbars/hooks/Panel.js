@@ -85,6 +85,11 @@ export default class Panel extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    // WYSIWYG 模式下，直接通过 execCommand 插入/包裹 panel 节点
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      this.$cherry.wysiwygEditor.execCommand('panel', shortKey || 'primary');
+      return false;
+    }
     let $selection = getSelection(this.editor.editor, selection, 'line', true) || '内容';
     let currentName = this.$getNameFromStr($selection);
     let title = this.$getTitle($selection);

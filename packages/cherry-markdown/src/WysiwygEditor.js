@@ -401,6 +401,10 @@ export default class WysiwygEditor {
       return null;
     });
 
+    // Ensure Panel (:::type) and Detail (+++ title) delimiters are separate paragraphs
+    // remark needs blank lines around block-level custom syntax
+    processed = this._ensureBlankLinesAroundDelimiters(processed);
+
     return processed;
   }
 
@@ -417,6 +421,58 @@ export default class WysiwygEditor {
       result = result.split(processed).join(original);
     }
     return result;
+  }
+
+  /**
+   * 确保 Panel (:::) 和 Detail (+++) 分隔符前后有空行，
+   * 使 remark 能将它们解析为独立段落
+   * @param {string} md
+   * @returns {string}
+   */
+  _ensureBlankLinesAroundDelimiters(md) {
+    const lines = md.split('\n');
+    const result = [];
+    let inCodeFence = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trimStart();
+
+      if (/^(`{3,}|~{3,})/.test(trimmed)) {
+        inCodeFence = !inCodeFence;
+        result.push(line);
+        continue;
+      }
+
+      if (inCodeFence) {
+        result.push(line);
+        continue;
+      }
+
+      // Panel opening: :::type [title]
+      // Panel closing: :::
+      // Detail opening: +++[-] title
+      // Detail closing: +++
+      const isDelimiter = /^:::\w/.test(trimmed) || /^:::\s*$/.test(trimmed)
+        || /^\+\+\+/.test(trimmed);
+
+      if (isDelimiter) {
+        // Ensure blank line before (if prev line is not blank and not start)
+        if (result.length > 0 && result[result.length - 1].trim() !== '') {
+          result.push('');
+        }
+        result.push(line);
+        // Ensure blank line after
+        const nextLine = i + 1 < lines.length ? lines[i + 1] : null;
+        if (nextLine !== null && nextLine.trim() !== '') {
+          result.push('');
+        }
+      } else {
+        result.push(line);
+      }
+    }
+
+    return result.join('\n');
   }
 
   /**

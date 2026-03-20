@@ -50,6 +50,7 @@ import {
   toggleBgColorCommand,
   toggleFontSizeCommand,
 } from './marks';
+import { insertRubyCommand, insertPanelCommand, insertDetailCommand } from './nodes';
 
 /**
  * 从 Header 按钮的 shortKey 中解析标题级别
@@ -133,6 +134,26 @@ export function createWysiwygCommandMap() {
         if (!shortKey || !/^[0-9]+$/.test(shortKey)) return false;
         const commands = ctx.get(commandsCtx);
         return commands.call(toggleFontSizeCommand.key, shortKey);
+      },
+      // 注音按钮：插入 ruby inline node
+      ruby: (ctx, shortKey) => {
+        const commands = ctx.get(commandsCtx);
+        const view = ctx.get(editorViewCtx);
+        const { state } = view;
+        const { from, to } = state.selection;
+        const selectedText = state.doc.textBetween(from, to) || '拼音';
+        const annotation = shortKey || 'pīn yīn';
+        return commands.call(insertRubyCommand.key, { text: selectedText, annotation });
+      },
+      // 面板按钮：包裹选中内容为 panel 节点
+      panel: (ctx, shortKey) => {
+        const commands = ctx.get(commandsCtx);
+        return commands.call(insertPanelCommand.key, shortKey || 'primary');
+      },
+      // 手风琴按钮：包裹选中内容为 detail 节点
+      detail: (ctx, shortKey) => {
+        const commands = ctx.get(commandsCtx);
+        return commands.call(insertDetailCommand.key, shortKey || '');
       },
       checklist: (ctx) => {
         const commands = ctx.get(commandsCtx);

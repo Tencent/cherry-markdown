@@ -39,6 +39,10 @@ export default class Link extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      this.$cherry.wysiwygEditor.execCommand('link');
+      return false;
+    }
     // 插入图片，调用上传文件逻辑
     if (/^http/.test(selection)) {
       return `[${this.locale.link}](${selection})`;

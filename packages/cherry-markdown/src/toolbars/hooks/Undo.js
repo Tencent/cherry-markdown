@@ -25,6 +25,10 @@ export default class Undo extends MenuBase {
   }
 
   onClick() {
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      this.$cherry.wysiwygEditor.execCommand('undo');
+      return;
+    }
     this.editor.editor.undo();
   }
 }

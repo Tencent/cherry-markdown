@@ -35,6 +35,12 @@ export default class Ruby extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    // WYSIWYG 模式下，直接通过 execCommand 插入 ruby node
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      const pinyin = (this.editor.$cherry.options.callback.changeString2Pinyin(selection) || 'pin yin').trim();
+      this.$cherry.wysiwygEditor.execCommand('ruby', pinyin);
+      return false;
+    }
     let $selection = getSelection(this.editor.editor, selection) || '拼音';
     // 如果选中的文本中已经有ruby语法了，则去掉该语法
     if (!this.isSelections && !this.$testIsRuby($selection)) {

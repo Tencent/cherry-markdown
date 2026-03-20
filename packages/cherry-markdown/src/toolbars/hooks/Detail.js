@@ -32,6 +32,11 @@ export default class Detail extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection) {
+    // WYSIWYG 模式下，直接通过 execCommand 插入/包裹 detail 节点
+    if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
+      this.$cherry.wysiwygEditor.execCommand('detail');
+      return false;
+    }
     let $selection =
       getSelection(this.editor.editor, selection, 'line', true) || this.$cherry.locale.detailDefaultContent;
     this.detailRule.lastIndex = 0;
