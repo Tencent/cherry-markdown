@@ -13,6 +13,11 @@ import { transformCherryBlocks, getNodeText } from './utils';
 const NODE_NAME = 'cherry_panel';
 const MDAST_TYPE = 'cherryPanel';
 
+const ALIGN_TYPES = new Set(['left', 'center', 'right', 'justify', 'l', 'c', 'r', 'j']);
+const ALIGN_SHORT_MAP = { l: 'left', c: 'center', r: 'right', j: 'justify' };
+function isAlignType(type) { return ALIGN_TYPES.has(type); }
+function normalizeAlignType(type) { return ALIGN_SHORT_MAP[type] || type; }
+
 // Match opening line: :::type [title]
 const START_PATTERN = /^:::(\w+)\s*(.*)?$/;
 // Match closing line: :::
@@ -80,6 +85,13 @@ export const panelSchema = $nodeSchema(NODE_NAME, () => ({
   defining: true,
   parseDOM: [
     {
+      tag: 'div.cherry-text-align',
+      getAttrs: (dom) => ({
+        panelType: dom.dataset.panelType || 'center',
+        title: '',
+      }),
+    },
+    {
       tag: 'div.cherry-panel',
       getAttrs: (dom) => ({
         panelType: dom.dataset.panelType || 'primary',
@@ -88,15 +100,30 @@ export const panelSchema = $nodeSchema(NODE_NAME, () => ({
       contentElement: '.cherry-panel--body',
     },
   ],
-  toDOM: (node) => [
-    'div',
-    {
-      class: `cherry-panel cherry-panel__${node.attrs.panelType}`,
-      'data-panel-type': node.attrs.panelType,
-    },
-    ['div', { class: 'cherry-panel--title', contenteditable: 'false' }, node.attrs.title || ''],
-    ['div', { class: 'cherry-panel--body' }, 0],
-  ],
+  toDOM: (node) => {
+    const { panelType, title } = node.attrs;
+    if (isAlignType(panelType)) {
+      const align = normalizeAlignType(panelType);
+      return [
+        'div',
+        {
+          class: `cherry-text-align cherry-text-align__${align}`,
+          style: `text-align:${align};`,
+          'data-panel-type': panelType,
+        },
+        0,
+      ];
+    }
+    return [
+      'div',
+      {
+        class: `cherry-panel cherry-panel__${panelType}`,
+        'data-panel-type': panelType,
+      },
+      ['div', { class: 'cherry-panel--title', contenteditable: 'false' }, title || ''],
+      ['div', { class: 'cherry-panel--body' }, 0],
+    ];
+  },
   parseMarkdown: {
     match: (node) => node.type === MDAST_TYPE,
     runner: (state, node, type) => {
