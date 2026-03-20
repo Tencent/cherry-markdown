@@ -155,7 +155,6 @@ export default class FormulaHandler {
 
     return null;
   }
-  }
 
   remove() {
     if (this.bubbleContainer) {
