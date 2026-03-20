@@ -36,6 +36,10 @@ export default class WysiwygEditor {
     this.lastMarkdownText = '';
     /** @type {Map<string, string>} processed URL → original URL */
     this._urlReverseMap = new Map();
+    /** @type {Map<string, string>} link URL → Cherry link attributes (e.g. {target=_blank}) */
+    this._linkAttrMap = new Map();
+    /** @type {Array<{type: string, name: string, url: string, attrs: string, original: string}>} */
+    this._mediaList = [];
   }
 
   /**
@@ -386,6 +390,34 @@ export default class WysiwygEditor {
       });
     }
 
+    // Convert Cherry !video[name](url) and !audio[name](url) to standard links
+    // so Milkdown can render them (restored in postprocessMarkdown)
+    this._mediaList = [];
+    processed = this._replaceOutsideCodeFence(
+      processed,
+      /!(video|audio)\[([^\]]*)\]\(([^)]+)\)(\{[^}]*\})?/g,
+      (match, type, name, url, attrs) => {
+        const prefix = type === 'video' ? '\u{1F3AC}' : '\u{1F509}';
+        this._mediaList.push({ type, name, url, attrs: attrs || '', original: match });
+        return `[${prefix} ${name}](${url})`;
+      },
+    );
+
+    // Strip Cherry link attributes like {target=_blank} that Milkdown doesn't understand
+    this._linkAttrMap.clear();
+    processed = this._replaceOutsideCodeFence(
+      processed,
+      /(\[[^\]]*\]\([^)]+\))\{([^}]+)\}/g,
+      (match, linkPart, attrs) => {
+        // Extract URL from the link to use as key
+        const urlMatch = linkPart.match(/\]\(([^)]+)\)$/);
+        if (urlMatch) {
+          this._linkAttrMap.set(urlMatch[1], `{${attrs}}`);
+        }
+        return linkPart;
+      },
+    );
+
     // Fix block math: split "text$$" into "text\n\n$$"
     processed = this._replaceOutsideCodeFence(processed, null, null, (line) => {
       // Opening $$: if line has text before $$ at end, split into two lines
@@ -414,12 +446,32 @@ export default class WysiwygEditor {
    * @returns {string}
    */
   postprocessMarkdown(md) {
-    if (this._urlReverseMap.size === 0) return md;
     let result = md;
-    for (const [processed, original] of this._urlReverseMap) {
-      // Replace all occurrences of the processed URL back to original
-      result = result.split(processed).join(original);
+
+    // Restore urlProcessor-transformed image URLs
+    if (this._urlReverseMap.size > 0) {
+      for (const [processed, original] of this._urlReverseMap) {
+        result = result.split(processed).join(original);
+      }
     }
+
+    // Restore Cherry !video/!audio syntax from converted links
+    if (this._mediaList.length > 0) {
+      for (const { type, name, url, attrs } of this._mediaList) {
+        const prefix = type === 'video' ? '\u{1F3AC}' : '\u{1F509}';
+        const converted = `[${prefix} ${name}](${url})`;
+        const original = `!${type}[${name}](${url})${attrs}`;
+        result = result.replaceAll(converted, original);
+      }
+    }
+
+    // Restore Cherry link attributes (e.g. {target=_blank})
+    if (this._linkAttrMap.size > 0) {
+      for (const [url, attrs] of this._linkAttrMap) {
+        result = result.replaceAll(`](${url})`, `](${url})${attrs}`);
+      }
+    }
+
     return result;
   }
 
