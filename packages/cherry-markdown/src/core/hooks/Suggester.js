@@ -22,10 +22,29 @@
 import escapeRegExp from 'lodash/escapeRegExp';
 import SyntaxBase from '@/core/SyntaxBase';
 import { allSuggestList, suggesterKeywords } from '@/core/hooks/SuggestList';
-import { Pass } from 'codemirror/src/util/misc';
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import { isBrowser } from '@/utils/env';
+
+// 默认 Pass 对象，用于 CodeMirror extraKeys 返回值
+// CodeMirror.Pass.toString() 返回 "CodeMirror.Pass"
+const DEFAULT_PASS = { toString: () => 'CodeMirror.Pass' };
+
+/**
+ * 从 cherry 实例中获取 CodeMirror Pass 对象
+ * @param {import('../../Cherry').default} cherry - cherry 实例
+ * @returns {*} CodeMirror Pass 对象
+ */
+function getPass(cherry) {
+  // 优先从 codemirrorModule 中获取真实的 Pass 对象
+  // Editor.codemirrorModule 是静态属性,存储了导入的 CodeMirror 模块
+  const codemirrorModule = cherry?.editor?.constructor?.codemirrorModule;
+  if (codemirrorModule?.Pass) {
+    return codemirrorModule.Pass;
+  }
+  // fallback 到默认值(toString() 返回 "CodeMirror.Pass" 以保持兼容性)
+  return DEFAULT_PASS;
+}
 
 /**
  * @typedef {import('codemirror')} CodeMirror
@@ -312,15 +331,15 @@ class SuggesterPanel {
             if (res) {
               return res;
             }
-            // logic to decide whether to move up or not
-            // return Pass.toString();
+            // 原有 handler 未处理，返回 Pass 继续默认处理
+            return getPass(this.$cherry);
           }
         };
       } else if (!extraKeys[key]) {
         extraKeys[key] = () => {
           if (this.cursorMove) {
-            // logic to decide whether to move up or not
-            return Pass.toString();
+            // 返回 Pass 对象表示"未处理，继续交给 CodeMirror 默认处理"
+            return getPass(this.$cherry);
           }
         };
       } else if (typeof extraKeys[key] === 'string') {

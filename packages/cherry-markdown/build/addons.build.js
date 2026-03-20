@@ -109,17 +109,31 @@ function buildAddons(entries) {
 
     console.log('[addons build] generating bundle %s', outputFile);
 
-    // generate code and a sourcemap
+    // generate UMD and ESM versions
     const { output: outputs } = await addonBundle.generate({
-      // dir: declarationDir,
-      file: outputFile,
+      file: `${outputFile.replace('.js', '')}.js`,
       format: 'umd',
       name: camelCaseModuleName,
       plugins: [terser()],
     });
 
+    const { output: esmOutputs } = await addonBundle.generate({
+      file: `${outputFile.replace('.js', '')}.esm.js`,
+      format: 'esm',
+      plugins: [terser()],
+    });
+
     // TODO: ts declaration 生成的目录不符合预期，以下为临时处理方案
     outputs.forEach((output) => {
+      const fileNameOnly = basename(output.fileName);
+      const targetPath = join(declarationDir, fileNameOnly);
+      console.log('[addons build] writing %s %s', output.type, targetPath);
+      mkdirSync(declarationDir, {
+        recursive: true,
+      });
+      writeFileSync(targetPath, output.code || output.source || '', { encoding: 'utf-8' });
+    });
+    esmOutputs.forEach((output) => {
       const fileNameOnly = basename(output.fileName);
       const targetPath = join(declarationDir, fileNameOnly);
       console.log('[addons build] writing %s %s', output.type, targetPath);

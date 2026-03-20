@@ -94,8 +94,7 @@ export default class Image extends SyntaxBase {
       const extendAttrStr = extendAttrs
         ? extendAttrs
             .replace(/[{}]/g, '')
-            .replace(/([^=\s]+)=([^\s]+)/g, '$1="$2"')
-            .replace(/&/g, '&amp;') // 对&多做一次转义，cherry现有的机制会自动把&amp;转成&，只有多做一次转义才能抵消cherry的机制
+            .replace(/([^=\s]+)=([^\s]+)/g, (match, key, value) => `${key}="${$e(value)}"`)
         : '';
       return `${leadingChar}<img ${srcProp}="${UrlCache.set(
         encodeURIOnce(this.$engine.urlProcessor(srcValue, 'image')),

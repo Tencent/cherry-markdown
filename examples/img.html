@@ -30,11 +30,11 @@
     <div id="markdown"></div>
     <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
     <script type="module">
-         // 使用 fetch 获取 markdown 文件内容
-        const response = await fetch('./assets/markdown/img.md');
-        const imgMd = await response.text();
+      import { imgConfig } from './assets/scripts/img-demo.js';
 
-       import { imgConfig } from './assets/scripts/img-demo.js';
+      // 使用 fetch 获取 markdown 文件内容
+      const response = await fetch('./assets/markdown/img.md');
+      const imgMd = await response.text();
       // 在Vite中使用?raw导入的文件内容已经是字符串，无需通过fetch获取
       const config = Object.assign({}, imgConfig, { value: imgMd });
       window.cherry = new Cherry(config);

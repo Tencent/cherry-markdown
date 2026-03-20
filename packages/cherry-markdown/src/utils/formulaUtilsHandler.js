@@ -17,6 +17,7 @@
 import { svg2img, getSvgString } from '@/utils/svgUtils';
 import { canvas2img } from '@/utils/export';
 import { copyToClip } from '@/utils/copy';
+import { unescapeHTMLSpecialChar } from '@/utils/sanitize';
 import MathBlock from '@/core/hooks/MathBlock';
 
 export default class FormulaHandler {
@@ -27,14 +28,14 @@ export default class FormulaHandler {
    * @param {Element} target 目标dom
    * @param {HTMLDivElement} container bubble容器
    * @param {HTMLDivElement} previewerDom 预览器dom
-   * @param {import('../Editor').default} editor 编辑器实例
+   * @param {import('../Cherry').default} $cherry Cherry实例（流式渲染场景下不依赖 editor）
    */
-  constructor(trigger, target, container, previewerDom, editor) {
+  constructor(trigger, target, container, previewerDom, $cherry) {
     this.trigger = trigger;
     this.target = target;
     this.container = container;
     this.previewerDom = previewerDom;
-    this.editor = editor;
+    this.$cherry = $cherry;
   }
 
   /**
@@ -109,7 +110,7 @@ export default class FormulaHandler {
     bubbleContainer.id = 'formula-utils-bubble-container'; // 方便 namedItem 获取
     bubbleContainer.className = ['formula-utils-bubble-container'].join(' ');
     this.bubbleContainer = bubbleContainer;
-    this?.editor?.$cherry?.wrapperDom?.appendChild(bubbleContainer);
+    this.$cherry?.wrapperDom?.appendChild(bubbleContainer);
   }
 
   /**
@@ -118,7 +119,7 @@ export default class FormulaHandler {
    * @param {number} y
    */
   showBubble(x, y) {
-    const bubbleContainer = this?.editor?.$cherry?.wrapperDom?.children?.namedItem('formula-utils-bubble-container');
+    const bubbleContainer = this.$cherry?.wrapperDom?.children?.namedItem('formula-utils-bubble-container');
     const targetRect = this.target.getBoundingClientRect();
     if (bubbleContainer instanceof HTMLElement) {
       this.bubbleContainer = bubbleContainer;
@@ -129,6 +130,30 @@ export default class FormulaHandler {
     this.bubbleContainer.style.top = `${y || targetRect.top}px`;
     this.bubbleContainer.style.left = `${x || targetRect.left}px`;
     this.bubbleContainer.addEventListener('click', this.bubbleClickHandler.bind(this), { once: true });
+  }
+
+  /**
+   * 从 DOM 的 data-content 属性获取 latex 源码
+   * @returns {string|null} latex 源码
+   */
+  getLatexFromDOM() {
+    // 找到公式容器元素（mjx-container 的父元素或者带有 data-content 属性的元素）
+    const mjxContainer = this.target.parentElement;
+    if (!mjxContainer) {
+      return null;
+    }
+
+    // 查找带有 data-content 属性的父元素
+    let element = mjxContainer;
+    while (element && !element.dataset?.content) {
+      element = element.parentElement;
+    }
+
+    if (element?.dataset?.content) {
+      return unescapeHTMLSpecialChar(element.dataset.content);
+    }
+
+    return null;
   }
 
   remove() {
@@ -224,16 +249,16 @@ export default class FormulaHandler {
                   }
                 }
               }
-              // TODO: other engine
-            } else if (name === 'latex') {
-              copyToClip(formulaCode);
-            } else if (name === '$') {
-              copyToClip(`${name}${formulaCode}${name}`);
-            } else if (name === '$$') {
-              copyToClip(`${name}\n${formulaCode}\n${name}`);
-            } else if (name === '\\') {
-              copyToClip(`\\${formulaCode}`);
             }
+            // TODO: other engine
+          } else if (name === 'latex') {
+            copyToClip(formulaCode);
+          } else if (name === '$') {
+            copyToClip(`${name}${formulaCode}${name}`);
+          } else if (name === '$$') {
+            copyToClip(`${name}\n${formulaCode}\n${name}`);
+          } else if (name === '\\') {
+            copyToClip(`\\${formulaCode}`);
           }
           break;
       }

@@ -51,6 +51,9 @@ import { getCodeBlockRule } from '@/utils/regexp';
 
 /** @type {import('~types/editor')} */
 export default class Editor {
+  /** @type {typeof import('codemirror')} CodeMirror 模块，供其他模块复用 */
+  static codemirrorModule = codemirror;
+
   /**
    * @constructor
    * @param {Partial<EditorConfiguration>} options
