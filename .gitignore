@@ -30,3 +30,6 @@ packages/**/yarn.lock
 
 # config
 examples/cherry-markdown-publish/src/common/config/*.yaml
+
+# playwright mcp
+.playwright-mcp

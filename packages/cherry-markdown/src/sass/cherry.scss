@@ -846,6 +846,53 @@
   }
 }
 
+/* WYSIWYG 脚注样式 — 与预览区视觉风格保持一致 */
+.cherry-wysiwyg {
+  /* 脚注引用：上标数字，与预览区 sup.cherry-footnote-number 风格一致 */
+  sup[data-type="footnote_reference"] {
+    font-size: 0.75em;
+    vertical-align: super;
+    color: var(--md-link-color, var(--primary-color));
+    cursor: pointer;
+    padding: 0 1px;
+    &::before { content: '['; }
+    &::after { content: ']'; }
+    &:hover {
+      color: var(--primary-color);
+      text-decoration: underline;
+    }
+  }
+
+  /* 脚注定义：与预览区 .footnote 列表风格一致 */
+  dl[data-type="footnote_definition"] {
+    color: var(--md-paragraph-color, #555);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px dotted var(--md-hr-border, #ccc);
+
+    dt {
+      display: inline;
+      font-weight: normal;
+      color: var(--md-link-color, var(--primary-color));
+      padding: 5px;
+      &::before { content: '['; }
+      &::after { content: '] '; }
+    }
+
+    dd {
+      display: inline;
+      margin-left: 0;
+    }
+
+    /* 第一个定义块上方加分隔线和标题，模拟预览区的 .footnote-title */
+    &:first-of-type {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid var(--md-hr-border, #ccc);
+    }
+  }
+}
+
 .cherry-ruby-node {
   cursor: pointer;
   border-bottom: 1px dashed #ccc;
