@@ -3,14 +3,25 @@
  */
 
 .cherry.theme__default {
+  /* ========== 自定义绿色主色调 ========== */
+  --cherry-green: #30D158;
+  --cherry-green-light: #e8fbe9;
+  --cherry-green-1: #d0f7d4;
+  --cherry-green-2: #a8eeaf;
+  --cherry-green-3: #6de077;
+  --cherry-green-4: #40c957;
+  --cherry-green-5: #30D158;
+  --cherry-green-dark: #28b84c;
+  --cherry-green-darker: #1f9e3f;
+
   /* ========== 基础色彩变量覆盖 ========== */
-  --primary-color: var(--oc-blue-6);
-  --secondary-color: var(--oc-blue-0);
+  --primary-color: var(--cherry-green);
+  --secondary-color: var(--cherry-green-light);
 
   --base-font-color: var(--oc-gray-8);
   --base-editor-bg: var(--oc-white);
   --base-previewer-bg: var(--oc-white);
-  --base-border-color: var(--oc-blue-5);
+  --base-border-color: var(--cherry-green-dark);
 
   /* ========== 工具栏相关变量 ========== */
   --toolbar-bg: var(--oc-white);
@@ -18,43 +29,43 @@
   --toolbar-btn-hover-bg: var(--oc-gray-2);
   --toolbar-btn-hover-color: var(--primary-color);
   --toolbar-btn-active-bg: var(--secondary-color);
-  --toolbar-split-color: var(--oc-blue-5);
+  --toolbar-split-color: var(--cherry-green-dark);
 
   /* ========== 编辑器相关变量 ========== */
   --editor-header-color: var(--primary-color);
-  --editor-string-color: var(--oc-blue-4);
-  --editor-comment-color: var(--oc-blue-4);
+  --editor-string-color: var(--cherry-green-4);
+  --editor-comment-color: var(--cherry-green-4);
   --editor-quote-color: var(--oc-gray-8);
-  --editor-link-color: var(--oc-blue-4);
-  --editor-url-bg-color: var(--oc-blue-0);
+  --editor-link-color: var(--cherry-green-4);
+  --editor-url-bg-color: var(--cherry-green-light);
   --editor-v2-color: var(--oc-gray-8);
   --editor-v3-color: var(--primary-color);
-  --editor-keyword-color: var(--oc-blue-4);
-  --editor-selection-bg: var(--oc-blue-2);
+  --editor-keyword-color: var(--cherry-green-4);
+  --editor-selection-bg: var(--cherry-green-2);
 
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: var(--primary-color);
   --md-paragraph-color: var(--oc-gray-8);
-  --md-link-color: var(--oc-blue-4);
+  --md-link-color: var(--cherry-green-4);
   --md-link-hover-color: var(--primary-color);
-  --md-inline-code-color: var(--oc-blue-4);
-  --md-inline-code-bg: var(--oc-blue-0);
-  --md-blockquote-bg: var(--oc-blue-0);
-  --md-hr-border: var(--oc-blue-5);
+  --md-inline-code-color: var(--cherry-green-dark);
+  --md-inline-code-bg: var(--cherry-green-light);
+  --md-blockquote-bg: var(--cherry-green-light);
+  --md-hr-border: var(--cherry-green-dark);
   /* ========== table 相关变量 ========== */
   --md-table-border: #D9DFE3;
-    --md-table-drag-border-bg: var(--oc-cyan-5);
-  --md-table-sort-active-bg: rgb(208, 226, 247);
+  --md-table-drag-border-bg: var(--cherry-green);
+  --md-table-sort-active-bg: rgba(48, 209, 88, 0.2);
 
   /* ========== 手风琴组件变量覆盖 ========== */
-  --accordion-bg: var(--oc-blue-0);
-  --accordion-border: var(--oc-blue-2);
+  --accordion-bg: var(--cherry-green-light);
+  --accordion-border: var(--cherry-green-2);
 
-  --accordion-summary-bg: var(--oc-blue-5);
-  --accordion-summary-hover-bg: var(--oc-blue-4);
+  --accordion-summary-bg: var(--cherry-green-dark);
+  --accordion-summary-hover-bg: var(--cherry-green-4);
 
-  --accordion-body-bg: var(--oc-blue-0);
-  --accordion-body-border: var(--oc-blue-1);
+  --accordion-body-bg: var(--cherry-green-light);
+  --accordion-body-border: var(--cherry-green-1);
   --accordion-body-color: var(--oc-gray-8);
 }
 
