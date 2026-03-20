@@ -38,8 +38,6 @@ export default class WysiwygEditor {
     this._urlReverseMap = new Map();
     /** @type {Map<string, string>} link URL → Cherry link attributes (e.g. {target=_blank}) */
     this._linkAttrMap = new Map();
-    /** @type {Array<{type: string, name: string, url: string, attrs: string, original: string}>} */
-    this._mediaList = [];
   }
 
   /**
@@ -59,6 +57,9 @@ export default class WysiwygEditor {
 
     const CrepeClass = wysiwygConfig.Crepe;
     const crepeOptions = wysiwygConfig.crepeOptions || {};
+
+    // Auto-configure Mermaid preview if MermaidCodeEngine is registered
+    this._configureMermaidPreview(crepeOptions);
 
     this.crepe = new CrepeClass({
       root: this.editorDom,
@@ -390,31 +391,19 @@ export default class WysiwygEditor {
       });
     }
 
-    // Convert Cherry !video[name](url) and !audio[name](url) to standard links
-    // so Milkdown can render them (restored in postprocessMarkdown)
-    this._mediaList = [];
-    processed = this._replaceOutsideCodeFence(
-      processed,
-      /!(video|audio)\[([^\]]*)\]\(([^)]+)\)(\{[^}]*\})?/g,
-      (match, type, name, url, attrs) => {
-        const prefix = type === 'video' ? '\u{1F3AC}' : '\u{1F509}';
-        this._mediaList.push({ type, name, url, attrs: attrs || '', original: match });
-        return `[${prefix} ${name}](${url})`;
-      },
-    );
-
     // Strip Cherry link attributes like {target=_blank} that Milkdown doesn't understand
+    // Skip !video/!audio attrs (e.g. {poster=...}) since they're handled by the media remark plugin
     this._linkAttrMap.clear();
     processed = this._replaceOutsideCodeFence(
       processed,
-      /(\[[^\]]*\]\([^)]+\))\{([^}]+)\}/g,
-      (match, linkPart, attrs) => {
-        // Extract URL from the link to use as key
-        const urlMatch = linkPart.match(/\]\(([^)]+)\)$/);
-        if (urlMatch) {
-          this._linkAttrMap.set(urlMatch[1], `{${attrs}}`);
+      /(!(video|audio))?\[([^\]]*)\]\(([^)]+)\)(\{[^}]*\})/g,
+      (match, mediaPrefix, mediaType, text, url, attrs) => {
+        if (mediaPrefix) {
+          // !video or !audio — keep attrs intact for remark plugin
+          return match;
         }
-        return linkPart;
+        this._linkAttrMap.set(url, attrs);
+        return `[${text}](${url})`;
       },
     );
 
@@ -452,16 +441,6 @@ export default class WysiwygEditor {
     if (this._urlReverseMap.size > 0) {
       for (const [processed, original] of this._urlReverseMap) {
         result = result.split(processed).join(original);
-      }
-    }
-
-    // Restore Cherry !video/!audio syntax from converted links
-    if (this._mediaList.length > 0) {
-      for (const { type, name, url, attrs } of this._mediaList) {
-        const prefix = type === 'video' ? '\u{1F3AC}' : '\u{1F509}';
-        const converted = `[${prefix} ${name}](${url})`;
-        const original = `!${type}[${name}](${url})${attrs}`;
-        result = result.replaceAll(converted, original);
       }
     }
 
@@ -573,6 +552,104 @@ export default class WysiwygEditor {
     }
 
     return result.join('\n');
+  }
+
+  /**
+   * 自动检测并配置 Mermaid 图表预览
+   * 如果 Cherry 已注册 MermaidCodeEngine，将其 mermaid API 注入到 Crepe 的
+   * CodeMirror 代码块预览中，使 language=mermaid 的代码块能渲染为 SVG 图表。
+   * 默认以预览模式展示，可通过 toggle 按钮切换到编辑模式。
+   * @param {object} crepeOptions Crepe 配置对象（会被原地修改）
+   */
+  _configureMermaidPreview(crepeOptions) {
+    const mermaidEngine = this.$cherry.options.engine?.syntax?.codeBlock?.customRenderer?.mermaid;
+    if (!mermaidEngine || !mermaidEngine.mermaidAPIRefs) return;
+
+    const mermaidAPI = mermaidEngine.mermaidAPIRefs;
+    const isAsync = mermaidAPI.render.length <= 3;
+
+    if (!crepeOptions.featureConfigs) crepeOptions.featureConfigs = {};
+    const codeMirrorConfig = crepeOptions.featureConfigs['code-mirror'] || {};
+    const existingRenderPreview = codeMirrorConfig.renderPreview;
+
+    // Mermaid 渲染需要一个隐藏的 canvas 容器
+    this._mermaidCanvas = null;
+
+    // 渲染队列：mermaid v9 同步渲染不能并发，需要串行处理
+    let renderQueue = Promise.resolve();
+    let counter = 0;
+
+    crepeOptions.featureConfigs['code-mirror'] = {
+      ...codeMirrorConfig,
+      // 有预览面板的代码块（mermaid/LaTeX）默认只显示预览，可切换到编辑
+      previewOnlyByDefault: true,
+      renderPreview: (language, content, applyPreview) => {
+        if (language.toLowerCase() === 'mermaid' && content.length > 0) {
+          // 通过队列串行渲染，避免 mermaid 并发渲染冲突
+          renderQueue = renderQueue.then(() =>
+            this._renderMermaid(mermaidAPI, isAsync, content, ++counter)
+              .then((svg) => applyPreview(svg))
+              .catch(() => applyPreview(null)),
+          );
+          return undefined; // async — Crepe 会显示 "Loading..."
+        }
+        if (existingRenderPreview) {
+          return existingRenderPreview(language, content, applyPreview);
+        }
+        return null;
+      },
+    };
+  }
+
+  /**
+   * 确保 mermaid 隐藏渲染容器存在
+   * @returns {HTMLElement}
+   */
+  _ensureMermaidCanvas() {
+    if (this._mermaidCanvas && document.body.contains(this._mermaidCanvas)) {
+      return this._mermaidCanvas;
+    }
+    this._mermaidCanvas = document.createElement('div');
+    this._mermaidCanvas.style.cssText = 'width:1024px;opacity:0;position:fixed;top:100%;';
+    (this.$cherry.wrapperDom || document.body).appendChild(this._mermaidCanvas);
+    return this._mermaidCanvas;
+  }
+
+  /**
+   * 调用 mermaid API 渲染图表
+   * @param {object} mermaidAPI mermaid 实例
+   * @param {boolean} isAsync 是否为 v10+ 异步版本
+   * @param {string} content mermaid 源码
+   * @param {number} id 渲染计数器
+   * @returns {Promise<string>} 渲染后的 SVG HTML
+   */
+  async _renderMermaid(mermaidAPI, isAsync, content, id) {
+    const canvas = this._ensureMermaidCanvas();
+    const graphId = `mermaid-wysiwyg-${id}-${Date.now()}`;
+
+    let svg;
+    if (isAsync) {
+      const result = await mermaidAPI.render(graphId, content, canvas);
+      svg = result.svg;
+    } else {
+      svg = await new Promise((resolve, reject) => {
+        try {
+          mermaidAPI.render(graphId, content, (svgCode) => resolve(svgCode), canvas);
+        } catch (e) {
+          reject(e);
+        }
+      });
+    }
+
+    // 修正 SVG 属性并转为 <img> data URL
+    // Crepe 的 PreviewPanel 使用 DOMPurify 清理 HTML，会移除 SVG 中的 foreignObject 元素
+    // （mermaid 用 foreignObject 渲染文字标签），因此需要将 SVG 编码为 data URL 图片
+    const fixedSvg = svg
+      .replace(/\s*markerUnits="0"/g, '')
+      .replace(/\s*x="NaN"/g, '')
+      .replace(/<br>/g, '<br/>');
+    const dataUrl = `data:image/svg+xml,${encodeURIComponent(fixedSvg)}`;
+    return `<img style="max-width:100%;height:auto;" src="${dataUrl}" />`;
   }
 
   /**
