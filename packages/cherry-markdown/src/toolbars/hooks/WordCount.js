@@ -60,18 +60,17 @@ export default class wordCount extends MenuBase {
 
     // 编辑区修改时延时触发字数统计，防止过于频繁
     let timeout = null;
-    setTimeout(() => {
-      this.$cherry.editor.editor.on('change', () => {
-        if (timeout) {
-          clearTimeout(timeout);
-        }
-        timeout = setTimeout(() => {
-          btnDom.dispatchEvent(this.countEvent);
-          timeout = null;
-        }, 500);
-      });
-      this.$dealEditorChange();
-    }, 500);
+    // CodeMirror 6 中通过事件系统监听变化
+    this.$cherry.$event.on('afterChange', () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      timeout = setTimeout(() => {
+        btnDom.dispatchEvent(this.countEvent);
+        timeout = null;
+      }, 500);
+    });
+    this.$dealEditorChange();
   }
 
   /**

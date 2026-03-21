@@ -24,6 +24,7 @@ import { imgDrawioReg, getValueWithoutCode } from '@/utils/regexp';
 import debounce from 'lodash/debounce';
 import FormulaHandler from '@/utils/formulaUtilsHandler';
 import ListHandler from '@/utils/listContentHandler';
+import { Transaction } from '@codemirror/state';
 
 /**
  * 预览区域的响应式工具栏
@@ -256,7 +257,7 @@ export default class PreviewerBubble {
     this.checkboxIdx = list.indexOf(target);
 
     // 然后找到Editor中对应的`- []`或者`- [ ]`进行修改
-    const contents = getValueWithoutCode(this.editor.editor.getValue()).split('\n');
+    const contents = getValueWithoutCode(this.editor.editor.view.state.doc.toString()).split('\n');
 
     let editorCheckboxCount = 0;
     // [ ]中的空格，或者[x]中的x的位置
@@ -277,8 +278,28 @@ export default class PreviewerBubble {
       // 无法找到对应的checkbox
       return;
     }
-    this.editor.editor.setSelection({ line: targetLine, ch: targetCh }, { line: targetLine, ch: targetCh + 1 });
-    this.editor.editor.replaceSelection(this.editor.editor.getSelection() === ' ' ? 'x' : ' ', 'around');
+    // CodeMirror 6 中设置选区需要使用 dispatch
+    // 添加 userEvent 注解标记这是程序触发的操作，避免显示 bubble 菜单
+    const { view } = this.editor.editor;
+    const { doc } = view.state;
+    const fromPos = doc.line(targetLine + 1).from + targetCh;
+    const toPos = doc.line(targetLine + 1).from + targetCh + 1;
+    view.dispatch({
+      selection: { anchor: fromPos, head: toPos },
+      annotations: Transaction.userEvent.of('checklist.toggle'),
+    });
+
+    // CodeMirror 6 中替换选中内容
+    const selection = view.state.selection.main;
+    const selectedText = view.state.doc.sliceString(selection.from, selection.to);
+    view.dispatch({
+      changes: {
+        from: selection.from,
+        to: selection.to,
+        insert: selectedText === ' ' ? 'x' : ' ',
+      },
+      annotations: Transaction.userEvent.of('checklist.toggle'),
+    });
   }
 
   /**
@@ -317,10 +338,18 @@ export default class PreviewerBubble {
           xmlData,
           (newData) => {
             const { xmlData, base64 } = newData;
-            this.editor.editor.replaceSelection(
-              `(${base64}){data-type=drawio data-xml=${encodeURI(xmlData)}}`,
-              'around',
-            );
+            // CodeMirror 6 中替换选中内容
+            const editorView = this.editor.editor.view;
+            const selection = editorView.state.selection.main;
+            // 使用 encodeURIComponent 而不是 encodeURI，确保属性上下文中的特殊字符被正确转义
+            const escapedXmlData = encodeURIComponent(xmlData);
+            editorView.dispatch({
+              changes: {
+                from: selection.from,
+                to: selection.to,
+                insert: `(${base64}){data-type=drawio data-xml=${escapedXmlData}}`,
+              },
+            });
           },
         );
         return;
@@ -743,7 +772,7 @@ export default class PreviewerBubble {
     const allDrawioImgs = Array.from(this.previewerDom.querySelectorAll('img[data-type="drawio"]'));
     const totalDrawioImgs = allDrawioImgs.length;
     const drawioImgIndex = allDrawioImgs.indexOf(htmlElement);
-    const content = getValueWithoutCode(this.editor.editor.getValue());
+    const content = getValueWithoutCode(this.editor.editor.view.state.doc.toString());
     const drawioImgsCode = content.match(imgDrawioReg);
     const testSrc = drawioImgsCode[drawioImgIndex]
       ? drawioImgsCode[drawioImgIndex].replace(/^!\[.*?\]\((.*?)\)/, '$1').trim()
@@ -762,7 +791,13 @@ export default class PreviewerBubble {
           if (testIndex === drawioImgIndex) {
             endCh = beginCh + targetString.length;
             beginCh += targetString.replace(/^(!\[[^\]]*])[^\n]*$/, '$1').length;
-            this.editor.editor.setSelection({ line, ch: beginCh }, { line, ch: endCh });
+            // CodeMirror 6 中设置选区
+            const { doc } = this.editor.editor.view.state;
+            const fromPos = doc.line(line + 1).from + beginCh;
+            const toPos = doc.line(line + 1).from + endCh;
+            this.editor.editor.view.dispatch({
+              selection: { anchor: fromPos, head: toPos },
+            });
             // 更新后需要再调用一次markText机制
             this.editor.dealSpecialWords();
             return true;
@@ -789,7 +824,7 @@ export default class PreviewerBubble {
    * @returns {boolean}
    */
   beginChangeImgValue(htmlElement) {
-    const content = getValueWithoutCode(this.editor.editor.getValue());
+    const content = getValueWithoutCode(this.editor.editor.view.state.doc.toString());
     const src = htmlElement.getAttribute('src');
     const imgReg = /(!\[[^\n]*?\]\([^)]+\))/g;
     const contentImgs = content.match(imgReg);
@@ -817,7 +852,13 @@ export default class PreviewerBubble {
             this.imgSize = imgSizeReg.test(targetString) ? targetString.replace(imgSizeReg, '$1') : '';
             beginCh += targetString.replace(/^(!\[[^#\]]*).*$/, '$1').length;
             endCh = beginCh + targetString.replace(/^(!\[[^#\]]*)([^\]]*?)\].*$/, '$2').length;
-            this.editor.editor.setSelection({ line, ch: beginCh }, { line, ch: endCh });
+            // CodeMirror 6 中设置选区
+            const { doc } = this.editor.editor.view.state;
+            const fromPos = doc.line(line + 1).from + beginCh;
+            const toPos = doc.line(line + 1).from + endCh;
+            this.editor.editor.view.dispatch({
+              selection: { anchor: fromPos, head: toPos },
+            });
             return true;
           }
           testIndex += 1;
@@ -899,10 +940,15 @@ export default class PreviewerBubble {
   }
 
   changeImgValue() {
-    this.editor.editor.replaceSelection(
-      [this.imgSize, this.imgDeco, this.imgAlign].filter((v) => v).join(' '),
-      'around',
-    );
+    // CodeMirror 6 中替换选中内容
+    const selection = this.editor.editor.view.state.selection.main;
+    this.editor.editor.view.dispatch({
+      changes: {
+        from: selection.from,
+        to: selection.to,
+        insert: [this.imgSize, this.imgDeco, this.imgAlign].filter((v) => v).join(' '),
+      },
+    });
   }
 
   /**
@@ -1050,16 +1096,17 @@ export default class PreviewerBubble {
       if (extendMatch) {
         // 选中所有扩展参数
         const extendStart = fullLangLine.indexOf(extendMatch[1]);
-        this.editor.editor.setSelection(
-          { line: langLineNum, ch: extendStart },
-          { line: langLineNum, ch: extendStart + extendMatch[1].length },
-        );
+        // CM6: 将 {line, ch} 转换为文档偏移量
+        const { doc } = this.editor.editor.view.state;
+        const from = doc.line(langLineNum + 1).from + extendStart;
+        const to = from + extendMatch[1].length;
+        this.editor.editor.setSelection(from, to);
       } else {
         // 没有扩展参数，将光标放在语言行末尾
-        this.editor.editor.setSelection(
-          { line: langLineNum, ch: fullLangLine.length },
-          { line: langLineNum, ch: fullLangLine.length },
-        );
+        // CM6: 将 {line, ch} 转换为文档偏移量
+        const { doc } = this.editor.editor.view.state;
+        const pos = doc.line(langLineNum + 1).from + fullLangLine.length;
+        this.editor.editor.setSelection(pos, pos);
       }
 
       this.mermaidLangLineNum = langLineNum;

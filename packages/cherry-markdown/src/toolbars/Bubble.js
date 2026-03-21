@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import Logger from '@/Logger';
 import Toolbar from './Toolbar';
 /**
  * 在编辑区域选中文本时浮现的bubble工具栏
@@ -22,9 +23,6 @@ export default class Bubble extends Toolbar {
    * @type {'flex' | 'block'}
    */
   static displayType = 'flex';
-  // constructor(options) {
-  //     super(options);
-  // }
 
   set visible(visible) {
     const bubbleStyle = window.getComputedStyle(this.bubbleDom);
@@ -48,7 +46,14 @@ export default class Bubble extends Toolbar {
     this.bubbleDom = this.options.dom;
     this.editorDom = this.options.editor.getEditorDom();
     this.initBubbleDom();
-    this.editorDom.querySelector('.CodeMirror').appendChild(this.bubbleDom);
+    // 添加空值检查，确保 .cm-editor 存在
+    const cmEditor = this.editorDom.querySelector('.cm-editor');
+    if (cmEditor) {
+      cmEditor.appendChild(this.bubbleDom);
+    } else {
+      Logger.warn('Bubble: .cm-editor not found, appending to editorDom instead');
+      this.editorDom.appendChild(this.bubbleDom);
+    }
     Object.entries(this.shortcutKeyMap).forEach(([key, value]) => {
       this.$cherry.toolbar.shortcutKeyMap[key] = value;
     });
@@ -63,7 +68,12 @@ export default class Bubble extends Toolbar {
    * @returns {number} 编辑区域的滚动区域
    */
   getScrollTop() {
-    return this.options.editor.editor.getScrollInfo().top;
+    const editorAdapter = this.options.editor.editor;
+    if (!editorAdapter) {
+      return 0;
+    }
+    const view = editorAdapter.view || editorAdapter;
+    return view.scrollDOM ? view.scrollDOM.scrollTop : 0;
   }
 
   /**
@@ -87,7 +97,15 @@ export default class Bubble extends Toolbar {
       this.bubbleDom.style.marginTop = '0';
       this.bubbleDom.dataset.scrollTop = String(this.getScrollTop());
     }
-    const positionLimit = this.editorDom.querySelector('.CodeMirror-lines').firstChild.getBoundingClientRect();
+    // 获取编辑器内容区域的边界，添加空值检查
+    const lineWrapping = this.editorDom.querySelector('.cm-lineWrapping');
+    const contentElement = lineWrapping?.firstChild;
+    if (!contentElement) {
+      // 如果编辑器 DOM 结构不符合预期，使用编辑器本身作为边界
+      Logger.warn('Bubble: .cm-lineWrapping or its firstChild not found');
+      return;
+    }
+    const positionLimit = contentElement.getBoundingClientRect();
     const editorPosition = this.editorDom.getBoundingClientRect();
     const minLeft = positionLimit.left - editorPosition.left;
     const maxLeft = positionLimit.width + minLeft;
@@ -161,74 +179,129 @@ export default class Bubble extends Toolbar {
   }
 
   addSelectionChangeListener() {
-    this.options.editor.addListener('change', (codemirror) => {
+    // 绑定事件处理方法，保存引用以便后续注销
+    this.boundHandleAfterChange = () => {
       // 当编辑区内容变更时自动隐藏bubble工具栏
       this.hideBubble();
-    });
-    this.options.editor.addListener('refresh', (codemirror) => {
-      // 当编辑区内容刷新时自动隐藏bubble工具栏
+    };
+    this.boundHandleLayoutChange = () => {
+      // 当编辑区布局刷新时自动隐藏bubble工具栏
       this.hideBubble();
-    });
-    this.options.editor.addListener('scroll', (codemirror) => {
+    };
+    this.boundHandleScroll = () => {
       // 当编辑区滚动时，需要实时同步bubble工具栏的位置
       this.updatePositionWhenScroll();
-    });
-    this.options.editor.addListener('beforeSelectionChange', (codemirror, info) => {
+    };
+    this.boundHandleBeforeSelectionChange = ({ selection, isUserInteraction }) => {
+      const { from, to } = selection;
       setTimeout(() => {
-        const selections = codemirror.getSelections();
+        const editorAdapter = this.options.editor.editor;
+        if (!editorAdapter) {
+          return;
+        }
+        // 兼容 CM6Adapter,获取真正的 EditorView
+        const view = editorAdapter.view || editorAdapter;
+        const editorState = view.state;
+        const selections = editorState.selection.ranges.map((range) =>
+          editorState.doc.sliceString(range.from, range.to),
+        );
         const selectionStr = selections.join('');
         if (selectionStr !== this.lastSelectionsStr && (selectionStr || this.lastSelectionsStr)) {
           this.lastSelections = !this.lastSelections ? [] : this.lastSelections;
-          this.$cherry.$event.emit('selectionChange', { selections, lastSelections: this.lastSelections, info });
+          this.$cherry.$event.emit('selectionChange', {
+            selections,
+            lastSelections: this.lastSelections,
+            info: { isUserInteraction },
+          });
           this.lastSelections = selections;
           this.lastSelectionsStr = selectionStr;
         }
       }, 10);
       // 当编辑区选中内容改变时，需要展示/隐藏bubble工具栏，并计算工具栏位置
-      if (info.origin !== '*mouse' && (info.origin !== null || typeof info.origin === 'undefined')) {
+      // 如果是用户手动选中，则展示bubble工具栏，如果是自动选中，则不需要展示
+      if (!isUserInteraction) {
         return true;
       }
-      if (!info.ranges[0]) {
-        return true;
-      }
-      const anchor = info.ranges[0].anchor.line * 1000000 + info.ranges[0].anchor.ch;
-      const head = info.ranges[0].head.line * 1000000 + info.ranges[0].head.ch;
+      // 直接从 selection 对象获取 anchor 和 head，而不是解构
+      const anchor = selection.anchor !== undefined ? selection.anchor : selection.from;
+      const head = selection.head !== undefined ? selection.head : selection.to;
       let direction = 'asc';
       if (anchor > head) {
         direction = 'desc';
       }
       setTimeout(() => {
-        const selections = codemirror.getSelections();
-        if (selections.join('').length <= 0) {
+        if (Math.abs(from - to) === 0) {
           this.hideBubble();
           return;
         }
-        const selectedObjs = codemirror.getWrapperElement().getElementsByClassName('CodeMirror-selected');
-        const editorPosition = this.editorDom.getBoundingClientRect();
-        let width = 0;
-        let top = 0;
-        if (typeof selectedObjs !== 'object' || selectedObjs.length <= 0) {
-          this.hideBubble();
-          return;
-        }
-        for (let key = 0; key < selectedObjs.length; key++) {
-          const one = selectedObjs[key];
-          const position = one.getBoundingClientRect();
-          const targetTop = position.top - editorPosition.top;
-          if (direction === 'asc') {
-            if (targetTop >= top) {
-              top = targetTop;
-              width = position.left - editorPosition.left + position.width / 2;
+        try {
+          const editorAdapter = this.options.editor.editor;
+          if (!editorAdapter) {
+            this.hideBubble();
+            return;
+          }
+          // 兼容 CM6Adapter,获取真正的 EditorView
+          const editorView = editorAdapter.view || editorAdapter;
+
+          const fromCoords = editorView.coordsAtPos(from);
+          const toCoords = editorView.coordsAtPos(to);
+
+          if (!fromCoords || !toCoords) {
+            this.hideBubble();
+            return;
+          }
+
+          const editorPosition = this.editorDom.getBoundingClientRect();
+
+          let top;
+          let width;
+
+          const isMultiLine = fromCoords.top !== toCoords.top;
+
+          if (isMultiLine) {
+            if (direction === 'asc') {
+              top = toCoords.top - editorPosition.top;
+              width = toCoords.left - editorPosition.left + (toCoords.right - toCoords.left) / 2;
+            } else {
+              top = fromCoords.top - editorPosition.top;
+              width = fromCoords.left - editorPosition.left + (fromCoords.right - fromCoords.left) / 2;
             }
           } else {
-            if (targetTop <= top || top <= 0) {
-              top = targetTop;
-              width = position.left - editorPosition.left + position.width / 2;
-            }
+            top = fromCoords.top - editorPosition.top;
+            width = fromCoords.left - editorPosition.left + (toCoords.left - fromCoords.left) / 2;
           }
+
+          this.showBubble(top, width);
+        } catch (error) {
+          console.warn('Error calculating bubble position:', error);
+          this.hideBubble();
         }
-        this.showBubble(top, width);
       }, 10);
-    });
+    };
+
+    this.$cherry.$event.on('afterChange', this.boundHandleAfterChange);
+    // CM6Adapter.refresh() 不会触发 refresh 事件，改为监听 layoutChange 事件
+    this.$cherry.$event.on('layoutChange', this.boundHandleLayoutChange);
+    this.$cherry.$event.on('onScroll', this.boundHandleScroll);
+    this.$cherry.$event.on('beforeSelectionChange', this.boundHandleBeforeSelectionChange);
+  }
+
+  /**
+   * 销毁 Bubble 实例，清理事件监听器
+   * 必须调用此方法以避免内存泄漏
+   */
+  destroy() {
+    // 移除 Cherry 事件监听 - 使用绑定的方法引用以确保正确注销
+    if (this.$cherry && this.$cherry.$event) {
+      this.$cherry.$event.off('afterChange', this.boundHandleAfterChange);
+      this.$cherry.$event.off('layoutChange', this.boundHandleLayoutChange);
+      this.$cherry.$event.off('onScroll', this.boundHandleScroll);
+      this.$cherry.$event.off('beforeSelectionChange', this.boundHandleBeforeSelectionChange);
+    }
+    // 清理 DOM 引用
+    this.bubbleDom = null;
+    this.editorDom = null;
+    this.bubbleTop = null;
+    this.bubbleBottom = null;
   }
 }

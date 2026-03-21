@@ -36,7 +36,7 @@ export default class Toc {
       this.updateTocList();
       this.$switchModel(this.model);
     }, 300);
-    this.editor.on('change', (codemirror, evt) => {
+    this.$cherry.$event.on('afterChange', () => {
       clearTimeout(this.timer);
       this.timer = setTimeout(() => {
         this.updateTocList();
@@ -132,7 +132,7 @@ export default class Toc {
         this.$switchModel(this.model);
       });
     }
-    this.editor.on('scroll', (codemirror, evt) => {
+    this.$cherry.$event.on('onScroll', () => {
       this.updateTocList(true);
     });
     const scrollDom = this.$cherry.previewer.getDomCanScroll();

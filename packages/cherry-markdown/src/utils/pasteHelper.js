@@ -27,16 +27,18 @@ const pasteHelper = {
   /**
    * 核心方法，粘贴后展示切换按钮
    * 只有粘贴html时才会出现切换按钮
-   * @param {Object} editor 编辑器对象
-   * @param {string} html html里的纯文本内容
-   * @param {string} md html对应的markdown源码
-   * @returns
+   * @param {Object} cherry - Cherry 编辑器实例
+   * @param {number} currentCursor - 当前光标位置（文档偏移量）
+   * @param {Object} editorView - 编辑器视图（CM6 适配器）
+   * @param {string} html - HTML 的纯文本内容
+   * @param {string} md - HTML 对应的 Markdown 源码
+   * @returns {void}
    */
-  showSwitchBtnAfterPasteHtml(locale, editor, html, md) {
+  showSwitchBtnAfterPasteHtml(cherry, currentCursor, editorView, html, md) {
     if (html.trim() === md.trim()) {
       return;
     }
-    this.init(locale, editor, html, md);
+    this.init(cherry, currentCursor, editorView, html, md);
     this.bindListener();
     this.initBubble();
     this.showBubble();
@@ -46,11 +48,21 @@ const pasteHelper = {
     }
   },
 
-  init(locale, editor, html, md) {
+  /**
+   * 初始化粘贴助手的内部状态
+   * @param {Object} cherry - Cherry 编辑器实例
+   * @param {number} currentCursor - 当前光标位置（文档偏移量）
+   * @param {Object} editorView - 编辑器视图
+   * @param {string} html - HTML 的纯文本内容
+   * @param {string} md - HTML 对应的 Markdown 源码
+   */
+  init(cherry, currentCursor, editorView, html, md) {
+    this.cherry = cherry;
     this.html = html;
     this.md = md;
-    this.codemirror = editor;
-    this.locale = locale;
+    this.currentCursor = currentCursor;
+    this.codemirror = editorView;
+    this.locale = cherry.locale;
   },
 
   /**
@@ -74,26 +86,40 @@ const pasteHelper = {
   },
 
   /**
+   * 在编辑器中自动选中刚刚粘贴的内容
+   * CM6: currentCursor 和 getCursor() 都是文档偏移量
+   */
+  setSelection() {
+    const end = this.codemirror.getCursor();
+    const begin = this.currentCursor;
+    // CM6: setSelection(anchor, head) 使用文档偏移量
+    this.codemirror.setSelection(begin, end);
+  },
+  /**
    * 绑定事件
-   * 当编辑器选中区域改变、内容改变时，隐藏切换按钮
-   * 当编辑器滚动时，实时更新切换按钮的位置
+   * 当编辑器选中区域改变、内容改变时、滚动时处理气泡位置
+   * CodeMirror 6: 使用适配器的事件监听
    * @returns null
    */
   bindListener() {
     if (!this.hasBindListener) {
       this.hasBindListener = true;
+
+      // 使用 CM6 适配器的 on 方法监听事件
+      this.codemirror.on('change', () => {
+        this.hideBubble();
+      });
+
+      this.codemirror.on('cursorActivity', () => {
+        this.hideBubble();
+      });
+
+      this.codemirror.on('scroll', () => {
+        this.updatePositionWhenScroll();
+      });
     } else {
       return true;
     }
-    this.codemirror.on('beforeSelectionChange', (codemirror, info) => {
-      this.hideBubble();
-    });
-    this.codemirror.on('beforeChange', (codemirror, info) => {
-      this.hideBubble();
-    });
-    this.codemirror.on('scroll', (codemirror) => {
-      this.updatePositionWhenScroll();
-    });
   },
 
   isHidden() {
@@ -130,7 +156,8 @@ const pasteHelper = {
   },
 
   getScrollTop() {
-    return this.codemirror.getScrollInfo().top;
+    // CodeMirror 6: 从 scrollDOM 获取滚动位置
+    return this.codemirror.scrollDOM?.scrollTop || 0;
   },
 
   showBubble() {
@@ -142,8 +169,11 @@ const pasteHelper = {
     }
     /**
      * @type {HTMLDivElement}
+     * CodeMirror 6: 使用 view.dom 获取编辑器 DOM 元素
      */
-    const codemirrorWrapper = this.codemirror.getWrapperElement();
+    const codemirrorWrapper = this.codemirror.view?.dom || this.codemirror.scrollDOM?.parentElement;
+    if (!codemirrorWrapper) return;
+
     const maxTop = codemirrorWrapper.clientHeight - this.bubbleDom.getBoundingClientRect().height - SAFE_AREA_MARGIN;
 
     if (top > maxTop) {
@@ -181,7 +211,11 @@ const pasteHelper = {
     this.bubbleDom.appendChild(switchText);
     this.bubbleDom.appendChild(switchMd);
     this.bubbleDom.setAttribute('data-type', 'md');
-    this.codemirror.getWrapperElement().appendChild(this.bubbleDom);
+    // CodeMirror 6: 使用 view.dom 或 scrollDOM 获取编辑器容器
+    const editorContainer = this.codemirror.view?.dom || this.codemirror.scrollDOM?.parentElement;
+    if (editorContainer) {
+      editorContainer.appendChild(this.bubbleDom);
+    }
     this.switchMd.addEventListener('click', this.switchMDClick.bind(this));
     this.switchText.addEventListener('click', this.switchTextClick.bind(this));
 
@@ -203,7 +237,9 @@ const pasteHelper = {
     }
     this.noHide = true;
     this.bubbleDom.setAttribute('data-type', 'md');
-    this.codemirror.doc.replaceSelection(this.md, 'around');
+    // CodeMirror 6: 使用 replaceSelection 替代 doc.replaceSelection
+    this.codemirror.replaceSelection(this.md);
+    this.setSelection();
     this.showBubble();
     this.switchMd.classList.add('active');
     this.switchText.classList.remove('active');
@@ -217,7 +253,9 @@ const pasteHelper = {
     // }
     this.noHide = true;
     this.bubbleDom.setAttribute('data-type', 'text');
-    this.codemirror.doc.replaceSelection(this.html, 'around');
+    // CodeMirror 6: 使用 replaceSelection 替代 doc.replaceSelection
+    this.codemirror.replaceSelection(this.html);
+    this.setSelection();
     this.showBubble();
     this.switchText.classList.add('active');
     this.switchMd.classList.remove('active');
@@ -225,7 +263,15 @@ const pasteHelper = {
   },
 
   getLastSelectedPosition() {
-    const selectedObjs = Array.from(this.codemirror.getWrapperElement().getElementsByClassName('CodeMirror-selected'));
+    // CodeMirror 6: 选中的元素类名为 cm-selectionBackground
+    const editorContainer = this.codemirror.view?.dom || this.codemirror.scrollDOM?.parentElement;
+    if (!editorContainer) {
+      this.hideBubble();
+      return {};
+    }
+
+    const selectedObjs = Array.from(editorContainer.getElementsByClassName('cm-selectionBackground') || []);
+
     let width = 0;
     let top = 0;
     if (selectedObjs.length <= 0) {

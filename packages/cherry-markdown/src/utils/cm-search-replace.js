@@ -30,29 +30,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// let Search;
-// export function initSearchHelper(cm) {
-//   Search = new SearchBox(cm);
-// }
-
-// export function isVisible() {
-//   return Search.isVisible();
-// }
-
-// export function showSearchBox(selection) {
-//   Search.show(selection, false);
-// }
-
-// export function hideSearchBox() {
-//   Search.hide();
-// }
-
 export default class SearchBox {
   /**
    * @param {object} $cherry Cherry实例
    */
   constructor($cherry) {
     this.$cherry = $cherry;
+    this.searchState = {
+      posFrom: null,
+      posTo: null,
+      lastQuery: null,
+      query: null,
+      overlay: null,
+      annotate: null,
+    };
   }
 
   init(cm) {
@@ -89,52 +80,86 @@ export default class SearchBox {
       },
     };
 
-    el.addEventListener('mousedown', (e) => {
+    // 保存事件处理器引用，便于 destroy 时移除
+    this.boundMousedownHandler = (e) => {
       setTimeout(() => {
         this.activeInput.focus();
       }, 0);
-
       e.stopPropagation();
-    });
+    };
 
-    el.addEventListener('click', (e) => {
+    this.boundClickHandler = (e) => {
       const t = e.target || e.srcElement;
       // @ts-ignore
       const action = t.getAttribute('action');
       if (action && this[action]) this[action]();
       else if (this.commands[action]) this.commands[action]();
       e.stopPropagation();
-    });
+    };
 
-    this.searchInput.addEventListener('input', () => {
+    this.boundSearchInputHandler = () => {
       this.find(false, false);
-    });
+    };
 
-    this.searchInput.addEventListener('focus', () => {
+    this.boundSearchInputFocusHandler = () => {
       this.activeInput = this.searchInput;
-    });
+    };
 
-    this.replaceInput.addEventListener('focus', () => {
+    this.boundReplaceInputFocusHandler = () => {
       this.activeInput = this.replaceInput;
-    });
+    };
+
+    el.addEventListener('mousedown', this.boundMousedownHandler);
+    el.addEventListener('click', this.boundClickHandler);
+    this.searchInput.addEventListener('input', this.boundSearchInputHandler);
+    this.searchInput.addEventListener('focus', this.boundSearchInputFocusHandler);
+    this.replaceInput.addEventListener('focus', this.boundReplaceInputFocusHandler);
+  }
+
+  /**
+   * 销毁 SearchBox 实例，清理事件监听器
+   * 必须调用此方法以避免内存泄漏
+   */
+  destroy() {
+    if (this.element) {
+      this.element.removeEventListener('mousedown', this.boundMousedownHandler);
+      this.element.removeEventListener('click', this.boundClickHandler);
+    }
+    if (this.searchInput) {
+      this.searchInput.removeEventListener('input', this.boundSearchInputHandler);
+      this.searchInput.removeEventListener('focus', this.boundSearchInputFocusHandler);
+    }
+    if (this.replaceInput) {
+      this.replaceInput.removeEventListener('focus', this.boundReplaceInputFocusHandler);
+    }
+    if (this.$cherry && this.$cherry.$event && this.boundTogglePreviewHandler) {
+      this.$cherry.$event.off('togglePreviewHidden', this.boundTogglePreviewHandler);
+    }
+    if (this.element && this.element.parentNode) {
+      this.element.parentNode.removeChild(this.element);
+    }
+    this.element = null;
+    this.cm = null;
+    this.$cherry = null;
+    this.searchInput = null;
+    this.replaceInput = null;
   }
 
   // 监听预览区域是否隐藏
   addEventListeners() {
     const searchElement = /** @type {HTMLElement} */ (this.element);
-    this.$cherry.$event.on('togglePreviewHidden', (state) => {
+    this.boundTogglePreviewHandler = (state) => {
       if (state) {
-        // 预览区域隐藏（悬浮），增大搜索框右侧间距，避免与侧边栏重叠
         searchElement.style.right = '48px';
       } else {
-        // 预览区域固定在右侧，取消右侧增大的边距
         searchElement.style.right = '';
       }
-    });
+    };
+    this.$cherry.$event.on('togglePreviewHidden', this.boundTogglePreviewHandler);
   }
 
   addHtml() {
-    const el = this.cm.getWrapperElement();
+    const el = this.cm.view?.dom || document.body;
     const div = document.createElement('div');
     const html = [
       '<div class="ace_search right">',
@@ -262,7 +287,7 @@ export default class SearchBox {
     this.find(false, false);
   }
 
-  find(skipCurrent, backwards) {
+  find(skipCurrent, backwards, scrollIntoView = true) {
     const { value } = this.searchInput;
     const options = {
       skipCurrent,
@@ -272,9 +297,8 @@ export default class SearchBox {
       wholeWord: this.wholeWordOption.checked,
     };
 
-    this.$find(value, options, (searchCursor) => {
-      const current = searchCursor.matches(false, searchCursor.from());
-      this.cm.setSelection(current.from, current.to);
+    this.$find(value, options, (start, end) => {
+      this.cm.setSelection(start, end, { userEvent: 'search.select', scrollIntoView });
     });
   }
 
@@ -285,64 +309,93 @@ export default class SearchBox {
       this.updateCount();
       return;
     }
-    let done;
-    let next;
-    let prev;
-    let position;
-    let val = value;
+
     const o = options;
-    let is = true;
     const { caseSensitive } = o;
     const { regExp } = o;
     const { wholeWord } = o;
 
-    if (regExp) {
-      // eslint-disable-next-line no-useless-escape
-      val = val.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+    let searchStr = value;
+    if (!regExp) {
+      searchStr = value.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
     }
     if (wholeWord) {
-      if (caseSensitive) {
-        val = RegExp(`\\b${val}\\b`);
-      } else {
-        val = RegExp(`\\b${val}\\b`, 'i');
-      }
+      searchStr = `\\b${searchStr}\\b`;
     }
-    if (regExp) {
-      val = RegExp(val);
-    }
+
     this.clearSearch(cm);
-    this.doSearch(cm, val, caseSensitive);
+    this.doSearch(cm, searchStr, caseSensitive);
     this.updateCount();
-    if (o.backwards) position = o.skipCurrent ? 'from' : 'to';
-    else position = o.skipCurrent ? 'to' : 'from';
 
-    const cursor = cm.getCursor(position);
-    const searchCursor = cm.getSearchCursor(val, cursor, !caseSensitive);
+    const { doc } = cm.state;
+    const text = doc.toString();
+    const flags = caseSensitive ? 'g' : 'gi';
 
-    ((next = searchCursor.findNext.bind(searchCursor)), (prev = searchCursor.findPrevious.bind(searchCursor)));
+    let searchRegex;
+    try {
+      searchRegex = new RegExp(searchStr, flags);
+    } catch (e) {
+      setCssClass(this.searchBox, 'ace_nomatch', true);
+      return;
+    }
 
-    if (o.backwards && !prev()) {
-      is = next();
+    const startPos = o.skipCurrent ? cm.state.selection.main.head : cm.state.selection.main.anchor;
+    let match;
+    let found = false;
 
-      if (is) {
-        cm.setCursor(cm.doc.size - 1, 0);
-        this.$find(value, options, callback);
-        done = true;
+    searchRegex.lastIndex = 0;
+
+    if (o.backwards) {
+      // 反向搜索：查找光标之前的最后一个匹配项
+      const beforeText = text.slice(0, startPos);
+      let lastMatch = null;
+      while ((match = searchRegex.exec(beforeText)) !== null) {
+        lastMatch = match;
       }
-    } else if (!o.backwards && !next()) {
-      is = prev();
+      if (lastMatch) {
+        const from = lastMatch.index;
+        const to = from + lastMatch[0].length;
+        callback(from, to);
+        found = true;
+      } else {
+        // 未找到则从文档末尾开始搜索
+        searchRegex.lastIndex = 0;
+        lastMatch = null;
+        while ((match = searchRegex.exec(text)) !== null) {
+          lastMatch = match;
+        }
+        if (lastMatch) {
+          const from = lastMatch.index;
+          const to = from + lastMatch[0].length;
+          callback(from, to);
+          found = true;
+        }
+      }
+    } else {
+      // 前向搜索
+      const afterText = text.slice(startPos);
+      match = searchRegex.exec(afterText);
 
-      if (is) {
-        cm.setCursor(0, 0);
-        this.$find(value, options, callback);
-        done = true;
+      if (match) {
+        const from = startPos + match.index;
+        const to = from + match[0].length;
+        callback(from, to);
+        found = true;
+      } else {
+        // 未找到则从头开始
+        searchRegex.lastIndex = 0;
+        match = searchRegex.exec(text);
+        if (match) {
+          const from = match.index;
+          const to = from + match[0].length;
+          callback(from, to);
+          found = true;
+        }
       }
     }
 
-    const noMatch = !is && this.searchInput.value;
+    const noMatch = !found && this.searchInput.value;
     setCssClass(this.searchBox, 'ace_nomatch', noMatch);
-
-    if (!done && is) callback(searchCursor);
   }
 
   findNext() {
@@ -354,21 +407,18 @@ export default class SearchBox {
   }
 
   findAll() {
-    const { cm } = this;
     const { value } = this.searchInput;
-    let range;
-    const noMatch = !range && this.searchInput.value;
+    const hasMatches = value && this.searchInput.value;
+    const noMatch = !hasMatches;
 
     setCssClass(this.searchBox, 'ace_nomatch', noMatch);
-
-    if (cm.showMatchesOnScrollbar) cm.showMatchesOnScrollbar(value);
 
     this.hide();
   }
 
   replace() {
     const { cm } = this;
-    const readOnly = cm.getOption('readOnly');
+    const readOnly = cm.getOption ? cm.getOption('readOnly') : !cm.view?.contentDOM?.isContentEditable;
     const isSelection = !!cm.getSelection();
     if (!readOnly && isSelection) cm.replaceSelection(this.replaceInput.value, 'start');
     this.updateCount();
@@ -376,7 +426,7 @@ export default class SearchBox {
 
   replaceAndFindNext() {
     const { cm } = this;
-    const readOnly = cm.getOption('readOnly');
+    const readOnly = cm.getOption ? cm.getOption('readOnly') : !cm.view?.contentDOM?.isContentEditable;
 
     if (!readOnly) {
       this.replace();
@@ -385,41 +435,118 @@ export default class SearchBox {
   }
 
   replaceAll() {
-    let value;
-    let cursor;
     const { cm } = this;
     const from = this.searchInput.value;
     const to = this.replaceInput.value;
-    let reg = RegExp(from, this.caseSensitiveOption.checked ? 'g' : 'gi');
 
-    if (this.wholeWordOption.checked && !this.regExpOption.checked) {
-      if (this.caseSensitiveOption.checked) {
-        reg = RegExp(`\\b${from}\\b`, 'g');
-      } else {
-        reg = RegExp(`\\b${from}\\b`, 'gi');
+    let reg;
+    try {
+      reg = RegExp(from, this.caseSensitiveOption.checked ? 'g' : 'gi');
+
+      if (this.wholeWordOption.checked && !this.regExpOption.checked) {
+        if (this.caseSensitiveOption.checked) {
+          reg = RegExp(`\\b${from}\\b`, 'g');
+        } else {
+          reg = RegExp(`\\b${from}\\b`, 'gi');
+        }
       }
+    } catch (e) {
+      setCssClass(this.searchBox, 'ace_nomatch', true);
+      return;
     }
 
-    if (!cm.getOption('readOnly') && cm.getSelection()) {
-      cursor = cm.getCursor();
-      value = cm.getValue();
-      value = value.replace(reg, to);
+    const { view } = cm;
+    if (!view) return;
 
-      cm.setValue(value);
-      cm.setCursor(cursor);
+    const readOnly = cm.getOption ? cm.getOption('readOnly') : !view.contentDOM?.isContentEditable;
+    if (readOnly) {
+      this.updateCount();
+      return;
     }
+
+    const text = view.state.doc.toString();
+
+    let newText;
+    try {
+      newText = text.replace(reg, to);
+    } catch (e) {
+      console.warn('Replace all failed:', e);
+      this.updateCount();
+      return;
+    }
+
+    if (newText === text) {
+      this.updateCount();
+      return;
+    }
+
+    // 计算光标新位置 - 追踪光标之前所有匹配的位置变化
+    const cursorPos = view.state.selection.main.head;
+    let newCursorPos = cursorPos;
+    let offset = 0;
+
+    reg.lastIndex = 0;
+    let match;
+    while ((match = reg.exec(text)) !== null) {
+      if (match[0].length === 0) {
+        reg.lastIndex += 1;
+        continue;
+      }
+      const matchStart = match.index;
+      const matchEnd = matchStart + match[0].length;
+
+      if (matchStart >= cursorPos) {
+        break;
+      }
+
+      // 处理特殊替换标记：$$ (转义$), $& (整个匹配), $1-$9 (捕获组)
+      let actualReplacement = to;
+      if (to.includes('$')) {
+        const currentMatch = match;
+        actualReplacement = to
+          .replace(/\$\$/g, '\x00ESCAPED_DOLLAR\x00')
+          .replace(/\$&/g, currentMatch[0])
+          .replace(/\$(\d)/g, (_, num) => currentMatch[parseInt(num, 10)] || '')
+          .replace(/\$`/g, text.substring(0, matchStart))
+          .replace(/\$'/g, text.substring(matchEnd))
+          .replace(/\x00ESCAPED_DOLLAR\x00/g, '$');
+      }
+
+      const replacementLength = actualReplacement.length;
+      const delta = replacementLength - match[0].length;
+      offset += delta;
+    }
+
+    newCursorPos = Math.max(0, Math.min(cursorPos + offset, newText.length));
+
+    try {
+      view.dispatch({
+        changes: { from: 0, to: text.length, insert: newText },
+        selection: { anchor: newCursorPos },
+      });
+    } catch (e) {
+      console.error('Failed to dispatch replace all:', e);
+      setCssClass(this.searchBox, 'ace_nomatch', true);
+      this.updateCount();
+      return;
+    }
+
     this.updateCount();
   }
 
   toggleReplace() {
     const { cm } = this;
-    const cmEle = cm.display.wrapper;
-    if (cmEle.parentElement.querySelector('[action=toggleReplace]').innerText === '+') {
-      cmEle.parentElement.querySelector('[action=toggleReplace]').innerText = '-';
+    const cmEle = cm.view?.dom || document.body;
+    const parent = cmEle.parentElement || document.body;
+    const toggleBtn = parent.querySelector('[action=toggleReplace]');
+    if (!toggleBtn) return;
+
+    if (toggleBtn.innerText === '+') {
+      toggleBtn.innerText = '-';
       this.replaceBox.style.display = '';
       this.isReplace = true;
     } else {
-      cmEle.parentElement.querySelector('[action=toggleReplace]').innerText = '+';
+      toggleBtn.innerText = '+';
       this.replaceBox.style.display = 'none';
       this.isReplace = false;
     }
@@ -494,15 +621,16 @@ export default class SearchBox {
   startSearch(cm, state, query, caseSensitive) {
     state.queryText = query;
     state.query = this.parseQuery(query);
-    cm.removeOverlay(state.overlay, this.queryCaseInsensitive(state.query, caseSensitive));
-    state.overlay = this.searchOverlay(state.query, this.queryCaseInsensitive(state.query, caseSensitive));
-    cm.addOverlay(state.overlay);
-    if (cm.showMatchesOnScrollbar) {
-      if (state.annotate) {
-        state.annotate.clear();
-        state.annotate = null;
+
+    if (cm.setSearchQuery) {
+      try {
+        // 检查是否已包含正则特殊字符，避免重复转义
+        const containsRegexChars = /\\[bBdDwWsStrnvf0.\\]/.test(query);
+        const isRegex = this.regExpOption?.checked || containsRegexChars;
+        cm.setSearchQuery(query, caseSensitive, isRegex);
+      } catch (e) {
+        console.warn('setSearchQuery failed:', e);
       }
-      state.annotate = cm.showMatchesOnScrollbar(state.query, this.queryCaseInsensitive(state.query, caseSensitive));
     }
   }
 
@@ -510,91 +638,79 @@ export default class SearchBox {
     return typeof query === 'string' && !caseSensitive;
   }
 
-  searchOverlay(query, caseInsensitive) {
-    let $query = query;
-    if (typeof query === 'string')
-      // eslint-disable-next-line no-useless-escape
-      $query = new RegExp(query.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&'), caseInsensitive ? 'gi' : 'g');
-    else if (!query.global) $query = new RegExp(query.source, query.ignoreCase ? 'gi' : 'g');
-
-    return {
-      token(stream) {
-        $query.lastIndex = stream.pos;
-        const match = $query.exec(stream.string);
-        if (match && match.index === stream.pos) {
-          stream.pos += match[0].length || 1;
-          return 'searching';
-        }
-        if (match) {
-          stream.pos = match.index;
-        } else {
-          stream.skipToEnd();
-        }
-      },
-    };
-  }
-
   getSearchState(cm) {
-    return (
-      cm.state.search ||
-      (cm.state.search = {
-        posFrom: null,
-        posTo: null,
-        lastQuery: null,
-        query: null,
-        overlay: null,
-      })
-    );
+    return this.searchState;
   }
 
   clearSearch(cm) {
-    cm.operation(() => {
-      const state = this.getSearchState(cm);
-      state.lastQuery = state.query;
-      if (!state.query) return;
-      state.query = null;
-      state.queryText = null;
-      cm.removeOverlay(state.overlay);
-      if (state.annotate) {
-        state.annotate.clear();
-        state.annotate = null;
+    if (cm.clearSearchQuery) {
+      try {
+        cm.clearSearchQuery();
+      } catch (e) {
+        console.warn('clearSearchQuery failed:', e);
       }
-    });
+    }
+
+    const state = this.getSearchState(cm);
+    state.lastQuery = state.query;
+    if (!state.query) return;
+    state.query = null;
+    state.queryText = null;
+
+    if (state.annotate) {
+      state.annotate.clear();
+      state.annotate = null;
+    }
   }
 
   updateCount() {
     const { cm } = this;
-    let val = this.searchInput.value;
-    let matches = [];
+    const val = this.searchInput.value;
+    let count = 0;
+
     if (val) {
-      // eslint-disable-next-line no-useless-escape
-      val = val.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+      let searchVal = val;
+      if (!this.regExpOption.checked) {
+        searchVal = val.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
+      }
+
       let reg;
-      if (this.caseSensitiveOption.checked) {
-        reg = RegExp(val, 'g');
-      } else {
-        reg = RegExp(val, 'gi');
-      }
-      if (this.wholeWordOption.checked) {
-        if (this.caseSensitiveOption.checked) {
-          reg = RegExp(`\\b${val}\\b`, 'g');
+      try {
+        if (this.wholeWordOption.checked) {
+          if (this.caseSensitiveOption.checked) {
+            reg = RegExp(`\\b${searchVal}\\b`, 'g');
+          } else {
+            reg = RegExp(`\\b${searchVal}\\b`, 'gi');
+          }
         } else {
-          reg = RegExp(`\\b${val}\\b`, 'gi');
+          if (this.caseSensitiveOption.checked) {
+            reg = RegExp(searchVal, 'g');
+          } else {
+            reg = RegExp(searchVal, 'gi');
+          }
         }
+
+        // 使用搜索游标迭代计数（对大文件性能更好）
+        const cursor = cm.getSearchCursor(reg, 0, !this.caseSensitiveOption.checked);
+        while (cursor.findNext()) {
+          count += 1;
+          if (count > 9999) {
+            count = 10000;
+            break;
+          }
+        }
+      } catch (e) {
+        count = 0;
       }
-      if (this.regExpOption.checked) {
-        reg = RegExp(val, 'gi');
-      }
-      matches = cm.getValue().match(reg);
     }
-    const count = matches ? matches.length : 0;
-    const cmEle = cm.display.wrapper;
-    const countEle = cmEle.parentElement.querySelector('.ace_search_counter');
+    const cmEle = cm.view?.dom || document.body;
+    const parent = cmEle.parentElement || document.body;
+    const countEle = parent.querySelector('.ace_search_counter');
     if (countEle) {
       countEle.innerText = `${count} ${this.$cherry.locale.matchesFoundText}`;
     }
     if (count === 0) {
-      cm.setSelection({ ch: 0, line: 0 }, { ch: 0, line: 0 });
+      cm.setSelection(0, 0, { userEvent: 'search.select' });
     }
   }
 
@@ -602,11 +718,9 @@ export default class SearchBox {
   updateLocaleStrings() {
     const { element, searchInput, replaceInput } = this;
     if (element) {
-      const htmlElement = /** @type {HTMLElement} */ (element); // 对解构出的 element 进行类型断言
-      // 更新输入框placeholder
+      const htmlElement = /** @type {HTMLElement} */ (element);
       searchInput.setAttribute('placeholder', this.$cherry.locale.searchFor);
       replaceInput.setAttribute('placeholder', this.$cherry.locale.replaceWith);
-      // 更新按钮title描述
       htmlElement.querySelector('.ace_searchbtn_close').setAttribute('title', this.$cherry.locale.close);
       htmlElement.querySelector('[action="findNext"]').setAttribute('title', this.$cherry.locale.nextMatch);
       htmlElement.querySelector('[action="findPrev"]').setAttribute('title', this.$cherry.locale.previousMatch);
@@ -620,7 +734,6 @@ export default class SearchBox {
       htmlElement
         .querySelector('[action="toggleWholeWords"]')
         .setAttribute('title', this.$cherry.locale.wholeWordSearch);
-      // 更新计数器文本
       this.updateCount();
     }
   }

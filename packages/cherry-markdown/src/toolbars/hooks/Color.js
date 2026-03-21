@@ -37,7 +37,7 @@ export default class Color extends MenuBase {
    */
   onClick(selection, shortKey = '', event) {
     if (this.hasCacheOnce() || this.$testIsShortKey(shortKey)) {
-      const $selection = getSelection(this.editor.editor, selection) || this.locale.color;
+      const $selection = getSelection(this.editor.editor.view, selection) || this.locale.color;
 
       const colorInfo = this.$getTypeAndColor(shortKey);
 

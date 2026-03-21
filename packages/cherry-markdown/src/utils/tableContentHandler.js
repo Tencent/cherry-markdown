@@ -323,6 +323,7 @@ export default class TableHandler {
       offsetInfo = this.$getTdOffset(tableCode.code, selectTdInfo.isTHead, selectTdInfo.trIndex, selectTdInfo.tdIndex);
     }
     const { preLine, preCh, plusCh, currentTd } = offsetInfo;
+    const { doc } = this.codeMirror.view.state;
     if (type === 'table') {
       const endLine = beginLine + tableCode.code.match(/\n/g).length;
       const endCh = tableCode.code.match(/[^\n]+\n*$/)[0].length;
@@ -336,7 +337,11 @@ export default class TableHandler {
         { line: beginLine + preLine, ch: preCh + plusCh },
       ];
     }
-    select && this.codeMirror.setSelection(...this.tableEditor.info.selection);
+    if (select) {
+      const from = doc.line(this.tableEditor.info.selection[0].line + 1).from + this.tableEditor.info.selection[0].ch;
+      const to = doc.line(this.tableEditor.info.selection[1].line + 1).from + this.tableEditor.info.selection[1].ch;
+      this.codeMirror.setSelection(from, to);
+    }
     this.tableEditor.info.code = currentTd;
   }
 
@@ -1103,7 +1108,9 @@ export default class TableHandler {
       return;
     }
 
-    this.codeMirror.replaceRange(newRow, { line: insertLine, ch: 0 });
+    const { doc } = this.codeMirror.view.state;
+    const offset = doc.line(insertLine + 1).from;
+    this.codeMirror.replaceRange(newRow, offset);
     this.$afterTableOperation();
   }
 

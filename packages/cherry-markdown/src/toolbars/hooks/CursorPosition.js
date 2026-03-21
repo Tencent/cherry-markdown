@@ -27,8 +27,27 @@ export default class CursorPosition extends MenuBase {
   }
 
   $updateCursorPosition() {
-    const { line, ch } = this.$cherry.editor?.editor?.getCursor() || { line: 0, ch: 0 };
-    const selected = this.$cherry.editor?.editor?.getSelection() || '';
+    const editor = this.$cherry.editor?.editor;
+    let line = 0;
+    let ch = 0;
+    
+    if (editor) {
+      const cursor = editor.getCursor();
+      if (cursor !== null && cursor !== undefined) {
+        // CM6Adapter.getCursor() 返回文档偏移量，需要转换为行列
+        const cursorOffset = typeof cursor === 'number' ? cursor : 0;
+        const view = editor.view;
+        if (view) {
+          // CM6 的 doc.lineAt() 返回的 number 是 1-indexed
+          // 为保持与 Cherry 其他 API 一致（使用 0-based），需要转换回 0-indexed
+          const docLine = view.state.doc.lineAt(cursorOffset);
+          line = docLine.number - 1;
+          ch = cursorOffset - docLine.from;
+        }
+      }
+    }
+    
+    const selected = (editor ? editor.getSelection() : null) || '';
     this.btnDom.innerHTML = `Ln ${line}, Col ${ch}${selected ? ` (${selected.length} selected)` : ''}`;
   }
 

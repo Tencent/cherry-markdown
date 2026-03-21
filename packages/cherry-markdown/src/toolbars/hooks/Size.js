@@ -82,11 +82,12 @@ export default class Size extends MenuBase {
 
   onClick(selection, shortKey = '17') {
     const size = this.$getSizeByShortKey(shortKey);
-    let $selection = getSelection(this.editor.editor, selection) || '字号';
+    let $selection = getSelection(this.editor.editor.view, selection) || '字号';
     // 如果选中的内容里有字号语法，则直接去掉该语法
     if (!this.isSelections && !this.$testIsSize($selection)) {
       this.getMoreSelection('!32 ', '!', () => {
-        const newSelection = this.editor.editor.getSelection();
+        const { from, to } = this.editor.editor.view.state.selection.main;
+        const newSelection = this.editor.editor.view.state.doc.sliceString(from, to);
         if (this.$testIsSize(newSelection)) {
           $selection = newSelection;
           return true;
