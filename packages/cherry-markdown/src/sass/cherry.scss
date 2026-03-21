@@ -844,52 +844,124 @@
   &.cherry-wysiwyg--hidden {
     display: none;
   }
+
+  /* 引用块样式 — 覆盖 Milkdown Crepe 默认样式，与预览区保持一致 */
+  blockquote {
+    padding: 10px 15px;
+    border-left: 10px solid var(--md-hr-border, var(--primary-color));
+    background: var(--md-blockquote-bg, rgba(102, 128, 153, 0.05));
+    color: var(--md-paragraph-color);
+    margin: 0 0 var(--spacing-lg, 16px);
+    box-sizing: border-box;
+    position: static;
+
+    &::before {
+      display: none;
+    }
+
+    p, blockquote, table, pre, ul, ol {
+      margin: 0;
+    }
+  }
 }
 
-/* WYSIWYG 脚注样式 — 与预览区视觉风格保持一致 */
+/* WYSIWYG 脚注样式 — ProseMirror Decoration 实现编号，与预览区一致 */
 .cherry-wysiwyg {
-  /* 脚注引用：上标数字，与预览区 sup.cherry-footnote-number 风格一致 */
+  /* "脚注"标题 — Widget Decoration 插入 */
+  .cherry-fn-title {
+    font-size: 20px;
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid var(--md-hr-border, #ccc);
+    margin-bottom: var(--spacing-lg, 16px);
+    color: var(--md-heading-color, var(--primary-color));
+    background-color: var(--md-inline-code-bg, #f6f8fa);
+    width: 60px;
+  }
+
+  /* 脚注引用：用 data-index 显示编号 [1] [2] */
   sup[data-type="footnote_reference"] {
-    font-size: 0.75em;
+    font-size: 0;
+    line-height: 0;
     vertical-align: super;
-    color: var(--md-link-color, var(--primary-color));
     cursor: pointer;
     padding: 0 1px;
-    &::before { content: '['; }
-    &::after { content: ']'; }
-    &:hover {
+
+    &[data-index]::before {
+      content: '[' attr(data-index) ']';
+      font-size: 0.75rem;
+      line-height: normal;
+      color: var(--md-link-color, var(--primary-color));
+    }
+
+    &:hover::before {
       color: var(--primary-color);
       text-decoration: underline;
     }
   }
 
-  /* 脚注定义：与预览区 .footnote 列表风格一致 */
+  /* 脚注定义：用 data-index 显示编号 + 虚线分隔 */
   dl[data-type="footnote_definition"] {
     color: var(--md-paragraph-color, #555);
-    margin-bottom: 16px;
+    margin-bottom: var(--spacing-lg, 16px);
     padding-bottom: 12px;
     border-bottom: 1px dotted var(--md-hr-border, #ccc);
 
     dt {
       display: inline;
       font-weight: normal;
-      color: var(--md-link-color, var(--primary-color));
       padding: 5px;
+      color: var(--md-link-color, var(--primary-color));
+
       &::before { content: '['; }
       &::after { content: '] '; }
+    }
+
+    /* 有 data-index 时，隐藏原始 label 并显示编号 */
+    &[data-index] dt {
+      font-size: 0;
+      &::before {
+        content: '[' attr(data-index) '] ';
+        font-size: 1rem;
+        color: var(--md-link-color, var(--primary-color));
+      }
+      &::after { content: none; }
     }
 
     dd {
       display: inline;
       margin-left: 0;
+
+      p { display: inline; margin: 0; }
     }
 
-    /* 第一个定义块上方加分隔线和标题，模拟预览区的 .footnote-title */
-    &:first-of-type {
-      margin-top: 50px;
-      padding-top: 20px;
-      border-top: 1px solid var(--md-hr-border, #ccc);
+    &.cherry-fn-highlight {
+      background: var(--md-blockquote-bg, rgba(102, 128, 153, 0.1));
+      transition: background 0.3s ease;
     }
+  }
+}
+
+/* WYSIWYG 脚注气泡卡片 */
+.cherry-fn-bubble {
+  position: absolute;
+  z-index: 100;
+  max-width: 400px;
+  padding: 12px 16px;
+  background: var(--base-previewer-bg, #fff);
+  border: 1px solid var(--md-hr-border, #ccc);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  .cherry-fn-bubble__title {
+    font-weight: bold;
+    color: var(--md-link-color, var(--primary-color));
+    margin-bottom: 8px;
+  }
+
+  .cherry-fn-bubble__content {
+    color: var(--md-paragraph-color);
+    line-height: 1.6;
   }
 }
 
