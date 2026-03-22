@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 import Logger from './Logger';
+import { setDrawioConfig } from './wysiwyg/nodes/drawio';
+import { setTocLocale } from './wysiwyg/nodes/toc';
 
 /**
  * WysiwygEditor - Milkdown Crepe 编辑器的包装类
@@ -57,6 +59,19 @@ export default class WysiwygEditor {
 
     const CrepeClass = wysiwygConfig.Crepe;
     const crepeOptions = wysiwygConfig.crepeOptions || {};
+
+    // Configure draw.io settings for the drawio NodeView
+    if (this.$cherry.options.drawioIframeUrl) {
+      setDrawioConfig({
+        iframeUrl: this.$cherry.options.drawioIframeUrl,
+        iframeStyle: this.$cherry.options.drawioIframeStyle || 'border: none;',
+      });
+    }
+
+    // Set locale for TOC node title
+    if (this.$cherry.locale) {
+      setTocLocale(this.$cherry.locale);
+    }
 
     // Auto-configure Mermaid preview if MermaidCodeEngine is registered
     this._configureMermaidPreview(crepeOptions);
@@ -393,6 +408,7 @@ export default class WysiwygEditor {
 
     // Strip Cherry link attributes like {target=_blank} that Milkdown doesn't understand
     // Skip !video/!audio attrs (e.g. {poster=...}) since they're handled by the media remark plugin
+    // Skip drawio attrs {data-type=drawio data-xml=...} since they're handled by the drawio remark plugin
     this._linkAttrMap.clear();
     processed = this._replaceOutsideCodeFence(
       processed,
@@ -400,6 +416,10 @@ export default class WysiwygEditor {
       (match, mediaPrefix, mediaType, text, url, attrs) => {
         if (mediaPrefix) {
           // !video or !audio — keep attrs intact for remark plugin
+          return match;
+        }
+        if (/data-type=drawio/.test(attrs)) {
+          // drawio image — keep attrs intact for remark plugin
           return match;
         }
         this._linkAttrMap.set(url, attrs);

@@ -11,6 +11,17 @@ const NODE_NAME = 'cherry_toc';
 const MDAST_TYPE = 'cherryToc';
 const tocPluginKey = new PluginKey('cherry-toc-refresh');
 
+// Module-level locale config, set by setTocLocale() before editor init
+let tocLocale = { toc: 'Table of Contents' };
+
+/**
+ * Set locale for TOC title. Call before editor initialization.
+ * @param {object} locale Cherry locale object (e.g. { toc: '目录' })
+ */
+export function setTocLocale(locale) {
+  if (locale) tocLocale = locale;
+}
+
 // ---------------------------------------------------------------------------
 // 1. Remark plugin: transform [[toc]] / [toc] paragraph into cherryToc node
 // ---------------------------------------------------------------------------
@@ -102,7 +113,7 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
 
   const titleEl = document.createElement('div');
   titleEl.className = 'toc-title';
-  titleEl.textContent = 'Table of Contents';
+  titleEl.textContent = tocLocale.toc || 'Table of Contents';
   dom.appendChild(titleEl);
 
   const listEl = document.createElement('ul');

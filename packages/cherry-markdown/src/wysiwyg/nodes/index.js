@@ -8,17 +8,19 @@ import { detail } from './detail';
 import { video, audio } from './media';
 import { footnote } from './footnote';
 import { toc } from './toc';
+import { drawio } from './drawio';
 
 export { rubySchema, insertRubyCommand, ruby } from './ruby';
 export { panelSchema, insertPanelCommand, panel } from './panel';
 export { detailSchema, insertDetailCommand, detail } from './detail';
 export { video, audio } from './media';
 export { footnote, insertFootnoteCommand } from './footnote';
-export { tocSchema, insertTocCommand, toc } from './toc';
+export { tocSchema, insertTocCommand, setTocLocale, toc } from './toc';
+export { drawioSchema, insertDrawioCommand, setDrawioConfig, drawio } from './drawio';
 
 /**
  * Returns all custom node plugins as a flat array, ready to be passed to editor.use()
  */
 export function getAllCustomNodePlugins() {
-  return [...ruby, ...panel, ...detail, ...video, ...audio, ...footnote, ...toc];
+  return [...ruby, ...panel, ...detail, ...video, ...audio, ...footnote, ...toc, ...drawio];
 }
