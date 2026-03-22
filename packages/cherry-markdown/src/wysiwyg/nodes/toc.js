@@ -148,7 +148,6 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
         const wasEditing = editingIndex;
         editingIndex = -1;
         syncToHeading(wasEditing, span.textContent);
-        // Re-render after sync to reflect any changes
         requestAnimationFrame(() => render());
       });
       span.addEventListener('keydown', (e) => {
@@ -162,6 +161,13 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
           span.blur();
         }
       });
+      // Only allow plain text paste, strip newlines
+      span.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text/plain').replace(/\n/g, ' ');
+        document.execCommand('insertText', false, text);
+      });
+      span.addEventListener('drop', (e) => e.preventDefault());
 
       li.appendChild(span);
       listEl.appendChild(li);
