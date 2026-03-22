@@ -325,6 +325,8 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
 
   function enterEditMode(contentEl, idx, originalText, clickX) {
     editingIndex = idx;
+    // Temporarily allow editing inside the outer non-editable container
+    dom.removeAttribute('contenteditable');
     contentEl.textContent = originalText;
     contentEl.contentEditable = 'true';
     contentEl.focus();
@@ -353,6 +355,7 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
 
     const handleBlur = () => {
       contentEl.contentEditable = 'false';
+      dom.contentEditable = 'false';
       contentEl.removeEventListener('blur', handleBlur);
       contentEl.removeEventListener('keydown', handleKey);
       contentEl.removeEventListener('paste', handlePaste);
