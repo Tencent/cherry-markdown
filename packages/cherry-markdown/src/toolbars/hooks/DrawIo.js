@@ -36,9 +36,19 @@ export default class DrawIo extends MenuBase {
       // 如果没有配置drawio的编辑页URL，则直接失效
       return selection;
     }
+    const isWysiwyg = this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor;
     if (this.hasCacheOnce()) {
       // @ts-ignore
       const { xmlData, base64 } = this.getAndCleanCacheOnce();
+      if (isWysiwyg) {
+        // WYSIWYG mode: insert via ProseMirror command
+        this.$cherry.wysiwygEditor.execCommand('draw.io', JSON.stringify({
+          desc: 'draw.io',
+          base64,
+          xmlData: encodeURI(xmlData),
+        }));
+        return selection;
+      }
       const begin = '![';
       const end = `](${base64}){data-type=drawio data-xml=${encodeURI(xmlData)}}`;
       this.registerAfterClickCb(() => {

@@ -33,6 +33,8 @@ import { imgConfig } from '@examples/assets/scripts/img-demo.js';
 import { aiChatScenario } from '@examples/assets/scripts/ai-chat-demo.js';
 
 const devCompatibleConfig = {
+  // Fix drawio iframe URL for Vite dev server (examples/ served via middleware)
+  drawioIframeUrl: '/examples/drawio_demo.html',
   callback: {
     urlProcessor: (url, type) => {
       console.log('urlProcessor', url, type);
@@ -55,6 +57,7 @@ const currentPath = window.__ORIGINAL_PATH__ || window.location.pathname;
 switch (currentPath) {
   case '/':
     basicConfig.callback.urlProcessor = devCompatibleConfig.callback.urlProcessor;
+    basicConfig.drawioIframeUrl = devCompatibleConfig.drawioIframeUrl;
     CONFIG = Object.assign({}, basicConfig, { value: indexMd });
     break;
   case '/h5.html':

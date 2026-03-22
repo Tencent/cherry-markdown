@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import path from 'path';
+import fs from 'fs';
 
 const paths = [
   '/index.html',
@@ -91,5 +92,24 @@ export default defineConfig({
     BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'development'),
     __EXAMPLES_PATH__: JSON.stringify(path.resolve(__dirname, '../../examples').replace(/\\/g, '/')),
   },
-  plugins: [spaFallback(), printLinks()],
+  plugins: [
+    // Serve examples/ directory at /examples/ for dev (e.g. drawio_demo.html)
+    {
+      name: 'serve-examples',
+      configureServer(server: any) {
+        const examplesDir = path.resolve(__dirname, '../../examples');
+        server.middlewares.use('/examples', (req: any, res: any, next: any) => {
+          const filePath = path.join(examplesDir, req.url.split('?')[0]);
+          if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+            res.writeHead(200);
+            fs.createReadStream(filePath).pipe(res);
+          } else {
+            next();
+          }
+        });
+      },
+    },
+    spaFallback(),
+    printLinks(),
+  ],
 });

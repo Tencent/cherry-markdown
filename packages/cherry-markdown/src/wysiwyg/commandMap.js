@@ -50,7 +50,7 @@ import {
   toggleBgColorCommand,
   toggleFontSizeCommand,
 } from './marks';
-import { insertRubyCommand, insertPanelCommand, insertDetailCommand, insertFootnoteCommand, insertTocCommand } from './nodes';
+import { insertRubyCommand, insertPanelCommand, insertDetailCommand, insertFootnoteCommand, insertTocCommand, insertDrawioCommand } from './nodes';
 
 /**
  * 从 Header 按钮的 shortKey 中解析标题级别
@@ -164,6 +164,17 @@ export function createWysiwygCommandMap() {
       toc: (ctx) => {
         const commands = ctx.get(commandsCtx);
         return commands.call(insertTocCommand.key);
+      },
+      // draw.io 按钮：接收 JSON 数据插入 drawio 节点
+      'draw.io': (ctx, shortKey) => {
+        if (!shortKey) return false;
+        try {
+          const data = JSON.parse(shortKey);
+          const commands = ctx.get(commandsCtx);
+          return commands.call(insertDrawioCommand.key, data);
+        } catch (e) {
+          return false;
+        }
       },
       checklist: (ctx) => {
         const commands = ctx.get(commandsCtx);
