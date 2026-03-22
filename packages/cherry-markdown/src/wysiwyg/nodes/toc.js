@@ -329,12 +329,15 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
         const indent = (targetLevel - 1) * 1.2;
         li.style.setProperty('--drop-indent', `${indent}em`);
 
-        if (e.clientY < mid) {
-          li.classList.add('cherry-toc-drop-above');
-          li.classList.remove('cherry-toc-drop-below');
-        } else {
+        // When target level is deeper than hovered heading, dropping on
+        // top-half means "first child of this heading" → show below indicator.
+        const isChild = targetLevel > h.level;
+        if (isChild || e.clientY >= mid) {
           li.classList.add('cherry-toc-drop-below');
           li.classList.remove('cherry-toc-drop-above');
+        } else {
+          li.classList.add('cherry-toc-drop-above');
+          li.classList.remove('cherry-toc-drop-below');
         }
       });
       li.addEventListener('dragleave', () => {
@@ -348,7 +351,13 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
         if (dragFromIndex < 0) return;
         const rect = li.getBoundingClientRect();
         const mid = rect.top + rect.height / 2;
-        const dropIdx = e.clientY < mid ? idx : idx + 1;
+        const targetLevel = dragFromLevel + dragLevelDelta;
+
+        // If target level is deeper than hovered heading, always insert
+        // after it (as its child), not before (which would land under
+        // the previous parent).
+        const isChild = targetLevel > h.level;
+        const dropIdx = (isChild || e.clientY >= mid) ? idx + 1 : idx;
         const adjustedTarget = dragFromIndex < dropIdx ? dropIdx - 1 : dropIdx;
         moveHeading(dragFromIndex, adjustedTarget, dragLevelDelta);
         dragFromIndex = -1;
