@@ -871,32 +871,58 @@
     width: auto;
   }
 
-  /* TOC 目录块样式 — 复用预览模式 .toc 样式，层级缩进 + 可编辑条目 */
+  /* TOC 目录块 — 完整复用预览模式 .toc 样式（因为 .cherry-wysiwyg 不在 .cherry-markdown 下） */
   .cherry-toc-block {
     user-select: none;
+    margin-bottom: var(--spacing-lg, 16px);
+    padding-left: 0;
+    background-color: var(--md-toc-bg, var(--oc-gray-0, #f8f9fa));
+    border: var(--border-width-1, 1px) solid var(--md-toc-border-color, var(--base-border-color, #dee2e6));
+    border-radius: var(--md-toc-radius, var(--radius-lg, 8px));
+    padding: var(--md-toc-padding, var(--spacing-lg, 16px));
+
+    .toc-title {
+      font-size: var(--font-size-2xl, 1.5em);
+      margin-bottom: var(--spacing-sm, 8px);
+      font-weight: var(--font-weight-bold, 700);
+      color: var(--md-toc-title-color, var(--md-heading-color));
+    }
 
     .cherry-toc-list {
       padding-left: 0;
       margin: 0;
     }
 
-    /* 层级缩进 — 按 heading level 递增 padding-left */
-    .toc-li-1 { padding-left: var(--md-toc-indicator-gap, 8px); }
-    .toc-li-2 { padding-left: calc(var(--md-toc-indicator-gap, 8px) + 1.2em); }
-    .toc-li-3 { padding-left: calc(var(--md-toc-indicator-gap, 8px) + 2.4em); }
-    .toc-li-4 { padding-left: calc(var(--md-toc-indicator-gap, 8px) + 3.6em); }
-    .toc-li-5 { padding-left: calc(var(--md-toc-indicator-gap, 8px) + 4.8em); }
-    .toc-li-6 { padding-left: calc(var(--md-toc-indicator-gap, 8px) + 6.0em); }
+    .toc-li {
+      list-style: none;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      border-left: var(--md-toc-indicator-width, 4px) solid var(--md-toc-indicator-color, var(--oc-gray-3, #dee2e6));
+      padding-left: var(--md-toc-indicator-gap, var(--spacing-lg, 16px));
+      transition: border-color 50ms ease-out;
 
-    /* 条目样式 — 复用预览模式 .toc a 的颜色/交互 */
+      &:hover {
+        border-left-color: var(--md-toc-indicator-hover-color, var(--primary-color));
+      }
+    }
+
+    /* 层级缩进 */
+    .toc-li-2 { padding-left: calc(var(--md-toc-indicator-gap, 16px) + 1.2em); }
+    .toc-li-3 { padding-left: calc(var(--md-toc-indicator-gap, 16px) + 2.4em); }
+    .toc-li-4 { padding-left: calc(var(--md-toc-indicator-gap, 16px) + 3.6em); }
+    .toc-li-5 { padding-left: calc(var(--md-toc-indicator-gap, 16px) + 4.8em); }
+    .toc-li-6 { padding-left: calc(var(--md-toc-indicator-gap, 16px) + 6.0em); }
+
+    /* 条目样式 — 与预览模式 .toc a 一致 */
     .cherry-toc-entry {
       display: block;
       cursor: text;
       outline: none;
       text-decoration: none;
-      color: var(--md-toc-link-color, var(--md-link-color, var(--primary-color)));
+      color: var(--md-toc-link-color, var(--md-paragraph-color));
       flex-grow: 1;
-      border-radius: var(--md-toc-link-radius, 4px);
+      border-radius: var(--md-toc-link-radius, var(--radius-md, 4px));
       padding: var(--spacing-xs, 2px) var(--spacing-sm, 4px);
       transition: color 50ms ease-out, background-color 50ms ease-out;
 
@@ -905,12 +931,12 @@
       }
 
       &:hover {
-        color: var(--md-toc-link-hover-color, var(--primary-color));
-        background-color: var(--md-toc-link-hover-bg, rgba(0,0,0,0.04));
+        color: var(--md-toc-link-hover-color, var(--md-link-hover-color));
+        background-color: var(--md-toc-link-hover-bg, var(--oc-gray-1, rgba(0,0,0,0.04)));
       }
 
       &:focus {
-        background-color: var(--md-toc-link-hover-bg, rgba(0,0,0,0.04));
+        background-color: var(--md-toc-link-hover-bg, var(--oc-gray-1, rgba(0,0,0,0.04)));
         box-shadow: 0 0 0 1px var(--md-toc-indicator-hover-color, var(--primary-color));
       }
     }
