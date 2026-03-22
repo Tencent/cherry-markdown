@@ -16,6 +16,7 @@
 import Logger from './Logger';
 import { setDrawioConfig } from './wysiwyg/nodes/drawio';
 import { setTocLocale } from './wysiwyg/nodes/toc';
+import { setCherryImageLocale } from './wysiwyg/nodes/cherryImage';
 
 /**
  * WysiwygEditor - Milkdown Crepe 编辑器的包装类
@@ -68,13 +69,18 @@ export default class WysiwygEditor {
       });
     }
 
-    // Set locale for TOC node title
+    // Set locale for TOC node title and image tool buttons
     if (this.$cherry.locale) {
       setTocLocale(this.$cherry.locale);
+      setCherryImageLocale(this.$cherry.locale);
     }
 
     // Auto-configure Mermaid preview if MermaidCodeEngine is registered
     this._configureMermaidPreview(crepeOptions);
+
+    // Disable Milkdown's built-in image-block; cherry_image custom node handles images instead
+    if (!crepeOptions.features) crepeOptions.features = {};
+    crepeOptions.features['image-block'] = false;
 
     this.crepe = new CrepeClass({
       root: this.editorDom,
@@ -268,17 +274,7 @@ export default class WysiwygEditor {
    */
   insertImage({ src, alt, title }) {
     if (!this.crepe || !this.initialized) return false;
-    const map = this.$cherry.options.wysiwyg?.commandMap;
-    if (!map?.commands?.image) return false;
-    try {
-      return this.crepe.editor.action((ctx) => {
-        const commands = ctx.get(map.commandsCtx);
-        return commands.call(map.commands.image.cmd.key, { src, alt: alt || '', title: title || '' });
-      });
-    } catch (e) {
-      Logger.warn('WYSIWYG insertImage failed', e);
-      return false;
-    }
+    return this.execCommand('image', JSON.stringify({ src, alt: alt || '', title: title || '' }));
   }
 
   /**

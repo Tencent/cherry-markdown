@@ -9,6 +9,7 @@ import { video, audio } from './media';
 import { footnote } from './footnote';
 import { toc } from './toc';
 import { drawio } from './drawio';
+import { cherryImage } from './cherryImage';
 
 export { rubySchema, insertRubyCommand, ruby } from './ruby';
 export { panelSchema, insertPanelCommand, panel } from './panel';
@@ -17,10 +18,11 @@ export { video, audio } from './media';
 export { footnote, insertFootnoteCommand } from './footnote';
 export { tocSchema, insertTocCommand, setTocLocale, toc } from './toc';
 export { drawioSchema, insertDrawioCommand, setDrawioConfig, drawio } from './drawio';
+export { cherryImageSchema, insertCherryImageCommand, setCherryImageLocale, cherryImage } from './cherryImage';
 
 /**
  * Returns all custom node plugins as a flat array, ready to be passed to editor.use()
  */
 export function getAllCustomNodePlugins() {
-  return [...ruby, ...panel, ...detail, ...video, ...audio, ...footnote, ...toc, ...drawio];
+  return [...ruby, ...panel, ...detail, ...video, ...audio, ...footnote, ...toc, ...drawio, ...cherryImage];
 }

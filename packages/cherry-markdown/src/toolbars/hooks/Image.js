@@ -40,11 +40,14 @@ export default class Image extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    // WYSIWYG 模式：使用 Milkdown insertImageCommand
+    // WYSIWYG 模式：使用 cherry_image 自定义节点
     if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
       const accept = this.$cherry.options?.fileTypeLimitMap?.image ?? '*';
       handleUpload(this.editor, 'image', accept, (name, url, params) => {
-        this.$cherry.wysiwygEditor.insertImage({ src: url, alt: params.name || name });
+        this.$cherry.wysiwygEditor.execCommand('image', JSON.stringify({
+          src: url,
+          alt: params.name || name,
+        }));
       });
       return false;
     }

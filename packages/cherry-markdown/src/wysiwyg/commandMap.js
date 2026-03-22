@@ -34,7 +34,6 @@ import {
   insertHrCommand,
   toggleLinkCommand,
   insertHardbreakCommand,
-  insertImageCommand,
   listItemSchema,
   wrapInBlockTypeCommand,
   clearTextInCurrentBlockCommand,
@@ -50,7 +49,7 @@ import {
   toggleBgColorCommand,
   toggleFontSizeCommand,
 } from './marks';
-import { insertRubyCommand, insertPanelCommand, insertDetailCommand, insertFootnoteCommand, insertTocCommand, insertDrawioCommand } from './nodes';
+import { insertRubyCommand, insertPanelCommand, insertDetailCommand, insertFootnoteCommand, insertTocCommand, insertDrawioCommand, insertCherryImageCommand } from './nodes';
 
 /**
  * 从 Header 按钮的 shortKey 中解析标题级别
@@ -97,7 +96,6 @@ export function createWysiwygCommandMap() {
       hr: { cmd: insertHrCommand },
       br: { cmd: insertHardbreakCommand },
       table: { cmd: insertTableCommand },
-      image: { cmd: insertImageCommand },
     },
     // 需要 Milkdown ctx 的复杂命令（接收 ctx 和 shortKey 参数）
     ctxCommands: {
@@ -164,6 +162,17 @@ export function createWysiwygCommandMap() {
       toc: (ctx) => {
         const commands = ctx.get(commandsCtx);
         return commands.call(insertTocCommand.key);
+      },
+      // 图片按钮：接收 JSON 数据插入 cherry_image 节点
+      image: (ctx, shortKey) => {
+        if (!shortKey) return false;
+        try {
+          const data = JSON.parse(shortKey);
+          const commands = ctx.get(commandsCtx);
+          return commands.call(insertCherryImageCommand.key, data);
+        } catch (e) {
+          return false;
+        }
       },
       // draw.io 按钮：接收 JSON 数据插入 drawio 节点
       'draw.io': (ctx, shortKey) => {
