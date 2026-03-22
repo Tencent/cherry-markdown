@@ -264,14 +264,17 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
       content.className = `level-${h.level} cherry-toc-entry`;
       const richContent = serializeInlineContent(h.node, view.state.schema);
       content.appendChild(richContent);
-      content.addEventListener('mousedown', (e) => e.stopPropagation());
-
-      // Click to edit as plain text
-      content.addEventListener('click', (e) => {
-        e.preventDefault();
+      content.addEventListener('mousedown', (e) => {
         e.stopPropagation();
         if (editingIndex === idx) return;
-        enterEditMode(content, idx, h.text);
+        // Record click X position for cursor placement after DOM swap
+        content._clickX = e.clientX;
+      });
+
+      content.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (editingIndex === idx) return;
+        enterEditMode(content, idx, h.text, content._clickX);
       });
 
       li.appendChild(content);
@@ -320,18 +323,33 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
     });
   }
 
-  function enterEditMode(contentEl, idx, originalText) {
+  function enterEditMode(contentEl, idx, originalText, clickX) {
     editingIndex = idx;
     contentEl.textContent = originalText;
     contentEl.contentEditable = 'true';
     contentEl.focus();
 
-    // Select all text
-    const range = document.createRange();
-    range.selectNodeContents(contentEl);
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
+    // Place cursor at click position using caretPositionFromPoint/caretRangeFromPoint
+    if (clickX !== undefined) {
+      const rect = contentEl.getBoundingClientRect();
+      const y = rect.top + rect.height / 2;
+      let caretRange;
+      if (document.caretPositionFromPoint) {
+        const pos = document.caretPositionFromPoint(clickX, y);
+        if (pos) {
+          caretRange = document.createRange();
+          caretRange.setStart(pos.offsetNode, pos.offset);
+          caretRange.collapse(true);
+        }
+      } else if (document.caretRangeFromPoint) {
+        caretRange = document.caretRangeFromPoint(clickX, y);
+      }
+      if (caretRange) {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(caretRange);
+      }
+    }
 
     const handleBlur = () => {
       contentEl.contentEditable = 'false';
