@@ -935,11 +935,17 @@
     }
 
     .cherry-toc-drop-above {
-      box-shadow: inset 0 2px 0 0 var(--primary-color, #30D158);
+      background-image: linear-gradient(var(--primary-color, #30D158), var(--primary-color, #30D158));
+      background-repeat: no-repeat;
+      background-size: calc(100% - var(--drop-indent, 0em)) 2px;
+      background-position: right top;
     }
 
     .cherry-toc-drop-below {
-      box-shadow: inset 0 -2px 0 0 var(--primary-color, #30D158);
+      background-image: linear-gradient(var(--primary-color, #30D158), var(--primary-color, #30D158));
+      background-repeat: no-repeat;
+      background-size: calc(100% - var(--drop-indent, 0em)) 2px;
+      background-position: right bottom;
     }
 
     /* 条目内容 — 富文本渲染，点击编辑 */
@@ -2070,6 +2076,29 @@
 
     &.ProseMirror-selectednode > img {
       outline: 2px solid var(--primary-color, #4d90fe);
+    }
+  }
+
+  .cherry-wysiwyg-image-caption {
+    display: block;
+    text-align: center;
+    font-size: 13px;
+    color: var(--md-text-color-secondary, #888);
+    padding: 4px 8px;
+    margin-top: 4px;
+    outline: none;
+    min-height: 1.2em;
+    line-height: 1.4;
+    border-radius: 3px;
+
+    &:focus {
+      background: var(--md-toc-link-hover-bg, rgba(0, 0, 0, 0.04));
+    }
+
+    &:empty::before {
+      content: attr(placeholder);
+      color: var(--md-text-color-tertiary, #bbb);
+      pointer-events: none;
     }
   }
 

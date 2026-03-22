@@ -123,6 +123,9 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
   let currentHeadings = [];
   let editingIndex = -1;
   let dragFromIndex = -1;
+  let dragStartX = 0;
+  let dragFromLevel = 1;
+  let dragLevelDelta = 0;
 
   // --- Document operations ---
 
@@ -180,8 +183,7 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
     view.dispatch(tr);
   }
 
-  function moveHeading(fromIdx, toIdx) {
-    if (fromIdx === toIdx) return;
+  function moveHeading(fromIdx, toIdx, levelDelta) {
     const headings = collectHeadings(view.state.doc);
     if (fromIdx < 0 || fromIdx >= headings.length) return;
     if (toIdx < 0 || toIdx > headings.length) return;
@@ -191,27 +193,40 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
     const srcNode = state.doc.nodeAt(src.pos);
     if (!srcNode) return;
 
-    // Determine insert position: before the target heading, or at doc end
-    let targetPos;
-    if (toIdx < headings.length) {
-      targetPos = headings[toIdx].pos;
-    } else {
-      targetPos = state.doc.content.size;
-    }
+    const needMove = fromIdx !== toIdx;
+    const newLevel = Math.max(1, Math.min(6, src.level + (levelDelta || 0)));
+    const needLevel = newLevel !== src.level;
+    if (!needMove && !needLevel) return;
 
     let tr = state.tr;
-    // If moving forward, delete first then insert; if backward, insert first then delete
-    if (fromIdx < toIdx) {
-      // Insert copy at target, then delete original
-      const insertPos = toIdx < headings.length ? headings[toIdx].pos : state.doc.content.size;
-      tr = tr.insert(insertPos, srcNode);
-      tr = tr.delete(tr.mapping.map(src.pos), tr.mapping.map(src.pos + srcNode.nodeSize));
-    } else {
-      // Delete original, then insert at target
-      tr = tr.delete(src.pos, src.pos + srcNode.nodeSize);
-      const mappedTarget = tr.mapping.map(targetPos);
-      tr = tr.insert(mappedTarget, srcNode);
+
+    // Apply level change first (before positions shift)
+    if (needLevel) {
+      tr = tr.setNodeMarkup(src.pos, undefined, { ...srcNode.attrs, level: newLevel });
     }
+
+    if (needMove) {
+      // Re-read node after potential markup change
+      const movedNode = tr.doc.nodeAt(tr.mapping.map(src.pos));
+      const mappedSrcPos = tr.mapping.map(src.pos);
+      const mappedSrcEnd = tr.mapping.map(src.pos + srcNode.nodeSize);
+
+      let targetPos;
+      if (toIdx < headings.length) {
+        targetPos = tr.mapping.map(headings[toIdx].pos);
+      } else {
+        targetPos = tr.doc.content.size;
+      }
+
+      if (fromIdx < toIdx) {
+        tr = tr.insert(targetPos, movedNode);
+        tr = tr.delete(tr.mapping.map(mappedSrcPos), tr.mapping.map(mappedSrcEnd));
+      } else {
+        tr = tr.delete(mappedSrcPos, mappedSrcEnd);
+        tr = tr.insert(tr.mapping.map(targetPos), movedNode);
+      }
+    }
+
     view.dispatch(tr);
   }
 
@@ -247,14 +262,21 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
       handle.draggable = true;
       handle.addEventListener('dragstart', (e) => {
         dragFromIndex = idx;
+        dragStartX = e.clientX;
+        dragFromLevel = h.level;
+        dragLevelDelta = 0;
         e.dataTransfer.effectAllowed = 'move';
         li.classList.add('cherry-toc-dragging');
       });
       handle.addEventListener('dragend', () => {
         dragFromIndex = -1;
+        dragLevelDelta = 0;
         li.classList.remove('cherry-toc-dragging');
         listEl.querySelectorAll('.cherry-toc-drop-above,.cherry-toc-drop-below').forEach(
-          (el) => { el.classList.remove('cherry-toc-drop-above', 'cherry-toc-drop-below'); },
+          (el) => {
+            el.classList.remove('cherry-toc-drop-above', 'cherry-toc-drop-below');
+            el.style.removeProperty('--drop-indent');
+          },
         );
       });
       li.appendChild(handle);
@@ -296,6 +318,17 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
         e.dataTransfer.dropEffect = 'move';
         const rect = li.getBoundingClientRect();
         const mid = rect.top + rect.height / 2;
+
+        // Horizontal offset → level delta (every 20px = 1 level)
+        const dx = e.clientX - dragStartX;
+        const rawDelta = Math.round(dx / 20);
+        dragLevelDelta = Math.max(1 - dragFromLevel, Math.min(6 - dragFromLevel, rawDelta));
+        const targetLevel = dragFromLevel + dragLevelDelta;
+
+        // Visual indicator with indent preview
+        const indent = (targetLevel - 1) * 1.2;
+        li.style.setProperty('--drop-indent', `${indent}em`);
+
         if (e.clientY < mid) {
           li.classList.add('cherry-toc-drop-above');
           li.classList.remove('cherry-toc-drop-below');
@@ -306,17 +339,20 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
       });
       li.addEventListener('dragleave', () => {
         li.classList.remove('cherry-toc-drop-above', 'cherry-toc-drop-below');
+        li.style.removeProperty('--drop-indent');
       });
       li.addEventListener('drop', (e) => {
         e.preventDefault();
         li.classList.remove('cherry-toc-drop-above', 'cherry-toc-drop-below');
+        li.style.removeProperty('--drop-indent');
         if (dragFromIndex < 0) return;
         const rect = li.getBoundingClientRect();
         const mid = rect.top + rect.height / 2;
         const dropIdx = e.clientY < mid ? idx : idx + 1;
         const adjustedTarget = dragFromIndex < dropIdx ? dropIdx - 1 : dropIdx;
-        moveHeading(dragFromIndex, adjustedTarget);
+        moveHeading(dragFromIndex, adjustedTarget, dragLevelDelta);
         dragFromIndex = -1;
+        dragLevelDelta = 0;
       });
 
       listEl.appendChild(li);
