@@ -396,6 +396,7 @@ const basicConfig = {
           'pdf',
           'word',
           'file',
+          'footnote',
         ],
       },
       'graph',

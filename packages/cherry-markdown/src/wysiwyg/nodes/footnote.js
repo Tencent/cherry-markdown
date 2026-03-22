@@ -7,8 +7,8 @@
  *
  * Node schemas come from @milkdown/preset-gfm. CSS in cherry.scss styles them.
  */
-import { $prose } from '@milkdown/kit/utils';
-import { Plugin, PluginKey } from '@milkdown/kit/prose/state';
+import { $prose, $command } from '@milkdown/kit/utils';
+import { Plugin, PluginKey, Selection } from '@milkdown/kit/prose/state';
 import { Decoration, DecorationSet } from '@milkdown/kit/prose/view';
 
 const footnoteKey = new PluginKey('cherryFootnote');
@@ -23,9 +23,33 @@ function removeBubble() {
 }
 
 /**
- * Show a floating bubble card near the clicked footnote reference.
+ * Update a footnote_definition node's content in ProseMirror.
  */
-function showFootnoteBubble(supEl, num, label, content, editorDom) {
+function updateFootnoteDefinition(view, label, newContent) {
+  const { state } = view;
+  let targetPos = null;
+  let targetNode = null;
+  state.doc.descendants((node, pos) => {
+    if (node.type.name === 'footnote_definition' && node.attrs.label === label) {
+      targetPos = pos;
+      targetNode = node;
+    }
+  });
+  if (targetPos == null || !targetNode) return;
+
+  const paragraph = state.schema.nodes.paragraph.create(
+    null,
+    newContent ? state.schema.text(newContent) : null,
+  );
+  const tr = state.tr.replaceWith(targetPos + 1, targetPos + targetNode.content.size + 1, paragraph);
+  view.dispatch(tr);
+}
+
+/**
+ * Show a floating bubble card near the clicked footnote reference.
+ * Content is editable; changes sync back to the ProseMirror document on close.
+ */
+function showFootnoteBubble(supEl, num, label, content, editorDom, view) {
   removeBubble();
 
   if (!bubbleEl) {
@@ -33,10 +57,15 @@ function showFootnoteBubble(supEl, num, label, content, editorDom) {
     bubbleEl.className = 'cherry-fn-bubble';
   }
 
+  const safeLabel = label.replace(/</g, '&lt;').replace(/>/g, '&gt;');
   bubbleEl.innerHTML = `
-    <div class="cherry-fn-bubble__title">[${num}] ${label}</div>
-    <div class="cherry-fn-bubble__content">${content}</div>
+    <div class="cherry-fn-bubble__title">[${num}] ${safeLabel}</div>
+    <div class="cherry-fn-bubble__content" contenteditable="true"></div>
   `;
+
+  // Set content as text (not innerHTML) to avoid XSS
+  const contentEl = bubbleEl.querySelector('.cherry-fn-bubble__content');
+  contentEl.textContent = content;
 
   // Position relative to the WYSIWYG container
   const container = editorDom.closest('.cherry-wysiwyg') || editorDom.parentElement;
@@ -59,9 +88,16 @@ function showFootnoteBubble(supEl, num, label, content, editorDom) {
   bubbleEl.style.left = `${left}px`;
   bubbleEl.style.maxWidth = `${bubbleWidth}px`;
 
-  // Remove on next click outside
+  // Focus the content area for immediate editing
+  contentEl.focus();
+
+  // On close: sync edited content back to ProseMirror document
   const onClickOutside = (e) => {
     if (!bubbleEl.contains(e.target)) {
+      const newContent = contentEl.textContent;
+      if (newContent !== content) {
+        updateFootnoteDefinition(view, label, newContent);
+      }
       removeBubble();
       document.removeEventListener('click', onClickOutside, true);
     }
@@ -148,6 +184,25 @@ export const footnotePlugin = $prose(() => {
         return DecorationSet.create(state.doc, decorations);
       },
 
+      handleKeyDown(view, event) {
+        if (event.key !== 'Enter') return false;
+
+        const { state } = view;
+        const { $from } = state.selection;
+        const { definitions, firstDefPos } = computeFootnoteState(state.doc);
+        if (definitions.length === 0 || firstDefPos === null) return false;
+
+        // Only intercept if cursor is within the footnote definitions area
+        if ($from.pos < firstDefPos) return false;
+
+        // Insert a new paragraph before the first footnote definition and move cursor there
+        const paragraph = state.schema.nodes.paragraph.create();
+        const tr = state.tr.insert(firstDefPos, paragraph);
+        tr.setSelection(Selection.near(tr.doc.resolve(firstDefPos + 1)));
+        view.dispatch(tr);
+        return true;
+      },
+
       handleClick(view, pos, event) {
         const target = event.target;
         if (!(target instanceof HTMLElement)) return false;
@@ -171,13 +226,40 @@ export const footnotePlugin = $prose(() => {
         // Get sequential number from decoration
         const num = sup.getAttribute('data-index') || '?';
 
-        // Sanitize content for display (plain text only)
-        const safeContent = defContent.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        showFootnoteBubble(sup, num, label, safeContent, view.dom);
+        showFootnoteBubble(sup, num, label, defContent, view.dom, view);
         return true;
       },
     },
   });
 });
 
-export const footnote = [footnotePlugin].flat();
+/**
+ * Command: insert a footnote reference at cursor + definition at document end.
+ * Payload: { label?: string } — auto-generates label if omitted.
+ */
+export const insertFootnoteCommand = $command('InsertFootnote', (ctx) => (opts = {}) =>
+  (state, dispatch) => {
+    const refType = state.schema.nodes.footnote_reference;
+    const defType = state.schema.nodes.footnote_definition;
+    if (!refType || !defType) return false;
+
+    // Determine next available label
+    const { labelToNum } = computeFootnoteState(state.doc);
+    const nextNum = labelToNum.size + 1;
+    const label = opts.label || `fn${nextNum}`;
+
+    // Insert reference at cursor
+    const refNode = refType.create({ label });
+    let tr = state.tr.replaceSelectionWith(refNode);
+
+    // Insert definition at document end
+    const paragraph = state.schema.nodes.paragraph.create(null, state.schema.text('脚注内容'));
+    const defNode = defType.create({ label }, paragraph);
+    tr = tr.insert(tr.doc.content.size, defNode);
+
+    dispatch?.(tr.scrollIntoView());
+    return true;
+  },
+);
+
+export const footnote = [footnotePlugin, insertFootnoteCommand].flat();

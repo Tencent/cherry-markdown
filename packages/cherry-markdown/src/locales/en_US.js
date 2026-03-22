@@ -44,6 +44,7 @@ export default {
   toc: 'Table Of Content',
   pdf: 'PDF',
   word: 'Word',
+  footnote: 'Footnote',
   table: 'Table',
   'line-table': 'Line Table',
   'bar-table': 'Bar Table',

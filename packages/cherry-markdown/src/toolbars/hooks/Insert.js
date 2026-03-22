@@ -146,6 +146,10 @@ export default class Insert extends MenuBase {
         this.$cherry.wysiwygEditor.insertText('\n[[toc]]\n');
         return;
       }
+      if (shortKey === 'footnote') {
+        this.$cherry.wysiwygEditor.execCommand('footnote');
+        return;
+      }
       if (shortKey === 'audio' || shortKey === 'video') {
         this.handleWysiwygUpload(shortKey);
         return;
@@ -330,6 +334,9 @@ export default class Insert extends MenuBase {
           return $selection.replace(/^\s*\{\s*([\s\S]+?)\s*\|[\s\S]+\}\s*/gm, '$1');
         }
         return ` { ${$selection} | ${this.editor.$cherry.options.callback.changeString2Pinyin($selection).trim()} } `;
+      case 'footnote':
+        // 插入脚注引用 + 定义
+        return `${selection}[^fn1]\n\n[^fn1]: 脚注内容\n\n`;
     }
   }
 }

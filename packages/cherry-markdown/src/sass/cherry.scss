@@ -867,16 +867,14 @@
 
 /* WYSIWYG 脚注样式 — ProseMirror Decoration 实现编号，与预览区一致 */
 .cherry-wysiwyg {
-  /* "脚注"标题 — Widget Decoration 插入 */
+  /* "脚注"标题 — Widget Decoration 插入，与预览区 .footnote-title 对齐 */
   .cherry-fn-title {
     font-size: 20px;
     margin-top: 50px;
-    padding-top: 20px;
     border-top: 1px solid var(--md-hr-border, #ccc);
+    padding-top: 8px;
     margin-bottom: var(--spacing-lg, 16px);
     color: var(--md-heading-color, var(--primary-color));
-    background-color: var(--md-inline-code-bg, #f6f8fa);
-    width: 60px;
   }
 
   /* 脚注引用：用 data-index 显示编号 [1] [2] */
@@ -917,15 +915,15 @@
       &::after { content: '] '; }
     }
 
-    /* 有 data-index 时，隐藏原始 label 并显示编号 */
-    &[data-index] dt {
-      font-size: 0;
+    /* 有 data-index 时：用 dl::before 显示编号（attr() 只能读取自身属性），隐藏 dt */
+    &[data-index] {
       &::before {
         content: '[' attr(data-index) '] ';
         font-size: 1rem;
         color: var(--md-link-color, var(--primary-color));
+        font-weight: normal;
       }
-      &::after { content: none; }
+      dt { display: none; }
     }
 
     dd {
@@ -962,6 +960,9 @@
   .cherry-fn-bubble__content {
     color: var(--md-paragraph-color);
     line-height: 1.6;
+    outline: none;
+    min-height: 1.6em;
+    cursor: text;
   }
 }
 

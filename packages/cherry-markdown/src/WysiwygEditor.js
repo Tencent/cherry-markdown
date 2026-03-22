@@ -426,6 +426,9 @@ export default class WysiwygEditor {
     // remark needs blank lines around block-level custom syntax
     processed = this._ensureBlankLinesAroundDelimiters(processed);
 
+    // Move footnote definitions to end of document (matching Cherry preview behavior)
+    processed = this._moveFootnoteDefinitionsToEnd(processed);
+
     return processed;
   }
 
@@ -504,6 +507,122 @@ export default class WysiwygEditor {
     }
 
     return result.join('\n');
+  }
+
+  /**
+   * 将脚注定义 [^label]: content 移到文档末尾，
+   * 与 Cherry 预览模式行为保持一致（脚注始终显示在文档底部）
+   * @param {string} md
+   * @returns {string}
+   */
+  _moveFootnoteDefinitionsToEnd(md) {
+    const lines = md.split('\n');
+    const bodyLines = [];
+    const footnoteDefs = [];
+    let inCodeFence = false;
+    let inFootnoteDef = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trimStart();
+
+      // Track code fence state
+      if (/^(`{3,}|~{3,})/.test(trimmed)) {
+        inCodeFence = !inCodeFence;
+        inFootnoteDef = false;
+        bodyLines.push(line);
+        continue;
+      }
+
+      if (inCodeFence) {
+        bodyLines.push(line);
+        continue;
+      }
+
+      // Footnote definition start: [^label]: content
+      if (/^\[\^[^\]]+\]:/.test(trimmed)) {
+        inFootnoteDef = true;
+        footnoteDefs.push(line);
+        continue;
+      }
+
+      // Continuation line of a footnote definition (indented by 2+ spaces or tab)
+      if (inFootnoteDef && /^(\s{2,}|\t)/.test(line) && line.trim() !== '') {
+        footnoteDefs.push(line);
+        continue;
+      }
+
+      // Blank line inside footnote definition block (could be between defs)
+      if (inFootnoteDef && line.trim() === '') {
+        // Peek ahead to see if next non-blank line is another footnote def
+        let nextNonBlank = i + 1;
+        while (nextNonBlank < lines.length && lines[nextNonBlank].trim() === '') {
+          nextNonBlank++;
+        }
+        if (nextNonBlank < lines.length && /^\[\^[^\]]+\]:/.test(lines[nextNonBlank].trimStart())) {
+          footnoteDefs.push(line);
+          continue;
+        }
+        // Not followed by another def, end footnote block
+        inFootnoteDef = false;
+        bodyLines.push(line);
+        continue;
+      }
+
+      inFootnoteDef = false;
+      bodyLines.push(line);
+    }
+
+    if (footnoteDefs.length === 0) return md;
+
+    // Group footnote definition lines by label (a definition may span multiple lines)
+    const defGroups = []; // [{ label, lines: string[] }]
+    for (const line of footnoteDefs) {
+      const m = line.trimStart().match(/^\[\^([^\]]+)\]:/);
+      if (m) {
+        defGroups.push({ label: m[1], lines: [line] });
+      } else if (defGroups.length > 0) {
+        defGroups[defGroups.length - 1].lines.push(line);
+      }
+    }
+
+    // Scan body for footnote references [^label] to determine encounter order
+    const bodyText = bodyLines.join('\n');
+    const refOrder = new Map();
+    let counter = 0;
+    const refRegex = /\[\^([^\]]+)\]/g;
+    let refMatch;
+    while ((refMatch = refRegex.exec(bodyText)) !== null) {
+      // Skip if followed by : (that's a definition, not a reference)
+      if (bodyText[refMatch.index + refMatch[0].length] === ':') continue;
+      const label = refMatch[1];
+      if (!refOrder.has(label)) {
+        refOrder.set(label, ++counter);
+      }
+    }
+
+    // Deduplicate definitions (keep first occurrence of each label)
+    const seen = new Set();
+    const uniqueDefs = defGroups.filter((g) => {
+      if (seen.has(g.label)) return false;
+      seen.add(g.label);
+      return true;
+    });
+
+    // Sort by reference encounter order; unreferenced definitions go last
+    uniqueDefs.sort((a, b) => {
+      const oa = refOrder.get(a.label) ?? Infinity;
+      const ob = refOrder.get(b.label) ?? Infinity;
+      return oa - ob;
+    });
+
+    // Remove trailing blank lines from body, then append sorted footnotes
+    while (bodyLines.length > 0 && bodyLines[bodyLines.length - 1].trim() === '') {
+      bodyLines.pop();
+    }
+
+    const sortedDefs = uniqueDefs.map((g) => g.lines.join('\n')).join('\n\n');
+    return bodyLines.join('\n') + '\n\n' + sortedDefs + '\n';
   }
 
   /**

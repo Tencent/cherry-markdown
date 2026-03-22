@@ -50,7 +50,7 @@ import {
   toggleBgColorCommand,
   toggleFontSizeCommand,
 } from './marks';
-import { insertRubyCommand, insertPanelCommand, insertDetailCommand } from './nodes';
+import { insertRubyCommand, insertPanelCommand, insertDetailCommand, insertFootnoteCommand } from './nodes';
 
 /**
  * 从 Header 按钮的 shortKey 中解析标题级别
@@ -154,6 +154,11 @@ export function createWysiwygCommandMap() {
       detail: (ctx, shortKey) => {
         const commands = ctx.get(commandsCtx);
         return commands.call(insertDetailCommand.key, shortKey || '');
+      },
+      // 脚注按钮：在光标处插入引用 + 文档末尾插入定义
+      footnote: (ctx, shortKey) => {
+        const commands = ctx.get(commandsCtx);
+        return commands.call(insertFootnoteCommand.key, { label: shortKey || '' });
       },
       checklist: (ctx) => {
         const commands = ctx.get(commandsCtx);

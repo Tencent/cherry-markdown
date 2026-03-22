@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+<g>
+	<!-- Letter "A" main body -->
+	<path d="M342.7,163.8h58.6l220,696.4h-72.8l-56.4-178.6H248.9l-56.4,178.6H120L342.7,163.8z M472.9,621.6L371,313.4L269.1,621.6H472.9z"/>
+	<!-- "[" left bracket -->
+	<path d="M600,80h120v50h-70v300h70v50h-120V80z"/>
+	<!-- "1" digit -->
+	<path d="M770,130h-30v-50h80v370h-50V130z"/>
+	<!-- "]" right bracket -->
+	<path d="M860,80h120v400h-120v-50h70v-300h-70V80z"/>
+</g>
+</svg>

@@ -44,6 +44,7 @@ export default {
   toc: '目录', // 目录
   pdf: 'pdf', // pdf
   word: 'word', // word
+  footnote: '脚注', // 脚注
   table: '表格', // 表格
   'line-table': '折线表格', // 折线表格
   'bar-table': '柱状表格', // 柱状表格

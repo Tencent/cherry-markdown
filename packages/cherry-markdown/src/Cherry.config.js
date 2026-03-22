@@ -681,6 +681,7 @@ const defaultConfig = {
           'bar-table',
           'pdf',
           'word',
+          'footnote',
         ],
       },
       'graph',

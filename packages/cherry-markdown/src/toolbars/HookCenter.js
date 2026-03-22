@@ -78,6 +78,7 @@ import ChangeLocale from './hooks/ChangeLocale';
 import ShortcutKey from './hooks/ShortcutKey';
 import Search from './hooks/Search';
 import SwitchWysiwyg from './hooks/SwitchWysiwyg';
+import Footnote from './hooks/Footnote';
 
 // 定义默认支持的工具栏
 // 目前不支持按需动态加载
@@ -144,6 +145,7 @@ const HookList = {
   shortcutKey: ShortcutKey,
   search: Search,
   switchWysiwyg: SwitchWysiwyg,
+  footnote: Footnote,
 };
 
 export default class HookCenter {
