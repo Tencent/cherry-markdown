@@ -183,6 +183,22 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
     view.dispatch(tr);
   }
 
+  /**
+   * Get the section range for a heading: from the heading pos to the start
+   * of the next heading at the same or higher level (or end of doc).
+   */
+  function getSectionRange(doc, headings, idx) {
+    const start = headings[idx].pos;
+    const level = headings[idx].level;
+    // Find next heading at same or higher level
+    for (let i = idx + 1; i < headings.length; i++) {
+      if (headings[i].level <= level) {
+        return { start, end: headings[i].pos };
+      }
+    }
+    return { start, end: doc.content.size };
+  }
+
   function moveHeading(fromIdx, toIdx, levelDelta) {
     const headings = collectHeadings(view.state.doc);
     if (fromIdx < 0 || fromIdx >= headings.length) return;
@@ -190,40 +206,54 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
 
     const { state } = view;
     const src = headings[fromIdx];
-    const srcNode = state.doc.nodeAt(src.pos);
-    if (!srcNode) return;
-
-    const needMove = fromIdx !== toIdx;
     const newLevel = Math.max(1, Math.min(6, src.level + (levelDelta || 0)));
+    const needMove = fromIdx !== toIdx;
     const needLevel = newLevel !== src.level;
     if (!needMove && !needLevel) return;
 
+    // Section = heading + all content until next same-or-higher-level heading
+    const section = getSectionRange(state.doc, headings, fromIdx);
+    const sectionSlice = state.doc.slice(section.start, section.end);
+
     let tr = state.tr;
 
-    // Apply level change first (before positions shift)
+    // Apply level changes to the heading and all sub-headings in the section
     if (needLevel) {
-      tr = tr.setNodeMarkup(src.pos, undefined, { ...srcNode.attrs, level: newLevel });
+      const delta = newLevel - src.level;
+      for (let i = fromIdx; i < headings.length; i++) {
+        if (i > fromIdx && headings[i].level <= src.level) break;
+        const h = headings[i];
+        const adjusted = Math.max(1, Math.min(6, h.level + delta));
+        if (adjusted !== h.level) {
+          tr = tr.setNodeMarkup(tr.mapping.map(h.pos), undefined, { ...h.node.attrs, level: adjusted });
+        }
+      }
     }
 
     if (needMove) {
-      // Re-read node after potential markup change
-      const movedNode = tr.doc.nodeAt(tr.mapping.map(src.pos));
-      const mappedSrcPos = tr.mapping.map(src.pos);
-      const mappedSrcEnd = tr.mapping.map(src.pos + srcNode.nodeSize);
-
+      // Compute target insert position in the original doc, then map
       let targetPos;
       if (toIdx < headings.length) {
-        targetPos = tr.mapping.map(headings[toIdx].pos);
+        targetPos = headings[toIdx].pos;
       } else {
-        targetPos = tr.doc.content.size;
+        targetPos = state.doc.content.size;
       }
 
+      // Re-read section content after level changes
+      const mappedStart = tr.mapping.map(section.start);
+      const mappedEnd = tr.mapping.map(section.end);
+      const updatedSlice = tr.doc.slice(mappedStart, mappedEnd);
+
       if (fromIdx < toIdx) {
-        tr = tr.insert(targetPos, movedNode);
-        tr = tr.delete(tr.mapping.map(mappedSrcPos), tr.mapping.map(mappedSrcEnd));
+        // Insert at target first, then delete original
+        const mappedTarget = tr.mapping.map(targetPos);
+        tr = tr.insert(mappedTarget, updatedSlice.content);
+        tr = tr.delete(tr.mapping.map(mappedStart), tr.mapping.map(mappedEnd));
       } else {
-        tr = tr.delete(mappedSrcPos, mappedSrcEnd);
-        tr = tr.insert(tr.mapping.map(targetPos), movedNode);
+        // Delete original first, then insert at target
+        tr = tr.delete(mappedStart, mappedEnd);
+        const mappedTarget = tr.mapping.map(targetPos);
+        tr = tr.insert(mappedTarget, updatedSlice.content);
       }
     }
 
@@ -349,6 +379,17 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
         li.classList.remove('cherry-toc-drop-above', 'cherry-toc-drop-below');
         li.style.removeProperty('--drop-indent');
         if (dragFromIndex < 0) return;
+
+        // Ignore drop onto own section's sub-headings
+        const fromLevel = currentHeadings[dragFromIndex]?.level;
+        if (idx > dragFromIndex && idx < currentHeadings.length) {
+          let inSection = true;
+          for (let i = dragFromIndex + 1; i <= idx; i++) {
+            if (currentHeadings[i].level <= fromLevel) { inSection = false; break; }
+          }
+          if (inSection) { dragFromIndex = -1; dragLevelDelta = 0; return; }
+        }
+
         const rect = li.getBoundingClientRect();
         const mid = rect.top + rect.height / 2;
         const targetLevel = dragFromLevel + dragLevelDelta;
