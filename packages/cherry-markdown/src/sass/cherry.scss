@@ -863,6 +863,13 @@
       margin: 0;
     }
   }
+
+  /* mermaid 图表宽度优化 — 收缩到内容宽度，与预览模式一致 */
+  .milkdown-code-block .preview-panel .preview img {
+    max-width: 100%;
+    height: auto;
+    width: auto;
+  }
 }
 
 /* WYSIWYG 脚注样式 — ProseMirror Decoration 实现编号，与预览区一致 */

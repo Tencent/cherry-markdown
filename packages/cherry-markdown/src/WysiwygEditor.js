@@ -688,15 +688,26 @@ export default class WysiwygEditor {
     const isAsync = mermaidAPI.render.length <= 3;
 
     // 自定义主题配置，在每次渲染前应用（避免被 Cherry 预览区渲染重置）
+    // mermaid base 主题变量派生链（mermaid.js:7413-7509）：
+    //   primaryTextColor → textColor / nodeTextColor / actorTextColor / taskTextColor / ...
+    //   nodeTextColor → .label { color } → 同时影响节点文字和 edgeLabel 文字
+    // 因此 primaryTextColor 必须设为深色，否则 edgeLabel 等在浅色背景上不可见。
+    // 不要单独设 nodeTextColor，它会覆盖 .label 全局颜色（包括 edgeLabel）。
     this._mermaidThemeConfig = {
       theme: 'base',
       themeVariables: {
         primaryColor: '#30D158',
-        primaryTextColor: '#fff',
+        primaryTextColor: '#1a1a1a',
         primaryBorderColor: '#28b84c',
         lineColor: '#30D158',
         secondaryColor: '#e8fbe9',
+        secondaryTextColor: '#1a1a1a',
         tertiaryColor: '#f0fff0',
+        tertiaryTextColor: '#1a1a1a',
+        edgeLabelBackground: '#f8f8f8',
+        clusterBkg: '#e8fbe9',
+        clusterBorder: '#28b84c',
+        titleColor: '#1a1a1a',
       },
     };
 
@@ -784,7 +795,33 @@ export default class WysiwygEditor {
       .replace(/\s*markerUnits="0"/g, '')
       .replace(/\s*x="NaN"/g, '')
       .replace(/<br>/g, '<br/>');
-    const dataUrl = `data:image/svg+xml,${encodeURIComponent(fixedSvg)}`;
+
+    // 解析 SVG，将 width/height="100%" 替换为 viewBox 的实际尺寸
+    // 参考预览模式 cherry-code-block-mermaid-plugin.js:convertMermaidSvgToImg
+    let finalSvg = fixedSvg;
+    try {
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(fixedSvg, 'image/svg+xml');
+      const svgEl = svgDoc.documentElement;
+      if (svgEl.tagName.toLowerCase() === 'svg') {
+        const shadowSvg = document.getElementById(graphId);
+        let box;
+        if (shadowSvg && shadowSvg.getBBox) {
+          box = shadowSvg.getBBox();
+        }
+        if (!svgEl.hasAttribute('viewBox') && box) {
+          svgEl.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
+        }
+        const vb = svgEl.viewBox?.baseVal;
+        if (vb && vb.width > 0) {
+          if (svgEl.getAttribute('width') === '100%') svgEl.setAttribute('width', `${vb.width}`);
+          if (svgEl.getAttribute('height') === '100%') svgEl.setAttribute('height', `${vb.height}`);
+        }
+        finalSvg = svgEl.outerHTML;
+      }
+    } catch (_) { /* 解析失败时使用原始 fixedSvg */ }
+
+    const dataUrl = `data:image/svg+xml,${encodeURIComponent(finalSvg)}`;
     return `<img style="max-width:100%;height:auto;" src="${dataUrl}" />`;
   }
 
