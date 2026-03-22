@@ -266,10 +266,11 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
       content.appendChild(richContent);
       content.addEventListener('mousedown', (e) => e.stopPropagation());
 
-      // Double-click to edit as plain text
-      content.addEventListener('dblclick', (e) => {
+      // Click to edit as plain text
+      content.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (editingIndex === idx) return;
         enterEditMode(content, idx, h.text);
       });
 

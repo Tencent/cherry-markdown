@@ -942,10 +942,10 @@
       box-shadow: inset 0 -2px 0 0 var(--primary-color, #30D158);
     }
 
-    /* 条目内容 — 富文本渲染，双击编辑 */
+    /* 条目内容 — 富文本渲染，点击编辑 */
     .cherry-toc-entry {
       display: inline;
-      cursor: default;
+      cursor: text;
       outline: none;
       text-decoration: none;
       color: var(--md-toc-link-color, var(--md-paragraph-color));
