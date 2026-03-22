@@ -325,15 +325,22 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
 
   function enterEditMode(contentEl, idx, originalText, clickX) {
     editingIndex = idx;
-    // Temporarily allow editing inside the outer non-editable container
-    dom.removeAttribute('contenteditable');
-    contentEl.textContent = originalText;
-    contentEl.contentEditable = 'true';
-    contentEl.focus();
 
-    // Place cursor at click position using caretPositionFromPoint/caretRangeFromPoint
+    // Wrap in an intermediate contentEditable container to isolate from
+    // the outer contentEditable='false' div (which must stay to keep
+    // ProseMirror node view behavior intact, including drag-and-drop).
+    const editWrapper = document.createElement('span');
+    editWrapper.contentEditable = 'true';
+    editWrapper.className = 'cherry-toc-edit-wrapper';
+    editWrapper.style.cssText = 'display:inline;outline:none;caret-color:auto;';
+    contentEl.textContent = '';
+    contentEl.appendChild(editWrapper);
+    editWrapper.textContent = originalText;
+    editWrapper.focus();
+
+    // Place cursor at click position
     if (clickX !== undefined) {
-      const rect = contentEl.getBoundingClientRect();
+      const rect = editWrapper.getBoundingClientRect();
       const y = rect.top + rect.height / 2;
       let caretRange;
       if (document.caretPositionFromPoint) {
@@ -354,26 +361,25 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
     }
 
     const handleBlur = () => {
-      contentEl.contentEditable = 'false';
-      dom.contentEditable = 'false';
-      contentEl.removeEventListener('blur', handleBlur);
-      contentEl.removeEventListener('keydown', handleKey);
-      contentEl.removeEventListener('paste', handlePaste);
+      const newText = editWrapper.textContent;
+      editWrapper.removeEventListener('blur', handleBlur);
+      editWrapper.removeEventListener('keydown', handleKey);
+      editWrapper.removeEventListener('paste', handlePaste);
       const wasEditing = editingIndex;
       editingIndex = -1;
-      syncTextToHeading(wasEditing, contentEl.textContent);
+      syncTextToHeading(wasEditing, newText);
       requestAnimationFrame(() => render());
     };
 
     const handleKey = (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        contentEl.blur();
+        editWrapper.blur();
       } else if (e.key === 'Escape') {
         e.preventDefault();
-        contentEl.textContent = originalText;
+        editWrapper.textContent = originalText;
         editingIndex = -1;
-        contentEl.blur();
+        editWrapper.blur();
       }
     };
 
@@ -383,9 +389,9 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
       document.execCommand('insertText', false, text);
     };
 
-    contentEl.addEventListener('blur', handleBlur);
-    contentEl.addEventListener('keydown', handleKey);
-    contentEl.addEventListener('paste', handlePaste);
+    editWrapper.addEventListener('blur', handleBlur);
+    editWrapper.addEventListener('keydown', handleKey);
+    editWrapper.addEventListener('paste', handlePaste);
   }
 
   function createIconButton(text, className, onClick) {
