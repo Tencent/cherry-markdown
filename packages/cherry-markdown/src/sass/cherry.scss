@@ -914,10 +914,38 @@
     .toc-li-5 { padding-left: calc(var(--md-toc-indicator-gap, 16px) + 4.8em); }
     .toc-li-6 { padding-left: calc(var(--md-toc-indicator-gap, 16px) + 6.0em); }
 
-    /* 条目样式 — 与预览模式 .toc a 一致 */
+    /* 拖拽手柄 */
+    .cherry-toc-handle {
+      cursor: grab;
+      opacity: 0;
+      margin-right: 4px;
+      font-size: 14px;
+      color: var(--md-toc-indicator-color, #adb5bd);
+      user-select: none;
+      transition: opacity 0.15s;
+      flex-shrink: 0;
+    }
+
+    .toc-li:hover .cherry-toc-handle {
+      opacity: 1;
+    }
+
+    .cherry-toc-dragging {
+      opacity: 0.4;
+    }
+
+    .cherry-toc-drop-above {
+      box-shadow: inset 0 2px 0 0 var(--primary-color, #30D158);
+    }
+
+    .cherry-toc-drop-below {
+      box-shadow: inset 0 -2px 0 0 var(--primary-color, #30D158);
+    }
+
+    /* 条目内容 — 富文本渲染，双击编辑 */
     .cherry-toc-entry {
-      display: block;
-      cursor: text;
+      display: inline;
+      cursor: default;
       outline: none;
       text-decoration: none;
       color: var(--md-toc-link-color, var(--md-paragraph-color));
@@ -925,6 +953,10 @@
       border-radius: var(--md-toc-link-radius, var(--radius-md, 4px));
       padding: var(--spacing-xs, 2px) var(--spacing-sm, 4px);
       transition: color 50ms ease-out, background-color 50ms ease-out;
+      min-height: 1.4em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
 
       &.level-1 {
         font-weight: var(--font-weight-semibold, 600);
@@ -935,9 +967,60 @@
         background-color: var(--md-toc-link-hover-bg, var(--oc-gray-1, rgba(0,0,0,0.04)));
       }
 
-      &:focus {
+      &[contenteditable="true"] {
+        cursor: text;
+        white-space: normal;
         background-color: var(--md-toc-link-hover-bg, var(--oc-gray-1, rgba(0,0,0,0.04)));
         box-shadow: 0 0 0 1px var(--md-toc-indicator-hover-color, var(--primary-color));
+      }
+
+      /* ruby 在 TOC 中保持可见 */
+      ruby { font-size: inherit; }
+      rt { font-size: 0.6em; }
+    }
+
+    /* 操作按钮 — hover 时显示 */
+    .cherry-toc-actions {
+      display: flex;
+      gap: 2px;
+      opacity: 0;
+      margin-left: auto;
+      flex-shrink: 0;
+      transition: opacity 0.15s;
+    }
+
+    .toc-li:hover .cherry-toc-actions {
+      opacity: 1;
+    }
+
+    .cherry-toc-btn {
+      border: none;
+      background: var(--md-toc-link-hover-bg, var(--oc-gray-1, #f1f3f5));
+      color: var(--md-paragraph-color, #495057);
+      cursor: pointer;
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 22px;
+      text-align: center;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background: var(--md-toc-link-active-bg, var(--oc-gray-2, #e9ecef));
+      }
+
+      &.cherry-toc-del:hover {
+        background: #ffe0e0;
+        color: #c92a2a;
+      }
+
+      &.cherry-toc-add:hover {
+        background: #d3f9d8;
+        color: #2b8a3e;
       }
     }
 
@@ -945,6 +1028,9 @@
       color: var(--md-paragraph-color, #999);
       font-style: italic;
       padding: var(--spacing-xs, 2px) var(--spacing-sm, 4px);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
   }
 }
