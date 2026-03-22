@@ -7,16 +7,18 @@ import { panel } from './panel';
 import { detail } from './detail';
 import { video, audio } from './media';
 import { footnote } from './footnote';
+import { toc } from './toc';
 
 export { rubySchema, insertRubyCommand, ruby } from './ruby';
 export { panelSchema, insertPanelCommand, panel } from './panel';
 export { detailSchema, insertDetailCommand, detail } from './detail';
 export { video, audio } from './media';
 export { footnote, insertFootnoteCommand } from './footnote';
+export { tocSchema, insertTocCommand, toc } from './toc';
 
 /**
  * Returns all custom node plugins as a flat array, ready to be passed to editor.use()
  */
 export function getAllCustomNodePlugins() {
-  return [...ruby, ...panel, ...detail, ...video, ...audio, ...footnote];
+  return [...ruby, ...panel, ...detail, ...video, ...audio, ...footnote, ...toc];
 }

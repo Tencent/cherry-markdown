@@ -870,6 +870,35 @@
     height: auto;
     width: auto;
   }
+
+  /* TOC 目录块样式 — 复用预览模式 .toc 样式，并支持可编辑条目 */
+  .cherry-toc-block {
+    user-select: none;
+
+    .cherry-toc-list {
+      padding-left: 0;
+      margin: 0;
+    }
+
+    .cherry-toc-entry {
+      display: block;
+      cursor: text;
+      outline: none;
+      border-radius: var(--md-toc-link-radius, 4px);
+      padding: var(--spacing-xs, 2px) var(--spacing-sm, 4px);
+
+      &:focus {
+        background-color: var(--md-toc-link-hover-bg, rgba(0,0,0,0.04));
+        box-shadow: 0 0 0 1px var(--md-toc-indicator-hover-color, var(--primary-color));
+      }
+    }
+
+    .toc-empty {
+      color: var(--md-paragraph-color, #999);
+      font-style: italic;
+      padding: var(--spacing-xs, 2px) var(--spacing-sm, 4px);
+    }
+  }
 }
 
 /* WYSIWYG 脚注样式 — ProseMirror Decoration 实现编号，与预览区一致 */

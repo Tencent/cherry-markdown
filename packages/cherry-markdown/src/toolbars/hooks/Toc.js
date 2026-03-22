@@ -29,9 +29,9 @@ export default class Toc extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    // WYSIWYG 模式：插入 [[toc]] 文本
+    // WYSIWYG 模式：通过 command 插入 TOC 节点
     if (this.$cherry.status?.wysiwyg === 'show' && this.$cherry.wysiwygEditor) {
-      this.$cherry.wysiwygEditor.insertText('\n[[toc]]\n');
+      this.$cherry.wysiwygEditor.execCommand('toc');
       return false;
     }
     // 插入目录
