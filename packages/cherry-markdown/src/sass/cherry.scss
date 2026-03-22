@@ -971,8 +971,6 @@
         cursor: text;
         caret-color: auto;
         white-space: normal;
-        background-color: var(--md-toc-link-hover-bg, var(--oc-gray-1, rgba(0,0,0,0.04)));
-        box-shadow: 0 0 0 1px var(--md-toc-indicator-hover-color, var(--primary-color));
       }
 
       /* ruby 在 TOC 中保持可见 */
