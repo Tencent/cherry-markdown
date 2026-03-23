@@ -32,13 +32,7 @@ import { markdown } from '@codemirror/lang-markdown';
 import { search, searchKeymap, SearchQuery } from '@codemirror/search';
 import { history, historyKeymap, defaultKeymap, indentWithTab } from '@codemirror/commands';
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
-import {
-  syntaxHighlighting,
-  defaultHighlightStyle,
-  foldGutter,
-  bracketMatching,
-  indentOnInput,
-} from '@codemirror/language';
+import { syntaxHighlighting, defaultHighlightStyle, foldGutter, indentOnInput } from '@codemirror/language';
 import htmlParser from '@/utils/htmlparser';
 import pasteHelper from '@/utils/pasteHelper';
 import Logger from '@/Logger';
@@ -1979,7 +1973,6 @@ export default class Editor {
 
       searchHighlightField,
 
-      bracketMatching(),
       indentOnInput(),
 
       highlightActiveLine(),
