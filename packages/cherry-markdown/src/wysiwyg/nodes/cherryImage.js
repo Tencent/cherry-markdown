@@ -385,6 +385,13 @@ export const cherryImageView = $view(cherryImageSchema.node, () => (initialNode,
     dismissActiveBubble();
     bubbleVisible = true;
 
+    // Disable ProseMirror's native drag on this node during resize interaction
+    wrapper.setAttribute('draggable', 'false');
+    img.setAttribute('draggable', 'false');
+
+    // Show caption for editing when bubble is active
+    caption.style.display = '';
+
     // posRef.parentNode === wrapper, so imgSizeHandler.getImgPosition() will calculate
     // coordinates relative to wrapper — correct for absolute positioning within wrapper.
     const previewerDom = posRef;
@@ -422,8 +429,8 @@ export const cherryImageView = $view(cherryImageSchema.node, () => (initialNode,
 
     // Mouse events for resize
     const onMouseDown = (e) => {
+      e.preventDefault(); // Prevent browser native drag on the handle points
       imgSizeHandler.emit('mousedown', e);
-      // Mirror 'doing-resize-img' to wrapper for user-select:none
       if (imgSizeHandler.$isResizing()) {
         wrapper.classList.add('doing-resize-img');
       }
@@ -434,6 +441,13 @@ export const cherryImageView = $view(cherryImageSchema.node, () => (initialNode,
       wrapper.classList.remove('doing-resize-img');
     };
 
+    // Block drag-start on the wrapper during bubble interaction
+    const onDragStart = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    wrapper.addEventListener('dragstart', onDragStart);
+
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
     sizeContainer.addEventListener('mousedown', onMouseDown);
@@ -443,6 +457,7 @@ export const cherryImageView = $view(cherryImageSchema.node, () => (initialNode,
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
       sizeContainer.removeEventListener('mousedown', onMouseDown);
+      wrapper.removeEventListener('dragstart', onDragStart);
     };
   }
 
@@ -454,6 +469,16 @@ export const cherryImageView = $view(cherryImageSchema.node, () => (initialNode,
     toolContainer.style.display = 'none';
     toolContainer.innerHTML = '';
     imgSizeHandler.emit('remove');
+
+    // Restore draggable
+    wrapper.removeAttribute('draggable');
+    img.removeAttribute('draggable');
+
+    // Hide caption if empty
+    if (!caption.textContent.trim()) {
+      caption.style.display = 'none';
+    }
+
     if (wrapper._cleanupResize) {
       wrapper._cleanupResize();
       wrapper._cleanupResize = null;
@@ -549,6 +574,15 @@ export const cherryImageView = $view(cherryImageSchema.node, () => (initialNode,
       hideBubble();
     },
     stopEvent(event) {
+      // During resize, block all events to prevent ProseMirror drag interference
+      if (imgSizeHandler.$isResizing()) {
+        return true;
+      }
+      // Prevent drag-start on resize handles (browser native drag interferes with resize)
+      if (event.type === 'dragstart' && bubbleVisible) {
+        event.preventDefault();
+        return true;
+      }
       // Allow mouse events on resize handles
       if (event.target.classList.contains('cherry-previewer-img-size-handler__points')) {
         return true;
