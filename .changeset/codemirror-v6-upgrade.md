@@ -1,5 +1,5 @@
 ---
-'cherry-markdown': major
+'cherry-markdown': minor
 ---
 
 - refactor: 升级 CodeMirror 到 v6
