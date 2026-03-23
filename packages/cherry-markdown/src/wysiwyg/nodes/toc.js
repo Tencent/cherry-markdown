@@ -140,6 +140,7 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
     const from = h.pos + 1;
     const to = from + headingNode.content.size;
     const tr = state.tr.replaceWith(from, to, newText ? state.schema.text(newText) : []);
+    tr.setMeta('scrollIntoView', false);
     view.dispatch(tr);
   }
 
@@ -151,6 +152,7 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
     if (newLevel === h.level) return;
     const { state } = view;
     const tr = state.tr.setNodeMarkup(h.pos, undefined, { ...h.node.attrs, level: newLevel });
+    tr.setMeta('scrollIntoView', false);
     view.dispatch(tr);
   }
 
@@ -171,6 +173,7 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
       state.schema.text(tocLocale.newHeading || 'New Heading'),
     );
     const tr = state.tr.insert(insertPos, heading);
+    tr.setMeta('scrollIntoView', false);
     view.dispatch(tr);
   }
 
@@ -180,6 +183,7 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
     const h = headings[index];
     const { state } = view;
     const tr = state.tr.delete(h.pos, h.pos + h.node.nodeSize);
+    tr.setMeta('scrollIntoView', false);
     view.dispatch(tr);
   }
 
@@ -261,6 +265,7 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
 
     if (!needMove) {
       // Only level change, no move — just dispatch
+      levelTr.setMeta('scrollIntoView', false);
       view.dispatch(levelTr);
     } else {
       // Step 2: Read the (possibly level-adjusted) section content
@@ -282,6 +287,7 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
       tr = tr.delete(section.start, section.end);
       const mappedTarget = tr.mapping.map(targetPos);
       tr = tr.insert(mappedTarget, sectionContent);
+      tr.setMeta('scrollIntoView', false);
       view.dispatch(tr);
     }
 
