@@ -873,6 +873,7 @@
 
   /* TOC 目录块 — 完整复用预览模式 .toc 样式（因为 .cherry-wysiwyg 不在 .cherry-markdown 下） */
   .cherry-toc-block {
+    position: relative;
     user-select: none;
     margin-bottom: var(--spacing-lg, 16px);
     padding-left: 0;
@@ -1040,6 +1041,28 @@
       display: flex;
       align-items: center;
       gap: 8px;
+    }
+
+    .cherry-toc-toast {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      background: var(--md-paragraph-color, #343a40);
+      color: #fff;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 4px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 10;
+
+      &.cherry-toc-toast-show {
+        opacity: 0.85;
+        transform: translateX(-50%) translateY(0);
+      }
     }
   }
 }

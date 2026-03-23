@@ -126,7 +126,6 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
   let dragStartX = 0;
   let dragFromLevel = 1;
   let dragLevelDelta = 0;
-  const levelIndentMap = {}; // level → paddingLeft in px, computed after render
 
   // --- Document operations ---
 
@@ -200,6 +199,34 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
     return { start, end: doc.content.size };
   }
 
+  function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'cherry-toc-toast';
+    toast.textContent = message;
+    dom.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('cherry-toc-toast-show'));
+    setTimeout(() => {
+      toast.classList.remove('cherry-toc-toast-show');
+      setTimeout(() => toast.remove(), 200);
+    }, 2000);
+  }
+
+  function countSectionContent(doc, headings, fromIdx) {
+    const section = getSectionRange(doc, headings, fromIdx);
+    let subHeadings = 0;
+    let blocks = 0;
+    doc.nodesBetween(section.start, section.end, (node, pos) => {
+      if (pos === section.start) return true; // skip the heading itself
+      if (node.isBlock && node.type.name !== 'doc') {
+        if (node.type.name === 'heading') subHeadings++;
+        else blocks++;
+        return false;
+      }
+      return true;
+    });
+    return { subHeadings, blocks };
+  }
+
   function moveHeading(fromIdx, toIdx, levelDelta) {
     const headings = collectHeadings(view.state.doc);
     if (fromIdx < 0 || fromIdx >= headings.length) return;
@@ -212,9 +239,11 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
     const needLevel = newLevel !== src.level;
     if (!needMove && !needLevel) return;
 
+    // Count section content before moving for user notification
+    const { subHeadings, blocks } = countSectionContent(state.doc, headings, fromIdx);
+
     // Section = heading + all content until next same-or-higher-level heading
     const section = getSectionRange(state.doc, headings, fromIdx);
-    const sectionSlice = state.doc.slice(section.start, section.end);
 
     let tr = state.tr;
 
@@ -232,7 +261,6 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
     }
 
     if (needMove) {
-      // Compute target insert position in the original doc, then map
       let targetPos;
       if (toIdx < headings.length) {
         targetPos = headings[toIdx].pos;
@@ -240,18 +268,15 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
         targetPos = state.doc.content.size;
       }
 
-      // Re-read section content after level changes
       const mappedStart = tr.mapping.map(section.start);
       const mappedEnd = tr.mapping.map(section.end);
       const updatedSlice = tr.doc.slice(mappedStart, mappedEnd);
 
       if (fromIdx < toIdx) {
-        // Insert at target first, then delete original
         const mappedTarget = tr.mapping.map(targetPos);
         tr = tr.insert(mappedTarget, updatedSlice.content);
         tr = tr.delete(tr.mapping.map(mappedStart), tr.mapping.map(mappedEnd));
       } else {
-        // Delete original first, then insert at target
         tr = tr.delete(mappedStart, mappedEnd);
         const mappedTarget = tr.mapping.map(targetPos);
         tr = tr.insert(mappedTarget, updatedSlice.content);
@@ -259,6 +284,21 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
     }
 
     view.dispatch(tr);
+
+    // Show toast if section had extra content
+    if (subHeadings > 0 || blocks > 0) {
+      const parts = [];
+      if (subHeadings > 0) parts.push(tocLocale.subHeadingCount
+        ? tocLocale.subHeadingCount.replace('{n}', subHeadings)
+        : `${subHeadings} sub-heading(s)`);
+      if (blocks > 0) parts.push(tocLocale.blockCount
+        ? tocLocale.blockCount.replace('{n}', blocks)
+        : `${blocks} block(s)`);
+      const msg = tocLocale.sectionMoved
+        ? tocLocale.sectionMoved.replace('{content}', parts.join(tocLocale.and || ', '))
+        : `Moved with ${parts.join(', ')}`;
+      showToast(msg);
+    }
   }
 
   // --- Render ---
@@ -356,8 +396,9 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
         dragLevelDelta = Math.max(1 - dragFromLevel, Math.min(6 - dragFromLevel, rawDelta));
         const targetLevel = dragFromLevel + dragLevelDelta;
 
-        // Visual indicator — use cached pixel indent for target level
-        li.style.setProperty('--drop-indent', `${levelIndentMap[targetLevel] || 0}px`);
+        // Visual indicator — match the actual padding-left of the target level
+        const indent = (targetLevel - 1) * 1.2;
+        li.style.setProperty('--drop-indent', `calc(var(--md-toc-indicator-gap, 16px) + ${indent}em)`);
 
         // When target level is deeper than hovered heading, dropping on
         // top-half means "first child of this heading" → show below indicator.
@@ -406,38 +447,6 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
       });
 
       listEl.appendChild(li);
-    });
-
-    // Cache pixel indent per level after DOM is built (read once, use in dragover)
-    requestAnimationFrame(() => {
-      for (let lvl = 1; lvl <= 6; lvl++) {
-        const el = listEl.querySelector(`.toc-li-${lvl}`);
-        if (el) {
-          levelIndentMap[lvl] = parseFloat(getComputedStyle(el).paddingLeft) || 0;
-        }
-      }
-      // Extrapolate missing levels from known ones
-      const knownLevels = Object.keys(levelIndentMap).map(Number).sort((a, b) => a - b);
-      if (knownLevels.length >= 2) {
-        const stepPx = (levelIndentMap[knownLevels[1]] - levelIndentMap[knownLevels[0]])
-          / (knownLevels[1] - knownLevels[0]);
-        const basePx = levelIndentMap[knownLevels[0]] - (knownLevels[0] - 1) * stepPx;
-        for (let lvl = 1; lvl <= 6; lvl++) {
-          if (!(lvl in levelIndentMap)) {
-            levelIndentMap[lvl] = basePx + (lvl - 1) * stepPx;
-          }
-        }
-      } else if (knownLevels.length === 1) {
-        const known = knownLevels[0];
-        const fontSize = parseFloat(getComputedStyle(listEl).fontSize) || 16;
-        const stepPx = 1.2 * fontSize;
-        const basePx = levelIndentMap[known] - (known - 1) * stepPx;
-        for (let lvl = 1; lvl <= 6; lvl++) {
-          if (!(lvl in levelIndentMap)) {
-            levelIndentMap[lvl] = basePx + (lvl - 1) * stepPx;
-          }
-        }
-      }
     });
   }
 
