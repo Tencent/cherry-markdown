@@ -90,18 +90,20 @@ function computeDecoStyle(attrs) {
  * In WYSIWYG, alignment is on the wrapper (block-level), not on the img.
  */
 function computeWrapperAlignment(alignment) {
-  // Use width:fit-content so auto margins work for centering/right-alignment
+  // Use width:fit-content so auto margins work for centering/right-alignment.
+  // CSS float is incompatible with ProseMirror's block structure (subsequent nodes
+  // slide under the float), so float-left/float-right are approximated as
+  // left/right alignment in WYSIWYG. The markdown output still preserves the
+  // float-left/float-right attribute for correct rendering in preview mode.
   switch (alignment) {
     case 'center':
       return 'width:fit-content;margin-left:auto;margin-right:auto;display:block;';
     case 'right':
+    case 'float-right':
       return 'width:fit-content;margin-left:auto;margin-right:0;display:block;';
     case 'left':
-      return 'width:fit-content;margin-right:auto;margin-left:0;display:block;';
     case 'float-left':
-      return 'float:left;margin-right:8px;';
-    case 'float-right':
-      return 'float:right;margin-left:8px;';
+      return 'width:fit-content;margin-right:auto;margin-left:0;display:block;';
     default:
       return '';
   }
