@@ -1314,8 +1314,8 @@ export default class Editor {
    * @private
    */
   doDealSpecialWordsInternal = () => {
-    // 纯预览模式下编辑器隐藏时不处理（避免性能问题）
-    if (this.$cherry?.status?.editor === 'hide') {
+    // 编辑器隐藏或已销毁时不处理（避免性能问题和异步回调错误）
+    if (this.$cherry?.status?.editor === 'hide' || this.isDestroyed) {
       return;
     }
 

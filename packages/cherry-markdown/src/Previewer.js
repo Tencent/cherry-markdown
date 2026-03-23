@@ -25,8 +25,6 @@ import { exportPDF, exportScreenShot, exportMarkdownFile, exportHTMLFile, export
 import PreviewerBubble from './toolbars/PreviewerBubble';
 import LazyLoadImg from '@/utils/lazyLoadImg';
 
-let onScroll = () => {}; // store in memory for remove event
-
 /**
  * 作用：
  *  dom更新
@@ -54,6 +52,34 @@ export default class Previewer {
    * @type {boolean} 是否为移动端预览模式
    */
   isMobilePreview = false;
+
+  /**
+   * @property
+   * @private
+   * @type {Function|null} 滚动事件处理器，保存为实例属性避免多实例冲突
+   */
+  scrollHandler = null;
+
+  /**
+   * @property
+   * @private
+   * @type {Function|null} 鼠标滚轮事件处理器，保存为实例属性避免内存泄漏
+   */
+  wheelHandler = null;
+
+  /**
+   * @property
+   * @private
+   * @type {ResizeObserver|null} ResizeObserver 实例，避免内存泄漏
+   */
+  resizeObserver = null;
+
+  /**
+   * @property
+   * @private
+   * @type {boolean} 标记该实例是否已销毁，防止销毁后的异步操作执行
+   */
+  isDestroyed = false;
 
   /**
    *
@@ -175,15 +201,24 @@ export default class Previewer {
    * “监听”编辑器的尺寸变化，变化时更新拖拽条的位置
    */
   onSizeChange() {
-    // 创建一个新的 ResizeObserver 实例
-    const resizeObserver = new ResizeObserver(() => {
+    // 清理旧的 ResizeObserver（如果存在）
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
+
+    // 创建一个新的 ResizeObserver 实例，保存为实例属性便于清理
+    this.resizeObserver = new ResizeObserver(() => {
+      // 销毁后不执行回调，防止访问已清理的引用
+      if (this.isDestroyed) {
+        return;
+      }
       this.syncVirtualLayoutFromReal();
       this.subMenusPositionChange();
       // 发布编辑器大小变化事件
       this.$cherry.$event.emit('editor.size.change');
     });
     // 开始监听元素
-    resizeObserver.observe(this.$cherry.wrapperDom);
+    this.resizeObserver.observe(this.$cherry.wrapperDom);
   }
 
   subMenusPositionChange() {
@@ -202,9 +237,14 @@ export default class Previewer {
    * @returns {HTMLElement}
    */
   getDomContainer() {
-    return this.isMobilePreview
-      ? this.options.previewerDom.querySelector('.cherry-mobile-previewer-content')
-      : this.options.previewerDom;
+    if (this.isMobilePreview) {
+      const mobileContainer = /** @type {HTMLElement | null} */ (
+        this.options.previewerDom.querySelector('.cherry-mobile-previewer-content')
+      );
+      // 如果移动端容器不存在，fallback 到主容器
+      return mobileContainer || this.options.previewerDom;
+    }
+    return this.options.previewerDom;
   }
 
   getDom() {
@@ -459,7 +499,11 @@ export default class Previewer {
 
   bindScroll() {
     const domContainer = this.getDomContainer();
-    onScroll = () => {
+    this.scrollHandler = () => {
+      // 销毁后不执行，防止访问已清理的引用
+      if (this.isDestroyed) {
+        return;
+      }
       if (this.applyingDomChanges) {
         return;
       }
@@ -510,23 +554,28 @@ export default class Previewer {
       // }
       // return this.editor.scrollToLineNum(lines - lineNum, 0, 0);
     };
-    addEvent(domContainer, 'scroll', onScroll, false);
-    addEvent(
-      domContainer,
-      'wheel',
-      () => {
-        // 鼠标滚轮滚动时,打断滚动动画并恢复监听
-        cancelAnimationFrame(this.animation.timer);
-        this.animation.timer = 0;
-        this.disableScrollListener = false;
-      },
-      false,
-    );
+    addEvent(domContainer, 'scroll', this.scrollHandler, false);
+
+    // 保存 wheel 事件处理器为实例属性，避免内存泄漏
+    this.wheelHandler = () => {
+      // 销毁后不执行
+      if (this.isDestroyed) {
+        return;
+      }
+      // 鼠标滚轮滚动时,打断滚动动画并恢复监听
+      cancelAnimationFrame(this.animation.timer);
+      this.animation.timer = 0;
+      this.disableScrollListener = false;
+    };
+    addEvent(domContainer, 'wheel', this.wheelHandler, false);
   }
 
   removeScroll() {
     const domContainer = this.getDomContainer();
-    removeEvent(domContainer, 'scroll', onScroll, false);
+    if (this.scrollHandler && domContainer) {
+      removeEvent(domContainer, 'scroll', this.scrollHandler, false);
+      this.scrollHandler = null;
+    }
   }
 
   $html2H(dom) {
@@ -745,6 +794,10 @@ export default class Previewer {
   }
 
   update(html) {
+    // 销毁后不执行更新
+    if (this.isDestroyed) {
+      return;
+    }
     // 更新时保留图片懒加载逻辑
     const newHtml = this.lazyLoadImg.changeSrc2DataSrc(html);
     if (!this.isPreviewerHidden()) {
@@ -920,6 +973,10 @@ export default class Previewer {
   }
 
   afterUpdate() {
+    // 销毁后不执行，防止访问已清理的 this.options
+    if (this.isDestroyed) {
+      return;
+    }
     this.options.afterUpdateCallBack.map((fn) => fn());
     if (this.highlightLineNum === undefined) {
       this.highlightLineNum = 0;
@@ -1302,5 +1359,62 @@ export default class Previewer {
       previewerDom.parentNode.innerHTML = previewerDom.innerHTML;
     }
     this.isMobilePreview = isMobile;
+  }
+
+  /**
+   * 销毁预览器实例，清理所有资源
+   * 此方法应在销毁 Cherry 编辑器时调用
+   */
+  destroy() {
+    if (this.isDestroyed) {
+      return;
+    }
+
+    this.isDestroyed = true;
+
+    // 清理滚动事件监听
+    this.removeScroll();
+
+    // 清理 wheel 事件监听
+    const domContainer = this.getDomContainer();
+    if (this.wheelHandler && domContainer) {
+      removeEvent(domContainer, 'wheel', this.wheelHandler, false);
+      this.wheelHandler = null;
+    }
+
+    // 清理 ResizeObserver
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
+    }
+
+    // 清理 LazyLoadImg 实例
+    if (this.lazyLoadImg && typeof this.lazyLoadImg.destroy === 'function') {
+      this.lazyLoadImg.destroy();
+      this.lazyLoadImg = null;
+    }
+
+    // 清理 PreviewerBubble 实例
+    if (this.previewerBubble && typeof this.previewerBubble.destroy === 'function') {
+      this.previewerBubble.destroy();
+      this.previewerBubble = null;
+    }
+
+    // 清理同步滚动锁定定时器
+    if (this.syncScrollLockTimer) {
+      clearTimeout(this.syncScrollLockTimer);
+      this.syncScrollLockTimer = 0;
+    }
+
+    // 清理动画定时器
+    if (this.animation && this.animation.timer) {
+      cancelAnimationFrame(this.animation.timer);
+      this.animation.timer = 0;
+    }
+
+    // 清理引用
+    this.$cherry = null;
+    this.editor = null;
+    this.options = null;
   }
 }

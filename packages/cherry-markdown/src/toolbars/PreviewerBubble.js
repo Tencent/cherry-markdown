@@ -64,36 +64,44 @@ export default class PreviewerBubble {
   init() {
     // 记录cherry外层容器的overflow属性，在后续的操作中会临时修改overflow属性，所以需要先记录
     this.oldWrapperDomOverflow = this.previewer.$cherry.wrapperDom.style.overflow;
-    this.previewerDom.addEventListener('click', this.$onClick.bind(this));
-    this.previewerDom.addEventListener('mouseover', this.$onMouseOver.bind(this));
-    // this.previewerDom.addEventListener('mouseout', this.$onMouseOut.bind(this));
 
-    document.addEventListener('mousedown', (event) => {
+    // 保存事件监听器引用，便于销毁时移除
+    this.$bindedOnClick = this.$onClick.bind(this);
+    this.$bindedOnMouseOver = this.$onMouseOver.bind(this);
+    this.$bindedOnMouseDown = (event) => {
       Object.values(this.bubbleHandler).forEach((handler) => handler.emit('mousedown', event));
-    });
-    document.addEventListener('mouseup', (event) => {
+    };
+    this.$bindedOnMouseUp = (event) => {
       Object.values(this.bubbleHandler).forEach((handler) =>
         handler.emit('mouseup', event, () => this.$removeAllPreviewerBubbles('click')),
       );
-    });
-    document.addEventListener('mousemove', (event) => {
+    };
+    this.$bindedOnMouseMove = (event) => {
       Object.values(this.bubbleHandler).forEach((handler) => handler.emit('mousemove', event));
-    });
-    document.addEventListener('keyup', (event) => {
+    };
+    this.$bindedOnKeyUp = (event) => {
       Object.values(this.bubbleHandler).forEach((handler) => handler.emit('keyup', event));
-    });
-
-    this.$cherry.$event.on('editor.size.change', () => {
+    };
+    this.$bindedOnScroll = (event) => {
+      Object.values(this.bubbleHandler).forEach((handler) => handler.emit('scroll', event));
+    };
+    this.$bindedOnChange = this.$onChange.bind(this);
+    this.$bindedOnEditorSizeChange = () => {
       Object.values(this.bubbleHandler).forEach((handler) => handler.emit('resize', {}));
-    });
+    };
 
-    this.previewerDom.addEventListener(
-      'scroll',
-      (event) => {
-        Object.values(this.bubbleHandler).forEach((handler) => handler.emit('scroll', event));
-      },
-      true,
-    );
+    this.previewerDom.addEventListener('click', this.$bindedOnClick);
+    this.previewerDom.addEventListener('mouseover', this.$bindedOnMouseOver);
+    // this.previewerDom.addEventListener('mouseout', this.$onMouseOut.bind(this));
+
+    document.addEventListener('mousedown', this.$bindedOnMouseDown);
+    document.addEventListener('mouseup', this.$bindedOnMouseUp);
+    document.addEventListener('mousemove', this.$bindedOnMouseMove);
+    document.addEventListener('keyup', this.$bindedOnKeyUp);
+
+    this.$cherry.$event.on('editor.size.change', this.$bindedOnEditorSizeChange);
+
+    this.previewerDom.addEventListener('scroll', this.$bindedOnScroll, true);
     this.$cherry.$event.on('previewerClose', () => this.$removeAllPreviewerBubbles());
     this.previewer.options.afterUpdateCallBack.push(() => {
       // 检查表格处理器是否需要重新创建
@@ -103,8 +111,11 @@ export default class PreviewerBubble {
         handler.emit('previewUpdate', () => this.$removeAllPreviewerBubbles()),
       );
     });
-    this.previewerDom.addEventListener('change', this.$onChange.bind(this));
+    this.previewerDom.addEventListener('change', this.$bindedOnChange);
     this.removeHoverBubble = debounce(() => this.$removeAllPreviewerBubbles('hover'), 400);
+
+    // 销毁标志
+    this.isDestroyed = false;
   }
 
   /**
@@ -538,7 +549,7 @@ export default class PreviewerBubble {
         value.emit('remove');
         delete this.bubbleHandler[key];
       });
-    if (Object.keys(this.bubbleHandler).length <= 0) {
+    if (Object.keys(this.bubbleHandler).length <= 0 && this.previewer?.$cherry?.wrapperDom) {
       this.previewer.$cherry.wrapperDom.style.overflow = this.oldWrapperDomOverflow || '';
     }
   }
@@ -603,7 +614,7 @@ export default class PreviewerBubble {
       this.bubbleHandler[trigger].emit('remove');
       delete this.bubbleHandler[trigger];
     }
-    if (Object.keys(this.bubbleHandler).length <= 0) {
+    if (Object.keys(this.bubbleHandler).length <= 0 && this.previewer?.$cherry?.wrapperDom) {
       this.previewer.$cherry.wrapperDom.style.overflow = this.oldWrapperDomOverflow || '';
     }
   }
@@ -1165,4 +1176,60 @@ export default class PreviewerBubble {
   $showBorderBubbles() {}
 
   $showBtnBubbles() {}
+
+  /**
+   * 销毁 PreviewerBubble 实例，清理事件监听器和引用
+   */
+  destroy() {
+    if (this.isDestroyed) {
+      return;
+    }
+
+    this.isDestroyed = true;
+
+    // 移除所有气泡
+    this.$removeAllPreviewerBubbles();
+
+    // 取消防抖定时器
+    if (this.removeHoverBubble && this.removeHoverBubble.cancel) {
+      this.removeHoverBubble.cancel();
+    }
+
+    // 移除 previewerDom 上的事件监听器
+    if (this.previewerDom) {
+      this.previewerDom.removeEventListener('click', this.$bindedOnClick);
+      this.previewerDom.removeEventListener('mouseover', this.$bindedOnMouseOver);
+      this.previewerDom.removeEventListener('scroll', this.$bindedOnScroll, true);
+      this.previewerDom.removeEventListener('change', this.$bindedOnChange);
+    }
+
+    // 移除 document 上的事件监听器
+    document.removeEventListener('mousedown', this.$bindedOnMouseDown);
+    document.removeEventListener('mouseup', this.$bindedOnMouseUp);
+    document.removeEventListener('mousemove', this.$bindedOnMouseMove);
+    document.removeEventListener('keyup', this.$bindedOnKeyUp);
+
+    // 移除自定义事件监听器
+    if (this.$cherry && this.$cherry.$event) {
+      this.$cherry.$event.off('editor.size.change', this.$bindedOnEditorSizeChange);
+    }
+
+    // 清理引用
+    this.$bindedOnClick = null;
+    this.$bindedOnMouseOver = null;
+    this.$bindedOnMouseDown = null;
+    this.$bindedOnMouseUp = null;
+    this.$bindedOnMouseMove = null;
+    this.$bindedOnKeyUp = null;
+    this.$bindedOnScroll = null;
+    this.$bindedOnChange = null;
+    this.$bindedOnEditorSizeChange = null;
+
+    this.bubble = {};
+    this.bubbleHandler = {};
+    this.previewer = null;
+    this.editor = null;
+    this.previewerDom = null;
+    this.$cherry = null;
+  }
 }
