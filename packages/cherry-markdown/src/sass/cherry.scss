@@ -934,19 +934,23 @@
       opacity: 0.4;
     }
 
-    .cherry-toc-drop-above {
-      background-image: linear-gradient(var(--primary-color, #30D158), var(--primary-color, #30D158));
-      background-repeat: no-repeat;
-      background-size: calc(100% - var(--drop-indent, 0em)) 2px;
-      background-position: right top;
+    .cherry-toc-drop-above,
+    .cherry-toc-drop-below {
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: var(--drop-indent, 0px);
+        right: 0;
+        height: 2px;
+        background: var(--primary-color, #30D158);
+        pointer-events: none;
+      }
     }
 
-    .cherry-toc-drop-below {
-      background-image: linear-gradient(var(--primary-color, #30D158), var(--primary-color, #30D158));
-      background-repeat: no-repeat;
-      background-size: calc(100% - var(--drop-indent, 0em)) 2px;
-      background-position: right bottom;
-    }
+    .cherry-toc-drop-above::after { top: 0; }
+    .cherry-toc-drop-below::after { bottom: 0; }
 
     /* 条目内容 — 富文本渲染，点击编辑 */
     .cherry-toc-entry {

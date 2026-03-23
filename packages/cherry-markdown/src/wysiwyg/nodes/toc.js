@@ -355,9 +355,9 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
         dragLevelDelta = Math.max(1 - dragFromLevel, Math.min(6 - dragFromLevel, rawDelta));
         const targetLevel = dragFromLevel + dragLevelDelta;
 
-        // Visual indicator with indent preview
+        // Visual indicator — match the actual padding-left of the target level
         const indent = (targetLevel - 1) * 1.2;
-        li.style.setProperty('--drop-indent', `${indent}em`);
+        li.style.setProperty('--drop-indent', `calc(var(--md-toc-indicator-gap, 16px) + ${indent}em)`);
 
         // When target level is deeper than hovered heading, dropping on
         // top-half means "first child of this heading" → show below indicator.
