@@ -2093,6 +2093,7 @@
     cursor: text;
     position: relative;
     z-index: 11;
+    caret-color: var(--md-text-color, #343a40);
 
     &:hover {
       background: var(--md-toc-link-hover-bg, rgba(0, 0, 0, 0.04));
