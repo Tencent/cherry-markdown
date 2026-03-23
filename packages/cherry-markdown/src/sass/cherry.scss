@@ -2098,6 +2098,12 @@
 /** 引入自带的主题 */
 /* WYSIWYG 图片调整 — 复用预览模式的 resize handles 和 tool handler 样式 */
 .cherry-wysiwyg {
+  /* Float image: siblings create BFC to prevent background/border from sliding under */
+  .ProseMirror > .cherry-wysiwyg-image-wrapper.cherry-img-align-float-left ~ *:not(.cherry-wysiwyg-image-wrapper),
+  .ProseMirror > .cherry-wysiwyg-image-wrapper.cherry-img-align-float-right ~ *:not(.cherry-wysiwyg-image-wrapper) {
+    overflow: auto;
+  }
+
   .cherry-wysiwyg-image-wrapper {
     position: relative;
     display: inline-block;
