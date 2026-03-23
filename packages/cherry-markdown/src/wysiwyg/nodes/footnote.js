@@ -15,8 +15,13 @@ const footnoteKey = new PluginKey('cherryFootnote');
 
 /** Singleton bubble element, reused across clicks */
 let bubbleEl = null;
+let activeClickOutsideHandler = null;
 
 function removeBubble() {
+  if (activeClickOutsideHandler) {
+    document.removeEventListener('click', activeClickOutsideHandler, true);
+    activeClickOutsideHandler = null;
+  }
   if (bubbleEl && bubbleEl.parentNode) {
     bubbleEl.parentNode.removeChild(bubbleEl);
   }
@@ -99,9 +104,9 @@ function showFootnoteBubble(supEl, num, label, content, editorDom, view) {
         updateFootnoteDefinition(view, label, newContent);
       }
       removeBubble();
-      document.removeEventListener('click', onClickOutside, true);
     }
   };
+  activeClickOutsideHandler = onClickOutside;
   setTimeout(() => document.addEventListener('click', onClickOutside, true), 0);
 }
 
@@ -140,6 +145,9 @@ function computeFootnoteState(doc) {
 export const footnotePlugin = $prose(() => {
   return new Plugin({
     key: footnoteKey,
+    view() {
+      return { destroy() { removeBubble(); } };
+    },
     props: {
       decorations(state) {
         const { labelToNum, references, definitions, firstDefPos } = computeFootnoteState(state.doc);
@@ -192,8 +200,12 @@ export const footnotePlugin = $prose(() => {
         const { definitions, firstDefPos } = computeFootnoteState(state.doc);
         if (definitions.length === 0 || firstDefPos === null) return false;
 
-        // Only intercept if cursor is within the footnote definitions area
-        if ($from.pos < firstDefPos) return false;
+        // Only intercept if cursor is inside a footnote_definition node
+        let insideFootnoteDef = false;
+        for (let d = $from.depth; d > 0; d--) {
+          if ($from.node(d).type.name === 'footnote_definition') { insideFootnoteDef = true; break; }
+        }
+        if (!insideFootnoteDef) return false;
 
         // Insert a new paragraph before the first footnote definition and move cursor there
         const paragraph = state.schema.nodes.paragraph.create();

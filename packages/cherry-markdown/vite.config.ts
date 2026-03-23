@@ -98,11 +98,24 @@ export default defineConfig({
       name: 'serve-examples',
       configureServer(server: any) {
         const examplesDir = path.resolve(__dirname, '../../examples');
+        const mimeTypes: Record<string, string> = {
+          '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css',
+          '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png',
+          '.jpg': 'image/jpeg', '.gif': 'image/gif', '.xml': 'application/xml',
+        };
         server.middlewares.use('/examples', (req: any, res: any, next: any) => {
-          const filePath = path.join(examplesDir, req.url.split('?')[0]);
-          if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-            res.writeHead(200);
-            fs.createReadStream(filePath).pipe(res);
+          const requestPath = (req.url || '').split('?')[0] || '/';
+          const resolvedPath = path.resolve(examplesDir, '.' + requestPath);
+          if (!resolvedPath.startsWith(examplesDir + path.sep) && resolvedPath !== examplesDir) {
+            res.statusCode = 403;
+            res.end('Forbidden');
+            return;
+          }
+          if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isFile()) {
+            const ext = path.extname(resolvedPath).toLowerCase();
+            const contentType = mimeTypes[ext] || 'application/octet-stream';
+            res.writeHead(200, { 'Content-Type': contentType });
+            fs.createReadStream(resolvedPath).pipe(res);
           } else {
             next();
           }

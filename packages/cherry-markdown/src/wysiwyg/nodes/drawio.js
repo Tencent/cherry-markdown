@@ -173,7 +173,12 @@ function openDrawioEditor(node, view, getPos) {
   const pos = typeof getPos === 'function' ? getPos() : getPos;
   if (typeof pos !== 'number') return;
 
-  const xmlData = decodeURI(node.attrs.xmlData);
+  let xmlData;
+  try {
+    xmlData = decodeURI(node.attrs.xmlData);
+  } catch (e) {
+    xmlData = node.attrs.xmlData;
+  }
 
   drawioDialog(
     _drawioConfig.iframeUrl,

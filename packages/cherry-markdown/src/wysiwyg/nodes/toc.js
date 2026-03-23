@@ -101,7 +101,7 @@ function serializeInlineContent(headingNode, schema) {
   return wrapper;
 }
 
-const activeTocViews = new Set();
+const activeTocViewsByEditor = new WeakMap();
 
 // ---------------------------------------------------------------------------
 // 4. NodeView
@@ -519,7 +519,16 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
     const handlePaste = (e) => {
       e.preventDefault();
       const text = (e.clipboardData || window.clipboardData).getData('text/plain').replace(/\n/g, ' ');
-      document.execCommand('insertText', false, text);
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      const textNode = document.createTextNode(text);
+      range.insertNode(textNode);
+      range.setStartAfter(textNode);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
     };
 
     editWrapper.addEventListener('blur', handleBlur);
@@ -543,7 +552,8 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
   render();
 
   const instance = { render };
-  activeTocViews.add(instance);
+  if (!activeTocViewsByEditor.has(view)) activeTocViewsByEditor.set(view, new Set());
+  activeTocViewsByEditor.get(view).add(instance);
 
   return {
     dom,
@@ -553,7 +563,10 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
     },
     ignoreMutation() { return true; },
     stopEvent() { return true; },
-    destroy() { activeTocViews.delete(instance); },
+    destroy() {
+      const set = activeTocViewsByEditor.get(view);
+      if (set) { set.delete(instance); if (set.size === 0) activeTocViewsByEditor.delete(view); }
+    },
   };
 });
 
@@ -566,7 +579,9 @@ export const tocRefreshPlugin = $prose(() => new Plugin({
     return {
       update(editorView, prevState) {
         if (editorView.state.doc.eq(prevState.doc)) return;
-        for (const tocInstance of activeTocViews) {
+        const views = activeTocViewsByEditor.get(editorView);
+        if (!views) return;
+        for (const tocInstance of views) {
           tocInstance.render();
         }
       },

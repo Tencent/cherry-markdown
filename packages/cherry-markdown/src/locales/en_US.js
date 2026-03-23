@@ -42,6 +42,8 @@ export default {
   hr: 'Horizontal Rule',
   br: 'New Line',
   toc: 'Table Of Content',
+  emptyToc: '(No headings)',
+  newHeading: 'New Heading',
   sectionMoved: 'Moved with {content}',
   subHeadingCount: '{n} sub-heading(s)',
   blockCount: '{n} block(s)',

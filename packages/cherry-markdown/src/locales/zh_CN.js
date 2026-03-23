@@ -42,6 +42,8 @@ export default {
   hr: '分隔线', // 分隔线
   br: '换行', // 换行
   toc: '目录', // 目录
+  emptyToc: '（暂无标题）',
+  newHeading: '新标题',
   sectionMoved: '已连同 {content} 一起移动',
   subHeadingCount: '{n} 个子标题',
   blockCount: '{n} 个内容块',

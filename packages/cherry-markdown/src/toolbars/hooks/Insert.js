@@ -334,9 +334,14 @@ export default class Insert extends MenuBase {
           return $selection.replace(/^\s*\{\s*([\s\S]+?)\s*\|[\s\S]+\}\s*/gm, '$1');
         }
         return ` { ${$selection} | ${this.editor.$cherry.options.callback.changeString2Pinyin($selection).trim()} } `;
-      case 'footnote':
-        // 插入脚注引用 + 定义
-        return `${selection}[^fn1]\n\n[^fn1]: 脚注内容\n\n`;
+      case 'footnote': {
+        // 插入脚注引用 + 定义（自动生成唯一标签）
+        const doc = this.editor.$cherry.getMarkdown?.() || '';
+        let n = 1;
+        while (doc.includes(`[^fn${n}]`)) n++;
+        const label = `fn${n}`;
+        return `${selection}[^${label}]\n\n[^${label}]: 脚注内容\n\n`;
+      }
     }
   }
 }

@@ -19,6 +19,14 @@ export default class Footnote extends MenuBase {
       this.$cherry.wysiwygEditor.execCommand('footnote');
       return false;
     }
-    return `${selection}[^fn1]\n\n[^fn1]: 脚注内容\n\n`;
+    const label = this.#nextFootnoteLabel();
+    return `${selection}[^${label}]\n\n[^${label}]: 脚注内容\n\n`;
+  }
+
+  #nextFootnoteLabel() {
+    const doc = this.$cherry.getMarkdown?.() || '';
+    let n = 1;
+    while (doc.includes(`[^fn${n}]`)) n++;
+    return `fn${n}`;
   }
 }
