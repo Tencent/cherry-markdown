@@ -203,7 +203,7 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
     const toast = document.createElement('div');
     toast.className = 'cherry-toc-toast';
     toast.textContent = message;
-    dom.appendChild(toast);
+    document.body.appendChild(toast);
     requestAnimationFrame(() => toast.classList.add('cherry-toc-toast-show'));
     setTimeout(() => {
       toast.classList.remove('cherry-toc-toast-show');
