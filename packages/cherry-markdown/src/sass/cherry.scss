@@ -2090,9 +2090,17 @@
     min-height: 1.2em;
     line-height: 1.4;
     border-radius: 3px;
+    cursor: text;
+    position: relative;
+    z-index: 11;
+
+    &:hover {
+      background: var(--md-toc-link-hover-bg, rgba(0, 0, 0, 0.04));
+    }
 
     &:focus {
       background: var(--md-toc-link-hover-bg, rgba(0, 0, 0, 0.04));
+      box-shadow: 0 0 0 1px var(--primary-color, #4d90fe);
     }
 
     &:empty::before {

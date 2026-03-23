@@ -342,16 +342,15 @@ export const cherryImageView = $view(cherryImageSchema.node, () => (initialNode,
   // Update title attr on caption blur
   caption.addEventListener('blur', () => {
     const newTitle = caption.textContent.trim();
-    if (!newTitle && !node.attrs.title) {
-      caption.style.display = 'none';
-      return;
-    }
-    if (newTitle !== node.attrs.title) {
+    if (newTitle !== (node.attrs.title || '')) {
       updateNodeAttrs({ title: newTitle });
     }
-    if (!newTitle) {
-      caption.style.display = 'none';
-    }
+    // Dismiss bubble after caption editing ends (deferred so focus can settle)
+    setTimeout(() => {
+      if (document.activeElement !== caption && !caption.contains(document.activeElement)) {
+        hideBubble();
+      }
+    }, 0);
   });
 
   // Prevent Enter from creating newline in caption
@@ -424,6 +423,15 @@ export const cherryImageView = $view(cherryImageSchema.node, () => (initialNode,
     imgToolHandler.bindChange((imgEl, type) => {
       handleToolChange(type);
     });
+
+    // Prevent toolbar from overlapping the caption area below the image
+    const captionRect = caption.getBoundingClientRect();
+    const toolRect = toolContainer.getBoundingClientRect();
+    if (captionRect.height > 0 && toolRect.bottom > captionRect.top && toolRect.top < captionRect.bottom) {
+      const currentTop = parseFloat(toolContainer.style.top) || 0;
+      const overlap = toolRect.bottom - captionRect.top + 4;
+      toolContainer.style.top = `${currentTop - overlap}px`;
+    }
 
     _activeBubble = { hideBubble };
 
@@ -571,6 +579,11 @@ export const cherryImageView = $view(cherryImageSchema.node, () => (initialNode,
     },
     deselectNode() {
       wrapper.classList.remove('ProseMirror-selectednode');
+      // Don't hide bubble if the caption is focused — clicking caption causes
+      // ProseMirror to deselect the node, but the user is editing the title.
+      if (document.activeElement === caption || caption.contains(document.activeElement)) {
+        return;
+      }
       hideBubble();
     },
     stopEvent(event) {
