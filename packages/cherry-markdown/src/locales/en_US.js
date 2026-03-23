@@ -196,6 +196,7 @@ export default {
   border: 'Border',
   shadow: 'Shadow',
   radius: 'Radius',
+  imageCaption: 'Add caption',
   customShortcut: 'Custom Shortcuts',
   staticShortcut: 'Built-in Shortcuts',
   edit: 'Edit',

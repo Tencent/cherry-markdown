@@ -197,6 +197,7 @@ export default {
   border: '边框',
   shadow: '阴影',
   radius: '圆角',
+  imageCaption: '添加标题',
   customShortcut: '自定义快捷键',
   staticShortcut: '内置快捷键',
   edit: '编辑',

@@ -195,6 +195,7 @@ export default {
   border: 'Рамка',
   shadow: 'Тень',
   radius: 'Скругление',
+  imageCaption: 'Добавить подпись',
   customShortcut: 'Пользовательские горячие клавиши',
   staticShortcut: 'Встроенные горячие клавиши',
   edit: 'Редактировать',
