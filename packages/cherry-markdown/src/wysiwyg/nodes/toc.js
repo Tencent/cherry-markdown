@@ -245,9 +245,8 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
     // Section = heading + all content until next same-or-higher-level heading
     const section = getSectionRange(state.doc, headings, fromIdx);
 
-    let tr = state.tr;
-
-    // Apply level changes to the heading and all sub-headings in the section
+    // Step 1: Apply level changes in a separate transaction to get clean content
+    let levelTr = state.tr;
     if (needLevel) {
       const delta = newLevel - src.level;
       for (let i = fromIdx; i < headings.length; i++) {
@@ -255,12 +254,21 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
         const h = headings[i];
         const adjusted = Math.max(1, Math.min(6, h.level + delta));
         if (adjusted !== h.level) {
-          tr = tr.setNodeMarkup(tr.mapping.map(h.pos), undefined, { ...h.node.attrs, level: adjusted });
+          levelTr = levelTr.setNodeMarkup(levelTr.mapping.map(h.pos), undefined, { ...h.node.attrs, level: adjusted });
         }
       }
     }
 
-    if (needMove) {
+    if (!needMove) {
+      // Only level change, no move — just dispatch
+      view.dispatch(levelTr);
+    } else {
+      // Step 2: Read the (possibly level-adjusted) section content
+      const adjStart = levelTr.mapping.map(section.start);
+      const adjEnd = levelTr.mapping.map(section.end);
+      const sectionContent = levelTr.doc.slice(adjStart, adjEnd).content;
+
+      // Step 3: Compute target position in original doc coordinates
       let targetPos;
       if (toIdx < headings.length) {
         targetPos = headings[toIdx].pos;
@@ -268,22 +276,14 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
         targetPos = state.doc.content.size;
       }
 
-      const mappedStart = tr.mapping.map(section.start);
-      const mappedEnd = tr.mapping.map(section.end);
-      const updatedSlice = tr.doc.slice(mappedStart, mappedEnd);
-
-      if (fromIdx < toIdx) {
-        const mappedTarget = tr.mapping.map(targetPos);
-        tr = tr.insert(mappedTarget, updatedSlice.content);
-        tr = tr.delete(tr.mapping.map(mappedStart), tr.mapping.map(mappedEnd));
-      } else {
-        tr = tr.delete(mappedStart, mappedEnd);
-        const mappedTarget = tr.mapping.map(targetPos);
-        tr = tr.insert(mappedTarget, updatedSlice.content);
-      }
+      // Step 4: Build a clean transaction — delete first, then insert at mapped target
+      // This avoids double-mapping issues from insert+delete in one transaction
+      let tr = state.tr;
+      tr = tr.delete(section.start, section.end);
+      const mappedTarget = tr.mapping.map(targetPos);
+      tr = tr.insert(mappedTarget, sectionContent);
+      view.dispatch(tr);
     }
-
-    view.dispatch(tr);
 
     // Show toast if section had extra content
     if (subHeadings > 0 || blocks > 0) {
