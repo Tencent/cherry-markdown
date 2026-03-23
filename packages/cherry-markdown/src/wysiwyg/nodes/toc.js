@@ -126,6 +126,7 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
   let dragStartX = 0;
   let dragFromLevel = 1;
   let dragLevelDelta = 0;
+  const levelIndentMap = {}; // level → paddingLeft in px, computed after render
 
   // --- Document operations ---
 
@@ -355,9 +356,8 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
         dragLevelDelta = Math.max(1 - dragFromLevel, Math.min(6 - dragFromLevel, rawDelta));
         const targetLevel = dragFromLevel + dragLevelDelta;
 
-        // Visual indicator — match the actual padding-left of the target level
-        const indent = (targetLevel - 1) * 1.2;
-        li.style.setProperty('--drop-indent', `calc(var(--md-toc-indicator-gap, 16px) + ${indent}em)`);
+        // Visual indicator — use cached pixel indent for target level
+        li.style.setProperty('--drop-indent', `${levelIndentMap[targetLevel] || 0}px`);
 
         // When target level is deeper than hovered heading, dropping on
         // top-half means "first child of this heading" → show below indicator.
@@ -406,6 +406,38 @@ export const tocView = $view(tocSchema.node, () => (initialNode, view, getPos) =
       });
 
       listEl.appendChild(li);
+    });
+
+    // Cache pixel indent per level after DOM is built (read once, use in dragover)
+    requestAnimationFrame(() => {
+      for (let lvl = 1; lvl <= 6; lvl++) {
+        const el = listEl.querySelector(`.toc-li-${lvl}`);
+        if (el) {
+          levelIndentMap[lvl] = parseFloat(getComputedStyle(el).paddingLeft) || 0;
+        }
+      }
+      // Extrapolate missing levels from known ones
+      const knownLevels = Object.keys(levelIndentMap).map(Number).sort((a, b) => a - b);
+      if (knownLevels.length >= 2) {
+        const stepPx = (levelIndentMap[knownLevels[1]] - levelIndentMap[knownLevels[0]])
+          / (knownLevels[1] - knownLevels[0]);
+        const basePx = levelIndentMap[knownLevels[0]] - (knownLevels[0] - 1) * stepPx;
+        for (let lvl = 1; lvl <= 6; lvl++) {
+          if (!(lvl in levelIndentMap)) {
+            levelIndentMap[lvl] = basePx + (lvl - 1) * stepPx;
+          }
+        }
+      } else if (knownLevels.length === 1) {
+        const known = knownLevels[0];
+        const fontSize = parseFloat(getComputedStyle(listEl).fontSize) || 16;
+        const stepPx = 1.2 * fontSize;
+        const basePx = levelIndentMap[known] - (known - 1) * stepPx;
+        for (let lvl = 1; lvl <= 6; lvl++) {
+          if (!(lvl in levelIndentMap)) {
+            levelIndentMap[lvl] = basePx + (lvl - 1) * stepPx;
+          }
+        }
+      }
     });
   }
 
