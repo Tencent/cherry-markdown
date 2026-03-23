@@ -1232,6 +1232,10 @@ export default class Editor {
     /** @type {boolean} */
     this.isDestroyed = false;
 
+    // 方向键拦截器（用于 Suggester 等模块拦截方向键），返回 true 表示拦截
+    /** @type {((key: string) => boolean) | null} */
+    this.arrowKeyInterceptor = null;
+
     const { codemirror, ...restOptions } = options;
     if (codemirror) {
       Object.assign(this.options.codemirror, codemirror);
@@ -1940,21 +1944,23 @@ export default class Editor {
 
     // 保存默认 keymap 配置
     this.defaultKeymap = [
+      // 方向键拦截器 - 放在最前面，优先级最高
+      { key: 'ArrowUp', run: () => self.arrowKeyInterceptor?.('ArrowUp') || false },
+      { key: 'ArrowDown', run: () => self.arrowKeyInterceptor?.('ArrowDown') || false },
+      { key: 'Escape', run: () => self.arrowKeyInterceptor?.('Escape') || false },
+      {
+        key: 'Enter',
+        run: (view) => {
+          if (self.arrowKeyInterceptor?.('Enter')) return true;
+          const adapter = self.editor || new CM6Adapter(view, self.vimCompartment);
+          return handleNewlineIndentList(adapter);
+        },
+      },
       ...defaultKeymap,
       ...historyKeymap,
       ...closeBracketsKeymap,
       ...filteredSearchKeymap,
       indentWithTab,
-      {
-        key: 'Enter',
-        run: (view) => {
-          // 复用已有的 adapter 实例，避免每次创建新实例
-          // 如果 editor 尚未初始化，创建临时适配器
-          const adapter = self.editor || new CM6Adapter(view, self.vimCompartment);
-          // 返回 handleNewlineIndentList 的结果，让 CodeMirror 决定是否执行默认行为
-          return handleNewlineIndentList(adapter);
-        },
-      },
     ];
 
     // 创建编辑器
@@ -2086,7 +2092,14 @@ export default class Editor {
 
       EditorView.domEventHandlers({
         keydown: (e) => {
-          if (this.editor) this.editor.emit('keydown', e);
+          if (this.editor) {
+            // 先触发事件，让 Suggester 等模块处理
+            this.editor.emit('keydown', e);
+            // 如果事件已被 preventDefault，说明已被处理，返回 true 阻止 CM6 继续处理
+            if (e.defaultPrevented) {
+              return true;
+            }
+          }
           this.options.onKeydown(/** @type {KeyboardEvent} */ (e), this.editor);
           return false;
         },
