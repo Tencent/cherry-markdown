@@ -696,8 +696,8 @@ export default class PreviewerBubble {
       htmlElement,
       this.bubble[trigger],
       this.previewerDom,
-      this,
       codemirrorModule,
+      this,
     );
     handler.showBubble(this.$isEnableBubbleAndEditorShow());
     this.bubbleHandler[trigger] = handler;
@@ -1104,20 +1104,19 @@ export default class PreviewerBubble {
       this.mermaidSize = sizeMatches ? sizeMatches.join(' ') : '';
       this.mermaidAlign = alignMatch ? alignMatch[0] : '';
 
+      // CM6: 计算扩展参数的文档偏移量
+      const { doc } = this.editor.editor.view.state;
+      const lineStart = doc.line(langLineNum + 1).from;
+
       if (extendMatch) {
-        // 选中所有扩展参数
         const extendStart = fullLangLine.indexOf(extendMatch[1]);
-        // CM6: 将 {line, ch} 转换为文档偏移量
-        const { doc } = this.editor.editor.view.state;
-        const from = doc.line(langLineNum + 1).from + extendStart;
-        const to = from + extendMatch[1].length;
-        this.editor.editor.setSelection(from, to);
+        this.mermaidExtendFrom = lineStart + extendStart;
+        this.mermaidExtendTo = this.mermaidExtendFrom + extendMatch[1].length;
+        this.editor.editor.setSelection(this.mermaidExtendFrom, this.mermaidExtendTo);
       } else {
-        // 没有扩展参数，将光标放在语言行末尾
-        // CM6: 将 {line, ch} 转换为文档偏移量
-        const { doc } = this.editor.editor.view.state;
-        const pos = doc.line(langLineNum + 1).from + fullLangLine.length;
-        this.editor.editor.setSelection(pos, pos);
+        this.mermaidExtendFrom = lineStart + fullLangLine.length;
+        this.mermaidExtendTo = this.mermaidExtendFrom;
+        this.editor.editor.setSelection(this.mermaidExtendFrom, this.mermaidExtendFrom);
       }
 
       this.mermaidLangLineNum = langLineNum;
@@ -1132,10 +1131,16 @@ export default class PreviewerBubble {
    */
   changeMermaidValue() {
     const value = [this.mermaidSize, this.mermaidAlign].filter((v) => v).join(' ');
+
     if (this.mermaidHasExtend) {
+      this.editor.editor.setSelection(this.mermaidExtendFrom, this.mermaidExtendTo);
       this.editor.editor.replaceSelection(value, 'around');
+      this.mermaidExtendTo = this.mermaidExtendFrom + value.length;
     } else if (value) {
+      this.editor.editor.setSelection(this.mermaidExtendFrom, this.mermaidExtendFrom);
       this.editor.editor.replaceSelection(` ${value}`, 'around');
+      this.mermaidExtendFrom += 1;
+      this.mermaidExtendTo = this.mermaidExtendFrom + value.length;
       this.mermaidHasExtend = true;
     }
   }

@@ -302,6 +302,10 @@ export default class TableHandler {
     const selectTdInfo = this.tableEditor.info;
     const { isInFootnote } = selectTdInfo;
     const tableCode = isInFootnote ? this.tableEditor.footnoteTableCodes[index] : this.tableEditor.tableCodes[index];
+    // 边界检查：如果表格代码不存在，直接返回
+    if (!tableCode) {
+      return;
+    }
     const whole = this.codeMirror.getValue();
     const beginLine = whole.slice(0, tableCode.offset).match(/\n/g)?.length ?? 0;
     // 根据表格类型选择不同的处理方式
@@ -366,7 +370,7 @@ export default class TableHandler {
     }
     // 计算单元格内容的实际位置（去除前后空格）
     const trimmedContent = current.trim();
-    // 当前单元格为空时，尝试选中单元格的“中间”位置
+    // 当前单元格为空时，尝试选中单元格的"中间"位置
     const leadingSpaces =
       trimmedContent.length > 0 ? current.match(/^\s*/)[0].length : Math.floor(current.match(/^\s*/)[0].length / 2);
     const basePreCh = needPlus1 ? pre.join('|').length + 1 : pre.join('|').length;
@@ -702,7 +706,24 @@ export default class TableHandler {
     if (e.target.tagName !== 'TEXTAREA') {
       return;
     }
-    this.codeMirror.replaceSelection(e.target.value.replace(/\n/g, '<br>'), 'around');
+    const newValue = e.target.value.replace(/\n/g, '<br>');
+    const { selection } = this.tableEditor.info;
+
+    // 使用存储的选区位置信息来计算替换范围
+    const { doc } = this.codeMirror.view.state;
+    const fromLine = doc.line(selection[0].line + 1);
+    const toLine = doc.line(selection[1].line + 1);
+    const from = fromLine.from + selection[0].ch;
+    const to = toLine.from + selection[1].ch;
+
+    // 使用 replaceRange 替换指定位置的内容
+    this.codeMirror.replaceRange(newValue, from, to);
+
+    // 更新存储的选区结束位置，以便下次输入时使用正确的位置
+    const newEndCh = selection[0].ch + newValue.length;
+    this.tableEditor.info.selection[1].ch = newEndCh;
+    // 同时更新存储的单元格内容
+    this.tableEditor.info.code = newValue;
   }
 
   /**
@@ -1073,7 +1094,7 @@ export default class TableHandler {
    */
   $afterTableOperation() {
     this.boundaryCache = null;
-    this.$findTableInEditor();
+    this.$collectTableCode();
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
   }
 
