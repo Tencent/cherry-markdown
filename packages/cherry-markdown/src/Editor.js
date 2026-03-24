@@ -138,12 +138,10 @@ const cherryHighlighter = tagHighlighter([
  * @property {string} [markId] - 用于追踪 mark 的唯一标识符
  */
 
-// 注意：keymapCompartment 和 vimCompartment 已移至 Editor 类实例属性中
-// 避免多实例共享导致状态冲突
+// 注意：keymapCompartment 和 vimCompartment 已移至 Editor 类实例属性
 
 // vim 模块缓存
 let vimModule = null;
-// vim 模块加载等待 Promise（不在 finally 中清理，确保所有等待者都能获取结果）
 let vimModuleLoadPromise = null;
 
 /**
@@ -151,25 +149,19 @@ let vimModuleLoadPromise = null;
  * @returns {Promise<any>} vim 模块
  */
 async function loadVimModule() {
-  // 已加载，直接返回
   if (vimModule) {
     return vimModule;
   }
-
-  // 正在加载，等待已有的 Promise
   if (vimModuleLoadPromise) {
     return vimModuleLoadPromise;
   }
 
-  // Bug Fix: 保存 Promise 引用，让所有并发调用者都能等待同一个 Promise
-  // 不在 finally 中清理，确保加载成功后返回缓存的模块
   vimModuleLoadPromise = (async () => {
     try {
       const mod = await import('@replit/codemirror-vim');
       vimModule = mod;
       return mod;
     } catch (e) {
-      // 加载失败时清理 Promise，允许重试
       vimModuleLoadPromise = null;
       Logger.error('Failed to load @replit/codemirror-vim. Please install it: npm install @replit/codemirror-vim');
       throw e;
@@ -179,17 +171,16 @@ async function loadVimModule() {
   return vimModuleLoadPromise;
 }
 
-// 缓存语法高亮扩展，避免重复创建
+// 缓存语法高亮扩展
 const cachedCherryHighlighting = syntaxHighlighting(cherryHighlighter);
 const cachedDefaultHighlighting = syntaxHighlighting(defaultHighlightStyle);
 
-// 创建搜索高亮效果 - 用于添加 cm-searching 类
+// 搜索高亮效果
 /** @type {import('@codemirror/state').StateEffectType<import('@codemirror/view').DecorationSet>} */
 const setSearchHighlightEffect = StateEffect.define();
 
 /**
- * 搜索高亮的 ViewPlugin - 使用增量更新提升性能
- * 只处理可见区域，避免遍历整个文档
+ * 搜索高亮的 ViewPlugin（增量更新，只处理可见区域）
  */
 const searchHighlightField = ViewPlugin.fromClass(
   class {
@@ -198,7 +189,7 @@ const searchHighlightField = ViewPlugin.fromClass(
      */
     constructor(view) {
       /** @type {RegExp | null} */
-      this.query = null; // 存储当前搜索查询
+      this.query = null;
       /** @type {import('@codemirror/view').DecorationSet} */
       this.decorations = Decoration.none;
       this.buildDecorations(view);
@@ -219,7 +210,6 @@ const searchHighlightField = ViewPlugin.fromClass(
     }
 
     /**
-     * 构建装饰（只处理可见区域）
      * @param {EditorView} view
      */
     buildDecorations(view) {
@@ -230,11 +220,8 @@ const searchHighlightField = ViewPlugin.fromClass(
 
       const decorations = [];
 
-      // 只处理可见区域（性能优化）
       for (const { from, to } of view.visibleRanges) {
         const text = view.state.doc.sliceString(from, to);
-
-        // 创建新的正则对象副本，避免 lastIndex 污染
         const tempQuery = new RegExp(this.query.source, this.query.flags);
         tempQuery.lastIndex = 0;
 
@@ -249,21 +236,15 @@ const searchHighlightField = ViewPlugin.fromClass(
             }).range(matchFrom, matchTo),
           );
 
-          // 防止无限循环（匹配空字符串时）
           if (match[0].length === 0) {
             tempQuery.lastIndex += 1;
           }
         }
       }
 
-      // 按 from 位置排序后传递给 Decoration.set
-      // 注意：Decoration.set 默认要求装饰按 from 升序排列
       this.decorations = Decoration.set(decorations.sort((a, b) => a.from - b.from));
     }
 
-    /**
-     * 清理资源
-     */
     destroy() {
       this.query = null;
       this.decorations = Decoration.none;
@@ -294,8 +275,7 @@ class CM6Adapter {
     this.currentKeyMap = 'sublime';
     /** @type {Compartment | null} */
     this.vimCompartment = vimCompartment || null;
-    // 实例级的 markId 计数器，确保每个 CM6Adapter 实例独立计数
-    /** @type {number} */
+    /** @type {number} 实例级 markId 计数器 */
     this.markIdCounter = 0;
   }
 
@@ -474,7 +454,6 @@ class CM6Adapter {
    */
   setCursor(pos) {
     const docLength = this.view.state.doc.length;
-    // 边界保护：确保位置有效（调用方应确保传入有效位置）
     const safePos = Math.max(0, Math.min(pos, docLength));
     this.view.dispatch({ selection: { anchor: safePos } });
   }
@@ -484,14 +463,13 @@ class CM6Adapter {
    * @param {number} anchor - 选区锚点位置（文档偏移量）
    * @param {number} [head] - 选区头部位置（文档偏移量），不传则与 anchor 相同
    * @param {Object} [options] - 可选参数
-   * @param {string} [options.userEvent] - 用户事件类型，用于区分编程式调用和用户交互
+   * @param {string} [options.userEvent] - 用户事件类型
    * @param {boolean} [options.scrollIntoView] - 是否滚动到选区位置
    * @returns {void}
    */
   setSelection(anchor, head, options = {}) {
     const docLength = this.view.state.doc.length;
     const headPos = head !== undefined ? head : anchor;
-    // 边界保护：确保位置有效（调用方应确保传入有效位置）
     const safeAnchor = Math.max(0, Math.min(anchor, docLength));
     const safeHead = Math.max(0, Math.min(headPos, docLength));
     const dispatchOptions = { selection: { anchor: safeAnchor, head: safeHead } };
@@ -555,7 +533,6 @@ class CM6Adapter {
   replaceRange(text, from, to) {
     const docLength = this.view.state.doc.length;
     const toPos = to !== undefined ? to : from;
-    // 边界保护：确保范围有效，防止 RangeError（调用方应确保传入有效范围）
     const safeFrom = Math.max(0, Math.min(from, docLength));
     const safeTo = Math.max(safeFrom, Math.min(toPos, docLength));
     this.view.dispatch({
@@ -577,10 +554,6 @@ class CM6Adapter {
 
   /**
    * 获取指定位置的屏幕坐标
-   *
-   * 返回相对于编辑器滚动容器的像素坐标，如果位置不可见则返回 null。
-   * 与 CM5 的 cursorCoords 完全兼容。
-   *
    * @param {number} [pos] - 文档位置（偏移量），不传则使用当前光标位置
    * @returns {Rect | null} 坐标对象 {left, top, bottom, right} 或 null
    */
@@ -598,7 +571,6 @@ class CM6Adapter {
    * @returns {void}
    */
   scrollTo(x, y) {
-    // requestMeasure 确保滚动与 CM6 状态同步
     this.view.requestMeasure({
       read: () => ({ x, y }),
       write: ({ x: scrollX, y: scrollY }) => {
@@ -807,7 +779,6 @@ class CM6Adapter {
    * @returns {TextMarker} 标记对象
    */
   markText(from, to, options) {
-    // 生成唯一 markId，与 applyBatchMarks 共享计数器
     this.markIdCounter += 1;
     const markId = `mark_${this.markIdCounter}`;
 
@@ -896,13 +867,12 @@ class CM6Adapter {
     let searchStr = typeof query === 'string' ? query : query.source;
     let isRegexp = query instanceof RegExp;
 
-    // 使用与 CodeMirror Search 相同的标志验证正则表达式
     if (isRegexp) {
       try {
         new RegExp(searchStr, 'gimu');
       } catch (e) {
         console.error('Invalid regexp for CodeMirror Search:', searchStr, e.message);
-        searchStr = '(?!.*)'; // 永不匹配的正则
+        searchStr = '(?!.*)';
         isRegexp = true;
       }
     }
@@ -914,17 +884,12 @@ class CM6Adapter {
     });
 
     const { doc } = this.view.state;
-
-    // 复用游标避免每次 findNext 都创建新实例
     let cursor = searchQuery.getCursor(doc, pos);
 
     /** @type {{ from: number; to: number } | null} */
     let lastSearchResult = null;
     let currentPos = pos;
 
-    // 用于向前搜索的辅助函数
-
-    // 用于向前搜索的辅助函数
     const findPreviousMatch = (/** @type {number} */ fromPos) => {
       const prevCursor = searchQuery.getCursor(doc, 0);
       let lastMatch = null;
@@ -946,7 +911,6 @@ class CM6Adapter {
         currentPos = result.value.to;
         lastSearchResult = result.value;
 
-        // 性能优化：简单字符串搜索无需 match()
         const matched = doc.sliceString(result.value.from, result.value.to);
         const matchArr = query instanceof RegExp ? matched.match(query) : [matched];
         return matchArr || false;
@@ -1085,7 +1049,6 @@ class ReplacementWidget extends WidgetType {
    * @returns {HTMLElement}
    */
   toDOM() {
-    // 返回克隆节点而非原始节点，避免多次调用时节点被移动
     return /** @type {HTMLElement} */ (this.dom.cloneNode(true));
   }
 
@@ -1094,7 +1057,6 @@ class ReplacementWidget extends WidgetType {
    * @returns {boolean}
    */
   eq(other) {
-    // 比较 Widget 的 dom 引用是否相同，避免不必要的 DOM 重建
     return this.dom === other.dom;
   }
 }
@@ -1125,7 +1087,6 @@ const markField = StateField.define({
     }
 
     if (toAdd.length > 0 || removeFilters.length > 0) {
-      // 构建 Set 索引，将过滤复杂度从 O(n*m) 降低至 O(n)
       const removeMarkIdSet = new Set();
       const removeRangeSet = new Set();
 
@@ -1137,7 +1098,6 @@ const markField = StateField.define({
         }
       }
 
-      // Bug Fix: 确保装饰按 from 位置排序，满足 RangeSet 的要求
       if (toAdd.length > 1) {
         toAdd.sort((a, b) => a.from - b.from);
       }
@@ -1202,42 +1162,33 @@ export default class Editor {
     /** @type {CM6AdapterType | null} */
     this.editor = null;
 
-    // 添加缺失的属性
     this.animation = {
       timer: 0,
       destinationTop: 0,
     };
     this.disableScrollListener = false;
 
-    // DOM 事件监听器管理（用于销毁时清理）
     /** @type {Array<{elm: Element, evType: string, fn: Function, useCapture: boolean}>} */
     this.domEventListeners = [];
 
-    // 保存默认的 keymap 配置，用于禁用/启用快捷键
     /** @type {import('@codemirror/view').KeyBinding[]} */
     this.defaultKeymap = [];
     /** @type {boolean} */
     this.shortcutDisabled = false;
 
-    // 为每个编辑器实例创建独立的 Compartment，避免多实例共享导致状态冲突
     /** @type {Compartment} */
     this.keymapCompartment = new Compartment();
     /** @type {Compartment} */
     this.vimCompartment = new Compartment();
 
-    // dealSpecialWords 防抖定时器（避免高频调用导致性能问题）
     /** @type {NodeJS.Timeout | number} */
     this.dealSpecialWordsTimer = 0;
-
-    // dealSpecialWords 防抖开始时间（用于强制处理超时）
     /** @type {number} */
     this.dealSpecialWordsStartTime = 0;
 
-    // 销毁状态标记（防止销毁后继续操作）
     /** @type {boolean} */
     this.isDestroyed = false;
 
-    // 方向键拦截器（用于 Suggester 等模块拦截方向键），返回 true 表示拦截
     /** @type {((key: string) => boolean) | null} */
     this.arrowKeyInterceptor = null;
 
@@ -1268,12 +1219,10 @@ export default class Editor {
     this.shortcutDisabled = disable;
 
     if (disable) {
-      // 禁用快捷键：使用空的 keymap
       view.dispatch({
         effects: this.keymapCompartment.reconfigure([]),
       });
     } else {
-      // 启用快捷键：恢复默认 keymap
       view.dispatch({
         effects: this.keymapCompartment.reconfigure(keymap.of(this.defaultKeymap)),
       });
@@ -1283,8 +1232,6 @@ export default class Editor {
   /**
    * 在onChange后处理draw.io的xml数据和图片的base64数据，对这种超大的数据增加省略号，
    * 以及对全角符号进行特殊染色。
-   *
-   * 支持自适应防抖配置：用户可通过 dealSpecialWordsConfig 调整延迟时间
    */
   dealSpecialWords = () => {
     const config = this.options.dealSpecialWordsConfig || {};
@@ -1295,15 +1242,11 @@ export default class Editor {
       clearTimeout(this.dealSpecialWordsTimer);
     }
 
-    // 记录首次调用时间，用于强制处理超时
     if (!this.dealSpecialWordsStartTime) {
       this.dealSpecialWordsStartTime = Date.now();
     }
 
     const timeSinceStart = Date.now() - this.dealSpecialWordsStartTime;
-    // 明确计算剩余强制处理时间，确保逻辑清晰
-    // 如果已经超过强制处理时间，立即执行（delay = 0）
-    // 否则取防抖时间和剩余强制时间的较小值
     const remainingForceTime = forceProcessMs - timeSinceStart;
     const delay = remainingForceTime <= 0 ? 0 : Math.min(debounceMs, remainingForceTime);
 
@@ -1315,11 +1258,10 @@ export default class Editor {
   };
 
   /**
-   * 实际执行特殊词处理的逻辑（分离出来以支持防抖）
+   * 实际执行特殊词处理的逻辑
    * @private
    */
   doDealSpecialWordsInternal = () => {
-    // 编辑器隐藏或已销毁时不处理（避免性能问题和异步回调错误）
     if (this.$cherry?.status?.editor === 'hide' || this.isDestroyed) {
       return;
     }
@@ -1905,7 +1847,7 @@ export default class Editor {
    * @param {EditorView} editorView
    */
   onScroll = (editorView) => {
-    this.$cherry.$event.emit('cleanAllSubMenus'); // 滚动时清除所有子菜单，这不应该在Bubble中处理，我们关注的是编辑器的滚动  add by ufec
+    this.$cherry.$event.emit('cleanAllSubMenus');
     if (this.disableScrollListener) {
       this.disableScrollListener = false;
       return;
@@ -1916,17 +1858,15 @@ export default class Editor {
       return;
     }
     if (scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 20) {
-      this.previewer.scrollToLineNum(null); // 滚动到底
+      this.previewer.scrollToLineNum(null);
       return;
     }
     const currentTop = scroller.scrollTop;
     const targetLineBlock = editorView.lineBlockAtHeight(currentTop);
-    const targetLine = editorView.state.doc.lineAt(targetLineBlock.from).number - 1; // 行号从 1 开始，转换为 0
-    //
+    const targetLine = editorView.state.doc.lineAt(targetLineBlock.from).number - 1;
     const lineHeight = targetLineBlock.height;
     const lineTop = targetLineBlock.top;
     const percent = (100 * (currentTop - lineTop)) / lineHeight / 100;
-    // codemirror中行号以0开始，所以需要+1
     this.previewer.scrollToLineNum(targetLine + 1, percent);
   };
 
@@ -1936,10 +1876,8 @@ export default class Editor {
    * @param {MouseEvent} evt
    */
   onMouseDown = (editorView, evt) => {
-    // 鼠标按下时，清除所有子菜单（如Bubble工具栏等），
-    this.$cherry.$event.emit('cleanAllSubMenus'); // Bubble中处理需要考虑太多，直接在编辑器中处理可包括Bubble中所有情况，因为产生Bubble的前提是光标在编辑器中 add by ufec
+    this.$cherry.$event.emit('cleanAllSubMenus');
 
-    // 验证坐标值是否有效
     if (!Number.isFinite(evt.clientX) || !Number.isFinite(evt.clientY)) {
       return;
     }
@@ -1972,15 +1910,10 @@ export default class Editor {
       throw new Error('The specific element is not a textarea.');
     }
 
-    // 保存 this 引用，用于 keymap 回调
     const self = this;
-
-    // 过滤与 Cherry Markdown 冲突的快捷键（Cherry 有自定义 SearchBox）
     const filteredSearchKeymap = searchKeymap.filter((binding) => binding.key !== 'Mod-f');
 
-    // 保存默认 keymap 配置
     this.defaultKeymap = [
-      // 方向键拦截器 - 放在最前面，优先级最高
       { key: 'ArrowUp', run: () => self.arrowKeyInterceptor?.('ArrowUp') || false },
       { key: 'ArrowDown', run: () => self.arrowKeyInterceptor?.('ArrowDown') || false },
       { key: 'Escape', run: () => self.arrowKeyInterceptor?.('Escape') || false },
@@ -1999,7 +1932,6 @@ export default class Editor {
       indentWithTab,
     ];
 
-    // 创建编辑器
     const extensions = [
       cachedCherryHighlighting,
       markdown(),
@@ -2024,10 +1956,7 @@ export default class Editor {
       ...(this.options.codemirror.lineNumbers ? [foldGutter()] : []),
       ...(this.options.codemirror.lineNumbers ? [lineNumbers()] : []),
 
-      // 键盘映射（使用实例级 Compartment 支持动态切换）
       this.keymapCompartment.of(keymap.of(this.defaultKeymap)),
-
-      // Vim 模式（使用实例级 Compartment 支持动态切换）
       this.vimCompartment.of([]),
 
       EditorView.lineWrapping,
@@ -2036,7 +1965,6 @@ export default class Editor {
 
       markField,
 
-      // Change Filter - 实现 beforeChange 语义
       EditorState.changeFilter.of((tr) => {
         if (!tr.docChanged) return true;
 
@@ -2070,7 +1998,6 @@ export default class Editor {
             if (tr.docChanged) {
               const userEvent = tr.annotation(Transaction.userEvent) || '';
               let origin = '';
-              // 使用精确匹配而非 includes()，避免误判（例如 'undo' 和 'redo'、'delete' 和 'undelete'）
               if (userEvent === 'input' || userEvent.startsWith('input.')) {
                 origin = '+input';
               } else if (userEvent === 'delete' || userEvent.startsWith('delete.')) {
@@ -2130,9 +2057,7 @@ export default class Editor {
       EditorView.domEventHandlers({
         keydown: (e) => {
           if (this.editor) {
-            // 先触发事件，让 Suggester 等模块处理
             this.editor.emit('keydown', e);
-            // 如果事件已被 preventDefault，说明已被处理，返回 true 阻止 CM6 继续处理
             if (e.defaultPrevented) {
               return true;
             }
@@ -2360,9 +2285,7 @@ export default class Editor {
     Array.from(Array(sheet.cssRules.length)).forEach(() => sheet.deleteRule(0));
 
     if (writingStyle === 'focus') {
-      // 获取编辑器容器的位置
       const editorDomRect = this.getEditorDom().getBoundingClientRect();
-      // 获取光标位置
       const { view } = this.editor;
       const cursorPos = view.state.selection.main.head;
       const cursorCoords = view.coordsAtPos(cursorPos);
@@ -2371,10 +2294,7 @@ export default class Editor {
       let bottomHeight = 0;
 
       if (cursorCoords) {
-        // 计算光标上方的高度（从编辑器顶部到光标位置）
         topHeight = cursorCoords.top - editorDomRect.top;
-        // 计算光标下方的高度（从光标位置到编辑器底部）
-        // 使用 cursorCoords.bottom 来考虑光标/行的高度
         bottomHeight = editorDomRect.bottom - cursorCoords.bottom;
       }
 
@@ -2383,11 +2303,9 @@ export default class Editor {
     }
 
     if (writingStyle === 'typewriter') {
-      // 编辑器顶/底部填充的空白高度 (用于内容不足时使光标所在行滚动到编辑器中央)
       const height = this.editor.scrollDOM.clientHeight / 2;
       sheet.insertRule(`.${className} .cm-editor .cm-scroller::before { height: ${height}px; }`, 0);
       sheet.insertRule(`.${className} .cm-editor .cm-scroller::after { height: ${height}px; }`, 0);
-      // CodeMirror 6 中的滚动方式
       this.editor.scrollDOM.scrollTop = height;
     }
   }
@@ -2516,7 +2434,6 @@ export default class Editor {
     const { doc } = view.state;
     const lineCount = doc.lines;
 
-    // 边界保护：确保行号和字符位置有效（调用方应确保传入有效位置）
     const fromLineNum = Math.max(1, Math.min(from.line + 1, lineCount));
     const toLineNum = Math.max(1, Math.min(to.line + 1, lineCount));
 
@@ -2575,19 +2492,16 @@ export default class Editor {
 
   /**
    * 销毁编辑器实例，清理资源
-   * 注意：必须调用此方法来避免内存泄漏
    */
   destroy() {
     this.isDestroyed = true;
 
-    // 清理 dealSpecialWords 防抖定时器
     if (this.dealSpecialWordsTimer) {
       clearTimeout(this.dealSpecialWordsTimer);
       this.dealSpecialWordsTimer = 0;
     }
     this.dealSpecialWordsStartTime = 0;
 
-    // 清理 animation.timer（requestAnimationFrame）
     if (this.animation && this.animation.timer) {
       cancelAnimationFrame(this.animation.timer);
       this.animation.timer = 0;
@@ -2614,7 +2528,6 @@ export default class Editor {
     }
 
     this.$cherry = null;
-    // 保留 Compartment 用于潜在的后续恢复
   }
 
   /**

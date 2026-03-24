@@ -619,28 +619,21 @@ class SuggesterPanel {
     if (cursorFrom === null || cursorFrom === undefined) {
       return;
     }
-    // 保存选项引用，避免 replaceRange 触发 change 事件后 optionList 被清空
     const optionItem = this.optionList[idx];
     if (!optionItem) {
       return;
     }
 
-    // 获取当前文档长度，用于边界检查
-    // 注意：docLength 可能为 undefined（mock 环境）
     const docLength = this.editor?.editor?.state?.doc?.length;
 
-    // 验证 cursorFrom 是否仍然有效（文档可能已经被修改）
-    // 只有当 docLength 是有效数字时才进行检查（包括空文档 docLength === 0 的情况）
+    // 验证 cursorFrom 是否仍然有效
     if (typeof docLength === 'number' && cursorFrom > docLength) {
-      // cursorFrom 已经超出文档范围，放弃操作
       this.stopRelate();
       return;
     }
 
     let cursorTo;
-    // 仅替换当前联想触发期间录入的字符，避免吞掉光标后的文本
-    // Reference: issue #1493 https://github.com/Tencent/cherry-markdown/issues/1493
-    // CM6: cursorFrom 是文档偏移量（number）
+    // 仅替换当前联想触发期间录入的字符 (issue #1493)
     const typedLength = Array.isArray(this.searchKeyCache) ? this.searchKeyCache.join('').length : 0;
     if (typedLength > 0) {
       cursorTo = cursorFrom + typedLength;
@@ -650,7 +643,6 @@ class SuggesterPanel {
       cursorTo = cursorFrom;
     }
 
-    // 边界检查：确保 cursorTo 不超出文档长度
     if (typeof docLength === 'number') {
       cursorTo = Math.min(cursorTo, docLength);
     }
@@ -664,12 +656,10 @@ class SuggesterPanel {
       } else {
         result = ` ${this.keyword}${optionItem} `;
       }
-      // 如果回填内容以空格结尾，同时光标位置后还有空格，则一并替换掉一个空格，避免残留双空格
-      // CM6: 使用文档偏移量获取字符
+      // 如果回填内容以空格结尾，同时光标位置后还有空格，则一并替换
       if (result.endsWith(' ') && this.editor?.editor?.state && cursorTo !== null) {
         const { doc } = this.editor.editor.state;
         const currentDocLength = doc?.length;
-        // 边界检查：确保 cursorTo 在文档范围内才读取字符
         if (typeof currentDocLength === 'number' && cursorTo < currentDocLength) {
           const charAtCursor = doc.sliceString(cursorTo, cursorTo + 1);
           if (charAtCursor === ' ') {
