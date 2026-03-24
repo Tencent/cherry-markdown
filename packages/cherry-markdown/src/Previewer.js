@@ -683,13 +683,21 @@ export default class Previewer {
             let hasUpdate = false;
             if (
               newContent[change.newIndex].dom.className === 'cherry-table-wrapper' &&
-              newContent[change.newIndex].dom.querySelector('.cherry-table-figure') &&
-              oldContent[change.oldIndex].dom.querySelector('.cherry-table-figure')
+              newContent[change.newIndex].dom.querySelector('.cherry-table-figure .cherry-echarts-wrapper') &&
+              oldContent[change.oldIndex].dom.querySelector('.cherry-table-figure .cherry-echarts-wrapper')
             ) {
-              oldContent[change.oldIndex].dom
-                .querySelector('.cherry-table-figure')
-                .replaceWith(newContent[change.newIndex].dom.querySelector('.cherry-table-figure'));
-              oldContent[change.oldIndex].dom.dataset.sign = newContent[change.oldIndex].dom.dataset.sign;
+              const oldWrapper = oldContent[change.oldIndex].dom.querySelector(
+                '.cherry-table-figure .cherry-echarts-wrapper',
+              );
+              const newWrapper = newContent[change.newIndex].dom.querySelector(
+                '.cherry-table-figure .cherry-echarts-wrapper',
+              );
+              oldWrapper.id = newWrapper.id;
+              oldWrapper.dataset.tableData = newWrapper.dataset.tableData;
+              oldWrapper.dataset.chartType = newWrapper.dataset.chartType;
+              oldWrapper.dataset.chartOptions = newWrapper.dataset.chartOptions;
+              oldContent[change.oldIndex].dom.dataset.sign = newContent[change.newIndex].dom.dataset.sign;
+              oldContent[change.oldIndex].dom.dataset.lines = newContent[change.newIndex].dom.dataset.lines;
               this.$updateDom(
                 newContent[change.newIndex].dom.querySelector('.cherry-table'),
                 oldContent[change.oldIndex].dom.querySelector('.cherry-table'),
