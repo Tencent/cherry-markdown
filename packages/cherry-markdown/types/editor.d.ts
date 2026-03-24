@@ -32,6 +32,7 @@ export interface MarkTextOptions {
   title?: string;
   replacedWith?: HTMLElement;
   atomic?: boolean;
+  markId?: string;
 }
 
 /**
@@ -71,8 +72,8 @@ export interface BatchMarkItem {
 export interface ScrollInfo {
   left: number;
   top: number;
-  height: number;
-  width: number;
+  scrollHeight: number;
+  scrollWidth: number;
   clientHeight: number;
   clientWidth: number;
 }
@@ -251,10 +252,9 @@ export interface ChangeObject {
 
 /** beforeChange 事件对象 */
 export interface BeforeChangeEvent {
-  /** 触发变更的 Transaction */
-  transaction: import('@codemirror/state').Transaction;
-  /** 取消变更的方法 */
-  cancel: () => void;
+  from: number;
+  to: number;
+  text: string[];
 }
 
 /** CM6Adapter 内部事件映射 */
@@ -388,7 +388,4 @@ export type EditorConfiguration = {
 
   /** 大文档处理策略配置（阈值、降级策略等） */
   largeDocumentConfig?: LargeDocumentConfig;
-
-  /** Vim 模块是否缓存，默认 true（缓存性能更好） */
-  vimModuleCacheable?: boolean;
 };
