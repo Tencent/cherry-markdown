@@ -24,7 +24,7 @@ export default class wordCount extends MenuBase {
     this.noIcon = true;
     this.countEvent = new Event('count');
     // 强制转成数字
-    this.countState = Number(localStorage.getItem('cherry-wordCountState')) || 1;
+    this.countState = Number(localStorage.getItem('cherry-wordCountState')) || 0;
   }
 
   $dealEditorChange() {
@@ -83,7 +83,7 @@ export default class wordCount extends MenuBase {
     // 循环切换4种状态
     this.countState += 1;
     if (this.countState > 3) {
-      this.countState = 1;
+      this.countState = 0;
     }
     // 转成string格式
     localStorage.setItem('cherry-wordCountState', String(this.countState));
