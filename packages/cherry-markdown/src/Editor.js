@@ -589,8 +589,8 @@ class CM6Adapter {
     return {
       left: this.view.scrollDOM.scrollLeft,
       top: this.view.scrollDOM.scrollTop,
-      height: this.view.scrollDOM.scrollHeight,
-      width: this.view.scrollDOM.scrollWidth,
+      scrollHeight: this.view.scrollDOM.scrollHeight,
+      scrollWidth: this.view.scrollDOM.scrollWidth,
       clientHeight: this.view.scrollDOM.clientHeight,
       clientWidth: this.view.scrollDOM.clientWidth,
     };
