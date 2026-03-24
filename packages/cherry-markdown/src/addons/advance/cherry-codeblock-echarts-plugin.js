@@ -37,15 +37,12 @@ export default class EChartsCodeBlockEngine {
   }
 
   constructor(echartsOptions = {}) {
-    const { echarts, cherry, size } = echartsOptions;
+    const { echarts, size } = echartsOptions;
     if (!echarts && !window.echarts) {
       throw new Error('codeblock-echarts-plugin[init]: Package echarts not found.');
     }
     this.size = size;
     this.echartsRef = echarts || window.echarts; // echarts引用
-
-    // 保存Cherry实例，用于事件监听及i18n
-    this.$cherry = cherry;
   }
 
   render(src, sign, $engine, language) {
@@ -54,20 +51,21 @@ export default class EChartsCodeBlockEngine {
     const width = this.size?.width || '100%';
     const height = this.size?.height || '300px';
     const styleStr = `width: ${width}; height: ${height};`;
+    const previewerDom = $engine.$cherry.previewer.getDom();
     // 延迟到下一轮事件循环再执行
     setTimeout(() => {
-      const container = document.getElementById(chartId);
+      const container = previewerDom.querySelector(`#${chartId}`);
       if (!container || !this.echartsRef) return;
       try {
         // 使用 new Function 替代 JSON.parse 以支持非标准 JSON (如带注释、key 无引号等)
         // eslint-disable-next-line no-new-func
         const option = new Function(`return ${src}`)();
-        const chart = this.echartsRef.init(container);
+        const chart = this.echartsRef.init(container, null);
         chart.setOption(option);
       } catch (error) {
         container.innerHTML = `<div style="color: red;">Render Error: ${error.message}</div>`;
       }
     }, 50);
-    return `<div id="${chartId}" style="${styleStr}"></div>`;
+    return `<div id="${chartId}" style="${styleStr}" class="cherry-echarts-codeblock-wrapper"></div>`;
   }
 }
