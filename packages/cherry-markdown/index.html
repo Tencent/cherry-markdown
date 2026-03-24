@@ -43,6 +43,13 @@
       import Cherry from './src/index.js';
       import '@examples/assets/scripts/pinyin/pinyin_dist.js';
 
+      // 引入官方库里的 Echarts 代码块插件
+      Cherry.usePlugin(Cherry.plugins.EChartsCodeBlockEngine, {
+        size: {
+          width: '100%',
+          height: '600px',
+        }
+      });
       window.Cherry = Cherry;
 
       import indexMd from '@examples/assets/markdown/index.md?raw';

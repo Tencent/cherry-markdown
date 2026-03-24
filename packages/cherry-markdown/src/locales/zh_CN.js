@@ -173,7 +173,7 @@ export default {
   disableShortcut: '禁用所有快捷键',
   enableShortcut: '取消禁用快捷键',
   recoverShortcut: '恢复默认配置',
-  search: '搜索',
+  search: '搜索/替换',
   autoWrap: '自动换行',
   footnoteTitle: '脚注',
   searchFor: '查找',
