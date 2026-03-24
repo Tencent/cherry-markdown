@@ -263,7 +263,12 @@ export default class Table extends ParagraphBase {
     //     Logger.log('originalStr preview:', originalStr.substring(0, 200));
     //   }
     // }
-    const chart = this.chartRenderEngine.render(chartOptions.type, chartOptions.options, tableObject);
+    const chart = this.chartRenderEngine.render(
+      chartOptions.type,
+      chartOptions.options,
+      tableObject,
+      this.$engine.$cherry,
+    );
     const chartHtml = `<figure class="cherry-table-figure">${chart}</figure>`;
     const newSign = `${tableResult.sign}${chartOptionsSign}`;
     return {

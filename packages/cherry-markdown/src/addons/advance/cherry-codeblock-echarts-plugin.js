@@ -54,25 +54,27 @@ export default class EChartsCodeBlockEngine {
     const previewerDom = $engine.$cherry.previewer.getDom();
     // 延迟到下一轮事件循环再执行
     setTimeout(() => {
-      const container = previewerDom.querySelector(
+      const containers = previewerDom.querySelectorAll(
         `div[data-sign="${sign}"][data-type="echarts"] .cherry-echarts-codeblock-wrapper`,
       );
-      if (!container || !this.echartsRef) return;
-      try {
-        const option = JSON5.parse(src.replace(/;\s*$/, ''));
-        // 判断是否已经初始化
-        let chart = this.echartsRef.getInstanceByDom(container);
-        if (!chart) {
-          chart = this.echartsRef.init(container);
+      if (containers.length <= 0 || !this.echartsRef) return;
+      const option = JSON5.parse(src.replace(/;\s*$/, ''));
+      containers.forEach((container) => {
+        try {
+          // 判断是否已经初始化
+          let chart = this.echartsRef.getInstanceByDom(container);
+          if (!chart) {
+            chart = this.echartsRef.init(container);
+          }
+          chart.setOption(option, true); // 增加 true 参数以强制覆盖旧配置
+        } catch (error) {
+          if ($engine.$cherry.options.engine.global.flowSessionContext) {
+            container.innerHTML = `drawing...`;
+          } else {
+            container.innerHTML = `<div style="color: red;">Render Error: ${error.message}</div>`;
+          }
         }
-        chart.setOption(option, true); // 增加 true 参数以强制覆盖旧配置
-      } catch (error) {
-        if ($engine.$cherry.options.engine.global.flowSessionContext) {
-          container.innerHTML = `drawing...`;
-        } else {
-          container.innerHTML = `<div style="color: red;">Render Error: ${error.message}</div>`;
-        }
-      }
+      });
     }, 50);
     return `<div style="${styleStr}" class="cherry-echarts-codeblock-wrapper"></div>`;
   }
