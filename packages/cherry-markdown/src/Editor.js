@@ -2155,35 +2155,36 @@ export default class Editor {
   }
 
   /**
-   *
-   * @param {number | null} beginLine 起始行，传入null时跳转到文档尾部
-   * @param {number} [endLine] 终止行
-   * @param {number} [percent] 百分比，取值0~1
+   * 跳转到指定行，支持行内百分比偏移
+   * @param {number | null} beginLine 起始行（0-indexed），传入null时跳转到文档尾部
+   * @param {number} [endLine] 终止行（保留参数，当前未使用）
+   * @param {number} [percent] 行内百分比偏移，取值0~1
    */
   jumpToLine(beginLine, endLine = 0, percent = 0) {
     if (!this.editor || !this.editor.view) return;
 
     const { view } = this.editor;
+    const { doc } = view.state;
 
+    // 边界处理：跳转到文档末尾
     if (beginLine === null) {
       this.disableScrollListener = true;
-      const { doc } = view.state;
-      view.dispatch({
-        effects: EditorView.scrollIntoView(doc.length, { y: 'end' }),
-      });
+      view.scrollDOM.scrollTop = view.scrollDOM.scrollHeight;
       return;
     }
 
-    const { doc } = view.state;
-    const targetLineNumber = Math.min(beginLine + 1, doc.lines);
+    // 计算目标行号（转换为 1-indexed，并确保在有效范围内）
+    const targetLineNumber = Math.min(Math.max(1, beginLine + 1), doc.lines);
     const targetLine = doc.line(targetLineNumber);
 
+    // 使用 lineBlockAt 获取目标行的位置信息
+    const lineBlock = view.lineBlockAt(targetLine.from);
+
+    // 计算精确的滚动位置：行顶部位置 + 行高 * 百分比偏移
+    const targetScrollTop = lineBlock.top + lineBlock.height * percent;
+
     this.disableScrollListener = true;
-    view.dispatch({
-      effects: EditorView.scrollIntoView(targetLine.from, {
-        y: 'center',
-      }),
-    });
+    view.scrollDOM.scrollTop = targetScrollTop;
   }
 
   /**
