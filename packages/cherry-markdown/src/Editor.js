@@ -143,9 +143,7 @@ const cherryHighlighter = tagHighlighter([
 
 // vim 模块缓存
 let vimModule = null;
-// vim 模块加载状态锁，防止并发加载
-let vimModuleLoading = false;
-// vim 模块加载等待队列
+// vim 模块加载等待 Promise（不在 finally 中清理，确保所有等待者都能获取结果）
 let vimModuleLoadPromise = null;
 
 /**
@@ -153,27 +151,32 @@ let vimModuleLoadPromise = null;
  * @returns {Promise<any>} vim 模块
  */
 async function loadVimModule() {
+  // 已加载，直接返回
   if (vimModule) {
     return vimModule;
   }
 
-  if (vimModuleLoading && vimModuleLoadPromise) {
+  // 正在加载，等待已有的 Promise
+  if (vimModuleLoadPromise) {
     return vimModuleLoadPromise;
   }
 
-  vimModuleLoading = true;
+  // Bug Fix: 保存 Promise 引用，让所有并发调用者都能等待同一个 Promise
+  // 不在 finally 中清理，确保加载成功后返回缓存的模块
+  vimModuleLoadPromise = (async () => {
+    try {
+      const mod = await import('@replit/codemirror-vim');
+      vimModule = mod;
+      return mod;
+    } catch (e) {
+      // 加载失败时清理 Promise，允许重试
+      vimModuleLoadPromise = null;
+      Logger.error('Failed to load @replit/codemirror-vim. Please install it: npm install @replit/codemirror-vim');
+      throw e;
+    }
+  })();
 
-  try {
-    vimModuleLoadPromise = import('@replit/codemirror-vim');
-    vimModule = await vimModuleLoadPromise;
-    return vimModule;
-  } catch (e) {
-    Logger.error('Failed to load @replit/codemirror-vim. Please install it: npm install @replit/codemirror-vim');
-    throw e;
-  } finally {
-    vimModuleLoading = false;
-    vimModuleLoadPromise = null;
-  }
+  return vimModuleLoadPromise;
 }
 
 // 缓存语法高亮扩展，避免重复创建
@@ -253,7 +256,9 @@ const searchHighlightField = ViewPlugin.fromClass(
         }
       }
 
-      this.decorations = Decoration.set(decorations.sort());
+      // 按 from 位置排序后传递给 Decoration.set
+      // 注意：Decoration.set 默认要求装饰按 from 升序排列
+      this.decorations = Decoration.set(decorations.sort((a, b) => a.from - b.from));
     }
 
     /**
@@ -468,7 +473,10 @@ class CM6Adapter {
    * @returns {void}
    */
   setCursor(pos) {
-    this.view.dispatch({ selection: { anchor: pos } });
+    const docLength = this.view.state.doc.length;
+    // 边界保护：确保位置有效（调用方应确保传入有效位置）
+    const safePos = Math.max(0, Math.min(pos, docLength));
+    this.view.dispatch({ selection: { anchor: safePos } });
   }
 
   /**
@@ -481,15 +489,19 @@ class CM6Adapter {
    * @returns {void}
    */
   setSelection(anchor, head, options = {}) {
+    const docLength = this.view.state.doc.length;
     const headPos = head !== undefined ? head : anchor;
-    const dispatchOptions = { selection: { anchor, head: headPos } };
+    // 边界保护：确保位置有效（调用方应确保传入有效位置）
+    const safeAnchor = Math.max(0, Math.min(anchor, docLength));
+    const safeHead = Math.max(0, Math.min(headPos, docLength));
+    const dispatchOptions = { selection: { anchor: safeAnchor, head: safeHead } };
 
     if (options.userEvent) {
       dispatchOptions.annotations = Transaction.userEvent.of(options.userEvent);
     }
 
     if (options.scrollIntoView) {
-      dispatchOptions.effects = EditorView.scrollIntoView(headPos);
+      dispatchOptions.effects = EditorView.scrollIntoView(safeHead);
     }
 
     this.view.dispatch(dispatchOptions);
@@ -541,9 +553,13 @@ class CM6Adapter {
    * @returns {void}
    */
   replaceRange(text, from, to) {
+    const docLength = this.view.state.doc.length;
     const toPos = to !== undefined ? to : from;
+    // 边界保护：确保范围有效，防止 RangeError（调用方应确保传入有效范围）
+    const safeFrom = Math.max(0, Math.min(from, docLength));
+    const safeTo = Math.max(safeFrom, Math.min(toPos, docLength));
     this.view.dispatch({
-      changes: { from, to: toPos, insert: text },
+      changes: { from: safeFrom, to: safeTo, insert: text },
     });
   }
 
@@ -1056,46 +1072,30 @@ class CM6Adapter {
 
 // 替换 Widget
 class ReplacementWidget extends WidgetType {
+  /**
+   * @param {HTMLElement} dom - 要替换的 DOM 元素
+   */
   constructor(dom) {
     super();
+    /** @type {HTMLElement} */
     this.dom = dom;
   }
 
+  /**
+   * @returns {HTMLElement}
+   */
   toDOM() {
     // 返回克隆节点而非原始节点，避免多次调用时节点被移动
-    return this.dom.cloneNode(true);
+    return /** @type {HTMLElement} */ (this.dom.cloneNode(true));
   }
 
+  /**
+   * @param {ReplacementWidget} other - 另一个 Widget 实例
+   * @returns {boolean}
+   */
   eq(other) {
     // 比较 Widget 的 dom 引用是否相同，避免不必要的 DOM 重建
     return this.dom === other.dom;
-  }
-}
-
-/**
- * 粘贴占位符 Widget - 用于异步粘贴时的占位显示
- */
-class PastePlaceholderWidget extends WidgetType {
-  /**
-   * @param {string} id - 占位符 ID
-   * @param {string} text - 占位符文本
-   */
-  constructor(id, text) {
-    super();
-    this.id = id;
-    this.text = text;
-  }
-
-  toDOM() {
-    const span = document.createElement('span');
-    span.className = 'paste-wrapper';
-    span.dataset.id = `paste-${this.id}`;
-    span.textContent = this.text;
-    return span;
-  }
-
-  eq(other) {
-    return this.id === other.id && this.text === other.text;
   }
 }
 
@@ -1135,6 +1135,11 @@ const markField = StateField.define({
         } else {
           removeRangeSet.add(`${filter.from}_${filter.to}`);
         }
+      }
+
+      // Bug Fix: 确保装饰按 from 位置排序，满足 RangeSet 的要求
+      if (toAdd.length > 1) {
+        toAdd.sort((a, b) => a.from - b.from);
       }
 
       updatedMarks = updatedMarks.update({
@@ -1296,15 +1301,17 @@ export default class Editor {
     }
 
     const timeSinceStart = Date.now() - this.dealSpecialWordsStartTime;
+    // 明确计算剩余强制处理时间，确保逻辑清晰
+    // 如果已经超过强制处理时间，立即执行（delay = 0）
+    // 否则取防抖时间和剩余强制时间的较小值
+    const remainingForceTime = forceProcessMs - timeSinceStart;
+    const delay = remainingForceTime <= 0 ? 0 : Math.min(debounceMs, remainingForceTime);
 
-    this.dealSpecialWordsTimer = setTimeout(
-      () => {
-        this.doDealSpecialWordsInternal();
-        this.dealSpecialWordsTimer = 0;
-        this.dealSpecialWordsStartTime = 0;
-      },
-      Math.min(debounceMs, Math.max(0, forceProcessMs - timeSinceStart)),
-    );
+    this.dealSpecialWordsTimer = setTimeout(() => {
+      this.doDealSpecialWordsInternal();
+      this.dealSpecialWordsTimer = 0;
+      this.dealSpecialWordsStartTime = 0;
+    }, delay);
   };
 
   /**
@@ -1374,7 +1381,6 @@ export default class Editor {
 
     // 一次性应用所有装饰（单个 Transaction）
     if (allMarkItems.length > 0) {
-      // @ts-ignore 类型系统中 CM6Adapter 类型定义不完全匹配，但运行时正确
       this.applyBatchMarks(this.editor, allMarkItems);
     }
   };
@@ -1409,7 +1415,6 @@ export default class Editor {
     this.collectMarkItems(base64Reg, 'cm-url base64', allMarkItems, undefined, existingMarksSet);
 
     if (allMarkItems.length > 0) {
-      // @ts-ignore 类型系统中 CM6Adapter 类型定义不完全匹配，但运行时正确
       this.applyBatchMarks(this.editor, allMarkItems);
     }
   };
@@ -1432,11 +1437,19 @@ export default class Editor {
   };
 
   /**
+   * @typedef {Object} MarkRange
+   * @property {number} begin - 起始位置
+   * @property {number} end - 结束位置
+   * @property {string} [bigString] - 可选的大字符串（用于标记内容）
+   * @property {string} [id] - 可选的 ID
+   */
+
+  /**
    * 收集标记项（不立即应用，用于批量处理）
    * @param {RegExp} reg - 正则表达式
    * @param {string} className - CSS 类名
-   * @param {Array} targetArray - 目标数组，用于收集标记项
-   * @param {Function} [callback] - 可选的回调函数，签名：callback(fromPos: number, matchResult: Array) -> {begin: number, end: number, bigString: string}
+   * @param {Array<import('../types/editor').BatchMarkItem>} targetArray - 目标数组，用于收集标记项
+   * @param {(fromPos: number, matchResult: RegExpMatchArray) => MarkRange | null} [callback] - 可选的回调函数
    * @param {Set<string>} [existingMarksSet] - 已有标记集合（用于避免 O(n²) 检查）
    */
   collectMarkItems = (reg, className, targetArray, callback, existingMarksSet) => {
@@ -1444,7 +1457,6 @@ export default class Editor {
     const searcher = editor.getSearchCursor(reg);
 
     for (let matchResult = searcher.findNext(); matchResult !== false; matchResult = searcher.findNext()) {
-      // @ts-ignore 类型系统中 CM6Adapter 类型定义不完全匹配，但运行时正确
       const item = this.collectMarkItem(editor, searcher, matchResult, className, callback, existingMarksSet);
       if (item) {
         targetArray.push(item);
@@ -1590,10 +1602,9 @@ export default class Editor {
     // 按住 Ctrl/Cmd 并点击全角字符时触发转换
     if (target.classList.contains('cm-fullWidth') && (evt.ctrlKey || evt.metaKey) && evt.buttons === 1) {
       const rect = target.getBoundingClientRect();
-      const editorRect = editorView.scrollDOM.getBoundingClientRect();
-      const x = rect.left - editorRect.left;
-      const y = rect.top - editorRect.top;
-      const fromPos = editorView.posAtCoords({ x, y });
+      // 注意：posAtCoords 期望的是视口坐标（clientX/clientY），
+      // getBoundingClientRect() 返回的 left/top 已经是视口坐标，无需再减去编辑器偏移
+      const fromPos = editorView.posAtCoords({ x: rect.left, y: rect.top });
       if (fromPos === null) return;
       const line = editorView.state.doc.lineAt(fromPos);
       const from = { line: line.number - 1, ch: fromPos - line.from };
@@ -1680,26 +1691,39 @@ export default class Editor {
     const marks = state.field(markField, false);
     if (!marks) return;
 
-    // 遍历所有装饰，查找匹配的占位符
+    // Bug Fix: 先收集匹配项，避免在遍历中修改状态
+    // 这样确保所有匹配项都能被正确处理
+    /** @type {Array<{from: number, to: number, markId: string}>} */
+    const matchedMarks = [];
+
     marks.between(0, state.doc.length, (from, to, decoration) => {
       const markId = decoration.spec?.attributes?.['data-mark-id'];
       if (markId && markId.startsWith('paste-') && markId.includes(randomId)) {
-        // 找到匹配的装饰，移除它并插入内容
+        matchedMarks.push({ from, to, markId });
+      }
+    });
+
+    // 统一处理收集到的匹配项
+    for (const { from, to, markId } of matchedMarks) {
+      if (mdText) {
+        // Bug Fix: 合并为单个 transaction，保证操作原子性
+        // 这样撤销时可以一次性撤销整个粘贴操作
+        editorView.dispatch({
+          changes: { from, to, insert: mdText },
+          effects: removeMark.of({ from, to, markId }),
+          selection: { anchor: from + mdText.length },
+        });
+      } else {
+        // 先移除占位符装饰，同时记录当前位置
         editorView.dispatch({
           effects: removeMark.of({ from, to, markId }),
           selection: { anchor: from },
         });
-
-        if (mdText) {
-          editorView.dispatch({
-            changes: { from, to, insert: mdText },
-            selection: { anchor: from + mdText.length },
-          });
-        } else {
-          this.formatHtml2MdWhenPaste(null, html, htmlText, editorView);
-        }
+        // Bug Fix: 使用当前选区位置，而不是传入可能已失效的 from/to
+        // formatHtml2MdWhenPaste 内部会使用 editorView.state.selection.main
+        this.formatHtml2MdWhenPaste(null, html, htmlText, editorView);
       }
-    });
+    }
   }
 
   /**
@@ -1713,13 +1737,6 @@ export default class Editor {
     // 生成一个随机id，用于有可能的异步回调
     const randomId = `${Math.random().toString(36).slice(2)}${new Date().getTime()}`;
     const markId = `paste-${randomId}`;
-
-    /**
-     * @typedef {Object} PasteCallbackParams
-     * @property {string} html - HTML 内容
-     * @property {string} htmlText - 纯文本 HTML
-     * @property {string} mdText - Markdown 文本
-     */
 
     // 创建符合 onPaste 期望的回调函数（接收 string 参数）
     // 但我们改为接收对象，所以使用 any 进行转换
@@ -1736,17 +1753,22 @@ export default class Editor {
       if (/^<<[\s\S]+>>$/.test(onPasteRet)) {
         const newText = `{{${randomId}|${onPasteRet.replace(/^<<([\s\S]+)>>$/, (whole, $1) => `<<${$1.replace(/[<>]/g, '')}>>`)}}}`;
         const selection = editorView.state.selection.main;
-        // 创建占位符装饰
-        const placeholderWidget = Decoration.widget({
-          widget: new PastePlaceholderWidget(randomId, newText),
-          attributes: { 'data-mark-id': markId },
+        // 创建粘贴占位符 Mark 装饰（范围装饰）
+        // 注意：Decoration.widget 是点装饰，只应该有一个位置
+        // 这里需要高亮整个粘贴范围，所以使用 Decoration.mark
+        const placeholderMark = Decoration.mark({
+          class: 'paste-wrapper',
+          attributes: {
+            'data-mark-id': markId,
+            'data-paste-id': `paste-${randomId}`,
+          },
         });
         editorView.dispatch({
           changes: { from: selection.from, to: selection.to, insert: newText },
           effects: addMark.of({
             from: selection.from,
             to: selection.from + newText.length,
-            decoration: placeholderWidget,
+            decoration: placeholderMark,
           }),
           selection: { anchor: selection.from + newText.length },
         });
@@ -1840,26 +1862,40 @@ export default class Editor {
     this.formatHtml2MdWhenPaste(event, html, htmlText, editorView);
   }
 
-  formatHtml2MdWhenPaste(event, html, htmlText, editorView) {
+  /**
+   * 将粘贴的 HTML 转换为 Markdown 并插入编辑器
+   * @param {ClipboardEvent | null} event - 粘贴事件（可能为 null，来自异步回调时）
+   * @param {string} html - HTML 内容
+   * @param {string} htmlText - 纯文本内容
+   * @param {CM6AdapterType} editorView - CodeMirror 6 适配器
+   * @param {number} [overrideFrom] - 可选，覆盖插入起始位置（用于异步回调场景）
+   * @param {number} [overrideTo] - 可选，覆盖插入结束位置（用于异步回调场景）
+   */
+  formatHtml2MdWhenPaste(event, html, htmlText, editorView, overrideFrom, overrideTo) {
     let divObj = document.createElement('DIV');
     divObj.innerHTML = html;
     const mdText = htmlParser.run(divObj.innerHTML);
     if (typeof mdText === 'string' && mdText.trim().length > 0) {
       const selection = editorView.state.selection.main;
-      // CM6: 使用文档偏移量而不是 {line, ch}
-      const currentCursor = selection.from;
+      // 使用传入的位置或当前选区位置
+      const from = overrideFrom ?? selection.from;
+      const to = overrideTo ?? selection.to;
+      const currentCursor = from;
 
       // 替换选中内容
       editorView.dispatch({
         changes: {
-          from: selection.from,
-          to: selection.to,
+          from,
+          to,
           insert: mdText,
         },
       });
 
       pasteHelper.showSwitchBtnAfterPasteHtml(this.$cherry, currentCursor, editorView, htmlText, mdText);
-      event.preventDefault();
+      // 仅在 event 存在时调用 preventDefault，避免空指针异常
+      if (event) {
+        event.preventDefault();
+      }
     }
     divObj = null;
   }
@@ -2034,17 +2070,18 @@ export default class Editor {
             if (tr.docChanged) {
               const userEvent = tr.annotation(Transaction.userEvent) || '';
               let origin = '';
-              if (userEvent.includes('input')) {
+              // 使用精确匹配而非 includes()，避免误判（例如 'undo' 和 'redo'、'delete' 和 'undelete'）
+              if (userEvent === 'input' || userEvent.startsWith('input.')) {
                 origin = '+input';
-              } else if (userEvent.includes('delete')) {
+              } else if (userEvent === 'delete' || userEvent.startsWith('delete.')) {
                 origin = '+delete';
-              } else if (userEvent.includes('undo')) {
+              } else if (userEvent === 'undo' || userEvent.startsWith('undo.')) {
                 origin = '+undo';
-              } else if (userEvent.includes('redo')) {
+              } else if (userEvent === 'redo' || userEvent.startsWith('redo.')) {
                 origin = '+redo';
-              } else if (userEvent.includes('paste')) {
+              } else if (userEvent === 'paste' || userEvent.startsWith('paste.')) {
                 origin = '+paste';
-              } else if (userEvent.includes('drop')) {
+              } else if (userEvent === 'drop' || userEvent.startsWith('drop.')) {
                 origin = '+drop';
               }
 
@@ -2477,8 +2514,17 @@ export default class Editor {
     if (!this.editor) return;
     const { view } = this.editor;
     const { doc } = view.state;
-    const fromPos = doc.line(from.line + 1).from + from.ch;
-    const toPos = doc.line(to.line + 1).from + to.ch;
+    const lineCount = doc.lines;
+
+    // 边界保护：确保行号和字符位置有效（调用方应确保传入有效位置）
+    const fromLineNum = Math.max(1, Math.min(from.line + 1, lineCount));
+    const toLineNum = Math.max(1, Math.min(to.line + 1, lineCount));
+
+    const fromLine = doc.line(fromLineNum);
+    const toLine = doc.line(toLineNum);
+
+    const fromPos = fromLine.from + Math.max(0, Math.min(from.ch, fromLine.length));
+    const toPos = toLine.from + Math.max(0, Math.min(to.ch, toLine.length));
 
     view.dispatch({
       selection: EditorSelection.range(fromPos, toPos),
@@ -2534,11 +2580,18 @@ export default class Editor {
   destroy() {
     this.isDestroyed = true;
 
+    // 清理 dealSpecialWords 防抖定时器
     if (this.dealSpecialWordsTimer) {
       clearTimeout(this.dealSpecialWordsTimer);
       this.dealSpecialWordsTimer = 0;
     }
     this.dealSpecialWordsStartTime = 0;
+
+    // 清理 animation.timer（requestAnimationFrame）
+    if (this.animation && this.animation.timer) {
+      cancelAnimationFrame(this.animation.timer);
+      this.animation.timer = 0;
+    }
 
     if (this.domEventListeners && this.domEventListeners.length > 0) {
       this.domEventListeners.forEach(({ elm, evType, fn, useCapture }) => {

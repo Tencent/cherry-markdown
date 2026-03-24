@@ -624,6 +624,19 @@ class SuggesterPanel {
     if (!optionItem) {
       return;
     }
+
+    // 获取当前文档长度，用于边界检查
+    // 注意：docLength 可能为 undefined（mock 环境）
+    const docLength = this.editor?.editor?.state?.doc?.length;
+
+    // 验证 cursorFrom 是否仍然有效（文档可能已经被修改）
+    // 只有当 docLength 是有效数字时才进行检查（包括空文档 docLength === 0 的情况）
+    if (typeof docLength === 'number' && cursorFrom > docLength) {
+      // cursorFrom 已经超出文档范围，放弃操作
+      this.stopRelate();
+      return;
+    }
+
     let cursorTo;
     // 仅替换当前联想触发期间录入的字符，避免吞掉光标后的文本
     // Reference: issue #1493 https://github.com/Tencent/cherry-markdown/issues/1493
@@ -636,6 +649,12 @@ class SuggesterPanel {
     } else {
       cursorTo = cursorFrom;
     }
+
+    // 边界检查：确保 cursorTo 不超出文档长度
+    if (typeof docLength === 'number') {
+      cursorTo = Math.min(cursorTo, docLength);
+    }
+
     if (optionItem) {
       let result = '';
       if (typeof optionItem === 'object' && optionItem !== null && typeof optionItem.value === 'string') {
@@ -649,9 +668,13 @@ class SuggesterPanel {
       // CM6: 使用文档偏移量获取字符
       if (result.endsWith(' ') && this.editor?.editor?.state && cursorTo !== null) {
         const { doc } = this.editor.editor.state;
-        const charAtCursor = doc.sliceString(cursorTo, cursorTo + 1);
-        if (charAtCursor === ' ') {
-          cursorTo = cursorTo + 1;
+        const currentDocLength = doc?.length;
+        // 边界检查：确保 cursorTo 在文档范围内才读取字符
+        if (typeof currentDocLength === 'number' && cursorTo < currentDocLength) {
+          const charAtCursor = doc.sliceString(cursorTo, cursorTo + 1);
+          if (charAtCursor === ' ') {
+            cursorTo = cursorTo + 1;
+          }
         }
       }
       // CM6: replaceRange 使用文档偏移量

@@ -127,6 +127,8 @@ export interface CM6Adapter {
   currentKeyMap: 'sublime' | 'vim';
   /** vim 模式的 Compartment（用于多实例隔离） */
   vimCompartment: import('@codemirror/state').Compartment | null;
+  /** 标记 ID 计数器（实例级别，用于多实例隔离） */
+  markIdCounter: number;
 
   // 代理属性 - 直接访问底层 EditorView 的属性
   /** 代理到 view.state */
@@ -223,24 +225,6 @@ export interface CM6Adapter {
   // 标记操作（使用文档偏移量）
   markText(from: number, to: number, options: MarkTextOptions): TextMarker;
   findMarks(from: number, to: number): MarkInfo[];
-
-  // 批量标记操作（性能优化）
-  /**
-   * 收集单个标记项（不立即创建 mark）
-   * @returns 返回标记数据或 null（如果已存在或无效）
-   */
-  collectMarkItem?(
-    editor: CM6Adapter,
-    searcher: SearchCursor,
-    matchResult: string[] | false,
-    className: string,
-    callback?: (match: string[]) => { begin: number; end: number; bigString?: string },
-  ): BatchMarkItem | null;
-
-  /**
-   * 批量应用所有装饰（使用单个 Transaction）
-   */
-  applyBatchMarks?(editor: CM6Adapter, markItems: BatchMarkItem[]): void;
 
   // 搜索游标（使用文档偏移量）
   getSearchCursor(query: string | RegExp, pos?: number, caseFold?: boolean): SearchCursor;
