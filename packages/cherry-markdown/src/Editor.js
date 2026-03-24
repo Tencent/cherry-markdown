@@ -279,8 +279,6 @@ class CM6Adapter {
     this.markIdCounter = 0;
   }
 
-  // ==================== 代理属性 ====================
-
   /**
    * 获取编辑器状态
    * @returns {EditorState}
@@ -299,7 +297,7 @@ class CM6Adapter {
 
   /**
    * 分发事务到编辑器
-   * @param {...import('@codemirror/state').TransactionSpec} specs - 事务规范
+   * @param {...import('@codemirror/state').TransactionSpec} specs
    * @returns {void}
    */
   dispatch(...specs) {
@@ -309,7 +307,7 @@ class CM6Adapter {
   /**
    * 请求测量
    * @template T
-   * @param {{ read: (view: EditorView) => T; write?: (measure: T, view: EditorView) => void }} [request] - 测量请求
+   * @param {{ read: (view: EditorView) => T; write?: (measure: T, view: EditorView) => void }} [request]
    * @returns {void}
    */
   requestMeasure(request) {
@@ -318,7 +316,7 @@ class CM6Adapter {
 
   /**
    * 坐标转位置
-   * @param {{ x: number; y: number }} coords - 坐标
+   * @param {{ x: number; y: number }} coords
    * @returns {number | null}
    */
   posAtCoords(coords) {
@@ -327,14 +325,12 @@ class CM6Adapter {
 
   /**
    * 获取行块信息
-   * @param {number} pos - 位置
+   * @param {number} pos
    * @returns {import('@codemirror/view').BlockInfo}
    */
   lineBlockAt(pos) {
     return this.view.lineBlockAt(pos);
   }
-
-  // ==================== 基本操作 ====================
 
   /**
    * 获取编辑器全部内容
@@ -436,12 +432,10 @@ class CM6Adapter {
     });
   }
 
-  // ==================== 光标和选区操作 ====================
-
   /**
-   * 获取光标位置（文档偏移量）
-   * @param {'head' | 'anchor'} [type='head'] - 'head' 返回光标头部位置，'anchor' 返回锚点位置
-   * @returns {number} 光标位置（文档偏移量）
+   * 获取光标位置
+   * @param {'head' | 'anchor'} [type='head'] - 'head' 返回光标头部，'anchor' 返回锚点位置
+   * @returns {number} 文档偏移量
    */
   getCursor(type = 'head') {
     return type === 'head' ? this.view.state.selection.main.head : this.view.state.selection.main.anchor;
@@ -449,7 +443,7 @@ class CM6Adapter {
 
   /**
    * 设置光标位置
-   * @param {number} pos - 光标位置（文档偏移量）
+   * @param {number} pos - 文档偏移量
    * @returns {void}
    */
   setCursor(pos) {
@@ -460,9 +454,9 @@ class CM6Adapter {
 
   /**
    * 设置选区
-   * @param {number} anchor - 选区锚点位置（文档偏移量）
-   * @param {number} [head] - 选区头部位置（文档偏移量），不传则与 anchor 相同
-   * @param {Object} [options] - 可选参数
+   * @param {number} anchor - 选区锚点（文档偏移量）
+   * @param {number} [head] - 选区头部（文档偏移量），不传则与 anchor 相同
+   * @param {Object} [options]
    * @param {string} [options.userEvent] - 用户事件类型
    * @param {boolean} [options.scrollIntoView] - 是否滚动到选区位置
    * @returns {void}
@@ -487,18 +481,16 @@ class CM6Adapter {
 
   /**
    * 获取所有选区
-   * @returns {readonly SelectionRange[]} CM6 原生 SelectionRange 数组
+   * @returns {readonly SelectionRange[]} CM6 SelectionRange 数组
    */
   listSelections() {
     return this.view.state.selection.ranges;
   }
 
-  // ==================== 行操作 ====================
-
   /**
    * 获取指定行的内容
-   * @param {number} lineNumber - 行号（1-indexed，与 CM6 一致）
-   * @returns {string} 行内容字符串
+   * @param {number} lineNumber - 行号（1-indexed）
+   * @returns {string}
    */
   getLine(lineNumber) {
     const lineObj = this.view.state.doc.line(lineNumber);
@@ -507,7 +499,7 @@ class CM6Adapter {
 
   /**
    * 获取文档总行数
-   * @returns {number} 行数
+   * @returns {number}
    */
   lineCount() {
     return this.view.state.doc.lines;
@@ -517,7 +509,7 @@ class CM6Adapter {
    * 获取指定范围的文本
    * @param {number} from - 起始位置（文档偏移量）
    * @param {number} to - 结束位置（文档偏移量）
-   * @returns {string} 范围内的文本
+   * @returns {string}
    */
   getRange(from, to) {
     return this.view.state.doc.sliceString(from, to);
@@ -540,17 +532,13 @@ class CM6Adapter {
     });
   }
 
-  // ==================== 文档操作 ====================
-
   /**
-   * 获取文档对象（返回自身以保持链式调用）
-   * @returns {CM6Adapter} CM6Adapter 实例
+   * 获取文档对象
+   * @returns {CM6Adapter}
    */
   getDoc() {
     return this;
   }
-
-  // ==================== 坐标操作 ====================
 
   /**
    * 获取指定位置的屏幕坐标
@@ -561,8 +549,6 @@ class CM6Adapter {
     const position = pos !== undefined ? pos : this.view.state.selection.main.head;
     return this.view.coordsAtPos(position);
   }
-
-  // ==================== 滚动操作 ====================
 
   /**
    * 滚动到指定位置
@@ -597,7 +583,7 @@ class CM6Adapter {
 
   /**
    * 获取滚动信息
-   * @returns {ScrollInfo} 滚动信息对象
+   * @returns {ScrollInfo} 包含滚动位置、尺寸等信息
    */
   getScrollInfo() {
     return {
@@ -610,11 +596,9 @@ class CM6Adapter {
     };
   }
 
-  // ==================== DOM 操作 ====================
-
   /**
    * 获取编辑器包装元素
-   * @returns {HTMLElement} 包装 DOM 元素
+   * @returns {HTMLElement} 编辑器最外层 DOM
    */
   getWrapperElement() {
     return this.view.dom;
@@ -622,7 +606,7 @@ class CM6Adapter {
 
   /**
    * 获取滚动容器元素
-   * @returns {HTMLElement} 滚动容器 DOM 元素
+   * @returns {HTMLElement} 可滚动的 DOM 容器
    */
   getScrollerElement() {
     return this.view.scrollDOM;
@@ -644,8 +628,6 @@ class CM6Adapter {
     this.view.focus();
   }
 
-  // ==================== 选项操作 ====================
-
   /**
    * 设置编辑器选项
    * @param {'value' | 'keyMap' | string} option - 选项名称
@@ -661,14 +643,13 @@ class CM6Adapter {
         this.setKeyMap(/** @type {'sublime' | 'vim'} */ (value));
         break;
       default:
-        // 静默忽略不支持的选项
         break;
     }
   }
 
   /**
    * 设置键盘映射模式
-   * @param {'sublime' | 'vim'} mode - 键盘映射模式
+   * @param {'sublime' | 'vim'} mode - 'sublime' 或 'vim' 模式
    * @returns {Promise<void>}
    */
   async setKeyMap(mode) {
@@ -718,11 +699,9 @@ class CM6Adapter {
     }
   }
 
-  // ==================== 搜索操作 ====================
-
   /**
    * 设置搜索查询并高亮匹配
-   * @param {string} query - 搜索字符串
+   * @param {string} query - 搜索字符串或正则表达式
    * @param {boolean} [caseSensitive=false] - 是否区分大小写
    * @param {boolean} [isRegex=false] - 是否为正则表达式
    * @returns {void}
@@ -768,8 +747,6 @@ class CM6Adapter {
       });
     }
   }
-
-  // ==================== 标记操作 ====================
 
   /**
    * 标记指定范围的文本
@@ -853,8 +830,6 @@ class CM6Adapter {
     }
     return result;
   }
-
-  // ==================== 搜索游标 ====================
 
   /**
    * 获取搜索游标
@@ -943,8 +918,6 @@ class CM6Adapter {
       },
     };
   }
-
-  // ==================== 事件系统 ====================
 
   /**
    * 添加事件监听器

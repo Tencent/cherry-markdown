@@ -714,7 +714,6 @@ export default class Previewer {
   $dealWithMyersDiffResult(result, oldContent, newContent, domContainer) {
     result.forEach((change) => {
       if (newContent[change.newIndex].dom) {
-        // 把已经加载过的图片的data-src变成src
         newContent[change.newIndex].dom.innerHTML = this.lazyLoadImg.changeLoadedDataSrc2Src(
           newContent[change.newIndex].dom.innerHTML,
         );
@@ -732,8 +731,8 @@ export default class Previewer {
           break;
         case 'update':
           try {
-            // 处理表格包含图表的特殊场景
             let hasUpdate = false;
+            // 处理表格包含图表的特殊场景
             if (
               newContent[change.newIndex].dom.className === 'cherry-table-wrapper' &&
               newContent[change.newIndex].dom.querySelector('.cherry-table-figure .cherry-echarts-wrapper') &&
@@ -1013,9 +1012,9 @@ export default class Previewer {
 
   /**
    * 根据行号计算出top值
-   * @param {Number} lineNum
-   * @param {Number} linePercent
-   * @return {Number} top
+   * @param {Number} lineNum - 行号
+   * @param {Number} linePercent - 行内百分比位置（0-1）
+   * @return {Number} 滚动位置（像素）
    */
   $getTopByLineNum(lineNum, linePercent = 0) {
     const domContainer = this.getDomContainer();
@@ -1035,26 +1034,19 @@ export default class Previewer {
         lines += blockLines;
         continue;
       } else {
-        // 基础定位，区块高度及offsetTop会受到block margin合并的影响
         const { height: blockHeight, offsetTop } = getBlockTopAndHeightWithMargin(doms[index]);
         const blockY = offsetTop - containerY;
         let scrollTo = blockY + blockHeight * linePercent;
-        // 区块多于1行
+        // 区块多于1行时，按比例计算行偏移
         if (blockLines > 1) {
-          // 高度百分比计算
-          // 该区块已经滚动过的行，不包括当前行，减一
           const overScrolledLines = blockLines - Math.abs($lineNum - (lines + blockLines)) - 1;
-          const overScrolledHeight = (overScrolledLines / blockLines) * blockHeight; // 已经滚过的高度
-          const blockLineHeight = blockHeight / blockLines; // 该区块每一行的高度
-          // 应该滚动到的位置
+          const overScrolledHeight = (overScrolledLines / blockLines) * blockHeight;
+          const blockLineHeight = blockHeight / blockLines;
           scrollTo = blockY + overScrolledHeight + blockLineHeight * linePercent;
-          // console.log('overscrolled:', overScrolledHeight, blockLineHeight, linePercent);
         }
-        // console.log('滚动编辑区域，左侧应scroll to ', lineNum, '::',scrollTo);
         return scrollTo;
       }
     }
-    // 如果计算完预览区域所有的行号依然＜左侧光标所在的行号，则预览区域直接滚到最低部
     return domContainer.scrollHeight;
   }
 

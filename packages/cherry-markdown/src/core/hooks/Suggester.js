@@ -43,12 +43,12 @@ import { isBrowser } from '@/utils/env';
 
 /**
  * @typedef {object} SuggesterConfigItem
- * @property {function(string, function(SuggestList): void): void} suggestList
- * @property {string} keyword
- * @property {function} suggestListRender
- * @property {function} echo
+ * @property {function(string, function(SuggestList): void): void} suggestList - 推荐项来源函数，接收搜索关键字和回调函数
+ * @property {string} keyword - 唤醒关键字（如 '@'、'#' 等）
+ * @property {function} suggestListRender - 自定义渲染函数（可选）
+ * @property {function} echo - 回填回调函数（可选）
  * @typedef {object} SuggesterConfig
- * @property {Array<SuggesterConfigItem>} suggester
+ * @property {Array<SuggesterConfigItem>} suggester - 推荐器配置数组
  */
 
 export default class Suggester extends SyntaxBase {
@@ -56,23 +56,12 @@ export default class Suggester extends SyntaxBase {
 
   constructor({ config, cherry }) {
     /**
-     * config.suggester 内容
-     * [{
-     * 请求url
-      suggestList: '',
-      唤醒关键字
-      keyword: '@',
-      建议模板 function
-      suggestListRender(valueArray) {
-
-      },
-      回填回调 function
-      echo(value) {
-            
-      }]
-     * 
+     * config.suggester 推荐器配置数组，每项配置：
+     * - suggestList: 推荐项来源（函数或字符串），函数接收关键字和结果回调
+     * - keyword: 唤醒关键字（如 '@'、'#' 等）
+     * - suggestListRender: 自定义渲染函数（可选）
+     * - echo: 回填回调函数（可选）
      */
-
     super({ needCache: true });
 
     this.config = config;
@@ -106,12 +95,11 @@ export default class Suggester extends SyntaxBase {
     this.suggester = {};
     const defaultSuggest = [];
     const that = this;
-    // 默认的唤醒关键字
+    // 默认的唤醒关键字配置
     for (const suggesterKeyword of suggesterKeywords) {
       defaultSuggest.push({
         keyword: suggesterKeyword,
         suggestList(_word, callback) {
-          // 将word全转成小写
           const word = _word.toLowerCase();
           const systemSuggestList = allSuggestList(
             suggesterKeyword,
@@ -124,23 +112,19 @@ export default class Suggester extends SyntaxBase {
             return;
           }
           const keyword = word
-            .replace(/\s+/g, '') // 删掉空格，避免产生不必要的空数组元素
-            .replace(new RegExp(`^${suggesterKeyword}`, 'g'), '') // 删掉word当中suggesterKeywords出现的字符
+            .replace(/\s+/g, '')
+            .replace(new RegExp(`^${suggesterKeyword}`, 'g'), '')
             .replace(/^[#]+/, '#')
             .replace(/^[/]+/, '/')
             .split('')
             .join('.*?');
-          // 匹配任何包含 "keyword" 的字符串，无论 "keyword" 是在字符串的开头、中间还是结尾，并且不区分大小写
           const test = new RegExp(`^.*?${keyword}.*?$`, 'i');
           const suggestList = systemSuggestList.filter((item) => {
-            // 处理精确匹配
             if (item.exactMatch) {
               return !word || item.keyword === word;
             }
-            // TODO: 首次联想的时候会把所有的候选项列出来，后续可以增加一些机制改成默认拉取一部分候选项
             return !word || test.test(item.keyword);
           });
-          // 当没有候选项时直接推出联想
           callback(suggestList.length === 0 ? false : suggestList);
         },
         echo() {
@@ -166,7 +150,7 @@ export default class Suggester extends SyntaxBase {
       this.suggester[configItem.keyword] = configItem;
     });
 
-    // 反复初始化时， 缓存还在， dom 已更新情况
+    // 反复初始化时，缓存还在但 DOM 已更新的情况
     if (this.suggesterPanel.hasEditor()) {
       this.suggesterPanel.editor = null;
     }
