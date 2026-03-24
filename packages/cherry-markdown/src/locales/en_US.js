@@ -172,7 +172,7 @@ export default {
   disableShortcut: 'Disable all shortcuts',
   enableShortcut: 'Enable all shortcuts',
   recoverShortcut: 'Restore default configuration',
-  search: 'Search',
+  search: 'Search/Replace',
   autoWrap: 'Auto Wrap',
   footnoteTitle: 'Footnote',
   searchFor: 'Search for',
