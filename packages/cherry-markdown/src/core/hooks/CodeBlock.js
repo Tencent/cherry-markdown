@@ -482,7 +482,6 @@ export default class CodeBlock extends ParagraphBase {
         $code = $code.replace(regex, '$1');
       }
 
-      // 未命中缓存，执行渲染
       let $lang = lang.trim().toLowerCase();
       // 从语言行中解析尺寸和对齐信息（如 mermaid #300px #200px #center）
       const mermaidSizeInfo = this.parseMermaidSize($lang);
@@ -509,7 +508,10 @@ export default class CodeBlock extends ParagraphBase {
           mermaidAlignClass,
         });
         if (cacheCode && cacheCode !== '') {
-          this.$codeCache(sign, cacheCode);
+          // echarts渲染的场景不再缓存，因为缓存后无法触发echarts渲染
+          if (!/^\s*echarts\s*$/.test($lang)) {
+            this.$codeCache(sign, cacheCode);
+          }
           return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
         }
         // 渲染出错则按正常code进行渲染

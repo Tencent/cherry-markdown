@@ -695,6 +695,15 @@ export default class Previewer {
                 oldContent[change.oldIndex].dom.querySelector('.cherry-table'),
               );
               hasUpdate = true;
+            } else if (
+              // 处理代码块渲染echarts的特殊场景
+              newContent[change.newIndex].dom.dataset.type === 'echarts' &&
+              newContent[change.newIndex].dom.querySelector('.cherry-echarts-codeblock-wrapper') &&
+              oldContent[change.oldIndex].dom.querySelector('.cherry-echarts-codeblock-wrapper')
+            ) {
+              oldContent[change.oldIndex].dom.dataset.sign = newContent[change.newIndex].dom.dataset.sign;
+              oldContent[change.oldIndex].dom.dataset.lines = newContent[change.newIndex].dom.dataset.lines;
+              hasUpdate = true;
             } else if (newContent[change.newIndex].dom.querySelector('svg')) {
               throw new Error(); // SVG暂不使用patch更新
             }
