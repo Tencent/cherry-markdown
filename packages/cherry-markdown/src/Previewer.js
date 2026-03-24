@@ -701,7 +701,8 @@ export default class Previewer {
               newContent[change.newIndex].dom.querySelector('.cherry-echarts-codeblock-wrapper') &&
               oldContent[change.oldIndex].dom.querySelector('.cherry-echarts-codeblock-wrapper')
             ) {
-              oldContent[change.oldIndex].dom.replaceWith(newContent[change.newIndex].dom);
+              oldContent[change.oldIndex].dom.dataset.sign = newContent[change.newIndex].dom.dataset.sign;
+              oldContent[change.oldIndex].dom.dataset.lines = newContent[change.newIndex].dom.dataset.lines;
               hasUpdate = true;
             } else if (newContent[change.newIndex].dom.querySelector('svg')) {
               throw new Error(); // SVG暂不使用patch更新

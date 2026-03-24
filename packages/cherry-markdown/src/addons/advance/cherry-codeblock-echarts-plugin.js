@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import mergeWith from 'lodash/mergeWith';
+import JSON5 from 'json5';
 
 export default class EChartsCodeBlockEngine {
   static install(cherryOptions, ...args) {
@@ -47,25 +48,32 @@ export default class EChartsCodeBlockEngine {
 
   render(src, sign, $engine, language) {
     if (src.trim().length <= 0) return '';
-    const chartId = `cherry-chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const width = this.size?.width || '100%';
     const height = this.size?.height || '300px';
     const styleStr = `width: ${width}; height: ${height};`;
     const previewerDom = $engine.$cherry.previewer.getDom();
     // 延迟到下一轮事件循环再执行
     setTimeout(() => {
-      const container = previewerDom.querySelector(`#${chartId}`);
+      const container = previewerDom.querySelector(
+        `div[data-sign="${sign}"][data-type="echarts"] .cherry-echarts-codeblock-wrapper`,
+      );
       if (!container || !this.echartsRef) return;
       try {
-        // 使用 new Function 替代 JSON.parse 以支持非标准 JSON (如带注释、key 无引号等)
-        // eslint-disable-next-line no-new-func
-        const option = new Function(`return ${src}`)();
-        const chart = this.echartsRef.init(container, null);
-        chart.setOption(option);
+        const option = JSON5.parse(src.replace(/;\s*$/, ''));
+        // 判断是否已经初始化
+        let chart = this.echartsRef.getInstanceByDom(container);
+        if (!chart) {
+          chart = this.echartsRef.init(container);
+        }
+        chart.setOption(option, true); // 增加 true 参数以强制覆盖旧配置
       } catch (error) {
-        container.innerHTML = `<div style="color: red;">Render Error: ${error.message}</div>`;
+        if ($engine.$cherry.options.engine.global.flowSessionContext) {
+          container.innerHTML = `drawing...`;
+        } else {
+          container.innerHTML = `<div style="color: red;">Render Error: ${error.message}</div>`;
+        }
       }
     }, 50);
-    return `<div id="${chartId}" style="${styleStr}" class="cherry-echarts-codeblock-wrapper"></div>`;
+    return `<div style="${styleStr}" class="cherry-echarts-codeblock-wrapper"></div>`;
   }
 }
