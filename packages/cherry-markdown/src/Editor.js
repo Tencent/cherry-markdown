@@ -534,10 +534,27 @@ class CM6Adapter {
 
   /**
    * 获取文档对象
+   * @CM5_COMPAT 兼容 CodeMirror 5 API，返回自身以便链式调用
    * @returns {CM6Adapter}
    */
   getDoc() {
     return this;
+  }
+
+  /**
+   * 滚动到指定位置
+   * @CM5_COMPAT 兼容 CodeMirror 5 API，内部已改用 scrollDOM.scrollTop 直接操作
+   * @param {number | null} x - 水平滚动位置（null 表示不改变）
+   * @param {number | null} y - 垂直滚动位置（null 表示不改变）
+   * @returns {void}
+   */
+  scrollTo(x, y) {
+    if (x !== null) {
+      this.view.scrollDOM.scrollLeft = x;
+    }
+    if (y !== null) {
+      this.view.scrollDOM.scrollTop = y;
+    }
   }
 
   /**
@@ -552,6 +569,7 @@ class CM6Adapter {
 
   /**
    * 将指定位置滚动到可视区域
+   * @CM5_COMPAT 兼容 CodeMirror 5 API，内部已改用 EditorView.scrollIntoView effect
    * @param {number} pos - 文档位置（偏移量）
    * @returns {void}
    */
@@ -563,6 +581,7 @@ class CM6Adapter {
 
   /**
    * 获取滚动信息
+   * @CM5_COMPAT 兼容 CodeMirror 5 API，内部已改用 scrollDOM 属性直接获取
    * @returns {ScrollInfo} 包含滚动位置、尺寸等信息
    */
   getScrollInfo() {
