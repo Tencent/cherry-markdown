@@ -551,26 +551,6 @@ class CM6Adapter {
   }
 
   /**
-   * 滚动到指定位置
-   * @param {number | null} x - 水平滚动位置，null 表示不改变
-   * @param {number | null} y - 垂直滚动位置，null 表示不改变
-   * @returns {void}
-   */
-  scrollTo(x, y) {
-    this.view.requestMeasure({
-      read: () => ({ x, y }),
-      write: ({ x: scrollX, y: scrollY }) => {
-        if (scrollY !== null) {
-          this.view.scrollDOM.scrollTop = scrollY;
-        }
-        if (scrollX !== null) {
-          this.view.scrollDOM.scrollLeft = scrollX;
-        }
-      },
-    });
-  }
-
-  /**
    * 将指定位置滚动到可视区域
    * @param {number} pos - 文档位置（偏移量）
    * @returns {void}
@@ -1822,7 +1802,9 @@ export default class Editor {
   onScroll = (editorView) => {
     this.$cherry.$event.emit('cleanAllSubMenus');
     if (this.disableScrollListener) {
-      this.disableScrollListener = false;
+      if (!this.animation.timer) {
+        this.disableScrollListener = false;
+      }
       return;
     }
     const scroller = editorView.scrollDOM;
@@ -2168,23 +2150,57 @@ export default class Editor {
 
     // 边界处理：跳转到文档末尾
     if (beginLine === null) {
+      cancelAnimationFrame(this.animation.timer);
       this.disableScrollListener = true;
       view.scrollDOM.scrollTop = view.scrollDOM.scrollHeight;
+      this.animation.timer = 0;
       return;
     }
 
-    // 计算目标行号（转换为 1-indexed，并确保在有效范围内）
-    const targetLineNumber = Math.min(Math.max(1, beginLine + 1), doc.lines);
-    const targetLine = doc.line(targetLineNumber);
+    const targetBeginLine = doc.line(Math.min(Math.max(1, beginLine + 1), doc.lines));
+    const targetEndLine = doc.line(Math.min(Math.max(1, endLine + beginLine + 1), doc.lines));
 
-    // 使用 lineBlockAt 获取目标行的位置信息
-    const lineBlock = view.lineBlockAt(targetLine.from);
+    const beginLineBlock = view.lineBlockAt(targetBeginLine.from);
+    const endLineBlock = view.lineBlockAt(targetEndLine.from);
 
     // 计算精确的滚动位置：行顶部位置 + 行高 * 百分比偏移
-    const targetScrollTop = lineBlock.top + lineBlock.height * percent;
+    const targetScrollTop = beginLineBlock.top + (endLineBlock.top - beginLineBlock.top) * percent;
+    this.animation.destinationTop = Math.ceil(targetScrollTop - 15);
+    if (this.animation.timer) {
+      return;
+    }
 
-    this.disableScrollListener = true;
-    view.scrollDOM.scrollTop = targetScrollTop;
+    const animationHandler = () => {
+      const currentTop = view.scrollDOM.scrollTop;
+      const delta = this.animation.destinationTop - currentTop;
+      // 100毫秒内完成动画
+      const move = Math.ceil(Math.min(Math.abs(delta), Math.max(1, Math.abs(delta) / (100 / 16.7))));
+      if (delta > 0) {
+        if (currentTop >= this.animation.destinationTop) {
+          this.animation.timer = 0;
+          return;
+        }
+        this.disableScrollListener = true;
+        view.scrollDOM.scrollTop = currentTop + move;
+      } else if (delta < 0) {
+        if (currentTop <= this.animation.destinationTop || currentTop <= 0) {
+          this.animation.timer = 0;
+          return;
+        }
+        this.disableScrollListener = true;
+        view.scrollDOM.scrollTop = currentTop - move;
+      } else {
+        this.animation.timer = 0;
+        return;
+      }
+      // 无法再继续滚动
+      if (currentTop === view.scrollDOM.scrollTop || move >= Math.abs(delta)) {
+        this.animation.timer = 0;
+        return;
+      }
+      this.animation.timer = requestAnimationFrame(animationHandler);
+    };
+    this.animation.timer = requestAnimationFrame(animationHandler);
   }
 
   /**
@@ -2200,7 +2216,6 @@ export default class Editor {
     }
     const $lineNum = Math.max(0, lineNum);
     this.jumpToLine($lineNum, endLine, percent);
-    Logger.log('滚动预览区域，左侧应scroll to ', $lineNum);
   }
 
   /**
