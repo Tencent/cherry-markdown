@@ -145,27 +145,10 @@ export interface CM6Adapter {
   /** 获取指定位置的行块信息 */
   lineBlockAt(pos: number): BlockInfo;
 
-  // 基本操作
-  getValue(): string;
-  setValue(value: string): void;
-  getSelection(): string;
+  // 选区操作（需要封装）
   getSelections(): string[];
   replaceSelection(text: string, select?: 'around' | 'start'): void;
   replaceSelections(texts: string[], select?: 'around' | 'start'): void;
-
-  // 光标操作（使用文档偏移量）
-  /**
-   * 获取光标位置
-   * @param type 光标类型：'head' 或 'anchor'
-   * @returns 文档偏移量
-   */
-  getCursor(type?: 'head' | 'anchor'): number;
-
-  /**
-   * 设置光标位置
-   * @param pos 文档偏移量
-   */
-  setCursor(pos: number): void;
 
   /**
    * 设置选区
@@ -184,10 +167,7 @@ export interface CM6Adapter {
 
   listSelections(): readonly SelectionRange[];
 
-  // 行操作
-  getLine(lineNumber: number): string;
-  lineCount(): number;
-  getRange(from: number, to: number): string;
+  // 范围操作（需要封装）
   replaceRange(text: string, from: number, to?: number): void;
 
   // 文档操作
@@ -201,18 +181,10 @@ export interface CM6Adapter {
    */
   cursorCoords(pos?: number): Rect | null;
 
-  // 滚动操作
-  scrollTo(x: number | null, y: number | null): void;
+  // 滚动操作（需要封装）
   scrollIntoView(pos: number): void;
-  getScrollInfo(): ScrollInfo;
 
-  // DOM 操作
-  getWrapperElement(): HTMLElement;
-  getScrollerElement(): HTMLElement;
-  refresh(): void;
-  focus(): void;
-
-  // 选项操作
+  // 选项操作（需要封装）
   setOption(option: 'value' | 'keyMap' | string, value: string | boolean | object): void;
   getOption(option: 'readOnly' | 'disableInput' | 'value' | string): string | boolean | object | null;
 

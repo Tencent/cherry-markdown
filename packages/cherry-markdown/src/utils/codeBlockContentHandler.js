@@ -105,7 +105,7 @@ export default class CodeBlockHandler {
   }
   $collectCodeBlockCode() {
     const codeBlockCodes = [];
-    this.codeMirror.getValue().replace(this.codeBlockReg, function (whole, ...args) {
+    this.codeMirror.view.state.doc.toString().replace(this.codeBlockReg, function (whole, ...args) {
       const match = whole.replace(/^\n*/, '');
       const offsetBegin = args[args.length - 2] + whole.match(/^\n*/)[0].length;
       if (!match.startsWith('```mermaid')) {
@@ -119,7 +119,7 @@ export default class CodeBlockHandler {
   }
   $setBlockSelection(index) {
     const codeBlockCode = this.codeBlockEditor.codeBlockCodes[index];
-    const whole = this.codeMirror.getValue();
+    const whole = this.codeMirror.view.state.doc.toString();
     const beginLine = whole.slice(0, codeBlockCode.offset).match(/\n/g)?.length ?? 0;
     const endLine = beginLine + codeBlockCode.code.match(/\n/g).length;
     const endCh = codeBlockCode.code.slice(0, -3).match(/[^\n]+\n*$/)[0].length;
@@ -137,7 +137,7 @@ export default class CodeBlockHandler {
   }
   $setLangSelection(index) {
     const codeBlockCode = this.codeBlockEditor.codeBlockCodes[index];
-    const whole = this.codeMirror.getValue();
+    const whole = this.codeMirror.view.state.doc.toString();
     const beginLine = whole.slice(0, codeBlockCode.offset).match(/\n/g)?.length ?? 0;
     const firstLine = codeBlockCode.code.match(/```\s*[^\n]+/)[0] ?? '```';
     const beginCh = 3;
@@ -303,7 +303,7 @@ export default class CodeBlockHandler {
     // 创建 CodeMirror 6 编辑器
     const editor = this.codeMirror;
     // 存储原始选区内容，用于初始化编辑器
-    const originalContent = editor.getSelection();
+    const originalContent = editor.state.doc.sliceString(editor.state.selection.main.from, editor.state.selection.main.to);
     const { from } = editor.state.selection.main;
 
     // 跟踪当前的替换范围起始位置和长度

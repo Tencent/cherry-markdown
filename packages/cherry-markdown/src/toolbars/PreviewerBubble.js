@@ -689,14 +689,14 @@ export default class PreviewerBubble {
     }
     this.$removeAllPreviewerBubbles('hover');
     this.$createPreviewerBubbles(trigger, `codeBlock-${trigger}-handler`);
-    // 从 Previewer 获取 CodeMirror 模块（由 Editor 传递，stream 模式下为 null）
-    const { codemirrorModule } = this.previewer;
+    // CM6: 传入 CM6Adapter 实例（stream 模式下 editor 可能不存在）
+    const codeMirror = this.editor?.editor ?? null;
     const handler = new CodeHandler(
       trigger,
       htmlElement,
       this.bubble[trigger],
       this.previewerDom,
-      codemirrorModule,
+      codeMirror,
       this,
     );
     handler.showBubble(this.$isEnableBubbleAndEditorShow());
@@ -1057,7 +1057,7 @@ export default class PreviewerBubble {
       return false;
     }
 
-    const rawContent = this.editor.editor.getValue();
+    const rawContent = this.editor.editor.view.state.doc.toString();
     // 在编辑器原始内容中按顺序找到所有 mermaid 代码块
     const codeBlockReg = /(?:^|\n)(\n*(?:>[\t ]*)*(?:[^\S\n]*))(`{3,})([^`]*?)\n([\w\W]*?)\n\s*\2[ \t]*(?=$|\n)/g;
     let match;

@@ -439,7 +439,7 @@ export default class Cherry extends CherryStatic {
    * @returns markdown源码内容
    */
   getValue() {
-    return this.editor?.editor?.getValue() || '';
+    return this.editor?.editor?.view?.state?.doc?.toString() || '';
   }
 
   /**
@@ -573,7 +573,7 @@ export default class Cherry extends CherryStatic {
 
     editorView.dispatch(transaction);
     if (focus) {
-      editorView.focus();
+      editorView.view.focus();
     }
   }
 
@@ -1036,7 +1036,7 @@ export default class Cherry extends CherryStatic {
       }
       let interval = this.options.engine.global.flowSessionContext ? 10 : 50;
       // 每多100行，增加1ms的延迟
-      interval += this.editor.editor.lineCount() / 100;
+      interval += this.editor.editor.view.state.doc.lines / 100;
       this.timer = setTimeout(() => {
         const markdownText = view.state.doc.toString();
         if (markdownText !== this.lastMarkdownText) {
@@ -1071,7 +1071,7 @@ export default class Cherry extends CherryStatic {
     // CodeMirror 6 使用事件系统，通过 $event 来监听变化
     this.$event.on('afterChange', () => {
       cb({
-        markdown: this.editor.editor.getValue(), // CodeMirror 6 API
+        markdown: this.editor.editor.view.state.doc.toString(), // CodeMirror 6 API
       });
     });
   }

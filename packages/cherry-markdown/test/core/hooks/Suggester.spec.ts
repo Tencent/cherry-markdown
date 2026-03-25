@@ -518,7 +518,8 @@ describe('core/hooks/Suggester', () => {
         });
 
         suggester.suggesterPanel.pasteSelectResult(0);
-        expect(mockCherry.editor.editor.setCursor).toHaveBeenCalledWith(-1);
+        // CM6 原生方式：使用 view.dispatch 设置光标
+        expect(mockCherry.editor.editor.view.dispatch).toHaveBeenCalled();
       });
 
       it('应该处理 selection 参数', () => {
@@ -696,7 +697,8 @@ describe('core/hooks/Suggester', () => {
         const evt = createMockKeyboardEvent(13);
         suggester.suggesterPanel.onKeyDown(customCherry.editor.editor, evt);
 
-        expect(customCherry.editor.editor.focus).toHaveBeenCalled();
+        // CM6 原生方式：使用 view.focus()
+        expect(customCherry.editor.editor.view.focus).toHaveBeenCalled();
       });
 
       it('应该处理 ESC 键（27）', async () => {

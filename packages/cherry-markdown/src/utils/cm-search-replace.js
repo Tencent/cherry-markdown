@@ -419,7 +419,7 @@ export default class SearchBox {
   replace() {
     const { cm } = this;
     const readOnly = cm.getOption ? cm.getOption('readOnly') : !cm.view?.contentDOM?.isContentEditable;
-    const isSelection = !!cm.getSelection();
+    const isSelection = !!cm.view.state.doc.sliceString(cm.state.selection.main.from, cm.state.selection.main.to);
     if (!readOnly && isSelection) cm.replaceSelection(this.replaceInput.value, 'start');
     this.updateCount();
   }
@@ -557,7 +557,7 @@ export default class SearchBox {
     this.clearSearch(cm);
     // @ts-ignore
     this.element.style.display = 'none';
-    cm.focus();
+    cm.view.focus();
   }
 
   isVisible() {
@@ -588,7 +588,7 @@ export default class SearchBox {
     const query = value;
     if (query && query !== state.queryText) {
       this.startSearch(cm, state, query, caseSensitive);
-      state.posFrom = cm.getCursor();
+      state.posFrom = cm.view.state.selection.main.head;
       state.posTo = state.posFrom;
     }
   }

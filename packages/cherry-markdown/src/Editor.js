@@ -333,34 +333,6 @@ class CM6Adapter {
   }
 
   /**
-   * 获取编辑器全部内容
-   * @returns {string} 文档内容字符串
-   */
-  getValue() {
-    return this.view.state.doc.toString();
-  }
-
-  /**
-   * 设置编辑器内容
-   * @param {string} value - 要设置的文本内容
-   * @returns {void}
-   */
-  setValue(value) {
-    this.view.dispatch({
-      changes: { from: 0, to: this.view.state.doc.length, insert: value },
-    });
-  }
-
-  /**
-   * 获取当前选中的文本
-   * @returns {string} 选中的文本，如果没有选中则返回空字符串
-   */
-  getSelection() {
-    const { from, to } = this.view.state.selection.main;
-    return this.view.state.doc.sliceString(from, to);
-  }
-
-  /**
    * 获取所有选区的文本
    * @returns {string[]} 所有选区文本的数组
    */
@@ -433,26 +405,6 @@ class CM6Adapter {
   }
 
   /**
-   * 获取光标位置
-   * @param {'head' | 'anchor'} [type='head'] - 'head' 返回光标头部，'anchor' 返回锚点位置
-   * @returns {number} 文档偏移量
-   */
-  getCursor(type = 'head') {
-    return type === 'head' ? this.view.state.selection.main.head : this.view.state.selection.main.anchor;
-  }
-
-  /**
-   * 设置光标位置
-   * @param {number} pos - 文档偏移量
-   * @returns {void}
-   */
-  setCursor(pos) {
-    const docLength = this.view.state.doc.length;
-    const safePos = Math.max(0, Math.min(pos, docLength));
-    this.view.dispatch({ selection: { anchor: safePos } });
-  }
-
-  /**
    * 设置选区
    * @param {number} anchor - 选区锚点（文档偏移量）
    * @param {number} [head] - 选区头部（文档偏移量），不传则与 anchor 相同
@@ -488,34 +440,6 @@ class CM6Adapter {
   }
 
   /**
-   * 获取指定行的内容
-   * @param {number} lineNumber - 行号（1-indexed）
-   * @returns {string}
-   */
-  getLine(lineNumber) {
-    const lineObj = this.view.state.doc.line(lineNumber);
-    return lineObj.text;
-  }
-
-  /**
-   * 获取文档总行数
-   * @returns {number}
-   */
-  lineCount() {
-    return this.view.state.doc.lines;
-  }
-
-  /**
-   * 获取指定范围的文本
-   * @param {number} from - 起始位置（文档偏移量）
-   * @param {number} to - 结束位置（文档偏移量）
-   * @returns {string}
-   */
-  getRange(from, to) {
-    return this.view.state.doc.sliceString(from, to);
-  }
-
-  /**
    * 替换指定范围的文本
    * @param {string} text - 替换文本
    * @param {number} from - 起始位置（文档偏移量）
@@ -542,22 +466,6 @@ class CM6Adapter {
   }
 
   /**
-   * 滚动到指定位置
-   * @CM5_COMPAT 兼容 CodeMirror 5 API，内部已改用 scrollDOM.scrollTop 直接操作
-   * @param {number | null} x - 水平滚动位置（null 表示不改变）
-   * @param {number | null} y - 垂直滚动位置（null 表示不改变）
-   * @returns {void}
-   */
-  scrollTo(x, y) {
-    if (x !== null) {
-      this.view.scrollDOM.scrollLeft = x;
-    }
-    if (y !== null) {
-      this.view.scrollDOM.scrollTop = y;
-    }
-  }
-
-  /**
    * 获取指定位置的屏幕坐标
    * @param {number} [pos] - 文档位置（偏移量），不传则使用当前光标位置
    * @returns {Rect | null} 坐标对象 {left, top, bottom, right} 或 null
@@ -580,54 +488,6 @@ class CM6Adapter {
   }
 
   /**
-   * 获取滚动信息
-   * @CM5_COMPAT 兼容 CodeMirror 5 API，内部已改用 scrollDOM 属性直接获取
-   * @returns {ScrollInfo} 包含滚动位置、尺寸等信息
-   */
-  getScrollInfo() {
-    return {
-      left: this.view.scrollDOM.scrollLeft,
-      top: this.view.scrollDOM.scrollTop,
-      scrollHeight: this.view.scrollDOM.scrollHeight,
-      scrollWidth: this.view.scrollDOM.scrollWidth,
-      clientHeight: this.view.scrollDOM.clientHeight,
-      clientWidth: this.view.scrollDOM.clientWidth,
-    };
-  }
-
-  /**
-   * 获取编辑器包装元素
-   * @returns {HTMLElement} 编辑器最外层 DOM
-   */
-  getWrapperElement() {
-    return this.view.dom;
-  }
-
-  /**
-   * 获取滚动容器元素
-   * @returns {HTMLElement} 可滚动的 DOM 容器
-   */
-  getScrollerElement() {
-    return this.view.scrollDOM;
-  }
-
-  /**
-   * 刷新编辑器布局
-   * @returns {void}
-   */
-  refresh() {
-    this.view.requestMeasure();
-  }
-
-  /**
-   * 聚焦编辑器
-   * @returns {void}
-   */
-  focus() {
-    this.view.focus();
-  }
-
-  /**
    * 设置编辑器选项
    * @param {'value' | 'keyMap' | string} option - 选项名称
    * @param {string | boolean | object} value - 选项值
@@ -636,7 +496,9 @@ class CM6Adapter {
   setOption(option, value) {
     switch (option) {
       case 'value':
-        this.setValue(/** @type {string} */ (value));
+        this.view.dispatch({
+          changes: { from: 0, to: this.view.state.doc.length, insert: /** @type {string} */ (value) },
+        });
         break;
       case 'keyMap':
         this.setKeyMap(/** @type {'sublime' | 'vim'} */ (value));
@@ -692,7 +554,7 @@ class CM6Adapter {
       case 'disableInput':
         return this.view.state.facet(EditorState.readOnly);
       case 'value':
-        return this.getValue();
+        return this.view.state.doc.toString();
       default:
         return null;
     }
@@ -1238,7 +1100,7 @@ export default class Editor {
       return;
     }
 
-    const lineCount = this.editor.lineCount();
+    const lineCount = this.editor.view.state.doc.lines;
     const largeDocConfig = this.options.largeDocumentConfig || {};
     const lineThreshold = largeDocConfig.lineThreshold ?? 10000;
     const strategy = largeDocConfig.strategy ?? 'degrade';
@@ -1340,7 +1202,7 @@ export default class Editor {
   getExistingMarksSet = () => {
     const marksSet = new Set();
     const { editor } = this;
-    const marks = editor.findMarks(0, editor.getValue().length);
+    const marks = editor.findMarks(0, editor.view.state.doc.length);
 
     marks.forEach((mark) => {
       const key = `${mark.from}_${mark.to}_${mark.className}`;
@@ -1487,7 +1349,7 @@ export default class Editor {
       const result = callback(fromPos, matchResult);
       if (result?.begin === undefined || result?.end === undefined) return null;
       if (result.begin >= result.end) return null;
-      if (result.begin < 0 || result.end > this.editor.getValue().length) return null;
+      if (result.begin < 0 || result.end > this.editor.view.state.doc.length) return null;
 
       return {
         begin: result.begin,
@@ -2106,7 +1968,7 @@ export default class Editor {
       this.options.onChange(null, editor);
       this.dealSpecialWords();
       if (this.options.autoSave2Textarea) {
-        textArea.value = editor.getValue();
+        textArea.value = editor.view.state.doc.toString();
       }
     });
 
@@ -2151,7 +2013,7 @@ export default class Editor {
     }
 
     if (this.options.codemirror.autofocus) {
-      editor.focus();
+      editor.view.focus();
     }
   }
 
@@ -2405,7 +2267,7 @@ export default class Editor {
    */
   focus() {
     if (this.editor) {
-      this.editor.focus();
+      this.editor.view.focus();
     }
   }
 

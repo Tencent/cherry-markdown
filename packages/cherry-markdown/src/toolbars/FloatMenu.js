@@ -106,6 +106,8 @@ export default class FloatMenu extends Toolbar {
     const line = state.doc.lineAt(selection.head);
 
     return {
+      view,
+      state,
       getCursor: () => ({ line: line.number - 1 }),
       getLine: (lineNum) => {
         try {
@@ -175,8 +177,10 @@ export default class FloatMenu extends Toolbar {
   }
 
   update(evt, codeMirror) {
-    const pos = codeMirror.getCursor();
-    if (this.isHidden(pos.line, codeMirror)) {
+    const { state } = codeMirror;
+    const cursorOffset = state.selection.main.head;
+    const line = state.doc.lineAt(cursorOffset).number - 1;
+    if (this.isHidden(line, codeMirror)) {
       this.options.dom.style.display = 'none';
       return false;
     }
@@ -190,9 +194,11 @@ export default class FloatMenu extends Toolbar {
    * @returns
    */
   cursorActivity(evt, codeMirror) {
-    const pos = codeMirror.getCursor();
-    // CM6 使用 .cm-content 作为内容区域
-    const codeMirrorLines = document.querySelector('.cherry-editor .cm-content');
+    const { state } = codeMirror;
+    const cursorOffset = state.selection.main.head;
+    const line = state.doc.lineAt(cursorOffset).number - 1;
+    // CM6 使用 .cm-content 作为内容区域，限定在当前实例的 editorDom 范围内查找
+    const codeMirrorLines = this.editorDom.querySelector('.cm-content');
     if (!codeMirrorLines || !(codeMirrorLines instanceof HTMLElement)) {
       return false;
     }
@@ -200,7 +206,7 @@ export default class FloatMenu extends Toolbar {
     const parsedPaddingLeft = Number.parseFloat(computedLinesStyle.paddingLeft);
     const codeWrapPaddingLeft = Number.isFinite(parsedPaddingLeft) ? parsedPaddingLeft : 0;
 
-    if (this.isHidden(pos.line, codeMirror)) {
+    if (this.isHidden(line, codeMirror)) {
       this.options.dom.style.display = 'none';
       return false;
     }
@@ -211,7 +217,7 @@ export default class FloatMenu extends Toolbar {
     // 将浮动工具栏定位到 placeholder 文本后面
     // CM6 使用 .cm-placeholder 类名
     const placeholderEl = codeMirrorLines.querySelector('.cm-placeholder');
-    const topOffset = this.getLineHeight(pos.line, codeMirror);
+    const topOffset = this.getLineHeight(line, codeMirror);
     if (placeholderEl instanceof HTMLElement && placeholderEl.offsetParent !== null) {
       const linesRect = codeMirrorLines.getBoundingClientRect();
       const textNode = Array.from(placeholderEl.childNodes).find(
@@ -242,12 +248,17 @@ export default class FloatMenu extends Toolbar {
     if (selections.length > 1) {
       return true;
     }
-    const selection = codeMirror.getSelection();
+    const { state } = codeMirror;
+    const selection = state.doc.sliceString(state.selection.main.from, state.selection.main.to);
     if (selection.length > 0) {
       return true;
     }
-    if (codeMirror.getLine(line)) {
-      return true;
+    // line 是 0-indexed，CM6 的 doc.line() 是 1-indexed
+    if (line >= 0 && line < state.doc.lines) {
+      const lineContent = state.doc.line(line + 1).text;
+      if (lineContent) {
+        return true;
+      }
     }
     return false;
   }

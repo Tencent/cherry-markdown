@@ -265,15 +265,30 @@ class SuggesterPanel {
       return;
     }
     let keyAction = false;
-    this.editor.editor.on('change', (codemirror, evt) => {
+
+    // change 事件必须使用 editor.editor.on('change')，因为 onCodeMirrorChange
+    // 需要 {text, from, to, origin} 格式的变更细节，而 $cherry.$event 的 afterChange
+    // 只传递 {markdownText, html}，不含这些信息
+    this.boundOnChange = (codemirror, evt) => {
       keyAction = true;
       this.onCodeMirrorChange(codemirror, evt);
-    });
+    };
+    this.editor.editor.on('change', this.boundOnChange);
 
-    this.editor.editor.on('cursorActivity', () => {
+    // cursorActivity 和 scroll 使用 $cherry.$event 模式
+    this.boundOnCursorActivity = () => {
       if (!keyAction) this.stopRelate();
       keyAction = false;
-    });
+    };
+    this.boundOnScroll = () => {
+      if (!this.searchCache) {
+        return;
+      }
+      this.relocatePanel(this.editor.editor);
+    };
+
+    this.$cherry.$event.on('beforeSelectionChange', this.boundOnCursorActivity);
+    this.$cherry.$event.on('onScroll', this.boundOnScroll);
 
     // CM6: 注册方向键拦截器（替代 CM5 的 extraKeys）
     const keyCodeMap = { ArrowUp: 38, ArrowDown: 40, Enter: 13, Escape: 27 };
@@ -286,7 +301,7 @@ class SuggesterPanel {
         if (index >= 0) {
           // 有选中项：执行选择并关闭面板
           this.pasteSelectResult(index);
-          this.editor.editor.focus();
+          this.editor.editor.view.focus();
           setTimeout(() => this.stopRelate(), 0);
           return true;
         }
@@ -298,14 +313,6 @@ class SuggesterPanel {
       this.onKeyDown(this.editor.editor, { keyCode: keyCodeMap[key], key, preventDefault() {}, stopPropagation() {} });
       return !this.cursorMove;
     };
-
-    this.editor.editor.on('scroll', (codemirror, evt) => {
-      if (!this.searchCache) {
-        return;
-      }
-      // 当编辑器滚动时触发
-      this.relocatePanel(this.editor.editor);
-    });
 
     this.onClickPanelItem();
   }
@@ -658,25 +665,25 @@ class SuggesterPanel {
       // 控制光标左移若干位
       // CM6: getCursor() 返回文档偏移量
       if (optionItem.goLeft) {
-        const cursor = this.editor.editor.getCursor();
-        this.editor.editor.setCursor(cursor - optionItem.goLeft);
+        const cursor = this.editor.editor.view.state.selection.main.head;
+        this.editor.editor.view.dispatch({ selection: { anchor: cursor - optionItem.goLeft } });
       }
       // 控制光标上移若干位
       // CM6: 需要将偏移量转换为行，然后向上移动
       if (optionItem.goTop) {
-        const cursor = this.editor.editor.getCursor();
+        const cursor = this.editor.editor.view.state.selection.main.head;
         const { doc } = this.editor.editor.state;
         const currentLine = doc.lineAt(cursor);
         const targetLineNumber = Math.max(1, currentLine.number - optionItem.goTop);
         const targetLine = doc.line(targetLineNumber);
         const ch = cursor - currentLine.from;
         const newPos = targetLine.from + Math.min(ch, targetLine.length);
-        this.editor.editor.setCursor(newPos);
+        this.editor.editor.view.dispatch({ selection: { anchor: newPos } });
       }
       // 选中某个范围
       // CM6: setSelection 使用文档偏移量
       if (optionItem.selection) {
-        const cursor = this.editor.editor.getCursor();
+        const cursor = this.editor.editor.view.state.selection.main.head;
         const fromPos = cursor - optionItem.selection.from;
         const toPos = cursor - optionItem.selection.to;
         this.editor.editor.setSelection(fromPos, toPos);
@@ -836,7 +843,7 @@ class SuggesterPanel {
         evt.stopPropagation();
         this.cursorMove = false;
         this.pasteSelectResult(index, evt);
-        codemirror.focus();
+        codemirror.view.focus();
       }
       setTimeout(() => {
         this.stopRelate();
@@ -845,7 +852,7 @@ class SuggesterPanel {
       // 按下esc或者←、→键的时候退出联想
       evt.preventDefault();
       evt.stopPropagation();
-      codemirror.focus();
+      codemirror.view.focus();
       setTimeout(() => {
         this.stopRelate();
       }, 0);
@@ -857,6 +864,23 @@ class SuggesterPanel {
    * 必须调用此方法以避免内存泄漏
    */
   destroy() {
+    // 移除 editor.editor 上的 change 事件监听器
+    if (this.editor && this.editor.editor && this.boundOnChange) {
+      this.editor.editor.off('change', this.boundOnChange);
+    }
+    // 移除 $cherry.$event 上的事件监听器
+    if (this.$cherry && this.$cherry.$event) {
+      if (this.boundOnCursorActivity) {
+        this.$cherry.$event.off('beforeSelectionChange', this.boundOnCursorActivity);
+      }
+      if (this.boundOnScroll) {
+        this.$cherry.$event.off('onScroll', this.boundOnScroll);
+      }
+    }
+    this.boundOnChange = null;
+    this.boundOnCursorActivity = null;
+    this.boundOnScroll = null;
+
     // 移除 panel 上的 click 事件监听器
     if (this.$suggesterPanel && this.boundClickHandler) {
       this.$suggesterPanel.removeEventListener('click', this.boundClickHandler, false);

@@ -30,24 +30,17 @@ export default class CursorPosition extends MenuBase {
     const editor = this.$cherry.editor?.editor;
     let line = 0;
     let ch = 0;
-    
-    if (editor) {
-      const cursor = editor.getCursor();
-      if (cursor !== null && cursor !== undefined) {
-        // CM6Adapter.getCursor() 返回文档偏移量，需要转换为行列
-        const cursorOffset = typeof cursor === 'number' ? cursor : 0;
-        const view = editor.view;
-        if (view) {
-          // CM6 的 doc.lineAt() 返回的 number 是 1-indexed
-          // 为保持与 Cherry 其他 API 一致（使用 0-based），需要转换回 0-indexed
-          const docLine = view.state.doc.lineAt(cursorOffset);
-          line = docLine.number - 1;
-          ch = cursorOffset - docLine.from;
-        }
-      }
+    let selected = '';
+
+    if (editor?.view) {
+      const { state } = editor.view;
+      const cursorOffset = state.selection.main.head;
+      const docLine = state.doc.lineAt(cursorOffset);
+      line = docLine.number - 1;
+      ch = cursorOffset - docLine.from;
+      selected = state.doc.sliceString(state.selection.main.from, state.selection.main.to);
     }
-    
-    const selected = (editor ? editor.getSelection() : null) || '';
+
     this.btnDom.innerHTML = `Ln ${line}, Col ${ch}${selected ? ` (${selected.length} selected)` : ''}`;
   }
 
@@ -57,10 +50,8 @@ export default class CursorPosition extends MenuBase {
       this.$updateCursorPosition();
     });
     this.$updateCursorPosition();
-    setTimeout(() => {
-      this.$cherry.editor.editor.on('cursorActivity', () => {
-        btnDom.dispatchEvent(this.countEvent);
-      });
-    }, 500);
+    this.$cherry.$event.on('beforeSelectionChange', () => {
+      btnDom.dispatchEvent(this.countEvent);
+    });
   }
 }

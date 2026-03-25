@@ -172,7 +172,7 @@ export default class TableHandler {
   $collectTableCode() {
     const tableCodes = [];
     const footnoteTableCodes = [];
-    const editorValue = this.codeMirror.getValue();
+    const editorValue = this.codeMirror.view.state.doc.toString();
 
     // 首先收集所有脚注的位置信息
     const footnoteRanges = [];
@@ -306,7 +306,7 @@ export default class TableHandler {
     if (!tableCode) {
       return;
     }
-    const whole = this.codeMirror.getValue();
+    const whole = this.codeMirror.view.state.doc.toString();
     const beginLine = whole.slice(0, tableCode.offset).match(/\n/g)?.length ?? 0;
     // 根据表格类型选择不同的处理方式
     let offsetInfo;
@@ -1106,7 +1106,8 @@ export default class TableHandler {
     if (this.tableEditor.info.isHtmlTable) return;
     const { tableIndex, columns } = this.tableEditor.info;
     this.$setSelection(tableIndex, 'table');
-    const selection = this.codeMirror.getSelection();
+    const { view } = this.codeMirror;
+    const selection = view.state.doc.sliceString(view.state.selection.main.from, view.state.selection.main.to);
     const lines = selection.split('\n');
     if (lines.length < 3) return;
 
@@ -1169,7 +1170,8 @@ export default class TableHandler {
    */
   $insertCol() {
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
-    const selection = this.codeMirror.getSelection();
+    const { view } = this.codeMirror;
+    const selection = view.state.doc.sliceString(view.state.selection.main.from, view.state.selection.main.to);
     const lines = selection.split('\n');
     const newLines = lines.map((line, index) => {
       const tableType = /^\s*\|/.test(line) ? 'type1' : 'type2';
@@ -1649,7 +1651,8 @@ export default class TableHandler {
   $alignColumn(alignment) {
     const { tableIndex, tdIndex } = this.tableEditor.info;
     this.$setSelection(tableIndex, 'table');
-    const selection = this.codeMirror.getSelection();
+    const { view } = this.codeMirror;
+    const selection = view.state.doc.sliceString(view.state.selection.main.from, view.state.selection.main.to);
     const lines = selection.split('\n');
 
     // 统一处理markdown表格（包括引用表格）
@@ -1806,7 +1809,8 @@ export default class TableHandler {
   $deleteCurrentRow() {
     const { tableIndex, trIndex } = this.tableEditor.info;
     this.$setSelection(tableIndex, 'table');
-    const selection = this.codeMirror.getSelection();
+    const { view } = this.codeMirror;
+    const selection = view.state.doc.sliceString(view.state.selection.main.from, view.state.selection.main.to);
     const table = selection.split('\n');
     table.splice(trIndex + 2, 1);
     const newText = table.join('\n');
@@ -1820,7 +1824,8 @@ export default class TableHandler {
   $deleteCurrentColumn() {
     const { tableIndex, tdIndex } = this.tableEditor.info;
     this.$setSelection(tableIndex, 'table');
-    const selection = this.codeMirror.getSelection();
+    const { view } = this.codeMirror;
+    const selection = view.state.doc.sliceString(view.state.selection.main.from, view.state.selection.main.to);
     const table = selection.split('\n');
     // 检查是否是引用语法中的表格
     const isBlockquoteTable = table.some((row) => row.trim().startsWith('>'));
@@ -1872,7 +1877,8 @@ export default class TableHandler {
   $dragCol() {
     const oldTdIndex = this.tableEditor.info.tdIndex;
     const thNode = this.target.parentElement;
-    const lines = this.codeMirror.getSelection().split(/\n/);
+    const { view } = this.codeMirror;
+    const lines = view.state.doc.sliceString(view.state.selection.main.from, view.state.selection.main.to).split(/\n/);
     const { tdNode } = this.tableEditor.info;
     const that = this;
 
@@ -1959,7 +1965,8 @@ export default class TableHandler {
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
     const oldTrIndex = this.tableEditor.info.trIndex + 2;
     const tBody = trNode.parentElement;
-    const lines = this.codeMirror.getSelection().split(/\n/);
+    const { view } = this.codeMirror;
+    const lines = view.state.doc.sliceString(view.state.selection.main.from, view.state.selection.main.to).split(/\n/);
     const that = this;
 
     function handleDragLeave(event) {

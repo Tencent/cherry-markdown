@@ -443,12 +443,7 @@ export default class Previewer {
       this.options.virtualDragLineDom.classList.remove('cherry-drag--show');
       // 刷新codemirror宽度
       try {
-        if (this.editor.editor.refresh && typeof this.editor.editor.refresh === 'function') {
-          this.editor.editor.refresh();
-        } else if (this.editor.editor.requestMeasure && typeof this.editor.editor.requestMeasure === 'function') {
-          // CodeMirror 6 equivalent
-          this.editor.editor.requestMeasure();
-        }
+        this.editor.editor.view.requestMeasure();
       } catch (e) {
         console.warn('Failed to refresh editor in Previewer:', e);
       }
@@ -899,12 +894,7 @@ export default class Previewer {
     }
     setTimeout(() => {
       try {
-        if (this.editor.editor.refresh && typeof this.editor.editor.refresh === 'function') {
-          this.editor.editor.refresh();
-        } else if (this.editor.editor.requestMeasure && typeof this.editor.editor.requestMeasure === 'function') {
-          // CodeMirror 6 equivalent
-          this.editor.editor.requestMeasure();
-        }
+        this.editor.editor.view.requestMeasure();
       } catch (e) {
         console.warn('Failed to refresh editor in Previewer:', e);
       }
@@ -965,12 +955,7 @@ export default class Previewer {
 
     setTimeout(() => {
       try {
-        if (this.editor.editor.refresh && typeof this.editor.editor.refresh === 'function') {
-          this.editor.editor.refresh();
-        } else if (this.editor.editor.requestMeasure && typeof this.editor.editor.requestMeasure === 'function') {
-          // CodeMirror 6 equivalent
-          this.editor.editor.requestMeasure();
-        }
+        this.editor.editor.view.requestMeasure();
       } catch (e) {
         console.warn('Failed to refresh editor in Previewer:', e);
       }

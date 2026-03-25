@@ -90,7 +90,7 @@ const pasteHelper = {
    * CM6: currentCursor 和 getCursor() 都是文档偏移量
    */
   setSelection() {
-    const end = this.codemirror.getCursor();
+    const end = this.codemirror.view.state.selection.main.head;
     const begin = this.currentCursor;
     // CM6: setSelection(anchor, head) 使用文档偏移量
     this.codemirror.setSelection(begin, end);
