@@ -19,7 +19,6 @@ import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
 import { getTableRule, isLookbehindSupported, mathBlockReg } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
-import { escapeHTMLSpecialChar } from '@/utils/sanitize';
 
 /**
  * 行内公式的语法

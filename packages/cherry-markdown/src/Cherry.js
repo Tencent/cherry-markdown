@@ -282,14 +282,14 @@ export default class Cherry extends CherryStatic {
     if (this.editor) {
       this.editor.destroy();
     }
-    
+
     // 清理 DOM
     if (this.noMountEl) {
       this.cherryDom.remove();
     } else {
       this.wrapperDom.remove();
     }
-    
+
     // 清理事件
     this.$event.clearAll();
   }
