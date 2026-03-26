@@ -110,9 +110,17 @@ const createMockCherry = (suggesterConfig = {}) => {
 
   const editorAdapter = createMockEditorAdapter();
 
+  // mock $cherry.$event（afterChange/beforeSelectionChange/onScroll 事件总线）
+  const $event = {
+    on: vi.fn(),
+    off: vi.fn(),
+    emit: vi.fn(),
+  };
+
   return {
     locale: 'zh-CN',
     wrapperDom,
+    $event,
     options: {
       editor: {
         suggester: suggesterConfig,
@@ -756,24 +764,44 @@ describe('core/hooks/Suggester', () => {
     });
 
     describe('bindEvent', () => {
-      it('应该绑定事件', () => {
+      it('应该绑定 change 事件到 editor.editor.on', () => {
         const suggester = createSuggesterInstance();
         suggester.suggesterPanel.editor = mockCherry.editor;
+        suggester.suggesterPanel.$cherry = mockCherry;
         suggester.suggesterPanel.setSuggester(suggester.suggester);
         suggester.suggesterPanel.tryCreatePanel = vi.fn();
         suggester.suggesterPanel.$suggesterPanel = createPanelDom();
         suggester.suggesterPanel.bindEvent();
 
-        expect(mockCherry.editor.editor.on).toHaveBeenCalled();
+        // change 事件保留在 CM6Adapter 上（需要 {text, from, to, origin} 细节）
+        expect(mockCherry.editor.editor.on).toHaveBeenCalledWith('change', expect.any(Function));
+      });
+
+      it('应该绑定 cursorActivity/scroll 事件到 $cherry.$event', () => {
+        const suggester = createSuggesterInstance();
+        suggester.suggesterPanel.editor = mockCherry.editor;
+        suggester.suggesterPanel.$cherry = mockCherry;
+        suggester.suggesterPanel.setSuggester(suggester.suggester);
+        suggester.suggesterPanel.tryCreatePanel = vi.fn();
+        suggester.suggesterPanel.$suggesterPanel = createPanelDom();
+        suggester.suggesterPanel.bindEvent();
+
+        // cursorActivity 和 scroll 使用 $cherry.$event 统一管理
+        expect(mockCherry.$event.on).toHaveBeenCalledWith('beforeSelectionChange', expect.any(Function));
+        expect(mockCherry.$event.on).toHaveBeenCalledWith('onScroll', expect.any(Function));
+        // afterChange 不应出现（已改为 editor.editor.on('change')）
+        expect(mockCherry.$event.on).not.toHaveBeenCalledWith('afterChange', expect.any(Function));
       });
 
       it('应该跳过当没有 showSuggestList', () => {
         const suggester = createSuggesterInstance();
         mockCherry.editor.options.showSuggestList = false;
         suggester.suggesterPanel.editor = mockCherry.editor;
+        suggester.suggesterPanel.$cherry = mockCherry;
         suggester.suggesterPanel.bindEvent();
 
         expect(mockCherry.editor.editor.on).not.toHaveBeenCalled();
+        expect(mockCherry.$event.on).not.toHaveBeenCalled();
       });
     });
 
