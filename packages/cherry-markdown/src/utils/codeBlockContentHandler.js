@@ -303,7 +303,10 @@ export default class CodeBlockHandler {
     // 创建 CodeMirror 6 编辑器
     const editor = this.codeMirror;
     // 存储原始选区内容，用于初始化编辑器
-    const originalContent = editor.state.doc.sliceString(editor.state.selection.main.from, editor.state.selection.main.to);
+    const originalContent = editor.state.doc.sliceString(
+      editor.state.selection.main.from,
+      editor.state.selection.main.to,
+    );
     const { from } = editor.state.selection.main;
 
     // 跟踪当前的替换范围起始位置和长度

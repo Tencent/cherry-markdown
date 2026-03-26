@@ -691,14 +691,7 @@ export default class PreviewerBubble {
     this.$createPreviewerBubbles(trigger, `codeBlock-${trigger}-handler`);
     // CM6: 传入 CM6Adapter 实例（stream 模式下 editor 可能不存在）
     const codeMirror = this.editor?.editor ?? null;
-    const handler = new CodeHandler(
-      trigger,
-      htmlElement,
-      this.bubble[trigger],
-      this.previewerDom,
-      codeMirror,
-      this,
-    );
+    const handler = new CodeHandler(trigger, htmlElement, this.bubble[trigger], this.previewerDom, codeMirror, this);
     handler.showBubble(this.$isEnableBubbleAndEditorShow());
     this.bubbleHandler[trigger] = handler;
   }
