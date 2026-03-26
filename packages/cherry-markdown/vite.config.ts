@@ -1,95 +1,104 @@
+/**
+ * Vite 开发服务器配置
+ *
+ * 该配置用于开发环境，支持实时预览 examples 中的所有 HTML 页面。
+ *
+ * 架构特点：
+ * - MPA（多页面应用）：以 examples/ 作为根目录
+ * - 虚拟模块：dist 请求重定向到源码，支持热更新
+ * - 中间件拦截：处理字体文件和资源路由
+ * - HTML 转换：自动处理 link 和 script 标签
+ *
+ * 注意：此配置仅用于开发，生产构建使用 Rollup（build/*.config.js）
+ */
+
 import { defineConfig } from 'vite';
 import path from 'path';
+import { cherryDevPlugin, printLinksPlugin } from './vite.plugins';
 
-const paths = [
+// Cherry Markdown 源码目录
+const cherryMarkdownDir = path.resolve(__dirname);
+const examplesDir = path.resolve(__dirname, '../../examples');
+const srcDir = path.resolve(cherryMarkdownDir, 'src');
+
+// examples 目录下所有可访问的 HTML 页面
+// 用于启动时打印可访问链接，以及插件中的文件存在性检查
+const htmlPages = [
   '/index.html',
-  // '/basic.html',
+  '/basic.html',
   '/h5.html',
   '/multiple.html',
   '/notoolbar.html',
   '/preview_only.html',
   '/xss.html',
-  // '/api.html',
+  '/api.html',
   '/img.html',
   '/table.html',
   '/head_num.html',
   '/ai_chat.html',
-  // '/vim.html',
-  // '/mermaid.html',
+  '/ai_chat_stream.html',
+  '/mermaid.html',
+  '/vim.html',
+  '/drawio_demo.html',
+  '/chart_toolbar_demo.html',
+  '/chatgpt.html',
+  '/suggester.html',
+  '/custom_codeblock_wrapper.html',
 ];
 
-function printLinks() {
-  return {
-    name: 'print-links',
-    configureServer(server: any) {
-      server.httpServer?.once('listening', () => {
-        const address = server.httpServer?.address();
-        let port = 5173;
-        // 始终使用 localhost
-        const host = 'localhost';
-        if (typeof address === 'object' && address) {
-          port = address.port || port;
-        }
-        console.log('\n可访问页面链接:');
-        paths.forEach((p) => {
-          console.log(`  http://${host}:${port}${p}`);
-        });
-        console.log('');
-      });
-    },
-  };
-}
-
-function spaFallback() {
-  return {
-    name: 'spa-fallback',
-    transformIndexHtml: (html: string, ctx: { path: string; filename?: string; server?: any }) => {
-      const path = ctx.path;
-      // 如果是配置的路径之一，注入脚本设置原始路径
-      // 优化的路径匹配逻辑
-      const isExactMatch = paths.includes(path);
-      const isPathWithoutHtmlMatch = path.endsWith('.html') && paths.includes(path.slice(0, -5));
-      const matchedPath = isExactMatch || isPathWithoutHtmlMatch ? (isExactMatch ? path : path.slice(0, -5)) : null;
-
-      if (matchedPath && matchedPath !== '/index.html') {
-        // 转义路径中的特殊字符以防止XSS注入
-        const escapedPath = matchedPath.replace(/['"\\]/g, '\\$&');
-        const script = `<script>window.__ORIGINAL_PATH__ = '${escapedPath}';</script>`;
-        return html.replace('</head>', `${script}\n  </head>`);
-      }
-      return html;
-    },
-  };
-}
-
 export default defineConfig({
-  root: process.cwd(),
+  // 以 examples 目录作为根目录，实现真正的多页面应用
+  root: examplesDir,
   base: '/',
-  publicDir: 'dist',
+
   resolve: {
     alias: [
-      { find: '@', replacement: path.resolve(__dirname, 'src') },
-      { find: '@examples', replacement: path.resolve(__dirname, '../../examples') },
+      // 源码别名
+      { find: '@', replacement: srcDir },
+      // examples 别名
+      { find: '@examples', replacement: examplesDir },
     ],
   },
+
   server: {
     host: '0.0.0.0',
     port: 5173,
-    open: false,
+    open: '/index.html',
+    // 允许所有主机
     allowedHosts: true,
     fs: {
-      allow: [path.resolve(__dirname), path.resolve(__dirname, 'dist'), path.resolve(__dirname, '..', '..')],
+      // 允许访问的目录
+      allow: [
+        examplesDir,
+        cherryMarkdownDir,
+        // 允许访问整个 monorepo
+        path.resolve(__dirname, '../..'),
+      ],
     },
   },
-  build: {
-    outDir: 'dist',
-    emptyOutDir: false,
-  },
+
+  // 定义全局常量
   define: {
     'process.env.BUILD_VERSION': JSON.stringify(process.env.BUILD_VERSION || ''),
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
     BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'development'),
-    __EXAMPLES_PATH__: JSON.stringify(path.resolve(__dirname, '../../examples').replace(/\\/g, '/')),
   },
-  plugins: [spaFallback(), printLinks()],
+
+  // CSS 配置
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // SCSS 配置
+        charset: false,
+      },
+    },
+  },
+
+  // 优化依赖预构建
+  optimizeDeps: {
+    include: ['codemirror'],
+    exclude: [],
+  },
+
+  plugins: [cherryDevPlugin(srcDir, cherryMarkdownDir), printLinksPlugin(examplesDir, htmlPages)],
 });
