@@ -539,7 +539,9 @@ export default class MenuBase {
       return selection;
     }
 
-    const { from, head } = view.state.selection.main;
+    const { from: selectFrom, to: selectHead } = view.state.selection.main;
+    const from = Math.min(selectFrom, selectHead);
+    const head = Math.max(selectFrom, selectHead);
     let targetRange = { from, to: head };
     // 选中整行
     if (type === 'line') {
