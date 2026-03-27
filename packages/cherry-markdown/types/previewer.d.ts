@@ -31,7 +31,7 @@ export interface PreviewerOptions {
   $cherry?: Cherry;
   // 配置图片懒加载的逻辑
   lazyLoadImg?: {
-    // 加载图片时如果需要展示loaing图，则配置loading图的地址
+    // 加载图片时如果需要展示 loading 图，则配置 loading 图的地址
     loadingImgPath?: string;
     // 同一时间最多有几个图片请求，最大同时加载6张图片
     maxNumPerTime?: 1 | 2 | 3 | 4 | 5 | 6,

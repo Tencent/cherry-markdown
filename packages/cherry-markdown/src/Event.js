@@ -64,6 +64,10 @@ export default class Event {
     this.emitter.all.clear();
   }
 
+  /**
+   * 根据配置项绑定事件回调
+   * @param {import('~types/cherry').CherryOptions} options 配置项
+   */
   bindCallbacksByOptions(options) {
     if (options.callback.afterChange) {
       this.on(this.Events.afterChange, (msg) => {

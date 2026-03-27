@@ -31,9 +31,31 @@ export default class AutoLink extends SyntaxBase {
     super({ config });
     this.enableShortLink = !!config.enableShortLink;
     this.shortLinkLength = config.shortLinkLength;
-    // eslint-disable-next-line no-nested-ternary
-    this.target = config.target ? `target="${config.target}"` : !!config.openNewPage ? 'target="_blank"' : '';
-    this.rel = config.rel ? `rel="${config.rel}"` : '';
+    const validTarget = ['_blank', '_parent', '_self', '_top'];
+    if (config.target && validTarget.includes(config.target)) {
+      this.target = `target="${config.target}"`;
+    } else {
+      this.target = config.openNewPage ? 'target="_blank"' : '';
+    }
+    // HTML标准 <a> 标签的 rel 属性有效值
+    const validRel = [
+      'alternate',
+      'author',
+      'bookmark',
+      'external',
+      'help',
+      'license',
+      'next',
+      'nofollow',
+      'noopener',
+      'noreferrer',
+      'opener',
+      'prev',
+      'privacy-policy',
+      'search',
+      'tag',
+    ];
+    this.rel = validRel.includes(config.rel) ? `rel="${config.rel}"` : '';
   }
 
   /**
