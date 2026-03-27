@@ -67,12 +67,19 @@ export default defineConfig({
     // 允许所有主机
     allowedHosts: true,
     fs: {
-      // 允许访问的目录
+      // 文件系统访问控制（安全性重要）
+      // 遵循最小权限原则：仅允许必需的目录
+      // 不允许访问：node_modules, .git, .env, 其他包等
       allow: [
-        examplesDir,
-        cherryMarkdownDir,
-        // 允许访问整个 monorepo
-        path.resolve(__dirname, '../..'),
+        examplesDir, // 开发示例
+        path.resolve(cherryMarkdownDir, 'src'), // 源码
+        path.resolve(cherryMarkdownDir, 'dist/fonts'), // 字体文件
+      ],
+      // 显式禁止访问敏感目录（Vite 4.3.9+ 支持）
+      deny: [
+        path.resolve(cherryMarkdownDir, '.env'),
+        path.resolve(cherryMarkdownDir, '.env.local'),
+        path.resolve(cherryMarkdownDir, '.env.*.local'),
       ],
     },
   },
