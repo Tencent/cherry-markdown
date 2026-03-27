@@ -50,7 +50,7 @@ export function printLinksPlugin(examplesDir: string, htmlPages: string[]): Plug
  * 1. 拦截对 dist/cherry-markdown.js 的请求，重定向到虚拟模块（源码）
  * 2. 拦截对 dist/cherry-markdown.css 的请求，重定向到虚拟模块（SCSS 源文件）
  * 3. 拦截字体文件请求，代理到 dist/fonts/ 目录
- * 4. 转换 HTML，将 link 标签转换为 JS 模块导入，将普通 script 转换为 module 类型
+ * 4. 转换 HTML，将 link 标签转换为 JS 模块导入，将引用 dist 的 script 转换为 module 类型
  */
 export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plugin {
   // 虚拟模块 ID

@@ -1,32 +1,34 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>引入指定版本mermaid demo - Cherry Editor</title>
-  <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css">
-  <link rel="Shortcut Icon" href="../logo/favicon.ico">
-  <style>
-    html {
-      height: 100%;
-    }
-    body {
-      height: 100%;
-      overflow: hidden;
-      margin: 0;
-    }
-    #markdown {
-      min-width: 800px;
-      max-width: 2600px;
-      width: 70%;
-      margin: 0 auto;
-    }
-  </style>
-</head>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>引入指定版本mermaid demo - Cherry Editor</title>
+    <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css" />
+    <link rel="Shortcut Icon" href="./logo/favicon.ico" />
+    <link rel="Shortcut Icon" href="../logo/favicon.ico" />
+    <link rel="Bookmark" href="../logo/favicon.ico" />
+    <style>
+      html {
+        height: 100%;
+      }
+      body {
+        height: 100%;
+        overflow: hidden;
+        margin: 0;
+      }
+      #markdown {
+        min-width: 800px;
+        max-width: 2600px;
+        width: 70%;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
 
-<body>
-  <div id="markdown"></div>
-<textarea id="md-source">
+  <body>
+    <div id="markdown"></div>
+    <textarea id="md-source">
 ## 引入cherry并使用自己的[mermaid](https://mermaid.js.org/){target=_blank}
 ```html
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"></script>
@@ -86,26 +88,26 @@ journey
       Sit down: 3: Me
 ```
 </textarea>
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"></script>
-  <script src="../packages/cherry-markdown/dist/cherry-markdown.core.js"></script>
-  <script src="../packages/cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin.js"></script>
-</body>
-<script>
-Cherry.usePlugin(CherryCodeBlockMermaidPlugin, {
-  mermaid: window.mermaid,
-  mermaidAPI: window.mermaid,
-});
-var config = {
-  id: 'markdown',
-  engine: {
-    syntax: {
-      codeBlock: {
-        changeLang: false,
-      }
-    }
-  }
-};
-var cherry = new Cherry(config);
-cherry.setValue(document.getElementById('md-source').value);
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"></script>
+    <script src="../packages/cherry-markdown/dist/cherry-markdown.core.js"></script>
+    <script src="../packages/cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin.js"></script>
+    <script type="module">
+      Cherry.usePlugin(CherryCodeBlockMermaidPlugin, {
+        mermaid: window.mermaid,
+        mermaidAPI: window.mermaid,
+      });
+      var config = {
+        id: 'markdown',
+        engine: {
+          syntax: {
+            codeBlock: {
+              changeLang: false,
+            }
+          }
+        }
+      };
+      var cherry = new Cherry(config);
+      cherry.setValue(document.getElementById('md-source').value);
+    </script>
+  </body>
 </html>
