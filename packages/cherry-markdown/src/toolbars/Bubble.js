@@ -194,89 +194,27 @@ export default class Bubble extends Toolbar {
     };
     this.boundHandleBeforeSelectionChange = ({ selection, isUserInteraction }) => {
       const { from, to } = selection;
-      setTimeout(() => {
-        const editorAdapter = this.options.editor.editor;
-        if (!editorAdapter) {
-          return;
-        }
-        // 兼容 CM6Adapter,获取真正的 EditorView
-        const view = editorAdapter.view || editorAdapter;
-        const editorState = view.state;
-        const selections = editorState.selection.ranges.map((range) =>
-          editorState.doc.sliceString(range.from, range.to),
-        );
-        const selectionStr = selections.join('');
-        if (selectionStr !== this.lastSelectionsStr && (selectionStr || this.lastSelectionsStr)) {
-          this.lastSelections = !this.lastSelections ? [] : this.lastSelections;
-          this.$cherry.$event.emit('selectionChange', {
-            selections,
-            lastSelections: this.lastSelections,
-            info: { isUserInteraction },
-          });
-          this.lastSelections = selections;
-          this.lastSelectionsStr = selectionStr;
-        }
-      }, 10);
-      // 当编辑区选中内容改变时，需要展示/隐藏bubble工具栏，并计算工具栏位置
-      // 如果是用户手动选中，则展示bubble工具栏，如果是自动选中，则不需要展示
-      if (!isUserInteraction) {
-        return true;
+      if (Math.abs(from - to) === 0) {
+        this.hideBubble();
+        return;
       }
-      // 直接从 selection 对象获取 anchor 和 head，而不是解构
-      const anchor = selection.anchor !== undefined ? selection.anchor : selection.from;
-      const head = selection.head !== undefined ? selection.head : selection.to;
-      let direction = 'asc';
-      if (anchor > head) {
-        direction = 'desc';
-      }
-      setTimeout(() => {
-        if (Math.abs(from - to) === 0) {
-          this.hideBubble();
-          return;
-        }
-        try {
-          const editorAdapter = this.options.editor.editor;
-          if (!editorAdapter) {
-            this.hideBubble();
-            return;
-          }
-          // 兼容 CM6Adapter,获取真正的 EditorView
-          const editorView = editorAdapter.view || editorAdapter;
+      const editorView = this.options.editor.editor.view;
+      const { doc } = editorView.state;
 
-          const fromCoords = editorView.coordsAtPos(from);
-          const toCoords = editorView.coordsAtPos(to);
+      const beginLine = doc.lineAt(from).number;
+      const endLine = doc.lineAt(to).number;
+      const sameLine = beginLine === endLine;
+      const fromLineLastChar = doc.line(beginLine).from + doc.line(beginLine).length;
 
-          if (!fromCoords || !toCoords) {
-            this.hideBubble();
-            return;
-          }
+      const fromCoords = editorView.coordsAtPos(from);
+      const fromLineLastCharCoords = editorView.coordsAtPos(fromLineLastChar);
+      const toCoords = editorView.coordsAtPos(to);
 
-          const editorPosition = this.editorDom.getBoundingClientRect();
-
-          let top;
-          let width;
-
-          const isMultiLine = fromCoords.top !== toCoords.top;
-
-          if (isMultiLine) {
-            if (direction === 'asc') {
-              top = toCoords.top - editorPosition.top;
-              width = toCoords.left - editorPosition.left + (toCoords.right - toCoords.left) / 2;
-            } else {
-              top = fromCoords.top - editorPosition.top;
-              width = fromCoords.left - editorPosition.left + (fromCoords.right - fromCoords.left) / 2;
-            }
-          } else {
-            top = fromCoords.top - editorPosition.top;
-            width = fromCoords.left - editorPosition.left + (toCoords.left - fromCoords.left) / 2;
-          }
-
-          this.showBubble(top, width);
-        } catch (error) {
-          console.warn('Error calculating bubble position:', error);
-          this.hideBubble();
-        }
-      }, 10);
+      const targetToCoords = sameLine ? toCoords : fromLineLastCharCoords;
+      const editorPosition = this.editorDom.getBoundingClientRect();
+      const top = fromCoords.top - editorPosition.top;
+      const width = fromCoords.left - editorPosition.left + (targetToCoords.left - fromCoords.left) / 2;
+      this.showBubble(top, width);
     };
 
     this.$cherry.$event.on('afterChange', this.boundHandleAfterChange);
