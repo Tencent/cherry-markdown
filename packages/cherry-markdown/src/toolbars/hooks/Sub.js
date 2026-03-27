@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { getSelection } from '@/utils/selection';
 /**
  * 下标的按钮
  **/
@@ -35,7 +34,7 @@ export default class Sub extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    let $selection = getSelection(this.editor.editor.view, selection) || this.locale.sub;
+    let $selection = this.getSelection(selection) || this.locale.sub;
     // 如果选中的内容里有下标的语法，则认为是要去掉下标语法
     if (!this.isSelections && !this.$testIsSub($selection)) {
       this.getMoreSelection('^^', '^^', () => {

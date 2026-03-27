@@ -15,7 +15,6 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import { getPanelRule } from '@/utils/regexp';
-import { getSelection } from '@/utils/selection';
 /**
  * 插入面板
  */
@@ -85,7 +84,7 @@ export default class Panel extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    let $selection = getSelection(this.editor.editor.view, selection, 'line', true) || '内容';
+    let $selection = this.getSelection(selection, 'line', true) || '内容';
     let currentName = this.$getNameFromStr($selection);
     let title = this.$getTitle($selection);
     if (currentName === false) {
@@ -93,6 +92,7 @@ export default class Panel extends MenuBase {
       this.getMoreSelection('::: ', '\n', () => {
         const { from, to } = this.editor.editor.view.state.selection.main;
         const newSelection = this.editor.editor.view.state.doc.sliceString(from, to);
+        console.log(newSelection)
         const isMatch = this.$getNameFromStr(newSelection);
         if (isMatch !== false) {
           $selection = newSelection;

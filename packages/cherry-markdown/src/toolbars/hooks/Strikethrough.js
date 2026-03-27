@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { getSelection } from '@/utils/selection';
 import { getKeyCode, getPlatformControlKey } from '@/utils/shortcutKey';
 /**
  * 删除线的按钮
@@ -45,7 +44,7 @@ export default class Strikethrough extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    let $selection = getSelection(this.editor.editor.view, selection) || this.locale.strikethrough;
+    let $selection = this.getSelection(selection) || this.locale.strikethrough;
     // @ts-ignore
     const needWhitespace = this.$cherry?.options?.engine?.syntax?.strikethrough?.needWhitespace;
     const space = needWhitespace ? ' ' : '';

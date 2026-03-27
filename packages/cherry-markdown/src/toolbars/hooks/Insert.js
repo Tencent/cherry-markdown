@@ -15,7 +15,6 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import BubbleTableMenu from '@/toolbars/BubbleTable';
-import { getSelection } from '@/utils/selection';
 /**
  * "插入"按钮
  */
@@ -92,7 +91,7 @@ export default class Insert extends MenuBase {
       const text = `${selection}\n\n|${headerText}\n|${controlText}${rowText.repeat(row)}\n\n`;
       return text;
     }
-    const $selection = getSelection(this.editor.editor.view, selection);
+    const $selection = this.getSelection(selection);
     switch (shortKey) {
       case 'hr':
         // 插入分割线

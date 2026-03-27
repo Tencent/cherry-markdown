@@ -18,7 +18,6 @@ import Logger from '@/Logger';
 import { escapeHTMLSpecialCharOnce as $e } from '@/utils/sanitize';
 import { createElement } from '@/utils/dom';
 import NestedError from '@/utils/error';
-import { getSelection as getSelectionUtil } from '@/utils/selection';
 import { EditorSelection } from '@codemirror/state';
 
 /**
@@ -480,48 +479,34 @@ export default class MenuBase {
    * @param {function} [cb] 回调函数，如果返回false，则恢复原来的选取
    */
   getMoreSelection(appendBefore = '', appendAfter = '', cb) {
-    const editorView = this.editor.editor;
-    const { view } = editorView;
-    const { state } = view;
-    const { selection, doc } = state;
-    const { main: selectionMain } = selection;
+    const { view } = this.editor.editor;
+    const { selection, doc } = view.state;
 
-    // 保存原始选择区域
-    const { anchor, head } = selectionMain;
-    const originalSelection = { anchor, head };
-
-    // 计算扩展后的选择区域
-    const { from, to } = selectionMain;
+    // 获得当前选区
+    const { from, to } = selection.main;
     let newFrom = from;
     let newTo = to;
 
-    // 处理前置内容
-    if (appendBefore) {
-      const beforeLines = appendBefore.match(/\n/g)?.length || 0;
-      if (beforeLines > 0) {
-        // 包含换行符，移动到行首
-        const fromLine = doc.lineAt(from);
-        const targetLineNum = Math.max(1, fromLine.number - beforeLines);
-        newFrom = doc.line(targetLineNum).from;
-      } else {
-        // 不包含换行符，向前扩展字符数
-        newFrom = Math.max(0, from - appendBefore.length);
-      }
+    if (/\n/.test(appendBefore)) {
+      // 如果包含换行，则起始位置一律按行首
+      const beginLine = doc.lineAt(from).number;
+      const beforeLines = appendBefore.match(/\n/g).length;
+      const targetLineNum = Math.max(1, beginLine - beforeLines);
+      newFrom = doc.line(targetLineNum).from;
+    } else {
+      const minFrom = doc.lineAt(from).from;
+      newFrom = Math.max(minFrom, from - appendBefore.length);
     }
 
-    // 处理后置内容
-    if (appendAfter) {
-      const afterLines = appendAfter.match(/\n/g)?.length || 0;
-      if (afterLines > 0) {
-        // 包含换行符，移动到目标行末
-        const toLine = doc.lineAt(to);
-        const targetLineNum = Math.min(doc.lines, toLine.number + afterLines);
-        newTo = doc.line(targetLineNum).to;
-      } else {
-        // 不包含换行符，向后扩展字符数
-        const toLine = doc.lineAt(to);
-        newTo = Math.min(toLine.to, to + appendAfter.length);
-      }
+    if (/\n/.test(appendAfter)) {
+      // 如果包含换行符，则结束位置一律按行末
+      const endLine = doc.lineAt(to).number;
+      const afterLines = appendAfter.match(/\n/g).length;
+      const targetLineNum = Math.min(doc.lines, endLine + afterLines);
+      newTo = doc.line(targetLineNum).to;
+    } else {
+      const maxTo = doc.lineAt(to).to;
+      newTo = Math.min(to + appendAfter.length, maxTo);
     }
 
     // 设置新的选择区域
@@ -532,7 +517,7 @@ export default class MenuBase {
     // 执行回调，如果返回false则恢复原选择
     if (cb && cb() === false) {
       view.dispatch({
-        selection: originalSelection,
+        selection: { anchor: from, head: to },
       });
     }
   }
@@ -550,9 +535,27 @@ export default class MenuBase {
     if (this.isSelections) {
       return selection;
     }
+    if (selection && !focus) {
+      return selection;
+    }
 
-    // 使用 CodeMirror 6 的 getSelection 工具函数
-    return getSelectionUtil(view, selection, type, focus);
+    const { from, head } = view.state.selection.main;
+    let targetRange = { from, to: head };
+    // 选中整行
+    if (type === 'line') {
+      targetRange = { from: view.state.doc.lineAt(from).from, to: view.state.doc.lineAt(head).to };
+    }
+    // 选中单词
+    if (type === 'word') {
+      targetRange = view.state.wordAt(head);
+    }
+    if (!targetRange) {
+      return selection;
+    }
+    view.dispatch({
+      selection: { anchor: targetRange.from, head: targetRange.to },
+    });
+    return view.state.doc.sliceString(targetRange.from, targetRange.to);
   }
 
   /**

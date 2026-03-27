@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { getSelection } from '@/utils/selection';
 import { ALT_KEY, getKeyCode } from '@/utils/shortcutKey';
 
 export default class Size extends MenuBase {
@@ -82,7 +81,7 @@ export default class Size extends MenuBase {
 
   onClick(selection, shortKey = '17') {
     const size = this.$getSizeByShortKey(shortKey);
-    let $selection = getSelection(this.editor.editor.view, selection) || '字号';
+    let $selection = this.getSelection(selection) || '字号';
     // 如果选中的内容里有字号语法，则直接去掉该语法
     if (!this.isSelections && !this.$testIsSize($selection)) {
       this.getMoreSelection('!32 ', '!', () => {

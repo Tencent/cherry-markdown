@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { getSelection } from '@/utils/selection';
 /**
  * 生成ruby，使用场景：给中文增加拼音、给中文增加英文、给英文增加中文等等
  */
@@ -35,7 +34,7 @@ export default class Ruby extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    let $selection = getSelection(this.editor.editor.view, selection) || '拼音';
+    let $selection = this.getSelection(selection) || '拼音';
     // 如果选中的文本中已经有ruby语法了，则去掉该语法
     if (!this.isSelections && !this.$testIsRuby($selection)) {
       this.getMoreSelection(' { ', ' } ', () => {

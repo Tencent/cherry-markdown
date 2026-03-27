@@ -15,7 +15,6 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import { getDetailRule } from '@/utils/regexp';
-import { getSelection } from '@/utils/selection';
 /**
  * 插入手风琴
  */
@@ -32,8 +31,7 @@ export default class Detail extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection) {
-    let $selection =
-      getSelection(this.editor.editor.view, selection, 'line', true) || this.$cherry.locale.detailDefaultContent;
+    let $selection = this.getSelection(selection, 'line', true) || this.$cherry.locale.detailDefaultContent;
     this.detailRule.lastIndex = 0;
     if (!this.detailRule.test($selection)) {
       // 如果没有命中手风琴语法，则尝试扩大选区
