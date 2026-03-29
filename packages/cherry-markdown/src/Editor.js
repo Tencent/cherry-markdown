@@ -39,8 +39,9 @@ import { addEvent } from './utils/event';
 import Logger from '@/Logger';
 import { handleFileUploadCallback } from '@/utils/file';
 import { createElement } from './utils/dom';
-import { longTextReg, base64Reg, imgDrawioXmlReg, createUrlReg } from './utils/regexp';
+import { base64Reg, imgDrawioXmlReg, createUrlReg, pasteWrapperReg } from './utils/regexp';
 import { handleNewlineIndentList } from './utils/autoindent';
+import { getCodeBlockRule } from '@/utils/regexp';
 
 /**
  * @typedef {import('~types/editor').EditorConfiguration} EditorConfiguration
@@ -50,6 +51,9 @@ import { handleNewlineIndentList } from './utils/autoindent';
 
 /** @type {import('~types/editor')} */
 export default class Editor {
+  /** @type {typeof import('codemirror')} CodeMirror 模块，供其他模块复用 */
+  static codemirrorModule = codemirror;
+
   /**
    * @constructor
    * @param {Partial<EditorConfiguration>} options
@@ -153,9 +157,30 @@ export default class Editor {
     if (this.$cherry.status.editor === 'hide') {
       return;
     }
+    this.formatBigData2Mark(pasteWrapperReg, 'cm-url paste-wrapper', (target, oneSearch) => {
+      const whole = oneSearch[0] ?? '';
+      const id = oneSearch[1] ?? '';
+      const bigString = oneSearch[2] ?? '';
+      const targetChFrom = target.ch;
+      const targetChTo = targetChFrom + whole.length;
+      const targetLine = target.line;
+      const begin = { line: targetLine, ch: targetChFrom };
+      const end = { line: targetLine, ch: targetChTo };
+      return { bigString, begin, end, id };
+    });
+
+    /**
+     * 如果编辑器行数超过10000，则不再处理
+     * 增加这个逻辑是为了避免性能问题，当超过1w行时，formatBigData2Mark耗费的性能会明显增加。后续在优化后可以去掉这个降级逻辑
+     * 允许降级的理由：超过1w行的md基本已经不关心base64等数据是否缩略展示了
+     */
+    if (this.editor.lineCount() > 10000) {
+      return;
+    }
     this.formatBigData2Mark(base64Reg, 'cm-url base64');
     this.formatBigData2Mark(imgDrawioXmlReg, 'cm-url drawio');
-    this.formatBigData2Mark(longTextReg, 'cm-url long-text');
+    // 长文本替换的正则性能太差，先注释掉
+    // this.formatBigData2Mark(longTextReg, 'cm-url long-text');
     if (this.$cherry.options.editor.maxUrlLength > 10) {
       const [protocolUrlPattern, wwwUrlPattern] = createUrlReg(this.$cherry.options.editor.maxUrlLength);
       this.formatBigData2Mark(protocolUrlPattern, 'cm-url url-truncated');
@@ -168,8 +193,22 @@ export default class Editor {
    * 把大字符串变成省略号
    * @param {*} reg 正则
    * @param {*} className 利用codemirror的MarkText生成的新元素的class
+   * @param {function} getBeginEnd 获取begin和end的函数
    */
-  formatBigData2Mark = (reg, className) => {
+  formatBigData2Mark = (
+    reg,
+    className,
+    getBeginEnd = (target, oneSearch) => {
+      const bigString = oneSearch[2] ?? '';
+      const targetChFrom = target.ch + oneSearch[1]?.length;
+      const targetChTo = targetChFrom + bigString.length;
+      const targetLine = target.line;
+      const begin = { line: targetLine, ch: targetChFrom };
+      const end = { line: targetLine, ch: targetChTo };
+      const id = '';
+      return { bigString, begin, end, id };
+    },
+  ) => {
     const codemirror = this.editor;
     const searcher = codemirror.getSearchCursor(reg);
 
@@ -179,17 +218,12 @@ export default class Editor {
       if (!target) {
         continue;
       }
-      const bigString = oneSearch[2] ?? '';
-      const targetChFrom = target.ch + oneSearch[1]?.length;
-      const targetChTo = targetChFrom + bigString.length;
-      const targetLine = target.line;
-      const begin = { line: targetLine, ch: targetChFrom };
-      const end = { line: targetLine, ch: targetChTo };
+      const { bigString, begin, end, id } = getBeginEnd(target, oneSearch);
       // 如果所在区域已经有mark了，则不再增加mark
       if (codemirror.findMarks(begin, end).length > 0) {
         continue;
       }
-      const newSpan = createElement('span', `cm-string ${className}`, { title: bigString });
+      const newSpan = createElement('span', `cm-string ${className}`, { title: bigString, 'data-id': id });
       newSpan.textContent = bigString;
       codemirror.markText(begin, end, { replacedWith: newSpan, atomic: true });
     }
@@ -285,32 +319,72 @@ export default class Editor {
   /**
    *
    * @param {ClipboardEvent} e
-   * @param {CodeMirror.Editor} codemirror
    */
-  onPaste(e, codemirror) {
+  onPaste(e) {
     let { clipboardData } = e;
-    if (clipboardData) {
-      this.handlePaste(e, clipboardData, codemirror);
-    } else {
+    if (!clipboardData) {
       ({ clipboardData } = window);
-      this.handlePaste(e, clipboardData, codemirror);
     }
+    const needHandlePaste = this.handleThirdPaste(e, clipboardData);
+    if (needHandlePaste) {
+      this.handlePaste(e, clipboardData);
+    }
+  }
+
+  onPasteCallback({ html, htmlText, mdText }) {
+    // @ts-ignore
+    const { randomId, _this } = this;
+    const allMarks = _this.editor.getAllMarks();
+    for (let i = 0; i < allMarks.length; i++) {
+      const mark = allMarks[i];
+      const span = mark.widgetNode.querySelector(`.paste-wrapper[data-id="${randomId}"]`);
+      if (span) {
+        const { from, to } = mark.find();
+        mark.clear();
+        _this.editor.setSelection(from, to);
+        if (mdText) {
+          _this.editor.replaceSelection(mdText, 'end');
+        } else {
+          _this.formatHtml2MdWhenPaste(null, html, htmlText);
+        }
+        break;
+      }
+    }
+  }
+
+  /**
+   * 调用第三方的粘贴回调
+   * @returns {boolean} true: 需要继续处理粘贴内容，false: 不需要继续处理粘贴内容
+   */
+  handleThirdPaste(event, clipboardData) {
+    // 生成一个随机id，用于有可能的异步回调
+    const randomId = `cherry-paste-${Math.random().toString(36).slice(2)}${new Date().getTime()}`;
+    const onPasteRet = this.$cherry.options.callback.onPaste(
+      clipboardData,
+      this.$cherry,
+      this.onPasteCallback.bind({ randomId, _this: this }),
+    );
+    if (onPasteRet !== false && typeof onPasteRet === 'string') {
+      event.preventDefault();
+      // 是否命中语法糖
+      if (/^<<[\s\S]+>>$/.test(onPasteRet)) {
+        const newText = `{{${randomId}|${onPasteRet.replace(/^<<([\s\S]+)>>$/, (whole, $1) => `<<${$1.replace(/[<>]/g, '')}>>`)}}}`;
+        this.editor.replaceSelection(newText);
+      } else {
+        this.editor.replaceSelection(onPasteRet, 'around');
+      }
+      return false;
+    }
+    return true;
   }
 
   /**
    *
    * @param {ClipboardEvent} event
    * @param {ClipboardEvent['clipboardData']} clipboardData
-   * @param {CodeMirror.Editor} codemirror
    * @returns {boolean | void}
    */
-  handlePaste(event, clipboardData, codemirror) {
-    const onPasteRet = this.$cherry.options.callback.onPaste(clipboardData, this.$cherry);
-    if (onPasteRet !== false && typeof onPasteRet === 'string') {
-      event.preventDefault();
-      codemirror.replaceSelection(onPasteRet);
-      return;
-    }
+  handlePaste(event, clipboardData) {
     let html = clipboardData.getData('Text/Html');
     const { items } = clipboardData;
 
@@ -331,7 +405,6 @@ export default class Editor {
     ) {
       html = '';
     }
-    const codemirrorDoc = codemirror.getDoc();
     this.fileUploadCount = 0;
     // 只要有html内容，就不处理剪切板里的其他内容，这么做的后果是粘贴excel内容时，只会粘贴html内容，不会把excel对应的截图粘进来
     for (let i = 0; !html && i < items.length; i++) {
@@ -346,14 +419,14 @@ export default class Editor {
             return;
           }
           const mdStr = `${this.fileUploadCount > 1 ? '\n' : ''}${handleFileUploadCallback(url, params, file)}`;
-          codemirrorDoc.replaceSelection(mdStr);
+          this.editor.replaceSelection(mdStr, 'end');
           // if (this.pasterHtml) {
           //   // 如果同时粘贴了html内容和文件内容，则在文件上传完成后强制让光标处于非选中状态，以防止自动选中的html内容被文件内容替换掉
           //   const { line, ch } = codemirror.getCursor();
           //   codemirror.setSelection({ line, ch }, { line, ch });
-          //   codemirrorDoc.replaceSelection(mdStr, 'end');
+          //   this.editor.replaceSelection(mdStr, 'end');
           // } else {
-          //   codemirrorDoc.replaceSelection(mdStr);
+          //   this.editor.replaceSelection(mdStr);
           // }
         });
         event.preventDefault();
@@ -365,23 +438,22 @@ export default class Editor {
     if (!html || !this.options.convertWhenPaste) {
       return true;
     }
+    this.formatHtml2MdWhenPaste(event, html, htmlText);
+  }
 
+  formatHtml2MdWhenPaste(event, html, htmlText) {
     let divObj = document.createElement('DIV');
     divObj.innerHTML = html;
-    html = divObj.innerHTML;
-    const mdText = htmlParser.run(html);
+    const mdText = htmlParser.run(divObj.innerHTML);
     if (typeof mdText === 'string' && mdText.trim().length > 0) {
-      const range = codemirror.listSelections();
-      if (codemirror.getSelections().length <= 1 && range[0] && range[0].anchor) {
-        const currentCursor = {};
-        currentCursor.line = range[0].anchor.line;
-        currentCursor.ch = range[0].anchor.ch;
-        codemirrorDoc.replaceSelection(mdText);
-        pasteHelper.showSwitchBtnAfterPasteHtml(this.$cherry, currentCursor, codemirror, htmlText, mdText);
+      const range = this.editor.listSelections();
+      if (this.editor.getSelections().length <= 1 && range[0] && range[0].anchor) {
+        this.editor.replaceSelection(mdText, 'around');
+        pasteHelper.showSwitchBtnAfterPasteHtml(this.$cherry.locale, this.editor, htmlText, mdText);
       } else {
-        codemirrorDoc.replaceSelection(mdText);
+        this.editor.replaceSelection(mdText, 'around');
       }
-      event.preventDefault();
+      event && event.preventDefault();
     }
     divObj = null;
   }
@@ -505,7 +577,7 @@ export default class Editor {
     });
 
     editor.on('paste', (codemirror, evt) => {
-      this.options.onPaste.call(this, evt, codemirror);
+      this.options.onPaste.call(this, evt);
     });
 
     if (this.options.autoScrollByCursor) {
@@ -537,7 +609,7 @@ export default class Editor {
               const mdStr = handleFileUploadCallback(url, params, file);
               // 当批量上传文件时，每个被插入的文件中间需要加个换行，但单个上传文件的时候不需要加换行
               const insertValue = i > 0 ? `\n${mdStr} ` : `${mdStr} `;
-              codemirror.replaceSelection(insertValue);
+              codemirror.replaceSelection(insertValue, 'end');
               this.dealSpecialWords();
             });
           }
@@ -554,7 +626,14 @@ export default class Editor {
       this.onCursorActivity();
     });
     editor.on('beforeChange', (codemirror) => {
-      this.selectAll = this.editor.getValue() === codemirror.getSelection();
+      // 判断是否是全选
+      const { line: toLine, ch: toCh } = this.editor.getCursor('to');
+      const { line: fromLine, ch: fromCh } = this.editor.getCursor('from');
+      this.selectAll =
+        fromLine === 0 &&
+        fromCh === 0 &&
+        toLine === this.editor.lineCount() - 1 &&
+        toCh === this.editor.getLine(toLine).length;
     });
 
     addEvent(
@@ -754,5 +833,59 @@ export default class Editor {
    */
   setValue(value = '') {
     this.editor.setOption('value', value);
+  }
+
+  /**
+   * 提供三种统计方式：
+   *  1. 字符数、单词数、行数
+   *  2. 段落数、图片、代码块
+   *  3. 中文数、英文单词数、数字数、符号数
+   */
+  wordCount(type) {
+    const markdown = this.$cherry.getMarkdown() || '';
+    switch (type) {
+      case 1: {
+        // 匹配中文和标点符号
+        const pattern =
+          /[\u4e00-\u9fa5]|[\u3001\u3002\uff01\uff0c\uff1b\uff1a\u201c\u201d\u2018\u2019\u300a\u300b\u3008\u3009\u3010\u3011\u300e\u300f\u300c\u300d\uff08\uff09\u2014\u2026\u2013\uff0e]/g;
+        // 统计字符数量，排除换行和空格
+        const characters = markdown.replace(/\n|\s/g, '').length;
+        // 统计中文和标点符号
+        const chineseWords = (markdown.match(pattern) || []).length;
+        // 统计英文单词
+        const englishWords = (markdown.match(/[a-zA-Z-]+/g) || []).length;
+        // 统计单词数量
+        const words = chineseWords + englishWords;
+        // 统计行数
+        const lines = markdown.split(/\n[\s\t\n]*/).length;
+        return { characters, words, lines };
+      }
+      case 2: {
+        const codeBlockReg = getCodeBlockRule().reg;
+        // 统计段落数量，使用至少两个连续换行符分割段落
+        const paragraphs = markdown.split(/\n{2,}/).filter((line) => line.trim() !== '').length;
+        // 统计代码块数量
+        const codeblocks = (markdown.match(codeBlockReg) || []).length;
+        const mdWithoutCode = markdown.replace(codeBlockReg, '\n');
+        // 统计图片数量
+        const images = (mdWithoutCode.match(/!\[[^\]]*\]\([^)]+\)/g) || []).length;
+        return { paragraphs, images, codeblocks };
+      }
+      case 3: {
+        // 统计中文数量（不包含中文符号）
+        const chineseWords = (markdown.match(/[\u4e00-\u9fa5]/g) || []).length;
+        // 统计英文单词数量
+        const englishWords = (markdown.match(/[a-zA-Z-]+/g) || []).length;
+        // 统计数字数量
+        const numbers = (markdown.match(/\d+/g) || []).length;
+        // 统计符号数量（包括中英文符号）
+        const symbols = (
+          markdown.match(
+            /[\u3001\u3002\uff01\uff0c\uff1b\uff1a\u201c\u201d\u2018\u2019\u300a\u300b\u3008\u3009\u3010\u3011\u300e\u300f\u300c\u300d\uff08\uff09\u2014\u2026\u2013\uff0e]/g,
+          ) || []
+        ).length;
+        return { chineseWords, englishWords, numbers, symbols };
+      }
+    }
   }
 }

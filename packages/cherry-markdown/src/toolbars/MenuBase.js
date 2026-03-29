@@ -211,6 +211,11 @@ export default class MenuBase {
   }
 
   /**
+   * 在创建菜单后执行的钩子
+   */
+  afterInit(btnDom) {}
+
+  /**
    * 创建一个一级菜单
    * @param {boolean} asSubMenu 是否以子菜单的形式创建
    */
@@ -557,6 +562,10 @@ export default class MenuBase {
    */
   static getTargetParentByButton(dom) {
     let parent = dom.parentElement;
+    // unwrap sidebar list wrapper to preserve position detection
+    if (parent && parent.classList.contains('cherry-sidebar-list')) {
+      parent = parent.parentElement;
+    }
     if (/toolbar-(left|right)/.test(parent.className)) {
       parent = parent.parentElement;
     }

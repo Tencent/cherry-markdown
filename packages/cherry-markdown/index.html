@@ -41,6 +41,15 @@
     <script type="module">
       import './src/sass/index.scss';
       import Cherry from './src/index.js';
+      import '@examples/assets/scripts/pinyin/pinyin_dist.js';
+
+      // 引入官方库里的 Echarts 代码块插件
+      Cherry.usePlugin(Cherry.plugins.EChartsCodeBlockEngine, {
+        size: {
+          width: '100%',
+          height: '600px',
+        }
+      });
       window.Cherry = Cherry;
 
       import indexMd from '@examples/assets/markdown/index.md?raw';
@@ -59,9 +68,8 @@
       const devCompatibleConfig = {
         callback: {
           urlProcessor: (url, type) => {
-
             console.log('urlProcessor', url, type);
-            if (type!=='image') return url;
+            if (type !== 'image') return url;
 
             // 协议（http/https）或协议相对 // 或 data: 等直接返回
             if (/^(https?:)?\/\//i.test(url) || /^data:/i.test(url) || url.startsWith('/')) {
@@ -75,26 +83,34 @@
         },
       };
 
-      let CONFIG ={};
+      let CONFIG = {};
 
-      switch (window.location.pathname) {
+      // 使用注入的原始路径或当前路径
+      const currentPath = window.__ORIGINAL_PATH__ || window.location.pathname;
+
+      switch (currentPath) {
         case '/':
-          CONFIG = Object.assign({}, basicConfig, { value: indexMd, ...devCompatibleConfig });
+          basicConfig.callback.urlProcessor = devCompatibleConfig.callback.urlProcessor;
+          CONFIG = Object.assign({}, basicConfig, { value: indexMd });
           break;
         case '/h5.html':
-          CONFIG = Object.assign({}, h5Config, { value: indexMd, ...devCompatibleConfig });
+          h5Config.callback.urlProcessor = devCompatibleConfig.callback.urlProcessor;
+          CONFIG = Object.assign({}, h5Config, { value: indexMd });
           break;
         case '/multiple.html':
-          CONFIG = Object.assign({}, multipleCherryConfig1, { value: indexMd, ...devCompatibleConfig });
+          multipleCherryConfig1.callback.urlProcessor = devCompatibleConfig.callback.urlProcessor;
+          CONFIG = Object.assign({}, multipleCherryConfig1, { value: indexMd });
 
           const CONFIG2 = Object.assign({}, multipleCherryConfig2, { value: indexMd, ...devCompatibleConfig });
           window.cherry = new Cherry(CONFIG2);
           break;
         case '/notoolbar.html':
-          CONFIG = Object.assign({}, noToolbarConfig, { value: indexMd, ...devCompatibleConfig });
+          noToolbarConfig.callback.urlProcessor = devCompatibleConfig.callback.urlProcessor;
+          CONFIG = Object.assign({}, noToolbarConfig, { value: indexMd });
           break;
         case '/preview_only.html':
-          CONFIG = Object.assign({}, previewConfig, { value: indexMd, ...devCompatibleConfig });
+          previewConfig.callback.urlProcessor = devCompatibleConfig.callback.urlProcessor;
+          CONFIG = Object.assign({}, previewConfig, { value: indexMd });
           break;
         case '/xss.html':
           CONFIG = {
@@ -108,7 +124,8 @@
           };
           break;
         case '/img.html':
-          CONFIG = Object.assign({}, imgConfig, { value: imgMd, ...devCompatibleConfig });
+          imgConfig.callback.urlProcessor = devCompatibleConfig.callback.urlProcessor;
+          CONFIG = Object.assign({}, imgConfig, { value: imgMd });
           break;
         case '/table.html':
           CONFIG = {
@@ -159,8 +176,6 @@
       if (window.location.pathname !== '/ai_chat.html') {
         window.cherry = new Cherry(CONFIG);
       }
-
-      import '@examples/assets/scripts/pinyin/pinyin_dist.js';
     </script>
   </body>
 </html>

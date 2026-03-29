@@ -1,0 +1,258 @@
+import { ref, computed, type Ref } from 'vue';
+import type { FileInfo, DirectoryNode } from '../types';
+import type { useFileStore as useFileStoreType } from '../../store/modal/file';
+import { openExistingFile as openExistingFileUtil, readFileContent, formatTimestamp } from '../fileUtils';
+import { openPath, revealItemInDir } from '@tauri-apps/plugin-opener';
+import { useContextMenu } from './useContextMenu';
+import { WINDOW_EVENTS } from '../../constants/events';
+import { notifyError, notifyInfo, notifySuccess } from '../../utils/notifications';
+import { MESSAGES } from '../../constants/i18n';
+
+// 常量定义
+const STORAGE_KEY_DIRECTORY_MANAGER_EXPANDED = 'cherry-markdown-directory-manager-expanded';
+const DEFAULT_DIRECTORY_MANAGER_EXPANDED = true;
+
+/**
+ * 文件管理composable
+ */
+type FileStoreInstance = ReturnType<typeof useFileStoreType>;
+
+export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: Ref<any>) {
+  // 响应式数据
+  const sortedRecentFiles = computed(() => fileStore.sortedRecentFiles);
+  const currentFilePath = computed(() => fileStore.currentFilePath);
+  const lastOpenedFile = computed(() => fileStore.lastOpenedFile);
+
+  /**
+   * 从localStorage加载目录管理展开状态
+   */
+  const loadDirectoryManagerExpandedState = (): boolean => {
+    try {
+      const savedState = localStorage.getItem(STORAGE_KEY_DIRECTORY_MANAGER_EXPANDED);
+      if (savedState === null) {
+        return DEFAULT_DIRECTORY_MANAGER_EXPANDED;
+      }
+
+      const parsed = JSON.parse(savedState);
+      return typeof parsed === 'boolean' ? parsed : DEFAULT_DIRECTORY_MANAGER_EXPANDED;
+    } catch (error) {
+      console.warn('加载目录管理展开状态失败:', error);
+      return DEFAULT_DIRECTORY_MANAGER_EXPANDED;
+    }
+  };
+
+  /**
+   * 保存目录管理展开状态到localStorage
+   */
+  const saveDirectoryManagerExpandedState = (expanded: boolean): void => {
+    try {
+      localStorage.setItem(STORAGE_KEY_DIRECTORY_MANAGER_EXPANDED, JSON.stringify(expanded));
+    } catch (error) {
+      console.warn('保存目录管理展开状态失败:', error);
+    }
+  };
+
+  // 组件状态
+  const recentFilesExpanded = ref(false);
+  const directoryManagerExpanded = ref(loadDirectoryManagerExpandedState());
+  const isLoading = ref(false);
+
+  // 切换目录管理展开状态
+  const toggleDirectoryManager = (): void => {
+    directoryManagerExpanded.value = !directoryManagerExpanded.value;
+    // 保存状态到localStorage
+    saveDirectoryManagerExpandedState(directoryManagerExpanded.value);
+
+    if (directoryManagerExpanded.value) {
+      recentFilesExpanded.value = false;
+    }
+  };
+
+  // 切换侧边栏
+  const toggleSidebar = (): void => {
+    fileStore.toggleSidebar();
+  };
+
+  // 打开现有文件
+  const openExistingFile = async (): Promise<void> => {
+    if (isLoading.value) return;
+    isLoading.value = true;
+    try {
+      const result = await openExistingFileUtil();
+      if (result.success && result.data) {
+        await openFile(result.data);
+      } else if (result.error) {
+        notifyError(`${MESSAGES.FILE.OPEN_FAILED}: ${result.error}`);
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  // 打开目录
+  const openDirectory = async (): Promise<void> => {
+    if (isLoading.value) return;
+    isLoading.value = true;
+    try {
+      if (folderManagerRef.value) {
+        await folderManagerRef.value.openDirectory();
+      }
+    } catch (error) {
+      notifyError(
+        `${MESSAGES.DIRECTORY.OPEN_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  // 打开文件
+  const openFile = async (
+    filePath: string,
+    fromDirectoryManager: boolean = false,
+    bumpRecent: boolean = true,
+  ): Promise<void> => {
+    try {
+      const result = await readFileContent(filePath);
+      if (result.success && result.data) {
+        // 通过自定义事件传递文件内容到App.vue
+        window.dispatchEvent(
+          new CustomEvent(WINDOW_EVENTS.OPEN_FILE_FROM_SIDEBAR, {
+            detail: { filePath, content: result.data },
+          }),
+        );
+        // 更新当前文件路径
+        fileStore.setCurrentFilePath(filePath);
+        // 添加到最近访问列表（可选）
+        if (bumpRecent) {
+          fileStore.addRecentFile(filePath);
+        }
+
+        if (fromDirectoryManager) {
+          // 如果从目录管理打开文件，始终展开目录管理区域
+          directoryManagerExpanded.value = true;
+          recentFilesExpanded.value = false;
+          saveDirectoryManagerExpandedState(true);
+        } else {
+          // 如果文件不在目录管理中，展开最近访问列表并高亮文件
+          recentFilesExpanded.value = true;
+          directoryManagerExpanded.value = false;
+          saveDirectoryManagerExpandedState(false);
+        }
+      } else {
+        notifyError(`${MESSAGES.FILE.READ_FAILED}: ${result.error}`);
+      }
+    } catch (error) {
+      notifyError(`${MESSAGES.FILE.OPEN_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`);
+    }
+  };
+
+  // 处理FolderManager的open-file事件
+  const handleOpenFile = (filePath: string, fromDirectoryManager: boolean): void => {
+    openFile(filePath, fromDirectoryManager);
+  };
+
+  // 刷新目录
+  const refreshDirectories = async (): Promise<void> => {
+    if (folderManagerRef.value) {
+      await folderManagerRef.value.refreshDirectories();
+    }
+  };
+
+  // 从最近文件中移除
+  const removeFromRecent = (filePath: string): void => {
+    try {
+      fileStore.removeRecentFile(filePath);
+      notifySuccess(MESSAGES.FILE_MANAGEMENT.REMOVE_SUCCESS);
+      void refreshDirectories();
+    } catch (error) {
+      notifyError(
+        `${MESSAGES.FILE_MANAGEMENT.REMOVE_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`,
+      );
+    }
+  };
+
+  // 复制文件路径
+  const copyFilePath = async (filePath: string): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(filePath);
+      notifyInfo(MESSAGES.CLIPBOARD.COPY_PATH_SUCCESS);
+      hideContextMenu();
+    } catch (error) {
+      notifyError(
+        `${MESSAGES.CLIPBOARD.COPY_PATH_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`,
+      );
+    }
+  };
+
+  // 在资源管理器中打开文件
+  const openInExplorer = async (filePath: string): Promise<void> => {
+    try {
+      const directoryPath = filePath.replace(/\\/g, '/').replace(/\/[^\\/]*$/, '');
+
+      // 优先尝试直接在资源管理器定位文件
+      try {
+        await revealItemInDir(filePath);
+        hideContextMenu();
+        return;
+      } catch (_) {
+        // fallback: 打开所在目录
+      }
+
+      await openPath(directoryPath);
+      hideContextMenu();
+    } catch (error) {
+      notifyError(
+        `${MESSAGES.EXPLORER.OPEN_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`,
+      );
+      // 备选方案：复制文件路径到剪贴板
+      try {
+        await navigator.clipboard.writeText(filePath);
+        notifyInfo(`${MESSAGES.CLIPBOARD.COPY_PATH_FALLBACK}: ${filePath}`);
+      } catch (clipboardError) {
+        notifyError(
+          `${MESSAGES.CLIPBOARD.COPY_PATH_FAILED}: ${clipboardError instanceof Error ? clipboardError.message : MESSAGES.UNKNOWN_ERROR}`,
+        );
+      }
+    }
+  };
+
+  // 显示右键菜单
+  const mapToFileInfo = (file: FileInfo | DirectoryNode): FileInfo => ({
+    path: file.path,
+    name: file.name,
+    lastAccessed: 'lastAccessed' in file && file.lastAccessed ? file.lastAccessed : Date.now(),
+    size: 'size' in file ? file.size : undefined,
+    type: 'type' in file ? file.type : undefined,
+  });
+
+  const { contextMenu, showContextMenu, hideContextMenu } = useContextMenu(mapToFileInfo);
+
+  // 格式化时间
+  const formatTime = (timestamp: number): string => {
+    return formatTimestamp(timestamp);
+  };
+
+  return {
+    sortedRecentFiles,
+    currentFilePath,
+    lastOpenedFile,
+    recentFilesExpanded,
+    directoryManagerExpanded,
+    contextMenu,
+    isLoading,
+    toggleDirectoryManager,
+    toggleSidebar,
+    openExistingFile,
+    openDirectory,
+    openFile,
+    handleOpenFile,
+    refreshDirectories,
+    removeFromRecent,
+    copyFilePath,
+    openInExplorer,
+    showContextMenu,
+    hideContextMenu,
+    formatTime,
+  };
+}

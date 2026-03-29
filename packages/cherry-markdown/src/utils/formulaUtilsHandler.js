@@ -15,7 +15,9 @@
  */
 
 import { svg2img, getSvgString } from '@/utils/svgUtils';
+import { canvas2img } from '@/utils/export';
 import { copyToClip } from '@/utils/copy';
+import { unescapeHTMLSpecialChar } from '@/utils/sanitize';
 import MathBlock from '@/core/hooks/MathBlock';
 
 export default class FormulaHandler {
@@ -26,14 +28,14 @@ export default class FormulaHandler {
    * @param {Element} target 目标dom
    * @param {HTMLDivElement} container bubble容器
    * @param {HTMLDivElement} previewerDom 预览器dom
-   * @param {import('../Editor').default} editor 编辑器实例
+   * @param {import('../Cherry').default} $cherry Cherry实例（流式渲染场景下不依赖 editor）
    */
-  constructor(trigger, target, container, previewerDom, editor) {
+  constructor(trigger, target, container, previewerDom, $cherry) {
     this.trigger = trigger;
     this.target = target;
     this.container = container;
     this.previewerDom = previewerDom;
-    this.editor = editor;
+    this.$cherry = $cherry;
   }
 
   /**
@@ -108,7 +110,7 @@ export default class FormulaHandler {
     bubbleContainer.id = 'formula-utils-bubble-container'; // 方便 namedItem 获取
     bubbleContainer.className = ['formula-utils-bubble-container'].join(' ');
     this.bubbleContainer = bubbleContainer;
-    this?.editor?.$cherry?.wrapperDom?.appendChild(bubbleContainer);
+    this.$cherry?.wrapperDom?.appendChild(bubbleContainer);
   }
 
   /**
@@ -117,7 +119,7 @@ export default class FormulaHandler {
    * @param {number} y
    */
   showBubble(x, y) {
-    const bubbleContainer = this?.editor?.$cherry?.wrapperDom?.children?.namedItem('formula-utils-bubble-container');
+    const bubbleContainer = this.$cherry?.wrapperDom?.children?.namedItem('formula-utils-bubble-container');
     const targetRect = this.target.getBoundingClientRect();
     if (bubbleContainer instanceof HTMLElement) {
       this.bubbleContainer = bubbleContainer;
@@ -128,19 +130,30 @@ export default class FormulaHandler {
     this.bubbleContainer.style.top = `${y || targetRect.top}px`;
     this.bubbleContainer.style.left = `${x || targetRect.left}px`;
     this.bubbleContainer.addEventListener('click', this.bubbleClickHandler.bind(this), { once: true });
-    this.collectFormulaCode();
   }
 
-  collectFormulaCode() {
-    const formulaCode = [];
-    // @ts-ignore
-    this.editor.editor.getValue().replace(/(\$+)\s*([\w\W]*?)\s*(\1)/g, (whole, start, content, end, offset) => {
-      formulaCode.push({
-        code: content,
-        offset,
-      });
-    });
-    this.formulaCode = formulaCode;
+  /**
+   * 从 DOM 的 data-content 属性获取 latex 源码
+   * @returns {string|null} latex 源码
+   */
+  getLatexFromDOM() {
+    // 找到公式容器元素（mjx-container 的父元素或者带有 data-content 属性的元素）
+    const mjxContainer = this.target.parentElement;
+    if (!mjxContainer) {
+      return null;
+    }
+
+    // 查找带有 data-content 属性的父元素
+    let element = mjxContainer;
+    while (element && !element.dataset?.content) {
+      element = element.parentElement;
+    }
+
+    if (element?.dataset?.content) {
+      return unescapeHTMLSpecialChar(element.dataset.content);
+    }
+
+    return null;
   }
 
   remove() {
@@ -159,6 +172,7 @@ export default class FormulaHandler {
     const { target } = e;
     if (target instanceof HTMLButtonElement) {
       const { name = '' } = target.dataset;
+      const formulaCode = this.getFormulaSource();
       switch (name) {
         case 'svg':
         case 'png':
@@ -166,6 +180,15 @@ export default class FormulaHandler {
           // 涉及到图片的操作
           if (this.target instanceof SVGSVGElement) {
             svg2img(this.target, { format: name });
+          } else {
+            // 如果target不是svg元素，则使用canvas2img
+            // 特殊处理，如果是katex元素，则使用katex的math元素 as targetDom
+            const targetDom =
+              this.target.classList && this.target.classList.contains('katex')
+                ? this.target.querySelector('.katex-html .base')
+                : this.target;
+            // @ts-ignore
+            canvas2img(targetDom, 'formula', { format: name });
           }
           break;
         case 'html':
@@ -176,8 +199,18 @@ export default class FormulaHandler {
               copyToClip(getSvgString(this.target));
             } else {
               const mathElement = this.target.parentElement.querySelector('math');
-              mathElement.setAttribute('xmlns', 'http://www.w3.org/1998/Math/MathML');
-              copyToClip(undefined, mathElement.outerHTML);
+              if (mathElement) {
+                mathElement.setAttribute('xmlns', 'http://www.w3.org/1998/Math/MathML');
+                copyToClip(undefined, mathElement.outerHTML);
+              }
+            }
+          } else if (this.target.classList && this.target.classList.contains('katex')) {
+            if (name === 'html') {
+              const mathElement = this.target.querySelector('math');
+              if (mathElement) {
+                mathElement.setAttribute('xmlns', 'http://www.w3.org/1998/Math/MathML');
+                copyToClip(undefined, mathElement.outerHTML);
+              }
             }
           }
           break;
@@ -188,45 +221,62 @@ export default class FormulaHandler {
         case 'mathml':
         case 'docx':
           // 涉及到公式API的操作
-          {
-            const allMjx = this.previewerDom.querySelectorAll('mjx-container');
-            let mjxIndex = -1;
-            allMjx.forEach((mjx, index) => {
-              if (mjx === this.target.parentElement) {
-                mjxIndex = index;
-              }
-            });
-            if (mjxIndex >= 0 && this.formulaCode[mjxIndex]) {
-              const { code } = this.formulaCode[mjxIndex];
-              if (name === 'mathml' || name === 'docx') {
-                /** @type {MathBlock} */
-                // @ts-ignore
-                const hook = this.editor.$cherry.engine.hooks.paragraph.find((hook) => hook instanceof MathBlock);
-                if (hook && hook.engine === 'MathJax') {
-                  window.MathJax?.texReset();
-                  window.MathJax?.tex2mmlPromise?.(code, { display: true }).then((mml) => {
-                    if (name === 'mathml') {
-                      copyToClip(mml);
-                    } else {
-                      // TODO: docx
-                    }
+          if (formulaCode) {
+            if (name === 'mathml' || name === 'docx') {
+              /** @type {MathBlock} */
+              // @ts-ignore
+              const hook = this.editor.$cherry.engine.hooks.paragraph.find((hook) => hook instanceof MathBlock);
+              if (hook && hook.engine === 'MathJax') {
+                window.MathJax?.texReset();
+                window.MathJax?.tex2mmlPromise?.(formulaCode, { display: true }).then((mml) => {
+                  if (name === 'mathml') {
+                    copyToClip(mml);
+                  } else {
+                    // TODO: docx
+                  }
+                });
+              } else if (hook && hook.engine === 'katex') {
+                if (window.katex) {
+                  const html = window.katex.renderToString(formulaCode, {
+                    throwOnError: false,
+                    displayMode: true,
+                    output: 'mathml',
                   });
+                  if (name === 'mathml') {
+                    copyToClip(html);
+                  } else {
+                    // TODO: docx
+                  }
                 }
-                // TODO: other engine
-              } else if (name === 'latex') {
-                copyToClip(code);
-              } else if (name === '$') {
-                copyToClip(`${name}${code}${name}`);
-              } else if (name === '$$') {
-                copyToClip(`${name}\n${code}\n${name}`);
-              } else if (name === '\\') {
-                copyToClip(`\\${code}`);
               }
             }
+            // TODO: other engine
+          } else if (name === 'latex') {
+            copyToClip(formulaCode);
+          } else if (name === '$') {
+            copyToClip(`${name}${formulaCode}${name}`);
+          } else if (name === '$$') {
+            copyToClip(`${name}\n${formulaCode}\n${name}`);
+          } else if (name === '\\') {
+            copyToClip(`\\${formulaCode}`);
           }
           break;
       }
     }
     this.remove();
+  }
+
+  getFormulaSource() {
+    const formulaContainer = this.target.closest('.Cherry-Math, .Cherry-InlineMath');
+    const encodedFormulaSource = formulaContainer instanceof HTMLElement ? formulaContainer.dataset.formulaSource : '';
+    if (!encodedFormulaSource) {
+      return '';
+    }
+    try {
+      // 源码写入 DOM 时做过 URL 编码，这里取出后恢复原文。
+      return decodeURIComponent(encodedFormulaSource);
+    } catch (err) {
+      return encodedFormulaSource;
+    }
   }
 }

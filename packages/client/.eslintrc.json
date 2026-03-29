@@ -1,0 +1,5 @@
+{
+  "globals": {
+    "__APP_VERSION__": "readonly"
+  }
+}

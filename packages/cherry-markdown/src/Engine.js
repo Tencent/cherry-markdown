@@ -19,7 +19,7 @@ import NestedError, { $expectTarget, $expectInherit, $expectInstance } from './u
 import CryptoJS from 'crypto-js';
 import SyntaxBase from './core/SyntaxBase';
 import ParagraphBase from './core/ParagraphBase';
-import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg } from './utils/regexp';
+import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg, base64Reg, pasteWrapperReg } from './utils/regexp';
 import { escapeHTMLSpecialChar } from './utils/sanitize';
 import Logger from './Logger';
 import { configureMathJax } from './utils/mathjax';
@@ -77,9 +77,9 @@ export default class Engine {
     this.timer = setTimeout(() => {
       this.$cherry.lastMarkdownText = '';
       this.hashCache.clear();
-      const markdownText = this.$cherry.editor.editor.getValue();
+      const markdownText = this.$cherry.editor?.editor?.getValue() || '';
       const html = this.makeHtml(markdownText);
-      this.$cherry.previewer.refresh(html);
+      this.$cherry.previewer?.refresh(html);
       this.$cherry.$event.emit('afterChange', {
         markdownText,
         html,
@@ -92,7 +92,7 @@ export default class Engine {
     if (this.urlProcessorMap[key]) {
       return this.urlProcessorMap[key];
     }
-    let originUrl = this.dealAfterMakeHtml(url);
+    let originUrl = this.$decodeReservedKeywords(url);
     originUrl = originUrl.replace(/&amp;/g, '&');
     const ret = this.$cherry.options.callback.urlProcessor(originUrl, srcType, (/** @type {string} */ newUrl) => {
       if (newUrl) {
@@ -147,7 +147,7 @@ export default class Engine {
             .querySelectorAll('.cherry-katex-need-render')
             .forEach((el) => {
               const displayMode = el.classList.contains('Cherry-Math');
-              el.innerHTML = window.katex.renderToString(decodeURI(el.getAttribute('data-content')), {
+              el.innerHTML = window.katex.renderToString(decodeURIComponent(el.getAttribute('data-content')), {
                 throwOnError: false,
                 displayMode,
               });
@@ -161,7 +161,7 @@ export default class Engine {
               const displayMode = domName === 'div';
               const key = domName === 'div' ? `math-block-${sign}` : `math-inline-${sign}`;
               // @ts-ignore
-              const html = window.katex.renderToString(decodeURI(content), {
+              const html = window.katex.renderToString(decodeURIComponent(content), {
                 throwOnError: false,
                 displayMode,
               });
@@ -212,8 +212,7 @@ export default class Engine {
   }
 
   $beforeMakeHtml(str) {
-    let $str = str.replace(/~/g, '~T');
-    $str = $str.replace(/\$/g, '~D');
+    let $str = this.$encodeReservedKeywords(str);
     $str = $str.replace(/\r\n/g, '\n'); // DOS to Unix
     $str = $str.replace(/\r/g, '\n'); // Mac to Unix
     // 避免正则性能问题，如/.+\n/.test(' '.repeat(99999)), 回溯次数过多
@@ -227,9 +226,7 @@ export default class Engine {
   }
 
   dealAfterMakeHtml(str) {
-    let $str = str.replace(/~D/g, '$');
-    $str = $str.replace(/~T/g, '~');
-    $str = $str.replace(/\\<\//g, '\\ </');
+    let $str = str.replace(/\\<\//g, '\\ </');
     $str = $str
       .replace(new RegExp(`\\\\(${PUNCTUATION})`, 'g'), (match, escapeChar) => {
         if (escapeChar === '&') {
@@ -244,11 +241,22 @@ export default class Engine {
     return $str;
   }
 
+  // 替换预留关键字
+  $encodeReservedKeywords(str) {
+    return str.replace(/~/g, '~T').replace(/\$/g, '~D');
+  }
+
+  // 还原预留关键字
+  $decodeReservedKeywords(str) {
+    return str.replace(/~D/g, '$').replace(/~T/g, '~');
+  }
+
   $afterMakeHtml(str) {
     let $str = this.$fireHookAction(str, 'paragraph', 'afterMakeHtml', this.$dealSentenceByCache.bind(this));
     // str = this._fireHookAction(str, 'sentence', 'afterMakeHtml');
     $str = this.dealAfterMakeHtml($str);
     $str = UrlCache.restoreAll($str);
+    $str = this.$decodeReservedKeywords($str);
     return $str;
   }
 
@@ -293,7 +301,13 @@ export default class Engine {
             canContinue = false;
           }
         }
-        return oneHook[action](newMd, actionArgs, this.markdownParams);
+        // const time = Date.now();
+        const ret = oneHook[action](newMd, actionArgs, this.markdownParams);
+        // const cost = Date.now() - time;
+        // if (cost > 50) {
+        //   console.log(`hook ${oneHook.getName()} ${action} cost ${Date.now() - time}ms`);
+        // }
+        return ret;
       }, $md);
     } catch (e) {
       throw new NestedError(e);
@@ -308,13 +322,17 @@ export default class Engine {
     return this.hash(str);
   }
 
+  sha256(str) {
+    return CryptoJS.SHA256(str).toString();
+  }
+
   /**
    * 计算哈希值
    * @param {String} str 被计算的字符串
    * @returns {String} 哈希值
    */
   hash(str) {
-    // 当缓存队列比较大时，随机抛弃500个缓存
+    // 当缓存队列比较大时，随机抛弃一些缓存
     if (this.hashStrMap.size > 2000) {
       const keys = Array.from(this.hashStrMap.keys()).slice(0, 200);
       keys.forEach((key) => this.hashStrMap.delete(key));
@@ -343,7 +361,12 @@ export default class Engine {
 
   // 缓存大文本数据，用以提升渲染性能
   $cacheBigData(md) {
-    let $md = md.replace(imgBase64Reg, (whole, m1, m2) => {
+    let $md = md.replace(base64Reg, (dataUri) => {
+      const cacheKey = `data:cherry/cache;sha256,${this.hash(dataUri)}`;
+      this.cachedBigData[cacheKey] = dataUri;
+      return cacheKey;
+    });
+    $md = $md.replace(imgBase64Reg, (whole, m1, m2) => {
       const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
       this.cachedBigData[cacheKey] = m2;
       return `${m1}${cacheKey})`;
@@ -353,18 +376,33 @@ export default class Engine {
       this.cachedBigData[cacheKey] = m2;
       return `${m1}${cacheKey}}`;
     });
-    $md = $md.replace(longTextReg, (whole, m1, m2) => {
-      const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
-      this.cachedBigData[cacheKey] = m2;
-      return `${m1}${cacheKey}}`;
-    });
+
+    const tmpArr = $md.split(/\n/);
+    for (let i = 0; i < tmpArr.length; i++) {
+      if (tmpArr[i].length > 6000) {
+        tmpArr[i] = tmpArr[i].replace(longTextReg, (whole) => {
+          const cacheKey = `bigDataBegin${this.hash(whole)}bigDataEnd`;
+          this.cachedBigData[cacheKey] = whole;
+          return cacheKey;
+        });
+      }
+    }
+    $md = tmpArr.join('\n');
+    $md = $md.replace(pasteWrapperReg, '');
     return $md;
   }
 
+  /**
+   * @param {string} md
+   */
   $deCacheBigData(md) {
-    return md.replace(/bigDataBegin[^\n]+?bigDataEnd/g, (whole) => {
-      return this.cachedBigData[whole];
-    });
+    return md
+      .replace(/data:cherry\/cache;sha256,[0-9a-f]+/g, (cacheUri) => {
+        return this.cachedBigData[cacheUri];
+      })
+      .replace(/bigDataBegin[^\n]+?bigDataEnd/g, (whole) => {
+        return this.cachedBigData[whole];
+      });
   }
 
   /**

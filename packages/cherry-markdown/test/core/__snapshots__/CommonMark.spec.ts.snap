@@ -787,21 +787,9 @@ exports[`engine > CommonMark-123 1`] = `
 `;
 
 exports[`engine > CommonMark-124 1`] = `
-"<div
-        data-sign="aed8acd0d907b2d4e168f20021dfa9ae1a8574319b7e6048909ee71173b0f5cd"
-        data-type="codeBlock"
-        data-lines="4" 
-        data-edit-code="true" 
-        data-copy-code="true"
-        data-expand-code="false"
-        data-change-lang="true"
-        data-lang="javascript"
-        style="position:relative"
-        class="cherry-code-expand"
-      >
-      <pre class="language-javascript"><code class="language-javascript"><span class="code-line">aaa</span>
-<span class="code-line"><span class="token template-string"><span class="token template-punctuation string">\`</span><span class="token template-punctuation string">\`</span></span><span class="token template-string"><span class="token template-punctuation string">\`</span><span class="token string"></span></span></span></code></pre>
-      </div><p data-sign="341bc3f1b434f6d1f5d0fa7347d3a70f754a52ce92292c4ab0dad22cb0d3c32a1" data-type="p" data-lines="1">\`\`\`\`\`\`</p>
+"<p data-sign="5356c3c275167a75447833ddc8dde1b582e561bad07d6c5c8a1e3774cbfa516b1" data-type="p" data-lines="1"><code>\`\`
+aaa
+\`</code></p>
 "
 `;
 
@@ -1066,8 +1054,8 @@ exports[`engine > CommonMark-142 1`] = `
 `;
 
 exports[`engine > CommonMark-143 1`] = `
-"<p data-sign="af3a790fee49396f060a5758c9ecd8532c877061921cce2bf056005529a15a9b5" data-type="p" data-lines="5"><del>~~    ruby startline=3 <span class="Cherry-InlineMath" data-type="mathBlock"
-        data-lines="2">$%@#$</span><br>def foo(x)<br>  return 3<br>end<br></del>~~~~~</p>
+"<p data-sign="29c780a2e3c40841ea3af406d46e744595c68d330ad1df1a7aba53444e500cfa4" data-type="p" data-lines="4"><del>~~    ruby startline=3 <span class="Cherry-InlineMath" data-type="mathBlock"
+        data-lines="2" data-formula-source="%25%40%23">$%@#$</span>def foo(x)<br>  return 3<br>end<br></del>~~~~~</p>
 "
 `;
 
@@ -1100,20 +1088,8 @@ exports[`engine > CommonMark-146 1`] = `
 `;
 
 exports[`engine > CommonMark-147 1`] = `
-"<div
-        data-sign="f11be2dd92768aa5923aefaa736e14e2231f747463c161ab8fd07e682bb6646a"
-        data-type="codeBlock"
-        data-lines="3" 
-        data-edit-code="true" 
-        data-copy-code="true"
-        data-expand-code="false"
-        data-change-lang="true"
-        data-lang="javascript"
-        style="position:relative"
-        class="cherry-code-expand"
-      >
-      <pre class="language-javascript"><code class="language-javascript"><span class="code-line"><span class="token template-string"><span class="token template-punctuation string">\`</span><span class="token template-punctuation string">\`</span></span>\` aaa</span></code></pre>
-      </div><p data-sign="f1b901847390b0ed7e374e7c1e464ec17b46a427c487a5ad6cbd2906405083d51" data-type="p" data-lines="1">\`\`\`</p>
+"<p data-sign="8c8ee4db3a5455cfc767d4d904b8c89599b0a497c0951aa221b95327f03346b41" data-type="p" data-lines="1"><code>\`
+\`</code> aaa</p>
 "
 `;
 
@@ -1360,7 +1336,7 @@ exports[`engine > CommonMark-192 1`] = `
 `;
 
 exports[`engine > CommonMark-193 1`] = `
-"<p data-sign="c748929db636b086c31f362ad2f999f6257bb59351aa714a748ec92ec7769b383" data-type="p" data-lines="3">      /url  <br>           'the title'  </p><p data-sign="3c65f714b4d72f614794b9c1dc97a9cb988e5bd7a6981a79e63700f04f901b8b2" data-type="p" data-lines="2">[foo](cherry-inner://e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 )</p>
+"<p data-sign="c748929db636b086c31f362ad2f999f6257bb59351aa714a748ec92ec7769b383" data-type="p" data-lines="3">      /url  <br>           'the title'  </p><p data-sign="3c65f714b4d72f614794b9c1dc97a9cb988e5bd7a6981a79e63700f04f901b8b2" data-type="p" data-lines="2">[foo]( )</p>
 "
 `;
 
@@ -1395,7 +1371,7 @@ exports[`engine > CommonMark-199 1`] = `
 `;
 
 exports[`engine > CommonMark-200 1`] = `
-"<p data-sign="901a805d3b4da566f815e5f755cc0781c4da142101080d8d5db1f7fb9ef0971b1" data-type="p" data-lines="1"><a href="&#60;&#62;">foo</a></p>
+"<p data-sign="710f04ae6827e964349ae1ce3cc82a5088ee94ab7a10d615a82f3ac2c94631a21" data-type="p" data-lines="1"><a href="">foo</a></p>
 "
 `;
 

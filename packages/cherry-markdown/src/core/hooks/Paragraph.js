@@ -55,8 +55,8 @@ export default class Paragraph extends ParagraphBase {
         if (p.trim() === '') {
           return '';
         }
-        // 调用行内语法，获得段落的签名和对应html内容
-        const { sign, html } = sentenceMakeFunc(p);
+        // 每增加1000个缓存，大概能提升10ms的性能（顶满的情况下）
+        const { sign, html } = this.cacheAndGetData(p, sentenceMakeFunc, 3000, -100);
         let domName = 'p';
         // 如果包含html块级标签（比如div、blockquote等），则当前段落外层用div包裹，反之用p包裹
         const isContainBlockTest = new RegExp(`<(${blockNames})[^>]*>`, 'i');

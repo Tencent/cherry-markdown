@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>流式输出md内容 - 插件懒加载</title>
+  <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css">
+  <style>
+    :root {
+      --ai-bg: #f8f9fb;
+      --ai-surface: #fff;
+      --ai-accent: #0d68ff;
+      --ai-muted: #ccc;
+      --ai-gap: 16px;
+      --ai-max-width: 780px;
+      --ai-msg-max-width: 680px;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: auto;
+      background: var(--ai-bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      color: #222;
+    }
+
+    .ai-chat-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 12px 16px;
+      box-sizing: border-box;
+    }
+
+    .dialog {
+      padding: 0 0 0 42px;
+      width: 100%;
+      max-width: var(--ai-max-width);
+      box-sizing: border-box;
+      margin: 0 auto;
+      overflow-y: auto;
+      background: transparent;
+    }
+
+    .one-msg {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin: 18px 0;
+      padding: 6px 8px;
+      width: 100%;
+      max-width: var(--ai-msg-max-width);
+      box-sizing: border-box;
+    }
+
+    .j-one-msg {
+      display: none;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--ai-muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      background: var(--ai-surface);
+      color: #111;
+    }
+
+    .chat-one-msg {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      background: var(--ai-surface);
+      border-radius: 8px;
+      padding: 10px 12px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      box-sizing: border-box;
+    }
+
+    .controls {
+      margin: 24px auto 20px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      width: 100%;
+      max-width: var(--ai-max-width);
+      box-sizing: border-box;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      border: 0;
+      background-color: var(--ai-accent);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(13, 104, 255, 0.16);
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .button.secondary {
+      background: #ffffff;
+      color: #333;
+      border: 1px solid var(--ai-muted);
+      box-shadow: none;
+    }
+
+    .button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin-left: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .status-input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .plugin-options {
+      width: 100%;
+      max-width: var(--ai-max-width);
+      margin: 0 auto 16px;
+      padding: 16px;
+      background: var(--ai-surface);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      box-sizing: border-box;
+    }
+
+    .plugin-options h3 {
+      margin: 0 0 12px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .plugin-list {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .plugin-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .plugin-item input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .plugin-item label {
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .plugin-item .plugin-status {
+      font-size: 12px;
+      color: #999;
+      margin-left: 4px;
+    }
+
+    .plugin-item .plugin-status.loaded {
+      color: #52c41a;
+    }
+
+    .plugin-item .plugin-status.loading {
+      color: #faad14;
+    }
+
+    .custom-input {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      width: 100%;
+      max-width: var(--ai-max-width);
+      box-sizing: border-box;
+    }
+
+    .custom-textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+
+    .cherry {
+      min-height: 0;
+    }
+
+    @media (max-width: 720px) {
+      .ai-chat-wrapper {
+        padding: 12px;
+      }
+
+      .dialog {
+        padding: 10px;
+      }
+
+      .controls {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .plugin-list {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+  </style>
+  <link rel="Shortcut Icon" href="../logo/favicon.ico">
+  <link rel="Bookmark" href="../logo/favicon.ico">
+</head>
+
+<body>
+  <div class="ai-chat-wrapper">
+    <!-- 插件选项区 -->
+    <div class="plugin-options">
+      <h3>🔌 插件懒加载选项（勾选后懒加载对应插件）</h3>
+      <div class="plugin-list">
+        <div class="plugin-item">
+          <input type="checkbox" id="plugin-mermaid" class="j-plugin-checkbox" data-plugin="mermaid">
+          <label for="plugin-mermaid">Mermaid（流程图）</label>
+          <span class="plugin-status j-plugin-status" data-plugin="mermaid"></span>
+        </div>
+        <div class="plugin-item">
+          <input type="checkbox" id="plugin-katex" class="j-plugin-checkbox" data-plugin="katex" checked>
+          <label for="plugin-katex">KaTeX（数学公式-轻量）</label>
+          <span class="plugin-status j-plugin-status" data-plugin="katex"></span>
+        </div>
+        <div class="plugin-item">
+          <input type="checkbox" id="plugin-mathjax" class="j-plugin-checkbox" data-plugin="mathjax">
+          <label for="plugin-mathjax">MathJax（数学公式-完整）</label>
+          <span class="plugin-status j-plugin-status" data-plugin="mathjax"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog j-dialog" role="log" aria-live="polite"></div>
+
+    <!-- 消息模板（隐藏） -->
+    <div class="one-msg j-one-msg" aria-hidden="true">
+      <div class="avatar">AI</div>
+      <div class="chat-one-msg"></div>
+    </div>
+
+    <!-- 控件区 -->
+    <div class="controls">
+      <button type="button" class="button j-button">
+        获取消息（剩余<span class="j-button-tips"></span>条消息）
+      </button>
+      <button type="button" class="button secondary j-pause-button">
+        暂停流式
+      </button>
+      <label class="status">
+        <input class="j-status-input status-input" type="checkbox" checked> 开启流式适配
+      </label>
+    </div>
+
+    <div class="custom-input">
+      <textarea class="custom-textarea j-custom-textarea" placeholder="请输入您想要流式打印的Markdown内容..."></textarea>
+      <div class="button custom-button j-custom-button">流式打印自定义内容</div>
+    </div>
+  </div>
+
+  <script src="../packages/cherry-markdown/dist/cherry-markdown.stream.js"></script>
+  <script type="module">
+    import { aiChatStreamScenario } from './assets/scripts/ai-chat-stream-demo.js';
+    aiChatStreamScenario();
+  </script>
+</body>
+
+</html>

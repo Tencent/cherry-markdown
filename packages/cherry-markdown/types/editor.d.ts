@@ -32,11 +32,7 @@ export type EditorEventCallback<
   ? (event: E, codemirror: CodeMirror.Editor) => void
   : (codemirror: CodeMirror.Editor) => void;
 
-type EditorPasteEventHandler = (
-  event: ClipboardEvent,
-  clipboardData: ClipboardEvent['clipboardData'],
-  codemirror: CodeMirror.Editor,
-) => void;
+type EditorPasteEventHandler = (event: ClipboardEvent, clipboardData: ClipboardEvent['clipboardData']) => void;
 
 export type EditorConfiguration = {
   id?: string; // textarea 的id属性值
