@@ -327,6 +327,39 @@ registerPlugin().then(() => {
 
 see `/src/Cherry.config.js` or click [here](https://github.com/Tencent/cherry-markdown/wiki/%E9%85%8D%E7%BD%AE%E9%A1%B9%E5%85%A8%E8%A7%A3)
 
+### Draw.io Editor Configuration
+
+Cherry Markdown supports integrating Draw.io (diagrams.net) chart editor via iframe.
+
+#### Basic Configuration
+
+```javascript
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+  value: '# welcome to cherry editor!',
+  // Configure draw.io iframe URL
+  drawioIframeUrl: 'https://example.com/your-drawio-page.html',
+  // Optional: configure iframe style
+  drawioIframeStyle: 'border: none; width: 100%; height: 600px;',
+});
+```
+
+#### Setting Up Draw.io Page
+
+Since Cherry opens draw.io editor through an iframe, you need to prepare a standalone draw.io page:
+
+1. Download draw.io source code or use diagrams.net
+2. Refer to project examples: `examples/drawio_demo.html` and `examples/assets/scripts/drawio-demo.js`
+3. Implement communication logic with the outer iframe container in your draw.io page
+
+#### Using in Frameworks
+
+- **Vue/React**: Same usage as native JS, just pass `drawioIframeUrl` configuration
+- Ensure draw.io page is accessible independently (proper CORS configuration)
+- The draw.io page needs to implement `postMessage` communication to pass chart data
+
+For more details, see: [drawio example](https://github.com/Tencent/cherry-markdown/blob/dev/examples/drawio_demo.html)
+
 ## Example
 
 Click [here](https://github.com/Tencent/cherry-markdown/wiki) for more examples.

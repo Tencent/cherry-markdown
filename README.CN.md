@@ -327,6 +327,39 @@ registerPlugin().then(() => {
 
 所有配置项基本都在 `/src/Cherry.config.js` 中进行了标注，详见：[配置项全解](https://github.com/Tencent/cherry-markdown/wiki/%E9%85%8D%E7%BD%AE%E9%A1%B9%E5%85%A8%E8%A7%A3)
 
+### Draw.io 编辑器配置
+
+Cherry Markdown 支持通过 iframe 集成 Draw.io（diagrams.net）图表编辑器。
+
+#### 基本配置
+
+```javascript
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+  value: '# welcome to cherry editor!',
+  // 配置 draw.io iframe 地址
+  drawioIframeUrl: 'https://example.com/your-drawio-page.html',
+  // 可选：配置 iframe 样式
+  drawioIframeStyle: 'border: none; width: 100%; height: 600px;',
+});
+```
+
+#### 搭建 Draw.io 页面
+
+由于 Cherry 通过 iframe 打开 draw.io 编辑器，你需要准备一个可独立访问的 draw.io 页面：
+
+1. 下载 draw.io 源码或使用 diagrams.net
+2. 参考项目示例：`examples/drawio_demo.html` 和 `examples/assets/scripts/drawio-demo.js`
+3. 在你的 draw.io 页面中实现与 iframe 外层容器的通信逻辑
+
+#### 框架中使用
+
+- **Vue/React**：与原生 JS 使用方式相同，传入 `drawioIframeUrl` 配置即可
+- 确保 draw.io 页面可独立访问（跨域配置正确）
+- draw.io 页面需要实现 `postMessage` 通信来传递图表数据
+
+更多细节请参考：[drawio 示例](https://github.com/Tencent/cherry-markdown/blob/dev/examples/drawio_demo.html)
+
 ## 示例
 
 点击查看 [Wiki 示例](https://github.com/Tencent/cherry-markdown/wiki)
