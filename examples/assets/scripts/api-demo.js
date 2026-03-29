@@ -1,6 +1,8 @@
-function dealClick(obj, e) {
+export function dealClick(obj, e) {
   eval(obj.parentNode.firstElementChild.value);
 }
+// 挂载到全局，HTML 中的 onclick 需要
+window.dealClick = dealClick;
 
 var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
   makeHtml(str) {
@@ -18,7 +20,7 @@ var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TY
   },
 });
 
-var cherryConfig = {
+export var cherryConfig = {
   id: 'markdown',
   externals: {
     echarts: window.echarts,
@@ -87,8 +89,3 @@ var cherryConfig = {
   keydown: [],
   //extensions: [],
 };
-
-fetch('./assets/markdown/api.md').then((response) => response.text()).then((value) => {
-  var config = Object.assign({}, cherryConfig, { value: value });
-  window.cherryObj = new Cherry(config);
-});

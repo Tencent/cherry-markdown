@@ -41,7 +41,6 @@ const htmlPages = [
   '/vim.html',
   '/drawio_demo.html',
   '/chart_toolbar_demo.html',
-  '/chatgpt.html',
   '/suggester.html',
   '/custom_codeblock_wrapper.html',
 ];

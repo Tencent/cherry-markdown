@@ -12,12 +12,6 @@
         height: 100%;
         overflow: hidden;
       }
-      #markdown {
-        margin-top: 5%;
-        width: 70%;
-        margin-left: auto;
-        margin-right: auto;
-      }
     </style>
     <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css" />
     <link rel="Shortcut Icon" href="./logo/favicon.ico" />
@@ -32,13 +26,10 @@
     <script type="module">
       const response = await fetch('./assets/markdown/table.md');
       const tableMd = await response.text();
-      const cherry = new Cherry({
+      window.cherry = new Cherry({
         id: 'markdown',
         toolbars: {
           toolbar: ['bold', 'italic', 'strikethrough', '|', 'header', 'list', 'graph']
-        },
-        editor: {
-          height: '70%'
         },
         value: tableMd,
       });

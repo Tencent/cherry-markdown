@@ -47,17 +47,56 @@ export function printLinksPlugin(examplesDir: string, htmlPages: string[]): Plug
  * Cherry Markdown 开发模式插件
  *
  * 功能：
- * 1. 拦截对 dist/cherry-markdown.js 的请求，重定向到虚拟模块（源码）
- * 2. 拦截对 dist/cherry-markdown.css 的请求，重定向到虚拟模块（SCSS 源文件）
- * 3. 拦截字体文件请求，代理到 dist/fonts/ 目录
- * 4. 转换 HTML，将 link 标签转换为 JS 模块导入，将引用 dist 的 script 转换为 module 类型
+ * 1. 拦截对 dist/cherry-markdown.js 的请求，重定向到虚拟模块（源码入口 index.js）
+ * 2. 拦截对 dist/cherry-markdown.core.js 的请求，重定向到虚拟模块（源码入口 index.core.js）
+ * 3. 拦截对 dist/cherry-markdown.css 的请求，重定向到虚拟模块（SCSS 源文件）
+ * 4. 拦截对 dist/addons/*.js 的请求，重定向到虚拟模块（src/addons/ 源码）
+ * 5. 拦截字体文件请求，代理到 dist/fonts/ 目录
+ * 6. 转换 HTML，将 link 标签转换为 JS 模块导入，将引用 dist 的 script 转换为 module 类型
  */
 export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plugin {
-  // 虚拟模块 ID
-  const virtualCherryJsId = 'virtual:cherry-markdown-js';
-  const virtualCherryCssId = 'virtual:cherry-markdown-css';
+  // 虚拟模块 ID 前缀
+  const VIRTUAL_PREFIX = 'virtual:cherry-';
+  const RESOLVED_PREFIX = `\0${VIRTUAL_PREFIX}`;
+
+  // 固定虚拟模块
+  const virtualCherryJsId = `${VIRTUAL_PREFIX}full-js`;
+  const virtualCherryCoreJsId = `${VIRTUAL_PREFIX}core-js`;
+  const virtualCherryCssId = `${VIRTUAL_PREFIX}css`;
   const resolvedVirtualCherryJsId = `\0${virtualCherryJsId}`;
+  const resolvedVirtualCherryCoreJsId = `\0${virtualCherryCoreJsId}`;
   const resolvedVirtualCherryCssId = `\0${virtualCherryCssId}`;
+
+  /**
+   * 将 addon 文件名转为 UMD 全局变量名（camelCase）
+   * 例如：cherry-code-block-mermaid-plugin → CherryCodeBlockMermaidPlugin
+   *
+   * 这与 addons.build.js 中的命名逻辑保持一致，
+   * 确保 HTML 中使用 window.CherryCodeBlockMermaidPlugin 能正确访问
+   */
+  function addonFileNameToGlobalName(fileName: string): string {
+    const nameWithoutExt = fileName.replace(/\.js$/, '');
+    return nameWithoutExt
+      .split('-')
+      .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+      .join('');
+  }
+
+  /**
+   * 从请求 URL 中提取 addon 文件名
+   * 匹配模式：.../dist/addons/<fileName>.js
+   */
+  function extractAddonFileName(url: string): string | null {
+    const match = url.match(/\/packages\/cherry-markdown\/dist\/addons\/([^/?]+\.js)/);
+    return match ? match[1] : null;
+  }
+
+  /**
+   * 为 addon 生成虚拟模块 ID
+   */
+  function getAddonVirtualId(fileName: string): string {
+    return `${VIRTUAL_PREFIX}addon-${fileName}`;
+  }
 
   return {
     name: 'cherry-dev-redirect',
@@ -68,23 +107,42 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
       server.middlewares.use((req, res, next) => {
         const url = req.url || '';
 
-        // 匹配模式：/packages/cherry-markdown/dist/cherry-markdown*.js
+        // 1. 拦截 addon JS 请求 → 虚拟模块
+        // 必须在主包匹配之前，避免被 cherry-markdown*.js 的正则吃掉
+        const addonFileName = extractAddonFileName(url);
+        if (addonFileName) {
+          // 检查对应源文件是否存在
+          const srcPath = path.join(srcDir, 'addons', addonFileName);
+          if (fs.existsSync(srcPath)) {
+            req.url = `/@id/${getAddonVirtualId(addonFileName)}`;
+            return next();
+          }
+        }
+
+        // 2. 拦截 cherry-markdown.core.js 请求 → core 虚拟模块
+        // 必须在通用的 cherry-markdown*.js 匹配之前
+        const coreJsPattern = /\/?\.{0,2}\/?packages\/cherry-markdown\/dist\/cherry-markdown\.core[^/]*\.js/;
+        if (coreJsPattern.test(url)) {
+          req.url = `/@id/${virtualCherryCoreJsId}`;
+          return next();
+        }
+
+        // 3. 拦截 cherry-markdown.js（非 core）请求 → full 虚拟模块
         const jsPattern = /\/?\.{0,2}\/?packages\/cherry-markdown\/dist\/cherry-markdown[^/]*\.js/;
         const cssPattern = /\/?\.{0,2}\/?packages\/cherry-markdown\/dist\/cherry-markdown[^/]*\.css/;
 
-        // 拦截 cherry-markdown.js 请求 → 虚拟模块
         if (jsPattern.test(url)) {
           req.url = `/@id/${virtualCherryJsId}`;
           return next();
         }
 
-        // 拦截 cherry-markdown.css 请求 → 虚拟模块
+        // 4. 拦截 cherry-markdown.css 请求 → 虚拟模块
         if (cssPattern.test(url)) {
           req.url = `/@id/${virtualCherryCssId}`;
           return next();
         }
 
-        // 拦截字体文件请求，代理到 dist/fonts/
+        // 5. 拦截字体文件请求，代理到 dist/fonts/
         // 情况1: src/sass/fonts/ 路径（Vite 处理 SCSS 时生成的绝对路径）
         // 情况2: /fonts/ 根路径（CSS 通过 JS 模块注入时，浏览器用页面 URL 解析相对路径 ./fonts/）
         const fontPatterns = [/\/packages\/cherry-markdown\/src\/sass\/fonts\/(.+)/, /^\/fonts\/(ch-icon\.[^?]+)/];
@@ -116,19 +174,36 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
     },
 
     resolveId(id) {
-      if (id === virtualCherryJsId) {
-        return resolvedVirtualCherryJsId;
-      }
-      if (id === virtualCherryCssId) {
-        return resolvedVirtualCherryCssId;
+      if (id === virtualCherryJsId) return resolvedVirtualCherryJsId;
+      if (id === virtualCherryCoreJsId) return resolvedVirtualCherryCoreJsId;
+      if (id === virtualCherryCssId) return resolvedVirtualCherryCssId;
+
+      // 动态 addon 虚拟模块
+      if (id.startsWith(VIRTUAL_PREFIX + 'addon-')) {
+        return `\0${id}`;
       }
     },
 
     load(id) {
-      // 加载虚拟 JS 模块 - 从源码导入并暴露到全局
+      const srcDirNormalized = srcDir.replace(/\\/g, '/');
+
+      // 加载 full bundle 虚拟模块 - 从 index.js 导入（包含 mermaid 等所有 addon）
       if (id === resolvedVirtualCherryJsId) {
         return `
-import Cherry from '${srcDir.replace(/\\/g, '/')}/index.js';
+import Cherry from '${srcDirNormalized}/index.js';
+
+// 暴露到全局，兼容 examples 中的用法
+window.Cherry = Cherry;
+
+export default Cherry;
+export { Cherry };
+`;
+      }
+
+      // 加载 core 虚拟模块 - 从 index.core.js 导入（不含 addon，按需加载）
+      if (id === resolvedVirtualCherryCoreJsId) {
+        return `
+import Cherry from '${srcDirNormalized}/index.core.js';
 
 // 暴露到全局，兼容 examples 中的用法
 window.Cherry = Cherry;
@@ -140,16 +215,38 @@ export { Cherry };
 
       // 加载虚拟 CSS 模块 - 导入 SCSS 源文件
       if (id === resolvedVirtualCherryCssId) {
-        return `import '${srcDir.replace(/\\/g, '/')}/sass/index.scss';`;
+        return `import '${srcDirNormalized}/sass/index.scss';`;
+      }
+
+      // 加载 addon 虚拟模块 - 从 src/addons/ 导入并暴露为 UMD 风格的全局变量
+      if (id.startsWith(RESOLVED_PREFIX + 'addon-')) {
+        const fileName = id.replace(RESOLVED_PREFIX + 'addon-', '');
+        const globalName = addonFileNameToGlobalName(fileName);
+        return `
+import AddonModule from '${srcDirNormalized}/addons/${fileName}';
+
+// 暴露到全局，兼容 dist/addons/ UMD 构建中的全局变量命名
+window.${globalName} = AddonModule;
+
+export default AddonModule;
+`;
       }
     },
 
     // 转换 HTML，处理脚本类型和样式引入
+    //
+    // 虚拟模块返回 ES module 代码（import/export），所以需要：
+    // 1. CSS link → module script（Vite 处理 SCSS 需通过 JS 模块）
+    // 2. cherry-markdown*.js → type="module"（虚拟模块是 ES module）
+    // 3. dist/addons/*.js → type="module"（addon 虚拟模块也是 ES module）
+    //
+    // 注意：由于 module 脚本延迟执行，后续依赖 Cherry 的脚本
+    // 必须也是 module 脚本或写在 <script type="module"> 内联块中，
+    // 以保证按文档顺序执行。
     transformIndexHtml(html) {
       let result = html;
 
-      // 1. 将引用 dist/cherry-markdown.css 的 link 标签转换为 JS 模块导入
-      // 因为 Vite 处理 SCSS 需要通过 JS 模块
+      // 1. CSS link → module script
       result = result.replace(
         /<link[^>]*href=["']([^"']*\/packages\/cherry-markdown\/dist\/cherry-markdown[^"']*\.css)["'][^>]*\/?>/gi,
         (_match, href) => {
@@ -157,16 +254,24 @@ export { Cherry };
         },
       );
 
-      // 2. 将引用 dist/cherry-markdown.js 的普通 script 标签转换为 module 类型
-      // 因为源码是 ES Module
+      // 2. cherry-markdown*.js（主包和 core）→ type="module"
       result = result.replace(
         /<script([^>]*)\s+src=["']([^"']*\/packages\/cherry-markdown\/dist\/cherry-markdown[^"']*)["']([^>]*)><\/script>/gi,
         (match, before, src, after) => {
-          // 如果已经是 module 类型，不做处理
           if (/type\s*=\s*["']module["']/i.test(before + after)) {
             return match;
           }
-          // 添加 type="module"
+          return `<script type="module"${before} src="${src}"${after}></script>`;
+        },
+      );
+
+      // 3. dist/addons/*.js → type="module"
+      result = result.replace(
+        /<script([^>]*)\s+src=["']([^"']*\/packages\/cherry-markdown\/dist\/addons\/[^"']*\.js)["']([^>]*)><\/script>/gi,
+        (match, before, src, after) => {
+          if (/type\s*=\s*["']module["']/i.test(before + after)) {
+            return match;
+          }
           return `<script type="module"${before} src="${src}"${after}></script>`;
         },
       );

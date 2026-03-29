@@ -92,10 +92,14 @@ journey
     <script src="../packages/cherry-markdown/dist/cherry-markdown.core.js"></script>
     <script src="../packages/cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin.js"></script>
     <script type="module">
+      // 使用 core + addon 按需加载模式
+      // cherry-markdown.core.js 不包含 mermaid 等 addon
+      // 需要通过 usePlugin 手动注册 mermaid 插件
       Cherry.usePlugin(CherryCodeBlockMermaidPlugin, {
         mermaid: window.mermaid,
         mermaidAPI: window.mermaid,
       });
+
       var config = {
         id: 'markdown',
         engine: {
