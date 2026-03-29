@@ -65,7 +65,13 @@ gulp.task('default', function (done) {
         });
       },
       function handleFonts(cb) {
-        iconStream.pipe(gulp.dest('dist/fonts/')).on('finish', cb);
+        // 同时输出到 dist/fonts 和 src/sass/fonts
+        // dist/fonts 用于生产环境发布包
+        // src/sass/fonts 用于开发环境 yarn dev
+        iconStream
+          .pipe(gulp.dest('src/sass/fonts/'))
+          .pipe(gulp.dest('dist/fonts/'))
+          .on('finish', cb);
       },
     ],
     done,
