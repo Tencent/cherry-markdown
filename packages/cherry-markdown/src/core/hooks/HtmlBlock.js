@@ -218,6 +218,21 @@ export default class HtmlBlock extends ParagraphBase {
     }
     config.HTML_INTEGRATION_POINTS.foreignobject = true;
 
+    const $strArr = $str.split('\n');
+    // 如果内容很大，则分批处理，用空间换sanitizer.sanitize消耗的时间
+    const batch = 100;
+    // 最大缓存容量（冗余20%）
+    const maxCacheLength = Math.round((1.2 * $strArr.length) / batch);
+    if ($strArr.length > batch) {
+      const ret = [];
+      for (let i = 0; i < $strArr.length; i += batch) {
+        const batchStr = $strArr.slice(i, i + batch).join('\n');
+        ret.push(
+          this.cacheAndGetData(batchStr, (batchStr) => sanitizer.sanitize(batchStr, config), maxCacheLength, -10),
+        );
+      }
+      return ret.join('\n');
+    }
     return sanitizer.sanitize($str, config);
   }
 }

@@ -12,7 +12,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version-file: .node-version
           cache: 'yarn'
 
       - name: Install dependencies
@@ -21,4 +21,4 @@ jobs:
         run: yarn build
       - name: Publish preview package
         run: |
-          npx pkg-pr-new publish './packages/cherry-markdown'
+          npx pkg-pr-new publish './packages/cherry-markdown' --compact --packageManager=pnpm,npm,yarn

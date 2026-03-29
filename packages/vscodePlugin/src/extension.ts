@@ -3,62 +3,57 @@ import * as path from 'path';
 import { getWebviewContent } from './webview';
 import { uploadFileHandler } from './handler/uploadFile';
 
-let cherryPanel: vscode.WebviewPanel; // 保存预览窗口的webview实例
-let isCherryPanelInit: boolean = false;
-let extensionPath: string = '';
-let targetDocument: vscode.TextEditor;
-let disableScrollTrigger: boolean = false; // true：滚动时不往webview发送滚动事件，反之发送
-let disableEditTrigger: boolean = false; // true：变更内容时不往webview发送内容变更事件，反之发送
-let cherryTheme: string | undefined = vscode.workspace.getConfiguration('cherryMarkdown').get('Theme'); // 缓存主题
+// 状态管理器
+// 更简化的状态对象
+const state = {
+  panel: undefined as vscode.WebviewPanel | undefined,
+  targetEditor: undefined as vscode.TextEditor | undefined,
+  webviewMsgDisposable: undefined as vscode.Disposable | undefined,
+  extPath: '',
+  scrollTimeout: undefined as ReturnType<typeof setTimeout> | undefined,
+  editTimeout: undefined as ReturnType<typeof setTimeout> | undefined,
+  disableScroll: false,
+  disableEdit: false,
+  isPanelInit: false,
+  theme: vscode.workspace.getConfiguration('cherryMarkdown').get('theme') as string | undefined,
+  reset() {
+    if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+    if (this.editTimeout) clearTimeout(this.editTimeout);
+    this.webviewMsgDisposable?.dispose();
+    this.panel = undefined;
+    this.targetEditor = undefined;
+    this.webviewMsgDisposable = undefined;
+    this.scrollTimeout = undefined;
+    this.editTimeout = undefined;
+    this.disableScroll = false;
+    this.disableEdit = false;
+    this.isPanelInit = false;
+    this.theme = vscode.workspace.getConfiguration('cherryMarkdown').get('theme') as string | undefined;
+  },
+};
+
 export function activate(context: vscode.ExtensionContext) {
-  extensionPath = context.extensionPath;
-  // 注册命令
-  const disposable = vscode.commands.registerCommand('cherrymarkdown.preview', () => {
-    triggerEditorContentChange(true);
-  });
-
-  context.subscriptions.push(disposable);
-
-  // 打开文件的时候触发
-  vscode.workspace.onDidOpenTextDocument(() => {
-    triggerEditorContentChange();
-  });
-
-  // 切换文件的时候更新预览区域内容
-  vscode.window.onDidChangeActiveTextEditor((e) => {
-    const cherryUsage: 'active' | 'only-manual' | undefined = vscode.workspace
-      .getConfiguration('cherryMarkdown')
-      .get('Usage');
-
-    if (e?.document && cherryUsage === 'active') {
-      triggerEditorContentChange();
-      // 如果打开的不是md文件，则让cherry强制进入预览模式
-      if (e.document.languageId !== 'markdown' && targetDocument) {
-        cherryPanel.webview.postMessage({ cmd: 'disable-edit', data: {} });
-      } else {
-        cherryPanel.webview.postMessage({ cmd: 'enable-edit', data: {} });
+  state.extPath = context.extensionPath;
+  context.subscriptions.push(
+    vscode.commands.registerCommand('cherrymarkdown.preview', () => triggerEditorContentChange(true)),
+  );
+  context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(() => triggerEditorContentChange()));
+  context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor((e) => handleActiveEditorChange(e)));
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument((e) => {
+      if (state.isPanelInit && e?.document && !state.disableEdit) {
+        triggerEditorContentChange();
       }
-    }
-  });
-
-  // 当修改文档内容的时候更新预览区域内容，如果已经关闭预览了，则不需要重新打开预览
-  vscode.workspace.onDidChangeTextDocument((e) => {
-    if (isCherryPanelInit && e?.document && !disableEditTrigger) {
-      triggerEditorContentChange();
-    }
-  });
-
-  // 滚动的时候让预览区域同步滚动
-  vscode.window.onDidChangeTextEditorVisibleRanges((e) => {
-    if (!isCherryPanelInit) {
-      return true;
-    }
-    disableScrollTrigger ||
-      cherryPanel.webview.postMessage({
-        cmd: 'editor-scroll',
-        data: e.visibleRanges[0].start.line,
-      });
-  });
+    }),
+  );
+  context.subscriptions.push(
+    vscode.window.onDidChangeTextEditorVisibleRanges((e) => {
+      if (!state.isPanelInit || !state.panel) return;
+      if (!state.disableScroll) {
+        state.panel.webview.postMessage({ cmd: 'editor-scroll', data: e.visibleRanges[0].start.line });
+      }
+    }),
+  );
 }
 
 // this method is called when your extension is deactivated
@@ -69,139 +64,136 @@ export function deactivate() {}
  * @returns
  */
 const getMarkdownFileInfo = () => {
-  let currentEditor = vscode.window.activeTextEditor;
-  // const currentLine = currentEditor?.visibleRanges[0].start.line;
-  let currentDoc = currentEditor?.document;
-  let currentText = '';
-  let currentTitle = '';
-  if (currentDoc?.languageId !== 'markdown' && targetDocument.document.languageId === 'markdown') {
-    currentEditor = targetDocument;
-    currentDoc = targetDocument.document;
+  let editor = vscode.window.activeTextEditor;
+  let doc = editor?.document;
+  let text = '';
+  let title = '';
+  if (doc?.languageId !== 'markdown' && state.targetEditor?.document?.languageId === 'markdown') {
+    editor = state.targetEditor;
+    doc = state.targetEditor?.document;
   }
-  if (currentDoc?.languageId === 'markdown') {
-    if (currentEditor) {
-      targetDocument = currentEditor;
-    }
-    currentText = currentDoc?.getText() || '';
-    currentTitle = path.basename(currentDoc?.fileName) || '';
+  if (doc?.languageId === 'markdown' && editor) {
+    state.targetEditor = editor;
+    text = doc.getText() || '';
+    title = path.basename(doc.fileName) || '';
   }
-
-  currentTitle = currentTitle
-    ? `${vscode.l10n.t('Preview')} ${currentTitle} ${vscode.l10n.t('By')} Cherry Markdown`
+  title = title
+    ? `${vscode.l10n.t('Preview')} ${title} ${vscode.l10n.t('By')} Cherry Markdown`
     : `${vscode.l10n.t('UnSupported')} ${vscode.l10n.t('By')} Cherry Markdown`;
-  const theme = cherryTheme ? cherryTheme : vscode.workspace.getConfiguration('cherryMarkdown').get('Theme');
-  const mdInfo = { text: currentText, theme };
-  return { mdInfo, currentTitle };
+  const theme = state.theme ?? vscode.workspace.getConfiguration('cherryMarkdown').get('theme');
+  return { mdInfo: { text, theme }, currentTitle: title };
 };
 
 /**
  * 初始化cherry预览窗口
  */
 const initCherryPanel = () => {
+  if (state.isPanelInit && state.panel) {
+    state.panel.reveal(vscode.ViewColumn.Two);
+    return;
+  }
   const { mdInfo, currentTitle } = getMarkdownFileInfo();
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath ?? '';
-  cherryPanel = vscode.window.createWebviewPanel('cherrymarkdown.preview', currentTitle, vscode.ViewColumn.Two, {
+  state.panel = vscode.window.createWebviewPanel('cherrymarkdown.preview', currentTitle, vscode.ViewColumn.Two, {
     enableScripts: true,
     retainContextWhenHidden: true,
     localResourceRoots: [
-      vscode.Uri.file(path.join(extensionPath, 'web-resources')),
-      vscode.Uri.file(path.join(extensionPath, 'dist')),
+      vscode.Uri.file(path.join(state.extPath, 'web-resources')),
+      vscode.Uri.file(path.join(state.extPath, 'web-resources', 'dist')),
       vscode.Uri.file(workspaceFolder),
     ],
   });
-  console.log('vscode.env.language', vscode.env.language);
-  cherryPanel.webview.html = getWebviewContent(
-    { ...mdInfo, vscodeLanguage: vscode.env.language },
-    cherryPanel,
-    extensionPath,
-  );
-  cherryPanel.iconPath = vscode.Uri.file(path.join(extensionPath, 'favicon.ico'));
-  isCherryPanelInit = true;
-
+  try {
+    state.panel.webview.html = getWebviewContent(
+      { ...mdInfo, vscodeLanguage: vscode.env.language },
+      state.panel,
+      state.extPath,
+    );
+  } catch (err) {
+    vscode.window.showErrorMessage('Failed to initialize Cherry Markdown webview.');
+    console.error(err);
+  }
+  state.panel.iconPath = vscode.Uri.file(path.join(state.extPath, 'favicon.ico'));
+  state.isPanelInit = true;
+  state.panel.onDidDispose(() => state.reset());
   initCherryPanelEvent();
 };
 
-let scrollTimeOut: ReturnType<typeof setTimeout> | undefined;
-let editTimeOut: ReturnType<typeof setTimeout> | undefined;
 const initCherryPanelEvent = () => {
-  cherryPanel?.webview?.onDidReceiveMessage(async (e) => {
+  if (!state.panel) return;
+  state.webviewMsgDisposable?.dispose();
+  state.webviewMsgDisposable = state.panel.webview.onDidReceiveMessage(async (e) => {
     const { type, data } = e;
     switch (type) {
-      // 滚动的时候同步滚动
-      case 'preview-scroll':
-        disableScrollTrigger = true;
-        // eslint-disable-next-line no-case-declarations
+      case 'preview-scroll': {
+        state.disableScroll = true;
+        if (!state.targetEditor) return;
         const pos = new vscode.Position(data, 0);
-        // eslint-disable-next-line no-case-declarations
         const range = new vscode.Range(pos, pos);
-        targetDocument.revealRange(range, vscode.TextEditorRevealType.AtTop);
-        scrollTimeOut && clearTimeout(scrollTimeOut);
-        scrollTimeOut = setTimeout(() => {
-          disableScrollTrigger = false;
+        state.targetEditor.revealRange(range, vscode.TextEditorRevealType.AtTop);
+        if (state.scrollTimeout) clearTimeout(state.scrollTimeout);
+        state.scrollTimeout = setTimeout(() => {
+          state.disableScroll = false;
         }, 500);
         return;
-      // 变更主题的时候同时更新配置
-      case 'change-theme':
-        cherryTheme = data;
+      }
+      case 'change-theme': {
+        state.theme = data;
         vscode.workspace.getConfiguration('cherryMarkdown').update('theme', data, true);
         break;
-      // 内容变更的时候同时更新对应的文档内容
-      case 'cherry-change':
-        disableEditTrigger = true;
-        targetDocument.edit((editBuilder) => {
-          const endNum = targetDocument.document.lineCount + 1;
+      }
+      case 'cherry-change': {
+        if (!state.targetEditor) break;
+        state.disableEdit = true;
+        state.targetEditor.edit((editBuilder) => {
+          const endNum = state.targetEditor!.document.lineCount + 1;
           const end = new vscode.Position(endNum, 0);
           editBuilder.replace(new vscode.Range(new vscode.Position(0, 0), end), data.markdown);
         });
-        editTimeOut && clearTimeout(editTimeOut);
-        editTimeOut = setTimeout(() => {
-          disableEditTrigger = false;
+        if (state.editTimeout) clearTimeout(state.editTimeout);
+        state.editTimeout = setTimeout(() => {
+          state.disableEdit = false;
         }, 500);
         break;
+      }
       case 'tips':
         vscode.window.showInformationMessage(data, 'OK');
         break;
       case 'cherry-load-img':
-        // vscode.window.showInformationMessage('暂不支持展示图片，如需要，请前往 https://github.com/Tencent/cherry-markdown 反馈', 'OK');
-        // loadOneImg(data);
+        // 可扩展图片加载逻辑
         break;
-      case 'upload-file':
-        uploadFileHandler(data).then((res) => {
-          if (res.url !== '') {
-            cherryPanel.webview.postMessage({
-              cmd: 'upload-file-callback',
-              data: res,
-            });
+      case 'upload-file': {
+        try {
+          const res = await uploadFileHandler(data);
+          if (res.url) {
+            state.panel?.webview.postMessage({ cmd: 'upload-file-callback', data: res });
           } else {
             vscode.window.showInformationMessage('上传不成功');
           }
-        });
+        } catch (err) {
+          vscode.window.showErrorMessage('上传失败');
+          console.error(err);
+        }
         break;
+      }
       case 'open-url': {
         if (data === 'href-invalid') {
           vscode.window.showErrorMessage('link is not valid, please check it.');
           return;
         }
-        // http/https协议的链接，直接打开
         if (/^(http|https):\/\//.test(data)) {
           vscode.env.openExternal(vscode.Uri.parse(data));
           return;
         }
-        // 本地绝对路径，打开文件(绝对路径需要解码)
         const decodedData = decodeURIComponent(data);
         if (path.isAbsolute(decodedData)) {
           const decodedDataPath = vscode.Uri.file(decodedData);
-          vscode.commands.executeCommand('vscode.open', decodedDataPath, {
-            preview: true,
-          });
+          vscode.commands.executeCommand('vscode.open', decodedDataPath, { preview: true });
           return;
         }
-        // 以#开头的锚点不处理
-        if (data.startsWith('#')) {
-          return;
-        }
-        // 本地相对路径，打开文件
-        const uri = vscode.Uri.file(path.join(targetDocument.document.uri.fsPath, '..', data));
+        if (data.startsWith('#')) return;
+        if (!state.targetEditor) return;
+        const uri = vscode.Uri.file(path.join(state.targetEditor.document.uri.fsPath, '..', data));
         vscode.commands.executeCommand('vscode.open', uri, { preview: true });
         break;
       }
@@ -210,19 +202,12 @@ const initCherryPanelEvent = () => {
           vscode.window.showErrorMessage('导出错误，请重新尝试');
           return;
         }
-
         const uri = await vscode.window.showSaveDialog({
-          filters: {
-            Images: ['png'],
-          },
+          filters: { Images: ['png'] },
           saveLabel: '保存截图',
         });
-
-        // 如果用户选择了保存路径
         if (uri) {
-          // 去掉 Base64 前缀
           const base64Data = data.replace(/^data:image\/png;base64,/, '');
-          // 将 Base64 数据转换为 Buffer
           const buffer = Buffer.from(base64Data, 'base64');
           await vscode.workspace.fs.writeFile(uri, buffer);
           vscode.window.showInformationMessage('Image saved successfully!');
@@ -233,27 +218,34 @@ const initCherryPanelEvent = () => {
       }
     }
   });
-  cherryPanel?.onDidDispose(() => {
-    isCherryPanelInit = false;
-  });
+};
+
+// handle active editor change
+const handleActiveEditorChange = (e: vscode.TextEditor | undefined) => {
+  const cherryUsage = vscode.workspace.getConfiguration('cherryMarkdown').get<'active' | 'only-manual'>('Usage');
+  if (!e?.document || cherryUsage !== 'active') return;
+  triggerEditorContentChange();
+  if (e.document.languageId !== 'markdown') {
+    state.panel?.webview.postMessage({ cmd: 'disable-edit', data: {} });
+  } else {
+    state.panel?.webview.postMessage({ cmd: 'enable-edit', data: {} });
+  }
 };
 
 /**
  * 向预览区发送vscode编辑区内容变更的消息
  */
-const triggerEditorContentChange = (focus: boolean = false) => {
-  if (isCherryPanelInit) {
+const triggerEditorContentChange = (focus = false) => {
+  if (state.isPanelInit && state.panel) {
     const { mdInfo, currentTitle } = getMarkdownFileInfo();
-    cherryPanel.title = currentTitle;
-    cherryPanel.webview.postMessage({ cmd: 'editor-change', data: mdInfo });
-  } else {
-    if (vscode.window.activeTextEditor?.document?.languageId === 'markdown') {
-      const cherryUsage: 'active' | 'only-manual' | undefined = vscode.workspace
-        .getConfiguration('cherryMarkdown')
-        .get('Usage');
-      if (cherryUsage === 'active' || focus) {
-        initCherryPanel();
-      }
+    state.panel.title = currentTitle;
+    state.panel.webview.postMessage({ cmd: 'editor-change', data: mdInfo });
+    return;
+  }
+  if (vscode.window.activeTextEditor?.document?.languageId === 'markdown') {
+    const cherryUsage = vscode.workspace.getConfiguration('cherryMarkdown').get<'active' | 'only-manual'>('Usage');
+    if (cherryUsage === 'active' || focus) {
+      initCherryPanel();
     }
   }
 };

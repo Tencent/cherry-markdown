@@ -69,15 +69,15 @@ export default class Table extends ParagraphBase {
   }
 
   $parseChartOptions(cell) {
-    Logger.log('Parsing chart options for cell:', cell);
+    // Logger.log('Parsing chart options for cell:', cell);
     // 初始化失败
     if (!this.chartRenderEngine) {
-      Logger.log('Chart render engine not available');
+      // Logger.log('Chart render engine not available');
       return null;
     }
     const CHART_REGEX = /^:(\w+):(?:[ ]*{(.*?)}[ ]*)?$/;
     if (!CHART_REGEX.test(cell)) {
-      Logger.log('Cell does not match chart regex:', cell);
+      // Logger.log('Cell does not match chart regex:', cell);
       return null;
     }
     const match = cell.match(CHART_REGEX);
@@ -86,7 +86,7 @@ export default class Table extends ParagraphBase {
       type: chartType,
       options: options ? this.$parseProps(options) : {},
     };
-    Logger.log('Parsed chart options:', result);
+    // Logger.log('Parsed chart options:', result);
     return result;
   }
 
@@ -263,7 +263,12 @@ export default class Table extends ParagraphBase {
     //     Logger.log('originalStr preview:', originalStr.substring(0, 200));
     //   }
     // }
-    const chart = this.chartRenderEngine.render(chartOptions.type, chartOptions.options, tableObject);
+    const chart = this.chartRenderEngine.render(
+      chartOptions.type,
+      chartOptions.options,
+      tableObject,
+      this.$engine.$cherry,
+    );
     const chartHtml = `<figure class="cherry-table-figure">${chart}</figure>`;
     const newSign = `${tableResult.sign}${chartOptionsSign}`;
     return {
@@ -313,8 +318,8 @@ export default class Table extends ParagraphBase {
       })
       .replace(/\\\|/g, '|'); // escape \|
     return {
-      html: `<div class="cherry-table-container" data-sign="${sign}${dataLines}" data-lines="${dataLines}">
-        <table class="cherry-table">${renderHtml}</table></div>`,
+      html: `<div class="cherry-table-wrapper" data-sign="${sign}${dataLines}" data-lines="${dataLines}">
+        <div class="cherry-table-container"><table class="cherry-table">${renderHtml}</table></div></div>`,
       sign,
     };
   }

@@ -1,5 +1,3 @@
-import './pinyin/pinyin_dist.js';
-
 /**
  * 自定义一个语法
  */
@@ -57,7 +55,7 @@ var customMenuA = Cherry.createMenuHook('加粗斜体', {
 /**
  * 定义一个空壳，用于自行规划cherry已有工具栏的层级结构
  */
-var customMenuB = Cherry.createMenuHook('实验室', {
+var customMenuB = Cherry.createMenuHook('自定义菜单+自定义菜单图标', {
   icon: {
     type: 'svg',
     content:
@@ -68,7 +66,7 @@ var customMenuB = Cherry.createMenuHook('实验室', {
 /**
  * 定义一个自带二级菜单的工具栏
  */
-var customMenuC = Cherry.createMenuHook('帮助中心', {
+var customMenuC = Cherry.createMenuHook('自定义菜单+子菜单', {
   iconName: 'question',
   onClick: (selection, type) => {
     switch (type) {
@@ -402,19 +400,20 @@ const basicConfig = {
       },
       'graph',
       'proTable',
+      '|',
       // 'customMenuTable',
-      'togglePreview',
-      'codeTheme',
-      'search',
-      'shortcutKey',
       {
         customMenuBName: ['ruby', 'audio', 'video', 'customMenuAName'],
       },
       'customMenuCName',
+      '|',
+      'shortcutKey', 
+      'search', 
+      'togglePreview',
     ],
-    toolbarRight: ['fullScreen', '|', 'export', 'changeLocale', 'wordCount'],
+    toolbarRight: ['fullScreen', '|', 'export', 'changeLocale', '|', 'wordCount'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
-    sidebar: ['mobilePreview', 'copy', 'theme'],
+    sidebar: ['mobilePreview', 'copy', 'theme', 'codeTheme'],
     toc: {
       // updateLocationHash: false, // 要不要更新URL的hash
       defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
@@ -472,6 +471,7 @@ const basicConfig = {
   keydown: [],
   //extensions: [],
   callback: {
+    changeString2Pinyin: pinyin,
     onClickPreview: (event) => {
       console.log('onClickPreview', event);
     },
@@ -482,11 +482,21 @@ const basicConfig = {
       console.log(`url-processor`, url, srcType);
       return url;
     },
+    // onPaste: (clipboardData, cherry, callback) => {
+    //   setTimeout(() => {
+    //     callback({
+    //       html: '<span>hello <strong>world</strong> !</span>',
+    //       htmlText: 'hello world !',
+    //       mdText: '',
+    //     });
+    //   }, 1000)
+    //   return '<<正在处理中...>>';
+    // },
   },
   editor: {
     id: 'cherry-text',
     name: 'cherry-text',
-    autoSave2Textarea: true,
+    autoSave2Textarea: false,
     defaultModel: 'edit&preview',
     showFullWidthMark: true, // 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》
     showSuggestList: true, // 是否显示联想框

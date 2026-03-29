@@ -219,6 +219,46 @@
     margin: var(--spacing-lg) 0;
   }
 
+  figure[data-type="mermaid"] {
+    overflow: hidden;
+    // 让 figure 收缩到 SVG 内容宽度，使选择框贴合图表
+    width: fit-content;
+    max-width: 100%;
+    svg {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    // 当 figure 设置了自定义尺寸时，SVG 需要完全跟随容器缩放
+    &[style*="width"] svg {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    // mermaid 对齐样式
+    &.cherry-mermaid-align-center {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    &.cherry-mermaid-align-right {
+      margin-left: auto;
+      margin-right: 0;
+    }
+    &.cherry-mermaid-align-left {
+      margin-left: 0;
+      margin-right: auto;
+    }
+    &.cherry-mermaid-align-float-left {
+      float: left;
+      margin-left: 0;
+      margin-right: var(--spacing-lg);
+    }
+    &.cherry-mermaid-align-float-right {
+      float: right;
+      margin-left: var(--spacing-lg);
+      margin-right: 0;
+    }
+  }
+
   p,
   pre,
   blockquote,

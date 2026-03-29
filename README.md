@@ -2,7 +2,7 @@
 
 # Cherry Markdown Writer
 
-[![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
+[![cnb 云原生开发](./logo/cnb-badge.svg)](https://cnb.cool/tencent/cherry-markdown/cherry-markdown) [![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
 
 English | [简体中文](./README.CN.md)
 
@@ -35,7 +35,8 @@ Cherry Markdown Writer is a Javascript Markdown editor. It has the advantages su
 - [IMG WYSIWYG](https://tencent.github.io/cherry-markdown/examples/img.html)
 - [Table WYSIWYG](https://tencent.github.io/cherry-markdown/examples/table.html)
 - [Headers with Auto Num](https://tencent.github.io/cherry-markdown/examples/head_num.html)
-- [Stream Input Mode (AI chat scenario)](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)
+- [Streaming rendering Mode (AI chat scenario)](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)
+- [Streaming Mode - Lazy Loading Plugins](https://tencent.github.io/cherry-markdown/examples/ai_chat_stream.html)
 - [VIM Editing Mode](https://tencent.github.io/cherry-markdown/examples/vim.html)
 - [Utilize Your Own Mermaid.js](https://tencent.github.io/cherry-markdown/examples/mermaid.html)
 - [Custom Code Block Wrapper](https://tencent.github.io/cherry-markdown/examples/custom_codeblock_wrapper.html)
@@ -49,6 +50,22 @@ Developer can call and instantiate Cherry Markdown Editor in a very simple way. 
 ### **Easy to extend**
 
 When the syntax that Cherry Markdown writer support can not meet your needs, secondary development or function extension can be carried out quickly. At the same time, Cherry Markdown writer should be implemented by pure JavaScript, and should not rely on framework technology such as angular, vue and react. Framework only provide a container environment.
+
+### Incremental / Progressive / Streaming rendering
+
+After enabling streaming rendering, Cherry will automatically complete the following syntax elements to avoid exposing Markdown source code, ensuring stable output during the streaming process([demo](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)):
+- Headings
+- Bold and italic text
+- Hyperlinks
+- Images and audio/video
+- Inline code blocks
+- Block code blocks
+- Inline formulas
+- Block formulas
+- Unordered lists
+- Tables
+- Mermaid diagrams
+- Footnotes
 
 ## Feature
 
@@ -69,16 +86,17 @@ When the syntax that Cherry Markdown writer support can not meet your needs, sec
 2. Classic & regular line break modes
 3. Multi-cursor editing
 4. Image size editing
-5. Table editing
-6. Table -> Chart (generate chart from table content)
-7. Export as image or PDF
-8. Floating toolbar: appears at the beginning of a new line
-9. Bubble toolbar: appears when text is selected
-10. Set shortcut keys
-11. Floating table of contents
-12. Theme switching
-13. Input suggestion (autocomplete)
-14. AI Chat scenario: stream-mode output supported
+5. Mermaid diagram size editing and alignment (drag to resize, support center/left/right/float alignment)
+6. Table editing
+7. Table -> Chart (generate chart from table content)
+8. Export as image or PDF
+9. Floating toolbar: appears at the beginning of a new line
+10. Bubble toolbar: appears when text is selected
+11. Set shortcut keys
+12. Floating table of contents
+13. Theme switching
+14. Input suggestion (autocomplete)
+15. AI Chat scenario: stream-mode output supported
 
 ### Performance Feature
 
@@ -229,6 +247,55 @@ const cherryInstance = new Cherry({
 });
 ````
 
+### Stream Build
+
+Cherry provides a build package optimized for streaming output scenarios. This package does not include large dependencies like mermaid or CodeMirror, enabling on-demand lazy loading. It is ideal for AI Chat and similar scenarios.
+
+```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
+import Cherry from 'cherry-markdown/dist/cherry-markdown.stream';
+
+// The stream build does not include the following dependencies by default,
+// which can be loaded on demand:
+// - mermaid (flowcharts)
+// - CodeMirror (code editor)
+
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+});
+
+cherryInstance.setMarkdown('# welcome to cherry editor!');
+```
+
+#### Loading Mermaid Plugin for Stream Build
+
+```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
+import Cherry from 'cherry-markdown/dist/cherry-markdown.stream';
+import CherryMermaidPlugin from 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin';
+import mermaid from 'mermaid';
+
+// Plugin registration must be done before Cherry is instantiated
+Cherry.usePlugin(CherryMermaidPlugin, {
+  mermaid,
+  mermaidAPI: mermaid,
+});
+
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+});
+```
+
+#### Differences Between Stream Build and Core Build
+
+| Build  | File                        | Mermaid | CodeMirror | Use Case          |
+| ------ | --------------------------- | ------- | ---------- | ----------------- |
+| Full   | `cherry-markdown.js`        | ✅       | ✅          | General purpose   |
+| Core   | `cherry-markdown.core.js`   | ❌       | ✅          | Without Mermaid   |
+| Stream | `cherry-markdown.stream.js` | ❌       | ❌          | AI Chat streaming |
+
+> Note: MathJax/KaTeX are external dependencies loaded dynamically via CDN and are not included in any build package.
+
 ### Dynamic import
 
 **recommend** Using Dynamic import, the following is an example of webpack Dynamic import.
@@ -259,6 +326,39 @@ registerPlugin().then(() => {
 ## Configuration
 
 see `/src/Cherry.config.js` or click [here](https://github.com/Tencent/cherry-markdown/wiki/%E9%85%8D%E7%BD%AE%E9%A1%B9%E5%85%A8%E8%A7%A3)
+
+### Draw.io Editor Configuration
+
+Cherry Markdown supports integrating Draw.io (diagrams.net) chart editor via iframe.
+
+#### Basic Configuration
+
+```javascript
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+  value: '# welcome to cherry editor!',
+  // Configure draw.io iframe URL
+  drawioIframeUrl: 'https://example.com/your-drawio-page.html',
+  // Optional: configure iframe style
+  drawioIframeStyle: 'border: none; width: 100%; height: 600px;',
+});
+```
+
+#### Setting Up Draw.io Page
+
+Since Cherry opens draw.io editor through an iframe, you need to prepare a standalone draw.io page:
+
+1. Download draw.io source code or use diagrams.net
+2. Refer to project examples: `examples/drawio_demo.html` and `examples/assets/scripts/drawio-demo.js`
+3. Implement communication logic with the outer iframe container in your draw.io page
+
+#### Using in Frameworks
+
+- **Vue/React**: Same usage as native JS, just pass `drawioIframeUrl` configuration
+- Ensure draw.io page is accessible independently (proper CORS configuration)
+- The draw.io page needs to implement `postMessage` communication to pass chart data
+
+For more details, see: [drawio example](https://github.com/Tencent/cherry-markdown/blob/dev/examples/drawio_demo.html)
 
 ## Example
 

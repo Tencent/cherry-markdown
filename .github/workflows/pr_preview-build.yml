@@ -2,7 +2,6 @@ name: Preview Build
 
 on:
   pull_request:
-    branches: [dev, main]
     types: [opened, synchronize, reopened]
 
 jobs:
@@ -20,7 +19,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version-file: .node-version
           cache: 'yarn'
 
       - run: yarn install

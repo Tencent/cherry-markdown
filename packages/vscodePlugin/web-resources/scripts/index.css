@@ -110,3 +110,8 @@
 .cherry-color-item__073763 { background-color: #073763;}
 .cherry-color-item__20124d { background-color: #20124d;}
 .cherry-color-item__4c1130 { background-color: #4c1130;}
+/* Image backfill styles applied by VSCode extension */
+.ch-image-border { border: 1px solid rgba(0,0,0,0.12); }
+.ch-image-no-border { border: none !important; }
+.ch-image-shadow { box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
+.ch-image-radius { border-radius: 6px; }

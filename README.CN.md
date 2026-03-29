@@ -2,7 +2,7 @@
 
 # Cherry Markdown Writer
 
-[![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
+[![cnb 云原生开发](./logo/cnb-badge.svg)](https://cnb.cool/tencent/cherry-markdown/cherry-markdown) [![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
 
 简体中文 | [English](./README.md)
 
@@ -36,6 +36,7 @@ Cherry Markdown Writer 是一款 Javascript Markdown 编辑器，具有开箱即
 - [表格编辑](https://tencent.github.io/cherry-markdown/examples/table.html)
 - [自动编号标题](https://tencent.github.io/cherry-markdown/examples/head_num.html)
 - [流式输入模式（AI chat 场景）](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)
+- [流式输入模式 - 可选插件懒加载](https://tencent.github.io/cherry-markdown/examples/ai_chat_stream.html)
 - [VIM 编辑模式](https://tencent.github.io/cherry-markdown/examples/vim.html)
 - [使用自带或自定义的 Mermaid.js](https://tencent.github.io/cherry-markdown/examples/mermaid.html)
 - [自定义代码块外层容器](https://tencent.github.io/cherry-markdown/examples/custom_codeblock_wrapper.html)
@@ -49,6 +50,23 @@ Cherry Markdown Writer 是一款 Javascript Markdown 编辑器，具有开箱即
 ### 易于扩展
 
 当 Cherry Markdown 编辑器默认支持的语法无法满足需求时，可以进行二次开发或功能扩展。Cherry 基于纯 JavaScript 实现，不依赖 Angular、Vue、React 等框架（框架仅作为容器环境）。
+
+### 流式渲染
+
+开启流式渲染后，cherry会对以下语法进行**自动补全**，避免出现Markdown源码，以达到在流式输出过程中稳定输出的效果（[demo](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)）：
+
+- 标题
+- 加粗、斜体
+- 超链接
+- 图片、音视频
+- 行内代码块
+- 段落代码块
+- 行内公式
+- 段落公式
+- 无序列表
+- 表格
+- mermaid画图
+- 脚注
 
 ## 功能
 
@@ -69,16 +87,17 @@ Cherry Markdown Writer 是一款 Javascript Markdown 编辑器，具有开箱即
 2. 经典换行与常规换行支持
 3. 多光标编辑
 4. 图片尺寸编辑
-5. 表格编辑
-6. 根据表格内容生成图表（表格 -> 图表）
-7. 导出为图片或 PDF
-8. 浮动工具栏：在新行行首出现
-9. 气泡工具栏：选中文本时出现
-10. 设置快捷键
-11. 悬浮目录
-12. 主题切换
-13. 输入联想
-14. AI Chat场景流式输出场景特别支持
+5. Mermaid 图表尺寸编辑与对齐布局（拖拽缩放、支持居中/左/右/浮动对齐）
+6. 表格编辑
+7. 根据表格内容生成图表（表格 -> 图表）
+8. 导出为图片或 PDF
+9. 浮动工具栏：在新行行首出现
+10. 气泡工具栏：选中文本时出现
+11. 设置快捷键
+12. 悬浮目录
+13. 主题切换
+14. 输入联想
+15. AI Chat场景流式输出场景特别支持
 
 ### 性能特性
 
@@ -229,6 +248,54 @@ const cherryInstance = new Cherry({
 });
 ````
 
+### 流式输出包（Stream Build）
+
+Cherry 提供了专为流式输出场景优化的构建包，该包不包含 mermaid、CodeMirror 等大型依赖，可实现按需懒加载，非常适合 AI Chat 等场景。
+
+```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
+import Cherry from 'cherry-markdown/dist/cherry-markdown.stream';
+
+// 流式输出包默认不包含以下依赖，可按需加载：
+// - mermaid（流程图）
+// - CodeMirror（代码编辑器）
+
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+});
+
+cherryInstance.setMarkdown('# welcome to cherry editor!');
+```
+
+#### 为流式输出包加载 Mermaid 插件
+
+```javascript
+import 'cherry-markdown/dist/cherry-markdown.css';
+import Cherry from 'cherry-markdown/dist/cherry-markdown.stream';
+import CherryMermaidPlugin from 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin';
+import mermaid from 'mermaid';
+
+// 插件注册必须在 Cherry 实例化之前完成
+Cherry.usePlugin(CherryMermaidPlugin, {
+  mermaid,
+  mermaidAPI: mermaid,
+});
+
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+});
+```
+
+#### 流式输出包与核心包的区别
+
+| 构建包     | 文件                        | 包含 Mermaid | 包含 CodeMirror | 适用场景         |
+| ---------- | --------------------------- | ------------ | --------------- | ---------------- |
+| 完整包     | `cherry-markdown.js`        | ✅            | ✅               | 通用场景         |
+| 核心包     | `cherry-markdown.core.js`   | ❌            | ✅               | 不需要 Mermaid   |
+| 流式输出包 | `cherry-markdown.stream.js` | ❌            | ❌               | AI Chat 流式输出 |
+
+> 注意：MathJax/KaTeX 为外部依赖，通过 CDN 动态加载，不包含在任何构建包中。
+
 ### 异步加载
 
 强烈推荐使用动态引入（Dynamic import），下面给出 webpack 动态引入的示例。
@@ -259,6 +326,39 @@ registerPlugin().then(() => {
 ## 配置
 
 所有配置项基本都在 `/src/Cherry.config.js` 中进行了标注，详见：[配置项全解](https://github.com/Tencent/cherry-markdown/wiki/%E9%85%8D%E7%BD%AE%E9%A1%B9%E5%85%A8%E8%A7%A3)
+
+### Draw.io 编辑器配置
+
+Cherry Markdown 支持通过 iframe 集成 Draw.io（diagrams.net）图表编辑器。
+
+#### 基本配置
+
+```javascript
+const cherryInstance = new Cherry({
+  id: 'markdown-container',
+  value: '# welcome to cherry editor!',
+  // 配置 draw.io iframe 地址
+  drawioIframeUrl: 'https://example.com/your-drawio-page.html',
+  // 可选：配置 iframe 样式
+  drawioIframeStyle: 'border: none; width: 100%; height: 600px;',
+});
+```
+
+#### 搭建 Draw.io 页面
+
+由于 Cherry 通过 iframe 打开 draw.io 编辑器，你需要准备一个可独立访问的 draw.io 页面：
+
+1. 下载 draw.io 源码或使用 diagrams.net
+2. 参考项目示例：`examples/drawio_demo.html` 和 `examples/assets/scripts/drawio-demo.js`
+3. 在你的 draw.io 页面中实现与 iframe 外层容器的通信逻辑
+
+#### 框架中使用
+
+- **Vue/React**：与原生 JS 使用方式相同，传入 `drawioIframeUrl` 配置即可
+- 确保 draw.io 页面可独立访问（跨域配置正确）
+- draw.io 页面需要实现 `postMessage` 通信来传递图表数据
+
+更多细节请参考：[drawio 示例](https://github.com/Tencent/cherry-markdown/blob/dev/examples/drawio_demo.html)
 
 ## 示例
 

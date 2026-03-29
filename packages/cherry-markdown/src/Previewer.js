@@ -127,13 +127,45 @@ export default class Previewer {
     this.disableScrollListener = false;
     this.bindScroll();
     this.editor = editor;
+    /** @type {typeof import('codemirror')|null} CodeMirror 模块（从 Editor 传递，stream 模式下为 null） */
+    this.codemirrorModule = editor?.constructor?.codemirrorModule ?? null;
     this.bindDrag();
+    // 异步初始化 PreviewerBubble
     this.$initPreviewerBubble();
     this.lazyLoadImg = new LazyLoadImg(this.options.lazyLoadImg, this);
     this.lazyLoadImg.doLazyLoad();
     this.bindClick();
     this.onMouseDown();
     this.onSizeChange();
+    if (this.$cherry.options.previewer.isMobilePreview) {
+      this.changePreviewToMobile(true);
+    }
+  }
+
+  /**
+   * 不依赖Editor的初始化方法，用于流式渲染场景
+   * 与init方法的区别：不需要editor参数，不绑定拖拽和滚动同步
+   * PreviewerBubble 始终初始化以保证基础的 click 事件监听和交互功能
+   * enablePreviewerBubble 配置只控制是否显示编辑工具栏（图片、表格等）
+   * 在无编辑器场景下，编辑相关功能（编辑代码、切换语言等）会自动禁用
+   */
+  initWithoutEditor() {
+    /**
+     * @property
+     * @private
+     * @type {boolean} 禁用滚动事件监听
+     */
+    this.disableScrollListener = false;
+    this.editor = null;
+    // 流式渲染模式下没有 CodeMirror
+    this.codemirrorModule = null;
+    // 始终初始化 PreviewerBubble，保证 click 事件监听和基础交互功能（代码块复制、展开等）
+    // enablePreviewerBubble 配置在 PreviewerBubble 内部控制是否显示编辑工具栏
+    this.$initPreviewerBubble();
+    this.lazyLoadImg = new LazyLoadImg(this.options.lazyLoadImg, this);
+    this.lazyLoadImg.doLazyLoad();
+    this.bindClick();
+    this.onMouseDown();
     if (this.$cherry.options.previewer.isMobilePreview) {
       this.changePreviewToMobile(true);
     }
@@ -216,7 +248,7 @@ export default class Previewer {
 
   calculateRealLayout(editorWidth) {
     // 根据editor的绝对宽度计算editor和previewer的百分比宽度
-    const editorDomWidth = this.editor.options.editorDom.getBoundingClientRect().width;
+    const editorDomWidth = this.editor?.options?.editorDom?.getBoundingClientRect()?.width || 0;
     const previewerDomWidth = this.options.previewerDom.getBoundingClientRect().width;
     const totalWidth = editorDomWidth + previewerDomWidth;
     let editorPercentage = +(editorWidth / totalWidth).toFixed(3);
@@ -241,14 +273,20 @@ export default class Previewer {
       $editorPercentage = '50%';
       $previewerPercentage = '50%';
     }
-    this.editor.options.editorDom.style.width = $editorPercentage;
+    if (this.editor?.options?.editorDom) {
+      this.editor.options.editorDom.style.width = $editorPercentage;
+    }
     this.options.previewerDom.style.width = $previewerPercentage;
 
-    this.syncVirtualLayoutFromReal();
+    setTimeout(() => this.syncVirtualLayoutFromReal(), 0);
   }
 
   syncVirtualLayoutFromReal() {
     // 通过editor和previewer的百分比宽度,同步更新mask和dragLine的px宽度及位置
+    // 流式渲染场景下没有editor，直接返回
+    if (!this.editor?.options?.editorDom) {
+      return;
+    }
     const editorPos = this.editor.options.editorDom.getBoundingClientRect();
     const previewerPos = this.options.previewerDom.getBoundingClientRect();
     const editorHeight = editorPos.height;
@@ -283,7 +321,7 @@ export default class Previewer {
 
   calculateVirtualLayout(editorLeft, editorRight) {
     // 计算mask和dragline应处在的位置,按px计算
-    const editorDomWidth = this.editor.options.editorDom.getBoundingClientRect().width;
+    const editorDomWidth = this.editor?.options?.editorDom?.getBoundingClientRect()?.width || 0;
     const previewerDomWidth = this.options.previewerDom.getBoundingClientRect().width;
     const totalWidth = editorDomWidth + previewerDomWidth;
     const startWidth = editorLeft.toFixed(0);
@@ -331,7 +369,7 @@ export default class Previewer {
         window.event.returnValue = false;
       }
 
-      const editorLeft = this.editor.options.editorDom.getBoundingClientRect().left;
+      const editorLeft = this.editor?.options?.editorDom?.getBoundingClientRect()?.left || 0;
       const editorRight = mouseMoveEvent.clientX;
       const virtualLayout = this.calculateVirtualLayout(editorLeft, editorRight);
       this.setVirtualLayout(virtualLayout.startWidth, virtualLayout.leftWidth, virtualLayout.rightWidth);
@@ -353,18 +391,19 @@ export default class Previewer {
       }
 
       // 重新设置editor和previewer宽度占比
-      const editorLeft = this.editor.options.editorDom.getBoundingClientRect().left;
+      const editorLeft = this.editor?.options?.editorDom?.getBoundingClientRect()?.left || 0;
       const editorRight = mouseUpEvent.clientX;
       const layout = this.calculateRealLayout(editorRight - editorLeft);
+      this.options.previewerCache.layout = layout;
       this.setRealLayout(layout.editorPercentage, layout.previewerPercentage);
       // 去掉蒙层和虚拟拖动条
-      this.editor.options.editorDom.classList.remove('no-select');
+      this.editor?.options?.editorDom?.classList?.remove('no-select');
       this.options.previewerDom.classList.remove('no-select');
       this.options.editorMaskDom.classList.remove('cherry-editor-mask--show');
       this.options.previewerMaskDom.classList.remove('cherry-previewer-mask--show');
       this.options.virtualDragLineDom.classList.remove('cherry-drag--show');
       // 刷新codemirror宽度
-      this.editor.editor.refresh();
+      this.editor?.editor?.refresh();
       // 取消事件绑定
       removeEvent(document, 'mousemove', dragLineMouseMove, false);
       removeEvent(document, 'mouseup', dragLineMouseUp, false);
@@ -387,7 +426,7 @@ export default class Previewer {
 
       this.syncVirtualLayoutFromReal();
 
-      const editorLeft = this.editor.options.editorDom.getBoundingClientRect().left;
+      const editorLeft = this.editor?.options?.editorDom?.getBoundingClientRect()?.left || 0;
       const editorRight = mouseDownEvent.clientX;
       const virtualLayout = this.calculateVirtualLayout(editorLeft, editorRight);
       this.setVirtualLayout(virtualLayout.startWidth, virtualLayout.leftWidth, virtualLayout.rightWidth);
@@ -397,7 +436,7 @@ export default class Previewer {
         this.options.editorMaskDom.classList.add('cherry-editor-mask--show');
         this.options.previewerMaskDom.classList.add('cherry-previewer-mask--show');
         this.options.previewerDom.classList.add('no-select');
-        this.editor.options.editorDom.classList.add('no-select');
+        this.editor?.options?.editorDom?.classList?.add('no-select');
         // 绑定事件
         addEvent(document, 'mousemove', dragLineMouseMove, false);
         addEvent(document, 'mouseup', dragLineMouseUp, false);
@@ -414,7 +453,7 @@ export default class Previewer {
     const domContainer = this.getDomContainer();
     onScroll = () => {
       if (this.applyingDomChanges) {
-        Logger.log(new Date(), 'sync scroll locked');
+        // Logger.log(new Date(), 'sync scroll locked');
         return;
       }
       if (this.disableScrollListener) {
@@ -422,12 +461,12 @@ export default class Previewer {
         return;
       }
       if (domContainer.scrollTop <= 0) {
-        this.editor.scrollToLineNum(0, 0, 1);
+        this.editor?.scrollToLineNum(0, 0, 1);
         return;
       }
       // 判定预览区域是否滚动到底部的逻辑，增加10px的冗余
       if (domContainer.scrollTop + domContainer.offsetHeight + 10 > domContainer.scrollHeight) {
-        this.editor.scrollToLineNum(null);
+        this.editor?.scrollToLineNum(null);
         return;
       }
       const domPosition = domContainer.getBoundingClientRect();
@@ -445,7 +484,7 @@ export default class Previewer {
         }
       }
       if (!targetElement) {
-        this.editor.scrollToLineNum(0, 0, 1);
+        this.editor?.scrollToLineNum(0, 0, 1);
         return;
       }
       // markdown元素存在margin，getBoundingRect不能获取到margin
@@ -462,7 +501,7 @@ export default class Previewer {
       // console.log('destLine:', lines, percent,
       //  mdRect.height + marginTop + marginBottom, mdOffsetTop, mdElement);
       // if(mdOffsetTop < 0) {
-      return this.editor.scrollToLineNum(lines - lineNum, lineNum, percent);
+      return this.editor?.scrollToLineNum(lines - lineNum, lineNum, percent);
       // }
       // return this.editor.scrollToLineNum(lines - lineNum, 0, 0);
     };
@@ -643,18 +682,35 @@ export default class Previewer {
             // 处理表格包含图表的特殊场景
             let hasUpdate = false;
             if (
-              newContent[change.newIndex].dom.className === 'cherry-table-container' &&
-              newContent[change.newIndex].dom.querySelector('.cherry-table-figure') &&
-              oldContent[change.oldIndex].dom.querySelector('.cherry-table-figure')
+              newContent[change.newIndex].dom.className === 'cherry-table-wrapper' &&
+              newContent[change.newIndex].dom.querySelector('.cherry-table-figure .cherry-echarts-wrapper') &&
+              oldContent[change.oldIndex].dom.querySelector('.cherry-table-figure .cherry-echarts-wrapper')
             ) {
-              oldContent[change.oldIndex].dom
-                .querySelector('.cherry-table-figure')
-                .replaceWith(newContent[change.newIndex].dom.querySelector('.cherry-table-figure'));
-              oldContent[change.oldIndex].dom.dataset.sign = newContent[change.oldIndex].dom.dataset.sign;
+              const oldWrapper = oldContent[change.oldIndex].dom.querySelector(
+                '.cherry-table-figure .cherry-echarts-wrapper',
+              );
+              const newWrapper = newContent[change.newIndex].dom.querySelector(
+                '.cherry-table-figure .cherry-echarts-wrapper',
+              );
+              oldWrapper.id = newWrapper.id;
+              oldWrapper.dataset.tableData = newWrapper.dataset.tableData;
+              oldWrapper.dataset.chartType = newWrapper.dataset.chartType;
+              oldWrapper.dataset.chartOptions = newWrapper.dataset.chartOptions;
+              oldContent[change.oldIndex].dom.dataset.sign = newContent[change.newIndex].dom.dataset.sign;
+              oldContent[change.oldIndex].dom.dataset.lines = newContent[change.newIndex].dom.dataset.lines;
               this.$updateDom(
                 newContent[change.newIndex].dom.querySelector('.cherry-table'),
                 oldContent[change.oldIndex].dom.querySelector('.cherry-table'),
               );
+              hasUpdate = true;
+            } else if (
+              // 处理代码块渲染echarts的特殊场景
+              newContent[change.newIndex].dom.dataset.type === 'echarts' &&
+              newContent[change.newIndex].dom.querySelector('.cherry-echarts-codeblock-wrapper') &&
+              oldContent[change.oldIndex].dom.querySelector('.cherry-echarts-codeblock-wrapper')
+            ) {
+              oldContent[change.oldIndex].dom.dataset.sign = newContent[change.newIndex].dom.dataset.sign;
+              oldContent[change.oldIndex].dom.dataset.lines = newContent[change.newIndex].dom.dataset.lines;
               hasUpdate = true;
             } else if (newContent[change.newIndex].dom.querySelector('svg')) {
               throw new Error(); // SVG暂不使用patch更新
@@ -675,7 +731,7 @@ export default class Previewer {
       if (newHtmlList.list.length && oldHtmlList.list.length) {
         const myersDiff = new MyersDiff(newHtmlList.list, oldHtmlList.list, (obj, index) => obj[index].sign);
         const res = myersDiff.doDiff();
-        Logger.log(res);
+        // Logger.log(res);
         this.$dealWithMyersDiffResult(res, oldHtmlList.list, newHtmlList.list, domContainer);
       } else if (newHtmlList.list.length && !oldHtmlList.list.length) {
         // 全新增
@@ -710,7 +766,7 @@ export default class Previewer {
       this.applyingDomChanges = true;
       // 预览区未隐藏时，直接更新
       const domContainer = this.getDomContainer();
-      if (this.editor.selectAll) {
+      if (this.editor?.selectAll) {
         domContainer.innerHTML = '';
       }
       let tmpDiv = null;
@@ -743,6 +799,35 @@ export default class Previewer {
   }
 
   $dealEditAndPreviewOnly(isEditOnly = true) {
+    this.$removeModelClass();
+    this.options.virtualDragLineDom.classList.add('cherry-drag--hidden');
+    const { previewerDom } = this.options;
+    const editorDom = this.editor?.options?.editorDom;
+    if (isEditOnly) {
+      previewerDom.classList.add('cherry-previewer--hidden');
+      editorDom?.classList?.add('cherry-editor--full');
+      previewerDom.classList.remove('cherry-previewer--full');
+      editorDom?.classList?.remove('cherry-editor--hidden');
+    } else {
+      previewerDom.classList.add('cherry-previewer--full');
+      editorDom?.classList?.add('cherry-editor--hidden');
+      previewerDom.classList.remove('cherry-previewer--hidden');
+      editorDom?.classList?.remove('cherry-editor--full');
+      /**
+       * 如果是流式输出，并且没有开启预览区编辑，则需要移除不再需要的dom
+       *  这里针对流式输出的场景简单移除dom，是符合预期的
+       *  但这种精简dom的方案在需要switchModel时会有问题
+       */
+      if (this.$cherry.options.engine.global.flowSessionContext && !this.options.enablePreviewerBubble) {
+        editorDom?.remove();
+        this.$cherry.toolbar?.options?.dom?.remove();
+        this.$cherry.wrapperDom
+          .querySelectorAll(
+            '.cherry-dropdown,.cherry-drag,.cherry-editor-mask,.cherry-previewer-mask,.cherry-suggester-panel',
+          )
+          .forEach((dom) => dom.remove());
+      }
+    }
     let fullEditorLayout = {
       editorPercentage: '0%',
       previewerPercentage: '100%',
@@ -753,39 +838,8 @@ export default class Previewer {
         previewerPercentage: '0%',
       };
     }
-    const editorWidth = this.editor.options.editorDom.getBoundingClientRect().width;
-    const layout = this.calculateRealLayout(editorWidth);
-    this.options.previewerCache.layout = layout;
     this.setRealLayout(fullEditorLayout.editorPercentage, fullEditorLayout.previewerPercentage);
-    this.options.virtualDragLineDom.classList.add('cherry-drag--hidden');
-    const { previewerDom } = this.options;
-    const { editorDom } = this.editor.options;
-    if (isEditOnly) {
-      previewerDom.classList.add('cherry-previewer--hidden');
-      editorDom.classList.add('cherry-editor--full');
-      previewerDom.classList.remove('cherry-preview--full');
-      editorDom.classList.remove('cherry-editor--hidden');
-    } else {
-      previewerDom.classList.add('cherry-preview--full');
-      editorDom.classList.add('cherry-editor--hidden');
-      previewerDom.classList.remove('cherry-previewer--hidden');
-      editorDom.classList.remove('cherry-editor--full');
-      /**
-       * 如果是流式输出，并且没有开启预览区编辑，则需要移除不再需要的dom
-       *  这里针对流式输出的场景简单移除dom，是符合预期的
-       *  但这种精简dom的方案在需要switchModel时会有问题
-       */
-      if (this.$cherry.options.engine.global.flowSessionContext && !this.options.enablePreviewerBubble) {
-        editorDom.remove();
-        this.$cherry.toolbar.options.dom.remove();
-        this.$cherry.wrapperDom
-          .querySelectorAll(
-            '.cherry-dropdown,.cherry-drag,.cherry-editor-mask,.cherry-previewer-mask,.cherry-suggester-panel',
-          )
-          .forEach((dom) => dom.remove());
-      }
-    }
-    setTimeout(() => this.editor.editor.refresh(), 0);
+    setTimeout(() => this.editor?.editor?.refresh(), 0);
   }
 
   previewOnly() {
@@ -799,8 +853,6 @@ export default class Previewer {
   }
 
   editOnly() {
-    const html = this.options.previewerCache.html ? this.options.previewerCache.html : this.getDomContainer().innerHTML;
-    this.doHtmlCache(html);
     this.$dealEditAndPreviewOnly(true);
     this.$cherry.$event.emit('previewerClose');
     this.$cherry.$event.emit('editorOpen');
@@ -811,35 +863,44 @@ export default class Previewer {
       editorPercentage: '100%',
       previewerPercentage: '100%',
     };
-    const editorWidth = this.editor.options.editorDom.getBoundingClientRect().width;
-    const layout = this.calculateRealLayout(editorWidth);
-    this.options.previewerCache.layout = layout;
     this.setRealLayout(fullEditorLayout.editorPercentage, fullEditorLayout.previewerPercentage);
     this.options.virtualDragLineDom.classList.add('cherry-drag--hidden');
     this.$cherry.createFloatPreviewer();
   }
 
   recoverFloatPreviewer() {
-    this.recoverPreviewer(true);
+    this.editAndPreview();
     this.$cherry.clearFloatPreviewer();
   }
 
-  recoverPreviewer(dealToolbar = false) {
-    this.options.previewerDom.classList.remove('cherry-previewer--hidden');
+  /**
+   * @deprecated use editAndPreview instead
+   */
+  recoverPreviewer() {
+    this.editAndPreview();
+  }
+
+  $removeModelClass() {
+    this.editor?.options?.editorDom?.classList?.remove('cherry-editor--hidden', 'cherry-editor--full');
+    this.options.previewerDom.classList.remove('cherry-previewer--hidden', 'cherry-preview--full');
     this.options.virtualDragLineDom.classList.remove('cherry-drag--hidden');
-    this.editor.options.editorDom.classList.remove('cherry-editor--full');
+  }
+
+  // 切换成双栏模式
+  editAndPreview() {
+    this.$removeModelClass();
     // 恢复现场
     const { layout } = this.options.previewerCache;
-    this.setRealLayout(layout.editorPercentage, layout.previewerPercentage);
+    const { editorPercentage = '50%', previewerPercentage = '50%' } = layout;
+    this.setRealLayout(editorPercentage, previewerPercentage);
     if (this.options.previewerCache.htmlChanged) {
       this.update(this.options.previewerCache.html);
     }
-    this.cleanHtmlCache();
 
     this.$cherry.$event.emit('previewerOpen');
     this.$cherry.$event.emit('editorOpen');
 
-    setTimeout(() => this.editor.editor.refresh(), 0);
+    setTimeout(() => this.editor?.editor?.refresh(), 0);
   }
 
   doHtmlCache(html) {
@@ -850,7 +911,6 @@ export default class Previewer {
   cleanHtmlCache() {
     this.options.previewerCache.html = '';
     this.options.previewerCache.htmlChanged = false;
-    this.options.previewerCache.layout = {};
   }
 
   afterUpdate() {

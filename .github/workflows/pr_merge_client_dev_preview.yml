@@ -5,44 +5,56 @@ on:
     types: [closed]
     paths:
       - 'packages/client/**'
+      - 'packages/cherry-markdown/**'
+      - '!packages/cherry-markdown/test/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
   pull-requests: write
   actions: read
+  issues: write
 
 jobs:
   client-preview:
-    # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
+    # 不需要在 fork 仓库的pr中运行, 仅当 pr 合并时运行
     if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
+    name: client-${{ matrix.platform_name }}-${{ matrix.arch }}
     runs-on: ${{ matrix.platform }}
+    timeout-minutes: 60
     strategy:
       fail-fast: false
+      max-parallel: 4
       matrix:
         include:
           - platform: macos-latest
             target: aarch64-apple-darwin
+            platform_name: macos
+            arch: arm64
             args: '--target aarch64-apple-darwin'
-            path_patterns: |
-              ./packages/clientsrc-tauri/target/**/release/bundle/dmg/*.dmg
-              ./packages/clientsrc-tauri/target/**/release/bundle/macos/*.app
           - platform: macos-latest
             target: x86_64-apple-darwin
+            platform_name: macos
+            arch: x64
             args: '--target x86_64-apple-darwin'
-            path_patterns: |
-              ./packages/clientsrc-tauri/target/**/release/bundle/dmg/*.dmg
-              ./packages/clientsrc-tauri/target/**/release/bundle/macos/*.app
           - platform: windows-latest
-            path_patterns: |
-              ./packages/client/src-tauri/target/**/release/bundle/msi/*.msi
-              ./packages/client/src-tauri/target/**/release/bundle/nsis/*.exe
+            target: x86_64-pc-windows-msvc
+            platform_name: windows
+            arch: x64
+            args: '--target x86_64-pc-windows-msvc'
           - platform: ubuntu-latest
-            path_patterns: |
-              ./packages/client/src-tauri/target/**/release/bundle/appimage/*.AppImage
-              ./packages/client/src-tauri/target/**/release/bundle/deb/*.deb
+            target: x86_64-unknown-linux-gnu
+            platform_name: linux
+            arch: x64
+            args: '--target x86_64-unknown-linux-gnu'
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -56,9 +68,11 @@ jobs:
           target: ${{ matrix.target }}
           toolchain: stable
 
-      - name: Ensure x86_64 Target is Installed
-        if: matrix.target == 'x86_64-apple-darwin'
-        run: rustup target add x86_64-apple-darwin
+      - name: Cache Rust Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/client/src-tauri -> target
+          save-if: false # PR Preview 只读(main)缓存，不保存新缓存
 
       - name: Install Linux Dependencies
         if: matrix.platform == 'ubuntu-latest'
@@ -66,44 +80,261 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: Build Tauri
+      - name: Get Version
+        id: version
+        shell: bash
         run: |
-          yarn --network-timeout 100000
-          yarn build
-          yarn build:client ${{ matrix.args }}
+          VERSION=$(node -p "require('./packages/client/package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
 
-      - name: Upload Files
-        id: upload-artifact
+      - name: Install Dependencies
+        run: yarn --network-timeout 100000
+
+      - name: Build Cherry Markdown
+        run: yarn build
+
+      - name: Build Tauri Client
+        run: yarn build:client ${{ matrix.args }}
+
+      - name: Collect and Upload Artifacts
+        id: artifacts
+        shell: bash
+        run: |
+          mkdir -p ./artifact-info
+          VERSION="${{ steps.version.outputs.version }}"
+          PLATFORM="${{ matrix.platform_name }}"
+          ARCH="${{ matrix.arch }}"
+          TARGET="${{ matrix.target }}"
+          TARGET_DIR="./packages/client/src-tauri/target/$TARGET/release/bundle"
+
+          # 创建产物信息文件
+          echo "version=$VERSION" > ./artifact-info/build-info.txt
+          echo "platform=$PLATFORM" >> ./artifact-info/build-info.txt
+          echo "arch=$ARCH" >> ./artifact-info/build-info.txt
+          echo "target=$TARGET" >> ./artifact-info/build-info.txt
+
+          # 收集所有产物文件名
+          > ./artifact-info/files.txt
+          if [ -d "$TARGET_DIR" ]; then
+            find "$TARGET_DIR" -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" \) | while read file; do
+              basename "$file" >> ./artifact-info/files.txt
+            done
+            find "$TARGET_DIR" -type d -name "*.app" | while read dir; do
+              basename "$dir" >> ./artifact-info/files.txt
+            done
+          fi
+
+          echo "Build Info:"
+          cat ./artifact-info/build-info.txt
+          echo "Artifacts:"
+          cat ./artifact-info/files.txt
+
+      # macOS: 上传 DMG
+      - name: Upload DMG
+        if: matrix.platform_name == 'macos'
         uses: actions/upload-artifact@v4
         with:
-          name: cherry-markdown_client_${{ matrix.platform }}
-          path: ${{ matrix.path_patterns }}
-      - name: Artifact Commit
-        run: |
-          echo "Artifact URL: ${{ steps.upload-artifact.outputs.artifact-url }}"
+          name: cherry-markdown-${{ steps.version.outputs.version }}-${{ matrix.platform_name }}-${{ matrix.arch }}-dmg
+          path: ./packages/client/src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
+          retention-days: 7
+          if-no-files-found: error
 
-      - name: Extract package info
-        id: extract-package
-        run: |
-          $name = node -p "require('./packages/client/package.json').name"
-          $version = node -p "require('./packages/client/package.json').version"
-          "name=$name" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-        shell: pwsh
+      # macOS: 上传 App
+      - name: Upload App
+        if: matrix.platform_name == 'macos'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cherry-markdown-${{ steps.version.outputs.version }}-${{ matrix.platform_name }}-${{ matrix.arch }}-app
+          path: ./packages/client/src-tauri/target/${{ matrix.target }}/release/bundle/macos/*.app
+          retention-days: 7
+          if-no-files-found: error
 
-      - name: Post Artifact URL to PR
-        uses: actions/github-script@v6
-        env:
-          ARTIFACT_URL: ${{ steps.upload-artifact.outputs.artifact-url }}
-          NAME: ${{ steps.extract-package.outputs.name }}
-          VERSION: ${{ steps.extract-package.outputs.version }}
-          PLATFORM: ${{ matrix.platform }}
+      # Windows: 上传 MSI
+      - name: Upload MSI
+        if: matrix.platform_name == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cherry-markdown-${{ steps.version.outputs.version }}-${{ matrix.platform_name }}-${{ matrix.arch }}-msi
+          path: ./packages/client/src-tauri/target/${{ matrix.target }}/release/bundle/msi/*.msi
+          retention-days: 7
+          if-no-files-found: error
+
+      # Windows: 上传 NSIS Exe
+      - name: Upload NSIS Installer
+        if: matrix.platform_name == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cherry-markdown-${{ steps.version.outputs.version }}-${{ matrix.platform_name }}-${{ matrix.arch }}-exe
+          path: ./packages/client/src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*.exe
+          retention-days: 7
+          if-no-files-found: error
+
+      # Linux: 上传 AppImage
+      - name: Upload AppImage
+        if: matrix.platform_name == 'linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cherry-markdown-${{ steps.version.outputs.version }}-${{ matrix.platform_name }}-${{ matrix.arch }}-appimage
+          path: ./packages/client/src-tauri/target/${{ matrix.target }}/release/bundle/appimage/*.AppImage
+          retention-days: 7
+          if-no-files-found: error
+
+      # Linux: 上传 Deb
+      - name: Upload Deb
+        if: matrix.platform_name == 'linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cherry-markdown-${{ steps.version.outputs.version }}-${{ matrix.platform_name }}-${{ matrix.arch }}-deb
+          path: ./packages/client/src-tauri/target/${{ matrix.target }}/release/bundle/deb/*.deb
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Upload Artifact Info
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-info-${{ matrix.platform_name }}-${{ matrix.arch }}
+          path: ./artifact-info/
+          retention-days: 7
+
+  post-preview-comment:
+    needs: client-preview
+    runs-on: ubuntu-latest
+    if: github.repository == 'Tencent/cherry-markdown'
+    steps:
+      - name: Download All Artifact Info
+        uses: actions/download-artifact@v4
+        with:
+          pattern: artifact-info-*
+          path: ./artifact-info
+
+      - name: Generate PR Comment with Cherry-Markdown Artifacts
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `📦 预览 (Preview) [${process.env.NAME}_${process.env.PLATFORM}@${process.env.VERSION}](${process.env.ARTIFACT_URL})`
+            const fs = require('fs');
+            const path = require('path');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const runId = context.runId;
+            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
+
+            // 获取本次 workflow run 的所有 artifacts
+            const { data: artifactList } = await github.rest.actions.listWorkflowRunArtifacts({
+              owner,
+              repo,
+              run_id: runId
             });
+
+            // 构建 artifact 名称到下载链接的映射
+            const artifactDownloadUrls = {};
+            for (const artifact of artifactList.artifacts) {
+              artifactDownloadUrls[artifact.name] = `https://github.com/${owner}/${repo}/actions/runs/${runId}/artifacts/${artifact.id}`;
+            }
+
+            // 读取构建信息
+            const artifactInfoDir = './artifact-info';
+            const buildInfos = [];
+
+            if (fs.existsSync(artifactInfoDir)) {
+              const dirs = fs.readdirSync(artifactInfoDir);
+              
+              for (const dir of dirs) {
+                const buildInfoPath = path.join(artifactInfoDir, dir, 'build-info.txt');
+                
+                if (fs.existsSync(buildInfoPath)) {
+                  const buildInfo = {};
+                  const buildInfoContent = fs.readFileSync(buildInfoPath, 'utf8');
+                  buildInfoContent.split('\n').forEach(line => {
+                    const [key, value] = line.split('=');
+                    if (key && value) {
+                      buildInfo[key.trim()] = value.trim();
+                    }
+                  });
+                  buildInfos.push(buildInfo);
+                }
+              }
+            }
+
+            // 生成评论内容
+            let body = '## 💻 Cherry-Markdown Client 预览构建已完成\n\n';
+
+            if (buildInfos.length === 0) {
+              body += '> ⚠️ 未找到构建产物，请检查构建日志。\n\n';
+              body += `[查看构建详情](${runUrl})\n`;
+            } else {
+              const version = buildInfos[0]?.version || 'unknown';
+              
+              // 定义产物类型映射
+              const artifactTypes = {
+                'macos': [
+                  { suffix: 'dmg', label: 'DMG 安装包' },
+                  { suffix: 'app', label: 'App 应用' }
+                ],
+                'windows': [
+                  { suffix: 'msi', label: 'MSI 安装包' },
+                  { suffix: 'exe', label: 'EXE 安装程序' }
+                ],
+                'linux': [
+                  { suffix: 'appimage', label: 'AppImage' },
+                  { suffix: 'deb', label: 'Deb 包' }
+                ]
+              };
+
+              // 按平台分组
+              const platformOrder = ['macOS', 'Windows', 'Linux'];
+              const platformMap = { 'macos': 'macOS', 'windows': 'Windows', 'linux': 'Linux' };
+              
+              // 生成表格
+              body += '| 平台 | 架构 | 产物类型 | 下载 |\n';
+              body += '|------|------|----------|------|\n';
+              
+              for (const info of buildInfos) {
+                const platform = info.platform;
+                const arch = info.arch;
+                const platformLabel = platformMap[platform] || platform;
+                const archLabel = arch === 'arm64' ? 'Apple Silicon' : 'x64';
+                const types = artifactTypes[platform] || [];
+                
+                for (const type of types) {
+                  const artifactName = `cherry-markdown-${version}-${platform}-${arch}-${type.suffix}`;
+                  const downloadUrl = artifactDownloadUrls[artifactName] || `${runUrl}`;
+                  body += `| ${platformLabel} | ${archLabel} | ${type.label} | [下载](${downloadUrl}) |\n`;
+                }
+              }
+              
+              body += `\n> 📋 版本: \`${version}\` | ⏰ 产物保留 7 天 | [查看所有构建产物](${runUrl})\n`;
+            }
+
+            // 查找现有的 Cherry-Markdown Client 预览构建评论
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: owner,
+              repo: repo
+            });
+
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('💻 Cherry-Markdown Client 预览构建')
+            );
+
+            if (botComment) {
+              // 更新现有评论
+              await github.rest.issues.updateComment({
+                comment_id: botComment.id,
+                owner: owner,
+                repo: repo,
+                body: body
+              });
+              console.log(`Updated existing comment: ${botComment.id}`);
+            } else {
+              // 创建新评论
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: owner,
+                repo: repo,
+                body: body
+              });
+              console.log('Created new comment');
+            }

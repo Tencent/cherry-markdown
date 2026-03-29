@@ -1,33 +1,13 @@
 use tauri::{
     menu::{Menu, MenuItem},
-    tray::TrayIconBuilder,
-    App,
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+    App, Manager,
 };
-
-use crate::utils::i18n::Language;
 
 use crate::utils::base::restore_and_focus_window;
 
 pub fn system_tray_menu(app: &mut App) -> Result<(), tauri::Error> {
-    let lang_str = "en".to_string();
-    let language = Language::new();
-
-    let quit = MenuItem::with_id(
-        app,
-        "quit",
-        language.quit.get_lang(&lang_str),
-        true,
-        None::<&str>,
-    )?;
-
-    // todo
-    // let language = MenuItem::with_id(
-    //     app,
-    //     "language",
-    //     language.language.get_lang(&lang_str),
-    //     true,
-    //     None::<&str>,
-    // )?;
+    let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
 
     let system_menu = Menu::with_items(app, &[&quit])?;
 
@@ -37,11 +17,27 @@ pub fn system_tray_menu(app: &mut App) -> Result<(), tauri::Error> {
         .icon(app.default_window_icon().unwrap().clone())
         .build(app)?;
 
-    system_tray.on_menu_event(move |app_handle, event| match event.id.as_ref() {
-        "show_main_window" => {
-            println!("show_main_window");
-            restore_and_focus_window(app_handle, "main");
+    system_tray.on_tray_icon_event(|tray, event| {
+        if let TrayIconEvent::Click {
+            button: MouseButton::Left,
+            button_state: MouseButtonState::Up,
+            ..
+        } = event
+        {
+            if let Some(window) = tray.app_handle().get_webview_window("main") {
+                let is_minimized = window.is_minimized().unwrap_or(false);
+                let is_visible = window.is_visible().unwrap_or(true);
+
+                if is_minimized || !is_visible {
+                    restore_and_focus_window(&tray.app_handle(), "main");
+                } else {
+                    let _ = window.hide();
+                }
+            }
         }
+    });
+
+    system_tray.on_menu_event(move |app_handle, event| match event.id.as_ref() {
         "quit" => {
             app_handle.exit(0);
         }

@@ -183,7 +183,7 @@ export default class MermaidCodeEngine {
         // 屏蔽转img标签功能，如需要转换为img解除屏蔽即可
         if (this.svg2img) {
           const dataUrl = `data:image/svg+xml,${encodeURIComponent(svgDoc.documentElement.outerHTML)}`;
-          svgHtml = `<img class="svg-img" src="${dataUrl}" alt="${graphId}" />`;
+          svgHtml = `<img class="svg-img" style="max-width:100%;height:auto;" src="${dataUrl}" alt="${graphId}" />`;
         }
       } else {
         svgHtml = injectSvgFallback(svgCode);
