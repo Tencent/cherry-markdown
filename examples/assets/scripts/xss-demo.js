@@ -16,7 +16,7 @@
  * 生成演示用 markdown 内容
  * @param {string} instanceId - Cherry 实例容器 ID，用于限定 <style> 作用域
  */
-function createXssDemoMarkdown(instanceId) {
+function createXssDemoMarkdown(instanceClass) {
   return `\
 # htmlWhiteList 效果演示
 
@@ -27,11 +27,11 @@ function createXssDemoMarkdown(instanceId) {
 通过 \`<style>\` 注入自定义样式，改变引用块的边框和背景色：
 
 <style>
-#${instanceId} blockquote {
+.${instanceClass} blockquote {
   border-left-color: #e53935 !important;
   background: #ffebee !important;
 }
-#${instanceId} h2 {
+.${instanceClass} h2 {
   color: #e53935 !important;
 }
 </style>
@@ -97,7 +97,7 @@ const xssConfig1 = {
   editor: {
     height: '100%',
   },
-  value: createXssDemoMarkdown('markdown-default'),
+  value: createXssDemoMarkdown('compare-panel__default'),
 };
 
 /**
@@ -135,7 +135,7 @@ const xssConfig2 = {
   editor: {
     height: '100%',
   },
-  value: createXssDemoMarkdown('markdown-whitelist'),
+  value: createXssDemoMarkdown('compare-panel__whitelist'),
 };
 
 export { xssConfig1, xssConfig2 };
