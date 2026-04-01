@@ -1218,10 +1218,8 @@ export default class Cherry extends CherryStatic {
    */
   clearFlowSessionCursor() {
     if (this.options.engine.global.flowSessionCursor) {
-      this.previewer.getDom().innerHTML = this.previewer
-        .getDom()
-        // @ts-ignore
-        .innerHTML.replaceAll(this.options.engine.global.flowSessionCursor, '');
+      const html = this.engine.makeHtml(this.getValue(), 'string', true);
+      this.previewer.update(html);
     }
   }
 }

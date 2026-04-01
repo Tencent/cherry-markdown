@@ -410,7 +410,10 @@ export default class Engine {
    * @param {string} md 内容
    * @returns {string}
    */
-  $setFlowSessionCursorCache(md) {
+  $setFlowSessionCursorCache(md, forceNoCursor = false) {
+    if (forceNoCursor) {
+      return md;
+    }
     if (this.$cherry.options.engine.global.flowSessionContext && this.$cherry.options.engine.global.flowSessionCursor) {
       // 为了不破坏加粗、斜体等语法，光标占位符放在加粗、斜体语法后面
       if (/[*_~^]+\n*$/.test(md)) {
@@ -466,11 +469,12 @@ export default class Engine {
   /**
    * @param {string} md md字符串
    * @param {'string'|'object'} returnType 返回格式，string：返回html字符串，object：返回结构化数据
+   * @param {boolean} forceNoCursor 是否强制不添加光标占位
    * @returns {string|object} 获取html
    */
-  makeHtml(md, returnType = 'string') {
+  makeHtml(md, returnType = 'string', forceNoCursor = false) {
     this.$prepareMakeHtml(md);
-    let $md = this.$setFlowSessionCursorCache(md);
+    let $md = this.$setFlowSessionCursorCache(md, forceNoCursor);
     $md = this.$cacheBigData($md);
     $md = this.$beforeMakeHtml($md);
     $md = this.$dealParagraph($md);

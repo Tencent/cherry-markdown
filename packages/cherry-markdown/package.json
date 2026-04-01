@@ -25,6 +25,7 @@
   ],
   "scripts": {
     "iconfont": "gulp",
+    "dev": "vite",
     "dev:vite": "vite",
     "build": "run-s clean build:all",
     "build:all": "run-p iconfont build:styles build:types build:addons build:full build:core build:engine build:stream",
