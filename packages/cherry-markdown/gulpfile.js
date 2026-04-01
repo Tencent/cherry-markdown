@@ -1,73 +1,71 @@
-import async from 'async';
-import gulp from 'gulp';
+import { src, dest } from 'gulp';
 import iconfont from 'gulp-iconfont';
-import rename from 'gulp-rename';
-import fs from 'fs';
-import path from 'path';
 import consolidate from 'gulp-consolidate';
-const runTimestamp = Math.round(Date.now() / 1000);
+import rename from 'gulp-rename';
+import convertStrokeToFill from 'oslllo-svg-fixer';
+import { resolve, dirname } from 'path';
+import { existsSync, mkdirSync, rmSync } from 'fs';
+import { fileURLToPath } from 'url';
 
-gulp.task('default', function (done) {
-  let lastUnicode = 0xea01; // 59905
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-  // Read source directory and sort by name
-  const files = fs.readdirSync('src/sass/icons');
+const SVG_SOURCE_DIR = resolve(__dirname, 'src/sass/icons');
+const SVG_CONVERTED_DIR = resolve(__dirname, 'src/sass/icons-converted');
+const FONT_OUTPUT_DIR = resolve(__dirname, 'dist/fonts');
 
-  // Filter files with containing unicode value
-  // and set last unicode
-  files.forEach(function (file) {
-    const basename = path.basename(file);
-    const matches = basename.match(/^(?:((?:u[0-9a-f]{4,6},?)+)-)?(.+)\.svg$/i);
-    let currentCode = -1;
+/**
+ * 生成图标字体
+ *
+ * 流程：
+ * 1. oslllo-svg-fixer：stroke → fill（iconfont 仅支持 fill path）
+ * 2. gulp-iconfont：生成字体文件
+ * 3. gulp-consolidate：通过模板生成 SCSS
+ */
+export default async function generateIconFont(done) {
+  try {
+    // stroke → fill，源目录 → 临时目录
+    mkdirSync(SVG_CONVERTED_DIR, { recursive: true });
+    await convertStrokeToFill(SVG_SOURCE_DIR, SVG_CONVERTED_DIR, {
+      showProgressBar: true,
+    }).fix();
 
-    if (matches && matches[1]) {
-      currentCode = parseInt(matches[1].split('u')[1], 16);
+    // 生成字体 + SCSS
+    src(`${SVG_CONVERTED_DIR}/*.svg`)
+      .pipe(
+        iconfont({
+          fontName: 'ch-icon',
+          prependUnicode: true,
+          formats: ['ttf', 'eot', 'woff', 'woff2', 'svg'],
+          timestamp: Math.round(Date.now() / 1000),
+          normalize: true,
+          fontHeight: 1024,
+          descent: 128,
+          centerHorizontally: true,
+        }),
+      )
+      .on('glyphs', (glyphs) => {
+        src('src/sass/icon_template.scss')
+          .pipe(
+            consolidate('lodash', {
+              glyphs,
+              fontName: 'ch-icon',
+              fontPath: './fonts/',
+              className: 'ch-icon',
+            }),
+          )
+          .pipe(rename({ basename: 'ch-icon' }))
+          .pipe(dest('src/sass/'));
+      })
+      .pipe(dest(FONT_OUTPUT_DIR))
+      .on('finish', () => {
+        rmSync(SVG_CONVERTED_DIR, { recursive: true, force: true });
+        done();
+      });
+  } catch (err) {
+    console.error('图标字体生成失败:', err);
+    if (existsSync(SVG_CONVERTED_DIR)) {
+      rmSync(SVG_CONVERTED_DIR, { recursive: true, force: true });
     }
-
-    if (currentCode >= lastUnicode) {
-      currentCode += 1;
-      lastUnicode = currentCode;
-    }
-  });
-
-  const iconStream = gulp.src(['src/sass/icons/*.svg']).pipe(
-    iconfont({
-      startUnicode: lastUnicode,
-      fontName: 'ch-icon', // required
-      prependUnicode: true, // recommended option
-      formats: ['ttf', 'eot', 'woff', 'woff2', 'svg'], // default, 'woff2' and 'svg' are available
-      timestamp: runTimestamp, // recommended to get consistent builds when watching files
-      normalize: true,
-    }),
-  );
-
-  async.parallel(
-    [
-      function handleGlyphs(cb) {
-        iconStream.on('glyphs', function (glyphs, options) {
-          gulp
-            .src('src/sass/icon_template.scss')
-            .pipe(
-              consolidate('lodash', {
-                glyphs,
-                fontName: 'ch-icon',
-                fontPath: './fonts/',
-                className: 'ch-icon',
-              }),
-            )
-            .pipe(
-              rename(function (path) {
-                path.basename = 'ch-icon';
-              }),
-            )
-            .pipe(gulp.dest('src/sass/'))
-            .on('finish', cb);
-        });
-      },
-      function handleFonts(cb) {
-        iconStream.pipe(gulp.dest('dist/fonts/')).on('finish', cb);
-      },
-    ],
-    done,
-  );
-});
+    done(err);
+  }
+}
