@@ -1567,24 +1567,30 @@
     width: 30px;
     height: calc(100% - 200px);
     max-height: 600px;
-    background: #ffffff00;
+    background: transparent;
     box-shadow: none;
     border-radius: 0;
+
     .cherry-toc-head {
       height: 25px;
-      border-bottom: 1px dashed #33333300;
+      border-bottom: 1px dashed transparent;
+
       .cherry-toc-title {
         display: none;
       }
+
       .ch-icon-chevronsRight {
         display: none;
       }
+
       .ch-icon-chevronsLeft {
         display: inline;
       }
     }
+
     .cherry-toc-list {
       padding-left: 7px;
+
       .cherry-toc-one-a {
         overflow: hidden;
         width: 0;
