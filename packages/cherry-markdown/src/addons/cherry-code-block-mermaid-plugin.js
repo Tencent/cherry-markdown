@@ -239,7 +239,8 @@ export default class MermaidCodeEngine {
       placeholderList?.forEach((placeholder) => {
         if (isToolbarMode) {
           // showSourceToolbar 模式：仅替换预览面板内容，保留工具栏和源码面板
-          const previewPanel = placeholder.parentElement?.closest?.('figure[data-type="mermaid"]')
+          const previewPanel = placeholder.parentElement
+            ?.closest?.('figure[data-type="mermaid"]')
             ?.querySelector('.cherry-mermaid-source-toolbar-panel[data-mode="preview"]');
           if (previewPanel) {
             previewPanel.innerHTML = html;
