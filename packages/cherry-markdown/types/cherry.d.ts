@@ -674,6 +674,7 @@ export type CherryDefaultToolbar =
   | 'image'
   | 'insert'
   | 'italic'
+  // @deprecated 使用 `align` 代替
   | 'justify'
   | 'line-table'
   | 'link'

@@ -99,7 +99,7 @@ export default {
   detail: 'Detail',
   complement: 'Complement',
   summary: 'Summary',
-  justify: 'justify',
+  justify: 'Justify',
   justifyLeft: 'Left',
   justifyCenter: 'Center',
   justifyRight: 'Right',

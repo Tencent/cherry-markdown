@@ -12502,6 +12502,11 @@ tar@^6.1.11, tar@^6.1.2:
     mkdirp "^1.0.3"
     yallist "^4.0.0"
 
+tdesign-icons-svg@^0.4.2:
+  version "0.4.2"
+  resolved "https://registry.npmjs.org/tdesign-icons-svg/-/tdesign-icons-svg-0.4.2.tgz#65c6f12832eb96e4560afd03c64834780e6be38a"
+  integrity sha512-vlrX01tg/CSJKGz73EAikoNI6ePmuPDFIDWRIFq6M8CZ+dUTypBlayChCl6wNnS+XvIcrR8950bMChUCiVHUyw==
+
 teex@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/teex/-/teex-1.0.1.tgz"
