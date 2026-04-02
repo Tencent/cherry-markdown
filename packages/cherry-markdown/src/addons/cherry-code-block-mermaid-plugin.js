@@ -233,14 +233,28 @@ export default class MermaidCodeEngine {
   handleAsyncRenderDone(graphId, sign, $engine, props, html) {
     props.updateCache(html);
     const container = $engine.$cherry.wrapperDom || document.body;
+    const isToolbarMode = props.showSourceToolbar;
     if (isBrowser()) {
       const placeholderList = container.querySelectorAll(`[data-sign="${sign}"][data-type="codeBlock"]`);
       placeholderList?.forEach((placeholder) => {
+        if (isToolbarMode) {
+          // showSourceToolbar 模式：仅替换预览面板内容，保留工具栏和源码面板
+          const previewPanel = placeholder.parentElement?.closest?.('figure[data-type="mermaid"]')
+            ?.querySelector('.cherry-mermaid-source-toolbar-panel[data-mode="preview"]');
+          if (previewPanel) {
+            previewPanel.innerHTML = html;
+            return;
+          }
+        }
         placeholder.parentElement.innerHTML = html;
       });
     }
     $engine.asyncRenderHandler.done(graphId, {
       replacer: (md) => {
+        if (isToolbarMode) {
+          // toolbar 模式下 updateCache 已通过 pushCache 更新了缓存占位符，无需额外字符串替换
+          return md;
+        }
         const regex = new RegExp(`<div data-sign="${sign}" data-type="codeBlock"[^>]*>.*?<\\/div>`, 'g');
         return md.replace(regex, html);
       },

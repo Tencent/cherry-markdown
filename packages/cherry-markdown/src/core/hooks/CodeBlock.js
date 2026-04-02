@@ -129,30 +129,63 @@ export default class CodeBlock extends ParagraphBase {
     const sizeStyle = props.mermaidSizeAttrs ? ` style="${props.mermaidSizeAttrs}"` : '';
     const alignClass = props.mermaidAlignClass ? ` class="${props.mermaidAlignClass}"` : '';
     const escapedLang = escapeHTMLSpecialChar(lang);
+    const showSourceToolbar = lang === 'mermaid' && this.mermaid && this.mermaid.showSourceToolbar;
+    // 提前计算源码 HTML 并缓存，避免每次 addContainer/updateCache 调用时重复生成
+    const $codeSrc = this.needCleanFlowCursor ? codeSrc.replace(/CHERRYFLOWSESSIONCURSOR/, '') : codeSrc;
+    const cachedSourceHtml = showSourceToolbar ? this.$codeReplace($codeSrc, lang, props.sign, props.lines) : '';
+    const containerAttrs = { tag, escapedLang, props, sizeStyle, alignClass };
     const addContainer = (html) => {
+      if (showSourceToolbar) {
+        return this.$buildMermaidSourceToolbarContainer(containerAttrs, html, cachedSourceHtml);
+      }
       return `<${tag} data-sign="${props.sign}" data-type="${escapedLang}" data-lines="${props.lines}"${sizeStyle}${alignClass}>${html}</${tag}>`;
     };
     let html = '';
-    const $codeSrc = this.needCleanFlowCursor ? codeSrc.replace(/CHERRYFLOWSESSIONCURSOR/, '') : codeSrc;
     if (lang === 'all') {
       html = engine.render($codeSrc, props.sign, this.$engine, props.lang);
     } else {
       html = engine.render($codeSrc, props.sign, this.$engine, {
         mermaidConfig: this.mermaid,
+        showSourceToolbar,
         updateCache: (cacheCode) => {
-          this.$codeCache(props.sign, addContainer(cacheCode));
-          this.pushCache(addContainer(cacheCode), props.sign, props.lines);
+          const containerHtml = addContainer(cacheCode);
+          this.$codeCache(props.sign, containerHtml);
+          this.pushCache(containerHtml, props.sign, props.lines);
         },
-        fallback: () => {
-          const $code = this.$codeReplace($codeSrc, lang, props.sign, props.lines);
-          return $code;
-        },
+        fallback: () => this.$codeReplace($codeSrc, lang, props.sign, props.lines),
       });
     }
     if (!html) {
       return false;
     }
     return addContainer(html);
+  }
+
+  /**
+   * 构建带有源码/预览切换工具栏的 mermaid 容器
+   * @param {object} attrs 容器属性 { tag, escapedLang, props, sizeStyle, alignClass }
+   * @param {string} previewHtml 预览区的 HTML 内容
+   * @param {string} sourceCodeHtml 源码区的 HTML 内容（已预先生成）
+   * @returns {string} 带工具栏的完整 HTML
+   */
+  $buildMermaidSourceToolbarContainer(attrs, previewHtml, sourceCodeHtml) {
+    const { tag, escapedLang, props, sizeStyle, alignClass } = attrs;
+    const locale = this.$cherry.getLocales();
+    const previewText = locale.mermaidPreview || 'Preview';
+    const sourceText = locale.mermaidSource || 'Source';
+    // header 区域
+    const header = `<div class="cherry-mermaid-source-toolbar">`
+      + `<div class="cherry-mermaid-source-toolbar-switch">`
+      + `<div class="cherry-mermaid-source-toolbar-tab active" data-mode="preview">${previewText}</div>`
+      + `<div class="cherry-mermaid-source-toolbar-tab" data-mode="source">${sourceText}</div>`
+      + `<div class="cherry-mermaid-source-toolbar-slider"></div>`
+      + `</div>`
+      + `</div>`;
+    // 内容区域：各面板通过 data-mode 与 tab 关联
+    const body = `<div class="cherry-mermaid-source-toolbar-panel active" data-mode="preview">${previewHtml}</div>`
+      + `<div class="cherry-mermaid-source-toolbar-panel" data-mode="source">${sourceCodeHtml}</div>`;
+    return `<${tag} data-sign="${props.sign}" data-type="${escapedLang}" data-lines="${props.lines}"${sizeStyle}${alignClass}>`
+      + header + body + `</${tag}>`;
   }
 
   // 修复渲染行号时打散的标签

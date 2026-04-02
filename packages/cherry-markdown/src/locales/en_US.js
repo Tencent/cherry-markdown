@@ -212,4 +212,6 @@ export default {
   minValue: 'Min value',
   high: 'High',
   low: 'Low',
+  mermaidSource: 'Source',
+  mermaidPreview: 'Preview',
 };

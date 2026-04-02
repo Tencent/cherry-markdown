@@ -396,6 +396,12 @@ export default class PreviewerBubble {
     }
 
     // ========== 以下是只读交互功能，不受 enablePreviewerBubble 配置影响 ==========
+    // mermaid 源码/预览切换工具栏（只读功能，不需要编辑器）
+    if (target.classList && target.classList.contains('cherry-mermaid-source-toolbar-tab')) {
+      this.$handleMermaidSourceToolbarClick(target);
+      return;
+    }
+
     // 公式工具栏（输出图片/代码等是只读功能，不需要编辑器）
     if (target.tagName === 'svg' && target?.parentElement?.tagName === 'MJX-CONTAINER') {
       this.$removeAllPreviewerBubbles('click'); // 先移除旧的 click bubble
@@ -1113,6 +1119,40 @@ export default class PreviewerBubble {
         return;
     }
     this.changeMermaidValue();
+  }
+
+  /**
+   * 处理 mermaid 源码/预览切换工具栏的点击
+   * @param {Element} tabElement 被点击的 tab 元素
+   */
+  $handleMermaidSourceToolbarClick(tabElement) {
+    const mode = tabElement.getAttribute('data-mode');
+    const figure = tabElement.closest('figure[data-type="mermaid"]');
+    if (!figure || !mode) return;
+
+    const switchContainer = tabElement.parentElement;
+    const slider = /** @type {HTMLElement} */ (switchContainer?.querySelector('.cherry-mermaid-source-toolbar-slider'));
+    const tabs = switchContainer?.querySelectorAll('.cherry-mermaid-source-toolbar-tab');
+    const panels = figure.querySelectorAll('.cherry-mermaid-source-toolbar-panel');
+
+    if (!slider || !tabs || !panels.length) return;
+
+    // 切换 tab active 状态
+    tabs.forEach((tab) => tab.classList.remove('active'));
+    tabElement.classList.add('active');
+
+    // 切换 panel 显隐：active 的 panel 显示，其余隐藏
+    panels.forEach((panel) => {
+      if (panel.getAttribute('data-mode') === mode) {
+        panel.classList.add('active');
+      } else {
+        panel.classList.remove('active');
+      }
+    });
+
+    // 滑块位置：tab 宽度 60px + 间距 3px = 63px 步进，与 SCSS 中 .cherry-mermaid-source-toolbar-tab 的定位一致
+    const tabIndex = Array.from(tabs).indexOf(tabElement);
+    slider.style.left = `${2 + tabIndex * 63}px`;
   }
 
   $showBorderBubbles() {}
