@@ -72,15 +72,11 @@
 
   /* 目录区域样式 */
   .cherry-flex-toc {
-    &:hover {
-      background-color: var(--oc-gray-4);
-      width: 260px;
-    }
 
     .cherry-toc-head {
       i {
         &:hover {
-          color: var(--primary-color);
+          color: var(--oc-orange-8);
         }
       }
     }
@@ -102,32 +98,10 @@
     }
 
     &.cherry-flex-toc__pure {
-      box-shadow: none;
 
       .cherry-toc-head {
-        .cherry-toc-title {
-          display: none;
-        }
-
-        .ch-icon-chevronsRight {
-          display: none;
-        }
-
         .ch-icon-chevronsLeft {
-          display: inline;
           color: var(--oc-orange-6);
-        }
-      }
-
-      .cherry-toc-list {
-        padding-left: 7px;
-
-        .cherry-toc-one-a {
-          overflow: hidden;
-          width: 0;
-          margin-bottom: 3px;
-          height: 5px;
-          border-left-width: 18px;
         }
       }
     }
@@ -231,4 +205,3 @@
   --panel-success-body-bg: linear-gradient(145deg, rgba(34, 197, 94, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
   --panel-success-body-color: var(--oc-green-3);
 }
-
