@@ -929,6 +929,11 @@
 .cherry-previewer-codeBlock-click-handler {
   position: absolute;
   z-index: 1;
+  .cm-editor {
+    font-family: var(--font-family-sans);
+    background-color: var(--base-editor-bg);
+    color: var(--base-font-color);
+  }
 }
 
 .cherry-mask-code-block {
