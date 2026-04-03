@@ -263,7 +263,8 @@
       height: 45px;
       line-height: 45px;
       position: relative;
-      background-color: #ebecef;
+      background-color: transparent;
+      backdrop-filter: brightness(0.96);  // 让下层变暗 4%，不改变色调
       border-radius: 4px 4px 0 0;
     }
 
@@ -274,7 +275,7 @@
       width: 127px;
       height: 35px;
       line-height: 35px;
-      background-color: #dfe0e2;
+      background-color: var(--mermaid-toolbar-switch-bg);
       border-radius: 8px;
     }
 
@@ -290,7 +291,7 @@
       background-color: transparent;
       cursor: pointer;
       font-size: 13px;
-      color: var(--base-text-color, #333);
+      color: var(--mermaid-toolbar-tab-color);
       user-select: none;
       white-space: nowrap;
 
@@ -301,12 +302,17 @@
       &:nth-child(2) {
         left: 65px;
       }
+
+      // active 状态：在亮色 slider 上显示深色文字
+      &.active {
+        color: var(--mermaid-toolbar-tab-active-color);
+      }
     }
 
     .cherry-mermaid-source-toolbar-slider {
       position: absolute;
       border-radius: 8px;
-      background-color: #fff;
+      background-color: var(--mermaid-toolbar-slider-bg);
       height: 30px;
       left: 2px;
       top: 2px;
@@ -336,9 +342,8 @@
       width: auto;
       max-width: 100%;
       overflow: hidden;
-      border: 2px solid #ebecef;
+      border: 1px solid var(--mermaid-container-border);
       border-radius: 4px;
-      background-color: #ebecef;
     }
   }
 

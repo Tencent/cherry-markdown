@@ -75,10 +75,14 @@
   --accordion-body-border: var(--oc-blue-5);
   --accordion-body-color: var(--base-font-color);
 
+  /* ========== Mermaid 工具栏变量覆盖 ========== */
+  --mermaid-toolbar-slider-bg: rgba(255, 255, 255, 0.15);
+  --mermaid-toolbar-tab-active-color: #fff;
+
   /* ========== 其余单个组件 ========== */
   --drag-border-color: #3a4453;
 
-    /* ========== Panel 相关变量 ========== */
+  /* ========== Panel 相关变量 ========== */
   --panel-border-radius: 16px;
   --panel-bg: linear-gradient(145deg, #2a2a2a 0%, #1e1e1e 100%);
   --panel-border: 1px solid rgba(109, 40, 217, 0.2);

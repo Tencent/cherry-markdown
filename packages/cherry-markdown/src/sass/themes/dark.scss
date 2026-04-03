@@ -70,6 +70,10 @@
   --accordion-body-border: var(--oc-gray-6);
   --accordion-body-color: var(--oc-gray-4);
 
+  /* ========== Mermaid 工具栏变量覆盖 ========== */
+  --mermaid-toolbar-slider-bg: rgba(255, 255, 255, 0.15);
+  --mermaid-toolbar-tab-active-color: #fff;
+
   /* 目录区域样式 */
   .cherry-flex-toc {
 
