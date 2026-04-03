@@ -18,6 +18,7 @@ import Logger from '@/Logger';
 import { escapeHTMLSpecialCharOnce as $e } from '@/utils/sanitize';
 import { createElement } from '@/utils/dom';
 import NestedError from '@/utils/error';
+import { EditorSelection } from '@codemirror/state';
 
 /**
  * @typedef {Object} SubMenuConfigItem
@@ -302,12 +303,13 @@ export default class MenuBase {
   /**
    * 处理菜单项点击事件
    * @param {MouseEvent | KeyboardEvent | undefined} [event] 点击事件
+   * @param {string} [shortKey] 快捷键参数
    * @returns {void}
    */
   fire(event, shortKey = '') {
     event?.stopPropagation();
     if (typeof this.onClick === 'function') {
-      const selections = this.editor.editor.getSelections();
+      const selections = this.editor.getSelections();
       // 判断是不是多选
       this.isSelections = selections.length > 1;
       // 当onClick返回null、undefined、false时，维持原样
@@ -317,36 +319,96 @@ export default class MenuBase {
       if (!this.bubbleMenu && this.updateMarkdown) {
         const hasPromise = results.some((result) => result instanceof Promise);
         if (hasPromise) {
-          // 非下拉菜单按钮保留selection
+          // 处理异步结果（如上传文件等）
           Promise.all(results.map((result) => (result instanceof Promise ? result : Promise.resolve(result)))).then(
             (resolvedResults) => {
               const safeResults = resolvedResults.map((result, index) =>
                 result === undefined || result === null ? selections[index] : String(result),
               );
-              this.editor.editor.replaceSelections(safeResults, 'around');
-              this.editor.editor.focus();
+              this.$replaceSelectionsWithCursor(safeResults);
               this.$afterClick();
+              this.editor.editor.view.focus();
             },
           );
         } else {
-          this.editor.editor.replaceSelections(results, 'around');
-          this.editor.editor.focus();
+          // 处理同步结果
+          this.$replaceSelectionsWithCursor(results);
           this.$afterClick();
+          this.editor.editor.view.focus();
         }
       }
     }
   }
 
   /**
-   * 获取当前选择区域的range
+   * 替换选区并智能调整光标位置（CodeMirror 6版本）
+   * @param {string[]} replacements 替换文本数组
+   */
+  $replaceSelectionsWithCursor(replacements) {
+    const { view } = this.editor.editor;
+    const { state } = view;
+    const { selection } = state;
+    const changes = [];
+    const newRanges = [];
+
+    // 累积的文档长度变化，用于计算最终的选区位置
+    // 注意：CM6 中 changes 必须使用原始位置，CM6 会自动处理映射
+    let offset = 0;
+
+    selection.ranges.forEach((range, index) => {
+      const replacement = String(replacements[index] || '');
+      const { from, to } = range;
+
+      // CM6 要求 changes 使用原始文档位置，CM6 会自动映射后续变更
+      changes.push({
+        from,
+        to,
+        insert: replacement,
+      });
+
+      // 计算新选区的位置（需要手动映射，因为 selection 是在变更后的文档中）
+      const mappedFrom = from + offset;
+      const mappedTo = mappedFrom + replacement.length;
+      newRanges.push(EditorSelection.range(mappedFrom, mappedTo));
+
+      // 更新累积偏移：新内容长度 - 原内容长度
+      offset += replacement.length - (to - from);
+    });
+
+    // 应用更改并设置多选区
+    view.dispatch({
+      changes,
+      selection: EditorSelection.create(newRanges),
+    });
+  }
+
+  /**
+   * 获取当前选择区域的range (完全兼容版本)
    */
   $getSelectionRange() {
-    const { anchor, head } = this.editor.editor.listSelections()[0];
-    // 如果begin在end的后面
-    if ((anchor.line === head.line && anchor.ch > head.ch) || anchor.line > head.line) {
-      return { begin: head, end: anchor };
+    const { view } = this.editor.editor;
+    const { state } = view;
+    const { selection, doc } = state;
+    const { main: selectionMain } = selection;
+
+    // 辅助函数：将偏移量转换为行列位置
+    const offsetToPos = (offset) => {
+      const line = doc.lineAt(offset);
+      return {
+        line: line.number - 1, // 转换为0基索引
+        ch: offset - line.from,
+      };
+    };
+
+    const anchorPos = offsetToPos(selectionMain.anchor);
+    const headPos = offsetToPos(selectionMain.head);
+
+    // 处理选择方向，确保 begin 在 end 之前
+    if (selectionMain.anchor > selectionMain.head) {
+      return { begin: headPos, end: anchorPos };
     }
-    return { begin: anchor, end: head };
+
+    return { begin: anchorPos, end: headPos };
   }
 
   /**
@@ -373,51 +435,90 @@ export default class MenuBase {
    * @param {String} lessAfter
    */
   setLessSelection(lessBefore, lessAfter) {
-    const cm = this.editor.editor;
+    const { view: cm } = this.editor.editor;
     const { begin, end } = this.$getSelectionRange();
-    const newBeginLine = lessBefore.match(/\n/g)?.length > 0 ? begin.line + lessBefore.match(/\n/g).length : begin.line;
-    const newBeginCh =
-      lessBefore.match(/\n/g)?.length > 0
-        ? lessBefore.replace(/^[\s\S]*?\n([^\n]*)$/, '$1').length
-        : begin.ch + lessBefore.length;
-    const newBegin = { line: newBeginLine, ch: newBeginCh };
-    const newEndLine = lessAfter.match(/\n/g)?.length > 0 ? end.line - lessAfter.match(/\n/g).length : end.line;
-    const newEndCh = lessAfter.match(/\n/g)?.length > 0 ? cm.getLine(newEndLine).length : end.ch - lessAfter.length;
-    const newEnd = { line: newEndLine, ch: newEndCh };
-    cm.setSelection(newBegin, newEnd);
+
+    // 计算 lessBefore 的偏移量
+    const lessBeforeLines = lessBefore.match(/\n/g)?.length || 0;
+    const newBeginLine = lessBeforeLines > 0 ? begin.line + lessBeforeLines : begin.line;
+    const lessBeforeLastLine = lessBefore.replace(/^[\s\S]*?\n([^\n]*)$/, '$1');
+    const newBeginCh = lessBeforeLines > 0 ? lessBeforeLastLine.length : begin.ch + lessBefore.length;
+
+    // 计算 lessAfter 的偏移量
+    const lessAfterLines = lessAfter.match(/\n/g)?.length || 0;
+    const newEndLine = lessAfterLines > 0 ? end.line - lessAfterLines : end.line;
+
+    // 修复：当 lessAfterLines > 0 时，我们移动到了新的行，
+    // newEndCh 应该是该行的实际长度，而不是基于 end.ch 计算
+    let newEndCh;
+    if (lessAfterLines > 0) {
+      // 获取目标行的内容长度
+      try {
+        const targetLine = cm.state.doc.line(newEndLine + 1);
+        newEndCh = targetLine.length;
+      } catch (e) {
+        console.warn('Error getting line length:', e);
+        newEndCh = 0;
+      }
+    } else {
+      newEndCh = end.ch - lessAfter.length;
+    }
+
+    const newFrom = cm.state.doc.line(newBeginLine + 1).from + newBeginCh;
+    const newTo = cm.state.doc.line(newEndLine + 1).from + newEndCh;
+
+    cm.dispatch({
+      selection: { anchor: newFrom, head: newTo },
+    });
   }
 
   /**
-   * 基于当前已选择区域，获取更多的选择区
+   * 基于当前已选择区域，获取更多的选择区 (CodeMirror 6 现代风格)
    * @param {string} [appendBefore] 选择区前面追加的内容
    * @param {string} [appendAfter] 选择区后面追加的内容
    * @param {function} [cb] 回调函数，如果返回false，则恢复原来的选取
    */
-  getMoreSelection(appendBefore, appendAfter, cb) {
-    const cm = this.editor.editor;
-    const { begin, end } = this.$getSelectionRange();
-    let newBeginCh =
-      // 如果只包含换行，则起始位置一定是0
-      /\n/.test(appendBefore) ? 0 : begin.ch - appendBefore.length;
-    newBeginCh = newBeginCh < 0 ? 0 : newBeginCh;
-    let newBeginLine = /\n/.test(appendBefore) ? begin.line - appendBefore.match(/\n/g).length : begin.line;
-    newBeginLine = newBeginLine < 0 ? 0 : newBeginLine;
-    const newBegin = { line: newBeginLine, ch: newBeginCh };
-    let newEndLine = end.line;
-    let newEndCh = end.ch;
-    if (/\n/.test(appendAfter)) {
-      newEndLine = end.line + appendAfter.match(/\n/g).length;
-      newEndCh = cm.getLine(newEndLine)?.length;
+  getMoreSelection(appendBefore = '', appendAfter = '', cb) {
+    const { view } = this.editor.editor;
+    const { selection, doc } = view.state;
+
+    // 获得当前选区
+    const { from, to } = selection.main;
+    let newFrom = from;
+    let newTo = to;
+
+    if (/\n/.test(appendBefore)) {
+      // 如果包含换行，则起始位置一律按行首
+      const beginLine = doc.lineAt(from).number;
+      const beforeLines = appendBefore.match(/\n/g).length;
+      const targetLineNum = Math.max(1, beginLine - beforeLines);
+      newFrom = doc.line(targetLineNum).from;
     } else {
-      newEndCh =
-        cm.getLine(end.line).length < end.ch + appendAfter.length
-          ? cm.getLine(end.line).length
-          : end.ch + appendAfter.length;
+      const minFrom = doc.lineAt(from).from;
+      newFrom = Math.max(minFrom, from - appendBefore.length);
     }
-    const newEnd = { line: newEndLine, ch: newEndCh };
-    cm.setSelection(newBegin, newEnd);
-    if (cb() === false) {
-      cm.setSelection(begin, end);
+
+    if (/\n/.test(appendAfter)) {
+      // 如果包含换行符，则结束位置一律按行末
+      const endLine = doc.lineAt(to).number;
+      const afterLines = appendAfter.match(/\n/g).length;
+      const targetLineNum = Math.min(doc.lines, endLine + afterLines);
+      newTo = doc.line(targetLineNum).to;
+    } else {
+      const maxTo = doc.lineAt(to).to;
+      newTo = Math.min(to + appendAfter.length, maxTo);
+    }
+
+    // 设置新的选择区域
+    view.dispatch({
+      selection: { anchor: newFrom, head: newTo },
+    });
+
+    // 执行回调，如果返回false则恢复原选择
+    if (cb && cb() === false) {
+      view.dispatch({
+        selection: { anchor: from, head: to },
+      });
     }
   }
 
@@ -429,7 +530,7 @@ export default class MenuBase {
    * @returns {string}
    */
   getSelection(selection, type = 'word', focus = false) {
-    const cm = this.editor.editor;
+    const { view } = this.editor.editor;
     // 多光标模式下不做处理
     if (this.isSelections) {
       return selection;
@@ -437,18 +538,26 @@ export default class MenuBase {
     if (selection && !focus) {
       return selection;
     }
-    // 获取光标所在行的内容，同时选中所在行
+
+    const { from: selectFrom, to: selectHead } = view.state.selection.main;
+    const from = Math.min(selectFrom, selectHead);
+    const head = Math.max(selectFrom, selectHead);
+    let targetRange = { from, to: head };
+    // 选中整行
     if (type === 'line') {
-      const { begin, end } = this.$getSelectionRange();
-      cm.setSelection({ line: begin.line, ch: 0 }, { line: end.line, ch: cm.getLine(end.line).length });
-      return cm.getSelection();
+      targetRange = { from: view.state.doc.lineAt(from).from, to: view.state.doc.lineAt(head).to };
     }
-    // 获取光标所在单词的内容，同时选中所在单词
+    // 选中单词
     if (type === 'word') {
-      const { anchor: begin, head: end } = cm.findWordAt(cm.getCursor());
-      cm.setSelection(begin, end);
-      return cm.getSelection();
+      targetRange = view.state.wordAt(head);
     }
+    if (!targetRange) {
+      return selection;
+    }
+    view.dispatch({
+      selection: { anchor: targetRange.from, head: targetRange.to },
+    });
+    return view.state.doc.sliceString(targetRange.from, targetRange.to);
   }
 
   /**

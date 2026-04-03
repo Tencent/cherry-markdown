@@ -1,4 +1,3 @@
-import { mac } from 'codemirror/src/util/browser';
 import {
   getAllowedShortcutKey,
   keyStackIsModifierkeys,
@@ -10,6 +9,7 @@ import {
   setDisableShortcutKey,
   storageKeyMap,
   clearStorageKeyMap,
+  mac,
 } from '@/utils/shortcutKey';
 import { createElement } from '@/utils/dom';
 
@@ -511,9 +511,10 @@ export default class ShortcutKeyConfigPanel {
   }
 
   /**
-   * 定义不支持修改的快捷键信息（是codemirror提供的类sublime快捷键）
+   * 定义不支持修改的快捷键信息（codemirror提供的类sublime快捷键）
    */
   $getStaticShortcut() {
+    // vim 模式下不显示 sublime 风格的快捷键
     if (this.$cherry.options.editor.keyMap === 'vim') {
       return '';
     }

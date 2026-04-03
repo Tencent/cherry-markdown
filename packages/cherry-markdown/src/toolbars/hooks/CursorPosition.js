@@ -27,8 +27,20 @@ export default class CursorPosition extends MenuBase {
   }
 
   $updateCursorPosition() {
-    const { line, ch } = this.$cherry.editor?.editor?.getCursor() || { line: 0, ch: 0 };
-    const selected = this.$cherry.editor?.editor?.getSelection() || '';
+    const editor = this.$cherry.editor?.editor;
+    let line = 0;
+    let ch = 0;
+    let selected = '';
+
+    if (editor?.view) {
+      const { state } = editor.view;
+      const cursorOffset = state.selection.main.head;
+      const docLine = state.doc.lineAt(cursorOffset);
+      line = docLine.number - 1;
+      ch = cursorOffset - docLine.from;
+      selected = state.doc.sliceString(state.selection.main.from, state.selection.main.to);
+    }
+
     this.btnDom.innerHTML = `Ln ${line}, Col ${ch}${selected ? ` (${selected.length} selected)` : ''}`;
   }
 
@@ -38,10 +50,8 @@ export default class CursorPosition extends MenuBase {
       this.$updateCursorPosition();
     });
     this.$updateCursorPosition();
-    setTimeout(() => {
-      this.$cherry.editor.editor.on('cursorActivity', () => {
-        btnDom.dispatchEvent(this.countEvent);
-      });
-    }, 500);
+    this.$cherry.$event.on('beforeSelectionChange', () => {
+      btnDom.dispatchEvent(this.countEvent);
+    });
   }
 }

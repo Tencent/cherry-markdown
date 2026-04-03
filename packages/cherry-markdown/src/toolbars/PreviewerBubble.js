@@ -24,6 +24,7 @@ import { imgDrawioReg, getValueWithoutCode } from '@/utils/regexp';
 import debounce from 'lodash/debounce';
 import FormulaHandler from '@/utils/formulaUtilsHandler';
 import ListHandler from '@/utils/listContentHandler';
+import { Transaction } from '@codemirror/state';
 
 /**
  * 预览区域的响应式工具栏
@@ -63,36 +64,44 @@ export default class PreviewerBubble {
   init() {
     // 记录cherry外层容器的overflow属性，在后续的操作中会临时修改overflow属性，所以需要先记录
     this.oldWrapperDomOverflow = this.previewer.$cherry.wrapperDom.style.overflow;
-    this.previewerDom.addEventListener('click', this.$onClick.bind(this));
-    this.previewerDom.addEventListener('mouseover', this.$onMouseOver.bind(this));
-    // this.previewerDom.addEventListener('mouseout', this.$onMouseOut.bind(this));
 
-    document.addEventListener('mousedown', (event) => {
+    // 保存事件监听器引用，便于销毁时移除
+    this.$bindedOnClick = this.$onClick.bind(this);
+    this.$bindedOnMouseOver = this.$onMouseOver.bind(this);
+    this.$bindedOnMouseDown = (event) => {
       Object.values(this.bubbleHandler).forEach((handler) => handler.emit('mousedown', event));
-    });
-    document.addEventListener('mouseup', (event) => {
+    };
+    this.$bindedOnMouseUp = (event) => {
       Object.values(this.bubbleHandler).forEach((handler) =>
         handler.emit('mouseup', event, () => this.$removeAllPreviewerBubbles('click')),
       );
-    });
-    document.addEventListener('mousemove', (event) => {
+    };
+    this.$bindedOnMouseMove = (event) => {
       Object.values(this.bubbleHandler).forEach((handler) => handler.emit('mousemove', event));
-    });
-    document.addEventListener('keyup', (event) => {
+    };
+    this.$bindedOnKeyUp = (event) => {
       Object.values(this.bubbleHandler).forEach((handler) => handler.emit('keyup', event));
-    });
-
-    this.$cherry.$event.on('editor.size.change', () => {
+    };
+    this.$bindedOnScroll = (event) => {
+      Object.values(this.bubbleHandler).forEach((handler) => handler.emit('scroll', event));
+    };
+    this.$bindedOnChange = this.$onChange.bind(this);
+    this.$bindedOnEditorSizeChange = () => {
       Object.values(this.bubbleHandler).forEach((handler) => handler.emit('resize', {}));
-    });
+    };
 
-    this.previewerDom.addEventListener(
-      'scroll',
-      (event) => {
-        Object.values(this.bubbleHandler).forEach((handler) => handler.emit('scroll', event));
-      },
-      true,
-    );
+    this.previewerDom.addEventListener('click', this.$bindedOnClick);
+    this.previewerDom.addEventListener('mouseover', this.$bindedOnMouseOver);
+    // this.previewerDom.addEventListener('mouseout', this.$onMouseOut.bind(this));
+
+    document.addEventListener('mousedown', this.$bindedOnMouseDown);
+    document.addEventListener('mouseup', this.$bindedOnMouseUp);
+    document.addEventListener('mousemove', this.$bindedOnMouseMove);
+    document.addEventListener('keyup', this.$bindedOnKeyUp);
+
+    this.$cherry.$event.on('editor.size.change', this.$bindedOnEditorSizeChange);
+
+    this.previewerDom.addEventListener('scroll', this.$bindedOnScroll, true);
     this.$cherry.$event.on('previewerClose', () => this.$removeAllPreviewerBubbles());
     this.previewer.options.afterUpdateCallBack.push(() => {
       // 检查表格处理器是否需要重新创建
@@ -102,8 +111,11 @@ export default class PreviewerBubble {
         handler.emit('previewUpdate', () => this.$removeAllPreviewerBubbles()),
       );
     });
-    this.previewerDom.addEventListener('change', this.$onChange.bind(this));
+    this.previewerDom.addEventListener('change', this.$bindedOnChange);
     this.removeHoverBubble = debounce(() => this.$removeAllPreviewerBubbles('hover'), 400);
+
+    // 销毁标志
+    this.isDestroyed = false;
   }
 
   /**
@@ -256,7 +268,7 @@ export default class PreviewerBubble {
     this.checkboxIdx = list.indexOf(target);
 
     // 然后找到Editor中对应的`- []`或者`- [ ]`进行修改
-    const contents = getValueWithoutCode(this.editor.editor.getValue()).split('\n');
+    const contents = getValueWithoutCode(this.editor.editor.view.state.doc.toString()).split('\n');
 
     let editorCheckboxCount = 0;
     // [ ]中的空格，或者[x]中的x的位置
@@ -277,8 +289,28 @@ export default class PreviewerBubble {
       // 无法找到对应的checkbox
       return;
     }
-    this.editor.editor.setSelection({ line: targetLine, ch: targetCh }, { line: targetLine, ch: targetCh + 1 });
-    this.editor.editor.replaceSelection(this.editor.editor.getSelection() === ' ' ? 'x' : ' ', 'around');
+    // CodeMirror 6 中设置选区需要使用 dispatch
+    // 添加 userEvent 注解标记这是程序触发的操作，避免显示 bubble 菜单
+    const { view } = this.editor.editor;
+    const { doc } = view.state;
+    const fromPos = doc.line(targetLine + 1).from + targetCh;
+    const toPos = doc.line(targetLine + 1).from + targetCh + 1;
+    view.dispatch({
+      selection: { anchor: fromPos, head: toPos },
+      annotations: Transaction.userEvent.of('checklist.toggle'),
+    });
+
+    // CodeMirror 6 中替换选中内容
+    const selection = view.state.selection.main;
+    const selectedText = view.state.doc.sliceString(selection.from, selection.to);
+    view.dispatch({
+      changes: {
+        from: selection.from,
+        to: selection.to,
+        insert: selectedText === ' ' ? 'x' : ' ',
+      },
+      annotations: Transaction.userEvent.of('checklist.toggle'),
+    });
   }
 
   /**
@@ -317,10 +349,18 @@ export default class PreviewerBubble {
           xmlData,
           (newData) => {
             const { xmlData, base64 } = newData;
-            this.editor.editor.replaceSelection(
-              `(${base64}){data-type=drawio data-xml=${encodeURI(xmlData)}}`,
-              'around',
-            );
+            // CodeMirror 6 中替换选中内容
+            const editorView = this.editor.editor.view;
+            const selection = editorView.state.selection.main;
+            // 使用 encodeURIComponent 而不是 encodeURI，确保属性上下文中的特殊字符被正确转义
+            const escapedXmlData = encodeURIComponent(xmlData);
+            editorView.dispatch({
+              changes: {
+                from: selection.from,
+                to: selection.to,
+                insert: `(${base64}){data-type=drawio data-xml=${escapedXmlData}}`,
+              },
+            });
           },
         );
         return;
@@ -515,7 +555,7 @@ export default class PreviewerBubble {
         value.emit('remove');
         delete this.bubbleHandler[key];
       });
-    if (Object.keys(this.bubbleHandler).length <= 0) {
+    if (Object.keys(this.bubbleHandler).length <= 0 && this.previewer?.$cherry?.wrapperDom) {
       this.previewer.$cherry.wrapperDom.style.overflow = this.oldWrapperDomOverflow || '';
     }
   }
@@ -580,7 +620,7 @@ export default class PreviewerBubble {
       this.bubbleHandler[trigger].emit('remove');
       delete this.bubbleHandler[trigger];
     }
-    if (Object.keys(this.bubbleHandler).length <= 0) {
+    if (Object.keys(this.bubbleHandler).length <= 0 && this.previewer?.$cherry?.wrapperDom) {
       this.previewer.$cherry.wrapperDom.style.overflow = this.oldWrapperDomOverflow || '';
     }
   }
@@ -655,16 +695,9 @@ export default class PreviewerBubble {
     }
     this.$removeAllPreviewerBubbles('hover');
     this.$createPreviewerBubbles(trigger, `codeBlock-${trigger}-handler`);
-    // 从 Previewer 获取 CodeMirror 模块（由 Editor 传递，stream 模式下为 null）
-    const { codemirrorModule } = this.previewer;
-    const handler = new CodeHandler(
-      trigger,
-      htmlElement,
-      this.bubble[trigger],
-      this.previewerDom,
-      this,
-      codemirrorModule,
-    );
+    // CM6: 传入 CM6Adapter 实例（stream 模式下 editor 可能不存在）
+    const codeMirror = this.editor?.editor ?? null;
+    const handler = new CodeHandler(trigger, htmlElement, this.bubble[trigger], this.previewerDom, codeMirror, this);
     handler.showBubble(this.$isEnableBubbleAndEditorShow());
     this.bubbleHandler[trigger] = handler;
   }
@@ -749,7 +782,7 @@ export default class PreviewerBubble {
     const allDrawioImgs = Array.from(this.previewerDom.querySelectorAll('img[data-type="drawio"]'));
     const totalDrawioImgs = allDrawioImgs.length;
     const drawioImgIndex = allDrawioImgs.indexOf(htmlElement);
-    const content = getValueWithoutCode(this.editor.editor.getValue());
+    const content = getValueWithoutCode(this.editor.editor.view.state.doc.toString());
     const drawioImgsCode = content.match(imgDrawioReg);
     const testSrc = drawioImgsCode[drawioImgIndex]
       ? drawioImgsCode[drawioImgIndex].replace(/^!\[.*?\]\((.*?)\)/, '$1').trim()
@@ -768,7 +801,13 @@ export default class PreviewerBubble {
           if (testIndex === drawioImgIndex) {
             endCh = beginCh + targetString.length;
             beginCh += targetString.replace(/^(!\[[^\]]*])[^\n]*$/, '$1').length;
-            this.editor.editor.setSelection({ line, ch: beginCh }, { line, ch: endCh });
+            // CodeMirror 6 中设置选区
+            const { doc } = this.editor.editor.view.state;
+            const fromPos = doc.line(line + 1).from + beginCh;
+            const toPos = doc.line(line + 1).from + endCh;
+            this.editor.editor.view.dispatch({
+              selection: { anchor: fromPos, head: toPos },
+            });
             // 更新后需要再调用一次markText机制
             this.editor.dealSpecialWords();
             return true;
@@ -795,7 +834,7 @@ export default class PreviewerBubble {
    * @returns {boolean}
    */
   beginChangeImgValue(htmlElement) {
-    const content = getValueWithoutCode(this.editor.editor.getValue());
+    const content = getValueWithoutCode(this.editor.editor.view.state.doc.toString());
     const src = htmlElement.getAttribute('src');
     const imgReg = /(!\[[^\n]*?\]\([^)]+\))/g;
     const contentImgs = content.match(imgReg);
@@ -823,7 +862,13 @@ export default class PreviewerBubble {
             this.imgSize = imgSizeReg.test(targetString) ? targetString.replace(imgSizeReg, '$1') : '';
             beginCh += targetString.replace(/^(!\[[^#\]]*).*$/, '$1').length;
             endCh = beginCh + targetString.replace(/^(!\[[^#\]]*)([^\]]*?)\].*$/, '$2').length;
-            this.editor.editor.setSelection({ line, ch: beginCh }, { line, ch: endCh });
+            // CodeMirror 6 中设置选区
+            const { doc } = this.editor.editor.view.state;
+            const fromPos = doc.line(line + 1).from + beginCh;
+            const toPos = doc.line(line + 1).from + endCh;
+            this.editor.editor.view.dispatch({
+              selection: { anchor: fromPos, head: toPos },
+            });
             return true;
           }
           testIndex += 1;
@@ -905,10 +950,15 @@ export default class PreviewerBubble {
   }
 
   changeImgValue() {
-    this.editor.editor.replaceSelection(
-      [this.imgSize, this.imgDeco, this.imgAlign].filter((v) => v).join(' '),
-      'around',
-    );
+    // CodeMirror 6 中替换选中内容
+    const selection = this.editor.editor.view.state.selection.main;
+    this.editor.editor.view.dispatch({
+      changes: {
+        from: selection.from,
+        to: selection.to,
+        insert: [this.imgSize, this.imgDeco, this.imgAlign].filter((v) => v).join(' '),
+      },
+    });
   }
 
   /**
@@ -1006,7 +1056,7 @@ export default class PreviewerBubble {
       return false;
     }
 
-    const rawContent = this.editor.editor.getValue();
+    const rawContent = this.editor.editor.view.state.doc.toString();
     // 在编辑器原始内容中按顺序找到所有 mermaid 代码块
     const codeBlockReg = /(?:^|\n)(\n*(?:>[\t ]*)*(?:[^\S\n]*))(`{3,})([^`]*?)\n([\w\W]*?)\n\s*\2[ \t]*(?=$|\n)/g;
     let match;
@@ -1053,19 +1103,19 @@ export default class PreviewerBubble {
       this.mermaidSize = sizeMatches ? sizeMatches.join(' ') : '';
       this.mermaidAlign = alignMatch ? alignMatch[0] : '';
 
+      // CM6: 计算扩展参数的文档偏移量
+      const { doc } = this.editor.editor.view.state;
+      const lineStart = doc.line(langLineNum + 1).from;
+
       if (extendMatch) {
-        // 选中所有扩展参数
         const extendStart = fullLangLine.indexOf(extendMatch[1]);
-        this.editor.editor.setSelection(
-          { line: langLineNum, ch: extendStart },
-          { line: langLineNum, ch: extendStart + extendMatch[1].length },
-        );
+        this.mermaidExtendFrom = lineStart + extendStart;
+        this.mermaidExtendTo = this.mermaidExtendFrom + extendMatch[1].length;
+        this.editor.editor.setSelection(this.mermaidExtendFrom, this.mermaidExtendTo);
       } else {
-        // 没有扩展参数，将光标放在语言行末尾
-        this.editor.editor.setSelection(
-          { line: langLineNum, ch: fullLangLine.length },
-          { line: langLineNum, ch: fullLangLine.length },
-        );
+        this.mermaidExtendFrom = lineStart + fullLangLine.length;
+        this.mermaidExtendTo = this.mermaidExtendFrom;
+        this.editor.editor.setSelection(this.mermaidExtendFrom, this.mermaidExtendFrom);
       }
 
       this.mermaidLangLineNum = langLineNum;
@@ -1080,10 +1130,16 @@ export default class PreviewerBubble {
    */
   changeMermaidValue() {
     const value = [this.mermaidSize, this.mermaidAlign].filter((v) => v).join(' ');
+
     if (this.mermaidHasExtend) {
+      this.editor.editor.setSelection(this.mermaidExtendFrom, this.mermaidExtendTo);
       this.editor.editor.replaceSelection(value, 'around');
+      this.mermaidExtendTo = this.mermaidExtendFrom + value.length;
     } else if (value) {
+      this.editor.editor.setSelection(this.mermaidExtendFrom, this.mermaidExtendFrom);
       this.editor.editor.replaceSelection(` ${value}`, 'around');
+      this.mermaidExtendFrom += 1;
+      this.mermaidExtendTo = this.mermaidExtendFrom + value.length;
       this.mermaidHasExtend = true;
     }
   }
@@ -1158,4 +1214,60 @@ export default class PreviewerBubble {
   $showBorderBubbles() {}
 
   $showBtnBubbles() {}
+
+  /**
+   * 销毁 PreviewerBubble 实例，清理事件监听器和引用
+   */
+  destroy() {
+    if (this.isDestroyed) {
+      return;
+    }
+
+    this.isDestroyed = true;
+
+    // 移除所有气泡
+    this.$removeAllPreviewerBubbles();
+
+    // 取消防抖定时器
+    if (this.removeHoverBubble && this.removeHoverBubble.cancel) {
+      this.removeHoverBubble.cancel();
+    }
+
+    // 移除 previewerDom 上的事件监听器
+    if (this.previewerDom) {
+      this.previewerDom.removeEventListener('click', this.$bindedOnClick);
+      this.previewerDom.removeEventListener('mouseover', this.$bindedOnMouseOver);
+      this.previewerDom.removeEventListener('scroll', this.$bindedOnScroll, true);
+      this.previewerDom.removeEventListener('change', this.$bindedOnChange);
+    }
+
+    // 移除 document 上的事件监听器
+    document.removeEventListener('mousedown', this.$bindedOnMouseDown);
+    document.removeEventListener('mouseup', this.$bindedOnMouseUp);
+    document.removeEventListener('mousemove', this.$bindedOnMouseMove);
+    document.removeEventListener('keyup', this.$bindedOnKeyUp);
+
+    // 移除自定义事件监听器
+    if (this.$cherry && this.$cherry.$event) {
+      this.$cherry.$event.off('editor.size.change', this.$bindedOnEditorSizeChange);
+    }
+
+    // 清理引用
+    this.$bindedOnClick = null;
+    this.$bindedOnMouseOver = null;
+    this.$bindedOnMouseDown = null;
+    this.$bindedOnMouseUp = null;
+    this.$bindedOnMouseMove = null;
+    this.$bindedOnKeyUp = null;
+    this.$bindedOnScroll = null;
+    this.$bindedOnChange = null;
+    this.$bindedOnEditorSizeChange = null;
+
+    this.bubble = {};
+    this.bubbleHandler = {};
+    this.previewer = null;
+    this.editor = null;
+    this.previewerDom = null;
+    this.$cherry = null;
+  }
 }

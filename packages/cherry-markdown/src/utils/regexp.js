@@ -168,6 +168,11 @@ export function getTableRule(merge = false) {
 }
 
 export function getCodeBlockRule() {
+  // 使用字符串定义各部分，避免 TypeScript 对单独的正则表达式进行反向引用检查
+  const beginSource = '(?:^|\\n)(\\n*((?:>[\\t ]*)*)(?:[^\\S\\n]*))(`{3,})([^`]*?)\\n';
+  const contentSource = '([\\w\\W]*?)';
+  const endSource = '[^\\S\\n]*\\3[ \\t]*(?=$|\\n+)'; // \3 反向引用第3个捕获组（反引号数量）
+
   const codeBlock = {
     /**
      * (?:^|\n)是区块的通用开头
@@ -176,17 +181,16 @@ export function getCodeBlockRule() {
      * (?:[^\S\n]*)捕获```前置的空格字符
      * 只要有连续3个及以上`并且前后`的数量相等，则认为是代码快语法
      */
-    begin: /(?:^|\n)(\n*((?:>[\t ]*)*)(?:[^\S\n]*))(`{3,})([^`]*?)\n/,
-    content: /([\w\W]*?)/, // '([\\w\\W]*?)',
-    end: /[^\S\n]*\3[ \t]*(?=$|\n+)/, // '\\s*```[ \\t]*(?=$|\\n+)',
-    reg: new RegExp(''),
+    begin: new RegExp(beginSource),
+    content: new RegExp(contentSource),
+    end: new RegExp(endSource),
+    reg: new RegExp(beginSource + contentSource + endSource, 'g'),
   };
-  codeBlock.reg = new RegExp(codeBlock.begin.source + codeBlock.content.source + codeBlock.end.source, 'g');
   return {
     ...codeBlock,
-    begin: codeBlock.begin.source,
-    content: codeBlock.content.source,
-    end: codeBlock.end.source,
+    begin: beginSource,
+    content: contentSource,
+    end: endSource,
   };
 }
 
@@ -263,7 +267,10 @@ export function getDetailRule() {
   return ret;
 }
 
-export const pasteWrapperReg = /{{(cherry-paste-[^|\n]+?)\|<<([^>]+?)>>}}/g;
+// pasteWrapperReg 匹配粘贴包装器标记
+// 格式: {{cherry-paste-xxx|<<...>>}}
+// 使用 .+? 匹配，在回调中验证不含换行符，保持匹配严格性
+export const pasteWrapperReg = /\{\{(cherry-paste-.+?)\|<<(.+?)>>\}\}/g;
 
 // 匹配图片URL里的base64，[name](data:image/png;base64,xxx) 和 ![alt](data:image/png;base64,xxx) 这两种形式的都处理
 export const imgBase64Reg = /(\[[^\n]*?\]\(data:image\/[a-z]{1,10};base64,)([^)]+)\)/g;

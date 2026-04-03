@@ -25,8 +25,6 @@ import { exportPDF, exportScreenShot, exportMarkdownFile, exportHTMLFile, export
 import PreviewerBubble from './toolbars/PreviewerBubble';
 import LazyLoadImg from '@/utils/lazyLoadImg';
 
-let onScroll = () => {}; // store in memory for remove event
-
 /**
  * 作用：
  *  dom更新
@@ -54,6 +52,34 @@ export default class Previewer {
    * @type {boolean} 是否为移动端预览模式
    */
   isMobilePreview = false;
+
+  /**
+   * @property
+   * @private
+   * @type {Function|null} 滚动事件处理器，保存为实例属性避免多实例冲突
+   */
+  scrollHandler = null;
+
+  /**
+   * @property
+   * @private
+   * @type {Function|null} 鼠标滚轮事件处理器，保存为实例属性避免内存泄漏
+   */
+  wheelHandler = null;
+
+  /**
+   * @property
+   * @private
+   * @type {ResizeObserver|null} ResizeObserver 实例，避免内存泄漏
+   */
+  resizeObserver = null;
+
+  /**
+   * @property
+   * @private
+   * @type {boolean} 标记该实例是否已销毁，防止销毁后的异步操作执行
+   */
+  isDestroyed = false;
 
   /**
    *
@@ -175,15 +201,24 @@ export default class Previewer {
    * “监听”编辑器的尺寸变化，变化时更新拖拽条的位置
    */
   onSizeChange() {
-    // 创建一个新的 ResizeObserver 实例
-    const resizeObserver = new ResizeObserver(() => {
+    // 清理旧的 ResizeObserver（如果存在）
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
+
+    // 创建一个新的 ResizeObserver 实例，保存为实例属性便于清理
+    this.resizeObserver = new ResizeObserver(() => {
+      // 销毁后不执行回调，防止访问已清理的引用
+      if (this.isDestroyed) {
+        return;
+      }
       this.syncVirtualLayoutFromReal();
       this.subMenusPositionChange();
       // 发布编辑器大小变化事件
       this.$cherry.$event.emit('editor.size.change');
     });
     // 开始监听元素
-    resizeObserver.observe(this.$cherry.wrapperDom);
+    this.resizeObserver.observe(this.$cherry.wrapperDom);
   }
 
   subMenusPositionChange() {
@@ -202,9 +237,14 @@ export default class Previewer {
    * @returns {HTMLElement}
    */
   getDomContainer() {
-    return this.isMobilePreview
-      ? this.options.previewerDom.querySelector('.cherry-mobile-previewer-content')
-      : this.options.previewerDom;
+    if (this.isMobilePreview) {
+      const mobileContainer = /** @type {HTMLElement | null} */ (
+        this.options.previewerDom.querySelector('.cherry-mobile-previewer-content')
+      );
+      // 如果移动端容器不存在，fallback 到主容器
+      return mobileContainer || this.options.previewerDom;
+    }
+    return this.options.previewerDom;
   }
 
   getDom() {
@@ -278,7 +318,7 @@ export default class Previewer {
     }
     this.options.previewerDom.style.width = $previewerPercentage;
 
-    setTimeout(() => this.syncVirtualLayoutFromReal(), 0);
+    this.syncVirtualLayoutFromReal();
   }
 
   syncVirtualLayoutFromReal() {
@@ -394,7 +434,6 @@ export default class Previewer {
       const editorLeft = this.editor?.options?.editorDom?.getBoundingClientRect()?.left || 0;
       const editorRight = mouseUpEvent.clientX;
       const layout = this.calculateRealLayout(editorRight - editorLeft);
-      this.options.previewerCache.layout = layout;
       this.setRealLayout(layout.editorPercentage, layout.previewerPercentage);
       // 去掉蒙层和虚拟拖动条
       this.editor?.options?.editorDom?.classList?.remove('no-select');
@@ -403,7 +442,11 @@ export default class Previewer {
       this.options.previewerMaskDom.classList.remove('cherry-previewer-mask--show');
       this.options.virtualDragLineDom.classList.remove('cherry-drag--show');
       // 刷新codemirror宽度
-      this.editor?.editor?.refresh();
+      try {
+        this.editor.editor.view.requestMeasure();
+      } catch (e) {
+        console.warn('Failed to refresh editor in Previewer:', e);
+      }
       // 取消事件绑定
       removeEvent(document, 'mousemove', dragLineMouseMove, false);
       removeEvent(document, 'mouseup', dragLineMouseUp, false);
@@ -451,13 +494,16 @@ export default class Previewer {
 
   bindScroll() {
     const domContainer = this.getDomContainer();
-    onScroll = () => {
+    this.scrollHandler = () => {
+      // 销毁后不执行，防止访问已清理的引用
+      if (this.isDestroyed) {
+        return;
+      }
       if (this.applyingDomChanges) {
-        // Logger.log(new Date(), 'sync scroll locked');
         return;
       }
       if (this.disableScrollListener) {
-        this.disableScrollListener = false;
+        // 如果正在动画滚动,不要重置标志,让动画继续控制
         return;
       }
       if (domContainer.scrollTop <= 0) {
@@ -498,31 +544,33 @@ export default class Previewer {
       const mdOffsetTop = mdRect.y - marginTop - domPosition.y;
       const lineNum = +targetElement.getAttribute('data-lines'); // 当前markdown元素所占行数
       const percent = (100 * Math.abs(mdOffsetTop)) / mdActualHeight / 100;
-      // console.log('destLine:', lines, percent,
-      //  mdRect.height + marginTop + marginBottom, mdOffsetTop, mdElement);
       // if(mdOffsetTop < 0) {
       return this.editor?.scrollToLineNum(lines - lineNum, lineNum, percent);
       // }
       // return this.editor.scrollToLineNum(lines - lineNum, 0, 0);
     };
-    addEvent(domContainer, 'scroll', onScroll, false);
-    addEvent(
-      domContainer,
-      'wheel',
-      () => {
-        // 鼠标滚轮滚动时，强制监听滚动事件
-        this.disableScrollListener = false;
-        // 打断滚动动画
-        cancelAnimationFrame(this.animation.timer);
-        this.animation.timer = 0;
-      },
-      false,
-    );
+    addEvent(domContainer, 'scroll', this.scrollHandler, false);
+
+    // 保存 wheel 事件处理器为实例属性，避免内存泄漏
+    this.wheelHandler = () => {
+      // 销毁后不执行
+      if (this.isDestroyed) {
+        return;
+      }
+      // 鼠标滚轮滚动时,打断滚动动画并恢复监听
+      cancelAnimationFrame(this.animation.timer);
+      this.animation.timer = 0;
+      this.disableScrollListener = false;
+    };
+    addEvent(domContainer, 'wheel', this.wheelHandler, false);
   }
 
   removeScroll() {
     const domContainer = this.getDomContainer();
-    removeEvent(domContainer, 'scroll', onScroll, false);
+    if (this.scrollHandler && domContainer) {
+      removeEvent(domContainer, 'scroll', this.scrollHandler, false);
+      this.scrollHandler = null;
+    }
   }
 
   $html2H(dom) {
@@ -661,7 +709,6 @@ export default class Previewer {
   $dealWithMyersDiffResult(result, oldContent, newContent, domContainer) {
     result.forEach((change) => {
       if (newContent[change.newIndex].dom) {
-        // 把已经加载过的图片的data-src变成src
         newContent[change.newIndex].dom.innerHTML = this.lazyLoadImg.changeLoadedDataSrc2Src(
           newContent[change.newIndex].dom.innerHTML,
         );
@@ -679,8 +726,8 @@ export default class Previewer {
           break;
         case 'update':
           try {
-            // 处理表格包含图表的特殊场景
             let hasUpdate = false;
+            // 处理表格包含图表的特殊场景
             if (
               newContent[change.newIndex].dom.className === 'cherry-table-wrapper' &&
               newContent[change.newIndex].dom.querySelector('.cherry-table-figure .cherry-echarts-wrapper') &&
@@ -758,6 +805,10 @@ export default class Previewer {
   }
 
   update(html) {
+    // 销毁后不执行更新
+    if (this.isDestroyed) {
+      return;
+    }
     // 更新时保留图片懒加载逻辑
     const newHtml = this.lazyLoadImg.changeSrc2DataSrc(html);
     if (!this.isPreviewerHidden()) {
@@ -799,7 +850,20 @@ export default class Previewer {
   }
 
   $dealEditAndPreviewOnly(isEditOnly = true) {
-    this.$removeModelClass();
+    let fullEditorLayout = {
+      editorPercentage: '0%',
+      previewerPercentage: '100%',
+    };
+    if (isEditOnly) {
+      fullEditorLayout = {
+        editorPercentage: '100%',
+        previewerPercentage: '0%',
+      };
+    }
+    const editorWidth = this.editor.options.editorDom.getBoundingClientRect().width;
+    const layout = this.calculateRealLayout(editorWidth);
+    this.options.previewerCache.layout = layout;
+    this.setRealLayout(fullEditorLayout.editorPercentage, fullEditorLayout.previewerPercentage);
     this.options.virtualDragLineDom.classList.add('cherry-drag--hidden');
     const { previewerDom } = this.options;
     const editorDom = this.editor?.options?.editorDom;
@@ -828,18 +892,13 @@ export default class Previewer {
           .forEach((dom) => dom.remove());
       }
     }
-    let fullEditorLayout = {
-      editorPercentage: '0%',
-      previewerPercentage: '100%',
-    };
-    if (isEditOnly) {
-      fullEditorLayout = {
-        editorPercentage: '100%',
-        previewerPercentage: '0%',
-      };
-    }
-    this.setRealLayout(fullEditorLayout.editorPercentage, fullEditorLayout.previewerPercentage);
-    setTimeout(() => this.editor?.editor?.refresh(), 0);
+    setTimeout(() => {
+      try {
+        this.editor.editor.view.requestMeasure();
+      } catch (e) {
+        console.warn('Failed to refresh editor in Previewer:', e);
+      }
+    }, 0);
   }
 
   previewOnly() {
@@ -853,6 +912,8 @@ export default class Previewer {
   }
 
   editOnly() {
+    const html = this.options.previewerCache.html ? this.options.previewerCache.html : this.getDomContainer().innerHTML;
+    this.doHtmlCache(html);
     this.$dealEditAndPreviewOnly(true);
     this.$cherry.$event.emit('previewerClose');
     this.$cherry.$event.emit('editorOpen');
@@ -863,44 +924,42 @@ export default class Previewer {
       editorPercentage: '100%',
       previewerPercentage: '100%',
     };
+    const editorWidth = this.editor.options.editorDom.getBoundingClientRect().width;
+    const layout = this.calculateRealLayout(editorWidth);
+    this.options.previewerCache.layout = layout;
     this.setRealLayout(fullEditorLayout.editorPercentage, fullEditorLayout.previewerPercentage);
     this.options.virtualDragLineDom.classList.add('cherry-drag--hidden');
     this.$cherry.createFloatPreviewer();
   }
 
   recoverFloatPreviewer() {
-    this.editAndPreview();
+    this.recoverPreviewer(true);
     this.$cherry.clearFloatPreviewer();
   }
 
-  /**
-   * @deprecated use editAndPreview instead
-   */
-  recoverPreviewer() {
-    this.editAndPreview();
-  }
-
-  $removeModelClass() {
-    this.editor?.options?.editorDom?.classList?.remove('cherry-editor--hidden', 'cherry-editor--full');
-    this.options.previewerDom.classList.remove('cherry-previewer--hidden', 'cherry-preview--full');
+  recoverPreviewer(dealToolbar = false) {
+    // Restore dual-pane mode by clearing all mode-related classes on previewer/editor
+    this.options.previewerDom.classList.remove('cherry-previewer--hidden', 'cherry-previewer--full');
     this.options.virtualDragLineDom.classList.remove('cherry-drag--hidden');
-  }
-
-  // 切换成双栏模式
-  editAndPreview() {
-    this.$removeModelClass();
+    this.editor.options.editorDom.classList.remove('cherry-editor--full', 'cherry-editor--hidden');
     // 恢复现场
     const { layout } = this.options.previewerCache;
-    const { editorPercentage = '50%', previewerPercentage = '50%' } = layout;
-    this.setRealLayout(editorPercentage, previewerPercentage);
+    this.setRealLayout(layout.editorPercentage, layout.previewerPercentage);
     if (this.options.previewerCache.htmlChanged) {
       this.update(this.options.previewerCache.html);
     }
+    this.cleanHtmlCache();
 
     this.$cherry.$event.emit('previewerOpen');
     this.$cherry.$event.emit('editorOpen');
 
-    setTimeout(() => this.editor?.editor?.refresh(), 0);
+    setTimeout(() => {
+      try {
+        this.editor.editor.view.requestMeasure();
+      } catch (e) {
+        console.warn('Failed to refresh editor in Previewer:', e);
+      }
+    }, 0);
   }
 
   doHtmlCache(html) {
@@ -911,9 +970,14 @@ export default class Previewer {
   cleanHtmlCache() {
     this.options.previewerCache.html = '';
     this.options.previewerCache.htmlChanged = false;
+    // NOTE: layout 不应该被清除，它用于 recoverPreviewer() 恢复用户的分割比例
   }
 
   afterUpdate() {
+    // 销毁后不执行，防止访问已清理的 this.options
+    if (this.isDestroyed) {
+      return;
+    }
     this.options.afterUpdateCallBack.map((fn) => fn());
     if (this.highlightLineNum === undefined) {
       this.highlightLineNum = 0;
@@ -933,9 +997,9 @@ export default class Previewer {
 
   /**
    * 根据行号计算出top值
-   * @param {Number} lineNum
-   * @param {Number} linePercent
-   * @return {Number} top
+   * @param {Number} lineNum - 行号
+   * @param {Number} linePercent - 行内百分比位置（0-1）
+   * @return {Number} 滚动位置（像素）
    */
   $getTopByLineNum(lineNum, linePercent = 0) {
     const domContainer = this.getDomContainer();
@@ -955,26 +1019,19 @@ export default class Previewer {
         lines += blockLines;
         continue;
       } else {
-        // 基础定位，区块高度及offsetTop会受到block margin合并的影响
         const { height: blockHeight, offsetTop } = getBlockTopAndHeightWithMargin(doms[index]);
         const blockY = offsetTop - containerY;
         let scrollTo = blockY + blockHeight * linePercent;
-        // 区块多于1行
+        // 区块多于1行时，按比例计算行偏移
         if (blockLines > 1) {
-          // 高度百分比计算
-          // 该区块已经滚动过的行，不包括当前行，减一
           const overScrolledLines = blockLines - Math.abs($lineNum - (lines + blockLines)) - 1;
-          const overScrolledHeight = (overScrolledLines / blockLines) * blockHeight; // 已经滚过的高度
-          const blockLineHeight = blockHeight / blockLines; // 该区块每一行的高度
-          // 应该滚动到的位置
+          const overScrolledHeight = (overScrolledLines / blockLines) * blockHeight;
+          const blockLineHeight = blockHeight / blockLines;
           scrollTo = blockY + overScrolledHeight + blockLineHeight * linePercent;
-          // console.log('overscrolled:', overScrolledHeight, blockLineHeight, linePercent);
         }
-        // console.log('滚动编辑区域，左侧应scroll to ', lineNum, '::',scrollTo);
         return scrollTo;
       }
     }
-    // 如果计算完预览区域所有的行号依然＜左侧光标所在的行号，则预览区域直接滚到最低部
     return domContainer.scrollHeight;
   }
 
@@ -1066,10 +1123,48 @@ export default class Previewer {
 
     let scrollTop = 0;
 
-    if (scrollDom.nodeName === 'HTML') {
-      scrollTop = scrollDom.scrollTop + target.getBoundingClientRect().y - 10;
+    // 尝试找到目标元素所在的data-sign块,使用精确的位置计算
+    let targetBlock = target;
+    while (targetBlock && targetBlock !== previewDom) {
+      if (targetBlock.hasAttribute('data-sign')) {
+        break;
+      }
+      targetBlock = targetBlock.parentElement;
+    }
+
+    // 如果找到了data-sign块,使用$getTopByLineNum的计算方式
+    if (targetBlock && targetBlock.hasAttribute('data-sign')) {
+      const doms = /** @type {NodeListOf<HTMLElement>}*/ (previewDom.querySelectorAll('[data-sign]'));
+      const containerY = previewDom.offsetTop;
+
+      for (let index = 0; index < doms.length; index++) {
+        if (doms[index].parentNode !== previewDom) {
+          continue;
+        }
+        if (doms[index] === targetBlock) {
+          // 找到目标块,使用精确的位置计算
+          const { offsetTop } = getBlockTopAndHeightWithMargin(doms[index]);
+          const blockY = offsetTop - containerY;
+
+          // 如果目标元素不是块本身,计算目标元素在块内的偏移
+          if (target !== targetBlock) {
+            const targetEl = /** @type {HTMLElement}*/ (target);
+            const targetBlockEl = /** @type {HTMLElement}*/ (targetBlock);
+            const targetOffsetInBlock = targetEl.offsetTop - targetBlockEl.offsetTop;
+            scrollTop = blockY + targetOffsetInBlock - 10;
+          } else {
+            scrollTop = blockY - 10;
+          }
+          break;
+        }
+      }
     } else {
-      scrollTop = scrollDom.scrollTop + target.getBoundingClientRect().y - scrollDom.getBoundingClientRect().y - 10;
+      // 没有找到data-sign块,使用原来的计算方式
+      if (scrollDom.nodeName === 'HTML') {
+        scrollTop = scrollDom.scrollTop + target.getBoundingClientRect().y - 10;
+      } else {
+        scrollTop = scrollDom.scrollTop + target.getBoundingClientRect().y - scrollDom.getBoundingClientRect().y - 10;
+      }
     }
 
     // 创建一个函数来清理图片样式并重新滚动
@@ -1130,21 +1225,29 @@ export default class Previewer {
       }, 100);
     };
 
-    // 添加滚动结束事件监听器
-    scrollDom.addEventListener('scrollend', handleScrollEnd);
-
-    // 如果浏览器不支持 scrollend 事件，使用 setTimeout 作为后备方案
-    setTimeout(() => {
-      scrollDom.removeEventListener('scrollend', handleScrollEnd);
-      handleScrollEnd();
-    }, 1000);
-
     // 开始滚动
     scrollDom.scrollTo({
       top: scrollTop,
       left: 0,
       behavior,
     });
+
+    // 对于 instant 行为，立即触发位置修正逻辑
+    if (behavior === 'instant') {
+      // 使用 requestAnimationFrame 确保滚动完成后再处理
+      requestAnimationFrame(() => {
+        handleScrollEnd();
+      });
+    } else {
+      // 添加滚动结束事件监听器
+      scrollDom.addEventListener('scrollend', handleScrollEnd);
+
+      // 如果浏览器不支持 scrollend 事件，使用 setTimeout 作为后备方案
+      setTimeout(() => {
+        scrollDom.removeEventListener('scrollend', handleScrollEnd);
+        handleScrollEnd();
+      }, 1000);
+    }
 
     return true;
   }
@@ -1162,11 +1265,12 @@ export default class Previewer {
       const dom = this.getDomContainer();
       const currentTop = dom.scrollTop;
       const delta = this.animation.destinationTop - currentTop;
-      // 100毫秒内完成动画
-      const move = Math.ceil(Math.min(Math.abs(delta), Math.max(1, Math.abs(delta) / (100 / 16.7))));
+      // 减小步进值,使滚动更平滑,从100ms改为200ms完成
+      const move = Math.ceil(Math.min(Math.abs(delta), Math.max(1, Math.abs(delta) / (200 / 16.7))));
       if (delta === 0 || currentTop >= dom.scrollHeight || move > Math.abs(delta)) {
         cancelAnimationFrame(this.animation.timer);
         this.animation.timer = 0;
+        this.disableScrollListener = false; // 动画结束后恢复滚动监听
         return;
       }
       this.disableScrollListener = true;
@@ -1249,5 +1353,62 @@ export default class Previewer {
       previewerDom.parentNode.innerHTML = previewerDom.innerHTML;
     }
     this.isMobilePreview = isMobile;
+  }
+
+  /**
+   * 销毁预览器实例，清理所有资源
+   * 此方法应在销毁 Cherry 编辑器时调用
+   */
+  destroy() {
+    if (this.isDestroyed) {
+      return;
+    }
+
+    this.isDestroyed = true;
+
+    // 清理滚动事件监听
+    this.removeScroll();
+
+    // 清理 wheel 事件监听
+    const domContainer = this.getDomContainer();
+    if (this.wheelHandler && domContainer) {
+      removeEvent(domContainer, 'wheel', this.wheelHandler, false);
+      this.wheelHandler = null;
+    }
+
+    // 清理 ResizeObserver
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
+    }
+
+    // 清理 LazyLoadImg 实例
+    if (this.lazyLoadImg && typeof this.lazyLoadImg.destroy === 'function') {
+      this.lazyLoadImg.destroy();
+      this.lazyLoadImg = null;
+    }
+
+    // 清理 PreviewerBubble 实例
+    if (this.previewerBubble && typeof this.previewerBubble.destroy === 'function') {
+      this.previewerBubble.destroy();
+      this.previewerBubble = null;
+    }
+
+    // 清理同步滚动锁定定时器
+    if (this.syncScrollLockTimer) {
+      clearTimeout(this.syncScrollLockTimer);
+      this.syncScrollLockTimer = 0;
+    }
+
+    // 清理动画定时器
+    if (this.animation && this.animation.timer) {
+      cancelAnimationFrame(this.animation.timer);
+      this.animation.timer = 0;
+    }
+
+    // 清理引用
+    this.$cherry = null;
+    this.editor = null;
+    this.options = null;
   }
 }

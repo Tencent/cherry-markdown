@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import Logger from '@/Logger';
 import Toolbar from './Toolbar';
 /**
  * 在编辑区域选中文本时浮现的bubble工具栏
@@ -22,9 +23,6 @@ export default class Bubble extends Toolbar {
    * @type {'flex' | 'block'}
    */
   static displayType = 'flex';
-  // constructor(options) {
-  //     super(options);
-  // }
 
   set visible(visible) {
     const bubbleStyle = window.getComputedStyle(this.bubbleDom);
@@ -48,7 +46,14 @@ export default class Bubble extends Toolbar {
     this.bubbleDom = this.options.dom;
     this.editorDom = this.options.editor.getEditorDom();
     this.initBubbleDom();
-    this.editorDom.querySelector('.CodeMirror').appendChild(this.bubbleDom);
+    // 添加空值检查，确保 .cm-editor 存在
+    const cmEditor = this.editorDom.querySelector('.cm-editor');
+    if (cmEditor) {
+      cmEditor.appendChild(this.bubbleDom);
+    } else {
+      Logger.warn('Bubble: .cm-editor not found, appending to editorDom instead');
+      this.editorDom.appendChild(this.bubbleDom);
+    }
     Object.entries(this.shortcutKeyMap).forEach(([key, value]) => {
       this.$cherry.toolbar.shortcutKeyMap[key] = value;
     });
@@ -63,7 +68,12 @@ export default class Bubble extends Toolbar {
    * @returns {number} 编辑区域的滚动区域
    */
   getScrollTop() {
-    return this.options.editor.editor.getScrollInfo().top;
+    const editorAdapter = this.options.editor.editor;
+    if (!editorAdapter) {
+      return 0;
+    }
+    const view = editorAdapter.view || editorAdapter;
+    return view.scrollDOM ? view.scrollDOM.scrollTop : 0;
   }
 
   /**
@@ -78,28 +88,43 @@ export default class Bubble extends Toolbar {
   /**
    * 根据高度计算bubble工具栏出现的位置的高度
    * 根据宽度计算bubble工具栏出现的位置的left值，以及bubble工具栏三角箭头的left值
-   * @param {number} top 高度
-   * @param {number} width 选中文本内容的宽度
+   * @param {number} top 高度（相对编辑器顶部的偏移）
+   * @param {number} width 选中文本内容的水平中心位置
+   * @param {boolean} isTopToBottom 是否从上到下选择，true 时 bubble 出现在选区下方，false 时出现在选区上方
+   * @param {number} selectionBottom 选区最后一行底部相对编辑器顶部的偏移，用于从下到上选择时顶部空间不足的 fallback 定位
    */
-  showBubble(top, width) {
+  showBubble(top, width, isTopToBottom = false, selectionBottom = top) {
     if (!this.visible) {
       this.visible = true;
       this.bubbleDom.style.marginTop = '0';
       this.bubbleDom.dataset.scrollTop = String(this.getScrollTop());
     }
-    const positionLimit = this.editorDom.querySelector('.CodeMirror-lines').firstChild.getBoundingClientRect();
+    // 获取编辑器内容区域的边界，添加空值检查
+    const lineWrapping = this.editorDom.querySelector('.cm-lineWrapping');
+    const contentElement = lineWrapping?.firstChild;
+    if (!contentElement) {
+      // 如果编辑器 DOM 结构不符合预期，使用编辑器本身作为边界
+      Logger.warn('Bubble: .cm-lineWrapping or its firstChild not found');
+      return;
+    }
+    const positionLimit = contentElement.getBoundingClientRect();
     const editorPosition = this.editorDom.getBoundingClientRect();
     const minLeft = positionLimit.left - editorPosition.left;
     const maxLeft = positionLimit.width + minLeft;
     const minTop = this.bubbleDom.offsetHeight * 2;
     let $top = top;
-    if ($top < minTop) {
-      // 如果高度小于编辑器的顶部，则让bubble工具栏出现在选中文本的下放
-      $top += this.bubbleDom.offsetHeight - this.bubbleTop.getBoundingClientRect().height;
+    if (isTopToBottom) {
+      // 从上到下选择：bubble 出现在选中文本的下方，箭头朝上
+      $top += this.bubbleTop.getBoundingClientRect().height;
+      this.bubbleTop.style.display = 'block';
+      this.bubbleBottom.style.display = 'none';
+    } else if ($top < minTop) {
+      // 从下到上选择，但距编辑器顶部空间不足：fallback 到选区最下方文字的下方
+      $top = selectionBottom + this.bubbleTop.getBoundingClientRect().height;
       this.bubbleTop.style.display = 'block';
       this.bubbleBottom.style.display = 'none';
     } else {
-      // 反之出现在选中文本内容的上方
+      // 从下到上选择：bubble 出现在选中文本的上方，箭头朝下
       $top -= this.bubbleDom.offsetHeight + this.bubbleBottom.getBoundingClientRect().height;
       this.bubbleTop.style.display = 'none';
       this.bubbleBottom.style.display = 'block';
@@ -161,74 +186,87 @@ export default class Bubble extends Toolbar {
   }
 
   addSelectionChangeListener() {
-    this.options.editor.addListener('change', (codemirror) => {
+    // 绑定事件处理方法，保存引用以便后续注销
+    this.boundHandleAfterChange = () => {
       // 当编辑区内容变更时自动隐藏bubble工具栏
       this.hideBubble();
-    });
-    this.options.editor.addListener('refresh', (codemirror) => {
-      // 当编辑区内容刷新时自动隐藏bubble工具栏
+    };
+    this.boundHandleLayoutChange = () => {
+      // 当编辑区布局刷新时自动隐藏bubble工具栏
       this.hideBubble();
-    });
-    this.options.editor.addListener('scroll', (codemirror) => {
+    };
+    this.boundHandleScroll = () => {
       // 当编辑区滚动时，需要实时同步bubble工具栏的位置
       this.updatePositionWhenScroll();
-    });
-    this.options.editor.addListener('beforeSelectionChange', (codemirror, info) => {
-      setTimeout(() => {
-        const selections = codemirror.getSelections();
-        const selectionStr = selections.join('');
-        if (selectionStr !== this.lastSelectionsStr && (selectionStr || this.lastSelectionsStr)) {
-          this.lastSelections = !this.lastSelections ? [] : this.lastSelections;
-          this.$cherry.$event.emit('selectionChange', { selections, lastSelections: this.lastSelections, info });
-          this.lastSelections = selections;
-          this.lastSelectionsStr = selectionStr;
-        }
-      }, 10);
-      // 当编辑区选中内容改变时，需要展示/隐藏bubble工具栏，并计算工具栏位置
-      if (info.origin !== '*mouse' && (info.origin !== null || typeof info.origin === 'undefined')) {
-        return true;
+    };
+    this.boundHandleBeforeSelectionChange = ({ selection, isUserInteraction }) => {
+      const { from, to } = selection;
+      if (Math.abs(from - to) === 0) {
+        this.hideBubble();
+        return;
       }
-      if (!info.ranges[0]) {
-        return true;
+      const editorView = this.options.editor.editor.view;
+      const { doc } = editorView.state;
+
+      // 通过 anchor/head 判断选择方向：anchor < head 表示从上到下选择，反之从下到上
+      const mainSelection = editorView.state.selection.main;
+      const isTopToBottom = mainSelection.anchor <= mainSelection.head;
+
+      const beginLine = doc.lineAt(from).number;
+      const endLine = doc.lineAt(to).number;
+      const sameLine = beginLine === endLine;
+
+      const fromCoords = editorView.coordsAtPos(from);
+      const toCoords = editorView.coordsAtPos(to);
+
+      const editorPosition = this.editorDom.getBoundingClientRect();
+
+      //   anchorCoords — bubble 所在行的起始端坐标（决定 top 和水平中心的左边界）
+      //   cursorCoords — bubble 所在行的结束端坐标（决定水平中心的右边界和 top）
+      let anchorCoords;
+      let cursorCoords;
+      if (isTopToBottom) {
+        // 从上到下：bubble 贴近选区最后一行底部，水平中心取最后一行的选中范围
+        anchorCoords = sameLine ? fromCoords : editorView.coordsAtPos(doc.line(endLine).from);
+        cursorCoords = toCoords;
+      } else {
+        // 从下到上：bubble 贴近选区第一行顶部，水平中心取第一行的选中范围
+        anchorCoords = fromCoords;
+        cursorCoords = sameLine
+          ? toCoords
+          : editorView.coordsAtPos(doc.line(beginLine).from + doc.line(beginLine).length);
       }
-      const anchor = info.ranges[0].anchor.line * 1000000 + info.ranges[0].anchor.ch;
-      const head = info.ranges[0].head.line * 1000000 + info.ranges[0].head.ch;
-      let direction = 'asc';
-      if (anchor > head) {
-        direction = 'desc';
-      }
-      setTimeout(() => {
-        const selections = codemirror.getSelections();
-        if (selections.join('').length <= 0) {
-          this.hideBubble();
-          return;
-        }
-        const selectedObjs = codemirror.getWrapperElement().getElementsByClassName('CodeMirror-selected');
-        const editorPosition = this.editorDom.getBoundingClientRect();
-        let width = 0;
-        let top = 0;
-        if (typeof selectedObjs !== 'object' || selectedObjs.length <= 0) {
-          this.hideBubble();
-          return;
-        }
-        for (let key = 0; key < selectedObjs.length; key++) {
-          const one = selectedObjs[key];
-          const position = one.getBoundingClientRect();
-          const targetTop = position.top - editorPosition.top;
-          if (direction === 'asc') {
-            if (targetTop >= top) {
-              top = targetTop;
-              width = position.left - editorPosition.left + position.width / 2;
-            }
-          } else {
-            if (targetTop <= top || top <= 0) {
-              top = targetTop;
-              width = position.left - editorPosition.left + position.width / 2;
-            }
-          }
-        }
-        this.showBubble(top, width);
-      }, 10);
-    });
+
+      const top = (isTopToBottom ? cursorCoords.bottom : anchorCoords.top) - editorPosition.top;
+      const selectionBottom = toCoords.bottom - editorPosition.top;
+      const width = anchorCoords.left - editorPosition.left + (cursorCoords.left - anchorCoords.left) / 2;
+
+      this.showBubble(top, width, isTopToBottom, selectionBottom);
+    };
+
+    this.$cherry.$event.on('afterChange', this.boundHandleAfterChange);
+    // CM6Adapter.refresh() 不会触发 refresh 事件，改为监听 layoutChange 事件
+    this.$cherry.$event.on('layoutChange', this.boundHandleLayoutChange);
+    this.$cherry.$event.on('onScroll', this.boundHandleScroll);
+    this.$cherry.$event.on('beforeSelectionChange', this.boundHandleBeforeSelectionChange);
+  }
+
+  /**
+   * 销毁 Bubble 实例，清理事件监听器
+   * 必须调用此方法以避免内存泄漏
+   */
+  destroy() {
+    // 移除 Cherry 事件监听 - 使用绑定的方法引用以确保正确注销
+    if (this.$cherry && this.$cherry.$event) {
+      this.$cherry.$event.off('afterChange', this.boundHandleAfterChange);
+      this.$cherry.$event.off('layoutChange', this.boundHandleLayoutChange);
+      this.$cherry.$event.off('onScroll', this.boundHandleScroll);
+      this.$cherry.$event.off('beforeSelectionChange', this.boundHandleBeforeSelectionChange);
+    }
+    // 清理 DOM 引用
+    this.bubbleDom = null;
+    this.editorDom = null;
+    this.bubbleTop = null;
+    this.bubbleBottom = null;
   }
 }

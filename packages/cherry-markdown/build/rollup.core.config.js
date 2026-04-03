@@ -51,5 +51,6 @@ if (!Array.isArray(options.external)) {
   options.external = [];
 }
 options.external.push('mermaid');
+options.external.push('@replit/codemirror-vim'); // 保持 vim 模块懒加载，避免 code-splitting
 
 export default options;

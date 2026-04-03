@@ -160,7 +160,7 @@ export default class ChatGpt extends MenuBase {
     this.button.className += ' icon-loading loading';
     this.button.innerText = '';
     // const that = this;
-    const inputText = selection || this.$cherry.editor.editor.getValue();
+    const inputText = selection || this.$cherry.editor.editor.view.state.doc.toString();
     await this.queryMap[name](inputText)
       .then((res) => this.concatText(selection, res.data?.choices?.[0]?.message?.content || ''))
       .catch((res) => {

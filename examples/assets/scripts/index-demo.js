@@ -71,7 +71,7 @@ var customMenuC = Cherry.createMenuHook('自定义菜单+子菜单', {
   onClick: (selection, type) => {
     switch (type) {
       case 'shortKey':
-        return `${selection}快捷键看这里：https://codemirror.net/5/demo/sublime.html`;
+        return `${selection}快捷键看这里：https://codemirror.net/docs/ref/#commands`;
       case 'github':
         return `${selection}我们在这里：https://github.com/Tencent/cherry-markdown`;
       case 'release':

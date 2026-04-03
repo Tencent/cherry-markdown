@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { getSelection } from '@/utils/selection';
 import { getKeyCode, getPlatformControlKey } from '@/utils/shortcutKey';
 /**
  * 插入1级~5级标题
@@ -82,12 +81,13 @@ export default class Header extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    const $selection = getSelection(this.editor.editor, selection, 'line', true) || this.locale.header;
+    const $selection = this.getSelection(selection, 'line', true) || this.locale.header;
     const header = this.$getFlagStr(shortKey);
     // 注释下面的代码，因为选中标题绝对只有一行，所以不需要扩大选区
     // if (!this.isSelections && !this.$testIsHead($selection)) {
     //   this.getMoreSelection('\n', '', () => {
-    //     const newSelection = this.editor.editor.getSelection();
+    //     const { from, to } = this.editor.editor.state.selection.main;
+    //     const newSelection = this.editor.editor.state.doc.sliceString(from, to);
     //     const isHead = this.$testIsHead(newSelection);
     //     if (isHead) {
     //       $selection = newSelection;

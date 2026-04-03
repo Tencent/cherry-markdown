@@ -63,6 +63,11 @@ export default class LazyLoadImg {
     // 记录上次加载完所有图片的个数
     this.lastLoadAllNum = 0;
     this.previewerDom = this.previewer.getDomContainer();
+    // 定时器引用，用于销毁时清理
+    this.pollingTimer = null;
+    this.checkAllLoadedTimer = null;
+    // 是否已销毁
+    this.isDestroyed = false;
   }
 
   /**
@@ -237,22 +242,29 @@ export default class LazyLoadImg {
    */
   doLazyLoad() {
     // 防止重复调用
-    if (this.isRunning) {
+    if (this.isRunning || this.isDestroyed) {
       return;
     }
     this.isRunning = true;
     const { maxNumPerTime } = this.options;
     const polling = () => {
+      // 如果已销毁，停止轮询
+      if (this.isDestroyed) {
+        return;
+      }
       // 保证至少有一次自动加载
       this.loadOneImg();
       for (let i = 1; i < maxNumPerTime; i++) {
         this.loadOneImg();
       }
-      setTimeout(polling, 200);
+      this.pollingTimer = setTimeout(polling, 200);
     };
     polling();
-    // setTimeout(polling, 200);
-    setInterval(() => {
+    // 定时检查所有图片是否加载完成
+    this.checkAllLoadedTimer = setInterval(() => {
+      if (this.isDestroyed) {
+        return;
+      }
       this.isLoadedAllDone();
     }, 1000);
   }
@@ -323,5 +335,38 @@ export default class LazyLoadImg {
       }
       return `<img ${m1}data-src="${src}"${m3}>`;
     });
+  }
+
+  /**
+   * 销毁懒加载实例，清理定时器和引用
+   */
+  destroy() {
+    if (this.isDestroyed) {
+      return;
+    }
+
+    this.isDestroyed = true;
+    this.isRunning = false;
+
+    // 清理轮询定时器
+    if (this.pollingTimer) {
+      clearTimeout(this.pollingTimer);
+      this.pollingTimer = null;
+    }
+
+    // 清理检查完成定时器
+    if (this.checkAllLoadedTimer) {
+      clearInterval(this.checkAllLoadedTimer);
+      this.checkAllLoadedTimer = null;
+    }
+
+    // 清理数据引用
+    this.srcLoadedList = [];
+    this.srcFailLoadedList = {};
+    this.srcLoadingList = [];
+    this.srcList = [];
+    this.previewer = null;
+    this.previewerDom = null;
+    this.options = null;
   }
 }
