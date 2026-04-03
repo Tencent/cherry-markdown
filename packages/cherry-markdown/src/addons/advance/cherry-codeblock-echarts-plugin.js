@@ -15,10 +15,12 @@
  */
 import mergeWith from 'lodash/mergeWith';
 import JSON5 from 'json5';
+import { getExternal } from '@/utils/external';
 
 export default class EChartsCodeBlockEngine {
   static install(cherryOptions, ...args) {
-    if (typeof window === 'undefined' || typeof window.echarts === 'undefined') {
+    const globalEcharts = /** @type {import('echarts').ECharts | undefined} */ (getExternal('echarts'));
+    if (!globalEcharts) {
       return;
     }
     mergeWith(cherryOptions, {
@@ -32,18 +34,20 @@ export default class EChartsCodeBlockEngine {
         },
       },
       externals: {
-        echarts: window.echarts,
+        echarts: globalEcharts,
       },
     });
   }
 
   constructor(echartsOptions = {}) {
-    const { echarts, size } = echartsOptions;
-    if (!echarts && !window.echarts) {
+    const { echarts } = echartsOptions;
+    const globalEcharts = /** @type {import('echarts').ECharts | undefined} */ (getExternal('echarts'));
+    const resolvedEcharts = echarts || globalEcharts;
+    if (!resolvedEcharts) {
       throw new Error('codeblock-echarts-plugin[init]: Package echarts not found.');
     }
-    this.size = size;
-    this.echartsRef = echarts || window.echarts; // echarts引用
+    this.size = echartsOptions.size;
+    this.echartsRef = resolvedEcharts; // echarts引用
   }
 
   render(src, sign, $engine, language) {

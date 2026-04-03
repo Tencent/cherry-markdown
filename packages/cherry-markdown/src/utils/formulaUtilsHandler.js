@@ -19,6 +19,7 @@ import { canvas2img } from '@/utils/export';
 import { copyToClip } from '@/utils/copy';
 import { unescapeHTMLSpecialChar } from '@/utils/sanitize';
 import MathBlock from '@/core/hooks/MathBlock';
+import { getExternal } from '@/utils/external';
 
 export default class FormulaHandler {
   /** @type{HTMLElement} */
@@ -227,8 +228,9 @@ export default class FormulaHandler {
               // @ts-ignore
               const hook = this.editor.$cherry.engine.hooks.paragraph.find((hook) => hook instanceof MathBlock);
               if (hook && hook.engine === 'MathJax') {
-                window.MathJax?.texReset();
-                window.MathJax?.tex2mmlPromise?.(formulaCode, { display: true }).then((mml) => {
+                const mj = /** @type {import('./types/global').MathJaxRuntime | undefined} */ (getExternal('MathJax'));
+                mj?.texReset?.();
+                mj?.tex2mmlPromise?.(formulaCode, { display: true }).then((mml) => {
                   if (name === 'mathml') {
                     copyToClip(mml);
                   } else {
@@ -236,8 +238,9 @@ export default class FormulaHandler {
                   }
                 });
               } else if (hook && hook.engine === 'katex') {
-                if (window.katex) {
-                  const html = window.katex.renderToString(formulaCode, {
+                const katexInstance = /** @type {import('./types/global').KatexRuntime | undefined} */ (getExternal('katex'));
+                if (katexInstance) {
+                  const html = katexInstance.renderToString(formulaCode, {
                     throwOnError: false,
                     displayMode: true,
                     output: 'mathml',

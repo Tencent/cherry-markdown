@@ -15,6 +15,7 @@
  */
 import mergeWith from 'lodash/mergeWith';
 import Logger from '@/Logger';
+import { getExternal } from '@/utils/external';
 
 // 主题与常量集中管理
 const THEME = {
@@ -71,11 +72,13 @@ export default class EChartsTableEngine {
 
   constructor(echartsOptions = {}) {
     const { echarts, cherryOptions, cherry, ...options } = echartsOptions;
-    if (!echarts && !window.echarts) {
+    const globalEcharts = getExternal('echarts');
+    const resolvedEcharts = echarts || globalEcharts;
+    if (!resolvedEcharts) {
       throw new Error('table-echarts-plugin[init]: Package echarts not found.');
     }
     this.options = { ...DEFAULT_OPTIONS, ...(options || {}) };
-    this.echartsRef = echarts || window.echarts; // echarts引用
+    this.echartsRef = /** @type {*} */ (resolvedEcharts); // echarts引用
     this.dom = null;
 
     // 保存Cherry配置，用于获取地图数据源URL

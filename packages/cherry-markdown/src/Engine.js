@@ -27,6 +27,7 @@ import AsyncRenderHandler from './utils/async-render-handler';
 import UrlCache from './UrlCache';
 import htmlParser from './utils/htmlparser';
 import { isBrowser } from './utils/env';
+import { getExternal } from './utils/external';
 import * as htmlparser2 from 'htmlparser2';
 import LRUCache from './utils/LRUCache';
 import { loadCSS, loadScript } from './utils/dom';
@@ -125,7 +126,7 @@ export default class Engine {
     }
     if (syntax.mathBlock.engine === 'MathJax' || syntax.inlineMath.engine === 'MathJax') {
       // 已经加载过MathJax
-      if (externals.MathJax || window.MathJax) {
+      if (externals.MathJax || getExternal('MathJax')) {
         return;
       }
       configureMathJax(plugins);
@@ -134,20 +135,22 @@ export default class Engine {
       }
     }
     if (syntax.mathBlock.engine === 'katex' || syntax.inlineMath.engine === 'katex') {
-      // @ts-ignore
-      if (window.katex) {
+      const katexInstance = /** @type {import('./types/global').KatexRuntime | undefined} */ (getExternal('katex'));
+      if (katexInstance) {
         return;
       }
       syntax.mathBlock.css && loadCSS(syntax.mathBlock.css, 'katex-css');
       if (syntax.mathBlock.src) {
         loadScript(syntax.mathBlock.src, 'katex-js').then(() => {
+          const resolvedKatex = /** @type {import('./types/global').KatexRuntime} */ (getExternal('katex'));
+          if (!resolvedKatex) { return; }
           // 先更新预览区域
           this.$cherry.previewer
             .getDom()
             .querySelectorAll('.cherry-katex-need-render')
             .forEach((el) => {
               const displayMode = el.classList.contains('Cherry-Math');
-              el.innerHTML = window.katex.renderToString(decodeURIComponent(el.getAttribute('data-content')), {
+              el.innerHTML = resolvedKatex.renderToString(decodeURIComponent(el.getAttribute('data-content')), {
                 throwOnError: false,
                 displayMode,
               });
@@ -158,12 +161,11 @@ export default class Engine {
           this.asyncRenderHandler.md = this.asyncRenderHandler.md.replace(
             /<(div|span) data-sign="([^"]+?)" class="([^"]+?) cherry-katex-need-render" ([^>]+? data-lines="[^"]+?") data-content="([\s\S]+?)"><\/\1>/g,
             (match, domName, sign, className, attrs, content) => {
-              const displayMode = domName === 'div';
-              const key = domName === 'div' ? `math-block-${sign}` : `math-inline-${sign}`;
-              // @ts-ignore
-              const html = window.katex.renderToString(decodeURIComponent(content), {
+              const isDisplayMode = domName === 'div';
+              const key = isDisplayMode ? `math-block-${sign}` : `math-inline-${sign}`;
+              const html = resolvedKatex.renderToString(decodeURIComponent(content), {
                 throwOnError: false,
-                displayMode,
+                displayMode: isDisplayMode,
               });
               needDoneKeys.push(key);
               return `<${domName} data-sign="${sign}" class="${className}" ${attrs}>${html}</${domName}>`;
