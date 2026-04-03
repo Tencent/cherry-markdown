@@ -17,6 +17,7 @@ import CherryEngine from './index.engine.core';
 import MermaidCodeEngine from './addons/cherry-code-block-mermaid-plugin';
 import mermaid from 'mermaid';
 
+// v9 及以下有 mermaid.mermaidAPI，v10+ 为 undefined
 const mermaidAPI = mermaid?.mermaidAPI;
 CherryEngine.usePlugin(MermaidCodeEngine, {
   mermaid,
