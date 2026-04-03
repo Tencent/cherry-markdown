@@ -88,10 +88,12 @@ export default class Bubble extends Toolbar {
   /**
    * 根据高度计算bubble工具栏出现的位置的高度
    * 根据宽度计算bubble工具栏出现的位置的left值，以及bubble工具栏三角箭头的left值
-   * @param {number} top 高度
-   * @param {number} width 选中文本内容的宽度
+   * @param {number} top 高度（相对编辑器顶部的偏移）
+   * @param {number} width 选中文本内容的水平中心位置
+   * @param {boolean} isTopToBottom 是否从上到下选择，true 时 bubble 出现在选区下方，false 时出现在选区上方
+   * @param {number} selectionBottom 选区最后一行底部相对编辑器顶部的偏移，用于从下到上选择时顶部空间不足的 fallback 定位
    */
-  showBubble(top, width) {
+  showBubble(top, width, isTopToBottom = false, selectionBottom = top) {
     if (!this.visible) {
       this.visible = true;
       this.bubbleDom.style.marginTop = '0';
@@ -111,13 +113,18 @@ export default class Bubble extends Toolbar {
     const maxLeft = positionLimit.width + minLeft;
     const minTop = this.bubbleDom.offsetHeight * 2;
     let $top = top;
-    if ($top < minTop) {
-      // 如果高度小于编辑器的顶部，则让bubble工具栏出现在选中文本的下放
-      $top += this.bubbleDom.offsetHeight - this.bubbleTop.getBoundingClientRect().height;
+    if (isTopToBottom) {
+      // 从上到下选择：bubble 出现在选中文本的下方，箭头朝上
+      $top += this.bubbleTop.getBoundingClientRect().height;
+      this.bubbleTop.style.display = 'block';
+      this.bubbleBottom.style.display = 'none';
+    } else if ($top < minTop) {
+      // 从下到上选择，但距编辑器顶部空间不足：fallback 到选区最下方文字的下方
+      $top = selectionBottom + this.bubbleTop.getBoundingClientRect().height;
       this.bubbleTop.style.display = 'block';
       this.bubbleBottom.style.display = 'none';
     } else {
-      // 反之出现在选中文本内容的上方
+      // 从下到上选择：bubble 出现在选中文本的上方，箭头朝下
       $top -= this.bubbleDom.offsetHeight + this.bubbleBottom.getBoundingClientRect().height;
       this.bubbleTop.style.display = 'none';
       this.bubbleBottom.style.display = 'block';
@@ -201,20 +208,40 @@ export default class Bubble extends Toolbar {
       const editorView = this.options.editor.editor.view;
       const { doc } = editorView.state;
 
+      // 通过 anchor/head 判断选择方向：anchor < head 表示从上到下选择，反之从下到上
+      const mainSelection = editorView.state.selection.main;
+      const isTopToBottom = mainSelection.anchor <= mainSelection.head;
+
       const beginLine = doc.lineAt(from).number;
       const endLine = doc.lineAt(to).number;
       const sameLine = beginLine === endLine;
-      const fromLineLastChar = doc.line(beginLine).from + doc.line(beginLine).length;
 
       const fromCoords = editorView.coordsAtPos(from);
-      const fromLineLastCharCoords = editorView.coordsAtPos(fromLineLastChar);
       const toCoords = editorView.coordsAtPos(to);
 
-      const targetToCoords = sameLine ? toCoords : fromLineLastCharCoords;
       const editorPosition = this.editorDom.getBoundingClientRect();
-      const top = fromCoords.top - editorPosition.top;
-      const width = fromCoords.left - editorPosition.left + (targetToCoords.left - fromCoords.left) / 2;
-      this.showBubble(top, width);
+
+      //   anchorCoords — bubble 所在行的起始端坐标（决定 top 和水平中心的左边界）
+      //   cursorCoords — bubble 所在行的结束端坐标（决定水平中心的右边界和 top）
+      let anchorCoords;
+      let cursorCoords;
+      if (isTopToBottom) {
+        // 从上到下：bubble 贴近选区最后一行底部，水平中心取最后一行的选中范围
+        anchorCoords = sameLine ? fromCoords : editorView.coordsAtPos(doc.line(endLine).from);
+        cursorCoords = toCoords;
+      } else {
+        // 从下到上：bubble 贴近选区第一行顶部，水平中心取第一行的选中范围
+        anchorCoords = fromCoords;
+        cursorCoords = sameLine
+          ? toCoords
+          : editorView.coordsAtPos(doc.line(beginLine).from + doc.line(beginLine).length);
+      }
+
+      const top = (isTopToBottom ? cursorCoords.bottom : anchorCoords.top) - editorPosition.top;
+      const selectionBottom = toCoords.bottom - editorPosition.top;
+      const width = anchorCoords.left - editorPosition.left + (cursorCoords.left - anchorCoords.left) / 2;
+
+      this.showBubble(top, width, isTopToBottom, selectionBottom);
     };
 
     this.$cherry.$event.on('afterChange', this.boundHandleAfterChange);
