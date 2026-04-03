@@ -213,4 +213,6 @@ export default {
   minValue: '最小值',
   high: '高',
   low: '低',
+  mermaidSource: '源码',
+  mermaidPreview: '预览',
 };

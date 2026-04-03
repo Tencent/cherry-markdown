@@ -147,7 +147,12 @@ function getCherryConfig() {
         flowSessionCursor: 'default',
       },
       syntax: {
-        codeBlock: { selfClosing: false },
+        codeBlock: {
+          selfClosing: false,
+          mermaid: {
+            showSourceToolbar: true,
+          },
+        },
         inlineCode: { selfClosing: false },
         header: { anchorStyle: 'none', selfClosing: false },
         table: { selfClosing: false },

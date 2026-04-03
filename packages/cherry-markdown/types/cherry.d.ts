@@ -354,6 +354,7 @@ export interface CherryEngineOptions {
           wrapperRender?: (language: string, code: string, innerHTML: string) => string;
           mermaid?: {
             svg2img?: boolean; // 是否将mermaid生成的画图变成img格式
+            showSourceToolbar?: boolean; // 是否显示mermaid源码/预览切换工具栏
           };
           /**
            * indentedCodeBlock是缩进代码块是否启用的开关

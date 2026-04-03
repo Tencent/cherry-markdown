@@ -257,6 +257,89 @@
       margin-left: var(--spacing-lg);
       margin-right: 0;
     }
+
+    // mermaid 源码/预览切换工具栏样式
+    .cherry-mermaid-source-toolbar {
+      height: 45px;
+      line-height: 45px;
+      position: relative;
+      background-color: #ebecef;
+      border-radius: 4px 4px 0 0;
+    }
+
+    .cherry-mermaid-source-toolbar-switch {
+      position: absolute;
+      left: 10px;
+      margin-top: 5px;
+      width: 127px;
+      height: 35px;
+      line-height: 35px;
+      background-color: #dfe0e2;
+      border-radius: 8px;
+    }
+
+    .cherry-mermaid-source-toolbar-tab {
+      position: absolute;
+      text-align: center;
+      height: 30px;
+      line-height: 30px;
+      width: 60px;
+      box-sizing: border-box;
+      top: 2px;
+      z-index: 2;
+      background-color: transparent;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--base-text-color, #333);
+      user-select: none;
+      white-space: nowrap;
+
+      &:first-child {
+        left: 2px;
+      }
+
+      &:nth-child(2) {
+        left: 65px;
+      }
+    }
+
+    .cherry-mermaid-source-toolbar-slider {
+      position: absolute;
+      border-radius: 8px;
+      background-color: #fff;
+      height: 30px;
+      left: 2px;
+      top: 2px;
+      width: 60px;
+      z-index: 1;
+      transition: left 0.3s;
+    }
+
+    // 面板：默认隐藏，active 时显示
+    .cherry-mermaid-source-toolbar-panel {
+      display: none;
+      width: 100%;
+
+      &.active {
+        display: block;
+      }
+
+      // 源码面板中的代码块样式微调
+      &[data-mode="source"] [data-type="codeBlock"] {
+        margin: 0;
+        border-radius: 0;
+      }
+    }
+
+    // 当包含工具栏时，调整溢出和宽度行为
+    &:has(.cherry-mermaid-source-toolbar) {
+      width: auto;
+      max-width: 100%;
+      overflow: hidden;
+      border: 2px solid #ebecef;
+      border-radius: 4px;
+      background-color: #ebecef;
+    }
   }
 
   p,

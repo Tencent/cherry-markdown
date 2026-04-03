@@ -212,4 +212,6 @@ export default {
   minValue: 'Минимальное значение',
   high: 'Высокий',
   low: 'Низкий',
+  mermaidSource: 'Исходный код',
+  mermaidPreview: 'Просмотр',
 };
