@@ -125,16 +125,20 @@ export default class PreviewerBubble {
    */
   isCherryCodeBlock(element) {
     if (!Element.prototype.closest) {
-      Element.prototype.closest = function (selector) {
-        let el = this;
-        while (el) {
-          if (el.matches(selector)) {
-            return el;
+      // @ts-ignore closest polyfill for old browsers
+      Element.prototype.closest = /** @type {any} */ (
+        function (selector) {
+          let el = this;
+          while (el) {
+            if (el.matches(selector)) {
+              return el;
+            }
+            // @ts-ignore parentElement in polyfill context
+            el = el.parentElement;
           }
-          el = el.parentElement;
+          return null;
         }
-        return null;
-      };
+      );
     }
     // 引用里的代码块先不支持所见即所得编辑
     if (this.$getClosestNode(element, 'BLOCKQUOTE') !== false) {
