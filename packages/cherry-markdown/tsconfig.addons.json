@@ -1,25 +1,18 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    // "noEmit": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "baseUrl": ".",
     "allowJs": true,
     "checkJs": true,
     "declaration": true,
     "emitDeclarationOnly": false,
     "outDir": "dist/addons",
-    "target": "ES5",
-    "paths": {
-      "@/libs/*": ["src/libs/*"]
-    },
+    "rootDir": ".",
+    "target": "ES2020",
+    "ignoreDeprecations": "6.0",
+    "strict": false,
+    "noFallthroughCasesInSwitch": false,
+    "moduleResolution": "bundler"
   },
-  // 按需引入addons，尽量不引入编辑器代码
-  "include": [
-    "src/addons/**/*-plugin.js",
-  ],
-  "files": [
-    "types/codemirror.d.ts",
-    "types/global.d.ts"
-  ]
+  "include": ["src/addons/**/*-plugin.js"],
+  "files": ["types/codemirror.d.ts", "types/global.d.ts"]
 }
