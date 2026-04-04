@@ -16,10 +16,10 @@
 import CherryStream from './CherryStream';
 
 import SyntaxHookBase from './core/SyntaxBase';
+import { isBrowser } from './utils/env';
 
 // in browser
-if (typeof window !== 'undefined') {
-  // @ts-ignore
+if (isBrowser()) {
   window.Cherry = CherryStream;
 }
 

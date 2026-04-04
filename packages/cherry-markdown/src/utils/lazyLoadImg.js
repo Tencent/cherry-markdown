@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { isBrowser } from './env';
+
 /**
  * 懒加载图片
  *
@@ -131,7 +133,7 @@ export default class LazyLoadImg {
     const imgs = this.previewerDom.querySelectorAll('img[data-src]');
     const { height, top } = this.previewerDom.getBoundingClientRect();
     const previewerHeight = height + top + 100; // 冗余一定高度用于提前加载
-    const windowsHeight = window?.innerHeight ?? 0 + 100; // 浏览器的视口高度
+    const windowsHeight = isBrowser() ? window.innerHeight + 100 : 0; // 浏览器的视口高度
     const maxHeight = Math.min(previewerHeight, windowsHeight); // 目标视区高度一定是小于浏览器视口高度的，也一定是小于预览区高度的
     const minHeight = top - 30; // 计算顶部高度时，需要预加载一行高
     const { autoLoadImgNum } = this.options;

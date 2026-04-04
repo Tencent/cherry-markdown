@@ -1,71 +1,71 @@
-import Mermaid from 'mermaid';
-import type * as EChartsType from 'echarts';
-import type { KatexOptions } from 'katex';
+/**
+ * 全局类型声明（随 npm 发布给用户）
+ *
+ * 为通过 `<script>` 标签引入 cherry-markdown 的用户
+ * 提供 `window` 上挂载对象的类型支持。
+ *
+ * @example
+ * 在 tsconfig.json 中引入：
+ * ```json
+ * {
+ *   "compilerOptions": {
+ *     "types": ["cherry-markdown/types/global"]
+ *   }
+ * }
+ * ```
+ *
+ * 或在任意 .d.ts 文件中：
+ * ```ts
+ * /// <reference types="cherry-markdown/types/global" />
+ * ```
+ */
 
-// for IE
+import type Cherry from '../dist/types/Cherry';
+import type MermaidCodeEngine from '../dist/types/addons/cherry-code-block-mermaid-plugin';
+import type PlantUMLCodeEngine from '../dist/types/addons/cherry-code-block-plantuml-plugin';
+
 export {};
 
-/** MathJax 运行时核心 API（仅声明 CherryMarkdown 实际使用的部分） */
-interface MathJaxRuntime {
-  /** 重置 tex 计数器 */
-  texReset?(): void;
-  /** 将 tex 源码转为 MathML Promise */
-  tex2mmlPromise?(tex: string, opts?: { display: boolean }): Promise<string>;
-  startup?: {
-    /** CSS 选择器数组，指定哪些元素需要 typeset */
-    elements?: string[];
-    /** 是否在页面加载时自动排版 */
-    typeset?: boolean;
-    [key: string]: unknown;
-  };
-  tex?: Record<string, unknown>;
-  options?: Record<string, unknown>;
-  loader?: { load?: string[] };
-  [key: string]: unknown;
-}
-
-/** katex 运行时 API（仅声明 CherryMarkdown 实际使用的部分） */
-interface KatexRuntime {
-  renderToString(tex: string, options?: KatexOptions): string;
-  render?(tex: string, element: HTMLElement, options?: KatexOptions): void;
-  [key: string]: unknown;
-}
-
 declare global {
-  const BUILD_ENV: string;
   interface Window {
-    // for IE
-    clipboardData: ClipboardEvent['clipboardData'];
+    /**
+     * Cherry Markdown 编辑器构造函数。
+     *
+     * 根据引入的构建产物不同，类型有所区别：
+     * - 完整版（cherry-markdown.js / cherry-markdown.core.js）→ `Cherry`
+     * - 流式版（cherry-markdown.stream.js）→ `CherryStream`
+     *
+     * 默认类型为完整版 `Cherry`，如需精确类型可自行 narrowing。
+     *
+     * @example
+     * ```ts
+     * const cherry = new window.Cherry({ id: 'markdown' });
+     * ```
+     */
+    Cherry?: typeof Cherry;
 
     /**
-     * mermaid 实例（v9+ 均通过顶层对象访问）
-     * 用户可通过 CDN <script> 加载后挂载到 window，或通过 CherryMarkdown externals 注入
+     * Mermaid 代码块插件（UMD 构建产物自动挂载）
+     *
+     * @example
+     * ```ts
+     * Cherry.usePlugin(window.CherryCodeBlockMermaidPlugin, {
+     *   mermaid: window.mermaid,
+     * });
+     * ```
      */
-    mermaid?: typeof Mermaid;
+    CherryCodeBlockMermaidPlugin?: typeof MermaidCodeEngine;
 
     /**
-     * @deprecated v10+ 已废弃。v9 及以下版本的独立 mermaidAPI 子对象。
-     * v10+ 所有功能已合并到顶层 mermaid 对象。
-     * 保留此声明仅为兼容旧版本使用者传入的 mermaidAPI 参数。
+     * PlantUML 代码块插件（UMD 构建产物自动挂载）
+     *
+     * @example
+     * ```ts
+     * Cherry.usePlugin(window.CherryCodeBlockPlantumlPlugin, {
+     *   baseUrl: 'http://www.plantuml.com/plantuml',
+     * });
+     * ```
      */
-    mermaidAPI?: {
-      initialize(config: Record<string, unknown>): void;
-      render(
-        id: string,
-        code: string,
-        callback?: (svg: string) => void,
-        container?: HTMLElement,
-      ): unknown | Promise<{ svg: string }>;
-      [key: string]: unknown;
-    };
-
-    /** echarts 实例（用户需自行通过 CDN 或 script 标签注入） */
-    echarts?: EChartsType.ECharts;
-
-    /** MathJax 实例（用户需自行通过 CDN 或 script 标签注入） */
-    MathJax?: MathJaxRuntime;
-
-    /** katex 实例（用户需自行通过 CDN 或 script 标签注入） */
-    katex?: KatexRuntime;
+    CherryCodeBlockPlantumlPlugin?: typeof PlantUMLCodeEngine;
   }
 }

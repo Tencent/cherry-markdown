@@ -37,7 +37,7 @@
   ],
   "files": [
     "types/codemirror.d.ts",
-    "types/global.d.ts",
+    "types/env.d.ts",
     "types/index.d.ts"
   ]
 }

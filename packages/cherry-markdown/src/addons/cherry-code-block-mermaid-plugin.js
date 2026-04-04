@@ -116,19 +116,22 @@ export default class MermaidCodeEngine {
    */
   constructor(mermaidOptions = {}) {
     const { mermaid, mermaidAPI } = mermaidOptions;
+    const browserMermaid = isBrowser() ? window.mermaid : null;
+    const browserMermaidAPI = isBrowser() ? window.mermaidAPI : null;
     if (
       !mermaidAPI &&
-      !window.mermaidAPI &&
+      !browserMermaidAPI &&
       (!mermaid || !mermaid.mermaidAPI) &&
-      (!window.mermaid || !window.mermaid.mermaidAPI)
+      (!browserMermaid || !browserMermaid.mermaidAPI)
     ) {
       throw new Error('code-block-mermaid-plugin[init]: Package mermaid or mermaidAPI not found.');
     }
     this.options = { ...DEFAULT_OPTIONS, ...(mermaidOptions || {}) };
-    this.mermaidAPIRefs = mermaidAPI || window.mermaidAPI || mermaid.mermaidAPI || window.mermaid.mermaidAPI;
+    this.mermaidAPIRefs =
+      mermaidAPI || browserMermaidAPI || mermaid.mermaidAPI || (browserMermaid && browserMermaid.mermaidAPI);
     if (this.isAsyncRenderVersion()) {
       // 异步渲染时，只有 mermaid.render 有队列优化，使用 mermaidAPI 会导致渲染出错
-      this.mermaidAPIRefs = mermaid || window.mermaid || this.mermaidAPIRefs;
+      this.mermaidAPIRefs = mermaid || browserMermaid || this.mermaidAPIRefs;
     }
     delete this.options.mermaid;
     delete this.options.mermaidAPI;
