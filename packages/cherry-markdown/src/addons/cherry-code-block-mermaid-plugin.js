@@ -47,7 +47,7 @@ const DEFAULT_OPTIONS = {
   fontFamily: 'sans-serif',
   themeCSS: '.label foreignObject { font-size: 90%; overflow: visible; } .label { font-family: sans-serif; }',
   startOnLoad: false,
-  logLevel: 5,
+  logLevel: 'error',
   // fontFamily: 'Arial, monospace'
 };
 
@@ -84,13 +84,13 @@ export default class MermaidCodeEngine {
   /**
    * @param {Object} mermaidOptions - Mermaid 配置选项
    * @param {Object} [mermaidOptions.mermaid] - mermaid 实例对象，如果未提供会尝试从 window.mermaid 获取
-   * @param {Object} [mermaidOptions.mermaidAPI] - mermaidAPI 实例对象，如果未提供会尝试从 window.mermaidAPI 获取
+   * @param {Object} [mermaidOptions.mermaidAPI] - mermaidAPI 实例对象（仅 v9 及以下版本需要，v10+ 可忽略）
    * @param {string} [mermaidOptions.theme='default'] - 主题，可选值: 'default', 'dark', 'forest', 'neutral' 等
    * @param {string} [mermaidOptions.altFontFamily='sans-serif'] - 备用字体
    * @param {string} [mermaidOptions.fontFamily='sans-serif'] - 主字体
    * @param {string} [mermaidOptions.themeCSS] - 自定义主题 CSS 样式
    * @param {boolean} [mermaidOptions.startOnLoad=false] - 是否在页面加载时自动渲染
-   * @param {number} [mermaidOptions.logLevel=5] - 日志级别，1-5，5 为最详细
+   * @param {number|string} [mermaidOptions.logLevel] - 日志级别（v9: 数字 1-5；v10+: 字符串 'debug'|'info'|...|'silent'）
    * @param {HTMLElement} [mermaidOptions.mermaidCanvasAppendDom] - Mermaid 临时画布容器的挂载节点
    * @param {Object} [mermaidOptions.flowchart] - 流程图配置，可设置 { useMaxWidth: false } 等
    * @param {Object} [mermaidOptions.sequence] - 序列图配置，可设置 { useMaxWidth: false } 等
@@ -116,31 +116,44 @@ export default class MermaidCodeEngine {
    */
   constructor(mermaidOptions = {}) {
     const { mermaid, mermaidAPI } = mermaidOptions;
+    // 兼容 v9（有 mermaidAPI 子对象）和 v10+（统一顶层对象）
     const browserMermaid = isBrowser() ? window.mermaid : null;
     const browserMermaidAPI = isBrowser() ? window.mermaidAPI : null;
-    if (
-      !mermaidAPI &&
-      !browserMermaidAPI &&
-      (!mermaid || !mermaid.mermaidAPI) &&
-      (!browserMermaid || !browserMermaid.mermaidAPI)
-    ) {
+    const resolvedMermaid = mermaid || browserMermaid;
+    const resolvedMermaidAPI =
+      mermaidAPI || browserMermaidAPI || (resolvedMermaid && resolvedMermaid.mermaidAPI) || null;
+
+    if (!resolvedMermaid && !resolvedMermaidAPI) {
       throw new Error('code-block-mermaid-plugin[init]: Package mermaid or mermaidAPI not found.');
     }
-    this.options = { ...DEFAULT_OPTIONS, ...(mermaidOptions || {}) };
-    this.mermaidAPIRefs =
-      mermaidAPI || browserMermaidAPI || mermaid.mermaidAPI || (browserMermaid && browserMermaid.mermaidAPI);
-    if (this.isAsyncRenderVersion()) {
-      // 异步渲染时，只有 mermaid.render 有队列优化，使用 mermaidAPI 会导致渲染出错
-      this.mermaidAPIRefs = mermaid || browserMermaid || this.mermaidAPIRefs;
-    }
+
+    // @ts-expect-error logLevel 兼容 v9(number) 和 v10+(string)
+    this.options = { ...DEFAULT_OPTIONS, ...mermaidOptions };
     delete this.options.mermaid;
     delete this.options.mermaidAPI;
+
+    // 根据版本选择渲染引用：
+    // - v9: 使用 mermaidAPI（render 同步回调模式）
+    // - v10+: 使用 mermaid（render 异步 Promise 模式）
+    if (resolvedMermaidAPI) {
+      // v9 及以下：存在独立的 mermaidAPI 对象
+      this.mermaidAPIRefs = resolvedMermaidAPI;
+      if (this.isAsyncRenderVersion()) {
+        // v9.x 中某些版本也有异步 render（参数长度为 3），此时使用 mermaid 主对象更可靠
+        this.mermaidAPIRefs = resolvedMermaid || this.mermaidAPIRefs;
+      }
+    } else {
+      // v10+：无 mermaidAPI，统一使用 mermaid 主对象
+      this.mermaidAPIRefs = resolvedMermaid;
+    }
     this.mermaidAPIRefs.initialize(this.options);
   }
 
-  // v10 以上开始，render 变为异步渲染，render 函数的参数数量从 4 变为 3
+  // 通过检测 render 函数的参数数量来判断是否为异步渲染版本
+  // v9: render(id, src, callback, canvas) → length === 4 → syncRender
+  // v10+: render(id, src, container?) → length <= 3 → asyncRender
   isAsyncRenderVersion() {
-    return this.mermaidAPIRefs.render.length === 3;
+    return !this.mermaidAPIRefs.render || this.mermaidAPIRefs.render.length <= 3;
   }
 
   mountMermaidCanvas($engine) {

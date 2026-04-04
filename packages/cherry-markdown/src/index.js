@@ -19,6 +19,7 @@ import PlantUMLCodeEngine from '@/addons/cherry-code-block-plantuml-plugin';
 import EChartsTableEngine from '@/addons/advance/cherry-table-echarts-plugin';
 import mermaid from 'mermaid';
 
+// v9 及以下有 mermaid.mermaidAPI，v10+ 为 undefined
 const mermaidAPI = mermaid?.mermaidAPI;
 Cherry.usePlugin(MermaidCodeEngine, {
   mermaid,

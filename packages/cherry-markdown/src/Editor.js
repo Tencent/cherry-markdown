@@ -1015,7 +1015,7 @@ export default class Editor {
     /** @type {Compartment} */
     this.vimCompartment = new Compartment();
 
-    /** @type {NodeJS.Timeout | number} */
+    /** @type {ReturnType<typeof setTimeout> | number} */
     this.dealSpecialWordsTimer = 0;
     /** @type {number} */
     this.dealSpecialWordsStartTime = 0;
@@ -1073,7 +1073,7 @@ export default class Editor {
     const forceProcessMs = config.forceProcessMs ?? 1000;
 
     if (this.dealSpecialWordsTimer) {
-      clearTimeout(this.dealSpecialWordsTimer);
+      clearTimeout(/** @type {number} */ (this.dealSpecialWordsTimer));
     }
 
     if (!this.dealSpecialWordsStartTime) {
@@ -2367,7 +2367,7 @@ export default class Editor {
     this.isDestroyed = true;
 
     if (this.dealSpecialWordsTimer) {
-      clearTimeout(this.dealSpecialWordsTimer);
+      clearTimeout(/** @type {number} */ (this.dealSpecialWordsTimer));
       this.dealSpecialWordsTimer = 0;
     }
     this.dealSpecialWordsStartTime = 0;

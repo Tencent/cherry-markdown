@@ -41,6 +41,7 @@ if (!isBrowser()) {
   });
 }
 
+// @ts-expect-error process.env from build env
 const VERSION = `${process.env.BUILD_VERSION}`;
 
 export class CherryStatic {
