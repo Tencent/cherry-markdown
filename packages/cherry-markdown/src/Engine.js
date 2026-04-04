@@ -135,15 +135,17 @@ export default class Engine {
       }
     }
     if (syntax.mathBlock.engine === 'katex' || syntax.inlineMath.engine === 'katex') {
-      const katexInstance = /** @type {import('./types/global').KatexRuntime | undefined} */ (getExternal('katex'));
+      const katexInstance = /** @type {import('katex').default | undefined} */ (getExternal('katex'));
       if (katexInstance) {
         return;
       }
       syntax.mathBlock.css && loadCSS(syntax.mathBlock.css, 'katex-css');
       if (syntax.mathBlock.src) {
         loadScript(syntax.mathBlock.src, 'katex-js').then(() => {
-          const resolvedKatex = /** @type {import('./types/global').KatexRuntime} */ (getExternal('katex'));
-          if (!resolvedKatex) { return; }
+          const resolvedKatex = /** @type {import('katex').default} */ (getExternal('katex'));
+          if (!resolvedKatex) {
+            return;
+          }
           // 先更新预览区域
           this.$cherry.previewer
             .getDom()

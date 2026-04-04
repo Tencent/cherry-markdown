@@ -228,7 +228,7 @@ export default class FormulaHandler {
               // @ts-ignore
               const hook = this.editor.$cherry.engine.hooks.paragraph.find((hook) => hook instanceof MathBlock);
               if (hook && hook.engine === 'MathJax') {
-                const mj = /** @type {import('./types/global').MathJaxRuntime | undefined} */ (getExternal('MathJax'));
+                const mj = getExternal('MathJax');
                 mj?.texReset?.();
                 mj?.tex2mmlPromise?.(formulaCode, { display: true }).then((mml) => {
                   if (name === 'mathml') {
@@ -238,7 +238,7 @@ export default class FormulaHandler {
                   }
                 });
               } else if (hook && hook.engine === 'katex') {
-                const katexInstance = /** @type {import('./types/global').KatexRuntime | undefined} */ (getExternal('katex'));
+                const katexInstance = /** @type {import('katex').default | undefined} */ (getExternal('katex'));
                 if (katexInstance) {
                   const html = katexInstance.renderToString(formulaCode, {
                     throwOnError: false,
