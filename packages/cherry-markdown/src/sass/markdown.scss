@@ -1,7 +1,9 @@
+@use 'sass:meta';
+
 .cherry-markdown {
   word-break: break-all;
   color: var(--md-paragraph-color);
-  background-color: var(--base-previewer-bg);
+  background-color: var(--color-bg-surface);
   h1,
   h2,
   h3,
@@ -151,11 +153,11 @@
   }
 
   kbd {
-    border: 1px solid var(--base-border-color);
+    border: 1px solid var(--color-border-default);
     border-radius: 4px;
     padding: 1px 2px;
     box-sizing: border-box;
-    box-shadow: inset 0px -1px var(--base-border-color);
+    box-shadow: inset 0px -1px var(--color-border-default);
     font-size: 0.85rem;
   }
 
@@ -420,7 +422,7 @@
     border: 1px solid var(--md-hr-border);
 
     [data-inline-code-theme='black'] & {
-      color: var(--base-font-color);
+      color: var(--color-text-primary);
       background-color: var(--md-inline-code-bg);
     }
   }
@@ -683,15 +685,15 @@
 .cherry[class*="theme__"] .cherry-previewer-table-content-handler {
   .cherry-previewer-table-content-handler__input {
     textarea {
-      background-color: var(--base-editor-bg);
-      color: var(--base-font-color);
+      background-color: var(--color-bg-canvas);
+      color: var(--color-text-primary);
       outline-color: var(--editor-header-color);
     }
   }
 }
 
 div[data-type='codeBlock'] {
-  @import 'prism/tomorrow-night';
+  @include meta.load-css('prism/tomorrow-night');
 
   div[data-code-wrap='wrap'] & code[class*=language-]{
     white-space: pre-wrap;
@@ -699,43 +701,43 @@ div[data-type='codeBlock'] {
   }
 
   [data-code-block-theme='default'] & {
-    @import 'prism/default';
+    @include meta.load-css('prism/default');
   }
 
   [data-code-block-theme='dark'] & {
-    @import 'prism/dark';
+    @include meta.load-css('prism/dark');
   }
 
   [data-code-block-theme='one-dark'] & {
-    @import 'prism/one-dark';
+    @include meta.load-css('prism/one-dark');
   }
 
   [data-code-block-theme='one-light'] & {
-    @import 'prism/one-light';
+    @include meta.load-css('prism/one-light');
   }
 
   [data-code-block-theme='vs-dark'] & {
-    @import 'prism/vs-dark';
+    @include meta.load-css('prism/vs-dark');
   }
 
   [data-code-block-theme='vs-light'] & {
-    @import 'prism/vs-light';
+    @include meta.load-css('prism/vs-light');
   }
 
   [data-code-block-theme='okaidia'] & {
-    @import 'prism/okaidia';
+    @include meta.load-css('prism/okaidia');
   }
 
   [data-code-block-theme='twilight'] & {
-    @import 'prism/twilight';
+    @include meta.load-css('prism/twilight');
   }
 
   [data-code-block-theme='coy'] & {
-    @import 'prism/coy';
+    @include meta.load-css('prism/coy');
   }
 
   [data-code-block-theme='solarized-light'] & {
-    @import 'prism/solarized-light';
+    @include meta.load-css('prism/solarized-light');
   }
 }
 
@@ -908,7 +910,7 @@ div[data-type='codeBlock'] {
   overflow: hidden;
   border-radius: var(--panel-border-radius, var(--radius-xl));
   box-sizing: border-box;
-  border: var(--panel-border, 0.5px solid var(--panel-border-color, transparent));
+  border: var(--panel-border, 1px solid var(--color-border-default));
   background: var(--panel-bg, transparent);
   box-shadow: var(--panel-box-shadow, none);
   backdrop-filter: var(--panel-backdrop-filter, none);
@@ -937,71 +939,61 @@ div[data-type='codeBlock'] {
 }
 
 .cherry-panel__primary {
-  --panel-bg: var(--panel-primary-bg, #cfe2ff);
-  --panel-border-color: var(--panel-primary-border-color, transparent);
-  --panel-box-shadow: var(--panel-primary-box-shadow, none);
-  --panel-title-bg: var(--panel-primary-title-bg, #0d6dfe);
-  --panel-title-color: var(--panel-primary-title-color, #fff);
-  --panel-title-border-radius: var(--panel-primary-title-border-radius, 0);
-  --panel-title-border-bottom: var(--panel-primary-title-border-bottom, none);
-  --panel-body-bg: var(--panel-primary-body-bg, transparent);
-  --panel-body-color: var(--panel-primary-body-color, #0a58ca);
-  --panel-body-border-radius: var(--panel-primary-body-border-radius, 0);
+  --panel-border: 1px solid var(--panel-primary-accent, var(--color-brand-primary));
+  --panel-bg: var(--panel-primary-surface, var(--color-bg-active));
+  --panel-box-shadow: var(--panel-primary-box-shadow, var(--panel-box-shadow));
+  --panel-title-bg: var(--panel-primary-emphasis, var(--panel-primary-accent, var(--color-brand-primary)));
+  --panel-title-color: var(--panel-primary-title-fg, #fff);
+  --panel-title-border-bottom: 1px solid var(--panel-primary-accent, var(--color-brand-primary));
+  --panel-body-bg: var(--panel-primary-surface, var(--color-bg-active));
+  --panel-body-color: var(--panel-primary-body-fg, var(--panel-primary-accent, var(--color-brand-primary)));
   --panel-icon: var(--panel-primary-icon, '\EA6A');
 }
 
 .cherry-panel__info {
-  --panel-bg: var(--panel-info-bg, #cff4fc);
-  --panel-border-color: var(--panel-info-border-color, transparent);
-  --panel-box-shadow: var(--panel-info-box-shadow, none);
-  --panel-title-bg: var(--panel-info-title-bg, #099cba);
-  --panel-title-color: var(--panel-info-title-color, #fff);
-  --panel-title-border-radius: var(--panel-info-title-border-radius, 0);
-  --panel-title-border-bottom: var(--panel-info-title-border-bottom, none);
-  --panel-body-bg: var(--panel-info-body-bg, transparent);
-  --panel-body-color: var(--panel-info-body-color, #087990);
-  --panel-body-border-radius: var(--panel-info-body-border-radius, 0);
+  --panel-border: 1px solid var(--panel-info-accent, var(--oc-cyan-5));
+  --panel-bg: var(--panel-info-surface, var(--oc-cyan-0));
+  --panel-box-shadow: var(--panel-info-box-shadow, var(--panel-box-shadow));
+  --panel-title-bg: var(--panel-info-emphasis, var(--oc-cyan-6));
+  --panel-title-color: var(--panel-info-title-fg, #fff);
+  --panel-title-border-bottom: 1px solid var(--panel-info-accent, var(--oc-cyan-5));
+  --panel-body-bg: var(--panel-info-surface, var(--oc-cyan-0));
+  --panel-body-color: var(--panel-info-body-fg, var(--oc-cyan-8));
   --panel-icon: var(--panel-info-icon, '\EA69');
 }
 
 .cherry-panel__warning {
-  --panel-bg: var(--panel-warning-bg, #fff3cd);
-  --panel-border-color: var(--panel-warning-border-color, transparent);
-  --panel-box-shadow: var(--panel-warning-box-shadow, none);
-  --panel-title-bg: var(--panel-warning-title-bg, #b38806);
-  --panel-title-color: var(--panel-warning-title-color, #fff);
-  --panel-title-border-radius: var(--panel-warning-title-border-radius, 0);
-  --panel-title-border-bottom: var(--panel-warning-title-border-bottom, none);
-  --panel-body-bg: var(--panel-warning-body-bg, transparent);
-  --panel-body-color: var(--panel-warning-body-color, #997404);
-  --panel-body-border-radius: var(--panel-warning-body-border-radius, 0);
+  --panel-border: 1px solid var(--panel-warning-accent, var(--oc-yellow-5));
+  --panel-bg: var(--panel-warning-surface, var(--oc-yellow-0));
+  --panel-box-shadow: var(--panel-warning-box-shadow, var(--panel-box-shadow));
+  --panel-title-bg: var(--panel-warning-emphasis, var(--oc-yellow-6));
+  --panel-title-color: var(--panel-warning-title-fg, #fff);
+  --panel-title-border-bottom: 1px solid var(--panel-warning-accent, var(--oc-yellow-5));
+  --panel-body-bg: var(--panel-warning-surface, var(--oc-yellow-0));
+  --panel-body-color: var(--panel-warning-body-fg, var(--oc-yellow-8));
   --panel-icon: var(--panel-warning-icon, '\EA6B');
 }
 
 .cherry-panel__danger {
-  --panel-bg: var(--panel-danger-bg, #f8d7da);
-  --panel-border-color: var(--panel-danger-border-color, transparent);
-  --panel-box-shadow: var(--panel-danger-box-shadow, none);
-  --panel-title-bg: var(--panel-danger-title-bg, #dc3545);
-  --panel-title-color: var(--panel-danger-title-color, #fff);
-  --panel-title-border-radius: var(--panel-danger-title-border-radius, 0);
-  --panel-title-border-bottom: var(--panel-danger-title-border-bottom, none);
-  --panel-body-bg: var(--panel-danger-body-bg, transparent);
-  --panel-body-color: var(--panel-danger-body-color, #b02a37);
-  --panel-body-border-radius: var(--panel-danger-body-border-radius, 0);
+  --panel-border: 1px solid var(--panel-danger-accent, var(--oc-red-5));
+  --panel-bg: var(--panel-danger-surface, var(--oc-red-0));
+  --panel-box-shadow: var(--panel-danger-box-shadow, var(--panel-box-shadow));
+  --panel-title-bg: var(--panel-danger-emphasis, var(--oc-red-6));
+  --panel-title-color: var(--panel-danger-title-fg, #fff);
+  --panel-title-border-bottom: 1px solid var(--panel-danger-accent, var(--oc-red-5));
+  --panel-body-bg: var(--panel-danger-surface, var(--oc-red-0));
+  --panel-body-color: var(--panel-danger-body-fg, var(--oc-red-8));
   --panel-icon: var(--panel-danger-icon, '\EA68');
 }
 
 .cherry-panel__success {
-  --panel-bg: var(--panel-success-bg, #d1e7dd);
-  --panel-border-color: var(--panel-success-border-color, transparent);
-  --panel-box-shadow: var(--panel-success-box-shadow, none);
-  --panel-title-bg: var(--panel-success-title-bg, #198754);
-  --panel-title-color: var(--panel-success-title-color, #fff);
-  --panel-title-border-radius: var(--panel-success-title-border-radius, 0);
-  --panel-title-border-bottom: var(--panel-success-title-border-bottom, none);
-  --panel-body-bg: var(--panel-success-body-bg, transparent);
-  --panel-body-color: var(--panel-success-body-color, #146c43);
-  --panel-body-border-radius: var(--panel-success-body-border-radius, 0);
+  --panel-border: 1px solid var(--panel-success-accent, var(--oc-green-5));
+  --panel-bg: var(--panel-success-surface, var(--oc-green-0));
+  --panel-box-shadow: var(--panel-success-box-shadow, var(--panel-box-shadow));
+  --panel-title-bg: var(--panel-success-emphasis, var(--oc-green-6));
+  --panel-title-color: var(--panel-success-title-fg, #fff);
+  --panel-title-border-bottom: 1px solid var(--panel-success-accent, var(--oc-green-5));
+  --panel-body-bg: var(--panel-success-surface, var(--oc-green-0));
+  --panel-body-color: var(--panel-success-body-fg, var(--oc-green-8));
   --panel-icon: var(--panel-success-icon, '\EA67');
 }

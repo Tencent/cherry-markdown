@@ -3,23 +3,34 @@
  */
 
 .cherry.theme__blue {
-  /* ========== 基础色彩变量覆盖 ========== */
-  --primary-color: var(--oc-indigo-6);
-  --secondary-color: var(--oc-violet-0);
+  /* ========== 新语义变量覆盖 ========== */
+  --color-brand-primary: var(--oc-indigo-6);
+  --color-brand-primary-hover: var(--oc-indigo-5);
+  --color-text-primary: var(--oc-indigo-8);
+  --color-text-secondary: var(--oc-indigo-6);
+  --color-bg-canvas: var(--oc-violet-0);
+  --color-bg-surface: var(--oc-violet-0);
+  --color-bg-hover: var(--oc-violet-3);
+  --color-bg-active: var(--oc-violet-0);
+  --color-border-default: var(--oc-indigo-4);
 
-  --base-font-color: var(--oc-indigo-8);
-  --base-editor-bg: var(--oc-violet-0);
-  --base-previewer-bg: var(--oc-violet-0);
-  --base-border-color: var(--oc-indigo-4);
+  /* ========== 兼容旧语义别名 ========== */
+  --primary-color: var(--color-brand-primary);
+  --secondary-color: var(--color-bg-active);
+  --base-font-color: var(--color-text-primary);
+  --base-editor-bg: var(--color-bg-canvas);
+  --base-previewer-bg: var(--color-bg-surface);
+  --base-border-color: var(--color-border-default);
 
   /* ========== 工具栏相关变量 ========== */
   --toolbar-bg: var(--oc-violet-1);
   --toolbar-btn-color: var(--oc-indigo-7);
-  --toolbar-btn-hover-bg: var(--oc-violet-3);
+  --toolbar-btn-hover-bg: var(--color-bg-hover);
   --toolbar-btn-hover-color: var(--oc-white);
-  --toolbar-btn-active-bg:var(--oc-blue-5);
-  --toolbar-split-color: var(--oc-indigo-4);
+  --toolbar-btn-active-bg: var(--oc-blue-5);
+  --toolbar-split-color: var(--color-border-default);
 
+  /* ========== 工具栏的下拉菜单 ========== */
   --dropdown-bg: var(--oc-white);
 
   /* ========== 编辑器相关变量 ========== */
@@ -43,18 +54,28 @@
   --md-inline-code-bg: var(--oc-violet-1);
   --md-blockquote-bg: var(--oc-violet-1);
   --md-hr-border: var(--oc-indigo-4);
-  /* ========== table 相关变量 ========== */
-  --md-table-border: var(--oc-blue-5);
-  --md-table-add-border: var(--oc-blue-9);
-  --md-table-delete-bg: var(--oc-violet-1);
-  --md-table-sort-active-bg: var(--oc-blue-5);
-  --md-table-sort-border: var(--oc-indigo-4);
-  /* ========== table 相关变量 ========== */
+
+  /* ========== Table 相关变量 ========== */
   --md-table-border: var(--oc-blue-5);
   --md-table-drag-border-bg: var(--primary-color);
   --md-table-sort-active-bg: rgba(184, 134, 253, 0.4);
 
+  /* ========== TOC 相关变量 ========== */
   --md-paragraph-highlight-line-bg: var(--oc-violet-1);
+  --md-toc-bg: var(--oc-white);
+  --md-toc-border-color: var(--base-border-color);
+  --md-toc-indicator-color: var(--oc-indigo-1);
+  --md-toc-link-hover-bg: var(--oc-violet-0);
+  --md-toc-link-active-bg: var(--oc-violet-1);
+
+  /* ========== Accordion 相关变量 ========== */
+  --accordion-bg: var(--oc-violet-0);
+  --accordion-border: var(--oc-indigo-2);
+  --accordion-summary-bg: var(--oc-indigo-6);
+  --accordion-summary-hover-bg: var(--oc-indigo-5);
+  --accordion-body-bg: var(--oc-violet-0);
+  --accordion-body-border: var(--oc-indigo-1);
+  --accordion-body-color: var(--oc-indigo-8);
 
   /* ========== Panel 相关变量 ========== */
   --panel-border-radius: 0;
@@ -63,64 +84,45 @@
   --panel-box-shadow: none;
   --panel-title-bg: transparent;
   --panel-title-color: inherit;
+  --panel-title-border-bottom: none;
   --panel-body-bg: transparent;
   --panel-body-color: inherit;
+  --panel-body-border-radius: 0;
 
   /* Primary Panel */
-  --panel-primary-border: none;
-  --panel-primary-border-color: transparent;
-  --panel-primary-title-bg: transparent;
-  --panel-primary-bg: transparent;
-  --panel-primary-title-color: var(--oc-blue-7);
-  --panel-primary-body-color: inherit;
+  --panel-primary-accent: transparent;
+  --panel-primary-surface: transparent;
+  --panel-primary-emphasis: transparent;
+  --panel-primary-title-fg: var(--oc-blue-7);
+  --panel-primary-body-fg: inherit;
 
   /* Info Panel */
-  --panel-info-border: none;
-  --panel-info-border-color: transparent;
-  --panel-info-title-bg: transparent;
-  --panel-info-bg: transparent;
-  --panel-info-title-color: var(--oc-cyan-7);
-  --panel-info-body-color: inherit;
+  --panel-info-accent: transparent;
+  --panel-info-surface: transparent;
+  --panel-info-emphasis: transparent;
+  --panel-info-title-fg: var(--oc-cyan-7);
+  --panel-info-body-fg: inherit;
 
   /* Warning Panel */
-  --panel-warning-border: none;
-  --panel-warning-border-color: transparent;
-  --panel-warning-title-bg: transparent;
-  --panel-warning-bg: transparent;
-  --panel-warning-title-color: var(--oc-yellow-7);
-  --panel-warning-body-color: inherit;
+  --panel-warning-accent: transparent;
+  --panel-warning-surface: transparent;
+  --panel-warning-emphasis: transparent;
+  --panel-warning-title-fg: var(--oc-yellow-7);
+  --panel-warning-body-fg: inherit;
 
   /* Danger Panel */
-  --panel-danger-border: none;
-  --panel-danger-border-color: transparent;
-  --panel-danger-title-bg: transparent;
-  --panel-danger-bg: transparent;
-  --panel-danger-title-color: var(--oc-pink-7);
-  --panel-danger-body-color: inherit;
+  --panel-danger-accent: transparent;
+  --panel-danger-surface: transparent;
+  --panel-danger-emphasis: transparent;
+  --panel-danger-title-fg: var(--oc-pink-7);
+  --panel-danger-body-fg: inherit;
 
   /* Success Panel */
-  --panel-success-border: none;
-  --panel-success-border-color: transparent;
-  --panel-success-title-bg: transparent;
-  --panel-success-bg: transparent;
-  --panel-success-title-color: var(--oc-teal-7);
-  --panel-success-body-color: inherit;
-  --md-toc-bg: var(--oc-white);
-  --md-toc-border-color: var(--base-border-color);
-  --md-toc-indicator-color: var(--oc-indigo-1);
-  --md-toc-link-hover-bg: var(--oc-violet-0);
-  --md-toc-link-active-bg: var(--oc-violet-1);
-  
-  /* ========== 手风琴组件变量覆盖 ========== */
-  --accordion-bg: var(--oc-violet-0);
-  --accordion-border: var(--oc-indigo-2);
-  
-  --accordion-summary-bg: var(--oc-indigo-6);
-  --accordion-summary-hover-bg: var(--oc-indigo-5);
-  
-  --accordion-body-bg: var(--oc-violet-0);
-  --accordion-body-border: var(--oc-indigo-1);
-  --accordion-body-color: var(--oc-indigo-8);
+  --panel-success-accent: transparent;
+  --panel-success-surface: transparent;
+  --panel-success-emphasis: transparent;
+  --panel-success-title-fg: var(--oc-teal-7);
+  --panel-success-body-fg: inherit;
 }
 
 /** 预览区域样式 */

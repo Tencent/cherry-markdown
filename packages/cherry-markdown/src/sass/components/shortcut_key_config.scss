@@ -1,14 +1,4 @@
 .cherry {
-  --shortcut-key-config-panel-bg: var(--dropdown-bg);
-  --shortcut-key-config-panel-text-color: var(--dropdown-item-color);
-
-  // 快捷键面板通用样式变量
-  --shortcut-panel-padding-x: 15px;
-  --shortcut-panel-padding-y: 10px;
-  --shortcut-panel-font-size-xs: var(--font-size-xs);
-  --shortcut-panel-border-radius: 4px;
-  --shortcut-panel-transition: all 0.2s;
-
   .cherry-shortcut-key-config-panel-wrapper {
     background-color: var(--shortcut-key-config-panel-bg);
     color: var(--shortcut-key-config-panel-text-color);
@@ -22,7 +12,7 @@
 
     @mixin hover-color {
       &:hover {
-        color: var(--primary-color);
+        color: var(--color-brand-primary);
       }
     }
 
@@ -62,8 +52,8 @@
           }
 
           &.active {
-            color: var(--primary-color);
-            background-color: var(--secondary-color);
+            color: var(--color-brand-primary);
+            background-color: var(--color-bg-active);
           }
         }
       }
@@ -104,10 +94,10 @@
             background-color: var(--dropdown-item-hover-bg);
 
             .shortcut-key-config-panel-kbd {
-              border: 1px dashed var(--primary-color);
+              border: 1px dashed var(--color-brand-primary);
               border-radius: var(--shortcut-panel-border-radius);
               padding: 2px 4px;
-              background: var(--secondary-color);
+              background: var(--color-bg-active);
               transform: translateX(0) !important;
             }
 

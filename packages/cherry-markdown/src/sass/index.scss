@@ -2,4 +2,4 @@
 
 // CodeMirror 6 不需要单独引入样式文件,样式已集成在 @codemirror/view 中
 
-@import './cherry.scss';
+@include meta.load-css('./cherry');

@@ -1,0 +1,14 @@
+.cherry {
+  --accordion-bg: var(--base-previewer-bg);
+  --accordion-border: var(--base-border-color);
+  --accordion-radius: var(--radius-lg);
+  --accordion-shadow: var(--shadow-md);
+
+  --accordion-summary-bg: var(--primary-color);
+  --accordion-summary-color: var(--oc-white);
+  --accordion-summary-hover-bg: var(--color-primary-hover);
+
+  --accordion-body-bg: var(--base-previewer-bg);
+  --accordion-body-color: var(--base-font-color);
+  --accordion-body-border: var(--base-border-color);
+}

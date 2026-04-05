@@ -1,13 +1,15 @@
-@import './variables/index.scss';
-@import './base.scss';
-@import './ch-icon.scss';
-@import './markdown.scss';
-@import './previewer.scss';
-@import './print.scss';
-@import './bubble_formula.scss';
-@import './formula_utils_bubble.scss';
-@import './components/shortcut_key_config.scss';
-@import './codemirror-v6-fixes';
+@use 'sass:meta';
+
+@include meta.load-css('./variables/index');
+@include meta.load-css('./base');
+@include meta.load-css('./ch-icon');
+@include meta.load-css('./markdown');
+@include meta.load-css('./previewer');
+@include meta.load-css('./print');
+@include meta.load-css('./bubble_formula');
+@include meta.load-css('./formula_utils_bubble');
+@include meta.load-css('./components/shortcut_key_config');
+@include meta.load-css('./codemirror-v6-fixes');
 
 @mixin cherryFont {
   font-family: var(--font-family-sans);
@@ -97,8 +99,8 @@
 .cherry {
   @include cherryFont;
   line-height: var(--md-paragraph-line-height);
-  color: var(--base-font-color);
-  background: var(--base-editor-bg);
+  color: var(--color-text-primary);
+  background: var(--color-bg-canvas);
   box-shadow: var(--shadow-md);
 
   .ch-icon {
@@ -152,7 +154,7 @@
 
     &-item {
       padding: 7px;
-      border: 1px solid var(--base-border-color);
+      border: 1px solid var(--color-border-default);
 
       &.active {
         background-color: var(--toolbar-btn-hover-bg);
@@ -264,7 +266,7 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       font-size: 16px;
-      color: var(--primary-color);
+      color: var(--color-brand-primary);
       margin-left: 2px;
       margin-top: -2px;
     }
@@ -376,7 +378,7 @@
   // 默认主题采用亮色搜索框
   &.theme__default {
     --ace-search-bg: var(--oc-white);
-    --ace-search-text-color: var(--base-font-color);
+    --ace-search-text-color: var(--color-text-primary);
   }
 
   // 其它主题从toolbar和dropdown中取色
@@ -421,8 +423,8 @@
       align-items: center;
 
       &:focus-within {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px var(--secondary-color);
+        border-color: var(--color-brand-primary);
+        box-shadow: 0 0 0 3px var(--color-bg-active);
       }
 
       &.ace_nomatch {
@@ -524,8 +526,8 @@
       }
 
       &.checked {
-        border-color: var(--primary-color);
-        background-color: var(--secondary-color);
+        border-color: var(--color-brand-primary);
+        background-color: var(--color-bg-active);
         color: var(--ace-search-text-color);
         opacity: var(--opacity-100);
       }
@@ -632,7 +634,7 @@
   }
 }
 
-@import './components/bubble';
+@include meta.load-css('./components/bubble');
 
 .cherry-floatmenu {
   z-index: 4;
@@ -704,7 +706,7 @@
   width: 50%;
   box-sizing: border-box;
   overflow: hidden;
-  background-color: var(--base-editor-bg);
+  background-color: var(--color-bg-canvas);
   z-index: 1;
 
   &.cherry-editor--full {
@@ -756,8 +758,8 @@
 
   .cm-editor {
     font-family: var(--font-family-sans);
-    background-color: var(--base-editor-bg);
-    color: var(--base-font-color);
+    background-color: var(--color-bg-canvas);
+    color: var(--color-text-primary);
 
     // codemirror 依赖隐藏的 textarea 计算行高，这里将字体大小设置为行高，避免输入法遮挡内容
     // Fixed https://github.com/Tencent/cherry-markdown/issues/82
@@ -772,7 +774,7 @@
       .cm-strong,
       .cm-em,
       .cm-meta {
-        color: var(--base-font-color);
+        color: var(--color-text-primary);
       }
 
       .cm-image-marker,
@@ -931,8 +933,8 @@
   z-index: 1;
   .cm-editor {
     font-family: var(--font-family-sans);
-    background-color: var(--base-editor-bg);
-    color: var(--base-font-color);
+    background-color: var(--color-bg-canvas);
+    color: var(--color-text-primary);
   }
 }
 
@@ -1014,9 +1016,9 @@
     box-shadow: 5px 0 5px rgba(0, 0, 0, 0.05);
     transition: all 0.3s;
     z-index: 2;
-    color: var(--base-font-color);
+    color: var(--color-text-primary);
     background-color: var(--toolbar-bg);
-    border: 1px solid var(--base-border-color);
+    border: 1px solid var(--color-border-default);
   }
   .cherry-code-block-custom-btn {
     width: auto;
@@ -1035,8 +1037,8 @@
     transition: all 0.3s;
     z-index: 2;
     color: var(--toolbar-btn-color);
-    background-color: var(--primary-color);
-    border: 1px solid var(--base-border-color);
+    background-color: var(--color-brand-primary);
+    border: 1px solid var(--color-border-default);
   }
   .cherry-expand-code-block {
     top: 45px;
@@ -1093,8 +1095,8 @@
   .cherry-unExpand-code-block:focus-visible,
   .cherry-edit-code-block:focus-visible {
     box-shadow:
-      0 0 0 2px var(--base-previewer-bg),
-      0 0 0 4px var(--primary-color);
+      0 0 0 2px var(--color-bg-surface),
+      0 0 0 4px var(--color-brand-primary);
   }
 
   .cherry-code-preview-lang-select {
@@ -1102,9 +1104,9 @@
     -webkit-appearance: none;
 
     font-size: 14px;
-    color: var(--base-font-color);
+    color: var(--color-text-primary);
     background-color: var(--toolbar-bg);
-    border: 1px solid var(--base-border-color);
+    border: 1px solid var(--color-border-default);
     border-radius: 6px;
     padding: 5px 36px 5px 12px;
     cursor: pointer;
@@ -1118,16 +1120,16 @@
   }
 
   .cherry-code-preview-lang-select:focus {
-    border-color: var(--primary-color);
+    border-color: var(--color-brand-primary);
     outline: 0;
     box-shadow:
-      0 0 0 2px var(--base-previewer-bg),
-      0 0 0 4px var(--primary-color);
+      0 0 0 2px var(--color-bg-surface),
+      0 0 0 4px var(--color-brand-primary);
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23495057' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 11 6-6 6 6'/%3e%3c/svg%3e");
   }
 
   .cherry-code-preview-lang-select option {
-    color: var(--base-font-color);
+    color: var(--color-text-primary);
     font-size: 14px;
     background-color: var(--toolbar-bg);
     cursor: cursor;
@@ -1138,8 +1140,8 @@
     color: var(--toolbar-btn-hover-color);
   }
   .cherry-code-preview-lang-select:disabled {
-    background-color: var(--base-border-color);
-    color: var(--base-font-color);
+    background-color: var(--color-border-default);
+    color: var(--color-text-primary);
     cursor: not-allowed;
   }
 }
@@ -1152,7 +1154,7 @@
   width: 0.7em;
   height: 0.7em;
   border-radius: 100%;
-  border: var(--primary-color) solid 1px;
+  border: var(--color-brand-primary) solid 1px;
   margin-left: 0.2em;
   box-sizing: border-box;
 }
@@ -1205,7 +1207,7 @@
   border-left: 2px solid var(--drag-border-color);
   width: 50%;
   box-sizing: border-box;
-  background-color: var(--base-previewer-bg);
+  background-color: var(--color-bg-surface);
   min-height: auto;
   overflow-y: auto;
   -webkit-print-color-adjust: exact;
@@ -1265,7 +1267,7 @@
     .cherry-expand-code-block,
     .cherry-unExpand-code-block,
     .cherry-edit-code-block {
-      background-color: var(--primary-color);
+      background-color: var(--color-brand-primary);
     }
   }
 
@@ -1589,7 +1591,7 @@
     .cherry-toc-title {
       font-size: var(--font-size-md);
       font-weight: bold;
-      color: var(--primary-color);
+      color: var(--color-brand-primary);
       padding-left: 5px;
     }
     .ch-icon-chevronsLeft {
@@ -1631,8 +1633,8 @@
       cursor: pointer;
       &:hover,
       &.current {
-        border-left-color: var(--primary-color);
-        color: var(--primary-color);
+        border-left-color: var(--color-brand-primary);
+        color: var(--color-brand-primary);
       }
       .cherry-toc-in-blockquote {
         font-size: 0.6em;
@@ -1746,11 +1748,4 @@
 }
 
 /** 引入自带的主题 */
-@import './themes/default.scss';
-@import './themes/dark.scss';
-@import './themes/abyss.scss';
-@import './themes/green.scss';
-@import './themes/red.scss';
-@import './themes/gray.scss';
-@import './themes/violet.scss';
-@import './themes/blue.scss';
+@include meta.load-css('./themes/index');
