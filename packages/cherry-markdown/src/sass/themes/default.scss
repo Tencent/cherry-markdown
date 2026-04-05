@@ -14,14 +14,6 @@
   --color-bg-active: var(--oc-blue-0);
   --color-border-default: var(--oc-blue-5);
 
-  /* ========== 兼容旧语义别名 ========== */
-  --primary-color: var(--color-brand-primary);
-  --secondary-color: var(--color-bg-active);
-  --base-font-color: var(--color-text-primary);
-  --base-editor-bg: var(--color-bg-canvas);
-  --base-previewer-bg: var(--color-bg-surface);
-  --base-border-color: var(--color-border-default);
-
   /* ========== 工具栏相关变量 ========== */
   --toolbar-bg: var(--oc-white);
   --toolbar-btn-color: var(--oc-gray-8);
@@ -31,22 +23,22 @@
   --toolbar-split-color: var(--oc-blue-5);
 
   /* ========== 编辑器相关变量 ========== */
-  --editor-header-color: var(--primary-color);
+  --editor-header-color: var(--color-brand-primary);
   --editor-string-color: var(--oc-blue-4);
   --editor-comment-color: var(--oc-blue-4);
   --editor-quote-color: var(--oc-gray-8);
   --editor-link-color: var(--oc-blue-4);
   --editor-url-bg-color: var(--oc-blue-0);
   --editor-v2-color: var(--oc-gray-8);
-  --editor-v3-color: var(--primary-color);
+  --editor-v3-color: var(--color-brand-primary);
   --editor-keyword-color: var(--oc-blue-4);
   --editor-selection-bg: var(--oc-blue-2);
 
   /* ========== Markdown 相关变量 ========== */
-  --md-heading-color: var(--primary-color);
+  --md-heading-color: var(--color-brand-primary);
   --md-paragraph-color: var(--oc-gray-8);
   --md-link-color: var(--oc-blue-4);
-  --md-link-hover-color: var(--primary-color);
+  --md-link-hover-color: var(--color-brand-primary);
   --md-inline-code-color: var(--oc-blue-4);
   --md-inline-code-bg: var(--oc-blue-0);
   --md-blockquote-bg: var(--oc-blue-0);

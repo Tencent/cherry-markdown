@@ -1,0 +1,26 @@
+/* ========== 工具栏相关 ========== */
+
+.cherry {
+  /* 工具栏容器 */
+  --toolbar-bg: var(--oc-white);
+  --toolbar-border: var(--color-border-default);
+  --toolbar-padding: var(--spacing-xs) var(--spacing-xl);
+  --toolbar-font-size: var(--font-size-sm);
+  --toolbar-radius: var(--radius-none);
+  --toolbar-shadow: var(--shadow-sm);
+  --toolbar-split-color: var(--color-border-default);
+
+  --toolbar-min-height: 48px;
+  --sidebar-list-height: 120px;
+
+  /* 工具栏按钮 */
+  --toolbar-btn-color: #3f4a56;
+  --toolbar-btn-bg: transparent;
+  --toolbar-btn-hover-color: var(--color-brand-primary);
+  --toolbar-btn-hover-bg: var(--color-bg-active);
+  --toolbar-btn-active-bg: var(--color-bg-active);
+  --toolbar-btn-disabled: #ccc;
+  --toolbar-btn-radius: var(--radius-lg);
+  --toolbar-btn-padding: 0 var(--spacing-md);
+  --toolbar-btn-height: var(--height-button);
+}

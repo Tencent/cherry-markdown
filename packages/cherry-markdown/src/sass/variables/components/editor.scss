@@ -1,0 +1,20 @@
+/* ========== 编辑器相关 ========== */
+
+.cherry {
+  /* 语法高亮与行内装饰，默认依赖语义层颜色 */
+  --editor-header-color: var(--color-text-primary);
+  --editor-comment-color: var(--oc-blue-6);
+  --editor-quote-color: var(--oc-blue-6);
+  --editor-string-color: var(--color-text-primary);
+  --editor-link-color: var(--oc-blue-6);
+  --editor-url-bg-color: #d7e6fe;
+  --editor-v2-color: var(--color-brand-primary);
+  --editor-v3-color: var(--color-bg-active);
+  --editor-keyword-color: var(--color-text-primary);
+
+  /* 交互态 */
+  --editor-cursor-color: var(--color-brand-primary);
+  --editor-selection-bg: var(--oc-blue-1);
+  --editor-line-number-color: var(--oc-gray-4);
+  --editor-active-line-bg: var(--oc-gray-0);
+}

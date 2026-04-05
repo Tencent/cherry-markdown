@@ -882,7 +882,7 @@
   }
 
   .cm-editor .cm-fullWidth {
-    color: var(--full-width-color) !important;
+    color: var(--color-brand-primary) !important;
     z-index: 3;
     cursor: pointer;
   }
@@ -1306,7 +1306,7 @@
 
     .cherry-color-tab-group {
       display: flex;
-      background: var(--border-color);
+      background: var(--color-border-default);
       border-radius: var(--radius-lg);
       padding: 2px;
       width: auto;
@@ -1446,7 +1446,7 @@
       gap: 6px;
 
       .cherry-color-recent-empty {
-        background: var(--bg-color-lighter);
+        background: var(--color-bg-hover);
         border-style: dashed;
         cursor: default;
 

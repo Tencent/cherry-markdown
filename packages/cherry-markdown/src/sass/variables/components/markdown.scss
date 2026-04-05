@@ -1,0 +1,40 @@
+/* ========== Markdown 元素样式 ========== */
+
+.cherry {
+  /* 正文基础排版 */
+  --md-heading-color: var(--color-text-primary);
+
+  --md-paragraph-color: var(--color-text-primary);
+  --md-paragraph-line-height: var(--line-height-relaxed);
+  --md-paragraph-highlight-line-bg: var(--color-bg-active);
+
+  /* 行内元素 */
+  --md-link-color: var(--oc-blue-6);
+  --md-link-hover-color: var(--color-text-link-hover);
+
+  --md-inline-code-color: var(--color-error);
+  --md-inline-code-bg: #e5e5e5;
+
+  /* 引用与分隔 */
+  --md-blockquote-bg: rgba(102, 128, 153, 0.05);
+  --md-blockquote-border: #D6DBDF;
+  --md-blockquote-color: var(--color-text-secondary);
+
+  --md-hr-border: var(--color-border-default);
+
+  /* TOC 目录 */
+  --md-toc-bg: var(--oc-gray-0);
+  --md-toc-border-color: var(--color-border-default);
+  --md-toc-radius: var(--radius-lg);
+  --md-toc-padding: var(--spacing-lg);
+  --md-toc-title-color: var(--md-heading-color);
+  --md-toc-link-hover-bg: var(--oc-gray-1);
+  --md-toc-link-active-bg: var(--oc-gray-2);
+  --md-toc-link-radius: var(--radius-md);
+  --md-toc-link-color: var(--md-paragraph-color);
+  --md-toc-link-hover-color: var(--md-link-hover-color);
+  --md-toc-indicator-width: var(--border-width-4);
+  --md-toc-indicator-color: var(--oc-gray-3);
+  --md-toc-indicator-hover-color: var(--md-toc-link-hover-color);
+  --md-toc-indicator-gap: var(--spacing-lg);
+}

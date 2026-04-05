@@ -1,7 +1,11 @@
+/* ========== 快捷键配置面板 ========== */
+
 .cherry {
+  /* 快捷键配置面板沿用 dropdown 的视觉基础 */
   --shortcut-key-config-panel-bg: var(--dropdown-bg);
   --shortcut-key-config-panel-text-color: var(--dropdown-item-color);
 
+  /* 面板内部布局和动画 */
   --shortcut-panel-padding-x: 15px;
   --shortcut-panel-padding-y: 10px;
   --shortcut-panel-font-size-xs: var(--font-size-xs);

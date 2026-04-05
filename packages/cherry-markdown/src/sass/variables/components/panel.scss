@@ -1,4 +1,7 @@
+/* ========== 面板 ========== */
+
 .cherry {
+  /* 面板共用容器样式 */
   --panel-margin: 10px 0;
   --panel-border-radius: var(--radius-xl);
   --panel-border: 1px solid var(--color-border-default);
@@ -17,6 +20,7 @@
   --panel-body-color: var(--color-text-primary);
   --panel-body-border-radius: 0 0 var(--panel-border-radius) var(--panel-border-radius);
 
+  /* 各状态优先通过 accent / surface / emphasis 三层来覆写，而不是重写细项实现 */
   --panel-primary-accent: var(--color-brand-primary);
   --panel-primary-surface: var(--color-bg-active);
   --panel-primary-emphasis: var(--panel-primary-accent);

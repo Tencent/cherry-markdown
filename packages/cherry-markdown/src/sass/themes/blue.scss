@@ -14,14 +14,6 @@
   --color-bg-active: var(--oc-violet-0);
   --color-border-default: var(--oc-indigo-4);
 
-  /* ========== 兼容旧语义别名 ========== */
-  --primary-color: var(--color-brand-primary);
-  --secondary-color: var(--color-bg-active);
-  --base-font-color: var(--color-text-primary);
-  --base-editor-bg: var(--color-bg-canvas);
-  --base-previewer-bg: var(--color-bg-surface);
-  --base-border-color: var(--color-border-default);
-
   /* ========== 工具栏相关变量 ========== */
   --toolbar-bg: var(--oc-violet-1);
   --toolbar-btn-color: var(--oc-indigo-7);
@@ -34,22 +26,22 @@
   --dropdown-bg: var(--oc-white);
 
   /* ========== 编辑器相关变量 ========== */
-  --editor-header-color: var(--primary-color);
+  --editor-header-color: var(--color-brand-primary);
   --editor-string-color: var(--oc-indigo-5);
   --editor-comment-color: var(--oc-indigo-5);
   --editor-quote-color: var(--oc-indigo-8);
   --editor-link-color: var(--oc-indigo-5);
   --editor-url-bg-color: var(--oc-violet-1);
   --editor-v2-color: var(--oc-indigo-8);
-  --editor-v3-color: var(--primary-color);
+  --editor-v3-color: var(--color-brand-primary);
   --editor-keyword-color: var(--oc-indigo-5);
   --editor-selection-bg: var(--oc-violet-2);
 
   /* ========== Markdown 相关变量 ========== */
-  --md-heading-color: var(--primary-color);
+  --md-heading-color: var(--color-brand-primary);
   --md-paragraph-color: var(--oc-indigo-8);
   --md-link-color: var(--oc-indigo-5);
-  --md-link-hover-color: var(--primary-color);
+  --md-link-hover-color: var(--color-brand-primary);
   --md-inline-code-color: var(--oc-indigo-5);
   --md-inline-code-bg: var(--oc-violet-1);
   --md-blockquote-bg: var(--oc-violet-1);
@@ -57,13 +49,13 @@
 
   /* ========== Table 相关变量 ========== */
   --md-table-border: var(--oc-blue-5);
-  --md-table-drag-border-bg: var(--primary-color);
+  --md-table-drag-border-bg: var(--color-brand-primary);
   --md-table-sort-active-bg: rgba(184, 134, 253, 0.4);
 
   /* ========== TOC 相关变量 ========== */
   --md-paragraph-highlight-line-bg: var(--oc-violet-1);
   --md-toc-bg: var(--oc-white);
-  --md-toc-border-color: var(--base-border-color);
+  --md-toc-border-color: var(--color-border-default);
   --md-toc-indicator-color: var(--oc-indigo-1);
   --md-toc-link-hover-bg: var(--oc-violet-0);
   --md-toc-link-active-bg: var(--oc-violet-1);

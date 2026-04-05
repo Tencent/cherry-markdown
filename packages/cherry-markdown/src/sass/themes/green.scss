@@ -14,14 +14,6 @@
   --color-bg-active: var(--oc-green-0);
   --color-border-default: var(--oc-green-8);
 
-  /* ========== 兼容旧语义别名 ========== */
-  --primary-color: var(--color-brand-primary);
-  --secondary-color: var(--color-bg-active);
-  --base-font-color: var(--color-text-primary);
-  --base-editor-bg: var(--color-bg-canvas);
-  --base-previewer-bg: var(--color-bg-surface);
-  --base-border-color: var(--color-border-default);
-
   /* ========== 工具栏相关变量 ========== */
   --toolbar-bg: var(--oc-white);
   --toolbar-btn-color: var(--color-brand-primary);
@@ -34,10 +26,10 @@
   --editor-header-color: var(--oc-green-7);
   --editor-string-color: var(--oc-green-6);
   --editor-comment-color: var(--oc-green-6);
-  --editor-quote-color: var(--primary-color);
+  --editor-quote-color: var(--color-brand-primary);
   --editor-link-color: var(--oc-green-6);
-  --editor-url-bg-color: var(--secondary-color);
-  --editor-v2-color: var(--primary-color);
+  --editor-url-bg-color: var(--color-bg-active);
+  --editor-v2-color: var(--color-brand-primary);
   --editor-v3-color: var(--oc-green-7);
   --editor-keyword-color: var(--oc-green-6);
   --editor-selection-bg: var(--oc-green-2);
@@ -47,7 +39,7 @@
 
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: var(--oc-green-7);
-  --md-paragraph-color: var(--primary-color);
+  --md-paragraph-color: var(--color-brand-primary);
   --md-link-color: var(--oc-green-6);
   --md-link-hover-color: var(--oc-green-7);
   --md-inline-code-color: var(--oc-green-6);
@@ -57,7 +49,7 @@
 
   /* ========== Table 相关变量 ========== */
   --md-table-border: var(--oc-green-8);
-  --md-table-drag-border-bg: var(--primary-color);
+  --md-table-drag-border-bg: var(--color-brand-primary);
   --md-table-sort-active-bg: rgba(137, 245, 171, 0.493);
 
   /* ========== TOC 相关变量 ========== */
@@ -73,7 +65,7 @@
   --accordion-summary-hover-bg: var(--oc-green-5);
   --accordion-body-bg: var(--oc-green-0);
   --accordion-body-border: var(--oc-green-1);
-  --accordion-body-color: var(--primary-color);
+  --accordion-body-color: var(--color-brand-primary);
 
   /* ========== Panel 相关变量 ========== */
   --panel-border-radius: 12px;

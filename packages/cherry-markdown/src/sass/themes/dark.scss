@@ -14,14 +14,6 @@
   --color-bg-active: #513838;
   --color-border-default: var(--oc-gray-5);
 
-  /* ========== 兼容旧语义别名 ========== */
-  --primary-color: var(--color-brand-primary);
-  --secondary-color: var(--color-bg-active);
-  --base-font-color: var(--color-text-primary);
-  --base-editor-bg: var(--color-bg-canvas);
-  --base-previewer-bg: var(--color-bg-surface);
-  --base-border-color: var(--color-border-default);
-
   /* ========== 工具栏相关变量 ========== */
   --toolbar-bg: var(--oc-gray-7);
   --toolbar-btn-color: var(--oc-gray-4);
@@ -33,14 +25,14 @@
   /* ========== 工具栏的下拉菜单 ========== */
   --dropdown-bg: var(--toolbar-bg);
   /* ========== 编辑器相关变量 ========== */
-  --editor-header-color: var(--primary-color);
+  --editor-header-color: var(--color-brand-primary);
   --editor-string-color: var(--oc-yellow-3);
   --editor-comment-color: var(--oc-yellow-3);
   --editor-quote-color: var(--oc-gray-4);
   --editor-link-color: var(--oc-yellow-3);
   --editor-url-bg-color: rgb(81, 56, 56);
   --editor-v2-color: var(--oc-gray-4);
-  --editor-v3-color: var(--primary-color);
+  --editor-v3-color: var(--color-brand-primary);
   --editor-keyword-color: var(--oc-yellow-3);
   --editor-selection-bg: rgba(134, 142, 150, 0.8);
 
@@ -60,7 +52,7 @@
   --md-hr-border: var(--oc-gray-5);
   /* ========== Table 相关变量 ========== */
   --md-table-border: var(--oc-gray-5);
-  --md-table-drag-border-bg: var(--primary-color);
+  --md-table-drag-border-bg: var(--color-brand-primary);
   --md-table-sort-active-bg: rgba(141, 104, 51, 0.493);
 
   /* ========== TOC 相关变量 ========== */
