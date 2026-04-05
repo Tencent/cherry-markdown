@@ -3,7 +3,7 @@
  */
 
 .cherry.theme__default {
-  /* ========== 新语义变量覆盖 ========== */
+  /* ========== 语义变量覆盖 ========== */
   --color-brand-primary: var(--oc-blue-6);
   --color-brand-primary-hover: var(--oc-blue-7);
   --color-text-primary: var(--oc-gray-8);
@@ -58,6 +58,3 @@
   --accordion-body-border: var(--oc-blue-1);
   --accordion-body-color: var(--oc-gray-8);
 }
-
-/** 预览区域样式 */
-.cherry-markdown.theme__default {}

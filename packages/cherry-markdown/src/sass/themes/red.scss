@@ -3,7 +3,7 @@
  */
 
 .cherry.theme__red {
-  /* ========== 新语义变量覆盖 ========== */
+  /* ========== 语义变量覆盖 ========== */
   --color-brand-primary: var(--oc-pink-7);
   --color-brand-primary-hover: var(--oc-pink-6);
   --color-text-primary: var(--oc-pink-9);
@@ -62,57 +62,25 @@
   /* ========== Accordion 相关变量 ========== */
   --accordion-bg: var(--oc-pink-0);
   --accordion-border: var(--oc-pink-2);
-  --accordion-summary-bg: linear-gradient(135deg, var(--oc-pink-6), var(--oc-pink-7));
-  --accordion-summary-hover-bg: linear-gradient(135deg, var(--oc-pink-5), var(--oc-pink-6));
+  --accordion-summary-bg: var(--oc-pink-6);
+  --accordion-summary-hover-bg: var(--oc-pink-5);
   --accordion-body-bg: var(--oc-pink-0);
   --accordion-body-border: var(--oc-pink-1);
   --accordion-body-color: var(--oc-pink-9);
 
   /* ========== Panel 相关变量 ========== */
   --panel-border-radius: 6px;
-  --panel-bg: linear-gradient(135deg, var(--oc-pink-0), var(--oc-pink-1));
+  --panel-bg: var(--oc-pink-0);
   --panel-border: 1px solid var(--oc-pink-3);
   --panel-box-shadow: 0 2px 8px rgba(230, 28, 132, 0.15);
-  --panel-title-bg: linear-gradient(135deg, var(--oc-pink-2), var(--oc-pink-1));
-  --panel-title-color: var(--oc-pink-9);
+  --panel-title-bg: var(--oc-pink-1);
   --panel-title-border-bottom: 1px solid var(--oc-pink-3);
   --panel-body-bg: var(--oc-pink-0);
-  --panel-body-color: var(--oc-pink-9);
-
-  /* Primary Panel */
-  --panel-primary-accent: var(--oc-pink-5);
-  --panel-primary-surface: linear-gradient(135deg, var(--oc-pink-0), var(--oc-pink-2));
-  --panel-primary-emphasis: linear-gradient(135deg, var(--oc-pink-5), var(--oc-pink-4));
-  --panel-primary-body-fg: var(--oc-pink-8);
-
-  /* Info Panel */
-  --panel-info-accent: var(--oc-grape-4);
-  --panel-info-surface: linear-gradient(135deg, var(--oc-grape-0), var(--oc-grape-1));
-  --panel-info-emphasis: linear-gradient(135deg, var(--oc-grape-4), var(--oc-grape-3));
-  --panel-info-body-fg: var(--oc-grape-8);
-
-  /* Warning Panel */
-  --panel-warning-accent: var(--oc-orange-4);
-  --panel-warning-surface: linear-gradient(135deg, var(--oc-orange-0), var(--oc-orange-1));
-  --panel-warning-emphasis: linear-gradient(135deg, var(--oc-orange-5), var(--oc-orange-4));
-  --panel-warning-body-fg: var(--oc-orange-8);
-
-  /* Danger Panel */
-  --panel-danger-accent: var(--oc-red-5);
-  --panel-danger-surface: linear-gradient(135deg, var(--oc-red-0), var(--oc-red-2));
-  --panel-danger-emphasis: linear-gradient(135deg, var(--oc-red-6), var(--oc-red-5));
-  --panel-danger-box-shadow: 0 2px 8px rgba(245, 101, 101, 0.2);
-  --panel-danger-body-fg: var(--oc-red-8);
-
-  /* Success Panel */
-  --panel-success-accent: var(--oc-teal-4);
-  --panel-success-surface: linear-gradient(135deg, var(--oc-teal-0), var(--oc-teal-1));
-  --panel-success-emphasis: linear-gradient(135deg, var(--oc-teal-5), var(--oc-teal-4));
-  --panel-success-body-fg: var(--oc-teal-8);
 }
 
 /** 预览区域样式 */
 .cherry-markdown.theme__red {
+
   h1,
   h2,
   h3,

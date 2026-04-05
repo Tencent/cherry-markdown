@@ -3,7 +3,7 @@
  */
 
 .cherry.theme__violet {
-  /* ========== 新语义变量覆盖 ========== */
+  /* ========== 语义变量覆盖 ========== */
   --color-brand-primary: var(--oc-violet-9);
   --color-brand-primary-hover: var(--oc-violet-7);
   --color-text-primary: var(--oc-violet-9);
@@ -74,45 +74,11 @@
   --panel-title-border-bottom: 1px solid var(--oc-gray-3);
   --panel-body-bg: var(--oc-white);
   --panel-body-color: var(--oc-gray-8);
-
-  /* Primary Panel */
-  --panel-primary-accent: var(--oc-blue-5);
-  --panel-primary-surface: var(--oc-blue-0);
-  --panel-primary-emphasis: var(--oc-blue-1);
-  --panel-primary-title-fg: var(--oc-blue-8);
-  --panel-primary-body-fg: var(--oc-blue-9);
-
-  /* Info Panel */
-  --panel-info-accent: var(--oc-cyan-5);
-  --panel-info-surface: var(--oc-cyan-0);
-  --panel-info-emphasis: var(--oc-cyan-1);
-  --panel-info-title-fg: var(--oc-cyan-8);
-  --panel-info-body-fg: var(--oc-cyan-9);
-
-  /* Warning Panel */
-  --panel-warning-accent: var(--oc-yellow-5);
-  --panel-warning-surface: var(--oc-yellow-0);
-  --panel-warning-emphasis: var(--oc-yellow-1);
-  --panel-warning-title-fg: var(--oc-yellow-8);
-  --panel-warning-body-fg: var(--oc-yellow-9);
-
-  /* Danger Panel */
-  --panel-danger-accent: var(--oc-red-5);
-  --panel-danger-surface: var(--oc-red-0);
-  --panel-danger-emphasis: var(--oc-red-1);
-  --panel-danger-title-fg: var(--oc-red-8);
-  --panel-danger-body-fg: var(--oc-red-9);
-
-  /* Success Panel */
-  --panel-success-accent: var(--oc-green-5);
-  --panel-success-surface: var(--oc-green-0);
-  --panel-success-emphasis: var(--oc-green-1);
-  --panel-success-title-fg: var(--oc-green-8);
-  --panel-success-body-fg: var(--oc-green-9);
 }
 
 /** 预览区域样式 */
 .cherry-markdown.theme__violet {
+
   h1,
   h2,
   h3,

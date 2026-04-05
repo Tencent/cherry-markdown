@@ -941,59 +941,54 @@ div[data-type='codeBlock'] {
 .cherry-panel__primary {
   --panel-border: 1px solid var(--panel-primary-accent, var(--color-brand-primary));
   --panel-bg: var(--panel-primary-surface, var(--color-bg-active));
-  --panel-box-shadow: var(--panel-primary-box-shadow, var(--panel-box-shadow));
   --panel-title-bg: var(--panel-primary-emphasis, var(--panel-primary-accent, var(--color-brand-primary)));
-  --panel-title-color: var(--panel-primary-title-fg, #fff);
+  --panel-title-color: var(--panel-primary-title-fg, var(--panel-title-color, #fff));
   --panel-title-border-bottom: 1px solid var(--panel-primary-accent, var(--color-brand-primary));
   --panel-body-bg: var(--panel-primary-surface, var(--color-bg-active));
-  --panel-body-color: var(--panel-primary-body-fg, var(--panel-primary-accent, var(--color-brand-primary)));
-  --panel-icon: var(--panel-primary-icon, '\EA6A');
+  --panel-body-color: var(--panel-primary-body-fg, var(--panel-body-color, var(--panel-primary-accent, var(--color-brand-primary))));
+  --panel-icon: '\EA6A';
 }
 
 .cherry-panel__info {
   --panel-border: 1px solid var(--panel-info-accent, var(--oc-cyan-5));
   --panel-bg: var(--panel-info-surface, var(--oc-cyan-0));
-  --panel-box-shadow: var(--panel-info-box-shadow, var(--panel-box-shadow));
   --panel-title-bg: var(--panel-info-emphasis, var(--oc-cyan-6));
-  --panel-title-color: var(--panel-info-title-fg, #fff);
+  --panel-title-color: var(--panel-info-title-fg, var(--panel-title-color, #fff));
   --panel-title-border-bottom: 1px solid var(--panel-info-accent, var(--oc-cyan-5));
   --panel-body-bg: var(--panel-info-surface, var(--oc-cyan-0));
-  --panel-body-color: var(--panel-info-body-fg, var(--oc-cyan-8));
-  --panel-icon: var(--panel-info-icon, '\EA69');
+  --panel-body-color: var(--panel-info-body-fg, var(--panel-body-color, var(--oc-cyan-8)));
+  --panel-icon: '\EA69';
 }
 
 .cherry-panel__warning {
   --panel-border: 1px solid var(--panel-warning-accent, var(--oc-yellow-5));
   --panel-bg: var(--panel-warning-surface, var(--oc-yellow-0));
-  --panel-box-shadow: var(--panel-warning-box-shadow, var(--panel-box-shadow));
   --panel-title-bg: var(--panel-warning-emphasis, var(--oc-yellow-6));
-  --panel-title-color: var(--panel-warning-title-fg, #fff);
+  --panel-title-color: var(--panel-warning-title-fg, var(--panel-title-color, #fff));
   --panel-title-border-bottom: 1px solid var(--panel-warning-accent, var(--oc-yellow-5));
   --panel-body-bg: var(--panel-warning-surface, var(--oc-yellow-0));
-  --panel-body-color: var(--panel-warning-body-fg, var(--oc-yellow-8));
-  --panel-icon: var(--panel-warning-icon, '\EA6B');
+  --panel-body-color: var(--panel-warning-body-fg, var(--panel-body-color, var(--oc-yellow-8)));
+  --panel-icon: '\EA6B';
 }
 
 .cherry-panel__danger {
   --panel-border: 1px solid var(--panel-danger-accent, var(--oc-red-5));
   --panel-bg: var(--panel-danger-surface, var(--oc-red-0));
-  --panel-box-shadow: var(--panel-danger-box-shadow, var(--panel-box-shadow));
   --panel-title-bg: var(--panel-danger-emphasis, var(--oc-red-6));
-  --panel-title-color: var(--panel-danger-title-fg, #fff);
+  --panel-title-color: var(--panel-danger-title-fg, var(--panel-title-color, #fff));
   --panel-title-border-bottom: 1px solid var(--panel-danger-accent, var(--oc-red-5));
   --panel-body-bg: var(--panel-danger-surface, var(--oc-red-0));
-  --panel-body-color: var(--panel-danger-body-fg, var(--oc-red-8));
-  --panel-icon: var(--panel-danger-icon, '\EA68');
+  --panel-body-color: var(--panel-danger-body-fg, var(--panel-body-color, var(--oc-red-8)));
+  --panel-icon: '\EA68';
 }
 
 .cherry-panel__success {
   --panel-border: 1px solid var(--panel-success-accent, var(--oc-green-5));
   --panel-bg: var(--panel-success-surface, var(--oc-green-0));
-  --panel-box-shadow: var(--panel-success-box-shadow, var(--panel-box-shadow));
   --panel-title-bg: var(--panel-success-emphasis, var(--oc-green-6));
-  --panel-title-color: var(--panel-success-title-fg, #fff);
+  --panel-title-color: var(--panel-success-title-fg, var(--panel-title-color, #fff));
   --panel-title-border-bottom: 1px solid var(--panel-success-accent, var(--oc-green-5));
   --panel-body-bg: var(--panel-success-surface, var(--oc-green-0));
-  --panel-body-color: var(--panel-success-body-fg, var(--oc-green-8));
-  --panel-icon: var(--panel-success-icon, '\EA67');
+  --panel-body-color: var(--panel-success-body-fg, var(--panel-body-color, var(--oc-green-8)));
+  --panel-icon: '\EA67';
 }

@@ -3,7 +3,7 @@
  */
 
 .cherry.theme__green {
-  /* ========== 新语义变量覆盖 ========== */
+  /* ========== 语义变量覆盖 ========== */
   --color-brand-primary: var(--oc-green-9);
   --color-brand-primary-hover: var(--oc-green-7);
   --color-text-primary: var(--oc-green-9);
@@ -77,49 +77,11 @@
   --panel-title-border-bottom: 1px solid var(--oc-green-3);
   --panel-body-bg: var(--oc-white);
   --panel-body-color: var(--oc-green-9);
-
-  /* Primary Panel */
-  --panel-primary-accent: var(--oc-green-4);
-  --panel-primary-surface: var(--oc-green-0);
-  --panel-primary-emphasis: var(--oc-green-3);
-  --panel-primary-title-fg: var(--oc-green-9);
-  --panel-primary-body-fg: var(--oc-green-8);
-  --panel-primary-box-shadow: 0 3px 12px rgba(64, 192, 87, 0.25);
-
-  /* Info Panel */
-  --panel-info-accent: var(--oc-cyan-4);
-  --panel-info-surface: var(--oc-cyan-0);
-  --panel-info-emphasis: var(--oc-cyan-2);
-  --panel-info-title-fg: var(--oc-cyan-9);
-  --panel-info-body-fg: var(--oc-cyan-8);
-  --panel-info-box-shadow: 0 3px 12px rgba(9, 196, 244, 0.15);
-
-  /* Warning Panel */
-  --panel-warning-accent: var(--oc-lime-4);
-  --panel-warning-surface: var(--oc-lime-0);
-  --panel-warning-emphasis: var(--oc-lime-2);
-  --panel-warning-title-fg: var(--oc-lime-9);
-  --panel-warning-body-fg: var(--oc-lime-8);
-  --panel-warning-box-shadow: 0 3px 12px rgba(130, 201, 30, 0.15);
-
-  /* Danger Panel */
-  --panel-danger-accent: var(--oc-red-4);
-  --panel-danger-surface: var(--oc-red-0);
-  --panel-danger-emphasis: var(--oc-red-2);
-  --panel-danger-title-fg: var(--oc-red-9);
-  --panel-danger-body-fg: var(--oc-red-8);
-  --panel-danger-box-shadow: 0 3px 12px rgba(250, 82, 82, 0.15);
-
-  /* Success Panel */
-  --panel-success-accent: var(--oc-green-5);
-  --panel-success-surface: var(--oc-green-0);
-  --panel-success-emphasis: var(--oc-green-4);
-  --panel-success-body-fg: var(--oc-green-8);
-  --panel-success-box-shadow: 0 3px 12px rgba(64, 192, 87, 0.3);
 }
 
 /** 预览区域样式 */
 .cherry-markdown.theme__green {
+
   h1,
   h2,
   h3,
