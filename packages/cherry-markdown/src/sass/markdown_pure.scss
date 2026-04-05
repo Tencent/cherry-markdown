@@ -1,6 +1,5 @@
 @use 'sass:meta';
 
-@include meta.load-css('./variables/index');
 @include meta.load-css('./markdown');
 /** 引入自带的主题 */
 @include meta.load-css('./themes/index');
