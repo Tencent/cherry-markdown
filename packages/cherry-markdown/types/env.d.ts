@@ -10,6 +10,7 @@ import katex from 'katex';
 import type * as EChartsType from 'echarts';
 import type Cherry from '../src/Cherry';
 import type CherryStream from '../src/CherryStream';
+import type CherryEngine from '../src/index.engine.core';
 
 // ─── 全局类型扩展 ─────────────────────────────────────────
 // 注：global.d.ts 也声明了 Window.Cherry（用户面向，仅 typeof Cherry）。
@@ -28,6 +29,13 @@ declare global {
      * - 在 index.stream.js 入口中挂载为精简版 CherryStream 类
      */
     Cherry?: typeof Cherry | typeof CherryStream;
+
+    /**
+     * Cherry Markdown 引擎构造函数。
+     * - 在 index.engine.js 和 index.engine.core.js 入口中挂载
+     * - 仅包含核心引擎，不包含编辑器 UI
+     */
+    CherryEngine?: typeof CherryEngine;
 
     /** mermaid 实例（v9+ 均通过顶层对象访问） */
     mermaid?: typeof Mermaid;

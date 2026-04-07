@@ -21,6 +21,8 @@
  */
 
 import type Cherry from '../dist/types/Cherry';
+import type CherryStream from '../dist/types/CherryStream';
+import type CherryEngine from '../dist/types/index.engine.core';
 import type MermaidCodeEngine from '../dist/types/addons/cherry-code-block-mermaid-plugin';
 import type PlantUMLCodeEngine from '../dist/types/addons/cherry-code-block-plantuml-plugin';
 
@@ -35,14 +37,30 @@ declare global {
      * - 完整版（cherry-markdown.js / cherry-markdown.core.js）→ `Cherry`
      * - 流式版（cherry-markdown.stream.js）→ `CherryStream`
      *
-     * 默认类型为完整版 `Cherry`，如需精确类型可自行 narrowing。
-     *
      * @example
      * ```ts
      * const cherry = new window.Cherry({ id: 'markdown' });
      * ```
      */
-    Cherry?: typeof Cherry;
+    Cherry?: typeof Cherry | typeof CherryStream;
+
+    /**
+     * Cherry Markdown 引擎构造函数。
+     *
+     * 仅包含核心引擎，不包含编辑器 UI。适用于：
+     * - 服务端渲染（SSR）
+     * - 纯文本转换场景
+     * - 无 UI 的解析需求
+     *
+     * @example
+     * ```ts
+     * const engine = new window.CherryEngine({
+     *   engine: { global: { urlProcessor: (url) => url } }
+     * });
+     * const html = engine.makeHtml(markdownText);
+     * ```
+     */
+    CherryEngine?: typeof CherryEngine;
 
     /**
      * Mermaid 代码块插件（UMD 构建产物自动挂载）

@@ -15,6 +15,7 @@
  */
 import mergeWith from 'lodash/mergeWith';
 import { isBrowser } from '@/utils/env';
+import { getExternal } from '@/utils/external';
 
 const CHART_TYPES = [
   'flowchart',
@@ -117,8 +118,8 @@ export default class MermaidCodeEngine {
   constructor(mermaidOptions = {}) {
     const { mermaid, mermaidAPI } = mermaidOptions;
     // 兼容 v9（有 mermaidAPI 子对象）和 v10+（统一顶层对象）
-    const browserMermaid = isBrowser() ? window.mermaid : null;
-    const browserMermaidAPI = isBrowser() ? window.mermaidAPI : null;
+    const browserMermaid = getExternal('mermaid');
+    const browserMermaidAPI = getExternal('mermaidAPI');
     const resolvedMermaid = mermaid || browserMermaid;
     const resolvedMermaidAPI =
       mermaidAPI || browserMermaidAPI || (resolvedMermaid && resolvedMermaid.mermaidAPI) || null;
