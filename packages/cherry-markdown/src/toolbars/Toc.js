@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import { createElement } from '../utils/dom';
+import { isBrowser } from '../utils/env';
 /**
  * 悬浮目录
  */
@@ -127,7 +128,7 @@ export default class Toc {
       this.$switchModel('full');
       this.setModelToLocalStorage('full');
     });
-    if (window) {
+    if (isBrowser()) {
       window.addEventListener('resize', () => {
         this.$switchModel(this.model);
       });
