@@ -32,8 +32,6 @@ export default class CodeBlock extends ParagraphBase {
   constructor({ externals, config, cherry }) {
     super({ needCache: true });
     CodeBlock.inlineCodeCache = {};
-    this.codeCache = {};
-    this.codeCacheList = [];
     this.customLang = [];
     this.customParser = {};
     this.lineNumber = config.lineNumber; // 是否显示行号
@@ -52,8 +50,6 @@ export default class CodeBlock extends ParagraphBase {
       });
     }
     this.customHighlighter = config.highlighter;
-    this.failedCleanCacheTimes = 0;
-    this.codeTimer = null;
     this.$cherry = cherry;
     this.needCleanFlowCursor =
       cherry?.options?.engine?.global?.flowSessionContext && cherry?.options?.engine?.global?.flowSessionCursor;
@@ -64,31 +60,7 @@ export default class CodeBlock extends ParagraphBase {
   }
 
   afterMakeHtml(html) {
-    if (this.codeTimer) {
-      clearTimeout(this.codeTimer);
-      this.failedCleanCacheTimes += 1;
-      this.codeTimer = null;
-    }
-    this.codeTimer = setTimeout(() => {
-      this.$resetCache();
-    }, 500);
-    if (this.failedCleanCacheTimes > 5) {
-      this.failedCleanCacheTimes = 0;
-      setTimeout(() => {
-        this.$resetCache();
-      }, 500);
-    }
     return this.restoreCache(html);
-  }
-
-  $resetCache() {
-    if (this.codeCacheList.length > 100) {
-      // 如果缓存超过100条，则清空最早的缓存
-      for (let i = 0; i < this.codeCacheList.length - 100; i++) {
-        delete this.codeCache[this.codeCacheList[i]];
-      }
-      this.codeCacheList = this.codeCacheList.slice(-100);
-    }
   }
 
   $codeReplace($codeSrc, $lang, sign, lines) {
@@ -96,27 +68,6 @@ export default class CodeBlock extends ParagraphBase {
     $code = this.renderCodeBlock($code, $lang, sign, lines);
     $code = $code.replace(/\\/g, '\\\\');
     return $code;
-  }
-
-  $codeCache(sign, str) {
-    if (sign && str) {
-      this.codeCacheList.push(sign);
-      this.codeCache[sign] = str;
-    }
-
-    if (this.codeCache[sign]) {
-      // 如果命中了缓存，则更新缓存顺序
-      for (let i = 0; i < this.codeCacheList.length - 100; i++) {
-        if (this.codeCacheList[i] === sign) {
-          // 删除i位置的元素
-          this.codeCacheList.splice(i, 1);
-          this.codeCacheList.push(sign);
-          break;
-        }
-      }
-      return this.codeCache[sign];
-    }
-    return false;
   }
 
   // 渲染特定语言代码块
@@ -148,8 +99,7 @@ export default class CodeBlock extends ParagraphBase {
         mermaidConfig: this.mermaid,
         showSourceToolbar,
         updateCache: (cacheCode) => {
-          const containerHtml = addContainer(cacheCode);
-          this.$codeCache(props.sign, containerHtml);
+          const containerHtml = this.cacheAndGetData(props.sign, () => addContainer(cacheCode), 2000, -300);
           this.pushCache(containerHtml, props.sign, props.lines);
         },
         fallback: () => this.$codeReplace($codeSrc, lang, props.sign, props.lines),
@@ -491,7 +441,7 @@ export default class CodeBlock extends ParagraphBase {
       let $code = code;
       const { sign, lines } = this.computeLines(match, leadingContent, code);
       // 从缓存中获取html
-      let cacheCode = this.$codeCache(sign);
+      let cacheCode = this.cacheData[sign];
       if (cacheCode && cacheCode !== '') {
         // 别忘了把 ">"（引用块）加回来
         const result = this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
@@ -531,26 +481,31 @@ export default class CodeBlock extends ParagraphBase {
       const $oldLang = $lang;
       $lang = this.formatLang($lang);
       if (this.isInternalCustomLangCovered($lang)) {
-        cacheCode = this.parseCustomLanguage($lang, $code, {
-          lines,
-          sign,
-          match,
-          addBlockQuoteSignToResult,
-          lang: $oldLang,
-          mermaidSizeAttrs,
-          mermaidAlignClass,
-        });
+        // echarts渲染的场景不再缓存，因为缓存后无法触发echarts渲染
+        if (!/^\s*echarts\s*$/.test($lang)) {
+          cacheCode = this.cacheAndGetData(
+            sign,
+            () =>
+              this.parseCustomLanguage($lang, $code, {
+                lines,
+                sign,
+                match,
+                addBlockQuoteSignToResult,
+                lang: $oldLang,
+                mermaidSizeAttrs,
+                mermaidAlignClass,
+              }),
+            2000,
+            -300,
+          );
+        }
         if (cacheCode && cacheCode !== '') {
-          // echarts渲染的场景不再缓存，因为缓存后无法触发echarts渲染
-          if (!/^\s*echarts\s*$/.test($lang)) {
-            this.$codeCache(sign, cacheCode);
-          }
           return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
         }
         // 渲染出错则按正常code进行渲染
       }
       // $code = this.$replaceSpecialChar($code);
-      cacheCode = this.$codeReplace($code, $lang, sign, lines);
+      cacheCode = this.cacheAndGetData(sign, () => this.$codeReplace($code, $lang, sign, lines), 2000, -300);
       const result = this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
       return addBlockQuoteSignToResult(result);
     });

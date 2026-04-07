@@ -69,6 +69,14 @@ export default class ParagraphBase extends SyntaxBase {
     return this.cacheData[key];
   }
 
+  /**
+   * 清空所有缓存
+   */
+  clearCache() {
+    this.cacheData = {};
+    this.cacheDataMap = [];
+  }
+
   initBrReg(classicBr = false) {
     // 是否启用经典换行逻辑
     // true：一个换行会被忽略，两个以上连续换行会分割成段落，

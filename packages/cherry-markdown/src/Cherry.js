@@ -591,15 +591,26 @@ export default class Cherry extends CherryStatic {
 
   /**
    * 强制重新渲染预览区域
+   * @param {boolean} [clearEngineCache=false] 是否清理engine的缓存
    */
-  refreshPreviewer() {
+  refreshPreviewer(clearEngineCache = false) {
     try {
       const markdownText = this.getValue();
+      if (clearEngineCache) {
+        this.clearEngineCache();
+      }
       const html = this.engine.makeHtml(markdownText);
       this.previewer.refresh(html);
     } catch (e) {
       throw new NestedError(e);
     }
+  }
+
+  /**
+   * 清理engine的缓存
+   */
+  clearEngineCache() {
+    this.engine.clearCache();
   }
 
   /**
