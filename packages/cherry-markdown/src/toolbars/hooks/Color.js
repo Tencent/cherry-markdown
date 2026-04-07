@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { getSelection } from '@/utils/selection';
 import { hexToRgb, hsvToRgb, rgbToHex, rgbToHsv } from '@/utils/color';
 
 /**
@@ -37,7 +36,7 @@ export default class Color extends MenuBase {
    */
   onClick(selection, shortKey = '', event) {
     if (this.hasCacheOnce() || this.$testIsShortKey(shortKey)) {
-      const $selection = getSelection(this.editor.editor, selection) || this.locale.color;
+      const $selection = this.getSelection(selection) || this.locale.color;
 
       const colorInfo = this.$getTypeAndColor(shortKey);
 

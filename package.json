@@ -16,7 +16,7 @@
     "prepare": "husky",
     "changeset": "npx @changesets/cli",
     "changeset-version": "npx @changesets/cli version",
-    "dev": "yarn workspace cherry-markdown dev:vite",
+    "dev": "yarn workspace cherry-markdown dev",
     "build": "yarn workspace cherry-markdown build",
     "postbuild": "tsx scripts/post-build.ts",
     "dev:client": "yarn workspace @cherry-markdown/client tauri dev",
@@ -47,7 +47,7 @@
     "lint-staged": "~12.5.0",
     "prettier": "^3.3.3",
     "tsx": "^4.19.2",
-    "typescript": "5.7.3",
+    "typescript": "^6.0.2",
     "vitest": "^3.1.3",
     "vue-eslint-parser": "^10.2.0"
   },

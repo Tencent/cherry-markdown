@@ -219,6 +219,134 @@
     margin: var(--spacing-lg) 0;
   }
 
+  figure[data-type="mermaid"] {
+    overflow: hidden;
+    // 让 figure 收缩到 SVG 内容宽度，使选择框贴合图表
+    width: fit-content;
+    max-width: 100%;
+    svg {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    // 当 figure 设置了自定义尺寸时，SVG 需要完全跟随容器缩放
+    &[style*="width"] svg {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    // mermaid 对齐样式
+    &.cherry-mermaid-align-center {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    &.cherry-mermaid-align-right {
+      margin-left: auto;
+      margin-right: 0;
+    }
+    &.cherry-mermaid-align-left {
+      margin-left: 0;
+      margin-right: auto;
+    }
+    &.cherry-mermaid-align-float-left {
+      float: left;
+      margin-left: 0;
+      margin-right: var(--spacing-lg);
+    }
+    &.cherry-mermaid-align-float-right {
+      float: right;
+      margin-left: var(--spacing-lg);
+      margin-right: 0;
+    }
+
+    // mermaid 源码/预览切换工具栏样式
+    .cherry-mermaid-source-toolbar {
+      height: 45px;
+      line-height: 45px;
+      position: relative;
+      background-color: transparent;
+      backdrop-filter: brightness(0.96);  // 让下层变暗 4%，不改变色调
+      border-radius: 4px 4px 0 0;
+    }
+
+    .cherry-mermaid-source-toolbar-switch {
+      position: absolute;
+      left: 10px;
+      margin-top: 5px;
+      width: 127px;
+      height: 35px;
+      line-height: 35px;
+      background-color: var(--mermaid-toolbar-switch-bg);
+      border-radius: 8px;
+    }
+
+    .cherry-mermaid-source-toolbar-tab {
+      position: absolute;
+      text-align: center;
+      height: 30px;
+      line-height: 30px;
+      width: 60px;
+      box-sizing: border-box;
+      top: 2px;
+      z-index: 2;
+      background-color: transparent;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--mermaid-toolbar-tab-color);
+      user-select: none;
+      white-space: nowrap;
+
+      &:first-child {
+        left: 2px;
+      }
+
+      &:nth-child(2) {
+        left: 65px;
+      }
+
+      // active 状态：在亮色 slider 上显示深色文字
+      &.active {
+        color: var(--mermaid-toolbar-tab-active-color);
+      }
+    }
+
+    .cherry-mermaid-source-toolbar-slider {
+      position: absolute;
+      border-radius: 8px;
+      background-color: var(--mermaid-toolbar-slider-bg);
+      height: 30px;
+      left: 2px;
+      top: 2px;
+      width: 60px;
+      z-index: 1;
+      transition: left 0.3s;
+    }
+
+    // 面板：默认隐藏，active 时显示
+    .cherry-mermaid-source-toolbar-panel {
+      display: none;
+      width: 100%;
+
+      &.active {
+        display: block;
+      }
+
+      // 源码面板中的代码块样式微调
+      &[data-mode="source"] [data-type="codeBlock"] {
+        margin: 0;
+        border-radius: 0;
+      }
+    }
+
+    // 当包含工具栏时，调整溢出和宽度行为
+    &:has(.cherry-mermaid-source-toolbar) {
+      width: auto;
+      max-width: 100%;
+      overflow: hidden;
+      border: 1px solid var(--mermaid-container-border);
+      border-radius: 4px;
+    }
+  }
+
   p,
   pre,
   blockquote,

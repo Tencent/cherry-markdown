@@ -1,14 +1,15 @@
 {
   "name": "cherry-markdown",
   "license": "Apache-2.0",
-  "version": "0.10.3",
+  "version": "0.11.0-alpha-5",
   "type": "module",
   "description": "a new markdown editor",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Tencent/cherry-markdown.git"
+    "url": "git+https://github.com/Tencent/cherry-markdown.git",
+    "directory": "packages/cherry-markdown"
   },
-  "main": "./dist/cherry-markdown.min.js",
+  "main": "./dist/cherry-markdown.js",
   "module": "./dist/cherry-markdown.esm.js",
   "style": "./dist/cherry-markdown.min.css",
   "types": "./dist/types/index.d.ts",
@@ -17,27 +18,27 @@
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "!types/env.d.ts"
   ],
   "sideEffects": [
     "./dist/*.css"
   ],
   "scripts": {
     "iconfont": "gulp",
+    "dev": "vite",
     "dev:vite": "vite",
-    "build": "run-s clean build:all build:cjs",
-    "build:all": "run-p iconfont build:styles build:types build:addons build:full build:core build:engine",
-    "build:cjs": "run-p build:core-cjs build:engine-cjs",
+    "build": "run-s clean build:all",
+    "build:all": "run-p iconfont build:styles build:types build:addons build:full build:core build:engine build:stream",
     "build:full": "cross-env NODE_ENV=production rollup --config build/build.js",
     "build:core": "cross-env CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.core.config.js",
-    "build:core-cjs": "cross-env BUILD_TARGET=commonjs CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.core.config.js",
     "build:engine": "cross-env CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.engine.config.js",
-    "build:engine-cjs": "cross-env BUILD_TARGET=commonjs CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.engine.config.js",
+    "build:stream": "cross-env NODE_ENV=production rollup --config build/rollup.stream.config.js",
     "build:addons": "node build/addons.build.js",
     "build:types": "tsc --project tsconfig.json && node build/replacePaths.js",
     "build:styles": "cross-env NODE_ENV=production rollup --config build/rollup.styles.config.js",
     "clean": "rimraf ./dist",
-    "check-bundle": "es-check es5 dist/cherry-markdown.js dist/cherry-markdown.min.js",
+    "check-bundle": "es-check es5 dist/cherry-markdown.js",
     "test": "vitest",
     "test:update": "vitest -u",
     "lint": "cd ../.. && npx prettier --check packages/cherry-markdown/src/**/*.js && npx eslint --ignore-path .eslintignore packages/cherry-markdown/src/**/*.js",
@@ -72,7 +73,6 @@
     "@types/glob": "^7.2.0",
     "@types/jsdom": "^16.2.13",
     "@types/lodash": "^4.14.170",
-    "@types/mermaid": "^8.2.6",
     "@types/virtual-dom": "^2.1.0",
     "@vitest/coverage-v8": "3.1.3",
     "async": "^3.2.4",
@@ -105,11 +105,19 @@
     "sass": "^1.52.3",
     "serve": "^14.2.0",
     "standard-version": "^9.3.2",
-    "typescript": "4.7.2",
     "virtual-dom": "^2.1.1",
     "vite": "^6.4.1"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "^6.18.6",
+    "@codemirror/commands": "^6.8.1",
+    "@codemirror/lang-markdown": "^6.3.2",
+    "@codemirror/language": "^6.12.2",
+    "@codemirror/search": "^6.5.10",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.40.0",
+    "@lezer/highlight": "^1.2.1",
+    "@replit/codemirror-vim": "^6.3.0",
     "@types/codemirror": "^0.0.108",
     "crypto-js": "^4.2.0",
     "dompurify": "^3.2.6",
@@ -127,6 +135,6 @@
     "glob-watcher": "6.0.0"
   },
   "optionalDependencies": {
-    "mermaid": "9.4.3"
+    "mermaid": "^11.14.0"
   }
 }

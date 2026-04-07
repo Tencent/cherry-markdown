@@ -37,43 +37,48 @@ const imgToolHandler = {
       y: position.y - editorPosition.y,
     };
   },
-  showBubble(img, container, previewerDom, event, locale) {
+  showBubble(img, container, previewerDom, event, locale, options = {}) {
     this.img = img;
+    this.isMermaid = options.isMermaid || false;
 
     this.previewerDom = previewerDom;
     this.container = container;
 
-    const decoList = [
-      { text: locale.border, type: 'border', active: false },
-      { text: locale.shadow, type: 'shadow', active: false },
-      { text: locale.radius, type: 'radius', active: false },
-    ];
-    const decoDiv = document.createElement('div');
-    decoDiv.className = 'img-tool-group';
     const getImgToolButtonClassName = (item) => `img-tool-button${item.active ? ' active' : ''}`;
-    this.container.appendChild(decoDiv);
-    decoList.forEach((deco) => {
-      deco.active = this.img.className.match(`cherry-img-deco-${deco.type}`);
-      const div = document.createElement('div');
-      const icon = document.createElement('i');
-      div.appendChild(icon);
-      icon.className = `img-tool-icon ch-icon ch-icon-imgDeco${capitalizeFirstLetter(deco.type)}`;
-      div.className = getImgToolButtonClassName(deco);
-      div.title = deco.text;
-      div.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        deco.active = !deco.active;
-        // 点击后，更新样式
-        div.className = getImgToolButtonClassName(deco);
-        this.emitChange(this.img, deco.type);
-      });
-      decoDiv.append(div);
-    });
 
-    const divider = document.createElement('div');
-    divider.className = 'img-tool-divider';
-    this.container.appendChild(divider);
+    // mermaid 模式下不显示装饰按钮（边框/阴影/圆角对 figure/SVG 无意义）
+    if (!this.isMermaid) {
+      const decoList = [
+        { text: locale.border, type: 'border', active: false },
+        { text: locale.shadow, type: 'shadow', active: false },
+        { text: locale.radius, type: 'radius', active: false },
+      ];
+      const decoDiv = document.createElement('div');
+      decoDiv.className = 'img-tool-group';
+      this.container.appendChild(decoDiv);
+      decoList.forEach((deco) => {
+        deco.active = this.img.className.match(`cherry-img-deco-${deco.type}`);
+        const div = document.createElement('div');
+        const icon = document.createElement('i');
+        div.appendChild(icon);
+        icon.className = `img-tool-icon ch-icon ch-icon-imgDeco${capitalizeFirstLetter(deco.type)}`;
+        div.className = getImgToolButtonClassName(deco);
+        div.title = deco.text;
+        div.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          deco.active = !deco.active;
+          // 点击后，更新样式
+          div.className = getImgToolButtonClassName(deco);
+          this.emitChange(this.img, deco.type);
+        });
+        decoDiv.append(div);
+      });
+
+      const divider = document.createElement('div');
+      divider.className = 'img-tool-divider';
+      this.container.appendChild(divider);
+    }
 
     const alignList = [
       { text: locale.alignLeft, type: 'left' },
@@ -86,7 +91,12 @@ const imgToolHandler = {
     alignDiv.className = 'img-tool-group';
     this.container.appendChild(alignDiv);
     alignList.forEach((align, index) => {
-      align.active = this.img.className.match(`cherry-img-align-${align.type}`);
+      if (this.isMermaid) {
+        // mermaid figure 的对齐通过 class 标记
+        align.active = this.img.classList.contains(`cherry-mermaid-align-${align.type}`);
+      } else {
+        align.active = this.img.className.match(`cherry-img-align-${align.type}`);
+      }
       const div = document.createElement('div');
       const icon = document.createElement('i');
       align.div = div;
@@ -104,7 +114,8 @@ const imgToolHandler = {
         div.className = getImgToolButtonClassName(align);
         this.emitChange(this.img, align.active ? align.type : 'clear-align');
 
-        imgSizeHandler.showBubble(this.img, this.container, this.previewerDom);
+        const sizeHandlerOptions = this.isMermaid ? { isMermaid: true } : undefined;
+        imgSizeHandler.showBubble(this.img, this.container, this.previewerDom, sizeHandlerOptions);
         setTimeout(() => {
           imgSizeHandler.updatePosition();
         }, 150);

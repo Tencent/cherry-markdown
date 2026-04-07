@@ -1,26 +1,16 @@
 {
-	"compilerOptions": {
-		"module": "commonjs",
-		"target": "es2020",
-		"outDir": "out",
-		"lib": [
-			"es2020",
-			"DOM"
-		],
-		"sourceMap": true,
-		"rootDir": ".",
-		"strict": true,
-		"esModuleInterop": true,
-		"skipLibCheck": true,
-		"resolveJsonModule": true,
-		"moduleResolution": "node"
-	},
-	"include": [
-		"src/**/*.ts",
-		"rspack.config.ts"
-	],
-	"exclude": [
-		"node_modules",
-		"dist"
-	]
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2020",
+    "outDir": "out",
+    "lib": ["es2020", "DOM"],
+    "sourceMap": true,
+    "rootDir": ".",
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
+    "noEmit": false
+  },
+  "include": ["src/**/*.ts", "rspack.config.ts"],
+  "exclude": ["node_modules", "dist"]
 }

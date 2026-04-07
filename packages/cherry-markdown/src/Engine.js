@@ -19,7 +19,7 @@ import NestedError, { $expectTarget, $expectInherit, $expectInstance } from './u
 import CryptoJS from 'crypto-js';
 import SyntaxBase from './core/SyntaxBase';
 import ParagraphBase from './core/ParagraphBase';
-import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg, base64Reg } from './utils/regexp';
+import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg, base64Reg, pasteWrapperReg } from './utils/regexp';
 import { escapeHTMLSpecialChar } from './utils/sanitize';
 import Logger from './Logger';
 import { configureMathJax } from './utils/mathjax';
@@ -27,6 +27,7 @@ import AsyncRenderHandler from './utils/async-render-handler';
 import UrlCache from './UrlCache';
 import htmlParser from './utils/htmlparser';
 import { isBrowser } from './utils/env';
+import { getExternal } from './utils/external';
 import * as htmlparser2 from 'htmlparser2';
 import LRUCache from './utils/LRUCache';
 import { loadCSS, loadScript } from './utils/dom';
@@ -77,9 +78,9 @@ export default class Engine {
     this.timer = setTimeout(() => {
       this.$cherry.lastMarkdownText = '';
       this.hashCache.clear();
-      const markdownText = this.$cherry.editor.editor.getValue();
+      const markdownText = this.$cherry.editor?.editor?.view?.state?.doc?.toString() || '';
       const html = this.makeHtml(markdownText);
-      this.$cherry.previewer.refresh(html);
+      this.$cherry.previewer?.refresh(html);
       this.$cherry.$event.emit('afterChange', {
         markdownText,
         html,
@@ -92,7 +93,7 @@ export default class Engine {
     if (this.urlProcessorMap[key]) {
       return this.urlProcessorMap[key];
     }
-    let originUrl = this.dealAfterMakeHtml(url);
+    let originUrl = this.$decodeReservedKeywords(url);
     originUrl = originUrl.replace(/&amp;/g, '&');
     const ret = this.$cherry.options.callback.urlProcessor(originUrl, srcType, (/** @type {string} */ newUrl) => {
       if (newUrl) {
@@ -125,7 +126,7 @@ export default class Engine {
     }
     if (syntax.mathBlock.engine === 'MathJax' || syntax.inlineMath.engine === 'MathJax') {
       // 已经加载过MathJax
-      if (externals.MathJax || window.MathJax) {
+      if (externals.MathJax || getExternal('MathJax')) {
         return;
       }
       configureMathJax(plugins);
@@ -134,20 +135,24 @@ export default class Engine {
       }
     }
     if (syntax.mathBlock.engine === 'katex' || syntax.inlineMath.engine === 'katex') {
-      // @ts-ignore
-      if (window.katex) {
+      const katexInstance = /** @type {import('katex').default | undefined} */ (getExternal('katex'));
+      if (katexInstance) {
         return;
       }
       syntax.mathBlock.css && loadCSS(syntax.mathBlock.css, 'katex-css');
       if (syntax.mathBlock.src) {
         loadScript(syntax.mathBlock.src, 'katex-js').then(() => {
+          const resolvedKatex = /** @type {import('katex').default} */ (getExternal('katex'));
+          if (!resolvedKatex) {
+            return;
+          }
           // 先更新预览区域
           this.$cherry.previewer
             .getDom()
             .querySelectorAll('.cherry-katex-need-render')
             .forEach((el) => {
               const displayMode = el.classList.contains('Cherry-Math');
-              el.innerHTML = window.katex.renderToString(decodeURI(el.getAttribute('data-content')), {
+              el.innerHTML = resolvedKatex.renderToString(decodeURIComponent(el.getAttribute('data-content')), {
                 throwOnError: false,
                 displayMode,
               });
@@ -158,12 +163,11 @@ export default class Engine {
           this.asyncRenderHandler.md = this.asyncRenderHandler.md.replace(
             /<(div|span) data-sign="([^"]+?)" class="([^"]+?) cherry-katex-need-render" ([^>]+? data-lines="[^"]+?") data-content="([\s\S]+?)"><\/\1>/g,
             (match, domName, sign, className, attrs, content) => {
-              const displayMode = domName === 'div';
-              const key = domName === 'div' ? `math-block-${sign}` : `math-inline-${sign}`;
-              // @ts-ignore
-              const html = window.katex.renderToString(decodeURI(content), {
+              const isDisplayMode = domName === 'div';
+              const key = isDisplayMode ? `math-block-${sign}` : `math-inline-${sign}`;
+              const html = resolvedKatex.renderToString(decodeURIComponent(content), {
                 throwOnError: false,
-                displayMode,
+                displayMode: isDisplayMode,
               });
               needDoneKeys.push(key);
               return `<${domName} data-sign="${sign}" class="${className}" ${attrs}>${html}</${domName}>`;
@@ -212,8 +216,7 @@ export default class Engine {
   }
 
   $beforeMakeHtml(str) {
-    let $str = str.replace(/~/g, '~T');
-    $str = $str.replace(/\$/g, '~D');
+    let $str = this.$encodeReservedKeywords(str);
     $str = $str.replace(/\r\n/g, '\n'); // DOS to Unix
     $str = $str.replace(/\r/g, '\n'); // Mac to Unix
     // 避免正则性能问题，如/.+\n/.test(' '.repeat(99999)), 回溯次数过多
@@ -227,9 +230,7 @@ export default class Engine {
   }
 
   dealAfterMakeHtml(str) {
-    let $str = str.replace(/~D/g, '$');
-    $str = $str.replace(/~T/g, '~');
-    $str = $str.replace(/\\<\//g, '\\ </');
+    let $str = str.replace(/\\<\//g, '\\ </');
     $str = $str
       .replace(new RegExp(`\\\\(${PUNCTUATION})`, 'g'), (match, escapeChar) => {
         if (escapeChar === '&') {
@@ -244,11 +245,22 @@ export default class Engine {
     return $str;
   }
 
+  // 替换预留关键字
+  $encodeReservedKeywords(str) {
+    return str.replace(/~/g, '~T').replace(/\$/g, '~D');
+  }
+
+  // 还原预留关键字
+  $decodeReservedKeywords(str) {
+    return str.replace(/~D/g, '$').replace(/~T/g, '~');
+  }
+
   $afterMakeHtml(str) {
     let $str = this.$fireHookAction(str, 'paragraph', 'afterMakeHtml', this.$dealSentenceByCache.bind(this));
     // str = this._fireHookAction(str, 'sentence', 'afterMakeHtml');
     $str = this.dealAfterMakeHtml($str);
     $str = UrlCache.restoreAll($str);
+    $str = this.$decodeReservedKeywords($str);
     return $str;
   }
 
@@ -293,7 +305,13 @@ export default class Engine {
             canContinue = false;
           }
         }
-        return oneHook[action](newMd, actionArgs, this.markdownParams);
+        // const time = Date.now();
+        const ret = oneHook[action](newMd, actionArgs, this.markdownParams);
+        // const cost = Date.now() - time;
+        // if (cost > 50) {
+        //   console.log(`hook ${oneHook.getName()} ${action} cost ${Date.now() - time}ms`);
+        // }
+        return ret;
       }, $md);
     } catch (e) {
       throw new NestedError(e);
@@ -308,13 +326,17 @@ export default class Engine {
     return this.hash(str);
   }
 
+  sha256(str) {
+    return CryptoJS.SHA256(str).toString();
+  }
+
   /**
    * 计算哈希值
    * @param {String} str 被计算的字符串
    * @returns {String} 哈希值
    */
   hash(str) {
-    // 当缓存队列比较大时，随机抛弃500个缓存
+    // 当缓存队列比较大时，随机抛弃一些缓存
     if (this.hashStrMap.size > 2000) {
       const keys = Array.from(this.hashStrMap.keys()).slice(0, 200);
       keys.forEach((key) => this.hashStrMap.delete(key));
@@ -358,11 +380,19 @@ export default class Engine {
       this.cachedBigData[cacheKey] = m2;
       return `${m1}${cacheKey}}`;
     });
-    $md = $md.replace(longTextReg, (whole, m1, m2) => {
-      const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
-      this.cachedBigData[cacheKey] = m2;
-      return `${m1}${cacheKey}}`;
-    });
+
+    const tmpArr = $md.split(/\n/);
+    for (let i = 0; i < tmpArr.length; i++) {
+      if (tmpArr[i].length > 6000) {
+        tmpArr[i] = tmpArr[i].replace(longTextReg, (whole) => {
+          const cacheKey = `bigDataBegin${this.hash(whole)}bigDataEnd`;
+          this.cachedBigData[cacheKey] = whole;
+          return cacheKey;
+        });
+      }
+    }
+    $md = tmpArr.join('\n');
+    $md = $md.replace(pasteWrapperReg, '');
     return $md;
   }
 
@@ -384,7 +414,10 @@ export default class Engine {
    * @param {string} md 内容
    * @returns {string}
    */
-  $setFlowSessionCursorCache(md) {
+  $setFlowSessionCursorCache(md, forceNoCursor = false) {
+    if (forceNoCursor) {
+      return md;
+    }
     if (this.$cherry.options.engine.global.flowSessionContext && this.$cherry.options.engine.global.flowSessionCursor) {
       // 为了不破坏加粗、斜体等语法，光标占位符放在加粗、斜体语法后面
       if (/[*_~^]+\n*$/.test(md)) {
@@ -440,11 +473,12 @@ export default class Engine {
   /**
    * @param {string} md md字符串
    * @param {'string'|'object'} returnType 返回格式，string：返回html字符串，object：返回结构化数据
+   * @param {boolean} forceNoCursor 是否强制不添加光标占位
    * @returns {string|object} 获取html
    */
-  makeHtml(md, returnType = 'string') {
+  makeHtml(md, returnType = 'string', forceNoCursor = false) {
     this.$prepareMakeHtml(md);
-    let $md = this.$setFlowSessionCursorCache(md);
+    let $md = this.$setFlowSessionCursorCache(md, forceNoCursor);
     $md = this.$cacheBigData($md);
     $md = this.$beforeMakeHtml($md);
     $md = this.$dealParagraph($md);

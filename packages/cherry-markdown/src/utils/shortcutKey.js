@@ -1,4 +1,8 @@
-import { mac } from 'codemirror/src/util/browser';
+import { isBrowser } from './env';
+
+// 检测是否是 Mac 平台
+export const mac = typeof navigator !== 'undefined' ? /Mac/.test(navigator.platform) : false;
+
 export const SHIFT_KEY = 'Shift';
 export const ALT_KEY = 'Alt';
 export const CONTROL_KEY = 'Control';
@@ -168,10 +172,12 @@ export const keyStackIsModifierkeys = (keyStack) => {
 };
 
 export const setDisableShortcutKey = (nameSpace, value = 'disable') => {
+  if (!isBrowser()) return;
   window.localStorage.setItem(`${nameSpace}-disable-cherry-shortcut-key`, value);
 };
 
 export const isEnableShortcutKey = (nameSpace) => {
+  if (!isBrowser()) return true;
   const disableShortcutKeyStorage = window.localStorage.getItem(`${nameSpace}-disable-cherry-shortcut-key`);
   if (disableShortcutKeyStorage === 'disable') {
     return false;
@@ -185,6 +191,7 @@ export const isEnableShortcutKey = (nameSpace) => {
  * @returns {void}
  */
 export const clearStorageKeyMap = (nameSpace) => {
+  if (!isBrowser()) return;
   window.localStorage.removeItem(`${nameSpace}-cherry-shortcut-keymap`);
 };
 
@@ -198,7 +205,8 @@ export const storageKeyMap = (nameSpace, keyMap) => {
   if (!keyMap || typeof keyMap !== 'object') {
     throw new Error('keyMap must be a object');
   }
-  return window.localStorage.setItem(`${nameSpace}-cherry-shortcut-keymap`, JSON.stringify(keyMap));
+  if (!isBrowser()) return;
+  window.localStorage.setItem(`${nameSpace}-cherry-shortcut-keymap`, JSON.stringify(keyMap));
 };
 
 /**
@@ -207,6 +215,7 @@ export const storageKeyMap = (nameSpace, keyMap) => {
  * @returns
  */
 export const getStorageKeyMap = (nameSpace) => {
+  if (!isBrowser()) return null;
   const shortcutKeyMapStorage = window.localStorage.getItem(`${nameSpace}-cherry-shortcut-keymap`);
   if (shortcutKeyMapStorage) {
     try {

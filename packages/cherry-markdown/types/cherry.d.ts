@@ -1,4 +1,4 @@
-import CodeMirror from 'codemirror';
+import { EditorView } from '@codemirror/view';
 import SyntaxBase from '../src/core/SyntaxBase';
 import { FormulaMenu } from '@/toolbars/BubbleFormula';
 
@@ -143,10 +143,15 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     afterAsyncRender?: CherryLifecycle;
     /** img 标签挂载前触发，可用于懒加载等场景 */
     beforeImageMounted?: (srcProp: string, src: string) => { srcProp: string; src: string };
-    onClickPreview?: (e: MouseEvent) => void;
+    /** 点击预览区域时触发，返回 false 可阻止后续处理 */
+    onClickPreview?: (e: MouseEvent) => void | false;
     onCopyCode?: (e: ClipboardEvent, code: string) => string | false;
     changeString2Pinyin?: (str: string) => string;
-    onPaste?: (clipboardData: ClipboardEvent['clipboardData'], cherry: Cherry) => string | boolean;
+    onPaste?: (
+      clipboardData: ClipboardEvent['clipboardData'],
+      cherry: Cherry,
+      callback?: (text: string) => void,
+    ) => string | boolean;
     onExpandCode?: (e: MouseEvent, code: string) => string;
     onUnExpandCode?: (e: MouseEvent, code: string) => string;
     onClickToc?: (e: MouseEvent, hash: string) => boolean;
@@ -349,6 +354,7 @@ export interface CherryEngineOptions {
           wrapperRender?: (language: string, code: string, innerHTML: string) => string;
           mermaid?: {
             svg2img?: boolean; // 是否将mermaid生成的画图变成img格式
+            showSourceToolbar?: boolean; // 是否显示mermaid源码/预览切换工具栏
           };
           /**
            * indentedCodeBlock是缩进代码块是否启用的开关
@@ -574,11 +580,11 @@ export interface CherryEditorOptions {
   convertWhenPaste?: boolean;
   /** 快捷键风格，目前仅支持 sublime 和 vim */
   keyMap?: 'sublime' | 'vim';
-  /** 透传给codemirror的配置项 */
+  /** 透传给 codemirror V6 的配置项 */
   codemirror?: object;
   /** 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal */
   writingStyle?: string;
-  editor?: CodeMirror.Editor;
+  editor?: EditorView;
   /** 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置 */
   keepDocumentScrollAfterInit?: boolean;
   /** 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》 */
@@ -616,7 +622,7 @@ export interface CherryPreviewerOptions {
   /** 预览区域的DOM className */
   className?: string;
   /** 是否是移动端预览 */
-  isMobilePreview?: boolean,
+  isMobilePreview?: boolean;
   enablePreviewerBubble?: boolean;
   floatWhenClosePreviewer?: boolean;
   // 配置图片懒加载的逻辑

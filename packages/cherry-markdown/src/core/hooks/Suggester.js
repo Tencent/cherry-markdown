@@ -22,13 +22,13 @@
 import escapeRegExp from 'lodash/escapeRegExp';
 import SyntaxBase from '@/core/SyntaxBase';
 import { allSuggestList, suggesterKeywords } from '@/core/hooks/SuggestList';
-import { Pass } from 'codemirror/src/util/misc';
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import { isBrowser } from '@/utils/env';
 
 /**
- * @typedef {import('codemirror')} CodeMirror
+ * @typedef {import('@codemirror/view').EditorView} EditorView
+ * @typedef {import('~types/editor').CM6Adapter} CM6Adapter
  */
 
 /**
@@ -43,12 +43,12 @@ import { isBrowser } from '@/utils/env';
 
 /**
  * @typedef {object} SuggesterConfigItem
- * @property {function(string, function(SuggestList): void): void} suggestList
- * @property {string} keyword
- * @property {function} suggestListRender
- * @property {function} echo
+ * @property {function(string, function(SuggestList): void): void} suggestList - 推荐项来源函数，接收搜索关键字和回调函数
+ * @property {string} keyword - 唤醒关键字（如 '@'、'#' 等）
+ * @property {function} suggestListRender - 自定义渲染函数（可选）
+ * @property {function} echo - 回填回调函数（可选）
  * @typedef {object} SuggesterConfig
- * @property {Array<SuggesterConfigItem>} suggester
+ * @property {Array<SuggesterConfigItem>} suggester - 推荐器配置数组
  */
 
 export default class Suggester extends SyntaxBase {
@@ -56,23 +56,12 @@ export default class Suggester extends SyntaxBase {
 
   constructor({ config, cherry }) {
     /**
-     * config.suggester 内容
-     * [{
-     * 请求url
-      suggestList: '',
-      唤醒关键字
-      keyword: '@',
-      建议模板 function
-      suggestListRender(valueArray) {
-
-      },
-      回填回调 function
-      echo(value) {
-            
-      }]
-     * 
+     * config.suggester 推荐器配置数组，每项配置：
+     * - suggestList: 推荐项来源（函数或字符串），函数接收关键字和结果回调
+     * - keyword: 唤醒关键字（如 '@'、'#' 等）
+     * - suggestListRender: 自定义渲染函数（可选）
+     * - echo: 回填回调函数（可选）
      */
-
     super({ needCache: true });
 
     this.config = config;
@@ -106,12 +95,11 @@ export default class Suggester extends SyntaxBase {
     this.suggester = {};
     const defaultSuggest = [];
     const that = this;
-    // 默认的唤醒关键字
+    // 默认的唤醒关键字配置
     for (const suggesterKeyword of suggesterKeywords) {
       defaultSuggest.push({
         keyword: suggesterKeyword,
         suggestList(_word, callback) {
-          // 将word全转成小写
           const word = _word.toLowerCase();
           const systemSuggestList = allSuggestList(
             suggesterKeyword,
@@ -124,23 +112,19 @@ export default class Suggester extends SyntaxBase {
             return;
           }
           const keyword = word
-            .replace(/\s+/g, '') // 删掉空格，避免产生不必要的空数组元素
-            .replace(new RegExp(`^${suggesterKeyword}`, 'g'), '') // 删掉word当中suggesterKeywords出现的字符
+            .replace(/\s+/g, '')
+            .replace(new RegExp(`^${suggesterKeyword}`, 'g'), '')
             .replace(/^[#]+/, '#')
             .replace(/^[/]+/, '/')
             .split('')
             .join('.*?');
-          // 匹配任何包含 "keyword" 的字符串，无论 "keyword" 是在字符串的开头、中间还是结尾，并且不区分大小写
           const test = new RegExp(`^.*?${keyword}.*?$`, 'i');
           const suggestList = systemSuggestList.filter((item) => {
-            // 处理精确匹配
             if (item.exactMatch) {
               return !word || item.keyword === word;
             }
-            // TODO: 首次联想的时候会把所有的候选项列出来，后续可以增加一些机制改成默认拉取一部分候选项
             return !word || test.test(item.keyword);
           });
-          // 当没有候选项时直接推出联想
           callback(suggestList.length === 0 ? false : suggestList);
         },
         echo() {
@@ -166,7 +150,7 @@ export default class Suggester extends SyntaxBase {
       this.suggester[configItem.keyword] = configItem;
     });
 
-    // 反复初始化时， 缓存还在， dom 已更新情况
+    // 反复初始化时，缓存还在但 DOM 已更新的情况
     if (this.suggesterPanel.hasEditor()) {
       this.suggesterPanel.editor = null;
     }
@@ -260,7 +244,8 @@ class SuggesterPanel {
   panelWrap = `<div class="cherry-suggester-panel"></div>`;
 
   hasEditor() {
-    return !!this.editor && !!this.editor.editor.display && !!this.editor.editor.display.wrapper;
+    // CodeMirror 6: 使用 view 属性检查编辑器是否存在
+    return !!this.editor && !!this.editor.editor && !!this.editor.editor.view;
   }
 
   /**
@@ -276,99 +261,96 @@ class SuggesterPanel {
   }
 
   bindEvent() {
-    if (!this.editor.options.showSuggestList) {
+    if (!this.editor?.options?.showSuggestList) {
       return;
     }
     let keyAction = false;
-    this.editor.editor.on('change', (codemirror, evt) => {
+
+    // change 事件必须使用 editor.editor.on('change')，因为 onCodeMirrorChange
+    // 需要 {text, from, to, origin} 格式的变更细节，而 $cherry.$event 的 afterChange
+    // 只传递 {markdownText, html}，不含这些信息
+    this.boundOnChange = (codemirror, evt) => {
       keyAction = true;
       this.onCodeMirrorChange(codemirror, evt);
-    });
+    };
+    this.editor.editor.on('change', this.boundOnChange);
 
-    this.editor.editor.on('keydown', (codemirror, evt) => {
-      keyAction = true;
-      if (this.enableRelate()) {
-        this.onKeyDown(codemirror, evt);
-      }
-    });
-
-    this.editor.editor.on('cursorActivity', () => {
-      // 当编辑区光标位置改变时触发
-      if (!keyAction) {
-        this.stopRelate();
-      }
+    // cursorActivity 和 scroll 使用 $cherry.$event 模式
+    this.boundOnCursorActivity = () => {
+      if (!keyAction) this.stopRelate();
       keyAction = false;
-    });
-
-    const extraKeys = this.editor.editor.getOption('extraKeys');
-    const decorateKeys = ['Up', 'Down', 'Enter'];
-    decorateKeys.forEach((key) => {
-      if (typeof extraKeys[key] === 'function') {
-        const proxyTarget = extraKeys[key];
-        extraKeys[key] = (codemirror) => {
-          if (this.cursorMove) {
-            const res = proxyTarget.call(codemirror, codemirror);
-
-            if (res) {
-              return res;
-            }
-            // logic to decide whether to move up or not
-            // return Pass.toString();
-          }
-        };
-      } else if (!extraKeys[key]) {
-        extraKeys[key] = () => {
-          if (this.cursorMove) {
-            // logic to decide whether to move up or not
-            return Pass.toString();
-          }
-        };
-      } else if (typeof extraKeys[key] === 'string') {
-        const command = extraKeys[key];
-        extraKeys[key] = (codemirror) => {
-          if (this.cursorMove) {
-            this.editor.editor.execCommand(command);
-
-            // logic to decide whether to move up or not
-            // return Pass.toString();
-          }
-        };
-      }
-    });
-
-    this.editor.editor.setOption('extraKeys', extraKeys);
-
-    this.editor.editor.on('scroll', (codemirror, evt) => {
+    };
+    this.boundOnScroll = () => {
       if (!this.searchCache) {
         return;
       }
-      // 当编辑器滚动时触发
       this.relocatePanel(this.editor.editor);
-    });
+    };
+
+    this.$cherry.$event.on('beforeSelectionChange', this.boundOnCursorActivity);
+    this.$cherry.$event.on('onScroll', this.boundOnScroll);
+
+    // CM6: 注册方向键拦截器（替代 CM5 的 extraKeys）
+    const keyCodeMap = { ArrowUp: 38, ArrowDown: 40, Enter: 13, Escape: 27 };
+    this.editor.arrowKeyInterceptor = (key) => {
+      keyAction = true;
+      if (!this.enableRelate()) return false;
+      // Enter 键特殊处理：直接执行选择，避免 onKeyDown 中 replaceRange 触发 stopRelate 导致状态混乱
+      if (key === 'Enter') {
+        const index = this.findSelectedItemIndex();
+        if (index >= 0) {
+          // 有选中项：执行选择并关闭面板
+          this.pasteSelectResult(index);
+          this.editor.editor.view.focus();
+          setTimeout(() => this.stopRelate(), 0);
+          return true;
+        }
+        // 无选中项但面板打开：关闭面板，阻止默认换行
+        // 这样用户可以通过按 Enter 快速关闭面板
+        setTimeout(() => this.stopRelate(), 0);
+        return true;
+      }
+      this.onKeyDown(this.editor.editor, { keyCode: keyCodeMap[key], key, preventDefault() {}, stopPropagation() {} });
+      return !this.cursorMove;
+    };
 
     this.onClickPanelItem();
   }
 
   onClickPanelItem() {
     this.tryCreatePanel();
-    this.$suggesterPanel.addEventListener(
-      'click',
-      (evt) => {
-        const idx = isChildNode(this.$suggesterPanel, evt.target);
-        if (idx > -1) {
-          this.editor.editor.focus();
-          this.pasteSelectResult(idx);
-        }
-        this.stopRelate();
-      },
-      false,
-    );
+    // 保存事件处理器引用，便于 destroy 时移除
+    this.boundClickHandler = (evt) => {
+      const idx = this.findClickedItemIndex(evt.target);
+      if (idx > -1) {
+        this.editor.editor.view.focus();
+        this.pasteSelectResult(idx);
+      }
+      // 使用 setTimeout 延迟 stopRelate，与 Enter 键处理保持一致
+      // 避免 replaceRange 触发 change 事件期间状态被清空
+      setTimeout(() => this.stopRelate(), 0);
+    };
+    this.$suggesterPanel.addEventListener('click', this.boundClickHandler, false);
+  }
 
-    function isChildNode(parent, node) {
-      let res = -1;
-      parent.childNodes.forEach((item, idx) => (item === node ? (res = idx) : ''));
-      return res;
+  /**
+   * 查找被点击元素对应的选项索引
+   * 支持点击 item 内部的子元素（如图标）
+   * @param {HTMLElement} target 被点击的元素
+   * @returns {number} 选项索引，未找到返回 -1
+   */
+  findClickedItemIndex(target) {
+    if (!this.$suggesterPanel) return -1;
+    let node = target;
+    // 向上查找最近的 item 元素
+    while (node && node !== this.$suggesterPanel) {
+      if (node.classList && node.classList.contains('cherry-suggester-panel__item')) {
+        // 找到 item，计算其索引
+        return Array.prototype.indexOf.call(this.$suggesterPanel.children, node);
+      }
+      node = node.parentElement;
     }
+    return -1;
   }
 
   showSuggesterPanel({ left, top, items }) {
@@ -466,22 +448,24 @@ class SuggesterPanel {
    * @param {CodeMirror} codemirror
    */
   relocatePanel(codemirror) {
-    // 找到光标位置来确定候选框位置
-    let $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
-    // 当editor选中某一内容时，".CodeMirror-cursor"会消失，此时通过定位".selected"来确定候选框位置
-    if (!$cursor) {
-      $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-selected');
+    // CodeMirror 6: 使用 coordsAtPos 获取光标位置
+    const editorView = this.editor?.editor?.view;
+    if (!editorView) {
+      return false;
     }
-    if (!$cursor) {
+
+    const cursorPos = editorView.state.selection.main.head;
+    const cursorCoords = editorView.coordsAtPos(cursorPos);
+
+    if (!cursorCoords) {
       return false;
     }
 
     const editorDomRect = this.$cherry.wrapperDom.getBoundingClientRect();
-    const cursorRect = $cursor.getBoundingClientRect();
 
-    const left = cursorRect.left - editorDomRect.left;
-    const cursorTop = cursorRect.top - editorDomRect.top;
-    const cursorHeight = cursorRect.height;
+    const left = cursorCoords.left - editorDomRect.left;
+    const cursorTop = cursorCoords.top - editorDomRect.top;
+    const cursorHeight = cursorCoords.bottom - cursorCoords.top;
 
     let top;
 
@@ -503,13 +487,18 @@ class SuggesterPanel {
    * @returns {{ left: number, top: number }}
    */
   getCursorPos(codemirror) {
-    const $cursor = document.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
-    if (!$cursor) return null;
-    const pos = codemirror.getCursor();
-    const lineHeight = codemirror.lineInfo(pos.line).handle.height;
-    const rect = $cursor.getBoundingClientRect();
-    const top = rect.top + lineHeight;
-    const { left } = rect;
+    // CodeMirror 6: 使用 coordsAtPos 获取光标位置
+    const editorView = this.editor?.editor?.view;
+    if (!editorView) return null;
+
+    const cursorPos = editorView.state.selection.main.head;
+    const cursorCoords = editorView.coordsAtPos(cursorPos);
+
+    if (!cursorCoords) return null;
+
+    const lineHeight = cursorCoords.bottom - cursorCoords.top;
+    const top = cursorCoords.top + lineHeight;
+    const { left } = cursorCoords;
     return { left, top };
   }
 
@@ -539,22 +528,29 @@ class SuggesterPanel {
 
     const actualPanelHeight = this.$suggesterPanel.offsetHeight || 380;
 
-    let $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
-    if (!$cursor) {
-      $cursor = this.$cherry.wrapperDom.querySelector('.CodeMirror-selected');
+    // CodeMirror 6: 光标在编辑器 view.dom 内部
+    // 需要从编辑器实例获取光标位置，而不是通过 DOM 查询
+    const editorView = this.editor?.editor?.view;
+    if (!editorView) {
+      this.$suggesterPanel.style.display = 'none';
+      return false;
     }
-    if (!$cursor) {
+
+    // 使用 CM6 的 coordsAtPos 获取光标位置
+    const cursorPos = editorView.state.selection.main.head;
+    const cursorCoords = editorView.coordsAtPos(cursorPos);
+
+    if (!cursorCoords) {
       this.$suggesterPanel.style.display = 'none';
       return false;
     }
 
     const editorDomRect = this.$cherry.wrapperDom.getBoundingClientRect();
-    const cursorRect = $cursor.getBoundingClientRect();
 
-    // 计算位置
-    const left = cursorRect.left - editorDomRect.left;
-    const cursorTop = cursorRect.top - editorDomRect.top;
-    const cursorHeight = cursorRect.height;
+    // 计算位置 - 使用 CM6 的 coordsAtPos 返回的坐标
+    const left = cursorCoords.left - editorDomRect.left;
+    const cursorTop = cursorCoords.top - editorDomRect.top;
+    const cursorHeight = cursorCoords.bottom - cursorCoords.top;
     const cursorBottomInView = cursorTop + cursorHeight;
 
     // 获取可用空间
@@ -607,81 +603,103 @@ class SuggesterPanel {
   /**
    * 粘贴选择结果
    * @param {number} idx 选择的结果索引
-   * @param {KeyboardEvent} evt 键盘事件
+   * @param {KeyboardEvent} [evt] 键盘事件（可选）
    */
   pasteSelectResult(idx, evt) {
     const { cursorFrom } = this;
-    if (!cursorFrom) {
+    if (cursorFrom === null || cursorFrom === undefined) {
       return;
     }
+    const optionItem = this.optionList[idx];
+    if (!optionItem) {
+      return;
+    }
+
+    const docLength = this.editor?.editor?.state?.doc?.length;
+
+    // 验证 cursorFrom 是否仍然有效
+    if (typeof docLength === 'number' && cursorFrom > docLength) {
+      this.stopRelate();
+      return;
+    }
+
     let cursorTo;
-    // 仅替换当前联想触发期间录入的字符，避免吞掉光标后的文本
-    // Reference: issue #1493 https://github.com/Tencent/cherry-markdown/issues/1493
+    // 仅替换当前联想触发期间录入的字符 (issue #1493)
     const typedLength = Array.isArray(this.searchKeyCache) ? this.searchKeyCache.join('').length : 0;
     if (typedLength > 0) {
-      cursorTo = { line: cursorFrom.line, ch: cursorFrom.ch + typedLength };
-    } else if (this.cursorTo) {
-      cursorTo = { line: this.cursorTo.line, ch: this.cursorTo.ch };
+      cursorTo = cursorFrom + typedLength;
+    } else if (this.cursorTo !== null && this.cursorTo !== undefined) {
+      cursorTo = this.cursorTo;
     } else {
-      cursorTo = { line: cursorFrom.line, ch: cursorFrom.ch };
+      cursorTo = cursorFrom;
     }
-    if (this.optionList[idx]) {
+
+    if (typeof docLength === 'number') {
+      cursorTo = Math.min(cursorTo, docLength);
+    }
+
+    if (optionItem) {
       let result = '';
-      if (
-        typeof this.optionList[idx] === 'object' &&
-        this.optionList[idx] !== null &&
-        typeof this.optionList[idx].value === 'string'
-      ) {
-        result = this.optionList[idx].value;
-      } else if (
-        typeof this.optionList[idx] === 'object' &&
-        this.optionList[idx] !== null &&
-        typeof this.optionList[idx].value === 'function'
-      ) {
-        result = this.optionList[idx].value();
+      if (typeof optionItem === 'object' && optionItem !== null && typeof optionItem.value === 'string') {
+        result = optionItem.value;
+      } else if (typeof optionItem === 'object' && optionItem !== null && typeof optionItem.value === 'function') {
+        result = optionItem.value();
       } else {
-        result = ` ${this.keyword}${this.optionList[idx]} `;
+        result = ` ${this.keyword}${optionItem} `;
       }
-      // 如果回填内容以空格结尾，同时光标位置后还有空格，则一并替换掉一个空格，避免残留双空格
-      if (result.endsWith(' ') && this.editor?.editor?.getLine && cursorTo && cursorTo.ch !== null) {
-        const lineText = this.editor.editor.getLine(cursorTo.line) || '';
-        if (lineText[cursorTo.ch] === ' ') {
-          cursorTo = { line: cursorTo.line, ch: cursorTo.ch + 1 };
+      // 如果回填内容以空格结尾，同时光标位置后还有空格，则一并替换
+      if (result.endsWith(' ') && this.editor?.editor?.state && cursorTo !== null) {
+        const { doc } = this.editor.editor.state;
+        const currentDocLength = doc?.length;
+        if (typeof currentDocLength === 'number' && cursorTo < currentDocLength) {
+          const charAtCursor = doc.sliceString(cursorTo, cursorTo + 1);
+          if (charAtCursor === ' ') {
+            cursorTo = cursorTo + 1;
+          }
         }
       }
-      // this.cursorTo.ch = this.cursorFrom.ch + result.length;
+      // CM6: replaceRange 使用文档偏移量
       if (result) {
         this.editor.editor.replaceRange(result, cursorFrom, cursorTo);
       }
       // 控制光标左移若干位
-      if (this.optionList[idx].goLeft) {
-        const cursor = this.editor.editor.getCursor();
-        this.editor.editor.setCursor(cursor.line, cursor.ch - this.optionList[idx].goLeft);
+      // CM6: getCursor() 返回文档偏移量
+      if (optionItem.goLeft) {
+        const cursor = this.editor.editor.view.state.selection.main.head;
+        this.editor.editor.view.dispatch({ selection: { anchor: cursor - optionItem.goLeft } });
       }
       // 控制光标上移若干位
-      if (this.optionList[idx].goTop) {
-        const cursor = this.editor.editor.getCursor();
-        this.editor.editor.setCursor(cursor.line - this.optionList[idx].goTop, cursor.ch);
+      // CM6: 需要将偏移量转换为行，然后向上移动
+      if (optionItem.goTop) {
+        const cursor = this.editor.editor.view.state.selection.main.head;
+        const { doc } = this.editor.editor.state;
+        const currentLine = doc.lineAt(cursor);
+        const targetLineNumber = Math.max(1, currentLine.number - optionItem.goTop);
+        const targetLine = doc.line(targetLineNumber);
+        const ch = cursor - currentLine.from;
+        const newPos = targetLine.from + Math.min(ch, targetLine.length);
+        this.editor.editor.view.dispatch({ selection: { anchor: newPos } });
       }
       // 选中某个范围
-      if (this.optionList[idx].selection) {
-        const { line } = this.editor.editor.getCursor();
-        const { ch } = this.editor.editor.getCursor();
-        this.editor.editor.setSelection(
-          { line, ch: ch - this.optionList[idx].selection.from },
-          { line, ch: ch - this.optionList[idx].selection.to },
-        );
+      // CM6: setSelection 使用文档偏移量
+      if (optionItem.selection) {
+        const cursor = this.editor.editor.view.state.selection.main.head;
+        const fromPos = cursor - optionItem.selection.from;
+        const toPos = cursor - optionItem.selection.to;
+        this.editor.editor.setSelection(fromPos, toPos);
       }
     }
   }
 
   /**
    * 寻找当前选中项的索引
-   * @returns {number}
+   * @returns {number} 选中项索引，未找到或面板不存在返回 -1
    */
   findSelectedItemIndex() {
-    return Array.prototype.findIndex.call(this.$suggesterPanel.childNodes, (item) =>
-      item.classList.contains('cherry-suggester-panel__item--selected'),
+    if (!this.$suggesterPanel) return -1;
+    return Array.prototype.findIndex.call(
+      this.$suggesterPanel.children,
+      (item) => item.classList && item.classList.contains('cherry-suggester-panel__item--selected'),
     );
   }
 
@@ -744,6 +762,10 @@ class SuggesterPanel {
     const { keyCode } = evt;
     // up down
     if ([38, 40].includes(keyCode)) {
+      // 阻止事件传播到 CodeMirror，避免光标移动
+      evt.preventDefault();
+      evt.stopPropagation();
+
       // issue 558
       if (this.optionList.length === 0) {
         setTimeout(() => {
@@ -816,25 +838,62 @@ class SuggesterPanel {
     } else if (keyCode === 13) {
       const index = this.findSelectedItemIndex();
       if (index >= 0) {
+        // 阻止事件传播，避免插入换行
+        evt.preventDefault();
         evt.stopPropagation();
         this.cursorMove = false;
         this.pasteSelectResult(index, evt);
-        codemirror.focus();
+        codemirror.view.focus();
       }
-      // const cache = JSON.parse(JSON.stringify(this.cursorTo));
-      // setTimeout(() => {
-      //   codemirror.setCursor(cache);
-      // }, 100);
       setTimeout(() => {
         this.stopRelate();
       }, 0);
     } else if (keyCode === 27 || keyCode === 0x25 || keyCode === 0x27) {
       // 按下esc或者←、→键的时候退出联想
+      evt.preventDefault();
       evt.stopPropagation();
-      codemirror.focus();
+      codemirror.view.focus();
       setTimeout(() => {
         this.stopRelate();
       }, 0);
     }
+  }
+
+  /**
+   * 销毁 SuggesterPanel 实例，清理事件监听器和 DOM 引用
+   * 必须调用此方法以避免内存泄漏
+   */
+  destroy() {
+    // 移除 editor.editor 上的 change 事件监听器
+    if (this.editor && this.editor.editor && this.boundOnChange) {
+      this.editor.editor.off('change', this.boundOnChange);
+    }
+    // 移除 $cherry.$event 上的事件监听器
+    if (this.$cherry && this.$cherry.$event) {
+      if (this.boundOnCursorActivity) {
+        this.$cherry.$event.off('beforeSelectionChange', this.boundOnCursorActivity);
+      }
+      if (this.boundOnScroll) {
+        this.$cherry.$event.off('onScroll', this.boundOnScroll);
+      }
+    }
+    this.boundOnChange = null;
+    this.boundOnCursorActivity = null;
+    this.boundOnScroll = null;
+
+    // 移除 panel 上的 click 事件监听器
+    if (this.$suggesterPanel && this.boundClickHandler) {
+      this.$suggesterPanel.removeEventListener('click', this.boundClickHandler, false);
+    }
+    // 清理 DOM 引用
+    if (this.$suggesterPanel && this.$suggesterPanel.parentNode) {
+      this.$suggesterPanel.parentNode.removeChild(this.$suggesterPanel);
+    }
+    this.$suggesterPanel = null;
+    this.editor = null;
+    this.$cherry = null;
+    this.suggesterConfig = {};
+    this.optionList = [];
+    this.searchKeyCache = [];
   }
 }

@@ -24,8 +24,17 @@ const imgSizeHandler = {
     const position = this.img.getBoundingClientRect();
     const editorPosition = this.previewerDom.parentNode.getBoundingClientRect();
     const padding = parseFloat(this.img.style.padding) || 0;
-    const alt = this.img.getAttribute('alt') || '';
-    const alignment = imgAltHelper.$getAlignment(alt);
+    let alignment = '';
+    if (this.isMermaid) {
+      // mermaid figure 的对齐信息从 class 中获取
+      const alignMatch = (this.img.className || '').match(
+        /cherry-mermaid-align-(center|right|left|float-right|float-left)/,
+      );
+      alignment = alignMatch ? alignMatch[1] : '';
+    } else {
+      const alt = this.img.getAttribute('alt') || '';
+      alignment = imgAltHelper.$getAlignment(alt);
+    }
 
     return {
       bottom: position.bottom - editorPosition.bottom,
@@ -41,6 +50,9 @@ const imgSizeHandler = {
   },
   initBubbleButtons() {
     const position = this.getImgPosition();
+    // mermaid figure 没有 .width 属性，使用 getBoundingClientRect 获取实际渲染尺寸
+    const width = this.isMermaid ? position.width || this.img.offsetWidth : this.img.width;
+    const height = this.isMermaid ? position.height || this.img.offsetHeight : this.img.height;
     return {
       points: {
         arr: [
@@ -65,8 +77,8 @@ const imgSizeHandler = {
         },
       },
       style: {
-        width: this.img.width,
-        height: this.img.height,
+        width,
+        height,
         left: position.left - 1,
         top: position.top - 1,
         marginTop: 0,
@@ -76,11 +88,12 @@ const imgSizeHandler = {
       position,
     };
   },
-  showBubble(img, container, previewerDom) {
+  showBubble(img, container, previewerDom, options = {}) {
     if (this.$isResizing()) {
       return;
     }
     this.img = img;
+    this.isMermaid = options.isMermaid || false;
     this.previewerDom = previewerDom;
     this.container = container;
     this.buts = this.initBubbleButtons();
@@ -200,6 +213,17 @@ const imgSizeHandler = {
     // 禁用图片拖拽功能，避免误触
     this.originalDraggable = this.img.draggable;
     this.img.draggable = false;
+
+    // mermaid figure 开始拖拽时，移除内部 SVG 的固定宽高，让 viewBox 接管缩放
+    if (this.isMermaid) {
+      const svg = this.img.querySelector('svg');
+      if (svg) {
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+      }
+    }
   },
   resizeStop(event, buts, editor, menu) {
     if (!this.$isResizing()) {
@@ -268,6 +292,11 @@ const imgSizeHandler = {
     // 左对齐 (left): 均不需要移动 left
 
     this.updateBubbleButs();
+    // mermaid figure 拖拽过程中实时更新元素尺寸，使缩放可见
+    if (this.isMermaid) {
+      this.img.style.width = `${this.buts.style.width}px`;
+      this.img.style.height = `${this.buts.style.height}px`;
+    }
     this.change();
   },
   change() {

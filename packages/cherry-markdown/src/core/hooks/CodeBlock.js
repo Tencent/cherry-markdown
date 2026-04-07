@@ -126,30 +126,66 @@ export default class CodeBlock extends ParagraphBase {
       return false;
     }
     const tag = CUSTOM_WRAPPER[engine.constructor.TYPE] || 'div';
+    const sizeStyle = props.mermaidSizeAttrs ? ` style="${props.mermaidSizeAttrs}"` : '';
+    const alignClass = props.mermaidAlignClass ? ` class="${props.mermaidAlignClass}"` : '';
+    const escapedLang = escapeHTMLSpecialChar(lang);
+    const showSourceToolbar = lang === 'mermaid' && this.mermaid && this.mermaid.showSourceToolbar;
+    // 提前计算源码 HTML 并缓存，避免每次 addContainer/updateCache 调用时重复生成
+    const $codeSrc = this.needCleanFlowCursor ? codeSrc.replace(/CHERRYFLOWSESSIONCURSOR/, '') : codeSrc;
+    const cachedSourceHtml = showSourceToolbar ? this.$codeReplace($codeSrc, lang, props.sign, props.lines) : '';
+    const containerAttrs = { tag, escapedLang, props, sizeStyle, alignClass };
     const addContainer = (html) => {
-      return `<${tag} data-sign="${props.sign}" data-type="${lang}" data-lines="${props.lines}">${html}</${tag}>`;
+      if (showSourceToolbar) {
+        return this.$buildMermaidSourceToolbarContainer(containerAttrs, html, cachedSourceHtml);
+      }
+      return `<${tag} data-sign="${props.sign}" data-type="${escapedLang}" data-lines="${props.lines}"${sizeStyle}${alignClass}>${html}</${tag}>`;
     };
     let html = '';
-    const $codeSrc = this.needCleanFlowCursor ? codeSrc.replace(/CHERRYFLOWSESSIONCURSOR/, '') : codeSrc;
     if (lang === 'all') {
       html = engine.render($codeSrc, props.sign, this.$engine, props.lang);
     } else {
       html = engine.render($codeSrc, props.sign, this.$engine, {
         mermaidConfig: this.mermaid,
+        showSourceToolbar,
         updateCache: (cacheCode) => {
-          this.$codeCache(props.sign, addContainer(cacheCode));
-          this.pushCache(addContainer(cacheCode), props.sign, props.lines);
+          const containerHtml = addContainer(cacheCode);
+          this.$codeCache(props.sign, containerHtml);
+          this.pushCache(containerHtml, props.sign, props.lines);
         },
-        fallback: () => {
-          const $code = this.$codeReplace($codeSrc, lang, props.sign, props.lines);
-          return $code;
-        },
+        fallback: () => this.$codeReplace($codeSrc, lang, props.sign, props.lines),
       });
     }
     if (!html) {
       return false;
     }
     return addContainer(html);
+  }
+
+  /**
+   * 构建带有源码/预览切换工具栏的 mermaid 容器
+   * @param {object} attrs 容器属性 { tag, escapedLang, props, sizeStyle, alignClass }
+   * @param {string} previewHtml 预览区的 HTML 内容
+   * @param {string} sourceCodeHtml 源码区的 HTML 内容（已预先生成）
+   * @returns {string} 带工具栏的完整 HTML
+   */
+  $buildMermaidSourceToolbarContainer(attrs, previewHtml, sourceCodeHtml) {
+    const { tag, escapedLang, props, sizeStyle, alignClass } = attrs;
+    const locale = this.$cherry.getLocales();
+    const previewText = locale.mermaidPreview || 'Preview';
+    const sourceText = locale.mermaidSource || 'Source';
+    // header 区域
+    const header = `<div class="cherry-mermaid-source-toolbar">`
+      + `<div class="cherry-mermaid-source-toolbar-switch">`
+      + `<div class="cherry-mermaid-source-toolbar-tab active" data-mode="preview">${previewText}</div>`
+      + `<div class="cherry-mermaid-source-toolbar-tab" data-mode="source">${sourceText}</div>`
+      + `<div class="cherry-mermaid-source-toolbar-slider"></div>`
+      + `</div>`
+      + `</div>`;
+    // 内容区域：各面板通过 data-mode 与 tab 关联
+    const body = `<div class="cherry-mermaid-source-toolbar-panel active" data-mode="preview">${previewHtml}</div>`
+      + `<div class="cherry-mermaid-source-toolbar-panel" data-mode="source">${sourceCodeHtml}</div>`;
+    return `<${tag} data-sign="${props.sign}" data-type="${escapedLang}" data-lines="${props.lines}"${sizeStyle}${alignClass}>`
+      + header + body + `</${tag}>`;
   }
 
   // 修复渲染行号时打散的标签
@@ -215,6 +251,36 @@ export default class CodeBlock extends ParagraphBase {
       sign,
       lines,
     };
+  }
+
+  /**
+   * 从代码块语言行中解析尺寸和对齐信息
+   * 支持语法: ```mermaid #300px #200px #center
+   * @param {string} lang 语言行文本
+   * @returns {{ lang: string, sizeAttrs: string, alignClass: string }} 解析后的语言名、尺寸样式和对齐class
+   */
+  parseMermaidSize(lang) {
+    const sizeRegex = /#([0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)/gi;
+    const alignRegex = /#(center|right|left|float-right|float-left)/i;
+    const allMarkersRegex = /#([0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto|center|right|left|float-right|float-left)/gi;
+
+    const sizes = lang.match(sizeRegex);
+    const alignMatch = lang.match(alignRegex);
+    const pureLang = lang.replace(allMarkersRegex, '').trim();
+
+    let sizeAttrs = '';
+    if (sizes?.length > 0) {
+      const [width, height] = sizes;
+      if (width) {
+        sizeAttrs = `width:${width.slice(1)};`;
+      }
+      if (height) {
+        sizeAttrs += `height:${height.slice(1)};`;
+      }
+    }
+
+    const alignClass = alignMatch ? `cherry-mermaid-align-${alignMatch[1]}` : '';
+    return { lang: pureLang, sizeAttrs, alignClass };
   }
 
   /**
@@ -390,7 +456,13 @@ export default class CodeBlock extends ParagraphBase {
     if ($codes.length % 2 === 1) {
       const lastCode = $codes[$codes.length - 1].replace(/(`)[^`]+$/, '$1').replace(/\n+/, '');
       const $str = str.replace(/\n+$/, '').replace(/\n`{1,2}$/, '');
-      return `${$str}\n${lastCode}\n`;
+      return (
+        `${$str}\n${lastCode}\n`
+          // 如果自动闭合后代码块为空，则删除代码块
+          .replace(/\n`{3,}[^`\n]*\n\s*`{3,}\n$/g, '\n')
+          // 如果自动闭合的是mermaid图，则再判断第二行以后的内容是否为空，如果为空，则删除代码块
+          .replace(/\n`{3,}\s*mermaid\s*\n[^\n]+\n\s*`{3,}\n$/g, '\n')
+      );
     }
     return str;
   }
@@ -443,8 +515,11 @@ export default class CodeBlock extends ParagraphBase {
         $code = $code.replace(regex, '$1');
       }
 
-      // 未命中缓存，执行渲染
       let $lang = lang.trim().toLowerCase();
+      // 从语言行中解析尺寸和对齐信息（如 mermaid #300px #200px #center）
+      const mermaidSizeInfo = this.parseMermaidSize($lang);
+      $lang = mermaidSizeInfo.lang;
+      const { sizeAttrs: mermaidSizeAttrs, alignClass: mermaidAlignClass } = mermaidSizeInfo;
       // 如果是公式关键字，则直接返回
       if (/^(math|katex|latex)$/i.test($lang) && !this.isInternalCustomLangCovered($lang)) {
         const prefix = match.match(/^\s*/g);
@@ -462,9 +537,14 @@ export default class CodeBlock extends ParagraphBase {
           match,
           addBlockQuoteSignToResult,
           lang: $oldLang,
+          mermaidSizeAttrs,
+          mermaidAlignClass,
         });
         if (cacheCode && cacheCode !== '') {
-          this.$codeCache(sign, cacheCode);
+          // echarts渲染的场景不再缓存，因为缓存后无法触发echarts渲染
+          if (!/^\s*echarts\s*$/.test($lang)) {
+            this.$codeCache(sign, cacheCode);
+          }
           return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
         }
         // 渲染出错则按正常code进行渲染

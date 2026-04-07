@@ -17,7 +17,7 @@ import ParagraphBase from '@/core/ParagraphBase';
 import { escapeFormulaPunctuations, LoadMathModule } from '@/utils/mathjax';
 import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
-import { getTableRule, isLookbehindSupported } from '@/utils/regexp';
+import { getTableRule, isLookbehindSupported, mathBlockReg } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 
 /**
@@ -36,6 +36,11 @@ export default class InlineMath extends ParagraphBase {
     // 非浏览器环境下配置为 node
     this.engine = isBrowser() ? (config.engine ?? 'MathJax') : 'node';
     this.$cherry = cherry;
+    /**
+     * 这里本意是用来存储「上一轮」成功渲染里的最后一个公式
+     * 但因为偷懒，存的是「上一次」成功渲染里的公式，所以这里有个大大的「TODO」
+     * 同时，mermaid渲染那里也有同样的问题，也有个大大的「TODO」
+     */
     this.lastCode = '';
   }
 
@@ -48,12 +53,14 @@ export default class InlineMath extends ParagraphBase {
     const lines = linesArr ? linesArr.length + 2 : 2;
     const sign = this.$engine.hash(wholeMatch);
     const $m1 = m1.replace(/\\~D/g, '$').replace(/\\~T/g, '~').replace(/~T/g, '~');
+    // 保留一份源码到渲染节点上，供 formulaUtilsHandler 直接读取，避免再次对全文做正则解析。
+    const encodedFormulaSource = encodeURIComponent($m1);
     // 既无MathJax又无katex时，原样输出
     let result = '';
     if (this.engine === 'katex') {
       // katex渲染
       if (!this.katex) {
-        result = `${leadingChar}<span data-sign="${sign}" class="Cherry-InlineMath cherry-katex-need-render" data-type="mathBlock" data-lines="${lines}" data-content="${encodeURI($m1)}"></span>`;
+        result = `${leadingChar}<span data-sign="${sign}" class="Cherry-InlineMath cherry-katex-need-render" data-type="mathBlock" data-formula-source="${encodedFormulaSource}" data-lines="${lines}" data-content="${encodeURIComponent($m1)}"></span>`;
         this.$engine.asyncRenderHandler.add(`math-inline-${sign}`);
       } else {
         let html = this.katex.renderToString($m1, {
@@ -65,7 +72,7 @@ export default class InlineMath extends ParagraphBase {
           }
           this.lastCode = html;
         }
-        result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}">${html}</span>`;
+        result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}" data-formula-source="${encodedFormulaSource}">${html}</span>`;
       }
     } else if (this.MathJax?.tex2svg) {
       // MathJax渲染
@@ -76,10 +83,10 @@ export default class InlineMath extends ParagraphBase {
         }
         this.lastCode = svg;
       }
-      result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}">${svg}</span>`;
+      result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}" data-formula-source="${encodedFormulaSource}">${svg}</span>`;
     } else {
       result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock"
-        data-lines="${lines}">$${escapeFormulaPunctuations(m1)}$</span>`;
+        data-lines="${lines}" data-formula-source="${encodedFormulaSource}">$${escapeFormulaPunctuations(m1)}$</span>`;
     }
 
     return this.pushCache(result, ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX + sign);
@@ -105,16 +112,27 @@ export default class InlineMath extends ParagraphBase {
     let $str = str;
     // 格里处理行内公式，让一个td里的行内公式语法生效，让跨td的行内公式语法失效
     $str = $str.replace(getTableRule(true), (whole, ...args) => {
-      return whole
-        .split('|')
-        .map((oneTd) => {
-          return this.makeInlineMath(oneTd);
+      const arr = whole.split('|');
+      return arr
+        .map((oneTd, index) => {
+          // 单元格里的段落公式直接替换成行内公式
+          const tdContent = this.transformBlockMathToInlineMath(oneTd);
+          // 判断是否为最后一个td
+          if (index === arr.length - 1) {
+            return this.makeInlineMathWithSelfClosing(tdContent);
+          }
+          return this.makeInlineMath(tdContent);
         })
         .join('|')
         .replace(/\\~D/g, '~D') // 出现反斜杠的情况（如/$e=m^2$）会导致多一个反斜杠，这里替换掉
         .replace(/~D/g, '\\~D');
     });
-    $str = this.makeInlineMath($str);
+    $str = this.makeInlineMathWithSelfClosing($str);
+    return $str;
+  }
+
+  makeInlineMathWithSelfClosing(str) {
+    let $str = this.makeInlineMath(str);
     if (this.isSelfClosing()) {
       const $oldStr = $str;
       $str = this.$dealUnclosingMath($str);
@@ -123,6 +141,19 @@ export default class InlineMath extends ParagraphBase {
       }
     }
     return $str;
+  }
+
+  transformBlockMathToInlineMath(str) {
+    if (isLookbehindSupported()) {
+      return str.replace(mathBlockReg, '$1$2~D$3~D$4');
+    }
+    return replaceLookbehind(
+      str,
+      mathBlockReg,
+      (whole, match1, match2, match3, match4) => `${match1}${match2}~D${match3}~D${match4}`,
+      true,
+      1,
+    );
   }
 
   makeInlineMath(str) {
@@ -143,7 +174,7 @@ export default class InlineMath extends ParagraphBase {
     const ret = {
       begin: isLookbehindSupported() ? '((?<!\\\\))~D\\n?' : '(^|[^\\\\])~D\\n?',
       content: '(.*?)\\n?',
-      end: isLookbehindSupported() ? '((?<!\\\\))~D' : '[^\\\\]~D',
+      end: '(\\s*)~D(?:\\s{0,1})',
     };
     ret.reg = new RegExp(ret.begin + ret.content + ret.end, 'g');
     return ret;

@@ -150,6 +150,13 @@
   --accordion-body-color: var(--base-font-color);
   --accordion-body-border: var(--base-border-color);
 
+  /* ========== Mermaid 源码工具栏 ========== */
+  --mermaid-toolbar-switch-bg: rgba(128, 128, 128, 0.12);
+  --mermaid-toolbar-slider-bg: rgba(255, 255, 255, 0.85);
+  --mermaid-toolbar-tab-color: inherit;
+  --mermaid-toolbar-tab-active-color: #333;  // active 状态深色文字，确保在亮色 slider 上可见
+  --mermaid-container-border: rgba(128, 128, 128, 0.2);
+
   /* ========== 其余单个组件 ========== */
   --drag-border-color: #ebedee;
 }

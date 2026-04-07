@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 import { getCodeBlockRule } from '@/utils/regexp';
-import codemirror from 'codemirror';
+import { EditorView, lineNumbers, keymap } from '@codemirror/view';
+import { EditorState } from '@codemirror/state';
+import { defaultKeymap, indentWithTab } from '@codemirror/commands';
 import { getCodePreviewLangSelectElement } from '@/utils/code-preview-language-setting';
 import { copyToClip } from '@/utils/copy';
-import 'codemirror/keymap/sublime';
+import Logger from '@/Logger';
 
 export default class CodeBlockHandler {
   /**
@@ -61,6 +63,14 @@ export default class CodeBlockHandler {
     }
   }
   $remove() {
+    // 销毁 CodeMirror 6 EditorView 以防止内存泄漏
+    if (this.codeBlockEditor.editorDom.inputDom) {
+      try {
+        this.codeBlockEditor.editorDom.inputDom.destroy();
+      } catch (e) {
+        Logger.warn('Failed to destroy EditorView:', e);
+      }
+    }
     this.codeBlockEditor = { info: {}, codeBlockCodes: [], editorDom: {} };
   }
   $tryRemoveMe(event, callback) {
@@ -95,7 +105,7 @@ export default class CodeBlockHandler {
   }
   $collectCodeBlockCode() {
     const codeBlockCodes = [];
-    this.codeMirror.getValue().replace(this.codeBlockReg, function (whole, ...args) {
+    this.codeMirror.view.state.doc.toString().replace(this.codeBlockReg, function (whole, ...args) {
       const match = whole.replace(/^\n*/, '');
       const offsetBegin = args[args.length - 2] + whole.match(/^\n*/)[0].length;
       if (!match.startsWith('```mermaid')) {
@@ -109,7 +119,7 @@ export default class CodeBlockHandler {
   }
   $setBlockSelection(index) {
     const codeBlockCode = this.codeBlockEditor.codeBlockCodes[index];
-    const whole = this.codeMirror.getValue();
+    const whole = this.codeMirror.view.state.doc.toString();
     const beginLine = whole.slice(0, codeBlockCode.offset).match(/\n/g)?.length ?? 0;
     const endLine = beginLine + codeBlockCode.code.match(/\n/g).length;
     const endCh = codeBlockCode.code.slice(0, -3).match(/[^\n]+\n*$/)[0].length;
@@ -118,11 +128,16 @@ export default class CodeBlockHandler {
       { line: endLine - 1, ch: endCh },
       { line: beginLine + 1, ch: 0 },
     ];
-    this.codeMirror.setSelection(...this.codeBlockEditor.info.selection);
+    const { doc } = this.codeMirror.view.state;
+    const from =
+      doc.line(this.codeBlockEditor.info.selection[0].line + 1).from + this.codeBlockEditor.info.selection[0].ch;
+    const to =
+      doc.line(this.codeBlockEditor.info.selection[1].line + 1).from + this.codeBlockEditor.info.selection[1].ch;
+    this.codeMirror.setSelection(from, to);
   }
   $setLangSelection(index) {
     const codeBlockCode = this.codeBlockEditor.codeBlockCodes[index];
-    const whole = this.codeMirror.getValue();
+    const whole = this.codeMirror.view.state.doc.toString();
     const beginLine = whole.slice(0, codeBlockCode.offset).match(/\n/g)?.length ?? 0;
     const firstLine = codeBlockCode.code.match(/```\s*[^\n]+/)[0] ?? '```';
     const beginCh = 3;
@@ -131,7 +146,12 @@ export default class CodeBlockHandler {
       { line: beginLine, ch: beginCh },
       { line: beginLine, ch: endLine },
     ];
-    this.codeMirror.setSelection(...this.codeBlockEditor.info.selection);
+    const { doc } = this.codeMirror.view.state;
+    const from =
+      doc.line(this.codeBlockEditor.info.selection[0].line + 1).from + this.codeBlockEditor.info.selection[0].ch;
+    const to =
+      doc.line(this.codeBlockEditor.info.selection[1].line + 1).from + this.codeBlockEditor.info.selection[1].ch;
+    this.codeMirror.setSelection(from, to);
   }
   showBubble(isEnableBubbleAndEditorShow = true) {
     this.$updateContainerPosition();
@@ -279,34 +299,54 @@ export default class CodeBlockHandler {
   $drawEditor() {
     const dom = document.createElement('div');
     dom.className = 'cherry-previewer-codeBlock-content-handler__input';
-    const input = document.createElement('textarea');
-    input.id = 'codeMirrorEditor';
-    dom.appendChild(input);
-    const editorInstance = codemirror.fromTextArea(input, {
-      mode: '',
-      theme: 'default',
-      scrollbarStyle: 'null', // 取消滚动动画
-      lineNumbers: true, // 显示行号
-      autofocus: true, // 自动对焦
-      lineWrapping: true, // 自动换行
-      cursorHeight: 0.85, // 光标高度，0.85好看一些
-      indentUnit: 4, // 缩进单位为4
-      tabSize: 4, // 一个tab转换成的空格数量
-      keyMap: 'sublime',
-    });
+
+    // 创建 CodeMirror 6 编辑器
     const editor = this.codeMirror;
-    editorInstance.on('change', () => {
-      editor.replaceSelection(editorInstance.getValue(), 'around');
+    // 存储原始选区内容，用于初始化编辑器
+    const originalContent = editor.state.doc.sliceString(
+      editor.state.selection.main.from,
+      editor.state.selection.main.to,
+    );
+    const { from } = editor.state.selection.main;
+
+    // 跟踪当前的替换范围起始位置和长度
+    // 起始位置不变，只需要跟踪长度变化
+    const currentFrom = from;
+    let currentLength = originalContent.length;
+
+    const extensions = [
+      lineNumbers(),
+      EditorView.lineWrapping,
+      keymap.of([...defaultKeymap, indentWithTab]),
+      EditorView.updateListener.of((update) => {
+        if (update.docChanged) {
+          const newContent = update.state.doc.toString();
+          const newLength = newContent.length;
+          // 使用当前范围进行替换，并更新范围长度
+          editor.dispatch({
+            changes: { from: currentFrom, to: currentFrom + currentLength, insert: newContent },
+          });
+          // 更新长度以备下次编辑使用
+          currentLength = newLength;
+        }
+      }),
+    ];
+
+    const state = EditorState.create({
+      doc: originalContent,
+      extensions,
     });
+
+    const view = new EditorView({
+      state,
+      parent: dom,
+    });
+
     this.codeBlockEditor.editorDom.inputDiv = dom;
-    this.codeBlockEditor.editorDom.inputDom = editorInstance;
+    this.codeBlockEditor.editorDom.inputDom = view;
     this.$updateEditorPosition();
     this.container.appendChild(this.codeBlockEditor.editorDom.inputDiv);
-    this.codeBlockEditor.editorDom.inputDom.focus();
-    this.codeBlockEditor.editorDom.inputDom.refresh();
-    editorInstance.setValue(this.codeMirror.getSelection());
-    // 去掉下面的逻辑，因为在代码块比较高时，强制让光标定位在最后会让页面出现跳跃的情况
-    // editorInstance.setCursor(Number.MAX_VALUE, Number.MAX_VALUE); // 指针设置至CodeBlock末尾
+    view.focus();
   }
 
   /**
@@ -364,12 +404,12 @@ export default class CodeBlockHandler {
   }
 
   /**
-   * 更新编辑器的位置（尺寸和位置）
+   * 更新编辑器的位置(尺寸和位置)
    */
   $updateEditorPosition() {
     this.$setInputOffset();
     const spanStyle = getComputedStyle(this.codeBlockEditor.info.codeBlockNode);
-    const editorWrapper = this.codeBlockEditor.editorDom.inputDom.getWrapperElement();
+    const editorWrapper = this.codeBlockEditor.editorDom.inputDom.dom;
     this.setStyle(editorWrapper, 'fontSize', spanStyle.fontSize || '16px');
     this.setStyle(editorWrapper, 'fontFamily', spanStyle.fontFamily);
     this.setStyle(editorWrapper, 'lineHeight', '1.8em');

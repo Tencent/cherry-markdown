@@ -37,10 +37,17 @@ export default class TableHandler {
     this.previewerDom = previewerDom;
     this.container = container;
     this.codeMirror = codeMirror;
-    this.$initReg();
-    this.$findTableInEditor();
     this.tableElement = tableElement;
     this.$cherry = cherry;
+
+    // 流式渲染场景下没有 codeMirror，跳过表格编辑功能初始化
+    if (!this.codeMirror) {
+      console.warn('TableHandler: codeMirror is not available, table editing is disabled');
+      return;
+    }
+
+    this.$initReg();
+    this.$findTableInEditor();
   }
 
   emit(type, event = {}, callback = () => {}) {
@@ -165,7 +172,7 @@ export default class TableHandler {
   $collectTableCode() {
     const tableCodes = [];
     const footnoteTableCodes = [];
-    const editorValue = this.codeMirror.getValue();
+    const editorValue = this.codeMirror.view.state.doc.toString();
 
     // 首先收集所有脚注的位置信息
     const footnoteRanges = [];
@@ -295,7 +302,11 @@ export default class TableHandler {
     const selectTdInfo = this.tableEditor.info;
     const { isInFootnote } = selectTdInfo;
     const tableCode = isInFootnote ? this.tableEditor.footnoteTableCodes[index] : this.tableEditor.tableCodes[index];
-    const whole = this.codeMirror.getValue();
+    // 边界检查：如果表格代码不存在，直接返回
+    if (!tableCode) {
+      return;
+    }
+    const whole = this.codeMirror.view.state.doc.toString();
     const beginLine = whole.slice(0, tableCode.offset).match(/\n/g)?.length ?? 0;
     // 根据表格类型选择不同的处理方式
     let offsetInfo;
@@ -316,6 +327,7 @@ export default class TableHandler {
       offsetInfo = this.$getTdOffset(tableCode.code, selectTdInfo.isTHead, selectTdInfo.trIndex, selectTdInfo.tdIndex);
     }
     const { preLine, preCh, plusCh, currentTd } = offsetInfo;
+    const { doc } = this.codeMirror.view.state;
     if (type === 'table') {
       const endLine = beginLine + tableCode.code.match(/\n/g).length;
       const endCh = tableCode.code.match(/[^\n]+\n*$/)[0].length;
@@ -329,7 +341,11 @@ export default class TableHandler {
         { line: beginLine + preLine, ch: preCh + plusCh },
       ];
     }
-    select && this.codeMirror.setSelection(...this.tableEditor.info.selection);
+    if (select) {
+      const from = doc.line(this.tableEditor.info.selection[0].line + 1).from + this.tableEditor.info.selection[0].ch;
+      const to = doc.line(this.tableEditor.info.selection[1].line + 1).from + this.tableEditor.info.selection[1].ch;
+      this.codeMirror.setSelection(from, to);
+    }
     this.tableEditor.info.code = currentTd;
   }
 
@@ -354,7 +370,7 @@ export default class TableHandler {
     }
     // 计算单元格内容的实际位置（去除前后空格）
     const trimmedContent = current.trim();
-    // 当前单元格为空时，尝试选中单元格的“中间”位置
+    // 当前单元格为空时，尝试选中单元格的"中间"位置
     const leadingSpaces =
       trimmedContent.length > 0 ? current.match(/^\s*/)[0].length : Math.floor(current.match(/^\s*/)[0].length / 2);
     const basePreCh = needPlus1 ? pre.join('|').length + 1 : pre.join('|').length;
@@ -690,7 +706,24 @@ export default class TableHandler {
     if (e.target.tagName !== 'TEXTAREA') {
       return;
     }
-    this.codeMirror.replaceSelection(e.target.value.replace(/\n/g, '<br>'), 'around');
+    const newValue = e.target.value.replace(/\n/g, '<br>');
+    const { selection } = this.tableEditor.info;
+
+    // 使用存储的选区位置信息来计算替换范围
+    const { doc } = this.codeMirror.view.state;
+    const fromLine = doc.line(selection[0].line + 1);
+    const toLine = doc.line(selection[1].line + 1);
+    const from = fromLine.from + selection[0].ch;
+    const to = toLine.from + selection[1].ch;
+
+    // 使用 replaceRange 替换指定位置的内容
+    this.codeMirror.replaceRange(newValue, from, to);
+
+    // 更新存储的选区结束位置，以便下次输入时使用正确的位置
+    const newEndCh = selection[0].ch + newValue.length;
+    this.tableEditor.info.selection[1].ch = newEndCh;
+    // 同时更新存储的单元格内容
+    this.tableEditor.info.code = newValue;
   }
 
   /**
@@ -1061,7 +1094,7 @@ export default class TableHandler {
    */
   $afterTableOperation() {
     this.boundaryCache = null;
-    this.$findTableInEditor();
+    this.$collectTableCode();
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
   }
 
@@ -1073,7 +1106,8 @@ export default class TableHandler {
     if (this.tableEditor.info.isHtmlTable) return;
     const { tableIndex, columns } = this.tableEditor.info;
     this.$setSelection(tableIndex, 'table');
-    const selection = this.codeMirror.getSelection();
+    const { view } = this.codeMirror;
+    const selection = view.state.doc.sliceString(view.state.selection.main.from, view.state.selection.main.to);
     const lines = selection.split('\n');
     if (lines.length < 3) return;
 
@@ -1096,7 +1130,9 @@ export default class TableHandler {
       return;
     }
 
-    this.codeMirror.replaceRange(newRow, { line: insertLine, ch: 0 });
+    const { doc } = this.codeMirror.view.state;
+    const offset = doc.line(insertLine + 1).from;
+    this.codeMirror.replaceRange(newRow, offset);
     this.$afterTableOperation();
   }
 
@@ -1134,7 +1170,8 @@ export default class TableHandler {
    */
   $insertCol() {
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
-    const selection = this.codeMirror.getSelection();
+    const { view } = this.codeMirror;
+    const selection = view.state.doc.sliceString(view.state.selection.main.from, view.state.selection.main.to);
     const lines = selection.split('\n');
     const newLines = lines.map((line, index) => {
       const tableType = /^\s*\|/.test(line) ? 'type1' : 'type2';
@@ -1614,7 +1651,8 @@ export default class TableHandler {
   $alignColumn(alignment) {
     const { tableIndex, tdIndex } = this.tableEditor.info;
     this.$setSelection(tableIndex, 'table');
-    const selection = this.codeMirror.getSelection();
+    const { view } = this.codeMirror;
+    const selection = view.state.doc.sliceString(view.state.selection.main.from, view.state.selection.main.to);
     const lines = selection.split('\n');
 
     // 统一处理markdown表格（包括引用表格）
@@ -1771,7 +1809,8 @@ export default class TableHandler {
   $deleteCurrentRow() {
     const { tableIndex, trIndex } = this.tableEditor.info;
     this.$setSelection(tableIndex, 'table');
-    const selection = this.codeMirror.getSelection();
+    const { view } = this.codeMirror;
+    const selection = view.state.doc.sliceString(view.state.selection.main.from, view.state.selection.main.to);
     const table = selection.split('\n');
     table.splice(trIndex + 2, 1);
     const newText = table.join('\n');
@@ -1785,7 +1824,8 @@ export default class TableHandler {
   $deleteCurrentColumn() {
     const { tableIndex, tdIndex } = this.tableEditor.info;
     this.$setSelection(tableIndex, 'table');
-    const selection = this.codeMirror.getSelection();
+    const { view } = this.codeMirror;
+    const selection = view.state.doc.sliceString(view.state.selection.main.from, view.state.selection.main.to);
     const table = selection.split('\n');
     // 检查是否是引用语法中的表格
     const isBlockquoteTable = table.some((row) => row.trim().startsWith('>'));
@@ -1837,7 +1877,8 @@ export default class TableHandler {
   $dragCol() {
     const oldTdIndex = this.tableEditor.info.tdIndex;
     const thNode = this.target.parentElement;
-    const lines = this.codeMirror.getSelection().split(/\n/);
+    const { view } = this.codeMirror;
+    const lines = view.state.doc.sliceString(view.state.selection.main.from, view.state.selection.main.to).split(/\n/);
     const { tdNode } = this.tableEditor.info;
     const that = this;
 
@@ -1924,7 +1965,8 @@ export default class TableHandler {
     this.$setSelection(this.tableEditor.info.tableIndex, 'table');
     const oldTrIndex = this.tableEditor.info.trIndex + 2;
     const tBody = trNode.parentElement;
-    const lines = this.codeMirror.getSelection().split(/\n/);
+    const { view } = this.codeMirror;
+    const lines = view.state.doc.sliceString(view.state.selection.main.from, view.state.selection.main.to).split(/\n/);
     const that = this;
 
     function handleDragLeave(event) {

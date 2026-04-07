@@ -40,10 +40,16 @@ export default class Blockquote extends ParagraphBase {
         after = `\n<${htmlDomTest.slice(1).join('\n<')}`;
       }
       const $content = htmlDomTest[0].replace(/^([ \t]*>)/gm, '');
-      let blockquoteContent = this.$engine.makeHtmlForBlockquote($content);
-      // 给 blockquote 内的标题添加标识
-      blockquoteContent = blockquoteContent.replace(/(<h[1-6]\s)/g, '$1data-in-blockquote="true" ');
-      handledHtml += blockquoteContent;
+      handledHtml += this.cacheAndGetData(
+        $content,
+        ($content) => {
+          const ret = this.$engine.makeHtmlForBlockquote($content);
+          // 给 blockquote 内的标题添加标识
+          return ret.replace(/(<h[1-6]\s)/g, '$1data-in-blockquote="true" ');
+        },
+        2000,
+        -300,
+      );
       // 标签闭合
       handledHtml += '</blockquote>';
       return `${this.getCacheWithSpace(this.pushCache(handledHtml, sign, lineCount), match)}${after}`;

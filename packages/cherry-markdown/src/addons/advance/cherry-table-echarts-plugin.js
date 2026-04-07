@@ -15,6 +15,8 @@
  */
 import mergeWith from 'lodash/mergeWith';
 import Logger from '@/Logger';
+import { getExternal } from '@/utils/external';
+import { isBrowser } from '@/utils/env';
 
 // 主题与常量集中管理
 const THEME = {
@@ -43,7 +45,7 @@ const DEFAULT_OPTIONS = {
 
 export default class EChartsTableEngine {
   static install(cherryOptions, ...args) {
-    if (typeof window === 'undefined') {
+    if (!isBrowser()) {
       Logger.warn('echarts-table-engine only works in browser.');
       mergeWith(cherryOptions, {
         engine: {
@@ -71,11 +73,13 @@ export default class EChartsTableEngine {
 
   constructor(echartsOptions = {}) {
     const { echarts, cherryOptions, cherry, ...options } = echartsOptions;
-    if (!echarts && !window.echarts) {
+    const globalEcharts = getExternal('echarts');
+    const resolvedEcharts = echarts || globalEcharts;
+    if (!resolvedEcharts) {
       throw new Error('table-echarts-plugin[init]: Package echarts not found.');
     }
     this.options = { ...DEFAULT_OPTIONS, ...(options || {}) };
-    this.echartsRef = echarts || window.echarts; // echarts引用
+    this.echartsRef = /** @type {*} */ (resolvedEcharts); // echarts引用
     this.dom = null;
 
     // 保存Cherry配置，用于获取地图数据源URL
@@ -313,13 +317,14 @@ export default class EChartsTableEngine {
   createChart(container, option = {}, type) {
     if (!container) return null;
     // 已存在实例直接返回，避免被观察器和延迟初始化同时触发导致重复初始化
-    const existed = this.echartsRef.getInstanceByDom(container);
-    if (existed && !existed.isDisposed()) return existed;
+    let chart = this.echartsRef.getInstanceByDom(container);
+    // if (existed && !existed.isDisposed()) return existed;
 
-    if (container.firstChild) container.innerHTML = '';
-
-    const chart = this.echartsRef.init(container, null, this.options);
-    if (option && Object.keys(option).length) chart.setOption(option);
+    // if (container.firstChild) container.innerHTML = '';
+    if (!chart) {
+      chart = this.echartsRef.init(container, null, this.options);
+    }
+    if (option && Object.keys(option).length) chart.setOption(option, true);
 
     this.instances.add(chart);
     this.$tagEchartsSvg(container);
@@ -568,7 +573,7 @@ export default class EChartsTableEngine {
   /**
    * 渲染入口：将表格数据渲染为指定类型图表，并返回 HTML 容器片段
    */
-  render(type, options, tableObject) {
+  render(type, options, tableObject, $cherry) {
     // Logger.log('Rendering chart:', type, options, tableObject);
 
     // 生成唯一ID和简化的配置数据
@@ -605,24 +610,27 @@ export default class EChartsTableEngine {
       ` data-chart-options="${chartOptionsStr.replace(/"/g, '&quot;')}">`,
       `</div>`,
     ].join('');
+    const previewDom = $cherry.previewer.getDom();
 
     // 延迟到下一轮事件循环再执行；只重试一次
     setTimeout(() => {
-      const container = document.getElementById(chartId);
-      if (!container || !this.echartsRef) return;
-      if (this.echartsRef.getInstanceByDom(container)) return;
-      try {
-        this.createChart(container, chartOption, type);
-        Logger.log('Chart initialized successfully:', chartId);
-      } catch (error) {
-        Logger.error('Failed to render chart:', error);
-        Logger.error('Chart options:', chartOption);
-        Logger.error('Container:', container);
-        container.innerHTML = `<div style="text-align: center; color: red; transform: translateY(125px);">
-          <div style="font-size: ${this.$theme().fontSize.title}px; color: ${this.$theme().color.error};">${this.cherry.locale.chartRenderError}</div>
-          <div style="font-size: ${this.$theme().fontSize.base}px; color: ${this.$theme().color.text}; opacity: 0.7;">${error.message}</div>
-        </div>`;
-      }
+      const containers = previewDom.querySelectorAll(`#${chartId}`);
+      if (containers.length <= 0 || !this.echartsRef) return;
+      // if (this.echartsRef.getInstanceByDom(container)) return;
+      containers.forEach((container) => {
+        try {
+          this.createChart(container, chartOption, type);
+        } catch (error) {
+          if ($cherry.options.engine.syntax.global.flowSessionContext) {
+            container.innerHTML = 'drawing...';
+          } else {
+            container.innerHTML = `<div style="text-align: center; color: red; transform: translateY(125px);">
+              <div style="font-size: ${this.$theme().fontSize.title}px; color: ${this.$theme().color.error};">${this.cherry.locale.chartRenderError}</div>
+              <div style="font-size: ${this.$theme().fontSize.base}px; color: ${this.$theme().color.text}; opacity: 0.7;">${error.message}</div>
+            </div>`;
+          }
+        }
+      });
       this.cleanupInvalidInstances();
     }, 50);
 
@@ -1123,10 +1131,10 @@ const ScatterChartOptionsHandler = {
       }));
     } else {
       // 回退到旧的智能推断逻辑
-      Logger.warn(
-        'DEPRECATION WARNING: The scatter chart syntax relying on header keywords is outdated and will be removed in a future version. Please use the "cherry:mapping" option for explicit mapping.\n' +
-          `e.g., Change '{group,name,x,y,size}' to '{ "cherry:mapping": { "x": "X", "y": "Y", "size": "Size", "group": "Group" } }'`,
-      );
+      // Logger.warn(
+      //   'DEPRECATION WARNING: The scatter chart syntax relying on header keywords is outdated and will be removed in a future version. Please use the "cherry:mapping" option for explicit mapping.\n' +
+      //     `e.g., Change '{group,name,x,y,size}' to '{ "cherry:mapping": { "x": "X", "y": "Y", "size": "Size", "group": "Group" } }'`,
+      // );
 
       const headers = tableObject.header;
       const findHeader = (candidates) =>
@@ -1320,7 +1328,7 @@ const MapChartLoadingOptionsHandler = {
     const { engine } = options;
     // console.log('Rendering map chart:', tableObject);
 
-    return typeof window.echarts === 'undefined'
+    return !getExternal('echarts')
       ? {
           title: {
             text: `${engine.cherry.locale.chartRenderError} : ${engine.cherry.locale.chartLibraryNotLoadedTip}`,
@@ -1458,7 +1466,7 @@ const MapChartOptionsHandler = {
 
     // 用户指定了新的地图数据源，检查是否与已注册的地图源匹配
     if (userMapSource) {
-      if (window.echarts && window.echarts.getMap && window.echarts.getMap(userMapSource)) {
+      if (getExternal('echarts')?.getMap?.(userMapSource)) {
         // 用户指定数据源已注册，直接使用
         return generateOptions(MapChartCompleteOptionsHandler, tableObject, options);
       }
@@ -1472,7 +1480,7 @@ const MapChartOptionsHandler = {
     let registeredMapSource = null;
 
     for (const source of possibleMapSources) {
-      if (window.echarts && window.echarts.getMap && window.echarts.getMap(source)) {
+      if (getExternal('echarts')?.getMap?.(source)) {
         isMapRegistered = true;
         registeredMapSource = source;
         break;
@@ -1528,7 +1536,7 @@ const MapChartOptionsHandler = {
 
     this.$fetchMapData(url)
       .then((geoJson) => {
-        window.echarts.registerMap(url, geoJson);
+        getExternal('echarts')?.registerMap?.(url, geoJson);
         // console.log(`地图数据加载成功！来源: ${url}`);
         this.$refreshMapChart(options.chartId, url, options.engine);
         return geoJson;
