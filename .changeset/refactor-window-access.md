@@ -2,8 +2,8 @@
 'cherry-markdown': patch
 ---
 
-refactor: 统一 window 对象访问方式，完善全局类型声明
+refactor(core): 统一外部依赖获取方式，优化全局类型声明
 
-- 新增 `getExternal()` 工具函数，统一收口 `window.echarts`、`window.mermaid`、`window.katex`、`window.MathJax` 等外部依赖的获取逻辑，内置 `isBrowser` 守卫，SSR 环境下安全返回 `undefined`
-- `global.d.ts` 不再 import mermaid/katex 等第三方包，改为只声明 cherry-markdown 自身挂载的全局类型（`window.Cherry`、`window.CherryEngine`、插件等），用户无需安装未使用的可选依赖即可获得类型支持
-- 新增 `CherryStream`、`CherryEngine`、`CherryCodeBlockMermaidPlugin`、`CherryCodeBlockPlantumlPlugin` 全局类型声明
+- 统一 echarts、mermaid、katex、MathJax 等外部依赖的获取逻辑，SSR 环境下安全返回 `undefined`，不再直接访问 `window` 对象
+- `global.d.ts` 移除对 mermaid/katex 等第三方包的 import，用户引入类型时不再需要安装未使用的可选依赖
+- 新增 `window.Cherry`、`window.CherryStream`、`window.CherryEngine`、`window.CherryCodeBlockMermaidPlugin`、`window.CherryCodeBlockPlantumlPlugin` 全局类型声明
