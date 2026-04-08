@@ -1,14 +1,13 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "node16",
     "target": "es2020",
     "outDir": "out",
     "lib": ["es2020", "DOM"],
     "sourceMap": true,
     "rootDir": ".",
-    "moduleResolution": "node",
-    "ignoreDeprecations": "6.0",
+    "moduleResolution": "node16",
     "noEmit": false
   },
   "include": ["src/**/*.ts", "rspack.config.ts"],

@@ -1,8 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "node16",
+    "moduleResolution": "node16",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -10,16 +10,15 @@
     "target": "ES2021",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
     "rootDir": ".",
     "incremental": true,
-    "ignoreDeprecations": "6.0",
     "strictNullChecks": false,
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "noEmit": false,
-    "paths": { "@common/*": ["src/common/*"], "@publish/*": ["src/publish/*"] }
+    "types": ["node"],
+    "paths": { "@common/*": ["./src/common/*"], "@publish/*": ["./src/publish/*"] }
   }
 }
