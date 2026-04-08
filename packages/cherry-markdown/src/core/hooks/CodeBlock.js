@@ -308,7 +308,7 @@ export default class CodeBlock extends ParagraphBase {
       >
       ${this.customWrapperRender(oldLang, cacheCode, codeHtml)}
       `;
-    if (needUnExpand) {
+    if (needUnExpand && $lang !== 'mermaid') {
       cacheCode += `<div class="cherry-mask-code-block">
         <div class="expand-btn ">
           <i class="ch-icon ch-icon-expand"></i>

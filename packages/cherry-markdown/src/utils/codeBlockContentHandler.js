@@ -182,7 +182,14 @@ export default class CodeBlockHandler {
    * 展示代码块区域的按钮
    */
   $showBtn(isEnableBubbleAndEditorShow) {
-    const { changeLang, editCode, copyCode, lang, expandCode } = this.target.dataset;
+    let { changeLang, editCode, copyCode, lang, expandCode } = this.target.dataset;
+    if (this.target.closest('.cherry-mermaid-source-toolbar-panel')) {
+      changeLang = 'false';
+      editCode = 'false';
+      expandCode = 'false';
+      copyCode = copyCode;
+      lang = lang;
+    }
     this.container.innerHTML = '';
     if (changeLang === 'true' && isEnableBubbleAndEditorShow) {
       // 添加删除btn
