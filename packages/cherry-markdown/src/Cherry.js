@@ -182,19 +182,27 @@ export default class Cherry extends CherryStatic {
       // 即便配置了不展示工具栏，也要让工具栏加载对应的语法hook
       wrapperDom.classList.add('cherry--no-toolbar');
     }
-    // 确保各工具栏配置是数组，如果是 false 或其他 falsy 值则使用空数组
-    ['toolbar', 'toolbarRight', 'bubble', 'sidebar', 'float'].forEach((key) => {
+    // 确保各工具栏配置是数组，如果是 false 或其他 falsy 值则使用空数组；
+    // toolbar 例外：配置为 false 时需回退到 defaultToolbar 以保留语法 hook 注册
+    ['toolbarRight', 'bubble', 'sidebar', 'float'].forEach((key) => {
       if (!Array.isArray(this.options.toolbars?.[key])) {
         this.options.toolbars[key] = [];
       }
     });
 
+    if (!Array.isArray(this.options.toolbars?.toolbar)) {
+      this.options.toolbars.toolbar = this.defaultToolbar;
+    }
+
     $expectTarget(this.options.toolbars.toolbar, Array);
 
-    // 判断是否需要渲染工具栏 DOM
-    const hasToolbarItems = (config) => !config || (Array.isArray(config) && config.length > 0);
+    // 判断是否需要渲染工具栏 DOM（归一化后 config 必为数组，只需判断长度）；
+    // 使用 Array.isArray 类型守卫确保类型安全（TS 无法追踪对象属性的运行时赋值窄化）
+    const toolbarConfig = this.options.toolbars.toolbar;
+    const toolbarRightConfig = this.options.toolbars.toolbarRight;
     this.shouldRenderToolbarDom =
-      hasToolbarItems(this.options.toolbars.toolbar) || hasToolbarItems(this.options.toolbars.toolbarRight);
+      (Array.isArray(toolbarConfig) && toolbarConfig.length > 0) ||
+      (Array.isArray(toolbarRightConfig) && toolbarRightConfig.length > 0);
 
     // 创建顶部工具栏
     this.createToolbar();
@@ -202,10 +210,8 @@ export default class Cherry extends CherryStatic {
 
     const wrapperFragment = document.createDocumentFragment();
 
-    // 只有当需要渲染工具栏时才添加工具栏 DOM
-    if (this.shouldRenderToolbarDom) {
-      wrapperFragment.appendChild(this.toolbar.options.dom);
-    }
+    // 根据当前配置决定是否挂载工具栏 DOM
+    this.syncToolbarDom(wrapperFragment);
     wrapperFragment.appendChild(editor.options.editorDom);
     if (!this.options.previewer.dom) {
       wrapperFragment.appendChild(previewer.options.previewerDom);
@@ -406,6 +412,8 @@ export default class Cherry extends CherryStatic {
         }
         if (showToolbar) {
           this.wrapperDom.classList.remove('cherry--no-toolbar');
+          // 始终同步 DOM 挂载状态：确保工具栏在页面中且可见
+          this.syncToolbarDom(this.wrapperDom);
         } else {
           this.wrapperDom.classList.add('cherry--no-toolbar');
         }
@@ -419,6 +427,8 @@ export default class Cherry extends CherryStatic {
         }
         if (showToolbar) {
           this.wrapperDom.classList.remove('cherry--no-toolbar');
+          // 始终同步 DOM 挂载状态
+          this.syncToolbarDom(this.wrapperDom);
         } else {
           this.wrapperDom.classList.add('cherry--no-toolbar');
         }
@@ -708,6 +718,38 @@ export default class Cherry extends CherryStatic {
   }
 
   /**
+   * 根据当前配置同步工具栏 DOM 的挂载/卸载状态
+   * @private
+   * @param {DocumentFragment|Element} [parent] 目标父容器（初始化时传 fragment，运行时传 wrapperDom）
+   */
+  syncToolbarDom(parent) {
+    const shouldRender =
+      (Array.isArray(this.options.toolbars.toolbar) && this.options.toolbars.toolbar.length > 0) ||
+      (Array.isArray(this.options.toolbars.toolbarRight) && this.options.toolbars.toolbarRight.length > 0);
+
+    const toolbarEl = this.toolbar?.options?.dom;
+    const target = parent || this.wrapperDom;
+
+    // 工具栏应始终在 editorDom（.cherry-editor）之前
+    const editorEl = target.querySelector('.cherry-editor');
+
+    if (shouldRender && toolbarEl && !toolbarEl.parentElement) {
+      // 需要渲染且尚未挂载 → 插入到 editor 前面
+      if (editorEl) {
+        target.insertBefore(toolbarEl, editorEl);
+      } else {
+        target.appendChild(toolbarEl);
+      }
+      this.shouldRenderToolbarDom = true;
+    } else if (!shouldRender && toolbarEl && toolbarEl.parentElement) {
+      // 不需要渲染但已挂载 → 移除
+      target.removeChild(toolbarEl);
+      this.shouldRenderToolbarDom = false;
+    }
+    return shouldRender;
+  }
+
+  /**
    * 动态重置工具栏配置
    * @public
    * @param {'toolbar'|'toolbarRight'|'sidebar'|'bubble'|'float'} [type] 修改工具栏的类型
@@ -746,6 +788,8 @@ export default class Cherry extends CherryStatic {
     this.createSidebar();
     this.createHiddenToolbar();
     this.createToc();
+    // 重新创建后需同步 DOM 挂载状态（初始未渲染时可能需要挂载）
+    this.syncToolbarDom(this.wrapperDom);
     return true;
   }
 
