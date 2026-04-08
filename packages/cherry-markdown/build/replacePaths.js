@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import replaceInFile from 'replace-in-file';
+import { readFileSync, writeFileSync } from 'fs';
 
 async function replacePaths() {
   try {
@@ -27,6 +28,11 @@ async function replacePaths() {
         console.log(result);
       }
     }
+
+    // 在产物主入口顶部插入三斜线引用，使消费者自动加载环境模块声明（CSS、addon 等）
+    const entryPath = 'dist/types/index.d.ts';
+    const content = readFileSync(entryPath, 'utf-8');
+    writeFileSync(entryPath, `/// <reference path="../../types/modules.d.ts" />\n${content}`);
   } catch (error) {
     throw error;
   }
