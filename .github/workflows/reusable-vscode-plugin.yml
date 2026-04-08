@@ -76,7 +76,7 @@ jobs:
 
       # ── 4. 生产模式编译插件 ──
       - name: Build VSCode Plugin (production bundle)
-        run: yarn workspace cherry-markdown build
+        run: yarn build:vscodePlugin
 
       # ── 5a. package 模式：打包 + 上传 artifact ──
       - name: Package VSCode Plugin
