@@ -50,6 +50,30 @@ export default class EChartsCodeBlockEngine {
     this.echartsRef = resolvedEcharts; // echarts引用
   }
 
+  /**
+   * 解析 ECharts option 字符串。
+   * 优先使用 new Function 执行 JS 对象字面量（支持函数、正则等 JS 语法），
+   * 失败后 fallback 到 JSON5.parse（仅支持纯数据）。
+   * @param {string} src 代码块源码
+   * @returns {object} 解析后的 ECharts option 对象
+   */
+  parseOption(src) {
+    const trimmed = src.replace(/;\s*$/, '').trim();
+    // 优先尝试 new Function，支持 function、箭头函数、正则等 JS 语法
+    try {
+      // eslint-disable-next-line no-new-func
+      const fn = new Function(`return (${trimmed})`);
+      const result = fn();
+      if (result && typeof result === 'object') {
+        return result;
+      }
+    } catch (e) {
+      // JS 执行失败，继续尝试 JSON5
+    }
+    // fallback: JSON5 解析纯数据格式
+    return JSON5.parse(trimmed);
+  }
+
   render(src, sign, $engine, language) {
     if (src.trim().length <= 0) return '';
     const width = this.size?.width || '100%';
@@ -62,7 +86,7 @@ export default class EChartsCodeBlockEngine {
         `div[data-sign="${sign}"][data-type="echarts"] .cherry-echarts-codeblock-wrapper`,
       );
       if (containers.length <= 0 || !this.echartsRef) return;
-      const option = JSON5.parse(src.replace(/;\s*$/, ''));
+      const option = this.parseOption(src);
       containers.forEach((container) => {
         try {
           // 判断是否已经初始化
