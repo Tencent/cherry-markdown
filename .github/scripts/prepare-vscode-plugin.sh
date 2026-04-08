@@ -1,24 +1,18 @@
 #!/bin/bash
 set -euo pipefail
 
-# 准备 VSCode Plugin 构建所需的 package.json 改写
-# 将 cherry-markdown 重命名为 cherry-markdown-core（内部依赖）
-# 将 vscodePlugin 重命名为 cherry-markdown（发布名）
-# 用途: pr_preview-build, pr_merge_dev_preview, release-vscode-plugin
+# VSCode Plugin 发布前的最小化改名
+#
+# 仅将 vscodePlugin 的 name 从 "cherry-markdown-vscode-plugin" 
+# 改为 "cherry-markdown"（VSCode Marketplace 发布名）
+# 
+# ⚠️ 此脚本必须在 yarn install + build + build:vscodePlugin 之后执行
+#    仅影响 vsce package / publish 阶段读取的 name 字段
+#    不影响任何构建阶段的 workspace 依赖解析
+#
+# 用途: pr-preview-build, merge-dev-preview, release-vscode-plugin
 
 ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
-cd "$ROOT_DIR"
+cd "$ROOT_DIR/packages/vscodePlugin"
 
-tmp=$(mktemp)
-jq '
-  .scripts["build"] = "yarn workspace cherry-markdown-core build" |
-  .scripts["build:vscodePlugin"] = "yarn workspace cherry-markdown build" |
-  .scripts["postinstall"] = "yarn workspace cherry-markdown-core run iconfont"
-' package.json > "$tmp" && mv "$tmp" package.json
-
-cd packages/cherry-markdown
-tmp=$(mktemp) && jq '.name = "cherry-markdown-core"' package.json > "$tmp" && mv "$tmp" package.json
-
-cd ../vscodePlugin
-tmp=$(mktemp) && jq '.dependencies["cherry-markdown-core"] = .dependencies["cherry-markdown"] | del(.dependencies["cherry-markdown"])' package.json > "$tmp" && mv "$tmp" package.json
 tmp=$(mktemp) && jq '.name = "cherry-markdown"' package.json > "$tmp" && mv "$tmp" package.json

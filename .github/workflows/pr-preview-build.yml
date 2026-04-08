@@ -194,15 +194,19 @@ jobs:
           node-version: '22.x'
           cache: 'yarn'
 
-      - name: Prepare package.json for VSCode Plugin
-        run: bash .github/scripts/prepare-vscode-plugin.sh
-
       - name: Install and Build Dependencies
         run: |
           yarn global add vsce
           yarn --network-timeout 100000
           yarn build
-          yarn build:vscodePlugin
+
+      - name: Build VSCode Plugin
+        run: yarn build:vscodePlugin
+
+      # 仅改 vscodePlugin 的 name 为 "cherry-markdown"（VSCode Marketplace 发布名）
+      # 不影响构建阶段的依赖解析，仅 vsce 打包时使用新名字
+      - name: Prepare for VSCode publishing
+        run: bash .github/scripts/prepare-vscode-plugin.sh
 
       - name: Package VSCode Plugin
         run: |
