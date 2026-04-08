@@ -193,10 +193,14 @@ jobs:
           yarn global add vsce
           yarn --network-timeout 100000
           yarn build
-          yarn build:vscodePlugin
 
-      # 仅改 vscodePlugin 的 name 为 "cherry-markdown"（VSCode Marketplace 发布名）
-      # 不影响构建阶段的依赖解析，仅 vsce publish 时使用新名字
+      # 直接调用 compile+package，跳过 build:vscodePlugin（后者触发 vsce → prepublish → workspace 重名冲突）
+      - name: Build VSCode Plugin (compile + production bundle)
+        run: |
+          yarn workspace cherry-markdown-vscode-plugin compile
+          yarn workspace cherry-markdown-vscode-plugin package
+
+      # 构建完成后改名（此时不再检查 workspace 一致性）
       - name: Prepare for VSCode publishing
         run: bash .github/scripts/prepare-vscode-plugin.sh
 
