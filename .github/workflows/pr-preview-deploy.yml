@@ -55,6 +55,7 @@ jobs:
       - name: Deploy to surge.sh
         if: steps.download.outcome == 'success'
         id: deploy
+        continue-on-error: true
         run: |
           export DEPLOY_DOMAIN=https://preview-pr-${{ needs.get-pr-id.outputs.pr_id }}-cherry-markdown.surge.sh
           npx surge --project ./ --domain $DEPLOY_DOMAIN --token ${{ secrets.SURGE_TOKEN }}
@@ -87,7 +88,7 @@ jobs:
           body-include: '<!-- AUTO_PREVIEW_PLAYGROUND -->'
 
       - name: Comment playground failed
-        if: steps.download.outcome == 'failure' || steps.deploy.outcome == 'failure'
+        if: steps.deploy.outcome != 'success'
         uses: actions-cool/maintain-one-comment@v3
         with:
           token: ${{ secrets.BOT_TOKEN }}

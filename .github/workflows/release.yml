@@ -18,6 +18,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+  id-token: write
+
 jobs:
   release:
     # 不需要在fork仓库的pr中运行, 仅当pr合并时运行

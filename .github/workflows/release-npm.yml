@@ -3,7 +3,9 @@
 #
 # 触发时机: 被 release.yml 调用 (workflow_call)
 # 功能: 构建 cherry-markdown 并发布到 npm registry
-#       构建使用 .node-version(18) 确保产物兼容性，发布前切换到 Node 24 确保包在新环境可用
+#       使用 OIDC (id-token) 进行 npm 认证，无需 NPM_TOKEN
+#       构建使用 .node-version(18) 确保产物兼容性，发布前切换到 Node 24
+# 前提: npm 包需在 npmjs.com 配置 Publishing access → GitHub Actions
 # =============================================================================
 
 name: 'Release: NPM'
@@ -25,7 +27,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
-          registry-url: 'https://registry.npmjs.com'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: |
@@ -44,4 +46,4 @@ jobs:
           cp README*.md packages/cherry-markdown/
            
           cd packages/cherry-markdown
-          npm publish --access public
+          npm publish --access public --provenance
