@@ -498,6 +498,16 @@ export default class CodeBlock extends ParagraphBase {
             2000,
             -300,
           );
+        } else {
+          cacheCode = this.parseCustomLanguage($lang, $code, {
+            lines,
+            sign,
+            match,
+            addBlockQuoteSignToResult,
+            lang: $oldLang,
+            mermaidSizeAttrs,
+            mermaidAlignClass,
+          });
         }
         if (cacheCode && cacheCode !== '') {
           return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
