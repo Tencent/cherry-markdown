@@ -7,7 +7,7 @@
 #   - 按发布的包名分别调用子工作流:
 #     • cherry-markdown → release-npm.yml
 #     • @cherry-markdown/client → release-client.yml
-#     • cherry-markdown-vscode-plugin → release-vscode-plugin.yml
+#     • cherry-markdown-vscode-plugin → reusable-vscode-plugin.yml (mode=release)
 #   - 发布完成后强制同步 main → dev（仅在有包发布时执行）
 # =============================================================================
 
@@ -70,7 +70,9 @@ jobs:
   build-vscodePlugin-release:
     needs: release
     if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"cherry-markdown-vscode-plugin"') }}
-    uses: ./.github/workflows/release-vscode-plugin.yml
+    uses: ./.github/workflows/reusable-vscode-plugin.yml
+    with:
+      mode: release
     secrets: inherit
 
   # 仅当有实际版本发布时才同步 main 到 dev，避免意外覆盖 dev

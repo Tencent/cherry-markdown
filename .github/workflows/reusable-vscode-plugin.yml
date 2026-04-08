@@ -1,0 +1,126 @@
+# =============================================================================
+# Reusable Workflow: VSCode Plugin 构建 / 预发布 / 正式发布
+#
+# 模式 (mode):
+#   "package"     — 改版本号 + 构建 + 打包 .vsix + 上传 artifact（PR Preview）
+#   "pre-release" — 改版本号 + 构建 + 预发布到 Marketplace（Merge → dev）
+#   "release"     — 构建 + 正式发布到 Marketplace（Push → main，changeset 版本号）
+#
+# 步骤:
+#   1. 改名（cherry-markdown-core + cherry-markdown）— 解决 workspace 冲突
+#   2. 改版本号（package / pre-release 模式加时间戳）
+#   3. 安装依赖 + 构建核心库
+#   4. 生产模式编译插件
+#   5. 打包 / 预发布 / 正式发布
+# =============================================================================
+
+name: 'Reusable: VSCode Plugin'
+
+on:
+  workflow_call:
+    inputs:
+      mode:
+        description: '"package" | "pre-release" | "release"'
+        required: true
+        type: string
+      pr_number:
+        description: '预发布时需要评论的 PR 编号'
+        required: false
+        type: number
+        default: 0
+
+jobs:
+  vscode-plugin:
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ inputs.mode == 'package' }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'yarn'
+
+      # ── 1. 改名：解决 workspace 同名冲突 ──
+      - name: Prepare package names
+        run: bash .github/scripts/prepare-vscode-plugin.sh
+
+      # ── 2. 改版本号（package / pre-release 加时间戳）──
+      - name: Stamp preview version
+        if: inputs.mode != 'release'
+        run: |
+          cd packages/vscodePlugin
+          TIMESTAMP=$(t=$(date +%m%d%H%M | sed 's/^0*//'); [ -n "$t" ] && printf '%s' "$t" || date +%H%M%S)
+
+          tmp=$(mktemp) && jq --arg ts "$TIMESTAMP" '
+            .version |= (
+              split(".") as $s |
+              if ($s|length) < 3 then
+                error("package.json version must be in '\''x.y.z'\'' format")
+              else
+                if $s[2] == "0" then
+                  ($s[0:2] + [$ts]) | join(".")
+                else
+                  ($s[0:2] + [($s[2] + $ts)]) | join(".")
+                end
+              end
+            )
+          ' package.json > "$tmp" && mv "$tmp" package.json
+
+      # ── 3. 安装依赖 + 构建核心库 ──
+      - name: Install and Build Dependencies
+        run: |
+          yarn --network-timeout 100000
+          yarn build
+
+      # ── 4. 生产模式编译插件 ──
+      - name: Build VSCode Plugin (production bundle)
+        run: yarn workspace cherry-markdown build
+
+      # ── 5a. package 模式：打包 + 上传 artifact ──
+      - name: Package VSCode Plugin
+        if: inputs.mode == 'package'
+        run: |
+          cd packages/vscodePlugin
+          npx @vscode/vsce package --no-dependencies --no-yarn
+
+      - name: Upload VSIX
+        if: inputs.mode == 'package'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vscode-plugin-vsix
+          path: packages/vscodePlugin/*.vsix
+          retention-days: 5
+          if-no-files-found: warn
+
+      # ── 5b. pre-release 模式：预发布到 Marketplace ──
+      - name: Publish VSCode Plugin (pre-release)
+        if: inputs.mode == 'pre-release'
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          cd packages/vscodePlugin
+          npx @vscode/vsce publish -p $VSCE_PAT --no-dependencies --no-yarn --pre-release
+
+      - name: Comment on PR (pre-release)
+        if: inputs.mode == 'pre-release' && inputs.pr_number > 0
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: ${{ inputs.pr_number }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🔌 Preview Cherry Markdown Extensions [see: prerelease-extensions](https://code.visualstudio.com/api/working-with-extensions/publishing-extension?from_column=20423&from=20423#prerelease-extensions)`
+            });
+
+      # ── 5c. release 模式：正式发布到 Marketplace ──
+      - name: Publish VSCode Plugin (release)
+        if: inputs.mode == 'release'
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          cd packages/vscodePlugin
+          npx @vscode/vsce publish -p $VSCE_PAT --no-dependencies --no-yarn

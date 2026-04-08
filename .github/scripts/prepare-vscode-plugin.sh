@@ -1,18 +1,43 @@
 #!/bin/bash
 set -euo pipefail
 
-# VSCode Plugin 发布前准备：改名
+# VSCode Plugin 发布前准备：解决 workspace 同名冲突
 #
-# 将 vscodePlugin 的 name 改为 "cherry-markdown"（VSCode Marketplace 发布名）
+# 改名策略:
+#   1. packages/cherry-markdown   name: cherry-markdown → cherry-markdown-core
+#   2. packages/vscodePlugin      name: cherry-markdown-vscode-plugin → cherry-markdown
+#   3. 根 package.json            build 脚本中的 workspace 引用同步更新
+#   4. vscodePlugin dependencies  cherry-markdown → cherry-markdown-core
 #
-# ⚠️ 必须在 yarn build / build:prod 之后执行
-#    此时 dist/ 已生成，@vscode/vsce 只需要读取 package.json 的 name 字段
+# ⚠️ 必须在 yarn install 之前执行
 #
-# 用途: pr-preview-build, merge-dev-preview, release-vscode-plugin
+# 用途: reusable-vscode-plugin.yml（package / pre-release / release 三种模式）
 
 ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+
+# 1. 核心库改名（避免与 vscodePlugin 的目标名 "cherry-markdown" 冲突）
+cd "$ROOT_DIR/packages/cherry-markdown"
+tmp=$(mktemp) && jq '.name = "cherry-markdown-core"' package.json > "$tmp" && mv "$tmp" package.json
+echo "✅ packages/cherry-markdown: name → cherry-markdown-core"
+
+# 2. vscodePlugin 改为 Marketplace 发布名
 cd "$ROOT_DIR/packages/vscodePlugin"
+tmp=$(mktemp) && jq '
+  .name = "cherry-markdown" |
+  if .dependencies["cherry-markdown"] then
+    .dependencies["cherry-markdown-core"] = .dependencies["cherry-markdown"] |
+    del(.dependencies["cherry-markdown"])
+  else . end
+' package.json > "$tmp" && mv "$tmp" package.json
+echo "✅ packages/vscodePlugin: name → cherry-markdown, dep → cherry-markdown-core"
 
-tmp=$(mktemp) && jq '.name = "cherry-markdown"' package.json > "$tmp" && mv "$tmp" package.json
-
-echo "✅ name → cherry-markdown"
+# 3. 根 package.json: 更新 workspace 引用
+cd "$ROOT_DIR"
+tmp=$(mktemp) && jq '
+  .scripts |= with_entries(
+    if .value | test("workspace cherry-markdown ") then
+      .value |= gsub("workspace cherry-markdown "; "workspace cherry-markdown-core ")
+    else . end
+  )
+' package.json > "$tmp" && mv "$tmp" package.json
+echo "✅ root package.json: workspace references updated"
