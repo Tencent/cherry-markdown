@@ -308,7 +308,7 @@ export default class CodeBlock extends ParagraphBase {
       >
       ${this.customWrapperRender(oldLang, cacheCode, codeHtml)}
       `;
-    if (needUnExpand) {
+    if (needUnExpand && $lang !== 'mermaid') {
       cacheCode += `<div class="cherry-mask-code-block">
         <div class="expand-btn ">
           <i class="ch-icon ch-icon-expand"></i>
@@ -498,6 +498,16 @@ export default class CodeBlock extends ParagraphBase {
             2000,
             -300,
           );
+        } else {
+          cacheCode = this.parseCustomLanguage($lang, $code, {
+            lines,
+            sign,
+            match,
+            addBlockQuoteSignToResult,
+            lang: $oldLang,
+            mermaidSizeAttrs,
+            mermaidAlignClass,
+          });
         }
         if (cacheCode && cacheCode !== '') {
           return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
