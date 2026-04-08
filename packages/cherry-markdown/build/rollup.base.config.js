@@ -68,6 +68,9 @@ const options = {
     resolve({
       // ignoreGlobal: false,
       browser: true,
+      preferBuiltins: false,
+      // 确保支持只有 exports.import 的包（如 langium）
+      exportConditions: ['browser', 'import', 'default'],
     }),
     commonjs({
       // non-CommonJS modules will be ignored, but you can also
@@ -144,6 +147,13 @@ const options = {
     },
   ],
   onwarn(warning, warn) {
+    // 将未解析的导入警告升级为错误，避免依赖静默变成 external
+    // 这是导致 "Class extends value undefined" 的根因之一：
+    // mermaid 的子依赖 (langium, marked) 在某些包管理器 hoisting 策略下
+    // 可能无法被 Rollup 解析，被静默当作 external，导致运行时 undefined
+    if (warning && warning.code === 'UNRESOLVED_IMPORT') {
+      throw new Error(`Unresolved import: ${warning.id} (imported by ${warning.importer})`);
+    }
     // 忽略 juice 的 circular dependency
     try {
       if (
