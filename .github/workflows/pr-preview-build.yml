@@ -196,15 +196,13 @@ jobs:
 
       - name: Install and Build Dependencies
         run: |
-          yarn global add @vscode/vsce
           yarn --network-timeout 100000
           yarn build
 
-      # 用原始包名构建（@vscode/vsce 不再触发旧版 prepublish 钩子）
-      - name: Build VSCode Plugin (compile + production bundle)
+      # 用原始包名构建（生产模式 rspack 编译）
+      - name: Build VSCode Plugin (production bundle)
         run: |
-          yarn workspace cherry-markdown-vscode-plugin compile
-          yarn workspace cherry-markdown-vscode-plugin package
+          yarn workspace cherry-markdown-vscode-plugin build:prod
 
       # 改名为 "cherry-markdown"（VSCode Marketplace 发布名）
       - name: Prepare for VSCode publishing
@@ -213,7 +211,7 @@ jobs:
       - name: Package VSCode Plugin
         run: |
           cd packages/vscodePlugin
-          vsce package --no-dependencies --no-yarn
+          npx @vscode/vsce package --no-dependencies --no-yarn
 
       - name: Upload VSIX
         uses: actions/upload-artifact@v4

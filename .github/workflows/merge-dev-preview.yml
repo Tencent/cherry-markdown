@@ -190,17 +190,15 @@ jobs:
 
       - name: Install and Build Dependencies
         run: |
-          yarn global add @vscode/vsce
           yarn --network-timeout 100000
           yarn build
 
-      # 用 @vsce/vsce 构建（不再触发旧版 prepublish 导致的 workspace 重名问题）
-      - name: Build VSCode Plugin (compile + production bundle)
+      # 编译生产产物（纯 rspack 构建）
+      - name: Build VSCode Plugin (production bundle)
         run: |
-          yarn workspace cherry-markdown-vscode-plugin compile
-          yarn workspace cherry-markdown-vscode-plugin package
+          yarn workspace cherry-markdown-vscode-plugin build:prod
 
-      # 改名 + 移除 prepublish（防止 vsce 触发 workspace 重名冲突）
+      # 改名为 "cherry-markdown"（VSCode Marketplace 发布名）
       - name: Prepare for VSCode publishing
         run: bash .github/scripts/prepare-vscode-plugin.sh
 
@@ -210,7 +208,7 @@ jobs:
         run: |
           cd packages/vscodePlugin
           # 发布 vscode 插件预览版
-          vsce publish -p $VSCE_PAT --no-dependencies --no-yarn --pre-release
+          npx @vscode/vsce publish -p $VSCE_PAT --no-dependencies --no-yarn --pre-release
 
       - name: Comment on PR with VSCode Plugin Preview Info
         uses: actions/github-script@v7

@@ -4,8 +4,7 @@
 # 触发时机: 被 release.yml 调用 (workflow_call)
 # 功能: 构建并发布 Cherry Markdown VSCode 插件到 VSCode Marketplace
 #
-# 关键: vsce 会触发 prepublish → yarn package → 检测到 workspace 重名冲突
-#       所以必须在 vsce 之前：改名 + 删除 prepublish 脚本
+# 流程: build → build:prod → 改名 → vsce publish
 # =============================================================================
 
 name: 'Release: VSCode Plugin'
@@ -28,37 +27,21 @@ jobs:
       # 用原始包名安装依赖和构建（workspace 解析正常）
       - name: Install and Build Dependencies
         run: |
-          yarn global add @vscode/vsce
           yarn --network-timeout 100000
           yarn build
 
-      # 用 @vsce/vsce 构建（不再触发旧版 prepublish 导致的 workspace 重名问题）
-      - name: Build VSCode Plugin (compile + production bundle)
+      # 编译生产产物（纯 rspack 构建）
+      - name: Build VSCode Plugin (production bundle)
         run: |
-          yarn workspace cherry-markdown-vscode-plugin compile
-          yarn workspace cherry-markdown-vscode-plugin package
+          yarn workspace cherry-markdown-vscode-plugin build:prod
 
-      # 改名 + 移除 prepublish 脚本（防止 vsce 触发 yarn package → workspace 重名冲突）
+      # 改名为 "cherry-markdown"（VSCode Marketplace 发布名）
       - name: Prepare for VSCode publishing
-        run: |
-          cd packages/vscodePlugin
-
-          # ① 改 name 为 "cherry-markdown"（VSCode Marketplace 发布名）
-          tmp=$(mktemp) && jq '.name = "cherry-markdown"' package.json > "$tmp" && mv "$tmp" package.json
-
-          # ② 备份并移除 vscode:prepublish（否则 vsce 触发它 → yarn package → 重名冲突）
-          tmp=$(mktemp) && jq '
-            .scripts["vscode:prepublish"] = null | 
-            .scripts | with_entries(select(.value == null)) | del(.[])
-          ' package.json > "$tmp" && mv "$tmp" package.json || true
-          # 简化版：直接删除 key
-          tmp=$(mktemp) && jq 'del(.scripts["vscode:prepublish"])' package.json > "$tmp" && mv "$tmp" package.json
-
-          echo "✅ name changed to cherry-markdown, prepublish removed"
+        run: bash .github/scripts/prepare-vscode-plugin.sh
 
       - name: Publish VSCode Plugin
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
           cd packages/vscodePlugin
-          vsce publish -p $VSCE_PAT --no-dependencies --no-yarn
+          npx @vscode/vsce publish -p $VSCE_PAT --no-dependencies --no-yarn
