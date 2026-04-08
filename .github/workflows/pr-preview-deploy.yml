@@ -1,12 +1,14 @@
 # =============================================================================
-# PR Preview: Deploy — 部署预览并发布 PR 评论汇总
+# PR Preview: Deploy — 部署预览并发布 PR 评论
 #
 # 触发时机: 由 pr-preview-build 完成后自动触发 (workflow_run)
 # 功能:
-#   1. 下载 playground artifact → 部署到 surge.sh（多页面在线预览）
-#   2. 收集 Client / VSCode Plugin 的 artifact 下载链接
-#   3. 在 PR 中维护一条统一评论，包含所有资源链接（每次 commit 更新）
-# 关联: 监听 name 为 "PR Preview: Build" 的 workflow 运行完成事件
+#   1. Playground → 部署到 surge.sh → 独立评论
+#   2. Client → 收集多平台 artifact 链接 → 独立评论
+#   3. VSCode Plugin → 收集 .vsix 链接 → 独立评论
+# 设计原则:
+#   每个产物的评论互相独立，某个构建失败不影响其他成功产物的评论
+#   通过不同的 body-include 标记区分三条评论
 # =============================================================================
 
 name: 'PR Preview: Deploy'
@@ -19,114 +21,48 @@ on:
       - completed
 
 jobs:
-  preview-success:
-    if: github.event.workflow_run.conclusion == 'success'
+  # ── 获取 PR 编号 ──
+  get-pr-id:
     runs-on: ubuntu-latest
     outputs:
       pr_id: ${{ steps.pr.outputs.id }}
     steps:
-      - name: download pr id
+      - name: Download PR ID
         uses: dawidd6/action-download-artifact@v8
         with:
           workflow: ${{ github.event.workflow_run.workflow_id }}
           run_id: ${{ github.event.workflow_run.id }}
           name: pr-id
 
-      - name: output pr id
+      - name: Output PR ID
         id: pr
         run: echo "id=$(<pr-id.txt)" >> $GITHUB_OUTPUT
 
-      - name: Download playground
+  # ── Playground: 部署 + 评论 ──
+  deploy-playground:
+    needs: get-pr-id
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download playground artifact
+        id: download
         uses: dawidd6/action-download-artifact@v8
+        continue-on-error: true
         with:
           workflow: ${{ github.event.workflow_run.workflow_id }}
           run_id: ${{ github.event.workflow_run.id }}
           name: playground
 
-      - id: deploy
+      - name: Deploy to surge.sh
+        if: steps.download.outcome == 'success'
+        id: deploy
         run: |
-          export DEPLOY_DOMAIN=https://preview-pr-${{ steps.pr.outputs.id }}-cherry-markdown.surge.sh
+          export DEPLOY_DOMAIN=https://preview-pr-${{ needs.get-pr-id.outputs.pr_id }}-cherry-markdown.surge.sh
           npx surge --project ./ --domain $DEPLOY_DOMAIN --token ${{ secrets.SURGE_TOKEN }}
           echo "url=$DEPLOY_DOMAIN" >> $GITHUB_OUTPUT
 
-      - name: Collect all artifact download links
-        id: collect-artifacts
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const runId = ${{ github.event.workflow_run.id }};
-
-            const { data: artifactList } = await github.rest.actions.listWorkflowRunArtifacts({
-              owner,
-              repo,
-              run_id: runId
-            });
-
-            const clientArtifacts = [];
-            const vscodeArtifacts = [];
-
-            for (const artifact of artifactList.artifacts) {
-              const url = `https://github.com/${owner}/${repo}/actions/runs/${runId}/artifacts/${artifact.id}`;
-              const name = artifact.name;
-
-              if (name.startsWith('client-')) {
-                clientArtifacts.push({ name, url, size: artifact.size_in_bytes });
-              } else if (name === 'vscode-plugin-vsix') {
-                vscodeArtifacts.push({ name, url, size: artifact.size_in_bytes });
-              }
-            }
-
-            core.setOutput('client_count', clientArtifacts.length);
-            core.setOutput('vscode_count', vscodeArtifacts.length);
-
-            // Build client table rows
-            let clientRows = '';
-            const platformMap = { 'macos': 'macOS', 'windows': 'Windows', 'linux': 'Linux' };
-            const archMap = { 'arm64': 'Apple Silicon', 'x64': 'x64' };
-            const typeLabels = {
-              'dmg': 'DMG 安装包',
-              'app': 'App 应用',
-              'msi': 'MSI 安装包',
-              'exe': 'EXE 安装程序',
-              'appimage': 'AppImage',
-              'deb': 'Deb 包'
-            };
-
-            // Sort: macOS first, then Windows, then Linux; arm64 before x64
-            const platformOrder = ['macos', 'windows', 'linux'];
-            const archOrder = ['arm64', 'x64'];
-            clientArtifacts.sort((a, b) => {
-              const [aPlatform, aArch, aType] = a.name.replace('client-', '').split('-');
-              const [bPlatform, bArch, bType] = b.name.replace('client-', '').split('-');
-              const pDiff = platformOrder.indexOf(aPlatform) - platformOrder.indexOf(bPlatform);
-              if (pDiff !== 0) return pDiff;
-              const aDiff = archOrder.indexOf(aArch) - archOrder.indexOf(bArch);
-              if (aDiff !== 0) return aDiff;
-              return 0;
-            });
-
-            for (const artifact of clientArtifacts) {
-              const parts = artifact.name.replace('client-', '').split('-');
-              const platform = parts[0];
-              const arch = parts[1];
-              const type = parts.slice(2).join('-');
-              const platformLabel = platformMap[platform] || platform;
-              const archLabel = archMap[arch] || arch;
-              const typeLabel = typeLabels[type] || type;
-              clientRows += `| ${platformLabel} | ${archLabel} | ${typeLabel} | [下载](${artifact.url}) |\n`;
-            }
-            core.setOutput('client_rows', clientRows);
-
-            // Build vscode rows
-            let vscodeRows = '';
-            for (const artifact of vscodeArtifacts) {
-              vscodeRows += `| [下载 .vsix](${artifact.url}) |\n`;
-            }
-            core.setOutput('vscode_rows', vscodeRows);
-
-      - uses: actions-cool/maintain-one-comment@v3
+      - name: Comment playground links
+        if: steps.deploy.outcome == 'success'
+        uses: actions-cool/maintain-one-comment@v3
         with:
           token: ${{ secrets.BOT_TOKEN }}
           body: |
@@ -146,40 +82,154 @@ jobs:
             * [使用自带或自定义的 Mermaid.js](${{steps.deploy.outputs.url}}/mermaid.html)
             * [自定义代码块外层容器](${{steps.deploy.outputs.url}}/custom_codeblock_wrapper.html)
             * [流式输出包](${{steps.deploy.outputs.url}}/ai_chat_stream.html)
+            <!-- AUTO_PREVIEW_PLAYGROUND -->
+          number: ${{ needs.get-pr-id.outputs.pr_id }}
+          body-include: '<!-- AUTO_PREVIEW_PLAYGROUND -->'
 
-            ### 💻 Client 构建产物${{ steps.collect-artifacts.outputs.client_count > 0 && '' || '（⚠️ 构建失败或未生成产物）' }}
-            ${{ steps.collect-artifacts.outputs.client_count > 0 && '| 平台 | 架构 | 产物类型 | 下载 |\n|------|------|----------|------|\n' || '' }}${{ steps.collect-artifacts.outputs.client_rows }}
-            ${{ steps.collect-artifacts.outputs.client_count > 0 && '> ⏰ 产物保留 5 天' || '' }}
-
-            ### 🔌 VSCode Plugin 构建产物${{ steps.collect-artifacts.outputs.vscode_count > 0 && '' || '（⚠️ 构建失败或未生成产物）' }}
-            ${{ steps.collect-artifacts.outputs.vscode_count > 0 && steps.collect-artifacts.outputs.vscode_rows || '' }}
-            <!-- [工作流地址](${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}) -->
-            <!-- AUTO_PREVIEW_HOOK -->
-          number: ${{ steps.pr.outputs.id }}
-          body-include: '<!-- AUTO_PREVIEW_HOOK -->'
-
-  preview-failed:
-    runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'failure'
-    steps:
-      - name: download pr id
-        uses: dawidd6/action-download-artifact@v8
-        with:
-          workflow: ${{ github.event.workflow_run.workflow_id }}
-          run_id: ${{ github.event.workflow_run.id }}
-          name: pr-id
-
-      - name: output pr id
-        id: pr
-        run: echo "id=$(<pr-id.txt)" >> $GITHUB_OUTPUT
-
-      - name: The job failed
+      - name: Comment playground failed
+        if: steps.download.outcome == 'failure' || steps.deploy.outcome == 'failure'
         uses: actions-cool/maintain-one-comment@v3
         with:
           token: ${{ secrets.BOT_TOKEN }}
           body: |
-            ❌ **PR Preview 构建失败**
-            <!-- [工作流地址](${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}) -->
-            <!-- AUTO_PREVIEW_HOOK -->
-          number: ${{ steps.pr.outputs.id }}
-          body-include: '<!-- AUTO_PREVIEW_HOOK -->'
+            ### 🌐 Playground 预览
+            ❌ 构建或部署失败 — [查看日志](${{github.server_url}}/${{github.repository}}/actions/runs/${{github.event.workflow_run.id}})
+            <!-- AUTO_PREVIEW_PLAYGROUND -->
+          number: ${{ needs.get-pr-id.outputs.pr_id }}
+          body-include: '<!-- AUTO_PREVIEW_PLAYGROUND -->'
+
+  # ── Client: 收集链接 + 评论 ──
+  comment-client:
+    needs: get-pr-id
+    runs-on: ubuntu-latest
+    steps:
+      - name: Collect client artifacts
+        id: collect
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const runId = ${{ github.event.workflow_run.id }};
+
+            const { data: artifactList } = await github.rest.actions.listWorkflowRunArtifacts({
+              owner, repo, run_id: runId
+            });
+
+            const clientArtifacts = artifactList.artifacts
+              .filter(a => a.name.startsWith('client-'))
+              .map(a => ({
+                name: a.name,
+                url: `https://github.com/${owner}/${repo}/actions/runs/${runId}/artifacts/${a.id}`,
+                size: a.size_in_bytes
+              }));
+
+            core.setOutput('count', clientArtifacts.length);
+
+            if (clientArtifacts.length === 0) return;
+
+            const platformMap = { 'macos': 'macOS', 'windows': 'Windows', 'linux': 'Linux' };
+            const archMap = { 'arm64': 'Apple Silicon', 'x64': 'x64' };
+            const typeLabels = {
+              'dmg': 'DMG 安装包', 'app': 'App 应用',
+              'msi': 'MSI 安装包', 'exe': 'EXE 安装程序',
+              'appimage': 'AppImage', 'deb': 'Deb 包'
+            };
+            const platformOrder = ['macos', 'windows', 'linux'];
+            const archOrder = ['arm64', 'x64'];
+
+            clientArtifacts.sort((a, b) => {
+              const [aP, aA] = a.name.replace('client-', '').split('-');
+              const [bP, bA] = b.name.replace('client-', '').split('-');
+              return (platformOrder.indexOf(aP) - platformOrder.indexOf(bP))
+                  || (archOrder.indexOf(aA) - archOrder.indexOf(bA));
+            });
+
+            let rows = '';
+            for (const a of clientArtifacts) {
+              const parts = a.name.replace('client-', '').split('-');
+              const p = platformMap[parts[0]] || parts[0];
+              const arch = archMap[parts[1]] || parts[1];
+              const type = typeLabels[parts.slice(2).join('-')] || parts.slice(2).join('-');
+              rows += `| ${p} | ${arch} | ${type} | [下载](${a.url}) |\n`;
+            }
+            core.setOutput('rows', rows);
+
+      - name: Comment client artifacts
+        if: steps.collect.outputs.count > 0
+        uses: actions-cool/maintain-one-comment@v3
+        with:
+          token: ${{ secrets.BOT_TOKEN }}
+          body: |
+            ### 💻 Client 构建产物
+            | 平台 | 架构 | 产物类型 | 下载 |
+            |------|------|----------|------|
+            ${{ steps.collect.outputs.rows }}
+            > ⏰ 产物保留 5 天
+            <!-- AUTO_PREVIEW_CLIENT -->
+          number: ${{ needs.get-pr-id.outputs.pr_id }}
+          body-include: '<!-- AUTO_PREVIEW_CLIENT -->'
+
+      - name: Comment client not available
+        if: steps.collect.outputs.count == 0
+        uses: actions-cool/maintain-one-comment@v3
+        with:
+          token: ${{ secrets.BOT_TOKEN }}
+          body: |
+            ### 💻 Client 构建产物
+            ⚠️ 未生成产物（构建失败或跳过）— [查看日志](${{github.server_url}}/${{github.repository}}/actions/runs/${{github.event.workflow_run.id}})
+            <!-- AUTO_PREVIEW_CLIENT -->
+          number: ${{ needs.get-pr-id.outputs.pr_id }}
+          body-include: '<!-- AUTO_PREVIEW_CLIENT -->'
+
+  # ── VSCode Plugin: 收集链接 + 评论 ──
+  comment-vscode:
+    needs: get-pr-id
+    runs-on: ubuntu-latest
+    steps:
+      - name: Collect vscode artifact
+        id: collect
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const runId = ${{ github.event.workflow_run.id }};
+
+            const { data: artifactList } = await github.rest.actions.listWorkflowRunArtifacts({
+              owner, repo, run_id: runId
+            });
+
+            const vscode = artifactList.artifacts.find(a => a.name === 'vscode-plugin-vsix');
+            if (vscode) {
+              const url = `https://github.com/${owner}/${repo}/actions/runs/${runId}/artifacts/${vscode.id}`;
+              core.setOutput('found', 'true');
+              core.setOutput('url', url);
+            } else {
+              core.setOutput('found', 'false');
+            }
+
+      - name: Comment vscode plugin artifact
+        if: steps.collect.outputs.found == 'true'
+        uses: actions-cool/maintain-one-comment@v3
+        with:
+          token: ${{ secrets.BOT_TOKEN }}
+          body: |
+            ### 🔌 VSCode Plugin 构建产物
+            [下载 .vsix](${{ steps.collect.outputs.url }})
+            > ⏰ 产物保留 5 天
+            <!-- AUTO_PREVIEW_VSCODE -->
+          number: ${{ needs.get-pr-id.outputs.pr_id }}
+          body-include: '<!-- AUTO_PREVIEW_VSCODE -->'
+
+      - name: Comment vscode plugin not available
+        if: steps.collect.outputs.found != 'true'
+        uses: actions-cool/maintain-one-comment@v3
+        with:
+          token: ${{ secrets.BOT_TOKEN }}
+          body: |
+            ### 🔌 VSCode Plugin 构建产物
+            ⚠️ 未生成产物（构建失败或跳过）— [查看日志](${{github.server_url}}/${{github.repository}}/actions/runs/${{github.event.workflow_run.id}})
+            <!-- AUTO_PREVIEW_VSCODE -->
+          number: ${{ needs.get-pr-id.outputs.pr_id }}
+          body-include: '<!-- AUTO_PREVIEW_VSCODE -->'

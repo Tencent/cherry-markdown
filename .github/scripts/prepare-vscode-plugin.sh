@@ -11,8 +11,14 @@ set -euo pipefail
 # 操作（全部在 yarn install 之前执行）:
 #   1. 更新根 package.json 中的 scripts（适配改名后的 workspace 名）
 #   2. 将核心库从 "cherry-markdown" 改名为 "cherry-markdown-core"
-#   3. 更新 vscodePlugin 和 client 的依赖引用
-#   4. 将 vscodePlugin 从 "cherry-markdown-vscode-plugin" 改名为 "cherry-markdown"
+#   3. vscodePlugin: 依赖 cherry-markdown → cherry-markdown-core, 包名 → cherry-markdown
+#
+# ⚠️ 为什么不改 packages/client 的依赖?
+#   client 也依赖 "cherry-markdown": "*"。改名后 vscodePlugin 的 name 变成了
+#   "cherry-markdown"，Yarn v1 workspace 解析会让 client 的依赖指向 vscodePlugin。
+#   虽然语义上不对，但 client 不参与 vscodePlugin 的构建流程，且如果改成
+#   "cherry-markdown-core" 反而会因为 yarn.lock 中无此条目导致去 npm 查找而报错。
+#   这与 main 分支的处理方式保持一致。
 #
 # 用途: reusable-vscode-plugin.yml（package / pre-release / release 三种模式）
 # =============================================================================
@@ -37,30 +43,23 @@ cd "$ROOT_DIR/packages/cherry-markdown"
 tmp=$(mktemp) && jq '.name = "cherry-markdown-core"' package.json > "$tmp" && mv "$tmp" package.json
 echo "   ✅ packages/cherry-markdown name → cherry-markdown-core"
 
-# ── 3. 更新依赖引用: cherry-markdown → cherry-markdown-core ──
-echo "📦 Step 3: 更新依赖引用..."
-
-# vscodePlugin
+# ── 3. vscodePlugin: 依赖改名 + 包名改名 ──
+echo "📦 Step 3: vscodePlugin 依赖改名 + 包名改名..."
 cd "$ROOT_DIR/packages/vscodePlugin"
-tmp=$(mktemp) && jq '
-  .dependencies["cherry-markdown-core"] = .dependencies["cherry-markdown"] |
+
+# 3a. 依赖: cherry-markdown → cherry-markdown-core
+#     Yarn v1 的 "*" 不匹配 prerelease 版本 (如 0.11.0-alpha-5)，
+#     所以读取核心库实际版本号作为依赖值。
+CORE_VERSION=$(jq -r '.version' "$ROOT_DIR/packages/cherry-markdown/package.json")
+tmp=$(mktemp) && jq --arg ver "$CORE_VERSION" '
+  .dependencies["cherry-markdown-core"] = $ver |
   del(.dependencies["cherry-markdown"])
 ' package.json > "$tmp" && mv "$tmp" package.json
-echo "   ✅ packages/vscodePlugin dep: cherry-markdown → cherry-markdown-core"
+echo "   ✅ dep: cherry-markdown → cherry-markdown-core@$CORE_VERSION"
 
-# client
-cd "$ROOT_DIR/packages/client"
-tmp=$(mktemp) && jq '
-  .dependencies["cherry-markdown-core"] = .dependencies["cherry-markdown"] |
-  del(.dependencies["cherry-markdown"])
-' package.json > "$tmp" && mv "$tmp" package.json
-echo "   ✅ packages/client dep: cherry-markdown → cherry-markdown-core"
-
-# ── 4. vscodePlugin 改名: cherry-markdown-vscode-plugin → cherry-markdown ──
-echo "📦 Step 4: vscodePlugin 改名..."
-cd "$ROOT_DIR/packages/vscodePlugin"
+# 3b. 包名: cherry-markdown-vscode-plugin → cherry-markdown
 tmp=$(mktemp) && jq '.name = "cherry-markdown"' package.json > "$tmp" && mv "$tmp" package.json
-echo "   ✅ packages/vscodePlugin name → cherry-markdown"
+echo "   ✅ name → cherry-markdown"
 
 echo ""
-echo "🎉 准备完成！接下来可以执行: yarn install → yarn build → yarn build:vscodePlugin"
+echo "🎉 准备完成！接下来执行: yarn install → yarn build → yarn build:vscodePlugin"
