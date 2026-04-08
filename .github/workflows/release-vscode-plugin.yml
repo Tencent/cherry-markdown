@@ -1,0 +1,41 @@
+# =============================================================================
+# Release: VSCode Plugin — VSCode 插件 vsce 发布
+#
+# 触发时机: 被 release.yml 调用 (workflow_call)
+# 功能: 构建并发布 Cherry Markdown VSCode 插件到 VSCode Marketplace
+#       通过 prepare-vscode-plugin.sh 统一处理 package.json 改写逻辑
+# =============================================================================
+
+name: 'Release: VSCode Plugin'
+
+on:
+  workflow_call:
+
+jobs:
+  release-vscode-plugin-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'yarn'
+
+      - name: Prepare Package Files
+        run: bash .github/scripts/prepare-vscode-plugin.sh
+
+      - name: Install and Build Dependencies
+        run: |
+          yarn global add vsce
+          yarn --network-timeout 100000
+          yarn build
+          yarn build:vscodePlugin
+
+      - name: Publish VSCode Plugin
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          cd packages/vscodePlugin
+          vsce publish -p $VSCE_PAT --no-dependencies --no-yarn

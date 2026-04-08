@@ -1,8 +1,19 @@
-name: Compressed Size
+# =============================================================================
+# PR: Compressed Size — 构建产物体积监控
+#
+# 触发时机: PR 打开 / 有新推送时自动运行
+# 功能: 对比 dist/**/*.{js,css,d.ts} 的压缩体积变化，在 PR 中显示 diff
+# =============================================================================
 
-on: 
+name: 'PR: Compressed Size'
+
+on:
   pull_request:
     types: [opened, synchronize]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:

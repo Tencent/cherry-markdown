@@ -1,10 +1,18 @@
-# .github/workflows/sync-cnb.yml
+# =============================================================================
+# Sync: CNB — 同步代码到腾讯 CNB 仓库
+#
+# 触发时机: 任何 push / 删除分支时自动运行
+# 功能:
+#   - push: 双向同步代码到 cnb.cool/tencent/cherry-markdown/cherry-markdown.git
+#   - delete: 通过 PR trigger 删除 CNB 上对应分支
+# 注意: delete job 仅限主仓库触发，防止 fork 误操作
+# =============================================================================
 
-name: Sync to CNB
-on: 
- - push
- - delete
+name: 'Sync: CNB'
 
+on:
+  - push
+  - delete
 
 jobs:
   sync-push:
@@ -27,7 +35,7 @@ jobs:
     if: ${{ github.repository == 'Tencent/cherry-markdown' && github.event_name == 'delete' && github.event.ref_type == 'branch' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: TDesignOteam//tdesign-pr-trigger-action@develop
+      - uses: TDesignOteam/tdesign-pr-trigger-action@develop
         with:
           repo: 'tencent/cherry-markdown/cherry-markdown'
           token: ${{ secrets.CHERRY_MARKDOWN_CNB_SYNC_GITHUB }}

@@ -1,4 +1,14 @@
-name: 'Build Client Release'
+# =============================================================================
+# Release: Client — Tauri 桌面客户端全平台构建与发布
+#
+# 触发时机: 被 release.yml 调用 (workflow_call)，传入 client_version 参数
+# 功能: 跨 4 个平台构建 Tauri Client，上传安装包到 GitHub Release
+#       平台矩阵: macOS arm64 / macOS x64 / Linux x64 / Windows x64
+#       产物: DMG / AppImage / Deb / MSI / EXE
+# 输入参数: client_version — 用于匹配 GitHub Release Tag
+# =============================================================================
+
+name: 'Release: Client'
 
 on:
   workflow_call:
@@ -6,6 +16,7 @@ on:
       client_version:
         required: true
         type: string
+
 jobs:
   release-client-build:
     permissions:
@@ -30,24 +41,20 @@ jobs:
     runs-on: ${{ matrix.platform }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: '22.x'
           cache: 'yarn'
 
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          # This ensures the target is installed if it's not empty.
           target: ${{ matrix.target }}
           toolchain: stable
-
-      - name: Ensure x86_64 Target is Installed
-        if: matrix.target == 'x86_64-apple-darwin'
-        run: rustup target add x86_64-apple-darwin
+          cache: true
 
       - name: Install Linux Dependencies
         if: matrix.platform == 'ubuntu-latest'

@@ -1,5 +1,16 @@
-name: pr-spell-check
+# =============================================================================
+# PR: Spell Check — 拼写检查
+#
+# 触发时机: 提交 PR 时自动运行
+# 功能: 复用 TDesign 共享 workflow 检查代码中的拼写错误
+# =============================================================================
+
+name: 'PR: Spell Check'
 on: [pull_request]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   run:

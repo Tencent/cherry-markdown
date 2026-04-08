@@ -1,4 +1,17 @@
-name: Release
+# =============================================================================
+# Release — 正式发布编排器
+#
+# 触发时机: push 到 main 分支（需有 changeset 变更）
+# 功能:
+#   - 使用 Changesets 进行版本管理和 tag 推送
+#   - 按发布的包名分别调用子工作流:
+#     • cherry-markdown → release-npm.yml
+#     • @cherry-markdown/client → release-client.yml
+#     • cherry-markdown-vscode-plugin → release-vscode-plugin.yml
+#   - 发布完成后强制同步 main → dev（仅在有包发布时执行）
+# =============================================================================
+
+name: 'Release'
 
 on:
   push:
@@ -14,11 +27,10 @@ jobs:
       publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
       publishedClientVersion: ${{ steps.extract_version.outputs.clientVersion }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install dependencies
-        run: |
-          yarn
+        run: yarn
 
       - name: Check for changesets
         id: changesets
@@ -39,33 +51,35 @@ jobs:
 
           # Debugging output
           echo "publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}"
-          echo "clientVersion: $clientVersion"
+          echo "clientVersion=$clientVersion"
 
   build-core-release:
     needs: release
     if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"cherry-markdown"') }}
-    uses: ./.github/workflows/release-cherry-markdown-build.yaml
+    uses: ./.github/workflows/release-npm.yml
     secrets: inherit
 
   build-client-release:
     needs: release
     if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"@cherry-markdown/client"') }}
-    uses: ./.github/workflows/release-client-build.yaml
+    uses: ./.github/workflows/release-client.yml
     with:
       client_version: ${{ needs.release.outputs.publishedClientVersion }}
+    secrets: inherit
 
   build-vscodePlugin-release:
     needs: release
     if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"cherry-markdown-vscode-plugin"') }}
-    uses: ./.github/workflows/release-vscode-plugin-build.yaml
+    uses: ./.github/workflows/release-vscode-plugin.yml
     secrets: inherit
 
-  # 强制同步 main 到 dev,以 main 为准,覆盖 dev 的所有内容
+  # 仅当有实际版本发布时才同步 main 到 dev，避免意外覆盖 dev
   sync-main-to-dev:
     needs: release
+    if: needs.release.outputs.publishedPackages != ''
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: main
           fetch-depth: 0
