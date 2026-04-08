@@ -226,6 +226,10 @@ const basicConfig = {
         wrapperRender: (lang, code, html) => {
           return `<div class="custom-codeblock-wrapper language-${lang}" data-tips="可以自定义代码块外层容器">${html}</div>`;
         },
+        mermaid: {
+          svg2img: false, // 是否将mermaid生成的画图变成img格式
+          showSourceToolbar: true, // 是否显示mermaid源码/预览切换工具栏
+        },
         customBtns: [
           {
             html: '自定义按钮1',
