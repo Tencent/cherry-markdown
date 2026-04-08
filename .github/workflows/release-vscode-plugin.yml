@@ -3,7 +3,9 @@
 #
 # 触发时机: 被 release.yml 调用 (workflow_call)
 # 功能: 构建并发布 Cherry Markdown VSCode 插件到 VSCode Marketplace
-#       通过 prepare-vscode-plugin.sh 统一处理 package.json 改写逻辑
+#
+# 关键: vsce 会触发 prepublish → yarn package → 检测到 workspace 重名冲突
+#       所以必须在 vsce 之前：改名 + 删除 prepublish 脚本
 # =============================================================================
 
 name: 'Release: VSCode Plugin'
@@ -26,7 +28,7 @@ jobs:
       # 用原始包名安装依赖和构建（workspace 解析正常）
       - name: Install and Build Dependencies
         run: |
-          yarn global add vsce
+          yarn global add @vscode/vsce
           yarn --network-timeout 100000
           yarn build
 
@@ -36,9 +38,23 @@ jobs:
           yarn workspace cherry-markdown-vscode-plugin compile
           yarn workspace cherry-markdown-vscode-plugin package
 
-      # 构建完成后改名
+      # 改名 + 移除 prepublish 脚本（防止 vsce 触发 yarn package → workspace 重名冲突）
       - name: Prepare for VSCode publishing
-        run: bash .github/scripts/prepare-vscode-plugin.sh
+        run: |
+          cd packages/vscodePlugin
+
+          # ① 改 name 为 "cherry-markdown"（VSCode Marketplace 发布名）
+          tmp=$(mktemp) && jq '.name = "cherry-markdown"' package.json > "$tmp" && mv "$tmp" package.json
+
+          # ② 备份并移除 vscode:prepublish（否则 vsce 触发它 → yarn package → 重名冲突）
+          tmp=$(mktemp) && jq '
+            .scripts["vscode:prepublish"] = null | 
+            .scripts | with_entries(select(.value == null)) | del(.[])
+          ' package.json > "$tmp" && mv "$tmp" package.json || true
+          # 简化版：直接删除 key
+          tmp=$(mktemp) && jq 'del(.scripts["vscode:prepublish"])' package.json > "$tmp" && mv "$tmp" package.json
+
+          echo "✅ name changed to cherry-markdown, prepublish removed"
 
       - name: Publish VSCode Plugin
         env:
