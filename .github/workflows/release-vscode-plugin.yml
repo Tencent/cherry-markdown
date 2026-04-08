@@ -32,7 +32,7 @@ jobs:
           yarn --network-timeout 100000
           yarn build
 
-      # 直接调用 compile+package，跳过 vsce（避免触发 prepublish 导致 workspace 重名冲突）
+      # 用 @vsce/vsce 构建（不再触发旧版 prepublish 导致的 workspace 重名问题）
       - name: Build VSCode Plugin (compile + production bundle)
         run: |
           yarn workspace cherry-markdown-vscode-plugin compile
