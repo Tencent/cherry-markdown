@@ -976,7 +976,7 @@ export default class PreviewerBubble {
 
   changeImgValue() {
     const value = [this.imgSize, this.imgDeco, this.imgAlign].filter((v) => v).join(' ');
-    const view = this.editor.editor.view;
+    const { view } = this.editor.editor;
 
     // 将缓存的位置映射到当前文档状态，防止中间的文档变更导致位置失效
     let from = this.imgExtendFrom;

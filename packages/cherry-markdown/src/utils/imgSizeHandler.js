@@ -121,9 +121,13 @@ const imgSizeHandler = {
     }
     // 预览区更新后图片位置可能变化（如对齐方式改变），需要更新选择框位置
     // 图片有 CSS transition (all 0.1s)，需等待过渡动画结束后再获取最终位置
-    this.img.addEventListener('transitionend', () => {
-      this.updatePosition();
-    }, { once: true });
+    this.img.addEventListener(
+      'transitionend',
+      () => {
+        this.updatePosition();
+      },
+      { once: true },
+    );
     // 兜底：如果过渡没有触发（如属性没变化），100ms 后也更新
     setTimeout(() => {
       this.updatePosition();

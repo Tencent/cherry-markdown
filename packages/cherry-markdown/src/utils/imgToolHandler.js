@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import imgSizeHandler from './imgSizeHandler';
-
 /**
  * 用于在图片被点击时弹出调整图片边框|阴影|圆角的工具栏
  */
@@ -220,9 +218,13 @@ const imgToolHandler = {
       this.position = { ...imgPosition };
     };
 
-    this.img.addEventListener('transitionend', () => {
-      updateToolbarPosition();
-    }, { once: true });
+    this.img.addEventListener(
+      'transitionend',
+      () => {
+        updateToolbarPosition();
+      },
+      { once: true },
+    );
     // 兜底：如果过渡没有触发（如属性没变化），120ms 后也更新
     setTimeout(() => {
       updateToolbarPosition();
