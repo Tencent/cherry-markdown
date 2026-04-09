@@ -552,7 +552,7 @@ export default class ShortcutKeyConfigPanel {
       { name: this.$cherry.locale.shortcutStatic12, key: 'Meta+Shift+M' },
       { name: this.$cherry.locale.shortcutStatic13, key: `Meta+${this.$cherry.locale.leftMouseButton}` },
       { name: this.$cherry.locale.shortcutStatic14, key: 'Meta+Shift+L' },
-      { name: this.$cherry.locale.shortcutStatic16, key: 'Alt+F3' },
+      { name: this.$cherry.locale.shortcutStatic16, key: 'Meta+Control+G' },
       { name: this.$cherry.locale.shortcutStatic17, key: 'Meta+Z' },
       { name: this.$cherry.locale.shortcutStatic18, key: 'Meta+Y' },
     ];

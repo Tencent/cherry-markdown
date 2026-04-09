@@ -29,8 +29,19 @@ import {
 } from '@codemirror/view';
 import { EditorState, StateEffect, StateField, EditorSelection, Transaction, Compartment } from '@codemirror/state';
 import { markdown } from '@codemirror/lang-markdown';
-import { search, searchKeymap, SearchQuery } from '@codemirror/search';
-import { history, historyKeymap, defaultKeymap, indentWithTab } from '@codemirror/commands';
+import { search, searchKeymap, SearchQuery, selectSelectionMatches } from '@codemirror/search';
+import {
+  history,
+  historyKeymap,
+  defaultKeymap,
+  indentWithTab,
+  moveLineUp,
+  moveLineDown,
+  copyLineDown,
+  selectLine,
+  insertBlankLine,
+  selectMatchingBracket,
+} from '@codemirror/commands';
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import { syntaxHighlighting, defaultHighlightStyle, foldGutter, indentOnInput } from '@codemirror/language';
 import htmlParser from '@/utils/htmlparser';
@@ -1747,7 +1758,12 @@ export default class Editor {
     }
 
     const self = this;
-    const filteredSearchKeymap = searchKeymap.filter((binding) => binding.key !== 'Mod-f');
+    // 过滤掉与自定义快捷键冲突的 searchKeymap 绑定：
+    // - Mod-f: 由 Cherry 工具栏搜索按钮处理
+    // - Mod-Shift-l: 与自定义的 Ctrl-Shift-L(分别选中每行) 冲突，selectSelectionMatches 改用 Alt-F3
+    const filteredSearchKeymap = searchKeymap.filter(
+      (binding) => binding.key !== 'Mod-f' && binding.key !== 'Mod-Shift-l',
+    );
 
     this.defaultKeymap = [
       { key: 'ArrowUp', run: () => self.arrowKeyInterceptor?.('ArrowUp') || false },
@@ -1761,6 +1777,47 @@ export default class Editor {
           return handleNewlineIndentList(adapter);
         },
       },
+      // Sublime Text style keybindings
+      // Ctrl-Shift-L / Cmd-Shift-L: 将选区拆分为多个光标，在每行末尾各放一个光标（Sublime split into lines）
+      {
+        key: 'Ctrl-Shift-l',
+        mac: 'Cmd-Shift-l',
+        run: (view) => {
+          const { state } = view;
+          const selections = state.selection.ranges;
+          const cursorRanges = [];
+          const visitedLines = new Set();
+          for (const range of selections) {
+            const startLine = state.doc.lineAt(range.from).number;
+            const endLine = state.doc.lineAt(range.to).number;
+            for (let lineNum = startLine; lineNum <= endLine; lineNum++) {
+              if (visitedLines.has(lineNum)) continue;
+              visitedLines.add(lineNum);
+              const line = state.doc.line(lineNum);
+              cursorRanges.push({ anchor: line.to });
+            }
+          }
+          if (cursorRanges.length === 0) return false;
+          view.dispatch({
+            selection: EditorSelection.create(cursorRanges.map((r) => EditorSelection.cursor(r.anchor))),
+          });
+          return true;
+        },
+      },
+      // Ctrl-Shift-↑ / Cmd-Shift-↑: 将当前行与上方行互换位置
+      { key: 'Ctrl-Shift-ArrowUp', mac: 'Cmd-Shift-ArrowUp', run: moveLineUp },
+      // Ctrl-Shift-↓ / Cmd-Shift-↓: 将当前行与下方行互换位置
+      { key: 'Ctrl-Shift-ArrowDown', mac: 'Cmd-Shift-ArrowDown', run: moveLineDown },
+      // Ctrl-Shift-D / Cmd-Shift-D: 复制当前行到下方
+      { key: 'Ctrl-Shift-d', mac: 'Cmd-Shift-d', run: copyLineDown },
+      // Ctrl-L / Cmd-L: 选中当前行（重复按可依次选中下一行）
+      { key: 'Ctrl-l', mac: 'Cmd-l', run: selectLine },
+      // Ctrl-Shift-Enter / Cmd-Shift-Enter: 在当前行上方插入空行
+      { key: 'Ctrl-Shift-Enter', mac: 'Cmd-Shift-Enter', run: insertBlankLine },
+      // Ctrl-Shift-M / Cmd-Shift-M: 选中匹配括号内的内容
+      { key: 'Ctrl-Shift-m', mac: 'Cmd-Shift-m', run: selectMatchingBracket },
+      // Alt-F3 / Cmd-Ctrl-G: 选中所有与当前选区相同的文本（批量编辑）
+      { key: 'Alt-F3', mac: 'Cmd-Ctrl-g', run: selectSelectionMatches },
       ...defaultKeymap,
       ...historyKeymap,
       ...closeBracketsKeymap,
@@ -1794,7 +1851,7 @@ export default class Editor {
 
       this.keymapCompartment.of(keymap.of(this.defaultKeymap)),
       this.vimCompartment.of([]),
-
+      EditorState.allowMultipleSelections.of(true),
       EditorView.lineWrapping,
 
       ...(this.options.codemirror.placeholder ? [placeholder(this.options.codemirror.placeholder)] : []),
