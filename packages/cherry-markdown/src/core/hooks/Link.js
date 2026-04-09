@@ -149,7 +149,7 @@ export default class Link extends SyntaxBase {
           '\\)' +
           '|' + // or
           '\\[('
-        }${NOT_ALL_WHITE_SPACES_INLINE})\\]` + // ?<ref> global ref
+        }${NOT_ALL_WHITE_SPACES_INLINE})\\](?!\\s*\\()` + // ?<ref> global ref, exclude [text][ref](url) inline link pattern
           ')',
         '(\\{target\\s*=\\s*(_blank|_parent|_self|_top)\\})?',
       ].join(''),
