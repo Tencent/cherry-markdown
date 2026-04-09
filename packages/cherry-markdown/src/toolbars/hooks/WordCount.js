@@ -56,7 +56,9 @@ export default class wordCount extends MenuBase {
     this.btnDom.addEventListener('count', () => {
       this.$dealEditorChange();
     });
-    this.$dealEditorChange();
+    setTimeout(() => {
+      this.$dealEditorChange();
+    }, 10);
 
     // 编辑区修改时延时触发字数统计，防止过于频繁
     let timeout = null;
@@ -70,7 +72,6 @@ export default class wordCount extends MenuBase {
         timeout = null;
       }, 500);
     });
-    this.$dealEditorChange();
   }
 
   /**
