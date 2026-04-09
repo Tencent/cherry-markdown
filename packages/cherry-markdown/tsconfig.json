@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "allowJs": true,
     "checkJs": true,
     "declaration": true,
@@ -9,13 +8,12 @@
     "emitDeclarationOnly": true,
     "outDir": "dist/types",
     "rootDir": "./src",
-    "ignoreDeprecations": "6.0",
     "strict": false,
     "noFallthroughCasesInSwitch": false,
-    "paths": { "@/*": ["src/*"], "~types/*": ["types/*"] },
+    "paths": { "@/*": ["./src/*"], "~types/*": ["./types/*"] },
     "experimentalDecorators": true
   },
   "include": ["src/index.js", "src/index.core.js", "src/index.engine.js", "src/index.stream.js"],
   "exclude": ["**/node_modules/**", "src/libs/**/*", "dist"],
-  "files": ["types/codemirror.d.ts", "types/env.d.ts", "types/index.d.ts"]
+  "files": ["types/codemirror.d.ts", "types/env.d.ts"]
 }

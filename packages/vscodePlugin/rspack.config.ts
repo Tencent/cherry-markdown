@@ -8,6 +8,13 @@ if (fs.existsSync(distPath)) {
   fs.rmSync(distPath, { recursive: true });
 }
 
+// 环境判断
+const argv = process.argv.join(' ');
+const isProduction =
+  argv.includes('--mode production') ||
+  process.env.RSPACK_BUILD_MODE === 'production' ||
+  process.env.NODE_ENV === 'production';
+
 // VSCode 扩展配置 (Node.js 环境)
 const extensionConfig: Configuration = {
   target: 'node',
@@ -58,8 +65,6 @@ const extensionConfig: Configuration = {
 };
 
 // Webview 配置 (浏览器环境)
-const argv = process.argv.join(' ');
-const isProduction = argv.includes('--mode production') || process.env.RSPACK_BUILD_MODE === 'production' || process.env.NODE_ENV === 'production';
 const webviewConfig: Configuration = {
   target: 'web',
   mode: isProduction ? 'production' : 'development',

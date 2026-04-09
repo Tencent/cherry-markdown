@@ -520,4 +520,14 @@ export default class Engine {
   makeMarkdown(html) {
     return htmlParser.run(html);
   }
+
+  /**
+   * 清理engine的缓存
+   */
+  clearCache() {
+    this.hooks.paragraph?.forEach((hook) => {
+      // @ts-ignore
+      hook.clearCache && hook.clearCache();
+    });
+  }
 }

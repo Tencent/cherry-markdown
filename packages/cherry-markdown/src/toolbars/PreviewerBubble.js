@@ -1009,6 +1009,10 @@ export default class PreviewerBubble {
     if (!this.$isEnableBubbleAndEditorShow()) {
       return;
     }
+    const sourceMode = figureElement.querySelector('.cherry-mermaid-source-toolbar-panel.active[data-mode="source"]');
+    if (sourceMode) {
+      return;
+    }
     this.$createPreviewerBubbles('click', 'img-handler');
 
     this.mermaidFigure = figureElement;
@@ -1196,6 +1200,8 @@ export default class PreviewerBubble {
     const panels = figure.querySelectorAll('.cherry-mermaid-source-toolbar-panel');
 
     if (!slider || !tabs || !panels.length) return;
+
+    this.$removeAllPreviewerBubbles();
 
     // 切换 tab active 状态
     tabs.forEach((tab) => tab.classList.remove('active'));
