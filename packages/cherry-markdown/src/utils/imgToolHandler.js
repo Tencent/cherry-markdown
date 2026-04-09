@@ -114,11 +114,8 @@ const imgToolHandler = {
         div.className = getImgToolButtonClassName(align);
         this.emitChange(this.img, align.active ? align.type : 'clear-align');
 
-        const sizeHandlerOptions = this.isMermaid ? { isMermaid: true } : undefined;
-        imgSizeHandler.showBubble(this.img, this.container, this.previewerDom, sizeHandlerOptions);
-        setTimeout(() => {
-          imgSizeHandler.updatePosition();
-        }, 150);
+        // 不再使用 setTimeout 猜测预览区更新时机
+        // 位置更新由 previewUpdate 事件在 afterUpdateCallBack 中触发
       });
       alignDiv.append(div);
     });
@@ -188,14 +185,48 @@ const imgToolHandler = {
     switch (type) {
       case 'scroll':
         return this.dealScroll(event);
+      case 'previewUpdate':
+        return this.previewUpdate(event);
     }
   },
   previewUpdate(callback) {
     if (this.$isResizing()) {
       return;
     }
-    this.remove();
-    callback();
+    // 预览区更新后图片位置可能变化（如对齐方式改变），需要更新工具栏位置
+    // 图片有 CSS transition (all 0.1s)，需等待过渡动画结束后再获取最终位置
+    const updateToolbarPosition = () => {
+      if (!this.img || !this.container || !this.previewerDom) {
+        return;
+      }
+      const imgPosition = this.getImgPosition();
+      const toolbarWidth = this.container.offsetWidth;
+      const toolbarHeight = this.container.offsetHeight;
+      const padding = 8;
+
+      let finalLeft;
+      let finalTop;
+
+      if (imgPosition.width < toolbarWidth + padding * 2 || imgPosition.height < toolbarHeight + padding * 2) {
+        finalLeft = imgPosition.left + (imgPosition.width - toolbarWidth) / 2;
+        finalTop = imgPosition.top + imgPosition.height + padding;
+      } else {
+        finalLeft = imgPosition.left + (imgPosition.width - toolbarWidth) / 2;
+        finalTop = imgPosition.top + imgPosition.height - toolbarHeight - padding;
+      }
+
+      this.container.style.left = `${finalLeft}px`;
+      this.container.style.top = `${finalTop}px`;
+      this.position = { ...imgPosition };
+    };
+
+    this.img.addEventListener('transitionend', () => {
+      updateToolbarPosition();
+    }, { once: true });
+    // 兜底：如果过渡没有触发（如属性没变化），120ms 后也更新
+    setTimeout(() => {
+      updateToolbarPosition();
+    }, 120);
   },
   remove() {
     this.butsLayout = false;
