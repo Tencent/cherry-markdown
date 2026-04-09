@@ -873,6 +873,10 @@ export default class PreviewerBubble {
             this.editor.editor.view.dispatch({
               selection: { anchor: fromPos, head: toPos },
             });
+            // 记录扩展参数的位置范围，供 changeImgValue 多次调用时正确替换
+            this.imgExtendFrom = fromPos;
+            this.imgExtendTo = toPos;
+            this.imgHasExtend = fromPos !== toPos;
             return true;
           }
           testIndex += 1;
@@ -954,15 +958,32 @@ export default class PreviewerBubble {
   }
 
   changeImgValue() {
-    // CodeMirror 6 中替换选中内容
-    const selection = this.editor.editor.view.state.selection.main;
-    this.editor.editor.view.dispatch({
-      changes: {
-        from: selection.from,
-        to: selection.to,
-        insert: [this.imgSize, this.imgDeco, this.imgAlign].filter((v) => v).join(' '),
-      },
-    });
+    const value = [this.imgSize, this.imgDeco, this.imgAlign].filter((v) => v).join(' ');
+    if (this.imgHasExtend) {
+      // 已有扩展参数：直接替换 imgExtendFrom ~ imgExtendTo 范围内的内容
+      this.editor.editor.view.dispatch({
+        changes: {
+          from: this.imgExtendFrom,
+          to: this.imgExtendTo,
+          insert: value,
+        },
+        selection: { anchor: this.imgExtendFrom, head: this.imgExtendFrom + value.length },
+      });
+      this.imgExtendTo = this.imgExtendFrom + value.length;
+    } else if (value) {
+      // 原本没有扩展参数：在光标处插入一个空格 + 内容
+      this.editor.editor.view.dispatch({
+        changes: {
+          from: this.imgExtendFrom,
+          to: this.imgExtendFrom,
+          insert: ` ${value}`,
+        },
+        selection: { anchor: this.imgExtendFrom + 1, head: this.imgExtendFrom + 1 + value.length },
+      });
+      this.imgExtendFrom += 1;
+      this.imgExtendTo = this.imgExtendFrom + value.length;
+      this.imgHasExtend = true;
+    }
   }
 
   /**
