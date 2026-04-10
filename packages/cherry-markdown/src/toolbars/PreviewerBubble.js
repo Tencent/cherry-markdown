@@ -16,6 +16,7 @@
 
 import imgSizeHandler from '@/utils/imgSizeHandler';
 import imgToolHandler from '@/utils/imgToolHandler';
+import { Transaction } from '@codemirror/state';
 import TableHandler from '@/utils/tableContentHandler';
 import FootnoteHoverHandler from '@/utils/footnoteHoverHandler';
 import CodeHandler from '@/utils/codeBlockContentHandler';
@@ -24,7 +25,6 @@ import { imgDrawioReg, getValueWithoutCode } from '@/utils/regexp';
 import debounce from 'lodash/debounce';
 import FormulaHandler from '@/utils/formulaUtilsHandler';
 import ListHandler from '@/utils/listContentHandler';
-import { Transaction } from '@codemirror/state';
 
 /**
  * 预览区域的响应式工具栏
@@ -58,6 +58,14 @@ export default class PreviewerBubble {
      * @type {{ [key: string]: { emit: (...args: any[]) => any, [key:string]: any }}}
      */
     this.bubbleHandler = {};
+    /** 图片扩展参数在编辑器中的位置范围 */
+    this.imgExtendFrom = 0;
+    this.imgExtendTo = 0;
+    this.imgHasExtend = false;
+    /** 前导空格位置，清除所有扩展参数时一并移除 */
+    this.imgLeadingSpacePos = -1;
+    /** 记录 beginChangeImgValue 时的文档状态，用于位置映射追踪 */
+    this.imgChangeBaseState = null;
     this.init();
   }
 
@@ -89,6 +97,7 @@ export default class PreviewerBubble {
     this.$bindedOnEditorSizeChange = () => {
       Object.values(this.bubbleHandler).forEach((handler) => handler.emit('resize', {}));
     };
+    this.$bindedOnLayoutChange = () => this.$removeAllPreviewerBubbles();
 
     this.previewerDom.addEventListener('click', this.$bindedOnClick);
     this.previewerDom.addEventListener('mouseover', this.$bindedOnMouseOver);
@@ -100,6 +109,7 @@ export default class PreviewerBubble {
     document.addEventListener('keyup', this.$bindedOnKeyUp);
 
     this.$cherry.$event.on('editor.size.change', this.$bindedOnEditorSizeChange);
+    this.$cherry.$event.on('layoutChange', this.$bindedOnLayoutChange);
 
     this.previewerDom.addEventListener('scroll', this.$bindedOnScroll, true);
     this.$cherry.$event.on('previewerClose', () => this.$removeAllPreviewerBubbles());
@@ -364,6 +374,7 @@ export default class PreviewerBubble {
                 to: selection.to,
                 insert: `(${base64}){data-type=drawio data-xml=${escapedXmlData}}`,
               },
+              annotations: Transaction.userEvent.of('api'),
             });
           },
         );
@@ -811,6 +822,7 @@ export default class PreviewerBubble {
             const toPos = doc.line(line + 1).from + endCh;
             this.editor.editor.view.dispatch({
               selection: { anchor: fromPos, head: toPos },
+              annotations: Transaction.userEvent.of('api'),
             });
             // 更新后需要再调用一次markText机制
             this.editor.dealSpecialWords();
@@ -872,7 +884,18 @@ export default class PreviewerBubble {
             const toPos = doc.line(line + 1).from + endCh;
             this.editor.editor.view.dispatch({
               selection: { anchor: fromPos, head: toPos },
+              annotations: Transaction.userEvent.of('api'),
             });
+            // 记录扩展参数的位置范围，供 changeImgValue 多次调用时正确替换
+            // fromPos 包含前导空格，imgExtendFrom 不含前导空格（用于精确替换扩展参数）
+            const hasExtend = fromPos !== toPos;
+            this.imgExtendFrom = fromPos;
+            this.imgExtendTo = toPos;
+            this.imgHasExtend = hasExtend;
+            // 记录前导空格的位置（清除所有扩展参数时需要一并移除）
+            this.imgLeadingSpacePos = hasExtend ? fromPos - 1 : -1;
+            // 记录当前文档状态，用于后续位置映射追踪
+            this.imgChangeBaseState = this.editor.editor.view.state;
             return true;
           }
           testIndex += 1;
@@ -954,15 +977,61 @@ export default class PreviewerBubble {
   }
 
   changeImgValue() {
-    // CodeMirror 6 中替换选中内容
-    const selection = this.editor.editor.view.state.selection.main;
-    this.editor.editor.view.dispatch({
-      changes: {
-        from: selection.from,
-        to: selection.to,
-        insert: [this.imgSize, this.imgDeco, this.imgAlign].filter((v) => v).join(' '),
-      },
-    });
+    const value = [this.imgSize, this.imgDeco, this.imgAlign].filter((v) => v).join(' ');
+    const { view } = this.editor.editor;
+
+    // 将缓存的位置映射到当前文档状态，防止中间的文档变更导致位置失效
+    let from = this.imgExtendFrom;
+    let to = this.imgExtendTo;
+    let leadingSpacePos = this.imgLeadingSpacePos;
+    if (this.imgChangeBaseState && this.imgChangeBaseState !== view.state) {
+      const changes = view.state.changes(this.imgChangeBaseState);
+      from = changes.mapPos(from, 1);
+      to = changes.mapPos(to, 1);
+      leadingSpacePos = leadingSpacePos >= 0 ? changes.mapPos(leadingSpacePos, 1) : -1;
+    }
+
+    const apiAnnotation = Transaction.userEvent.of('api');
+
+    if (this.imgHasExtend) {
+      if (value) {
+        // 已有扩展参数且新值非空：替换扩展参数部分
+        view.dispatch({
+          changes: { from, to, insert: value },
+          selection: { anchor: from, head: from + value.length },
+          annotations: apiAnnotation,
+        });
+        this.imgExtendFrom = from;
+        this.imgExtendTo = from + value.length;
+        this.imgLeadingSpacePos = leadingSpacePos;
+      } else {
+        // 清除所有扩展参数：同时移除前导空格
+        const deleteFrom = leadingSpacePos >= 0 ? leadingSpacePos : from;
+        view.dispatch({
+          changes: { from: deleteFrom, to, insert: '' },
+          selection: { anchor: deleteFrom },
+          annotations: apiAnnotation,
+        });
+        this.imgExtendFrom = deleteFrom;
+        this.imgExtendTo = deleteFrom;
+        this.imgHasExtend = false;
+        this.imgLeadingSpacePos = -1;
+      }
+    } else if (value) {
+      // 原本没有扩展参数：插入空格 + 扩展参数
+      const insertText = ` ${value}`;
+      view.dispatch({
+        changes: { from, to: from, insert: insertText },
+        selection: { anchor: from + 1, head: from + 1 + value.length },
+        annotations: apiAnnotation,
+      });
+      this.imgExtendFrom = from + 1;
+      this.imgExtendTo = this.imgExtendFrom + value.length;
+      this.imgLeadingSpacePos = from;
+      this.imgHasExtend = true;
+    }
+    // 更新基准状态为当前 state，下次 changeImgValue 调用时基于此映射
+    this.imgChangeBaseState = view.state;
   }
 
   /**
@@ -1260,6 +1329,7 @@ export default class PreviewerBubble {
     // 移除自定义事件监听器
     if (this.$cherry && this.$cherry.$event) {
       this.$cherry.$event.off('editor.size.change', this.$bindedOnEditorSizeChange);
+      this.$cherry.$event.off('layoutChange', this.$bindedOnLayoutChange);
     }
 
     // 清理引用
@@ -1272,6 +1342,7 @@ export default class PreviewerBubble {
     this.$bindedOnScroll = null;
     this.$bindedOnChange = null;
     this.$bindedOnEditorSizeChange = null;
+    this.$bindedOnLayoutChange = null;
 
     this.bubble = {};
     this.bubbleHandler = {};
