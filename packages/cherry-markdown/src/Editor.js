@@ -1812,12 +1812,6 @@ export default class Editor {
       { key: 'Ctrl-Shift-d', mac: 'Cmd-Shift-d', run: copyLineDown },
       // Ctrl-L / Cmd-L: 选中当前行（重复按可依次选中下一行）
       { key: 'Ctrl-l', mac: 'Cmd-l', run: selectLine },
-      // Ctrl-Shift-Enter / Cmd-Shift-Enter: 在当前行下方插入空行
-      { key: 'Ctrl-Shift-Enter', mac: 'Cmd-Shift-Enter', run: insertBlankLine },
-      // Ctrl-Shift-M / Cmd-Shift-M: 选中匹配括号内的内容
-      { key: 'Ctrl-Shift-m', mac: 'Cmd-Shift-m', run: selectMatchingBracket },
-      // Alt-F3 / Cmd-Ctrl-G: 选中所有与当前选区相同的文本（批量编辑）
-      { key: 'Alt-F3', mac: 'Cmd-Ctrl-g', run: selectSelectionMatches },
       ...defaultKeymap,
       ...historyKeymap,
       ...closeBracketsKeymap,
