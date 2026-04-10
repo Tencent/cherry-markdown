@@ -18,7 +18,6 @@
  * 用于在图片被点击时弹出调整图片边框|阴影|圆角的工具栏
  */
 const imgToolHandler = {
-  mouseResize: {},
   position: { x: 0, y: 0 },
   getImgPosition() {
     const position = this.img.getBoundingClientRect();
@@ -188,53 +187,39 @@ const imgToolHandler = {
     }
   },
   previewUpdate(callback) {
-    if (this.$isResizing()) {
-      return;
-    }
     // 预览区更新后图片位置可能变化（如对齐方式改变），需要更新工具栏位置
     // 图片有 CSS transition (all 0.1s)，需等待过渡动画结束后再获取最终位置
-    const updateToolbarPosition = () => {
-      if (!this.img || !this.container || !this.previewerDom) {
-        return;
-      }
-      const imgPosition = this.getImgPosition();
-      const toolbarWidth = this.container.offsetWidth;
-      const toolbarHeight = this.container.offsetHeight;
-      const padding = 8;
-
-      let finalLeft;
-      let finalTop;
-
-      if (imgPosition.width < toolbarWidth + padding * 2 || imgPosition.height < toolbarHeight + padding * 2) {
-        finalLeft = imgPosition.left + (imgPosition.width - toolbarWidth) / 2;
-        finalTop = imgPosition.top + imgPosition.height + padding;
-      } else {
-        finalLeft = imgPosition.left + (imgPosition.width - toolbarWidth) / 2;
-        finalTop = imgPosition.top + imgPosition.height - toolbarHeight - padding;
-      }
-
-      this.container.style.left = `${finalLeft}px`;
-      this.container.style.top = `${finalTop}px`;
-      this.position = { ...imgPosition };
-    };
-
-    this.img.addEventListener(
-      'transitionend',
-      () => {
-        updateToolbarPosition();
-      },
-      { once: true },
-    );
-    // 兜底：如果过渡没有触发（如属性没变化），120ms 后也更新
-    setTimeout(() => {
-      updateToolbarPosition();
-    }, 120);
+    this.img.addEventListener('transitionend', () => this.updatePosition(), { once: true });
   },
   remove() {
     this.butsLayout = false;
   },
-  $isResizing() {
-    return this.mouseResize.resize;
+  /**
+   * 更新工具栏位置，用于预览区更新或编辑器大小变化后重新定位
+   */
+  updatePosition() {
+    if (!this.img || !this.container || !this.previewerDom) {
+      return;
+    }
+    const imgPosition = this.getImgPosition();
+    const toolbarWidth = this.container.offsetWidth;
+    const toolbarHeight = this.container.offsetHeight;
+    const padding = 8;
+
+    let finalLeft;
+    let finalTop;
+
+    if (imgPosition.width < toolbarWidth + padding * 2 || imgPosition.height < toolbarHeight + padding * 2) {
+      finalLeft = imgPosition.left + (imgPosition.width - toolbarWidth) / 2;
+      finalTop = imgPosition.top + imgPosition.height + padding;
+    } else {
+      finalLeft = imgPosition.left + (imgPosition.width - toolbarWidth) / 2;
+      finalTop = imgPosition.top + imgPosition.height - toolbarHeight - padding;
+    }
+
+    this.container.style.left = `${finalLeft}px`;
+    this.container.style.top = `${finalTop}px`;
+    this.position = { ...imgPosition };
   },
   dealScroll(event) {
     const position = this.getImgPosition();
@@ -244,9 +229,6 @@ const imgToolHandler = {
     if (this.container.style.marginLeft !== position.left - this.position.left) {
       this.container.style.marginLeft = `${position.left - this.position.left}px`;
     }
-  },
-  change() {
-    this.emitChange(this.img, { width: this.buts.style.width, height: this.buts.style.height });
   },
   bindChange(func) {
     this.emitChange = func;
