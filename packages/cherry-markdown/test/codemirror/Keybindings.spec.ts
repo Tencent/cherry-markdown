@@ -32,8 +32,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { EditorView, keymap } from '@codemirror/view';
-import { EditorState, EditorSelection } from '@codemirror/state';
+import { EditorSelection } from '@codemirror/state';
 import {
   moveLineUp,
   moveLineDown,
@@ -42,54 +41,12 @@ import {
   insertBlankLine,
   selectMatchingBracket,
 } from '@codemirror/commands';
-import { selectSelectionMatches, search } from '@codemirror/search';
-import { closeBrackets } from '@codemirror/autocomplete';
-import { bracketMatching } from '@codemirror/language';
+import { selectSelectionMatches } from '@codemirror/search';
+import { createCm6View, getDoc, getSelection, getAllSelections } from '../helpers/cM6View';
 
-// ============ 工具函数 ============
+// ============ 工具函数（别名，保持测试可读性）============
 
-/**
- * 创建一个带有指定内容和光标位置的真实 EditorView
- * @param doc 初始文档内容
- * @param anchor 选区起点（默认 0）
- * @param head 选区终点（默认等于 anchor，即光标）
- */
-function createView(doc: string, anchor = 0, head = anchor): EditorView {
-  return new EditorView({
-    state: EditorState.create({
-      doc,
-      selection: EditorSelection.single(anchor, head),
-      extensions: [
-        closeBrackets(),
-        bracketMatching(),
-        search(),
-        EditorState.allowMultipleSelections.of(true),
-      ],
-    }),
-  });
-}
-
-/**
- * 获取 EditorView 当前文档内容
- */
-function getDoc(view: EditorView): string {
-  return view.state.doc.toString();
-}
-
-/**
- * 获取主选区的 anchor 和 head
- */
-function getSelection(view: EditorView): { anchor: number; head: number } {
-  const main = view.state.selection.main;
-  return { anchor: main.anchor, head: main.head };
-}
-
-/**
- * 获取所有选区
- */
-function getAllSelections(view: EditorView): Array<{ anchor: number; head: number }> {
-  return view.state.selection.ranges.map((r) => ({ anchor: r.anchor, head: r.head }));
-}
+const createView = createCm6View;
 
 // ============ 测试用文档 ============
 
