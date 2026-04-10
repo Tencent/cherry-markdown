@@ -1,11 +1,15 @@
 name: 'Build Cherry Markdown Release'
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 on:
   workflow_call:
+    inputs:
+      core_version:
+        required: true
+        type: string
 jobs:
   release-npm-build:
     runs-on: ubuntu-latest
@@ -23,6 +27,12 @@ jobs:
           yarn
           yarn build
 
+      - name: Package dist assets
+        working-directory: packages/cherry-markdown
+        run: |
+          tar -czvf ../cherry-markdown-${{ inputs.core_version }}.tar.gz dist/
+          zip -r ../cherry-markdown-${{ inputs.core_version }}.zip dist/
+
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -33,3 +43,12 @@ jobs:
            
           cd packages/cherry-markdown
           npm publish --access public
+
+      - name: Upload dist to GitHub Release
+        uses: AButler/upload-release-assets@v3.0
+        with:
+          files: |
+            cherry-markdown-*.tar.gz;
+            cherry-markdown-*.zip
+          release-tag: 'cherry-markdown@${{ inputs.core_version }}'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
