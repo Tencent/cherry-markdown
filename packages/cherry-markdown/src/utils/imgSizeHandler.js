@@ -113,6 +113,8 @@ const imgSizeHandler = {
         return this.remove();
       case 'previewUpdate':
         return this.previewUpdate(event);
+      case 'resize':
+        requestAnimationFrame(() => this.updatePosition());
     }
   },
   previewUpdate(callback) {

@@ -97,6 +97,7 @@ export default class PreviewerBubble {
     this.$bindedOnEditorSizeChange = () => {
       Object.values(this.bubbleHandler).forEach((handler) => handler.emit('resize', {}));
     };
+    this.$bindedOnLayoutChange = () => this.$removeAllPreviewerBubbles();
 
     this.previewerDom.addEventListener('click', this.$bindedOnClick);
     this.previewerDom.addEventListener('mouseover', this.$bindedOnMouseOver);
@@ -108,6 +109,7 @@ export default class PreviewerBubble {
     document.addEventListener('keyup', this.$bindedOnKeyUp);
 
     this.$cherry.$event.on('editor.size.change', this.$bindedOnEditorSizeChange);
+    this.$cherry.$event.on('layoutChange', this.$bindedOnLayoutChange);
 
     this.previewerDom.addEventListener('scroll', this.$bindedOnScroll, true);
     this.$cherry.$event.on('previewerClose', () => this.$removeAllPreviewerBubbles());
@@ -1327,6 +1329,7 @@ export default class PreviewerBubble {
     // 移除自定义事件监听器
     if (this.$cherry && this.$cherry.$event) {
       this.$cherry.$event.off('editor.size.change', this.$bindedOnEditorSizeChange);
+      this.$cherry.$event.off('layoutChange', this.$bindedOnLayoutChange);
     }
 
     // 清理引用
@@ -1339,6 +1342,7 @@ export default class PreviewerBubble {
     this.$bindedOnScroll = null;
     this.$bindedOnChange = null;
     this.$bindedOnEditorSizeChange = null;
+    this.$bindedOnLayoutChange = null;
 
     this.bubble = {};
     this.bubbleHandler = {};

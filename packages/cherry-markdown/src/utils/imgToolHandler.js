@@ -184,12 +184,16 @@ const imgToolHandler = {
         return this.dealScroll(event);
       case 'previewUpdate':
         return this.previewUpdate(event);
+      case 'resize':
+        requestAnimationFrame(() => this.updatePosition());
     }
   },
   previewUpdate(callback) {
     // 预览区更新后图片位置可能变化（如对齐方式改变），需要更新工具栏位置
     // 图片有 CSS transition (all 0.1s)，需等待过渡动画结束后再获取最终位置
     this.img.addEventListener('transitionend', () => this.updatePosition(), { once: true });
+    // 兜底：如果过渡没有触发（如属性没变化），120ms 后也更新
+    setTimeout(() => this.updatePosition(), 120);
   },
   remove() {
     this.butsLayout = false;
