@@ -25,6 +25,7 @@ const msgList = [
   '### 数学公式示例\n\n#### 行内公式\n质能方程：$E = mc^2$\n\n#### 块级公式\n高斯公式：\n$$\\oint_S \\vec{F} \\cdot d\\vec{A} = \\int_V (\\nabla \\cdot \\vec{F}) dV$$\n\n二次方程根：\n$$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$\n',
   '### Mermaid 流程图示例\n\n```mermaid\ngraph TD\n    A[开始] --> B{是否加载插件?}\n    B -->|是| C[懒加载插件]\n    B -->|否| D[使用默认渲染]\n    C --> E[渲染内容]\n    D --> E\n    E --> F[结束]\n```\n\n#### 时序图\n\n```mermaid\nsequenceDiagram\n    participant 用户\n    participant Cherry\n    participant 插件\n    用户->>Cherry: setMarkdown()\n    Cherry->>插件: 检查是否需要渲染\n    插件-->>Cherry: 返回渲染结果\n    Cherry-->>用户: 显示内容\n```\n',
   '### 综合示例\n\n#### 代码块\n```python\ndef fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)\n\nprint(fibonacci(10))  # 输出: 55\n```\n\n#### 表格\n| 插件 | 用途 | 大小 |\n|:----:|:-----|-----:|\n| Mermaid | 流程图、时序图 | ~2MB |\n| KaTeX | 数学公式（快） | ~300KB |\n| MathJax | 数学公式（全） | ~3MB |\n\n#### 数学公式\n欧拉公式：$e^{i\\pi} + 1 = 0$\n',
+  '## 表格图表示例\n\n### 折线图\n| :line:{"title": "折线图"} | Header1 | Header2 | Header3 | Header4 |\n| ------ | ------ | ------ | ------ | ------ |\n| Sample1 | 11 | 11 | 4 | 33 |\n| Sample2 | 112 | 111 | 22 | 222 |\n| Sample3 | 333 | 142 | 311 | 11 |\n\n### 柱状图\n| :bar:{"title": "柱状图"} | Header1 | Header2 | Header3 | Header4 |\n| ------ | ------ | ------ | ------ | ------ |\n| Sample1 | 11 | 11 | 4 | 33 |\n| Sample2 | 112 | 111 | 22 | 222 |\n| Sample3 | 333 | 142 | 311 | 11 |\n\n### 热力图\n| :heatmap:{"title": "热力图"} | 周一 | 周二 | 周三 | 周四 | 周五 |\n| ------ | ------ | ------ | ------ | ------ | ------ |\n| 上午 | 10 | 20 | 30 | 40 | 50 |\n| 下午 | 15 | 25 | 35 | 45 | 55 |\n| 晚上 | 5 | 15 | 25 | 35 | 45 |\n\n### 饼图\n| :pie:{"title": "饼图"} | 数值 |\n| ------ | ------ |\n| 苹果 | 40 |\n| 香蕉 | 30 |\n| 橙子 | 20 |\n| 葡萄 | 10 |\n\n### 雷达图\n| :radar:{"title": "雷达图"} | 技能1 | 技能2 | 技能3 | 技能4 | 技能5 |\n| ------ | ------ | ------ | ------ | ------ | ------ |\n| 用户A | 90 | 85 | 75 | 80 | 88 |\n| 用户B | 75 | 90 | 88 | 85 | 78 |\n| 用户C | 85 | 78 | 90 | 88 | 85 |\n\n### 散点图\n| :scatter:{"title": "数据散点图"} | 横坐标 | 纵坐标 | 大小 | 系列 |\n| ------ | ------ | ------ | ------ | ------ |\n| A1 | 10 | 20 | 5 | 系列一 |\n| A2 | 15 | 25 | 10 | 系列一 |\n| A3 | 18 | 22 | 8 | 系列一 |\n| A4 | 22 | 28 | 12 | 系列一 |\n| A5 | 25 | 35 | 15 | 系列一 |\n| B1 | 12 | 18 | 8 | 系列二 |\n| B2 | 20 | 30 | 12 | 系列二 |\n| B3 | 28 | 25 | 10 | 系列二 |\n| B4 | 35 | 38 | 14 | 系列二 |\n| B5 | 40 | 45 | 16 | 系列二 |\n\n### 桑基图\n| :sankey:{"title": "能源流向图"} | 目标 | 数值 |\n| ------ | ------ | ------ |\n| 煤炭 | 发电 | 300 |\n| 天然气 | 发电 | 200 |\n| 石油 | 交通 | 250 |\n| 水力 | 发电 | 150 |\n| 发电 | 工业 | 400 |\n| 发电 | 居民 | 250 |\n| 交通 | 货运 | 150 |\n| 交通 | 客运 | 100 |\n\n### 地图\n| :map:{"title": "中国地图"} | 数值 |\n| :-: | :-: |\n| 北京 | 100 |\n| 上海 | 200 |\n| 广东 | 300 |\n| 四川 | 150 |\n| 江苏 | 250 |\n| 浙江 | 180 |\n',
 ];
 
 // 加载脚本
@@ -147,6 +148,10 @@ function getCherryConfig() {
         flowSessionCursor: 'default',
       },
       syntax: {
+        table: {
+          enableChart: true,
+          selfClosing: false,
+        },
         codeBlock: {
           selfClosing: false,
           mermaid: {

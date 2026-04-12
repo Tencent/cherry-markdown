@@ -16,6 +16,7 @@
 import mergeWith from 'lodash/mergeWith';
 import JSON5 from 'json5';
 import { getExternal } from '@/utils/external';
+import { generateContainerId, createErrorElement } from '@/utils/async-render-pipeline';
 
 export default class EChartsCodeBlockEngine {
   static install(cherryOptions, ...args) {
@@ -51,26 +52,22 @@ export default class EChartsCodeBlockEngine {
   }
 
   /**
-   * 解析 ECharts option 字符串。
-   * 优先使用 new Function 执行 JS 对象字面量（支持函数、正则等 JS 语法），
-   * 失败后 fallback 到 JSON5.parse（仅支持纯数据）。
+   * 解析 ECharts option 字符串（纯 JSON5）。
+   *
+   * 支持 JSON5 宽松语法：注释、尾逗号、无引号 key、单引号字符串等，
+   * 覆盖绝大多数 ECharts 配置场景。
+   *
+   * 不支持 JS 函数语法（如 `formatter: (params) => ...`），
+   * 请使用 ECharts 内置的字符串模板替代，例如：
+   *   - `formatter: '{b}: {c}%'`
+   *   - `axisLabel: { formatter: '{value} 万元' }`
+   *
+   * @see https://echarts.apache.org/zh/option.html#tooltip.formatter
    * @param {string} src 代码块源码
    * @returns {object} 解析后的 ECharts option 对象
    */
   parseOption(src) {
     const trimmed = src.replace(/;\s*$/, '').trim();
-    // 优先尝试 new Function，支持 function、箭头函数、正则等 JS 语法
-    try {
-      // eslint-disable-next-line no-new-func
-      const fn = new Function(`return (${trimmed})`);
-      const result = fn();
-      if (result && typeof result === 'object') {
-        return result;
-      }
-    } catch (e) {
-      // JS 执行失败，继续尝试 JSON5
-    }
-    // fallback: JSON5 解析纯数据格式
     return JSON5.parse(trimmed);
   }
 
@@ -79,31 +76,52 @@ export default class EChartsCodeBlockEngine {
     const width = this.size?.width || '100%';
     const height = this.size?.height || '300px';
     const styleStr = `width: ${width}; height: ${height};`;
-    const previewerDom = $engine.$cherry.previewer.getDom();
-    // 延迟到下一轮事件循环再执行
-    setTimeout(() => {
-      const containers = previewerDom.querySelectorAll(
-        `div[data-sign="${sign}"][data-type="echarts"] .cherry-echarts-codeblock-wrapper`,
-      );
-      if (containers.length <= 0 || !this.echartsRef) return;
-      const option = this.parseOption(src);
-      containers.forEach((container) => {
-        try {
-          // 判断是否已经初始化
-          let chart = this.echartsRef.getInstanceByDom(container);
-          if (!chart) {
-            chart = this.echartsRef.init(container);
+
+    // 生成唯一 ID，用于 pipeline 查找容器
+    const containerId = generateContainerId('echarts-cb');
+
+    // 预解析 option（在 render 阶段，上下文完整）
+    let option = {};
+    try {
+      option = this.parseOption(src);
+    } catch (e) {
+      const safeMsg = String(e.message)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      return `<div style="${styleStr}" class="cherry-echarts-codeblock-wrapper"><div style="color: red;">Parse Error: ${safeMsg}</div></div>`;
+    }
+
+    // 将渲染任务推入异步管线队列
+    const CherryCtor = /** @type {typeof import('../../CherryStatic').CherryStatic} */ ($engine.$cherry.constructor);
+    const pipeline = CherryCtor.asyncRenderPipeline;
+    if (pipeline) {
+      const { echartsRef } = this;
+      const flowMode = !!$engine.$cherry.options?.engine?.global?.flowSessionContext;
+      pipeline.enqueue({
+        containerId,
+        instanceId: $engine.$cherry.instanceId,
+        execute(container) {
+          if (!echartsRef) return;
+          try {
+            let chart = echartsRef.getInstanceByDom(container);
+            if (!chart) {
+              chart = echartsRef.init(container);
+            }
+            chart.setOption(option, true);
+          } catch (error) {
+            if (flowMode) {
+              container.innerHTML = 'drawing...';
+            } else {
+              container.innerHTML = '';
+              container.appendChild(createErrorElement(error.message));
+            }
           }
-          chart.setOption(option, true); // 增加 true 参数以强制覆盖旧配置
-        } catch (error) {
-          if ($engine.$cherry.options.engine.global.flowSessionContext) {
-            container.innerHTML = `drawing...`;
-          } else {
-            container.innerHTML = `<div style="color: red;">Render Error: ${error.message}</div>`;
-          }
-        }
+        },
+        priority: 20,
       });
-    }, 50);
-    return `<div style="${styleStr}" class="cherry-echarts-codeblock-wrapper"></div>`;
+    }
+
+    return `<div style="${styleStr}" class="cherry-echarts-codeblock-wrapper" id="${containerId}"></div>`;
   }
 }

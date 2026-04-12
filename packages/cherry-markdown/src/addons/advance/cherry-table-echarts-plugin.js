@@ -17,6 +17,7 @@ import mergeWith from 'lodash/mergeWith';
 import Logger from '@/Logger';
 import { getExternal } from '@/utils/external';
 import { isBrowser } from '@/utils/env';
+import { generateContainerId, createErrorElement } from '@/utils/async-render-pipeline';
 
 // 主题与常量集中管理
 const THEME = {
@@ -316,11 +317,10 @@ export default class EChartsTableEngine {
    */
   createChart(container, option = {}, type) {
     if (!container) return null;
-    // 已存在实例直接返回，避免被观察器和延迟初始化同时触发导致重复初始化
+    // 创建前清理失效实例，防止 instances Set 无限增长
+    this.cleanupInvalidInstances();
+    // 已存在实例直接复用，避免重复初始化
     let chart = this.echartsRef.getInstanceByDom(container);
-    // if (existed && !existed.isDisposed()) return existed;
-
-    // if (container.firstChild) container.innerHTML = '';
     if (!chart) {
       chart = this.echartsRef.init(container, null, this.options);
     }
@@ -544,11 +544,11 @@ export default class EChartsTableEngine {
   $enableLocaleObserver() {
     // 如果有Cherry实例，通过其事件系统监听语言变更事件
     if (this.cherry && this.cherry.$event) {
-      const handler = (locale) => {
-        setTimeout(() => {
+      const handler = () => {
+        requestAnimationFrame(() => {
           const root = this.$getCherryRoot();
           this.$rebuildAllCharts(root);
-        }, 0);
+        });
       };
       this.cherry.$event.on(this.cherry.$event.Events.afterChangeLocale, handler);
     }
@@ -571,21 +571,19 @@ export default class EChartsTableEngine {
   }
 
   /**
-   * 渲染入口：将表格数据渲染为指定类型图表，并返回 HTML 容器片段
+   * 渲染入口：预计算图表配置，将渲染闭包推入异步管线，返回占位 HTML。
+   * pipeline.flush() 在 Previewer.afterUpdate() 的 rAF 中执行，届时容器已挂载。
    */
   render(type, options, tableObject, $cherry) {
-    // Logger.log('Rendering chart:', type, options, tableObject);
+    const chartId = generateContainerId('chart');
 
-    // 生成唯一ID和简化的配置数据
-    const chartId = `chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    // 序列化数据用于存储
+    // 序列化供 $rebuildAllCharts 等场景复用
     const tableDataStr = JSON.stringify(tableObject);
     const chartOptionsStr = JSON.stringify(options);
 
     options.chartId = chartId;
     this.$buildEchartsThemeFromCss();
     const chartOption = this.$generateChartOptions(type, tableObject, options);
-    // Logger.log('Chart options:', chartOption);
 
     // HTML样式配置
     const styleConfig = {
@@ -600,39 +598,41 @@ export default class EChartsTableEngine {
       .map(([key, value]) => `${key}: ${value};`)
       .join(' ');
 
-    // 创建一个包含所有必要信息的HTML结构
     const htmlContent = [
       `<div class="cherry-echarts-wrapper"`,
       ` style="${styleStr}"`,
       ` id="${chartId}"`,
-      ` data-chart-type="${type}"`,
+      ` data-chart-type="${String(type).replace(/"/g, '&quot;')}"`,
       ` data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"`,
       ` data-chart-options="${chartOptionsStr.replace(/"/g, '&quot;')}">`,
       `</div>`,
     ].join('');
-    const previewDom = $cherry.previewer.getDom();
 
-    // 延迟到下一轮事件循环再执行；只重试一次
-    setTimeout(() => {
-      const containers = previewDom.querySelectorAll(`#${chartId}`);
-      if (containers.length <= 0 || !this.echartsRef) return;
-      // if (this.echartsRef.getInstanceByDom(container)) return;
-      containers.forEach((container) => {
-        try {
-          this.createChart(container, chartOption, type);
-        } catch (error) {
-          if ($cherry.options.engine.syntax.global.flowSessionContext) {
-            container.innerHTML = 'drawing...';
-          } else {
-            container.innerHTML = `<div style="text-align: center; color: red; transform: translateY(125px);">
-              <div style="font-size: ${this.$theme().fontSize.title}px; color: ${this.$theme().color.error};">${this.cherry.locale.chartRenderError}</div>
-              <div style="font-size: ${this.$theme().fontSize.base}px; color: ${this.$theme().color.text}; opacity: 0.7;">${error.message}</div>
-            </div>`;
+    // 将渲染闭包推入管线，闭包捕获 chartOption，无需序列化到 HTML 属性
+    const CherryCtor = /** @type {typeof import('../../CherryStatic').CherryStatic} */ ($cherry.constructor);
+    const pipeline = CherryCtor.asyncRenderPipeline;
+    if (pipeline) {
+      const engine = this;
+      const flowMode = !!$cherry.options?.engine?.global?.flowSessionContext;
+      pipeline.enqueue({
+        containerId: chartId,
+        instanceId: $cherry.instanceId,
+        execute(container) {
+          if (!engine.echartsRef) return;
+          try {
+            engine.createChart(container, chartOption, type);
+          } catch (error) {
+            if (flowMode) {
+              container.innerHTML = 'drawing...';
+            } else {
+              container.innerHTML = '';
+              container.appendChild(createErrorElement(error.message));
+            }
           }
-        }
+        },
+        priority: 10,
       });
-      this.cleanupInvalidInstances();
-    }, 50);
+    }
 
     return htmlContent;
   }
@@ -641,15 +641,18 @@ export default class EChartsTableEngine {
   addClickHighlightEffect(chartInstance, chartType) {
     let selectedDataIndex = null;
     chartInstance.on('click', (params) => {
-      Logger.log('Chart clicked:', params);
-      // 如果点击的是同一个数据项，则取消高亮
       if (selectedDataIndex === params.dataIndex) {
+        // 再次点击同一项：取消高亮
         selectedDataIndex = null;
         this.clearHighlight(chartInstance, chartType);
         return;
       }
-      // 记录当前选中的数据项
+      // 取消上一个高亮（如果有）
+      if (selectedDataIndex !== null) {
+        chartInstance.dispatchAction({ type: 'downplay', dataIndex: selectedDataIndex });
+      }
       selectedDataIndex = params.dataIndex;
+      chartInstance.dispatchAction({ type: 'highlight', dataIndex: selectedDataIndex });
     });
   }
   // 清除高亮效果
@@ -1532,18 +1535,17 @@ const MapChartOptionsHandler = {
     }
 
     const url = paths[index];
-    // console.log(`尝试加载地图数据: ${url}`);
 
     this.$fetchMapData(url)
       .then((geoJson) => {
         getExternal('echarts')?.registerMap?.(url, geoJson);
-        // console.log(`地图数据加载成功！来源: ${url}`);
         this.$refreshMapChart(options.chartId, url, options.engine);
         return geoJson;
       })
       .catch((error) => {
         Logger.warn(`Map data loading failed (${url}):`, error.message);
-        this.$handleMapLoadFailure(options);
+        // 继续尝试下一条路径，而非直接报错
+        this.$tryLoadMapDataFromPaths(paths, index + 1, options);
       });
   },
   $handleMapLoadFailure(options) {
@@ -1583,30 +1585,31 @@ const MapChartOptionsHandler = {
   },
   $refreshMapChart(chartId, url, engine) {
     const container = document.querySelector(`[id="${chartId}"][data-chart-type="map"]`);
+    if (!container || !engine.echartsRef) return;
+
     const tableDataStr = container.getAttribute('data-table-data');
     const chartOptionsStr = container.getAttribute('data-chart-options');
 
-    if (tableDataStr && engine.echartsRef) {
-      try {
-        const tableData = JSON.parse(tableDataStr);
-        const chartOptions = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
-        chartOptions.engine = engine;
-        deepMerge(chartOptions, { mapDataSource: url });
+    if (!tableDataStr) return;
 
-        const chartOption = generateOptions(MapChartCompleteOptionsHandler, tableData, chartOptions);
-        const existingChart = engine.echartsRef.getInstanceByDom(container);
+    try {
+      const tableData = JSON.parse(tableDataStr);
+      const chartOptions = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
+      chartOptions.engine = engine;
+      deepMerge(chartOptions, { mapDataSource: url });
 
-        if (existingChart) {
-          existingChart.clear();
-          existingChart.setOption(chartOption, true);
-          // console.log('Map chart refreshed successfully:', chartId);
-        } else {
-          engine.createChart(container, chartOption, 'map');
-        }
-        container.setAttribute('data-map-status', 'success'); // 成功加载数据状态
-      } catch (error) {
-        // console.error('Failed to refresh map chart:', chartId, error);
+      const chartOption = generateOptions(MapChartCompleteOptionsHandler, tableData, chartOptions);
+      const existingChart = engine.echartsRef.getInstanceByDom(container);
+
+      if (existingChart) {
+        existingChart.clear();
+        existingChart.setOption(chartOption, true);
+      } else {
+        engine.createChart(container, chartOption, 'map');
       }
+      container.setAttribute('data-map-status', 'success');
+    } catch (error) {
+      Logger.warn(`$refreshMapChart failed for #${chartId}:`, error);
     }
   },
 };

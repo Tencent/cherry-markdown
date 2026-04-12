@@ -23,6 +23,7 @@ import TapdTablePlugin from './addons/advance/cherry-tapd-table-plugin';
 import TapdHtmlTagPlugin from './addons/advance/cherry-tapd-html-tag-plugin';
 import TapdCheckListPlugin from './addons/advance/cherry-tapd-checklist-plugin';
 import EChartsCodeBlockEngine from './addons/advance/cherry-codeblock-echarts-plugin';
+import AsyncRenderPipeline from './utils/async-render-pipeline';
 import { isBrowser } from './utils/env';
 
 const constants = { HOOKS_TYPE_LIST };
@@ -33,13 +34,6 @@ const plugins = {
   TapdCheckListPlugin,
   EChartsCodeBlockEngine,
 };
-const nodeIgnorePlugin = [];
-
-if (!isBrowser()) {
-  nodeIgnorePlugin.forEach((key) => {
-    delete plugins[key];
-  });
-}
 
 // @ts-expect-error process.env from build env
 const VERSION = `${process.env.BUILD_VERSION}`;
@@ -50,11 +44,12 @@ export class CherryStatic {
   static constants = constants;
   static plugins = plugins;
   static VERSION = VERSION;
+  /** 全局异步渲染管线实例 */
+  static asyncRenderPipeline = new AsyncRenderPipeline();
   /**
-   * @this {typeof import('./Cherry').default | typeof CherryStatic}
+   * 注册插件，须在实例化前调用，只能通过子类（Cherry / CherryStream / CherryEngine）调用。
    * @param {{ install: (defaultConfig: any, ...args: any[]) => void }} PluginClass 插件Class
    * @param  {...any} args 初始化插件的参数
-   * @returns
    */
   static usePlugin(PluginClass, ...args) {
     if (this === CherryStatic) {
@@ -73,9 +68,4 @@ export class CherryStatic {
     // @ts-ignore
     PluginClass.$cherry$mounted = true;
   }
-
-  // for type check only
-  // TODO: fix this error
-  // eslint-disable-next-line no-useless-constructor
-  constructor(...args) {}
 }

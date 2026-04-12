@@ -42,7 +42,7 @@ export default class Previewer {
   /**
    * @property
    * @private
-   * @type {number} 释放同步滚动锁定的定时器ID
+   * @type {number} 释放同步滚动锁定的 requestAnimationFrame handle
    */
   syncScrollLockTimer = 0;
 
@@ -815,7 +815,7 @@ export default class Previewer {
     const newHtml = this.lazyLoadImg.changeSrc2DataSrc(html);
     if (!this.isPreviewerHidden()) {
       // 标记当前正在更新预览区域，锁定同步滚动功能
-      window.clearTimeout(this.syncScrollLockTimer);
+      window.cancelAnimationFrame(this.syncScrollLockTimer);
       this.applyingDomChanges = true;
       // 预览区未隐藏时，直接更新
       const domContainer = this.getDomContainer();
@@ -840,10 +840,12 @@ export default class Previewer {
         this.$dealUpdate(domContainer, oldHtmlList, newHtmlList);
         this.afterUpdate();
       } finally {
-        // 延时释放同步滚动功能，在DOM更新完成后执行
-        this.syncScrollLockTimer = window.setTimeout(() => {
-          this.applyingDomChanges = false;
-        }, 50);
+        // 等 layout（第一帧）和 paint（第二帧）完成后再解锁同步滚动。
+        this.syncScrollLockTimer = requestAnimationFrame(() => {
+          this.syncScrollLockTimer = requestAnimationFrame(() => {
+            this.applyingDomChanges = false;
+          });
+        });
       }
     } else {
       // 预览区隐藏时，先缓存起来，等到预览区打开再一次性更新
@@ -894,13 +896,13 @@ export default class Previewer {
           .forEach((dom) => dom.remove());
       }
     }
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       try {
         this.editor.editor.view.requestMeasure();
       } catch (e) {
-        console.warn('Failed to refresh editor in Previewer:', e);
+        // 流式场景下可能没有 editor，静默忽略
       }
-    }, 0);
+    });
   }
 
   previewOnly() {
@@ -955,13 +957,13 @@ export default class Previewer {
     this.$cherry.$event.emit('previewerOpen');
     this.$cherry.$event.emit('editorOpen');
 
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       try {
         this.editor.editor.view.requestMeasure();
       } catch (e) {
-        console.warn('Failed to refresh editor in Previewer:', e);
+        // 流式场景下可能没有 editor，静默忽略
       }
-    }, 0);
+    });
   }
 
   doHtmlCache(html) {
@@ -981,6 +983,23 @@ export default class Previewer {
       return;
     }
     this.options.afterUpdateCallBack.map((fn) => fn());
+
+    // 在 rAF 中触发异步渲染管线，确保 DOM layout 完成后容器尺寸可用，
+    // 避免 echarts.init 等依赖容器宽高的渲染得到 0 值。
+    const root = this.getDomContainer();
+    if (root && this.$cherry) {
+      // 通过 constructor 访问静态属性，避免直接引入 CherryStatic 产生循环依赖
+      const CherryCtor = /** @type {typeof import('./CherryStatic').CherryStatic} */ (this.$cherry.constructor);
+      const pipeline = CherryCtor.asyncRenderPipeline;
+      if (pipeline && typeof pipeline.flush === 'function') {
+        const { instanceId } = this;
+        requestAnimationFrame(() => {
+          if (this.isDestroyed) return;
+          pipeline.flush(root, { instanceId });
+        });
+      }
+    }
+
     if (this.highlightLineNum === undefined) {
       this.highlightLineNum = 0;
     }
@@ -1318,7 +1337,7 @@ export default class Previewer {
 
   onMouseDown() {
     addEvent(this.getDomContainer(), 'mousedown', () => {
-      setTimeout(() => {
+      queueMicrotask(() => {
         this.$cherry.$event.emit('cleanAllSubMenus');
       });
     });
@@ -1398,7 +1417,7 @@ export default class Previewer {
 
     // 清理同步滚动锁定定时器
     if (this.syncScrollLockTimer) {
-      clearTimeout(this.syncScrollLockTimer);
+      cancelAnimationFrame(this.syncScrollLockTimer);
       this.syncScrollLockTimer = 0;
     }
 
@@ -1406,6 +1425,19 @@ export default class Previewer {
     if (this.animation && this.animation.timer) {
       cancelAnimationFrame(this.animation.timer);
       this.animation.timer = 0;
+    }
+
+    // 清理异步渲染管线中属于当前实例的任务，防止孤儿任务泄漏
+    if (this.$cherry) {
+      try {
+        const CherryCtor = /** @type {typeof import('./CherryStatic').CherryStatic} */ (this.$cherry.constructor);
+        const pipeline = CherryCtor.asyncRenderPipeline;
+        if (pipeline && typeof pipeline.reset === 'function') {
+          pipeline.reset(this.instanceId);
+        }
+      } catch (e) {
+        // 静默处理，不影响销毁流程
+      }
     }
 
     // 清理引用
