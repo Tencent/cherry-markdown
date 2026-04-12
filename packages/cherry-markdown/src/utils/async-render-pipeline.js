@@ -25,7 +25,7 @@ import Logger from '@/Logger';
  */
 
 /** 全局递增计数器，用于生成唯一容器 ID */
-let _idCounter = 0;
+let idCounter = 0;
 
 /**
  * 生成唯一容器 ID（递增计数器 + 随机后缀，同毫秒内也不会冲突）
@@ -33,7 +33,8 @@ let _idCounter = 0;
  * @returns {string} 形如 `chart-1-a3b2c1` 的唯一 ID
  */
 export function generateContainerId(prefix = 'async') {
-  return `${prefix}-${++_idCounter}-${Math.random().toString(36).slice(2, 8)}`;
+  idCounter += 1;
+  return `${prefix}-${idCounter}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 /**

@@ -62,9 +62,11 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
   // 固定虚拟模块
   const virtualCherryJsId = `${VIRTUAL_PREFIX}full-js`;
   const virtualCherryCoreJsId = `${VIRTUAL_PREFIX}core-js`;
+  const virtualCherryStreamJsId = `${VIRTUAL_PREFIX}stream-js`;
   const virtualCherryCssId = `${VIRTUAL_PREFIX}css`;
   const resolvedVirtualCherryJsId = `\0${virtualCherryJsId}`;
   const resolvedVirtualCherryCoreJsId = `\0${virtualCherryCoreJsId}`;
+  const resolvedVirtualCherryStreamJsId = `\0${virtualCherryStreamJsId}`;
   const resolvedVirtualCherryCssId = `\0${virtualCherryCssId}`;
 
   /**
@@ -127,7 +129,16 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
           return next();
         }
 
-        // 3. 拦截 cherry-markdown.js（非 core）请求 → full 虚拟模块
+        // 3. 拦截 cherry-markdown.stream.js 请求 → stream 虚拟模块
+        // 必须在通用的 cherry-markdown*.js 匹配之前
+        // stream 版本不包含 mermaid 等 addon 的 usePlugin 注册，按需手动加载
+        const streamJsPattern = /\/?\.{0,2}\/?packages\/cherry-markdown\/dist\/cherry-markdown\.stream[^/]*\.js/;
+        if (streamJsPattern.test(url)) {
+          req.url = `/@id/${virtualCherryStreamJsId}`;
+          return next();
+        }
+
+        // 4. 拦截 cherry-markdown.js（非 core、非 stream）请求 → full 虚拟模块
         const jsPattern = /\/?\.{0,2}\/?packages\/cherry-markdown\/dist\/cherry-markdown[^/]*\.js/;
         const cssPattern = /\/?\.{0,2}\/?packages\/cherry-markdown\/dist\/cherry-markdown[^/]*\.css/;
 
@@ -136,13 +147,13 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
           return next();
         }
 
-        // 4. 拦截 cherry-markdown.css 请求 → 虚拟模块
+        // 5. 拦截 cherry-markdown.css 请求 → 虚拟模块
         if (cssPattern.test(url)) {
           req.url = `/@id/${virtualCherryCssId}`;
           return next();
         }
 
-        // 5. 拦截字体文件请求，代理到 dist/fonts/
+        // 6. 拦截字体文件请求，代理到 dist/fonts/
         // 情况1: src/sass/fonts/ 路径（Vite 处理 SCSS 时生成的绝对路径）
         // 情况2: /fonts/ 根路径（CSS 通过 JS 模块注入时，浏览器用页面 URL 解析相对路径 ./fonts/）
         const fontPatterns = [/\/packages\/cherry-markdown\/src\/sass\/fonts\/(.+)/, /^\/fonts\/(ch-icon\.[^?]+)/];
@@ -176,6 +187,7 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
     resolveId(id) {
       if (id === virtualCherryJsId) return resolvedVirtualCherryJsId;
       if (id === virtualCherryCoreJsId) return resolvedVirtualCherryCoreJsId;
+      if (id === virtualCherryStreamJsId) return resolvedVirtualCherryStreamJsId;
       if (id === virtualCherryCssId) return resolvedVirtualCherryCssId;
 
       // 动态 addon 虚拟模块
@@ -204,6 +216,26 @@ export { Cherry };
       if (id === resolvedVirtualCherryCoreJsId) {
         return `
 import Cherry from '${srcDirNormalized}/index.core.js';
+
+// 暴露到全局，兼容 examples 中的用法
+window.Cherry = Cherry;
+
+export default Cherry;
+export { Cherry };
+`;
+      }
+
+      // 加载 stream 虚拟模块 - 从 index.stream.js 导入
+      // EChartsTableEngine 需通过 usePlugin 注册（注入 chartRenderEngine 到默认配置）
+      // echarts 通过页面 <script> 全局加载，不需要动态开关
+      if (id === resolvedVirtualCherryStreamJsId) {
+        return `
+import Cherry from '${srcDirNormalized}/index.stream.js';
+import EChartsTableEngine from '${srcDirNormalized}/addons/advance/cherry-table-echarts-plugin';
+
+if (typeof window !== 'undefined' && window.echarts) {
+  Cherry.usePlugin(EChartsTableEngine);
+}
 
 // 暴露到全局，兼容 examples 中的用法
 window.Cherry = Cherry;
