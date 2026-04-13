@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 import CherryStream from './CherryStream';
+import EChartsTableEngine from '@/addons/advance/cherry-table-echarts-plugin';
 
 import SyntaxHookBase from './core/SyntaxBase';
 import { isBrowser } from './utils/env';
+
+CherryStream.usePlugin(EChartsTableEngine);
 
 // in browser
 if (isBrowser()) {

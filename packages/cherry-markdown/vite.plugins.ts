@@ -179,7 +179,7 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
       if (id === virtualCherryCssId) return resolvedVirtualCherryCssId;
 
       // 动态 addon 虚拟模块
-      if (id.startsWith(VIRTUAL_PREFIX + 'addon-')) {
+      if (id.startsWith(`${VIRTUAL_PREFIX}addon-`)) {
         return `\0${id}`;
       }
     },
@@ -219,8 +219,8 @@ export { Cherry };
       }
 
       // 加载 addon 虚拟模块 - 从 src/addons/ 导入并暴露为 UMD 风格的全局变量
-      if (id.startsWith(RESOLVED_PREFIX + 'addon-')) {
-        const fileName = id.replace(RESOLVED_PREFIX + 'addon-', '');
+      if (id.startsWith(`${RESOLVED_PREFIX}addon-`)) {
+        const fileName = id.replace(`${RESOLVED_PREFIX}addon-`, '');
         const globalName = addonFileNameToGlobalName(fileName);
         return `
 import AddonModule from '${srcDirNormalized}/addons/${fileName}';
