@@ -10,6 +10,9 @@
 
 name: 'Reusable: Client Build'
 
+permissions:
+  contents: write
+
 on:
   workflow_call:
     inputs:

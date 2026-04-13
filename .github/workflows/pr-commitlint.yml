@@ -36,7 +36,7 @@ jobs:
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: Run commitlint
         uses: wagoid/commitlint-github-action@v6
