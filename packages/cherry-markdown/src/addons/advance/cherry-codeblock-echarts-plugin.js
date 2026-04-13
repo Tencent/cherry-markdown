@@ -93,7 +93,7 @@ export default class EChartsCodeBlockEngine {
       return `<div style="${styleStr}" class="cherry-echarts-codeblock-wrapper"><div style="color: red;">Parse Error: ${safeMsg}</div></div>`;
     }
 
-    // 将渲染任务推入异步管线队列
+    // 推入异步管线，闭包捕获 option
     const CherryCtor = /** @type {typeof import('../../CherryStatic').CherryStatic} */ ($engine.$cherry.constructor);
     const pipeline = CherryCtor.asyncRenderPipeline;
     if (pipeline) {

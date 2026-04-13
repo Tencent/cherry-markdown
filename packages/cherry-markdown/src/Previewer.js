@@ -1427,7 +1427,7 @@ export default class Previewer {
       this.animation.timer = 0;
     }
 
-    // 清理异步渲染管线中属于当前实例的任务，防止孤儿任务泄漏
+    // 清理异步渲染管线中当前实例的任务
     if (this.$cherry) {
       try {
         const CherryCtor = /** @type {typeof import('./CherryStatic').CherryStatic} */ (this.$cherry.constructor);

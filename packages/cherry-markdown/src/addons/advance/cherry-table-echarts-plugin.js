@@ -571,8 +571,8 @@ export default class EChartsTableEngine {
   }
 
   /**
-   * 渲染入口：预计算图表配置，将渲染闭包推入异步管线，返回占位 HTML。
-   * pipeline.flush() 在 Previewer.afterUpdate() 的 rAF 中执行，届时容器已挂载。
+   * 渲染入口：预计算图表配置，推入异步管线，返回占位 HTML。
+   * pipeline.flush() 在 Previewer.afterUpdate() 的 rAF 中执行。
    */
   render(type, options, tableObject, $cherry) {
     const chartId = generateContainerId('chart');
@@ -608,7 +608,7 @@ export default class EChartsTableEngine {
       `</div>`,
     ].join('');
 
-    // 将渲染闭包推入管线，闭包捕获 chartOption，无需序列化到 HTML 属性
+    // 推入异步管线，闭包捕获 chartOption 避免序列化到 HTML
     const CherryCtor = /** @type {typeof import('../../CherryStatic').CherryStatic} */ ($cherry.constructor);
     const pipeline = CherryCtor.asyncRenderPipeline;
     if (pipeline) {
