@@ -52,22 +52,26 @@ export default class EChartsCodeBlockEngine {
   }
 
   /**
-   * 解析 ECharts option 字符串（纯 JSON5）。
-   *
-   * 支持 JSON5 宽松语法：注释、尾逗号、无引号 key、单引号字符串等，
-   * 覆盖绝大多数 ECharts 配置场景。
-   *
-   * 不支持 JS 函数语法（如 `formatter: (params) => ...`），
-   * 请使用 ECharts 内置的字符串模板替代，例如：
-   *   - `formatter: '{b}: {c}%'`
-   *   - `axisLabel: { formatter: '{value} 万元' }`
-   *
-   * @see https://echarts.apache.org/zh/option.html#tooltip.formatter
+   * 解析 ECharts option 字符串。
+   * 优先使用 new Function 执行 JS 对象字面量（支持函数、正则等 JS 语法），
+   * 失败后 fallback 到 JSON5.parse（仅支持纯数据）。
    * @param {string} src 代码块源码
    * @returns {object} 解析后的 ECharts option 对象
    */
   parseOption(src) {
     const trimmed = src.replace(/;\s*$/, '').trim();
+    // 优先尝试 new Function，支持 function、箭头函数、正则等 JS 语法
+    try {
+      // eslint-disable-next-line no-new-func
+      const fn = new Function(`return (${trimmed})`);
+      const result = fn();
+      if (result && typeof result === 'object') {
+        return result;
+      }
+    } catch (e) {
+      // JS 执行失败，继续尝试 JSON5
+    }
+    // fallback: JSON5 解析纯数据格式
     return JSON5.parse(trimmed);
   }
 
@@ -85,10 +89,7 @@ export default class EChartsCodeBlockEngine {
     try {
       option = this.parseOption(src);
     } catch (e) {
-      const safeMsg = String(e.message)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+      const safeMsg = String(e.message).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       return `<div style="${styleStr}" class="cherry-echarts-codeblock-wrapper"><div style="color: red;">Parse Error: ${safeMsg}</div></div>`;
     }
 
