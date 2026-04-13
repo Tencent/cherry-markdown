@@ -32,6 +32,7 @@ jobs:
   detect-changes:
     if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       cherry-markdown: ${{ steps.filter.outputs.cherry-markdown }}
       vscode-plugin: ${{ steps.filter.outputs.vscode-plugin }}
@@ -51,7 +52,7 @@ jobs:
   npm-dev-preview:
     needs: detect-changes
     if: needs.detect-changes.outputs.cherry-markdown == 'true'
-    uses: ./.github/workflows/merge-dev-preview-npm.yml
+    uses: ./.github/workflows/reusable-npm-dev-preview.yml
     with:
       pr_number: ${{ github.event.pull_request.number }}
     secrets: inherit

@@ -13,9 +13,17 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   deploy-github-pages:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
@@ -25,7 +33,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
-          registry-url: https://registry.npmjs.org/
           cache: yarn
 
       - name: Install dependencies
@@ -38,9 +45,9 @@ jobs:
         run: |
           mkdir -p gh-pages-out
 
-          cp -v --parents -r packages/cherry-markdown/dist gh-pages-out/
-          cp -v --parents examples/*.html gh-pages-out/
-          cp -v --parents -r examples/assets gh-pages-out/
+          cp --parents -r packages/cherry-markdown/dist gh-pages-out/
+          cp --parents examples/*.html gh-pages-out/
+          cp --parents -r examples/assets gh-pages-out/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

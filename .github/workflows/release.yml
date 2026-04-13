@@ -5,8 +5,8 @@
 # 功能:
 #   - 使用 Changesets 进行版本管理和 tag 推送
 #   - 按发布的包名分别调用子工作流:
-#     • cherry-markdown → release-npm.yml
-#     • @cherry-markdown/client → release-client.yml
+#     • cherry-markdown → reusable-npm-release.yml
+#     • @cherry-markdown/client → reusable-client-build.yml (mode=release)
 #     • cherry-markdown-vscode-plugin → reusable-vscode-plugin.yml (mode=release)
 #   - 发布完成后强制同步 main → dev（仅在有包发布时执行）
 # =============================================================================
@@ -27,6 +27,7 @@ jobs:
     # 不需要在fork仓库的pr中运行, 仅当pr合并时运行
     if: github.repository == 'Tencent/cherry-markdown'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     outputs:
       publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
       publishedClientVersion: ${{ steps.extract_version.outputs.clientVersion }}
@@ -60,14 +61,15 @@ jobs:
   build-core-release:
     needs: release
     if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"cherry-markdown"') }}
-    uses: ./.github/workflows/release-npm.yml
+    uses: ./.github/workflows/reusable-npm-release.yml
     secrets: inherit
 
   build-client-release:
     needs: release
     if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"@cherry-markdown/client"') }}
-    uses: ./.github/workflows/release-client.yml
+    uses: ./.github/workflows/reusable-client-build.yml
     with:
+      mode: release
       client_version: ${{ needs.release.outputs.publishedClientVersion }}
     secrets: inherit
 
@@ -84,6 +86,7 @@ jobs:
     needs: release
     if: needs.release.outputs.publishedPackages != ''
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
         with:

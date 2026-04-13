@@ -5,7 +5,7 @@
 # 并在 PR 中评论安装指引
 # =============================================================================
 
-name: 'Merge Dev Preview: npm'
+name: 'Reusable: npm Dev Preview'
 
 on:
   workflow_call:
@@ -17,6 +17,7 @@ on:
 jobs:
   npm-dev-preview:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       id-token: write

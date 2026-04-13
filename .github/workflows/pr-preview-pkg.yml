@@ -12,6 +12,9 @@ on:
   pull_request:
     branches: [dev, main]
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -19,6 +22,7 @@ concurrency:
 jobs:
   pkg-pr-new:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
       - name: Set up Node.js

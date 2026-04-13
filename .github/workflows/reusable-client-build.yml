@@ -1,20 +1,33 @@
 # =============================================================================
 # Reusable Workflow: Client 全平台构建
 #
-# Tauri 桌面客户端多平台构建
+# Tauri 桌面客户端多平台构建，支持两种模式:
+#   - preview: PR 预览，产物上传为 artifact（保留 5 天）
+#   - release: 正式发布，产物上传到 GitHub Release
 # 平台: macOS (arm64/x64), Windows (x64), Linux (x64)
 # 产物: DMG, App, MSI, EXE, AppImage, Deb
 # =============================================================================
 
-name: 'Build: Client'
+name: 'Reusable: Client Build'
 
 on:
   workflow_call:
+    inputs:
+      mode:
+        description: 'preview: upload artifacts | release: upload to GitHub Release'
+        required: false
+        type: string
+        default: 'preview'
+      client_version:
+        description: 'Client version for GitHub Release tag (required for release mode)'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   client-build:
     runs-on: ${{ matrix.platform }}
-    continue-on-error: true
+    continue-on-error: ${{ inputs.mode == 'preview' }}
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -57,11 +70,13 @@ jobs:
           target: ${{ matrix.target }}
           toolchain: stable
 
-      - name: Cache Rust Dependencies
+      # Preview 模式: 使用独立的 rust-cache（只读，不保存新缓存）
+      - name: Cache Rust Dependencies (Preview)
+        if: inputs.mode == 'preview'
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: packages/client/src-tauri -> target
-          save-if: false # PR Preview 只读缓存，不保存新缓存
+          save-if: false
 
       - name: Install Linux Dependencies
         if: matrix.platform == 'ubuntu-latest'
@@ -78,9 +93,13 @@ jobs:
       - name: Build Tauri Client
         run: yarn build:client ${{ matrix.args }}
 
+      # =========================================================================
+      # Preview 模式: 上传 artifact（保留 5 天）
+      # =========================================================================
+
       # macOS: Upload DMG
       - name: Upload DMG
-        if: matrix.platform_name == 'macos'
+        if: inputs.mode == 'preview' && matrix.platform_name == 'macos'
         uses: actions/upload-artifact@v4
         with:
           name: client-${{ matrix.platform_name }}-${{ matrix.arch }}-dmg
@@ -90,7 +109,7 @@ jobs:
 
       # macOS: Upload App
       - name: Upload App
-        if: matrix.platform_name == 'macos'
+        if: inputs.mode == 'preview' && matrix.platform_name == 'macos'
         uses: actions/upload-artifact@v4
         with:
           name: client-${{ matrix.platform_name }}-${{ matrix.arch }}-app
@@ -100,7 +119,7 @@ jobs:
 
       # Windows: Upload MSI
       - name: Upload MSI
-        if: matrix.platform_name == 'windows'
+        if: inputs.mode == 'preview' && matrix.platform_name == 'windows'
         uses: actions/upload-artifact@v4
         with:
           name: client-${{ matrix.platform_name }}-${{ matrix.arch }}-msi
@@ -110,7 +129,7 @@ jobs:
 
       # Windows: Upload NSIS Exe
       - name: Upload NSIS Installer
-        if: matrix.platform_name == 'windows'
+        if: inputs.mode == 'preview' && matrix.platform_name == 'windows'
         uses: actions/upload-artifact@v4
         with:
           name: client-${{ matrix.platform_name }}-${{ matrix.arch }}-exe
@@ -120,7 +139,7 @@ jobs:
 
       # Linux: Upload AppImage
       - name: Upload AppImage
-        if: matrix.platform_name == 'linux'
+        if: inputs.mode == 'preview' && matrix.platform_name == 'linux'
         uses: actions/upload-artifact@v4
         with:
           name: client-${{ matrix.platform_name }}-${{ matrix.arch }}-appimage
@@ -130,10 +149,46 @@ jobs:
 
       # Linux: Upload Deb
       - name: Upload Deb
-        if: matrix.platform_name == 'linux'
+        if: inputs.mode == 'preview' && matrix.platform_name == 'linux'
         uses: actions/upload-artifact@v4
         with:
           name: client-${{ matrix.platform_name }}-${{ matrix.arch }}-deb
           path: ./packages/client/src-tauri/target/${{ matrix.target }}/release/bundle/deb/*.deb
           retention-days: 5
           if-no-files-found: warn
+
+      # =========================================================================
+      # Release 模式: 上传到 GitHub Release
+      # =========================================================================
+
+      # macOS: Upload Release Assets
+      - name: Upload macOS Release Asset
+        if: inputs.mode == 'release' && matrix.platform_name == 'macos'
+        uses: AButler/upload-release-assets@v3.0
+        with:
+          files: |
+            packages/client/src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
+          release-tag: '@cherry-markdown/client@${{ inputs.client_version }}'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Windows: Upload Release Assets
+      - name: Upload Windows Release Asset
+        if: inputs.mode == 'release' && matrix.platform_name == 'windows'
+        uses: AButler/upload-release-assets@v3.0
+        with:
+          files: |
+            packages/client/src-tauri/target/${{ matrix.target }}/release/bundle/msi/*.msi;
+            packages/client/src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*.exe
+          release-tag: '@cherry-markdown/client@${{ inputs.client_version }}'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Linux: Upload Release Assets
+      - name: Upload Linux Release Asset
+        if: inputs.mode == 'release' && matrix.platform_name == 'linux'
+        uses: AButler/upload-release-assets@v3.0
+        with:
+          files: |
+            packages/client/src-tauri/target/${{ matrix.target }}/release/bundle/deb/*.deb;
+            packages/client/src-tauri/target/${{ matrix.target }}/release/bundle/appimage/*.AppImage
+          release-tag: '@cherry-markdown/client@${{ inputs.client_version }}'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}

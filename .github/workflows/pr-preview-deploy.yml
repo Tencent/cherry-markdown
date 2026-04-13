@@ -20,10 +20,16 @@ on:
     types:
       - completed
 
+permissions:
+  actions: read
+  pull-requests: write
+
 jobs:
   # ── 获取 PR 编号 ──
   get-pr-id:
+    if: github.repository == 'Tencent/cherry-markdown'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       pr_id: ${{ steps.pr.outputs.id }}
     steps:
@@ -42,6 +48,7 @@ jobs:
   deploy-playground:
     needs: get-pr-id
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Download playground artifact
         id: download
@@ -187,6 +194,7 @@ jobs:
   comment-vscode:
     needs: get-pr-id
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Collect vscode artifact
         id: collect

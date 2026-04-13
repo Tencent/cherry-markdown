@@ -17,16 +17,21 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   playground:
-    uses: ./.github/workflows/pr-preview-build-playground.yml
+    uses: ./.github/workflows/reusable-playground-build.yml
 
   client:
-    uses: ./.github/workflows/pr-preview-build-client.yml
+    uses: ./.github/workflows/reusable-client-build.yml
+    with:
+      mode: preview
 
   vscode-plugin:
     uses: ./.github/workflows/reusable-vscode-plugin.yml

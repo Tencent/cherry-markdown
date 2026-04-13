@@ -1,0 +1,44 @@
+# =============================================================================
+# PR Check: Commitlint — 校验 PR 中所有 commit message 格式
+#
+# 触发时机: PR 打开 / 有新推送 / 重开时自动运行
+# 功能:
+#   - 使用项目 commitlint.config.js 校验所有新增 commit
+#   - 弥补 fork PR 绕过本地 husky 的问题
+# =============================================================================
+
+name: 'PR: Commitlint'
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run commitlint
+        uses: wagoid/commitlint-github-action@v6
+        with:
+          configFile: commitlint.config.js
