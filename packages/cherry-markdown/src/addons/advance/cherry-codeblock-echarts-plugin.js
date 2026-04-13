@@ -16,6 +16,7 @@
 import mergeWith from 'lodash/mergeWith';
 import JSON5 from 'json5';
 import { getExternal } from '@/utils/external';
+import { generateContainerId, createErrorElement } from '@/utils/async-render-pipeline';
 
 export default class EChartsCodeBlockEngine {
   static install(cherryOptions, ...args) {
@@ -79,31 +80,49 @@ export default class EChartsCodeBlockEngine {
     const width = this.size?.width || '100%';
     const height = this.size?.height || '300px';
     const styleStr = `width: ${width}; height: ${height};`;
-    const previewerDom = $engine.$cherry.previewer.getDom();
-    // 延迟到下一轮事件循环再执行
-    setTimeout(() => {
-      const containers = previewerDom.querySelectorAll(
-        `div[data-sign="${sign}"][data-type="echarts"] .cherry-echarts-codeblock-wrapper`,
-      );
-      if (containers.length <= 0 || !this.echartsRef) return;
-      const option = this.parseOption(src);
-      containers.forEach((container) => {
-        try {
-          // 判断是否已经初始化
-          let chart = this.echartsRef.getInstanceByDom(container);
-          if (!chart) {
-            chart = this.echartsRef.init(container);
+
+    // 生成唯一 ID，用于 pipeline 查找容器
+    const containerId = generateContainerId('echarts-cb');
+
+    // 预解析 option（在 render 阶段，上下文完整）
+    let option = {};
+    try {
+      option = this.parseOption(src);
+    } catch (e) {
+      const safeMsg = String(e.message).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `<div style="${styleStr}" class="cherry-echarts-codeblock-wrapper"><div style="color: red;">Parse Error: ${safeMsg}</div></div>`;
+    }
+
+    // 推入异步管线，闭包捕获 option
+    const CherryCtor = /** @type {typeof import('../../CherryStatic').CherryStatic} */ ($engine.$cherry.constructor);
+    const pipeline = CherryCtor.asyncRenderPipeline;
+    if (pipeline) {
+      const { echartsRef } = this;
+      const flowMode = !!$engine.$cherry.options?.engine?.global?.flowSessionContext;
+      pipeline.enqueue({
+        containerId,
+        instanceId: $engine.$cherry.instanceId,
+        execute(container) {
+          if (!echartsRef) return;
+          try {
+            let chart = echartsRef.getInstanceByDom(container);
+            if (!chart) {
+              chart = echartsRef.init(container);
+            }
+            chart.setOption(option, true);
+          } catch (error) {
+            if (flowMode) {
+              container.innerHTML = 'drawing...';
+            } else {
+              container.innerHTML = '';
+              container.appendChild(createErrorElement(error.message));
+            }
           }
-          chart.setOption(option, true); // 增加 true 参数以强制覆盖旧配置
-        } catch (error) {
-          if ($engine.$cherry.options.engine.global.flowSessionContext) {
-            container.innerHTML = `drawing...`;
-          } else {
-            container.innerHTML = `<div style="color: red;">Render Error: ${error.message}</div>`;
-          }
-        }
+        },
+        priority: 20,
       });
-    }, 50);
-    return `<div style="${styleStr}" class="cherry-echarts-codeblock-wrapper"></div>`;
+    }
+
+    return `<div style="${styleStr}" class="cherry-echarts-codeblock-wrapper" id="${containerId}"></div>`;
   }
 }

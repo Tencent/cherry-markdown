@@ -103,6 +103,15 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
     enforce: 'pre',
 
     configureServer(server) {
+      // 检查 dist/fonts/ 是否存在，开发时字体文件依赖此目录
+      const fontsDir = path.join(cherryMarkdownDir, 'dist', 'fonts');
+      if (!fs.existsSync(fontsDir) || fs.readdirSync(fontsDir).length === 0) {
+        console.warn(
+          '\n⚠️  Cherry Markdown: dist/fonts/ 目录不存在或为空。\n' +
+            '   开发模式下字体文件从此目录代理。请先运行 `npm run build` 或 `npm run iconfont` 生成字体文件。\n',
+        );
+      }
+
       // 中间件：拦截请求并进行转发或代理
       server.middlewares.use((req, res, next) => {
         const url = req.url || '';
@@ -179,7 +188,7 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
       if (id === virtualCherryCssId) return resolvedVirtualCherryCssId;
 
       // 动态 addon 虚拟模块
-      if (id.startsWith(VIRTUAL_PREFIX + 'addon-')) {
+      if (id.startsWith(`${VIRTUAL_PREFIX}addon-`)) {
         return `\0${id}`;
       }
     },
@@ -193,7 +202,11 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
 import Cherry from '${srcDirNormalized}/index.js';
 
 // 暴露到全局，兼容 examples 中的用法
-window.Cherry = Cherry;
+// 注意：index.core.js 中已有 isBrowser() 守卫的 window.Cherry 赋值，
+// 这里保持一致的守卫逻辑，与生产构建行为对齐
+if (typeof window === 'object') {
+  window.Cherry = Cherry;
+}
 
 export default Cherry;
 export { Cherry };
@@ -206,7 +219,11 @@ export { Cherry };
 import Cherry from '${srcDirNormalized}/index.core.js';
 
 // 暴露到全局，兼容 examples 中的用法
-window.Cherry = Cherry;
+// 注意：index.core.js 中已有 isBrowser() 守卫的 window.Cherry 赋值，
+// 这里保持一致的守卫逻辑，与生产构建行为对齐
+if (typeof window === 'object') {
+  window.Cherry = Cherry;
+}
 
 export default Cherry;
 export { Cherry };
@@ -219,14 +236,17 @@ export { Cherry };
       }
 
       // 加载 addon 虚拟模块 - 从 src/addons/ 导入并暴露为 UMD 风格的全局变量
-      if (id.startsWith(RESOLVED_PREFIX + 'addon-')) {
-        const fileName = id.replace(RESOLVED_PREFIX + 'addon-', '');
+      if (id.startsWith(`${RESOLVED_PREFIX}addon-`)) {
+        const fileName = id.replace(`${RESOLVED_PREFIX}addon-`, '');
         const globalName = addonFileNameToGlobalName(fileName);
         return `
 import AddonModule from '${srcDirNormalized}/addons/${fileName}';
 
 // 暴露到全局，兼容 dist/addons/ UMD 构建中的全局变量命名
-window.${globalName} = AddonModule;
+// 与生产 UMD 行为对齐：仅在浏览器环境下挂载全局变量
+if (typeof window === 'object') {
+  window.${globalName} = AddonModule;
+}
 
 export default AddonModule;
 `;
