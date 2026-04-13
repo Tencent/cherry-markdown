@@ -132,7 +132,7 @@ const msgList = [
   {
     title: '概述：流式渲染配置',
     content:
-      '### 概述\n通过以下方式打开Cherry Markdown的流式渲染能力：\n```javascript\nconst cherry = new Cherry({\n  editor: {\n    height: "auto",\n    defaultModel: "previewOnly",\n  },\n  engine: {\n    global: {\n      flowSessionContext: true,\n      flowSessionCursor: "default",\n    },\n  },\n});\n```\n',
+      '### 概述\n\n#### 1. 引入 Stream 版本\n```html\n<script src="path/to/cherry-markdown.stream.js"></script>\n```\n\n#### 2. 启用流式渲染能力\n```javascript\nconst cherry = new Cherry({\n  editor: {\n    height: "auto",\n    defaultModel: "previewOnly", // 纯预览模式\n  },\n  engine: {\n    global: {\n      flowSessionContext: true,  // 开启流式渲染\n      flowSessionCursor: "default",\n    },\n  },\n});\n```\n\n#### 3. 流式更新内容\n```javascript\n// 逐字更新内容\ncherry.setMarkdown(text.substring(0, index));\n```\n',
   },
   {
     title: '数学公式',
@@ -143,11 +143,6 @@ const msgList = [
     title: 'Mermaid 流程图',
     content:
       '### Mermaid 流程图示例\n\n```mermaid\ngraph TD\n    A[开始] --> B{是否加载插件?}\n    B -->|是| C[懒加载插件]\n    B -->|否| D[使用默认渲染]\n    C --> E[渲染内容]\n    D --> E\n    E --> F[结束]\n```\n\n#### 时序图\n\n```mermaid\nsequenceDiagram\n    participant 用户\n    participant Cherry\n    participant 插件\n    用户->>Cherry: setMarkdown()\n    Cherry->>插件: 检查是否需要渲染\n    插件-->>Cherry: 返回渲染结果\n    Cherry-->>用户: 显示内容\n```\n',
-  },
-  {
-    title: '代码块 + 表格 + 公式',
-    content:
-      '### 综合示例\n\n#### 代码块\n```python\ndef fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)\n\nprint(fibonacci(10))  # 输出: 55\n```\n\n#### 表格\n| 插件 | 用途 | 大小 |\n|:----:|:-----|-----:|\n| Mermaid | 流程图、时序图 | ~2MB |\n| KaTeX | 数学公式（快） | ~300KB |\n| MathJax | 数学公式（全） | ~3MB |\n\n#### 数学公式\n欧拉公式：$e^{i\\pi} + 1 = 0$\n',
   },
   {
     title: '表格图表（ECharts）',
@@ -483,24 +478,28 @@ export function aiChatStreamScenario() {
     dialog.appendChild(msgEl);
     msgEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
 
-    // 逐字打印
-    function step() {
+    // 滚动到底部
+    const scrollToBottom = () => {
       try {
         dialog.scrollTop = dialog.scrollHeight;
       } catch (e) {
         /* noop */
       }
+    };
+
+    // 逐字打印
+    function step() {
+      scrollToBottom();
+      
       if (paused) {
         setTimeout(step, 100);
         return;
       }
+
       // 逐字更新 Markdown 内容
       currentCherry.setMarkdown(msg.substring(0, currentWordIndex));
-      try {
-        dialog.scrollTop = dialog.scrollHeight;
-      } catch (e) {
-        /* noop */
-      }
+      scrollToBottom();
+
       if (currentWordIndex < msg.length) {
         currentWordIndex++;
         setTimeout(step, interval);
