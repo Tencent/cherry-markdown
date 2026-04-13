@@ -8,7 +8,7 @@ export default defineConfig({
   },
   test: {
     testTransformMode: {
-      web: ['\\.[jt]sx$'],
+      web: ['\\.[jt]sx?$'],
     },
     globals: true,
     environment: 'jsdom', // Use jsdom for browser-like tests
