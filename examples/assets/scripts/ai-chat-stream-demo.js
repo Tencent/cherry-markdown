@@ -156,6 +156,45 @@ const msgList = [
 // ============================================================================
 
 /**
+ * Promise 超时包装器
+ * 给任意 Promise 添加超时保护，超时后自动 reject
+ * @param {Promise} promise - 原始 Promise
+ * @param {number} ms - 超时毫秒数
+ * @param {string} message - 超时错误信息
+ * @returns {Promise}
+ */
+function withTimeout(promise, ms, message = '操作超时') {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(message)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+/**
+ * 轻量 Toast 提示
+ * @param {string} message - 提示文本
+ * @param {'error'|'success'|'info'} type - 提示类型
+ * @param {number} duration - 显示时长（毫秒），默认 3000
+ */
+function showToast(message, type = 'info', duration = 3000) {
+  const container = document.querySelector('.j-toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  // 触发淡入（需等下一帧让浏览器应用初始样式）
+  requestAnimationFrame(() => { toast.classList.add('toast-visible'); });
+  setTimeout(() => {
+    toast.classList.remove('toast-visible');
+    toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+    // 兜底：如果 transitionend 没触发，400ms 后强制移除
+    setTimeout(() => toast.remove(), 400);
+  }, duration);
+}
+
+/**
  * 动态加载 JavaScript 脚本
  * @param {string} src - 脚本 URL
  * @param {string} id - 脚本元素 ID（用于避免重复加载）
@@ -173,8 +212,8 @@ function loadScript(src, id, { module = false } = {}) {
     script.id = id;
     script.src = src;
     if (module) script.type = 'module';
-    script.onload = () => setTimeout(resolve, 100);
-    script.onerror = reject;
+    script.onload = resolve; // 浏览器保证 onload 时脚本已执行，无需额外延迟
+    script.onerror = () => reject(new Error(`脚本加载失败: ${src}`));
     document.head.appendChild(script);
   });
 }
@@ -186,7 +225,7 @@ function loadScript(src, id, { module = false } = {}) {
  * @returns {Promise<void>}
  */
 function loadCSS(href, id) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     if (document.getElementById(id)) {
       resolve();
       return;
@@ -196,6 +235,7 @@ function loadCSS(href, id) {
     link.rel = 'stylesheet';
     link.href = href;
     link.onload = resolve;
+    link.onerror = () => reject(new Error(`样式加载失败: ${href}`));
     document.head.appendChild(link);
   });
 }
@@ -238,32 +278,46 @@ async function loadPlugin(plugin) {
   updatePluginStatus(plugin, 'loading');
 
   try {
-    if (cdn.css) await loadCSS(cdn.css, `${plugin}-css`);
-    await loadScript(cdn.src, `${plugin}-js`);
+    // CDN 资源加载超时 15s（大文件如 ECharts ~3MB 需要足够时间）
+    if (cdn.css) await withTimeout(loadCSS(cdn.css, `${plugin}-css`), 15000, `${plugin} 样式加载超时`);
+    await withTimeout(loadScript(cdn.src, `${plugin}-js`), 15000, `${plugin} 脚本加载超时`);
 
     if (plugin === 'mermaid' && window.mermaid) {
       window.mermaid.initialize({ startOnLoad: false });
     }
 
     if (cdn.pluginSrc) {
-      await loadScript(cdn.pluginSrc, `${plugin}-plugin-js`, { module: true });
-      // 等待 module script 执行完成
-      await new Promise((resolve) => {
-        const check = () =>
-          (plugin === 'mermaid' && window.CherryCodeBlockMermaidPlugin) ||
-          (plugin === 'echarts' && window.CherryTableEchartsPlugin)
-            ? resolve()
-            : setTimeout(check, 50);
-        check();
-      });
+      await withTimeout(
+        loadScript(cdn.pluginSrc, `${plugin}-plugin-js`, { module: true }),
+        15000,
+        `${plugin} 适配插件加载超时`,
+      );
+      // 等待 module script 执行完成（5s 超时保护）
+      await withTimeout(
+        new Promise((resolve) => {
+          const check = () =>
+            (plugin === 'mermaid' && window.CherryCodeBlockMermaidPlugin) ||
+            (plugin === 'echarts' && window.CherryTableEchartsPlugin)
+              ? resolve()
+              : setTimeout(check, 50);
+          check();
+        }),
+        5000,
+        `${plugin} 插件初始化超时`,
+      );
     }
 
     state.loaded = true;
     state.loading = false;
     updatePluginStatus(plugin, 'loaded');
+    showToast(`${plugin} 加载成功`, 'success', 2000);
   } catch (e) {
     state.loading = false;
     updatePluginStatus(plugin, '');
+    // 加载失败时取消勾选
+    const cb = document.getElementById(`plugin-${plugin}`);
+    if (cb) cb.checked = false;
+    showToast(`${plugin} 加载失败: ${e.message}`, 'error');
     console.error(`[Plugin] ${plugin} 加载失败:`, e);
   }
 }
@@ -271,7 +325,8 @@ async function loadPlugin(plugin) {
 /**
  * 卸载插件。
  * - mermaid：不删除脚本（MutationObserver 不可撤销），仅标记 loaded=false
- * - katex/mathjax/echarts：删除 DOM 标签 + 清理 window 引用
+ * - katex/mathjax/echarts：删除 JS 标签 + 清理 window 引用
+ * - CSS 保留不删除，避免已渲染消息的公式/图表样式错乱
  */
 function unloadPlugin(plugin) {
   const state = pluginState[plugin];
@@ -282,7 +337,7 @@ function unloadPlugin(plugin) {
     window.mermaid?.initialize({ startOnLoad: false });
   } else {
     document.getElementById(`${plugin}-js`)?.remove();
-    document.getElementById(`${plugin}-css`)?.remove();
+    // 注意：不删除 CSS，保留已渲染内容的样式
     if (plugin === 'katex') delete window.katex;
     if (plugin === 'mathjax') delete window.MathJax;
     if (plugin === 'echarts') {
@@ -424,6 +479,33 @@ export function aiChatStreamScenario() {
   let paused = false; // 是否暂停
   let currentWordIndex = 0; // 当前打印到的字符索引
   let interval = 30; // 打印间隔（毫秒）
+  let rafId = null; // requestAnimationFrame ID
+
+  // Cherry 实例管理（防止内存泄漏）
+  const MAX_INSTANCES = 5;
+  const cherryInstances = [];
+
+  /**
+   * 销毁所有 Cherry 实例
+   */
+  function destroyAllInstances() {
+    while (cherryInstances.length > 0) {
+      const instance = cherryInstances.shift();
+      try { instance.destroy(); } catch (e) { /* noop */ }
+    }
+  }
+
+  /**
+   * 注册 Cherry 实例，超过上限时销毁最早的实例
+   * @param {Object} cherry - Cherry 实例
+   */
+  function registerInstance(cherry) {
+    cherryInstances.push(cherry);
+    while (cherryInstances.length > MAX_INSTANCES) {
+      const oldest = cherryInstances.shift();
+      try { oldest.destroy(); } catch (e) { /* noop */ }
+    }
+  }
 
   /**
    * 打印期间禁用/恢复交互控件
@@ -434,6 +516,18 @@ export function aiChatStreamScenario() {
       el.disabled = disabled;
     });
     customTextarea.disabled = disabled;
+  }
+
+  /**
+   * 更新暂停按钮状态
+   * @param {boolean} isPrinting - 当前是否正在打印
+   */
+  function updatePauseButton(isPrinting) {
+    pauseBtn.disabled = !isPrinting;
+    if (!isPrinting) {
+      paused = false;
+      pauseBtn.innerText = '暂停流式';
+    }
   }
 
   // 渲染消息选择按钮
@@ -459,13 +553,18 @@ export function aiChatStreamScenario() {
 
   /**
    * 开始流式打印
-   * 创建新的 Cherry 实例并逐字更新内容
+   * 创建新的 Cherry 实例并使用 rAF + 批量字符推进
    * @param {string} msg - 要打印的 Markdown 内容
    */
   function beginPrint(msg) {
+    // 取消之前的 rAF（若有残留）
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+
     printing = true;
+    paused = false;
     currentWordIndex = 0;
     setControlsDisabled(true);
+    updatePauseButton(true);
 
     // 克隆消息模板
     const msgEl = msgTemplate.cloneNode(true);
@@ -475,42 +574,55 @@ export function aiChatStreamScenario() {
     const config = getCherryConfig();
     config.el = msgEl.querySelector('.chat-one-msg');
     currentCherry = new Cherry(config);
+    registerInstance(currentCherry);
     dialog.appendChild(msgEl);
     msgEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
 
-    // 滚动到底部
-    const scrollToBottom = () => {
-      try {
-        dialog.scrollTop = dialog.scrollHeight;
-      } catch (e) {
-        /* noop */
-      }
-    };
+    // 滚动节流：每 N 个字符触发一次 scrollIntoView
+    const SCROLL_EVERY = 10;
+    let lastScrollIndex = 0;
 
-    // 逐字打印
-    function step() {
-      scrollToBottom();
-      
-      if (paused) {
-        setTimeout(step, 100);
-        return;
-      }
-
-      // 逐字更新 Markdown 内容
-      currentCherry.setMarkdown(msg.substring(0, currentWordIndex));
-      scrollToBottom();
-
-      if (currentWordIndex < msg.length) {
-        currentWordIndex++;
-        setTimeout(step, interval);
-      } else {
-        // 打印完成
-        printing = false;
-        setControlsDisabled(false);
+    function scrollIfNeeded() {
+      if (currentWordIndex - lastScrollIndex >= SCROLL_EVERY) {
+        lastScrollIndex = currentWordIndex;
         msgEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
       }
     }
-    setTimeout(step, interval);
+
+    // rAF + 基于时间的批量字符推进
+    let lastTime = performance.now();
+
+    function step(now) {
+      if (!printing) return;
+
+      if (paused) {
+        lastTime = now; // 暂停时重置时间基准，避免恢复后一次性跳过大量字符
+        rafId = requestAnimationFrame(step);
+        return;
+      }
+
+      // 根据经过时间计算本帧应推进的字符数
+      const elapsed = now - lastTime;
+      const charsToAdvance = Math.max(1, Math.floor(elapsed / interval));
+      lastTime = now;
+
+      currentWordIndex = Math.min(currentWordIndex + charsToAdvance, msg.length);
+      currentCherry.setMarkdown(msg.substring(0, currentWordIndex));
+      scrollIfNeeded();
+
+      if (currentWordIndex < msg.length) {
+        rafId = requestAnimationFrame(step);
+      } else {
+        // 打印完成
+        rafId = null;
+        printing = false;
+        setControlsDisabled(false);
+        updatePauseButton(false);
+        msgEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    }
+
+    rafId = requestAnimationFrame(step);
   }
 
   // ========================================================================
@@ -531,6 +643,9 @@ export function aiChatStreamScenario() {
       const plugin = this.dataset.plugin;
 
       if (this.checked) {
+        // 加载期间禁用所有插件复选框，防止重复点击
+        document.querySelectorAll('.j-plugin-checkbox').forEach((cb) => { cb.disabled = true; });
+
         // KaTeX ↔ MathJax 互斥：勾选其中一个会自动取消另一个
         const other = MUTUAL_EXCLUSION[plugin];
         if (other) {
@@ -541,6 +656,9 @@ export function aiChatStreamScenario() {
           }
         }
         await loadPlugin(plugin); // 懒加载插件
+
+        // 加载完成，恢复所有复选框可用
+        document.querySelectorAll('.j-plugin-checkbox').forEach((cb) => { cb.disabled = false; });
       } else {
         unloadPlugin(plugin); // 卸载插件
       }
@@ -550,11 +668,13 @@ export function aiChatStreamScenario() {
   // 流式适配开关（影响打印速度）
   document.querySelector('.j-status-input').addEventListener('change', function () {
     interval = this.checked ? 30 : 50; // 开启时快速打印（30ms），关闭时慢速（50ms）
+    destroyAllInstances(); // 销毁所有 Cherry 实例
     dialog.innerHTML = ''; // 清空消息列表
   });
 
   // 暂停/继续按钮
   pauseBtn.addEventListener('click', () => {
+    if (!printing) return; // 非打印状态不响应
     paused = !paused;
     pauseBtn.innerText = paused ? '继续流式' : '暂停流式';
   });
@@ -564,7 +684,7 @@ export function aiChatStreamScenario() {
     if (printing) return;
     const content = customTextarea.value.trim();
     if (!content) {
-      alert('请输入要流式打印的内容');
+      showToast('请输入要流式打印的内容', 'info');
       return;
     }
     await ensureCheckedPluginsLoaded();

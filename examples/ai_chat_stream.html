@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
   <meta charset="UTF-8">
@@ -148,8 +148,20 @@
       box-sizing: border-box;
     }
 
-    .plugin-options h3 {
-      display: none;
+    .plugin-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      margin: 0 0 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .plugin-title-hint {
+      font-size: 11px;
+      font-weight: 400;
+      color: #999;
     }
 
     .plugin-list {
@@ -292,6 +304,51 @@
       min-height: 0;
     }
 
+    /* Toast 提示 */
+    .toast-container {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #fff;
+      background: #333;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      transform: translateX(20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: auto;
+      max-width: 360px;
+      word-break: break-word;
+    }
+
+    .toast-visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .toast-error {
+      background: #ff4d4f;
+    }
+
+    .toast-success {
+      background: #52c41a;
+    }
+
+    .toast-info {
+      background: #1890ff;
+    }
+
     @media (max-width: 720px) {
       .ai-chat-wrapper {
         padding: 12px;
@@ -321,9 +378,15 @@
 </head>
 
 <body>
+  <!-- Toast 提示容器 -->
+  <div class="toast-container j-toast-container"></div>
+
   <div class="ai-chat-wrapper">
     <!-- 插件选项区 -->
     <div class="plugin-options">
+      <div class="plugin-title">
+        扩展插件 <span class="plugin-title-hint">勾选后点击下方消息按钮即可加载</span>
+      </div>
       <div class="plugin-list">
         <div class="plugin-item">
           <input type="checkbox" id="plugin-mermaid" class="j-plugin-checkbox" data-plugin="mermaid">
@@ -356,7 +419,7 @@
 
     <!-- 控件区 -->
     <div class="controls">
-      <button type="button" class="button secondary j-pause-button">
+      <button type="button" class="button secondary j-pause-button" disabled>
         暂停流式
       </button>
       <label class="status">
