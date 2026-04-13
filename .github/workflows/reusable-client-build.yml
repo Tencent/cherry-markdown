@@ -11,7 +11,7 @@
 name: 'Reusable: Client Build'
 
 permissions:
-  contents: write
+  contents: read
 
 on:
   workflow_call:
@@ -30,6 +30,8 @@ on:
 jobs:
   client-build:
     runs-on: ${{ matrix.platform }}
+    permissions:
+      contents: write  # release 模式需要写入权限上传 Release Assets；preview 模式虽声明 write 但 fork PR 会被 GitHub 强制限制为 read-only
     continue-on-error: ${{ inputs.mode == 'preview' }}
     timeout-minutes: 60
     strategy:
