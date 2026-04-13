@@ -29,11 +29,12 @@ let idCounter = 0;
 
 /**
  * 生成唯一容器 ID（递增计数器 + 随机后缀，同毫秒内也不会冲突）
+ * 计数器达到 MAX_SAFE_INTEGER 后自动回绕，配合随机后缀仍可保证唯一性。
  * @param {string} prefix ID 前缀，如 'chart'、'echarts-cb'、'mermaid'
  * @returns {string} 形如 `chart-1-a3b2c1` 的唯一 ID
  */
 export function generateContainerId(prefix = 'async') {
-  idCounter += 1;
+  idCounter = (idCounter % Number.MAX_SAFE_INTEGER) + 1;
   return `${prefix}-${idCounter}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
@@ -93,8 +94,7 @@ export default class AsyncRenderPipeline {
 
     const { instanceId } = options;
 
-    // 按 instanceId 提取当前实例的任务，其余任务留在队列等待各自的 flush。
-    // 未携带 instanceId 的任务只在无 instanceId 的全局 flush 中消费。
+    // 按 instanceId 提取当前实例的任务，其余留在队列
     let tasks;
     if (instanceId) {
       tasks = [];
@@ -118,7 +118,10 @@ export default class AsyncRenderPipeline {
     for (const task of tasks) {
       const escapedId = typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(task.containerId) : task.containerId;
       const container = root.querySelector(`#${escapedId}`);
-      if (!container) continue;
+      if (!container) {
+        Logger.log(`[AsyncRenderPipeline] Container #${task.containerId} not found in DOM, task skipped.`);
+        continue;
+      }
 
       try {
         task.execute(container);

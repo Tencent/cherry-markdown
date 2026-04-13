@@ -278,9 +278,13 @@ export default class Cherry extends CherryStatic {
   }
 
   destroy() {
-    // 先销毁编辑器实例（清理 EditorView 和资源）
     if (this.editor) {
       this.editor.destroy();
+    }
+
+    // 销毁预览器（含 pipeline 任务清理）
+    if (this.previewer) {
+      this.previewer.destroy();
     }
 
     // 清理 DOM

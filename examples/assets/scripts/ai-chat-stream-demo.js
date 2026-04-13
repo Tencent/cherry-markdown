@@ -1,27 +1,11 @@
 /**
  * AI Chat Stream Demo - 插件懒加载与启用/禁用管理
  *
- * ## Cherry Markdown 内部机制
- *
- * ### 数学公式（KaTeX / MathJax）
- * - Cherry 构造时 `Engine.initMath()` 根据 `config.engine.syntax.mathBlock` 的
- *   engine/src/css 配置决定是否加载 CDN 脚本。
- * - 如果 engine 和 src 都为空，`initMath()` 直接 return，不加载任何东西。
- * - `LoadMathModule` 装饰器在每次 `toHtml` 时从 `window`/`externals` 获取
- *   katex/MathJax 实例；找不到则原样输出公式源码。
- * - Cherry 默认配置中 `mathBlock.engine = 'MathJax'`，所以必须显式覆盖为空。
- *
- * ### Mermaid
- * - 通过 `codeBlock.customRenderer.mermaid` 注入 `CherryCodeBlockMermaidPlugin` 实例。
- * - CodeBlock hook 在渲染时检查 `customParser[lang]`，存在则调用其 render 方法。
- * - 不使用 `Cherry.usePlugin()` —— 它会永久修改 `Cherry.config.defaults`（静态属性），
- *   注册后无法撤销，导致后续所有实例都会继承 mermaid 渲染器。
- * - mermaid v11 加载后注册 MutationObserver（不可撤销），通过 wrapperRender 替换
- *   代码块 class 来阻止自动渲染。
- *
- * ### 流式打印
- * - 每条消息创建独立的 Cherry 实例，通过 `setMarkdown()` 逐字更新。
- * - 关键是 `getCherryConfig()` 根据当前 checkbox 状态返回正确配置。
+ * 关键机制：
+ * - 数学公式：未勾选时 engine/src/css 置空，initMath() 直接跳过；默认 MathJax 需显式覆盖
+ * - Mermaid：通过 customRenderer 注入（不用 usePlugin 避免污染全局静态配置），
+ *   wrapperRender 替换 class 阻止 MutationObserver 自动渲染
+ * - 流式打印：每条消息创建独立 Cherry 实例，setMarkdown() 逐字更新
  */
 
 // ============================================================================
@@ -149,13 +133,12 @@ async function loadPlugin(plugin) {
     await loadScript(cdn.src, `${plugin}-js`);
 
     if (plugin === 'mermaid') {
-      // 禁用 mermaid 自动渲染（MutationObserver 仍会注册但不会立即扫描）
+      // 禁用 mermaid 自动渲染
       if (window.mermaid) window.mermaid.initialize({ startOnLoad: false });
-      // 加载 Cherry 适配插件（暴露 window.CherryCodeBlockMermaidPlugin）
-      // 使用 module 模式：Vite dev server 会将此请求重定向到 ES module 虚拟模块
+      // 加载 Cherry 适配插件（module 模式，Vite dev server 重定向到 ES module）
       if (cdn.pluginSrc) {
         await loadScript(cdn.pluginSrc, `${plugin}-plugin-js`, { module: true });
-        // module script 的 onload 不保证模块已执行，轮询等待全局变量可用
+        // module script onload 不保证模块已执行，轮询等待
         await new Promise((resolve) => {
           const check = () => (window.CherryCodeBlockMermaidPlugin ? resolve() : setTimeout(check, 50));
           check();
@@ -174,10 +157,9 @@ async function loadPlugin(plugin) {
 }
 
 /**
- * 卸载插件。
- * - mermaid：不删除脚本（MutationObserver 不可撤销），仅标记 loaded=false，
- *   靠 getCherryConfig 中不传 customRenderer + wrapperRender 替换 class 来阻止渲染。
- * - katex/mathjax：删除 DOM 标签 + 清理 window 引用，重新勾选时 loadPlugin 会重新加载。
+ * 卸载插件。mermaid 不删除脚本（MutationObserver 不可撤销），
+ * 靠不传 customRenderer + wrapperRender 替换 class 阻止渲染。
+ * katex/mathjax 删除 DOM 标签并清理 window 引用。
  */
 function unloadPlugin(plugin) {
   const state = pluginState[plugin];
@@ -202,13 +184,8 @@ function unloadPlugin(plugin) {
 
 /**
  * 根据当前 checkbox + 加载状态生成 Cherry 配置。
- *
- * 核心原则：
- * - 未勾选 → engine/src/css 全部置空，Cherry 的 initMath() 直接跳过
- * - 已勾选 + 已加载 → 传入正确的 engine/src/css
- * - mermaid 启用 → 通过 customRenderer 传入实例（不用 usePlugin）
- * - mermaid 禁用 → wrapperRender 替换 class 防止 MutationObserver 自动渲染
- * - wrapperRender 始终设置（即使 mermaid 启用时也作为 fallback 保护）
+ * 未勾选则 engine/src/css 置空跳过加载；mermaid 通过 customRenderer 注入，不用 usePlugin；
+ * wrapperRender 始终设置，替换 class 防止 MutationObserver 自动渲染。
  */
 function getCherryConfig() {
   // ---- 数学引擎 ----
@@ -243,9 +220,7 @@ function getCherryConfig() {
     };
   }
 
-  // 始终设置 wrapperRender：
-  // - mermaid 未启用：替换 class 阻止 MutationObserver 自动渲染
-  // - mermaid 已启用：作为 fallback（parseCustomLanguage 失败时回退到普通代码块）
+  // 始终设置 wrapperRender：替换 class 阻止 mermaid MutationObserver 自动渲染，同时作为启用时的 fallback
   codeBlockCfg.wrapperRender = (language, _code, innerHTML) => {
     if (language === 'mermaid') {
       return innerHTML.replace(/language-mermaid/g, 'language-mermaid-disabled');
@@ -253,8 +228,7 @@ function getCherryConfig() {
     return innerHTML;
   };
 
-  // ---- 组装配置 ----
-  // 注意：Cherry 默认 mathBlock.engine='MathJax'，必须显式置空覆盖
+  // Cherry 默认 mathBlock.engine='MathJax'，必须显式置空
   return {
     editor: {
       height: 'auto',
@@ -332,6 +306,12 @@ export function aiChatStreamScenario() {
     printing = true;
     currentWordIndex = 0;
     setControlsDisabled(true);
+
+    // 销毁上一个实例
+    if (currentCherry && typeof currentCherry.destroy === 'function') {
+      currentCherry.destroy();
+      currentCherry = null;
+    }
 
     const msgEl = msgTemplate.cloneNode(true);
     msgEl.classList.remove('j-one-msg');

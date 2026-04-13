@@ -280,7 +280,7 @@ export default class CherryStream extends CherryStatic {
       previewerDom: previewer,
       value: this.options.value || '',
       isPreviewOnly: true,
-      enablePreviewerBubble: enablePreviewerBubble === true, // 流式渲染默认不开启预览区编辑功能，避免引入codemirror
+      enablePreviewerBubble: enablePreviewerBubble === true, // 避免引入 codemirror
       lazyLoadImg: this.options.previewer.lazyLoadImg,
     });
 
@@ -303,6 +303,11 @@ export default class CherryStream extends CherryStatic {
   }
 
   destroy() {
+    // 销毁预览器实例（清理滚动事件、ResizeObserver、LazyLoadImg、PreviewerBubble、pipeline 等）
+    if (this.previewer) {
+      this.previewer.destroy();
+    }
+
     if (this.noMountEl) {
       this.cherryDom.remove();
     } else {
