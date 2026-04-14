@@ -2007,12 +2007,12 @@ export default class Editor {
     // 绑定事件监听器
     editor.on('blur', (cm, evt) => {
       this.options.onBlur(/** @type {Event} */ (evt), editor);
-      this.$cherry.$event.emit('blur', { evt, cherry: this.$cherry });
+      this.$cherry.$event.emit('blur', { e: evt, cherry: this.$cherry });
     });
 
     editor.on('focus', (cm, evt) => {
       this.options.onFocus(/** @type {Event} */ (evt), editor);
-      this.$cherry.$event.emit('focus', { evt, cherry: this.$cherry });
+      this.$cherry.$event.emit('focus', { e: evt, cherry: this.$cherry });
     });
 
     editor.on('change', () => {

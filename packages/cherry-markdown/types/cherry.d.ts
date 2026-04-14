@@ -145,7 +145,7 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     beforeImageMounted?: (srcProp: string, src: string) => { srcProp: string; src: string };
     /** 点击预览区域时触发，返回 false 可阻止后续处理 */
     onClickPreview?: (e: MouseEvent) => void | false;
-    onCopyCode?: (e: ClipboardEvent, code: string) => string | false;
+    onCopyCode?: (e: { target: HTMLElement }, code: string) => string | false;
     changeString2Pinyin?: (str: string) => string;
     onPaste?: (
       clipboardData: ClipboardEvent['clipboardData'],
@@ -157,15 +157,18 @@ export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOpti
     onClickToc?: (e: MouseEvent, hash: string) => boolean;
   };
   event: {
-    focus?: ({ e: MouseEvent, cherry: Cherry }) => void;
-    blur?: ({ e: MouseEvent, cherry: Cherry }) => void;
+    focus?: (event: { e: Event; cherry: Cherry }) => void;
+    blur?: (event: { e: Event; cherry: Cherry }) => void;
     /** 编辑器内容改变并完成渲染后触发 */
     afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */
     afterInit?: CherryLifecycle;
     /** 编辑器完成所有异步渲染后触发 */
     afterAsyncRender?: CherryLifecycle;
-    /** 编辑器选区变化时触发 */
+    /**
+     * 编辑器选区变化时触发
+     * @todo 暂未实现
+     */
     selectionChange?: ({ selections: [], lastSelections: [], info }) => void;
     /** 变更语言时触发 */
     afterChangeLocale?: (locale: string) => void;
@@ -280,8 +283,8 @@ export interface CherryEngineOptions {
       | {
           /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
           target?: '_blank' | '';
-          /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
-          rel?: '_blank' | 'nofollow' | '';
+          /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow"属性*/
+          rel?: 'nofollow' | 'noopener' | 'noreferrer' | '';
           /** 自定义<a>标签的属性，默认为空 */
           attrRender?: (text: string, href: string) => string;
           selfClosing?: boolean;
@@ -291,8 +294,8 @@ export interface CherryEngineOptions {
       | {
           /** 生成的<a>标签追加target属性的默认值 空：在<a>标签里不会追加target属性， _blank：在<a>标签里追加target="_blank"属性 */
           target?: '_blank' | '';
-          /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow：在"属性*/
-          rel?: '_blank' | 'nofollow' | '';
+          /** 生成的<a>标签追加rel属性的默认值 空：在<a>标签里不会追加rel属性， nofollow：在<a>标签里追加rel="nofollow"属性*/
+          rel?: 'nofollow' | 'noopener' | 'noreferrer' | '';
           /** 是否开启短链接 默认:true */
           enableShortLink?: boolean;
           /** 短链接长度 默认:20 */
@@ -372,8 +375,8 @@ export interface CherryEngineOptions {
            * 自定义按钮，出现在代码块右上角
            **/
           customBtns?: {
-            html: '';
-            onClick: (event: MouseEvent, code: string, language: string) => {};
+            html: string;
+            onClick: (event: MouseEvent, code: string, language: string) => void;
           }[];
         };
     emoji?:
@@ -651,15 +654,19 @@ export interface CherryPreviewerOptions {
 export type CherryToolbarSeparator = '|';
 
 export type CherryDefaultToolbar =
+  | 'align'
   | 'audio'
   | 'bar-table'
   | 'bold'
   | 'br'
+  | 'changeLocale'
+  | 'chatgpt'
   | 'checklist'
   | 'code'
   | 'codeTheme'
   | 'color'
   | 'copy'
+  | 'cursorPosition'
   | 'detail'
   | 'drawIo'
   | 'export'
@@ -673,6 +680,7 @@ export type CherryDefaultToolbar =
   | 'header'
   | 'hr'
   | 'image'
+  | 'inlineCode'
   | 'insert'
   | 'italic'
   | 'justify'
@@ -683,13 +691,17 @@ export type CherryDefaultToolbar =
   | 'ol'
   | 'panel'
   | 'pdf'
+  | 'proTable'
   | 'publish'
   | 'quickTable'
   | 'quote'
   | 'redo'
   | 'ruby'
+  | 'search'
   | 'settings'
+  | 'shortcutKey'
   | 'size'
+  | 'split'
   | 'strikethrough'
   | 'sub'
   | 'sup'
@@ -709,9 +721,11 @@ export type CherryDefaultBubbleToolbar =
   | CherryToolbarSeparator
   | 'bold'
   | 'italic'
+  | 'underline'
   | 'strikethrough'
   | 'sub'
   | 'sup'
+  | 'quote'
   | 'size'
   | 'color';
 
@@ -722,7 +736,7 @@ export type CherryDefaultFloatToolbar =
   | 'h3'
   | 'checklist'
   | 'quote'
-  | 'quickTable'
+  | 'table'
   | 'code';
 
 export type SupportPlatform = 'wechat' | 'toutiao';
@@ -861,7 +875,7 @@ export interface CherryFileUploadHandler {
 export interface CherryFileUploadMultiHandler {
   /**
    * @param files 用户上传的文件对象数组
-   * @param callback 回调函数，接收最终的文件url
+   * @param callback 回调函数，接收上传结果数组
    */
   (
     files: File[],
@@ -875,21 +889,23 @@ export interface CherryFileUploadMultiHandler {
      * @param params.height 设置高度，可以是像素、也可以是百分比（图片、视频场景下生效）
      */
     callback: (
-      url: string,
-      params?: {
-        name?: string;
-        poster?: string;
-        isBorder?: boolean;
-        isShadow?: boolean;
-        isRadius?: boolean;
-        width?: string;
-        height?: string;
-      },
+      results: Array<{
+        url: string;
+        params?: {
+          name?: string;
+          poster?: string;
+          isBorder?: boolean;
+          isShadow?: boolean;
+          isRadius?: boolean;
+          width?: string;
+          height?: string;
+        };
+      }>,
     ) => void,
   ): void;
 }
 
-type ShortcutKeyMapStruct = {
+export type ShortcutKeyMapStruct = {
   /**
    * 原始hook
    */
