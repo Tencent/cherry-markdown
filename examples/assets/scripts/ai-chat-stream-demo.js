@@ -576,18 +576,6 @@ export function aiChatStreamScenario() {
     currentCherry = new Cherry(config);
     registerInstance(currentCherry);
     dialog.appendChild(msgEl);
-    msgEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
-
-    // 滚动节流：每 N 个字符触发一次 scrollIntoView
-    const SCROLL_EVERY = 10;
-    let lastScrollIndex = 0;
-
-    function scrollIfNeeded() {
-      if (currentWordIndex - lastScrollIndex >= SCROLL_EVERY) {
-        lastScrollIndex = currentWordIndex;
-        msgEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
-      }
-    }
 
     // rAF + 基于时间的批量字符推进
     let lastTime = performance.now();
@@ -608,7 +596,6 @@ export function aiChatStreamScenario() {
 
       currentWordIndex = Math.min(currentWordIndex + charsToAdvance, msg.length);
       currentCherry.setMarkdown(msg.substring(0, currentWordIndex));
-      scrollIfNeeded();
 
       if (currentWordIndex < msg.length) {
         rafId = requestAnimationFrame(step);
@@ -618,7 +605,6 @@ export function aiChatStreamScenario() {
         printing = false;
         setControlsDisabled(false);
         updatePauseButton(false);
-        msgEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
       }
     }
 
