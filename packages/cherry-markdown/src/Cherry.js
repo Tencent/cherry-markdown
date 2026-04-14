@@ -1117,15 +1117,6 @@ export default class Cherry extends CherryStatic {
             html,
           });
         }
-        // 强制每次编辑(包括undo、redo)编辑器都会自动滚动到光标位置
-        if (!this.options.editor.keepDocumentScrollAfterInit) {
-          view.dispatch({
-            effects: EditorView.scrollIntoView(view.state.selection.main.from, {
-              y: 'nearest',
-              x: 'nearest',
-            }),
-          });
-        }
       }, interval);
     } catch (e) {
       throw new NestedError(e);
