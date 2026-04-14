@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { EditorView } from '@codemirror/view';
 import mergeWith from 'lodash/mergeWith';
 import Editor from './Editor';
 import Engine from './Engine';
@@ -196,13 +195,8 @@ export default class Cherry extends CherryStatic {
 
     $expectTarget(this.options.toolbars.toolbar, Array);
 
-    // 判断是否需要渲染工具栏 DOM（归一化后 config 必为数组，只需判断长度）；
-    // 使用 Array.isArray 类型守卫确保类型安全（TS 无法追踪对象属性的运行时赋值窄化）
-    const toolbarConfig = this.options.toolbars.toolbar;
-    const toolbarRightConfig = this.options.toolbars.toolbarRight;
-    this.shouldRenderToolbarDom =
-      (Array.isArray(toolbarConfig) && toolbarConfig.length > 0) ||
-      (Array.isArray(toolbarRightConfig) && toolbarRightConfig.length > 0);
+    // 根据归一化后的配置计算是否需要渲染工具栏 DOM
+    this.shouldRenderToolbarDom = this.#computeShouldRenderToolbar();
 
     // 创建顶部工具栏
     this.createToolbar();
@@ -437,6 +431,9 @@ export default class Cherry extends CherryStatic {
         this.previewer.previewOnly();
         this.toolbar && this.toolbar.previewOnly();
         this.wrapperDom.classList.add('cherry--no-toolbar');
+        if (!this.#computeShouldRenderToolbar()) {
+          this.syncToolbarDom(this.wrapperDom);
+        }
         break;
     }
   }
@@ -476,7 +473,7 @@ export default class Cherry extends CherryStatic {
 
   /**
    * 获取CodeMirror 实例
-   * @returns { EditorView } CodeMirror 6 适配器实例
+   * @returns { import('@codemirror/view').EditorView } CodeMirror 6 适配器实例
    */
   getCodeMirror() {
     return this.editor.editor.view;
@@ -729,14 +726,24 @@ export default class Cherry extends CherryStatic {
   }
 
   /**
+   * 计算是否需要渲染工具栏 DOM（单一真相源）
+   * @returns {boolean} 是否应渲染
+   */
+  #computeShouldRenderToolbar() {
+    return (
+      (Array.isArray(this.options.toolbars.toolbar) && this.options.toolbars.toolbar.length > 0) ||
+      (Array.isArray(this.options.toolbars.toolbarRight) && this.options.toolbars.toolbarRight.length > 0)
+    );
+  }
+
+  /**
    * 根据当前配置同步工具栏 DOM 的挂载/卸载状态
    * @private
    * @param {DocumentFragment|Element} [parent] 目标父容器（初始化时传 fragment，运行时传 wrapperDom）
    */
   syncToolbarDom(parent) {
-    const shouldRender =
-      (Array.isArray(this.options.toolbars.toolbar) && this.options.toolbars.toolbar.length > 0) ||
-      (Array.isArray(this.options.toolbars.toolbarRight) && this.options.toolbars.toolbarRight.length > 0);
+    // 使用统一的私有方法计算，避免与构造函数中的判断逻辑不一致
+    const shouldRender = this.#computeShouldRenderToolbar();
 
     const toolbarEl = this.toolbar?.options?.dom;
     const target = parent || this.wrapperDom;
@@ -791,6 +798,18 @@ export default class Cherry extends CherryStatic {
     this.cherryDom.querySelectorAll('.cherry-dropdown').forEach((item) => {
       item.remove();
     });
+    // 清理旧工具栏 DOM，防止多次 reset 后旧实例/事件监听器泄漏
+    const oldToolbarDom = this.toolbar?.options?.dom;
+    if (oldToolbarDom && oldToolbarDom.parentElement) {
+      oldToolbarDom.parentElement.removeChild(oldToolbarDom);
+    }
+    // 销毁有独立事件系统的子工具栏，释放事件监听器
+    if (this.bubble && typeof this.bubble.destroy === 'function') {
+      this.bubble.destroy();
+    }
+    if (this.floatMenu && typeof this.floatMenu.destroy === 'function') {
+      this.floatMenu.destroy();
+    }
     this.options.toolbars[type] = toolbar;
     this.createToolbar();
     this.createToolbarRight();
@@ -1062,7 +1081,7 @@ export default class Cherry extends CherryStatic {
 
   /**
    * @private
-   * @param {EditorView | Object} editorView
+   * @param {import('@codemirror/view').EditorView | Object} editorView
    */
   initText(editorView) {
     try {
@@ -1085,13 +1104,13 @@ export default class Cherry extends CherryStatic {
   /**
    * @private
    * @param {Event} _evt
-   * @param {EditorView} editorView
+   * @param {import('@codemirror/view').EditorView} editorView
    */
   /**
    * 编辑器内容变更时触发,更新预览区内容
    * @private
    * @param {Event} _evt - 编辑事件对象(未使用)
-   * @param {EditorView | Object} editorView - 编辑器实例
+   * @param {import('@codemirror/view').EditorView | Object} editorView - 编辑器实例
    */
   editText(_evt, editorView) {
     try {
