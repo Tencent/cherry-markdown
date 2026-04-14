@@ -1,0 +1,61 @@
+# =============================================================================
+# Deploy: GitHub Pages — 文档站部署到 gh-pages 分支
+#
+# 触发时机: push 到 main 分支时自动运行
+# 功能: 构建项目 → 打包 dist + examples → 部署到 gh-pages 分支
+#       用户可通过 https://tencent.github.io/cherry-markdown/ 访问在线示例
+# =============================================================================
+
+name: 'Deploy: GitHub Pages'
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-github-pages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build project
+        run: yarn build
+
+      - name: Prepare publish directory
+        run: |
+          mkdir -p gh-pages-out
+
+          cp --parents -r packages/cherry-markdown/dist gh-pages-out/
+          cp --parents examples/*.html gh-pages-out/
+          cp --parents -r examples/assets gh-pages-out/
+          # 可视化配置生成器（目录可能尚未存在，条件复制）
+          [ -d examples/config_helper ] && cp --parents -r examples/config_helper gh-pages-out/ || true
+          # 修复 HTML 中的相对路径
+          find gh-pages-out/examples -type f -name "*.html" -exec sed -i 's|\.\./packages|./packages|g' {} +
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./gh-pages-out
+          publish_branch: gh-pages

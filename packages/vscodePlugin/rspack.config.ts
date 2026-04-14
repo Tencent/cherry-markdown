@@ -28,7 +28,7 @@ const extensionConfig: Configuration = {
     libraryTarget: 'commonjs2',
     clean: false, // 已手动清理
   },
-  devtool: 'nosources-source-map',
+  devtool: isProduction ? false : 'nosources-source-map',
   externals: {
     vscode: 'commonjs vscode',
   },
@@ -78,7 +78,7 @@ const webviewConfig: Configuration = {
     libraryTarget: 'umd',
     clean: false,
   },
-  devtool: isProduction ? 'hidden-source-map' : 'source-map',
+  devtool: isProduction ? false : 'source-map',
   resolve: {
     extensions: ['.ts', '.js'],
   },

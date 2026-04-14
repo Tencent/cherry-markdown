@@ -5,7 +5,6 @@
     "target": "es2020",
     "outDir": "out",
     "lib": ["es2020", "DOM"],
-    "sourceMap": true,
     "rootDir": ".",
     "moduleResolution": "node16",
     "noEmit": false
