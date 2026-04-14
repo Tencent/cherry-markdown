@@ -207,12 +207,14 @@ export default class Settings extends MenuBase {
   toggleToolbar() {
     const { wrapperDom } = this.engine.$cherry;
     if (wrapperDom instanceof HTMLDivElement) {
-      if (wrapperDom.className.indexOf('cherry--no-toolbar') > -1) {
+      const isHidden = wrapperDom.className.indexOf('cherry--no-toolbar') > -1;
+      if (isHidden) {
         wrapperDom.classList.remove('cherry--no-toolbar');
-        this.$cherry.$event.emit('toolbarShow');
+        this.engine.$cherry.syncToolbarDom(wrapperDom);
+        this.engine.$cherry.$event.emit('toolbarShow');
       } else {
         wrapperDom.classList.add('cherry--no-toolbar');
-        this.$cherry.$event.emit('toolbarHide');
+        this.engine.$cherry.$event.emit('toolbarHide');
       }
     }
   }

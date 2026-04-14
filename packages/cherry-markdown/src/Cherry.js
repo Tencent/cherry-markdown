@@ -254,9 +254,7 @@ export default class Cherry extends CherryStatic {
       this.status.editor = 'show';
     });
 
-    // 切换模式；toolbar 禁用时同步 showToolbar 为 false，防止 switchModel 移除 cherry--no-toolbar
-    const effectiveShowToolbar = this.options.toolbars.showToolbar && !this.#toolbarUserDisabled;
-    this.switchModel(this.options.editor.defaultModel, effectiveShowToolbar);
+    this.switchModel(this.options.editor.defaultModel, this.options.toolbars.showToolbar);
 
     // 如果配置了初始化后根据hash自动滚动
     if (this.options.autoScrollByHashAfterInit) {
@@ -395,16 +393,17 @@ export default class Cherry extends CherryStatic {
    * 一般纯预览模式和纯编辑模式适合在屏幕较小的终端使用，比如手机移动端
    */
   switchModel(model = 'edit&preview', showToolbar = true) {
+    const effectiveShowToolbar = showToolbar && !this.#toolbarUserDisabled;
     switch (model) {
       case 'edit&preview':
         if (this.previewer) {
           this.previewer.editOnly();
           this.previewer.recoverPreviewer();
         }
-        if (this.toolbar && showToolbar) {
+        if (this.toolbar && effectiveShowToolbar) {
           this.toolbar.showToolbar();
         }
-        if (showToolbar) {
+        if (effectiveShowToolbar) {
           this.wrapperDom.classList.remove('cherry--no-toolbar');
           this.syncToolbarDom(this.wrapperDom);
         } else {
@@ -415,10 +414,10 @@ export default class Cherry extends CherryStatic {
         if (!this.previewer.isPreviewerHidden()) {
           this.previewer.editOnly();
         }
-        if (this.toolbar && showToolbar) {
+        if (this.toolbar && effectiveShowToolbar) {
           this.toolbar.showToolbar();
         }
-        if (showToolbar) {
+        if (effectiveShowToolbar) {
           this.wrapperDom.classList.remove('cherry--no-toolbar');
           this.syncToolbarDom(this.wrapperDom);
         } else {
@@ -818,6 +817,13 @@ export default class Cherry extends CherryStatic {
       this.floatMenu.destroy();
     }
     this.options.toolbars[type] = toolbar;
+    // 运行时替换配置后同步 disabled 状态，否则 #computeShouldRenderToolbar() 仍用旧值
+    if (type === 'toolbar') {
+      this.#toolbarUserDisabled = !Array.isArray(toolbar);
+    }
+    if (type === 'toolbarRight') {
+      this.#toolbarRightUserDisabled = !Array.isArray(toolbar);
+    }
     this.createToolbar();
     this.createToolbarRight();
     this.createBubble();
@@ -826,6 +832,12 @@ export default class Cherry extends CherryStatic {
     this.createHiddenToolbar();
     this.createToc();
     this.syncToolbarDom(this.wrapperDom);
+    // 同步 CSS 类，否则初始化时 toolbar:false 添加的 cherry--no-toolbar 不会被移除
+    if (this.#computeShouldRenderToolbar()) {
+      this.wrapperDom.classList.remove('cherry--no-toolbar');
+    } else {
+      this.wrapperDom.classList.add('cherry--no-toolbar');
+    }
     return true;
   }
 
