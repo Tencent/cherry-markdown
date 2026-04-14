@@ -69,13 +69,17 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
 
   /**
    * 将 addon 文件名转为 UMD 全局变量名（camelCase）
-   * 例如：cherry-code-block-mermaid-plugin → CherryCodeBlockMermaidPlugin
+   * 例如：
+   *   - cherry-code-block-mermaid-plugin → CherryCodeBlockMermaidPlugin
+   *   - advance/cherry-table-echarts-plugin → CherryTableEchartsPlugin
    *
    * 这与 addons.build.js 中的命名逻辑保持一致，
-   * 确保 HTML 中使用 window.CherryCodeBlockMermaidPlugin 能正确访问
+   * 确保 HTML 中使用 window.CherryTableEchartsPlugin 能正确访问
    */
   function addonFileNameToGlobalName(fileName: string): string {
-    const nameWithoutExt = fileName.replace(/\.js$/, '');
+    // 去掉路径前缀（如 advance/），只保留文件名
+    const baseName = fileName.includes('/') ? fileName.split('/').pop()! : fileName;
+    const nameWithoutExt = baseName.replace(/\.js$/, '');
     return nameWithoutExt
       .split('-')
       .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
@@ -83,11 +87,14 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
   }
 
   /**
-   * 从请求 URL 中提取 addon 文件名
-   * 匹配模式：.../dist/addons/<fileName>.js
+   * 从请求 URL 中提取 addon 文件名（支持子目录）
+   * 匹配模式：.../dist/addons/[subdir/]<fileName>.js
+   * 例如：
+   *   - dist/addons/cherry-code-block-mermaid-plugin.js → cherry-code-block-mermaid-plugin.js
+   *   - dist/addons/advance/cherry-table-echarts-plugin.js → advance/cherry-table-echarts-plugin.js
    */
   function extractAddonFileName(url: string): string | null {
-    const match = url.match(/\/packages\/cherry-markdown\/dist\/addons\/([^/?]+\.js)/);
+    const match = url.match(/\/packages\/cherry-markdown\/dist\/addons\/([^?]+\.js)/);
     return match ? match[1] : null;
   }
 
