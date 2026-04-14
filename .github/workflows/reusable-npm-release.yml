@@ -4,7 +4,7 @@
 # 触发时机: 被 release.yml 调用 (workflow_call)
 # 功能: 构建 cherry-markdown 并发布到 npm registry
 #       使用 OIDC (id-token) 进行 npm 认证，无需 NPM_TOKEN
-#       构建使用 .node-version(18) 确保产物兼容性，发布前切换到 Node 24
+#       构建使用 .node-version(20) 确保产物兼容性，发布前切换到 Node 24
 # 前提: npm 包需在 npmjs.com 配置 Publishing access → GitHub Actions
 # =============================================================================
 
@@ -37,7 +37,7 @@ jobs:
           yarn build
 
       # 使用最新 LTS (24) 执行 npm publish，确保发布的包兼容新版 Node
-      # 构建阶段用 .node-version (18)，发布阶段升级到 24 避免兼容性问题
+      # 构建阶段用 .node-version (20)，发布阶段升级到 24 避免兼容性问题
       - uses: actions/setup-node@v4
         with:
           node-version: 24
