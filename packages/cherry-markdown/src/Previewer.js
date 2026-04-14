@@ -319,6 +319,8 @@ export default class Previewer {
     this.options.previewerDom.style.width = $previewerPercentage;
 
     this.syncVirtualLayoutFromReal();
+    // 布局变化后工具栏位置已失效，通知各工具栏隐藏
+    this.$cherry.$event.emit('layoutChange');
   }
 
   syncVirtualLayoutFromReal() {

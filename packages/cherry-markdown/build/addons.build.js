@@ -5,6 +5,7 @@ import eslint from '@rollup/plugin-eslint';
 import alias from '@rollup/plugin-alias';
 import json from '@rollup/plugin-json';
 import typescript from 'rollup-plugin-typescript2';
+import envReplacePlugin from './env.js';
 
 import { resolve as _resolve, join, dirname, basename, extname } from 'path';
 import { mkdirSync, writeFileSync } from 'fs';
@@ -14,9 +15,9 @@ import glob from 'glob';
 
 import { rollup as _rollup } from 'rollup';
 import terser from '@rollup/plugin-terser';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const PROJECT_ROOT_PATH = _resolve(__dirname, '../');
+const currentFilename = fileURLToPath(import.meta.url);
+const currentDirname = dirname(currentFilename);
+const PROJECT_ROOT_PATH = _resolve(currentDirname, '../');
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 glob(
@@ -64,7 +65,7 @@ function buildAddons(entries) {
             ]
           : []),
         json(),
-        // envReplacePlugin(),
+        envReplacePlugin(),
         alias({
           entries: [
             {

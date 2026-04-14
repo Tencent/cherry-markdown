@@ -200,6 +200,11 @@ export default class Bubble extends Toolbar {
       this.updatePositionWhenScroll();
     };
     this.boundHandleBeforeSelectionChange = ({ selection, isUserInteraction }) => {
+      // 忽略程序化的选区变更（如预览区操作图片属性时的 dispatch）
+      if (!isUserInteraction) {
+        this.hideBubble();
+        return;
+      }
       const { from, to } = selection;
       if (Math.abs(from - to) === 0) {
         this.hideBubble();
