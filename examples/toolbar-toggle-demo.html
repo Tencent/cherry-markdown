@@ -216,7 +216,7 @@
         const wrapper = c.wrapperDom;
         const toolbarEl = wrapper?.querySelector('.cherry-toolbar');
         return {
-          shouldRenderToolbarDom: c.shouldRenderToolbarDom,
+          shouldHide: c.shouldHideToolbar(),
           noToolbarClass: wrapper?.classList.contains('cherry--no-toolbar') ?? null,
           toolbarInDOM: toolbarEl ? wrapper.contains(toolbarEl) : false,
           toolbarExists: !!toolbarEl,
@@ -224,7 +224,6 @@
           toolbarConfig: c.options.toolbars.toolbar,
           toolbarRightConfig: c.options.toolbars.toolbarRight,
           previewerHidden: c.previewer?.isPreviewerHidden?.() ?? null,
-          // 获取子元素顺序
           childrenOrder: Array.from(wrapper?.children || []).map(el =>
             el.tagName.toLowerCase() + (el.className ? '.' + Array.from(el.classList).slice(0,2).join('.') : '')
           ),
@@ -234,7 +233,7 @@
       function snapStr(s) {
         if (!s) return '(null)';
         return JSON.stringify({
-          shouldRender: s.shouldRenderToolbarDom,
+          shouldHide: s.shouldHide,
           noTBCss: s.noToolbarClass,
           inDOM: s.toolbarInDOM,
           display: s.toolbarDisplay,
@@ -346,7 +345,7 @@
         const s = getSnapshot();
         return [
           assert(s.toolbarConfig.length === 0, `toolbar 应为空`),
-          assert(!s.toolbarInDOM, `toolbar 应已脱离 DOM 树 (inDOM=${s.toolbarInDOM})`),
+          assert(s.noToolbarClass, `应有 cherry--no-toolbar 类`),
         ];
       }
 
@@ -434,8 +433,8 @@
         await delay(150);
         const s = getSnapshot();
         return [
-          assert(!s.toolbarInDOM || s.toolbarDisplay === 'none',
-            `清空后隐藏: toolbar 不应可见 (inDOM=${s.toolbarInDOM}, display=${s.toolbarDisplay})`),
+          assert(s.noToolbarClass,
+            `清空后隐藏: 应有 cherry--no-toolbar 类`),
         ];
       }
 
@@ -451,7 +450,7 @@
         const s = getSnapshot();
         return [
           assert(s.toolbarConfig.length === 0, `最终 toolbar 应为空 (长度=${s.toolbarConfig?.length})`),
-          assert(!s.toolbarInDOM, `最终 toolbar 不应在 DOM 中`),
+          assert(s.noToolbarClass, `最终应有 cherry--no-toolbar 类`),
         ];
       }
 
@@ -480,8 +479,8 @@
         // toolbarRight 有内容时应触发渲染
         return [
           assert(s.toolbarRightConfig.length > 0, `toolbarRight 有内容`),
-          assert(s.shouldRenderToolbarDom === true,
-            `shouldRenderToolbarDom 应为 true (实际: ${s.shouldRenderToolbarDom})`),
+          assert(s.shouldHide === false, `shouldHideToolbar 应为 false (实际: ${s.shouldHide})`),
+          assert(!s.noToolbarClass, `不应有 cherry--no-toolbar 类`),
         ];
       }
 
@@ -494,8 +493,49 @@
           assert(Array.isArray(s.toolbarConfig), `toolbar 应为数组`),
           assert(s.toolbarConfig.length > 5,
             `toolbar false 应回退 defaultToolbar (长度>=5, 实际:${s.toolbarConfig?.length})`),
-          assert(s.shouldRenderToolbarDom === true,
-            `应有默认按钮所以 shouldRender=true (实际:${s.shouldRenderToolbarDom})`),
+          assert(s.shouldHide === true, `toolbar:false 应隐藏 (实际: ${s.shouldHide})`),
+          assert(s.noToolbarClass, `应有 cherry--no-toolbar 类`),
+        ];
+      }
+
+      async function T15_toolbar和toolbarRight都有内容() {
+        await createCherry({ toolbars: { toolbar: ['bold'], toolbarRight: ['theme'] } });
+        await delay(100);
+        const s = getSnapshot();
+        return [
+          assert(!s.noToolbarClass, `不应有 cherry--no-toolbar 类`),
+          assert(s.shouldHide === false, `shouldHide 应为 false`),
+        ];
+      }
+
+      async function T16_toolbarFalse且toolbarRight为空() {
+        await createCherry({ toolbars: { toolbar: false, toolbarRight: [] } });
+        await delay(100);
+        const s = getSnapshot();
+        return [
+          assert(s.noToolbarClass, `应有 cherry--no-toolbar 类`),
+          assert(s.shouldHide === true, `shouldHide 应为 true`),
+        ];
+      }
+
+      async function T17_toolbarFalse且toolbarRight有内容() {
+        await createCherry({ toolbars: { toolbar: false, toolbarRight: ['theme'] } });
+        await delay(100);
+        const s = getSnapshot();
+        return [
+          assert(s.noToolbarClass, `toolbar:false 禁用整个顶部栏，应有 cherry--no-toolbar`),
+          assert(s.shouldHide === true, `shouldHide 应为 true`),
+        ];
+      }
+
+      async function T18_toolbar有内容且toolbarRightFalse() {
+        await createCherry({ toolbars: { toolbar: ['bold'], toolbarRight: false } });
+        await delay(100);
+        const s = getSnapshot();
+        return [
+          assert(!s.noToolbarClass, `左侧有按钮，不应有 cherry--no-toolbar`),
+          assert(s.shouldHide === false, `shouldHide 应为 false`),
+          assert(Array.isArray(s.toolbarRightConfig), `toolbarRight:false 应归一化为数组`),
         ];
       }
 
@@ -530,6 +570,10 @@
           ['T12 空→switchModel→resetToolbar', T12_空工具栏时switchModel再resetToolbar],
           ['T13 toolbarRight 单独控制', T13_toolbarRight单独控制],
           ['T14 toolbar:false 回退逻辑', T14_toolbarFalse回退defaultToolbar],
+          ['T15 toolbar+toolbarRight都有内容', T15_toolbar和toolbarRight都有内容],
+          ['T16 toolbar:false+toolbarRight:[]', T16_toolbarFalse且toolbarRight为空],
+          ['T17 toolbar:false+toolbarRight有内容', T17_toolbarFalse且toolbarRight有内容],
+          ['T18 toolbar有内容+toolbarRight:false', T18_toolbar有内容且toolbarRightFalse],
         ];
 
         for (const [name, fn] of tests) {
