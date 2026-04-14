@@ -1,0 +1,37 @@
+# =============================================================================
+# PR: Unit Test — 单元测试运行
+#
+# 触发时机: 提交 PR 到 main 或 dev 分支时自动运行
+# 功能: 执行 yarn test，验证代码逻辑正确性
+# =============================================================================
+
+name: 'PR: Unit Test'
+
+on:
+  pull_request:
+    branches: [main, dev]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'yarn'
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Test
+        run: yarn test

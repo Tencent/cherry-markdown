@@ -1,0 +1,67 @@
+# =============================================================================
+# Merge Dev Preview — 合并到 dev 后自动发布开发预览版
+#
+# 触发时机: PR 合并 (closed + merged) 到 dev 分支，且变更涉及 packages/cherry-markdown 或 packages/vscodePlugin
+# 功能:
+#   1. npm-dev-preview: 发布 @cherry-markdown/cherry-markdown-dev 到 npm（带时间戳版本号），PR 评论安装指引
+#   2. vscode-plugin-preview: 以 --pre-release 模式发布 VSCode 插件，PR 评论下载信息
+# 使用 pull_request_target 安全访问 secrets（VSCE_PAT / BOT_TOKEN）
+# 并发控制: 不取消旧运行（合并事件只应执行一次）
+# =============================================================================
+
+name: 'Merge Dev Preview'
+
+on:
+  pull_request_target:
+    types: [closed]
+    paths:
+      - 'packages/cherry-markdown/**'
+      - 'packages/vscodePlugin/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  detect-changes:
+    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      cherry-markdown: ${{ steps.filter.outputs.cherry-markdown }}
+      vscode-plugin: ${{ steps.filter.outputs.vscode-plugin }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            cherry-markdown:
+              - 'packages/cherry-markdown/**'
+            vscode-plugin:
+              - 'packages/vscodePlugin/**'
+
+  npm-dev-preview:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.cherry-markdown == 'true'
+    uses: ./.github/workflows/reusable-npm-dev-preview.yml
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+    secrets: inherit
+
+  vscode-plugin-preview:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.vscode-plugin == 'true'
+    uses: ./.github/workflows/reusable-vscode-plugin.yml
+    with:
+      mode: pre-release
+      pr_number: ${{ github.event.pull_request.number }}
+    secrets: inherit

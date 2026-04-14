@@ -167,11 +167,9 @@
     }
   },
   "scripts": {
-    "build": "vsce package",
-    "vscode:prepublish": "yarn package",
-    "compile": "rspack build",
-    "watch": "rspack build --watch",
-    "package": "rspack build --mode production --devtool hidden-source-map",
+    "dev": "rspack build --watch",
+    "build": "rspack build --mode production",
+    "package": "npx @vscode/vsce package --no-dependencies --no-yarn",
     "lint": "cd ../.. && npx prettier --check packages/vscodePlugin/src/**/*.ts && npx eslint packages/vscodePlugin/src/**/*.ts",
     "lint:fix": "cd ../.. && npx prettier --write packages/vscodePlugin/src/**/*.ts && npx eslint packages/vscodePlugin/src/**/*.ts --fix"
   },
