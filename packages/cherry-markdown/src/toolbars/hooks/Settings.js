@@ -207,14 +207,9 @@ export default class Settings extends MenuBase {
   toggleToolbar() {
     const { wrapperDom } = this.engine.$cherry;
     if (wrapperDom instanceof HTMLDivElement) {
-      const isHidden = wrapperDom.classList.contains('cherry--no-toolbar');
-      if (isHidden) {
-        // 先同步 DOM，再根据实际渲染结果决定是否移除 CSS 类（防止空白）
-        const rendered = this.engine.$cherry.syncToolbarDom(wrapperDom);
-        wrapperDom.classList.toggle('cherry--no-toolbar', !rendered);
-        if (rendered) {
-          this.engine.$cherry.$event.emit('toolbarShow');
-        }
+      if (wrapperDom.classList.contains('cherry--no-toolbar')) {
+        wrapperDom.classList.remove('cherry--no-toolbar');
+        this.engine.$cherry.$event.emit('toolbarShow');
       } else {
         wrapperDom.classList.add('cherry--no-toolbar');
         this.engine.$cherry.$event.emit('toolbarHide');
