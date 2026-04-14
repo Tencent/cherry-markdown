@@ -181,13 +181,11 @@ export default class Cherry extends CherryStatic {
       // 即便配置了不展示工具栏，也要让工具栏加载对应的语法hook
       wrapperDom.classList.add('cherry--no-toolbar');
     }
-    // 确保各工具栏配置是数组，如果是 false 或其他 falsy 值则使用空数组；
-    // toolbar 例外：配置为 false 时需回退到 defaultToolbar 以保留语法 hook 注册
-    ['toolbarRight', 'bubble', 'sidebar', 'float'].forEach((key) => {
-      if (!Array.isArray(this.options.toolbars?.[key])) {
-        this.options.toolbars[key] = [];
-      }
-    });
+    // toolbarRight 需要归一化为数组（createToolbarRight 无条件创建，必须保证是数组）；
+    // bubble / sidebar / float 保留 false 语义（下游 create* 方法通过 if(config) 判断是否创建）
+    if (!Array.isArray(this.options.toolbars?.toolbarRight)) {
+      this.options.toolbars.toolbarRight = [];
+    }
 
     if (!Array.isArray(this.options.toolbars?.toolbar)) {
       this.options.toolbars.toolbar = this.defaultToolbar;
