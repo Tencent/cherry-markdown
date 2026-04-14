@@ -32,9 +32,6 @@ on:
 jobs:
   vscode-plugin:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: write
     timeout-minutes: 30
     continue-on-error: ${{ inputs.mode == 'package' }}
     steps:

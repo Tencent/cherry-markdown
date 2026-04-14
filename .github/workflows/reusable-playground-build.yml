@@ -13,8 +13,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     timeout-minutes: 20
     steps:
       - run: echo ${{ github.event.number }} > pr-id.txt
