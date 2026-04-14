@@ -177,23 +177,24 @@ export default class Cherry extends CherryStatic {
     // 创建预览区
     const previewer = this.createPreviewer();
 
-    if (this.options.toolbars.showToolbar === false || this.options.toolbars.toolbar === false) {
-      // 即便配置了不展示工具栏，也要让工具栏加载对应的语法hook
+    // 归一化前记录原始禁用意图（归一化会将 false 替换为 defaultToolbar，丢失原始语义）
+    this.#toolbarUserDisabled = this.options.toolbars.showToolbar === false || this.options.toolbars.toolbar === false;
+    this.#toolbarRightUserDisabled = this.options.toolbars.toolbarRight === false;
+
+    if (this.#toolbarUserDisabled) {
       wrapperDom.classList.add('cherry--no-toolbar');
     }
-    // toolbarRight 需要归一化为数组（createToolbarRight 无条件创建，必须保证是数组）；
-    // bubble / sidebar / float 保留 false 语义（下游 create* 方法通过 if(config) 判断是否创建）
+    // toolbarRight 必须为数组（createToolbarRight 无守卫）；bubble/sidebar/float 保留 false 语义
     if (!Array.isArray(this.options.toolbars?.toolbarRight)) {
       this.options.toolbars.toolbarRight = [];
     }
-
+    // toolbar 为 false 时回退到 defaultToolbar 以保留语法 hook 注册
     if (!Array.isArray(this.options.toolbars?.toolbar)) {
       this.options.toolbars.toolbar = this.defaultToolbar;
     }
 
     $expectTarget(this.options.toolbars.toolbar, Array);
 
-    // 根据归一化后的配置计算是否需要渲染工具栏 DOM
     this.shouldRenderToolbarDom = this.#computeShouldRenderToolbar();
 
     // 创建顶部工具栏
@@ -253,8 +254,9 @@ export default class Cherry extends CherryStatic {
       this.status.editor = 'show';
     });
 
-    // 切换模式，有纯预览模式、纯编辑模式、双栏编辑模式
-    this.switchModel(this.options.editor.defaultModel, this.options.toolbars.showToolbar);
+    // 切换模式；toolbar 禁用时同步 showToolbar 为 false，防止 switchModel 移除 cherry--no-toolbar
+    const effectiveShowToolbar = this.options.toolbars.showToolbar && !this.#toolbarUserDisabled;
+    this.switchModel(this.options.editor.defaultModel, effectiveShowToolbar);
 
     // 如果配置了初始化后根据hash自动滚动
     if (this.options.autoScrollByHashAfterInit) {
@@ -404,7 +406,6 @@ export default class Cherry extends CherryStatic {
         }
         if (showToolbar) {
           this.wrapperDom.classList.remove('cherry--no-toolbar');
-          // 始终同步 DOM 挂载状态：确保工具栏在页面中且可见
           this.syncToolbarDom(this.wrapperDom);
         } else {
           this.wrapperDom.classList.add('cherry--no-toolbar');
@@ -419,7 +420,6 @@ export default class Cherry extends CherryStatic {
         }
         if (showToolbar) {
           this.wrapperDom.classList.remove('cherry--no-toolbar');
-          // 始终同步 DOM 挂载状态
           this.syncToolbarDom(this.wrapperDom);
         } else {
           this.wrapperDom.classList.add('cherry--no-toolbar');
@@ -723,15 +723,26 @@ export default class Cherry extends CherryStatic {
     return this.toolbar;
   }
 
+  /** @type {boolean} 用户是否显式禁用了 toolbar（归一化前记录） */
+  #toolbarUserDisabled = false;
+
+  /** @type {boolean} 用户是否显式禁用了 toolbarRight（归一化前记录） */
+  #toolbarRightUserDisabled = false;
+
   /**
-   * 计算是否需要渲染工具栏 DOM（单一真相源）
-   * @returns {boolean} 是否应渲染
+   * 计算是否需要渲染工具栏 DOM
+   * @returns {boolean}
    */
   #computeShouldRenderToolbar() {
-    return (
-      (Array.isArray(this.options.toolbars.toolbar) && this.options.toolbars.toolbar.length > 0) ||
-      (Array.isArray(this.options.toolbars.toolbarRight) && this.options.toolbars.toolbarRight.length > 0)
-    );
+    const toolbarActive =
+      !this.#toolbarUserDisabled &&
+      Array.isArray(this.options.toolbars.toolbar) &&
+      this.options.toolbars.toolbar.length > 0;
+    const toolbarRightActive =
+      !this.#toolbarRightUserDisabled &&
+      Array.isArray(this.options.toolbars.toolbarRight) &&
+      this.options.toolbars.toolbarRight.length > 0;
+    return toolbarActive || toolbarRightActive;
   }
 
   /**
@@ -740,7 +751,6 @@ export default class Cherry extends CherryStatic {
    * @param {DocumentFragment|Element} [parent] 目标父容器（初始化时传 fragment，运行时传 wrapperDom）
    */
   syncToolbarDom(parent) {
-    // 使用统一的私有方法计算，避免与构造函数中的判断逻辑不一致
     const shouldRender = this.#computeShouldRenderToolbar();
 
     const toolbarEl = this.toolbar?.options?.dom;
@@ -796,12 +806,11 @@ export default class Cherry extends CherryStatic {
     this.cherryDom.querySelectorAll('.cherry-dropdown').forEach((item) => {
       item.remove();
     });
-    // 清理旧工具栏 DOM，防止多次 reset 后旧实例/事件监听器泄漏
+    // 清理旧工具栏 DOM 和子工具栏实例，防止泄漏
     const oldToolbarDom = this.toolbar?.options?.dom;
     if (oldToolbarDom && oldToolbarDom.parentElement) {
       oldToolbarDom.parentElement.removeChild(oldToolbarDom);
     }
-    // 销毁有独立事件系统的子工具栏，释放事件监听器
     if (this.bubble && typeof this.bubble.destroy === 'function') {
       this.bubble.destroy();
     }
@@ -816,7 +825,6 @@ export default class Cherry extends CherryStatic {
     this.createSidebar();
     this.createHiddenToolbar();
     this.createToc();
-    // 重新创建后需同步 DOM 挂载状态（初始未渲染时可能需要挂载）
     this.syncToolbarDom(this.wrapperDom);
     return true;
   }

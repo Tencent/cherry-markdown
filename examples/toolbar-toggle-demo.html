@@ -270,7 +270,10 @@
           try { cherryInstance.destroy(); } catch(e) {}
           document.getElementById('markdown').innerHTML = '';
         }
-        cherryInstance = new Cherry(Object.assign(base, configOverrides));
+        cherryInstance = new Cherry(Object.assign({}, base, configOverrides, {
+          toolbars: Object.assign({}, base.toolbars, configOverrides.toolbars || {}),
+          editor: Object.assign({}, base.editor, configOverrides.editor || {}),
+        }));
         window.cherry = cherryInstance;
         // 等待渲染完成
         return new Promise(resolve => setTimeout(resolve, 300));
