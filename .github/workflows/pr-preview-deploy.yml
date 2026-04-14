@@ -99,22 +99,11 @@ jobs:
           number: ${{ needs.get-pr-id.outputs.pr_id }}
           body-include: '<!-- AUTO_PREVIEW_PLAYGROUND -->'
 
-      - name: Comment playground failed
-        if: steps.deploy.outcome != 'success'
-        uses: actions-cool/maintain-one-comment@v3
-        with:
-          token: ${{ secrets.BOT_TOKEN }}
-          body: |
-            ### 🌐 Playground 预览
-            ❌ 构建或部署失败 — [查看日志](${{github.server_url}}/${{github.repository}}/actions/runs/${{github.event.workflow_run.id}})
-            <!-- AUTO_PREVIEW_PLAYGROUND -->
-          number: ${{ needs.get-pr-id.outputs.pr_id }}
-          body-include: '<!-- AUTO_PREVIEW_PLAYGROUND -->'
-
   # ── Client: 收集链接 + 评论 ──
   comment-client:
     needs: get-pr-id
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Collect client artifacts
         id: collect
@@ -183,18 +172,6 @@ jobs:
           number: ${{ needs.get-pr-id.outputs.pr_id }}
           body-include: '<!-- AUTO_PREVIEW_CLIENT -->'
 
-      - name: Comment client not available
-        if: steps.collect.outputs.count == 0
-        uses: actions-cool/maintain-one-comment@v3
-        with:
-          token: ${{ secrets.BOT_TOKEN }}
-          body: |
-            ### 💻 Client 构建产物
-            ⚠️ 未生成产物（构建失败或跳过）— [查看日志](${{github.server_url}}/${{github.repository}}/actions/runs/${{github.event.workflow_run.id}})
-            <!-- AUTO_PREVIEW_CLIENT -->
-          number: ${{ needs.get-pr-id.outputs.pr_id }}
-          body-include: '<!-- AUTO_PREVIEW_CLIENT -->'
-
   # ── VSCode Plugin: 收集链接 + 评论 ──
   comment-vscode:
     needs: get-pr-id
@@ -232,18 +209,6 @@ jobs:
             ### 🔌 VSCode Plugin 构建产物
             [下载 .vsix](${{ steps.collect.outputs.url }})
             > ⏰ 产物保留 5 天
-            <!-- AUTO_PREVIEW_VSCODE -->
-          number: ${{ needs.get-pr-id.outputs.pr_id }}
-          body-include: '<!-- AUTO_PREVIEW_VSCODE -->'
-
-      - name: Comment vscode plugin not available
-        if: steps.collect.outputs.found != 'true'
-        uses: actions-cool/maintain-one-comment@v3
-        with:
-          token: ${{ secrets.BOT_TOKEN }}
-          body: |
-            ### 🔌 VSCode Plugin 构建产物
-            ⚠️ 未生成产物（构建失败或跳过）— [查看日志](${{github.server_url}}/${{github.repository}}/actions/runs/${{github.event.workflow_run.id}})
             <!-- AUTO_PREVIEW_VSCODE -->
           number: ${{ needs.get-pr-id.outputs.pr_id }}
           body-include: '<!-- AUTO_PREVIEW_VSCODE -->'

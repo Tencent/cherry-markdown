@@ -67,14 +67,7 @@ jobs:
           cache: yarn
 
       - name: Install and build
-        working-directory: ./packages/cherry-markdown
         run: yarn install && yarn build
-
-      # 使用最新 LTS (24) 执行 npm publish
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          registry-url: https://registry.npmjs.org/
 
       - name: npm publish
         working-directory: ./packages/cherry-markdown
