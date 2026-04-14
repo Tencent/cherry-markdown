@@ -18,10 +18,6 @@ jobs:
   npm-dev-preview:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    permissions:
-      contents: read
-      id-token: write
-      issues: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6

@@ -10,10 +10,6 @@
 
 name: 'Reusable: npm Release'
 
-permissions:
-  contents: read
-  id-token: write
-
 on:
   workflow_call:
 
