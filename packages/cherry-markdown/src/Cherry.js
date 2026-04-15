@@ -177,14 +177,6 @@ export default class Cherry extends CherryStatic {
     // 创建预览区
     const previewer = this.createPreviewer();
 
-    this.toolbarUserDisabled = this.options.toolbars.showToolbar === false || this.options.toolbars.toolbar === false;
-    if (!Array.isArray(this.options.toolbars?.toolbar)) {
-      this.options.toolbars.toolbar = this.defaultToolbar;
-    }
-    if (!Array.isArray(this.options.toolbars?.toolbarRight)) {
-      this.options.toolbars.toolbarRight = [];
-    }
-
     $expectTarget(this.options.toolbars.toolbar, Array);
 
     // 创建顶部工具栏
@@ -193,7 +185,7 @@ export default class Cherry extends CherryStatic {
 
     const wrapperFragment = document.createDocumentFragment();
 
-    if (this.shouldHideToolbar()) {
+    if (this.shouldHideToolbar() || this.options.toolbars.showToolbar === false) {
       wrapperDom.classList.add('cherry--no-toolbar');
     }
     wrapperFragment.appendChild(this.toolbar.options.dom);
@@ -227,9 +219,11 @@ export default class Cherry extends CherryStatic {
 
     this.$event.on('toolbarHide', () => {
       this.status.toolbar = 'hide';
+      this.wrapperDom.classList.add('cherry--no-toolbar');
     });
     this.$event.on('toolbarShow', () => {
       this.status.toolbar = 'show';
+      this.wrapperDom.classList.remove('cherry--no-toolbar');
     });
     this.$event.on('previewerClose', () => {
       this.status.previewer = 'hide';
@@ -395,9 +389,9 @@ export default class Cherry extends CherryStatic {
           this.toolbar.showToolbar();
         }
         if (showToolbar && !this.shouldHideToolbar()) {
-          this.wrapperDom.classList.remove('cherry--no-toolbar');
+          this.$event.emit('toolbarShow');
         } else {
-          this.wrapperDom.classList.add('cherry--no-toolbar');
+          this.$event.emit('toolbarHide');
         }
         break;
       case 'editOnly':
@@ -408,15 +402,14 @@ export default class Cherry extends CherryStatic {
           this.toolbar.showToolbar();
         }
         if (showToolbar && !this.shouldHideToolbar()) {
-          this.wrapperDom.classList.remove('cherry--no-toolbar');
+          this.$event.emit('toolbarShow');
         } else {
-          this.wrapperDom.classList.add('cherry--no-toolbar');
+          this.$event.emit('toolbarHide');
         }
         break;
       case 'previewOnly':
         this.previewer.previewOnly();
         this.toolbar && this.toolbar.previewOnly();
-        this.wrapperDom.classList.add('cherry--no-toolbar');
         break;
     }
   }
@@ -710,9 +703,6 @@ export default class Cherry extends CherryStatic {
 
   /** @returns {boolean} 是否应隐藏顶部工具栏 */
   shouldHideToolbar() {
-    if (this.toolbarUserDisabled) {
-      return true;
-    }
     const hasToolbar = Array.isArray(this.options.toolbars.toolbar) && this.options.toolbars.toolbar.length > 0;
     const hasToolbarRight =
       Array.isArray(this.options.toolbars.toolbarRight) && this.options.toolbars.toolbarRight.length > 0;
@@ -757,17 +747,6 @@ export default class Cherry extends CherryStatic {
       this.floatMenu.destroy();
     }
     this.options.toolbars[type] = toolbar;
-    if (type === 'toolbar') {
-      this.toolbarUserDisabled = !Array.isArray(toolbar);
-      if (!Array.isArray(this.options.toolbars.toolbar)) {
-        this.options.toolbars.toolbar = this.defaultToolbar;
-      }
-    }
-    if (type === 'toolbarRight') {
-      if (!Array.isArray(this.options.toolbars.toolbarRight)) {
-        this.options.toolbars.toolbarRight = [];
-      }
-    }
     this.createToolbar();
     this.createToolbarRight();
     this.createBubble();

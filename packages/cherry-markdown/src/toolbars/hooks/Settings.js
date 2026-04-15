@@ -205,15 +205,10 @@ export default class Settings extends MenuBase {
    * 切换Toolbar显示状态
    */
   toggleToolbar() {
-    const { wrapperDom } = this.engine.$cherry;
-    if (wrapperDom instanceof HTMLDivElement) {
-      if (wrapperDom.classList.contains('cherry--no-toolbar')) {
-        wrapperDom.classList.remove('cherry--no-toolbar');
-        this.engine.$cherry.$event.emit('toolbarShow');
-      } else {
-        wrapperDom.classList.add('cherry--no-toolbar');
-        this.engine.$cherry.$event.emit('toolbarHide');
-      }
+    if (this.$cherry.status.toolbar) {
+      this.$cherry.$event.emit('toolbarHide');
+    } else {
+      this.$cherry.$event.emit('toolbarShow');
     }
   }
 }
