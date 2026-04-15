@@ -104,13 +104,13 @@ export default class Toolbar {
 
   previewOnly() {
     this.options.dom.classList.add('preview-only');
-    this.$cherry.wrapperDom.classList.add('cherry--no-toolbar');
+    // cherry--no-toolbar 由 Cherry.switchModel 统一管理，此处不再重复操作
     this.$cherry.$event.emit('toolbarHide');
   }
 
   showToolbar() {
     this.options.dom.classList.remove('preview-only');
-    this.$cherry.wrapperDom.classList.remove('cherry--no-toolbar');
+    // cherry--no-toolbar 由 Cherry.switchModel 统一管理，此处不再重复操作
     this.$cherry.$event.emit('toolbarShow');
   }
 
