@@ -202,6 +202,9 @@ export default class HookCenter {
    */
   init() {
     const { buttonConfig } = this.toolbar.options;
+    if (!Array.isArray(buttonConfig)) {
+      return;
+    }
     buttonConfig.forEach((item) => {
       if (typeof item === 'string') {
         this.level1MenusName.push(item);

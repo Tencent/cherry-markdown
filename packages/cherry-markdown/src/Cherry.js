@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { EditorView } from '@codemirror/view';
 import mergeWith from 'lodash/mergeWith';
 import Editor from './Editor';
 import Engine from './Engine';
@@ -178,19 +177,17 @@ export default class Cherry extends CherryStatic {
     // 创建预览区
     const previewer = this.createPreviewer();
 
-    if (this.options.toolbars.showToolbar === false || this.options.toolbars.toolbar === false) {
-      // 即便配置了不展示工具栏，也要让工具栏加载对应的语法hook
-      wrapperDom.classList.add('cherry--no-toolbar');
-      this.options.toolbars.toolbar = this.options.toolbars.toolbar
-        ? this.options.toolbars.toolbar
-        : this.defaultToolbar;
-    }
     $expectTarget(this.options.toolbars.toolbar, Array);
+
     // 创建顶部工具栏
     this.createToolbar();
     this.createToolbarRight();
 
     const wrapperFragment = document.createDocumentFragment();
+
+    if (this.shouldHideToolbar() || this.options.toolbars.showToolbar === false) {
+      wrapperDom.classList.add('cherry--no-toolbar');
+    }
     wrapperFragment.appendChild(this.toolbar.options.dom);
     wrapperFragment.appendChild(editor.options.editorDom);
     if (!this.options.previewer.dom) {
@@ -222,9 +219,11 @@ export default class Cherry extends CherryStatic {
 
     this.$event.on('toolbarHide', () => {
       this.status.toolbar = 'hide';
+      this.wrapperDom.classList.add('cherry--no-toolbar');
     });
     this.$event.on('toolbarShow', () => {
       this.status.toolbar = 'show';
+      this.wrapperDom.classList.remove('cherry--no-toolbar');
     });
     this.$event.on('previewerClose', () => {
       this.status.previewer = 'hide';
@@ -241,7 +240,6 @@ export default class Cherry extends CherryStatic {
       this.status.editor = 'show';
     });
 
-    // 切换模式，有纯预览模式、纯编辑模式、双栏编辑模式
     this.switchModel(this.options.editor.defaultModel, this.options.toolbars.showToolbar);
 
     // 如果配置了初始化后根据hash自动滚动
@@ -390,10 +388,10 @@ export default class Cherry extends CherryStatic {
         if (this.toolbar && showToolbar) {
           this.toolbar.showToolbar();
         }
-        if (showToolbar) {
-          this.wrapperDom.classList.remove('cherry--no-toolbar');
+        if (showToolbar && !this.shouldHideToolbar()) {
+          this.$event.emit('toolbarShow');
         } else {
-          this.wrapperDom.classList.add('cherry--no-toolbar');
+          this.$event.emit('toolbarHide');
         }
         break;
       case 'editOnly':
@@ -403,16 +401,15 @@ export default class Cherry extends CherryStatic {
         if (this.toolbar && showToolbar) {
           this.toolbar.showToolbar();
         }
-        if (showToolbar) {
-          this.wrapperDom.classList.remove('cherry--no-toolbar');
+        if (showToolbar && !this.shouldHideToolbar()) {
+          this.$event.emit('toolbarShow');
         } else {
-          this.wrapperDom.classList.add('cherry--no-toolbar');
+          this.$event.emit('toolbarHide');
         }
         break;
       case 'previewOnly':
         this.previewer.previewOnly();
         this.toolbar && this.toolbar.previewOnly();
-        this.wrapperDom.classList.add('cherry--no-toolbar');
         break;
     }
   }
@@ -452,7 +449,7 @@ export default class Cherry extends CherryStatic {
 
   /**
    * 获取CodeMirror 实例
-   * @returns { EditorView } CodeMirror 6 适配器实例
+   * @returns { import('@codemirror/view').EditorView } CodeMirror 6 适配器实例
    */
   getCodeMirror() {
     return this.editor.editor.view;
@@ -704,6 +701,14 @@ export default class Cherry extends CherryStatic {
     return this.toolbar;
   }
 
+  /** @returns {boolean} 是否应隐藏顶部工具栏 */
+  shouldHideToolbar() {
+    const hasToolbar = Array.isArray(this.options.toolbars.toolbar) && this.options.toolbars.toolbar.length > 0;
+    const hasToolbarRight =
+      Array.isArray(this.options.toolbars.toolbarRight) && this.options.toolbars.toolbarRight.length > 0;
+    return !hasToolbar && !hasToolbarRight;
+  }
+
   /**
    * 动态重置工具栏配置
    * @public
@@ -735,6 +740,12 @@ export default class Cherry extends CherryStatic {
     this.cherryDom.querySelectorAll('.cherry-dropdown').forEach((item) => {
       item.remove();
     });
+    if (this.bubble && typeof this.bubble.destroy === 'function') {
+      this.bubble.destroy();
+    }
+    if (this.floatMenu && typeof this.floatMenu.destroy === 'function') {
+      this.floatMenu.destroy();
+    }
     this.options.toolbars[type] = toolbar;
     this.createToolbar();
     this.createToolbarRight();
@@ -743,6 +754,7 @@ export default class Cherry extends CherryStatic {
     this.createSidebar();
     this.createHiddenToolbar();
     this.createToc();
+    this.wrapperDom.classList.toggle('cherry--no-toolbar', this.shouldHideToolbar());
     return true;
   }
 
@@ -1004,7 +1016,7 @@ export default class Cherry extends CherryStatic {
 
   /**
    * @private
-   * @param {EditorView | Object} editorView
+   * @param {import('@codemirror/view').EditorView | Object} editorView
    */
   initText(editorView) {
     try {
@@ -1027,13 +1039,13 @@ export default class Cherry extends CherryStatic {
   /**
    * @private
    * @param {Event} _evt
-   * @param {EditorView} editorView
+   * @param {import('@codemirror/view').EditorView} editorView
    */
   /**
    * 编辑器内容变更时触发,更新预览区内容
    * @private
    * @param {Event} _evt - 编辑事件对象(未使用)
-   * @param {EditorView | Object} editorView - 编辑器实例
+   * @param {import('@codemirror/view').EditorView | Object} editorView - 编辑器实例
    */
   editText(_evt, editorView) {
     try {

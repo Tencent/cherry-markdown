@@ -43,6 +43,7 @@ const htmlPages = [
   '/chart_toolbar_demo.html',
   '/suggester.html',
   '/custom_codeblock_wrapper.html',
+  '/toolbar-toggle-demo.html',
 ];
 
 export default defineConfig({
