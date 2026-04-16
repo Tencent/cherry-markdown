@@ -6,30 +6,55 @@
 
 // 所有可用的工具栏按钮（'|' 为分割线，可多次使用）
 export const TOOLBAR_BUTTONS = [
-  'bold', 'italic', 'strikethrough', 'color', 'header',
-  'list', 'insert', 'graph', 'togglePreview', 'settings',
-  'switchModel', 'codeTheme', 'export', 'undo', 'redo',
-  'underline', 'sub', 'sup', 'ruby', 'size', 'checklist',
-  'quote', 'quickTable', 'code', 'link', 'image', 'audio',
-  'video', 'br', 'hr', 'formula', 'toc', 'table',
-  'drawIo', 'pdf', 'word', 'file', 'panel', 'detail',
-  'justify', 'theme', 'copy', 'fullScreen', '|'
+  'bold', 'italic', 'strikethrough', 'sub', 'sup',
+  'header', 'list', 'ol', 'ul', 'checklist',
+  'graph', 'size', 'color', 'quote', 'quickTable',
+  'togglePreview', 'code', 'inlineCode', 'codeTheme', 'export',
+  'settings', 'fullScreen', 'undo', 'redo', 'underline',
+  'switchModel', 'image', 'audio', 'video', 'br',
+  'hr', 'formula', 'link', 'table', 'toc',
+  'proTable', 'pdf', 'word', 'ruby', 'theme',
+  'file', 'panel', 'align', 'detail', 'drawIo',
+  'wordCount', 'cursorPosition', 'changeLocale', 'shortcutKey', 'search', '|'
+];
+
+// 顶部右对齐工具栏按钮（'|' 为分割线，可多次使用）
+export const TOOLBAR_RIGHT_BUTTONS = [
+  'bold', 'italic', 'strikethrough', 'sub', 'sup',
+  'header', 'list', 'ol', 'ul', 'checklist',
+  'graph', 'size', 'color', 'quote', 'quickTable',
+  'togglePreview', 'code', 'inlineCode', 'codeTheme', 'export',
+  'settings', 'fullScreen', 'undo', 'redo', 'underline',
+  'switchModel', 'image', 'audio', 'video', 'br',
+  'hr', 'formula', 'link', 'table', 'toc',
+  'proTable', 'pdf', 'word', 'ruby', 'theme',
+  'file', 'panel', 'align', 'detail', 'drawIo',
+  'mobilePreview', 'copy', 
+  'wordCount', 'cursorPosition', 'changeLocale', 'shortcutKey', 'search', '|'
 ];
 
 // 气泡工具栏按钮（'|' 为分割线，可多次使用）
 export const BUBBLE_BUTTONS = [
-  'bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup',
-  'quote', 'ruby', 'size', 'color', '|'
+  'bold', 'italic', 'strikethrough', 'sub', 'sup',
+  'header', 'list', 'ol', 'ul', 'checklist',
+  'size', 'color', 'quote', 'code', 'inlineCode','underline','link', 'table',
+  'ruby', 'panel', 'align', 'detail','|'
 ];
 
 // 浮动工具栏按钮（'|' 为分割线，可多次使用）
 export const FLOAT_BUTTONS = [
-  'h1', 'h2', 'h3', 'checklist', 'quote', 'quickTable', 'code', '|'
+  'header', 'list', 'ol', 'ul', 'checklist',
+  'graph', 'quote', 'quickTable', 'code', 
+  'image', 'audio', 'video', 'br',
+  'hr', 'formula', 'link', 'table', 'toc',
+  'proTable', 'pdf', 'word', 'theme',
+  'file', 'panel', 'align', 'detail', 'drawIo',
+  '|'
 ];
 
 // 侧边栏按钮（'|' 为分割线，可多次使用）
 export const SIDEBAR_BUTTONS = [
-  'mobilePreview', 'copy', 'theme', '|'
+  'togglePreview', 'export', 'settings', 'fullScreen', 'switchModel', 'mobilePreview', 'copy', 'theme', 'wordCount', 'changeLocale', 'shortcutKey', 'search', '|'
 ];
 
 // 配置项源码映射
@@ -77,8 +102,8 @@ value: '',`,
   // 配置为 false 时关闭顶部工具栏
   toolbar: [
     'bold', 'italic', 'strikethrough', '|',
-    'color', 'header', 'list', 'insert', '|',
-    'graph', 'togglePreview', 'settings'
+    'color', 'header', 'list', '|',
+    'graph', 'code', 'formula'
   ],
   // toolbar: false, // 关闭顶部工具栏
 },`,
@@ -107,14 +132,11 @@ value: '',`,
   // sidebar: false, // 关闭侧边栏
 },`,
 
-  'toolbars.showToolbar': `toolbars: {
-  // 是否显示顶部工具栏
-  showToolbar: true,
-},`,
-
-  'toolbars.theme': `toolbars: {
-  // 工具栏主题 'dark' | 'light'
-  theme: 'dark',
+  'toolbars.toolbarRight': `toolbars: {
+  // 顶部右对齐工具栏
+  // 配置为 false 时关闭顶部右对齐工具栏
+  toolbarRight: ['togglePreview', 'settings', 'fullScreen'],
+  // toolbarRight: false, // 关闭顶部右对齐工具栏
 },`,
 
   'engine.global.classicBr': `engine: {
@@ -136,8 +158,46 @@ value: '',`,
   'engine.global.htmlWhiteList': `engine: {
   global: {
     // 额外允许渲染的html标签
-    // 标签以^开头表示该标签会被转义
+    // 标签以英文竖线分隔，如：htmlWhiteList: 'iframe|script|style'
+    // 默认为空，默认允许渲染的html见src/utils/sanitize.js whiteList 属性
     htmlWhiteList: '',
+  },
+},`,
+
+  'engine.global.htmlBlackList': `engine: {
+  global: {
+    // html黑名单，优先级高于htmlWhiteList
+    // 标签以英文竖线分隔，如：htmlBlackList: 'div|span'
+    // 默认为空，表示不禁止渲染任何html标签
+    // 如果要禁用所有html标签，可配置htmlBlackList: '*'
+    htmlBlackList: '',
+  },
+},`,
+
+  'engine.global.htmlAttrWhiteList': `engine: {
+  global: {
+    // 额外允许渲染的html标签的属性
+    // 标签以英文竖线分隔，如：htmlAttrWhiteList: 'part|onmouseover|my-attr'
+    // 默认为空，默认允许渲染的html标签属性见 DOMPurify 白名单
+    htmlAttrWhiteList: '',
+  },
+},`,
+
+  'engine.global.flowSessionContext': `engine: {
+  global: {
+    // 适配流式会话的场景
+    // 开启后将具备：渲染频率提升、代码块/表格/加粗斜体等自动闭合等特性
+    flowSessionContext: false,
+  },
+},`,
+
+  'engine.global.flowSessionCursor': `engine: {
+  global: {
+    // 流式会话时，在最后位置增加一个类似光标的dom
+    // 'default'：用cherry提供的默认样式
+    // ''：不增加任何dom
+    // '<span class="custom-cursor"></span>': 自定义的dom
+    flowSessionCursor: '',
   },
 },`,
 
@@ -255,10 +315,10 @@ value: '',`,
   syntax: {
     // 目录配置
     toc: {
-      /** 是否渲染标题序号 */
+      /** 默认只渲染一个目录 */
+      allowMultiToc: false,
+      /** 是否显示自增序号 */
       showAutoNumber: false,
-      /** 默认展开层级 */
-      defaultLevel: 3,
     },
   },
 },`,
@@ -267,10 +327,19 @@ value: '',`,
   syntax: {
     // 标题配置
     header: {
-      /** 标题是否带锚点 */
-      anchorStyle: 'default', // 'default' | 'autonumber' | 'none'
-      /** 是否严格要求标题前有空行 */
-      strict: true,
+      /**
+       * 标题的样式：
+       *  - default       默认样式，标题前面有锚点
+       *  - autonumber    标题前面有自增序号锚点
+       *  - none          标题没有锚点
+       */
+      anchorStyle: 'default',
+      /**
+       * 是否开启严格模式
+       *    true：严格模式，# head 有效，#head 无效
+       *    false：宽松模式，# head 和 #head 都有效
+       */
+      strict: false,
     },
   },
 },`,
@@ -279,8 +348,10 @@ value: '',`,
   syntax: {
     // HTML块配置
     htmlBlock: {
-      // 是否过滤style标签
-      filterStyle: true,
+      // 是否过滤html标签中的style属性
+      filterStyle: false,
+      // 是否去掉</xxx>标签后面的连续换行符
+      removeTrailingNewline: false,
     },
   },
 },`,
@@ -407,6 +478,82 @@ fileUpload: (file, callback) => {
   // 引入katex组件
   katex: window.katex,
 },`,
+
+  'editor.keyMap': `editor: {
+  // 快捷键风格，目前仅支持 sublime 和 vim
+  keyMap: 'sublime',
+},`,
+
+  'editor.writingStyle': `editor: {
+  // 书写风格
+  // normal: 普通模式
+  // typewriter: 打字机模式（光标始终在屏幕中间）
+  // focus: 专注模式（当前行高亮，其他行变暗）
+  writingStyle: 'normal',
+},`,
+
+  'editor.showFullWidthMark': `editor: {
+  // 是否高亮全角符号（·|￥|、|：|"|"|【|】|（|）|《|》）
+  showFullWidthMark: true,
+},`,
+
+  'editor.showSuggestList': `editor: {
+  // 是否显示联想框
+  showSuggestList: true,
+},`,
+
+  'editor.maxUrlLength': `editor: {
+  // URL的最大长度，-1表示不限制，超过该长度的URL会显示省略号
+  maxUrlLength: -1,
+},`,
+
+  'previewer.isMobilePreview': `previewer: {
+  // 是否启用移动端预览
+  isMobilePreview: false,
+},`,
+
+  'previewer.floatWhenClosePreviewer': `previewer: {
+  // 关闭预览时是否浮动显示预览区域
+  floatWhenClosePreviewer: false,
+},`,
+
+  'nameSpace': `// cherry缓存的作用范围，相同nameSpace的实例共享localStorage缓存
+nameSpace: 'cherry',`,
+
+  'autoScrollByHashAfterInit': `// cherry初始化后是否检查 location.hash 尝试滚动到对应位置
+autoScrollByHashAfterInit: false,`,
+
+  'themeSettings': `themeSettings: {
+  // 主题列表，用于切换主题
+  themeList: [
+    { className: 'default', label: '默认' },
+    { className: 'dark', label: '暗黑' },
+    { className: 'gray', label: '沉稳' },
+    { className: 'abyss', label: '深海' },
+    { className: 'green', label: '清新' },
+    { className: 'red', label: '热情' },
+    { className: 'violet', label: '淡雅' },
+    { className: 'blue', label: '清幽' },
+  ],
+  mainTheme: 'default',
+  codeBlockTheme: 'default',
+  inlineCodeTheme: 'red', // red or black
+},`,
+
+  'themeSettings.mainTheme': `themeSettings: {
+  // 编辑器主题
+  mainTheme: 'default',
+},`,
+
+  'themeSettings.codeBlockTheme': `themeSettings: {
+  // 代码块高亮主题
+  codeBlockTheme: 'default',
+},`,
+
+  'themeSettings.inlineCodeTheme': `themeSettings: {
+  // 行内代码颜色主题 red or black
+  inlineCodeTheme: 'red',
+},`,
 };
 
 // 配置分类定义
@@ -486,6 +633,28 @@ export const CONFIG_CATEGORIES = [
         enabled: true,
         value: 'zh_CN',
       },
+      {
+        key: 'nameSpace',
+        name: '缓存命名空间',
+        path: 'nameSpace',
+        type: 'string',
+        default: "'cherry'",
+        description: 'cherry 缓存的作用范围，相同 nameSpace 的实例共享 localStorage 缓存',
+        inputType: 'text',
+        enabled: true,
+        value: 'cherry',
+      },
+      {
+        key: 'autoScrollByHashAfterInit',
+        name: '初始化后 Hash 滚动',
+        path: 'autoScrollByHashAfterInit',
+        type: 'boolean',
+        default: 'false',
+        description: 'cherry 初始化后是否检查 location.hash 尝试滚动到对应位置',
+        inputType: 'toggle',
+        enabled: true,
+        value: false,
+      },
     ],
   },
   {
@@ -542,6 +711,63 @@ export const CONFIG_CATEGORIES = [
         enabled: true,
         value: true,
       },
+      {
+        key: 'editor.keyMap',
+        name: '快捷键风格',
+        path: 'editor.keyMap',
+        type: 'string',
+        default: "'sublime'",
+        description: '快捷键风格，目前仅支持 sublime 和 vim',
+        inputType: 'select',
+        options: ['sublime', 'vim'],
+        enabled: true,
+        value: 'sublime',
+      },
+      {
+        key: 'editor.writingStyle',
+        name: '书写风格',
+        path: 'editor.writingStyle',
+        type: 'string',
+        default: "'normal'",
+        description: '书写风格：normal 普通 | typewriter 打字机（光标始终在屏幕中间）| focus 专注（当前行高亮）',
+        inputType: 'select',
+        options: ['normal', 'typewriter', 'focus'],
+        enabled: true,
+        value: 'normal',
+      },
+      {
+        key: 'editor.showFullWidthMark',
+        name: '高亮全角符号',
+        path: 'editor.showFullWidthMark',
+        type: 'boolean',
+        default: 'true',
+        description: '是否高亮全角符号（·|￥|、|：等）',
+        inputType: 'toggle',
+        enabled: true,
+        value: true,
+      },
+      {
+        key: 'editor.showSuggestList',
+        name: '显示联想框',
+        path: 'editor.showSuggestList',
+        type: 'boolean',
+        default: 'true',
+        description: '是否显示输入联想框',
+        inputType: 'toggle',
+        enabled: true,
+        value: true,
+      },
+      {
+        key: 'editor.maxUrlLength',
+        name: 'URL 最大长度',
+        path: 'editor.maxUrlLength',
+        type: 'number',
+        default: '-1',
+        description: 'URL 的最大长度，-1 表示不限制，超过该长度的 URL 会显示省略号',
+        inputType: 'text',
+        enabled: true,
+        value: -1,
+      },
     ],
   },
   {
@@ -553,29 +779,6 @@ export const CONFIG_CATEGORIES = [
     description: '工具栏按钮和显示设置',
     items: [
       {
-        key: 'toolbars.showToolbar',
-        name: '显示工具栏',
-        path: 'toolbars.showToolbar',
-        type: 'boolean',
-        default: 'true',
-        description: '是否显示顶部工具栏',
-        inputType: 'toggle',
-        enabled: true,
-        value: true,
-      },
-      {
-        key: 'toolbars.theme',
-        name: '工具栏主题',
-        path: 'toolbars.theme',
-        type: 'string',
-        default: "'dark'",
-        description: '工具栏主题风格',
-        inputType: 'select',
-        options: ['dark', 'light'],
-        enabled: true,
-        value: 'dark',
-      },
-      {
         key: 'toolbars.toolbar',
         name: '顶部工具栏按钮',
         path: 'toolbars.toolbar',
@@ -586,7 +789,20 @@ export const CONFIG_CATEGORIES = [
         options: TOOLBAR_BUTTONS,
         canDisable: true,
         enabled: true,
-        value: ['bold', 'italic', 'strikethrough', '|', 'color', 'header', 'list', 'insert', '|', 'graph', 'togglePreview', 'settings'],
+        value: ['bold', 'italic', 'strikethrough', '|', 'color', 'header', 'list', '|', 'graph', 'code', 'formula'],
+      },
+      {
+        key: 'toolbars.toolbarRight',
+        name: '顶部右对齐工具栏按钮',
+        path: 'toolbars.toolbarRight',
+        type: 'array',
+        default: "['togglePreview','settings','fullScreen']",
+        description: '顶部右对齐工具栏显示的按钮列表，设为 false 可关闭顶部右对齐工具栏',
+        inputType: 'toolbar-select',
+        options: TOOLBAR_RIGHT_BUTTONS,
+        canDisable: true,
+        enabled: true,
+        value: ['togglePreview', 'settings', 'fullScreen'],
       },
       {
         key: 'toolbars.bubble',
@@ -654,7 +870,51 @@ export const CONFIG_CATEGORIES = [
         path: 'engine.global.htmlWhiteList',
         type: 'string',
         default: "''",
-        description: '额外允许渲染的 HTML 标签，以 ^ 开头表示转义',
+        description: '额外允许渲染的 HTML 标签，标签以英文竖线分隔，如：iframe|script|style',
+        inputType: 'text',
+        enabled: true,
+        value: '',
+      },
+      {
+        key: 'engine.global.htmlBlackList',
+        name: 'HTML 黑名单',
+        path: 'engine.global.htmlBlackList',
+        type: 'string',
+        default: "''",
+        description: 'HTML 黑名单，优先级高于白名单，标签以英文竖线分隔，配置 * 可禁用所有 HTML 标签',
+        inputType: 'text',
+        enabled: true,
+        value: '',
+      },
+      {
+        key: 'engine.global.htmlAttrWhiteList',
+        name: 'HTML 属性白名单',
+        path: 'engine.global.htmlAttrWhiteList',
+        type: 'string',
+        default: "''",
+        description: '额外允许渲染的 HTML 标签属性，标签以英文竖线分隔，如：part|onmouseover|my-attr',
+        inputType: 'text',
+        enabled: true,
+        value: '',
+      },
+      {
+        key: 'engine.global.flowSessionContext',
+        name: '流式会话模式',
+        path: 'engine.global.flowSessionContext',
+        type: 'boolean',
+        default: 'false',
+        description: '适配流式会话场景，开启后渲染频率提升、代码块/表格等自动闭合',
+        inputType: 'toggle',
+        enabled: true,
+        value: false,
+      },
+      {
+        key: 'engine.global.flowSessionCursor',
+        name: '流式会话光标',
+        path: 'engine.global.flowSessionCursor',
+        type: 'string',
+        default: "''",
+        description: "流式会话时在末尾增加光标 DOM，'default' 使用默认样式，'' 不增加",
         inputType: 'text',
         enabled: true,
         value: '',
@@ -741,13 +1001,13 @@ export const CONFIG_CATEGORIES = [
           { key: 'theme', name: '主题', type: 'select', value: 'dark', options: ['dark', 'light'] },
           { key: 'wrap', name: '自动换行', type: 'boolean', value: true },
           { key: 'lineNumber', name: '显示行号', type: 'boolean', value: true },
-          { key: 'copyCode', name: '复制按钮', type: 'boolean', value: true },
-          { key: 'editCode', name: '编辑按钮', type: 'boolean', value: true },
+          { key: 'copyCode', name: '复制按鈕', type: 'boolean', value: true },
+          { key: 'editCode', name: '编辑按鈕', type: 'boolean', value: true },
           { key: 'changeLang', name: '语言切换', type: 'boolean', value: true },
+          { key: 'expandCode', name: '展开/折叠按鈕', type: 'boolean', value: false },
           { key: 'indentedCodeBlock', name: '缩进代码块', type: 'boolean', value: true },
         ],
-      },
-      {
+      },      {
         key: 'engine.syntax.emoji',
         name: 'Emoji 表情',
         path: 'engine.syntax.emoji',
@@ -823,14 +1083,14 @@ export const CONFIG_CATEGORIES = [
         name: '目录 (TOC)',
         path: 'engine.syntax.toc',
         type: 'object',
-        default: '{ showAutoNumber: false, defaultLevel: 3 }',
+        default: '{ allowMultiToc: false, showAutoNumber: false }',
         description: '目录自动生成配置',
         inputType: 'toggle',
         enabled: true,
         value: true,
         subItems: [
+          { key: 'allowMultiToc', name: '允许多个目录', type: 'boolean', value: false },
           { key: 'showAutoNumber', name: '显示序号', type: 'boolean', value: false },
-          { key: 'defaultLevel', name: '默认层级', type: 'number', value: 3 },
         ],
       },
       {
@@ -838,14 +1098,14 @@ export const CONFIG_CATEGORIES = [
         name: '标题',
         path: 'engine.syntax.header',
         type: 'object',
-        default: "{ anchorStyle: 'default', strict: true }",
+        default: "{ anchorStyle: 'default', strict: false }",
         description: '标题解析配置',
         inputType: 'toggle',
         enabled: true,
         value: true,
         subItems: [
           { key: 'anchorStyle', name: '锚点样式', type: 'select', value: 'default', options: ['default', 'autonumber', 'none'] },
-          { key: 'strict', name: '严格模式', type: 'boolean', value: true },
+          { key: 'strict', name: '严格模式', type: 'boolean', value: false },
         ],
       },
       {
@@ -853,13 +1113,14 @@ export const CONFIG_CATEGORIES = [
         name: 'HTML 块',
         path: 'engine.syntax.htmlBlock',
         type: 'object',
-        default: '{ filterStyle: true }',
+        default: '{ filterStyle: false, removeTrailingNewline: false }',
         description: 'HTML 块级内容渲染配置',
         inputType: 'toggle',
         enabled: true,
         value: true,
         subItems: [
-          { key: 'filterStyle', name: '过滤 style 标签', type: 'boolean', value: true },
+          { key: 'filterStyle', name: '过滤 style 属性', type: 'boolean', value: false },
+          { key: 'removeTrailingNewline', name: '去掉闭合标签后连续换行', type: 'boolean', value: false },
         ],
       },
       {
@@ -923,6 +1184,28 @@ export const CONFIG_CATEGORIES = [
         inputType: 'toggle',
         enabled: true,
         value: true,
+      },
+      {
+        key: 'previewer.isMobilePreview',
+        name: '移动端预览',
+        path: 'previewer.isMobilePreview',
+        type: 'boolean',
+        default: 'false',
+        description: '是否启用移动端预览模式',
+        inputType: 'toggle',
+        enabled: true,
+        value: false,
+      },
+      {
+        key: 'previewer.floatWhenClosePreviewer',
+        name: '关闭预览时浮动',
+        path: 'previewer.floatWhenClosePreviewer',
+        type: 'boolean',
+        default: 'false',
+        description: '关闭预览时是否浮动显示预览区域',
+        inputType: 'toggle',
+        enabled: true,
+        value: false,
       },
     ],
   },
@@ -1045,6 +1328,52 @@ export const CONFIG_CATEGORIES = [
       },
     ],
   },
+  {
+    id: 'themeSettings',
+    name: '主题设置',
+    icon: 'fa-solid fa-palette',
+    iconBg: 'bg-rose-50',
+    iconColor: 'text-rose-500',
+    description: '编辑器主题相关设置',
+    items: [
+      {
+        key: 'themeSettings.mainTheme',
+        name: '主题',
+        path: 'themeSettings.mainTheme',
+        type: 'string',
+        default: "'default'",
+        description: '编辑器主题',
+        inputType: 'select',
+        options: ['default', 'dark', 'gray', 'abyss', 'green', 'red', 'violet', 'blue'],
+        enabled: true,
+        value: 'default',
+      },
+      {
+        key: 'themeSettings.codeBlockTheme',
+        name: '代码块主题',
+        path: 'themeSettings.codeBlockTheme',
+        type: 'string',
+        default: "'default'",
+        description: '代码块的高亮主题',
+        inputType: 'select',
+        options: ['default', 'dark', 'light', 'monokai', 'github', 'tomorrow', 'solarized-light', 'solarized-dark'],
+        enabled: true,
+        value: 'default',
+      },
+      {
+        key: 'themeSettings.inlineCodeTheme',
+        name: '行内代码主题',
+        path: 'themeSettings.inlineCodeTheme',
+        type: 'string',
+        default: "'red'",
+        description: '行内代码的颜色主题',
+        inputType: 'select',
+        options: ['red', 'black'],
+        enabled: true,
+        value: 'red',
+      },
+    ],
+  },
 ];
 
 // 预设配置
@@ -1058,7 +1387,8 @@ export const PRESETS = {
     name: '精简模式',
     description: '轻量级编辑器',
     overrides: {
-      'toolbars.toolbar': ['bold', 'italic', 'header', '|', 'list', 'code', '|', 'togglePreview'],
+      'toolbars.toolbar': ['bold', 'italic', 'header', '|', 'list', 'code'],
+      'toolbars.toolbarRight': ['togglePreview'],
       'toolbars.bubble': ['bold', 'italic', 'underline'],
       'toolbars.float': ['h1', 'h2', 'h3'],
       'toolbars.sidebar': false,
@@ -1068,7 +1398,8 @@ export const PRESETS = {
     name: '完整模式',
     description: '全部功能开启',
     overrides: {
-      'toolbars.toolbar': ['bold', 'italic', 'strikethrough', 'underline', '|', 'color', 'header', 'list', 'checklist', '|', 'quote', 'quickTable', 'code', 'formula', '|', 'link', 'image', 'audio', 'video', '|', 'hr', 'br', 'toc', '|', 'graph', 'togglePreview', 'export', 'settings', '|', 'undo', 'redo', 'fullScreen'],
+      'toolbars.toolbar': ['bold', 'italic', 'strikethrough', 'underline', '|', 'color', 'header', 'list', 'checklist', '|', 'quote', 'quickTable', 'code', 'formula', '|', 'link', 'image', 'audio', 'video', '|', 'hr', 'br', 'toc', '|', 'graph'],
+      'toolbars.toolbarRight': ['togglePreview', 'export', 'settings', '|', 'undo', 'redo', 'fullScreen'],
       'toolbars.bubble': ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', 'size', 'color'],
       'toolbars.float': ['h1', 'h2', 'h3', 'checklist', 'quote', 'quickTable', 'code'],
       'toolbars.sidebar': ['mobilePreview', 'copy', 'theme'],
@@ -1079,8 +1410,8 @@ export const PRESETS = {
     description: '只读预览',
     overrides: {
       'isPreviewOnly': true,
-      'toolbars.showToolbar': false,
       'toolbars.toolbar': false,
+      'toolbars.toolbarRight': false,
       'toolbars.bubble': false,
       'toolbars.float': false,
       'toolbars.sidebar': false,

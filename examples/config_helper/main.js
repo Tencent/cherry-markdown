@@ -4,7 +4,7 @@
 import { CONFIG_CATEGORIES, SOURCE_CODE_MAP, PRESETS, CHERRY_CONFIG_SOURCE } from './config-data.js';
 
 // 全局状态
-let cherryInstance = null;
+window.cherryInstance = null;
 let currentConfig = {};
 let configState = {};
 
@@ -342,12 +342,76 @@ function renderSubItem(parentKey, sub, idx) {
   `;
 }
 
+// 工具栏按钮名称映射（英文key -> 中文名称）
+const TOOLBAR_BUTTON_LABELS = {
+  'bold': '加粗',
+  'italic': '斜体',
+  'strikethrough': '删除线',
+  'sub': '下标',
+  'sup': '上标',
+  'header': '标题',
+  'list': '列表',
+  'ol': '有序列表',
+  'ul': '无序列表',
+  'checklist': '检查列表',
+  'graph': '图形',
+  'size': '尺寸',
+  'h1': '一级标题',
+  'h2': '二级标题',
+  'h3': '三级标题',
+  'color': '颜色',
+  'quote': '引用',
+  'quickTable': '快速表格',
+  'togglePreview': '切换预览',
+  'code': '代码',
+  'inlineCode': '内联代码',
+  'codeTheme': '代码主题',
+  'export': '导出',
+  'settings': '设置',
+  'fullScreen': '全屏',
+  'mobilePreview': '移动预览',
+  'copy': '复制',
+  'undo': '撤销',
+  'redo': '重做',
+  'underline': '下划线',
+  'switchModel': '切换模型',
+  'image': '图像',
+  'audio': '音频',
+  'video': '视频',
+  'br': '换行',
+  'hr': '水平线',
+  'formula': '公式',
+  'link': '链接',
+  'table': '表格',
+  'toc': '目录',
+  'proTable': '表格图表',
+  'pdf': 'PDF',
+  'word': 'Word',
+  'ruby': 'Ruby',
+  'theme': '主题',
+  'file': '文件',
+  'panel': '信息面板',
+  'align': '对齐',
+  'detail': '手风琴',
+  'drawIo': 'DrawIo',
+  'wordCount': '字数统计',
+  'cursorPosition': '光标位置',
+  'changeLocale': '切换语言',
+  'shortcutKey': '快捷键',
+  'search': '搜索',
+};
+
+function getButtonLabel(val) {
+  return TOOLBAR_BUTTON_LABELS[val] || val;
+}
+
 function renderToolbarChips(key, options, selectedValues) {
   // 候选区：普通按钮（不含分割线）
   const normalOptions = options.filter(opt => opt !== '|');
   const candidateChips = normalOptions.map(opt => {
     const active = selectedValues.includes(opt) ? 'active' : '';
-    return `<span class="toolbar-chip ${active}" data-parent-key="${key}" data-value="${opt}">${opt}</span>`;
+    const label = getButtonLabel(opt);
+    return `<span class="toolbar-chip ${active}" data-parent-key="${key}" data-value="${opt}" title="${opt}">${label}</span>`;
   }).join('');
 
   // 添加分割线按钮
@@ -360,7 +424,7 @@ function renderToolbarChips(key, options, selectedValues) {
   if (selectedValues.length > 0) {
     const sortItems = selectedValues.map((val, idx) => {
       const isSep = val === '|';
-      const label = isSep ? '|' : val;
+      const label = isSep ? '|' : getButtonLabel(val);
       const cls = isSep ? 'sort-item separator-item' : 'sort-item';
       return `<span class="${cls}" draggable="true" data-parent-key="${key}" data-sort-idx="${idx}" data-value="${val}" title="${isSep ? '分割线（拖拽排序 / 点击删除）' : val + '（拖拽排序）'}">
         <i class="fa-solid fa-grip-vertical sort-handle"></i>
