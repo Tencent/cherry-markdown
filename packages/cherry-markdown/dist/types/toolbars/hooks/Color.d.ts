@@ -50,7 +50,7 @@ export default class Color extends MenuBase {
     };
     hideOtherSubMenu(hideAllSubMenu: any): void;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';
 /**
  * 调色盘
  */

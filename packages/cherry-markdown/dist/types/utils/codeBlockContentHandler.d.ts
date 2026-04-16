@@ -64,7 +64,7 @@ export default class CodeBlockHandler {
      */
     $updateContainerPosition(): void;
     /**
-     * 更新编辑器的位置（尺寸和位置）
+     * 更新编辑器的位置(尺寸和位置)
      */
     $updateEditorPosition(): void;
     /**

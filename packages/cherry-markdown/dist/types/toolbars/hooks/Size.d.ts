@@ -26,4 +26,4 @@ export default class Size extends MenuBase {
     $getSizeByShortKey(shortKey: any): any;
     onClick(selection: any, shortKey?: string): string;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

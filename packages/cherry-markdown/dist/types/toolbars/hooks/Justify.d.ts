@@ -4,4 +4,4 @@
  */
 export default class Justify extends Align {
 }
-import Align from "./Align";
+import Align from './Align';

@@ -8,4 +8,4 @@ export default class FullScreen extends MenuBase {
      */
     onClick(): void;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

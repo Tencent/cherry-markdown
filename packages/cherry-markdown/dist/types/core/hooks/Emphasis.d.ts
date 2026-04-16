@@ -13,4 +13,4 @@ export default class Emphasis extends SyntaxBase {
         config: any;
     }): any;
 }
-import SyntaxBase from "@/core/SyntaxBase";
+import SyntaxBase from '@/core/SyntaxBase';

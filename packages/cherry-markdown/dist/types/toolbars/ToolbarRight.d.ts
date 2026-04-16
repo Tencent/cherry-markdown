@@ -3,4 +3,4 @@
  */
 export default class ToolbarRight extends Toolbar {
 }
-import Toolbar from "./Toolbar";
+import Toolbar from './Toolbar';

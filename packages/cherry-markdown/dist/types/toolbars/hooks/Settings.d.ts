@@ -58,5 +58,5 @@ export default class Settings extends MenuBase {
      */
     toggleToolbar(): void;
 }
-import MenuBase from "@/toolbars/MenuBase";
-import ShortcutKeyConfigPanel from "@/toolbars/ShortcutKeyConfigPanel";
+import MenuBase from '@/toolbars/MenuBase';
+import ShortcutKeyConfigPanel from '@/toolbars/ShortcutKeyConfigPanel';

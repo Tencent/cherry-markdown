@@ -4,6 +4,6 @@ declare namespace _default {
     export { ruRu as ru_RU };
 }
 export default _default;
-import zhCn from "./zh_CN";
-import enUs from "./en_US";
-import ruRu from "./ru_RU";
+import zhCn from './zh_CN';
+import enUs from './en_US';
+import ruRu from './ru_RU';

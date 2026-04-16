@@ -8,6 +8,7 @@ export class CherryStatic {
         TapdTablePlugin: typeof TapdTablePlugin;
         TapdHtmlTagPlugin: typeof TapdHtmlTagPlugin;
         TapdCheckListPlugin: typeof TapdCheckListPlugin;
+        EChartsCodeBlockEngine: typeof EChartsCodeBlockEngine;
     };
     static VERSION: string;
     /**
@@ -21,8 +22,9 @@ export class CherryStatic {
     }, ...args: any[]): void;
     constructor(...args: any[]);
 }
-import { createSyntaxHook } from "./Factory";
-import { createMenuHook } from "./Factory";
-import TapdTablePlugin from "./addons/advance/cherry-tapd-table-plugin";
-import TapdHtmlTagPlugin from "./addons/advance/cherry-tapd-html-tag-plugin";
-import TapdCheckListPlugin from "./addons/advance/cherry-tapd-checklist-plugin";
+import { createSyntaxHook } from './Factory';
+import { createMenuHook } from './Factory';
+import TapdTablePlugin from './addons/advance/cherry-tapd-table-plugin';
+import TapdHtmlTagPlugin from './addons/advance/cherry-tapd-html-tag-plugin';
+import TapdCheckListPlugin from './addons/advance/cherry-tapd-checklist-plugin';
+import EChartsCodeBlockEngine from './addons/advance/cherry-codeblock-echarts-plugin';

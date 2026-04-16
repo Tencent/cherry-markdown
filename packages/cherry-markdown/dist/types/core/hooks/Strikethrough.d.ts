@@ -8,6 +8,6 @@ export default class Strikethrough extends SyntaxBase {
     needWhitespace: boolean;
     rule({ config }?: {
         config: any;
-    }): import("~types/syntax").BasicHookRegexpRule;
+    }): import("../../types/syntax").BasicHookRegexpRule;
 }
-import SyntaxBase from "@/core/SyntaxBase";
+import SyntaxBase from '@/core/SyntaxBase';

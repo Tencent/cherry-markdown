@@ -11,4 +11,4 @@ export default class Detail extends MenuBase {
      */
     onClick(selection: string): string;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

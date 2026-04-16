@@ -24,4 +24,4 @@ export default class Footnote extends ParagraphBase {
         end: string;
     };
 }
-import ParagraphBase from "@/core/ParagraphBase";
+import ParagraphBase from '@/core/ParagraphBase';

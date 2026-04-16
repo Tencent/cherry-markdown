@@ -20,5 +20,5 @@ export default class ShortcutKey extends MenuBase {
     onClick(selection: string, shortKey?: string): string;
     shortcutKeyConfigPanel: ShortcutKeyConfigPanel;
 }
-import MenuBase from "@/toolbars/MenuBase";
-import ShortcutKeyConfigPanel from "@/toolbars/ShortcutKeyConfigPanel";
+import MenuBase from '@/toolbars/MenuBase';
+import ShortcutKeyConfigPanel from '@/toolbars/ShortcutKeyConfigPanel';

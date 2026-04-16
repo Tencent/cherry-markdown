@@ -1,19 +1,4 @@
 /**
- * Copyright (C) 2021 Tencent.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
  * 懒加载图片
  *
  * - 只缓存图片的src的原因
@@ -45,6 +30,9 @@ export default class LazyLoadImg {
     loadingImgNum: number;
     lastLoadAllNum: number;
     previewerDom: any;
+    pollingTimer: number;
+    checkAllLoadedTimer: number;
+    isDestroyed: boolean;
     /**
      * 判断图片的src是否加载过
      * @param {String} src
@@ -140,4 +128,8 @@ export default class LazyLoadImg {
      * @returns {String}
      */
     changeSrc2DataSrc(content: string, focus?: boolean): string;
+    /**
+     * 销毁懒加载实例，清理定时器和引用
+     */
+    destroy(): void;
 }

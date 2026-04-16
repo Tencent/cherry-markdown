@@ -259,7 +259,7 @@ export default class TableHandler {
      * @param {number} columnIndex
      * @param {'left'|'right'|'top'|'bottom'} position
      */
-    $highlightColumnCellsDom(columnIndex: number, position: 'left' | 'right' | 'top' | 'bottom'): void;
+    $highlightColumnCellsDom(columnIndex: number, position: "left" | "right" | "top" | "bottom"): void;
     /**
      * 高亮当前列
      */

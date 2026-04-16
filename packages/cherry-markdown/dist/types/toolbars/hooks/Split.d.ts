@@ -10,4 +10,4 @@ export default class Split extends MenuBase {
      */
     createBtn(): HTMLElement;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

@@ -17,4 +17,4 @@ export default class Underline extends MenuBase {
      */
     onClick(selection: string, shortKey?: string): string;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

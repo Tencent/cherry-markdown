@@ -12,5 +12,5 @@ export default class Table extends MenuBase {
      */
     onClick(selection: string, shortKey?: string): any;
 }
-import MenuBase from "@/toolbars/MenuBase";
-import BubbleTableMenu from "@/toolbars/BubbleTable";
+import MenuBase from '@/toolbars/MenuBase';
+import BubbleTableMenu from '@/toolbars/BubbleTable';

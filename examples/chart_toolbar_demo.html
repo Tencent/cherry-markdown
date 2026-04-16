@@ -1,20 +1,32 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cherry Markdown - 图表工具栏测试</title>
-    <link href="cherry-markdown.css" rel="stylesheet">
-    <script src="echarts.min.js"></script>
-    <script src="cherry-markdown.js"></script>
-</head>
-<body>
-    <div id="cherry-markdown"></div>
+    <link rel="stylesheet" type="text/css" href="./packages/cherry-markdown/dist/cherry-markdown.css" />
+    <link rel="Shortcut Icon" href="./logo/favicon.ico" />
+    <link rel="Shortcut Icon" href="../logo/favicon.ico" />
+    <link rel="Bookmark" href="../logo/favicon.ico" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+    </style>
+  </head>
 
-    <script>
-        const cherryInstance = new Cherry({
-            id: 'cherry-markdown',
-            value: `# Cherry Markdown 图表工具栏测试
+  <body>
+    <div id="cherry-markdown"></div>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
+    <script src="./packages/cherry-markdown/dist/cherry-markdown.js"></script>
+    <script type="module">
+      const cherryInstance = new Cherry({
+        id: 'cherry-markdown',
+        value: `# Cherry Markdown 图表工具栏测试
 
 ## 工具栏配置示例
 
@@ -68,25 +80,23 @@
 | 江苏 | 590 |
 | 浙江 | 420 |
 `,
-            toolbars: {
-                toolbar: [
-                    'bold', 'italic', 'strikethrough', '|',
-                    'color', 'header', '|',
-                    'list', 'ol', 'ul', 'checklist', '|',
-                    'proTable', '|',
-                    'link', 'image', 'code', '|',
-                    'togglePreview', 'fullScreen'
-                ]
-            },
-            editor: {
-                height: '600px'
-            },
-            previewer: {
-                dom: false,
-                className: 'cherry-editor',
-                enablePreviewerBubble: true
-            }
-        });
+        toolbars: {
+          toolbar: [
+            'bold', 'italic', 'strikethrough', '|',
+            'color', 'header', '|',
+            'list', 'ol', 'ul', 'checklist', '|',
+            'proTable', '|',
+            'link', 'image', 'code', '|',
+            'togglePreview', 'fullScreen'
+          ]
+        },
+        editor: {},
+        previewer: {
+          dom: false,
+          className: 'cherry-editor',
+          enablePreviewerBubble: true
+        }
+      });
     </script>
-</body>
+  </body>
 </html>

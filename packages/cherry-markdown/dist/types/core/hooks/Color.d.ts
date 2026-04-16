@@ -7,4 +7,4 @@ export default class Color extends SyntaxBase {
         content: string;
     };
 }
-import SyntaxBase from "@/core/SyntaxBase";
+import SyntaxBase from '@/core/SyntaxBase';

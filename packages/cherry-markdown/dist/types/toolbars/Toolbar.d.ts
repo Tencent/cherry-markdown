@@ -69,8 +69,8 @@ export default class Toolbar {
     init(): void;
     previewOnly(): void;
     showToolbar(): void;
-    isHasLevel2Menu(name: any): string[];
-    isHasConfigMenu(name: any): import("./MenuBase").SubMenuConfigItem[];
+    level2MenuList(name: any): string[];
+    hasConfigMenuList(name: any): import("./MenuBase").SubMenuConfigItem[];
     /**
      * 判断是否有子菜单，目前有两种子菜单配置方式：1、通过`subMenuConfig`属性 2、通过`buttonConfig`配置属性
      * @param {string} name
@@ -148,7 +148,7 @@ export type Italic = () => void;
  * 向cherry编辑器中插入标题语法
  * - level 标题等级 1~5
  */
-export type Header = (level: 1 | 2 | 3 | 4 | 5 | '1' | '2' | '3' | '4' | '5') => void;
+export type Header = (level: 1 | 2 | 3 | 4 | 5 | "1" | "2" | "3" | "4" | "5") => void;
 /**
  * 向cherry编辑器中插入删除线语法
  */
@@ -159,7 +159,7 @@ export type Strikethrough = () => void;
  * - ul(2)无序列表
  * - checklist(3)checklist
  */
-export type List = (type: 'ol' | 'ul' | 'checklist' | 1 | 2 | 3 | '1' | '2' | '3') => void;
+export type List = (type: "ol" | "ul" | "checklist" | 1 | 2 | 3 | "1" | "2" | "3") => void;
 /**
  * 插入表格语法约束
  */
@@ -179,7 +179,7 @@ export type normalTableRowCol = `normal-table-${number}*${number}`;
  * - normal-table 插入3行5列的表格
  * - normal-table-row*col 如normal-table-2*4插入2行(包含表头是3行)4列的表格
  */
-export type Insert = (insert: 'hr' | 'br' | 'code' | 'formula' | 'checklist' | 'toc' | 'link' | 'image' | 'video' | 'audio' | 'normal-table' | normalTableRowCol) => void;
+export type Insert = (insert: "hr" | "br" | "code" | "formula" | "checklist" | "toc" | "link" | "image" | "video" | "audio" | "normal-table" | normalTableRowCol) => void;
 /**
  * 向cherry编辑器中插入画图语法
  * - flow(1) 流程图
@@ -189,5 +189,5 @@ export type Insert = (insert: 'hr' | 'br' | 'code' | 'formula' | 'checklist' | '
  * - pie(5)饼图
  * - gantt(6)甘特图
  */
-export type Graph = (type: '1' | '2' | '3' | '4' | '5' | '6' | 1 | 2 | 3 | 4 | 5 | 6 | 'flow' | 'sequence' | 'state' | 'class' | 'pie' | 'gantt') => void;
-import HookCenter from "./HookCenter";
+export type Graph = (type: "1" | "2" | "3" | "4" | "5" | "6" | 1 | 2 | 3 | 4 | 5 | 6 | "flow" | "sequence" | "state" | "class" | "pie" | "gantt") => void;
+import HookCenter from './HookCenter';

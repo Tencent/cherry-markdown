@@ -16,4 +16,4 @@ export default class Search extends MenuBase {
      */
     onClick(selection: string, shortKey?: string): void;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

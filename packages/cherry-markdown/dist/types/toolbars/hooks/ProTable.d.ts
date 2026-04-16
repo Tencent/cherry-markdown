@@ -49,4 +49,4 @@ export default class ProTable extends MenuBase {
      */
     insertSankeyTable(selection: any): string;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

@@ -30,4 +30,4 @@ export default class Copy extends MenuBase {
      */
     onClick(e: Event): void;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

@@ -35,6 +35,14 @@ export default class SearchBox {
      */
     constructor($cherry: object);
     $cherry: any;
+    searchState: {
+        posFrom: any;
+        posTo: any;
+        lastQuery: any;
+        query: any;
+        overlay: any;
+        annotate: any;
+    };
     init(cm: any): void;
     cm: any;
     element: ChildNode;
@@ -44,7 +52,20 @@ export default class SearchBox {
         toggleCaseSensitive: () => void;
         toggleWholeWords: () => void;
     };
+    boundMousedownHandler: (e: any) => void;
+    boundClickHandler: (e: any) => void;
+    boundSearchInputHandler: () => void;
+    boundSearchInputFocusHandler: () => void;
+    boundReplaceInputFocusHandler: () => void;
+    /**
+     * 销毁 SearchBox 实例，清理事件监听器
+     * 必须调用此方法以避免内存泄漏
+     */
+    destroy(): void;
+    searchInput: any;
+    replaceInput: any;
     addEventListeners(): void;
+    boundTogglePreviewHandler: (state: any) => void;
     addHtml(): ChildNode;
     initElements(el: any): void;
     searchBox: any;
@@ -53,11 +74,9 @@ export default class SearchBox {
     regExpOption: any;
     caseSensitiveOption: any;
     wholeWordOption: any;
-    searchInput: any;
-    replaceInput: any;
     bindKeys(): void;
     $syncOptions(): void;
-    find(skipCurrent: any, backwards: any): void;
+    find(skipCurrent: any, backwards: any, scrollIntoView?: boolean): void;
     $find(value: any, options: any, callback: any): void;
     findNext(): void;
     findPrev(): void;
@@ -76,10 +95,14 @@ export default class SearchBox {
     parseQuery(query: any): any;
     startSearch(cm: any, state: any, query: any, caseSensitive: any): void;
     queryCaseInsensitive(query: any, caseSensitive: any): boolean;
-    searchOverlay(query: any, caseInsensitive: any): {
-        token(stream: any): string;
+    getSearchState(cm: any): {
+        posFrom: any;
+        posTo: any;
+        lastQuery: any;
+        query: any;
+        overlay: any;
+        annotate: any;
     };
-    getSearchState(cm: any): any;
     clearSearch(cm: any): void;
     updateCount(): void;
     updateLocaleStrings(): void;

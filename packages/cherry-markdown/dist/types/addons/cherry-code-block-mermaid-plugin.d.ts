@@ -4,13 +4,13 @@ export default class MermaidCodeEngine {
     /**
      * @param {Object} mermaidOptions - Mermaid 配置选项
      * @param {Object} [mermaidOptions.mermaid] - mermaid 实例对象，如果未提供会尝试从 window.mermaid 获取
-     * @param {Object} [mermaidOptions.mermaidAPI] - mermaidAPI 实例对象，如果未提供会尝试从 window.mermaidAPI 获取
+     * @param {Object} [mermaidOptions.mermaidAPI] - mermaidAPI 实例对象（仅 v9 及以下版本需要，v10+ 可忽略）
      * @param {string} [mermaidOptions.theme='default'] - 主题，可选值: 'default', 'dark', 'forest', 'neutral' 等
      * @param {string} [mermaidOptions.altFontFamily='sans-serif'] - 备用字体
      * @param {string} [mermaidOptions.fontFamily='sans-serif'] - 主字体
      * @param {string} [mermaidOptions.themeCSS] - 自定义主题 CSS 样式
      * @param {boolean} [mermaidOptions.startOnLoad=false] - 是否在页面加载时自动渲染
-     * @param {number} [mermaidOptions.logLevel=5] - 日志级别，1-5，5 为最详细
+     * @param {number|string} [mermaidOptions.logLevel] - 日志级别（v9: 数字 1-5；v10+: 字符串 'debug'|'info'|...|'silent'）
      * @param {HTMLElement} [mermaidOptions.mermaidCanvasAppendDom] - Mermaid 临时画布容器的挂载节点
      * @param {Object} [mermaidOptions.flowchart] - 流程图配置，可设置 { useMaxWidth: false } 等
      * @param {Object} [mermaidOptions.sequence] - 序列图配置，可设置 { useMaxWidth: false } 等
@@ -42,7 +42,7 @@ export default class MermaidCodeEngine {
         fontFamily?: string;
         themeCSS?: string;
         startOnLoad?: boolean;
-        logLevel?: number;
+        logLevel?: number | string;
         mermaidCanvasAppendDom?: HTMLElement;
         flowchart?: any;
         sequence?: any;
@@ -73,7 +73,7 @@ export default class MermaidCodeEngine {
         fontFamily: string;
         themeCSS: string;
         startOnLoad: boolean;
-        logLevel: number;
+        logLevel: string;
     };
     dom: any;
     mermaidCanvas: any;

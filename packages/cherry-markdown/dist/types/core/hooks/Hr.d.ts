@@ -11,4 +11,4 @@ export default class Hr extends ParagraphBase {
         content: string;
     };
 }
-import ParagraphBase from "@/core/ParagraphBase";
+import ParagraphBase from '@/core/ParagraphBase';

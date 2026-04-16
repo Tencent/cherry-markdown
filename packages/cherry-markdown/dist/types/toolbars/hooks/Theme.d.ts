@@ -18,4 +18,4 @@ export default class Theme extends MenuBase {
      */
     onClick(selection: string, shortKey?: string): string;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

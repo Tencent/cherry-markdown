@@ -39,7 +39,7 @@ export function getCodeBlockRule(): {
  * @param {('ol'|'ul'|'checklist')} type  列表类型
  * @returns {String}
  */
-export function getListFromStr(selection: any, type: ('ol' | 'ul' | 'checklist')): string;
+export function getListFromStr(selection: any, type: ("ol" | "ul" | "checklist")): string;
 /**
  * 信息面板的识别正则
  * @returns {object}
@@ -59,6 +59,7 @@ export function getPanelRule(): object;
  * @returns {object}
  */
 export function getDetailRule(): object;
+export const mathBlockReg: RegExp;
 export const HORIZONTAL_WHITESPACE: "[ \\t\\u00a0]";
 export const ALLOW_WHITESPACE_MULTILINE: "(?:.*?)(?:(?:\\n.*?)*?)";
 export const DO_NOT_STARTS_AND_END_WITH_SPACES: "(?:\\S|(?:\\S.*?\\S))";
@@ -73,7 +74,7 @@ export const NOT_ALL_WHITE_SPACES_INLINE: "(?:[^\\n]*?\\S[^\\n]*?)";
 export const NORMAL_INDENT: "[ ]{0, 3}|\\t";
 export const NO_BACKSLASH_BEFORE_CAPTURE: "[^\\\\]";
 export const PUNCTUATION: "[\\u0021-\\u002F\\u003a-\\u0040\\u005b-\\u0060\\u007b-\\u007e]";
-export const CHINESE_PUNCTUATION: "[！“”¥‘’（），。—：；《》？【】「」·～｜]";
+export const CHINESE_PUNCTUATION: "[\uFF01\u201C\u201D\u00A5\u2018\u2019\uFF08\uFF09\uFF0C\u3002\u2014\uFF1A\uFF1B\u300A\u300B\uFF1F\u3010\u3011\u300C\u300D\u00B7\uFF5E\uFF5C]";
 export const UNDERSCORE_EMPHASIS_BOUNDARY: string;
 export const EMAIL_INLINE: RegExp;
 export const EMAIL: RegExp;
@@ -82,6 +83,7 @@ export const URL_INLINE: RegExp;
 export const URL_NO_SLASH: RegExp;
 export const URL: RegExp;
 export const LIST_CONTENT: RegExp;
+export const pasteWrapperReg: RegExp;
 export const imgBase64Reg: RegExp;
 export const base64Reg: RegExp;
 export const longTextReg: RegExp;

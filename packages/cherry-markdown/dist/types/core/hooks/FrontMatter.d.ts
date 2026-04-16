@@ -8,4 +8,4 @@ export default class FrontMatter extends ParagraphBase {
         content: string;
     };
 }
-import ParagraphBase from "@/core/ParagraphBase";
+import ParagraphBase from '@/core/ParagraphBase';

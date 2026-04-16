@@ -6,14 +6,14 @@ export default class ListHandler {
      * @param {HTMLDivElement} previewerDom 预览器dom
      * @param {import('../Editor').default} editor 编辑器实例
      */
-    constructor(trigger: string, target: HTMLParagraphElement, container: HTMLDivElement, previewerDom: HTMLDivElement, editor: import('../Editor').default, options?: {});
+    constructor(trigger: string, target: HTMLParagraphElement, container: HTMLDivElement, previewerDom: HTMLDivElement, editor: import("../Editor").default, options?: {});
     /** @type{HTMLElement} */
     bubbleContainer: HTMLElement;
     regList: RegExp;
-    /** @type{Array.<import('codemirror').Position>} */
-    range: Array<import('codemirror').Position>;
-    /** @type{import('codemirror').Position} */
-    position: import('codemirror').Position;
+    /** @type{Array.<number>} */
+    range: Array<number>;
+    /** @type{number} */
+    position: number;
     input: boolean;
     isCheckbox: boolean;
     trigger: string;

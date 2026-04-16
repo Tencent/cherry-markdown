@@ -18,5 +18,5 @@ export default class Insert extends MenuBase {
      */
     onClick(selection: string, shortKey?: string, callback?: Function): string;
 }
-import MenuBase from "@/toolbars/MenuBase";
-import BubbleTableMenu from "@/toolbars/BubbleTable";
+import MenuBase from '@/toolbars/MenuBase';
+import BubbleTableMenu from '@/toolbars/BubbleTable';

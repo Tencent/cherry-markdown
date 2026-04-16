@@ -6,17 +6,17 @@ export default class PreviewerBubble {
      *
      * @param {import('../Previewer').default} previewer
      */
-    constructor(previewer: import('../Previewer').default);
+    constructor(previewer: import("../Previewer").default);
     /**
      * @property
      * @type {import('../Previewer').default}
      */
-    previewer: import('../Previewer').default;
+    previewer: import("../Previewer").default;
     /**
      * @property
-     * @type {import('../Editor').default}
+     * @type {import('../Editor').default|null}
      */
-    editor: import('../Editor').default;
+    editor: import("../Editor").default | null;
     previewerDom: HTMLDivElement;
     $cherry: import("..").default;
     /**
@@ -32,13 +32,32 @@ export default class PreviewerBubble {
      */
     bubbleHandler: {
         [key: string]: {
-            [key: string]: any;
             emit: (...args: any[]) => any;
+            [key: string]: any;
         };
     };
+    /** 图片扩展参数在编辑器中的位置范围 */
+    imgExtendFrom: number;
+    imgExtendTo: number;
+    imgHasExtend: boolean;
+    /** 前导空格位置，清除所有扩展参数时一并移除 */
+    imgLeadingSpacePos: number;
+    /** 记录 beginChangeImgValue 时的文档状态，用于位置映射追踪 */
+    imgChangeBaseState: any;
     init(): void;
     oldWrapperDomOverflow: string;
+    $bindedOnClick: any;
+    $bindedOnMouseOver: any;
+    $bindedOnMouseDown: (event: any) => void;
+    $bindedOnMouseUp: (event: any) => void;
+    $bindedOnMouseMove: (event: any) => void;
+    $bindedOnKeyUp: (event: any) => void;
+    $bindedOnScroll: (event: any) => void;
+    $bindedOnChange: any;
+    $bindedOnEditorSizeChange: () => void;
+    $bindedOnLayoutChange: () => void;
     removeHoverBubble: import("lodash").DebouncedFunc<() => void>;
+    isDestroyed: boolean;
     /**
      * 判断是否为代码块
      * @param {HTMLElement} element
@@ -53,6 +72,12 @@ export default class PreviewerBubble {
      */
     isCherryTable(element: HTMLElement): boolean | HTMLElement;
     /**
+     * 检测编辑器是否可用
+     * 用于流式渲染场景下的读写分离判断
+     * @returns {boolean}
+     */
+    $hasEditor(): boolean;
+    /**
      * 是否开启了预览区操作 && 是否有编辑区
      * @returns {boolean}
      */
@@ -63,6 +88,8 @@ export default class PreviewerBubble {
     checkboxIdx: number;
     /**
      * 点击预览区域的事件处理
+     * 基础交互功能（代码块展开/复制、链接跳转、脚注等）始终可用
+     * enablePreviewerBubble 配置只控制是否显示编辑工具栏（图片、表格、列表等）
      * @param {MouseEvent} e
      * @returns
      */
@@ -175,7 +202,56 @@ export default class PreviewerBubble {
      * @param {string} type 容器类型（用作样式名：cherry-previewer-{type}）
      */
     $createPreviewerBubbles(trigger?: string, type?: string): void;
+    /**
+     * 判断目标元素是否为 mermaid 图表或其子元素
+     * @param {Element} element
+     * @returns {HTMLElement|false}
+     */
+    $getMermaidFigure(element: Element): HTMLElement | false;
+    /**
+     * 为选中的 mermaid 图表增加尺寸调整工具
+     * @param {HTMLElement} figureElement mermaid 图表的 figure DOM
+     */
+    $showMermaidPreviewerBubbles(figureElement: HTMLElement, event: any): void;
+    mermaidFigure: HTMLElement;
+    /**
+     * 选中 mermaid 代码块语法的语言行中的扩展参数部分（尺寸 + 对齐）
+     * @param {HTMLElement} figureElement mermaid figure DOM
+     * @returns {boolean}
+     */
+    beginChangeMermaidValue(figureElement: HTMLElement): boolean;
+    mermaidSize: string;
+    mermaidAlign: string;
+    mermaidExtendFrom: number;
+    mermaidExtendTo: number;
+    mermaidLangLineNum: number;
+    mermaidHasExtend: boolean;
+    /**
+     * 拼接 mermaid 扩展参数并替换编辑器中的选中文本
+     */
+    changeMermaidValue(): void;
+    /**
+     * 修改 mermaid 图表尺寸时的回调
+     * @param {HTMLElement} htmlElement mermaid figure 元素
+     * @param {Object} style 图表的属性（宽高）
+     */
+    changeMermaidSize(htmlElement: HTMLElement, style: any): void;
+    /**
+     * 修改 mermaid 图表对齐方式时的回调
+     * @param {HTMLElement} htmlElement mermaid figure 元素
+     * @param {string} type 对齐方式
+     */
+    changeMermaidStyle(htmlElement: HTMLElement, type: string): void;
+    /**
+     * 处理 mermaid 源码/预览切换工具栏的点击
+     * @param {Element} tabElement 被点击的 tab 元素
+     */
+    $handleMermaidSourceToolbarClick(tabElement: Element): void;
     $showBorderBubbles(): void;
     $showBtnBubbles(): void;
+    /**
+     * 销毁 PreviewerBubble 实例，清理事件监听器和引用
+     */
+    destroy(): void;
 }
-import TableHandler from "@/utils/tableContentHandler";
+import TableHandler from '@/utils/tableContentHandler';

@@ -15,9 +15,19 @@ export default class CommentReference extends ParagraphBase {
     });
     commentCache: {};
     $cleanCache(): void;
+    /**
+     * 去除包裹 url 的尖括号
+     * @param {string} wrappedUrl
+     */
+    unwrapUrl(wrappedUrl: string): string;
     pushCommentReferenceCache(key: any, cache: any): void;
     getCommentReferenceCache(key: any): any;
-    beforeMakeHtml(str: any): any;
+    /**
+     *
+     * @param {string} str
+     * @returns
+     */
+    beforeMakeHtml(str: string): string;
     makeHtml(str: any, sentenceMakeFunc: any): any;
     afterMakeHtml(str: any): string;
     rule(): {
@@ -26,4 +36,4 @@ export default class CommentReference extends ParagraphBase {
         end: string;
     };
 }
-import ParagraphBase from "@/core/ParagraphBase";
+import ParagraphBase from '@/core/ParagraphBase';

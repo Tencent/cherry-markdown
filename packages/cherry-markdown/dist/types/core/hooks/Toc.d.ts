@@ -55,6 +55,6 @@ export default class Toc extends ParagraphBase {
      */
     rule(): any;
 }
-import ParagraphBase from "@/core/ParagraphBase";
+import ParagraphBase from '@/core/ParagraphBase';
 declare function defaultLinkProcessor(link: any): any;
 export {};

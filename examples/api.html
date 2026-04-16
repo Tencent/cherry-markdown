@@ -62,7 +62,7 @@
       text-align: center;
     }
   </style>
-  <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css">
+  <link rel="stylesheet" type="text/css" href="./packages/cherry-markdown/dist/cherry-markdown.css">
   <link rel="Shortcut Icon" href="./logo/favicon.ico">
   <link rel="Shortcut Icon" href="../logo/favicon.ico">
   <link rel="Bookmark" href="../logo/favicon.ico">
@@ -286,11 +286,12 @@ cherryObj.toggleToc('pure'); // 强制切换到极简状态</textarea>
     </div>
 
     <div class="one-api">
-      <h2 class="one-api__name">refreshPreviewer()</h2>
+      <h2 class="one-api__name">refreshPreviewer(clearEngineCache:{true|false})</h2>
       <p class="one-api__desc">强制重新渲染预览区域</p>
       <div class="one-api__try">
         <textarea id="setMarkdown" placeholder="输入内容">
-cherryObj.refreshPreviewer();</textarea>
+cherryObj.refreshPreviewer(); // 强制重新渲染预览区
+cherryObj.refreshPreviewer(true); // 清空编译引擎的缓存，再强制重新渲染预览区</textarea>
         <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
       </div>
     </div>
@@ -698,10 +699,17 @@ cherryObj.toolbar.toolbarHandlers.graph(4)</textarea>
 
   <div id="markdown"></div>
 
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
   <!--<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>-->
-  <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
-  <script src="./assets/scripts/api-demo.js"></script>
+  <script src="./packages/cherry-markdown/dist/cherry-markdown.js"></script>
+  <script type="module">
+    import { dealClick, cherryConfig } from './assets/scripts/api-demo.js';
+
+    const response = await fetch('./assets/markdown/api.md');
+    const value = await response.text();
+    const config = Object.assign({}, cherryConfig, { value });
+    window.cherryObj = new Cherry(config);
+  </script>
 </body>
 
 </html>

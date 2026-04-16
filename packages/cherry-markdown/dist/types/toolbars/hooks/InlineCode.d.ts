@@ -4,7 +4,7 @@
 export default class InlineCode extends MenuBase {
     constructor($cherry: any);
     shortcutKeyMap: {
-        [x: string]: {
+        "Control-Backquote": {
             hookName: string;
             aliasName: string;
         };
@@ -17,4 +17,4 @@ export default class InlineCode extends MenuBase {
      */
     onClick(selection: string, shortKey?: string): string;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

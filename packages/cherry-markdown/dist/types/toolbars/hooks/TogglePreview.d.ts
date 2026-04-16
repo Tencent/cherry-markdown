@@ -10,11 +10,11 @@ export default class TogglePreview extends MenuBase {
      * 绑定预览事件
      */
     attachEventListeners(): void;
-    set isHidden(arg: boolean);
+    set isHidden(state: boolean);
     get isHidden(): boolean;
     /**
      * 响应点击事件
      */
     onClick(): void;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

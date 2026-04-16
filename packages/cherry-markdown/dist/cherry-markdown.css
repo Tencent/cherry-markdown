@@ -1,504 +1,4 @@
 @charset "UTF-8";
-/* BASICS */
-.CodeMirror {
-  /* Set height, width, borders, and global font properties here */
-  font-family: monospace;
-  height: 300px;
-  color: black;
-  direction: ltr;
-}
-
-/* PADDING */
-.CodeMirror-lines {
-  padding: 4px 0; /* Vertical padding around content */
-}
-
-.CodeMirror pre.CodeMirror-line,
-.CodeMirror pre.CodeMirror-line-like {
-  padding: 0 4px; /* Horizontal padding of content */
-}
-
-.CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {
-  background-color: white; /* The little square between H and V scrollbars */
-}
-
-/* GUTTER */
-.CodeMirror-gutters {
-  border-right: 1px solid #ddd;
-  background-color: #f7f7f7;
-  white-space: nowrap;
-}
-
-.CodeMirror-linenumber {
-  padding: 0 3px 0 5px;
-  min-width: 20px;
-  text-align: right;
-  color: #999;
-  white-space: nowrap;
-}
-
-.CodeMirror-guttermarker {
-  color: black;
-}
-
-.CodeMirror-guttermarker-subtle {
-  color: #999;
-}
-
-/* CURSOR */
-.CodeMirror-cursor {
-  border-left: 1px solid black;
-  border-right: none;
-  width: 0;
-}
-
-/* Shown when moving in bi-directional text */
-.CodeMirror div.CodeMirror-secondarycursor {
-  border-left: 1px solid silver;
-}
-
-.cm-fat-cursor .CodeMirror-cursor {
-  width: auto;
-  border: 0 !important;
-  background: #7e7;
-}
-
-.cm-fat-cursor div.CodeMirror-cursors {
-  z-index: 1;
-}
-
-.cm-fat-cursor-mark {
-  background-color: rgba(20, 255, 20, 0.5);
-  -webkit-animation: blink 1.06s steps(1) infinite;
-  -moz-animation: blink 1.06s steps(1) infinite;
-  animation: blink 1.06s steps(1) infinite;
-}
-
-.cm-animate-fat-cursor {
-  width: auto;
-  border: 0;
-  -webkit-animation: blink 1.06s steps(1) infinite;
-  -moz-animation: blink 1.06s steps(1) infinite;
-  animation: blink 1.06s steps(1) infinite;
-  background-color: #7e7;
-}
-
-@-moz-keyframes blink {
-  50% {
-    background-color: transparent;
-  }
-}
-@-webkit-keyframes blink {
-  50% {
-    background-color: transparent;
-  }
-}
-@keyframes blink {
-  50% {
-    background-color: transparent;
-  }
-}
-/* Can style cursor different in overwrite (non-insert) mode */
-.cm-tab {
-  display: inline-block;
-  text-decoration: inherit;
-}
-
-.CodeMirror-rulers {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -50px;
-  bottom: 0;
-  overflow: hidden;
-}
-
-.CodeMirror-ruler {
-  border-left: 1px solid #ccc;
-  top: 0;
-  bottom: 0;
-  position: absolute;
-}
-
-/* DEFAULT THEME */
-.cm-s-default .cm-header {
-  color: blue;
-}
-
-.cm-s-default .cm-quote {
-  color: #090;
-}
-
-.cm-negative {
-  color: #d44;
-}
-
-.cm-positive {
-  color: #292;
-}
-
-.cm-header, .cm-strong {
-  font-weight: bold;
-}
-
-.cm-em {
-  font-style: italic;
-}
-
-.cm-link {
-  text-decoration: underline;
-}
-
-.cm-strikethrough {
-  text-decoration: line-through;
-}
-
-.cm-s-default .cm-keyword {
-  color: #708;
-}
-
-.cm-s-default .cm-atom {
-  color: #219;
-}
-
-.cm-s-default .cm-number {
-  color: #164;
-}
-
-.cm-s-default .cm-def {
-  color: #00f;
-}
-
-.cm-s-default .cm-variable-2 {
-  color: #05a;
-}
-
-.cm-s-default .cm-variable-3, .cm-s-default .cm-type {
-  color: #085;
-}
-
-.cm-s-default .cm-comment {
-  color: #a50;
-}
-
-.cm-s-default .cm-string {
-  color: #a11;
-}
-
-.cm-s-default .cm-string-2 {
-  color: #f50;
-}
-
-.cm-s-default .cm-meta {
-  color: #555;
-}
-
-.cm-s-default .cm-qualifier {
-  color: #555;
-}
-
-.cm-s-default .cm-builtin {
-  color: #30a;
-}
-
-.cm-s-default .cm-bracket {
-  color: #997;
-}
-
-.cm-s-default .cm-tag {
-  color: #170;
-}
-
-.cm-s-default .cm-attribute {
-  color: #00c;
-}
-
-.cm-s-default .cm-hr {
-  color: #999;
-}
-
-.cm-s-default .cm-link {
-  color: #00c;
-}
-
-.cm-s-default .cm-error {
-  color: #f00;
-}
-
-.cm-invalidchar {
-  color: #f00;
-}
-
-.CodeMirror-composing {
-  border-bottom: 2px solid;
-}
-
-/* Default styles for common addons */
-div.CodeMirror span.CodeMirror-matchingbracket {
-  color: #0b0;
-}
-
-div.CodeMirror span.CodeMirror-nonmatchingbracket {
-  color: #a22;
-}
-
-.CodeMirror-matchingtag {
-  background: rgba(255, 150, 0, 0.3);
-}
-
-.CodeMirror-activeline-background {
-  background: #e8f2ff;
-}
-
-/* STOP */
-/* The rest of this file contains styles related to the mechanics of
-   the editor. You probably shouldn't touch them. */
-.CodeMirror {
-  position: relative;
-  overflow: hidden;
-  background: white;
-}
-
-.CodeMirror-scroll {
-  overflow: scroll !important; /* Things will break if this is overridden */
-  /* 50px is the magic margin used to hide the element's real scrollbars */
-  /* See overflow: hidden in .CodeMirror */
-  margin-bottom: -50px;
-  margin-right: -50px;
-  padding-bottom: 50px;
-  height: 100%;
-  outline: none; /* Prevent dragging from highlighting the element */
-  position: relative;
-}
-
-.CodeMirror-sizer {
-  position: relative;
-  border-right: 50px solid transparent;
-}
-
-/* The fake, visible scrollbars. Used to force redraw during scrolling
-   before actual scrolling happens, thus preventing shaking and
-   flickering artifacts. */
-.CodeMirror-vscrollbar, .CodeMirror-hscrollbar, .CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {
-  position: absolute;
-  z-index: 6;
-  display: none;
-  outline: none;
-}
-
-.CodeMirror-vscrollbar {
-  right: 0;
-  top: 0;
-  overflow-x: hidden;
-  overflow-y: scroll;
-}
-
-.CodeMirror-hscrollbar {
-  bottom: 0;
-  left: 0;
-  overflow-y: hidden;
-  overflow-x: scroll;
-}
-
-.CodeMirror-scrollbar-filler {
-  right: 0;
-  bottom: 0;
-}
-
-.CodeMirror-gutter-filler {
-  left: 0;
-  bottom: 0;
-}
-
-.CodeMirror-gutters {
-  position: absolute;
-  left: 0;
-  top: 0;
-  min-height: 100%;
-  z-index: 3;
-}
-
-.CodeMirror-gutter {
-  white-space: normal;
-  height: 100%;
-  display: inline-block;
-  vertical-align: top;
-  margin-bottom: -50px;
-}
-
-.CodeMirror-gutter-wrapper {
-  position: absolute;
-  z-index: 4;
-  background: none !important;
-  border: none !important;
-}
-
-.CodeMirror-gutter-background {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  z-index: 4;
-}
-
-.CodeMirror-gutter-elt {
-  position: absolute;
-  cursor: default;
-  z-index: 4;
-}
-
-.CodeMirror-gutter-wrapper ::selection {
-  background-color: transparent;
-}
-
-.CodeMirror-gutter-wrapper ::-moz-selection {
-  background-color: transparent;
-}
-
-.CodeMirror-lines {
-  cursor: text;
-  min-height: 1px; /* prevents collapsing before first draw */
-}
-
-.CodeMirror pre.CodeMirror-line,
-.CodeMirror pre.CodeMirror-line-like {
-  /* Reset some styles that the rest of the page might have set */
-  -moz-border-radius: 0;
-  -webkit-border-radius: 0;
-  border-radius: 0;
-  border-width: 0;
-  background: transparent;
-  font-family: inherit;
-  font-size: inherit;
-  margin: 0;
-  white-space: pre;
-  word-wrap: normal;
-  line-height: inherit;
-  color: inherit;
-  z-index: 2;
-  position: relative;
-  overflow: visible;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-font-variant-ligatures: contextual;
-  font-variant-ligatures: contextual;
-}
-
-.CodeMirror-wrap pre.CodeMirror-line,
-.CodeMirror-wrap pre.CodeMirror-line-like {
-  word-wrap: break-word;
-  white-space: pre-wrap;
-  word-break: normal;
-}
-
-.CodeMirror-linebackground {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 0;
-}
-
-.CodeMirror-linewidget {
-  position: relative;
-  z-index: 2;
-  padding: 0.1px; /* Force widget margins to stay inside of the container */
-}
-
-.CodeMirror-rtl pre {
-  direction: rtl;
-}
-
-.CodeMirror-code {
-  outline: none;
-}
-
-/* Force content-box sizing for the elements where we expect it */
-.CodeMirror-scroll,
-.CodeMirror-sizer,
-.CodeMirror-gutter,
-.CodeMirror-gutters,
-.CodeMirror-linenumber {
-  -moz-box-sizing: content-box;
-  box-sizing: content-box;
-}
-
-.CodeMirror-measure {
-  position: absolute;
-  width: 100%;
-  height: 0;
-  overflow: hidden;
-  visibility: hidden;
-}
-
-.CodeMirror-cursor {
-  position: absolute;
-  pointer-events: none;
-}
-
-.CodeMirror-measure pre {
-  position: static;
-}
-
-div.CodeMirror-cursors {
-  visibility: hidden;
-  position: relative;
-  z-index: 3;
-}
-
-div.CodeMirror-dragcursors {
-  visibility: visible;
-}
-
-.CodeMirror-focused div.CodeMirror-cursors {
-  visibility: visible;
-}
-
-.CodeMirror-selected {
-  background: #d9d9d9;
-}
-
-.CodeMirror-focused .CodeMirror-selected {
-  background: #d7d4f0;
-}
-
-.CodeMirror-crosshair {
-  cursor: crosshair;
-}
-
-.CodeMirror-line::selection, .CodeMirror-line > span::selection, .CodeMirror-line > span > span::selection {
-  background: #d7d4f0;
-}
-
-.CodeMirror-line::-moz-selection, .CodeMirror-line > span::-moz-selection, .CodeMirror-line > span > span::-moz-selection {
-  background: #d7d4f0;
-}
-
-.cm-searching {
-  background-color: #ffa;
-  background-color: rgba(255, 255, 0, 0.4);
-}
-
-/* Used to force a border model for a node */
-.cm-force-border {
-  padding-right: 0.1px;
-}
-
-@media print {
-  /* Hide the cursor when printing */
-  .CodeMirror div.CodeMirror-cursors {
-    visibility: hidden;
-  }
-}
-/* See issue #2901 */
-.cm-tab-wrap-hack:after {
-  content: "";
-}
-
-/* Help users use markselection to safely style text background */
-span.CodeMirror-selectedtext {
-  background: none;
-}
-
 :root {
   /* ========== 尺寸系统 ========== */
   --spacing-xs: 4px;
@@ -607,6 +107,7 @@ span.CodeMirror-selectedtext {
   --toolbar-shadow: var(--shadow-sm);
   --toolbar-split-color: var(--base-border-color);
   --toolbar-min-height: 48px;
+  --sidebar-list-height: 120px;
   --toolbar-btn-color: #3f4a56;
   --toolbar-btn-bg: transparent;
   --toolbar-btn-hover-color: var(--primary-color);
@@ -693,6 +194,12 @@ span.CodeMirror-selectedtext {
   --accordion-body-bg: var(--base-previewer-bg);
   --accordion-body-color: var(--base-font-color);
   --accordion-body-border: var(--base-border-color);
+  /* ========== Mermaid 源码工具栏 ========== */
+  --mermaid-toolbar-switch-bg: rgba(128, 128, 128, 0.12);
+  --mermaid-toolbar-slider-bg: rgba(255, 255, 255, 0.85);
+  --mermaid-toolbar-tab-color: inherit;
+  --mermaid-toolbar-tab-active-color: #333;
+  --mermaid-container-border: rgba(128, 128, 128, 0.2);
   /* ========== 其余单个组件 ========== */
   --drag-border-color: #ebedee;
 }
@@ -1378,6 +885,14 @@ span.CodeMirror-selectedtext {
   content: "\ea92";
 }
 
+.ch-icon-main-theme:before {
+  content: "\ea94";
+}
+
+.ch-icon-code-theme:before {
+  content: "\ea95";
+}
+
 .cherry-markdown {
   word-break: break-all;
   color: var(--md-paragraph-color);
@@ -1574,6 +1089,114 @@ span.CodeMirror-selectedtext {
 .cherry-markdown figure {
   overflow-x: auto;
   margin: var(--spacing-lg) 0;
+}
+.cherry-markdown figure[data-type=mermaid] {
+  overflow: hidden;
+  width: fit-content;
+  max-width: 100%;
+}
+.cherry-markdown figure[data-type=mermaid] svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+.cherry-markdown figure[data-type=mermaid][style*=width] svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+.cherry-markdown figure[data-type=mermaid].cherry-mermaid-align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+.cherry-markdown figure[data-type=mermaid].cherry-mermaid-align-right {
+  margin-left: auto;
+  margin-right: 0;
+}
+.cherry-markdown figure[data-type=mermaid].cherry-mermaid-align-left {
+  margin-left: 0;
+  margin-right: auto;
+}
+.cherry-markdown figure[data-type=mermaid].cherry-mermaid-align-float-left {
+  float: left;
+  margin-left: 0;
+  margin-right: var(--spacing-lg);
+}
+.cherry-markdown figure[data-type=mermaid].cherry-mermaid-align-float-right {
+  float: right;
+  margin-left: var(--spacing-lg);
+  margin-right: 0;
+}
+.cherry-markdown figure[data-type=mermaid] .cherry-mermaid-source-toolbar {
+  height: 45px;
+  line-height: 45px;
+  position: relative;
+  background-color: transparent;
+  backdrop-filter: brightness(0.96);
+  border-radius: 4px 4px 0 0;
+}
+.cherry-markdown figure[data-type=mermaid] .cherry-mermaid-source-toolbar-switch {
+  position: absolute;
+  left: 10px;
+  margin-top: 5px;
+  width: 127px;
+  height: 35px;
+  line-height: 35px;
+  background-color: var(--mermaid-toolbar-switch-bg);
+  border-radius: 8px;
+}
+.cherry-markdown figure[data-type=mermaid] .cherry-mermaid-source-toolbar-tab {
+  position: absolute;
+  text-align: center;
+  height: 30px;
+  line-height: 30px;
+  width: 60px;
+  box-sizing: border-box;
+  top: 2px;
+  z-index: 2;
+  background-color: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--mermaid-toolbar-tab-color);
+  user-select: none;
+  white-space: nowrap;
+}
+.cherry-markdown figure[data-type=mermaid] .cherry-mermaid-source-toolbar-tab:first-child {
+  left: 2px;
+}
+.cherry-markdown figure[data-type=mermaid] .cherry-mermaid-source-toolbar-tab:nth-child(2) {
+  left: 65px;
+}
+.cherry-markdown figure[data-type=mermaid] .cherry-mermaid-source-toolbar-tab.active {
+  color: var(--mermaid-toolbar-tab-active-color);
+}
+.cherry-markdown figure[data-type=mermaid] .cherry-mermaid-source-toolbar-slider {
+  position: absolute;
+  border-radius: 8px;
+  background-color: var(--mermaid-toolbar-slider-bg);
+  height: 30px;
+  left: 2px;
+  top: 2px;
+  width: 60px;
+  z-index: 1;
+  transition: left 0.3s;
+}
+.cherry-markdown figure[data-type=mermaid] .cherry-mermaid-source-toolbar-panel {
+  display: none;
+  width: 100%;
+}
+.cherry-markdown figure[data-type=mermaid] .cherry-mermaid-source-toolbar-panel.active {
+  display: block;
+}
+.cherry-markdown figure[data-type=mermaid] .cherry-mermaid-source-toolbar-panel[data-mode=source] [data-type=codeBlock] {
+  margin: 0;
+  border-radius: 0;
+}
+.cherry-markdown figure[data-type=mermaid]:has(.cherry-mermaid-source-toolbar) {
+  width: auto;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--mermaid-container-border);
+  border-radius: 4px;
 }
 .cherry-markdown p,
 .cherry-markdown pre,
@@ -4266,6 +3889,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 }
 .cherry .cherry-previewer-img-tool-handler .img-tool-button.active, .cherry .cherry-previewer-img-tool-handler .img-tool-button:hover {
   background-color: var(--toolbar-btn-hover-bg);
+  color: var(--toolbar-btn-hover-color);
 }
 .cherry .cherry-previewer-img-tool-handler .img-tool-divider {
   width: 100%;
@@ -5001,6 +4625,29 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   color: var(--color-error);
 }
 
+.cherry .cm-editor .cm-cursor {
+  border-left: 2px solid var(--editor-cursor-color);
+}
+.cherry .cm-editor.cm-focused .cm-cursor {
+  border-left-color: var(--editor-cursor-color);
+}
+.cherry .cm-editor .cm-gutter {
+  border-right: 1px solid var(--base-border-color);
+  background-color: var(--base-editor-bg);
+}
+.cherry .cm-editor .cm-lineNumbers {
+  color: var(--editor-line-number-color);
+  padding: 0 8px 0 4px;
+  font-family: var(--font-family-mono);
+  font-size: 0.9em;
+}
+.cherry .cm-editor .cm-activeLineGutter {
+  background-color: var(--editor-active-line-bg);
+}
+.cherry .cm-editor .cm-searching {
+  background-color: var(--searching-highlight-color, rgba(252, 195, 25, 0.5));
+}
+
 .cherry {
   display: flex;
   flex-flow: row wrap;
@@ -5015,8 +4662,39 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   max-height: calc(100% - var(--height-toolbar));
   min-height: calc(100% - var(--height-toolbar));
 }
-.cherry .CodeMirror {
+.cherry .cm-editor.cm-focused {
+  outline: none !important;
+}
+.cherry .cm-editor {
+  width: 100%;
   height: 100%;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-md);
+  line-height: var(--md-paragraph-line-height);
+}
+.cherry .cm-editor .cm-scroller {
+  font-family: inherit;
+  line-height: inherit;
+}
+.cherry .cm-editor .cm-content {
+  width: 100%;
+  padding: 15px 34px;
+  word-break: break-all;
+  white-space: pre-wrap;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.cherry .cm-editor .cm-line {
+  font-family: inherit;
+}
+.cherry .cm-editor .cm-selectionLayer .cm-selectionBackground {
+  background-color: var(--editor-selection-bg) !important;
+}
+.cherry .cm-editor.cm-focused .cm-selectionBackground {
+  background-color: var(--editor-selection-bg) !important;
+}
+.cherry .cm-editor .cm-selectionBackground {
+  background-color: var(--editor-selection-bg) !important;
 }
 .cherry.cherry--no-toolbar .cherry-toolbar,
 .cherry.cherry--no-toolbar .cherry-sidebar {
@@ -5144,7 +4822,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   padding: var(--toolbar-padding);
   font-size: var(--toolbar-font-size);
   line-height: 2.8;
-  min-height: var(--toolbar-min-height);
+  min-height: var(--height-toolbar);
   flex-basis: 100%;
   box-sizing: border-box;
   z-index: 2;
@@ -5466,6 +5144,12 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   bottom: 0;
   overflow: hidden;
 }
+.cherry-sidebar .cherry-sidebar-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
 .cherry-sidebar .cherry-toolbar-button {
   height: 30px;
   width: 30px;
@@ -5653,6 +5337,10 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   color: var(--toolbar-btn-hover-color);
 }
 
+#cherry-text {
+  display: none !important;
+}
+
 .cherry-editor {
   position: relative;
   padding-top: 5px;
@@ -5690,59 +5378,53 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   pointer-events: none;
   z-index: 11;
 }
-.cherry-editor-writing-style--typewriter .CodeMirror-lines {
+.cherry-editor-writing-style--typewriter .cm-lineWrapping {
   position: relative;
 }
-.cherry-editor-writing-style--typewriter .CodeMirror-lines::before {
+.cherry-editor-writing-style--typewriter .cm-lineWrapping::before {
   content: "";
   display: block;
 }
-.cherry-editor-writing-style--typewriter .CodeMirror-lines::after {
+.cherry-editor-writing-style--typewriter .cm-lineWrapping::after {
   content: "";
   display: block;
 }
-.cherry-editor .CodeMirror {
+.cherry-editor .cm-editor {
   font-family: var(--font-family-sans);
   background-color: var(--base-editor-bg);
   color: var(--base-font-color);
 }
-.cherry-editor .CodeMirror textarea {
+.cherry-editor .cm-editor textarea {
   font-size: var(--md-paragraph-line-height);
 }
-.cherry-editor .CodeMirror .CodeMirror-cursor {
-  border-left: 1px solid var(--editor-cursor-color);
-}
-.cherry-editor .CodeMirror .CodeMirror-selected {
-  background-color: var(--editor-selection-bg);
-}
-.cherry-editor .CodeMirror .CodeMirror-scroll span,
-.cherry-editor .CodeMirror .CodeMirror-scroll .cm-variable-2,
-.cherry-editor .CodeMirror .CodeMirror-scroll .cm-string,
-.cherry-editor .CodeMirror .CodeMirror-scroll .cm-strong,
-.cherry-editor .CodeMirror .CodeMirror-scroll .cm-em,
-.cherry-editor .CodeMirror .CodeMirror-scroll .cm-meta {
+.cherry-editor .cm-editor .cm-scroller span,
+.cherry-editor .cm-editor .cm-scroller .cm-variable-2,
+.cherry-editor .cm-editor .cm-scroller .cm-string,
+.cherry-editor .cm-editor .cm-scroller .cm-strong,
+.cherry-editor .cm-editor .cm-scroller .cm-em,
+.cherry-editor .cm-editor .cm-scroller .cm-meta {
   color: var(--base-font-color);
 }
-.cherry-editor .CodeMirror .CodeMirror-scroll .cm-image-marker,
-.cherry-editor .CodeMirror .CodeMirror-scroll .cm-quote,
-.cherry-editor .CodeMirror .CodeMirror-scroll .cm-header,
-.cherry-editor .CodeMirror .CodeMirror-scroll .cm-atom {
+.cherry-editor .cm-editor .cm-scroller .cm-image-marker,
+.cherry-editor .cm-editor .cm-scroller .cm-quote,
+.cherry-editor .cm-editor .cm-scroller .cm-header,
+.cherry-editor .cm-editor .cm-scroller .cm-atom {
   color: var(--editor-header-color);
 }
-.cherry-editor .CodeMirror .CodeMirror-scroll .cm-url {
+.cherry-editor .cm-editor .cm-scroller .cm-url {
   background-color: var(--editor-url-bg-color);
 }
-.cherry-editor .CodeMirror .CodeMirror-scroll .cm-comment,
-.cherry-editor .CodeMirror .CodeMirror-scroll .cm-url {
+.cherry-editor .cm-editor .cm-scroller .cm-comment,
+.cherry-editor .cm-editor .cm-scroller .cm-url {
   color: var(--editor-comment-color);
 }
-.cherry-editor .CodeMirror-lines {
+.cherry-editor .cm-lineWrapping {
   padding: 15px 34px;
 }
-.cherry-editor .CodeMirror-lines .long-text,
-.cherry-editor .CodeMirror-lines .drawio,
-.cherry-editor .CodeMirror-lines .base64,
-.cherry-editor .CodeMirror-lines .url-truncated {
+.cherry-editor .cm-lineWrapping .long-text,
+.cherry-editor .cm-lineWrapping .drawio,
+.cherry-editor .cm-lineWrapping .base64,
+.cherry-editor .cm-lineWrapping .url-truncated {
   display: inline-block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5752,49 +5434,61 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   color: darkmagenta !important;
   font-size: var(--font-size-xs) !important;
 }
-.cherry-editor .CodeMirror-lines .url-truncated {
+.cherry-editor .cm-lineWrapping .url-truncated {
   max-width: 200px;
 }
-.cherry-editor .CodeMirror-lines .cm-invalidchar[title=\\u200b] {
+.cherry-editor .cm-lineWrapping .cm-invalidchar[title=\\u200b] {
   display: none;
 }
-.cherry-editor .cm-s-default .cm-header {
+.cherry-editor .cm-editor .cm-header {
   color: var(--editor-header-color);
 }
-.cherry-editor .cm-s-default .cm-string {
+.cherry-editor .cm-editor .cm-string {
   color: var(--editor-string-color);
 }
-.cherry-editor .cm-s-default .cm-comment {
+.cherry-editor .cm-editor .cm-comment {
   color: var(--editor-comment-color);
   font-family: var(--font-family-mono);
   font-size: 0.9em;
 }
-.cherry-editor .cm-s-default .cm-whitespace,
+.cherry-editor .cm-editor .cm-whitespace,
 .cherry-editor .cm-tab {
   font-family: var(--font-family-mono);
   font-size: 0.9em;
 }
-.cherry-editor .cm-s-default .cm-quote {
+.cherry-editor .cm-editor .cm-quote {
   color: var(--editor-quote-color);
 }
-.cherry-editor .cm-s-default .cm-link {
+.cherry-editor .cm-editor .cm-link {
+  text-decoration: underline;
   color: var(--editor-link-color);
 }
-.cherry-editor .cm-s-default .cm-url {
+.cherry-editor .cm-editor .cm-header {
+  text-decoration: none;
+}
+.cherry-editor .cm-editor .cm-url {
   background: var(--editor-url-bg-color);
   font-family: var(--font-family-mono);
   font-size: 0.9em;
+  text-decoration: none;
 }
-.cherry-editor .cm-s-default .cm-variable-2 {
+.cherry-editor .cm-editor .cm-url-bracket {
+  color: #3b82f6;
+  font-weight: bold;
+  background-color: rgba(59, 130, 246, 0.1);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+.cherry-editor .cm-editor .cm-variable-2 {
   color: var(--editor-v2-color);
 }
-.cherry-editor .cm-s-default .cm-variable-3 {
+.cherry-editor .cm-editor .cm-variable-3 {
   color: var(--editor-v3-color);
 }
-.cherry-editor .cm-s-default .cm-keyword {
+.cherry-editor .cm-editor .cm-keyword {
   color: var(--editor-keyword-color);
 }
-.cherry-editor .cm-s-default .cm-fullWidth {
+.cherry-editor .cm-editor .cm-fullWidth {
   color: var(--full-width-color) !important;
   z-index: 3;
   cursor: pointer;
@@ -5839,6 +5533,11 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 .cherry-previewer-codeBlock-click-handler {
   position: absolute;
   z-index: 1;
+}
+.cherry-previewer-codeBlock-click-handler .cm-editor {
+  font-family: var(--font-family-sans);
+  background-color: var(--base-editor-bg);
+  color: var(--base-font-color);
 }
 
 .cherry-mask-code-block {
@@ -6379,7 +6078,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   z-index: 11;
   position: absolute;
   right: 0;
-  top: calc(var(--height-toolbar) + 120px);
+  top: calc(var(--height-toolbar) + var(--sidebar-list-height));
   height: calc(100% - 220px);
   max-height: 600px;
   width: 160px;
@@ -6479,13 +6178,13 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   width: 30px;
   height: calc(100% - 200px);
   max-height: 600px;
-  background: rgba(255, 255, 255, 0);
+  background: transparent;
   box-shadow: none;
   border-radius: 0;
 }
 .cherry-flex-toc.cherry-flex-toc__pure .cherry-toc-head {
   height: 25px;
-  border-bottom: 1px dashed rgba(51, 51, 51, 0);
+  border-bottom: 1px dashed transparent;
 }
 .cherry-flex-toc.cherry-flex-toc__pure .cherry-toc-head .cherry-toc-title {
   display: none;
@@ -6691,14 +6390,13 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --accordion-body-bg: var(--oc-gray-7);
   --accordion-body-border: var(--oc-gray-6);
   --accordion-body-color: var(--oc-gray-4);
+  /* ========== Mermaid 工具栏变量覆盖 ========== */
+  --mermaid-toolbar-slider-bg: rgba(255, 255, 255, 0.15);
+  --mermaid-toolbar-tab-active-color: #fff;
   /* 目录区域样式 */
 }
-.cherry.theme__dark .cherry-flex-toc:hover {
-  background-color: var(--oc-gray-4);
-  width: 260px;
-}
 .cherry.theme__dark .cherry-flex-toc .cherry-toc-head i:hover {
-  color: var(--primary-color);
+  color: var(--oc-orange-8);
 }
 .cherry.theme__dark .cherry-flex-toc .cherry-toc-list .cherry-toc-one-a {
   border-left-color: rgba(255, 146, 43, 0.3);
@@ -6711,28 +6409,8 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   border-left-color: var(--oc-orange-4);
   color: var(--oc-orange-6);
 }
-.cherry.theme__dark .cherry-flex-toc.cherry-flex-toc__pure {
-  box-shadow: none;
-}
-.cherry.theme__dark .cherry-flex-toc.cherry-flex-toc__pure .cherry-toc-head .cherry-toc-title {
-  display: none;
-}
-.cherry.theme__dark .cherry-flex-toc.cherry-flex-toc__pure .cherry-toc-head .ch-icon-chevronsRight {
-  display: none;
-}
 .cherry.theme__dark .cherry-flex-toc.cherry-flex-toc__pure .cherry-toc-head .ch-icon-chevronsLeft {
-  display: inline;
   color: var(--oc-orange-6);
-}
-.cherry.theme__dark .cherry-flex-toc.cherry-flex-toc__pure .cherry-toc-list {
-  padding-left: 7px;
-}
-.cherry.theme__dark .cherry-flex-toc.cherry-flex-toc__pure .cherry-toc-list .cherry-toc-one-a {
-  overflow: hidden;
-  width: 0;
-  margin-bottom: 3px;
-  height: 5px;
-  border-left-width: 18px;
 }
 
 /** 快捷键配置面板样式 */
@@ -6868,7 +6546,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --md-toc-bg: #2A2F3B;
   --md-toc-title-color: var(--primary-color);
   --md-toc-link-color: var(--primary-color);
-  --md-toc-indicator-color: var(--primary-color);
+  --md-toc-indicator-color: var(--secondary-color);
   --md-toc-link-hover-color: var(--secondary-color);
   --md-toc-link-hover-bg: var(--primary-color);
   --md-toc-indicator-hover-color: var(--primary-color);
@@ -6881,6 +6559,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --accordion-body-bg: #2A2F3B;
   --accordion-body-border: var(--oc-blue-5);
   --accordion-body-color: var(--base-font-color);
+  /* ========== Mermaid 工具栏变量覆盖 ========== */
+  --mermaid-toolbar-slider-bg: rgba(255, 255, 255, 0.15);
+  --mermaid-toolbar-tab-active-color: #fff;
   /* ========== 其余单个组件 ========== */
   --drag-border-color: #3a4453;
   /* ========== Panel 相关变量 ========== */

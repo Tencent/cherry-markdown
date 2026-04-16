@@ -8,4 +8,4 @@ export default class Transfer extends SyntaxBase {
     beforeMakeHtml(str: any): any;
     afterMakeHtml(str: any): any;
 }
-import SyntaxBase from "../SyntaxBase.js";
+import SyntaxBase from '../SyntaxBase.js';

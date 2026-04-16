@@ -6,4 +6,4 @@ export default class HighLight extends SyntaxBase {
         content: string;
     };
 }
-import SyntaxBase from "../SyntaxBase.js";
+import SyntaxBase from '../SyntaxBase.js';

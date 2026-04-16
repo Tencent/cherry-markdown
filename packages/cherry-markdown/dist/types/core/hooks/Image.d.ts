@@ -23,4 +23,4 @@ export default class Image extends SyntaxBase {
         end: string;
     };
 }
-import SyntaxBase from "@/core/SyntaxBase";
+import SyntaxBase from '@/core/SyntaxBase';

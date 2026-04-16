@@ -29,7 +29,7 @@
         height: 100%;
       }
     </style>
-    <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css" />
+    <link rel="stylesheet" type="text/css" href="./packages/cherry-markdown/dist/cherry-markdown.css" />
     <link rel="Shortcut Icon" href="./logo/favicon.ico" />
     <link rel="Shortcut Icon" href="../logo/favicon.ico" />
     <link rel="Bookmark" href="../logo/favicon.ico" />
@@ -45,15 +45,23 @@
       integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
       crossorigin="anonymous"
     ></script>
-    <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+    <script src="./packages/cherry-markdown/dist/cherry-markdown.js"></script>
     <script src="./assets/scripts/pinyin/pinyin_dist.js"></script>
     <script type="module">
+      import { basicConfig } from './assets/scripts/index-demo.js';
+
       // 使用 fetch 获取 markdown 文件内容
       const response = await fetch('./assets/markdown/index.md');
       const basicMd = await response.text();
-      import { basicConfig } from './assets/scripts/index-demo.js';
       // 在Vite中使用?raw导入的文件内容已经是字符串，无需通过fetch获取
       const config = Object.assign({}, basicConfig, { value: basicMd });
+      // 引入官方库里的 Echarts 代码块插件
+      Cherry.usePlugin(Cherry.plugins.EChartsCodeBlockEngine, {
+        size: {
+          width: '100%',
+          height: '600px',
+        }
+      });
       window.cherry = new Cherry(config);
     </script>
   </body>

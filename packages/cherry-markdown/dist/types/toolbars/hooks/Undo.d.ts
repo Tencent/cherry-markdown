@@ -6,4 +6,4 @@ export default class Undo extends MenuBase {
     constructor($cherry: any);
     onClick(): void;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

@@ -20,4 +20,4 @@ export default class HtmlBlock extends ParagraphBase {
     makeHtml(str: any, sentenceMakeFunc: any): any;
     afterMakeHtml(str: any): any;
 }
-import ParagraphBase from "@/core/ParagraphBase";
+import ParagraphBase from '@/core/ParagraphBase';

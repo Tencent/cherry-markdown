@@ -7,4 +7,4 @@ export default class Export extends MenuBase {
     }[];
     onClick(shortKey: string, type: any): void;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

@@ -117,10 +117,18 @@ declare const _default: {
     editingShortcutKeyConfigTip: string;
     staticShortcutTip: string;
     disabledShortcutTip: string;
+    cursorPosition: string;
     wordCount: string;
     wordCountP: string;
     wordCountW: string;
     wordCountC: string;
+    wordCountL: string;
+    wordCountImg: string;
+    wordCountCode: string;
+    wordCountChinese: string;
+    wordCountEnglish: string;
+    wordCountNumber: string;
+    wordCountSymbol: string;
     deleteColumn: string;
     deleteRow: string;
     addRow: string;
@@ -190,5 +198,7 @@ declare const _default: {
     minValue: string;
     high: string;
     low: string;
+    mermaidSource: string;
+    mermaidPreview: string;
 };
 export default _default;

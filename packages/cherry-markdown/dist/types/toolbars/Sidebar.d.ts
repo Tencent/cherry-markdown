@@ -5,4 +5,4 @@
  */
 export default class Sidebar extends Toolbar {
 }
-import Toolbar from "./Toolbar";
+import Toolbar from './Toolbar';

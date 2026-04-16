@@ -12,7 +12,7 @@ export default class Toc {
     position: any;
     cssText: any;
     init(): void;
-    timer: NodeJS.Timeout;
+    timer: number;
     getModelFromLocalStorage(): any;
     setModelToLocalStorage(model: any): void;
     drawDom(): void;
@@ -24,5 +24,6 @@ export default class Toc {
     $switchModel(model?: string): void;
     model: string;
     $getClosestNode(node: any, targetNodeName: any): any;
+    makeHtmlStringToNode(newHtml: any): ChildNode;
     updateTocList(onlyScroll?: boolean): void;
 }

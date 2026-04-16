@@ -5,8 +5,6 @@ export default class CodeBlock extends ParagraphBase {
         config: any;
         cherry: any;
     });
-    codeCache: {};
-    codeCacheList: any[];
     customLang: any[];
     customParser: {};
     lineNumber: any;
@@ -19,16 +17,20 @@ export default class CodeBlock extends ParagraphBase {
     indentedCodeBlock: any;
     INLINE_CODE_REGEX: RegExp;
     customHighlighter: any;
-    failedCleanCacheTimes: number;
-    codeTimer: NodeJS.Timeout;
     $cherry: any;
     needCleanFlowCursor: any;
     showInlineColor: any;
     afterMakeHtml(html: any): any;
-    $resetCache(): void;
     $codeReplace($codeSrc: any, $lang: any, sign: any, lines: any): any;
-    $codeCache(sign: any, str: any): any;
     parseCustomLanguage(lang: any, codeSrc: any, props: any): string | false;
+    /**
+     * 构建带有源码/预览切换工具栏的 mermaid 容器
+     * @param {object} attrs 容器属性 { tag, escapedLang, props, sizeStyle, alignClass }
+     * @param {string} previewHtml 预览区的 HTML 内容
+     * @param {string} sourceCodeHtml 源码区的 HTML 内容（已预先生成）
+     * @returns {string} 带工具栏的完整 HTML
+     */
+    $buildMermaidSourceToolbarContainer(attrs: object, previewHtml: string, sourceCodeHtml: string): string;
     fillTag(lines: any): any;
     renderLineNumber(code: any): any;
     /**
@@ -45,6 +47,17 @@ export default class CodeBlock extends ParagraphBase {
     computeLines(match: string, leadingContent: string, code: string): {
         sign: string;
         lines: number;
+    };
+    /**
+     * 从代码块语言行中解析尺寸和对齐信息
+     * 支持语法: ```mermaid #300px #200px #center
+     * @param {string} lang 语言行文本
+     * @returns {{ lang: string, sizeAttrs: string, alignClass: string }} 解析后的语言名、尺寸样式和对齐class
+     */
+    parseMermaidSize(lang: string): {
+        lang: string;
+        sizeAttrs: string;
+        alignClass: string;
     };
     /**
      * 补齐用codeBlock承载的mermaid
@@ -102,4 +115,4 @@ export default class CodeBlock extends ParagraphBase {
         reg: RegExp;
     };
 }
-import ParagraphBase from "@/core/ParagraphBase";
+import ParagraphBase from '@/core/ParagraphBase';

@@ -13,4 +13,4 @@ export default class TapdHtmlTagPlugin extends ParagraphBase {
     };
     _trimScripTag(str: any): any;
 }
-import ParagraphBase from "@/core/ParagraphBase";
+import ParagraphBase from '@/core/ParagraphBase';

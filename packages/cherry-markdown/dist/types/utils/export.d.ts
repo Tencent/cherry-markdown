@@ -11,6 +11,13 @@ export function exportPDF(previewDom: HTMLElement, fileName: string): void;
  */
 export function exportScreenShot(previewDom: HTMLElement, fileName: string): void;
 /**
+ * 利用canvas将dom节点导出成图片
+ * @param {HTMLElement} dom 目标dom节点
+ * @param {String} fileName 导出图片文件名
+ * @param {Object} options 导出选项
+ */
+export function canvas2img(dom: HTMLElement, fileName: string, options?: any): void;
+/**
  * 导出 markdown 文件
  * @param {String} markdownText markdown文本
  * @param {String} fileName 导出markdown文件名

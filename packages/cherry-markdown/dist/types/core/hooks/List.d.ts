@@ -20,4 +20,4 @@ export default class List extends ParagraphBase {
         end: string;
     };
 }
-import ParagraphBase from "@/core/ParagraphBase";
+import ParagraphBase from '@/core/ParagraphBase';

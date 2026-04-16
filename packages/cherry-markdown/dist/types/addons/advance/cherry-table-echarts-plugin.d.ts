@@ -147,7 +147,7 @@ export default class EChartsTableEngine {
     /**
      * 渲染入口：将表格数据渲染为指定类型图表，并返回 HTML 容器片段
      */
-    render(type: any, options: any, tableObject: any): string;
+    render(type: any, options: any, tableObject: any, $cherry: any): string;
     addClickHighlightEffect(chartInstance: any, chartType: any): void;
     clearHighlight(chartInstance: any, chartType: any): void;
     onDestroy(): void;

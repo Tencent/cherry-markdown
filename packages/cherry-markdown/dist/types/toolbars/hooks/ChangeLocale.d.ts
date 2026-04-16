@@ -12,4 +12,4 @@ export default class ChangeLocale extends MenuBase {
     nameMap: {};
     onClick(selection: any, shortKey: any): void;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

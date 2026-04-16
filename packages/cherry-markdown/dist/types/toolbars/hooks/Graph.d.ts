@@ -21,7 +21,7 @@ export default class Graph extends MenuBase {
      * @param {1|2|3|4|5|6|'1'|'2'|'3'|'4'|'5'|'6'|'flow'|'sequence'|'state'|'class'|'pie'|'gantt'|''} shortKey 快捷键参数
      * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
      */
-    onClick(selection: string, shortKey?: 1 | 2 | 3 | 4 | 5 | 6 | '1' | '2' | '3' | '4' | '5' | '6' | 'flow' | 'sequence' | 'state' | 'class' | 'pie' | 'gantt' | ''): string;
+    onClick(selection: string, shortKey?: 1 | 2 | 3 | 4 | 5 | 6 | "1" | "2" | "3" | "4" | "5" | "6" | "flow" | "sequence" | "state" | "class" | "pie" | "gantt" | ""): string;
     /**
      * 画图的markdown源码模版
      * @param {string} type 画图的类型
@@ -29,4 +29,4 @@ export default class Graph extends MenuBase {
      */
     $getSampleCode(type: string): any;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

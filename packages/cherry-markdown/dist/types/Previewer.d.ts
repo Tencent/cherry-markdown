@@ -7,9 +7,9 @@
 export default class Previewer {
     /**
      *
-     * @param {Partial<import('~types/previewer').PreviewerOptions>} options 预览区域设置
+     * @param {Partial<import('../../types/previewer').PreviewerOptions>} options 预览区域设置
      */
-    constructor(options: Partial<import('~types/previewer').PreviewerOptions>);
+    constructor(options: Partial<import("../../types/previewer").PreviewerOptions>);
     /**
      * @property
      * @private
@@ -30,9 +30,33 @@ export default class Previewer {
     public isMobilePreview: boolean;
     /**
      * @property
-     * @type {import('~types/previewer').PreviewerOptions}
+     * @private
+     * @type {Function|null} 滚动事件处理器，保存为实例属性避免多实例冲突
      */
-    options: import('~types/previewer').PreviewerOptions;
+    private scrollHandler;
+    /**
+     * @property
+     * @private
+     * @type {Function|null} 鼠标滚轮事件处理器，保存为实例属性避免内存泄漏
+     */
+    private wheelHandler;
+    /**
+     * @property
+     * @private
+     * @type {ResizeObserver|null} ResizeObserver 实例，避免内存泄漏
+     */
+    private resizeObserver;
+    /**
+     * @property
+     * @private
+     * @type {boolean} 标记该实例是否已销毁，防止销毁后的异步操作执行
+     */
+    private isDestroyed;
+    /**
+     * @property
+     * @type {import('../../types/previewer').PreviewerOptions}
+     */
+    options: import("../../types/previewer").PreviewerOptions;
     $cherry: import("./Cherry").default;
     instanceId: string;
     /**
@@ -49,7 +73,17 @@ export default class Previewer {
      */
     private disableScrollListener;
     editor: any;
+    /** @type {typeof import('codemirror')|null} CodeMirror 模块（从 Editor 传递，stream 模式下为 null） */
+    codemirrorModule: typeof import("codemirror") | null;
     lazyLoadImg: LazyLoadImg;
+    /**
+     * 不依赖Editor的初始化方法，用于流式渲染场景
+     * 与init方法的区别：不需要editor参数，不绑定拖拽和滚动同步
+     * PreviewerBubble 始终初始化以保证基础的 click 事件监听和交互功能
+     * enablePreviewerBubble 配置只控制是否显示编辑工具栏（图片、表格等）
+     * 在无编辑器场景下，编辑相关功能（编辑代码、切换语言等）会自动禁用
+     */
+    initWithoutEditor(): void;
     /**
      * “监听”编辑器的尺寸变化，变化时更新拖拽条的位置
      */
@@ -117,9 +151,9 @@ export default class Previewer {
     registerAfterUpdate(fn: any): void;
     /**
      * 根据行号计算出top值
-     * @param {Number} lineNum
-     * @param {Number} linePercent
-     * @return {Number} top
+     * @param {Number} lineNum - 行号
+     * @param {Number} linePercent - 行内百分比位置（0-1）
+     * @return {Number} 滚动位置（像素）
      */
     $getTopByLineNum(lineNum: number, linePercent?: number): number;
     /**
@@ -138,14 +172,14 @@ export default class Previewer {
      * @param {number} scrollTop 元素的id属性值
      * @param {'auto'|'smooth'|'instant'} behavior 滚动方式
      */
-    scrollToTop(scrollTop: number, behavior?: 'auto' | 'smooth' | 'instant'): void;
+    scrollToTop(scrollTop: number, behavior?: "auto" | "smooth" | "instant"): void;
     /**
      * 滚动到对应id的位置，实现锚点滚动能力
      * @param {string} id 元素的id属性值
      * @param {'smooth'|'instant'|'auto'} behavior 滚动方式
      * @return {boolean} 是否有对应id的元素并执行滚动
      */
-    scrollToId(id: string, behavior?: 'smooth' | 'instant' | 'auto'): boolean;
+    scrollToId(id: string, behavior?: "smooth" | "instant" | "auto"): boolean;
     /**
      * 实现滚动动画
      * @param { Number } targetY 目标位置
@@ -166,8 +200,13 @@ export default class Previewer {
      * 'pdf'：导出成pdf文件; 'img' | screenShot：导出成png图片; 'markdown'：导出成markdown文件; 'html'：导出成html文件; 'word'：导出到Word（复制到剪贴板）;
      * @param {string} [fileName] 导出文件名
      */
-    public export(type?: 'pdf' | 'img' | 'screenShot' | 'markdown' | 'html' | 'word', fileName?: string): void;
+    public export(type?: "pdf" | "img" | "screenShot" | "markdown" | "html" | "word", fileName?: string): void;
     changePreviewToMobile(isMobile?: boolean): void;
+    /**
+     * 销毁预览器实例，清理所有资源
+     * 此方法应在销毁 Cherry 编辑器时调用
+     */
+    destroy(): void;
 }
-import LazyLoadImg from "@/utils/lazyLoadImg";
-import PreviewerBubble from "./toolbars/PreviewerBubble";
+import LazyLoadImg from '@/utils/lazyLoadImg';
+import PreviewerBubble from './toolbars/PreviewerBubble';

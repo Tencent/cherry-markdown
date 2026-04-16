@@ -10,4 +10,4 @@ export default class Br extends MenuBase {
      */
     onClick(selection: string, shortKey?: string): string;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

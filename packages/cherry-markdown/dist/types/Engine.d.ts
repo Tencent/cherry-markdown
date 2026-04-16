@@ -4,7 +4,7 @@ export default class Engine {
      * @param {Partial<import('./Cherry').CherryOptions>} markdownParams 初始化Cherry时传入的选项
      * @param {import('./Cherry').default} cherry Cherry实例
      */
-    constructor(markdownParams: Partial<import('./Cherry').CherryOptions>, cherry: import('./Cherry').default);
+    constructor(markdownParams: Partial<import("./Cherry").CherryOptions>, cherry: import("./Cherry").default);
     $cherry: import("./Cherry").default;
     hookCenter: HookCenter;
     hooks: Record<import("../types/syntax").HookType, SyntaxBase[]>;
@@ -17,7 +17,7 @@ export default class Engine {
     currentStrMd5: any[];
     globalConfig: {
         classicBr?: boolean;
-        urlProcessor?: (url: string, srcType: "link" | "audio" | "video" | "image" | "autolink", callback?: any) => string;
+        urlProcessor?: (url: string, srcType: "image" | "audio" | "video" | "autolink" | "link", callback?: any) => string;
         htmlWhiteList?: string;
         htmlBlackList?: string;
         htmlAttrWhiteList?: string;
@@ -32,7 +32,7 @@ export default class Engine {
      * 该方法会清空所有缓存，所以降低了该方法的执行频率，1s内最多执行一次
      */
     reMakeHtml(): void;
-    timer: NodeJS.Timeout;
+    timer: number;
     urlProcessor(url: any, srcType: any): any;
     initMath(opts: any): void;
     $configInit(params: any): void;
@@ -40,6 +40,8 @@ export default class Engine {
     $completeMakeHtml(md: any): void;
     $beforeMakeHtml(str: any): any;
     dealAfterMakeHtml(str: any): any;
+    $encodeReservedKeywords(str: any): any;
+    $decodeReservedKeywords(str: any): any;
     $afterMakeHtml(str: any): any;
     $dealSentenceByCache(md: any): {
         sign: string;
@@ -51,6 +53,7 @@ export default class Engine {
      * @deprecated 已废弃，推荐使用 .hash()
      */
     md5(str: any): string;
+    sha256(str: any): any;
     /**
      * 计算哈希值
      * @param {String} str 被计算的字符串
@@ -63,26 +66,30 @@ export default class Engine {
     };
     $dealParagraph(md: any): any;
     $cacheBigData(md: any): any;
-    $deCacheBigData(md: any): any;
+    /**
+     * @param {string} md
+     */
+    $deCacheBigData(md: string): string;
     /**
      * 流式输出场景时，在最后增加一个光标占位
      * @param {string} md 内容
      * @returns {string}
      */
-    $setFlowSessionCursorCache(md: string): string;
+    $setFlowSessionCursorCache(md: string, forceNoCursor?: boolean): string;
     /**
      * 流式输出场景时，把最后的光标占位替换为配置的dom元素，并在一段时间后删除该元素
      * @param {string} md 内容
      * @returns {string}
      */
     $clearFlowSessionCursorCache(md: string): string;
-    clearCursorTimer: NodeJS.Timeout;
+    clearCursorTimer: number;
     /**
      * @param {string} md md字符串
      * @param {'string'|'object'} returnType 返回格式，string：返回html字符串，object：返回结构化数据
+     * @param {boolean} forceNoCursor 是否强制不添加光标占位
      * @returns {string|object} 获取html
      */
-    makeHtml(md: string, returnType?: 'string' | 'object'): string | object;
+    makeHtml(md: string, returnType?: "string" | "object", forceNoCursor?: boolean): string | object;
     makeHtmlForBlockquote(md: any): any;
     makeHtmlForFootnote(md: any): any;
     mounted(): void;
@@ -91,8 +98,12 @@ export default class Engine {
      * @returns {string} 获取markdown
      */
     makeMarkdown(html: string): string;
+    /**
+     * 清理engine的缓存
+     */
+    clearCache(): void;
 }
-import HookCenter from "./core/HookCenter";
-import SyntaxBase from "./core/SyntaxBase";
-import AsyncRenderHandler from "./utils/async-render-handler";
-import LRUCache from "./utils/LRUCache";
+import HookCenter from './core/HookCenter';
+import SyntaxBase from './core/SyntaxBase';
+import AsyncRenderHandler from './utils/async-render-handler';
+import LRUCache from './utils/LRUCache';

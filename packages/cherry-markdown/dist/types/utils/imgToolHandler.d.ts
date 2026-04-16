@@ -1,9 +1,8 @@
 export default imgToolHandler;
 declare namespace imgToolHandler {
-    const mouseResize: {};
     namespace position {
-        const x: number;
-        const y: number;
+        let x: number;
+        let y: number;
     }
     function getImgPosition(): {
         bottom: number;
@@ -15,30 +14,14 @@ declare namespace imgToolHandler {
         x: number;
         y: number;
     };
-    function getImgPosition(): {
-        bottom: number;
-        top: number;
-        height: any;
-        width: any;
-        right: number;
-        left: number;
-        x: number;
-        y: number;
-    };
-    function showBubble(img: any, container: any, previewerDom: any, event: any, locale: any): void;
-    function showBubble(img: any, container: any, previewerDom: any, event: any, locale: any): void;
-    function emit(type: any, event?: {}): void;
+    function showBubble(img: any, container: any, previewerDom: any, event: any, locale: any, options?: {}): void;
     function emit(type: any, event?: {}): void;
     function previewUpdate(callback: any): void;
-    function previewUpdate(callback: any): void;
     function remove(): void;
-    function remove(): void;
-    function $isResizing(): any;
-    function $isResizing(): any;
+    /**
+     * 更新工具栏位置，用于预览区更新或编辑器大小变化后重新定位
+     */
+    function updatePosition(): void;
     function dealScroll(event: any): void;
-    function dealScroll(event: any): void;
-    function change(): void;
-    function change(): void;
-    function bindChange(func: any): void;
     function bindChange(func: any): void;
 }

@@ -19,6 +19,6 @@ export default class List extends MenuBase {
      * @param {1|2|3|'ol'|'1'|'2'|'3'|'ul'|'checklist'|''} shortKey 快捷键：ol(1)有序列表，ul(2)无序列表，checklist(3) 检查项
      * @returns 对应markdown的源码
      */
-    onClick(selection: string, shortKey?: 1 | 2 | 3 | 'ol' | '1' | '2' | '3' | 'ul' | 'checklist' | ''): string;
+    onClick(selection: string, shortKey?: 1 | 2 | 3 | "ol" | "1" | "2" | "3" | "ul" | "checklist" | ""): string;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

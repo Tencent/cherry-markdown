@@ -25,7 +25,7 @@ export default class Panel extends ParagraphBase {
         className: string;
     };
     $getTitle(name: any): any;
-    $getTargetType(name: any): "center" | "left" | "right" | "success" | "justify" | "primary" | "info" | "warning" | "danger";
+    $getTargetType(name: any): "left" | "right" | "center" | "justify" | "primary" | "info" | "warning" | "danger" | "success";
     rule(): any;
 }
-import ParagraphBase from "@/core/ParagraphBase";
+import ParagraphBase from '@/core/ParagraphBase';

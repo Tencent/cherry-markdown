@@ -9,4 +9,4 @@ export default class SwitchModel extends MenuBase {
     attachEventListeners(): void;
     onClick(): void;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';

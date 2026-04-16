@@ -1,5 +1,6 @@
 /**
- * @typedef {import('codemirror')} CodeMirror
+ * @typedef {import('@codemirror/view').EditorView} EditorView
+ * @typedef {import('../../types/editor').CM6Adapter} CM6Adapter
  */
 /**
  * @typedef { Object } SuggestListItemObject 推荐列表项对象
@@ -12,12 +13,12 @@
  */
 /**
  * @typedef {object} SuggesterConfigItem
- * @property {function(string, function(SuggestList): void): void} suggestList
- * @property {string} keyword
- * @property {function} suggestListRender
- * @property {function} echo
+ * @property {function(string, function(SuggestList): void): void} suggestList - 推荐项来源函数，接收搜索关键字和回调函数
+ * @property {string} keyword - 唤醒关键字（如 '@'、'#' 等）
+ * @property {function} suggestListRender - 自定义渲染函数（可选）
+ * @property {function} echo - 回填回调函数（可选）
  * @typedef {object} SuggesterConfig
- * @property {Array<SuggesterConfigItem>} suggester
+ * @property {Array<SuggesterConfigItem>} suggester - 推荐器配置数组
  */
 export default class Suggester extends SyntaxBase {
     constructor({ config, cherry }: {
@@ -39,7 +40,8 @@ export default class Suggester extends SyntaxBase {
     toHtml(wholeMatch: any, leadingChar: any, keyword: any, text: any): any;
     rule(): any;
 }
-export type CodeMirror = typeof import("codemirror");
+export type EditorView = import("@codemirror/view").EditorView;
+export type CM6Adapter = import("../../types/editor").CM6Adapter;
 /**
  * 推荐列表项对象
  */
@@ -70,15 +72,30 @@ export type SuggestListItem = SuggestListItemObject | string;
  */
 export type SuggestList = Array<SuggestListItem>;
 export type SuggesterConfigItem = {
+    /**
+     * - 推荐项来源函数，接收搜索关键字和回调函数
+     */
     suggestList: (arg0: string, arg1: (arg0: SuggestList) => void) => void;
+    /**
+     * - 唤醒关键字（如 '@'、'#' 等）
+     */
     keyword: string;
+    /**
+     * - 自定义渲染函数（可选）
+     */
     suggestListRender: Function;
+    /**
+     * - 回填回调函数（可选）
+     */
     echo: Function;
 };
 export type SuggesterConfig = {
+    /**
+     * - 推荐器配置数组
+     */
     suggester: Array<SuggesterConfigItem>;
 };
-import SyntaxBase from "@/core/SyntaxBase";
+import SyntaxBase from '@/core/SyntaxBase';
 declare class SuggesterPanel {
     constructor(cherry: any);
     searchCache: boolean;
@@ -99,11 +116,22 @@ declare class SuggesterPanel {
      * 设置编辑器
      * @param {import('@/Editor').default} editor
      */
-    setEditor(editor: import('@/Editor').default): void;
+    setEditor(editor: import("@/Editor").default): void;
     editor: import("@/Editor").default;
     setSuggester(suggester: any): void;
     bindEvent(): void;
+    boundOnChange: (codemirror: any, evt: any) => void;
+    boundOnCursorActivity: () => void;
+    boundOnScroll: () => void;
     onClickPanelItem(): void;
+    boundClickHandler: (evt: any) => void;
+    /**
+     * 查找被点击元素对应的选项索引
+     * 支持点击 item 内部的子元素（如图标）
+     * @param {HTMLElement} target 被点击的元素
+     * @returns {number} 选项索引，未找到返回 -1
+     */
+    findClickedItemIndex(target: HTMLElement): number;
     showSuggesterPanel({ left, top, items }: {
         left: any;
         top: any;
@@ -128,13 +156,13 @@ declare class SuggesterPanel {
      * 面板重定位（滚动时调用，不进行边界判定）
      * @param {CodeMirror} codemirror
      */
-    relocatePanel(codemirror: CodeMirror): boolean;
+    relocatePanel(codemirror: typeof import("codemirror")): boolean;
     /**
      * 获取光标位置
      * @param {CodeMirror} codemirror
      * @returns {{ left: number, top: number }}
      */
-    getCursorPos(codemirror: CodeMirror): {
+    getCursorPos(codemirror: typeof import("codemirror")): {
         left: number;
         top: number;
     };
@@ -150,12 +178,12 @@ declare class SuggesterPanel {
     /**
      * 粘贴选择结果
      * @param {number} idx 选择的结果索引
-     * @param {KeyboardEvent} evt 键盘事件
+     * @param {KeyboardEvent} [evt] 键盘事件（可选）
      */
-    pasteSelectResult(idx: number, evt: KeyboardEvent): void;
+    pasteSelectResult(idx: number, evt?: KeyboardEvent): void;
     /**
      * 寻找当前选中项的索引
-     * @returns {number}
+     * @returns {number} 选中项索引，未找到或面板不存在返回 -1
      */
     findSelectedItemIndex(): number;
     enableRelate(): boolean;
@@ -172,5 +200,10 @@ declare class SuggesterPanel {
      * @param {KeyboardEvent} evt
      */
     onKeyDown(codemirror: CodeMirror.Editor, evt: KeyboardEvent): boolean;
+    /**
+     * 销毁 SuggesterPanel 实例，清理事件监听器和 DOM 引用
+     * 必须调用此方法以避免内存泄漏
+     */
+    destroy(): void;
 }
 export {};

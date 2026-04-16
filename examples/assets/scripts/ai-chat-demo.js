@@ -144,8 +144,6 @@ function ensureChatDemoDom() {
       border-radius: 8px;
       padding: 10px 12px;
       box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-      white-space: pre-wrap;
-      word-break: break-word;
       box-sizing: border-box;
     }
 

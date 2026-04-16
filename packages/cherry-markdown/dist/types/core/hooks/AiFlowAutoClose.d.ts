@@ -15,4 +15,4 @@ export default class AiFlowAutoClose extends ParagraphBase {
     dealLink(str: any): any;
     makeHtml(str: any, sentenceMakeFunc: any): any;
 }
-import ParagraphBase from "@/core/ParagraphBase";
+import ParagraphBase from '@/core/ParagraphBase';

@@ -4,16 +4,16 @@ export default class FormulaHandler {
      * @param {Element} target 目标dom
      * @param {HTMLDivElement} container bubble容器
      * @param {HTMLDivElement} previewerDom 预览器dom
-     * @param {import('../Editor').default} editor 编辑器实例
+     * @param {import('../Cherry').default} $cherry Cherry实例（流式渲染场景下不依赖 editor）
      */
-    constructor(trigger: string, target: Element, container: HTMLDivElement, previewerDom: HTMLDivElement, editor: import('../Editor').default);
+    constructor(trigger: string, target: Element, container: HTMLDivElement, previewerDom: HTMLDivElement, $cherry: import("../Cherry").default);
     /** @type{HTMLElement} */
     bubbleContainer: HTMLElement;
     trigger: string;
     target: Element;
     container: HTMLDivElement;
     previewerDom: HTMLDivElement;
-    editor: import("../Editor").default;
+    $cherry: import("..").default;
     /**
      * 触发事件
      * @param {string} type 事件类型
@@ -30,12 +30,16 @@ export default class FormulaHandler {
      * @param {number} y
      */
     showBubble(x: number, y: number): void;
-    collectFormulaCode(): void;
-    formulaCode: any[];
+    /**
+     * 从 DOM 的 data-content 属性获取 latex 源码
+     * @returns {string|null} latex 源码
+     */
+    getLatexFromDOM(): string | null;
     remove(): void;
     /**
      * bubble 上的点击事件
      * @param {Event} e
      */
     bubbleClickHandler(e: Event): void;
+    getFormulaSource(): string;
 }

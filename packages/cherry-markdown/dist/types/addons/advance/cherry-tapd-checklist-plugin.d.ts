@@ -15,4 +15,4 @@ export default class TapdCheckListPlugin extends ParagraphBase {
     afterMakeHtml(html: any): any;
     rule(): {};
 }
-import ParagraphBase from "@/core/ParagraphBase";
+import ParagraphBase from '@/core/ParagraphBase';

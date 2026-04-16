@@ -1,6 +1,6 @@
 export namespace gfmUnicode {
-    const defaultURL: string;
-    const emojis: {
+    let defaultURL: string;
+    let emojis: {
         '+1': string;
         '-1': string;
         100: string;
@@ -1784,28 +1784,28 @@ export namespace gfmUnicode {
     };
 }
 export namespace githubCustom {
-    const defaultURL_1: string;
+    let defaultURL_1: string;
     export { defaultURL_1 as defaultURL };
     export namespace emojis_1 {
-        const atom: string;
-        const basecamp: string;
-        const basecampy: string;
-        const bowtie: string;
-        const electron: string;
-        const feelsgood: string;
-        const finnadie: string;
-        const goberserk: string;
-        const godmode: string;
-        const hurtrealbad: string;
-        const neckbeard: string;
-        const octocat: string;
-        const rage1: string;
-        const rage2: string;
-        const rage3: string;
-        const rage4: string;
-        const shipit: string;
-        const suspect: string;
-        const trollface: string;
+        let atom: string;
+        let basecamp: string;
+        let basecampy: string;
+        let bowtie: string;
+        let electron: string;
+        let feelsgood: string;
+        let finnadie: string;
+        let goberserk: string;
+        let godmode: string;
+        let hurtrealbad: string;
+        let neckbeard: string;
+        let octocat: string;
+        let rage1: string;
+        let rage2: string;
+        let rage3: string;
+        let rage4: string;
+        let shipit: string;
+        let suspect: string;
+        let trollface: string;
     }
     export { emojis_1 as emojis };
 }

@@ -18,5 +18,5 @@ export default class Formula extends MenuBase {
      */
     onClick(selection: string, shortKey?: string): boolean;
 }
-import MenuBase from "@/toolbars/MenuBase";
-import BubbleFormula from "../BubbleFormula";
+import MenuBase from '@/toolbars/MenuBase';
+import BubbleFormula from '../BubbleFormula';

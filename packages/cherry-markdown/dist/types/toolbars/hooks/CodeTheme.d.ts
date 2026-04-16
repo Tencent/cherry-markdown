@@ -22,4 +22,4 @@ export default class CodeTheme extends MenuBase {
      */
     onClick(shortKey: string, codeTheme: string): void;
 }
-import MenuBase from "@/toolbars/MenuBase";
+import MenuBase from '@/toolbars/MenuBase';
