@@ -1,5 +1,98 @@
 # Change Log
 
+## 0.11.0
+
+### Minor Changes
+
+- - refactor: 升级 CodeMirror 到 v6
+  - 将 CodeMirror 从 v5 升级到 v6，重构 CM6Adapter 适配器
+  - 优化特殊字符标记处理性能
+  - 修复选区映射、正则处理、Bubble 事件等问题
+  - 支持 vim 模式懒加载（@replit/codemirror-vim） [@RSS1102](https://github.com/RSS1102)([#1586](https://github.com/Tencent/cherry-markdown/pull/1586))([`c2b9e9e`](https://github.com/Tencent/cherry-markdown/commit/c2b9e9ea874c319015fae1829ec3896de772464e))
+- refactor: 优化构建配置并增强 stream 模式
+- feat(editor): 重构 `codeMirror· 模块加载方式为依赖注入，提升架构灵活性，stream 模式下不加载 `codeMirror`
+- refactor(build): 优化构建配置，仅支持 UMD/ESM 模式
+- fix(xss): 修复 XSS 安全漏洞 [@RSS1102](https://github.com/RSS1102)([#1653](https://github.com/Tencent/cherry-markdown/pull/1653))([`dbddcc0`](https://github.com/Tencent/cherry-markdown/commit/dbddcc08c096caf4c51b1dcb5f939551a0a7a6ce))
+- fix: 当 `toolbar` 和 `toolbarRight` 都为 `false` 或空数组时，隐藏顶部工具栏 [@RSS1102](https://github.com/RSS1102)([#1591](https://github.com/Tencent/cherry-markdown/pull/1591))([`8216cfb`](https://github.com/Tencent/cherry-markdown/commit/8216cfbe28e3501a6d55d2dd8a8ff1e34aee58ee))
+
+### Patch Changes
+
+- chore: node >= `20.x` [@RSS1102](https://github.com/RSS1102)([#1688](https://github.com/Tencent/cherry-markdown/pull/1688))([`03fa646`](https://github.com/Tencent/cherry-markdown/commit/03fa6462f692332521551f2e953ebac2146aec4a))
+- fix: 恢复扩展 PrismJS 支持的语言列表 [@RSS1102](https://github.com/RSS1102)([#1637](https://github.com/Tencent/cherry-markdown/pull/1637))([`253d68f`](https://github.com/Tencent/cherry-markdown/commit/253d68fc92f1de27511c02f955834186b874f119))
+- fix: #1649 增强refreshPreviewer函数，增加clearEngineCache接口 [@sunsonliu](https://github.com/sunsonliu)([#1674](https://github.com/Tencent/cherry-markdown/pull/1674))([`b8e9459`](https://github.com/Tencent/cherry-markdown/commit/b8e9459466fd4e3e5a82bdf08c8b1830d962a576))
+- fix: #1610 带 ~ 的超链接，引用显示后，点击的超链接变成了 ~T [@sunsonliu](https://github.com/sunsonliu)([#1611](https://github.com/Tencent/cherry-markdown/pull/1611))([`c658115`](https://github.com/Tencent/cherry-markdown/commit/c6581157cb58db484d261368db70ea542d489b80))
+- feat: #1549 流式渲染场景，优化代码块自动闭合的时机并优化行内公式在表格里也可以自动闭合 [@sunsonliu](https://github.com/sunsonliu)([#1640](https://github.com/Tencent/cherry-markdown/pull/1640))([`98d0f88`](https://github.com/Tencent/cherry-markdown/commit/98d0f888ed2c19486d0556a7ba94567e04412f0d))
+- fix: #1593 首次粘贴html内容时，cherry会默认把html转成Markdown，但提示的却是TEXT [@sunsonliu](https://github.com/sunsonliu)([#1612](https://github.com/Tencent/cherry-markdown/pull/1612))([`3d4e6bc`](https://github.com/Tencent/cherry-markdown/commit/3d4e6bca940da60c013e4a6d615a3ba908b89005))
+- fix: #1331 当使用katex渲染公式时，预览区公式操作丢失了 [@sunsonliu](https://github.com/sunsonliu)([#1646](https://github.com/Tencent/cherry-markdown/pull/1646))([`9965e48`](https://github.com/Tencent/cherry-markdown/commit/9965e487adf726a3abeae3be4f7a7b2964e54acb))
+- feat: 优化右侧悬浮目录的更新机制 [@sunsonliu](https://github.com/sunsonliu)([#1620](https://github.com/Tencent/cherry-markdown/pull/1620))([`b5dbc94`](https://github.com/Tencent/cherry-markdown/commit/b5dbc9418f5937ade270f061a9b2a975c71b7ecb))
+- 完善 Sublime 风格快捷键，新增在上方插入空行、选中括号内容、选中所有相同文本等快捷键，补全 Mac 侧绑定，修复多光标滚动异常 [@sunsonliu](https://github.com/sunsonliu)([#1685](https://github.com/Tencent/cherry-markdown/pull/1685))([`8ca33f1`](https://github.com/Tencent/cherry-markdown/commit/8ca33f18680d70867e1678e3beca6b1d57880111))
+- feat: #1632 表格中也支持段落公式，段落公式按行内公式渲染 [@sunsonliu](https://github.com/sunsonliu)([#1634](https://github.com/Tencent/cherry-markdown/pull/1634))([`77815d1`](https://github.com/Tencent/cherry-markdown/commit/77815d1327ec38e8a9517b6db841e6470053dd1e))
+- fix: 优化清理虚拟光标的逻辑 [@sunsonliu](https://github.com/sunsonliu)([#1667](https://github.com/Tencent/cherry-markdown/pull/1667))([`b6d6460`](https://github.com/Tencent/cherry-markdown/commit/b6d64603f165c71f035b48791e02879125e0598f))
+- - fix: 修复 addons 构建缺少环境变量替换导致运行时报错的问题 [@RSS1102](https://github.com/RSS1102)([#1693](https://github.com/Tencent/cherry-markdown/pull/1693))([`1bbdab7`](https://github.com/Tencent/cherry-markdown/commit/1bbdab73fa775fadb62a27123a4613a0a67fb0e6))
+- fix(theme): 修复暗黑主题下 TOC 收起功能失效问题
+
+- 修复暗黑主题下 TOC（目录）收起功能失效的问题
+- 修改深海主题下 TOC 指示器颜色以提升可读性
+
+该问题由 PR #1464 引入，从 v0.10.1 开始受影响，影响所有后续版本。 [@RSS1102](https://github.com/RSS1102)([#1668](https://github.com/Tencent/cherry-markdown/pull/1668))([`e51ae4b`](https://github.com/Tencent/cherry-markdown/commit/e51ae4b3c741d46f051bcd2db9017832b51b3499))
+
+- fix: 修复预览区图片编辑的多个问题
+
+- 连续修改图片属性时位置偏移
+- 清除图片扩展参数后残留多余空格
+- 预览区操作图片时左侧编辑器工具栏意外弹出
+- 修改图片对齐方式后选择框未跟随图片位置 [@sunsonliu](https://github.com/sunsonliu)([#1687](https://github.com/Tencent/cherry-markdown/pull/1687))([`1648dc0`](https://github.com/Tencent/cherry-markdown/commit/1648dc0359452383f34d10d21318411c28b91cc2))
+- fix: 将 mermaid 日志级(`logLevel`)别调整为 `fatal`(依然是 `5`) [@RSS1102](https://github.com/RSS1102)([#1696](https://github.com/Tencent/cherry-markdown/pull/1696))([`0a3a631`](https://github.com/Tencent/cherry-markdown/commit/0a3a631256f5f2c5ac91ac685f0c2ac8c693ab03))
+- build(types): 重构模块声明文件与构建流程
+
+- 新增 `types/modules.d.ts`，为 CSS 样式文件和 addon 插件提供完整的模块类型声明，解决 TypeScript `noUncheckedSideEffectImports` 下导入报错的问题
+- 构建产物自动注入三斜线引用，消费者无需额外配置即可获得类型支持 [@RSS1102](https://github.com/RSS1102)([#1680](https://github.com/Tencent/cherry-markdown/pull/1680))([`8f776a7`](https://github.com/Tencent/cherry-markdown/commit/8f776a716d644f225467eed16674d9cc1de2238d))
+- fix: 优化mermaid图的预览区交互效果 [@sunsonliu](https://github.com/sunsonliu)([#1675](https://github.com/Tencent/cherry-markdown/pull/1675))([`76f156f`](https://github.com/Tencent/cherry-markdown/commit/76f156f7f58a9a34d5a80fd7af193d88e826a1fb))
+- fix: 从渲染后的公式节点读取源码，避免公式工具条复制时出现正则误匹配 [@Seeridia](https://github.com/Seeridia)([#1648](https://github.com/Tencent/cherry-markdown/pull/1648))([`c1957e3`](https://github.com/Tencent/cherry-markdown/commit/c1957e3a269801c9f023a424c2ab153123c877a4))
+- fix: 将截图导出格式从 JPEG 改为 PNG [@RSS1102](https://github.com/RSS1102)([#1609](https://github.com/Tencent/cherry-markdown/pull/1609))([`1e8308b`](https://github.com/Tencent/cherry-markdown/commit/1e8308b222631d6fd93d9c4d5d3e2442e4311107))
+- fix: #1570 修复点击脚注列表里的标号时有js报错的问题 [@sunsonliu](https://github.com/sunsonliu)([#1573](https://github.com/Tencent/cherry-markdown/pull/1573))([`f5e01e9`](https://github.com/Tencent/cherry-markdown/commit/f5e01e98be5bb73928c3377f3344b1b437b90128))
+- feat: #1600 提高超大文档的性能 [@sunsonliu](https://github.com/sunsonliu)([#1615](https://github.com/Tencent/cherry-markdown/pull/1615))([`e24d7cd`](https://github.com/Tencent/cherry-markdown/commit/e24d7cd40d97b75b23bea5b866695cf53117590c))
+- chore:`@types/node` 升级为 `@20.10.6` [@RSS1102](https://github.com/RSS1102)([#1579](https://github.com/Tencent/cherry-markdown/pull/1579))([`68017a4`](https://github.com/Tencent/cherry-markdown/commit/68017a4eec2705c33b4fd28dc7433097f4f06cc7))
+- feat: 优化表格图表刷新机制，更新demo文档 [@sunsonliu](https://github.com/sunsonliu)([#1658](https://github.com/Tencent/cherry-markdown/pull/1658))([`1c2b4ea`](https://github.com/Tencent/cherry-markdown/commit/1c2b4eaf993f0f9db8e863b22211df5dec0153b5))
+- feat: #1691 增加可视化配置生成器（对应版本：0.10.3） [@sunsonliu](https://github.com/sunsonliu)([#1692](https://github.com/Tencent/cherry-markdown/pull/1692))([`827ccf9`](https://github.com/Tencent/cherry-markdown/commit/827ccf96f524d3a3e4668a50371be371f0a8feac))
+- feat(mermaid): 添加 mermaid 代码块源码/预览切换工具栏功能
+
+- 新增 mermaid 代码块的源码/预览切换工具栏，支持在渲染图和源码之间快速切换
+- 新增 `engine.syntax.codeBlock.mermaid.showSourceToolbar` 配置项，可控制是否显示切换工具栏
+- 支持多主题适配（默认/暗黑/深海主题） [@RSS1102](https://github.com/RSS1102)([#1670](https://github.com/Tencent/cherry-markdown/pull/1670))([`c0fbc35`](https://github.com/Tencent/cherry-markdown/commit/c0fbc35419a6027a282accac60e1ce023ad7860f))
+- feat(mermaid): 支持 mermaid 图表尺寸编辑和对齐
+
+- 新增 mermaid 图表尺寸拖拽调整功能
+- 支持 mermaid 图表对齐方式设置（左对齐、居中、右对齐、左浮动、右浮动） [@Jie-echo](https://github.com/Jie-echo)([#1641](https://github.com/Tencent/cherry-markdown/pull/1641))([`8b190e9`](https://github.com/Tencent/cherry-markdown/commit/8b190e9dcb622946085cb483dc7423fbec092ce5))
+- feat: onPaste粘贴的回调函数支持异步回调 #1595 [@sunsonliu](https://github.com/sunsonliu)([#1614](https://github.com/Tencent/cherry-markdown/pull/1614))([`3110c04`](https://github.com/Tencent/cherry-markdown/commit/3110c04de16182062fffb253b0b2060a82d633a8))
+- feat: #1621 增加和丰富统计信息 [@sunsonliu](https://github.com/sunsonliu)([#1628](https://github.com/Tencent/cherry-markdown/pull/1628))([`d624871`](https://github.com/Tencent/cherry-markdown/commit/d624871c48aecc46abd4cd05100d0a50f0e2ff61))
+- feat: 新增echarts代码块插件，支持直接渲染echarts [@sunsonliu](https://github.com/sunsonliu)([#1656](https://github.com/Tencent/cherry-markdown/pull/1656))([`233834d`](https://github.com/Tencent/cherry-markdown/commit/233834d382b6bef9d6d2ecbb81e3b0137a4509e0))
+- chore: 将 release build 的 Node 版本设置为 `18.x` [@RSS1102](https://github.com/RSS1102)([#1559](https://github.com/Tencent/cherry-markdown/pull/1559))([`b559a2a`](https://github.com/Tencent/cherry-markdown/commit/b559a2aea06dd470e0fd5bacf24e40a25ecbcbb4))
+- fix: #1622 表格左右滚动影响到图表的问题 [@sunsonliu](https://github.com/sunsonliu)([#1629](https://github.com/Tencent/cherry-markdown/pull/1629))([`033ca64`](https://github.com/Tencent/cherry-markdown/commit/033ca6424f32b8e43a2817fb7adfae2809ff3c52))
+- refactor(core): 统一外部依赖获取方式，优化全局类型声明
+
+- 统一 echarts、mermaid、katex、MathJax 等外部依赖的获取逻辑，SSR 环境下安全返回 `undefined`，不再直接访问 `window` 对象
+- `global.d.ts` 移除对 mermaid/katex 等第三方包的 import，用户引入类型时不再需要安装未使用的可选依赖
+- 新增 `window.Cherry`、`window.CherryStream`、`window.CherryEngine`、`window.CherryCodeBlockMermaidPlugin`、`window.CherryCodeBlockPlantumlPlugin` 全局类型声明 [@RSS1102](https://github.com/RSS1102)([#1672](https://github.com/Tencent/cherry-markdown/pull/1672))([`52c42da`](https://github.com/Tencent/cherry-markdown/commit/52c42da70c220c4e69f75c46403954d168b45633))
+- fix: 优化拖拽预览区宽度的逻辑，使其更稳定 [@sunsonliu](https://github.com/sunsonliu)([#1580](https://github.com/Tencent/cherry-markdown/pull/1580))([`755dd8c`](https://github.com/Tencent/cherry-markdown/commit/755dd8cd8cca0cc748384f51c64f9ce6ebcc9cb4))
+- style: 增加主题和代码块主题的图标 [@sunsonliu](https://github.com/sunsonliu)([#1547](https://github.com/Tencent/cherry-markdown/pull/1547))([`c15f54f`](https://github.com/Tencent/cherry-markdown/commit/c15f54f5c514c541f98e7f3fcd12d64b18c02788))
+- fix: 修复表格同一个单元格内无法连续输入\|的问题 [@sunsonliu](https://github.com/sunsonliu)([#1588](https://github.com/Tencent/cherry-markdown/pull/1588))([`5d2d0be`](https://github.com/Tencent/cherry-markdown/commit/5d2d0be8fe879775bb35359d660a69e205ea3467))
+- fix: 移除工具栏高度动态更新逻辑，简化任务栏高度变量管理 [@Seeridia](https://github.com/Seeridia)([#1585](https://github.com/Tencent/cherry-markdown/pull/1585))([`2478d68`](https://github.com/Tencent/cherry-markdown/commit/2478d680595156078f555043fd3d9cb9d7ba7daf))
+- feat(sidebar): 添加侧边栏列表样式和动态高度支持 [@RSS1102](https://github.com/RSS1102)([#1587](https://github.com/Tencent/cherry-markdown/pull/1587))([`e069033`](https://github.com/Tencent/cherry-markdown/commit/e069033baa5ed51ecbd0fa6bfe54b3f37f1f74e4))
+- fix: image syntax compatibility, Fixes #1554 [@lyngai](https://github.com/lyngai)([#1555](https://github.com/Tencent/cherry-markdown/pull/1555))([`a275692`](https://github.com/Tencent/cherry-markdown/commit/a275692e01fb3f02055d1ec63fb363a3c8855222))
+- - chore: 升级 typescript 至 v6.0.2，升级 mermaid 可选依赖至 ^11.14.0
+  - typescript: 4.7.2 → 6.0.2（构建工具升级，对用户无影响）
+    - 全项目统一 TS 版本，新增 tsconfig.base.json 公共配置
+    - 移除 @types/d3-dispatch（typescript 6 原生支持新语法）
+    - 适配 typescript 6 兼容性：ignoreDeprecations、rootDir、strict 模式优化
+    - 修复 logLevel 类型、clearTimeout 类型、process/env、closest polyfill 等 TS 错误
+  - mermaid（optionalDependencies）: 9.4.3 → ^11.14.0
+    - mermaid 是图表渲染可选依赖，用户按需安装即可使用流程图/时序图等代码块功能
+    - 兼容 v9/v10/v11 多版本 API，自动检测运行环境选择渲染方式 [@RSS1102](https://github.com/RSS1102)([#1671](https://github.com/Tencent/cherry-markdown/pull/1671))([`54d8692`](https://github.com/Tencent/cherry-markdown/commit/54d8692bc09ee990e49fb76466065a8fc71c7201))
+- fix: 1、优化demo 的菜单配置；2、字数统计增加起始状态 [@sunsonliu](https://github.com/sunsonliu)([#1659](https://github.com/Tencent/cherry-markdown/pull/1659))([`ba77f20`](https://github.com/Tencent/cherry-markdown/commit/ba77f20660523832317a36efd2aa666b3688eaf2))
+- feat: 支持 `onClickPreview` 返回 `false` 阻止后续处理 [@RSS1102](https://github.com/RSS1102)([#1625](https://github.com/Tencent/cherry-markdown/pull/1625))([`6cf9b7d`](https://github.com/Tencent/cherry-markdown/commit/6cf9b7d359f2a460c19e024ec24048882f06ad0f))
+- fix(echarts-plugin): support function syntax in echarts codeblock option parsing [@ethanflin](https://github.com/ethanflin)([#1678](https://github.com/Tencent/cherry-markdown/pull/1678))([`d098abd`](https://github.com/Tencent/cherry-markdown/commit/d098abd1b71c827a37a1d4e3fb2d18c7b3d66c9b))
+
 ## 0.11.0-alpha.0
 
 ### Minor Changes
