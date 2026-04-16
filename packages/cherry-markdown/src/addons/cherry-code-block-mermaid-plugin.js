@@ -48,7 +48,7 @@ const DEFAULT_OPTIONS = {
   fontFamily: 'sans-serif',
   themeCSS: '.label foreignObject { font-size: 90%; overflow: visible; } .label { font-family: sans-serif; }',
   startOnLoad: false,
-  logLevel: 'error',
+  logLevel: 'fatal',
   // fontFamily: 'Arial, monospace'
 };
 
