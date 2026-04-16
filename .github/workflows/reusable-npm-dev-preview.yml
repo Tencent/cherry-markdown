@@ -61,8 +61,11 @@ jobs:
           echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
           echo "PACKAGE_NAME=@cherry-markdown/cherry-markdown-dev" >> $GITHUB_ENV
 
-      - name: Install and build
-        run: yarn install && yarn build
+      - name: Install 
+        run: yarn install
+
+      - name: Build
+        run: yarn build  
 
       - name: npm publish
         working-directory: ./packages/cherry-markdown

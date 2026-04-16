@@ -12,11 +12,7 @@
 name: 'Merge Dev Preview'
 
 on:
-  pull_request_target:
-    types: [closed]
-    paths:
-      - 'packages/cherry-markdown/**'
-      - 'packages/vscodePlugin/**'
+  pull_request:
 
 permissions:
   contents: read
