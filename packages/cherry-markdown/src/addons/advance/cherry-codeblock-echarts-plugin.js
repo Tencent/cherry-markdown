@@ -48,6 +48,7 @@ export default class EChartsCodeBlockEngine {
     }
     this.size = echartsOptions.size;
     this.echartsRef = resolvedEcharts; // echarts引用
+    this.srcCache = new Map();
   }
 
   /**
@@ -91,10 +92,17 @@ export default class EChartsCodeBlockEngine {
         try {
           // 判断是否已经初始化
           let chart = this.echartsRef.getInstanceByDom(container);
-          if (!chart) {
+          const isNewChart = !chart;
+          if (isNewChart) {
             chart = this.echartsRef.init(container);
           }
+          // 如果图表已存在且 sign 未变，跳过 setOption，避免动画被重置
+          if (!isNewChart && this.srcCache.has(sign)) {
+            return; // src 没有变化，跳过重绘
+          }
           chart.setOption(option, true); // 增加 true 参数以强制覆盖旧配置
+          // 记录当前 sign，用于下次判断内容是否变化
+          this.srcCache.set(sign, 1);
         } catch (error) {
           if ($engine.$cherry.options.engine.global.flowSessionContext) {
             container.innerHTML = `drawing...`;
