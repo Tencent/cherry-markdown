@@ -7,8 +7,8 @@
 #   "release"     — 构建 + 正式发布到 Marketplace（Push → main，changeset 版本号）
 #
 # 步骤:
-#   1. 改名（cherry-markdown-core + cherry-markdown）— 解决 workspace 冲突
-#   2. 改版本号（package / pre-release 模式加时间戳）
+#   1. 改版本号（package / pre-release 模式加时间戳）
+#   2. 改名（cherry-markdown-core + cherry-markdown）— 解决 workspace 冲突
 #   3. 安装依赖 + 构建核心库
 #   4. 生产模式编译插件
 #   5. 打包 / 预发布 / 正式发布
@@ -82,7 +82,7 @@ jobs:
       - name: Build VSCode Plugin (production bundle)
         run: yarn build:vscodePlugin
 
-      # ── 7a. package 模式：打包 + 上传 artifact ──
+      # ── 5a. package 模式：打包 + 上传 artifact ──
       - name: Package VSCode Plugin
         if: inputs.mode == 'package'
         run: |
@@ -98,7 +98,7 @@ jobs:
           retention-days: 5
           if-no-files-found: warn
 
-      # ── 7b. pre-release 模式：预发布到 Marketplace ──
+      # ── 5b. pre-release 模式：预发布到 Marketplace ──
       - name: Publish VSCode Plugin (pre-release)
         if: inputs.mode == 'pre-release'
         env:
@@ -120,7 +120,7 @@ jobs:
               body: `🔌 Preview Cherry Markdown Extensions [see: prerelease-extensions](https://code.visualstudio.com/api/working-with-extensions/publishing-extension?from_column=20423&from=20423#prerelease-extensions)`
             });
 
-      # ── 7c. release 模式：正式发布到 Marketplace ──
+      # ── 5c. release 模式：正式发布到 Marketplace ──
       - name: Publish VSCode Plugin (release)
         if: inputs.mode == 'release'
         env:
