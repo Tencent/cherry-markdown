@@ -29,7 +29,7 @@ jobs:
           registry-url: https://registry.npmjs.org/
           cache: yarn
 
-      - name: Prepare dev package
+      - name: Compute dev version
         working-directory: ./packages/cherry-markdown
         env:
           COMMIT_SHORT_SHA: ${{ github.sha }}
@@ -43,19 +43,28 @@ jobs:
           echo "PACKAGE_NAME=@cherry-markdown/cherry-markdown-dev" >> $GITHUB_ENV
           echo "COMMIT_MESSAGE=$(git log --oneline -1)" >> $GITHUB_ENV
 
+      # 先更新版本号（保持原始 name），确保构建产物内嵌新版本
+      - name: Update version in package.json
+        working-directory: ./packages/cherry-markdown
+        run: |
+          tmp=$(mktemp) && jq \
+            --arg version "$PACKAGE_VERSION" \
+            '.version = $version' \
+            package.json > "$tmp" && mv "$tmp" package.json
+
       # 在原始 name (cherry-markdown) 下完成 install & build，
       # 保证根 package.json 的 postinstall / build 脚本能找到 workspace
+      # 此时 version 已是新版本，构建产物内的版本号将正确反映
       - name: Install and build
         run: yarn install && yarn build
 
-      # 构建完成后再改名、改版本、写 README，为 npm publish 做准备
+      # 构建完成后再改包名、写 README，为 npm publish 做准备
       - name: Prepare dev package for publish
         working-directory: ./packages/cherry-markdown
         run: |
           tmp=$(mktemp) && jq \
             --arg name "$PACKAGE_NAME" \
-            --arg version "$PACKAGE_VERSION" \
-            '.name = $name | .version = $version | del(.scripts.publish?)' \
+            '.name = $name | del(.scripts.publish?)' \
             package.json > "$tmp" && mv "$tmp" package.json
 
           cat > README.md <<EOF

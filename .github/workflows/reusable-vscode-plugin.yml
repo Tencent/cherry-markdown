@@ -43,11 +43,8 @@ jobs:
           node-version: '22.x'
           cache: 'yarn'
 
-      # ── 1. 改名：解决 workspace 同名冲突 ──
-      - name: Prepare package names
-        run: bash .github/scripts/prepare-vscode-plugin.sh
-
-      # ── 2. 改版本号（package / pre-release 加时间戳）──
+      # ── 1. 改版本号（package / pre-release 加时间戳）──
+      # 先改版本，确保构建产物内嵌新版本号
       - name: Stamp preview version
         if: inputs.mode != 'release'
         run: |
@@ -69,7 +66,13 @@ jobs:
             )
           ' package.json > "$tmp" && mv "$tmp" package.json
 
+      # ── 2. 改名：解决 workspace 同名冲突 ──
+      # 在改版本后改名，确保构建时使用新版本号
+      - name: Prepare package names
+        run: bash .github/scripts/prepare-vscode-plugin.sh
+
       # ── 3. 安装依赖 + 构建核心库 ──
+      # 此时根 scripts 已指向 cherry-markdown-core，postinstall 能找到
       - name: Install and Build Dependencies
         run: |
           yarn --network-timeout 100000
@@ -79,7 +82,7 @@ jobs:
       - name: Build VSCode Plugin (production bundle)
         run: yarn build:vscodePlugin
 
-      # ── 5a. package 模式：打包 + 上传 artifact ──
+      # ── 7a. package 模式：打包 + 上传 artifact ──
       - name: Package VSCode Plugin
         if: inputs.mode == 'package'
         run: |
@@ -95,7 +98,7 @@ jobs:
           retention-days: 5
           if-no-files-found: warn
 
-      # ── 5b. pre-release 模式：预发布到 Marketplace ──
+      # ── 7b. pre-release 模式：预发布到 Marketplace ──
       - name: Publish VSCode Plugin (pre-release)
         if: inputs.mode == 'pre-release'
         env:
@@ -117,7 +120,7 @@ jobs:
               body: `🔌 Preview Cherry Markdown Extensions [see: prerelease-extensions](https://code.visualstudio.com/api/working-with-extensions/publishing-extension?from_column=20423&from=20423#prerelease-extensions)`
             });
 
-      # ── 5c. release 模式：正式发布到 Marketplace ──
+      # ── 7c. release 模式：正式发布到 Marketplace ──
       - name: Publish VSCode Plugin (release)
         if: inputs.mode == 'release'
         env:
