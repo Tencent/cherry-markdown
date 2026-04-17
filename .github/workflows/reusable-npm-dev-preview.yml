@@ -35,19 +35,29 @@ jobs:
           COMMIT_SHORT_SHA: ${{ github.sha }}
         run: |
           COMMIT_SHORT_SHA="${COMMIT_SHORT_SHA:0:7}"
-          COMMIT_MESSAGE=$(git log --oneline -1)
-
           BASE_VERSION=$(jq -r .version package.json)
           VERSION="${BASE_VERSION}-$(date +'%Y%m%d%H%M').${COMMIT_SHORT_SHA}"
 
-          # 修改包名和版本号
+          # 输出环境变量供后续步骤使用
+          echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "PACKAGE_NAME=@cherry-markdown/cherry-markdown-dev" >> $GITHUB_ENV
+          echo "COMMIT_MESSAGE=$(git log --oneline -1)" >> $GITHUB_ENV
+
+      # 在原始 name (cherry-markdown) 下完成 install & build，
+      # 保证根 package.json 的 postinstall / build 脚本能找到 workspace
+      - name: Install and build
+        run: yarn install && yarn build
+
+      # 构建完成后再改名、改版本、写 README，为 npm publish 做准备
+      - name: Prepare dev package for publish
+        working-directory: ./packages/cherry-markdown
+        run: |
           tmp=$(mktemp) && jq \
-            --arg name "@cherry-markdown/cherry-markdown-dev" \
-            --arg version "$VERSION" \
+            --arg name "$PACKAGE_NAME" \
+            --arg version "$PACKAGE_VERSION" \
             '.name = $name | .version = $version | del(.scripts.publish?)' \
             package.json > "$tmp" && mv "$tmp" package.json
 
-          # 写入警告 README
           cat > README.md <<EOF
           **⚠️ 开发预览警告 / Development Preview Warning**
 
@@ -56,13 +66,6 @@ jobs:
           此版本为临时测试版，禁止在生产环境使用！
           This is a development preview version, do NOT use in production!
           EOF
-
-          # 输出环境变量供后续步骤使用
-          echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
-          echo "PACKAGE_NAME=@cherry-markdown/cherry-markdown-dev" >> $GITHUB_ENV
-
-      - name: Install and build
-        run: yarn install && yarn build
 
       - name: npm publish
         working-directory: ./packages/cherry-markdown
