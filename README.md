@@ -1,4 +1,4 @@
-<p align="center"><img src="logo/new_logo.png" alt="cherry logo" width="50%"/></p>
+1<p align="center"><img src="logo/new_logo.png" alt="cherry logo" width="50%"/></p>
 1
 # Cherry Markdown Writer
 
