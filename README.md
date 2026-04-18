@@ -1,5 +1,5 @@
 <p align="center"><img src="logo/new_logo.png" alt="cherry logo" width="50%"/></p>
-
+1
 # Cherry Markdown Writer
 
 [![cnb 云原生开发](./logo/cnb-badge.svg)](https://cnb.cool/tencent/cherry-markdown/cherry-markdown) [![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
