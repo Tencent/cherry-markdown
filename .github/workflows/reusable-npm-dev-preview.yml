@@ -14,6 +14,16 @@ on:
         required: true
         type: number
 
+# reusable workflow 必须显式声明 permissions
+# id-token: write —— npm provenance 依赖 OIDC 签发的 token
+# contents: read  —— checkout 读取仓库内容
+# pull-requests: write / issues: write —— 在 PR 下评论安装指引
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+  issues: write
+
 jobs:
   npm-dev-preview:
     runs-on: ubuntu-latest
@@ -78,6 +88,10 @@ jobs:
 
       - name: npm publish
         working-directory: ./packages/cherry-markdown
+        env:
+          # 若 npm 已配置 Trusted Publisher（OIDC），可删除此行；
+          # 否则必须提供 NPM_TOKEN（Automation Token，勾选 bypass 2FA）
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public --tag latest --provenance
 
       - name: Comment install instructions
