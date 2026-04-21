@@ -1,10 +1,9 @@
 # =============================================================================
 # Merge Dev Preview — 合并到 dev 后自动发布开发预览版
 #
-# 触发时机: PR 合并 (closed + merged) 到 dev 分支，且变更涉及 packages/cherry-markdown 或 packages/vscodePlugin
-# 功能:
-#   1. npm-dev-preview: 发布 @cherry-markdown/cherry-markdown-dev 到 npm（带时间戳版本号），PR 评论安装指引
-#   2. vscode-plugin-preview: 以 --pre-release 模式发布 VSCode 插件，PR 评论下载信息
+# 触发时机: PR 合并 (closed + merged) 到 dev 分支，且变更涉及以下路径:
+#   - packages/cherry-markdown: 发布 npm dev 预览版 + VSCode 插件 pre-release
+#   - packages/vscodePlugin:    发布 VSCode 插件 pre-release
 # 使用 pull_request 确保 OIDC token claims 正确匹配 Trusted Publisher
 # 并发控制: 不取消旧运行（合并事件只应执行一次）
 # =============================================================================
@@ -60,7 +59,7 @@ jobs:
 
   vscode-plugin-preview:
     needs: detect-changes
-    if: needs.detect-changes.outputs.vscode-plugin == 'true'
+    if: needs.detect-changes.outputs.vscode-plugin == 'true' || needs.detect-changes.outputs.cherry-markdown == 'true'
     uses: ./.github/workflows/reusable-vscode-plugin.yml
     with:
       mode: pre-release

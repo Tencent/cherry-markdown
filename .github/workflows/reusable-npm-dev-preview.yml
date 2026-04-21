@@ -32,40 +32,27 @@ jobs:
 
       - name: Compute dev version
         working-directory: ./packages/cherry-markdown
-        env:
-          COMMIT_SHORT_SHA: ${{ github.sha }}
         run: |
-          COMMIT_SHORT_SHA="${COMMIT_SHORT_SHA:0:7}"
-          BASE_VERSION=$(jq -r .version package.json)
-          VERSION="${BASE_VERSION}-$(date +'%Y%m%d%H%M').${COMMIT_SHORT_SHA}"
+          BASE_VERSION=$(npm pkg get version --json | tr -d '"')
+          VERSION="${BASE_VERSION}-$(date +'%Y%m%d%H%M').${GITHUB_SHA:0:7}"
           echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
           echo "PACKAGE_NAME=@cherry-markdown/cherry-markdown-dev" >> $GITHUB_ENV
-          echo "COMMIT_MESSAGE=$(git log --oneline -1)" >> $GITHUB_ENV
 
       # 先改 version（保持原始 name），确保构建产物内嵌新版本
       - name: Update version
         working-directory: ./packages/cherry-markdown
-        run: |
-          tmp=$(mktemp) && jq --arg v "$PACKAGE_VERSION" '.version = $v' package.json > "$tmp" && mv "$tmp" package.json
+        run: npm version "$PACKAGE_VERSION" --no-git-tag-version
 
       # 在原始 name 下 install & build，workspace 依赖原始包名
       - name: Install and build
         run: yarn install && yarn build
 
-      # build 完成后改包名、注入 publishConfig、写 README
+      # build 完成后改包名、写 README
       - name: Prepare package for publish
         working-directory: ./packages/cherry-markdown
         run: |
-          tmp=$(mktemp) && jq \
-            --arg name "$PACKAGE_NAME" \
-            '.name = $name | del(.scripts.publish?) | .publishConfig = {"registry":"https://registry.npmjs.org","access":"public","provenance":true}' \
-            package.json > "$tmp" && mv "$tmp" package.json
-
-          cat > README.md <<'EOF'
-          **⚠️ Development Preview Warning**
-          This is a dev preview version, do NOT use in production!
-          EOF
-          sed -i 's/^          //' README.md
+          npm pkg set name="$PACKAGE_NAME"
+          printf '**⚠️ Development Preview Warning / 开发预览版警告**\n\nThis is a dev preview version, do NOT use in production!\n此版本为开发预览版，禁止在生产环境使用！\n' > README.md
 
       - name: Publish to npm
         working-directory: ./packages/cherry-markdown

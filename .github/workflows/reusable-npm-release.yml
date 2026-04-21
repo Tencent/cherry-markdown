@@ -28,10 +28,7 @@ jobs:
 
       - name: Prepare package for publish
         working-directory: ./packages/cherry-markdown
-        run: |
-          cp ../../README*.md .
-          tmp=$(mktemp) && jq '.publishConfig = {"registry":"https://registry.npmjs.org","access":"public","provenance":true}' \
-            package.json > "$tmp" && mv "$tmp" package.json
+        run: cp ../../README*.md . || { echo "❌ Failed to copy README files" >&2; exit 1; }
 
       - name: Publish cherry-markdown
         working-directory: ./packages/cherry-markdown
