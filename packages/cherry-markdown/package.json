@@ -55,7 +55,7 @@
   ],
   "author": "Cherry Oteam",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "devDependencies": {
     "@babel/core": "^7.7.2",
