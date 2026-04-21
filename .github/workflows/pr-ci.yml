@@ -27,9 +27,9 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [22.x, 24.x]
-        # 22: 稳定 LTS (支持至 2027-04)
-        # 24: 最新 LTS (支持至 2027-04)
+        node-version: [lts/*, 24.x]
+        # lts/*: 当前最新 Active LTS（自动跟随）
+        # 24.x: 固定开发基准版本
 
     steps:
       - uses: actions/checkout@v6

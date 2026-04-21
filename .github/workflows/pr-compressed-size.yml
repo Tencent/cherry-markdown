@@ -26,6 +26,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: 'yarn'
       - uses: preactjs/compressed-size-action@v2
         with:
           pattern: './packages/cherry-markdown/dist/**/*.{js,css,d.ts}'
+          install-script: 'yarn --frozen-lockfile --ignore-engines'
