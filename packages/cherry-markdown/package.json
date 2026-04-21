@@ -24,6 +24,11 @@
   "sideEffects": [
     "./dist/*.css"
   ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "iconfont": "gulp",
     "dev": "vite",

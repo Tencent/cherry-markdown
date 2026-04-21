@@ -3,9 +3,9 @@
 #
 # 触发时机: PR 打开 / 有新推送 / 重开时自动运行
 # 功能:
-#   1. playground 构建 — 用于 surge.sh 在线预览
-#   2. Client 全平台构建 — Tauri 桌面客户端 [macOS arm64/x64, Win x64, Linux x64]
-#   3. VSCode Plugin 打包 — .vsix 文件
+#   1. playground 构建 — 用于 surge.sh 在线预览（所有 PR 均触发）
+#   2. Client 全平台构建 — packages/cherry-markdown 或 packages/client 变更时触发
+#   3. VSCode Plugin 打包 — packages/cherry-markdown 或 packages/vscodePlugin 变更时触发
 # 所有构建产物上传为 artifact，由 pr-preview-deploy 统一处理
 # 注意: Client 和 VSCode Plugin 构建失败不影响主流程 (continue-on-error)
 # 并发控制: 连续提交取消旧运行
@@ -25,15 +25,38 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      client: ${{ steps.filter.outputs.client }}
+      vscode-plugin: ${{ steps.filter.outputs.vscode-plugin }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            client:
+              - 'packages/cherry-markdown/**'
+              - 'packages/client/**'
+            vscode-plugin:
+              - 'packages/cherry-markdown/**'
+              - 'packages/vscodePlugin/**'
+
   playground:
     uses: ./.github/workflows/reusable-playground-build.yml
 
   client:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.client == 'true'
     uses: ./.github/workflows/reusable-client-build.yml
     with:
       mode: preview
 
   vscode-plugin:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.vscode-plugin == 'true'
     uses: ./.github/workflows/reusable-vscode-plugin.yml
     with:
       mode: package
