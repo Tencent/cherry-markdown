@@ -33,7 +33,7 @@ jobs:
       - name: Compute dev version
         working-directory: ./packages/cherry-markdown
         run: |
-          BASE_VERSION=$(npm pkg get version --json | tr -d '"')
+          BASE_VERSION=$(node -p "require('./package.json').version")
           VERSION="${BASE_VERSION}-$(date +'%Y%m%d%H%M').${GITHUB_SHA:0:7}"
           echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
           echo "PACKAGE_NAME=@cherry-markdown/cherry-markdown-dev" >> $GITHUB_ENV
