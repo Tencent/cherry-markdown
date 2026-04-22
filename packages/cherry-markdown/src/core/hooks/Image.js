@@ -84,7 +84,7 @@ export default class Image extends SyntaxBase {
       }
       attrs = title && title.trim() !== '' ? ` title="${$e(title.replace(/["']/g, ''))}"` : '';
       let srcProp = 'src';
-      let srcValue;
+      let srcValue = link;
       const cherryOptions = this.$engine.$cherry.options;
       if (cherryOptions.callback && cherryOptions.callback.beforeImageMounted) {
         const imgAttrs = cherryOptions.callback.beforeImageMounted(srcProp, link);
