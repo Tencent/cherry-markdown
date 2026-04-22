@@ -174,7 +174,10 @@ export default class CodeBlock extends ParagraphBase {
   renderLineNumber(code) {
     if (!this.lineNumber) return code;
     let codeLines = code.split('\n');
-    codeLines.pop(); // 末尾回车不增加行号
+    // 只有当最后一行为空时（即代码以换行符结尾）才移除，避免丢失实际代码行
+    if (codeLines.length > 0 && codeLines[codeLines.length - 1] === '') {
+      codeLines.pop();
+    }
     codeLines = this.fillTag(codeLines);
     return `<span class="code-line">${codeLines.join('</span>\n<span class="code-line">')}</span>`;
   }
