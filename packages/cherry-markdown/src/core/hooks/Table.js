@@ -198,6 +198,13 @@ export default class Table extends ParagraphBase {
     if (chartOptions) {
       rows[0][0] = '';
     }
+    // 在流式输出场景下，光标占位符 CHERRYFLOWSESSIONCURSOR 可能被混入到表格单元格文本中，
+    // 一旦这些文本被图表插件序列化进 data-table-data / data-chart-options 的属性值 JSON 中，
+    // 最终 $clearFlowSessionCursorCache 会把 <span class="cherry-flow-session-cursor"></span>
+    // 这样带双引号的片段替换进属性值内部，导致浏览器解析 HTML 时属性被提前闭合，
+    // 进而出现属性值后半段泄漏为文本节点的问题（#cherry-echarts-wrapper 内容泄漏 bug）。
+    // 这里仅在需要生成图表时清理单元格中的占位符，避免影响普通表格的光标显示。
+    const stripFlowCursor = (cell) => (typeof cell === 'string' ? cell.replace(/CHERRYFLOWSESSIONCURSOR/g, '') : cell);
     /**
      * ~CTHD: <thead>
      * ~CTHD$: </thead>
@@ -212,7 +219,9 @@ export default class Table extends ParagraphBase {
      */
     const tableHeader = this.$extendColumns(rows[0], maxCol)
       .map((cell, col) => {
-        tableObject.header.push(cell.replace(/~CS/g, '\\|'));
+        tableObject.header.push(
+          chartOptions ? stripFlowCursor(cell.replace(/~CS/g, '\\|')) : cell.replace(/~CS/g, '\\|'),
+        );
         const { html: cellHtml } = sentenceMakeFunc(cell.replace(/~CS/g, '\\|'));
         // 前后补一个空格，否则自动链接会将缓存的内容全部收入链接内部
         return `~CTH${textAlignRules[col] || 'U'} ${cellHtml} ~CTH$`;
@@ -226,7 +235,9 @@ export default class Table extends ParagraphBase {
         const currentRowCountWithoutHeader = line - 2;
         tableObject.rows[currentRowCountWithoutHeader] = [];
         const $extendedColumns = this.$extendColumns(row, maxCol).map((cell, col) => {
-          tableObject.rows[currentRowCountWithoutHeader].push(cell.replace(/~CS/g, '\\|'));
+          tableObject.rows[currentRowCountWithoutHeader].push(
+            chartOptions ? stripFlowCursor(cell.replace(/~CS/g, '\\|')) : cell.replace(/~CS/g, '\\|'),
+          );
           const { html: cellHtml } = sentenceMakeFunc(cell.replace(/~CS/g, '\\|'));
           // 前后补一个空格，否则自动链接会将缓存的内容全部收入链接内部
           return `~CTD${textAlignRules[col] || 'U'} ${cellHtml} ~CTD$`;
