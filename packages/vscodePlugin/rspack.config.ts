@@ -1,4 +1,4 @@
-import { Configuration } from '@rspack/core';
+import { Configuration, rspack } from '@rspack/core';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -6,6 +6,12 @@ import * as fs from 'fs';
 const distPath = path.resolve(__dirname, 'dist');
 if (fs.existsSync(distPath)) {
   fs.rmSync(distPath, { recursive: true });
+}
+
+// Webview 构建前清理 web-resources/dist 目录（由 rspack 完整生成）
+const webviewDistPath = path.resolve(__dirname, 'web-resources', 'dist');
+if (fs.existsSync(webviewDistPath)) {
+  fs.rmSync(webviewDistPath, { recursive: true });
 }
 
 // 环境判断
@@ -64,7 +70,6 @@ const extensionConfig: Configuration = {
 };
 
 // Webview 配置 (浏览器环境)
-const webviewDistPath = path.resolve(__dirname, 'web-resources', 'dist');
 const webviewConfig: Configuration = {
   target: 'web',
   mode: isProduction ? 'production' : 'development',
@@ -77,7 +82,7 @@ const webviewConfig: Configuration = {
     libraryTarget: 'umd',
     // 资源文件（字体等）输出到 assets/ 子目录
     assetModuleFilename: 'assets/[name][ext]',
-    clean: false,
+    clean: false, // 已手动清理
   },
   devtool: isProduction ? false : 'source-map',
   resolve: {
@@ -101,12 +106,13 @@ const webviewConfig: Configuration = {
         },
         type: 'javascript/auto',
       },
-      // 处理 CSS 文件（cherry-markdown 的样式）
+      // CSS：用 CssExtractRspackPlugin 提取为独立 .css 文件（替代实验性的 experiments.css）
       {
         test: /\.css$/,
-        type: 'css',
+        use: [rspack.CssExtractRspackPlugin.loader, 'css-loader'],
+        type: 'javascript/auto',
       },
-      // 处理字体文件
+      // 字体文件
       {
         test: /\.(woff|woff2|ttf|eot)$/,
         type: 'asset/resource',
@@ -114,7 +120,7 @@ const webviewConfig: Configuration = {
           filename: 'fonts/[name][ext]',
         },
       },
-      // 处理图片/SVG
+      // 图片 / SVG
       {
         test: /\.(png|jpg|gif|svg)$/,
         type: 'asset/resource',
@@ -124,6 +130,11 @@ const webviewConfig: Configuration = {
       },
     ],
   },
+  plugins: [
+    new rspack.CssExtractRspackPlugin({
+      filename: '[name].css',
+    }),
+  ],
   optimization: {
     minimize: isProduction,
   },

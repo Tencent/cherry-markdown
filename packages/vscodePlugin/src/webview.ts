@@ -27,6 +27,10 @@ export function getWebviewContent(mdInfo: object, currentPanel: vscode.WebviewPa
     'scripts/index.js': currentPanel.webview.asWebviewUri(
       vscode.Uri.file(path.join(extensionPath, 'web-resources', 'dist', 'index.js')),
     ),
+    // rspack CssExtractRspackPlugin 产出的 CSS（包含 cherry-markdown 样式 + 用户 CSS import）
+    'dist/index.css': currentPanel.webview.asWebviewUri(
+      vscode.Uri.file(path.join(extensionPath, 'web-resources', 'dist', 'index.css')),
+    ),
     'scripts/index.css': currentPanel.webview.asWebviewUri(
       vscode.Uri.file(path.join(extensionPath, 'web-resources/scripts/index.css')),
     ),
@@ -40,9 +44,10 @@ export function getWebviewContent(mdInfo: object, currentPanel: vscode.WebviewPa
 http-equiv="Content-Security-Policy"
 content="default-src 'none'; img-src ${currentPanel.webview.cspSource} https: http: data:; script-src ${
     currentPanel.webview.cspSource
-  }; style-src ${currentPanel.webview.cspSource} 'unsafe-inline'; font-src ${currentPanel.webview.cspSource};"
+  }; style-src ${currentPanel.webview.cspSource}; font-src ${currentPanel.webview.cspSource};"
 />
     <title>Cherry Editor - Markdown Editor</title>
+    <link rel="stylesheet" type="text/css" href="${pageResourceUrlsMap['dist/index.css']}">
     <link rel="stylesheet" type="text/css" href="${pageResourceUrlsMap['index.css']}">
     <link rel="stylesheet" type="text/css" href="${pageResourceUrlsMap['scripts/index.css']}">
     <script src="${pageResourceUrlsMap['global-vars.js']}"></script>

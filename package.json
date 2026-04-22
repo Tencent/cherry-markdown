@@ -18,7 +18,6 @@
     "changeset-version": "npx @changesets/cli version",
     "dev": "yarn workspace cherry-markdown dev",
     "build": "yarn workspace cherry-markdown build",
-    "postbuild": "tsx scripts/post-build.ts",
     "dev:client": "yarn workspace @cherry-markdown/client tauri dev",
     "build:client": "yarn workspace @cherry-markdown/client tauri build",
     "build:vscodePlugin": "yarn workspace cherry-markdown-vscode-plugin build",
