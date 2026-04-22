@@ -21,12 +21,6 @@ export function getWebviewContent(mdInfo: object, currentPanel: vscode.WebviewPa
     'index.css': currentPanel.webview.asWebviewUri(
       vscode.Uri.file(path.join(extensionPath, 'web-resources/index.css')),
     ),
-    'cherry-markdown.css': currentPanel.webview.asWebviewUri(
-      vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/cherry-markdown.min.css')),
-    ),
-    'cherry-markdown.js': currentPanel.webview.asWebviewUri(
-      vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/cherry-markdown.min.js')),
-    ),
     'scripts/pinyin/pinyin_dist.js': currentPanel.webview.asWebviewUri(
       vscode.Uri.file(path.join(extensionPath, 'web-resources/scripts/pinyin/pinyin_dist.js')),
     ),
@@ -35,15 +29,6 @@ export function getWebviewContent(mdInfo: object, currentPanel: vscode.WebviewPa
     ),
     'scripts/index.css': currentPanel.webview.asWebviewUri(
       vscode.Uri.file(path.join(extensionPath, 'web-resources/scripts/index.css')),
-    ),
-    'dist/fonts/ch-icon.woff': currentPanel.webview.asWebviewUri(
-      vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/fonts/ch-icon.woff')),
-    ),
-    'dist/fonts/ch-icon.woff2': currentPanel.webview.asWebviewUri(
-      vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/fonts/ch-icon.woff2')),
-    ),
-    'dist/fonts/ch-icon.ttf': currentPanel.webview.asWebviewUri(
-      vscode.Uri.file(path.join(extensionPath, 'web-resources/dist/fonts/ch-icon.ttf')),
     ),
   };
   return `<!DOCTYPE html>
@@ -55,13 +40,9 @@ export function getWebviewContent(mdInfo: object, currentPanel: vscode.WebviewPa
 http-equiv="Content-Security-Policy"
 content="default-src 'none'; img-src ${currentPanel.webview.cspSource} https: http: data:; script-src ${
     currentPanel.webview.cspSource
-  }; style-src ${currentPanel.webview.cspSource}; font-src ${currentPanel.webview.cspSource};"
+  }; style-src ${currentPanel.webview.cspSource} 'unsafe-inline'; font-src ${currentPanel.webview.cspSource};"
 />
     <title>Cherry Editor - Markdown Editor</title>
-    <link rel="preload" as="font" href="${pageResourceUrlsMap['dist/fonts/ch-icon.woff']}" crossorigin="anonymous">
-    <link rel="preload" as="font" href="${pageResourceUrlsMap['dist/fonts/ch-icon.woff2']}" crossorigin="anonymous">
-    <link rel="preload" as="font" href="${pageResourceUrlsMap['dist/fonts/ch-icon.ttf']}" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="${pageResourceUrlsMap['cherry-markdown.css']}">
     <link rel="stylesheet" type="text/css" href="${pageResourceUrlsMap['index.css']}">
     <link rel="stylesheet" type="text/css" href="${pageResourceUrlsMap['scripts/index.css']}">
     <script src="${pageResourceUrlsMap['global-vars.js']}"></script>
@@ -71,7 +52,6 @@ content="default-src 'none'; img-src ${currentPanel.webview.cspSource} https: ht
     <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%;"></div>
     <textarea id="markdown-info">${JSON.stringify(mdInfo)}</textarea>
     <div id="markdown" class="markdown-preview-only"></div>
-    <script src="${pageResourceUrlsMap['cherry-markdown.js']}"></script>
     <script src="${pageResourceUrlsMap['scripts/pinyin/pinyin_dist.js']}"></script>
     <script src="${pageResourceUrlsMap['scripts/index.js']}"></script>
   </body>

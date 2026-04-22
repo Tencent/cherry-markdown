@@ -55,9 +55,8 @@ const extensionConfig: Configuration = {
   },
   optimization: {
     minimize: isProduction,
-    splitChunks: {
-      chunks: 'all',
-    },
+    // VSCode 扩展只识别单一入口文件，不能拆分 chunk
+    splitChunks: false,
   },
   performance: {
     hints: isProduction ? 'warning' : false,
@@ -65,6 +64,7 @@ const extensionConfig: Configuration = {
 };
 
 // Webview 配置 (浏览器环境)
+const webviewDistPath = path.resolve(__dirname, 'web-resources', 'dist');
 const webviewConfig: Configuration = {
   target: 'web',
   mode: isProduction ? 'production' : 'development',
@@ -72,10 +72,11 @@ const webviewConfig: Configuration = {
     index: './web-resources/scripts/index.js',
   },
   output: {
-    // 输出到 web-resources/dist 以便 webview 直接加载
-    path: path.resolve(__dirname, 'web-resources', 'dist'),
+    path: webviewDistPath,
     filename: '[name].js',
     libraryTarget: 'umd',
+    // 资源文件（字体等）输出到 assets/ 子目录
+    assetModuleFilename: 'assets/[name][ext]',
     clean: false,
   },
   devtool: isProduction ? false : 'source-map',
@@ -100,7 +101,31 @@ const webviewConfig: Configuration = {
         },
         type: 'javascript/auto',
       },
+      // 处理 CSS 文件（cherry-markdown 的样式）
+      {
+        test: /\.css$/,
+        type: 'css',
+      },
+      // 处理字体文件
+      {
+        test: /\.(woff|woff2|ttf|eot)$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'fonts/[name][ext]',
+        },
+      },
+      // 处理图片/SVG
+      {
+        test: /\.(png|jpg|gif|svg)$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[name][ext]',
+        },
+      },
     ],
+  },
+  optimization: {
+    minimize: isProduction,
   },
 };
 

@@ -54,7 +54,7 @@
       "distro-ubuntu": {
         "description": "cherry-markdown icon",
         "default": {
-          "fontPath": "./web-resources/dist/ch-icon.woff",
+          "fontPath": "./web-resources/dist/fonts/ch-icon.woff",
           "fontCharacter": "\\ea28"
         }
       }

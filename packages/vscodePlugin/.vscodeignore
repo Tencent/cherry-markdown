@@ -5,9 +5,9 @@ src/**
 .gitignore
 .yarnrc
 vsc-extension-quickstart.md
-**/tsconfig.json
 **/.eslintrc.json
 **/*.map
 **/*.ts
+!web-resources/dist/**
 
 web-resources/scripts/global-vars.js
