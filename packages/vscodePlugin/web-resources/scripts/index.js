@@ -1,5 +1,7 @@
-import Cherry from 'cherry-markdown';
-import 'cherry-markdown/dist/cherry-markdown.min.css';
+// CI 环境下核心库被重命名为 cherry-markdown-core，本地开发时为 cherry-markdown
+// rspack.config.ts 中的 alias 会确保两种情况下都能正确解析
+import Cherry from 'cherry-markdown-core';
+import 'cherry-markdown-core/dist/cherry-markdown.min.css';
 
 // Heavy modules are loaded on demand to reduce initial bundle size
 // MathJax and html-to-image are dynamically imported when needed
