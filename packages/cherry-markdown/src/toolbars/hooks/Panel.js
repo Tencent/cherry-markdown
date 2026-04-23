@@ -92,7 +92,7 @@ export default class Panel extends MenuBase {
       this.getMoreSelection('::: ', '\n', () => {
         const { from, to } = this.editor.editor.view.state.selection.main;
         const newSelection = this.editor.editor.view.state.doc.sliceString(from, to);
-        console.log(newSelection)
+        // console.log(newSelection)
         const isMatch = this.$getNameFromStr(newSelection);
         if (isMatch !== false) {
           $selection = newSelection;

@@ -26,11 +26,12 @@
   --editor-comment-color: var(--oc-yellow-3);
   --editor-quote-color: var(--oc-gray-4);
   --editor-link-color: var(--oc-yellow-3);
-  --editor-url-bg-color: rgb(81, 56, 56);
+  --editor-url-color: rgb(81, 56, 56);
   --editor-v2-color: var(--oc-gray-4);
   --editor-v3-color: var(--primary-color);
   --editor-keyword-color: var(--oc-yellow-3);
   --editor-selection-bg: rgba(134, 142, 150, 0.8);
+  --editor-active-line-bg: rgba(134, 142, 150, 0.4);
 
   --dropdown-item-hover-bg: var(--oc-gray-9);
   --dropdown-item-hover-color: var(--oc-orange-5);

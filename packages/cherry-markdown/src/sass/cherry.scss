@@ -59,6 +59,9 @@
 
     .cm-line {
       font-family: inherit;
+      &.cm-activeLine {
+        background-color: var(--editor-active-line-bg);
+      }
     }
 
     // CM6 选中样式 - 整行高亮效果
@@ -783,7 +786,7 @@
       }
 
       .cm-url {
-        background-color: var(--editor-url-bg-color);
+        color: var(--editor-url-color);
       }
 
       .cm-comment,
@@ -791,98 +794,118 @@
         color: var(--editor-comment-color);
       }
     }
-  }
-
-  .cm-lineWrapping {
-    padding: 15px 34px;
-
-    // 对draw.io的xml数据，和图片里base64格式的数据限定最大宽度
-    .long-text,
-    .drawio,
-    .base64,
-    .url-truncated {
-      display: inline-block;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 80px;
-      white-space: nowrap;
-      vertical-align: bottom;
-      color: darkmagenta !important;
-      font-size: var(--font-size-xs) !important;
+    .cm-lineWrapping {
+      padding: 15px 34px;
+  
+      // 对draw.io的xml数据，和图片里base64格式的数据限定最大宽度
+      .long-text,
+      .drawio,
+      .base64,
+      .url-truncated {
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 80px;
+        white-space: nowrap;
+        vertical-align: bottom;
+        color: darkmagenta !important;
+        font-size: var(--font-size-xs) !important;
+      }
+  
+      .url-truncated {
+        max-width: 200px;
+      }
+      .cm-invalidchar[title='\\\\u200b'] {
+        display: none;
+      }
     }
-
-    .url-truncated {
-      max-width: 200px;
+  
+    .cm-header {
+      color: var(--editor-header-color);
+      &.cm-meta {
+        opacity: 0.5;
+      }
+      &.cm-header-1 {
+        font-size: 2em;
+      }
+      &.cm-header-2 {
+        font-size: 1.5em;
+      }
+      &.cm-header-3 {
+        font-size: 1.25em;
+      }
+      &.cm-header-4 {
+        font-size: 1em;
+      }
+      &.cm-header-5 {
+        font-size: 0.875em;
+      }
+      &.cm-header-6 {
+        font-size: 0.85em;
+      }
     }
-    .cm-invalidchar[title='\\\\u200b'] {
-      display: none;
+  
+    .cm-string {
+      color: var(--editor-string-color);
     }
-  }
-
-  .cm-editor .cm-header {
-    color: var(--editor-header-color);
-  }
-
-  .cm-editor .cm-string {
-    color: var(--editor-string-color);
-  }
-
-  .cm-editor .cm-comment {
-    color: var(--editor-comment-color);
-    font-family: var(--font-family-mono);
-    font-size: 0.9em;
-  }
-
-  .cm-editor .cm-whitespace,
-  .cm-tab {
-    font-family: var(--font-family-mono);
-    font-size: 0.9em;
-  }
-
-  .cm-editor .cm-quote {
-    color: var(--editor-quote-color);
-  }
-
-  .cm-editor .cm-link {
-    text-decoration: underline;
-    color: var(--editor-link-color);
-  }
-
-  .cm-editor .cm-header {
-    text-decoration: none;
-  }
-
-  .cm-editor .cm-url {
-    background: var(--editor-url-bg-color);
-    font-family: var(--font-family-mono);
-    font-size: 0.9em;
-    text-decoration: none;
-  }
-
-  .cm-editor .cm-url-bracket {
-    color: #3b82f6;
-    font-weight: bold;
-    background-color: rgba(59, 130, 246, 0.1);
-    border-radius: 2px;
-    padding: 0 1px;
-  }
-
-  .cm-editor .cm-variable-2 {
-    color: var(--editor-v2-color);
-  }
-
-  .cm-editor .cm-variable-3 {
-    color: var(--editor-v3-color);
-  }
-
-  .cm-editor .cm-keyword {
-    color: var(--editor-keyword-color);
-  }
-
-  .cm-editor .cm-fullWidth {
-    color: var(--full-width-color) !important;
-    z-index: 3;
-    cursor: pointer;
+  
+    .cm-comment {
+      color: var(--editor-comment-color);
+      font-family: var(--font-family-mono);
+      font-size: 0.9em;
+    }
+  
+    .cm-whitespace,
+    .cm-tab {
+      font-family: var(--font-family-mono);
+      font-size: 0.9em;
+    }
+  
+    .cm-quote {
+      color: var(--editor-quote-color);
+    }
+  
+    .cm-link {
+      text-decoration: underline;
+      color: var(--editor-link-color);
+    }
+  
+    .cm-header {
+      text-decoration: none;
+    }
+  
+    .cm-url {
+      color: var(--editor-url-color);
+      font-family: var(--font-family-mono);
+      font-size: 0.9em;
+      text-decoration: none;
+    }
+  
+    .cm-url-bracket {
+      color: #3b82f6;
+      font-weight: bold;
+      background-color: rgba(59, 130, 246, 0.1);
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+  
+    .cm-variable-2 {
+      color: var(--editor-v2-color);
+    }
+  
+    .cm-variable-3 {
+      color: var(--editor-v3-color);
+    }
+  
+    .cm-keyword {
+      color: var(--editor-keyword-color);
+    }
+  
+    .cm-fullWidth {
+      color: var(--full-width-color) !important;
+      z-index: 3;
+      cursor: pointer;
+    }
   }
 }
 
