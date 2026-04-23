@@ -1,0 +1,43 @@
+/* ========== 信息面板 ========== */
+
+.cherry {
+  /* 面板共用容器样式 */
+  --panel-margin: 10px 0;
+  --panel-border-radius: var(--radius-xl);
+  --panel-border: 1px solid var(--color-border-default);
+  --panel-bg: var(--color-bg-surface);
+  --panel-box-shadow: none;
+  --panel-backdrop-filter: none;
+
+  --panel-title-padding: 5px 20px;
+  --panel-title-bg: var(--color-bg-hover);
+  --panel-title-color: var(--color-text-primary);
+  --panel-title-border-radius: var(--panel-border-radius) var(--panel-border-radius) 0 0;
+  --panel-title-border-bottom: 1px solid var(--color-border-default);
+
+  --panel-body-padding: 5px 20px;
+  --panel-body-bg: var(--color-bg-surface);
+  --panel-body-color: var(--color-text-primary);
+  --panel-body-border-radius: 0 0 var(--panel-border-radius) var(--panel-border-radius);
+
+  /* 各状态优先通过 accent / surface / emphasis 三层来覆写 */
+  --panel-primary-accent: var(--color-brand-primary);
+  --panel-primary-surface: var(--color-bg-active);
+  --panel-primary-emphasis: var(--panel-primary-accent);
+
+  --panel-info-accent: var(--oc-cyan-5);
+  --panel-info-surface: var(--oc-cyan-0);
+  --panel-info-emphasis: var(--oc-cyan-6);
+
+  --panel-warning-accent: var(--oc-yellow-5);
+  --panel-warning-surface: var(--oc-yellow-0);
+  --panel-warning-emphasis: var(--oc-yellow-6);
+
+  --panel-danger-accent: var(--oc-red-5);
+  --panel-danger-surface: var(--oc-red-0);
+  --panel-danger-emphasis: var(--oc-red-6);
+
+  --panel-success-accent: var(--oc-green-5);
+  --panel-success-surface: var(--oc-green-0);
+  --panel-success-emphasis: var(--oc-green-6);
+}

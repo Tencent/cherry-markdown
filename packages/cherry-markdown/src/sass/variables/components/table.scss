@@ -1,0 +1,9 @@
+/* ========== 表格 ========== */
+
+.cherry {
+  /* 表格编辑态颜色：边框、操作按钮、拖拽指示与排序高亮 */
+  --md-table-border: var(--color-border-default);
+  --md-table-operator-color: var(--color-brand-primary);
+  --md-table-drag-border-bg: var(--color-brand-primary);
+  --md-table-sort-active-bg: var(--color-bg-active);
+}

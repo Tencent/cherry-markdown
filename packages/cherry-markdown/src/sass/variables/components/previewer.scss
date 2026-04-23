@@ -1,0 +1,8 @@
+/* ========== 预览器相关 ========== */
+
+.cherry {
+  /* mobile-bg 只作用于移动设备模拟预览区 */
+  --previewer-mobile-bg: var(--color-bg-surface);
+  /* 拖拽分栏线 */
+  --drag-border-color: var(--color-border-default);
+}

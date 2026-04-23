@@ -1,0 +1,20 @@
+/* ========== 工具栏的下拉菜单 ========== */
+
+.cherry {
+  /* 弹层本身 */
+  --dropdown-bg: var(--toolbar-bg);
+  --dropdown-border: var(--color-border-default);
+  --dropdown-shadow: var(--shadow-md);
+  --dropdown-radius: var(--radius-xl);
+  --dropdown-padding: var(--spacing-xs) 0;
+
+  /* 列表项 */
+  --dropdown-item-height: var(--height-button);
+  --dropdown-item-radius: var(--dropdown-radius);
+  --dropdown-item-padding: var(--spacing-sm) var(--spacing-md);
+  --dropdown-item-hover-bg: var(--color-bg-hover);
+  --dropdown-item-color: var(--toolbar-btn-color);
+  --dropdown-item-hover-color: var(--color-text-primary);
+  --dropdown-item-active-bg: var(--color-bg-active);
+  --dropdown-item-active-color: var(--color-brand-primary);
+}

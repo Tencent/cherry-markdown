@@ -2,161 +2,43 @@
 // 基于现有组件和样式需求，映射到一级变量
 
 .cherry {
-  /* ========== 基础色彩映射 ========== */
-  --base-font-color: #3f4a56;
-  --base-sub-font-color: #6d6e6f;
-  --base-border-color: #dfe6ee;
-  --base-editor-bg: #ffffff;
-  --base-previewer-bg: #ffffff;
-  
-  /* ========== 主题色彩系统 ========== */
-  --primary-color: #3582fb;
-  --secondary-color: #f0f4ff;
-  
   /* ========== 系统状态颜色 ========== */
   --color-success: var(--oc-green-6);
   --color-warning: var(--oc-yellow-6);
   --color-error: var(--oc-red-6);
   --color-info: var(--oc-blue-6);
+  --color-link-hover: #3582fb;
+  --color-primary-hover: var(--color-link-hover);
 
-  /* ========== 工具栏相关 ========== */
-  --toolbar-bg: var(--oc-white);
-  --toolbar-border: var(--base-border-color);
-  --toolbar-padding: var(--spacing-xs) var(--spacing-xl);
-  --toolbar-font-size: var(--font-size-sm);
-  --toolbar-radius: none;
-  --toolbar-shadow: var(--shadow-sm);
-  --toolbar-split-color: var(--base-border-color);
+  /* ========== 新语义命名层 ========== */
+  --color-text-primary: #3f4a56;
+  --color-text-secondary: #6d6e6f;
+  --color-text-link: var(--md-link-color);
+  --color-text-link-hover: var(--color-link-hover);
 
-  --toolbar-min-height: 48px; // 单行工具栏的高度
-  // 侧边栏列表高度（由 JS 动态写入），默认 120px 作为无侧栏时的回退
-  --sidebar-list-height: 120px;
+  --color-bg-canvas: #ffffff;
+  --color-bg-surface: #ffffff;
+  --color-bg-subtle: var(--oc-gray-0);
+  --color-bg-hover: var(--oc-gray-1);
+  --color-bg-active: #f0f4ff;
 
-  // 工具栏按钮
-  --toolbar-btn-color: #3f4a56;
-  --toolbar-btn-bg: transparent;
-  --toolbar-btn-hover-color: var(--primary-color);
-  --toolbar-btn-hover-bg: var(--secondary-color);
-  --toolbar-btn-disabled: #ccc;
-  --toolbar-btn-radius: var(--radius-lg);
-  --toolbar-btn-padding: 0 var(--spacing-md);
-  --toolbar-btn-height: var(--height-button);
+  --color-border-default: #dfe6ee;
+  --color-border-strong: var(--oc-gray-4);
 
-  /* ========== 工具栏的下拉菜单 ========== */
-  --dropdown-bg: var(--toolbar-bg);
-  --dropdown-border: var(--base-border-color);
-  --dropdown-shadow: var(--shadow-md);
-  --dropdown-radius: var(--radius-xl);
-  --dropdown-padding: var(--spacing-xs) 0;
-  
-  // 下拉菜单项
-  --dropdown-item-height: var(--height-button);
-  --dropdown-item-radius: var(--dropdown-radius);
-  --dropdown-item-padding: var(--spacing-sm) var(--spacing-md);
-  --dropdown-item-hover-bg: var(--oc-gray-2);
-  --dropdown-item-color: var(--toolbar-btn-color);
-  --dropdown-item-hover-color: var(--base-font-color);
-  --dropdown-item-active-bg: var(--secondary-color);
-  --dropdown-item-active-color: var(--primary-color);
+  --color-brand-primary: #3582fb;
+  --color-brand-primary-hover: var(--color-primary-hover);
 
-  /* ========== 编辑气泡 ========== */
-  --bubble-bg: var(--toolbar-bg);
-  --bubble-border: var(--base-border-color);
-  --bubble-shadow: var(--shadow-md);
-  --bubble-radius: var(--radius-xl);
-  --bubble-padding: var(--toolbar-btn-padding);
-  --bubble-btn-height: var(--height-button);
-  --bubble-z-index: var(--z-index-popover);
-  
-  /* ========== 编辑器相关 ========== */
-  //  ---base-editor-bg 编辑器背景颜色
-  --editor-header-color: var(--base-font-color);
-  --editor-comment-color: var(--oc-blue-6);
-  --editor-quote-color: var(--oc-blue-6);
-  --editor-string-color: var(--base-font-color);
-  --editor-link-color: var(--oc-blue-6);
-  --editor-url-bg-color: #d7e6fe;
-  --editor-v2-color: var(--primary-color);
-  --editor-v3-color: var(--secondary-color);
-  --editor-keyword-color: var(--base-font-color);
-  --editor-cursor-color: var(--primary-color);
-  --editor-selection-bg: var(--oc-blue-1);
-  --editor-line-number-color: var(--oc-gray-4);
-  --editor-active-line-bg: var(--oc-gray-0);
-  
-  /* ========== 预览器相关 ========== */
-  // --base-previewer-bg 预览器背景颜色
-  --previewer-mobile-bg: var(--base-previewer-bg);
-  
-  /* ========== Markdown 元素样式 ========== */
-  // 标题
-  --md-heading-color: var(--base-font-color);
-  
-  // 段落
-  --md-paragraph-color: var(--base-font-color);
-  --md-paragraph-line-height: var(--line-height-relaxed);
-  --md-paragraph-highlight-line-bg: var(--secondary-color);  // 当前编辑行高光背景色
+  /* ========== 历史兼容变量 ========== */
+  /* 仅保留给外部覆写或遗留调用，不建议新增内部依赖 */
+  --base-font-color: var(--color-text-primary);
+  --base-sub-font-color: var(--color-text-secondary);
+  --base-border-color: var(--color-border-default);
+  --base-editor-bg: var(--color-bg-canvas);
+  --base-previewer-bg: var(--color-bg-surface);
+  --primary-color: var(--color-brand-primary);
+  --secondary-color: var(--color-bg-active);
+  --border-color: var(--color-border-default);
+  --bg-color-lighter: var(--color-bg-hover);
+  --full-width-color: var(--color-brand-primary);
 
-  // 链接
-  --md-link-color: var(--oc-blue-6);
-  --md-link-hover-color: var(--color-link-hover);
-  
-  // 行内代码
-  --md-inline-code-color: var(--color-error);
-  --md-inline-code-bg: #e5e5e5;
-  
-  // 引用
-  --md-blockquote-bg: rgba(102, 128, 153, 0.05);
-  --md-blockquote-border: #D6DBDF;
-  --md-blockquote-color: var(--base-sub-font-color);
-  
-  // 表格
-  --md-table-border: var(--base-border-color);
-  --md-table-operator-color: var(--primary-color);  // 表格操作按钮颜色
-  
-  // 分割线
-  --md-hr-border: var(--base-border-color);
-
-  // 目录 (TOC)
-  --md-toc-bg: var(--oc-gray-0);
-  --md-toc-border-color: var(--base-border-color);
-  --md-toc-radius: var(--radius-lg);
-  --md-toc-padding: var(--spacing-lg);
-  --md-toc-title-color: var(--md-heading-color);
-  --md-toc-link-hover-bg: var(--oc-gray-1);
-  --md-toc-link-active-bg: var(--oc-gray-2);
-  --md-toc-link-radius: var(--radius-md);
-  --md-toc-link-color: var(--md-paragraph-color);
-  --md-toc-link-hover-color: var(--md-link-hover-color);
-  --md-toc-indicator-width: var(--border-width-4); 
-  --md-toc-indicator-color: var(--oc-gray-3);
-  --md-toc-indicator-hover-color: var(--md-toc-link-hover-color);
-  --md-toc-indicator-gap: var(--spacing-lg);
-  
-  /* ========== 手风琴组件样式 ========== */
-  // 基础样式
-  --accordion-bg: var(--base-previewer-bg);
-  --accordion-border: var(--base-border-color);
-  --accordion-radius: var(--radius-lg);
-  --accordion-shadow: var(--shadow-md);
-  
-  // 标题样式
-  --accordion-summary-bg: var(--primary-color);
-  --accordion-summary-color: var(--oc-white);
-  --accordion-summary-hover-bg: var(--color-primary-hover);
-  
-  // 内容区域
-  --accordion-body-bg: var(--base-previewer-bg);
-  --accordion-body-color: var(--base-font-color);
-  --accordion-body-border: var(--base-border-color);
-
-  /* ========== Mermaid 源码工具栏 ========== */
-  --mermaid-toolbar-switch-bg: rgba(128, 128, 128, 0.12);
-  --mermaid-toolbar-slider-bg: rgba(255, 255, 255, 0.85);
-  --mermaid-toolbar-tab-color: inherit;
-  --mermaid-toolbar-tab-active-color: #333;  // active 状态深色文字，确保在亮色 slider 上可见
-  --mermaid-container-border: rgba(128, 128, 128, 0.2);
-
-  /* ========== 其余单个组件 ========== */
-  --drag-border-color: #ebedee;
 }

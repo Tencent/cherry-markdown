@@ -1,0 +1,19 @@
+/* ========== 手风琴 ========== */
+
+.cherry {
+  /* 外层容器 */
+  --accordion-bg: var(--color-bg-surface);
+  --accordion-border: var(--color-border-default);
+  --accordion-radius: var(--radius-lg);
+  --accordion-shadow: var(--shadow-md);
+
+  /* summary 是可点击标题区 */
+  --accordion-summary-bg: var(--color-brand-primary);
+  --accordion-summary-color: var(--oc-white);
+  --accordion-summary-hover-bg: var(--color-primary-hover);
+
+  /* body 是展开后的内容区 */
+  --accordion-body-bg: var(--color-bg-surface);
+  --accordion-body-color: var(--color-text-primary);
+  --accordion-body-border: var(--color-border-default);
+}

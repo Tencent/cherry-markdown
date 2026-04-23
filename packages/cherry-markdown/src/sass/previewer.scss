@@ -17,8 +17,8 @@
     border-radius: 5px;
     z-index: 11;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    background: var(--base-editor-bg);
-    border: 1px solid var(--base-border-color);
+    background: var(--color-bg-canvas);
+    border: 1px solid var(--color-border-default);
   }
   .footnote.hidden {
     display: none;
@@ -26,7 +26,7 @@
   .cherry-previewer-img-size-handler {
     position:absolute;
     box-shadow: 0 1px 4px 0 rgba(20,81,154, 0.5);
-    border:1px solid var(--primary-color);
+    border:1px solid var(--color-brand-primary);
     box-sizing: content-box;
     pointer-events:none;
     .cherry-previewer-img-size-handler__points {
@@ -36,7 +36,7 @@
       margin-top: -7px;
       margin-left: -7px;
       border-radius: 9px;
-      background: var(--primary-color);
+      background: var(--color-brand-primary);
       border: 2px solid var(--oc-white);
       box-sizing: content-box;
       box-shadow: 0px 2px 2px 0px rgba(20,81,154,0.5);
@@ -83,9 +83,20 @@
     }
   }
   .cherry-previewer-img-tool-handler {
-    @extend .cherry-bubble;
-    padding: var(--bubble-padding);
+    position: absolute;
     display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    font-size: var(--font-size-sm);
+    min-height: var(--bubble-btn-height);
+    min-width: 50px;
+    border: var(--border-width-1) solid var(--bubble-border);
+    background-color: var(--bubble-bg);
+    box-shadow: var(--bubble-shadow);
+    border-radius: var(--bubble-radius);
+    z-index: var(--bubble-z-index);
+    padding: var(--bubble-padding);
     flex-direction: column;
 
     .img-tool-group {
@@ -122,7 +133,7 @@
       width: 100%;
       margin: var(--border-width-4) 0;
       height: var(--border-width-1);
-      border-bottom: var(--border-width-1) var(--base-border-color) dashed;
+      border-bottom: var(--border-width-1) var(--color-border-default) dashed;
     }
 
     .img-tool-icon {
@@ -141,7 +152,7 @@
         border: 0;
         box-sizing: border-box;
         resize: none;
-        outline: 1px solid var(--primary-color);
+        outline: 1px solid var(--color-brand-primary);
         word-break: break-all;
       }
     }
@@ -180,7 +191,7 @@
       cursor: pointer;
       transition: all 0.3s;
       &:hover {
-        background-color: var(--secondary-color);
+        background-color: var(--color-bg-active);
       }
     }
 
@@ -197,7 +208,7 @@
       font-size: var(--font-size-xs);
       border: 1px solid var(--md-table-operator-color);
       border-radius: 999px;
-      background-color: var(--base-previewer-bg);
+      background-color: var(--color-bg-surface);
       cursor: pointer;
       transition: all 0.3s;
       z-index: 1001;
@@ -291,7 +302,7 @@
       width: var(--bubble-btn-height);
       height: var(--bubble-btn-height);
       cursor: pointer;
-      color: var(--base-font-color);
+      color: var(--color-text-primary);
       font-size: var(--font-size-sm);
       transition: background-color 0.2s ease, color 0.2s ease;
       border-radius: calc(var(--bubble-radius) - 2px);
@@ -338,12 +349,10 @@
       background-color: var(--md-paragraph-highlight-line-bg);
     }
     100% {
-      background-color: var(--base-previewer-bg);
+      background-color: var(--color-bg-surface);
     }
   }
   .cherry-highlight-line {
     animation: changeHighlightLineBg 1s;
   }
 }
-
-

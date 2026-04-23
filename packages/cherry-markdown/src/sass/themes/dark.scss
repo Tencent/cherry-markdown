@@ -3,39 +3,44 @@
  */
 
 .cherry.theme__dark {
-  /* ========== 基础色彩变量覆盖 ========== */
-  --primary-color: var(--oc-orange-5);
-  --secondary-color: #513838;
-
-  --base-font-color: var(--oc-gray-4);
-  --base-editor-bg: var(--oc-gray-9);
-  --base-previewer-bg: var(--oc-gray-8);
-  --base-border-color: var(--oc-gray-5);
+  /* ========== 语义变量覆盖 ========== */
+  --color-brand-primary: var(--oc-orange-5);
+  --color-brand-primary-hover: var(--oc-orange-6);
+  --color-text-primary: var(--oc-gray-4);
+  --color-text-secondary: var(--oc-gray-5);
+  --color-bg-canvas: var(--oc-gray-9);
+  --color-bg-surface: var(--oc-gray-8);
+  --color-bg-hover: var(--oc-gray-8);
+  --color-bg-active: #513838;
+  --color-border-default: var(--oc-gray-5);
 
   /* ========== 工具栏相关变量 ========== */
   --toolbar-bg: var(--oc-gray-7);
   --toolbar-btn-color: var(--oc-gray-4);
   --toolbar-btn-hover-bg: var(--oc-gray-6);
   --toolbar-btn-hover-color: var(--oc-white);
-  --toolbar-btn-active-bg:var(--oc-gray-8);
-  --toolbar-split-color: var(--oc-gray-5);
+  --toolbar-btn-active-bg: var(--color-bg-active);
+  --toolbar-split-color: var(--color-border-default);
+
+  /* ========== 工具栏的下拉菜单 ========== */
+  --dropdown-bg: var(--toolbar-bg);
 
   /* ========== 编辑器相关变量 ========== */
-  --editor-header-color: var(--primary-color);
+  --editor-header-color: var(--color-brand-primary);
   --editor-string-color: var(--oc-yellow-3);
   --editor-comment-color: var(--oc-yellow-3);
   --editor-quote-color: var(--oc-gray-4);
   --editor-link-color: var(--oc-yellow-3);
   --editor-url-bg-color: rgb(81, 56, 56);
   --editor-v2-color: var(--oc-gray-4);
-  --editor-v3-color: var(--primary-color);
+  --editor-v3-color: var(--color-brand-primary);
   --editor-keyword-color: var(--oc-yellow-3);
   --editor-selection-bg: rgba(134, 142, 150, 0.8);
 
   --dropdown-item-hover-bg: var(--oc-gray-9);
   --dropdown-item-hover-color: var(--oc-orange-5);
-  --dropdown-item-active-bg: var(--secondary-color);
-  --dropdown-item-active-color: var(--primary-color);
+  --dropdown-item-active-bg: var(--color-bg-active);
+  --dropdown-item-active-color: var(--color-brand-primary);
 
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: var(--oc-orange-5);
@@ -46,12 +51,12 @@
   --md-inline-code-bg: rgb(81, 56, 56);
   --md-blockquote-bg: rgba(102, 128, 153, 0.05);
   --md-hr-border: var(--oc-gray-5);
+  /* ========== Table 相关变量 ========== */
   --md-table-border: var(--oc-gray-5);
-  /* ========== table 相关变量 ========== */
-  --md-table-border: var(--oc-gray-5);
-  --md-table-drag-border-bg: var(--primary-color);
+  --md-table-drag-border-bg: var(--color-brand-primary);
   --md-table-sort-active-bg: rgba(141, 104, 51, 0.493);
 
+  /* ========== TOC 相关变量 ========== */
   --md-toc-bg: var(--oc-gray-9);
   --md-toc-border-color: var(--oc-gray-7);
   --md-toc-indicator-color: var(--oc-gray-7);
@@ -59,24 +64,30 @@
   --md-toc-link-active-bg: var(--oc-gray-7);
   --md-paragraph-highlight-line-bg: var(--oc-gray-7);
 
-  /* ========== 手风琴组件变量覆盖 ========== */
+  /* ========== Accordion 相关变量 ========== */
   --accordion-bg: var(--oc-gray-8);
   --accordion-border: var(--oc-gray-6);
-  
   --accordion-summary-bg: var(--oc-orange-6);
   --accordion-summary-hover-bg: var(--oc-orange-5);
-  
   --accordion-body-bg: var(--oc-gray-7);
   --accordion-body-border: var(--oc-gray-6);
   --accordion-body-color: var(--oc-gray-4);
 
-  /* ========== Mermaid 工具栏变量覆盖 ========== */
+  /* ========== Mermaid 相关变量 ========== */
   --mermaid-toolbar-slider-bg: rgba(255, 255, 255, 0.15);
   --mermaid-toolbar-tab-active-color: #fff;
 
-  /* 目录区域样式 */
-  .cherry-flex-toc {
+  /* ========== Panel 相关变量 ========== */
+  --panel-border-radius: 16px;
+  --panel-bg: #242424;
+  --panel-border: 1px solid rgba(109, 40, 217, 0.2);
+  --panel-box-shadow: none;
+  --panel-title-bg: #2f2f2f;
+  --panel-title-border-bottom: 1px solid rgba(109, 40, 217, 0.15);
+  --panel-body-bg: #242424;
 
+  /* ========== TOC 区域样式 ========== */
+  .cherry-flex-toc {
     .cherry-toc-head {
       i {
         &:hover {
@@ -114,14 +125,15 @@
 
 /** 快捷键配置面板样式 */
 .cherry-shortcut-key-config-panel-wrapper {
-  .shortcut-panel-title, .shortcut-panel-settings {
+
+  .shortcut-panel-title,
+  .shortcut-panel-settings {
     color: var(--oc-gray-9);
   }
 }
 
 /** 预览区域样式 */
 .cherry-markdown.theme__dark {
-
   figure {
     svg:not(.echarts-svg) {
 
@@ -149,63 +161,4 @@
       }
     }
   }
-
-  /* ========== Panel 相关变量 ========== */
-  --panel-border-radius: 16px;
-  --panel-bg: linear-gradient(145deg, #2a2a2a 0%, #1e1e1e 100%);
-  --panel-border: 1px solid rgba(109, 40, 217, 0.2);
-  --panel-box-shadow: none;
-  --panel-backdrop-filter: blur(10px);
-  --panel-title-bg: linear-gradient(145deg, #333333 0%, #2a2a2a 100%);
-  --panel-title-color: var(--oc-gray-1);
-  --panel-title-border-radius: 16px 16px 0 0;
-  --panel-title-border-bottom: 1px solid rgba(109, 40, 217, 0.15);
-  --panel-body-bg: linear-gradient(145deg, #242424 0%, #1e1e1e 100%);
-  --panel-body-color: var(--oc-gray-2);
-  --panel-body-border-radius: 0 0 16px 16px;
-
-  /* Primary Panel */
-  --panel-primary-bg: linear-gradient(145deg, rgba(109, 40, 217, 0.08) 0%, rgba(67, 56, 202, 0.08) 100%);
-  --panel-primary-border-color: rgba(109, 40, 217, 0.3);
-  --panel-primary-box-shadow: none;
-  --panel-primary-title-bg: linear-gradient(145deg, rgba(109, 40, 217, 0.3) 0%, rgba(67, 56, 202, 0.3) 100%);
-  --panel-primary-title-color: var(--oc-violet-2);
-  --panel-primary-body-bg: linear-gradient(145deg, rgba(109, 40, 217, 0.05) 0%, rgba(67, 56, 202, 0.05) 100%);
-  --panel-primary-body-color: var(--oc-violet-3);
-
-  /* Info Panel */
-  --panel-info-bg: linear-gradient(145deg, rgba(34, 184, 207, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%);
-  --panel-info-border-color: rgba(34, 184, 207, 0.3);
-  --panel-info-box-shadow: none;
-  --panel-info-title-bg: linear-gradient(145deg, rgba(34, 184, 207, 0.3) 0%, rgba(59, 130, 246, 0.3) 100%);
-  --panel-info-title-color: var(--oc-cyan-2);
-  --panel-info-body-bg: linear-gradient(145deg, rgba(34, 184, 207, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
-  --panel-info-body-color: var(--oc-cyan-3);
-
-  /* Warning Panel */
-  --panel-warning-bg: linear-gradient(145deg, rgba(255, 193, 7, 0.08) 0%, rgba(251, 191, 36, 0.08) 100%);
-  --panel-warning-border-color: rgba(255, 193, 7, 0.3);
-  --panel-warning-box-shadow: none;
-  --panel-warning-title-bg: linear-gradient(145deg, rgba(255, 193, 7, 0.3) 0%, rgba(251, 191, 36, 0.3) 100%);
-  --panel-warning-title-color: var(--oc-yellow-2);
-  --panel-warning-body-bg: linear-gradient(145deg, rgba(255, 193, 7, 0.05) 0%, rgba(251, 191, 36, 0.05) 100%);
-  --panel-warning-body-color: var(--oc-yellow-3);
-
-  /* Danger Panel */
-  --panel-danger-bg: linear-gradient(145deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 127, 0.08) 100%);
-  --panel-danger-border-color: rgba(239, 68, 68, 0.3);
-  --panel-danger-box-shadow: none;
-  --panel-danger-title-bg: linear-gradient(145deg, rgba(239, 68, 68, 0.3) 0%, rgba(220, 38, 127, 0.3) 100%);
-  --panel-danger-title-color: var(--oc-red-2);
-  --panel-danger-body-bg: linear-gradient(145deg, rgba(239, 68, 68, 0.05) 0%, rgba(220, 38, 127, 0.05) 100%);
-  --panel-danger-body-color: var(--oc-red-3);
-
-  /* Success Panel */
-  --panel-success-bg: linear-gradient(145deg, rgba(34, 197, 94, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);
-  --panel-success-border-color: rgba(34, 197, 94, 0.3);
-  --panel-success-box-shadow: none;
-  --panel-success-title-bg: linear-gradient(145deg, rgba(34, 197, 94, 0.3) 0%, rgba(16, 185, 129, 0.3) 100%);
-  --panel-success-title-color: var(--oc-green-2);
-  --panel-success-body-bg: linear-gradient(145deg, rgba(34, 197, 94, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
-  --panel-success-body-color: var(--oc-green-3);
 }

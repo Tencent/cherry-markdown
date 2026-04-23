@@ -1,0 +1,11 @@
+/* ========== 编辑气泡 ========== */
+
+.cherry {
+  --bubble-bg: var(--toolbar-bg);
+  --bubble-border: var(--color-border-default);
+  --bubble-shadow: var(--shadow-md);
+  --bubble-radius: var(--radius-xl);
+  --bubble-padding: var(--toolbar-btn-padding);
+  --bubble-btn-height: var(--height-button);
+  --bubble-z-index: var(--z-index-popover);
+}

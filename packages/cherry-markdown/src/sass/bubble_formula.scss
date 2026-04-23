@@ -18,7 +18,7 @@
     width: 120px;
     flex-shrink: 0;
     padding: 8px;
-    border-right: 1px solid var(--base-border-color);
+    border-right: 1px solid var(--color-border-default);
     position: relative;
 
     .cherry-formula-main-tabs {
@@ -28,7 +28,7 @@
         cursor: pointer;
         font-size: 14px;
         font-weight: 500;
-        color: var(--base-font-color);
+        color: var(--color-text-primary);
         user-select: none;
         transition: background-color 0.2s ease, color 0.2s ease;
 
@@ -58,7 +58,7 @@
       white-space: nowrap;
 
       a {
-        color: var(--primary-color);
+        color: var(--color-brand-primary);
         text-decoration: none;
 
         &:hover {
@@ -99,7 +99,7 @@
         border-radius: 16px;
         cursor: pointer;
         font-size: 13px;
-        color: var(--base-font-color);
+        color: var(--color-text-primary);
         user-select: none;
         transition: background-color 0.2s ease, color 0.2s ease;
 
@@ -139,10 +139,10 @@
   .cherry-formula-grid-group-title {
     font-size: 14px;
     font-weight: 600;
-    color: var(--base-font-color);
+    color: var(--color-text-primary);
     margin-bottom: 12px;
     padding-bottom: 8px;
-    border-bottom: 1px solid var(--base-border-color);
+    border-bottom: 1px solid var(--color-border-default);
   }
 
   .cherry-formula-grid-items {
@@ -159,7 +159,7 @@
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.2s ease, border-color 0.2s ease;
-    background-color: var(--base-editor-bg);
+    background-color: var(--color-bg-canvas);
 
     &:hover {
       background-color: var(--dropdown-item-hover-bg);

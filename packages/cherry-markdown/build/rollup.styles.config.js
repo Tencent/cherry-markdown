@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import scss from 'rollup-plugin-scss';
 import * as dartSass from 'sass';
+import path from 'node:path';
 // baseConfig not used in styles config
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -33,6 +33,40 @@ const createCleanupPlugin = () => ({
   },
 });
 
+const createSassAssetPlugin = ({ input, fileName, style = 'expanded', watch }) => ({
+  name: `sass-asset:${fileName}`,
+  transform(code, id) {
+    if (path.resolve(id) !== path.resolve(input)) {
+      return null;
+    }
+
+    return {
+      code: 'export default undefined;',
+      map: { mappings: '' },
+    };
+  },
+  buildStart() {
+    if (watch) {
+      const files = Array.isArray(watch) ? watch : [watch];
+      files.forEach((file) => this.addWatchFile(file));
+    }
+  },
+  async generateBundle() {
+    const entryFile = path.resolve(input);
+    const result = await dartSass.compileAsync(entryFile, {
+      loadPaths: ['node_modules', process.cwd()],
+      style,
+      charset: false,
+    });
+
+    this.emitFile({
+      type: 'asset',
+      fileName,
+      source: result.css,
+    });
+  },
+});
+
 const createStyleConfigs = ({ input, cssBaseName, outputBaseName, watch }) => {
   const configs = [
     {
@@ -41,11 +75,10 @@ const createStyleConfigs = ({ input, cssBaseName, outputBaseName, watch }) => {
         file: `dist/${outputBaseName}.styles.js`,
       },
       plugins: [
-        scss({
+        createSassAssetPlugin({
+          input,
           fileName: `${cssBaseName}.css`,
-          failOnError: true,
-          sass: dartSass,
-          ...(watch ? { watch } : {}),
+          watch,
         }),
         createCleanupPlugin(),
       ],
@@ -59,11 +92,10 @@ const createStyleConfigs = ({ input, cssBaseName, outputBaseName, watch }) => {
         file: `dist/${outputBaseName}.styles.min.js`,
       },
       plugins: [
-        scss({
+        createSassAssetPlugin({
+          input,
           fileName: `${cssBaseName}.min.css`,
-          failOnError: true,
-          sass: dartSass,
-          outputStyle: 'compressed',
+          style: 'compressed',
         }),
         createCleanupPlugin(),
       ],

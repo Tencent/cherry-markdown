@@ -201,8 +201,8 @@ function showExportWordTip() {
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: var(--base-editor-bg);
-      border: 1px solid var(--base-border-color);
+      background: var(--color-bg-canvas);
+      border: 1px solid var(--color-border-default);
       border-radius: var(--radius-xl);
       padding: var(--spacing-lg);
       box-shadow: var(--shadow-lg);
@@ -211,16 +211,16 @@ function showExportWordTip() {
       text-align: center;
       font-family: var(--font-family-base, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
     ">
-      <h3 style="margin: 0 0 var(--spacing-md) 0; color: var(--base-font-color);">内容已复制到剪贴板</h3>
-      <p style="margin: 0 0 var(--spacing-md) 0; color: var(--base-sub-font-color); line-height: var(--line-height-relaxed);">
+      <h3 style="margin: 0 0 var(--spacing-md) 0; color: var(--color-text-primary);">内容已复制到剪贴板</h3>
+      <p style="margin: 0 0 var(--spacing-md) 0; color: var(--color-text-secondary); line-height: var(--line-height-relaxed);">
         请打开 Microsoft Word，然后按 <strong>Ctrl+V</strong>（Windows）或 <strong>Cmd+V</strong>（Mac）粘贴内容。
       </p>
-      <p style="margin: 0 0 var(--spacing-lg) 0; color: var(--base-sub-font-color); font-size: var(--font-size-sm);">
+      <p style="margin: 0 0 var(--spacing-lg) 0; color: var(--color-text-secondary); font-size: var(--font-size-sm);">
         部分样式可能会丢失或变更
       </p>
       <button onclick="this.parentElement.parentElement.remove()" style="
-        background: var(--secondary-color);
-        color: var(--primary-color);
+        background: var(--color-bg-active);
+        color: var(--color-brand-primary);
         border: none;
         padding: var(--spacing-sm) var(--spacing-md);
         border-radius: var(--radius-md);
