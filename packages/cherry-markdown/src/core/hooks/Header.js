@@ -83,7 +83,7 @@ export default class Header extends ParagraphBase {
     const idIndex = this.headerIDCache.indexOf(newId);
     if (idIndex !== -1) {
       this.headerIDCounter[idIndex] += 1;
-      newId += `-${this.headerIDCounter[idIndex] + 1}`;
+      newId += `-${this.headerIDCounter[idIndex]}`;
     } else {
       const newIndex = this.headerIDCache.push(newId);
       this.headerIDCounter[newIndex - 1] = 1;
