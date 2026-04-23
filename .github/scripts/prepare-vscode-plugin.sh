@@ -2,10 +2,10 @@
 set -euo pipefail
 
 # =============================================================================
-# VSCode Plugin 发布前准备：解决 workspace 同名冲突
+# VS Code Plugin 发布前准备：解决 workspace 同名冲突
 #
 # 背景:
-#   核心库名为 "cherry-markdown"，但 VSCode Marketplace 也需要以 "cherry-markdown"
+#   核心库名为 "cherry-markdown"，但 VS Code Marketplace 也需要以 "cherry-markdown"
 #   发布插件。Yarn v1 workspace 不允许两个包同名，因此需要在 yarn install 前重命名。
 #
 # 操作（全部在 yarn install 之前执行）:
@@ -26,25 +26,25 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
 # ── 1. 更新根 package.json scripts ──
-echo "📦 Step 1: 更新根 package.json scripts..."
+echo "📦 Step1: 更新根 package.json scripts..."
 cd "$ROOT_DIR"
 tmp=$(mktemp) && jq '
   .scripts["postinstall"] = "yarn workspace cherry-markdown-core run iconfont" |
   .scripts["build"] = "yarn workspace cherry-markdown-core build" |
-  .scripts["build:vscodePlugin"] = "yarn workspace cherry-markdown build"
+  .scripts["build:vscodePlugin"] = "cd packages/vscodePlugin && yarn build"
 ' package.json > "$tmp" && mv "$tmp" package.json
 echo "   ✅ postinstall → cherry-markdown-core run iconfont"
 echo "   ✅ build → cherry-markdown-core build"
-echo "   ✅ build:vscodePlugin → cherry-markdown build"
+echo "   ✅ build:vscodePlugin → cd packages/vscodePlugin && yarn build"
 
 # ── 2. 核心库改名: cherry-markdown → cherry-markdown-core ──
-echo "📦 Step 2: 核心库改名..."
+echo "📦 Step2: 核心库改名..."
 cd "$ROOT_DIR/packages/cherry-markdown"
 tmp=$(mktemp) && jq '.name = "cherry-markdown-core"' package.json > "$tmp" && mv "$tmp" package.json
 echo "   ✅ packages/cherry-markdown name → cherry-markdown-core"
 
 # ── 3. vscodePlugin: 依赖改名 + 包名改名 ──
-echo "📦 Step 3: vscodePlugin 依赖改名 + 包名改名..."
+echo "📦 Step3: vscodePlugin 依赖改名 + 包名改名..."
 cd "$ROOT_DIR/packages/vscodePlugin"
 
 # 3a. 依赖: cherry-markdown → cherry-markdown-core

@@ -1,12 +1,19 @@
+// CI 环境下核心库被重命名为 cherry-markdown-core，本地开发时为 cherry-markdown
+// rspack.config.ts 中的 alias 会确保两种情况下都能正确解析
+import Cherry from 'cherry-markdown-core';
+import 'cherry-markdown-core/dist/cherry-markdown.min.css';
+
 // Heavy modules are loaded on demand to reduce initial bundle size
 // MathJax and html-to-image are dynamically imported when needed
 
 // import md5 from 'md5';
 
+// eslint-disable-next-line no-undef
+const vscode = acquireVsCodeApi();
+
 /**
  * 在侧边栏增加编辑/预览入口
  */
-// eslint-disable-next-line no-undef
 const customMenuChangeModule = Cherry.createMenuHook('编辑', {
   iconName: 'pen',
   onClick(selection) {
@@ -33,12 +40,10 @@ const customMenuChangeModule = Cherry.createMenuHook('编辑', {
   },
 });
 
-// eslint-disable-next-line no-undef
 const customMenuFont = Cherry.createMenuHook('字体样式', {
   iconName: 'font',
 });
 
-// eslint-disable-next-line no-undef
 const customMenuExport = Cherry.createMenuHook('保存', {
   iconName: 'export',
   subMenuConfig: [
@@ -252,8 +257,7 @@ const basicConfig = {
   keydown: [],
   // extensions: [],
   callback: {
-    // eslint-disable-next-line no-undef
-    changeString2Pinyin: pinyin,
+    changeString2Pinyin: window.pinyin,
     beforeImageMounted(srcProp, srcValue) {
       const { _activeTextEditorPath } = window;
 
@@ -323,10 +327,8 @@ const locale = languageIdentifiers[mdInfo.vscodeLanguage] || 'zh_CN';
 const config = Object.assign({}, basicConfig, { value: mdInfo.text, locale });
 // 异步加载 MathJax（如果需要），以便拆分包体积但不阻塞初始化
 import(/* webpackChunkName: "mathjax" */ 'mathjax/es5/tex-svg.js').catch(() => {});
-// eslint-disable-next-line new-cap, no-undef
+// eslint-disable-next-line new-cap
 const cherry = new Cherry(config);
-// eslint-disable-next-line no-undef
-const vscode = acquireVsCodeApi();
 // 图片缓存
 // const imgCache = {};
 
