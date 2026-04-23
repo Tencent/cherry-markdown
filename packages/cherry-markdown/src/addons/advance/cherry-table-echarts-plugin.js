@@ -600,14 +600,19 @@ export default class EChartsTableEngine {
       .map(([key, value]) => `${key}: ${value};`)
       .join(' ');
 
+    // HTML attribute value escaping: must escape & first, then <, >, "
+    // Prevents streaming-mode tag truncation when serialized JSON contains these characters.
+    const escapeAttr = (s) =>
+      String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
     // 创建一个包含所有必要信息的HTML结构
     const htmlContent = [
       `<div class="cherry-echarts-wrapper"`,
-      ` style="${styleStr}"`,
-      ` id="${chartId}"`,
-      ` data-chart-type="${type}"`,
-      ` data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"`,
-      ` data-chart-options="${chartOptionsStr.replace(/"/g, '&quot;')}">`,
+      ` style="${escapeAttr(styleStr)}"`,
+      ` id="${escapeAttr(chartId)}"`,
+      ` data-chart-type="${escapeAttr(type)}"`,
+      ` data-table-data="${escapeAttr(tableDataStr)}"`,
+      ` data-chart-options="${escapeAttr(chartOptionsStr)}">`,
       `</div>`,
     ].join('');
     const previewDom = $cherry.previewer.getDom();

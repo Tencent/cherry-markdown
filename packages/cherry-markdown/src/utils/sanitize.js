@@ -365,7 +365,7 @@ export function escapeHTMLEntitiesWithoutSemicolon(content) {
       match.indexOf(';') === -1 ||
       hexCodePoint.length > 6 ||
       // Object.keys(htmlEntitiesMap).indexOf(decimalCodePoint) === -1
-      !isValidStringCodePoint(hexCode)
+      !isValidStringCodePoint(decimalCodePoint)
     ) {
       return match.replace(/&/g, '&amp;');
     }

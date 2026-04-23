@@ -350,15 +350,15 @@ exports[`engine > CommonMark-61 1`] = `"<ul data-lines="2" data-sign="e8d3a73332
 exports[`engine > CommonMark-62 1`] = `
 "<h1 id="foo" data-sign="3abf3d4f5c4eccfa1d7e6e89b8928ee08c48b142fbdb7565af844a2ac95e6fd4" data-lines="1">foo</h1>
 
-<h2 id="foo-3" data-sign="791b14d9ec794d3ded4169c7768eecf0ac67981ac6870c6c164907c9af4fa5fa" data-lines="1">foo</h2>
+<h2 id="foo-2" data-sign="8dbb009608f2f78b78a79ca4702e520b9a36b7cd50e6d1f4f77773f62b145974" data-lines="1">foo</h2>
 
-<h3 id="foo-4" data-sign="6ef850fe9c2368000df9ceadbfafba68126035ced6bab33169bb5979e92e81b6" data-lines="1">foo</h3>
+<h3 id="foo-3" data-sign="53552c3314e2e49a0532427ba50f5c351f379ea5090543e6fe71bcaea08de273" data-lines="1">foo</h3>
 
-<h4 id="foo-5" data-sign="c43159e2c9523b295765328120f44a8f54c76159ad45eeee60e146dd9ee5560e" data-lines="1">foo</h4>
+<h4 id="foo-4" data-sign="8ea4062843b9c989099abceb0a08fb0521cd7536eb3d55904ce946a87fe0bbe8" data-lines="1">foo</h4>
 
-<h5 id="foo-6" data-sign="4131eb5b143a3fc8bd661ce10e17444bea27bf9470574728f8428eeb84f5ee3f" data-lines="1">foo</h5>
+<h5 id="foo-5" data-sign="154c75991fb10bedf7dc2673ed88b08b6edf6bf8e79cef0a9b78ea733ffd05f5" data-lines="1">foo</h5>
 
-<h6 id="foo-7" data-sign="b8b9cb5fc30cd550e3de6e70bba4f82184fac8f806a1de4e9f7ce4ce7258b290" data-lines="1">foo</h6>
+<h6 id="foo-6" data-sign="7adae295b6b9dec2a3506bb6f961a1541df3b12e4b20acff49b51207e4eca17b" data-lines="1">foo</h6>
 "
 `;
 
@@ -392,9 +392,9 @@ exports[`engine > CommonMark-67 1`] = `
 exports[`engine > CommonMark-68 1`] = `
 "<h3 id="foo" data-sign="6ddc86348d638fbd65e006e9d712758623a63dadaf3debb866818b2803d2bde9" data-lines="1">foo</h3>
 
-<h2 id="foo-3" data-sign="791b14d9ec794d3ded4169c7768eecf0ac67981ac6870c6c164907c9af4fa5fa" data-lines="1">foo</h2>
+<h2 id="foo-2" data-sign="8dbb009608f2f78b78a79ca4702e520b9a36b7cd50e6d1f4f77773f62b145974" data-lines="1">foo</h2>
 
-<h1 id="foo-4" data-sign="079fa2879ba48fe36b7484bf40f1631b17260bf82b5962c6e98a0d3a3028ad2a" data-lines="1">foo</h1>
+<h1 id="foo-3" data-sign="d57e536d20efcfb65244b85072e8dc9a6c1d290bbe0505c362f02245704a9668" data-lines="1">foo</h1>
 "
 `;
 
@@ -420,7 +420,7 @@ exports[`engine > CommonMark-71 1`] = `
 exports[`engine > CommonMark-72 1`] = `
 "<h1 id="foo" data-sign="3abf3d4f5c4eccfa1d7e6e89b8928ee08c48b142fbdb7565af844a2ac95e6fd4" data-lines="1">foo</h1>
 
-<h5 id="foo-3" data-sign="96960a1688c8910ac49dce1a7e388b910af2d46a006cf2659aaf5c2ff6ec0643" data-lines="1">foo</h5>
+<h5 id="foo-2" data-sign="116a2877ea1ef40f9ec28f8b54722550b03ee6ec18832f05c8c0a75f3b496b20" data-lines="1">foo</h5>
 "
 `;
 
@@ -442,9 +442,9 @@ exports[`engine > CommonMark-75 1`] = `
 exports[`engine > CommonMark-76 1`] = `
 "<h3 id="foo-" data-sign="9d2608861f9f31e85c014fd2879c9d8e4a69cdd7df2dfd6bd1865afb43ffad29" data-lines="1">foo ###</h3>
 
-<h2 id="foo--3" data-sign="733d9e8e97c05a91773be9c637c7c5e9eb94694d38c1f162e5bf8aeed91584cf" data-lines="1">foo ###</h2>
+<h2 id="foo--2" data-sign="6c104e4020d1387d57614264294d22fe4b60680a945093c6a5650a5945c8869c" data-lines="1">foo ###</h2>
 
-<h1 id="foo--4" data-sign="414ac73601e902e773be0140a59e5155edb5dde3d2ef79ef455f0cb4d272f9df" data-lines="1">foo #</h1>
+<h1 id="foo--3" data-sign="d5b4dce5ac416c0fa36a3051210142f8c622a859290252e7e08d4d40568e9cc3" data-lines="1">foo #</h1>
 "
 `;
 
@@ -465,7 +465,7 @@ exports[`engine > CommonMark-78 1`] = `
 exports[`engine > CommonMark-79 1`] = `
 "<h2 id="" data-sign="700456215b4d8fa4168161027be764796de19f29eb5fb4d3f3ff067ad570b931" data-lines="1"></h2><p data-sign="334359b90efed75da5f0ada1d5e6b256f4a6bd0aee7eb39c0f90182a021ffc8b1" data-type="p" data-lines="1">#</p>
 
-<h3 id="-3" data-sign="b29de082c0f66594e1eec323fea02006627e8d84ef8a9b6f386826d0aaf1bf0a" data-lines="1"></h3>
+<h3 id="-2" data-sign="1cf1a9a0a54d544b903a698b278151bd9ebb25fa01e9a9349dca24ff1369555a" data-lines="1"></h3>
 "
 `;
 
@@ -492,16 +492,16 @@ exports[`engine > CommonMark-82 1`] = `
 exports[`engine > CommonMark-83 1`] = `
 "<h2 id="foo" data-sign="f36b0619c6f0224a37cb034d78a37a9bd908150200b2269d1251773c4141141f" data-lines="2">Foo</h2>
 
-<h1 id="foo-3" data-sign="456b03cf52fa9474fd512516844a83dcb4f3400ebd71b68e28e834caba1a092a" data-lines="3">Foo</h1>
+<h1 id="foo-2" data-sign="2e19b1a396ef2d667a6e7f30fe25ad4006812c65a6ce504aafe8df49f2498cea" data-lines="3">Foo</h1>
 "
 `;
 
 exports[`engine > CommonMark-84 1`] = `
 "<h2 id="foo" data-sign="f36b0619c6f0224a37cb034d78a37a9bd908150200b2269d1251773c4141141f" data-lines="2">Foo</h2>
 
-<h2 id="foo-3" data-sign="abdd65fde3f298514c21db88bb7632c180c45cd0c44bf3735aec940246f4c941" data-lines="3">Foo</h2>
+<h2 id="foo-2" data-sign="66ae83909cc0893a30ae835e8a1ea81dfe16fe1664355637cee5173efd8b2d8a" data-lines="3">Foo</h2>
 
-<h1 id="foo-4" data-sign="dbf3af57d3e057a77cea488ea1c3dc86e30da5444990cae8a63e2bbd5c3af08a" data-lines="3">Foo</h1>
+<h1 id="foo-3" data-sign="456b03cf52fa9474fd512516844a83dcb4f3400ebd71b68e28e834caba1a092a" data-lines="3">Foo</h1>
 "
 `;
 
@@ -693,7 +693,7 @@ exports[`engine > CommonMark-114 1`] = `
 `;
 
 exports[`engine > CommonMark-115 1`] = `
-"<h1 id="heading" data-sign="0808fb2037aae4ed917a39ffad593d2c061a71e0cf9290b93e0269117cd8c5ba" data-lines="1">Heading</h1><p data-sign="ef6d27ab0b294a4af74545f3afa8eb654162de068c0409054e2846c0b17873e61" data-type="p" data-lines="1">    foo</p><h2 id="heading-3" data-sign="0cbb468af393d56ea77d54031cc18cdfa1a05e5ae7912fbbb65195631ed6f20d" data-lines="2">Heading</h2><p data-sign="ef6d27ab0b294a4af74545f3afa8eb654162de068c0409054e2846c0b17873e61" data-type="p" data-lines="1">    foo</p>
+"<h1 id="heading" data-sign="0808fb2037aae4ed917a39ffad593d2c061a71e0cf9290b93e0269117cd8c5ba" data-lines="1">Heading</h1><p data-sign="ef6d27ab0b294a4af74545f3afa8eb654162de068c0409054e2846c0b17873e61" data-type="p" data-lines="1">    foo</p><h2 id="heading-2" data-sign="4bc06acdc2748f5eb1e55c2cee8887e04c78465a2768c0358588f2307f62e525" data-lines="2">Heading</h2><p data-sign="ef6d27ab0b294a4af74545f3afa8eb654162de068c0409054e2846c0b17873e61" data-type="p" data-lines="1">    foo</p>
 
 <hr data-sign="hr1" data-lines="1">"
 `;
@@ -836,7 +836,8 @@ exports[`engine > CommonMark-128 1`] = `
       >
       <pre class="language-javascript"><code class="language-javascript"><span class="code-line">aaa</span>
 <span class="code-line"></span>
-<span class="code-line">bbb</span></code></pre>
+<span class="code-line">bbb</span>
+<span class="code-line"><span class="token operator">></span></span></code></pre>
       </div></blockquote>
 "
 `;
