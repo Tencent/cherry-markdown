@@ -1,160 +1,161 @@
 /*
- * 清幽主题
+ * Editary-inspired theme — professional writing, forest-green accent, paper-like
  */
 
 .cherry.theme__blue {
   /* ========== 基础色彩变量覆盖 ========== */
-  --primary-color: var(--oc-indigo-6);
-  --secondary-color: var(--oc-violet-0);
+  --primary-color: #2b7a4b;
+  --secondary-color: #f4f8f6;
 
-  --base-font-color: var(--oc-indigo-8);
-  --base-editor-bg: var(--oc-violet-0);
-  --base-previewer-bg: var(--oc-violet-0);
-  --base-border-color: var(--oc-indigo-4);
+  --base-font-color: #1a1a1a;
+  --base-editor-bg: #fbfbfa;
+  --base-previewer-bg: #fbfbfa;
+  --base-border-color: #e2e2e0;
 
   /* ========== 工具栏相关变量 ========== */
-  --toolbar-bg: var(--oc-violet-1);
-  --toolbar-btn-color: var(--oc-indigo-7);
-  --toolbar-btn-hover-bg: var(--oc-violet-3);
-  --toolbar-btn-hover-color: var(--oc-white);
-  --toolbar-btn-active-bg:var(--oc-blue-5);
-  --toolbar-split-color: var(--oc-indigo-4);
+  --toolbar-bg: #fbfbfa;
+  --toolbar-btn-color: #4a4a48;
+  --toolbar-btn-hover-bg: #eef2f0;
+  --toolbar-btn-hover-color: var(--primary-color);
+  --toolbar-btn-active-bg: #e2e2e0;
+  --toolbar-split-color: #e2e2e0;
 
-  --dropdown-bg: var(--oc-white);
+  --dropdown-bg: #ffffff;
+  --dropdown-item-hover-bg: #eef2f0;
+  --dropdown-item-hover-color: var(--primary-color);
 
   /* ========== 编辑器相关变量 ========== */
   --editor-header-color: var(--primary-color);
-  --editor-string-color: var(--oc-indigo-5);
-  --editor-comment-color: var(--oc-indigo-5);
-  --editor-quote-color: var(--oc-indigo-8);
-  --editor-link-color: var(--oc-indigo-5);
-  --editor-url-color: var(--oc-violet-1);
-  --editor-v2-color: var(--oc-indigo-8);
+  --editor-string-color: #2b7a4b;
+  --editor-comment-color: #9c9c9a;
+  --editor-quote-color: #5a5a58;
+  --editor-link-color: #1a6b8a;
+  --editor-url-color: rgba(43, 122, 75, 0.1);
+  --editor-v2-color: #1a1a1a;
   --editor-v3-color: var(--primary-color);
-  --editor-keyword-color: var(--oc-indigo-5);
-  --editor-selection-bg: var(--oc-violet-2);
-  --editor-active-line-bg: rgba(229, 219, 255, 0.4);
+  --editor-keyword-color: #1a6b8a;
+  --editor-selection-bg: #c8e6d4;
+  --editor-active-line-bg: rgba(43, 122, 75, 0.05);
 
   /* ========== Markdown 相关变量 ========== */
-  --md-heading-color: var(--primary-color);
-  --md-paragraph-color: var(--oc-indigo-8);
-  --md-link-color: var(--oc-indigo-5);
+  --md-heading-color: #1a1a1a;
+  --md-paragraph-color: #1a1a1a;
+  --md-link-color: #1a6b8a;
   --md-link-hover-color: var(--primary-color);
-  --md-inline-code-color: var(--oc-indigo-5);
-  --md-inline-code-bg: var(--oc-violet-1);
-  --md-blockquote-bg: var(--oc-violet-1);
-  --md-hr-border: var(--oc-indigo-4);
+  --md-inline-code-color: #c7254e;
+  --md-inline-code-bg: #f2f2f0;
+  --md-blockquote-bg: #f7f9f8;
+  --md-blockquote-border: #2b7a4b;
+  --md-blockquote-color: #5a5a58;
+  --md-hr-border: #e2e2e0;
   /* ========== table 相关变量 ========== */
-  --md-table-border: var(--oc-blue-5);
-  --md-table-add-border: var(--oc-blue-9);
-  --md-table-delete-bg: var(--oc-violet-1);
-  --md-table-sort-active-bg: var(--oc-blue-5);
-  --md-table-sort-border: var(--oc-indigo-4);
-  /* ========== table 相关变量 ========== */
-  --md-table-border: var(--oc-blue-5);
+  --md-table-border: #e2e2e0;
   --md-table-drag-border-bg: var(--primary-color);
-  --md-table-sort-active-bg: rgba(184, 134, 253, 0.4);
+  --md-table-sort-active-bg: rgba(43, 122, 75, 0.1);
 
-  --md-paragraph-highlight-line-bg: var(--oc-violet-1);
+  --md-paragraph-highlight-line-bg: #f4f8f6;
 
   /* ========== Panel 相关变量 ========== */
-  --panel-border-radius: 0;
-  --panel-bg: transparent;
-  --panel-border: none;
+  --panel-border-radius: 4px;
+  --panel-bg: #f7f9f8;
+  --panel-border: 1px solid #e2e2e0;
   --panel-box-shadow: none;
-  --panel-title-bg: transparent;
-  --panel-title-color: inherit;
-  --panel-body-bg: transparent;
-  --panel-body-color: inherit;
+  --panel-title-bg: #eef2f0;
+  --panel-title-color: #1a1a1a;
+  --panel-title-border-radius: 4px 4px 0 0;
+  --panel-title-border-bottom: 1px solid #e2e2e0;
+  --panel-body-bg: #fbfbfa;
+  --panel-body-color: #1a1a1a;
+  --panel-body-border-radius: 0 0 4px 4px;
 
   /* Primary Panel */
-  --panel-primary-border: none;
-  --panel-primary-border-color: transparent;
-  --panel-primary-title-bg: transparent;
-  --panel-primary-bg: transparent;
-  --panel-primary-title-color: var(--oc-blue-7);
-  --panel-primary-body-color: inherit;
+  --panel-primary-bg: rgba(43, 122, 75, 0.05);
+  --panel-primary-border-color: #2b7a4b;
+  --panel-primary-title-bg: rgba(43, 122, 75, 0.1);
+  --panel-primary-title-color: #1a5a38;
+  --panel-primary-body-bg: rgba(43, 122, 75, 0.03);
+  --panel-primary-body-color: #1a1a1a;
 
   /* Info Panel */
-  --panel-info-border: none;
-  --panel-info-border-color: transparent;
-  --panel-info-title-bg: transparent;
-  --panel-info-bg: transparent;
-  --panel-info-title-color: var(--oc-cyan-7);
-  --panel-info-body-color: inherit;
+  --panel-info-bg: rgba(26, 107, 138, 0.05);
+  --panel-info-border-color: #1a6b8a;
+  --panel-info-title-bg: rgba(26, 107, 138, 0.1);
+  --panel-info-title-color: #145570;
+  --panel-info-body-bg: rgba(26, 107, 138, 0.03);
+  --panel-info-body-color: #1a1a1a;
 
   /* Warning Panel */
-  --panel-warning-border: none;
-  --panel-warning-border-color: transparent;
-  --panel-warning-title-bg: transparent;
-  --panel-warning-bg: transparent;
-  --panel-warning-title-color: var(--oc-yellow-7);
-  --panel-warning-body-color: inherit;
+  --panel-warning-bg: rgba(196, 152, 42, 0.05);
+  --panel-warning-border-color: #c4982a;
+  --panel-warning-title-bg: rgba(196, 152, 42, 0.1);
+  --panel-warning-title-color: #8a6a18;
+  --panel-warning-body-bg: rgba(196, 152, 42, 0.03);
+  --panel-warning-body-color: #1a1a1a;
 
   /* Danger Panel */
-  --panel-danger-border: none;
-  --panel-danger-border-color: transparent;
-  --panel-danger-title-bg: transparent;
-  --panel-danger-bg: transparent;
-  --panel-danger-title-color: var(--oc-pink-7);
-  --panel-danger-body-color: inherit;
+  --panel-danger-bg: rgba(199, 37, 78, 0.05);
+  --panel-danger-border-color: #c7254e;
+  --panel-danger-title-bg: rgba(199, 37, 78, 0.1);
+  --panel-danger-title-color: #9a1a3a;
+  --panel-danger-body-bg: rgba(199, 37, 78, 0.03);
+  --panel-danger-body-color: #1a1a1a;
 
   /* Success Panel */
-  --panel-success-border: none;
-  --panel-success-border-color: transparent;
-  --panel-success-title-bg: transparent;
-  --panel-success-bg: transparent;
-  --panel-success-title-color: var(--oc-teal-7);
-  --panel-success-body-color: inherit;
-  --md-toc-bg: var(--oc-white);
-  --md-toc-border-color: var(--base-border-color);
-  --md-toc-indicator-color: var(--oc-indigo-1);
-  --md-toc-link-hover-bg: var(--oc-violet-0);
-  --md-toc-link-active-bg: var(--oc-violet-1);
-  
+  --panel-success-bg: rgba(43, 122, 75, 0.05);
+  --panel-success-border-color: #2b7a4b;
+  --panel-success-title-bg: rgba(43, 122, 75, 0.1);
+  --panel-success-title-color: #1a5a38;
+  --panel-success-body-bg: rgba(43, 122, 75, 0.03);
+  --panel-success-body-color: #1a1a1a;
+
+  --md-toc-bg: #f7f9f8;
+  --md-toc-border-color: #e2e2e0;
+  --md-toc-indicator-color: #d0d0ce;
+  --md-toc-link-hover-bg: #eef2f0;
+  --md-toc-link-active-bg: #e2e8e5;
+
   /* ========== 手风琴组件变量覆盖 ========== */
-  --accordion-bg: var(--oc-violet-0);
-  --accordion-border: var(--oc-indigo-2);
+  --accordion-bg: #f7f9f8;
+  --accordion-border: #e2e2e0;
+  --accordion-summary-bg: #2b7a4b;
+  --accordion-summary-hover-bg: #236640;
+  --accordion-body-bg: #fbfbfa;
+  --accordion-body-border: #eef2f0;
+  --accordion-body-color: #1a1a1a;
   
-  --accordion-summary-bg: var(--oc-indigo-6);
-  --accordion-summary-hover-bg: var(--oc-indigo-5);
-  
-  --accordion-body-bg: var(--oc-violet-0);
-  --accordion-body-border: var(--oc-indigo-1);
-  --accordion-body-color: var(--oc-indigo-8);
+  .cherry-toolbar {
+    box-shadow: none;
+  }
 }
 
 /** 预览区域样式 */
 .cherry-markdown.theme__blue {
-  h1,
-  h2,
-  h3,
-  h4,
-  h5 {
-    text-align: center;
-    border-bottom: 1px dashed var(--md-hr-border);
-    padding-bottom: 15px;
-    margin-bottom: 25px;
+
+  /** Editary-style: h1 with bottom border for clear section separation */
+  h1 {
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e2e2e0;
+    margin-bottom: 24px;
   }
 
-  /** Blue主题特殊的panel样式 - 使用左边框 */
+  /** Editary-style: left-border panels for structured callouts */
   .cherry-panel__primary {
-    border-left: 4px solid var(--oc-blue-6);
+    border-left: 3px solid #2b7a4b;
   }
 
   .cherry-panel__info {
-    border-left: 4px solid var(--oc-cyan-6);
+    border-left: 3px solid #1a6b8a;
   }
 
   .cherry-panel__warning {
-    border-left: 4px solid var(--oc-yellow-6);
+    border-left: 3px solid #c4982a;
   }
 
   .cherry-panel__danger {
-    border-left: 4px solid var(--oc-pink-6);
+    border-left: 3px solid #c7254e;
   }
 
   .cherry-panel__success {
-    border-left: 4px solid var(--oc-teal-6);
+    border-left: 3px solid #2b7a4b;
   }
 }
