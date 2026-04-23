@@ -122,6 +122,10 @@
   --accordion-body-bg: #fbfbfa;
   --accordion-body-border: #eef2f0;
   --accordion-body-color: #1a1a1a;
+  
+  .cherry-toolbar {
+    box-shadow: none;
+  }
 }
 
 /** 预览区域样式 */
@@ -154,7 +158,4 @@
   .cherry-panel__success {
     border-left: 3px solid #2b7a4b;
   }
-}
-.cherry-toolbar {
-  box-shadow: none;
 }
