@@ -176,9 +176,9 @@ export function createMenuHook(name, options) {
     }
 
     get shortcutKeys() {
-      console.warn(
-        'shortcutKeys will deprecated in the future, please use shortcutKeyMap instead, get more info at https://github.com/Tencent/cherry-markdown/wiki',
-      );
+      // console.warn(
+      //   'shortcutKeys will deprecated in the future, please use shortcutKeyMap instead, get more info at https://github.com/Tencent/cherry-markdown/wiki',
+      // );
       if (filteredOptions.shortcutKeys) {
         return filteredOptions.shortcutKeys;
       }

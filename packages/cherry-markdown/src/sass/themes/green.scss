@@ -26,11 +26,12 @@
   --editor-comment-color: var(--oc-green-6);
   --editor-quote-color: var(--primary-color);
   --editor-link-color: var(--oc-green-6);
-  --editor-url-bg-color: var(--secondary-color);
+  --editor-url-color: var(--secondary-color);
   --editor-v2-color: var(--primary-color);
   --editor-v3-color: var(--oc-green-7);
   --editor-keyword-color: var(--oc-green-6);
   --editor-selection-bg: var(--oc-green-2);
+  --editor-active-line-bg: rgba(235, 251, 238, 0.4);
 
   /* ========== 预览器相关变量 ========== */
   --previewer-mobile-bg: var(--oc-white);

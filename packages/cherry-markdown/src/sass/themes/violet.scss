@@ -1,126 +1,128 @@
 /*
- * 淡雅主题
+ * Bear-inspired theme — warm, minimal, content-focused
  */
 
 .cherry.theme__violet {
   /* ========== 基础色彩变量覆盖 ========== */
-  --primary-color: var(--oc-violet-9);
-  --secondary-color: var(--oc-violet-0);
+  --primary-color: #c05040;
+  --secondary-color: #faf6f0;
 
-  --base-font-color: var(--primary-color);
-  --base-editor-bg: var(--oc-white);
-  --base-previewer-bg: var(--oc-white);
-  --base-border-color: var(--oc-violet-8);
+  --base-font-color: #3b3330;
+  --base-editor-bg: #faf6f0;
+  --base-previewer-bg: #faf6f0;
+  --base-border-color: #e0d6cc;
 
   /* ========== 工具栏相关变量 ========== */
-  --toolbar-bg: var(--oc-white);
-  --toolbar-btn-color: var(--primary-color);
-  --toolbar-btn-hover-bg: var(--oc-violet-5);
-  --toolbar-btn-hover-color: var(--oc-violet-0);
-  --toolbar-btn-active-bg: var(--oc-violet-7);
-  --toolbar-split-color: var(--oc-violet-8);
+  --toolbar-bg: #f5efe7;
+  --toolbar-btn-color: #6b5e55;
+  --toolbar-btn-hover-bg: #ebe3d9;
+  --toolbar-btn-hover-color: var(--primary-color);
+  --toolbar-btn-active-bg: #e0d6cc;
+  --toolbar-split-color: #e0d6cc;
 
   /* ========== 编辑器相关变量 ========== */
-  --editor-header-color: var(--oc-violet-7);
-  --editor-string-color: var(--oc-violet-6);
-  --editor-comment-color: var(--oc-violet-6);
-  --editor-quote-color: var(--primary-color);
-  --editor-link-color: var(--oc-violet-6);
-  --editor-url-bg-color: var(--oc-violet-0);
-  --editor-v2-color: var(--primary-color);
-  --editor-v3-color: var(--oc-violet-7);
-  --editor-keyword-color: var(--oc-violet-6);
-  --editor-selection-bg: var(--oc-violet-2);
+  --editor-header-color: var(--primary-color);
+  --editor-string-color: #8a6d3b;
+  --editor-comment-color: #a89a8c;
+  --editor-quote-color: #8a7968;
+  --editor-link-color: #b85a4e;
+  --editor-url-color: #a89a8c;
+  --editor-v2-color: #3b3330;
+  --editor-v3-color: var(--primary-color);
+  --editor-keyword-color: #8a6d3b;
+  --editor-selection-bg: #e8d8c8;
+  --editor-active-line-bg: rgba(224, 214, 204, 0.4);
 
   /* ========== Markdown 相关变量 ========== */
-  --md-heading-color: var(--oc-violet-7);
-  --md-paragraph-color: var(--primary-color);
-  --md-link-color: var(--oc-violet-6);
-  --md-link-hover-color: var(--oc-violet-7);
-  --md-inline-code-color: var(--oc-violet-6);
-  --md-inline-code-bg: var(--oc-violet-1);
-  --md-blockquote-bg: var(--oc-violet-1);
-  --md-hr-border: var(--oc-violet-8);
+  --md-heading-color: #3b3330;
+  --md-paragraph-color: #3b3330;
+  --md-link-color: var(--primary-color);
+  --md-link-hover-color: #a03828;
+  --md-inline-code-color: #c05040;
+  --md-inline-code-bg: #f0e8de;
+  --md-blockquote-bg: #f0e8de;
+  --md-blockquote-border: #d4c4b0;
+  --md-blockquote-color: #8a7968;
+  --md-hr-border: #e0d6cc;
   /* ========== table 相关变量 ========== */
-  --md-table-border: var(--oc-violet-8);
+  --md-table-border: #e0d6cc;
   --md-table-drag-border-bg: var(--primary-color);
-  --md-table-sort-active-bg: var(--oc-violet-2);
+  --md-table-sort-active-bg: #ebe3d9;
 
   /* ========== Panel 相关变量 ========== */
-  --panel-border-radius: 4px;
-  --panel-bg: var(--oc-white);
-  --panel-border: 1px solid var(--oc-gray-2);
-  --panel-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --panel-title-bg: var(--oc-gray-1);
-  --panel-title-color: var(--oc-gray-8);
-  --panel-title-border-radius: 2px 2px 0 0;
-  --panel-title-border-bottom: 1px solid var(--oc-gray-3);
-  --panel-body-bg: var(--oc-white);
-  --panel-body-color: var(--oc-gray-8);
-  --panel-body-border-radius: 0 0 2px 2px;
+  --panel-border-radius: 6px;
+  --panel-bg: #f5efe7;
+  --panel-border: 1px solid #e0d6cc;
+  --panel-box-shadow: none;
+  --panel-title-bg: #ebe3d9;
+  --panel-title-color: #3b3330;
+  --panel-title-border-radius: 6px 6px 0 0;
+  --panel-title-border-bottom: 1px solid #e0d6cc;
+  --panel-body-bg: #f5efe7;
+  --panel-body-color: #3b3330;
+  --panel-body-border-radius: 0 0 6px 6px;
 
   /* Primary Panel */
-  --panel-primary-border-color: var(--oc-blue-5);
-  --panel-primary-title-bg: var(--oc-blue-1);
-  --panel-primary-title-color: var(--oc-blue-8);
-  --panel-primary-title-border-bottom: 1px solid var(--oc-blue-3);
-  --panel-primary-body-bg: var(--oc-blue-0);
-  --panel-primary-body-color: var(--oc-blue-9);
+  --panel-primary-border-color: #c8a882;
+  --panel-primary-title-bg: #f0e0cc;
+  --panel-primary-title-color: #6b4c30;
+  --panel-primary-title-border-bottom: 1px solid #d4c4b0;
+  --panel-primary-body-bg: #faf2e8;
+  --panel-primary-body-color: #5a4030;
 
   /* Info Panel */
-  --panel-info-border-color: var(--oc-cyan-5);
-  --panel-info-title-bg: var(--oc-cyan-1);
-  --panel-info-title-color: var(--oc-cyan-8);
-  --panel-info-title-border-bottom: 1px solid var(--oc-cyan-3);
-  --panel-info-body-bg: var(--oc-cyan-0);
-  --panel-info-body-color: var(--oc-cyan-9);
+  --panel-info-border-color: #8cb8c8;
+  --panel-info-title-bg: #e0f0f4;
+  --panel-info-title-color: #3a6878;
+  --panel-info-title-border-bottom: 1px solid #b8d8e4;
+  --panel-info-body-bg: #f0f8fa;
+  --panel-info-body-color: #3a6878;
 
   /* Warning Panel */
-  --panel-warning-border-color: var(--oc-yellow-5);
-  --panel-warning-title-bg: var(--oc-yellow-1);
-  --panel-warning-title-color: var(--oc-yellow-8);
-  --panel-warning-title-border-bottom: 1px solid var(--oc-yellow-3);
-  --panel-warning-body-bg: var(--oc-yellow-0);
-  --panel-warning-body-color: var(--oc-yellow-9);
+  --panel-warning-border-color: #d4b06a;
+  --panel-warning-title-bg: #faf0d8;
+  --panel-warning-title-color: #7a5c20;
+  --panel-warning-title-border-bottom: 1px solid #e8d4a0;
+  --panel-warning-body-bg: #fdf8ee;
+  --panel-warning-body-color: #7a5c20;
 
   /* Danger Panel */
-  --panel-danger-border-color: var(--oc-red-5);
-  --panel-danger-title-bg: var(--oc-red-1);
-  --panel-danger-title-color: var(--oc-red-8);
-  --panel-danger-title-border-bottom: 1px solid var(--oc-red-3);
-  --panel-danger-body-bg: var(--oc-red-0);
-  --panel-danger-body-color: var(--oc-red-9);
+  --panel-danger-border-color: #d08070;
+  --panel-danger-title-bg: #fae8e4;
+  --panel-danger-title-color: #8a3828;
+  --panel-danger-title-border-bottom: 1px solid #e4c0b8;
+  --panel-danger-body-bg: #fdf4f2;
+  --panel-danger-body-color: #8a3828;
 
   /* Success Panel */
-  --panel-success-border-color: var(--oc-green-5);
-  --panel-success-title-bg: var(--oc-green-1);
-  --panel-success-title-color: var(--oc-green-8);
-  --panel-success-title-border-bottom: 1px solid var(--oc-green-3);
-  --panel-success-body-bg: var(--oc-green-0);
-  --panel-success-body-color: var(--oc-green-9);
-  --md-toc-bg: var(--oc-violet-0);
-  --md-toc-indicator-color: var(--oc-violet-1);
-  --md-toc-link-hover-bg: var(--oc-violet-1);
-  --md-toc-link-active-bg: var(--oc-violet-2);
-  
+  --panel-success-border-color: #88b888;
+  --panel-success-title-bg: #e4f0e4;
+  --panel-success-title-color: #3a6838;
+  --panel-success-title-border-bottom: 1px solid #b8d4b8;
+  --panel-success-body-bg: #f2f8f2;
+  --panel-success-body-color: #3a6838;
+
+  --md-toc-bg: #f5efe7;
+  --md-toc-border-color: #e0d6cc;
+  --md-toc-indicator-color: #e0d6cc;
+  --md-toc-link-hover-bg: #ebe3d9;
+  --md-toc-link-active-bg: #e0d6cc;
+
   /* ========== 手风琴组件变量覆盖 ========== */
-  --accordion-bg: var(--oc-violet-0);
-  --accordion-border: var(--oc-violet-2);
-  --accordion-summary-bg: var(--oc-violet-6);
-  --accordion-summary-hover-bg: var(--oc-violet-5);
-  --accordion-body-bg: var(--oc-violet-0);
-  --accordion-body-border: var(--oc-violet-1);
-  --accordion-body-color: var(--primary-color);
+  --accordion-bg: #f5efe7;
+  --accordion-border: #e0d6cc;
+  --accordion-summary-bg: #c05040;
+  --accordion-summary-hover-bg: #a84438;
+  --accordion-body-bg: #f5efe7;
+  --accordion-body-border: #ebe3d9;
+  --accordion-body-color: #3b3330;
 }
 
 /** 预览区域样式 */
 .cherry-markdown.theme__violet {
-  h1,
-  h2,
-  h3,
-  h4,
-  h5 {
-    text-align: center;
-    margin-bottom: 35px;
+  h1 {
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0d6cc;
+    margin-bottom: 24px;
   }
 }

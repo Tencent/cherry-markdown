@@ -26,11 +26,12 @@
   --editor-comment-color: var(--oc-blue-4);
   --editor-quote-color: var(--oc-gray-8);
   --editor-link-color: var(--oc-blue-4);
-  --editor-url-bg-color: var(--oc-blue-0);
+  --editor-url-color: var(--oc-blue-0);
   --editor-v2-color: var(--oc-gray-8);
   --editor-v3-color: var(--primary-color);
   --editor-keyword-color: var(--oc-blue-4);
   --editor-selection-bg: var(--oc-blue-2);
+  --editor-active-line-bg: rgba(231, 245, 255, 0.4);
 
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: var(--primary-color);
