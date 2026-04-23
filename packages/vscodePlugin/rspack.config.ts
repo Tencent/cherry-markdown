@@ -87,6 +87,8 @@ const webviewConfig: Configuration = {
   devtool: isProduction ? false : 'source-map',
   resolve: {
     extensions: ['.ts', '.js'],
+    // 确保能解析 monorepo 根目录 node_modules 中的 cherry-markdown（yarn workspace hoisting）
+    modules: [path.resolve(__dirname, 'node_modules'), path.resolve(__dirname, '../../node_modules'), 'node_modules'],
   },
   module: {
     rules: [
