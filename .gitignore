@@ -33,3 +33,5 @@ examples/cherry-markdown-publish/src/common/config/*.yaml
 
 # CodeBuddy local data
 .codebuddy/
+
+.vsix
