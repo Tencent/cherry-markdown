@@ -91,8 +91,14 @@ const webviewConfig: Configuration = {
     modules: [path.resolve(__dirname, 'node_modules'), path.resolve(__dirname, '../../node_modules'), 'node_modules'],
     // CI 脚本将核心库重命名为 cherry-markdown-core，本地开发时包名仍为 cherry-markdown
     // 此 alias 确保两种场景下 import from 'cherry-markdown-core' 都能正确解析
+    // 注意：rspack 需要显式指定入口文件路径，不能仅指定目录
+    // __dirname = packages/vscodePlugin，目标在 packages/cherry-markdown/dist/
     alias: {
-      'cherry-markdown-core': path.resolve(__dirname, '../../cherry-markdown'),
+      'cherry-markdown-core$': path.resolve(__dirname, '../cherry-markdown/dist/cherry-markdown.esm.js'),
+      'cherry-markdown-core/dist/cherry-markdown.min.css': path.resolve(
+        __dirname,
+        '../cherry-markdown/dist/cherry-markdown.min.css'
+      ),
     },
   },
   module: {

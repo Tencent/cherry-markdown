@@ -20,7 +20,7 @@
     "build": "yarn workspace cherry-markdown build",
     "dev:client": "yarn workspace @cherry-markdown/client tauri dev",
     "build:client": "yarn workspace @cherry-markdown/client tauri build",
-    "build:vscodePlugin": "yarn workspace cherry-markdown-vscode-plugin build",
+    "build:vscodePlugin": "yarn workspace cherry-markdown build && yarn workspace cherry-markdown-vscode-plugin build",
     "example:react": "yarn workspace @cherry-markdown/react_demo dev",
     "test": "yarn workspace cherry-markdown test",
     "test:update": "yarn workspace cherry-markdown test:update",
