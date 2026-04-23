@@ -773,7 +773,8 @@ Cherry.usePlugin(Cherry.plugins.EChartsCodeBlockEngine, {
   size: {
     width: '100%',
     height: '600px',
-  }
+  },
+  enableJs: true, // 是否允许执行 JavaScript，默认为 false，**注意**：开启后有安全风险，请确保输出的代码是安全的
 });
 ...
 const cherryObj = new Cherry(config);

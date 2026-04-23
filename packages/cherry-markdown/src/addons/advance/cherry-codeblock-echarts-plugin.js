@@ -47,6 +47,7 @@ export default class EChartsCodeBlockEngine {
       throw new Error('codeblock-echarts-plugin[init]: Package echarts not found.');
     }
     this.size = echartsOptions.size;
+    this.enableJs = echartsOptions.enableJs ?? false;
     this.echartsRef = resolvedEcharts; // echarts引用
     this.srcCache = new Map();
   }
@@ -60,19 +61,20 @@ export default class EChartsCodeBlockEngine {
    */
   parseOption(src) {
     const trimmed = src.replace(/;\s*$/, '').trim();
-    // 优先尝试 new Function，支持 function、箭头函数、正则等 JS 语法
+    if (this.enableJs !== true) {
+      return JSON5.parse(trimmed);
+    }
     try {
+      return JSON5.parse(trimmed);
+    } catch (e) {
       // eslint-disable-next-line no-new-func
       const fn = new Function(`return (${trimmed})`);
       const result = fn();
       if (result && typeof result === 'object') {
         return result;
       }
-    } catch (e) {
-      // JS 执行失败，继续尝试 JSON5
+      throw e;
     }
-    // fallback: JSON5 解析纯数据格式
-    return JSON5.parse(trimmed);
   }
 
   render(src, sign, $engine, language) {
@@ -87,9 +89,9 @@ export default class EChartsCodeBlockEngine {
         `div[data-sign="${sign}"][data-type="echarts"] .cherry-echarts-codeblock-wrapper`,
       );
       if (containers.length <= 0 || !this.echartsRef) return;
-      const option = this.parseOption(src);
       containers.forEach((container) => {
         try {
+          const option = this.parseOption(src);
           // 判断是否已经初始化
           let chart = this.echartsRef.getInstanceByDom(container);
           const isNewChart = !chart;
