@@ -1,17 +1,16 @@
 # =============================================================================
-# Reusable Workflow: VSCode Plugin 构建 / 预发布 / 正式发布
+# Reusable Workflow: VSCode Plugin 构建 / 正式发布
 #
 # 模式 (mode):
 #   "package"     — 改版本号 + 构建 + 打包 .vsix + 上传 artifact（PR Preview）
-#   "pre-release" — 改版本号 + 构建 + 预发布到 Marketplace（Merge → dev）
 #   "release"     — 构建 + 正式发布到 Marketplace（Push → main，changeset 版本号）
 #
 # 步骤:
 #   1. 改名（cherry-markdown-core + cherry-markdown）— 解决 workspace 冲突
-#   2. 改版本号（package / pre-release 模式加时间戳）
+#   2. 改版本号（package 模式加时间戳）
 #   3. 安装依赖 + 构建核心库
 #   4. 生产模式编译插件
-#   5. 打包 / 预发布 / 正式发布
+#   5. 打包 / 正式发布
 # =============================================================================
 
 name: 'Reusable: VSCode Plugin'
@@ -20,11 +19,11 @@ on:
   workflow_call:
     inputs:
       mode:
-        description: '"package" | "pre-release" | "release"'
+        description: '"package" | "release"'
         required: true
         type: string
       pr_number:
-        description: '预发布时需要评论的 PR 编号'
+        description: 'package 模式下评论的 PR 编号'
         required: false
         type: number
         default: 0
@@ -47,24 +46,20 @@ jobs:
       - name: Prepare package names
         run: bash .github/scripts/prepare-vscode-plugin.sh
 
-      # ── 2. 改版本号（package / pre-release 加时间戳）──
+      # ── 2. 改版本号（package 加时间戳）──
       - name: Stamp preview version
         if: inputs.mode != 'release'
         run: |
           cd packages/vscodePlugin
-          TIMESTAMP=$(t=$(date +%m%d%H%M | sed 's/^0*//'); [ -n "$t" ] && printf '%s' "$t" || date +%H%M%S)
+          TS=$(date +%d%H%M)
 
-          tmp=$(mktemp) && jq --arg ts "$TIMESTAMP" '
+          tmp=$(mktemp) && jq --arg ts "$TS" '
             .version |= (
               split(".") as $s |
               if ($s|length) < 3 then
                 error("package.json version must be in '\''x.y.z'\'' format")
               else
-                if $s[2] == "0" then
-                  ($s[0:2] + [$ts]) | join(".")
-                else
-                  ($s[0:2] + [($s[2] + $ts)]) | join(".")
-                end
+                ($s[0:2] + [$s[2] + $ts]) | join(".")
               end
             )
           ' package.json > "$tmp" && mv "$tmp" package.json
@@ -95,27 +90,40 @@ jobs:
           retention-days: 5
           if-no-files-found: warn
 
-      # ── 5b. pre-release 模式：预发布到 Marketplace ──
-      - name: Publish VSCode Plugin (pre-release)
-        if: inputs.mode == 'pre-release'
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        run: |
-          cd packages/vscodePlugin
-          npx @vscode/vsce publish -p $VSCE_PAT --no-dependencies --no-yarn --pre-release
-
-      - name: Comment on PR (pre-release)
-        if: inputs.mode == 'pre-release' && inputs.pr_number > 0
+      # ── 5b. package 模式：PR 评论通知 ──
+      - name: Comment on PR (artifact link)
+        if: inputs.mode == 'package' && inputs.pr_number > 0
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.issues.createComment({
+            const runId = context.runId;
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${runId}`;
+            const body = `🔌 Cherry Markdown VSCode Plugin preview build ready!\n\nDownload the \`.vsix\` from [Artifacts](${runUrl}) → *Artifacts* section.`;
+
+            // 查找已有评论并更新，避免重复堆积
+            const { data: comments } = await github.rest.issues.listComments({
               issue_number: ${{ inputs.pr_number }},
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🔌 Preview Cherry Markdown Extensions [see: prerelease-extensions](https://code.visualstudio.com/api/working-with-extensions/publishing-extension?from_column=20423&from=20423#prerelease-extensions)`
             });
+            const botComment = comments.find(c => c.user.type === "Bot" && c.body.includes("Cherry Markdown VSCode Plugin"));
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                comment_id: botComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: ${{ inputs.pr_number }},
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body,
+              });
+            }
 
       # ── 5c. release 模式：正式发布到 Marketplace ──
       - name: Publish VSCode Plugin (release)
