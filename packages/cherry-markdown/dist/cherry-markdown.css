@@ -144,7 +144,7 @@
   --editor-quote-color: var(--oc-blue-6);
   --editor-string-color: var(--base-font-color);
   --editor-link-color: var(--oc-blue-6);
-  --editor-url-color: #d7e6fe;
+  --editor-url-bg-color: #d7e6fe;
   --editor-v2-color: var(--primary-color);
   --editor-v3-color: var(--secondary-color);
   --editor-keyword-color: var(--base-font-color);
@@ -4687,9 +4687,6 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 .cherry .cm-editor .cm-line {
   font-family: inherit;
 }
-.cherry .cm-editor .cm-line.cm-activeLine {
-  background-color: var(--editor-active-line-bg);
-}
 .cherry .cm-editor .cm-selectionLayer .cm-selectionBackground {
   background-color: var(--editor-selection-bg) !important;
 }
@@ -5415,19 +5412,19 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   color: var(--editor-header-color);
 }
 .cherry-editor .cm-editor .cm-scroller .cm-url {
-  color: var(--editor-url-color);
+  background-color: var(--editor-url-bg-color);
 }
 .cherry-editor .cm-editor .cm-scroller .cm-comment,
 .cherry-editor .cm-editor .cm-scroller .cm-url {
   color: var(--editor-comment-color);
 }
-.cherry-editor .cm-editor .cm-lineWrapping {
+.cherry-editor .cm-lineWrapping {
   padding: 15px 34px;
 }
-.cherry-editor .cm-editor .cm-lineWrapping .long-text,
-.cherry-editor .cm-editor .cm-lineWrapping .drawio,
-.cherry-editor .cm-editor .cm-lineWrapping .base64,
-.cherry-editor .cm-editor .cm-lineWrapping .url-truncated {
+.cherry-editor .cm-lineWrapping .long-text,
+.cherry-editor .cm-lineWrapping .drawio,
+.cherry-editor .cm-lineWrapping .base64,
+.cherry-editor .cm-lineWrapping .url-truncated {
   display: inline-block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5437,35 +5434,14 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   color: darkmagenta !important;
   font-size: var(--font-size-xs) !important;
 }
-.cherry-editor .cm-editor .cm-lineWrapping .url-truncated {
+.cherry-editor .cm-lineWrapping .url-truncated {
   max-width: 200px;
 }
-.cherry-editor .cm-editor .cm-lineWrapping .cm-invalidchar[title=\\u200b] {
+.cherry-editor .cm-lineWrapping .cm-invalidchar[title=\\u200b] {
   display: none;
 }
 .cherry-editor .cm-editor .cm-header {
   color: var(--editor-header-color);
-}
-.cherry-editor .cm-editor .cm-header.cm-meta {
-  opacity: 0.5;
-}
-.cherry-editor .cm-editor .cm-header.cm-header-1 {
-  font-size: 2em;
-}
-.cherry-editor .cm-editor .cm-header.cm-header-2 {
-  font-size: 1.5em;
-}
-.cherry-editor .cm-editor .cm-header.cm-header-3 {
-  font-size: 1.25em;
-}
-.cherry-editor .cm-editor .cm-header.cm-header-4 {
-  font-size: 1em;
-}
-.cherry-editor .cm-editor .cm-header.cm-header-5 {
-  font-size: 0.875em;
-}
-.cherry-editor .cm-editor .cm-header.cm-header-6 {
-  font-size: 0.85em;
 }
 .cherry-editor .cm-editor .cm-string {
   color: var(--editor-string-color);
@@ -5476,7 +5452,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   font-size: 0.9em;
 }
 .cherry-editor .cm-editor .cm-whitespace,
-.cherry-editor .cm-editor .cm-tab {
+.cherry-editor .cm-tab {
   font-family: var(--font-family-mono);
   font-size: 0.9em;
 }
@@ -5491,7 +5467,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   text-decoration: none;
 }
 .cherry-editor .cm-editor .cm-url {
-  color: var(--editor-url-color);
+  background: var(--editor-url-bg-color);
   font-family: var(--font-family-mono);
   font-size: 0.9em;
   text-decoration: none;
@@ -6291,20 +6267,17 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --toolbar-btn-hover-color: var(--primary-color);
   --toolbar-btn-active-bg: var(--secondary-color);
   --toolbar-split-color: var(--oc-blue-5);
-  --dropdown-item-hover-bg: var(--toolbar-btn-hover-bg);
-  --dropdown-item-hover-color: var(--toolbar-btn-hover-color);
   /* ========== 编辑器相关变量 ========== */
   --editor-header-color: var(--primary-color);
   --editor-string-color: var(--oc-blue-4);
   --editor-comment-color: var(--oc-blue-4);
   --editor-quote-color: var(--oc-gray-8);
   --editor-link-color: var(--oc-blue-4);
-  --editor-url-color: var(--oc-blue-0);
+  --editor-url-bg-color: var(--oc-blue-0);
   --editor-v2-color: var(--oc-gray-8);
   --editor-v3-color: var(--primary-color);
   --editor-keyword-color: var(--oc-blue-4);
   --editor-selection-bg: var(--oc-blue-2);
-  --editor-active-line-bg: rgba(231, 245, 255, 0.4);
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: var(--primary-color);
   --md-paragraph-color: var(--oc-gray-8);
@@ -6380,12 +6353,11 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --editor-comment-color: var(--oc-yellow-3);
   --editor-quote-color: var(--oc-gray-4);
   --editor-link-color: var(--oc-yellow-3);
-  --editor-url-color: rgb(81, 56, 56);
+  --editor-url-bg-color: rgb(81, 56, 56);
   --editor-v2-color: var(--oc-gray-4);
   --editor-v3-color: var(--primary-color);
   --editor-keyword-color: var(--oc-yellow-3);
   --editor-selection-bg: rgba(134, 142, 150, 0.8);
-  --editor-active-line-bg: rgba(134, 142, 150, 0.4);
   --dropdown-item-hover-bg: var(--oc-gray-9);
   --dropdown-item-hover-color: var(--oc-orange-5);
   --dropdown-item-active-bg: var(--secondary-color);
@@ -6546,7 +6518,6 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --dropdown-radius: var(--radius-xl);
   --dropdown-padding: var(--spacing-xs) 0;
   --dropdown-item-hover-bg: var(--toolbar-btn-hover-bg);
-  --dropdown-item-hover-color: var(--toolbar-btn-hover-color);
   --dropdown-item-color: var(--toolbar-btn-color);
   /* ========== 编辑器相关变量 ========== */
   --editor-header-color: var(--primary-color);
@@ -6554,12 +6525,11 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --editor-comment-color: #A8A8A9;
   --editor-quote-color: var(--oc-gray-8);
   --editor-link-color: var(--oc-blue-4);
-  --editor-url-color: none;
+  --editor-url-bg-color: none;
   --editor-v2-color: var(--oc-gray-8);
   --editor-v3-color: var(--primary-color);
   --editor-keyword-color: var(--oc-blue-4);
   --editor-selection-bg: #636e87;
-  --editor-active-line-bg: rgba(99, 110, 135, 0.2);
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: var(--primary-color);
   --md-paragraph-color: var(--base-font-color);
@@ -6686,20 +6656,17 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --toolbar-btn-hover-color: var(--secondary-color);
   --toolbar-btn-active-bg:var(--oc-green-7);
   --toolbar-split-color: var(--oc-green-8);
-  --dropdown-item-hover-bg: var(--toolbar-btn-hover-bg);
-  --dropdown-item-hover-color: var(--toolbar-btn-hover-color);
   /* ========== 编辑器相关变量 ========== */
   --editor-header-color: var(--oc-green-7);
   --editor-string-color: var(--oc-green-6);
   --editor-comment-color: var(--oc-green-6);
   --editor-quote-color: var(--primary-color);
   --editor-link-color: var(--oc-green-6);
-  --editor-url-color: var(--secondary-color);
+  --editor-url-bg-color: var(--secondary-color);
   --editor-v2-color: var(--primary-color);
   --editor-v3-color: var(--oc-green-7);
   --editor-keyword-color: var(--oc-green-6);
   --editor-selection-bg: var(--oc-green-2);
-  --editor-active-line-bg: rgba(235, 251, 238, 0.4);
   /* ========== 预览器相关变量 ========== */
   --previewer-mobile-bg: var(--oc-white);
   /* ========== Markdown 相关变量 ========== */
@@ -6804,20 +6771,17 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --toolbar-btn-active-bg: var(--oc-pink-7);
   --toolbar-split-color: var(--oc-pink-8);
   --dropdown-bg: var(--oc-white);
-  --dropdown-item-hover-bg: var(--toolbar-btn-hover-bg);
-  --dropdown-item-hover-color: var(--toolbar-btn-hover-color);
   /* ========== 编辑器相关变量 ========== */
   --editor-header-color: var(--primary-color);
   --editor-string-color: var(--oc-pink-5);
   --editor-comment-color: var(--oc-pink-5);
   --editor-quote-color: var(--oc-pink-9);
   --editor-link-color: var(--oc-pink-5);
-  --editor-url-color: var(--oc-pink-1);
+  --editor-url-bg-color: var(--oc-pink-1);
   --editor-v2-color: var(--oc-pink-9);
   --editor-v3-color: var(--primary-color);
   --editor-keyword-color: var(--oc-pink-5);
   --editor-selection-bg: var(--oc-pink-2);
-  --editor-active-line-bg: #fcc2d733;
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: var(--primary-color);
   --md-paragraph-color: var(--oc-pink-9);
@@ -6936,265 +6900,258 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --accordion-summary-hover-bg: var(--oc-gray-3);
   --accordion-summary-bg: var(--oc-gray-2);
   --accordion-summary-color: var(--oc-gray-7);
-  --dropdown-item-hover-bg: var(--oc-gray-2);
-  --dropdown-item-hover-color: var(--oc-gray-8);
-  --editor-url-color: var(--oc-gray-2);
-  --editor-active-line-bg: rgba(241, 243, 245, 0.4);
+  --editor-url-bg-color: var(--oc-gray-2);
   --accordion-shadow: none;
 }
 
 /*
- * Bear-inspired theme — warm, minimal, content-focused
+ * 淡雅主题
  */
 .cherry.theme__violet {
   /* ========== 基础色彩变量覆盖 ========== */
-  --primary-color: #c05040;
-  --secondary-color: #faf6f0;
-  --base-font-color: #3b3330;
-  --base-editor-bg: #faf6f0;
-  --base-previewer-bg: #faf6f0;
-  --base-border-color: #e0d6cc;
+  --primary-color: var(--oc-violet-9);
+  --secondary-color: var(--oc-violet-0);
+  --base-font-color: var(--primary-color);
+  --base-editor-bg: var(--oc-white);
+  --base-previewer-bg: var(--oc-white);
+  --base-border-color: var(--oc-violet-8);
   /* ========== 工具栏相关变量 ========== */
-  --toolbar-bg: #f5efe7;
-  --toolbar-btn-color: #6b5e55;
-  --toolbar-btn-hover-bg: #ebe3d9;
-  --toolbar-btn-hover-color: var(--primary-color);
-  --toolbar-btn-active-bg: #e0d6cc;
-  --toolbar-split-color: #e0d6cc;
-  --dropdown-item-hover-bg: #ebe3d9;
-  --dropdown-item-hover-color: var(--primary-color);
+  --toolbar-bg: var(--oc-white);
+  --toolbar-btn-color: var(--primary-color);
+  --toolbar-btn-hover-bg: var(--oc-violet-5);
+  --toolbar-btn-hover-color: var(--oc-violet-0);
+  --toolbar-btn-active-bg: var(--oc-violet-7);
+  --toolbar-split-color: var(--oc-violet-8);
   /* ========== 编辑器相关变量 ========== */
-  --editor-header-color: var(--primary-color);
-  --editor-string-color: #8a6d3b;
-  --editor-comment-color: #a89a8c;
-  --editor-quote-color: #8a7968;
-  --editor-link-color: #b85a4e;
-  --editor-url-color: #a89a8c;
-  --editor-v2-color: #3b3330;
-  --editor-v3-color: var(--primary-color);
-  --editor-keyword-color: #8a6d3b;
-  --editor-selection-bg: #e8d8c8;
-  --editor-active-line-bg: rgba(224, 214, 204, 0.4);
+  --editor-header-color: var(--oc-violet-7);
+  --editor-string-color: var(--oc-violet-6);
+  --editor-comment-color: var(--oc-violet-6);
+  --editor-quote-color: var(--primary-color);
+  --editor-link-color: var(--oc-violet-6);
+  --editor-url-bg-color: var(--oc-violet-0);
+  --editor-v2-color: var(--primary-color);
+  --editor-v3-color: var(--oc-violet-7);
+  --editor-keyword-color: var(--oc-violet-6);
+  --editor-selection-bg: var(--oc-violet-2);
   /* ========== Markdown 相关变量 ========== */
-  --md-heading-color: #3b3330;
-  --md-paragraph-color: #3b3330;
-  --md-link-color: var(--primary-color);
-  --md-link-hover-color: #a03828;
-  --md-inline-code-color: #c05040;
-  --md-inline-code-bg: #f0e8de;
-  --md-blockquote-bg: #f0e8de;
-  --md-blockquote-border: #d4c4b0;
-  --md-blockquote-color: #8a7968;
-  --md-hr-border: #e0d6cc;
+  --md-heading-color: var(--oc-violet-7);
+  --md-paragraph-color: var(--primary-color);
+  --md-link-color: var(--oc-violet-6);
+  --md-link-hover-color: var(--oc-violet-7);
+  --md-inline-code-color: var(--oc-violet-6);
+  --md-inline-code-bg: var(--oc-violet-1);
+  --md-blockquote-bg: var(--oc-violet-1);
+  --md-hr-border: var(--oc-violet-8);
   /* ========== table 相关变量 ========== */
-  --md-table-border: #e0d6cc;
+  --md-table-border: var(--oc-violet-8);
   --md-table-drag-border-bg: var(--primary-color);
-  --md-table-sort-active-bg: #ebe3d9;
+  --md-table-sort-active-bg: var(--oc-violet-2);
   /* ========== Panel 相关变量 ========== */
-  --panel-border-radius: 6px;
-  --panel-bg: #f5efe7;
-  --panel-border: 1px solid #e0d6cc;
-  --panel-box-shadow: none;
-  --panel-title-bg: #ebe3d9;
-  --panel-title-color: #3b3330;
-  --panel-title-border-radius: 6px 6px 0 0;
-  --panel-title-border-bottom: 1px solid #e0d6cc;
-  --panel-body-bg: #f5efe7;
-  --panel-body-color: #3b3330;
-  --panel-body-border-radius: 0 0 6px 6px;
+  --panel-border-radius: 4px;
+  --panel-bg: var(--oc-white);
+  --panel-border: 1px solid var(--oc-gray-2);
+  --panel-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --panel-title-bg: var(--oc-gray-1);
+  --panel-title-color: var(--oc-gray-8);
+  --panel-title-border-radius: 2px 2px 0 0;
+  --panel-title-border-bottom: 1px solid var(--oc-gray-3);
+  --panel-body-bg: var(--oc-white);
+  --panel-body-color: var(--oc-gray-8);
+  --panel-body-border-radius: 0 0 2px 2px;
   /* Primary Panel */
-  --panel-primary-border-color: #c8a882;
-  --panel-primary-title-bg: #f0e0cc;
-  --panel-primary-title-color: #6b4c30;
-  --panel-primary-title-border-bottom: 1px solid #d4c4b0;
-  --panel-primary-body-bg: #faf2e8;
-  --panel-primary-body-color: #5a4030;
+  --panel-primary-border-color: var(--oc-blue-5);
+  --panel-primary-title-bg: var(--oc-blue-1);
+  --panel-primary-title-color: var(--oc-blue-8);
+  --panel-primary-title-border-bottom: 1px solid var(--oc-blue-3);
+  --panel-primary-body-bg: var(--oc-blue-0);
+  --panel-primary-body-color: var(--oc-blue-9);
   /* Info Panel */
-  --panel-info-border-color: #8cb8c8;
-  --panel-info-title-bg: #e0f0f4;
-  --panel-info-title-color: #3a6878;
-  --panel-info-title-border-bottom: 1px solid #b8d8e4;
-  --panel-info-body-bg: #f0f8fa;
-  --panel-info-body-color: #3a6878;
+  --panel-info-border-color: var(--oc-cyan-5);
+  --panel-info-title-bg: var(--oc-cyan-1);
+  --panel-info-title-color: var(--oc-cyan-8);
+  --panel-info-title-border-bottom: 1px solid var(--oc-cyan-3);
+  --panel-info-body-bg: var(--oc-cyan-0);
+  --panel-info-body-color: var(--oc-cyan-9);
   /* Warning Panel */
-  --panel-warning-border-color: #d4b06a;
-  --panel-warning-title-bg: #faf0d8;
-  --panel-warning-title-color: #7a5c20;
-  --panel-warning-title-border-bottom: 1px solid #e8d4a0;
-  --panel-warning-body-bg: #fdf8ee;
-  --panel-warning-body-color: #7a5c20;
+  --panel-warning-border-color: var(--oc-yellow-5);
+  --panel-warning-title-bg: var(--oc-yellow-1);
+  --panel-warning-title-color: var(--oc-yellow-8);
+  --panel-warning-title-border-bottom: 1px solid var(--oc-yellow-3);
+  --panel-warning-body-bg: var(--oc-yellow-0);
+  --panel-warning-body-color: var(--oc-yellow-9);
   /* Danger Panel */
-  --panel-danger-border-color: #d08070;
-  --panel-danger-title-bg: #fae8e4;
-  --panel-danger-title-color: #8a3828;
-  --panel-danger-title-border-bottom: 1px solid #e4c0b8;
-  --panel-danger-body-bg: #fdf4f2;
-  --panel-danger-body-color: #8a3828;
+  --panel-danger-border-color: var(--oc-red-5);
+  --panel-danger-title-bg: var(--oc-red-1);
+  --panel-danger-title-color: var(--oc-red-8);
+  --panel-danger-title-border-bottom: 1px solid var(--oc-red-3);
+  --panel-danger-body-bg: var(--oc-red-0);
+  --panel-danger-body-color: var(--oc-red-9);
   /* Success Panel */
-  --panel-success-border-color: #88b888;
-  --panel-success-title-bg: #e4f0e4;
-  --panel-success-title-color: #3a6838;
-  --panel-success-title-border-bottom: 1px solid #b8d4b8;
-  --panel-success-body-bg: #f2f8f2;
-  --panel-success-body-color: #3a6838;
-  --md-toc-bg: #f5efe7;
-  --md-toc-border-color: #e0d6cc;
-  --md-toc-indicator-color: #e0d6cc;
-  --md-toc-link-hover-bg: #ebe3d9;
-  --md-toc-link-active-bg: #e0d6cc;
+  --panel-success-border-color: var(--oc-green-5);
+  --panel-success-title-bg: var(--oc-green-1);
+  --panel-success-title-color: var(--oc-green-8);
+  --panel-success-title-border-bottom: 1px solid var(--oc-green-3);
+  --panel-success-body-bg: var(--oc-green-0);
+  --panel-success-body-color: var(--oc-green-9);
+  --md-toc-bg: var(--oc-violet-0);
+  --md-toc-indicator-color: var(--oc-violet-1);
+  --md-toc-link-hover-bg: var(--oc-violet-1);
+  --md-toc-link-active-bg: var(--oc-violet-2);
   /* ========== 手风琴组件变量覆盖 ========== */
-  --accordion-bg: #f5efe7;
-  --accordion-border: #e0d6cc;
-  --accordion-summary-bg: #c05040;
-  --accordion-summary-hover-bg: #a84438;
-  --accordion-body-bg: #f5efe7;
-  --accordion-body-border: #ebe3d9;
-  --accordion-body-color: #3b3330;
+  --accordion-bg: var(--oc-violet-0);
+  --accordion-border: var(--oc-violet-2);
+  --accordion-summary-bg: var(--oc-violet-6);
+  --accordion-summary-hover-bg: var(--oc-violet-5);
+  --accordion-body-bg: var(--oc-violet-0);
+  --accordion-body-border: var(--oc-violet-1);
+  --accordion-body-color: var(--primary-color);
 }
 
 /** 预览区域样式 */
-.cherry-markdown.theme__violet h1 {
-  padding-bottom: 8px;
-  border-bottom: 1px solid #e0d6cc;
-  margin-bottom: 24px;
+.cherry-markdown.theme__violet h1,
+.cherry-markdown.theme__violet h2,
+.cherry-markdown.theme__violet h3,
+.cherry-markdown.theme__violet h4,
+.cherry-markdown.theme__violet h5 {
+  text-align: center;
+  margin-bottom: 35px;
 }
 
 /*
- * Editary-inspired theme — professional writing, forest-green accent, paper-like
+ * 清幽主题
  */
 .cherry.theme__blue {
   /* ========== 基础色彩变量覆盖 ========== */
-  --primary-color: #2b7a4b;
-  --secondary-color: #f4f8f6;
-  --base-font-color: #1a1a1a;
-  --base-editor-bg: #fbfbfa;
-  --base-previewer-bg: #fbfbfa;
-  --base-border-color: #e2e2e0;
+  --primary-color: var(--oc-indigo-6);
+  --secondary-color: var(--oc-violet-0);
+  --base-font-color: var(--oc-indigo-8);
+  --base-editor-bg: var(--oc-violet-0);
+  --base-previewer-bg: var(--oc-violet-0);
+  --base-border-color: var(--oc-indigo-4);
   /* ========== 工具栏相关变量 ========== */
-  --toolbar-bg: #fbfbfa;
-  --toolbar-btn-color: #4a4a48;
-  --toolbar-btn-hover-bg: #eef2f0;
-  --toolbar-btn-hover-color: var(--primary-color);
-  --toolbar-btn-active-bg: #e2e2e0;
-  --toolbar-split-color: #e2e2e0;
-  --dropdown-bg: #ffffff;
-  --dropdown-item-hover-bg: #eef2f0;
-  --dropdown-item-hover-color: var(--primary-color);
+  --toolbar-bg: var(--oc-violet-1);
+  --toolbar-btn-color: var(--oc-indigo-7);
+  --toolbar-btn-hover-bg: var(--oc-violet-3);
+  --toolbar-btn-hover-color: var(--oc-white);
+  --toolbar-btn-active-bg:var(--oc-blue-5);
+  --toolbar-split-color: var(--oc-indigo-4);
+  --dropdown-bg: var(--oc-white);
   /* ========== 编辑器相关变量 ========== */
   --editor-header-color: var(--primary-color);
-  --editor-string-color: #2b7a4b;
-  --editor-comment-color: #9c9c9a;
-  --editor-quote-color: #5a5a58;
-  --editor-link-color: #1a6b8a;
-  --editor-url-color: rgba(43, 122, 75, 0.1);
-  --editor-v2-color: #1a1a1a;
+  --editor-string-color: var(--oc-indigo-5);
+  --editor-comment-color: var(--oc-indigo-5);
+  --editor-quote-color: var(--oc-indigo-8);
+  --editor-link-color: var(--oc-indigo-5);
+  --editor-url-bg-color: var(--oc-violet-1);
+  --editor-v2-color: var(--oc-indigo-8);
   --editor-v3-color: var(--primary-color);
-  --editor-keyword-color: #1a6b8a;
-  --editor-selection-bg: #c8e6d4;
-  --editor-active-line-bg: rgba(43, 122, 75, 0.05);
+  --editor-keyword-color: var(--oc-indigo-5);
+  --editor-selection-bg: var(--oc-violet-2);
   /* ========== Markdown 相关变量 ========== */
-  --md-heading-color: #1a1a1a;
-  --md-paragraph-color: #1a1a1a;
-  --md-link-color: #1a6b8a;
+  --md-heading-color: var(--primary-color);
+  --md-paragraph-color: var(--oc-indigo-8);
+  --md-link-color: var(--oc-indigo-5);
   --md-link-hover-color: var(--primary-color);
-  --md-inline-code-color: #c7254e;
-  --md-inline-code-bg: #f2f2f0;
-  --md-blockquote-bg: #f7f9f8;
-  --md-blockquote-border: #2b7a4b;
-  --md-blockquote-color: #5a5a58;
-  --md-hr-border: #e2e2e0;
+  --md-inline-code-color: var(--oc-indigo-5);
+  --md-inline-code-bg: var(--oc-violet-1);
+  --md-blockquote-bg: var(--oc-violet-1);
+  --md-hr-border: var(--oc-indigo-4);
   /* ========== table 相关变量 ========== */
-  --md-table-border: #e2e2e0;
+  --md-table-border: var(--oc-blue-5);
+  --md-table-add-border: var(--oc-blue-9);
+  --md-table-delete-bg: var(--oc-violet-1);
+  --md-table-sort-active-bg: var(--oc-blue-5);
+  --md-table-sort-border: var(--oc-indigo-4);
+  /* ========== table 相关变量 ========== */
+  --md-table-border: var(--oc-blue-5);
   --md-table-drag-border-bg: var(--primary-color);
-  --md-table-sort-active-bg: rgba(43, 122, 75, 0.1);
-  --md-paragraph-highlight-line-bg: #f4f8f6;
+  --md-table-sort-active-bg: rgba(184, 134, 253, 0.4);
+  --md-paragraph-highlight-line-bg: var(--oc-violet-1);
   /* ========== Panel 相关变量 ========== */
-  --panel-border-radius: 4px;
-  --panel-bg: #f7f9f8;
-  --panel-border: 1px solid #e2e2e0;
+  --panel-border-radius: 0;
+  --panel-bg: transparent;
+  --panel-border: none;
   --panel-box-shadow: none;
-  --panel-title-bg: #eef2f0;
-  --panel-title-color: #1a1a1a;
-  --panel-title-border-radius: 4px 4px 0 0;
-  --panel-title-border-bottom: 1px solid #e2e2e0;
-  --panel-body-bg: #fbfbfa;
-  --panel-body-color: #1a1a1a;
-  --panel-body-border-radius: 0 0 4px 4px;
+  --panel-title-bg: transparent;
+  --panel-title-color: inherit;
+  --panel-body-bg: transparent;
+  --panel-body-color: inherit;
   /* Primary Panel */
-  --panel-primary-bg: rgba(43, 122, 75, 0.05);
-  --panel-primary-border-color: #2b7a4b;
-  --panel-primary-title-bg: rgba(43, 122, 75, 0.1);
-  --panel-primary-title-color: #1a5a38;
-  --panel-primary-body-bg: rgba(43, 122, 75, 0.03);
-  --panel-primary-body-color: #1a1a1a;
+  --panel-primary-border: none;
+  --panel-primary-border-color: transparent;
+  --panel-primary-title-bg: transparent;
+  --panel-primary-bg: transparent;
+  --panel-primary-title-color: var(--oc-blue-7);
+  --panel-primary-body-color: inherit;
   /* Info Panel */
-  --panel-info-bg: rgba(26, 107, 138, 0.05);
-  --panel-info-border-color: #1a6b8a;
-  --panel-info-title-bg: rgba(26, 107, 138, 0.1);
-  --panel-info-title-color: #145570;
-  --panel-info-body-bg: rgba(26, 107, 138, 0.03);
-  --panel-info-body-color: #1a1a1a;
+  --panel-info-border: none;
+  --panel-info-border-color: transparent;
+  --panel-info-title-bg: transparent;
+  --panel-info-bg: transparent;
+  --panel-info-title-color: var(--oc-cyan-7);
+  --panel-info-body-color: inherit;
   /* Warning Panel */
-  --panel-warning-bg: rgba(196, 152, 42, 0.05);
-  --panel-warning-border-color: #c4982a;
-  --panel-warning-title-bg: rgba(196, 152, 42, 0.1);
-  --panel-warning-title-color: #8a6a18;
-  --panel-warning-body-bg: rgba(196, 152, 42, 0.03);
-  --panel-warning-body-color: #1a1a1a;
+  --panel-warning-border: none;
+  --panel-warning-border-color: transparent;
+  --panel-warning-title-bg: transparent;
+  --panel-warning-bg: transparent;
+  --panel-warning-title-color: var(--oc-yellow-7);
+  --panel-warning-body-color: inherit;
   /* Danger Panel */
-  --panel-danger-bg: rgba(199, 37, 78, 0.05);
-  --panel-danger-border-color: #c7254e;
-  --panel-danger-title-bg: rgba(199, 37, 78, 0.1);
-  --panel-danger-title-color: #9a1a3a;
-  --panel-danger-body-bg: rgba(199, 37, 78, 0.03);
-  --panel-danger-body-color: #1a1a1a;
+  --panel-danger-border: none;
+  --panel-danger-border-color: transparent;
+  --panel-danger-title-bg: transparent;
+  --panel-danger-bg: transparent;
+  --panel-danger-title-color: var(--oc-pink-7);
+  --panel-danger-body-color: inherit;
   /* Success Panel */
-  --panel-success-bg: rgba(43, 122, 75, 0.05);
-  --panel-success-border-color: #2b7a4b;
-  --panel-success-title-bg: rgba(43, 122, 75, 0.1);
-  --panel-success-title-color: #1a5a38;
-  --panel-success-body-bg: rgba(43, 122, 75, 0.03);
-  --panel-success-body-color: #1a1a1a;
-  --md-toc-bg: #f7f9f8;
-  --md-toc-border-color: #e2e2e0;
-  --md-toc-indicator-color: #d0d0ce;
-  --md-toc-link-hover-bg: #eef2f0;
-  --md-toc-link-active-bg: #e2e8e5;
+  --panel-success-border: none;
+  --panel-success-border-color: transparent;
+  --panel-success-title-bg: transparent;
+  --panel-success-bg: transparent;
+  --panel-success-title-color: var(--oc-teal-7);
+  --panel-success-body-color: inherit;
+  --md-toc-bg: var(--oc-white);
+  --md-toc-border-color: var(--base-border-color);
+  --md-toc-indicator-color: var(--oc-indigo-1);
+  --md-toc-link-hover-bg: var(--oc-violet-0);
+  --md-toc-link-active-bg: var(--oc-violet-1);
   /* ========== 手风琴组件变量覆盖 ========== */
-  --accordion-bg: #f7f9f8;
-  --accordion-border: #e2e2e0;
-  --accordion-summary-bg: #2b7a4b;
-  --accordion-summary-hover-bg: #236640;
-  --accordion-body-bg: #fbfbfa;
-  --accordion-body-border: #eef2f0;
-  --accordion-body-color: #1a1a1a;
-}
-.cherry.theme__blue .cherry-toolbar {
-  box-shadow: none;
+  --accordion-bg: var(--oc-violet-0);
+  --accordion-border: var(--oc-indigo-2);
+  --accordion-summary-bg: var(--oc-indigo-6);
+  --accordion-summary-hover-bg: var(--oc-indigo-5);
+  --accordion-body-bg: var(--oc-violet-0);
+  --accordion-body-border: var(--oc-indigo-1);
+  --accordion-body-color: var(--oc-indigo-8);
 }
 
 /** 预览区域样式 */
 .cherry-markdown.theme__blue {
-  /** Editary-style: h1 with bottom border for clear section separation */
-  /** Editary-style: left-border panels for structured callouts */
+  /** Blue主题特殊的panel样式 - 使用左边框 */
 }
-.cherry-markdown.theme__blue h1 {
-  padding-bottom: 10px;
-  border-bottom: 2px solid #e2e2e0;
-  margin-bottom: 24px;
+.cherry-markdown.theme__blue h1,
+.cherry-markdown.theme__blue h2,
+.cherry-markdown.theme__blue h3,
+.cherry-markdown.theme__blue h4,
+.cherry-markdown.theme__blue h5 {
+  text-align: center;
+  border-bottom: 1px dashed var(--md-hr-border);
+  padding-bottom: 15px;
+  margin-bottom: 25px;
 }
 .cherry-markdown.theme__blue .cherry-panel__primary {
-  border-left: 3px solid #2b7a4b;
+  border-left: 4px solid var(--oc-blue-6);
 }
 .cherry-markdown.theme__blue .cherry-panel__info {
-  border-left: 3px solid #1a6b8a;
+  border-left: 4px solid var(--oc-cyan-6);
 }
 .cherry-markdown.theme__blue .cherry-panel__warning {
-  border-left: 3px solid #c4982a;
+  border-left: 4px solid var(--oc-yellow-6);
 }
 .cherry-markdown.theme__blue .cherry-panel__danger {
-  border-left: 3px solid #c7254e;
+  border-left: 4px solid var(--oc-pink-6);
 }
 .cherry-markdown.theme__blue .cherry-panel__success {
-  border-left: 3px solid #2b7a4b;
+  border-left: 4px solid var(--oc-teal-6);
 }

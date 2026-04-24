@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>XSS 白名单对比演示 - Cherry Editor</title>
+    <link rel="stylesheet" type="text/css" href="./packages/cherry-markdown/dist/cherry-markdown.css" />
+    <link rel="Shortcut Icon" href="./logo/favicon.ico" />
+    <link rel="Shortcut Icon" href="./logo/favicon.ico" />
+    <link rel="Bookmark" href="./logo/favicon.ico" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html, body {
+        height: 100%;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+
+      /* 顶部标题栏 */
+      .page-header {
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+      }
+      .page-header code {
+        background: rgba(255,255,255,0.2);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 13px;
+      }
+
+      /* 双栏容器 */
+      .compare-container {
+        display: flex;
+        height: calc(100% - 48px);
+      }
+      .compare-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        overflow: hidden;
+      }
+      .compare-panel + .compare-panel {
+        border-left: 2px solid #e0e0e0;
+      }
+
+      /* 每栏顶部标签 */
+      .panel-label {
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+      .panel-label.default {
+        background: #fff3e0;
+        color: #e65100;
+      }
+      .panel-label.whitelist {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+      .panel-label code {
+        background: rgba(0,0,0,0.08);
+        padding: 1px 5px;
+        border-radius: 3px;
+        font-size: 12px;
+        margin-left: 4px;
+      }
+
+      /* Cherry 实例容器 */
+      .editor-wrapper {
+        flex: 1;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="page-header">
+      对比演示：<code>engine.global.htmlWhiteList</code> 配置对 HTML 标签渲染的影响
+    </div>
+
+    <div class="compare-container">
+      <!-- 左栏：默认模式 -->
+      <div class="compare-panel compare-panel__default">
+        <div class="panel-label default">
+          🔒 默认模式 — <code>htmlWhiteList: ''</code>（style / iframe 被过滤）
+        </div>
+        <div class="editor-wrapper">
+          <div id="markdown-default"></div>
+        </div>
+      </div>
+
+      <!-- 右栏：白名单模式 -->
+      <div class="compare-panel compare-panel__whitelist">
+        <div class="panel-label whitelist">
+          🔓 白名单模式 — <code>htmlWhiteList: 'iframe|style'</code>（style / iframe 正常渲染）
+        </div>
+        <div class="editor-wrapper">
+          <div id="markdown-whitelist"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="./packages/cherry-markdown/dist/cherry-markdown.js"></script>
+    <script type="module">
+      import { xssConfig1, xssConfig2 } from './assets/scripts/xss-demo.js';
+
+      // 实例1：默认模式（HTML 标签被过滤）
+      window.cherryDefault = new Cherry(xssConfig1);
+
+      // 实例2：白名单模式（iframe + style 被允许）
+      window.cherryWhitelist = new Cherry(xssConfig2);
+    </script>
+  </body>
+</html>
