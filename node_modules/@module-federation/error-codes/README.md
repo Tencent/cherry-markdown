@@ -1,1 +1,0 @@
-# `@module-federation/error-codes`

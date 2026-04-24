@@ -1,1 +1,0 @@
-{"version":3,"file":"helpers.cjs.cjs","sources":["../src/helpers.ts"],"sourcesContent":[null],"names":["helpers","getGlobalFederationInstance"],"mappings":";;;;;AAQA,cAAe;AACb,IAAA,GAAGA,mBAAO;AACV,IAAA,MAAM,EAAE;QACN,GAAGA,mBAAO,CAAC,MAAM;qCACjBC,iCAA2B;AAC5B,KAAA;CAOF;;;;"}
