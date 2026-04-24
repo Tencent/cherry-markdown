@@ -46,15 +46,12 @@ jobs:
           mkdir -p gh-pages-out
 
           cp --parents -r packages/cherry-markdown/dist gh-pages-out/
+          cp --parents examples/*.html gh-pages-out/
           cp --parents -r examples/assets gh-pages-out/
-          cp --parents -r logo gh-pages-out/
-
-          # HTML 放根目录，改写 ../ → ./
-          for f in examples/*.html; do
-            sed -E 's|\.\./packages/|./packages/|g; s|\.\./logo/|./logo/|g' "$f" > "gh-pages-out/$(basename $f)"
-          done
-
+          # 可视化配置生成器（目录可能尚未存在，条件复制）
           [ -d examples/config_helper ] && cp --parents -r examples/config_helper gh-pages-out/ || true
+          # logo 资源也复制到 gh-pages-out 根目录
+          cp -r logo gh-pages-out/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
