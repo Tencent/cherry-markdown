@@ -31,6 +31,7 @@ jobs:
     outputs:
       publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
       publishedClientVersion: ${{ steps.extract_version.outputs.clientVersion }}
+      publishedCoreVersion: ${{ steps.extract_version.outputs.coreVersion }}
     steps:
       - uses: actions/checkout@v6
 
@@ -59,14 +60,20 @@ jobs:
           clientVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/client") | .version')
           echo "clientVersion=$clientVersion" >> $GITHUB_OUTPUT
 
+          coreVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="cherry-markdown") | .version')
+          echo "coreVersion=$coreVersion" >> $GITHUB_OUTPUT
+
           # Debugging output
           echo "publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}"
           echo "clientVersion=$clientVersion"
+          echo "coreVersion=$coreVersion"
 
   build-core-release:
     needs: release
     if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"cherry-markdown"') }}
     uses: ./.github/workflows/reusable-npm-release.yml
+    with:
+      core_version: ${{ needs.release.outputs.publishedCoreVersion }}
     secrets: inherit
 
   build-client-release:
