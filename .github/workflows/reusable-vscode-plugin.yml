@@ -51,7 +51,7 @@ jobs:
         if: inputs.mode != 'release'
         run: |
           cd packages/vscodePlugin
-          TS=$(date +%d%H%M)
+          TS=$(date +%d%H%M | sed 's/^0*//')
 
           tmp=$(mktemp) && jq --arg ts "$TS" '
             .version |= (
@@ -59,7 +59,7 @@ jobs:
               if ($s|length) < 3 then
                 error("package.json version must be in '\''x.y.z'\'' format")
               else
-                ($s[0:2] + [$s[2] + $ts]) | join(".")
+                ($s[0:2] + [($s[2] | tonumber) * 1000000 + ($ts | tonumber)]) | join(".")
               end
             )
           ' package.json > "$tmp" && mv "$tmp" package.json
