@@ -1,13 +1,19 @@
-# Reusable Workflow: NPM Release — cherry-markdown 核心包 npm 发布
+# Reusable Workflow: NPM Release — cherry-markdown 核心包 npm 发布 + dist 产物上传到 GitHub Release
 # 使用 OIDC Trusted Publisher 进行 npm 认证，无需 NPM_TOKEN
 
 name: 'Reusable: npm Release'
 
 on:
   workflow_call:
+    inputs:
+      core_version:
+        description: 'cherry-markdown version for GitHub Release tag (required for upload)'
+        required: false
+        type: string
+        default: ''
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
@@ -33,3 +39,21 @@ jobs:
       - name: Publish cherry-markdown
         working-directory: ./packages/cherry-markdown
         run: NODE_AUTH_TOKEN="" npm publish --access public --provenance --no-workspaces
+
+      # =========================================================================
+      # 将 dist 产物打包为 zip 并上传到 GitHub Release
+      # =========================================================================
+      - name: Package dist to zip
+        if: inputs.core_version != ''
+        working-directory: ./packages/cherry-markdown
+        run: |
+          cd dist
+          zip -r ../../cherry-markdown-${{ inputs.core_version }}.zip .
+          cd ../..
+
+      - name: Upload dist zip to GitHub Release
+        if: inputs.core_version != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          files: cherry-markdown-${{ inputs.core_version }}.zip
+          tag_name: 'cherry-markdown@${{ inputs.core_version }}'
