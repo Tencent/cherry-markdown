@@ -1,0 +1,61 @@
+{
+  "name": "@module-federation/sdk",
+  "version": "0.21.6",
+  "type": "module",
+  "license": "MIT",
+  "description": "A sdk for support module federation",
+  "keywords": [
+    "Module Federation",
+    "sdk"
+  ],
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/module-federation/core.git",
+    "directory": "packages/sdk"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "zhanghang <hanric.zhang@gmail.com>",
+  "sideEffects": false,
+  "main": "./dist/index.cjs.cjs",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.esm.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs.cjs"
+      }
+    },
+    "./normalize-webpack-path": {
+      "import": {
+        "types": "./dist/normalize-webpack-path.d.ts",
+        "default": "./dist/normalize-webpack-path.esm.js"
+      },
+      "require": {
+        "types": "./dist/normalize-webpack-path.d.ts",
+        "default": "./dist/normalize-webpack-path.cjs.cjs"
+      }
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ],
+      "normalize-webpack-path": [
+        "./dist/normalize-webpack-path.d.ts"
+      ]
+    }
+  }
+}

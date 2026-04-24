@@ -1,0 +1,19 @@
+{
+  "name": "microbuffer",
+  "version": "1.0.0",
+  "description": "Light implementation of binary buffer with helpers for easy access.",
+  "keywords": [
+    "buffer"
+  ],
+  "repository": "fontello/microbuffer",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "0.18.0",
+    "eslint-plugin-nodeca": "^1.0.3",
+    "lodash": "*",
+    "mocha": "^2.2.4"
+  },
+  "scripts": {
+    "test": "make test"
+  }
+}

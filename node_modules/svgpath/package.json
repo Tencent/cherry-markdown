@@ -1,0 +1,35 @@
+{
+  "name": "svgpath",
+  "version": "2.6.0",
+  "description": "Low level toolkit for SVG paths transformations.",
+  "keywords": [
+    "svg",
+    "path",
+    "transform",
+    "scale",
+    "translate",
+    "rotate",
+    "matrix"
+  ],
+  "license": "MIT",
+  "funding": "https://github.com/fontello/svg2ttf?sponsor=1",
+  "repository": "fontello/svgpath",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "npm run lint && nyc mocha",
+    "covreport": "nyc report --reporter html && nyc report --reporter lcov",
+    "benchmark": "benchmark/benchmark.js",
+    "benchmark-prepare": "mkdir -p benchmark/implementations/2.4.1 && git checkout 2.4.1 && cp index.js benchmark/implementations/2.4.1 && cp -R --parents **/*.js benchmark/implementations/2.4.1 && git checkout master"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "lib/"
+  ],
+  "devDependencies": {
+    "benchmark": "^2.1.1",
+    "eslint": "^8.5.0",
+    "mocha": "^10.1.0",
+    "nyc": "^15.0.1"
+  }
+}

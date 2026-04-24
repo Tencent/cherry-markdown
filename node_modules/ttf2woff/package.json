@@ -1,0 +1,34 @@
+{
+  "name": "ttf2woff",
+  "version": "2.0.2",
+  "description": "Convert TTF font to WOFF",
+  "keywords": [
+    "font",
+    "ttf",
+    "woff",
+    "convertor"
+  ],
+  "author": "Viktor Semykin <thesame.ml@gmail.com>",
+  "license": "MIT",
+  "repository": "fontello/ttf2woff",
+  "bin": {
+    "ttf2woff": "./ttf2woff.js"
+  },
+  "files": [
+    "index.js",
+    "ttf2woff.js"
+  ],
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint .",
+    "test": "npm run lint && ./node_modules/.bin/mocha"
+  },
+  "dependencies": {
+    "argparse": "^1.0.6",
+    "microbuffer": "^1.0.0",
+    "pako": "^1.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.1.0",
+    "mocha": "^7.2.0"
+  }
+}

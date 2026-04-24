@@ -1,0 +1,59 @@
+## Issue
+<!--
+
+Thanks for reporting an issue.
+
+Before doing so, there are a few checks to do in
+ order to optimize its resolution. Just fill in the
+ following template.
+
+Beware that you also can create a pull request
+ if you know how to solve the issue.
+
+Finally scroll down if you asking for a feature ;)
+
+-->
+
+I'm a gentledev i:
+- [ ] fully read the README recently
+- [ ] searched for existing issues
+- [ ] checked i'm up to date with the latest version of the project
+
+### Expected behavior
+
+### Actual behavior
+
+### Steps to reproduce the behavior
+
+### Debugging informations
+- `node -v` result:
+```
+<paste here>
+```
+
+- `npm -v` result:
+```
+<paste here>
+```
+If the result is lower than 6.9.5, there is
+ poor chances i even have a look to it. Please,
+ use the last [NodeJS LTS version](https://nodejs.org/en/).
+
+## Feature request
+<!--
+
+If you think a feature need to be added, your suggestions
+ are welcome. Beware though that:
+- I try to keep my module simple so please ensure the requested
+ feature is really related to this module. If not, you may
+ instead create a module that augment/work with this one,
+- I am not your employee so keep calm and be aware that your
+ request may stay incomplete for ever. Nothing impeach you
+ to implement the feature and get it merged though.
+-->
+
+### Feature description
+
+### Use cases
+
+- [ ] I will/have implement the feature

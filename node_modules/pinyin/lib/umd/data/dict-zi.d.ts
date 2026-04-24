@@ -1,0 +1,2 @@
+declare const dict: Record<number, string>;
+export default dict;

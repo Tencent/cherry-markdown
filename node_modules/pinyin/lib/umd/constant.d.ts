@@ -1,0 +1,18 @@
+import type { IPinyinAllOptions } from "./declare";
+export declare enum ENUM_PINYIN_STYLE {
+    NORMAL = 0,
+    TONE = 1,
+    TONE2 = 2,
+    TO3NE = 5,
+    INITIALS = 3,
+    FIRST_LETTER = 4,
+    PASSPORT = 6
+}
+export declare enum ENUM_PINYIN_MODE {
+    NORMAL = 0,
+    SURNAME = 1
+}
+export declare const DEFAULT_OPTIONS: IPinyinAllOptions;
+export declare const PHONETIC_SYMBOL: Record<string, string>;
+export declare const INITIALS: string[];
+export declare const FINALS: string[];

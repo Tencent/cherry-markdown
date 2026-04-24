@@ -1,0 +1,6 @@
+childs.+.childs.+.title=test-file1
+childs.*.childs.*.parent&=childs.*
+childs.*.childs.+.title=test-file2
+childs.*.childs.*.parent&=childs.*
+childs.*.index.title=test-index
+# voir avec root scope

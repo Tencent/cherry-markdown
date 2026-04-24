@@ -1,0 +1,30 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
+<svg xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <font id="shapeicons" horiz-adv-x="150">
+    <font-face font-family="shapeicons"
+      units-per-em="150" ascent="150"
+      descent="0" />
+    <missing-glyph horiz-adv-x="0" />
+    <glyph glyph-name="circle"
+      unicode="&#xE001;"
+      horiz-adv-x="150" d="M55 100A20 20 0 0 1 95 100A20 20 0 0 1 55 100M55 50A20 20 0 0 1 95 50A20 20 0 0 1 55 50" />
+    <glyph glyph-name="ellipse"
+      unicode="&#xE002;"
+      horiz-adv-x="150" d="M55 100A20 30 0 0 1 95 100A20 30 0 0 1 55 100M45 50A30 20 0 0 1 105 50A30 20 0 0 1 45 50" />
+    <glyph glyph-name="lines"
+      unicode="&#xE003;"
+      horiz-adv-x="150" d="M10 120L11 119L141 59L140 60z" />
+    <glyph glyph-name="polygon"
+      unicode="&#xE004;"
+      horiz-adv-x="150" d="M10 120L10 60L140 60L140 120z" />
+    <glyph glyph-name="polyline"
+      unicode="&#xE005;"
+      horiz-adv-x="150" d="M10 120L10 60L140 60L140 120L10 120" />
+    <glyph glyph-name="rect"
+      unicode="&#xE006;"
+      horiz-adv-x="150" d="M10 60H140V30H10V60z" />
+  </font>
+</defs>
+</svg>

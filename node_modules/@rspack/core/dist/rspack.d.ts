@@ -1,0 +1,16 @@
+import type { Callback } from "@rspack/lite-tapable";
+import { Compiler } from "./Compiler";
+import { type RspackOptions } from "./config";
+import { MultiCompiler, type MultiRspackOptions } from "./MultiCompiler";
+import MultiStats from "./MultiStats";
+import { Stats } from "./Stats";
+declare function createMultiCompiler(options: MultiRspackOptions): MultiCompiler;
+declare function createCompiler(userOptions: RspackOptions): Compiler;
+declare function rspack(options: MultiRspackOptions): MultiCompiler;
+declare function rspack(options: RspackOptions): Compiler;
+declare function rspack(options: MultiRspackOptions | RspackOptions): MultiCompiler | Compiler;
+declare function rspack(options: MultiRspackOptions, callback?: Callback<Error, MultiStats>): null | MultiCompiler;
+declare function rspack(options: RspackOptions, callback?: Callback<Error, Stats>): null | Compiler;
+declare function rspack(options: MultiRspackOptions | RspackOptions, callback?: Callback<Error, MultiStats | Stats>): null | MultiCompiler | Compiler;
+export { createCompiler, createMultiCompiler, MultiStats, rspack, Stats };
+export default rspack;

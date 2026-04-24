@@ -1,0 +1,2 @@
+declare const phrases_dict: Record<string, string[][]>;
+export default phrases_dict;

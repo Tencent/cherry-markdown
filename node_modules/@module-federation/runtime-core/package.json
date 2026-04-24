@@ -1,0 +1,58 @@
+{
+  "name": "@module-federation/runtime-core",
+  "version": "0.21.6",
+  "type": "module",
+  "author": "zhouxiao <codingzx@gmail.com>",
+  "main": "./dist/index.cjs.cjs",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/module-federation/core.git",
+    "directory": "packages/runtime-core"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.esm.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs.cjs"
+      }
+    },
+    "./types": {
+      "import": {
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.esm.js"
+      },
+      "require": {
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.cjs.cjs"
+      }
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ],
+      "types": [
+        "./dist/types.d.ts"
+      ]
+    }
+  },
+  "dependencies": {
+    "@module-federation/sdk": "0.21.6",
+    "@module-federation/error-codes": "0.21.6"
+  }
+}

@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
+<svg xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <font id="onlywithry" horiz-adv-x="500">
+    <font-face font-family="onlywithry"
+      units-per-em="500" ascent="500"
+      descent="0" />
+    <missing-glyph horiz-adv-x="0" />
+    <glyph glyph-name="rounded"
+      unicode="&#xE001;"
+      horiz-adv-x="500" d="M139.1 499.56H477.51A22.49 22.49 0 0 0 500 477.07V140.42A22.49 22.49 0 0 0 477.51 117.93H139.1A22.49 22.49 0 0 0 116.61 140.42V477.07A22.49 22.49 0 0 0 139.1 499.56zM23.31 396.21A23.31 23.31 0 0 1 0 372.9V23.78A23.339999999999996 23.339999999999996 0 0 1 23.34 0.44H436.94A23.31 23.31 0 0 1 460.25 23.75V49.93H61.69A12.23 12.23 0 0 0 49.46 62.16V396.16z" />
+  </font>
+</defs>
+</svg>

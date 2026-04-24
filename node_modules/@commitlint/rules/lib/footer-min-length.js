@@ -1,0 +1,11 @@
+import { minLength } from '@commitlint/ensure';
+export const footerMinLength = (parsed, _when = undefined, value = 0) => {
+    if (!parsed.footer) {
+        return [true];
+    }
+    return [
+        minLength(parsed.footer, value),
+        `footer must not be shorter than ${value} characters`,
+    ];
+};
+//# sourceMappingURL=footer-min-length.js.map

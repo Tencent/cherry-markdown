@@ -1,0 +1,67 @@
+{
+	"name": "alien-signals",
+	"version": "3.1.2",
+	"license": "MIT",
+	"description": "The lightest signal library.",
+	"packageManager": "pnpm@9.12.0",
+	"types": "./types/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./types/index.d.ts",
+			"import": "./esm/index.mjs",
+			"require": "./cjs/index.cjs"
+		},
+		"./cjs": {
+			"types": "./types/index.d.ts",
+			"import": "./cjs/index.cjs",
+			"require": "./cjs/index.cjs"
+		},
+		"./esm": {
+			"types": "./types/index.d.ts",
+			"import": "./esm/index.mjs",
+			"require": "./esm/index.mjs"
+		},
+		"./system": {
+			"types": "./types/system.d.ts",
+			"import": "./esm/system.mjs",
+			"require": "./cjs/system.cjs"
+		},
+		"./cjs/system": {
+			"types": "./types/system.d.ts",
+			"import": "./cjs/system.cjs",
+			"require": "./cjs/system.cjs"
+		},
+		"./esm/system": {
+			"types": "./types/system.d.ts",
+			"import": "./esm/system.mjs",
+			"require": "./esm/system.mjs"
+		}
+	},
+	"files": [
+		"cjs/*.cjs",
+		"esm/*.mjs",
+		"types/*.d.ts"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/johnsoncodehk/signals.git"
+	},
+	"scripts": {
+		"prepublishOnly": "npm run check && npm run test",
+		"check": "tsslint --project tsconfig.json",
+		"size": "node ./size.js",
+		"build": "node ./build.js",
+		"test": "npm run build && vitest run",
+		"bench": "npm run build && node --jitless --expose-gc benchs/propagate.mjs",
+		"memory": "npm run build && node --expose-gc benchs/memoryUsage.mjs"
+	},
+	"devDependencies": {
+		"@tsslint/cli": "latest",
+		"@tsslint/config": "latest",
+		"jest-extended": "latest",
+		"mitata": "latest",
+		"rolldown": "latest",
+		"typescript": "latest",
+		"vitest": "latest"
+	}
+}

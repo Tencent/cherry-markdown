@@ -1,0 +1,10 @@
+{
+  extends: 'eslint-config-simplifield/lib/backend',
+  parserOptions: {
+    sourceType: 'script',
+    modules: true,
+  },
+  rules: {
+    'no-magic-numbers': 0,
+  },
+}

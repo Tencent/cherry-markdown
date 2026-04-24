@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cherry Markdown 配置生成器</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" type="text/css" href="../../packages/cherry-markdown/dist/cherry-markdown.css" />
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- 顶部导航 -->
+  <header class="bg-gradient-to-r from-pink-600 via-red-500 to-orange-500 text-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+          <i class="fa-solid fa-cherry text-2xl"><img src="./logo_icon.png"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight">Cherry Markdown 配置生成器</h1>
+          <p class="text-xs text-white/70">可视化配置 · 实时预览 · 一键导出</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="btn-reset" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-all backdrop-blur-sm border border-white/20">
+          <i class="fa-solid fa-rotate-right mr-1"></i> 重置配置
+        </button>
+        <button id="btn-export" class="px-4 py-2 bg-white hover:bg-gray-100 text-red-600 rounded-lg text-sm font-medium transition-all shadow-sm">
+          <i class="fa-solid fa-code mr-1"></i> 导出配置
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体内容 -->
+  <main class="max-w-[1600px] mx-auto px-6 py-6">
+    <div class="grid grid-cols-12 gap-6">
+      <!-- 左侧：配置面板 -->
+      <aside id="config-panel" class="col-span-12 lg:col-span-4 xl:col-span-3 space-y-4 overflow-y-auto" style="max-height: calc(100vh - 120px);">
+        <!-- 搜索栏 -->
+        <div class="sticky top-0 z-10 bg-gray-50 pb-2">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input id="search-input" type="text" placeholder="搜索配置项..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition-all">
+          </div>
+        </div>
+        <!-- 配置分类列表 -->
+        <div id="config-categories"></div>
+      </aside>
+
+      <!-- 右侧：预览区域 -->
+      <section class="col-span-12 lg:col-span-8 xl:col-span-9 space-y-4">
+        <!-- 标签页切换 -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="flex border-b border-gray-100">
+            <button id="tab-preview" class="tab-btn active flex-1 py-3 text-sm font-medium text-center transition-all relative">
+              <i class="fa-solid fa-eye mr-1"></i> 实时预览
+            </button>
+            <button id="tab-code" class="tab-btn flex-1 py-3 text-sm font-medium text-center transition-all relative">
+              <i class="fa-solid fa-code mr-1"></i> 配置代码
+            </button>
+            <button id="tab-source" class="tab-btn flex-1 py-3 text-sm font-medium text-center transition-all relative">
+              <i class="fa-brands fa-github mr-1"></i> 源码参考
+            </button>
+          </div>
+
+          <!-- 预览面板 -->
+          <div id="panel-preview" class="tab-panel active">
+            <div id="cherry-editor" style="height: 600px;"></div>
+          </div>
+
+          <!-- 配置代码面板 -->
+          <div id="panel-code" class="tab-panel hidden">
+            <div class="relative">
+              <button id="btn-copy" class="absolute top-4 right-4 z-10 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white text-xs rounded-lg transition-all">
+                <i class="fa-regular fa-copy mr-1"></i> 复制代码
+              </button>
+              <pre id="code-output" class="p-6 bg-gray-900 text-green-400 text-sm font-mono overflow-auto" style="max-height: 600px; min-height: 600px;"></pre>
+            </div>
+          </div>
+
+          <!-- 源码参考面板 -->
+          <div id="panel-source" class="tab-panel hidden">
+            <div class="p-6 space-y-4" style="max-height: 600px; overflow-y: auto;">
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-800">
+                  <i class="fa-brands fa-github mr-2"></i>Cherry.config.js 源码参考
+                </h3>
+                <a href="https://github.com/Tencent/cherry-markdown/blob/dev/packages/cherry-markdown/src/Cherry.config.js" target="_blank" class="text-sm text-red-500 hover:text-red-600 transition-colors">
+                  <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> 在 GitHub 上查看
+                </a>
+              </div>
+              <div id="source-content" class="bg-gray-900 rounded-xl p-6 text-sm font-mono text-gray-300 overflow-auto"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 快捷操作 -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <button id="preset-default" class="preset-btn bg-white hover:bg-gray-50 border border-gray-200 rounded-xl p-4 text-center transition-all hover:shadow-md group">
+            <div class="w-10 h-10 mx-auto mb-2 bg-blue-50 rounded-lg flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+              <i class="fa-solid fa-sliders text-blue-500"></i>
+            </div>
+            <div class="text-sm font-medium text-gray-700">默认配置</div>
+            <div class="text-xs text-gray-400 mt-1">标准编辑器</div>
+          </button>
+          <button id="preset-simple" class="preset-btn bg-white hover:bg-gray-50 border border-gray-200 rounded-xl p-4 text-center transition-all hover:shadow-md group">
+            <div class="w-10 h-10 mx-auto mb-2 bg-green-50 rounded-lg flex items-center justify-center group-hover:bg-green-100 transition-colors">
+              <i class="fa-solid fa-feather text-green-500"></i>
+            </div>
+            <div class="text-sm font-medium text-gray-700">精简模式</div>
+            <div class="text-xs text-gray-400 mt-1">轻量级编辑</div>
+          </button>
+          <button id="preset-full" class="preset-btn bg-white hover:bg-gray-50 border border-gray-200 rounded-xl p-4 text-center transition-all hover:shadow-md group">
+            <div class="w-10 h-10 mx-auto mb-2 bg-purple-50 rounded-lg flex items-center justify-center group-hover:bg-purple-100 transition-colors">
+              <i class="fa-solid fa-maximize text-purple-500"></i>
+            </div>
+            <div class="text-sm font-medium text-gray-700">完整模式</div>
+            <div class="text-xs text-gray-400 mt-1">全部功能</div>
+          </button>
+          <button id="preset-preview" class="preset-btn bg-white hover:bg-gray-50 border border-gray-200 rounded-xl p-4 text-center transition-all hover:shadow-md group">
+            <div class="w-10 h-10 mx-auto mb-2 bg-orange-50 rounded-lg flex items-center justify-center group-hover:bg-orange-100 transition-colors">
+              <i class="fa-solid fa-book-open text-orange-500"></i>
+            </div>
+            <div class="text-sm font-medium text-gray-700">纯预览</div>
+            <div class="text-xs text-gray-400 mt-1">只读模式</div>
+          </button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- 导出弹窗 -->
+  <div id="export-modal" class="fixed inset-0 z-[100] hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="modal-overlay"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <h3 class="text-lg font-semibold text-gray-800">
+            <i class="fa-solid fa-file-export mr-2 text-red-500"></i>导出配置代码
+          </h3>
+          <button id="modal-close" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
+            <i class="fa-solid fa-xmark text-gray-500"></i>
+          </button>
+        </div>
+        <div class="p-6">
+          <div class="relative">
+            <button id="btn-modal-copy" class="absolute top-3 right-3 z-10 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs rounded-lg transition-all">
+              <i class="fa-regular fa-copy mr-1"></i> 复制
+            </button>
+            <pre id="modal-code" class="bg-gray-900 text-green-400 text-sm font-mono p-6 rounded-xl overflow-auto max-h-[50vh]"></pre>
+          </div>
+          <p class="text-xs text-gray-400 mt-4 text-center">
+            <i class="fa-solid fa-circle-info mr-1"></i>
+            将以上代码粘贴到你的项目中，作为 new Cherry(config) 的参数即可使用
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 页脚 -->
+  <footer class="text-center py-6 text-gray-400 text-sm border-t border-gray-100 mt-8">
+    <p>Cherry Markdown 配置生成器 · 基于 <a href="https://github.com/Tencent/cherry-markdown" target="_blank" class="text-red-400 hover:text-red-500 transition-colors">Cherry Markdown</a> 开源项目</p>
+  </footer>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"
+    integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
+    crossorigin="anonymous"
+  ></script>
+  <script src="../../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+  <script src="../assets/scripts/pinyin/pinyin_dist.js"></script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

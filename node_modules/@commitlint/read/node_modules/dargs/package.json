@@ -1,0 +1,51 @@
+{
+	"name": "dargs",
+	"version": "8.1.0",
+	"description": "Reverse minimist. Convert an object of options into an array of command-line arguments.",
+	"license": "MIT",
+	"repository": "sindresorhus/dargs",
+	"funding": "https://github.com/sponsors/sindresorhus",
+	"author": {
+		"name": "Sindre Sorhus",
+		"email": "sindresorhus@gmail.com",
+		"url": "https://sindresorhus.com"
+	},
+	"type": "module",
+	"exports": "./index.js",
+	"engines": {
+		"node": ">=12"
+	},
+	"scripts": {
+		"test": "xo && ava && tsd"
+	},
+	"files": [
+		"index.js",
+		"index.d.ts"
+	],
+	"keywords": [
+		"reverse",
+		"minimist",
+		"options",
+		"arguments",
+		"args",
+		"flags",
+		"cli",
+		"nopt",
+		"commander",
+		"binary",
+		"command",
+		"inverse",
+		"opposite",
+		"invert",
+		"switch",
+		"construct",
+		"parse",
+		"parser",
+		"argv"
+	],
+	"devDependencies": {
+		"ava": "^3.15.0",
+		"tsd": "^0.14.0",
+		"xo": "^0.39.1"
+	}
+}

@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
+<svg xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <font id="translatex" horiz-adv-x="327.66">
+    <font-face font-family="translatex"
+      units-per-em="500" ascent="500"
+      descent="0" />
+    <missing-glyph horiz-adv-x="0" />
+    <glyph glyph-name="translatex"
+      unicode="&#xE001;"
+      horiz-adv-x="327.66" d="M307.45 0A20.22 20.22 0 0 0 291.91 7.28L163.83 161L35.75 7.28A20.22 20.22 0 0 0 0 20.22V479.78A20.22 20.22 0 0 0 20.22 500H307.44A20.22 20.22 0 0 0 327.66 479.78V20.22A20.22 20.22 0 0 0 307.45 0z" />
+  </font>
+</defs>
+</svg>

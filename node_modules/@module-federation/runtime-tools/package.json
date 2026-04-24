@@ -1,0 +1,85 @@
+{
+  "name": "@module-federation/runtime-tools",
+  "version": "0.21.6",
+  "type": "module",
+  "author": "zhanghang <hanric.zhang@gmail.com>",
+  "main": "./dist/index.cjs.cjs",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/module-federation/core.git",
+    "directory": "packages/runtime-tools"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.esm.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs.cjs"
+      }
+    },
+    "./runtime": {
+      "import": {
+        "types": "./dist/runtime.d.ts",
+        "default": "./dist/runtime.esm.js"
+      },
+      "require": {
+        "types": "./dist/runtime.d.ts",
+        "default": "./dist/runtime.cjs.cjs"
+      }
+    },
+    "./runtime-core": {
+      "import": {
+        "types": "./dist/runtime-core.d.ts",
+        "default": "./dist/runtime-core.esm.js"
+      },
+      "require": {
+        "types": "./dist/runtime-core.d.ts",
+        "default": "./dist/runtime-core.cjs.cjs"
+      }
+    },
+    "./webpack-bundler-runtime": {
+      "import": {
+        "types": "./dist/webpack-bundler-runtime.d.ts",
+        "default": "./dist/webpack-bundler-runtime.esm.js"
+      },
+      "require": {
+        "types": "./dist/webpack-bundler-runtime.d.ts",
+        "default": "./dist/webpack-bundler-runtime.cjs.cjs"
+      }
+    },
+    "./*": "./*"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ],
+      "runtime": [
+        "./dist/runtime.d.ts"
+      ],
+      "webpack-bundler-runtime": [
+        "./dist/webpack-bundler-runtime.d.ts"
+      ],
+      "runtime-core": [
+        "./dist/runtime-core.d.ts"
+      ]
+    }
+  },
+  "dependencies": {
+    "@module-federation/runtime": "0.21.6",
+    "@module-federation/webpack-bundler-runtime": "0.21.6"
+  }
+}

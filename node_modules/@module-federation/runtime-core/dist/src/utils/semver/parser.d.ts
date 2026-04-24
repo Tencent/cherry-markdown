@@ -1,0 +1,9 @@
+export declare function parseHyphen(range: string): string;
+export declare function parseComparatorTrim(range: string): string;
+export declare function parseTildeTrim(range: string): string;
+export declare function parseCaretTrim(range: string): string;
+export declare function parseCarets(range: string): string;
+export declare function parseTildes(range: string): string;
+export declare function parseXRanges(range: string): string;
+export declare function parseStar(range: string): string;
+export declare function parseGTE0(comparatorString: string): string;

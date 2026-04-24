@@ -1,0 +1,30 @@
+{
+  "name": "dom-parser",
+  "version": "0.1.6",
+  "description": "Fast dom parser based on regexps",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ershov-konst/dom-parser.git"
+  },
+  "keywords": [
+    "domparser",
+    "dom",
+    "parser",
+    "xml",
+    "html",
+    "xmlparser",
+    "htmlparser",
+    "scraping"
+  ],
+  "main": "index.js",
+  "devDependencies": {
+    "mocha": "2.3.x",
+    "chai": "2.1.x",
+    "dom-compare": "https://github.com/ershov-konst/dom-compare.git"
+  },
+  "scripts": {
+    "test": "npm install && ./node_modules/.bin/mocha"
+  },
+  "author": "Konstantin Ershov",
+  "license": "ISC"
+}

@@ -1,0 +1,33 @@
+{
+  "name": "ttf2eot",
+  "version": "2.0.0",
+  "description": "Convert TTF font to EOT",
+  "keywords": [
+    "font",
+    "ttf",
+    "eot",
+    "convertor"
+  ],
+  "author": "Viktor Semykin <thesame.ml@gmail.com>",
+  "license": "MIT",
+  "repository": "fontello/ttf2eot",
+  "bin": {
+    "ttf2eot": "./ttf2eot.js"
+  },
+  "files": [
+    "index.js",
+    "ttf2eot.js"
+  ],
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint .",
+    "test": "npm run lint && ./node_modules/.bin/mocha"
+  },
+  "dependencies": {
+    "argparse": "^1.0.6",
+    "microbuffer": "^1.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^2.3.0",
+    "mocha": "^2.4.5"
+  }
+}

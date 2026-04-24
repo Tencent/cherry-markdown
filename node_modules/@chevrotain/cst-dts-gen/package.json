@@ -1,0 +1,50 @@
+{
+  "name": "@chevrotain/cst-dts-gen",
+  "version": "11.1.2",
+  "description": "Generates type definitions for Chevrotain CST nodes",
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/Chevrotain/chevrotain/issues"
+  },
+  "license": "Apache-2.0",
+  "type": "module",
+  "types": "./lib/src/api.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib/src/api.js",
+      "types": "./lib/src/api.d.ts"
+    }
+  },
+  "files": [
+    "lib/src/**/*.js",
+    "lib/src/**/*.map",
+    "lib/src/**/*.d.ts",
+    "src/**/*.ts"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Chevrotain/chevrotain.git"
+  },
+  "scripts": {
+    "---------- CI FLOWS --------": "",
+    "ci": "pnpm run build test",
+    "build": "npm-run-all clean compile",
+    "test": "echo \"tests are in a different package\"",
+    "---------- BUILD STEPS --------": "",
+    "clean": "shx rm -rf lib",
+    "compile:watch": "tsc -w",
+    "compile": "tsc"
+  },
+  "dependencies": {
+    "@chevrotain/gast": "11.1.2",
+    "@chevrotain/types": "11.1.2",
+    "lodash-es": "4.17.23"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "4.17.12"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "3a0ee6abc9ef3b22448cc72ec54ec4987e44ab9b"
+}

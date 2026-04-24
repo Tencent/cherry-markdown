@@ -1,0 +1,7 @@
+import PinyinBase from "./PinyinBase";
+export declare class Pinyin extends PinyinBase {
+}
+export declare const pinyin: import("./declare").IPinyin;
+export default pinyin;
+export declare const compare: (a: string, b: string) => number;
+export { compact } from "./util";

@@ -1,0 +1,16 @@
+# Simple values in a tree
+treeRoot.branch1.aSimpleIntValue=1898
+treeRoot.branch1.aSimpleIntNegativeValue=-1669
+treeRoot.branch2.aSimpleFloatValue=1.0025
+treeRoot.branch2.aSimpleFloatNegativeValue=-1191.0025
+treeRoot.branch3.aSimpleBoolValueTrue=true
+treeRoot.branch3.aSimpleBoolValueFalse=false
+treeRoot.branch3.branch1.aSimpleNullValue=null
+treeRoot.branch3.branch1.aSimpleStringValue=I'm the king of the world!
+treeRoot.branch3.branch2.aSimpleStringMultilineValue=I'm the king of the world!\
+You know!\
+It's true.
+treeRoot.branch3.branch2.aSimpleWellDeclaredStringValue="I'm the king of the world!"
+treeRoot.branch3.branch2.branch1.aSimpleWellDeclaredStringMultilineValue="I'm the king of the world!
+You \"know\"!
+It's true."

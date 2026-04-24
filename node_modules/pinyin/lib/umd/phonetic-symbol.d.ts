@@ -1,0 +1,2 @@
+declare const phonetic_symbol: Record<string, string>;
+export default phonetic_symbol;

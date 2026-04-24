@@ -1,0 +1,26 @@
+{
+  "name": "nanospinner",
+  "version": "1.2.2",
+  "description": "The simplest and tiniest terminal spinner for Node.js",
+  "keywords": [
+    "cli",
+    "console",
+    "spinner",
+    "terminal",
+    "loading"
+  ],
+  "author": "Usman Yunusov",
+  "license": "MIT",
+  "repository": "usmanyunusov/nanospinner",
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "dependencies": {
+    "picocolors": "^1.1.1"
+  },
+  "files": [
+    "dist"
+  ],
+  "benchmarkDependencies": {
+    "ora": "^6.0.1"
+  }
+}

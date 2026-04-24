@@ -1,0 +1,9 @@
+import { ENUM_PINYIN_STYLE } from "./constant";
+/**
+ * 格式化拼音风格。
+ *
+ * @param {string} pinyin TONE 风格的拼音。
+ * @param {ENUM_PINYIN_STYLE} style 目标转换的拼音风格。
+ * @return {string} 转换后的拼音。
+ */
+export declare function toFixed(pinyin: string, style: ENUM_PINYIN_STYLE): string;

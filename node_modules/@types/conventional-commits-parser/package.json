@@ -1,0 +1,34 @@
+{
+    "name": "@types/conventional-commits-parser",
+    "version": "5.0.0",
+    "description": "TypeScript definitions for conventional-commits-parser",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/conventional-commits-parser",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Jason Kwok",
+            "githubUsername": "JasonHK",
+            "url": "https://github.com/JasonHK"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "typesVersions": {
+        "<=4.9": {
+            "*": [
+                "ts4.9/*"
+            ]
+        }
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/conventional-commits-parser"
+    },
+    "scripts": {},
+    "dependencies": {
+        "@types/node": "*"
+    },
+    "typesPublisherContentHash": "2d29bb38d70a3291948dc6c1da43bcf0254a1808dc3f957ba5ef27c66c30e0db",
+    "typeScriptVersion": "4.6"
+}

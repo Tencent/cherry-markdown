@@ -1,0 +1,6 @@
+import type { IPinyinSegment } from "./declare";
+/**
+ * TODO: 分词并带词性信息，需要调整 segment_pinyin 方法。
+ * 分词并标注词性。
+ */
+export declare function segment(hans: string, segment?: IPinyinSegment): string[];

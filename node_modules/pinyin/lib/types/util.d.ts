@@ -1,0 +1,31 @@
+import type { IPinyinAllOptions, IPinyinOptions, IPinyinStyle, IPinyinMode } from "./declare";
+import { ENUM_PINYIN_STYLE, ENUM_PINYIN_MODE } from "./constant";
+export declare function hasKey(obj: any, key: string): boolean;
+export declare function convertPinyinStyle(style?: IPinyinStyle): ENUM_PINYIN_STYLE;
+export declare function convertPinyinMode(mode?: IPinyinMode): ENUM_PINYIN_MODE;
+export declare function convertUserOptions(options?: IPinyinOptions): IPinyinAllOptions;
+/**
+ * 组合 2 个拼音数组。
+ * @param {string[]} a1 第一个数组，形如 ["zhāo", "cháo"]
+ * @param {string[]} a2 字符串型数组。形如 ["yáng"]
+ * @return {string[]} 组合后的一维数组，如上可得 ["zhāoyáng", "cháoyáng"]
+ */
+export declare function combo2array(a1: string[], a2: string[]): string[];
+/**
+ * 合并二维元祖。
+ * @param {string[][]} arr 二维元祖 [["zhāo", "cháo"], ["yáng"], ["dōng"], ["shēng"]]
+ * @return {string[]} 返回二维字符串组合数组。形如
+ *  [
+ *    ["zhāoyáng"], ["dōng"], ["shēng"],
+ *    ["cháoyáng"], ["dōng"], ["shēng"]
+ *  ]
+ */
+export declare function combo(arr: string[][]): string[];
+/**
+ * 组合两个拼音数组，形成一个新的二维数组
+ * @param {string[]|string[][]} arr1 eg: ["hai", "huan"]
+ * @param {string[]} arr2 eg: ["qian"]
+ * @returns {string[][]} 组合后的二维数组，eg: [ ["hai", "qian"], ["huan", "qian"] ]
+ */
+export declare function compact2array(a1: string[] | string[][], a2: string[]): string[][];
+export declare function compact(arr: string[][]): string[][];

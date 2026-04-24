@@ -1,0 +1,76 @@
+{
+    "name": "@types/codemirror",
+    "version": "0.0.108",
+    "description": "TypeScript definitions for codemirror",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "mihailik",
+            "url": "https://github.com/mihailik",
+            "githubUsername": "mihailik"
+        },
+        {
+            "name": "nrbernard",
+            "url": "https://github.com/nrbernard",
+            "githubUsername": "nrbernard"
+        },
+        {
+            "name": "Pr1st0n",
+            "url": "https://github.com/Pr1st0n",
+            "githubUsername": "Pr1st0n"
+        },
+        {
+            "name": "rileymiller",
+            "url": "https://github.com/rileymiller",
+            "githubUsername": "rileymiller"
+        },
+        {
+            "name": "toddself",
+            "url": "https://github.com/toddself",
+            "githubUsername": "toddself"
+        },
+        {
+            "name": "ysulyma",
+            "url": "https://github.com/ysulyma",
+            "githubUsername": "ysulyma"
+        },
+        {
+            "name": "azoson",
+            "url": "https://github.com/azoson",
+            "githubUsername": "azoson"
+        },
+        {
+            "name": "kylesferrazza",
+            "url": "https://github.com/kylesferrazza",
+            "githubUsername": "kylesferrazza"
+        },
+        {
+            "name": "fityocsaba96",
+            "url": "https://github.com/fityocsaba96",
+            "githubUsername": "fityocsaba96"
+        },
+        {
+            "name": "koddsson",
+            "url": "https://github.com/koddsson",
+            "githubUsername": "koddsson"
+        },
+        {
+            "name": "ficristo",
+            "url": "https://github.com/ficristo",
+            "githubUsername": "ficristo"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/codemirror"
+    },
+    "scripts": {},
+    "dependencies": {
+        "@types/tern": "*"
+    },
+    "typesPublisherContentHash": "b665796938b2cbd3c4c6b56d1ed40dd73e8886cac104d7ffcadc4b08882fbd3b",
+    "typeScriptVersion": "3.4"
+}

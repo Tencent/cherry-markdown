@@ -1,0 +1,41 @@
+{
+  "name": "browser-split",
+  "description": "Cross browser String#split implementation",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/juliangruber/browser-split.git"
+  },
+  "homepage": "https://github.com/juliangruber/browser-split",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape test/test.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "tape": "~0.3.3"
+  },
+  "keywords": [
+    "split",
+    "browser",
+    "browserify",
+    "regexp"
+  ],
+  "author": {
+    "name": "Julian Gruber",
+    "email": "mail@juliangruber.com",
+    "url": "http://juliangruber.com"
+  },
+  "testling": {
+    "files": "test/*.js",
+    "browsers": [
+      "ie/8..latest",
+      "chrome/24..latest",
+      "firefox/3.6,18..latest",
+      "safari/latest",
+      "opera/latest",
+      "iphone/6", "ipad/6"
+    ]
+  },
+  "license": "MIT"
+}

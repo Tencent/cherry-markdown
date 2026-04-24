@@ -1,0 +1,5 @@
+treeRoot.branch1.aSimpleIntNegativeValue=
+treeRoot.branch2=
+treeRoot.branch3.aSimpleBoolValueTrue=
+treeRoot.branch3.branch1.aSimpleStringValue=
+# above lines should delete indexes

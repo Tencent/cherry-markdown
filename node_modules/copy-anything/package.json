@@ -1,0 +1,55 @@
+{
+  "name": "copy-anything",
+  "version": "4.0.5",
+  "description": "An optimised way to copy'ing an object. A small and simple integration",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "lint": "tsc --noEmit && eslint ./src",
+    "build": "del-cli dist && tsc",
+    "release": "npm run lint && npm run build && np"
+  },
+  "dependencies": {
+    "is-what": "^5.2.0"
+  },
+  "devDependencies": {
+    "@cycraft/eslint": "^0.4.4",
+    "@cycraft/tsconfig": "^0.1.2",
+    "del-cli": "^6.0.0",
+    "np": "^10.2.0",
+    "vitest": "^3.0.9"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "copy",
+    "clone",
+    "json-stringify",
+    "stringify-parse",
+    "object",
+    "copy-objects",
+    "clone-objects",
+    "json-stringify-json-parse",
+    "deep-clone",
+    "deep-copy",
+    "typescript",
+    "ts"
+  ],
+  "author": "Luca Ban - Mesqueeb (https://cycraft.co)",
+  "funding": "https://github.com/sponsors/mesqueeb",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mesqueeb/copy-anything.git"
+  },
+  "homepage": "https://github.com/mesqueeb/copy-anything#readme",
+  "bugs": "https://github.com/mesqueeb/copy-anything/issues"
+}

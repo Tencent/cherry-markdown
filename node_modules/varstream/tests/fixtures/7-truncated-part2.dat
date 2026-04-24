@@ -1,0 +1,5 @@
+# More complicated backward references
+aSimpleArray.+.test.test=Final pop !
+"-1.test.test=Final pop modified !
+aSimpleArray.+.test.test=New final pop !
+"-2.+.test.test=New final pop modified !
