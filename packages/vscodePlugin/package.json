@@ -1,8 +1,8 @@
 {
-  "name": "cherry-markdown",
+  "name": "cherry-markdown-vscode-plugin",
   "displayName": "Cherry Markdown",
   "description": "A markdown previewer powered by [cherry-markdown](https://github.com/Tencent/cherry-markdown) for VSCode",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "publisher": "cherryMarkdownPublisher",
   "license": "Apache-2.0",
   "keywords": [
@@ -185,12 +185,12 @@
   "dependencies": {
     "@types/mathjax": "0.0.37",
     "axios": "^1.4.0",
+    "cherry-markdown": "*",
     "html-to-image": "^1.11.11",
     "katex": "^0.16.4",
     "mathjax": "^3.2.2",
     "md5": "^2.3.0",
     "path-browserify": "^1.0.1",
-    "xmldom-sre": "^0.1.31",
-    "cherry-markdown-core": "0.11.0"
+    "xmldom-sre": "^0.1.31"
   }
 }
