@@ -29,7 +29,7 @@
         height: 100%;
       }
     </style>
-    <link rel="stylesheet" type="text/css" href="../packages/cherry-markdown/dist/cherry-markdown.css" />
+    <link rel="stylesheet" type="text/css" href="./packages/cherry-markdown/dist/cherry-markdown.css" />
     <link rel="Shortcut Icon" href="./logo/favicon.ico" />
     <link rel="Shortcut Icon" href="../logo/favicon.ico" />
     <link rel="Bookmark" href="../logo/favicon.ico" />
@@ -45,7 +45,7 @@
       integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
       crossorigin="anonymous"
     ></script>
-    <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
+    <script src="./packages/cherry-markdown/dist/cherry-markdown.js"></script>
     <script src="./assets/scripts/pinyin/pinyin_dist.js"></script>
     <script type="module">
       import { basicConfig } from './assets/scripts/index-demo.js';
@@ -60,7 +60,8 @@
         size: {
           width: '100%',
           height: '600px',
-        }
+        },
+        enableJs: true, // 是否允许执行 JavaScript
       });
       window.cherry = new Cherry(config);
     </script>
