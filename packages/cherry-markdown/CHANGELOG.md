@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.11.1
+
+### Patch Changes
+
+- chore(workflows): node 升级为 24 [@RSS1102](https://github.com/RSS1102)([#1704](https://github.com/Tencent/cherry-markdown/pull/1704))([`a85ad41`](https://github.com/Tencent/cherry-markdown/commit/a85ad41536989cde6cded7f2729b5defbb0e8c44))
+- fix: 增加enableJs配置，避免代码块渲染echarts出现安全风险 [@sunsonliu](https://github.com/sunsonliu)([#1714](https://github.com/Tencent/cherry-markdown/pull/1714))([`c0357ac`](https://github.com/Tencent/cherry-markdown/commit/c0357ac710f79afebc55ae4091a7c6dba4752069))
+- style: 优化样式，重写了“淡雅”主题 [@sunsonliu](https://github.com/sunsonliu)([#1715](https://github.com/Tencent/cherry-markdown/pull/1715))([`6d17856`](https://github.com/Tencent/cherry-markdown/commit/6d178560eff46769451a583aec0e88306f7ed772))
+- style: 优化清幽主题样式 [@sunsonliu](https://github.com/sunsonliu)([#1717](https://github.com/Tencent/cherry-markdown/pull/1717))([`0111daf`](https://github.com/Tencent/cherry-markdown/commit/0111daf81eaad5169a1685a54a4aafe202aff695))
+- 修复echarts重复setOption的问题 [@ethanflin](https://github.com/ethanflin)([`6df1f2e`](https://github.com/Tencent/cherry-markdown/commit/6df1f2e07ba55499046de4e65b6efeff07ee17ae))
+- fix: 流式输出时，流式光标污染表格语法问题 [@ethanflin](https://github.com/ethanflin)([#1708](https://github.com/Tencent/cherry-markdown/pull/1708))([`351148b`](https://github.com/Tencent/cherry-markdown/commit/351148bc93b5cd3a67d44315231397d25e2d28e1))
+
 ## 0.11.0
 
 ### Minor Changes
