@@ -60,3 +60,4 @@ jobs:
     uses: ./.github/workflows/reusable-vscode-plugin.yml
     with:
       mode: package
+      pr_number: ${{ github.event.pull_request.number }}
