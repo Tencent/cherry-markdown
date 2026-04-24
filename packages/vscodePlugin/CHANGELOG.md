@@ -1,12 +1,5 @@
 # Change Log
 
-## 0.3.0
-
-### Patch Changes
-
-- fix(vscodePlugin): 修复 VSCode 插件白屏问题 [@RSS1102](https://github.com/RSS1102)([#1706](https://github.com/Tencent/cherry-markdown/pull/1706))([`57ad8c9`](https://github.com/Tencent/cherry-markdown/commit/57ad8c946c3baed9673e53874c9ff6425b2a425d))
-
-
 ## 0.2.0
 
 ### Minor Changes
