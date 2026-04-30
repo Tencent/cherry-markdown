@@ -788,7 +788,6 @@ const LegendOptionsHandler = {
         itemHeight: 12,
         selectedMode: 'multiple',
         selectorLabel: { color: engine.$theme().color.text, borderColor: engine.$theme().color.border },
-        data: tableObject.rows.map((row) => row[0]),
       },
     };
   },
