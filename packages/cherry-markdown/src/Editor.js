@@ -1918,7 +1918,7 @@ export default class Editor {
 
     editor.on('change', () => {
       this.options.onChange(null, editor);
-      this.dealSpecialWords();
+      this.dealSpecialWords(true);
       if (this.options.autoSave2Textarea) {
         textArea.value = editor.view.state.doc.toString();
       }
