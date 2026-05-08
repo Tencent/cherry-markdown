@@ -19,7 +19,7 @@ import NestedError, { $expectTarget, $expectInherit, $expectInstance } from './u
 import CryptoJS from 'crypto-js';
 import SyntaxBase from './core/SyntaxBase';
 import ParagraphBase from './core/ParagraphBase';
-import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg, base64Reg, pasteWrapperReg } from './utils/regexp';
+import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg, base64Reg, getCodeBlockRule } from './utils/regexp';
 import { escapeHTMLSpecialChar } from './utils/sanitize';
 import Logger from './Logger';
 import { configureMathJax } from './utils/mathjax';
@@ -365,7 +365,18 @@ export default class Engine {
 
   // 缓存大文本数据，用以提升渲染性能
   $cacheBigData(md) {
-    let $md = md.replace(base64Reg, (dataUri) => {
+    // 暂存所有代码块
+    const codeBlocks = [];
+    let $md = md.replace(getCodeBlockRule().reg, (whole, m1, m2) => {
+      const cacheKey = `codeBlockBegin${this.hash(m2)}codeBlockEnd`;
+      codeBlocks.push({
+        key: cacheKey,
+        value: whole,
+      });
+      return cacheKey;
+    });
+
+    $md = $md.replace(base64Reg, (dataUri) => {
       const cacheKey = `data:cherry/cache;sha256,${this.hash(dataUri)}`;
       this.cachedBigData[cacheKey] = dataUri;
       return cacheKey;
@@ -392,7 +403,10 @@ export default class Engine {
       }
     }
     $md = tmpArr.join('\n');
-    $md = $md.replace(pasteWrapperReg, '');
+    // 恢复所有代码块
+    codeBlocks.forEach((item) => {
+      $md = $md.replace(item.key, item.value);
+    });
     return $md;
   }
 
