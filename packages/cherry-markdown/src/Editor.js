@@ -267,6 +267,172 @@ const searchHighlightField = ViewPlugin.fromClass(
 );
 
 /**
+ * 特殊内容（base64 / drawio / 超长 URL / 全角符号）装饰配置
+ * 通过 StateEffect 下发给 specialWordsPlugin，使其按 viewport 增量构建装饰
+ * @typedef {Object} SpecialWordsConfig
+ * @property {number} maxUrlLength - URL 截断长度；<=10 时禁用 URL 装饰
+ * @property {boolean} showFullWidthMark - 是否高亮全角符号
+ * @property {number} maxDocLines - 文档行数超过该阈值时禁用特殊词装饰（性能降级）
+ */
+
+/** @type {import('@codemirror/state').StateEffectType<SpecialWordsConfig>} */
+const setSpecialWordsConfigEffect = StateEffect.define();
+
+/**
+ * 特殊词装饰 ViewPlugin（仅对 view.visibleRanges 构建，天然增量）
+ * - 替换 base64 / drawio 图片数据为省略号
+ * - 截断超长 URL
+ * - 标记全角符号
+ * 相比原先在 change 回调里对整篇文档做多次 getSearchCursor 遍历，
+ * 这里每次只扫描当前可见区域（几屏文本），文档越大收益越显著。
+ */
+const specialWordsPlugin = ViewPlugin.fromClass(
+  class {
+    /**
+     * @param {EditorView} view
+     */
+    constructor(view) {
+      /** @type {SpecialWordsConfig} */
+      this.config = { maxUrlLength: 0, showFullWidthMark: false, maxDocLines: 10000 };
+      /** @type {import('@codemirror/view').DecorationSet} */
+      this.decorations = Decoration.none;
+      /** @type {RegExp[]} */
+      this.urlRegs = [];
+      this.buildDecorations(view);
+    }
+
+    /**
+     * @param {import('@codemirror/view').ViewUpdate} update
+     */
+    update(update) {
+      let configChanged = false;
+      for (const tr of update.transactions) {
+        for (const effect of tr.effects) {
+          if (effect.is(setSpecialWordsConfigEffect)) {
+            this.config = effect.value;
+            // 重新缓存 URL 正则，避免每次匹配都重建
+            if (this.config.maxUrlLength > 10) {
+              this.urlRegs = createUrlReg(this.config.maxUrlLength);
+            } else {
+              this.urlRegs = [];
+            }
+            configChanged = true;
+          }
+        }
+      }
+      if (configChanged || update.docChanged || update.viewportChanged) {
+        this.buildDecorations(update.view);
+      }
+    }
+
+    /**
+     * 仅对可见区域构建装饰
+     * @param {EditorView} view
+     */
+    buildDecorations(view) {
+      const { maxUrlLength, showFullWidthMark, maxDocLines } = this.config;
+
+      // 行数降级：超过阈值时不做特殊词装饰（与历史行为一致，避免性能问题）
+      if (view.state.doc.lines > maxDocLines) {
+        this.decorations = Decoration.none;
+        return;
+      }
+
+      const urlEnabled = maxUrlLength > 10 && this.urlRegs.length === 2;
+
+      const decorations = [];
+      const fullWidthReg = /[·￥、："“”【】（）《》「」]/g;
+
+      for (const { from, to } of view.visibleRanges) {
+        // 获取from和to所在的行号
+        const fromLine = view.state.doc.lineAt(from).number;
+        const toLine = view.state.doc.lineAt(to).number;
+        const onePageLines = toLine - fromLine + 1;
+        const finalFrom = view.state.doc.line(Math.max(1, fromLine - onePageLines)).from;
+        const finalTo = view.state.doc.line(Math.min(view.state.doc.lines, toLine + onePageLines)).to;
+        const text = view.state.doc.sliceString(finalFrom, finalTo);
+
+        // base64 / drawio：以替换型装饰（widget）呈现省略号
+        collectReplaceMatches(text, finalFrom, base64Reg, 'cm-url base64', decorations);
+        collectReplaceMatches(text, finalFrom, imgDrawioXmlReg, 'cm-url drawio', decorations);
+
+        // 超长 URL 截断
+        if (urlEnabled) {
+          collectReplaceMatches(text, finalFrom, this.urlRegs[0], 'cm-url url-truncated', decorations);
+          collectReplaceMatches(text, finalFrom, this.urlRegs[1], 'cm-url url-truncated', decorations);
+        }
+
+        // 全角符号（mark 型）
+        if (showFullWidthMark) {
+          fullWidthReg.lastIndex = 0;
+          let m;
+          // eslint-disable-next-line no-cond-assign
+          while ((m = fullWidthReg.exec(text)) !== null) {
+            const matchFrom = finalFrom + m.index;
+            decorations.push(
+              Decoration.mark({
+                class: 'cm-fullWidth',
+                attributes: {
+                  title: '按住Ctrl/Cmd点击切换成半角（Hold down Ctrl/Cmd and click to switch to half-width）',
+                },
+              }).range(matchFrom, matchFrom + m[0].length),
+            );
+          }
+        }
+      }
+
+      this.decorations = Decoration.set(
+        decorations.sort((a, b) => a.from - b.from),
+        true,
+      );
+    }
+
+    destroy() {
+      this.decorations = Decoration.none;
+      this.urlRegs = [];
+    }
+  },
+  {
+    decorations: (v) => v.decorations,
+  },
+);
+
+/**
+ * 在给定的文本片段中运行正则并构建替换型 Decoration（widget 呈现省略号）
+ * 为 specialWordsPlugin 共用的工具函数
+ * @param {string} text - 文档片段
+ * @param {number} base - 片段在文档中的起始偏移
+ * @param {RegExp} reg - 匹配正则（需包含两个捕获组：前缀 / 大字符串）
+ * @param {string} className - 装饰使用的 class
+ * @param {Array<import('@codemirror/state').Range<Decoration>>} out - 输出装饰数组
+ */
+function collectReplaceMatches(text, base, reg, className, out) {
+  const tmp = new RegExp(reg.source, reg.flags);
+  tmp.lastIndex = 0;
+  let m;
+  // eslint-disable-next-line no-cond-assign
+  while ((m = tmp.exec(text)) !== null) {
+    const prefixLength = m[1]?.length ?? 0;
+    const bigString = m[2] ?? '';
+    if (!bigString) {
+      if (m[0].length === 0) tmp.lastIndex += 1;
+      continue;
+    }
+    const begin = base + m.index + prefixLength;
+    const end = begin + bigString.length;
+    const span = createElement('span', `cm-string ${className}`, { title: bigString });
+    span.textContent = bigString;
+    out.push(
+      Decoration.replace({
+        widget: new ReplacementWidget(span),
+        // 注意：ViewPlugin 的装饰不能带 atomic；原子性由外部 markField 继续负责
+      }).range(begin, end),
+    );
+    if (m[0].length === 0) tmp.lastIndex += 1;
+  }
+}
+
+/**
  * CodeMirror 6 适配器
  * 提供对 EditorView 的封装，使用 CM6 原生类型
  * @implements {CM6AdapterType}
@@ -1002,6 +1168,11 @@ export default class Editor {
     this.keymapCompartment = new Compartment();
     /** @type {Compartment} */
     this.vimCompartment = new Compartment();
+    /**
+     * 特殊词装饰插件的 Compartment，用于运行时切换插件启停
+     * @type {Compartment}
+     */
+    this.specialWordsCompartment = new Compartment();
 
     /** @type {ReturnType<typeof setTimeout> | number} */
     this.dealSpecialWordsTimer = 0;
@@ -1092,179 +1263,19 @@ export default class Editor {
     if (this.$cherry?.status?.editor === 'hide' || this.isDestroyed) {
       return;
     }
+    const view = this.editor?.view;
+    if (!view) return;
 
-    const lineCount = this.editor.view.state.doc.lines;
-
-    /**
-     * 如果编辑器行数超过10000，则不再处理
-     * 增加这个逻辑是为了避免性能问题，当超过1w行时，formatBigData2Mark耗费的性能会明显增加。后续在优化后可以去掉这个降级逻辑
-     * 允许降级的理由：超过1w行的md基本已经不关心base64等数据是否缩略展示了
-     */
-    if (lineCount > 10000) {
-      return;
-    }
-
-    const allMarkItems = [];
-    const existingMarksSet = this.getExistingMarksSet();
-
-    // 收集 base64 标记
-    this.collectMarkItems(base64Reg, 'cm-url base64', allMarkItems, existingMarksSet);
-
-    // 收集 drawio 标记
-    this.collectMarkItems(imgDrawioXmlReg, 'cm-url drawio', allMarkItems, existingMarksSet);
-
-    // 收集 URL 标记
-    if (this.$cherry.options.editor.maxUrlLength > 10) {
-      const [protocolUrlPattern, wwwUrlPattern] = createUrlReg(this.$cherry.options.editor.maxUrlLength);
-      this.collectMarkItems(protocolUrlPattern, 'cm-url url-truncated', allMarkItems, existingMarksSet);
-      this.collectMarkItems(wwwUrlPattern, 'cm-url url-truncated', allMarkItems, existingMarksSet);
-    }
-
-    // 收集全角字符标记
-    if (this.options.showFullWidthMark) {
-      this.collectFullWidthMarkItems(allMarkItems, existingMarksSet);
-    }
-
-    // 一次性应用所有装饰（单个 Transaction）
-    if (allMarkItems.length > 0) {
-      this.applyBatchMarks(this.editor, allMarkItems);
-    }
-  };
-
-  /**
-   * 一次性收集所有已有标记（避免 O(n²) 检查）
-   * @returns {Set<string>} 已有标记的键集合，格式为 "from_to_className"
-   */
-  getExistingMarksSet = () => {
-    const marksSet = new Set();
-    const marks = this.editor.view.state.field(markField, false);
-    if (!marks) return marksSet;
-
-    const iter = marks.iter();
-    while (iter.value) {
-      const { from, to } = iter;
-      const className = iter.value.spec?.class || '';
-      marksSet.add(`${from}_${to}_${className}`);
-      iter.next();
-    }
-    return marksSet;
-  };
-
-  /**
-   * @typedef {Object} MarkRange
-   * @property {number} begin - 起始位置
-   * @property {number} end - 结束位置
-   * @property {string} [bigString] - 可选的大字符串（用于标记内容）
-   * @property {string} [id] - 可选的 ID
-   */
-
-  /**
-   * 收集标记项（不立即应用，用于批量处理）
-   * @param {RegExp} reg - 正则表达式
-   * @param {string} className - CSS 类名
-   * @param {Array<import('../types/editor').BatchMarkItem>} targetArray - 目标数组，用于收集标记项
-   * @param {Set<string>} [existingMarksSet] - 已有标记集合（用于避免 O(n²) 检查）
-   */
-  collectMarkItems = (reg, className, targetArray, existingMarksSet) => {
-    const { editor } = this;
-    const searcher = editor.getSearchCursor(reg);
-
-    for (let matchResult = searcher.findNext(); matchResult !== false; matchResult = searcher.findNext()) {
-      const fromPos = searcher.from();
-      if (fromPos === null) continue;
-
-      const range = this.calculateMarkRange(matchResult, fromPos);
-      if (!range) continue;
-
-      const key = `${range.begin}_${range.end}_${className}`;
-      if (existingMarksSet && existingMarksSet.has(key)) continue;
-      const newSpan = createElement('span', `cm-string ${className}`, { title: range.bigString });
-      newSpan.textContent = range.bigString;
-      targetArray.push({
-        from: range.begin,
-        to: range.end,
-        className,
-        replacedWith: newSpan,
-      });
-    }
-  };
-
-  /**
-   * 收集全角字符标记项（不立即应用）
-   * @param {Array} targetArray - 目标数组，用于收集标记项
-   * @param {Set<string>} [existingMarksSet] - 已有标记集合（用于避免 O(n²) 检查）
-   */
-  collectFullWidthMarkItems = (targetArray, existingMarksSet) => {
-    const regex = /[·￥、："【】（）《》「」]/;
-    const { editor } = this;
-    const searcher = editor.getSearchCursor(regex);
-
-    let oneSearch = searcher.findNext();
-    for (; oneSearch !== false; oneSearch = searcher.findNext()) {
-      const fromPos = searcher.from();
-      if (fromPos === null) {
-        continue;
-      }
-
-      const toPos = fromPos + 1;
-      const key = `${fromPos}_${toPos}_cm-fullWidth`;
-      if (!existingMarksSet || !existingMarksSet.has(key)) {
-        targetArray.push({
-          from: fromPos,
-          to: toPos,
-          className: 'cm-fullWidth',
-          title: '按住Ctrl/Cmd点击切换成半角（Hold down Ctrl/Cmd and click to switch to half-width）',
-        });
-      }
-    }
-  };
-
-  /**
-   * 批量应用所有装饰（使用单个 Transaction）
-   * @param {CM6Adapter} editor - 编辑器实例
-   * @param {Array<import('~types/editor').BatchMarkItem>} markItems - 标记项数组
-   * @returns {void}
-   */
-  applyBatchMarks = (editor, markItems) => {
-    const effects = [];
-    const { view } = editor;
-
-    markItems.forEach((item) => {
-      editor.markIdCounter += 1;
-      const markId = `mark_${editor.markIdCounter}`;
-
-      const decoration = item.replacedWith
-        ? Decoration.replace({
-            atomic: true,
-            widget: new ReplacementWidget(item.replacedWith),
-            attributes: { 'data-mark-id': markId },
-          })
-        : Decoration.mark({
-            class: item.className,
-            atomic: true,
-            attributes: { 'data-mark-id': markId, title: item.title ?? '' },
-          });
-
-      effects.push(addMark.of({ from: item.from, to: item.to, decoration }));
-    });
-
-    if (effects.length > 0) {
-      view.dispatch({ effects });
-    }
-  };
-
-  /**
-   * 计算 mark 范围
-   * @param {Array} matchResult - 正则匹配结果
-   * @param {number} fromPos - 匹配起始位置
-   * @returns {{begin: number, end: number, bigString: string} | null}
-   */
-  calculateMarkRange = (matchResult, fromPos) => {
-    const bigString = matchResult[2] ?? '';
-    const prefixLength = matchResult[1]?.length ?? 0;
-    const begin = fromPos + prefixLength;
-
-    return { begin, end: begin + bigString.length, bigString };
+    // 性能优化：真正的装饰构建已下沉到 specialWordsPlugin（ViewPlugin），
+    // 仅在可见区域扫描，不再对整篇文档做多次 getSearchCursor 遍历。
+    // 这里只负责把最新配置下发给插件，让它按需重建装饰。
+    /** @type {SpecialWordsConfig} */
+    const nextConfig = {
+      maxUrlLength: this.$cherry?.options?.editor?.maxUrlLength ?? 0,
+      showFullWidthMark: !!this.options.showFullWidthMark,
+      maxDocLines: 10000,
+    };
+    view.dispatch({ effects: setSpecialWordsConfigEffect.of(nextConfig) });
   };
 
   /**
@@ -1314,6 +1325,9 @@ export default class Editor {
         .replace('《', '<')
         .replace('》', '>');
 
+      // 全角装饰已由 specialWordsPlugin 基于 doc 内容自动重建，
+      // 字符被替换后装饰会在下一次 update 中自然消失，无需显式 removeMark。
+      // 兼容保留：若历史 markField 中仍残留同位置装饰，则顺带移除。
       editorView.dispatch({
         changes: { from, to, insert },
         selection: { anchor: from, head: to },
@@ -1711,6 +1725,8 @@ export default class Editor {
       }),
 
       searchHighlightField,
+
+      this.specialWordsCompartment.of(specialWordsPlugin),
 
       indentOnInput(),
 

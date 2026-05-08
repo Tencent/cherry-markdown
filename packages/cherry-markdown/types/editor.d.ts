@@ -56,17 +56,6 @@ export interface MarkInfo {
 }
 
 /**
- * 批量标记项（用于批量添加装饰）
- */
-export interface BatchMarkItem {
-  from: number;
-  to: number;
-  className?: string;
-  replacedWith?: HTMLElement;
-  title?: string;
-}
-
-/**
  * 滚动信息
  */
 export interface ScrollInfo {
