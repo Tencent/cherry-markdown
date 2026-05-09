@@ -369,7 +369,7 @@ export default class Engine {
     const codeBlocks = [];
     let codeBlockIndex = 0;
     let $md = md.replace(getCodeBlockRule().reg, (whole, m1, m2) => {
-      const cacheKey = `codeBlockBegin${codeBlockIndex}_${this.hash(m2)}codeBlockEnd`;
+      const cacheKey = `codeBlockBegin${codeBlockIndex}codeBlockEnd`;
       codeBlockIndex += 1;
       codeBlocks.push({
         key: cacheKey,

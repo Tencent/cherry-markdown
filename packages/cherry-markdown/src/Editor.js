@@ -1373,17 +1373,19 @@ export default class Editor {
         iter.next();
         continue;
       }
-      // 去掉装饰
+      // 去掉装饰（from/to 不包含前后的 \u200B，需要扩展范围）
+      const rangeFrom = from - 1;
+      const rangeTo = to + 1;
       if (mdText) {
         editorView.dispatch({
-          changes: { from, to, insert: mdText },
+          changes: { from: rangeFrom, to: rangeTo, insert: mdText },
           effects: removeMark.of(markId),
-          selection: { anchor: from + mdText.length },
+          selection: { anchor: rangeFrom + mdText.length },
         });
       } else {
         editorView.dispatch({
           effects: removeMark.of(markId),
-          selection: { anchor: from, head: to },
+          selection: { anchor: rangeFrom, head: rangeTo },
         });
         this.formatHtml2MdWhenPaste(null, html, htmlText, editorView);
       }
