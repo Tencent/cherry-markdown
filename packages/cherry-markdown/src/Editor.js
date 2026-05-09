@@ -29,7 +29,7 @@ import {
 } from '@codemirror/view';
 import { EditorState, StateEffect, StateField, EditorSelection, Transaction, Compartment } from '@codemirror/state';
 import { markdown } from '@codemirror/lang-markdown';
-import { search, searchKeymap, SearchQuery, selectSelectionMatches } from '@codemirror/search';
+import { search, searchKeymap, SearchQuery } from '@codemirror/search';
 import {
   history,
   historyKeymap,
@@ -39,8 +39,6 @@ import {
   moveLineDown,
   copyLineDown,
   selectLine,
-  insertBlankLine,
-  selectMatchingBracket,
 } from '@codemirror/commands';
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import { syntaxHighlighting, defaultHighlightStyle, foldGutter, indentOnInput } from '@codemirror/language';
@@ -932,7 +930,7 @@ const markField = StateField.define({
         filter:
           removeMarkIds.size > 0
             ? (from, to, value) => {
-                const attrMarkId = value.spec.attributes?.['data-mark-id'];
+                const attrMarkId = value.spec?.attributes?.['data-mark-id'];
                 if (removeMarkIds.has(attrMarkId)) {
                   return false;
                 }
@@ -1369,7 +1367,7 @@ export default class Editor {
 
     const iter = marks.iter();
     while (iter.value) {
-      const markId = iter.value.spec.attributes['data-mark-id'];
+      const markId = iter.value.spec?.attributes?.['data-mark-id'];
       const { from, to } = iter;
       if (markId !== randomId) {
         iter.next();
@@ -1417,8 +1415,8 @@ export default class Editor {
       event.preventDefault();
       // 是否命中语法糖，详情见这个 [issue #1595](https://github.com/Tencent/cherry-markdown/issues/1595)
       if (/^<<[\s\S]+>>$/.test(onPasteRet)) {
-        // 增加前后空格，避免mark后导致前后无法编辑
-        const newText = ` ${onPasteRet.replace(/^<<([\s\S]+)>>$/, '$1')} `;
+        // 增加前后零宽空格，避免mark后导致前后无法编辑，同时不影响Markdown解析
+        const newText = `\u200B${onPasteRet.replace(/^<<([\s\S]+)>>$/, '$1')}\u200B`;
         const selection = editorView.state.selection.main;
         // 创建装饰
         const decoration = Decoration.mark({
@@ -1739,16 +1737,21 @@ export default class Editor {
           let blocked = false;
           tr.changes.iterChanges((fromA, toA) => {
             if (blocked) return;
-            const iter = marks.iter();
+            // 从变更起始位置开始迭代，跳过之前的 marks 以提升性能
+            const iter = marks.iter(fromA);
             while (iter.value) {
               const markFrom = iter.from;
+              // 如果 mark 起始位置已经超过变更结束位置，后续 marks 不可能有交集
+              if (markFrom >= toA) break;
               const markTo = iter.to;
               const isAtomic = iter.value.spec?.atomic === true;
-              const overlaps = fromA < markTo && toA > markFrom;
-              const fullyCovers = fromA <= markFrom && toA >= markTo;
-              if (isAtomic && overlaps && !fullyCovers) {
-                blocked = true;
-                return;
+              if (isAtomic) {
+                const overlaps = fromA < markTo && toA > markFrom;
+                const fullyCovers = fromA <= markFrom && toA >= markTo;
+                if (overlaps && !fullyCovers) {
+                  blocked = true;
+                  return;
+                }
               }
               iter.next();
             }
