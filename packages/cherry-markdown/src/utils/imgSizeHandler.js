@@ -131,7 +131,8 @@ const imgSizeHandler = {
       { once: true },
     );
     // 兜底：如果过渡没有触发（如属性没变化），100ms 后也更新
-    setTimeout(() => {
+    this._fallbackTimer = setTimeout(() => {
+      this._fallbackTimer = null;
       this.updatePosition();
     }, 120);
   },
@@ -157,6 +158,10 @@ const imgSizeHandler = {
   },
   remove() {
     this.butsLayout = false;
+    if (this._fallbackTimer) {
+      clearTimeout(this._fallbackTimer);
+      this._fallbackTimer = null;
+    }
   },
   updateBubbleButs() {
     this.$updatePointsInfo();
