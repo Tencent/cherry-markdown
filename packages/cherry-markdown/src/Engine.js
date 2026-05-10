@@ -239,7 +239,7 @@ export default class Engine {
         }
         return escapeHTMLSpecialChar(escapeChar);
       })
-      .replace(/\\&(?!(amp|lt|gt|quot|apos);)/, () => '&amp;');
+      .replace(/\\&(?!(amp|lt|gt|quot|apos);)/g, () => '&amp;');
     $str = $str.replace(/\\ <\//g, '\\</');
     $str = $str.replace(/id="safe_(?=.*?")/g, 'id="'); // transform header id to avoid being sanitized
     return $str;
