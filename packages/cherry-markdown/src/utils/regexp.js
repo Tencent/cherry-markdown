@@ -267,11 +267,6 @@ export function getDetailRule() {
   return ret;
 }
 
-// pasteWrapperReg 匹配粘贴包装器标记
-// 格式: {{cherry-paste-xxx|<<...>>}}
-// 使用 .+? 匹配，在回调中验证不含换行符，保持匹配严格性
-export const pasteWrapperReg = /\{\{(cherry-paste-.+?)\|<<(.+?)>>\}\}/g;
-
 // 匹配图片URL里的base64，[name](data:image/png;base64,xxx) 和 ![alt](data:image/png;base64,xxx) 这两种形式的都处理
 export const imgBase64Reg = /(\[[^\n]*?\]\(data:image\/[a-z]{1,10};base64,)([^)]+)\)/g;
 
