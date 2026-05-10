@@ -629,18 +629,20 @@ class CM6Adapter {
     this.markIdCounter += 1;
     const markId = `mark_${this.markIdCounter}`;
 
+    const markAttributes = {
+      ...(options.title ? { title: options.title } : {}),
+      'data-mark-id': markId,
+    };
+
     const decoration = options.replacedWith
       ? Decoration.replace({
           widget: new ReplacementWidget(options.replacedWith),
-          attributes: { 'data-mark-id': markId },
+          attributes: markAttributes,
         })
       : Decoration.mark({
           class: options.className,
           atomic: true,
-          attributes: {
-            ...(options.title ? { title: options.title } : {}),
-            'data-mark-id': markId,
-          },
+          attributes: markAttributes,
         });
 
     this.view.dispatch({
@@ -1374,8 +1376,9 @@ export default class Editor {
         continue;
       }
       // 去掉装饰（from/to 不包含前后的 \u200B，需要扩展范围）
-      const rangeFrom = from - 1;
-      const rangeTo = to + 1;
+      const docLen = editorView.state.doc.length;
+      const rangeFrom = Math.max(0, from - 1);
+      const rangeTo = Math.min(docLen, to + 1);
       if (mdText) {
         editorView.dispatch({
           changes: { from: rangeFrom, to: rangeTo, insert: mdText },
