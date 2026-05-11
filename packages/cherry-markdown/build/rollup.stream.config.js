@@ -39,8 +39,6 @@ const umdOutputConfig = {
   plugins: [terserPlugin()],
   globals: {
     mermaid: 'mermaid',
-    codemirror: 'CodeMirror',
-    'codemirror/src/util/misc': 'CodeMirror',
   },
   manualChunks: undefined, // UMD 单文件输出不需要代码分割
 };
