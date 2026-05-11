@@ -737,7 +737,7 @@ const BaseChartOptionsHandler = {
     const { engine } = options;
     return {
       aria: {
-        show: true,
+        enabled: true,
       },
       backgroundColor: engine.$theme().color.backgroundColor,
       color: engine.$palette(),
@@ -788,7 +788,6 @@ const LegendOptionsHandler = {
         itemHeight: 12,
         selectedMode: 'multiple',
         selectorLabel: { color: engine.$theme().color.text, borderColor: engine.$theme().color.border },
-        data: tableObject.rows.map((row) => row[0]),
       },
     };
   },
@@ -918,19 +917,20 @@ const RadarChartOptionsHandler = {
         return result;
       },
       radar: {
-        name: {
-          textStyle: { color: engine.$theme().color.text, fontSize: 12, fontWeight: 'bold' },
-          formatter(name) {
-            return name.length > 6 ? `${name.substr(0, 6)}...` : name;
-          },
-        },
         indicator,
         radius: '60%',
         center: ['50%', '50%'],
         splitNumber: 5,
         shape: 'polygon',
         splitArea: { areaStyle: { color: engine.$palette('radar').reverse() } },
-        axisName: { color: engine.$theme().color.text },
+        axisName: {
+          color: engine.$theme().color.text,
+          fontSize: 12,
+          fontWeight: 'bold',
+          formatter(name) {
+            return name.length > 6 ? `${name.substr(0, 6)}...` : name;
+          },
+        },
         axisLine: { lineStyle: { color: 'rgba(211, 253, 250, 0.8)' } },
         splitLine: { lineStyle: { color: 'rgba(211, 253, 250, 0.8)' } },
       },
