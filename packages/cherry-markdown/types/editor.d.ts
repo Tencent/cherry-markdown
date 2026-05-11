@@ -63,7 +63,7 @@ export interface BatchMarkItem {
   to: number;
   className?: string;
   replacedWith?: HTMLElement;
-  options: MarkTextOptions;
+  title?: string;
 }
 
 /**
