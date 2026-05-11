@@ -751,7 +751,7 @@ class SuggesterPanel {
 
   /**
    * 监听方向键选择 options
-   * @param {CodeMirror.Editor} codemirror
+   * @param {import('@codemirror/view').EditorView} codemirror
    * @param {KeyboardEvent} evt
    */
   onKeyDown(codemirror, evt) {
