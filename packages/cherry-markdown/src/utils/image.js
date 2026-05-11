@@ -124,7 +124,7 @@ const imgAltHelper = {
         return;
       case 'float-left':
         result.extendStyles += 'float:left;transform:translateX(0);margin-left:0;display:block;';
-        result.extendClasses += ' cherry-img0align-float-right';
+        result.extendClasses += ' cherry-img-align-float-right';
         return;
       default:
         return;
