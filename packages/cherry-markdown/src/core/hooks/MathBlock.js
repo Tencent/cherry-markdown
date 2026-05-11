@@ -85,7 +85,15 @@ export default class MathBlock extends ParagraphBase {
       }
     } else if (this.MathJax?.tex2svg) {
       // MathJax渲染
-      let svg = getHTML(this.MathJax.tex2svg($content), true);
+      let svg = '';
+      try {
+        svg = getHTML(this.MathJax.tex2svg($content), true);
+      } catch (e) {
+        if (this.isSelfClosing()) {
+          svg = this.lastCode;
+        }
+      }
+
       if (this.isSelfClosing()) {
         if (/data-mml-node="merror"/.test(svg) && this.lastCode) {
           svg = this.lastCode;

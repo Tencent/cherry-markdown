@@ -477,13 +477,13 @@ const basicConfig = {
   callback: {
     changeString2Pinyin: window.pinyin,
     onClickPreview: (event) => {
-      console.log('onClickPreview', event);
+      // console.log('onClickPreview', event);
     },
     afterAsyncRender: (md, html) => {
       // console.log("afterAsyncRender", md, html);
     },
     urlProcessor(url, srcType) {
-      console.log(`url-processor`, url, srcType);
+      // console.log(`url-processor`, url, srcType);
       return url;
     },
     // onPaste: (clipboardData, cherry, callback) => {
