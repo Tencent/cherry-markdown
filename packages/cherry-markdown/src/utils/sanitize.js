@@ -452,7 +452,7 @@ export function isValidScheme(url) {
     return true;
   }
   const SCHEME_BLACKLIST = ['javascript', 'data'];
-  const scheme = match[1].replace(/[\s]/g, ''); // 协议中间可能会出现空白字符绕过检查
+  const scheme = match[1].replace(/[\s\x00-\x1f]/g, ''); // 协议中间可能会出现空白字符或控制字符绕过检查
   if (SCHEME_BLACKLIST.indexOf(scheme.toLowerCase()) !== -1) {
     return false;
   }
