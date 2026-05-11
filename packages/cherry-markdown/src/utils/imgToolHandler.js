@@ -193,10 +193,17 @@ const imgToolHandler = {
     // 图片有 CSS transition (all 0.1s)，需等待过渡动画结束后再获取最终位置
     this.img.addEventListener('transitionend', () => this.updatePosition(), { once: true });
     // 兜底：如果过渡没有触发（如属性没变化），120ms 后也更新
-    setTimeout(() => this.updatePosition(), 120);
+    this._fallbackTimer = setTimeout(() => {
+      this._fallbackTimer = null;
+      this.updatePosition();
+    }, 120);
   },
   remove() {
     this.butsLayout = false;
+    if (this._fallbackTimer) {
+      clearTimeout(this._fallbackTimer);
+      this._fallbackTimer = null;
+    }
   },
   /**
    * 更新工具栏位置，用于预览区更新或编辑器大小变化后重新定位
