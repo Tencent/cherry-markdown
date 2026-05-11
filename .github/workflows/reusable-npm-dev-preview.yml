@@ -84,9 +84,13 @@ jobs:
               '```',
               '',
               '**overrides：**',
-              `npm: \`"overrides": { "cherry-markdown": "npm:${name}@${version}" }\``,
-              `yarn: \`"resolutions": { "cherry-markdown": "npm:${name}@${version}" }\``,
-              `pnpm: \`"pnpm": { "overrides": { "cherry-markdown": "npm:${name}@${version}" } }\``,
+              '```json',
+              '{',
+              '  "overrides": {',
+              `    "cherry-markdown": "npm:${name}@${version}"`,
+              '  }',
+              '}',
+              '```',
             ].join('\n');
             github.rest.issues.createComment({
               issue_number: ${{ inputs.pr_number }},
