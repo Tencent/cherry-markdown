@@ -235,7 +235,7 @@ export default class List extends ParagraphBase {
   $getLineNum(str) {
     const beginLine = str.match(/^\n\n/)?.length ?? 0;
     const $str = str.replace(/^\n+/, '').replace(/\n+$/, '\n');
-    return $str.match(/\n/g)?.length ?? 0 + beginLine;
+    return ($str.match(/\n/g)?.length ?? 0) + beginLine;
   }
 
   makeHtml(str, sentenceMakeFunc) {
