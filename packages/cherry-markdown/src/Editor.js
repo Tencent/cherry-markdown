@@ -51,6 +51,7 @@ import { createElement } from './utils/dom';
 import { base64Reg, imgDrawioXmlReg, createUrlReg, getCodeBlockRule } from './utils/regexp';
 import { addEvent, removeEvent } from './utils/event';
 import { handleNewlineIndentList } from './utils/autoindent';
+import diff from 'fast-diff';
 
 /**
  * 自定义语法高亮器 - 将 Lezer tags 映射为 cm-* 类名
@@ -2151,9 +2152,20 @@ export default class Editor {
 
   /**
    * 设置编辑器值
+   * @param {string} value 新内容
+   * @param {boolean} [keepCursor=false] 是否保持光标位置
+   *
+   * 协作场景说明：
+   *  - keepCursor 为 true 时，会基于 fast-diff 计算新旧内容之间的最小变更集，
+   *    并通过 EditorView.dispatch({ changes }) 让 CodeMirror 6 自身的 ChangeSet
+   *    机制自动映射当前 selection（包括多光标/选区端点）。
    */
-  setValue(value = '') {
-    if (this.editor) {
+  setValue(value = '', keepCursor = false) {
+    if (!this.editor) {
+      return;
+    }
+
+    if (keepCursor === false) {
       this.editor.dispatch({
         changes: {
           from: 0,
@@ -2161,7 +2173,57 @@ export default class Editor {
           insert: value,
         },
       });
+      return;
     }
+
+    // const currentScrollTop = this.editor.scrollDOM.scrollTop;
+    const old = this.editor.state.doc.toString();
+
+    // 内容完全一致时无需 dispatch
+    if (old === value) {
+      return;
+    }
+
+    // 基于 fast-diff 生成最小化的 changes 列表
+    const changes = this.computeMinimalChanges(old, value);
+
+    if (changes.length === 0) {
+      return;
+    }
+
+    // 不指定 selection，CodeMirror 会基于 changes 自动映射当前光标/选区
+    this.editor.dispatch({ changes });
+
+    this.dealSpecialWords();
+    // this.editor.scrollDOM.scrollTop = currentScrollTop;
+  }
+
+  /**
+   * 基于 fast-diff 计算两段文本的最小变更集合，供 EditorView.dispatch 使用
+   * @private
+   * @param {string} oldStr 旧内容
+   * @param {string} newStr 新内容
+   * @returns {{from: number, to: number, insert: string}[]}
+   */
+  computeMinimalChanges(oldStr, newStr) {
+    const diffs = diff(oldStr, newStr);
+    /** @type {{from: number, to: number, insert: string}[]} */
+    const changes = [];
+    // pos 是相对“旧文档”的位置游标
+    let pos = 0;
+    for (let i = 0; i < diffs.length; i++) {
+      const [op, text] = diffs[i];
+      if (op === diff.EQUAL) {
+        pos += text.length;
+      } else if (op === diff.DELETE) {
+        changes.push({ from: pos, to: pos + text.length, insert: '' });
+        pos += text.length;
+      } else if (op === diff.INSERT) {
+        changes.push({ from: pos, to: pos, insert: text });
+        // INSERT 不消耗旧文档位置，pos 不变
+      }
+    }
+    return changes;
   }
 
   /**
