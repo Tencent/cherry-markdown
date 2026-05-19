@@ -63,13 +63,6 @@ export default class Previewer {
   /**
    * @property
    * @private
-   * @type {number} requestAnimationFrame 句柄，用于对 scroll 事件做节流，避免一帧内重复计算
-   */
-  scrollRafId = 0;
-
-  /**
-   * @property
-   * @private
    * @type {Function|null} 鼠标滚轮事件处理器，保存为实例属性避免内存泄漏
    */
   wheelHandler = null;
@@ -504,8 +497,7 @@ export default class Previewer {
   bindScroll() {
     const domContainer = this.getDomContainer();
 
-    // 真正执行滚动同步的逻辑，每帧最多执行一次（由 scrollHandler 通过 rAF 调度）
-    const runScrollSync = () => {
+    this.scrollHandler = () => {
       // 销毁后不执行，防止访问已清理的引用
       if (this.isDestroyed) {
         return;
@@ -559,23 +551,6 @@ export default class Previewer {
       return this.editor?.scrollToLineNum(lines - lineNum, lineNum, percent);
       // }
       // return this.editor.scrollToLineNum(lines - lineNum, 0, 0);
-    };
-
-    // 通过 requestAnimationFrame 对 scroll 事件做节流：
-    //  - 一帧内多次触发 scroll 时，只在下一帧执行一次同步逻辑
-    //  - 避免高频 scroll 导致的重复 layout 计算（getBoundingClientRect / getComputedStyle）
-    this.scrollHandler = () => {
-      if (this.isDestroyed) {
-        return;
-      }
-      if (this.scrollRafId) {
-        // 本帧已排队，直接丢弃本次事件
-        return;
-      }
-      this.scrollRafId = requestAnimationFrame(() => {
-        this.scrollRafId = 0;
-        runScrollSync();
-      });
     };
     addEvent(domContainer, 'scroll', this.scrollHandler, false);
 
@@ -1396,12 +1371,6 @@ export default class Previewer {
 
     // 清理滚动事件监听
     this.removeScroll();
-
-    // 清理待执行的 scroll rAF
-    if (this.scrollRafId) {
-      cancelAnimationFrame(this.scrollRafId);
-      this.scrollRafId = 0;
-    }
 
     // 清理 wheel 事件监听
     const domContainer = this.getDomContainer();
