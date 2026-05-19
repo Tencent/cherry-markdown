@@ -14,36 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * Lightweight non-cryptographic hash utility.
- *
- * Goals:
- *  1. Replace CryptoJS.SHA256 in hot paths (cache key generation) with a much
- *     faster pure-JS implementation. Hashing is invoked many times per render
- *     pass, so micro-performance matters more than cryptographic strength.
- *  2. Keep the output charset compatible with all existing consumers:
- *       - cherry-inner://[0-9a-f]+               (UrlCache.js)
- *       - data-sign="..."                        (CodeBlock / Header / ...)
- *       - inserted into a `\w+?` regex group     (ParagraphBase.js)
- *     => output is always lowercase hexadecimal.
- *  3. Keep collision probability extremely low for the cache-key use case.
- *     A single 32-bit hash collides at ~77k inputs (birthday bound), which is
- *     not acceptable for a long-running editor session. We therefore compose
- *     two independent xxHash32 passes (different seeds) into a 64-bit value,
- *     and additionally mix the input length into the high seed so two inputs
- *     of different lengths can never produce the same output. The effective
- *     collision space is 2^64, which is comfortable for in-memory caches.
- *
- * Algorithm: xxHash32 (Yann Collet), implemented with Math.imul and unsigned
- * 32-bit arithmetic. We feed `charCodeAt` values directly (UTF-16 code units),
- * which is consistent within a single JS process and is all we need for cache
- * identity. We do NOT need cross-language byte-level reproducibility.
- *
- * Benchmarks (Chrome, ~10KB markdown, hashed once per render):
- *   CryptoJS.SHA256:   ~0.85 ms
- *   xxHash32 x2 here:  ~0.10 ms   (≈ 8x faster, no extra bundle weight)
- */
-
 const PRIME32_1 = 0x9e3779b1 | 0;
 const PRIME32_2 = 0x85ebca77 | 0;
 const PRIME32_3 = 0xc2b2ae3d | 0;
