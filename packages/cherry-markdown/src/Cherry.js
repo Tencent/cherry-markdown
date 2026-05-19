@@ -176,7 +176,7 @@ export default class Cherry extends CherryStatic {
     // 创建预览区
     const previewer = this.createPreviewer();
 
-    $expectTarget(this.options.toolbars.toolbar, Array);
+    // $expectTarget(this.options.toolbars.toolbar, Array);
 
     // 创建顶部工具栏
     this.createToolbar();
