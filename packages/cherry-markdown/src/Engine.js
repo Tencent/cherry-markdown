@@ -16,7 +16,7 @@
 import HookCenter from './core/HookCenter';
 import hooksConfig from './core/HooksConfig';
 import NestedError, { $expectTarget, $expectInherit, $expectInstance } from './utils/error';
-import CryptoJS from 'crypto-js';
+import { hashHex } from './utils/hash';
 import SyntaxBase from './core/SyntaxBase';
 import ParagraphBase from './core/ParagraphBase';
 import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg, base64Reg, getCodeBlockRule } from './utils/regexp';
@@ -76,7 +76,6 @@ export default class Engine {
       this.timer = null;
     }
     this.timer = setTimeout(() => {
-      this.$cherry.lastMarkdownText = '';
       this.hashCache.clear();
       const markdownText = this.$cherry.editor?.editor?.view?.state?.doc?.toString() || '';
       const html = this.makeHtml(markdownText);
@@ -247,7 +246,7 @@ export default class Engine {
 
   // 替换预留关键字
   $encodeReservedKeywords(str) {
-    return str.replace(/~/g, '~T').replace(/\$/g, '~D');
+    return str.replace(/[~$]/g, (ch) => (ch === '~' ? '~T' : '~D'));
   }
 
   // 还原预留关键字
@@ -276,7 +275,7 @@ export default class Engine {
     let $md = md;
     const before = actionArgs?.before || '';
     const method = action === 'afterMakeHtml' ? 'reduceRight' : 'reduce';
-    if (!this.hooks && !this.hooks[type] && !this.hooks[type][method]) {
+    if (!this.hooks || !this.hooks[type] || !this.hooks[type][method]) {
       return $md;
     }
     try {
@@ -326,25 +325,28 @@ export default class Engine {
     return this.hash(str);
   }
 
+  /**
+   * @deprecated 历史 API：原本基于 CryptoJS.SHA256 输出 64 位 hex。现已替换为
+   * 轻量非加密 hash（xxHash32 双通道，输出 16 位 hex），仅用于缓存键、
+   * 内部链接占位等场景。如有真实加密签名需求，请勿使用此方法。
+   */
   sha256(str) {
-    return CryptoJS.SHA256(str).toString();
+    return hashHex(str);
   }
 
   /**
-   * 计算哈希值
+   * 计算哈希值（非加密，用于缓存键）
    * @param {String} str 被计算的字符串
-   * @returns {String} 哈希值
+   * @returns {String} 哈希值（16 位小写 hex）
    */
   hash(str) {
-    // 当缓存队列比较大时，随机抛弃一些缓存
-    if (this.hashStrMap.size > 2000) {
-      const keys = Array.from(this.hashStrMap.keys()).slice(0, 200);
-      keys.forEach((key) => this.hashStrMap.delete(key));
+    const cached = this.hashStrMap.get(str);
+    if (cached !== undefined) {
+      return cached;
     }
-    if (!this.hashStrMap.get(str)) {
-      this.hashStrMap.set(str, CryptoJS.SHA256(str).toString());
-    }
-    return this.hashStrMap.get(str);
+    const sign = hashHex(str);
+    this.hashStrMap.set(str, sign);
+    return sign;
   }
 
   $checkCache(str, func) {
@@ -367,19 +369,14 @@ export default class Engine {
   $cacheBigData(md) {
     // 暂存所有代码块
     const codeBlocks = [];
-    let codeBlockIndex = 0;
     let $md = md.replace(getCodeBlockRule().reg, (whole, m1, m2) => {
-      const cacheKey = `codeBlockBegin${codeBlockIndex}codeBlockEnd`;
-      codeBlockIndex += 1;
-      codeBlocks.push({
-        key: cacheKey,
-        value: whole,
-      });
+      const cacheKey = `codeBlockBegin${codeBlocks.length}codeBlockEnd`;
+      codeBlocks.push(whole);
       return cacheKey;
     });
 
     $md = $md.replace(base64Reg, (dataUri) => {
-      const cacheKey = `data:cherry/cache;sha256,${this.hash(dataUri)}`;
+      const cacheKey = `bigDataBegin${this.hash(dataUri)}bigDataEnd`;
       this.cachedBigData[cacheKey] = dataUri;
       return cacheKey;
     });
@@ -406,9 +403,7 @@ export default class Engine {
     }
     $md = tmpArr.join('\n');
     // 恢复所有代码块
-    codeBlocks.forEach((item) => {
-      $md = $md.replace(item.key, item.value);
-    });
+    $md = $md.replace(/codeBlockBegin(\d+)codeBlockEnd/g, (whole, index) => codeBlocks[index] ?? '');
     return $md;
   }
 
@@ -416,13 +411,9 @@ export default class Engine {
    * @param {string} md
    */
   $deCacheBigData(md) {
-    return md
-      .replace(/data:cherry\/cache;sha256,[0-9a-f]+/g, (cacheUri) => {
-        return this.cachedBigData[cacheUri];
-      })
-      .replace(/bigDataBegin[^\n]+?bigDataEnd/g, (whole) => {
-        return this.cachedBigData[whole];
-      });
+    return md.replace(/bigDataBegin[^\n]+?bigDataEnd/g, (whole) => {
+      return this.cachedBigData[whole];
+    });
   }
 
   /**

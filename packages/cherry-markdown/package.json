@@ -111,7 +111,6 @@
     "@codemirror/view": "^6.40.0",
     "@lezer/highlight": "^1.2.1",
     "@replit/codemirror-vim": "^6.3.0",
-    "crypto-js": "^4.2.0",
     "dompurify": "^3.2.6",
     "htmlparser2": "^10.0.0",
     "jsdom": "~19.0.0"

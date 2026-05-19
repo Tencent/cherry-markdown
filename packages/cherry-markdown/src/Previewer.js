@@ -496,6 +496,7 @@ export default class Previewer {
 
   bindScroll() {
     const domContainer = this.getDomContainer();
+
     this.scrollHandler = () => {
       // 销毁后不执行，防止访问已清理的引用
       if (this.isDestroyed) {
