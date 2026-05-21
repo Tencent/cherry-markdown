@@ -95,9 +95,9 @@
     "rimraf": "^3.0.2",
     "rollup": "4.52.3",
     "rollup-plugin-postcss": "^4.0.2",
-    "rollup-plugin-scss": "^4.0.1",
+    "rollup-plugin-sass": "^1.15.3",
     "rollup-plugin-typescript2": "^0.36.0",
-    "sass": "^1.52.3",
+    "sass": "^1.99.0",
     "serve": "^14.2.0",
     "virtual-dom": "^2.1.1"
   },

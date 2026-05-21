@@ -1,3 +1,5 @@
+@use './components/bubble';
+
 .cherry {
   .doing-resize-img {
     -moz-user-select:none;
@@ -82,8 +84,9 @@
       cursor:e-resize;
     }
   }
+  // 复用 bubble 模块的基础盒模型；扩展样式见本选择器内，勿改用 @extend（跨模块不可用）
   .cherry-previewer-img-tool-handler {
-    @extend .cherry-bubble;
+    @include bubble.cherry-bubble-base;
     padding: var(--bubble-padding);
     display: flex;
     flex-direction: column;
