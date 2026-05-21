@@ -1,4 +1,16 @@
-.cherry-bubble {
+// 气泡浮层的「基础盒模型」样式（定位、边框、背景、阴影等）。
+//
+// 说明：
+// - 这是 Sass @mixin，编译后不会出现 .cherry-bubble-base 类名，DOM 仍使用 .cherry-bubble。
+// - 后缀 -base 表示可被多处 @include 的公共片段，不是额外的 CSS 选择器。
+// - 使用 @mixin 而非 @extend：Sass 模块体系下 @extend 不能跨文件引用（previewer 与 bubble 分属不同模块）。
+// - 与 @extend 的差异：@include 会把样式复制到每个选择器；覆盖 .cherry-bubble 不会自动作用于
+//   .cherry-previewer-img-tool-handler，需分别覆盖或写共同父选择器。
+//
+// 使用处：
+// - 本文件 .cherry-bubble
+// - previewer.scss → .cherry .cherry-previewer-img-tool-handler（@include bubble.cherry-bubble-base）
+@mixin cherry-bubble-base {
   position: absolute;
 
   display: flex;
@@ -17,6 +29,11 @@
   border-radius: var(--bubble-radius);
   z-index: var(--bubble-z-index);
   padding: var(--spacing-xs);
+}
+
+// 编辑器/预览区通用气泡容器；基础样式来自 cherry-bubble-base，下方为气泡专有结构（箭头等）
+.cherry-bubble {
+  @include cherry-bubble-base;
 
   &.cherry-bubble--centered {
     left: 50%;
