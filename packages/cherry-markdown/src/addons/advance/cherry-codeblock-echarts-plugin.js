@@ -109,7 +109,7 @@ export default class EChartsCodeBlockEngine {
           if ($engine.$cherry.options.engine.global.flowSessionContext) {
             container.innerHTML = `drawing...`;
           } else {
-            container.innerHTML = `<div style="color: red;">Render Error: ${error.message}</div>`;
+            container.innerHTML = `<div style="color: red;">Render Error: ${error.message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
           }
         }
       });

@@ -70,7 +70,7 @@ jobs:
 
       - name: Comment playground links
         if: steps.deploy.outcome == 'success'
-        uses: actions-cool/maintain-one-comment@v3
+        uses: TDesignOteam/workflows/actions/maintain-one-comment@main
         with:
           token: ${{ secrets.BOT_TOKEN }}
           body: |
@@ -159,7 +159,7 @@ jobs:
 
       - name: Comment client artifacts
         if: steps.collect.outputs.count > 0
-        uses: actions-cool/maintain-one-comment@v3
+        uses: TDesignOteam/workflows/actions/maintain-one-comment@main
         with:
           token: ${{ secrets.BOT_TOKEN }}
           body: |
@@ -202,7 +202,7 @@ jobs:
 
       - name: Comment vscode plugin artifact
         if: steps.collect.outputs.found == 'true'
-        uses: actions-cool/maintain-one-comment@v3
+        uses: TDesignOteam/workflows/actions/maintain-one-comment@main
         with:
           token: ${{ secrets.BOT_TOKEN }}
           body: |

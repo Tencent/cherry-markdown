@@ -29,7 +29,7 @@ import {
 } from '@codemirror/view';
 import { EditorState, StateEffect, StateField, EditorSelection, Transaction, Compartment } from '@codemirror/state';
 import { markdown } from '@codemirror/lang-markdown';
-import { search, searchKeymap, SearchQuery, selectSelectionMatches } from '@codemirror/search';
+import { search, searchKeymap, SearchQuery } from '@codemirror/search';
 import {
   history,
   historyKeymap,
@@ -39,8 +39,6 @@ import {
   moveLineDown,
   copyLineDown,
   selectLine,
-  insertBlankLine,
-  selectMatchingBracket,
 } from '@codemirror/commands';
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import { syntaxHighlighting, defaultHighlightStyle, foldGutter, indentOnInput } from '@codemirror/language';
@@ -50,9 +48,10 @@ import Logger from '@/Logger';
 import { handleFileUploadCallback } from '@/utils/file';
 import { tagHighlighter, tags } from '@lezer/highlight';
 import { createElement } from './utils/dom';
-import { base64Reg, imgDrawioXmlReg, createUrlReg, getCodeBlockRule, pasteWrapperReg } from './utils/regexp';
+import { base64Reg, imgDrawioXmlReg, createUrlReg, getCodeBlockRule } from './utils/regexp';
 import { addEvent, removeEvent } from './utils/event';
 import { handleNewlineIndentList } from './utils/autoindent';
+import diff from 'fast-diff';
 
 /**
  * 自定义语法高亮器 - 将 Lezer tags 映射为 cm-* 类名
@@ -631,21 +630,24 @@ class CM6Adapter {
     this.markIdCounter += 1;
     const markId = `mark_${this.markIdCounter}`;
 
+    const markAttributes = {
+      ...(options.title ? { title: options.title } : {}),
+      'data-mark-id': markId,
+    };
+
     const decoration = options.replacedWith
       ? Decoration.replace({
           widget: new ReplacementWidget(options.replacedWith),
-          attributes: { 'data-mark-id': markId },
+          attributes: markAttributes,
         })
       : Decoration.mark({
           class: options.className,
-          attributes: {
-            ...(options.title ? { title: options.title } : {}),
-            'data-mark-id': markId,
-          },
+          atomic: true,
+          attributes: markAttributes,
         });
 
     this.view.dispatch({
-      effects: addMark.of({ from, to, decoration, options, markId }),
+      effects: addMark.of({ from, to, decoration, options }),
     });
 
     const { view } = this;
@@ -654,7 +656,7 @@ class CM6Adapter {
     return {
       clear: () => {
         view.dispatch({
-          effects: removeMark.of({ from, to, markId: savedMarkId }),
+          effects: removeMark.of(savedMarkId),
         });
       },
       find: () => {
@@ -711,24 +713,12 @@ class CM6Adapter {
    * @returns {SearchCursor} 搜索游标对象
    */
   getSearchCursor(query, pos = 0, caseFold) {
-    let searchStr = typeof query === 'string' ? query : query.source;
-    let isRegexp = query instanceof RegExp;
-
-    if (isRegexp) {
-      try {
-        new RegExp(searchStr, 'gimu');
-      } catch (e) {
-        console.error('Invalid regexp for CodeMirror Search:', searchStr, e.message);
-        searchStr = '(?!.*)';
-        isRegexp = true;
-      }
-    }
-
     const searchQuery = new SearchQuery({
-      search: searchStr,
-      regexp: isRegexp,
+      search: query instanceof RegExp ? query.source : query,
+      regexp: query instanceof RegExp,
       caseSensitive: caseFold === false,
     });
+    const req = query instanceof RegExp ? new RegExp(query.source, query.flags.replace('g', '')) : new RegExp('');
 
     const { doc } = this.view.state;
     let cursor = searchQuery.getCursor(doc, pos);
@@ -759,7 +749,7 @@ class CM6Adapter {
         lastSearchResult = result.value;
 
         const matched = doc.sliceString(result.value.from, result.value.to);
-        const matchArr = query instanceof RegExp ? matched.match(query) : [matched];
+        const matchArr = query instanceof RegExp ? matched.match(req) : [matched];
         return matchArr || false;
       },
       findPrevious: () => {
@@ -771,7 +761,7 @@ class CM6Adapter {
         cursor = searchQuery.getCursor(doc, currentPos);
 
         const matched = doc.sliceString(prevMatch.from, prevMatch.to);
-        const matchResult = query instanceof RegExp ? matched.match(query) : [matched];
+        const matchResult = query instanceof RegExp ? matched.match(req) : [matched];
         return matchResult || false;
       },
       from: () => {
@@ -909,7 +899,7 @@ class ReplacementWidget extends WidgetType {
 // Mark 状态管理
 /** @type {import('@codemirror/state').StateEffectType<MarkEffectValue>} */
 const addMark = StateEffect.define();
-/** @type {import('@codemirror/state').StateEffectType<{from: number, to: number, markId?: string}>} */
+/** @type {import('@codemirror/state').StateEffectType<string>} */
 const removeMark = StateEffect.define();
 
 const markField = StateField.define({
@@ -920,29 +910,20 @@ const markField = StateField.define({
     let updatedMarks = currentMarks.map(tr.changes);
 
     const toAdd = [];
-    const removeFilters = [];
+    const removeMarkIds = new Set();
 
     for (const effect of tr.effects) {
       if (effect.is(addMark) && effect.value) {
-        const decoration = effect.value.decoration.range(effect.value.from, effect.value.to);
-        toAdd.push(decoration);
+        const { from, to, decoration } = effect.value;
+        if (decoration) {
+          toAdd.push(decoration.range(from, to));
+        }
       } else if (effect.is(removeMark) && effect.value) {
-        removeFilters.push(effect.value);
+        removeMarkIds.add(effect.value);
       }
     }
 
-    if (toAdd.length > 0 || removeFilters.length > 0) {
-      const removeMarkIdSet = new Set();
-      const removeRangeSet = new Set();
-
-      for (const filter of removeFilters) {
-        if (filter.markId) {
-          removeMarkIdSet.add(filter.markId);
-        } else {
-          removeRangeSet.add(`${filter.from}_${filter.to}`);
-        }
-      }
-
+    if (toAdd.length > 0 || removeMarkIds.size > 0) {
       if (toAdd.length > 1) {
         toAdd.sort((a, b) => a.from - b.from);
       }
@@ -950,13 +931,10 @@ const markField = StateField.define({
       updatedMarks = updatedMarks.update({
         add: toAdd,
         filter:
-          removeFilters.length > 0
+          removeMarkIds.size > 0
             ? (from, to, value) => {
                 const attrMarkId = value.spec?.attributes?.['data-mark-id'];
-                if (attrMarkId && removeMarkIdSet.has(attrMarkId)) {
-                  return false;
-                }
-                if (removeRangeSet.has(`${from}_${to}`)) {
+                if (removeMarkIds.has(attrMarkId)) {
                   return false;
                 }
                 return true;
@@ -1077,8 +1055,13 @@ export default class Editor {
   /**
    * 在onChange后处理draw.io的xml数据和图片的base64数据，对这种超大的数据增加省略号，
    * 以及对全角符号进行特殊染色。
+   * @param {boolean} force 是否强制处理
    */
-  dealSpecialWords = () => {
+  dealSpecialWords = (force = false) => {
+    if (force) {
+      this.doDealSpecialWordsInternal();
+      return;
+    }
     const config = this.options.dealSpecialWordsConfig || {};
     const debounceMs = config.debounceMs ?? 200;
     const forceProcessMs = config.forceProcessMs ?? 1000;
@@ -1112,53 +1095,30 @@ export default class Editor {
     }
 
     const lineCount = this.editor.view.state.doc.lines;
-    const largeDocConfig = this.options.largeDocumentConfig || {};
-    const lineThreshold = largeDocConfig.lineThreshold ?? 10000;
-    const strategy = largeDocConfig.strategy ?? 'degrade';
 
-    if (lineCount > lineThreshold) {
-      if (strategy === 'skip') {
-        return;
-      }
-      if (strategy === 'degrade') {
-        return this.doPartialMarkProcessing();
-      }
+    /**
+     * 如果编辑器行数超过10000，则不再处理
+     * 增加这个逻辑是为了避免性能问题，当超过1w行时，formatBigData2Mark耗费的性能会明显增加。后续在优化后可以去掉这个降级逻辑
+     * 允许降级的理由：超过1w行的md基本已经不关心base64等数据是否缩略展示了
+     */
+    if (lineCount > 10000) {
+      return;
     }
 
     const allMarkItems = [];
     const existingMarksSet = this.getExistingMarksSet();
 
-    // 收集 paste-wrapper 标记
-    this.collectMarkItems(
-      pasteWrapperReg,
-      'cm-url paste-wrapper',
-      allMarkItems,
-      (fromPos, matchResult) => {
-        const whole = matchResult[0] ?? '';
-        const id = matchResult[1] ?? '';
-        const bigString = matchResult[2] ?? '';
-        // 验证：ID 和 bigString 不应包含换行符（保持原正则 [^|\n] 的严格性）
-        if (id.includes('\n') || bigString.includes('\n')) {
-          return null;
-        }
-        const begin = fromPos;
-        const end = fromPos + whole.length;
-        return { bigString, begin, end, id };
-      },
-      existingMarksSet,
-    );
-
     // 收集 base64 标记
-    this.collectMarkItems(base64Reg, 'cm-url base64', allMarkItems, undefined, existingMarksSet);
+    this.collectMarkItems(base64Reg, 'cm-url base64', allMarkItems, existingMarksSet);
 
     // 收集 drawio 标记
-    this.collectMarkItems(imgDrawioXmlReg, 'cm-url drawio', allMarkItems, undefined, existingMarksSet);
+    this.collectMarkItems(imgDrawioXmlReg, 'cm-url drawio', allMarkItems, existingMarksSet);
 
     // 收集 URL 标记
     if (this.$cherry.options.editor.maxUrlLength > 10) {
       const [protocolUrlPattern, wwwUrlPattern] = createUrlReg(this.$cherry.options.editor.maxUrlLength);
-      this.collectMarkItems(protocolUrlPattern, 'cm-url url-truncated', allMarkItems, undefined, existingMarksSet);
-      this.collectMarkItems(wwwUrlPattern, 'cm-url url-truncated', allMarkItems, undefined, existingMarksSet);
+      this.collectMarkItems(protocolUrlPattern, 'cm-url url-truncated', allMarkItems, existingMarksSet);
+      this.collectMarkItems(wwwUrlPattern, 'cm-url url-truncated', allMarkItems, existingMarksSet);
     }
 
     // 收集全角字符标记
@@ -1173,53 +1133,21 @@ export default class Editor {
   };
 
   /**
-   * 大文档降级处理：仅处理高优先级标记，跳过低优先级标记以保证性能
-   * @private
-   */
-  doPartialMarkProcessing = () => {
-    const allMarkItems = [];
-    const existingMarksSet = this.getExistingMarksSet();
-
-    // 大文档降级：只处理高优先级标记（paste-wrapper 和 base64）
-    this.collectMarkItems(
-      pasteWrapperReg,
-      'cm-url paste-wrapper',
-      allMarkItems,
-      (fromPos, matchResult) => {
-        const whole = matchResult[0] ?? '';
-        const id = matchResult[1] ?? '';
-        const bigString = matchResult[2] ?? '';
-        if (id.includes('\n') || bigString.includes('\n')) {
-          return null;
-        }
-        const begin = fromPos;
-        const end = fromPos + whole.length;
-        return { bigString, begin, end, id };
-      },
-      existingMarksSet,
-    );
-
-    this.collectMarkItems(base64Reg, 'cm-url base64', allMarkItems, undefined, existingMarksSet);
-
-    if (allMarkItems.length > 0) {
-      this.applyBatchMarks(this.editor, allMarkItems);
-    }
-  };
-
-  /**
    * 一次性收集所有已有标记（避免 O(n²) 检查）
    * @returns {Set<string>} 已有标记的键集合，格式为 "from_to_className"
    */
   getExistingMarksSet = () => {
     const marksSet = new Set();
-    const { editor } = this;
-    const marks = editor.findMarks(0, editor.view.state.doc.length);
+    const marks = this.editor.view.state.field(markField, false);
+    if (!marks) return marksSet;
 
-    marks.forEach((mark) => {
-      const key = `${mark.from}_${mark.to}_${mark.className}`;
-      marksSet.add(key);
-    });
-
+    const iter = marks.iter();
+    while (iter.value) {
+      const { from, to } = iter;
+      const className = iter.value.spec?.class || '';
+      marksSet.add(`${from}_${to}_${className}`);
+      iter.next();
+    }
     return marksSet;
   };
 
@@ -1236,18 +1164,29 @@ export default class Editor {
    * @param {RegExp} reg - 正则表达式
    * @param {string} className - CSS 类名
    * @param {Array<import('../types/editor').BatchMarkItem>} targetArray - 目标数组，用于收集标记项
-   * @param {(fromPos: number, matchResult: RegExpMatchArray) => MarkRange | null} [callback] - 可选的回调函数
    * @param {Set<string>} [existingMarksSet] - 已有标记集合（用于避免 O(n²) 检查）
    */
-  collectMarkItems = (reg, className, targetArray, callback, existingMarksSet) => {
+  collectMarkItems = (reg, className, targetArray, existingMarksSet) => {
     const { editor } = this;
     const searcher = editor.getSearchCursor(reg);
 
     for (let matchResult = searcher.findNext(); matchResult !== false; matchResult = searcher.findNext()) {
-      const item = this.collectMarkItem(editor, searcher, matchResult, className, callback, existingMarksSet);
-      if (item) {
-        targetArray.push(item);
-      }
+      const fromPos = searcher.from();
+      if (fromPos === null) continue;
+
+      const range = this.calculateMarkRange(matchResult, fromPos);
+      if (!range) continue;
+
+      const key = `${range.begin}_${range.end}_${className}`;
+      if (existingMarksSet && existingMarksSet.has(key)) continue;
+      const newSpan = createElement('span', `cm-string ${className}`, { title: range.bigString });
+      newSpan.textContent = range.bigString;
+      targetArray.push({
+        from: range.begin,
+        to: range.end,
+        className,
+        replacedWith: newSpan,
+      });
     }
   };
 
@@ -1257,7 +1196,7 @@ export default class Editor {
    * @param {Set<string>} [existingMarksSet] - 已有标记集合（用于避免 O(n²) 检查）
    */
   collectFullWidthMarkItems = (targetArray, existingMarksSet) => {
-    const regex = /[·￥、："【】（）《》]/;
+    const regex = /[·￥、："【】（）《》「」]/;
     const { editor } = this;
     const searcher = editor.getSearchCursor(regex);
 
@@ -1275,45 +1214,10 @@ export default class Editor {
           from: fromPos,
           to: toPos,
           className: 'cm-fullWidth',
-          options: {
-            className: 'cm-fullWidth',
-            title: '按住Ctrl/Cmd点击切换成半角（Hold down Ctrl/Cmd and click to switch to half-width）',
-          },
+          title: '按住Ctrl/Cmd点击切换成半角（Hold down Ctrl/Cmd and click to switch to half-width）',
         });
       }
     }
-  };
-
-  /**
-   * 收集单个匹配结果的数据（不立即创建 mark）
-   * @param {CM6Adapter} editor - 编辑器实例
-   * @param {SearchCursor} searcher - 搜索游标
-   * @param {Array} matchResult - 正则匹配结果
-   * @param {string} className - CSS 类名
-   * @param {Function} [callback] - 可选的回调函数，签名：callback(fromPos: number, matchResult: Array) -> {begin: number, end: number, bigString: string}
-   * @param {Set<string>} [existingMarksSet] - 已有标记集合（用于避免 O(n²) 检查）
-   * @returns {import('~types/editor').BatchMarkItem | null} 返回标记数据或 null（如果已存在或无效）
-   */
-  collectMarkItem = (editor, searcher, matchResult, className, callback, existingMarksSet) => {
-    const fromPos = searcher.from();
-    if (fromPos === null) return null;
-
-    const range = this.calculateMarkRange(matchResult, fromPos, callback);
-    if (!range) return null;
-
-    const key = `${range.begin}_${range.end}_${className}`;
-    if (existingMarksSet && existingMarksSet.has(key)) return null;
-
-    const newSpan = createElement('span', `cm-string ${className}`, { title: range.bigString });
-    newSpan.textContent = range.bigString;
-
-    return {
-      from: range.begin,
-      to: range.end,
-      className,
-      replacedWith: newSpan,
-      options: { replacedWith: newSpan, atomic: true },
-    };
   };
 
   /**
@@ -1330,17 +1234,19 @@ export default class Editor {
       editor.markIdCounter += 1;
       const markId = `mark_${editor.markIdCounter}`;
 
-      const decoration = item.options.replacedWith
+      const decoration = item.replacedWith
         ? Decoration.replace({
-            widget: new ReplacementWidget(item.options.replacedWith),
+            atomic: true,
+            widget: new ReplacementWidget(item.replacedWith),
             attributes: { 'data-mark-id': markId },
           })
         : Decoration.mark({
             class: item.className,
-            attributes: { 'data-mark-id': markId },
+            atomic: true,
+            attributes: { 'data-mark-id': markId, title: item.title ?? '' },
           });
 
-      effects.push(addMark.of({ from: item.from, to: item.to, decoration, options: item.options, markId }));
+      effects.push(addMark.of({ from: item.from, to: item.to, decoration }));
     });
 
     if (effects.length > 0) {
@@ -1352,23 +1258,9 @@ export default class Editor {
    * 计算 mark 范围
    * @param {Array} matchResult - 正则匹配结果
    * @param {number} fromPos - 匹配起始位置
-   * @param {Function} [callback] - 可选的回调函数
    * @returns {{begin: number, end: number, bigString: string} | null}
    */
-  calculateMarkRange = (matchResult, fromPos, callback) => {
-    if (callback) {
-      const result = callback(fromPos, matchResult);
-      if (result?.begin === undefined || result?.end === undefined) return null;
-      if (result.begin >= result.end) return null;
-      if (result.begin < 0 || result.end > this.editor.view.state.doc.length) return null;
-
-      return {
-        begin: result.begin,
-        end: result.end,
-        bigString: result.bigString ?? '',
-      };
-    }
-
+  calculateMarkRange = (matchResult, fromPos) => {
     const bigString = matchResult[2] ?? '';
     const prefixLength = matchResult[1]?.length ?? 0;
     const begin = fromPos + prefixLength;
@@ -1387,25 +1279,27 @@ export default class Editor {
       return;
     }
     // 按住 Ctrl/Cmd 并点击全角字符时触发转换
-    if (target.classList.contains('cm-fullWidth') && (evt.ctrlKey || evt.metaKey) && evt.buttons === 1) {
+    const isFullWidth = target.classList.contains('cm-fullWidth') || target.closest('.cm-fullWidth');
+    if (isFullWidth && (evt.ctrlKey || evt.metaKey) && evt.buttons === 1) {
       const rect = target.getBoundingClientRect();
-      // 注意：posAtCoords 期望的是视口坐标（clientX/clientY），
-      // getBoundingClientRect() 返回的 left/top 已经是视口坐标，无需再减去编辑器偏移
       const fromPos = editorView.posAtCoords({ x: rect.left, y: rect.top });
       if (fromPos === null) return;
-      const line = editorView.state.doc.lineAt(fromPos);
-      const from = { line: line.number - 1, ch: fromPos - line.from };
-      const to = { line: from.line, ch: from.ch + 1 };
-      const selection = EditorSelection.range(
-        editorView.state.doc.line(from.line + 1).from + from.ch,
-        editorView.state.doc.line(to.line + 1).from + to.ch,
-      );
-      editorView.dispatch({
-        selection,
-        scrollIntoView: true,
-      });
+      const from = fromPos;
+      const to = fromPos + 1;
+      // 根据from和to找到对应的装饰器的markId
+      let markId = '';
+      const marks = editorView.state.field(markField, false);
+      if (!marks) return;
+      const iter = marks.iter();
+      while (iter.value) {
+        if (iter.from === from && iter.to === to) {
+          markId = iter.value.spec.attributes['data-mark-id'];
+          break;
+        }
+        iter.next();
+      }
 
-      const replacementText = target.innerText
+      const insert = target.innerText
         .replace('·', '`')
         .replace('￥', '$')
         .replace('、', '/')
@@ -1414,19 +1308,17 @@ export default class Editor {
         .replace('"', '"')
         .replace('【', '[')
         .replace('】', ']')
+        .replace('「', '{')
+        .replace('」', '}')
         .replace('（', '(')
         .replace('）', ')')
         .replace('《', '<')
         .replace('》', '>');
 
       editorView.dispatch({
-        changes: {
-          from: editorView.state.selection.main.from,
-          to: editorView.state.selection.main.to,
-          insert: replacementText,
-        },
-        selection: { anchor: editorView.state.selection.main.from + replacementText.length },
-        scrollIntoView: true,
+        changes: { from, to, insert },
+        selection: { anchor: from, head: to },
+        effects: markId ? removeMark.of(markId) : [],
       });
     }
   }
@@ -1472,44 +1364,36 @@ export default class Editor {
    * @param {CM6AdapterType} editorView - 编辑器视图
    */
   onPasteCallback({ html, htmlText, mdText, randomId }, editorView) {
-    // 在 CM6 中，我们使用 markField 来存储装饰
-    // 查找包含 randomId 的装饰
     const { state } = editorView;
     const marks = state.field(markField, false);
     if (!marks) return;
 
-    // Bug Fix: 先收集匹配项，避免在遍历中修改状态
-    // 这样确保所有匹配项都能被正确处理
-    /** @type {Array<{from: number, to: number, markId: string}>} */
-    const matchedMarks = [];
-
-    marks.between(0, state.doc.length, (from, to, decoration) => {
-      const markId = decoration.spec?.attributes?.['data-mark-id'];
-      if (markId && markId.startsWith('paste-') && markId.includes(randomId)) {
-        matchedMarks.push({ from, to, markId });
+    const iter = marks.iter();
+    while (iter.value) {
+      const markId = iter.value.spec?.attributes?.['data-mark-id'];
+      const { from, to } = iter;
+      if (markId !== randomId) {
+        iter.next();
+        continue;
       }
-    });
-
-    // 统一处理收集到的匹配项
-    for (const { from, to, markId } of matchedMarks) {
+      // 去掉装饰（from/to 不包含前后的 \u200B，需要扩展范围）
+      const docLen = editorView.state.doc.length;
+      const rangeFrom = Math.max(0, from - 1);
+      const rangeTo = Math.min(docLen, to + 1);
       if (mdText) {
-        // Bug Fix: 合并为单个 transaction，保证操作原子性
-        // 这样撤销时可以一次性撤销整个粘贴操作
         editorView.dispatch({
-          changes: { from, to, insert: mdText },
-          effects: removeMark.of({ from, to, markId }),
-          selection: { anchor: from + mdText.length },
+          changes: { from: rangeFrom, to: rangeTo, insert: mdText },
+          effects: removeMark.of(markId),
+          selection: { anchor: rangeFrom + mdText.length },
         });
       } else {
-        // 先移除占位符装饰，同时记录当前位置
         editorView.dispatch({
-          effects: removeMark.of({ from, to, markId }),
-          selection: { anchor: from },
+          effects: removeMark.of(markId),
+          selection: { anchor: rangeFrom, head: rangeTo },
         });
-        // Bug Fix: 使用当前选区位置，而不是传入可能已失效的 from/to
-        // formatHtml2MdWhenPaste 内部会使用 editorView.state.selection.main
         this.formatHtml2MdWhenPaste(null, html, htmlText, editorView);
       }
+      iter.next();
     }
   }
 
@@ -1522,8 +1406,7 @@ export default class Editor {
    */
   handleThirdPaste(event, clipboardData, editorView) {
     // 生成一个随机id，用于有可能的异步回调
-    const randomId = `${Math.random().toString(36).slice(2)}${new Date().getTime()}`;
-    const markId = `paste-${randomId}`;
+    const randomId = `cherry-paste-${Math.random().toString(36).slice(2)}${new Date().getTime()}`;
 
     // 创建符合 onPaste 期望的回调函数（接收 string 参数）
     // 但我们改为接收对象，所以使用 any 进行转换
@@ -1536,26 +1419,25 @@ export default class Editor {
 
     if (onPasteRet !== false && typeof onPasteRet === 'string') {
       event.preventDefault();
-      // 是否命中语法糖
+      // 是否命中语法糖，详情见这个 [issue #1595](https://github.com/Tencent/cherry-markdown/issues/1595)
       if (/^<<[\s\S]+>>$/.test(onPasteRet)) {
-        const newText = `{{${randomId}|${onPasteRet.replace(/^<<([\s\S]+)>>$/, (whole, $1) => `<<${$1.replace(/[<>]/g, '')}>>`)}}}`;
+        // 增加前后零宽空格，避免mark后导致前后无法编辑，同时不影响Markdown解析
+        const newText = `\u200B${onPasteRet.replace(/^<<([\s\S]+)>>$/, '$1')}\u200B`;
         const selection = editorView.state.selection.main;
-        // 创建粘贴占位符 Mark 装饰（范围装饰）
-        // 注意：Decoration.widget 是点装饰，只应该有一个位置
-        // 这里需要高亮整个粘贴范围，所以使用 Decoration.mark
-        const placeholderMark = Decoration.mark({
+        // 创建装饰
+        const decoration = Decoration.mark({
           class: 'paste-wrapper',
+          atomic: true,
           attributes: {
-            'data-mark-id': markId,
-            'data-paste-id': `paste-${randomId}`,
+            'data-mark-id': randomId,
           },
         });
         editorView.dispatch({
           changes: { from: selection.from, to: selection.to, insert: newText },
           effects: addMark.of({
-            from: selection.from,
-            to: selection.from + newText.length,
-            decoration: placeholderMark,
+            from: selection.from + 1,
+            to: selection.from + newText.length - 1,
+            decoration,
           }),
           selection: { anchor: selection.from + newText.length },
         });
@@ -1855,6 +1737,34 @@ export default class Editor {
       EditorState.changeFilter.of((tr) => {
         if (!tr.docChanged) return true;
 
+        // 所有定义了atomic=true 的装饰器都被认为是原子装饰器，不允许局部修改和局部删除
+        const marks = tr.startState.field(markField, false);
+        if (marks && marks !== Decoration.none) {
+          let blocked = false;
+          tr.changes.iterChanges((fromA, toA) => {
+            if (blocked) return;
+            // 从变更起始位置开始迭代，跳过之前的 marks 以提升性能
+            const iter = marks.iter(fromA);
+            while (iter.value) {
+              const markFrom = iter.from;
+              // 如果 mark 起始位置已经超过变更结束位置，后续 marks 不可能有交集
+              if (markFrom >= toA) break;
+              const markTo = iter.to;
+              const isAtomic = iter.value.spec?.atomic === true;
+              if (isAtomic) {
+                const overlaps = fromA < markTo && toA > markFrom;
+                const fullyCovers = fromA <= markFrom && toA >= markTo;
+                if (overlaps && !fullyCovers) {
+                  blocked = true;
+                  return;
+                }
+              }
+              iter.next();
+            }
+          });
+          if (blocked) return false;
+        }
+
         const adapter = this.editor;
         if (adapter) {
           let shouldCancel = false;
@@ -2066,6 +1976,7 @@ export default class Editor {
     if (this.options.codemirror.autofocus) {
       editor.view.focus();
     }
+    this.dealSpecialWords(true);
   }
 
   /**
@@ -2241,9 +2152,20 @@ export default class Editor {
 
   /**
    * 设置编辑器值
+   * @param {string} value 新内容
+   * @param {boolean} [keepCursor=false] 是否保持光标位置
+   *
+   * 协作场景说明：
+   *  - keepCursor 为 true 时，会基于 fast-diff 计算新旧内容之间的最小变更集，
+   *    并通过 EditorView.dispatch({ changes }) 让 CodeMirror 6 自身的 ChangeSet
+   *    机制自动映射当前 selection（包括多光标/选区端点）。
    */
-  setValue(value = '') {
-    if (this.editor) {
+  setValue(value = '', keepCursor = false) {
+    if (!this.editor) {
+      return;
+    }
+
+    if (keepCursor === false) {
       this.editor.dispatch({
         changes: {
           from: 0,
@@ -2251,7 +2173,57 @@ export default class Editor {
           insert: value,
         },
       });
+      return;
     }
+
+    // const currentScrollTop = this.editor.scrollDOM.scrollTop;
+    const old = this.editor.state.doc.toString();
+
+    // 内容完全一致时无需 dispatch
+    if (old === value) {
+      return;
+    }
+
+    // 基于 fast-diff 生成最小化的 changes 列表
+    const changes = this.computeMinimalChanges(old, value);
+
+    if (changes.length === 0) {
+      return;
+    }
+
+    // 不指定 selection，CodeMirror 会基于 changes 自动映射当前光标/选区
+    this.editor.dispatch({ changes });
+
+    this.dealSpecialWords();
+    // this.editor.scrollDOM.scrollTop = currentScrollTop;
+  }
+
+  /**
+   * 基于 fast-diff 计算两段文本的最小变更集合，供 EditorView.dispatch 使用
+   * @private
+   * @param {string} oldStr 旧内容
+   * @param {string} newStr 新内容
+   * @returns {{from: number, to: number, insert: string}[]}
+   */
+  computeMinimalChanges(oldStr, newStr) {
+    const diffs = diff(oldStr, newStr);
+    /** @type {{from: number, to: number, insert: string}[]} */
+    const changes = [];
+    // pos 是相对“旧文档”的位置游标
+    let pos = 0;
+    for (let i = 0; i < diffs.length; i++) {
+      const [op, text] = diffs[i];
+      if (op === diff.EQUAL) {
+        pos += text.length;
+      } else if (op === diff.DELETE) {
+        changes.push({ from: pos, to: pos + text.length, insert: '' });
+        pos += text.length;
+      } else if (op === diff.INSERT) {
+        changes.push({ from: pos, to: pos, insert: text });
+        // INSERT 不消耗旧文档位置，pos 不变
+      }
+    }
+    return changes;
   }
 
   /**

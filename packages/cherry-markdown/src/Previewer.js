@@ -153,7 +153,7 @@ export default class Previewer {
     this.disableScrollListener = false;
     this.bindScroll();
     this.editor = editor;
-    /** @type {typeof import('codemirror')|null} CodeMirror 模块（从 Editor 传递，stream 模式下为 null） */
+    /** @type {object|null} CodeMirror 模块（从 Editor 传递，stream 模式下为 null） */
     this.codemirrorModule = editor?.constructor?.codemirrorModule ?? null;
     this.bindDrag();
     // 异步初始化 PreviewerBubble
@@ -496,6 +496,7 @@ export default class Previewer {
 
   bindScroll() {
     const domContainer = this.getDomContainer();
+
     this.scrollHandler = () => {
       // 销毁后不执行，防止访问已清理的引用
       if (this.isDestroyed) {

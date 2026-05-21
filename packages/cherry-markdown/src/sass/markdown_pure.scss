@@ -1,10 +1,13 @@
-@import './markdown.scss';
-/** 引入自带的主题 */
-@import './themes/default.scss';
-@import './themes/dark.scss';
-@import './themes/abyss.scss';
-@import './themes/green.scss';
-@import './themes/red.scss';
-@import './themes/gray.scss';
-@import './themes/violet.scss';
-@import './themes/blue.scss';
+@use 'sass:meta';
+
+@use './markdown';
+
+/** 引入自带的主题（保持与 cherry 一致的主题覆盖顺序） */
+@include meta.load-css('./themes/default');
+@include meta.load-css('./themes/dark');
+@include meta.load-css('./themes/abyss');
+@include meta.load-css('./themes/green');
+@include meta.load-css('./themes/red');
+@include meta.load-css('./themes/gray');
+@include meta.load-css('./themes/violet');
+@include meta.load-css('./themes/blue');
