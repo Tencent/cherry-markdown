@@ -99,7 +99,7 @@ jobs:
               '  }',
               '}',
               '```',
-              '**pnpm overrides：**',
+              '**pnpm.overrides：**',
               '```json',
               '{',
               '  "pnpm": {',
