@@ -65,6 +65,15 @@ jobs:
           script: |
             const name = process.env.PACKAGE_NAME;
             const version = process.env.PACKAGE_VERSION;
+            const alias = `npm:${name}@${version}`;
+
+            const jsonBlock = (title, obj) =>
+              [`**${title}：**（写入 \`package.json\`）`, '', '```json', JSON.stringify(obj, null, 2), '```', ''].join(
+                '\n',
+              );
+
+            const bashBlock = (title, cmd) => [`**${title}：**`, '', '```bash', cmd, '```', ''].join('\n');
+
             const body = [
               `📦 **cherry-markdown dev published** — \`${name}@${version}\``,
               '',
@@ -73,20 +82,12 @@ jobs:
               '',
               `**[NPM](https://www.npmjs.com/package/${name}/v/${version})**`,
               '',
-              '```bash',
-              `pnpm add cherry-markdown@npm:${name}@${version}`,
-              '```',
-              '```bash',
-              `yarn add cherry-markdown@npm:${name}@${version}`,
-              '```',
-              '```bash',
-              `npm i cherry-markdown@npm:${name}@${version}`,
-              '```',
-              '',
-              '**overrides：**',
-              `npm: \`"overrides": { "cherry-markdown": "npm:${name}@${version}" }\``,
-              `yarn: \`"resolutions": { "cherry-markdown": "npm:${name}@${version}" }\``,
-              `pnpm: \`"pnpm": { "overrides": { "cherry-markdown": "npm:${name}@${version}" } }\``,
+              bashBlock('pnpm', `pnpm add cherry-markdown@${alias}`),
+              bashBlock('yarn', `yarn add cherry-markdown@${alias}`),
+              bashBlock('npm', `npm i cherry-markdown@${alias}`),
+              jsonBlock('npm overrides', { overrides: { 'cherry-markdown': alias } }),
+              jsonBlock('yarn resolutions', { resolutions: { 'cherry-markdown': alias } }),
+              jsonBlock('pnpm.overrides', { pnpm: { overrides: { 'cherry-markdown': alias } } }),
             ].join('\n');
             github.rest.issues.createComment({
               issue_number: ${{ inputs.pr_number }},
