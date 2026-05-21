@@ -1092,7 +1092,10 @@ export default class PreviewerBubble {
     const imgSizeDiv = document.createElement('div');
     imgSizeDiv.className = 'cherry-previewer-img-size-handler';
     this.bubble.click.appendChild(imgSizeDiv);
-    imgSizeHandler.showBubble(figureElement, imgSizeDiv, this.previewerDom, { isMermaid: true });
+    imgSizeHandler.showBubble(figureElement, imgSizeDiv, this.previewerDom, {
+      isMermaid: true,
+      targetIndex: this.mermaidIndex,
+    });
     imgSizeHandler.bindChange(this.changeMermaidSize.bind(this));
 
     // 添加对齐工具面板（仅对齐按钮，不含装饰按钮）
@@ -1105,7 +1108,7 @@ export default class PreviewerBubble {
       this.previewerDom,
       event,
       this.previewer.$cherry.getLocales(),
-      { isMermaid: true },
+      { isMermaid: true, targetIndex: this.mermaidIndex },
     );
     imgToolHandler.bindChange(this.changeMermaidStyle.bind(this));
 
@@ -1132,6 +1135,7 @@ export default class PreviewerBubble {
     if (mermaidIndex < 0) {
       return false;
     }
+    this.mermaidIndex = mermaidIndex;
 
     const rawContent = this.editor.editor.view.state.doc.toString();
     // 在编辑器原始内容中按顺序找到所有 mermaid 代码块

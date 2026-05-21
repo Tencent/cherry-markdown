@@ -1,3 +1,5 @@
+@use 'sass:meta';
+
 .cherry-markdown {
   word-break: break-all;
   color: var(--md-paragraph-color);
@@ -691,7 +693,7 @@
 }
 
 div[data-type='codeBlock'] {
-  @import 'prism/tomorrow-night';
+  @include meta.load-css('prism/tomorrow-night');
 
   div[data-code-wrap='wrap'] & code[class*=language-]{
     white-space: pre-wrap;
@@ -699,43 +701,43 @@ div[data-type='codeBlock'] {
   }
 
   [data-code-block-theme='default'] & {
-    @import 'prism/default';
+    @include meta.load-css('prism/default');
   }
 
   [data-code-block-theme='dark'] & {
-    @import 'prism/dark';
+    @include meta.load-css('prism/dark');
   }
 
   [data-code-block-theme='one-dark'] & {
-    @import 'prism/one-dark';
+    @include meta.load-css('prism/one-dark');
   }
 
   [data-code-block-theme='one-light'] & {
-    @import 'prism/one-light';
+    @include meta.load-css('prism/one-light');
   }
 
   [data-code-block-theme='vs-dark'] & {
-    @import 'prism/vs-dark';
+    @include meta.load-css('prism/vs-dark');
   }
 
   [data-code-block-theme='vs-light'] & {
-    @import 'prism/vs-light';
+    @include meta.load-css('prism/vs-light');
   }
 
   [data-code-block-theme='okaidia'] & {
-    @import 'prism/okaidia';
+    @include meta.load-css('prism/okaidia');
   }
 
   [data-code-block-theme='twilight'] & {
-    @import 'prism/twilight';
+    @include meta.load-css('prism/twilight');
   }
 
   [data-code-block-theme='coy'] & {
-    @import 'prism/coy';
+    @include meta.load-css('prism/coy');
   }
 
   [data-code-block-theme='solarized-light'] & {
-    @import 'prism/solarized-light';
+    @include meta.load-css('prism/solarized-light');
   }
 }
 

@@ -37,6 +37,7 @@ const imgToolHandler = {
   showBubble(img, container, previewerDom, event, locale, options = {}) {
     this.img = img;
     this.isMermaid = options.isMermaid || false;
+    this.targetIndex = Number.isInteger(options.targetIndex) ? options.targetIndex : -1;
 
     this.previewerDom = previewerDom;
     this.container = container;
@@ -189,6 +190,7 @@ const imgToolHandler = {
     }
   },
   previewUpdate(callback) {
+    this.refreshTarget();
     // 预览区更新后图片位置可能变化（如对齐方式改变），需要更新工具栏位置
     // 图片有 CSS transition (all 0.1s)，需等待过渡动画结束后再获取最终位置
     this.img.addEventListener('transitionend', () => this.updatePosition(), { once: true });
@@ -197,6 +199,13 @@ const imgToolHandler = {
       this._fallbackTimer = null;
       this.updatePosition();
     }, 120);
+  },
+  refreshTarget() {
+    if (!this.isMermaid || this.targetIndex < 0 || !this.previewerDom) {
+      return;
+    }
+    const figures = this.previewerDom.querySelectorAll('figure[data-type="mermaid"]');
+    this.img = figures[this.targetIndex] || this.img;
   },
   remove() {
     this.butsLayout = false;
@@ -212,6 +221,7 @@ const imgToolHandler = {
     if (!this.img || !this.container || !this.previewerDom) {
       return;
     }
+    this.refreshTarget();
     const imgPosition = this.getImgPosition();
     const toolbarWidth = this.container.offsetWidth;
     const toolbarHeight = this.container.offsetHeight;

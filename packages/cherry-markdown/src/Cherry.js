@@ -36,7 +36,6 @@ import {
   saveCodeWrapToLocal,
 } from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
-import getPosBydiffs from './utils/recount-pos';
 import defaultConfig from './Cherry.config';
 import cloneDeep from 'lodash/cloneDeep';
 import Event from './Event';
@@ -177,7 +176,7 @@ export default class Cherry extends CherryStatic {
     // 创建预览区
     const previewer = this.createPreviewer();
 
-    $expectTarget(this.options.toolbars.toolbar, Array);
+    // $expectTarget(this.options.toolbars.toolbar, Array);
 
     // 创建顶部工具栏
     this.createToolbar();
@@ -436,7 +435,7 @@ export default class Cherry extends CherryStatic {
    * @returns markdown源码内容
    */
   getValue() {
-    return this.editor?.editor?.view?.state?.doc?.toString() || '';
+    return this.lastMarkdownText || this.editor?.editor?.view?.state?.doc?.toString() || '';
   }
 
   /**
@@ -497,34 +496,14 @@ export default class Cherry extends CherryStatic {
   /**
    * 覆盖编辑区的内容
    * @param {string} content markdown内容
-   * @param {boolean} keepCursor 是否保持光标位置
+   * @param {boolean} [keepCursor=false] 是否保持光标位置
+   *
+   * 协作场景说明：
+   *  - keepCursor 为 true 时，底层会基于 fast-diff 计算最小变更集，并由 CodeMirror 6
+   *    的 ChangeSet 机制自动映射当前光标/选区位置。
    */
   setValue(content, keepCursor = false) {
-    if (keepCursor === false) {
-      this.editor.setValue(content);
-      return;
-    }
-
-    const editorView = this.editor.editor;
-    const currentScrollTop = editorView.scrollDOM.scrollTop;
-    const old = this.getValue();
-
-    // 获取当前光标位置
-    const currentPos = editorView.state.selection.main.head;
-    const newPos = getPosBydiffs(currentPos, old, content);
-
-    // 更新内容并保持光标位置
-    editorView.dispatch({
-      changes: {
-        from: 0,
-        to: editorView.state.doc.length,
-        insert: content,
-      },
-      selection: { anchor: Math.min(newPos, content.length) },
-    });
-
-    this.editor.dealSpecialWords();
-    editorView.scrollDOM.scrollTop = currentScrollTop;
+    this.editor.setValue(content, keepCursor);
   }
 
   /**
@@ -1057,20 +1036,25 @@ export default class Cherry extends CherryStatic {
         clearTimeout(this.timer);
         this.timer = null;
       }
-      let interval = this.options.engine.global.flowSessionContext ? 10 : 50;
-      // 每多100行，增加1ms的延迟
-      interval += this.editor.editor.view.state.doc.lines / 100;
+      let interval = this.options.engine.global.flowSessionContext ? 10 : 30;
+      const lineCount = this.editor.editor.view.state.doc.lines;
+      if (5000 < lineCount && lineCount < 20000) {
+        interval = this.options.engine.global.flowSessionContext ? 50 : 100;
+      }
+      if (lineCount >= 20000) {
+        interval = lineCount / 100;
+        // 最大间隔为 500ms
+        interval = Math.min(interval, 500);
+      }
       this.timer = setTimeout(() => {
         const markdownText = view.state.doc.toString();
-        if (markdownText !== this.lastMarkdownText) {
-          this.lastMarkdownText = markdownText;
-          const html = this.engine.makeHtml(markdownText);
-          this.previewer.update(html);
-          this.$event.emit('afterChange', {
-            markdownText,
-            html,
-          });
-        }
+        this.lastMarkdownText = markdownText;
+        const html = this.engine.makeHtml(markdownText);
+        this.previewer.update(html);
+        this.$event.emit('afterChange', {
+          markdownText,
+          html,
+        });
       }, interval);
     } catch (e) {
       throw new NestedError(e);
