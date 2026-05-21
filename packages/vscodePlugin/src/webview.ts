@@ -44,7 +44,7 @@ export function getWebviewContent(mdInfo: object, currentPanel: vscode.WebviewPa
 http-equiv="Content-Security-Policy"
 content="default-src 'none'; img-src ${currentPanel.webview.cspSource} https: http: data:; script-src ${
     currentPanel.webview.cspSource
-  }; style-src ${currentPanel.webview.cspSource}; font-src ${currentPanel.webview.cspSource};"
+  }; style-src ${currentPanel.webview.cspSource} 'unsafe-inline'; font-src ${currentPanel.webview.cspSource};"
 />
     <title>Cherry Editor - Markdown Editor</title>
     <link rel="stylesheet" type="text/css" href="${pageResourceUrlsMap['dist/index.css']}">
