@@ -728,52 +728,49 @@ export default class Previewer {
           }
           break;
         case 'update':
-          try {
-            let hasUpdate = false;
-            // 处理表格包含图表的特殊场景
-            if (
-              newContent[change.newIndex].dom.className === 'cherry-table-wrapper' &&
-              newContent[change.newIndex].dom.querySelector('.cherry-table-figure .cherry-echarts-wrapper') &&
-              oldContent[change.oldIndex].dom.querySelector('.cherry-table-figure .cherry-echarts-wrapper')
-            ) {
-              const oldWrapper = oldContent[change.oldIndex].dom.querySelector(
-                '.cherry-table-figure .cherry-echarts-wrapper',
-              );
-              const newWrapper = newContent[change.newIndex].dom.querySelector(
-                '.cherry-table-figure .cherry-echarts-wrapper',
-              );
-              oldWrapper.id = newWrapper.id;
-              oldWrapper.dataset.tableData = newWrapper.dataset.tableData;
-              oldWrapper.dataset.chartType = newWrapper.dataset.chartType;
-              oldWrapper.dataset.chartOptions = newWrapper.dataset.chartOptions;
-              oldContent[change.oldIndex].dom.dataset.sign = newContent[change.newIndex].dom.dataset.sign;
-              oldContent[change.oldIndex].dom.dataset.lines = newContent[change.newIndex].dom.dataset.lines;
-              this.$updateDom(
-                newContent[change.newIndex].dom.querySelector('.cherry-table'),
-                oldContent[change.oldIndex].dom.querySelector('.cherry-table'),
-              );
-              hasUpdate = true;
-            } else if (
-              // 处理代码块渲染echarts的特殊场景
-              newContent[change.newIndex].dom.dataset.type === 'echarts' &&
-              newContent[change.newIndex].dom.querySelector('.cherry-echarts-codeblock-wrapper') &&
-              oldContent[change.oldIndex].dom.querySelector('.cherry-echarts-codeblock-wrapper')
-            ) {
-              oldContent[change.oldIndex].dom.dataset.sign = newContent[change.newIndex].dom.dataset.sign;
-              oldContent[change.oldIndex].dom.dataset.lines = newContent[change.newIndex].dom.dataset.lines;
-              hasUpdate = true;
-            } else if (newContent[change.newIndex].dom.querySelector('svg')) {
-              throw new Error(); // SVG暂不使用patch更新
-            }
-            if (!hasUpdate) {
-              this.$updateDom(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
-            }
-          } catch (e) {
-            domContainer.insertBefore(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
-            domContainer.removeChild(oldContent[change.oldIndex].dom);
-          }
+          this.$updateOneNode(domContainer, oldContent[change.oldIndex].dom, newContent[change.newIndex].dom);
       }
     });
+  }
+
+  $updateOneNode(domContainer, oldNode, newNode) {
+    try {
+      let hasUpdate = false;
+      // 处理表格包含图表的特殊场景
+      if (
+        newNode.className === 'cherry-table-wrapper' &&
+        newNode.querySelector('.cherry-table-figure .cherry-echarts-wrapper') &&
+        oldNode.querySelector('.cherry-table-figure .cherry-echarts-wrapper')
+      ) {
+        const oldWrapper = oldNode.querySelector('.cherry-table-figure .cherry-echarts-wrapper');
+        const newWrapper = newNode.querySelector('.cherry-table-figure .cherry-echarts-wrapper');
+        oldWrapper.id = newWrapper.id;
+        oldWrapper.dataset.tableData = newWrapper.dataset.tableData;
+        oldWrapper.dataset.chartType = newWrapper.dataset.chartType;
+        oldWrapper.dataset.chartOptions = newWrapper.dataset.chartOptions;
+        oldNode.dataset.sign = newNode.dataset.sign;
+        oldNode.dataset.lines = newNode.dataset.lines;
+        this.$updateDom(newNode.querySelector('.cherry-table'), oldNode.querySelector('.cherry-table'));
+        hasUpdate = true;
+      } else if (
+        // 处理代码块渲染echarts的特殊场景
+        newNode.dataset.type === 'echarts' &&
+        newNode.querySelector('.cherry-echarts-codeblock-wrapper') &&
+        oldNode.querySelector('.cherry-echarts-codeblock-wrapper')
+      ) {
+        oldNode.dataset.sign = newNode.dataset.sign;
+        oldNode.dataset.lines = newNode.dataset.lines;
+        hasUpdate = true;
+      } else if (newNode.querySelector('svg')) {
+        throw new Error(); // SVG暂不使用patch更新
+      }
+      if (!hasUpdate) {
+        this.$updateDom(newNode, oldNode);
+      }
+    } catch (e) {
+      domContainer.insertBefore(newNode, oldNode);
+      domContainer.removeChild(oldNode);
+    }
   }
 
   $dealUpdate(domContainer, oldHtmlList, newHtmlList) {
@@ -807,6 +804,19 @@ export default class Previewer {
     domContainer.innerHTML = html;
   }
 
+  $createNodeByHtml(html) {
+    if (typeof window.DOMParser !== 'undefined') {
+      // 如果支持DOMParser，则使用DOMParser将html字符串转成对应的HtmlElement
+      // 使用DOMParser是为了防止newHtml里的图片等资源自动加载
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      return doc.querySelector('body').children;
+    }
+    const tmpDiv = document.createElement('div');
+    tmpDiv.innerHTML = html;
+    return tmpDiv.children;
+  }
+
   update(html) {
     // 销毁后不执行更新
     if (this.isDestroyed) {
@@ -823,18 +833,8 @@ export default class Previewer {
       if (this.editor?.selectAll) {
         domContainer.innerHTML = '';
       }
-      let tmpDiv = null;
-      if (typeof window.DOMParser !== 'undefined') {
-        // 如果支持DOMParser，则使用DOMParser将html字符串转成对应的HtmlElement
-        // 使用DOMParser是为了防止newHtml里的图片等资源自动加载
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(newHtml, 'text/html');
-        tmpDiv = doc.querySelector('body');
-      } else {
-        tmpDiv = document.createElement('div');
-        tmpDiv.innerHTML = newHtml;
-      }
-      const newHtmlList = this.$getSignData(tmpDiv.children);
+      const newNode = this.$createNodeByHtml(newHtml);
+      const newHtmlList = this.$getSignData(newNode);
       const oldHtmlList = this.$getSignData(domContainer.children);
 
       try {
@@ -1010,32 +1010,43 @@ export default class Previewer {
       return domContainer.scrollHeight;
     }
     const $lineNum = typeof lineNum === 'number' ? lineNum : parseInt(lineNum, 10);
-    const doms = /** @type {NodeListOf<HTMLElement>}*/ (domContainer.querySelectorAll('[data-sign]'));
+    const { node, lines, blockLines } = this.$getTargetNodeByLineNum($lineNum);
+    if (node) {
+      const { height: blockHeight, offsetTop } = getBlockTopAndHeightWithMargin(node);
+      const containerY = domContainer.offsetTop;
+      const blockY = offsetTop - containerY;
+      let scrollTo = blockY + blockHeight * linePercent;
+      // 区块多于1行时，按比例计算行偏移
+      if (blockLines > 1) {
+        const overScrolledLines = blockLines - Math.abs($lineNum - (lines + blockLines)) - 1;
+        const overScrolledHeight = (overScrolledLines / blockLines) * blockHeight;
+        const blockLineHeight = blockHeight / blockLines;
+        scrollTo = blockY + overScrolledHeight + blockLineHeight * linePercent;
+      }
+      return scrollTo;
+    }
+    return domContainer.scrollHeight;
+  }
+
+  $getTargetNodeByLineNum(lineNum) {
+    const domContainer = this.getDomContainer();
+    const $lineNum = typeof lineNum === 'number' ? lineNum : parseInt(lineNum, 10);
+    const doms = domContainer.childNodes;
     let lines = 0;
-    const containerY = domContainer.offsetTop;
     for (let index = 0; index < doms.length; index++) {
-      if (doms[index].parentNode !== domContainer) {
+      const node = doms[index];
+      if (!(node instanceof HTMLElement) || !node.dataset?.sign) {
         continue;
       }
-      const blockLines = parseInt(doms[index].getAttribute('data-lines'), 10);
+      const blockLines = parseInt(node.dataset.lines, 10);
       if (lines + blockLines < $lineNum) {
         lines += blockLines;
         continue;
       } else {
-        const { height: blockHeight, offsetTop } = getBlockTopAndHeightWithMargin(doms[index]);
-        const blockY = offsetTop - containerY;
-        let scrollTo = blockY + blockHeight * linePercent;
-        // 区块多于1行时，按比例计算行偏移
-        if (blockLines > 1) {
-          const overScrolledLines = blockLines - Math.abs($lineNum - (lines + blockLines)) - 1;
-          const overScrolledHeight = (overScrolledLines / blockLines) * blockHeight;
-          const blockLineHeight = blockHeight / blockLines;
-          scrollTo = blockY + overScrolledHeight + blockLineHeight * linePercent;
-        }
-        return scrollTo;
+        return { node, lines, blockLines };
       }
     }
-    return domContainer.scrollHeight;
+    return null;
   }
 
   /**

@@ -1025,11 +1025,16 @@ export default class Cherry extends CherryStatic {
    * @private
    * @param {Event} _evt - 编辑事件对象(未使用)
    * @param {import('@codemirror/view').EditorView | Object} editorView - 编辑器实例
+   * @param {import('@codemirror/state').ChangeDesc} change - 变更描述
    */
-  editText(_evt, editorView) {
+  editText(_evt, editorView, change) {
     try {
       // 兼容 CM6Adapter,如果传入的是 adapter,则获取其内部的 view
       const view = editorView.view || editorView;
+
+      if (!this.previewer.isPreviewerHidden() && this.dealPeerInsertChange(view, change)) {
+        return;
+      }
 
       // 如果已有定时器,先清除,避免多次触发
       if (this.timer) {
@@ -1059,6 +1064,39 @@ export default class Cherry extends CherryStatic {
     } catch (e) {
       throw new NestedError(e);
     }
+  }
+
+  /**
+   * 处理单次新增普通字符的情况
+   * @param {*} editorView
+   * @param {*} change
+   * @returns {boolean}
+   */
+  dealPeerInsertChange(editorView, change) {
+    // 还没写完，先返回false
+    return false;
+    if (change.origin === '+input') {
+      const { text, from } = change;
+      // 只判断单光标输入的情况
+      if (text.length !== 1) return false;
+      const insertStr = text[0];
+      // 只判断输入中文、英文、数字的情况
+      if (!/^[\u4e00-\u9fa5a-zA-Z0-9]+$/.test(insertStr)) return false;
+      const line = editorView.state.doc.lineAt(from);
+      const lineNum = line.number;
+      const { node, lines, blockLines } = this.previewer.$getTargetNodeByLineNum(lineNum);
+      if (!node) return false;
+      const beginLine = editorView.state.doc.line(Math.min(editorView.state.doc.lines, lines + 1));
+      const endLine = editorView.state.doc.line(Math.min(editorView.state.doc.lines, lines + blockLines + 1));
+      const md = editorView.state.sliceDoc(beginLine.from, endLine.to);
+      const html = this.engine.makeHtml(md);
+      const newNode = this.previewer.$createNodeByHtml(html);
+      if (!newNode) return false;
+      newNode[0].classList.add('cherry-highlight-line');
+      this.previewer.$updateOneNode(this.previewer.getDomContainer(), node, newNode[0]);
+      return true;
+    }
+    return false;
   }
 
   /**

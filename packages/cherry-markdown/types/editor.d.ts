@@ -343,7 +343,7 @@ export type EditorConfiguration = {
   onFocus: EditorEventCallback<'onFocus'>;
   onBlur: EditorEventCallback<'onBlur'>;
   onPaste: EditorEventCallback<'onPaste'>;
-  onChange: (update: ViewUpdate | null, codemirror: CM6Adapter) => void;
+  onChange: (update: ViewUpdate | null, codemirror: CM6Adapter, change: any | null) => void;
   onScroll: (editorView: EditorView) => void;
   handlePaste?: EditorPasteEventHandler;
   /** 预览区域跟随编辑器光标自动滚动 */

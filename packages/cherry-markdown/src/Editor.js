@@ -1925,8 +1925,8 @@ export default class Editor {
       this.$cherry.$event.emit('focus', { evt, cherry: this.$cherry });
     });
 
-    editor.on('change', () => {
-      this.options.onChange(null, editor);
+    editor.on('change', (event, change) => {
+      this.options.onChange(null, editor, change);
       this.dealSpecialWords();
       if (this.options.autoSave2Textarea) {
         textArea.value = editor.view.state.doc.toString();
