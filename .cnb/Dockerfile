@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:24
 
 RUN sed -i 's@deb.debian.org@mirrors.cloud.tencent.com@g' /etc/apt/sources.list.d/debian.sources
 
@@ -17,7 +17,7 @@ RUN curl -fsSL https://code-server.dev/install.sh | sh \
   && code-server --install-extension tencent-cloud.coding-copilot \
   && echo done
 
-
+RUN corepack enable pnpm
 ENV LANG=C.UTF-8
 ENV LANGUAGE=C.UTF-8
 
