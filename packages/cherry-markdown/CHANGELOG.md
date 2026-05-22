@@ -1,5 +1,20 @@
 # Change Log
 
+## 0.11.2
+
+### Patch Changes
+
+- fix: 修复echarts5+不再支持的api [@sunsonliu](https://github.com/sunsonliu)([#1725](https://github.com/Tencent/cherry-markdown/pull/1725))([`ba41211`](https://github.com/Tencent/cherry-markdown/commit/ba412115fc1364b830feebe81c4d66474413557f))
+- fix: 修复 mermaid 图表尺寸拖拽后工具栏漂移 [@Yong-yuan-X](https://github.com/Yong-yuan-X)([#1741](https://github.com/Tencent/cherry-markdown/pull/1741))([`dbd793c`](https://github.com/Tencent/cherry-markdown/commit/dbd793c3b2a1bb89a6e537c6f3735eec7a89c06f))
+- 内部优化样式构建：Sass 迁移至模块系统（`@use` / `@forward`），并使用 `rollup-plugin-sass` 现代编译 API，消除构建时的弃用警告。
+
+- 对使用者无破坏性变更，与原有 API、主题类名保持不变。
+- ⚠️ 若你通过自定义 CSS 覆盖 `.cherry-bubble` 相关样式，建议在升级后确认预览区图片工具条外观是否符合预期。 [@RSS1102](https://github.com/RSS1102)([#1745](https://github.com/Tencent/cherry-markdown/pull/1745))([`4f8ea67`](https://github.com/Tencent/cherry-markdown/commit/4f8ea67c0513ee7a91642469a3631aeb56ee8cad))
+- fix: mathjax报错导致engine.makeHtml中断 [@sunsonliu](https://github.com/sunsonliu)([#1726](https://github.com/Tencent/cherry-markdown/pull/1726))([`26fc2eb`](https://github.com/Tencent/cherry-markdown/commit/26fc2eb1c14be7029664f4bfe9730bcc54844716))
+- feat: 多项性能与稳定性优化 [@sunsonliu](https://github.com/sunsonliu)([#1742](https://github.com/Tencent/cherry-markdown/pull/1742))([`823279b`](https://github.com/Tencent/cherry-markdown/commit/823279bef9131e7979b801517e0fed4c98767e44))
+- fix: #1722 优化装饰器的相关逻辑，优化异步粘贴回调的逻辑 [@sunsonliu](https://github.com/sunsonliu)([#1727](https://github.com/Tencent/cherry-markdown/pull/1727))([`1364a7d`](https://github.com/Tencent/cherry-markdown/commit/1364a7d590c9e5db75aa23c852243185de8ce34a))
+- fix: 修复纯预览demo报错 [@sunsonliu](https://github.com/sunsonliu)([#1743](https://github.com/Tencent/cherry-markdown/pull/1743))([`0cd1d0f`](https://github.com/Tencent/cherry-markdown/commit/0cd1d0fc0dee16217d822a53a0084c45307d991d))
+
 ## 0.11.1
 
 ### Patch Changes
