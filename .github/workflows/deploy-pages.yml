@@ -50,8 +50,8 @@ jobs:
           cp --parents -r examples/assets gh-pages-out/
           # 可视化配置生成器（目录可能尚未存在，条件复制）
           [ -d examples/config_helper ] && cp --parents -r examples/config_helper gh-pages-out/ || true
-          # 修复 HTML 中的相对路径
-          find gh-pages-out/examples -type f -name "*.html" -exec sed -i 's|\.\./packages|./packages|g' {} +
+          # favicon 等资源（examples/*.html 使用 ../logo/...）
+          cp -r logo gh-pages-out/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
