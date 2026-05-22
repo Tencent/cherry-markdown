@@ -17,7 +17,8 @@ RUN curl -fsSL https://code-server.dev/install.sh | sh \
   && code-server --install-extension tencent-cloud.coding-copilot \
   && echo done
 
-RUN corepack enable pnpm
+RUN corepack enable pnpm && pnpm -v
+
 ENV LANG=C.UTF-8
 ENV LANGUAGE=C.UTF-8
 
