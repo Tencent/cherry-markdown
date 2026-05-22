@@ -53,11 +53,16 @@ export default class Engine {
      * @deprecated 已废弃，推荐使用 .hash()
      */
     md5(str: any): string;
-    sha256(str: any): any;
     /**
-     * 计算哈希值
+     * @deprecated 历史 API：原本基于 CryptoJS.SHA256 输出 64 位 hex。现已替换为
+     * 轻量非加密 hash（xxHash32 双通道，输出 16 位 hex），仅用于缓存键、
+     * 内部链接占位等场景。如有真实加密签名需求，请勿使用此方法。
+     */
+    sha256(str: any): string;
+    /**
+     * 计算哈希值（非加密，用于缓存键）
      * @param {String} str 被计算的字符串
-     * @returns {String} 哈希值
+     * @returns {String} 哈希值（16 位小写 hex）
      */
     hash(str: string): string;
     $checkCache(str: any, func: any): {

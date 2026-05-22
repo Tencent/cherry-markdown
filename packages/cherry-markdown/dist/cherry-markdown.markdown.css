@@ -3,8 +3,6 @@
   word-break: break-all;
   color: var(--md-paragraph-color);
   background-color: var(--base-previewer-bg);
-  /* Inline code */
-  /* 数学表达式展示 */
 }
 .cherry-markdown h1,
 .cherry-markdown h2,
@@ -362,6 +360,9 @@
 .cherry-markdown div[data-type=codeBlock] > pre code[class*=language-] .code-line:last-child {
   margin-bottom: 0;
 }
+.cherry-markdown {
+  /* Inline code */
+}
 .cherry-markdown :not(pre) > code {
   padding: 0.1em;
   border-radius: 0.3em;
@@ -482,17 +483,17 @@
 .cherry-markdown .check-list-item .ch-icon {
   margin: 0 6px 0 -20px;
 }
-.cherry-markdown .footnote:not(a) {
-  padding-top: 20px;
-  border-top: 1px solid var(--md-hr-border);
-  margin-top: 50px;
-}
 .cherry-markdown .footnote:not(a) .footnote-title {
   font-size: 20px;
   margin-top: -38px;
   background-color: var(--md-inline-code-bg);
   width: 60px;
   margin-bottom: var(--spacing-lg);
+}
+.cherry-markdown .footnote:not(a) {
+  padding-top: 20px;
+  border-top: 1px solid var(--md-hr-border);
+  margin-top: 50px;
 }
 .cherry-markdown .footnote:not(a) .one-footnote {
   color: var(--md-paragraph-color);
@@ -516,6 +517,9 @@
   white-space: nowrap;
   background-color: var(--md-inline-code-bg);
 }
+.cherry-markdown {
+  /* 数学表达式展示 */
+}
 .cherry-markdown mjx-assistive-mml {
   position: absolute;
   top: 0;
@@ -523,9 +527,6 @@
   clip: rect(1px, 1px, 1px, 1px);
   padding: 1px 0 0 0;
   border: 0;
-}
-.cherry-markdown.head-num {
-  counter-reset: level1;
 }
 .cherry-markdown.head-num h1 .anchor:before,
 .cherry-markdown.head-num h2 .anchor:before,
@@ -537,6 +538,9 @@
   font-size: inherit;
   vertical-align: inherit;
   padding-right: 10px;
+}
+.cherry-markdown.head-num {
+  counter-reset: level1;
 }
 .cherry-markdown.head-num h1 {
   counter-reset: level2;
@@ -592,8 +596,6 @@ div[data-type=codeBlock] {
    * Based on https://github.com/chriskempson/tomorrow-theme
    * @author Rose Pritchard
    */
-  /* Code blocks */
-  /* Inline code */
 }
 div[data-type=codeBlock] code[class*=language-],
 div[data-type=codeBlock] pre[class*=language-] {
@@ -615,6 +617,9 @@ div[data-type=codeBlock] pre[class*=language-] {
   -ms-hyphens: none;
   hyphens: none;
 }
+div[data-type=codeBlock] {
+  /* Code blocks */
+}
 div[data-type=codeBlock] pre[class*=language-] {
   padding: 1em;
   margin: 0.5em 0;
@@ -623,6 +628,9 @@ div[data-type=codeBlock] pre[class*=language-] {
 div[data-type=codeBlock] :not(pre) > code[class*=language-],
 div[data-type=codeBlock] pre[class*=language-] {
   background: #2d2d2d;
+}
+div[data-type=codeBlock] {
+  /* Inline code */
 }
 div[data-type=codeBlock] :not(pre) > code[class*=language-] {
   padding: 0.1em;
@@ -703,8 +711,6 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
    * Based on dabblet (http://dabblet.com)
    * @author Lea Verou
    */
-  /* Code blocks */
-  /* Inline code */
 }
 [data-code-block-theme=default] div[data-type=codeBlock] code[class*=language-],
 [data-code-block-theme=default] div[data-type=codeBlock] pre[class*=language-] {
@@ -743,6 +749,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
     text-shadow: none;
   }
 }
+[data-code-block-theme=default] div[data-type=codeBlock] {
+  /* Code blocks */
+}
 [data-code-block-theme=default] div[data-type=codeBlock] pre[class*=language-] {
   padding: 1em;
   margin: 0.5em 0;
@@ -751,6 +760,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=default] div[data-type=codeBlock] :not(pre) > code[class*=language-],
 [data-code-block-theme=default] div[data-type=codeBlock] pre[class*=language-] {
   background: #f5f2f0;
+}
+[data-code-block-theme=default] div[data-type=codeBlock] {
+  /* Inline code */
 }
 [data-code-block-theme=default] div[data-type=codeBlock] :not(pre) > code[class*=language-] {
   padding: 0.1em;
@@ -827,8 +839,6 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
    * Based on the slides of the talk “/Reg(exp){2}lained/”
    * @author Lea Verou
    */
-  /* Code blocks */
-  /* Inline code */
 }
 [data-code-block-theme=dark] div[data-type=codeBlock] code[class*=language-],
 [data-code-block-theme=dark] div[data-type=codeBlock] pre[class*=language-] {
@@ -861,6 +871,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=dark] div[data-type=codeBlock] :not(pre) > code[class*=language-] {
   background: hsl(30, 20%, 25%);
 }
+[data-code-block-theme=dark] div[data-type=codeBlock] {
+  /* Code blocks */
+}
 [data-code-block-theme=dark] div[data-type=codeBlock] pre[class*=language-] {
   padding: 1em;
   margin: 0.5em 0;
@@ -868,6 +881,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   border: 0.3em solid hsl(30, 20%, 40%);
   border-radius: 0.5em;
   box-shadow: 1px 1px 0.5em black inset;
+}
+[data-code-block-theme=dark] div[data-type=codeBlock] {
+  /* Inline code */
 }
 [data-code-block-theme=dark] div[data-type=codeBlock] :not(pre) > code[class*=language-] {
   padding: 0.15em 0.2em 0.05em;
@@ -963,44 +979,6 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
    * --syntax-gutter-background-color-selected: hsl(220, 13%, 26%);
    * --syntax-cursor-line: hsla(220, 100%, 80%, 0.04);
    */
-  /* Selection */
-  /* Code blocks */
-  /* Inline code */
-  /* Print */
-  /* HTML overrides */
-  /* CSS overrides */
-  /* JS overrides */
-  /* JSON overrides */
-  /* MD overrides */
-  /* General */
-  /* Plugin overrides */
-  /* Selectors should have higher specificity than those in the plugins' default stylesheets */
-  /* Show Invisibles plugin overrides */
-  /* Toolbar plugin overrides */
-  /* Space out all buttons and move them away from the right edge of the code block */
-  /* Styling the buttons */
-  /* Line Highlight plugin overrides */
-  /* The highlighted line itself */
-  /* Default line numbers in Line Highlight plugin */
-  /* Hovering over a linkable line number (in the gutter area) */
-  /* Requires Line Numbers plugin as well */
-  /* Line Numbers and Command Line plugins overrides */
-  /* Line separating gutter from coding area */
-  /* Stuff in the gutter */
-  /* Match Braces plugin overrides */
-  /* Note: Outline colour is inherited from the braces */
-  /* Diff Highlight plugin overrides */
-  /* Taken from https://github.com/atom/github/blob/master/styles/variables.less */
-  /* Previewers plugin overrides */
-  /* Based on https://github.com/atom-community/atom-ide-datatip/blob/master/styles/atom-ide-datatips.less and https://github.com/atom/atom/blob/master/packages/one-dark-ui */
-  /* Border around popup */
-  /* Angle and time should remain as circles and are hence not included */
-  /* Triangles pointing to the code */
-  /* Background colour within the popup */
-  /* For angle, this is the positive area (eg. 90deg will display one quadrant in this colour) */
-  /* For time, this is the alternate colour */
-  /* Stroke colours of the handle, direction point, and vector itself */
-  /* Fill colour of the handle */
 }
 [data-code-block-theme=one-dark] div[data-type=codeBlock] code[class*=language-],
 [data-code-block-theme=one-dark] div[data-type=codeBlock] pre[class*=language-] {
@@ -1022,6 +1000,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   -ms-hyphens: none;
   hyphens: none;
 }
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Selection */
+}
 [data-code-block-theme=one-dark] div[data-type=codeBlock] code[class*=language-]::-moz-selection,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] code[class*=language-] *::-moz-selection,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] pre[class*=language-] *::-moz-selection {
@@ -1036,16 +1017,25 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   color: inherit;
   text-shadow: none;
 }
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Code blocks */
+}
 [data-code-block-theme=one-dark] div[data-type=codeBlock] pre[class*=language-] {
   padding: 1em;
   margin: 0.5em 0;
   overflow: auto;
   border-radius: 0.3em;
 }
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Inline code */
+}
 [data-code-block-theme=one-dark] div[data-type=codeBlock] :not(pre) > code[class*=language-] {
   padding: 0.2em 0.3em;
   border-radius: 0.3em;
   white-space: normal;
+}
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Print */
 }
 @media print {
   [data-code-block-theme=one-dark] div[data-type=codeBlock] code[class*=language-],
@@ -1099,9 +1089,15 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .token.url {
   color: hsl(187, 47%, 55%);
 }
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* HTML overrides */
+}
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .token.attr-value > .token.punctuation.attr-equals,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .token.special-attr > .token.attr-value > .token.value.css {
   color: hsl(220, 14%, 71%);
+}
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* CSS overrides */
 }
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .language-css .token.selector {
   color: hsl(355, 65%, 65%);
@@ -1120,17 +1116,26 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .language-css .token.atrule .token.rule {
   color: hsl(286, 60%, 67%);
 }
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* JS overrides */
+}
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .language-javascript .token.operator {
   color: hsl(286, 60%, 67%);
 }
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .language-javascript .token.template-string > .token.interpolation > .token.interpolation-punctuation.punctuation {
   color: hsl(5, 48%, 51%);
 }
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* JSON overrides */
+}
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .language-json .token.operator {
   color: hsl(220, 14%, 71%);
 }
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .language-json .token.null.keyword {
   color: hsl(29, 54%, 61%);
+}
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* MD overrides */
 }
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .language-markdown .token.url,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .language-markdown .token.url > .token.operator,
@@ -1164,6 +1169,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .language-markdown .token.title.important > .token.punctuation {
   color: hsl(355, 65%, 65%);
 }
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* General */
+}
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .token.bold {
   font-weight: bold;
 }
@@ -1177,6 +1185,11 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .token.namespace {
   opacity: 0.8;
 }
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Plugin overrides */
+  /* Selectors should have higher specificity than those in the plugins' default stylesheets */
+  /* Show Invisibles plugin overrides */
+}
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .token.token.tab:not(:empty):before,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .token.token.cr:before,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .token.token.lf:before,
@@ -1184,8 +1197,15 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   color: hsla(220, 14%, 71%, 0.15);
   text-shadow: none;
 }
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Toolbar plugin overrides */
+  /* Space out all buttons and move them away from the right edge of the code block */
+}
 [data-code-block-theme=one-dark] div[data-type=codeBlock] div.code-toolbar > .toolbar.toolbar > .toolbar-item {
   margin-right: 0.4em;
+}
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Styling the buttons */
 }
 [data-code-block-theme=one-dark] div[data-type=codeBlock] div.code-toolbar > .toolbar.toolbar > .toolbar-item > button,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] div.code-toolbar > .toolbar.toolbar > .toolbar-item > a,
@@ -1204,8 +1224,15 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   background: hsl(220, 13%, 28%);
   color: hsl(220, 14%, 71%);
 }
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Line Highlight plugin overrides */
+  /* The highlighted line itself */
+}
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .line-highlight.line-highlight {
   background: hsla(220, 100%, 80%, 0.04);
+}
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Default line numbers in Line Highlight plugin */
 }
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .line-highlight.line-highlight:before,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .line-highlight.line-highlight[data-end]:after {
@@ -1215,16 +1242,31 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   border-radius: 0.3em;
   box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.2); /* same as Toolbar plugin default */
 }
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Hovering over a linkable line number (in the gutter area) */
+  /* Requires Line Numbers plugin as well */
+}
 [data-code-block-theme=one-dark] div[data-type=codeBlock] pre[id].linkable-line-numbers.linkable-line-numbers span.line-numbers-rows > span:hover:before {
   background-color: hsla(220, 100%, 80%, 0.04);
+}
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Line Numbers and Command Line plugins overrides */
+  /* Line separating gutter from coding area */
 }
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .line-numbers.line-numbers .line-numbers-rows,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .command-line .command-line-prompt {
   border-right-color: hsla(220, 14%, 71%, 0.15);
 }
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Stuff in the gutter */
+}
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .line-numbers .line-numbers-rows > span:before,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .command-line .command-line-prompt > span:before {
   color: hsl(220, 14%, 45%);
+}
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Match Braces plugin overrides */
+  /* Note: Outline colour is inherited from the braces */
 }
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .rainbow-braces .token.token.punctuation.brace-level-1,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .rainbow-braces .token.token.punctuation.brace-level-5,
@@ -1245,6 +1287,10 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .rainbow-braces .token.token.punctuation.brace-level-8,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .rainbow-braces .token.token.punctuation.brace-level-12 {
   color: hsl(286, 60%, 67%);
+}
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Diff Highlight plugin overrides */
+  /* Taken from https://github.com/atom/github/blob/master/styles/variables.less */
 }
 [data-code-block-theme=one-dark] div[data-type=codeBlock] pre.diff-highlight > code .token.token.deleted:not(.prefix),
 [data-code-block-theme=one-dark] div[data-type=codeBlock] pre > code.diff-highlight .token.token.deleted:not(.prefix) {
@@ -1278,14 +1324,25 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=one-dark] div[data-type=codeBlock] pre > code.diff-highlight .token.token.inserted:not(.prefix) *::selection {
   background-color: hsla(135, 73%, 55%, 0.25);
 }
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Previewers plugin overrides */
+  /* Based on https://github.com/atom-community/atom-ide-datatip/blob/master/styles/atom-ide-datatips.less and https://github.com/atom/atom/blob/master/packages/one-dark-ui */
+  /* Border around popup */
+}
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .prism-previewer.prism-previewer:before,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .prism-previewer-gradient.prism-previewer-gradient div {
   border-color: hsl(224, 13%, 17%);
+}
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Angle and time should remain as circles and are hence not included */
 }
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .prism-previewer-color.prism-previewer-color:before,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .prism-previewer-gradient.prism-previewer-gradient div,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .prism-previewer-easing.prism-previewer-easing:before {
   border-radius: 0.3em;
+}
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Triangles pointing to the code */
 }
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .prism-previewer.prism-previewer:after {
   border-top-color: hsl(224, 13%, 17%);
@@ -1293,20 +1350,33 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .prism-previewer-flipped.prism-previewer-flipped.after {
   border-bottom-color: hsl(224, 13%, 17%);
 }
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Background colour within the popup */
+}
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .prism-previewer-angle.prism-previewer-angle:before,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .prism-previewer-time.prism-previewer-time:before,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .prism-previewer-easing.prism-previewer-easing {
   background: hsl(219, 13%, 22%);
+}
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* For angle, this is the positive area (eg. 90deg will display one quadrant in this colour) */
+  /* For time, this is the alternate colour */
 }
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .prism-previewer-angle.prism-previewer-angle circle,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .prism-previewer-time.prism-previewer-time circle {
   stroke: hsl(220, 14%, 71%);
   stroke-opacity: 1;
 }
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Stroke colours of the handle, direction point, and vector itself */
+}
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .prism-previewer-easing.prism-previewer-easing circle,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .prism-previewer-easing.prism-previewer-easing path,
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .prism-previewer-easing.prism-previewer-easing line {
   stroke: hsl(220, 14%, 71%);
+}
+[data-code-block-theme=one-dark] div[data-type=codeBlock] {
+  /* Fill colour of the handle */
 }
 [data-code-block-theme=one-dark] div[data-type=codeBlock] .prism-previewer-easing.prism-previewer-easing circle {
   fill: transparent;
@@ -1340,43 +1410,6 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
    * --syntax-gutter-background-color-selected: hsl(230, 1%, 90%);
    * --syntax-cursor-line: hsla(230, 8%, 24%, 0.05);
    */
-  /* Selection */
-  /* Code blocks */
-  /* Inline code */
-  /* HTML overrides */
-  /* CSS overrides */
-  /* JS overrides */
-  /* JSON overrides */
-  /* MD overrides */
-  /* General */
-  /* Plugin overrides */
-  /* Selectors should have higher specificity than those in the plugins' default stylesheets */
-  /* Show Invisibles plugin overrides */
-  /* Toolbar plugin overrides */
-  /* Space out all buttons and move them away from the right edge of the code block */
-  /* Styling the buttons */
-  /* Line Highlight plugin overrides */
-  /* The highlighted line itself */
-  /* Default line numbers in Line Highlight plugin */
-  /* Hovering over a linkable line number (in the gutter area) */
-  /* Requires Line Numbers plugin as well */
-  /* Line Numbers and Command Line plugins overrides */
-  /* Line separating gutter from coding area */
-  /* Stuff in the gutter */
-  /* Match Braces plugin overrides */
-  /* Note: Outline colour is inherited from the braces */
-  /* Diff Highlight plugin overrides */
-  /* Taken from https://github.com/atom/github/blob/master/styles/variables.less */
-  /* Previewers plugin overrides */
-  /* Based on https://github.com/atom-community/atom-ide-datatip/blob/master/styles/atom-ide-datatips.less and https://github.com/atom/atom/blob/master/packages/one-light-ui */
-  /* Border around popup */
-  /* Angle and time should remain as circles and are hence not included */
-  /* Triangles pointing to the code */
-  /* Background colour within the popup */
-  /* For angle, this is the positive area (eg. 90deg will display one quadrant in this colour) */
-  /* For time, this is the alternate colour */
-  /* Stroke colours of the handle, direction point, and vector itself */
-  /* Fill colour of the handle */
 }
 [data-code-block-theme=one-light] div[data-type=codeBlock] code[class*=language-],
 [data-code-block-theme=one-light] div[data-type=codeBlock] pre[class*=language-] {
@@ -1397,6 +1430,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   -ms-hyphens: none;
   hyphens: none;
 }
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Selection */
+}
 [data-code-block-theme=one-light] div[data-type=codeBlock] code[class*=language-]::-moz-selection,
 [data-code-block-theme=one-light] div[data-type=codeBlock] code[class*=language-] *::-moz-selection,
 [data-code-block-theme=one-light] div[data-type=codeBlock] pre[class*=language-] *::-moz-selection {
@@ -1409,11 +1445,17 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   background: hsl(230, 1%, 90%);
   color: inherit;
 }
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Code blocks */
+}
 [data-code-block-theme=one-light] div[data-type=codeBlock] pre[class*=language-] {
   padding: 1em;
   margin: 0.5em 0;
   overflow: auto;
   border-radius: 0.3em;
+}
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Inline code */
 }
 [data-code-block-theme=one-light] div[data-type=codeBlock] :not(pre) > code[class*=language-] {
   padding: 0.2em 0.3em;
@@ -1466,9 +1508,15 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=one-light] div[data-type=codeBlock] .token.url {
   color: hsl(198, 99%, 37%);
 }
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* HTML overrides */
+}
 [data-code-block-theme=one-light] div[data-type=codeBlock] .token.attr-value > .token.punctuation.attr-equals,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .token.special-attr > .token.attr-value > .token.value.css {
   color: hsl(230, 8%, 24%);
+}
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* CSS overrides */
 }
 [data-code-block-theme=one-light] div[data-type=codeBlock] .language-css .token.selector {
   color: hsl(5, 74%, 59%);
@@ -1487,17 +1535,26 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=one-light] div[data-type=codeBlock] .language-css .token.atrule .token.rule {
   color: hsl(301, 63%, 40%);
 }
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* JS overrides */
+}
 [data-code-block-theme=one-light] div[data-type=codeBlock] .language-javascript .token.operator {
   color: hsl(301, 63%, 40%);
 }
 [data-code-block-theme=one-light] div[data-type=codeBlock] .language-javascript .token.template-string > .token.interpolation > .token.interpolation-punctuation.punctuation {
   color: hsl(344, 84%, 43%);
 }
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* JSON overrides */
+}
 [data-code-block-theme=one-light] div[data-type=codeBlock] .language-json .token.operator {
   color: hsl(230, 8%, 24%);
 }
 [data-code-block-theme=one-light] div[data-type=codeBlock] .language-json .token.null.keyword {
   color: hsl(35, 99%, 36%);
+}
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* MD overrides */
 }
 [data-code-block-theme=one-light] div[data-type=codeBlock] .language-markdown .token.url,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .language-markdown .token.url > .token.operator,
@@ -1531,6 +1588,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=one-light] div[data-type=codeBlock] .language-markdown .token.title.important > .token.punctuation {
   color: hsl(5, 74%, 59%);
 }
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* General */
+}
 [data-code-block-theme=one-light] div[data-type=codeBlock] .token.bold {
   font-weight: bold;
 }
@@ -1544,14 +1604,26 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=one-light] div[data-type=codeBlock] .token.namespace {
   opacity: 0.8;
 }
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Plugin overrides */
+  /* Selectors should have higher specificity than those in the plugins' default stylesheets */
+  /* Show Invisibles plugin overrides */
+}
 [data-code-block-theme=one-light] div[data-type=codeBlock] .token.token.tab:not(:empty):before,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .token.token.cr:before,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .token.token.lf:before,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .token.token.space:before {
   color: hsla(230, 8%, 24%, 0.2);
 }
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Toolbar plugin overrides */
+  /* Space out all buttons and move them away from the right edge of the code block */
+}
 [data-code-block-theme=one-light] div[data-type=codeBlock] div.code-toolbar > .toolbar.toolbar > .toolbar-item {
   margin-right: 0.4em;
+}
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Styling the buttons */
 }
 [data-code-block-theme=one-light] div[data-type=codeBlock] div.code-toolbar > .toolbar.toolbar > .toolbar-item > button,
 [data-code-block-theme=one-light] div[data-type=codeBlock] div.code-toolbar > .toolbar.toolbar > .toolbar-item > a,
@@ -1570,8 +1642,15 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   background: hsl(230, 1%, 78%); /* custom: darken(--syntax-bg, 20%) */
   color: hsl(230, 8%, 24%);
 }
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Line Highlight plugin overrides */
+  /* The highlighted line itself */
+}
 [data-code-block-theme=one-light] div[data-type=codeBlock] .line-highlight.line-highlight {
   background: hsla(230, 8%, 24%, 0.05);
+}
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Default line numbers in Line Highlight plugin */
 }
 [data-code-block-theme=one-light] div[data-type=codeBlock] .line-highlight.line-highlight:before,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .line-highlight.line-highlight[data-end]:after {
@@ -1581,16 +1660,31 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   border-radius: 0.3em;
   box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.2); /* same as Toolbar plugin default */
 }
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Hovering over a linkable line number (in the gutter area) */
+  /* Requires Line Numbers plugin as well */
+}
 [data-code-block-theme=one-light] div[data-type=codeBlock] pre[id].linkable-line-numbers.linkable-line-numbers span.line-numbers-rows > span:hover:before {
   background-color: hsla(230, 8%, 24%, 0.05);
+}
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Line Numbers and Command Line plugins overrides */
+  /* Line separating gutter from coding area */
 }
 [data-code-block-theme=one-light] div[data-type=codeBlock] .line-numbers.line-numbers .line-numbers-rows,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .command-line .command-line-prompt {
   border-right-color: hsla(230, 8%, 24%, 0.2);
 }
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Stuff in the gutter */
+}
 [data-code-block-theme=one-light] div[data-type=codeBlock] .line-numbers .line-numbers-rows > span:before,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .command-line .command-line-prompt > span:before {
   color: hsl(230, 1%, 62%);
+}
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Match Braces plugin overrides */
+  /* Note: Outline colour is inherited from the braces */
 }
 [data-code-block-theme=one-light] div[data-type=codeBlock] .rainbow-braces .token.token.punctuation.brace-level-1,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .rainbow-braces .token.token.punctuation.brace-level-5,
@@ -1611,6 +1705,10 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=one-light] div[data-type=codeBlock] .rainbow-braces .token.token.punctuation.brace-level-8,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .rainbow-braces .token.token.punctuation.brace-level-12 {
   color: hsl(301, 63%, 40%);
+}
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Diff Highlight plugin overrides */
+  /* Taken from https://github.com/atom/github/blob/master/styles/variables.less */
 }
 [data-code-block-theme=one-light] div[data-type=codeBlock] pre.diff-highlight > code .token.token.deleted:not(.prefix),
 [data-code-block-theme=one-light] div[data-type=codeBlock] pre > code.diff-highlight .token.token.deleted:not(.prefix) {
@@ -1644,14 +1742,25 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=one-light] div[data-type=codeBlock] pre > code.diff-highlight .token.token.inserted:not(.prefix) *::selection {
   background-color: hsla(135, 73%, 55%, 0.25);
 }
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Previewers plugin overrides */
+  /* Based on https://github.com/atom-community/atom-ide-datatip/blob/master/styles/atom-ide-datatips.less and https://github.com/atom/atom/blob/master/packages/one-light-ui */
+  /* Border around popup */
+}
 [data-code-block-theme=one-light] div[data-type=codeBlock] .prism-previewer.prism-previewer:before,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .prism-previewer-gradient.prism-previewer-gradient div {
   border-color: rgb(242, 242, 242);
+}
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Angle and time should remain as circles and are hence not included */
 }
 [data-code-block-theme=one-light] div[data-type=codeBlock] .prism-previewer-color.prism-previewer-color:before,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .prism-previewer-gradient.prism-previewer-gradient div,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .prism-previewer-easing.prism-previewer-easing:before {
   border-radius: 0.3em;
+}
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Triangles pointing to the code */
 }
 [data-code-block-theme=one-light] div[data-type=codeBlock] .prism-previewer.prism-previewer:after {
   border-top-color: rgb(242, 242, 242);
@@ -1659,34 +1768,36 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=one-light] div[data-type=codeBlock] .prism-previewer-flipped.prism-previewer-flipped.after {
   border-bottom-color: rgb(242, 242, 242);
 }
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Background colour within the popup */
+}
 [data-code-block-theme=one-light] div[data-type=codeBlock] .prism-previewer-angle.prism-previewer-angle:before,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .prism-previewer-time.prism-previewer-time:before,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .prism-previewer-easing.prism-previewer-easing {
   background: hsl(0, 0%, 100%);
+}
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* For angle, this is the positive area (eg. 90deg will display one quadrant in this colour) */
+  /* For time, this is the alternate colour */
 }
 [data-code-block-theme=one-light] div[data-type=codeBlock] .prism-previewer-angle.prism-previewer-angle circle,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .prism-previewer-time.prism-previewer-time circle {
   stroke: hsl(230, 8%, 24%);
   stroke-opacity: 1;
 }
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Stroke colours of the handle, direction point, and vector itself */
+}
 [data-code-block-theme=one-light] div[data-type=codeBlock] .prism-previewer-easing.prism-previewer-easing circle,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .prism-previewer-easing.prism-previewer-easing path,
 [data-code-block-theme=one-light] div[data-type=codeBlock] .prism-previewer-easing.prism-previewer-easing line {
   stroke: hsl(230, 8%, 24%);
 }
+[data-code-block-theme=one-light] div[data-type=codeBlock] {
+  /* Fill colour of the handle */
+}
 [data-code-block-theme=one-light] div[data-type=codeBlock] .prism-previewer-easing.prism-previewer-easing circle {
   fill: transparent;
-}
-[data-code-block-theme=vs-dark] div[data-type=codeBlock] {
-  /*********************************************************
-  * Tokens
-  */
-  /*********************************************************
-  * Language Specific
-  */
-  /*********************************************************
-  * Line highlighting
-  */
 }
 [data-code-block-theme=vs-dark] div[data-type=codeBlock] pre[class*=language-],
 [data-code-block-theme=vs-dark] div[data-type=codeBlock] code[class*=language-] {
@@ -1732,6 +1843,11 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   border-radius: 0.3em;
   color: #db4c69;
   background: #1e1e1e;
+}
+[data-code-block-theme=vs-dark] div[data-type=codeBlock] {
+  /*********************************************************
+  * Tokens
+  */
 }
 [data-code-block-theme=vs-dark] div[data-type=codeBlock] .namespace {
   opacity: 0.7;
@@ -1873,6 +1989,11 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=vs-dark] div[data-type=codeBlock] .token.namespace {
   color: #4ec9b0;
 }
+[data-code-block-theme=vs-dark] div[data-type=codeBlock] {
+  /*********************************************************
+  * Language Specific
+  */
+}
 [data-code-block-theme=vs-dark] div[data-type=codeBlock] pre[class*=language-javascript],
 [data-code-block-theme=vs-dark] div[data-type=codeBlock] code[class*=language-javascript],
 [data-code-block-theme=vs-dark] div[data-type=codeBlock] pre[class*=language-jsx],
@@ -1897,6 +2018,11 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=vs-dark] div[data-type=codeBlock] .language-html .token.punctuation {
   color: #808080;
 }
+[data-code-block-theme=vs-dark] div[data-type=codeBlock] {
+  /*********************************************************
+  * Line highlighting
+  */
+}
 [data-code-block-theme=vs-dark] div[data-type=codeBlock] pre[class*=language-] > code[class*=language-] {
   position: relative;
   z-index: 1;
@@ -1911,14 +2037,6 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
    * VS theme by Andrew Lock (https://andrewlock.net)
    * Inspired by Visual Studio syntax coloring
    */
-  /* Code blocks */
-  /* Inline code */
-  /* overrides color-values for the Line Numbers plugin
-   * http://prismjs.com/plugins/line-numbers/
-   */
-  /* overrides color-values for the Line Highlight plugin
-  * http://prismjs.com/plugins/line-highlight/
-  */
 }
 [data-code-block-theme=vs-light] div[data-type=codeBlock] code[class*=language-],
 [data-code-block-theme=vs-light] div[data-type=codeBlock] pre[class*=language-] {
@@ -1950,12 +2068,18 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=vs-light] div[data-type=codeBlock] code[class*=language-]::selection, [data-code-block-theme=vs-light] div[data-type=codeBlock] code[class*=language-] ::selection {
   background: #C1DEF1;
 }
+[data-code-block-theme=vs-light] div[data-type=codeBlock] {
+  /* Code blocks */
+}
 [data-code-block-theme=vs-light] div[data-type=codeBlock] pre[class*=language-] {
   padding: 1em;
   margin: 0.5em 0;
   overflow: auto;
   border: 1px solid #dddddd;
   background-color: white;
+}
+[data-code-block-theme=vs-light] div[data-type=codeBlock] {
+  /* Inline code */
 }
 [data-code-block-theme=vs-light] div[data-type=codeBlock] :not(pre) > code[class*=language-] {
   padding: 0.2em;
@@ -2038,11 +2162,21 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   background: #ffff00;
   color: #393A34;
 }
+[data-code-block-theme=vs-light] div[data-type=codeBlock] {
+  /* overrides color-values for the Line Numbers plugin
+   * http://prismjs.com/plugins/line-numbers/
+   */
+}
 [data-code-block-theme=vs-light] div[data-type=codeBlock] .line-numbers.line-numbers .line-numbers-rows {
   border-right-color: #a5a5a5;
 }
 [data-code-block-theme=vs-light] div[data-type=codeBlock] .line-numbers .line-numbers-rows > span:before {
   color: #2B91AF;
+}
+[data-code-block-theme=vs-light] div[data-type=codeBlock] {
+  /* overrides color-values for the Line Highlight plugin
+  * http://prismjs.com/plugins/line-highlight/
+  */
 }
 [data-code-block-theme=vs-light] div[data-type=codeBlock] .line-highlight.line-highlight {
   background: rgba(193, 222, 241, 0.2);
@@ -2057,8 +2191,6 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
    * Loosely based on Monokai textmate theme by http://www.monokai.nl/
    * @author ocodia
    */
-  /* Code blocks */
-  /* Inline code */
 }
 [data-code-block-theme=okaidia] div[data-type=codeBlock] code[class*=language-],
 [data-code-block-theme=okaidia] div[data-type=codeBlock] pre[class*=language-] {
@@ -2081,6 +2213,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   -ms-hyphens: none;
   hyphens: none;
 }
+[data-code-block-theme=okaidia] div[data-type=codeBlock] {
+  /* Code blocks */
+}
 [data-code-block-theme=okaidia] div[data-type=codeBlock] pre[class*=language-] {
   padding: 1em;
   margin: 0.5em 0;
@@ -2090,6 +2225,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=okaidia] div[data-type=codeBlock] :not(pre) > code[class*=language-],
 [data-code-block-theme=okaidia] div[data-type=codeBlock] pre[class*=language-] {
   background: #272822;
+}
+[data-code-block-theme=okaidia] div[data-type=codeBlock] {
+  /* Inline code */
 }
 [data-code-block-theme=okaidia] div[data-type=codeBlock] :not(pre) > code[class*=language-] {
   padding: 0.1em;
@@ -2166,11 +2304,6 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
    * Based (more or less) on the Twilight theme originally of Textmate fame.
    * @author Remy Bach
    */
-  /* Code blocks */
-  /* Text Selection colour */
-  /* Inline code */
-  /* Markup */
-  /* Make the tokens sit above the line highlight so the colours don't look faded. */
 }
 [data-code-block-theme=twilight] div[data-type=codeBlock] code[class*=language-],
 [data-code-block-theme=twilight] div[data-type=codeBlock] pre[class*=language-] {
@@ -2197,6 +2330,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=twilight] div[data-type=codeBlock] :not(pre) > code[class*=language-] {
   background: hsl(0, 0%, 8%); /* #141414 */
 }
+[data-code-block-theme=twilight] div[data-type=codeBlock] {
+  /* Code blocks */
+}
 [data-code-block-theme=twilight] div[data-type=codeBlock] pre[class*=language-] {
   border-radius: 0.5em;
   border: 0.3em solid hsl(0, 0%, 33%); /* #282A2B */
@@ -2213,6 +2349,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   /* Safari */
   background: hsl(200, 4%, 16%); /* #282A2B */
 }
+[data-code-block-theme=twilight] div[data-type=codeBlock] {
+  /* Text Selection colour */
+}
 [data-code-block-theme=twilight] div[data-type=codeBlock] pre[class*=language-]::-moz-selection, [data-code-block-theme=twilight] div[data-type=codeBlock] pre[class*=language-] ::-moz-selection,
 [data-code-block-theme=twilight] div[data-type=codeBlock] code[class*=language-]::-moz-selection, [data-code-block-theme=twilight] div[data-type=codeBlock] code[class*=language-] ::-moz-selection {
   text-shadow: none;
@@ -2222,6 +2361,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=twilight] div[data-type=codeBlock] code[class*=language-]::selection, [data-code-block-theme=twilight] div[data-type=codeBlock] code[class*=language-] ::selection {
   text-shadow: none;
   background: hsla(0, 0%, 93%, 0.15); /* #EDEDED */
+}
+[data-code-block-theme=twilight] div[data-type=codeBlock] {
+  /* Inline code */
 }
 [data-code-block-theme=twilight] div[data-type=codeBlock] :not(pre) > code[class*=language-] {
   border-radius: 0.3em;
@@ -2290,10 +2432,16 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   padding: 1em 0 1em 3em;
   position: relative;
 }
+[data-code-block-theme=twilight] div[data-type=codeBlock] {
+  /* Markup */
+}
 [data-code-block-theme=twilight] div[data-type=codeBlock] .language-markup .token.tag,
 [data-code-block-theme=twilight] div[data-type=codeBlock] .language-markup .token.attr-name,
 [data-code-block-theme=twilight] div[data-type=codeBlock] .language-markup .token.punctuation {
   color: hsl(33, 33%, 52%); /* #AC885B */
+}
+[data-code-block-theme=twilight] div[data-type=codeBlock] {
+  /* Make the tokens sit above the line highlight so the colours don't look faded. */
 }
 [data-code-block-theme=twilight] div[data-type=codeBlock] .token {
   position: relative;
@@ -2344,11 +2492,6 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
    * Based on https://github.com/tshedor/workshop-wp-theme (Example: http://workshop.kansan.com/category/sessions/basics or http://workshop.timshedor.com/category/sessions/basics);
    * @author Tim  Shedor
    */
-  /* Code blocks */
-  /* Margin bottom to accommodate shadow */
-  /* Inline code */
-  /* Plugin styles: Line Numbers */
-  /* Plugin styles: Line Highlight */
 }
 [data-code-block-theme=coy] div[data-type=codeBlock] code[class*=language-],
 [data-code-block-theme=coy] div[data-type=codeBlock] pre[class*=language-] {
@@ -2369,6 +2512,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   -moz-hyphens: none;
   -ms-hyphens: none;
   hyphens: none;
+}
+[data-code-block-theme=coy] div[data-type=codeBlock] {
+  /* Code blocks */
 }
 [data-code-block-theme=coy] div[data-type=codeBlock] pre[class*=language-] {
   position: relative;
@@ -2392,6 +2538,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   padding: 0 1em;
   display: block;
 }
+[data-code-block-theme=coy] div[data-type=codeBlock] {
+  /* Margin bottom to accommodate shadow */
+}
 [data-code-block-theme=coy] div[data-type=codeBlock] :not(pre) > code[class*=language-],
 [data-code-block-theme=coy] div[data-type=codeBlock] pre[class*=language-] {
   background-color: #fdfdfd;
@@ -2399,6 +2548,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   margin-bottom: 1em;
+}
+[data-code-block-theme=coy] div[data-type=codeBlock] {
+  /* Inline code */
 }
 [data-code-block-theme=coy] div[data-type=codeBlock] :not(pre) > code[class*=language-] {
   position: relative;
@@ -2509,6 +2661,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
     box-shadow: none;
   }
 }
+[data-code-block-theme=coy] div[data-type=codeBlock] {
+  /* Plugin styles: Line Numbers */
+}
 [data-code-block-theme=coy] div[data-type=codeBlock] pre[class*=language-].line-numbers.line-numbers {
   padding-left: 0;
 }
@@ -2517,6 +2672,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 }
 [data-code-block-theme=coy] div[data-type=codeBlock] pre[class*=language-].line-numbers.line-numbers .line-numbers-rows {
   left: 0;
+}
+[data-code-block-theme=coy] div[data-type=codeBlock] {
+  /* Plugin styles: Line Highlight */
 }
 [data-code-block-theme=coy] div[data-type=codeBlock] pre[class*=language-][data-line] {
   padding-top: 0;
@@ -2561,8 +2719,6 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   cyan      #2aa198
   green     #859900
   */
-  /* Code blocks */
-  /* Inline code */
 }
 [data-code-block-theme=solarized-light] div[data-type=codeBlock] code[class*=language-],
 [data-code-block-theme=solarized-light] div[data-type=codeBlock] pre[class*=language-] {
@@ -2591,6 +2747,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=solarized-light] div[data-type=codeBlock] code[class*=language-]::selection, [data-code-block-theme=solarized-light] div[data-type=codeBlock] code[class*=language-] ::selection {
   background: #073642; /* base02 */
 }
+[data-code-block-theme=solarized-light] div[data-type=codeBlock] {
+  /* Code blocks */
+}
 [data-code-block-theme=solarized-light] div[data-type=codeBlock] pre[class*=language-] {
   padding: 1em;
   margin: 0.5em 0;
@@ -2600,6 +2759,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 [data-code-block-theme=solarized-light] div[data-type=codeBlock] :not(pre) > code[class*=language-],
 [data-code-block-theme=solarized-light] div[data-type=codeBlock] pre[class*=language-] {
   background-color: #fdf6e3; /* base3 */
+}
+[data-code-block-theme=solarized-light] div[data-type=codeBlock] {
+  /* Inline code */
 }
 [data-code-block-theme=solarized-light] div[data-type=codeBlock] :not(pre) > code[class*=language-] {
   padding: 0.1em;
@@ -2829,7 +2991,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --panel-body-bg: var(--panel-primary-body-bg, transparent);
   --panel-body-color: var(--panel-primary-body-color, #0a58ca);
   --panel-body-border-radius: var(--panel-primary-body-border-radius, 0);
-  --panel-icon: var(--panel-primary-icon, "");
+  --panel-icon: var(--panel-primary-icon, '\EA6A');
 }
 
 .cherry-panel__info {
@@ -2843,7 +3005,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --panel-body-bg: var(--panel-info-body-bg, transparent);
   --panel-body-color: var(--panel-info-body-color, #087990);
   --panel-body-border-radius: var(--panel-info-body-border-radius, 0);
-  --panel-icon: var(--panel-info-icon, "");
+  --panel-icon: var(--panel-info-icon, '\EA69');
 }
 
 .cherry-panel__warning {
@@ -2857,7 +3019,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --panel-body-bg: var(--panel-warning-body-bg, transparent);
   --panel-body-color: var(--panel-warning-body-color, #997404);
   --panel-body-border-radius: var(--panel-warning-body-border-radius, 0);
-  --panel-icon: var(--panel-warning-icon, "");
+  --panel-icon: var(--panel-warning-icon, '\EA6B');
 }
 
 .cherry-panel__danger {
@@ -2871,7 +3033,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --panel-body-bg: var(--panel-danger-body-bg, transparent);
   --panel-body-color: var(--panel-danger-body-color, #b02a37);
   --panel-body-border-radius: var(--panel-danger-body-border-radius, 0);
-  --panel-icon: var(--panel-danger-icon, "");
+  --panel-icon: var(--panel-danger-icon, '\EA68');
 }
 
 .cherry-panel__success {
@@ -2885,10 +3047,10 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --panel-body-bg: var(--panel-success-body-bg, transparent);
   --panel-body-color: var(--panel-success-body-color, #146c43);
   --panel-body-border-radius: var(--panel-success-body-border-radius, 0);
-  --panel-icon: var(--panel-success-icon, "");
+  --panel-icon: var(--panel-success-icon, '\EA67');
 }
 
-/** 引入自带的主题 */
+/** 引入自带的主题（保持与 cherry 一致的主题覆盖顺序） */
 /*
  * 默认主题
  */
@@ -2945,22 +3107,6 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 }
 
 /** 预览区域样式 */
-.cherry-markdown.theme__default {
-  /** checklist 模式，未勾选时 */
-  /** checklist 模式，勾选时 */
-  /** 行内代码 */
-  /** 
-   * 代码块
-   */
-  /** 
-   * 表格
-   */
-  /** 可以理解为上下结构的音标，下部是文字，上部是对应的拼音 */
-  /** 脚注 */
-  /** 行间公式 */
-  /** 段落公式 */
-  /** 目录 */
-}
 .cherry-markdown.theme__default h1,
 .cherry-markdown.theme__default h2,
 .cherry-markdown.theme__default h3,
@@ -2969,9 +3115,55 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 .cherry-markdown.theme__default h6 {
   /** 标题前面的锚点或序号 */
 }
+
+.cherry-markdown.theme__default {
+  /** checklist 模式，未勾选时 */
+}
+
+.cherry-markdown.theme__default {
+  /** checklist 模式，勾选时 */
+}
+
+.cherry-markdown.theme__default {
+  /** 行内代码 */
+}
+
+.cherry-markdown.theme__default {
+  /** 
+   * 代码块
+   */
+}
+
+.cherry-markdown.theme__default {
+  /** 
+   * 表格
+   */
+}
+
+.cherry-markdown.theme__default {
+  /** 可以理解为上下结构的音标，下部是文字，上部是对应的拼音 */
+}
+
 .cherry-markdown.theme__default ruby {
   /** 上部的拼音 */
 }
+
+.cherry-markdown.theme__default {
+  /** 脚注 */
+}
+
+.cherry-markdown.theme__default {
+  /** 行间公式 */
+}
+
+.cherry-markdown.theme__default {
+  /** 段落公式 */
+}
+
+.cherry-markdown.theme__default {
+  /** 目录 */
+}
+
 /*
  * 暗黑主题
  */
@@ -3039,20 +3231,25 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --mermaid-toolbar-tab-active-color: #fff;
   /* 目录区域样式 */
 }
+
 .cherry.theme__dark .cherry-flex-toc .cherry-toc-head i:hover {
   color: var(--oc-orange-8);
 }
+
 .cherry.theme__dark .cherry-flex-toc .cherry-toc-list .cherry-toc-one-a {
   border-left-color: rgba(255, 146, 43, 0.3);
 }
+
 .cherry.theme__dark .cherry-flex-toc .cherry-toc-list .cherry-toc-one-a.current {
   border-left-color: var(--oc-orange-6);
   color: var(--oc-orange-6);
 }
+
 .cherry.theme__dark .cherry-flex-toc .cherry-toc-list .cherry-toc-one-a:hover {
   border-left-color: var(--oc-orange-4);
   color: var(--oc-orange-6);
 }
+
 .cherry.theme__dark .cherry-flex-toc.cherry-flex-toc__pure .cherry-toc-head .ch-icon-chevronsLeft {
   color: var(--oc-orange-6);
 }
@@ -3063,6 +3260,29 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 }
 
 /** 预览区域样式 */
+.cherry-markdown.theme__dark figure svg:not(.echarts-svg) path,
+.cherry-markdown.theme__dark figure svg:not(.echarts-svg) rect,
+.cherry-markdown.theme__dark figure svg:not(.echarts-svg) line {
+  stroke: var(--oc-yellow-3) !important;
+}
+
+.cherry-markdown.theme__dark figure svg:not(.echarts-svg) text {
+  fill: var(--oc-yellow-6) !important;
+  stroke: none !important;
+}
+
+.cherry-markdown.theme__dark figure svg:not(.echarts-svg) tspan {
+  fill: var(--oc-yellow-6) !important;
+}
+
+.cherry-markdown.theme__dark figure svg:not(.echarts-svg) circle {
+  fill: var(--oc-violet-0) !important;
+}
+
+.cherry-markdown.theme__dark figure svg:not(.echarts-svg) circle.state-start {
+  fill: var(--oc-yellow-6) !important;
+}
+
 .cherry-markdown.theme__dark {
   /* ========== Panel 相关变量 ========== */
   --panel-border-radius: 16px;
@@ -3117,24 +3337,6 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --panel-success-title-color: var(--oc-green-2);
   --panel-success-body-bg: linear-gradient(145deg, rgba(34, 197, 94, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
   --panel-success-body-color: var(--oc-green-3);
-}
-.cherry-markdown.theme__dark figure svg:not(.echarts-svg) path,
-.cherry-markdown.theme__dark figure svg:not(.echarts-svg) rect,
-.cherry-markdown.theme__dark figure svg:not(.echarts-svg) line {
-  stroke: var(--oc-yellow-3) !important;
-}
-.cherry-markdown.theme__dark figure svg:not(.echarts-svg) text {
-  fill: var(--oc-yellow-6) !important;
-  stroke: none !important;
-}
-.cherry-markdown.theme__dark figure svg:not(.echarts-svg) tspan {
-  fill: var(--oc-yellow-6) !important;
-}
-.cherry-markdown.theme__dark figure svg:not(.echarts-svg) circle {
-  fill: var(--oc-violet-0) !important;
-}
-.cherry-markdown.theme__dark figure svg:not(.echarts-svg) circle.state-start {
-  fill: var(--oc-yellow-6) !important;
 }
 
 /*
@@ -3270,16 +3472,20 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 .cherry-markdown.theme__abyss figure svg:not(.echarts-svg) line {
   stroke: var(--primary-color) !important;
 }
+
 .cherry-markdown.theme__abyss figure svg:not(.echarts-svg) text {
   fill: var(--primary-color) !important;
   stroke: none !important;
 }
+
 .cherry-markdown.theme__abyss figure svg:not(.echarts-svg) tspan {
   fill: var(--primary-color) !important;
 }
+
 .cherry-markdown.theme__abyss figure svg:not(.echarts-svg) circle {
   fill: var(--oc-violet-0) !important;
 }
+
 .cherry-markdown.theme__abyss figure svg:not(.echarts-svg) circle.state-start {
   fill: var(--oc-white) !important;
 }
@@ -3785,6 +3991,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --accordion-body-border: #eef2f0;
   --accordion-body-color: #1a1a1a;
 }
+
 .cherry.theme__blue .cherry-toolbar {
   box-shadow: none;
 }
@@ -3792,25 +3999,34 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 /** 预览区域样式 */
 .cherry-markdown.theme__blue {
   /** Editary-style: h1 with bottom border for clear section separation */
-  /** Editary-style: left-border panels for structured callouts */
 }
+
 .cherry-markdown.theme__blue h1 {
   padding-bottom: 10px;
   border-bottom: 2px solid #e2e2e0;
   margin-bottom: 24px;
 }
+
+.cherry-markdown.theme__blue {
+  /** Editary-style: left-border panels for structured callouts */
+}
+
 .cherry-markdown.theme__blue .cherry-panel__primary {
   border-left: 3px solid #2b7a4b;
 }
+
 .cherry-markdown.theme__blue .cherry-panel__info {
   border-left: 3px solid #1a6b8a;
 }
+
 .cherry-markdown.theme__blue .cherry-panel__warning {
   border-left: 3px solid #c4982a;
 }
+
 .cherry-markdown.theme__blue .cherry-panel__danger {
   border-left: 3px solid #c7254e;
 }
+
 .cherry-markdown.theme__blue .cherry-panel__success {
   border-left: 3px solid #2b7a4b;
 }

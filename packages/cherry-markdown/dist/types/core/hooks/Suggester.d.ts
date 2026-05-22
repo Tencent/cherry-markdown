@@ -156,13 +156,13 @@ declare class SuggesterPanel {
      * 面板重定位（滚动时调用，不进行边界判定）
      * @param {CodeMirror} codemirror
      */
-    relocatePanel(codemirror: typeof import("codemirror")): boolean;
+    relocatePanel(codemirror: CodeMirror): boolean;
     /**
      * 获取光标位置
      * @param {CodeMirror} codemirror
      * @returns {{ left: number, top: number }}
      */
-    getCursorPos(codemirror: typeof import("codemirror")): {
+    getCursorPos(codemirror: CodeMirror): {
         left: number;
         top: number;
     };
@@ -174,7 +174,7 @@ declare class SuggesterPanel {
      */
     relocatePanelWithBoundaryCheck(): boolean;
     stopRelate(): void;
-    cursorTo: import("codemirror").Position;
+    cursorTo: any;
     /**
      * 粘贴选择结果
      * @param {number} idx 选择的结果索引
@@ -196,10 +196,10 @@ declare class SuggesterPanel {
     onCodeMirrorChange(codemirror: CodeMirror.Editor, evt: CodeMirror.EditorChange): void;
     /**
      * 监听方向键选择 options
-     * @param {CodeMirror.Editor} codemirror
+     * @param {import('@codemirror/view').EditorView} codemirror
      * @param {KeyboardEvent} evt
      */
-    onKeyDown(codemirror: CodeMirror.Editor, evt: KeyboardEvent): boolean;
+    onKeyDown(codemirror: import("@codemirror/view").EditorView, evt: KeyboardEvent): boolean;
     /**
      * 销毁 SuggesterPanel 实例，清理事件监听器和 DOM 引用
      * 必须调用此方法以避免内存泄漏

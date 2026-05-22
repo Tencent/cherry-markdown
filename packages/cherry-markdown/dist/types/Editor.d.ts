@@ -50,18 +50,14 @@ export default class Editor {
     /**
      * 在onChange后处理draw.io的xml数据和图片的base64数据，对这种超大的数据增加省略号，
      * 以及对全角符号进行特殊染色。
+     * @param {boolean} force 是否强制处理
      */
-    dealSpecialWords: () => void;
+    dealSpecialWords: (force?: boolean) => void;
     /**
      * 实际执行特殊词处理的逻辑
      * @private
      */
     private doDealSpecialWordsInternal;
-    /**
-     * 大文档降级处理：仅处理高优先级标记，跳过低优先级标记以保证性能
-     * @private
-     */
-    private doPartialMarkProcessing;
     /**
      * 一次性收集所有已有标记（避免 O(n²) 检查）
      * @returns {Set<string>} 已有标记的键集合，格式为 "from_to_className"
@@ -79,44 +75,15 @@ export default class Editor {
      * @param {RegExp} reg - 正则表达式
      * @param {string} className - CSS 类名
      * @param {Array<import('../types/editor').BatchMarkItem>} targetArray - 目标数组，用于收集标记项
-     * @param {(fromPos: number, matchResult: RegExpMatchArray) => MarkRange | null} [callback] - 可选的回调函数
      * @param {Set<string>} [existingMarksSet] - 已有标记集合（用于避免 O(n²) 检查）
      */
-    collectMarkItems: (reg: RegExp, className: string, targetArray: Array<import("../types/editor").BatchMarkItem>, callback?: (fromPos: number, matchResult: RegExpMatchArray) => {
-        /**
-         * - 起始位置
-         */
-        begin: number;
-        /**
-         * - 结束位置
-         */
-        end: number;
-        /**
-         * - 可选的大字符串（用于标记内容）
-         */
-        bigString?: string;
-        /**
-         * - 可选的 ID
-         */
-        id?: string;
-    } | null, existingMarksSet?: Set<string>) => void;
+    collectMarkItems: (reg: RegExp, className: string, targetArray: Array<import("../types/editor").BatchMarkItem>, existingMarksSet?: Set<string>) => void;
     /**
      * 收集全角字符标记项（不立即应用）
      * @param {Array} targetArray - 目标数组，用于收集标记项
      * @param {Set<string>} [existingMarksSet] - 已有标记集合（用于避免 O(n²) 检查）
      */
     collectFullWidthMarkItems: (targetArray: any[], existingMarksSet?: Set<string>) => void;
-    /**
-     * 收集单个匹配结果的数据（不立即创建 mark）
-     * @param {CM6Adapter} editor - 编辑器实例
-     * @param {SearchCursor} searcher - 搜索游标
-     * @param {Array} matchResult - 正则匹配结果
-     * @param {string} className - CSS 类名
-     * @param {Function} [callback] - 可选的回调函数，签名：callback(fromPos: number, matchResult: Array) -> {begin: number, end: number, bigString: string}
-     * @param {Set<string>} [existingMarksSet] - 已有标记集合（用于避免 O(n²) 检查）
-     * @returns {import('../../types/editor').BatchMarkItem | null} 返回标记数据或 null（如果已存在或无效）
-     */
-    collectMarkItem: (editor: CM6Adapter, searcher: SearchCursor, matchResult: any[], className: string, callback?: Function, existingMarksSet?: Set<string>) => import("../../types/editor").BatchMarkItem | null;
     /**
      * 批量应用所有装饰（使用单个 Transaction）
      * @param {CM6Adapter} editor - 编辑器实例
@@ -128,10 +95,9 @@ export default class Editor {
      * 计算 mark 范围
      * @param {Array} matchResult - 正则匹配结果
      * @param {number} fromPos - 匹配起始位置
-     * @param {Function} [callback] - 可选的回调函数
      * @returns {{begin: number, end: number, bigString: string} | null}
      */
-    calculateMarkRange: (matchResult: any[], fromPos: number, callback?: Function) => {
+    calculateMarkRange: (matchResult: any[], fromPos: number) => {
         begin: number;
         end: number;
         bigString: string;
@@ -261,8 +227,23 @@ export default class Editor {
     setWritingStyle(writingStyle: any): void;
     /**
      * 设置编辑器值
+     * @param {string} value 新内容
+     * @param {boolean} [keepCursor=false] 是否保持光标位置
+     *
+     * 协作场景说明：
+     *  - keepCursor 为 true 时，会基于 fast-diff 计算新旧内容之间的最小变更集，
+     *    并通过 EditorView.dispatch({ changes }) 让 CodeMirror 6 自身的 ChangeSet
+     *    机制自动映射当前 selection（包括多光标/选区端点）。
      */
-    setValue(value?: string): void;
+    setValue(value?: string, keepCursor?: boolean): void;
+    /**
+     * 基于 fast-diff 计算两段文本的最小变更集合，供 EditorView.dispatch 使用
+     * @private
+     * @param {string} oldStr 旧内容
+     * @param {string} newStr 新内容
+     * @returns {{from: number, to: number, insert: string}[]}
+     */
+    private computeMinimalChanges;
     /**
      * 获取编辑器值
      */

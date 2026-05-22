@@ -83,7 +83,6 @@ export const URL_INLINE: RegExp;
 export const URL_NO_SLASH: RegExp;
 export const URL: RegExp;
 export const LIST_CONTENT: RegExp;
-export const pasteWrapperReg: RegExp;
 export const imgBase64Reg: RegExp;
 export const base64Reg: RegExp;
 export const longTextReg: RegExp;

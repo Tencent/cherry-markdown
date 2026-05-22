@@ -56,7 +56,7 @@ export default class PreviewerBubble {
     $bindedOnChange: any;
     $bindedOnEditorSizeChange: () => void;
     $bindedOnLayoutChange: () => void;
-    removeHoverBubble: import("lodash").DebouncedFunc<() => void>;
+    removeHoverBubble: any;
     isDestroyed: boolean;
     /**
      * 判断是否为代码块
@@ -220,6 +220,7 @@ export default class PreviewerBubble {
      * @returns {boolean}
      */
     beginChangeMermaidValue(figureElement: HTMLElement): boolean;
+    mermaidIndex: number;
     mermaidSize: string;
     mermaidAlign: string;
     mermaidExtendFrom: number;

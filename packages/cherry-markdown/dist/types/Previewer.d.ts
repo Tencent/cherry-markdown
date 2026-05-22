@@ -73,8 +73,8 @@ export default class Previewer {
      */
     private disableScrollListener;
     editor: any;
-    /** @type {typeof import('codemirror')|null} CodeMirror 模块（从 Editor 传递，stream 模式下为 null） */
-    codemirrorModule: typeof import("codemirror") | null;
+    /** @type {object|null} CodeMirror 模块（从 Editor 传递，stream 模式下为 null） */
+    codemirrorModule: object | null;
     lazyLoadImg: LazyLoadImg;
     /**
      * 不依赖Editor的初始化方法，用于流式渲染场景

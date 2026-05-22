@@ -16,10 +16,7 @@ export default class Cherry extends CherryStatic {
      * @param {CherryOptions} options
      */
     constructor(options: CherryOptions);
-    defaultToolbar: false | (string | number | {
-        [x: string]: (string | number)[];
-        [x: number]: (string | number)[];
-    })[];
+    defaultToolbar: any;
     /**
      * @property
      * @type {CherryOptions}
@@ -754,7 +751,11 @@ export default class Cherry extends CherryStatic {
     /**
      * 覆盖编辑区的内容
      * @param {string} content markdown内容
-     * @param {boolean} keepCursor 是否保持光标位置
+     * @param {boolean} [keepCursor=false] 是否保持光标位置
+     *
+     * 协作场景说明：
+     *  - keepCursor 为 true 时，底层会基于 fast-diff 计算最小变更集，并由 CodeMirror 6
+     *    的 ChangeSet 机制自动映射当前光标/选区位置。
      */
     setValue(content: string, keepCursor?: boolean): void;
     /**

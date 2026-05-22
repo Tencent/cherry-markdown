@@ -17,6 +17,7 @@ declare namespace imgToolHandler {
     function showBubble(img: any, container: any, previewerDom: any, event: any, locale: any, options?: {}): void;
     function emit(type: any, event?: {}): void;
     function previewUpdate(callback: any): void;
+    function refreshTarget(): void;
     function remove(): void;
     /**
      * 更新工具栏位置，用于预览区更新或编辑器大小变化后重新定位
