@@ -28,7 +28,7 @@ jobs:
         with:
           node-version-file: .node-version
           registry-url: 'https://registry.npmjs.org'
-          cache: yarn
+          cache: pnpm
 
       - name: Compute dev version
         working-directory: ./packages/cherry-markdown
@@ -45,7 +45,7 @@ jobs:
 
       # 在原始 name 下 install & build，workspace 依赖原始包名
       - name: Install and build
-        run: yarn install && yarn build
+        run: pnpm install && pnpm build
 
       # build 完成后改包名、写 README
       - name: Prepare package for publish

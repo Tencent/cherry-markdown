@@ -8,24 +8,21 @@
   "author": "Cherry Oteam",
   "license": "Apache-2.0",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
-    "postinstall": "yarn workspace cherry-markdown run iconfont",
+    "postinstall": "pnpm --filter cherry-markdown run iconfont",
     "prepare": "husky",
     "changeset": "npx @changesets/cli",
     "changeset-version": "npx @changesets/cli version",
-    "dev": "yarn workspace cherry-markdown dev",
-    "build": "yarn workspace cherry-markdown build",
-    "dev:client": "yarn workspace @cherry-markdown/client tauri dev",
-    "build:client": "yarn workspace @cherry-markdown/client tauri build",
-    "build:vscodePlugin": "yarn workspace cherry-markdown build && yarn workspace cherry-markdown-vscode-plugin build",
-    "example:react": "yarn workspace @cherry-markdown/react_demo dev",
-    "test": "yarn workspace cherry-markdown test",
-    "test:update": "yarn workspace cherry-markdown test:update",
-    "lint:all": "yarn workspace cherry-markdown lint && yarn workspace @cherry-markdown/client lint && yarn workspace cherry-markdown-vscode-plugin lint",
-    "lint:fix:all": "yarn workspace cherry-markdown lint:fix && yarn workspace @cherry-markdown/client lint:fix && yarn workspace cherry-markdown-vscode-plugin lint:fix"
+    "dev": "pnpm --filter cherry-markdown dev",
+    "build": "pnpm --filter cherry-markdown build",
+    "dev:client": "pnpm --filter @cherry-markdown/client tauri dev",
+    "build:client": "pnpm --filter @cherry-markdown/client tauri build",
+    "build:vscodePlugin": "pnpm --filter cherry-markdown build && pnpm --filter cherry-markdown-vscode-plugin build",
+    "example:react": "pnpm --filter @cherry-markdown/react_demo dev",
+    "test": "pnpm --filter cherry-markdown test",
+    "test:update": "pnpm --filter cherry-markdown test:update",
+    "lint:all": "pnpm --filter cherry-markdown lint && pnpm --filter @cherry-markdown/client lint && pnpm --filter cherry-markdown-vscode-plugin lint",
+    "lint:fix:all": "pnpm --filter cherry-markdown lint:fix && pnpm --filter @cherry-markdown/client lint:fix && pnpm --filter cherry-markdown-vscode-plugin lint:fix"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.0",
@@ -55,16 +52,26 @@
   },
   "engines": {
     "node": ">=24",
-    "yarn": ">=1.22.18"
+    "pnpm": ">=10.0.0"
   },
-  "resolutions": {
-    "glob-parent": "5.1.2",
-    "set-value": "4.0.1",
-    "lodash.template": "4.5.0",
-    "yargs-parser": "20.2.9",
-    "xmldom": "0.5.0",
-    "ansi-regex": "5.0.1",
-    "glob-watcher": "6.0.0"
+  "pnpm": {
+    "overrides": {
+      "glob-parent": "5.1.2",
+      "set-value": "4.0.1",
+      "lodash.template": "4.5.0",
+      "yargs-parser": "20.2.9",
+      "xmldom": "0.5.0",
+      "ansi-regex": "5.0.1",
+      "glob-watcher": "6.0.0"
+    },
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@parcel/watcher",
+      "@swc/core",
+      "core-js-pure",
+      "esbuild",
+      "ttf2woff2"
+    ]
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "pnpm@10.11.0"
 }

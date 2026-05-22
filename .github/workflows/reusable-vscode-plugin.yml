@@ -40,7 +40,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
-          cache: 'yarn'
+          cache: 'pnpm'
 
       # ── 1. 改名：解决 workspace 同名冲突 ──
       - name: Prepare package names
@@ -67,19 +67,19 @@ jobs:
       # ── 3. 安装依赖 + 构建核心库 ──
       - name: Install and Build Dependencies
         run: |
-          yarn --network-timeout 100000
-          yarn build
+          pnpm install
+          pnpm build
 
       # ── 4. 生产模式编译插件 ──
       - name: Build VSCode Plugin (production bundle)
-        run: yarn build:vscodePlugin
+        run: pnpm build:vscodePlugin
 
       # ── 5a. package 模式：打包 + 上传 artifact ──
       - name: Package VSCode Plugin
         if: inputs.mode == 'package'
         run: |
           cd packages/vscodePlugin
-          npx @vscode/vsce package --no-dependencies --no-yarn
+          npx @vscode/vsce package --no-dependencies
 
       - name: Upload VSIX
         if: inputs.mode == 'package'
@@ -97,4 +97,4 @@ jobs:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
           cd packages/vscodePlugin
-          npx @vscode/vsce publish -p $VSCE_PAT --no-dependencies --no-yarn
+          npx @vscode/vsce publish -p $VSCE_PAT --no-dependencies

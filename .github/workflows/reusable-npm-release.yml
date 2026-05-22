@@ -27,10 +27,10 @@ jobs:
         with:
           node-version-file: .node-version
           registry-url: 'https://registry.npmjs.org'
-          cache: yarn
+          cache: pnpm
 
       - name: Install and build
-        run: yarn install && yarn build
+        run: pnpm install && pnpm build
 
       - name: Prepare package for publish
         working-directory: ./packages/cherry-markdown

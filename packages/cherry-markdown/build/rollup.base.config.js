@@ -152,10 +152,10 @@ const options = {
     // mermaid 的子依赖 (langium, marked) 在某些包管理器 hoisting 策略下
     // 可能无法被 Rollup 解析，被静默当作 external，导致运行时 undefined
     //
-    // 已知根因：yarn 1.x workspaces 处理 optionalDependencies 时，
+    // 已知根因：pnpm 处理 optionalDependencies 时，
     // 如果传递依赖的 engines.node 与当前 Node 版本不匹配，
     // 会静默跳过安装这些传递依赖（如 marked@16 要求 node>=20，langium@4 要求 node>=20.10）。
-    // 修复方式：.yarnrc 中添加 --ignore-engines true
+    // 修复方式：.npmrc 中添加 strict-peer-dependencies=false
     if (warning && warning.code === 'UNRESOLVED_IMPORT') {
       const id = warning.id || warning.source || 'unknown';
       const importer = warning.importer || 'unknown';
@@ -163,7 +163,7 @@ const options = {
         `Unresolved import: ${id} (imported by ${importer})\n`
         + 'This may be caused by incomplete dependency installation.\n'
         + 'If this involves mermaid sub-dependencies (marked, langium, etc.),\n'
-        + 'ensure .yarnrc contains "--ignore-engines true" and run "yarn install" again.',
+        + 'ensure .npmrc contains "strict-peer-dependencies=false" and run "pnpm install" again.',
       );
     }
     // 忽略 juice 的 circular dependency

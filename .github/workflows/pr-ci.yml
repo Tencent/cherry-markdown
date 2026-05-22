@@ -36,13 +36,13 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'yarn'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: yarn
+        run: pnpm install
 
       - name: Eslint
-        run: yarn lint:all
+        run: pnpm lint:all
 
       - name: Build
-        run: yarn build
+        run: pnpm build

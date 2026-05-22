@@ -70,7 +70,7 @@ jobs:
             echo ""
             echo "This PR is missing a changeset. Please add one by running:"
             echo ""
-            echo "  yarn changeset"
+            echo "  pnpm changeset"
             echo ""
             echo "If this change doesn't need a version bump, add the 'skip-changeset' label to this PR."
             exit 1

@@ -16,7 +16,7 @@
     "@tauri-apps/plugin-fs": "2.2.0",
     "@tauri-apps/plugin-global-shortcut": "^2.3.1",
     "@tauri-apps/plugin-opener": "2.2.0",
-    "cherry-markdown": "*",
+    "cherry-markdown": "workspace:*",
     "echarts": "^6.0.0",
     "katex": "^0.16.27",
     "pinyin": "^4.0.0",

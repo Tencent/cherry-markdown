@@ -169,7 +169,7 @@
   "scripts": {
     "dev": "rspack build --watch",
     "build": "rspack build --mode production",
-    "package": "yarn build && npx @vscode/vsce package --no-dependencies --no-yarn",
+    "package": "pnpm build && npx @vscode/vsce package --no-dependencies",
     "lint": "cd ../.. && npx prettier --check packages/vscodePlugin/src/**/*.ts && npx eslint packages/vscodePlugin/src/**/*.ts",
     "lint:fix": "cd ../.. && npx prettier --write packages/vscodePlugin/src/**/*.ts && npx eslint packages/vscodePlugin/src/**/*.ts --fix"
   },
@@ -178,7 +178,7 @@
     "@rspack/core": "^1.5.3",
     "@types/vscode": "^1.58.0",
     "axios": "^1.4.0",
-    "cherry-markdown": "*",
+    "cherry-markdown": "workspace:*",
     "css-loader": "^7.1.4",
     "html-to-image": "^1.11.11",
     "mathjax": "^3.2.2"

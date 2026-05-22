@@ -27,11 +27,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
-          cache: 'yarn'
+          cache: 'pnpm'
 
-      - run: yarn install
+      - run: pnpm install
 
-      - run: yarn build
+      - run: pnpm build
 
       - run: |
           mkdir -p playground/packages/cherry-markdown
