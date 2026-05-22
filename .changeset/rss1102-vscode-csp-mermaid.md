@@ -1,5 +1,5 @@
 ---
-'cherry-markdown': patch
+'cherry-markdown-vscode-plugin': patch
 ---
 
 fix(vscodePlugin): 放开 Webview CSP `style-src` 的 `'unsafe-inline'`，修复 Mermaid 等运行时注入 inline `<style>` / `style` 属性的库被拦截导致的渲染异常（部分节点缺失 `label-container` class、`fill` 退回 SVG 默认黑色等）。
