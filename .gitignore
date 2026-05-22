@@ -23,8 +23,9 @@ yarn-error.log*
 *.sw?
 
 # Lock files
+.pnpm-store
 package-lock.json
-pnpm-lock.yaml
+yarn.lock
 
 packages/**/yarn.lock
 
@@ -35,3 +36,4 @@ examples/cherry-markdown-publish/src/common/config/*.yaml
 .codebuddy/
 
 *.vsix
+node_modules
