@@ -17,6 +17,7 @@ import SyntaxBase, { HOOKS_TYPE_LIST } from './SyntaxBase';
 import { prependLineFeedForParagraph } from '@/utils/lineFeed';
 import { getIsClassicBrFromLocal, testKeyInLocal } from '@/utils/config';
 import { blockNames } from '@/utils/sanitize';
+import LRUCache from '../utils/LRUCache';
 
 let cacheCounter = 0;
 // ~~C${cacheCounter}I${cacheIndex}$
@@ -33,11 +34,10 @@ export default class ParagraphBase extends SyntaxBase {
     this.needCache = !!needCache;
     this.sign = '';
     if (needCache) {
-      this.cache = defaultCache || {};
+      this.cache = new LRUCache(2000);
       this.cacheKey = `~~C${cacheCounter}`;
       cacheCounter += 1;
     }
-    this.failedResetCacheTimes = 0;
     this.cacheData = {};
     this.cacheDataMap = [];
   }
@@ -311,10 +311,10 @@ export default class ParagraphBase extends SyntaxBase {
     }
     const $sign = sign || this.$engine.hash(str);
     const key = `${this.cacheKey}I${$sign}_L${lineCount}$`;
-    this.cache[$sign] = {
+    this.cache.set($sign, {
       content: str,
       key,
-    };
+    });
     return key;
   }
 
@@ -322,23 +322,18 @@ export default class ParagraphBase extends SyntaxBase {
     if (!this.needCache) {
       return;
     }
-    return this.cache[sign].content || '';
+    return this.cache.get(sign)?.content || '';
   }
 
   testHasCache(sign) {
-    if (!this.needCache || !this.cache[sign]) {
+    if (!this.needCache || !this.cache.get(sign)) {
       return false;
     }
-    return this.cache[sign].key;
+    return this.cache.get(sign).key;
   }
 
   // 当缓存全部被消费后，调用此方法清理多大的缓存
-  resetCache() {
-    if (!this.needCache) {
-      return;
-    }
-    this.cache = {};
-  }
+  resetCache() {}
 
   restoreCache(html) {
     // restore cached content
@@ -350,20 +345,6 @@ export default class ParagraphBase extends SyntaxBase {
       'g',
     );
     const $html = html.replace(regex, (match, cacheSign) => this.popCache(cacheSign.replace(/_L\d+$/, '')));
-    if (this.timer) {
-      clearTimeout(this.timer);
-      this.failedResetCacheTimes += 1;
-      this.timer = null;
-    }
-    this.timer = setTimeout(() => {
-      this.resetCache();
-    }, 500);
-    if (this.failedResetCacheTimes > 5) {
-      this.failedResetCacheTimes = 0;
-      setTimeout(() => {
-        this.resetCache();
-      }, 500);
-    }
     return $html;
   }
 
@@ -374,7 +355,7 @@ export default class ParagraphBase extends SyntaxBase {
   checkCache(wholeMatch, sentenceMakeFunc, lineCount = 0) {
     this.sign = this.$engine.hash(wholeMatch);
     // miss cache
-    if (!this.cache[this.sign]) {
+    if (!this.cache.get(this.sign)) {
       return this.toHtml(wholeMatch, sentenceMakeFunc);
     }
     return `${this.cacheKey}I${this.sign}_L${lineCount}$`;
