@@ -218,20 +218,28 @@ export default class HtmlBlock extends ParagraphBase {
     }
     config.HTML_INTEGRATION_POINTS.foreignobject = true;
 
-    const $strArr = $str.split('\n');
+    const $strArr = $str.split(/(?=<p data-sign=)/);
     // 如果内容很大，则分批处理，用空间换sanitizer.sanitize消耗的时间
-    const batch = 100;
+    const batch = 50;
     // 最大缓存容量（冗余20%）
-    const maxCacheLength = Math.round((1.2 * $strArr.length) / batch);
+    const maxCacheLength = Math.max(20, Math.round((1.2 * $strArr.length) / batch));
+    const cacheMap = {};
     if ($strArr.length > batch) {
       const ret = [];
       for (let i = 0; i < $strArr.length; i += batch) {
-        const batchStr = $strArr.slice(i, i + batch).join('\n');
+        const batchStr = $strArr.slice(i, i + batch).join('');
+        const cacheKey = this.$engine.hashHex(batchStr);
+        cacheMap[cacheKey] = batchStr;
         ret.push(
-          this.cacheAndGetData(batchStr, (batchStr) => sanitizer.sanitize(batchStr, config), maxCacheLength, -10),
+          this.cacheAndGetData(
+            cacheKey,
+            (cacheKey) => sanitizer.sanitize(cacheMap[cacheKey], config),
+            maxCacheLength,
+            -1 * Math.round(maxCacheLength / 10),
+          ),
         );
       }
-      return ret.join('\n');
+      return ret.join('');
     }
     return sanitizer.sanitize($str, config);
   }
