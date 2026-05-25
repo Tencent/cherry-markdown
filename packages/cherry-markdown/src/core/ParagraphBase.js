@@ -329,7 +329,7 @@ export default class ParagraphBase extends SyntaxBase {
     if (!this.needCache || !this.cache.get(sign)) {
       return false;
     }
-    return this.cache.get(sign).key;
+    return this.cache.get(sign)?.key;
   }
 
   // 当缓存全部被消费后，调用此方法清理多大的缓存
