@@ -334,6 +334,10 @@ export default class Engine {
     return hashHex(str);
   }
 
+  hashHex(str) {
+    return hashHex(str);
+  }
+
   /**
    * 计算哈希值（非加密，用于缓存键）
    * @param {String} str 被计算的字符串
