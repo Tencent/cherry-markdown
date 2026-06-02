@@ -1055,8 +1055,7 @@ exports[`engine > CommonMark-142 1`] = `
 `;
 
 exports[`engine > CommonMark-143 1`] = `
-"<p data-sign="f5469e83cfcae1984" data-type="p" data-lines="4"><del>~~    ruby startline=3 <span class="Cherry-InlineMath" data-type="mathBlock"
-        data-lines="2" data-formula-source="%25%40%23">$%@#$</span>def foo(x)<br>  return 3<br>end<br></del>~~~~~</p>
+"<p data-sign="f5469e83cfcae1984" data-type="p" data-lines="4"><del>~~    ruby startline=3 <span data-sign="fcd0efd90249bcfa" class="Cherry-InlineMath cherry-mathjax-need-render" data-type="mathBlock" data-formula-source="%25%40%23" data-lines="2" data-content="%25%40%23"></span>def foo(x)<br>  return 3<br>end<br></del>~~~~~</p>
 "
 `;
 
