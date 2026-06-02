@@ -124,14 +124,18 @@ export default class MermaidCodeEngine {
     const resolvedMermaidAPI =
       mermaidAPI || browserMermaidAPI || (resolvedMermaid && resolvedMermaid.mermaidAPI) || null;
 
-    if (!resolvedMermaid && !resolvedMermaidAPI) {
-      throw new Error('code-block-mermaid-plugin[init]: Package mermaid or mermaidAPI not found.');
-    }
-
     // @ts-expect-error logLevel 兼容 v9(number) 和 v10+(string)
     this.options = { ...DEFAULT_OPTIONS, ...mermaidOptions };
     delete this.options.mermaid;
     delete this.options.mermaidAPI;
+
+    if (!resolvedMermaid && !resolvedMermaidAPI) {
+      // mermaid 可能是异步加载的，这里不直接抛错，留待异步渲染时重试获取
+      // 注意：syncRender 路径无法等待异步加载，仍然会因 mermaidAPIRefs 为 null 而失败
+      // eslint-disable-next-line no-console
+      this.mermaidAPIRefs = null;
+      return;
+    }
 
     // 根据版本选择渲染引用：
     // - v9: 使用 mermaidAPI（render 同步回调模式）
@@ -154,7 +158,7 @@ export default class MermaidCodeEngine {
   // v9: render(id, src, callback, canvas) → length === 4 → syncRender
   // v10+: render(id, src, container?) → length <= 3 → asyncRender
   isAsyncRenderVersion() {
-    return !this.mermaidAPIRefs.render || this.mermaidAPIRefs.render.length <= 3;
+    return !this.mermaidAPIRefs || !this.mermaidAPIRefs.render || this.mermaidAPIRefs.render.length <= 3;
   }
 
   mountMermaidCanvas($engine) {
@@ -279,8 +283,60 @@ export default class MermaidCodeEngine {
     });
   }
 
-  asyncRender(graphId, src, sign, $engine, props) {
-    $engine.asyncRenderHandler.add(graphId);
+  /**
+   * 尝试重新从全局获取 mermaid 实例（当外部异步加载 mermaid 时，构造时刻可能尚未就绪）
+   * @returns {boolean} 是否成功获取
+   */
+  tryResolveMermaidAPIRefs() {
+    if (this.mermaidAPIRefs) {
+      return true;
+    }
+    const browserMermaid = getExternal('mermaid');
+    const browserMermaidAPI = getExternal('mermaidAPI');
+    const resolvedMermaid = browserMermaid;
+    const resolvedMermaidAPI = browserMermaidAPI || (resolvedMermaid && resolvedMermaid.mermaidAPI) || null;
+    if (!resolvedMermaid && !resolvedMermaidAPI) {
+      return false;
+    }
+    if (resolvedMermaidAPI) {
+      this.mermaidAPIRefs = resolvedMermaidAPI;
+      if (this.isAsyncRenderVersion()) {
+        this.mermaidAPIRefs = resolvedMermaid || this.mermaidAPIRefs;
+      }
+    } else {
+      this.mermaidAPIRefs = resolvedMermaid;
+    }
+    try {
+      this.mermaidAPIRefs.initialize(this.options);
+    } catch (e) {
+      // 忽略重复初始化等异常
+    }
+    return true;
+  }
+
+  asyncRender(graphId, src, sign, $engine, props, retryCount = 0) {
+    // mermaid 可能是异步加载的，初次调用时 mermaidAPIRefs 可能为 null，这里做延迟重试
+    if (!this.mermaidAPIRefs && !this.tryResolveMermaidAPIRefs()) {
+      const MAX_RETRY = 60; // 最多重试次数
+      const RETRY_INTERVAL = 300; // 每次间隔 300ms
+      if (retryCount === 0) {
+        $engine.asyncRenderHandler.add(graphId);
+      }
+      if (retryCount < MAX_RETRY) {
+        setTimeout(() => {
+          this.asyncRender(graphId, src, sign, $engine, props, retryCount + 1);
+        }, RETRY_INTERVAL);
+      } else {
+        // 超过最大重试次数，回退到源码并完成异步渲染流程
+        const html = props.fallback();
+        this.handleAsyncRenderDone(graphId, sign, $engine, props, html);
+        throw new Error('code-block-mermaid-plugin[init]: Package mermaid or mermaidAPI not found.');
+      }
+      return props.fallback();
+    }
+    if (retryCount === 0) {
+      $engine.asyncRenderHandler.add(graphId);
+    }
     this.mermaidAPIRefs
       .render(graphId, src, this.mermaidCanvas)
       .then(({ svg: svgCode }) => {
