@@ -13,7 +13,7 @@
       >
         <div class="file-row">
           <span class="file-name">{{ file.name }}</span>
-          <span class="file-time">{{ formatTime(file.lastSaved ?? file.lastOpened ?? file.lastAccessed) }}</span>
+          <!-- <span class="file-time">{{ file.lastSaved ? formatTime(file.lastSaved) : '未保存' }}</span> -->
         </div>
       </li>
     </ul>

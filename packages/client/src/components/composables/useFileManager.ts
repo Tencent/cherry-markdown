@@ -1,7 +1,12 @@
 import { ref, computed, type Ref } from 'vue';
 import type { FileInfo, DirectoryNode } from '../types';
 import type { useFileStore as useFileStoreType } from '../../store/modal/file';
-import { openExistingFile as openExistingFileUtil, readFileContent, formatTimestamp } from '../fileUtils';
+import {
+  openExistingFile as openExistingFileUtil,
+  readFileContent,
+  formatTimestamp,
+  normalizePath,
+} from '../fileUtils';
 import { openPath, revealItemInDir } from '@tauri-apps/plugin-opener';
 import { useContextMenu } from './useContextMenu';
 import { WINDOW_EVENTS } from '../../constants/events';
@@ -113,19 +118,23 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
     bumpRecent: boolean = true,
   ): Promise<void> => {
     try {
-      const result = await readFileContent(filePath);
+      // 统一路径分隔符（Windows 下将 `\` 规范化为 `/`），
+      // 确保与保存流程（App.vue 中 saveMarkdown）写入 store 的路径格式一致，
+      // 否则 markSaved 通过 path 精确匹配时会找不到对应记录，导致 lastSaved 不更新。
+      const normalizedPath = normalizePath(filePath);
+      const result = await readFileContent(normalizedPath);
       if (result.success && result.data) {
         // 通过自定义事件传递文件内容到App.vue
         window.dispatchEvent(
           new CustomEvent(WINDOW_EVENTS.OPEN_FILE_FROM_SIDEBAR, {
-            detail: { filePath, content: result.data },
+            detail: { filePath: normalizedPath, content: result.data },
           }),
         );
         // 更新当前文件路径
-        fileStore.setCurrentFilePath(filePath);
+        fileStore.setCurrentFilePath(normalizedPath);
         // 添加到最近访问列表（可选）
         if (bumpRecent) {
-          fileStore.addRecentFile(filePath);
+          fileStore.addRecentFile(normalizedPath);
         }
 
         if (fromDirectoryManager) {
