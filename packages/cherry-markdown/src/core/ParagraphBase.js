@@ -48,9 +48,10 @@ export default class ParagraphBase extends SyntaxBase {
    * @param {function} getValueByKey 用于获取缓存数据的回调函数
    * @param {number} maxKeys 最大缓存数
    * @param {number} removeKeys 每次删除的缓存数
+   * @param {boolean} focusUpdate 是否更新缓存
    * @returns {any}
    */
-  cacheAndGetData(key, getValueByKey, maxKeys, removeKeys) {
+  cacheAndGetData(key, getValueByKey, maxKeys, removeKeys, focusUpdate = false) {
     if (!this.cacheData[key]) {
       /**
        * 缓存太多时，清空最近插入的一些缓存
@@ -65,6 +66,10 @@ export default class ParagraphBase extends SyntaxBase {
       // 调用行内语法，获得段落的签名和对应html内容
       this.cacheData[key] = getValueByKey(key);
       this.cacheDataMap.push(key);
+    } else {
+      if (focusUpdate) {
+        this.cacheData[key] = getValueByKey(key);
+      }
     }
     return this.cacheData[key];
   }
