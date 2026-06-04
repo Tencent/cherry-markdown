@@ -438,6 +438,10 @@ export default class EChartsTableEngine {
 
   /**
    * 启用主题变更观察器
+   *
+   * 注意：主题切换时，本观察器只会走"轻量主题应用"通道（$applyThemeOnly），
+   * 仅刷新颜色/字体等主题相关字段，绝不会重新生成 series.data / series.map / xAxis.data 等数据相关字段。
+   * 这样可以避免地图类图表在每次切换主题时被整体重建，进而避免触发 $loadMapData / $tryLoadMapDataFromPaths 重复加载。
    */
   $enableThemeObserver(container) {
     const root = this.$getCherryRoot(container);
@@ -446,7 +450,7 @@ export default class EChartsTableEngine {
     const observer = new MutationObserver(() => {
       this.$buildEchartsThemeFromCss(root);
       Array.from(this.instances).forEach((inst) => {
-        this.$setInstanceTheme(inst);
+        this.$applyThemeOnly(inst);
       });
     });
     observer.observe(root, { attributes: true, attributeFilter: ['class'] });
@@ -454,7 +458,8 @@ export default class EChartsTableEngine {
   }
 
   /**
-   * 通过 echartsInstance.setOption 刷新主题
+   * [兼容保留] 通过 echartsInstance.setOption 整体刷新图表配置（会重新生成 series.data 等数据字段）。
+   * 主题切换不再调用此方法；此方法仅留作真正需要"重建"的外部扩展点。
    * @param {*} instance ECharts 实例
    */
   $setInstanceTheme(instance) {
@@ -464,6 +469,157 @@ export default class EChartsTableEngine {
     const option = this.$chartOptionsFromDataset(container) || {};
     instance.setOption(option, false, true);
     this.$tagEchartsSvg(container);
+  }
+
+  /**
+   * 轻量主题应用：仅根据当前运行时主题，构造一个"只含主题相关字段"的增量 option，
+   * 通过 setOption(delta, notMerge=false, lazyUpdate=true) 进行合并刷新。
+   *
+   * - 不会触碰 series[].data / series[].map / xAxis.data / yAxis.data / visualMap.min/max
+   * - 不会重新走 $generateChartOptions，因此不会触发 MapChartOptionsHandler.options，
+   *   也就不会再次调用 $loadMapData / $tryLoadMapDataFromPaths。
+   * - 调色盘等"非 CSS 变量驱动"的颜色（如 inRange）保留原样，避免覆盖业务选择。
+   *
+   * @param {*} instance ECharts 实例
+   */
+  $applyThemeOnly(instance) {
+    if (!instance || typeof instance.getDom !== 'function') return;
+    if (instance.isDisposed && instance.isDisposed()) return;
+    const container = instance.getDom();
+    if (!container || !container.isConnected) return;
+
+    const theme = this.$theme();
+    if (!theme) return;
+
+    const currentOption = instance.getOption ? instance.getOption() : null;
+    if (!currentOption) return;
+
+    const delta = this.$buildThemeOnlyOption(currentOption, theme);
+    try {
+      // notMerge=false：与现有 option 合并，仅覆盖 delta 中显式声明的字段
+      // lazyUpdate=true：批量重绘，避免主题连续切换时抖动
+      instance.setOption(delta, false, true);
+      this.$tagEchartsSvg(container);
+    } catch (e) {
+      Logger.warn('apply theme-only option failed:', e);
+    }
+  }
+
+  /**
+   * 基于当前 option 的形态，构造仅含主题相关字段的增量 option。
+   * 对于数组型字段（series/xAxis/yAxis/visualMap），按当前数组长度生成等长占位对象，
+   * 以便 ECharts 按下标合并而不会破坏原数组结构。
+   *
+   * @param {*} currentOption ECharts 实例当前 getOption() 返回值
+   * @param {*} theme 当前运行时主题
+   * @returns {Object} 仅含主题字段的 option delta
+   */
+  $buildThemeOnlyOption(currentOption, theme) {
+    const { color: c, fontSize: fs } = theme;
+
+    /** 把任意 option 字段规整为数组（ECharts getOption 总是返回数组） */
+    const toArr = (v) => {
+      if (Array.isArray(v)) return v;
+      if (v) return [v];
+      return [];
+    };
+
+    const delta = {
+      backgroundColor: c.backgroundColor,
+      // 调色盘：跟随主题刷新文本类色彩，不强制覆盖业务自定义色板
+      // 故此处不写 color: this.$palette()，保留 ECharts 内部已合并的调色盘
+      textStyle: { color: c.text },
+    };
+
+    // title（可能是对象或数组）
+    const titleArr = toArr(currentOption.title);
+    if (titleArr.length) {
+      delta.title = titleArr.map(() => ({
+        textStyle: { color: c.tooltipText },
+        subtextStyle: { color: c.text },
+      }));
+    }
+
+    // tooltip
+    if (currentOption.tooltip) {
+      delta.tooltip = {
+        backgroundColor: c.tooltipBg,
+        borderColor: c.border,
+        textStyle: { color: c.tooltipText, fontSize: fs.base },
+      };
+    }
+
+    // legend
+    const legendArr = toArr(currentOption.legend);
+    if (legendArr.length) {
+      delta.legend = legendArr.map(() => ({
+        textStyle: { color: c.text, fontSize: fs.base },
+        selectorLabel: { color: c.text, borderColor: c.border },
+      }));
+    }
+
+    // toolbox
+    const toolboxArr = toArr(currentOption.toolbox);
+    if (toolboxArr.length) {
+      delta.toolbox = toolboxArr.map(() => ({
+        iconStyle: { borderColor: c.border },
+        emphasis: { iconStyle: { borderColor: c.borderHover } },
+      }));
+    }
+
+    // xAxis / yAxis
+    const buildAxisDelta = (axisArr) =>
+      axisArr.map(() => ({
+        axisLine: { lineStyle: { color: c.text } },
+        axisLabel: { color: c.text, fontSize: fs.base },
+        splitLine: { lineStyle: { color: c.lineSplit, type: 'dashed' } },
+        nameTextStyle: { color: c.text },
+      }));
+    const xAxisArr = toArr(currentOption.xAxis);
+    if (xAxisArr.length) delta.xAxis = buildAxisDelta(xAxisArr);
+    const yAxisArr = toArr(currentOption.yAxis);
+    if (yAxisArr.length) delta.yAxis = buildAxisDelta(yAxisArr);
+
+    // visualMap：只刷文字色，不动 min/max/inRange
+    const visualMapArr = toArr(currentOption.visualMap);
+    if (visualMapArr.length) {
+      delta.visualMap = visualMapArr.map(() => ({
+        textStyle: { color: c.text, fontSize: fs.base },
+      }));
+    }
+
+    // radar：只刷指示器名称颜色
+    const radarArr = toArr(currentOption.radar);
+    if (radarArr.length) {
+      delta.radar = radarArr.map(() => ({
+        axisName: { color: c.text },
+      }));
+    }
+
+    // series：按类型刷新主题相关字段，绝不动 data / map / type
+    const seriesArr = toArr(currentOption.series);
+    if (seriesArr.length) {
+      delta.series = seriesArr.map((s) => {
+        const type = s && s.type;
+        const seriesDelta = {
+          label: { color: c.text },
+          itemStyle: { shadowColor: theme.shadow.color },
+          emphasis: {
+            itemStyle: { shadowColor: theme.shadow.color, borderColor: c.emphasis },
+          },
+        };
+        if (type === 'line') {
+          seriesDelta.itemStyle.borderColor = '#fff';
+        }
+        if (type === 'sankey') {
+          seriesDelta.label = { color: c.text, fontSize: fs.base };
+        }
+        // map 类型：仅刷 label / emphasis 文本与阴影色，不动 series.map / series.data
+        return seriesDelta;
+      });
+    }
+
+    return delta;
   }
 
   $generateChartOptions(type, tableObject, options) {

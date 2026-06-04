@@ -205,28 +205,6 @@ const saveMarkdown = async (): Promise<FileOperationResult> => {
   }
 };
 
-// ========== 编辑器模式管理 ==========
-const switchToPreviewOnly = (): void => {
-  cherryMarkdown.wrapperDom.classList.add('markdown-preview-only');
-
-  // 隐藏编辑按钮
-  const pen = cherryMarkdown.wrapperDom.querySelector('.cherry-toolbar-pen');
-  if (pen) {
-    pen.classList.remove('active');
-  }
-  cherryMarkdown.previewer.options.enablePreviewerBubble = false;
-};
-
-const switchToEdit = (): void => {
-  cherryMarkdown.wrapperDom.classList.remove('markdown-preview-only');
-  // 显示编辑按钮
-  const pen = cherryMarkdown.wrapperDom.querySelector('.cherry-toolbar-pen');
-  if (pen) {
-    pen.classList.add('active');
-  }
-  cherryMarkdown.previewer.options.enablePreviewerBubble = true;
-};
-
 const dealAfterChange = (): void => {
   if (!needDealAfterChange) {
     needDealAfterChange = true;
@@ -237,18 +215,6 @@ const dealAfterChange = (): void => {
   hasUnsavedChanges = true;
   if (fileStore.currentFilePath) {
     void updateTitle(fileStore.currentFilePath, true);
-  }
-};
-
-const handleEditButtonClick = (): void => {
-  const pen = cherryMarkdown.wrapperDom.querySelector('.cherry-toolbar-pen');
-
-  if (pen) {
-    if (cherryMarkdown.wrapperDom.classList.contains('markdown-preview-only')) {
-      switchToEdit();
-    } else {
-      switchToPreviewOnly();
-    }
   }
 };
 
@@ -371,15 +337,6 @@ onMounted(async () => {
   // 注册保存快捷键（仅当前窗口聚焦时生效）
   registerSaveShortcut();
 
-  // 设置编辑按钮事件监听
-  setTimeout(() => {
-    const pen = cherryMarkdown.wrapperDom.querySelector('.cherry-toolbar-pen');
-    if (pen) {
-      pen.removeEventListener('click', handleEditButtonClick);
-      pen.addEventListener('click', handleEditButtonClick);
-    }
-  }, 100);
-
   // 自动恢复上次打开的文件
   await restoreLastOpenedFile();
   cherryMarkdown.on('afterChange', dealAfterChange);
@@ -428,5 +385,10 @@ onUnmounted(async () => {
   height: 100%;
   width: 100%;
   flex: 1;
+}
+
+#markdown-editor .cherry.cherry--no-toolbar .cherry-sidebar {
+  display: block;
+  height: auto;
 }
 </style>

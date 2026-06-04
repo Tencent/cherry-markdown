@@ -381,7 +381,7 @@ export default class Cherry extends CherryStatic {
     switch (model) {
       case 'edit&preview':
         if (this.previewer) {
-          this.previewer.editOnly();
+          // this.previewer.editAndPreviewShow();
           this.previewer.recoverPreviewer();
         }
         if (this.toolbar && showToolbar) {
