@@ -99,7 +99,7 @@ export default class CodeBlock extends ParagraphBase {
         mermaidConfig: this.mermaid,
         showSourceToolbar,
         updateCache: (cacheCode) => {
-          const containerHtml = this.cacheAndGetData(props.sign, () => addContainer(cacheCode), 2000, -300);
+          const containerHtml = this.cacheAndGetData(props.sign, () => addContainer(cacheCode), 2000, -300, true);
           this.pushCache(containerHtml, props.sign, props.lines);
         },
         fallback: () => this.$codeReplace($codeSrc, lang, props.sign, props.lines),
