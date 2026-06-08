@@ -2,8 +2,8 @@
  * mermaid 预览操作框会话
  *
  * 维护说明：
- * - 编辑器解析、布局参数 → @/utils/mermaidEditorHelper
- * - 预览可见性、figure 查找 → @/utils/mermaidPreviewHelper
+ * - 编辑器解析、布局参数 → utils/mermaidEditorHelper
+ * - 预览可见性、figure 查找 → utils/mermaidPreviewHelper
  * - 本类只负责会话状态、rebind、双控件位置同步与生命周期校验
  */
 
