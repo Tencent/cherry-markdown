@@ -16,6 +16,7 @@
 
 import imgSizeHandler from '@/utils/imgSizeHandler';
 import imgToolHandler from '@/utils/imgToolHandler';
+import { isMermaidPreviewVisible } from '@/utils/mermaidPreviewHelper';
 import { Transaction } from '@codemirror/state';
 import TableHandler from '@/utils/tableContentHandler';
 import FootnoteHoverHandler from '@/utils/footnoteHoverHandler';
@@ -116,11 +117,19 @@ export default class PreviewerBubble {
     this.previewer.options.afterUpdateCallBack.push(() => {
       // 检查表格处理器是否需要重新创建
       this.$checkAndRecreateTableHandlers();
+      // 预览区 DOM 更新后，检查图片/mermaid 选中目标是否仍存在（如左侧已删除整个 mermaid 块）
+      this.$checkAndRemoveInvalidImgHandlers();
 
       Object.values(this.bubbleHandler).forEach((handler) =>
-        handler.emit('previewUpdate', () => this.$removeAllPreviewerBubbles()),
+        handler.emit('previewUpdate', () => this.$removeImgPreviewerBubbles()),
       );
     });
+    // 编辑器内容变更并完成预览同步后，再次校验（兜底 afterUpdateCallBack 未触发的场景）
+    this.$bindedOnAfterChange = () => this.$checkAndRemoveInvalidImgHandlers();
+    this.$cherry.$event.on('afterChange', this.$bindedOnAfterChange);
+    // mermaid 异步渲染/失败回退会直接改 DOM，不经过 previewer.update，需单独监听
+    this.$bindedOnAfterAsyncRender = () => this.$checkAndRemoveInvalidImgHandlers({ strict: true });
+    this.$cherry.$event.on('afterAsyncRender', this.$bindedOnAfterAsyncRender);
     this.previewerDom.addEventListener('change', this.$bindedOnChange);
     this.removeHoverBubble = debounce(() => this.$removeAllPreviewerBubbles('hover'), 400);
 
@@ -554,18 +563,34 @@ export default class PreviewerBubble {
   }
 
   /**
+   * click 气泡与 imgTool 成对出现，移除 click 时需一并清理 imgTool
+   * @param {string} key 气泡 trigger 键名
+   * @param {string} trigger 当前指定的移除范围
+   * @returns {boolean}
+   */
+  $shouldRemoveBubbleKey(key, trigger) {
+    if (!trigger) {
+      return true;
+    }
+    if (trigger === 'click') {
+      return key === 'click' || key === 'imgTool';
+    }
+    return key === trigger;
+  }
+
+  /**
    * 隐藏预览区域已经激活的工具栏
    * @param {string} trigger 移除指定的触发方式，不传默认全部移除
    */
   $removeAllPreviewerBubbles(trigger = '') {
     Object.entries(this.bubble)
-      .filter(([key]) => !trigger || trigger === key)
+      .filter(([key]) => this.$shouldRemoveBubbleKey(key, trigger))
       .forEach(([key, value]) => {
         value.remove();
         delete this.bubble[key];
       });
     Object.entries(this.bubbleHandler)
-      .filter(([key]) => !trigger || trigger === key)
+      .filter(([key]) => this.$shouldRemoveBubbleKey(key, trigger))
       .forEach(([key, value]) => {
         value.emit('remove');
         delete this.bubbleHandler[key];
@@ -573,6 +598,17 @@ export default class PreviewerBubble {
     if (Object.keys(this.bubbleHandler).length <= 0 && this.previewer?.$cherry?.wrapperDom) {
       this.previewer.$cherry.wrapperDom.style.overflow = this.oldWrapperDomOverflow || '';
     }
+    if (!trigger || trigger === 'click') {
+      this.mermaidFigure = null;
+      this.mermaidTargetFigure = null;
+    }
+  }
+
+  /**
+   * 移除图片/mermaid 编辑相关的气泡（选择框 + 对齐工具栏）
+   */
+  $removeImgPreviewerBubbles() {
+    this.$removeAllPreviewerBubbles('click');
   }
 
   /**
@@ -590,6 +626,116 @@ export default class PreviewerBubble {
         }
       }
     });
+  }
+
+  /**
+   * 按索引获取预览区中当前的 mermaid figure
+   * @returns {HTMLElement | null}
+   */
+  $getMermaidFigureAtIndex() {
+    if (this.mermaidIndex < 0) {
+      return null;
+    }
+    const figures = this.previewerDom.querySelectorAll('figure[data-type="mermaid"]');
+    return /** @type {HTMLElement | null} */ (figures[this.mermaidIndex] || null);
+  }
+
+  /**
+   * 预览刷新后按索引重新绑定 mermaid figure（避免引用已替换的旧 DOM）
+   * @returns {HTMLElement | null | undefined}
+   */
+  $resolveMermaidTargetFigure() {
+    if (!imgSizeHandler.isMermaid) {
+      return imgSizeHandler.img;
+    }
+    const current = this.$getMermaidFigureAtIndex();
+    if (current) {
+      this.mermaidTargetFigure = current;
+      imgSizeHandler.img = current;
+      if (this.bubbleHandler.imgTool === imgToolHandler) {
+        imgToolHandler.img = current;
+      }
+      return current;
+    }
+    return this.mermaidTargetFigure || imgSizeHandler.img;
+  }
+
+  /**
+   * 编辑器中是否仍存在当前索引对应的 mermaid 代码块
+   * @returns {boolean}
+   */
+  $isMermaidBlockStillInEditor() {
+    if (!this.$hasEditor() || this.mermaidIndex < 0) {
+      return false;
+    }
+    const rawContent = this.editor.editor.view.state.doc.toString();
+    const codeBlockReg = /(?:^|\n)(\n*(?:>[\t ]*)*(?:[^\S\n]*))(`{3,})([^`]*?)\n([\w\W]*?)\n\s*\2[ \t]*(?=$|\n)/g;
+    let match;
+    let currentMermaidIdx = -1;
+
+    while ((match = codeBlockReg.exec(rawContent)) !== null) {
+      const langLine = match[3].trim().toLowerCase();
+      const langPure = langLine
+        .replace(/#([0-9]+(px|em|pt|pc|in|mm|cm|ex|%)|auto)/gi, '')
+        .replace(/#(center|right|left|float-right|float-left)/gi, '')
+        .trim();
+
+      if (langPure !== 'mermaid' && !/^flow([ ](td|lr))?$/i.test(langPure) && langPure !== 'seq') {
+        continue;
+      }
+      currentMermaidIdx += 1;
+      if (currentMermaidIdx === this.mermaidIndex) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * 检查图片/mermaid 尺寸处理器是否仍然有效
+   * @param {{ strict?: boolean }} [options] strict=true 时在异步渲染完成后严格校验预览内容
+   * @returns {boolean}
+   */
+  $isImgHandlerValid(options = {}) {
+    const { strict = false } = options;
+    if (this.bubbleHandler.click !== imgSizeHandler) {
+      return true;
+    }
+    if (imgSizeHandler.$isResizing()) {
+      return true;
+    }
+
+    const target = imgSizeHandler.isMermaid ? this.$resolveMermaidTargetFigure() : imgSizeHandler.img;
+    if (!target || !document.contains(target) || !this.previewerDom.contains(target)) {
+      return false;
+    }
+
+    if (imgSizeHandler.isMermaid) {
+      // 布局调整触发的预览刷新：figure 与源码块仍在时，异步重绘期间 svg 可能暂时消失
+      if (!strict && this.$getMermaidFigureAtIndex() && this.$isMermaidBlockStillInEditor()) {
+        return true;
+      }
+      return isMermaidPreviewVisible(/** @type {HTMLElement} */ (target), this.previewerDom);
+    }
+
+    if (target.tagName !== 'IMG') {
+      return false;
+    }
+    const rect = target.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  }
+
+  /**
+   * 预览区更新后检查图片/mermaid 选中目标是否仍可编辑
+   * @param {{ strict?: boolean }} [options]
+   */
+  $checkAndRemoveInvalidImgHandlers(options = {}) {
+    if (this.bubbleHandler.click !== imgSizeHandler) {
+      return;
+    }
+    if (!this.$isImgHandlerValid(options)) {
+      this.$removeImgPreviewerBubbles();
+    }
   }
 
   /**
@@ -734,16 +880,22 @@ export default class PreviewerBubble {
       return { emit: () => {} };
     }
 
+    const onInvalidTarget = () => this.$removeImgPreviewerBubbles();
+    const validateTarget = () => this.$isImgHandlerValid();
+
     const imgSizeDiv = document.createElement('div');
     imgSizeDiv.className = 'cherry-previewer-img-size-handler';
     this.bubble.click.appendChild(imgSizeDiv);
-    imgSizeHandler.showBubble(htmlElement, imgSizeDiv, this.previewerDom);
+    imgSizeHandler.showBubble(htmlElement, imgSizeDiv, this.previewerDom, { onInvalidTarget, validateTarget });
     imgSizeHandler.bindChange(this.changeImgSize.bind(this));
 
     const imgToolDiv = document.createElement('div');
     imgToolDiv.className = 'cherry-previewer-img-tool-handler';
     this.bubble.click.appendChild(imgToolDiv);
-    imgToolHandler.showBubble(htmlElement, imgToolDiv, this.previewerDom, event, this.previewer.$cherry.getLocales());
+    imgToolHandler.showBubble(htmlElement, imgToolDiv, this.previewerDom, event, this.previewer.$cherry.getLocales(), {
+      onInvalidTarget,
+      validateTarget,
+    });
     imgToolHandler.bindChange(this.changeImgStyle.bind(this));
 
     // 订阅编辑器大小变化事件
@@ -1085,9 +1237,13 @@ export default class PreviewerBubble {
     this.$createPreviewerBubbles('click', 'img-handler');
 
     this.mermaidFigure = figureElement;
+    this.mermaidTargetFigure = figureElement;
     if (!this.beginChangeMermaidValue(figureElement)) {
       return;
     }
+
+    const onInvalidTarget = () => this.$removeImgPreviewerBubbles();
+    const validateTarget = () => this.$isImgHandlerValid();
 
     const imgSizeDiv = document.createElement('div');
     imgSizeDiv.className = 'cherry-previewer-img-size-handler';
@@ -1095,6 +1251,8 @@ export default class PreviewerBubble {
     imgSizeHandler.showBubble(figureElement, imgSizeDiv, this.previewerDom, {
       isMermaid: true,
       targetIndex: this.mermaidIndex,
+      onInvalidTarget,
+      validateTarget,
     });
     imgSizeHandler.bindChange(this.changeMermaidSize.bind(this));
 
@@ -1108,7 +1266,7 @@ export default class PreviewerBubble {
       this.previewerDom,
       event,
       this.previewer.$cherry.getLocales(),
-      { isMermaid: true, targetIndex: this.mermaidIndex },
+      { isMermaid: true, targetIndex: this.mermaidIndex, onInvalidTarget, validateTarget },
     );
     imgToolHandler.bindChange(this.changeMermaidStyle.bind(this));
 
@@ -1334,6 +1492,8 @@ export default class PreviewerBubble {
     if (this.$cherry && this.$cherry.$event) {
       this.$cherry.$event.off('editor.size.change', this.$bindedOnEditorSizeChange);
       this.$cherry.$event.off('layoutChange', this.$bindedOnLayoutChange);
+      this.$cherry.$event.off('afterChange', this.$bindedOnAfterChange);
+      this.$cherry.$event.off('afterAsyncRender', this.$bindedOnAfterAsyncRender);
     }
 
     // 清理引用
@@ -1347,6 +1507,8 @@ export default class PreviewerBubble {
     this.$bindedOnChange = null;
     this.$bindedOnEditorSizeChange = null;
     this.$bindedOnLayoutChange = null;
+    this.$bindedOnAfterChange = null;
+    this.$bindedOnAfterAsyncRender = null;
 
     this.bubble = {};
     this.bubbleHandler = {};
