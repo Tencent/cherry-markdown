@@ -40,6 +40,7 @@ const imgToolHandler = {
     this.targetIndex = Number.isInteger(options.targetIndex) ? options.targetIndex : -1;
     this.onInvalidTarget = options.onInvalidTarget || null;
     this.validateTarget = options.validateTarget || null;
+    this.resolveTarget = options.resolveTarget || null;
 
     this.previewerDom = previewerDom;
     this.container = container;
@@ -237,20 +238,24 @@ const imgToolHandler = {
     }, 120);
   },
   refreshTarget() {
-    if (!this.isMermaid || this.targetIndex < 0 || !this.previewerDom) {
+    if (!this.isMermaid || !this.previewerDom) {
       return;
     }
-    // 当前目标仍在预览区时保留引用，避免因索引位移误绑到其他 mermaid
     if (this.img && this.previewerDom.contains(this.img)) {
       return;
     }
-    const figures = this.previewerDom.querySelectorAll('figure[data-type="mermaid"]');
-    this.img = figures[this.targetIndex] || this.img;
+    if (typeof this.resolveTarget === 'function') {
+      const resolved = this.resolveTarget();
+      if (resolved) {
+        this.img = resolved;
+      }
+    }
   },
   remove() {
     this.$clearPreviewUpdateTimer();
     this.onInvalidTarget = null;
     this.validateTarget = null;
+    this.resolveTarget = null;
   },
   /**
    * 更新工具栏位置，用于预览区更新或编辑器大小变化后重新定位

@@ -16,7 +16,7 @@
 
 import imgSizeHandler from '@/utils/imgSizeHandler';
 import imgToolHandler from '@/utils/imgToolHandler';
-import { isMermaidPreviewVisible } from '@/utils/mermaidPreviewHelper';
+import MermaidBubbleSession from '@/toolbars/MermaidBubbleSession';
 import { Transaction } from '@codemirror/state';
 import TableHandler from '@/utils/tableContentHandler';
 import FootnoteHoverHandler from '@/utils/footnoteHoverHandler';
@@ -67,6 +67,8 @@ export default class PreviewerBubble {
     this.imgLeadingSpacePos = -1;
     /** 记录 beginChangeImgValue 时的文档状态，用于位置映射追踪 */
     this.imgChangeBaseState = null;
+    /** @type {MermaidBubbleSession} */
+    this.mermaidSession = new MermaidBubbleSession(this);
     this.init();
   }
 
@@ -117,18 +119,33 @@ export default class PreviewerBubble {
     this.previewer.options.afterUpdateCallBack.push(() => {
       // 检查表格处理器是否需要重新创建
       this.$checkAndRecreateTableHandlers();
-      // 预览区 DOM 更新后，检查图片/mermaid 选中目标是否仍存在（如左侧已删除整个 mermaid 块）
-      this.$checkAndRemoveInvalidImgHandlers();
 
-      Object.values(this.bubbleHandler).forEach((handler) =>
-        handler.emit('previewUpdate', () => this.$removeImgPreviewerBubbles()),
-      );
+      if (this.mermaidSession.isActive()) {
+        this.mermaidSession.onPreviewUpdate();
+      } else {
+        Object.values(this.bubbleHandler).forEach((handler) =>
+          handler.emit('previewUpdate', () => this.$removeImgPreviewerBubbles()),
+        );
+      }
+
+      this.$checkAndRemoveInvalidImgHandlers();
+      this.mermaidSession.clearSelfEditingIfReady();
     });
-    // 编辑器内容变更并完成预览同步后，再次校验（兜底 afterUpdateCallBack 未触发的场景）
-    this.$bindedOnAfterChange = () => this.$checkAndRemoveInvalidImgHandlers();
+    // 预览隐藏时 afterUpdate 不会刷新 DOM，仅在此时做兜底校验
+    this.$bindedOnAfterChange = () => {
+      if (this.previewer?.isPreviewerHidden?.()) {
+        this.$checkAndRemoveInvalidImgHandlers();
+      }
+    };
     this.$cherry.$event.on('afterChange', this.$bindedOnAfterChange);
     // mermaid 异步渲染/失败回退会直接改 DOM，不经过 previewer.update，需单独监听
-    this.$bindedOnAfterAsyncRender = () => this.$checkAndRemoveInvalidImgHandlers({ strict: true });
+    this.$bindedOnAfterAsyncRender = () => {
+      if (this.mermaidSession.isActive()) {
+        this.mermaidSession.onAsyncRenderDone();
+      } else {
+        this.$checkAndRemoveInvalidImgHandlers({ strict: true });
+      }
+    };
     this.$cherry.$event.on('afterAsyncRender', this.$bindedOnAfterAsyncRender);
     this.previewerDom.addEventListener('change', this.$bindedOnChange);
     this.removeHoverBubble = debounce(() => this.$removeAllPreviewerBubbles('hover'), 400);
@@ -599,8 +616,7 @@ export default class PreviewerBubble {
       this.previewer.$cherry.wrapperDom.style.overflow = this.oldWrapperDomOverflow || '';
     }
     if (!trigger || trigger === 'click') {
-      this.mermaidFigure = null;
-      this.mermaidTargetFigure = null;
+      this.mermaidSession.reset();
     }
   }
 
@@ -629,93 +645,25 @@ export default class PreviewerBubble {
   }
 
   /**
-   * 按索引获取预览区中当前的 mermaid figure
-   * @returns {HTMLElement | null}
-   */
-  $getMermaidFigureAtIndex() {
-    if (this.mermaidIndex < 0) {
-      return null;
-    }
-    const figures = this.previewerDom.querySelectorAll('figure[data-type="mermaid"]');
-    return /** @type {HTMLElement | null} */ (figures[this.mermaidIndex] || null);
-  }
-
-  /**
-   * 预览刷新后按索引重新绑定 mermaid figure（避免引用已替换的旧 DOM）
-   * @returns {HTMLElement | null | undefined}
-   */
-  $resolveMermaidTargetFigure() {
-    if (!imgSizeHandler.isMermaid) {
-      return imgSizeHandler.img;
-    }
-    const current = this.$getMermaidFigureAtIndex();
-    if (current) {
-      this.mermaidTargetFigure = current;
-      imgSizeHandler.img = current;
-      if (this.bubbleHandler.imgTool === imgToolHandler) {
-        imgToolHandler.img = current;
-      }
-      return current;
-    }
-    return this.mermaidTargetFigure || imgSizeHandler.img;
-  }
-
-  /**
-   * 编辑器中是否仍存在当前索引对应的 mermaid 代码块
-   * @returns {boolean}
-   */
-  $isMermaidBlockStillInEditor() {
-    if (!this.$hasEditor() || this.mermaidIndex < 0) {
-      return false;
-    }
-    const rawContent = this.editor.editor.view.state.doc.toString();
-    const codeBlockReg = /(?:^|\n)(\n*(?:>[\t ]*)*(?:[^\S\n]*))(`{3,})([^`]*?)\n([\w\W]*?)\n\s*\2[ \t]*(?=$|\n)/g;
-    let match;
-    let currentMermaidIdx = -1;
-
-    while ((match = codeBlockReg.exec(rawContent)) !== null) {
-      const langLine = match[3].trim().toLowerCase();
-      const langPure = langLine
-        .replace(/#([0-9]+(px|em|pt|pc|in|mm|cm|ex|%)|auto)/gi, '')
-        .replace(/#(center|right|left|float-right|float-left)/gi, '')
-        .trim();
-
-      if (langPure !== 'mermaid' && !/^flow([ ](td|lr))?$/i.test(langPure) && langPure !== 'seq') {
-        continue;
-      }
-      currentMermaidIdx += 1;
-      if (currentMermaidIdx === this.mermaidIndex) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
    * 检查图片/mermaid 尺寸处理器是否仍然有效
    * @param {{ strict?: boolean }} [options] strict=true 时在异步渲染完成后严格校验预览内容
    * @returns {boolean}
    */
   $isImgHandlerValid(options = {}) {
-    const { strict = false } = options;
     if (this.bubbleHandler.click !== imgSizeHandler) {
       return true;
     }
+    if (imgSizeHandler.isMermaid && this.mermaidSession.isActive()) {
+      return this.mermaidSession.isValid(options);
+    }
+
     if (imgSizeHandler.$isResizing()) {
       return true;
     }
 
-    const target = imgSizeHandler.isMermaid ? this.$resolveMermaidTargetFigure() : imgSizeHandler.img;
+    const target = imgSizeHandler.img;
     if (!target || !document.contains(target) || !this.previewerDom.contains(target)) {
       return false;
-    }
-
-    if (imgSizeHandler.isMermaid) {
-      // 布局调整触发的预览刷新：figure 与源码块仍在时，异步重绘期间 svg 可能暂时消失
-      if (!strict && this.$getMermaidFigureAtIndex() && this.$isMermaidBlockStillInEditor()) {
-        return true;
-      }
-      return isMermaidPreviewVisible(/** @type {HTMLElement} */ (target), this.previewerDom);
     }
 
     if (target.tagName !== 'IMG') {
@@ -1224,6 +1172,8 @@ export default class PreviewerBubble {
 
   /**
    * 为选中的 mermaid 图表增加尺寸调整工具
+   *
+   * fix(PreviewerBubble): mermaid 会话逻辑见 MermaidBubbleSession，编辑器解析见 mermaidEditorHelper
    * @param {HTMLElement} figureElement mermaid 图表的 figure DOM
    */
   $showMermaidPreviewerBubbles(figureElement, event) {
@@ -1236,25 +1186,23 @@ export default class PreviewerBubble {
     }
     this.$createPreviewerBubbles('click', 'img-handler');
 
-    this.mermaidFigure = figureElement;
-    this.mermaidTargetFigure = figureElement;
-    if (!this.beginChangeMermaidValue(figureElement)) {
+    if (!this.mermaidSession.beginEdit(figureElement)) {
       return;
     }
 
     const onInvalidTarget = () => this.$removeImgPreviewerBubbles();
-    const validateTarget = () => this.$isImgHandlerValid();
+    const handlerOptions = this.mermaidSession.createHandlerOptions(onInvalidTarget);
 
     const imgSizeDiv = document.createElement('div');
     imgSizeDiv.className = 'cherry-previewer-img-size-handler';
     this.bubble.click.appendChild(imgSizeDiv);
     imgSizeHandler.showBubble(figureElement, imgSizeDiv, this.previewerDom, {
       isMermaid: true,
-      targetIndex: this.mermaidIndex,
-      onInvalidTarget,
-      validateTarget,
+      targetIndex: this.mermaidSession.previewIndex,
+      ...handlerOptions,
     });
-    imgSizeHandler.bindChange(this.changeMermaidSize.bind(this));
+    imgSizeHandler.bindChange((_htmlElement, style) => this.mermaidSession.changeSize(style));
+    this.mermaidSession.bindPositionFollow();
 
     // 添加对齐工具面板（仅对齐按钮，不含装饰按钮）
     const imgToolDiv = document.createElement('div');
@@ -1266,156 +1214,21 @@ export default class PreviewerBubble {
       this.previewerDom,
       event,
       this.previewer.$cherry.getLocales(),
-      { isMermaid: true, targetIndex: this.mermaidIndex, onInvalidTarget, validateTarget },
+      { isMermaid: true, targetIndex: this.mermaidSession.previewIndex, ...handlerOptions },
     );
-    imgToolHandler.bindChange(this.changeMermaidStyle.bind(this));
+    imgToolHandler.bindChange((_htmlElement, type) => this.mermaidSession.changeAlign(type));
 
     const updateHandler = imgSizeHandler.updatePosition.bind(imgSizeHandler);
     this.$cherry.$event.on('editor.size.change', updateHandler);
     const originalRemove = imgSizeHandler.remove;
     imgSizeHandler.remove = () => {
       this.$cherry.$event.off('editor.size.change', updateHandler);
+      this.mermaidSession.disposeHandlers();
       return originalRemove.call(imgSizeHandler);
     };
     this.bubbleHandler.click = imgSizeHandler;
     this.bubbleHandler.imgTool = imgToolHandler;
   }
-
-  /**
-   * 选中 mermaid 代码块语法的语言行中的扩展参数部分（尺寸 + 对齐）
-   * @param {HTMLElement} figureElement mermaid figure DOM
-   * @returns {boolean}
-   */
-  beginChangeMermaidValue(figureElement) {
-    // 找到预览区中所有 mermaid 图表，确定当前点击的是第几个
-    const allMermaidFigures = Array.from(this.previewerDom.querySelectorAll('figure[data-type="mermaid"]'));
-    const mermaidIndex = allMermaidFigures.indexOf(figureElement);
-    if (mermaidIndex < 0) {
-      return false;
-    }
-    this.mermaidIndex = mermaidIndex;
-
-    const rawContent = this.editor.editor.view.state.doc.toString();
-    // 在编辑器原始内容中按顺序找到所有 mermaid 代码块
-    const codeBlockReg = /(?:^|\n)(\n*(?:>[\t ]*)*(?:[^\S\n]*))(`{3,})([^`]*?)\n([\w\W]*?)\n\s*\2[ \t]*(?=$|\n)/g;
-    let match;
-    let currentMermaidIdx = -1;
-
-    while ((match = codeBlockReg.exec(rawContent)) !== null) {
-      const langLine = match[3].trim().toLowerCase();
-      const langPure = langLine
-        .replace(/#([0-9]+(px|em|pt|pc|in|mm|cm|ex|%)|auto)/gi, '')
-        .replace(/#(center|right|left|float-right|float-left)/gi, '')
-        .trim();
-
-      // 判断是否为 mermaid 类型的代码块
-      if (langPure !== 'mermaid' && !/^flow([ ](td|lr))?$/i.test(langPure) && langPure !== 'seq') {
-        continue;
-      }
-      currentMermaidIdx += 1;
-      if (currentMermaidIdx !== mermaidIndex) {
-        continue;
-      }
-
-      // 找到了对应的代码块，定位语言行
-      const fullMatchStart = match.index;
-      const leadingContent = match[1] || '';
-      const backtickPos = rawContent.indexOf(match[2], fullMatchStart + leadingContent.length);
-      const beforeBacktick = rawContent.substring(0, backtickPos);
-      const langLineNum = (beforeBacktick.match(/\n/g) || []).length;
-
-      // 获取该行的完整内容
-      const allLines = rawContent.split('\n');
-      const fullLangLine = allLines[langLineNum] || '';
-
-      // 匹配所有扩展参数（尺寸 + 对齐），如 "#400px #300px #center"
-      const extendRegex =
-        /((?:\s*#(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto|center|right|left|float-right|float-left))+)\s*$/i;
-      const extendMatch = fullLangLine.match(extendRegex);
-
-      // 提取当前的尺寸和对齐信息
-      const sizeRegex = /#([0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)/gi;
-      const alignRegex = /#(center|right|left|float-right|float-left)/i;
-      const sizeMatches = fullLangLine.match(sizeRegex);
-      const alignMatch = fullLangLine.match(alignRegex);
-
-      this.mermaidSize = sizeMatches ? sizeMatches.join(' ') : '';
-      this.mermaidAlign = alignMatch ? alignMatch[0] : '';
-
-      // CM6: 计算扩展参数的文档偏移量
-      const { doc } = this.editor.editor.view.state;
-      const lineStart = doc.line(langLineNum + 1).from;
-
-      if (extendMatch) {
-        const extendStart = fullLangLine.indexOf(extendMatch[1]);
-        this.mermaidExtendFrom = lineStart + extendStart;
-        this.mermaidExtendTo = this.mermaidExtendFrom + extendMatch[1].length;
-        this.editor.editor.setSelection(this.mermaidExtendFrom, this.mermaidExtendTo);
-      } else {
-        this.mermaidExtendFrom = lineStart + fullLangLine.length;
-        this.mermaidExtendTo = this.mermaidExtendFrom;
-        this.editor.editor.setSelection(this.mermaidExtendFrom, this.mermaidExtendFrom);
-      }
-
-      this.mermaidLangLineNum = langLineNum;
-      this.mermaidHasExtend = !!extendMatch;
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * 拼接 mermaid 扩展参数并替换编辑器中的选中文本
-   */
-  changeMermaidValue() {
-    const value = [this.mermaidSize, this.mermaidAlign].filter((v) => v).join(' ');
-
-    if (this.mermaidHasExtend) {
-      this.editor.editor.setSelection(this.mermaidExtendFrom, this.mermaidExtendTo);
-      this.editor.editor.replaceSelection(value, 'around');
-      this.mermaidExtendTo = this.mermaidExtendFrom + value.length;
-    } else if (value) {
-      this.editor.editor.setSelection(this.mermaidExtendFrom, this.mermaidExtendFrom);
-      this.editor.editor.replaceSelection(` ${value}`, 'around');
-      this.mermaidExtendFrom += 1;
-      this.mermaidExtendTo = this.mermaidExtendFrom + value.length;
-      this.mermaidHasExtend = true;
-    }
-  }
-
-  /**
-   * 修改 mermaid 图表尺寸时的回调
-   * @param {HTMLElement} htmlElement mermaid figure 元素
-   * @param {Object} style 图表的属性（宽高）
-   */
-  changeMermaidSize(htmlElement, style) {
-    this.mermaidSize = `#${Math.round(style.width)}px #${Math.round(style.height)}px`;
-    this.changeMermaidValue();
-  }
-
-  /**
-   * 修改 mermaid 图表对齐方式时的回调
-   * @param {HTMLElement} htmlElement mermaid figure 元素
-   * @param {string} type 对齐方式
-   */
-  changeMermaidStyle(htmlElement, type) {
-    switch (type) {
-      case 'left':
-      case 'right':
-      case 'center':
-      case 'float-left':
-      case 'float-right':
-        this.mermaidAlign = `#${type}`;
-        break;
-      case 'clear-align':
-        this.mermaidAlign = '';
-        break;
-      default:
-        return;
-    }
-    this.changeMermaidValue();
-  }
-
   /**
    * 处理 mermaid 源码/预览切换工具栏的点击
    * @param {Element} tabElement 被点击的 tab 元素

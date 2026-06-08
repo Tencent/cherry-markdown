@@ -97,6 +97,7 @@ const imgSizeHandler = {
     this.targetIndex = Number.isInteger(options.targetIndex) ? options.targetIndex : -1;
     this.onInvalidTarget = options.onInvalidTarget || null;
     this.validateTarget = options.validateTarget || null;
+    this.resolveTarget = options.resolveTarget || null;
     this.previewerDom = previewerDom;
     this.container = container;
     this.buts = this.initBubbleButtons();
@@ -167,15 +168,18 @@ const imgSizeHandler = {
     }, 120);
   },
   refreshTarget() {
-    if (!this.isMermaid || this.targetIndex < 0 || !this.previewerDom) {
+    if (!this.isMermaid || !this.previewerDom) {
       return;
     }
-    // 当前目标仍在预览区时保留引用，避免因索引位移误绑到其他 mermaid
     if (this.img && this.previewerDom.contains(this.img)) {
       return;
     }
-    const figures = this.previewerDom.querySelectorAll('figure[data-type="mermaid"]');
-    this.img = figures[this.targetIndex] || this.img;
+    if (typeof this.resolveTarget === 'function') {
+      const resolved = this.resolveTarget();
+      if (resolved) {
+        this.img = resolved;
+      }
+    }
   },
   drawBubbleButs() {
     if (this.butsLayout) {
@@ -203,6 +207,8 @@ const imgSizeHandler = {
     this.butsPoints = null;
     this.onInvalidTarget = null;
     this.validateTarget = null;
+    this.resolveTarget = null;
+    this.onPositionUpdated = null;
   },
   updateBubbleButs() {
     this.$updatePointsInfo();
@@ -214,6 +220,9 @@ const imgSizeHandler = {
       this.butsPoints[`pints-${name}`].style.top = `${this.buts.points.arrInfo[name].top}px`;
       this.butsPoints[`pints-${name}`].style.left = `${this.buts.points.arrInfo[name].left}px`;
     });
+    if (this.isMermaid) {
+      this.onPositionUpdated?.();
+    }
   },
   $updatePointsInfo() {
     const pointLeft = this.buts.style.width;

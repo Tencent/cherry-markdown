@@ -4,6 +4,36 @@
  */
 
 /**
+ * 统计预览区 mermaid figure 数量
+ * @param {ParentNode} previewerDom
+ * @returns {number}
+ */
+export function countMermaidFigures(previewerDom) {
+  if (!previewerDom) {
+    return 0;
+  }
+  return previewerDom.querySelectorAll('figure[data-type="mermaid"]').length;
+}
+
+/**
+ * 按 index 解析 mermaid figure
+ * @param {ParentNode} previewerDom
+ * @param {number} index
+ * @param {number} [expectedFigureCount=-1] 传入时须与当前 figure 数量一致，-1 表示不校验
+ * @returns {HTMLElement | null}
+ */
+export function getMermaidFigureByIndex(previewerDom, index, expectedFigureCount = -1) {
+  if (!previewerDom || index < 0) {
+    return null;
+  }
+  const figures = previewerDom.querySelectorAll('figure[data-type="mermaid"]');
+  if (expectedFigureCount >= 0 && figures.length !== expectedFigureCount) {
+    return null;
+  }
+  return /** @type {HTMLElement | null} */ (figures[index] || null);
+}
+
+/**
  * 获取 mermaid 预览内容根节点（工具栏模式下为 preview panel，否则为 figure 本身）
  * @param {HTMLElement} figure
  * @returns {HTMLElement}

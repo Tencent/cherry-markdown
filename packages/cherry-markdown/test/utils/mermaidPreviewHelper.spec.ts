@@ -1,9 +1,11 @@
 /**
- * mermaid 预览可见性判断单元测试
+ * mermaid 预览辅助逻辑单元测试
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
+  countMermaidFigures,
+  getMermaidFigureByIndex,
   getMermaidPreviewRoot,
   hasMermaidRenderedContent,
   isMermaidPreviewVisible,
@@ -85,5 +87,64 @@ describe('mermaidPreviewHelper', () => {
 
     expect(hasMermaidRenderedContent(getMermaidPreviewRoot(figure))).toBe(false);
     expect(isMermaidPreviewVisible(figure, previewerDom)).toBe(false);
+  });
+});
+
+describe('getMermaidFigureByIndex', () => {
+  let previewerDom: HTMLDivElement;
+
+  beforeEach(() => {
+    previewerDom = document.createElement('div');
+    document.body.appendChild(previewerDom);
+  });
+
+  afterEach(() => {
+    previewerDom.remove();
+  });
+
+  it('应按 index 找到 figure', () => {
+    const fig1 = document.createElement('figure');
+    fig1.setAttribute('data-type', 'mermaid');
+    const fig2 = document.createElement('figure');
+    fig2.setAttribute('data-type', 'mermaid');
+    previewerDom.appendChild(fig1);
+    previewerDom.appendChild(fig2);
+
+    expect(getMermaidFigureByIndex(previewerDom, 0, 2)).toBe(fig1);
+    expect(getMermaidFigureByIndex(previewerDom, 1, 2)).toBe(fig2);
+  });
+
+  it('删除选中块后 figure 数量变化应返回 null', () => {
+    const fig1 = document.createElement('figure');
+    fig1.setAttribute('data-type', 'mermaid');
+    const fig2 = document.createElement('figure');
+    fig2.setAttribute('data-type', 'mermaid');
+    previewerDom.appendChild(fig1);
+    previewerDom.appendChild(fig2);
+
+    fig1.remove();
+
+    expect(getMermaidFigureByIndex(previewerDom, 0, 2)).toBeNull();
+    expect(countMermaidFigures(previewerDom)).toBe(1);
+  });
+
+  it('figure 数量不变时布局刷新后仍可按 index 命中', () => {
+    const fig = document.createElement('figure');
+    fig.setAttribute('data-type', 'mermaid');
+    previewerDom.appendChild(fig);
+
+    expect(getMermaidFigureByIndex(previewerDom, 0, 1)).toBe(fig);
+  });
+
+  it('传入 expectedFigureCount 且数量不一致时返回 null', () => {
+    const fig = document.createElement('figure');
+    fig.setAttribute('data-type', 'mermaid');
+    previewerDom.appendChild(fig);
+
+    const neighbor = document.createElement('figure');
+    neighbor.setAttribute('data-type', 'mermaid');
+    previewerDom.appendChild(neighbor);
+
+    expect(getMermaidFigureByIndex(previewerDom, 0, 1)).toBeNull();
   });
 });
