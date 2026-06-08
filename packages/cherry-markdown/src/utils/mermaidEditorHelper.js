@@ -132,14 +132,30 @@ export function getMermaidBlockAtPreviewIndex(rawContent, previewIndex) {
  * 按源码内容查找 mermaid 块在编辑器中的 index（删邻居块后 index 会变化）
  * @param {string} rawContent
  * @param {string} codeBody 选中时记录的代码块正文
+ * @param {number} [preferredIndex=-1] 多个块正文相同时，优先命中该 index
  * @returns {number} index，未找到返回 -1
  */
-export function findMermaidBlockIndexByCodeBody(rawContent, codeBody) {
+export function findMermaidBlockIndexByCodeBody(rawContent, codeBody, preferredIndex = -1) {
   if (!codeBody) {
     return -1;
   }
   const blocks = listMermaidBlocks(rawContent);
-  return blocks.findIndex((block) => block.codeBody === codeBody);
+  const matchedIndices = blocks.reduce((indices, block, index) => {
+    if (block.codeBody === codeBody) {
+      indices.push(index);
+    }
+    return indices;
+  }, /** @type {number[]} */ ([]));
+  if (matchedIndices.length === 0) {
+    return -1;
+  }
+  if (matchedIndices.length === 1) {
+    return matchedIndices[0];
+  }
+  if (preferredIndex >= 0 && matchedIndices.includes(preferredIndex)) {
+    return preferredIndex;
+  }
+  return matchedIndices[0];
 }
 
 /**

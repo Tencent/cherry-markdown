@@ -301,6 +301,9 @@ export default class MermaidCodeEngine {
     if (isBrowser()) {
       const placeholderList = container.querySelectorAll(`[data-sign="${sign}"][data-type="codeBlock"]`);
       placeholderList?.forEach((placeholder) => {
+        if (placeholder.closest('[data-mode="source"]')) {
+          return;
+        }
         if (isToolbarMode) {
           // showSourceToolbar 模式：仅替换预览面板内容，保留工具栏和源码面板
           const previewPanel = placeholder.parentElement

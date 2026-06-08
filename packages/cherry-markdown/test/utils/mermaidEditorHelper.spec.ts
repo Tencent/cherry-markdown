@@ -52,6 +52,15 @@ graph TD
     expect(findMermaidBlockIndexByCodeBody(md, blockB)).toBe(-1);
   });
 
+  it('正文相同块应优先命中 anchorPreviewIndex', () => {
+    const body = 'graph TD\n  A-->B';
+    const md = `\`\`\`mermaid\n${body}\n\`\`\`\n\n\`\`\`mermaid\n${body}\n\`\`\``;
+
+    expect(findMermaidBlockIndexByCodeBody(md, body, 0)).toBe(0);
+    expect(findMermaidBlockIndexByCodeBody(md, body, 1)).toBe(1);
+    expect(findMermaidBlockIndexByCodeBody(md, body)).toBe(0);
+  });
+
   it('应解析语言行上的尺寸与对齐扩展参数', () => {
     const layout = parseMermaidLayoutFromLangLine('```mermaid #400px #300px #center');
     expect(layout.size).toBe('#400px #300px');

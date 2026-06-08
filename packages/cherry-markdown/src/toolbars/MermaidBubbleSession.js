@@ -24,6 +24,7 @@ export default class MermaidBubbleSession {
   /** 重置会话状态（移除操作框时调用） */
   reset() {
     this.anchorBody = '';
+    this.anchorPreviewIndex = -1;
     this.previewIndex = -1;
     this.selfEditing = false;
     this.size = '';
@@ -33,6 +34,8 @@ export default class MermaidBubbleSession {
     this.hasExtend = false;
     this.langLineNum = -1;
     this.clearPositionSyncTimer();
+    this.clearAsyncValidityTimer();
+    this.clearPositionTransitionListener();
   }
 
   /** 当前是否处于 mermaid 操作框会话 */
@@ -66,6 +69,7 @@ export default class MermaidBubbleSession {
 
     this.previewIndex = context.previewIndex;
     this.anchorBody = context.anchorBody;
+    this.anchorPreviewIndex = context.previewIndex;
     this.langLineNum = context.langLineNum;
     this.extendFrom = context.extendFrom;
     this.extendTo = context.extendTo;
@@ -117,7 +121,11 @@ export default class MermaidBubbleSession {
     if (!editor?.editor || !this.anchorBody) {
       return -1;
     }
-    return findMermaidBlockIndexByCodeBody(editor.editor.view.state.doc.toString(), this.anchorBody);
+    return findMermaidBlockIndexByCodeBody(
+      editor.editor.view.state.doc.toString(),
+      this.anchorBody,
+      this.anchorPreviewIndex,
+    );
   }
 
   /**
@@ -199,6 +207,21 @@ export default class MermaidBubbleSession {
     }
   }
 
+  clearAsyncValidityTimer() {
+    if (this._asyncValidityTimer) {
+      clearTimeout(this._asyncValidityTimer);
+      this._asyncValidityTimer = null;
+    }
+  }
+
+  clearPositionTransitionListener() {
+    if (this._positionTransitionFigure && this._positionTransitionHandler) {
+      this._positionTransitionFigure.removeEventListener('transitionend', this._positionTransitionHandler);
+    }
+    this._positionTransitionFigure = null;
+    this._positionTransitionHandler = null;
+  }
+
   /**
    * 等待 figure 过渡结束后统一更新位置
    * @param {() => void} [onInvalidTarget]
@@ -210,6 +233,7 @@ export default class MermaidBubbleSession {
 
     imgSizeHandler.$clearPreviewUpdateTimer?.();
     this.clearPositionSyncTimer();
+    this.clearPositionTransitionListener();
 
     const sync = () => {
       if (!this.isValid({ strict: false })) {
@@ -225,6 +249,8 @@ export default class MermaidBubbleSession {
       return;
     }
 
+    this._positionTransitionFigure = figure;
+    this._positionTransitionHandler = sync;
     figure.addEventListener('transitionend', sync, { once: true });
     this._positionSyncTimer = setTimeout(() => {
       this._positionSyncTimer = null;
@@ -241,8 +267,34 @@ export default class MermaidBubbleSession {
   /** mermaid 异步渲染 patch DOM 后 */
   onAsyncRenderDone() {
     this.onPreviewUpdate();
-    this.host.$checkAndRemoveInvalidImgHandlers({ strict: true });
-    this.clearSelfEditingIfReady();
+    this.scheduleAsyncValidityCheck();
+  }
+
+  /**
+   * fix(MermaidBubbleSession): 邻居块异步恢复会触发布局重排，延迟校验避免误关选中框
+   * @param {number} [attempt]
+   */
+  scheduleAsyncValidityCheck(attempt = 0) {
+    this.clearAsyncValidityTimer();
+    const maxAttempts = 8;
+    const delay = attempt === 0 ? 0 : 50;
+
+    this._asyncValidityTimer = setTimeout(() => {
+      this._asyncValidityTimer = null;
+      if (!this.isActive()) {
+        return;
+      }
+      this.resolveFigure();
+      if (this.isValid({ strict: true })) {
+        this.clearSelfEditingIfReady();
+        return;
+      }
+      if (attempt >= maxAttempts) {
+        this.host.$checkAndRemoveInvalidImgHandlers({ strict: true });
+        return;
+      }
+      this.scheduleAsyncValidityCheck(attempt + 1);
+    }, delay);
   }
 
   /** 布局编辑完成且 svg 可见时清除 selfEditing 标记 */

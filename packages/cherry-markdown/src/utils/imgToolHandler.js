@@ -241,14 +241,15 @@ const imgToolHandler = {
     if (!this.isMermaid || !this.previewerDom) {
       return;
     }
-    if (this.img && this.previewerDom.contains(this.img)) {
-      return;
-    }
     if (typeof this.resolveTarget === 'function') {
       const resolved = this.resolveTarget();
       if (resolved) {
         this.img = resolved;
+        return;
       }
+    }
+    if (this.img && this.previewerDom.contains(this.img)) {
+      return;
     }
   },
   remove() {
