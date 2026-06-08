@@ -703,6 +703,10 @@ export type CherryDefaultToolbar =
   | 'ul'
   | 'video'
   | 'word'
+  | 'align'
+  | 'proTable'
+  | 'search'
+  | 'shortcutKey'
   | 'wordCount';
 
 export type CherryDefaultBubbleToolbar =

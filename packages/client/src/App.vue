@@ -4,7 +4,6 @@ import { invoke } from '@tauri-apps/api/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
-import { register, unregister } from '@tauri-apps/plugin-global-shortcut';
 import { useFileStore } from './store';
 import { ref, onMounted, onUnmounted } from 'vue';
 import SidePanelManager from './components/SidePanelManager.vue';
@@ -14,6 +13,7 @@ import type { FileOperationResult } from './components/types';
 import { useAppEvents, type OpenFileFromSidebarEvent } from './components/composables/useAppEvents';
 import { notifyError, notifySuccess } from './utils/notifications';
 import { MESSAGES, DIALOGS } from './constants/i18n';
+import { normalizePath } from './components/fileUtils';
 
 // 响应式数据
 let cherryMarkdown = cherryInstance();
@@ -125,17 +125,18 @@ const openFile = async (): Promise<FileOperationResult> => {
       return { success: false, error: MESSAGES.FILE.USER_CANCELLED_SELECT };
     }
 
-    const markdown = await readTextFile(path);
+    const normalizedPath = normalizePath(path);
+    const markdown = await readTextFile(normalizedPath);
     needDealAfterChange = false;
     hasUnsavedChanges = false;
     cherryMarkdown.setMarkdown(markdown);
-    fileStore.setCurrentFilePath(path);
+    fileStore.setCurrentFilePath(normalizedPath);
 
     // 添加到最近访问列表
-    fileStore.addRecentFile(path);
-    await updateTitle(path, false);
+    fileStore.addRecentFile(normalizedPath);
+    await updateTitle(normalizedPath, false);
 
-    return { success: true, path };
+    return { success: true, path: normalizedPath };
   } catch (error) {
     const message = `${MESSAGES.FILE.OPEN_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`;
     notifyError(message);
@@ -163,15 +164,16 @@ const saveAsNewMarkdown = async (): Promise<FileOperationResult> => {
       return { success: false, error: MESSAGES.FILE.USER_CANCELLED_SAVE };
     }
 
-    await writeTextFile(path, markdown);
-    fileStore.setCurrentFilePath(path);
-    fileStore.addRecentFile(path);
-    fileStore.markSaved(path);
+    const normalizedPath = normalizePath(path);
+    await writeTextFile(normalizedPath, markdown);
+    fileStore.setCurrentFilePath(normalizedPath);
+    fileStore.addRecentFile(normalizedPath);
+    fileStore.markSaved(normalizedPath);
     hasUnsavedChanges = false;
-    await updateTitle(path, false);
+    await updateTitle(normalizedPath, false);
     notifySuccess(MESSAGES.FILE.SAVE_AS_SUCCESS);
 
-    return { success: true, path };
+    return { success: true, path: normalizedPath };
   } catch (error) {
     const message = `${MESSAGES.FILE.SAVE_AS_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`;
     notifyError(message);
@@ -189,39 +191,18 @@ const saveMarkdown = async (): Promise<FileOperationResult> => {
       return await saveAsNewMarkdown();
     }
 
-    await writeTextFile(fileStore.currentFilePath, markdown);
-    fileStore.markSaved(fileStore.currentFilePath);
+    const normalizedPath = normalizePath(fileStore.currentFilePath);
+    await writeTextFile(normalizedPath, markdown);
+    fileStore.markSaved(normalizedPath);
     hasUnsavedChanges = false;
-    await updateTitle(fileStore.currentFilePath, false);
+    await updateTitle(normalizedPath, false);
     notifySuccess(MESSAGES.FILE.SAVE_SUCCESS);
-    return { success: true, path: fileStore.currentFilePath };
+    return { success: true, path: normalizedPath };
   } catch (error) {
     const message = `${MESSAGES.FILE.SAVE_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`;
     notifyError(message);
     return { success: false, error: error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR };
   }
-};
-
-// ========== 编辑器模式管理 ==========
-const switchToPreviewOnly = (): void => {
-  cherryMarkdown.wrapperDom.classList.add('markdown-preview-only');
-
-  // 隐藏编辑按钮
-  const pen = cherryMarkdown.wrapperDom.querySelector('.cherry-toolbar-pen');
-  if (pen) {
-    pen.classList.remove('active');
-  }
-  cherryMarkdown.previewer.options.enablePreviewerBubble = false;
-};
-
-const switchToEdit = (): void => {
-  cherryMarkdown.wrapperDom.classList.remove('markdown-preview-only');
-  // 显示编辑按钮
-  const pen = cherryMarkdown.wrapperDom.querySelector('.cherry-toolbar-pen');
-  if (pen) {
-    pen.classList.add('active');
-  }
-  cherryMarkdown.previewer.options.enablePreviewerBubble = true;
 };
 
 const dealAfterChange = (): void => {
@@ -237,28 +218,21 @@ const dealAfterChange = (): void => {
   }
 };
 
-const handleEditButtonClick = (): void => {
-  const pen = cherryMarkdown.wrapperDom.querySelector('.cherry-toolbar-pen');
-
-  if (pen) {
-    if (cherryMarkdown.wrapperDom.classList.contains('markdown-preview-only')) {
-      switchToEdit();
-    } else {
-      switchToPreviewOnly();
-    }
-  }
-};
-
 // ========== 文件恢复功能 ==========
 const restoreLastOpenedFile = async (): Promise<void> => {
   if (fileStore.currentFilePath) {
     try {
-      const markdown = await readTextFile(fileStore.currentFilePath);
+      const normalizedPath = normalizePath(fileStore.currentFilePath);
+      const markdown = await readTextFile(normalizedPath);
       needDealAfterChange = false;
       hasUnsavedChanges = false;
       cherryMarkdown.setMarkdown(markdown);
-      console.log('成功恢复上次打开的文件:', fileStore.currentFilePath);
-      await updateTitle(fileStore.currentFilePath, false);
+      // 把归一化后的路径写回 store，避免历史数据残留反斜杠导致后续 markSaved 匹配不到
+      if (normalizedPath !== fileStore.currentFilePath) {
+        fileStore.setCurrentFilePath(normalizedPath);
+      }
+      console.log('成功恢复上次打开的文件:', normalizedPath);
+      await updateTitle(normalizedPath, false);
     } catch (error) {
       console.warn('恢复上次打开的文件失败:', error);
       // 如果文件不存在或无法访问，清除当前文件路径并从最近记录移除
@@ -276,8 +250,9 @@ const handleOpenFileFromSidebar = async (event: OpenFileFromSidebarEvent): Promi
   needDealAfterChange = false;
   hasUnsavedChanges = false;
   cherryMarkdown.setMarkdown(content);
-  fileStore.setCurrentFilePath(filePath);
-  await updateTitle(filePath, false);
+  const normalizedPath = normalizePath(filePath);
+  fileStore.setCurrentFilePath(normalizedPath);
+  await updateTitle(normalizedPath, false);
 };
 
 const handleSaveFromToolbar = async (): Promise<void> => {
@@ -295,25 +270,33 @@ const toggleToolbar = async (): Promise<void> => {
 };
 
 // ========== 键盘快捷键处理 ==========
-const registerSaveShortcut = async (): Promise<void> => {
-  try {
-    // 注册 Ctrl+S 保存快捷键
-    await register('CommandOrControl+S', async () => {
-      if (fileStore.currentFilePath || hasUnsavedChanges) {
-        await saveMarkdown();
-      }
-    });
-  } catch (error) {
-    console.warn('注册保存快捷键失败:', error);
+// 使用窗口内 keydown 监听代替全局快捷键：webview 内的 keydown 事件天然只会在
+// 当前窗口聚焦时触发，因此既不会拦截其他应用（如记事本）的同名快捷键，也无需
+// 额外调用 isFocused 进行判断。
+//
+// 注意：preventDefault / stopPropagation 必须在事件回调的同步阶段调用，
+// 因此本函数保持同步，异步的保存逻辑通过 void 触发，避免被任何 await 推迟。
+const handleSaveShortcut = (event: KeyboardEvent): void => {
+  const isSaveShortcut =
+    (event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === 's';
+  if (!isSaveShortcut) return;
+
+  // 立即同步拦截，避免被 Cherry 内部 CodeMirror keymap 等默认行为消费
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (fileStore.currentFilePath || hasUnsavedChanges) {
+    void saveMarkdown();
   }
 };
 
-const unregisterSaveShortcut = async (): Promise<void> => {
-  try {
-    await unregister('CommandOrControl+S');
-  } catch (error) {
-    console.warn('注销保存快捷键失败:', error);
-  }
+const registerSaveShortcut = (): void => {
+  // capture 阶段监听，确保在 Cherry 编辑器内部处理之前先获取到事件
+  window.addEventListener('keydown', handleSaveShortcut, true);
+};
+
+const unregisterSaveShortcut = (): void => {
+  window.removeEventListener('keydown', handleSaveShortcut, true);
 };
 
 const appEvents = useAppEvents({
@@ -351,17 +334,8 @@ onMounted(async () => {
     }
   });
 
-  // 注册全局保存快捷键
-  await registerSaveShortcut();
-
-  // 设置编辑按钮事件监听
-  setTimeout(() => {
-    const pen = cherryMarkdown.wrapperDom.querySelector('.cherry-toolbar-pen');
-    if (pen) {
-      pen.removeEventListener('click', handleEditButtonClick);
-      pen.addEventListener('click', handleEditButtonClick);
-    }
-  }, 100);
+  // 注册保存快捷键（仅当前窗口聚焦时生效）
+  registerSaveShortcut();
 
   // 自动恢复上次打开的文件
   await restoreLastOpenedFile();
@@ -374,8 +348,8 @@ onUnmounted(async () => {
     unlistenCloseRequested();
   }
 
-  // 注销全局保存快捷键
-  await unregisterSaveShortcut();
+  // 注销保存快捷键
+  unregisterSaveShortcut();
   await appEvents.cleanupAll();
 });
 </script>
@@ -411,5 +385,10 @@ onUnmounted(async () => {
   height: 100%;
   width: 100%;
   flex: 1;
+}
+
+#markdown-editor .cherry.cherry--no-toolbar .cherry-sidebar {
+  display: block;
+  height: auto;
 }
 </style>

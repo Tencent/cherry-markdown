@@ -83,25 +83,31 @@ export default class MathBlock extends ParagraphBase {
         result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
               data-lines="${lines}" data-formula-source="${encodedFormulaSource}">${html}</div>`;
       }
-    } else if (this.MathJax?.tex2svg) {
+    } else if (this.engine === 'MathJax') {
       // MathJax渲染
-      let svg = '';
-      try {
-        svg = getHTML(this.MathJax.tex2svg($content), true);
-      } catch (e) {
-        if (this.isSelfClosing()) {
-          svg = this.lastCode;
+      if (!this.MathJax?.tex2svg) {
+        // MathJax尚未加载完成，先输出占位符，等待异步加载完成后再渲染
+        result = `<div data-sign="${sign}" class="Cherry-Math cherry-mathjax-need-render" data-type="mathBlock" data-formula-source="${encodedFormulaSource}" data-lines="${lines}" data-content="${encodeURIComponent($content)}"></div>`;
+        this.$engine.asyncRenderHandler.add(`math-block-${sign}`);
+      } else {
+        let svg = '';
+        try {
+          svg = getHTML(this.MathJax.tex2svg($content), true);
+        } catch (e) {
+          if (this.isSelfClosing()) {
+            svg = this.lastCode;
+          }
         }
-      }
 
-      if (this.isSelfClosing()) {
-        if (/data-mml-node="merror"/.test(svg) && this.lastCode) {
-          svg = this.lastCode;
+        if (this.isSelfClosing()) {
+          if (/data-mml-node="merror"/.test(svg) && this.lastCode) {
+            svg = this.lastCode;
+          }
+          this.lastCode = svg;
         }
-        this.lastCode = svg;
+        result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
+              data-lines="${lines}" data-formula-source="${encodedFormulaSource}">${svg}</div>`;
       }
-      result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
-            data-lines="${lines}" data-formula-source="${encodedFormulaSource}">${svg}</div>`;
     } else {
       result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
       data-lines="${lines}" data-formula-source="${encodedFormulaSource}">$$${escapeFormulaPunctuations(content)}$$</div>`;
