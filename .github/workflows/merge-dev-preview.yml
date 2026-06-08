@@ -2,8 +2,7 @@
 # Merge Dev Preview — 合并到 dev 后自动发布开发预览版
 #
 # 触发时机: PR 合并 (closed + merged) 到 dev 分支，且变更涉及以下路径:
-#   - packages/cherry-markdown: 发布 npm dev 预览版 + VSCode 插件 pre-release
-#   - packages/vscodePlugin:    发布 VSCode 插件 pre-release
+#   - packages/cherry-markdown: 发布 npm dev 预览版
 # 使用 pull_request 确保 OIDC token claims 正确匹配 Trusted Publisher
 # 并发控制: 不取消旧运行（合并事件只应执行一次）
 # =============================================================================
@@ -16,7 +15,6 @@ on:
     branches: [dev]
     paths:
       - 'packages/cherry-markdown/**'
-      - 'packages/vscodePlugin/**'
 
 permissions:
   contents: read
@@ -35,7 +33,6 @@ jobs:
     timeout-minutes: 10
     outputs:
       cherry-markdown: ${{ steps.filter.outputs.cherry-markdown }}
-      vscode-plugin: ${{ steps.filter.outputs.vscode-plugin }}
     steps:
       - uses: actions/checkout@v6
 
@@ -46,22 +43,11 @@ jobs:
           filters: |
             cherry-markdown:
               - 'packages/cherry-markdown/**'
-            vscode-plugin:
-              - 'packages/vscodePlugin/**'
 
   npm-dev-preview:
     needs: detect-changes
     if: needs.detect-changes.outputs.cherry-markdown == 'true'
     uses: ./.github/workflows/reusable-npm-dev-preview.yml
     with:
-      pr_number: ${{ github.event.pull_request.number }}
-    secrets: inherit
-
-  vscode-plugin-preview:
-    needs: detect-changes
-    if: needs.detect-changes.outputs.vscode-plugin == 'true' || needs.detect-changes.outputs.cherry-markdown == 'true'
-    uses: ./.github/workflows/reusable-vscode-plugin.yml
-    with:
-      mode: pre-release
       pr_number: ${{ github.event.pull_request.number }}
     secrets: inherit

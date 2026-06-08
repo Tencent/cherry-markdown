@@ -22,15 +22,12 @@ import ParagraphBase from './core/ParagraphBase';
 import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg, base64Reg, getCodeBlockRule } from './utils/regexp';
 import { escapeHTMLSpecialChar } from './utils/sanitize';
 import Logger from './Logger';
-import { configureMathJax } from './utils/mathjax';
 import AsyncRenderHandler from './utils/async-render-handler';
 import UrlCache from './UrlCache';
 import htmlParser from './utils/htmlparser';
-import { isBrowser } from './utils/env';
-import { getExternal } from './utils/external';
 import * as htmlparser2 from 'htmlparser2';
 import LRUCache from './utils/LRUCache';
-import { loadCSS, loadScript } from './utils/dom';
+import { initMathEngines } from './utils/math-loader';
 
 export default class Engine {
   /**
@@ -112,76 +109,7 @@ export default class Engine {
   }
 
   initMath(opts) {
-    // 无论MathJax还是Katex，都可以先进行MathJax配置
-    const { externals, engine } = opts;
-    const { syntax } = engine;
-    const { plugins } = syntax.mathBlock;
-    // 未开启公式
-    if (
-      !isBrowser() ||
-      (!syntax.mathBlock.src && !syntax.inlineMath.src && !syntax.mathBlock.engine && !syntax.inlineMath.engine)
-    ) {
-      return;
-    }
-    if (syntax.mathBlock.engine === 'MathJax' || syntax.inlineMath.engine === 'MathJax') {
-      // 已经加载过MathJax
-      if (externals.MathJax || getExternal('MathJax')) {
-        return;
-      }
-      configureMathJax(plugins);
-      if (syntax.mathBlock.src || syntax.inlineMath.src) {
-        loadScript(syntax.mathBlock.src ? syntax.mathBlock.src : syntax.inlineMath.src, 'mathjax-js');
-      }
-    }
-    if (syntax.mathBlock.engine === 'katex' || syntax.inlineMath.engine === 'katex') {
-      const katexInstance = /** @type {import('katex').default | undefined} */ (getExternal('katex'));
-      if (katexInstance) {
-        return;
-      }
-      syntax.mathBlock.css && loadCSS(syntax.mathBlock.css, 'katex-css');
-      if (syntax.mathBlock.src) {
-        loadScript(syntax.mathBlock.src, 'katex-js').then(() => {
-          const resolvedKatex = /** @type {import('katex').default} */ (getExternal('katex'));
-          if (!resolvedKatex) {
-            return;
-          }
-          // 先更新预览区域
-          this.$cherry.previewer
-            .getDom()
-            .querySelectorAll('.cherry-katex-need-render')
-            .forEach((el) => {
-              const displayMode = el.classList.contains('Cherry-Math');
-              el.innerHTML = resolvedKatex.renderToString(decodeURIComponent(el.getAttribute('data-content')), {
-                throwOnError: false,
-                displayMode,
-              });
-              el.classList.remove('cherry-katex-need-render');
-            });
-          // 再更新asyncRenderHandler里的md（实际为html）内容
-          const needDoneKeys = [];
-          this.asyncRenderHandler.md = this.asyncRenderHandler.md.replace(
-            /<(div|span) data-sign="([^"]+?)" class="([^"]+?) cherry-katex-need-render" ([^>]+? data-lines="[^"]+?") data-content="([\s\S]+?)"><\/\1>/g,
-            (match, domName, sign, className, attrs, content) => {
-              const isDisplayMode = domName === 'div';
-              const key = isDisplayMode ? `math-block-${sign}` : `math-inline-${sign}`;
-              const html = resolvedKatex.renderToString(decodeURIComponent(content), {
-                throwOnError: false,
-                displayMode: isDisplayMode,
-              });
-              needDoneKeys.push(key);
-              return `<${domName} data-sign="${sign}" class="${className}" ${attrs}>${html}</${domName}>`;
-            },
-          );
-          needDoneKeys.forEach((key) => {
-            this.asyncRenderHandler.done(key);
-          });
-          // 最后再更新预览区缓存的内容（当预览区隐藏的时候需要更新）
-          if (this.$cherry.previewer.isPreviewerHidden()) {
-            this.$cherry.previewer.options.previewerCache.html = this.asyncRenderHandler.md;
-          }
-        });
-      }
-    }
+    initMathEngines(this, opts);
   }
 
   $configInit(params) {
@@ -331,6 +259,10 @@ export default class Engine {
    * 内部链接占位等场景。如有真实加密签名需求，请勿使用此方法。
    */
   sha256(str) {
+    return hashHex(str);
+  }
+
+  hashHex(str) {
     return hashHex(str);
   }
 

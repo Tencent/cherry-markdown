@@ -74,16 +74,22 @@ export default class InlineMath extends ParagraphBase {
         }
         result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}" data-formula-source="${encodedFormulaSource}">${html}</span>`;
       }
-    } else if (this.MathJax?.tex2svg) {
+    } else if (this.engine === 'MathJax') {
       // MathJax渲染
-      let svg = getHTML(this.MathJax.tex2svg($m1, { em: 12, ex: 6, display: false }), true);
-      if (this.isSelfClosing()) {
-        if (/data-mml-node="merror"/.test(svg) && this.lastCode) {
-          svg = this.lastCode;
+      if (!this.MathJax?.tex2svg) {
+        // MathJax尚未加载完成，先输出占位符，等待异步加载完成后再渲染
+        result = `${leadingChar}<span data-sign="${sign}" class="Cherry-InlineMath cherry-mathjax-need-render" data-type="mathBlock" data-formula-source="${encodedFormulaSource}" data-lines="${lines}" data-content="${encodeURIComponent($m1)}"></span>`;
+        this.$engine.asyncRenderHandler.add(`math-inline-${sign}`);
+      } else {
+        let svg = getHTML(this.MathJax.tex2svg($m1, { em: 12, ex: 6, display: false }), true);
+        if (this.isSelfClosing()) {
+          if (/data-mml-node="merror"/.test(svg) && this.lastCode) {
+            svg = this.lastCode;
+          }
+          this.lastCode = svg;
         }
-        this.lastCode = svg;
+        result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}" data-formula-source="${encodedFormulaSource}">${svg}</span>`;
       }
-      result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock" data-lines="${lines}" data-formula-source="${encodedFormulaSource}">${svg}</span>`;
     } else {
       result = `${leadingChar}<span class="Cherry-InlineMath" data-type="mathBlock"
         data-lines="${lines}" data-formula-source="${encodedFormulaSource}">$${escapeFormulaPunctuations(m1)}$</span>`;

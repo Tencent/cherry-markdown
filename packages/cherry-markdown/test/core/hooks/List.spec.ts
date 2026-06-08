@@ -76,7 +76,7 @@ describe('core/hooks/list', () => {
   it('list hook', () => {
     cases.forEach((item) => {
       listHook.makeHtml(item, (text) => ({ html: text }));
-      expect(listHook.cache[listHook.sign].content).toMatchSnapshot();
+      expect(listHook.cache.get(listHook.sign)?.content).toMatchSnapshot();
     });
   });
 });

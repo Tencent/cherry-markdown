@@ -42,6 +42,14 @@ type CustomConfig = {
 
 const customMenuChangeModule = Cherry.createMenuHook('编辑', {
   iconName: 'pen',
+  onClick() {
+    const { editor } = this.$cherry.getStatus();
+    if (editor === 'show') {
+      this.$cherry.switchModel('previewOnly');
+    } else {
+      this.$cherry.switchModel('edit&preview');
+    }
+  },
 });
 
 const customSave = Cherry.createMenuHook('save', {
@@ -68,15 +76,6 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     // externals
     katex,
     echarts: echartsInstance,
-  },
-  // chatGpt的openai配置
-  openai: {
-    apiKey: '', // apiKey
-    // proxy: {
-    //   host: '127.0.0.1',
-    //   port: '7890',
-    // }, // http & https代理配置
-    ignoreError: false, // 是否忽略请求失败，默认忽略
   },
   // 解析引擎配置
   engine: {
@@ -219,27 +218,20 @@ const cherryConfig: CherryOptions<CustomConfig> = {
   toolbars: {
     toolbar: [
       'bold',
-      'italic',
       {
-        strikethrough: ['strikethrough', 'underline', 'sub', 'sup', 'ruby'],
+        italic: ['italic', 'strikethrough', 'underline', 'sub', 'sup', 'ruby'],
       },
       'size',
-      '|',
       'color',
-      'header',
-      // '|',
-      // 'drawIo',
       '|',
-      'ol',
-      'ul',
-      'checklist',
+      'header',
+      { ol: ['ol', 'ul', 'checklist'] },
       'panel',
-      // 'align',
-      'detail',
+      'align',
       '|',
       {
         insert: [
-          // 'image',
+          'image',
           // 'audio',
           // 'video',
           // 'link',
@@ -250,18 +242,19 @@ const cherryConfig: CherryOptions<CustomConfig> = {
           // 'formula',
           'toc',
           'table',
+          'detail',
+          'drawIo',
           // 'pdf',
           // 'word',
           // 'file',
         ],
       },
       'formula',
-      'image',
       'graph',
-      // 'proTable',
+      'proTable',
       '|',
-      // 'search',
-      // 'shortcutKey',
+      'search',
+      'shortcutKey',
       'togglePreview',
     ],
     toolbarRight: ['customSave', 'export', '|', 'wordCount'] as any[],
