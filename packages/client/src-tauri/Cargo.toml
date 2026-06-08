@@ -1,6 +1,6 @@
 [package]
 name = "cherry-markdown-client"
-version = "0.2.1"
+version = "0.3.0"
 description = "A Cherry Markdown Client"
 authors = ["Cherry OTeam"]
 edition = "2021"
