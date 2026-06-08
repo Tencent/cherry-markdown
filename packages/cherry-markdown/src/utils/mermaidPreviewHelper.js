@@ -68,10 +68,8 @@ function getVisualSize(visual) {
   if (rect.width > 0 && rect.height > 0) {
     return { width: rect.width, height: rect.height };
   }
-  const width =
-    htmlVisual.offsetWidth || Number.parseFloat(htmlVisual.getAttribute('width') || '') || 0;
-  const height =
-    htmlVisual.offsetHeight || Number.parseFloat(htmlVisual.getAttribute('height') || '') || 0;
+  const width = htmlVisual.offsetWidth || Number.parseFloat(htmlVisual.getAttribute('width') || '') || 0;
+  const height = htmlVisual.offsetHeight || Number.parseFloat(htmlVisual.getAttribute('height') || '') || 0;
   return { width, height };
 }
 

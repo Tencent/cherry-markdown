@@ -201,25 +201,25 @@ export default class MermaidBubbleSession {
   }
 
   clearPositionSyncTimer() {
-    if (this._positionSyncTimer) {
-      clearTimeout(this._positionSyncTimer);
-      this._positionSyncTimer = null;
+    if (this.positionSyncTimer) {
+      clearTimeout(this.positionSyncTimer);
+      this.positionSyncTimer = null;
     }
   }
 
   clearAsyncValidityTimer() {
-    if (this._asyncValidityTimer) {
-      clearTimeout(this._asyncValidityTimer);
-      this._asyncValidityTimer = null;
+    if (this.asyncValidityTimer) {
+      clearTimeout(this.asyncValidityTimer);
+      this.asyncValidityTimer = null;
     }
   }
 
   clearPositionTransitionListener() {
-    if (this._positionTransitionFigure && this._positionTransitionHandler) {
-      this._positionTransitionFigure.removeEventListener('transitionend', this._positionTransitionHandler);
+    if (this.positionTransitionFigure && this.positionTransitionHandler) {
+      this.positionTransitionFigure.removeEventListener('transitionend', this.positionTransitionHandler);
     }
-    this._positionTransitionFigure = null;
-    this._positionTransitionHandler = null;
+    this.positionTransitionFigure = null;
+    this.positionTransitionHandler = null;
   }
 
   /**
@@ -249,11 +249,11 @@ export default class MermaidBubbleSession {
       return;
     }
 
-    this._positionTransitionFigure = figure;
-    this._positionTransitionHandler = sync;
+    this.positionTransitionFigure = figure;
+    this.positionTransitionHandler = sync;
     figure.addEventListener('transitionend', sync, { once: true });
-    this._positionSyncTimer = setTimeout(() => {
-      this._positionSyncTimer = null;
+    this.positionSyncTimer = setTimeout(() => {
+      this.positionSyncTimer = null;
       sync();
     }, 120);
   }
@@ -279,8 +279,8 @@ export default class MermaidBubbleSession {
     const maxAttempts = 8;
     const delay = attempt === 0 ? 0 : 50;
 
-    this._asyncValidityTimer = setTimeout(() => {
-      this._asyncValidityTimer = null;
+    this.asyncValidityTimer = setTimeout(() => {
+      this.asyncValidityTimer = null;
       if (!this.isActive()) {
         return;
       }

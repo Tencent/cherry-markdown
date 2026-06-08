@@ -9,6 +9,7 @@
       "@/*": ["src/*"],
       "~types/*": ["types/*"]
     },
+    "ignoreDeprecations": "6.0"
   },
   "include": ["./**/*.ts", "./**/*.tsx"],
   "files": ["../types/env.d.ts", "../types/codemirror.d.ts"]
