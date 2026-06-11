@@ -79,6 +79,30 @@ export default class MermaidCodeEngine {
     mermaidCanvas: any;
     lastRenderedCode: string;
     needReturnLastRenderedCode: boolean;
+    /** 按 mermaid 源码内容缓存已渲染 HTML，布局参数变更时复用以避免闪回 codeBlock */
+    contentRenderCache: Map<any, any>;
+    contentRenderCacheMax: number;
+    /**
+     * 生成 mermaid 源码内容缓存 key（与布局 sign 无关）
+     * @param {string} src
+     * @param {import('../Engine').default} $engine
+     * @returns {string}
+     */
+    $getContentCacheKey(src: string, $engine: import("../Engine").default): string;
+    /**
+     * 读取已缓存的 mermaid 渲染结果
+     * @param {string} src
+     * @param {import('../Engine').default} $engine
+     * @returns {string}
+     */
+    $getCachedRenderHtml(src: string, $engine: import("../Engine").default): string;
+    /**
+     * 缓存 mermaid 渲染结果（仅缓存含 svg 的成功结果）
+     * @param {string} src
+     * @param {import('../Engine').default} $engine
+     * @param {string} html
+     */
+    $setCachedRenderHtml(src: string, $engine: import("../Engine").default, html: string): void;
     isAsyncRenderVersion(): boolean;
     mountMermaidCanvas($engine: any): void;
     /**
@@ -91,7 +115,12 @@ export default class MermaidCodeEngine {
     processSvgCode(svgCode: any, graphId: any): string;
     syncRender(graphId: any, src: any, sign: any, $engine: any): any;
     handleAsyncRenderDone(graphId: any, sign: any, $engine: any, props: any, html: any): void;
-    asyncRender(graphId: any, src: any, sign: any, $engine: any, props: any): any;
+    /**
+     * 尝试重新从全局获取 mermaid 实例（当外部异步加载 mermaid 时，构造时刻可能尚未就绪）
+     * @returns {boolean} 是否成功获取
+     */
+    tryResolveMermaidAPIRefs(): boolean;
+    asyncRender(graphId: any, src: any, sign: any, $engine: any, props: any, retryCount?: number): any;
     render(src: any, sign: any, $engine: any, props?: {}): any;
     svg2img: any;
 }

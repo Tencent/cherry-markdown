@@ -59,6 +59,7 @@ export default class Engine {
      * 内部链接占位等场景。如有真实加密签名需求，请勿使用此方法。
      */
     sha256(str: any): string;
+    hashHex(str: any): string;
     /**
      * 计算哈希值（非加密，用于缓存键）
      * @param {String} str 被计算的字符串

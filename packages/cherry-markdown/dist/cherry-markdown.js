@@ -3305,11 +3305,11 @@
 
 	var es_object_getOwnPropertyDescriptors = {};
 
-	var ownKeys$h;
+	var ownKeys$i;
 	var hasRequiredOwnKeys;
 
 	function requireOwnKeys () {
-		if (hasRequiredOwnKeys) return ownKeys$h;
+		if (hasRequiredOwnKeys) return ownKeys$i;
 		hasRequiredOwnKeys = 1;
 		'use strict';
 		var getBuiltIn = /*@__PURE__*/ requireGetBuiltIn();
@@ -3321,12 +3321,12 @@
 		var concat = uncurryThis([].concat);
 
 		// all object keys, includes non-enumerable and symbols
-		ownKeys$h = getBuiltIn('Reflect', 'ownKeys') || function ownKeys(it) {
+		ownKeys$i = getBuiltIn('Reflect', 'ownKeys') || function ownKeys(it) {
 		  var keys = getOwnPropertyNamesModule.f(anObject(it));
 		  var getOwnPropertySymbols = getOwnPropertySymbolsModule.f;
 		  return getOwnPropertySymbols ? concat(keys, getOwnPropertySymbols(it)) : keys;
 		};
-		return ownKeys$h;
+		return ownKeys$i;
 	}
 
 	var hasRequiredEs_object_getOwnPropertyDescriptors;
@@ -51595,6 +51595,9 @@
 	    this.html = html;
 	    this.md = md;
 	    this.currentCursor = currentCursor;
+	    // 记录粘贴区域，切换 TEXT/Markdown 时按范围替换，避免选区丢失导致内容重复
+	    this.pasteFrom = currentCursor;
+	    this.pasteTo = currentCursor + md.length;
 	    this.codemirror = editorView;
 	    this.locale = cherry.locale;
 	  },
@@ -51621,10 +51624,16 @@
 	   * CM6: currentCursor 和 getCursor() 都是文档偏移量
 	   */
 	  setSelection: function setSelection() {
-	    var end = this.codemirror.view.state.selection.main.head;
-	    var begin = this.currentCursor;
 	    // CM6: setSelection(anchor, head) 使用文档偏移量
-	    this.codemirror.setSelection(begin, end);
+	    this.codemirror.setSelection(this.pasteFrom, this.pasteTo);
+	  },
+	  /**
+	   * 按粘贴区域替换内容，并同步更新区域终点
+	   * @param {string} text - 替换文本
+	   */
+	  replacePasteContent: function replacePasteContent(text) {
+	    this.codemirror.replaceRange(text, this.pasteFrom, this.pasteTo);
+	    this.pasteTo = this.pasteFrom + text.length;
 	  },
 	  /**
 	   * 绑定事件
@@ -51741,15 +51750,11 @@
 	    }
 	    this.switchMd.addEventListener('click', _bindInstanceProperty(_context = this.switchMDClick).call(_context, this));
 	    this.switchText.addEventListener('click', _bindInstanceProperty(_context2 = this.switchTextClick).call(_context2, this));
-	    if (this.getTypeFromLocalStorage() === 'text') {
-	      this.switchText.classList.add('active');
-	      this.switchMd.classList.remove('active');
-	      this.bubbleDom.setAttribute('data-type', 'text');
-	    } else {
-	      this.switchMd.classList.add('active');
-	      this.switchText.classList.remove('active');
-	      this.bubbleDom.setAttribute('data-type', 'md');
-	    }
+
+	    // 首次粘贴内容始终为 Markdown，切换逻辑由 showSwitchBtnAfterPasteHtml 统一处理
+	    this.switchMd.classList.add('active');
+	    this.switchText.classList.remove('active');
+	    this.bubbleDom.setAttribute('data-type', 'md');
 	  },
 	  switchMDClick: function switchMDClick(event) {
 	    this.setTypeToLocalStorage('md');
@@ -51758,8 +51763,7 @@
 	    }
 	    this.noHide = true;
 	    this.bubbleDom.setAttribute('data-type', 'md');
-	    // CodeMirror 6: 使用 replaceSelection 替代 doc.replaceSelection
-	    this.codemirror.replaceSelection(this.md);
+	    this.replacePasteContent(this.md);
 	    this.setSelection();
 	    this.showBubble();
 	    this.switchMd.classList.add('active');
@@ -51768,14 +51772,14 @@
 	  },
 	  switchTextClick: function switchTextClick(event) {
 	    this.setTypeToLocalStorage('text');
-	    // 由于默认是粘贴md，当记忆text的时候，会先转md再转text，所以这里的判断会有问题，不想再套娃解决了，直接注释掉
-	    // if (this.bubbleDom.getAttribute('data-type') === 'text') {
-	    //   return;
-	    // }
+	    // data-type 在 initBubble 中固定为 md（与刚插入的 Markdown 内容一致），
+	    // localStorage 触发的自动切换不会被此处拦截；请勿在 initBubble 中按 localStorage 预置 text。
+	    if (this.bubbleDom.getAttribute('data-type') === 'text') {
+	      return;
+	    }
 	    this.noHide = true;
 	    this.bubbleDom.setAttribute('data-type', 'text');
-	    // CodeMirror 6: 使用 replaceSelection 替代 doc.replaceSelection
-	    this.codemirror.replaceSelection(this.html);
+	    this.replacePasteContent(this.html);
 	    this.setSelection();
 	    this.showBubble();
 	    this.switchText.classList.add('active');
@@ -52024,8 +52028,8 @@
 	  return _concatInstanceProperty(_context5 = _concatInstanceProperty(_context6 = _concatInstanceProperty(_context7 = _concatInstanceProperty(_context8 = _concatInstanceProperty(_context9 = _concatInstanceProperty(_context0 = "".concat(before)).call(_context0, type, "[")).call(_context9, name)).call(_context8, style, "](")).call(_context7, url, ")")).call(_context6, poster)).call(_context5, after);
 	}
 
-	function ownKeys$g(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$g(e) { for (var r = 1; r < arguments.length; r++) { var _context4, _context5; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context4 = ownKeys$g(Object(t), !0)).call(_context4, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context5 = ownKeys$g(Object(t))).call(_context5, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function ownKeys$h(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+	function _objectSpread$h(e) { for (var r = 1; r < arguments.length; r++) { var _context4, _context5; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context4 = ownKeys$h(Object(t), !0)).call(_context4, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context5 = ownKeys$h(Object(t))).call(_context5, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	/**
 	 * Copyright (C) 2021 Tencent.
 	 *
@@ -52190,7 +52194,7 @@
 	    end: new RegExp(endSource),
 	    reg: new RegExp(beginSource + contentSource + endSource, 'g')
 	  };
-	  return _objectSpread$g(_objectSpread$g({}, codeBlock), {}, {
+	  return _objectSpread$h(_objectSpread$h({}, codeBlock), {}, {
 	    begin: beginSource,
 	    content: contentSource,
 	    end: endSource
@@ -53584,8 +53588,8 @@
 	var _excluded$2 = ["codemirror"];
 	function _callSuper$1H(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1I() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1I() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1I = function _isNativeReflectConstruct() { return !!t; })(); }
-	function ownKeys$f(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$f(e) { for (var r = 1; r < arguments.length; r++) { var _context31, _context32; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context31 = ownKeys$f(Object(t), !0)).call(_context31, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context32 = ownKeys$f(Object(t))).call(_context32, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function ownKeys$g(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+	function _objectSpread$g(e) { for (var r = 1; r < arguments.length; r++) { var _context31, _context32; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context31 = ownKeys$g(Object(t), !0)).call(_context31, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context32 = ownKeys$g(Object(t))).call(_context32, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _createForOfIteratorHelper$1l(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1l(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 	function _unsupportedIterableToArray$1l(r, a) { if (r) { var _context30; if ("string" == typeof r) return _arrayLikeToArray$1o(r, a); var t = _sliceInstanceProperty(_context30 = {}.toString.call(r)).call(_context30, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1o(r, a) : void 0; } }
 	function _arrayLikeToArray$1o(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
@@ -54436,7 +54440,7 @@
 	    value: function markText(from, to, options) {
 	      this.markIdCounter += 1;
 	      var markId = "mark_".concat(this.markIdCounter);
-	      var markAttributes = _objectSpread$f(_objectSpread$f({}, options.title ? {
+	      var markAttributes = _objectSpread$g(_objectSpread$g({}, options.title ? {
 	        title: options.title
 	      } : {}), {}, {
 	        'data-mark-id': markId
@@ -57047,8 +57051,8 @@
 	var _String$fromCodePoint = /*@__PURE__*/getDefaultExportFromCjs$1(fromCodePointExports);
 
 	var _context$w, _context2$t;
-	function ownKeys$e(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$e(e) { for (var r = 1; r < arguments.length; r++) { var _context3, _context4; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context3 = ownKeys$e(Object(t), !0)).call(_context3, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context4 = ownKeys$e(Object(t))).call(_context4, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function ownKeys$f(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+	function _objectSpread$f(e) { for (var r = 1; r < arguments.length; r++) { var _context3, _context4; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context3 = ownKeys$f(Object(t), !0)).call(_context3, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context4 = ownKeys$f(Object(t))).call(_context4, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	/**
 	 * Copyright (C) 2021 Tencent.
 	 *
@@ -57334,7 +57338,7 @@
 	};
 
 	// TODO: 使用whatwg的entities.json
-	var htmlEntitiesMap = _objectSpread$e(_objectSpread$e(_objectSpread$e(_objectSpread$e(_objectSpread$e(_objectSpread$e({}, ASCIICharacters), ISO88591Characters), ISO88591Symbols), MathSymbols), GreekLetters), MiscellaneousHTMLEntities);
+	var htmlEntitiesMap = _objectSpread$f(_objectSpread$f(_objectSpread$f(_objectSpread$f(_objectSpread$f(_objectSpread$f({}, ASCIICharacters), ISO88591Characters), ISO88591Symbols), MathSymbols), GreekLetters), MiscellaneousHTMLEntities);
 	var htmlEntitiesCodePoint = _Object$keys(htmlEntitiesMap);
 	var htmlEntitiesWithoutSemicolon = _mapInstanceProperty(htmlEntitiesCodePoint).call(htmlEntitiesCodePoint, function (code) {
 	  return htmlEntitiesMap[code].replace(/^&(\w+);$/g, function (match, name) {
@@ -57498,6 +57502,351 @@
 	  return encodeURI(str).replace(/%25/g, '%');
 	}
 
+	var keys$5;
+	var hasRequiredKeys$4;
+
+	function requireKeys$4 () {
+		if (hasRequiredKeys$4) return keys$5;
+		hasRequiredKeys$4 = 1;
+		'use strict';
+		requireEs_array_iterator();
+		requireEs_object_toString();
+		var getBuiltInPrototypeMethod = /*@__PURE__*/ requireGetBuiltInPrototypeMethod();
+
+		keys$5 = getBuiltInPrototypeMethod('Array', 'keys');
+		return keys$5;
+	}
+
+	var keys$4;
+	var hasRequiredKeys$3;
+
+	function requireKeys$3 () {
+		if (hasRequiredKeys$3) return keys$4;
+		hasRequiredKeys$3 = 1;
+		'use strict';
+		var parent = /*@__PURE__*/ requireKeys$4();
+
+		keys$4 = parent;
+		return keys$4;
+	}
+
+	var keys$3;
+	var hasRequiredKeys$2;
+
+	function requireKeys$2 () {
+		if (hasRequiredKeys$2) return keys$3;
+		hasRequiredKeys$2 = 1;
+		'use strict';
+		requireWeb_domCollections_iterator();
+		var classof = /*@__PURE__*/ requireClassof();
+		var hasOwn = /*@__PURE__*/ requireHasOwnProperty();
+		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
+		var method = /*@__PURE__*/ requireKeys$3();
+
+		var ArrayPrototype = Array.prototype;
+
+		var DOMIterables = {
+		  DOMTokenList: true,
+		  NodeList: true
+		};
+
+		keys$3 = function (it) {
+		  var own = it.keys;
+		  return it === ArrayPrototype || (isPrototypeOf(ArrayPrototype, it) && own === ArrayPrototype.keys)
+		    || hasOwn(DOMIterables, classof(it)) ? method : own;
+		};
+		return keys$3;
+	}
+
+	var keys$2;
+	var hasRequiredKeys$1;
+
+	function requireKeys$1 () {
+		if (hasRequiredKeys$1) return keys$2;
+		hasRequiredKeys$1 = 1;
+		keys$2 = /*@__PURE__*/ requireKeys$2();
+		return keys$2;
+	}
+
+	var keysExports = requireKeys$1();
+	var _keysInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(keysExports);
+
+	var values$7;
+	var hasRequiredValues$6;
+
+	function requireValues$6 () {
+		if (hasRequiredValues$6) return values$7;
+		hasRequiredValues$6 = 1;
+		'use strict';
+		requireEs_array_iterator();
+		requireEs_object_toString();
+		var getBuiltInPrototypeMethod = /*@__PURE__*/ requireGetBuiltInPrototypeMethod();
+
+		values$7 = getBuiltInPrototypeMethod('Array', 'values');
+		return values$7;
+	}
+
+	var values$6;
+	var hasRequiredValues$5;
+
+	function requireValues$5 () {
+		if (hasRequiredValues$5) return values$6;
+		hasRequiredValues$5 = 1;
+		'use strict';
+		var parent = /*@__PURE__*/ requireValues$6();
+
+		values$6 = parent;
+		return values$6;
+	}
+
+	var values$5;
+	var hasRequiredValues$4;
+
+	function requireValues$4 () {
+		if (hasRequiredValues$4) return values$5;
+		hasRequiredValues$4 = 1;
+		'use strict';
+		requireWeb_domCollections_iterator();
+		var classof = /*@__PURE__*/ requireClassof();
+		var hasOwn = /*@__PURE__*/ requireHasOwnProperty();
+		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
+		var method = /*@__PURE__*/ requireValues$5();
+
+		var ArrayPrototype = Array.prototype;
+
+		var DOMIterables = {
+		  DOMTokenList: true,
+		  NodeList: true
+		};
+
+		values$5 = function (it) {
+		  var own = it.values;
+		  return it === ArrayPrototype || (isPrototypeOf(ArrayPrototype, it) && own === ArrayPrototype.values)
+		    || hasOwn(DOMIterables, classof(it)) ? method : own;
+		};
+		return values$5;
+	}
+
+	var values$4;
+	var hasRequiredValues$3;
+
+	function requireValues$3 () {
+		if (hasRequiredValues$3) return values$4;
+		hasRequiredValues$3 = 1;
+		values$4 = /*@__PURE__*/ requireValues$4();
+		return values$4;
+	}
+
+	var valuesExports$1 = requireValues$3();
+	var _valuesInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(valuesExports$1);
+
+	var entries$7;
+	var hasRequiredEntries$6;
+
+	function requireEntries$6 () {
+		if (hasRequiredEntries$6) return entries$7;
+		hasRequiredEntries$6 = 1;
+		'use strict';
+		requireEs_array_iterator();
+		requireEs_object_toString();
+		var getBuiltInPrototypeMethod = /*@__PURE__*/ requireGetBuiltInPrototypeMethod();
+
+		entries$7 = getBuiltInPrototypeMethod('Array', 'entries');
+		return entries$7;
+	}
+
+	var entries$6;
+	var hasRequiredEntries$5;
+
+	function requireEntries$5 () {
+		if (hasRequiredEntries$5) return entries$6;
+		hasRequiredEntries$5 = 1;
+		'use strict';
+		var parent = /*@__PURE__*/ requireEntries$6();
+
+		entries$6 = parent;
+		return entries$6;
+	}
+
+	var entries$5;
+	var hasRequiredEntries$4;
+
+	function requireEntries$4 () {
+		if (hasRequiredEntries$4) return entries$5;
+		hasRequiredEntries$4 = 1;
+		'use strict';
+		requireWeb_domCollections_iterator();
+		var classof = /*@__PURE__*/ requireClassof();
+		var hasOwn = /*@__PURE__*/ requireHasOwnProperty();
+		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
+		var method = /*@__PURE__*/ requireEntries$5();
+
+		var ArrayPrototype = Array.prototype;
+
+		var DOMIterables = {
+		  DOMTokenList: true,
+		  NodeList: true
+		};
+
+		entries$5 = function (it) {
+		  var own = it.entries;
+		  return it === ArrayPrototype || (isPrototypeOf(ArrayPrototype, it) && own === ArrayPrototype.entries)
+		    || hasOwn(DOMIterables, classof(it)) ? method : own;
+		};
+		return entries$5;
+	}
+
+	var entries$4;
+	var hasRequiredEntries$3;
+
+	function requireEntries$3 () {
+		if (hasRequiredEntries$3) return entries$4;
+		hasRequiredEntries$3 = 1;
+		entries$4 = /*@__PURE__*/ requireEntries$4();
+		return entries$4;
+	}
+
+	var entriesExports$1 = requireEntries$3();
+	var _entriesInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(entriesExports$1);
+
+	/**
+	 * LRU缓存类
+	 * 使用Map实现LRU缓存，Map会保持键的插入顺序
+	 */
+	var LRUCache = /*#__PURE__*/function () {
+	  /**
+	   * 创建一个LRU缓存
+	   * @param {number} capacity 缓存容量
+	   */
+	  function LRUCache(capacity) {
+	    _classCallCheck$1(this, LRUCache);
+	    this.capacity = capacity;
+	    this.cache = new _Map$2();
+	  }
+
+	  /**
+	   * 获取缓存项
+	   * @param {string} key 缓存键
+	   * @returns {any} 缓存值，不存在则返回undefined
+	   */
+	  return _createClass$1(LRUCache, [{
+	    key: "get",
+	    value: function get(key) {
+	      if (!this.cache.has(key)) return undefined;
+
+	      // 获取值并更新位置（删除后重新插入到末尾）
+	      var value = this.cache.get(key);
+	      this.cache["delete"](key);
+	      this.cache.set(key, value);
+	      return value;
+	    }
+
+	    /**
+	     * 设置缓存项
+	     * @param {string} key 缓存键
+	     * @param {any} value 缓存值
+	     */
+	  }, {
+	    key: "set",
+	    value: function set(key, value) {
+	      // 如果键已存在，先删除（相当于更新位置）
+	      if (this.cache.has(key)) {
+	        this.cache["delete"](key);
+	      }
+
+	      // 如果缓存已满，删除最旧的100个项（或者全部，如果少于100个）
+	      if (this.cache.size >= this.capacity) {
+	        var _context;
+	        var iterator = _keysInstanceProperty(_context = this.cache).call(_context);
+	        var deleteCount = Math.min(100, this.cache.size);
+	        for (var i = 0; i < deleteCount; i++) {
+	          var result = iterator.next();
+	          if (result.done) break;
+	          var oldKey = result.value;
+	          this.cache["delete"](oldKey);
+	        }
+	      }
+
+	      // 添加新项到缓存末尾
+	      this.cache.set(key, value);
+	    }
+
+	    /**
+	     * 检查键是否存在
+	     * @param {string} key 缓存键
+	     * @returns {boolean} 是否存在
+	     */
+	  }, {
+	    key: "has",
+	    value: function has(key) {
+	      return this.cache.has(key);
+	    }
+
+	    /**
+	     * 删除缓存项
+	     * @param {string} key 缓存键
+	     * @returns {boolean} 是否删除成功
+	     */
+	  }, {
+	    key: "delete",
+	    value: function _delete(key) {
+	      return this.cache["delete"](key);
+	    }
+
+	    /**
+	     * 清空缓存
+	     */
+	  }, {
+	    key: "clear",
+	    value: function clear() {
+	      this.cache.clear();
+	    }
+
+	    /**
+	     * 获取所有键
+	     * @returns {Array} 键数组
+	     */
+	  }, {
+	    key: "keys",
+	    value: function keys() {
+	      var _context2;
+	      return _Array$from(_keysInstanceProperty(_context2 = this.cache).call(_context2));
+	    }
+
+	    /**
+	     * 获取所有值
+	     * @returns {Array} 值数组
+	     */
+	  }, {
+	    key: "values",
+	    value: function values() {
+	      var _context3;
+	      return _Array$from(_valuesInstanceProperty(_context3 = this.cache).call(_context3));
+	    }
+
+	    /**
+	     * 获取所有键值对
+	     * @returns {Array} 键值对数组
+	     */
+	  }, {
+	    key: "entries",
+	    value: function entries() {
+	      var _context4;
+	      return _Array$from(_entriesInstanceProperty(_context4 = this.cache).call(_context4));
+	    }
+
+	    /**
+	     * 获取缓存大小
+	     * @returns {number} 缓存大小
+	     */
+	  }, {
+	    key: "size",
+	    get: function get() {
+	      return this.cache.size;
+	    }
+	  }]);
+	}();
+
 	function _callSuper$1G(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1H() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1H() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1H = function _isNativeReflectConstruct() { return !!t; })(); }
 	var cacheCounter = 0;
@@ -57517,11 +57866,10 @@
 	    _this.needCache = !!needCache;
 	    _this.sign = '';
 	    if (needCache) {
-	      _this.cache = defaultCache || {};
+	      _this.cache = new LRUCache(2000);
 	      _this.cacheKey = "~~C".concat(cacheCounter);
 	      cacheCounter += 1;
 	    }
-	    _this.failedResetCacheTimes = 0;
 	    _this.cacheData = {};
 	    _this.cacheDataMap = [];
 	    return _this;
@@ -57533,6 +57881,7 @@
 	   * @param {function} getValueByKey 用于获取缓存数据的回调函数
 	   * @param {number} maxKeys 最大缓存数
 	   * @param {number} removeKeys 每次删除的缓存数
+	   * @param {boolean} focusUpdate 是否更新缓存
 	   * @returns {any}
 	   */
 	  _inherits(ParagraphBase, _SyntaxBase);
@@ -57540,6 +57889,7 @@
 	    key: "cacheAndGetData",
 	    value: function cacheAndGetData(key, getValueByKey, maxKeys, removeKeys) {
 	      var _this2 = this;
+	      var focusUpdate = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
 	      if (!this.cacheData[key]) {
 	        /**
 	         * 缓存太多时，清空最近插入的一些缓存
@@ -57555,6 +57905,10 @@
 	        // 调用行内语法，获得段落的签名和对应html内容
 	        this.cacheData[key] = getValueByKey(key);
 	        this.cacheDataMap.push(key);
+	      } else {
+	        if (focusUpdate) {
+	          this.cacheData[key] = getValueByKey(key);
+	        }
 	      }
 	      return this.cacheData[key];
 	    }
@@ -57821,38 +58175,35 @@
 	      }
 	      var $sign = sign || this.$engine.hash(str);
 	      var key = _concatInstanceProperty(_context7 = _concatInstanceProperty(_context8 = "".concat(this.cacheKey, "I")).call(_context8, $sign, "_L")).call(_context7, lineCount, "$");
-	      this.cache[$sign] = {
+	      this.cache.set($sign, {
 	        content: str,
 	        key: key
-	      };
+	      });
 	      return key;
 	    }
 	  }, {
 	    key: "popCache",
 	    value: function popCache(sign) {
+	      var _this$cache$get;
 	      if (!this.needCache) {
 	        return;
 	      }
-	      return this.cache[sign].content || '';
+	      return ((_this$cache$get = this.cache.get(sign)) === null || _this$cache$get === void 0 ? void 0 : _this$cache$get.content) || '';
 	    }
 	  }, {
 	    key: "testHasCache",
 	    value: function testHasCache(sign) {
-	      if (!this.needCache || !this.cache[sign]) {
+	      var _this$cache$get2;
+	      if (!this.needCache || !this.cache.get(sign)) {
 	        return false;
 	      }
-	      return this.cache[sign].key;
+	      return (_this$cache$get2 = this.cache.get(sign)) === null || _this$cache$get2 === void 0 ? void 0 : _this$cache$get2.key;
 	    }
 
 	    // 当缓存全部被消费后，调用此方法清理多大的缓存
 	  }, {
 	    key: "resetCache",
-	    value: function resetCache() {
-	      if (!this.needCache) {
-	        return;
-	      }
-	      this.cache = {};
-	    }
+	    value: function resetCache() {}
 	  }, {
 	    key: "restoreCache",
 	    value: function restoreCache(html) {
@@ -57866,20 +58217,6 @@
 	      var $html = html.replace(regex, function (match, cacheSign) {
 	        return _this3.popCache(cacheSign.replace(/_L\d+$/, ''));
 	      });
-	      if (this.timer) {
-	        clearTimeout(this.timer);
-	        this.failedResetCacheTimes += 1;
-	        this.timer = null;
-	      }
-	      this.timer = _setTimeout(function () {
-	        _this3.resetCache();
-	      }, 500);
-	      if (this.failedResetCacheTimes > 5) {
-	        this.failedResetCacheTimes = 0;
-	        _setTimeout(function () {
-	          _this3.resetCache();
-	        }, 500);
-	      }
 	      return $html;
 	    }
 
@@ -57894,7 +58231,7 @@
 	      var lineCount = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 	      this.sign = this.$engine.hash(wholeMatch);
 	      // miss cache
-	      if (!this.cache[this.sign]) {
+	      if (!this.cache.get(this.sign)) {
 	        return this.toHtml(wholeMatch, sentenceMakeFunc);
 	      }
 	      return _concatInstanceProperty(_context0 = _concatInstanceProperty(_context1 = "".concat(this.cacheKey, "I")).call(_context1, this.sign, "_L")).call(_context0, lineCount, "$");
@@ -59171,8 +59508,8 @@
 	  return _arrayWithHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$1m(r) || _nonIterableRest$1();
 	}
 
-	function ownKeys$d(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$d(e) { for (var r = 1; r < arguments.length; r++) { var _context3, _context4; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context3 = ownKeys$d(Object(t), !0)).call(_context3, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context4 = ownKeys$d(Object(t))).call(_context4, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function ownKeys$e(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+	function _objectSpread$e(e) { for (var r = 1; r < arguments.length; r++) { var _context3, _context4; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context3 = ownKeys$e(Object(t), !0)).call(_context3, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context4 = ownKeys$e(Object(t))).call(_context4, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _arrayLikeToArray$1n(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	/**
 	 * Copyright (C) 2021 Tencent.
@@ -59248,7 +59585,7 @@
 	        replacedText: replacer.apply(void 0, _concatInstanceProperty(_context2 = [_sliceInstanceProperty(match).call(match, rollbackLength), '']).call(_context2, _toConsumableArray$1(restArgs)))
 	      });
 	    } else {
-	      replaceBuffer.push(_objectSpread$d(_objectSpread$d({}, replaceInfo), {}, {
+	      replaceBuffer.push(_objectSpread$e(_objectSpread$e({}, replaceInfo), {}, {
 	        replacedText: replacer.apply(void 0, _toConsumableArray$1(args))
 	      }));
 	    }
@@ -59390,8 +59727,8 @@
 	}(SyntaxBase);
 	_defineProperty$3(Size$2, "HOOK_NAME", 'fontSize');
 
-	function ownKeys$c(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$c(e) { for (var r = 1; r < arguments.length; r++) { var _context, _context2; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context = ownKeys$c(Object(t), !0)).call(_context, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context2 = ownKeys$c(Object(t))).call(_context2, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function ownKeys$d(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+	function _objectSpread$d(e) { for (var r = 1; r < arguments.length; r++) { var _context, _context2; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context = ownKeys$d(Object(t), !0)).call(_context, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context2 = ownKeys$d(Object(t))).call(_context2, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _callSuper$1B(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1B() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1B() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1B = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
@@ -59439,13 +59776,13 @@
 	      /** @type {import('~types/syntax').BasicHookRegexpRule} */
 	      var ret = /** @type {any} */{};
 	      if (!!config.needWhitespace) {
-	        ret = _objectSpread$c(_objectSpread$c({}, ret), {}, {
+	        ret = _objectSpread$d(_objectSpread$d({}, ret), {}, {
 	          begin: '(^|[\\s])\\~T\\~T',
 	          end: '\\~T\\~T(?=\\s|$)',
 	          content: '([\\w\\W]+?)'
 	        });
 	      } else {
-	        ret = _objectSpread$c(_objectSpread$c({}, ret), {}, {
+	        ret = _objectSpread$d(_objectSpread$d({}, ret), {}, {
 	          begin: '(^|[^\\\\])\\~T\\~T',
 	          end: '\\~T\\~T',
 	          content: '([\\w\\W]+?)'
@@ -69759,7 +70096,7 @@
 	          updateCache: function updateCache(cacheCode) {
 	            var containerHtml = _this2.cacheAndGetData(props.sign, function () {
 	              return addContainer(cacheCode);
-	            }, 2000, -300);
+	            }, 2000, -300, true);
 	            _this2.pushCache(containerHtml, props.sign, props.lines);
 	          },
 	          fallback: function fallback() {
@@ -71699,8 +72036,8 @@
 	function _createForOfIteratorHelper$1k(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1k(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 	function _unsupportedIterableToArray$1k(r, a) { if (r) { var _context19; if ("string" == typeof r) return _arrayLikeToArray$1m(r, a); var t = _sliceInstanceProperty(_context19 = {}.toString.call(r)).call(_context19, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1m(r, a) : void 0; } }
 	function _arrayLikeToArray$1m(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-	function ownKeys$b(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$b(e) { for (var r = 1; r < arguments.length; r++) { var _context17, _context18; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context17 = ownKeys$b(Object(t), !0)).call(_context17, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context18 = ownKeys$b(Object(t))).call(_context18, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function ownKeys$c(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+	function _objectSpread$c(e) { for (var r = 1; r < arguments.length; r++) { var _context17, _context18; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context17 = ownKeys$c(Object(t), !0)).call(_context17, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context18 = ownKeys$c(Object(t))).call(_context18, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _callSuper$1r(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1r() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1r() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1r = function _isNativeReflectConstruct() { return !!t; })(); }
 	var TABLE_LOOSE = 'loose';
@@ -71725,9 +72062,9 @@
 	    _this.selfClosing = selfClosing;
 	    if (enableChart === true) {
 	      try {
-	        _this.chartRenderEngine = new ChartRenderEngine(_objectSpread$b(_objectSpread$b(_objectSpread$b({}, externals && requiredPackages instanceof Array && _reduceInstanceProperty(requiredPackages).call(requiredPackages, function (acc, pkg) {
+	        _this.chartRenderEngine = new ChartRenderEngine(_objectSpread$c(_objectSpread$c(_objectSpread$c({}, externals && requiredPackages instanceof Array && _reduceInstanceProperty(requiredPackages).call(requiredPackages, function (acc, pkg) {
 	          delete chartEngineOptions[pkg]; // 过滤第三方包选项
-	          return _objectSpread$b(_objectSpread$b({}, acc), {}, _defineProperty$3({}, pkg, externals[pkg]));
+	          return _objectSpread$c(_objectSpread$c({}, acc), {}, _defineProperty$3({}, pkg, externals[pkg]));
 	        }, {})), {}, {
 	          renderer: 'svg',
 	          width: 500,
@@ -72374,8 +72711,8 @@
 	  }
 	};
 
-	function ownKeys$a(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$a(e) { for (var r = 1; r < arguments.length; r++) { var _context21, _context22; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context21 = ownKeys$a(Object(t), !0)).call(_context21, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context22 = ownKeys$a(Object(t))).call(_context22, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function ownKeys$b(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+	function _objectSpread$b(e) { for (var r = 1; r < arguments.length; r++) { var _context21, _context22; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context21 = ownKeys$b(Object(t), !0)).call(_context21, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context22 = ownKeys$b(Object(t))).call(_context22, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _callSuper$1o(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1o() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1o() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1o = function _isNativeReflectConstruct() { return !!t; })(); }
 	var Image$2 = /*#__PURE__*/function (_SyntaxBase) {
@@ -72532,7 +72869,7 @@
 	        end: '({[^{}]+?})?' // extend attrs e.g. {width=50 height=60}
 	      };
 	      if (extendMedia) {
-	        var extend = _objectSpread$a({}, ret);
+	        var extend = _objectSpread$b({}, ret);
 	        // TODO: 支持Lookbehind
 	        extend.begin = isLookbehindSupported() ? "((?<!\\\\))!(".concat(extendMedia.tag.join('|'), ")") : "(^|[^\\\\])!(".concat(extendMedia.tag.join('|'), ")");
 	        extend.end = '({poster=(.*)})?';
@@ -72545,8 +72882,8 @@
 	}(SyntaxBase);
 	_defineProperty$3(Image$2, "HOOK_NAME", 'image');
 
-	function ownKeys$9(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$9(e) { for (var r = 1; r < arguments.length; r++) { var _context0, _context1; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context0 = ownKeys$9(Object(t), !0)).call(_context0, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context1 = ownKeys$9(Object(t))).call(_context1, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function ownKeys$a(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+	function _objectSpread$a(e) { for (var r = 1; r < arguments.length; r++) { var _context0, _context1; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context0 = ownKeys$a(Object(t), !0)).call(_context0, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context1 = ownKeys$a(Object(t))).call(_context1, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _callSuper$1n(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1n() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1n() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1n = function _isNativeReflectConstruct() { return !!t; })(); }
 	var INDENT_SPACE_NUM = 4; // commonmark default use 1~4 spaces for indent
@@ -72655,7 +72992,7 @@
 	        this.tree[last].strs.push(node.strs[0]);
 	      } else {
 	        this.tree[parent].children.push(current);
-	        this.tree[current] = _objectSpread$9(_objectSpread$9({}, node), {}, {
+	        this.tree[current] = _objectSpread$a(_objectSpread$a({}, node), {}, {
 	          parent: parent
 	        });
 	      }
@@ -73259,7 +73596,6 @@
 	  return _createClass$1(MathBlock, [{
 	    key: "toHtml",
 	    value: function toHtml(wholeMatch, lineSpace, leadingChar, content) {
-	      var _this$MathJax;
 	      _bindInstanceProperty(LoadMathModule).call(LoadMathModule, this)('engine');
 	      // 去掉开头的空字符，去掉结尾的换行符
 	      var wholeMatchWithoutSpace = wholeMatch.replace(/^[ \f\r\t\v]*/, '').replace(/\s*$/, '');
@@ -73303,27 +73639,35 @@
 	          }
 	          result = _concatInstanceProperty(_context4 = _concatInstanceProperty(_context5 = _concatInstanceProperty(_context6 = "<div data-sign=\"".concat(sign, "\" class=\"Cherry-Math\" data-type=\"mathBlock\"\n              data-lines=\"")).call(_context6, lines, "\" data-formula-source=\"")).call(_context5, encodedFormulaSource, "\">")).call(_context4, html, "</div>");
 	        }
-	      } else if ((_this$MathJax = this.MathJax) !== null && _this$MathJax !== void 0 && _this$MathJax.tex2svg) {
-	        var _context7, _context8, _context9;
+	      } else if (this.engine === 'MathJax') {
+	        var _this$MathJax;
 	        // MathJax渲染
-	        var svg = '';
-	        try {
-	          svg = getHTML(this.MathJax.tex2svg($content), true);
-	        } catch (e) {
+	        if (!((_this$MathJax = this.MathJax) !== null && _this$MathJax !== void 0 && _this$MathJax.tex2svg)) {
+	          var _context7, _context8, _context9;
+	          // MathJax尚未加载完成，先输出占位符，等待异步加载完成后再渲染
+	          result = _concatInstanceProperty(_context7 = _concatInstanceProperty(_context8 = _concatInstanceProperty(_context9 = "<div data-sign=\"".concat(sign, "\" class=\"Cherry-Math cherry-mathjax-need-render\" data-type=\"mathBlock\" data-formula-source=\"")).call(_context9, encodedFormulaSource, "\" data-lines=\"")).call(_context8, lines, "\" data-content=\"")).call(_context7, encodeURIComponent($content), "\"></div>");
+	          this.$engine.asyncRenderHandler.add("math-block-".concat(sign));
+	        } else {
+	          var _context0, _context1, _context10;
+	          var svg = '';
+	          try {
+	            svg = getHTML(this.MathJax.tex2svg($content), true);
+	          } catch (e) {
+	            if (this.isSelfClosing()) {
+	              svg = this.lastCode;
+	            }
+	          }
 	          if (this.isSelfClosing()) {
-	            svg = this.lastCode;
+	            if (/data-mml-node="merror"/.test(svg) && this.lastCode) {
+	              svg = this.lastCode;
+	            }
+	            this.lastCode = svg;
 	          }
+	          result = _concatInstanceProperty(_context0 = _concatInstanceProperty(_context1 = _concatInstanceProperty(_context10 = "<div data-sign=\"".concat(sign, "\" class=\"Cherry-Math\" data-type=\"mathBlock\"\n              data-lines=\"")).call(_context10, lines, "\" data-formula-source=\"")).call(_context1, encodedFormulaSource, "\">")).call(_context0, svg, "</div>");
 	        }
-	        if (this.isSelfClosing()) {
-	          if (/data-mml-node="merror"/.test(svg) && this.lastCode) {
-	            svg = this.lastCode;
-	          }
-	          this.lastCode = svg;
-	        }
-	        result = _concatInstanceProperty(_context7 = _concatInstanceProperty(_context8 = _concatInstanceProperty(_context9 = "<div data-sign=\"".concat(sign, "\" class=\"Cherry-Math\" data-type=\"mathBlock\"\n            data-lines=\"")).call(_context9, lines, "\" data-formula-source=\"")).call(_context8, encodedFormulaSource, "\">")).call(_context7, svg, "</div>");
 	      } else {
-	        var _context0, _context1, _context10;
-	        result = _concatInstanceProperty(_context0 = _concatInstanceProperty(_context1 = _concatInstanceProperty(_context10 = "<div data-sign=\"".concat(sign, "\" class=\"Cherry-Math\" data-type=\"mathBlock\"\n      data-lines=\"")).call(_context10, lines, "\" data-formula-source=\"")).call(_context1, encodedFormulaSource, "\">$$")).call(_context0, escapeFormulaPunctuations(content), "$$</div>");
+	        var _context11, _context12, _context13;
+	        result = _concatInstanceProperty(_context11 = _concatInstanceProperty(_context12 = _concatInstanceProperty(_context13 = "<div data-sign=\"".concat(sign, "\" class=\"Cherry-Math\" data-type=\"mathBlock\"\n      data-lines=\"")).call(_context13, lines, "\" data-formula-source=\"")).call(_context12, encodedFormulaSource, "\">$$")).call(_context11, escapeFormulaPunctuations(content), "$$</div>");
 	      }
 	      return leadingChar + this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
 	    }
@@ -73344,12 +73688,12 @@
 	  }, {
 	    key: "makeMath",
 	    value: function makeMath(str) {
-	      var _context12;
+	      var _context15;
 	      if (isLookbehindSupported()) {
-	        var _context11;
-	        return str.replace(this.RULE.reg, _bindInstanceProperty(_context11 = this.toHtml).call(_context11, this));
+	        var _context14;
+	        return str.replace(this.RULE.reg, _bindInstanceProperty(_context14 = this.toHtml).call(_context14, this));
 	      }
-	      return replaceLookbehind(str, this.RULE.reg, _bindInstanceProperty(_context12 = this.toHtml).call(_context12, this), true, 1);
+	      return replaceLookbehind(str, this.RULE.reg, _bindInstanceProperty(_context15 = this.toHtml).call(_context15, this), true, 1);
 	    }
 	  }, {
 	    key: "beforeMakeHtml",
@@ -73421,7 +73765,6 @@
 	  return _createClass$1(InlineMath, [{
 	    key: "toHtml",
 	    value: function toHtml(wholeMatch, leadingChar, m1) {
-	      var _this$MathJax;
 	      if (!m1) {
 	        return wholeMatch;
 	      }
@@ -73453,24 +73796,32 @@
 	          }
 	          result = _concatInstanceProperty(_context5 = _concatInstanceProperty(_context6 = _concatInstanceProperty(_context7 = "".concat(leadingChar, "<span class=\"Cherry-InlineMath\" data-type=\"mathBlock\" data-lines=\"")).call(_context7, lines, "\" data-formula-source=\"")).call(_context6, encodedFormulaSource, "\">")).call(_context5, html, "</span>");
 	        }
-	      } else if ((_this$MathJax = this.MathJax) !== null && _this$MathJax !== void 0 && _this$MathJax.tex2svg) {
-	        var _context8, _context9, _context0;
+	      } else if (this.engine === 'MathJax') {
+	        var _this$MathJax;
 	        // MathJax渲染
-	        var svg = getHTML(this.MathJax.tex2svg($m1, {
-	          em: 12,
-	          ex: 6,
-	          display: false
-	        }), true);
-	        if (this.isSelfClosing()) {
-	          if (/data-mml-node="merror"/.test(svg) && this.lastCode) {
-	            svg = this.lastCode;
+	        if (!((_this$MathJax = this.MathJax) !== null && _this$MathJax !== void 0 && _this$MathJax.tex2svg)) {
+	          var _context8, _context9, _context0, _context1;
+	          // MathJax尚未加载完成，先输出占位符，等待异步加载完成后再渲染
+	          result = _concatInstanceProperty(_context8 = _concatInstanceProperty(_context9 = _concatInstanceProperty(_context0 = _concatInstanceProperty(_context1 = "".concat(leadingChar, "<span data-sign=\"")).call(_context1, sign, "\" class=\"Cherry-InlineMath cherry-mathjax-need-render\" data-type=\"mathBlock\" data-formula-source=\"")).call(_context0, encodedFormulaSource, "\" data-lines=\"")).call(_context9, lines, "\" data-content=\"")).call(_context8, encodeURIComponent($m1), "\"></span>");
+	          this.$engine.asyncRenderHandler.add("math-inline-".concat(sign));
+	        } else {
+	          var _context10, _context11, _context12;
+	          var svg = getHTML(this.MathJax.tex2svg($m1, {
+	            em: 12,
+	            ex: 6,
+	            display: false
+	          }), true);
+	          if (this.isSelfClosing()) {
+	            if (/data-mml-node="merror"/.test(svg) && this.lastCode) {
+	              svg = this.lastCode;
+	            }
+	            this.lastCode = svg;
 	          }
-	          this.lastCode = svg;
+	          result = _concatInstanceProperty(_context10 = _concatInstanceProperty(_context11 = _concatInstanceProperty(_context12 = "".concat(leadingChar, "<span class=\"Cherry-InlineMath\" data-type=\"mathBlock\" data-lines=\"")).call(_context12, lines, "\" data-formula-source=\"")).call(_context11, encodedFormulaSource, "\">")).call(_context10, svg, "</span>");
 	        }
-	        result = _concatInstanceProperty(_context8 = _concatInstanceProperty(_context9 = _concatInstanceProperty(_context0 = "".concat(leadingChar, "<span class=\"Cherry-InlineMath\" data-type=\"mathBlock\" data-lines=\"")).call(_context0, lines, "\" data-formula-source=\"")).call(_context9, encodedFormulaSource, "\">")).call(_context8, svg, "</span>");
 	      } else {
-	        var _context1, _context10, _context11;
-	        result = _concatInstanceProperty(_context1 = _concatInstanceProperty(_context10 = _concatInstanceProperty(_context11 = "".concat(leadingChar, "<span class=\"Cherry-InlineMath\" data-type=\"mathBlock\"\n        data-lines=\"")).call(_context11, lines, "\" data-formula-source=\"")).call(_context10, encodedFormulaSource, "\">$")).call(_context1, escapeFormulaPunctuations(m1), "$</span>");
+	        var _context13, _context14, _context15;
+	        result = _concatInstanceProperty(_context13 = _concatInstanceProperty(_context14 = _concatInstanceProperty(_context15 = "".concat(leadingChar, "<span class=\"Cherry-InlineMath\" data-type=\"mathBlock\"\n        data-lines=\"")).call(_context15, lines, "\" data-formula-source=\"")).call(_context14, encodedFormulaSource, "\">$")).call(_context13, escapeFormulaPunctuations(m1), "$</span>");
 	      }
 	      return this.pushCache(result, ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX + sign);
 	    }
@@ -73531,22 +73882,22 @@
 	        return str.replace(mathBlockReg, '$1$2~D$3~D$4');
 	      }
 	      return replaceLookbehind(str, mathBlockReg, function (whole, match1, match2, match3, match4) {
-	        var _context12, _context13, _context14;
-	        return _concatInstanceProperty(_context12 = _concatInstanceProperty(_context13 = _concatInstanceProperty(_context14 = "".concat(match1)).call(_context14, match2, "~D")).call(_context13, match3, "~D")).call(_context12, match4);
+	        var _context16, _context17, _context18;
+	        return _concatInstanceProperty(_context16 = _concatInstanceProperty(_context17 = _concatInstanceProperty(_context18 = "".concat(match1)).call(_context18, match2, "~D")).call(_context17, match3, "~D")).call(_context16, match4);
 	      }, true, 1);
 	    }
 	  }, {
 	    key: "makeInlineMath",
 	    value: function makeInlineMath(str) {
-	      var _context16;
+	      var _context20;
 	      if (!this.test(str)) {
 	        return str;
 	      }
 	      if (isLookbehindSupported()) {
-	        var _context15;
-	        return str.replace(this.RULE.reg, _bindInstanceProperty(_context15 = this.toHtml).call(_context15, this));
+	        var _context19;
+	        return str.replace(this.RULE.reg, _bindInstanceProperty(_context19 = this.toHtml).call(_context19, this));
 	      }
-	      return replaceLookbehind(str, this.RULE.reg, _bindInstanceProperty(_context16 = this.toHtml).call(_context16, this), true, 1);
+	      return replaceLookbehind(str, this.RULE.reg, _bindInstanceProperty(_context20 = this.toHtml).call(_context20, this), true, 1);
 	    }
 	  }, {
 	    key: "makeHtml",
@@ -74420,7 +74771,7 @@
 	/*! @license DOMPurify 3.4.2 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/3.4.2/LICENSE */
 
 	const {
-	  entries: entries$7,
+	  entries: entries$3,
 	  setPrototypeOf,
 	  isFrozen,
 	  getPrototypeOf: getPrototypeOf$1,
@@ -74571,7 +74922,7 @@
 	 */
 	function clone$3(object) {
 	  const newObject = create$4(null);
-	  for (const [property, value] of entries$7(object)) {
+	  for (const [property, value] of entries$3(object)) {
 	    const isPropertyExist = objectHasOwnProperty(object, property);
 	    if (isPropertyExist) {
 	      if (arrayIsArray(value)) {
@@ -74841,7 +75192,7 @@
 	  /**
 	   * Expose whether this browser supports running the full DOMPurify.
 	   */
-	  DOMPurify.isSupported = typeof entries$7 === 'function' && typeof getParentNode === 'function' && implementation && implementation.createHTMLDocument !== undefined;
+	  DOMPurify.isSupported = typeof entries$3 === 'function' && typeof getParentNode === 'function' && implementation && implementation.createHTMLDocument !== undefined;
 	  const {
 	    MUSTACHE_EXPR,
 	    ERB_EXPR,
@@ -76076,20 +76427,23 @@
 	        config.HTML_INTEGRATION_POINTS = {};
 	      }
 	      config.HTML_INTEGRATION_POINTS.foreignobject = true;
-	      var $strArr = $str.split('\n');
+	      var $strArr = $str.split(/(?=<p data-sign=)/);
 	      // 如果内容很大，则分批处理，用空间换sanitizer.sanitize消耗的时间
-	      var batch = 100;
+	      var batch = 50;
 	      // 最大缓存容量（冗余20%）
-	      var maxCacheLength = Math.round(1.2 * $strArr.length / batch);
+	      var maxCacheLength = Math.max(20, Math.round(1.2 * $strArr.length / batch));
+	      var cacheMap = {};
 	      if ($strArr.length > batch) {
 	        var ret = [];
 	        for (var i = 0; i < $strArr.length; i += batch) {
-	          var batchStr = _sliceInstanceProperty($strArr).call($strArr, i, i + batch).join('\n');
-	          ret.push(this.cacheAndGetData(batchStr, function (batchStr) {
-	            return sanitizer.sanitize(batchStr, config);
-	          }, maxCacheLength, -10));
+	          var batchStr = _sliceInstanceProperty($strArr).call($strArr, i, i + batch).join('');
+	          var cacheKey = this.$engine.hashHex(batchStr);
+	          cacheMap[cacheKey] = batchStr;
+	          ret.push(this.cacheAndGetData(cacheKey, function (cacheKey) {
+	            return sanitizer.sanitize(cacheMap[cacheKey], config);
+	          }, maxCacheLength, -1 * Math.round(maxCacheLength / 10)));
 	        }
-	        return ret.join('\n');
+	        return ret.join('');
 	      }
 	      return sanitizer.sanitize($str, config);
 	    }
@@ -77922,8 +78276,8 @@
 	  }
 	};
 
-	function ownKeys$8(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$8(e) { for (var r = 1; r < arguments.length; r++) { var _context3, _context4; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context3 = ownKeys$8(Object(t), !0)).call(_context3, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context4 = ownKeys$8(Object(t))).call(_context4, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function ownKeys$9(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+	function _objectSpread$9(e) { for (var r = 1; r < arguments.length; r++) { var _context3, _context4; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context3 = ownKeys$9(Object(t), !0)).call(_context3, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context4 = ownKeys$9(Object(t))).call(_context4, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _callSuper$1e(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1e() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1e() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1e = function _isNativeReflectConstruct() { return !!t; })(); }
 
@@ -77975,7 +78329,7 @@
 	      upperCase: false,
 	      customHandled: false,
 	      resourceURL: 'https://github.githubassets.com/images/icons/emoji/unicode/${code}.png?v8',
-	      emojis: _objectSpread$8({}, gfmUnicode.emojis)
+	      emojis: _objectSpread$9({}, gfmUnicode.emojis)
 	    };
 	    if (_typeof$2(config) !== 'object') {
 	      return _possibleConstructorReturn(_this);
@@ -78338,8 +78692,8 @@
 	});
 
 	var _context$v;
-	function ownKeys$7(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$7(e) { for (var r = 1; r < arguments.length; r++) { var _context5, _context6; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context5 = ownKeys$7(Object(t), !0)).call(_context5, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context6 = ownKeys$7(Object(t))).call(_context6, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function ownKeys$8(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+	function _objectSpread$8(e) { for (var r = 1; r < arguments.length; r++) { var _context5, _context6; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context5 = ownKeys$8(Object(t), !0)).call(_context5, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context6 = ownKeys$8(Object(t))).call(_context6, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _createForOfIteratorHelper$1j(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1j(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 	function _unsupportedIterableToArray$1j(r, a) { if (r) { var _context4; if ("string" == typeof r) return _arrayLikeToArray$1k(r, a); var t = _sliceInstanceProperty(_context4 = {}.toString.call(r)).call(_context4, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1k(r, a) : void 0; } }
 	function _arrayLikeToArray$1k(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
@@ -78666,12 +79020,12 @@
 	    effectiveSystemList = _concatInstanceProperty(SystemSuggestList).call(SystemSuggestList, suggesterConfig.extendSystemSuggestList);
 	  }
 	  var systemSuggestList = _mapInstanceProperty(effectiveSystemList).call(effectiveSystemList, function (item) {
-	    return _objectSpread$7(_objectSpread$7({}, item), {}, {
+	    return _objectSpread$8(_objectSpread$8({}, item), {}, {
 	      label: locales[item.label] || item.label
 	    });
 	  });
 	  var otherSuggestList = _mapInstanceProperty(OtherSuggestList).call(OtherSuggestList, function (item) {
-	    return _objectSpread$7(_objectSpread$7({}, item), {}, {
+	    return _objectSpread$8(_objectSpread$8({}, item), {}, {
 	      label: locales[item.label] || item.label
 	    });
 	  });
@@ -85660,350 +86014,164 @@
 	    return getFeed(parseDOM(feed, options));
 	}
 
-	var keys$5;
-	var hasRequiredKeys$4;
-
-	function requireKeys$4 () {
-		if (hasRequiredKeys$4) return keys$5;
-		hasRequiredKeys$4 = 1;
-		'use strict';
-		requireEs_array_iterator();
-		requireEs_object_toString();
-		var getBuiltInPrototypeMethod = /*@__PURE__*/ requireGetBuiltInPrototypeMethod();
-
-		keys$5 = getBuiltInPrototypeMethod('Array', 'keys');
-		return keys$5;
+	/**
+	 * 通用的「占位符回填」流程：扫描 DOM、替换 asyncRenderHandler.md、触发 done、更新预览缓存
+	 * @param {import('../Engine').default} engine Engine 实例
+	 * @param {Object} options
+	 * @param {string} options.className 占位符的 class 名称（如 cherry-katex-need-render）
+	 * @param {(content: string, isDisplayMode: boolean) => string} options.render 渲染函数
+	 */
+	function rerenderPendingMath(engine, _ref) {
+	  var _context;
+	  var className = _ref.className,
+	    render = _ref.render;
+	  // 1. 先更新预览区域 DOM
+	  _forEachInstanceProperty(_context = engine.$cherry.previewer.getDom().querySelectorAll(".".concat(className))).call(_context, function (el) {
+	    var isDisplayMode = el.classList.contains('Cherry-Math');
+	    el.innerHTML = render(decodeURIComponent(el.getAttribute('data-content')), isDisplayMode);
+	    el.classList.remove(className);
+	  });
+	  // 2. 再更新 asyncRenderHandler 中缓存的 md（实际为 html）
+	  var needDoneKeys = [];
+	  var placeholderReg = new RegExp("<(div|span) data-sign=\"([^\"]+?)\" class=\"([^\"]+?) ".concat(className, "\" ([^>]+? data-lines=\"[^\"]+?\") data-content=\"([\\s\\S]+?)\"><\\/\\1>"), 'g');
+	  engine.asyncRenderHandler.md = engine.asyncRenderHandler.md.replace(placeholderReg, function (match, domName, sign, originClass, attrs, content) {
+	    var _context2, _context3, _context4, _context5, _context6;
+	    var isDisplayMode = domName === 'div';
+	    var key = isDisplayMode ? "math-block-".concat(sign) : "math-inline-".concat(sign);
+	    var html = render(decodeURIComponent(content), isDisplayMode);
+	    needDoneKeys.push(key);
+	    return _concatInstanceProperty(_context2 = _concatInstanceProperty(_context3 = _concatInstanceProperty(_context4 = _concatInstanceProperty(_context5 = _concatInstanceProperty(_context6 = "<".concat(domName, " data-sign=\"")).call(_context6, sign, "\" class=\"")).call(_context5, originClass, "\" ")).call(_context4, attrs, ">")).call(_context3, html, "</")).call(_context2, domName, ">");
+	  });
+	  _forEachInstanceProperty(needDoneKeys).call(needDoneKeys, function (key) {
+	    engine.asyncRenderHandler.done(key);
+	  });
+	  // 3. 当预览区隐藏时，同步更新预览区缓存
+	  if (engine.$cherry.previewer.isPreviewerHidden()) {
+	    engine.$cherry.previewer.options.previewerCache.html = engine.asyncRenderHandler.md;
+	  }
 	}
-
-	var keys$4;
-	var hasRequiredKeys$3;
-
-	function requireKeys$3 () {
-		if (hasRequiredKeys$3) return keys$4;
-		hasRequiredKeys$3 = 1;
-		'use strict';
-		var parent = /*@__PURE__*/ requireKeys$4();
-
-		keys$4 = parent;
-		return keys$4;
-	}
-
-	var keys$3;
-	var hasRequiredKeys$2;
-
-	function requireKeys$2 () {
-		if (hasRequiredKeys$2) return keys$3;
-		hasRequiredKeys$2 = 1;
-		'use strict';
-		requireWeb_domCollections_iterator();
-		var classof = /*@__PURE__*/ requireClassof();
-		var hasOwn = /*@__PURE__*/ requireHasOwnProperty();
-		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
-		var method = /*@__PURE__*/ requireKeys$3();
-
-		var ArrayPrototype = Array.prototype;
-
-		var DOMIterables = {
-		  DOMTokenList: true,
-		  NodeList: true
-		};
-
-		keys$3 = function (it) {
-		  var own = it.keys;
-		  return it === ArrayPrototype || (isPrototypeOf(ArrayPrototype, it) && own === ArrayPrototype.keys)
-		    || hasOwn(DOMIterables, classof(it)) ? method : own;
-		};
-		return keys$3;
-	}
-
-	var keys$2;
-	var hasRequiredKeys$1;
-
-	function requireKeys$1 () {
-		if (hasRequiredKeys$1) return keys$2;
-		hasRequiredKeys$1 = 1;
-		keys$2 = /*@__PURE__*/ requireKeys$2();
-		return keys$2;
-	}
-
-	var keysExports = requireKeys$1();
-	var _keysInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(keysExports);
-
-	var values$7;
-	var hasRequiredValues$6;
-
-	function requireValues$6 () {
-		if (hasRequiredValues$6) return values$7;
-		hasRequiredValues$6 = 1;
-		'use strict';
-		requireEs_array_iterator();
-		requireEs_object_toString();
-		var getBuiltInPrototypeMethod = /*@__PURE__*/ requireGetBuiltInPrototypeMethod();
-
-		values$7 = getBuiltInPrototypeMethod('Array', 'values');
-		return values$7;
-	}
-
-	var values$6;
-	var hasRequiredValues$5;
-
-	function requireValues$5 () {
-		if (hasRequiredValues$5) return values$6;
-		hasRequiredValues$5 = 1;
-		'use strict';
-		var parent = /*@__PURE__*/ requireValues$6();
-
-		values$6 = parent;
-		return values$6;
-	}
-
-	var values$5;
-	var hasRequiredValues$4;
-
-	function requireValues$4 () {
-		if (hasRequiredValues$4) return values$5;
-		hasRequiredValues$4 = 1;
-		'use strict';
-		requireWeb_domCollections_iterator();
-		var classof = /*@__PURE__*/ requireClassof();
-		var hasOwn = /*@__PURE__*/ requireHasOwnProperty();
-		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
-		var method = /*@__PURE__*/ requireValues$5();
-
-		var ArrayPrototype = Array.prototype;
-
-		var DOMIterables = {
-		  DOMTokenList: true,
-		  NodeList: true
-		};
-
-		values$5 = function (it) {
-		  var own = it.values;
-		  return it === ArrayPrototype || (isPrototypeOf(ArrayPrototype, it) && own === ArrayPrototype.values)
-		    || hasOwn(DOMIterables, classof(it)) ? method : own;
-		};
-		return values$5;
-	}
-
-	var values$4;
-	var hasRequiredValues$3;
-
-	function requireValues$3 () {
-		if (hasRequiredValues$3) return values$4;
-		hasRequiredValues$3 = 1;
-		values$4 = /*@__PURE__*/ requireValues$4();
-		return values$4;
-	}
-
-	var valuesExports$1 = requireValues$3();
-	var _valuesInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(valuesExports$1);
-
-	var entries$6;
-	var hasRequiredEntries$6;
-
-	function requireEntries$6 () {
-		if (hasRequiredEntries$6) return entries$6;
-		hasRequiredEntries$6 = 1;
-		'use strict';
-		requireEs_array_iterator();
-		requireEs_object_toString();
-		var getBuiltInPrototypeMethod = /*@__PURE__*/ requireGetBuiltInPrototypeMethod();
-
-		entries$6 = getBuiltInPrototypeMethod('Array', 'entries');
-		return entries$6;
-	}
-
-	var entries$5;
-	var hasRequiredEntries$5;
-
-	function requireEntries$5 () {
-		if (hasRequiredEntries$5) return entries$5;
-		hasRequiredEntries$5 = 1;
-		'use strict';
-		var parent = /*@__PURE__*/ requireEntries$6();
-
-		entries$5 = parent;
-		return entries$5;
-	}
-
-	var entries$4;
-	var hasRequiredEntries$4;
-
-	function requireEntries$4 () {
-		if (hasRequiredEntries$4) return entries$4;
-		hasRequiredEntries$4 = 1;
-		'use strict';
-		requireWeb_domCollections_iterator();
-		var classof = /*@__PURE__*/ requireClassof();
-		var hasOwn = /*@__PURE__*/ requireHasOwnProperty();
-		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
-		var method = /*@__PURE__*/ requireEntries$5();
-
-		var ArrayPrototype = Array.prototype;
-
-		var DOMIterables = {
-		  DOMTokenList: true,
-		  NodeList: true
-		};
-
-		entries$4 = function (it) {
-		  var own = it.entries;
-		  return it === ArrayPrototype || (isPrototypeOf(ArrayPrototype, it) && own === ArrayPrototype.entries)
-		    || hasOwn(DOMIterables, classof(it)) ? method : own;
-		};
-		return entries$4;
-	}
-
-	var entries$3;
-	var hasRequiredEntries$3;
-
-	function requireEntries$3 () {
-		if (hasRequiredEntries$3) return entries$3;
-		hasRequiredEntries$3 = 1;
-		entries$3 = /*@__PURE__*/ requireEntries$4();
-		return entries$3;
-	}
-
-	var entriesExports$1 = requireEntries$3();
-	var _entriesInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(entriesExports$1);
 
 	/**
-	 * LRU缓存类
-	 * 使用Map实现LRU缓存，Map会保持键的插入顺序
+	 * @typedef {{ engine?: 'katex' | 'MathJax'; src?: string; css?: string; plugins?: boolean; selfClosing?: boolean }} MathBlockOptions
+	 * @typedef {{ engine?: 'katex' | 'MathJax'; src?: string; selfClosing?: boolean }} InlineMathOptions
+	 * @typedef {{ mathBlock: MathBlockOptions; inlineMath: InlineMathOptions }} ResolvedMathSyntax
 	 */
-	var LRUCache = /*#__PURE__*/function () {
-	  /**
-	   * 创建一个LRU缓存
-	   * @param {number} capacity 缓存容量
-	   */
-	  function LRUCache(capacity) {
-	    _classCallCheck$1(this, LRUCache);
-	    this.capacity = capacity;
-	    this.cache = new _Map$2();
+
+	/**
+	 * 加载 MathJax 并在加载完成后回填渲染所有占位符
+	 * @param {import('../Engine').default} engine Engine 实例
+	 * @param {ResolvedMathSyntax} syntax syntax 配置（mathBlock / inlineMath 已确保不是 false）
+	 */
+	function setupMathJax(engine, syntax) {
+	  // 已经加载过 MathJax
+	  if (getExternal('MathJax')) {
+	    return;
 	  }
-
-	  /**
-	   * 获取缓存项
-	   * @param {string} key 缓存键
-	   * @returns {any} 缓存值，不存在则返回undefined
-	   */
-	  return _createClass$1(LRUCache, [{
-	    key: "get",
-	    value: function get(key) {
-	      if (!this.cache.has(key)) return undefined;
-
-	      // 获取值并更新位置（删除后重新插入到末尾）
-	      var value = this.cache.get(key);
-	      this.cache["delete"](key);
-	      this.cache.set(key, value);
-	      return value;
+	  var plugins = syntax.mathBlock.plugins;
+	  configureMathJax(plugins);
+	  var mathJaxSrc = syntax.mathBlock.src ? syntax.mathBlock.src : syntax.inlineMath.src;
+	  if (!mathJaxSrc) {
+	    return;
+	  }
+	  loadScript(mathJaxSrc, 'mathjax-js').then(function () {
+	    var _resolvedMathJax$star;
+	    var resolvedMathJax = /** @type {{ tex2svg?: Function, startup?: { promise?: Promise<unknown> } } | undefined} */
+	    getExternal('MathJax');
+	    if (!resolvedMathJax) {
+	      return;
 	    }
-
-	    /**
-	     * 设置缓存项
-	     * @param {string} key 缓存键
-	     * @param {any} value 缓存值
-	     */
-	  }, {
-	    key: "set",
-	    value: function set(key, value) {
-	      // 如果键已存在，先删除（相当于更新位置）
-	      if (this.cache.has(key)) {
-	        this.cache["delete"](key);
+	    // MathJax 通过 startup.promise 表示就绪；若不存在则视为同步可用
+	    var ready = ((_resolvedMathJax$star = resolvedMathJax.startup) === null || _resolvedMathJax$star === void 0 ? void 0 : _resolvedMathJax$star.promise) || _Promise$1.resolve();
+	    ready.then(function () {
+	      var mathJaxInstance = /** @type {{ tex2svg?: Function } | undefined} */getExternal('MathJax');
+	      if (!mathJaxInstance || !mathJaxInstance.tex2svg) {
+	        return;
 	      }
-
-	      // 如果缓存已满，删除最旧的100个项（或者全部，如果少于100个）
-	      if (this.cache.size >= this.capacity) {
-	        var _context;
-	        var iterator = _keysInstanceProperty(_context = this.cache).call(_context);
-	        var deleteCount = Math.min(100, this.cache.size);
-	        for (var i = 0; i < deleteCount; i++) {
-	          var result = iterator.next();
-	          if (result.done) break;
-	          var oldKey = result.value;
-	          this.cache["delete"](oldKey);
+	      var render = function render(content, isDisplayMode) {
+	        try {
+	          return getHTML(isDisplayMode ? mathJaxInstance.tex2svg(content) : mathJaxInstance.tex2svg(content, {
+	            em: 12,
+	            ex: 6,
+	            display: false
+	          }), true);
+	        } catch (e) {
+	          return '';
 	        }
-	      }
+	      };
+	      rerenderPendingMath(engine, {
+	        className: 'cherry-mathjax-need-render',
+	        render: render
+	      });
+	    });
+	  });
+	}
 
-	      // 添加新项到缓存末尾
-	      this.cache.set(key, value);
+	/**
+	 * 加载 katex 并在加载完成后回填渲染所有占位符
+	 * @param {import('../Engine').default} engine Engine 实例
+	 * @param {ResolvedMathSyntax} syntax syntax 配置（mathBlock / inlineMath 已确保不是 false）
+	 */
+	function setupKatex(engine, syntax) {
+	  // 已经加载过 katex
+	  if (getExternal('katex')) {
+	    return;
+	  }
+	  syntax.mathBlock.css && loadCSS(syntax.mathBlock.css, 'katex-css');
+	  if (!syntax.mathBlock.src) {
+	    return;
+	  }
+	  loadScript(syntax.mathBlock.src, 'katex-js').then(function () {
+	    var resolvedKatex = /** @type {import('katex').default | undefined} */getExternal('katex');
+	    if (!resolvedKatex) {
+	      return;
 	    }
+	    var render = function render(content, isDisplayMode) {
+	      return resolvedKatex.renderToString(content, {
+	        throwOnError: false,
+	        displayMode: isDisplayMode
+	      });
+	    };
+	    rerenderPendingMath(engine, {
+	      className: 'cherry-katex-need-render',
+	      render: render
+	    });
+	  });
+	}
 
-	    /**
-	     * 检查键是否存在
-	     * @param {string} key 缓存键
-	     * @returns {boolean} 是否存在
-	     */
-	  }, {
-	    key: "has",
-	    value: function has(key) {
-	      return this.cache.has(key);
+	/**
+	 * 公式引擎初始化入口（按需加载 MathJax / katex 并在加载完成后回填渲染）
+	 * @param {import('../Engine').default} engine Engine 实例
+	 * @param {Partial<import('../Cherry').CherryOptions>} opts 初始化选项
+	 */
+	function initMathEngines(engine, opts) {
+	  if (!isBrowser()) {
+	    return;
+	  }
+	  var externals = opts.externals,
+	    engineOpts = opts.engine;
+	  var syntax = engineOpts.syntax;
+	  // mathBlock / inlineMath 都可能配置为 false 用以关闭，先做类型收窄
+	  var mathBlock = syntax.mathBlock ? syntax.mathBlock : {};
+	  var inlineMath = syntax.inlineMath ? syntax.inlineMath : {};
+	  // 未开启任何公式语法，直接退出
+	  if (!mathBlock.src && !inlineMath.src && !mathBlock.engine && !inlineMath.engine) {
+	    return;
+	  }
+	  /** @type {ResolvedMathSyntax} */
+	  var resolvedSyntax = {
+	    mathBlock: mathBlock,
+	    inlineMath: inlineMath
+	  };
+	  if (mathBlock.engine === 'MathJax' || inlineMath.engine === 'MathJax') {
+	    // 外部已注入 MathJax 时跳过加载
+	    if (!externals.MathJax) {
+	      setupMathJax(engine, resolvedSyntax);
 	    }
-
-	    /**
-	     * 删除缓存项
-	     * @param {string} key 缓存键
-	     * @returns {boolean} 是否删除成功
-	     */
-	  }, {
-	    key: "delete",
-	    value: function _delete(key) {
-	      return this.cache["delete"](key);
-	    }
-
-	    /**
-	     * 清空缓存
-	     */
-	  }, {
-	    key: "clear",
-	    value: function clear() {
-	      this.cache.clear();
-	    }
-
-	    /**
-	     * 获取所有键
-	     * @returns {Array} 键数组
-	     */
-	  }, {
-	    key: "keys",
-	    value: function keys() {
-	      var _context2;
-	      return _Array$from(_keysInstanceProperty(_context2 = this.cache).call(_context2));
-	    }
-
-	    /**
-	     * 获取所有值
-	     * @returns {Array} 值数组
-	     */
-	  }, {
-	    key: "values",
-	    value: function values() {
-	      var _context3;
-	      return _Array$from(_valuesInstanceProperty(_context3 = this.cache).call(_context3));
-	    }
-
-	    /**
-	     * 获取所有键值对
-	     * @returns {Array} 键值对数组
-	     */
-	  }, {
-	    key: "entries",
-	    value: function entries() {
-	      var _context4;
-	      return _Array$from(_entriesInstanceProperty(_context4 = this.cache).call(_context4));
-	    }
-
-	    /**
-	     * 获取缓存大小
-	     * @returns {number} 缓存大小
-	     */
-	  }, {
-	    key: "size",
-	    get: function get() {
-	      return this.cache.size;
-	    }
-	  }]);
-	}();
+	  }
+	  if (mathBlock.engine === 'katex' || inlineMath.engine === 'katex') {
+	    setupKatex(engine, resolvedSyntax);
+	  }
+	}
 
 	var Engine = /*#__PURE__*/function () {
 	  /**
@@ -86093,71 +86261,7 @@
 	  }, {
 	    key: "initMath",
 	    value: function initMath(opts) {
-	      var _this3 = this;
-	      // 无论MathJax还是Katex，都可以先进行MathJax配置
-	      var externals = opts.externals,
-	        engine = opts.engine;
-	      var syntax = engine.syntax;
-	      var plugins = syntax.mathBlock.plugins;
-	      // 未开启公式
-	      if (!isBrowser() || !syntax.mathBlock.src && !syntax.inlineMath.src && !syntax.mathBlock.engine && !syntax.inlineMath.engine) {
-	        return;
-	      }
-	      if (syntax.mathBlock.engine === 'MathJax' || syntax.inlineMath.engine === 'MathJax') {
-	        // 已经加载过MathJax
-	        if (externals.MathJax || getExternal('MathJax')) {
-	          return;
-	        }
-	        configureMathJax(plugins);
-	        if (syntax.mathBlock.src || syntax.inlineMath.src) {
-	          loadScript(syntax.mathBlock.src ? syntax.mathBlock.src : syntax.inlineMath.src, 'mathjax-js');
-	        }
-	      }
-	      if (syntax.mathBlock.engine === 'katex' || syntax.inlineMath.engine === 'katex') {
-	        var katexInstance = /** @type {import('katex').default | undefined} */getExternal('katex');
-	        if (katexInstance) {
-	          return;
-	        }
-	        syntax.mathBlock.css && loadCSS(syntax.mathBlock.css, 'katex-css');
-	        if (syntax.mathBlock.src) {
-	          loadScript(syntax.mathBlock.src, 'katex-js').then(function () {
-	            var _context2;
-	            var resolvedKatex = /** @type {import('katex').default} */getExternal('katex');
-	            if (!resolvedKatex) {
-	              return;
-	            }
-	            // 先更新预览区域
-	            _forEachInstanceProperty(_context2 = _this3.$cherry.previewer.getDom().querySelectorAll('.cherry-katex-need-render')).call(_context2, function (el) {
-	              var displayMode = el.classList.contains('Cherry-Math');
-	              el.innerHTML = resolvedKatex.renderToString(decodeURIComponent(el.getAttribute('data-content')), {
-	                throwOnError: false,
-	                displayMode: displayMode
-	              });
-	              el.classList.remove('cherry-katex-need-render');
-	            });
-	            // 再更新asyncRenderHandler里的md（实际为html）内容
-	            var needDoneKeys = [];
-	            _this3.asyncRenderHandler.md = _this3.asyncRenderHandler.md.replace(/<(div|span) data-sign="([^"]+?)" class="([^"]+?) cherry-katex-need-render" ([^>]+? data-lines="[^"]+?") data-content="([\s\S]+?)"><\/\1>/g, function (match, domName, sign, className, attrs, content) {
-	              var _context3, _context4, _context5, _context6, _context7;
-	              var isDisplayMode = domName === 'div';
-	              var key = isDisplayMode ? "math-block-".concat(sign) : "math-inline-".concat(sign);
-	              var html = resolvedKatex.renderToString(decodeURIComponent(content), {
-	                throwOnError: false,
-	                displayMode: isDisplayMode
-	              });
-	              needDoneKeys.push(key);
-	              return _concatInstanceProperty(_context3 = _concatInstanceProperty(_context4 = _concatInstanceProperty(_context5 = _concatInstanceProperty(_context6 = _concatInstanceProperty(_context7 = "<".concat(domName, " data-sign=\"")).call(_context7, sign, "\" class=\"")).call(_context6, className, "\" ")).call(_context5, attrs, ">")).call(_context4, html, "</")).call(_context3, domName, ">");
-	            });
-	            _forEachInstanceProperty(needDoneKeys).call(needDoneKeys, function (key) {
-	              _this3.asyncRenderHandler.done(key);
-	            });
-	            // 最后再更新预览区缓存的内容（当预览区隐藏的时候需要更新）
-	            if (_this3.$cherry.previewer.isPreviewerHidden()) {
-	              _this3.$cherry.previewer.options.previewerCache.html = _this3.asyncRenderHandler.md;
-	            }
-	          });
-	        }
-	      }
+	      initMathEngines(this, opts);
 	    }
 	  }, {
 	    key: "$configInit",
@@ -86194,7 +86298,7 @@
 	  }, {
 	    key: "$beforeMakeHtml",
 	    value: function $beforeMakeHtml(str) {
-	      var _context8;
+	      var _context2;
 	      var $str = this.$encodeReservedKeywords(str);
 	      $str = $str.replace(/\r\n/g, '\n'); // DOS to Unix
 	      $str = $str.replace(/\r/g, '\n'); // Mac to Unix
@@ -86204,7 +86308,7 @@
 	        $str += '\n';
 	      }
 	      $str = this.$fireHookAction($str, 'sentence', 'beforeMakeHtml');
-	      $str = this.$fireHookAction($str, 'paragraph', 'beforeMakeHtml', _bindInstanceProperty(_context8 = this.$dealSentenceByCache).call(_context8, this));
+	      $str = this.$fireHookAction($str, 'paragraph', 'beforeMakeHtml', _bindInstanceProperty(_context2 = this.$dealSentenceByCache).call(_context2, this));
 	      return $str;
 	    }
 	  }, {
@@ -86243,8 +86347,8 @@
 	  }, {
 	    key: "$afterMakeHtml",
 	    value: function $afterMakeHtml(str) {
-	      var _context9;
-	      var $str = this.$fireHookAction(str, 'paragraph', 'afterMakeHtml', _bindInstanceProperty(_context9 = this.$dealSentenceByCache).call(_context9, this));
+	      var _context3;
+	      var $str = this.$fireHookAction(str, 'paragraph', 'afterMakeHtml', _bindInstanceProperty(_context3 = this.$dealSentenceByCache).call(_context3, this));
 	      // str = this._fireHookAction(str, 'sentence', 'afterMakeHtml');
 	      $str = this.dealAfterMakeHtml($str);
 	      $str = UrlCache.restoreAll($str);
@@ -86254,21 +86358,21 @@
 	  }, {
 	    key: "$dealSentenceByCache",
 	    value: function $dealSentenceByCache(md) {
-	      var _this4 = this;
+	      var _this3 = this;
 	      return this.$checkCache(md, function (str) {
-	        return _this4.$dealSentence(str);
+	        return _this3.$dealSentence(str);
 	      });
 	    }
 	  }, {
 	    key: "$dealSentence",
 	    value: function $dealSentence(md) {
-	      var _context0;
-	      return this.$fireHookAction(md, 'sentence', 'makeHtml', _bindInstanceProperty(_context0 = this.$dealSentenceByCache).call(_context0, this));
+	      var _context4;
+	      return this.$fireHookAction(md, 'sentence', 'makeHtml', _bindInstanceProperty(_context4 = this.$dealSentenceByCache).call(_context4, this));
 	    }
 	  }, {
 	    key: "$fireHookAction",
 	    value: function $fireHookAction(md, type, action, actionArgs) {
-	      var _this5 = this;
+	      var _this4 = this;
 	      var $md = md;
 	      var before = (actionArgs === null || actionArgs === void 0 ? void 0 : actionArgs.before) || '';
 	      var method = action === 'afterMakeHtml' ? 'reduceRight' : 'reduce';
@@ -86282,7 +86386,7 @@
 	            return newMd;
 	          }
 	          if (!oneHook.$engine) {
-	            oneHook.$engine = _this5;
+	            oneHook.$engine = _this4;
 	            // Deprecated
 	            _Object$defineProperty$1(oneHook, '_engine', {
 	              get: function get() {
@@ -86301,7 +86405,7 @@
 	            }
 	          }
 	          // const time = Date.now();
-	          var ret = oneHook[action](newMd, actionArgs, _this5.markdownParams);
+	          var ret = oneHook[action](newMd, actionArgs, _this4.markdownParams);
 	          // const cost = Date.now() - time;
 	          // if (cost > 50) {
 	          //   console.log(`hook ${oneHook.getName()} ${action} cost ${Date.now() - time}ms`);
@@ -86331,6 +86435,11 @@
 	  }, {
 	    key: "sha256",
 	    value: function sha256(str) {
+	      return hashHex(str);
+	    }
+	  }, {
+	    key: "hashHex",
+	    value: function hashHex$1(str) {
 	      return hashHex(str);
 	    }
 
@@ -86369,15 +86478,15 @@
 	  }, {
 	    key: "$dealParagraph",
 	    value: function $dealParagraph(md) {
-	      var _context1;
-	      return this.$fireHookAction(md, 'paragraph', 'makeHtml', _bindInstanceProperty(_context1 = this.$dealSentenceByCache).call(_context1, this));
+	      var _context5;
+	      return this.$fireHookAction(md, 'paragraph', 'makeHtml', _bindInstanceProperty(_context5 = this.$dealSentenceByCache).call(_context5, this));
 	    }
 
 	    // 缓存大文本数据，用以提升渲染性能
 	  }, {
 	    key: "$cacheBigData",
 	    value: function $cacheBigData(md) {
-	      var _this6 = this;
+	      var _this5 = this;
 	      // 暂存所有代码块
 	      var codeBlocks = [];
 	      var $md = md.replace(getCodeBlockRule().reg, function (whole, m1, m2) {
@@ -86386,28 +86495,28 @@
 	        return cacheKey;
 	      });
 	      $md = $md.replace(base64Reg, function (dataUri) {
-	        var cacheKey = "bigDataBegin".concat(_this6.hash(dataUri), "bigDataEnd");
-	        _this6.cachedBigData[cacheKey] = dataUri;
+	        var cacheKey = "bigDataBegin".concat(_this5.hash(dataUri), "bigDataEnd");
+	        _this5.cachedBigData[cacheKey] = dataUri;
 	        return cacheKey;
 	      });
 	      $md = $md.replace(imgBase64Reg, function (whole, m1, m2) {
-	        var _context10;
-	        var cacheKey = "bigDataBegin".concat(_this6.hash(m2), "bigDataEnd");
-	        _this6.cachedBigData[cacheKey] = m2;
-	        return _concatInstanceProperty(_context10 = "".concat(m1)).call(_context10, cacheKey, ")");
+	        var _context6;
+	        var cacheKey = "bigDataBegin".concat(_this5.hash(m2), "bigDataEnd");
+	        _this5.cachedBigData[cacheKey] = m2;
+	        return _concatInstanceProperty(_context6 = "".concat(m1)).call(_context6, cacheKey, ")");
 	      });
 	      $md = $md.replace(imgDrawioXmlReg, function (whole, m1, m2) {
-	        var _context11;
-	        var cacheKey = "bigDataBegin".concat(_this6.hash(m2), "bigDataEnd");
-	        _this6.cachedBigData[cacheKey] = m2;
-	        return _concatInstanceProperty(_context11 = "".concat(m1)).call(_context11, cacheKey, "}");
+	        var _context7;
+	        var cacheKey = "bigDataBegin".concat(_this5.hash(m2), "bigDataEnd");
+	        _this5.cachedBigData[cacheKey] = m2;
+	        return _concatInstanceProperty(_context7 = "".concat(m1)).call(_context7, cacheKey, "}");
 	      });
 	      var tmpArr = $md.split(/\n/);
 	      for (var i = 0; i < tmpArr.length; i++) {
 	        if (tmpArr[i].length > 6000) {
 	          tmpArr[i] = tmpArr[i].replace(longTextReg, function (whole) {
-	            var cacheKey = "bigDataBegin".concat(_this6.hash(whole), "bigDataEnd");
-	            _this6.cachedBigData[cacheKey] = whole;
+	            var cacheKey = "bigDataBegin".concat(_this5.hash(whole), "bigDataEnd");
+	            _this5.cachedBigData[cacheKey] = whole;
 	            return cacheKey;
 	          });
 	        }
@@ -86427,9 +86536,9 @@
 	  }, {
 	    key: "$deCacheBigData",
 	    value: function $deCacheBigData(md) {
-	      var _this7 = this;
+	      var _this6 = this;
 	      return md.replace(/bigDataBegin[^\n]+?bigDataEnd/g, function (whole) {
-	        return _this7.cachedBigData[whole];
+	        return _this6.cachedBigData[whole];
 	      });
 	    }
 
@@ -86487,13 +86596,13 @@
 	  }, {
 	    key: "$clearFlowSessionCursorCache",
 	    value: function $clearFlowSessionCursorCache(md) {
-	      var _this8 = this;
+	      var _this7 = this;
 	      if (this.$cherry.options.engine.global.flowSessionCursor) {
 	        if (this.clearCursorTimer) {
 	          clearTimeout(this.clearCursorTimer);
 	        }
 	        this.clearCursorTimer = _setTimeout(function () {
-	          _this8.$cherry.clearFlowSessionCursor();
+	          _this7.$cherry.clearFlowSessionCursor();
 	        }, 2560);
 	        return md.replace(/CHERRYFLOWSESSIONCURSOR/g, this.$cherry.options.engine.global.flowSessionCursor);
 	      }
@@ -99796,6 +99905,9 @@
 	    this.img = img;
 	    this.isMermaid = options.isMermaid || false;
 	    this.targetIndex = _Number$isInteger(options.targetIndex) ? options.targetIndex : -1;
+	    this.onInvalidTarget = options.onInvalidTarget || null;
+	    this.validateTarget = options.validateTarget || null;
+	    this.resolveTarget = options.resolveTarget || null;
 	    this.previewerDom = previewerDom;
 	    this.container = container;
 	    this.buts = this.initBubbleButtons();
@@ -99823,15 +99935,40 @@
 	        });
 	    }
 	  },
+	  $isTargetValid: function $isTargetValid() {
+	    var _this$previewerDom;
+	    if (typeof this.validateTarget === 'function') {
+	      return this.validateTarget();
+	    }
+	    return !!(this.img && document.contains(this.img) && (_this$previewerDom = this.previewerDom) !== null && _this$previewerDom !== void 0 && _this$previewerDom.contains(this.img));
+	  },
+	  $clearPreviewUpdateTimer: function $clearPreviewUpdateTimer() {
+	    if (this._fallbackTimer) {
+	      clearTimeout(this._fallbackTimer);
+	      this._fallbackTimer = null;
+	    }
+	  },
 	  previewUpdate: function previewUpdate(callback) {
 	    var _this2 = this;
 	    if (this.$isResizing()) {
 	      return;
 	    }
+	    this.$clearPreviewUpdateTimer();
 	    this.refreshTarget();
+	    // 目标元素已从预览区移除（如删除了 mermaid 源码），清理选择框和浮动工具栏
+	    if (!this.$isTargetValid()) {
+	      var _ref;
+	      (_ref = callback || this.onInvalidTarget) === null || _ref === void 0 ? void 0 : _ref();
+	      return;
+	    }
 	    // 预览区更新后图片位置可能变化（如对齐方式改变），需要更新选择框位置
 	    // 图片有 CSS transition (all 0.1s)，需等待过渡动画结束后再获取最终位置
 	    this.img.addEventListener('transitionend', function () {
+	      if (!_this2.$isTargetValid()) {
+	        var _this2$onInvalidTarge;
+	        (_this2$onInvalidTarge = _this2.onInvalidTarget) === null || _this2$onInvalidTarge === void 0 ? void 0 : _this2$onInvalidTarge.call(_this2);
+	        return;
+	      }
 	      _this2.updatePosition();
 	    }, {
 	      once: true
@@ -99839,15 +99976,28 @@
 	    // 兜底：如果过渡没有触发（如属性没变化），100ms 后也更新
 	    this._fallbackTimer = _setTimeout(function () {
 	      _this2._fallbackTimer = null;
+	      if (!_this2.$isTargetValid()) {
+	        var _ref2;
+	        (_ref2 = callback || _this2.onInvalidTarget) === null || _ref2 === void 0 ? void 0 : _ref2();
+	        return;
+	      }
 	      _this2.updatePosition();
 	    }, 120);
 	  },
 	  refreshTarget: function refreshTarget() {
-	    if (!this.isMermaid || this.targetIndex < 0 || !this.previewerDom) {
+	    if (!this.isMermaid || !this.previewerDom) {
 	      return;
 	    }
-	    var figures = this.previewerDom.querySelectorAll('figure[data-type="mermaid"]');
-	    this.img = figures[this.targetIndex] || this.img;
+	    if (typeof this.resolveTarget === 'function') {
+	      var resolved = this.resolveTarget();
+	      if (resolved) {
+	        this.img = resolved;
+	        return;
+	      }
+	    }
+	    if (this.img && this.previewerDom.contains(this.img)) {
+	      return;
+	    }
 	  },
 	  drawBubbleButs: function drawBubbleButs() {
 	    var _context,
@@ -99868,11 +100018,13 @@
 	    return this.updateBubbleButs();
 	  },
 	  remove: function remove() {
+	    this.$clearPreviewUpdateTimer();
 	    this.butsLayout = false;
-	    if (this._fallbackTimer) {
-	      clearTimeout(this._fallbackTimer);
-	      this._fallbackTimer = null;
-	    }
+	    this.butsPoints = null;
+	    this.onInvalidTarget = null;
+	    this.validateTarget = null;
+	    this.resolveTarget = null;
+	    this.onPositionUpdated = null;
 	  },
 	  updateBubbleButs: function updateBubbleButs() {
 	    var _context2,
@@ -99887,6 +100039,10 @@
 	      _this4.butsPoints["pints-".concat(name)].style.top = "".concat(_this4.buts.points.arrInfo[name].top, "px");
 	      _this4.butsPoints["pints-".concat(name)].style.left = "".concat(_this4.buts.points.arrInfo[name].left, "px");
 	    });
+	    if (this.isMermaid) {
+	      var _this$onPositionUpdat;
+	      (_this$onPositionUpdat = this.onPositionUpdated) === null || _this$onPositionUpdat === void 0 ? void 0 : _this$onPositionUpdat.call(this);
+	    }
 	  },
 	  $updatePointsInfo: function $updatePointsInfo() {
 	    var _context4,
@@ -100105,6 +100261,11 @@
 	      return;
 	    }
 	    this.refreshTarget();
+	    if (!this.$isTargetValid()) {
+	      var _this$onInvalidTarget;
+	      (_this$onInvalidTarget = this.onInvalidTarget) === null || _this$onInvalidTarget === void 0 ? void 0 : _this$onInvalidTarget.call(this);
+	      return;
+	    }
 	    // 重新计算图片位置
 	    var newPosition = this.getImgPosition();
 	    this.buts.position = newPosition;
@@ -100116,8 +100277,8 @@
 	  }
 	};
 
-	function ownKeys$6(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$6(e) { for (var r = 1; r < arguments.length; r++) { var _context2, _context3; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context2 = ownKeys$6(Object(t), !0)).call(_context2, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context3 = ownKeys$6(Object(t))).call(_context3, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function ownKeys$7(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+	function _objectSpread$7(e) { for (var r = 1; r < arguments.length; r++) { var _context2, _context3; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context2 = ownKeys$7(Object(t), !0)).call(_context2, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context3 = ownKeys$7(Object(t))).call(_context3, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	/**
 	 * Copyright (C) 2021 Tencent.
 	 *
@@ -100163,6 +100324,9 @@
 	    this.img = img;
 	    this.isMermaid = options.isMermaid || false;
 	    this.targetIndex = _Number$isInteger(options.targetIndex) ? options.targetIndex : -1;
+	    this.onInvalidTarget = options.onInvalidTarget || null;
+	    this.validateTarget = options.validateTarget || null;
+	    this.resolveTarget = options.resolveTarget || null;
 	    this.previewerDom = previewerDom;
 	    this.container = container;
 	    var getImgToolButtonClassName = function getImgToolButtonClassName(item) {
@@ -100310,7 +100474,7 @@
 	    }
 	    this.container.style.left = "".concat(finalLeft, "px");
 	    this.container.style.top = "".concat(finalTop, "px");
-	    this.position = _objectSpread$6({}, imgPosition);
+	    this.position = _objectSpread$7({}, imgPosition);
 	  },
 	  emit: function emit(type) {
 	    var _this2 = this;
@@ -100318,6 +100482,8 @@
 	    switch (type) {
 	      case 'scroll':
 	        return this.dealScroll(event);
+	      case 'remove':
+	        return this.remove();
 	      case 'previewUpdate':
 	        return this.previewUpdate(event);
 	      case 'resize':
@@ -100326,35 +100492,72 @@
 	        });
 	    }
 	  },
+	  $isTargetValid: function $isTargetValid() {
+	    var _this$previewerDom;
+	    if (typeof this.validateTarget === 'function') {
+	      return this.validateTarget();
+	    }
+	    return !!(this.img && document.contains(this.img) && (_this$previewerDom = this.previewerDom) !== null && _this$previewerDom !== void 0 && _this$previewerDom.contains(this.img));
+	  },
+	  $clearPreviewUpdateTimer: function $clearPreviewUpdateTimer() {
+	    if (this._fallbackTimer) {
+	      clearTimeout(this._fallbackTimer);
+	      this._fallbackTimer = null;
+	    }
+	  },
 	  previewUpdate: function previewUpdate(callback) {
 	    var _this3 = this;
+	    this.$clearPreviewUpdateTimer();
 	    this.refreshTarget();
+	    // 目标元素已从预览区移除（如删除了 mermaid 源码），清理选择框和浮动工具栏
+	    if (!this.$isTargetValid()) {
+	      var _ref;
+	      (_ref = callback || this.onInvalidTarget) === null || _ref === void 0 ? void 0 : _ref();
+	      return;
+	    }
 	    // 预览区更新后图片位置可能变化（如对齐方式改变），需要更新工具栏位置
 	    // 图片有 CSS transition (all 0.1s)，需等待过渡动画结束后再获取最终位置
 	    this.img.addEventListener('transitionend', function () {
-	      return _this3.updatePosition();
+	      if (!_this3.$isTargetValid()) {
+	        var _this3$onInvalidTarge;
+	        (_this3$onInvalidTarge = _this3.onInvalidTarget) === null || _this3$onInvalidTarge === void 0 ? void 0 : _this3$onInvalidTarge.call(_this3);
+	        return;
+	      }
+	      _this3.updatePosition();
 	    }, {
 	      once: true
 	    });
 	    // 兜底：如果过渡没有触发（如属性没变化），120ms 后也更新
 	    this._fallbackTimer = _setTimeout(function () {
 	      _this3._fallbackTimer = null;
+	      if (!_this3.$isTargetValid()) {
+	        var _ref2;
+	        (_ref2 = callback || _this3.onInvalidTarget) === null || _ref2 === void 0 ? void 0 : _ref2();
+	        return;
+	      }
 	      _this3.updatePosition();
 	    }, 120);
 	  },
 	  refreshTarget: function refreshTarget() {
-	    if (!this.isMermaid || this.targetIndex < 0 || !this.previewerDom) {
+	    if (!this.isMermaid || !this.previewerDom) {
 	      return;
 	    }
-	    var figures = this.previewerDom.querySelectorAll('figure[data-type="mermaid"]');
-	    this.img = figures[this.targetIndex] || this.img;
+	    if (typeof this.resolveTarget === 'function') {
+	      var resolved = this.resolveTarget();
+	      if (resolved) {
+	        this.img = resolved;
+	        return;
+	      }
+	    }
+	    if (this.img && this.previewerDom.contains(this.img)) {
+	      return;
+	    }
 	  },
 	  remove: function remove() {
-	    this.butsLayout = false;
-	    if (this._fallbackTimer) {
-	      clearTimeout(this._fallbackTimer);
-	      this._fallbackTimer = null;
-	    }
+	    this.$clearPreviewUpdateTimer();
+	    this.onInvalidTarget = null;
+	    this.validateTarget = null;
+	    this.resolveTarget = null;
 	  },
 	  /**
 	   * 更新工具栏位置，用于预览区更新或编辑器大小变化后重新定位
@@ -100364,6 +100567,11 @@
 	      return;
 	    }
 	    this.refreshTarget();
+	    if (!this.$isTargetValid()) {
+	      var _this$onInvalidTarget;
+	      (_this$onInvalidTarget = this.onInvalidTarget) === null || _this$onInvalidTarget === void 0 ? void 0 : _this$onInvalidTarget.call(this);
+	      return;
+	    }
 	    var imgPosition = this.getImgPosition();
 	    var toolbarWidth = this.container.offsetWidth;
 	    var toolbarHeight = this.container.offsetHeight;
@@ -100379,7 +100587,7 @@
 	    }
 	    this.container.style.left = "".concat(finalLeft, "px");
 	    this.container.style.top = "".concat(finalTop, "px");
-	    this.position = _objectSpread$6({}, imgPosition);
+	    this.position = _objectSpread$7({}, imgPosition);
 	  },
 	  dealScroll: function dealScroll(event) {
 	    var position = this.getImgPosition();
@@ -100405,6 +100613,771 @@
 	    return c.toUpperCase();
 	  }) : '';
 	}
+
+	/**
+	 * mermaid 编辑器侧代码块解析
+	 *
+	 * 职责（维护入口集中在此文件）：
+	 * - 识别编辑器中的 mermaid 代码块
+	 * - 按源码正文锚定块（删邻居后 rebind）
+	 * - 解析语言行上的尺寸/对齐扩展参数
+	 */
+
+	/** @type {RegExp} 与 PreviewerBubble 历史逻辑保持一致 */
+	var MERMAID_CODE_BLOCK_REG = /(?:^|\n)(\n*(?:>[\t ]*)*(?:[^\S\n]*))(`{3,})([^`]*?)\n([\w\W]*?)\n\s*\2[ \t]*(?=$|\n)/g;
+	var MERMAID_LAYOUT_EXTEND_REG = /((?:\s*#(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto|center|right|left|float-right|float-left))+)\s*$/i;
+	var MERMAID_SIZE_REG = /#([0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)/gi;
+	var MERMAID_ALIGN_REG = /#(center|right|left|float-right|float-left)/i;
+
+	/**
+	 * 判断语言行是否为 mermaid 类型
+	 * @param {string} langLine
+	 * @returns {boolean}
+	 */
+	function isMermaidLangLine(langLine) {
+	  var _context;
+	  var langPure = _trimInstanceProperty(_context = _trimInstanceProperty(langLine).call(langLine).toLowerCase().replace(/#([0-9]+(px|em|pt|pc|in|mm|cm|ex|%)|auto)/gi, '').replace(/#(center|right|left|float-right|float-left)/gi, '')).call(_context);
+	  return langPure === 'mermaid' || /^flow([ ](td|lr))?$/i.test(langPure) || langPure === 'seq';
+	}
+
+	/**
+	 * 解析语言行上的尺寸与对齐扩展参数
+	 * @param {string} fullLangLine 语言行完整文本（含反引号后的 lang 部分所在行）
+	 * @returns {{
+	 *   size: string,
+	 *   align: string,
+	 *   hasExtend: boolean,
+	 *   extendStartInLine: number,
+	 *   extendLength: number,
+	 * }}
+	 */
+	function parseMermaidLayoutFromLangLine(fullLangLine) {
+	  var extendMatch = fullLangLine.match(MERMAID_LAYOUT_EXTEND_REG);
+	  var sizeMatches = fullLangLine.match(MERMAID_SIZE_REG);
+	  var alignMatch = fullLangLine.match(MERMAID_ALIGN_REG);
+	  if (extendMatch) {
+	    return {
+	      size: sizeMatches ? sizeMatches.join(' ') : '',
+	      align: alignMatch ? alignMatch[0] : '',
+	      hasExtend: true,
+	      extendStartInLine: _indexOfInstanceProperty(fullLangLine).call(fullLangLine, extendMatch[1]),
+	      extendLength: extendMatch[1].length
+	    };
+	  }
+	  return {
+	    size: sizeMatches ? sizeMatches.join(' ') : '',
+	    align: alignMatch ? alignMatch[0] : '',
+	    hasExtend: false,
+	    extendStartInLine: fullLangLine.length,
+	    extendLength: 0
+	  };
+	}
+
+	/**
+	 * 列出编辑器中所有 mermaid 代码块
+	 * @param {string} rawContent
+	 * @returns {{
+	 *   index: number,
+	 *   codeBody: string,
+	 *   langLine: string,
+	 *   matchIndex: number,
+	 *   leadingContent: string,
+	 *   fence: string,
+	 * }[]}
+	 */
+	function listMermaidBlocks(rawContent) {
+	  var blocks = [];
+	  if (!rawContent) {
+	    return blocks;
+	  }
+	  var reg = new RegExp(MERMAID_CODE_BLOCK_REG.source, 'g');
+	  var match;
+	  while ((match = reg.exec(rawContent)) !== null) {
+	    var _context2;
+	    var langLine = _trimInstanceProperty(_context2 = match[3]).call(_context2).toLowerCase();
+	    if (!isMermaidLangLine(langLine)) {
+	      continue;
+	    }
+	    blocks.push({
+	      index: blocks.length,
+	      codeBody: match[4],
+	      langLine: langLine,
+	      matchIndex: match.index,
+	      leadingContent: match[1] || '',
+	      fence: match[2]
+	    });
+	  }
+	  return blocks;
+	}
+
+	/**
+	 * 计算代码块语言行在文档中的行号（0-based）
+	 * @param {string} rawContent
+	 * @param {{ matchIndex: number, leadingContent: string, fence: string }} block
+	 * @returns {number}
+	 */
+	function getMermaidLangLineNumber(rawContent, block) {
+	  var backtickPos = _indexOfInstanceProperty(rawContent).call(rawContent, block.fence, block.matchIndex + block.leadingContent.length);
+	  var beforeBacktick = rawContent.substring(0, backtickPos);
+	  return (beforeBacktick.match(/\n/g) || []).length;
+	}
+
+	/**
+	 * 按预览区 index 获取对应编辑器 mermaid 块
+	 * @param {string} rawContent
+	 * @param {number} previewIndex
+	 * @returns {ReturnType<typeof listMermaidBlocks>[number] | null}
+	 */
+	function getMermaidBlockAtPreviewIndex(rawContent, previewIndex) {
+	  if (previewIndex < 0) {
+	    return null;
+	  }
+	  var blocks = listMermaidBlocks(rawContent);
+	  return blocks[previewIndex] || null;
+	}
+
+	/**
+	 * 按源码内容查找 mermaid 块在编辑器中的 index（删邻居块后 index 会变化）
+	 * @param {string} rawContent
+	 * @param {string} codeBody 选中时记录的代码块正文
+	 * @param {number} [preferredIndex=-1] 多个块正文相同时，优先命中该 index
+	 * @returns {number} index，未找到返回 -1
+	 */
+	function findMermaidBlockIndexByCodeBody(rawContent, codeBody) {
+	  var preferredIndex = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : -1;
+	  if (!codeBody) {
+	    return -1;
+	  }
+	  var blocks = listMermaidBlocks(rawContent);
+	  var matchedIndices = _reduceInstanceProperty(blocks).call(blocks, function (indices, block, index) {
+	    if (block.codeBody === codeBody) {
+	      indices.push(index);
+	    }
+	    return indices;
+	  }, /** @type {number[]} */[]);
+	  if (matchedIndices.length === 0) {
+	    return -1;
+	  }
+	  if (matchedIndices.length === 1) {
+	    return matchedIndices[0];
+	  }
+	  if (preferredIndex >= 0 && _includesInstanceProperty(matchedIndices).call(matchedIndices, preferredIndex)) {
+	    return preferredIndex;
+	  }
+	  return matchedIndices[0];
+	}
+
+	/**
+	 * 构建 mermaid 布局编辑所需的编辑器选区信息
+	 * @param {string} rawContent
+	 * @param {number} previewIndex 预览区 figure index
+	 * @param {import('@codemirror/state').Text} doc CM6 文档
+	 * @returns {{
+	 *   previewIndex: number,
+	 *   anchorBody: string,
+	 *   langLineNum: number,
+	 *   extendFrom: number,
+	 *   extendTo: number,
+	 *   size: string,
+	 *   align: string,
+	 *   hasExtend: boolean,
+	 * } | null}
+	 */
+	function buildMermaidEditContext(rawContent, previewIndex, doc) {
+	  var block = getMermaidBlockAtPreviewIndex(rawContent, previewIndex);
+	  if (!block || !doc) {
+	    return null;
+	  }
+	  var langLineNum = getMermaidLangLineNumber(rawContent, block);
+	  var fullLangLine = rawContent.split('\n')[langLineNum] || '';
+	  var layout = parseMermaidLayoutFromLangLine(fullLangLine);
+	  var lineStart = doc.line(langLineNum + 1).from;
+	  var extendFrom = lineStart + layout.extendStartInLine;
+	  var extendTo = layout.hasExtend ? extendFrom + layout.extendLength : extendFrom;
+	  return {
+	    previewIndex: previewIndex,
+	    anchorBody: block.codeBody,
+	    langLineNum: langLineNum,
+	    extendFrom: extendFrom,
+	    extendTo: extendTo,
+	    size: layout.size,
+	    align: layout.align,
+	    hasExtend: layout.hasExtend
+	  };
+	}
+
+	var es_number_parseFloat = {};
+
+	var hasRequiredEs_number_parseFloat;
+
+	function requireEs_number_parseFloat () {
+		if (hasRequiredEs_number_parseFloat) return es_number_parseFloat;
+		hasRequiredEs_number_parseFloat = 1;
+		'use strict';
+		var $ = /*@__PURE__*/ require_export();
+		var parseFloat = /*@__PURE__*/ requireNumberParseFloat();
+
+		// `Number.parseFloat` method
+		// https://tc39.es/ecma262/#sec-number.parseFloat
+		// eslint-disable-next-line es/no-number-parsefloat -- required for testing
+		$({ target: 'Number', stat: true, forced: Number.parseFloat !== parseFloat }, {
+		  parseFloat: parseFloat
+		});
+		return es_number_parseFloat;
+	}
+
+	var _parseFloat$2;
+	var hasRequired_parseFloat$2;
+
+	function require_parseFloat$2 () {
+		if (hasRequired_parseFloat$2) return _parseFloat$2;
+		hasRequired_parseFloat$2 = 1;
+		'use strict';
+		requireEs_number_parseFloat();
+		var path = /*@__PURE__*/ requirePath();
+
+		_parseFloat$2 = path.Number.parseFloat;
+		return _parseFloat$2;
+	}
+
+	var _parseFloat$1;
+	var hasRequired_parseFloat$1;
+
+	function require_parseFloat$1 () {
+		if (hasRequired_parseFloat$1) return _parseFloat$1;
+		hasRequired_parseFloat$1 = 1;
+		'use strict';
+		var parent = /*@__PURE__*/ require_parseFloat$2();
+
+		_parseFloat$1 = parent;
+		return _parseFloat$1;
+	}
+
+	var _parseFloat;
+	var hasRequired_parseFloat;
+
+	function require_parseFloat () {
+		if (hasRequired_parseFloat) return _parseFloat;
+		hasRequired_parseFloat = 1;
+		_parseFloat = /*@__PURE__*/ require_parseFloat$1();
+		return _parseFloat;
+	}
+
+	var _parseFloatExports = require_parseFloat();
+	var _Number$parseFloat = /*@__PURE__*/getDefaultExportFromCjs$1(_parseFloatExports);
+
+	/**
+	 * mermaid 预览可见性判断
+	 * 用于决定右侧尺寸编辑框是否应继续展示（figure 壳子可能还在，但预览图表已消失）
+	 */
+
+	/**
+	 * 统计预览区 mermaid figure 数量
+	 * @param {ParentNode} previewerDom
+	 * @returns {number}
+	 */
+	function countMermaidFigures(previewerDom) {
+	  if (!previewerDom) {
+	    return 0;
+	  }
+	  return previewerDom.querySelectorAll('figure[data-type="mermaid"]').length;
+	}
+
+	/**
+	 * 按 index 解析 mermaid figure
+	 * @param {ParentNode} previewerDom
+	 * @param {number} index
+	 * @param {number} [expectedFigureCount=-1] 传入时须与当前 figure 数量一致，-1 表示不校验
+	 * @returns {HTMLElement | null}
+	 */
+	function getMermaidFigureByIndex(previewerDom, index) {
+	  var expectedFigureCount = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : -1;
+	  if (!previewerDom || index < 0) {
+	    return null;
+	  }
+	  var figures = previewerDom.querySelectorAll('figure[data-type="mermaid"]');
+	  if (expectedFigureCount >= 0 && figures.length !== expectedFigureCount) {
+	    return null;
+	  }
+	  return /** @type {HTMLElement | null} */figures[index] || null;
+	}
+
+	/**
+	 * 获取 mermaid 预览内容根节点（工具栏模式下为 preview panel，否则为 figure 本身）
+	 * @param {HTMLElement} figure
+	 * @returns {HTMLElement}
+	 */
+	function getMermaidPreviewRoot(figure) {
+	  var previewPanel = figure.querySelector('.cherry-mermaid-source-toolbar-panel[data-mode="preview"]');
+	  return /** @type {HTMLElement} */previewPanel || figure;
+	}
+
+	/**
+	 * 获取 mermaid 渲染后的可视节点（svg 或 svg 转 img）
+	 * @param {ParentNode} root
+	 * @returns {Element | null}
+	 */
+	function getMermaidVisualElement(root) {
+	  var svg = root.querySelector('svg');
+	  if (svg) {
+	    return svg;
+	  }
+	  var svgImg = root.querySelector('img.svg-img');
+	  return svgImg || null;
+	}
+
+	/**
+	 * 读取元素可视尺寸（优先 layout，回退 attribute）
+	 * @param {Element} visual
+	 * @returns {{ width: number, height: number }}
+	 */
+	function getVisualSize(visual) {
+	  var htmlVisual = /** @type {HTMLElement} */visual;
+	  var rect = htmlVisual.getBoundingClientRect();
+	  if (rect.width > 0 && rect.height > 0) {
+	    return {
+	      width: rect.width,
+	      height: rect.height
+	    };
+	  }
+	  var width = htmlVisual.offsetWidth || _Number$parseFloat(htmlVisual.getAttribute('width') || '') || 0;
+	  var height = htmlVisual.offsetHeight || _Number$parseFloat(htmlVisual.getAttribute('height') || '') || 0;
+	  return {
+	    width: width,
+	    height: height
+	  };
+	}
+
+	/**
+	 * 预览区内是否存在已渲染且可见的 mermaid 图表
+	 * @param {ParentNode} root
+	 * @returns {boolean}
+	 */
+	function hasMermaidRenderedContent(root) {
+	  var visual = getMermaidVisualElement(root);
+	  if (!visual) {
+	    return false;
+	  }
+	  var _getVisualSize = getVisualSize(visual),
+	    width = _getVisualSize.width,
+	    height = _getVisualSize.height;
+	  return width > 0 && height > 0;
+	}
+
+	/**
+	 * 判断 mermaid 预览是否仍可用于尺寸/对齐编辑
+	 * @param {HTMLElement | null | undefined} figure
+	 * @param {ParentNode | null | undefined} previewerDom
+	 * @returns {boolean}
+	 */
+	function isMermaidPreviewVisible(figure, previewerDom) {
+	  if (!figure || !previewerDom || !document.contains(figure) || !previewerDom.contains(figure)) {
+	    return false;
+	  }
+	  if (figure.getAttribute('data-type') !== 'mermaid') {
+	    return false;
+	  }
+	  // 工具栏切到源码模式时不展示尺寸编辑框
+	  if (figure.querySelector('.cherry-mermaid-source-toolbar-panel.active[data-mode="source"]')) {
+	    return false;
+	  }
+	  var previewRoot = getMermaidPreviewRoot(figure);
+	  return hasMermaidRenderedContent(previewRoot);
+	}
+
+	var MermaidBubbleSession = /*#__PURE__*/function () {
+	  /**
+	   * @param {import('./PreviewerBubble').default} host PreviewerBubble 实例
+	   */
+	  function MermaidBubbleSession(host) {
+	    _classCallCheck$1(this, MermaidBubbleSession);
+	    this.host = host;
+	    this.reset();
+	  }
+
+	  /** 重置会话状态（移除操作框时调用） */
+	  return _createClass$1(MermaidBubbleSession, [{
+	    key: "reset",
+	    value: function reset() {
+	      this.anchorBody = '';
+	      this.anchorPreviewIndex = -1;
+	      this.previewIndex = -1;
+	      this.selfEditing = false;
+	      this.size = '';
+	      this.align = '';
+	      this.extendFrom = 0;
+	      this.extendTo = 0;
+	      this.hasExtend = false;
+	      this.langLineNum = -1;
+	      this.clearPositionSyncTimer();
+	      this.clearAsyncValidityTimer();
+	      this.clearPositionTransitionListener();
+	    }
+
+	    /** 当前是否处于 mermaid 操作框会话 */
+	  }, {
+	    key: "isActive",
+	    value: function isActive() {
+	      var bubbleHandler = this.host.bubbleHandler;
+	      return bubbleHandler.click === imgSizeHandler && imgSizeHandler.isMermaid;
+	    }
+
+	    /**
+	     * 选中 mermaid 时初始化编辑上下文
+	     * @param {HTMLElement} figureElement
+	     * @returns {boolean}
+	     */
+	  }, {
+	    key: "beginEdit",
+	    value: function beginEdit(figureElement) {
+	      var _this$host = this.host,
+	        previewerDom = _this$host.previewerDom,
+	        editor = _this$host.editor;
+	      if (!(editor !== null && editor !== void 0 && editor.editor)) {
+	        return false;
+	      }
+	      var allFigures = _Array$from(previewerDom.querySelectorAll('figure[data-type="mermaid"]'));
+	      var previewIndex = _indexOfInstanceProperty(allFigures).call(allFigures, figureElement);
+	      if (previewIndex < 0) {
+	        return false;
+	      }
+	      var rawContent = editor.editor.view.state.doc.toString();
+	      var context = buildMermaidEditContext(rawContent, previewIndex, editor.editor.view.state.doc);
+	      if (!context) {
+	        return false;
+	      }
+	      this.previewIndex = context.previewIndex;
+	      this.anchorBody = context.anchorBody;
+	      this.anchorPreviewIndex = context.previewIndex;
+	      this.langLineNum = context.langLineNum;
+	      this.extendFrom = context.extendFrom;
+	      this.extendTo = context.extendTo;
+	      this.size = context.size;
+	      this.align = context.align;
+	      this.hasExtend = context.hasExtend;
+	      if (this.hasExtend) {
+	        editor.editor.setSelection(this.extendFrom, this.extendTo);
+	      } else {
+	        editor.editor.setSelection(this.extendFrom, this.extendFrom);
+	      }
+	      return true;
+	    }
+
+	    /** 注入 handler 的校验/解析回调 */
+	  }, {
+	    key: "createHandlerOptions",
+	    value: function createHandlerOptions(onInvalidTarget) {
+	      var _this = this;
+	      return {
+	        onInvalidTarget: onInvalidTarget,
+	        validateTarget: function validateTarget() {
+	          return _this.isValid({
+	            strict: false
+	          });
+	        },
+	        resolveTarget: function resolveTarget() {
+	          return _this.resolveFigure();
+	        }
+	      };
+	    }
+
+	    /** 绑定 imgSizeHandler 拖拽时同步方向控制器 */
+	  }, {
+	    key: "bindPositionFollow",
+	    value: function bindPositionFollow() {
+	      var _this2 = this;
+	      imgSizeHandler.onPositionUpdated = function () {
+	        if (_this2.host.bubbleHandler.imgTool !== imgToolHandler) {
+	          return;
+	        }
+	        imgToolHandler.refreshTarget();
+	        imgToolHandler.updatePosition();
+	      };
+	    }
+
+	    /** 清理 timer 与联动回调（imgSizeHandler.remove 时调用） */
+	  }, {
+	    key: "disposeHandlers",
+	    value: function disposeHandlers() {
+	      this.clearPositionSyncTimer();
+	      imgSizeHandler.onPositionUpdated = null;
+	    }
+
+	    /**
+	     * 按编辑器源码锚点解析 index
+	     * @returns {number}
+	     */
+	  }, {
+	    key: "getEditorIndex",
+	    value: function getEditorIndex() {
+	      var editor = this.host.editor;
+	      if (!(editor !== null && editor !== void 0 && editor.editor) || !this.anchorBody) {
+	        return -1;
+	      }
+	      return findMermaidBlockIndexByCodeBody(editor.editor.view.state.doc.toString(), this.anchorBody, this.anchorPreviewIndex);
+	    }
+
+	    /**
+	     * 预览刷新后 rebind figure
+	     * @returns {HTMLElement | null}
+	     */
+	  }, {
+	    key: "resolveFigure",
+	    value: function resolveFigure() {
+	      if (!imgSizeHandler.isMermaid) {
+	        return imgSizeHandler.img;
+	      }
+	      var editorIndex = this.getEditorIndex();
+	      if (editorIndex < 0) {
+	        return null;
+	      }
+	      this.previewIndex = editorIndex;
+	      var previewerDom = this.host.previewerDom;
+	      if (editorIndex >= countMermaidFigures(previewerDom)) {
+	        return null;
+	      }
+	      var current = getMermaidFigureByIndex(previewerDom, editorIndex);
+	      if (!current) {
+	        return null;
+	      }
+	      imgSizeHandler.img = current;
+	      if (this.host.bubbleHandler.imgTool === imgToolHandler) {
+	        imgToolHandler.img = current;
+	      }
+	      return current;
+	    }
+
+	    /**
+	     * 校验操作框是否仍有效
+	     * @param {{ strict?: boolean }} [options]
+	     * @returns {boolean}
+	     */
+	  }, {
+	    key: "isValid",
+	    value: function isValid() {
+	      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	      var _options$strict = options.strict,
+	        strict = _options$strict === void 0 ? false : _options$strict;
+	      if (imgSizeHandler.$isResizing()) {
+	        return true;
+	      }
+	      var editorIndex = this.getEditorIndex();
+	      var target = this.resolveFigure();
+	      if (!strict && this.selfEditing) {
+	        return editorIndex >= 0;
+	      }
+	      if (editorIndex < 0) {
+	        return false;
+	      }
+	      if (!target || !document.contains(target) || !this.host.previewerDom.contains(target)) {
+	        return false;
+	      }
+	      return isMermaidPreviewVisible(target, this.host.previewerDom);
+	    }
+
+	    /** 同步选择框与方向控制器位置 */
+	  }, {
+	    key: "applyHandlerPositions",
+	    value: function applyHandlerPositions() {
+	      if (!imgSizeHandler.$isResizing()) {
+	        imgSizeHandler.updatePosition();
+	      }
+	      if (this.host.bubbleHandler.imgTool === imgToolHandler) {
+	        imgToolHandler.refreshTarget();
+	        imgToolHandler.updatePosition();
+	      }
+	    }
+	  }, {
+	    key: "clearPositionSyncTimer",
+	    value: function clearPositionSyncTimer() {
+	      if (this.positionSyncTimer) {
+	        clearTimeout(this.positionSyncTimer);
+	        this.positionSyncTimer = null;
+	      }
+	    }
+	  }, {
+	    key: "clearAsyncValidityTimer",
+	    value: function clearAsyncValidityTimer() {
+	      if (this.asyncValidityTimer) {
+	        clearTimeout(this.asyncValidityTimer);
+	        this.asyncValidityTimer = null;
+	      }
+	    }
+	  }, {
+	    key: "clearPositionTransitionListener",
+	    value: function clearPositionTransitionListener() {
+	      if (this.positionTransitionFigure && this.positionTransitionHandler) {
+	        this.positionTransitionFigure.removeEventListener('transitionend', this.positionTransitionHandler);
+	      }
+	      this.positionTransitionFigure = null;
+	      this.positionTransitionHandler = null;
+	    }
+
+	    /**
+	     * 等待 figure 过渡结束后统一更新位置
+	     * @param {() => void} [onInvalidTarget]
+	     */
+	  }, {
+	    key: "schedulePositionSync",
+	    value: function schedulePositionSync(onInvalidTarget) {
+	      var _imgSizeHandler$$clea,
+	        _this3 = this;
+	      if (!this.isActive() || imgSizeHandler.$isResizing()) {
+	        return;
+	      }
+	      (_imgSizeHandler$$clea = imgSizeHandler.$clearPreviewUpdateTimer) === null || _imgSizeHandler$$clea === void 0 ? void 0 : _imgSizeHandler$$clea.call(imgSizeHandler);
+	      this.clearPositionSyncTimer();
+	      this.clearPositionTransitionListener();
+	      var sync = function sync() {
+	        if (!_this3.isValid({
+	          strict: false
+	        })) {
+	          var _context;
+	          (onInvalidTarget || _bindInstanceProperty(_context = _this3.host.$removeImgPreviewerBubbles).call(_context, _this3.host))();
+	          return;
+	        }
+	        _this3.applyHandlerPositions();
+	      };
+	      var figure = imgSizeHandler.img;
+	      if (!figure) {
+	        sync();
+	        return;
+	      }
+	      this.positionTransitionFigure = figure;
+	      this.positionTransitionHandler = sync;
+	      figure.addEventListener('transitionend', sync, {
+	        once: true
+	      });
+	      this.positionSyncTimer = _setTimeout(function () {
+	        _this3.positionSyncTimer = null;
+	        sync();
+	      }, 120);
+	    }
+
+	    /** 预览 DOM 更新后 */
+	  }, {
+	    key: "onPreviewUpdate",
+	    value: function onPreviewUpdate() {
+	      var _this4 = this;
+	      this.resolveFigure();
+	      this.schedulePositionSync(function () {
+	        return _this4.host.$removeImgPreviewerBubbles();
+	      });
+	    }
+
+	    /** mermaid 异步渲染 patch DOM 后 */
+	  }, {
+	    key: "onAsyncRenderDone",
+	    value: function onAsyncRenderDone() {
+	      this.onPreviewUpdate();
+	      this.scheduleAsyncValidityCheck();
+	    }
+
+	    /**
+	     * fix(MermaidBubbleSession): 邻居块异步恢复会触发布局重排，延迟校验避免误关选中框
+	     * @param {number} [attempt]
+	     */
+	  }, {
+	    key: "scheduleAsyncValidityCheck",
+	    value: function scheduleAsyncValidityCheck() {
+	      var _this5 = this;
+	      var attempt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+	      this.clearAsyncValidityTimer();
+	      var maxAttempts = 8;
+	      var delay = attempt === 0 ? 0 : 50;
+	      this.asyncValidityTimer = _setTimeout(function () {
+	        _this5.asyncValidityTimer = null;
+	        if (!_this5.isActive()) {
+	          return;
+	        }
+	        _this5.resolveFigure();
+	        if (_this5.isValid({
+	          strict: true
+	        })) {
+	          _this5.clearSelfEditingIfReady();
+	          return;
+	        }
+	        if (attempt >= maxAttempts) {
+	          _this5.host.$checkAndRemoveInvalidImgHandlers({
+	            strict: true
+	          });
+	          return;
+	        }
+	        _this5.scheduleAsyncValidityCheck(attempt + 1);
+	      }, delay);
+	    }
+
+	    /** 布局编辑完成且 svg 可见时清除 selfEditing 标记 */
+	  }, {
+	    key: "clearSelfEditingIfReady",
+	    value: function clearSelfEditingIfReady() {
+	      if (!this.selfEditing || !this.isActive()) {
+	        this.selfEditing = false;
+	        return;
+	      }
+	      var target = this.resolveFigure();
+	      if (target && isMermaidPreviewVisible(target, this.host.previewerDom)) {
+	        this.selfEditing = false;
+	      }
+	    }
+
+	    /** 写入布局参数到编辑器语言行 */
+	  }, {
+	    key: "applyLayoutValue",
+	    value: function applyLayoutValue() {
+	      var _context2;
+	      this.selfEditing = true;
+	      var editor = this.host.editor;
+	      if (!(editor !== null && editor !== void 0 && editor.editor)) {
+	        return;
+	      }
+	      var value = _filterInstanceProperty(_context2 = [this.size, this.align]).call(_context2, function (v) {
+	        return v;
+	      }).join(' ');
+	      if (this.hasExtend) {
+	        editor.editor.setSelection(this.extendFrom, this.extendTo);
+	        editor.editor.replaceSelection(value, 'around');
+	        this.extendTo = this.extendFrom + value.length;
+	      } else if (value) {
+	        editor.editor.setSelection(this.extendFrom, this.extendFrom);
+	        editor.editor.replaceSelection(" ".concat(value), 'around');
+	        this.extendFrom += 1;
+	        this.extendTo = this.extendFrom + value.length;
+	        this.hasExtend = true;
+	      }
+	    }
+
+	    /** @param {{ width: number, height: number }} style */
+	  }, {
+	    key: "changeSize",
+	    value: function changeSize(style) {
+	      var _context3;
+	      this.size = _concatInstanceProperty(_context3 = "#".concat(Math.round(style.width), "px #")).call(_context3, Math.round(style.height), "px");
+	      this.applyLayoutValue();
+	    }
+
+	    /** @param {string} type */
+	  }, {
+	    key: "changeAlign",
+	    value: function changeAlign(type) {
+	      switch (type) {
+	        case 'left':
+	        case 'right':
+	        case 'center':
+	        case 'float-left':
+	        case 'float-right':
+	          this.align = "#".concat(type);
+	          break;
+	        case 'clear-align':
+	          this.align = '';
+	          break;
+	        default:
+	          return;
+	      }
+	      this.applyLayoutValue();
+	    }
+	  }]);
+	}();
 
 	function _createForOfIteratorHelper$1g(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1g(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 	function _unsupportedIterableToArray$1g(r, a) { if (r) { var _context23; if ("string" == typeof r) return _arrayLikeToArray$1h(r, a); var t = _sliceInstanceProperty(_context23 = {}.toString.call(r)).call(_context23, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1h(r, a) : void 0; } }
@@ -104487,6 +105460,9 @@
 	  }]);
 	}();
 
+	function ownKeys$6(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+	function _objectSpread$6(e) { for (var r = 1; r < arguments.length; r++) { var _context27, _context28; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context27 = ownKeys$6(Object(t), !0)).call(_context27, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context28 = ownKeys$6(Object(t))).call(_context28, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+
 	/**
 	 * 预览区域的响应式工具栏
 	 */
@@ -104527,6 +105503,8 @@
 	    this.imgLeadingSpacePos = -1;
 	    /** 记录 beginChangeImgValue 时的文档状态，用于位置映射追踪 */
 	    this.imgChangeBaseState = null;
+	    /** @type {MermaidBubbleSession} */
+	    this.mermaidSession = new MermaidBubbleSession(this);
 	    this.init();
 	  }
 	  return _createClass$1(PreviewerBubble, [{
@@ -104599,15 +105577,40 @@
 	        return _this.$removeAllPreviewerBubbles();
 	      });
 	      this.previewer.options.afterUpdateCallBack.push(function () {
-	        var _context0;
 	        // 检查表格处理器是否需要重新创建
 	        _this.$checkAndRecreateTableHandlers();
-	        _forEachInstanceProperty(_context0 = _Object$values(_this.bubbleHandler)).call(_context0, function (handler) {
-	          return handler.emit('previewUpdate', function () {
-	            return _this.$removeAllPreviewerBubbles();
+	        if (_this.mermaidSession.isActive()) {
+	          _this.mermaidSession.onPreviewUpdate();
+	        } else {
+	          var _context0;
+	          _forEachInstanceProperty(_context0 = _Object$values(_this.bubbleHandler)).call(_context0, function (handler) {
+	            return handler.emit('previewUpdate', function () {
+	              return _this.$removeImgPreviewerBubbles();
+	            });
 	          });
-	        });
+	        }
+	        _this.$checkAndRemoveInvalidImgHandlers();
+	        _this.mermaidSession.clearSelfEditingIfReady();
 	      });
+	      // 预览隐藏时 afterUpdate 不会刷新 DOM，仅在此时做兜底校验
+	      this.$bindedOnAfterChange = function () {
+	        var _this$previewer, _this$previewer$isPre;
+	        if ((_this$previewer = _this.previewer) !== null && _this$previewer !== void 0 && (_this$previewer$isPre = _this$previewer.isPreviewerHidden) !== null && _this$previewer$isPre !== void 0 && _this$previewer$isPre.call(_this$previewer)) {
+	          _this.$checkAndRemoveInvalidImgHandlers();
+	        }
+	      };
+	      this.$cherry.$event.on('afterChange', this.$bindedOnAfterChange);
+	      // mermaid 异步渲染/失败回退会直接改 DOM，不经过 previewer.update，需单独监听
+	      this.$bindedOnAfterAsyncRender = function () {
+	        if (_this.mermaidSession.isActive()) {
+	          _this.mermaidSession.onAsyncRenderDone();
+	        } else {
+	          _this.$checkAndRemoveInvalidImgHandlers({
+	            strict: true
+	          });
+	        }
+	      };
+	      this.$cherry.$event.on('afterAsyncRender', this.$bindedOnAfterAsyncRender);
 	      this.previewerDom.addEventListener('change', this.$bindedOnChange);
 	      this.removeHoverBubble = debounce$2(function () {
 	        return _this.$removeAllPreviewerBubbles('hover');
@@ -104708,7 +105711,7 @@
 	  }, {
 	    key: "$onMouseOver",
 	    value: function $onMouseOver(e) {
-	      var _this$previewer, _this$previewer$$cher, _this$previewer$$cher2, _this$previewer$$cher3, _this$previewer$$cher4, _this$previewer$$cher5;
+	      var _this$previewer2, _this$previewer2$$che, _this$previewer2$$che2, _this$previewer2$$che3, _this$previewer2$$che4, _this$previewer2$$che5;
 	      /** @type {Event} */
 	      var target = e.target;
 	      // 这里要用Element，而不是HTMLElement
@@ -104745,7 +105748,7 @@
 	        case 'A':
 	          // @ts-ignore
 	          // eslint-disable-next-line no-case-declarations
-	          var bubbleCard = ((_this$previewer = this.previewer) === null || _this$previewer === void 0 ? void 0 : (_this$previewer$$cher = _this$previewer.$cherry) === null || _this$previewer$$cher === void 0 ? void 0 : (_this$previewer$$cher2 = _this$previewer$$cher.options) === null || _this$previewer$$cher2 === void 0 ? void 0 : (_this$previewer$$cher3 = _this$previewer$$cher2.engine) === null || _this$previewer$$cher3 === void 0 ? void 0 : (_this$previewer$$cher4 = _this$previewer$$cher3.syntax) === null || _this$previewer$$cher4 === void 0 ? void 0 : (_this$previewer$$cher5 = _this$previewer$$cher4.footnote) === null || _this$previewer$$cher5 === void 0 ? void 0 : _this$previewer$$cher5.bubbleCard) || false;
+	          var bubbleCard = ((_this$previewer2 = this.previewer) === null || _this$previewer2 === void 0 ? void 0 : (_this$previewer2$$che = _this$previewer2.$cherry) === null || _this$previewer2$$che === void 0 ? void 0 : (_this$previewer2$$che2 = _this$previewer2$$che.options) === null || _this$previewer2$$che2 === void 0 ? void 0 : (_this$previewer2$$che3 = _this$previewer2$$che2.engine) === null || _this$previewer2$$che3 === void 0 ? void 0 : (_this$previewer2$$che4 = _this$previewer2$$che3.syntax) === null || _this$previewer2$$che4 === void 0 ? void 0 : (_this$previewer2$$che5 = _this$previewer2$$che4.footnote) === null || _this$previewer2$$che5 === void 0 ? void 0 : _this$previewer2$$che5.bubbleCard) || false;
 	          if (bubbleCard !== false && /cherry-show-bubble-card/.test(e.target.className)) {
 	            this.removeHoverBubble.cancel();
 	            this.$removeAllPreviewerBubbles('hover');
@@ -104839,13 +105842,13 @@
 	  }, {
 	    key: "$onClick",
 	    value: function $onClick(e) {
-	      var _this$previewer$$cher6,
-	        _this$previewer$$cher7,
+	      var _this$previewer$$cher,
+	        _this$previewer$$cher2,
 	        _this3 = this,
-	        _this$previewer$$cher8,
+	        _this$previewer$$cher3,
 	        _target$parentElement;
 	      // 如果有自定义的onClickPreview回调函数，则先执行；返回false时中断后续处理
-	      if (((_this$previewer$$cher6 = this.previewer.$cherry.options.callback) === null || _this$previewer$$cher6 === void 0 ? void 0 : (_this$previewer$$cher7 = _this$previewer$$cher6.onClickPreview) === null || _this$previewer$$cher7 === void 0 ? void 0 : _this$previewer$$cher7.call(_this$previewer$$cher6, e)) === false) {
+	      if (((_this$previewer$$cher = this.previewer.$cherry.options.callback) === null || _this$previewer$$cher === void 0 ? void 0 : (_this$previewer$$cher2 = _this$previewer$$cher.onClickPreview) === null || _this$previewer$$cher2 === void 0 ? void 0 : _this$previewer$$cher2.call(_this$previewer$$cher, e)) === false) {
 	        return false;
 	      }
 	      var target = e.target;
@@ -104905,7 +105908,7 @@
 	        case 'A':
 	          // 如果配置了点击toc目录不更新location hash
 	          // @ts-ignore
-	          if (((_this$previewer$$cher8 = this.previewer.$cherry.options.toolbars.toc) === null || _this$previewer$$cher8 === void 0 ? void 0 : _this$previewer$$cher8.updateLocationHash) === false) {
+	          if (((_this$previewer$$cher3 = this.previewer.$cherry.options.toolbars.toc) === null || _this$previewer$$cher3 === void 0 ? void 0 : _this$previewer$$cher3.updateLocationHash) === false) {
 	            if (target instanceof Element && target.nodeName === 'A' && /level-\d+/.test(target.className)) {
 	              var _context10;
 	              var liNode = target.parentElement;
@@ -104917,9 +105920,9 @@
 	          }
 	          // 如果点击的是脚注
 	          if (target instanceof Element && target.nodeName === 'A' && /(footnote|footnote-ref)/.test(target.className)) {
-	            var _this$previewer$$cher9, _this$previewer$$cher0, _this$previewer$$cher1, _this$previewer$$cher10, _this$previewer$$cher11;
+	            var _this$previewer$$cher4, _this$previewer$$cher5, _this$previewer$$cher6, _this$previewer$$cher7, _this$previewer$$cher8;
 	            if (target.classList.contains('footnote') && // @ts-ignore
-	            (_this$previewer$$cher9 = this.previewer.$cherry.options.engine) !== null && _this$previewer$$cher9 !== void 0 && (_this$previewer$$cher0 = _this$previewer$$cher9.syntax) !== null && _this$previewer$$cher0 !== void 0 && (_this$previewer$$cher1 = _this$previewer$$cher0.footnote) !== null && _this$previewer$$cher1 !== void 0 && (_this$previewer$$cher10 = _this$previewer$$cher1.refNumber) !== null && _this$previewer$$cher10 !== void 0 && _this$previewer$$cher10.clickRefNumberCallback) {
+	            (_this$previewer$$cher4 = this.previewer.$cherry.options.engine) !== null && _this$previewer$$cher4 !== void 0 && (_this$previewer$$cher5 = _this$previewer$$cher4.syntax) !== null && _this$previewer$$cher5 !== void 0 && (_this$previewer$$cher6 = _this$previewer$$cher5.footnote) !== null && _this$previewer$$cher6 !== void 0 && (_this$previewer$$cher7 = _this$previewer$$cher6.refNumber) !== null && _this$previewer$$cher7 !== void 0 && _this$previewer$$cher7.clickRefNumberCallback) {
 	              var _this$previewer$getDo;
 	              var refNum = target.getAttribute('data-index');
 	              var refTitle = target.getAttribute('data-key');
@@ -104936,7 +105939,7 @@
 	            }
 	            /** 增加个潜规则逻辑，脚注跳转时是否更新location hash也跟随options.toolbars.toc.updateLocationHash 的配置 */
 	            // @ts-ignore
-	            if (((_this$previewer$$cher11 = this.previewer.$cherry.options.toolbars.toc) === null || _this$previewer$$cher11 === void 0 ? void 0 : _this$previewer$$cher11.updateLocationHash) === false) {
+	            if (((_this$previewer$$cher8 = this.previewer.$cherry.options.toolbars.toc) === null || _this$previewer$$cher8 === void 0 ? void 0 : _this$previewer$$cher8.updateLocationHash) === false) {
 	              var id = target.getAttribute('href');
 	              this.previewer.scrollToId(id);
 	              e.stopPropagation();
@@ -105054,6 +106057,24 @@
 	    }
 
 	    /**
+	     * click 气泡与 imgTool 成对出现，移除 click 时需一并清理 imgTool
+	     * @param {string} key 气泡 trigger 键名
+	     * @param {string} trigger 当前指定的移除范围
+	     * @returns {boolean}
+	     */
+	  }, {
+	    key: "$shouldRemoveBubbleKey",
+	    value: function $shouldRemoveBubbleKey(key, trigger) {
+	      if (!trigger) {
+	        return true;
+	      }
+	      if (trigger === 'click') {
+	        return key === 'click' || key === 'imgTool';
+	      }
+	      return key === trigger;
+	    }
+
+	    /**
 	     * 隐藏预览区域已经激活的工具栏
 	     * @param {string} trigger 移除指定的触发方式，不传默认全部移除
 	     */
@@ -105065,13 +106086,13 @@
 	        _this4 = this,
 	        _context13,
 	        _context14,
-	        _this$previewer2,
-	        _this$previewer2$$che;
+	        _this$previewer3,
+	        _this$previewer3$$che;
 	      var trigger = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
 	      _forEachInstanceProperty(_context11 = _filterInstanceProperty(_context12 = _Object$entries(this.bubble)).call(_context12, function (_ref) {
 	        var _ref2 = _slicedToArray$1(_ref, 1),
 	          key = _ref2[0];
-	        return !trigger || trigger === key;
+	        return _this4.$shouldRemoveBubbleKey(key, trigger);
 	      })).call(_context11, function (_ref3) {
 	        var _ref4 = _slicedToArray$1(_ref3, 2),
 	          key = _ref4[0],
@@ -105082,7 +106103,7 @@
 	      _forEachInstanceProperty(_context13 = _filterInstanceProperty(_context14 = _Object$entries(this.bubbleHandler)).call(_context14, function (_ref5) {
 	        var _ref6 = _slicedToArray$1(_ref5, 1),
 	          key = _ref6[0];
-	        return !trigger || trigger === key;
+	        return _this4.$shouldRemoveBubbleKey(key, trigger);
 	      })).call(_context13, function (_ref7) {
 	        var _ref8 = _slicedToArray$1(_ref7, 2),
 	          key = _ref8[0],
@@ -105090,9 +106111,21 @@
 	        value.emit('remove');
 	        delete _this4.bubbleHandler[key];
 	      });
-	      if (_Object$keys(this.bubbleHandler).length <= 0 && (_this$previewer2 = this.previewer) !== null && _this$previewer2 !== void 0 && (_this$previewer2$$che = _this$previewer2.$cherry) !== null && _this$previewer2$$che !== void 0 && _this$previewer2$$che.wrapperDom) {
+	      if (_Object$keys(this.bubbleHandler).length <= 0 && (_this$previewer3 = this.previewer) !== null && _this$previewer3 !== void 0 && (_this$previewer3$$che = _this$previewer3.$cherry) !== null && _this$previewer3$$che !== void 0 && _this$previewer3$$che.wrapperDom) {
 	        this.previewer.$cherry.wrapperDom.style.overflow = this.oldWrapperDomOverflow || '';
 	      }
+	      if (!trigger || trigger === 'click') {
+	        this.mermaidSession.reset();
+	      }
+	    }
+
+	    /**
+	     * 移除图片/mermaid 编辑相关的气泡（选择框 + 对齐工具栏）
+	     */
+	  }, {
+	    key: "$removeImgPreviewerBubbles",
+	    value: function $removeImgPreviewerBubbles() {
+	      this.$removeAllPreviewerBubbles('click');
 	    }
 
 	    /**
@@ -105117,6 +106150,51 @@
 	          }
 	        }
 	      });
+	    }
+
+	    /**
+	     * 检查图片/mermaid 尺寸处理器是否仍然有效
+	     * @param {{ strict?: boolean }} [options] strict=true 时在异步渲染完成后严格校验预览内容
+	     * @returns {boolean}
+	     */
+	  }, {
+	    key: "$isImgHandlerValid",
+	    value: function $isImgHandlerValid() {
+	      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	      if (this.bubbleHandler.click !== imgSizeHandler) {
+	        return true;
+	      }
+	      if (imgSizeHandler.isMermaid && this.mermaidSession.isActive()) {
+	        return this.mermaidSession.isValid(options);
+	      }
+	      if (imgSizeHandler.$isResizing()) {
+	        return true;
+	      }
+	      var target = imgSizeHandler.img;
+	      if (!target || !document.contains(target) || !this.previewerDom.contains(target)) {
+	        return false;
+	      }
+	      if (target.tagName !== 'IMG') {
+	        return false;
+	      }
+	      var rect = target.getBoundingClientRect();
+	      return rect.width > 0 && rect.height > 0;
+	    }
+
+	    /**
+	     * 预览区更新后检查图片/mermaid 选中目标是否仍可编辑
+	     * @param {{ strict?: boolean }} [options]
+	     */
+	  }, {
+	    key: "$checkAndRemoveInvalidImgHandlers",
+	    value: function $checkAndRemoveInvalidImgHandlers() {
+	      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	      if (this.bubbleHandler.click !== imgSizeHandler) {
+	        return;
+	      }
+	      if (!this.$isImgHandlerValid(options)) {
+	        this.$removeImgPreviewerBubbles();
+	      }
 	    }
 
 	    /**
@@ -105158,7 +106236,7 @@
 	  }, {
 	    key: "$removePreviewerBubble",
 	    value: function $removePreviewerBubble(trigger) {
-	      var _this$previewer3, _this$previewer3$$che;
+	      var _this$previewer4, _this$previewer4$$che;
 	      if (this.bubble[trigger]) {
 	        this.bubble[trigger].remove();
 	        delete this.bubble[trigger];
@@ -105167,7 +106245,7 @@
 	        this.bubbleHandler[trigger].emit('remove');
 	        delete this.bubbleHandler[trigger];
 	      }
-	      if (_Object$keys(this.bubbleHandler).length <= 0 && (_this$previewer3 = this.previewer) !== null && _this$previewer3 !== void 0 && (_this$previewer3$$che = _this$previewer3.$cherry) !== null && _this$previewer3$$che !== void 0 && _this$previewer3$$che.wrapperDom) {
+	      if (_Object$keys(this.bubbleHandler).length <= 0 && (_this$previewer4 = this.previewer) !== null && _this$previewer4 !== void 0 && (_this$previewer4$$che = _this$previewer4.$cherry) !== null && _this$previewer4$$che !== void 0 && _this$previewer4$$che.wrapperDom) {
 	        this.previewer.$cherry.wrapperDom.style.overflow = this.oldWrapperDomOverflow || '';
 	      }
 	    }
@@ -105247,10 +106325,10 @@
 	  }, {
 	    key: "$showImgPreviewerBubbles",
 	    value: function $showImgPreviewerBubbles(htmlElement, event) {
-	      var _context17,
+	      var _this6 = this,
+	        _context17,
 	        _context18,
-	        _context19,
-	        _this6 = this;
+	        _context19;
 	      // 图片编辑功能需要编辑器支持
 	      if (!this.$hasEditor()) {
 	        return;
@@ -105264,15 +106342,27 @@
 	          emit: function emit() {}
 	        };
 	      }
+	      var onInvalidTarget = function onInvalidTarget() {
+	        return _this6.$removeImgPreviewerBubbles();
+	      };
+	      var validateTarget = function validateTarget() {
+	        return _this6.$isImgHandlerValid();
+	      };
 	      var imgSizeDiv = document.createElement('div');
 	      imgSizeDiv.className = 'cherry-previewer-img-size-handler';
 	      this.bubble.click.appendChild(imgSizeDiv);
-	      imgSizeHandler.showBubble(htmlElement, imgSizeDiv, this.previewerDom);
+	      imgSizeHandler.showBubble(htmlElement, imgSizeDiv, this.previewerDom, {
+	        onInvalidTarget: onInvalidTarget,
+	        validateTarget: validateTarget
+	      });
 	      imgSizeHandler.bindChange(_bindInstanceProperty(_context17 = this.changeImgSize).call(_context17, this));
 	      var imgToolDiv = document.createElement('div');
 	      imgToolDiv.className = 'cherry-previewer-img-tool-handler';
 	      this.bubble.click.appendChild(imgToolDiv);
-	      imgToolHandler.showBubble(htmlElement, imgToolDiv, this.previewerDom, event, this.previewer.$cherry.getLocales());
+	      imgToolHandler.showBubble(htmlElement, imgToolDiv, this.previewerDom, event, this.previewer.$cherry.getLocales(), {
+	        onInvalidTarget: onInvalidTarget,
+	        validateTarget: validateTarget
+	      });
 	      imgToolHandler.bindChange(_bindInstanceProperty(_context18 = this.changeImgStyle).call(_context18, this));
 
 	      // 订阅编辑器大小变化事件
@@ -105663,15 +106753,15 @@
 
 	    /**
 	     * 为选中的 mermaid 图表增加尺寸调整工具
+	     *
+	     * fix(PreviewerBubble): mermaid 会话逻辑见 MermaidBubbleSession，编辑器解析见 mermaidEditorHelper
 	     * @param {HTMLElement} figureElement mermaid 图表的 figure DOM
 	     */
 	  }, {
 	    key: "$showMermaidPreviewerBubbles",
 	    value: function $showMermaidPreviewerBubbles(figureElement, event) {
-	      var _context25,
-	        _context26,
-	        _context27,
-	        _this7 = this;
+	      var _this7 = this,
+	        _context25;
 	      if (!this.$isEnableBubbleAndEditorShow()) {
 	        return;
 	      }
@@ -105680,177 +106770,47 @@
 	        return;
 	      }
 	      this.$createPreviewerBubbles('click', 'img-handler');
-	      this.mermaidFigure = figureElement;
-	      if (!this.beginChangeMermaidValue(figureElement)) {
+	      if (!this.mermaidSession.beginEdit(figureElement)) {
 	        return;
 	      }
+	      var onInvalidTarget = function onInvalidTarget() {
+	        return _this7.$removeImgPreviewerBubbles();
+	      };
+	      var handlerOptions = this.mermaidSession.createHandlerOptions(onInvalidTarget);
 	      var imgSizeDiv = document.createElement('div');
 	      imgSizeDiv.className = 'cherry-previewer-img-size-handler';
 	      this.bubble.click.appendChild(imgSizeDiv);
-	      imgSizeHandler.showBubble(figureElement, imgSizeDiv, this.previewerDom, {
+	      imgSizeHandler.showBubble(figureElement, imgSizeDiv, this.previewerDom, _objectSpread$6({
 	        isMermaid: true,
-	        targetIndex: this.mermaidIndex
+	        targetIndex: this.mermaidSession.previewIndex
+	      }, handlerOptions));
+	      imgSizeHandler.bindChange(function (_htmlElement, style) {
+	        return _this7.mermaidSession.changeSize(style);
 	      });
-	      imgSizeHandler.bindChange(_bindInstanceProperty(_context25 = this.changeMermaidSize).call(_context25, this));
+	      this.mermaidSession.bindPositionFollow();
 
 	      // 添加对齐工具面板（仅对齐按钮，不含装饰按钮）
 	      var imgToolDiv = document.createElement('div');
 	      imgToolDiv.className = 'cherry-previewer-img-tool-handler';
 	      this.bubble.click.appendChild(imgToolDiv);
-	      imgToolHandler.showBubble(figureElement, imgToolDiv, this.previewerDom, event, this.previewer.$cherry.getLocales(), {
+	      imgToolHandler.showBubble(figureElement, imgToolDiv, this.previewerDom, event, this.previewer.$cherry.getLocales(), _objectSpread$6({
 	        isMermaid: true,
-	        targetIndex: this.mermaidIndex
+	        targetIndex: this.mermaidSession.previewIndex
+	      }, handlerOptions));
+	      imgToolHandler.bindChange(function (_htmlElement, type) {
+	        return _this7.mermaidSession.changeAlign(type);
 	      });
-	      imgToolHandler.bindChange(_bindInstanceProperty(_context26 = this.changeMermaidStyle).call(_context26, this));
-	      var updateHandler = _bindInstanceProperty(_context27 = imgSizeHandler.updatePosition).call(_context27, imgSizeHandler);
+	      var updateHandler = _bindInstanceProperty(_context25 = imgSizeHandler.updatePosition).call(_context25, imgSizeHandler);
 	      this.$cherry.$event.on('editor.size.change', updateHandler);
 	      var originalRemove = imgSizeHandler.remove;
 	      imgSizeHandler.remove = function () {
 	        _this7.$cherry.$event.off('editor.size.change', updateHandler);
+	        _this7.mermaidSession.disposeHandlers();
 	        return originalRemove.call(imgSizeHandler);
 	      };
 	      this.bubbleHandler.click = imgSizeHandler;
 	      this.bubbleHandler.imgTool = imgToolHandler;
 	    }
-
-	    /**
-	     * 选中 mermaid 代码块语法的语言行中的扩展参数部分（尺寸 + 对齐）
-	     * @param {HTMLElement} figureElement mermaid figure DOM
-	     * @returns {boolean}
-	     */
-	  }, {
-	    key: "beginChangeMermaidValue",
-	    value: function beginChangeMermaidValue(figureElement) {
-	      // 找到预览区中所有 mermaid 图表，确定当前点击的是第几个
-	      var allMermaidFigures = _Array$from(this.previewerDom.querySelectorAll('figure[data-type="mermaid"]'));
-	      var mermaidIndex = _indexOfInstanceProperty(allMermaidFigures).call(allMermaidFigures, figureElement);
-	      if (mermaidIndex < 0) {
-	        return false;
-	      }
-	      this.mermaidIndex = mermaidIndex;
-	      var rawContent = this.editor.editor.view.state.doc.toString();
-	      // 在编辑器原始内容中按顺序找到所有 mermaid 代码块
-	      var codeBlockReg = /(?:^|\n)(\n*(?:>[\t ]*)*(?:[^\S\n]*))(`{3,})([^`]*?)\n([\w\W]*?)\n\s*\2[ \t]*(?=$|\n)/g;
-	      var match;
-	      var currentMermaidIdx = -1;
-	      while ((match = codeBlockReg.exec(rawContent)) !== null) {
-	        var _context28, _context29;
-	        var langLine = _trimInstanceProperty(_context28 = match[3]).call(_context28).toLowerCase();
-	        var langPure = _trimInstanceProperty(_context29 = langLine.replace(/#([0-9]+(px|em|pt|pc|in|mm|cm|ex|%)|auto)/gi, '').replace(/#(center|right|left|float-right|float-left)/gi, '')).call(_context29);
-
-	        // 判断是否为 mermaid 类型的代码块
-	        if (langPure !== 'mermaid' && !/^flow([ ](td|lr))?$/i.test(langPure) && langPure !== 'seq') {
-	          continue;
-	        }
-	        currentMermaidIdx += 1;
-	        if (currentMermaidIdx !== mermaidIndex) {
-	          continue;
-	        }
-
-	        // 找到了对应的代码块，定位语言行
-	        var fullMatchStart = match.index;
-	        var leadingContent = match[1] || '';
-	        var backtickPos = _indexOfInstanceProperty(rawContent).call(rawContent, match[2], fullMatchStart + leadingContent.length);
-	        var beforeBacktick = rawContent.substring(0, backtickPos);
-	        var langLineNum = (beforeBacktick.match(/\n/g) || []).length;
-
-	        // 获取该行的完整内容
-	        var allLines = rawContent.split('\n');
-	        var fullLangLine = allLines[langLineNum] || '';
-
-	        // 匹配所有扩展参数（尺寸 + 对齐），如 "#400px #300px #center"
-	        var extendRegex = /((?:\s*#(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto|center|right|left|float-right|float-left))+)\s*$/i;
-	        var extendMatch = fullLangLine.match(extendRegex);
-
-	        // 提取当前的尺寸和对齐信息
-	        var sizeRegex = /#([0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)/gi;
-	        var alignRegex = /#(center|right|left|float-right|float-left)/i;
-	        var sizeMatches = fullLangLine.match(sizeRegex);
-	        var alignMatch = fullLangLine.match(alignRegex);
-	        this.mermaidSize = sizeMatches ? sizeMatches.join(' ') : '';
-	        this.mermaidAlign = alignMatch ? alignMatch[0] : '';
-
-	        // CM6: 计算扩展参数的文档偏移量
-	        var doc = this.editor.editor.view.state.doc;
-	        var lineStart = doc.line(langLineNum + 1).from;
-	        if (extendMatch) {
-	          var extendStart = _indexOfInstanceProperty(fullLangLine).call(fullLangLine, extendMatch[1]);
-	          this.mermaidExtendFrom = lineStart + extendStart;
-	          this.mermaidExtendTo = this.mermaidExtendFrom + extendMatch[1].length;
-	          this.editor.editor.setSelection(this.mermaidExtendFrom, this.mermaidExtendTo);
-	        } else {
-	          this.mermaidExtendFrom = lineStart + fullLangLine.length;
-	          this.mermaidExtendTo = this.mermaidExtendFrom;
-	          this.editor.editor.setSelection(this.mermaidExtendFrom, this.mermaidExtendFrom);
-	        }
-	        this.mermaidLangLineNum = langLineNum;
-	        this.mermaidHasExtend = !!extendMatch;
-	        return true;
-	      }
-	      return false;
-	    }
-
-	    /**
-	     * 拼接 mermaid 扩展参数并替换编辑器中的选中文本
-	     */
-	  }, {
-	    key: "changeMermaidValue",
-	    value: function changeMermaidValue() {
-	      var _context30;
-	      var value = _filterInstanceProperty(_context30 = [this.mermaidSize, this.mermaidAlign]).call(_context30, function (v) {
-	        return v;
-	      }).join(' ');
-	      if (this.mermaidHasExtend) {
-	        this.editor.editor.setSelection(this.mermaidExtendFrom, this.mermaidExtendTo);
-	        this.editor.editor.replaceSelection(value, 'around');
-	        this.mermaidExtendTo = this.mermaidExtendFrom + value.length;
-	      } else if (value) {
-	        this.editor.editor.setSelection(this.mermaidExtendFrom, this.mermaidExtendFrom);
-	        this.editor.editor.replaceSelection(" ".concat(value), 'around');
-	        this.mermaidExtendFrom += 1;
-	        this.mermaidExtendTo = this.mermaidExtendFrom + value.length;
-	        this.mermaidHasExtend = true;
-	      }
-	    }
-
-	    /**
-	     * 修改 mermaid 图表尺寸时的回调
-	     * @param {HTMLElement} htmlElement mermaid figure 元素
-	     * @param {Object} style 图表的属性（宽高）
-	     */
-	  }, {
-	    key: "changeMermaidSize",
-	    value: function changeMermaidSize(htmlElement, style) {
-	      var _context31;
-	      this.mermaidSize = _concatInstanceProperty(_context31 = "#".concat(Math.round(style.width), "px #")).call(_context31, Math.round(style.height), "px");
-	      this.changeMermaidValue();
-	    }
-
-	    /**
-	     * 修改 mermaid 图表对齐方式时的回调
-	     * @param {HTMLElement} htmlElement mermaid figure 元素
-	     * @param {string} type 对齐方式
-	     */
-	  }, {
-	    key: "changeMermaidStyle",
-	    value: function changeMermaidStyle(htmlElement, type) {
-	      switch (type) {
-	        case 'left':
-	        case 'right':
-	        case 'center':
-	        case 'float-left':
-	        case 'float-right':
-	          this.mermaidAlign = "#".concat(type);
-	          break;
-	        case 'clear-align':
-	          this.mermaidAlign = '';
-	          break;
-	        default:
-	          return;
-	      }
-	      this.changeMermaidValue();
-	    }
-
 	    /**
 	     * 处理 mermaid 源码/预览切换工具栏的点击
 	     * @param {Element} tabElement 被点击的 tab 元素
@@ -105858,7 +106818,7 @@
 	  }, {
 	    key: "$handleMermaidSourceToolbarClick",
 	    value: function $handleMermaidSourceToolbarClick(tabElement) {
-	      var _context32;
+	      var _context26;
 	      var mode = tabElement.getAttribute('data-mode');
 	      var figure = tabElement.closest('figure[data-type="mermaid"]');
 	      if (!figure || !mode) return;
@@ -105885,7 +106845,7 @@
 	      });
 
 	      // 滑块位置：tab 宽度 60px + 间距 3px = 63px 步进，与 SCSS 中 .cherry-mermaid-source-toolbar-tab 的定位一致
-	      var tabIndex = _indexOfInstanceProperty(_context32 = _Array$from(tabs)).call(_context32, tabElement);
+	      var tabIndex = _indexOfInstanceProperty(_context26 = _Array$from(tabs)).call(_context26, tabElement);
 	      slider.style.left = "".concat(2 + tabIndex * 63, "px");
 	    }
 	  }, {
@@ -105932,6 +106892,8 @@
 	      if (this.$cherry && this.$cherry.$event) {
 	        this.$cherry.$event.off('editor.size.change', this.$bindedOnEditorSizeChange);
 	        this.$cherry.$event.off('layoutChange', this.$bindedOnLayoutChange);
+	        this.$cherry.$event.off('afterChange', this.$bindedOnAfterChange);
+	        this.$cherry.$event.off('afterAsyncRender', this.$bindedOnAfterAsyncRender);
 	      }
 
 	      // 清理引用
@@ -105945,6 +106907,8 @@
 	      this.$bindedOnChange = null;
 	      this.$bindedOnEditorSizeChange = null;
 	      this.$bindedOnLayoutChange = null;
+	      this.$bindedOnAfterChange = null;
+	      this.$bindedOnAfterAsyncRender = null;
 	      this.bubble = {};
 	      this.bubbleHandler = {};
 	      this.previewer = null;
@@ -117778,66 +118742,6 @@
 	 */
 	_defineProperty$3(Bubble, "displayType", 'flex');
 
-	var es_number_parseFloat = {};
-
-	var hasRequiredEs_number_parseFloat;
-
-	function requireEs_number_parseFloat () {
-		if (hasRequiredEs_number_parseFloat) return es_number_parseFloat;
-		hasRequiredEs_number_parseFloat = 1;
-		'use strict';
-		var $ = /*@__PURE__*/ require_export();
-		var parseFloat = /*@__PURE__*/ requireNumberParseFloat();
-
-		// `Number.parseFloat` method
-		// https://tc39.es/ecma262/#sec-number.parseFloat
-		// eslint-disable-next-line es/no-number-parsefloat -- required for testing
-		$({ target: 'Number', stat: true, forced: Number.parseFloat !== parseFloat }, {
-		  parseFloat: parseFloat
-		});
-		return es_number_parseFloat;
-	}
-
-	var _parseFloat$2;
-	var hasRequired_parseFloat$2;
-
-	function require_parseFloat$2 () {
-		if (hasRequired_parseFloat$2) return _parseFloat$2;
-		hasRequired_parseFloat$2 = 1;
-		'use strict';
-		requireEs_number_parseFloat();
-		var path = /*@__PURE__*/ requirePath();
-
-		_parseFloat$2 = path.Number.parseFloat;
-		return _parseFloat$2;
-	}
-
-	var _parseFloat$1;
-	var hasRequired_parseFloat$1;
-
-	function require_parseFloat$1 () {
-		if (hasRequired_parseFloat$1) return _parseFloat$1;
-		hasRequired_parseFloat$1 = 1;
-		'use strict';
-		var parent = /*@__PURE__*/ require_parseFloat$2();
-
-		_parseFloat$1 = parent;
-		return _parseFloat$1;
-	}
-
-	var _parseFloat;
-	var hasRequired_parseFloat;
-
-	function require_parseFloat () {
-		if (hasRequired_parseFloat) return _parseFloat;
-		hasRequired_parseFloat = 1;
-		_parseFloat = /*@__PURE__*/ require_parseFloat$1();
-		return _parseFloat;
-	}
-
-	var _parseFloatExports = require_parseFloat();
-	var _Number$parseFloat = /*@__PURE__*/getDefaultExportFromCjs$1(_parseFloatExports);
-
 	function _callSuper$8(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$8() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$8() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$8 = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
@@ -124675,7 +125579,7 @@
 	      switch (model) {
 	        case 'edit&preview':
 	          if (this.previewer) {
-	            this.previewer.editOnly();
+	            // this.previewer.editAndPreviewShow();
 	            this.previewer.recoverPreviewer();
 	          }
 	          if (this.toolbar && showToolbar) {
@@ -125615,7 +126519,7 @@
 	}
 
 	function ownKeys$2(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$2(e) { for (var r = 1; r < arguments.length; r++) { var _context4, _context5; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context4 = ownKeys$2(Object(t), !0)).call(_context4, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context5 = ownKeys$2(Object(t))).call(_context5, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread$2(e) { for (var r = 1; r < arguments.length; r++) { var _context5, _context6; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context5 = ownKeys$2(Object(t), !0)).call(_context5, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context6 = ownKeys$2(Object(t))).call(_context6, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	var CHART_TYPES = ['flowchart', 'sequence', 'gantt', 'journey', 'timeline', 'class', 'state', 'er', 'pie', 'quadrantChart', 'xyChart', 'requirement', 'architecture', 'mindmap', 'kanban', 'gitGraph', 'c4', 'sankey', 'packet', 'block', 'radar'];
 	var DEFAULT_OPTIONS$1 = {
 	  // TODO: themes
@@ -125676,6 +126580,9 @@
 	    // 上次渲染的代码
 	    _defineProperty$3(this, "lastRenderedCode", '');
 	    _defineProperty$3(this, "needReturnLastRenderedCode", false);
+	    /** 按 mermaid 源码内容缓存已渲染 HTML，布局参数变更时复用以避免闪回 codeBlock */
+	    _defineProperty$3(this, "contentRenderCache", new _Map$2());
+	    _defineProperty$3(this, "contentRenderCacheMax", 100);
 	    var mermaid = mermaidOptions.mermaid,
 	      mermaidAPI = mermaidOptions.mermaidAPI;
 	    // 兼容 v9（有 mermaidAPI 子对象）和 v10+（统一顶层对象）
@@ -125683,14 +126590,18 @@
 	    var browserMermaidAPI = getExternal('mermaidAPI');
 	    var resolvedMermaid = mermaid || browserMermaid;
 	    var resolvedMermaidAPI = mermaidAPI || browserMermaidAPI || resolvedMermaid && resolvedMermaid.mermaidAPI || null;
-	    if (!resolvedMermaid && !resolvedMermaidAPI) {
-	      throw new Error('code-block-mermaid-plugin[init]: Package mermaid or mermaidAPI not found.');
-	    }
 
 	    // @ts-expect-error logLevel 兼容 v9(number) 和 v10+(string)
 	    this.options = _objectSpread$2(_objectSpread$2({}, DEFAULT_OPTIONS$1), mermaidOptions);
 	    delete this.options.mermaid;
 	    delete this.options.mermaidAPI;
+	    if (!resolvedMermaid && !resolvedMermaidAPI) {
+	      // mermaid 可能是异步加载的，这里不直接抛错，留待异步渲染时重试获取
+	      // 注意：syncRender 路径无法等待异步加载，仍然会因 mermaidAPIRefs 为 null 而失败
+	      // eslint-disable-next-line no-console
+	      this.mermaidAPIRefs = null;
+	      return;
+	    }
 
 	    // 根据版本选择渲染引用：
 	    // - v9: 使用 mermaidAPI（render 同步回调模式）
@@ -125713,9 +126624,55 @@
 	  // v9: render(id, src, callback, canvas) → length === 4 → syncRender
 	  // v10+: render(id, src, container?) → length <= 3 → asyncRender
 	  return _createClass$1(MermaidCodeEngine, [{
+	    key: "$getContentCacheKey",
+	    value:
+	    /**
+	     * 生成 mermaid 源码内容缓存 key（与布局 sign 无关）
+	     * @param {string} src
+	     * @param {import('../Engine').default} $engine
+	     * @returns {string}
+	     */
+	    function $getContentCacheKey(src, $engine) {
+	      var _$engine$hash, _$engine$hash2;
+	      return (_$engine$hash = $engine === null || $engine === void 0 ? void 0 : (_$engine$hash2 = $engine.hash) === null || _$engine$hash2 === void 0 ? void 0 : _$engine$hash2.call($engine, src)) !== null && _$engine$hash !== void 0 ? _$engine$hash : src;
+	    }
+
+	    /**
+	     * 读取已缓存的 mermaid 渲染结果
+	     * @param {string} src
+	     * @param {import('../Engine').default} $engine
+	     * @returns {string}
+	     */
+	  }, {
+	    key: "$getCachedRenderHtml",
+	    value: function $getCachedRenderHtml(src, $engine) {
+	      return this.contentRenderCache.get(this.$getContentCacheKey(src, $engine)) || '';
+	    }
+
+	    /**
+	     * 缓存 mermaid 渲染结果（仅缓存含 svg 的成功结果）
+	     * @param {string} src
+	     * @param {import('../Engine').default} $engine
+	     * @param {string} html
+	     */
+	  }, {
+	    key: "$setCachedRenderHtml",
+	    value: function $setCachedRenderHtml(src, $engine, html) {
+	      if (!html || !_includesInstanceProperty(html).call(html, '<svg') && !_includesInstanceProperty(html).call(html, 'svg-img')) {
+	        return;
+	      }
+	      var key = this.$getContentCacheKey(src, $engine);
+	      if (this.contentRenderCache.size >= this.contentRenderCacheMax) {
+	        var _context;
+	        var firstKey = _keysInstanceProperty(_context = this.contentRenderCache).call(_context).next().value;
+	        this.contentRenderCache["delete"](firstKey);
+	      }
+	      this.contentRenderCache.set(key, html);
+	    }
+	  }, {
 	    key: "isAsyncRenderVersion",
 	    value: function isAsyncRenderVersion() {
-	      return !this.mermaidAPIRefs.render || this.mermaidAPIRefs.render.length <= 3;
+	      return !this.mermaidAPIRefs || !this.mermaidAPIRefs.render || this.mermaidAPIRefs.render.length <= 3;
 	    }
 	  }, {
 	    key: "mountMermaidCanvas",
@@ -125754,8 +126711,8 @@
 	          var shadowSvg = /** @type {SVGSVGElement} */ /** @type {any} */document.getElementById(graphId);
 	          var svgBox = shadowSvg.getBBox();
 	          if (!svgDom.hasAttribute('viewBox')) {
-	            var _context;
-	            svgDom.setAttribute('viewBox', _concatInstanceProperty(_context = "0 0 ".concat(svgBox.width, " ")).call(_context, svgBox.height));
+	            var _context2;
+	            svgDom.setAttribute('viewBox', _concatInstanceProperty(_context2 = "0 0 ".concat(svgBox.width, " ")).call(_context2, svgBox.height));
 	          } else {
 	            svgBox = svgDom.viewBox.baseVal;
 	          }
@@ -125765,9 +126722,9 @@
 	          svgHtml = svgDoc.documentElement.outerHTML;
 	          // 屏蔽转img标签功能，如需要转换为img解除屏蔽即可
 	          if (this.svg2img) {
-	            var _context2;
+	            var _context3;
 	            var dataUrl = "data:image/svg+xml,".concat(encodeURIComponent(svgDoc.documentElement.outerHTML));
-	            svgHtml = _concatInstanceProperty(_context2 = "<img class=\"svg-img\" style=\"max-width:100%;height:auto;\" src=\"".concat(dataUrl, "\" alt=\"")).call(_context2, graphId, "\" />");
+	            svgHtml = _concatInstanceProperty(_context3 = "<img class=\"svg-img\" style=\"max-width:100%;height:auto;\" src=\"".concat(dataUrl, "\" alt=\"")).call(_context3, graphId, "\" />");
 	          }
 	        } else {
 	          svgHtml = injectSvgFallback(svgCode);
@@ -125794,6 +126751,7 @@
 	          html = _this.processSvgCode(svgCode, graphId);
 	        }, this.mermaidCanvas);
 	        this.lastRenderedCode = html;
+	        this.$setCachedRenderHtml(src, $engine, html);
 	      } catch (e) {
 	        /**
 	         * 如果开启了流式渲染，当前有上次渲染结果时，使用上次渲染结果
@@ -125817,6 +126775,9 @@
 	      if (isBrowser()) {
 	        var placeholderList = container.querySelectorAll("[data-sign=\"".concat(sign, "\"][data-type=\"codeBlock\"]"));
 	        placeholderList === null || placeholderList === void 0 ? void 0 : _forEachInstanceProperty(placeholderList).call(placeholderList, function (placeholder) {
+	          if (placeholder.closest('[data-mode="source"]')) {
+	            return;
+	          }
 	          if (isToolbarMode) {
 	            var _placeholder$parentEl, _placeholder$parentEl2, _placeholder$parentEl3;
 	            // showSourceToolbar 模式：仅替换预览面板内容，保留工具栏和源码面板
@@ -125840,16 +126801,76 @@
 	        }
 	      });
 	    }
+
+	    /**
+	     * 尝试重新从全局获取 mermaid 实例（当外部异步加载 mermaid 时，构造时刻可能尚未就绪）
+	     * @returns {boolean} 是否成功获取
+	     */
+	  }, {
+	    key: "tryResolveMermaidAPIRefs",
+	    value: function tryResolveMermaidAPIRefs() {
+	      if (this.mermaidAPIRefs) {
+	        return true;
+	      }
+	      var browserMermaid = getExternal('mermaid');
+	      var browserMermaidAPI = getExternal('mermaidAPI');
+	      var resolvedMermaid = browserMermaid;
+	      var resolvedMermaidAPI = browserMermaidAPI || resolvedMermaid && resolvedMermaid.mermaidAPI || null;
+	      if (!resolvedMermaid && !resolvedMermaidAPI) {
+	        return false;
+	      }
+	      if (resolvedMermaidAPI) {
+	        this.mermaidAPIRefs = resolvedMermaidAPI;
+	        if (this.isAsyncRenderVersion()) {
+	          this.mermaidAPIRefs = resolvedMermaid || this.mermaidAPIRefs;
+	        }
+	      } else {
+	        this.mermaidAPIRefs = resolvedMermaid;
+	      }
+	      try {
+	        this.mermaidAPIRefs.initialize(this.options);
+	      } catch (e) {
+	        // 忽略重复初始化等异常
+	      }
+	      return true;
+	    }
 	  }, {
 	    key: "asyncRender",
 	    value: function asyncRender(graphId, src, sign, $engine, props) {
 	      var _this2 = this;
-	      $engine.asyncRenderHandler.add(graphId);
+	      var retryCount = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
+	      var cachedHtml = retryCount === 0 ? this.$getCachedRenderHtml(src, $engine) : '';
+	      if (cachedHtml) {
+	        return cachedHtml;
+	      }
+	      // mermaid 可能是异步加载的，初次调用时 mermaidAPIRefs 可能为 null，这里做延迟重试
+	      if (!this.mermaidAPIRefs && !this.tryResolveMermaidAPIRefs()) {
+	        var MAX_RETRY = 60; // 最多重试次数
+	        var RETRY_INTERVAL = 300; // 每次间隔 300ms
+	        if (retryCount === 0) {
+	          $engine.asyncRenderHandler.add(graphId);
+	        }
+	        if (retryCount < MAX_RETRY) {
+	          _setTimeout(function () {
+	            _this2.asyncRender(graphId, src, sign, $engine, props, retryCount + 1);
+	          }, RETRY_INTERVAL);
+	        } else {
+	          // 超过最大重试次数，回退到源码并完成异步渲染流程
+	          var html = props.fallback();
+	          this.handleAsyncRenderDone(graphId, sign, $engine, props, html);
+	          throw new Error('code-block-mermaid-plugin[init]: Package mermaid or mermaidAPI not found.');
+	        }
+	        return props.fallback();
+	      }
+	      if (retryCount === 0) {
+	        $engine.asyncRenderHandler.add(graphId);
+	      }
 	      this.mermaidAPIRefs.render(graphId, src, this.mermaidCanvas).then(function (_ref) {
 	        var svgCode = _ref.svg;
 	        // 渲染完成后，替换为渲染结果
 	        var html = _this2.processSvgCode(svgCode, graphId);
 	        _this2.lastRenderedCode = html;
+	        _this2.$setCachedRenderHtml(src, $engine, html);
 	        _this2.handleAsyncRenderDone(graphId, sign, $engine, props, html);
 	      })["catch"](function () {
 	        /**
@@ -125864,8 +126885,8 @@
 	        } else {
 	          // 渲染失败后，回退到源码
 	          _this2.needReturnLastRenderedCode = false;
-	          var html = props.fallback();
-	          _this2.handleAsyncRenderDone(graphId, sign, $engine, props, html);
+	          var _html = props.fallback();
+	          _this2.handleAsyncRenderDone(graphId, sign, $engine, props, _html);
 	        }
 	      });
 	      if (this.needReturnLastRenderedCode) {
@@ -125877,17 +126898,21 @@
 	  }, {
 	    key: "render",
 	    value: function render(src, sign, $engine) {
-	      var _context3, _props$mermaidConfig$, _props$mermaidConfig;
+	      var _context4, _props$mermaidConfig$, _props$mermaidConfig;
 	      var props = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 	      var $sign = sign;
 	      if (!$sign) {
 	        $sign = Math.round(Math.random() * 100000000);
 	      }
+	      var cachedHtml = this.$getCachedRenderHtml(src, $engine);
+	      if (cachedHtml) {
+	        return cachedHtml;
+	      }
 	      this.mountMermaidCanvas($engine);
 	      // 多实例的情况下相同的内容ID相同会导致mermaid渲染异常
 	      // 需要通过添加时间戳使得多次渲染相同内容的图像ID唯一
 	      // 图像渲染节流在CodeBlock Hook内部控制
-	      var graphId = _concatInstanceProperty(_context3 = "mermaid-".concat(sign, "-")).call(_context3, new Date().getTime());
+	      var graphId = _concatInstanceProperty(_context4 = "mermaid-".concat(sign, "-")).call(_context4, new Date().getTime());
 	      this.svg2img = (_props$mermaidConfig$ = (_props$mermaidConfig = props.mermaidConfig) === null || _props$mermaidConfig === void 0 ? void 0 : _props$mermaidConfig.svg2img) !== null && _props$mermaidConfig$ !== void 0 ? _props$mermaidConfig$ : false;
 	      return this.isAsyncRenderVersion() ? this.asyncRender(graphId, src, $sign, $engine, props) : this.syncRender(graphId, src, $sign, $engine);
 	    }
@@ -128099,6 +129124,10 @@
 
 	    /**
 	     * 启用主题变更观察器
+	     *
+	     * 注意：主题切换时，本观察器只会走"轻量主题应用"通道（$applyThemeOnly），
+	     * 仅刷新颜色/字体等主题相关字段，绝不会重新生成 series.data / series.map / xAxis.data 等数据相关字段。
+	     * 这样可以避免地图类图表在每次切换主题时被整体重建，进而避免触发 $loadMapData / $tryLoadMapDataFromPaths 重复加载。
 	     */
 	  }, {
 	    key: "$enableThemeObserver",
@@ -128111,7 +129140,7 @@
 	        var _context3;
 	        _this2.$buildEchartsThemeFromCss(root);
 	        _forEachInstanceProperty(_context3 = _Array$from(_this2.instances)).call(_context3, function (inst) {
-	          _this2.$setInstanceTheme(inst);
+	          _this2.$applyThemeOnly(inst);
 	        });
 	      });
 	      observer.observe(root, {
@@ -128122,7 +129151,8 @@
 	    }
 
 	    /**
-	     * 通过 echartsInstance.setOption 刷新主题
+	     * [兼容保留] 通过 echartsInstance.setOption 整体刷新图表配置（会重新生成 series.data 等数据字段）。
+	     * 主题切换不再调用此方法；此方法仅留作真正需要"重建"的外部扩展点。
 	     * @param {*} instance ECharts 实例
 	     */
 	  }, {
@@ -128134,6 +129164,220 @@
 	      var option = this.$chartOptionsFromDataset(container) || {};
 	      instance.setOption(option, false, true);
 	      this.$tagEchartsSvg(container);
+	    }
+
+	    /**
+	     * 轻量主题应用：仅根据当前运行时主题，构造一个"只含主题相关字段"的增量 option，
+	     * 通过 setOption(delta, notMerge=false, lazyUpdate=true) 进行合并刷新。
+	     *
+	     * - 不会触碰 series[].data / series[].map / xAxis.data / yAxis.data / visualMap.min/max
+	     * - 不会重新走 $generateChartOptions，因此不会触发 MapChartOptionsHandler.options，
+	     *   也就不会再次调用 $loadMapData / $tryLoadMapDataFromPaths。
+	     * - 调色盘等"非 CSS 变量驱动"的颜色（如 inRange）保留原样，避免覆盖业务选择。
+	     *
+	     * @param {*} instance ECharts 实例
+	     */
+	  }, {
+	    key: "$applyThemeOnly",
+	    value: function $applyThemeOnly(instance) {
+	      if (!instance || typeof instance.getDom !== 'function') return;
+	      if (instance.isDisposed && instance.isDisposed()) return;
+	      var container = instance.getDom();
+	      if (!container || !container.isConnected) return;
+	      var theme = this.$theme();
+	      if (!theme) return;
+	      var currentOption = instance.getOption ? instance.getOption() : null;
+	      if (!currentOption) return;
+	      var delta = this.$buildThemeOnlyOption(currentOption, theme);
+	      try {
+	        // notMerge=false：与现有 option 合并，仅覆盖 delta 中显式声明的字段
+	        // lazyUpdate=true：批量重绘，避免主题连续切换时抖动
+	        instance.setOption(delta, false, true);
+	        this.$tagEchartsSvg(container);
+	      } catch (e) {
+	        Logger.warn('apply theme-only option failed:', e);
+	      }
+	    }
+
+	    /**
+	     * 基于当前 option 的形态，构造仅含主题相关字段的增量 option。
+	     * 对于数组型字段（series/xAxis/yAxis/visualMap），按当前数组长度生成等长占位对象，
+	     * 以便 ECharts 按下标合并而不会破坏原数组结构。
+	     *
+	     * @param {*} currentOption ECharts 实例当前 getOption() 返回值
+	     * @param {*} theme 当前运行时主题
+	     * @returns {Object} 仅含主题字段的 option delta
+	     */
+	  }, {
+	    key: "$buildThemeOnlyOption",
+	    value: function $buildThemeOnlyOption(currentOption, theme) {
+	      var c = theme.color,
+	        fs = theme.fontSize;
+
+	      /** 把任意 option 字段规整为数组（ECharts getOption 总是返回数组） */
+	      var toArr = function toArr(v) {
+	        if (_Array$isArray$1(v)) return v;
+	        if (v) return [v];
+	        return [];
+	      };
+	      var delta = {
+	        backgroundColor: c.backgroundColor,
+	        // 调色盘：跟随主题刷新文本类色彩，不强制覆盖业务自定义色板
+	        // 故此处不写 color: this.$palette()，保留 ECharts 内部已合并的调色盘
+	        textStyle: {
+	          color: c.text
+	        }
+	      };
+
+	      // title（可能是对象或数组）
+	      var titleArr = toArr(currentOption.title);
+	      if (titleArr.length) {
+	        delta.title = _mapInstanceProperty(titleArr).call(titleArr, function () {
+	          return {
+	            textStyle: {
+	              color: c.tooltipText
+	            },
+	            subtextStyle: {
+	              color: c.text
+	            }
+	          };
+	        });
+	      }
+
+	      // tooltip
+	      if (currentOption.tooltip) {
+	        delta.tooltip = {
+	          backgroundColor: c.tooltipBg,
+	          borderColor: c.border,
+	          textStyle: {
+	            color: c.tooltipText,
+	            fontSize: fs.base
+	          }
+	        };
+	      }
+
+	      // legend
+	      var legendArr = toArr(currentOption.legend);
+	      if (legendArr.length) {
+	        delta.legend = _mapInstanceProperty(legendArr).call(legendArr, function () {
+	          return {
+	            textStyle: {
+	              color: c.text,
+	              fontSize: fs.base
+	            },
+	            selectorLabel: {
+	              color: c.text,
+	              borderColor: c.border
+	            }
+	          };
+	        });
+	      }
+
+	      // toolbox
+	      var toolboxArr = toArr(currentOption.toolbox);
+	      if (toolboxArr.length) {
+	        delta.toolbox = _mapInstanceProperty(toolboxArr).call(toolboxArr, function () {
+	          return {
+	            iconStyle: {
+	              borderColor: c.border
+	            },
+	            emphasis: {
+	              iconStyle: {
+	                borderColor: c.borderHover
+	              }
+	            }
+	          };
+	        });
+	      }
+
+	      // xAxis / yAxis
+	      var buildAxisDelta = function buildAxisDelta(axisArr) {
+	        return _mapInstanceProperty(axisArr).call(axisArr, function () {
+	          return {
+	            axisLine: {
+	              lineStyle: {
+	                color: c.text
+	              }
+	            },
+	            axisLabel: {
+	              color: c.text,
+	              fontSize: fs.base
+	            },
+	            splitLine: {
+	              lineStyle: {
+	                color: c.lineSplit,
+	                type: 'dashed'
+	              }
+	            },
+	            nameTextStyle: {
+	              color: c.text
+	            }
+	          };
+	        });
+	      };
+	      var xAxisArr = toArr(currentOption.xAxis);
+	      if (xAxisArr.length) delta.xAxis = buildAxisDelta(xAxisArr);
+	      var yAxisArr = toArr(currentOption.yAxis);
+	      if (yAxisArr.length) delta.yAxis = buildAxisDelta(yAxisArr);
+
+	      // visualMap：只刷文字色，不动 min/max/inRange
+	      var visualMapArr = toArr(currentOption.visualMap);
+	      if (visualMapArr.length) {
+	        delta.visualMap = _mapInstanceProperty(visualMapArr).call(visualMapArr, function () {
+	          return {
+	            textStyle: {
+	              color: c.text,
+	              fontSize: fs.base
+	            }
+	          };
+	        });
+	      }
+
+	      // radar：只刷指示器名称颜色
+	      var radarArr = toArr(currentOption.radar);
+	      if (radarArr.length) {
+	        delta.radar = _mapInstanceProperty(radarArr).call(radarArr, function () {
+	          return {
+	            axisName: {
+	              color: c.text
+	            }
+	          };
+	        });
+	      }
+
+	      // series：按类型刷新主题相关字段，绝不动 data / map / type
+	      var seriesArr = toArr(currentOption.series);
+	      if (seriesArr.length) {
+	        delta.series = _mapInstanceProperty(seriesArr).call(seriesArr, function (s) {
+	          var type = s && s.type;
+	          var seriesDelta = {
+	            label: {
+	              color: c.text
+	            },
+	            itemStyle: {
+	              shadowColor: theme.shadow.color
+	            },
+	            emphasis: {
+	              itemStyle: {
+	                shadowColor: theme.shadow.color,
+	                borderColor: c.emphasis
+	              }
+	            }
+	          };
+	          if (type === 'line') {
+	            seriesDelta.itemStyle.borderColor = '#fff';
+	          }
+	          if (type === 'sankey') {
+	            seriesDelta.label = {
+	              color: c.text,
+	              fontSize: fs.base
+	            };
+	          }
+	          // map 类型：仅刷 label / emphasis 文本与阴影色，不动 series.map / series.data
+	          return seriesDelta;
+	        });
+	      }
+	      return delta;
 	    }
 	  }, {
 	    key: "$generateChartOptions",

@@ -115,13 +115,40 @@ export default class EChartsTableEngine {
     $getCherryRoot(container?: any): any;
     /**
      * 启用主题变更观察器
+     *
+     * 注意：主题切换时，本观察器只会走"轻量主题应用"通道（$applyThemeOnly），
+     * 仅刷新颜色/字体等主题相关字段，绝不会重新生成 series.data / series.map / xAxis.data 等数据相关字段。
+     * 这样可以避免地图类图表在每次切换主题时被整体重建，进而避免触发 $loadMapData / $tryLoadMapDataFromPaths 重复加载。
      */
     $enableThemeObserver(container: any): void;
     /**
-     * 通过 echartsInstance.setOption 刷新主题
+     * [兼容保留] 通过 echartsInstance.setOption 整体刷新图表配置（会重新生成 series.data 等数据字段）。
+     * 主题切换不再调用此方法；此方法仅留作真正需要"重建"的外部扩展点。
      * @param {*} instance ECharts 实例
      */
     $setInstanceTheme(instance: any): void;
+    /**
+     * 轻量主题应用：仅根据当前运行时主题，构造一个"只含主题相关字段"的增量 option，
+     * 通过 setOption(delta, notMerge=false, lazyUpdate=true) 进行合并刷新。
+     *
+     * - 不会触碰 series[].data / series[].map / xAxis.data / yAxis.data / visualMap.min/max
+     * - 不会重新走 $generateChartOptions，因此不会触发 MapChartOptionsHandler.options，
+     *   也就不会再次调用 $loadMapData / $tryLoadMapDataFromPaths。
+     * - 调色盘等"非 CSS 变量驱动"的颜色（如 inRange）保留原样，避免覆盖业务选择。
+     *
+     * @param {*} instance ECharts 实例
+     */
+    $applyThemeOnly(instance: any): void;
+    /**
+     * 基于当前 option 的形态，构造仅含主题相关字段的增量 option。
+     * 对于数组型字段（series/xAxis/yAxis/visualMap），按当前数组长度生成等长占位对象，
+     * 以便 ECharts 按下标合并而不会破坏原数组结构。
+     *
+     * @param {*} currentOption ECharts 实例当前 getOption() 返回值
+     * @param {*} theme 当前运行时主题
+     * @returns {Object} 仅含主题字段的 option delta
+     */
+    $buildThemeOnlyOption(currentOption: any, theme: any): any;
     $generateChartOptions(type: any, tableObject: any, options: any): any;
     /**
      * 从容器 `data-*` 属性解析并生成 Option 图表配置

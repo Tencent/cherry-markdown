@@ -34,6 +34,11 @@ declare namespace pasteHelper {
      */
     function setSelection(): void;
     /**
+     * 按粘贴区域替换内容，并同步更新区域终点
+     * @param {string} text - 替换文本
+     */
+    function replacePasteContent(text: string): void;
+    /**
      * 绑定事件
      * 当编辑器选中区域改变、内容改变时、滚动时处理气泡位置
      * CodeMirror 6: 使用适配器的事件监听

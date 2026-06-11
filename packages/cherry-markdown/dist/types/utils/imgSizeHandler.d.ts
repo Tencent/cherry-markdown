@@ -81,6 +81,8 @@ declare namespace imgSizeHandler {
     };
     function showBubble(img: any, container: any, previewerDom: any, options?: {}): void;
     function emit(type: any, event?: {}): boolean | void;
+    function $isTargetValid(): any;
+    function $clearPreviewUpdateTimer(): void;
     function previewUpdate(callback: any): void;
     function refreshTarget(): void;
     function drawBubbleButs(): void;

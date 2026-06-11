@@ -44,6 +44,8 @@ export default class PreviewerBubble {
     imgLeadingSpacePos: number;
     /** 记录 beginChangeImgValue 时的文档状态，用于位置映射追踪 */
     imgChangeBaseState: any;
+    /** @type {MermaidBubbleSession} */
+    mermaidSession: MermaidBubbleSession;
     init(): void;
     oldWrapperDomOverflow: string;
     $bindedOnClick: any;
@@ -56,6 +58,8 @@ export default class PreviewerBubble {
     $bindedOnChange: any;
     $bindedOnEditorSizeChange: () => void;
     $bindedOnLayoutChange: () => void;
+    $bindedOnAfterChange: () => void;
+    $bindedOnAfterAsyncRender: () => void;
     removeHoverBubble: any;
     isDestroyed: boolean;
     /**
@@ -97,15 +101,41 @@ export default class PreviewerBubble {
     $onChange(e: any): void;
     $getClosestNode(node: any, targetNodeName: any): any;
     /**
+     * click 气泡与 imgTool 成对出现，移除 click 时需一并清理 imgTool
+     * @param {string} key 气泡 trigger 键名
+     * @param {string} trigger 当前指定的移除范围
+     * @returns {boolean}
+     */
+    $shouldRemoveBubbleKey(key: string, trigger: string): boolean;
+    /**
      * 隐藏预览区域已经激活的工具栏
      * @param {string} trigger 移除指定的触发方式，不传默认全部移除
      */
     $removeAllPreviewerBubbles(trigger?: string): void;
     /**
+     * 移除图片/mermaid 编辑相关的气泡（选择框 + 对齐工具栏）
+     */
+    $removeImgPreviewerBubbles(): void;
+    /**
      * 检查并重新创建表格处理器
      * 当表格结构发生变化时，需要重新创建处理器以避免位置异常
      */
     $checkAndRecreateTableHandlers(): void;
+    /**
+     * 检查图片/mermaid 尺寸处理器是否仍然有效
+     * @param {{ strict?: boolean }} [options] strict=true 时在异步渲染完成后严格校验预览内容
+     * @returns {boolean}
+     */
+    $isImgHandlerValid(options?: {
+        strict?: boolean;
+    }): boolean;
+    /**
+     * 预览区更新后检查图片/mermaid 选中目标是否仍可编辑
+     * @param {{ strict?: boolean }} [options]
+     */
+    $checkAndRemoveInvalidImgHandlers(options?: {
+        strict?: boolean;
+    }): void;
     /**
      * 检查表格处理器是否仍然有效
      * @param {TableHandler} handler 表格处理器实例
@@ -210,39 +240,11 @@ export default class PreviewerBubble {
     $getMermaidFigure(element: Element): HTMLElement | false;
     /**
      * 为选中的 mermaid 图表增加尺寸调整工具
+     *
+     * fix(PreviewerBubble): mermaid 会话逻辑见 MermaidBubbleSession，编辑器解析见 mermaidEditorHelper
      * @param {HTMLElement} figureElement mermaid 图表的 figure DOM
      */
     $showMermaidPreviewerBubbles(figureElement: HTMLElement, event: any): void;
-    mermaidFigure: HTMLElement;
-    /**
-     * 选中 mermaid 代码块语法的语言行中的扩展参数部分（尺寸 + 对齐）
-     * @param {HTMLElement} figureElement mermaid figure DOM
-     * @returns {boolean}
-     */
-    beginChangeMermaidValue(figureElement: HTMLElement): boolean;
-    mermaidIndex: number;
-    mermaidSize: string;
-    mermaidAlign: string;
-    mermaidExtendFrom: number;
-    mermaidExtendTo: number;
-    mermaidLangLineNum: number;
-    mermaidHasExtend: boolean;
-    /**
-     * 拼接 mermaid 扩展参数并替换编辑器中的选中文本
-     */
-    changeMermaidValue(): void;
-    /**
-     * 修改 mermaid 图表尺寸时的回调
-     * @param {HTMLElement} htmlElement mermaid figure 元素
-     * @param {Object} style 图表的属性（宽高）
-     */
-    changeMermaidSize(htmlElement: HTMLElement, style: any): void;
-    /**
-     * 修改 mermaid 图表对齐方式时的回调
-     * @param {HTMLElement} htmlElement mermaid figure 元素
-     * @param {string} type 对齐方式
-     */
-    changeMermaidStyle(htmlElement: HTMLElement, type: string): void;
     /**
      * 处理 mermaid 源码/预览切换工具栏的点击
      * @param {Element} tabElement 被点击的 tab 元素
@@ -255,4 +257,5 @@ export default class PreviewerBubble {
      */
     destroy(): void;
 }
+import MermaidBubbleSession from '@/toolbars/MermaidBubbleSession';
 import TableHandler from '@/utils/tableContentHandler';

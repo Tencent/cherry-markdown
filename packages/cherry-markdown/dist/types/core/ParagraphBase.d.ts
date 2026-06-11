@@ -7,9 +7,8 @@ export default class ParagraphBase extends SyntaxBase {
     });
     needCache: boolean;
     sign: string;
-    cache: {};
+    cache: LRUCache;
     cacheKey: string;
-    failedResetCacheTimes: number;
     cacheData: {};
     cacheDataMap: any[];
     /**
@@ -18,9 +17,10 @@ export default class ParagraphBase extends SyntaxBase {
      * @param {function} getValueByKey 用于获取缓存数据的回调函数
      * @param {number} maxKeys 最大缓存数
      * @param {number} removeKeys 每次删除的缓存数
+     * @param {boolean} focusUpdate 是否更新缓存
      * @returns {any}
      */
-    cacheAndGetData(key: string, getValueByKey: Function, maxKeys: number, removeKeys: number): any;
+    cacheAndGetData(key: string, getValueByKey: Function, maxKeys: number, removeKeys: number, focusUpdate?: boolean): any;
     /**
      * 清空所有缓存
      */
@@ -96,7 +96,6 @@ export default class ParagraphBase extends SyntaxBase {
     testHasCache(sign: any): any;
     resetCache(): void;
     restoreCache(html: any): any;
-    timer: number;
     /**
      *
      * @param {string} wholeMatch whole match
@@ -105,3 +104,4 @@ export default class ParagraphBase extends SyntaxBase {
     signWithCache(html: any): boolean;
 }
 import SyntaxBase from './SyntaxBase';
+import LRUCache from '../utils/LRUCache';
