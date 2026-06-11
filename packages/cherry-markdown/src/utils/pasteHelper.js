@@ -61,6 +61,9 @@ const pasteHelper = {
     this.html = html;
     this.md = md;
     this.currentCursor = currentCursor;
+    // 记录粘贴区域，切换 TEXT/Markdown 时按范围替换，避免选区丢失导致内容重复
+    this.pasteFrom = currentCursor;
+    this.pasteTo = currentCursor + md.length;
     this.codemirror = editorView;
     this.locale = cherry.locale;
   },
@@ -90,10 +93,17 @@ const pasteHelper = {
    * CM6: currentCursor 和 getCursor() 都是文档偏移量
    */
   setSelection() {
-    const end = this.codemirror.view.state.selection.main.head;
-    const begin = this.currentCursor;
     // CM6: setSelection(anchor, head) 使用文档偏移量
-    this.codemirror.setSelection(begin, end);
+    this.codemirror.setSelection(this.pasteFrom, this.pasteTo);
+  },
+
+  /**
+   * 按粘贴区域替换内容，并同步更新区域终点
+   * @param {string} text - 替换文本
+   */
+  replacePasteContent(text) {
+    this.codemirror.replaceRange(text, this.pasteFrom, this.pasteTo);
+    this.pasteTo = this.pasteFrom + text.length;
   },
   /**
    * 绑定事件
@@ -219,15 +229,10 @@ const pasteHelper = {
     this.switchMd.addEventListener('click', this.switchMDClick.bind(this));
     this.switchText.addEventListener('click', this.switchTextClick.bind(this));
 
-    if (this.getTypeFromLocalStorage() === 'text') {
-      this.switchText.classList.add('active');
-      this.switchMd.classList.remove('active');
-      this.bubbleDom.setAttribute('data-type', 'text');
-    } else {
-      this.switchMd.classList.add('active');
-      this.switchText.classList.remove('active');
-      this.bubbleDom.setAttribute('data-type', 'md');
-    }
+    // 首次粘贴内容始终为 Markdown，切换逻辑由 showSwitchBtnAfterPasteHtml 统一处理
+    this.switchMd.classList.add('active');
+    this.switchText.classList.remove('active');
+    this.bubbleDom.setAttribute('data-type', 'md');
   },
 
   switchMDClick(event) {
@@ -237,8 +242,7 @@ const pasteHelper = {
     }
     this.noHide = true;
     this.bubbleDom.setAttribute('data-type', 'md');
-    // CodeMirror 6: 使用 replaceSelection 替代 doc.replaceSelection
-    this.codemirror.replaceSelection(this.md);
+    this.replacePasteContent(this.md);
     this.setSelection();
     this.showBubble();
     this.switchMd.classList.add('active');
@@ -247,14 +251,14 @@ const pasteHelper = {
   },
   switchTextClick(event) {
     this.setTypeToLocalStorage('text');
-    // 由于默认是粘贴md，当记忆text的时候，会先转md再转text，所以这里的判断会有问题，不想再套娃解决了，直接注释掉
-    // if (this.bubbleDom.getAttribute('data-type') === 'text') {
-    //   return;
-    // }
+    // data-type 在 initBubble 中固定为 md（与刚插入的 Markdown 内容一致），
+    // localStorage 触发的自动切换不会被此处拦截；请勿在 initBubble 中按 localStorage 预置 text。
+    if (this.bubbleDom.getAttribute('data-type') === 'text') {
+      return;
+    }
     this.noHide = true;
     this.bubbleDom.setAttribute('data-type', 'text');
-    // CodeMirror 6: 使用 replaceSelection 替代 doc.replaceSelection
-    this.codemirror.replaceSelection(this.html);
+    this.replacePasteContent(this.html);
     this.setSelection();
     this.showBubble();
     this.switchText.classList.add('active');

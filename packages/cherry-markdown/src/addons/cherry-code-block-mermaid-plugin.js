@@ -81,6 +81,48 @@ export default class MermaidCodeEngine {
   // 上次渲染的代码
   lastRenderedCode = '';
   needReturnLastRenderedCode = false;
+  /** 按 mermaid 源码内容缓存已渲染 HTML，布局参数变更时复用以避免闪回 codeBlock */
+  contentRenderCache = new Map();
+
+  contentRenderCacheMax = 100;
+
+  /**
+   * 生成 mermaid 源码内容缓存 key（与布局 sign 无关）
+   * @param {string} src
+   * @param {import('../Engine').default} $engine
+   * @returns {string}
+   */
+  $getContentCacheKey(src, $engine) {
+    return $engine?.hash?.(src) ?? src;
+  }
+
+  /**
+   * 读取已缓存的 mermaid 渲染结果
+   * @param {string} src
+   * @param {import('../Engine').default} $engine
+   * @returns {string}
+   */
+  $getCachedRenderHtml(src, $engine) {
+    return this.contentRenderCache.get(this.$getContentCacheKey(src, $engine)) || '';
+  }
+
+  /**
+   * 缓存 mermaid 渲染结果（仅缓存含 svg 的成功结果）
+   * @param {string} src
+   * @param {import('../Engine').default} $engine
+   * @param {string} html
+   */
+  $setCachedRenderHtml(src, $engine, html) {
+    if (!html || (!html.includes('<svg') && !html.includes('svg-img'))) {
+      return;
+    }
+    const key = this.$getContentCacheKey(src, $engine);
+    if (this.contentRenderCache.size >= this.contentRenderCacheMax) {
+      const firstKey = this.contentRenderCache.keys().next().value;
+      this.contentRenderCache.delete(firstKey);
+    }
+    this.contentRenderCache.set(key, html);
+  }
 
   /**
    * @param {Object} mermaidOptions - Mermaid 配置选项
@@ -236,6 +278,7 @@ export default class MermaidCodeEngine {
         this.mermaidCanvas,
       );
       this.lastRenderedCode = html;
+      this.$setCachedRenderHtml(src, $engine, html);
     } catch (e) {
       /**
        * 如果开启了流式渲染，当前有上次渲染结果时，使用上次渲染结果
@@ -258,6 +301,9 @@ export default class MermaidCodeEngine {
     if (isBrowser()) {
       const placeholderList = container.querySelectorAll(`[data-sign="${sign}"][data-type="codeBlock"]`);
       placeholderList?.forEach((placeholder) => {
+        if (placeholder.closest('[data-mode="source"]')) {
+          return;
+        }
         if (isToolbarMode) {
           // showSourceToolbar 模式：仅替换预览面板内容，保留工具栏和源码面板
           const previewPanel = placeholder.parentElement
@@ -315,6 +361,10 @@ export default class MermaidCodeEngine {
   }
 
   asyncRender(graphId, src, sign, $engine, props, retryCount = 0) {
+    const cachedHtml = retryCount === 0 ? this.$getCachedRenderHtml(src, $engine) : '';
+    if (cachedHtml) {
+      return cachedHtml;
+    }
     // mermaid 可能是异步加载的，初次调用时 mermaidAPIRefs 可能为 null，这里做延迟重试
     if (!this.mermaidAPIRefs && !this.tryResolveMermaidAPIRefs()) {
       const MAX_RETRY = 60; // 最多重试次数
@@ -343,6 +393,7 @@ export default class MermaidCodeEngine {
         // 渲染完成后，替换为渲染结果
         const html = this.processSvgCode(svgCode, graphId);
         this.lastRenderedCode = html;
+        this.$setCachedRenderHtml(src, $engine, html);
         this.handleAsyncRenderDone(graphId, sign, $engine, props, html);
       })
       .catch(() => {
@@ -377,6 +428,10 @@ export default class MermaidCodeEngine {
     let $sign = sign;
     if (!$sign) {
       $sign = Math.round(Math.random() * 100000000);
+    }
+    const cachedHtml = this.$getCachedRenderHtml(src, $engine);
+    if (cachedHtml) {
+      return cachedHtml;
     }
     this.mountMermaidCanvas($engine);
     // 多实例的情况下相同的内容ID相同会导致mermaid渲染异常
