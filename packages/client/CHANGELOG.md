@@ -1,5 +1,13 @@
 # @cherry-markdown/client
 
+## 0.3.1
+
+### Patch Changes
+
+- fix: 修复Windows下路径报错的问题 [@sunsonliu](https://github.com/sunsonliu)([#1759](https://github.com/Tencent/cherry-markdown/pull/1759))([`d800673`](https://github.com/Tencent/cherry-markdown/commit/d8006734c0cc848647917af33222a4604cfa3489))
+- Updated dependencies [[`1fe23d4`](https://github.com/Tencent/cherry-markdown/commit/1fe23d43a13ded6f0b15fbfbbc67dcd313a05771), [`135d212`](https://github.com/Tencent/cherry-markdown/commit/135d212fb929f532c5e8efbb8f0f9327a347c5a2), [`43495c4`](https://github.com/Tencent/cherry-markdown/commit/43495c4fb8c8b6a46871f5168a51dae366e395df), [`2a3407f`](https://github.com/Tencent/cherry-markdown/commit/2a3407fa5384f774aa5b6c15a9cf46f1e44fb50f), [`d004126`](https://github.com/Tencent/cherry-markdown/commit/d00412618d56f5e858253c2e8c5b9fec295ccdd9), [`572f204`](https://github.com/Tencent/cherry-markdown/commit/572f204571e25b4d80256075f1e3a6e8d12404fc)]:
+  - cherry-markdown@0.11.3
+
 ## 0.3.0
 
 ### Minor Changes

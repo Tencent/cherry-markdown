@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.11.3
+
+### Patch Changes
+
+- fix: 修复 mermaid 渲染失败后选中编辑框依然渲染漂移 [@RSS1102](https://github.com/RSS1102)([#1762](https://github.com/Tencent/cherry-markdown/pull/1762))([`1fe23d4`](https://github.com/Tencent/cherry-markdown/commit/1fe23d43a13ded6f0b15fbfbbc67dcd313a05771))
+- - fix(pasteHelper): 修复粘贴 HTML 后切换 TEXT 导致内容重复 [@RSS1102](https://github.com/RSS1102)([#1765](https://github.com/Tencent/cherry-markdown/pull/1765))([`135d212`](https://github.com/Tencent/cherry-markdown/commit/135d212fb929f532c5e8efbb8f0f9327a347c5a2))
+- fix: #1752 支持mathjax的延时加载 [@sunsonliu](https://github.com/sunsonliu)([#1758](https://github.com/Tencent/cherry-markdown/pull/1758))([`43495c4`](https://github.com/Tencent/cherry-markdown/commit/43495c4fb8c8b6a46871f5168a51dae366e395df))
+- fix: 代码块缓存机制导致mermaid没有正确渲染 [@sunsonliu](https://github.com/sunsonliu)([#1761](https://github.com/Tencent/cherry-markdown/pull/1761))([`2a3407f`](https://github.com/Tencent/cherry-markdown/commit/2a3407fa5384f774aa5b6c15a9cf46f1e44fb50f))
+- fix: 修复htmlBlock分批转义提速逻辑破坏原始内容的bug [@sunsonliu](https://github.com/sunsonliu)([#1755](https://github.com/Tencent/cherry-markdown/pull/1755))([`d004126`](https://github.com/Tencent/cherry-markdown/commit/d00412618d56f5e858253c2e8c5b9fec295ccdd9))
+- feat: 支持mermaid延时加载 [@sunsonliu](https://github.com/sunsonliu)([#1757](https://github.com/Tencent/cherry-markdown/pull/1757))([`572f204`](https://github.com/Tencent/cherry-markdown/commit/572f204571e25b4d80256075f1e3a6e8d12404fc))
+
 ## 0.11.2
 
 ### Patch Changes
