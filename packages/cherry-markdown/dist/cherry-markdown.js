@@ -125159,7 +125159,7 @@
 	}
 
 	// @ts-expect-error process.env from build env
-	var VERSION$2 = "0.11.2";
+	var VERSION$2 = "0.11.3";
 	var CherryStatic = /*#__PURE__*/function () {
 	  // for type check only
 	  // TODO: fix this error
