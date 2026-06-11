@@ -38,6 +38,9 @@ const imgToolHandler = {
     this.img = img;
     this.isMermaid = options.isMermaid || false;
     this.targetIndex = Number.isInteger(options.targetIndex) ? options.targetIndex : -1;
+    this.onInvalidTarget = options.onInvalidTarget || null;
+    this.validateTarget = options.validateTarget || null;
+    this.resolveTarget = options.resolveTarget || null;
 
     this.previewerDom = previewerDom;
     this.container = container;
@@ -183,36 +186,77 @@ const imgToolHandler = {
     switch (type) {
       case 'scroll':
         return this.dealScroll(event);
+      case 'remove':
+        return this.remove();
       case 'previewUpdate':
         return this.previewUpdate(event);
       case 'resize':
         requestAnimationFrame(() => this.updatePosition());
     }
   },
-  previewUpdate(callback) {
-    this.refreshTarget();
-    // 预览区更新后图片位置可能变化（如对齐方式改变），需要更新工具栏位置
-    // 图片有 CSS transition (all 0.1s)，需等待过渡动画结束后再获取最终位置
-    this.img.addEventListener('transitionend', () => this.updatePosition(), { once: true });
-    // 兜底：如果过渡没有触发（如属性没变化），120ms 后也更新
-    this._fallbackTimer = setTimeout(() => {
-      this._fallbackTimer = null;
-      this.updatePosition();
-    }, 120);
-  },
-  refreshTarget() {
-    if (!this.isMermaid || this.targetIndex < 0 || !this.previewerDom) {
-      return;
+  $isTargetValid() {
+    if (typeof this.validateTarget === 'function') {
+      return this.validateTarget();
     }
-    const figures = this.previewerDom.querySelectorAll('figure[data-type="mermaid"]');
-    this.img = figures[this.targetIndex] || this.img;
+    return !!(this.img && document.contains(this.img) && this.previewerDom?.contains(this.img));
   },
-  remove() {
-    this.butsLayout = false;
+  $clearPreviewUpdateTimer() {
     if (this._fallbackTimer) {
       clearTimeout(this._fallbackTimer);
       this._fallbackTimer = null;
     }
+  },
+  previewUpdate(callback) {
+    this.$clearPreviewUpdateTimer();
+    this.refreshTarget();
+    // 目标元素已从预览区移除（如删除了 mermaid 源码），清理选择框和浮动工具栏
+    if (!this.$isTargetValid()) {
+      (callback || this.onInvalidTarget)?.();
+      return;
+    }
+    // 预览区更新后图片位置可能变化（如对齐方式改变），需要更新工具栏位置
+    // 图片有 CSS transition (all 0.1s)，需等待过渡动画结束后再获取最终位置
+    this.img.addEventListener(
+      'transitionend',
+      () => {
+        if (!this.$isTargetValid()) {
+          this.onInvalidTarget?.();
+          return;
+        }
+        this.updatePosition();
+      },
+      { once: true },
+    );
+    // 兜底：如果过渡没有触发（如属性没变化），120ms 后也更新
+    this._fallbackTimer = setTimeout(() => {
+      this._fallbackTimer = null;
+      if (!this.$isTargetValid()) {
+        (callback || this.onInvalidTarget)?.();
+        return;
+      }
+      this.updatePosition();
+    }, 120);
+  },
+  refreshTarget() {
+    if (!this.isMermaid || !this.previewerDom) {
+      return;
+    }
+    if (typeof this.resolveTarget === 'function') {
+      const resolved = this.resolveTarget();
+      if (resolved) {
+        this.img = resolved;
+        return;
+      }
+    }
+    if (this.img && this.previewerDom.contains(this.img)) {
+      return;
+    }
+  },
+  remove() {
+    this.$clearPreviewUpdateTimer();
+    this.onInvalidTarget = null;
+    this.validateTarget = null;
+    this.resolveTarget = null;
   },
   /**
    * 更新工具栏位置，用于预览区更新或编辑器大小变化后重新定位
@@ -222,6 +266,10 @@ const imgToolHandler = {
       return;
     }
     this.refreshTarget();
+    if (!this.$isTargetValid()) {
+      this.onInvalidTarget?.();
+      return;
+    }
     const imgPosition = this.getImgPosition();
     const toolbarWidth = this.container.offsetWidth;
     const toolbarHeight = this.container.offsetHeight;

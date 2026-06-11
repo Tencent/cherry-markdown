@@ -10,6 +10,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import imgSizeHandler from '@/utils/imgSizeHandler';
+import imgToolHandler from '@/utils/imgToolHandler';
 
 // ============ 辅助函数 ============
 
@@ -685,6 +687,25 @@ describe('imgSizeHandler previewUpdate', () => {
   });
 });
 
+describe('imgSizeHandler 目标元素移除', () => {
+  it('previewUpdate 在目标已脱离预览区时应调用清理回调', () => {
+    const previewerDom = document.createElement('div');
+    const removedFigure = document.createElement('figure');
+    removedFigure.setAttribute('data-type', 'mermaid');
+    const callback = vi.fn();
+
+    imgSizeHandler.isMermaid = true;
+    imgSizeHandler.targetIndex = 0;
+    imgSizeHandler.previewerDom = previewerDom;
+    imgSizeHandler.img = removedFigure;
+    imgSizeHandler.mouseResize = { resize: false };
+
+    imgSizeHandler.previewUpdate(callback);
+
+    expect(callback).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('imgToolHandler previewUpdate', () => {
   let handler: ReturnType<typeof createMockToolHandler>;
 
@@ -809,5 +830,23 @@ describe('imgToolHandler previewUpdate', () => {
       expect.any(Function),
       { once: true },
     );
+  });
+});
+
+describe('imgToolHandler 目标元素移除', () => {
+  it('previewUpdate 在目标已脱离预览区时应调用清理回调', () => {
+    const previewerDom = document.createElement('div');
+    const removedFigure = document.createElement('figure');
+    removedFigure.setAttribute('data-type', 'mermaid');
+    const callback = vi.fn();
+
+    imgToolHandler.isMermaid = true;
+    imgToolHandler.targetIndex = 0;
+    imgToolHandler.previewerDom = previewerDom;
+    imgToolHandler.img = removedFigure;
+
+    imgToolHandler.previewUpdate(callback);
+
+    expect(callback).toHaveBeenCalledTimes(1);
   });
 });
