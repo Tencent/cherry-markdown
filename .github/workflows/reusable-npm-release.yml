@@ -45,15 +45,13 @@ jobs:
       # =========================================================================
       - name: Package dist to zip
         if: inputs.core_version != ''
-        working-directory: ./packages/cherry-markdown
-        run: |
-          cd dist
-          zip -r ../../cherry-markdown-${{ inputs.core_version }}.zip .
-          cd ../..
+        working-directory: ./packages/cherry-markdown/dist
+        run: zip -r "$GITHUB_WORKSPACE/cherry-markdown-${{ inputs.core_version }}.zip" .
 
       - name: Upload dist zip to GitHub Release
         if: inputs.core_version != ''
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: cherry-markdown-${{ inputs.core_version }}.zip
           tag_name: 'cherry-markdown@${{ inputs.core_version }}'
+          fail_on_unmatched_files: true
