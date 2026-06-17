@@ -1558,6 +1558,9 @@ export default class Editor {
           to,
           insert: mdText,
         },
+        selection: {
+          anchor: from + mdText.length,
+        },
       });
 
       pasteHelper.showSwitchBtnAfterPasteHtml(this.$cherry, currentCursor, editorView, htmlText, mdText);
