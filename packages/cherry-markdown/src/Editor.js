@@ -1476,7 +1476,12 @@ export default class Editor {
       return;
     }
     let html = clipboardData.getData('Text/Html');
-    const { items } = clipboardData;
+    const { items, types } = clipboardData;
+
+    // 判断是否来自 vscode 粘贴
+    if (types.includes('vscode-editor-data')) {
+      return;
+    }
 
     // 优先处理来自 Word 等应用的粘贴内容
     // 有效的内容通常由 StartFragment 和 EndFragment 标记包裹。
@@ -1537,19 +1542,15 @@ export default class Editor {
    * @param {string} html - HTML 内容
    * @param {string} htmlText - 纯文本内容
    * @param {CM6AdapterType} editorView - CodeMirror 6 适配器
-   * @param {number} [overrideFrom] - 可选，覆盖插入起始位置（用于异步回调场景）
-   * @param {number} [overrideTo] - 可选，覆盖插入结束位置（用于异步回调场景）
    */
-  formatHtml2MdWhenPaste(event, html, htmlText, editorView, overrideFrom, overrideTo) {
+  formatHtml2MdWhenPaste(event, html, htmlText, editorView) {
     let divObj = document.createElement('DIV');
     divObj.innerHTML = html;
     const mdText = htmlParser.run(divObj.innerHTML);
     if (typeof mdText === 'string' && mdText.trim().length > 0) {
       const selection = editorView.state.selection.main;
       // 使用传入的位置或当前选区位置
-      const from = overrideFrom ?? selection.from;
-      const to = overrideTo ?? selection.to;
-      const currentCursor = from;
+      const { from, to } = selection;
 
       // 替换选中内容
       editorView.dispatch({
@@ -1559,11 +1560,12 @@ export default class Editor {
           insert: mdText,
         },
         selection: {
-          anchor: from + mdText.length,
+          anchor: from,
+          head: from + mdText.length,
         },
       });
 
-      pasteHelper.showSwitchBtnAfterPasteHtml(this.$cherry, currentCursor, editorView, htmlText, mdText);
+      pasteHelper.showSwitchBtnAfterPasteHtml(this.$cherry, from, editorView, htmlText, mdText);
       // 仅在 event 存在时调用 preventDefault，避免空指针异常
       if (event) {
         event.preventDefault();
