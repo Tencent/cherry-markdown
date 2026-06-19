@@ -1,6 +1,6 @@
 {
   "name": "@cherry-markdown/plugin-searcher",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Cherry Markdown 搜索插件",
   "license": "Apache-2.0",
   "type": "module",
