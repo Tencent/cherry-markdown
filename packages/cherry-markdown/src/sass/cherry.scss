@@ -9,7 +9,6 @@
 @use './bubble_formula';
 @use './formula_utils_bubble';
 @use './components/shortcut_key_config';
-@use '../../../../plugin/searcher/src/styles/searcher';
 @use './codemirror-v6-fixes';
 
 @mixin cherryFont {

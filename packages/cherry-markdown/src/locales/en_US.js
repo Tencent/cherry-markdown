@@ -188,8 +188,6 @@ export default {
   matchesFoundText: 'matches found.',
   toggleReplace: 'Toggle Replace',
   close: 'Close',
-  searcherRecentTitle: 'Recent searches',
-  searcherDelete: 'Delete',
   border: 'Border',
   shadow: 'Shadow',
   radius: 'Radius',

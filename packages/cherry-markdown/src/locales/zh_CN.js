@@ -189,8 +189,6 @@ export default {
   matchesFoundText: '处匹配',
   toggleReplace: '展开/收起替换框',
   close: '关闭',
-  searcherRecentTitle: '最近文本',
-  searcherDelete: '删除',
   border: '边框',
   shadow: '阴影',
   radius: '圆角',

@@ -1,31 +1,30 @@
 /**
- * 将 plugin-searcher 构建产物同步到 cherry-markdown/dist/addons
+ * 将 plugin-searcher 样式编译并同步到 cherry-markdown/dist/addons
+ * JS 由 addons.build.js 从 src/addons/cherry-searcher-plugin.js 构建，此处仅处理 CSS
  */
-import { copyFileSync, mkdirSync, existsSync } from 'fs';
+import * as sass from 'sass';
+import { mkdirSync, existsSync, writeFileSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const cherryRoot = resolve(currentDir, '..');
-const pluginDist = resolve(cherryRoot, '../../plugin/searcher/dist');
+const pluginRoot = resolve(cherryRoot, '../../plugin/searcher');
+const scssFile = join(pluginRoot, 'src/styles/searcher.scss');
 const targetDir = join(cherryRoot, 'dist/addons');
+const targetCss = join(targetDir, 'cherry-searcher-plugin.css');
 
-const files = ['cherry-searcher-plugin.js', 'cherry-searcher-plugin.esm.js'];
-
-if (!existsSync(pluginDist)) {
-  console.error('[sync-searcher-addon] plugin dist not found, run plugin-searcher build first');
+if (!existsSync(scssFile)) {
+  console.error('[sync-searcher-addon] 未找到 plugin-searcher 样式源文件，请先构建 @cherry-markdown/plugin-searcher');
   process.exit(1);
 }
 
 mkdirSync(targetDir, { recursive: true });
 
-files.forEach((file) => {
-  const source = join(pluginDist, file);
-  const target = join(targetDir, file);
-  if (!existsSync(source)) {
-    console.error(`[sync-searcher-addon] missing ${source}`);
-    process.exit(1);
-  }
-  copyFileSync(source, target);
-  console.log('[sync-searcher-addon] copied %s', target);
+const cssResult = sass.compile(scssFile, {
+  loadPaths: [resolve(cherryRoot, '../../node_modules')],
+  style: 'expanded',
 });
+
+writeFileSync(targetCss, cssResult.css, 'utf-8');
+console.log('[sync-searcher-addon] wrote %s', targetCss);

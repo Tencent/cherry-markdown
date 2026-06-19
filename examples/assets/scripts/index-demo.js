@@ -412,7 +412,6 @@ const basicConfig = {
       'customMenuCName',
       '|',
       'shortcutKey',
-      'searcher',
       'togglePreview',
     ],
     toolbarRight: ['fullScreen', '|', 'export', 'changeLocale', '|', 'wordCount'],

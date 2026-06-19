@@ -138,7 +138,12 @@ export default class Toolbar {
     const fragLeft = document.createDocumentFragment();
 
     this.menus.level1MenusName.forEach((name) => {
-      const btn = this.menus.hooks[name].createBtn();
+      const hook = this.menus.hooks[name];
+      if (!hook || typeof hook.createBtn !== 'function') {
+        Logger.warn(`[Cherry toolbar] 跳过未注册的菜单项: ${name}`);
+        return;
+      }
+      const btn = hook.createBtn();
       if (typeof window === 'object' && 'onpointerup' in window) {
         // 只有先down再up的才触发click逻辑，避免误触（尤其是float menu的场景）
         btn.addEventListener(

@@ -1,7 +1,9 @@
 import Cherry from 'cherry-markdown';
+import SearcherCherryPlugin from 'cherry-markdown/dist/addons/cherry-searcher-plugin.esm.js';
 import { CherryOptions } from 'cherry-markdown/types/cherry';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import '@cherry-markdown/plugin-searcher/styles/searcher.scss';
 
 import { pinyin } from 'pinyin';
 import { WINDOW_EVENTS } from '../constants/events';
@@ -253,7 +255,6 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       'graph',
       'proTable',
       '|',
-      'searcher',
       'shortcutKey',
       'togglePreview',
     ],
@@ -385,6 +386,8 @@ const cherryConfig: CherryOptions<CustomConfig> = {
 /**
  * @description cherryInstance
  */
+Cherry.usePlugin(SearcherCherryPlugin);
+
 export const cherryInstance = (() => {
   return () => {
     return new Cherry(cherryConfig);

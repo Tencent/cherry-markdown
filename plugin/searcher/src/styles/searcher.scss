@@ -2,6 +2,47 @@
  * Searcher 插件样式
  * 参考 TEditor te-searcher 单行搜索框设计
  */
+
+// 操作按钮共用：区分大小写 / 全字匹配 / 替换 / 全部替换
+@mixin searcher-action-btn-states {
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--oc-gray-6);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  // 默认可用：hover
+  &:hover:not(:disabled):not(.is-forbidden) {
+    background-color: rgba(31, 35, 41, 0.08);
+    color: var(--toolbar-btn-color);
+  }
+
+  // 选中（大小写 / 全字匹配开启）
+  &.is-active {
+    background-color: rgba(51, 112, 255, 0.15);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  // 不可操作（无匹配、未输入关键词、替换内容为空等）
+  &.is-unavailable,
+  &:disabled:not(.is-forbidden):not(.is-active) {
+    opacity: 0.4;
+    color: var(--oc-gray-6);
+    cursor: default;
+  }
+
+  // 禁止（编辑器只读）
+  &.is-forbidden:disabled {
+    opacity: 0.35;
+    color: var(--oc-gray-5);
+    cursor: not-allowed;
+  }
+}
+
 .cherry-searcher {
   position: fixed;
   z-index: 120;
@@ -134,7 +175,30 @@
     }
   }
 
+  // 区分大小写 / 全字匹配
+  &__toggle {
+    @include searcher-action-btn-states;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    user-select: none;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  // 替换 / 全部替换（默认可操作态与 toggle 一致，不可用时见 mixin 禁用样式）
   &__replace-btn {
+    @include searcher-action-btn-states;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -142,38 +206,15 @@
     height: 22px;
     padding: 0 4px;
     margin: 0;
-    border: 1px solid transparent;
-    border-radius: 3px;
-    background: transparent;
-    color: var(--oc-gray-6);
     font-size: 12px;
     line-height: 1;
     font-family: inherit;
     font-weight: 400;
-    cursor: pointer;
     white-space: nowrap;
     user-select: none;
-    transition:
-      background-color 0.15s ease,
-      color 0.15s ease;
 
-    &:hover:not(:disabled) {
-      background-color: rgba(31, 35, 41, 0.08);
-      color: var(--toolbar-btn-color);
-    }
-
-    &:disabled {
-      opacity: 0.4;
-      cursor: default;
-    }
-
-    &.is-emphasis:not(:disabled) {
-      color: var(--primary-color);
-    }
-
-    &.is-emphasis:not(:disabled):hover {
-      background-color: rgba(51, 112, 255, 0.15);
-      color: var(--primary-color);
+    &:not(:disabled) {
+      cursor: pointer;
     }
   }
 
@@ -258,41 +299,6 @@
     flex-shrink: 0;
   }
 
-  &__toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    padding: 0;
-    margin: 0;
-    border: 1px solid transparent;
-    border-radius: 3px;
-    background: transparent;
-    color: var(--oc-gray-6);
-    cursor: pointer;
-    transition:
-      background-color 0.15s ease,
-      border-color 0.15s ease,
-      color 0.15s ease;
-
-    svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    &:hover {
-      background-color: rgba(31, 35, 41, 0.08);
-      color: var(--toolbar-btn-color);
-    }
-
-    &.is-active {
-      background-color: rgba(51, 112, 255, 0.15);
-      border-color: var(--primary-color);
-      color: var(--primary-color);
-    }
-  }
-
   &__nav {
     display: flex;
     align-items: center;
@@ -342,56 +348,6 @@
       cursor: default;
     }
   }
-
-  &__recent {
-    margin-top: 12px;
-  }
-
-  &__recent-title {
-    color: var(--oc-gray-6);
-    font-size: 12px;
-    margin-bottom: 8px;
-    font-weight: 400;
-  }
-
-  &__tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  &__tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 8px;
-    border: 1px solid var(--dropdown-border);
-    border-radius: 4px;
-    background: var(--dropdown-bg);
-    color: var(--toolbar-btn-color);
-    font-size: 12px;
-    cursor: pointer;
-    transition: background-color 0.15s ease;
-
-    &:hover {
-      background-color: rgba(31, 35, 41, 0.05);
-    }
-  }
-
-  &__tag-delete {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 14px;
-    height: 14px;
-    color: var(--oc-gray-5);
-    font-size: 14px;
-    line-height: 1;
-
-    &:hover {
-      color: var(--toolbar-btn-color);
-    }
-  }
 }
 
 .cherry.theme__dark {
@@ -400,20 +356,11 @@
       background-color: rgba(255, 255, 255, 0.06);
     }
 
-    &__toggle:hover,
+    &__toggle:hover:not(:disabled):not(.is-forbidden),
+    &__replace-btn:hover:not(:disabled):not(.is-forbidden),
     &__nav-btn:hover:not(:disabled),
-    &__expand-btn:hover,
-    &__replace-btn:hover:not(:disabled) {
+    &__expand-btn:hover {
       background-color: rgba(255, 255, 255, 0.08);
-    }
-
-    &__replace-btn.is-emphasis:not(:disabled):hover {
-      background-color: rgba(51, 112, 255, 0.2);
-      color: var(--primary-color);
-    }
-
-    &__tag:hover {
-      background-color: rgba(255, 255, 255, 0.06);
     }
   }
 }

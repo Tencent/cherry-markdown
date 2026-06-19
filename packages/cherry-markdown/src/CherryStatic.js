@@ -23,7 +23,6 @@ import TapdTablePlugin from './addons/advance/cherry-tapd-table-plugin';
 import TapdHtmlTagPlugin from './addons/advance/cherry-tapd-html-tag-plugin';
 import TapdCheckListPlugin from './addons/advance/cherry-tapd-checklist-plugin';
 import EChartsCodeBlockEngine from './addons/advance/cherry-codeblock-echarts-plugin';
-import SearcherPlugin from '@cherry-markdown/plugin-searcher';
 import { isBrowser } from './utils/env';
 
 const constants = { HOOKS_TYPE_LIST };
@@ -33,7 +32,6 @@ const plugins = {
   TapdHtmlTagPlugin,
   TapdCheckListPlugin,
   EChartsCodeBlockEngine,
-  SearcherPlugin,
 };
 const nodeIgnorePlugin = [];
 
@@ -52,9 +50,33 @@ export class CherryStatic {
   static constants = constants;
   static plugins = plugins;
   static VERSION = VERSION;
+
+  /** @type {Array<{ PluginClass: { onCherryInit?: (cherry: any, ...args: any[]) => void; onCherryDestroy?: (cherry: any, ...args: any[]) => void }; args: any[] }>} */
+  static _pluginInits = [];
+
+  /**
+   * Cherry 实例初始化完成后调用已注册插件的 onCherryInit
+   * @param {import('./Cherry').default} cherry
+   */
+  static invokePluginInits(cherry) {
+    CherryStatic._pluginInits.forEach(({ PluginClass, args }) => {
+      PluginClass.onCherryInit?.(cherry, ...args);
+    });
+  }
+
+  /**
+   * Cherry 实例销毁前调用已注册插件的 onCherryDestroy
+   * @param {import('./Cherry').default} cherry
+   */
+  static invokePluginDestroys(cherry) {
+    CherryStatic._pluginInits.forEach(({ PluginClass, args }) => {
+      PluginClass.onCherryDestroy?.(cherry, ...args);
+    });
+  }
+
   /**
    * @this {typeof import('./Cherry').default | typeof CherryStatic}
-   * @param {{ install: (defaultConfig: any, ...args: any[]) => void }} PluginClass 插件Class
+   * @param {{ install: (defaultConfig: any, ...args: any[]) => void; onCherryInit?: (cherry: any, ...args: any[]) => void; onCherryDestroy?: (cherry: any, ...args: any[]) => void }} PluginClass 插件Class
    * @param  {...any} args 初始化插件的参数
    * @returns
    */
@@ -72,6 +94,9 @@ export class CherryStatic {
     }
     // @ts-ignore
     PluginClass.install.apply(PluginClass, [this.config.defaults, ...args]);
+    if (typeof PluginClass.onCherryInit === 'function') {
+      CherryStatic._pluginInits.push({ PluginClass, args });
+    }
     // @ts-ignore
     PluginClass.$cherry$mounted = true;
   }

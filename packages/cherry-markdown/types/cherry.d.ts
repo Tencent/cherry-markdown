@@ -705,7 +705,6 @@ export type CherryDefaultToolbar =
   | 'word'
   | 'align'
   | 'proTable'
-  | 'searcher'
   | 'shortcutKey'
   | 'wordCount';
 

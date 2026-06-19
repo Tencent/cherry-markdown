@@ -1,34 +1,63 @@
-export interface SearcherTagItem {
-  value: string;
-  label?: string;
+/**
+ * @cherry-markdown/plugin-searcher 包入口类型声明
+ * 构建时与 searcher.types.d.ts 一并复制到 dist/。
+ */
+import type {
+  EditorAdapter,
+  SearcherLocale,
+  SearcherMatchRange,
+  SearcherOptions,
+  SearcherPanelParams,
+  SearcherShowOptions,
+} from './searcher.types.js';
+
+export type {
+  SearcherLocale,
+  SearcherOptions,
+  SearcherSearchEvent,
+  SearcherReplaceEvent,
+  EditorAdapter,
+  SearcherPanelParams,
+  SearcherMatchRange,
+  SearcherSearchState,
+  SearcherShowOptions,
+} from './searcher.types.js';
+
+export declare const DEFAULT_OPTIONS: Required<
+  Pick<SearcherOptions, 'enableReplace' | 'expandReplaceOnOpen'>
+>;
+
+export declare const SEARCHER_LOCALES: {
+  zh_CN: Required<SearcherLocale>;
+  en_US: Required<SearcherLocale>;
+};
+
+export declare const LOCALE_ZH_CN: Required<SearcherLocale>;
+export declare const LOCALE_EN_US: Required<SearcherLocale>;
+export declare const DEFAULT_LOCALE_ID: 'en_US';
+
+export declare function mergeOptions(
+  options?: SearcherOptions,
+): SearcherOptions & typeof DEFAULT_OPTIONS;
+
+export declare function resolveLocale(options?: SearcherOptions): Required<SearcherLocale>;
+
+export default class SearcherPanel {
+  constructor(params: SearcherPanelParams);
+  dom: HTMLElement;
+  options: SearcherOptions;
+  editorAdapter: EditorAdapter;
+  isVisible(): boolean;
+  show(
+    anchorRect: { left: number; top: number; width: number; height: number },
+    selection?: string,
+    showOptions?: SearcherShowOptions,
+  ): void;
+  hide(): void;
+  destroy(): void;
+  setReplaceExpanded(expanded: boolean): void;
+  updateLocaleStrings(): void;
 }
-
-export interface SearcherPluginOptions {
-  /** 搜索输入框占位文本 */
-  placeholder?: string;
-  /** 最近文本区域标题 */
-  recentTitle?: string;
-  /** 历史记录/推荐标签 */
-  recentTexts?: SearcherTagItem[];
-  /** 最大历史记录数量，默认 10 */
-  maxRecentCount?: number;
-  /** localStorage 存储键名 */
-  storageKey?: string;
-  /** 标签删除回调，返回 false 可阻止删除 */
-  onTagDelete?: (value: string) => boolean | void;
-  /** 是否启用替换功能，默认 true */
-  enableReplace?: boolean;
-  /** 打开面板时是否默认展开替换行，默认 false */
-  defaultExpandReplace?: boolean;
-}
-
-export default class SearcherPlugin {
-  static install(cherryOptions: Record<string, unknown>, options?: SearcherPluginOptions): void;
-}
-
-export class SearcherMenu {}
-
-export class SearcherPanel {}
 
 export function escapeRegExp(str: string): string;
 
@@ -43,9 +72,6 @@ export function findMatches(
   query: string,
   caseSensitive: boolean,
   wholeWord: boolean,
-): Array<{ from: number; to: number }>;
+): SearcherMatchRange[];
 
-export function findNearestMatchIndex(
-  matches: Array<{ from: number; to: number }>,
-  cursorPos: number,
-): number;
+export function findNearestMatchIndex(matches: SearcherMatchRange[], cursorPos: number): number;

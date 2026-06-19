@@ -58,14 +58,16 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
   // 虚拟模块 ID 前缀
   const VIRTUAL_PREFIX = 'virtual:cherry-';
   const RESOLVED_PREFIX = `\0${VIRTUAL_PREFIX}`;
-
   // 固定虚拟模块
   const virtualCherryJsId = `${VIRTUAL_PREFIX}full-js`;
   const virtualCherryCoreJsId = `${VIRTUAL_PREFIX}core-js`;
   const virtualCherryCssId = `${VIRTUAL_PREFIX}css`;
+  const virtualSearcherCssId = `${VIRTUAL_PREFIX}searcher-css`;
   const resolvedVirtualCherryJsId = `\0${virtualCherryJsId}`;
   const resolvedVirtualCherryCoreJsId = `\0${virtualCherryCoreJsId}`;
   const resolvedVirtualCherryCssId = `\0${virtualCherryCssId}`;
+  const resolvedVirtualSearcherCssId = `\0${virtualSearcherCssId}`;
+  const pluginSearcherScss = path.resolve(cherryMarkdownDir, '../../plugin/searcher/src/styles/searcher.scss');
 
   /**
    * 将 addon 文件名转为 UMD 全局变量名（camelCase）
@@ -137,6 +139,8 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
         // 3. 拦截 cherry-markdown.js（非 core）请求 → full 虚拟模块
         const jsPattern = /\/?\.{0,2}\/?packages\/cherry-markdown\/dist\/cherry-markdown[^/]*\.js/;
         const cssPattern = /\/?\.{0,2}\/?packages\/cherry-markdown\/dist\/cherry-markdown[^/]*\.css/;
+        const searcherCssPattern =
+          /\/?\.{0,2}\/?packages\/cherry-markdown\/dist\/addons\/cherry-searcher-plugin\.css/;
 
         if (jsPattern.test(url)) {
           req.url = `/@id/${virtualCherryJsId}`;
@@ -149,7 +153,13 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
           return next();
         }
 
-        // 5. 拦截字体文件请求，代理到 dist/fonts/
+        // 5. 拦截 searcher addon CSS → 虚拟模块（开发态无需 dist 预构建）
+        if (searcherCssPattern.test(url)) {
+          req.url = `/@id/${virtualSearcherCssId}`;
+          return next();
+        }
+
+        // 6. 拦截字体文件请求，代理到 dist/fonts/
         // 情况1: src/sass/fonts/ 路径（Vite 处理 SCSS 时生成的绝对路径）
         // 情况2: /fonts/ 根路径（CSS 通过 JS 模块注入时，浏览器用页面 URL 解析相对路径 ./fonts/）
         const fontPatterns = [/\/packages\/cherry-markdown\/src\/sass\/fonts\/(.+)/, /^\/fonts\/(ch-icon\.[^?]+)/];
@@ -184,6 +194,7 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
       if (id === virtualCherryJsId) return resolvedVirtualCherryJsId;
       if (id === virtualCherryCoreJsId) return resolvedVirtualCherryCoreJsId;
       if (id === virtualCherryCssId) return resolvedVirtualCherryCssId;
+      if (id === virtualSearcherCssId) return resolvedVirtualSearcherCssId;
 
       // 动态 addon 虚拟模块
       if (id.startsWith(VIRTUAL_PREFIX + 'addon-')) {
@@ -222,7 +233,17 @@ export { Cherry };
 
       // 加载虚拟 CSS 模块 - 导入 SCSS 源文件
       if (id === resolvedVirtualCherryCssId) {
-        return `import '${srcDirNormalized}/sass/index.scss';`;
+        return `
+import '${srcDirNormalized}/sass/index.scss';
+`;
+      }
+
+      // 加载 Searcher 插件样式（addon CSS）
+      if (id === resolvedVirtualSearcherCssId) {
+        const scssPath = pluginSearcherScss.replace(/\\/g, '/');
+        return `
+import '${scssPath}';
+`;
       }
 
       // 加载 addon 虚拟模块 - 从 src/addons/ 导入并暴露为 UMD 风格的全局变量
@@ -256,6 +277,13 @@ export default AddonModule;
       // 1. CSS link → module script
       result = result.replace(
         /<link[^>]*href=["']([^"']*\/packages\/cherry-markdown\/dist\/cherry-markdown[^"']*\.css)["'][^>]*\/?>/gi,
+        (_match, href) => {
+          return `<script type="module">import "${href}";</script>`;
+        },
+      );
+
+      result = result.replace(
+        /<link[^>]*href=["']([^"']*\/packages\/cherry-markdown\/dist\/addons\/cherry-searcher-plugin\.css)["'][^>]*\/?>/gi,
         (_match, href) => {
           return `<script type="module">import "${href}";</script>`;
         },

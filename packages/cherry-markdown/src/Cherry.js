@@ -76,11 +76,6 @@ export default class Cherry extends CherryStatic {
      */
     this.options = mergeWith({}, defaultConfigCopy, options, customizer);
 
-    /** @type {any|null} 搜索面板实例 */
-    this.searcherPanelInstance = null;
-    /** @type {boolean} 是否初始化搜索面板 */
-    this.searcherPanelInit = false;
-
     this.storageFloatPreviewerWrapData = {
       x: 50,
       y: 58,
@@ -275,7 +270,10 @@ export default class Cherry extends CherryStatic {
   }
 
   destroy() {
-    // 先销毁编辑器实例（清理 EditorView 和资源）
+    // 先销毁插件桥接（解绑监听、清理面板 DOM）
+    this.constructor.invokePluginDestroys(this);
+
+    // 再销毁编辑器实例（清理 EditorView 和资源）
     if (this.editor) {
       this.editor.destroy();
     }
@@ -1010,6 +1008,7 @@ export default class Cherry extends CherryStatic {
         this.previewer.update(html);
       }
       this.$event.emit('afterInit', { markdownText, html });
+      this.constructor.invokePluginInits(this);
     } catch (e) {
       throw new NestedError(e);
     }
@@ -1185,7 +1184,6 @@ export default class Cherry extends CherryStatic {
     this.locale = this.locales[locale];
     this.$event.emit('afterChangeLocale', locale);
     this.resetToolbar('toolbar', this.options.toolbars.toolbar || []);
-    if (this.searcherPanelInstance) this.searcherPanelInstance.updateLocaleStrings();
     return true;
   }
 

@@ -59,8 +59,8 @@ export default defineConfig({
       { find: '@cherry', replacement: srcDir },
       { find: '@cherry-markdown/plugin-searcher', replacement: path.resolve(pluginSearcherDir, 'src/index.js') },
       {
-        find: '@cherry-markdown/plugin-searcher/SearcherMenu',
-        replacement: path.resolve(pluginSearcherDir, 'src/SearcherMenu.js'),
+        find: '@cherry-markdown/plugin-searcher/styles/searcher.scss',
+        replacement: path.resolve(pluginSearcherDir, 'styles/searcher.scss'),
       },
       // examples 别名
       { find: '@examples', replacement: examplesDir },

@@ -42,22 +42,10 @@ export function findMatches(text, query, caseSensitive, wholeWord) {
     return [];
   }
 
-  /** @type {Array<{ from: number; to: number }>} */
-  const matches = [];
-  let match = regex.exec(text);
-
-  while (match) {
-    matches.push({
-      from: match.index,
-      to: match.index + match[0].length,
-    });
-    if (match[0].length === 0) {
-      regex.lastIndex += 1;
-    }
-    match = regex.exec(text);
-  }
-
-  return matches;
+  return Array.from(text.matchAll(regex), (match) => ({
+    from: match.index,
+    to: match.index + match[0].length,
+  }));
 }
 
 /**

@@ -1,13 +1,7 @@
 /**
- * 构建 @cherry-markdown/plugin-searcher 的 UMD / ESM 发版产物
- *
- * 将 @cherry/* 解析为 cherry-markdown 源码并打包，供 npm 发布使用。
+ * 构建 @cherry-markdown/plugin-searcher（原生 ES Module，无 Babel 转译）
  */
-import babel from '@rollup/plugin-babel';
-import resolve from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
-import alias from '@rollup/plugin-alias';
-import json from '@rollup/plugin-json';
+import * as sass from 'sass';
 import terser from '@rollup/plugin-terser';
 import { rollup } from 'rollup';
 import { mkdirSync, writeFileSync, copyFileSync } from 'fs';
@@ -16,50 +10,15 @@ import { fileURLToPath } from 'url';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const packageRoot = pathResolve(currentDir, '..');
-const cherrySrc = pathResolve(packageRoot, '../../packages/cherry-markdown/src');
 const distDir = join(packageRoot, 'dist');
 const inputFile = join(packageRoot, 'src/index.js');
-const umdName = 'CherrySearcherPlugin';
+const umdName = 'SearcherPanel';
 
 async function build() {
   mkdirSync(distDir, { recursive: true });
 
   const bundle = await rollup({
     input: inputFile,
-    plugins: [
-      json(),
-      alias({
-        entries: [
-          {
-            find: '@',
-            replacement: cherrySrc,
-          },
-          {
-            find: '@cherry',
-            replacement: cherrySrc,
-          },
-        ],
-      }),
-      resolve({ browser: true }),
-      commonjs({
-        include: [/node_modules/],
-        extensions: ['.js'],
-      }),
-      babel({
-        babelHelpers: 'runtime',
-        babelrc: false,
-        configFile: false,
-        exclude: [/node_modules[\\/](?!lodash)/],
-        presets: [['@babel/preset-env', { modules: false }]],
-        plugins: [
-          ['@babel/plugin-transform-runtime', { corejs: 3 }],
-          ['@babel/plugin-proposal-decorators', { legacy: true }],
-          '@babel/plugin-proposal-class-properties',
-          '@babel/plugin-proposal-nullish-coalescing-operator',
-          '@babel/plugin-proposal-optional-chaining',
-        ],
-      }),
-    ],
   });
 
   const umdOutput = await bundle.generate({
@@ -74,14 +33,28 @@ async function build() {
     plugins: [terser()],
   });
 
-  writeFileSync(join(distDir, 'cherry-searcher-plugin.js'), umdOutput.output[0].code, 'utf-8');
-  writeFileSync(join(distDir, 'cherry-searcher-plugin.esm.js'), esmOutput.output[0].code, 'utf-8');
+  writeFileSync(join(distDir, 'searcher.js'), umdOutput.output[0].code, 'utf-8');
+  writeFileSync(join(distDir, 'searcher.esm.js'), esmOutput.output[0].code, 'utf-8');
 
   copyFileSync(join(packageRoot, 'types/index.d.ts'), join(distDir, 'index.d.ts'));
+  copyFileSync(join(packageRoot, 'types/searcher.types.d.ts'), join(distDir, 'searcher.types.d.ts'));
 
-  console.log('[plugin-searcher build] wrote dist/cherry-searcher-plugin.js');
-  console.log('[plugin-searcher build] wrote dist/cherry-searcher-plugin.esm.js');
+  const stylesDir = join(packageRoot, 'styles');
+  mkdirSync(stylesDir, { recursive: true });
+  copyFileSync(join(packageRoot, 'src/styles/searcher.scss'), join(stylesDir, 'searcher.scss'));
+
+  const cssResult = sass.compile(join(packageRoot, 'src/styles/searcher.scss'), {
+    loadPaths: [pathResolve(packageRoot, '../../node_modules')],
+    style: 'expanded',
+  });
+  writeFileSync(join(distDir, 'searcher.css'), cssResult.css, 'utf-8');
+
+  console.log('[plugin-searcher build] wrote dist/searcher.js (UMD)');
+  console.log('[plugin-searcher build] wrote dist/searcher.esm.js (ESM)');
   console.log('[plugin-searcher build] wrote dist/index.d.ts');
+  console.log('[plugin-searcher build] wrote dist/searcher.types.d.ts');
+  console.log('[plugin-searcher build] wrote styles/searcher.scss');
+  console.log('[plugin-searcher build] wrote dist/searcher.css');
 }
 
 build().catch((error) => {

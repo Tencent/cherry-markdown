@@ -297,12 +297,15 @@ export default class CherryStream extends CherryStatic {
       const html = this.engine.makeHtml(markdownText);
       this.previewer.update(html);
       this.$event.emit('afterInit', { markdownText, html });
+      this.constructor.invokePluginInits(this);
     } catch (e) {
       throw new NestedError(e);
     }
   }
 
   destroy() {
+    this.constructor.invokePluginDestroys(this);
+
     if (this.noMountEl) {
       this.cherryDom.remove();
     } else {
