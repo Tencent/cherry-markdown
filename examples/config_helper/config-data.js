@@ -15,7 +15,7 @@ export const TOOLBAR_BUTTONS = [
   'hr', 'formula', 'link', 'table', 'toc',
   'proTable', 'pdf', 'word', 'ruby', 'theme',
   'file', 'panel', 'align', 'detail', 'drawIo',
-  'wordCount', 'cursorPosition', 'changeLocale', 'shortcutKey', 'search', '|'
+  'wordCount', 'cursorPosition', 'changeLocale', 'shortcutKey', 'searcher', '|'
 ];
 
 // 顶部右对齐工具栏按钮（'|' 为分割线，可多次使用）
@@ -30,7 +30,7 @@ export const TOOLBAR_RIGHT_BUTTONS = [
   'proTable', 'pdf', 'word', 'ruby', 'theme',
   'file', 'panel', 'align', 'detail', 'drawIo',
   'mobilePreview', 'copy', 
-  'wordCount', 'cursorPosition', 'changeLocale', 'shortcutKey', 'search', '|'
+  'wordCount', 'cursorPosition', 'changeLocale', 'shortcutKey', 'searcher', '|'
 ];
 
 // 气泡工具栏按钮（'|' 为分割线，可多次使用）
@@ -54,7 +54,7 @@ export const FLOAT_BUTTONS = [
 
 // 侧边栏按钮（'|' 为分割线，可多次使用）
 export const SIDEBAR_BUTTONS = [
-  'togglePreview', 'export', 'settings', 'fullScreen', 'switchModel', 'mobilePreview', 'copy', 'theme', 'wordCount', 'changeLocale', 'shortcutKey', 'search', '|'
+  'togglePreview', 'export', 'settings', 'fullScreen', 'switchModel', 'mobilePreview', 'copy', 'theme', 'wordCount', 'changeLocale', 'shortcutKey', 'searcher', '|'
 ];
 
 // 配置项源码映射

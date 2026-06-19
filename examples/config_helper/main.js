@@ -398,7 +398,7 @@ const TOOLBAR_BUTTON_LABELS = {
   'cursorPosition': '光标位置',
   'changeLocale': '切换语言',
   'shortcutKey': '快捷键',
-  'search': '搜索',
+  'searcher': '搜索',
 };
 
 function getButtonLabel(val) {

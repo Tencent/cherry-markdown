@@ -253,7 +253,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       'graph',
       'proTable',
       '|',
-      'search',
+      'searcher',
       'shortcutKey',
       'togglePreview',
     ],

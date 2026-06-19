@@ -173,6 +173,7 @@ export default {
   enableShortcut: 'Включить горячие клавиши',
   recoverShortcut: 'Восстановить конфигурацию по умолчанию',
   search: 'Поиск/Заменить',
+  searcher: 'Поиск',
   autoWrap: 'Автоперенос строк',
   footnoteTitle: 'Сноска',
   searchFor: 'Найти',

@@ -76,10 +76,10 @@ export default class Cherry extends CherryStatic {
      */
     this.options = mergeWith({}, defaultConfigCopy, options, customizer);
 
-    /** @type {import('./utils/cm-search-replace').default} SearchBox 实例 */
-    this.searchBoxInstance = null;
-    /** @type {boolean} 是否初始化SearchBox */
-    this.searchBoxInit = false;
+    /** @type {any|null} 搜索面板实例 */
+    this.searcherPanelInstance = null;
+    /** @type {boolean} 是否初始化搜索面板 */
+    this.searcherPanelInit = false;
 
     this.storageFloatPreviewerWrapData = {
       x: 50,
@@ -1185,7 +1185,7 @@ export default class Cherry extends CherryStatic {
     this.locale = this.locales[locale];
     this.$event.emit('afterChangeLocale', locale);
     this.resetToolbar('toolbar', this.options.toolbars.toolbar || []);
-    if (this.searchBoxInstance) this.searchBoxInstance.updateLocaleStrings();
+    if (this.searcherPanelInstance) this.searcherPanelInstance.updateLocaleStrings();
     return true;
   }
 

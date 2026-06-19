@@ -72,6 +72,18 @@ function buildAddons(entries) {
               find: '@',
               replacement: _resolve(PROJECT_ROOT_PATH, 'src'),
             },
+            {
+              find: '@cherry',
+              replacement: _resolve(PROJECT_ROOT_PATH, 'src'),
+            },
+            {
+              find: '@cherry-markdown/plugin-searcher',
+              replacement: _resolve(PROJECT_ROOT_PATH, '../../plugin/searcher/src/index.js'),
+            },
+            {
+              find: '@cherry-markdown/plugin-searcher/SearcherMenu',
+              replacement: _resolve(PROJECT_ROOT_PATH, '../../plugin/searcher/src/SearcherMenu.js'),
+            },
           ],
         }),
         resolve({

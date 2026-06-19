@@ -34,6 +34,18 @@ const aliasPluginOptions = {
       find: '@',
       replacement: path.resolve(PROJECT_ROOT_PATH, 'src'),
     },
+    {
+      find: '@cherry',
+      replacement: path.resolve(PROJECT_ROOT_PATH, 'src'),
+    },
+    {
+      find: '@cherry-markdown/plugin-searcher',
+      replacement: path.resolve(PROJECT_ROOT_PATH, '../../plugin/searcher/src/index.js'),
+    },
+    {
+      find: '@cherry-markdown/plugin-searcher/SearcherMenu',
+      replacement: path.resolve(PROJECT_ROOT_PATH, '../../plugin/searcher/src/SearcherMenu.js'),
+    },
   ],
 };
 

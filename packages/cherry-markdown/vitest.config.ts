@@ -4,6 +4,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
+      '@cherry': resolve(__dirname, './src'),
+      '@cherry-markdown/plugin-searcher': resolve(__dirname, '../../plugin/searcher/src/index.js'),
     },
   },
   test: {
