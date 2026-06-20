@@ -30,7 +30,7 @@
     "provenance": true
   },
   "scripts": {
-    "iconfont": "node build/generate-iconfont.js",
+    "iconfont": "node build/run-iconfont.js",
     "dev": "vite",
     "dev:vite": "vite",
     "build": "run-s clean build:all",
@@ -78,7 +78,7 @@
     "babel-plugin-prismjs": "^2.1.0",
     "cross-env": "^7.0.2",
     "es-check": "^7.1.1",
-    "fonteditor-core": "^2.6.3",
+    "fantasticon": "^4.1.0",
     "glob": "^8.0.3",
     "html2canvas": "^1.1.3",
     "es-toolkit": "^1.44.0",
@@ -95,7 +95,6 @@
     "rollup-plugin-typescript2": "^0.36.0",
     "sass": "^1.99.0",
     "serve": "^14.2.0",
-    "svgicons2svgfont": "^12.0.0",
     "virtual-dom": "^2.1.1"
   },
   "dependencies": {
