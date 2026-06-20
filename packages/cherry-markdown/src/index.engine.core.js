@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import mergeWith from 'lodash/mergeWith';
+import { mergeWith, cloneDeep } from 'es-toolkit/compat';
 
 import Engine from './Engine';
 import { CherryStatic } from './CherryStatic';
@@ -21,7 +21,6 @@ import SyntaxHookBase from './core/SyntaxBase';
 import MenuHookBase from './toolbars/MenuBase';
 import defaultConfig from './Cherry.config';
 import { customizer } from './utils/config';
-import cloneDeep from 'lodash/cloneDeep';
 import { urlProcessorProxy } from './UrlCache';
 
 class CherryEngine extends CherryStatic {

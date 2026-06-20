@@ -93,7 +93,7 @@ function buildAddons(entries) {
         }),
         babel({
           babelHelpers: 'runtime',
-          exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5)/],
+          exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5|es-toolkit)/],
           babelrc: false,
           configFile: false,
           presets: [['@babel/preset-env', { modules: false }]],
