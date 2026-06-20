@@ -22,6 +22,8 @@ import { generateFonts } from 'fantasticon';
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 const packageRoot = path.resolve(currentDir, '..');
 const iconsDir = path.join(packageRoot, 'src/sass/icons');
+// fantasticon 内部用 glob 扫描 SVG，Windows 反斜杠路径会匹配不到文件
+const fantasticonInputDir = iconsDir.replace(/\\/g, '/');
 const fontsDir = path.join(packageRoot, 'dist/fonts');
 const scssPath = path.join(packageRoot, 'src/sass/ch-icon.scss');
 const templatePath = path.join(packageRoot, 'templates', 'iconfont.scss.hbs');
@@ -74,7 +76,7 @@ function loadCodepoints() {
 
 /** @type {import('fantasticon').RunnerOptions} */
 const config = {
-  inputDir: iconsDir,
+  inputDir: fantasticonInputDir,
   outputDir: fontsDir,
   name: 'ch-icon',
   prefix: 'ch-icon',
