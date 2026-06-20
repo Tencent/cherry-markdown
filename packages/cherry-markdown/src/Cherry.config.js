@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { cloneDeep } from 'es-toolkit/compat';
+import cloneDeep from 'es-toolkit/compat/cloneDeep';
 
 const callbacks = {
   /**

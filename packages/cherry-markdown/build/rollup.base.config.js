@@ -105,7 +105,7 @@ const options = {
     babel({
       // use inline config to avoid Babel attempting to load an ESM config file asynchronously
       babelHelpers: 'runtime',
-      exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5|es-toolkit|lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
+      exclude: [/node_modules[\\/](?!codemirror[\\/]src[\\/]|parse5|lodash-es|d3-.*[\\/]src|d3[\\/]src|dagre-d3-es)/],
       babelrc: false,
       configFile: false,
       presets: babelConfig.presets,

@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { mergeWith, cloneDeep } from 'es-toolkit/compat';
+import mergeWith from 'es-toolkit/compat/mergeWith';
+import cloneDeep from 'es-toolkit/compat/cloneDeep';
 import Engine from './Engine';
 import Previewer from './Previewer';
 import { createElement } from './utils/dom';
