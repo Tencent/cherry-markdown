@@ -271,7 +271,7 @@ export default class Cherry extends CherryStatic {
 
   destroy() {
     // 先销毁插件桥接（解绑监听、清理面板 DOM）
-    this.constructor.invokePluginDestroys(this);
+    CherryStatic.invokePluginDestroys(this);
 
     // 再销毁编辑器实例（清理 EditorView 和资源）
     if (this.editor) {
@@ -1008,7 +1008,7 @@ export default class Cherry extends CherryStatic {
         this.previewer.update(html);
       }
       this.$event.emit('afterInit', { markdownText, html });
-      this.constructor.invokePluginInits(this);
+      CherryStatic.invokePluginInits(this);
     } catch (e) {
       throw new NestedError(e);
     }

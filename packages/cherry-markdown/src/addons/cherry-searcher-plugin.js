@@ -6,7 +6,7 @@ import { getAllowedShortcutKey, getKeyCode, getPlatformControlKey, keyStack2Uniq
 
 /**
  * 将 Cherry.locale 映射为 Searcher 文案（Cherry 适配层）
- * @param {import('@/Cherry').default} cherry
+ * @param {import('../../types/addons/cherry-searcher-plugin').SearcherCherryHost} cherry
  * @returns {import('@cherry-markdown/plugin-searcher').SearcherLocale}
  */
 function mapCherryLocale(cherry) {
@@ -30,7 +30,7 @@ function mapCherryLocale(cherry) {
 
 /**
  * 合并 Cherry 宿主语言与 usePlugin 配置
- * @param {import('@/Cherry').default} cherry
+ * @param {import('../../types/addons/cherry-searcher-plugin').SearcherCherryHost} cherry
  * @param {import('@cherry-markdown/plugin-searcher').SearcherOptions} userOptions
  */
 function buildSearcherOptions(cherry, userOptions) {
@@ -49,7 +49,7 @@ function buildSearcherOptions(cherry, userOptions) {
 }
 
 /**
- * @param {import('@/Cherry').default} cherry
+ * @param {import('../../types/addons/cherry-searcher-plugin').SearcherCherryHost} cherry
  * @returns {import('@cherry-markdown/plugin-searcher').EditorAdapter}
  */
 function createCherryEditorAdapter(cherry) {
@@ -99,7 +99,7 @@ function createCherryEditorAdapter(cherry) {
 
 class SearcherCherryBridge {
   /**
-   * @param {import('@/Cherry').default} cherry
+   * @param {import('../../types/addons/cherry-searcher-plugin').SearcherCherryHost} cherry
    * @param {import('@cherry-markdown/plugin-searcher').SearcherOptions} userOptions
    */
   constructor(cherry, userOptions) {
@@ -259,14 +259,14 @@ export default class SearcherCherryPlugin {
   }
 
   /**
-   * @param {import('@/Cherry').default} cherry
+   * @param {import('../../types/addons/cherry-searcher-plugin').SearcherCherryHost} cherry
    */
   static onCherryInit(cherry) {
     cherry.searcherBridge = new SearcherCherryBridge(cherry, SearcherCherryPlugin.mergedOptions);
   }
 
   /**
-   * @param {import('@/Cherry').default} cherry
+   * @param {import('../../types/addons/cherry-searcher-plugin').SearcherCherryHost} cherry
    */
   static onCherryDestroy(cherry) {
     cherry.searcherBridge?.destroy();

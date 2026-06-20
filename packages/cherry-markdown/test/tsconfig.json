@@ -4,12 +4,12 @@
     "allowJs": true,
     "noEmit": true,
     "strict": false,
-    "baseUrl": "..",
     "paths": {
-      "@/*": ["src/*"],
-      "~types/*": ["types/*"]
-    },
+      "@/*": ["../src/*"],
+      "~types/*": ["../types/*"],
+      "@cherry-markdown/plugin-searcher": ["../../../plugin/searcher/types/index.d.ts"]
+    }
   },
-  "include": ["./**/*.ts", "./**/*.tsx"],
+  "include": ["./**/*.ts", "./**/*.tsx", "../types/addons/**/*.d.ts"],
   "files": ["../types/env.d.ts", "../types/codemirror.d.ts"]
 }

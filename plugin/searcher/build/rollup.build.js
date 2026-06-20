@@ -38,6 +38,7 @@ async function build() {
 
   copyFileSync(join(packageRoot, 'types/index.d.ts'), join(distDir, 'index.d.ts'));
   copyFileSync(join(packageRoot, 'types/searcher.types.d.ts'), join(distDir, 'searcher.types.d.ts'));
+  copyFileSync(join(packageRoot, 'types/styles.d.ts'), join(distDir, 'styles.d.ts'));
 
   const stylesDir = join(packageRoot, 'styles');
   mkdirSync(stylesDir, { recursive: true });

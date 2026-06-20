@@ -2,11 +2,20 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import SearcherCherryPlugin from '@/addons/cherry-searcher-plugin';
 import { CherryStatic } from '@/CherryStatic';
 import { mac } from '@/utils/shortcutKey';
+import type { SearcherCherryHost } from '../../types/addons/cherry-searcher-plugin';
+
+/** 获取 onCherryInit 后挂载的 searcherBridge（测试断言用） */
+function getSearcherBridge(cherry: SearcherCherryHost) {
+  if (!cherry.searcherBridge) {
+    throw new Error('searcherBridge is not initialized');
+  }
+  return cherry.searcherBridge;
+}
 
 describe('SearcherCherryPlugin', () => {
   beforeEach(() => {
     SearcherCherryPlugin.mergedOptions = {};
-    CherryStatic._pluginInits.length = 0;
+    CherryStatic.pluginInits.length = 0;
   });
 
   afterEach(() => {
@@ -43,8 +52,8 @@ describe('SearcherCherryPlugin', () => {
       getOption: (key) => (key === 'readOnly' ? false : undefined),
     };
 
-    const handlers = {};
-    const cherry = {
+    const handlers: Record<string, (...args: unknown[]) => void> = {};
+    const cherry: SearcherCherryHost = {
       locale: { searchFor: 'Search for' },
       options: { locale: 'en_US' },
       editor: {
@@ -62,8 +71,8 @@ describe('SearcherCherryPlugin', () => {
     };
 
     SearcherCherryPlugin.onCherryInit(cherry);
-    expect(cherry.searcherBridge).toBeDefined();
-    expect(cherry.searcherBridge.panel.dom.parentNode).toBe(wrapperDom);
+    const bridge = getSearcherBridge(cherry);
+    expect(bridge.panel.dom.parentNode).toBe(wrapperDom);
 
     const event = new KeyboardEvent('keydown', {
       key: 'f',
@@ -74,13 +83,13 @@ describe('SearcherCherryPlugin', () => {
     });
     editorDom.dispatchEvent(event);
 
-    expect(cherry.searcherBridge.panel.isVisible()).toBe(true);
+    expect(bridge.panel.isVisible()).toBe(true);
   });
 
   it('Cherry locale 映射到 panel.options.locale', () => {
     SearcherCherryPlugin.install({}, {});
 
-    const cherry = {
+    const cherry: SearcherCherryHost = {
       locale: {
         searchFor: '查找',
       },
@@ -102,8 +111,9 @@ describe('SearcherCherryPlugin', () => {
     };
 
     SearcherCherryPlugin.onCherryInit(cherry);
-    expect(cherry.searcherBridge.panel.options.localeId).toBe('zh_CN');
-    expect(cherry.searcherBridge.panel.options.locale?.searchFor).toBe('查找');
+    const bridge = getSearcherBridge(cherry);
+    expect(bridge.panel.options.localeId).toBe('zh_CN');
+    expect(bridge.panel.options.locale?.searchFor).toBe('查找');
   });
 
   it('EditorAdapter.setSearchQuery 透传 asRegex 参数', () => {
@@ -122,7 +132,7 @@ describe('SearcherCherryPlugin', () => {
       getOption: () => false,
     };
 
-    const cherry = {
+    const cherry: SearcherCherryHost = {
       locale: {},
       options: { locale: 'en_US' },
       editor: {
@@ -133,7 +143,7 @@ describe('SearcherCherryPlugin', () => {
     };
 
     SearcherCherryPlugin.onCherryInit(cherry);
-    cherry.searcherBridge.panel.editorAdapter.setSearchQuery('hello', true, true);
+    getSearcherBridge(cherry).panel.editorAdapter.setSearchQuery('hello', true, true);
 
     expect(editor.setSearchQuery).toHaveBeenCalledWith('hello', true, true);
   });
@@ -143,7 +153,7 @@ describe('SearcherCherryPlugin', () => {
 
     const editorDom = document.createElement('div');
     const off = vi.fn();
-    const cherry = {
+    const cherry: SearcherCherryHost = {
       locale: {},
       options: { locale: 'en_US' },
       editor: {
@@ -169,7 +179,8 @@ describe('SearcherCherryPlugin', () => {
     };
 
     SearcherCherryPlugin.onCherryInit(cherry);
-    const destroySpy = vi.spyOn(cherry.searcherBridge.panel, 'destroy');
+    const bridge = getSearcherBridge(cherry);
+    const destroySpy = vi.spyOn(bridge.panel, 'destroy');
 
     SearcherCherryPlugin.onCherryDestroy(cherry);
 
@@ -202,7 +213,7 @@ describe('SearcherCherryPlugin', () => {
     };
 
     const handlers: Record<string, (msg?: unknown) => void> = {};
-    const cherry = {
+    const cherry: SearcherCherryHost = {
       locale: {},
       options: { locale: 'en_US' },
       editor: {
@@ -219,12 +230,13 @@ describe('SearcherCherryPlugin', () => {
     };
 
     SearcherCherryPlugin.onCherryInit(cherry);
-    cherry.searcherBridge.panel.show({ left: 0, top: 0, width: 0, height: 0 }, 'foo');
-    expect(cherry.searcherBridge.panel.state.matches).toHaveLength(2);
+    const bridge = getSearcherBridge(cherry);
+    bridge.panel.show({ left: 0, top: 0, width: 0, height: 0 }, 'foo');
+    expect(bridge.panel.state.matches).toHaveLength(2);
 
     doc = 'foo';
     handlers.afterChange?.({});
-    expect(cherry.searcherBridge.panel.state.matches).toHaveLength(1);
+    expect(bridge.panel.state.matches).toHaveLength(1);
   });
 
   it('invokePluginDestroys 调用已注册插件的 onCherryDestroy', () => {
@@ -240,7 +252,7 @@ describe('SearcherCherryPlugin', () => {
       }
     }
 
-    CherryStatic._pluginInits.push({ PluginClass: FakePlugin, args: [] });
+    CherryStatic.pluginInits.push({ PluginClass: FakePlugin, args: [] });
     CherryStatic.invokePluginDestroys({ id: 'demo' });
     expect(destroy).toHaveBeenCalledWith('demo');
   });
@@ -257,7 +269,23 @@ describe('SearcherCherryPlugin', () => {
     };
 
     FakeCherry.usePlugin(FakePlugin, { foo: 1 });
-    expect(CherryStatic._pluginInits).toHaveLength(1);
-    expect(CherryStatic._pluginInits[0].args).toEqual([{ foo: 1 }]);
+    expect(CherryStatic.pluginInits).toHaveLength(1);
+    expect(CherryStatic.pluginInits[0].args).toEqual([{ foo: 1 }]);
+  });
+
+  it('SearcherCherryPlugin 类型声明文件存在且导出关键 API', async () => {
+    const { readFileSync, existsSync } = await import('fs');
+    const { resolve } = await import('path');
+    const dtsPath = resolve(process.cwd(), 'types/addons/cherry-searcher-plugin.d.ts');
+
+    expect(existsSync(dtsPath)).toBe(true);
+
+    const content = readFileSync(dtsPath, 'utf-8');
+    expect(content).toContain('export default class SearcherCherryPlugin');
+    expect(content).toContain('static install');
+    expect(content).toContain('static onCherryInit');
+    expect(content).toContain('static onCherryDestroy');
+    expect(content).toContain('SearcherCherryBridge');
+    expect(content).toContain("declare module 'cherry-markdown/dist/types/Cherry'");
   });
 });

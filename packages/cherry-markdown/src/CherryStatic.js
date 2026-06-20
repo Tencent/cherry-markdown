@@ -41,7 +41,6 @@ if (!isBrowser()) {
   });
 }
 
-// @ts-expect-error process.env from build env
 const VERSION = `${process.env.BUILD_VERSION}`;
 
 export class CherryStatic {
@@ -52,24 +51,24 @@ export class CherryStatic {
   static VERSION = VERSION;
 
   /** @type {Array<{ PluginClass: { onCherryInit?: (cherry: any, ...args: any[]) => void; onCherryDestroy?: (cherry: any, ...args: any[]) => void }; args: any[] }>} */
-  static _pluginInits = [];
+  static pluginInits = [];
 
   /**
    * Cherry 实例初始化完成后调用已注册插件的 onCherryInit
-   * @param {import('./Cherry').default} cherry
+   * @param {import('./Cherry').default | import('./CherryStream').default | Record<string, unknown>} cherry
    */
   static invokePluginInits(cherry) {
-    CherryStatic._pluginInits.forEach(({ PluginClass, args }) => {
+    CherryStatic.pluginInits.forEach(({ PluginClass, args }) => {
       PluginClass.onCherryInit?.(cherry, ...args);
     });
   }
 
   /**
    * Cherry 实例销毁前调用已注册插件的 onCherryDestroy
-   * @param {import('./Cherry').default} cherry
+   * @param {import('./Cherry').default | import('./CherryStream').default | Record<string, unknown>} cherry
    */
   static invokePluginDestroys(cherry) {
-    CherryStatic._pluginInits.forEach(({ PluginClass, args }) => {
+    CherryStatic.pluginInits.forEach(({ PluginClass, args }) => {
       PluginClass.onCherryDestroy?.(cherry, ...args);
     });
   }
@@ -95,7 +94,7 @@ export class CherryStatic {
     // @ts-ignore
     PluginClass.install.apply(PluginClass, [this.config.defaults, ...args]);
     if (typeof PluginClass.onCherryInit === 'function') {
-      CherryStatic._pluginInits.push({ PluginClass, args });
+      CherryStatic.pluginInits.push({ PluginClass, args });
     }
     // @ts-ignore
     PluginClass.$cherry$mounted = true;

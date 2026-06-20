@@ -1,13 +1,15 @@
 /**
  * @cherry-markdown/plugin-searcher 包入口类型声明
- * 构建时与 searcher.types.d.ts 一并复制到 dist/。
+ * 构建时与 searcher.types.d.ts、styles.d.ts 一并复制到 dist/。
  */
+/// <reference path="./styles.d.ts" />
 import type {
   EditorAdapter,
   SearcherLocale,
   SearcherMatchRange,
   SearcherOptions,
   SearcherPanelParams,
+  SearcherSearchState,
   SearcherShowOptions,
 } from './searcher.types.js';
 
@@ -47,6 +49,10 @@ export default class SearcherPanel {
   dom: HTMLElement;
   options: SearcherOptions;
   editorAdapter: EditorAdapter;
+  /** 当前搜索状态（关键词、匹配列表、激活项等） */
+  state: SearcherSearchState;
+  /** 替换内容输入框，未启用替换时为 null */
+  replaceInput: HTMLInputElement | null;
   isVisible(): boolean;
   show(
     anchorRect: { left: number; top: number; width: number; height: number },
@@ -57,6 +63,8 @@ export default class SearcherPanel {
   destroy(): void;
   setReplaceExpanded(expanded: boolean): void;
   updateLocaleStrings(): void;
+  /** 按当前输入重新计算匹配并刷新高亮 */
+  runSearch(keepActiveIndex?: boolean): void;
 }
 
 export function escapeRegExp(str: string): string;

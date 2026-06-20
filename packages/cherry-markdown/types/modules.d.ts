@@ -44,3 +44,21 @@ declare module 'cherry-markdown/dist/addons/cherry-code-block-plantuml-plugin' {
   const plugin: any;
   export default plugin;
 }
+
+/** Searcher 搜索插件（独立构建产物，需单独引入） */
+declare module 'cherry-markdown/dist/addons/cherry-searcher-plugin' {
+  import SearcherCherryPlugin from './addons/cherry-searcher-plugin';
+  export default SearcherCherryPlugin;
+}
+
+/** Searcher 搜索插件 ESM 构建产物 */
+declare module 'cherry-markdown/dist/addons/cherry-searcher-plugin.esm.js' {
+  import SearcherCherryPlugin from './addons/cherry-searcher-plugin';
+  export default SearcherCherryPlugin;
+}
+
+/** Searcher 搜索插件样式（由 sync-searcher-addon 从 plugin-searcher 同步） */
+declare module 'cherry-markdown/dist/addons/cherry-searcher-plugin.css';
+
+/** @cherry-markdown/plugin-searcher 样式（Cherry 集成或独立使用时引入） */
+declare module '@cherry-markdown/plugin-searcher/styles/searcher.scss';
