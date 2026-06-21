@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import mergeWith from 'lodash/mergeWith';
+import mergeWith from 'es-toolkit/compat/mergeWith';
+import cloneDeep from 'es-toolkit/compat/cloneDeep';
 import Engine from './Engine';
 import Previewer from './Previewer';
 import { createElement } from './utils/dom';
@@ -27,7 +28,6 @@ import {
 } from './utils/config';
 import NestedError from './utils/error';
 import defaultConfig from './Cherry.config';
-import cloneDeep from 'lodash/cloneDeep';
 import Event from './Event';
 import locales from '@/locales/index';
 

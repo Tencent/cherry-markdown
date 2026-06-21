@@ -30,7 +30,7 @@
     "provenance": true
   },
   "scripts": {
-    "iconfont": "gulp",
+    "iconfont": "node build/run-iconfont.js",
     "dev": "vite",
     "dev:vite": "vite",
     "build": "run-s clean build:all",

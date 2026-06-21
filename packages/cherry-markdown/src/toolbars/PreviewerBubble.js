@@ -23,7 +23,7 @@ import FootnoteHoverHandler from '@/utils/footnoteHoverHandler';
 import CodeHandler from '@/utils/codeBlockContentHandler';
 import { drawioDialog } from '@/utils/dialog';
 import { imgDrawioReg, getValueWithoutCode } from '@/utils/regexp';
-import debounce from 'lodash/debounce';
+import debounce from 'es-toolkit/compat/debounce';
 import FormulaHandler from '@/utils/formulaUtilsHandler';
 import ListHandler from '@/utils/listContentHandler';
 
@@ -148,6 +148,7 @@ export default class PreviewerBubble {
     };
     this.$cherry.$event.on('afterAsyncRender', this.$bindedOnAfterAsyncRender);
     this.previewerDom.addEventListener('change', this.$bindedOnChange);
+    /** @type {(() => void) & { cancel?: () => void }} */
     this.removeHoverBubble = debounce(() => this.$removeAllPreviewerBubbles('hover'), 400);
 
     // 销毁标志
