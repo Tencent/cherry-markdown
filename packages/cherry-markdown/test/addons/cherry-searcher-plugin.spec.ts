@@ -67,7 +67,7 @@ describe('SearcherCherryPlugin', () => {
 
     SearcherCherryPlugin.onCherryInit(cherry);
     const bridge = getSearcherBridge(cherry);
-    expect(bridge.panel.dom.parentNode).toBe(wrapperDom);
+    expect(bridge.panel.dom.parentNode).toBe(editorDom);
 
     const toolbarButton = document.createElement('button');
     const searcherMenu = new Searcher({

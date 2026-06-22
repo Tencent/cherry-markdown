@@ -50,11 +50,7 @@ declare module 'cherry-markdown/dist/addons/cherry-searcher-plugin' {
   import type { SearcherOptions } from '@cherry-markdown/plugin-searcher';
 
   export class SearcherCherryBridge {
-    handleTrigger(
-      selection?: string,
-      aliasName?: string,
-      anchorRect?: { left: number; top: number; width: number; height: number },
-    ): void;
+    handleTrigger(selection?: string, aliasName?: string): void;
   }
 
   const SearcherCherryPlugin: {

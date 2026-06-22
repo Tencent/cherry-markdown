@@ -153,14 +153,27 @@ export default class SearcherPanel {
   }
 
   /**
+   * 是否挂载在 Cherry 编辑区容器内（使用 CSS 右上角定位，与旧版 ace_search 一致）
+   * @returns {boolean}
+   */
+  isMountedInEditor() {
+    return Boolean(this.dom.parentElement?.classList?.contains('cherry-editor'));
+  }
+
+  /**
    * 显示搜索面板
-   * @param {{ left: number; top: number; width: number; height: number }} anchorRect
+   * @param {{ left: number; top: number; width: number; height: number }} [anchorRect] 独立使用时按视口锚点定位；Cherry 编辑区内可省略
    * @param {string} [selection='']
    * @param {import('../types/searcher.types.js').SearcherShowOptions} [showOptions={}]
    */
   show(anchorRect, selection = '', showOptions = {}) {
     this.dom.style.display = '';
-    this.positionPanel(anchorRect);
+    if (anchorRect) {
+      this.positionPanel(anchorRect);
+    } else if (this.isMountedInEditor()) {
+      this.dom.style.left = '';
+      this.dom.style.top = '';
+    }
 
     if (showOptions.expandReplace && this.enableReplace) {
       this.setReplaceExpanded(true);
@@ -204,10 +217,16 @@ export default class SearcherPanel {
   }
 
   /**
-   * 根据锚点矩形定位面板（与旧版 .ace_search.right 一致：编辑区右上角，并限制在视口内）
+   * 根据锚点矩形定位面板（独立使用 fixed 模式）；Cherry 编辑区内由 CSS 定位
    * @param {{ left: number; top: number; width: number; height: number }} anchorRect
    */
   positionPanel(anchorRect) {
+    if (this.isMountedInEditor()) {
+      this.dom.style.left = '';
+      this.dom.style.top = '';
+      return;
+    }
+
     const panelWidth = this.dom.offsetWidth || 420;
     const panelHeight = this.dom.offsetHeight || 52;
     const pageWidth = document.documentElement.clientWidth;
@@ -224,7 +243,7 @@ export default class SearcherPanel {
       left = Math.max(margin, pageWidth - panelWidth - margin);
     }
 
-    // 旧版 cm-search-replace：top: spacing-lg，贴在编辑区顶部
+    // 旧版 cm-search-replace：top: spacing-lg，贴在编辑区顶部（fixed 模式用视口坐标）
     let top = anchorRect.top + margin;
     if (top + panelHeight > pageHeight - margin) {
       top = Math.max(margin, pageHeight - panelHeight - margin);
@@ -236,21 +255,17 @@ export default class SearcherPanel {
 
   createDOM() {
     const container = createElement('div', 'cherry-searcher');
-    const sideSlot = this.enableReplace
-      ? [
-          '      <div class="cherry-searcher__side">',
-          `        <button type="button" class="cherry-searcher__expand-btn" aria-expanded="false" aria-label="toggle replace">${EXPAND_ICON}</button>`,
-          '      </div>',
-        ].join('\n')
+    const expandBtnHtml = this.enableReplace
+      ? `<button type="button" class="cherry-searcher__expand-btn" aria-expanded="false" aria-label="toggle replace">${EXPAND_ICON}</button>`
       : '';
-    const sideSpacer = this.enableReplace
-      ? '      <div class="cherry-searcher__side cherry-searcher__side--spacer"></div>'
+    const replaceSpacerHtml = this.enableReplace
+      ? '<span class="cherry-searcher__expand-spacer" aria-hidden="true"></span>'
       : '';
     const replaceRowHtml = this.enableReplace
       ? [
           '    <div class="cherry-searcher__row cherry-searcher__replace-row is-hidden">',
-          sideSpacer,
           '      <div class="cherry-searcher__input-wrapper cherry-searcher__replace-wrapper">',
+          replaceSpacerHtml,
           '        <input class="cherry-searcher__replace-input" type="text" spellcheck="false" />',
           '        <span class="cherry-searcher__divider"></span>',
           '        <div class="cherry-searcher__replace-actions">',
@@ -266,8 +281,8 @@ export default class SearcherPanel {
       '<div class="cherry-searcher__container">',
       '  <div class="cherry-searcher__rows">',
       '    <div class="cherry-searcher__row cherry-searcher__search-row">',
-      sideSlot,
       '      <div class="cherry-searcher__input-wrapper">',
+      expandBtnHtml,
       `        <span class="cherry-searcher__icon cherry-searcher__icon--search">${SEARCH_ICON}</span>`,
       '        <input class="cherry-searcher__input" type="text" spellcheck="false" />',
       `        <button type="button" class="cherry-searcher__clear" aria-label="clear">${CLEAR_ICON}</button>`,

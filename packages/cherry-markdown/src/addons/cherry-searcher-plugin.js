@@ -137,8 +137,10 @@ export class SearcherCherryBridge {
     this.handleLocaleChange = this.handleLocaleChange.bind(this);
     this.handleToolbarHide = this.handleToolbarHide.bind(this);
     this.handleDocumentChange = this.handleDocumentChange.bind(this);
+    this.handlePreviewHidden = this.handlePreviewHidden.bind(this);
 
-    const mountTarget = cherry.editor?.options?.wrapperDom || cherry.wrapperDom || document.body;
+    const editorDom = cherry.editor?.options?.editorDom;
+    const mountTarget = editorDom || cherry.editor?.options?.wrapperDom || cherry.wrapperDom || document.body;
 
     this.panel = new SearcherPanel({
       editorAdapter: createCherryEditorAdapter(cherry),
@@ -165,7 +167,7 @@ export class SearcherCherryBridge {
     return !editor.getOption('readOnly');
   }
 
-  /** 获取面板锚点矩形（快捷键等无按钮锚点时使用编辑区范围） */
+  /** 获取面板锚点矩形（仅独立嵌入非 Cherry 编辑区时使用） */
   getAnchorRect() {
     const editorDom = this.cherry.editor?.options?.editorDom;
     if (editorDom) {
@@ -180,6 +182,7 @@ export class SearcherCherryBridge {
       this.cherry.$event.on(Events.afterChangeLocale, this.handleLocaleChange);
       this.cherry.$event.on(Events.afterChange, this.handleDocumentChange);
       this.cherry.$event.on('toolbarHide', this.handleToolbarHide);
+      this.cherry.$event.on('togglePreviewHidden', this.handlePreviewHidden);
     }
   }
 
@@ -187,9 +190,8 @@ export class SearcherCherryBridge {
    * 响应工具栏点击或快捷键（统一入口）
    * @param {string} [selection] 工具栏传入的选中文本
    * @param {string} [aliasName] 快捷键别名，`searcher-replace` 表示展开替换
-   * @param {{ left: number; top: number; width: number; height: number }} [anchorRect] 锚点矩形，缺省用编辑区
    */
-  handleTrigger(selection = '', aliasName = '', anchorRect) {
+  handleTrigger(selection = '', aliasName = '') {
     if (!this.isEditableMode()) {
       return;
     }
@@ -206,10 +208,14 @@ export class SearcherCherryBridge {
     }
 
     const selectedText = selection || this.panel.editorAdapter.getSelectedText();
-    const rect = anchorRect ?? this.getAnchorRect();
-    this.panel.show(rect, selectedText, {
+    this.panel.show(undefined, selectedText, {
       expandReplace: expandReplace || this.options.expandReplaceOnOpen === true,
     });
+  }
+
+  /** 预览区隐藏、侧边栏露出时右移搜索框，避免被遮挡 */
+  handlePreviewHidden(state) {
+    this.panel.dom.classList.toggle('is-preview-sidebar-offset', Boolean(state));
   }
 
   /** 文档变更且面板可见时，防抖刷新匹配结果与高亮 */
@@ -244,7 +250,7 @@ export class SearcherCherryBridge {
     }
 
     const selection = this.panel.editorAdapter.getSelectedText();
-    this.panel.show(this.getAnchorRect(), selection, { expandReplace: true });
+    this.panel.show(undefined, selection, { expandReplace: true });
   }
 
   destroy() {
@@ -253,6 +259,7 @@ export class SearcherCherryBridge {
       this.cherry.$event.off(Events.afterChangeLocale, this.handleLocaleChange);
       this.cherry.$event.off(Events.afterChange, this.handleDocumentChange);
       this.cherry.$event.off('toolbarHide', this.handleToolbarHide);
+      this.cherry.$event.off('togglePreviewHidden', this.handlePreviewHidden);
     }
 
     this.panel.destroy();

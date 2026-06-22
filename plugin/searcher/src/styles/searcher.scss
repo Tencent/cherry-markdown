@@ -56,6 +56,19 @@
   width: 420px;
   max-width: calc(100vw - 16px);
 
+  // Cherry 编辑区内：与旧版 .ace_search.right 一致（相对编辑区右上角）
+  .cherry-editor & {
+    position: absolute;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    left: auto;
+  }
+
+  // 预览区收起、侧边栏露出时右移，避免被遮挡（沿用旧版 cm-search-replace）
+  &.is-preview-sidebar-offset {
+    right: 48px;
+  }
+
   &__container {
     width: 100%;
   }
@@ -63,48 +76,83 @@
   &__rows {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 0;
   }
 
   &__row {
     display: flex;
-    align-items: center;
-    gap: 4px;
+    align-items: stretch;
     width: 100%;
     min-width: 0;
   }
 
-  &__side {
+  &__input-wrapper {
     display: flex;
     align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: 22px;
+    flex: 1;
+    min-width: 0;
     height: 32px;
+    padding: 0 8px 0 0;
+    gap: 0;
+    background-color: rgba(31, 35, 41, 0.05);
+    border: 1px solid var(--dropdown-border);
+    border-radius: 6px;
+    transition: border-color 0.15s ease;
 
-    &--spacer {
-      pointer-events: none;
+    &:focus-within {
+      border-color: var(--primary-color);
     }
   }
 
+  // 展开替换行：外圈统一边框，任一输入框聚焦时整体高亮
+  &.is-replace-expanded &__rows {
+    border: 1px solid var(--dropdown-border);
+    border-radius: 6px;
+    background-color: rgba(31, 35, 41, 0.05);
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+
+    &:focus-within {
+      border-color: var(--primary-color);
+    }
+  }
+
+  &.is-replace-expanded &__input-wrapper {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+
+    &:focus-within {
+      border-color: transparent;
+    }
+  }
+
+  &.is-replace-expanded &__search-row &__input-wrapper {
+    border-bottom: 1px solid var(--dropdown-border);
+  }
+
+  &.is-replace-expanded &__expand-btn {
+    border-radius: 0;
+  }
+
+  // 折叠按钮内嵌在搜索框左侧（无边框）
   &__expand-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: 22px;
-    height: 22px;
+    align-self: stretch;
+    width: 26px;
     padding: 0;
     margin: 0;
-    border: 1px solid transparent;
-    border-radius: 3px;
+    border: none;
+    border-radius: 6px 0 0 6px;
     background: transparent;
     color: var(--oc-gray-6);
     cursor: pointer;
     transition:
       background-color 0.15s ease,
-      color 0.15s ease,
-      transform 0.15s ease;
+      color 0.15s ease;
 
     svg {
       width: 14px;
@@ -118,8 +166,16 @@
     }
   }
 
+  // 替换行与搜索词输入左对齐（占位折叠按钮宽度）
+  &__expand-spacer {
+    flex-shrink: 0;
+    align-self: stretch;
+    width: 26px;
+    pointer-events: none;
+  }
+
   &.is-replace-expanded &__expand-btn svg {
-    transform: rotate(90deg);
+    transform: rotate(-90deg);
   }
 
   &__replace-row {
@@ -128,26 +184,25 @@
     }
   }
 
-  &__input-wrapper {
+  &__icon {
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex: 1;
-    min-width: 0;
-    height: 32px;
-    padding: 0 8px;
-    background-color: rgba(31, 35, 41, 0.05);
-    border: 1px solid var(--dropdown-border);
-    border-radius: 6px;
-    transition: border-color 0.15s ease;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    color: var(--oc-gray-6);
 
-    &:focus-within {
-      border-color: var(--primary-color);
+    svg {
+      width: 100%;
+      height: 100%;
     }
   }
 
   &__replace-wrapper {
     gap: 6px;
+    padding-left: 0;
   }
 
   &__replace-actions {
@@ -161,7 +216,7 @@
     flex: 1;
     min-width: 0;
     height: 100%;
-    padding: 0;
+    padding: 0 0 0 8px;
     margin: 0;
     border: none;
     background: transparent;
@@ -218,26 +273,11 @@
     }
   }
 
-  &__icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: 16px;
-    height: 16px;
-    color: var(--oc-gray-6);
-
-    svg {
-      width: 100%;
-      height: 100%;
-    }
-  }
-
   &__input {
     flex: 1;
     min-width: 0;
     height: 100%;
-    padding: 0;
+    padding: 0 0 0 8px;
     margin: 0;
     border: none;
     background: transparent;
@@ -354,6 +394,14 @@
   .cherry-searcher {
     &__input-wrapper {
       background-color: rgba(255, 255, 255, 0.06);
+    }
+
+    &.is-replace-expanded &__rows {
+      background-color: rgba(255, 255, 255, 0.06);
+    }
+
+    &.is-replace-expanded &__input-wrapper {
+      background: transparent;
     }
 
     &__toggle:hover:not(:disabled):not(.is-forbidden),

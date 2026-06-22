@@ -44,7 +44,6 @@ export default class Searcher extends MenuBase {
       return;
     }
 
-    const anchorRect = this.dom?.getBoundingClientRect();
-    bridge.handleTrigger(selection, aliasName, anchorRect);
+    bridge.handleTrigger(selection, aliasName);
   }
 }

@@ -51,7 +51,7 @@ export default class SearcherPanel {
   replaceInput: HTMLInputElement | null;
   isVisible(): boolean;
   show(
-    anchorRect: { left: number; top: number; width: number; height: number },
+    anchorRect?: { left: number; top: number; width: number; height: number },
     selection?: string,
     showOptions?: SearcherShowOptions,
   ): void;
