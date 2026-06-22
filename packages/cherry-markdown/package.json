@@ -39,7 +39,7 @@
     "build:core": "cross-env CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.core.config.js",
     "build:engine": "cross-env CORE_BUILD=true NODE_ENV=production rollup --config build/rollup.engine.config.js",
     "build:stream": "cross-env NODE_ENV=production rollup --config build/rollup.stream.config.js",
-    "build:addons": "node build/addons.build.js && node build/sync-searcher-addon.js",
+    "build:addons": "node build/addons.build.js",
     "build:types": "tsc --project tsconfig.json && node build/replacePaths.js",
     "build:styles": "cross-env NODE_ENV=production rollup --config build/rollup.styles.config.js",
     "clean": "rimraf ./dist",

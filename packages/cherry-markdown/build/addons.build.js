@@ -7,6 +7,7 @@ import json from '@rollup/plugin-json';
 import typescript from 'rollup-plugin-typescript2';
 import envReplacePlugin from './env.js';
 
+import * as sass from 'sass';
 import { resolve as _resolve, join, dirname, basename, extname } from 'path';
 import { mkdirSync, writeFileSync, copyFileSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
@@ -19,6 +20,27 @@ const currentFilename = fileURLToPath(import.meta.url);
 const currentDirname = dirname(currentFilename);
 const PROJECT_ROOT_PATH = _resolve(currentDirname, '../');
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const SEARCHER_PLUGIN_ENTRY = 'src/addons/cherry-searcher-plugin.js';
+
+/** 将 plugin-searcher 样式编译到 dist/addons/cherry-searcher-plugin.css */
+function syncSearcherAddonCss() {
+  const pluginRoot = _resolve(PROJECT_ROOT_PATH, '../../plugin/searcher');
+  const scssFile = join(pluginRoot, 'src/styles/searcher.scss');
+  const targetCss = join(PROJECT_ROOT_PATH, 'dist/addons/cherry-searcher-plugin.css');
+
+  if (!existsSync(scssFile)) {
+    console.error('[addons build] 未找到 plugin-searcher 样式源文件：%s', scssFile);
+    process.exit(1);
+  }
+
+  mkdirSync(dirname(targetCss), { recursive: true });
+  const cssResult = sass.compile(scssFile, {
+    loadPaths: [_resolve(PROJECT_ROOT_PATH, '../../node_modules')],
+    style: 'expanded',
+  });
+  writeFileSync(targetCss, cssResult.css, 'utf-8');
+  console.log('[addons build] wrote %s', targetCss);
+}
 
 glob(
   'src/addons/**/*-plugin.js',
@@ -153,20 +175,16 @@ function buildAddons(entries) {
     });
 
     // 将 rollup-plugin-typescript2 产出的声明同步到 dist/types/addons（供 global.d.ts 等引用）
-    const emittedDts = join(
-      PROJECT_ROOT_PATH,
-      'dist/addons/src/addons',
-      outputFileName.replace(/\.js$/, '.d.ts'),
-    );
-    const targetTypesDts = join(
-      PROJECT_ROOT_PATH,
-      'dist/types/addons',
-      outputFileName.replace(/\.js$/, '.d.ts'),
-    );
+    const emittedDts = join(PROJECT_ROOT_PATH, 'dist/addons/src/addons', outputFileName.replace(/\.js$/, '.d.ts'));
+    const targetTypesDts = join(PROJECT_ROOT_PATH, 'dist/types/addons', outputFileName.replace(/\.js$/, '.d.ts'));
     if (existsSync(emittedDts)) {
       mkdirSync(dirname(targetTypesDts), { recursive: true });
       copyFileSync(emittedDts, targetTypesDts);
       console.log('[addons build] wrote %s', targetTypesDts);
+    }
+
+    if (entry === SEARCHER_PLUGIN_ENTRY) {
+      syncSearcherAddonCss();
     }
   });
 }

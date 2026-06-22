@@ -57,7 +57,7 @@ declare module 'cherry-markdown/dist/addons/cherry-searcher-plugin.esm.js' {
   export default plugin;
 }
 
-/** Searcher 搜索插件样式（由 sync-searcher-addon 从 plugin-searcher 同步） */
+/** Searcher 搜索插件样式（由 addons.build.js 从 plugin-searcher 编译同步） */
 declare module 'cherry-markdown/dist/addons/cherry-searcher-plugin.css';
 
 /** @cherry-markdown/plugin-searcher 样式（Cherry 集成或独立使用时引入） */
