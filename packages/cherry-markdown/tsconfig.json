@@ -10,7 +10,11 @@
     "rootDir": "./src",
     "strict": false,
     "noFallthroughCasesInSwitch": false,
-    "paths": { "@/*": ["./src/*"], "~types/*": ["./types/*"] },
+    "paths": {
+      "@/*": ["./src/*"],
+      "~types/*": ["./types/*"],
+      "@cherry-markdown/plugin-searcher": ["../../plugin/searcher/types/index.d.ts"]
+    },
     "experimentalDecorators": true
   },
   "include": ["src/index.js", "src/index.core.js", "src/index.engine.js", "src/index.stream.js"],
