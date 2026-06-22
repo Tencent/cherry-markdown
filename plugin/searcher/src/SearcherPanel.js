@@ -40,9 +40,10 @@ const SEARCH_ICON = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.o
 
 const CLEAR_ICON = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
 
-const CASE_ICON = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.854 11.702h-1l-.816-2.159H3.772l-.768 2.16H2L5.084 4h.9l2.87 7.702Zm-2.015-2.93L5.564 5.234l-.065-.258-.05.186-1.3 3.61h2.69ZM13.27 11.852c-.69 0-1.208-.203-1.556-.608-.345-.406-.518-.98-.518-1.72 0-.728.183-1.319.547-1.773.367-.454.858-.681 1.474-.681.577 0 1.014.177 1.31.53.3.35.449.845.449 1.484v.424h-3.023c.01.482.12.855.33 1.12.212.26.532.39.963.39.322 0 .607-.04.856-.119.252-.08.523-.2.815-.36v.738c-.257.145-.517.25-.78.318a3.76 3.76 0 0 1-.867.097v.16Zm-.187-4.113c-.323 0-.584.114-.78.344-.193.228-.308.546-.343.953h2.136c-.005-.41-.097-.727-.275-.952-.175-.23-.418-.345-.738-.345Z" fill="currentColor"/></svg>`;
+// 区分大小写 / 全字匹配：字形由 SCSS 控制字号与主题色
+const CASE_ICON = `<svg class="cherry-searcher__toggle-icon" viewBox="0 0 16 16" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><text x="8" y="11.75" text-anchor="middle">Aa</text></svg>`;
 
-const WHOLE_WORD_ICON = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 4h1.014l1.527 5.264.073.32.065.342.064-.342.076-.32L7.02 4h.96l1.697 5.264.076.32.065.342.065-.342.072-.32L11.486 4H12.5L10.28 12H9.207L7.5 6.678 5.793 12H4.72L2.5 4Z" fill="currentColor"/><path d="M1 13h14v1H1v-1Z" fill="currentColor"/></svg>`;
+const WHOLE_WORD_ICON = `<svg class="cherry-searcher__toggle-icon" viewBox="0 0 16 16" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><text x="8" y="10.75" text-anchor="middle">ab</text><path d="M2.5 12.75H13.5"/></svg>`;
 
 const PREV_ICON = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 10L8 6L4 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 

@@ -257,6 +257,27 @@
       width: 14px;
       height: 14px;
     }
+
+    // 字形图标略大于描边图标，颜色继承按钮 currentColor（与导航等一致）
+    svg.cherry-searcher__toggle-icon {
+      width: 16px;
+      height: 16px;
+
+      text {
+        fill: currentColor;
+        font-size: 11px;
+        font-family: inherit;
+        font-weight: 500;
+        user-select: none;
+      }
+
+      path {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1;
+        stroke-linecap: round;
+      }
+    }
   }
 
   // 替换 / 全部替换（默认可操作态与 toggle 一致，不可用时见 mixin 禁用样式）
