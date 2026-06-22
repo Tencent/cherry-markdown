@@ -256,6 +256,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       'proTable',
       '|',
       'shortcutKey',
+      'searcher',
       'togglePreview',
     ],
     toolbarRight: ['customSave', 'export', '|', 'wordCount'] as any[],

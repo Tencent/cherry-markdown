@@ -47,14 +47,32 @@ declare module 'cherry-markdown/dist/addons/cherry-code-block-plantuml-plugin' {
 
 /** Searcher 搜索插件（独立构建产物，需单独引入） */
 declare module 'cherry-markdown/dist/addons/cherry-searcher-plugin' {
-  const plugin: any;
-  export default plugin;
+  import type { SearcherOptions } from '@cherry-markdown/plugin-searcher';
+
+  export class SearcherCherryBridge {
+    handleTrigger(
+      selection?: string,
+      aliasName?: string,
+      anchorRect?: { left: number; top: number; width: number; height: number },
+    ): void;
+  }
+
+  const SearcherCherryPlugin: {
+    install(
+      cherryDefaults: { toolbars?: { config?: { searcher?: SearcherOptions } } },
+      userOptions?: SearcherOptions,
+    ): void;
+    onCherryInit(cherry: unknown, userOptions?: SearcherOptions): void;
+    onCherryDestroy(cherry: unknown): void;
+  };
+
+  export default SearcherCherryPlugin;
 }
 
 /** Searcher 搜索插件 ESM 构建产物 */
 declare module 'cherry-markdown/dist/addons/cherry-searcher-plugin.esm.js' {
-  const plugin: any;
-  export default plugin;
+  import type SearcherCherryPlugin from 'cherry-markdown/dist/addons/cherry-searcher-plugin';
+  export default SearcherCherryPlugin;
 }
 
 /** Searcher 搜索插件样式（由 addons.build.js 从 plugin-searcher 编译同步） */

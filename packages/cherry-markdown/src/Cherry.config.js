@@ -685,6 +685,7 @@ const defaultConfig = {
       },
       'graph',
       'shortcutKey',
+      'searcher',
       'togglePreview',
     ],
     toolbarRight: [],

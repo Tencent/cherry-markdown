@@ -61,6 +61,16 @@ export default class SearcherPanel {
   updateLocaleStrings(): void;
   /** 按当前输入重新计算匹配并刷新高亮 */
   runSearch(keepActiveIndex?: boolean): void;
+  /** 防抖调度搜索（输入或文档变更时使用） */
+  scheduleSearch(keepActiveIndex?: boolean): void;
+  /** 取消待执行的防抖搜索 */
+  cancelScheduledSearch(): void;
+  /** 立即执行待定的防抖搜索 */
+  flushScheduledSearch(keepActiveIndex?: boolean): void;
+  /** 设置搜索关键词并触发搜索 */
+  setQuery(query: string, keepCurrentIndex?: boolean, immediate?: boolean): void;
+  /** 清空搜索关键词 */
+  clearQuery(): void;
 }
 
 export function escapeRegExp(str: string): string;
