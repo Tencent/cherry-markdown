@@ -45,7 +45,6 @@
       crossorigin="anonymous"
     ></script>
     <script src="../packages/cherry-markdown/dist/cherry-markdown.js"></script>
-    <script src="../packages/cherry-markdown/dist/addons/cherry-searcher-plugin.js"></script>
     <script src="./assets/scripts/pinyin/pinyin_dist.js"></script>
     <script type="module">
       import { basicConfig } from './assets/scripts/index-demo.js';
@@ -63,7 +62,6 @@
         },
         enableJs: true, // 是否允许执行 JavaScript
       });
-      Cherry.usePlugin(CherrySearcherPlugin);
       window.cherry = new Cherry(config);
     </script>
   </body>

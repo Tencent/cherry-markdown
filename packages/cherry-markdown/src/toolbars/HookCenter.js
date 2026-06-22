@@ -142,6 +142,8 @@ const HookList = {
   changeLocale: ChangeLocale,
   shortcutKey: ShortcutKey,
   searcher: Searcher,
+  /** 兼容旧版工具栏配置中的 search 按钮名 */
+  search: Searcher,
 };
 
 export default class HookCenter {
