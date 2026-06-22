@@ -1,7 +1,15 @@
 /**
- * Cherry Markdown 搜索插件（usePlugin 集成 searcherBridge；工具栏按钮见 toolbars/hooks/Searcher.js）
+ * Cherry Markdown 搜索插件（usePlugin 集成；工具栏按钮见 toolbars/hooks/Searcher.js）
  */
 import SearcherPanel, { mergeOptions } from '@cherry-markdown/plugin-searcher';
+import {
+  getSearcherBridge,
+  registerSearcherBridge,
+  triggerSearcher,
+  unregisterSearcherBridge,
+} from './searcher-runtime.js';
+
+export { getSearcherBridge, triggerSearcher };
 
 /**
  * Searcher 插件初始化后的 Cherry 宿主形态
@@ -11,11 +19,11 @@ import SearcherPanel, { mergeOptions } from '@cherry-markdown/plugin-searcher';
  * @property {Object} [editor] 编辑器包装
  * @property {HTMLElement} [wrapperDom] 外层容器
  * @property {Object} [$event] Cherry 事件总线
- * @property {SearcherCherryBridge} [searcherBridge] 插件初始化后挂载
+ * @property {{ name?: string, icon?: string }} [$currentMenuOptions] 工具栏 hook 构造用（单测）
  */
 
 /**
- * 将 Cherry.locale 映射为 Searcher 文案（Cherry 适配层）
+ * 将 Cherry.locale 映射为 Searcher 文案
  * @param {SearcherCherryHost} cherry
  * @returns {import('@cherry-markdown/plugin-searcher').SearcherLocale}
  */
@@ -39,17 +47,16 @@ function mapCherryLocale(cherry) {
 }
 
 /**
- * 合并 usePlugin 默认值、实例 toolbars.config.searcher 与 onCherryInit 覆盖项（后者优先级递增）
+ * 合并 usePlugin 参数与实例 toolbars.config.searcher（后者优先）
  * @param {SearcherCherryHost} cherry
  * @param {import('@cherry-markdown/plugin-searcher').SearcherOptions} [initOptions]
  * @returns {import('@cherry-markdown/plugin-searcher').SearcherOptions}
  */
-export function resolvePluginUserOptions(cherry, initOptions = {}) {
-  return {
-    ...SearcherCherryPlugin.mergedOptions,
+function resolvePluginUserOptions(cherry, initOptions = {}) {
+  return mergeOptions({
     ...initOptions,
     ...cherry.options?.toolbars?.config?.searcher,
-  };
+  });
 }
 
 /**
@@ -57,7 +64,7 @@ export function resolvePluginUserOptions(cherry, initOptions = {}) {
  * @param {SearcherCherryHost} cherry
  * @param {import('@cherry-markdown/plugin-searcher').SearcherOptions} userOptions
  */
-export function buildSearcherOptions(cherry, userOptions) {
+function buildSearcherOptions(cherry, userOptions) {
   const cherryLocaleId = cherry.options?.locale;
   const localeId =
     userOptions.localeId ?? (cherryLocaleId === 'zh_CN' || cherryLocaleId === 'en_US' ? cherryLocaleId : undefined);
@@ -76,7 +83,7 @@ export function buildSearcherOptions(cherry, userOptions) {
  * @param {SearcherCherryHost} cherry
  * @returns {import('@cherry-markdown/plugin-searcher').EditorAdapter}
  */
-export function createCherryEditorAdapter(cherry) {
+function createCherryEditorAdapter(cherry) {
   const editor = cherry.editor?.editor;
 
   return {
@@ -122,16 +129,16 @@ export function createCherryEditorAdapter(cherry) {
 }
 
 /**
- * Cherry 与 SearcherPanel 之间的桥接层：挂载面板、同步配置与 Cherry 事件
+ * Cherry 与 SearcherPanel 之间的桥接：挂载面板、同步配置与 Cherry 事件
+ * @internal 仅插件内部使用，不挂到 Cherry 实例上
  */
-export class SearcherCherryBridge {
+class SearcherCherryBridge {
   /**
    * @param {SearcherCherryHost} cherry
    * @param {import('@cherry-markdown/plugin-searcher').SearcherOptions} userOptions
    */
   constructor(cherry, userOptions) {
     this.cherry = cherry;
-    this.userOptions = userOptions;
     this.options = buildSearcherOptions(cherry, userOptions);
 
     this.handleLocaleChange = this.handleLocaleChange.bind(this);
@@ -167,23 +174,16 @@ export class SearcherCherryBridge {
     return !editor.getOption('readOnly');
   }
 
-  /** 获取面板锚点矩形（仅独立嵌入非 Cherry 编辑区时使用） */
-  getAnchorRect() {
-    const editorDom = this.cherry.editor?.options?.editorDom;
-    if (editorDom) {
-      return editorDom.getBoundingClientRect();
-    }
-    return { left: 16, top: 16, width: 0, height: 0 };
-  }
-
   bindEvents() {
-    if (this.cherry.$event) {
-      const { Events } = this.cherry.$event;
-      this.cherry.$event.on(Events.afterChangeLocale, this.handleLocaleChange);
-      this.cherry.$event.on(Events.afterChange, this.handleDocumentChange);
-      this.cherry.$event.on('toolbarHide', this.handleToolbarHide);
-      this.cherry.$event.on('togglePreviewHidden', this.handlePreviewHidden);
+    if (!this.cherry.$event) {
+      return;
     }
+
+    const { Events } = this.cherry.$event;
+    this.cherry.$event.on(Events.afterChangeLocale, this.handleLocaleChange);
+    this.cherry.$event.on(Events.afterChange, this.handleDocumentChange);
+    this.cherry.$event.on('toolbarHide', this.handleToolbarHide);
+    this.cherry.$event.on('togglePreviewHidden', this.handlePreviewHidden);
   }
 
   /**
@@ -200,10 +200,12 @@ export class SearcherCherryBridge {
 
     if (this.panel.isVisible()) {
       if (expandReplace) {
-        this.openReplacePanel();
-        return;
+        this.panel.setReplaceExpanded(true);
+        this.panel.replaceInput?.focus();
+        this.panel.replaceInput?.select();
+      } else {
+        this.panel.hide();
       }
-      this.panel.hide();
       return;
     }
 
@@ -229,8 +231,7 @@ export class SearcherCherryBridge {
 
   /** Cherry 切换语言后同步面板文案 */
   handleLocaleChange() {
-    this.userOptions = resolvePluginUserOptions(this.cherry);
-    this.options = buildSearcherOptions(this.cherry, this.userOptions);
+    this.options = buildSearcherOptions(this.cherry, resolvePluginUserOptions(this.cherry));
     this.panel.options = this.options;
     this.panel.updateLocaleStrings();
   }
@@ -238,19 +239,6 @@ export class SearcherCherryBridge {
   /** 工具栏收起时关闭搜索面板 */
   handleToolbarHide() {
     this.panel.hide();
-  }
-
-  /** 展开替换行；面板未打开时以替换模式打开 */
-  openReplacePanel() {
-    if (this.panel.isVisible()) {
-      this.panel.setReplaceExpanded(true);
-      this.panel.replaceInput?.focus();
-      this.panel.replaceInput?.select();
-      return;
-    }
-
-    const selection = this.panel.editorAdapter.getSelectedText();
-    this.panel.show(undefined, selection, { expandReplace: true });
   }
 
   destroy() {
@@ -267,16 +255,12 @@ export class SearcherCherryBridge {
 }
 
 export default class SearcherCherryPlugin {
-  /** @type {import('@cherry-markdown/plugin-searcher').SearcherOptions} */
-  static mergedOptions = {};
-
   /**
    * @param {{ toolbars?: import('../../types/cherry').CherryToolbarsOptions }} cherryDefaults
    * @param {import('@cherry-markdown/plugin-searcher').SearcherOptions} [userOptions]
    */
   static install(cherryDefaults, userOptions = {}) {
     const mergedOptions = mergeOptions(userOptions);
-    SearcherCherryPlugin.mergedOptions = mergedOptions;
 
     cherryDefaults.toolbars = cherryDefaults.toolbars || {};
     cherryDefaults.toolbars.config = {
@@ -290,14 +274,14 @@ export default class SearcherCherryPlugin {
    * @param {import('@cherry-markdown/plugin-searcher').SearcherOptions} [userOptions]
    */
   static onCherryInit(cherry, userOptions = {}) {
-    cherry.searcherBridge = new SearcherCherryBridge(cherry, resolvePluginUserOptions(cherry, userOptions));
+    registerSearcherBridge(cherry, new SearcherCherryBridge(cherry, resolvePluginUserOptions(cherry, userOptions)));
   }
 
   /**
    * @param {SearcherCherryHost} cherry
    */
   static onCherryDestroy(cherry) {
-    cherry.searcherBridge?.destroy();
-    delete cherry.searcherBridge;
+    getSearcherBridge(cherry)?.destroy();
+    unregisterSearcherBridge(cherry);
   }
 }

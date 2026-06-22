@@ -4,7 +4,6 @@
  * 单行搜索框：图标 + 输入 + 清空 + 大小写 + 全字匹配 + 计数导航
  * 可选展开替换行：替换输入 + 替换 + 全部替换
  */
-import { createElement } from './dom.js';
 import { buildSearchRegex, collectMatches, findMatches, findNearestMatchIndex } from './search-utils.js';
 import { resolveLocale } from './locale.js';
 
@@ -92,13 +91,13 @@ export default class SearcherPanel {
   replaceInput;
 
   /** @type {HTMLButtonElement | null} */
+  replaceClearButton;
+
+  /** @type {HTMLButtonElement | null} */
   replaceButton;
 
   /** @type {HTMLButtonElement | null} */
   replaceAllButton;
-
-  /** @type {HTMLElement} */
-  searchRow;
 
   /**
    * @param {import('../types/searcher.types.js').SearcherPanelParams} params
@@ -113,8 +112,6 @@ export default class SearcherPanel {
     this.editorAdapter = editorAdapter;
     this.options = options;
     this.enableReplace = options.enableReplace !== false;
-    /** @type {'search' | 'replace'} */
-    this.activeInput = 'search';
     /** @type {boolean} */
     this.replaceExpanded = options.expandReplaceOnOpen === true;
 
@@ -131,6 +128,10 @@ export default class SearcherPanel {
     this._searchTimer = null;
     /** @type {boolean} */
     this._pendingKeepActiveIndex = false;
+
+    this.handleDocumentPointerDown = this.handleDocumentPointerDown.bind(this);
+    /** @type {boolean} */
+    this._outsideCloseBound = false;
 
     this.dom = this.createDOM();
     this.cacheElements();
@@ -194,12 +195,14 @@ export default class SearcherPanel {
     }
 
     this.updateReplaceButtonState();
+    this.bindCloseOnOutside();
   }
 
   /**
    * 隐藏搜索面板
    */
   hide() {
+    this.unbindCloseOnOutside();
     this.clearHighlight();
     this.dom.style.display = 'none';
     this.editorAdapter.focus();
@@ -211,9 +214,47 @@ export default class SearcherPanel {
   destroy() {
     this.cancelScheduledSearch();
     this.clearHighlight();
+    this.unbindCloseOnOutside();
     if (this.dom.parentNode) {
       this.dom.parentNode.removeChild(this.dom);
     }
+  }
+
+  /** 面板可见时监听文档点击，仅在面板外按下时关闭 */
+  bindCloseOnOutside() {
+    if (this._outsideCloseBound || this.options.closeOnClickOutside === false) {
+      return;
+    }
+
+    document.addEventListener('mousedown', this.handleDocumentPointerDown);
+    this._outsideCloseBound = true;
+  }
+
+  /** 移除文档点击监听 */
+  unbindCloseOnOutside() {
+    if (!this._outsideCloseBound) {
+      return;
+    }
+
+    document.removeEventListener('mousedown', this.handleDocumentPointerDown);
+    this._outsideCloseBound = false;
+  }
+
+  /**
+   * 点击面板外关闭（面板内任意位置点击均不关闭，由 dom mousedown stopPropagation 保证）
+   * @param {MouseEvent} event
+   */
+  handleDocumentPointerDown(event) {
+    if (this.options.closeOnClickOutside === false || !this.isVisible()) {
+      return;
+    }
+
+    const target = /** @type {Node} */ (event.target);
+    if (this.dom.contains(target)) {
+      return;
+    }
+
+    this.hide();
   }
 
   /**
@@ -254,7 +295,8 @@ export default class SearcherPanel {
   }
 
   createDOM() {
-    const container = createElement('div', 'cherry-searcher');
+    const container = document.createElement('div');
+    container.className = 'cherry-searcher';
     const expandBtnHtml = this.enableReplace
       ? `<button type="button" class="cherry-searcher__expand-btn" aria-expanded="false" aria-label="toggle replace">${EXPAND_ICON}</button>`
       : '';
@@ -267,6 +309,7 @@ export default class SearcherPanel {
           '      <div class="cherry-searcher__input-wrapper cherry-searcher__replace-wrapper">',
           replaceSpacerHtml,
           '        <input class="cherry-searcher__replace-input" type="text" spellcheck="false" />',
+          `        <button type="button" class="cherry-searcher__clear cherry-searcher__replace-clear" aria-label="clear">${CLEAR_ICON}</button>`,
           '        <span class="cherry-searcher__divider"></span>',
           '        <div class="cherry-searcher__replace-actions">',
           '          <button type="button" class="cherry-searcher__replace-btn is-unavailable" data-action="replace" disabled></button>',
@@ -316,7 +359,6 @@ export default class SearcherPanel {
   }
 
   cacheElements() {
-    this.searchRow = queryRequired(this.dom, '.cherry-searcher__search-row');
     this.expandButton = /** @type {HTMLButtonElement | null} */ (
       queryOptional(this.dom, '.cherry-searcher__expand-btn')
     );
@@ -331,6 +373,9 @@ export default class SearcherPanel {
     this.replaceInput = /** @type {HTMLInputElement | null} */ (
       queryOptional(this.dom, '.cherry-searcher__replace-input')
     );
+    this.replaceClearButton = /** @type {HTMLButtonElement | null} */ (
+      queryOptional(this.dom, '.cherry-searcher__replace-clear')
+    );
     this.replaceButton = /** @type {HTMLButtonElement | null} */ (queryOptional(this.dom, '[data-action="replace"]'));
     this.replaceAllButton = /** @type {HTMLButtonElement | null} */ (
       queryOptional(this.dom, '[data-action="replaceAll"]')
@@ -340,10 +385,6 @@ export default class SearcherPanel {
   bindEvents() {
     this.input.addEventListener('input', () => {
       this.setQuery(this.input.value, true, false);
-    });
-
-    this.input.addEventListener('focus', () => {
-      this.activeInput = 'search';
     });
 
     this.input.addEventListener('keydown', (event) => {
@@ -365,11 +406,8 @@ export default class SearcherPanel {
     });
 
     if (this.replaceInput) {
-      this.replaceInput.addEventListener('focus', () => {
-        this.activeInput = 'replace';
-      });
-
       this.replaceInput.addEventListener('input', () => {
+        this.updateReplaceClearVisibility();
         this.updateReplaceButtonState();
       });
 
@@ -404,6 +442,11 @@ export default class SearcherPanel {
 
     this.replaceAllButton?.addEventListener('click', () => {
       this.replaceAll();
+    });
+
+    this.replaceClearButton?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      this.clearReplaceText();
     });
 
     this.clearButton.addEventListener('click', (event) => {
@@ -458,6 +501,27 @@ export default class SearcherPanel {
   clearQuery() {
     this.setQuery('');
     this.input.focus();
+  }
+
+  /** 清空替换为输入框 */
+  clearReplaceText() {
+    if (!this.replaceInput) {
+      return;
+    }
+
+    this.replaceInput.value = '';
+    this.updateReplaceClearVisibility();
+    this.updateReplaceButtonState();
+    this.replaceInput.focus();
+  }
+
+  /** 同步替换输入框清空按钮可见性 */
+  updateReplaceClearVisibility() {
+    if (!this.replaceClearButton || !this.replaceInput) {
+      return;
+    }
+
+    this.replaceClearButton.classList.toggle('is-visible', this.replaceInput.value.length > 0);
   }
 
   /**
@@ -515,9 +579,7 @@ export default class SearcherPanel {
       return;
     }
 
-    if (keepActiveIndex && this.state.activeMatchIndex >= 0 && this.state.activeMatchIndex < matches.length) {
-      // 保持当前匹配索引
-    } else {
+    if (!(keepActiveIndex && this.state.activeMatchIndex >= 0 && this.state.activeMatchIndex < matches.length)) {
       const cursorPos = this.editorAdapter.getCursorHead();
       this.state.activeMatchIndex = findNearestMatchIndex(matches, cursorPos);
     }
@@ -658,6 +720,18 @@ export default class SearcherPanel {
   }
 
   /**
+   * 替换完成后收回面板焦点，便于继续输入
+   */
+  refocusPanelInput() {
+    if (this.replaceExpanded && this.replaceInput) {
+      this.replaceInput.focus();
+      return;
+    }
+
+    this.input.focus();
+  }
+
+  /**
    * 替换当前匹配项
    * @param {boolean} [keepIndex=false] - 为 true 时替换后仍停留在同序号匹配项
    * @returns {boolean} 是否成功替换
@@ -698,6 +772,7 @@ export default class SearcherPanel {
       range: { from: match.from, to: match.to },
     });
     this.emitSearch();
+    this.refocusPanelInput();
     return true;
   }
 
@@ -728,6 +803,7 @@ export default class SearcherPanel {
       to: replacement,
       count: replacedCount,
     });
+    this.refocusPanelInput();
   }
 
   /**
@@ -743,6 +819,7 @@ export default class SearcherPanel {
 
     if (matches.length === 0) {
       this.counter.textContent = '0/0';
+      this.counter.classList.remove('is-active');
       this.prevButton.disabled = true;
       this.nextButton.disabled = true;
       this.updateReplaceButtonState();
@@ -750,6 +827,7 @@ export default class SearcherPanel {
     }
 
     this.counter.textContent = `${activeMatchIndex + 1}/${matches.length}`;
+    this.counter.classList.add('is-active');
     this.prevButton.disabled = false;
     this.nextButton.disabled = false;
     this.updateReplaceButtonState();
@@ -794,6 +872,9 @@ export default class SearcherPanel {
     }
     if (this.replaceInput) {
       this.replaceInput.placeholder = locale.replaceWith;
+    }
+    if (this.replaceClearButton) {
+      this.replaceClearButton.title = locale.close;
     }
     if (this.replaceButton) {
       this.replaceButton.textContent = locale.replace;

@@ -6,4 +6,6 @@ export const DEFAULT_OPTIONS = {
   enableReplace: true,
   /** 打开面板时是否默认展开替换行 */
   expandReplaceOnOpen: false,
+  /** 点击面板外时是否自动关闭（面板内任意点击保持打开） */
+  closeOnClickOutside: true,
 };

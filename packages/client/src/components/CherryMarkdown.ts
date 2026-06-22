@@ -1,9 +1,8 @@
 import Cherry from 'cherry-markdown';
-import SearcherCherryPlugin from 'cherry-markdown/dist/addons/cherry-searcher-plugin.esm.js';
 import { CherryOptions } from 'cherry-markdown/types/cherry';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
-import '@cherry-markdown/plugin-searcher/styles/searcher.scss';
+import 'cherry-markdown/dist/addons/cherry-searcher-plugin.css';
 
 import { pinyin } from 'pinyin';
 import { WINDOW_EVENTS } from '../constants/events';
@@ -386,9 +385,8 @@ const cherryConfig: CherryOptions<CustomConfig> = {
 
 /**
  * @description cherryInstance
+ * 完整包 index.js 已默认 Cherry.usePlugin(SearcherCherryPlugin)，此处无需重复注册
  */
-Cherry.usePlugin(SearcherCherryPlugin);
-
 export const cherryInstance = (() => {
   return () => {
     return new Cherry(cherryConfig);

@@ -16,9 +16,6 @@ export const SEARCHER_LOCALES = {
 /** 缺省语言（独立使用时 fallback） */
 export const DEFAULT_LOCALE_ID = 'en_US';
 
-export const LOCALE_ZH_CN = zhCN;
-export const LOCALE_EN_US = enUS;
-
 /**
  * 解析语言 ID
  * @param {Partial<SearcherOptions>} [options]

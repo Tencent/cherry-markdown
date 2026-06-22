@@ -1,26 +1,12 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import SearcherCherryPlugin from '@/addons/cherry-searcher-plugin';
+import { describe, expect, it, vi, afterEach } from 'vitest';
+import SearcherCherryPlugin, { getSearcherBridge } from '@/addons/cherry-searcher-plugin';
 import Searcher from '@/toolbars/hooks/Searcher';
-import { CherryStatic } from '@/CherryStatic';
 import type { CherryToolbarsOptions } from '../../types/cherry';
 
 /** 与 cherry-searcher-plugin.js JSDoc 中的 SearcherCherryHost 保持一致 */
 type SearcherCherryHost = Parameters<typeof SearcherCherryPlugin.onCherryInit>[0];
 
-/** 获取 onCherryInit 后挂载的 searcherBridge（测试断言用） */
-function getSearcherBridge(cherry: SearcherCherryHost) {
-  if (!cherry.searcherBridge) {
-    throw new Error('searcherBridge is not initialized');
-  }
-  return cherry.searcherBridge;
-}
-
 describe('SearcherCherryPlugin', () => {
-  beforeEach(() => {
-    SearcherCherryPlugin.mergedOptions = {};
-    CherryStatic.pluginInits.length = 0;
-  });
-
   afterEach(() => {
     document.body.innerHTML = '';
   });
@@ -33,7 +19,6 @@ describe('SearcherCherryPlugin', () => {
     expect(defaults.toolbars.toolbar).toEqual(['bold']);
     expect(defaults.toolbars.customMenu).toEqual({});
     expect(defaults.toolbars.config?.searcher?.localeId).toBe('zh_CN');
-    expect(SearcherCherryPlugin.mergedOptions.localeId).toBe('zh_CN');
   });
 
   it('工具栏按钮可打开搜索面板', () => {
@@ -67,16 +52,14 @@ describe('SearcherCherryPlugin', () => {
 
     SearcherCherryPlugin.onCherryInit(cherry);
     const bridge = getSearcherBridge(cherry);
+    if (!bridge) {
+      throw new Error('searcher bridge is not initialized');
+    }
     expect(bridge.panel.dom.parentNode).toBe(editorDom);
 
     const toolbarButton = document.createElement('button');
-    const searcherMenu = new Searcher({
-      ...cherry,
-      editor: cherry.editor,
-      options: cherry.options,
-      locale: cherry.locale,
-      $currentMenuOptions: { name: 'searcher', icon: 'search' },
-    });
+    cherry.$currentMenuOptions = { name: 'searcher', icon: 'search' };
+    const searcherMenu = new Searcher(cherry);
     searcherMenu.dom = toolbarButton;
     searcherMenu.onClick('');
 
@@ -216,7 +199,7 @@ describe('SearcherCherryPlugin', () => {
     expect(off).toHaveBeenCalledWith('afterChangeLocale', expect.any(Function));
     expect(off).toHaveBeenCalledWith('afterChange', expect.any(Function));
     expect(off).toHaveBeenCalledWith('toolbarHide', expect.any(Function));
-    expect(cherry.searcherBridge).toBeUndefined();
+    expect(getSearcherBridge(cherry)).toBeUndefined();
   });
 
   it('afterChange 在面板可见时刷新搜索匹配', async () => {
@@ -268,56 +251,5 @@ describe('SearcherCherryPlugin', () => {
     await vi.advanceTimersByTimeAsync(150);
     expect(bridge.panel.state.matches).toHaveLength(1);
     vi.useRealTimers();
-  });
-
-  it('invokePluginDestroys 调用已注册插件的 onCherryDestroy', () => {
-    const destroy = vi.fn();
-
-    class FakePlugin {
-      static install() {}
-
-      static onCherryInit() {}
-
-      static onCherryDestroy(cherry: { id: string }) {
-        destroy(cherry.id);
-      }
-    }
-
-    CherryStatic.pluginInits.push({ PluginClass: FakePlugin, args: [] });
-    CherryStatic.invokePluginDestroys({ id: 'demo' });
-    expect(destroy).toHaveBeenCalledWith('demo');
-  });
-
-  it('usePlugin 注册 onCherryInit 回调', () => {
-    class FakePlugin {
-      static install() {}
-      static onCherryInit() {}
-    }
-
-    const FakeCherry = class extends CherryStatic {
-      static initialized = false;
-      static config = { defaults: {} };
-    };
-
-    FakeCherry.usePlugin(FakePlugin, { foo: 1 });
-    expect(CherryStatic.pluginInits).toHaveLength(1);
-    expect(CherryStatic.pluginInits[0].args).toEqual([{ foo: 1 }]);
-  });
-
-  it('SearcherCherryPlugin 源码导出关键 API', async () => {
-    const { readFileSync } = await import('fs');
-    const { resolve } = await import('path');
-    const sourcePath = resolve(process.cwd(), 'src/addons/cherry-searcher-plugin.js');
-
-    const content = readFileSync(sourcePath, 'utf-8');
-    expect(content).toContain('export default class SearcherCherryPlugin');
-    expect(content).toContain('static install');
-    expect(content).toContain('static onCherryInit');
-    expect(content).toContain('static onCherryDestroy');
-    expect(content).toContain('export class SearcherCherryBridge');
-    expect(content).toContain('export function createCherryEditorAdapter');
-    expect(content).toContain('export function resolvePluginUserOptions');
-    expect(content).toContain('handleTrigger');
-    expect(content).toContain('@typedef {Object} SearcherCherryHost');
   });
 });

@@ -3,19 +3,18 @@
  * 参考 TEditor te-searcher 单行搜索框设计
  */
 
-// 操作按钮共用：区分大小写 / 全字匹配 / 替换 / 全部替换
+// 可交互控件共用：默认可用色、hover、选中、禁用
 @mixin searcher-action-btn-states {
   border: 1px solid transparent;
   border-radius: 3px;
   background: transparent;
-  color: var(--oc-gray-6);
+  color: var(--toolbar-btn-color);
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease,
     color 0.15s ease;
 
-  // 默认可用：hover
-  &:hover:not(:disabled):not(.is-forbidden) {
+  &:hover:not(:disabled):not(.is-forbidden):not(.is-unavailable) {
     background-color: rgba(31, 35, 41, 0.08);
     color: var(--toolbar-btn-color);
   }
@@ -40,6 +39,27 @@
     opacity: 0.35;
     color: var(--oc-gray-5);
     cursor: not-allowed;
+  }
+}
+
+// 图标类按钮（导航、展开等），与 action-btn 同色体系
+@mixin searcher-icon-btn {
+  @include searcher-action-btn-states;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:disabled {
+    cursor: default;
   }
 }
 
@@ -137,32 +157,16 @@
 
   // 折叠按钮内嵌在搜索框左侧（无边框）
   &__expand-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    @include searcher-icon-btn;
+
     flex-shrink: 0;
     align-self: stretch;
     width: 26px;
-    padding: 0;
-    margin: 0;
     border: none;
     border-radius: 6px 0 0 6px;
-    background: transparent;
-    color: var(--oc-gray-6);
-    cursor: pointer;
-    transition:
-      background-color 0.15s ease,
-      color 0.15s ease;
 
     svg {
-      width: 14px;
-      height: 14px;
       transition: transform 0.15s ease;
-    }
-
-    &:hover {
-      background-color: rgba(31, 35, 41, 0.08);
-      color: var(--toolbar-btn-color);
     }
   }
 
@@ -203,6 +207,11 @@
   &__replace-wrapper {
     gap: 6px;
     padding-left: 0;
+
+    .cherry-searcher__replace-input {
+      flex: 1;
+      min-width: 0;
+    }
   }
 
   &__replace-actions {
@@ -292,6 +301,8 @@
   }
 
   &__clear {
+    @include searcher-action-btn-states;
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -302,20 +313,15 @@
     margin: 0;
     border: none;
     border-radius: 2px;
-    background: transparent;
-    color: var(--oc-gray-5);
     cursor: pointer;
     opacity: 0;
     transition:
       color 0.15s ease,
-      opacity 0.15s ease;
+      opacity 0.15s ease,
+      background-color 0.15s ease;
 
     &.is-visible {
       opacity: 1;
-    }
-
-    &:hover {
-      color: var(--toolbar-btn-color);
     }
 
     svg {
@@ -354,39 +360,18 @@
     line-height: 1;
     white-space: nowrap;
     user-select: none;
+
+    // 有匹配结果时使用与可交互控件一致的正文色
+    &.is-active {
+      color: var(--toolbar-btn-color);
+    }
   }
 
   &__nav-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    @include searcher-icon-btn;
+
     width: 22px;
     height: 22px;
-    padding: 0;
-    margin: 0;
-    border: 1px solid transparent;
-    border-radius: 3px;
-    background: transparent;
-    color: var(--oc-gray-6);
-    cursor: pointer;
-    transition:
-      background-color 0.15s ease,
-      color 0.15s ease;
-
-    svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    &:hover:not(:disabled) {
-      background-color: rgba(31, 35, 41, 0.08);
-      color: var(--toolbar-btn-color);
-    }
-
-    &:disabled {
-      opacity: 0.4;
-      cursor: default;
-    }
   }
 }
 
@@ -404,10 +389,11 @@
       background: transparent;
     }
 
-    &__toggle:hover:not(:disabled):not(.is-forbidden),
-    &__replace-btn:hover:not(:disabled):not(.is-forbidden),
+    &__toggle:hover:not(:disabled):not(.is-forbidden):not(.is-unavailable),
+    &__replace-btn:hover:not(:disabled):not(.is-forbidden):not(.is-unavailable),
     &__nav-btn:hover:not(:disabled),
-    &__expand-btn:hover {
+    &__expand-btn:hover:not(:disabled),
+    &__clear:hover:not(:disabled) {
       background-color: rgba(255, 255, 255, 0.08);
     }
   }

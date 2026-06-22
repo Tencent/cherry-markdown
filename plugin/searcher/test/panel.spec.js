@@ -63,6 +63,55 @@ describe('SearcherPanel', () => {
     expect(adapter.clearSearchQuery).toHaveBeenCalled();
   });
 
+  it('点击面板外关闭', () => {
+    const panel = new SearcherPanel({
+      editorAdapter: createMockAdapter(),
+      mountTarget: document.body,
+    });
+
+    panel.show({ left: 0, top: 0, width: 0, height: 0 }, 'a');
+    document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    expect(panel.isVisible()).toBe(false);
+    panel.destroy();
+  });
+
+  it('点击面板内不关闭', () => {
+    const panel = new SearcherPanel({
+      editorAdapter: createMockAdapter('foo'),
+      mountTarget: document.body,
+    });
+
+    panel.show({ left: 0, top: 0, width: 0, height: 0 }, 'foo');
+    panel.counter.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    expect(panel.isVisible()).toBe(true);
+    panel.destroy();
+  });
+
+  it('closeOnClickOutside 为 false 时点击面板外不关闭', () => {
+    const panel = new SearcherPanel({
+      editorAdapter: createMockAdapter(),
+      mountTarget: document.body,
+      options: { closeOnClickOutside: false },
+    });
+
+    panel.show({ left: 0, top: 0, width: 0, height: 0 }, 'a');
+    document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    expect(panel.isVisible()).toBe(true);
+    panel.destroy();
+  });
+
+  it('有匹配时计数器使用 is-active 样式类', () => {
+    const panel = new SearcherPanel({
+      editorAdapter: createMockAdapter('foo bar foo'),
+      mountTarget: document.body,
+    });
+
+    panel.show({ left: 0, top: 0, width: 0, height: 0 }, 'foo');
+    expect(panel.counter.classList.contains('is-active')).toBe(true);
+    expect(panel.counter.textContent).toBe('1/2');
+    panel.destroy();
+  });
+
   it('applyHighlight 以 asRegex=true 调用 setSearchQuery', async () => {
     vi.useFakeTimers();
     const adapter = createMockAdapter('hello world');
@@ -105,6 +154,25 @@ describe('SearcherPanel', () => {
     panel.destroy();
   });
 
+  it('替换输入框有内容时显示清空按钮', () => {
+    const panel = new SearcherPanel({
+      editorAdapter: createMockAdapter('foo'),
+      mountTarget: document.body,
+      options: { enableReplace: true },
+    });
+
+    panel.show({ left: 0, top: 0, width: 0, height: 0 }, 'foo', { expandReplace: true });
+    panel.replaceInput.value = 'baz';
+    panel.replaceInput.dispatchEvent(new Event('input'));
+
+    expect(panel.dom.querySelector('.cherry-searcher__replace-clear')?.classList.contains('is-visible')).toBe(true);
+
+    panel.replaceClearButton?.click();
+    expect(panel.replaceInput?.value).toBe('');
+    expect(panel.dom.querySelector('.cherry-searcher__replace-clear')?.classList.contains('is-visible')).toBe(false);
+    panel.destroy();
+  });
+
   it('onReplace 在单个 / 全部替换成功后触发', () => {
     const onReplace = vi.fn();
     const panel = new SearcherPanel({
@@ -134,6 +202,7 @@ describe('SearcherPanel', () => {
       to: 'baz',
       count: 1,
     });
+    expect(panel.isVisible()).toBe(true);
     panel.destroy();
   });
 });

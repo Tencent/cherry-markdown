@@ -1,9 +1,10 @@
 /**
  * 搜索工具栏按钮（Cherry Markdown 内置）
  *
- * 点击或快捷键触发；实际搜索面板由 SearcherCherryPlugin 挂载的 searcherBridge 提供。
+ * 点击或快捷键触发；面板由 SearcherCherryPlugin 在 onCherryInit 时挂载。
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { triggerSearcher } from '@/addons/searcher-runtime';
 import { getKeyCode, getPlatformControlKey } from '@/utils/shortcutKey';
 
 export default class Searcher extends MenuBase {
@@ -27,23 +28,12 @@ export default class Searcher extends MenuBase {
     }
   }
 
-  getBridge() {
-    return /** @type {import('../../addons/cherry-searcher-plugin').SearcherCherryBridge | undefined} */ (
-      this.$cherry.searcherBridge
-    );
-  }
-
   /**
    * 响应工具栏点击或快捷键
    * @param {string} selection
    * @param {string} [aliasName]
    */
   onClick(selection, aliasName = '') {
-    const bridge = this.getBridge();
-    if (!bridge) {
-      return;
-    }
-
-    bridge.handleTrigger(selection, aliasName);
+    triggerSearcher(this.$cherry, selection, aliasName);
   }
 }

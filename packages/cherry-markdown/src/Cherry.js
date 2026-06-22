@@ -50,12 +50,6 @@ import { LIST_CONTENT } from '@/utils/regexp';
 /** @typedef {import('~types/editor').CM6Adapter} CM6AdapterType */
 export default class Cherry extends CherryStatic {
   /**
-   * Searcher 插件桥接层（usePlugin(SearcherCherryPlugin) 后由 onCherryInit 挂载）
-   * @type {import('./addons/cherry-searcher-plugin').SearcherCherryBridge | undefined}
-   */
-  searcherBridge;
-
-  /**
    * @protected
    */
   static initialized = false;

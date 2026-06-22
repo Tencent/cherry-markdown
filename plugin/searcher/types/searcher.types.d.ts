@@ -50,6 +50,11 @@ export interface SearcherOptions {
    */
   expandReplaceOnOpen?: boolean;
   /**
+   * 点击面板外时是否自动关闭（面板内任意点击保持打开）
+   * @default true
+   */
+  closeOnClickOutside?: boolean;
+  /**
    * 搜索完成回调（关键词非空且匹配计算结束后触发）
    * @param event 当前搜索词、选项与匹配结果
    */

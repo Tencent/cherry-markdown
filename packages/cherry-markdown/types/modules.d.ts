@@ -49,9 +49,7 @@ declare module 'cherry-markdown/dist/addons/cherry-code-block-plantuml-plugin' {
 declare module 'cherry-markdown/dist/addons/cherry-searcher-plugin' {
   import type { SearcherOptions } from '@cherry-markdown/plugin-searcher';
 
-  export class SearcherCherryBridge {
-    handleTrigger(selection?: string, aliasName?: string): void;
-  }
+  export function triggerSearcher(cherry: unknown, selection?: string, aliasName?: string): void;
 
   const SearcherCherryPlugin: {
     install(

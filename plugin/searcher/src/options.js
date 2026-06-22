@@ -11,8 +11,16 @@ import { DEFAULT_OPTIONS } from './default-options.js';
  * @returns {SearcherOptions & typeof DEFAULT_OPTIONS}
  */
 export function mergeOptions(userOptions = {}) {
+  const normalized = { ...userOptions };
+
+  // 兼容旧名 closeOnBlur（已改为 closeOnClickOutside）
+  if (normalized.closeOnBlur !== undefined && normalized.closeOnClickOutside === undefined) {
+    normalized.closeOnClickOutside = normalized.closeOnBlur;
+  }
+  delete normalized.closeOnBlur;
+
   return {
     ...DEFAULT_OPTIONS,
-    ...userOptions,
+    ...normalized,
   };
 }
