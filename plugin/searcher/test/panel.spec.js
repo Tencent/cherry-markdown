@@ -63,7 +63,8 @@ describe('SearcherPanel', () => {
     expect(adapter.clearSearchQuery).toHaveBeenCalled();
   });
 
-  it('applyHighlight 以 asRegex=true 调用 setSearchQuery', () => {
+  it('applyHighlight 以 asRegex=true 调用 setSearchQuery', async () => {
+    vi.useFakeTimers();
     const adapter = createMockAdapter('hello world');
     const panel = new SearcherPanel({
       editorAdapter: adapter,
@@ -72,9 +73,11 @@ describe('SearcherPanel', () => {
 
     panel.input.value = 'hello';
     panel.input.dispatchEvent(new Event('input'));
+    await vi.advanceTimersByTimeAsync(150);
 
     expect(adapter.setSearchQuery).toHaveBeenCalledWith(expect.any(String), false, true);
     panel.destroy();
+    vi.useRealTimers();
   });
 
   it('onSearch 在搜索完成后触发', () => {
@@ -93,7 +96,10 @@ describe('SearcherPanel', () => {
         caseSensitive: false,
         wholeWord: false,
         activeMatchIndex: expect.any(Number),
-        matches: expect.arrayContaining([{ from: 0, to: 5 }, { from: 12, to: 17 }]),
+        matches: expect.arrayContaining([
+          { from: 0, to: 5 },
+          { from: 12, to: 17 },
+        ]),
       }),
     );
     panel.destroy();

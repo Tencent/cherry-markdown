@@ -10,6 +10,6 @@
       "@cherry-markdown/plugin-searcher": ["../../../plugin/searcher/types/index.d.ts"]
     }
   },
-  "include": ["./**/*.ts", "./**/*.tsx", "../types/addons/**/*.d.ts"],
+  "include": ["./**/*.ts", "./**/*.tsx"],
   "files": ["../types/env.d.ts", "../types/codemirror.d.ts"]
 }

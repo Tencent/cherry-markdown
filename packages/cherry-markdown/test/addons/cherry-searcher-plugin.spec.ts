@@ -2,7 +2,9 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import SearcherCherryPlugin from '@/addons/cherry-searcher-plugin';
 import { CherryStatic } from '@/CherryStatic';
 import { mac } from '@/utils/shortcutKey';
-import type { SearcherCherryHost } from '../../types/addons/cherry-searcher-plugin';
+
+/** 与 cherry-searcher-plugin.js JSDoc 中的 SearcherCherryHost 保持一致 */
+type SearcherCherryHost = Parameters<typeof SearcherCherryPlugin.onCherryInit>[0];
 
 /** 获取 onCherryInit 后挂载的 searcherBridge（测试断言用） */
 function getSearcherBridge(cherry: SearcherCherryHost) {
@@ -191,7 +193,8 @@ describe('SearcherCherryPlugin', () => {
     expect(cherry.searcherBridge).toBeUndefined();
   });
 
-  it('afterChange 在面板可见时刷新搜索匹配', () => {
+  it('afterChange 在面板可见时刷新搜索匹配', async () => {
+    vi.useFakeTimers();
     SearcherCherryPlugin.install({}, {});
 
     let doc = 'foo bar foo';
@@ -236,7 +239,9 @@ describe('SearcherCherryPlugin', () => {
 
     doc = 'foo';
     handlers.afterChange?.({});
+    await vi.advanceTimersByTimeAsync(150);
     expect(bridge.panel.state.matches).toHaveLength(1);
+    vi.useRealTimers();
   });
 
   it('invokePluginDestroys 调用已注册插件的 onCherryDestroy', () => {
@@ -273,19 +278,18 @@ describe('SearcherCherryPlugin', () => {
     expect(CherryStatic.pluginInits[0].args).toEqual([{ foo: 1 }]);
   });
 
-  it('SearcherCherryPlugin 类型声明文件存在且导出关键 API', async () => {
-    const { readFileSync, existsSync } = await import('fs');
+  it('SearcherCherryPlugin 源码导出关键 API', async () => {
+    const { readFileSync } = await import('fs');
     const { resolve } = await import('path');
-    const dtsPath = resolve(process.cwd(), 'types/addons/cherry-searcher-plugin.d.ts');
+    const sourcePath = resolve(process.cwd(), 'src/addons/cherry-searcher-plugin.js');
 
-    expect(existsSync(dtsPath)).toBe(true);
-
-    const content = readFileSync(dtsPath, 'utf-8');
+    const content = readFileSync(sourcePath, 'utf-8');
     expect(content).toContain('export default class SearcherCherryPlugin');
     expect(content).toContain('static install');
     expect(content).toContain('static onCherryInit');
     expect(content).toContain('static onCherryDestroy');
-    expect(content).toContain('SearcherCherryBridge');
-    expect(content).toContain("declare module 'cherry-markdown/dist/types/Cherry'");
+    expect(content).toContain('export class SearcherCherryBridge');
+    expect(content).toContain('export function createCherryEditorAdapter');
+    expect(content).toContain('@typedef {Object} SearcherCherryHost');
   });
 });

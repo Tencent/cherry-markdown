@@ -30,6 +30,15 @@ describe('searcher/search-utils', () => {
     expect(findNearestMatchIndex(matches, 25)).toBe(0);
   });
 
+  it('findNearestMatchIndex: 光标在匹配项内部时应选中该项', () => {
+    const matches = [
+      { from: 0, to: 5 },
+      { from: 10, to: 15 },
+    ];
+    expect(findNearestMatchIndex(matches, 2)).toBe(0);
+    expect(findNearestMatchIndex(matches, 12)).toBe(1);
+  });
+
   it('buildSearchRegex: 空查询返回 null', () => {
     expect(buildSearchRegex('', false, false)).toBeNull();
   });

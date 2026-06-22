@@ -10,7 +10,10 @@
     "target": "ES2020",
     "strict": false,
     "noFallthroughCasesInSwitch": false,
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "paths": {
+      "@cherry-markdown/plugin-searcher": ["../../plugin/searcher/types/index.d.ts"]
+    }
   },
   "include": ["src/addons/**/*-plugin.js"],
   "files": ["types/codemirror.d.ts", "types/global.d.ts"]

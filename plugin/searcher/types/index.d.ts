@@ -2,7 +2,7 @@
  * @cherry-markdown/plugin-searcher 包入口类型声明
  * 构建时与 searcher.types.d.ts、styles.d.ts 一并复制到 dist/。
  */
-/// <reference path="./styles.d.ts" />
+import './styles.js';
 import type {
   EditorAdapter,
   SearcherLocale,
@@ -25,9 +25,7 @@ export type {
   SearcherShowOptions,
 } from './searcher.types.js';
 
-export declare const DEFAULT_OPTIONS: Required<
-  Pick<SearcherOptions, 'enableReplace' | 'expandReplaceOnOpen'>
->;
+export declare const DEFAULT_OPTIONS: Required<Pick<SearcherOptions, 'enableReplace' | 'expandReplaceOnOpen'>>;
 
 export declare const SEARCHER_LOCALES: {
   zh_CN: Required<SearcherLocale>;
@@ -38,9 +36,7 @@ export declare const LOCALE_ZH_CN: Required<SearcherLocale>;
 export declare const LOCALE_EN_US: Required<SearcherLocale>;
 export declare const DEFAULT_LOCALE_ID: 'en_US';
 
-export declare function mergeOptions(
-  options?: SearcherOptions,
-): SearcherOptions & typeof DEFAULT_OPTIONS;
+export declare function mergeOptions(options?: SearcherOptions): SearcherOptions & typeof DEFAULT_OPTIONS;
 
 export declare function resolveLocale(options?: SearcherOptions): Required<SearcherLocale>;
 
@@ -69,11 +65,7 @@ export default class SearcherPanel {
 
 export function escapeRegExp(str: string): string;
 
-export function buildSearchRegex(
-  query: string,
-  caseSensitive: boolean,
-  wholeWord: boolean,
-): RegExp | null;
+export function buildSearchRegex(query: string, caseSensitive: boolean, wholeWord: boolean): RegExp | null;
 
 export function findMatches(
   text: string,

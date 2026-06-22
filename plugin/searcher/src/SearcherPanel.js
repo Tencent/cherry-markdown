@@ -5,8 +5,11 @@
  * 可选展开替换行：替换输入 + 替换 + 全部替换
  */
 import { createElement } from './dom.js';
-import { buildSearchRegex, findMatches, findNearestMatchIndex } from './search-utils.js';
+import { buildSearchRegex, collectMatches, findMatches, findNearestMatchIndex } from './search-utils.js';
 import { resolveLocale } from './locale.js';
+
+/** 输入搜索防抖间隔（毫秒） */
+const SEARCH_DEBOUNCE_MS = 150;
 
 /**
  * 查询必需的 DOM 节点并断言类型
@@ -124,6 +127,11 @@ export default class SearcherPanel {
       activeMatchIndex: -1,
     };
 
+    /** @type {ReturnType<typeof setTimeout> | null} */
+    this._searchTimer = null;
+    /** @type {boolean} */
+    this._pendingKeepActiveIndex = false;
+
     this.dom = this.createDOM();
     this.cacheElements();
     this.bindEvents();
@@ -188,6 +196,7 @@ export default class SearcherPanel {
    * 销毁面板
    */
   destroy() {
+    this.cancelScheduledSearch();
     this.clearHighlight();
     if (this.dom.parentNode) {
       this.dom.parentNode.removeChild(this.dom);
@@ -315,7 +324,7 @@ export default class SearcherPanel {
 
   bindEvents() {
     this.input.addEventListener('input', () => {
-      this.setQuery(this.input.value, true);
+      this.setQuery(this.input.value, true, false);
     });
 
     this.input.addEventListener('focus', () => {
@@ -326,6 +335,7 @@ export default class SearcherPanel {
       const keyboardEvent = /** @type {KeyboardEvent} */ (event);
       if (keyboardEvent.key === 'Enter') {
         keyboardEvent.preventDefault();
+        this.flushScheduledSearch(true);
         if (this.state.matches.length > 0) {
           this.navigate(keyboardEvent.shiftKey ? 'prev' : 'next');
         }
@@ -416,12 +426,18 @@ export default class SearcherPanel {
   /**
    * @param {string} query
    * @param {boolean} [keepCurrentIndex=false]
+   * @param {boolean} [immediate=true] - 为 false 时对输入做防抖
    */
-  setQuery(query, keepCurrentIndex = false) {
+  setQuery(query, keepCurrentIndex = false, immediate = true) {
     this.state.query = query;
     this.input.value = query;
     this.clearButton.classList.toggle('is-visible', query.length > 0);
-    this.runSearch(keepCurrentIndex);
+
+    if (!query || immediate) {
+      this.runSearch(keepCurrentIndex);
+    } else {
+      this.scheduleSearch(keepCurrentIndex);
+    }
   }
 
   clearQuery() {
@@ -429,14 +445,51 @@ export default class SearcherPanel {
     this.input.focus();
   }
 
+  /**
+   * 防抖调度搜索（输入或文档变更时使用）
+   * @param {boolean} [keepActiveIndex=false]
+   */
+  scheduleSearch(keepActiveIndex = false) {
+    this._pendingKeepActiveIndex = keepActiveIndex;
+    this.cancelScheduledSearch();
+    this._searchTimer = setTimeout(() => {
+      this._searchTimer = null;
+      this.runSearch(this._pendingKeepActiveIndex);
+    }, SEARCH_DEBOUNCE_MS);
+  }
+
+  /** 取消待执行的防抖搜索 */
+  cancelScheduledSearch() {
+    if (this._searchTimer) {
+      clearTimeout(this._searchTimer);
+      this._searchTimer = null;
+    }
+  }
+
+  /**
+   * 立即执行待定的防抖搜索
+   * @param {boolean} [keepActiveIndex=true]
+   */
+  flushScheduledSearch(keepActiveIndex = true) {
+    if (!this._searchTimer) {
+      return;
+    }
+
+    this.cancelScheduledSearch();
+    this.runSearch(keepActiveIndex);
+  }
+
   runSearch(keepActiveIndex = false) {
     if (!this.editorAdapter) {
       return;
     }
 
+    this.cancelScheduledSearch();
+
     const text = this.editorAdapter.getDocString();
     const { query, caseSensitive, wholeWord } = this.state;
-    const matches = findMatches(text, query, caseSensitive, wholeWord);
+    const regex = buildSearchRegex(query, caseSensitive, wholeWord);
+    const matches = regex ? collectMatches(text, regex) : [];
 
     this.state.matches = matches;
 
@@ -454,7 +507,7 @@ export default class SearcherPanel {
       this.state.activeMatchIndex = findNearestMatchIndex(matches, cursorPos);
     }
 
-    this.applyHighlight();
+    this.applyHighlight(regex);
     this.focusCurrentMatch();
     this.updateCounter();
     this.emitSearch();
@@ -476,7 +529,10 @@ export default class SearcherPanel {
     });
   }
 
-  applyHighlight() {
+  /**
+   * @param {RegExp | null} [regex]
+   */
+  applyHighlight(regex) {
     if (!this.editorAdapter) {
       return;
     }
@@ -487,13 +543,13 @@ export default class SearcherPanel {
       return;
     }
 
-    const regex = buildSearchRegex(query, caseSensitive, wholeWord);
-    if (!regex) {
+    const searchRegex = regex ?? buildSearchRegex(query, caseSensitive, wholeWord);
+    if (!searchRegex) {
       return;
     }
 
     // pattern 已由 buildSearchRegex 构建，宿主需按正则解析
-    this.editorAdapter.setSearchQuery(regex.source, caseSensitive, true);
+    this.editorAdapter.setSearchQuery(searchRegex.source, caseSensitive, true);
   }
 
   clearHighlight() {

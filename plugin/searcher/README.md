@@ -116,4 +116,4 @@ src/
 └── index.js
 ```
 
-Cherry 适配（`SearcherCherryBridge`、快捷键 Mod+F/H）位于主包 `packages/cherry-markdown/src/addons/cherry-searcher-plugin.js`。
+Cherry 适配（`SearcherCherryBridge`、快捷键 Mod+F/H）位于主包 `packages/cherry-markdown/src/addons/cherry-searcher-plugin.js`，类型由 `addons.build.js` 与其他 addon 一致从 JSDoc 生成到 `dist/types/addons/`。

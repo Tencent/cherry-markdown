@@ -5,8 +5,19 @@ import SearcherPanel, { mergeOptions } from '@cherry-markdown/plugin-searcher';
 import { getAllowedShortcutKey, getKeyCode, getPlatformControlKey, keyStack2UniqueString } from '@/utils/shortcutKey';
 
 /**
+ * Searcher 插件初始化后的 Cherry 宿主形态
+ * @typedef {Object} SearcherCherryHost
+ * @property {Record<string, string | undefined>} [locale] Cherry 文案
+ * @property {{ locale?: string }} [options] Cherry 配置
+ * @property {Object} [editor] 编辑器包装
+ * @property {HTMLElement} [wrapperDom] 外层容器
+ * @property {Object} [$event] Cherry 事件总线
+ * @property {SearcherCherryBridge} [searcherBridge] 插件初始化后挂载
+ */
+
+/**
  * 将 Cherry.locale 映射为 Searcher 文案（Cherry 适配层）
- * @param {import('../../types/addons/cherry-searcher-plugin').SearcherCherryHost} cherry
+ * @param {SearcherCherryHost} cherry
  * @returns {import('@cherry-markdown/plugin-searcher').SearcherLocale}
  */
 function mapCherryLocale(cherry) {
@@ -30,10 +41,10 @@ function mapCherryLocale(cherry) {
 
 /**
  * 合并 Cherry 宿主语言与 usePlugin 配置
- * @param {import('../../types/addons/cherry-searcher-plugin').SearcherCherryHost} cherry
+ * @param {SearcherCherryHost} cherry
  * @param {import('@cherry-markdown/plugin-searcher').SearcherOptions} userOptions
  */
-function buildSearcherOptions(cherry, userOptions) {
+export function buildSearcherOptions(cherry, userOptions) {
   const cherryLocaleId = cherry.options?.locale;
   const localeId =
     userOptions.localeId ?? (cherryLocaleId === 'zh_CN' || cherryLocaleId === 'en_US' ? cherryLocaleId : undefined);
@@ -49,10 +60,10 @@ function buildSearcherOptions(cherry, userOptions) {
 }
 
 /**
- * @param {import('../../types/addons/cherry-searcher-plugin').SearcherCherryHost} cherry
+ * @param {SearcherCherryHost} cherry
  * @returns {import('@cherry-markdown/plugin-searcher').EditorAdapter}
  */
-function createCherryEditorAdapter(cherry) {
+export function createCherryEditorAdapter(cherry) {
   const editor = cherry.editor?.editor;
 
   return {
@@ -97,9 +108,9 @@ function createCherryEditorAdapter(cherry) {
   };
 }
 
-class SearcherCherryBridge {
+export class SearcherCherryBridge {
   /**
-   * @param {import('../../types/addons/cherry-searcher-plugin').SearcherCherryHost} cherry
+   * @param {SearcherCherryHost} cherry
    * @param {import('@cherry-markdown/plugin-searcher').SearcherOptions} userOptions
    */
   constructor(cherry, userOptions) {
@@ -166,13 +177,13 @@ class SearcherCherryBridge {
     }
   }
 
-  /** 文档变更且面板可见时，保持匹配结果与高亮同步 */
+  /** 文档变更且面板可见时，防抖刷新匹配结果与高亮 */
   handleDocumentChange() {
     if (!this.panel.isVisible() || !this.panel.state.query) {
       return;
     }
 
-    this.panel.runSearch(true);
+    this.panel.scheduleSearch(true);
   }
 
   handleLocaleChange() {
@@ -259,14 +270,19 @@ export default class SearcherCherryPlugin {
   }
 
   /**
-   * @param {import('../../types/addons/cherry-searcher-plugin').SearcherCherryHost} cherry
+   * @param {SearcherCherryHost} cherry
+   * @param {import('@cherry-markdown/plugin-searcher').SearcherOptions} [userOptions]
    */
-  static onCherryInit(cherry) {
-    cherry.searcherBridge = new SearcherCherryBridge(cherry, SearcherCherryPlugin.mergedOptions);
+  static onCherryInit(cherry, userOptions = {}) {
+    const pluginUserOptions = {
+      ...SearcherCherryPlugin.mergedOptions,
+      ...userOptions,
+    };
+    cherry.searcherBridge = new SearcherCherryBridge(cherry, pluginUserOptions);
   }
 
   /**
-   * @param {import('../../types/addons/cherry-searcher-plugin').SearcherCherryHost} cherry
+   * @param {SearcherCherryHost} cherry
    */
   static onCherryDestroy(cherry) {
     cherry.searcherBridge?.destroy();

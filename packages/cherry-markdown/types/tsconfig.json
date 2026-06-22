@@ -1,0 +1,10 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@cherry-markdown/plugin-searcher": ["../../../plugin/searcher/types/index.d.ts"]
+    }
+  },
+  "include": ["./**/*.d.ts"]
+}
