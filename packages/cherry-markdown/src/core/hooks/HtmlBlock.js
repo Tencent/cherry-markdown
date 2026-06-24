@@ -90,12 +90,18 @@ export default class HtmlBlock extends ParagraphBase {
     $str = escapeHTMLEntitiesWithoutSemicolon($str);
     $str = $str.replace(/<[/]?([^<]*?)>/g, (whole, m1) => {
       if (htmlBlackList && htmlBlackList.test(m1) && !this.isAutoLinkTag(whole) && !this.isHtmlComment(whole)) {
+        if (/\n[\t ]*$/.test(m1)) {
+          return whole.replace(/</g, '&#60;');
+        }
         return whole.replace(/</g, '&#60;').replace(/>/g, '&#62;');
       }
       // 匹配到非白名单且非AutoLink语法的尖括号会被转义
       // 如果是HTML注释，放行
       if (!whiteList.test(m1) && !this.isAutoLinkTag(whole) && !this.isHtmlComment(whole)) {
         if (this.htmlWhiteListAppend === false || !this.htmlWhiteListAppend.test(m1)) {
+          if (/\n[\t ]*$/.test(m1)) {
+            return whole.replace(/</g, '&#60;');
+          }
           return whole.replace(/</g, '&#60;').replace(/>/g, '&#62;');
         }
       }
