@@ -738,7 +738,7 @@ exports[`engine > CommonMark-119 1`] = `
 `;
 
 exports[`engine > CommonMark-120 1`] = `
-"<p data-sign="ed89641781e499544" data-type="p" data-lines="4"><del>~<br>&lt;<br> &gt;<br></del>~</p>
+"<p data-sign="3354207be9e4868c4" data-type="p" data-lines="4"><del>~<br>&lt;<br> &gt;<br></del>~</p>
 "
 `;
 
