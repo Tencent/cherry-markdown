@@ -60,10 +60,8 @@ const pasteHelper = {
     this.cherry = cherry;
     this.html = html;
     this.md = md;
-    this.currentCursor = currentCursor;
     // 记录粘贴区域，切换 TEXT/Markdown 时按范围替换，避免选区丢失导致内容重复
     this.pasteFrom = currentCursor;
-    this.pasteTo = currentCursor + md.length;
     this.codemirror = editorView;
     this.locale = cherry.locale;
   },
@@ -89,21 +87,27 @@ const pasteHelper = {
   },
 
   /**
-   * 在编辑器中自动选中刚刚粘贴的内容
-   * CM6: currentCursor 和 getCursor() 都是文档偏移量
-   */
-  setSelection() {
-    // CM6: setSelection(anchor, head) 使用文档偏移量
-    this.codemirror.setSelection(this.pasteFrom, this.pasteTo);
-  },
-
-  /**
    * 按粘贴区域替换内容，并同步更新区域终点
-   * @param {string} text - 替换文本
+   * @param {string} after - 替换后文本
+   * @param {string} before - 替换前文本
    */
-  replacePasteContent(text) {
-    this.codemirror.replaceRange(text, this.pasteFrom, this.pasteTo);
-    this.pasteTo = this.pasteFrom + text.length;
+  replacePasteContent(after, before) {
+    // 去除\r\n,这俩算作一个字符
+    const $after = after.replace(/\r\n/g, '\n');
+    const $before = before.replace(/\r\n/g, '\n');
+    const from = this.pasteFrom;
+    const to = this.pasteFrom + $before.length;
+    this.codemirror.dispatch({
+      changes: {
+        from,
+        to,
+        insert: $after,
+      },
+      selection: {
+        anchor: from,
+        head: from + $after.length,
+      },
+    });
   },
   /**
    * 绑定事件
@@ -242,8 +246,7 @@ const pasteHelper = {
     }
     this.noHide = true;
     this.bubbleDom.setAttribute('data-type', 'md');
-    this.replacePasteContent(this.md);
-    this.setSelection();
+    this.replacePasteContent(this.md, this.html);
     this.showBubble();
     this.switchMd.classList.add('active');
     this.switchText.classList.remove('active');
@@ -258,8 +261,7 @@ const pasteHelper = {
     }
     this.noHide = true;
     this.bubbleDom.setAttribute('data-type', 'text');
-    this.replacePasteContent(this.html);
-    this.setSelection();
+    this.replacePasteContent(this.html, this.md);
     this.showBubble();
     this.switchText.classList.add('active');
     this.switchMd.classList.remove('active');

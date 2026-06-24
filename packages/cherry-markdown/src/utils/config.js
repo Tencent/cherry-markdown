@@ -15,7 +15,7 @@
  */
 
 /**
- * 用于lodash.mergeWith的customizer
+ * 用于 mergeWith 的 customizer
  * @param {any} objValue
  * @param {any} srcValue
  * @returns

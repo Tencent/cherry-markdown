@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import mergeWith from 'lodash/mergeWith';
+import mergeWith from 'es-toolkit/compat/mergeWith';
 import { isBrowser } from '@/utils/env';
 import { getExternal } from '@/utils/external';
 
