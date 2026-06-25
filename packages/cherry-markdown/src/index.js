@@ -17,7 +17,6 @@ import Cherry from './index.core';
 import MermaidCodeEngine from '@/addons/cherry-code-block-mermaid-plugin';
 import PlantUMLCodeEngine from '@/addons/cherry-code-block-plantuml-plugin';
 import EChartsTableEngine from '@/addons/advance/cherry-table-echarts-plugin';
-import SearcherCherryPlugin from '@/addons/cherry-searcher-plugin';
 import mermaid from 'mermaid';
 
 // v9 及以下有 mermaid.mermaidAPI，v10+ 为 undefined
@@ -30,7 +29,6 @@ Cherry.usePlugin(MermaidCodeEngine, {
 });
 Cherry.usePlugin(PlantUMLCodeEngine, {});
 Cherry.usePlugin(EChartsTableEngine);
-Cherry.usePlugin(SearcherCherryPlugin);
 
 export * from './index.core';
 export default Cherry;

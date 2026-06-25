@@ -76,7 +76,7 @@ import DrawIo from './hooks/DrawIo';
 import Publish from './hooks/Publish';
 import ChangeLocale from './hooks/ChangeLocale';
 import ShortcutKey from './hooks/ShortcutKey';
-import Searcher from './hooks/Searcher';
+import Search from './hooks/Search';
 
 // 定义默认支持的工具栏
 // 目前不支持按需动态加载
@@ -141,9 +141,7 @@ const HookList = {
   publish: Publish,
   changeLocale: ChangeLocale,
   shortcutKey: ShortcutKey,
-  searcher: Searcher,
-  /** 兼容旧版工具栏配置中的 search 按钮名 */
-  search: Searcher,
+  search: Search,
 };
 
 export default class HookCenter {

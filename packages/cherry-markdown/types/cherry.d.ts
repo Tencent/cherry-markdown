@@ -1,5 +1,4 @@
 import { EditorView } from '@codemirror/view';
-import type { SearcherOptions } from '@cherry-markdown/plugin-searcher';
 import SyntaxBase from '../src/core/SyntaxBase';
 import { FormulaMenu } from '@/toolbars/BubbleFormula';
 
@@ -689,7 +688,7 @@ export type CherryDefaultToolbar =
   | 'quote'
   | 'redo'
   | 'ruby'
-  | 'searcher'
+  | 'search'
   | 'settings'
   | 'size'
   | 'strikethrough'
@@ -765,8 +764,6 @@ export interface CherryToolbarConfig {
     /** 地图数据源URL配置，支持多个路径，按优先级依次尝试 */
     sourceUrl?: string[];
   };
-  /** Searcher 搜索插件配置（usePlugin(SearcherCherryPlugin) 时由 install 写入） */
-  searcher?: SearcherOptions;
 }
 export interface CherryChangeLocaleToolbarOption {
   locale: string;

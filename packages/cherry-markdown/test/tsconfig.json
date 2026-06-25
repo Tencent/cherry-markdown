@@ -6,8 +6,7 @@
     "strict": false,
     "paths": {
       "@/*": ["../src/*"],
-      "~types/*": ["../types/*"],
-      "@cherry-markdown/plugin-searcher": ["../../../plugin/searcher/types/index.d.ts"]
+      "~types/*": ["../types/*"]
     }
   },
   "include": ["./**/*.ts", "./**/*.tsx"],

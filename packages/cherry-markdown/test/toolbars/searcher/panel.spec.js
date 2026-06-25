@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import SearcherPanel from '../src/SearcherPanel.js';
+import SearcherPanel from '@/toolbars/searcher/SearcherPanel';
 
-/** @returns {import('../types/searcher.types.js').EditorAdapter} */
+/** @returns {object} */
 function createMockAdapter(text = 'hello world hello') {
   let doc = text;
   let selection = { from: 0, to: 0 };
@@ -42,10 +42,9 @@ describe('SearcherPanel', () => {
     const panel = new SearcherPanel({
       editorAdapter: createMockAdapter('foo bar foo'),
       mountTarget: document.body,
-      options: { enableReplace: true },
     });
 
-    panel.show({ left: 10, top: 20, width: 100, height: 30 }, 'foo');
+    panel.show('foo');
     expect(panel.isVisible()).toBe(true);
     expect(panel.dom.querySelector('.cherry-searcher__input')?.value).toBe('foo');
   });
@@ -57,7 +56,7 @@ describe('SearcherPanel', () => {
       mountTarget: document.body,
     });
 
-    panel.show({ left: 0, top: 0, width: 0, height: 0 }, 'a');
+    panel.show('a');
     panel.hide();
     expect(panel.isVisible()).toBe(false);
     expect(adapter.clearSearchQuery).toHaveBeenCalled();
@@ -69,7 +68,7 @@ describe('SearcherPanel', () => {
       mountTarget: document.body,
     });
 
-    panel.show({ left: 0, top: 0, width: 0, height: 0 }, 'a');
+    panel.show('a');
     document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
     expect(panel.isVisible()).toBe(false);
     panel.destroy();
@@ -81,21 +80,8 @@ describe('SearcherPanel', () => {
       mountTarget: document.body,
     });
 
-    panel.show({ left: 0, top: 0, width: 0, height: 0 }, 'foo');
+    panel.show('foo');
     panel.counter.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-    expect(panel.isVisible()).toBe(true);
-    panel.destroy();
-  });
-
-  it('closeOnClickOutside 为 false 时点击面板外不关闭', () => {
-    const panel = new SearcherPanel({
-      editorAdapter: createMockAdapter(),
-      mountTarget: document.body,
-      options: { closeOnClickOutside: false },
-    });
-
-    panel.show({ left: 0, top: 0, width: 0, height: 0 }, 'a');
-    document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
     expect(panel.isVisible()).toBe(true);
     panel.destroy();
   });
@@ -106,7 +92,7 @@ describe('SearcherPanel', () => {
       mountTarget: document.body,
     });
 
-    panel.show({ left: 0, top: 0, width: 0, height: 0 }, 'foo');
+    panel.show('foo');
     expect(panel.counter.classList.contains('is-active')).toBe(true);
     expect(panel.counter.textContent).toBe('1/2');
     panel.destroy();
@@ -129,39 +115,13 @@ describe('SearcherPanel', () => {
     vi.useRealTimers();
   });
 
-  it('onSearch 在搜索完成后触发', () => {
-    const onSearch = vi.fn();
-    const panel = new SearcherPanel({
-      editorAdapter: createMockAdapter('hello world hello'),
-      mountTarget: document.body,
-      options: { onSearch },
-    });
-
-    panel.show({ left: 0, top: 0, width: 0, height: 0 }, 'hello');
-
-    expect(onSearch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: 'hello',
-        caseSensitive: false,
-        wholeWord: false,
-        activeMatchIndex: expect.any(Number),
-        matches: expect.arrayContaining([
-          { from: 0, to: 5 },
-          { from: 12, to: 17 },
-        ]),
-      }),
-    );
-    panel.destroy();
-  });
-
   it('替换输入框有内容时显示清空按钮', () => {
     const panel = new SearcherPanel({
       editorAdapter: createMockAdapter('foo'),
       mountTarget: document.body,
-      options: { enableReplace: true },
     });
 
-    panel.show({ left: 0, top: 0, width: 0, height: 0 }, 'foo', { expandReplace: true });
+    panel.show('foo', { expandReplace: true });
     panel.replaceInput.value = 'baz';
     panel.replaceInput.dispatchEvent(new Event('input'));
 
@@ -173,35 +133,21 @@ describe('SearcherPanel', () => {
     panel.destroy();
   });
 
-  it('onReplace 在单个 / 全部替换成功后触发', () => {
-    const onReplace = vi.fn();
+  it('单个 / 全部替换会更新文档', () => {
+    const adapter = createMockAdapter('foo bar foo');
     const panel = new SearcherPanel({
-      editorAdapter: createMockAdapter('foo bar foo'),
+      editorAdapter: adapter,
       mountTarget: document.body,
-      options: { enableReplace: true, onReplace },
     });
 
-    panel.show({ left: 0, top: 0, width: 0, height: 0 }, 'foo');
+    panel.show('foo');
     panel.replaceInput.value = 'baz';
     panel.replaceCurrent();
 
-    expect(onReplace).toHaveBeenCalledWith({
-      mode: 'single',
-      query: 'foo',
-      from: 'foo',
-      to: 'baz',
-      count: 1,
-      range: { from: 0, to: 3 },
-    });
+    expect(adapter.getDocString()).toBe('baz bar foo');
 
     panel.replaceAll();
-    expect(onReplace).toHaveBeenLastCalledWith({
-      mode: 'all',
-      query: 'foo',
-      from: 'foo',
-      to: 'baz',
-      count: 1,
-    });
+    expect(adapter.getDocString()).toBe('baz bar baz');
     expect(panel.isVisible()).toBe(true);
     panel.destroy();
   });

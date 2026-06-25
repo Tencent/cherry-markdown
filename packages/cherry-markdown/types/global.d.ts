@@ -25,7 +25,6 @@ import type CherryStream from '../dist/types/CherryStream';
 import type CherryEngine from '../dist/types/index.engine.core';
 import type MermaidCodeEngine from '../dist/types/addons/cherry-code-block-mermaid-plugin';
 import type PlantUMLCodeEngine from '../dist/types/addons/cherry-code-block-plantuml-plugin';
-import type SearcherCherryPlugin from '../dist/types/addons/cherry-searcher-plugin';
 
 export {};
 
@@ -86,15 +85,5 @@ declare global {
      * ```
      */
     CherryCodeBlockPlantumlPlugin?: typeof PlantUMLCodeEngine;
-
-    /**
-     * Searcher 搜索插件（UMD 构建产物自动挂载）
-     *
-     * @example
-     * ```ts
-     * Cherry.usePlugin(window.CherrySearcherPlugin, { localeId: 'zh_CN' });
-     * ```
-     */
-    CherrySearcherPlugin?: typeof SearcherCherryPlugin;
   }
 }

@@ -44,6 +44,7 @@ import Logger from '@/Logger';
 
 import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
+import { destroySearcherBridge, initSearcherBridge } from './toolbars/searcher/SearcherBridge';
 import { LIST_CONTENT } from '@/utils/regexp';
 
 /** @typedef {import('~types/cherry').CherryOptions} CherryOptions */
@@ -270,8 +271,8 @@ export default class Cherry extends CherryStatic {
   }
 
   destroy() {
-    // 先销毁插件桥接（解绑监听、清理面板 DOM）
-    CherryStatic.invokePluginDestroys(this);
+    // 先销毁搜索面板桥接（解绑监听、清理面板 DOM）
+    destroySearcherBridge(this);
 
     // 再销毁编辑器实例（清理 EditorView 和资源）
     if (this.editor) {
@@ -1008,7 +1009,7 @@ export default class Cherry extends CherryStatic {
         this.previewer.update(html);
       }
       this.$event.emit('afterInit', { markdownText, html });
-      CherryStatic.invokePluginInits(this);
+      initSearcherBridge(this);
     } catch (e) {
       throw new NestedError(e);
     }

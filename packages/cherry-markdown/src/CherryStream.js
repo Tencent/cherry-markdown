@@ -33,6 +33,7 @@ import locales from '@/locales/index';
 
 import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
+import { destroySearcherBridge, initSearcherBridge } from './toolbars/searcher/SearcherBridge';
 
 /**
  * @typedef {import('~types/cherry').CherryOptions} CherryOptions
@@ -297,14 +298,14 @@ export default class CherryStream extends CherryStatic {
       const html = this.engine.makeHtml(markdownText);
       this.previewer.update(html);
       this.$event.emit('afterInit', { markdownText, html });
-      CherryStatic.invokePluginInits(this);
+      initSearcherBridge(this);
     } catch (e) {
       throw new NestedError(e);
     }
   }
 
   destroy() {
-    CherryStatic.invokePluginDestroys(this);
+    destroySearcherBridge(this);
 
     if (this.noMountEl) {
       this.cherryDom.remove();

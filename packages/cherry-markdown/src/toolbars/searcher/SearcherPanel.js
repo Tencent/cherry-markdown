@@ -1,14 +1,55 @@
 /**
- * TEditor 风格的搜索面板（ES Module + class 语法）
+ * Cherry 内置搜索/替换面板
  *
- * 单行搜索框：图标 + 输入 + 清空 + 大小写 + 全字匹配 + 计数导航
- * 可选展开替换行：替换输入 + 替换 + 全部替换
+ * 挂载在编辑区右上角，提供查找、高亮、导航与替换能力。
+ * 由 {@link SearcherBridge} 创建，不对外单独暴露；文案来自 Cherry 全局 `locale`。
+ *
+ * @module toolbars/searcher/SearcherPanel
  */
 import { buildSearchRegex, collectMatches, findMatches, findNearestMatchIndex } from './search-utils.js';
-import { resolveLocale } from './locale.js';
+import { pickSearcherLocale } from './locale.js';
 
-/** 输入搜索防抖间隔（毫秒） */
+/** 输入搜索防抖间隔（毫秒），减少连续输入时的匹配计算次数 */
 const SEARCH_DEBOUNCE_MS = 150;
+
+/**
+ * 面板构造参数
+ * @typedef {object} SearcherPanelParams
+ * @property {SearcherEditorAdapter} editorAdapter 编辑器读写适配器
+ * @property {Record<string, string | undefined>} [locale] Cherry 全局 locale，面板通过 pickSearcherLocale 提取文案
+ * @property {ParentNode | null} [mountTarget] 面板挂载节点，通常为 `.cherry-editor`
+ */
+
+/**
+ * 编辑器适配器（与 SearcherBridge.createEditorAdapter 返回值一致）
+ * @typedef {object} SearcherEditorAdapter
+ * @property {() => string} getDocString
+ * @property {() => { from: number; to: number }} getSelection
+ * @property {() => string} getSelectedText
+ * @property {() => number} getCursorHead
+ * @property {(from: number, to: number, options?: object) => void} setSelection
+ * @property {(text: string, from: number, to: number) => void} replaceRange
+ * @property {(pattern: string, caseSensitive: boolean, asRegex: boolean) => void} setSearchQuery
+ * @property {() => void} clearSearchQuery
+ * @property {() => void} focus
+ * @property {() => boolean} isReadOnly
+ */
+
+/**
+ * 面板显示选项
+ * @typedef {object} SearcherShowOptions
+ * @property {boolean} [expandReplace] 为 true 时打开面板同时展开替换行（Mod+H）
+ */
+
+/**
+ * 搜索运行时状态
+ * @typedef {object} SearcherPanelState
+ * @property {string} query 当前搜索关键词
+ * @property {boolean} caseSensitive 是否区分大小写
+ * @property {boolean} wholeWord 是否全字匹配
+ * @property {Array<{ from: number; to: number }>} matches 文档中全部匹配区间
+ * @property {number} activeMatchIndex 当前高亮匹配项在 matches 中的下标，无匹配时为 -1
+ */
 
 /**
  * 查询必需的 DOM 节点并断言类型
@@ -51,14 +92,20 @@ const NEXT_ICON = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org
 
 const EXPAND_ICON = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
+/**
+ * 搜索/替换面板
+ *
+ * 搜索行：输入框、清空、大小写/全字匹配切换、匹配计数与上/下导航。
+ * 替换行：替换为输入、单条替换、全部替换（只读时禁用）。
+ */
 export default class SearcherPanel {
-  /** @type {import('../types/searcher.types.js').EditorAdapter} */
+  /** @type {SearcherEditorAdapter} 编辑器适配器 */
   editorAdapter;
 
-  /** @type {import('../types/searcher.types.js').SearcherOptions} */
-  options;
+  /** @type {Record<string, string>} 面板文案，字段见 locale.js 的 SEARCHER_LOCALE_KEYS */
+  locale;
 
-  /** @type {HTMLElement} */
+  /** @type {HTMLElement} 面板根节点，类名 `cherry-searcher` */
   dom;
 
   /** @type {HTMLInputElement} */
@@ -101,22 +148,23 @@ export default class SearcherPanel {
   replaceAllButton;
 
   /**
-   * @param {import('../types/searcher.types.js').SearcherPanelParams} params
+   * 创建搜索面板并挂载到编辑区
+   *
+   * @param {SearcherPanelParams} params 构造参数
    */
   constructor(params) {
     const {
       editorAdapter,
-      options = {},
+      locale = {},
       mountTarget = typeof document !== 'undefined' ? document.body : null,
     } = params;
 
     this.editorAdapter = editorAdapter;
-    this.options = options;
-    this.enableReplace = options.enableReplace !== false;
-    /** @type {boolean} */
-    this.replaceExpanded = options.expandReplaceOnOpen === true;
+    this.locale = pickSearcherLocale(locale);
+    this.enableReplace = true;
+    this.replaceExpanded = false;
 
-    /** @type {import('../types/searcher.types.js').SearcherSearchState} */
+    /** @type {SearcherPanelState} 搜索匹配与高亮状态 */
     this.state = {
       query: '',
       caseSensitive: false,
@@ -155,29 +203,15 @@ export default class SearcherPanel {
   }
 
   /**
-   * 是否挂载在 Cherry 编辑区容器内（使用 CSS 右上角定位，与旧版 ace_search 一致）
-   * @returns {boolean}
-   */
-  isMountedInEditor() {
-    return Boolean(this.dom.parentElement?.classList?.contains('cherry-editor'));
-  }
-
-  /**
    * 显示搜索面板
-   * @param {{ left: number; top: number; width: number; height: number }} [anchorRect] 独立使用时按视口锚点定位；Cherry 编辑区内可省略
-   * @param {string} [selection='']
-   * @param {import('../types/searcher.types.js').SearcherShowOptions} [showOptions={}]
+   *
+   * @param {string} [selection=''] 预填搜索词；有值时立即执行搜索
+   * @param {SearcherShowOptions} [showOptions] 显示选项，`expandReplace` 为 true 时展开替换行
    */
-  show(anchorRect, selection = '', showOptions = {}) {
+  show(selection = '', showOptions = {}) {
     this.dom.style.display = '';
-    if (anchorRect) {
-      this.positionPanel(anchorRect);
-    } else if (this.isMountedInEditor()) {
-      this.dom.style.left = '';
-      this.dom.style.top = '';
-    }
 
-    if (showOptions.expandReplace && this.enableReplace) {
+    if (showOptions.expandReplace) {
       this.setReplaceExpanded(true);
     }
 
@@ -200,7 +234,7 @@ export default class SearcherPanel {
   }
 
   /**
-   * 隐藏搜索面板
+   * 隐藏搜索面板，清除编辑器高亮并将焦点交还编辑器
    */
   hide() {
     this.unbindCloseOnOutside();
@@ -210,7 +244,7 @@ export default class SearcherPanel {
   }
 
   /**
-   * 销毁面板
+   * 销毁面板：取消定时器、清除高亮、移除 DOM
    */
   destroy() {
     this.cancelScheduledSearch();
@@ -223,7 +257,7 @@ export default class SearcherPanel {
 
   /** 面板可见时监听文档点击，仅在面板外按下时关闭 */
   bindCloseOnOutside() {
-    if (this._outsideCloseBound || this.options.closeOnClickOutside === false) {
+    if (this._outsideCloseBound) {
       return;
     }
 
@@ -246,7 +280,7 @@ export default class SearcherPanel {
    * @param {MouseEvent} event
    */
   handleDocumentPointerDown(event) {
-    if (this.options.closeOnClickOutside === false || !this.isVisible()) {
+    if (!this.isVisible()) {
       return;
     }
 
@@ -259,42 +293,10 @@ export default class SearcherPanel {
   }
 
   /**
-   * 根据锚点矩形定位面板（独立使用 fixed 模式）；Cherry 编辑区内由 CSS 定位
-   * @param {{ left: number; top: number; width: number; height: number }} anchorRect
+   * 构建面板 DOM 结构（搜索行 + 可折叠替换行）
+   *
+   * @returns {HTMLElement} 面板根元素
    */
-  positionPanel(anchorRect) {
-    if (this.isMountedInEditor()) {
-      this.dom.style.left = '';
-      this.dom.style.top = '';
-      return;
-    }
-
-    const panelWidth = this.dom.offsetWidth || 420;
-    const panelHeight = this.dom.offsetHeight || 52;
-    const pageWidth = document.documentElement.clientWidth;
-    const pageHeight = document.documentElement.clientHeight;
-    const margin = 8;
-    let left = anchorRect.left + anchorRect.width - panelWidth - margin;
-
-    // 编辑区较窄时，避免面板超出左边界
-    if (left < anchorRect.left + margin) {
-      left = anchorRect.left + margin;
-    }
-
-    if (left + panelWidth > pageWidth - margin) {
-      left = Math.max(margin, pageWidth - panelWidth - margin);
-    }
-
-    // 旧版 cm-search-replace：top: spacing-lg，贴在编辑区顶部（fixed 模式用视口坐标）
-    let top = anchorRect.top + margin;
-    if (top + panelHeight > pageHeight - margin) {
-      top = Math.max(margin, pageHeight - panelHeight - margin);
-    }
-
-    this.dom.style.left = `${left}px`;
-    this.dom.style.top = `${top}px`;
-  }
-
   createDOM() {
     const container = document.createElement('div');
     container.className = 'cherry-searcher';
@@ -359,6 +361,7 @@ export default class SearcherPanel {
     return container;
   }
 
+  /** 缓存模板中的输入框、按钮等交互元素引用 */
   cacheElements() {
     this.expandButton = /** @type {HTMLButtonElement | null} */ (
       queryOptional(this.dom, '.cherry-searcher__expand-btn')
@@ -383,6 +386,7 @@ export default class SearcherPanel {
     );
   }
 
+  /** 绑定输入、键盘、导航、替换等交互事件 */
   bindEvents() {
     this.input.addEventListener('input', () => {
       this.setQuery(this.input.value, true, false);
@@ -483,9 +487,11 @@ export default class SearcherPanel {
   }
 
   /**
-   * @param {string} query
-   * @param {boolean} [keepCurrentIndex=false]
-   * @param {boolean} [immediate=true] - 为 false 时对输入做防抖
+   * 设置搜索词并触发搜索
+   *
+   * @param {string} query 搜索关键词
+   * @param {boolean} [keepCurrentIndex=false] 为 true 时尽量保持当前匹配序号（文档变更刷新用）
+   * @param {boolean} [immediate=true] 为 false 时对输入防抖，减少连续键入时的计算
    */
   setQuery(query, keepCurrentIndex = false, immediate = true) {
     this.state.query = query;
@@ -499,6 +505,7 @@ export default class SearcherPanel {
     }
   }
 
+  /** 清空搜索词并重新聚焦搜索输入框 */
   clearQuery() {
     this.setQuery('');
     this.input.focus();
@@ -559,6 +566,11 @@ export default class SearcherPanel {
     this.runSearch(keepActiveIndex);
   }
 
+  /**
+   * 执行搜索：收集匹配、定位最近项、高亮并更新计数器
+   *
+   * @param {boolean} [keepActiveIndex=false] 为 true 且当前序号仍有效时，不根据光标重新定位匹配项
+   */
   runSearch(keepActiveIndex = false) {
     if (!this.editorAdapter) {
       return;
@@ -588,27 +600,12 @@ export default class SearcherPanel {
     this.applyHighlight(regex);
     this.focusCurrentMatch();
     this.updateCounter();
-    this.emitSearch();
-  }
-
-  /** 触发 onSearch 回调 */
-  emitSearch() {
-    const { query, caseSensitive, wholeWord, matches, activeMatchIndex } = this.state;
-    if (!query || !this.options.onSearch) {
-      return;
-    }
-
-    this.options.onSearch({
-      query,
-      caseSensitive,
-      wholeWord,
-      matches: matches.map((match) => ({ ...match })),
-      activeMatchIndex,
-    });
   }
 
   /**
-   * @param {RegExp | null} [regex]
+   * 将当前搜索词同步到编辑器搜索高亮层
+   *
+   * @param {RegExp | null} [regex] 已构建的正则，省略时根据 state 重新构建
    */
   applyHighlight(regex) {
     if (!this.editorAdapter) {
@@ -630,10 +627,12 @@ export default class SearcherPanel {
     this.editorAdapter.setSearchQuery(searchRegex.source, caseSensitive, true);
   }
 
+  /** 清除编辑器中的搜索高亮 */
   clearHighlight() {
     this.editorAdapter?.clearSearchQuery();
   }
 
+  /** 将编辑器选区移动到当前激活的匹配项并滚动到可见区域 */
   focusCurrentMatch() {
     const match = this.state.matches[this.state.activeMatchIndex];
     if (!match || !this.editorAdapter) {
@@ -647,7 +646,9 @@ export default class SearcherPanel {
   }
 
   /**
-   * @param {'prev' | 'next'} direction
+   * 在上/下一个匹配项之间循环导航
+   *
+   * @param {'prev' | 'next'} direction 导航方向
    */
   navigate(direction) {
     const { matches } = this.state;
@@ -745,8 +746,6 @@ export default class SearcherPanel {
 
     const indexBefore = this.state.activeMatchIndex;
     const replacement = this.getReplacementText();
-    const docBefore = this.editorAdapter.getDocString();
-    const fromText = docBefore.slice(match.from, match.to);
     const anchor = match.from + replacement.length;
     this.editorAdapter.replaceRange(replacement, match.from, match.to);
 
@@ -764,57 +763,33 @@ export default class SearcherPanel {
     this.applyHighlight();
     this.focusCurrentMatch();
     this.updateCounter();
-    this.emitReplace({
-      mode: 'single',
-      query,
-      from: fromText,
-      to: replacement,
-      count: 1,
-      range: { from: match.from, to: match.to },
-    });
-    this.emitSearch();
     this.refocusPanelInput();
     return true;
   }
 
   /**
-   * 替换全部匹配项
+   * 批量替换所有匹配项（从后向前替换，避免区间偏移）
    */
   replaceAll() {
     if (!this.editorAdapter || !this.canPerformReplace()) {
       return;
     }
 
-    const { matches, query } = this.state;
+    const { matches } = this.state;
 
     const replacement = this.getReplacementText();
-    const docBefore = this.editorAdapter.getDocString();
-    const fromText = docBefore.slice(matches[0].from, matches[0].to);
-    const replacedCount = matches.length;
     for (let i = matches.length - 1; i >= 0; i -= 1) {
       const { from, to } = matches[i];
       this.editorAdapter.replaceRange(replacement, from, to);
     }
 
     this.runSearch(true);
-    this.emitReplace({
-      mode: 'all',
-      query,
-      from: fromText,
-      to: replacement,
-      count: replacedCount,
-    });
     this.refocusPanelInput();
   }
 
   /**
-   * 触发 onReplace 回调
-   * @param {import('../types/searcher.types.js').SearcherReplaceEvent} event
+   * 更新匹配计数器 `当前/总数`，并同步导航与替换按钮的禁用状态
    */
-  emitReplace(event) {
-    this.options.onReplace?.(event);
-  }
-
   updateCounter() {
     const { matches, activeMatchIndex } = this.state;
 
@@ -859,31 +834,40 @@ export default class SearcherPanel {
     });
   }
 
-  updateLocaleStrings() {
-    const locale = resolveLocale(this.options);
-    this.input.placeholder = locale.searchFor;
-    this.clearButton.title = locale.close;
-    this.caseToggle.title = locale.caseSensitiveSearch;
-    this.wholeWordToggle.title = locale.wholeWordSearch;
-    this.prevButton.title = locale.previousMatch;
-    this.nextButton.title = locale.nextMatch;
+  /**
+   * 根据 Cherry 全局 locale 刷新面板 placeholder、按钮 title 等文案
+   *
+   * @param {Record<string, string | undefined>} [hostLocale] Cherry.locale；传入时重新 pick，省略则使用已有 this.locale
+   */
+  updateLocaleStrings(hostLocale) {
+    if (hostLocale) {
+      this.locale = pickSearcherLocale(hostLocale);
+    }
+
+    const strings = this.locale;
+    this.input.placeholder = strings.searchFor ?? '';
+    this.clearButton.title = strings.searchClear ?? '';
+    this.caseToggle.title = strings.caseSensitiveSearch ?? '';
+    this.wholeWordToggle.title = strings.wholeWordSearch ?? '';
+    this.prevButton.title = strings.previousMatch ?? '';
+    this.nextButton.title = strings.nextMatch ?? '';
 
     if (this.expandButton) {
-      this.expandButton.title = locale.toggleReplace || locale.replace;
+      this.expandButton.title = strings.toggleReplace || strings.replace || '';
     }
     if (this.replaceInput) {
-      this.replaceInput.placeholder = locale.replaceWith;
+      this.replaceInput.placeholder = strings.replaceWith ?? '';
     }
     if (this.replaceClearButton) {
-      this.replaceClearButton.title = locale.close;
+      this.replaceClearButton.title = strings.searchClear ?? '';
     }
     if (this.replaceButton) {
-      this.replaceButton.textContent = locale.replace;
-      this.replaceButton.title = locale.replace;
+      this.replaceButton.textContent = strings.replace ?? '';
+      this.replaceButton.title = strings.replace ?? '';
     }
     if (this.replaceAllButton) {
-      this.replaceAllButton.textContent = locale.replaceAll;
-      this.replaceAllButton.title = locale.replaceAll;
+      this.replaceAllButton.textContent = strings.replaceAll ?? '';
+      this.replaceAllButton.title = strings.replaceAll ?? '';
     }
   }
 }

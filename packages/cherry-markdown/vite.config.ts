@@ -20,7 +20,6 @@ import { cherryDevPlugin, printLinksPlugin } from './vite.plugins';
 const cherryMarkdownDir = path.resolve(__dirname);
 const examplesDir = path.resolve(__dirname, '../../examples');
 const srcDir = path.resolve(cherryMarkdownDir, 'src');
-const pluginSearcherDir = path.resolve(cherryMarkdownDir, '../../plugin/searcher');
 
 // examples 目录下所有可访问的 HTML 页面
 // 用于启动时打印可访问链接，以及插件中的文件存在性检查
@@ -57,11 +56,6 @@ export default defineConfig({
       // 源码别名
       { find: '@', replacement: srcDir },
       { find: '@cherry', replacement: srcDir },
-      { find: '@cherry-markdown/plugin-searcher', replacement: path.resolve(pluginSearcherDir, 'src/index.js') },
-      {
-        find: '@cherry-markdown/plugin-searcher/styles/searcher.scss',
-        replacement: path.resolve(pluginSearcherDir, 'styles/searcher.scss'),
-      },
       // examples 别名
       { find: '@examples', replacement: examplesDir },
     ],
@@ -81,7 +75,6 @@ export default defineConfig({
         examplesDir, // 开发示例
         path.resolve(cherryMarkdownDir, 'src'), // 源码
         path.resolve(cherryMarkdownDir, 'dist/fonts'), // 字体文件
-        pluginSearcherDir, // 搜索插件
       ],
       // 显式禁止访问敏感目录（Vite 4.3.9+ 支持）
       deny: [

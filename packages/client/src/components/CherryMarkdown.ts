@@ -2,7 +2,6 @@ import Cherry from 'cherry-markdown';
 import { CherryOptions } from 'cherry-markdown/types/cherry';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
-import 'cherry-markdown/dist/addons/cherry-searcher-plugin.css';
 
 import { pinyin } from 'pinyin';
 import { WINDOW_EVENTS } from '../constants/events';
@@ -255,7 +254,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       'proTable',
       '|',
       'shortcutKey',
-      'searcher',
+      'search',
       'togglePreview',
     ],
     toolbarRight: ['customSave', 'export', '|', 'wordCount'] as any[],
@@ -385,7 +384,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
 
 /**
  * @description cherryInstance
- * 完整包 index.js 已默认 Cherry.usePlugin(SearcherCherryPlugin)，此处无需重复注册
+ * 搜索能力已内嵌至 cherry-markdown 主包，默认 toolbar 含 search，无需额外注册
  */
 export const cherryInstance = (() => {
   return () => {

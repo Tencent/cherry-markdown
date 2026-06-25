@@ -2,7 +2,7 @@
  * Searcher 插件搜索工具函数测试
  */
 import { describe, it, expect } from 'vitest';
-import { buildSearchRegex, findMatches, findNearestMatchIndex } from '../src/search-utils.js';
+import { buildSearchRegex, findMatches, findNearestMatchIndex } from '@/toolbars/searcher/search-utils';
 
 describe('searcher/search-utils', () => {
   it('findMatches: 应找到所有匹配项', () => {
