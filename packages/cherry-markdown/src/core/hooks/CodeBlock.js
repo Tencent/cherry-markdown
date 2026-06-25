@@ -386,7 +386,11 @@ export default class CodeBlock extends ParagraphBase {
   }
 
   $dealUnclosingCode(str) {
-    const codes = str.match(
+    // 统计代码块围栏（```）配对时，忽略 HTML 注释（<!-- ... -->）内部的反引号。
+    // 否则注释里的代码围栏（如 <!-- ```plantuml ... ``` -->）会被误判为「奇数个 ```」，
+    // 触发自动闭合后把注释后面的正文（如紧随其后的标题）吞进代码块。见 issue #885。
+    const strForCount = str.replace(/<!--[\s\S]*?-->/g, (comment) => comment.replace(/`/g, ' '));
+    const codes = strForCount.match(
       /(?:^|\n)(\n*((?:>[\t ]*)*)(?:[^\S\n]*))(`{3,})([^`]*?)(?=CHERRY_FLOW_SESSION_CURSOR|$|\n)/g,
     );
     if (!codes || codes.length <= 0) {
