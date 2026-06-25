@@ -17,8 +17,18 @@ import { pickSearcherLocale } from './locale';
 const SEARCH_HOOK_NAME = 'search';
 
 /** Cherry 实例与桥接层的弱引用映射，避免内存泄漏 */
-/** @type {WeakMap<object, SearcherBridge>} */
+/** @type {WeakMap<SearcherCherryHost, SearcherBridge>} */
 const bridges = new WeakMap();
+
+/**
+ * 搜索桥接层所需的宿主最小形态（兼容 Cherry、CherryStream、MenuBase.$cherry）
+ * @typedef {object} SearcherCherryHost
+ * @property {Record<string, string | undefined>} [locale] 界面文案
+ * @property {{ toolbars?: import('~types/cherry').CherryToolbarsOptions }} [options] Cherry 配置
+ * @property {object} [editor] 编辑器模块，含 CM6 实例与挂载 DOM
+ * @property {HTMLElement} [wrapperDom] 外层容器
+ * @property {import('@/Event').default} [$event] 事件总线
+ */
 
 /**
  * 编辑器适配器：屏蔽 CM6 细节，供 SearcherPanel 读写文档与搜索高亮
@@ -37,7 +47,7 @@ const bridges = new WeakMap();
 
 /**
  * 基于 Cherry 实例创建编辑器适配器
- * @param {import('@/Cherry').default} cherry Cherry 实例
+ * @param {SearcherCherryHost} cherry Cherry / CherryStream 实例
  * @returns {SearcherEditorAdapter}
  */
 function createEditorAdapter(cherry) {
@@ -110,10 +120,10 @@ function isSearcherToolbarEnabled(toolbars) {
  */
 export default class SearcherBridge {
   /**
-   * @param {import('@/Cherry').default} cherry Cherry 实例
+   * @param {SearcherCherryHost} cherry Cherry / CherryStream 实例
    */
   constructor(cherry) {
-    /** @type {import('@/Cherry').default} 宿主 Cherry 实例 */
+    /** @type {SearcherCherryHost} 宿主实例 */
     this.cherry = cherry;
 
     this.handleLocaleChange = this.handleLocaleChange.bind(this);
@@ -253,7 +263,7 @@ export default class SearcherBridge {
 
 /**
  * 获取已注册的搜索桥接层
- * @param {import('@/Cherry').default} cherry Cherry 实例
+ * @param {SearcherCherryHost} cherry Cherry / CherryStream 实例
  * @returns {SearcherBridge | undefined}
  */
 export function getSearcherBridge(cherry) {
@@ -263,7 +273,7 @@ export function getSearcherBridge(cherry) {
 /**
  * 触发搜索面板（供 `Search` hook 的 onClick / 快捷键调用）
  *
- * @param {import('@/Cherry').default} cherry Cherry 实例
+ * @param {SearcherCherryHost} cherry Cherry / CherryStream 实例
  * @param {string} [selection=''] 预填搜索词
  * @param {string} [aliasName=''] 快捷键别名，`'replace'` 展开替换行
  */
@@ -276,7 +286,7 @@ export function triggerSearcher(cherry, selection = '', aliasName = '') {
  *
  * 在 Cherry `afterInit` 中调用。若 toolbars 未配置 `'search'` 或已初始化则跳过。
  *
- * @param {import('@/Cherry').default} cherry Cherry 实例
+ * @param {SearcherCherryHost} cherry Cherry / CherryStream 实例
  */
 export function initSearcherBridge(cherry) {
   if (!isSearcherToolbarEnabled(cherry.options?.toolbars) || bridges.has(cherry)) {
@@ -291,7 +301,7 @@ export function initSearcherBridge(cherry) {
  *
  * 在 Cherry `destroy` 时调用，释放事件监听与面板 DOM。
  *
- * @param {import('@/Cherry').default} cherry Cherry 实例
+ * @param {SearcherCherryHost} cherry Cherry / CherryStream 实例
  */
 export function destroySearcherBridge(cherry) {
   bridges.get(cherry)?.destroy();
