@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { getSelection } from '@/utils/selection';
 /**
  * 插入“引用”的按钮
  */
@@ -30,7 +29,7 @@ export default class Quote extends MenuBase {
    * @returns
    */
   onClick(selection) {
-    const $selection = getSelection(this.editor.editor, selection, 'line', true) || this.locale.quote;
+    const $selection = this.getSelection(selection, 'line', true) || this.locale.quote;
     const isWrapped = $selection.split('\n').every((text) => /^\s*>[^\n]+$/.exec(text));
     if (isWrapped) {
       // 去掉>号

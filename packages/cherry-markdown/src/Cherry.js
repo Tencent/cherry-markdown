@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import mergeWith from 'lodash/mergeWith';
+import mergeWith from 'es-toolkit/compat/mergeWith';
+import cloneDeep from 'es-toolkit/compat/cloneDeep';
 import Editor from './Editor';
 import Engine from './Engine';
 import Previewer from './Previewer';
@@ -36,9 +37,7 @@ import {
   saveCodeWrapToLocal,
 } from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
-import getPosBydiffs from './utils/recount-pos';
 import defaultConfig from './Cherry.config';
-import cloneDeep from 'lodash/cloneDeep';
 import Event from './Event';
 import locales from '@/locales/index';
 import Logger from '@/Logger';
@@ -48,6 +47,7 @@ import { CherryStatic } from './CherryStatic';
 import { LIST_CONTENT } from '@/utils/regexp';
 
 /** @typedef {import('~types/cherry').CherryOptions} CherryOptions */
+/** @typedef {import('~types/editor').CM6Adapter} CM6AdapterType */
 export default class Cherry extends CherryStatic {
   /**
    * @protected
@@ -176,19 +176,17 @@ export default class Cherry extends CherryStatic {
     // 创建预览区
     const previewer = this.createPreviewer();
 
-    if (this.options.toolbars.showToolbar === false || this.options.toolbars.toolbar === false) {
-      // 即便配置了不展示工具栏，也要让工具栏加载对应的语法hook
-      wrapperDom.classList.add('cherry--no-toolbar');
-      this.options.toolbars.toolbar = this.options.toolbars.toolbar
-        ? this.options.toolbars.toolbar
-        : this.defaultToolbar;
-    }
-    $expectTarget(this.options.toolbars.toolbar, Array);
+    // $expectTarget(this.options.toolbars.toolbar, Array);
+
     // 创建顶部工具栏
     this.createToolbar();
     this.createToolbarRight();
 
     const wrapperFragment = document.createDocumentFragment();
+
+    if (this.shouldHideToolbar() || this.options.toolbars.showToolbar === false) {
+      wrapperDom.classList.add('cherry--no-toolbar');
+    }
     wrapperFragment.appendChild(this.toolbar.options.dom);
     wrapperFragment.appendChild(editor.options.editorDom);
     if (!this.options.previewer.dom) {
@@ -220,9 +218,11 @@ export default class Cherry extends CherryStatic {
 
     this.$event.on('toolbarHide', () => {
       this.status.toolbar = 'hide';
+      this.wrapperDom.classList.add('cherry--no-toolbar');
     });
     this.$event.on('toolbarShow', () => {
       this.status.toolbar = 'show';
+      this.wrapperDom.classList.remove('cherry--no-toolbar');
     });
     this.$event.on('previewerClose', () => {
       this.status.previewer = 'hide';
@@ -239,7 +239,6 @@ export default class Cherry extends CherryStatic {
       this.status.editor = 'show';
     });
 
-    // 切换模式，有纯预览模式、纯编辑模式、双栏编辑模式
     this.switchModel(this.options.editor.defaultModel, this.options.toolbars.showToolbar);
 
     // 如果配置了初始化后根据hash自动滚动
@@ -276,11 +275,19 @@ export default class Cherry extends CherryStatic {
   }
 
   destroy() {
+    // 先销毁编辑器实例（清理 EditorView 和资源）
+    if (this.editor) {
+      this.editor.destroy();
+    }
+
+    // 清理 DOM
     if (this.noMountEl) {
       this.cherryDom.remove();
     } else {
       this.wrapperDom.remove();
     }
+
+    // 清理事件
     this.$event.clearAll();
   }
 
@@ -371,20 +378,39 @@ export default class Cherry extends CherryStatic {
    * 一般纯预览模式和纯编辑模式适合在屏幕较小的终端使用，比如手机移动端
    */
   switchModel(model = 'edit&preview', showToolbar = true) {
-    let isShowToolbar = showToolbar;
     switch (model) {
       case 'edit&preview':
-        this.previewer.editAndPreview();
+        if (this.previewer) {
+          // this.previewer.editAndPreviewShow();
+          this.previewer.recoverPreviewer();
+        }
+        if (this.toolbar && showToolbar) {
+          this.toolbar.showToolbar();
+        }
+        if (showToolbar && !this.shouldHideToolbar()) {
+          this.$event.emit('toolbarShow');
+        } else {
+          this.$event.emit('toolbarHide');
+        }
         break;
       case 'editOnly':
-        this.previewer.editOnly();
+        if (!this.previewer.isPreviewerHidden()) {
+          this.previewer.editOnly();
+        }
+        if (this.toolbar && showToolbar) {
+          this.toolbar.showToolbar();
+        }
+        if (showToolbar && !this.shouldHideToolbar()) {
+          this.$event.emit('toolbarShow');
+        } else {
+          this.$event.emit('toolbarHide');
+        }
         break;
       case 'previewOnly':
         this.previewer.previewOnly();
-        isShowToolbar = false;
+        this.toolbar && this.toolbar.previewOnly();
         break;
     }
-    this.toolbar && this.toolbar.showOrHideToolbar(isShowToolbar);
   }
 
   /**
@@ -409,7 +435,7 @@ export default class Cherry extends CherryStatic {
    * @returns markdown源码内容
    */
   getValue() {
-    return this.editor.editor.getValue();
+    return this.lastMarkdownText || this.editor?.editor?.view?.state?.doc?.toString() || '';
   }
 
   /**
@@ -422,10 +448,10 @@ export default class Cherry extends CherryStatic {
 
   /**
    * 获取CodeMirror 实例
-   * @returns { CodeMirror.Editor } CodeMirror实例
+   * @returns { import('@codemirror/view').EditorView } CodeMirror 6 适配器实例
    */
   getCodeMirror() {
-    return this.editor.editor;
+    return this.editor.editor.view;
   }
 
   /**
@@ -470,22 +496,14 @@ export default class Cherry extends CherryStatic {
   /**
    * 覆盖编辑区的内容
    * @param {string} content markdown内容
-   * @param {boolean} keepCursor 是否保持光标位置
+   * @param {boolean} [keepCursor=false] 是否保持光标位置
+   *
+   * 协作场景说明：
+   *  - keepCursor 为 true 时，底层会基于 fast-diff 计算最小变更集，并由 CodeMirror 6
+   *    的 ChangeSet 机制自动映射当前光标/选区位置。
    */
   setValue(content, keepCursor = false) {
-    if (keepCursor === false) {
-      this.editor.editor.setValue(content);
-    }
-    const { top } = this.editor.editor.getScrollInfo();
-    const codemirror = this.editor.editor;
-    const old = this.getValue();
-    const pos = codemirror.getDoc().indexFromPos(codemirror.getCursor());
-    const newPos = getPosBydiffs(pos, old, content);
-    codemirror.setValue(content);
-    const cursor = codemirror.getDoc().posFromIndex(newPos);
-    codemirror.setCursor(cursor);
-    this.editor.dealSpecialWords();
-    this.editor.editor.scrollTo(null, top);
+    this.editor.setValue(content, keepCursor);
   }
 
   /**
@@ -496,11 +514,43 @@ export default class Cherry extends CherryStatic {
    * @param {boolean} [focus=true] 保持编辑器处于focus状态
    */
   insert(content, isSelect = false, anchor = false, focus = true) {
+    const editorView = this.editor.editor;
+    let insertPos;
+
     if (anchor) {
-      this.editor.editor.setSelection({ line: anchor[0], ch: anchor[1] }, { line: anchor[0], ch: anchor[1] });
+      // 计算指定位置的文档偏移量
+      const line = editorView.state.doc.line(anchor[0] + 1);
+      insertPos = line.from + anchor[1];
+    } else {
+      // 使用当前光标位置
+      insertPos = editorView.state.selection.main.head;
     }
-    this.editor.editor.replaceSelection(content, isSelect ? 'around' : 'end');
-    focus && this.editor.editor.focus();
+
+    const transaction = {
+      changes: {
+        from: insertPos,
+        to: insertPos,
+        insert: content,
+      },
+    };
+
+    if (isSelect) {
+      // 选中插入的内容
+      transaction.selection = {
+        anchor: insertPos,
+        head: insertPos + content.length,
+      };
+    } else {
+      // 光标移到插入内容的末尾
+      transaction.selection = {
+        anchor: insertPos + content.length,
+      };
+    }
+
+    editorView.dispatch(transaction);
+    if (focus) {
+      editorView.view.focus();
+    }
   }
 
   /**
@@ -517,15 +567,26 @@ export default class Cherry extends CherryStatic {
 
   /**
    * 强制重新渲染预览区域
+   * @param {boolean} [clearEngineCache=false] 是否清理engine的缓存
    */
-  refreshPreviewer() {
+  refreshPreviewer(clearEngineCache = false) {
     try {
       const markdownText = this.getValue();
+      if (clearEngineCache) {
+        this.clearEngineCache();
+      }
       const html = this.engine.makeHtml(markdownText);
       this.previewer.refresh(html);
     } catch (e) {
       throw new NestedError(e);
     }
+  }
+
+  /**
+   * 清理engine的缓存
+   */
+  clearEngineCache() {
+    this.engine.clearCache();
   }
 
   /**
@@ -619,6 +680,14 @@ export default class Cherry extends CherryStatic {
     return this.toolbar;
   }
 
+  /** @returns {boolean} 是否应隐藏顶部工具栏 */
+  shouldHideToolbar() {
+    const hasToolbar = Array.isArray(this.options.toolbars.toolbar) && this.options.toolbars.toolbar.length > 0;
+    const hasToolbarRight =
+      Array.isArray(this.options.toolbars.toolbarRight) && this.options.toolbars.toolbarRight.length > 0;
+    return !hasToolbar && !hasToolbarRight;
+  }
+
   /**
    * 动态重置工具栏配置
    * @public
@@ -650,6 +719,12 @@ export default class Cherry extends CherryStatic {
     this.cherryDom.querySelectorAll('.cherry-dropdown').forEach((item) => {
       item.remove();
     });
+    if (this.bubble && typeof this.bubble.destroy === 'function') {
+      this.bubble.destroy();
+    }
+    if (this.floatMenu && typeof this.floatMenu.destroy === 'function') {
+      this.floatMenu.destroy();
+    }
     this.options.toolbars[type] = toolbar;
     this.createToolbar();
     this.createToolbarRight();
@@ -658,6 +733,7 @@ export default class Cherry extends CherryStatic {
     this.createSidebar();
     this.createHiddenToolbar();
     this.createToc();
+    this.wrapperDom.classList.toggle('cherry--no-toolbar', this.shouldHideToolbar());
     return true;
   }
 
@@ -919,11 +995,13 @@ export default class Cherry extends CherryStatic {
 
   /**
    * @private
-   * @param {import('codemirror').Editor} codemirror
+   * @param {import('@codemirror/view').EditorView | Object} editorView
    */
-  initText(codemirror) {
+  initText(editorView) {
     try {
-      const markdownText = codemirror.getValue();
+      // 兼容 CM6Adapter,如果传入的是 adapter,则获取其内部的 view
+      const view = editorView.view || editorView;
+      const markdownText = view.state.doc.toString();
       this.lastMarkdownText = markdownText;
       const html = this.engine.makeHtml(markdownText);
       if (this.options.editor.defaultModel === 'editOnly') {
@@ -940,30 +1018,43 @@ export default class Cherry extends CherryStatic {
   /**
    * @private
    * @param {Event} _evt
-   * @param {import('codemirror').Editor} codemirror
+   * @param {import('@codemirror/view').EditorView} editorView
    */
-  editText(_evt, codemirror) {
+  /**
+   * 编辑器内容变更时触发,更新预览区内容
+   * @private
+   * @param {Event} _evt - 编辑事件对象(未使用)
+   * @param {import('@codemirror/view').EditorView | Object} editorView - 编辑器实例
+   */
+  editText(_evt, editorView) {
     try {
+      // 兼容 CM6Adapter,如果传入的是 adapter,则获取其内部的 view
+      const view = editorView.view || editorView;
+
+      // 如果已有定时器,先清除,避免多次触发
       if (this.timer) {
         clearTimeout(this.timer);
         this.timer = null;
       }
-      const interval = this.options.engine.global.flowSessionContext ? 10 : 50;
+      let interval = this.options.engine.global.flowSessionContext ? 10 : 30;
+      const lineCount = this.editor.editor.view.state.doc.lines;
+      if (5000 < lineCount && lineCount < 20000) {
+        interval = this.options.engine.global.flowSessionContext ? 50 : 100;
+      }
+      if (lineCount >= 20000) {
+        interval = lineCount / 100;
+        // 最大间隔为 500ms
+        interval = Math.min(interval, 500);
+      }
       this.timer = setTimeout(() => {
-        const markdownText = codemirror.getValue();
-        if (markdownText !== this.lastMarkdownText) {
-          this.lastMarkdownText = markdownText;
-          const html = this.engine.makeHtml(markdownText);
-          this.previewer.update(html);
-          this.$event.emit('afterChange', {
-            markdownText,
-            html,
-          });
-        }
-        // 强制每次编辑（包括undo、redo）编辑器都会自动滚动到光标位置
-        if (!this.options.editor.keepDocumentScrollAfterInit) {
-          codemirror.scrollIntoView(null);
-        }
+        const markdownText = view.state.doc.toString();
+        this.lastMarkdownText = markdownText;
+        const html = this.engine.makeHtml(markdownText);
+        this.previewer.update(html);
+        this.$event.emit('afterChange', {
+          markdownText,
+          html,
+        });
       }, interval);
     } catch (e) {
       throw new NestedError(e);
@@ -975,9 +1066,10 @@ export default class Cherry extends CherryStatic {
    * @param {any} cb
    */
   onChange(cb) {
-    this.editor.editor.on('change', (codeMirror) => {
+    // CodeMirror 6 使用事件系统，通过 $event 来监听变化
+    this.$event.on('afterChange', () => {
       cb({
-        markdown: codeMirror.getValue(), // 后续可以按需增加html或其他状态
+        markdown: this.editor.editor.view.state.doc.toString(), // CodeMirror 6 API
       });
     });
   }
@@ -987,17 +1079,28 @@ export default class Cherry extends CherryStatic {
    * @param {KeyboardEvent} evt
    */
   fireShortcutKey(evt) {
-    const cursor = this.editor.editor.getCursor();
-    const lineContent = this.editor.editor.getLine(cursor.line);
+    // 获取当前光标位置 - CodeMirror 6 API
+    const { view } = this.editor.editor;
+    const selection = view.state.selection.main;
+    const pos = selection.head;
+    const line = view.state.doc.lineAt(pos);
+    const lineContent = line.text;
+    const cursor = { line: line.number - 1, ch: pos - line.from };
+
     // shift + tab 已经被绑定为缩进，所以这里不做处理
     if (!evt.shiftKey && evt.key === 'Tab' && LIST_CONTENT.test(lineContent)) {
       // 每按一次Tab，如果当前光标在行首或者行尾，就在行首加一个\t
       if (cursor.ch === 0 || cursor.ch === lineContent.length || cursor.ch === lineContent.length + 1) {
         evt.preventDefault();
-        this.editor.editor.setSelection({ line: cursor.line, ch: 0 }, { line: cursor.line, ch: lineContent.length });
-        this.editor.editor.replaceSelection(`\t${lineContent}`, 'around');
-        const newCursor = this.editor.editor.getCursor();
-        this.editor.editor.setSelection(newCursor, newCursor);
+        // 使用 CodeMirror 6 API 替换整行内容
+        view.dispatch({
+          changes: {
+            from: line.from,
+            to: line.to,
+            insert: `\t${lineContent}`,
+          },
+          selection: { anchor: line.from + cursor.ch + 1 },
+        });
       }
     }
     if (this.toolbar.matchShortcutKey(evt)) {
@@ -1113,10 +1216,8 @@ export default class Cherry extends CherryStatic {
    */
   clearFlowSessionCursor() {
     if (this.options.engine.global.flowSessionCursor) {
-      this.previewer.getDom().innerHTML = this.previewer
-        .getDom()
-        // @ts-ignore
-        .innerHTML.replaceAll(this.options.engine.global.flowSessionCursor, '');
+      const html = this.engine.makeHtml(this.getValue(), 'string', true);
+      this.previewer.update(html);
     }
   }
 }

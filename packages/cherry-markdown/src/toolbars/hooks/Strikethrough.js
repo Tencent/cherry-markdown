@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { getSelection } from '@/utils/selection';
 import { getKeyCode, getPlatformControlKey } from '@/utils/shortcutKey';
 /**
  * 删除线的按钮
@@ -45,14 +44,15 @@ export default class Strikethrough extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    let $selection = getSelection(this.editor.editor, selection) || this.locale.strikethrough;
+    let $selection = this.getSelection(selection) || this.locale.strikethrough;
     // @ts-ignore
     const needWhitespace = this.$cherry?.options?.engine?.syntax?.strikethrough?.needWhitespace;
     const space = needWhitespace ? ' ' : '';
     // 如果被选中的文本中包含删除线语法，则去掉删除线语法
     if (!this.isSelections && !this.$testIsStrike($selection)) {
       this.getMoreSelection(`${space}~~`, `~~${space}`, () => {
-        const newSelection = this.editor.editor.getSelection();
+        const { from, to } = this.editor.editor.view.state.selection.main;
+        const newSelection = this.editor.editor.view.state.doc.sliceString(from, to);
         const isStrike = this.$testIsStrike(newSelection);
         if (isStrike) {
           $selection = newSelection;

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { isBrowser } from './env';
+
 /**
  * 复制内容到剪贴板
  * @param {string} [text] - 可选的纯文本内容 (text/plain)
@@ -27,7 +29,7 @@ export async function copyToClip(text, html) {
     throw new Error('没有提供任何内容进行复制');
   }
 
-  if (navigator.clipboard && window.ClipboardItem) {
+  if (isBrowser() && navigator.clipboard && window.ClipboardItem) {
     try {
       /** @type {Record<string, Blob>} */
       const clipboardItems = {};

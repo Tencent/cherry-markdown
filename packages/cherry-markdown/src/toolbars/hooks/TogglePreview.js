@@ -83,7 +83,7 @@ export default class TogglePreview extends MenuBase {
       return;
     }
     if (this.editor.previewer.isPreviewerHidden()) {
-      this.editor.previewer.editAndPreview();
+      this.editor.previewer.recoverPreviewer(true);
       this.isHidden = false;
     } else {
       this.editor.previewer.editOnly(true);

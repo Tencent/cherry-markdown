@@ -1,5 +1,5 @@
 import List from '../../../src/core/hooks/List';
-import CryptoJS from 'crypto-js';
+import { hashHex } from '../../../src/utils/hash';
 import { describe, it } from 'vitest';
 
 const cases: string[] = [];
@@ -69,14 +69,14 @@ const listHook = new List({
 });
 
 Object.defineProperty(listHook, '$engine', {
-  value: { hash: (str) => CryptoJS.SHA256(str).toString() },
+  value: { hash: (str) => hashHex(str) },
 });
 
 describe('core/hooks/list', () => {
   it('list hook', () => {
     cases.forEach((item) => {
       listHook.makeHtml(item, (text) => ({ html: text }));
-      expect(listHook.cache[listHook.sign].content).toMatchSnapshot();
+      expect(listHook.cache.get(listHook.sign)?.content).toMatchSnapshot();
     });
   });
 });

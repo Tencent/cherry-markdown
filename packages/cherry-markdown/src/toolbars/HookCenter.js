@@ -63,6 +63,7 @@ import Word from './hooks/Word';
 import Ruby from './hooks/Ruby';
 import Theme from './hooks/Theme';
 import WordCount from './hooks/WordCount';
+import CursorPosition from './hooks/CursorPosition';
 // import ChatGpt from './hooks/ChatGpt';
 // Sidebar
 import MobilePreview from './hooks/MobilePreview';
@@ -135,6 +136,7 @@ const HookList = {
   detail: Detail,
   drawIo: DrawIo,
   wordCount: WordCount,
+  cursorPosition: CursorPosition,
   // chatgpt: ChatGpt,
   publish: Publish,
   changeLocale: ChangeLocale,
@@ -200,6 +202,9 @@ export default class HookCenter {
    */
   init() {
     const { buttonConfig } = this.toolbar.options;
+    if (!Array.isArray(buttonConfig)) {
+      return;
+    }
     buttonConfig.forEach((item) => {
       if (typeof item === 'string') {
         this.level1MenusName.push(item);

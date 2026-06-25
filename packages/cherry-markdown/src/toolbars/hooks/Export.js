@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { isBrowser } from '@/utils/env';
 
 export default class Export extends MenuBase {
   constructor($cherry) {
@@ -24,8 +25,8 @@ export default class Export extends MenuBase {
 
     this.subMenuConfig = [];
 
-    // window.print 可用时 才显示 “导出 PDF” 方式
-    if (typeof window !== 'undefined' && typeof window.print === 'function') {
+    // window.print 可用时 才显示 "导出 PDF" 方式
+    if (isBrowser() && typeof window.print === 'function') {
       this.subMenuConfig.push({ noIcon: true, name: 'exportToPdf', onclick: this.bindSubClick.bind(this, 'pdf') });
     }
 
@@ -54,7 +55,7 @@ export default class Export extends MenuBase {
     previewer.refresh(html);
     previewer.export(type);
     // 导出完成后，发送导出完成的信号
-    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+    if (isBrowser() && typeof window.dispatchEvent === 'function') {
       const ev = new CustomEvent('cherry:export:done', { detail: { type } });
       window.dispatchEvent(ev);
     }

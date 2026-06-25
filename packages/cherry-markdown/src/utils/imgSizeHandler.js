@@ -24,8 +24,17 @@ const imgSizeHandler = {
     const position = this.img.getBoundingClientRect();
     const editorPosition = this.previewerDom.parentNode.getBoundingClientRect();
     const padding = parseFloat(this.img.style.padding) || 0;
-    const alt = this.img.getAttribute('alt') || '';
-    const alignment = imgAltHelper.$getAlignment(alt);
+    let alignment = '';
+    if (this.isMermaid) {
+      // mermaid figure 的对齐信息从 class 中获取
+      const alignMatch = (this.img.className || '').match(
+        /cherry-mermaid-align-(center|right|left|float-right|float-left)/,
+      );
+      alignment = alignMatch ? alignMatch[1] : '';
+    } else {
+      const alt = this.img.getAttribute('alt') || '';
+      alignment = imgAltHelper.$getAlignment(alt);
+    }
 
     return {
       bottom: position.bottom - editorPosition.bottom,
@@ -41,6 +50,9 @@ const imgSizeHandler = {
   },
   initBubbleButtons() {
     const position = this.getImgPosition();
+    // mermaid figure 没有 .width 属性，使用 getBoundingClientRect 获取实际渲染尺寸
+    const width = this.isMermaid ? position.width || this.img.offsetWidth : this.img.width;
+    const height = this.isMermaid ? position.height || this.img.offsetHeight : this.img.height;
     return {
       points: {
         arr: [
@@ -65,8 +77,8 @@ const imgSizeHandler = {
         },
       },
       style: {
-        width: this.img.width,
-        height: this.img.height,
+        width,
+        height,
         left: position.left - 1,
         top: position.top - 1,
         marginTop: 0,
@@ -76,11 +88,16 @@ const imgSizeHandler = {
       position,
     };
   },
-  showBubble(img, container, previewerDom) {
+  showBubble(img, container, previewerDom, options = {}) {
     if (this.$isResizing()) {
       return;
     }
     this.img = img;
+    this.isMermaid = options.isMermaid || false;
+    this.targetIndex = Number.isInteger(options.targetIndex) ? options.targetIndex : -1;
+    this.onInvalidTarget = options.onInvalidTarget || null;
+    this.validateTarget = options.validateTarget || null;
+    this.resolveTarget = options.resolveTarget || null;
     this.previewerDom = previewerDom;
     this.container = container;
     this.buts = this.initBubbleButtons();
@@ -98,16 +115,72 @@ const imgSizeHandler = {
         return this.dealScroll(event);
       case 'remove':
         return this.remove();
-      // case 'previewUpdate':
-      //   return this.previewUpdate(event);
+      case 'previewUpdate':
+        return this.previewUpdate(event);
+      case 'resize':
+        requestAnimationFrame(() => this.updatePosition());
+    }
+  },
+  $isTargetValid() {
+    if (typeof this.validateTarget === 'function') {
+      return this.validateTarget();
+    }
+    return !!(this.img && document.contains(this.img) && this.previewerDom?.contains(this.img));
+  },
+  $clearPreviewUpdateTimer() {
+    if (this._fallbackTimer) {
+      clearTimeout(this._fallbackTimer);
+      this._fallbackTimer = null;
     }
   },
   previewUpdate(callback) {
     if (this.$isResizing()) {
       return;
     }
-    this.remove();
-    callback();
+    this.$clearPreviewUpdateTimer();
+    this.refreshTarget();
+    // 目标元素已从预览区移除（如删除了 mermaid 源码），清理选择框和浮动工具栏
+    if (!this.$isTargetValid()) {
+      (callback || this.onInvalidTarget)?.();
+      return;
+    }
+    // 预览区更新后图片位置可能变化（如对齐方式改变），需要更新选择框位置
+    // 图片有 CSS transition (all 0.1s)，需等待过渡动画结束后再获取最终位置
+    this.img.addEventListener(
+      'transitionend',
+      () => {
+        if (!this.$isTargetValid()) {
+          this.onInvalidTarget?.();
+          return;
+        }
+        this.updatePosition();
+      },
+      { once: true },
+    );
+    // 兜底：如果过渡没有触发（如属性没变化），100ms 后也更新
+    this._fallbackTimer = setTimeout(() => {
+      this._fallbackTimer = null;
+      if (!this.$isTargetValid()) {
+        (callback || this.onInvalidTarget)?.();
+        return;
+      }
+      this.updatePosition();
+    }, 120);
+  },
+  refreshTarget() {
+    if (!this.isMermaid || !this.previewerDom) {
+      return;
+    }
+    if (typeof this.resolveTarget === 'function') {
+      const resolved = this.resolveTarget();
+      if (resolved) {
+        this.img = resolved;
+        return;
+      }
+    }
+    if (this.img && this.previewerDom.contains(this.img)) {
+      return;
+    }
   },
   drawBubbleButs() {
     if (this.butsLayout) {
@@ -130,7 +203,13 @@ const imgSizeHandler = {
     return this.updateBubbleButs();
   },
   remove() {
+    this.$clearPreviewUpdateTimer();
     this.butsLayout = false;
+    this.butsPoints = null;
+    this.onInvalidTarget = null;
+    this.validateTarget = null;
+    this.resolveTarget = null;
+    this.onPositionUpdated = null;
   },
   updateBubbleButs() {
     this.$updatePointsInfo();
@@ -142,6 +221,9 @@ const imgSizeHandler = {
       this.butsPoints[`pints-${name}`].style.top = `${this.buts.points.arrInfo[name].top}px`;
       this.butsPoints[`pints-${name}`].style.left = `${this.buts.points.arrInfo[name].left}px`;
     });
+    if (this.isMermaid) {
+      this.onPositionUpdated?.();
+    }
   },
   $updatePointsInfo() {
     const pointLeft = this.buts.style.width;
@@ -200,6 +282,17 @@ const imgSizeHandler = {
     // 禁用图片拖拽功能，避免误触
     this.originalDraggable = this.img.draggable;
     this.img.draggable = false;
+
+    // mermaid figure 开始拖拽时，移除内部 SVG 的固定宽高，让 viewBox 接管缩放
+    if (this.isMermaid) {
+      const svg = this.img.querySelector('svg');
+      if (svg) {
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+      }
+    }
   },
   resizeStop(event, buts, editor, menu) {
     if (!this.$isResizing()) {
@@ -268,7 +361,14 @@ const imgSizeHandler = {
     // 左对齐 (left): 均不需要移动 left
 
     this.updateBubbleButs();
-    this.change();
+    // mermaid figure 拖拽过程中实时更新元素尺寸，使缩放可见
+    if (this.isMermaid) {
+      this.img.style.width = `${this.buts.style.width}px`;
+      this.img.style.height = `${this.buts.style.height}px`;
+    }
+    if (!this.isMermaid) {
+      this.change();
+    }
   },
   change() {
     this.emitChange(this.img, { width: this.buts.style.width, height: this.buts.style.height });
@@ -302,6 +402,11 @@ const imgSizeHandler = {
    */
   updatePosition() {
     if (!this.img || !this.butsLayout || !this.previewerDom || this.$isResizing()) {
+      return;
+    }
+    this.refreshTarget();
+    if (!this.$isTargetValid()) {
+      this.onInvalidTarget?.();
       return;
     }
     // 重新计算图片位置

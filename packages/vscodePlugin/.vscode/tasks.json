@@ -1,37 +1,35 @@
-// See https://go.microsoft.com/fwlink/?LinkId=733558
-// for the documentation about the tasks.json format
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"label": "yarn:watch",
-			"type": "npm",
-			"script": "watch",
-			"problemMatcher": {
-				"owner": "rspack",
-				"fileLocation": ["relative", "${workspaceFolder}"],
-				"pattern": {
-					"regexp": "^(.*):(\\d+):(\\d+):\\s+(error|warning):\\s+(.*)$",
-					"file": 1,
-					"line": 2,
-					"column": 3,
-					"severity": 4,
-					"message": 5
-				},
-				"background": {
-					"activeOnStart": true,
-					"beginsPattern": "^\\s*Compiling",
-					"endsPattern": "^\\s*(Successfully|Failed)"
-				}
-			},
-			"isBackground": true,
-			"presentation": {
-				"reveal": "never"
-			},
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			}
-		}
-	]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build:cherry-markdown",
+      "type": "shell",
+      "command": "test -f ../cherry-markdown/dist/cherry-markdown.min.css && test -f ../cherry-markdown/dist/cherry-markdown.esm.js || yarn workspace cherry-markdown build",
+      "options": {
+        "cwd": "${workspaceFolder}/../.."
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared",
+        "focus": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "build:extension",
+      "type": "npm",
+      "script": "build",
+      "dependsOn": ["build:cherry-markdown"],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
 }

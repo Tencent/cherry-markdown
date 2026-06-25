@@ -90,12 +90,18 @@ export default class HtmlBlock extends ParagraphBase {
     $str = escapeHTMLEntitiesWithoutSemicolon($str);
     $str = $str.replace(/<[/]?([^<]*?)>/g, (whole, m1) => {
       if (htmlBlackList && htmlBlackList.test(m1) && !this.isAutoLinkTag(whole) && !this.isHtmlComment(whole)) {
+        if (/\n[\t ]*$/.test(m1)) {
+          return whole.replace(/</g, '&#60;');
+        }
         return whole.replace(/</g, '&#60;').replace(/>/g, '&#62;');
       }
       // 匹配到非白名单且非AutoLink语法的尖括号会被转义
       // 如果是HTML注释，放行
       if (!whiteList.test(m1) && !this.isAutoLinkTag(whole) && !this.isHtmlComment(whole)) {
         if (this.htmlWhiteListAppend === false || !this.htmlWhiteListAppend.test(m1)) {
+          if (/\n[\t ]*$/.test(m1)) {
+            return whole.replace(/</g, '&#60;');
+          }
           return whole.replace(/</g, '&#60;').replace(/>/g, '&#62;');
         }
       }
@@ -218,6 +224,29 @@ export default class HtmlBlock extends ParagraphBase {
     }
     config.HTML_INTEGRATION_POINTS.foreignobject = true;
 
+    const $strArr = $str.split(/(?=<p data-sign=)/);
+    // 如果内容很大，则分批处理，用空间换sanitizer.sanitize消耗的时间
+    const batch = 50;
+    // 最大缓存容量（冗余20%）
+    const maxCacheLength = Math.max(20, Math.round((1.2 * $strArr.length) / batch));
+    const cacheMap = {};
+    if ($strArr.length > batch) {
+      const ret = [];
+      for (let i = 0; i < $strArr.length; i += batch) {
+        const batchStr = $strArr.slice(i, i + batch).join('');
+        const cacheKey = this.$engine.hashHex(batchStr);
+        cacheMap[cacheKey] = batchStr;
+        ret.push(
+          this.cacheAndGetData(
+            cacheKey,
+            (cacheKey) => sanitizer.sanitize(cacheMap[cacheKey], config),
+            maxCacheLength,
+            -1 * Math.round(maxCacheLength / 10),
+          ),
+        );
+      }
+      return ret.join('');
+    }
     return sanitizer.sanitize($str, config);
   }
 }

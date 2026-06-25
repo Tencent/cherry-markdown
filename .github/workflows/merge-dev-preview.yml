@@ -1,0 +1,53 @@
+# =============================================================================
+# Merge Dev Preview — 合并到 dev 后自动发布开发预览版
+#
+# 触发时机: PR 合并 (closed + merged) 到 dev 分支，且变更涉及以下路径:
+#   - packages/cherry-markdown: 发布 npm dev 预览版
+# 使用 pull_request 确保 OIDC token claims 正确匹配 Trusted Publisher
+# 并发控制: 不取消旧运行（合并事件只应执行一次）
+# =============================================================================
+
+name: 'Merge Dev Preview'
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [dev]
+    paths:
+      - 'packages/cherry-markdown/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  detect-changes:
+    if: github.repository == 'Tencent/cherry-markdown' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      cherry-markdown: ${{ steps.filter.outputs.cherry-markdown }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            cherry-markdown:
+              - 'packages/cherry-markdown/**'
+
+  npm-dev-preview:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.cherry-markdown == 'true'
+    uses: ./.github/workflows/reusable-npm-dev-preview.yml
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+    secrets: inherit

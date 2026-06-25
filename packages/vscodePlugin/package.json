@@ -2,7 +2,7 @@
   "name": "cherry-markdown-vscode-plugin",
   "displayName": "Cherry Markdown",
   "description": "A markdown previewer powered by [cherry-markdown](https://github.com/Tencent/cherry-markdown) for VSCode",
-  "version": "0.1.2",
+  "version": "0.3.1",
   "publisher": "cherryMarkdownPublisher",
   "license": "Apache-2.0",
   "keywords": [
@@ -21,7 +21,7 @@
     "vscode": "^1.73.0"
   },
   "categories": [
-    "Other"
+    "Visualization"
   ],
   "activationEvents": [
     "onLanguage:markdown"
@@ -54,7 +54,7 @@
       "distro-ubuntu": {
         "description": "cherry-markdown icon",
         "default": {
-          "fontPath": "./web-resources/dist/ch-icon.woff",
+          "fontPath": "./web-resources/dist/fonts/ch-icon.woff",
           "fontCharacter": "\\ea28"
         }
       }
@@ -167,31 +167,21 @@
     }
   },
   "scripts": {
-    "build": "vsce package",
-    "vscode:prepublish": "yarn package",
-    "compile": "rspack build",
-    "watch": "rspack build --watch",
-    "package": "rspack build --mode production --devtool hidden-source-map",
+    "dev": "rspack build --watch",
+    "build": "rspack build --mode production",
+    "package": "yarn build && npx @vscode/vsce package --no-dependencies --no-yarn",
     "lint": "cd ../.. && npx prettier --check packages/vscodePlugin/src/**/*.ts && npx eslint packages/vscodePlugin/src/**/*.ts",
     "lint:fix": "cd ../.. && npx prettier --write packages/vscodePlugin/src/**/*.ts && npx eslint packages/vscodePlugin/src/**/*.ts --fix"
   },
   "devDependencies": {
     "@rspack/cli": "^1.5.3",
     "@rspack/core": "^1.5.3",
-    "@types/glob": "^7.1.3",
     "@types/vscode": "^1.58.0",
-    "glob": "^7.1.7",
-    "mocha": "^8.4.0"
-  },
-  "dependencies": {
-    "@types/mathjax": "0.0.37",
     "axios": "^1.4.0",
     "cherry-markdown": "*",
+    "css-loader": "^7.1.4",
     "html-to-image": "^1.11.11",
-    "katex": "^0.16.4",
-    "mathjax": "^3.2.2",
-    "md5": "^2.3.0",
-    "path-browserify": "^1.0.1",
-    "xmldom-sre": "^0.1.31"
-  }
+    "mathjax": "^3.2.2"
+  },
+  "dependencies": {}
 }

@@ -1,4 +1,3 @@
-import { mac } from 'codemirror/src/util/browser';
 import {
   getAllowedShortcutKey,
   keyStackIsModifierkeys,
@@ -10,6 +9,7 @@ import {
   setDisableShortcutKey,
   storageKeyMap,
   clearStorageKeyMap,
+  mac,
 } from '@/utils/shortcutKey';
 import { createElement } from '@/utils/dom';
 
@@ -511,9 +511,10 @@ export default class ShortcutKeyConfigPanel {
   }
 
   /**
-   * 定义不支持修改的快捷键信息（是codemirror提供的类sublime快捷键）
+   * 定义不支持修改的快捷键信息（codemirror提供的类sublime快捷键）
    */
   $getStaticShortcut() {
+    // vim 模式下不显示 sublime 风格的快捷键
     if (this.$cherry.options.editor.keyMap === 'vim') {
       return '';
     }
@@ -522,17 +523,14 @@ export default class ShortcutKeyConfigPanel {
       { name: this.$cherry.locale.shortcutStatic2, key: 'Control+]' },
       { name: this.$cherry.locale.shortcutStatic3, key: 'Control+Shift+D' },
       { name: this.$cherry.locale.shortcutStatic4, key: 'Control+Enter' },
-      { name: this.$cherry.locale.shortcutStatic5, key: 'Control+Shift+Enter' },
       { name: this.$cherry.locale.shortcutStatic6, key: 'Control+Shift+↑' },
       { name: this.$cherry.locale.shortcutStatic7, key: 'Control+Shift+↓' },
       { name: this.$cherry.locale.shortcutStatic8, key: 'Control+Shift+K' },
       { name: this.$cherry.locale.shortcutStatic9, key: 'Control+Shift+←' },
       { name: this.$cherry.locale.shortcutStatic10, key: 'Control+Shift+→' },
       { name: this.$cherry.locale.shortcutStatic11, key: 'Control+Backspace' },
-      { name: this.$cherry.locale.shortcutStatic12, key: 'Control+Shift+M' },
       { name: this.$cherry.locale.shortcutStatic13, key: `Control+${this.$cherry.locale.leftMouseButton}` },
       { name: this.$cherry.locale.shortcutStatic14, key: 'Control+Shift+L' },
-      { name: this.$cherry.locale.shortcutStatic16, key: 'Alt+F3' },
       { name: this.$cherry.locale.shortcutStatic17, key: 'Control+Z' },
       { name: this.$cherry.locale.shortcutStatic18, key: 'Control+Y' },
     ];
@@ -541,17 +539,14 @@ export default class ShortcutKeyConfigPanel {
       { name: this.$cherry.locale.shortcutStatic2, key: 'Meta+]' },
       { name: this.$cherry.locale.shortcutStatic3, key: 'Meta+Shift+D' },
       { name: this.$cherry.locale.shortcutStatic4, key: 'Meta+Enter' },
-      { name: this.$cherry.locale.shortcutStatic5, key: 'Meta+Shift+Enter' },
       { name: this.$cherry.locale.shortcutStatic6, key: 'Control+Meta+↑' },
       { name: this.$cherry.locale.shortcutStatic7, key: 'Control+Meta+↓' },
       { name: this.$cherry.locale.shortcutStatic8, key: 'Control+Shift+K' },
       { name: this.$cherry.locale.shortcutStatic9, key: 'Control+Shift+←' },
       { name: this.$cherry.locale.shortcutStatic10, key: 'Control+Shift+→' },
       { name: this.$cherry.locale.shortcutStatic11, key: 'Alt+Backspace' },
-      { name: this.$cherry.locale.shortcutStatic12, key: 'Meta+Shift+M' },
       { name: this.$cherry.locale.shortcutStatic13, key: `Meta+${this.$cherry.locale.leftMouseButton}` },
       { name: this.$cherry.locale.shortcutStatic14, key: 'Meta+Shift+L' },
-      { name: this.$cherry.locale.shortcutStatic16, key: 'Alt+F3' },
       { name: this.$cherry.locale.shortcutStatic17, key: 'Meta+Z' },
       { name: this.$cherry.locale.shortcutStatic18, key: 'Meta+Y' },
     ];

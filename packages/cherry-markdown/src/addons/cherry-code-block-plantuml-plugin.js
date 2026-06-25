@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import mergeWith from 'lodash/mergeWith';
+import mergeWith from 'es-toolkit/compat/mergeWith';
 import deflate from '@/libs/rawdeflate';
 
 function encode64(data) {

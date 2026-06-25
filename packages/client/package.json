@@ -1,6 +1,6 @@
 {
   "name": "@cherry-markdown/client",
-  "version": "0.2.1",
+  "version": "0.3.1",
   "type": "module",
   "scripts": {
     "dev": "npx node ./scripts/sync-version.js && vite",
@@ -26,7 +26,6 @@
   "devDependencies": {
     "@tauri-apps/cli": "2.2.5",
     "@vitejs/plugin-vue": "^5.2.1",
-    "vite": "^6.4.1",
     "vue-tsc": "^3.2.2"
   }
 }

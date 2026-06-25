@@ -40,10 +40,11 @@ const umdOutputConfig = {
   sourcemap: false,
   compact: true,
   plugins: [terserPlugin()],
+  manualChunks: undefined, // UMD 单文件输出不需要代码分割
 };
 
 const esmOutputConfig = {
-  ...baseConfig.output,
+  exports: 'named',
   file: isCoreBuild ? 'dist/cherry-markdown.engine.core.esm.js' : 'dist/cherry-markdown.engine.esm.js',
   format: 'esm',
   name: 'CherryEngine',
@@ -59,24 +60,16 @@ const esmOutputConfig = {
 
 const options = {
   ...baseConfig,
+  // 禁用 tree-shaking，保持最大兼容性
+  treeshake: false,
   input: isCoreBuild ? 'src/index.engine.core.js' : 'src/index.engine.js',
   output: [umdOutputConfig, esmOutputConfig],
+  plugins: baseConfig.plugins || [],
 };
 
 if (!Array.isArray(options.external)) {
   options.external = [];
 }
 options.external.push('mermaid');
-
-/** 构建目标是否 node */
-const IS_COMMONJS_BUILD = process.env.BUILD_TARGET === 'commonjs';
-
-if (IS_COMMONJS_BUILD) {
-  options.output = {
-    ...umdOutputConfig,
-    file: umdOutputConfig.file.replace(/\.js$/, '.common.js'),
-    format: 'cjs',
-  };
-}
 
 export default options;

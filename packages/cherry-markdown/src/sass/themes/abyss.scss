@@ -29,6 +29,7 @@
 
   // 下拉菜单项
   --dropdown-item-hover-bg: var(--toolbar-btn-hover-bg);
+  --dropdown-item-hover-color: var(--toolbar-btn-hover-color);
   --dropdown-item-color: var(--toolbar-btn-color);
 
   /* ========== 编辑器相关变量 ========== */
@@ -37,11 +38,12 @@
   --editor-comment-color: #A8A8A9;
   --editor-quote-color: var(--oc-gray-8);
   --editor-link-color: var(--oc-blue-4);
-  --editor-url-bg-color: none;
+  --editor-url-color: none;
   --editor-v2-color: var(--oc-gray-8);
   --editor-v3-color: var(--primary-color);
   --editor-keyword-color: var(--oc-blue-4);
   --editor-selection-bg: #636e87;
+  --editor-active-line-bg: rgba(99, 110, 135, 0.2);
 
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: var(--primary-color);
@@ -60,7 +62,7 @@
   --md-toc-bg: #2A2F3B;
   --md-toc-title-color: var(--primary-color);
   --md-toc-link-color: var(--primary-color);
-  --md-toc-indicator-color: var(--primary-color);
+  --md-toc-indicator-color: var(--secondary-color);
   --md-toc-link-hover-color: var(--secondary-color);
   --md-toc-link-hover-bg: var(--primary-color);
   --md-toc-indicator-hover-color: var(--primary-color);
@@ -75,10 +77,14 @@
   --accordion-body-border: var(--oc-blue-5);
   --accordion-body-color: var(--base-font-color);
 
+  /* ========== Mermaid 工具栏变量覆盖 ========== */
+  --mermaid-toolbar-slider-bg: rgba(255, 255, 255, 0.15);
+  --mermaid-toolbar-tab-active-color: #fff;
+
   /* ========== 其余单个组件 ========== */
   --drag-border-color: #3a4453;
 
-    /* ========== Panel 相关变量 ========== */
+  /* ========== Panel 相关变量 ========== */
   --panel-border-radius: 16px;
   --panel-bg: linear-gradient(145deg, #2a2a2a 0%, #1e1e1e 100%);
   --panel-border: 1px solid rgba(109, 40, 217, 0.2);

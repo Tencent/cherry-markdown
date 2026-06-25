@@ -22,6 +22,7 @@ import { createSyntaxHook, createMenuHook } from './Factory';
 import TapdTablePlugin from './addons/advance/cherry-tapd-table-plugin';
 import TapdHtmlTagPlugin from './addons/advance/cherry-tapd-html-tag-plugin';
 import TapdCheckListPlugin from './addons/advance/cherry-tapd-checklist-plugin';
+import EChartsCodeBlockEngine from './addons/advance/cherry-codeblock-echarts-plugin';
 import { isBrowser } from './utils/env';
 
 const constants = { HOOKS_TYPE_LIST };
@@ -30,6 +31,7 @@ const plugins = {
   TapdTablePlugin,
   TapdHtmlTagPlugin,
   TapdCheckListPlugin,
+  EChartsCodeBlockEngine,
 };
 const nodeIgnorePlugin = [];
 
@@ -39,6 +41,7 @@ if (!isBrowser()) {
   });
 }
 
+// @ts-expect-error process.env from build env
 const VERSION = `${process.env.BUILD_VERSION}`;
 
 export class CherryStatic {

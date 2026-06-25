@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import mergeWith from 'lodash/mergeWith';
+import mergeWith from 'es-toolkit/compat/mergeWith';
 import Logger from '@/Logger';
+import { getExternal } from '@/utils/external';
+import { isBrowser } from '@/utils/env';
 
 // 主题与常量集中管理
 const THEME = {
@@ -43,7 +45,7 @@ const DEFAULT_OPTIONS = {
 
 export default class EChartsTableEngine {
   static install(cherryOptions, ...args) {
-    if (typeof window === 'undefined') {
+    if (!isBrowser()) {
       Logger.warn('echarts-table-engine only works in browser.');
       mergeWith(cherryOptions, {
         engine: {
@@ -71,11 +73,13 @@ export default class EChartsTableEngine {
 
   constructor(echartsOptions = {}) {
     const { echarts, cherryOptions, cherry, ...options } = echartsOptions;
-    if (!echarts && !window.echarts) {
+    const globalEcharts = getExternal('echarts');
+    const resolvedEcharts = echarts || globalEcharts;
+    if (!resolvedEcharts) {
       throw new Error('table-echarts-plugin[init]: Package echarts not found.');
     }
     this.options = { ...DEFAULT_OPTIONS, ...(options || {}) };
-    this.echartsRef = echarts || window.echarts; // echarts引用
+    this.echartsRef = /** @type {*} */ (resolvedEcharts); // echarts引用
     this.dom = null;
 
     // 保存Cherry配置，用于获取地图数据源URL
@@ -313,13 +317,14 @@ export default class EChartsTableEngine {
   createChart(container, option = {}, type) {
     if (!container) return null;
     // 已存在实例直接返回，避免被观察器和延迟初始化同时触发导致重复初始化
-    const existed = this.echartsRef.getInstanceByDom(container);
-    if (existed && !existed.isDisposed()) return existed;
+    let chart = this.echartsRef.getInstanceByDom(container);
+    // if (existed && !existed.isDisposed()) return existed;
 
-    if (container.firstChild) container.innerHTML = '';
-
-    const chart = this.echartsRef.init(container, null, this.options);
-    if (option && Object.keys(option).length) chart.setOption(option);
+    // if (container.firstChild) container.innerHTML = '';
+    if (!chart) {
+      chart = this.echartsRef.init(container, null, this.options);
+    }
+    if (option && Object.keys(option).length) chart.setOption(option, true);
 
     this.instances.add(chart);
     this.$tagEchartsSvg(container);
@@ -433,6 +438,10 @@ export default class EChartsTableEngine {
 
   /**
    * 启用主题变更观察器
+   *
+   * 注意：主题切换时，本观察器只会走"轻量主题应用"通道（$applyThemeOnly），
+   * 仅刷新颜色/字体等主题相关字段，绝不会重新生成 series.data / series.map / xAxis.data 等数据相关字段。
+   * 这样可以避免地图类图表在每次切换主题时被整体重建，进而避免触发 $loadMapData / $tryLoadMapDataFromPaths 重复加载。
    */
   $enableThemeObserver(container) {
     const root = this.$getCherryRoot(container);
@@ -441,7 +450,7 @@ export default class EChartsTableEngine {
     const observer = new MutationObserver(() => {
       this.$buildEchartsThemeFromCss(root);
       Array.from(this.instances).forEach((inst) => {
-        this.$setInstanceTheme(inst);
+        this.$applyThemeOnly(inst);
       });
     });
     observer.observe(root, { attributes: true, attributeFilter: ['class'] });
@@ -449,7 +458,8 @@ export default class EChartsTableEngine {
   }
 
   /**
-   * 通过 echartsInstance.setOption 刷新主题
+   * [兼容保留] 通过 echartsInstance.setOption 整体刷新图表配置（会重新生成 series.data 等数据字段）。
+   * 主题切换不再调用此方法；此方法仅留作真正需要"重建"的外部扩展点。
    * @param {*} instance ECharts 实例
    */
   $setInstanceTheme(instance) {
@@ -459,6 +469,157 @@ export default class EChartsTableEngine {
     const option = this.$chartOptionsFromDataset(container) || {};
     instance.setOption(option, false, true);
     this.$tagEchartsSvg(container);
+  }
+
+  /**
+   * 轻量主题应用：仅根据当前运行时主题，构造一个"只含主题相关字段"的增量 option，
+   * 通过 setOption(delta, notMerge=false, lazyUpdate=true) 进行合并刷新。
+   *
+   * - 不会触碰 series[].data / series[].map / xAxis.data / yAxis.data / visualMap.min/max
+   * - 不会重新走 $generateChartOptions，因此不会触发 MapChartOptionsHandler.options，
+   *   也就不会再次调用 $loadMapData / $tryLoadMapDataFromPaths。
+   * - 调色盘等"非 CSS 变量驱动"的颜色（如 inRange）保留原样，避免覆盖业务选择。
+   *
+   * @param {*} instance ECharts 实例
+   */
+  $applyThemeOnly(instance) {
+    if (!instance || typeof instance.getDom !== 'function') return;
+    if (instance.isDisposed && instance.isDisposed()) return;
+    const container = instance.getDom();
+    if (!container || !container.isConnected) return;
+
+    const theme = this.$theme();
+    if (!theme) return;
+
+    const currentOption = instance.getOption ? instance.getOption() : null;
+    if (!currentOption) return;
+
+    const delta = this.$buildThemeOnlyOption(currentOption, theme);
+    try {
+      // notMerge=false：与现有 option 合并，仅覆盖 delta 中显式声明的字段
+      // lazyUpdate=true：批量重绘，避免主题连续切换时抖动
+      instance.setOption(delta, false, true);
+      this.$tagEchartsSvg(container);
+    } catch (e) {
+      Logger.warn('apply theme-only option failed:', e);
+    }
+  }
+
+  /**
+   * 基于当前 option 的形态，构造仅含主题相关字段的增量 option。
+   * 对于数组型字段（series/xAxis/yAxis/visualMap），按当前数组长度生成等长占位对象，
+   * 以便 ECharts 按下标合并而不会破坏原数组结构。
+   *
+   * @param {*} currentOption ECharts 实例当前 getOption() 返回值
+   * @param {*} theme 当前运行时主题
+   * @returns {Object} 仅含主题字段的 option delta
+   */
+  $buildThemeOnlyOption(currentOption, theme) {
+    const { color: c, fontSize: fs } = theme;
+
+    /** 把任意 option 字段规整为数组（ECharts getOption 总是返回数组） */
+    const toArr = (v) => {
+      if (Array.isArray(v)) return v;
+      if (v) return [v];
+      return [];
+    };
+
+    const delta = {
+      backgroundColor: c.backgroundColor,
+      // 调色盘：跟随主题刷新文本类色彩，不强制覆盖业务自定义色板
+      // 故此处不写 color: this.$palette()，保留 ECharts 内部已合并的调色盘
+      textStyle: { color: c.text },
+    };
+
+    // title（可能是对象或数组）
+    const titleArr = toArr(currentOption.title);
+    if (titleArr.length) {
+      delta.title = titleArr.map(() => ({
+        textStyle: { color: c.tooltipText },
+        subtextStyle: { color: c.text },
+      }));
+    }
+
+    // tooltip
+    if (currentOption.tooltip) {
+      delta.tooltip = {
+        backgroundColor: c.tooltipBg,
+        borderColor: c.border,
+        textStyle: { color: c.tooltipText, fontSize: fs.base },
+      };
+    }
+
+    // legend
+    const legendArr = toArr(currentOption.legend);
+    if (legendArr.length) {
+      delta.legend = legendArr.map(() => ({
+        textStyle: { color: c.text, fontSize: fs.base },
+        selectorLabel: { color: c.text, borderColor: c.border },
+      }));
+    }
+
+    // toolbox
+    const toolboxArr = toArr(currentOption.toolbox);
+    if (toolboxArr.length) {
+      delta.toolbox = toolboxArr.map(() => ({
+        iconStyle: { borderColor: c.border },
+        emphasis: { iconStyle: { borderColor: c.borderHover } },
+      }));
+    }
+
+    // xAxis / yAxis
+    const buildAxisDelta = (axisArr) =>
+      axisArr.map(() => ({
+        axisLine: { lineStyle: { color: c.text } },
+        axisLabel: { color: c.text, fontSize: fs.base },
+        splitLine: { lineStyle: { color: c.lineSplit, type: 'dashed' } },
+        nameTextStyle: { color: c.text },
+      }));
+    const xAxisArr = toArr(currentOption.xAxis);
+    if (xAxisArr.length) delta.xAxis = buildAxisDelta(xAxisArr);
+    const yAxisArr = toArr(currentOption.yAxis);
+    if (yAxisArr.length) delta.yAxis = buildAxisDelta(yAxisArr);
+
+    // visualMap：只刷文字色，不动 min/max/inRange
+    const visualMapArr = toArr(currentOption.visualMap);
+    if (visualMapArr.length) {
+      delta.visualMap = visualMapArr.map(() => ({
+        textStyle: { color: c.text, fontSize: fs.base },
+      }));
+    }
+
+    // radar：只刷指示器名称颜色
+    const radarArr = toArr(currentOption.radar);
+    if (radarArr.length) {
+      delta.radar = radarArr.map(() => ({
+        axisName: { color: c.text },
+      }));
+    }
+
+    // series：按类型刷新主题相关字段，绝不动 data / map / type
+    const seriesArr = toArr(currentOption.series);
+    if (seriesArr.length) {
+      delta.series = seriesArr.map((s) => {
+        const type = s && s.type;
+        const seriesDelta = {
+          label: { color: c.text },
+          itemStyle: { shadowColor: theme.shadow.color },
+          emphasis: {
+            itemStyle: { shadowColor: theme.shadow.color, borderColor: c.emphasis },
+          },
+        };
+        if (type === 'line') {
+          seriesDelta.itemStyle.borderColor = '#fff';
+        }
+        if (type === 'sankey') {
+          seriesDelta.label = { color: c.text, fontSize: fs.base };
+        }
+        // map 类型：仅刷 label / emphasis 文本与阴影色，不动 series.map / series.data
+        return seriesDelta;
+      });
+    }
+
+    return delta;
   }
 
   $generateChartOptions(type, tableObject, options) {
@@ -568,7 +729,7 @@ export default class EChartsTableEngine {
   /**
    * 渲染入口：将表格数据渲染为指定类型图表，并返回 HTML 容器片段
    */
-  render(type, options, tableObject) {
+  render(type, options, tableObject, $cherry) {
     // Logger.log('Rendering chart:', type, options, tableObject);
 
     // 生成唯一ID和简化的配置数据
@@ -595,34 +756,42 @@ export default class EChartsTableEngine {
       .map(([key, value]) => `${key}: ${value};`)
       .join(' ');
 
+    // HTML attribute value escaping: must escape & first, then <, >, "
+    // Prevents streaming-mode tag truncation when serialized JSON contains these characters.
+    const escapeAttr = (s) =>
+      String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
     // 创建一个包含所有必要信息的HTML结构
     const htmlContent = [
       `<div class="cherry-echarts-wrapper"`,
-      ` style="${styleStr}"`,
-      ` id="${chartId}"`,
-      ` data-chart-type="${type}"`,
-      ` data-table-data="${tableDataStr.replace(/"/g, '&quot;')}"`,
-      ` data-chart-options="${chartOptionsStr.replace(/"/g, '&quot;')}">`,
+      ` style="${escapeAttr(styleStr)}"`,
+      ` id="${escapeAttr(chartId)}"`,
+      ` data-chart-type="${escapeAttr(type)}"`,
+      ` data-table-data="${escapeAttr(tableDataStr)}"`,
+      ` data-chart-options="${escapeAttr(chartOptionsStr)}">`,
       `</div>`,
     ].join('');
+    const previewDom = $cherry.previewer.getDom();
 
     // 延迟到下一轮事件循环再执行；只重试一次
     setTimeout(() => {
-      const container = document.getElementById(chartId);
-      if (!container || !this.echartsRef) return;
-      if (this.echartsRef.getInstanceByDom(container)) return;
-      try {
-        this.createChart(container, chartOption, type);
-        Logger.log('Chart initialized successfully:', chartId);
-      } catch (error) {
-        Logger.error('Failed to render chart:', error);
-        Logger.error('Chart options:', chartOption);
-        Logger.error('Container:', container);
-        container.innerHTML = `<div style="text-align: center; color: red; transform: translateY(125px);">
-          <div style="font-size: ${this.$theme().fontSize.title}px; color: ${this.$theme().color.error};">${this.cherry.locale.chartRenderError}</div>
-          <div style="font-size: ${this.$theme().fontSize.base}px; color: ${this.$theme().color.text}; opacity: 0.7;">${error.message}</div>
-        </div>`;
-      }
+      const containers = previewDom.querySelectorAll(`#${chartId}`);
+      if (containers.length <= 0 || !this.echartsRef) return;
+      // if (this.echartsRef.getInstanceByDom(container)) return;
+      containers.forEach((container) => {
+        try {
+          this.createChart(container, chartOption, type);
+        } catch (error) {
+          if ($cherry.options.engine.syntax.global.flowSessionContext) {
+            container.innerHTML = 'drawing...';
+          } else {
+            container.innerHTML = `<div style="text-align: center; color: red; transform: translateY(125px);">
+              <div style="font-size: ${this.$theme().fontSize.title}px; color: ${this.$theme().color.error};">${this.cherry.locale.chartRenderError}</div>
+              <div style="font-size: ${this.$theme().fontSize.base}px; color: ${this.$theme().color.text}; opacity: 0.7;">${error.message}</div>
+            </div>`;
+          }
+        }
+      });
       this.cleanupInvalidInstances();
     }, 50);
 
@@ -724,7 +893,7 @@ const BaseChartOptionsHandler = {
     const { engine } = options;
     return {
       aria: {
-        show: true,
+        enabled: true,
       },
       backgroundColor: engine.$theme().color.backgroundColor,
       color: engine.$palette(),
@@ -775,7 +944,6 @@ const LegendOptionsHandler = {
         itemHeight: 12,
         selectedMode: 'multiple',
         selectorLabel: { color: engine.$theme().color.text, borderColor: engine.$theme().color.border },
-        data: tableObject.rows.map((row) => row[0]),
       },
     };
   },
@@ -905,19 +1073,20 @@ const RadarChartOptionsHandler = {
         return result;
       },
       radar: {
-        name: {
-          textStyle: { color: engine.$theme().color.text, fontSize: 12, fontWeight: 'bold' },
-          formatter(name) {
-            return name.length > 6 ? `${name.substr(0, 6)}...` : name;
-          },
-        },
         indicator,
         radius: '60%',
         center: ['50%', '50%'],
         splitNumber: 5,
         shape: 'polygon',
         splitArea: { areaStyle: { color: engine.$palette('radar').reverse() } },
-        axisName: { color: engine.$theme().color.text },
+        axisName: {
+          color: engine.$theme().color.text,
+          fontSize: 12,
+          fontWeight: 'bold',
+          formatter(name) {
+            return name.length > 6 ? `${name.substr(0, 6)}...` : name;
+          },
+        },
         axisLine: { lineStyle: { color: 'rgba(211, 253, 250, 0.8)' } },
         splitLine: { lineStyle: { color: 'rgba(211, 253, 250, 0.8)' } },
       },
@@ -1123,10 +1292,10 @@ const ScatterChartOptionsHandler = {
       }));
     } else {
       // 回退到旧的智能推断逻辑
-      Logger.warn(
-        'DEPRECATION WARNING: The scatter chart syntax relying on header keywords is outdated and will be removed in a future version. Please use the "cherry:mapping" option for explicit mapping.\n' +
-          `e.g., Change '{group,name,x,y,size}' to '{ "cherry:mapping": { "x": "X", "y": "Y", "size": "Size", "group": "Group" } }'`,
-      );
+      // Logger.warn(
+      //   'DEPRECATION WARNING: The scatter chart syntax relying on header keywords is outdated and will be removed in a future version. Please use the "cherry:mapping" option for explicit mapping.\n' +
+      //     `e.g., Change '{group,name,x,y,size}' to '{ "cherry:mapping": { "x": "X", "y": "Y", "size": "Size", "group": "Group" } }'`,
+      // );
 
       const headers = tableObject.header;
       const findHeader = (candidates) =>
@@ -1320,7 +1489,7 @@ const MapChartLoadingOptionsHandler = {
     const { engine } = options;
     // console.log('Rendering map chart:', tableObject);
 
-    return typeof window.echarts === 'undefined'
+    return !getExternal('echarts')
       ? {
           title: {
             text: `${engine.cherry.locale.chartRenderError} : ${engine.cherry.locale.chartLibraryNotLoadedTip}`,
@@ -1458,7 +1627,7 @@ const MapChartOptionsHandler = {
 
     // 用户指定了新的地图数据源，检查是否与已注册的地图源匹配
     if (userMapSource) {
-      if (window.echarts && window.echarts.getMap && window.echarts.getMap(userMapSource)) {
+      if (getExternal('echarts')?.getMap?.(userMapSource)) {
         // 用户指定数据源已注册，直接使用
         return generateOptions(MapChartCompleteOptionsHandler, tableObject, options);
       }
@@ -1472,7 +1641,7 @@ const MapChartOptionsHandler = {
     let registeredMapSource = null;
 
     for (const source of possibleMapSources) {
-      if (window.echarts && window.echarts.getMap && window.echarts.getMap(source)) {
+      if (getExternal('echarts')?.getMap?.(source)) {
         isMapRegistered = true;
         registeredMapSource = source;
         break;
@@ -1528,7 +1697,7 @@ const MapChartOptionsHandler = {
 
     this.$fetchMapData(url)
       .then((geoJson) => {
-        window.echarts.registerMap(url, geoJson);
+        getExternal('echarts')?.registerMap?.(url, geoJson);
         // console.log(`地图数据加载成功！来源: ${url}`);
         this.$refreshMapChart(options.chartId, url, options.engine);
         return geoJson;

@@ -27,8 +27,6 @@ import envReplacePlugin from './env.js';
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT_PATH = path.resolve(currentDir, '..');
-/** 构建目标是否 node */
-const IS_COMMONJS_BUILD = process.env.BUILD_TARGET === 'commonjs';
 
 const aliasPluginOptions = {
   entries: [
@@ -39,13 +37,6 @@ const aliasPluginOptions = {
   ],
 };
 
-if (IS_COMMONJS_BUILD) {
-  aliasPluginOptions.entries.unshift({
-    find: '@/Sanitizer',
-    replacement: path.resolve(PROJECT_ROOT_PATH, 'src', 'Sanitizer.node.js'),
-  });
-}
-
 /**
  * @type {import('rollup').RollupOptions}
  */
@@ -55,9 +46,9 @@ const options = {
     globals: {
       jsdom: 'jsdom',
     },
-    // disable code splitting
-    manualChunks: () => 'cherry',
   },
+  // 禁用 tree-shaking，保持最大兼容性
+  treeshake: false,
   plugins: [
     // Only run ESLint in builds that explicitly enable it. Default: disabled to avoid
     // parser errors when tools load ESM Babel configs during rollup CLI execution.
@@ -77,6 +68,9 @@ const options = {
     resolve({
       // ignoreGlobal: false,
       browser: true,
+      preferBuiltins: false,
+      // 确保支持只有 exports.import 的包（如 langium）
+      exportConditions: ['browser', 'import', 'default'],
     }),
     commonjs({
       // non-CommonJS modules will be ignored, but you can also
@@ -127,11 +121,17 @@ const options = {
             return;
           }
           const file = bundle[fileName];
+          // 安全检查：只处理入口文件
+          if (!file.isEntry || !file.facadeModuleId) {
+            return;
+          }
           const fileBaseName = fileName.replace(/\.js$/, '');
           const entryFileName = file.facadeModuleId.split(/[/\\]/).pop();
           const entryFileBase = entryFileName.replace(/\.js$/, '');
-          const namedExports = file.exports.filter((name) => name !== 'default');
-          const defaultName = options.name;
+          // 安全检查：确保 exports 是数组
+          const exports = Array.isArray(file.exports) ? file.exports : [];
+          const namedExports = exports.filter((name) => name !== 'default');
+          const defaultName = options.name || 'Cherry';
           const source = [
             `import ${defaultName}, { ${namedExports.join(', ')} } from "./types/${entryFileBase}";`,
             `export { ${namedExports.join(', ')} };`,
@@ -147,6 +147,25 @@ const options = {
     },
   ],
   onwarn(warning, warn) {
+    // 将未解析的导入警告升级为错误，避免依赖静默变成 external
+    // 这是导致 "Class extends value undefined" 的根因之一：
+    // mermaid 的子依赖 (langium, marked) 在某些包管理器 hoisting 策略下
+    // 可能无法被 Rollup 解析，被静默当作 external，导致运行时 undefined
+    //
+    // 已知根因：yarn 1.x workspaces 处理 optionalDependencies 时，
+    // 如果传递依赖的 engines.node 与当前 Node 版本不匹配，
+    // 会静默跳过安装这些传递依赖（如 marked@16 要求 node>=20，langium@4 要求 node>=20.10）。
+    // 修复方式：.yarnrc 中添加 --ignore-engines true
+    if (warning && warning.code === 'UNRESOLVED_IMPORT') {
+      const id = warning.id || warning.source || 'unknown';
+      const importer = warning.importer || 'unknown';
+      throw new Error(
+        `Unresolved import: ${id} (imported by ${importer})\n`
+        + 'This may be caused by incomplete dependency installation.\n'
+        + 'If this involves mermaid sub-dependencies (marked, langium, etc.),\n'
+        + 'ensure .yarnrc contains "--ignore-engines true" and run "yarn install" again.',
+      );
+    }
     // 忽略 juice 的 circular dependency
     try {
       if (

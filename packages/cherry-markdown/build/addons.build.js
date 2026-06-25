@@ -5,6 +5,7 @@ import eslint from '@rollup/plugin-eslint';
 import alias from '@rollup/plugin-alias';
 import json from '@rollup/plugin-json';
 import typescript from 'rollup-plugin-typescript2';
+import envReplacePlugin from './env.js';
 
 import { resolve as _resolve, join, dirname, basename, extname } from 'path';
 import { mkdirSync, writeFileSync } from 'fs';
@@ -14,9 +15,9 @@ import glob from 'glob';
 
 import { rollup as _rollup } from 'rollup';
 import terser from '@rollup/plugin-terser';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const PROJECT_ROOT_PATH = _resolve(__dirname, '../');
+const currentFilename = fileURLToPath(import.meta.url);
+const currentDirname = dirname(currentFilename);
+const PROJECT_ROOT_PATH = _resolve(currentDirname, '../');
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 glob(
@@ -64,7 +65,7 @@ function buildAddons(entries) {
             ]
           : []),
         json(),
-        // envReplacePlugin(),
+        envReplacePlugin(),
         alias({
           entries: [
             {
@@ -109,17 +110,31 @@ function buildAddons(entries) {
 
     console.log('[addons build] generating bundle %s', outputFile);
 
-    // generate code and a sourcemap
+    // generate UMD and ESM versions
     const { output: outputs } = await addonBundle.generate({
-      // dir: declarationDir,
-      file: outputFile,
+      file: `${outputFile.replace('.js', '')}.js`,
       format: 'umd',
       name: camelCaseModuleName,
       plugins: [terser()],
     });
 
+    const { output: esmOutputs } = await addonBundle.generate({
+      file: `${outputFile.replace('.js', '')}.esm.js`,
+      format: 'esm',
+      plugins: [terser()],
+    });
+
     // TODO: ts declaration 生成的目录不符合预期，以下为临时处理方案
     outputs.forEach((output) => {
+      const fileNameOnly = basename(output.fileName);
+      const targetPath = join(declarationDir, fileNameOnly);
+      console.log('[addons build] writing %s %s', output.type, targetPath);
+      mkdirSync(declarationDir, {
+        recursive: true,
+      });
+      writeFileSync(targetPath, output.code || output.source || '', { encoding: 'utf-8' });
+    });
+    esmOutputs.forEach((output) => {
       const fileNameOnly = basename(output.fileName);
       const targetPath = join(declarationDir, fileNameOnly);
       console.log('[addons build] writing %s %s', output.type, targetPath);

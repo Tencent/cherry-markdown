@@ -30,6 +30,8 @@ const terserPlugin = (options = {}) =>
 
 const options = {
   ...baseConfig,
+  // 禁用 tree-shaking，保持最大兼容性
+  treeshake: false,
   input: 'src/index.core.js',
   output: {
     ...baseConfig.output,
@@ -40,24 +42,15 @@ const options = {
     sourcemap: false,
     compact: true,
     plugins: [terserPlugin()],
-    manualChunks: () => 'main',
+    manualChunks: undefined, // UMD 单文件输出不需要代码分割
   },
+  plugins: baseConfig.plugins || [],
 };
 
 if (!Array.isArray(options.external)) {
   options.external = [];
 }
 options.external.push('mermaid');
-
-/** 构建目标是否 node */
-const IS_COMMONJS_BUILD = process.env.BUILD_TARGET === 'commonjs';
-
-if (IS_COMMONJS_BUILD) {
-  options.output = {
-    ...options.output,
-    file: options.output.file.replace(/\.js$/, '.common.js'),
-    format: 'cjs',
-  };
-}
+options.external.push('@replit/codemirror-vim'); // 保持 vim 模块懒加载，避免 code-splitting
 
 export default options;

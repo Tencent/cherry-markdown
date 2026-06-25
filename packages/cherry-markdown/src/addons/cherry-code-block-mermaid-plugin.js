@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import mergeWith from 'lodash/mergeWith';
+import mergeWith from 'es-toolkit/compat/mergeWith';
 import { isBrowser } from '@/utils/env';
+import { getExternal } from '@/utils/external';
 
 const CHART_TYPES = [
   'flowchart',
@@ -47,7 +48,7 @@ const DEFAULT_OPTIONS = {
   fontFamily: 'sans-serif',
   themeCSS: '.label foreignObject { font-size: 90%; overflow: visible; } .label { font-family: sans-serif; }',
   startOnLoad: false,
-  logLevel: 5,
+  logLevel: 'fatal',
   // fontFamily: 'Arial, monospace'
 };
 
@@ -80,17 +81,59 @@ export default class MermaidCodeEngine {
   // 上次渲染的代码
   lastRenderedCode = '';
   needReturnLastRenderedCode = false;
+  /** 按 mermaid 源码内容缓存已渲染 HTML，布局参数变更时复用以避免闪回 codeBlock */
+  contentRenderCache = new Map();
+
+  contentRenderCacheMax = 100;
+
+  /**
+   * 生成 mermaid 源码内容缓存 key（与布局 sign 无关）
+   * @param {string} src
+   * @param {import('../Engine').default} $engine
+   * @returns {string}
+   */
+  $getContentCacheKey(src, $engine) {
+    return $engine?.hash?.(src) ?? src;
+  }
+
+  /**
+   * 读取已缓存的 mermaid 渲染结果
+   * @param {string} src
+   * @param {import('../Engine').default} $engine
+   * @returns {string}
+   */
+  $getCachedRenderHtml(src, $engine) {
+    return this.contentRenderCache.get(this.$getContentCacheKey(src, $engine)) || '';
+  }
+
+  /**
+   * 缓存 mermaid 渲染结果（仅缓存含 svg 的成功结果）
+   * @param {string} src
+   * @param {import('../Engine').default} $engine
+   * @param {string} html
+   */
+  $setCachedRenderHtml(src, $engine, html) {
+    if (!html || (!html.includes('<svg') && !html.includes('svg-img'))) {
+      return;
+    }
+    const key = this.$getContentCacheKey(src, $engine);
+    if (this.contentRenderCache.size >= this.contentRenderCacheMax) {
+      const firstKey = this.contentRenderCache.keys().next().value;
+      this.contentRenderCache.delete(firstKey);
+    }
+    this.contentRenderCache.set(key, html);
+  }
 
   /**
    * @param {Object} mermaidOptions - Mermaid 配置选项
    * @param {Object} [mermaidOptions.mermaid] - mermaid 实例对象，如果未提供会尝试从 window.mermaid 获取
-   * @param {Object} [mermaidOptions.mermaidAPI] - mermaidAPI 实例对象，如果未提供会尝试从 window.mermaidAPI 获取
+   * @param {Object} [mermaidOptions.mermaidAPI] - mermaidAPI 实例对象（仅 v9 及以下版本需要，v10+ 可忽略）
    * @param {string} [mermaidOptions.theme='default'] - 主题，可选值: 'default', 'dark', 'forest', 'neutral' 等
    * @param {string} [mermaidOptions.altFontFamily='sans-serif'] - 备用字体
    * @param {string} [mermaidOptions.fontFamily='sans-serif'] - 主字体
    * @param {string} [mermaidOptions.themeCSS] - 自定义主题 CSS 样式
    * @param {boolean} [mermaidOptions.startOnLoad=false] - 是否在页面加载时自动渲染
-   * @param {number} [mermaidOptions.logLevel=5] - 日志级别，1-5，5 为最详细
+   * @param {number|string} [mermaidOptions.logLevel] - 日志级别（v9: 数字 1-5；v10+: 字符串 'debug'|'info'|...|'silent'）
    * @param {HTMLElement} [mermaidOptions.mermaidCanvasAppendDom] - Mermaid 临时画布容器的挂载节点
    * @param {Object} [mermaidOptions.flowchart] - 流程图配置，可设置 { useMaxWidth: false } 等
    * @param {Object} [mermaidOptions.sequence] - 序列图配置，可设置 { useMaxWidth: false } 等
@@ -116,28 +159,48 @@ export default class MermaidCodeEngine {
    */
   constructor(mermaidOptions = {}) {
     const { mermaid, mermaidAPI } = mermaidOptions;
-    if (
-      !mermaidAPI &&
-      !window.mermaidAPI &&
-      (!mermaid || !mermaid.mermaidAPI) &&
-      (!window.mermaid || !window.mermaid.mermaidAPI)
-    ) {
-      throw new Error('code-block-mermaid-plugin[init]: Package mermaid or mermaidAPI not found.');
-    }
-    this.options = { ...DEFAULT_OPTIONS, ...(mermaidOptions || {}) };
-    this.mermaidAPIRefs = mermaidAPI || window.mermaidAPI || mermaid.mermaidAPI || window.mermaid.mermaidAPI;
-    if (this.isAsyncRenderVersion()) {
-      // 异步渲染时，只有 mermaid.render 有队列优化，使用 mermaidAPI 会导致渲染出错
-      this.mermaidAPIRefs = mermaid || window.mermaid || this.mermaidAPIRefs;
-    }
+    // 兼容 v9（有 mermaidAPI 子对象）和 v10+（统一顶层对象）
+    const browserMermaid = getExternal('mermaid');
+    const browserMermaidAPI = getExternal('mermaidAPI');
+    const resolvedMermaid = mermaid || browserMermaid;
+    const resolvedMermaidAPI =
+      mermaidAPI || browserMermaidAPI || (resolvedMermaid && resolvedMermaid.mermaidAPI) || null;
+
+    // @ts-expect-error logLevel 兼容 v9(number) 和 v10+(string)
+    this.options = { ...DEFAULT_OPTIONS, ...mermaidOptions };
     delete this.options.mermaid;
     delete this.options.mermaidAPI;
+
+    if (!resolvedMermaid && !resolvedMermaidAPI) {
+      // mermaid 可能是异步加载的，这里不直接抛错，留待异步渲染时重试获取
+      // 注意：syncRender 路径无法等待异步加载，仍然会因 mermaidAPIRefs 为 null 而失败
+      // eslint-disable-next-line no-console
+      this.mermaidAPIRefs = null;
+      return;
+    }
+
+    // 根据版本选择渲染引用：
+    // - v9: 使用 mermaidAPI（render 同步回调模式）
+    // - v10+: 使用 mermaid（render 异步 Promise 模式）
+    if (resolvedMermaidAPI) {
+      // v9 及以下：存在独立的 mermaidAPI 对象
+      this.mermaidAPIRefs = resolvedMermaidAPI;
+      if (this.isAsyncRenderVersion()) {
+        // v9.x 中某些版本也有异步 render（参数长度为 3），此时使用 mermaid 主对象更可靠
+        this.mermaidAPIRefs = resolvedMermaid || this.mermaidAPIRefs;
+      }
+    } else {
+      // v10+：无 mermaidAPI，统一使用 mermaid 主对象
+      this.mermaidAPIRefs = resolvedMermaid;
+    }
     this.mermaidAPIRefs.initialize(this.options);
   }
 
-  // v10 以上开始，render 变为异步渲染，render 函数的参数数量从 4 变为 3
+  // 通过检测 render 函数的参数数量来判断是否为异步渲染版本
+  // v9: render(id, src, callback, canvas) → length === 4 → syncRender
+  // v10+: render(id, src, container?) → length <= 3 → asyncRender
   isAsyncRenderVersion() {
-    return this.mermaidAPIRefs.render.length === 3;
+    return !this.mermaidAPIRefs || !this.mermaidAPIRefs.render || this.mermaidAPIRefs.render.length <= 3;
   }
 
   mountMermaidCanvas($engine) {
@@ -183,7 +246,7 @@ export default class MermaidCodeEngine {
         // 屏蔽转img标签功能，如需要转换为img解除屏蔽即可
         if (this.svg2img) {
           const dataUrl = `data:image/svg+xml,${encodeURIComponent(svgDoc.documentElement.outerHTML)}`;
-          svgHtml = `<img class="svg-img" src="${dataUrl}" alt="${graphId}" />`;
+          svgHtml = `<img class="svg-img" style="max-width:100%;height:auto;" src="${dataUrl}" alt="${graphId}" />`;
         }
       } else {
         svgHtml = injectSvgFallback(svgCode);
@@ -215,6 +278,7 @@ export default class MermaidCodeEngine {
         this.mermaidCanvas,
       );
       this.lastRenderedCode = html;
+      this.$setCachedRenderHtml(src, $engine, html);
     } catch (e) {
       /**
        * 如果开启了流式渲染，当前有上次渲染结果时，使用上次渲染结果
@@ -233,28 +297,103 @@ export default class MermaidCodeEngine {
   handleAsyncRenderDone(graphId, sign, $engine, props, html) {
     props.updateCache(html);
     const container = $engine.$cherry.wrapperDom || document.body;
+    const isToolbarMode = props.showSourceToolbar;
     if (isBrowser()) {
       const placeholderList = container.querySelectorAll(`[data-sign="${sign}"][data-type="codeBlock"]`);
       placeholderList?.forEach((placeholder) => {
+        if (placeholder.closest('[data-mode="source"]')) {
+          return;
+        }
+        if (isToolbarMode) {
+          // showSourceToolbar 模式：仅替换预览面板内容，保留工具栏和源码面板
+          const previewPanel = placeholder.parentElement
+            ?.closest?.('figure[data-type="mermaid"]')
+            ?.querySelector('.cherry-mermaid-source-toolbar-panel[data-mode="preview"]');
+          if (previewPanel) {
+            previewPanel.innerHTML = html;
+            return;
+          }
+        }
         placeholder.parentElement.innerHTML = html;
       });
     }
     $engine.asyncRenderHandler.done(graphId, {
       replacer: (md) => {
+        if (isToolbarMode) {
+          // toolbar 模式下 updateCache 已通过 pushCache 更新了缓存占位符，无需额外字符串替换
+          return md;
+        }
         const regex = new RegExp(`<div data-sign="${sign}" data-type="codeBlock"[^>]*>.*?<\\/div>`, 'g');
         return md.replace(regex, html);
       },
     });
   }
 
-  asyncRender(graphId, src, sign, $engine, props) {
-    $engine.asyncRenderHandler.add(graphId);
+  /**
+   * 尝试重新从全局获取 mermaid 实例（当外部异步加载 mermaid 时，构造时刻可能尚未就绪）
+   * @returns {boolean} 是否成功获取
+   */
+  tryResolveMermaidAPIRefs() {
+    if (this.mermaidAPIRefs) {
+      return true;
+    }
+    const browserMermaid = getExternal('mermaid');
+    const browserMermaidAPI = getExternal('mermaidAPI');
+    const resolvedMermaid = browserMermaid;
+    const resolvedMermaidAPI = browserMermaidAPI || (resolvedMermaid && resolvedMermaid.mermaidAPI) || null;
+    if (!resolvedMermaid && !resolvedMermaidAPI) {
+      return false;
+    }
+    if (resolvedMermaidAPI) {
+      this.mermaidAPIRefs = resolvedMermaidAPI;
+      if (this.isAsyncRenderVersion()) {
+        this.mermaidAPIRefs = resolvedMermaid || this.mermaidAPIRefs;
+      }
+    } else {
+      this.mermaidAPIRefs = resolvedMermaid;
+    }
+    try {
+      this.mermaidAPIRefs.initialize(this.options);
+    } catch (e) {
+      // 忽略重复初始化等异常
+    }
+    return true;
+  }
+
+  asyncRender(graphId, src, sign, $engine, props, retryCount = 0) {
+    const cachedHtml = retryCount === 0 ? this.$getCachedRenderHtml(src, $engine) : '';
+    if (cachedHtml) {
+      return cachedHtml;
+    }
+    // mermaid 可能是异步加载的，初次调用时 mermaidAPIRefs 可能为 null，这里做延迟重试
+    if (!this.mermaidAPIRefs && !this.tryResolveMermaidAPIRefs()) {
+      const MAX_RETRY = 60; // 最多重试次数
+      const RETRY_INTERVAL = 300; // 每次间隔 300ms
+      if (retryCount === 0) {
+        $engine.asyncRenderHandler.add(graphId);
+      }
+      if (retryCount < MAX_RETRY) {
+        setTimeout(() => {
+          this.asyncRender(graphId, src, sign, $engine, props, retryCount + 1);
+        }, RETRY_INTERVAL);
+      } else {
+        // 超过最大重试次数，回退到源码并完成异步渲染流程
+        const html = props.fallback();
+        this.handleAsyncRenderDone(graphId, sign, $engine, props, html);
+        throw new Error('code-block-mermaid-plugin[init]: Package mermaid or mermaidAPI not found.');
+      }
+      return props.fallback();
+    }
+    if (retryCount === 0) {
+      $engine.asyncRenderHandler.add(graphId);
+    }
     this.mermaidAPIRefs
       .render(graphId, src, this.mermaidCanvas)
       .then(({ svg: svgCode }) => {
         // 渲染完成后，替换为渲染结果
         const html = this.processSvgCode(svgCode, graphId);
         this.lastRenderedCode = html;
+        this.$setCachedRenderHtml(src, $engine, html);
         this.handleAsyncRenderDone(graphId, sign, $engine, props, html);
       })
       .catch(() => {
@@ -289,6 +428,10 @@ export default class MermaidCodeEngine {
     let $sign = sign;
     if (!$sign) {
       $sign = Math.round(Math.random() * 100000000);
+    }
+    const cachedHtml = this.$getCachedRenderHtml(src, $engine);
+    if (cachedHtml) {
+      return cachedHtml;
     }
     this.mountMermaidCanvas($engine);
     // 多实例的情况下相同的内容ID相同会导致mermaid渲染异常

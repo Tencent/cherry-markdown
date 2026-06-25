@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import scss from 'rollup-plugin-scss';
-import * as dartSass from 'sass';
-// baseConfig not used in styles config
+import sass from 'rollup-plugin-sass';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
@@ -37,15 +35,15 @@ const createStyleConfigs = ({ input, cssBaseName, outputBaseName, watch }) => {
   const configs = [
     {
       input,
+      treeshake: false,
       output: {
         file: `dist/${outputBaseName}.styles.js`,
       },
       plugins: [
-        scss({
-          fileName: `${cssBaseName}.css`,
-          failOnError: true,
-          sass: dartSass,
-          ...(watch ? { watch } : {}),
+        sass({
+          api: 'modern',
+          output: `dist/${cssBaseName}.css`,
+          options: { style: 'expanded' },
         }),
         createCleanupPlugin(),
       ],
@@ -55,15 +53,15 @@ const createStyleConfigs = ({ input, cssBaseName, outputBaseName, watch }) => {
   if (IS_PRODUCTION) {
     configs.push({
       input,
+      treeshake: false,
       output: {
         file: `dist/${outputBaseName}.styles.min.js`,
       },
       plugins: [
-        scss({
-          fileName: `${cssBaseName}.min.css`,
-          failOnError: true,
-          sass: dartSass,
-          outputStyle: 'compressed',
+        sass({
+          api: 'modern',
+          output: `dist/${cssBaseName}.min.css`,
+          options: { style: 'compressed' },
         }),
         createCleanupPlugin(),
       ],

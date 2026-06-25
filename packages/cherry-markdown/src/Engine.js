@@ -16,20 +16,18 @@
 import HookCenter from './core/HookCenter';
 import hooksConfig from './core/HooksConfig';
 import NestedError, { $expectTarget, $expectInherit, $expectInstance } from './utils/error';
-import CryptoJS from 'crypto-js';
+import { hashHex } from './utils/hash';
 import SyntaxBase from './core/SyntaxBase';
 import ParagraphBase from './core/ParagraphBase';
-import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg, base64Reg } from './utils/regexp';
+import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg, base64Reg, getCodeBlockRule } from './utils/regexp';
 import { escapeHTMLSpecialChar } from './utils/sanitize';
 import Logger from './Logger';
-import { configureMathJax } from './utils/mathjax';
 import AsyncRenderHandler from './utils/async-render-handler';
 import UrlCache from './UrlCache';
 import htmlParser from './utils/htmlparser';
-import { isBrowser } from './utils/env';
 import * as htmlparser2 from 'htmlparser2';
 import LRUCache from './utils/LRUCache';
-import { loadCSS, loadScript } from './utils/dom';
+import { initMathEngines } from './utils/math-loader';
 
 export default class Engine {
   /**
@@ -75,11 +73,10 @@ export default class Engine {
       this.timer = null;
     }
     this.timer = setTimeout(() => {
-      this.$cherry.lastMarkdownText = '';
       this.hashCache.clear();
-      const markdownText = this.$cherry.editor.editor.getValue();
+      const markdownText = this.$cherry.editor?.editor?.view?.state?.doc?.toString() || '';
       const html = this.makeHtml(markdownText);
-      this.$cherry.previewer.refresh(html);
+      this.$cherry.previewer?.refresh(html);
       this.$cherry.$event.emit('afterChange', {
         markdownText,
         html,
@@ -112,73 +109,7 @@ export default class Engine {
   }
 
   initMath(opts) {
-    // 无论MathJax还是Katex，都可以先进行MathJax配置
-    const { externals, engine } = opts;
-    const { syntax } = engine;
-    const { plugins } = syntax.mathBlock;
-    // 未开启公式
-    if (
-      !isBrowser() ||
-      (!syntax.mathBlock.src && !syntax.inlineMath.src && !syntax.mathBlock.engine && !syntax.inlineMath.engine)
-    ) {
-      return;
-    }
-    if (syntax.mathBlock.engine === 'MathJax' || syntax.inlineMath.engine === 'MathJax') {
-      // 已经加载过MathJax
-      if (externals.MathJax || window.MathJax) {
-        return;
-      }
-      configureMathJax(plugins);
-      if (syntax.mathBlock.src || syntax.inlineMath.src) {
-        loadScript(syntax.mathBlock.src ? syntax.mathBlock.src : syntax.inlineMath.src, 'mathjax-js');
-      }
-    }
-    if (syntax.mathBlock.engine === 'katex' || syntax.inlineMath.engine === 'katex') {
-      // @ts-ignore
-      if (window.katex) {
-        return;
-      }
-      syntax.mathBlock.css && loadCSS(syntax.mathBlock.css, 'katex-css');
-      if (syntax.mathBlock.src) {
-        loadScript(syntax.mathBlock.src, 'katex-js').then(() => {
-          // 先更新预览区域
-          this.$cherry.previewer
-            .getDom()
-            .querySelectorAll('.cherry-katex-need-render')
-            .forEach((el) => {
-              const displayMode = el.classList.contains('Cherry-Math');
-              el.innerHTML = window.katex.renderToString(decodeURI(el.getAttribute('data-content')), {
-                throwOnError: false,
-                displayMode,
-              });
-              el.classList.remove('cherry-katex-need-render');
-            });
-          // 再更新asyncRenderHandler里的md（实际为html）内容
-          const needDoneKeys = [];
-          this.asyncRenderHandler.md = this.asyncRenderHandler.md.replace(
-            /<(div|span) data-sign="([^"]+?)" class="([^"]+?) cherry-katex-need-render" ([^>]+? data-lines="[^"]+?") data-content="([\s\S]+?)"><\/\1>/g,
-            (match, domName, sign, className, attrs, content) => {
-              const displayMode = domName === 'div';
-              const key = domName === 'div' ? `math-block-${sign}` : `math-inline-${sign}`;
-              // @ts-ignore
-              const html = window.katex.renderToString(decodeURI(content), {
-                throwOnError: false,
-                displayMode,
-              });
-              needDoneKeys.push(key);
-              return `<${domName} data-sign="${sign}" class="${className}" ${attrs}>${html}</${domName}>`;
-            },
-          );
-          needDoneKeys.forEach((key) => {
-            this.asyncRenderHandler.done(key);
-          });
-          // 最后再更新预览区缓存的内容（当预览区隐藏的时候需要更新）
-          if (this.$cherry.previewer.isPreviewerHidden()) {
-            this.$cherry.previewer.options.previewerCache.html = this.asyncRenderHandler.md;
-          }
-        });
-      }
-    }
+    initMathEngines(this, opts);
   }
 
   $configInit(params) {
@@ -235,7 +166,7 @@ export default class Engine {
         }
         return escapeHTMLSpecialChar(escapeChar);
       })
-      .replace(/\\&(?!(amp|lt|gt|quot|apos);)/, () => '&amp;');
+      .replace(/\\&(?!(amp|lt|gt|quot|apos);)/g, () => '&amp;');
     $str = $str.replace(/\\ <\//g, '\\</');
     $str = $str.replace(/id="safe_(?=.*?")/g, 'id="'); // transform header id to avoid being sanitized
     return $str;
@@ -243,7 +174,7 @@ export default class Engine {
 
   // 替换预留关键字
   $encodeReservedKeywords(str) {
-    return str.replace(/~/g, '~T').replace(/\$/g, '~D');
+    return str.replace(/[~$]/g, (ch) => (ch === '~' ? '~T' : '~D'));
   }
 
   // 还原预留关键字
@@ -272,7 +203,7 @@ export default class Engine {
     let $md = md;
     const before = actionArgs?.before || '';
     const method = action === 'afterMakeHtml' ? 'reduceRight' : 'reduce';
-    if (!this.hooks && !this.hooks[type] && !this.hooks[type][method]) {
+    if (!this.hooks || !this.hooks[type] || !this.hooks[type][method]) {
       return $md;
     }
     try {
@@ -301,7 +232,13 @@ export default class Engine {
             canContinue = false;
           }
         }
-        return oneHook[action](newMd, actionArgs, this.markdownParams);
+        // const time = Date.now();
+        const ret = oneHook[action](newMd, actionArgs, this.markdownParams);
+        // const cost = Date.now() - time;
+        // if (cost > 50) {
+        //   console.log(`hook ${oneHook.getName()} ${action} cost ${Date.now() - time}ms`);
+        // }
+        return ret;
       }, $md);
     } catch (e) {
       throw new NestedError(e);
@@ -317,20 +254,31 @@ export default class Engine {
   }
 
   /**
-   * 计算哈希值
+   * @deprecated 历史 API：原本基于 CryptoJS.SHA256 输出 64 位 hex。现已替换为
+   * 轻量非加密 hash（xxHash32 双通道，输出 16 位 hex），仅用于缓存键、
+   * 内部链接占位等场景。如有真实加密签名需求，请勿使用此方法。
+   */
+  sha256(str) {
+    return hashHex(str);
+  }
+
+  hashHex(str) {
+    return hashHex(str);
+  }
+
+  /**
+   * 计算哈希值（非加密，用于缓存键）
    * @param {String} str 被计算的字符串
-   * @returns {String} 哈希值
+   * @returns {String} 哈希值（16 位小写 hex）
    */
   hash(str) {
-    // 当缓存队列比较大时，随机抛弃500个缓存
-    if (this.hashStrMap.size > 2000) {
-      const keys = Array.from(this.hashStrMap.keys()).slice(0, 200);
-      keys.forEach((key) => this.hashStrMap.delete(key));
+    const cached = this.hashStrMap.get(str);
+    if (cached !== undefined) {
+      return cached;
     }
-    if (!this.hashStrMap.get(str)) {
-      this.hashStrMap.set(str, CryptoJS.SHA256(str).toString());
-    }
-    return this.hashStrMap.get(str);
+    const sign = hashHex(str);
+    this.hashStrMap.set(str, sign);
+    return sign;
   }
 
   $checkCache(str, func) {
@@ -351,8 +299,16 @@ export default class Engine {
 
   // 缓存大文本数据，用以提升渲染性能
   $cacheBigData(md) {
-    let $md = md.replace(base64Reg, (dataUri) => {
-      const cacheKey = `data:cherry/cache;sha256,${this.hash(dataUri)}`;
+    // 暂存所有代码块
+    const codeBlocks = [];
+    let $md = md.replace(getCodeBlockRule().reg, (whole, m1, m2) => {
+      const cacheKey = `codeBlockBegin${codeBlocks.length}codeBlockEnd`;
+      codeBlocks.push(whole);
+      return cacheKey;
+    });
+
+    $md = $md.replace(base64Reg, (dataUri) => {
+      const cacheKey = `bigDataBegin${this.hash(dataUri)}bigDataEnd`;
       this.cachedBigData[cacheKey] = dataUri;
       return cacheKey;
     });
@@ -366,11 +322,20 @@ export default class Engine {
       this.cachedBigData[cacheKey] = m2;
       return `${m1}${cacheKey}}`;
     });
-    $md = $md.replace(longTextReg, (whole, m1, m2) => {
-      const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
-      this.cachedBigData[cacheKey] = m2;
-      return `${m1}${cacheKey}}`;
-    });
+
+    const tmpArr = $md.split(/\n/);
+    for (let i = 0; i < tmpArr.length; i++) {
+      if (tmpArr[i].length > 6000) {
+        tmpArr[i] = tmpArr[i].replace(longTextReg, (whole) => {
+          const cacheKey = `bigDataBegin${this.hash(whole)}bigDataEnd`;
+          this.cachedBigData[cacheKey] = whole;
+          return cacheKey;
+        });
+      }
+    }
+    $md = tmpArr.join('\n');
+    // 恢复所有代码块
+    $md = $md.replace(/codeBlockBegin(\d+)codeBlockEnd/g, (whole, index) => codeBlocks[index] ?? '');
     return $md;
   }
 
@@ -378,13 +343,9 @@ export default class Engine {
    * @param {string} md
    */
   $deCacheBigData(md) {
-    return md
-      .replace(/data:cherry\/cache;sha256,[0-9a-f]+/g, (cacheUri) => {
-        return this.cachedBigData[cacheUri];
-      })
-      .replace(/bigDataBegin[^\n]+?bigDataEnd/g, (whole) => {
-        return this.cachedBigData[whole];
-      });
+    return md.replace(/bigDataBegin[^\n]+?bigDataEnd/g, (whole) => {
+      return this.cachedBigData[whole];
+    });
   }
 
   /**
@@ -392,7 +353,10 @@ export default class Engine {
    * @param {string} md 内容
    * @returns {string}
    */
-  $setFlowSessionCursorCache(md) {
+  $setFlowSessionCursorCache(md, forceNoCursor = false) {
+    if (forceNoCursor) {
+      return md;
+    }
     if (this.$cherry.options.engine.global.flowSessionContext && this.$cherry.options.engine.global.flowSessionCursor) {
       // 为了不破坏加粗、斜体等语法，光标占位符放在加粗、斜体语法后面
       if (/[*_~^]+\n*$/.test(md)) {
@@ -448,11 +412,12 @@ export default class Engine {
   /**
    * @param {string} md md字符串
    * @param {'string'|'object'} returnType 返回格式，string：返回html字符串，object：返回结构化数据
+   * @param {boolean} forceNoCursor 是否强制不添加光标占位
    * @returns {string|object} 获取html
    */
-  makeHtml(md, returnType = 'string') {
+  makeHtml(md, returnType = 'string', forceNoCursor = false) {
     this.$prepareMakeHtml(md);
-    let $md = this.$setFlowSessionCursorCache(md);
+    let $md = this.$setFlowSessionCursorCache(md, forceNoCursor);
     $md = this.$cacheBigData($md);
     $md = this.$beforeMakeHtml($md);
     $md = this.$dealParagraph($md);
@@ -493,5 +458,15 @@ export default class Engine {
    */
   makeMarkdown(html) {
     return htmlParser.run(html);
+  }
+
+  /**
+   * 清理engine的缓存
+   */
+  clearCache() {
+    this.hooks.paragraph?.forEach((hook) => {
+      // @ts-ignore
+      hook.clearCache && hook.clearCache();
+    });
   }
 }

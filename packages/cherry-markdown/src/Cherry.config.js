@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import cloneDeep from 'lodash/cloneDeep';
+import cloneDeep from 'es-toolkit/compat/cloneDeep';
 
 const callbacks = {
   /**
@@ -303,6 +303,7 @@ const defaultConfig = {
         },
         mermaid: {
           svg2img: false, // 是否将mermaid生成的画图变成img格式
+          showSourceToolbar: false, // 是否显示mermaid源码/预览切换工具栏
         },
         /**
          * indentedCodeBlock是缩进代码块是否启用的开关

@@ -42,13 +42,15 @@ export function handleUploadMulti(editor, type = 'image', accept = '*', callback
         return callback(arr);
       }
       let code = '';
-      for (const file of files) {
-        const { url } = file;
-        code += `${handleType(type, file, url)}/n`;
-      }
-      // 替换选中区域
-      // @ts-ignore
-      editor.editor.doc.replaceSelection(code);
+      // 遍历上传结果数组 arr，而不是原始文件数组 files
+      arr.forEach((item, index) => {
+        const { url } = item;
+        // 使用 arr 中对应的 file 信息，如果没有则回退到 files
+        const file = item.file || files[index];
+        code += `${handleType(type, file, url)}\n`;
+      });
+      // 替换选中区域 - CodeMirror 6
+      editor.editor.replaceSelection(code);
     });
   });
   input.click();
@@ -81,9 +83,8 @@ export function handleUpload(editor, type = 'image', accept = '*', callback = nu
       }
       let code = '';
       code = handleType(type, file, url);
-      // 替换选中区域
-      // @ts-ignore
-      editor.editor.doc.replaceSelection(code);
+      // 替换选中区域 - CodeMirror 6
+      editor.editor.replaceSelection(code);
     });
   });
   input.click();

@@ -165,7 +165,7 @@ export default class Settings extends MenuBase {
         return;
       }
       if (this.editor.previewer.isPreviewerHidden()) {
-        this.editor.previewer.editAndPreview();
+        this.editor.previewer.recoverPreviewer(true);
       } else {
         this.editor.previewer.editOnly(true);
       }
@@ -205,15 +205,10 @@ export default class Settings extends MenuBase {
    * 切换Toolbar显示状态
    */
   toggleToolbar() {
-    const { wrapperDom } = this.engine.$cherry;
-    if (wrapperDom instanceof HTMLDivElement) {
-      if (wrapperDom.className.indexOf('cherry--no-toolbar') > -1) {
-        wrapperDom.classList.remove('cherry--no-toolbar');
-        this.$cherry.$event.emit('toolbarShow');
-      } else {
-        wrapperDom.classList.add('cherry--no-toolbar');
-        this.$cherry.$event.emit('toolbarHide');
-      }
+    if (this.$cherry.status.toolbar) {
+      this.$cherry.$event.emit('toolbarHide');
+    } else {
+      this.$cherry.$event.emit('toolbarShow');
     }
   }
 }

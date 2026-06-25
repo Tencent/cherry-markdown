@@ -1,3 +1,6 @@
+/**
+ * 自定义一个语法
+ */
 var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
   makeHtml(str) {
     console.warn('custom hook', 'hello');
@@ -15,7 +18,7 @@ var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TY
 });
 var suggest = [];
 var list = ['barryhu', 'ivorwei', 'sunsunliu', 'jiaweicui', 'other', 'new'];
-var basicConfig = {
+export var basicConfig = {
   id: 'markdown',
   externals: {
     echarts: window.echarts,
@@ -49,31 +52,6 @@ var basicConfig = {
         useUnicode: false,
         customResourceURL: 'https://github.githubassets.com/images/icons/emoji/unicode/${code}.png?v8',
         upperCase: true,
-      },
-      suggester: {
-        suggester: [
-          {
-            // 获取 列表
-            suggestList(word, callback) {
-              suggest.push(list[Math.floor(Math.random() * 6)]);
-              if (suggest.length >= 6) {
-                suggest.shift();
-              }
-              callback(suggest);
-            },
-            // 唤醒关键字
-            // default '@'
-            keyword: '@',
-            // 建议模板
-            suggestListRender(valueArray) {
-              return '';
-            },
-            // 回填回调
-            echo(value) {
-              return '';
-            },
-          },
-        ],
       },
     },
     customSyntax: {
@@ -109,6 +87,31 @@ var basicConfig = {
   },
   editor: {
     defaultModel: 'edit&preview',
+    suggester: {
+      suggester: [
+        {
+          // 获取 列表
+          suggestList(word, callback) {
+            suggest.push(list[Math.floor(Math.random() * 6)]);
+            if (suggest.length >= 6) {
+              suggest.shift();
+            }
+            callback(suggest);
+          },
+          // 唤醒关键字
+          // default '@'
+          keyword: '@',
+          // 建议模板
+          suggestListRender(valueArray) {
+            return '';
+          },
+          // 回填回调
+          echo(value) {
+            return '';
+          },
+        },
+      ],
+    },
   },
   previewer: {
     // 自定义markdown预览区域class
@@ -117,10 +120,3 @@ var basicConfig = {
   keydown: [],
   //extensions: [],
 };
-
-fetch('./assets/markdown/index.md')
-  .then((response) => response.text())
-  .then((value) => {
-    var config = Object.assign({}, basicConfig, { value });
-    window.cherry = new Cherry(config);
-  });

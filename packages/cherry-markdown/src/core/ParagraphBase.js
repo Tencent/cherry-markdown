@@ -17,6 +17,7 @@ import SyntaxBase, { HOOKS_TYPE_LIST } from './SyntaxBase';
 import { prependLineFeedForParagraph } from '@/utils/lineFeed';
 import { getIsClassicBrFromLocal, testKeyInLocal } from '@/utils/config';
 import { blockNames } from '@/utils/sanitize';
+import LRUCache from '../utils/LRUCache';
 
 let cacheCounter = 0;
 // ~~C${cacheCounter}I${cacheIndex}$
@@ -33,11 +34,52 @@ export default class ParagraphBase extends SyntaxBase {
     this.needCache = !!needCache;
     this.sign = '';
     if (needCache) {
-      this.cache = defaultCache || {};
+      this.cache = new LRUCache(2000);
       this.cacheKey = `~~C${cacheCounter}`;
       cacheCounter += 1;
     }
-    this.failedResetCacheTimes = 0;
+    this.cacheData = {};
+    this.cacheDataMap = [];
+  }
+
+  /**
+   * 缓存数据，并返回缓存数据，当缓存大于maxKeys时，会删除removeKeys个缓存
+   * @param {string} key 缓存的key
+   * @param {function} getValueByKey 用于获取缓存数据的回调函数
+   * @param {number} maxKeys 最大缓存数
+   * @param {number} removeKeys 每次删除的缓存数
+   * @param {boolean} focusUpdate 是否更新缓存
+   * @returns {any}
+   */
+  cacheAndGetData(key, getValueByKey, maxKeys, removeKeys, focusUpdate = false) {
+    if (!this.cacheData[key]) {
+      /**
+       * 缓存太多时，清空最近插入的一些缓存
+       *  - 为什么是“最近的”，主要考虑流式输出场景
+       */
+      if (this.cacheDataMap.length > maxKeys) {
+        const removed = this.cacheDataMap.splice(removeKeys);
+        removed.forEach((item) => {
+          delete this.cacheData[item];
+        });
+      }
+      // 调用行内语法，获得段落的签名和对应html内容
+      this.cacheData[key] = getValueByKey(key);
+      this.cacheDataMap.push(key);
+    } else {
+      if (focusUpdate) {
+        this.cacheData[key] = getValueByKey(key);
+      }
+    }
+    return this.cacheData[key];
+  }
+
+  /**
+   * 清空所有缓存
+   */
+  clearCache() {
+    this.cacheData = {};
+    this.cacheDataMap = [];
   }
 
   initBrReg(classicBr = false) {
@@ -274,10 +316,10 @@ export default class ParagraphBase extends SyntaxBase {
     }
     const $sign = sign || this.$engine.hash(str);
     const key = `${this.cacheKey}I${$sign}_L${lineCount}$`;
-    this.cache[$sign] = {
+    this.cache.set($sign, {
       content: str,
       key,
-    };
+    });
     return key;
   }
 
@@ -285,23 +327,18 @@ export default class ParagraphBase extends SyntaxBase {
     if (!this.needCache) {
       return;
     }
-    return this.cache[sign].content || '';
+    return this.cache.get(sign)?.content || '';
   }
 
   testHasCache(sign) {
-    if (!this.needCache || !this.cache[sign]) {
+    if (!this.needCache || !this.cache.get(sign)) {
       return false;
     }
-    return this.cache[sign].key;
+    return this.cache.get(sign)?.key;
   }
 
   // 当缓存全部被消费后，调用此方法清理多大的缓存
-  resetCache() {
-    if (!this.needCache) {
-      return;
-    }
-    this.cache = {};
-  }
+  resetCache() {}
 
   restoreCache(html) {
     // restore cached content
@@ -313,20 +350,6 @@ export default class ParagraphBase extends SyntaxBase {
       'g',
     );
     const $html = html.replace(regex, (match, cacheSign) => this.popCache(cacheSign.replace(/_L\d+$/, '')));
-    if (this.timer) {
-      clearTimeout(this.timer);
-      this.failedResetCacheTimes += 1;
-      this.timer = null;
-    }
-    this.timer = setTimeout(() => {
-      this.resetCache();
-    }, 500);
-    if (this.failedResetCacheTimes > 5) {
-      this.failedResetCacheTimes = 0;
-      setTimeout(() => {
-        this.resetCache();
-      }, 500);
-    }
     return $html;
   }
 
@@ -337,7 +360,7 @@ export default class ParagraphBase extends SyntaxBase {
   checkCache(wholeMatch, sentenceMakeFunc, lineCount = 0) {
     this.sign = this.$engine.hash(wholeMatch);
     // miss cache
-    if (!this.cache[this.sign]) {
+    if (!this.cache.get(this.sign)) {
       return this.toHtml(wholeMatch, sentenceMakeFunc);
     }
     return `${this.cacheKey}I${this.sign}_L${lineCount}$`;

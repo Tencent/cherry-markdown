@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import { isBrowser } from './env';
+import { getExternal } from './external';
 import { PUNCTUATION } from './regexp';
 import { escapeHTMLSpecialChar } from './sanitize';
 
@@ -21,54 +22,53 @@ import { escapeHTMLSpecialChar } from './sanitize';
  * 装饰器，挂载对应的模块到实例上
  */
 export function LoadMathModule() {
-  if (!isBrowser()) {
-    return;
-  }
-  const self = /** @type {import('../core/SyntaxBase').default & { katex: any; MathJax: any }} */ (this);
-  self.katex = self.$externals?.katex ?? window.katex;
-  self.MathJax = self.$externals?.MathJax ?? window.MathJax;
+  const self = /** @type {import('../core/SyntaxBase').default & { katex?: unknown; MathJax?: unknown }} */ (this);
+  self.katex = getExternal('katex', self.$externals?.katex);
+  self.MathJax = getExternal('MathJax', self.$externals?.MathJax);
 }
 
 export const configureMathJax = (usePlugins) => {
   if (!isBrowser()) {
-    // console.log('mathjax disabled');
     return;
   }
   const plugins = usePlugins
     ? ['input/asciimath', '[tex]/noerrors', '[tex]/cancel', '[tex]/color', '[tex]/boldsymbol', 'ui/safe']
     : ['ui/safe'];
-  // @ts-ignore
-  window.MathJax = {
-    startup: {
-      elements: ['.Cherry-Math', '.Cherry-InlineMath'],
-      typeset: true,
-    },
-    tex: {
-      inlineMath: [
-        ['$', '$'],
-        ['\\(', '\\)'],
-      ],
-      displayMath: [
-        ['$$', '$$'],
-        ['\\[', '\\]'],
-      ],
-      tags: 'ams',
-      packages: { '[+]': ['noerrors', 'cancel', 'color'] },
-      macros: {
-        bm: ['{\\boldsymbol{#1}}', 1],
+  // 使用 getExternal 确保 SSR 安全（虽然 configureMathJax 上面已守卫，但保持一致性）
+  const mathJaxTarget = /** @type {Record<string, unknown>} */ (getExternal('MathJax'));
+  if (mathJaxTarget) {
+    Object.assign(mathJaxTarget, {
+      startup: {
+        elements: ['.Cherry-Math', '.Cherry-InlineMath'],
+        typeset: true,
       },
-    },
-    options: {
-      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'a'],
-      ignoreHtmlClass: 'tex2jax_ignore',
-      processHtmlClass: 'tex2jax_process',
-      // 关闭 mathjax 菜单
-      enableMenu: false,
-    },
-    loader: {
-      load: plugins,
-    },
-  };
+      tex: {
+        inlineMath: [
+          ['$', '$'],
+          ['\\(', '\\)'],
+        ],
+        displayMath: [
+          ['$$', '$$'],
+          ['\\[', '\\]'],
+        ],
+        tags: 'ams',
+        packages: { '[+]': ['noerrors', 'cancel', 'color'] },
+        macros: {
+          bm: ['{\\boldsymbol{#1}}', 1],
+        },
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'a'],
+        ignoreHtmlClass: 'tex2jax_ignore',
+        processHtmlClass: 'tex2jax_process',
+        // 关闭 mathjax 菜单
+        enableMenu: false,
+      },
+      loader: {
+        load: plugins,
+      },
+    });
+  }
 };
 
 const noEscape = ['&', '<', '>', '"', "'"]; // 需要转换为HTML实体字符的符号

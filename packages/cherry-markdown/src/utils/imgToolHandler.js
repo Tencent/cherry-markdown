@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-import imgSizeHandler from './imgSizeHandler';
-
 /**
  * 用于在图片被点击时弹出调整图片边框|阴影|圆角的工具栏
  */
 const imgToolHandler = {
-  mouseResize: {},
   position: { x: 0, y: 0 },
   getImgPosition() {
     const position = this.img.getBoundingClientRect();
@@ -37,43 +34,52 @@ const imgToolHandler = {
       y: position.y - editorPosition.y,
     };
   },
-  showBubble(img, container, previewerDom, event, locale) {
+  showBubble(img, container, previewerDom, event, locale, options = {}) {
     this.img = img;
+    this.isMermaid = options.isMermaid || false;
+    this.targetIndex = Number.isInteger(options.targetIndex) ? options.targetIndex : -1;
+    this.onInvalidTarget = options.onInvalidTarget || null;
+    this.validateTarget = options.validateTarget || null;
+    this.resolveTarget = options.resolveTarget || null;
 
     this.previewerDom = previewerDom;
     this.container = container;
 
-    const decoList = [
-      { text: locale.border, type: 'border', active: false },
-      { text: locale.shadow, type: 'shadow', active: false },
-      { text: locale.radius, type: 'radius', active: false },
-    ];
-    const decoDiv = document.createElement('div');
-    decoDiv.className = 'img-tool-group';
     const getImgToolButtonClassName = (item) => `img-tool-button${item.active ? ' active' : ''}`;
-    this.container.appendChild(decoDiv);
-    decoList.forEach((deco) => {
-      deco.active = this.img.className.match(`cherry-img-deco-${deco.type}`);
-      const div = document.createElement('div');
-      const icon = document.createElement('i');
-      div.appendChild(icon);
-      icon.className = `img-tool-icon ch-icon ch-icon-imgDeco${capitalizeFirstLetter(deco.type)}`;
-      div.className = getImgToolButtonClassName(deco);
-      div.title = deco.text;
-      div.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        deco.active = !deco.active;
-        // 点击后，更新样式
-        div.className = getImgToolButtonClassName(deco);
-        this.emitChange(this.img, deco.type);
-      });
-      decoDiv.append(div);
-    });
 
-    const divider = document.createElement('div');
-    divider.className = 'img-tool-divider';
-    this.container.appendChild(divider);
+    // mermaid 模式下不显示装饰按钮（边框/阴影/圆角对 figure/SVG 无意义）
+    if (!this.isMermaid) {
+      const decoList = [
+        { text: locale.border, type: 'border', active: false },
+        { text: locale.shadow, type: 'shadow', active: false },
+        { text: locale.radius, type: 'radius', active: false },
+      ];
+      const decoDiv = document.createElement('div');
+      decoDiv.className = 'img-tool-group';
+      this.container.appendChild(decoDiv);
+      decoList.forEach((deco) => {
+        deco.active = this.img.className.match(`cherry-img-deco-${deco.type}`);
+        const div = document.createElement('div');
+        const icon = document.createElement('i');
+        div.appendChild(icon);
+        icon.className = `img-tool-icon ch-icon ch-icon-imgDeco${capitalizeFirstLetter(deco.type)}`;
+        div.className = getImgToolButtonClassName(deco);
+        div.title = deco.text;
+        div.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          deco.active = !deco.active;
+          // 点击后，更新样式
+          div.className = getImgToolButtonClassName(deco);
+          this.emitChange(this.img, deco.type);
+        });
+        decoDiv.append(div);
+      });
+
+      const divider = document.createElement('div');
+      divider.className = 'img-tool-divider';
+      this.container.appendChild(divider);
+    }
 
     const alignList = [
       { text: locale.alignLeft, type: 'left' },
@@ -86,7 +92,12 @@ const imgToolHandler = {
     alignDiv.className = 'img-tool-group';
     this.container.appendChild(alignDiv);
     alignList.forEach((align, index) => {
-      align.active = this.img.className.match(`cherry-img-align-${align.type}`);
+      if (this.isMermaid) {
+        // mermaid figure 的对齐通过 class 标记
+        align.active = this.img.classList.contains(`cherry-mermaid-align-${align.type}`);
+      } else {
+        align.active = this.img.className.match(`cherry-img-align-${align.type}`);
+      }
       const div = document.createElement('div');
       const icon = document.createElement('i');
       align.div = div;
@@ -104,10 +115,8 @@ const imgToolHandler = {
         div.className = getImgToolButtonClassName(align);
         this.emitChange(this.img, align.active ? align.type : 'clear-align');
 
-        imgSizeHandler.showBubble(this.img, this.container, this.previewerDom);
-        setTimeout(() => {
-          imgSizeHandler.updatePosition();
-        }, 150);
+        // 不再使用 setTimeout 猜测预览区更新时机
+        // 位置更新由 previewUpdate 事件在 afterUpdateCallBack 中触发
       });
       alignDiv.append(div);
     });
@@ -177,20 +186,109 @@ const imgToolHandler = {
     switch (type) {
       case 'scroll':
         return this.dealScroll(event);
+      case 'remove':
+        return this.remove();
+      case 'previewUpdate':
+        return this.previewUpdate(event);
+      case 'resize':
+        requestAnimationFrame(() => this.updatePosition());
+    }
+  },
+  $isTargetValid() {
+    if (typeof this.validateTarget === 'function') {
+      return this.validateTarget();
+    }
+    return !!(this.img && document.contains(this.img) && this.previewerDom?.contains(this.img));
+  },
+  $clearPreviewUpdateTimer() {
+    if (this._fallbackTimer) {
+      clearTimeout(this._fallbackTimer);
+      this._fallbackTimer = null;
     }
   },
   previewUpdate(callback) {
-    if (this.$isResizing()) {
+    this.$clearPreviewUpdateTimer();
+    this.refreshTarget();
+    // 目标元素已从预览区移除（如删除了 mermaid 源码），清理选择框和浮动工具栏
+    if (!this.$isTargetValid()) {
+      (callback || this.onInvalidTarget)?.();
       return;
     }
-    this.remove();
-    callback();
+    // 预览区更新后图片位置可能变化（如对齐方式改变），需要更新工具栏位置
+    // 图片有 CSS transition (all 0.1s)，需等待过渡动画结束后再获取最终位置
+    this.img.addEventListener(
+      'transitionend',
+      () => {
+        if (!this.$isTargetValid()) {
+          this.onInvalidTarget?.();
+          return;
+        }
+        this.updatePosition();
+      },
+      { once: true },
+    );
+    // 兜底：如果过渡没有触发（如属性没变化），120ms 后也更新
+    this._fallbackTimer = setTimeout(() => {
+      this._fallbackTimer = null;
+      if (!this.$isTargetValid()) {
+        (callback || this.onInvalidTarget)?.();
+        return;
+      }
+      this.updatePosition();
+    }, 120);
+  },
+  refreshTarget() {
+    if (!this.isMermaid || !this.previewerDom) {
+      return;
+    }
+    if (typeof this.resolveTarget === 'function') {
+      const resolved = this.resolveTarget();
+      if (resolved) {
+        this.img = resolved;
+        return;
+      }
+    }
+    if (this.img && this.previewerDom.contains(this.img)) {
+      return;
+    }
   },
   remove() {
-    this.butsLayout = false;
+    this.$clearPreviewUpdateTimer();
+    this.onInvalidTarget = null;
+    this.validateTarget = null;
+    this.resolveTarget = null;
   },
-  $isResizing() {
-    return this.mouseResize.resize;
+  /**
+   * 更新工具栏位置，用于预览区更新或编辑器大小变化后重新定位
+   */
+  updatePosition() {
+    if (!this.img || !this.container || !this.previewerDom) {
+      return;
+    }
+    this.refreshTarget();
+    if (!this.$isTargetValid()) {
+      this.onInvalidTarget?.();
+      return;
+    }
+    const imgPosition = this.getImgPosition();
+    const toolbarWidth = this.container.offsetWidth;
+    const toolbarHeight = this.container.offsetHeight;
+    const padding = 8;
+
+    let finalLeft;
+    let finalTop;
+
+    if (imgPosition.width < toolbarWidth + padding * 2 || imgPosition.height < toolbarHeight + padding * 2) {
+      finalLeft = imgPosition.left + (imgPosition.width - toolbarWidth) / 2;
+      finalTop = imgPosition.top + imgPosition.height + padding;
+    } else {
+      finalLeft = imgPosition.left + (imgPosition.width - toolbarWidth) / 2;
+      finalTop = imgPosition.top + imgPosition.height - toolbarHeight - padding;
+    }
+
+    this.container.style.left = `${finalLeft}px`;
+    this.container.style.top = `${finalTop}px`;
+    this.position = { ...imgPosition };
   },
   dealScroll(event) {
     const position = this.getImgPosition();
@@ -200,9 +298,6 @@ const imgToolHandler = {
     if (this.container.style.marginLeft !== position.left - this.position.left) {
       this.container.style.marginLeft = `${position.left - this.position.left}px`;
     }
-  },
-  change() {
-    this.emitChange(this.img, { width: this.buts.style.width, height: this.buts.style.height });
   },
   bindChange(func) {
     this.emitChange = func;

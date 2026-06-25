@@ -13,7 +13,6 @@
       >
         <div class="file-row">
           <span class="file-name">{{ file.name }}</span>
-          <span class="file-time">{{ formatTime(file.lastSaved ?? file.lastOpened ?? file.lastAccessed) }}</span>
         </div>
       </li>
     </ul>
@@ -36,7 +35,6 @@
 import { ref } from 'vue';
 import { useFileStore } from '../store';
 import { useFileManager } from './composables/useFileManager';
-import { formatTimestamp } from './fileUtils';
 import ContextMenu from './ui/ContextMenu.vue';
 
 const fileStore = useFileStore();
@@ -63,7 +61,7 @@ const openRecent = async (filePath: string): Promise<void> => {
   await openFile(filePath, false, false);
 };
 
-const formatTime = (time: number): string => formatTimestamp(time);
+// const formatTime = (time: number): string => formatTimestamp(time);
 
 const showMenu = (event: MouseEvent, file: any): void => {
   showContextMenu(event, file);

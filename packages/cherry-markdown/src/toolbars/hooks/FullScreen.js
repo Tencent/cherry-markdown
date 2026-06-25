@@ -45,6 +45,7 @@ export default class FullScreen extends MenuBase {
       cherryToolbarFullscreen && cherryToolbarFullscreen.appendChild(minScreen);
       cherryClass.add('fullscreen');
     }
-    this.editor.editor.refresh();
+    // CodeMirror 6 中刷新通过 requestMeasure 实现
+    this.editor.editor.requestMeasure();
   }
 }

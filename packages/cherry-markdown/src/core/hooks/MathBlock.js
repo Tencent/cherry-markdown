@@ -61,11 +61,13 @@ export default class MathBlock extends ParagraphBase {
     // 既无MathJax又无katex时，原样输出
     let result = '';
     const $content = content.replace(/\\~D/g, '$').replace(/\\~T/g, '~').replace(/~T/g, '~');
+    // 保留一份源码到渲染节点上，供 formulaUtilsHandler 直接读取，避免再次对全文做正则解析。
+    const encodedFormulaSource = encodeURIComponent($content);
 
     if (this.engine === 'katex') {
       // katex渲染
       if (!this.katex) {
-        result = `<div data-sign="${sign}" class="Cherry-Math cherry-katex-need-render" data-type="mathBlock" data-lines="${lines}" data-content="${encodeURI($content)}"></div>`;
+        result = `<div data-sign="${sign}" class="Cherry-Math cherry-katex-need-render" data-type="mathBlock" data-formula-source="${encodedFormulaSource}" data-lines="${lines}" data-content="${encodeURIComponent($content)}"></div>`;
         this.$engine.asyncRenderHandler.add(`math-block-${sign}`);
       } else {
         let html = this.katex.renderToString($content, {
@@ -79,22 +81,36 @@ export default class MathBlock extends ParagraphBase {
           this.lastCode = html;
         }
         result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
-              data-lines="${lines}">${html}</div>`;
+              data-lines="${lines}" data-formula-source="${encodedFormulaSource}">${html}</div>`;
       }
-    } else if (this.MathJax?.tex2svg) {
+    } else if (this.engine === 'MathJax') {
       // MathJax渲染
-      let svg = getHTML(this.MathJax.tex2svg($content), true);
-      if (this.isSelfClosing()) {
-        if (/data-mml-node="merror"/.test(svg) && this.lastCode) {
-          svg = this.lastCode;
+      if (!this.MathJax?.tex2svg) {
+        // MathJax尚未加载完成，先输出占位符，等待异步加载完成后再渲染
+        result = `<div data-sign="${sign}" class="Cherry-Math cherry-mathjax-need-render" data-type="mathBlock" data-formula-source="${encodedFormulaSource}" data-lines="${lines}" data-content="${encodeURIComponent($content)}"></div>`;
+        this.$engine.asyncRenderHandler.add(`math-block-${sign}`);
+      } else {
+        let svg = '';
+        try {
+          svg = getHTML(this.MathJax.tex2svg($content), true);
+        } catch (e) {
+          if (this.isSelfClosing()) {
+            svg = this.lastCode;
+          }
         }
-        this.lastCode = svg;
+
+        if (this.isSelfClosing()) {
+          if (/data-mml-node="merror"/.test(svg) && this.lastCode) {
+            svg = this.lastCode;
+          }
+          this.lastCode = svg;
+        }
+        result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
+              data-lines="${lines}" data-formula-source="${encodedFormulaSource}">${svg}</div>`;
       }
-      result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
-            data-lines="${lines}">${svg}</div>`;
     } else {
       result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
-      data-lines="${lines}">$$${escapeFormulaPunctuations(content)}$$</div>`;
+      data-lines="${lines}" data-formula-source="${encodedFormulaSource}">$$${escapeFormulaPunctuations(content)}$$</div>`;
     }
 
     return leadingChar + this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);

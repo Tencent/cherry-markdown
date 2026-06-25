@@ -32,8 +32,6 @@ export default class CodeBlock extends ParagraphBase {
   constructor({ externals, config, cherry }) {
     super({ needCache: true });
     CodeBlock.inlineCodeCache = {};
-    this.codeCache = {};
-    this.codeCacheList = [];
     this.customLang = [];
     this.customParser = {};
     this.lineNumber = config.lineNumber; // 是否显示行号
@@ -52,8 +50,6 @@ export default class CodeBlock extends ParagraphBase {
       });
     }
     this.customHighlighter = config.highlighter;
-    this.failedCleanCacheTimes = 0;
-    this.codeTimer = null;
     this.$cherry = cherry;
     this.needCleanFlowCursor =
       cherry?.options?.engine?.global?.flowSessionContext && cherry?.options?.engine?.global?.flowSessionCursor;
@@ -64,31 +60,7 @@ export default class CodeBlock extends ParagraphBase {
   }
 
   afterMakeHtml(html) {
-    if (this.codeTimer) {
-      clearTimeout(this.codeTimer);
-      this.failedCleanCacheTimes += 1;
-      this.codeTimer = null;
-    }
-    this.codeTimer = setTimeout(() => {
-      this.$resetCache();
-    }, 500);
-    if (this.failedCleanCacheTimes > 5) {
-      this.failedCleanCacheTimes = 0;
-      setTimeout(() => {
-        this.$resetCache();
-      }, 500);
-    }
     return this.restoreCache(html);
-  }
-
-  $resetCache() {
-    if (this.codeCacheList.length > 100) {
-      // 如果缓存超过100条，则清空最早的缓存
-      for (let i = 0; i < this.codeCacheList.length - 100; i++) {
-        delete this.codeCache[this.codeCacheList[i]];
-      }
-      this.codeCacheList = this.codeCacheList.slice(-100);
-    }
   }
 
   $codeReplace($codeSrc, $lang, sign, lines) {
@@ -98,27 +70,6 @@ export default class CodeBlock extends ParagraphBase {
     return $code;
   }
 
-  $codeCache(sign, str) {
-    if (sign && str) {
-      this.codeCacheList.push(sign);
-      this.codeCache[sign] = str;
-    }
-
-    if (this.codeCache[sign]) {
-      // 如果命中了缓存，则更新缓存顺序
-      for (let i = 0; i < this.codeCacheList.length - 100; i++) {
-        if (this.codeCacheList[i] === sign) {
-          // 删除i位置的元素
-          this.codeCacheList.splice(i, 1);
-          this.codeCacheList.push(sign);
-          break;
-        }
-      }
-      return this.codeCache[sign];
-    }
-    return false;
-  }
-
   // 渲染特定语言代码块
   parseCustomLanguage(lang, codeSrc, props) {
     const engine = this.customParser[lang];
@@ -126,30 +77,65 @@ export default class CodeBlock extends ParagraphBase {
       return false;
     }
     const tag = CUSTOM_WRAPPER[engine.constructor.TYPE] || 'div';
+    const sizeStyle = props.mermaidSizeAttrs ? ` style="${props.mermaidSizeAttrs}"` : '';
+    const alignClass = props.mermaidAlignClass ? ` class="${props.mermaidAlignClass}"` : '';
+    const escapedLang = escapeHTMLSpecialChar(lang);
+    const showSourceToolbar = lang === 'mermaid' && this.mermaid && this.mermaid.showSourceToolbar;
+    // 提前计算源码 HTML 并缓存，避免每次 addContainer/updateCache 调用时重复生成
+    const $codeSrc = this.needCleanFlowCursor ? codeSrc.replace(/CHERRYFLOWSESSIONCURSOR/, '') : codeSrc;
+    const cachedSourceHtml = showSourceToolbar ? this.$codeReplace($codeSrc, lang, props.sign, props.lines) : '';
+    const containerAttrs = { tag, escapedLang, props, sizeStyle, alignClass };
     const addContainer = (html) => {
-      return `<${tag} data-sign="${props.sign}" data-type="${lang}" data-lines="${props.lines}">${html}</${tag}>`;
+      if (showSourceToolbar) {
+        return this.$buildMermaidSourceToolbarContainer(containerAttrs, html, cachedSourceHtml);
+      }
+      return `<${tag} data-sign="${props.sign}" data-type="${escapedLang}" data-lines="${props.lines}"${sizeStyle}${alignClass}>${html}</${tag}>`;
     };
     let html = '';
-    const $codeSrc = this.needCleanFlowCursor ? codeSrc.replace(/CHERRYFLOWSESSIONCURSOR/, '') : codeSrc;
     if (lang === 'all') {
       html = engine.render($codeSrc, props.sign, this.$engine, props.lang);
     } else {
       html = engine.render($codeSrc, props.sign, this.$engine, {
         mermaidConfig: this.mermaid,
+        showSourceToolbar,
         updateCache: (cacheCode) => {
-          this.$codeCache(props.sign, addContainer(cacheCode));
-          this.pushCache(addContainer(cacheCode), props.sign, props.lines);
+          const containerHtml = this.cacheAndGetData(props.sign, () => addContainer(cacheCode), 2000, -300, true);
+          this.pushCache(containerHtml, props.sign, props.lines);
         },
-        fallback: () => {
-          const $code = this.$codeReplace($codeSrc, lang, props.sign, props.lines);
-          return $code;
-        },
+        fallback: () => this.$codeReplace($codeSrc, lang, props.sign, props.lines),
       });
     }
     if (!html) {
       return false;
     }
     return addContainer(html);
+  }
+
+  /**
+   * 构建带有源码/预览切换工具栏的 mermaid 容器
+   * @param {object} attrs 容器属性 { tag, escapedLang, props, sizeStyle, alignClass }
+   * @param {string} previewHtml 预览区的 HTML 内容
+   * @param {string} sourceCodeHtml 源码区的 HTML 内容（已预先生成）
+   * @returns {string} 带工具栏的完整 HTML
+   */
+  $buildMermaidSourceToolbarContainer(attrs, previewHtml, sourceCodeHtml) {
+    const { tag, escapedLang, props, sizeStyle, alignClass } = attrs;
+    const locale = this.$cherry.getLocales();
+    const previewText = locale.mermaidPreview || 'Preview';
+    const sourceText = locale.mermaidSource || 'Source';
+    // header 区域
+    const header = `<div class="cherry-mermaid-source-toolbar">`
+      + `<div class="cherry-mermaid-source-toolbar-switch">`
+      + `<div class="cherry-mermaid-source-toolbar-tab active" data-mode="preview">${previewText}</div>`
+      + `<div class="cherry-mermaid-source-toolbar-tab" data-mode="source">${sourceText}</div>`
+      + `<div class="cherry-mermaid-source-toolbar-slider"></div>`
+      + `</div>`
+      + `</div>`;
+    // 内容区域：各面板通过 data-mode 与 tab 关联
+    const body = `<div class="cherry-mermaid-source-toolbar-panel active" data-mode="preview">${previewHtml}</div>`
+      + `<div class="cherry-mermaid-source-toolbar-panel" data-mode="source">${sourceCodeHtml}</div>`;
+    return `<${tag} data-sign="${props.sign}" data-type="${escapedLang}" data-lines="${props.lines}"${sizeStyle}${alignClass}>`
+      + header + body + `</${tag}>`;
   }
 
   // 修复渲染行号时打散的标签
@@ -188,7 +174,10 @@ export default class CodeBlock extends ParagraphBase {
   renderLineNumber(code) {
     if (!this.lineNumber) return code;
     let codeLines = code.split('\n');
-    codeLines.pop(); // 末尾回车不增加行号
+    // 只有当最后一行为空时（即代码以换行符结尾）才移除，避免丢失实际代码行
+    if (codeLines.length > 0 && codeLines[codeLines.length - 1] === '') {
+      codeLines.pop();
+    }
     codeLines = this.fillTag(codeLines);
     return `<span class="code-line">${codeLines.join('</span>\n<span class="code-line">')}</span>`;
   }
@@ -215,6 +204,36 @@ export default class CodeBlock extends ParagraphBase {
       sign,
       lines,
     };
+  }
+
+  /**
+   * 从代码块语言行中解析尺寸和对齐信息
+   * 支持语法: ```mermaid #300px #200px #center
+   * @param {string} lang 语言行文本
+   * @returns {{ lang: string, sizeAttrs: string, alignClass: string }} 解析后的语言名、尺寸样式和对齐class
+   */
+  parseMermaidSize(lang) {
+    const sizeRegex = /#([0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)/gi;
+    const alignRegex = /#(center|right|left|float-right|float-left)/i;
+    const allMarkersRegex = /#([0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto|center|right|left|float-right|float-left)/gi;
+
+    const sizes = lang.match(sizeRegex);
+    const alignMatch = lang.match(alignRegex);
+    const pureLang = lang.replace(allMarkersRegex, '').trim();
+
+    let sizeAttrs = '';
+    if (sizes?.length > 0) {
+      const [width, height] = sizes;
+      if (width) {
+        sizeAttrs = `width:${width.slice(1)};`;
+      }
+      if (height) {
+        sizeAttrs += `height:${height.slice(1)};`;
+      }
+    }
+
+    const alignClass = alignMatch ? `cherry-mermaid-align-${alignMatch[1]}` : '';
+    return { lang: pureLang, sizeAttrs, alignClass };
   }
 
   /**
@@ -286,13 +305,13 @@ export default class CodeBlock extends ParagraphBase {
         data-copy-code="${this.copyCode}"
         data-expand-code="${this.expandCode}"
         data-change-lang="${this.changeLang}"
-        data-lang="${lang}"
+        data-lang="${oldLang}"
         style="position:relative"
         class="${needUnExpand ? 'cherry-code-unExpand' : 'cherry-code-expand'}"
       >
       ${this.customWrapperRender(oldLang, cacheCode, codeHtml)}
       `;
-    if (needUnExpand) {
+    if (needUnExpand && $lang !== 'mermaid') {
       cacheCode += `<div class="cherry-mask-code-block">
         <div class="expand-btn ">
           <i class="ch-icon ch-icon-expand"></i>
@@ -367,7 +386,11 @@ export default class CodeBlock extends ParagraphBase {
   }
 
   $dealUnclosingCode(str) {
-    const codes = str.match(
+    // 统计代码块围栏（```）配对时，忽略 HTML 注释（<!-- ... -->）内部的反引号。
+    // 否则注释里的代码围栏（如 <!-- ```plantuml ... ``` -->）会被误判为「奇数个 ```」，
+    // 触发自动闭合后把注释后面的正文（如紧随其后的标题）吞进代码块。见 issue #885。
+    const strForCount = str.replace(/<!--[\s\S]*?-->/g, (comment) => comment.replace(/`/g, ' '));
+    const codes = strForCount.match(
       /(?:^|\n)(\n*((?:>[\t ]*)*)(?:[^\S\n]*))(`{3,})([^`]*?)(?=CHERRY_FLOW_SESSION_CURSOR|$|\n)/g,
     );
     if (!codes || codes.length <= 0) {
@@ -390,7 +413,13 @@ export default class CodeBlock extends ParagraphBase {
     if ($codes.length % 2 === 1) {
       const lastCode = $codes[$codes.length - 1].replace(/(`)[^`]+$/, '$1').replace(/\n+/, '');
       const $str = str.replace(/\n+$/, '').replace(/\n`{1,2}$/, '');
-      return `${$str}\n${lastCode}\n`;
+      return (
+        `${$str}\n${lastCode}\n`
+          // 如果自动闭合后代码块为空，则删除代码块
+          .replace(/\n`{3,}[^`\n]*\n\s*`{3,}\n$/g, '\n')
+          // 如果自动闭合的是mermaid图，则再判断第二行以后的内容是否为空，如果为空，则删除代码块
+          .replace(/\n`{3,}\s*mermaid\s*\n[^\n]+\n\s*`{3,}\n$/g, '\n')
+      );
     }
     return str;
   }
@@ -419,7 +448,7 @@ export default class CodeBlock extends ParagraphBase {
       let $code = code;
       const { sign, lines } = this.computeLines(match, leadingContent, code);
       // 从缓存中获取html
-      let cacheCode = this.$codeCache(sign);
+      let cacheCode = this.cacheData[sign];
       if (cacheCode && cacheCode !== '') {
         // 别忘了把 ">"（引用块）加回来
         const result = this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
@@ -443,8 +472,11 @@ export default class CodeBlock extends ParagraphBase {
         $code = $code.replace(regex, '$1');
       }
 
-      // 未命中缓存，执行渲染
       let $lang = lang.trim().toLowerCase();
+      // 从语言行中解析尺寸和对齐信息（如 mermaid #300px #200px #center）
+      const mermaidSizeInfo = this.parseMermaidSize($lang);
+      $lang = mermaidSizeInfo.lang;
+      const { sizeAttrs: mermaidSizeAttrs, alignClass: mermaidAlignClass } = mermaidSizeInfo;
       // 如果是公式关键字，则直接返回
       if (/^(math|katex|latex)$/i.test($lang) && !this.isInternalCustomLangCovered($lang)) {
         const prefix = match.match(/^\s*/g);
@@ -456,21 +488,41 @@ export default class CodeBlock extends ParagraphBase {
       const $oldLang = $lang;
       $lang = this.formatLang($lang);
       if (this.isInternalCustomLangCovered($lang)) {
-        cacheCode = this.parseCustomLanguage($lang, $code, {
-          lines,
-          sign,
-          match,
-          addBlockQuoteSignToResult,
-          lang: $oldLang,
-        });
+        // echarts渲染的场景不再缓存，因为缓存后无法触发echarts渲染
+        if (!/^\s*echarts\s*$/.test($lang)) {
+          cacheCode = this.cacheAndGetData(
+            sign,
+            () =>
+              this.parseCustomLanguage($lang, $code, {
+                lines,
+                sign,
+                match,
+                addBlockQuoteSignToResult,
+                lang: $oldLang,
+                mermaidSizeAttrs,
+                mermaidAlignClass,
+              }),
+            2000,
+            -300,
+          );
+        } else {
+          cacheCode = this.parseCustomLanguage($lang, $code, {
+            lines,
+            sign,
+            match,
+            addBlockQuoteSignToResult,
+            lang: $oldLang,
+            mermaidSizeAttrs,
+            mermaidAlignClass,
+          });
+        }
         if (cacheCode && cacheCode !== '') {
-          this.$codeCache(sign, cacheCode);
           return this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
         }
         // 渲染出错则按正常code进行渲染
       }
       // $code = this.$replaceSpecialChar($code);
-      cacheCode = this.$codeReplace($code, $lang, sign, lines);
+      cacheCode = this.cacheAndGetData(sign, () => this.$codeReplace($code, $lang, sign, lines), 2000, -300);
       const result = this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
       return addBlockQuoteSignToResult(result);
     });
