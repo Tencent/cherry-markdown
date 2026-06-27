@@ -8,12 +8,7 @@
  */
 import SearcherPanel from './SearcherPanel';
 import { getSearcherToolbarConfig, pickSearcherLocale, resolveSearcherConfig } from './config';
-import {
-  clearOrphanSearcherPanels,
-  createEditorAdapter,
-  getSearchHook,
-  isSearcherToolbarEnabled,
-} from './bridge-utils';
+import { createEditorAdapter, getSearchHook, isSearcherToolbarEnabled } from './bridge-utils';
 
 export {
   getSearcherToolbarConfig,
@@ -44,7 +39,6 @@ export default class SearcherBridge {
 
     const editorDom = cherry.editor?.options?.editorDom;
     const mountTarget = editorDom || cherry.editor?.options?.wrapperDom || cherry.wrapperDom;
-    clearOrphanSearcherPanels(mountTarget);
 
     this.panel = new SearcherPanel({
       editorAdapter: createEditorAdapter(cherry),

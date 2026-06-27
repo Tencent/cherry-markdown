@@ -89,20 +89,6 @@ export function getSearchHook(cherry) {
 }
 
 /**
- * 开发热更新时清理遗留面板 DOM（生产环境不执行）
- * @param {ParentNode | null | undefined} mountTarget
- */
-export function clearOrphanSearcherPanels(mountTarget) {
-  if (typeof import.meta !== 'undefined' && !import.meta.env?.DEV) {
-    return;
-  }
-
-  mountTarget?.querySelectorAll('.cherry-searcher').forEach((element) => {
-    element.remove();
-  });
-}
-
-/**
  * @param {SearcherCherryHost} cherry
  * @returns {SearcherEditorAdapter}
  */
