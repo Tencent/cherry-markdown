@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pickSearcherLocale } from '@/toolbars/searcher/locale';
+import { pickSearcherLocale } from '@/toolbars/searcher/config';
 import locales from '@/locales/index';
 
 describe('pickSearcherLocale', () => {

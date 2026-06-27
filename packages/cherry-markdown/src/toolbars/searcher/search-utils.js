@@ -12,20 +12,30 @@ export function escapeRegExp(str) {
  * @param {string} query
  * @param {boolean} caseSensitive
  * @param {boolean} wholeWord
+ * @param {boolean} [useRegex=false] 为 true 时将 query 作为正则源字符串解析
  * @returns {RegExp | null}
  */
-export function buildSearchRegex(query, caseSensitive, wholeWord) {
+export function buildSearchRegex(query, caseSensitive, wholeWord, useRegex = false) {
   if (!query) {
     return null;
   }
 
-  let pattern = escapeRegExp(query);
-  if (wholeWord) {
-    pattern = `\\b${pattern}\\b`;
+  let pattern;
+  if (useRegex) {
+    pattern = query;
+  } else {
+    pattern = escapeRegExp(query);
+    if (wholeWord) {
+      pattern = `\\b${pattern}\\b`;
+    }
   }
 
   const flags = caseSensitive ? 'g' : 'gi';
-  return new RegExp(pattern, flags);
+  try {
+    return new RegExp(pattern, flags);
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -47,10 +57,11 @@ export function collectMatches(text, regex) {
  * @param {string} query
  * @param {boolean} caseSensitive
  * @param {boolean} wholeWord
+ * @param {boolean} [useRegex=false]
  * @returns {Array<{ from: number; to: number }>}
  */
-export function findMatches(text, query, caseSensitive, wholeWord) {
-  const regex = buildSearchRegex(query, caseSensitive, wholeWord);
+export function findMatches(text, query, caseSensitive, wholeWord, useRegex = false) {
+  const regex = buildSearchRegex(query, caseSensitive, wholeWord, useRegex);
   if (!regex) {
     return [];
   }
@@ -69,8 +80,8 @@ export function findNearestMatchIndex(matches, cursorPos) {
     return -1;
   }
 
-  // 光标落在匹配项内部时优先选中该项
-  const insideIndex = matches.findIndex((item) => cursorPos >= item.from && cursorPos < item.to);
+  // 光标落在匹配项内部，或选区 head 落在匹配末尾（to）时，仍视为当前匹配
+  const insideIndex = matches.findIndex((item) => cursorPos >= item.from && cursorPos <= item.to);
   if (insideIndex !== -1) {
     return insideIndex;
   }

@@ -174,6 +174,7 @@ export default {
   enableShortcut: '取消禁用快捷键',
   recoverShortcut: '恢复默认配置',
   search: '搜索/替换',
+  searchOnly: '搜索',
   autoWrap: '自动换行',
   footnoteTitle: '脚注',
   searchFor: '查找',

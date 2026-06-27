@@ -419,3 +419,9 @@
     }
   }
 }
+
+// 工具栏搜索按钮展开时的激活态（与字号下拉等一致）
+.cherry-toolbar-button.cherry-toolbar-button--active {
+  background: var(--toolbar-btn-active-bg);
+  color: var(--toolbar-btn-hover-color);
+}

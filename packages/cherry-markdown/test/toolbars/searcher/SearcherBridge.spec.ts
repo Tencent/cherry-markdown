@@ -3,6 +3,7 @@ import {
   destroySearcherBridge,
   getSearcherBridge,
   initSearcherBridge,
+  resolveSearcherConfig,
 } from '@/toolbars/searcher/SearcherBridge';
 import Search from '@/toolbars/hooks/Search';
 
@@ -13,6 +14,8 @@ type SearcherCherryHost = {
     locale?: string;
     toolbars?: {
       toolbar?: Array<string | Record<string, unknown>>;
+      sidebar?: Array<string | Record<string, unknown>>;
+      config?: { searcher?: { enableReplace?: boolean; expandReplaceOnOpen?: boolean } };
     };
   };
   editor?: {
@@ -43,6 +46,8 @@ function createMockCherry(overrides: Partial<SearcherCherryHost> = {}): Searcher
       focus: vi.fn(),
     },
     getOption: (key: string) => (key === 'readOnly' ? false : undefined),
+    setSearchQuery: vi.fn(),
+    clearSearchQuery: vi.fn(),
   };
 
   return {
@@ -58,7 +63,11 @@ function createMockCherry(overrides: Partial<SearcherCherryHost> = {}): Searcher
       options: { editorDom, wrapperDom },
     },
     wrapperDom,
-    $event: { Events: { afterChangeLocale: 'afterChangeLocale', afterChange: 'afterChange' }, on: vi.fn(), off: vi.fn() },
+    $event: {
+      Events: { afterChangeLocale: 'afterChangeLocale', afterChange: 'afterChange' },
+      on: vi.fn(),
+      off: vi.fn(),
+    },
     ...overrides,
   };
 }
@@ -84,6 +93,92 @@ describe('SearcherBridge', () => {
     expect(getSearcherBridge(cherry)).toBeUndefined();
   });
 
+  it('仅 sidebar 配置 search 时也会初始化桥接层', () => {
+    const cherry = createMockCherry({
+      options: { locale: 'en_US', toolbars: { sidebar: ['search'] } },
+    });
+    initSearcherBridge(cherry);
+    expect(getSearcherBridge(cherry)).toBeDefined();
+  });
+
+  it('只读模式下仍可打开搜索面板', () => {
+    const cherry = createMockCherry({
+      editor: {
+        editor: {
+          view: {
+            state: {
+              doc: { toString: () => 'abc', sliceString: () => '' },
+              selection: { main: { from: 0, to: 0, head: 0 } },
+            },
+            focus: vi.fn(),
+          },
+          setSearchQuery: vi.fn(),
+          clearSearchQuery: vi.fn(),
+          getOption: (key: string) => (key === 'readOnly' ? true : undefined),
+        },
+        options: { editorDom: document.createElement('div'), wrapperDom: document.body },
+      },
+    });
+
+    initSearcherBridge(cherry);
+    getSearcherBridge(cherry)?.handleTrigger('', 'search');
+    expect(getSearcherBridge(cherry)?.panel.isVisible()).toBe(true);
+    expect(getSearcherBridge(cherry)?.panel.canPerformReplace()).toBe(false);
+  });
+
+  it('resolveSearcherConfig 解析 enableReplace 与 expandReplaceOnOpen', () => {
+    expect(resolveSearcherConfig(undefined)).toEqual({ enableReplace: true, expandReplaceOnOpen: false });
+    expect(resolveSearcherConfig({ enableReplace: false, expandReplaceOnOpen: true })).toEqual({
+      enableReplace: false,
+      expandReplaceOnOpen: true,
+    });
+  });
+
+  it('面板隐藏时文档变更仍同步匹配列表', async () => {
+    vi.useFakeTimers();
+
+    let doc = 'foo bar foo';
+    const handlers: Record<string, (msg?: unknown) => void> = {};
+    const cherry = createMockCherry({
+      editor: {
+        editor: {
+          view: {
+            state: {
+              doc: {
+                toString: () => doc,
+                sliceString: (from: number, to: number) => doc.slice(from, to),
+              },
+              selection: { main: { from: 0, to: 0, head: 0 } },
+            },
+            focus: vi.fn(),
+          },
+          setSelection: vi.fn(),
+          setSearchQuery: vi.fn(),
+          clearSearchQuery: vi.fn(),
+          getOption: () => false,
+        },
+        options: { editorDom: document.createElement('div'), wrapperDom: document.body },
+      },
+      $event: {
+        Events: { afterChangeLocale: 'afterChangeLocale', afterChange: 'afterChange' },
+        on: (event: string, handler: (msg?: unknown) => void) => {
+          handlers[event] = handler;
+        },
+        off: vi.fn(),
+      },
+    });
+
+    initSearcherBridge(cherry);
+    const bridge = getSearcherBridge(cherry);
+    bridge?.panel.show('foo');
+    bridge?.panel.hide();
+
+    doc = 'foo';
+    handlers.afterChange?.({});
+    expect(bridge?.panel.state.matches).toHaveLength(1);
+    vi.useRealTimers();
+  });
+
   it('工具栏按钮可打开搜索面板', () => {
     const cherry = createMockCherry();
     initSearcherBridge(cherry);
@@ -98,6 +193,38 @@ describe('SearcherBridge', () => {
     searchMenu.onClick('');
 
     expect(bridge.panel.isVisible()).toBe(true);
+  });
+
+  it('工具栏按钮再次点击可关闭搜索面板', () => {
+    const cherry = createMockCherry();
+    initSearcherBridge(cherry);
+    const bridge = getSearcherBridge(cherry);
+    if (!bridge) {
+      throw new Error('searcher bridge is not initialized');
+    }
+
+    cherry.$currentMenuOptions = { name: 'search', icon: 'search' };
+    const searchMenu = new Search(cherry);
+    searchMenu.dom = document.createElement('button');
+    searchMenu.onClick('');
+    expect(bridge.panel.isVisible()).toBe(true);
+
+    expect(searchMenu.toggleToolbarPanel()).toBe(true);
+    expect(bridge.panel.isVisible()).toBe(false);
+  });
+
+  it('快捷键 aliasName 为 search 时再次触发可关闭面板', () => {
+    const cherry = createMockCherry();
+    initSearcherBridge(cherry);
+    const bridge = getSearcherBridge(cherry);
+    if (!bridge) {
+      throw new Error('searcher bridge is not initialized');
+    }
+
+    bridge.handleTrigger('', 'search');
+    expect(bridge.panel.isVisible()).toBe(true);
+    bridge.handleTrigger('', 'search');
+    expect(bridge.panel.isVisible()).toBe(false);
   });
 
   it('Cherry locale 映射到面板文案', () => {

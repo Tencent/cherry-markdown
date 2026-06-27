@@ -39,7 +39,20 @@ describe('searcher/search-utils', () => {
     expect(findNearestMatchIndex(matches, 12)).toBe(1);
   });
 
+  it('findNearestMatchIndex: 光标在匹配末尾时不应跳到下一项', () => {
+    const matches = [
+      { from: 0, to: 5 },
+      { from: 13, to: 18 },
+    ];
+    expect(findNearestMatchIndex(matches, 5)).toBe(0);
+    expect(findNearestMatchIndex(matches, 18)).toBe(1);
+  });
+
   it('buildSearchRegex: 空查询返回 null', () => {
     expect(buildSearchRegex('', false, false)).toBeNull();
+  });
+
+  it('buildSearchRegex: 无效正则返回 null', () => {
+    expect(buildSearchRegex('[', false, false, true)).toBeNull();
   });
 });

@@ -7,9 +7,10 @@
  * @module toolbars/searcher/SearcherPanel
  */
 import { buildSearchRegex, collectMatches, findMatches, findNearestMatchIndex } from './search-utils.js';
-import { pickSearcherLocale } from './locale.js';
+import { pickSearcherLocale } from './config.js';
+import { applyReplaceExpandedDomState, buildSearcherPanelHtml } from './panel-dom.js';
 
-/** 输入搜索防抖间隔（毫秒），减少连续输入时的匹配计算次数 */
+/** 输入防抖间隔（毫秒） */
 const SEARCH_DEBOUNCE_MS = 150;
 
 /**
@@ -17,28 +18,18 @@ const SEARCH_DEBOUNCE_MS = 150;
  * @typedef {object} SearcherPanelParams
  * @property {SearcherEditorAdapter} editorAdapter 编辑器读写适配器
  * @property {Record<string, string | undefined>} [locale] Cherry 全局 locale，面板通过 pickSearcherLocale 提取文案
+ * @property {boolean} [enableReplace=true] 是否展示替换行
  * @property {ParentNode | null} [mountTarget] 面板挂载节点，通常为 `.cherry-editor`
+ * @property {(visible: boolean) => void} [onVisibilityChange] 面板显隐回调，用于同步工具栏按钮激活态
  */
 
-/**
- * 编辑器适配器（与 SearcherBridge.createEditorAdapter 返回值一致）
- * @typedef {object} SearcherEditorAdapter
- * @property {() => string} getDocString
- * @property {() => { from: number; to: number }} getSelection
- * @property {() => string} getSelectedText
- * @property {() => number} getCursorHead
- * @property {(from: number, to: number, options?: object) => void} setSelection
- * @property {(text: string, from: number, to: number) => void} replaceRange
- * @property {(pattern: string, caseSensitive: boolean, asRegex: boolean) => void} setSearchQuery
- * @property {() => void} clearSearchQuery
- * @property {() => void} focus
- * @property {() => boolean} isReadOnly
- */
+/** @typedef {import('./bridge-utils').SearcherEditorAdapter} SearcherEditorAdapter */
 
 /**
  * 面板显示选项
  * @typedef {object} SearcherShowOptions
  * @property {boolean} [expandReplace] 为 true 时打开面板同时展开替换行（Mod+H）
+ * @property {boolean} [selectAll] 为 true 时聚焦输入框并全选内容（首次带选中文本打开）
  */
 
 /**
@@ -47,6 +38,7 @@ const SEARCH_DEBOUNCE_MS = 150;
  * @property {string} query 当前搜索关键词
  * @property {boolean} caseSensitive 是否区分大小写
  * @property {boolean} wholeWord 是否全字匹配
+ * @property {boolean} useRegex 是否按正则表达式解析搜索词
  * @property {Array<{ from: number; to: number }>} matches 文档中全部匹配区间
  * @property {number} activeMatchIndex 当前高亮匹配项在 matches 中的下标，无匹配时为 -1
  */
@@ -77,26 +69,11 @@ function queryOptional(root, selector) {
   return /** @type {T | null} */ (root.querySelector(selector));
 }
 
-const SEARCH_ICON = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.333 12.667A5.333 5.333 0 1 0 7.333 2a5.333 5.333 0 0 0 0 10.667ZM14 14l-2.9-2.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-
-const CLEAR_ICON = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
-
-// 区分大小写 / 全字匹配：字形由 SCSS 控制字号与主题色
-const CASE_ICON = `<svg class="cherry-searcher__toggle-icon" viewBox="0 0 16 16" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><text x="8" y="11.75" text-anchor="middle">Aa</text></svg>`;
-
-const WHOLE_WORD_ICON = `<svg class="cherry-searcher__toggle-icon" viewBox="0 0 16 16" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><text x="8" y="10.75" text-anchor="middle">ab</text><path d="M2.5 12.75H13.5"/></svg>`;
-
-const PREV_ICON = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 10L8 6L4 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-
-const NEXT_ICON = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-
-const EXPAND_ICON = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-
 /**
  * 搜索/替换面板
  *
- * 搜索行：输入框、清空、大小写/全字匹配切换、匹配计数与上/下导航。
- * 替换行：替换为输入、单条替换、全部替换（只读时禁用）。
+ * 搜索行：输入框、匹配选项、计数与导航。
+ * 替换行：可折叠，由 `enableReplace` 控制；只读时禁用替换操作。
  */
 export default class SearcherPanel {
   /** @type {SearcherEditorAdapter} 编辑器适配器 */
@@ -122,6 +99,9 @@ export default class SearcherPanel {
 
   /** @type {HTMLButtonElement} */
   wholeWordToggle;
+
+  /** @type {HTMLButtonElement} */
+  regexToggle;
 
   /** @type {HTMLElement} */
   counter;
@@ -156,12 +136,15 @@ export default class SearcherPanel {
     const {
       editorAdapter,
       locale = {},
+      enableReplace = true,
       mountTarget = typeof document !== 'undefined' ? document.body : null,
+      onVisibilityChange,
     } = params;
 
     this.editorAdapter = editorAdapter;
     this.locale = pickSearcherLocale(locale);
-    this.enableReplace = true;
+    this.enableReplace = enableReplace;
+    this.onVisibilityChange = onVisibilityChange;
     this.replaceExpanded = false;
 
     /** @type {SearcherPanelState} 搜索匹配与高亮状态 */
@@ -169,18 +152,17 @@ export default class SearcherPanel {
       query: '',
       caseSensitive: false,
       wholeWord: false,
+      useRegex: false,
       matches: [],
       activeMatchIndex: -1,
     };
 
     /** @type {ReturnType<typeof setTimeout> | null} */
-    this._searchTimer = null;
+    this.searchTimer = null;
     /** @type {boolean} */
-    this._pendingKeepActiveIndex = false;
+    this.pendingKeepActiveIndex = false;
 
-    this.handleDocumentPointerDown = this.handleDocumentPointerDown.bind(this);
-    /** @type {boolean} */
-    this._outsideCloseBound = false;
+    this.handlePanelShortcutKey = this.handlePanelShortcutKey.bind(this);
 
     this.dom = this.createDOM();
     this.cacheElements();
@@ -209,38 +191,70 @@ export default class SearcherPanel {
    * @param {SearcherShowOptions} [showOptions] 显示选项，`expandReplace` 为 true 时展开替换行
    */
   show(selection = '', showOptions = {}) {
+    const { expandReplace = false, selectAll = Boolean(selection) } = showOptions;
+
     this.dom.style.display = '';
 
-    if (showOptions.expandReplace) {
+    if (expandReplace) {
       this.setReplaceExpanded(true);
     }
 
     if (selection) {
       this.setQuery(selection, false);
     } else if (this.state.query) {
-      this.runSearch();
+      this.syncMatches(true, true);
     }
 
-    if (this.replaceExpanded && this.replaceInput) {
-      this.replaceInput.focus();
-      this.replaceInput.select();
-    } else {
-      this.input.focus();
-      this.input.select();
-    }
-
+    this.focusPanelInput({ selectAll, replace: this.replaceExpanded });
     this.updateReplaceButtonState();
-    this.bindCloseOnOutside();
+    this.onVisibilityChange?.(true);
   }
 
   /**
    * 隐藏搜索面板，清除编辑器高亮并将焦点交还编辑器
    */
   hide() {
-    this.unbindCloseOnOutside();
     this.clearHighlight();
     this.dom.style.display = 'none';
     this.editorAdapter.focus();
+    this.onVisibilityChange?.(false);
+  }
+
+  /**
+   * 聚焦搜索或替换输入框
+   * @param {{ selectAll?: boolean; replace?: boolean }} [options]
+   */
+  focusPanelInput(options = {}) {
+    const { selectAll = false, replace = false } = options;
+    const input = replace && this.replaceInput ? this.replaceInput : this.input;
+
+    input.focus();
+    if (selectAll) {
+      input.select();
+      return;
+    }
+
+    const end = input.value.length;
+    input.setSelectionRange(end, end);
+  }
+
+  /**
+   * Esc：先清空当前输入框内容，再次 Esc 关闭面板
+   * @param {HTMLInputElement} inputEl
+   */
+  handleEscapeKey(inputEl) {
+    if (inputEl === this.replaceInput && this.replaceInput?.value) {
+      this.clearReplaceText();
+      return;
+    }
+
+    if (this.state.query) {
+      this.clearQuery();
+      this.input.focus();
+      return;
+    }
+
+    this.hide();
   }
 
   /**
@@ -249,47 +263,40 @@ export default class SearcherPanel {
   destroy() {
     this.cancelScheduledSearch();
     this.clearHighlight();
-    this.unbindCloseOnOutside();
     if (this.dom.parentNode) {
       this.dom.parentNode.removeChild(this.dom);
     }
   }
 
-  /** 面板可见时监听文档点击，仅在面板外按下时关闭 */
-  bindCloseOnOutside() {
-    if (this._outsideCloseBound) {
-      return;
-    }
-
-    document.addEventListener('mousedown', this.handleDocumentPointerDown);
-    this._outsideCloseBound = true;
-  }
-
-  /** 移除文档点击监听 */
-  unbindCloseOnOutside() {
-    if (!this._outsideCloseBound) {
-      return;
-    }
-
-    document.removeEventListener('mousedown', this.handleDocumentPointerDown);
-    this._outsideCloseBound = false;
-  }
-
   /**
-   * 点击面板外关闭（面板内任意位置点击均不关闭，由 dom mousedown stopPropagation 保证）
-   * @param {MouseEvent} event
+   * 面板内拦截 Mod+F / Mod+H，避免唤起浏览器查找并支持再次 Mod+F 关闭
+   * @param {KeyboardEvent} event
    */
-  handleDocumentPointerDown(event) {
+  handlePanelShortcutKey(event) {
     if (!this.isVisible()) {
       return;
     }
 
-    const target = /** @type {Node} */ (event.target);
-    if (this.dom.contains(target)) {
+    const mod = event.ctrlKey || event.metaKey;
+    if (!mod) {
       return;
     }
 
-    this.hide();
+    const key = event.key.toLowerCase();
+    if (key === 'f') {
+      event.preventDefault();
+      event.stopPropagation();
+      this.hide();
+      return;
+    }
+
+    if (key === 'h' && this.enableReplace) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.setReplaceExpanded(true);
+      this.replaceInput?.focus();
+      this.replaceInput?.select();
+    }
   }
 
   /**
@@ -300,64 +307,8 @@ export default class SearcherPanel {
   createDOM() {
     const container = document.createElement('div');
     container.className = 'cherry-searcher';
-    const expandBtnHtml = this.enableReplace
-      ? `<button type="button" class="cherry-searcher__expand-btn" aria-expanded="false" aria-label="toggle replace">${EXPAND_ICON}</button>`
-      : '';
-    const replaceSpacerHtml = this.enableReplace
-      ? '<span class="cherry-searcher__expand-spacer" aria-hidden="true"></span>'
-      : '';
-    const replaceRowHtml = this.enableReplace
-      ? [
-          '    <div class="cherry-searcher__row cherry-searcher__replace-row is-hidden">',
-          '      <div class="cherry-searcher__input-wrapper cherry-searcher__replace-wrapper">',
-          replaceSpacerHtml,
-          '        <input class="cherry-searcher__replace-input" type="text" spellcheck="false" />',
-          `        <button type="button" class="cherry-searcher__clear cherry-searcher__replace-clear" aria-label="clear">${CLEAR_ICON}</button>`,
-          '        <span class="cherry-searcher__divider"></span>',
-          '        <div class="cherry-searcher__replace-actions">',
-          '          <button type="button" class="cherry-searcher__replace-btn is-unavailable" data-action="replace" disabled></button>',
-          '          <button type="button" class="cherry-searcher__replace-btn cherry-searcher__replace-btn--all is-unavailable" data-action="replaceAll" disabled></button>',
-          '        </div>',
-          '      </div>',
-          '    </div>',
-        ].join('\n')
-      : '';
-
-    container.innerHTML = [
-      '<div class="cherry-searcher__container">',
-      '  <div class="cherry-searcher__rows">',
-      '    <div class="cherry-searcher__row cherry-searcher__search-row">',
-      '      <div class="cherry-searcher__input-wrapper">',
-      expandBtnHtml,
-      `        <span class="cherry-searcher__icon cherry-searcher__icon--search">${SEARCH_ICON}</span>`,
-      '        <input class="cherry-searcher__input" type="text" spellcheck="false" />',
-      `        <button type="button" class="cherry-searcher__clear" aria-label="clear">${CLEAR_ICON}</button>`,
-      '        <span class="cherry-searcher__divider"></span>',
-      '        <div class="cherry-searcher__toggles">',
-      `          <button type="button" class="cherry-searcher__toggle" data-type="caseSensitive" aria-pressed="false" title="">${CASE_ICON}</button>`,
-      `          <button type="button" class="cherry-searcher__toggle" data-type="wholeWord" aria-pressed="false" title="">${WHOLE_WORD_ICON}</button>`,
-      '        </div>',
-      '        <span class="cherry-searcher__divider"></span>',
-      '        <div class="cherry-searcher__nav">',
-      '          <span class="cherry-searcher__counter">0/0</span>',
-      `          <button type="button" class="cherry-searcher__nav-btn" data-direction="prev" aria-label="prev">${PREV_ICON}</button>`,
-      `          <button type="button" class="cherry-searcher__nav-btn" data-direction="next" aria-label="next">${NEXT_ICON}</button>`,
-      '        </div>',
-      '      </div>',
-      '    </div>',
-      replaceRowHtml,
-      '  </div>',
-      '</div>',
-    ]
-      .filter(Boolean)
-      .join('\n');
-
-    if (this.replaceExpanded) {
-      container.classList.add('is-replace-expanded');
-      container.querySelector('.cherry-searcher__replace-row')?.classList.remove('is-hidden');
-      container.querySelector('.cherry-searcher__expand-btn')?.setAttribute('aria-expanded', 'true');
-    }
-
+    container.innerHTML = buildSearcherPanelHtml(this.enableReplace);
+    applyReplaceExpandedDomState(container, this.replaceExpanded);
     return container;
   }
 
@@ -370,6 +321,7 @@ export default class SearcherPanel {
     this.clearButton = /** @type {HTMLButtonElement} */ (queryRequired(this.dom, '.cherry-searcher__clear'));
     this.caseToggle = /** @type {HTMLButtonElement} */ (queryRequired(this.dom, '[data-type="caseSensitive"]'));
     this.wholeWordToggle = /** @type {HTMLButtonElement} */ (queryRequired(this.dom, '[data-type="wholeWord"]'));
+    this.regexToggle = /** @type {HTMLButtonElement} */ (queryRequired(this.dom, '[data-type="useRegex"]'));
     this.counter = queryRequired(this.dom, '.cherry-searcher__counter');
     this.prevButton = /** @type {HTMLButtonElement} */ (queryRequired(this.dom, '[data-direction="prev"]'));
     this.nextButton = /** @type {HTMLButtonElement} */ (queryRequired(this.dom, '[data-direction="next"]'));
@@ -386,51 +338,27 @@ export default class SearcherPanel {
     );
   }
 
-  /** 绑定输入、键盘、导航、替换等交互事件 */
-  bindEvents() {
-    this.input.addEventListener('input', () => {
-      this.setQuery(this.input.value, true, false);
+  /** 绑定替换区事件（仅 enableReplace 为 true 时在构造阶段调用一次） */
+  bindReplaceEvents() {
+    this.replaceInput?.addEventListener('input', () => {
+      this.updateReplaceClearVisibility();
+      this.updateReplaceButtonState();
     });
 
-    this.input.addEventListener('keydown', (event) => {
+    this.replaceInput?.addEventListener('keydown', (event) => {
       const keyboardEvent = /** @type {KeyboardEvent} */ (event);
       if (keyboardEvent.key === 'Enter') {
         keyboardEvent.preventDefault();
-        this.flushScheduledSearch(true);
-        if (this.state.matches.length > 0) {
-          this.navigate(keyboardEvent.shiftKey ? 'prev' : 'next');
+        if (keyboardEvent.shiftKey) {
+          this.replaceCurrent(true);
+        } else {
+          this.replaceCurrent();
         }
       } else if (keyboardEvent.key === 'Escape') {
         keyboardEvent.preventDefault();
-        if (this.state.query) {
-          this.clearQuery();
-        } else {
-          this.hide();
-        }
+        this.handleEscapeKey(this.replaceInput);
       }
     });
-
-    if (this.replaceInput) {
-      this.replaceInput.addEventListener('input', () => {
-        this.updateReplaceClearVisibility();
-        this.updateReplaceButtonState();
-      });
-
-      this.replaceInput.addEventListener('keydown', (event) => {
-        const keyboardEvent = /** @type {KeyboardEvent} */ (event);
-        if (keyboardEvent.key === 'Enter') {
-          keyboardEvent.preventDefault();
-          if (keyboardEvent.shiftKey) {
-            this.replaceCurrent(true);
-          } else {
-            this.replaceCurrent();
-          }
-        } else if (keyboardEvent.key === 'Escape') {
-          keyboardEvent.preventDefault();
-          this.hide();
-        }
-      });
-    }
 
     this.expandButton?.addEventListener('click', () => {
       this.setReplaceExpanded(!this.replaceExpanded);
@@ -453,6 +381,31 @@ export default class SearcherPanel {
       event.stopPropagation();
       this.clearReplaceText();
     });
+  }
+
+  /** 绑定输入、键盘、导航、替换等交互事件 */
+  bindEvents() {
+    this.input.addEventListener('input', () => {
+      this.setQuery(this.input.value, true, false);
+    });
+
+    this.input.addEventListener('keydown', (event) => {
+      const keyboardEvent = /** @type {KeyboardEvent} */ (event);
+      if (keyboardEvent.key === 'Enter') {
+        keyboardEvent.preventDefault();
+        this.flushScheduledSearch(true);
+        if (this.state.matches.length > 0) {
+          this.navigate(keyboardEvent.shiftKey ? 'prev' : 'next');
+        }
+      } else if (keyboardEvent.key === 'Escape') {
+        keyboardEvent.preventDefault();
+        this.handleEscapeKey(this.input);
+      }
+    });
+
+    if (this.replaceInput) {
+      this.bindReplaceEvents();
+    }
 
     this.clearButton.addEventListener('click', (event) => {
       event.stopPropagation();
@@ -473,6 +426,13 @@ export default class SearcherPanel {
       this.runSearch();
     });
 
+    this.regexToggle.addEventListener('click', () => {
+      this.state.useRegex = !this.state.useRegex;
+      this.regexToggle.setAttribute('aria-pressed', String(this.state.useRegex));
+      this.regexToggle.classList.toggle('is-active', this.state.useRegex);
+      this.runSearch();
+    });
+
     this.prevButton.addEventListener('click', () => {
       this.navigate('prev');
     });
@@ -484,6 +444,8 @@ export default class SearcherPanel {
     this.dom.addEventListener('mousedown', (event) => {
       event.stopPropagation();
     });
+
+    this.dom.addEventListener('keydown', this.handlePanelShortcutKey, true);
   }
 
   /**
@@ -537,19 +499,19 @@ export default class SearcherPanel {
    * @param {boolean} [keepActiveIndex=false]
    */
   scheduleSearch(keepActiveIndex = false) {
-    this._pendingKeepActiveIndex = keepActiveIndex;
+    this.pendingKeepActiveIndex = keepActiveIndex;
     this.cancelScheduledSearch();
-    this._searchTimer = setTimeout(() => {
-      this._searchTimer = null;
-      this.runSearch(this._pendingKeepActiveIndex);
+    this.searchTimer = setTimeout(() => {
+      this.searchTimer = null;
+      this.runSearch(this.pendingKeepActiveIndex);
     }, SEARCH_DEBOUNCE_MS);
   }
 
   /** 取消待执行的防抖搜索 */
   cancelScheduledSearch() {
-    if (this._searchTimer) {
-      clearTimeout(this._searchTimer);
-      this._searchTimer = null;
+    if (this.searchTimer) {
+      clearTimeout(this.searchTimer);
+      this.searchTimer = null;
     }
   }
 
@@ -558,7 +520,7 @@ export default class SearcherPanel {
    * @param {boolean} [keepActiveIndex=true]
    */
   flushScheduledSearch(keepActiveIndex = true) {
-    if (!this._searchTimer) {
+    if (!this.searchTimer) {
       return;
     }
 
@@ -567,11 +529,12 @@ export default class SearcherPanel {
   }
 
   /**
-   * 执行搜索：收集匹配、定位最近项、高亮并更新计数器
+   * 同步匹配结果；面板隐藏时仅更新 state，不写入编辑器高亮
    *
-   * @param {boolean} [keepActiveIndex=false] 为 true 且当前序号仍有效时，不根据光标重新定位匹配项
+   * @param {boolean} [keepActiveIndex=false]
+   * @param {boolean} [applyToEditor=true]
    */
-  runSearch(keepActiveIndex = false) {
+  syncMatches(keepActiveIndex = false, applyToEditor = true) {
     if (!this.editorAdapter) {
       return;
     }
@@ -579,15 +542,17 @@ export default class SearcherPanel {
     this.cancelScheduledSearch();
 
     const text = this.editorAdapter.getDocString();
-    const { query, caseSensitive, wholeWord } = this.state;
-    const regex = buildSearchRegex(query, caseSensitive, wholeWord);
+    const { query, caseSensitive, wholeWord, useRegex } = this.state;
+    const regex = buildSearchRegex(query, caseSensitive, wholeWord, useRegex);
     const matches = regex ? collectMatches(text, regex) : [];
 
     this.state.matches = matches;
 
     if (!query) {
       this.state.activeMatchIndex = -1;
-      this.clearHighlight();
+      if (applyToEditor) {
+        this.clearHighlight();
+      }
       this.updateCounter();
       return;
     }
@@ -597,9 +562,21 @@ export default class SearcherPanel {
       this.state.activeMatchIndex = findNearestMatchIndex(matches, cursorPos);
     }
 
-    this.applyHighlight(regex);
-    this.focusCurrentMatch();
+    if (applyToEditor) {
+      this.applyHighlight(regex);
+      this.focusCurrentMatch();
+    }
+
     this.updateCounter();
+  }
+
+  /**
+   * 执行搜索：收集匹配、定位最近项、高亮并更新计数器
+   *
+   * @param {boolean} [keepActiveIndex=false] 为 true 且当前序号仍有效时，不根据光标重新定位匹配项
+   */
+  runSearch(keepActiveIndex = false) {
+    this.syncMatches(keepActiveIndex, true);
   }
 
   /**
@@ -612,13 +589,13 @@ export default class SearcherPanel {
       return;
     }
 
-    const { query, caseSensitive, wholeWord } = this.state;
+    const { query, caseSensitive, wholeWord, useRegex } = this.state;
     if (!query) {
       this.clearHighlight();
       return;
     }
 
-    const searchRegex = regex ?? buildSearchRegex(query, caseSensitive, wholeWord);
+    const searchRegex = regex ?? buildSearchRegex(query, caseSensitive, wholeWord, useRegex);
     if (!searchRegex) {
       return;
     }
@@ -750,8 +727,8 @@ export default class SearcherPanel {
     this.editorAdapter.replaceRange(replacement, match.from, match.to);
 
     const text = this.editorAdapter.getDocString();
-    const { query, caseSensitive, wholeWord } = this.state;
-    const matches = findMatches(text, query, caseSensitive, wholeWord);
+    const { query, caseSensitive, wholeWord, useRegex } = this.state;
+    const matches = findMatches(text, query, caseSensitive, wholeWord, useRegex);
     this.state.matches = matches;
 
     if (keepIndex && matches.length > 0) {
@@ -849,11 +826,13 @@ export default class SearcherPanel {
     this.clearButton.title = strings.searchClear ?? '';
     this.caseToggle.title = strings.caseSensitiveSearch ?? '';
     this.wholeWordToggle.title = strings.wholeWordSearch ?? '';
+    this.regexToggle.title = strings.regExpSearch ?? '';
     this.prevButton.title = strings.previousMatch ?? '';
     this.nextButton.title = strings.nextMatch ?? '';
 
     if (this.expandButton) {
       this.expandButton.title = strings.toggleReplace || strings.replace || '';
+      this.expandButton.setAttribute('aria-label', strings.toggleReplace || strings.replace || '');
     }
     if (this.replaceInput) {
       this.replaceInput.placeholder = strings.replaceWith ?? '';
