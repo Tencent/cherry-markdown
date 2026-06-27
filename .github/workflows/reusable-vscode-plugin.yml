@@ -3,14 +3,14 @@
 #
 # 模式 (mode):
 #   "package"     — 改版本号 + 构建 + 打包 .vsix + 上传 artifact（PR Preview）
-#   "release"     — 构建 + 正式发布到 Marketplace（Push → main，changeset 版本号）
+#   "release"     — 构建 + 打包 .vsix + 发布到 VS Marketplace 与 Open VSX
 #
 # 步骤:
 #   1. 改名（cherry-markdown-core + cherry-markdown）— 解决 workspace 冲突
 #   2. 改版本号（package 模式加时间戳）
 #   3. 安装依赖 + 构建核心库
 #   4. 生产模式编译插件
-#   5. 打包 / 正式发布
+#   5. 打包 / 上传 artifact / 双市场发布
 # =============================================================================
 
 name: 'Reusable: VSCode Plugin'
@@ -90,11 +90,28 @@ jobs:
           retention-days: 5
           if-no-files-found: warn
 
-      # ── 5b. release 模式：正式发布到 Marketplace ──
-      - name: Publish VSCode Plugin (release)
+      # ── 5b. release 模式：打包一次，同一 .vsix 发布到双市场 ──
+      - name: Package VSIX (release)
+        if: inputs.mode == 'release'
+        run: |
+          cd packages/vscodePlugin
+          npx @vscode/vsce package --no-dependencies --no-yarn
+          ls -1 *.vsix
+
+      - name: Publish to Visual Studio Marketplace
         if: inputs.mode == 'release'
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
           cd packages/vscodePlugin
-          npx @vscode/vsce publish -p $VSCE_PAT --no-dependencies --no-yarn
+          VSIX=$(ls -1 *.vsix | head -1)
+          npx @vscode/vsce publish --packagePath "$VSIX" --no-dependencies --no-yarn
+
+      - name: Publish to Open VSX Registry
+        if: inputs.mode == 'release'
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          cd packages/vscodePlugin
+          VSIX=$(ls -1 *.vsix | head -1)
+          npx ovsx publish "$VSIX" --no-dependencies --no-yarn
