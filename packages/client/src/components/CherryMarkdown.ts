@@ -253,8 +253,8 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       'graph',
       'proTable',
       '|',
-      'search',
       'shortcutKey',
+      'search',
       'togglePreview',
     ],
     toolbarRight: ['customSave', 'export', '|', 'wordCount'] as any[],
@@ -384,6 +384,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
 
 /**
  * @description cherryInstance
+ * 搜索能力已内嵌至 cherry-markdown 主包，默认 toolbar 含 search，无需额外注册
  */
 export const cherryInstance = (() => {
   return () => {

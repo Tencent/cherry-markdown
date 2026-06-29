@@ -10,7 +10,10 @@
     "rootDir": "./src",
     "strict": false,
     "noFallthroughCasesInSwitch": false,
-    "paths": { "@/*": ["./src/*"], "~types/*": ["./types/*"] },
+    "paths": {
+      "@/*": ["./src/*"],
+      "~types/*": ["./types/*"]
+    },
     "experimentalDecorators": true
   },
   "include": ["src/index.js", "src/index.core.js", "src/index.engine.js", "src/index.stream.js"],

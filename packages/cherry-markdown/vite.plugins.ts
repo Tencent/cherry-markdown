@@ -58,7 +58,6 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
   // 虚拟模块 ID 前缀
   const VIRTUAL_PREFIX = 'virtual:cherry-';
   const RESOLVED_PREFIX = `\0${VIRTUAL_PREFIX}`;
-
   // 固定虚拟模块
   const virtualCherryJsId = `${VIRTUAL_PREFIX}full-js`;
   const virtualCherryCoreJsId = `${VIRTUAL_PREFIX}core-js`;
@@ -222,7 +221,9 @@ export { Cherry };
 
       // 加载虚拟 CSS 模块 - 导入 SCSS 源文件
       if (id === resolvedVirtualCherryCssId) {
-        return `import '${srcDirNormalized}/sass/index.scss';`;
+        return `
+import '${srcDirNormalized}/sass/index.scss';
+`;
       }
 
       // 加载 addon 虚拟模块 - 从 src/addons/ 导入并暴露为 UMD 风格的全局变量

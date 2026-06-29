@@ -4,12 +4,10 @@
     "allowJs": true,
     "noEmit": true,
     "strict": false,
-    "baseUrl": "..",
     "paths": {
-      "@/*": ["src/*"],
-      "~types/*": ["types/*"]
-    },
-    "ignoreDeprecations": "6.0"
+      "@/*": ["../src/*"],
+      "~types/*": ["../types/*"]
+    }
   },
   "include": ["./**/*.ts", "./**/*.tsx"],
   "files": ["../types/env.d.ts", "../types/codemirror.d.ts"]

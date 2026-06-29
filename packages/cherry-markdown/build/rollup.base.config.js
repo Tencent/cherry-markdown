@@ -34,6 +34,10 @@ const aliasPluginOptions = {
       find: '@',
       replacement: path.resolve(PROJECT_ROOT_PATH, 'src'),
     },
+    {
+      find: '@cherry',
+      replacement: path.resolve(PROJECT_ROOT_PATH, 'src'),
+    },
   ],
 };
 

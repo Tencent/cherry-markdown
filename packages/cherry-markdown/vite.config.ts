@@ -55,6 +55,7 @@ export default defineConfig({
     alias: [
       // 源码别名
       { find: '@', replacement: srcDir },
+      { find: '@cherry', replacement: srcDir },
       // examples 别名
       { find: '@examples', replacement: examplesDir },
     ],

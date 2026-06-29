@@ -50,6 +50,7 @@ export class CherryStatic {
   static constants = constants;
   static plugins = plugins;
   static VERSION = VERSION;
+
   /**
    * @this {typeof import('./Cherry').default | typeof CherryStatic}
    * @param {{ install: (defaultConfig: any, ...args: any[]) => void }} PluginClass 插件Class

@@ -44,6 +44,7 @@ import Logger from '@/Logger';
 
 import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
+import { destroySearcherBridge, initSearcherBridge } from './toolbars/searcher/SearcherBridge';
 import { LIST_CONTENT } from '@/utils/regexp';
 
 /** @typedef {import('~types/cherry').CherryOptions} CherryOptions */
@@ -75,11 +76,6 @@ export default class Cherry extends CherryStatic {
      * @type {CherryOptions}
      */
     this.options = mergeWith({}, defaultConfigCopy, options, customizer);
-
-    /** @type {import('./utils/cm-search-replace').default} SearchBox 实例 */
-    this.searchBoxInstance = null;
-    /** @type {boolean} 是否初始化SearchBox */
-    this.searchBoxInit = false;
 
     this.storageFloatPreviewerWrapData = {
       x: 50,
@@ -275,7 +271,10 @@ export default class Cherry extends CherryStatic {
   }
 
   destroy() {
-    // 先销毁编辑器实例（清理 EditorView 和资源）
+    // 先销毁搜索面板桥接（解绑监听、清理面板 DOM）
+    destroySearcherBridge(this);
+
+    // 再销毁编辑器实例（清理 EditorView 和资源）
     if (this.editor) {
       this.editor.destroy();
     }
@@ -1010,6 +1009,7 @@ export default class Cherry extends CherryStatic {
         this.previewer.update(html);
       }
       this.$event.emit('afterInit', { markdownText, html });
+      initSearcherBridge(this);
     } catch (e) {
       throw new NestedError(e);
     }
@@ -1185,7 +1185,6 @@ export default class Cherry extends CherryStatic {
     this.locale = this.locales[locale];
     this.$event.emit('afterChangeLocale', locale);
     this.resetToolbar('toolbar', this.options.toolbars.toolbar || []);
-    if (this.searchBoxInstance) this.searchBoxInstance.updateLocaleStrings();
     return true;
   }
 
