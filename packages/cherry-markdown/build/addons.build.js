@@ -8,7 +8,7 @@ import typescript from 'rollup-plugin-typescript2';
 import envReplacePlugin from './env.js';
 
 import { resolve as _resolve, join, dirname, basename, extname } from 'path';
-import { mkdirSync, writeFileSync } from 'fs';
+import { mkdirSync, writeFileSync, copyFileSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 
 import glob from 'glob';
@@ -70,6 +70,10 @@ function buildAddons(entries) {
           entries: [
             {
               find: '@',
+              replacement: _resolve(PROJECT_ROOT_PATH, 'src'),
+            },
+            {
+              find: '@cherry',
               replacement: _resolve(PROJECT_ROOT_PATH, 'src'),
             },
           ],
@@ -143,5 +147,14 @@ function buildAddons(entries) {
       });
       writeFileSync(targetPath, output.code || output.source || '', { encoding: 'utf-8' });
     });
+
+    // 将 rollup-plugin-typescript2 产出的声明同步到 dist/types/addons（供 global.d.ts 等引用）
+    const emittedDts = join(PROJECT_ROOT_PATH, 'dist/addons/src/addons', outputFileName.replace(/\.js$/, '.d.ts'));
+    const targetTypesDts = join(PROJECT_ROOT_PATH, 'dist/types/addons', outputFileName.replace(/\.js$/, '.d.ts'));
+    if (existsSync(emittedDts)) {
+      mkdirSync(dirname(targetTypesDts), { recursive: true });
+      copyFileSync(emittedDts, targetTypesDts);
+      console.log('[addons build] wrote %s', targetTypesDts);
+    }
   });
 }

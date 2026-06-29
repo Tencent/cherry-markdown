@@ -688,6 +688,7 @@ export type CherryDefaultToolbar =
   | 'quote'
   | 'redo'
   | 'ruby'
+  | 'search'
   | 'settings'
   | 'size'
   | 'strikethrough'
@@ -705,7 +706,6 @@ export type CherryDefaultToolbar =
   | 'word'
   | 'align'
   | 'proTable'
-  | 'search'
   | 'shortcutKey'
   | 'wordCount';
 
@@ -764,6 +764,19 @@ export interface CherryToolbarConfig {
     /** 地图数据源URL配置，支持多个路径，按优先级依次尝试 */
     sourceUrl?: string[];
   };
+  /** 搜索/替换面板 */
+  searcher?: CherrySearcherToolbarOption;
+}
+
+/** 搜索/替换面板配置（仅 `new Cherry()` 时生效，修改后需刷新或重新初始化实例） */
+export interface CherrySearcherToolbarOption {
+  /**
+   * 是否启用替换能力，默认 true。
+   * 为 false 时：无替换行、无 Mod+H 快捷键、工具栏 tooltip 显示「搜索」。
+   */
+  enableReplace?: boolean;
+  /** 打开面板时是否默认展开替换行，默认 false；需 enableReplace 为 true */
+  expandReplaceOnOpen?: boolean;
 }
 export interface CherryChangeLocaleToolbarOption {
   locale: string;

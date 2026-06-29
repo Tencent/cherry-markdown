@@ -685,6 +685,7 @@ const defaultConfig = {
       },
       'graph',
       'shortcutKey',
+      'search',
       'togglePreview',
     ],
     toolbarRight: [],
@@ -751,6 +752,16 @@ const defaultConfig = {
           name: 'Русский',
         },
       ],
+      /**
+       * 搜索/替换面板（Cherry 内置）
+       * - enableReplace: 是否显示替换区，默认 true
+       * - expandReplaceOnOpen: 打开时是否展开替换行，默认 false
+       * 配置仅在 new Cherry() 时生效
+       */
+      searcher: {
+        enableReplace: true,
+        expandReplaceOnOpen: false,
+      },
     },
   },
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效

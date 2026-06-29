@@ -4,6 +4,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
+      '@cherry': resolve(__dirname, './src'),
     },
   },
   test: {

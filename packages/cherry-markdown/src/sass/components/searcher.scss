@@ -1,0 +1,427 @@
+/**
+ * Searcher 插件样式
+ * 参考 TEditor te-searcher 单行搜索框设计
+ */
+
+// 可交互控件共用：默认可用色、hover、选中、禁用
+@mixin searcher-action-btn-states {
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--toolbar-btn-color);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover:not(:disabled):not(.is-forbidden):not(.is-unavailable) {
+    background-color: rgba(31, 35, 41, 0.08);
+    color: var(--toolbar-btn-color);
+  }
+
+  // 选中（大小写 / 全字匹配开启）
+  &.is-active {
+    background-color: rgba(51, 112, 255, 0.15);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  // 不可操作（无匹配、未输入关键词、替换内容为空等）
+  &.is-unavailable,
+  &:disabled:not(.is-forbidden):not(.is-active) {
+    opacity: 0.4;
+    color: var(--oc-gray-6);
+    cursor: default;
+  }
+
+  // 禁止（编辑器只读）
+  &.is-forbidden:disabled {
+    opacity: 0.35;
+    color: var(--oc-gray-5);
+    cursor: not-allowed;
+  }
+}
+
+// 图标类按钮（导航、展开等），与 action-btn 同色体系
+@mixin searcher-icon-btn {
+  @include searcher-action-btn-states;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.cherry-searcher {
+  position: fixed;
+  z-index: 120;
+  box-sizing: border-box;
+  font-family: var(--font-family-sans);
+  background: var(--dropdown-bg);
+  border: var(--border-width-1) solid var(--dropdown-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--dropdown-shadow);
+  padding: 8px;
+  width: 420px;
+  max-width: calc(100vw - 16px);
+
+  // Cherry 编辑区内：与旧版 .ace_search.right 一致（相对编辑区右上角）
+  .cherry-editor & {
+    position: absolute;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    left: auto;
+  }
+
+  // 预览区收起、侧边栏露出时右移，避免被遮挡（沿用旧版 cm-search-replace）
+  &.is-preview-sidebar-offset {
+    right: 48px;
+  }
+
+  &__container {
+    width: 100%;
+  }
+
+  &__rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  &__row {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    min-width: 0;
+  }
+
+  &__input-wrapper {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    height: 32px;
+    padding: 0 8px 0 0;
+    gap: 0;
+    background-color: rgba(31, 35, 41, 0.05);
+    border: 1px solid var(--dropdown-border);
+    border-radius: 6px;
+    transition: border-color 0.15s ease;
+
+    &:focus-within {
+      border-color: var(--primary-color);
+    }
+  }
+
+  // 展开替换行：外圈统一边框，任一输入框聚焦时整体高亮
+  &.is-replace-expanded &__rows {
+    border: 1px solid var(--dropdown-border);
+    border-radius: 6px;
+    background-color: rgba(31, 35, 41, 0.05);
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+
+    &:focus-within {
+      border-color: var(--primary-color);
+    }
+  }
+
+  &.is-replace-expanded &__input-wrapper {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+
+    &:focus-within {
+      border-color: transparent;
+    }
+  }
+
+  &.is-replace-expanded &__search-row &__input-wrapper {
+    border-bottom: 1px solid var(--dropdown-border);
+  }
+
+  &.is-replace-expanded &__expand-btn {
+    border-radius: 0;
+  }
+
+  // 折叠按钮内嵌在搜索框左侧（无边框）
+  &__expand-btn {
+    @include searcher-icon-btn;
+
+    flex-shrink: 0;
+    align-self: stretch;
+    width: 26px;
+    border: none;
+    border-radius: 6px 0 0 6px;
+
+    svg {
+      transition: transform 0.15s ease;
+    }
+  }
+
+  // 替换行与搜索词输入左对齐（占位折叠按钮宽度）
+  &__expand-spacer {
+    flex-shrink: 0;
+    align-self: stretch;
+    width: 26px;
+    pointer-events: none;
+  }
+
+  &.is-replace-expanded &__expand-btn svg {
+    transform: rotate(-90deg);
+  }
+
+  &__replace-row {
+    &.is-hidden {
+      display: none;
+    }
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    color: var(--oc-gray-6);
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__replace-wrapper {
+    gap: 6px;
+    padding-left: 0;
+
+    .cherry-searcher__replace-input {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  &__replace-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  &__replace-input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0 0 0 8px;
+    margin: 0;
+    border: none;
+    background: transparent;
+    color: var(--toolbar-btn-color);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+
+    &::placeholder {
+      color: var(--oc-gray-5);
+    }
+  }
+
+  // 区分大小写 / 全字匹配
+  &__toggle {
+    @include searcher-action-btn-states;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    user-select: none;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    // 字形图标略大于描边图标，颜色继承按钮 currentColor（与导航等一致）
+    svg.cherry-searcher__toggle-icon {
+      width: 16px;
+      height: 16px;
+
+      text {
+        fill: currentColor;
+        font-size: 11px;
+        font-family: inherit;
+        font-weight: 500;
+        user-select: none;
+      }
+
+      path {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1;
+        stroke-linecap: round;
+      }
+    }
+  }
+
+  // 替换 / 全部替换（默认可操作态与 toggle 一致，不可用时见 mixin 禁用样式）
+  &__replace-btn {
+    @include searcher-action-btn-states;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    height: 22px;
+    padding: 0 4px;
+    margin: 0;
+    font-size: 12px;
+    line-height: 1;
+    font-family: inherit;
+    font-weight: 400;
+    white-space: nowrap;
+    user-select: none;
+
+    &:not(:disabled) {
+      cursor: pointer;
+    }
+  }
+
+  &__input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0 0 0 8px;
+    margin: 0;
+    border: none;
+    background: transparent;
+    color: var(--toolbar-btn-color);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+
+    &::placeholder {
+      color: var(--oc-gray-5);
+    }
+  }
+
+  &__clear {
+    @include searcher-action-btn-states;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    opacity: 0;
+    transition:
+      color 0.15s ease,
+      opacity 0.15s ease,
+      background-color 0.15s ease;
+
+    &.is-visible {
+      opacity: 1;
+    }
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  &__divider {
+    width: 1px;
+    height: 16px;
+    background-color: var(--dropdown-border);
+    margin: 0 4px;
+    flex-shrink: 0;
+  }
+
+  &__toggles {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  &__nav {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  &__counter {
+    min-width: 32px;
+    text-align: center;
+    color: var(--oc-gray-5);
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+    user-select: none;
+
+    // 有匹配结果时使用与可交互控件一致的正文色
+    &.is-active {
+      color: var(--toolbar-btn-color);
+    }
+  }
+
+  &__nav-btn {
+    @include searcher-icon-btn;
+
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.cherry.theme__dark {
+  .cherry-searcher {
+    &__input-wrapper {
+      background-color: rgba(255, 255, 255, 0.06);
+    }
+
+    &.is-replace-expanded &__rows {
+      background-color: rgba(255, 255, 255, 0.06);
+    }
+
+    &.is-replace-expanded &__input-wrapper {
+      background: transparent;
+    }
+
+    &__toggle:hover:not(:disabled):not(.is-forbidden):not(.is-unavailable),
+    &__replace-btn:hover:not(:disabled):not(.is-forbidden):not(.is-unavailable),
+    &__nav-btn:hover:not(:disabled),
+    &__expand-btn:hover:not(:disabled),
+    &__clear:hover:not(:disabled) {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+}
+
+// 工具栏搜索按钮展开时的激活态（与字号下拉等一致）
+.cherry-toolbar-button.cherry-toolbar-button--active {
+  background: var(--toolbar-btn-active-bg);
+  color: var(--toolbar-btn-hover-color);
+}
