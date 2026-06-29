@@ -213,14 +213,30 @@ export function exportMarkdownFile(markdownText, fileName) {
  * @param {String} fileName 导出HTML文件名
  */
 export function exportHTMLFile(HTMLText, fileName) {
-  const blob = new Blob([HTMLText], { type: 'text/markdown;charset=utf-8' });
+  // 构建完整的 HTML5 文档
+  const fullHTML = `<!DOCTYPE html>
+    <html lang="${navigator.language || 'en'}">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${fileName}</title>
+    </head>
+    <body>
+      ${HTMLText}
+    </body>
+    </html>`;
+
+  const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+
   const aLink = document.createElement('a');
   aLink.style.display = 'none';
   aLink.href = URL.createObjectURL(blob);
   aLink.download = `${fileName}.html`;
   document.body.appendChild(aLink);
   aLink.click();
+  // 释放内存
   document.body.removeChild(aLink);
+  URL.revokeObjectURL(aLink.href);
 }
 
 // Word 导出功能
