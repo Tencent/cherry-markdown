@@ -266,6 +266,74 @@ const searchHighlightField = ViewPlugin.fromClass(
 );
 
 /**
+ * YAML frontmatter 装饰 ViewPlugin
+ * 检测文档开头的 YAML frontmatter（首行为 `---`，至下一个独占一行的 `---` 之间的内容），
+ * 给这些行打上 `cm-frontmatter` 的 line class，避免被 markdown 解析器渲染成 setext H2 样式。
+ */
+const frontMatterDecorationPlugin = ViewPlugin.fromClass(
+  class {
+    /**
+     * @param {EditorView} view
+     */
+    constructor(view) {
+      /** @type {import('@codemirror/view').DecorationSet} */
+      this.decorations = this.buildDecorations(view);
+    }
+
+    /**
+     * @param {import('@codemirror/view').ViewUpdate} update
+     */
+    update(update) {
+      if (update.docChanged || update.viewportChanged) {
+        this.decorations = this.buildDecorations(update.view);
+      }
+    }
+
+    /**
+     * 构造 frontmatter 行装饰
+     * @param {EditorView} view
+     * @returns {import('@codemirror/view').DecorationSet}
+     */
+    buildDecorations(view) {
+      const { doc } = view.state;
+      if (doc.length === 0) return Decoration.none;
+
+      // frontmatter 必须从文档第一行的 `---` 开始
+      const firstLine = doc.line(1);
+      if (firstLine.text.trim() !== '---') return Decoration.none;
+
+      // 查找闭合的 `---`
+      let endLineNum = -1;
+      const totalLines = doc.lines;
+      for (let i = 2; i <= totalLines; i++) {
+        const line = doc.line(i);
+        if (line.text.trim() === '---') {
+          endLineNum = i;
+          break;
+        }
+      }
+      // 没有找到闭合行，认为不是合法 frontmatter
+      if (endLineNum === -1) return Decoration.none;
+
+      const lineDeco = Decoration.line({ class: 'cm-frontmatter' });
+      const decorations = [];
+      for (let i = 1; i <= endLineNum; i++) {
+        const line = doc.line(i);
+        decorations.push(lineDeco.range(line.from));
+      }
+      return Decoration.set(decorations);
+    }
+
+    destroy() {
+      this.decorations = Decoration.none;
+    }
+  },
+  {
+    decorations: (v) => v.decorations,
+  },
+);
+
+/**
  * CodeMirror 6 适配器
  * 提供对 EditorView 的封装，使用 CM6 原生类型
  * @implements {CM6AdapterType}
@@ -1720,6 +1788,8 @@ export default class Editor {
       }),
 
       searchHighlightField,
+
+      frontMatterDecorationPlugin,
 
       indentOnInput(),
 
