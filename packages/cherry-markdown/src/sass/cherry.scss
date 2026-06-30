@@ -664,6 +664,29 @@
         font-size: 0.85em;
       }
     }
+
+    // YAML frontmatter 行：避免被 markdown 解析器渲染成 setext H2 等 heading 样式
+    .cm-line.cm-frontmatter {
+      .cm-header,
+      .cm-header-1,
+      .cm-header-2,
+      .cm-header-3,
+      .cm-header-4,
+      .cm-header-5,
+      .cm-header-6,
+      &.cm-header,
+      &.cm-header-1,
+      &.cm-header-2,
+      &.cm-header-3,
+      &.cm-header-4,
+      &.cm-header-5,
+      &.cm-header-6 {
+        font-size: var(--font-size-md) !important;
+        font-weight: normal !important;
+        color: var(--base-font-color) !important;
+        text-decoration: none !important;
+      }
+    }
   
     .cm-string {
       color: var(--editor-string-color);
