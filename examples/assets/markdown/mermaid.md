@@ -1,6 +1,8 @@
 ## 引入cherry并使用自己的[mermaid](https://mermaid.js.org/){target=_blank}
+
+### 方式一，window下已经安装了mermaid
 ```html
-<script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.16.0/dist/mermaid.min.js"></script>
 <script src="yourPath/cherry-markdown.core.js"></script>
 <script src="yourPath/addons/cherry-code-block-mermaid-plugin.js"></script>
 <script>
@@ -9,6 +11,28 @@ Cherry.usePlugin(CherryCodeBlockMermaidPlugin, {
   mermaidAPI: window.mermaid,
 });
 var cherryEditor = new Cherry({id: 'markdown'});
+</script>
+```
+
+### 方式二，让cherry自动安装mermaid
+```html
+<script src="yourPath/cherry-markdown.core.js"></script>
+<script src="yourPath/addons/cherry-code-block-mermaid-plugin.js"></script>
+<script>
+Cherry.usePlugin(CherryCodeBlockMermaidPlugin);
+var cherryEditor = new Cherry({
+  id: 'markdown',
+  engine: {
+    syntax: {
+      codeBlock: {
+        mermaid: {
+          showSourceToolbar: true,
+          src: 'https://cdn.jsdelivr.net/npm/mermaid@11.16.0/dist/mermaid.min.js',
+        },
+      },
+    },
+  },
+});
 </script>
 ```
 

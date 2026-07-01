@@ -16,6 +16,7 @@
 import mergeWith from 'es-toolkit/compat/mergeWith';
 import { isBrowser } from '@/utils/env';
 import { getExternal } from '@/utils/external';
+import { loadScript } from '@/utils/dom';
 
 const CHART_TYPES = [
   'flowchart',
@@ -159,6 +160,11 @@ export default class MermaidCodeEngine {
    */
   constructor(mermaidOptions = {}) {
     const { mermaid, mermaidAPI } = mermaidOptions;
+    // 是否由用户显式传入了 mermaid / mermaidAPI 实例，用于判断是否需要通过 src 动态加载
+    this.hasExplicitMermaid = Boolean(mermaid || mermaidAPI);
+    // 动态加载 mermaid 脚本的状态，避免重复注入 <script>
+    this.mermaidScriptLoading = false;
+    this.mermaidScriptLoaded = false;
     // 兼容 v9（有 mermaidAPI 子对象）和 v10+（统一顶层对象）
     const browserMermaid = getExternal('mermaid');
     const browserMermaidAPI = getExternal('mermaidAPI');
@@ -360,6 +366,41 @@ export default class MermaidCodeEngine {
     return true;
   }
 
+  /**
+   * 当用户没有显式传入 mermaid 实例，且在 engine.syntax.codeBlock.mermaid.src 中配置了脚本地址时，
+   * 通过 utils/dom.js 中的 loadScript 动态加载 mermaid 脚本。
+   * 加载完成后 tryResolveMermaidAPIRefs 会在异步渲染的重试逻辑中自动获取到 window.mermaid。
+   * @param {Object} [props] render 传入的 props，其中 mermaidConfig 对应 engine.syntax.codeBlock.mermaid
+   * @returns {boolean} 是否已发起（或已完成）脚本加载
+   */
+  ensureMermaidLoaded(props) {
+    if (!isBrowser()) {
+      return false;
+    }
+    if (this.hasExplicitMermaid || this.mermaidAPIRefs) {
+      return false;
+    }
+    if (this.mermaidScriptLoading || this.mermaidScriptLoaded) {
+      return true;
+    }
+    const src = props?.mermaidConfig?.src;
+    if (!src || typeof src !== 'string') {
+      return false;
+    }
+    this.mermaidScriptLoading = true;
+    loadScript(src, 'cherry-mermaid-external-script')
+      .then(() => {
+        this.mermaidScriptLoaded = true;
+        this.mermaidScriptLoading = false;
+        // 触发一次解析，尽早绑定 mermaidAPIRefs（异步渲染的重试逻辑也会兜底）
+        this.tryResolveMermaidAPIRefs();
+      })
+      .catch(() => {
+        this.mermaidScriptLoading = false;
+      });
+    return true;
+  }
+
   asyncRender(graphId, src, sign, $engine, props, retryCount = 0) {
     const cachedHtml = retryCount === 0 ? this.$getCachedRenderHtml(src, $engine) : '';
     if (cachedHtml) {
@@ -367,6 +408,8 @@ export default class MermaidCodeEngine {
     }
     // mermaid 可能是异步加载的，初次调用时 mermaidAPIRefs 可能为 null，这里做延迟重试
     if (!this.mermaidAPIRefs && !this.tryResolveMermaidAPIRefs()) {
+      // 若用户未显式传入 mermaid 实例，但配置了 mermaid.src，则通过 loadScript 动态加载 mermaid
+      this.ensureMermaidLoaded(props);
       const MAX_RETRY = 60; // 最多重试次数
       const RETRY_INTERVAL = 300; // 每次间隔 300ms
       if (retryCount === 0) {
