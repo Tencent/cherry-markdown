@@ -3,10 +3,7 @@
  */
 
 // 注册 Mermaid 插件（core 版本需要手动注册）
-Cherry.usePlugin(CherryCodeBlockMermaidPlugin, {
-  mermaid: window.mermaid,
-  mermaidAPI: window.mermaid,
-});
+Cherry.usePlugin(CherryCodeBlockMermaidPlugin);
 
 // 初始化编辑器
 const response = await fetch('./assets/markdown/mermaid.md');
@@ -21,6 +18,7 @@ window.cherry = new Cherry({
         changeLang: false,
         mermaid: {
           showSourceToolbar: true,
+          src: 'https://cdn.jsdelivr.net/npm/mermaid@11.16.0/dist/mermaid.min.js',
         },
       },
     },
