@@ -23,7 +23,7 @@ import FootnoteHoverHandler from '@/utils/footnoteHoverHandler';
 import CodeHandler from '@/utils/codeBlockContentHandler';
 import { drawioDialog } from '@/utils/dialog';
 import { imgDrawioReg, getValueWithoutCode } from '@/utils/regexp';
-import debounce from 'es-toolkit/compat/debounce';
+import debounce from '@/utils/toolkit/debounce';
 import FormulaHandler from '@/utils/formulaUtilsHandler';
 import ListHandler from '@/utils/listContentHandler';
 

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import mergeWith from 'es-toolkit/compat/mergeWith';
-import cloneDeep from 'es-toolkit/compat/cloneDeep';
+import mergeWith from '@/utils/toolkit/mergeWith';
+import cloneDeep from '@/utils/toolkit/cloneDeep';
 import defaultConfig from '@/Cherry.config';
 // cspell:ignore customizer
 import { customizer as configMergeFn } from '@/utils/config';
