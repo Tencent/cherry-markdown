@@ -183,6 +183,7 @@ export default {
   nextMatch: 'Следующее',
   replace: 'Заменить',
   replaceAll: 'Заменить всё',
+  selectAllMatches: 'Выделить все совпадения',
   regExpSearch: 'Регулярное выражение',
   caseSensitiveSearch: 'С учётом регистра',
   wholeWordSearch: 'Целое слово',

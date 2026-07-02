@@ -38,6 +38,7 @@ function buildReplaceRowHtml(hidden = true) {
     '        <div class="cherry-searcher__replace-actions">',
     '          <button type="button" class="cherry-searcher__replace-btn is-unavailable" data-action="replace" disabled></button>',
     '          <button type="button" class="cherry-searcher__replace-btn cherry-searcher__replace-btn--all is-unavailable" data-action="replaceAll" disabled></button>',
+    '          <button type="button" class="cherry-searcher__replace-btn cherry-searcher__replace-btn--select-all is-unavailable" data-action="selectAllMatches" disabled></button>',
     '        </div>',
     '      </div>',
     '    </div>',

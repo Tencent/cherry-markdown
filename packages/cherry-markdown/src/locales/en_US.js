@@ -183,6 +183,7 @@ export default {
   nextMatch: 'Next Match',
   replace: 'Replace',
   replaceAll: 'Replace All',
+  selectAllMatches: 'Select All Matches',
   regExpSearch: 'RegExp Search',
   caseSensitiveSearch: 'CaseSensitive Search',
   wholeWordSearch: 'Whole Word Search',

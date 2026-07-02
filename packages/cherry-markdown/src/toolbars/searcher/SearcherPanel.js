@@ -127,6 +127,9 @@ export default class SearcherPanel {
   /** @type {HTMLButtonElement | null} */
   replaceAllButton;
 
+  /** @type {HTMLButtonElement | null} */
+  selectAllMatchesButton;
+
   /**
    * 创建搜索面板并挂载到编辑区
    *
@@ -336,6 +339,9 @@ export default class SearcherPanel {
     this.replaceAllButton = /** @type {HTMLButtonElement | null} */ (
       queryOptional(this.dom, '[data-action="replaceAll"]')
     );
+    this.selectAllMatchesButton = /** @type {HTMLButtonElement | null} */ (
+      queryOptional(this.dom, '[data-action="selectAllMatches"]')
+    );
   }
 
   /** 绑定替换区事件（仅 enableReplace 为 true 时在构造阶段调用一次） */
@@ -375,6 +381,10 @@ export default class SearcherPanel {
 
     this.replaceAllButton?.addEventListener('click', () => {
       this.replaceAll();
+    });
+
+    this.selectAllMatchesButton?.addEventListener('click', () => {
+      this.selectAllMatches();
     });
 
     this.replaceClearButton?.addEventListener('click', (event) => {
@@ -745,6 +755,23 @@ export default class SearcherPanel {
   }
 
   /**
+   * 选中所有匹配项（多光标 / 多选区），随后关闭面板并清除搜索高亮
+   */
+  selectAllMatches() {
+    if (!this.editorAdapter || this.state.matches.length === 0) {
+      return;
+    }
+
+    if (typeof this.editorAdapter.setSelections !== 'function') {
+      return;
+    }
+
+    this.hide();
+    // 再设置多光标 / 多选区：view.dispatch 会自动让 CodeMirror 视图获得焦点
+    this.editorAdapter.setSelections(this.state.matches, { scrollIntoView: true });
+  }
+
+  /**
    * 批量替换所有匹配项（从后向前替换，避免区间偏移）
    */
   replaceAll() {
@@ -809,6 +836,15 @@ export default class SearcherPanel {
 
       button.classList.add(readOnly ? 'is-forbidden' : 'is-unavailable');
     });
+
+    if (this.selectAllMatchesButton) {
+      const canSelectAll = this.state.matches.length > 0;
+      this.selectAllMatchesButton.disabled = !canSelectAll;
+      this.selectAllMatchesButton.classList.remove('is-forbidden', 'is-unavailable');
+      if (!canSelectAll) {
+        this.selectAllMatchesButton.classList.add('is-unavailable');
+      }
+    }
   }
 
   /**
@@ -847,6 +883,10 @@ export default class SearcherPanel {
     if (this.replaceAllButton) {
       this.replaceAllButton.textContent = strings.replaceAll ?? '';
       this.replaceAllButton.title = strings.replaceAll ?? '';
+    }
+    if (this.selectAllMatchesButton) {
+      this.selectAllMatchesButton.textContent = strings.selectAllMatches ?? '';
+      this.selectAllMatchesButton.title = strings.selectAllMatches ?? '';
     }
   }
 }
