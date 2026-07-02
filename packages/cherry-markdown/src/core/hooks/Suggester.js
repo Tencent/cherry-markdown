@@ -19,7 +19,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import escapeRegExp from 'es-toolkit/compat/escapeRegExp';
+import escapeRegExp from '@/utils/toolkit/escapeRegExp';
 import SyntaxBase from '@/core/SyntaxBase';
 import { allSuggestList, suggesterKeywords } from '@/core/hooks/SuggestList';
 import { isLookbehindSupported } from '@/utils/regexp';

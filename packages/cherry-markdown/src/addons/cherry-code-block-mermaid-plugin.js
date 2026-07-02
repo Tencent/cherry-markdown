@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import mergeWith from 'es-toolkit/compat/mergeWith';
+import mergeWith from '@/utils/toolkit/mergeWith';
 import { isBrowser } from '@/utils/env';
 import { getExternal } from '@/utils/external';
 import { loadScript } from '@/utils/dom';
