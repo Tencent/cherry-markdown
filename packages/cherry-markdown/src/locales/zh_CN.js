@@ -184,6 +184,7 @@ export default {
   nextMatch: '查找下一个',
   replace: '替换',
   replaceAll: '全部替换',
+  selectAllMatches: '选中全部匹配',
   regExpSearch: '正则表达式搜索',
   caseSensitiveSearch: '区分大小写搜索',
   wholeWordSearch: '全字匹配搜索',

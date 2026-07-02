@@ -3,6 +3,7 @@
  *
  * @module toolbars/searcher/bridge-utils
  */
+import { EditorSelection } from '@codemirror/state';
 
 /** 与 HookCenter、toolbars.* 配置项一致的 hook 名称 */
 export const SEARCH_HOOK_NAME = 'search';
@@ -29,6 +30,7 @@ export const SEARCH_HOOK_NAME = 'search';
  * @property {() => string} getSelectedText
  * @property {() => number} getCursorHead
  * @property {(from: number, to: number, options?: object) => void} setSelection
+ * @property {(ranges: Array<{ from: number; to: number }>, options?: object) => void} setSelections
  * @property {(text: string, from: number, to: number) => void} replaceRange
  * @property {(pattern: string, caseSensitive: boolean, asRegex: boolean) => void} setSearchQuery
  * @property {() => void} clearSearchQuery
@@ -118,6 +120,26 @@ export function createEditorAdapter(cherry) {
     },
     setSelection(from, to, options) {
       editor?.setSelection(from, to, options);
+    },
+    setSelections(ranges, options = {}) {
+      const view = editor?.view;
+      if (!view || !Array.isArray(ranges) || ranges.length === 0) {
+        return;
+      }
+
+      const docLength = view.state.doc.length;
+      const cmRanges = ranges.map(({ from, to }) => {
+        const safeFrom = Math.max(0, Math.min(from, docLength));
+        const safeTo = Math.max(safeFrom, Math.min(to, docLength));
+        return EditorSelection.range(safeFrom, safeTo);
+      });
+
+      /** @type {{ selection: any; annotations?: any; effects?: any; scrollIntoView?: boolean }} */
+      const dispatchOptions = { selection: EditorSelection.create(cmRanges) };
+      if (options.scrollIntoView) {
+        dispatchOptions.scrollIntoView = true;
+      }
+      view.dispatch(dispatchOptions);
     },
     replaceRange(text, from, to) {
       editor?.replaceRange(text, from, to);

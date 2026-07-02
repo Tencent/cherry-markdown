@@ -19,6 +19,7 @@ export const SEARCHER_LOCALE_KEYS = [
   'replace',
   'replaceWith',
   'replaceAll',
+  'selectAllMatches',
   'toggleReplace',
 ];
 
