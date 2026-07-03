@@ -905,6 +905,94 @@ div[data-type='codeBlock'] {
   }
 }
 
+.cherry-panel-cols {
+  // 列间距（分隔线两侧的留白之和）
+  --panel-cols-gap: 32px;
+  // 列间分隔线，可被主题覆盖（例如改为 dashed 或 none）
+  --panel-cols-divider: 1px dotted var(--md-hr-border, rgba(0, 0, 0, 0.011));
+
+  display: grid;
+  gap: 0; // 使用列内 padding + border-left 实现分隔线，不再依赖 grid gap
+  margin: var(--panel-cols-margin, 16px 0);
+  align-items: stretch;
+  width: 100%;
+  box-sizing: border-box;
+
+  .cherry-panel--col {
+    min-width: 0; // 防止子元素（如 pre、table）撑破布局
+    box-sizing: border-box;
+    padding: var(--panel-col-padding, 0);
+    background: var(--panel-col-bg, transparent);
+    border-radius: var(--panel-col-border-radius, 0);
+    line-height: 1.7;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+
+    // 首/尾元素去除多余外边距，保证顶部与底部对齐
+    > *:first-child {
+      margin-top: 0;
+    }
+    > *:last-child {
+      margin-bottom: 0;
+    }
+
+    // 让常见块级内容自适应列宽
+    img,
+    video,
+    iframe {
+      max-width: 100%;
+      height: auto;
+    }
+
+    pre,
+    table {
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      display: block;
+    }
+  }
+
+  // 相邻列之间加分隔线：左侧 border + 左右对称 padding，视觉上分隔线正好居中
+  .cherry-panel--col + .cherry-panel--col {
+    border-left: var(--panel-cols-divider);
+    padding-left: calc(var(--panel-cols-gap) / 2);
+  }
+  .cherry-panel--col:not(:last-child) {
+    padding-right: calc(var(--panel-cols-gap) / 2);
+  }
+}
+
+.cherry-panel-cols__2cols {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cherry-panel-cols__3cols {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+// 移动端/窄容器下自动堆叠为单列：分隔线由左侧竖线切换为顶部横线
+@media (max-width: 640px) {
+  .cherry-panel-cols__2cols,
+  .cherry-panel-cols__3cols {
+    grid-template-columns: minmax(0, 1fr);
+
+    .cherry-panel--col + .cherry-panel--col {
+      border-left: none;
+      border-top: var(--panel-cols-divider);
+      padding-left: 0;
+      padding-top: calc(var(--panel-cols-gap, 32px) / 2);
+    }
+    .cherry-panel--col:not(:last-child) {
+      padding-right: 0;
+      padding-bottom: calc(var(--panel-cols-gap, 32px) / 2);
+    }
+  }
+}
+
 .cherry-panel {
   margin: var(--panel-margin, 10px 0);
   overflow: hidden;

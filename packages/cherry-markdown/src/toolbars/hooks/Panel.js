@@ -84,7 +84,15 @@ export default class Panel extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    let $selection = this.getSelection(selection, 'line', true) || '内容';
+    const threeCols = '第一列\n::\n第二列\n::\n第三列';
+    const twoCols = '第一列\n::\n第二列';
+    let defaultContent = '内容';
+    if (shortKey === '3cols') {
+      defaultContent = threeCols;
+    } else if (shortKey === '2cols') {
+      defaultContent = twoCols;
+    }
+    let $selection = this.getSelection(selection, 'line', true) || defaultContent;
     let currentName = this.$getNameFromStr($selection);
     let title = this.$getTitle($selection);
     if (currentName === false) {
