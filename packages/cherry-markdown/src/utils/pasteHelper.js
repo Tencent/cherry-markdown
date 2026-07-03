@@ -239,7 +239,7 @@ const pasteHelper = {
     this.bubbleDom.setAttribute('data-type', 'md');
   },
 
-  switchMDClick(event) {
+  switchMDClick(_event) {
     this.setTypeToLocalStorage('md');
     if (this.bubbleDom.getAttribute('data-type') === 'md') {
       return;
@@ -252,7 +252,7 @@ const pasteHelper = {
     this.switchText.classList.remove('active');
     this.noHide = false;
   },
-  switchTextClick(event) {
+  switchTextClick(_event) {
     this.setTypeToLocalStorage('text');
     // data-type 在 initBubble 中固定为 md（与刚插入的 Markdown 内容一致），
     // localStorage 触发的自动切换不会被此处拦截；请勿在 initBubble 中按 localStorage 预置 text。

@@ -93,7 +93,7 @@ export default class MathBlock extends ParagraphBase {
         let svg = '';
         try {
           svg = getHTML(this.MathJax.tex2svg($content), true);
-        } catch (e) {
+        } catch {
           if (this.isSelfClosing()) {
             svg = this.lastCode;
           }

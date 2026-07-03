@@ -29,10 +29,10 @@ export default class BubbleTableMenu {
   constructor({ row, col }, className) {
     this.init(row, col, className);
     this.initEventListeners();
-    this.afterClick = (...args) => {};
+    this.afterClick = (..._args) => {};
   }
 
-  init(row, col, className) {
+  init(row, col, _className) {
     const container = document.createElement('table');
     const cellArr = [];
     const classNames = ['cherry-insert-table-menu', 'cherry-dropdown'];

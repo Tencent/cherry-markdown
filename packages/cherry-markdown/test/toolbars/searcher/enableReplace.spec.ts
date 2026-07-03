@@ -6,6 +6,7 @@ import defaultConfig from '@/Cherry.config';
 import { customizer as configMergeFn } from '@/utils/config';
 import { initSearcherBridge, getSearcherBridge, type SearcherCherryHost } from '@/toolbars/searcher/SearcherBridge';
 import Search from '@/toolbars/hooks/Search';
+import Event from '@/Event';
 
 function createMockCherry(overrides: Partial<SearcherCherryHost> = {}): SearcherCherryHost {
   const editorDom = document.createElement('div');
@@ -24,7 +25,7 @@ function createMockCherry(overrides: Partial<SearcherCherryHost> = {}): Searcher
     clearSearchQuery: vi.fn(),
   };
 
-  return {
+  const mockCherry: SearcherCherryHost = {
     locale: {},
     options: {
       toolbars: {
@@ -37,13 +38,10 @@ function createMockCherry(overrides: Partial<SearcherCherryHost> = {}): Searcher
       options: { editorDom },
     },
     wrapperDom: document.body,
-    $event: {
-      Events: { afterChangeLocale: 'afterChangeLocale', afterChange: 'afterChange' },
-      on: vi.fn(),
-      off: vi.fn(),
-    },
+    $event: new Event('test'),
     ...overrides,
-  } as SearcherCherryHost;
+  };
+  return mockCherry;
 }
 
 describe('enableReplace 配置', () => {

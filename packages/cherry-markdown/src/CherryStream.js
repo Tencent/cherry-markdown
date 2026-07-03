@@ -352,7 +352,7 @@ export default class CherryStream extends CherryStatic {
           location.hash = '';
           location.hash = hash;
         }
-      } catch (error) {
+      } catch {
         // empty
       }
     }

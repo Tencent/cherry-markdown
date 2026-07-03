@@ -349,7 +349,7 @@ export default class Cherry extends CherryStatic {
           location.hash = '';
           location.hash = hash;
         }
-      } catch (error) {
+      } catch {
         // empty
       }
     }
@@ -954,7 +954,7 @@ export default class Cherry extends CherryStatic {
     });
   };
 
-  handleFloatPreviewerMouseUp = (evt) => {
+  handleFloatPreviewerMouseUp = (_evt) => {
     this.floatPreviewerWrapDom.classList.remove('float-previewer-dragging');
   };
 

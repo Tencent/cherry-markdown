@@ -189,12 +189,13 @@ export default class Toolbar {
   }
 
   setSubMenuPosition(menuObj, subMenuObj) {
+    const localSubMenuObj = subMenuObj;
     const pos = menuObj.getMenuPosition();
     // 115px: 避免下拉菜单超过侧边栏
     const left = Math.min(pos.left + pos.width / 2, window.innerWidth - 115);
-    subMenuObj.style.left = `${left}px`;
-    subMenuObj.style.top = `${pos.top + pos.height}px`;
-    subMenuObj.style.position = menuObj.positionModel;
+    localSubMenuObj.style.left = `${left}px`;
+    localSubMenuObj.style.top = `${pos.top + pos.height}px`;
+    localSubMenuObj.style.position = menuObj.positionModel;
   }
 
   drawSubMenus(name) {
@@ -319,7 +320,8 @@ export default class Toolbar {
   hideAllSubMenu() {
     this.currentActiveSubMenu = null;
     this.$cherry.wrapperDom.querySelectorAll('.cherry-dropdown').forEach((dom) => {
-      dom.style.display = 'none';
+      const localDom = dom;
+      localDom.style.display = 'none';
     });
   }
 
@@ -423,11 +425,12 @@ export default class Toolbar {
 
   collectToolbarHandler() {
     this.toolbarHandlers = this.menus.allMenusName.reduce((handlerMap, name) => {
+      const localHandlerMap = handlerMap;
       const menuHook = this.menus.hooks[name];
       if (!menuHook) {
-        return handlerMap;
+        return localHandlerMap;
       }
-      handlerMap[name] = (shortcut, _callback) => {
+      localHandlerMap[name] = (shortcut, _callback) => {
         if (typeof _callback === 'function') {
           Logger.warn(
             'MenuBase#onClick param callback is no longer supported. Please register the callback via MenuBase#registerAfterClickCb instead.',
@@ -435,7 +438,7 @@ export default class Toolbar {
         }
         menuHook.fire.call(menuHook, undefined, shortcut);
       };
-      return handlerMap;
+      return localHandlerMap;
     }, {});
   }
 

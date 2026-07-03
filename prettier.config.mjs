@@ -1,4 +1,5 @@
-module.exports = {
+/** 根目录统一 Prettier 配置；检查范围见 .prettierignore */
+export default {
   // 一行最多 120 字符
   printWidth: 120,
   // 使用 2 个空格缩进

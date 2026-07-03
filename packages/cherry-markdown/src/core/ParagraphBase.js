@@ -29,7 +29,7 @@ export default class ParagraphBase extends SyntaxBase {
   static IN_PARAGRAPH_CACHE_KEY_PREFIX = '!';
   static IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX = '\\!';
 
-  constructor({ needCache, defaultCache = {} } = { needCache: false }) {
+  constructor({ needCache, _defaultCache = {} } = { needCache: false }) {
     super({});
     this.needCache = !!needCache;
     this.sign = '';
@@ -161,13 +161,13 @@ export default class ParagraphBase extends SyntaxBase {
       .replace(this.removeNewlinesBetweenTags, '</$1>\r$2<$3$4'); // replace \n to \r
   }
 
-  toHtml(str, sentenceMakeFunc) {
+  toHtml(str, _sentenceMakeFunc) {
     return str;
   }
 
   beforeMakeHtml(
     str,
-    sentenceMakeFunc = (md) => {
+    _sentenceMakeFunc = (md) => {
       return { sign: '', html: md };
     },
   ) {
@@ -189,7 +189,7 @@ export default class ParagraphBase extends SyntaxBase {
 
   afterMakeHtml(
     str,
-    sentenceMakeFunc = (md) => {
+    _sentenceMakeFunc = (md) => {
       return { sign: '', html: md };
     },
   ) {
@@ -370,7 +370,7 @@ export default class ParagraphBase extends SyntaxBase {
     // console.log('base mounted');
   }
 
-  signWithCache(html) {
+  signWithCache(_html) {
     return false;
   }
 }

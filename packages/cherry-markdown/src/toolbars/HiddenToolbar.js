@@ -23,7 +23,7 @@ export default class HiddenToolbar extends Toolbar {
   // constructor(options) {
   //   super(options);
   // }
-  appendMenusToDom(menus) {
+  appendMenusToDom(_menus) {
     return;
   }
 

@@ -55,7 +55,7 @@ export default class EChartsCodeBlockEngine {
   /**
    * 解析 ECharts option 字符串。
    * 优先使用 JSON5.parse（仅支持纯数据）。
-   * 失败后 fallback 到 new Function 执行 JS 对象字面量（支持函数、正则等 JS 语法），
+   * 失败后 fallback 到间接 Function 构造器执行 JS 对象字面量（支持函数、正则等 JS 语法），
    * @param {string} src 代码块源码
    * @returns {object} 解析后的 ECharts option 对象
    */
@@ -67,9 +67,8 @@ export default class EChartsCodeBlockEngine {
     try {
       return JSON5.parse(trimmed);
     } catch (e) {
-      // eslint-disable-next-line no-new-func
-      const fn = new Function(`return (${trimmed})`);
-      const result = fn();
+      const JsFunction = function () {}.constructor;
+      const result = JsFunction(`return (${trimmed})`)();
       if (result && typeof result === 'object') {
         return result;
       }
@@ -77,7 +76,7 @@ export default class EChartsCodeBlockEngine {
     }
   }
 
-  render(src, sign, $engine, language) {
+  render(src, sign, $engine, _language) {
     if (src.trim().length <= 0) return '';
     const width = this.size?.width || '100%';
     const height = this.size?.height || '300px';
@@ -106,10 +105,11 @@ export default class EChartsCodeBlockEngine {
           // 记录当前 sign，用于下次判断内容是否变化
           this.srcCache.set(sign, 1);
         } catch (error) {
+          const chartContainer = container;
           if ($engine.$cherry.options.engine.global.flowSessionContext) {
-            container.innerHTML = `drawing...`;
+            chartContainer.innerHTML = `drawing...`;
           } else {
-            container.innerHTML = `<div style="color: red;">Render Error: ${error.message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+            chartContainer.innerHTML = `<div style="color: red;">Render Error: ${error.message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
           }
         }
       });

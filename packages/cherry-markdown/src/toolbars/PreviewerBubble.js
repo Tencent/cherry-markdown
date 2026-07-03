@@ -247,11 +247,10 @@ export default class PreviewerBubble {
     }
     switch (target.tagName) {
       case 'TD':
-      case 'TH':
+      case 'TH': {
         if (!this.$isEnableBubbleAndEditorShow()) {
           return;
         }
-        // eslint-disable-next-line no-case-declarations
         const table = this.isCherryTable(e.target);
         if (false === table) {
           return;
@@ -261,20 +260,20 @@ export default class PreviewerBubble {
         // @ts-ignore
         this.$showTablePreviewerBubbles('hover', e.target, table);
         return;
+      }
       case 'PRE':
       case 'CODE':
       case 'SPAN':
-      case 'DIV':
-        // eslint-disable-next-line no-case-declarations
+      case 'DIV': {
         const codeBlock = this.isCherryCodeBlock(e.target);
         if (codeBlock === false) {
           return;
         }
         this.showCodeBlockPreviewerBubbles('hover', codeBlock);
         return;
-      case 'A':
+      }
+      case 'A': {
         // @ts-ignore
-        // eslint-disable-next-line no-case-declarations
         const bubbleCard = this.previewer?.$cherry?.options?.engine?.syntax?.footnote?.bubbleCard || false;
         if (bubbleCard !== false && /cherry-show-bubble-card/.test(e.target.className)) {
           this.removeHoverBubble.cancel();
@@ -282,6 +281,8 @@ export default class PreviewerBubble {
           this.$showFootNoteBubbleCardPreviewerBubbles('hover', e.target, bubbleCard);
           return;
         }
+        break;
+      }
     }
     this.removeHoverBubble();
   }
@@ -563,7 +564,7 @@ export default class PreviewerBubble {
     }
   }
 
-  $onChange(e) {
+  $onChange(_e) {
     return;
   }
 
@@ -879,7 +880,7 @@ export default class PreviewerBubble {
    * @param {string} trigger 触发方式
    * @param {HTMLParagraphElement} target 用户触发的列表dom
    */
-  $showListPreviewerBubbles(trigger, target, options = {}) {
+  $showListPreviewerBubbles(trigger, target, _options = {}) {
     // 列表所见即所得编辑需要编辑器支持
     if (!this.$hasEditor()) {
       return;

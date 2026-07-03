@@ -37,7 +37,7 @@ export default class FootnoteHoverHandler {
     this.bubbleConfig = bubbleConfig;
   }
 
-  emit(type, event = {}, callback = () => {}) {
+  emit(type, _event = {}, _callback = () => {}) {
     switch (type) {
       case 'remove':
         return this.$remove();
@@ -123,9 +123,10 @@ export default class FootnoteHoverHandler {
   }
 
   setStyle(element, property, value) {
-    const info = element.getBoundingClientRect();
+    const localElement = element;
+    const info = localElement.getBoundingClientRect();
     if (info[property] !== value) {
-      element.style[property] = value;
+      localElement.style[property] = value;
     }
   }
 

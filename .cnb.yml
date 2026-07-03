@@ -1,5 +1,5 @@
 # .cnb.yml
-"**":
+'**':
   push:
     - imports:
         - https://cnb.cool/tencent/cherry-markdown/cherry-markdown-secret/-/blob/main/secret.yml
@@ -14,7 +14,7 @@
             password: ${CHERRY_MARKDOWN_GITHUB_TOKEN}
             insecure_skip_verify: true
             timeout: 300
-$:            
+$:
   vscode:
     - docker:
         image: docker.cnb.cool/tencent/cherry-markdown/cherry-markdown
@@ -26,5 +26,5 @@ $:
         - docker
       stages:
         - name: install dependencies
-          script: 
-          - yarn install             
+          script:
+            - yarn install

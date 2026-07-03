@@ -59,6 +59,7 @@ const imgAltHelper = {
    * @param alt
    */
   $addDecorationStyle(result, alt) {
+    const localResult = result;
     // console.log('update deco');
     const info = alt.match(/#(border|shadow|radius|B|S|R)/g);
     if (info) {
@@ -66,18 +67,18 @@ const imgAltHelper = {
         switch (info[i]) {
           case '#border':
           case '#B':
-            result.extendStyles += 'border:1px solid #888888;padding: 2px;box-sizing: border-box;';
-            result.extendClasses += ' cherry-img-deco-border';
+            localResult.extendStyles += 'border:1px solid #888888;padding: 2px;box-sizing: border-box;';
+            localResult.extendClasses += ' cherry-img-deco-border';
             break;
           case '#shadow':
           case '#S':
-            result.extendStyles += 'box-shadow:0 2px 15px -5px rgb(0 0 0 / 50%);';
-            result.extendClasses += ' cherry-img-deco-shadow';
+            localResult.extendStyles += 'box-shadow:0 2px 15px -5px rgb(0 0 0 / 50%);';
+            localResult.extendClasses += ' cherry-img-deco-shadow';
             break;
           case '#radius':
           case '#R':
-            result.extendStyles += 'border-radius: 15px;';
-            result.extendClasses += ' cherry-img-deco-radius';
+            localResult.extendStyles += 'border-radius: 15px;';
+            localResult.extendClasses += ' cherry-img-deco-radius';
             break;
         }
       }
@@ -101,30 +102,31 @@ const imgAltHelper = {
    * @param {string} alt
    */
   $addAlignmentStyle(result, alt) {
+    const localResult = result;
     const alignment = this.$getAlignment(alt);
     if (!alignment) {
       return;
     }
     switch (alignment) {
       case 'center':
-        result.extendStyles += 'transform:translateX(-50%);margin-left:50%;display:block;';
-        result.extendClasses += ' cherry-img-align-center';
+        localResult.extendStyles += 'transform:translateX(-50%);margin-left:50%;display:block;';
+        localResult.extendClasses += ' cherry-img-align-center';
         return;
       case 'right':
-        result.extendStyles += 'transform:translateX(-100%);margin-left:100%;margin-right:-100%;display:block;';
-        result.extendClasses += ' cherry-img-align-right';
+        localResult.extendStyles += 'transform:translateX(-100%);margin-left:100%;margin-right:-100%;display:block;';
+        localResult.extendClasses += ' cherry-img-align-right';
         return;
       case 'left':
-        result.extendStyles += 'transform:translateX(0);margin-left:0;display:block;';
-        result.extendClasses += ' cherry-img-align-left';
+        localResult.extendStyles += 'transform:translateX(0);margin-left:0;display:block;';
+        localResult.extendClasses += ' cherry-img-align-left';
         return;
       case 'float-right':
-        result.extendStyles += 'float:right;transform:translateX(0);margin-left:0;display:block;';
-        result.extendClasses += ' cherry-img-align-float-left';
+        localResult.extendStyles += 'float:right;transform:translateX(0);margin-left:0;display:block;';
+        localResult.extendClasses += ' cherry-img-align-float-left';
         return;
       case 'float-left':
-        result.extendStyles += 'float:left;transform:translateX(0);margin-left:0;display:block;';
-        result.extendClasses += ' cherry-img-align-float-right';
+        localResult.extendStyles += 'float:left;transform:translateX(0);margin-left:0;display:block;';
+        localResult.extendClasses += ' cherry-img-align-float-right';
         return;
       default:
         return;

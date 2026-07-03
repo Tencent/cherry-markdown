@@ -9,7 +9,7 @@
  * - Bubble.js 对 isUserInteraction 的判断
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import imgSizeHandler from '@/utils/imgSizeHandler';
 import imgToolHandler from '@/utils/imgToolHandler';
 
@@ -77,7 +77,7 @@ function createBubble(view: any) {
 
     changeImgValue() {
       const value = [this.imgSize, this.imgDeco, this.imgAlign].filter((v: string) => v).join(' ');
-      const view = this.editor.editor.view;
+      const { view } = this.editor.editor;
 
       let from = this.imgExtendFrom;
       let to = this.imgExtendTo;
@@ -142,11 +142,15 @@ function createMockSizeHandler() {
           return this.previewUpdate(event);
       }
     },
-    previewUpdate(callback?: any) {
+    previewUpdate(_callback?: any) {
       if (this.$isResizing()) return;
-      this.img?.addEventListener?.('transitionend', () => {
-        this.updatePosition();
-      }, { once: true });
+      this.img?.addEventListener?.(
+        'transitionend',
+        () => {
+          this.updatePosition();
+        },
+        { once: true },
+      );
     },
   };
 }
@@ -163,7 +167,12 @@ function createMockToolHandler() {
     position: { top: 0, left: 0 },
     $isResizing: vi.fn(() => false),
     getImgPosition: vi.fn(() => ({
-      top: 100, left: 50, width: 300, height: 200, bottom: 300, right: 350,
+      top: 100,
+      left: 50,
+      width: 300,
+      height: 200,
+      bottom: 300,
+      right: 350,
     })),
     emit(type: string, event?: any) {
       switch (type) {
@@ -171,11 +180,15 @@ function createMockToolHandler() {
           return this.previewUpdate(event);
       }
     },
-    previewUpdate(callback?: any) {
+    previewUpdate(_callback?: any) {
       if (this.$isResizing()) return;
-      this.img?.addEventListener?.('transitionend', () => {
-        this._updateToolbarPosition();
-      }, { once: true });
+      this.img?.addEventListener?.(
+        'transitionend',
+        () => {
+          this._updateToolbarPosition();
+        },
+        { once: true },
+      );
     },
     _updateToolbarPosition() {
       if (!this.img || !this.container || !this.previewerDom) return;
@@ -550,8 +563,12 @@ describe('Bubble isUserInteraction 判断', () => {
   it('isUserInteraction 为 false 时应隐藏 bubble', () => {
     // 模拟 Bubble 的 beforeSelectionChange 处理逻辑
     let bubbleVisible = false;
-    const showBubble = () => { bubbleVisible = true; };
-    const hideBubble = () => { bubbleVisible = false; };
+    const showBubble = () => {
+      bubbleVisible = true;
+    };
+    const hideBubble = () => {
+      bubbleVisible = false;
+    };
 
     const handleBeforeSelectionChange = ({ selection, isUserInteraction }: any) => {
       if (!isUserInteraction) {
@@ -576,8 +593,12 @@ describe('Bubble isUserInteraction 判断', () => {
 
   it('isUserInteraction 为 true 且有选区时应显示 bubble', () => {
     let bubbleVisible = false;
-    const showBubble = () => { bubbleVisible = true; };
-    const hideBubble = () => { bubbleVisible = false; };
+    const showBubble = () => {
+      bubbleVisible = true;
+    };
+    const hideBubble = () => {
+      bubbleVisible = false;
+    };
 
     const handleBeforeSelectionChange = ({ selection, isUserInteraction }: any) => {
       if (!isUserInteraction) {
@@ -602,8 +623,12 @@ describe('Bubble isUserInteraction 判断', () => {
 
   it('isUserInteraction 为 true 但无选区时应隐藏 bubble', () => {
     let bubbleVisible = false;
-    const showBubble = () => { bubbleVisible = true; };
-    const hideBubble = () => { bubbleVisible = false; };
+    const showBubble = () => {
+      bubbleVisible = true;
+    };
+    const hideBubble = () => {
+      bubbleVisible = false;
+    };
 
     const handleBeforeSelectionChange = ({ selection, isUserInteraction }: any) => {
       if (!isUserInteraction) {
@@ -640,11 +665,7 @@ describe('imgSizeHandler previewUpdate', () => {
 
     handler.previewUpdate();
 
-    expect(addEventListenerSpy).toHaveBeenCalledWith(
-      'transitionend',
-      expect.any(Function),
-      { once: true },
-    );
+    expect(addEventListenerSpy).toHaveBeenCalledWith('transitionend', expect.any(Function), { once: true });
   });
 
   it('正在调整大小时不应注册监听', () => {
@@ -679,11 +700,7 @@ describe('imgSizeHandler previewUpdate', () => {
 
     handler.emit('previewUpdate');
 
-    expect(handler.img.addEventListener).toHaveBeenCalledWith(
-      'transitionend',
-      expect.any(Function),
-      { once: true },
-    );
+    expect(handler.img.addEventListener).toHaveBeenCalledWith('transitionend', expect.any(Function), { once: true });
   });
 });
 
@@ -720,11 +737,7 @@ describe('imgToolHandler previewUpdate', () => {
 
     handler.previewUpdate();
 
-    expect(addEventListenerSpy).toHaveBeenCalledWith(
-      'transitionend',
-      expect.any(Function),
-      { once: true },
-    );
+    expect(addEventListenerSpy).toHaveBeenCalledWith('transitionend', expect.any(Function), { once: true });
   });
 
   it('正在调整大小时不应注册监听', () => {
@@ -786,7 +799,12 @@ describe('imgToolHandler previewUpdate', () => {
     handler.container = { style: {} as any, offsetWidth: 400, offsetHeight: 40 };
     handler.previewerDom = {};
     handler.getImgPosition.mockReturnValue({
-      top: 100, left: 50, width: 300, height: 30, bottom: 130, right: 350,
+      top: 100,
+      left: 50,
+      width: 300,
+      height: 30,
+      bottom: 130,
+      right: 350,
     });
     handler.$isResizing.mockReturnValue(false);
 
@@ -807,7 +825,12 @@ describe('imgToolHandler previewUpdate', () => {
     handler.container = { style: {} as any, offsetWidth: 200, offsetHeight: 40 };
     handler.previewerDom = {};
     handler.getImgPosition.mockReturnValue({
-      top: 100, left: 50, width: 300, height: 200, bottom: 300, right: 350,
+      top: 100,
+      left: 50,
+      width: 300,
+      height: 200,
+      bottom: 300,
+      right: 350,
     });
     handler.$isResizing.mockReturnValue(false);
 
@@ -825,11 +848,7 @@ describe('imgToolHandler previewUpdate', () => {
 
     handler.emit('previewUpdate');
 
-    expect(handler.img.addEventListener).toHaveBeenCalledWith(
-      'transitionend',
-      expect.any(Function),
-      { once: true },
-    );
+    expect(handler.img.addEventListener).toHaveBeenCalledWith('transitionend', expect.any(Function), { once: true });
   });
 });
 

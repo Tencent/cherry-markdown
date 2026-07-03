@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import AutoLink from '../../../src/core/hooks/AutoLink';
 
 function createAutoLinkHook(config = {}) {
-  const hook = new AutoLink({ config, globalConfig: {} }) as any;
+  const hook = new AutoLink({ config, _globalConfig: {} }) as any;
   hook.$engine = { urlProcessor: (url: string) => url };
   hook.$engine.$cherry = {
     options: {
@@ -18,7 +18,7 @@ function createAutoLinkHook(config = {}) {
   return hook;
 }
 
-const autoLinkHook = new AutoLink({ config: {}, globalConfig: {} });
+const autoLinkHook = new AutoLink({ config: {}, _globalConfig: {} });
 
 describe('core/hooks/autolink', () => {
   describe('isLinkInHtmlAttribute', () => {

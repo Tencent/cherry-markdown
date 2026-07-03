@@ -56,8 +56,8 @@ export default class Search extends MenuBase {
     });
   }
 
-  /** @param {HTMLElement} btnDom */
-  afterInit(btnDom) {
+  /** @param {HTMLElement} _btnDom */
+  afterInit(_btnDom) {
     this.syncToolbarLabel();
   }
 

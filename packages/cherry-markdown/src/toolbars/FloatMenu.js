@@ -58,9 +58,9 @@ export default class FloatMenu extends Toolbar {
 
   /**
    * 处理选区变化
-   * @param {Object} event 选区变化事件
+   * @param {Object} _event 选区变化事件
    */
-  handleSelectionChange(event) {
+  handleSelectionChange(_event) {
     if (this.editor && this.editor.editor) {
       // 创建兼容的 CodeMirror 对象
       const compatCodeMirror = this.createCompatCodeMirror();
@@ -82,7 +82,7 @@ export default class FloatMenu extends Toolbar {
    * 处理beforeSelectionChange事件
    * @param {Object} selection 选区对象
    */
-  handleBeforeSelectionChange({ selection }) {
+  handleBeforeSelectionChange({ _selection }) {
     if (this.editor && this.editor.editor) {
       const compatCodeMirror = this.createCompatCodeMirror();
       this.cursorActivity(null, compatCodeMirror);
@@ -112,7 +112,7 @@ export default class FloatMenu extends Toolbar {
       getLine: (lineNum) => {
         try {
           return state.doc.line(lineNum + 1).text;
-        } catch (e) {
+        } catch {
           return '';
         }
       },
@@ -140,7 +140,7 @@ export default class FloatMenu extends Toolbar {
                 console.warn('Failed to get coords for line height:', coordsError);
               }
               callback({ height: lineHeight });
-            } catch (e) {
+            } catch {
               break;
             }
           }
@@ -150,7 +150,7 @@ export default class FloatMenu extends Toolbar {
       coordsAtPos: (pos) => {
         try {
           return view.coordsAtPos(pos);
-        } catch (e) {
+        } catch {
           return null;
         }
       },
@@ -266,10 +266,10 @@ export default class FloatMenu extends Toolbar {
   /**
    * 获取对应行的顶部偏移量，用来定位 float 工具栏
    * @param {number} line 0-indexed 行号
-   * @param {Object} codeMirror 兼容的 CodeMirror 对象
+   * @param {Object} _codeMirror 兼容的 CodeMirror 对象
    * @returns {number}
    */
-  getLineHeight(line, codeMirror) {
+  getLineHeight(line, _codeMirror) {
     // CodeMirror 6 中需要重新实现行高计算
     const editorAdapter = this.editor.editor;
     if (!editorAdapter) {
@@ -294,7 +294,7 @@ export default class FloatMenu extends Toolbar {
           if (lineBlock) {
             return lineBlock.top;
           }
-        } catch (blockError) {
+        } catch {
           // 静默处理，降级到默认行高
         }
         return line * 20;

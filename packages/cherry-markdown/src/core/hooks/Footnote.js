@@ -19,7 +19,7 @@ import { compileRegExp } from '@/utils/regexp';
 export default class Footnote extends ParagraphBase {
   static HOOK_NAME = 'footnote';
 
-  constructor({ externals, config, cherry }) {
+  constructor({ _externals, config, cherry }) {
     super();
     this.config = config;
     this.$cherry = cherry;
@@ -133,7 +133,7 @@ export default class Footnote extends ParagraphBase {
     return $str;
   }
 
-  makeHtml(str, sentenceMakeFunc) {
+  makeHtml(str, _sentenceMakeFunc) {
     return str;
   }
 

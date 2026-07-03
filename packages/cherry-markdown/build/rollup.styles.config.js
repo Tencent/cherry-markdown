@@ -22,16 +22,15 @@ const IS_PRODUCTION = process.env.NODE_ENV === 'production';
  */
 const createCleanupPlugin = () => ({
   name: 'remove-non-asset-artifacts',
-  generateBundle: (option, bundle) => {
-    Object.keys(bundle).forEach((key) => {
-      if (bundle[key].type !== 'asset') {
-        delete bundle[key];
-      }
+  generateBundle: (_option, bundle) => {
+    const removableKeys = Object.keys(bundle).filter((key) => bundle[key].type !== 'asset');
+    removableKeys.forEach((key) => {
+      delete bundle[key];
     });
   },
 });
 
-const createStyleConfigs = ({ input, cssBaseName, outputBaseName, watch }) => {
+const createStyleConfigs = ({ input, cssBaseName, outputBaseName, watch: _watch }) => {
   const configs = [
     {
       input,

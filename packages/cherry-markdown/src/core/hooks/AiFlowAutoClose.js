@@ -22,7 +22,7 @@ import ParagraphBase from '@/core/ParagraphBase';
  */
 export default class AiFlowAutoClose extends ParagraphBase {
   static HOOK_NAME = 'aiFlowAutoClose';
-  constructor({ config, cherry }) {
+  constructor({ _config, cherry }) {
     super({ needCache: false });
     this.$cherry = cherry;
   }
@@ -128,7 +128,7 @@ export default class AiFlowAutoClose extends ParagraphBase {
     });
   }
 
-  makeHtml(str, sentenceMakeFunc) {
+  makeHtml(str, _sentenceMakeFunc) {
     const lastN = /\n$/.test(str) ? '\n' : '';
     let $str = str.replace(/\n$/, '');
     // 判断是否有虚拟光标

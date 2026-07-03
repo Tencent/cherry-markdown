@@ -112,11 +112,7 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
   };
 
   // 打开文件
-  const openFile = async (
-    filePath: string,
-    fromDirectoryManager: boolean = false,
-    bumpRecent: boolean = true,
-  ): Promise<void> => {
+  const openFile = async (filePath: string, fromDirectoryManager = false, bumpRecent = true): Promise<void> => {
     try {
       // 统一路径分隔符（Windows 下将 `\` 规范化为 `/`），
       // 确保与保存流程（App.vue 中 saveMarkdown）写入 store 的路径格式一致，
@@ -204,7 +200,7 @@ export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: R
         await revealItemInDir(filePath);
         hideContextMenu();
         return;
-      } catch (_) {
+      } catch {
         // fallback: 打开所在目录
       }
 

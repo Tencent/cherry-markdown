@@ -18,7 +18,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* eslint-disable no-underscore-dangle */
 import ParagraphBase from '@/core/ParagraphBase';
 /**
  * [TAPD](https://tapd.cn)的html块语法
@@ -44,7 +43,7 @@ export default class TapdHtmlTagPlugin extends ParagraphBase {
         .replace(/&#60;/g, '<')
         .replace(/&#62;/g, '>')
         .replace('style="LAYOUT-GRID', 'style="');
-      $whole = this._trimScripTag($whole);
+      $whole = this.trimScriptTag($whole);
       const data = sentenceMakeFunc($whole);
       return `<div data-lines="${lines}" data-sign="${data.sign}">${$whole}</div>`;
     });
@@ -57,7 +56,7 @@ export default class TapdHtmlTagPlugin extends ParagraphBase {
     };
   }
 
-  _trimScripTag(str) {
+  trimScriptTag(str) {
     return str
       .replace(/(<(?:script|script\s[^>]*)>)([\s\S]*?)(<\/script>)/gi, '')
       .replace(/(<iframe [^>]*>)|(<\/iframe>)/gi, '');

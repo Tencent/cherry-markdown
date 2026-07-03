@@ -50,7 +50,7 @@ export default class ChangeLocale extends MenuBase {
     this.setName(this.nameMap[this.$cherry.options.locale] || this.nameMap.zh_CN);
   }
 
-  onClick(selection, shortKey) {
+  onClick(_selection, shortKey) {
     if (!this.$cherry.locales[shortKey]) {
       return;
     }

@@ -1,3 +1,0 @@
-{
-  "ignorePatterns": ["out", "dist", "**/*.d.ts", "packages/cherry-markdown/src/libs/**/*.js"]
-}

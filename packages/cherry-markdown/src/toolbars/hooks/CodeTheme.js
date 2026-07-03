@@ -44,10 +44,10 @@ export default class CodeTheme extends MenuBase {
 
   /**
    * 获取当前激活的子菜单索引
-   * @param {HTMLDivElement} subMenuDomPanel
+   * @param {HTMLDivElement} _subMenuDomPanel
    * @returns {number|number[]} 当前激活的子菜单索引或索引数组
    */
-  getActiveSubMenuIndex(subMenuDomPanel) {
+  getActiveSubMenuIndex(_subMenuDomPanel) {
     const wrap = this.$cherry.getCodeWrap();
     const currentTheme = getCodeThemeFromLocal(this.$cherry.nameSpace);
 
@@ -84,10 +84,10 @@ export default class CodeTheme extends MenuBase {
 
   /**
    * 响应点击事件
-   * @param {string} shortKey 快捷键参数，本函数不处理这个参数
+   * @param {string} _shortKey 快捷键参数，本函数不处理这个参数
    * @param {string} codeTheme 具体的代码块主题
    */
-  onClick(shortKey = '', codeTheme) {
+  onClick(_shortKey = '', codeTheme) {
     if (codeTheme === 'wrap') {
       // 切换是否自动换行
       const wrap = this.$cherry.getCodeWrap();

@@ -8,7 +8,7 @@ import 'cherry-markdown-core/dist/cherry-markdown.min.css';
 
 // import md5 from 'md5';
 
-// eslint-disable-next-line no-undef
+/* global acquireVsCodeApi */
 const vscode = acquireVsCodeApi();
 
 /**
@@ -71,7 +71,6 @@ const customMenuExport = Cherry.createMenuHook('保存', {
   ],
 });
 
-// eslint-disable-next-line no-undef
 // const customMenuPublish = Cherry.createMenuHook('发布',  {
 //   iconName: 'publish',
 //   onClick: (selection, type) => {
@@ -120,8 +119,7 @@ const basicConfig = {
   isPreviewOnly: false,
   engine: {
     global: {
-      // eslint-disable-next-line no-unused-vars
-      urlProcessor(url, srcType) {
+      urlProcessor(url, _srcType) {
         // console.log('url-processor', url, srcType);
         // if (srcType === 'image') {
         //   loadOneImg({ src: url });
@@ -327,7 +325,6 @@ const locale = languageIdentifiers[mdInfo.vscodeLanguage] || 'zh_CN';
 const config = Object.assign({}, basicConfig, { value: mdInfo.text, locale });
 // 异步加载 MathJax（如果需要），以便拆分包体积但不阻塞初始化
 import(/* webpackChunkName: "mathjax" */ 'mathjax/es5/tex-svg.js').catch(() => {});
-// eslint-disable-next-line new-cap
 const cherry = new Cherry(config);
 // 图片缓存
 // const imgCache = {};
@@ -455,17 +452,16 @@ window.addEventListener('message', (e) => {
         window.disableScrollListener = false;
       }, 500);
       break;
-    case 'disable-edit':
+    case 'disable-edit': {
       // 强制进入预览模式
       window.isDisableEdit = true;
-      // eslint-disable-next-line no-case-declarations
       const pen = document.getElementsByClassName('cherry-toolbar-pen')[0];
-      // eslint-disable-next-line no-case-declarations
       const markdown = document.getElementById('markdown');
       markdown.className = 'markdown-preview-only';
       pen.className = pen.className.replace(' active', '');
       pen.innerHTML = '<i class="ch-icon ch-icon-pen"></i>';
       break;
+    }
     case 'enable-edit':
       window.isDisableEdit = false;
       break;
@@ -492,7 +488,7 @@ window.addEventListener('message', (e) => {
             img.classList.add('ch-image-radius');
           }
         });
-      } catch (e) {
+      } catch {
         // 忽略前端样式应用中的错误
       }
       break;

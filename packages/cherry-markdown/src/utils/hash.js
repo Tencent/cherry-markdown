@@ -125,15 +125,10 @@ function xxHash32(str, seed) {
  * @returns {string} 16-char lowercase hex
  */
 export function hashHex(str) {
-  if (typeof str !== 'string') {
-    // Match CryptoJS.SHA256(undefined).toString() -> hash of "" semantics by
-    // coercing to string. This keeps existing call sites safe.
-    // eslint-disable-next-line no-param-reassign
-    str = String(str == null ? '' : str);
-  }
-  const lo = xxHash32(str, SEED_LO);
+  const input = typeof str !== 'string' ? String(str === null || str === undefined ? '' : str) : str;
+  const lo = xxHash32(input, SEED_LO);
   // Fold the length into the high seed: guarantees no cross-length collision.
-  const hi = xxHash32(str, (SEED_HI ^ str.length) | 0);
+  const hi = xxHash32(input, (SEED_HI ^ input.length) | 0);
   return toHex8(hi) + toHex8(lo);
 }
 

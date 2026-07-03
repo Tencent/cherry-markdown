@@ -171,7 +171,7 @@ export default class Table extends ParagraphBase {
     return { textAlignRules, COLUMN_ALIGN_MAP };
   }
 
-  $parseTable(lines, sentenceMakeFunc, dataLines, originalStr = '') {
+  $parseTable(lines, sentenceMakeFunc, dataLines, _originalStr = '') {
     let maxCol = 0;
     const rows = lines.map((line, index) => {
       const cols = line.replace(/\\\|/g, '~CS').split('|');

@@ -10,10 +10,15 @@ import { SUPPORTED_FILE_EXTENSIONS, MAX_DIRECTORY_DEPTH, DEFAULT_FILE_CONTENT } 
  */
 const isWindowsPlatform = (): boolean => {
   if (typeof navigator === 'undefined') return false;
-  // `navigator.userAgentData.platform` is the modern API; fall back to legacy fields.
-  // Tauri webview on Windows always reports "Win32" / "Windows".
-  const uaData = (navigator as unknown as { userAgentData?: { platform?: string } }).userAgentData;
-  const platform = (uaData?.platform || navigator.platform || navigator.userAgent || '').toLowerCase();
+  const navigatorWithUAData = navigator as Navigator & {
+    userAgentData?: { platform?: string };
+  };
+  const platform = (
+    navigatorWithUAData.userAgentData?.platform ||
+    navigator.platform ||
+    navigator.userAgent ||
+    ''
+  ).toLowerCase();
   return platform.includes('win');
 };
 
@@ -72,7 +77,7 @@ export const checkPathExists = async (path: string): Promise<boolean> => {
   try {
     await readDir(normalizePath(path));
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 };
@@ -86,7 +91,7 @@ export const isSupportedFile = (fileName: string): boolean => {
 // 递归加载目录结构（可配置最大深度，包含所有子目录与文件）
 export const loadDirectoryStructure = async (
   dirPath: string,
-  depth: number = 0,
+  depth = 0,
   maxDepth: number = MAX_DIRECTORY_DEPTH,
 ): Promise<DirectoryStructureResult> => {
   if (depth > maxDepth) {

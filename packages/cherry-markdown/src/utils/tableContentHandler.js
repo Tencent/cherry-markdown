@@ -90,7 +90,8 @@ export default class TableHandler {
   }
 
   setStyle(element, property, value) {
-    element.style[property] = value;
+    const localElement = element;
+    localElement.style[property] = value;
   }
 
   /**
@@ -144,18 +145,18 @@ export default class TableHandler {
     if (this.boundaryTableRef && this.boundaryMouseMoveHandlerRef) {
       try {
         this.boundaryTableRef.removeEventListener('mousemove', this.boundaryMouseMoveHandlerRef);
-      } catch (e) {}
+      } catch {}
     }
     if (this.boundaryGlobalMoveRef) {
       try {
         document.removeEventListener('mousemove', this.boundaryGlobalMoveRef, true);
-      } catch (e) {}
+      } catch {}
     }
     // 移除 添加行列符号
     if (this.tableEditor?.editorDom?.symbolContainer?.parentNode) {
       try {
         this.tableEditor.editorDom.symbolContainer.parentNode.removeChild(this.tableEditor.editorDom.symbolContainer);
-      } catch (e) {}
+      } catch {}
     }
     // 清空边界缓存
     this.boundaryCache = null;
@@ -197,7 +198,7 @@ export default class TableHandler {
 
     // 处理markdown表格语法
     editorValue
-      .replace(this.codeBlockReg, (whole, ...args) => {
+      .replace(this.codeBlockReg, (whole, ..._args) => {
         // 先把代码块里的表格语法关键字干掉
         return whole.replace(/\|/g, '.');
       })
@@ -355,9 +356,9 @@ export default class TableHandler {
    * @param {Boolean} isTHead
    * @param {Number} trIndex
    * @param {Number} tdIndex
-   * @param {Boolean} isInBlock
+   * @param {Boolean} _isInBlock
    */
-  $getTdOffset(tableCode, isTHead, trIndex, tdIndex, isInBlock = false) {
+  $getTdOffset(tableCode, isTHead, trIndex, tdIndex, _isInBlock = false) {
     const codes = tableCode.split(/\n/);
     const targetTr = isTHead ? 0 : trIndex + 2;
     const tds = codes[targetTr].split(/\|/);
@@ -859,9 +860,10 @@ export default class TableHandler {
       if (plannedRow) {
         const top = plannedRow.pos - tableRect.top - 6;
         rowSymbols.forEach((symbol, index) => {
-          symbol.style.top = `${top}px`;
-          symbol.style.left = index === 0 ? '-20px' : `${tableRect.width + 4}px`;
-          symbol.style.display = '';
+          const localSymbol = symbol;
+          localSymbol.style.top = `${top}px`;
+          localSymbol.style.left = index === 0 ? '-20px' : `${tableRect.width + 4}px`;
+          localSymbol.style.display = '';
           this.tableEditor.editorDom.boundaryTriggerSymbol.rows[index].index = plannedRow.index;
         });
         activeRow = plannedRow;
@@ -869,10 +871,12 @@ export default class TableHandler {
         hLine.style.display = '';
       } else {
         rowSymbols.forEach((symbol) => {
-          symbol.style.display = 'none';
+          const localSymbol = symbol;
+          localSymbol.style.display = 'none';
         });
         this.tableEditor.editorDom.boundaryTriggerSymbol.rows.forEach((row) => {
-          row.index = null;
+          const localRow = row;
+          localRow.index = null;
         });
         activeRow = null;
         hLine.style.display = 'none';
@@ -946,7 +950,10 @@ export default class TableHandler {
       if (x < tableRect.left || x > tableRect.right || y < tableRect.top || y > tableRect.bottom) {
         if (!activeCol && !activeRow) {
           colSymbol.style.display = 'none';
-          rowSymbols.forEach((symbol) => (symbol.style.display = 'none'));
+          rowSymbols.forEach((rowSymbol) => {
+            const symbolEl = rowSymbol;
+            symbolEl.style.display = 'none';
+          });
           vLine.style.display = 'none';
           hLine.style.display = 'none';
         }
@@ -1024,7 +1031,10 @@ export default class TableHandler {
       const isAnySymbolSafe = inSafe(colSymbol) || rowSymbols.some((symbol) => inSafe(symbol));
       if (!isAnySymbolSafe) {
         colSymbol.style.display = 'none';
-        rowSymbols.forEach((symbol) => (symbol.style.display = 'none'));
+        rowSymbols.forEach((rowSymbol) => {
+          const symbolEl = rowSymbol;
+          symbolEl.style.display = 'none';
+        });
         vLine.style.display = 'none';
         hLine.style.display = 'none';
         activeCol = null;
@@ -1250,20 +1260,21 @@ export default class TableHandler {
    * @param {HTMLElement} button - 菜单按钮元素
    */
   $addRowDragFunctionality(button) {
-    button.draggable = true;
-    button.title = '拖拽移动行';
+    const localButton = button;
+    localButton.draggable = true;
+    localButton.title = '拖拽移动行';
 
     // 鼠标悬停时高亮当前行
-    button.addEventListener('mouseover', () => {
+    localButton.addEventListener('mouseover', () => {
       this.$applyRowHighlight(true);
     });
 
-    button.addEventListener('mouseleave', () => {
+    localButton.addEventListener('mouseleave', () => {
       this.$applyRowHighlight(false);
     });
 
     // 拖拽开始
-    button.addEventListener('mousedown', (e) => {
+    localButton.addEventListener('mousedown', (_e) => {
       this.$setSelection(this.tableEditor.info.tableIndex, 'table');
       this.$dragLine();
     });
@@ -1274,20 +1285,21 @@ export default class TableHandler {
    * @param {HTMLElement} button - 菜单按钮元素
    */
   $addColumnDragFunctionality(button) {
-    button.draggable = true;
-    button.title = '拖拽移动列';
+    const localButton = button;
+    localButton.draggable = true;
+    localButton.title = '拖拽移动列';
 
     // 鼠标悬停时高亮当前列
-    button.addEventListener('mouseover', () => {
+    localButton.addEventListener('mouseover', () => {
       this.$highlightCurrentColumn();
     });
 
-    button.addEventListener('mouseleave', () => {
+    localButton.addEventListener('mouseleave', () => {
       this.$unhighlightCurrentColumn();
     });
 
     // 拖拽开始
-    button.addEventListener('mousedown', (e) => {
+    localButton.addEventListener('mousedown', (_e) => {
       this.$setSelection(this.tableEditor.info.tableIndex, 'table');
       this.$dragCol();
     });
@@ -1352,11 +1364,12 @@ export default class TableHandler {
     // 清除所有单元格的高光类
     const allCells = table.querySelectorAll('td, th');
     allCells.forEach((cell) => {
+      const localCell = cell;
       // 清除背景高光
-      cell.classList.remove('table-highlight-row', 'table-highlight-col');
+      localCell.classList.remove('table-highlight-row', 'table-highlight-col');
 
       // 清除边框高光
-      cell.classList.remove(
+      localCell.classList.remove(
         'table-highlight-border-reorder-right',
         'table-highlight-border-reorder-left',
         'table-highlight-border-reorder-top',
@@ -1364,28 +1377,29 @@ export default class TableHandler {
       );
 
       // 清除内联样式
-      if (cell instanceof HTMLElement) {
-        cell.style.border = '';
-        cell.style.borderLeft = '';
-        cell.style.borderRight = '';
-        cell.style.borderTop = '';
-        cell.style.borderBottom = '';
-        cell.style.background = '';
+      if (localCell instanceof HTMLElement) {
+        localCell.style.border = '';
+        localCell.style.borderLeft = '';
+        localCell.style.borderRight = '';
+        localCell.style.borderTop = '';
+        localCell.style.borderBottom = '';
+        localCell.style.background = '';
       }
     });
 
     // 清除行的边框高光
     const allRows = table.querySelectorAll('tr');
     allRows.forEach((row) => {
-      row.classList.remove(
+      const localRow = row;
+      localRow.classList.remove(
         'table-highlight-border-reorder-right',
         'table-highlight-border-reorder-left',
         'table-highlight-border-reorder-top',
         'table-highlight-border-reorder-bottom',
       );
-      if (row instanceof HTMLElement) {
-        row.style.border = '';
-        row.style.background = '';
+      if (localRow instanceof HTMLElement) {
+        localRow.style.border = '';
+        localRow.style.background = '';
       }
     });
   }
@@ -1622,7 +1636,7 @@ export default class TableHandler {
   /**
    * 执行菜单动作
    */
-  $executeMenuAction(action, type) {
+  $executeMenuAction(action, _type) {
     switch (action) {
       case 'deleteRow':
         this.$deleteCurrentRow();
@@ -1668,11 +1682,12 @@ export default class TableHandler {
    * @param {string} alignment - 对齐方式
    */
   $alignColumnInMarkdownTable(lines, columnIndex, alignment) {
-    if (lines.length < 2) return;
+    const localLines = lines;
+    if (localLines.length < 2) return;
 
     // 找到分隔符行（第二行）
     const separatorLineIndex = 1;
-    const separatorLine = lines[separatorLineIndex];
+    const separatorLine = localLines[separatorLineIndex];
 
     // 检查是否是引用表格
     const isBlockquoteTable = separatorLine.trim().startsWith('>');
@@ -1706,12 +1721,12 @@ export default class TableHandler {
       cells[columnIndex] = newSeparator;
 
       if (isBlockquoteTable) {
-        lines[separatorLineIndex] = `${quotePrefix}|${cells.join('|')}|`;
+        localLines[separatorLineIndex] = `${quotePrefix}|${cells.join('|')}|`;
       } else {
-        lines[separatorLineIndex] = `|${cells.join('|')}|`;
+        localLines[separatorLineIndex] = `|${cells.join('|')}|`;
       }
 
-      const newText = lines.join('\n');
+      const newText = localLines.join('\n');
       this.codeMirror.replaceSelection(newText);
     }
   }
@@ -1763,6 +1778,7 @@ export default class TableHandler {
    * 显示菜单气泡
    */
   $showMenuBubble(button, bubble) {
+    const localBubble = bubble;
     // 隐藏其他所有菜单气泡
     const allBubbles = this.container.querySelectorAll('.cherry-previewer-table-menu-bubble');
     allBubbles.forEach((b) => {
@@ -1771,21 +1787,21 @@ export default class TableHandler {
       }
     });
 
-    bubble.classList.remove('cherry-previewer-table-menu-bubble--hidden');
+    localBubble.classList.remove('cherry-previewer-table-menu-bubble--hidden');
 
     // 设置气泡位置
     const { type } = button.dataset;
     if (type === 'left') {
-      bubble.style.top = '350%';
-      bubble.style.transform = 'translateY(-50%) rotate(-90deg)';
+      localBubble.style.top = '350%';
+      localBubble.style.transform = 'translateY(-50%) rotate(-90deg)';
     } else if (type === 'top') {
-      bubble.style.top = '-450%';
-      bubble.style.left = '50%';
-      bubble.style.transform = 'translateX(-50%)';
+      localBubble.style.top = '-450%';
+      localBubble.style.left = '50%';
+      localBubble.style.transform = 'translateX(-50%)';
     }
 
     const closeMenuHandler = (e) => {
-      if (!bubble.contains(e.target) && !button.contains(e.target)) {
+      if (!localBubble.contains(e.target) && !button.contains(e.target)) {
         this.$hideMenuBubble(bubble);
         document.removeEventListener('click', closeMenuHandler);
       }
@@ -1887,7 +1903,7 @@ export default class TableHandler {
       tdNode.setAttribute('draggable', true);
     }
 
-    function handleDragLeave(event) {
+    function handleDragLeave(_event) {
       that.$clearAllBorders();
     }
 
@@ -1910,7 +1926,7 @@ export default class TableHandler {
         return;
       }
 
-      const newLines = lines.map((line, index) => {
+      const newLines = lines.map((line, _index) => {
         // 跳过空行
         if (!line.trim()) return line;
 
@@ -1969,7 +1985,7 @@ export default class TableHandler {
     const lines = view.state.doc.sliceString(view.state.selection.main.from, view.state.selection.main.to).split(/\n/);
     const that = this;
 
-    function handleDragLeave(event) {
+    function handleDragLeave(_event) {
       that.$clearAllBorders();
     }
 

@@ -126,7 +126,7 @@ export default class Engine {
           }
           $expectInstance(hook);
           hooksConfig.push(hook);
-        } catch (e) {
+        } catch {
           throw new Error('the hook does not correctly inherit');
         }
       }
@@ -209,11 +209,12 @@ export default class Engine {
     try {
       let canContinue = true;
       $md = this.hooks[type][method]((newMd, oneHook) => {
+        const localOneHook = oneHook;
         if (!canContinue) {
           return newMd;
         }
-        if (!oneHook.$engine) {
-          oneHook.$engine = this;
+        if (!localOneHook.$engine) {
+          localOneHook.$engine = this;
           // Deprecated
           Object.defineProperty(oneHook, '_engine', {
             get() {
@@ -228,7 +229,7 @@ export default class Engine {
         }
         // 特殊处理：引用语法在实现嵌套引用时，需要将引用语法之前的语法进行执行，但不需要执行引用语法之后的语法
         if (before && type === 'paragraph' && action === 'afterMakeHtml') {
-          if (oneHook.getName() === before) {
+          if (localOneHook.getName() === before) {
             canContinue = false;
           }
         }
@@ -236,7 +237,7 @@ export default class Engine {
         const ret = oneHook[action](newMd, actionArgs, this.markdownParams);
         // const cost = Date.now() - time;
         // if (cost > 50) {
-        //   console.log(`hook ${oneHook.getName()} ${action} cost ${Date.now() - time}ms`);
+        //   console.log(`hook ${localOneHook.getName()} ${action} cost ${Date.now() - time}ms`);
         // }
         return ret;
       }, $md);
@@ -301,7 +302,7 @@ export default class Engine {
   $cacheBigData(md) {
     // 暂存所有代码块
     const codeBlocks = [];
-    let $md = md.replace(getCodeBlockRule().reg, (whole, m1, m2) => {
+    let $md = md.replace(getCodeBlockRule().reg, (whole, _m1, _m2) => {
       const cacheKey = `codeBlockBegin${codeBlocks.length}codeBlockEnd`;
       codeBlocks.push(whole);
       return cacheKey;

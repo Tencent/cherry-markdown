@@ -41,8 +41,13 @@ if (!isBrowser()) {
   });
 }
 
-// @ts-expect-error process.env from build env
 const VERSION = `${process.env.BUILD_VERSION}`;
+
+/**
+ * @typedef {object} CherryPluginClass
+ * @property {boolean} [$cherry$mounted]
+ * @property {function(object, ...any[]): void} install
+ */
 
 export class CherryStatic {
   static createSyntaxHook = createSyntaxHook;
@@ -53,30 +58,31 @@ export class CherryStatic {
 
   /**
    * @this {typeof import('./Cherry').default | typeof CherryStatic}
-   * @param {{ install: (defaultConfig: any, ...args: any[]) => void }} PluginClass 插件Class
+   * @param {CherryPluginClass} PluginClass 插件 Class
    * @param  {...any} args 初始化插件的参数
-   * @returns
+   * @returns {void}
    */
   static usePlugin(PluginClass, ...args) {
+    const localPluginClass = PluginClass;
     if (this === CherryStatic) {
       throw new Error('`usePlugin` is not allowed to called through CherryStatic class.');
     }
-    // @ts-ignore
+    // @ts-expect-error 子类静态属性由 Cherry / CherryEngine 挂载
     if (this.initialized) {
       throw new Error('The function `usePlugin` should be called before Cherry is instantiated.');
     }
-    // @ts-ignore
-    if (PluginClass.$cherry$mounted === true) {
+    if (localPluginClass.$cherry$mounted === true) {
       return;
     }
-    // @ts-ignore
-    PluginClass.install.apply(PluginClass, [this.config.defaults, ...args]);
-    // @ts-ignore
-    PluginClass.$cherry$mounted = true;
+    // @ts-expect-error 子类静态 config 由 Cherry / CherryEngine 挂载
+    localPluginClass.install.apply(PluginClass, [this.config.defaults, ...args]);
+    localPluginClass.$cherry$mounted = true;
   }
 
-  // for type check only
-  // TODO: fix this error
-  // eslint-disable-next-line no-useless-constructor
-  constructor(...args) {}
+  constructor(..._args) {
+    // 基类仅挂载静态 API，禁止直接实例化
+    if (new.target === CherryStatic) {
+      throw new Error('CherryStatic cannot be instantiated directly.');
+    }
+  }
 }

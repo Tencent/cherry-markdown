@@ -97,17 +97,16 @@ export default class MenuBase {
     /** @type {SubMenuConfigItem[]} */
     this.subMenuConfig = []; // 子菜单配置
     this.noIcon = false; // 是否不显示图标
-    this.cacheOnce = false; // 是否保存一次点击事件生成的内容
+    /** @type {false | any} 是否保存一次点击事件生成的内容 */
+    this.cacheOnce = false;
     /**
      * 子菜单的定位方式
      * @property
      * @type {'absolute' | 'fixed' | 'sidebar'}
      */
     this.positionModel = 'absolute';
-    // eslint-disable-next-line no-underscore-dangle
     if (typeof this._onClick === 'function') {
       Logger.warn('`MenuBase._onClick` is deprecated. Override `fire` instead');
-      // eslint-disable-next-line no-underscore-dangle
       this.fire = this._onClick;
     }
     /**
@@ -150,6 +149,9 @@ export default class MenuBase {
     this.cacheOnce = info;
   }
 
+  /**
+   * @returns {any}
+   */
   getAndCleanCacheOnce() {
     this.updateMarkdown = true;
     const ret = this.cacheOnce;
@@ -214,7 +216,7 @@ export default class MenuBase {
   /**
    * 在创建菜单后执行的钩子
    */
-  afterInit(btnDom) {}
+  afterInit(_btnDom) {}
 
   /**
    * 创建一个一级菜单
@@ -564,11 +566,11 @@ export default class MenuBase {
    * 反转子菜单点击事件参数顺序
    * @deprecated
    */
-  bindSubClick(shortcut, selection) {
+  bindSubClick(shortcut, _selection) {
     return this.fire(null, shortcut);
   }
 
-  onClick(selection, shortcut, callback) {
+  onClick(selection, _shortcut, _callback) {
     return selection;
   }
 
@@ -683,10 +685,10 @@ export default class MenuBase {
 
   /**
    * 绑定子菜单点击事件
-   * @param {HTMLDivElement} subMenuDomPanel
+   * @param {HTMLDivElement} _subMenuDomPanel
    * @returns {number|number[]} 当前激活的子菜单索引或索引数组
    */
-  getActiveSubMenuIndex(subMenuDomPanel) {
+  getActiveSubMenuIndex(_subMenuDomPanel) {
     return -1;
   }
 }

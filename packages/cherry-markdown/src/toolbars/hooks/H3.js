@@ -30,10 +30,10 @@ export default class H3 extends MenuBase {
   /**
    * 响应点击事件
    * @param {string} selection 被用户选中的文本内容
-   * @param {string} shortKey 快捷键参数，本函数不处理这个参数
+   * @param {string} _shortKey 快捷键参数，本函数不处理这个参数
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
-  onClick(selection, shortKey = '') {
+  onClick(selection, _shortKey = '') {
     const $selection = this.getSelection(selection, 'line', true) || this.locale.h3;
     const header = '###';
     // 注释下面的代码，因为选中标题绝对只有一行，所以不需要扩大选区

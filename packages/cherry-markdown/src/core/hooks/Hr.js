@@ -35,7 +35,7 @@ export default class Hr extends ParagraphBase {
     });
   }
 
-  makeHtml(str, sentenceMakeFunc) {
+  makeHtml(str, _sentenceMakeFunc) {
     return str;
   }
 

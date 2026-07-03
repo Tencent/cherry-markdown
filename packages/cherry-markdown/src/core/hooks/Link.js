@@ -19,13 +19,27 @@ import { compileRegExp, isLookbehindSupported, NOT_ALL_WHITE_SPACES_INLINE } fro
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import UrlCache from '@/UrlCache';
 
+/**
+ * 根据链接配置生成 target 属性字符串
+ * @param {{ target?: string, openNewPage?: boolean }} config
+ * @returns {string}
+ */
+function resolveLinkTarget(config) {
+  if (config.target) {
+    return `target="${config.target}"`;
+  }
+  if (config.openNewPage) {
+    return 'target="_blank"';
+  }
+  return '';
+}
+
 export default class Link extends SyntaxBase {
   static HOOK_NAME = 'link';
 
-  constructor({ config, globalConfig }) {
+  constructor({ config, _globalConfig }) {
     super({ config });
-    // eslint-disable-next-line no-nested-ternary
-    this.target = config.target ? `target="${config.target}"` : !!config.openNewPage ? 'target="_blank"' : '';
+    this.target = resolveLinkTarget(config);
     this.rel = config.rel ? `rel="${config.rel}"` : '';
   }
 

@@ -23,7 +23,7 @@
  * - $getTdOffset: 边界检查
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 // Mock CodeMirror 6 实例
 const createMockCodeMirror = (content: string) => {
@@ -119,9 +119,7 @@ const createMockTableHandler = (codeMirror: ReturnType<typeof createMockCodeMirr
     // 核心修复：$setSelection 边界检查
     $setSelection(index: number, type = 'table') {
       const { isInFootnote } = this.tableEditor.info;
-      const tableCode = isInFootnote
-        ? this.tableEditor.footnoteTableCodes[index]
-        : this.tableEditor.tableCodes[index];
+      const tableCode = isInFootnote ? this.tableEditor.footnoteTableCodes[index] : this.tableEditor.tableCodes[index];
 
       // 边界检查：如果表格代码不存在，直接返回
       if (!tableCode) {
@@ -144,7 +142,7 @@ const createMockTableHandler = (codeMirror: ReturnType<typeof createMockCodeMirr
 
         // 计算文档偏移量并设置选区
         const { doc } = this.codeMirror.view.state;
-        const from = doc.line(beginLine + 1).from;
+        const { from } = doc.line(beginLine + 1);
         const to = doc.line(endLine + 1).from + lastLineLength;
         this.codeMirror.setSelection(from, to);
       }

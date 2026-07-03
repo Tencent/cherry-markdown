@@ -17,8 +17,18 @@ import type CherryEngine from '../src/index.engine.core';
 // 两者不冲突——global.d.ts 不在 tsconfig files 中，开发时不参与编译。
 // env.d.ts 的声明使用联合类型，覆盖 index.core.js 和 index.stream.js 两个入口。
 
+declare namespace NodeJS {
+  interface ProcessEnv {
+    BUILD_VERSION?: string;
+  }
+}
+
 declare global {
   const BUILD_ENV: string;
+  /** 构建脚本注入，Rollup define 会替换 process.env */
+  const process: {
+    env: NodeJS.ProcessEnv;
+  };
   interface Window {
     // for IE
     clipboardData: ClipboardEvent['clipboardData'];

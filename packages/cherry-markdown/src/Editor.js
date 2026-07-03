@@ -1295,12 +1295,13 @@ export default class Editor {
    * @returns {void}
    */
   applyBatchMarks = (editor, markItems) => {
+    const localEditor = editor;
     const effects = [];
     const { view } = editor;
 
     markItems.forEach((item) => {
-      editor.markIdCounter += 1;
-      const markId = `mark_${editor.markIdCounter}`;
+      localEditor.markIdCounter += 1;
+      const markId = `mark_${localEditor.markIdCounter}`;
 
       const decoration = item.replacedWith
         ? Decoration.replace({

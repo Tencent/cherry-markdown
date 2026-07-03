@@ -58,20 +58,22 @@ const imgToolHandler = {
       decoDiv.className = 'img-tool-group';
       this.container.appendChild(decoDiv);
       decoList.forEach((deco) => {
-        deco.active = this.img.className.match(`cherry-img-deco-${deco.type}`);
+        const localDeco = deco;
+        localDeco.active = this.img.className.match(`cherry-img-deco-${localDeco.type}`);
         const div = document.createElement('div');
         const icon = document.createElement('i');
         div.appendChild(icon);
-        icon.className = `img-tool-icon ch-icon ch-icon-imgDeco${capitalizeFirstLetter(deco.type)}`;
+        icon.className = `img-tool-icon ch-icon ch-icon-imgDeco${capitalizeFirstLetter(localDeco.type)}`;
         div.className = getImgToolButtonClassName(deco);
-        div.title = deco.text;
+        div.title = localDeco.text;
         div.addEventListener('click', (e) => {
+          const localDeco = deco;
           e.preventDefault();
           e.stopPropagation();
-          deco.active = !deco.active;
+          localDeco.active = !localDeco.active;
           // 点击后，更新样式
           div.className = getImgToolButtonClassName(deco);
-          this.emitChange(this.img, deco.type);
+          this.emitChange(this.img, localDeco.type);
         });
         decoDiv.append(div);
       });
@@ -91,29 +93,35 @@ const imgToolHandler = {
     const alignDiv = document.createElement('div');
     alignDiv.className = 'img-tool-group';
     this.container.appendChild(alignDiv);
-    alignList.forEach((align, index) => {
+    alignList.forEach((align, _index) => {
+      const localAlign = align;
       if (this.isMermaid) {
         // mermaid figure 的对齐通过 class 标记
-        align.active = this.img.classList.contains(`cherry-mermaid-align-${align.type}`);
+        localAlign.active = this.img.classList.contains(`cherry-mermaid-align-${localAlign.type}`);
       } else {
-        align.active = this.img.className.match(`cherry-img-align-${align.type}`);
+        localAlign.active = this.img.className.match(`cherry-img-align-${localAlign.type}`);
       }
       const div = document.createElement('div');
       const icon = document.createElement('i');
-      align.div = div;
+      localAlign.div = div;
       div.appendChild(icon);
-      icon.className = `img-tool-icon ch-icon ch-icon-imgAlign${capitalizeLetter(align.type)}`;
+      icon.className = `img-tool-icon ch-icon ch-icon-imgAlign${capitalizeLetter(localAlign.type)}`;
       div.className = getImgToolButtonClassName(align);
-      div.title = align.text;
+      div.title = localAlign.text;
       div.addEventListener('click', (e) => {
+        const localAlign = align;
         e.preventDefault();
         e.stopPropagation();
-        align.active = !align.active;
-        alignList.forEach(
-          (align1) => align1 !== align && ((align1.active = false) || (align1.div.className = `img-tool-button`)),
-        );
+        localAlign.active = !localAlign.active;
+        alignList.forEach((alignItem) => {
+          if (alignItem !== align) {
+            const otherAlign = alignItem;
+            otherAlign.active = false;
+            otherAlign.div.className = 'img-tool-button';
+          }
+        });
         div.className = getImgToolButtonClassName(align);
-        this.emitChange(this.img, align.active ? align.type : 'clear-align');
+        this.emitChange(this.img, localAlign.active ? localAlign.type : 'clear-align');
 
         // 不再使用 setTimeout 猜测预览区更新时机
         // 位置更新由 previewUpdate 事件在 afterUpdateCallBack 中触发
@@ -201,9 +209,9 @@ const imgToolHandler = {
     return !!(this.img && document.contains(this.img) && this.previewerDom?.contains(this.img));
   },
   $clearPreviewUpdateTimer() {
-    if (this._fallbackTimer) {
-      clearTimeout(this._fallbackTimer);
-      this._fallbackTimer = null;
+    if (this.fallbackTimer) {
+      clearTimeout(this.fallbackTimer);
+      this.fallbackTimer = null;
     }
   },
   previewUpdate(callback) {
@@ -228,8 +236,8 @@ const imgToolHandler = {
       { once: true },
     );
     // 兜底：如果过渡没有触发（如属性没变化），120ms 后也更新
-    this._fallbackTimer = setTimeout(() => {
-      this._fallbackTimer = null;
+    this.fallbackTimer = setTimeout(() => {
+      this.fallbackTimer = null;
       if (!this.$isTargetValid()) {
         (callback || this.onInvalidTarget)?.();
         return;
@@ -290,7 +298,7 @@ const imgToolHandler = {
     this.container.style.top = `${finalTop}px`;
     this.position = { ...imgPosition };
   },
-  dealScroll(event) {
+  dealScroll(_event) {
     const position = this.getImgPosition();
     if (this.container.style.marginTop !== position.top - this.position.top) {
       this.container.style.marginTop = `${position.top - this.position.top}px`;

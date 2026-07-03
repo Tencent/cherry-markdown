@@ -1,6 +1,6 @@
 import List from '../../../src/core/hooks/List';
 import { hashHex } from '../../../src/utils/hash';
-import { describe, it } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 const cases: string[] = [];
 cases[0] = `

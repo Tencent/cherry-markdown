@@ -315,7 +315,7 @@ const isValidStringCodePoint = (codePoint) => {
   try {
     const string = String.fromCodePoint(codePoint);
     return !isEmptyString(string); // 如果转换的为空串，说明CodePoint不合法
-  } catch (e) {
+  } catch {
     // 转换出错，也是不合法的CodePoint
     return false;
   }
@@ -426,7 +426,7 @@ export function unescapeHTMLNumberEntities(html) {
     try {
       const escaped = String.fromCodePoint(codePoint);
       return escaped;
-    } catch (e) {
+    } catch {
       return match;
     }
   });
@@ -439,7 +439,7 @@ export function unescapeHTMLHexEntities(html) {
     try {
       const escaped = String.fromCodePoint(hexCode);
       return escaped;
-    } catch (e) {
+    } catch {
       return match;
     }
   });

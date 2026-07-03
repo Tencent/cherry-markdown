@@ -123,11 +123,11 @@ export default class Previewer {
         // 针对加载失败的图片 或 beforeLoadOneImgCallback 返回false 的图片，最多尝试加载几次，为了防止死循环，最多5次。以图片的src为纬度统计重试次数
         maxTryTimesPerSrc: 2,
         // 加载一张图片之前的回调函数，函数return false 会终止加载操作
-        beforeLoadOneImgCallback: (img) => {},
+        beforeLoadOneImgCallback: (_img) => {},
         // 加载一张图片失败之后的回调函数
-        failLoadOneImgCallback: (img) => {},
+        failLoadOneImgCallback: (_img) => {},
         // 加载一张图片之后的回调函数，如果图片加载失败，则不会回调该函数
-        afterLoadOneImgCallback: (img) => {},
+        afterLoadOneImgCallback: (_img) => {},
         // 加载完所有图片后调用的回调函数
         afterLoadAllImgCallback: () => {},
       },
@@ -356,8 +356,9 @@ export default class Previewer {
   }
 
   $tryChangeValue(obj, key, value) {
-    if (obj.style[key] !== value) {
-      obj.style[key] = value;
+    const localObj = obj;
+    if (localObj.style[key] !== value) {
+      localObj.style[key] = value;
     }
   }
 
@@ -398,43 +399,45 @@ export default class Previewer {
 
   bindDrag() {
     const dragLineMouseMove = (mouseMoveEvent) => {
+      const localMouseMoveEvent = mouseMoveEvent;
       // 阻止事件冒泡
-      if (mouseMoveEvent && mouseMoveEvent.stopPropagation) {
-        mouseMoveEvent.stopPropagation();
+      if (mouseMoveEvent && localMouseMoveEvent.stopPropagation) {
+        localMouseMoveEvent.stopPropagation();
       } else {
-        mouseMoveEvent.cancelBubble = true;
+        localMouseMoveEvent.cancelBubble = true;
       }
       // 取消默认事件
-      if (mouseMoveEvent.preventDefault) {
-        mouseMoveEvent.preventDefault();
+      if (localMouseMoveEvent.preventDefault) {
+        localMouseMoveEvent.preventDefault();
       } else {
         window.event.returnValue = false;
       }
 
       const editorLeft = this.editor?.options?.editorDom?.getBoundingClientRect()?.left || 0;
-      const editorRight = mouseMoveEvent.clientX;
+      const editorRight = localMouseMoveEvent.clientX;
       const virtualLayout = this.calculateVirtualLayout(editorLeft, editorRight);
       this.setVirtualLayout(virtualLayout.startWidth, virtualLayout.leftWidth, virtualLayout.rightWidth);
       return false;
     };
 
     const dragLineMouseUp = (mouseUpEvent) => {
+      const localMouseUpEvent = mouseUpEvent;
       // 阻止事件冒泡
-      if (mouseUpEvent && mouseUpEvent.stopPropagation) {
-        mouseUpEvent.stopPropagation();
+      if (mouseUpEvent && localMouseUpEvent.stopPropagation) {
+        localMouseUpEvent.stopPropagation();
       } else {
-        mouseUpEvent.cancelBubble = true;
+        localMouseUpEvent.cancelBubble = true;
       }
       // 取消默认事件
-      if (mouseUpEvent.preventDefault) {
-        mouseUpEvent.preventDefault();
+      if (localMouseUpEvent.preventDefault) {
+        localMouseUpEvent.preventDefault();
       } else {
         window.event.returnValue = false;
       }
 
       // 重新设置editor和previewer宽度占比
       const editorLeft = this.editor?.options?.editorDom?.getBoundingClientRect()?.left || 0;
-      const editorRight = mouseUpEvent.clientX;
+      const editorRight = localMouseUpEvent.clientX;
       const layout = this.calculateRealLayout(editorRight - editorLeft);
       this.setRealLayout(layout.editorPercentage, layout.previewerPercentage);
       // 去掉蒙层和虚拟拖动条
@@ -456,15 +459,16 @@ export default class Previewer {
     };
 
     const dragLineMouseDown = (mouseDownEvent) => {
+      const localMouseDownEvent = mouseDownEvent;
       // 阻止事件冒泡
-      if (mouseDownEvent && mouseDownEvent.stopPropagation) {
-        mouseDownEvent.stopPropagation();
+      if (mouseDownEvent && localMouseDownEvent.stopPropagation) {
+        localMouseDownEvent.stopPropagation();
       } else {
-        mouseDownEvent.cancelBubble = true;
+        localMouseDownEvent.cancelBubble = true;
       }
       // 取消默认事件
-      if (mouseDownEvent.preventDefault) {
-        mouseDownEvent.preventDefault();
+      if (localMouseDownEvent.preventDefault) {
+        localMouseDownEvent.preventDefault();
       } else {
         window.event.returnValue = false;
       }
@@ -472,7 +476,7 @@ export default class Previewer {
       this.syncVirtualLayoutFromReal();
 
       const editorLeft = this.editor?.options?.editorDom?.getBoundingClientRect()?.left || 0;
-      const editorRight = mouseDownEvent.clientX;
+      const editorRight = localMouseDownEvent.clientX;
       const virtualLayout = this.calculateVirtualLayout(editorLeft, editorRight);
       this.setVirtualLayout(virtualLayout.startWidth, virtualLayout.leftWidth, virtualLayout.rightWidth);
       if (!this.options.virtualDragLineDom.classList.contains('cherry-drag--show')) {
@@ -710,21 +714,23 @@ export default class Previewer {
   }
 
   $dealWithMyersDiffResult(result, oldContent, newContent, domContainer) {
+    const localNewContent = newContent;
+    const localOldContent = oldContent;
     result.forEach((change) => {
-      if (newContent[change.newIndex].dom) {
-        newContent[change.newIndex].dom.innerHTML = this.lazyLoadImg.changeLoadedDataSrc2Src(
-          newContent[change.newIndex].dom.innerHTML,
+      if (localNewContent[change.newIndex].dom) {
+        localNewContent[change.newIndex].dom.innerHTML = this.lazyLoadImg.changeLoadedDataSrc2Src(
+          localNewContent[change.newIndex].dom.innerHTML,
         );
       }
       switch (change.type) {
         case 'delete':
-          domContainer.removeChild(oldContent[change.oldIndex].dom);
+          domContainer.removeChild(localOldContent[change.oldIndex].dom);
           break;
         case 'insert':
-          if (oldContent[change.oldIndex]) {
-            domContainer.insertBefore(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
+          if (localOldContent[change.oldIndex]) {
+            domContainer.insertBefore(localNewContent[change.newIndex].dom, localOldContent[change.oldIndex].dom);
           } else {
-            domContainer.appendChild(newContent[change.newIndex].dom);
+            domContainer.appendChild(localNewContent[change.newIndex].dom);
           }
           break;
         case 'update':
@@ -732,45 +738,45 @@ export default class Previewer {
             let hasUpdate = false;
             // 处理表格包含图表的特殊场景
             if (
-              newContent[change.newIndex].dom.className === 'cherry-table-wrapper' &&
-              newContent[change.newIndex].dom.querySelector('.cherry-table-figure .cherry-echarts-wrapper') &&
-              oldContent[change.oldIndex].dom.querySelector('.cherry-table-figure .cherry-echarts-wrapper')
+              localNewContent[change.newIndex].dom.className === 'cherry-table-wrapper' &&
+              localNewContent[change.newIndex].dom.querySelector('.cherry-table-figure .cherry-echarts-wrapper') &&
+              localOldContent[change.oldIndex].dom.querySelector('.cherry-table-figure .cherry-echarts-wrapper')
             ) {
-              const oldWrapper = oldContent[change.oldIndex].dom.querySelector(
+              const oldWrapper = localOldContent[change.oldIndex].dom.querySelector(
                 '.cherry-table-figure .cherry-echarts-wrapper',
               );
-              const newWrapper = newContent[change.newIndex].dom.querySelector(
+              const newWrapper = localNewContent[change.newIndex].dom.querySelector(
                 '.cherry-table-figure .cherry-echarts-wrapper',
               );
               oldWrapper.id = newWrapper.id;
               oldWrapper.dataset.tableData = newWrapper.dataset.tableData;
               oldWrapper.dataset.chartType = newWrapper.dataset.chartType;
               oldWrapper.dataset.chartOptions = newWrapper.dataset.chartOptions;
-              oldContent[change.oldIndex].dom.dataset.sign = newContent[change.newIndex].dom.dataset.sign;
-              oldContent[change.oldIndex].dom.dataset.lines = newContent[change.newIndex].dom.dataset.lines;
+              localOldContent[change.oldIndex].dom.dataset.sign = localNewContent[change.newIndex].dom.dataset.sign;
+              localOldContent[change.oldIndex].dom.dataset.lines = localNewContent[change.newIndex].dom.dataset.lines;
               this.$updateDom(
-                newContent[change.newIndex].dom.querySelector('.cherry-table'),
-                oldContent[change.oldIndex].dom.querySelector('.cherry-table'),
+                localNewContent[change.newIndex].dom.querySelector('.cherry-table'),
+                localOldContent[change.oldIndex].dom.querySelector('.cherry-table'),
               );
               hasUpdate = true;
             } else if (
               // 处理代码块渲染echarts的特殊场景
-              newContent[change.newIndex].dom.dataset.type === 'echarts' &&
-              newContent[change.newIndex].dom.querySelector('.cherry-echarts-codeblock-wrapper') &&
-              oldContent[change.oldIndex].dom.querySelector('.cherry-echarts-codeblock-wrapper')
+              localNewContent[change.newIndex].dom.dataset.type === 'echarts' &&
+              localNewContent[change.newIndex].dom.querySelector('.cherry-echarts-codeblock-wrapper') &&
+              localOldContent[change.oldIndex].dom.querySelector('.cherry-echarts-codeblock-wrapper')
             ) {
-              oldContent[change.oldIndex].dom.dataset.sign = newContent[change.newIndex].dom.dataset.sign;
-              oldContent[change.oldIndex].dom.dataset.lines = newContent[change.newIndex].dom.dataset.lines;
+              localOldContent[change.oldIndex].dom.dataset.sign = localNewContent[change.newIndex].dom.dataset.sign;
+              localOldContent[change.oldIndex].dom.dataset.lines = localNewContent[change.newIndex].dom.dataset.lines;
               hasUpdate = true;
-            } else if (newContent[change.newIndex].dom.querySelector('svg')) {
+            } else if (localNewContent[change.newIndex].dom.querySelector('svg')) {
               throw new Error(); // SVG暂不使用patch更新
             }
             if (!hasUpdate) {
-              this.$updateDom(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
+              this.$updateDom(localNewContent[change.newIndex].dom, localOldContent[change.oldIndex].dom);
             }
-          } catch (e) {
-            domContainer.insertBefore(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
-            domContainer.removeChild(oldContent[change.oldIndex].dom);
+          } catch {
+            domContainer.insertBefore(localNewContent[change.newIndex].dom, localOldContent[change.oldIndex].dom);
+            domContainer.removeChild(localOldContent[change.oldIndex].dom);
           }
       }
     });
@@ -940,7 +946,7 @@ export default class Previewer {
     this.$cherry.clearFloatPreviewer();
   }
 
-  recoverPreviewer(dealToolbar = false) {
+  recoverPreviewer(_dealToolbar = false) {
     // Restore dual-pane mode by clearing all mode-related classes on previewer/editor
     this.options.previewerDom.classList.remove('cherry-previewer--hidden', 'cherry-previewer--full');
     this.options.virtualDragLineDom.classList.remove('cherry-drag--hidden');

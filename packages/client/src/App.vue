@@ -80,7 +80,7 @@ const confirmProceedWhenUnsaved = async (): Promise<boolean> => {
 };
 
 // ========== 窗口标题管理 ==========
-const updateTitle = async (path: string | null, unsaved: boolean = false): Promise<void> => {
+const updateTitle = async (path: string | null, unsaved = false): Promise<void> => {
   let fileName = '';
   if (path) {
     // 从路径中提取文件名

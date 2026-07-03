@@ -61,9 +61,9 @@ export interface Cherry<T extends CherryCustomOptions = CherryCustomOptions> {
   options: CherryOptions<T>;
 }
 
-export type CherryOptions<T extends CherryCustomOptions = CherryCustomOptions> = Partial<_CherryOptions<T>>;
+export type CherryOptions<T extends CherryCustomOptions = CherryCustomOptions> = Partial<CherryOptionsBase<T>>;
 
-export interface _CherryOptions<T extends CherryCustomOptions = CherryCustomOptions> {
+export interface CherryOptionsBase<T extends CherryCustomOptions = CherryCustomOptions> {
   openai: any;
   /** 第三方依赖 */
   externals: CherryExternalsOptions;
@@ -711,24 +711,10 @@ export type CherryDefaultToolbar =
   | 'wordCount';
 
 export type CherryDefaultBubbleToolbar =
-  | CherryToolbarSeparator
-  | 'bold'
-  | 'italic'
-  | 'strikethrough'
-  | 'sub'
-  | 'sup'
-  | 'size'
-  | 'color';
+  CherryToolbarSeparator | 'bold' | 'italic' | 'strikethrough' | 'sub' | 'sup' | 'size' | 'color';
 
 export type CherryDefaultFloatToolbar =
-  | CherryToolbarSeparator
-  | 'h1'
-  | 'h2'
-  | 'h3'
-  | 'checklist'
-  | 'quote'
-  | 'quickTable'
-  | 'code';
+  CherryToolbarSeparator | 'h1' | 'h2' | 'h3' | 'checklist' | 'quote' | 'quickTable' | 'code';
 
 export type SupportPlatform = 'wechat' | 'toutiao';
 export interface CherryPublishToolbarOption {
@@ -795,8 +781,7 @@ export interface CherryToolbarsOptions<F extends CherryToolbarsCustomType = Cher
         | keyof Partial<F['CustomMenuType']>
         | {
             [K in keyof Partial<F['CustomMenuType']> | CherryDefaultToolbar]?: (
-              | keyof F['CustomMenuType']
-              | CherryDefaultToolbar
+              keyof F['CustomMenuType'] | CherryDefaultToolbar
             )[];
           }
       )[]
@@ -845,67 +830,63 @@ export interface CherryToolbarsOptions<F extends CherryToolbarsCustomType = Cher
   config?: CherryToolbarConfig;
 }
 
-export interface CherryFileUploadHandler {
+/**
+ * @param file 用户上传的文件对象
+ * @param callback 回调函数，接收最终的文件 url
+ */
+export type CherryFileUploadHandler = (
+  file: File,
   /**
-   * @param file 用户上传的文件对象
-   * @param callback 回调函数，接收最终的文件url
+   * @param params.name 回填的 alt 信息
+   * @param params.poster 封面图片地址（视频的场景下生效）
+   * @param params.isBorder 是否有边框样式（图片场景下生效）
+   * @param params.isShadow 是否有阴影样式（图片场景下生效）
+   * @param params.isRadius 是否有圆角样式（图片场景下生效）
+   * @param params.width 设置宽度，可以是像素、也可以是百分比（图片、视频场景下生效）
+   * @param params.height 设置高度，可以是像素、也可以是百分比（图片、视频场景下生效）
    */
-  (
-    file: File,
-    /**
-     * @param params.name 回填的alt信息
-     * @param params.poster 封面图片地址（视频的场景下生效）
-     * @param params.isBorder 是否有边框样式（图片场景下生效）
-     * @param params.isShadow 是否有阴影样式（图片场景下生效）
-     * @param params.isRadius 是否有圆角样式（图片场景下生效）
-     * @param params.width 设置宽度，可以是像素、也可以是百分比（图片、视频场景下生效）
-     * @param params.height 设置高度，可以是像素、也可以是百分比（图片、视频场景下生效）
-     */
-    callback: (
-      url: string,
-      params?: {
-        name?: string;
-        poster?: string;
-        isBorder?: boolean;
-        isShadow?: boolean;
-        isRadius?: boolean;
-        width?: string;
-        height?: string;
-      },
-    ) => void,
-  ): void;
-}
+  callback: (
+    url: string,
+    params?: {
+      name?: string;
+      poster?: string;
+      isBorder?: boolean;
+      isShadow?: boolean;
+      isRadius?: boolean;
+      width?: string;
+      height?: string;
+    },
+  ) => void,
+) => void;
 
-export interface CherryFileUploadMultiHandler {
+/**
+ * @param files 用户上传的文件对象数组
+ * @param callback 回调函数，接收最终的文件 url
+ */
+export type CherryFileUploadMultiHandler = (
+  files: File[],
   /**
-   * @param files 用户上传的文件对象数组
-   * @param callback 回调函数，接收最终的文件url
+   * @param params.name 回填的 alt 信息
+   * @param params.poster 封面图片地址（视频的场景下生效）
+   * @param params.isBorder 是否有边框样式（图片场景下生效）
+   * @param params.isShadow 是否有阴影样式（图片场景下生效）
+   * @param params.isRadius 是否有圆角样式（图片场景下生效）
+   * @param params.width 设置宽度，可以是像素、也可以是百分比（图片、视频场景下生效）
+   * @param params.height 设置高度，可以是像素、也可以是百分比（图片、视频场景下生效）
    */
-  (
-    files: File[],
-    /**
-     * @param params.name 回填的alt信息
-     * @param params.poster 封面图片地址（视频的场景下生效）
-     * @param params.isBorder 是否有边框样式（图片场景下生效）
-     * @param params.isShadow 是否有阴影样式（图片场景下生效）
-     * @param params.isRadius 是否有圆角样式（图片场景下生效）
-     * @param params.width 设置宽度，可以是像素、也可以是百分比（图片、视频场景下生效）
-     * @param params.height 设置高度，可以是像素、也可以是百分比（图片、视频场景下生效）
-     */
-    callback: (
-      url: string,
-      params?: {
-        name?: string;
-        poster?: string;
-        isBorder?: boolean;
-        isShadow?: boolean;
-        isRadius?: boolean;
-        width?: string;
-        height?: string;
-      },
-    ) => void,
-  ): void;
-}
+  callback: (
+    url: string,
+    params?: {
+      name?: string;
+      poster?: string;
+      isBorder?: boolean;
+      isShadow?: boolean;
+      isRadius?: boolean;
+      width?: string;
+      height?: string;
+    },
+  ) => void,
+) => void;
 
 type ShortcutKeyMapStruct = {
   /**

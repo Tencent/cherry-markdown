@@ -17,6 +17,21 @@ import SyntaxBase from '@/core/SyntaxBase';
 import { escapeHTMLSpecialCharOnce as $e, encodeURIOnce } from '@/utils/sanitize';
 import { compileRegExp, EMAIL, EMAIL_INLINE, URL_INLINE_NO_SLASH, URL, URL_NO_SLASH, URL_INLINE } from '@/utils/regexp';
 
+/**
+ * 根据链接配置生成 target 属性字符串
+ * @param {{ target?: string, openNewPage?: boolean }} config
+ * @returns {string}
+ */
+function resolveLinkTarget(config) {
+  if (config.target) {
+    return `target="${config.target}"`;
+  }
+  if (config.openNewPage) {
+    return 'target="_blank"';
+  }
+  return '';
+}
+
 export default class AutoLink extends SyntaxBase {
   static HOOK_NAME = 'autoLink';
 
@@ -27,12 +42,11 @@ export default class AutoLink extends SyntaxBase {
     return text.replace(/_/g, '&#x5f;').replace(/\*/g, '&#x2a;');
   };
 
-  constructor({ config, globalConfig }) {
+  constructor({ config, _globalConfig }) {
     super({ config });
     this.enableShortLink = !!config.enableShortLink;
     this.shortLinkLength = config.shortLinkLength;
-    // eslint-disable-next-line no-nested-ternary
-    this.target = config.target ? `target="${config.target}"` : !!config.openNewPage ? 'target="_blank"' : '';
+    this.target = resolveLinkTarget(config);
     this.rel = config.rel ? `rel="${config.rel}"` : '';
   }
 
@@ -109,11 +123,11 @@ export default class AutoLink extends SyntaxBase {
   /**
    * 将字符串中的URL或电子邮件地址转换为HTML链接
    * @param {string} str - 包含可能URL或电子邮件地址的原始字符串
-   * @param {Function} [sentenceMakeFunc] - 可选的回调函数，用于处理句子生成
+   * @param {Function} [_sentenceMakeFunc] - 可选的回调函数，用于处理句子生成
    * @returns {string} 转换后的HTML字符串，其中URL和电子邮件地址被替换为<a>标签
    * @throws {Error} 如果输入不是字符串可能会抛出错误
    */
-  makeHtml(str, sentenceMakeFunc) {
+  makeHtml(str, _sentenceMakeFunc) {
     if (!(this.test(str) && (EMAIL_INLINE.test(str) || URL_INLINE_NO_SLASH.test(str)))) {
       return str;
     }

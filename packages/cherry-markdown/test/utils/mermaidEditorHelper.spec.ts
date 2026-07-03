@@ -47,7 +47,7 @@ graph TD
 
   it('删除选中块后应找不到锚点', () => {
     const blockB = 'graph TD\n  C-->D';
-    const md = `\`\`\`mermaid\ngraph TD\n  A-->B\n\`\`\``;
+    const md = '```mermaid\ngraph TD\n  A-->B\n```';
 
     expect(findMermaidBlockIndexByCodeBody(md, blockB)).toBe(-1);
   });

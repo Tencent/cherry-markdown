@@ -6,9 +6,7 @@
     "dev": "npx node ./scripts/sync-version.js && vite",
     "build": "npx node ./scripts/sync-version.js && vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "version:sync": "node ./scripts/sync-version.js",
-    "lint": "cd ../.. && npx prettier --check packages/client/src/**/*.{ts,vue} && npx eslint packages/client/src/**/*.{ts,vue}",
-    "lint:fix": "cd ../.. && npx prettier --write packages/client/src/**/*.{ts,vue} && npx eslint packages/client/src/**/*.{ts,vue} --fix"
+    "version:sync": "node ./scripts/sync-version.js"
   },
   "dependencies": {
     "@tauri-apps/api": "2.2.0",
@@ -25,7 +23,6 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "2.2.5",
-    "@vitejs/plugin-vue": "^5.2.1",
-    "vue-tsc": "^3.2.2"
+    "@vitejs/plugin-vue": "^5.2.1"
   }
 }

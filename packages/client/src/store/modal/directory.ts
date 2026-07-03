@@ -67,7 +67,7 @@ export const useDirectoryStore = defineStore('directories', {
     currentPath: loadCurrentFromStorage(),
   }),
   actions: {
-    upsertDirectory(path: string, expanded: boolean = true) {
+    upsertDirectory(path: string, expanded = true) {
       const idx = this.items.findIndex((it) => it.path === path);
       if (idx >= 0) {
         this.items[idx].expanded = expanded;

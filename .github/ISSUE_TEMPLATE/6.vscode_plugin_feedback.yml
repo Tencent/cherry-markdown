@@ -1,6 +1,6 @@
 name: 🔌 VSCode Plugin Feedback
 description: About VSCode Plugin issue
-title: "[VSCode Plugin]"
+title: '[VSCode Plugin]'
 labels: [🔌vscode-plugin, pending-no-confirmed]
 body:
   - type: markdown

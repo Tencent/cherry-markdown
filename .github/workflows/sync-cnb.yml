@@ -30,15 +30,15 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      
+
       - name: Sync to CNB Repository
         uses: docker://tencentcom/git-sync
         env:
-          PLUGIN_TARGET_URL: "https://cnb.cool/tencent/cherry-markdown/cherry-markdown.git"
-          PLUGIN_AUTH_TYPE: "https"
-          PLUGIN_USERNAME: "cnb"
+          PLUGIN_TARGET_URL: 'https://cnb.cool/tencent/cherry-markdown/cherry-markdown.git'
+          PLUGIN_AUTH_TYPE: 'https'
+          PLUGIN_USERNAME: 'cnb'
           PLUGIN_PASSWORD: ${{ secrets.CHERRY_MARKDOWN_CNB_SYNC_GITHUB }}
-          PLUGIN_FORCE: "true"
+          PLUGIN_FORCE: 'true'
 
   sync-delete-branch:
     if: ${{ github.repository == 'Tencent/cherry-markdown' && github.event_name == 'delete' && github.event.ref_type == 'branch' }}
@@ -50,4 +50,4 @@ jobs:
           repo: 'tencent/cherry-markdown/cherry-markdown'
           token: ${{ secrets.CHERRY_MARKDOWN_CNB_SYNC_GITHUB }}
           branch: ${{ github.event.ref }}
-          trigger: '/delete-cnb-branch'   
+          trigger: '/delete-cnb-branch'

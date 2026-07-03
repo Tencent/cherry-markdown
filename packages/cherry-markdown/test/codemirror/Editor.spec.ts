@@ -34,7 +34,8 @@ import { describe, it, expect, vi } from 'vitest';
 // ============ Mock CM6 组件 ============
 
 // 创建 Mock EditorView
-const createMockEditorView = (doc = '', selection = { anchor: 0, head: 0 }) => {
+const createMockEditorView = (initialDoc = '', selection = { anchor: 0, head: 0 }) => {
+  let doc = initialDoc;
   const docLength = doc.length;
 
   return {
@@ -83,24 +84,6 @@ const createMockEditorView = (doc = '', selection = { anchor: 0, head: 0 }) => {
     destroy: vi.fn(),
   };
 };
-
-// 创建 Mock Cherry 实例 (保留用于未来扩展)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _createMockCherry = (options = {}) => ({
-  options: {
-    engine: {
-      syntax: {},
-      global: {},
-    },
-    editor: {
-      maxUrlLength: 1000,
-    },
-    ...options,
-  },
-  status: {
-    editor: 'show',
-  },
-});
 
 // ============ 测试数据 ============
 
@@ -152,7 +135,7 @@ describe('Editor 核心方法测试', () => {
 
     it('lineCount: 应正确计算总行数', () => {
       const mockView = createMockEditorView(SAMPLE_DOC);
-      const lines = mockView.state.doc.lines;
+      const { lines } = mockView.state.doc;
 
       // SAMPLE_DOC 包含多行
       expect(lines).toBeGreaterThan(1);

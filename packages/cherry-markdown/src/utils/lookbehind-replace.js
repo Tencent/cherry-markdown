@@ -44,15 +44,16 @@ function replaceStringByBuffer(str, buffer) {
  * @param {number} [rollbackLength=1] 连续匹配时，每次指针回退的长度，默认为 1
  */
 export function replaceLookbehind(str, regex, replacer, continuousMatch = false, rollbackLength = 1) {
+  const localRegex = regex;
   if (!regex) {
     return str;
   }
   // 从头开始匹配
-  regex.lastIndex = 0;
+  localRegex.lastIndex = 0;
   let args;
   let lastIndex = 0;
   const replaceBuffer = [];
-  while ((args = regex.exec(str)) !== null) {
+  while ((args = localRegex.exec(str)) !== null) {
     const replaceInfo = {
       begin: args.index,
       length: args[0].length,
@@ -72,10 +73,10 @@ export function replaceLookbehind(str, regex, replacer, continuousMatch = false,
       });
     }
     // console.log(args);
-    lastIndex = regex.lastIndex;
-    regex.lastIndex -= rollbackLength;
+    lastIndex = localRegex.lastIndex;
+    localRegex.lastIndex -= rollbackLength;
   }
   // 正则复位，避免影响其他逻辑
-  regex.lastIndex = 0;
+  localRegex.lastIndex = 0;
   return replaceStringByBuffer(str, replaceBuffer);
 }

@@ -40,10 +40,10 @@ export default class Underline extends MenuBase {
   /**
    *
    * @param {string} selection 被用户选中的文本内容
-   * @param {string} shortKey 快捷键参数，本函数不处理这个参数
+   * @param {string} _shortKey 快捷键参数，本函数不处理这个参数
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
-  onClick(selection, shortKey = '') {
+  onClick(selection, _shortKey = '') {
     let $selection = selection ? selection : this.locale.underline;
     // 如果选中的内容里有下划线语法，则认为是要去掉下划线语法
     if (!this.isSelections && !this.$testIsUnderline($selection)) {

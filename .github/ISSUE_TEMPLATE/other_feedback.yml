@@ -1,6 +1,6 @@
 name: ✏️ Others
 description: If none of them are in other ranges, please use this to illustrate.
-title: "[Others]"
+title: '[Others]'
 labels: [pending-no-confirmed]
 body:
   - type: markdown

@@ -24,7 +24,7 @@ export default class Blockquote extends ParagraphBase {
     // TODO: String.prototype.repeat polyfill
   }
 
-  handleMatch(str, sentenceMakeFunc) {
+  handleMatch(str, _sentenceMakeFunc) {
     return str.replace(this.RULE.reg, (match, lines, content) => {
       const lineCount = this.getLineCount(match, lines); // 段落所占行数
       const sign = this.$engine.hash(match);

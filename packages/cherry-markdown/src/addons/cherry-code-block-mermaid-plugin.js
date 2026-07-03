@@ -180,7 +180,7 @@ export default class MermaidCodeEngine {
     if (!resolvedMermaid && !resolvedMermaidAPI) {
       // mermaid 可能是异步加载的，这里不直接抛错，留待异步渲染时重试获取
       // 注意：syncRender 路径无法等待异步加载，仍然会因 mermaidAPIRefs 为 null 而失败
-      // eslint-disable-next-line no-console
+
       this.mermaidAPIRefs = null;
       return;
     }
@@ -257,7 +257,7 @@ export default class MermaidCodeEngine {
       } else {
         svgHtml = injectSvgFallback(svgCode);
       }
-    } catch (e) {
+    } catch {
       svgHtml = injectSvgFallback(svgCode);
     }
     return svgHtml;
@@ -307,12 +307,13 @@ export default class MermaidCodeEngine {
     if (isBrowser()) {
       const placeholderList = container.querySelectorAll(`[data-sign="${sign}"][data-type="codeBlock"]`);
       placeholderList?.forEach((placeholder) => {
-        if (placeholder.closest('[data-mode="source"]')) {
+        const localPlaceholder = placeholder;
+        if (localPlaceholder.closest('[data-mode="source"]')) {
           return;
         }
         if (isToolbarMode) {
           // showSourceToolbar 模式：仅替换预览面板内容，保留工具栏和源码面板
-          const previewPanel = placeholder.parentElement
+          const previewPanel = localPlaceholder.parentElement
             ?.closest?.('figure[data-type="mermaid"]')
             ?.querySelector('.cherry-mermaid-source-toolbar-panel[data-mode="preview"]');
           if (previewPanel) {
@@ -320,7 +321,7 @@ export default class MermaidCodeEngine {
             return;
           }
         }
-        placeholder.parentElement.innerHTML = html;
+        localPlaceholder.parentElement.innerHTML = html;
       });
     }
     $engine.asyncRenderHandler.done(graphId, {
@@ -360,7 +361,7 @@ export default class MermaidCodeEngine {
     }
     try {
       this.mermaidAPIRefs.initialize(this.options);
-    } catch (e) {
+    } catch {
       // 忽略重复初始化等异常
     }
     return true;

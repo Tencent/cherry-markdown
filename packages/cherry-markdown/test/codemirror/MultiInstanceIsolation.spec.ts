@@ -120,8 +120,8 @@ describe('多实例隔离测试', () => {
       const fn2 = vi.fn();
 
       // 为不同实例设置定时器
-      editor1.dealSpecialWordsTimer = setTimeout(fn1, 200) as unknown as number;
-      editor2.dealSpecialWordsTimer = setTimeout(fn2, 300) as unknown as number;
+      editor1.dealSpecialWordsTimer = window.setTimeout(fn1, 200);
+      editor2.dealSpecialWordsTimer = window.setTimeout(fn2, 300);
 
       expect(editor1.dealSpecialWordsTimer).not.toBe(editor2.dealSpecialWordsTimer);
 
@@ -134,7 +134,7 @@ describe('多实例隔离测试', () => {
       const editor1 = createMockEditor(1);
 
       const fn = vi.fn();
-      editor1.dealSpecialWordsTimer = setTimeout(fn, 200) as unknown as number;
+      editor1.dealSpecialWordsTimer = window.setTimeout(fn, 200);
 
       editor1.destroy();
 
@@ -149,8 +149,8 @@ describe('多实例隔离测试', () => {
       const fn1 = vi.fn();
       const fn2 = vi.fn();
 
-      editor1.dealSpecialWordsTimer = setTimeout(fn1, 200) as unknown as number;
-      editor2.dealSpecialWordsTimer = setTimeout(fn2, 200) as unknown as number;
+      editor1.dealSpecialWordsTimer = window.setTimeout(fn1, 200);
+      editor2.dealSpecialWordsTimer = window.setTimeout(fn2, 200);
 
       editor1.destroy();
 
@@ -234,7 +234,7 @@ describe('多实例隔离测试', () => {
       const editor = createMockEditor(1);
 
       editor.markIdCounter = 100;
-      editor.dealSpecialWordsTimer = setTimeout(() => {}, 200) as unknown as number;
+      editor.dealSpecialWordsTimer = window.setTimeout(() => {}, 200);
       editor.eventHandlers.set('change', [() => {}]);
 
       editor.destroy();
@@ -256,7 +256,7 @@ describe('多实例隔离测试', () => {
       // 初始化所有实例
       editors.forEach((e, idx) => {
         e.markIdCounter = (idx + 1) * 100;
-        e.dealSpecialWordsTimer = setTimeout(() => {}, 200 + idx * 100) as unknown as number;
+        e.dealSpecialWordsTimer = window.setTimeout(() => {}, 200 + idx * 100);
         e.eventHandlers.set('change', [() => {}]);
       });
 

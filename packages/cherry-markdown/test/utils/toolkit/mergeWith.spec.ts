@@ -10,14 +10,14 @@ describe('utils/toolkit/mergeWith', () => {
   });
 
   it('插件 install 场景：向 customRenderer 注入类实例', () => {
-    class MermaidEngine {
-      static TYPE = 'figure';
-    }
-    const cherryOptions = {
+    class MermaidEngine {}
+    const cherryOptions: {
+      engine: { syntax: { codeBlock: { customRenderer: Record<string, unknown> } } };
+    } = {
       engine: {
         syntax: {
           codeBlock: {
-            customRenderer: {} as Record<string, unknown>,
+            customRenderer: {},
           },
         },
       },

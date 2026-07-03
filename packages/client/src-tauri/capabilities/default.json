@@ -57,21 +57,11 @@
     },
     {
       "identifier": "fs:allow-exists",
-      "allow": [
-        { "path": "**" },
-        { "path": "**/*" },
-        { "path": "/**" },
-        { "path": "/**/*" }
-      ]
+      "allow": [{ "path": "**" }, { "path": "**/*" }, { "path": "/**" }, { "path": "/**/*" }]
     },
     {
       "identifier": "fs:allow-read-dir",
-      "allow": [
-        { "path": "**" },
-        { "path": "**/*" },
-        { "path": "/**" },
-        { "path": "/**/*" }
-      ]
+      "allow": [{ "path": "**" }, { "path": "**/*" }, { "path": "/**" }, { "path": "/**/*" }]
     },
 
     "fs:read-dirs",

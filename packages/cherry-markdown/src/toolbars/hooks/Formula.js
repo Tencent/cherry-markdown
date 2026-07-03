@@ -41,9 +41,10 @@ export default class Formula extends MenuBase {
   /**
    * 响应点击事件
    * @param {string} selection 被用户选中的文本内容
+   * @param {string} [_shortKey] 快捷键参数，本 hook 不处理这个参数
    * @returns {boolean} 回填到编辑器光标位置/选中文本区域的内容
    */
-  onClick(selection, shortKey = '') {
+  onClick(selection, _shortKey = '') {
     if (this.subBubbleFormulaMenu.isHide() || !this.hasCacheOnce()) {
       const pos = this.dom.getBoundingClientRect();
       const menuDom = this.subBubbleFormulaMenu.dom;

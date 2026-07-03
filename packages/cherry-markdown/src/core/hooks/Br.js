@@ -55,7 +55,7 @@ export default class Br extends ParagraphBase {
     });
   }
 
-  makeHtml(str, sentenceMakeFunc) {
+  makeHtml(str, _sentenceMakeFunc) {
     return str;
   }
 

@@ -29,7 +29,7 @@ try {
   const head = execSync('git rev-parse HEAD').toString();
   // [, currentBranch] = branchRegexp.exec(branch);
   [, currentRev] = shortHEADRegexp.exec(head);
-} catch (e) {
+} catch {
   console.warn('failed to get git revision.');
 }
 

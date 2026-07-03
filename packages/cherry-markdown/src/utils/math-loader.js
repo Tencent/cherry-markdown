@@ -26,14 +26,16 @@ import { loadCSS, loadScript, getHTML } from './dom';
  * @param {(content: string, isDisplayMode: boolean) => string} options.render 渲染函数
  */
 function rerenderPendingMath(engine, { className, render }) {
+  const localEngine = engine;
   // 1. 先更新预览区域 DOM
-  engine.$cherry.previewer
+  localEngine.$cherry.previewer
     .getDom()
     .querySelectorAll(`.${className}`)
     .forEach((el) => {
-      const isDisplayMode = el.classList.contains('Cherry-Math');
-      el.innerHTML = render(decodeURIComponent(el.getAttribute('data-content')), isDisplayMode);
-      el.classList.remove(className);
+      const localEl = el;
+      const isDisplayMode = localEl.classList.contains('Cherry-Math');
+      localEl.innerHTML = render(decodeURIComponent(localEl.getAttribute('data-content')), isDisplayMode);
+      localEl.classList.remove(className);
     });
   // 2. 再更新 asyncRenderHandler 中缓存的 md（实际为 html）
   const needDoneKeys = [];
@@ -41,7 +43,7 @@ function rerenderPendingMath(engine, { className, render }) {
     `<(div|span) data-sign="([^"]+?)" class="([^"]+?) ${className}" ([^>]+? data-lines="[^"]+?") data-content="([\\s\\S]+?)"><\\/\\1>`,
     'g',
   );
-  engine.asyncRenderHandler.md = engine.asyncRenderHandler.md.replace(
+  localEngine.asyncRenderHandler.md = localEngine.asyncRenderHandler.md.replace(
     placeholderReg,
     (match, domName, sign, originClass, attrs, content) => {
       const isDisplayMode = domName === 'div';
@@ -52,11 +54,11 @@ function rerenderPendingMath(engine, { className, render }) {
     },
   );
   needDoneKeys.forEach((key) => {
-    engine.asyncRenderHandler.done(key);
+    localEngine.asyncRenderHandler.done(key);
   });
   // 3. 当预览区隐藏时，同步更新预览区缓存
-  if (engine.$cherry.previewer.isPreviewerHidden()) {
-    engine.$cherry.previewer.options.previewerCache.html = engine.asyncRenderHandler.md;
+  if (localEngine.$cherry.previewer.isPreviewerHidden()) {
+    localEngine.$cherry.previewer.options.previewerCache.html = localEngine.asyncRenderHandler.md;
   }
 }
 
@@ -105,7 +107,7 @@ function setupMathJax(engine, syntax) {
               : mathJaxInstance.tex2svg(content, { em: 12, ex: 6, display: false }),
             true,
           );
-        } catch (e) {
+        } catch {
           return '';
         }
       };
