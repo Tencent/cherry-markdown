@@ -47,7 +47,7 @@ export default class Panel extends ParagraphBase {
       if (!this.enablePanel && /primary|info|warning|danger|success/i.test(type)) {
         return match;
       }
-      if (!this.enableAlign && /(left|right|center|justify)/i.test(type)) {
+      if (!this.enableAlign && /(left|right|center|justify|2cols|3cols)/i.test(type)) {
         return match;
       }
       const lineCount = this.getLineCount(match, preLines);
@@ -70,6 +70,9 @@ export default class Panel extends ParagraphBase {
     if (/(left|right|center|justify)/i.test(type)) {
       return `cherry-text-align cherry-text-align__${type}`;
     }
+    if (/(2cols|3cols)/i.test(type)) {
+      return `cherry-panel-cols cherry-panel-cols__${type}`;
+    }
     return `cherry-panel cherry-panel__${type}`;
   }
 
@@ -85,9 +88,6 @@ export default class Panel extends ParagraphBase {
     if (/(left|right|center|justify)/i.test(ret.type)) {
       ret.appendStyle = `style="text-align:${ret.type};"`;
     }
-    ret.title = `<div class="cherry-panel--title ${ret.title ? 'cherry-panel--title__not-empty' : ''}">${
-      ret.title
-    }</div>`;
     const paragraphProcessor = (str) => {
       if (str.trim() === '') {
         return '';
@@ -102,6 +102,28 @@ export default class Panel extends ParagraphBase {
       }
       return `<${domName}>${this.$cleanParagraph(html)}</${domName}>`;
     };
+    // 多列排版语法（2cols/3cols）：使用 --- 分隔每一列
+    if (/(2cols|3cols)/i.test(ret.type)) {
+      ret.title = '';
+      const colCount = ret.type === '3cols' ? 3 : 2;
+      const rawCols = this.$splitCols(ret.body, colCount);
+      const colsHtml = rawCols
+        .map((colStr) => {
+          let $col = '';
+          if (this.isContainsCache(colStr)) {
+            $col = this.makeExcludingCached(colStr, paragraphProcessor);
+          } else {
+            $col = paragraphProcessor(colStr);
+          }
+          return `<div class="cherry-panel--col">${$col}</div>`;
+        })
+        .join('');
+      ret.body = colsHtml;
+      return ret;
+    }
+    ret.title = `<div class="cherry-panel--title ${ret.title ? 'cherry-panel--title__not-empty' : ''}">${
+      ret.title
+    }</div>`;
     let $body = '';
     if (this.isContainsCache(ret.body)) {
       $body = this.makeExcludingCached(ret.body, paragraphProcessor);
@@ -110,6 +132,27 @@ export default class Panel extends ParagraphBase {
     }
     ret.body = `<div class="cherry-panel--body">${$body}</div>`;
     return ret;
+  }
+
+  /**
+   * 按 :: 分隔符拆分多列排版语法的内容
+   * @param {string} str 面板内容
+   * @param {number} colCount 期望的列数（2 或 3）
+   * @returns {string[]} 拆分后的各列内容
+   */
+  $splitCols(str, colCount) {
+    // 匹配独占一行的 :: 分隔符（前后为空行/文本行边界均可）
+    const parts = str.split(/\n[ \t]*::[ \t]*(?=\n|$)/);
+    // 若列数不足，补齐空列；若超过则将多余部分合并到最后一列
+    if (parts.length > colCount) {
+      const head = parts.slice(0, colCount - 1);
+      const tail = parts.slice(colCount - 1).join('\n::\n');
+      return [...head, tail];
+    }
+    while (parts.length < colCount) {
+      parts.push('');
+    }
+    return parts;
   }
 
   $getTitle(name) {
@@ -147,6 +190,10 @@ export default class Panel extends ParagraphBase {
       case 'justify':
       case 'j':
         return 'justify';
+      case '2cols':
+        return '2cols';
+      case '3cols':
+        return '3cols';
       default:
         return 'primary';
     }
