@@ -27,6 +27,7 @@
             v-if="activePanelId === 'explorer'"
             class="header-action"
             title="打开目录"
+            aria-label="打开目录"
             @click="triggerOpenDirectory"
           >
             <FolderIcon :size="16" />
@@ -35,11 +36,17 @@
             v-if="activePanelId === 'recent'"
             class="header-action"
             title="打开文件"
+            aria-label="打开文件"
             @click="triggerOpenRecentFile"
           >
             <FileIcon :size="16" />
           </button>
-          <button class="header-toggle" :title="isCollapsed ? '展开侧边栏' : '折叠侧边栏'" @click="toggleCollapse">
+          <button
+            class="header-toggle"
+            :title="isCollapsed ? '展开侧边栏' : '折叠侧边栏'"
+            :aria-label="isCollapsed ? '展开侧边栏' : '折叠侧边栏'"
+            @click="toggleCollapse"
+          >
             <ArrowIcon :size="14" :direction="isCollapsed ? 'right' : 'left'" />
           </button>
         </div>

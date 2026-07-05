@@ -80,9 +80,8 @@ export default class FloatMenu extends Toolbar {
 
   /**
    * 处理beforeSelectionChange事件
-   * @param {Object} selection 选区对象
    */
-  handleBeforeSelectionChange({ _selection }) {
+  handleBeforeSelectionChange() {
     if (this.editor && this.editor.editor) {
       const compatCodeMirror = this.createCompatCodeMirror();
       this.cursorActivity(null, compatCodeMirror);
