@@ -37,7 +37,7 @@ export default class FootnoteHoverHandler {
     this.bubbleConfig = bubbleConfig;
   }
 
-  emit(type, _event = {}, _callback = () => {}) {
+  emit(type, event = {}, callback = () => {}) {
     switch (type) {
       case 'remove':
         return this.$remove();

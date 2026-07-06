@@ -132,7 +132,7 @@ export default class MyersDiff {
   /**
    * 组装出返回值
    */
-  assembleResult(snakes, _newObj, _oldObj) {
+  assembleResult(snakes, newObj, oldObj) {
     // const grayColor = 'color: gray';
     // const redColor = 'color: red';
     // const greenColor = 'color: green';

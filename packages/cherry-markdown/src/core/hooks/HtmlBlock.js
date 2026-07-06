@@ -62,7 +62,7 @@ export default class HtmlBlock extends ParagraphBase {
     return htmlComment.test(match);
   }
 
-  beforeMakeHtml(str, _sentenceMakeFunc) {
+  beforeMakeHtml(str, sentenceMakeFunc) {
     if (this.$engine.htmlWhiteListAppend) {
       /**
        * @property
@@ -157,7 +157,7 @@ export default class HtmlBlock extends ParagraphBase {
   //     return str;
   // }
 
-  makeHtml(str, _sentenceMakeFunc) {
+  makeHtml(str, sentenceMakeFunc) {
     return str;
   }
 

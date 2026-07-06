@@ -43,7 +43,7 @@ export default class TapdHtmlTagPlugin extends ParagraphBase {
         .replace(/&#60;/g, '<')
         .replace(/&#62;/g, '>')
         .replace('style="LAYOUT-GRID', 'style="');
-      $whole = this.trimScriptTag($whole);
+      $whole = this._trimScripTag($whole);
       const data = sentenceMakeFunc($whole);
       return `<div data-lines="${lines}" data-sign="${data.sign}">${$whole}</div>`;
     });
@@ -56,7 +56,7 @@ export default class TapdHtmlTagPlugin extends ParagraphBase {
     };
   }
 
-  trimScriptTag(str) {
+  _trimScripTag(str) {
     return str
       .replace(/(<(?:script|script\s[^>]*)>)([\s\S]*?)(<\/script>)/gi, '')
       .replace(/(<iframe [^>]*>)|(<\/iframe>)/gi, '');

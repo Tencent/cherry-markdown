@@ -44,7 +44,7 @@ const DEFAULT_OPTIONS = {
 };
 
 export default class EChartsTableEngine {
-  static install(cherryOptions, ..._args) {
+  static install(cherryOptions, ...args) {
     if (!isBrowser()) {
       Logger.warn('echarts-table-engine only works in browser.');
       mergeWith(cherryOptions, {
@@ -666,7 +666,7 @@ export default class EChartsTableEngine {
   /**
    * 定向重建一组容器对应的图表
    */
-  $rehydrateChartsForContainers(containersSet, _rootEl) {
+  $rehydrateChartsForContainers(containersSet, rootEl) {
     containersSet.forEach((container) => {
       if (!(container instanceof Element) || !container.isConnected) return;
       const type = container.getAttribute('data-chart-type');
@@ -701,7 +701,7 @@ export default class EChartsTableEngine {
   $enableLocaleObserver() {
     // 如果有Cherry实例，通过其事件系统监听语言变更事件
     if (this.cherry && this.cherry.$event) {
-      const handler = (_locale) => {
+      const handler = (locale) => {
         setTimeout(() => {
           const root = this.$getCherryRoot();
           this.$rebuildAllCharts(root);
@@ -817,7 +817,7 @@ export default class EChartsTableEngine {
     });
   }
   // 清除高亮效果
-  clearHighlight(chartInstance, _chartType) {
+  clearHighlight(chartInstance, chartType) {
     // 取消ECharts内置的高亮
     chartInstance.dispatchAction({
       type: 'downplay',

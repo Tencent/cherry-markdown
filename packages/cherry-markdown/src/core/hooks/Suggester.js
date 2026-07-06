@@ -89,7 +89,7 @@ export default class Suggester extends SyntaxBase {
    * 初始化配置
    * @param {SuggesterConfig} config
    */
-  initConfig(_config) {
+  initConfig(config) {
     let { suggester } = this.$cherry.options.editor.suggester || {};
 
     this.suggester = {};
@@ -384,7 +384,7 @@ class SuggesterPanel {
   updatePanel(suggestList) {
     this.tryCreatePanel();
     let defaultValue = suggestList
-      .map((suggest, _idx) => {
+      .map((suggest, idx) => {
         if (typeof suggest === 'object' && suggest !== null) {
           let renderContent = suggest.label;
           if (suggest?.icon) {
@@ -438,7 +438,7 @@ class SuggesterPanel {
 
     // Change this to div.childNodes to support multiple top-level nodes
     const frag = document.createDocumentFragment();
-    Array.prototype.map.call(this.template.childNodes, (item, _idx) => {
+    Array.prototype.map.call(this.template.childNodes, (item, idx) => {
       frag.appendChild(item);
     });
     return frag;
@@ -448,7 +448,7 @@ class SuggesterPanel {
    * 面板重定位（滚动时调用，不进行边界判定）
    * @param {CodeMirror} codemirror
    */
-  relocatePanel(_codemirror) {
+  relocatePanel(codemirror) {
     // CodeMirror 6: 使用 coordsAtPos 获取光标位置
     const editorView = this.editor?.editor?.view;
     if (!editorView) {
@@ -487,7 +487,7 @@ class SuggesterPanel {
    * @param {CodeMirror} codemirror
    * @returns {{ left: number, top: number }}
    */
-  getCursorPos(_codemirror) {
+  getCursorPos(codemirror) {
     // CodeMirror 6: 使用 coordsAtPos 获取光标位置
     const editorView = this.editor?.editor?.view;
     if (!editorView) return null;
@@ -606,7 +606,7 @@ class SuggesterPanel {
    * @param {number} idx 选择的结果索引
    * @param {KeyboardEvent} [evt] 键盘事件（可选）
    */
-  pasteSelectResult(idx, _evt) {
+  pasteSelectResult(idx, evt) {
     const { cursorFrom } = this;
     if (cursorFrom === null || cursorFrom === undefined) {
       return;

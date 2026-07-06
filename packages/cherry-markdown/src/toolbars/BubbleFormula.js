@@ -575,9 +575,9 @@ export default class BubbleFormula {
 
   /**
    * 点击具体公式后的回调函数
-   * @param {string} _latex
+   * @param {string} latex
    */
-  afterClick(_latex) {}
+  afterClick(latex) {}
 
   constructor(options = {}) {
     if (Object.keys(options).length) {

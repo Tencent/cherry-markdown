@@ -117,7 +117,7 @@ export default class InlineMath extends ParagraphBase {
   beforeMakeHtml(str) {
     let $str = str;
     // 格里处理行内公式，让一个td里的行内公式语法生效，让跨td的行内公式语法失效
-    $str = $str.replace(getTableRule(true), (whole, ..._args) => {
+    $str = $str.replace(getTableRule(true), (whole, ...args) => {
       const arr = whole.split('|');
       return arr
         .map((oneTd, index) => {

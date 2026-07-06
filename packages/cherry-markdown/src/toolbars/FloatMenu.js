@@ -58,9 +58,9 @@ export default class FloatMenu extends Toolbar {
 
   /**
    * 处理选区变化
-   * @param {Object} _event 选区变化事件
+   * @param {Object} event 选区变化事件
    */
-  handleSelectionChange(_event) {
+  handleSelectionChange(event) {
     if (this.editor && this.editor.editor) {
       // 创建兼容的 CodeMirror 对象
       const compatCodeMirror = this.createCompatCodeMirror();
@@ -265,10 +265,10 @@ export default class FloatMenu extends Toolbar {
   /**
    * 获取对应行的顶部偏移量，用来定位 float 工具栏
    * @param {number} line 0-indexed 行号
-   * @param {Object} _codeMirror 兼容的 CodeMirror 对象
+   * @param {Object} codeMirror 兼容的 CodeMirror 对象
    * @returns {number}
    */
-  getLineHeight(line, _codeMirror) {
+  getLineHeight(line, codeMirror) {
     // CodeMirror 6 中需要重新实现行高计算
     const editorAdapter = this.editor.editor;
     if (!editorAdapter) {

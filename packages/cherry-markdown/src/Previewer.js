@@ -123,11 +123,11 @@ export default class Previewer {
         // 针对加载失败的图片 或 beforeLoadOneImgCallback 返回false 的图片，最多尝试加载几次，为了防止死循环，最多5次。以图片的src为纬度统计重试次数
         maxTryTimesPerSrc: 2,
         // 加载一张图片之前的回调函数，函数return false 会终止加载操作
-        beforeLoadOneImgCallback: (_img) => {},
+        beforeLoadOneImgCallback: (img) => {},
         // 加载一张图片失败之后的回调函数
-        failLoadOneImgCallback: (_img) => {},
+        failLoadOneImgCallback: (img) => {},
         // 加载一张图片之后的回调函数，如果图片加载失败，则不会回调该函数
-        afterLoadOneImgCallback: (_img) => {},
+        afterLoadOneImgCallback: (img) => {},
         // 加载完所有图片后调用的回调函数
         afterLoadAllImgCallback: () => {},
       },
@@ -946,7 +946,7 @@ export default class Previewer {
     this.$cherry.clearFloatPreviewer();
   }
 
-  recoverPreviewer(_dealToolbar = false) {
+  recoverPreviewer(dealToolbar = false) {
     // Restore dual-pane mode by clearing all mode-related classes on previewer/editor
     this.options.previewerDom.classList.remove('cherry-previewer--hidden', 'cherry-previewer--full');
     this.options.virtualDragLineDom.classList.remove('cherry-drag--hidden');

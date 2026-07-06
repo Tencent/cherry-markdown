@@ -20,7 +20,7 @@ import { escapeHTMLSpecialChar } from '@/utils/sanitize';
 export default class FrontMatter extends ParagraphBase {
   static HOOK_NAME = 'frontMatter';
 
-  constructor(_options) {
+  constructor(options) {
     super({ needCache: true });
   }
 
@@ -63,7 +63,7 @@ export default class FrontMatter extends ParagraphBase {
     });
   }
 
-  makeHtml(str, _sentenceMakeFunc) {
+  makeHtml(str, sentenceMakeFunc) {
     return str;
   }
 

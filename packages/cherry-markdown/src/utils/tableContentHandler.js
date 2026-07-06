@@ -198,7 +198,7 @@ export default class TableHandler {
 
     // 处理markdown表格语法
     editorValue
-      .replace(this.codeBlockReg, (whole, ..._args) => {
+      .replace(this.codeBlockReg, (whole, ...args) => {
         // 先把代码块里的表格语法关键字干掉
         return whole.replace(/\|/g, '.');
       })
@@ -356,9 +356,9 @@ export default class TableHandler {
    * @param {Boolean} isTHead
    * @param {Number} trIndex
    * @param {Number} tdIndex
-   * @param {Boolean} _isInBlock
+   * @param {Boolean} isInBlock
    */
-  $getTdOffset(tableCode, isTHead, trIndex, tdIndex, _isInBlock = false) {
+  $getTdOffset(tableCode, isTHead, trIndex, tdIndex, isInBlock = false) {
     const codes = tableCode.split(/\n/);
     const targetTr = isTHead ? 0 : trIndex + 2;
     const tds = codes[targetTr].split(/\|/);
@@ -1274,7 +1274,7 @@ export default class TableHandler {
     });
 
     // 拖拽开始
-    localButton.addEventListener('mousedown', (_e) => {
+    localButton.addEventListener('mousedown', (e) => {
       this.$setSelection(this.tableEditor.info.tableIndex, 'table');
       this.$dragLine();
     });
@@ -1299,7 +1299,7 @@ export default class TableHandler {
     });
 
     // 拖拽开始
-    localButton.addEventListener('mousedown', (_e) => {
+    localButton.addEventListener('mousedown', (e) => {
       this.$setSelection(this.tableEditor.info.tableIndex, 'table');
       this.$dragCol();
     });
@@ -1636,7 +1636,7 @@ export default class TableHandler {
   /**
    * 执行菜单动作
    */
-  $executeMenuAction(action, _type) {
+  $executeMenuAction(action, type) {
     switch (action) {
       case 'deleteRow':
         this.$deleteCurrentRow();
@@ -1903,7 +1903,7 @@ export default class TableHandler {
       tdNode.setAttribute('draggable', true);
     }
 
-    function handleDragLeave(_event) {
+    function handleDragLeave(event) {
       that.$clearAllBorders();
     }
 
@@ -1926,7 +1926,7 @@ export default class TableHandler {
         return;
       }
 
-      const newLines = lines.map((line, _index) => {
+      const newLines = lines.map((line, index) => {
         // 跳过空行
         if (!line.trim()) return line;
 
@@ -1985,7 +1985,7 @@ export default class TableHandler {
     const lines = view.state.doc.sliceString(view.state.selection.main.from, view.state.selection.main.to).split(/\n/);
     const that = this;
 
-    function handleDragLeave(_event) {
+    function handleDragLeave(event) {
       that.$clearAllBorders();
     }
 

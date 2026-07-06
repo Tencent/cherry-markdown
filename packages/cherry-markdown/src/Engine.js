@@ -302,7 +302,7 @@ export default class Engine {
   $cacheBigData(md) {
     // 暂存所有代码块
     const codeBlocks = [];
-    let $md = md.replace(getCodeBlockRule().reg, (whole, _m1, _m2) => {
+    let $md = md.replace(getCodeBlockRule().reg, (whole, m1, m2) => {
       const cacheKey = `codeBlockBegin${codeBlocks.length}codeBlockEnd`;
       codeBlocks.push(whole);
       return cacheKey;

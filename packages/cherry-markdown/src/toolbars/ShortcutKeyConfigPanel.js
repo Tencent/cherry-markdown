@@ -445,7 +445,7 @@ export default class ShortcutKeyConfigPanel {
    */
   generateShortcutKeyConfigPanelHtmlStr() {
     const liStr = Object.entries(this.$cherry.toolbar.shortcutKeyMap ?? {})
-      .filter(([_key, val]) => typeof val === 'object' && val)
+      .filter(([key, val]) => typeof val === 'object' && val)
       .map(([key, val]) => {
         const { hookName, aliasName, ...rest } = val;
         let otherDataSet = '';

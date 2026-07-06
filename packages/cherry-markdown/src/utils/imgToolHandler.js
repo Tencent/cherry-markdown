@@ -93,7 +93,7 @@ const imgToolHandler = {
     const alignDiv = document.createElement('div');
     alignDiv.className = 'img-tool-group';
     this.container.appendChild(alignDiv);
-    alignList.forEach((align, _index) => {
+    alignList.forEach((align, index) => {
       const localAlign = align;
       if (this.isMermaid) {
         // mermaid figure 的对齐通过 class 标记
@@ -209,9 +209,9 @@ const imgToolHandler = {
     return !!(this.img && document.contains(this.img) && this.previewerDom?.contains(this.img));
   },
   $clearPreviewUpdateTimer() {
-    if (this.fallbackTimer) {
-      clearTimeout(this.fallbackTimer);
-      this.fallbackTimer = null;
+    if (this._fallbackTimer) {
+      clearTimeout(this._fallbackTimer);
+      this._fallbackTimer = null;
     }
   },
   previewUpdate(callback) {
@@ -236,8 +236,8 @@ const imgToolHandler = {
       { once: true },
     );
     // 兜底：如果过渡没有触发（如属性没变化），120ms 后也更新
-    this.fallbackTimer = setTimeout(() => {
-      this.fallbackTimer = null;
+    this._fallbackTimer = setTimeout(() => {
+      this._fallbackTimer = null;
       if (!this.$isTargetValid()) {
         (callback || this.onInvalidTarget)?.();
         return;
@@ -298,7 +298,7 @@ const imgToolHandler = {
     this.container.style.top = `${finalTop}px`;
     this.position = { ...imgPosition };
   },
-  dealScroll(_event) {
+  dealScroll(event) {
     const position = this.getImgPosition();
     if (this.container.style.marginTop !== position.top - this.position.top) {
       this.container.style.marginTop = `${position.top - this.position.top}px`;

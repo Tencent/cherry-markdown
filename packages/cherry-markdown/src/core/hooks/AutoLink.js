@@ -42,7 +42,7 @@ export default class AutoLink extends SyntaxBase {
     return text.replace(/_/g, '&#x5f;').replace(/\*/g, '&#x2a;');
   };
 
-  constructor({ config, _globalConfig }) {
+  constructor({ config, globalConfig }) {
     super({ config });
     this.enableShortLink = !!config.enableShortLink;
     this.shortLinkLength = config.shortLinkLength;
@@ -123,11 +123,11 @@ export default class AutoLink extends SyntaxBase {
   /**
    * 将字符串中的URL或电子邮件地址转换为HTML链接
    * @param {string} str - 包含可能URL或电子邮件地址的原始字符串
-   * @param {Function} [_sentenceMakeFunc] - 可选的回调函数，用于处理句子生成
+   * @param {Function} [sentenceMakeFunc] - 可选的回调函数，用于处理句子生成
    * @returns {string} 转换后的HTML字符串，其中URL和电子邮件地址被替换为<a>标签
    * @throws {Error} 如果输入不是字符串可能会抛出错误
    */
-  makeHtml(str, _sentenceMakeFunc) {
+  makeHtml(str, sentenceMakeFunc) {
     if (!(this.test(str) && (EMAIL_INLINE.test(str) || URL_INLINE_NO_SLASH.test(str)))) {
       return str;
     }

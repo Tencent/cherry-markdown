@@ -37,7 +37,7 @@ function resolveLinkTarget(config) {
 export default class Link extends SyntaxBase {
   static HOOK_NAME = 'link';
 
-  constructor({ config, _globalConfig }) {
+  constructor({ config, globalConfig }) {
     super({ config });
     this.target = resolveLinkTarget(config);
     this.rel = config.rel ? `rel="${config.rel}"` : '';

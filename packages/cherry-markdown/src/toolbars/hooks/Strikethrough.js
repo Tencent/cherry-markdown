@@ -40,10 +40,10 @@ export default class Strikethrough extends MenuBase {
   /**
    *
    * @param {string} selection 被用户选中的文本内容
-   * @param {string} _shortKey 快捷键参数，本函数不处理这个参数
+   * @param {string} shortKey 快捷键参数，本函数不处理这个参数
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
-  onClick(selection, _shortKey = '') {
+  onClick(selection, shortKey = '') {
     let $selection = this.getSelection(selection) || this.locale.strikethrough;
     const strikethroughConfig = this.$cherry?.options?.engine?.syntax?.strikethrough;
     const needWhitespace = strikethroughConfig !== false && strikethroughConfig?.needWhitespace;

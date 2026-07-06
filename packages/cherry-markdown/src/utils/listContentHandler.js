@@ -40,7 +40,7 @@ export default class ListHandler {
    * @param {HTMLDivElement} previewerDom 预览器dom
    * @param {import('../Editor').default} editor 编辑器实例
    */
-  constructor(trigger, target, container, previewerDom, editor, _options = {}) {
+  constructor(trigger, target, container, previewerDom, editor, options = {}) {
     this.trigger = trigger;
     this.target = target;
     this.container = container;
@@ -64,9 +64,9 @@ export default class ListHandler {
   /**
    * 触发事件
    * @param {string} type 事件类型
-   * @param {Event} _event 事件对象
+   * @param {Event} event 事件对象
    */
-  emit(type, _event) {
+  emit(type, event) {
     switch (type) {
       case 'remove':
         return this.remove();

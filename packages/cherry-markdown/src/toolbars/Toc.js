@@ -120,11 +120,11 @@ export default class Toc {
         }
       }
     });
-    this.tocClose.addEventListener('click', (_e) => {
+    this.tocClose.addEventListener('click', (e) => {
       this.$switchModel('pure');
       this.setModelToLocalStorage('pure');
     });
-    this.tocOpen.addEventListener('click', (_e) => {
+    this.tocOpen.addEventListener('click', (e) => {
       this.$switchModel('full');
       this.setModelToLocalStorage('full');
     });

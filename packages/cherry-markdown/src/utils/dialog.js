@@ -73,7 +73,7 @@ const dialog = {
       dom.style.top = `${top}px`;
     };
 
-    const handleMouseUp = function (_e) {
+    const handleMouseUp = function (e) {
       head.style.cursor = 'grab';
       body.style.pointerEvents = null;
 

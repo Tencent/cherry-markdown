@@ -42,10 +42,10 @@ export default class FormulaHandler {
   /**
    * 触发事件
    * @param {string} type 事件类型
-   * @param {Event} _event 事件对象
+   * @param {Event} event 事件对象
    */
   // @ts-ignore
-  emit(type, _event) {
+  emit(type, event) {
     switch (type) {
       case 'remove':
       case 'scroll':

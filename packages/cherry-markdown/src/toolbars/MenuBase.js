@@ -216,7 +216,7 @@ export default class MenuBase {
   /**
    * 在创建菜单后执行的钩子
    */
-  afterInit(_btnDom) {}
+  afterInit(btnDom) {}
 
   /**
    * 创建一个一级菜单
@@ -566,11 +566,11 @@ export default class MenuBase {
    * 反转子菜单点击事件参数顺序
    * @deprecated
    */
-  bindSubClick(shortcut, _selection) {
+  bindSubClick(shortcut, selection) {
     return this.fire(null, shortcut);
   }
 
-  onClick(selection, _shortcut, _callback) {
+  onClick(selection, shortcut, callback) {
     return selection;
   }
 
@@ -685,10 +685,10 @@ export default class MenuBase {
 
   /**
    * 绑定子菜单点击事件
-   * @param {HTMLDivElement} _subMenuDomPanel
+   * @param {HTMLDivElement} subMenuDomPanel
    * @returns {number|number[]} 当前激活的子菜单索引或索引数组
    */
-  getActiveSubMenuIndex(_subMenuDomPanel) {
+  getActiveSubMenuIndex(subMenuDomPanel) {
     return -1;
   }
 }

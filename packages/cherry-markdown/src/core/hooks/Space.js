@@ -20,7 +20,7 @@ import SyntaxBase from '@/core/SyntaxBase';
 export default class Space extends SyntaxBase {
   static HOOK_NAME = 'space';
 
-  makeHtml(str, _sentenceMakeFunc) {
+  makeHtml(str, sentenceMakeFunc) {
     return str.replace(this.RULE.reg, (whole) => {
       return '&nbsp;'.repeat(whole.length);
     });

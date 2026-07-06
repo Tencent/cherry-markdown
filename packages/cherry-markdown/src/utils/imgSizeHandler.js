@@ -128,9 +128,9 @@ const imgSizeHandler = {
     return !!(this.img && document.contains(this.img) && this.previewerDom?.contains(this.img));
   },
   $clearPreviewUpdateTimer() {
-    if (this.fallbackTimer) {
-      clearTimeout(this.fallbackTimer);
-      this.fallbackTimer = null;
+    if (this._fallbackTimer) {
+      clearTimeout(this._fallbackTimer);
+      this._fallbackTimer = null;
     }
   },
   previewUpdate(callback) {
@@ -158,8 +158,8 @@ const imgSizeHandler = {
       { once: true },
     );
     // 兜底：如果过渡没有触发（如属性没变化），100ms 后也更新
-    this.fallbackTimer = setTimeout(() => {
-      this.fallbackTimer = null;
+    this._fallbackTimer = setTimeout(() => {
+      this._fallbackTimer = null;
       if (!this.$isTargetValid()) {
         (callback || this.onInvalidTarget)?.();
         return;
@@ -254,7 +254,7 @@ const imgSizeHandler = {
   $isResizing() {
     return this.mouseResize.resize;
   },
-  dealScroll(_event) {
+  dealScroll(event) {
     const position = this.getImgPosition();
     if (this.butsLayout.style.marginTop !== position.top - this.buts.position.top) {
       this.butsLayout.style.marginTop = `${position.top - this.buts.position.top}px`;
@@ -294,7 +294,7 @@ const imgSizeHandler = {
       }
     }
   },
-  resizeStop(_event, _buts, _editor, _menu) {
+  resizeStop(event, buts, editor, menu) {
     if (!this.$isResizing()) {
       return false;
     }
@@ -311,7 +311,7 @@ const imgSizeHandler = {
     this.change();
     this.updatePosition();
   },
-  resizeWorking(event, _buts) {
+  resizeWorking(event, buts) {
     if (!this.$isResizing()) {
       return;
     }

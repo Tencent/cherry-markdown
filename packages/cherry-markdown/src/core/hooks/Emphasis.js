@@ -59,7 +59,7 @@ export default class Emphasis extends SyntaxBase {
 
     // TODO: fix this error
     // @ts-expect-error
-    $str = $str.replace(this.RULE.underscore.reg, (match, leading, symbol, text, _index, _string) => {
+    $str = $str.replace(this.RULE.underscore.reg, (match, leading, symbol, text, index, string) => {
       if (text.trim() === '') {
         return match;
       }

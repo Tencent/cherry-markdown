@@ -164,13 +164,6 @@ export default [
     },
   },
   ...createTencentTsConfigs(packageRoots.cherryMarkdownTest, ['packages/cherry-markdown/test/**/*.ts']),
-  // MenuBase：向后兼容已废弃的 _onClick API，仅此文件放行
-  {
-    files: ['packages/cherry-markdown/src/toolbars/MenuBase.js'],
-    rules: {
-      'no-underscore-dangle': ['error', { allow: ['_onClick'] }],
-    },
-  },
   // client：Vite define 注入的全局常量命名
   {
     files: ['packages/client/src/vite-env.d.ts'],
@@ -197,6 +190,15 @@ export default [
     files: ['packages/cherry-markdown/src/utils/toolkit/mergeWith.js'],
     rules: {
       'no-param-reassign': 'off',
+    },
+  },
+  // cherry-markdown 源码：按需求关闭未使用变量与下划线命名 lint（_xxx 用法还原）
+  {
+    files: ['packages/cherry-markdown/src/**/*.{js,ts}'],
+    rules: {
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'no-underscore-dangle': 'off',
     },
   },
   // 放在最后：关闭与 Prettier 冲突的格式规则（缩进、引号等交给 Prettier）

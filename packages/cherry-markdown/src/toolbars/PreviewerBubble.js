@@ -564,7 +564,7 @@ export default class PreviewerBubble {
     }
   }
 
-  $onChange(_e) {
+  $onChange(e) {
     return;
   }
 
@@ -880,7 +880,7 @@ export default class PreviewerBubble {
    * @param {string} trigger 触发方式
    * @param {HTMLParagraphElement} target 用户触发的列表dom
    */
-  $showListPreviewerBubbles(trigger, target, _options = {}) {
+  $showListPreviewerBubbles(trigger, target, options = {}) {
     // 列表所见即所得编辑需要编辑器支持
     if (!this.$hasEditor()) {
       return;

@@ -18,7 +18,7 @@
 const Logger = new Proxy(
   {},
   {
-    get(target, prop, _receiver) {
+    get(target, prop, receiver) {
       if (
         typeof BUILD_ENV !== 'undefined' &&
         BUILD_ENV !== 'production' &&

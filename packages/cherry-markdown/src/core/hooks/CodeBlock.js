@@ -29,7 +29,7 @@ export default class CodeBlock extends ParagraphBase {
   static HOOK_NAME = 'codeBlock';
   static inlineCodeCache = {};
 
-  constructor({ _externals, config, cherry }) {
+  constructor({ externals, config, cherry }) {
     super({ needCache: true });
     CodeBlock.inlineCodeCache = {};
     this.customLang = [];
@@ -197,9 +197,9 @@ export default class CodeBlock extends ParagraphBase {
    * 预处理代码块
    * @param {string} match
    * @param {string} leadingContent
-   * @param {string} _code
+   * @param {string} code
    */
-  computeLines(match, leadingContent, _code) {
+  computeLines(match, leadingContent, code) {
     const leadingSpaces = leadingContent;
     const lines = this.getLineCount(match, leadingSpaces);
     const sign = this.$engine.hash(match.replace(/^\n+/, '') + lines);
@@ -427,7 +427,7 @@ export default class CodeBlock extends ParagraphBase {
     return str;
   }
 
-  beforeMakeHtml(str, _sentenceMakeFunc, _markdownParams) {
+  beforeMakeHtml(str, sentenceMakeFunc, markdownParams) {
     let $str = str;
 
     // 处理段落代码块自动闭合
@@ -529,7 +529,7 @@ export default class CodeBlock extends ParagraphBase {
       return addBlockQuoteSignToResult(result);
     });
     // 表格里处理行内代码，让一个td里的行内代码语法生效，让跨td的行内代码语法失效
-    $str = $str.replace(getTableRule(true), (whole, ..._args) => {
+    $str = $str.replace(getTableRule(true), (whole, ...args) => {
       return whole
         .replace(/\\\|/g, '~CHERRYNormalLine')
         .split('|')

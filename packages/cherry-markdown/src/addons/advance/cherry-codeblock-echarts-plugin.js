@@ -76,7 +76,7 @@ export default class EChartsCodeBlockEngine {
     }
   }
 
-  render(src, sign, $engine, _language) {
+  render(src, sign, $engine, language) {
     if (src.trim().length <= 0) return '';
     const width = this.size?.width || '100%';
     const height = this.size?.height || '300px';
