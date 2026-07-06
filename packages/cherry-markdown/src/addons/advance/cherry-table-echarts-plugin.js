@@ -623,7 +623,6 @@ export default class EChartsTableEngine {
   }
 
   $generateChartOptions(type, tableObject, options) {
-    const localOptions = options;
     const handler = {
       bar: BarChartOptionsHandler,
       line: LineChartOptionsHandler,
@@ -634,8 +633,8 @@ export default class EChartsTableEngine {
       scatter: ScatterChartOptionsHandler,
       sankey: SankeyChartOptionsHandler,
     }[type];
-    localOptions.engine = this;
-    return handler ? generateOptions(handler, tableObject, localOptions) : {};
+    options.engine = this;
+    return handler ? generateOptions(handler, tableObject, options) : {};
   }
 
   /**
@@ -784,11 +783,10 @@ export default class EChartsTableEngine {
         try {
           this.createChart(container, chartOption, type);
         } catch (error) {
-          const localContainer = container;
           if ($cherry.options.engine.syntax.global.flowSessionContext) {
-            localContainer.innerHTML = 'drawing...';
+            container.innerHTML = 'drawing...';
           } else {
-            localContainer.innerHTML = `<div style="text-align: center; color: red; transform: translateY(125px);">
+            container.innerHTML = `<div style="text-align: center; color: red; transform: translateY(125px);">
               <div style="font-size: ${this.$theme().fontSize.title}px; color: ${this.$theme().color.error};">${this.cherry.locale.chartRenderError}</div>
               <div style="font-size: ${this.$theme().fontSize.base}px; color: ${this.$theme().color.text}; opacity: 0.7;">${error.message}</div>
             </div>`;
@@ -827,11 +825,10 @@ export default class EChartsTableEngine {
     const option = chartInstance.getOption();
     const seriesData = option.series[0].data;
     seriesData.forEach((item) => {
-      const localItem = item;
-      if (localItem.itemStyle) {
-        delete localItem.itemStyle.opacity;
-        delete localItem.itemStyle.borderWidth;
-        delete localItem.itemStyle.borderColor;
+      if (item.itemStyle) {
+        delete item.itemStyle.opacity;
+        delete item.itemStyle.borderWidth;
+        delete item.itemStyle.borderColor;
       }
     });
     chartInstance.setOption({

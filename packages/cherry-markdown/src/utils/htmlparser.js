@@ -952,9 +952,8 @@ const htmlParser = {
     });
   },
   clearSelfNodeColorAttrs(htmlItem) {
-    const localHtmlItem = htmlItem;
-    if (localHtmlItem.attrs && localHtmlItem.attrs.style) {
-      const styles = localHtmlItem.attrs.style.split(';');
+    if (htmlItem.attrs && htmlItem.attrs.style) {
+      const styles = htmlItem.attrs.style.split(';');
       const newStyles = [];
       for (let index = 0; index < styles.length; index++) {
         if (styles[index] && styles[index].indexOf('color') === -1) {
@@ -962,9 +961,9 @@ const htmlParser = {
         }
       }
       if (newStyles.length) {
-        localHtmlItem.attrs.style = `${newStyles.join(';')};`;
+        htmlItem.attrs.style = `${newStyles.join(';')};`;
       } else {
-        delete localHtmlItem.attrs.style;
+        delete htmlItem.attrs.style;
       }
     }
   },

@@ -63,7 +63,6 @@ export class CherryStatic {
    * @returns {void}
    */
   static usePlugin(PluginClass, ...args) {
-    const localPluginClass = PluginClass;
     if (this === CherryStatic) {
       throw new Error('`usePlugin` is not allowed to called through CherryStatic class.');
     }
@@ -71,12 +70,12 @@ export class CherryStatic {
     if (this.initialized) {
       throw new Error('The function `usePlugin` should be called before Cherry is instantiated.');
     }
-    if (localPluginClass.$cherry$mounted === true) {
+    if (PluginClass.$cherry$mounted === true) {
       return;
     }
     // @ts-expect-error 子类静态 config 由 Cherry / CherryEngine 挂载
-    localPluginClass.install.apply(PluginClass, [this.config.defaults, ...args]);
-    localPluginClass.$cherry$mounted = true;
+    PluginClass.install.apply(PluginClass, [this.config.defaults, ...args]);
+    PluginClass.$cherry$mounted = true;
   }
 
   constructor(..._args) {

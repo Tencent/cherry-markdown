@@ -435,10 +435,9 @@ export default class CodeBlockHandler {
   }
 
   setStyle(element, property, value) {
-    const localElement = element;
-    const info = localElement.getBoundingClientRect();
+    const info = element.getBoundingClientRect();
     if (info[property] !== value) {
-      localElement.style[property] = value;
+      element.style[property] = value;
     }
   }
 

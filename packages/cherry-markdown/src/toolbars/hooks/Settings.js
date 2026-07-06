@@ -138,8 +138,7 @@ export default class Settings extends MenuBase {
       saveIsClassicBrToLocal(targetIsClassicBr);
       this.engine.$cherry.options.engine.global.classicBr = targetIsClassicBr;
       this.engine.hookCenter.hookList.paragraph.forEach((item) => {
-        const localItem = item;
-        localItem.classicBr = targetIsClassicBr;
+        item.classicBr = targetIsClassicBr;
       });
 
       let i = this.$cherry.wrapperDom.querySelector('.cherry-dropdown .ch-icon-normal');

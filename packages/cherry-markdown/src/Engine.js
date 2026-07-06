@@ -209,12 +209,11 @@ export default class Engine {
     try {
       let canContinue = true;
       $md = this.hooks[type][method]((newMd, oneHook) => {
-        const localOneHook = oneHook;
         if (!canContinue) {
           return newMd;
         }
-        if (!localOneHook.$engine) {
-          localOneHook.$engine = this;
+        if (!oneHook.$engine) {
+          oneHook.$engine = this;
           // Deprecated
           Object.defineProperty(oneHook, '_engine', {
             get() {
@@ -229,7 +228,7 @@ export default class Engine {
         }
         // 特殊处理：引用语法在实现嵌套引用时，需要将引用语法之前的语法进行执行，但不需要执行引用语法之后的语法
         if (before && type === 'paragraph' && action === 'afterMakeHtml') {
-          if (localOneHook.getName() === before) {
+          if (oneHook.getName() === before) {
             canContinue = false;
           }
         }
@@ -237,7 +236,7 @@ export default class Engine {
         const ret = oneHook[action](newMd, actionArgs, this.markdownParams);
         // const cost = Date.now() - time;
         // if (cost > 50) {
-        //   console.log(`hook ${localOneHook.getName()} ${action} cost ${Date.now() - time}ms`);
+        //   console.log(`hook ${oneHook.getName()} ${action} cost ${Date.now() - time}ms`);
         // }
         return ret;
       }, $md);

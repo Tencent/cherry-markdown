@@ -250,9 +250,8 @@ export default class ShortcutKeyConfigPanel {
    * @param {string[]} keys 快捷键数组
    */
   updateKeyboardContainer(kbdContainer, keys) {
-    const localKbdContainer = kbdContainer;
     if (!(kbdContainer instanceof HTMLElement)) return;
-    localKbdContainer.innerHTML = this.processKeysToHtml(keys);
+    kbdContainer.innerHTML = this.processKeysToHtml(keys);
   }
 
   /**

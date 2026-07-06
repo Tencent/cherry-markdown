@@ -58,22 +58,20 @@ const imgToolHandler = {
       decoDiv.className = 'img-tool-group';
       this.container.appendChild(decoDiv);
       decoList.forEach((deco) => {
-        const localDeco = deco;
-        localDeco.active = this.img.className.match(`cherry-img-deco-${localDeco.type}`);
+        deco.active = this.img.className.match(`cherry-img-deco-${deco.type}`);
         const div = document.createElement('div');
         const icon = document.createElement('i');
         div.appendChild(icon);
-        icon.className = `img-tool-icon ch-icon ch-icon-imgDeco${capitalizeFirstLetter(localDeco.type)}`;
+        icon.className = `img-tool-icon ch-icon ch-icon-imgDeco${capitalizeFirstLetter(deco.type)}`;
         div.className = getImgToolButtonClassName(deco);
-        div.title = localDeco.text;
+        div.title = deco.text;
         div.addEventListener('click', (e) => {
-          const localDeco = deco;
           e.preventDefault();
           e.stopPropagation();
-          localDeco.active = !localDeco.active;
+          deco.active = !deco.active;
           // 点击后，更新样式
           div.className = getImgToolButtonClassName(deco);
-          this.emitChange(this.img, localDeco.type);
+          this.emitChange(this.img, deco.type);
         });
         decoDiv.append(div);
       });
@@ -94,25 +92,23 @@ const imgToolHandler = {
     alignDiv.className = 'img-tool-group';
     this.container.appendChild(alignDiv);
     alignList.forEach((align, index) => {
-      const localAlign = align;
       if (this.isMermaid) {
         // mermaid figure 的对齐通过 class 标记
-        localAlign.active = this.img.classList.contains(`cherry-mermaid-align-${localAlign.type}`);
+        align.active = this.img.classList.contains(`cherry-mermaid-align-${align.type}`);
       } else {
-        localAlign.active = this.img.className.match(`cherry-img-align-${localAlign.type}`);
+        align.active = this.img.className.match(`cherry-img-align-${align.type}`);
       }
       const div = document.createElement('div');
       const icon = document.createElement('i');
-      localAlign.div = div;
+      align.div = div;
       div.appendChild(icon);
-      icon.className = `img-tool-icon ch-icon ch-icon-imgAlign${capitalizeLetter(localAlign.type)}`;
+      icon.className = `img-tool-icon ch-icon ch-icon-imgAlign${capitalizeLetter(align.type)}`;
       div.className = getImgToolButtonClassName(align);
-      div.title = localAlign.text;
+      div.title = align.text;
       div.addEventListener('click', (e) => {
-        const localAlign = align;
         e.preventDefault();
         e.stopPropagation();
-        localAlign.active = !localAlign.active;
+        align.active = !align.active;
         alignList.forEach((alignItem) => {
           if (alignItem !== align) {
             const otherAlign = alignItem;
@@ -121,7 +117,7 @@ const imgToolHandler = {
           }
         });
         div.className = getImgToolButtonClassName(align);
-        this.emitChange(this.img, localAlign.active ? localAlign.type : 'clear-align');
+        this.emitChange(this.img, align.active ? align.type : 'clear-align');
 
         // 不再使用 setTimeout 猜测预览区更新时机
         // 位置更新由 previewUpdate 事件在 afterUpdateCallBack 中触发

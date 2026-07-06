@@ -185,20 +185,14 @@ export default [
       'no-param-reassign': 'off',
     },
   },
-  // toolkit：mergeWith 与 lodash 一致，需就地修改 target
-  {
-    files: ['packages/cherry-markdown/src/utils/toolkit/mergeWith.js'],
-    rules: {
-      'no-param-reassign': 'off',
-    },
-  },
-  // cherry-markdown 源码：按需求关闭未使用变量与下划线命名 lint（_xxx 用法还原）
+  // cherry-markdown：关闭未使用变量、下划线命名、就地修改参数 lint
   {
     files: ['packages/cherry-markdown/src/**/*.{js,ts}'],
     rules: {
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       'no-underscore-dangle': 'off',
+      'no-param-reassign': 'off',
     },
   },
   // 放在最后：关闭与 Prettier 冲突的格式规则（缩进、引号等交给 Prettier）

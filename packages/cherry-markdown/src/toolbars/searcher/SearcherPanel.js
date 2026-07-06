@@ -823,19 +823,18 @@ export default class SearcherPanel {
     /** @type {(HTMLButtonElement | null)[]} */
     const replaceButtons = [this.replaceButton, this.replaceAllButton];
     replaceButtons.forEach((button) => {
-      const localButton = button;
       if (!button) {
         return;
       }
 
-      localButton.disabled = !canReplace;
-      localButton.classList.remove('is-forbidden', 'is-unavailable');
+      button.disabled = !canReplace;
+      button.classList.remove('is-forbidden', 'is-unavailable');
 
       if (canReplace) {
         return;
       }
 
-      localButton.classList.add(readOnly ? 'is-forbidden' : 'is-unavailable');
+      button.classList.add(readOnly ? 'is-forbidden' : 'is-unavailable');
     });
 
     if (this.selectAllMatchesButton) {

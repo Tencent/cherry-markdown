@@ -307,13 +307,12 @@ export default class MermaidCodeEngine {
     if (isBrowser()) {
       const placeholderList = container.querySelectorAll(`[data-sign="${sign}"][data-type="codeBlock"]`);
       placeholderList?.forEach((placeholder) => {
-        const localPlaceholder = placeholder;
-        if (localPlaceholder.closest('[data-mode="source"]')) {
+        if (placeholder.closest('[data-mode="source"]')) {
           return;
         }
         if (isToolbarMode) {
           // showSourceToolbar 模式：仅替换预览面板内容，保留工具栏和源码面板
-          const previewPanel = localPlaceholder.parentElement
+          const previewPanel = placeholder.parentElement
             ?.closest?.('figure[data-type="mermaid"]')
             ?.querySelector('.cherry-mermaid-source-toolbar-panel[data-mode="preview"]');
           if (previewPanel) {
@@ -321,7 +320,7 @@ export default class MermaidCodeEngine {
             return;
           }
         }
-        localPlaceholder.parentElement.innerHTML = html;
+        placeholder.parentElement.innerHTML = html;
       });
     }
     $engine.asyncRenderHandler.done(graphId, {

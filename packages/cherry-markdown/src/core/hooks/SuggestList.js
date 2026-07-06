@@ -385,8 +385,7 @@ export function allSuggestList(keyword, locales, suggesterConfig) {
 
   if (keyword[0] === '/' || keyword[0] === '、' || addonsKeywords.includes(keyword[0])) {
     systemSuggestList.forEach((item) => {
-      const localItem = item;
-      localItem.keyword = ''.concat(keyword[0], localItem.keyword);
+      item.keyword = ''.concat(keyword[0], item.keyword);
     });
   }
   // '、'除了返回系统候选表，还需要返回两个半角字符

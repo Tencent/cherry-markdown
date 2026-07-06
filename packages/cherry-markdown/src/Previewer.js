@@ -356,9 +356,8 @@ export default class Previewer {
   }
 
   $tryChangeValue(obj, key, value) {
-    const localObj = obj;
-    if (localObj.style[key] !== value) {
-      localObj.style[key] = value;
+    if (obj.style[key] !== value) {
+      obj.style[key] = value;
     }
   }
 
@@ -399,45 +398,43 @@ export default class Previewer {
 
   bindDrag() {
     const dragLineMouseMove = (mouseMoveEvent) => {
-      const localMouseMoveEvent = mouseMoveEvent;
       // 阻止事件冒泡
-      if (mouseMoveEvent && localMouseMoveEvent.stopPropagation) {
-        localMouseMoveEvent.stopPropagation();
+      if (mouseMoveEvent && mouseMoveEvent.stopPropagation) {
+        mouseMoveEvent.stopPropagation();
       } else {
-        localMouseMoveEvent.cancelBubble = true;
+        mouseMoveEvent.cancelBubble = true;
       }
       // 取消默认事件
-      if (localMouseMoveEvent.preventDefault) {
-        localMouseMoveEvent.preventDefault();
+      if (mouseMoveEvent.preventDefault) {
+        mouseMoveEvent.preventDefault();
       } else {
         window.event.returnValue = false;
       }
 
       const editorLeft = this.editor?.options?.editorDom?.getBoundingClientRect()?.left || 0;
-      const editorRight = localMouseMoveEvent.clientX;
+      const editorRight = mouseMoveEvent.clientX;
       const virtualLayout = this.calculateVirtualLayout(editorLeft, editorRight);
       this.setVirtualLayout(virtualLayout.startWidth, virtualLayout.leftWidth, virtualLayout.rightWidth);
       return false;
     };
 
     const dragLineMouseUp = (mouseUpEvent) => {
-      const localMouseUpEvent = mouseUpEvent;
       // 阻止事件冒泡
-      if (mouseUpEvent && localMouseUpEvent.stopPropagation) {
-        localMouseUpEvent.stopPropagation();
+      if (mouseUpEvent && mouseUpEvent.stopPropagation) {
+        mouseUpEvent.stopPropagation();
       } else {
-        localMouseUpEvent.cancelBubble = true;
+        mouseUpEvent.cancelBubble = true;
       }
       // 取消默认事件
-      if (localMouseUpEvent.preventDefault) {
-        localMouseUpEvent.preventDefault();
+      if (mouseUpEvent.preventDefault) {
+        mouseUpEvent.preventDefault();
       } else {
         window.event.returnValue = false;
       }
 
       // 重新设置editor和previewer宽度占比
       const editorLeft = this.editor?.options?.editorDom?.getBoundingClientRect()?.left || 0;
-      const editorRight = localMouseUpEvent.clientX;
+      const editorRight = mouseUpEvent.clientX;
       const layout = this.calculateRealLayout(editorRight - editorLeft);
       this.setRealLayout(layout.editorPercentage, layout.previewerPercentage);
       // 去掉蒙层和虚拟拖动条
@@ -459,16 +456,15 @@ export default class Previewer {
     };
 
     const dragLineMouseDown = (mouseDownEvent) => {
-      const localMouseDownEvent = mouseDownEvent;
       // 阻止事件冒泡
-      if (mouseDownEvent && localMouseDownEvent.stopPropagation) {
-        localMouseDownEvent.stopPropagation();
+      if (mouseDownEvent && mouseDownEvent.stopPropagation) {
+        mouseDownEvent.stopPropagation();
       } else {
-        localMouseDownEvent.cancelBubble = true;
+        mouseDownEvent.cancelBubble = true;
       }
       // 取消默认事件
-      if (localMouseDownEvent.preventDefault) {
-        localMouseDownEvent.preventDefault();
+      if (mouseDownEvent.preventDefault) {
+        mouseDownEvent.preventDefault();
       } else {
         window.event.returnValue = false;
       }
@@ -476,7 +472,7 @@ export default class Previewer {
       this.syncVirtualLayoutFromReal();
 
       const editorLeft = this.editor?.options?.editorDom?.getBoundingClientRect()?.left || 0;
-      const editorRight = localMouseDownEvent.clientX;
+      const editorRight = mouseDownEvent.clientX;
       const virtualLayout = this.calculateVirtualLayout(editorLeft, editorRight);
       this.setVirtualLayout(virtualLayout.startWidth, virtualLayout.leftWidth, virtualLayout.rightWidth);
       if (!this.options.virtualDragLineDom.classList.contains('cherry-drag--show')) {
@@ -714,23 +710,21 @@ export default class Previewer {
   }
 
   $dealWithMyersDiffResult(result, oldContent, newContent, domContainer) {
-    const localNewContent = newContent;
-    const localOldContent = oldContent;
     result.forEach((change) => {
-      if (localNewContent[change.newIndex].dom) {
-        localNewContent[change.newIndex].dom.innerHTML = this.lazyLoadImg.changeLoadedDataSrc2Src(
-          localNewContent[change.newIndex].dom.innerHTML,
+      if (newContent[change.newIndex].dom) {
+        newContent[change.newIndex].dom.innerHTML = this.lazyLoadImg.changeLoadedDataSrc2Src(
+          newContent[change.newIndex].dom.innerHTML,
         );
       }
       switch (change.type) {
         case 'delete':
-          domContainer.removeChild(localOldContent[change.oldIndex].dom);
+          domContainer.removeChild(oldContent[change.oldIndex].dom);
           break;
         case 'insert':
-          if (localOldContent[change.oldIndex]) {
-            domContainer.insertBefore(localNewContent[change.newIndex].dom, localOldContent[change.oldIndex].dom);
+          if (oldContent[change.oldIndex]) {
+            domContainer.insertBefore(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
           } else {
-            domContainer.appendChild(localNewContent[change.newIndex].dom);
+            domContainer.appendChild(newContent[change.newIndex].dom);
           }
           break;
         case 'update':
@@ -738,45 +732,45 @@ export default class Previewer {
             let hasUpdate = false;
             // 处理表格包含图表的特殊场景
             if (
-              localNewContent[change.newIndex].dom.className === 'cherry-table-wrapper' &&
-              localNewContent[change.newIndex].dom.querySelector('.cherry-table-figure .cherry-echarts-wrapper') &&
-              localOldContent[change.oldIndex].dom.querySelector('.cherry-table-figure .cherry-echarts-wrapper')
+              newContent[change.newIndex].dom.className === 'cherry-table-wrapper' &&
+              newContent[change.newIndex].dom.querySelector('.cherry-table-figure .cherry-echarts-wrapper') &&
+              oldContent[change.oldIndex].dom.querySelector('.cherry-table-figure .cherry-echarts-wrapper')
             ) {
-              const oldWrapper = localOldContent[change.oldIndex].dom.querySelector(
+              const oldWrapper = oldContent[change.oldIndex].dom.querySelector(
                 '.cherry-table-figure .cherry-echarts-wrapper',
               );
-              const newWrapper = localNewContent[change.newIndex].dom.querySelector(
+              const newWrapper = newContent[change.newIndex].dom.querySelector(
                 '.cherry-table-figure .cherry-echarts-wrapper',
               );
               oldWrapper.id = newWrapper.id;
               oldWrapper.dataset.tableData = newWrapper.dataset.tableData;
               oldWrapper.dataset.chartType = newWrapper.dataset.chartType;
               oldWrapper.dataset.chartOptions = newWrapper.dataset.chartOptions;
-              localOldContent[change.oldIndex].dom.dataset.sign = localNewContent[change.newIndex].dom.dataset.sign;
-              localOldContent[change.oldIndex].dom.dataset.lines = localNewContent[change.newIndex].dom.dataset.lines;
+              oldContent[change.oldIndex].dom.dataset.sign = newContent[change.newIndex].dom.dataset.sign;
+              oldContent[change.oldIndex].dom.dataset.lines = newContent[change.newIndex].dom.dataset.lines;
               this.$updateDom(
-                localNewContent[change.newIndex].dom.querySelector('.cherry-table'),
-                localOldContent[change.oldIndex].dom.querySelector('.cherry-table'),
+                newContent[change.newIndex].dom.querySelector('.cherry-table'),
+                oldContent[change.oldIndex].dom.querySelector('.cherry-table'),
               );
               hasUpdate = true;
             } else if (
               // 处理代码块渲染echarts的特殊场景
-              localNewContent[change.newIndex].dom.dataset.type === 'echarts' &&
-              localNewContent[change.newIndex].dom.querySelector('.cherry-echarts-codeblock-wrapper') &&
-              localOldContent[change.oldIndex].dom.querySelector('.cherry-echarts-codeblock-wrapper')
+              newContent[change.newIndex].dom.dataset.type === 'echarts' &&
+              newContent[change.newIndex].dom.querySelector('.cherry-echarts-codeblock-wrapper') &&
+              oldContent[change.oldIndex].dom.querySelector('.cherry-echarts-codeblock-wrapper')
             ) {
-              localOldContent[change.oldIndex].dom.dataset.sign = localNewContent[change.newIndex].dom.dataset.sign;
-              localOldContent[change.oldIndex].dom.dataset.lines = localNewContent[change.newIndex].dom.dataset.lines;
+              oldContent[change.oldIndex].dom.dataset.sign = newContent[change.newIndex].dom.dataset.sign;
+              oldContent[change.oldIndex].dom.dataset.lines = newContent[change.newIndex].dom.dataset.lines;
               hasUpdate = true;
-            } else if (localNewContent[change.newIndex].dom.querySelector('svg')) {
+            } else if (newContent[change.newIndex].dom.querySelector('svg')) {
               throw new Error(); // SVG暂不使用patch更新
             }
             if (!hasUpdate) {
-              this.$updateDom(localNewContent[change.newIndex].dom, localOldContent[change.oldIndex].dom);
+              this.$updateDom(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
             }
           } catch {
-            domContainer.insertBefore(localNewContent[change.newIndex].dom, localOldContent[change.oldIndex].dom);
-            domContainer.removeChild(localOldContent[change.oldIndex].dom);
+            domContainer.insertBefore(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
+            domContainer.removeChild(oldContent[change.oldIndex].dom);
           }
       }
     });

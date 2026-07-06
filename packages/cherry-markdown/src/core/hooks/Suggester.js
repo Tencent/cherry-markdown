@@ -139,16 +139,15 @@ export default class Suggester extends SyntaxBase {
     }
 
     suggester.forEach((configItem) => {
-      const localConfigItem = configItem;
-      if (!localConfigItem.suggestList) {
+      if (!configItem.suggestList) {
         console.warn('[cherry-suggester]: the suggestList of config is missing.');
         return;
       }
 
-      if (!localConfigItem.keyword) {
-        localConfigItem.keyword = '@';
+      if (!configItem.keyword) {
+        configItem.keyword = '@';
       }
-      this.suggester[localConfigItem.keyword] = configItem;
+      this.suggester[configItem.keyword] = configItem;
     });
 
     // 反复初始化时，缓存还在但 DOM 已更新的情况

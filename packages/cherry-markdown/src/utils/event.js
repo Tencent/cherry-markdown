@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 export function addEvent(elm, evType, fn, useCapture) {
-  const localElm = elm;
-  if (localElm.addEventListener) {
-    localElm.addEventListener(evType, fn, useCapture); // DOM2.0
+  if (elm.addEventListener) {
+    elm.addEventListener(evType, fn, useCapture); // DOM2.0
     return true;
   }
 
-  if (localElm.attachEvent) {
-    const r = localElm.attachEvent(`on${evType}`, fn); // IE5+
+  if (elm.attachEvent) {
+    const r = elm.attachEvent(`on${evType}`, fn); // IE5+
     return r;
   }
-  localElm[`on${evType}`] = fn; // DOM 0
+  elm[`on${evType}`] = fn; // DOM 0
 }
 
 export function removeEvent(elm, evType, fn, useCapture) {
-  const localElm = elm;
-  if (localElm.removeEventListener) {
-    localElm.removeEventListener(evType, fn, useCapture); // DOM2.0
-  } else if (localElm.detachEvent) {
-    const r = localElm.detachEvent(`on${evType}`, fn); // IE5+
+  if (elm.removeEventListener) {
+    elm.removeEventListener(evType, fn, useCapture); // DOM2.0
+  } else if (elm.detachEvent) {
+    const r = elm.detachEvent(`on${evType}`, fn); // IE5+
     return r;
   } else {
-    localElm[`on${evType}`] = null; // DOM 0
+    elm[`on${evType}`] = null; // DOM 0
   }
 }

@@ -40,11 +40,10 @@ export function makeChecklist(text) {
 
 // 缩进处理
 function handleIndent(str, node) {
-  const localNode = node;
   const indentRegex = /^(\t|[ ])/;
   let $str = str;
   while (indentRegex.test($str)) {
-    localNode.space += $str[0] === '\t' ? TAB_SPACE_NUM : 1;
+    node.space += $str[0] === '\t' ? TAB_SPACE_NUM : 1;
     $str = $str.replace(indentRegex, '');
   }
   return $str;
@@ -75,17 +74,16 @@ function getListStyle(m2) {
 
 // 标识符处理
 function handleMark(str, node) {
-  const localNode = node;
   const listRegex =
     /^((([*+-]|\d+[.]|en-[a-z]\.|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)([^\r]*?)($|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.]|en-[a-z]\.|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)))/;
   if (!listRegex.test(str)) {
-    localNode.type = 'blank';
+    node.type = 'blank';
     return str;
   }
   return str.replace(listRegex, (wholeMatch, m1, m2, m3, m4) => {
-    localNode.type = m2.search(/[*+-]/g) > -1 ? 'ul' : 'ol';
-    localNode.listStyle = getListStyle(m2);
-    localNode.start = Number(m2.replace('.', '')) ? Number(m2.replace('.', '')) : 1;
+    node.type = m2.search(/[*+-]/g) > -1 ? 'ul' : 'ol';
+    node.listStyle = getListStyle(m2);
+    node.start = Number(m2.replace('.', '')) ? Number(m2.replace('.', '')) : 1;
     return m4;
   });
 }
@@ -173,7 +171,6 @@ export default class List extends ParagraphBase {
   }
 
   renderSubTree(node, children, type) {
-    const localNode = node;
     let lines = 0;
     const attr = {};
     const content = children.reduce((html, item) => {
@@ -184,7 +181,7 @@ export default class List extends ParagraphBase {
       const str = `<p>${child.strs.join('<br>')}</p>`;
       child.lines += this.getLineCount(child.strs.join('\n'));
       const children = child.children.length ? this.renderTree(item) : '';
-      localNode.lines += child.lines;
+      node.lines += child.lines;
       lines += child.lines;
       // checklist 样式适配
       const checklistRegex = /<span class="ch-icon ch-icon-(square|check)"><\/span>/;
@@ -193,9 +190,9 @@ export default class List extends ParagraphBase {
       }
       return `${html}<li${attrsToAttributeString(itemAttr)}>${str}${children}</li>`;
     }, '');
-    if (localNode.parent === undefined) {
+    if (node.parent === undefined) {
       // 根节点增加属性
-      attr['data-lines'] = localNode.index === 0 ? lines + this.emptyLines : lines;
+      attr['data-lines'] = node.index === 0 ? lines + this.emptyLines : lines;
       attr['data-sign'] = this.sign;
     }
     if (children[0] && type === 'ol') {
