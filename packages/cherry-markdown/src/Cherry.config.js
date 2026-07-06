@@ -833,7 +833,7 @@ const defaultConfig = {
     afterInit: callbacks.afterInit,
     focus: ({ e: e, cherry: cherry }) => {},
     blur: ({ e: e, cherry: cherry }) => {},
-    selectionChange: ({ selections: _selections, lastSelections: _lastSelections, info: _info }) => {},
+    selectionChange: ({ selections: selections, lastSelections: lastSelections, info: info }) => {},
     afterChangeLocale: (locale) => {},
     changeMainTheme: (theme) => {},
     changeCodeBlockTheme: (theme) => {},

@@ -1203,7 +1203,7 @@ export default class PreviewerBubble {
       targetIndex: this.mermaidSession.previewIndex,
       ...handlerOptions,
     });
-    imgSizeHandler.bindChange((_htmlElement, style) => this.mermaidSession.changeSize(style));
+    imgSizeHandler.bindChange((htmlElement, style) => this.mermaidSession.changeSize(style));
     this.mermaidSession.bindPositionFollow();
 
     // 添加对齐工具面板（仅对齐按钮，不含装饰按钮）
@@ -1218,7 +1218,7 @@ export default class PreviewerBubble {
       this.previewer.$cherry.getLocales(),
       { isMermaid: true, targetIndex: this.mermaidSession.previewIndex, ...handlerOptions },
     );
-    imgToolHandler.bindChange((_htmlElement, type) => this.mermaidSession.changeAlign(type));
+    imgToolHandler.bindChange((htmlElement, type) => this.mermaidSession.changeAlign(type));
 
     const updateHandler = imgSizeHandler.updatePosition.bind(imgSizeHandler);
     this.$cherry.$event.on('editor.size.change', updateHandler);

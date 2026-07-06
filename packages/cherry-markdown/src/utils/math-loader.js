@@ -105,7 +105,7 @@ function setupMathJax(engine, syntax) {
               : mathJaxInstance.tex2svg(content, { em: 12, ex: 6, display: false }),
             true,
           );
-        } catch {
+        } catch (e) {
           return '';
         }
       };

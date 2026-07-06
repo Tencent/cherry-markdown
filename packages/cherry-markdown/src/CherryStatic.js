@@ -78,7 +78,7 @@ export class CherryStatic {
     PluginClass.$cherry$mounted = true;
   }
 
-  constructor(..._args) {
+  constructor(...args) {
     // 基类仅挂载静态 API，禁止直接实例化
     if (new.target === CherryStatic) {
       throw new Error('CherryStatic cannot be instantiated directly.');

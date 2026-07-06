@@ -32,7 +32,7 @@ export default class FrontMatter extends ParagraphBase {
       try {
         // 优先按 JSON 格式解析
         frontmatter = JSON.parse(content.trim());
-      } catch {
+      } catch (error) {
         // 按 k:v[\nk:v]* 格式解析
         const lines = content.trim().split('\n');
         frontmatter = {};

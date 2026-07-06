@@ -39,7 +39,7 @@ function createMockView(initialDoc: string) {
     doc: makeDoc(doc),
     selection: { main: { anchor: 0, head: 0 } },
     changes: vi.fn((_otherState: any) => ({
-      mapPos: (pos: number, _assoc?: number) => pos,
+      mapPos: (pos: number) => pos,
     })),
   };
 
@@ -185,12 +185,12 @@ function createMockToolHandler() {
       this.img?.addEventListener?.(
         'transitionend',
         () => {
-          this._updateToolbarPosition();
+          this.updateToolbarPosition();
         },
         { once: true },
       );
     },
-    _updateToolbarPosition() {
+    updateToolbarPosition() {
       if (!this.img || !this.container || !this.previewerDom) return;
       const imgPosition = this.getImgPosition();
       const toolbarWidth = this.container.offsetWidth;
@@ -680,7 +680,7 @@ describe('imgSizeHandler previewUpdate', () => {
   it('transitionend 触发时应调用 updatePosition', () => {
     let transitionendHandler: (() => void) | null = null;
     handler.img = {
-      addEventListener: (_event: string, fn: () => void, _opts: any) => {
+      addEventListener: (event: string, fn: () => void, _opts: any) => {
         transitionendHandler = fn;
       },
     };
@@ -752,7 +752,7 @@ describe('imgToolHandler previewUpdate', () => {
   it('transitionend 触发时应更新工具栏位置', () => {
     let transitionendHandler: (() => void) | null = null;
     handler.img = {
-      addEventListener: (_event: string, fn: () => void, _opts: any) => {
+      addEventListener: (event: string, fn: () => void, _opts: any) => {
         transitionendHandler = fn;
       },
     };
@@ -779,7 +779,7 @@ describe('imgToolHandler previewUpdate', () => {
     handler.$isResizing.mockReturnValue(false);
 
     let transitionendHandler: (() => void) | null = null;
-    handler.img.addEventListener = (_event: string, fn: () => void, _opts: any) => {
+    handler.img.addEventListener = (event: string, fn: () => void, _opts: any) => {
       transitionendHandler = fn;
     };
 
@@ -792,7 +792,7 @@ describe('imgToolHandler previewUpdate', () => {
   it('图片小时工具栏应放在图片下方', () => {
     let transitionendHandler: (() => void) | null = null;
     handler.img = {
-      addEventListener: (_event: string, fn: () => void, _opts: any) => {
+      addEventListener: (event: string, fn: () => void, _opts: any) => {
         transitionendHandler = fn;
       },
     };
@@ -818,7 +818,7 @@ describe('imgToolHandler previewUpdate', () => {
   it('图片足够大时工具栏应在图片内部底部', () => {
     let transitionendHandler: (() => void) | null = null;
     handler.img = {
-      addEventListener: (_event: string, fn: () => void, _opts: any) => {
+      addEventListener: (event: string, fn: () => void, _opts: any) => {
         transitionendHandler = fn;
       },
     };

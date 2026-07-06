@@ -278,7 +278,7 @@ export default class FormulaHandler {
     try {
       // 源码写入 DOM 时做过 URL 编码，这里取出后恢复原文。
       return decodeURIComponent(encodedFormulaSource);
-    } catch {
+    } catch (err) {
       return encodedFormulaSource;
     }
   }

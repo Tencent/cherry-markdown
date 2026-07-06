@@ -97,16 +97,17 @@ export default class MenuBase {
     /** @type {SubMenuConfigItem[]} */
     this.subMenuConfig = []; // 子菜单配置
     this.noIcon = false; // 是否不显示图标
-    /** @type {false | any} 是否保存一次点击事件生成的内容 */
-    this.cacheOnce = false;
+    this.cacheOnce = false; // 是否保存一次点击事件生成的内容
     /**
      * 子菜单的定位方式
      * @property
      * @type {'absolute' | 'fixed' | 'sidebar'}
      */
     this.positionModel = 'absolute';
+
     if (typeof this._onClick === 'function') {
       Logger.warn('`MenuBase._onClick` is deprecated. Override `fire` instead');
+
       this.fire = this._onClick;
     }
     /**
@@ -149,9 +150,6 @@ export default class MenuBase {
     this.cacheOnce = info;
   }
 
-  /**
-   * @returns {any}
-   */
   getAndCleanCacheOnce() {
     this.updateMarkdown = true;
     const ret = this.cacheOnce;

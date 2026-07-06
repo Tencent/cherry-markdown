@@ -763,7 +763,7 @@ const htmlParser = {
               }
             }
           });
-        } catch {
+        } catch (error) {
           // console.log('error', error)
         }
       }
