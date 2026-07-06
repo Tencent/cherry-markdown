@@ -105,11 +105,10 @@ export default class EChartsCodeBlockEngine {
           // 记录当前 sign，用于下次判断内容是否变化
           this.srcCache.set(sign, 1);
         } catch (error) {
-          const chartContainer = container;
           if ($engine.$cherry.options.engine.global.flowSessionContext) {
-            chartContainer.innerHTML = `drawing...`;
+            container.innerHTML = `drawing...`;
           } else {
-            chartContainer.innerHTML = `<div style="color: red;">Render Error: ${error.message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+            container.innerHTML = `<div style="color: red;">Render Error: ${error.message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
           }
         }
       });

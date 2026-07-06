@@ -947,8 +947,7 @@ export default class TableHandler {
         if (!activeCol && !activeRow) {
           colSymbol.style.display = 'none';
           rowSymbols.forEach((rowSymbol) => {
-            const symbolEl = rowSymbol;
-            symbolEl.style.display = 'none';
+            rowSymbol.style.display = 'none';
           });
           vLine.style.display = 'none';
           hLine.style.display = 'none';
@@ -1028,8 +1027,7 @@ export default class TableHandler {
       if (!isAnySymbolSafe) {
         colSymbol.style.display = 'none';
         rowSymbols.forEach((rowSymbol) => {
-          const symbolEl = rowSymbol;
-          symbolEl.style.display = 'none';
+          rowSymbol.style.display = 'none';
         });
         vLine.style.display = 'none';
         hLine.style.display = 'none';

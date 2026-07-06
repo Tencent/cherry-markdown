@@ -646,20 +646,20 @@ export default class EChartsTableEngine {
     const chartOptionsStr = container.getAttribute('data-chart-options');
     const chartId = container.getAttribute('id');
     let tableData = null;
-    let chartOptions = {};
+    let options = {};
     try {
       tableData = tableDataStr ? JSON.parse(tableDataStr) : null;
     } catch {
       tableData = null;
     }
     try {
-      chartOptions = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
+      options = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
     } catch {
-      chartOptions = { chartId };
+      options = { chartId };
     }
     if (!type || !tableData) return {};
-    chartOptions.chartId = chartId;
-    return this.$generateChartOptions(type, tableData, chartOptions);
+    options.chartId = chartId;
+    return this.$generateChartOptions(type, tableData, options);
   }
 
   /**
@@ -734,14 +734,14 @@ export default class EChartsTableEngine {
 
     // 生成唯一ID和简化的配置数据
     const chartId = `chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const chartOptions = options;
+
     // 序列化数据用于存储
     const tableDataStr = JSON.stringify(tableObject);
-    const chartOptionsStr = JSON.stringify(chartOptions);
+    const chartOptionsStr = JSON.stringify(options);
 
-    chartOptions.chartId = chartId;
+    options.chartId = chartId;
     this.$buildEchartsThemeFromCss();
-    const chartOption = this.$generateChartOptions(type, tableObject, chartOptions);
+    const chartOption = this.$generateChartOptions(type, tableObject, options);
     // Logger.log('Chart options:', chartOption);
 
     // HTML样式配置
@@ -1751,11 +1751,11 @@ const MapChartOptionsHandler = {
     if (tableDataStr && engine.echartsRef) {
       try {
         const tableData = JSON.parse(tableDataStr);
-        const chartOptions = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
-        chartOptions.engine = engine;
-        deepMerge(chartOptions, { mapDataSource: url });
+        const options = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
+        options.engine = engine;
+        deepMerge(options, { mapDataSource: url });
 
-        const chartOption = generateOptions(MapChartCompleteOptionsHandler, tableData, chartOptions);
+        const chartOption = generateOptions(MapChartCompleteOptionsHandler, tableData, options);
         const existingChart = engine.echartsRef.getInstanceByDom(container);
 
         if (existingChart) {

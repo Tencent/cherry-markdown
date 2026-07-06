@@ -80,13 +80,12 @@ export function exportPDF(previewDom, fileName) {
   document.title = fileName;
 
   getReadyToExport(previewDom, (/** @type {HTMLElement}*/ cherryPreviewer, /** @type {function}*/ thenFinish) => {
-    const previewEl = cherryPreviewer;
     // 开启导出专用样式开关，仅在导出流程中生效，避免常规打印误隐藏整页
     const htmlEl = document.documentElement;
     const hadExportOnly = htmlEl.classList.contains('cherry-export-only');
     if (!hadExportOnly) htmlEl.classList.add('cherry-export-only');
     // 强制展开所有代码块
-    previewEl.innerHTML = previewEl.innerHTML.replace(
+    cherryPreviewer.innerHTML = cherryPreviewer.innerHTML.replace(
       /class="cherry-code-unExpand("| )/g,
       'class="cherry-code-expand$1',
     );
@@ -108,20 +107,19 @@ export function exportPDF(previewDom, fileName) {
  */
 export function exportScreenShot(previewDom, fileName) {
   getReadyToExport(previewDom, (/** @type {HTMLElement}*/ cherryPreviewer, /** @type {function}*/ thenFinish) => {
-    const previewEl = cherryPreviewer;
     window.scrollTo(0, 0);
     // 去掉audio和video标签
-    previewEl.innerHTML = previewEl.innerHTML.replace(/<audio [^>]+?>([^\n]*?)<\/audio>/g, '$1');
-    previewEl.innerHTML = previewEl.innerHTML.replace(/<video [^>]+?>([^\n]*?)<\/video>/g, '$1');
+    cherryPreviewer.innerHTML = cherryPreviewer.innerHTML.replace(/<audio [^>]+?>([^\n]*?)<\/audio>/g, '$1');
+    cherryPreviewer.innerHTML = cherryPreviewer.innerHTML.replace(/<video [^>]+?>([^\n]*?)<\/video>/g, '$1');
     // 强制展开所有代码块
-    previewEl.innerHTML = previewEl.innerHTML.replace(
+    cherryPreviewer.innerHTML = cherryPreviewer.innerHTML.replace(
       /class="cherry-code-unExpand("| )/g,
       'class="cherry-code-expand$1',
     );
-    html2canvas(previewEl, {
+    html2canvas(cherryPreviewer, {
       allowTaint: true,
-      height: previewEl.clientHeight,
-      width: previewEl.clientWidth,
+      height: cherryPreviewer.clientHeight,
+      width: cherryPreviewer.clientWidth,
       scrollY: 0,
       scrollX: 0,
       logging: false,

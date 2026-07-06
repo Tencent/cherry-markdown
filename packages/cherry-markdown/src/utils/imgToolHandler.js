@@ -111,9 +111,8 @@ const imgToolHandler = {
         align.active = !align.active;
         alignList.forEach((alignItem) => {
           if (alignItem !== align) {
-            const otherAlign = alignItem;
-            otherAlign.active = false;
-            otherAlign.div.className = 'img-tool-button';
+            alignItem.active = false;
+            alignItem.div.className = 'img-tool-button';
           }
         });
         div.className = getImgToolButtonClassName(align);
