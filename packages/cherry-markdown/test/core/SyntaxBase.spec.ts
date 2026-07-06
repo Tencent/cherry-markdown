@@ -7,7 +7,7 @@ import { assignHookClassProps } from '../helpers/hookClass';
 /** 定义测试用的 SyntaxBase 子类 */
 const defineTestSyntaxClass = (hookName = 'testHook', hookType = HOOKS_TYPE_LIST.SEN) => {
   class TestSyntax extends SyntaxBase {
-    rule(_editorConfig: any) {
+    rule() {
       return {
         begin: '^',
         end: '$',

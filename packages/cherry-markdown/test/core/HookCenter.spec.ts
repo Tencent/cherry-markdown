@@ -34,7 +34,7 @@ const createEditorConfig = (overrides = {}) => ({
 /** 创建 mock SyntaxBase hook 类 */
 const createMockHookClass = (hookName: string) => {
   class MockHook extends SyntaxBase {
-    rule(_editorConfig?: object) {
+    rule() {
       return { begin: '', end: '', content: '', reg: new RegExp('') };
     }
   }
@@ -48,7 +48,7 @@ const createMockHookInstance = (hookName: string, overrides: object = {}) =>
 /** 创建 mock ParagraphBase hook 类 */
 const createMockParagraphHook = (hookName: string) => {
   class MockHook extends ParagraphBase {
-    rule(_editorConfig?: object) {
+    rule() {
       return { begin: '', end: '', content: '', reg: new RegExp('') };
     }
   }

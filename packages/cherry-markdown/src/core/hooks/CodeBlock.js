@@ -443,7 +443,7 @@ export default class CodeBlock extends ParagraphBase {
         if (leadingContentBlockQuote) {
           const regex = new RegExp(`^\n*`, '');
           const leadingNewline = result.match(regex)[0];
-          return leadingNewline + leadingContentBlockQuote + result.replace(regex, (_unused) => '');
+          return leadingNewline + leadingContentBlockQuote + result.replace(regex, (_) => '');
         }
         return result;
       }
