@@ -16,16 +16,15 @@ export default class Cherry extends CherryStatic {
      * @param {CherryOptions} options
      */
     constructor(options: CherryOptions);
-    defaultToolbar: any;
+    defaultToolbar: false | (string | number | {
+        [x: string]: (string | number)[];
+        [x: number]: (string | number)[];
+    })[];
     /**
      * @property
      * @type {CherryOptions}
      */
     options: CherryOptions;
-    /** @type {import('./utils/cm-search-replace').default} SearchBox 实例 */
-    searchBoxInstance: import("./utils/cm-search-replace").default;
-    /** @type {boolean} 是否初始化SearchBox */
-    searchBoxInit: boolean;
     storageFloatPreviewerWrapData: {
         x: number;
         y: number;
@@ -194,14 +193,17 @@ export default class Cherry extends CherryStatic {
             enableShortcut: string;
             recoverShortcut: string;
             search: string;
+            searchOnly: string;
             autoWrap: string;
             footnoteTitle: string;
             searchFor: string;
+            searchClear: string;
             replaceWith: string;
             previousMatch: string;
             nextMatch: string;
             replace: string;
             replaceAll: string;
+            selectAllMatches: string;
             regExpSearch: string;
             caseSensitiveSearch: string;
             wholeWordSearch: string;
@@ -395,14 +397,17 @@ export default class Cherry extends CherryStatic {
             enableShortcut: string;
             recoverShortcut: string;
             search: string;
+            searchOnly: string;
             autoWrap: string;
             footnoteTitle: string;
             searchFor: string;
+            searchClear: string;
             replaceWith: string;
             previousMatch: string;
             nextMatch: string;
             replace: string;
             replaceAll: string;
+            selectAllMatches: string;
             regExpSearch: string;
             caseSensitiveSearch: string;
             wholeWordSearch: string;
@@ -596,14 +601,17 @@ export default class Cherry extends CherryStatic {
             enableShortcut: string;
             recoverShortcut: string;
             search: string;
+            searchOnly: string;
             autoWrap: string;
             footnoteTitle: string;
             searchFor: string;
+            searchClear: string;
             replaceWith: string;
             previousMatch: string;
             nextMatch: string;
             replace: string;
             replaceAll: string;
+            selectAllMatches: string;
             regExpSearch: string;
             caseSensitiveSearch: string;
             wholeWordSearch: string;
@@ -875,13 +883,13 @@ export default class Cherry extends CherryStatic {
     private initText;
     /**
      * @private
-     * @param {Event} _evt
+     * @param {Event} evt
      * @param {import('@codemirror/view').EditorView} editorView
      */
     /**
      * 编辑器内容变更时触发,更新预览区内容
      * @private
-     * @param {Event} _evt - 编辑事件对象(未使用)
+     * @param {Event} evt - 编辑事件对象(未使用)
      * @param {import('@codemirror/view').EditorView | Object} editorView - 编辑器实例
      */
     private editText;

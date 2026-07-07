@@ -17,7 +17,7 @@ declare class CherryEngine extends CherryStatic {
      * @readonly
      */
     static readonly config: {
-        defaults: any;
+        defaults: Partial<Partial<import("../../types/cherry").CherryOptionsBase<import("../../types/cherry").CherryCustomOptions>>>;
     };
     /**
      * @param {any} options

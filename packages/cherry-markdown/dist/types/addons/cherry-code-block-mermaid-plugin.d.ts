@@ -103,6 +103,9 @@ export default class MermaidCodeEngine {
      * @param {string} html
      */
     $setCachedRenderHtml(src: string, $engine: import("../Engine").default, html: string): void;
+    hasExplicitMermaid: boolean;
+    mermaidScriptLoading: boolean;
+    mermaidScriptLoaded: boolean;
     isAsyncRenderVersion(): boolean;
     mountMermaidCanvas($engine: any): void;
     /**
@@ -120,6 +123,14 @@ export default class MermaidCodeEngine {
      * @returns {boolean} 是否成功获取
      */
     tryResolveMermaidAPIRefs(): boolean;
+    /**
+     * 当用户没有显式传入 mermaid 实例，且在 engine.syntax.codeBlock.mermaid.src 中配置了脚本地址时，
+     * 通过 utils/dom.js 中的 loadScript 动态加载 mermaid 脚本。
+     * 加载完成后 tryResolveMermaidAPIRefs 会在异步渲染的重试逻辑中自动获取到 window.mermaid。
+     * @param {Object} [props] render 传入的 props，其中 mermaidConfig 对应 engine.syntax.codeBlock.mermaid
+     * @returns {boolean} 是否已发起（或已完成）脚本加载
+     */
+    ensureMermaidLoaded(props?: any): boolean;
     asyncRender(graphId: any, src: any, sign: any, $engine: any, props: any, retryCount?: number): any;
     render(src: any, sign: any, $engine: any, props?: {}): any;
     svg2img: any;

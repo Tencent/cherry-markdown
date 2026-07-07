@@ -157,14 +157,17 @@ declare const _default: {
     enableShortcut: string;
     recoverShortcut: string;
     search: string;
+    searchOnly: string;
     autoWrap: string;
     footnoteTitle: string;
     searchFor: string;
+    searchClear: string;
     replaceWith: string;
     previousMatch: string;
     nextMatch: string;
     replace: string;
     replaceAll: string;
+    selectAllMatches: string;
     regExpSearch: string;
     caseSensitiveSearch: string;
     wholeWordSearch: string;

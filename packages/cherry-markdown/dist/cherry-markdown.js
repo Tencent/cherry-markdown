@@ -380,11 +380,11 @@
 	}
 
 	var isObject$3;
-	var hasRequiredIsObject$3;
+	var hasRequiredIsObject$2;
 
-	function requireIsObject$3 () {
-		if (hasRequiredIsObject$3) return isObject$3;
-		hasRequiredIsObject$3 = 1;
+	function requireIsObject$2 () {
+		if (hasRequiredIsObject$2) return isObject$3;
+		hasRequiredIsObject$2 = 1;
 		'use strict';
 		var isCallable = /*@__PURE__*/ requireIsCallable();
 
@@ -538,11 +538,11 @@
 	}
 
 	var isSymbol$1;
-	var hasRequiredIsSymbol$2;
+	var hasRequiredIsSymbol$1;
 
-	function requireIsSymbol$2 () {
-		if (hasRequiredIsSymbol$2) return isSymbol$1;
-		hasRequiredIsSymbol$2 = 1;
+	function requireIsSymbol$1 () {
+		if (hasRequiredIsSymbol$1) return isSymbol$1;
+		hasRequiredIsSymbol$1 = 1;
 		'use strict';
 		var getBuiltIn = /*@__PURE__*/ requireGetBuiltIn();
 		var isCallable = /*@__PURE__*/ requireIsCallable();
@@ -627,7 +627,7 @@
 		'use strict';
 		var call = /*@__PURE__*/ requireFunctionCall();
 		var isCallable = /*@__PURE__*/ requireIsCallable();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 
 		var $TypeError = TypeError;
 
@@ -813,8 +813,8 @@
 		hasRequiredToPrimitive$5 = 1;
 		'use strict';
 		var call = /*@__PURE__*/ requireFunctionCall();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
-		var isSymbol = /*@__PURE__*/ requireIsSymbol$2();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
+		var isSymbol = /*@__PURE__*/ requireIsSymbol$1();
 		var getMethod = /*@__PURE__*/ requireGetMethod();
 		var ordinaryToPrimitive = /*@__PURE__*/ requireOrdinaryToPrimitive();
 		var wellKnownSymbol = /*@__PURE__*/ requireWellKnownSymbol();
@@ -848,7 +848,7 @@
 		hasRequiredToPropertyKey = 1;
 		'use strict';
 		var toPrimitive = /*@__PURE__*/ requireToPrimitive$5();
-		var isSymbol = /*@__PURE__*/ requireIsSymbol$2();
+		var isSymbol = /*@__PURE__*/ requireIsSymbol$1();
 
 		// `ToPropertyKey` abstract operation
 		// https://tc39.es/ecma262/#sec-topropertykey
@@ -867,7 +867,7 @@
 		hasRequiredDocumentCreateElement = 1;
 		'use strict';
 		var globalThis = /*@__PURE__*/ requireGlobalThis();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 
 		var document = globalThis.document;
 		// typeof document.createElement is 'object' in old IE
@@ -1017,7 +1017,7 @@
 		if (hasRequiredAnObject) return anObject;
 		hasRequiredAnObject = 1;
 		'use strict';
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 
 		var $String = String;
 		var $TypeError = TypeError;
@@ -1237,7 +1237,7 @@
 		'use strict';
 		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThis();
 		var aCallable = /*@__PURE__*/ requireACallable();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 		var hasOwn = /*@__PURE__*/ requireHasOwnProperty();
 		var arraySlice = /*@__PURE__*/ requireArraySlice();
 		var NATIVE_BIND = /*@__PURE__*/ requireFunctionBindNative();
@@ -1824,7 +1824,7 @@
 		var bind = /*@__PURE__*/ requireFunctionBind();
 		var aConstructor = /*@__PURE__*/ requireAConstructor();
 		var anObject = /*@__PURE__*/ requireAnObject();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 		var create = /*@__PURE__*/ requireObjectCreate();
 		var fails = /*@__PURE__*/ requireFails();
 
@@ -1922,11 +1922,11 @@
 	var es_symbol_constructor = {};
 
 	var toString$4;
-	var hasRequiredToString$2;
+	var hasRequiredToString$1;
 
-	function requireToString$2 () {
-		if (hasRequiredToString$2) return toString$4;
-		hasRequiredToString$2 = 1;
+	function requireToString$1 () {
+		if (hasRequiredToString$1) return toString$4;
+		hasRequiredToString$1 = 1;
 		'use strict';
 		var classof = /*@__PURE__*/ requireClassof();
 
@@ -2178,7 +2178,7 @@
 		'use strict';
 		var NATIVE_WEAK_MAP = /*@__PURE__*/ requireWeakMapBasicDetection();
 		var globalThis = /*@__PURE__*/ requireGlobalThis();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 		var createNonEnumerableProperty = /*@__PURE__*/ requireCreateNonEnumerableProperty();
 		var hasOwn = /*@__PURE__*/ requireHasOwnProperty();
 		var shared = /*@__PURE__*/ requireSharedStore();
@@ -2250,11 +2250,11 @@
 	}
 
 	var isArray$7;
-	var hasRequiredIsArray$8;
+	var hasRequiredIsArray$7;
 
-	function requireIsArray$8 () {
-		if (hasRequiredIsArray$8) return isArray$7;
-		hasRequiredIsArray$8 = 1;
+	function requireIsArray$7 () {
+		if (hasRequiredIsArray$7) return isArray$7;
+		hasRequiredIsArray$7 = 1;
 		'use strict';
 		var classof = /*@__PURE__*/ requireClassofRaw();
 
@@ -2274,9 +2274,9 @@
 		if (hasRequiredArraySpeciesConstructor) return arraySpeciesConstructor;
 		hasRequiredArraySpeciesConstructor = 1;
 		'use strict';
-		var isArray = /*@__PURE__*/ requireIsArray$8();
+		var isArray = /*@__PURE__*/ requireIsArray$7();
 		var isConstructor = /*@__PURE__*/ requireIsConstructor();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 		var wellKnownSymbol = /*@__PURE__*/ requireWellKnownSymbol();
 
 		var SPECIES = wellKnownSymbol('species');
@@ -2434,7 +2434,7 @@
 		var anObject = /*@__PURE__*/ requireAnObject();
 		var toIndexedObject = /*@__PURE__*/ requireToIndexedObject();
 		var toPropertyKey = /*@__PURE__*/ requireToPropertyKey();
-		var $toString = /*@__PURE__*/ requireToString$2();
+		var $toString = /*@__PURE__*/ requireToString$1();
 		var createPropertyDescriptor = /*@__PURE__*/ requireCreatePropertyDescriptor();
 		var nativeObjectCreate = /*@__PURE__*/ requireObjectCreate();
 		var objectKeys = /*@__PURE__*/ requireObjectKeys();
@@ -2712,7 +2712,7 @@
 		var $ = /*@__PURE__*/ require_export();
 		var getBuiltIn = /*@__PURE__*/ requireGetBuiltIn();
 		var hasOwn = /*@__PURE__*/ requireHasOwnProperty();
-		var toString = /*@__PURE__*/ requireToString$2();
+		var toString = /*@__PURE__*/ requireToString$1();
 		var shared = /*@__PURE__*/ requireShared();
 		var NATIVE_SYMBOL_REGISTRY = /*@__PURE__*/ requireSymbolRegistryDetection();
 
@@ -2744,7 +2744,7 @@
 		'use strict';
 		var $ = /*@__PURE__*/ require_export();
 		var hasOwn = /*@__PURE__*/ requireHasOwnProperty();
-		var isSymbol = /*@__PURE__*/ requireIsSymbol$2();
+		var isSymbol = /*@__PURE__*/ requireIsSymbol$1();
 		var tryToString = /*@__PURE__*/ requireTryToString();
 		var shared = /*@__PURE__*/ requireShared();
 		var NATIVE_SYMBOL_REGISTRY = /*@__PURE__*/ requireSymbolRegistryDetection();
@@ -2771,7 +2771,7 @@
 		if (hasRequiredIsRawJson) return isRawJson;
 		hasRequiredIsRawJson = 1;
 		'use strict';
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 		var getInternalState = /*@__PURE__*/ requireInternalState().get;
 
 		isRawJson = function isRawJSON(O) {
@@ -2879,12 +2879,12 @@
 		var call = /*@__PURE__*/ requireFunctionCall();
 		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThis();
 		var fails = /*@__PURE__*/ requireFails();
-		var isArray = /*@__PURE__*/ requireIsArray$8();
+		var isArray = /*@__PURE__*/ requireIsArray$7();
 		var isCallable = /*@__PURE__*/ requireIsCallable();
 		var isRawJSON = /*@__PURE__*/ requireIsRawJson();
-		var isSymbol = /*@__PURE__*/ requireIsSymbol$2();
+		var isSymbol = /*@__PURE__*/ requireIsSymbol$1();
 		var classof = /*@__PURE__*/ requireClassofRaw();
-		var toString = /*@__PURE__*/ requireToString$2();
+		var toString = /*@__PURE__*/ requireToString$1();
 		var arraySlice = /*@__PURE__*/ requireArraySlice();
 		var parseJSONString = /*@__PURE__*/ requireParseJsonString();
 		var uid = /*@__PURE__*/ requireUid();
@@ -3613,7 +3613,7 @@
 		hasRequiredArraySetLength = 1;
 		'use strict';
 		var DESCRIPTORS = /*@__PURE__*/ requireDescriptors();
-		var isArray = /*@__PURE__*/ requireIsArray$8();
+		var isArray = /*@__PURE__*/ requireIsArray$7();
 
 		var $TypeError = TypeError;
 		// eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
@@ -3649,8 +3649,8 @@
 		'use strict';
 		var $ = /*@__PURE__*/ require_export();
 		var fails = /*@__PURE__*/ requireFails();
-		var isArray = /*@__PURE__*/ requireIsArray$8();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isArray = /*@__PURE__*/ requireIsArray$7();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 		var toObject = /*@__PURE__*/ requireToObject();
 		var lengthOfArrayLike = /*@__PURE__*/ requireLengthOfArrayLike();
 		var doesNotExceedSafeInteger = /*@__PURE__*/ requireDoesNotExceedSafeInteger();
@@ -4164,7 +4164,7 @@
 		'use strict';
 		var fails = /*@__PURE__*/ requireFails();
 		var isCallable = /*@__PURE__*/ requireIsCallable();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 		var create = /*@__PURE__*/ requireObjectCreate();
 		var getPrototypeOf = /*@__PURE__*/ requireObjectGetPrototypeOf();
 		var defineBuiltIn = /*@__PURE__*/ requireDefineBuiltIn();
@@ -4264,7 +4264,7 @@
 		if (hasRequiredIsPossiblePrototype) return isPossiblePrototype;
 		hasRequiredIsPossiblePrototype = 1;
 		'use strict';
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 
 		isPossiblePrototype = function (argument) {
 		  return isObject(argument) || argument === null;
@@ -4300,7 +4300,7 @@
 		'use strict';
 		/* eslint-disable no-proto -- safe */
 		var uncurryThisAccessor = /*@__PURE__*/ requireFunctionUncurryThisAccessor();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 		var requireObjectCoercible = /*@__PURE__*/ requireRequireObjectCoercible();
 		var aPossiblePrototype = /*@__PURE__*/ requireAPossiblePrototype();
 
@@ -4745,7 +4745,7 @@
 		var shared = /*@__PURE__*/ requireShared();
 		var getBuiltIn = /*@__PURE__*/ requireGetBuiltIn();
 		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThis();
-		var isSymbol = /*@__PURE__*/ requireIsSymbol$2();
+		var isSymbol = /*@__PURE__*/ requireIsSymbol$1();
 		var wellKnownSymbol = /*@__PURE__*/ requireWellKnownSymbol();
 
 		var Symbol = getBuiltIn('Symbol');
@@ -4969,7 +4969,7 @@
 	}
 
 	var symbolExports$1 = /*@__PURE__*/ requireSymbol$1();
-	var _Symbol$5 = /*@__PURE__*/getDefaultExportFromCjs$1(symbolExports$1);
+	var _Symbol$4 = /*@__PURE__*/getDefaultExportFromCjs$1(symbolExports$1);
 
 	var es_string_iterator = {};
 
@@ -4982,7 +4982,7 @@
 		'use strict';
 		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThis();
 		var toIntegerOrInfinity = /*@__PURE__*/ requireToIntegerOrInfinity();
-		var toString = /*@__PURE__*/ requireToString$2();
+		var toString = /*@__PURE__*/ requireToString$1();
 		var requireObjectCoercible = /*@__PURE__*/ requireRequireObjectCoercible();
 
 		var charAt = uncurryThis(''.charAt);
@@ -5026,7 +5026,7 @@
 		hasRequiredEs_string_iterator = 1;
 		'use strict';
 		var charAt = /*@__PURE__*/ requireStringMultibyte().charAt;
-		var toString = /*@__PURE__*/ requireToString$2();
+		var toString = /*@__PURE__*/ requireToString$1();
 		var InternalStateModule = /*@__PURE__*/ requireInternalState();
 		var defineIterator = /*@__PURE__*/ requireIteratorDefine();
 		var createIterResultObject = /*@__PURE__*/ requireCreateIterResultObject();
@@ -5132,10 +5132,10 @@
 	function _typeof$2(o) {
 	  "@babel/helpers - typeof";
 
-	  return _typeof$2 = "function" == typeof _Symbol$5 && "symbol" == typeof _Symbol$iterator$1 ? function (o) {
+	  return _typeof$2 = "function" == typeof _Symbol$4 && "symbol" == typeof _Symbol$iterator$1 ? function (o) {
 	    return typeof o;
 	  } : function (o) {
-	    return o && "function" == typeof _Symbol$5 && o.constructor === _Symbol$5 && o !== _Symbol$5.prototype ? "symbol" : typeof o;
+	    return o && "function" == typeof _Symbol$4 && o.constructor === _Symbol$4 && o !== _Symbol$4.prototype ? "symbol" : typeof o;
 	  }, _typeof$2(o);
 	}
 
@@ -5662,7 +5662,7 @@
 	  }), e && _setPrototypeOf(t, e);
 	}
 
-	function _defineProperty$3(e, r, t) {
+	function _defineProperty$2(e, r, t) {
 	  return (r = toPropertyKey(r)) in e ? _Object$defineProperty(e, r, {
 	    value: t,
 	    enumerable: !0,
@@ -6102,7 +6102,7 @@
 		if (hasRequiredIsRegexp) return isRegexp;
 		hasRequiredIsRegexp = 1;
 		'use strict';
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 		var classof = /*@__PURE__*/ requireClassofRaw();
 		var wellKnownSymbol = /*@__PURE__*/ requireWellKnownSymbol();
 
@@ -6171,7 +6171,7 @@
 		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThis();
 		var notARegExp = /*@__PURE__*/ requireNotARegexp();
 		var requireObjectCoercible = /*@__PURE__*/ requireRequireObjectCoercible();
-		var toString = /*@__PURE__*/ requireToString$2();
+		var toString = /*@__PURE__*/ requireToString$1();
 		var correctIsRegExpLogic = /*@__PURE__*/ requireCorrectIsRegexpLogic();
 
 		var stringIndexOf = uncurryThis(''.indexOf);
@@ -6364,11 +6364,11 @@
 	}
 
 	var keys$9;
-	var hasRequiredKeys$7;
+	var hasRequiredKeys$6;
 
-	function requireKeys$7 () {
-		if (hasRequiredKeys$7) return keys$9;
-		hasRequiredKeys$7 = 1;
+	function requireKeys$6 () {
+		if (hasRequiredKeys$6) return keys$9;
+		hasRequiredKeys$6 = 1;
 		'use strict';
 		requireEs_object_keys();
 		var path = /*@__PURE__*/ requirePath();
@@ -6378,29 +6378,29 @@
 	}
 
 	var keys$8;
-	var hasRequiredKeys$6;
+	var hasRequiredKeys$5;
 
-	function requireKeys$6 () {
-		if (hasRequiredKeys$6) return keys$8;
-		hasRequiredKeys$6 = 1;
+	function requireKeys$5 () {
+		if (hasRequiredKeys$5) return keys$8;
+		hasRequiredKeys$5 = 1;
 		'use strict';
-		var parent = /*@__PURE__*/ requireKeys$7();
+		var parent = /*@__PURE__*/ requireKeys$6();
 
 		keys$8 = parent;
 		return keys$8;
 	}
 
 	var keys$7;
-	var hasRequiredKeys$5;
+	var hasRequiredKeys$4;
 
-	function requireKeys$5 () {
-		if (hasRequiredKeys$5) return keys$7;
-		hasRequiredKeys$5 = 1;
-		keys$7 = /*@__PURE__*/ requireKeys$6();
+	function requireKeys$4 () {
+		if (hasRequiredKeys$4) return keys$7;
+		hasRequiredKeys$4 = 1;
+		keys$7 = /*@__PURE__*/ requireKeys$5();
 		return keys$7;
 	}
 
-	var keysExports$1 = requireKeys$5();
+	var keysExports$1 = requireKeys$4();
 	var _Object$keys = /*@__PURE__*/getDefaultExportFromCjs$1(keysExports$1);
 
 	var es_array_isArray = {};
@@ -6412,7 +6412,7 @@
 		hasRequiredEs_array_isArray = 1;
 		'use strict';
 		var $ = /*@__PURE__*/ require_export();
-		var isArray = /*@__PURE__*/ requireIsArray$8();
+		var isArray = /*@__PURE__*/ requireIsArray$7();
 
 		// `Array.isArray` method
 		// https://tc39.es/ecma262/#sec-array.isarray
@@ -6423,11 +6423,11 @@
 	}
 
 	var isArray$6;
-	var hasRequiredIsArray$7;
+	var hasRequiredIsArray$6;
 
-	function requireIsArray$7 () {
-		if (hasRequiredIsArray$7) return isArray$6;
-		hasRequiredIsArray$7 = 1;
+	function requireIsArray$6 () {
+		if (hasRequiredIsArray$6) return isArray$6;
+		hasRequiredIsArray$6 = 1;
 		'use strict';
 		requireEs_array_isArray();
 		var path = /*@__PURE__*/ requirePath();
@@ -6437,29 +6437,29 @@
 	}
 
 	var isArray$5;
-	var hasRequiredIsArray$6;
+	var hasRequiredIsArray$5;
 
-	function requireIsArray$6 () {
-		if (hasRequiredIsArray$6) return isArray$5;
-		hasRequiredIsArray$6 = 1;
+	function requireIsArray$5 () {
+		if (hasRequiredIsArray$5) return isArray$5;
+		hasRequiredIsArray$5 = 1;
 		'use strict';
-		var parent = /*@__PURE__*/ requireIsArray$7();
+		var parent = /*@__PURE__*/ requireIsArray$6();
 
 		isArray$5 = parent;
 		return isArray$5;
 	}
 
 	var isArray$4;
-	var hasRequiredIsArray$5;
+	var hasRequiredIsArray$4;
 
-	function requireIsArray$5 () {
-		if (hasRequiredIsArray$5) return isArray$4;
-		hasRequiredIsArray$5 = 1;
-		isArray$4 = /*@__PURE__*/ requireIsArray$6();
+	function requireIsArray$4 () {
+		if (hasRequiredIsArray$4) return isArray$4;
+		hasRequiredIsArray$4 = 1;
+		isArray$4 = /*@__PURE__*/ requireIsArray$5();
 		return isArray$4;
 	}
 
-	var isArrayExports$1 = requireIsArray$5();
+	var isArrayExports$1 = requireIsArray$4();
 	var _Array$isArray$1 = /*@__PURE__*/getDefaultExportFromCjs$1(isArrayExports$1);
 
 	var es_array_forEach = {};
@@ -6601,3345 +6601,301 @@
 	var forEachExports = requireForEach();
 	var _forEachInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(forEachExports);
 
-	/**
-	 * Removes all key-value entries from the list cache.
-	 *
-	 * @private
-	 * @name clear
-	 * @memberOf ListCache
-	 */
+	var getPrototypeOf$1;
+	var hasRequiredGetPrototypeOf;
 
-	var _listCacheClear$1;
-	var hasRequired_listCacheClear$1;
-
-	function require_listCacheClear$1 () {
-		if (hasRequired_listCacheClear$1) return _listCacheClear$1;
-		hasRequired_listCacheClear$1 = 1;
-		function listCacheClear() {
-		  this.__data__ = [];
-		  this.size = 0;
-		}
-
-		_listCacheClear$1 = listCacheClear;
-		return _listCacheClear$1;
+	function requireGetPrototypeOf () {
+		if (hasRequiredGetPrototypeOf) return getPrototypeOf$1;
+		hasRequiredGetPrototypeOf = 1;
+		getPrototypeOf$1 = /*@__PURE__*/ requireGetPrototypeOf$4();
+		return getPrototypeOf$1;
 	}
+
+	var getPrototypeOfExports = requireGetPrototypeOf();
+	var _Object$getPrototypeOf = /*@__PURE__*/getDefaultExportFromCjs$1(getPrototypeOfExports);
 
 	/**
-	 * Performs a
-	 * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
-	 * comparison between two values to determine if they are equivalent.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 4.0.0
-	 * @category Lang
-	 * @param {*} value The value to compare.
-	 * @param {*} other The other value to compare.
-	 * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
-	 * @example
-	 *
-	 * var object = { 'a': 1 };
-	 * var other = { 'a': 1 };
-	 *
-	 * _.eq(object, object);
-	 * // => true
-	 *
-	 * _.eq(object, other);
-	 * // => false
-	 *
-	 * _.eq('a', 'a');
-	 * // => true
-	 *
-	 * _.eq('a', Object('a'));
-	 * // => false
-	 *
-	 * _.eq(NaN, NaN);
-	 * // => true
+	 * 判断是否为纯对象（非 null、非数组、原型为 Object 或 null）
+	 * @param {unknown} value
+	 * @returns {value is Record<string, unknown>}
 	 */
-
-	var eq_1$1;
-	var hasRequiredEq$1;
-
-	function requireEq$1 () {
-		if (hasRequiredEq$1) return eq_1$1;
-		hasRequiredEq$1 = 1;
-		function eq(value, other) {
-		  return value === other || (value !== value && other !== other);
-		}
-
-		eq_1$1 = eq;
-		return eq_1$1;
-	}
-
-	var _assocIndexOf$1;
-	var hasRequired_assocIndexOf$1;
-
-	function require_assocIndexOf$1 () {
-		if (hasRequired_assocIndexOf$1) return _assocIndexOf$1;
-		hasRequired_assocIndexOf$1 = 1;
-		var eq = requireEq$1();
-
-		/**
-		 * Gets the index at which the `key` is found in `array` of key-value pairs.
-		 *
-		 * @private
-		 * @param {Array} array The array to inspect.
-		 * @param {*} key The key to search for.
-		 * @returns {number} Returns the index of the matched value, else `-1`.
-		 */
-		function assocIndexOf(array, key) {
-		  var length = array.length;
-		  while (length--) {
-		    if (eq(array[length][0], key)) {
-		      return length;
-		    }
-		  }
-		  return -1;
-		}
-
-		_assocIndexOf$1 = assocIndexOf;
-		return _assocIndexOf$1;
-	}
-
-	var _listCacheDelete$1;
-	var hasRequired_listCacheDelete$1;
-
-	function require_listCacheDelete$1 () {
-		if (hasRequired_listCacheDelete$1) return _listCacheDelete$1;
-		hasRequired_listCacheDelete$1 = 1;
-		var assocIndexOf = require_assocIndexOf$1();
-
-		/** Used for built-in method references. */
-		var arrayProto = Array.prototype;
-
-		/** Built-in value references. */
-		var splice = arrayProto.splice;
-
-		/**
-		 * Removes `key` and its value from the list cache.
-		 *
-		 * @private
-		 * @name delete
-		 * @memberOf ListCache
-		 * @param {string} key The key of the value to remove.
-		 * @returns {boolean} Returns `true` if the entry was removed, else `false`.
-		 */
-		function listCacheDelete(key) {
-		  var data = this.__data__,
-		      index = assocIndexOf(data, key);
-
-		  if (index < 0) {
-		    return false;
-		  }
-		  var lastIndex = data.length - 1;
-		  if (index == lastIndex) {
-		    data.pop();
-		  } else {
-		    splice.call(data, index, 1);
-		  }
-		  --this.size;
-		  return true;
-		}
-
-		_listCacheDelete$1 = listCacheDelete;
-		return _listCacheDelete$1;
-	}
-
-	var _listCacheGet$1;
-	var hasRequired_listCacheGet$1;
-
-	function require_listCacheGet$1 () {
-		if (hasRequired_listCacheGet$1) return _listCacheGet$1;
-		hasRequired_listCacheGet$1 = 1;
-		var assocIndexOf = require_assocIndexOf$1();
-
-		/**
-		 * Gets the list cache value for `key`.
-		 *
-		 * @private
-		 * @name get
-		 * @memberOf ListCache
-		 * @param {string} key The key of the value to get.
-		 * @returns {*} Returns the entry value.
-		 */
-		function listCacheGet(key) {
-		  var data = this.__data__,
-		      index = assocIndexOf(data, key);
-
-		  return index < 0 ? undefined : data[index][1];
-		}
-
-		_listCacheGet$1 = listCacheGet;
-		return _listCacheGet$1;
-	}
-
-	var _listCacheHas$1;
-	var hasRequired_listCacheHas$1;
-
-	function require_listCacheHas$1 () {
-		if (hasRequired_listCacheHas$1) return _listCacheHas$1;
-		hasRequired_listCacheHas$1 = 1;
-		var assocIndexOf = require_assocIndexOf$1();
-
-		/**
-		 * Checks if a list cache value for `key` exists.
-		 *
-		 * @private
-		 * @name has
-		 * @memberOf ListCache
-		 * @param {string} key The key of the entry to check.
-		 * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
-		 */
-		function listCacheHas(key) {
-		  return assocIndexOf(this.__data__, key) > -1;
-		}
-
-		_listCacheHas$1 = listCacheHas;
-		return _listCacheHas$1;
-	}
-
-	var _listCacheSet$1;
-	var hasRequired_listCacheSet$1;
-
-	function require_listCacheSet$1 () {
-		if (hasRequired_listCacheSet$1) return _listCacheSet$1;
-		hasRequired_listCacheSet$1 = 1;
-		var assocIndexOf = require_assocIndexOf$1();
-
-		/**
-		 * Sets the list cache `key` to `value`.
-		 *
-		 * @private
-		 * @name set
-		 * @memberOf ListCache
-		 * @param {string} key The key of the value to set.
-		 * @param {*} value The value to set.
-		 * @returns {Object} Returns the list cache instance.
-		 */
-		function listCacheSet(key, value) {
-		  var data = this.__data__,
-		      index = assocIndexOf(data, key);
-
-		  if (index < 0) {
-		    ++this.size;
-		    data.push([key, value]);
-		  } else {
-		    data[index][1] = value;
-		  }
-		  return this;
-		}
-
-		_listCacheSet$1 = listCacheSet;
-		return _listCacheSet$1;
-	}
-
-	var _ListCache$1;
-	var hasRequired_ListCache$1;
-
-	function require_ListCache$1 () {
-		if (hasRequired_ListCache$1) return _ListCache$1;
-		hasRequired_ListCache$1 = 1;
-		var listCacheClear = require_listCacheClear$1(),
-		    listCacheDelete = require_listCacheDelete$1(),
-		    listCacheGet = require_listCacheGet$1(),
-		    listCacheHas = require_listCacheHas$1(),
-		    listCacheSet = require_listCacheSet$1();
-
-		/**
-		 * Creates an list cache object.
-		 *
-		 * @private
-		 * @constructor
-		 * @param {Array} [entries] The key-value pairs to cache.
-		 */
-		function ListCache(entries) {
-		  var index = -1,
-		      length = entries == null ? 0 : entries.length;
-
-		  this.clear();
-		  while (++index < length) {
-		    var entry = entries[index];
-		    this.set(entry[0], entry[1]);
-		  }
-		}
-
-		// Add methods to `ListCache`.
-		ListCache.prototype.clear = listCacheClear;
-		ListCache.prototype['delete'] = listCacheDelete;
-		ListCache.prototype.get = listCacheGet;
-		ListCache.prototype.has = listCacheHas;
-		ListCache.prototype.set = listCacheSet;
-
-		_ListCache$1 = ListCache;
-		return _ListCache$1;
-	}
-
-	var _stackClear;
-	var hasRequired_stackClear;
-
-	function require_stackClear () {
-		if (hasRequired_stackClear) return _stackClear;
-		hasRequired_stackClear = 1;
-		var ListCache = require_ListCache$1();
-
-		/**
-		 * Removes all key-value entries from the stack.
-		 *
-		 * @private
-		 * @name clear
-		 * @memberOf Stack
-		 */
-		function stackClear() {
-		  this.__data__ = new ListCache;
-		  this.size = 0;
-		}
-
-		_stackClear = stackClear;
-		return _stackClear;
+	function isPlainObject$1(value) {
+	  if (value === null || _typeof$2(value) !== 'object') {
+	    return false;
+	  }
+	  var proto = _Object$getPrototypeOf(value);
+	  return proto === Object.prototype || proto === null;
 	}
 
 	/**
-	 * Removes `key` and its value from the stack.
-	 *
-	 * @private
-	 * @name delete
-	 * @memberOf Stack
-	 * @param {string} key The key of the value to remove.
-	 * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+	 * @typedef {(objValue: unknown, srcValue: unknown, key?: string, object?: object, source?: object) => unknown} MergeCustomizer
 	 */
 
-	var _stackDelete;
-	var hasRequired_stackDelete;
-
-	function require_stackDelete () {
-		if (hasRequired_stackDelete) return _stackDelete;
-		hasRequired_stackDelete = 1;
-		function stackDelete(key) {
-		  var data = this.__data__,
-		      result = data['delete'](key);
-
-		  this.size = data.size;
-		  return result;
-		}
-
-		_stackDelete = stackDelete;
-		return _stackDelete;
+	/**
+	 * 递归深合并 source 到 target
+	 * @param {object} target
+	 * @param {object} source
+	 * @param {MergeCustomizer} [customizer]
+	 */
+	function mergeWithDeep(target, source, customizer) {
+	  if (source === null || source === undefined || _typeof$2(source) !== 'object') {
+	    return;
+	  }
+	  var keys = _Object$keys(source);
+	  for (var i = 0; i < keys.length; i++) {
+	    var key = keys[i];
+	    var srcValue = source[key];
+	    var objValue = target[key];
+	    if (customizer) {
+	      var customized = customizer(objValue, srcValue, key, target, source);
+	      if (customized !== undefined) {
+	        target[key] = customized;
+	        continue;
+	      }
+	    }
+	    if (srcValue === undefined) {
+	      continue;
+	    }
+	    if (isPlainObject$1(objValue) && isPlainObject$1(srcValue)) {
+	      mergeWithDeep(objValue, srcValue, customizer);
+	    } else if (_Array$isArray$1(objValue) && _Array$isArray$1(srcValue)) {
+	      mergeWithDeep(objValue, srcValue, customizer);
+	    } else {
+	      target[key] = srcValue;
+	    }
+	  }
 	}
 
 	/**
-	 * Gets the stack value for `key`.
-	 *
-	 * @private
-	 * @name get
-	 * @memberOf Stack
-	 * @param {string} key The key of the value to get.
-	 * @returns {*} Returns the entry value.
+	 * 深合并对象。末参为函数时视为 customizer（lodash 兼容），否则全部为 source。
+	 * @param {object} object 目标对象（会被修改）
+	 * @param {...object|MergeCustomizer} args 一个或多个 source，或 sources + customizer
+	 * @returns {object} 合并后的目标对象
 	 */
-
-	var _stackGet;
-	var hasRequired_stackGet;
-
-	function require_stackGet () {
-		if (hasRequired_stackGet) return _stackGet;
-		hasRequired_stackGet = 1;
-		function stackGet(key) {
-		  return this.__data__.get(key);
-		}
-
-		_stackGet = stackGet;
-		return _stackGet;
-	}
-
-	/**
-	 * Checks if a stack value for `key` exists.
-	 *
-	 * @private
-	 * @name has
-	 * @memberOf Stack
-	 * @param {string} key The key of the entry to check.
-	 * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
-	 */
-
-	var _stackHas;
-	var hasRequired_stackHas;
-
-	function require_stackHas () {
-		if (hasRequired_stackHas) return _stackHas;
-		hasRequired_stackHas = 1;
-		function stackHas(key) {
-		  return this.__data__.has(key);
-		}
-
-		_stackHas = stackHas;
-		return _stackHas;
-	}
-
-	/** Detect free variable `global` from Node.js. */
-
-	var _freeGlobal$1;
-	var hasRequired_freeGlobal$1;
-
-	function require_freeGlobal$1 () {
-		if (hasRequired_freeGlobal$1) return _freeGlobal$1;
-		hasRequired_freeGlobal$1 = 1;
-		var freeGlobal = typeof commonjsGlobal$1 == 'object' && commonjsGlobal$1 && commonjsGlobal$1.Object === Object && commonjsGlobal$1;
-
-		_freeGlobal$1 = freeGlobal;
-		return _freeGlobal$1;
-	}
-
-	var _root$1;
-	var hasRequired_root$1;
-
-	function require_root$1 () {
-		if (hasRequired_root$1) return _root$1;
-		hasRequired_root$1 = 1;
-		var freeGlobal = require_freeGlobal$1();
-
-		/** Detect free variable `self`. */
-		var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
-
-		/** Used as a reference to the global object. */
-		var root = freeGlobal || freeSelf || Function('return this')();
-
-		_root$1 = root;
-		return _root$1;
-	}
-
-	var _Symbol$4;
-	var hasRequired_Symbol$1;
-
-	function require_Symbol$1 () {
-		if (hasRequired_Symbol$1) return _Symbol$4;
-		hasRequired_Symbol$1 = 1;
-		var root = require_root$1();
-
-		/** Built-in value references. */
-		var Symbol = root.Symbol;
-
-		_Symbol$4 = Symbol;
-		return _Symbol$4;
-	}
-
-	var _getRawTag$1;
-	var hasRequired_getRawTag$1;
-
-	function require_getRawTag$1 () {
-		if (hasRequired_getRawTag$1) return _getRawTag$1;
-		hasRequired_getRawTag$1 = 1;
-		var Symbol = require_Symbol$1();
-
-		/** Used for built-in method references. */
-		var objectProto = Object.prototype;
-
-		/** Used to check objects for own properties. */
-		var hasOwnProperty = objectProto.hasOwnProperty;
-
-		/**
-		 * Used to resolve the
-		 * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
-		 * of values.
-		 */
-		var nativeObjectToString = objectProto.toString;
-
-		/** Built-in value references. */
-		var symToStringTag = Symbol ? Symbol.toStringTag : undefined;
-
-		/**
-		 * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.
-		 *
-		 * @private
-		 * @param {*} value The value to query.
-		 * @returns {string} Returns the raw `toStringTag`.
-		 */
-		function getRawTag(value) {
-		  var isOwn = hasOwnProperty.call(value, symToStringTag),
-		      tag = value[symToStringTag];
-
-		  try {
-		    value[symToStringTag] = undefined;
-		    var unmasked = true;
-		  } catch (e) {}
-
-		  var result = nativeObjectToString.call(value);
-		  if (unmasked) {
-		    if (isOwn) {
-		      value[symToStringTag] = tag;
-		    } else {
-		      delete value[symToStringTag];
-		    }
-		  }
-		  return result;
-		}
-
-		_getRawTag$1 = getRawTag;
-		return _getRawTag$1;
-	}
-
-	/** Used for built-in method references. */
-
-	var _objectToString$1;
-	var hasRequired_objectToString$1;
-
-	function require_objectToString$1 () {
-		if (hasRequired_objectToString$1) return _objectToString$1;
-		hasRequired_objectToString$1 = 1;
-		var objectProto = Object.prototype;
-
-		/**
-		 * Used to resolve the
-		 * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
-		 * of values.
-		 */
-		var nativeObjectToString = objectProto.toString;
-
-		/**
-		 * Converts `value` to a string using `Object.prototype.toString`.
-		 *
-		 * @private
-		 * @param {*} value The value to convert.
-		 * @returns {string} Returns the converted string.
-		 */
-		function objectToString(value) {
-		  return nativeObjectToString.call(value);
-		}
-
-		_objectToString$1 = objectToString;
-		return _objectToString$1;
-	}
-
-	var _baseGetTag$1;
-	var hasRequired_baseGetTag$1;
-
-	function require_baseGetTag$1 () {
-		if (hasRequired_baseGetTag$1) return _baseGetTag$1;
-		hasRequired_baseGetTag$1 = 1;
-		var Symbol = require_Symbol$1(),
-		    getRawTag = require_getRawTag$1(),
-		    objectToString = require_objectToString$1();
-
-		/** `Object#toString` result references. */
-		var nullTag = '[object Null]',
-		    undefinedTag = '[object Undefined]';
-
-		/** Built-in value references. */
-		var symToStringTag = Symbol ? Symbol.toStringTag : undefined;
-
-		/**
-		 * The base implementation of `getTag` without fallbacks for buggy environments.
-		 *
-		 * @private
-		 * @param {*} value The value to query.
-		 * @returns {string} Returns the `toStringTag`.
-		 */
-		function baseGetTag(value) {
-		  if (value == null) {
-		    return value === undefined ? undefinedTag : nullTag;
-		  }
-		  return (symToStringTag && symToStringTag in Object(value))
-		    ? getRawTag(value)
-		    : objectToString(value);
-		}
-
-		_baseGetTag$1 = baseGetTag;
-		return _baseGetTag$1;
-	}
-
-	/**
-	 * Checks if `value` is the
-	 * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
-	 * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 0.1.0
-	 * @category Lang
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is an object, else `false`.
-	 * @example
-	 *
-	 * _.isObject({});
-	 * // => true
-	 *
-	 * _.isObject([1, 2, 3]);
-	 * // => true
-	 *
-	 * _.isObject(_.noop);
-	 * // => true
-	 *
-	 * _.isObject(null);
-	 * // => false
-	 */
-
-	var isObject_1$2;
-	var hasRequiredIsObject$2;
-
-	function requireIsObject$2 () {
-		if (hasRequiredIsObject$2) return isObject_1$2;
-		hasRequiredIsObject$2 = 1;
-		function isObject(value) {
-		  var type = typeof value;
-		  return value != null && (type == 'object' || type == 'function');
-		}
-
-		isObject_1$2 = isObject;
-		return isObject_1$2;
-	}
-
-	var isFunction_1$1;
-	var hasRequiredIsFunction$1;
-
-	function requireIsFunction$1 () {
-		if (hasRequiredIsFunction$1) return isFunction_1$1;
-		hasRequiredIsFunction$1 = 1;
-		var baseGetTag = require_baseGetTag$1(),
-		    isObject = requireIsObject$2();
-
-		/** `Object#toString` result references. */
-		var asyncTag = '[object AsyncFunction]',
-		    funcTag = '[object Function]',
-		    genTag = '[object GeneratorFunction]',
-		    proxyTag = '[object Proxy]';
-
-		/**
-		 * Checks if `value` is classified as a `Function` object.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 0.1.0
-		 * @category Lang
-		 * @param {*} value The value to check.
-		 * @returns {boolean} Returns `true` if `value` is a function, else `false`.
-		 * @example
-		 *
-		 * _.isFunction(_);
-		 * // => true
-		 *
-		 * _.isFunction(/abc/);
-		 * // => false
-		 */
-		function isFunction(value) {
-		  if (!isObject(value)) {
-		    return false;
-		  }
-		  // The use of `Object#toString` avoids issues with the `typeof` operator
-		  // in Safari 9 which returns 'object' for typed arrays and other constructors.
-		  var tag = baseGetTag(value);
-		  return tag == funcTag || tag == genTag || tag == asyncTag || tag == proxyTag;
-		}
-
-		isFunction_1$1 = isFunction;
-		return isFunction_1$1;
-	}
-
-	var _coreJsData$1;
-	var hasRequired_coreJsData$1;
-
-	function require_coreJsData$1 () {
-		if (hasRequired_coreJsData$1) return _coreJsData$1;
-		hasRequired_coreJsData$1 = 1;
-		var root = require_root$1();
-
-		/** Used to detect overreaching core-js shims. */
-		var coreJsData = root['__core-js_shared__'];
-
-		_coreJsData$1 = coreJsData;
-		return _coreJsData$1;
-	}
-
-	var _isMasked$1;
-	var hasRequired_isMasked$1;
-
-	function require_isMasked$1 () {
-		if (hasRequired_isMasked$1) return _isMasked$1;
-		hasRequired_isMasked$1 = 1;
-		var coreJsData = require_coreJsData$1();
-
-		/** Used to detect methods masquerading as native. */
-		var maskSrcKey = (function() {
-		  var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
-		  return uid ? ('Symbol(src)_1.' + uid) : '';
-		}());
-
-		/**
-		 * Checks if `func` has its source masked.
-		 *
-		 * @private
-		 * @param {Function} func The function to check.
-		 * @returns {boolean} Returns `true` if `func` is masked, else `false`.
-		 */
-		function isMasked(func) {
-		  return !!maskSrcKey && (maskSrcKey in func);
-		}
-
-		_isMasked$1 = isMasked;
-		return _isMasked$1;
-	}
-
-	/** Used for built-in method references. */
-
-	var _toSource$1;
-	var hasRequired_toSource$1;
-
-	function require_toSource$1 () {
-		if (hasRequired_toSource$1) return _toSource$1;
-		hasRequired_toSource$1 = 1;
-		var funcProto = Function.prototype;
-
-		/** Used to resolve the decompiled source of functions. */
-		var funcToString = funcProto.toString;
-
-		/**
-		 * Converts `func` to its source code.
-		 *
-		 * @private
-		 * @param {Function} func The function to convert.
-		 * @returns {string} Returns the source code.
-		 */
-		function toSource(func) {
-		  if (func != null) {
-		    try {
-		      return funcToString.call(func);
-		    } catch (e) {}
-		    try {
-		      return (func + '');
-		    } catch (e) {}
-		  }
-		  return '';
-		}
-
-		_toSource$1 = toSource;
-		return _toSource$1;
-	}
-
-	var _baseIsNative$1;
-	var hasRequired_baseIsNative$1;
-
-	function require_baseIsNative$1 () {
-		if (hasRequired_baseIsNative$1) return _baseIsNative$1;
-		hasRequired_baseIsNative$1 = 1;
-		var isFunction = requireIsFunction$1(),
-		    isMasked = require_isMasked$1(),
-		    isObject = requireIsObject$2(),
-		    toSource = require_toSource$1();
-
-		/**
-		 * Used to match `RegExp`
-		 * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
-		 */
-		var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
-
-		/** Used to detect host constructors (Safari). */
-		var reIsHostCtor = /^\[object .+?Constructor\]$/;
-
-		/** Used for built-in method references. */
-		var funcProto = Function.prototype,
-		    objectProto = Object.prototype;
-
-		/** Used to resolve the decompiled source of functions. */
-		var funcToString = funcProto.toString;
-
-		/** Used to check objects for own properties. */
-		var hasOwnProperty = objectProto.hasOwnProperty;
-
-		/** Used to detect if a method is native. */
-		var reIsNative = RegExp('^' +
-		  funcToString.call(hasOwnProperty).replace(reRegExpChar, '\\$&')
-		  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-		);
-
-		/**
-		 * The base implementation of `_.isNative` without bad shim checks.
-		 *
-		 * @private
-		 * @param {*} value The value to check.
-		 * @returns {boolean} Returns `true` if `value` is a native function,
-		 *  else `false`.
-		 */
-		function baseIsNative(value) {
-		  if (!isObject(value) || isMasked(value)) {
-		    return false;
-		  }
-		  var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
-		  return pattern.test(toSource(value));
-		}
-
-		_baseIsNative$1 = baseIsNative;
-		return _baseIsNative$1;
-	}
-
-	/**
-	 * Gets the value at `key` of `object`.
-	 *
-	 * @private
-	 * @param {Object} [object] The object to query.
-	 * @param {string} key The key of the property to get.
-	 * @returns {*} Returns the property value.
-	 */
-
-	var _getValue$1;
-	var hasRequired_getValue$1;
-
-	function require_getValue$1 () {
-		if (hasRequired_getValue$1) return _getValue$1;
-		hasRequired_getValue$1 = 1;
-		function getValue(object, key) {
-		  return object == null ? undefined : object[key];
-		}
-
-		_getValue$1 = getValue;
-		return _getValue$1;
-	}
-
-	var _getNative$1;
-	var hasRequired_getNative$1;
-
-	function require_getNative$1 () {
-		if (hasRequired_getNative$1) return _getNative$1;
-		hasRequired_getNative$1 = 1;
-		var baseIsNative = require_baseIsNative$1(),
-		    getValue = require_getValue$1();
-
-		/**
-		 * Gets the native function at `key` of `object`.
-		 *
-		 * @private
-		 * @param {Object} object The object to query.
-		 * @param {string} key The key of the method to get.
-		 * @returns {*} Returns the function if it's native, else `undefined`.
-		 */
-		function getNative(object, key) {
-		  var value = getValue(object, key);
-		  return baseIsNative(value) ? value : undefined;
-		}
-
-		_getNative$1 = getNative;
-		return _getNative$1;
-	}
-
-	var _Map$3;
-	var hasRequired_Map$1;
-
-	function require_Map$1 () {
-		if (hasRequired_Map$1) return _Map$3;
-		hasRequired_Map$1 = 1;
-		var getNative = require_getNative$1(),
-		    root = require_root$1();
-
-		/* Built-in method references that are verified to be native. */
-		var Map = getNative(root, 'Map');
-
-		_Map$3 = Map;
-		return _Map$3;
-	}
-
-	var _nativeCreate$1;
-	var hasRequired_nativeCreate$1;
-
-	function require_nativeCreate$1 () {
-		if (hasRequired_nativeCreate$1) return _nativeCreate$1;
-		hasRequired_nativeCreate$1 = 1;
-		var getNative = require_getNative$1();
-
-		/* Built-in method references that are verified to be native. */
-		var nativeCreate = getNative(Object, 'create');
-
-		_nativeCreate$1 = nativeCreate;
-		return _nativeCreate$1;
-	}
-
-	var _hashClear$1;
-	var hasRequired_hashClear$1;
-
-	function require_hashClear$1 () {
-		if (hasRequired_hashClear$1) return _hashClear$1;
-		hasRequired_hashClear$1 = 1;
-		var nativeCreate = require_nativeCreate$1();
-
-		/**
-		 * Removes all key-value entries from the hash.
-		 *
-		 * @private
-		 * @name clear
-		 * @memberOf Hash
-		 */
-		function hashClear() {
-		  this.__data__ = nativeCreate ? nativeCreate(null) : {};
-		  this.size = 0;
-		}
-
-		_hashClear$1 = hashClear;
-		return _hashClear$1;
-	}
-
-	/**
-	 * Removes `key` and its value from the hash.
-	 *
-	 * @private
-	 * @name delete
-	 * @memberOf Hash
-	 * @param {Object} hash The hash to modify.
-	 * @param {string} key The key of the value to remove.
-	 * @returns {boolean} Returns `true` if the entry was removed, else `false`.
-	 */
-
-	var _hashDelete$1;
-	var hasRequired_hashDelete$1;
-
-	function require_hashDelete$1 () {
-		if (hasRequired_hashDelete$1) return _hashDelete$1;
-		hasRequired_hashDelete$1 = 1;
-		function hashDelete(key) {
-		  var result = this.has(key) && delete this.__data__[key];
-		  this.size -= result ? 1 : 0;
-		  return result;
-		}
-
-		_hashDelete$1 = hashDelete;
-		return _hashDelete$1;
-	}
-
-	var _hashGet$1;
-	var hasRequired_hashGet$1;
-
-	function require_hashGet$1 () {
-		if (hasRequired_hashGet$1) return _hashGet$1;
-		hasRequired_hashGet$1 = 1;
-		var nativeCreate = require_nativeCreate$1();
-
-		/** Used to stand-in for `undefined` hash values. */
-		var HASH_UNDEFINED = '__lodash_hash_undefined__';
-
-		/** Used for built-in method references. */
-		var objectProto = Object.prototype;
-
-		/** Used to check objects for own properties. */
-		var hasOwnProperty = objectProto.hasOwnProperty;
-
-		/**
-		 * Gets the hash value for `key`.
-		 *
-		 * @private
-		 * @name get
-		 * @memberOf Hash
-		 * @param {string} key The key of the value to get.
-		 * @returns {*} Returns the entry value.
-		 */
-		function hashGet(key) {
-		  var data = this.__data__;
-		  if (nativeCreate) {
-		    var result = data[key];
-		    return result === HASH_UNDEFINED ? undefined : result;
-		  }
-		  return hasOwnProperty.call(data, key) ? data[key] : undefined;
-		}
-
-		_hashGet$1 = hashGet;
-		return _hashGet$1;
-	}
-
-	var _hashHas$1;
-	var hasRequired_hashHas$1;
-
-	function require_hashHas$1 () {
-		if (hasRequired_hashHas$1) return _hashHas$1;
-		hasRequired_hashHas$1 = 1;
-		var nativeCreate = require_nativeCreate$1();
-
-		/** Used for built-in method references. */
-		var objectProto = Object.prototype;
-
-		/** Used to check objects for own properties. */
-		var hasOwnProperty = objectProto.hasOwnProperty;
-
-		/**
-		 * Checks if a hash value for `key` exists.
-		 *
-		 * @private
-		 * @name has
-		 * @memberOf Hash
-		 * @param {string} key The key of the entry to check.
-		 * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
-		 */
-		function hashHas(key) {
-		  var data = this.__data__;
-		  return nativeCreate ? (data[key] !== undefined) : hasOwnProperty.call(data, key);
-		}
-
-		_hashHas$1 = hashHas;
-		return _hashHas$1;
-	}
-
-	var _hashSet$1;
-	var hasRequired_hashSet$1;
-
-	function require_hashSet$1 () {
-		if (hasRequired_hashSet$1) return _hashSet$1;
-		hasRequired_hashSet$1 = 1;
-		var nativeCreate = require_nativeCreate$1();
-
-		/** Used to stand-in for `undefined` hash values. */
-		var HASH_UNDEFINED = '__lodash_hash_undefined__';
-
-		/**
-		 * Sets the hash `key` to `value`.
-		 *
-		 * @private
-		 * @name set
-		 * @memberOf Hash
-		 * @param {string} key The key of the value to set.
-		 * @param {*} value The value to set.
-		 * @returns {Object} Returns the hash instance.
-		 */
-		function hashSet(key, value) {
-		  var data = this.__data__;
-		  this.size += this.has(key) ? 0 : 1;
-		  data[key] = (nativeCreate && value === undefined) ? HASH_UNDEFINED : value;
-		  return this;
-		}
-
-		_hashSet$1 = hashSet;
-		return _hashSet$1;
-	}
-
-	var _Hash$1;
-	var hasRequired_Hash$1;
-
-	function require_Hash$1 () {
-		if (hasRequired_Hash$1) return _Hash$1;
-		hasRequired_Hash$1 = 1;
-		var hashClear = require_hashClear$1(),
-		    hashDelete = require_hashDelete$1(),
-		    hashGet = require_hashGet$1(),
-		    hashHas = require_hashHas$1(),
-		    hashSet = require_hashSet$1();
-
-		/**
-		 * Creates a hash object.
-		 *
-		 * @private
-		 * @constructor
-		 * @param {Array} [entries] The key-value pairs to cache.
-		 */
-		function Hash(entries) {
-		  var index = -1,
-		      length = entries == null ? 0 : entries.length;
-
-		  this.clear();
-		  while (++index < length) {
-		    var entry = entries[index];
-		    this.set(entry[0], entry[1]);
-		  }
-		}
-
-		// Add methods to `Hash`.
-		Hash.prototype.clear = hashClear;
-		Hash.prototype['delete'] = hashDelete;
-		Hash.prototype.get = hashGet;
-		Hash.prototype.has = hashHas;
-		Hash.prototype.set = hashSet;
-
-		_Hash$1 = Hash;
-		return _Hash$1;
-	}
-
-	var _mapCacheClear$1;
-	var hasRequired_mapCacheClear$1;
-
-	function require_mapCacheClear$1 () {
-		if (hasRequired_mapCacheClear$1) return _mapCacheClear$1;
-		hasRequired_mapCacheClear$1 = 1;
-		var Hash = require_Hash$1(),
-		    ListCache = require_ListCache$1(),
-		    Map = require_Map$1();
-
-		/**
-		 * Removes all key-value entries from the map.
-		 *
-		 * @private
-		 * @name clear
-		 * @memberOf MapCache
-		 */
-		function mapCacheClear() {
-		  this.size = 0;
-		  this.__data__ = {
-		    'hash': new Hash,
-		    'map': new (Map || ListCache),
-		    'string': new Hash
-		  };
-		}
-
-		_mapCacheClear$1 = mapCacheClear;
-		return _mapCacheClear$1;
-	}
-
-	/**
-	 * Checks if `value` is suitable for use as unique object key.
-	 *
-	 * @private
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is suitable, else `false`.
-	 */
-
-	var _isKeyable$1;
-	var hasRequired_isKeyable$1;
-
-	function require_isKeyable$1 () {
-		if (hasRequired_isKeyable$1) return _isKeyable$1;
-		hasRequired_isKeyable$1 = 1;
-		function isKeyable(value) {
-		  var type = typeof value;
-		  return (type == 'string' || type == 'number' || type == 'symbol' || type == 'boolean')
-		    ? (value !== '__proto__')
-		    : (value === null);
-		}
-
-		_isKeyable$1 = isKeyable;
-		return _isKeyable$1;
-	}
-
-	var _getMapData$1;
-	var hasRequired_getMapData$1;
-
-	function require_getMapData$1 () {
-		if (hasRequired_getMapData$1) return _getMapData$1;
-		hasRequired_getMapData$1 = 1;
-		var isKeyable = require_isKeyable$1();
-
-		/**
-		 * Gets the data for `map`.
-		 *
-		 * @private
-		 * @param {Object} map The map to query.
-		 * @param {string} key The reference key.
-		 * @returns {*} Returns the map data.
-		 */
-		function getMapData(map, key) {
-		  var data = map.__data__;
-		  return isKeyable(key)
-		    ? data[typeof key == 'string' ? 'string' : 'hash']
-		    : data.map;
-		}
-
-		_getMapData$1 = getMapData;
-		return _getMapData$1;
-	}
-
-	var _mapCacheDelete$1;
-	var hasRequired_mapCacheDelete$1;
-
-	function require_mapCacheDelete$1 () {
-		if (hasRequired_mapCacheDelete$1) return _mapCacheDelete$1;
-		hasRequired_mapCacheDelete$1 = 1;
-		var getMapData = require_getMapData$1();
-
-		/**
-		 * Removes `key` and its value from the map.
-		 *
-		 * @private
-		 * @name delete
-		 * @memberOf MapCache
-		 * @param {string} key The key of the value to remove.
-		 * @returns {boolean} Returns `true` if the entry was removed, else `false`.
-		 */
-		function mapCacheDelete(key) {
-		  var result = getMapData(this, key)['delete'](key);
-		  this.size -= result ? 1 : 0;
-		  return result;
-		}
-
-		_mapCacheDelete$1 = mapCacheDelete;
-		return _mapCacheDelete$1;
-	}
-
-	var _mapCacheGet$1;
-	var hasRequired_mapCacheGet$1;
-
-	function require_mapCacheGet$1 () {
-		if (hasRequired_mapCacheGet$1) return _mapCacheGet$1;
-		hasRequired_mapCacheGet$1 = 1;
-		var getMapData = require_getMapData$1();
-
-		/**
-		 * Gets the map value for `key`.
-		 *
-		 * @private
-		 * @name get
-		 * @memberOf MapCache
-		 * @param {string} key The key of the value to get.
-		 * @returns {*} Returns the entry value.
-		 */
-		function mapCacheGet(key) {
-		  return getMapData(this, key).get(key);
-		}
-
-		_mapCacheGet$1 = mapCacheGet;
-		return _mapCacheGet$1;
-	}
-
-	var _mapCacheHas$1;
-	var hasRequired_mapCacheHas$1;
-
-	function require_mapCacheHas$1 () {
-		if (hasRequired_mapCacheHas$1) return _mapCacheHas$1;
-		hasRequired_mapCacheHas$1 = 1;
-		var getMapData = require_getMapData$1();
-
-		/**
-		 * Checks if a map value for `key` exists.
-		 *
-		 * @private
-		 * @name has
-		 * @memberOf MapCache
-		 * @param {string} key The key of the entry to check.
-		 * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
-		 */
-		function mapCacheHas(key) {
-		  return getMapData(this, key).has(key);
-		}
-
-		_mapCacheHas$1 = mapCacheHas;
-		return _mapCacheHas$1;
-	}
-
-	var _mapCacheSet$1;
-	var hasRequired_mapCacheSet$1;
-
-	function require_mapCacheSet$1 () {
-		if (hasRequired_mapCacheSet$1) return _mapCacheSet$1;
-		hasRequired_mapCacheSet$1 = 1;
-		var getMapData = require_getMapData$1();
-
-		/**
-		 * Sets the map `key` to `value`.
-		 *
-		 * @private
-		 * @name set
-		 * @memberOf MapCache
-		 * @param {string} key The key of the value to set.
-		 * @param {*} value The value to set.
-		 * @returns {Object} Returns the map cache instance.
-		 */
-		function mapCacheSet(key, value) {
-		  var data = getMapData(this, key),
-		      size = data.size;
-
-		  data.set(key, value);
-		  this.size += data.size == size ? 0 : 1;
-		  return this;
-		}
-
-		_mapCacheSet$1 = mapCacheSet;
-		return _mapCacheSet$1;
-	}
-
-	var _MapCache$1;
-	var hasRequired_MapCache$1;
-
-	function require_MapCache$1 () {
-		if (hasRequired_MapCache$1) return _MapCache$1;
-		hasRequired_MapCache$1 = 1;
-		var mapCacheClear = require_mapCacheClear$1(),
-		    mapCacheDelete = require_mapCacheDelete$1(),
-		    mapCacheGet = require_mapCacheGet$1(),
-		    mapCacheHas = require_mapCacheHas$1(),
-		    mapCacheSet = require_mapCacheSet$1();
-
-		/**
-		 * Creates a map cache object to store key-value pairs.
-		 *
-		 * @private
-		 * @constructor
-		 * @param {Array} [entries] The key-value pairs to cache.
-		 */
-		function MapCache(entries) {
-		  var index = -1,
-		      length = entries == null ? 0 : entries.length;
-
-		  this.clear();
-		  while (++index < length) {
-		    var entry = entries[index];
-		    this.set(entry[0], entry[1]);
-		  }
-		}
-
-		// Add methods to `MapCache`.
-		MapCache.prototype.clear = mapCacheClear;
-		MapCache.prototype['delete'] = mapCacheDelete;
-		MapCache.prototype.get = mapCacheGet;
-		MapCache.prototype.has = mapCacheHas;
-		MapCache.prototype.set = mapCacheSet;
-
-		_MapCache$1 = MapCache;
-		return _MapCache$1;
-	}
-
-	var _stackSet;
-	var hasRequired_stackSet;
-
-	function require_stackSet () {
-		if (hasRequired_stackSet) return _stackSet;
-		hasRequired_stackSet = 1;
-		var ListCache = require_ListCache$1(),
-		    Map = require_Map$1(),
-		    MapCache = require_MapCache$1();
-
-		/** Used as the size to enable large array optimizations. */
-		var LARGE_ARRAY_SIZE = 200;
-
-		/**
-		 * Sets the stack `key` to `value`.
-		 *
-		 * @private
-		 * @name set
-		 * @memberOf Stack
-		 * @param {string} key The key of the value to set.
-		 * @param {*} value The value to set.
-		 * @returns {Object} Returns the stack cache instance.
-		 */
-		function stackSet(key, value) {
-		  var data = this.__data__;
-		  if (data instanceof ListCache) {
-		    var pairs = data.__data__;
-		    if (!Map || (pairs.length < LARGE_ARRAY_SIZE - 1)) {
-		      pairs.push([key, value]);
-		      this.size = ++data.size;
-		      return this;
-		    }
-		    data = this.__data__ = new MapCache(pairs);
-		  }
-		  data.set(key, value);
-		  this.size = data.size;
-		  return this;
-		}
-
-		_stackSet = stackSet;
-		return _stackSet;
-	}
-
-	var _Stack;
-	var hasRequired_Stack;
-
-	function require_Stack () {
-		if (hasRequired_Stack) return _Stack;
-		hasRequired_Stack = 1;
-		var ListCache = require_ListCache$1(),
-		    stackClear = require_stackClear(),
-		    stackDelete = require_stackDelete(),
-		    stackGet = require_stackGet(),
-		    stackHas = require_stackHas(),
-		    stackSet = require_stackSet();
-
-		/**
-		 * Creates a stack cache object to store key-value pairs.
-		 *
-		 * @private
-		 * @constructor
-		 * @param {Array} [entries] The key-value pairs to cache.
-		 */
-		function Stack(entries) {
-		  var data = this.__data__ = new ListCache(entries);
-		  this.size = data.size;
-		}
-
-		// Add methods to `Stack`.
-		Stack.prototype.clear = stackClear;
-		Stack.prototype['delete'] = stackDelete;
-		Stack.prototype.get = stackGet;
-		Stack.prototype.has = stackHas;
-		Stack.prototype.set = stackSet;
-
-		_Stack = Stack;
-		return _Stack;
-	}
-
-	var _defineProperty$2;
-	var hasRequired_defineProperty$1;
-
-	function require_defineProperty$1 () {
-		if (hasRequired_defineProperty$1) return _defineProperty$2;
-		hasRequired_defineProperty$1 = 1;
-		var getNative = require_getNative$1();
-
-		var defineProperty = (function() {
-		  try {
-		    var func = getNative(Object, 'defineProperty');
-		    func({}, '', {});
-		    return func;
-		  } catch (e) {}
-		}());
-
-		_defineProperty$2 = defineProperty;
-		return _defineProperty$2;
-	}
-
-	var _baseAssignValue$1;
-	var hasRequired_baseAssignValue$1;
-
-	function require_baseAssignValue$1 () {
-		if (hasRequired_baseAssignValue$1) return _baseAssignValue$1;
-		hasRequired_baseAssignValue$1 = 1;
-		var defineProperty = require_defineProperty$1();
-
-		/**
-		 * The base implementation of `assignValue` and `assignMergeValue` without
-		 * value checks.
-		 *
-		 * @private
-		 * @param {Object} object The object to modify.
-		 * @param {string} key The key of the property to assign.
-		 * @param {*} value The value to assign.
-		 */
-		function baseAssignValue(object, key, value) {
-		  if (key == '__proto__' && defineProperty) {
-		    defineProperty(object, key, {
-		      'configurable': true,
-		      'enumerable': true,
-		      'value': value,
-		      'writable': true
-		    });
-		  } else {
-		    object[key] = value;
-		  }
-		}
-
-		_baseAssignValue$1 = baseAssignValue;
-		return _baseAssignValue$1;
-	}
-
-	var _assignMergeValue;
-	var hasRequired_assignMergeValue;
-
-	function require_assignMergeValue () {
-		if (hasRequired_assignMergeValue) return _assignMergeValue;
-		hasRequired_assignMergeValue = 1;
-		var baseAssignValue = require_baseAssignValue$1(),
-		    eq = requireEq$1();
-
-		/**
-		 * This function is like `assignValue` except that it doesn't assign
-		 * `undefined` values.
-		 *
-		 * @private
-		 * @param {Object} object The object to modify.
-		 * @param {string} key The key of the property to assign.
-		 * @param {*} value The value to assign.
-		 */
-		function assignMergeValue(object, key, value) {
-		  if ((value !== undefined && !eq(object[key], value)) ||
-		      (value === undefined && !(key in object))) {
-		    baseAssignValue(object, key, value);
-		  }
-		}
-
-		_assignMergeValue = assignMergeValue;
-		return _assignMergeValue;
-	}
-
-	/**
-	 * Creates a base function for methods like `_.forIn` and `_.forOwn`.
-	 *
-	 * @private
-	 * @param {boolean} [fromRight] Specify iterating from right to left.
-	 * @returns {Function} Returns the new base function.
-	 */
-
-	var _createBaseFor;
-	var hasRequired_createBaseFor;
-
-	function require_createBaseFor () {
-		if (hasRequired_createBaseFor) return _createBaseFor;
-		hasRequired_createBaseFor = 1;
-		function createBaseFor(fromRight) {
-		  return function(object, iteratee, keysFunc) {
-		    var index = -1,
-		        iterable = Object(object),
-		        props = keysFunc(object),
-		        length = props.length;
-
-		    while (length--) {
-		      var key = props[fromRight ? length : ++index];
-		      if (iteratee(iterable[key], key, iterable) === false) {
-		        break;
-		      }
-		    }
-		    return object;
-		  };
-		}
-
-		_createBaseFor = createBaseFor;
-		return _createBaseFor;
-	}
-
-	var _baseFor;
-	var hasRequired_baseFor;
-
-	function require_baseFor () {
-		if (hasRequired_baseFor) return _baseFor;
-		hasRequired_baseFor = 1;
-		var createBaseFor = require_createBaseFor();
-
-		/**
-		 * The base implementation of `baseForOwn` which iterates over `object`
-		 * properties returned by `keysFunc` and invokes `iteratee` for each property.
-		 * Iteratee functions may exit iteration early by explicitly returning `false`.
-		 *
-		 * @private
-		 * @param {Object} object The object to iterate over.
-		 * @param {Function} iteratee The function invoked per iteration.
-		 * @param {Function} keysFunc The function to get the keys of `object`.
-		 * @returns {Object} Returns `object`.
-		 */
-		var baseFor = createBaseFor();
-
-		_baseFor = baseFor;
-		return _baseFor;
-	}
-
-	var _cloneBuffer$1 = {exports: {}};
-
-	var _cloneBuffer = _cloneBuffer$1.exports;
-
-	var hasRequired_cloneBuffer;
-
-	function require_cloneBuffer () {
-		if (hasRequired_cloneBuffer) return _cloneBuffer$1.exports;
-		hasRequired_cloneBuffer = 1;
-		(function (module, exports) {
-			var root = require_root$1();
-
-			/** Detect free variable `exports`. */
-			var freeExports = 'object' == 'object' && exports && !exports.nodeType && exports;
-
-			/** Detect free variable `module`. */
-			var freeModule = freeExports && 'object' == 'object' && module && !module.nodeType && module;
-
-			/** Detect the popular CommonJS extension `module.exports`. */
-			var moduleExports = freeModule && freeModule.exports === freeExports;
-
-			/** Built-in value references. */
-			var Buffer = moduleExports ? root.Buffer : undefined,
-			    allocUnsafe = Buffer ? Buffer.allocUnsafe : undefined;
-
-			/**
-			 * Creates a clone of  `buffer`.
-			 *
-			 * @private
-			 * @param {Buffer} buffer The buffer to clone.
-			 * @param {boolean} [isDeep] Specify a deep clone.
-			 * @returns {Buffer} Returns the cloned buffer.
-			 */
-			function cloneBuffer(buffer, isDeep) {
-			  if (isDeep) {
-			    return buffer.slice();
-			  }
-			  var length = buffer.length,
-			      result = allocUnsafe ? allocUnsafe(length) : new buffer.constructor(length);
-
-			  buffer.copy(result);
-			  return result;
-			}
-
-			module.exports = cloneBuffer; 
-		} (_cloneBuffer$1, _cloneBuffer$1.exports));
-		return _cloneBuffer$1.exports;
-	}
-
-	var _Uint8Array;
-	var hasRequired_Uint8Array;
-
-	function require_Uint8Array () {
-		if (hasRequired_Uint8Array) return _Uint8Array;
-		hasRequired_Uint8Array = 1;
-		var root = require_root$1();
-
-		/** Built-in value references. */
-		var Uint8Array = root.Uint8Array;
-
-		_Uint8Array = Uint8Array;
-		return _Uint8Array;
-	}
-
-	var _cloneArrayBuffer;
-	var hasRequired_cloneArrayBuffer;
-
-	function require_cloneArrayBuffer () {
-		if (hasRequired_cloneArrayBuffer) return _cloneArrayBuffer;
-		hasRequired_cloneArrayBuffer = 1;
-		var Uint8Array = require_Uint8Array();
-
-		/**
-		 * Creates a clone of `arrayBuffer`.
-		 *
-		 * @private
-		 * @param {ArrayBuffer} arrayBuffer The array buffer to clone.
-		 * @returns {ArrayBuffer} Returns the cloned array buffer.
-		 */
-		function cloneArrayBuffer(arrayBuffer) {
-		  var result = new arrayBuffer.constructor(arrayBuffer.byteLength);
-		  new Uint8Array(result).set(new Uint8Array(arrayBuffer));
-		  return result;
-		}
-
-		_cloneArrayBuffer = cloneArrayBuffer;
-		return _cloneArrayBuffer;
-	}
-
-	var _cloneTypedArray;
-	var hasRequired_cloneTypedArray;
-
-	function require_cloneTypedArray () {
-		if (hasRequired_cloneTypedArray) return _cloneTypedArray;
-		hasRequired_cloneTypedArray = 1;
-		var cloneArrayBuffer = require_cloneArrayBuffer();
-
-		/**
-		 * Creates a clone of `typedArray`.
-		 *
-		 * @private
-		 * @param {Object} typedArray The typed array to clone.
-		 * @param {boolean} [isDeep] Specify a deep clone.
-		 * @returns {Object} Returns the cloned typed array.
-		 */
-		function cloneTypedArray(typedArray, isDeep) {
-		  var buffer = isDeep ? cloneArrayBuffer(typedArray.buffer) : typedArray.buffer;
-		  return new typedArray.constructor(buffer, typedArray.byteOffset, typedArray.length);
-		}
-
-		_cloneTypedArray = cloneTypedArray;
-		return _cloneTypedArray;
-	}
-
-	/**
-	 * Copies the values of `source` to `array`.
-	 *
-	 * @private
-	 * @param {Array} source The array to copy values from.
-	 * @param {Array} [array=[]] The array to copy values to.
-	 * @returns {Array} Returns `array`.
-	 */
-
-	var _copyArray$1;
-	var hasRequired_copyArray$1;
-
-	function require_copyArray$1 () {
-		if (hasRequired_copyArray$1) return _copyArray$1;
-		hasRequired_copyArray$1 = 1;
-		function copyArray(source, array) {
-		  var index = -1,
-		      length = source.length;
-
-		  array || (array = Array(length));
-		  while (++index < length) {
-		    array[index] = source[index];
-		  }
-		  return array;
-		}
-
-		_copyArray$1 = copyArray;
-		return _copyArray$1;
-	}
-
-	var _baseCreate;
-	var hasRequired_baseCreate;
-
-	function require_baseCreate () {
-		if (hasRequired_baseCreate) return _baseCreate;
-		hasRequired_baseCreate = 1;
-		var isObject = requireIsObject$2();
-
-		/** Built-in value references. */
-		var objectCreate = Object.create;
-
-		/**
-		 * The base implementation of `_.create` without support for assigning
-		 * properties to the created object.
-		 *
-		 * @private
-		 * @param {Object} proto The object to inherit from.
-		 * @returns {Object} Returns the new object.
-		 */
-		var baseCreate = (function() {
-		  function object() {}
-		  return function(proto) {
-		    if (!isObject(proto)) {
-		      return {};
-		    }
-		    if (objectCreate) {
-		      return objectCreate(proto);
-		    }
-		    object.prototype = proto;
-		    var result = new object;
-		    object.prototype = undefined;
-		    return result;
-		  };
-		}());
-
-		_baseCreate = baseCreate;
-		return _baseCreate;
-	}
-
-	/**
-	 * Creates a unary function that invokes `func` with its argument transformed.
-	 *
-	 * @private
-	 * @param {Function} func The function to wrap.
-	 * @param {Function} transform The argument transform.
-	 * @returns {Function} Returns the new function.
-	 */
-
-	var _overArg;
-	var hasRequired_overArg;
-
-	function require_overArg () {
-		if (hasRequired_overArg) return _overArg;
-		hasRequired_overArg = 1;
-		function overArg(func, transform) {
-		  return function(arg) {
-		    return func(transform(arg));
-		  };
-		}
-
-		_overArg = overArg;
-		return _overArg;
-	}
-
-	var _getPrototype;
-	var hasRequired_getPrototype;
-
-	function require_getPrototype () {
-		if (hasRequired_getPrototype) return _getPrototype;
-		hasRequired_getPrototype = 1;
-		var overArg = require_overArg();
-
-		/** Built-in value references. */
-		var getPrototype = overArg(Object.getPrototypeOf, Object);
-
-		_getPrototype = getPrototype;
-		return _getPrototype;
-	}
-
-	/** Used for built-in method references. */
-
-	var _isPrototype;
-	var hasRequired_isPrototype;
-
-	function require_isPrototype () {
-		if (hasRequired_isPrototype) return _isPrototype;
-		hasRequired_isPrototype = 1;
-		var objectProto = Object.prototype;
-
-		/**
-		 * Checks if `value` is likely a prototype object.
-		 *
-		 * @private
-		 * @param {*} value The value to check.
-		 * @returns {boolean} Returns `true` if `value` is a prototype, else `false`.
-		 */
-		function isPrototype(value) {
-		  var Ctor = value && value.constructor,
-		      proto = (typeof Ctor == 'function' && Ctor.prototype) || objectProto;
-
-		  return value === proto;
-		}
-
-		_isPrototype = isPrototype;
-		return _isPrototype;
-	}
-
-	var _initCloneObject;
-	var hasRequired_initCloneObject;
-
-	function require_initCloneObject () {
-		if (hasRequired_initCloneObject) return _initCloneObject;
-		hasRequired_initCloneObject = 1;
-		var baseCreate = require_baseCreate(),
-		    getPrototype = require_getPrototype(),
-		    isPrototype = require_isPrototype();
-
-		/**
-		 * Initializes an object clone.
-		 *
-		 * @private
-		 * @param {Object} object The object to clone.
-		 * @returns {Object} Returns the initialized clone.
-		 */
-		function initCloneObject(object) {
-		  return (typeof object.constructor == 'function' && !isPrototype(object))
-		    ? baseCreate(getPrototype(object))
-		    : {};
-		}
-
-		_initCloneObject = initCloneObject;
-		return _initCloneObject;
-	}
-
-	/**
-	 * Checks if `value` is object-like. A value is object-like if it's not `null`
-	 * and has a `typeof` result of "object".
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 4.0.0
-	 * @category Lang
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
-	 * @example
-	 *
-	 * _.isObjectLike({});
-	 * // => true
-	 *
-	 * _.isObjectLike([1, 2, 3]);
-	 * // => true
-	 *
-	 * _.isObjectLike(_.noop);
-	 * // => false
-	 *
-	 * _.isObjectLike(null);
-	 * // => false
-	 */
-
-	var isObjectLike_1$1;
-	var hasRequiredIsObjectLike$1;
-
-	function requireIsObjectLike$1 () {
-		if (hasRequiredIsObjectLike$1) return isObjectLike_1$1;
-		hasRequiredIsObjectLike$1 = 1;
-		function isObjectLike(value) {
-		  return value != null && typeof value == 'object';
-		}
-
-		isObjectLike_1$1 = isObjectLike;
-		return isObjectLike_1$1;
-	}
-
-	var _baseIsArguments;
-	var hasRequired_baseIsArguments;
-
-	function require_baseIsArguments () {
-		if (hasRequired_baseIsArguments) return _baseIsArguments;
-		hasRequired_baseIsArguments = 1;
-		var baseGetTag = require_baseGetTag$1(),
-		    isObjectLike = requireIsObjectLike$1();
-
-		/** `Object#toString` result references. */
-		var argsTag = '[object Arguments]';
-
-		/**
-		 * The base implementation of `_.isArguments`.
-		 *
-		 * @private
-		 * @param {*} value The value to check.
-		 * @returns {boolean} Returns `true` if `value` is an `arguments` object,
-		 */
-		function baseIsArguments(value) {
-		  return isObjectLike(value) && baseGetTag(value) == argsTag;
-		}
-
-		_baseIsArguments = baseIsArguments;
-		return _baseIsArguments;
-	}
-
-	var isArguments_1;
-	var hasRequiredIsArguments;
-
-	function requireIsArguments () {
-		if (hasRequiredIsArguments) return isArguments_1;
-		hasRequiredIsArguments = 1;
-		var baseIsArguments = require_baseIsArguments(),
-		    isObjectLike = requireIsObjectLike$1();
-
-		/** Used for built-in method references. */
-		var objectProto = Object.prototype;
-
-		/** Used to check objects for own properties. */
-		var hasOwnProperty = objectProto.hasOwnProperty;
-
-		/** Built-in value references. */
-		var propertyIsEnumerable = objectProto.propertyIsEnumerable;
-
-		/**
-		 * Checks if `value` is likely an `arguments` object.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 0.1.0
-		 * @category Lang
-		 * @param {*} value The value to check.
-		 * @returns {boolean} Returns `true` if `value` is an `arguments` object,
-		 *  else `false`.
-		 * @example
-		 *
-		 * _.isArguments(function() { return arguments; }());
-		 * // => true
-		 *
-		 * _.isArguments([1, 2, 3]);
-		 * // => false
-		 */
-		var isArguments = baseIsArguments(function() { return arguments; }()) ? baseIsArguments : function(value) {
-		  return isObjectLike(value) && hasOwnProperty.call(value, 'callee') &&
-		    !propertyIsEnumerable.call(value, 'callee');
-		};
-
-		isArguments_1 = isArguments;
-		return isArguments_1;
-	}
-
-	/**
-	 * Checks if `value` is classified as an `Array` object.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 0.1.0
-	 * @category Lang
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is an array, else `false`.
-	 * @example
-	 *
-	 * _.isArray([1, 2, 3]);
-	 * // => true
-	 *
-	 * _.isArray(document.body.children);
-	 * // => false
-	 *
-	 * _.isArray('abc');
-	 * // => false
-	 *
-	 * _.isArray(_.noop);
-	 * // => false
-	 */
-
-	var isArray_1$1;
-	var hasRequiredIsArray$4;
-
-	function requireIsArray$4 () {
-		if (hasRequiredIsArray$4) return isArray_1$1;
-		hasRequiredIsArray$4 = 1;
-		var isArray = Array.isArray;
-
-		isArray_1$1 = isArray;
-		return isArray_1$1;
-	}
-
-	/** Used as references for various `Number` constants. */
-
-	var isLength_1;
-	var hasRequiredIsLength;
-
-	function requireIsLength () {
-		if (hasRequiredIsLength) return isLength_1;
-		hasRequiredIsLength = 1;
-		var MAX_SAFE_INTEGER = 9007199254740991;
-
-		/**
-		 * Checks if `value` is a valid array-like length.
-		 *
-		 * **Note:** This method is loosely based on
-		 * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 4.0.0
-		 * @category Lang
-		 * @param {*} value The value to check.
-		 * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
-		 * @example
-		 *
-		 * _.isLength(3);
-		 * // => true
-		 *
-		 * _.isLength(Number.MIN_VALUE);
-		 * // => false
-		 *
-		 * _.isLength(Infinity);
-		 * // => false
-		 *
-		 * _.isLength('3');
-		 * // => false
-		 */
-		function isLength(value) {
-		  return typeof value == 'number' &&
-		    value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-		}
-
-		isLength_1 = isLength;
-		return isLength_1;
-	}
-
-	var isArrayLike_1;
-	var hasRequiredIsArrayLike;
-
-	function requireIsArrayLike () {
-		if (hasRequiredIsArrayLike) return isArrayLike_1;
-		hasRequiredIsArrayLike = 1;
-		var isFunction = requireIsFunction$1(),
-		    isLength = requireIsLength();
-
-		/**
-		 * Checks if `value` is array-like. A value is considered array-like if it's
-		 * not a function and has a `value.length` that's an integer greater than or
-		 * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 4.0.0
-		 * @category Lang
-		 * @param {*} value The value to check.
-		 * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
-		 * @example
-		 *
-		 * _.isArrayLike([1, 2, 3]);
-		 * // => true
-		 *
-		 * _.isArrayLike(document.body.children);
-		 * // => true
-		 *
-		 * _.isArrayLike('abc');
-		 * // => true
-		 *
-		 * _.isArrayLike(_.noop);
-		 * // => false
-		 */
-		function isArrayLike(value) {
-		  return value != null && isLength(value.length) && !isFunction(value);
-		}
-
-		isArrayLike_1 = isArrayLike;
-		return isArrayLike_1;
-	}
-
-	var isArrayLikeObject_1;
-	var hasRequiredIsArrayLikeObject;
-
-	function requireIsArrayLikeObject () {
-		if (hasRequiredIsArrayLikeObject) return isArrayLikeObject_1;
-		hasRequiredIsArrayLikeObject = 1;
-		var isArrayLike = requireIsArrayLike(),
-		    isObjectLike = requireIsObjectLike$1();
-
-		/**
-		 * This method is like `_.isArrayLike` except that it also checks if `value`
-		 * is an object.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 4.0.0
-		 * @category Lang
-		 * @param {*} value The value to check.
-		 * @returns {boolean} Returns `true` if `value` is an array-like object,
-		 *  else `false`.
-		 * @example
-		 *
-		 * _.isArrayLikeObject([1, 2, 3]);
-		 * // => true
-		 *
-		 * _.isArrayLikeObject(document.body.children);
-		 * // => true
-		 *
-		 * _.isArrayLikeObject('abc');
-		 * // => false
-		 *
-		 * _.isArrayLikeObject(_.noop);
-		 * // => false
-		 */
-		function isArrayLikeObject(value) {
-		  return isObjectLike(value) && isArrayLike(value);
-		}
-
-		isArrayLikeObject_1 = isArrayLikeObject;
-		return isArrayLikeObject_1;
-	}
-
-	var isBuffer$1 = {exports: {}};
-
-	/**
-	 * This method returns `false`.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 4.13.0
-	 * @category Util
-	 * @returns {boolean} Returns `false`.
-	 * @example
-	 *
-	 * _.times(2, _.stubFalse);
-	 * // => [false, false]
-	 */
-
-	var stubFalse_1;
-	var hasRequiredStubFalse;
-
-	function requireStubFalse () {
-		if (hasRequiredStubFalse) return stubFalse_1;
-		hasRequiredStubFalse = 1;
-		function stubFalse() {
-		  return false;
-		}
-
-		stubFalse_1 = stubFalse;
-		return stubFalse_1;
-	}
-
-	var isBuffer_1 = isBuffer$1.exports;
-
-	var hasRequiredIsBuffer;
-
-	function requireIsBuffer () {
-		if (hasRequiredIsBuffer) return isBuffer$1.exports;
-		hasRequiredIsBuffer = 1;
-		(function (module, exports) {
-			var root = require_root$1(),
-			    stubFalse = requireStubFalse();
-
-			/** Detect free variable `exports`. */
-			var freeExports = 'object' == 'object' && exports && !exports.nodeType && exports;
-
-			/** Detect free variable `module`. */
-			var freeModule = freeExports && 'object' == 'object' && module && !module.nodeType && module;
-
-			/** Detect the popular CommonJS extension `module.exports`. */
-			var moduleExports = freeModule && freeModule.exports === freeExports;
-
-			/** Built-in value references. */
-			var Buffer = moduleExports ? root.Buffer : undefined;
-
-			/* Built-in method references for those with the same name as other `lodash` methods. */
-			var nativeIsBuffer = Buffer ? Buffer.isBuffer : undefined;
-
-			/**
-			 * Checks if `value` is a buffer.
-			 *
-			 * @static
-			 * @memberOf _
-			 * @since 4.3.0
-			 * @category Lang
-			 * @param {*} value The value to check.
-			 * @returns {boolean} Returns `true` if `value` is a buffer, else `false`.
-			 * @example
-			 *
-			 * _.isBuffer(new Buffer(2));
-			 * // => true
-			 *
-			 * _.isBuffer(new Uint8Array(2));
-			 * // => false
-			 */
-			var isBuffer = nativeIsBuffer || stubFalse;
-
-			module.exports = isBuffer; 
-		} (isBuffer$1, isBuffer$1.exports));
-		return isBuffer$1.exports;
-	}
-
-	var isPlainObject_1;
-	var hasRequiredIsPlainObject;
-
-	function requireIsPlainObject () {
-		if (hasRequiredIsPlainObject) return isPlainObject_1;
-		hasRequiredIsPlainObject = 1;
-		var baseGetTag = require_baseGetTag$1(),
-		    getPrototype = require_getPrototype(),
-		    isObjectLike = requireIsObjectLike$1();
-
-		/** `Object#toString` result references. */
-		var objectTag = '[object Object]';
-
-		/** Used for built-in method references. */
-		var funcProto = Function.prototype,
-		    objectProto = Object.prototype;
-
-		/** Used to resolve the decompiled source of functions. */
-		var funcToString = funcProto.toString;
-
-		/** Used to check objects for own properties. */
-		var hasOwnProperty = objectProto.hasOwnProperty;
-
-		/** Used to infer the `Object` constructor. */
-		var objectCtorString = funcToString.call(Object);
-
-		/**
-		 * Checks if `value` is a plain object, that is, an object created by the
-		 * `Object` constructor or one with a `[[Prototype]]` of `null`.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 0.8.0
-		 * @category Lang
-		 * @param {*} value The value to check.
-		 * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
-		 * @example
-		 *
-		 * function Foo() {
-		 *   this.a = 1;
-		 * }
-		 *
-		 * _.isPlainObject(new Foo);
-		 * // => false
-		 *
-		 * _.isPlainObject([1, 2, 3]);
-		 * // => false
-		 *
-		 * _.isPlainObject({ 'x': 0, 'y': 0 });
-		 * // => true
-		 *
-		 * _.isPlainObject(Object.create(null));
-		 * // => true
-		 */
-		function isPlainObject(value) {
-		  if (!isObjectLike(value) || baseGetTag(value) != objectTag) {
-		    return false;
-		  }
-		  var proto = getPrototype(value);
-		  if (proto === null) {
-		    return true;
-		  }
-		  var Ctor = hasOwnProperty.call(proto, 'constructor') && proto.constructor;
-		  return typeof Ctor == 'function' && Ctor instanceof Ctor &&
-		    funcToString.call(Ctor) == objectCtorString;
-		}
-
-		isPlainObject_1 = isPlainObject;
-		return isPlainObject_1;
-	}
-
-	var _baseIsTypedArray;
-	var hasRequired_baseIsTypedArray;
-
-	function require_baseIsTypedArray () {
-		if (hasRequired_baseIsTypedArray) return _baseIsTypedArray;
-		hasRequired_baseIsTypedArray = 1;
-		var baseGetTag = require_baseGetTag$1(),
-		    isLength = requireIsLength(),
-		    isObjectLike = requireIsObjectLike$1();
-
-		/** `Object#toString` result references. */
-		var argsTag = '[object Arguments]',
-		    arrayTag = '[object Array]',
-		    boolTag = '[object Boolean]',
-		    dateTag = '[object Date]',
-		    errorTag = '[object Error]',
-		    funcTag = '[object Function]',
-		    mapTag = '[object Map]',
-		    numberTag = '[object Number]',
-		    objectTag = '[object Object]',
-		    regexpTag = '[object RegExp]',
-		    setTag = '[object Set]',
-		    stringTag = '[object String]',
-		    weakMapTag = '[object WeakMap]';
-
-		var arrayBufferTag = '[object ArrayBuffer]',
-		    dataViewTag = '[object DataView]',
-		    float32Tag = '[object Float32Array]',
-		    float64Tag = '[object Float64Array]',
-		    int8Tag = '[object Int8Array]',
-		    int16Tag = '[object Int16Array]',
-		    int32Tag = '[object Int32Array]',
-		    uint8Tag = '[object Uint8Array]',
-		    uint8ClampedTag = '[object Uint8ClampedArray]',
-		    uint16Tag = '[object Uint16Array]',
-		    uint32Tag = '[object Uint32Array]';
-
-		/** Used to identify `toStringTag` values of typed arrays. */
-		var typedArrayTags = {};
-		typedArrayTags[float32Tag] = typedArrayTags[float64Tag] =
-		typedArrayTags[int8Tag] = typedArrayTags[int16Tag] =
-		typedArrayTags[int32Tag] = typedArrayTags[uint8Tag] =
-		typedArrayTags[uint8ClampedTag] = typedArrayTags[uint16Tag] =
-		typedArrayTags[uint32Tag] = true;
-		typedArrayTags[argsTag] = typedArrayTags[arrayTag] =
-		typedArrayTags[arrayBufferTag] = typedArrayTags[boolTag] =
-		typedArrayTags[dataViewTag] = typedArrayTags[dateTag] =
-		typedArrayTags[errorTag] = typedArrayTags[funcTag] =
-		typedArrayTags[mapTag] = typedArrayTags[numberTag] =
-		typedArrayTags[objectTag] = typedArrayTags[regexpTag] =
-		typedArrayTags[setTag] = typedArrayTags[stringTag] =
-		typedArrayTags[weakMapTag] = false;
-
-		/**
-		 * The base implementation of `_.isTypedArray` without Node.js optimizations.
-		 *
-		 * @private
-		 * @param {*} value The value to check.
-		 * @returns {boolean} Returns `true` if `value` is a typed array, else `false`.
-		 */
-		function baseIsTypedArray(value) {
-		  return isObjectLike(value) &&
-		    isLength(value.length) && !!typedArrayTags[baseGetTag(value)];
-		}
-
-		_baseIsTypedArray = baseIsTypedArray;
-		return _baseIsTypedArray;
-	}
-
-	/**
-	 * The base implementation of `_.unary` without support for storing metadata.
-	 *
-	 * @private
-	 * @param {Function} func The function to cap arguments for.
-	 * @returns {Function} Returns the new capped function.
-	 */
-
-	var _baseUnary;
-	var hasRequired_baseUnary;
-
-	function require_baseUnary () {
-		if (hasRequired_baseUnary) return _baseUnary;
-		hasRequired_baseUnary = 1;
-		function baseUnary(func) {
-		  return function(value) {
-		    return func(value);
-		  };
-		}
-
-		_baseUnary = baseUnary;
-		return _baseUnary;
-	}
-
-	var _nodeUtil$1 = {exports: {}};
-
-	var _nodeUtil = _nodeUtil$1.exports;
-
-	var hasRequired_nodeUtil;
-
-	function require_nodeUtil () {
-		if (hasRequired_nodeUtil) return _nodeUtil$1.exports;
-		hasRequired_nodeUtil = 1;
-		(function (module, exports) {
-			var freeGlobal = require_freeGlobal$1();
-
-			/** Detect free variable `exports`. */
-			var freeExports = 'object' == 'object' && exports && !exports.nodeType && exports;
-
-			/** Detect free variable `module`. */
-			var freeModule = freeExports && 'object' == 'object' && module && !module.nodeType && module;
-
-			/** Detect the popular CommonJS extension `module.exports`. */
-			var moduleExports = freeModule && freeModule.exports === freeExports;
-
-			/** Detect free variable `process` from Node.js. */
-			var freeProcess = moduleExports && freeGlobal.process;
-
-			/** Used to access faster Node.js helpers. */
-			var nodeUtil = (function() {
-			  try {
-			    // Use `util.types` for Node.js 10+.
-			    var types = freeModule && freeModule.require && freeModule.require('util').types;
-
-			    if (types) {
-			      return types;
-			    }
-
-			    // Legacy `process.binding('util')` for Node.js < 10.
-			    return freeProcess && freeProcess.binding && freeProcess.binding('util');
-			  } catch (e) {}
-			}());
-
-			module.exports = nodeUtil; 
-		} (_nodeUtil$1, _nodeUtil$1.exports));
-		return _nodeUtil$1.exports;
-	}
-
-	var isTypedArray_1;
-	var hasRequiredIsTypedArray;
-
-	function requireIsTypedArray () {
-		if (hasRequiredIsTypedArray) return isTypedArray_1;
-		hasRequiredIsTypedArray = 1;
-		var baseIsTypedArray = require_baseIsTypedArray(),
-		    baseUnary = require_baseUnary(),
-		    nodeUtil = require_nodeUtil();
-
-		/* Node.js helper references. */
-		var nodeIsTypedArray = nodeUtil && nodeUtil.isTypedArray;
-
-		/**
-		 * Checks if `value` is classified as a typed array.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 3.0.0
-		 * @category Lang
-		 * @param {*} value The value to check.
-		 * @returns {boolean} Returns `true` if `value` is a typed array, else `false`.
-		 * @example
-		 *
-		 * _.isTypedArray(new Uint8Array);
-		 * // => true
-		 *
-		 * _.isTypedArray([]);
-		 * // => false
-		 */
-		var isTypedArray = nodeIsTypedArray ? baseUnary(nodeIsTypedArray) : baseIsTypedArray;
-
-		isTypedArray_1 = isTypedArray;
-		return isTypedArray_1;
-	}
-
-	/**
-	 * Gets the value at `key`, unless `key` is "__proto__" or "constructor".
-	 *
-	 * @private
-	 * @param {Object} object The object to query.
-	 * @param {string} key The key of the property to get.
-	 * @returns {*} Returns the property value.
-	 */
-
-	var _safeGet;
-	var hasRequired_safeGet;
-
-	function require_safeGet () {
-		if (hasRequired_safeGet) return _safeGet;
-		hasRequired_safeGet = 1;
-		function safeGet(object, key) {
-		  if (key === 'constructor' && typeof object[key] === 'function') {
-		    return;
-		  }
-
-		  if (key == '__proto__') {
-		    return;
-		  }
-
-		  return object[key];
-		}
-
-		_safeGet = safeGet;
-		return _safeGet;
-	}
-
-	var _assignValue$1;
-	var hasRequired_assignValue$1;
-
-	function require_assignValue$1 () {
-		if (hasRequired_assignValue$1) return _assignValue$1;
-		hasRequired_assignValue$1 = 1;
-		var baseAssignValue = require_baseAssignValue$1(),
-		    eq = requireEq$1();
-
-		/** Used for built-in method references. */
-		var objectProto = Object.prototype;
-
-		/** Used to check objects for own properties. */
-		var hasOwnProperty = objectProto.hasOwnProperty;
-
-		/**
-		 * Assigns `value` to `key` of `object` if the existing value is not equivalent
-		 * using [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
-		 * for equality comparisons.
-		 *
-		 * @private
-		 * @param {Object} object The object to modify.
-		 * @param {string} key The key of the property to assign.
-		 * @param {*} value The value to assign.
-		 */
-		function assignValue(object, key, value) {
-		  var objValue = object[key];
-		  if (!(hasOwnProperty.call(object, key) && eq(objValue, value)) ||
-		      (value === undefined && !(key in object))) {
-		    baseAssignValue(object, key, value);
-		  }
-		}
-
-		_assignValue$1 = assignValue;
-		return _assignValue$1;
-	}
-
-	var _copyObject;
-	var hasRequired_copyObject;
-
-	function require_copyObject () {
-		if (hasRequired_copyObject) return _copyObject;
-		hasRequired_copyObject = 1;
-		var assignValue = require_assignValue$1(),
-		    baseAssignValue = require_baseAssignValue$1();
-
-		/**
-		 * Copies properties of `source` to `object`.
-		 *
-		 * @private
-		 * @param {Object} source The object to copy properties from.
-		 * @param {Array} props The property identifiers to copy.
-		 * @param {Object} [object={}] The object to copy properties to.
-		 * @param {Function} [customizer] The function to customize copied values.
-		 * @returns {Object} Returns `object`.
-		 */
-		function copyObject(source, props, object, customizer) {
-		  var isNew = !object;
-		  object || (object = {});
-
-		  var index = -1,
-		      length = props.length;
-
-		  while (++index < length) {
-		    var key = props[index];
-
-		    var newValue = customizer
-		      ? customizer(object[key], source[key], key, object, source)
-		      : undefined;
-
-		    if (newValue === undefined) {
-		      newValue = source[key];
-		    }
-		    if (isNew) {
-		      baseAssignValue(object, key, newValue);
-		    } else {
-		      assignValue(object, key, newValue);
-		    }
-		  }
-		  return object;
-		}
-
-		_copyObject = copyObject;
-		return _copyObject;
-	}
-
-	/**
-	 * The base implementation of `_.times` without support for iteratee shorthands
-	 * or max array length checks.
-	 *
-	 * @private
-	 * @param {number} n The number of times to invoke `iteratee`.
-	 * @param {Function} iteratee The function invoked per iteration.
-	 * @returns {Array} Returns the array of results.
-	 */
-
-	var _baseTimes;
-	var hasRequired_baseTimes;
-
-	function require_baseTimes () {
-		if (hasRequired_baseTimes) return _baseTimes;
-		hasRequired_baseTimes = 1;
-		function baseTimes(n, iteratee) {
-		  var index = -1,
-		      result = Array(n);
-
-		  while (++index < n) {
-		    result[index] = iteratee(index);
-		  }
-		  return result;
-		}
-
-		_baseTimes = baseTimes;
-		return _baseTimes;
-	}
-
-	/** Used as references for various `Number` constants. */
-
-	var _isIndex$1;
-	var hasRequired_isIndex$1;
-
-	function require_isIndex$1 () {
-		if (hasRequired_isIndex$1) return _isIndex$1;
-		hasRequired_isIndex$1 = 1;
-		var MAX_SAFE_INTEGER = 9007199254740991;
-
-		/** Used to detect unsigned integer values. */
-		var reIsUint = /^(?:0|[1-9]\d*)$/;
-
-		/**
-		 * Checks if `value` is a valid array-like index.
-		 *
-		 * @private
-		 * @param {*} value The value to check.
-		 * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
-		 * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
-		 */
-		function isIndex(value, length) {
-		  var type = typeof value;
-		  length = length == null ? MAX_SAFE_INTEGER : length;
-
-		  return !!length &&
-		    (type == 'number' ||
-		      (type != 'symbol' && reIsUint.test(value))) &&
-		        (value > -1 && value % 1 == 0 && value < length);
-		}
-
-		_isIndex$1 = isIndex;
-		return _isIndex$1;
-	}
-
-	var _arrayLikeKeys;
-	var hasRequired_arrayLikeKeys;
-
-	function require_arrayLikeKeys () {
-		if (hasRequired_arrayLikeKeys) return _arrayLikeKeys;
-		hasRequired_arrayLikeKeys = 1;
-		var baseTimes = require_baseTimes(),
-		    isArguments = requireIsArguments(),
-		    isArray = requireIsArray$4(),
-		    isBuffer = requireIsBuffer(),
-		    isIndex = require_isIndex$1(),
-		    isTypedArray = requireIsTypedArray();
-
-		/** Used for built-in method references. */
-		var objectProto = Object.prototype;
-
-		/** Used to check objects for own properties. */
-		var hasOwnProperty = objectProto.hasOwnProperty;
-
-		/**
-		 * Creates an array of the enumerable property names of the array-like `value`.
-		 *
-		 * @private
-		 * @param {*} value The value to query.
-		 * @param {boolean} inherited Specify returning inherited property names.
-		 * @returns {Array} Returns the array of property names.
-		 */
-		function arrayLikeKeys(value, inherited) {
-		  var isArr = isArray(value),
-		      isArg = !isArr && isArguments(value),
-		      isBuff = !isArr && !isArg && isBuffer(value),
-		      isType = !isArr && !isArg && !isBuff && isTypedArray(value),
-		      skipIndexes = isArr || isArg || isBuff || isType,
-		      result = skipIndexes ? baseTimes(value.length, String) : [],
-		      length = result.length;
-
-		  for (var key in value) {
-		    if ((inherited || hasOwnProperty.call(value, key)) &&
-		        !(skipIndexes && (
-		           // Safari 9 has enumerable `arguments.length` in strict mode.
-		           key == 'length' ||
-		           // Node.js 0.10 has enumerable non-index properties on buffers.
-		           (isBuff && (key == 'offset' || key == 'parent')) ||
-		           // PhantomJS 2 has enumerable non-index properties on typed arrays.
-		           (isType && (key == 'buffer' || key == 'byteLength' || key == 'byteOffset')) ||
-		           // Skip index properties.
-		           isIndex(key, length)
-		        ))) {
-		      result.push(key);
-		    }
-		  }
-		  return result;
-		}
-
-		_arrayLikeKeys = arrayLikeKeys;
-		return _arrayLikeKeys;
-	}
-
-	/**
-	 * This function is like
-	 * [`Object.keys`](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
-	 * except that it includes inherited enumerable properties.
-	 *
-	 * @private
-	 * @param {Object} object The object to query.
-	 * @returns {Array} Returns the array of property names.
-	 */
-
-	var _nativeKeysIn;
-	var hasRequired_nativeKeysIn;
-
-	function require_nativeKeysIn () {
-		if (hasRequired_nativeKeysIn) return _nativeKeysIn;
-		hasRequired_nativeKeysIn = 1;
-		function nativeKeysIn(object) {
-		  var result = [];
-		  if (object != null) {
-		    for (var key in Object(object)) {
-		      result.push(key);
-		    }
-		  }
-		  return result;
-		}
-
-		_nativeKeysIn = nativeKeysIn;
-		return _nativeKeysIn;
-	}
-
-	var _baseKeysIn;
-	var hasRequired_baseKeysIn;
-
-	function require_baseKeysIn () {
-		if (hasRequired_baseKeysIn) return _baseKeysIn;
-		hasRequired_baseKeysIn = 1;
-		var isObject = requireIsObject$2(),
-		    isPrototype = require_isPrototype(),
-		    nativeKeysIn = require_nativeKeysIn();
-
-		/** Used for built-in method references. */
-		var objectProto = Object.prototype;
-
-		/** Used to check objects for own properties. */
-		var hasOwnProperty = objectProto.hasOwnProperty;
-
-		/**
-		 * The base implementation of `_.keysIn` which doesn't treat sparse arrays as dense.
-		 *
-		 * @private
-		 * @param {Object} object The object to query.
-		 * @returns {Array} Returns the array of property names.
-		 */
-		function baseKeysIn(object) {
-		  if (!isObject(object)) {
-		    return nativeKeysIn(object);
-		  }
-		  var isProto = isPrototype(object),
-		      result = [];
-
-		  for (var key in object) {
-		    if (!(key == 'constructor' && (isProto || !hasOwnProperty.call(object, key)))) {
-		      result.push(key);
-		    }
-		  }
-		  return result;
-		}
-
-		_baseKeysIn = baseKeysIn;
-		return _baseKeysIn;
-	}
-
-	var keysIn_1;
-	var hasRequiredKeysIn;
-
-	function requireKeysIn () {
-		if (hasRequiredKeysIn) return keysIn_1;
-		hasRequiredKeysIn = 1;
-		var arrayLikeKeys = require_arrayLikeKeys(),
-		    baseKeysIn = require_baseKeysIn(),
-		    isArrayLike = requireIsArrayLike();
-
-		/**
-		 * Creates an array of the own and inherited enumerable property names of `object`.
-		 *
-		 * **Note:** Non-object values are coerced to objects.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 3.0.0
-		 * @category Object
-		 * @param {Object} object The object to query.
-		 * @returns {Array} Returns the array of property names.
-		 * @example
-		 *
-		 * function Foo() {
-		 *   this.a = 1;
-		 *   this.b = 2;
-		 * }
-		 *
-		 * Foo.prototype.c = 3;
-		 *
-		 * _.keysIn(new Foo);
-		 * // => ['a', 'b', 'c'] (iteration order is not guaranteed)
-		 */
-		function keysIn(object) {
-		  return isArrayLike(object) ? arrayLikeKeys(object, true) : baseKeysIn(object);
-		}
-
-		keysIn_1 = keysIn;
-		return keysIn_1;
-	}
-
-	var toPlainObject_1;
-	var hasRequiredToPlainObject;
-
-	function requireToPlainObject () {
-		if (hasRequiredToPlainObject) return toPlainObject_1;
-		hasRequiredToPlainObject = 1;
-		var copyObject = require_copyObject(),
-		    keysIn = requireKeysIn();
-
-		/**
-		 * Converts `value` to a plain object flattening inherited enumerable string
-		 * keyed properties of `value` to own properties of the plain object.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 3.0.0
-		 * @category Lang
-		 * @param {*} value The value to convert.
-		 * @returns {Object} Returns the converted plain object.
-		 * @example
-		 *
-		 * function Foo() {
-		 *   this.b = 2;
-		 * }
-		 *
-		 * Foo.prototype.c = 3;
-		 *
-		 * _.assign({ 'a': 1 }, new Foo);
-		 * // => { 'a': 1, 'b': 2 }
-		 *
-		 * _.assign({ 'a': 1 }, _.toPlainObject(new Foo));
-		 * // => { 'a': 1, 'b': 2, 'c': 3 }
-		 */
-		function toPlainObject(value) {
-		  return copyObject(value, keysIn(value));
-		}
-
-		toPlainObject_1 = toPlainObject;
-		return toPlainObject_1;
-	}
-
-	var _baseMergeDeep;
-	var hasRequired_baseMergeDeep;
-
-	function require_baseMergeDeep () {
-		if (hasRequired_baseMergeDeep) return _baseMergeDeep;
-		hasRequired_baseMergeDeep = 1;
-		var assignMergeValue = require_assignMergeValue(),
-		    cloneBuffer = require_cloneBuffer(),
-		    cloneTypedArray = require_cloneTypedArray(),
-		    copyArray = require_copyArray$1(),
-		    initCloneObject = require_initCloneObject(),
-		    isArguments = requireIsArguments(),
-		    isArray = requireIsArray$4(),
-		    isArrayLikeObject = requireIsArrayLikeObject(),
-		    isBuffer = requireIsBuffer(),
-		    isFunction = requireIsFunction$1(),
-		    isObject = requireIsObject$2(),
-		    isPlainObject = requireIsPlainObject(),
-		    isTypedArray = requireIsTypedArray(),
-		    safeGet = require_safeGet(),
-		    toPlainObject = requireToPlainObject();
-
-		/**
-		 * A specialized version of `baseMerge` for arrays and objects which performs
-		 * deep merges and tracks traversed objects enabling objects with circular
-		 * references to be merged.
-		 *
-		 * @private
-		 * @param {Object} object The destination object.
-		 * @param {Object} source The source object.
-		 * @param {string} key The key of the value to merge.
-		 * @param {number} srcIndex The index of `source`.
-		 * @param {Function} mergeFunc The function to merge values.
-		 * @param {Function} [customizer] The function to customize assigned values.
-		 * @param {Object} [stack] Tracks traversed source values and their merged
-		 *  counterparts.
-		 */
-		function baseMergeDeep(object, source, key, srcIndex, mergeFunc, customizer, stack) {
-		  var objValue = safeGet(object, key),
-		      srcValue = safeGet(source, key),
-		      stacked = stack.get(srcValue);
-
-		  if (stacked) {
-		    assignMergeValue(object, key, stacked);
-		    return;
-		  }
-		  var newValue = customizer
-		    ? customizer(objValue, srcValue, (key + ''), object, source, stack)
-		    : undefined;
-
-		  var isCommon = newValue === undefined;
-
-		  if (isCommon) {
-		    var isArr = isArray(srcValue),
-		        isBuff = !isArr && isBuffer(srcValue),
-		        isTyped = !isArr && !isBuff && isTypedArray(srcValue);
-
-		    newValue = srcValue;
-		    if (isArr || isBuff || isTyped) {
-		      if (isArray(objValue)) {
-		        newValue = objValue;
-		      }
-		      else if (isArrayLikeObject(objValue)) {
-		        newValue = copyArray(objValue);
-		      }
-		      else if (isBuff) {
-		        isCommon = false;
-		        newValue = cloneBuffer(srcValue, true);
-		      }
-		      else if (isTyped) {
-		        isCommon = false;
-		        newValue = cloneTypedArray(srcValue, true);
-		      }
-		      else {
-		        newValue = [];
-		      }
-		    }
-		    else if (isPlainObject(srcValue) || isArguments(srcValue)) {
-		      newValue = objValue;
-		      if (isArguments(objValue)) {
-		        newValue = toPlainObject(objValue);
-		      }
-		      else if (!isObject(objValue) || isFunction(objValue)) {
-		        newValue = initCloneObject(srcValue);
-		      }
-		    }
-		    else {
-		      isCommon = false;
-		    }
-		  }
-		  if (isCommon) {
-		    // Recursively merge objects and arrays (susceptible to call stack limits).
-		    stack.set(srcValue, newValue);
-		    mergeFunc(newValue, srcValue, srcIndex, customizer, stack);
-		    stack['delete'](srcValue);
-		  }
-		  assignMergeValue(object, key, newValue);
-		}
-
-		_baseMergeDeep = baseMergeDeep;
-		return _baseMergeDeep;
-	}
-
-	var _baseMerge;
-	var hasRequired_baseMerge;
-
-	function require_baseMerge () {
-		if (hasRequired_baseMerge) return _baseMerge;
-		hasRequired_baseMerge = 1;
-		var Stack = require_Stack(),
-		    assignMergeValue = require_assignMergeValue(),
-		    baseFor = require_baseFor(),
-		    baseMergeDeep = require_baseMergeDeep(),
-		    isObject = requireIsObject$2(),
-		    keysIn = requireKeysIn(),
-		    safeGet = require_safeGet();
-
-		/**
-		 * The base implementation of `_.merge` without support for multiple sources.
-		 *
-		 * @private
-		 * @param {Object} object The destination object.
-		 * @param {Object} source The source object.
-		 * @param {number} srcIndex The index of `source`.
-		 * @param {Function} [customizer] The function to customize merged values.
-		 * @param {Object} [stack] Tracks traversed source values and their merged
-		 *  counterparts.
-		 */
-		function baseMerge(object, source, srcIndex, customizer, stack) {
-		  if (object === source) {
-		    return;
-		  }
-		  baseFor(source, function(srcValue, key) {
-		    stack || (stack = new Stack);
-		    if (isObject(srcValue)) {
-		      baseMergeDeep(object, source, key, srcIndex, baseMerge, customizer, stack);
-		    }
-		    else {
-		      var newValue = customizer
-		        ? customizer(safeGet(object, key), srcValue, (key + ''), object, source, stack)
-		        : undefined;
-
-		      if (newValue === undefined) {
-		        newValue = srcValue;
-		      }
-		      assignMergeValue(object, key, newValue);
-		    }
-		  }, keysIn);
-		}
-
-		_baseMerge = baseMerge;
-		return _baseMerge;
-	}
-
-	/**
-	 * This method returns the first argument it receives.
-	 *
-	 * @static
-	 * @since 0.1.0
-	 * @memberOf _
-	 * @category Util
-	 * @param {*} value Any value.
-	 * @returns {*} Returns `value`.
-	 * @example
-	 *
-	 * var object = { 'a': 1 };
-	 *
-	 * console.log(_.identity(object) === object);
-	 * // => true
-	 */
-
-	var identity_1;
-	var hasRequiredIdentity;
-
-	function requireIdentity () {
-		if (hasRequiredIdentity) return identity_1;
-		hasRequiredIdentity = 1;
-		function identity(value) {
-		  return value;
-		}
-
-		identity_1 = identity;
-		return identity_1;
-	}
-
-	/**
-	 * A faster alternative to `Function#apply`, this function invokes `func`
-	 * with the `this` binding of `thisArg` and the arguments of `args`.
-	 *
-	 * @private
-	 * @param {Function} func The function to invoke.
-	 * @param {*} thisArg The `this` binding of `func`.
-	 * @param {Array} args The arguments to invoke `func` with.
-	 * @returns {*} Returns the result of `func`.
-	 */
-
-	var _apply;
-	var hasRequired_apply;
-
-	function require_apply () {
-		if (hasRequired_apply) return _apply;
-		hasRequired_apply = 1;
-		function apply(func, thisArg, args) {
-		  switch (args.length) {
-		    case 0: return func.call(thisArg);
-		    case 1: return func.call(thisArg, args[0]);
-		    case 2: return func.call(thisArg, args[0], args[1]);
-		    case 3: return func.call(thisArg, args[0], args[1], args[2]);
-		  }
-		  return func.apply(thisArg, args);
-		}
-
-		_apply = apply;
-		return _apply;
-	}
-
-	var _overRest;
-	var hasRequired_overRest;
-
-	function require_overRest () {
-		if (hasRequired_overRest) return _overRest;
-		hasRequired_overRest = 1;
-		var apply = require_apply();
-
-		/* Built-in method references for those with the same name as other `lodash` methods. */
-		var nativeMax = Math.max;
-
-		/**
-		 * A specialized version of `baseRest` which transforms the rest array.
-		 *
-		 * @private
-		 * @param {Function} func The function to apply a rest parameter to.
-		 * @param {number} [start=func.length-1] The start position of the rest parameter.
-		 * @param {Function} transform The rest array transform.
-		 * @returns {Function} Returns the new function.
-		 */
-		function overRest(func, start, transform) {
-		  start = nativeMax(start === undefined ? (func.length - 1) : start, 0);
-		  return function() {
-		    var args = arguments,
-		        index = -1,
-		        length = nativeMax(args.length - start, 0),
-		        array = Array(length);
-
-		    while (++index < length) {
-		      array[index] = args[start + index];
-		    }
-		    index = -1;
-		    var otherArgs = Array(start + 1);
-		    while (++index < start) {
-		      otherArgs[index] = args[index];
-		    }
-		    otherArgs[start] = transform(array);
-		    return apply(func, this, otherArgs);
-		  };
-		}
-
-		_overRest = overRest;
-		return _overRest;
-	}
-
-	/**
-	 * Creates a function that returns `value`.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 2.4.0
-	 * @category Util
-	 * @param {*} value The value to return from the new function.
-	 * @returns {Function} Returns the new constant function.
-	 * @example
-	 *
-	 * var objects = _.times(2, _.constant({ 'a': 1 }));
-	 *
-	 * console.log(objects);
-	 * // => [{ 'a': 1 }, { 'a': 1 }]
-	 *
-	 * console.log(objects[0] === objects[1]);
-	 * // => true
-	 */
-
-	var constant_1;
-	var hasRequiredConstant;
-
-	function requireConstant () {
-		if (hasRequiredConstant) return constant_1;
-		hasRequiredConstant = 1;
-		function constant(value) {
-		  return function() {
-		    return value;
-		  };
-		}
-
-		constant_1 = constant;
-		return constant_1;
-	}
-
-	var _baseSetToString;
-	var hasRequired_baseSetToString;
-
-	function require_baseSetToString () {
-		if (hasRequired_baseSetToString) return _baseSetToString;
-		hasRequired_baseSetToString = 1;
-		var constant = requireConstant(),
-		    defineProperty = require_defineProperty$1(),
-		    identity = requireIdentity();
-
-		/**
-		 * The base implementation of `setToString` without support for hot loop shorting.
-		 *
-		 * @private
-		 * @param {Function} func The function to modify.
-		 * @param {Function} string The `toString` result.
-		 * @returns {Function} Returns `func`.
-		 */
-		var baseSetToString = !defineProperty ? identity : function(func, string) {
-		  return defineProperty(func, 'toString', {
-		    'configurable': true,
-		    'enumerable': false,
-		    'value': constant(string),
-		    'writable': true
-		  });
-		};
-
-		_baseSetToString = baseSetToString;
-		return _baseSetToString;
-	}
-
-	/** Used to detect hot functions by number of calls within a span of milliseconds. */
-
-	var _shortOut;
-	var hasRequired_shortOut;
-
-	function require_shortOut () {
-		if (hasRequired_shortOut) return _shortOut;
-		hasRequired_shortOut = 1;
-		var HOT_COUNT = 800,
-		    HOT_SPAN = 16;
-
-		/* Built-in method references for those with the same name as other `lodash` methods. */
-		var nativeNow = Date.now;
-
-		/**
-		 * Creates a function that'll short out and invoke `identity` instead
-		 * of `func` when it's called `HOT_COUNT` or more times in `HOT_SPAN`
-		 * milliseconds.
-		 *
-		 * @private
-		 * @param {Function} func The function to restrict.
-		 * @returns {Function} Returns the new shortable function.
-		 */
-		function shortOut(func) {
-		  var count = 0,
-		      lastCalled = 0;
-
-		  return function() {
-		    var stamp = nativeNow(),
-		        remaining = HOT_SPAN - (stamp - lastCalled);
-
-		    lastCalled = stamp;
-		    if (remaining > 0) {
-		      if (++count >= HOT_COUNT) {
-		        return arguments[0];
-		      }
-		    } else {
-		      count = 0;
-		    }
-		    return func.apply(undefined, arguments);
-		  };
-		}
-
-		_shortOut = shortOut;
-		return _shortOut;
-	}
-
-	var _setToString;
-	var hasRequired_setToString;
-
-	function require_setToString () {
-		if (hasRequired_setToString) return _setToString;
-		hasRequired_setToString = 1;
-		var baseSetToString = require_baseSetToString(),
-		    shortOut = require_shortOut();
-
-		/**
-		 * Sets the `toString` method of `func` to return `string`.
-		 *
-		 * @private
-		 * @param {Function} func The function to modify.
-		 * @param {Function} string The `toString` result.
-		 * @returns {Function} Returns `func`.
-		 */
-		var setToString = shortOut(baseSetToString);
-
-		_setToString = setToString;
-		return _setToString;
-	}
-
-	var _baseRest;
-	var hasRequired_baseRest;
-
-	function require_baseRest () {
-		if (hasRequired_baseRest) return _baseRest;
-		hasRequired_baseRest = 1;
-		var identity = requireIdentity(),
-		    overRest = require_overRest(),
-		    setToString = require_setToString();
-
-		/**
-		 * The base implementation of `_.rest` which doesn't validate or coerce arguments.
-		 *
-		 * @private
-		 * @param {Function} func The function to apply a rest parameter to.
-		 * @param {number} [start=func.length-1] The start position of the rest parameter.
-		 * @returns {Function} Returns the new function.
-		 */
-		function baseRest(func, start) {
-		  return setToString(overRest(func, start, identity), func + '');
-		}
-
-		_baseRest = baseRest;
-		return _baseRest;
-	}
-
-	var _isIterateeCall;
-	var hasRequired_isIterateeCall;
-
-	function require_isIterateeCall () {
-		if (hasRequired_isIterateeCall) return _isIterateeCall;
-		hasRequired_isIterateeCall = 1;
-		var eq = requireEq$1(),
-		    isArrayLike = requireIsArrayLike(),
-		    isIndex = require_isIndex$1(),
-		    isObject = requireIsObject$2();
-
-		/**
-		 * Checks if the given arguments are from an iteratee call.
-		 *
-		 * @private
-		 * @param {*} value The potential iteratee value argument.
-		 * @param {*} index The potential iteratee index or key argument.
-		 * @param {*} object The potential iteratee object argument.
-		 * @returns {boolean} Returns `true` if the arguments are from an iteratee call,
-		 *  else `false`.
-		 */
-		function isIterateeCall(value, index, object) {
-		  if (!isObject(object)) {
-		    return false;
-		  }
-		  var type = typeof index;
-		  if (type == 'number'
-		        ? (isArrayLike(object) && isIndex(index, object.length))
-		        : (type == 'string' && index in object)
-		      ) {
-		    return eq(object[index], value);
-		  }
-		  return false;
-		}
-
-		_isIterateeCall = isIterateeCall;
-		return _isIterateeCall;
-	}
-
-	var _createAssigner;
-	var hasRequired_createAssigner;
-
-	function require_createAssigner () {
-		if (hasRequired_createAssigner) return _createAssigner;
-		hasRequired_createAssigner = 1;
-		var baseRest = require_baseRest(),
-		    isIterateeCall = require_isIterateeCall();
-
-		/**
-		 * Creates a function like `_.assign`.
-		 *
-		 * @private
-		 * @param {Function} assigner The function to assign values.
-		 * @returns {Function} Returns the new assigner function.
-		 */
-		function createAssigner(assigner) {
-		  return baseRest(function(object, sources) {
-		    var index = -1,
-		        length = sources.length,
-		        customizer = length > 1 ? sources[length - 1] : undefined,
-		        guard = length > 2 ? sources[2] : undefined;
-
-		    customizer = (assigner.length > 3 && typeof customizer == 'function')
-		      ? (length--, customizer)
-		      : undefined;
-
-		    if (guard && isIterateeCall(sources[0], sources[1], guard)) {
-		      customizer = length < 3 ? undefined : customizer;
-		      length = 1;
-		    }
-		    object = Object(object);
-		    while (++index < length) {
-		      var source = sources[index];
-		      if (source) {
-		        assigner(object, source, index, customizer);
-		      }
-		    }
-		    return object;
-		  });
-		}
-
-		_createAssigner = createAssigner;
-		return _createAssigner;
-	}
-
-	var mergeWith_1;
-	var hasRequiredMergeWith;
-
-	function requireMergeWith () {
-		if (hasRequiredMergeWith) return mergeWith_1;
-		hasRequiredMergeWith = 1;
-		var baseMerge = require_baseMerge(),
-		    createAssigner = require_createAssigner();
-
-		/**
-		 * This method is like `_.merge` except that it accepts `customizer` which
-		 * is invoked to produce the merged values of the destination and source
-		 * properties. If `customizer` returns `undefined`, merging is handled by the
-		 * method instead. The `customizer` is invoked with six arguments:
-		 * (objValue, srcValue, key, object, source, stack).
-		 *
-		 * **Note:** This method mutates `object`.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 4.0.0
-		 * @category Object
-		 * @param {Object} object The destination object.
-		 * @param {...Object} sources The source objects.
-		 * @param {Function} customizer The function to customize assigned values.
-		 * @returns {Object} Returns `object`.
-		 * @example
-		 *
-		 * function customizer(objValue, srcValue) {
-		 *   if (_.isArray(objValue)) {
-		 *     return objValue.concat(srcValue);
-		 *   }
-		 * }
-		 *
-		 * var object = { 'a': [1], 'b': [2] };
-		 * var other = { 'a': [3], 'b': [4] };
-		 *
-		 * _.mergeWith(object, other, customizer);
-		 * // => { 'a': [1, 3], 'b': [2, 4] }
-		 */
-		var mergeWith = createAssigner(function(object, source, srcIndex, customizer) {
-		  baseMerge(object, source, srcIndex, customizer);
+	function mergeWith$1(object) {
+	  /** @type {MergeCustomizer | undefined} */
+	  var customizer;
+	  for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	    args[_key - 1] = arguments[_key];
+	  }
+	  if (typeof args[args.length - 1] === 'function') {
+	    customizer = /** @type {MergeCustomizer} */args.pop();
+	  }
+	  for (var i = 0; i < args.length; i++) {
+	    var source = args[i];
+	    if (source !== null && source !== undefined && _typeof$2(source) === 'object') {
+	      mergeWithDeep(object, source, customizer);
+	    }
+	  }
+	  return object;
+	}
+
+	var es_weakMap = {};
+
+	var es_weakMap_constructor = {};
+
+	var freezing;
+	var hasRequiredFreezing;
+
+	function requireFreezing () {
+		if (hasRequiredFreezing) return freezing;
+		hasRequiredFreezing = 1;
+		'use strict';
+		var fails = /*@__PURE__*/ requireFails();
+
+		freezing = !fails(function () {
+		  // eslint-disable-next-line es/no-object-isextensible, es/no-object-preventextensions -- required for testing
+		  return Object.isExtensible(Object.preventExtensions({}));
 		});
-
-		mergeWith_1 = mergeWith;
-		return mergeWith_1;
+		return freezing;
 	}
 
-	var mergeWithExports = requireMergeWith();
-	var mergeWith$1 = /*@__PURE__*/getDefaultExportFromCjs$1(mergeWithExports);
+	var defineBuiltIns;
+	var hasRequiredDefineBuiltIns;
 
-	var symbol$1;
-	var hasRequiredSymbol;
+	function requireDefineBuiltIns () {
+		if (hasRequiredDefineBuiltIns) return defineBuiltIns;
+		hasRequiredDefineBuiltIns = 1;
+		'use strict';
+		var defineBuiltIn = /*@__PURE__*/ requireDefineBuiltIn();
 
-	function requireSymbol () {
-		if (hasRequiredSymbol) return symbol$1;
-		hasRequiredSymbol = 1;
-		symbol$1 = /*@__PURE__*/ requireSymbol$4();
-		return symbol$1;
+		defineBuiltIns = function (target, src, options) {
+		  for (var key in src) {
+		    if (options && options.unsafe && target[key]) target[key] = src[key];
+		    else defineBuiltIn(target, key, src[key], options);
+		  } return target;
+		};
+		return defineBuiltIns;
 	}
 
-	var symbolExports = requireSymbol();
-	var _Symbol$3 = /*@__PURE__*/getDefaultExportFromCjs$1(symbolExports);
+	var internalMetadata$1 = {exports: {}};
+
+	var arrayBufferNonExtensible;
+	var hasRequiredArrayBufferNonExtensible;
+
+	function requireArrayBufferNonExtensible () {
+		if (hasRequiredArrayBufferNonExtensible) return arrayBufferNonExtensible;
+		hasRequiredArrayBufferNonExtensible = 1;
+		'use strict';
+		// FF26- bug: ArrayBuffers are non-extensible, but Object.isExtensible does not report it
+		var fails = /*@__PURE__*/ requireFails();
+
+		arrayBufferNonExtensible = fails(function () {
+		  if (typeof ArrayBuffer == 'function') {
+		    var buffer = new ArrayBuffer(8);
+		    // eslint-disable-next-line es/no-object-isextensible, es/no-object-defineproperty -- safe
+		    if (Object.isExtensible(buffer)) Object.defineProperty(buffer, 'a', { value: 8 });
+		  }
+		});
+		return arrayBufferNonExtensible;
+	}
+
+	var objectIsExtensible;
+	var hasRequiredObjectIsExtensible;
+
+	function requireObjectIsExtensible () {
+		if (hasRequiredObjectIsExtensible) return objectIsExtensible;
+		hasRequiredObjectIsExtensible = 1;
+		'use strict';
+		var fails = /*@__PURE__*/ requireFails();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
+		var classof = /*@__PURE__*/ requireClassofRaw();
+		var ARRAY_BUFFER_NON_EXTENSIBLE = /*@__PURE__*/ requireArrayBufferNonExtensible();
+
+		// eslint-disable-next-line es/no-object-isextensible -- safe
+		var $isExtensible = Object.isExtensible;
+		var FAILS_ON_PRIMITIVES = fails(function () { $isExtensible(1); });
+
+		// `Object.isExtensible` method
+		// https://tc39.es/ecma262/#sec-object.isextensible
+		objectIsExtensible = (FAILS_ON_PRIMITIVES || ARRAY_BUFFER_NON_EXTENSIBLE) ? function isExtensible(it) {
+		  if (!isObject(it)) return false;
+		  if (ARRAY_BUFFER_NON_EXTENSIBLE && classof(it) === 'ArrayBuffer') return false;
+		  return $isExtensible ? $isExtensible(it) : true;
+		} : $isExtensible;
+		return objectIsExtensible;
+	}
+
+	var internalMetadata = internalMetadata$1.exports;
+
+	var hasRequiredInternalMetadata;
+
+	function requireInternalMetadata () {
+		if (hasRequiredInternalMetadata) return internalMetadata$1.exports;
+		hasRequiredInternalMetadata = 1;
+		'use strict';
+		var $ = /*@__PURE__*/ require_export();
+		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThis();
+		var hiddenKeys = /*@__PURE__*/ requireHiddenKeys();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
+		var hasOwn = /*@__PURE__*/ requireHasOwnProperty();
+		var defineProperty = /*@__PURE__*/ requireObjectDefineProperty().f;
+		var getOwnPropertyNamesModule = /*@__PURE__*/ requireObjectGetOwnPropertyNames();
+		var getOwnPropertyNamesExternalModule = /*@__PURE__*/ requireObjectGetOwnPropertyNamesExternal();
+		var isExtensible = /*@__PURE__*/ requireObjectIsExtensible();
+		var uid = /*@__PURE__*/ requireUid();
+		var FREEZING = /*@__PURE__*/ requireFreezing();
+
+		var REQUIRED = false;
+		var METADATA = uid('meta');
+		var id = 0;
+
+		var setMetadata = function (it) {
+		  defineProperty(it, METADATA, { value: {
+		    objectID: 'O' + id++, // object ID
+		    weakData: {}          // weak collections IDs
+		  } });
+		};
+
+		var fastKey = function (it, create) {
+		  // return a primitive with prefix
+		  if (!isObject(it)) return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
+		  if (!hasOwn(it, METADATA)) {
+		    // can't set metadata to uncaught frozen object
+		    if (!isExtensible(it)) return 'F';
+		    // not necessary to add metadata
+		    if (!create) return 'E';
+		    // add missing metadata
+		    setMetadata(it);
+		  // return object ID
+		  } return it[METADATA].objectID;
+		};
+
+		var getWeakData = function (it, create) {
+		  if (!hasOwn(it, METADATA)) {
+		    // can't set metadata to uncaught frozen object
+		    if (!isExtensible(it)) return true;
+		    // not necessary to add metadata
+		    if (!create) return false;
+		    // add missing metadata
+		    setMetadata(it);
+		  // return the store of weak collections IDs
+		  } return it[METADATA].weakData;
+		};
+
+		// add metadata on freeze-family methods calling
+		var onFreeze = function (it) {
+		  if (FREEZING && REQUIRED && isExtensible(it) && !hasOwn(it, METADATA)) setMetadata(it);
+		  return it;
+		};
+
+		var enable = function () {
+		  meta.enable = function () { /* empty */ };
+		  REQUIRED = true;
+		  var getOwnPropertyNames = getOwnPropertyNamesModule.f;
+		  var splice = uncurryThis([].splice);
+		  var test = {};
+		  // eslint-disable-next-line unicorn/no-immediate-mutation -- ES3 syntax limitation
+		  test[METADATA] = 1;
+
+		  // prevent exposing of metadata key
+		  if (getOwnPropertyNames(test).length) {
+		    getOwnPropertyNamesModule.f = function (it) {
+		      var result = getOwnPropertyNames(it);
+		      for (var i = 0, length = result.length; i < length; i++) {
+		        if (result[i] === METADATA) {
+		          splice(result, i, 1);
+		          break;
+		        }
+		      } return result;
+		    };
+
+		    $({ target: 'Object', stat: true, forced: true }, {
+		      getOwnPropertyNames: getOwnPropertyNamesExternalModule.f
+		    });
+		  }
+		};
+
+		var meta = internalMetadata$1.exports = {
+		  enable: enable,
+		  fastKey: fastKey,
+		  getWeakData: getWeakData,
+		  onFreeze: onFreeze
+		};
+
+		hiddenKeys[METADATA] = true;
+		return internalMetadata$1.exports;
+	}
+
+	var isArrayIteratorMethod;
+	var hasRequiredIsArrayIteratorMethod;
+
+	function requireIsArrayIteratorMethod () {
+		if (hasRequiredIsArrayIteratorMethod) return isArrayIteratorMethod;
+		hasRequiredIsArrayIteratorMethod = 1;
+		'use strict';
+		var wellKnownSymbol = /*@__PURE__*/ requireWellKnownSymbol();
+		var Iterators = /*@__PURE__*/ requireIterators();
+
+		var ITERATOR = wellKnownSymbol('iterator');
+		var ArrayPrototype = Array.prototype;
+
+		// check on default Array iterator
+		isArrayIteratorMethod = function (it) {
+		  return it !== undefined && (Iterators.Array === it || ArrayPrototype[ITERATOR] === it);
+		};
+		return isArrayIteratorMethod;
+	}
 
 	var getIteratorMethod$5;
 	var hasRequiredGetIteratorMethod$6;
@@ -9963,6 +6919,950 @@
 		};
 		return getIteratorMethod$5;
 	}
+
+	var getIterator$5;
+	var hasRequiredGetIterator$6;
+
+	function requireGetIterator$6 () {
+		if (hasRequiredGetIterator$6) return getIterator$5;
+		hasRequiredGetIterator$6 = 1;
+		'use strict';
+		var call = /*@__PURE__*/ requireFunctionCall();
+		var aCallable = /*@__PURE__*/ requireACallable();
+		var anObject = /*@__PURE__*/ requireAnObject();
+		var tryToString = /*@__PURE__*/ requireTryToString();
+		var getIteratorMethod = /*@__PURE__*/ requireGetIteratorMethod$6();
+
+		var $TypeError = TypeError;
+
+		getIterator$5 = function (argument, usingIterator) {
+		  var iteratorMethod = arguments.length < 2 ? getIteratorMethod(argument) : usingIterator;
+		  if (aCallable(iteratorMethod)) return anObject(call(iteratorMethod, argument));
+		  throw new $TypeError(tryToString(argument) + ' is not iterable');
+		};
+		return getIterator$5;
+	}
+
+	var iteratorClose;
+	var hasRequiredIteratorClose;
+
+	function requireIteratorClose () {
+		if (hasRequiredIteratorClose) return iteratorClose;
+		hasRequiredIteratorClose = 1;
+		'use strict';
+		var call = /*@__PURE__*/ requireFunctionCall();
+		var anObject = /*@__PURE__*/ requireAnObject();
+		var getMethod = /*@__PURE__*/ requireGetMethod();
+
+		iteratorClose = function (iterator, kind, value) {
+		  var innerResult, innerError;
+		  anObject(iterator);
+		  try {
+		    innerResult = getMethod(iterator, 'return');
+		    if (!innerResult) {
+		      if (kind === 'throw') throw value;
+		      return value;
+		    }
+		    innerResult = call(innerResult, iterator);
+		  } catch (error) {
+		    innerError = true;
+		    innerResult = error;
+		  }
+		  if (kind === 'throw') throw value;
+		  if (innerError) throw innerResult;
+		  anObject(innerResult);
+		  return value;
+		};
+		return iteratorClose;
+	}
+
+	var iterate;
+	var hasRequiredIterate;
+
+	function requireIterate () {
+		if (hasRequiredIterate) return iterate;
+		hasRequiredIterate = 1;
+		'use strict';
+		var bind = /*@__PURE__*/ requireFunctionBindContext();
+		var call = /*@__PURE__*/ requireFunctionCall();
+		var anObject = /*@__PURE__*/ requireAnObject();
+		var tryToString = /*@__PURE__*/ requireTryToString();
+		var isArrayIteratorMethod = /*@__PURE__*/ requireIsArrayIteratorMethod();
+		var lengthOfArrayLike = /*@__PURE__*/ requireLengthOfArrayLike();
+		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
+		var getIterator = /*@__PURE__*/ requireGetIterator$6();
+		var getIteratorMethod = /*@__PURE__*/ requireGetIteratorMethod$6();
+		var iteratorClose = /*@__PURE__*/ requireIteratorClose();
+
+		var $TypeError = TypeError;
+
+		var Result = function (stopped, result) {
+		  this.stopped = stopped;
+		  this.result = result;
+		};
+
+		var ResultPrototype = Result.prototype;
+
+		iterate = function (iterable, unboundFunction, options) {
+		  var that = options && options.that;
+		  var AS_ENTRIES = !!(options && options.AS_ENTRIES);
+		  var IS_RECORD = !!(options && options.IS_RECORD);
+		  var IS_ITERATOR = !!(options && options.IS_ITERATOR);
+		  var INTERRUPTED = !!(options && options.INTERRUPTED);
+		  var fn = bind(unboundFunction, that);
+		  var iterator, iterFn, index, length, result, next, step;
+
+		  var stop = function (condition) {
+		    var $iterator = iterator;
+		    iterator = undefined;
+		    if ($iterator) iteratorClose($iterator, 'normal');
+		    return new Result(true, condition);
+		  };
+
+		  var callFn = function (value) {
+		    if (AS_ENTRIES) {
+		      anObject(value);
+		      return INTERRUPTED ? fn(value[0], value[1], stop) : fn(value[0], value[1]);
+		    } return INTERRUPTED ? fn(value, stop) : fn(value);
+		  };
+
+		  if (IS_RECORD) {
+		    iterator = iterable.iterator;
+		  } else if (IS_ITERATOR) {
+		    iterator = iterable;
+		  } else {
+		    iterFn = getIteratorMethod(iterable);
+		    if (!iterFn) throw new $TypeError(tryToString(iterable) + ' is not iterable');
+		    // optimisation for array iterators
+		    if (isArrayIteratorMethod(iterFn)) {
+		      for (index = 0, length = lengthOfArrayLike(iterable); length > index; index++) {
+		        result = callFn(iterable[index]);
+		        if (result && isPrototypeOf(ResultPrototype, result)) return result;
+		      } return new Result(false);
+		    }
+		    iterator = getIterator(iterable, iterFn);
+		  }
+
+		  next = IS_RECORD ? iterable.next : iterator.next;
+		  while (!(step = call(next, iterator)).done) {
+		    // `IteratorValue` errors should propagate without closing the iterator
+		    var value = step.value;
+		    try {
+		      result = callFn(value);
+		    } catch (error) {
+		      if (iterator) iteratorClose(iterator, 'throw', error);
+		      else throw error;
+		    }
+		    if (typeof result == 'object' && result && isPrototypeOf(ResultPrototype, result)) return result;
+		  } return new Result(false);
+		};
+		return iterate;
+	}
+
+	var anInstance;
+	var hasRequiredAnInstance;
+
+	function requireAnInstance () {
+		if (hasRequiredAnInstance) return anInstance;
+		hasRequiredAnInstance = 1;
+		'use strict';
+		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
+
+		var $TypeError = TypeError;
+
+		anInstance = function (it, Prototype) {
+		  if (isPrototypeOf(Prototype, it)) return it;
+		  throw new $TypeError('Incorrect invocation');
+		};
+		return anInstance;
+	}
+
+	var collection$2;
+	var hasRequiredCollection;
+
+	function requireCollection () {
+		if (hasRequiredCollection) return collection$2;
+		hasRequiredCollection = 1;
+		'use strict';
+		var $ = /*@__PURE__*/ require_export();
+		var globalThis = /*@__PURE__*/ requireGlobalThis();
+		var InternalMetadataModule = /*@__PURE__*/ requireInternalMetadata();
+		var call = /*@__PURE__*/ requireFunctionCall();
+		var fails = /*@__PURE__*/ requireFails();
+		var createNonEnumerableProperty = /*@__PURE__*/ requireCreateNonEnumerableProperty();
+		var iterate = /*@__PURE__*/ requireIterate();
+		var anInstance = /*@__PURE__*/ requireAnInstance();
+		var isCallable = /*@__PURE__*/ requireIsCallable();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
+		var isNullOrUndefined = /*@__PURE__*/ requireIsNullOrUndefined();
+		var setToStringTag = /*@__PURE__*/ requireSetToStringTag();
+		var defineProperty = /*@__PURE__*/ requireObjectDefineProperty().f;
+		var forEach = /*@__PURE__*/ requireArrayIteration().forEach;
+		var DESCRIPTORS = /*@__PURE__*/ requireDescriptors();
+		var InternalStateModule = /*@__PURE__*/ requireInternalState();
+
+		var setInternalState = InternalStateModule.set;
+		var internalStateGetterFor = InternalStateModule.getterFor;
+
+		collection$2 = function (CONSTRUCTOR_NAME, wrapper, common) {
+		  var IS_MAP = CONSTRUCTOR_NAME.indexOf('Map') !== -1;
+		  var IS_WEAK = CONSTRUCTOR_NAME.indexOf('Weak') !== -1;
+		  var ADDER = IS_MAP ? 'set' : 'add';
+		  var NativeConstructor = globalThis[CONSTRUCTOR_NAME];
+		  var NativePrototype = NativeConstructor && NativeConstructor.prototype;
+		  var exported = {};
+		  var Constructor;
+
+		  if (!DESCRIPTORS || !isCallable(NativeConstructor)
+		    || !(IS_WEAK || NativePrototype.forEach && !fails(function () { new NativeConstructor().entries().next(); }))
+		  ) {
+		    // create collection constructor
+		    Constructor = common.getConstructor(wrapper, CONSTRUCTOR_NAME, IS_MAP, ADDER);
+		    InternalMetadataModule.enable();
+		  } else {
+		    Constructor = wrapper(function (target, iterable) {
+		      setInternalState(anInstance(target, Prototype), {
+		        type: CONSTRUCTOR_NAME,
+		        collection: new NativeConstructor()
+		      });
+		      if (!isNullOrUndefined(iterable)) iterate(iterable, target[ADDER], { that: target, AS_ENTRIES: IS_MAP });
+		    });
+
+		    var Prototype = Constructor.prototype;
+
+		    var getInternalState = internalStateGetterFor(CONSTRUCTOR_NAME);
+
+		    forEach(['add', 'clear', 'delete', 'forEach', 'get', 'has', 'set', 'keys', 'values', 'entries'], function (KEY) {
+		      var IS_ADDER = KEY === 'add' || KEY === 'set';
+		      if (KEY in NativePrototype && !(IS_WEAK && KEY === 'clear')) {
+		        createNonEnumerableProperty(Prototype, KEY, function (a, b) {
+		          var that = this;
+		          var collection = getInternalState(that).collection;
+		          if (!IS_ADDER && IS_WEAK && !isObject(a)) return KEY === 'get' ? undefined : false;
+		          var result = collection[KEY](KEY === 'forEach' ? function (value, key) {
+		            call(a, b, value, key, that);
+		          } : a === 0 ? 0 : a, b);
+		          return IS_ADDER ? that : result;
+		        });
+		      }
+		    });
+
+		    IS_WEAK || defineProperty(Prototype, 'size', {
+		      configurable: true,
+		      get: function () {
+		        return getInternalState(this).collection.size;
+		      }
+		    });
+		  }
+
+		  setToStringTag(Constructor, CONSTRUCTOR_NAME, false, true);
+
+		  exported[CONSTRUCTOR_NAME] = Constructor;
+		  $({ global: true, forced: true }, exported);
+
+		  if (!IS_WEAK) common.setStrong(Constructor, CONSTRUCTOR_NAME, IS_MAP);
+
+		  return Constructor;
+		};
+		return collection$2;
+	}
+
+	var collectionWeak;
+	var hasRequiredCollectionWeak;
+
+	function requireCollectionWeak () {
+		if (hasRequiredCollectionWeak) return collectionWeak;
+		hasRequiredCollectionWeak = 1;
+		'use strict';
+		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThis();
+		var defineBuiltIns = /*@__PURE__*/ requireDefineBuiltIns();
+		var getWeakData = /*@__PURE__*/ requireInternalMetadata().getWeakData;
+		var anInstance = /*@__PURE__*/ requireAnInstance();
+		var anObject = /*@__PURE__*/ requireAnObject();
+		var isNullOrUndefined = /*@__PURE__*/ requireIsNullOrUndefined();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
+		var iterate = /*@__PURE__*/ requireIterate();
+		var ArrayIterationModule = /*@__PURE__*/ requireArrayIteration();
+		var hasOwn = /*@__PURE__*/ requireHasOwnProperty();
+		var InternalStateModule = /*@__PURE__*/ requireInternalState();
+
+		var setInternalState = InternalStateModule.set;
+		var internalStateGetterFor = InternalStateModule.getterFor;
+		var find = ArrayIterationModule.find;
+		var findIndex = ArrayIterationModule.findIndex;
+		var splice = uncurryThis([].splice);
+		var id = 0;
+
+		// fallback for uncaught frozen keys
+		var uncaughtFrozenStore = function (state) {
+		  return state.frozen || (state.frozen = new UncaughtFrozenStore());
+		};
+
+		var UncaughtFrozenStore = function () {
+		  this.entries = [];
+		};
+
+		var findUncaughtFrozen = function (store, key) {
+		  return find(store.entries, function (it) {
+		    return it[0] === key;
+		  });
+		};
+
+		UncaughtFrozenStore.prototype = {
+		  get: function (key) {
+		    var entry = findUncaughtFrozen(this, key);
+		    if (entry) return entry[1];
+		  },
+		  has: function (key) {
+		    return !!findUncaughtFrozen(this, key);
+		  },
+		  set: function (key, value) {
+		    var entry = findUncaughtFrozen(this, key);
+		    if (entry) entry[1] = value;
+		    else this.entries.push([key, value]);
+		  },
+		  'delete': function (key) {
+		    var index = findIndex(this.entries, function (it) {
+		      return it[0] === key;
+		    });
+		    if (~index) splice(this.entries, index, 1);
+		    return !!~index;
+		  }
+		};
+
+		collectionWeak = {
+		  getConstructor: function (wrapper, CONSTRUCTOR_NAME, IS_MAP, ADDER) {
+		    var Constructor = wrapper(function (that, iterable) {
+		      anInstance(that, Prototype);
+		      setInternalState(that, {
+		        type: CONSTRUCTOR_NAME,
+		        id: id++,
+		        frozen: null
+		      });
+		      if (!isNullOrUndefined(iterable)) iterate(iterable, that[ADDER], { that: that, AS_ENTRIES: IS_MAP });
+		    });
+
+		    var Prototype = Constructor.prototype;
+
+		    var getInternalState = internalStateGetterFor(CONSTRUCTOR_NAME);
+
+		    var define = function (that, key, value) {
+		      var state = getInternalState(that);
+		      var data = getWeakData(anObject(key), true);
+		      if (data === true) uncaughtFrozenStore(state).set(key, value);
+		      else data[state.id] = value;
+		      return that;
+		    };
+
+		    defineBuiltIns(Prototype, {
+		      // `{ WeakMap, WeakSet }.prototype.delete(key)` methods
+		      // https://tc39.es/ecma262/#sec-weakmap.prototype.delete
+		      // https://tc39.es/ecma262/#sec-weakset.prototype.delete
+		      'delete': function (key) {
+		        var state = getInternalState(this);
+		        if (!isObject(key)) return false;
+		        var data = getWeakData(key);
+		        if (data === true) return uncaughtFrozenStore(state)['delete'](key);
+		        return data && hasOwn(data, state.id) && delete data[state.id];
+		      },
+		      // `{ WeakMap, WeakSet }.prototype.has(key)` methods
+		      // https://tc39.es/ecma262/#sec-weakmap.prototype.has
+		      // https://tc39.es/ecma262/#sec-weakset.prototype.has
+		      has: function has(key) {
+		        var state = getInternalState(this);
+		        if (!isObject(key)) return false;
+		        var data = getWeakData(key);
+		        if (data === true) return uncaughtFrozenStore(state).has(key);
+		        return data && hasOwn(data, state.id);
+		      }
+		    });
+
+		    defineBuiltIns(Prototype, IS_MAP ? {
+		      // `WeakMap.prototype.get(key)` method
+		      // https://tc39.es/ecma262/#sec-weakmap.prototype.get
+		      get: function get(key) {
+		        var state = getInternalState(this);
+		        if (isObject(key)) {
+		          var data = getWeakData(key);
+		          if (data === true) return uncaughtFrozenStore(state).get(key);
+		          if (data) return data[state.id];
+		        }
+		      },
+		      // `WeakMap.prototype.set(key, value)` method
+		      // https://tc39.es/ecma262/#sec-weakmap.prototype.set
+		      set: function set(key, value) {
+		        return define(this, key, value);
+		      }
+		    } : {
+		      // `WeakSet.prototype.add(value)` method
+		      // https://tc39.es/ecma262/#sec-weakset.prototype.add
+		      add: function add(value) {
+		        return define(this, value, true);
+		      }
+		    });
+
+		    return Constructor;
+		  }
+		};
+		return collectionWeak;
+	}
+
+	var hasRequiredEs_weakMap_constructor;
+
+	function requireEs_weakMap_constructor () {
+		if (hasRequiredEs_weakMap_constructor) return es_weakMap_constructor;
+		hasRequiredEs_weakMap_constructor = 1;
+		'use strict';
+		var FREEZING = /*@__PURE__*/ requireFreezing();
+		var globalThis = /*@__PURE__*/ requireGlobalThis();
+		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThis();
+		var defineBuiltIns = /*@__PURE__*/ requireDefineBuiltIns();
+		var InternalMetadataModule = /*@__PURE__*/ requireInternalMetadata();
+		var collection = /*@__PURE__*/ requireCollection();
+		var collectionWeak = /*@__PURE__*/ requireCollectionWeak();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
+		var enforceInternalState = /*@__PURE__*/ requireInternalState().enforce;
+		var fails = /*@__PURE__*/ requireFails();
+		var NATIVE_WEAK_MAP = /*@__PURE__*/ requireWeakMapBasicDetection();
+
+		var $Object = Object;
+		// eslint-disable-next-line es/no-array-isarray -- safe
+		var isArray = Array.isArray;
+		// eslint-disable-next-line es/no-object-isextensible -- safe
+		var isExtensible = $Object.isExtensible;
+		// eslint-disable-next-line es/no-object-isfrozen -- safe
+		var isFrozen = $Object.isFrozen;
+		// eslint-disable-next-line es/no-object-issealed -- safe
+		var isSealed = $Object.isSealed;
+		// eslint-disable-next-line es/no-object-freeze -- safe
+		var freeze = $Object.freeze;
+		// eslint-disable-next-line es/no-object-seal -- safe
+		var seal = $Object.seal;
+
+		var IS_IE11 = !globalThis.ActiveXObject && 'ActiveXObject' in globalThis;
+		var InternalWeakMap;
+
+		var wrapper = function (init) {
+		  return function WeakMap() {
+		    return init(this, arguments.length ? arguments[0] : undefined);
+		  };
+		};
+
+		// `WeakMap` constructor
+		// https://tc39.es/ecma262/#sec-weakmap-constructor
+		var $WeakMap = collection('WeakMap', wrapper, collectionWeak);
+		var WeakMapPrototype = $WeakMap.prototype;
+		var nativeSet = uncurryThis(WeakMapPrototype.set);
+
+		// Chakra Edge bug: adding frozen arrays to WeakMap unfreeze them
+		var hasMSEdgeFreezingBug = function () {
+		  return FREEZING && fails(function () {
+		    var frozenArray = freeze([]);
+		    nativeSet(new $WeakMap(), frozenArray, 1);
+		    return !isFrozen(frozenArray);
+		  });
+		};
+
+		// IE11 WeakMap frozen keys fix
+		// We can't use feature detection because it crash some old IE builds
+		// https://github.com/zloirock/core-js/issues/485
+		if (NATIVE_WEAK_MAP) if (IS_IE11) {
+		  InternalWeakMap = collectionWeak.getConstructor(wrapper, 'WeakMap', true);
+		  InternalMetadataModule.enable();
+		  var nativeDelete = uncurryThis(WeakMapPrototype['delete']);
+		  var nativeHas = uncurryThis(WeakMapPrototype.has);
+		  var nativeGet = uncurryThis(WeakMapPrototype.get);
+		  defineBuiltIns(WeakMapPrototype, {
+		    'delete': function (key) {
+		      if (isObject(key) && !isExtensible(key)) {
+		        var state = enforceInternalState(this);
+		        if (!state.frozen) state.frozen = new InternalWeakMap();
+		        return nativeDelete(this, key) || state.frozen['delete'](key);
+		      } return nativeDelete(this, key);
+		    },
+		    has: function has(key) {
+		      if (isObject(key) && !isExtensible(key)) {
+		        var state = enforceInternalState(this);
+		        if (!state.frozen) state.frozen = new InternalWeakMap();
+		        return nativeHas(this, key) || state.frozen.has(key);
+		      } return nativeHas(this, key);
+		    },
+		    get: function get(key) {
+		      if (isObject(key) && !isExtensible(key)) {
+		        var state = enforceInternalState(this);
+		        if (!state.frozen) state.frozen = new InternalWeakMap();
+		        return nativeHas(this, key) ? nativeGet(this, key) : state.frozen.get(key);
+		      } return nativeGet(this, key);
+		    },
+		    set: function set(key, value) {
+		      if (isObject(key) && !isExtensible(key)) {
+		        var state = enforceInternalState(this);
+		        if (!state.frozen) state.frozen = new InternalWeakMap();
+		        nativeHas(this, key) ? nativeSet(this, key, value) : state.frozen.set(key, value);
+		      } else nativeSet(this, key, value);
+		      return this;
+		    }
+		  });
+		// Chakra Edge frozen keys fix
+		} else if (hasMSEdgeFreezingBug()) {
+		  defineBuiltIns(WeakMapPrototype, {
+		    set: function set(key, value) {
+		      var arrayIntegrityLevel;
+		      if (isArray(key)) {
+		        if (isFrozen(key)) arrayIntegrityLevel = freeze;
+		        else if (isSealed(key)) arrayIntegrityLevel = seal;
+		      }
+		      nativeSet(this, key, value);
+		      if (arrayIntegrityLevel) arrayIntegrityLevel(key);
+		      return this;
+		    }
+		  });
+		}
+		return es_weakMap_constructor;
+	}
+
+	var hasRequiredEs_weakMap;
+
+	function requireEs_weakMap () {
+		if (hasRequiredEs_weakMap) return es_weakMap;
+		hasRequiredEs_weakMap = 1;
+		'use strict';
+		// TODO: Remove this module from `core-js@4` since it's replaced to module below
+		requireEs_weakMap_constructor();
+		return es_weakMap;
+	}
+
+	var es_weakMap_getOrInsert = {};
+
+	var caller;
+	var hasRequiredCaller;
+
+	function requireCaller () {
+		if (hasRequiredCaller) return caller;
+		hasRequiredCaller = 1;
+		'use strict';
+		caller = function (methodName, numArgs) {
+		  return numArgs === 1 ? function (object, arg) {
+		    return object[methodName](arg);
+		  } : function (object, arg1, arg2) {
+		    return object[methodName](arg1, arg2);
+		  };
+		};
+		return caller;
+	}
+
+	var weakMapHelpers;
+	var hasRequiredWeakMapHelpers;
+
+	function requireWeakMapHelpers () {
+		if (hasRequiredWeakMapHelpers) return weakMapHelpers;
+		hasRequiredWeakMapHelpers = 1;
+		'use strict';
+		var getBuiltIn = /*@__PURE__*/ requireGetBuiltIn();
+		var caller = /*@__PURE__*/ requireCaller();
+
+		weakMapHelpers = {
+		  WeakMap: getBuiltIn('WeakMap'),
+		  set: caller('set', 2),
+		  get: caller('get', 1),
+		  has: caller('has', 1),
+		  remove: caller('delete', 1)
+		};
+		return weakMapHelpers;
+	}
+
+	var hasRequiredEs_weakMap_getOrInsert;
+
+	function requireEs_weakMap_getOrInsert () {
+		if (hasRequiredEs_weakMap_getOrInsert) return es_weakMap_getOrInsert;
+		hasRequiredEs_weakMap_getOrInsert = 1;
+		'use strict';
+		var $ = /*@__PURE__*/ require_export();
+		var WeakMapHelpers = /*@__PURE__*/ requireWeakMapHelpers();
+		var IS_PURE = /*@__PURE__*/ requireIsPure();
+
+		var get = WeakMapHelpers.get;
+		var has = WeakMapHelpers.has;
+		var set = WeakMapHelpers.set;
+
+		// `WeakMap.prototype.getOrInsert` method
+		// https://tc39.es/ecma262/#sec-weakmap.prototype.getorinsert
+		$({ target: 'WeakMap', proto: true, real: true, forced: IS_PURE }, {
+		  getOrInsert: function getOrInsert(key, value) {
+		    if (has(this, key)) return get(this, key);
+		    set(this, key, value);
+		    return value;
+		  }
+		});
+		return es_weakMap_getOrInsert;
+	}
+
+	var es_weakMap_getOrInsertComputed = {};
+
+	var aWeakMap;
+	var hasRequiredAWeakMap;
+
+	function requireAWeakMap () {
+		if (hasRequiredAWeakMap) return aWeakMap;
+		hasRequiredAWeakMap = 1;
+		'use strict';
+		var tryToString = /*@__PURE__*/ requireTryToString();
+
+		var $TypeError = TypeError;
+
+		// Perform ? RequireInternalSlot(M, [[WeakMapData]])
+		aWeakMap = function (it) {
+		  if (typeof it == 'object' && 'has' in it && 'get' in it && 'set' in it && 'delete' in it) return it;
+		  throw new $TypeError(tryToString(it) + ' is not a weakmap');
+		};
+		return aWeakMap;
+	}
+
+	var aWeakKey;
+	var hasRequiredAWeakKey;
+
+	function requireAWeakKey () {
+		if (hasRequiredAWeakKey) return aWeakKey;
+		hasRequiredAWeakKey = 1;
+		'use strict';
+		var WeakMapHelpers = /*@__PURE__*/ requireWeakMapHelpers();
+
+		var weakmap = new WeakMapHelpers.WeakMap();
+		var set = WeakMapHelpers.set;
+		var remove = WeakMapHelpers.remove;
+
+		aWeakKey = function (key) {
+		  set(weakmap, key, 1);
+		  remove(weakmap, key);
+		  return key;
+		};
+		return aWeakKey;
+	}
+
+	var hasRequiredEs_weakMap_getOrInsertComputed;
+
+	function requireEs_weakMap_getOrInsertComputed () {
+		if (hasRequiredEs_weakMap_getOrInsertComputed) return es_weakMap_getOrInsertComputed;
+		hasRequiredEs_weakMap_getOrInsertComputed = 1;
+		'use strict';
+		var $ = /*@__PURE__*/ require_export();
+		var aCallable = /*@__PURE__*/ requireACallable();
+		var aWeakMap = /*@__PURE__*/ requireAWeakMap();
+		var aWeakKey = /*@__PURE__*/ requireAWeakKey();
+		var WeakMapHelpers = /*@__PURE__*/ requireWeakMapHelpers();
+		var IS_PURE = /*@__PURE__*/ requireIsPure();
+
+		var get = WeakMapHelpers.get;
+		var has = WeakMapHelpers.has;
+		var set = WeakMapHelpers.set;
+
+		var FORCED = IS_PURE || !function () {
+		  try {
+		    // eslint-disable-next-line es/no-weak-map, no-throw-literal -- testing
+		    if (WeakMap.prototype.getOrInsertComputed) new WeakMap().getOrInsertComputed(1, function () { throw 1; });
+		  } catch (error) {
+		    // FF144 Nightly - Beta 3 bug
+		    // https://bugzilla.mozilla.org/show_bug.cgi?id=1988369
+		    return error instanceof TypeError;
+		  }
+		}();
+
+		// `WeakMap.prototype.getOrInsertComputed` method
+		// https://tc39.es/ecma262/#sec-weakmap.prototype.getorinsertcomputed
+		$({ target: 'WeakMap', proto: true, real: true, forced: FORCED }, {
+		  getOrInsertComputed: function getOrInsertComputed(key, callbackfn) {
+		    if (!IS_PURE) aWeakMap(this);
+		    aWeakKey(key);
+		    aCallable(callbackfn);
+		    if (has(this, key)) return get(this, key);
+		    var value = callbackfn(key);
+		    set(this, key, value);
+		    return value;
+		  }
+		});
+		return es_weakMap_getOrInsertComputed;
+	}
+
+	var weakMap$2;
+	var hasRequiredWeakMap$2;
+
+	function requireWeakMap$2 () {
+		if (hasRequiredWeakMap$2) return weakMap$2;
+		hasRequiredWeakMap$2 = 1;
+		'use strict';
+		requireEs_array_iterator();
+		requireEs_object_toString();
+		requireEs_weakMap();
+		requireEs_weakMap_getOrInsert();
+		requireEs_weakMap_getOrInsertComputed();
+		var path = /*@__PURE__*/ requirePath();
+
+		weakMap$2 = path.WeakMap;
+		return weakMap$2;
+	}
+
+	var weakMap$1;
+	var hasRequiredWeakMap$1;
+
+	function requireWeakMap$1 () {
+		if (hasRequiredWeakMap$1) return weakMap$1;
+		hasRequiredWeakMap$1 = 1;
+		'use strict';
+		var parent = /*@__PURE__*/ requireWeakMap$2();
+		requireWeb_domCollections_iterator();
+
+		weakMap$1 = parent;
+		return weakMap$1;
+	}
+
+	var weakMap;
+	var hasRequiredWeakMap;
+
+	function requireWeakMap () {
+		if (hasRequiredWeakMap) return weakMap;
+		hasRequiredWeakMap = 1;
+		weakMap = /*@__PURE__*/ requireWeakMap$1();
+		return weakMap;
+	}
+
+	var weakMapExports = requireWeakMap();
+	var _WeakMap = /*@__PURE__*/getDefaultExportFromCjs$1(weakMapExports);
+
+	var es_regexp_flags = {};
+
+	var hasRequiredEs_regexp_flags;
+
+	function requireEs_regexp_flags () {
+		if (hasRequiredEs_regexp_flags) return es_regexp_flags;
+		hasRequiredEs_regexp_flags = 1;
+		// empty
+		return es_regexp_flags;
+	}
+
+	var regexpFlagsDetection;
+	var hasRequiredRegexpFlagsDetection;
+
+	function requireRegexpFlagsDetection () {
+		if (hasRequiredRegexpFlagsDetection) return regexpFlagsDetection;
+		hasRequiredRegexpFlagsDetection = 1;
+		'use strict';
+		var globalThis = /*@__PURE__*/ requireGlobalThis();
+		var fails = /*@__PURE__*/ requireFails();
+
+		// babel-minify and Closure Compiler transpiles RegExp('.', 'd') -> /./d and it causes SyntaxError
+		var RegExp = globalThis.RegExp;
+
+		var FLAGS_GETTER_IS_CORRECT = !fails(function () {
+		  var INDICES_SUPPORT = true;
+		  try {
+		    RegExp('.', 'd');
+		  } catch (error) {
+		    INDICES_SUPPORT = false;
+		  }
+
+		  var O = {};
+		  // modern V8 bug
+		  var calls = '';
+		  var expected = INDICES_SUPPORT ? 'dgimsy' : 'gimsy';
+
+		  var addGetter = function (key, chr) {
+		    // eslint-disable-next-line es/no-object-defineproperty -- safe
+		    Object.defineProperty(O, key, { get: function () {
+		      calls += chr;
+		      return true;
+		    } });
+		  };
+
+		  var pairs = {
+		    dotAll: 's',
+		    global: 'g',
+		    ignoreCase: 'i',
+		    multiline: 'm',
+		    sticky: 'y'
+		  };
+
+		  if (INDICES_SUPPORT) pairs.hasIndices = 'd';
+
+		  for (var key in pairs) addGetter(key, pairs[key]);
+
+		  // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
+		  var result = Object.getOwnPropertyDescriptor(RegExp.prototype, 'flags').get.call(O);
+
+		  return result !== expected || calls !== expected;
+		});
+
+		regexpFlagsDetection = { correct: FLAGS_GETTER_IS_CORRECT };
+		return regexpFlagsDetection;
+	}
+
+	var regexpFlags;
+	var hasRequiredRegexpFlags;
+
+	function requireRegexpFlags () {
+		if (hasRequiredRegexpFlags) return regexpFlags;
+		hasRequiredRegexpFlags = 1;
+		'use strict';
+		var anObject = /*@__PURE__*/ requireAnObject();
+
+		// `RegExp.prototype.flags` getter implementation
+		// https://tc39.es/ecma262/#sec-get-regexp.prototype.flags
+		regexpFlags = function () {
+		  var that = anObject(this);
+		  var result = '';
+		  if (that.hasIndices) result += 'd';
+		  if (that.global) result += 'g';
+		  if (that.ignoreCase) result += 'i';
+		  if (that.multiline) result += 'm';
+		  if (that.dotAll) result += 's';
+		  if (that.unicode) result += 'u';
+		  if (that.unicodeSets) result += 'v';
+		  if (that.sticky) result += 'y';
+		  return result;
+		};
+		return regexpFlags;
+	}
+
+	var regexpGetFlags;
+	var hasRequiredRegexpGetFlags;
+
+	function requireRegexpGetFlags () {
+		if (hasRequiredRegexpGetFlags) return regexpGetFlags;
+		hasRequiredRegexpGetFlags = 1;
+		'use strict';
+		var call = /*@__PURE__*/ requireFunctionCall();
+		var hasOwn = /*@__PURE__*/ requireHasOwnProperty();
+		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
+		var regExpFlagsDetection = /*@__PURE__*/ requireRegexpFlagsDetection();
+		var regExpFlagsGetterImplementation = /*@__PURE__*/ requireRegexpFlags();
+
+		var RegExpPrototype = RegExp.prototype;
+
+		regexpGetFlags = regExpFlagsDetection.correct ? function (it) {
+		  return it.flags;
+		} : function (it) {
+		  return (!regExpFlagsDetection.correct && isPrototypeOf(RegExpPrototype, it) && !hasOwn(it, 'flags'))
+		    ? call(regExpFlagsGetterImplementation, it)
+		    : it.flags;
+		};
+		return regexpGetFlags;
+	}
+
+	var flags$2;
+	var hasRequiredFlags$3;
+
+	function requireFlags$3 () {
+		if (hasRequiredFlags$3) return flags$2;
+		hasRequiredFlags$3 = 1;
+		'use strict';
+		requireEs_regexp_flags();
+		var getRegExpFlags = /*@__PURE__*/ requireRegexpGetFlags();
+
+		flags$2 = getRegExpFlags;
+		return flags$2;
+	}
+
+	var flags_1;
+	var hasRequiredFlags$2;
+
+	function requireFlags$2 () {
+		if (hasRequiredFlags$2) return flags_1;
+		hasRequiredFlags$2 = 1;
+		'use strict';
+		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
+		var flags = /*@__PURE__*/ requireFlags$3();
+
+		var RegExpPrototype = RegExp.prototype;
+
+		flags_1 = function (it) {
+		  return (it === RegExpPrototype || isPrototypeOf(RegExpPrototype, it)) ? flags(it) : it.flags;
+		};
+		return flags_1;
+	}
+
+	var flags$1;
+	var hasRequiredFlags$1;
+
+	function requireFlags$1 () {
+		if (hasRequiredFlags$1) return flags$1;
+		hasRequiredFlags$1 = 1;
+		'use strict';
+		var parent = /*@__PURE__*/ requireFlags$2();
+
+		flags$1 = parent;
+		return flags$1;
+	}
+
+	var flags;
+	var hasRequiredFlags;
+
+	function requireFlags () {
+		if (hasRequiredFlags) return flags;
+		hasRequiredFlags = 1;
+		flags = /*@__PURE__*/ requireFlags$1();
+		return flags;
+	}
+
+	var flagsExports = requireFlags();
+	var _flagsInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(flagsExports);
+
+	/**
+	 * 深拷贝值。支持纯对象、数组、Date、RegExp；函数与原始类型按引用/值复制。
+	 * 不支持 Map、Set、TypedArray（Cherry 配置场景未用到）。
+	 * @template T
+	 * @param {T} value 待拷贝的值
+	 * @param {WeakMap<object, unknown>} [stack] 循环引用栈（内部使用）
+	 * @returns {T} 深拷贝结果
+	 */
+	function cloneDeep$1(value) {
+	  var stack = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : new _WeakMap();
+	  if (value === null || _typeof$2(value) !== 'object') {
+	    return value;
+	  }
+	  if (typeof value === 'function') {
+	    return value;
+	  }
+	  if (stack.has(value)) {
+	    return /** @type {T} */stack.get(value);
+	  }
+	  if (value instanceof Date) {
+	    return /** @type {T} */new Date(value.getTime());
+	  }
+	  if (value instanceof RegExp) {
+	    return /** @type {T} */new RegExp(value.source, _flagsInstanceProperty(value));
+	  }
+	  if (_Array$isArray$1(value)) {
+	    var result = [];
+	    stack.set(value, result);
+	    for (var i = 0; i < value.length; i++) {
+	      result[i] = cloneDeep$1(value[i], stack);
+	    }
+	    return /** @type {T} */result;
+	  }
+	  if (isPlainObject$1(value)) {
+	    var _result = {};
+	    stack.set(value, _result);
+	    var keys = _Object$keys(value);
+	    for (var _i = 0; _i < keys.length; _i++) {
+	      var key = keys[_i];
+	      _result[key] = cloneDeep$1(value[key], stack);
+	    }
+	    return /** @type {T} */_result;
+	  }
+	  return value;
+	}
+
+	var symbol$1;
+	var hasRequiredSymbol;
+
+	function requireSymbol () {
+		if (hasRequiredSymbol) return symbol$1;
+		hasRequiredSymbol = 1;
+		symbol$1 = /*@__PURE__*/ requireSymbol$4();
+		return symbol$1;
+	}
+
+	var symbolExports = requireSymbol();
+	var _Symbol$3 = /*@__PURE__*/getDefaultExportFromCjs$1(symbolExports);
 
 	var getIteratorMethod_1;
 	var hasRequiredGetIteratorMethod$5;
@@ -10050,7 +7950,7 @@
 		if (hasRequiredIsArray$3) return isArray$3;
 		hasRequiredIsArray$3 = 1;
 		'use strict';
-		var parent = /*@__PURE__*/ requireIsArray$6();
+		var parent = /*@__PURE__*/ requireIsArray$5();
 
 		isArray$3 = parent;
 		return isArray$3;
@@ -10083,53 +7983,20 @@
 	var isArrayExports = /*@__PURE__*/ requireIsArray$1();
 	var _Array$isArray = /*@__PURE__*/getDefaultExportFromCjs$1(isArrayExports);
 
-	function _arrayLikeToArray$1p(r, a) {
+	function _arrayLikeToArray$1q(r, a) {
 	  (null == a || a > r.length) && (a = r.length);
 	  for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
 	  return n;
 	}
 
 	function _arrayWithoutHoles$1(r) {
-	  if (_Array$isArray(r)) return _arrayLikeToArray$1p(r);
+	  if (_Array$isArray(r)) return _arrayLikeToArray$1q(r);
 	}
 
 	var getIteratorMethodExports = /*@__PURE__*/ requireGetIteratorMethod$1();
 	var _getIteratorMethod = /*@__PURE__*/getDefaultExportFromCjs$1(getIteratorMethodExports);
 
 	var es_array_from = {};
-
-	var iteratorClose;
-	var hasRequiredIteratorClose;
-
-	function requireIteratorClose () {
-		if (hasRequiredIteratorClose) return iteratorClose;
-		hasRequiredIteratorClose = 1;
-		'use strict';
-		var call = /*@__PURE__*/ requireFunctionCall();
-		var anObject = /*@__PURE__*/ requireAnObject();
-		var getMethod = /*@__PURE__*/ requireGetMethod();
-
-		iteratorClose = function (iterator, kind, value) {
-		  var innerResult, innerError;
-		  anObject(iterator);
-		  try {
-		    innerResult = getMethod(iterator, 'return');
-		    if (!innerResult) {
-		      if (kind === 'throw') throw value;
-		      return value;
-		    }
-		    innerResult = call(innerResult, iterator);
-		  } catch (error) {
-		    innerError = true;
-		    innerResult = error;
-		  }
-		  if (kind === 'throw') throw value;
-		  if (innerError) throw innerResult;
-		  anObject(innerResult);
-		  return value;
-		};
-		return iteratorClose;
-	}
 
 	var callWithSafeIterationClosing;
 	var hasRequiredCallWithSafeIterationClosing;
@@ -10150,49 +8017,6 @@
 		  }
 		};
 		return callWithSafeIterationClosing;
-	}
-
-	var isArrayIteratorMethod;
-	var hasRequiredIsArrayIteratorMethod;
-
-	function requireIsArrayIteratorMethod () {
-		if (hasRequiredIsArrayIteratorMethod) return isArrayIteratorMethod;
-		hasRequiredIsArrayIteratorMethod = 1;
-		'use strict';
-		var wellKnownSymbol = /*@__PURE__*/ requireWellKnownSymbol();
-		var Iterators = /*@__PURE__*/ requireIterators();
-
-		var ITERATOR = wellKnownSymbol('iterator');
-		var ArrayPrototype = Array.prototype;
-
-		// check on default Array iterator
-		isArrayIteratorMethod = function (it) {
-		  return it !== undefined && (Iterators.Array === it || ArrayPrototype[ITERATOR] === it);
-		};
-		return isArrayIteratorMethod;
-	}
-
-	var getIterator$5;
-	var hasRequiredGetIterator$6;
-
-	function requireGetIterator$6 () {
-		if (hasRequiredGetIterator$6) return getIterator$5;
-		hasRequiredGetIterator$6 = 1;
-		'use strict';
-		var call = /*@__PURE__*/ requireFunctionCall();
-		var aCallable = /*@__PURE__*/ requireACallable();
-		var anObject = /*@__PURE__*/ requireAnObject();
-		var tryToString = /*@__PURE__*/ requireTryToString();
-		var getIteratorMethod = /*@__PURE__*/ requireGetIteratorMethod$6();
-
-		var $TypeError = TypeError;
-
-		getIterator$5 = function (argument, usingIterator) {
-		  var iteratorMethod = arguments.length < 2 ? getIteratorMethod(argument) : usingIterator;
-		  if (aCallable(iteratorMethod)) return anObject(call(iteratorMethod, argument));
-		  throw new $TypeError(tryToString(argument) + ' is not iterable');
-		};
-		return getIterator$5;
 	}
 
 	var arrayFrom;
@@ -10400,7 +8224,7 @@
 	var _Array$from$1 = /*@__PURE__*/getDefaultExportFromCjs$1(fromExports$1);
 
 	function _iterableToArray$1(r) {
-	  if ("undefined" != typeof _Symbol$5 && null != _getIteratorMethod(r) || null != r["@@iterator"]) return _Array$from$1(r);
+	  if ("undefined" != typeof _Symbol$4 && null != _getIteratorMethod(r) || null != r["@@iterator"]) return _Array$from$1(r);
 	}
 
 	var es_array_slice = {};
@@ -10412,9 +8236,9 @@
 		hasRequiredEs_array_slice = 1;
 		'use strict';
 		var $ = /*@__PURE__*/ require_export();
-		var isArray = /*@__PURE__*/ requireIsArray$8();
+		var isArray = /*@__PURE__*/ requireIsArray$7();
 		var isConstructor = /*@__PURE__*/ requireIsConstructor();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 		var toAbsoluteIndex = /*@__PURE__*/ requireToAbsoluteIndex();
 		var lengthOfArrayLike = /*@__PURE__*/ requireLengthOfArrayLike();
 		var toIndexedObject = /*@__PURE__*/ requireToIndexedObject();
@@ -10549,12 +8373,12 @@
 	var sliceExports$1 = /*@__PURE__*/ requireSlice$1();
 	var _sliceInstanceProperty$1 = /*@__PURE__*/getDefaultExportFromCjs$1(sliceExports$1);
 
-	function _unsupportedIterableToArray$1m(r, a) {
+	function _unsupportedIterableToArray$1n(r, a) {
 	  if (r) {
 	    var _context;
-	    if ("string" == typeof r) return _arrayLikeToArray$1p(r, a);
+	    if ("string" == typeof r) return _arrayLikeToArray$1q(r, a);
 	    var t = _sliceInstanceProperty$1(_context = {}.toString.call(r)).call(_context, 8, -1);
-	    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from$1(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1p(r, a) : void 0;
+	    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from$1(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1q(r, a) : void 0;
 	  }
 	}
 
@@ -10563,7 +8387,7 @@
 	}
 
 	function _toConsumableArray$1(r) {
-	  return _arrayWithoutHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$1m(r) || _nonIterableSpread$1();
+	  return _arrayWithoutHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$1n(r) || _nonIterableSpread$1();
 	}
 
 	var getOwnPropertySymbols$2;
@@ -10890,7 +8714,7 @@
 	var _pushInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(pushExports);
 
 	function _iterableToArrayLimit$1(r, l) {
-	  var t = null == r ? null : "undefined" != typeof _Symbol$5 && _getIteratorMethod(r) || r["@@iterator"];
+	  var t = null == r ? null : "undefined" != typeof _Symbol$4 && _getIteratorMethod(r) || r["@@iterator"];
 	  if (null != t) {
 	    var e,
 	      n,
@@ -10922,7 +8746,7 @@
 	}
 
 	function _slicedToArray$1(r, e) {
-	  return _arrayWithHoles$1(r) || _iterableToArrayLimit$1(r, e) || _unsupportedIterableToArray$1m(r, e) || _nonIterableRest$1();
+	  return _arrayWithHoles$1(r) || _iterableToArrayLimit$1(r, e) || _unsupportedIterableToArray$1n(r, e) || _nonIterableRest$1();
 	}
 
 	var es_aggregateError = {};
@@ -10962,7 +8786,7 @@
 		if (hasRequiredInstallErrorCause) return installErrorCause;
 		hasRequiredInstallErrorCause = 1;
 		'use strict';
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 		var createNonEnumerableProperty = /*@__PURE__*/ requireCreateNonEnumerableProperty();
 
 		// `InstallErrorCause` abstract operation
@@ -11044,89 +8868,6 @@
 		return errorStackInstall;
 	}
 
-	var iterate;
-	var hasRequiredIterate;
-
-	function requireIterate () {
-		if (hasRequiredIterate) return iterate;
-		hasRequiredIterate = 1;
-		'use strict';
-		var bind = /*@__PURE__*/ requireFunctionBindContext();
-		var call = /*@__PURE__*/ requireFunctionCall();
-		var anObject = /*@__PURE__*/ requireAnObject();
-		var tryToString = /*@__PURE__*/ requireTryToString();
-		var isArrayIteratorMethod = /*@__PURE__*/ requireIsArrayIteratorMethod();
-		var lengthOfArrayLike = /*@__PURE__*/ requireLengthOfArrayLike();
-		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
-		var getIterator = /*@__PURE__*/ requireGetIterator$6();
-		var getIteratorMethod = /*@__PURE__*/ requireGetIteratorMethod$6();
-		var iteratorClose = /*@__PURE__*/ requireIteratorClose();
-
-		var $TypeError = TypeError;
-
-		var Result = function (stopped, result) {
-		  this.stopped = stopped;
-		  this.result = result;
-		};
-
-		var ResultPrototype = Result.prototype;
-
-		iterate = function (iterable, unboundFunction, options) {
-		  var that = options && options.that;
-		  var AS_ENTRIES = !!(options && options.AS_ENTRIES);
-		  var IS_RECORD = !!(options && options.IS_RECORD);
-		  var IS_ITERATOR = !!(options && options.IS_ITERATOR);
-		  var INTERRUPTED = !!(options && options.INTERRUPTED);
-		  var fn = bind(unboundFunction, that);
-		  var iterator, iterFn, index, length, result, next, step;
-
-		  var stop = function (condition) {
-		    var $iterator = iterator;
-		    iterator = undefined;
-		    if ($iterator) iteratorClose($iterator, 'normal');
-		    return new Result(true, condition);
-		  };
-
-		  var callFn = function (value) {
-		    if (AS_ENTRIES) {
-		      anObject(value);
-		      return INTERRUPTED ? fn(value[0], value[1], stop) : fn(value[0], value[1]);
-		    } return INTERRUPTED ? fn(value, stop) : fn(value);
-		  };
-
-		  if (IS_RECORD) {
-		    iterator = iterable.iterator;
-		  } else if (IS_ITERATOR) {
-		    iterator = iterable;
-		  } else {
-		    iterFn = getIteratorMethod(iterable);
-		    if (!iterFn) throw new $TypeError(tryToString(iterable) + ' is not iterable');
-		    // optimisation for array iterators
-		    if (isArrayIteratorMethod(iterFn)) {
-		      for (index = 0, length = lengthOfArrayLike(iterable); length > index; index++) {
-		        result = callFn(iterable[index]);
-		        if (result && isPrototypeOf(ResultPrototype, result)) return result;
-		      } return new Result(false);
-		    }
-		    iterator = getIterator(iterable, iterFn);
-		  }
-
-		  next = IS_RECORD ? iterable.next : iterator.next;
-		  while (!(step = call(next, iterator)).done) {
-		    // `IteratorValue` errors should propagate without closing the iterator
-		    var value = step.value;
-		    try {
-		      result = callFn(value);
-		    } catch (error) {
-		      if (iterator) iteratorClose(iterator, 'throw', error);
-		      else throw error;
-		    }
-		    if (typeof result == 'object' && result && isPrototypeOf(ResultPrototype, result)) return result;
-		  } return new Result(false);
-		};
-		return iterate;
-	}
-
 	var normalizeStringArgument;
 	var hasRequiredNormalizeStringArgument;
 
@@ -11134,7 +8875,7 @@
 		if (hasRequiredNormalizeStringArgument) return normalizeStringArgument;
 		hasRequiredNormalizeStringArgument = 1;
 		'use strict';
-		var toString = /*@__PURE__*/ requireToString$2();
+		var toString = /*@__PURE__*/ requireToString$1();
 
 		normalizeStringArgument = function (argument, $default) {
 		  return argument === undefined ? arguments.length < 2 ? '' : $default : toString(argument);
@@ -11254,24 +8995,6 @@
 		  }
 		};
 		return setSpecies;
-	}
-
-	var anInstance;
-	var hasRequiredAnInstance;
-
-	function requireAnInstance () {
-		if (hasRequiredAnInstance) return anInstance;
-		hasRequiredAnInstance = 1;
-		'use strict';
-		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
-
-		var $TypeError = TypeError;
-
-		anInstance = function (it, Prototype) {
-		  if (isPrototypeOf(Prototype, it)) return it;
-		  throw new $TypeError('Incorrect invocation');
-		};
-		return anInstance;
 	}
 
 	var speciesConstructor;
@@ -11758,7 +9481,7 @@
 		var setSpecies = /*@__PURE__*/ requireSetSpecies();
 		var aCallable = /*@__PURE__*/ requireACallable();
 		var isCallable = /*@__PURE__*/ requireIsCallable();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 		var anInstance = /*@__PURE__*/ requireAnInstance();
 		var speciesConstructor = /*@__PURE__*/ requireSpeciesConstructor();
 		var task = /*@__PURE__*/ requireTask().set;
@@ -12214,7 +9937,7 @@
 		hasRequiredPromiseResolve = 1;
 		'use strict';
 		var anObject = /*@__PURE__*/ requireAnObject();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 		var newPromiseCapability = /*@__PURE__*/ requireNewPromiseCapability();
 
 		promiseResolve = function (C, x) {
@@ -12651,7 +10374,7 @@
 	}
 
 	var promiseExports$1 = /*@__PURE__*/ requirePromise$1();
-	var _Promise$2 = /*@__PURE__*/getDefaultExportFromCjs$1(promiseExports$1);
+	var _Promise$1 = /*@__PURE__*/getDefaultExportFromCjs$1(promiseExports$1);
 
 	function asyncGeneratorStep(n, t, e, r, o, a, c) {
 	  try {
@@ -12660,13 +10383,13 @@
 	  } catch (n) {
 	    return void e(n);
 	  }
-	  i.done ? t(u) : _Promise$2.resolve(u).then(r, o);
+	  i.done ? t(u) : _Promise$1.resolve(u).then(r, o);
 	}
 	function _asyncToGenerator(n) {
 	  return function () {
 	    var t = this,
 	      e = arguments;
-	    return new _Promise$2(function (r, o) {
+	    return new _Promise$1(function (r, o) {
 	      var a = n.apply(t, e);
 	      function _next(n) {
 	        asyncGeneratorStep(a, r, o, _next, _throw, "next", n);
@@ -12691,7 +10414,7 @@
 		'use strict';
 		var $ = /*@__PURE__*/ require_export();
 		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThis();
-		var isArray = /*@__PURE__*/ requireIsArray$8();
+		var isArray = /*@__PURE__*/ requireIsArray$7();
 
 		var nativeReverse = uncurryThis([].reverse);
 		var test = [1, 2];
@@ -13662,7 +11385,7 @@
 		var toObject = /*@__PURE__*/ requireToObject();
 		var lengthOfArrayLike = /*@__PURE__*/ requireLengthOfArrayLike();
 		var deletePropertyOrThrow = /*@__PURE__*/ requireDeletePropertyOrThrow();
-		var toString = /*@__PURE__*/ requireToString$2();
+		var toString = /*@__PURE__*/ requireToString$1();
 		var fails = /*@__PURE__*/ requireFails();
 		var internalSort = /*@__PURE__*/ requireArraySort();
 		var arrayMethodIsStrict = /*@__PURE__*/ requireArrayMethodIsStrict();
@@ -13825,459 +11548,169 @@
 	var sortExports = requireSort();
 	var _sortInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(sortExports);
 
-	var es_regexp_flags = {};
+	var es_string_trim = {};
 
-	var hasRequiredEs_regexp_flags;
+	var whitespaces;
+	var hasRequiredWhitespaces;
 
-	function requireEs_regexp_flags () {
-		if (hasRequiredEs_regexp_flags) return es_regexp_flags;
-		hasRequiredEs_regexp_flags = 1;
-		// empty
-		return es_regexp_flags;
+	function requireWhitespaces () {
+		if (hasRequiredWhitespaces) return whitespaces;
+		hasRequiredWhitespaces = 1;
+		'use strict';
+		// a string of all valid unicode whitespaces
+		whitespaces = '\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u1680\u2000\u2001\u2002' +
+		  '\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF';
+		return whitespaces;
 	}
 
-	var regexpFlagsDetection;
-	var hasRequiredRegexpFlagsDetection;
+	var stringTrim$1;
+	var hasRequiredStringTrim;
 
-	function requireRegexpFlagsDetection () {
-		if (hasRequiredRegexpFlagsDetection) return regexpFlagsDetection;
-		hasRequiredRegexpFlagsDetection = 1;
+	function requireStringTrim () {
+		if (hasRequiredStringTrim) return stringTrim$1;
+		hasRequiredStringTrim = 1;
 		'use strict';
-		var globalThis = /*@__PURE__*/ requireGlobalThis();
+		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThis();
+		var requireObjectCoercible = /*@__PURE__*/ requireRequireObjectCoercible();
+		var toString = /*@__PURE__*/ requireToString$1();
+		var whitespaces = /*@__PURE__*/ requireWhitespaces();
+
+		var replace = uncurryThis(''.replace);
+		var ltrim = RegExp('^[' + whitespaces + ']+');
+		var rtrim = RegExp('(^|[^' + whitespaces + '])[' + whitespaces + ']+$');
+
+		// `String.prototype.{ trim, trimStart, trimEnd, trimLeft, trimRight }` methods implementation
+		var createMethod = function (TYPE) {
+		  return function ($this) {
+		    var string = toString(requireObjectCoercible($this));
+		    if (TYPE & 1) string = replace(string, ltrim, '');
+		    if (TYPE & 2) string = replace(string, rtrim, '$1');
+		    return string;
+		  };
+		};
+
+		stringTrim$1 = {
+		  // `String.prototype.{ trimLeft, trimStart }` methods
+		  // https://tc39.es/ecma262/#sec-string.prototype.trimstart
+		  start: createMethod(1),
+		  // `String.prototype.{ trimRight, trimEnd }` methods
+		  // https://tc39.es/ecma262/#sec-string.prototype.trimend
+		  end: createMethod(2),
+		  // `String.prototype.trim` method
+		  // https://tc39.es/ecma262/#sec-string.prototype.trim
+		  trim: createMethod(3)
+		};
+		return stringTrim$1;
+	}
+
+	var stringTrimForced;
+	var hasRequiredStringTrimForced;
+
+	function requireStringTrimForced () {
+		if (hasRequiredStringTrimForced) return stringTrimForced;
+		hasRequiredStringTrimForced = 1;
+		'use strict';
+		var PROPER_FUNCTION_NAME = /*@__PURE__*/ requireFunctionName().PROPER;
 		var fails = /*@__PURE__*/ requireFails();
+		var whitespaces = /*@__PURE__*/ requireWhitespaces();
 
-		// babel-minify and Closure Compiler transpiles RegExp('.', 'd') -> /./d and it causes SyntaxError
-		var RegExp = globalThis.RegExp;
+		var non = '\u200B\u0085\u180E';
 
-		var FLAGS_GETTER_IS_CORRECT = !fails(function () {
-		  var INDICES_SUPPORT = true;
-		  try {
-		    RegExp('.', 'd');
-		  } catch (error) {
-		    INDICES_SUPPORT = false;
+		// check that a method works with the correct list
+		// of whitespaces and has a correct name
+		stringTrimForced = function (METHOD_NAME) {
+		  return fails(function () {
+		    return !!whitespaces[METHOD_NAME]()
+		      || non[METHOD_NAME]() !== non
+		      || (PROPER_FUNCTION_NAME && whitespaces[METHOD_NAME].name !== METHOD_NAME);
+		  });
+		};
+		return stringTrimForced;
+	}
+
+	var hasRequiredEs_string_trim;
+
+	function requireEs_string_trim () {
+		if (hasRequiredEs_string_trim) return es_string_trim;
+		hasRequiredEs_string_trim = 1;
+		'use strict';
+		var $ = /*@__PURE__*/ require_export();
+		var $trim = /*@__PURE__*/ requireStringTrim().trim;
+		var forcedStringTrimMethod = /*@__PURE__*/ requireStringTrimForced();
+
+		// `String.prototype.trim` method
+		// https://tc39.es/ecma262/#sec-string.prototype.trim
+		$({ target: 'String', proto: true, forced: forcedStringTrimMethod('trim') }, {
+		  trim: function trim() {
+		    return $trim(this);
 		  }
-
-		  var O = {};
-		  // modern V8 bug
-		  var calls = '';
-		  var expected = INDICES_SUPPORT ? 'dgimsy' : 'gimsy';
-
-		  var addGetter = function (key, chr) {
-		    // eslint-disable-next-line es/no-object-defineproperty -- safe
-		    Object.defineProperty(O, key, { get: function () {
-		      calls += chr;
-		      return true;
-		    } });
-		  };
-
-		  var pairs = {
-		    dotAll: 's',
-		    global: 'g',
-		    ignoreCase: 'i',
-		    multiline: 'm',
-		    sticky: 'y'
-		  };
-
-		  if (INDICES_SUPPORT) pairs.hasIndices = 'd';
-
-		  for (var key in pairs) addGetter(key, pairs[key]);
-
-		  // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
-		  var result = Object.getOwnPropertyDescriptor(RegExp.prototype, 'flags').get.call(O);
-
-		  return result !== expected || calls !== expected;
 		});
-
-		regexpFlagsDetection = { correct: FLAGS_GETTER_IS_CORRECT };
-		return regexpFlagsDetection;
+		return es_string_trim;
 	}
 
-	var regexpFlags;
-	var hasRequiredRegexpFlags;
+	var trim$5;
+	var hasRequiredTrim$3;
 
-	function requireRegexpFlags () {
-		if (hasRequiredRegexpFlags) return regexpFlags;
-		hasRequiredRegexpFlags = 1;
+	function requireTrim$3 () {
+		if (hasRequiredTrim$3) return trim$5;
+		hasRequiredTrim$3 = 1;
 		'use strict';
-		var anObject = /*@__PURE__*/ requireAnObject();
+		requireEs_string_trim();
+		var getBuiltInPrototypeMethod = /*@__PURE__*/ requireGetBuiltInPrototypeMethod();
 
-		// `RegExp.prototype.flags` getter implementation
-		// https://tc39.es/ecma262/#sec-get-regexp.prototype.flags
-		regexpFlags = function () {
-		  var that = anObject(this);
-		  var result = '';
-		  if (that.hasIndices) result += 'd';
-		  if (that.global) result += 'g';
-		  if (that.ignoreCase) result += 'i';
-		  if (that.multiline) result += 'm';
-		  if (that.dotAll) result += 's';
-		  if (that.unicode) result += 'u';
-		  if (that.unicodeSets) result += 'v';
-		  if (that.sticky) result += 'y';
-		  return result;
-		};
-		return regexpFlags;
+		trim$5 = getBuiltInPrototypeMethod('String', 'trim');
+		return trim$5;
 	}
 
-	var regexpGetFlags;
-	var hasRequiredRegexpGetFlags;
+	var trim$4;
+	var hasRequiredTrim$2;
 
-	function requireRegexpGetFlags () {
-		if (hasRequiredRegexpGetFlags) return regexpGetFlags;
-		hasRequiredRegexpGetFlags = 1;
-		'use strict';
-		var call = /*@__PURE__*/ requireFunctionCall();
-		var hasOwn = /*@__PURE__*/ requireHasOwnProperty();
-		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
-		var regExpFlagsDetection = /*@__PURE__*/ requireRegexpFlagsDetection();
-		var regExpFlagsGetterImplementation = /*@__PURE__*/ requireRegexpFlags();
-
-		var RegExpPrototype = RegExp.prototype;
-
-		regexpGetFlags = regExpFlagsDetection.correct ? function (it) {
-		  return it.flags;
-		} : function (it) {
-		  return (!regExpFlagsDetection.correct && isPrototypeOf(RegExpPrototype, it) && !hasOwn(it, 'flags'))
-		    ? call(regExpFlagsGetterImplementation, it)
-		    : it.flags;
-		};
-		return regexpGetFlags;
-	}
-
-	var flags$2;
-	var hasRequiredFlags$3;
-
-	function requireFlags$3 () {
-		if (hasRequiredFlags$3) return flags$2;
-		hasRequiredFlags$3 = 1;
-		'use strict';
-		requireEs_regexp_flags();
-		var getRegExpFlags = /*@__PURE__*/ requireRegexpGetFlags();
-
-		flags$2 = getRegExpFlags;
-		return flags$2;
-	}
-
-	var flags_1;
-	var hasRequiredFlags$2;
-
-	function requireFlags$2 () {
-		if (hasRequiredFlags$2) return flags_1;
-		hasRequiredFlags$2 = 1;
+	function requireTrim$2 () {
+		if (hasRequiredTrim$2) return trim$4;
+		hasRequiredTrim$2 = 1;
 		'use strict';
 		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
-		var flags = /*@__PURE__*/ requireFlags$3();
+		var method = /*@__PURE__*/ requireTrim$3();
 
-		var RegExpPrototype = RegExp.prototype;
+		var StringPrototype = String.prototype;
 
-		flags_1 = function (it) {
-		  return (it === RegExpPrototype || isPrototypeOf(RegExpPrototype, it)) ? flags(it) : it.flags;
+		trim$4 = function (it) {
+		  var own = it.trim;
+		  return typeof it == 'string' || it === StringPrototype
+		    || (isPrototypeOf(StringPrototype, it) && own === StringPrototype.trim) ? method : own;
 		};
-		return flags_1;
+		return trim$4;
 	}
 
-	var flags$1;
-	var hasRequiredFlags$1;
+	var trim$3;
+	var hasRequiredTrim$1;
 
-	function requireFlags$1 () {
-		if (hasRequiredFlags$1) return flags$1;
-		hasRequiredFlags$1 = 1;
+	function requireTrim$1 () {
+		if (hasRequiredTrim$1) return trim$3;
+		hasRequiredTrim$1 = 1;
 		'use strict';
-		var parent = /*@__PURE__*/ requireFlags$2();
+		var parent = /*@__PURE__*/ requireTrim$2();
 
-		flags$1 = parent;
-		return flags$1;
+		trim$3 = parent;
+		return trim$3;
 	}
 
-	var flags;
-	var hasRequiredFlags;
+	var trim$2;
+	var hasRequiredTrim;
 
-	function requireFlags () {
-		if (hasRequiredFlags) return flags;
-		hasRequiredFlags = 1;
-		flags = /*@__PURE__*/ requireFlags$1();
-		return flags;
+	function requireTrim () {
+		if (hasRequiredTrim) return trim$2;
+		hasRequiredTrim = 1;
+		trim$2 = /*@__PURE__*/ requireTrim$1();
+		return trim$2;
 	}
 
-	var flagsExports = requireFlags();
-	var _flagsInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(flagsExports);
+	var trimExports = requireTrim();
+	var _trimInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(trimExports);
 
 	var es_map = {};
 
 	var es_map_constructor = {};
-
-	var internalMetadata$1 = {exports: {}};
-
-	var arrayBufferNonExtensible;
-	var hasRequiredArrayBufferNonExtensible;
-
-	function requireArrayBufferNonExtensible () {
-		if (hasRequiredArrayBufferNonExtensible) return arrayBufferNonExtensible;
-		hasRequiredArrayBufferNonExtensible = 1;
-		'use strict';
-		// FF26- bug: ArrayBuffers are non-extensible, but Object.isExtensible does not report it
-		var fails = /*@__PURE__*/ requireFails();
-
-		arrayBufferNonExtensible = fails(function () {
-		  if (typeof ArrayBuffer == 'function') {
-		    var buffer = new ArrayBuffer(8);
-		    // eslint-disable-next-line es/no-object-isextensible, es/no-object-defineproperty -- safe
-		    if (Object.isExtensible(buffer)) Object.defineProperty(buffer, 'a', { value: 8 });
-		  }
-		});
-		return arrayBufferNonExtensible;
-	}
-
-	var objectIsExtensible;
-	var hasRequiredObjectIsExtensible;
-
-	function requireObjectIsExtensible () {
-		if (hasRequiredObjectIsExtensible) return objectIsExtensible;
-		hasRequiredObjectIsExtensible = 1;
-		'use strict';
-		var fails = /*@__PURE__*/ requireFails();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
-		var classof = /*@__PURE__*/ requireClassofRaw();
-		var ARRAY_BUFFER_NON_EXTENSIBLE = /*@__PURE__*/ requireArrayBufferNonExtensible();
-
-		// eslint-disable-next-line es/no-object-isextensible -- safe
-		var $isExtensible = Object.isExtensible;
-		var FAILS_ON_PRIMITIVES = fails(function () { $isExtensible(1); });
-
-		// `Object.isExtensible` method
-		// https://tc39.es/ecma262/#sec-object.isextensible
-		objectIsExtensible = (FAILS_ON_PRIMITIVES || ARRAY_BUFFER_NON_EXTENSIBLE) ? function isExtensible(it) {
-		  if (!isObject(it)) return false;
-		  if (ARRAY_BUFFER_NON_EXTENSIBLE && classof(it) === 'ArrayBuffer') return false;
-		  return $isExtensible ? $isExtensible(it) : true;
-		} : $isExtensible;
-		return objectIsExtensible;
-	}
-
-	var freezing;
-	var hasRequiredFreezing;
-
-	function requireFreezing () {
-		if (hasRequiredFreezing) return freezing;
-		hasRequiredFreezing = 1;
-		'use strict';
-		var fails = /*@__PURE__*/ requireFails();
-
-		freezing = !fails(function () {
-		  // eslint-disable-next-line es/no-object-isextensible, es/no-object-preventextensions -- required for testing
-		  return Object.isExtensible(Object.preventExtensions({}));
-		});
-		return freezing;
-	}
-
-	var internalMetadata = internalMetadata$1.exports;
-
-	var hasRequiredInternalMetadata;
-
-	function requireInternalMetadata () {
-		if (hasRequiredInternalMetadata) return internalMetadata$1.exports;
-		hasRequiredInternalMetadata = 1;
-		'use strict';
-		var $ = /*@__PURE__*/ require_export();
-		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThis();
-		var hiddenKeys = /*@__PURE__*/ requireHiddenKeys();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
-		var hasOwn = /*@__PURE__*/ requireHasOwnProperty();
-		var defineProperty = /*@__PURE__*/ requireObjectDefineProperty().f;
-		var getOwnPropertyNamesModule = /*@__PURE__*/ requireObjectGetOwnPropertyNames();
-		var getOwnPropertyNamesExternalModule = /*@__PURE__*/ requireObjectGetOwnPropertyNamesExternal();
-		var isExtensible = /*@__PURE__*/ requireObjectIsExtensible();
-		var uid = /*@__PURE__*/ requireUid();
-		var FREEZING = /*@__PURE__*/ requireFreezing();
-
-		var REQUIRED = false;
-		var METADATA = uid('meta');
-		var id = 0;
-
-		var setMetadata = function (it) {
-		  defineProperty(it, METADATA, { value: {
-		    objectID: 'O' + id++, // object ID
-		    weakData: {}          // weak collections IDs
-		  } });
-		};
-
-		var fastKey = function (it, create) {
-		  // return a primitive with prefix
-		  if (!isObject(it)) return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
-		  if (!hasOwn(it, METADATA)) {
-		    // can't set metadata to uncaught frozen object
-		    if (!isExtensible(it)) return 'F';
-		    // not necessary to add metadata
-		    if (!create) return 'E';
-		    // add missing metadata
-		    setMetadata(it);
-		  // return object ID
-		  } return it[METADATA].objectID;
-		};
-
-		var getWeakData = function (it, create) {
-		  if (!hasOwn(it, METADATA)) {
-		    // can't set metadata to uncaught frozen object
-		    if (!isExtensible(it)) return true;
-		    // not necessary to add metadata
-		    if (!create) return false;
-		    // add missing metadata
-		    setMetadata(it);
-		  // return the store of weak collections IDs
-		  } return it[METADATA].weakData;
-		};
-
-		// add metadata on freeze-family methods calling
-		var onFreeze = function (it) {
-		  if (FREEZING && REQUIRED && isExtensible(it) && !hasOwn(it, METADATA)) setMetadata(it);
-		  return it;
-		};
-
-		var enable = function () {
-		  meta.enable = function () { /* empty */ };
-		  REQUIRED = true;
-		  var getOwnPropertyNames = getOwnPropertyNamesModule.f;
-		  var splice = uncurryThis([].splice);
-		  var test = {};
-		  // eslint-disable-next-line unicorn/no-immediate-mutation -- ES3 syntax limitation
-		  test[METADATA] = 1;
-
-		  // prevent exposing of metadata key
-		  if (getOwnPropertyNames(test).length) {
-		    getOwnPropertyNamesModule.f = function (it) {
-		      var result = getOwnPropertyNames(it);
-		      for (var i = 0, length = result.length; i < length; i++) {
-		        if (result[i] === METADATA) {
-		          splice(result, i, 1);
-		          break;
-		        }
-		      } return result;
-		    };
-
-		    $({ target: 'Object', stat: true, forced: true }, {
-		      getOwnPropertyNames: getOwnPropertyNamesExternalModule.f
-		    });
-		  }
-		};
-
-		var meta = internalMetadata$1.exports = {
-		  enable: enable,
-		  fastKey: fastKey,
-		  getWeakData: getWeakData,
-		  onFreeze: onFreeze
-		};
-
-		hiddenKeys[METADATA] = true;
-		return internalMetadata$1.exports;
-	}
-
-	var collection$2;
-	var hasRequiredCollection;
-
-	function requireCollection () {
-		if (hasRequiredCollection) return collection$2;
-		hasRequiredCollection = 1;
-		'use strict';
-		var $ = /*@__PURE__*/ require_export();
-		var globalThis = /*@__PURE__*/ requireGlobalThis();
-		var InternalMetadataModule = /*@__PURE__*/ requireInternalMetadata();
-		var call = /*@__PURE__*/ requireFunctionCall();
-		var fails = /*@__PURE__*/ requireFails();
-		var createNonEnumerableProperty = /*@__PURE__*/ requireCreateNonEnumerableProperty();
-		var iterate = /*@__PURE__*/ requireIterate();
-		var anInstance = /*@__PURE__*/ requireAnInstance();
-		var isCallable = /*@__PURE__*/ requireIsCallable();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
-		var isNullOrUndefined = /*@__PURE__*/ requireIsNullOrUndefined();
-		var setToStringTag = /*@__PURE__*/ requireSetToStringTag();
-		var defineProperty = /*@__PURE__*/ requireObjectDefineProperty().f;
-		var forEach = /*@__PURE__*/ requireArrayIteration().forEach;
-		var DESCRIPTORS = /*@__PURE__*/ requireDescriptors();
-		var InternalStateModule = /*@__PURE__*/ requireInternalState();
-
-		var setInternalState = InternalStateModule.set;
-		var internalStateGetterFor = InternalStateModule.getterFor;
-
-		collection$2 = function (CONSTRUCTOR_NAME, wrapper, common) {
-		  var IS_MAP = CONSTRUCTOR_NAME.indexOf('Map') !== -1;
-		  var IS_WEAK = CONSTRUCTOR_NAME.indexOf('Weak') !== -1;
-		  var ADDER = IS_MAP ? 'set' : 'add';
-		  var NativeConstructor = globalThis[CONSTRUCTOR_NAME];
-		  var NativePrototype = NativeConstructor && NativeConstructor.prototype;
-		  var exported = {};
-		  var Constructor;
-
-		  if (!DESCRIPTORS || !isCallable(NativeConstructor)
-		    || !(IS_WEAK || NativePrototype.forEach && !fails(function () { new NativeConstructor().entries().next(); }))
-		  ) {
-		    // create collection constructor
-		    Constructor = common.getConstructor(wrapper, CONSTRUCTOR_NAME, IS_MAP, ADDER);
-		    InternalMetadataModule.enable();
-		  } else {
-		    Constructor = wrapper(function (target, iterable) {
-		      setInternalState(anInstance(target, Prototype), {
-		        type: CONSTRUCTOR_NAME,
-		        collection: new NativeConstructor()
-		      });
-		      if (!isNullOrUndefined(iterable)) iterate(iterable, target[ADDER], { that: target, AS_ENTRIES: IS_MAP });
-		    });
-
-		    var Prototype = Constructor.prototype;
-
-		    var getInternalState = internalStateGetterFor(CONSTRUCTOR_NAME);
-
-		    forEach(['add', 'clear', 'delete', 'forEach', 'get', 'has', 'set', 'keys', 'values', 'entries'], function (KEY) {
-		      var IS_ADDER = KEY === 'add' || KEY === 'set';
-		      if (KEY in NativePrototype && !(IS_WEAK && KEY === 'clear')) {
-		        createNonEnumerableProperty(Prototype, KEY, function (a, b) {
-		          var that = this;
-		          var collection = getInternalState(that).collection;
-		          if (!IS_ADDER && IS_WEAK && !isObject(a)) return KEY === 'get' ? undefined : false;
-		          var result = collection[KEY](KEY === 'forEach' ? function (value, key) {
-		            call(a, b, value, key, that);
-		          } : a === 0 ? 0 : a, b);
-		          return IS_ADDER ? that : result;
-		        });
-		      }
-		    });
-
-		    IS_WEAK || defineProperty(Prototype, 'size', {
-		      configurable: true,
-		      get: function () {
-		        return getInternalState(this).collection.size;
-		      }
-		    });
-		  }
-
-		  setToStringTag(Constructor, CONSTRUCTOR_NAME, false, true);
-
-		  exported[CONSTRUCTOR_NAME] = Constructor;
-		  $({ global: true, forced: true }, exported);
-
-		  if (!IS_WEAK) common.setStrong(Constructor, CONSTRUCTOR_NAME, IS_MAP);
-
-		  return Constructor;
-		};
-		return collection$2;
-	}
-
-	var defineBuiltIns;
-	var hasRequiredDefineBuiltIns;
-
-	function requireDefineBuiltIns () {
-		if (hasRequiredDefineBuiltIns) return defineBuiltIns;
-		hasRequiredDefineBuiltIns = 1;
-		'use strict';
-		var defineBuiltIn = /*@__PURE__*/ requireDefineBuiltIn();
-
-		defineBuiltIns = function (target, src, options) {
-		  for (var key in src) {
-		    if (options && options.unsafe && target[key]) target[key] = src[key];
-		    else defineBuiltIn(target, key, src[key], options);
-		  } return target;
-		};
-		return defineBuiltIns;
-	}
 
 	var collectionStrong;
 	var hasRequiredCollectionStrong;
@@ -14524,23 +11957,6 @@
 
 	var es_map_groupBy = {};
 
-	var caller;
-	var hasRequiredCaller;
-
-	function requireCaller () {
-		if (hasRequiredCaller) return caller;
-		hasRequiredCaller = 1;
-		'use strict';
-		caller = function (methodName, numArgs) {
-		  return numArgs === 1 ? function (object, arg) {
-		    return object[methodName](arg);
-		  } : function (object, arg1, arg2) {
-		    return object[methodName](arg1, arg2);
-		  };
-		};
-		return caller;
-	}
-
 	var mapHelpers;
 	var hasRequiredMapHelpers;
 
@@ -14720,166 +12136,6 @@
 	var mapExports$1 = requireMap$3();
 	var _Map$2 = /*@__PURE__*/getDefaultExportFromCjs$1(mapExports$1);
 
-	var es_string_trim = {};
-
-	var whitespaces;
-	var hasRequiredWhitespaces;
-
-	function requireWhitespaces () {
-		if (hasRequiredWhitespaces) return whitespaces;
-		hasRequiredWhitespaces = 1;
-		'use strict';
-		// a string of all valid unicode whitespaces
-		whitespaces = '\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u1680\u2000\u2001\u2002' +
-		  '\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF';
-		return whitespaces;
-	}
-
-	var stringTrim$1;
-	var hasRequiredStringTrim;
-
-	function requireStringTrim () {
-		if (hasRequiredStringTrim) return stringTrim$1;
-		hasRequiredStringTrim = 1;
-		'use strict';
-		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThis();
-		var requireObjectCoercible = /*@__PURE__*/ requireRequireObjectCoercible();
-		var toString = /*@__PURE__*/ requireToString$2();
-		var whitespaces = /*@__PURE__*/ requireWhitespaces();
-
-		var replace = uncurryThis(''.replace);
-		var ltrim = RegExp('^[' + whitespaces + ']+');
-		var rtrim = RegExp('(^|[^' + whitespaces + '])[' + whitespaces + ']+$');
-
-		// `String.prototype.{ trim, trimStart, trimEnd, trimLeft, trimRight }` methods implementation
-		var createMethod = function (TYPE) {
-		  return function ($this) {
-		    var string = toString(requireObjectCoercible($this));
-		    if (TYPE & 1) string = replace(string, ltrim, '');
-		    if (TYPE & 2) string = replace(string, rtrim, '$1');
-		    return string;
-		  };
-		};
-
-		stringTrim$1 = {
-		  // `String.prototype.{ trimLeft, trimStart }` methods
-		  // https://tc39.es/ecma262/#sec-string.prototype.trimstart
-		  start: createMethod(1),
-		  // `String.prototype.{ trimRight, trimEnd }` methods
-		  // https://tc39.es/ecma262/#sec-string.prototype.trimend
-		  end: createMethod(2),
-		  // `String.prototype.trim` method
-		  // https://tc39.es/ecma262/#sec-string.prototype.trim
-		  trim: createMethod(3)
-		};
-		return stringTrim$1;
-	}
-
-	var stringTrimForced;
-	var hasRequiredStringTrimForced;
-
-	function requireStringTrimForced () {
-		if (hasRequiredStringTrimForced) return stringTrimForced;
-		hasRequiredStringTrimForced = 1;
-		'use strict';
-		var PROPER_FUNCTION_NAME = /*@__PURE__*/ requireFunctionName().PROPER;
-		var fails = /*@__PURE__*/ requireFails();
-		var whitespaces = /*@__PURE__*/ requireWhitespaces();
-
-		var non = '\u200B\u0085\u180E';
-
-		// check that a method works with the correct list
-		// of whitespaces and has a correct name
-		stringTrimForced = function (METHOD_NAME) {
-		  return fails(function () {
-		    return !!whitespaces[METHOD_NAME]()
-		      || non[METHOD_NAME]() !== non
-		      || (PROPER_FUNCTION_NAME && whitespaces[METHOD_NAME].name !== METHOD_NAME);
-		  });
-		};
-		return stringTrimForced;
-	}
-
-	var hasRequiredEs_string_trim;
-
-	function requireEs_string_trim () {
-		if (hasRequiredEs_string_trim) return es_string_trim;
-		hasRequiredEs_string_trim = 1;
-		'use strict';
-		var $ = /*@__PURE__*/ require_export();
-		var $trim = /*@__PURE__*/ requireStringTrim().trim;
-		var forcedStringTrimMethod = /*@__PURE__*/ requireStringTrimForced();
-
-		// `String.prototype.trim` method
-		// https://tc39.es/ecma262/#sec-string.prototype.trim
-		$({ target: 'String', proto: true, forced: forcedStringTrimMethod('trim') }, {
-		  trim: function trim() {
-		    return $trim(this);
-		  }
-		});
-		return es_string_trim;
-	}
-
-	var trim$5;
-	var hasRequiredTrim$3;
-
-	function requireTrim$3 () {
-		if (hasRequiredTrim$3) return trim$5;
-		hasRequiredTrim$3 = 1;
-		'use strict';
-		requireEs_string_trim();
-		var getBuiltInPrototypeMethod = /*@__PURE__*/ requireGetBuiltInPrototypeMethod();
-
-		trim$5 = getBuiltInPrototypeMethod('String', 'trim');
-		return trim$5;
-	}
-
-	var trim$4;
-	var hasRequiredTrim$2;
-
-	function requireTrim$2 () {
-		if (hasRequiredTrim$2) return trim$4;
-		hasRequiredTrim$2 = 1;
-		'use strict';
-		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
-		var method = /*@__PURE__*/ requireTrim$3();
-
-		var StringPrototype = String.prototype;
-
-		trim$4 = function (it) {
-		  var own = it.trim;
-		  return typeof it == 'string' || it === StringPrototype
-		    || (isPrototypeOf(StringPrototype, it) && own === StringPrototype.trim) ? method : own;
-		};
-		return trim$4;
-	}
-
-	var trim$3;
-	var hasRequiredTrim$1;
-
-	function requireTrim$1 () {
-		if (hasRequiredTrim$1) return trim$3;
-		hasRequiredTrim$1 = 1;
-		'use strict';
-		var parent = /*@__PURE__*/ requireTrim$2();
-
-		trim$3 = parent;
-		return trim$3;
-	}
-
-	var trim$2;
-	var hasRequiredTrim;
-
-	function requireTrim () {
-		if (hasRequiredTrim) return trim$2;
-		hasRequiredTrim = 1;
-		trim$2 = /*@__PURE__*/ requireTrim$1();
-		return trim$2;
-	}
-
-	var trimExports = requireTrim();
-	var _trimInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(trimExports);
-
 	var indexOf$1;
 	var hasRequiredIndexOf;
 
@@ -15041,7 +12297,7 @@
 		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThisClause();
 		var getOwnPropertyDescriptor = /*@__PURE__*/ requireObjectGetOwnPropertyDescriptor().f;
 		var toLength = /*@__PURE__*/ requireToLength();
-		var toString = /*@__PURE__*/ requireToString$2();
+		var toString = /*@__PURE__*/ requireToString$1();
 		var notARegExp = /*@__PURE__*/ requireNotARegexp();
 		var requireObjectCoercible = /*@__PURE__*/ requireRequireObjectCoercible();
 		var correctIsRegExpLogic = /*@__PURE__*/ requireCorrectIsRegexpLogic();
@@ -15140,7 +12396,7 @@
 		if (hasRequiredFlattenIntoArray) return flattenIntoArray_1;
 		hasRequiredFlattenIntoArray = 1;
 		'use strict';
-		var isArray = /*@__PURE__*/ requireIsArray$8();
+		var isArray = /*@__PURE__*/ requireIsArray$7();
 		var lengthOfArrayLike = /*@__PURE__*/ requireLengthOfArrayLike();
 		var doesNotExceedSafeInteger = /*@__PURE__*/ requireDoesNotExceedSafeInteger();
 		var bind = /*@__PURE__*/ requireFunctionBindContext();
@@ -16009,7 +13265,7 @@
 	}
 
 	var setExports$1 = requireSet$1();
-	var _Set$1 = /*@__PURE__*/getDefaultExportFromCjs$1(setExports$1);
+	var _Set = /*@__PURE__*/getDefaultExportFromCjs$1(setExports$1);
 
 	var es_date_now = {};
 
@@ -16037,11 +13293,11 @@
 	}
 
 	var now$4;
-	var hasRequiredNow$4;
+	var hasRequiredNow$3;
 
-	function requireNow$4 () {
-		if (hasRequiredNow$4) return now$4;
-		hasRequiredNow$4 = 1;
+	function requireNow$3 () {
+		if (hasRequiredNow$3) return now$4;
+		hasRequiredNow$3 = 1;
 		'use strict';
 		requireEs_date_now();
 		var path = /*@__PURE__*/ requirePath();
@@ -16051,29 +13307,29 @@
 	}
 
 	var now$3;
-	var hasRequiredNow$3;
+	var hasRequiredNow$2;
 
-	function requireNow$3 () {
-		if (hasRequiredNow$3) return now$3;
-		hasRequiredNow$3 = 1;
+	function requireNow$2 () {
+		if (hasRequiredNow$2) return now$3;
+		hasRequiredNow$2 = 1;
 		'use strict';
-		var parent = /*@__PURE__*/ requireNow$4();
+		var parent = /*@__PURE__*/ requireNow$3();
 
 		now$3 = parent;
 		return now$3;
 	}
 
 	var now$2;
-	var hasRequiredNow$2;
+	var hasRequiredNow$1;
 
-	function requireNow$2 () {
-		if (hasRequiredNow$2) return now$2;
-		hasRequiredNow$2 = 1;
-		now$2 = /*@__PURE__*/ requireNow$3();
+	function requireNow$1 () {
+		if (hasRequiredNow$1) return now$2;
+		hasRequiredNow$1 = 1;
+		now$2 = /*@__PURE__*/ requireNow$2();
 		return now$2;
 	}
 
-	var nowExports = requireNow$2();
+	var nowExports = requireNow$1();
 	var _Date$now = /*@__PURE__*/getDefaultExportFromCjs$1(nowExports);
 
 	var es_number_isFinite = {};
@@ -50115,7 +47371,7 @@
 		var globalThis = /*@__PURE__*/ requireGlobalThis();
 		var fails = /*@__PURE__*/ requireFails();
 		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThis();
-		var toString = /*@__PURE__*/ requireToString$2();
+		var toString = /*@__PURE__*/ requireToString$1();
 		var trim = /*@__PURE__*/ requireStringTrim().trim;
 		var whitespaces = /*@__PURE__*/ requireWhitespaces();
 
@@ -50204,7 +47460,7 @@
 		hasRequiredStringRepeat = 1;
 		'use strict';
 		var toIntegerOrInfinity = /*@__PURE__*/ requireToIntegerOrInfinity();
-		var toString = /*@__PURE__*/ requireToString$2();
+		var toString = /*@__PURE__*/ requireToString$1();
 		var requireObjectCoercible = /*@__PURE__*/ requireRequireObjectCoercible();
 
 		var $RangeError = RangeError;
@@ -51270,7 +48526,7 @@
 		var globalThis = /*@__PURE__*/ requireGlobalThis();
 		var fails = /*@__PURE__*/ requireFails();
 		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThis();
-		var toString = /*@__PURE__*/ requireToString$2();
+		var toString = /*@__PURE__*/ requireToString$1();
 		var trim = /*@__PURE__*/ requireStringTrim().trim;
 		var whitespaces = /*@__PURE__*/ requireWhitespaces();
 
@@ -51360,7 +48616,7 @@
 	}
 
 	var promiseExports = requirePromise();
-	var _Promise$1 = /*@__PURE__*/getDefaultExportFromCjs$1(promiseExports);
+	var _Promise = /*@__PURE__*/getDefaultExportFromCjs$1(promiseExports);
 
 	/**
 	 * Copyright (C) 2021 Tencent.
@@ -51529,7 +48785,7 @@
 	  return element;
 	}
 	function loadScript(src, id) {
-	  return new _Promise$1(function (resolve, reject) {
+	  return new _Promise(function (resolve, reject) {
 	    if (document.getElementById(id)) {
 	      resolve();
 	      return;
@@ -51594,10 +48850,8 @@
 	    this.cherry = cherry;
 	    this.html = html;
 	    this.md = md;
-	    this.currentCursor = currentCursor;
 	    // 记录粘贴区域，切换 TEXT/Markdown 时按范围替换，避免选区丢失导致内容重复
 	    this.pasteFrom = currentCursor;
-	    this.pasteTo = currentCursor + md.length;
 	    this.codemirror = editorView;
 	    this.locale = cherry.locale;
 	  },
@@ -51620,20 +48874,27 @@
 	    localStorage.setItem('cherry-paste-type', type);
 	  },
 	  /**
-	   * 在编辑器中自动选中刚刚粘贴的内容
-	   * CM6: currentCursor 和 getCursor() 都是文档偏移量
-	   */
-	  setSelection: function setSelection() {
-	    // CM6: setSelection(anchor, head) 使用文档偏移量
-	    this.codemirror.setSelection(this.pasteFrom, this.pasteTo);
-	  },
-	  /**
 	   * 按粘贴区域替换内容，并同步更新区域终点
-	   * @param {string} text - 替换文本
+	   * @param {string} after - 替换后文本
+	   * @param {string} before - 替换前文本
 	   */
-	  replacePasteContent: function replacePasteContent(text) {
-	    this.codemirror.replaceRange(text, this.pasteFrom, this.pasteTo);
-	    this.pasteTo = this.pasteFrom + text.length;
+	  replacePasteContent: function replacePasteContent(after, before) {
+	    // 去除\r\n,这俩算作一个字符
+	    var $after = after.replace(/\r\n/g, '\n');
+	    var $before = before.replace(/\r\n/g, '\n');
+	    var from = this.pasteFrom;
+	    var to = this.pasteFrom + $before.length;
+	    this.codemirror.dispatch({
+	      changes: {
+	        from: from,
+	        to: to,
+	        insert: $after
+	      },
+	      selection: {
+	        anchor: from,
+	        head: from + $after.length
+	      }
+	    });
 	  },
 	  /**
 	   * 绑定事件
@@ -51763,8 +49024,7 @@
 	    }
 	    this.noHide = true;
 	    this.bubbleDom.setAttribute('data-type', 'md');
-	    this.replacePasteContent(this.md);
-	    this.setSelection();
+	    this.replacePasteContent(this.md, this.html);
 	    this.showBubble();
 	    this.switchMd.classList.add('active');
 	    this.switchText.classList.remove('active');
@@ -51779,8 +49039,7 @@
 	    }
 	    this.noHide = true;
 	    this.bubbleDom.setAttribute('data-type', 'text');
-	    this.replacePasteContent(this.html);
-	    this.setSelection();
+	    this.replacePasteContent(this.html, this.md);
 	    this.showBubble();
 	    this.switchText.classList.add('active');
 	    this.switchMd.classList.remove('active');
@@ -51839,8 +49098,7 @@
 	/** @type {Partial<Console>} */
 	var Logger = new Proxy({}, {
 	  get: function get(target, prop, receiver) {
-	    // @ts-ignore
-	    if ("production" !== 'production' && typeof console !== 'undefined' && prop in console) {
+	    if (typeof "production" !== 'undefined' && "production" !== 'production' && typeof console !== 'undefined' && prop in console) {
 	      return console[prop];
 	    }
 	    return function () {};
@@ -52029,7 +49287,7 @@
 	}
 
 	function ownKeys$h(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$h(e) { for (var r = 1; r < arguments.length; r++) { var _context4, _context5; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context4 = ownKeys$h(Object(t), !0)).call(_context4, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context5 = ownKeys$h(Object(t))).call(_context5, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread$h(e) { for (var r = 1; r < arguments.length; r++) { var _context4, _context5; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context4 = ownKeys$h(Object(t), !0)).call(_context4, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context5 = ownKeys$h(Object(t))).call(_context5, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	/**
 	 * Copyright (C) 2021 Tencent.
 	 *
@@ -52058,7 +49316,7 @@
 	  try {
 	    new RegExp('(?<=.)');
 	    return true;
-	  } catch (ignore) {}
+	  } catch (_unused) {}
 	  return false;
 	}
 	var HORIZONTAL_WHITESPACE = "[ \\t\\u00a0]";
@@ -53589,10 +50847,10 @@
 	function _callSuper$1H(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1I() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1I() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1I = function _isNativeReflectConstruct() { return !!t; })(); }
 	function ownKeys$g(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$g(e) { for (var r = 1; r < arguments.length; r++) { var _context31, _context32; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context31 = ownKeys$g(Object(t), !0)).call(_context31, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context32 = ownKeys$g(Object(t))).call(_context32, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
-	function _createForOfIteratorHelper$1l(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1l(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-	function _unsupportedIterableToArray$1l(r, a) { if (r) { var _context30; if ("string" == typeof r) return _arrayLikeToArray$1o(r, a); var t = _sliceInstanceProperty(_context30 = {}.toString.call(r)).call(_context30, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1o(r, a) : void 0; } }
-	function _arrayLikeToArray$1o(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _objectSpread$g(e) { for (var r = 1; r < arguments.length; r++) { var _context33, _context34; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context33 = ownKeys$g(Object(t), !0)).call(_context33, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context34 = ownKeys$g(Object(t))).call(_context34, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _createForOfIteratorHelper$1m(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1m(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$1m(r, a) { if (r) { var _context32; if ("string" == typeof r) return _arrayLikeToArray$1p(r, a); var t = _sliceInstanceProperty(_context32 = {}.toString.call(r)).call(_context32, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1p(r, a) : void 0; } }
+	function _arrayLikeToArray$1p(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
 	/**
 	 * 自定义语法高亮器 - 将 Lezer tags 映射为 cm-* 类名
@@ -53835,49 +51093,49 @@
 	} // 缓存语法高亮扩展
 	function _loadVimModule() {
 	  _loadVimModule = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime.mark(function _callee3() {
-	    return _regeneratorRuntime.wrap(function (_context29) {
-	      while (1) switch (_context29.prev = _context29.next) {
+	    return _regeneratorRuntime.wrap(function (_context31) {
+	      while (1) switch (_context31.prev = _context31.next) {
 	        case 0:
 	          if (!vimModule) {
-	            _context29.next = 1;
+	            _context31.next = 1;
 	            break;
 	          }
-	          return _context29.abrupt("return", vimModule);
+	          return _context31.abrupt("return", vimModule);
 	        case 1:
 	          if (!vimModuleLoadPromise) {
-	            _context29.next = 2;
+	            _context31.next = 2;
 	            break;
 	          }
-	          return _context29.abrupt("return", vimModuleLoadPromise);
+	          return _context31.abrupt("return", vimModuleLoadPromise);
 	        case 2:
 	          vimModuleLoadPromise = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime.mark(function _callee2() {
 	            var mod, _t2;
-	            return _regeneratorRuntime.wrap(function (_context28) {
-	              while (1) switch (_context28.prev = _context28.next) {
+	            return _regeneratorRuntime.wrap(function (_context30) {
+	              while (1) switch (_context30.prev = _context30.next) {
 	                case 0:
-	                  _context28.prev = 0;
-	                  _context28.next = 1;
+	                  _context30.prev = 0;
+	                  _context30.next = 1;
 	                  return Promise.resolve().then(function () { return index$1; });
 	                case 1:
-	                  mod = _context28.sent;
+	                  mod = _context30.sent;
 	                  vimModule = mod;
-	                  return _context28.abrupt("return", mod);
+	                  return _context30.abrupt("return", mod);
 	                case 2:
-	                  _context28.prev = 2;
-	                  _t2 = _context28["catch"](0);
+	                  _context30.prev = 2;
+	                  _t2 = _context30["catch"](0);
 	                  vimModuleLoadPromise = null;
 	                  Logger.error('Failed to load @replit/codemirror-vim. Please install it: npm install @replit/codemirror-vim');
 	                  throw _t2;
 	                case 3:
 	                case "end":
-	                  return _context28.stop();
+	                  return _context30.stop();
 	              }
 	            }, _callee2, null, [[0, 2]]);
 	          }))();
-	          return _context29.abrupt("return", vimModuleLoadPromise);
+	          return _context31.abrupt("return", vimModuleLoadPromise);
 	        case 3:
 	        case "end":
-	          return _context29.stop();
+	          return _context31.stop();
 	      }
 	    }, _callee3);
 	  }));
@@ -53935,7 +51193,7 @@
 	        return;
 	      }
 	      var decorations = [];
-	      var _iterator = _createForOfIteratorHelper$1l(view.visibleRanges),
+	      var _iterator = _createForOfIteratorHelper$1m(view.visibleRanges),
 	        _step;
 	      try {
 	        for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -53970,6 +51228,83 @@
 	    key: "destroy",
 	    value: function destroy() {
 	      this.query = null;
+	      this.decorations = Decoration.none;
+	    }
+	  }]);
+	}(), {
+	  decorations: function decorations(v) {
+	    return v.decorations;
+	  }
+	});
+
+	/**
+	 * YAML frontmatter 装饰 ViewPlugin
+	 * 检测文档开头的 YAML frontmatter（首行为 `---`，至下一个独占一行的 `---` 之间的内容），
+	 * 给这些行打上 `cm-frontmatter` 的 line class，避免被 markdown 解析器渲染成 setext H2 样式。
+	 */
+	var frontMatterDecorationPlugin = ViewPlugin.fromClass(/*#__PURE__*/function () {
+	  /**
+	   * @param {EditorView} view
+	   */
+	  function _class2(view) {
+	    _classCallCheck$1(this, _class2);
+	    /** @type {import('@codemirror/view').DecorationSet} */
+	    this.decorations = this.buildDecorations(view);
+	  }
+
+	  /**
+	   * @param {import('@codemirror/view').ViewUpdate} update
+	   */
+	  return _createClass$1(_class2, [{
+	    key: "update",
+	    value: function update(_update2) {
+	      if (_update2.docChanged || _update2.viewportChanged) {
+	        this.decorations = this.buildDecorations(_update2.view);
+	      }
+	    }
+
+	    /**
+	     * 构造 frontmatter 行装饰
+	     * @param {EditorView} view
+	     * @returns {import('@codemirror/view').DecorationSet}
+	     */
+	  }, {
+	    key: "buildDecorations",
+	    value: function buildDecorations(view) {
+	      var _context3;
+	      var doc = view.state.doc;
+	      if (doc.length === 0) return Decoration.none;
+
+	      // frontmatter 必须从文档第一行的 `---` 开始
+	      var firstLine = doc.line(1);
+	      if (_trimInstanceProperty(_context3 = firstLine.text).call(_context3) !== '---') return Decoration.none;
+
+	      // 查找闭合的 `---`
+	      var endLineNum = -1;
+	      var totalLines = doc.lines;
+	      for (var i = 2; i <= totalLines; i++) {
+	        var _context4;
+	        var line = doc.line(i);
+	        if (_trimInstanceProperty(_context4 = line.text).call(_context4) === '---') {
+	          endLineNum = i;
+	          break;
+	        }
+	      }
+	      // 没有找到闭合行，认为不是合法 frontmatter
+	      if (endLineNum === -1) return Decoration.none;
+	      var lineDeco = Decoration.line({
+	        "class": 'cm-frontmatter'
+	      });
+	      var decorations = [];
+	      for (var _i = 1; _i <= endLineNum; _i++) {
+	        var _line = doc.line(_i);
+	        decorations.push(lineDeco.range(_line.from));
+	      }
+	      return Decoration.set(decorations);
+	    }
+	  }, {
+	    key: "destroy",
+	    value: function destroy() {
 	      this.decorations = Decoration.none;
 	    }
 	  }]);
@@ -54077,9 +51412,9 @@
 	  }, {
 	    key: "getSelections",
 	    value: function getSelections() {
-	      var _context3,
+	      var _context5,
 	        _this = this;
-	      return _mapInstanceProperty(_context3 = this.view.state.selection.ranges).call(_context3, function (range) {
+	      return _mapInstanceProperty(_context5 = this.view.state.selection.ranges).call(_context5, function (range) {
 	        return _this.view.state.doc.sliceString(range.from, range.to);
 	      });
 	    }
@@ -54301,34 +51636,34 @@
 	    value: (function () {
 	      var _setKeyMap = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime.mark(function _callee(mode) {
 	        var vimMod, _t;
-	        return _regeneratorRuntime.wrap(function (_context4) {
-	          while (1) switch (_context4.prev = _context4.next) {
+	        return _regeneratorRuntime.wrap(function (_context6) {
+	          while (1) switch (_context6.prev = _context6.next) {
 	            case 0:
 	              if (this.vimCompartment) {
-	                _context4.next = 1;
+	                _context6.next = 1;
 	                break;
 	              }
 	              console.warn('vimCompartment not available, cannot switch keyMap');
-	              return _context4.abrupt("return");
+	              return _context6.abrupt("return");
 	            case 1:
 	              if (!(mode === 'vim')) {
-	                _context4.next = 6;
+	                _context6.next = 6;
 	                break;
 	              }
-	              _context4.prev = 2;
-	              _context4.next = 3;
+	              _context6.prev = 2;
+	              _context6.next = 3;
 	              return loadVimModule();
 	            case 3:
-	              vimMod = _context4.sent;
+	              vimMod = _context6.sent;
 	              this.view.dispatch({
 	                effects: this.vimCompartment.reconfigure(vimMod.vim())
 	              });
 	              this.currentKeyMap = 'vim';
-	              _context4.next = 5;
+	              _context6.next = 5;
 	              break;
 	            case 4:
-	              _context4.prev = 4;
-	              _t = _context4["catch"](2);
+	              _context6.prev = 4;
+	              _t = _context6["catch"](2);
 	              console.error('Failed to load vim module, falling back to sublime mode:', _t);
 	              this.view.dispatch({
 	                effects: this.vimCompartment.reconfigure([])
@@ -54336,7 +51671,7 @@
 	              this.currentKeyMap = 'sublime';
 	              throw new Error('Failed to switch to vim mode. Using sublime mode instead.');
 	            case 5:
-	              _context4.next = 7;
+	              _context6.next = 7;
 	              break;
 	            case 6:
 	              this.view.dispatch({
@@ -54345,7 +51680,7 @@
 	              this.currentKeyMap = 'sublime';
 	            case 7:
 	            case "end":
-	              return _context4.stop();
+	              return _context6.stop();
 	          }
 	        }, _callee, this, [[2, 4]]);
 	      }));
@@ -54685,14 +52020,14 @@
 	            });
 	          } else {
 	            _forEachInstanceProperty(handlers).call(handlers, function (handler) {
-	              var _context5;
-	              return handler.apply(void 0, _concatInstanceProperty(_context5 = [_this2]).call(_context5, args));
+	              var _context7;
+	              return handler.apply(void 0, _concatInstanceProperty(_context7 = [_this2]).call(_context7, args));
 	            });
 	          }
 	        } else {
 	          _forEachInstanceProperty(handlers).call(handlers, function (handler) {
-	            var _context6;
-	            return handler.apply(void 0, _concatInstanceProperty(_context6 = [_this2]).call(_context6, args));
+	            var _context8;
+	            return handler.apply(void 0, _concatInstanceProperty(_context8 = [_this2]).call(_context8, args));
 	          });
 	        }
 	      }
@@ -54744,8 +52079,8 @@
 	  update: function update(currentMarks, tr) {
 	    var updatedMarks = _mapInstanceProperty(currentMarks).call(currentMarks, tr.changes);
 	    var toAdd = [];
-	    var removeMarkIds = new _Set$1();
-	    var _iterator2 = _createForOfIteratorHelper$1l(tr.effects),
+	    var removeMarkIds = new _Set();
+	    var _iterator2 = _createForOfIteratorHelper$1m(tr.effects),
 	      _step2;
 	    try {
 	      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -54805,7 +52140,7 @@
 	     * 禁用快捷键
 	     * @param {boolean} disable 是否禁用快捷键
 	     */
-	    _defineProperty$3(this, "disableShortcut", function () {
+	    _defineProperty$2(this, "disableShortcut", function () {
 	      var disable = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 	      if (!_this4.editor || !_this4.editor.view) {
 	        return;
@@ -54827,7 +52162,7 @@
 	     * 以及对全角符号进行特殊染色。
 	     * @param {boolean} force 是否强制处理
 	     */
-	    _defineProperty$3(this, "dealSpecialWords", function () {
+	    _defineProperty$2(this, "dealSpecialWords", function () {
 	      var _config$debounceMs, _config$forceProcessM;
 	      var force = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 	      if (force) {
@@ -54856,7 +52191,7 @@
 	     * 实际执行特殊词处理的逻辑
 	     * @private
 	     */
-	    _defineProperty$3(this, "doDealSpecialWordsInternal", function () {
+	    _defineProperty$2(this, "doDealSpecialWordsInternal", function () {
 	      var _this4$$cherry, _this4$$cherry$status;
 	      if (((_this4$$cherry = _this4.$cherry) === null || _this4$$cherry === void 0 ? void 0 : (_this4$$cherry$status = _this4$$cherry.status) === null || _this4$$cherry$status === void 0 ? void 0 : _this4$$cherry$status.editor) === 'hide' || _this4.isDestroyed) {
 	        return;
@@ -54904,17 +52239,17 @@
 	     * 一次性收集所有已有标记（避免 O(n²) 检查）
 	     * @returns {Set<string>} 已有标记的键集合，格式为 "from_to_className"
 	     */
-	    _defineProperty$3(this, "getExistingMarksSet", function () {
-	      var marksSet = new _Set$1();
+	    _defineProperty$2(this, "getExistingMarksSet", function () {
+	      var marksSet = new _Set();
 	      var marks = _this4.editor.view.state.field(markField, false);
 	      if (!marks) return marksSet;
 	      var iter = marks.iter();
 	      while (iter.value) {
-	        var _iter$value$spec3, _context7, _context8;
+	        var _iter$value$spec3, _context9, _context0;
 	        var from = iter.from,
 	          to = iter.to;
 	        var className = ((_iter$value$spec3 = iter.value.spec) === null || _iter$value$spec3 === void 0 ? void 0 : _iter$value$spec3["class"]) || '';
-	        marksSet.add(_concatInstanceProperty(_context7 = _concatInstanceProperty(_context8 = "".concat(from, "_")).call(_context8, to, "_")).call(_context7, className));
+	        marksSet.add(_concatInstanceProperty(_context9 = _concatInstanceProperty(_context0 = "".concat(from, "_")).call(_context0, to, "_")).call(_context9, className));
 	        iter.next();
 	      }
 	      return marksSet;
@@ -54933,16 +52268,16 @@
 	     * @param {Array<import('../types/editor').BatchMarkItem>} targetArray - 目标数组，用于收集标记项
 	     * @param {Set<string>} [existingMarksSet] - 已有标记集合（用于避免 O(n²) 检查）
 	     */
-	    _defineProperty$3(this, "collectMarkItems", function (reg, className, targetArray, existingMarksSet) {
+	    _defineProperty$2(this, "collectMarkItems", function (reg, className, targetArray, existingMarksSet) {
 	      var editor = _this4.editor;
 	      var searcher = editor.getSearchCursor(reg);
 	      for (var matchResult = searcher.findNext(); matchResult !== false; matchResult = searcher.findNext()) {
-	        var _context9, _context0;
+	        var _context1, _context10;
 	        var fromPos = searcher.from();
 	        if (fromPos === null) continue;
 	        var range = _this4.calculateMarkRange(matchResult, fromPos);
 	        if (!range) continue;
-	        var key = _concatInstanceProperty(_context9 = _concatInstanceProperty(_context0 = "".concat(range.begin, "_")).call(_context0, range.end, "_")).call(_context9, className);
+	        var key = _concatInstanceProperty(_context1 = _concatInstanceProperty(_context10 = "".concat(range.begin, "_")).call(_context10, range.end, "_")).call(_context1, className);
 	        if (existingMarksSet && existingMarksSet.has(key)) continue;
 	        var newSpan = createElement('span', "cm-string ".concat(className), {
 	          title: range.bigString
@@ -54961,19 +52296,19 @@
 	     * @param {Array} targetArray - 目标数组，用于收集标记项
 	     * @param {Set<string>} [existingMarksSet] - 已有标记集合（用于避免 O(n²) 检查）
 	     */
-	    _defineProperty$3(this, "collectFullWidthMarkItems", function (targetArray, existingMarksSet) {
+	    _defineProperty$2(this, "collectFullWidthMarkItems", function (targetArray, existingMarksSet) {
 	      var regex = /[·￥、："【】（）《》「」]/;
 	      var editor = _this4.editor;
 	      var searcher = editor.getSearchCursor(regex);
 	      var oneSearch = searcher.findNext();
 	      for (; oneSearch !== false; oneSearch = searcher.findNext()) {
-	        var _context1;
+	        var _context11;
 	        var fromPos = searcher.from();
 	        if (fromPos === null) {
 	          continue;
 	        }
 	        var toPos = fromPos + 1;
-	        var key = _concatInstanceProperty(_context1 = "".concat(fromPos, "_")).call(_context1, toPos, "_cm-fullWidth");
+	        var key = _concatInstanceProperty(_context11 = "".concat(fromPos, "_")).call(_context11, toPos, "_cm-fullWidth");
 	        if (!existingMarksSet || !existingMarksSet.has(key)) {
 	          targetArray.push({
 	            from: fromPos,
@@ -54990,7 +52325,7 @@
 	     * @param {Array<import('~types/editor').BatchMarkItem>} markItems - 标记项数组
 	     * @returns {void}
 	     */
-	    _defineProperty$3(this, "applyBatchMarks", function (editor, markItems) {
+	    _defineProperty$2(this, "applyBatchMarks", function (editor, markItems) {
 	      var effects = [];
 	      var view = editor.view;
 	      _forEachInstanceProperty(markItems).call(markItems, function (item) {
@@ -55029,7 +52364,7 @@
 	     * @param {number} fromPos - 匹配起始位置
 	     * @returns {{begin: number, end: number, bigString: string} | null}
 	     */
-	    _defineProperty$3(this, "calculateMarkRange", function (matchResult, fromPos) {
+	    _defineProperty$2(this, "calculateMarkRange", function (matchResult, fromPos) {
 	      var _matchResult$, _matchResult$1$length, _matchResult$2;
 	      var bigString = (_matchResult$ = matchResult[2]) !== null && _matchResult$ !== void 0 ? _matchResult$ : '';
 	      var prefixLength = (_matchResult$1$length = (_matchResult$2 = matchResult[1]) === null || _matchResult$2 === void 0 ? void 0 : _matchResult$2.length) !== null && _matchResult$1$length !== void 0 ? _matchResult$1$length : 0;
@@ -55050,7 +52385,7 @@
 	     * @param {KeyboardEvent} e - 键盘事件对象
 	     * @param {EditorView} editorView - 编辑器实例
 	     */
-	    _defineProperty$3(this, "onKeyup", function (e, editorView) {
+	    _defineProperty$2(this, "onKeyup", function (e, editorView) {
 	      var pos = editorView.state.selection.main.head;
 	      var line = editorView.state.doc.lineAt(pos).number;
 	      _this4.previewer.highlightLine(line);
@@ -55059,7 +52394,7 @@
 	     *
 	     * @param {EditorView} editorView
 	     */
-	    _defineProperty$3(this, "onScroll", function (editorView) {
+	    _defineProperty$2(this, "onScroll", function (editorView) {
 	      _this4.$cherry.$event.emit('cleanAllSubMenus');
 	      if (_this4.disableScrollListener) {
 	        if (!_this4.animation.timer) {
@@ -55089,7 +52424,7 @@
 	     * @param {EditorView} editorView - 当前的CodeMirror实例
 	     * @param {MouseEvent} evt
 	     */
-	    _defineProperty$3(this, "onMouseDown", function (editorView, evt) {
+	    _defineProperty$2(this, "onMouseDown", function (editorView, evt) {
 	      _this4.$cherry.$event.emit('cleanAllSubMenus');
 	      if (!_Number$isFinite(evt.clientX) || !_Number$isFinite(evt.clientY)) {
 	        return;
@@ -55110,7 +52445,7 @@
 	    /**
 	     * 光标变化事件
 	     */
-	    _defineProperty$3(this, "onCursorActivity", function () {
+	    _defineProperty$2(this, "onCursorActivity", function () {
 	      _this4.refreshWritingStatus();
 	    });
 	    /**
@@ -55330,11 +52665,11 @@
 	  }, {
 	    key: "handleThirdPaste",
 	    value: function handleThirdPaste(event, clipboardData, editorView) {
-	      var _context10,
-	        _context11,
+	      var _context12,
+	        _context13,
 	        _this5 = this;
 	      // 生成一个随机id，用于有可能的异步回调
-	      var randomId = _concatInstanceProperty(_context10 = "cherry-paste-".concat(_sliceInstanceProperty(_context11 = Math.random().toString(36)).call(_context11, 2))).call(_context10, new Date().getTime());
+	      var randomId = _concatInstanceProperty(_context12 = "cherry-paste-".concat(_sliceInstanceProperty(_context13 = Math.random().toString(36)).call(_context13, 2))).call(_context12, new Date().getTime());
 
 	      // 创建符合 onPaste 期望的回调函数（接收 string 参数）
 	      // 但我们改为接收对象，所以使用 any 进行转换
@@ -55427,7 +52762,13 @@
 	        return;
 	      }
 	      var html = clipboardData.getData('Text/Html');
-	      var items = clipboardData.items;
+	      var items = clipboardData.items,
+	        types = clipboardData.types;
+
+	      // 判断是否来自 vscode 粘贴
+	      if (_includesInstanceProperty(types).call(types, 'vscode-editor-data')) {
+	        return;
+	      }
 
 	      // 优先处理来自 Word 等应用的粘贴内容
 	      // 有效的内容通常由 StartFragment 和 EndFragment 标记包裹。
@@ -55451,13 +52792,13 @@
 	          // 读取该图片
 	          var file = item.getAsFile();
 	          _this6.$cherry.options.callback.fileUpload(file, function (url) {
-	            var _context12;
+	            var _context14;
 	            var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 	            _this6.fileUploadCount += 1;
 	            if (typeof url !== 'string') {
 	              return;
 	            }
-	            var mdStr = _concatInstanceProperty(_context12 = "".concat(_this6.fileUploadCount > 1 ? '\n' : '')).call(_context12, handleFileUploadCallback(url, params, file));
+	            var mdStr = _concatInstanceProperty(_context14 = "".concat(_this6.fileUploadCount > 1 ? '\n' : '')).call(_context14, handleFileUploadCallback(url, params, file));
 	            // 插入内容
 	            editorView.dispatch({
 	              changes: {
@@ -55488,21 +52829,18 @@
 	     * @param {string} html - HTML 内容
 	     * @param {string} htmlText - 纯文本内容
 	     * @param {CM6AdapterType} editorView - CodeMirror 6 适配器
-	     * @param {number} [overrideFrom] - 可选，覆盖插入起始位置（用于异步回调场景）
-	     * @param {number} [overrideTo] - 可选，覆盖插入结束位置（用于异步回调场景）
 	     */
 	  }, {
 	    key: "formatHtml2MdWhenPaste",
-	    value: function formatHtml2MdWhenPaste(event, html, htmlText, editorView, overrideFrom, overrideTo) {
+	    value: function formatHtml2MdWhenPaste(event, html, htmlText, editorView) {
 	      var divObj = document.createElement('DIV');
 	      divObj.innerHTML = html;
 	      var mdText = htmlParser.run(divObj.innerHTML);
 	      if (typeof mdText === 'string' && _trimInstanceProperty(mdText).call(mdText).length > 0) {
 	        var selection = editorView.state.selection.main;
 	        // 使用传入的位置或当前选区位置
-	        var from = overrideFrom !== null && overrideFrom !== void 0 ? overrideFrom : selection.from;
-	        var to = overrideTo !== null && overrideTo !== void 0 ? overrideTo : selection.to;
-	        var currentCursor = from;
+	        var from = selection.from,
+	          to = selection.to;
 
 	        // 替换选中内容
 	        editorView.dispatch({
@@ -55510,9 +52848,13 @@
 	            from: from,
 	            to: to,
 	            insert: mdText
+	          },
+	          selection: {
+	            anchor: from,
+	            head: from + mdText.length
 	          }
 	        });
-	        pasteHelper.showSwitchBtnAfterPasteHtml(this.$cherry, currentCursor, editorView, htmlText, mdText);
+	        pasteHelper.showSwitchBtnAfterPasteHtml(this.$cherry, from, editorView, htmlText, mdText);
 	        // 仅在 event 存在时调用 preventDefault，避免空指针异常
 	        if (event) {
 	          event.preventDefault();
@@ -55528,8 +52870,8 @@
 	     * @param {*} previewer
 	     */
 	    function init(previewer) {
-	      var _context13,
-	        _context14,
+	      var _context15,
+	        _context16,
 	        _this7 = this;
 	      var textArea = this.options.editorDom.querySelector("#".concat(this.options.id));
 	      if (!(textArea instanceof HTMLTextAreaElement)) {
@@ -55542,7 +52884,7 @@
 	      var filteredSearchKeymap = _filterInstanceProperty(searchKeymap).call(searchKeymap, function (binding) {
 	        return binding.key !== 'Mod-f' && binding.key !== 'Mod-Shift-l';
 	      });
-	      this.defaultKeymap = _concatInstanceProperty(_context13 = [{
+	      this.defaultKeymap = _concatInstanceProperty(_context15 = [{
 	        key: 'ArrowUp',
 	        run: function run() {
 	          var _self$arrowKeyInterce;
@@ -55578,8 +52920,8 @@
 	          var state = view.state;
 	          var selections = state.selection.ranges;
 	          var cursorRanges = [];
-	          var visitedLines = new _Set$1();
-	          var _iterator3 = _createForOfIteratorHelper$1l(selections),
+	          var visitedLines = new _Set();
+	          var _iterator3 = _createForOfIteratorHelper$1m(selections),
 	            _step3;
 	          try {
 	            for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
@@ -55632,11 +52974,11 @@
 	        key: 'Ctrl-l',
 	        mac: 'Cmd-l',
 	        run: selectLine
-	      }]).call(_context13, _toConsumableArray$1(defaultKeymap), _toConsumableArray$1(historyKeymap), _toConsumableArray$1(closeBracketsKeymap), _toConsumableArray$1(filteredSearchKeymap), [indentWithTab]);
-	      var extensions = _concatInstanceProperty(_context14 = [cachedCherryHighlighting, markdown(), history(), search(), closeBrackets(), cachedDefaultHighlighting, drawSelection({
+	      }]).call(_context15, _toConsumableArray$1(defaultKeymap), _toConsumableArray$1(historyKeymap), _toConsumableArray$1(closeBracketsKeymap), _toConsumableArray$1(filteredSearchKeymap), [indentWithTab]);
+	      var extensions = _concatInstanceProperty(_context16 = [cachedCherryHighlighting, markdown(), history(), search(), closeBrackets(), cachedDefaultHighlighting, drawSelection({
 	        cursorBlinkRate: 1200,
 	        drawRangeCursor: false
-	      }), searchHighlightField, indentOnInput(), highlightActiveLine(), highlightActiveLineGutter(), rectangularSelection()]).call(_context14, _toConsumableArray$1(this.options.codemirror.lineNumbers ? [foldGutter()] : []), _toConsumableArray$1(this.options.codemirror.lineNumbers ? [lineNumbers()] : []), [this.keymapCompartment.of(keymap.of(this.defaultKeymap)), this.vimCompartment.of([]), EditorState.allowMultipleSelections.of(true), EditorView.lineWrapping], _toConsumableArray$1(this.options.codemirror.placeholder ? [placeholder(this.options.codemirror.placeholder)] : []), [markField, EditorState.changeFilter.of(function (tr) {
+	      }), searchHighlightField, frontMatterDecorationPlugin, indentOnInput(), highlightActiveLine(), highlightActiveLineGutter(), rectangularSelection()]).call(_context16, _toConsumableArray$1(this.options.codemirror.lineNumbers ? [foldGutter()] : []), _toConsumableArray$1(this.options.codemirror.lineNumbers ? [lineNumbers()] : []), [this.keymapCompartment.of(keymap.of(this.defaultKeymap)), this.vimCompartment.of([]), EditorState.allowMultipleSelections.of(true), EditorView.lineWrapping], _toConsumableArray$1(this.options.codemirror.placeholder ? [placeholder(this.options.codemirror.placeholder)] : []), [markField, EditorState.changeFilter.of(function (tr) {
 	        if (!tr.docChanged) return true;
 
 	        // 所有定义了atomic=true 的装饰器都被认为是原子装饰器，不允许局部修改和局部删除
@@ -55686,7 +53028,7 @@
 	        var adapter = _this7.editor;
 	        if (!adapter) return;
 	        if (update.docChanged) {
-	          var _iterator4 = _createForOfIteratorHelper$1l(update.transactions),
+	          var _iterator4 = _createForOfIteratorHelper$1m(update.transactions),
 	            _step4;
 	          try {
 	            var _loop2 = function _loop2() {
@@ -55732,12 +53074,12 @@
 	          }
 	        }
 	        if (update.selectionSet) {
-	          var _context15, _context16;
+	          var _context17, _context18;
 	          var selection = update.state.selection.main;
 	          var isUserInteraction = false;
-	          var userEventAnno = _findInstanceProperty(_context15 = _mapInstanceProperty(_context16 = update.transactions).call(_context16, function (tr) {
+	          var userEventAnno = _findInstanceProperty(_context17 = _mapInstanceProperty(_context18 = update.transactions).call(_context18, function (tr) {
 	            return tr.annotation(Transaction.userEvent);
-	          })).call(_context15, function (anno) {
+	          })).call(_context17, function (anno) {
 	            return anno !== null && anno !== undefined;
 	          });
 	          if (userEventAnno) {
@@ -55985,14 +53327,14 @@
 	  }, {
 	    key: "initWritingStyle",
 	    value: function initWritingStyle() {
-	      var _context17, _context18;
+	      var _context19, _context20;
 	      var writingStyle = this.options.writingStyle;
 	      var className = "cherry-editor-writing-style--".concat(writingStyle);
 	      var editorDom = this.getEditorDom();
 	      // 重置状态
-	      _forEachInstanceProperty(_context17 = _filterInstanceProperty(_context18 = _Array$from(editorDom.classList)).call(_context18, function (className) {
+	      _forEachInstanceProperty(_context19 = _filterInstanceProperty(_context20 = _Array$from(editorDom.classList)).call(_context20, function (className) {
 	        return _startsWithInstanceProperty(className).call(className, 'cherry-editor-writing-style--');
-	      })).call(_context17, function (className) {
+	      })).call(_context19, function (className) {
 	        return editorDom.classList.remove(className);
 	      });
 	      if (writingStyle === 'normal') {
@@ -56008,7 +53350,7 @@
 	  }, {
 	    key: "refreshWritingStatus",
 	    value: function refreshWritingStatus() {
-	      var _context19, _context20;
+	      var _context21, _context22;
 	      var writingStyle = this.options.writingStyle;
 	      if (writingStyle !== 'focus' && writingStyle !== 'typewriter') {
 	        return;
@@ -56019,15 +53361,15 @@
 	       */
 	      var style = document.querySelector('#cherry-editor-writing-style') || document.createElement('style');
 	      style.id = 'cherry-editor-writing-style';
-	      _findInstanceProperty(_context19 = _Array$from(document.head.childNodes)).call(_context19, function (node) {
+	      _findInstanceProperty(_context21 = _Array$from(document.head.childNodes)).call(_context21, function (node) {
 	        return node === style;
 	      }) || document.head.appendChild(style);
 	      var sheet = style.sheet;
-	      _forEachInstanceProperty(_context20 = _Array$from(Array(sheet.cssRules.length))).call(_context20, function () {
+	      _forEachInstanceProperty(_context22 = _Array$from(Array(sheet.cssRules.length))).call(_context22, function () {
 	        return sheet.deleteRule(0);
 	      });
 	      if (writingStyle === 'focus') {
-	        var _context21, _context22;
+	        var _context23, _context24;
 	        var editorDomRect = this.getEditorDom().getBoundingClientRect();
 	        var view = this.editor.view;
 	        var cursorPos = view.state.selection.main.head;
@@ -56038,14 +53380,14 @@
 	          topHeight = cursorCoords.top - editorDomRect.top;
 	          bottomHeight = editorDomRect.bottom - cursorCoords.bottom;
 	        }
-	        sheet.insertRule(_concatInstanceProperty(_context21 = ".".concat(className, "::before { height: ")).call(_context21, topHeight > 0 ? topHeight : 0, "px; }"), 0);
-	        sheet.insertRule(_concatInstanceProperty(_context22 = ".".concat(className, "::after { height: ")).call(_context22, bottomHeight > 0 ? bottomHeight : 0, "px; }"), 0);
+	        sheet.insertRule(_concatInstanceProperty(_context23 = ".".concat(className, "::before { height: ")).call(_context23, topHeight > 0 ? topHeight : 0, "px; }"), 0);
+	        sheet.insertRule(_concatInstanceProperty(_context24 = ".".concat(className, "::after { height: ")).call(_context24, bottomHeight > 0 ? bottomHeight : 0, "px; }"), 0);
 	      }
 	      if (writingStyle === 'typewriter') {
-	        var _context23, _context24;
+	        var _context25, _context26;
 	        var height = this.editor.scrollDOM.clientHeight / 2;
-	        sheet.insertRule(_concatInstanceProperty(_context23 = ".".concat(className, " .cm-editor .cm-scroller::before { height: ")).call(_context23, height, "px; }"), 0);
-	        sheet.insertRule(_concatInstanceProperty(_context24 = ".".concat(className, " .cm-editor .cm-scroller::after { height: ")).call(_context24, height, "px; }"), 0);
+	        sheet.insertRule(_concatInstanceProperty(_context25 = ".".concat(className, " .cm-editor .cm-scroller::before { height: ")).call(_context25, height, "px; }"), 0);
+	        sheet.insertRule(_concatInstanceProperty(_context26 = ".".concat(className, " .cm-editor .cm-scroller::after { height: ")).call(_context26, height, "px; }"), 0);
 	        this.editor.scrollDOM.scrollTop = height;
 	      }
 	    }
@@ -56248,10 +53590,10 @@
 	  }, {
 	    key: "getSelections",
 	    value: function getSelections() {
-	      var _context25;
+	      var _context27;
 	      if (!this.editor) return [];
 	      var view = this.editor.view;
-	      var selections = _mapInstanceProperty(_context25 = view.state.selection.ranges).call(_context25, function (range) {
+	      var selections = _mapInstanceProperty(_context27 = view.state.selection.ranges).call(_context27, function (range) {
 	        return view.state.doc.sliceString(range.from, range.to);
 	      });
 	      return selections;
@@ -56319,9 +53661,9 @@
 	          }
 	        case 2:
 	          {
-	            var _context26;
+	            var _context28;
 	            var codeBlockReg = getCodeBlockRule().reg;
-	            var paragraphs = _filterInstanceProperty(_context26 = markdown.split(/\n{2,}/)).call(_context26, function (line) {
+	            var paragraphs = _filterInstanceProperty(_context28 = markdown.split(/\n{2,}/)).call(_context28, function (line) {
 	              return _trimInstanceProperty(line).call(line) !== '';
 	            }).length;
 	            var codeblocks = (markdown.match(codeBlockReg) || []).length;
@@ -56368,8 +53710,8 @@
 	        this.animation.timer = 0;
 	      }
 	      if (this.domEventListeners && this.domEventListeners.length > 0) {
-	        var _context27;
-	        _forEachInstanceProperty(_context27 = this.domEventListeners).call(_context27, function (_ref3) {
+	        var _context29;
+	        _forEachInstanceProperty(_context29 = this.domEventListeners).call(_context29, function (_ref3) {
 	          var elm = _ref3.elm,
 	            evType = _ref3.evType,
 	            fn = _ref3.fn,
@@ -56550,12 +53892,12 @@
 	     * @protected
 	     * @type {import('../Engine').default}
 	     */
-	    _defineProperty$3(this, "$engine", void 0);
-	    _defineProperty$3(this, "$locale", void 0);
+	    _defineProperty$2(this, "$engine", void 0);
+	    _defineProperty$2(this, "$locale", void 0);
 	    /**
 	     * @type {EditorConfig['externals']}
 	     */
-	    _defineProperty$3(this, "$externals", void 0);
+	    _defineProperty$2(this, "$externals", void 0);
 	    // editorConfig.pageHooks: 已实例化的页面级hook
 	    // editorConfig.syntaxOptions: 当前Hook的用户配置
 	    // editorConfig.externals: 第三方库
@@ -56731,12 +54073,12 @@
 	 * @static
 	 * @type {string}
 	 */
-	_defineProperty$3(SyntaxBase, "HOOK_NAME", 'default');
+	_defineProperty$2(SyntaxBase, "HOOK_NAME", 'default');
 	/**
 	 * @static
 	 * @type {HookType}
 	 */
-	_defineProperty$3(SyntaxBase, "HOOK_TYPE", HOOKS_TYPE_LIST.DEFAULT);
+	_defineProperty$2(SyntaxBase, "HOOK_TYPE", HOOKS_TYPE_LIST.DEFAULT);
 
 	/**
 	 * Copyright (C) 2021 Tencent.
@@ -56807,7 +54149,7 @@
 	 */
 
 	/**
-	 * 用于lodash.mergeWith的customizer
+	 * 用于 mergeWith 的 customizer
 	 * @param {any} objValue
 	 * @param {any} srcValue
 	 * @returns
@@ -56891,11 +54233,12 @@
 	 */
 	function changeTheme($cherry) {
 	  var theme = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-	  var newTheme = (theme ? theme : getThemeFromLocal(false, $cherry.nameSpace)).replace(/^.*theme__/, '');
+	  var cherry = $cherry;
+	  var newTheme = (theme ? theme : getThemeFromLocal(false, cherry.nameSpace)).replace(/^.*theme__/, '');
 	  var newClass = " theme__".concat(newTheme);
-	  $cherry.wrapperDom.className = $cherry.wrapperDom.className.replace(/ theme__[^ $]+?( |$)/g, ' ') + newClass;
-	  $cherry.previewer.getDomContainer().className = $cherry.previewer.getDomContainer().className.replace(/ theme__[^ $]+?( |$)/g, ' ') + newClass;
-	  saveThemeToLocal($cherry.nameSpace, newTheme);
+	  cherry.wrapperDom.className = cherry.wrapperDom.className.replace(/ theme__[^ $]+?( |$)/g, ' ') + newClass;
+	  cherry.previewer.getDomContainer().className = cherry.previewer.getDomContainer().className.replace(/ theme__[^ $]+?( |$)/g, ' ') + newClass;
+	  saveThemeToLocal(cherry.nameSpace, newTheme);
 	}
 
 	/**
@@ -57052,7 +54395,7 @@
 
 	var _context$w, _context2$t;
 	function ownKeys$f(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$f(e) { for (var r = 1; r < arguments.length; r++) { var _context3, _context4; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context3 = ownKeys$f(Object(t), !0)).call(_context3, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context4 = ownKeys$f(Object(t))).call(_context4, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread$f(e) { for (var r = 1; r < arguments.length; r++) { var _context3, _context4; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context3 = ownKeys$f(Object(t), !0)).call(_context3, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context4 = ownKeys$f(Object(t))).call(_context4, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	/**
 	 * Copyright (C) 2021 Tencent.
 	 *
@@ -57503,11 +54846,11 @@
 	}
 
 	var keys$5;
-	var hasRequiredKeys$4;
+	var hasRequiredKeys$3;
 
-	function requireKeys$4 () {
-		if (hasRequiredKeys$4) return keys$5;
-		hasRequiredKeys$4 = 1;
+	function requireKeys$3 () {
+		if (hasRequiredKeys$3) return keys$5;
+		hasRequiredKeys$3 = 1;
 		'use strict';
 		requireEs_array_iterator();
 		requireEs_object_toString();
@@ -57518,30 +54861,30 @@
 	}
 
 	var keys$4;
-	var hasRequiredKeys$3;
+	var hasRequiredKeys$2;
 
-	function requireKeys$3 () {
-		if (hasRequiredKeys$3) return keys$4;
-		hasRequiredKeys$3 = 1;
+	function requireKeys$2 () {
+		if (hasRequiredKeys$2) return keys$4;
+		hasRequiredKeys$2 = 1;
 		'use strict';
-		var parent = /*@__PURE__*/ requireKeys$4();
+		var parent = /*@__PURE__*/ requireKeys$3();
 
 		keys$4 = parent;
 		return keys$4;
 	}
 
 	var keys$3;
-	var hasRequiredKeys$2;
+	var hasRequiredKeys$1;
 
-	function requireKeys$2 () {
-		if (hasRequiredKeys$2) return keys$3;
-		hasRequiredKeys$2 = 1;
+	function requireKeys$1 () {
+		if (hasRequiredKeys$1) return keys$3;
+		hasRequiredKeys$1 = 1;
 		'use strict';
 		requireWeb_domCollections_iterator();
 		var classof = /*@__PURE__*/ requireClassof();
 		var hasOwn = /*@__PURE__*/ requireHasOwnProperty();
 		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
-		var method = /*@__PURE__*/ requireKeys$3();
+		var method = /*@__PURE__*/ requireKeys$2();
 
 		var ArrayPrototype = Array.prototype;
 
@@ -57559,16 +54902,16 @@
 	}
 
 	var keys$2;
-	var hasRequiredKeys$1;
+	var hasRequiredKeys;
 
-	function requireKeys$1 () {
-		if (hasRequiredKeys$1) return keys$2;
-		hasRequiredKeys$1 = 1;
-		keys$2 = /*@__PURE__*/ requireKeys$2();
+	function requireKeys () {
+		if (hasRequiredKeys) return keys$2;
+		hasRequiredKeys = 1;
+		keys$2 = /*@__PURE__*/ requireKeys$1();
 		return keys$2;
 	}
 
-	var keysExports = requireKeys$1();
+	var keysExports = requireKeys();
 	var _keysInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(keysExports);
 
 	var values$7;
@@ -58248,10 +55591,10 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(ParagraphBase, "HOOK_TYPE", HOOKS_TYPE_LIST.PAR);
+	_defineProperty$2(ParagraphBase, "HOOK_TYPE", HOOKS_TYPE_LIST.PAR);
 	// 不需要排他的sign前缀，如~~C0I${IN_PARAGRAPH_CACHE_KEY_PREFIX}sign$
-	_defineProperty$3(ParagraphBase, "IN_PARAGRAPH_CACHE_KEY_PREFIX", '!');
-	_defineProperty$3(ParagraphBase, "IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX", '\\!');
+	_defineProperty$2(ParagraphBase, "IN_PARAGRAPH_CACHE_KEY_PREFIX", '!');
+	_defineProperty$2(ParagraphBase, "IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX", '\\!');
 
 	var esnext_map_getOrInsert = {};
 
@@ -59505,12 +56848,12 @@
 	}();
 
 	function _toArray(r) {
-	  return _arrayWithHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$1m(r) || _nonIterableRest$1();
+	  return _arrayWithHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$1n(r) || _nonIterableRest$1();
 	}
 
 	function ownKeys$e(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$e(e) { for (var r = 1; r < arguments.length; r++) { var _context3, _context4; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context3 = ownKeys$e(Object(t), !0)).call(_context3, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context4 = ownKeys$e(Object(t))).call(_context4, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
-	function _arrayLikeToArray$1n(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _objectSpread$e(e) { for (var r = 1; r < arguments.length; r++) { var _context3, _context4; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context3 = ownKeys$e(Object(t), !0)).call(_context3, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context4 = ownKeys$e(Object(t))).call(_context4, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _arrayLikeToArray$1o(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	/**
 	 * Copyright (C) 2021 Tencent.
 	 *
@@ -59577,7 +56920,7 @@
 	      var _args = args,
 	        _args2 = _toArray(_args),
 	        match = _args2[0],
-	        restArgs = _sliceInstanceProperty(_context = _arrayLikeToArray$1n(_args2)).call(_context, 2);
+	        restArgs = _sliceInstanceProperty(_context = _arrayLikeToArray$1o(_args2)).call(_context, 2);
 	      // 丢弃 leadingChar，需要调整begin和length
 	      replaceBuffer.push({
 	        begin: replaceInfo.begin + rollbackLength,
@@ -59638,7 +56981,7 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(Color$4, "HOOK_NAME", 'fontColor');
+	_defineProperty$2(Color$4, "HOOK_NAME", 'fontColor');
 
 	function _callSuper$1D(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1D() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1D() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1D = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -59680,7 +57023,7 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(BackgroundColor, "HOOK_NAME", 'bgColor');
+	_defineProperty$2(BackgroundColor, "HOOK_NAME", 'bgColor');
 
 	function _callSuper$1C(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1C() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1C() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1C = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -59725,10 +57068,10 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(Size$2, "HOOK_NAME", 'fontSize');
+	_defineProperty$2(Size$2, "HOOK_NAME", 'fontSize');
 
 	function ownKeys$d(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$d(e) { for (var r = 1; r < arguments.length; r++) { var _context, _context2; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context = ownKeys$d(Object(t), !0)).call(_context, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context2 = ownKeys$d(Object(t))).call(_context2, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread$d(e) { for (var r = 1; r < arguments.length; r++) { var _context, _context2; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context = ownKeys$d(Object(t), !0)).call(_context, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context2 = ownKeys$d(Object(t))).call(_context2, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _callSuper$1B(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1B() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1B() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1B = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
@@ -59793,7 +57136,7 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(Strikethrough$1, "HOOK_NAME", 'strikethrough');
+	_defineProperty$2(Strikethrough$1, "HOOK_NAME", 'strikethrough');
 
 	function _callSuper$1A(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1A() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1A() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1A = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -59835,7 +57178,7 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(Sup$1, "HOOK_NAME", 'sup');
+	_defineProperty$2(Sup$1, "HOOK_NAME", 'sup');
 
 	function _callSuper$1z(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1z() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1z() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1z = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -59877,7 +57220,7 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(Sub$1, "HOOK_NAME", 'sub');
+	_defineProperty$2(Sub$1, "HOOK_NAME", 'sub');
 
 	function _readOnlyError(r) {
 	  throw new TypeError('"' + r + '" is read-only');
@@ -70120,7 +67463,7 @@
 	  }, {
 	    key: "$buildMermaidSourceToolbarContainer",
 	    value: function $buildMermaidSourceToolbarContainer(attrs, previewHtml, sourceCodeHtml) {
-	      var _context0, _context1, _context10, _context11, _context12;
+	      var _context0, _context1, _context10, _context11, _context12, _context13, _context14, _context15;
 	      var tag = attrs.tag,
 	        escapedLang = attrs.escapedLang,
 	        props = attrs.props,
@@ -70133,7 +67476,7 @@
 	      var header = "<div class=\"cherry-mermaid-source-toolbar\">" + "<div class=\"cherry-mermaid-source-toolbar-switch\">" + "<div class=\"cherry-mermaid-source-toolbar-tab active\" data-mode=\"preview\">".concat(previewText, "</div>") + "<div class=\"cherry-mermaid-source-toolbar-tab\" data-mode=\"source\">".concat(sourceText, "</div>") + "<div class=\"cherry-mermaid-source-toolbar-slider\"></div>" + "</div>" + "</div>";
 	      // 内容区域：各面板通过 data-mode 与 tab 关联
 	      var body = "<div class=\"cherry-mermaid-source-toolbar-panel active\" data-mode=\"preview\">".concat(previewHtml, "</div>") + "<div class=\"cherry-mermaid-source-toolbar-panel\" data-mode=\"source\">".concat(sourceCodeHtml, "</div>");
-	      return _concatInstanceProperty(_context0 = _concatInstanceProperty(_context1 = _concatInstanceProperty(_context10 = _concatInstanceProperty(_context11 = _concatInstanceProperty(_context12 = "<".concat(tag, " data-sign=\"")).call(_context12, props.sign, "\" data-type=\"")).call(_context11, escapedLang, "\" data-lines=\"")).call(_context10, props.lines, "\"")).call(_context1, sizeStyle)).call(_context0, alignClass, ">") + header + body + "</".concat(tag, ">");
+	      return _concatInstanceProperty(_context0 = _concatInstanceProperty(_context1 = _concatInstanceProperty(_context10 = _concatInstanceProperty(_context11 = _concatInstanceProperty(_context12 = _concatInstanceProperty(_context13 = _concatInstanceProperty(_context14 = _concatInstanceProperty(_context15 = "<".concat(tag, " data-sign=\"")).call(_context15, props.sign, "\" data-type=\"")).call(_context14, escapedLang, "\" data-lines=\"")).call(_context13, props.lines, "\"")).call(_context12, sizeStyle)).call(_context11, alignClass, ">")).call(_context10, header)).call(_context1, body, "</")).call(_context0, tag, ">");
 	    }
 
 	    // 修复渲染行号时打散的标签
@@ -70146,9 +67489,9 @@
 	        var line = rawLine;
 	        // 补全上一行未闭合标签
 	        while (tagStack.length) {
-	          var _context13;
+	          var _context16;
 	          var tag = tagStack.pop();
-	          line = _concatInstanceProperty(_context13 = "".concat(tag)).call(_context13, line);
+	          line = _concatInstanceProperty(_context16 = "".concat(tag)).call(_context16, line);
 	        }
 	        // 计算未闭合标签
 	        var tags = line.match(/<span class="(.+?)">|<\/span>/g);
@@ -70191,8 +67534,8 @@
 	  }, {
 	    key: "isInternalCustomLangCovered",
 	    value: function isInternalCustomLangCovered(lang) {
-	      var _context14;
-	      return _indexOfInstanceProperty(_context14 = this.customLang).call(_context14, lang) !== -1;
+	      var _context17;
+	      return _indexOfInstanceProperty(_context17 = this.customLang).call(_context17, lang) !== -1;
 	    }
 
 	    /**
@@ -70222,13 +67565,13 @@
 	  }, {
 	    key: "parseMermaidSize",
 	    value: function parseMermaidSize(lang) {
-	      var _context15;
+	      var _context18;
 	      var sizeRegex = /#([0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)/gi;
 	      var alignRegex = /#(center|right|left|float-right|float-left)/i;
 	      var allMarkersRegex = /#([0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto|center|right|left|float-right|float-left)/gi;
 	      var sizes = lang.match(sizeRegex);
 	      var alignMatch = lang.match(alignRegex);
-	      var pureLang = _trimInstanceProperty(_context15 = lang.replace(allMarkersRegex, '')).call(_context15);
+	      var pureLang = _trimInstanceProperty(_context18 = lang.replace(allMarkersRegex, '')).call(_context18);
 	      var sizeAttrs = '';
 	      if ((sizes === null || sizes === void 0 ? void 0 : sizes.length) > 0) {
 	        var _sizes = _slicedToArray$1(sizes, 2),
@@ -70261,9 +67604,9 @@
 	        lang = $lang;
 	      // 临时实现流程图、时序图缩略写法
 	      if (/^flow([ ](TD|LR))?$/i.test(lang) && !this.isInternalCustomLangCovered(lang)) {
-	        var _context16;
+	        var _context19;
 	        var suffix = lang.match(/^flow(?:[ ](TD|LR))?$/i) || [];
-	        code = _concatInstanceProperty(_context16 = "graph ".concat(suffix[1] || 'TD', "\n")).call(_context16, code);
+	        code = _concatInstanceProperty(_context19 = "graph ".concat(suffix[1] || 'TD', "\n")).call(_context19, code);
 	        lang = 'mermaid';
 	      }
 	      if (/^seq$/i.test(lang) && !this.isInternalCustomLangCovered(lang)) {
@@ -70286,8 +67629,8 @@
 	  }, {
 	    key: "wrapCode",
 	    value: function wrapCode($code, lang) {
-	      var _context17;
-	      return _concatInstanceProperty(_context17 = "<code class=\"language-".concat(lang, "\">")).call(_context17, $code, "</code>");
+	      var _context20;
+	      return _concatInstanceProperty(_context20 = "<code class=\"language-".concat(lang, "\">")).call(_context20, $code, "</code>");
 	    }
 
 	    /**
@@ -70300,7 +67643,7 @@
 	  }, {
 	    key: "renderCodeBlock",
 	    value: function renderCodeBlock($code, $lang, sign, lines) {
-	      var _$code$match, _context18, _context19, _context20, _context21, _context22, _context23, _context24, _context25, _context26;
+	      var _$code$match, _context21, _context22, _context23, _context24, _context25, _context26, _context27, _context28, _context29;
 	      var cacheCode = $code;
 	      var lang = $lang;
 	      // 兼容流式输出时占位光标影响代码块语言识别的场景
@@ -70319,8 +67662,8 @@
 	        cacheCode = this.renderLineNumber(cacheCode);
 	      }
 	      var needUnExpand = this.expandCode && ((_$code$match = $code.match(/\n/g)) === null || _$code$match === void 0 ? void 0 : _$code$match.length) > 10; // 是否需要收起代码块
-	      var codeHtml = _concatInstanceProperty(_context18 = "<pre class=\"language-".concat(lang, "\">")).call(_context18, this.wrapCode(cacheCode, lang), "</pre>");
-	      cacheCode = _concatInstanceProperty(_context19 = _concatInstanceProperty(_context20 = _concatInstanceProperty(_context21 = _concatInstanceProperty(_context22 = _concatInstanceProperty(_context23 = _concatInstanceProperty(_context24 = _concatInstanceProperty(_context25 = _concatInstanceProperty(_context26 = "<div\n        data-sign=\"".concat(sign, "\"\n        data-type=\"codeBlock\"\n        data-lines=\"")).call(_context26, lines, "\" \n        data-edit-code=\"")).call(_context25, this.editCode, "\" \n        data-copy-code=\"")).call(_context24, this.copyCode, "\"\n        data-expand-code=\"")).call(_context23, this.expandCode, "\"\n        data-change-lang=\"")).call(_context22, this.changeLang, "\"\n        data-lang=\"")).call(_context21, oldLang, "\"\n        style=\"position:relative\"\n        class=\"")).call(_context20, needUnExpand ? 'cherry-code-unExpand' : 'cherry-code-expand', "\"\n      >\n      ")).call(_context19, this.customWrapperRender(oldLang, cacheCode, codeHtml), "\n      ");
+	      var codeHtml = _concatInstanceProperty(_context21 = "<pre class=\"language-".concat(lang, "\">")).call(_context21, this.wrapCode(cacheCode, lang), "</pre>");
+	      cacheCode = _concatInstanceProperty(_context22 = _concatInstanceProperty(_context23 = _concatInstanceProperty(_context24 = _concatInstanceProperty(_context25 = _concatInstanceProperty(_context26 = _concatInstanceProperty(_context27 = _concatInstanceProperty(_context28 = _concatInstanceProperty(_context29 = "<div\n        data-sign=\"".concat(sign, "\"\n        data-type=\"codeBlock\"\n        data-lines=\"")).call(_context29, lines, "\" \n        data-edit-code=\"")).call(_context28, this.editCode, "\" \n        data-copy-code=\"")).call(_context27, this.copyCode, "\"\n        data-expand-code=\"")).call(_context26, this.expandCode, "\"\n        data-change-lang=\"")).call(_context25, this.changeLang, "\"\n        data-lang=\"")).call(_context24, oldLang, "\"\n        style=\"position:relative\"\n        class=\"")).call(_context23, needUnExpand ? 'cherry-code-unExpand' : 'cherry-code-expand', "\"\n      >\n      ")).call(_context22, this.customWrapperRender(oldLang, cacheCode, codeHtml), "\n      ");
 	      if (needUnExpand && $lang !== 'mermaid') {
 	        cacheCode += "<div class=\"cherry-mask-code-block\">\n        <div class=\"expand-btn \">\n          <i class=\"ch-icon ch-icon-expand\"></i>\n        </div>\n      </div>";
 	      }
@@ -70364,10 +67707,10 @@
 	        return str;
 	      }
 	      return this.$recoverCodeInIndent(str).replace(this.$getIndentedCodeReg(), function (match, code) {
-	        var _context27, _context28;
+	        var _context30, _context31;
 	        var lineCount = (match.match(/\n/g) || []).length;
 	        var sign = _this3.$engine.hash(match);
-	        var html = _concatInstanceProperty(_context27 = _concatInstanceProperty(_context28 = "<pre data-sign=\"".concat(sign, "\" data-lines=\"")).call(_context28, lineCount, "\"><code class=\"indent-code\">")).call(_context27, escapeHTMLSpecialChar(code.replace(/\n( {4}|\t)/g, '\n')), "</code></pre>");
+	        var html = _concatInstanceProperty(_context30 = _concatInstanceProperty(_context31 = "<pre data-sign=\"".concat(sign, "\" data-lines=\"")).call(_context31, lineCount, "\"><code class=\"indent-code\">")).call(_context30, escapeHTMLSpecialChar(code.replace(/\n( {4}|\t)/g, '\n')), "</code></pre>");
 	        // return this.getCacheWithSpace(this.pushCache(html), match, true);
 	        return prependLineFeedForParagraph(match, _this3.pushCache(html, sign, lineCount));
 	      });
@@ -70403,7 +67746,13 @@
 	  }, {
 	    key: "$dealUnclosingCode",
 	    value: function $dealUnclosingCode(str) {
-	      var codes = str.match(/(?:^|\n)(\n*((?:>[\t ]*)*)(?:[^\S\n]*))(`{3,})([^`]*?)(?=CHERRY_FLOW_SESSION_CURSOR|$|\n)/g);
+	      // 统计代码块围栏（```）配对时，忽略 HTML 注释（<!-- ... -->）内部的反引号。
+	      // 否则注释里的代码围栏（如 <!-- ```plantuml ... ``` -->）会被误判为「奇数个 ```」，
+	      // 触发自动闭合后把注释后面的正文（如紧随其后的标题）吞进代码块。见 issue #885。
+	      var strForCount = str.replace(/<!--[\s\S]*?-->/g, function (comment) {
+	        return comment.replace(/`/g, ' ');
+	      });
+	      var codes = strForCount.match(/(?:^|\n)(\n*((?:>[\t ]*)*)(?:[^\S\n]*))(`{3,})([^`]*?)(?=CHERRY_FLOW_SESSION_CURSOR|$|\n)/g);
 	      if (!codes || codes.length <= 0) {
 	        return str;
 	      }
@@ -70422,10 +67771,10 @@
 	      });
 	      // 如果有奇数个代码块关键字，则进行自动闭合
 	      if ($codes.length % 2 === 1) {
-	        var _context29;
+	        var _context32;
 	        var lastCode = $codes[$codes.length - 1].replace(/(`)[^`]+$/, '$1').replace(/\n+/, '');
 	        var $str = str.replace(/\n+$/, '').replace(/\n`{1,2}$/, '');
-	        return _concatInstanceProperty(_context29 = "".concat($str, "\n")).call(_context29, lastCode, "\n") // 如果自动闭合后代码块为空，则删除代码块
+	        return _concatInstanceProperty(_context32 = "".concat($str, "\n")).call(_context32, lastCode, "\n") // 如果自动闭合后代码块为空，则删除代码块
 	        .replace(/\n`{3,}[^`\n]*\n\s*`{3,}\n$/g, '\n')
 	        // 如果自动闭合的是mermaid图，则再判断第二行以后的内容是否为空，如果为空，则删除代码块
 	        .replace(/\n`{3,}\s*mermaid\s*\n[^\n]+\n\s*`{3,}\n$/g, '\n');
@@ -70451,8 +67800,7 @@
 	          if (leadingContentBlockQuote) {
 	            var regex = new RegExp("^\n*", '');
 	            var leadingNewline = result.match(regex)[0];
-	            // eslint-disable-next-line no-param-reassign
-	            result = leadingNewline + leadingContentBlockQuote + result.replace(regex, function (_) {
+	            return leadingNewline + leadingContentBlockQuote + result.replace(regex, function (_) {
 	              return '';
 	            });
 	          }
@@ -70494,10 +67842,10 @@
 	          mermaidAlignClass = mermaidSizeInfo.alignClass;
 	        // 如果是公式关键字，则直接返回
 	        if (/^(math|katex|latex)$/i.test($lang) && !_this4.isInternalCustomLangCovered($lang)) {
-	          var _context30;
+	          var _context33;
 	          var prefix = match.match(/^\s*/g);
 	          // ~D为经编辑器中间转义后的$，code结尾包含结束```前的所有换行符，所以不需要补换行
-	          return _concatInstanceProperty(_context30 = "".concat(prefix, "~D~D\n")).call(_context30, $code, "~D~D"); // 提供公式语法供公式钩子解析
+	          return _concatInstanceProperty(_context33 = "".concat(prefix, "~D~D\n")).call(_context33, $code, "~D~D"); // 提供公式语法供公式钩子解析
 	        }
 	        // 自定义语言渲染，可覆盖内置的自定义语言逻辑
 	        var _this4$appendMermaid = _this4.appendMermaid($code, $lang);
@@ -70545,8 +67893,8 @@
 	      });
 	      // 表格里处理行内代码，让一个td里的行内代码语法生效，让跨td的行内代码语法失效
 	      $str = $str.replace(getTableRule(true), function (whole) {
-	        var _context31;
-	        return _mapInstanceProperty(_context31 = whole.replace(/\\\|/g, '~CHERRYNormalLine').split('|')).call(_context31, function (oneTd) {
+	        var _context34;
+	        return _mapInstanceProperty(_context34 = whole.replace(/\\\|/g, '~CHERRYNormalLine').split('|')).call(_context34, function (oneTd) {
 	          return _this4.makeInlineCode(oneTd, false).replace(/~CHERRYNormalLine/g, '\\|');
 	        }).join('|').replace(/`/g, '\\`');
 	      });
@@ -70567,9 +67915,9 @@
 	  }, {
 	    key: "formatLang",
 	    value: function formatLang(lang) {
-	      var _context32;
+	      var _context35;
 	      // 增加一个潜规则，即便配置了all，也不处理mermaid
-	      if (_indexOfInstanceProperty(_context32 = this.customLang).call(_context32, 'all') !== -1 && lang !== 'mermaid') {
+	      if (_indexOfInstanceProperty(_context35 = this.customLang).call(_context35, 'all') !== -1 && lang !== 'mermaid') {
 	        return 'all';
 	      }
 	      return lang;
@@ -70599,9 +67947,9 @@
 	          var escaped = escapeHTMLSpecialChar($code);
 	          var html = '';
 	          if (_this5.showInlineColor && (isHex || isRgb || isHsl)) {
-	            var _context33;
+	            var _context36;
 	            var color = trimmed;
-	            html = _concatInstanceProperty(_context33 = "<code>".concat(escaped, "<span class=\"ch-inline-color\" style=\"background:")).call(_context33, color, ";\"></span></code>");
+	            html = _concatInstanceProperty(_context36 = "<code>".concat(escaped, "<span class=\"ch-inline-color\" style=\"background:")).call(_context36, color, ";\"></span></code>");
 	          } else {
 	            html = "<code>".concat(escaped, "</code>");
 	          }
@@ -70619,16 +67967,16 @@
 	        if (this.$cherry.options.engine.syntax.inlineCode.selfClosing || this.$cherry.options.engine.global.flowSessionContext) {
 	          var hasAutoClose = false;
 	          $str = $str.replace(/(^|\n)([^\n]+)(\n$)/, function (match, prefix, content, suffix) {
-	            var _context36, _context37;
+	            var _context39, _context40;
 	            var $content = content.replace(/\\`/g, '~~not~inlineCode').replace(/`+$/, '');
 	            hasAutoClose = /(`+)([^`]+)$/.test($content) && !/(`+)([^`]*~~CODE[^`]+)$/.test($content);
 	            if (!hasAutoClose) {
-	              var _context34, _context35;
+	              var _context37, _context38;
 	              $content = $content.replace(/~~not~inlineCode/g, '\\`');
-	              return _concatInstanceProperty(_context34 = _concatInstanceProperty(_context35 = "".concat(prefix)).call(_context35, $content)).call(_context34, suffix);
+	              return _concatInstanceProperty(_context37 = _concatInstanceProperty(_context38 = "".concat(prefix)).call(_context38, $content)).call(_context37, suffix);
 	            }
 	            $content = $content.replace(/(`+)([^`]+)$/, '$1$2$1').replace(/~~not~inlineCode/g, '\\`');
-	            return _concatInstanceProperty(_context36 = _concatInstanceProperty(_context37 = "".concat(prefix)).call(_context37, $content)).call(_context36, suffix);
+	            return _concatInstanceProperty(_context39 = _concatInstanceProperty(_context40 = "".concat(prefix)).call(_context40, $content)).call(_context39, suffix);
 	          });
 	          if (hasAutoClose) {
 	            $str = this.makeInlineCode($str, false);
@@ -70661,8 +68009,8 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(CodeBlock, "HOOK_NAME", 'codeBlock');
-	_defineProperty$3(CodeBlock, "inlineCodeCache", {});
+	_defineProperty$2(CodeBlock, "HOOK_NAME", 'codeBlock');
+	_defineProperty$2(CodeBlock, "inlineCodeCache", {});
 
 	function _callSuper$1x(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1x() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1x() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1x = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -70711,7 +68059,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(InlineCode$1, "HOOK_NAME", 'inlineCode');
+	_defineProperty$2(InlineCode$1, "HOOK_NAME", 'inlineCode');
 
 	var es_math_imul = {};
 
@@ -70909,15 +68257,10 @@
 	 * @returns {string} 16-char lowercase hex
 	 */
 	function hashHex(str) {
-	  if (typeof str !== 'string') {
-	    // Match CryptoJS.SHA256(undefined).toString() -> hash of "" semantics by
-	    // coercing to string. This keeps existing call sites safe.
-	    // eslint-disable-next-line no-param-reassign
-	    str = String(str == null ? '' : str);
-	  }
-	  var lo = xxHash32(str, SEED_LO);
+	  var input = typeof str !== 'string' ? String(str === null || str === undefined ? '' : str) : str;
+	  var lo = xxHash32(input, SEED_LO);
 	  // Fold the length into the high seed: guarantees no cross-length collision.
-	  var hi = xxHash32(str, SEED_HI ^ str.length | 0);
+	  var hi = xxHash32(input, SEED_HI ^ input.length | 0);
 	  return toHex8(hi) + toHex8(lo);
 	}
 
@@ -71026,6 +68369,21 @@
 
 	function _callSuper$1w(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1w() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1w() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1w = function _isNativeReflectConstruct() { return !!t; })(); }
+
+	/**
+	 * 根据链接配置生成 target 属性字符串
+	 * @param {{ target?: string, openNewPage?: boolean }} config
+	 * @returns {string}
+	 */
+	function resolveLinkTarget$1(config) {
+	  if (config.target) {
+	    return "target=\"".concat(config.target, "\"");
+	  }
+	  if (config.openNewPage) {
+	    return 'target="_blank"';
+	  }
+	  return '';
+	}
 	var Link$2 = /*#__PURE__*/function (_SyntaxBase) {
 	  function Link(_ref) {
 	    var _this;
@@ -71035,8 +68393,7 @@
 	    _this = _callSuper$1w(this, Link, [{
 	      config: config
 	    }]);
-	    // eslint-disable-next-line no-nested-ternary
-	    _this.target = config.target ? "target=\"".concat(config.target, "\"") : !!config.openNewPage ? 'target="_blank"' : '';
+	    _this.target = resolveLinkTarget$1(config);
 	    _this.rel = config.rel ? "rel=\"".concat(config.rel, "\"") : '';
 	    return _this;
 	  }
@@ -71178,7 +68535,7 @@
 	        // or
 	        '\\[(')).call(_context9, NOT_ALL_WHITE_SPACES_INLINE, ")\\](?!\\s*\\()") +
 	        // ?<ref> global ref, exclude [text][ref](url) inline link pattern
-	        ')', '(\\{target\\s*=\\s*(_blank|_parent|_self|_top)\\})?'].join(''),
+	        ')', '(\\{target\\s*=\\s*(_blank|parent|self|top)\\})?'].join(''),
 	        end: ''
 	      };
 	      // let ret = {begin:'((^|[^\\\\])\\*\\*|([\\s]|^)__)',
@@ -71188,7 +68545,7 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(Link$2, "HOOK_NAME", 'link');
+	_defineProperty$2(Link$2, "HOOK_NAME", 'link');
 
 	function _callSuper$1v(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1v() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1v() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1v = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -71317,7 +68674,7 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(Emphasis, "HOOK_NAME", 'fontEmphasis');
+	_defineProperty$2(Emphasis, "HOOK_NAME", 'fontEmphasis');
 
 	function _callSuper$1u(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1u() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1u() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1u = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -71402,7 +68759,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(Paragraph, "HOOK_NAME", 'normalParagraph');
+	_defineProperty$2(Paragraph, "HOOK_NAME", 'normalParagraph');
 
 	var es_reflect_get = {};
 
@@ -71429,7 +68786,7 @@
 		'use strict';
 		var $ = /*@__PURE__*/ require_export();
 		var call = /*@__PURE__*/ requireFunctionCall();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 		var anObject = /*@__PURE__*/ requireAnObject();
 		var isDataDescriptor = /*@__PURE__*/ requireIsDataDescriptor();
 		var getOwnPropertyDescriptorModule = /*@__PURE__*/ requireObjectGetOwnPropertyDescriptor();
@@ -71592,10 +68949,8 @@
 	    var _this;
 	    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
 	        config: undefined,
-	        externals: undefined,
 	        cherry: undefined
 	      },
-	      externals = _ref.externals,
 	      config = _ref.config,
 	      cherry = _ref.cherry;
 	    _classCallCheck$1(this, Header);
@@ -71649,7 +69004,7 @@
 	          // unicode
 	          try {
 	            id += encodeURIComponent(c);
-	          } catch (error) {
+	          } catch (_unused) {
 	            // empty
 	          }
 	        }
@@ -71844,7 +69199,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(Header$1, "HOOK_NAME", 'header');
+	_defineProperty$2(Header$1, "HOOK_NAME", 'header');
 
 	function _callSuper$1s(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1s() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1s() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1s = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -71887,7 +69242,7 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(Transfer, "HOOK_NAME", 'transfer');
+	_defineProperty$2(Transfer, "HOOK_NAME", 'transfer');
 
 	var es_array_reduce = {};
 
@@ -72033,11 +69388,11 @@
 	var reduceExports = requireReduce();
 	var _reduceInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(reduceExports);
 
-	function _createForOfIteratorHelper$1k(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1k(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-	function _unsupportedIterableToArray$1k(r, a) { if (r) { var _context19; if ("string" == typeof r) return _arrayLikeToArray$1m(r, a); var t = _sliceInstanceProperty(_context19 = {}.toString.call(r)).call(_context19, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1m(r, a) : void 0; } }
-	function _arrayLikeToArray$1m(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _createForOfIteratorHelper$1l(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1l(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$1l(r, a) { if (r) { var _context19; if ("string" == typeof r) return _arrayLikeToArray$1n(r, a); var t = _sliceInstanceProperty(_context19 = {}.toString.call(r)).call(_context19, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1n(r, a) : void 0; } }
+	function _arrayLikeToArray$1n(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function ownKeys$c(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$c(e) { for (var r = 1; r < arguments.length; r++) { var _context17, _context18; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context17 = ownKeys$c(Object(t), !0)).call(_context17, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context18 = ownKeys$c(Object(t))).call(_context18, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread$c(e) { for (var r = 1; r < arguments.length; r++) { var _context17, _context18; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context17 = ownKeys$c(Object(t), !0)).call(_context17, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context18 = ownKeys$c(Object(t))).call(_context18, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _callSuper$1r(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1r() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1r() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1r = function _isNativeReflectConstruct() { return !!t; })(); }
 	var TABLE_LOOSE = 'loose';
@@ -72064,7 +69419,7 @@
 	      try {
 	        _this.chartRenderEngine = new ChartRenderEngine(_objectSpread$c(_objectSpread$c(_objectSpread$c({}, externals && requiredPackages instanceof Array && _reduceInstanceProperty(requiredPackages).call(requiredPackages, function (acc, pkg) {
 	          delete chartEngineOptions[pkg]; // 过滤第三方包选项
-	          return _objectSpread$c(_objectSpread$c({}, acc), {}, _defineProperty$3({}, pkg, externals[pkg]));
+	          return _objectSpread$c(_objectSpread$c({}, acc), {}, _defineProperty$2({}, pkg, externals[pkg]));
 	        }, {})), {}, {
 	          renderer: 'svg',
 	          width: 500,
@@ -72153,7 +69508,7 @@
 	          return _trimInstanceProperty(s).call(s);
 	        })).call(_context2, Boolean);
 	        var kvRegex = /^(\w+|\s*".*?"\s*|\s*'.*?'\s*)\s*:\s*(.+?)$/;
-	        var _iterator = _createForOfIteratorHelper$1k(pairs),
+	        var _iterator = _createForOfIteratorHelper$1l(pairs),
 	          _step;
 	        try {
 	          for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -72423,7 +69778,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(Table$1, "HOOK_NAME", 'table');
+	_defineProperty$2(Table$1, "HOOK_NAME", 'table');
 
 	/**
 	 * Copyright (C) 2021 Tencent.
@@ -72531,7 +69886,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(Br$1, "HOOK_NAME", 'br');
+	_defineProperty$2(Br$1, "HOOK_NAME", 'br');
 
 	function _callSuper$1p(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1p() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1p() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1p = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -72578,7 +69933,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(Hr$1, "HOOK_NAME", 'hr');
+	_defineProperty$2(Hr$1, "HOOK_NAME", 'hr');
 
 	/**
 	 * Copyright (C) 2021 Tencent.
@@ -72712,7 +70067,7 @@
 	};
 
 	function ownKeys$b(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$b(e) { for (var r = 1; r < arguments.length; r++) { var _context21, _context22; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context21 = ownKeys$b(Object(t), !0)).call(_context21, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context22 = ownKeys$b(Object(t))).call(_context22, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread$b(e) { for (var r = 1; r < arguments.length; r++) { var _context21, _context22; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context21 = ownKeys$b(Object(t), !0)).call(_context21, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context22 = ownKeys$b(Object(t))).call(_context22, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _callSuper$1o(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1o() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1o() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1o = function _isNativeReflectConstruct() { return !!t; })(); }
 	var Image$2 = /*#__PURE__*/function (_SyntaxBase) {
@@ -72880,10 +70235,10 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(Image$2, "HOOK_NAME", 'image');
+	_defineProperty$2(Image$2, "HOOK_NAME", 'image');
 
 	function ownKeys$a(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$a(e) { for (var r = 1; r < arguments.length; r++) { var _context0, _context1; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context0 = ownKeys$a(Object(t), !0)).call(_context0, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context1 = ownKeys$a(Object(t))).call(_context1, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread$a(e) { for (var r = 1; r < arguments.length; r++) { var _context0, _context1; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context0 = ownKeys$a(Object(t), !0)).call(_context0, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context1 = ownKeys$a(Object(t))).call(_context1, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _callSuper$1n(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1n() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1n() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1n = function _isNativeReflectConstruct() { return !!t; })(); }
 	var INDENT_SPACE_NUM = 4; // commonmark default use 1~4 spaces for indent
@@ -73145,7 +70500,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(List$2, "HOOK_NAME", 'list');
+	_defineProperty$2(List$2, "HOOK_NAME", 'list');
 
 	function _callSuper$1m(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1m() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1m() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1m = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -73212,10 +70567,25 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(Blockquote, "HOOK_NAME", 'blockquote');
+	_defineProperty$2(Blockquote, "HOOK_NAME", 'blockquote');
 
 	function _callSuper$1l(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1l() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1l() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1l = function _isNativeReflectConstruct() { return !!t; })(); }
+
+	/**
+	 * 根据链接配置生成 target 属性字符串
+	 * @param {{ target?: string, openNewPage?: boolean }} config
+	 * @returns {string}
+	 */
+	function resolveLinkTarget(config) {
+	  if (config.target) {
+	    return "target=\"".concat(config.target, "\"");
+	  }
+	  if (config.openNewPage) {
+	    return 'target="_blank"';
+	  }
+	  return '';
+	}
 	var AutoLink = /*#__PURE__*/function (_SyntaxBase) {
 	  function AutoLink(_ref) {
 	    var _this;
@@ -73227,8 +70597,7 @@
 	    }]);
 	    _this.enableShortLink = !!config.enableShortLink;
 	    _this.shortLinkLength = config.shortLinkLength;
-	    // eslint-disable-next-line no-nested-ternary
-	    _this.target = config.target ? "target=\"".concat(config.target, "\"") : !!config.openNewPage ? 'target="_blank"' : '';
+	    _this.target = resolveLinkTarget(config);
 	    _this.rel = config.rel ? "rel=\"".concat(config.rel, "\"") : '';
 	    return _this;
 	  }
@@ -73454,8 +70823,8 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(AutoLink, "HOOK_NAME", 'autoLink');
-	_defineProperty$3(AutoLink, "escapePreservedSymbol", function (text) {
+	_defineProperty$2(AutoLink, "HOOK_NAME", 'autoLink');
+	_defineProperty$2(AutoLink, "escapePreservedSymbol", function (text) {
 	  // _ prevent conflict with emphasis
 	  // _ => 0x5f
 	  // * => 0x2a
@@ -73583,10 +70952,10 @@
 	     * 该语法具有排他性，并且需要优先其他段落级语法进行渲染
 	     * @type {'katex' | 'MathJax' | 'node'}
 	     */
-	    _defineProperty$3(_this, "engine", 'MathJax');
+	    _defineProperty$2(_this, "engine", 'MathJax');
 	    // 渲染引擎，默认为MathJax，MathJax支持2.x与3.x版本
-	    _defineProperty$3(_this, "katex", void 0);
-	    _defineProperty$3(_this, "MathJax", void 0);
+	    _defineProperty$2(_this, "katex", void 0);
+	    _defineProperty$2(_this, "MathJax", void 0);
 	    _this.engine = isBrowser() ? (_config$engine = config.engine) !== null && _config$engine !== void 0 ? _config$engine : 'MathJax' : 'node';
 	    _this.$cherry = cherry;
 	    _this.lastCode = '';
@@ -73726,7 +71095,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(MathBlock, "HOOK_NAME", 'mathBlock');
+	_defineProperty$2(MathBlock, "HOOK_NAME", 'mathBlock');
 
 	function _callSuper$1j(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1j() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1j() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1j = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -73747,10 +71116,10 @@
 	    }]);
 	    // 非浏览器环境下配置为 node
 	    /** @type {'katex' | 'MathJax' | 'node'} */
-	    _defineProperty$3(_this, "engine", 'MathJax');
+	    _defineProperty$2(_this, "engine", 'MathJax');
 	    // 渲染引擎，默认为MathJax，MathJax支持2.x与3.x版本
-	    _defineProperty$3(_this, "katex", void 0);
-	    _defineProperty$3(_this, "MathJax", void 0);
+	    _defineProperty$2(_this, "katex", void 0);
+	    _defineProperty$2(_this, "MathJax", void 0);
 	    _this.engine = isBrowser() ? (_config$engine = config.engine) !== null && _config$engine !== void 0 ? _config$engine : 'MathJax' : 'node';
 	    _this.$cherry = cherry;
 	    /**
@@ -73917,7 +71286,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(InlineMath, "HOOK_NAME", 'inlineMath');
+	_defineProperty$2(InlineMath, "HOOK_NAME", 'inlineMath');
 
 	var es_array_fill = {};
 
@@ -74053,19 +71422,19 @@
 	    _this = _callSuper$1i(this, Toc, [{
 	      needCache: true
 	    }]);
-	    _defineProperty$3(_this, "tocStyle", 'nested');
+	    _defineProperty$2(_this, "tocStyle", 'nested');
 	    // plain or nested
-	    _defineProperty$3(_this, "tocNodeClass", 'toc-li');
-	    _defineProperty$3(_this, "tocContainerClass", 'toc');
-	    _defineProperty$3(_this, "tocTitleClass", 'toc-title');
-	    _defineProperty$3(_this, "linkProcessor", defaultLinkProcessor);
-	    _defineProperty$3(_this, "baseLevel", 1);
+	    _defineProperty$2(_this, "tocNodeClass", 'toc-li');
+	    _defineProperty$2(_this, "tocContainerClass", 'toc');
+	    _defineProperty$2(_this, "tocTitleClass", 'toc-title');
+	    _defineProperty$2(_this, "linkProcessor", defaultLinkProcessor);
+	    _defineProperty$2(_this, "baseLevel", 1);
 	    /** 标记当前是否处于第一个toc，且仅渲染一个toc */
-	    _defineProperty$3(_this, "isFirstTocToken", true);
+	    _defineProperty$2(_this, "isFirstTocToken", true);
 	    /** 允许渲染多个TOC */
-	    _defineProperty$3(_this, "allowMultiToc", false);
+	    _defineProperty$2(_this, "allowMultiToc", false);
 	    /** 是否显示自增序号 */
-	    _defineProperty$3(_this, "showAutoNumber", false);
+	    _defineProperty$2(_this, "showAutoNumber", false);
 	    _forEachInstanceProperty(_context = _Object$keys(defaultOptions$2)).call(_context, function (key) {
 	      _this[key] = config[key] || defaultOptions$2[key];
 	    });
@@ -74353,7 +71722,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(Toc$2, "HOOK_NAME", 'toc');
+	_defineProperty$2(Toc$2, "HOOK_NAME", 'toc');
 
 	function _callSuper$1h(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1h() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1h() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1h = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -74534,7 +71903,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(Footnote, "HOOK_NAME", 'footnote');
+	_defineProperty$2(Footnote, "HOOK_NAME", 'footnote');
 
 	var es_string_endsWith = {};
 
@@ -74548,7 +71917,7 @@
 		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThisClause();
 		var getOwnPropertyDescriptor = /*@__PURE__*/ requireObjectGetOwnPropertyDescriptor().f;
 		var toLength = /*@__PURE__*/ requireToLength();
-		var toString = /*@__PURE__*/ requireToString$2();
+		var toString = /*@__PURE__*/ requireToString$1();
 		var notARegExp = /*@__PURE__*/ requireNotARegexp();
 		var requireObjectCoercible = /*@__PURE__*/ requireRequireObjectCoercible();
 		var correctIsRegExpLogic = /*@__PURE__*/ requireCorrectIsRegexpLogic();
@@ -74640,7 +72009,7 @@
 	var endsWithExports = requireEndsWith();
 	var _endsWithInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(endsWithExports);
 
-	function _arrayLikeToArray$1l(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _arrayLikeToArray$1m(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function _callSuper$1g(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1g() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1g() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1g = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
@@ -74695,7 +72064,7 @@
 	      var _cache$split = cache.split(/[ ]+/g),
 	        _cache$split2 = _toArray(_cache$split),
 	        url = _cache$split2[0],
-	        args = _sliceInstanceProperty(_context = _arrayLikeToArray$1l(_cache$split2)).call(_context, 1);
+	        args = _sliceInstanceProperty(_context = _arrayLikeToArray$1m(_cache$split2)).call(_context, 1);
 	      var innerUrl = UrlCache.set(this.unwrapUrl(url));
 	      this.commentCache["".concat(key).toLowerCase()] = _concatInstanceProperty(_context2 = [innerUrl]).call(_context2, _toConsumableArray$1(args)).join(' ');
 	    }
@@ -74766,7 +72135,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(CommentReference, "HOOK_NAME", 'commentReference');
+	_defineProperty$2(CommentReference, "HOOK_NAME", 'commentReference');
 
 	/*! @license DOMPurify 3.4.2 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/3.4.2/LICENSE */
 
@@ -74774,7 +72143,7 @@
 	  entries: entries$3,
 	  setPrototypeOf,
 	  isFrozen,
-	  getPrototypeOf: getPrototypeOf$1,
+	  getPrototypeOf,
 	  getOwnPropertyDescriptor
 	} = Object;
 	let {
@@ -75006,7 +72375,7 @@
 	        return unapply(desc.value);
 	      }
 	    }
-	    object = getPrototypeOf$1(object);
+	    object = getPrototypeOf(object);
 	  }
 	  function fallbackValue() {
 	    return null;
@@ -76314,12 +73683,18 @@
 	      $str = escapeHTMLEntitiesWithoutSemicolon($str);
 	      $str = $str.replace(/<[/]?([^<]*?)>/g, function (whole, m1) {
 	        if (htmlBlackList && htmlBlackList.test(m1) && !_this2.isAutoLinkTag(whole) && !_this2.isHtmlComment(whole)) {
+	          if (/\n[\t ]*$/.test(m1)) {
+	            return whole.replace(/</g, '&#60;');
+	          }
 	          return whole.replace(/</g, '&#60;').replace(/>/g, '&#62;');
 	        }
 	        // 匹配到非白名单且非AutoLink语法的尖括号会被转义
 	        // 如果是HTML注释，放行
 	        if (!whiteList.test(m1) && !_this2.isAutoLinkTag(whole) && !_this2.isHtmlComment(whole)) {
 	          if (_this2.htmlWhiteListAppend === false || !_this2.htmlWhiteListAppend.test(m1)) {
+	            if (/\n[\t ]*$/.test(m1)) {
+	              return whole.replace(/</g, '&#60;');
+	            }
 	            return whole.replace(/</g, '&#60;').replace(/>/g, '&#62;');
 	          }
 	        }
@@ -76449,7 +73824,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(HtmlBlock, "HOOK_NAME", 'htmlBlock');
+	_defineProperty$2(HtmlBlock, "HOOK_NAME", 'htmlBlock');
 
 	/**
 	 * Copyright (C) 2021 Tencent.
@@ -78277,7 +75652,7 @@
 	};
 
 	function ownKeys$9(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$9(e) { for (var r = 1; r < arguments.length; r++) { var _context3, _context4; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context3 = ownKeys$9(Object(t), !0)).call(_context3, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context4 = ownKeys$9(Object(t))).call(_context4, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread$9(e) { for (var r = 1; r < arguments.length; r++) { var _context3, _context4; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context3 = ownKeys$9(Object(t), !0)).call(_context3, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context4 = ownKeys$9(Object(t))).call(_context4, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _callSuper$1e(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1e() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1e() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1e = function _isNativeReflectConstruct() { return !!t; })(); }
 
@@ -78398,7 +75773,7 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(Emoji, "HOOK_NAME", 'emoji');
+	_defineProperty$2(Emoji, "HOOK_NAME", 'emoji');
 
 	function _callSuper$1d(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1d() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1d() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1d = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -78434,7 +75809,7 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(Underline$1, "HOOK_NAME", 'underline');
+	_defineProperty$2(Underline$1, "HOOK_NAME", 'underline');
 
 	function _callSuper$1c(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1c() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1c() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1c = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -78465,203 +75840,32 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(HighLight, "HOOK_NAME", 'highLight');
+	_defineProperty$2(HighLight, "HOOK_NAME", 'highLight');
 
 	/**
-	 * A specialized version of `_.map` for arrays without support for iteratee
-	 * shorthands.
+	 * Copyright (C) 2021 Tencent.
 	 *
-	 * @private
-	 * @param {Array} [array] The array to iterate over.
-	 * @param {Function} iteratee The function invoked per iteration.
-	 * @returns {Array} Returns the new mapped array.
+	 * Licensed under the Apache License, Version 2.0 (the "License");
+	 * you may not use this file except in compliance with the License.
+	 * You may obtain a copy of the License at
+	 *
+	 *     http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software
+	 * distributed under the License is distributed on an "AS IS" BASIS,
+	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 * See the License for the specific language governing permissions and
+	 * limitations under the License.
 	 */
 
-	var _arrayMap$1;
-	var hasRequired_arrayMap$1;
-
-	function require_arrayMap$1 () {
-		if (hasRequired_arrayMap$1) return _arrayMap$1;
-		hasRequired_arrayMap$1 = 1;
-		function arrayMap(array, iteratee) {
-		  var index = -1,
-		      length = array == null ? 0 : array.length,
-		      result = Array(length);
-
-		  while (++index < length) {
-		    result[index] = iteratee(array[index], index, array);
-		  }
-		  return result;
-		}
-
-		_arrayMap$1 = arrayMap;
-		return _arrayMap$1;
+	/**
+	 * 转义字符串中的正则特殊字符，便于将字面量拼入 RegExp
+	 * @param {unknown} str 待转义字符串
+	 * @returns {string}
+	 */
+	function escapeRegExp$3(str) {
+	  return String(str).replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
 	}
-
-	var isSymbol_1$1;
-	var hasRequiredIsSymbol$1;
-
-	function requireIsSymbol$1 () {
-		if (hasRequiredIsSymbol$1) return isSymbol_1$1;
-		hasRequiredIsSymbol$1 = 1;
-		var baseGetTag = require_baseGetTag$1(),
-		    isObjectLike = requireIsObjectLike$1();
-
-		/** `Object#toString` result references. */
-		var symbolTag = '[object Symbol]';
-
-		/**
-		 * Checks if `value` is classified as a `Symbol` primitive or object.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 4.0.0
-		 * @category Lang
-		 * @param {*} value The value to check.
-		 * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
-		 * @example
-		 *
-		 * _.isSymbol(Symbol.iterator);
-		 * // => true
-		 *
-		 * _.isSymbol('abc');
-		 * // => false
-		 */
-		function isSymbol(value) {
-		  return typeof value == 'symbol' ||
-		    (isObjectLike(value) && baseGetTag(value) == symbolTag);
-		}
-
-		isSymbol_1$1 = isSymbol;
-		return isSymbol_1$1;
-	}
-
-	var _baseToString$1;
-	var hasRequired_baseToString$1;
-
-	function require_baseToString$1 () {
-		if (hasRequired_baseToString$1) return _baseToString$1;
-		hasRequired_baseToString$1 = 1;
-		var Symbol = require_Symbol$1(),
-		    arrayMap = require_arrayMap$1(),
-		    isArray = requireIsArray$4(),
-		    isSymbol = requireIsSymbol$1();
-
-		/** Used as references for various `Number` constants. */
-		var INFINITY = 1 / 0;
-
-		/** Used to convert symbols to primitives and strings. */
-		var symbolProto = Symbol ? Symbol.prototype : undefined,
-		    symbolToString = symbolProto ? symbolProto.toString : undefined;
-
-		/**
-		 * The base implementation of `_.toString` which doesn't convert nullish
-		 * values to empty strings.
-		 *
-		 * @private
-		 * @param {*} value The value to process.
-		 * @returns {string} Returns the string.
-		 */
-		function baseToString(value) {
-		  // Exit early for strings to avoid a performance hit in some environments.
-		  if (typeof value == 'string') {
-		    return value;
-		  }
-		  if (isArray(value)) {
-		    // Recursively convert values (susceptible to call stack limits).
-		    return arrayMap(value, baseToString) + '';
-		  }
-		  if (isSymbol(value)) {
-		    return symbolToString ? symbolToString.call(value) : '';
-		  }
-		  var result = (value + '');
-		  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
-		}
-
-		_baseToString$1 = baseToString;
-		return _baseToString$1;
-	}
-
-	var toString_1$1;
-	var hasRequiredToString$1;
-
-	function requireToString$1 () {
-		if (hasRequiredToString$1) return toString_1$1;
-		hasRequiredToString$1 = 1;
-		var baseToString = require_baseToString$1();
-
-		/**
-		 * Converts `value` to a string. An empty string is returned for `null`
-		 * and `undefined` values. The sign of `-0` is preserved.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 4.0.0
-		 * @category Lang
-		 * @param {*} value The value to convert.
-		 * @returns {string} Returns the converted string.
-		 * @example
-		 *
-		 * _.toString(null);
-		 * // => ''
-		 *
-		 * _.toString(-0);
-		 * // => '-0'
-		 *
-		 * _.toString([1, 2, 3]);
-		 * // => '1,2,3'
-		 */
-		function toString(value) {
-		  return value == null ? '' : baseToString(value);
-		}
-
-		toString_1$1 = toString;
-		return toString_1$1;
-	}
-
-	var escapeRegExp_1;
-	var hasRequiredEscapeRegExp;
-
-	function requireEscapeRegExp () {
-		if (hasRequiredEscapeRegExp) return escapeRegExp_1;
-		hasRequiredEscapeRegExp = 1;
-		var toString = requireToString$1();
-
-		/**
-		 * Used to match `RegExp`
-		 * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
-		 */
-		var reRegExpChar = /[\\^$.*+?()[\]{}|]/g,
-		    reHasRegExpChar = RegExp(reRegExpChar.source);
-
-		/**
-		 * Escapes the `RegExp` special characters "^", "$", "\", ".", "*", "+",
-		 * "?", "(", ")", "[", "]", "{", "}", and "|" in `string`.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 3.0.0
-		 * @category String
-		 * @param {string} [string=''] The string to escape.
-		 * @returns {string} Returns the escaped string.
-		 * @example
-		 *
-		 * _.escapeRegExp('[lodash](https://lodash.com/)');
-		 * // => '\[lodash\]\(https://lodash\.com/\)'
-		 */
-		function escapeRegExp(string) {
-		  string = toString(string);
-		  return (string && reHasRegExpChar.test(string))
-		    ? string.replace(reRegExpChar, '\\$&')
-		    : string;
-		}
-
-		escapeRegExp_1 = escapeRegExp;
-		return escapeRegExp_1;
-	}
-
-	var escapeRegExpExports = requireEscapeRegExp();
-	var escapeRegExp$2 = /*@__PURE__*/getDefaultExportFromCjs$1(escapeRegExpExports);
 
 	// 预览区域代码块可切换语言功能: https://github.com/Tencent/cherry-markdown/issues/433;
 
@@ -78693,10 +75897,10 @@
 
 	var _context$v;
 	function ownKeys$8(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$8(e) { for (var r = 1; r < arguments.length; r++) { var _context5, _context6; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context5 = ownKeys$8(Object(t), !0)).call(_context5, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context6 = ownKeys$8(Object(t))).call(_context6, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
-	function _createForOfIteratorHelper$1j(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1j(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-	function _unsupportedIterableToArray$1j(r, a) { if (r) { var _context4; if ("string" == typeof r) return _arrayLikeToArray$1k(r, a); var t = _sliceInstanceProperty(_context4 = {}.toString.call(r)).call(_context4, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1k(r, a) : void 0; } }
-	function _arrayLikeToArray$1k(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _objectSpread$8(e) { for (var r = 1; r < arguments.length; r++) { var _context5, _context6; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context5 = ownKeys$8(Object(t), !0)).call(_context5, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context6 = ownKeys$8(Object(t))).call(_context6, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _createForOfIteratorHelper$1k(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1k(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$1k(r, a) { if (r) { var _context4; if ("string" == typeof r) return _arrayLikeToArray$1l(r, a); var t = _sliceInstanceProperty(_context4 = {}.toString.call(r)).call(_context4, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1l(r, a) : void 0; } }
+	function _arrayLikeToArray$1l(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
 	/*
 	 * 外加配置系统联想词
@@ -78981,7 +76185,7 @@
 	  var CodePreviewLangSuggestListExact = [];
 	  _forEachInstanceProperty(codePreviewLangSelectList).call(codePreviewLangSelectList, function (lang) {
 	    var str = '';
-	    var _iterator = _createForOfIteratorHelper$1j(lang),
+	    var _iterator = _createForOfIteratorHelper$1k(lang),
 	      _step;
 	    try {
 	      for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -79041,9 +76245,9 @@
 	  });
 	}
 
-	function _createForOfIteratorHelper$1i(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1i(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-	function _unsupportedIterableToArray$1i(r, a) { if (r) { var _context10; if ("string" == typeof r) return _arrayLikeToArray$1j(r, a); var t = _sliceInstanceProperty(_context10 = {}.toString.call(r)).call(_context10, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1j(r, a) : void 0; } }
-	function _arrayLikeToArray$1j(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _createForOfIteratorHelper$1j(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1j(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$1j(r, a) { if (r) { var _context10; if ("string" == typeof r) return _arrayLikeToArray$1k(r, a); var t = _sliceInstanceProperty(_context10 = {}.toString.call(r)).call(_context10, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1k(r, a) : void 0; } }
+	function _arrayLikeToArray$1k(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function _callSuper$1b(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1b() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1b() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1b = function _isNativeReflectConstruct() { return !!t; })(); }
 
@@ -79123,7 +76327,7 @@
 	      var defaultSuggest = [];
 	      var that = this;
 	      // 默认的唤醒关键字配置
-	      var _iterator = _createForOfIteratorHelper$1i(suggesterKeywords),
+	      var _iterator = _createForOfIteratorHelper$1j(suggesterKeywords),
 	        _step;
 	      try {
 	        var _loop = function _loop() {
@@ -79240,7 +76444,7 @@
 	        });
 	      }
 	      var keys = _mapInstanceProperty(suggester).call(suggester, function (key) {
-	        return escapeRegExp$2(key);
+	        return escapeRegExp$3(key);
 	      }).join('|');
 	      var reg = new RegExp(_concatInstanceProperty(_context7 = _concatInstanceProperty(_context8 = "".concat(isLookbehindSupported() ? '((?<!\\\\))[ ]' : '(^|[^\\\\])[ ]', "(")).call(_context8, keys, ")(([^")).call(_context7, keys, "\\s])+)"), 'g');
 	      return /** @type {any} */{
@@ -79259,11 +76463,11 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(Suggester, "HOOK_NAME", 'suggester');
+	_defineProperty$2(Suggester, "HOOK_NAME", 'suggester');
 	var SuggesterPanel = /*#__PURE__*/function () {
 	  function SuggesterPanel(cherry) {
 	    _classCallCheck$1(this, SuggesterPanel);
-	    _defineProperty$3(this, "panelWrap", "<div class=\"cherry-suggester-panel\"></div>");
+	    _defineProperty$2(this, "panelWrap", "<div class=\"cherry-suggester-panel\"></div>");
 	    this.searchCache = false;
 	    this.searchKeyCache = [];
 	    this.optionList = [];
@@ -80034,7 +77238,7 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(Ruby$1, "HOOK_NAME", 'ruby');
+	_defineProperty$2(Ruby$1, "HOOK_NAME", 'ruby');
 
 	function _callSuper$19(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$19() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$19() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$19 = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -80081,7 +77285,7 @@
 	        if (!_this2.enablePanel && /primary|info|warning|danger|success/i.test(type)) {
 	          return match;
 	        }
-	        if (!_this2.enableAlign && /(left|right|center|justify)/i.test(type)) {
+	        if (!_this2.enableAlign && /(left|right|center|justify|2cols|3cols)/i.test(type)) {
 	          return match;
 	        }
 	        var lineCount = _this2.getLineCount(match, preLines);
@@ -80105,13 +77309,16 @@
 	      if (/(left|right|center|justify)/i.test(type)) {
 	        return "cherry-text-align cherry-text-align__".concat(type);
 	      }
+	      if (/(2cols|3cols)/i.test(type)) {
+	        return "cherry-panel-cols cherry-panel-cols__".concat(type);
+	      }
 	      return "cherry-panel cherry-panel__".concat(type);
 	    }
 	  }, {
 	    key: "$getPanelInfo",
 	    value: function $getPanelInfo(name, str, sentenceMakeFunc) {
-	      var _context6,
-	        _this3 = this;
+	      var _this3 = this,
+	        _context8;
 	      var ret = {
 	        type: this.$getTargetType(name),
 	        title: sentenceMakeFunc(this.$getTitle(name)).html,
@@ -80123,9 +77330,8 @@
 	      if (/(left|right|center|justify)/i.test(ret.type)) {
 	        ret.appendStyle = "style=\"text-align:".concat(ret.type, ";\"");
 	      }
-	      ret.title = _concatInstanceProperty(_context6 = "<div class=\"cherry-panel--title ".concat(ret.title ? 'cherry-panel--title__not-empty' : '', "\">")).call(_context6, ret.title, "</div>");
 	      var paragraphProcessor = function paragraphProcessor(str) {
-	        var _context7, _context8;
+	        var _context6, _context7;
 	        if (_trimInstanceProperty(str).call(str) === '') {
 	          return '';
 	        }
@@ -80138,8 +77344,26 @@
 	        if (isContainBlockTest.test(html)) {
 	          domName = 'div';
 	        }
-	        return _concatInstanceProperty(_context7 = _concatInstanceProperty(_context8 = "<".concat(domName, ">")).call(_context8, _this3.$cleanParagraph(html), "</")).call(_context7, domName, ">");
+	        return _concatInstanceProperty(_context6 = _concatInstanceProperty(_context7 = "<".concat(domName, ">")).call(_context7, _this3.$cleanParagraph(html), "</")).call(_context6, domName, ">");
 	      };
+	      // 多列排版语法（2cols/3cols）：使用 --- 分隔每一列
+	      if (/(2cols|3cols)/i.test(ret.type)) {
+	        ret.title = '';
+	        var colCount = ret.type === '3cols' ? 3 : 2;
+	        var rawCols = this.$splitCols(ret.body, colCount);
+	        var colsHtml = _mapInstanceProperty(rawCols).call(rawCols, function (colStr) {
+	          var $col = '';
+	          if (_this3.isContainsCache(colStr)) {
+	            $col = _this3.makeExcludingCached(colStr, paragraphProcessor);
+	          } else {
+	            $col = paragraphProcessor(colStr);
+	          }
+	          return "<div class=\"cherry-panel--col\">".concat($col, "</div>");
+	        }).join('');
+	        ret.body = colsHtml;
+	        return ret;
+	      }
+	      ret.title = _concatInstanceProperty(_context8 = "<div class=\"cherry-panel--title ".concat(ret.title ? 'cherry-panel--title__not-empty' : '', "\">")).call(_context8, ret.title, "</div>");
 	      var $body = '';
 	      if (this.isContainsCache(ret.body)) {
 	        $body = this.makeExcludingCached(ret.body, paragraphProcessor);
@@ -80148,6 +77372,30 @@
 	      }
 	      ret.body = "<div class=\"cherry-panel--body\">".concat($body, "</div>");
 	      return ret;
+	    }
+
+	    /**
+	     * 按 :: 分隔符拆分多列排版语法的内容
+	     * @param {string} str 面板内容
+	     * @param {number} colCount 期望的列数（2 或 3）
+	     * @returns {string[]} 拆分后的各列内容
+	     */
+	  }, {
+	    key: "$splitCols",
+	    value: function $splitCols(str, colCount) {
+	      // 匹配独占一行的 :: 分隔符（前后为空行/文本行边界均可）
+	      var parts = str.split(/\n[ \t]*::[ \t]*(?=\n|$)/);
+	      // 若列数不足，补齐空列；若超过则将多余部分合并到最后一列
+	      if (parts.length > colCount) {
+	        var _context9;
+	        var head = _sliceInstanceProperty(parts).call(parts, 0, colCount - 1);
+	        var tail = _sliceInstanceProperty(parts).call(parts, colCount - 1).join('\n::\n');
+	        return _concatInstanceProperty(_context9 = []).call(_context9, _toConsumableArray$1(head), [tail]);
+	      }
+	      while (parts.length < colCount) {
+	        parts.push('');
+	      }
+	      return parts;
 	    }
 	  }, {
 	    key: "$getTitle",
@@ -80187,6 +77435,10 @@
 	        case 'justify':
 	        case 'j':
 	          return 'justify';
+	        case '2cols':
+	          return '2cols';
+	        case '3cols':
+	          return '3cols';
 	        default:
 	          return 'primary';
 	      }
@@ -80198,7 +77450,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(Panel$1, "HOOK_NAME", 'panel');
+	_defineProperty$2(Panel$1, "HOOK_NAME", 'panel');
 
 	function _callSuper$18(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$18() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$18() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$18 = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -80305,7 +77557,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(Detail$1, "HOOK_NAME", 'detail');
+	_defineProperty$2(Detail$1, "HOOK_NAME", 'detail');
 
 	var es_date_toJson = {};
 
@@ -80318,7 +77570,7 @@
 		'use strict';
 		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThis();
 		var toLength = /*@__PURE__*/ requireToLength();
-		var toString = /*@__PURE__*/ requireToString$2();
+		var toString = /*@__PURE__*/ requireToString$1();
 		var $repeat = /*@__PURE__*/ requireStringRepeat();
 		var requireObjectCoercible = /*@__PURE__*/ requireRequireObjectCoercible();
 
@@ -80556,7 +77808,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(FrontMatter, "HOOK_NAME", 'frontMatter');
+	_defineProperty$2(FrontMatter, "HOOK_NAME", 'frontMatter');
 
 	function _callSuper$16(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$16() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$16() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$16 = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -80590,7 +77842,7 @@
 	    }
 	  }]);
 	}(SyntaxBase);
-	_defineProperty$3(Space, "HOOK_NAME", 'space');
+	_defineProperty$2(Space, "HOOK_NAME", 'space');
 
 	function _callSuper$15(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$15() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$15() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$15 = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -80729,7 +77981,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(AiFlowAutoClose, "HOOK_NAME", 'aiFlowAutoClose');
+	_defineProperty$2(AiFlowAutoClose, "HOOK_NAME", 'aiFlowAutoClose');
 
 	/**
 	 * Copyright (C) 2021 Tencent.
@@ -80782,11 +78034,11 @@
 	  function AsyncRenderHandler(cherry) {
 	    _classCallCheck$1(this, AsyncRenderHandler);
 	    // 保存等待渲染的 sign
-	    _defineProperty$3(this, "pendingRenderers", new _Set$1());
+	    _defineProperty$2(this, "pendingRenderers", new _Set());
 	    // md 源码
-	    _defineProperty$3(this, "originMd", '');
+	    _defineProperty$2(this, "originMd", '');
 	    // 当前渲染结果，会随着异步渲染进行而更新
-	    _defineProperty$3(this, "md", '');
+	    _defineProperty$2(this, "md", '');
 	    this.$cherry = cherry;
 	  }
 	  return _createClass$1(AsyncRenderHandler, [{
@@ -86081,7 +83333,7 @@
 	      return;
 	    }
 	    // MathJax 通过 startup.promise 表示就绪；若不存在则视为同步可用
-	    var ready = ((_resolvedMathJax$star = resolvedMathJax.startup) === null || _resolvedMathJax$star === void 0 ? void 0 : _resolvedMathJax$star.promise) || _Promise$1.resolve();
+	    var ready = ((_resolvedMathJax$star = resolvedMathJax.startup) === null || _resolvedMathJax$star === void 0 ? void 0 : _resolvedMathJax$star.promise) || _Promise.resolve();
 	    ready.then(function () {
 	      var mathJaxInstance = /** @type {{ tex2svg?: Function } | undefined} */getExternal('MathJax');
 	      if (!mathJaxInstance || !mathJaxInstance.tex2svg) {
@@ -86278,7 +83530,7 @@
 	            }
 	            $expectInstance(hook);
 	            hooksConfig.push(hook);
-	          } catch (e) {
+	          } catch (_unused) {
 	            throw new Error('the hook does not correctly inherit');
 	          }
 	        }
@@ -86349,7 +83601,7 @@
 	    value: function $afterMakeHtml(str) {
 	      var _context3;
 	      var $str = this.$fireHookAction(str, 'paragraph', 'afterMakeHtml', _bindInstanceProperty(_context3 = this.$dealSentenceByCache).call(_context3, this));
-	      // str = this._fireHookAction(str, 'sentence', 'afterMakeHtml');
+	      // str = this.fireHookAction(str, 'sentence', 'afterMakeHtml');
 	      $str = this.dealAfterMakeHtml($str);
 	      $str = UrlCache.restoreAll($str);
 	      $str = this.$decodeReservedKeywords($str);
@@ -88879,8 +86131,8 @@
 		var bind = /*@__PURE__*/ requireFunctionBindContext();
 		var classof = /*@__PURE__*/ requireClassof();
 		var anObject = /*@__PURE__*/ requireAnObject();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
-		var $toString = /*@__PURE__*/ requireToString$2();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
+		var $toString = /*@__PURE__*/ requireToString$1();
 		var create = /*@__PURE__*/ requireObjectCreate();
 		var createPropertyDescriptor = /*@__PURE__*/ requireCreatePropertyDescriptor();
 		var getIterator = /*@__PURE__*/ requireGetIterator$6();
@@ -89662,7 +86914,7 @@
 		var arraySlice = /*@__PURE__*/ requireArraySlice();
 		var codeAt = /*@__PURE__*/ requireStringMultibyte().codeAt;
 		var toASCII = /*@__PURE__*/ requireStringPunycodeToAscii();
-		var $toString = /*@__PURE__*/ requireToString$2();
+		var $toString = /*@__PURE__*/ requireToString$1();
 		var setToStringTag = /*@__PURE__*/ requireSetToStringTag();
 		var validateArgumentsLength = /*@__PURE__*/ requireValidateArgumentsLength();
 		var URLSearchParamsModule = requireWeb_urlSearchParams_constructor();
@@ -90750,7 +88002,7 @@
 		var getBuiltIn = /*@__PURE__*/ requireGetBuiltIn();
 		var fails = /*@__PURE__*/ requireFails();
 		var validateArgumentsLength = /*@__PURE__*/ requireValidateArgumentsLength();
-		var toString = /*@__PURE__*/ requireToString$2();
+		var toString = /*@__PURE__*/ requireToString$1();
 		var USE_NATIVE_URL = /*@__PURE__*/ requireUrlConstructorDetection();
 
 		var URL = getBuiltIn('URL');
@@ -90795,7 +88047,7 @@
 		var $ = /*@__PURE__*/ require_export();
 		var getBuiltIn = /*@__PURE__*/ requireGetBuiltIn();
 		var validateArgumentsLength = /*@__PURE__*/ requireValidateArgumentsLength();
-		var toString = /*@__PURE__*/ requireToString$2();
+		var toString = /*@__PURE__*/ requireToString$1();
 		var USE_NATIVE_URL = /*@__PURE__*/ requireUrlConstructorDetection();
 
 		var URL = getBuiltIn('URL');
@@ -98830,9 +96082,9 @@
 	  _URL.revokeObjectURL(url);
 	}
 
-	function _createForOfIteratorHelper$1h(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1h(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-	function _unsupportedIterableToArray$1h(r, a) { if (r) { var _context5; if ("string" == typeof r) return _arrayLikeToArray$1i(r, a); var t = _sliceInstanceProperty(_context5 = {}.toString.call(r)).call(_context5, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1i(r, a) : void 0; } }
-	function _arrayLikeToArray$1i(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _createForOfIteratorHelper$1i(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1i(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$1i(r, a) { if (r) { var _context5; if ("string" == typeof r) return _arrayLikeToArray$1j(r, a); var t = _sliceInstanceProperty(_context5 = {}.toString.call(r)).call(_context5, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1j(r, a) : void 0; } }
+	function _arrayLikeToArray$1j(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
 	// 统一创建图片节点
 	function createImg(dataUrl, width, height) {
@@ -98862,7 +96114,7 @@
 	 * @returns {Promise<string>} dataURL
 	 */
 	function rasterizeSVGToPNG(svg, width, height) {
-	  return new _Promise$1(function (resolve, reject) {
+	  return new _Promise(function (resolve, reject) {
 	    try {
 	      var svgString = getSvgString(svg);
 	      var canvas = document.createElement('canvas');
@@ -98965,7 +96217,7 @@
 	          wrapper.appendChild(container);
 	          document.body.appendChild(wrapper);
 	          nodes = _Array$from(container.querySelectorAll(TARGET_SELECTORS.join(','))); // 逐个替换图片
-	          _iterator = _createForOfIteratorHelper$1h(nodes);
+	          _iterator = _createForOfIteratorHelper$1i(nodes);
 	          _context2.prev = 1;
 	          _iterator.s();
 	        case 2:
@@ -99273,8 +96525,11 @@
 	 * @param {String} fileName 导出HTML文件名
 	 */
 	function exportHTMLFile(HTMLText, fileName) {
-	  var blob = new Blob([HTMLText], {
-	    type: 'text/markdown;charset=utf-8'
+	  var _context3, _context4;
+	  // 构建完整的 HTML5 文档
+	  var fullHTML = _concatInstanceProperty(_context3 = _concatInstanceProperty(_context4 = "<!DOCTYPE html>\n    <html lang=\"".concat(navigator.language || 'en', "\">\n    <head>\n      <meta charset=\"UTF-8\">\n      <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n      <title>")).call(_context4, fileName, "</title>\n    </head>\n    <body>\n      ")).call(_context3, HTMLText, "\n    </body>\n    </html>");
+	  var blob = new Blob([fullHTML], {
+	    type: 'text/html;charset=utf-8'
 	  });
 	  var aLink = document.createElement('a');
 	  aLink.style.display = 'none';
@@ -99282,7 +96537,9 @@
 	  aLink.download = "".concat(fileName, ".html");
 	  document.body.appendChild(aLink);
 	  aLink.click();
+	  // 释放内存
 	  document.body.removeChild(aLink);
+	  _URL.revokeObjectURL(aLink.href);
 	}
 
 	var es_object_values = {};
@@ -99535,9 +96792,9 @@
 		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThis();
 		var requireObjectCoercible = /*@__PURE__*/ requireRequireObjectCoercible();
 		var isCallable = /*@__PURE__*/ requireIsCallable();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 		var isRegExp = /*@__PURE__*/ requireIsRegexp();
-		var toString = /*@__PURE__*/ requireToString$2();
+		var toString = /*@__PURE__*/ requireToString$1();
 		var getMethod = /*@__PURE__*/ requireGetMethod();
 		var getRegExpFlags = /*@__PURE__*/ requireRegexpGetFlags();
 		var getSubstitution = /*@__PURE__*/ requireGetSubstitution();
@@ -99737,7 +96994,7 @@
 		if (hasRequiredIsIntegralNumber) return isIntegralNumber;
 		hasRequiredIsIntegralNumber = 1;
 		'use strict';
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 
 		var floor = Math.floor;
 
@@ -100278,7 +97535,7 @@
 	};
 
 	function ownKeys$7(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$7(e) { for (var r = 1; r < arguments.length; r++) { var _context2, _context3; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context2 = ownKeys$7(Object(t), !0)).call(_context2, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context3 = ownKeys$7(Object(t))).call(_context3, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread$7(e) { for (var r = 1; r < arguments.length; r++) { var _context2, _context3; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context2 = ownKeys$7(Object(t), !0)).call(_context2, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context3 = ownKeys$7(Object(t))).call(_context3, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	/**
 	 * Copyright (C) 2021 Tencent.
 	 *
@@ -101379,9 +98636,9 @@
 	  }]);
 	}();
 
-	function _createForOfIteratorHelper$1g(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1g(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-	function _unsupportedIterableToArray$1g(r, a) { if (r) { var _context23; if ("string" == typeof r) return _arrayLikeToArray$1h(r, a); var t = _sliceInstanceProperty(_context23 = {}.toString.call(r)).call(_context23, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1h(r, a) : void 0; } }
-	function _arrayLikeToArray$1h(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _createForOfIteratorHelper$1h(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1h(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$1h(r, a) { if (r) { var _context23; if ("string" == typeof r) return _arrayLikeToArray$1i(r, a); var t = _sliceInstanceProperty(_context23 = {}.toString.call(r)).call(_context23, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1i(r, a) : void 0; } }
+	function _arrayLikeToArray$1i(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
 	/**
 	 * 用于在表格上出现编辑区，并提供拖拽行列的功能
@@ -101392,7 +98649,7 @@
 	    /**
 	     * 用来存放所有的数据
 	     */
-	    _defineProperty$3(this, "tableEditor", void 0);
+	    _defineProperty$2(this, "tableEditor", void 0);
 	    this.tableEditor = {
 	      info: {},
 	      // 当前点击的预览区域table的相关信息
@@ -101532,18 +98789,18 @@
 	      if (this.boundaryTableRef && this.boundaryMouseMoveHandlerRef) {
 	        try {
 	          this.boundaryTableRef.removeEventListener('mousemove', this.boundaryMouseMoveHandlerRef);
-	        } catch (e) {}
+	        } catch (_unused) {}
 	      }
 	      if (this.boundaryGlobalMoveRef) {
 	        try {
 	          document.removeEventListener('mousemove', this.boundaryGlobalMoveRef, true);
-	        } catch (e) {}
+	        } catch (_unused2) {}
 	      }
 	      // 移除 添加行列符号
 	      if ((_this$tableEditor2 = this.tableEditor) !== null && _this$tableEditor2 !== void 0 && (_this$tableEditor2$ed = _this$tableEditor2.editorDom) !== null && _this$tableEditor2$ed !== void 0 && (_this$tableEditor2$ed2 = _this$tableEditor2$ed.symbolContainer) !== null && _this$tableEditor2$ed2 !== void 0 && _this$tableEditor2$ed2.parentNode) {
 	        try {
 	          this.tableEditor.editorDom.symbolContainer.parentNode.removeChild(this.tableEditor.editorDom.symbolContainer);
-	        } catch (e) {}
+	        } catch (_unused3) {}
 	      }
 	      // 清空边界缓存
 	      this.boundaryCache = null;
@@ -102423,8 +99680,8 @@
 	        if (x < tableRect.left || x > tableRect.right || y < tableRect.top || y > tableRect.bottom) {
 	          if (!activeCol && !activeRow) {
 	            colSymbol.style.display = 'none';
-	            _forEachInstanceProperty(rowSymbols).call(rowSymbols, function (symbol) {
-	              return symbol.style.display = 'none';
+	            _forEachInstanceProperty(rowSymbols).call(rowSymbols, function (rowSymbol) {
+	              rowSymbol.style.display = 'none';
 	            });
 	            vLine.style.display = 'none';
 	            hLine.style.display = 'none';
@@ -102445,7 +99702,7 @@
 	          activeCol = null;
 	          var bestCol = null;
 	          var bestColDist = Infinity;
-	          var _iterator = _createForOfIteratorHelper$1g(colBoundaries),
+	          var _iterator = _createForOfIteratorHelper$1h(colBoundaries),
 	            _step;
 	          try {
 	            for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -102471,7 +99728,7 @@
 	          activeRow = null;
 	          var bestRow = null;
 	          var bestRowDist = Infinity;
-	          var _iterator2 = _createForOfIteratorHelper$1g(rowBoundaries),
+	          var _iterator2 = _createForOfIteratorHelper$1h(rowBoundaries),
 	            _step2;
 	          try {
 	            for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -102514,8 +99771,8 @@
 	        });
 	        if (!isAnySymbolSafe) {
 	          colSymbol.style.display = 'none';
-	          _forEachInstanceProperty(rowSymbols).call(rowSymbols, function (symbol) {
-	            return symbol.style.display = 'none';
+	          _forEachInstanceProperty(rowSymbols).call(rowSymbols, function (rowSymbol) {
+	            rowSymbol.style.display = 'none';
 	          });
 	          vLine.style.display = 'none';
 	          hLine.style.display = 'none';
@@ -103675,7 +100932,7 @@
 	    /**
 	     * 用来存放所有的数据
 	     */
-	    _defineProperty$3(this, "bubbleCard", {
+	    _defineProperty$2(this, "bubbleCard", {
 	      refNum: 0,
 	      // 角标的序号
 	      refTitle: '',
@@ -103892,7 +101149,7 @@
 	    /**
 	     * 用来存放所有的数据
 	     */
-	    _defineProperty$3(this, "codeBlockEditor", {
+	    _defineProperty$2(this, "codeBlockEditor", {
 	      info: {},
 	      // 当前点击的预览区域code的相关信息
 	      editorDom: {} // 编辑器容器
@@ -104564,370 +101821,61 @@
 	  });
 	}
 
-	var now_1$1;
-	var hasRequiredNow$1;
+	/**
+	 * Copyright (C) 2021 Tencent.
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License");
+	 * you may not use this file except in compliance with the License.
+	 * You may obtain a copy of the License at
+	 *
+	 *     http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software
+	 * distributed under the License is distributed on an "AS IS" BASIS,
+	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 * See the License for the specific language governing permissions and
+	 * limitations under the License.
+	 */
 
-	function requireNow$1 () {
-		if (hasRequiredNow$1) return now_1$1;
-		hasRequiredNow$1 = 1;
-		var root = require_root$1();
+	/**
+	 * @typedef {(...args: unknown[]) => unknown} DebouncedFunction
+	 * @typedef {DebouncedFunction & { cancel: () => void }} Debounced
+	 */
 
-		/**
-		 * Gets the timestamp of the number of milliseconds that have elapsed since
-		 * the Unix epoch (1 January 1970 00:00:00 UTC).
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 2.4.0
-		 * @category Date
-		 * @returns {number} Returns the timestamp.
-		 * @example
-		 *
-		 * _.defer(function(stamp) {
-		 *   console.log(_.now() - stamp);
-		 * }, _.now());
-		 * // => Logs the number of milliseconds it took for the deferred invocation.
-		 */
-		var now = function() {
-		  return root.Date.now();
-		};
+	/**
+	 * 防抖：延迟 wait 毫秒后执行，期间重复调用会重置计时（trailing）。
+	 * @template {(...args: unknown[]) => unknown} T
+	 * @param {T} func 原函数
+	 * @param {number} [wait=0] 延迟毫秒数
+	 * @returns {Debounced}
+	 */
+	function debounce$2(func) {
+	  var wait = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+	  /** @type {ReturnType<typeof setTimeout> | undefined} */
+	  var timerId;
 
-		now_1$1 = now;
-		return now_1$1;
+	  /** @type {Debounced} */
+	  var debounced = function debounced() {
+	    var _this = this;
+	    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+	      args[_key] = arguments[_key];
+	    }
+	    if (timerId !== undefined) {
+	      clearTimeout(timerId);
+	    }
+	    timerId = _setTimeout(function () {
+	      timerId = undefined;
+	      func.apply(_this, args);
+	    }, wait);
+	  };
+	  debounced.cancel = function () {
+	    if (timerId !== undefined) {
+	      clearTimeout(timerId);
+	      timerId = undefined;
+	    }
+	  };
+	  return debounced;
 	}
-
-	/** Used to match a single whitespace character. */
-
-	var _trimmedEndIndex$1;
-	var hasRequired_trimmedEndIndex$1;
-
-	function require_trimmedEndIndex$1 () {
-		if (hasRequired_trimmedEndIndex$1) return _trimmedEndIndex$1;
-		hasRequired_trimmedEndIndex$1 = 1;
-		var reWhitespace = /\s/;
-
-		/**
-		 * Used by `_.trim` and `_.trimEnd` to get the index of the last non-whitespace
-		 * character of `string`.
-		 *
-		 * @private
-		 * @param {string} string The string to inspect.
-		 * @returns {number} Returns the index of the last non-whitespace character.
-		 */
-		function trimmedEndIndex(string) {
-		  var index = string.length;
-
-		  while (index-- && reWhitespace.test(string.charAt(index))) {}
-		  return index;
-		}
-
-		_trimmedEndIndex$1 = trimmedEndIndex;
-		return _trimmedEndIndex$1;
-	}
-
-	var _baseTrim$1;
-	var hasRequired_baseTrim$1;
-
-	function require_baseTrim$1 () {
-		if (hasRequired_baseTrim$1) return _baseTrim$1;
-		hasRequired_baseTrim$1 = 1;
-		var trimmedEndIndex = require_trimmedEndIndex$1();
-
-		/** Used to match leading whitespace. */
-		var reTrimStart = /^\s+/;
-
-		/**
-		 * The base implementation of `_.trim`.
-		 *
-		 * @private
-		 * @param {string} string The string to trim.
-		 * @returns {string} Returns the trimmed string.
-		 */
-		function baseTrim(string) {
-		  return string
-		    ? string.slice(0, trimmedEndIndex(string) + 1).replace(reTrimStart, '')
-		    : string;
-		}
-
-		_baseTrim$1 = baseTrim;
-		return _baseTrim$1;
-	}
-
-	var toNumber_1$1;
-	var hasRequiredToNumber$1;
-
-	function requireToNumber$1 () {
-		if (hasRequiredToNumber$1) return toNumber_1$1;
-		hasRequiredToNumber$1 = 1;
-		var baseTrim = require_baseTrim$1(),
-		    isObject = requireIsObject$2(),
-		    isSymbol = requireIsSymbol$1();
-
-		/** Used as references for various `Number` constants. */
-		var NAN = 0 / 0;
-
-		/** Used to detect bad signed hexadecimal string values. */
-		var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
-
-		/** Used to detect binary string values. */
-		var reIsBinary = /^0b[01]+$/i;
-
-		/** Used to detect octal string values. */
-		var reIsOctal = /^0o[0-7]+$/i;
-
-		/** Built-in method references without a dependency on `root`. */
-		var freeParseInt = parseInt;
-
-		/**
-		 * Converts `value` to a number.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 4.0.0
-		 * @category Lang
-		 * @param {*} value The value to process.
-		 * @returns {number} Returns the number.
-		 * @example
-		 *
-		 * _.toNumber(3.2);
-		 * // => 3.2
-		 *
-		 * _.toNumber(Number.MIN_VALUE);
-		 * // => 5e-324
-		 *
-		 * _.toNumber(Infinity);
-		 * // => Infinity
-		 *
-		 * _.toNumber('3.2');
-		 * // => 3.2
-		 */
-		function toNumber(value) {
-		  if (typeof value == 'number') {
-		    return value;
-		  }
-		  if (isSymbol(value)) {
-		    return NAN;
-		  }
-		  if (isObject(value)) {
-		    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
-		    value = isObject(other) ? (other + '') : other;
-		  }
-		  if (typeof value != 'string') {
-		    return value === 0 ? value : +value;
-		  }
-		  value = baseTrim(value);
-		  var isBinary = reIsBinary.test(value);
-		  return (isBinary || reIsOctal.test(value))
-		    ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
-		    : (reIsBadHex.test(value) ? NAN : +value);
-		}
-
-		toNumber_1$1 = toNumber;
-		return toNumber_1$1;
-	}
-
-	var debounce_1$1;
-	var hasRequiredDebounce$1;
-
-	function requireDebounce$1 () {
-		if (hasRequiredDebounce$1) return debounce_1$1;
-		hasRequiredDebounce$1 = 1;
-		var isObject = requireIsObject$2(),
-		    now = requireNow$1(),
-		    toNumber = requireToNumber$1();
-
-		/** Error message constants. */
-		var FUNC_ERROR_TEXT = 'Expected a function';
-
-		/* Built-in method references for those with the same name as other `lodash` methods. */
-		var nativeMax = Math.max,
-		    nativeMin = Math.min;
-
-		/**
-		 * Creates a debounced function that delays invoking `func` until after `wait`
-		 * milliseconds have elapsed since the last time the debounced function was
-		 * invoked. The debounced function comes with a `cancel` method to cancel
-		 * delayed `func` invocations and a `flush` method to immediately invoke them.
-		 * Provide `options` to indicate whether `func` should be invoked on the
-		 * leading and/or trailing edge of the `wait` timeout. The `func` is invoked
-		 * with the last arguments provided to the debounced function. Subsequent
-		 * calls to the debounced function return the result of the last `func`
-		 * invocation.
-		 *
-		 * **Note:** If `leading` and `trailing` options are `true`, `func` is
-		 * invoked on the trailing edge of the timeout only if the debounced function
-		 * is invoked more than once during the `wait` timeout.
-		 *
-		 * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
-		 * until to the next tick, similar to `setTimeout` with a timeout of `0`.
-		 *
-		 * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
-		 * for details over the differences between `_.debounce` and `_.throttle`.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 0.1.0
-		 * @category Function
-		 * @param {Function} func The function to debounce.
-		 * @param {number} [wait=0] The number of milliseconds to delay.
-		 * @param {Object} [options={}] The options object.
-		 * @param {boolean} [options.leading=false]
-		 *  Specify invoking on the leading edge of the timeout.
-		 * @param {number} [options.maxWait]
-		 *  The maximum time `func` is allowed to be delayed before it's invoked.
-		 * @param {boolean} [options.trailing=true]
-		 *  Specify invoking on the trailing edge of the timeout.
-		 * @returns {Function} Returns the new debounced function.
-		 * @example
-		 *
-		 * // Avoid costly calculations while the window size is in flux.
-		 * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
-		 *
-		 * // Invoke `sendMail` when clicked, debouncing subsequent calls.
-		 * jQuery(element).on('click', _.debounce(sendMail, 300, {
-		 *   'leading': true,
-		 *   'trailing': false
-		 * }));
-		 *
-		 * // Ensure `batchLog` is invoked once after 1 second of debounced calls.
-		 * var debounced = _.debounce(batchLog, 250, { 'maxWait': 1000 });
-		 * var source = new EventSource('/stream');
-		 * jQuery(source).on('message', debounced);
-		 *
-		 * // Cancel the trailing debounced invocation.
-		 * jQuery(window).on('popstate', debounced.cancel);
-		 */
-		function debounce(func, wait, options) {
-		  var lastArgs,
-		      lastThis,
-		      maxWait,
-		      result,
-		      timerId,
-		      lastCallTime,
-		      lastInvokeTime = 0,
-		      leading = false,
-		      maxing = false,
-		      trailing = true;
-
-		  if (typeof func != 'function') {
-		    throw new TypeError(FUNC_ERROR_TEXT);
-		  }
-		  wait = toNumber(wait) || 0;
-		  if (isObject(options)) {
-		    leading = !!options.leading;
-		    maxing = 'maxWait' in options;
-		    maxWait = maxing ? nativeMax(toNumber(options.maxWait) || 0, wait) : maxWait;
-		    trailing = 'trailing' in options ? !!options.trailing : trailing;
-		  }
-
-		  function invokeFunc(time) {
-		    var args = lastArgs,
-		        thisArg = lastThis;
-
-		    lastArgs = lastThis = undefined;
-		    lastInvokeTime = time;
-		    result = func.apply(thisArg, args);
-		    return result;
-		  }
-
-		  function leadingEdge(time) {
-		    // Reset any `maxWait` timer.
-		    lastInvokeTime = time;
-		    // Start the timer for the trailing edge.
-		    timerId = setTimeout(timerExpired, wait);
-		    // Invoke the leading edge.
-		    return leading ? invokeFunc(time) : result;
-		  }
-
-		  function remainingWait(time) {
-		    var timeSinceLastCall = time - lastCallTime,
-		        timeSinceLastInvoke = time - lastInvokeTime,
-		        timeWaiting = wait - timeSinceLastCall;
-
-		    return maxing
-		      ? nativeMin(timeWaiting, maxWait - timeSinceLastInvoke)
-		      : timeWaiting;
-		  }
-
-		  function shouldInvoke(time) {
-		    var timeSinceLastCall = time - lastCallTime,
-		        timeSinceLastInvoke = time - lastInvokeTime;
-
-		    // Either this is the first call, activity has stopped and we're at the
-		    // trailing edge, the system time has gone backwards and we're treating
-		    // it as the trailing edge, or we've hit the `maxWait` limit.
-		    return (lastCallTime === undefined || (timeSinceLastCall >= wait) ||
-		      (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
-		  }
-
-		  function timerExpired() {
-		    var time = now();
-		    if (shouldInvoke(time)) {
-		      return trailingEdge(time);
-		    }
-		    // Restart the timer.
-		    timerId = setTimeout(timerExpired, remainingWait(time));
-		  }
-
-		  function trailingEdge(time) {
-		    timerId = undefined;
-
-		    // Only invoke if we have `lastArgs` which means `func` has been
-		    // debounced at least once.
-		    if (trailing && lastArgs) {
-		      return invokeFunc(time);
-		    }
-		    lastArgs = lastThis = undefined;
-		    return result;
-		  }
-
-		  function cancel() {
-		    if (timerId !== undefined) {
-		      clearTimeout(timerId);
-		    }
-		    lastInvokeTime = 0;
-		    lastArgs = lastCallTime = lastThis = timerId = undefined;
-		  }
-
-		  function flush() {
-		    return timerId === undefined ? result : trailingEdge(now());
-		  }
-
-		  function debounced() {
-		    var time = now(),
-		        isInvoking = shouldInvoke(time);
-
-		    lastArgs = arguments;
-		    lastThis = this;
-		    lastCallTime = time;
-
-		    if (isInvoking) {
-		      if (timerId === undefined) {
-		        return leadingEdge(lastCallTime);
-		      }
-		      if (maxing) {
-		        // Handle invocations in a tight loop.
-		        clearTimeout(timerId);
-		        timerId = setTimeout(timerExpired, wait);
-		        return invokeFunc(lastCallTime);
-		      }
-		    }
-		    if (timerId === undefined) {
-		      timerId = setTimeout(timerExpired, wait);
-		    }
-		    return result;
-		  }
-		  debounced.cancel = cancel;
-		  debounced.flush = flush;
-		  return debounced;
-		}
-
-		debounce_1$1 = debounce;
-		return debounce_1$1;
-	}
-
-	var debounceExports$1 = requireDebounce$1();
-	var debounce$2 = /*@__PURE__*/getDefaultExportFromCjs$1(debounceExports$1);
 
 	var FormulaHandler = /*#__PURE__*/function () {
 	  /**
@@ -104940,7 +101888,7 @@
 	  function FormulaHandler(trigger, target, container, previewerDom, $cherry) {
 	    _classCallCheck$1(this, FormulaHandler);
 	    /** @type{HTMLElement} */
-	    _defineProperty$3(this, "bubbleContainer", null);
+	    _defineProperty$2(this, "bubbleContainer", null);
 	    this.trigger = trigger;
 	    this.target = target;
 	    this.container = container;
@@ -105171,7 +102119,7 @@
 	  }]);
 	}();
 
-	function _arrayLikeToArray$1g(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _arrayLikeToArray$1h(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	var ListHandler = /*#__PURE__*/function () {
 	  /**
 	   * @param {string} trigger 触发方式
@@ -105185,14 +102133,14 @@
 	    var options = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : {};
 	    _classCallCheck$1(this, ListHandler);
 	    /** @type{HTMLElement} */
-	    _defineProperty$3(this, "bubbleContainer", null);
-	    _defineProperty$3(this, "regList", LIST_CONTENT);
+	    _defineProperty$2(this, "bubbleContainer", null);
+	    _defineProperty$2(this, "regList", LIST_CONTENT);
 	    /** @type{Array.<number>} */
-	    _defineProperty$3(this, "range", []);
+	    _defineProperty$2(this, "range", []);
 	    /** @type{number} */
-	    _defineProperty$3(this, "position", 0);
-	    _defineProperty$3(this, "input", false);
-	    _defineProperty$3(this, "isCheckbox", false);
+	    _defineProperty$2(this, "position", 0);
+	    _defineProperty$2(this, "input", false);
+	    _defineProperty$2(this, "isCheckbox", false);
 	    this.trigger = trigger;
 	    this.target = target;
 	    this.container = container;
@@ -105297,7 +102245,6 @@
 	            content = _regRes[4];
 	          if (contentsLiCount === targetLiIdx && indent !== undefined) {
 	            targetLine = lineIdx;
-	            // eslint-disable-next-line prefer-destructuring
 	            targetContent.push(content); // 这里只取一个没必要解构
 	            targetCh = _indexOfInstanceProperty(lineContent).call(lineContent, content);
 	            // 1. 这种需要特殊处理，需要跳过一个空格位，否则层级会错乱
@@ -105416,7 +102363,7 @@
 	      var _splitInnerText = splitInnerText,
 	        _splitInnerText2 = _toArray(_splitInnerText),
 	        before = _splitInnerText2[0],
-	        after = _sliceInstanceProperty(_context3 = _arrayLikeToArray$1g(_splitInnerText2)).call(_context3, 1);
+	        after = _sliceInstanceProperty(_context3 = _arrayLikeToArray$1h(_splitInnerText2)).call(_context3, 1);
 	      // 获取当前光标位置
 	      var cursor = this.editor.editor.view.state.selection.main.head;
 	      var doc = this.editor.editor.view.state.doc;
@@ -105461,7 +102408,7 @@
 	}();
 
 	function ownKeys$6(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$6(e) { for (var r = 1; r < arguments.length; r++) { var _context27, _context28; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context27 = ownKeys$6(Object(t), !0)).call(_context27, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context28 = ownKeys$6(Object(t))).call(_context28, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread$6(e) { for (var r = 1; r < arguments.length; r++) { var _context27, _context28; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context27 = ownKeys$6(Object(t), !0)).call(_context27, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context28 = ownKeys$6(Object(t))).call(_context28, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 
 	/**
 	 * 预览区域的响应式工具栏
@@ -105612,6 +102559,7 @@
 	      };
 	      this.$cherry.$event.on('afterAsyncRender', this.$bindedOnAfterAsyncRender);
 	      this.previewerDom.addEventListener('change', this.$bindedOnChange);
+	      /** @type {(() => void) & { cancel?: () => void }} */
 	      this.removeHoverBubble = debounce$2(function () {
 	        return _this.$removeAllPreviewerBubbles('hover');
 	      }, 400);
@@ -105711,7 +102659,6 @@
 	  }, {
 	    key: "$onMouseOver",
 	    value: function $onMouseOver(e) {
-	      var _this$previewer2, _this$previewer2$$che, _this$previewer2$$che2, _this$previewer2$$che3, _this$previewer2$$che4, _this$previewer2$$che5;
 	      /** @type {Event} */
 	      var target = e.target;
 	      // 这里要用Element，而不是HTMLElement
@@ -105721,39 +102668,44 @@
 	      switch (target.tagName) {
 	        case 'TD':
 	        case 'TH':
-	          if (!this.$isEnableBubbleAndEditorShow()) {
+	          {
+	            if (!this.$isEnableBubbleAndEditorShow()) {
+	              return;
+	            }
+	            var table = this.isCherryTable(e.target);
+	            if (false === table) {
+	              return;
+	            }
+	            this.removeHoverBubble.cancel();
+	            this.$removeAllPreviewerBubbles('hover');
+	            // @ts-ignore
+	            this.$showTablePreviewerBubbles('hover', e.target, table);
 	            return;
 	          }
-	          // eslint-disable-next-line no-case-declarations
-	          var table = this.isCherryTable(e.target);
-	          if (false === table) {
-	            return;
-	          }
-	          this.removeHoverBubble.cancel();
-	          this.$removeAllPreviewerBubbles('hover');
-	          // @ts-ignore
-	          this.$showTablePreviewerBubbles('hover', e.target, table);
-	          return;
 	        case 'PRE':
 	        case 'CODE':
 	        case 'SPAN':
 	        case 'DIV':
-	          // eslint-disable-next-line no-case-declarations
-	          var codeBlock = this.isCherryCodeBlock(e.target);
-	          if (codeBlock === false) {
+	          {
+	            var codeBlock = this.isCherryCodeBlock(e.target);
+	            if (codeBlock === false) {
+	              return;
+	            }
+	            this.showCodeBlockPreviewerBubbles('hover', codeBlock);
 	            return;
 	          }
-	          this.showCodeBlockPreviewerBubbles('hover', codeBlock);
-	          return;
 	        case 'A':
-	          // @ts-ignore
-	          // eslint-disable-next-line no-case-declarations
-	          var bubbleCard = ((_this$previewer2 = this.previewer) === null || _this$previewer2 === void 0 ? void 0 : (_this$previewer2$$che = _this$previewer2.$cherry) === null || _this$previewer2$$che === void 0 ? void 0 : (_this$previewer2$$che2 = _this$previewer2$$che.options) === null || _this$previewer2$$che2 === void 0 ? void 0 : (_this$previewer2$$che3 = _this$previewer2$$che2.engine) === null || _this$previewer2$$che3 === void 0 ? void 0 : (_this$previewer2$$che4 = _this$previewer2$$che3.syntax) === null || _this$previewer2$$che4 === void 0 ? void 0 : (_this$previewer2$$che5 = _this$previewer2$$che4.footnote) === null || _this$previewer2$$che5 === void 0 ? void 0 : _this$previewer2$$che5.bubbleCard) || false;
-	          if (bubbleCard !== false && /cherry-show-bubble-card/.test(e.target.className)) {
-	            this.removeHoverBubble.cancel();
-	            this.$removeAllPreviewerBubbles('hover');
-	            this.$showFootNoteBubbleCardPreviewerBubbles('hover', e.target, bubbleCard);
-	            return;
+	          {
+	            var _this$previewer2, _this$previewer2$$che, _this$previewer2$$che2, _this$previewer2$$che3, _this$previewer2$$che4, _this$previewer2$$che5;
+	            // @ts-ignore
+	            var bubbleCard = ((_this$previewer2 = this.previewer) === null || _this$previewer2 === void 0 ? void 0 : (_this$previewer2$$che = _this$previewer2.$cherry) === null || _this$previewer2$$che === void 0 ? void 0 : (_this$previewer2$$che2 = _this$previewer2$$che.options) === null || _this$previewer2$$che2 === void 0 ? void 0 : (_this$previewer2$$che3 = _this$previewer2$$che2.engine) === null || _this$previewer2$$che3 === void 0 ? void 0 : (_this$previewer2$$che4 = _this$previewer2$$che3.syntax) === null || _this$previewer2$$che4 === void 0 ? void 0 : (_this$previewer2$$che5 = _this$previewer2$$che4.footnote) === null || _this$previewer2$$che5 === void 0 ? void 0 : _this$previewer2$$che5.bubbleCard) || false;
+	            if (bubbleCard !== false && /cherry-show-bubble-card/.test(e.target.className)) {
+	              this.removeHoverBubble.cancel();
+	              this.$removeAllPreviewerBubbles('hover');
+	              this.$showFootNoteBubbleCardPreviewerBubbles('hover', e.target, bubbleCard);
+	              return;
+	            }
+	            break;
 	          }
 	      }
 	      this.removeHoverBubble();
@@ -106784,7 +103736,7 @@
 	        isMermaid: true,
 	        targetIndex: this.mermaidSession.previewIndex
 	      }, handlerOptions));
-	      imgSizeHandler.bindChange(function (_htmlElement, style) {
+	      imgSizeHandler.bindChange(function (htmlElement, style) {
 	        return _this7.mermaidSession.changeSize(style);
 	      });
 	      this.mermaidSession.bindPositionFollow();
@@ -106797,7 +103749,7 @@
 	        isMermaid: true,
 	        targetIndex: this.mermaidSession.previewIndex
 	      }, handlerOptions));
-	      imgToolHandler.bindChange(function (_htmlElement, type) {
+	      imgToolHandler.bindChange(function (htmlElement, type) {
 	        return _this7.mermaidSession.changeAlign(type);
 	      });
 	      var updateHandler = _bindInstanceProperty(_context25 = imgSizeHandler.updatePosition).call(_context25, imgSizeHandler);
@@ -106960,7 +103912,7 @@
 	var LazyLoadImg = /*#__PURE__*/function () {
 	  function LazyLoadImg(options, previewer) {
 	    _classCallCheck$1(this, LazyLoadImg);
-	    _defineProperty$3(this, "options", {
+	    _defineProperty$2(this, "options", {
 	      // 加载图片时如果需要展示loading图，则配置loading图的地址
 	      loadingImgPath: '',
 	      // 同一时间最多有几个图片请求，最大同时加载6张图片
@@ -107176,7 +104128,7 @@
 	     * **关于实现方式的思考**
 	     * 实现图片懒加载一般有三种方式：
 	     *  1、监听滚动事件，滚动到视野内的图片开始加载
-	     *  2、定时检测当前视窗内是否有图片需要加载
+	     *  2、定时（或者通过Intersection Observer）检测当前视窗内是否有图片需要加载
 	     *  3、当前一张图片加载完成后，自动加载下一张图片
 	     *
 	     * 方式1监听滚动事件的弊端：
@@ -107191,6 +104143,7 @@
 	     *  1、需要额外的逻辑来控制并发
 	     *  2、消耗计算资源，所以需要尽量优化单次计算量，并尽量避免在轮询里进行大范围dom操作
 	     *  3、两次图片加载中间可能有最大轮询间隔的空闲时间浪费
+	     *  4、如果用Intersection Observer，还需要额外逻辑实现预加载功能
 	     *
 	     * 方式3依次加载的弊端：
 	     *  1、没办法实现滚动到视野内再加载图片
@@ -107368,43 +104321,43 @@
 	     * @private
 	     * @type {boolean} 等待预览区域更新。预览区域更新时，预览区的滚动不会引起编辑器滚动，避免因插入的元素高度变化导致编辑区域跳动
 	     */
-	    _defineProperty$3(this, "applyingDomChanges", false);
+	    _defineProperty$2(this, "applyingDomChanges", false);
 	    /**
 	     * @property
 	     * @private
 	     * @type {number} 释放同步滚动锁定的定时器ID
 	     */
-	    _defineProperty$3(this, "syncScrollLockTimer", 0);
+	    _defineProperty$2(this, "syncScrollLockTimer", 0);
 	    /**
 	     * @property
 	     * @public
 	     * @type {boolean} 是否为移动端预览模式
 	     */
-	    _defineProperty$3(this, "isMobilePreview", false);
+	    _defineProperty$2(this, "isMobilePreview", false);
 	    /**
 	     * @property
 	     * @private
 	     * @type {Function|null} 滚动事件处理器，保存为实例属性避免多实例冲突
 	     */
-	    _defineProperty$3(this, "scrollHandler", null);
+	    _defineProperty$2(this, "scrollHandler", null);
 	    /**
 	     * @property
 	     * @private
 	     * @type {Function|null} 鼠标滚轮事件处理器，保存为实例属性避免内存泄漏
 	     */
-	    _defineProperty$3(this, "wheelHandler", null);
+	    _defineProperty$2(this, "wheelHandler", null);
 	    /**
 	     * @property
 	     * @private
 	     * @type {ResizeObserver|null} ResizeObserver 实例，避免内存泄漏
 	     */
-	    _defineProperty$3(this, "resizeObserver", null);
+	    _defineProperty$2(this, "resizeObserver", null);
 	    /**
 	     * @property
 	     * @private
 	     * @type {boolean} 标记该实例是否已销毁，防止销毁后的异步操作执行
 	     */
-	    _defineProperty$3(this, "isDestroyed", false);
+	    _defineProperty$2(this, "isDestroyed", false);
 	    /**
 	     * @property
 	     * @type {import('~types/previewer').PreviewerOptions}
@@ -108032,8 +104985,8 @@
 	      return this.$testChild(dom.parentNode);
 	    }
 	  }, {
-	    key: "_testMaxIndex",
-	    value: function _testMaxIndex(index, arr) {
+	    key: "testMaxIndex",
+	    value: function testMaxIndex(index, arr) {
 	      if (!arr) {
 	        return false;
 	      }
@@ -108069,8 +105022,8 @@
 	      return ret;
 	    }
 	  }, {
-	    key: "_hasNewSign",
-	    value: function _hasNewSign(list, sign, signIndex) {
+	    key: "hasNewSign",
+	    value: function hasNewSign(list, sign, signIndex) {
 	      if (list.length > 0) {
 	        var resSign;
 	        _forEachInstanceProperty(list).call(list, function (listItem, i) {
@@ -108133,7 +105086,7 @@
 	              if (!hasUpdate) {
 	                _this5.$updateDom(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
 	              }
-	            } catch (e) {
+	            } catch (_unused) {
 	              domContainer.insertBefore(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
 	              domContainer.removeChild(oldContent[change.oldIndex].dom);
 	            }
@@ -108517,7 +105470,7 @@
 	      var scrollDom = this.getDomCanScroll(previewDom);
 	      // 设置未加载图片的默认尺寸
 	      var images = previewDom.getElementsByTagName('img');
-	      var modifiedImages = new _Set$1(); // 记录被修改过样式的图片
+	      var modifiedImages = new _Set(); // 记录被修改过样式的图片
 	      var isDealScroll = false;
 	      _forEachInstanceProperty(_context11 = _Array$from(images)).call(_context11, function (img) {
 	        if (!img.hasAttribute('width') && !img.hasAttribute('height') && !img.style.width && !img.style.height) {
@@ -108616,8 +105569,8 @@
 	          var _context13;
 	          // 获取所有修改过的图片的加载状态
 	          var imageLoadPromises = _mapInstanceProperty(_context13 = _Array$from(modifiedImages)).call(_context13, function (img) {
-	            if (img.complete) return _Promise$1.resolve();
-	            return new _Promise$1(function (resolve) {
+	            if (img.complete) return _Promise.resolve();
+	            return new _Promise(function (resolve) {
 	              var _onLoad = function onLoad() {
 	                img.removeEventListener('load', _onLoad);
 	                img.removeEventListener('error', _onLoad);
@@ -108629,7 +105582,7 @@
 	          });
 
 	          // 等待所有图片加载完成后再清理样式
-	          _Promise$1.all(imageLoadPromises).then(function () {
+	          _Promise.all(imageLoadPromises).then(function () {
 	            // 使用 requestAnimationFrame 确保在下一帧渲染时处理
 	            requestAnimationFrame(cleanupAndScroll);
 	          });
@@ -108908,7 +105861,7 @@
 	     * @deprecated
 	     * @type {MenuBase['fire']}
 	     */
-	    _defineProperty$3(this, "_onClick", void 0);
+	    _defineProperty$2(this, "_onClick", void 0);
 	    this.$cherry = $cherry;
 	    this.bubbleMenu = false;
 	    this.subMenu = null; // 子菜单实例
@@ -108934,10 +105887,8 @@
 	     * @type {'absolute' | 'fixed' | 'sidebar'}
 	     */
 	    this.positionModel = 'absolute';
-	    // eslint-disable-next-line no-underscore-dangle
 	    if (typeof this._onClick === 'function') {
 	      Logger.warn('`MenuBase._onClick` is deprecated. Override `fire` instead');
-	      // eslint-disable-next-line no-underscore-dangle
 	      this.fire = this._onClick;
 	    }
 	    /**
@@ -108987,6 +105938,11 @@
 	    value: function setCacheOnce(info) {
 	      this.cacheOnce = info;
 	    }
+
+	    /**
+	     * 获取并清除缓存数据
+	     * @returns {any} 缓存的数据，可以是任意类型（文件信息、DrawIo数据、表格/公式字符串等）
+	     */
 	  }, {
 	    key: "getAndCleanCacheOnce",
 	    value: function getAndCleanCacheOnce() {
@@ -108995,6 +105951,11 @@
 	      this.cacheOnce = false;
 	      return ret;
 	    }
+
+	    /**
+	     * 检查是否有缓存数据
+	     * @returns {boolean}
+	     */
 	  }, {
 	    key: "hasCacheOnce",
 	    value: function hasCacheOnce() {
@@ -109177,12 +106138,12 @@
 	        });
 	        if (!this.bubbleMenu && this.updateMarkdown) {
 	          var hasPromise = _someInstanceProperty(results).call(results, function (result) {
-	            return result instanceof _Promise$1;
+	            return result instanceof _Promise;
 	          });
 	          if (hasPromise) {
 	            // 处理异步结果（如上传文件等）
-	            _Promise$1.all(_mapInstanceProperty(results).call(results, function (result) {
-	              return result instanceof _Promise$1 ? result : _Promise$1.resolve(result);
+	            _Promise.all(_mapInstanceProperty(results).call(results, function (result) {
+	              return result instanceof _Promise ? result : _Promise.resolve(result);
 	            })).then(function (resolvedResults) {
 	              var safeResults = _mapInstanceProperty(resolvedResults).call(resolvedResults, function (result, index) {
 	                return result === undefined || result === null ? selections[index] : String(result);
@@ -109629,7 +106590,7 @@
 	var ENTER_KEY = 'Enter';
 	var ESCAPE_KEY = 'Escape';
 	var BACKSPACE_KEY = 'Backspace';
-	var shortKey2UnPlatformKey = _defineProperty$3(_defineProperty$3(_defineProperty$3(_defineProperty$3({}, SHIFT_KEY, function (/** @type {boolean} */isMac) {
+	var shortKey2UnPlatformKey = _defineProperty$2(_defineProperty$2(_defineProperty$2(_defineProperty$2({}, SHIFT_KEY, function (/** @type {boolean} */isMac) {
 	  if (isMac) {
 	    return {
 	      text: '⇧',
@@ -109932,7 +106893,7 @@
 	    _classCallCheck$1(this, Bold);
 	    _this = _callSuper$14(this, Bold, [$cherry]);
 	    _this.setName('bold', 'bold');
-	    _this.shortcutKeyMap = _defineProperty$3({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('b')), {
+	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('b')), {
 	      hookName: _this.name,
 	      aliasName: _this.name
 	    });
@@ -110004,7 +106965,7 @@
 	    _classCallCheck$1(this, Italic);
 	    _this = _callSuper$13(this, Italic, [$cherry]);
 	    _this.setName('italic', 'italic');
-	    _this.shortcutKeyMap = _defineProperty$3({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('i')), {
+	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('i')), {
 	      hookName: _this.name,
 	      aliasName: _this.name
 	    });
@@ -110106,7 +107067,7 @@
 	    _classCallCheck$1(this, Strikethrough);
 	    _this = _callSuper$11(this, Strikethrough, [$cherry]);
 	    _this.setName('strikethrough', 'strike');
-	    _this.shortcutKeyMap = _defineProperty$3({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('d')), {
+	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('d')), {
 	      hookName: _this.name,
 	      aliasName: _this.name
 	    });
@@ -110132,13 +107093,12 @@
 	        _this$$cherry$options,
 	        _this$$cherry$options2,
 	        _this$$cherry$options3,
-	        _this$$cherry$options4,
 	        _this2 = this,
 	        _context2;
 	      var shortKey = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
 	      var $selection = this.getSelection(selection) || this.locale.strikethrough;
-	      // @ts-ignore
-	      var needWhitespace = (_this$$cherry = this.$cherry) === null || _this$$cherry === void 0 ? void 0 : (_this$$cherry$options = _this$$cherry.options) === null || _this$$cherry$options === void 0 ? void 0 : (_this$$cherry$options2 = _this$$cherry$options.engine) === null || _this$$cherry$options2 === void 0 ? void 0 : (_this$$cherry$options3 = _this$$cherry$options2.syntax) === null || _this$$cherry$options3 === void 0 ? void 0 : (_this$$cherry$options4 = _this$$cherry$options3.strikethrough) === null || _this$$cherry$options4 === void 0 ? void 0 : _this$$cherry$options4.needWhitespace;
+	      var strikethroughConfig = (_this$$cherry = this.$cherry) === null || _this$$cherry === void 0 ? void 0 : (_this$$cherry$options = _this$$cherry.options) === null || _this$$cherry$options === void 0 ? void 0 : (_this$$cherry$options2 = _this$$cherry$options.engine) === null || _this$$cherry$options2 === void 0 ? void 0 : (_this$$cherry$options3 = _this$$cherry$options2.syntax) === null || _this$$cherry$options3 === void 0 ? void 0 : _this$$cherry$options3.strikethrough;
+	      var needWhitespace = strikethroughConfig !== false && (strikethroughConfig === null || strikethroughConfig === void 0 ? void 0 : strikethroughConfig.needWhitespace);
 	      var space = needWhitespace ? ' ' : '';
 	      // 如果被选中的文本中包含删除线语法，则去掉删除线语法
 	      if (!this.isSelections && !this.$testIsStrike($selection)) {
@@ -110375,7 +107335,7 @@
 	}
 
 	function ownKeys$5(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$5(e) { for (var r = 1; r < arguments.length; r++) { var _context25, _context26; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context25 = ownKeys$5(Object(t), !0)).call(_context25, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context26 = ownKeys$5(Object(t))).call(_context26, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread$5(e) { for (var r = 1; r < arguments.length; r++) { var _context25, _context26; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context25 = ownKeys$5(Object(t), !0)).call(_context25, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context26 = ownKeys$5(Object(t))).call(_context26, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _callSuper$_(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$_() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$_() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$_ = function _isNativeReflectConstruct() { return !!t; })(); }
 
@@ -110595,7 +107555,7 @@
 	    /**
 	     * 定义调色盘每个色块的颜色值
 	     */
-	    _defineProperty$3(this, "presetColors", [
+	    _defineProperty$2(this, "presetColors", [
 	    // 蓝色系
 	    ['#e6f3ff', '#cce7ff', '#99d6ff', '#66c5ff', '#33b4ff', '#0099ff', '#0080e6', '#0066cc', '#004d99', '#003366'],
 	    // 红色系
@@ -111125,7 +108085,7 @@
 	      name: 'h5',
 	      onclick: _bindInstanceProperty(_context5 = _this.bindSubClick).call(_context5, _this, '5')
 	    }];
-	    _this.shortcutKeyMap = _defineProperty$3(_defineProperty$3(_defineProperty$3(_defineProperty$3(_defineProperty$3({}, _concatInstanceProperty(_context6 = "".concat(getPlatformControlKey(), "-")).call(_context6, getKeyCode(1)), {
+	    _this.shortcutKeyMap = _defineProperty$2(_defineProperty$2(_defineProperty$2(_defineProperty$2(_defineProperty$2({}, _concatInstanceProperty(_context6 = "".concat(getPlatformControlKey(), "-")).call(_context6, getKeyCode(1)), {
 	      hookName: _this.name,
 	      aliasName: 'h1'
 	    }), _concatInstanceProperty(_context7 = "".concat(getPlatformControlKey(), "-")).call(_context7, getKeyCode(2)), {
@@ -111422,9 +108382,8 @@
 	      input.style.display = 'none';
 	      // document.body.appendChild(input);
 	      input.addEventListener('change', function (event) {
-	        // @ts-ignore
-	        var _event$target$files = _slicedToArray$1(event.target.files, 1),
-	          file = _event$target$files[0];
+	        var files = (/** @type {HTMLInputElement} */event.target).files;
+	        var file = files === null || files === void 0 ? void 0 : files[0];
 	        // 文件上传后的回调函数可以由调用方自己实现
 	        _this2.$cherry.options.callback.fileUpload(file, function (url) {
 	          // 文件上传的默认回调行数，调用方可以完全不使用该函数
@@ -111921,7 +108880,7 @@
 	      'Alt-Digit3': '24',
 	      'Alt-Digit4': '32'
 	    };
-	    _this.shortcutKeyMap = _defineProperty$3(_defineProperty$3(_defineProperty$3(_defineProperty$3({}, _concatInstanceProperty(_context5 = "".concat(ALT_KEY, "-")).call(_context5, getKeyCode(1)), {
+	    _this.shortcutKeyMap = _defineProperty$2(_defineProperty$2(_defineProperty$2(_defineProperty$2({}, _concatInstanceProperty(_context5 = "".concat(ALT_KEY, "-")).call(_context5, getKeyCode(1)), {
 	      hookName: _this.name,
 	      aliasName: "".concat(_this.name, "-small")
 	    }), _concatInstanceProperty(_context6 = "".concat(ALT_KEY, "-")).call(_context6, getKeyCode(2)), {
@@ -112391,7 +109350,7 @@
 	    _classCallCheck$1(this, TogglePreview);
 	    _this = _callSuper$M(this, TogglePreview, [$cherry]);
 	    /** @type {boolean} 当前预览状态 */
-	    _defineProperty$3(_this, "$previewerHidden", false);
+	    _defineProperty$2(_this, "$previewerHidden", false);
 	    _this.setName('previewClose', 'previewClose');
 	    _this.instanceId = $cherry.instanceId;
 	    _this.updateMarkdown = false;
@@ -112579,7 +109538,7 @@
 	    _classCallCheck$1(this, Code);
 	    _this = _callSuper$I(this, Code, [$cherry]);
 	    _this.setName('codeBlock', 'codeBlock');
-	    _this.shortcutKeyMap = _defineProperty$3({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('k')), {
+	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('k')), {
 	      hookName: 'code',
 	      aliasName: _this.name
 	    });
@@ -112618,7 +109577,7 @@
 	    _classCallCheck$1(this, InlineCode);
 	    _this = _callSuper$H(this, InlineCode, [$cherry]);
 	    _this.setName('inlineCode', 'code');
-	    _this.shortcutKeyMap = _defineProperty$3({}, "".concat(CONTROL_KEY, "-Backquote"), {
+	    _this.shortcutKeyMap = _defineProperty$2({}, "".concat(CONTROL_KEY, "-Backquote"), {
 	      hookName: _this.name,
 	      aliasName: _this.name
 	    });
@@ -113635,7 +110594,7 @@
 	      onclick: _bindInstanceProperty(_context3 = _this.bindSubClick).call(_context3, _this, 'toggleToolbar')
 	    }];
 	    _this.attachEventListeners();
-	    _this.shortcutKeyMap = _defineProperty$3({}, _concatInstanceProperty(_context4 = "".concat(getPlatformControlKey(), "-")).call(_context4, getKeyCode('0')), {
+	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context4 = "".concat(getPlatformControlKey(), "-")).call(_context4, getKeyCode('0')), {
 	      hookName: _this.name,
 	      sub: 'toggleToolbar',
 	      aliasName: 'hide'
@@ -113739,9 +110698,8 @@
 	    value: function onClick(selection) {
 	      var shortKey = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
 	      var callback = arguments.length > 2 ? arguments[2] : undefined;
-	      // eslint-disable-next-line no-param-reassign
-	      shortKey = this.matchShortcutKey(shortKey);
-	      if (shortKey === 'classicBr') {
+	      var resolvedShortKey = this.matchShortcutKey(shortKey);
+	      if (resolvedShortKey === 'classicBr') {
 	        var _context7;
 	        var targetIsClassicBr = !getIsClassicBrFromLocal();
 	        saveIsClassicBrToLocal(targetIsClassicBr);
@@ -113760,7 +110718,7 @@
 	        }
 	        this.engine.$cherry.previewer.update('');
 	        this.engine.$cherry.initText(this.engine.$cherry.editor.editor);
-	      } else if (shortKey === 'previewClose') {
+	      } else if (resolvedShortKey === 'previewClose') {
 	        // 需要浮动预览
 	        if (this.editor.previewer.isPreviewerNeedFloat()) {
 	          // 正在浮动预览
@@ -113776,9 +110734,9 @@
 	        } else {
 	          this.editor.previewer.editOnly(true);
 	        }
-	      } else if (shortKey === 'toggleToolbar') {
+	      } else if (resolvedShortKey === 'toggleToolbar') {
 	        this.toggleToolbar();
-	      } else if (shortKey === 'shortcutKey') {
+	      } else if (resolvedShortKey === 'shortcutKey') {
 	        var _this$engine, _this$engine$$cherry, _this$engine$$cherry$2, _this$engine$$cherry$3;
 	        if (!this.shortcutKeyConfigPanel) {
 	          this.shortcutKeyConfigPanel = new ShortcutKeyConfigPanel(this.engine.$cherry);
@@ -113845,7 +110803,7 @@
 	    _classCallCheck$1(this, Underline);
 	    _this = _callSuper$D(this, Underline, [$cherry]);
 	    _this.setName('underline', 'underline');
-	    _this.shortcutKeyMap = _defineProperty$3({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('u')), {
+	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('u')), {
 	      hookName: _this.name,
 	      aliasName: _this.name
 	    });
@@ -113947,9 +110905,9 @@
 	  }]);
 	}(MenuBase);
 
-	function _createForOfIteratorHelper$1f(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1f(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-	function _unsupportedIterableToArray$1f(r, a) { if (r) { var _context8; if ("string" == typeof r) return _arrayLikeToArray$1f(r, a); var t = _sliceInstanceProperty(_context8 = {}.toString.call(r)).call(_context8, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1f(r, a) : void 0; } }
-	function _arrayLikeToArray$1f(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _createForOfIteratorHelper$1g(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1g(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$1g(r, a) { if (r) { var _context8; if ("string" == typeof r) return _arrayLikeToArray$1g(r, a); var t = _sliceInstanceProperty(_context8 = {}.toString.call(r)).call(_context8, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1g(r, a) : void 0; } }
+	function _arrayLikeToArray$1g(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function _callSuper$B(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$B() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$B() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$B = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
@@ -113965,7 +110923,7 @@
 	    _classCallCheck$1(this, Image);
 	    _this = _callSuper$B(this, Image, [$cherry]);
 	    _this.setName('image', 'image');
-	    _this.shortcutKeyMap = _defineProperty$3({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('g')), {
+	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('g')), {
 	      hookName: _this.name,
 	      aliasName: _this.name
 	    });
@@ -113975,6 +110933,7 @@
 	  /**
 	   * 响应点击事件
 	   * @param {string} selection 被用户选中的文本内容
+	   * @param {string} [shortKey] 快捷键参数，本 hook 不处理这个参数
 	   * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
 	   */
 	  _inherits(Image, _MenuBase);
@@ -113993,11 +110952,9 @@
 	      var multiple = (_this$$cherry$options4 = (_this$$cherry = this.$cherry) === null || _this$$cherry === void 0 ? void 0 : (_this$$cherry$options5 = _this$$cherry.options.multipleFileSelection) === null || _this$$cherry$options5 === void 0 ? void 0 : _this$$cherry$options5.image) !== null && _this$$cherry$options4 !== void 0 ? _this$$cherry$options4 : false;
 	      if (multiple) {
 	        if (this.hasCacheOnce()) {
-	          // @ts-ignore
 	          var arr = this.getAndCleanCacheOnce();
 	          var res = '';
-	          // @ts-ignore
-	          var _iterator = _createForOfIteratorHelper$1f(arr),
+	          var _iterator = _createForOfIteratorHelper$1g(arr),
 	            _step;
 	          try {
 	            var _loop = function _loop() {
@@ -114033,7 +110990,6 @@
 	      }
 	      if (this.hasCacheOnce()) {
 	        var _context5, _context6, _context7;
-	        // @ts-ignore
 	        var _this$getAndCleanCach = this.getAndCleanCacheOnce(),
 	          _name = _this$getAndCleanCach.name,
 	          url = _this$getAndCleanCach.url,
@@ -114061,9 +111017,9 @@
 	  }]);
 	}(MenuBase);
 
-	function _createForOfIteratorHelper$1e(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1e(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-	function _unsupportedIterableToArray$1e(r, a) { if (r) { var _context7; if ("string" == typeof r) return _arrayLikeToArray$1e(r, a); var t = _sliceInstanceProperty(_context7 = {}.toString.call(r)).call(_context7, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1e(r, a) : void 0; } }
-	function _arrayLikeToArray$1e(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _createForOfIteratorHelper$1f(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1f(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$1f(r, a) { if (r) { var _context7; if ("string" == typeof r) return _arrayLikeToArray$1f(r, a); var t = _sliceInstanceProperty(_context7 = {}.toString.call(r)).call(_context7, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1f(r, a) : void 0; } }
+	function _arrayLikeToArray$1f(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function _callSuper$A(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$A() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$A() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$A = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
@@ -114081,6 +111037,7 @@
 	  /**
 	   * 响应点击事件
 	   * @param {string} selection 被用户选中的文本内容
+	   * @param {string} [shortKey] 快捷键参数，本 hook 不处理这个参数
 	   * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
 	   */
 	  _inherits(Audio, _MenuBase);
@@ -114099,11 +111056,9 @@
 	      var multiple = (_this$$cherry$options4 = (_this$$cherry = this.$cherry) === null || _this$$cherry === void 0 ? void 0 : (_this$$cherry$options5 = _this$$cherry.options.multipleFileSelection) === null || _this$$cherry$options5 === void 0 ? void 0 : _this$$cherry$options5.audio) !== null && _this$$cherry$options4 !== void 0 ? _this$$cherry$options4 : false;
 	      if (multiple) {
 	        if (this.hasCacheOnce()) {
-	          // @ts-ignore
 	          var arr = this.getAndCleanCacheOnce();
 	          var res = '';
-	          // @ts-ignore
-	          var _iterator = _createForOfIteratorHelper$1e(arr),
+	          var _iterator = _createForOfIteratorHelper$1f(arr),
 	            _step;
 	          try {
 	            var _loop = function _loop() {
@@ -114139,7 +111094,6 @@
 	      }
 	      if (this.hasCacheOnce()) {
 	        var _context4, _context5, _context6;
-	        // @ts-ignore
 	        var _this$getAndCleanCach = this.getAndCleanCacheOnce(),
 	          _name = _this$getAndCleanCach.name,
 	          url = _this$getAndCleanCach.url,
@@ -114167,9 +111121,9 @@
 	  }]);
 	}(MenuBase);
 
-	function _createForOfIteratorHelper$1d(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1d(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-	function _unsupportedIterableToArray$1d(r, a) { if (r) { var _context9; if ("string" == typeof r) return _arrayLikeToArray$1d(r, a); var t = _sliceInstanceProperty(_context9 = {}.toString.call(r)).call(_context9, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1d(r, a) : void 0; } }
-	function _arrayLikeToArray$1d(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _createForOfIteratorHelper$1e(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1e(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$1e(r, a) { if (r) { var _context9; if ("string" == typeof r) return _arrayLikeToArray$1e(r, a); var t = _sliceInstanceProperty(_context9 = {}.toString.call(r)).call(_context9, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1e(r, a) : void 0; } }
+	function _arrayLikeToArray$1e(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function _callSuper$z(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$z() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$z() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$z = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
@@ -114187,6 +111141,7 @@
 	  /**
 	   * 响应点击事件
 	   * @param {string} selection 被用户选中的文本内容
+	   * @param {string} [shortKey] 快捷键参数，本 hook 不处理这个参数
 	   * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
 	   */
 	  _inherits(Video, _MenuBase);
@@ -114205,11 +111160,9 @@
 	      var multiple = (_this$$cherry$options4 = (_this$$cherry = this.$cherry) === null || _this$$cherry === void 0 ? void 0 : (_this$$cherry$options5 = _this$$cherry.options.multipleFileSelection) === null || _this$$cherry$options5 === void 0 ? void 0 : _this$$cherry$options5.video) !== null && _this$$cherry$options4 !== void 0 ? _this$$cherry$options4 : false;
 	      if (multiple) {
 	        if (this.hasCacheOnce()) {
-	          // @ts-ignore
 	          var arr = this.getAndCleanCacheOnce();
 	          var res = '';
-	          // @ts-ignore
-	          var _iterator = _createForOfIteratorHelper$1d(arr),
+	          var _iterator = _createForOfIteratorHelper$1e(arr),
 	            _step;
 	          try {
 	            var _loop = function _loop() {
@@ -114245,7 +111198,6 @@
 	      }
 	      if (this.hasCacheOnce()) {
 	        var _context5, _context6, _context7, _context8;
-	        // @ts-ignore
 	        var _this$getAndCleanCach = this.getAndCleanCacheOnce(),
 	          _name = _this$getAndCleanCach.name,
 	          url = _this$getAndCleanCach.url,
@@ -114290,6 +111242,7 @@
 	  /**
 	   * 响应点击事件
 	   * @param {string} selection 被用户选中的文本内容
+	   * @param {string} [shortKey] 快捷键参数，本 hook 不处理这个参数
 	   * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
 	   */
 	  _inherits(Br, _MenuBase);
@@ -114319,6 +111272,7 @@
 	  /**
 	   * 响应点击事件
 	   * @param {string} selection 被用户选中的文本内容
+	   * @param {string} [shortKey] 快捷键参数，本 hook 不处理这个参数
 	   * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
 	   */
 	  _inherits(Hr, _MenuBase);
@@ -114332,9 +111286,9 @@
 	  }]);
 	}(MenuBase);
 
-	function _createForOfIteratorHelper$1c(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1c(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-	function _unsupportedIterableToArray$1c(r, a) { if (r) { var _context19; if ("string" == typeof r) return _arrayLikeToArray$1c(r, a); var t = _sliceInstanceProperty(_context19 = {}.toString.call(r)).call(_context19, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1c(r, a) : void 0; } }
-	function _arrayLikeToArray$1c(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _createForOfIteratorHelper$1d(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1d(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$1d(r, a) { if (r) { var _context19; if ("string" == typeof r) return _arrayLikeToArray$1d(r, a); var t = _sliceInstanceProperty(_context19 = {}.toString.call(r)).call(_context19, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1d(r, a) : void 0; } }
+	function _arrayLikeToArray$1d(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	/**
 	 * Copyright (C) 2021 Tencent.
 	 *
@@ -114380,7 +111334,7 @@
 	     * @type {Object.<string, FormulaMenu>}
 	     * @see https://github.com/QianJianTech/LaTeXLive/blob/master/json/map_input.json
 	     */
-	    _defineProperty$3(this, "formulaConfig", {
+	    _defineProperty$2(this, "formulaConfig", {
 	      toolbar: {
 	        title: '快捷工具',
 	        subCategory: {
@@ -114800,7 +111754,7 @@
 	    /**
 	     * 是否显示 www.latexlive.com 的外链
 	     */
-	    _defineProperty$3(this, "showLatexLive", true);
+	    _defineProperty$2(this, "showLatexLive", true);
 	    if (_Object$keys(options).length) {
 	      this.formulaConfig = options.templateConfig || this.formulaConfig;
 	      this.showLatexLive = options.showLatexLive;
@@ -114874,7 +111828,7 @@
 	          var inGroup = false;
 
 	          // 按分组（latex 为空时为分组标题）组织公式
-	          var _iterator = _createForOfIteratorHelper$1c(subCategory.formulas),
+	          var _iterator = _createForOfIteratorHelper$1d(subCategory.formulas),
 	            _step;
 	          try {
 	            for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -115091,7 +112045,7 @@
 	    _this.subBubbleFormulaMenu = new BubbleFormula($cherry === null || $cherry === void 0 ? void 0 : (_$cherry$options = $cherry.options) === null || _$cherry$options === void 0 ? void 0 : (_$cherry$options$tool = _$cherry$options.toolbars) === null || _$cherry$options$tool === void 0 ? void 0 : (_$cherry$options$tool2 = _$cherry$options$tool.config) === null || _$cherry$options$tool2 === void 0 ? void 0 : _$cherry$options$tool2.formula);
 	    $cherry.editor.options.wrapperDom.appendChild(_this.subBubbleFormulaMenu.dom);
 	    _this.catchOnce = '';
-	    _this.shortcutKeyMap = _defineProperty$3({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('m')), {
+	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('m')), {
 	      hookName: _this.name,
 	      aliasName: _this.name
 	    });
@@ -115101,6 +112055,7 @@
 	  /**
 	   * 响应点击事件
 	   * @param {string} selection 被用户选中的文本内容
+	   * @param {string} [shortKey] 快捷键参数，本 hook 不处理这个参数
 	   * @returns {boolean} 回填到编辑器光标位置/选中文本区域的内容
 	   */
 	  _inherits(Formula, _MenuBase);
@@ -115156,7 +112111,7 @@
 	    _classCallCheck$1(this, Link);
 	    _this = _callSuper$v(this, Link, [$cherry]);
 	    _this.setName('link', 'link');
-	    _this.shortcutKeyMap = _defineProperty$3({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('l')), {
+	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('l')), {
 	      hookName: _this.name,
 	      aliasName: _this.name
 	    });
@@ -115166,6 +112121,7 @@
 	  /**
 	   * 响应点击事件
 	   * @param {string} selection 被用户选中的文本内容
+	   * @param {string} [shortKey] 快捷键参数，本 hook 不处理这个参数
 	   * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
 	   */
 	  _inherits(Link, _MenuBase);
@@ -115207,6 +112163,7 @@
 	  /**
 	   * 响应点击事件
 	   * @param {string} selection 被用户选中的文本内容
+	   * @param {string} [shortKey] 快捷键参数，本 hook 不处理这个参数
 	   * @returns {*} 回填到编辑器光标位置/选中文本区域的内容
 	   */
 	  _inherits(Table, _MenuBase);
@@ -115255,6 +112212,7 @@
 	  /**
 	   * 响应点击事件
 	   * @param {string} selection 被用户选中的文本内容
+	   * @param {string} [shortKey] 快捷键参数，本 hook 不处理这个参数
 	   * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
 	   */
 	  _inherits(Toc, _MenuBase);
@@ -115455,9 +112413,9 @@
 	  }]);
 	}(MenuBase);
 
-	function _createForOfIteratorHelper$1b(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1b(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-	function _unsupportedIterableToArray$1b(r, a) { if (r) { var _context5; if ("string" == typeof r) return _arrayLikeToArray$1b(r, a); var t = _sliceInstanceProperty(_context5 = {}.toString.call(r)).call(_context5, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1b(r, a) : void 0; } }
-	function _arrayLikeToArray$1b(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _createForOfIteratorHelper$1c(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1c(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$1c(r, a) { if (r) { var _context5; if ("string" == typeof r) return _arrayLikeToArray$1c(r, a); var t = _sliceInstanceProperty(_context5 = {}.toString.call(r)).call(_context5, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1c(r, a) : void 0; } }
+	function _arrayLikeToArray$1c(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function _callSuper$r(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$r() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$r() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$r = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
@@ -115475,6 +112433,7 @@
 	  /**
 	   * 响应点击事件
 	   * @param {string} selection 被用户选中的文本内容
+	   * @param {string} [shortKey] 快捷键参数，本 hook 不处理这个参数
 	   * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
 	   */
 	  _inherits(Pdf, _MenuBase);
@@ -115495,8 +112454,7 @@
 	        if (this.hasCacheOnce()) {
 	          var arr = this.getAndCleanCacheOnce();
 	          var res = '';
-	          // @ts-ignore
-	          var _iterator = _createForOfIteratorHelper$1b(arr),
+	          var _iterator = _createForOfIteratorHelper$1c(arr),
 	            _step;
 	          try {
 	            var _loop = function _loop() {
@@ -115532,7 +112490,6 @@
 	      }
 	      if (this.hasCacheOnce()) {
 	        var _context3, _context4;
-	        // @ts-ignore
 	        var _this$getAndCleanCach = this.getAndCleanCacheOnce(),
 	          name = _this$getAndCleanCach.name,
 	          url = _this$getAndCleanCach.url,
@@ -115560,9 +112517,9 @@
 	  }]);
 	}(MenuBase);
 
-	function _createForOfIteratorHelper$1a(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1a(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-	function _unsupportedIterableToArray$1a(r, a) { if (r) { var _context5; if ("string" == typeof r) return _arrayLikeToArray$1a(r, a); var t = _sliceInstanceProperty(_context5 = {}.toString.call(r)).call(_context5, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1a(r, a) : void 0; } }
-	function _arrayLikeToArray$1a(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _createForOfIteratorHelper$1b(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1b(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$1b(r, a) { if (r) { var _context5; if ("string" == typeof r) return _arrayLikeToArray$1b(r, a); var t = _sliceInstanceProperty(_context5 = {}.toString.call(r)).call(_context5, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1b(r, a) : void 0; } }
+	function _arrayLikeToArray$1b(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function _callSuper$q(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$q() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$q() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$q = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
@@ -115580,6 +112537,7 @@
 	  /**
 	   * 响应点击事件
 	   * @param {string} selection 被用户选中的文本内容
+	   * @param {string} [shortKey] 快捷键参数，本 hook 不处理这个参数
 	   * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
 	   */
 	  _inherits(File, _MenuBase);
@@ -115598,11 +112556,9 @@
 	      var multiple = (_this$$cherry$options4 = (_this$$cherry = this.$cherry) === null || _this$$cherry === void 0 ? void 0 : (_this$$cherry$options5 = _this$$cherry.options.multipleFileSelection) === null || _this$$cherry$options5 === void 0 ? void 0 : _this$$cherry$options5.file) !== null && _this$$cherry$options4 !== void 0 ? _this$$cherry$options4 : false;
 	      if (multiple) {
 	        if (this.hasCacheOnce()) {
-	          // @ts-ignore
 	          var arr = this.getAndCleanCacheOnce();
 	          var res = '';
-	          // @ts-ignore
-	          var _iterator = _createForOfIteratorHelper$1a(arr),
+	          var _iterator = _createForOfIteratorHelper$1b(arr),
 	            _step;
 	          try {
 	            var _loop = function _loop() {
@@ -115638,7 +112594,6 @@
 	      }
 	      if (this.hasCacheOnce()) {
 	        var _context3, _context4;
-	        // @ts-ignore
 	        var _this$getAndCleanCach = this.getAndCleanCacheOnce(),
 	          _name = _this$getAndCleanCach.name,
 	          url = _this$getAndCleanCach.url,
@@ -115666,9 +112621,9 @@
 	  }]);
 	}(MenuBase);
 
-	function _createForOfIteratorHelper$19(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$19(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-	function _unsupportedIterableToArray$19(r, a) { if (r) { var _context5; if ("string" == typeof r) return _arrayLikeToArray$19(r, a); var t = _sliceInstanceProperty(_context5 = {}.toString.call(r)).call(_context5, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$19(r, a) : void 0; } }
-	function _arrayLikeToArray$19(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _createForOfIteratorHelper$1a(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1a(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$1a(r, a) { if (r) { var _context5; if ("string" == typeof r) return _arrayLikeToArray$1a(r, a); var t = _sliceInstanceProperty(_context5 = {}.toString.call(r)).call(_context5, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1a(r, a) : void 0; } }
+	function _arrayLikeToArray$1a(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function _callSuper$p(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$p() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$p() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$p = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
@@ -115686,6 +112641,7 @@
 	  /**
 	   * 响应点击事件
 	   * @param {string} selection 被用户选中的文本内容
+	   * @param {string} [shortKey] 快捷键参数，本 hook 不处理这个参数
 	   * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
 	   */
 	  _inherits(Word, _MenuBase);
@@ -115704,11 +112660,9 @@
 	      var multiple = (_this$$cherry$options4 = (_this$$cherry = this.$cherry) === null || _this$$cherry === void 0 ? void 0 : (_this$$cherry$options5 = _this$$cherry.options.multipleFileSelection) === null || _this$$cherry$options5 === void 0 ? void 0 : _this$$cherry$options5.word) !== null && _this$$cherry$options4 !== void 0 ? _this$$cherry$options4 : false;
 	      if (multiple) {
 	        if (this.hasCacheOnce()) {
-	          // @ts-ignore
 	          var arr = this.getAndCleanCacheOnce();
 	          var res = '';
-	          // @ts-ignore
-	          var _iterator = _createForOfIteratorHelper$19(arr),
+	          var _iterator = _createForOfIteratorHelper$1a(arr),
 	            _step;
 	          try {
 	            var _loop = function _loop() {
@@ -115743,7 +112697,6 @@
 	      }
 	      if (this.hasCacheOnce()) {
 	        var _context3, _context4;
-	        // @ts-ignore
 	        var _this$getAndCleanCach = this.getAndCleanCacheOnce(),
 	          _name = _this$getAndCleanCach.name,
 	          url = _this$getAndCleanCach.url,
@@ -115978,6 +112931,7 @@
 	    /**
 	     * 响应点击事件
 	     * @param {string} selection 被用户选中的文本内容
+	     * @param {string} [shortKey] 快捷键参数，本 hook 不处理这个参数
 	     * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
 	     */
 	  }, {
@@ -116123,7 +113077,7 @@
 	                promises.push(convertImgToBase64$1(src));
 	              });
 	              _context3.next = 1;
-	              return _Promise$1.all(promises);
+	              return _Promise.all(promises);
 	            case 1:
 	              urls = _context3.sent;
 	              return _context3.abrupt("return", html.replace(imgRegex, function (match, prefix, src, suffix) {
@@ -116241,7 +113195,7 @@
 	  }]);
 	}(MenuBase);
 	function convertImgToBase64$1(url, callback, outputFormat) {
-	  return new _Promise$1(function (resolve) {
+	  return new _Promise(function (resolve) {
 	    var canvas = /** @type {HTMLCanvasElement}*/document.createElement('CANVAS');
 	    var ctx = canvas.getContext('2d');
 	    var img = new Image();
@@ -116337,7 +113291,15 @@
 	        _context9,
 	        _context0;
 	      var shortKey = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-	      var $selection = this.getSelection(selection, 'line', true) || '内容';
+	      var threeCols = '第一列\n::\n第二列\n::\n第三列';
+	      var twoCols = '第一列\n::\n第二列';
+	      var defaultContent = '内容';
+	      if (shortKey === '3cols') {
+	        defaultContent = threeCols;
+	      } else if (shortKey === '2cols') {
+	        defaultContent = twoCols;
+	      }
+	      var $selection = this.getSelection(selection, 'line', true) || defaultContent;
 	      var currentName = this.$getNameFromStr($selection);
 	      var title = this.$getTitle($selection);
 	      if (currentName === false) {
@@ -116405,7 +113367,7 @@
 	 */
 	var Align = /*#__PURE__*/function (_Panel) {
 	  function Align($cherry) {
-	    var _locale$alignLeft, _context, _locale$alignCenter, _context2, _locale$alignRight, _context3, _locale$alignJustify, _context4;
+	    var _locale$alignLeft, _context, _locale$alignCenter, _context2, _locale$alignRight, _context3, _locale$alignJustify, _context4, _locale$align2Col, _context5, _locale$align3Col, _context6;
 	    var _this;
 	    _classCallCheck$1(this, Align);
 	    _this = _callSuper$h(this, Align, [$cherry]);
@@ -116428,6 +113390,14 @@
 	      iconName: 'alignJustify',
 	      name: (_locale$alignJustify = locale === null || locale === void 0 ? void 0 : locale.alignJustify) !== null && _locale$alignJustify !== void 0 ? _locale$alignJustify : '两端对齐',
 	      onclick: _bindInstanceProperty(_context4 = _this.bindSubClick).call(_context4, _this, 'justify')
+	    }, {
+	      iconName: 'alignJustify',
+	      name: (_locale$align2Col = locale === null || locale === void 0 ? void 0 : locale.align2Col) !== null && _locale$align2Col !== void 0 ? _locale$align2Col : '两列排版',
+	      onclick: _bindInstanceProperty(_context5 = _this.bindSubClick).call(_context5, _this, '2cols')
+	    }, {
+	      iconName: 'alignJustify',
+	      name: (_locale$align3Col = locale === null || locale === void 0 ? void 0 : locale.align3Col) !== null && _locale$align3Col !== void 0 ? _locale$align3Col : '三列排版',
+	      onclick: _bindInstanceProperty(_context6 = _this.bindSubClick).call(_context6, _this, '3cols')
 	    }];
 	    return _this;
 	  }
@@ -116562,7 +113532,6 @@
 	      }
 	      if (this.hasCacheOnce()) {
 	        var _context, _context2;
-	        // @ts-ignore
 	        var _this$getAndCleanCach = this.getAndCleanCacheOnce(),
 	          xmlData = _this$getAndCleanCach.xmlData,
 	          base64 = _this$getAndCleanCach.base64;
@@ -116592,7 +113561,7 @@
 	 * @returns {Promise<string>} img node
 	 */
 	function convertImgToBase64(url, callback, outputFormat) {
-	  return new _Promise$1(function (resolve) {
+	  return new _Promise(function (resolve) {
 	    var canvas = /** @type {HTMLCanvasElement}*/document.createElement('CANVAS');
 	    var ctx = canvas.getContext('2d');
 	    var img = new Image();
@@ -116635,7 +113604,7 @@
 	            return match;
 	          });
 	          _context3.next = 1;
-	          return _Promise$1.all(promises);
+	          return _Promise.all(promises);
 	        case 1:
 	          urls = _context3.sent;
 	          // 去掉a标签的href属性，微信公众号不支持
@@ -116692,7 +113661,7 @@
 	}();
 
 	function ownKeys$4(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$4(e) { for (var r = 1; r < arguments.length; r++) { var _context6, _context7; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context6 = ownKeys$4(Object(t), !0)).call(_context6, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context7 = ownKeys$4(Object(t))).call(_context7, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread$4(e) { for (var r = 1; r < arguments.length; r++) { var _context6, _context7; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context6 = ownKeys$4(Object(t), !0)).call(_context6, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context7 = ownKeys$4(Object(t))).call(_context7, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _callSuper$d(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$d() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$d() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$d = function _isNativeReflectConstruct() { return !!t; })(); }
 
@@ -116717,13 +113686,12 @@
 	      if (!Object.prototype.hasOwnProperty.call(config, 'key')) {
 	        throw new Error('publish config must have key');
 	      }
-	      // @ts-ignore
-	      if (!_includesInstanceProperty(supportPlatforms).call(supportPlatforms, config.key)) {
+	      if (!_includesInstanceProperty(supportPlatforms).call(supportPlatforms, /** @type {import('~types/cherry').SupportPlatform} */config.key)) {
 	        throw new Error("publish config key must be one of ".concat(supportPlatforms.join(',')));
 	      }
 	      return config.key;
 	    });
-	    if (new _Set$1(keys).size !== keys.length) {
+	    if (new _Set(keys).size !== keys.length) {
 	      throw new Error('publish config key must be unique');
 	    }
 	    _this.subMenuConfig = _mapInstanceProperty(publishConfigs).call(publishConfigs, function (config) {
@@ -116899,7 +113867,6 @@
 	      this.$cherry.options.locale = shortKey;
 	      this.$cherry.locale = this.$cherry.locales[shortKey];
 	      this.$cherry.resetToolbar('toolbar', this.$cherry.options.toolbars.toolbar || []);
-	      if (this.$cherry.searchBoxInstance) this.$cherry.searchBoxInstance.updateLocaleStrings();
 	    }
 	  }]);
 	}(MenuBase);
@@ -116918,7 +113885,7 @@
 	    _this.setName('shortcutKeySetting', 'command');
 	    _this.updateMarkdown = false;
 	    _this.disabledHideAllSubMenu = true;
-	    _this.shortcutKeyMap = _defineProperty$3({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('0')), {
+	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('0')), {
 	      hookName: _this.name,
 	      sub: 'toggleToolbar',
 	      aliasName: 'hide'
@@ -116959,792 +113926,1809 @@
 	  }]);
 	}(MenuBase);
 
+	var esnext_string_matchAll = {};
+
+	var es_string_matchAll = {};
+
+	var advanceStringIndex;
+	var hasRequiredAdvanceStringIndex;
+
+	function requireAdvanceStringIndex () {
+		if (hasRequiredAdvanceStringIndex) return advanceStringIndex;
+		hasRequiredAdvanceStringIndex = 1;
+		'use strict';
+		var charAt = /*@__PURE__*/ requireStringMultibyte().charAt;
+
+		// `AdvanceStringIndex` abstract operation
+		// https://tc39.es/ecma262/#sec-advancestringindex
+		advanceStringIndex = function (S, index, unicode) {
+		  return index + (unicode ? charAt(S, index).length || 1 : 1);
+		};
+		return advanceStringIndex;
+	}
+
+	var regexpExec;
+	var hasRequiredRegexpExec;
+
+	function requireRegexpExec () {
+		if (hasRequiredRegexpExec) return regexpExec;
+		hasRequiredRegexpExec = 1;
+		'use strict';
+		regexpExec = /./.exec;
+		return regexpExec;
+	}
+
+	var regexpExecAbstract;
+	var hasRequiredRegexpExecAbstract;
+
+	function requireRegexpExecAbstract () {
+		if (hasRequiredRegexpExecAbstract) return regexpExecAbstract;
+		hasRequiredRegexpExecAbstract = 1;
+		'use strict';
+		var call = /*@__PURE__*/ requireFunctionCall();
+		var anObject = /*@__PURE__*/ requireAnObject();
+		var isCallable = /*@__PURE__*/ requireIsCallable();
+		var classof = /*@__PURE__*/ requireClassofRaw();
+		var regexpExec = /*@__PURE__*/ requireRegexpExec();
+
+		var $TypeError = TypeError;
+
+		// `RegExpExec` abstract operation
+		// https://tc39.es/ecma262/#sec-regexpexec
+		regexpExecAbstract = function (R, S) {
+		  var exec = R.exec;
+		  if (isCallable(exec)) {
+		    var result = call(exec, R, S);
+		    if (result !== null) anObject(result);
+		    return result;
+		  }
+		  if (classof(R) === 'RegExp') return call(regexpExec, R, S);
+		  throw new $TypeError('RegExp#exec called on incompatible receiver');
+		};
+		return regexpExecAbstract;
+	}
+
+	var hasRequiredEs_string_matchAll;
+
+	function requireEs_string_matchAll () {
+		if (hasRequiredEs_string_matchAll) return es_string_matchAll;
+		hasRequiredEs_string_matchAll = 1;
+		'use strict';
+		/* eslint-disable es/no-string-prototype-matchall -- safe */
+		var $ = /*@__PURE__*/ require_export();
+		var call = /*@__PURE__*/ requireFunctionCall();
+		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThisClause();
+		var createIteratorConstructor = /*@__PURE__*/ requireIteratorCreateConstructor();
+		var createIterResultObject = /*@__PURE__*/ requireCreateIterResultObject();
+		var requireObjectCoercible = /*@__PURE__*/ requireRequireObjectCoercible();
+		var toLength = /*@__PURE__*/ requireToLength();
+		var toString = /*@__PURE__*/ requireToString$1();
+		var anObject = /*@__PURE__*/ requireAnObject();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
+		var classof = /*@__PURE__*/ requireClassofRaw();
+		var isRegExp = /*@__PURE__*/ requireIsRegexp();
+		var getRegExpFlags = /*@__PURE__*/ requireRegexpGetFlags();
+		var getMethod = /*@__PURE__*/ requireGetMethod();
+		var defineBuiltIn = /*@__PURE__*/ requireDefineBuiltIn();
+		var fails = /*@__PURE__*/ requireFails();
+		var wellKnownSymbol = /*@__PURE__*/ requireWellKnownSymbol();
+		var speciesConstructor = /*@__PURE__*/ requireSpeciesConstructor();
+		var advanceStringIndex = /*@__PURE__*/ requireAdvanceStringIndex();
+		var regExpExec = /*@__PURE__*/ requireRegexpExecAbstract();
+		var InternalStateModule = /*@__PURE__*/ requireInternalState();
+		var IS_PURE = /*@__PURE__*/ requireIsPure();
+
+		var MATCH_ALL = wellKnownSymbol('matchAll');
+		var REGEXP_STRING = 'RegExp String';
+		var REGEXP_STRING_ITERATOR = REGEXP_STRING + ' Iterator';
+		var setInternalState = InternalStateModule.set;
+		var getInternalState = InternalStateModule.getterFor(REGEXP_STRING_ITERATOR);
+		var RegExpPrototype = RegExp.prototype;
+		var $TypeError = TypeError;
+		var stringIndexOf = uncurryThis(''.indexOf);
+		var nativeMatchAll = uncurryThis(''.matchAll);
+
+		var WORKS_WITH_NON_GLOBAL_REGEX = !!nativeMatchAll && !fails(function () {
+		  nativeMatchAll('a', /./);
+		});
+
+		var $RegExpStringIterator = createIteratorConstructor(function RegExpStringIterator(regexp, string, $global, fullUnicode) {
+		  setInternalState(this, {
+		    type: REGEXP_STRING_ITERATOR,
+		    regexp: regexp,
+		    string: string,
+		    global: $global,
+		    unicode: fullUnicode,
+		    done: false
+		  });
+		}, REGEXP_STRING, function next() {
+		  var state = getInternalState(this);
+		  if (state.done) return createIterResultObject(undefined, true);
+		  var R = state.regexp;
+		  var S = state.string;
+		  var match = regExpExec(R, S);
+		  if (match === null) {
+		    state.done = true;
+		    return createIterResultObject(undefined, true);
+		  }
+		  if (state.global) {
+		    if (toString(match[0]) === '') R.lastIndex = advanceStringIndex(S, toLength(R.lastIndex), state.unicode);
+		    return createIterResultObject(match, false);
+		  }
+		  state.done = true;
+		  return createIterResultObject(match, false);
+		});
+
+		var $matchAll = function (string) {
+		  var R = anObject(this);
+		  var S = toString(string);
+		  var C = speciesConstructor(R, RegExp);
+		  var flags = toString(getRegExpFlags(R));
+		  var matcher, $global, fullUnicode;
+		  matcher = new C(C === RegExp ? R.source : R, flags);
+		  $global = !!~stringIndexOf(flags, 'g');
+		  fullUnicode = !!~stringIndexOf(flags, 'u') || !!~stringIndexOf(flags, 'v');
+		  matcher.lastIndex = toLength(R.lastIndex);
+		  return new $RegExpStringIterator(matcher, S, $global, fullUnicode);
+		};
+
+		// `String.prototype.matchAll` method
+		// https://tc39.es/ecma262/#sec-string.prototype.matchall
+		$({ target: 'String', proto: true, forced: WORKS_WITH_NON_GLOBAL_REGEX }, {
+		  matchAll: function matchAll(regexp) {
+		    var O = requireObjectCoercible(this);
+		    var flags, S, matcher, rx;
+		    if (isObject(regexp)) {
+		      if (isRegExp(regexp)) {
+		        flags = toString(requireObjectCoercible(getRegExpFlags(regexp)));
+		        if (!~stringIndexOf(flags, 'g')) throw new $TypeError('`.matchAll` does not allow non-global regexes');
+		      }
+		      if (WORKS_WITH_NON_GLOBAL_REGEX) return nativeMatchAll(O, regexp);
+		      matcher = getMethod(regexp, MATCH_ALL);
+		      if (matcher === undefined && IS_PURE && classof(regexp) === 'RegExp') matcher = $matchAll;
+		      if (matcher) return call(matcher, regexp, O);
+		    } else if (WORKS_WITH_NON_GLOBAL_REGEX) return nativeMatchAll(O, regexp);
+		    S = toString(O);
+		    rx = new RegExp(regexp, 'g');
+		    return IS_PURE ? call($matchAll, rx, S) : rx[MATCH_ALL](S);
+		  }
+		});
+
+		IS_PURE || MATCH_ALL in RegExpPrototype || defineBuiltIn(RegExpPrototype, MATCH_ALL, $matchAll);
+		return es_string_matchAll;
+	}
+
+	var hasRequiredEsnext_string_matchAll;
+
+	function requireEsnext_string_matchAll () {
+		if (hasRequiredEsnext_string_matchAll) return esnext_string_matchAll;
+		hasRequiredEsnext_string_matchAll = 1;
+		'use strict';
+		// TODO: Remove from `core-js@4`
+		requireEs_string_matchAll();
+		return esnext_string_matchAll;
+	}
+
+	var matchAll$6;
+	var hasRequiredMatchAll$6;
+
+	function requireMatchAll$6 () {
+		if (hasRequiredMatchAll$6) return matchAll$6;
+		hasRequiredMatchAll$6 = 1;
+		'use strict';
+		requireEs_object_toString();
+		requireEs_regexp_exec();
+		requireEs_string_matchAll();
+		var getBuiltInPrototypeMethod = /*@__PURE__*/ requireGetBuiltInPrototypeMethod();
+
+		matchAll$6 = getBuiltInPrototypeMethod('String', 'matchAll');
+		return matchAll$6;
+	}
+
+	var matchAll$5;
+	var hasRequiredMatchAll$5;
+
+	function requireMatchAll$5 () {
+		if (hasRequiredMatchAll$5) return matchAll$5;
+		hasRequiredMatchAll$5 = 1;
+		'use strict';
+		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
+		var method = /*@__PURE__*/ requireMatchAll$6();
+
+		var StringPrototype = String.prototype;
+
+		matchAll$5 = function (it) {
+		  var own = it.matchAll;
+		  return typeof it == 'string' || it === StringPrototype
+		    || (isPrototypeOf(StringPrototype, it) && own === StringPrototype.matchAll) ? method : own;
+		};
+		return matchAll$5;
+	}
+
+	var matchAll$4;
+	var hasRequiredMatchAll$4;
+
+	function requireMatchAll$4 () {
+		if (hasRequiredMatchAll$4) return matchAll$4;
+		hasRequiredMatchAll$4 = 1;
+		'use strict';
+		var parent = /*@__PURE__*/ requireMatchAll$5();
+
+		matchAll$4 = parent;
+		return matchAll$4;
+	}
+
+	var matchAll$3;
+	var hasRequiredMatchAll$3;
+
+	function requireMatchAll$3 () {
+		if (hasRequiredMatchAll$3) return matchAll$3;
+		hasRequiredMatchAll$3 = 1;
+		'use strict';
+		var parent = /*@__PURE__*/ requireMatchAll$4();
+
+		matchAll$3 = parent;
+		return matchAll$3;
+	}
+
+	var matchAll$2;
+	var hasRequiredMatchAll$2;
+
+	function requireMatchAll$2 () {
+		if (hasRequiredMatchAll$2) return matchAll$2;
+		hasRequiredMatchAll$2 = 1;
+		'use strict';
+		// TODO: remove from `core-js@4`
+		requireEsnext_string_matchAll();
+
+		var parent = /*@__PURE__*/ requireMatchAll$3();
+
+		matchAll$2 = parent;
+		return matchAll$2;
+	}
+
+	var matchAll$1;
+	var hasRequiredMatchAll$1;
+
+	function requireMatchAll$1 () {
+		if (hasRequiredMatchAll$1) return matchAll$1;
+		hasRequiredMatchAll$1 = 1;
+		'use strict';
+		matchAll$1 = /*@__PURE__*/ requireMatchAll$2();
+		return matchAll$1;
+	}
+
+	var matchAll;
+	var hasRequiredMatchAll;
+
+	function requireMatchAll () {
+		if (hasRequiredMatchAll) return matchAll;
+		hasRequiredMatchAll = 1;
+		matchAll = /*@__PURE__*/ requireMatchAll$1();
+		return matchAll;
+	}
+
+	var matchAllExports = requireMatchAll();
+	var _matchAllInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(matchAllExports);
+
 	/**
-	 * Search and replace widget
-	 *  Redevelopment Based : https://github.com/L-Focus/cm-search-replace, License:None  =>
-	 * https://github.com/zhuhs/codemirror-search-replace, License:None  =>
-	 * https://github.com/coderaiser/cm-searchbox, License: https://github.com/coderaiser/cm-searchbox/blob/master/LICENSE =>
-	 * https://github.com/ajaxorg/ace License: https://github.com/ajaxorg/ace/blob/master/LICENSE
-	 * Copyright (c) 2010, Ajax.org B.V.
-	 * All rights reserved.
-	 *
-	 * Redistribution and use in source and binary forms, with or without
-	 * modification, are permitted provided that the following conditions are met:
-	 *     * Redistributions of source code must retain the above copyright
-	 *       notice, this list of conditions and the following disclaimer.
-	 *     * Redistributions in binary form must reproduce the above copyright
-	 *       notice, this list of conditions and the following disclaimer in the
-	 *       documentation and/or other materials provided with the distribution.
-	 *     * Neither the name of Ajax.org B.V. nor the
-	 *       names of its contributors may be used to endorse or promote products
-	 *       derived from this software without specific prior written permission.
-	 *
-	 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-	 * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-	 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-	 * DISCLAIMED. IN NO EVENT SHALL AJAX.ORG B.V. BE LIABLE FOR ANY
-	 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-	 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-	 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-	 * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-	 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-	 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+	 * 转义正则表达式中的特殊字符
+	 * @param {string} str
+	 * @returns {string}
 	 */
-	var SearchBox = /*#__PURE__*/function () {
-	  /**
-	   * @param {object} $cherry Cherry实例
-	   */
-	  function SearchBox($cherry) {
-	    _classCallCheck$1(this, SearchBox);
-	    this.$cherry = $cherry;
-	    this.searchState = {
-	      posFrom: null,
-	      posTo: null,
-	      lastQuery: null,
-	      query: null,
-	      overlay: null,
-	      annotate: null
-	    };
+	function escapeRegExp$2(str) {
+	  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	}
+
+	/**
+	 * 构建搜索正则表达式
+	 * @param {string} query
+	 * @param {boolean} caseSensitive
+	 * @param {boolean} wholeWord
+	 * @param {boolean} [useRegex=false] 为 true 时将 query 作为正则源字符串解析
+	 * @returns {RegExp | null}
+	 */
+	function buildSearchRegex(query, caseSensitive, wholeWord) {
+	  var useRegex = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+	  if (!query) {
+	    return null;
 	  }
-	  return _createClass$1(SearchBox, [{
-	    key: "init",
-	    value: function init(cm) {
-	      var _this = this;
-	      this.cm = cm;
-	      var el = this.addHtml();
-	      this.element = el;
+	  var pattern;
+	  if (useRegex) {
+	    pattern = query;
+	  } else {
+	    pattern = escapeRegExp$2(query);
+	    if (wholeWord) {
+	      pattern = "\\b".concat(pattern, "\\b");
+	    }
+	  }
+	  var flags = caseSensitive ? 'g' : 'gi';
+	  try {
+	    return new RegExp(pattern, flags);
+	  } catch (_unused) {
+	    return null;
+	  }
+	}
 
-	      // this.addStyle();
+	/**
+	 * 用已有正则收集匹配区间
+	 * @param {string} text
+	 * @param {RegExp} regex
+	 * @returns {Array<{ from: number; to: number }>}
+	 */
+	function collectMatches(text, regex) {
+	  return _Array$from(_matchAllInstanceProperty(text).call(text, regex), function (match) {
+	    return {
+	      from: match.index,
+	      to: match.index + match[0].length
+	    };
+	  });
+	}
 
-	      this.initElements(el);
-	      this.activeInput = this.searchInput;
-	      // @ts-ignore
-	      this.element.style.display = 'none';
-	      // this.bindKeys();
+	/**
+	 * 在文档文本中查找所有匹配项
+	 * @param {string} text
+	 * @param {string} query
+	 * @param {boolean} caseSensitive
+	 * @param {boolean} wholeWord
+	 * @param {boolean} [useRegex=false]
+	 * @returns {Array<{ from: number; to: number }>}
+	 */
+	function findMatches(text, query, caseSensitive, wholeWord) {
+	  var useRegex = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
+	  var regex = buildSearchRegex(query, caseSensitive, wholeWord, useRegex);
+	  if (!regex) {
+	    return [];
+	  }
+	  return collectMatches(text, regex);
+	}
 
-	      this.updateLocaleStrings(); // 初始化时更新语言字符串
+	/**
+	 * 根据光标位置查找最近的匹配项索引
+	 * @param {Array<{ from: number; to: number }>} matches
+	 * @param {number} cursorPos
+	 * @returns {number}
+	 */
+	function findNearestMatchIndex(matches, cursorPos) {
+	  if (matches.length === 0) {
+	    return -1;
+	  }
 
-	      this.addEventListeners();
-	      this.commands = {
-	        toggleRegexpMode: function toggleRegexpMode() {
-	          _this.regExpOption.checked = !_this.regExpOption.checked;
-	          _this.$syncOptions();
-	        },
-	        toggleCaseSensitive: function toggleCaseSensitive() {
-	          _this.caseSensitiveOption.checked = !_this.caseSensitiveOption.checked;
-	          _this.$syncOptions();
-	        },
-	        toggleWholeWords: function toggleWholeWords() {
-	          _this.wholeWordOption.checked = !_this.wholeWordOption.checked;
-	          _this.$syncOptions();
-	        }
-	      };
+	  // 光标落在匹配项内部，或选区 head 落在匹配末尾（to）时，仍视为当前匹配
+	  var insideIndex = _findIndexInstanceProperty(matches).call(matches, function (item) {
+	    return cursorPos >= item.from && cursorPos <= item.to;
+	  });
+	  if (insideIndex !== -1) {
+	    return insideIndex;
+	  }
+	  var nextIndex = _findIndexInstanceProperty(matches).call(matches, function (item) {
+	    return item.from >= cursorPos;
+	  });
+	  return nextIndex !== -1 ? nextIndex : 0;
+	}
 
-	      // 保存事件处理器引用，便于 destroy 时移除
-	      this.boundMousedownHandler = function (e) {
-	        _setTimeout(function () {
-	          _this.activeInput.focus();
-	        }, 0);
-	        e.stopPropagation();
-	      };
-	      this.boundClickHandler = function (e) {
-	        var t = e.target || e.srcElement;
-	        // @ts-ignore
-	        var action = t.getAttribute('action');
-	        if (action && _this[action]) _this[action]();else if (_this.commands[action]) _this.commands[action]();
-	        e.stopPropagation();
-	      };
-	      this.boundSearchInputHandler = function () {
-	        _findInstanceProperty(_this).call(_this, false, false);
-	      };
-	      this.boundSearchInputFocusHandler = function () {
-	        _this.activeInput = _this.searchInput;
-	      };
-	      this.boundReplaceInputFocusHandler = function () {
-	        _this.activeInput = _this.replaceInput;
-	      };
-	      el.addEventListener('mousedown', this.boundMousedownHandler);
-	      el.addEventListener('click', this.boundClickHandler);
-	      this.searchInput.addEventListener('input', this.boundSearchInputHandler);
-	      this.searchInput.addEventListener('focus', this.boundSearchInputFocusHandler);
-	      this.replaceInput.addEventListener('focus', this.boundReplaceInputFocusHandler);
+	/**
+	 * 搜索/替换：配置解析与文案提取
+	 *
+	 * 配置路径：`toolbars.config.searcher`，仅在 `new Cherry()` 时合并生效。
+	 * 实现位于 `toolbars/searcher/`，在 toolbars 中配置 `'search'` 即可启用。
+	 *
+	 * @module toolbars/searcher/config
+	 */
+
+	/** 面板从 Cherry 全局 locale 提取的字段 */
+	var SEARCHER_LOCALE_KEYS = ['searchFor', 'searchClear', 'caseSensitiveSearch', 'wholeWordSearch', 'regExpSearch', 'previousMatch', 'nextMatch', 'replace', 'replaceWith', 'replaceAll', 'selectAllMatches', 'toggleReplace'];
+
+	/**
+	 * @typedef {object} SearcherConfig
+	 * @property {boolean} enableReplace 是否启用替换能力（默认 true）
+	 * @property {boolean} expandReplaceOnOpen 打开面板时是否默认展开替换行（默认 false）
+	 */
+
+	/**
+	 * 解析 `toolbars.config.searcher`
+	 * @param {import('~types/cherry').CherrySearcherToolbarOption | undefined} config
+	 * @returns {SearcherConfig}
+	 */
+	function resolveSearcherConfig(config) {
+	  return {
+	    enableReplace: (config === null || config === void 0 ? void 0 : config.enableReplace) !== false,
+	    expandReplaceOnOpen: (config === null || config === void 0 ? void 0 : config.expandReplaceOnOpen) === true
+	  };
+	}
+
+	/**
+	 * @param {{ options?: { toolbars?: { config?: { searcher?: import('~types/cherry').CherrySearcherToolbarOption } } } } | undefined} cherry
+	 * @returns {import('~types/cherry').CherrySearcherToolbarOption | undefined}
+	 */
+	function getSearcherToolbarConfig(cherry) {
+	  var _cherry$options, _cherry$options$toolb, _cherry$options$toolb2;
+	  var config = cherry === null || cherry === void 0 ? void 0 : (_cherry$options = cherry.options) === null || _cherry$options === void 0 ? void 0 : (_cherry$options$toolb = _cherry$options.toolbars) === null || _cherry$options$toolb === void 0 ? void 0 : (_cherry$options$toolb2 = _cherry$options$toolb.config) === null || _cherry$options$toolb2 === void 0 ? void 0 : _cherry$options$toolb2.searcher;
+	  if (!config || _typeof$2(config) !== 'object') {
+	    return undefined;
+	  }
+	  return config;
+	}
+
+	/**
+	 * @param {{ options?: { toolbars?: { config?: { searcher?: import('~types/cherry').CherrySearcherToolbarOption } } } } | undefined} cherry
+	 * @returns {boolean}
+	 */
+	function isSearcherReplaceEnabled(cherry) {
+	  return resolveSearcherConfig(getSearcherToolbarConfig(cherry)).enableReplace;
+	}
+
+	/**
+	 * 从 Cherry 全局 locale 提取 Searcher 面板文案
+	 * @param {Record<string, string | undefined>} [hostLocale]
+	 * @returns {Record<string, string>}
+	 */
+	function pickSearcherLocale() {
+	  var hostLocale = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	  /** @type {Record<string, string>} */
+	  var picked = {};
+	  _forEachInstanceProperty(SEARCHER_LOCALE_KEYS).call(SEARCHER_LOCALE_KEYS, function (key) {
+	    var value = hostLocale[key];
+	    if (value !== undefined) {
+	      picked[key] = value;
+	    }
+	  });
+	  return picked;
+	}
+
+	/**
+	 * 搜索面板 DOM 模板（图标 + 完整 HTML 结构）
+	 *
+	 * @module toolbars/searcher/panel-dom
+	 */
+
+	var SEARCH_ICON = "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7.333 12.667A5.333 5.333 0 1 0 7.333 2a5.333 5.333 0 0 0 0 10.667ZM14 14l-2.9-2.9\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>";
+	var CLEAR_ICON = "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M12 4L4 12M4 4l8 8\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"/></svg>";
+	var CASE_ICON = "<svg class=\"cherry-searcher__toggle-icon\" viewBox=\"0 0 16 16\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\"><text x=\"8\" y=\"11.75\" text-anchor=\"middle\">Aa</text></svg>";
+	var WHOLE_WORD_ICON = "<svg class=\"cherry-searcher__toggle-icon\" viewBox=\"0 0 16 16\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\"><text x=\"8\" y=\"10.75\" text-anchor=\"middle\">ab</text><path d=\"M2.5 12.75H13.5\"/></svg>";
+	var REGEX_ICON = "<svg class=\"cherry-searcher__toggle-icon\" viewBox=\"0 0 16 16\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\"><text x=\"8\" y=\"11.75\" text-anchor=\"middle\">.*</text></svg>";
+	var PREV_ICON = "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M12 10L8 6L4 10\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>";
+	var NEXT_ICON = "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M4 6L8 10L12 6\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>";
+	var EXPAND_ICON = "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M6 4L10 8L6 12\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>";
+
+	/**
+	 * 构建替换行 HTML
+	 * @param {boolean} [hidden=true]
+	 * @returns {string}
+	 */
+	function buildReplaceRowHtml() {
+	  var hidden = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+	  var hiddenClass = hidden ? ' is-hidden' : '';
+	  return ["    <div class=\"cherry-searcher__row cherry-searcher__replace-row".concat(hiddenClass, "\">"), '      <div class="cherry-searcher__input-wrapper cherry-searcher__replace-wrapper">', '        <span class="cherry-searcher__expand-spacer" aria-hidden="true"></span>', '        <input class="cherry-searcher__replace-input" type="text" spellcheck="false" />', "        <button type=\"button\" class=\"cherry-searcher__clear cherry-searcher__replace-clear\" aria-label=\"clear\">".concat(CLEAR_ICON, "</button>"), '        <span class="cherry-searcher__divider"></span>', '        <div class="cherry-searcher__replace-actions">', '          <button type="button" class="cherry-searcher__replace-btn is-unavailable" data-action="replace" disabled></button>', '          <button type="button" class="cherry-searcher__replace-btn cherry-searcher__replace-btn--all is-unavailable" data-action="replaceAll" disabled></button>', '          <button type="button" class="cherry-searcher__replace-btn cherry-searcher__replace-btn--select-all is-unavailable" data-action="selectAllMatches" disabled></button>', '        </div>', '      </div>', '    </div>'].join('\n');
+	}
+
+	/**
+	 * 构建搜索面板 innerHTML（不含根节点 `.cherry-searcher`）
+	 * @param {boolean} enableReplace 是否包含替换行与展开按钮
+	 * @returns {string}
+	 */
+	function buildSearcherPanelHtml(enableReplace) {
+	  var _context;
+	  var expandBtnHtml = enableReplace ? "<button type=\"button\" class=\"cherry-searcher__expand-btn\" aria-expanded=\"false\">".concat(EXPAND_ICON, "</button>") : '';
+	  var replaceRowHtml = enableReplace ? buildReplaceRowHtml(true) : '';
+	  return _filterInstanceProperty(_context = ['<div class="cherry-searcher__container">', '  <div class="cherry-searcher__rows">', '    <div class="cherry-searcher__row cherry-searcher__search-row">', '      <div class="cherry-searcher__input-wrapper">', expandBtnHtml, "        <span class=\"cherry-searcher__icon cherry-searcher__icon--search\">".concat(SEARCH_ICON, "</span>"), '        <input class="cherry-searcher__input" type="text" spellcheck="false" />', "        <button type=\"button\" class=\"cherry-searcher__clear\" aria-label=\"clear\">".concat(CLEAR_ICON, "</button>"), '        <span class="cherry-searcher__divider"></span>', '        <div class="cherry-searcher__toggles">', "          <button type=\"button\" class=\"cherry-searcher__toggle\" data-type=\"caseSensitive\" aria-pressed=\"false\" title=\"\">".concat(CASE_ICON, "</button>"), "          <button type=\"button\" class=\"cherry-searcher__toggle\" data-type=\"wholeWord\" aria-pressed=\"false\" title=\"\">".concat(WHOLE_WORD_ICON, "</button>"), "          <button type=\"button\" class=\"cherry-searcher__toggle\" data-type=\"useRegex\" aria-pressed=\"false\" title=\"\">".concat(REGEX_ICON, "</button>"), '        </div>', '        <span class="cherry-searcher__divider"></span>', '        <div class="cherry-searcher__nav">', '          <span class="cherry-searcher__counter">0/0</span>', "          <button type=\"button\" class=\"cherry-searcher__nav-btn\" data-direction=\"prev\" aria-label=\"prev\">".concat(PREV_ICON, "</button>"), "          <button type=\"button\" class=\"cherry-searcher__nav-btn\" data-direction=\"next\" aria-label=\"next\">".concat(NEXT_ICON, "</button>"), '        </div>', '      </div>', '    </div>', replaceRowHtml, '  </div>', '</div>']).call(_context, Boolean).join('\n');
+	}
+
+	/**
+	 * 应用替换行初始展开态
+	 * @param {HTMLElement} root 面板根节点
+	 * @param {boolean} replaceExpanded
+	 */
+	function applyReplaceExpandedDomState(root, replaceExpanded) {
+	  var _root$querySelector, _root$querySelector2;
+	  if (!replaceExpanded) {
+	    return;
+	  }
+	  root.classList.add('is-replace-expanded');
+	  (_root$querySelector = root.querySelector('.cherry-searcher__replace-row')) === null || _root$querySelector === void 0 ? void 0 : _root$querySelector.classList.remove('is-hidden');
+	  (_root$querySelector2 = root.querySelector('.cherry-searcher__expand-btn')) === null || _root$querySelector2 === void 0 ? void 0 : _root$querySelector2.setAttribute('aria-expanded', 'true');
+	}
+
+	/** 输入防抖间隔（毫秒） */
+	var SEARCH_DEBOUNCE_MS = 150;
+
+	/**
+	 * 面板构造参数
+	 * @typedef {object} SearcherPanelParams
+	 * @property {SearcherEditorAdapter} editorAdapter 编辑器读写适配器
+	 * @property {Record<string, string | undefined>} [locale] Cherry 全局 locale，面板通过 pickSearcherLocale 提取文案
+	 * @property {boolean} [enableReplace=true] 是否展示替换行
+	 * @property {ParentNode | null} [mountTarget] 面板挂载节点，通常为 `.cherry-editor`
+	 * @property {(visible: boolean) => void} [onVisibilityChange] 面板显隐回调，用于同步工具栏按钮激活态
+	 */
+
+	/** @typedef {import('./bridge-utils').SearcherEditorAdapter} SearcherEditorAdapter */
+
+	/**
+	 * 面板显示选项
+	 * @typedef {object} SearcherShowOptions
+	 * @property {boolean} [expandReplace] 为 true 时打开面板同时展开替换行（Mod+H）
+	 * @property {boolean} [selectAll] 为 true 时聚焦输入框并全选内容（首次带选中文本打开）
+	 */
+
+	/**
+	 * 搜索运行时状态
+	 * @typedef {object} SearcherPanelState
+	 * @property {string} query 当前搜索关键词
+	 * @property {boolean} caseSensitive 是否区分大小写
+	 * @property {boolean} wholeWord 是否全字匹配
+	 * @property {boolean} useRegex 是否按正则表达式解析搜索词
+	 * @property {Array<{ from: number; to: number }>} matches 文档中全部匹配区间
+	 * @property {number} activeMatchIndex 当前高亮匹配项在 matches 中的下标，无匹配时为 -1
+	 */
+
+	/**
+	 * 查询必需的 DOM 节点并断言类型
+	 * @template {Element} T
+	 * @param {ParentNode} root
+	 * @param {string} selector
+	 * @returns {T}
+	 */
+	function queryRequired(root, selector) {
+	  var element = root.querySelector(selector);
+	  if (!element) {
+	    throw new Error("SearcherPanel: missing element \"".concat(selector, "\""));
+	  }
+	  return /** @type {T} */element;
+	}
+
+	/**
+	 * 查询可选 DOM 节点
+	 * @template {Element} T
+	 * @param {ParentNode} root
+	 * @param {string} selector
+	 * @returns {T | null}
+	 */
+	function queryOptional(root, selector) {
+	  return /** @type {T | null} */root.querySelector(selector);
+	}
+
+	/**
+	 * 搜索/替换面板
+	 *
+	 * 搜索行：输入框、匹配选项、计数与导航。
+	 * 替换行：可折叠，由 `enableReplace` 控制；只读时禁用替换操作。
+	 */
+	var SearcherPanel = /*#__PURE__*/function () {
+	  /**
+	   * 创建搜索面板并挂载到编辑区
+	   *
+	   * @param {SearcherPanelParams} params 构造参数
+	   */
+	  function SearcherPanel(params) {
+	    var _context;
+	    _classCallCheck$1(this, SearcherPanel);
+	    /** @type {SearcherEditorAdapter} 编辑器适配器 */
+	    _defineProperty$2(this, "editorAdapter", void 0);
+	    /** @type {Record<string, string>} 面板文案，字段见 locale.js 的 SEARCHER_LOCALE_KEYS */
+	    _defineProperty$2(this, "locale", void 0);
+	    /** @type {HTMLElement} 面板根节点，类名 `cherry-searcher` */
+	    _defineProperty$2(this, "dom", void 0);
+	    /** @type {HTMLInputElement} */
+	    _defineProperty$2(this, "input", void 0);
+	    /** @type {HTMLButtonElement | null} */
+	    _defineProperty$2(this, "expandButton", void 0);
+	    /** @type {HTMLButtonElement} */
+	    _defineProperty$2(this, "clearButton", void 0);
+	    /** @type {HTMLButtonElement} */
+	    _defineProperty$2(this, "caseToggle", void 0);
+	    /** @type {HTMLButtonElement} */
+	    _defineProperty$2(this, "wholeWordToggle", void 0);
+	    /** @type {HTMLButtonElement} */
+	    _defineProperty$2(this, "regexToggle", void 0);
+	    /** @type {HTMLElement} */
+	    _defineProperty$2(this, "counter", void 0);
+	    /** @type {HTMLButtonElement} */
+	    _defineProperty$2(this, "prevButton", void 0);
+	    /** @type {HTMLButtonElement} */
+	    _defineProperty$2(this, "nextButton", void 0);
+	    /** @type {HTMLElement | null} */
+	    _defineProperty$2(this, "replaceRow", void 0);
+	    /** @type {HTMLInputElement | null} */
+	    _defineProperty$2(this, "replaceInput", void 0);
+	    /** @type {HTMLButtonElement | null} */
+	    _defineProperty$2(this, "replaceClearButton", void 0);
+	    /** @type {HTMLButtonElement | null} */
+	    _defineProperty$2(this, "replaceButton", void 0);
+	    /** @type {HTMLButtonElement | null} */
+	    _defineProperty$2(this, "replaceAllButton", void 0);
+	    /** @type {HTMLButtonElement | null} */
+	    _defineProperty$2(this, "selectAllMatchesButton", void 0);
+	    var editorAdapter = params.editorAdapter,
+	      _params$locale = params.locale,
+	      locale = _params$locale === void 0 ? {} : _params$locale,
+	      _params$enableReplace = params.enableReplace,
+	      enableReplace = _params$enableReplace === void 0 ? true : _params$enableReplace,
+	      _params$mountTarget = params.mountTarget,
+	      mountTarget = _params$mountTarget === void 0 ? typeof document !== 'undefined' ? document.body : null : _params$mountTarget,
+	      onVisibilityChange = params.onVisibilityChange;
+	    this.editorAdapter = editorAdapter;
+	    this.locale = pickSearcherLocale(locale);
+	    this.enableReplace = enableReplace;
+	    this.onVisibilityChange = onVisibilityChange;
+	    this.replaceExpanded = false;
+
+	    /** @type {SearcherPanelState} 搜索匹配与高亮状态 */
+	    this.state = {
+	      query: '',
+	      caseSensitive: false,
+	      wholeWord: false,
+	      useRegex: false,
+	      matches: [],
+	      activeMatchIndex: -1
+	    };
+
+	    /** @type {ReturnType<typeof setTimeout> | null} */
+	    this.searchTimer = null;
+	    /** @type {boolean} */
+	    this.pendingKeepActiveIndex = false;
+	    this.handlePanelShortcutKey = _bindInstanceProperty(_context = this.handlePanelShortcutKey).call(_context, this);
+	    this.dom = this.createDOM();
+	    this.cacheElements();
+	    this.bindEvents();
+	    this.updateLocaleStrings();
+	    this.updateReplaceButtonState();
+	    this.dom.style.display = 'none';
+	    if (mountTarget) {
+	      mountTarget.appendChild(this.dom);
+	    }
+	  }
+
+	  /**
+	   * 面板是否可见
+	   * @returns {boolean}
+	   */
+	  return _createClass$1(SearcherPanel, [{
+	    key: "isVisible",
+	    value: function isVisible() {
+	      return this.dom.style.display !== 'none';
 	    }
 
 	    /**
-	     * 销毁 SearchBox 实例，清理事件监听器
-	     * 必须调用此方法以避免内存泄漏
+	     * 显示搜索面板
+	     *
+	     * @param {string} [selection=''] 预填搜索词；有值时立即执行搜索
+	     * @param {SearcherShowOptions} [showOptions] 显示选项，`expandReplace` 为 true 时展开替换行
+	     */
+	  }, {
+	    key: "show",
+	    value: function show() {
+	      var _this$onVisibilityCha;
+	      var selection = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+	      var showOptions = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	      var _showOptions$expandRe = showOptions.expandReplace,
+	        expandReplace = _showOptions$expandRe === void 0 ? false : _showOptions$expandRe,
+	        _showOptions$selectAl = showOptions.selectAll,
+	        selectAll = _showOptions$selectAl === void 0 ? Boolean(selection) : _showOptions$selectAl;
+	      this.dom.style.display = '';
+	      if (expandReplace) {
+	        this.setReplaceExpanded(true);
+	      }
+	      if (selection) {
+	        this.setQuery(selection, false);
+	      } else if (this.state.query) {
+	        this.syncMatches(true, true);
+	      }
+	      this.focusPanelInput({
+	        selectAll: selectAll,
+	        replace: this.replaceExpanded
+	      });
+	      this.updateReplaceButtonState();
+	      (_this$onVisibilityCha = this.onVisibilityChange) === null || _this$onVisibilityCha === void 0 ? void 0 : _this$onVisibilityCha.call(this, true);
+	    }
+
+	    /**
+	     * 隐藏搜索面板，清除编辑器高亮并将焦点交还编辑器
+	     */
+	  }, {
+	    key: "hide",
+	    value: function hide() {
+	      var _this$onVisibilityCha2;
+	      this.clearHighlight();
+	      this.dom.style.display = 'none';
+	      this.editorAdapter.focus();
+	      (_this$onVisibilityCha2 = this.onVisibilityChange) === null || _this$onVisibilityCha2 === void 0 ? void 0 : _this$onVisibilityCha2.call(this, false);
+	    }
+
+	    /**
+	     * 聚焦搜索或替换输入框
+	     * @param {{ selectAll?: boolean; replace?: boolean }} [options]
+	     */
+	  }, {
+	    key: "focusPanelInput",
+	    value: function focusPanelInput() {
+	      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	      var _options$selectAll = options.selectAll,
+	        selectAll = _options$selectAll === void 0 ? false : _options$selectAll,
+	        _options$replace = options.replace,
+	        replace = _options$replace === void 0 ? false : _options$replace;
+	      var input = replace && this.replaceInput ? this.replaceInput : this.input;
+	      input.focus();
+	      if (selectAll) {
+	        input.select();
+	        return;
+	      }
+	      var end = input.value.length;
+	      input.setSelectionRange(end, end);
+	    }
+
+	    /**
+	     * Esc：先清空当前输入框内容，再次 Esc 关闭面板
+	     * @param {HTMLInputElement} inputEl
+	     */
+	  }, {
+	    key: "handleEscapeKey",
+	    value: function handleEscapeKey(inputEl) {
+	      var _this$replaceInput;
+	      if (inputEl === this.replaceInput && (_this$replaceInput = this.replaceInput) !== null && _this$replaceInput !== void 0 && _this$replaceInput.value) {
+	        this.clearReplaceText();
+	        return;
+	      }
+	      if (this.state.query) {
+	        this.clearQuery();
+	        this.input.focus();
+	        return;
+	      }
+	      this.hide();
+	    }
+
+	    /**
+	     * 销毁面板：取消定时器、清除高亮、移除 DOM
 	     */
 	  }, {
 	    key: "destroy",
 	    value: function destroy() {
-	      if (this.element) {
-	        this.element.removeEventListener('mousedown', this.boundMousedownHandler);
-	        this.element.removeEventListener('click', this.boundClickHandler);
+	      this.cancelScheduledSearch();
+	      this.clearHighlight();
+	      if (this.dom.parentNode) {
+	        this.dom.parentNode.removeChild(this.dom);
 	      }
-	      if (this.searchInput) {
-	        this.searchInput.removeEventListener('input', this.boundSearchInputHandler);
-	        this.searchInput.removeEventListener('focus', this.boundSearchInputFocusHandler);
-	      }
-	      if (this.replaceInput) {
-	        this.replaceInput.removeEventListener('focus', this.boundReplaceInputFocusHandler);
-	      }
-	      if (this.$cherry && this.$cherry.$event && this.boundTogglePreviewHandler) {
-	        this.$cherry.$event.off('togglePreviewHidden', this.boundTogglePreviewHandler);
-	      }
-	      if (this.element && this.element.parentNode) {
-	        this.element.parentNode.removeChild(this.element);
-	      }
-	      this.element = null;
-	      this.cm = null;
-	      this.$cherry = null;
-	      this.searchInput = null;
-	      this.replaceInput = null;
 	    }
 
-	    // 监听预览区域是否隐藏
+	    /**
+	     * 面板内拦截 Mod+F / Mod+H，避免唤起浏览器查找并支持再次 Mod+F 关闭
+	     * @param {KeyboardEvent} event
+	     */
 	  }, {
-	    key: "addEventListeners",
-	    value: function addEventListeners() {
-	      var searchElement = /** @type {HTMLElement} */this.element;
-	      this.boundTogglePreviewHandler = function (state) {
-	        if (state) {
-	          searchElement.style.right = '48px';
-	        } else {
-	          searchElement.style.right = '';
-	        }
-	      };
-	      this.$cherry.$event.on('togglePreviewHidden', this.boundTogglePreviewHandler);
+	    key: "handlePanelShortcutKey",
+	    value: function handlePanelShortcutKey(event) {
+	      if (!this.isVisible()) {
+	        return;
+	      }
+	      var mod = event.ctrlKey || event.metaKey;
+	      if (!mod) {
+	        return;
+	      }
+	      var key = event.key.toLowerCase();
+	      if (key === 'f') {
+	        event.preventDefault();
+	        event.stopPropagation();
+	        this.hide();
+	        return;
+	      }
+	      if (key === 'h' && this.enableReplace) {
+	        var _this$replaceInput2, _this$replaceInput3;
+	        event.preventDefault();
+	        event.stopPropagation();
+	        this.setReplaceExpanded(true);
+	        (_this$replaceInput2 = this.replaceInput) === null || _this$replaceInput2 === void 0 ? void 0 : _this$replaceInput2.focus();
+	        (_this$replaceInput3 = this.replaceInput) === null || _this$replaceInput3 === void 0 ? void 0 : _this$replaceInput3.select();
+	      }
 	    }
+
+	    /**
+	     * 构建面板 DOM 结构（搜索行 + 可折叠替换行）
+	     *
+	     * @returns {HTMLElement} 面板根元素
+	     */
 	  }, {
-	    key: "addHtml",
-	    value: function addHtml() {
-	      var _this$cm$view;
-	      var el = ((_this$cm$view = this.cm.view) === null || _this$cm$view === void 0 ? void 0 : _this$cm$view.dom) || document.body;
-	      var div = document.createElement('div');
-	      var html = ['<div class="ace_search right">', "<button type=\"button\" action=\"hide\" class=\"ace_searchbtn_close\" title=\"".concat(this.$cherry.locale.close, "\">"), '<svg width="12" height="12" viewBox="0 0 12 12" fill="none">', '<path d="M11 1L1 11M1 1L11 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>', '</svg>', '</button>', '<div class="ace_search_form">', "<input class=\"ace_search_field\" placeholder=\"".concat(this.$cherry.locale.searchFor, "\" spellcheck=\"false\"></input>"), "<button type=\"button\" action=\"findNext\" class=\"ace_searchbtn next\" title=\"".concat(this.$cherry.locale.nextMatch, "\">"), '<svg width="12" height="12" viewBox="0 0 12 12" fill="none">', '<path d="M3 5.5L6 8.5L9 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>', '</svg>', '</button>', "<button type=\"button\" action=\"findPrev\" class=\"ace_searchbtn prev\" title=\"".concat(this.$cherry.locale.previousMatch, "\">"), '<svg width="12" height="12" viewBox="0 0 12 12" fill="none">', '<path d="M3 8.5L6 5.5L9 8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>', '</svg>', '</button>', '</div>', '<div class="ace_replace_form">', "<input class=\"ace_search_field\" placeholder=\"".concat(this.$cherry.locale.replaceWith, "\" spellcheck=\"false\"></input>"), "<button type=\"button\" action=\"replaceAndFindNext\" title=\"".concat(this.$cherry.locale.replace, "\" class=\"ace_replacebtn\">"), '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">', '<path fill-rule="evenodd" clip-rule="evenodd" d="M3.221 3.739L5.482 6.008L7.7 3.784L7 3.084L5.988 4.091L5.98 2.491C5.97909 2.35567 6.03068 2.22525 6.12392 2.12716C6.21716 2.02908 6.3448 1.97095 6.48 1.965H8V1H6.48C6.28496 1.00026 6.09189 1.03902 5.91186 1.11405C5.73183 1.18908 5.56838 1.29892 5.43088 1.43725C5.29338 1.57558 5.18455 1.73969 5.11061 1.92018C5.03667 2.10066 4.99908 2.29396 5 2.489V4.1L3.927 3.033L3.221 3.739ZM9.89014 5.53277H9.90141C10.0836 5.84426 10.3521 6 10.707 6C11.0995 6 11.4131 5.83236 11.6479 5.49708C11.8826 5.1618 12 4.71728 12 4.16353C12 3.65304 11.8995 3.2507 11.6986 2.95652C11.4977 2.66234 11.2113 2.51525 10.8394 2.51525C10.4338 2.51525 10.1211 2.70885 9.90141 3.09604H9.89014V1H9V5.91888H9.89014V5.53277ZM9.87606 4.47177V4.13108C9.87606 3.88449 9.93427 3.6844 10.0507 3.53082C10.169 3.37724 10.3174 3.30045 10.4958 3.30045C10.6854 3.30045 10.831 3.37833 10.9324 3.53407C11.0357 3.68765 11.0873 3.9018 11.0873 4.17651C11.0873 4.50746 11.031 4.76379 10.9183 4.94549C10.8075 5.12503 10.6507 5.2148 10.4479 5.2148C10.2808 5.2148 10.1437 5.14449 10.0366 5.00389C9.92958 4.86329 9.87606 4.68592 9.87606 4.47177ZM9 12.7691C8.74433 12.923 8.37515 13 7.89247 13C7.32855 13 6.87216 12.8225 6.5233 12.4674C6.17443 12.1124 6 11.6543 6 11.0931C6 10.4451 6.18638 9.93484 6.55914 9.5624C6.93429 9.18747 7.43489 9.00001 8.06093 9.00001C8.49343 9.00001 8.80645 9.0596 9 9.17878V10.1769C8.76344 9.99319 8.4994 9.90132 8.20789 9.90132C7.88292 9.90132 7.62485 10.0006 7.43369 10.1993C7.24492 10.3954 7.15054 10.6673 7.15054 11.0149C7.15054 11.3526 7.24134 11.6183 7.42294 11.8119C7.60454 12.0031 7.85424 12.0987 8.17204 12.0987C8.454 12.0987 8.72999 12.0068 9 11.8231V12.7691ZM4 7L3 8V14L4 15H11L12 14V8L11 7H4ZM4 8H5H10H11V9V13V14H10H5H4V13V9V8Z" fill="currentColor"/>', '</svg></button>', "<button type=\"button\" action=\"replaceAll\" title=\"".concat(_replaceAllInstanceProperty(this.$cherry.locale), "\" class=\"ace_replacebtn\">"), '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">', '<path fill-rule="evenodd" clip-rule="evenodd" d="M11.6009 2.67683C11.7474 2.36708 11.9559 2.2122 12.2263 2.2122C12.4742 2.2122 12.6651 2.32987 12.7991 2.56522C12.933 2.80056 13 3.12243 13 3.53082C13 3.97383 12.9218 4.32944 12.7653 4.59766C12.6088 4.86589 12.3997 5 12.138 5C11.9014 5 11.7224 4.87541 11.6009 4.62622H11.5934V4.93511H11V1H11.5934V2.67683H11.6009ZM11.584 3.77742C11.584 3.94873 11.6197 4.09063 11.6911 4.20311C11.7624 4.3156 11.8538 4.37184 11.9653 4.37184C12.1005 4.37184 12.205 4.30002 12.2789 4.15639C12.354 4.01103 12.3915 3.80597 12.3915 3.54121C12.3915 3.32144 12.3571 3.15012 12.2883 3.02726C12.2207 2.90266 12.1236 2.84036 11.9972 2.84036C11.8782 2.84036 11.7793 2.9018 11.7005 3.02466C11.6228 3.14752 11.584 3.30759 11.584 3.50487V3.77742ZM4.11969 7.695L2 5.56781L2.66188 4.90594L3.66781 5.90625V4.39594C3.66695 4.21309 3.70219 4.03187 3.7715 3.86266C3.84082 3.69346 3.94286 3.53961 4.07176 3.40992C4.20066 3.28023 4.3539 3.17727 4.52268 3.10692C4.69146 3.03658 4.87246 3.00024 5.05531 3H7.39906V3.90469H5.05531C4.92856 3.91026 4.8089 3.96476 4.72149 4.05672C4.63408 4.14868 4.58571 4.27094 4.58656 4.39781L4.59406 5.89781L5.54281 4.95375L6.19906 5.61L4.11969 7.695ZM9.3556 4.93017H10V3.22067C10 2.40689 9.68534 2 9.05603 2C8.92098 2 8.77083 2.02421 8.6056 2.07263C8.44181 2.12104 8.3125 2.17691 8.21767 2.24022V2.90503C8.45474 2.70205 8.70474 2.60056 8.96767 2.60056C9.22917 2.60056 9.35991 2.75698 9.35991 3.06983L8.76078 3.17318C8.25359 3.25885 8 3.57914 8 4.13408C8 4.39665 8.06106 4.60708 8.18319 4.76536C8.30675 4.92179 8.47557 5 8.68966 5C8.97989 5 9.19899 4.83985 9.34698 4.51955H9.3556V4.93017ZM9.35991 3.57542V3.76816C9.35991 3.9432 9.31968 4.08845 9.23922 4.20391C9.15876 4.3175 9.0546 4.3743 8.92672 4.3743C8.83477 4.3743 8.76149 4.34264 8.7069 4.27933C8.65374 4.21415 8.62716 4.13128 8.62716 4.03073C8.62716 3.80912 8.73779 3.6797 8.95905 3.64246L9.35991 3.57542ZM7 12.9302H6.3556V12.5196H6.34698C6.19899 12.8399 5.97989 13 5.68966 13C5.47557 13 5.30675 12.9218 5.18319 12.7654C5.06106 12.6071 5 12.3966 5 12.1341C5 11.5791 5.25359 11.2588 5.76078 11.1732L6.35991 11.0698C6.35991 10.757 6.22917 10.6006 5.96767 10.6006C5.70474 10.6006 5.45474 10.702 5.21767 10.905V10.2402C5.3125 10.1769 5.44181 10.121 5.6056 10.0726C5.77083 10.0242 5.92098 10 6.05603 10C6.68534 10 7 10.4069 7 11.2207V12.9302ZM6.35991 11.7682V11.5754L5.95905 11.6425C5.73779 11.6797 5.62716 11.8091 5.62716 12.0307C5.62716 12.1313 5.65374 12.2142 5.7069 12.2793C5.76149 12.3426 5.83477 12.3743 5.92672 12.3743C6.0546 12.3743 6.15876 12.3175 6.23922 12.2039C6.31968 12.0885 6.35991 11.9432 6.35991 11.7682ZM9.26165 13C9.58343 13 9.82955 12.9423 10 12.8268V12.1173C9.81999 12.2551 9.636 12.324 9.44803 12.324C9.23616 12.324 9.06969 12.2523 8.94863 12.1089C8.82756 11.9637 8.76702 11.7644 8.76702 11.5112C8.76702 11.2505 8.82995 11.0466 8.95579 10.8994C9.08323 10.7505 9.25528 10.676 9.47192 10.676C9.66627 10.676 9.84229 10.7449 10 10.8827V10.1341C9.87097 10.0447 9.66229 10 9.37395 10C8.95659 10 8.62286 10.1406 8.37276 10.4218C8.12425 10.7011 8 11.0838 8 11.5698C8 11.9907 8.11629 12.3343 8.34887 12.6006C8.58144 12.8669 8.8857 13 9.26165 13ZM2 9L3 8H12L13 9V14L12 15H3L2 14V9ZM3 9V14H12V9H3ZM6 7L7 6H14L15 7V12L14 13V12V7H7H6Z" fill="currentColor"/>', '</svg></button>', '</div>', '<div class="ace_search_options">', "<span action=\"toggleReplace\" class=\"ace_button replace_toggle\" title=\"".concat(this.$cherry.locale.toggleReplace, "\">-</span>"), "<span class=\"ace_search_counter\">0 ".concat(this.$cherry.locale.matchesFoundText, "</span>"), '<div class="ace_search_control">', "<span action=\"toggleRegexpMode\" title=\"".concat(this.$cherry.locale.regExpSearch, "\"></span>"), "<span action=\"toggleCaseSensitive\" class=\"ace_button\" title=\"".concat(this.$cherry.locale.caseSensitiveSearch, "\">Aa</span>"), "<span action=\"toggleWholeWords\" title=\"".concat(this.$cherry.locale.wholeWordSearch, "\"></span>"), '</div>', '</div>', '</div>'].join('');
-	      div.innerHTML = html;
-	      var elSearch = div.firstChild;
-	      el.appendChild(elSearch);
-	      return elSearch;
+	    key: "createDOM",
+	    value: function createDOM() {
+	      var container = document.createElement('div');
+	      container.className = 'cherry-searcher';
+	      container.innerHTML = buildSearcherPanelHtml(this.enableReplace);
+	      applyReplaceExpandedDomState(container, this.replaceExpanded);
+	      return container;
 	    }
+
+	    /** 缓存模板中的输入框、按钮等交互元素引用 */
 	  }, {
-	    key: "initElements",
-	    value: function initElements(el) {
-	      this.searchBox = el.querySelector('.ace_search_form');
-	      this.replaceBox = el.querySelector('.ace_replace_form');
-	      this.searchOptions = el.querySelector('.ace_search_options');
-	      this.regExpOption = el.querySelector('[action=toggleRegexpMode]');
-	      this.caseSensitiveOption = el.querySelector('[action=toggleCaseSensitive]');
-	      this.wholeWordOption = el.querySelector('[action=toggleWholeWords]');
-	      this.searchInput = this.searchBox.querySelector('.ace_search_field');
-	      this.replaceInput = this.replaceBox.querySelector('.ace_search_field');
+	    key: "cacheElements",
+	    value: function cacheElements() {
+	      this.expandButton = /** @type {HTMLButtonElement | null} */
+	      queryOptional(this.dom, '.cherry-searcher__expand-btn');
+	      this.input = /** @type {HTMLInputElement} */queryRequired(this.dom, '.cherry-searcher__input');
+	      this.clearButton = /** @type {HTMLButtonElement} */queryRequired(this.dom, '.cherry-searcher__clear');
+	      this.caseToggle = /** @type {HTMLButtonElement} */queryRequired(this.dom, '[data-type="caseSensitive"]');
+	      this.wholeWordToggle = /** @type {HTMLButtonElement} */queryRequired(this.dom, '[data-type="wholeWord"]');
+	      this.regexToggle = /** @type {HTMLButtonElement} */queryRequired(this.dom, '[data-type="useRegex"]');
+	      this.counter = queryRequired(this.dom, '.cherry-searcher__counter');
+	      this.prevButton = /** @type {HTMLButtonElement} */queryRequired(this.dom, '[data-direction="prev"]');
+	      this.nextButton = /** @type {HTMLButtonElement} */queryRequired(this.dom, '[data-direction="next"]');
+	      this.replaceRow = queryOptional(this.dom, '.cherry-searcher__replace-row');
+	      this.replaceInput = /** @type {HTMLInputElement | null} */
+	      queryOptional(this.dom, '.cherry-searcher__replace-input');
+	      this.replaceClearButton = /** @type {HTMLButtonElement | null} */
+	      queryOptional(this.dom, '.cherry-searcher__replace-clear');
+	      this.replaceButton = /** @type {HTMLButtonElement | null} */queryOptional(this.dom, '[data-action="replace"]');
+	      this.replaceAllButton = /** @type {HTMLButtonElement | null} */
+	      queryOptional(this.dom, '[data-action="replaceAll"]');
+	      this.selectAllMatchesButton = /** @type {HTMLButtonElement | null} */
+	      queryOptional(this.dom, '[data-action="selectAllMatches"]');
 	    }
+
+	    /** 绑定替换区事件（仅 enableReplace 为 true 时在构造阶段调用一次） */
 	  }, {
-	    key: "bindKeys",
-	    value: function bindKeys() {
-	      var sb = this;
-	      var obj = {
-	        'Ctrl-F|Cmd-F|Ctrl-H|Command-Alt-F': function CtrlFCmdFCtrlHCommandAltF() {
-	          sb.isReplace = !sb.isReplace;
-	          var isReplace = sb.isReplace;
-	          sb.replaceBox.style.display = isReplace ? '' : 'none';
-	          sb[isReplace ? 'replaceInput' : 'searchInput'].focus();
-	        },
-	        'Ctrl-G|Cmd-G': function CtrlGCmdG() {
-	          sb.findNext();
-	        },
-	        'Ctrl-Shift-G|Cmd-Shift-G': function CtrlShiftGCmdShiftG() {
-	          sb.findPrev();
-	        },
-	        Esc: function Esc() {
-	          _setTimeout(function () {
-	            sb.hide();
-	          });
-	        },
-	        Enter: function Enter() {
-	          if (sb.activeInput === sb.replaceInput) sb.replace();
-	          sb.findNext();
-	        },
-	        'Shift-Enter': function ShiftEnter() {
-	          if (sb.activeInput === sb.replaceInput) sb.replace();
-	          sb.findPrev();
-	        },
-	        'Alt-Enter': function AltEnter() {
-	          if (sb.activeInput === sb.replaceInput) _replaceAllInstanceProperty(sb).call(sb);
-	          sb.findAll();
-	        },
-	        Tab: function Tab() {
-	          if (this.activeInput === this.replaceInput) this.searchInput.focus();else this.replaceInput.focus();
-	        }
-	      };
-	      this.element.addEventListener('keydown', function (event) {
-	        var _context;
-	        _someInstanceProperty(_context = _Object$keys(obj)).call(_context, function (name) {
-	          var is = key(name, event);
-	          if (is) {
-	            event.stopPropagation();
-	            event.preventDefault();
-	            obj[name](event);
+	    key: "bindReplaceEvents",
+	    value: function bindReplaceEvents() {
+	      var _this$replaceInput4,
+	        _this = this,
+	        _this$replaceInput5,
+	        _this$expandButton,
+	        _this$replaceButton,
+	        _this$replaceAllButto,
+	        _this$selectAllMatche,
+	        _this$replaceClearBut;
+	      (_this$replaceInput4 = this.replaceInput) === null || _this$replaceInput4 === void 0 ? void 0 : _this$replaceInput4.addEventListener('input', function () {
+	        _this.updateReplaceClearVisibility();
+	        _this.updateReplaceButtonState();
+	      });
+	      (_this$replaceInput5 = this.replaceInput) === null || _this$replaceInput5 === void 0 ? void 0 : _this$replaceInput5.addEventListener('keydown', function (event) {
+	        var keyboardEvent = /** @type {KeyboardEvent} */event;
+	        if (keyboardEvent.key === 'Enter') {
+	          keyboardEvent.preventDefault();
+	          if (keyboardEvent.shiftKey) {
+	            _this.replaceCurrent(true);
+	          } else {
+	            _this.replaceCurrent();
 	          }
-	          return is;
-	        });
+	        } else if (keyboardEvent.key === 'Escape') {
+	          keyboardEvent.preventDefault();
+	          _this.handleEscapeKey(_this.replaceInput);
+	        }
+	      });
+	      (_this$expandButton = this.expandButton) === null || _this$expandButton === void 0 ? void 0 : _this$expandButton.addEventListener('click', function () {
+	        _this.setReplaceExpanded(!_this.replaceExpanded);
+	        if (_this.replaceExpanded) {
+	          var _this$replaceInput6;
+	          (_this$replaceInput6 = _this.replaceInput) === null || _this$replaceInput6 === void 0 ? void 0 : _this$replaceInput6.focus();
+	        } else {
+	          _this.input.focus();
+	        }
+	      });
+	      (_this$replaceButton = this.replaceButton) === null || _this$replaceButton === void 0 ? void 0 : _this$replaceButton.addEventListener('click', function () {
+	        _this.replaceCurrent();
+	      });
+	      (_this$replaceAllButto = this.replaceAllButton) === null || _this$replaceAllButto === void 0 ? void 0 : _this$replaceAllButto.addEventListener('click', function () {
+	        _replaceAllInstanceProperty(_this).call(_this);
+	      });
+	      (_this$selectAllMatche = this.selectAllMatchesButton) === null || _this$selectAllMatche === void 0 ? void 0 : _this$selectAllMatche.addEventListener('click', function () {
+	        _this.selectAllMatches();
+	      });
+	      (_this$replaceClearBut = this.replaceClearButton) === null || _this$replaceClearBut === void 0 ? void 0 : _this$replaceClearBut.addEventListener('click', function (event) {
+	        event.stopPropagation();
+	        _this.clearReplaceText();
 	      });
 	    }
+
+	    /** 绑定输入、键盘、导航、替换等交互事件 */
 	  }, {
-	    key: "$syncOptions",
-	    value: function $syncOptions() {
-	      var _context2;
-	      setCssClass$1(this.regExpOption, 'checked', this.regExpOption.checked);
-	      setCssClass$1(this.wholeWordOption, 'checked', this.wholeWordOption.checked);
-	      setCssClass$1(this.caseSensitiveOption, 'checked', this.caseSensitiveOption.checked);
-	      _findInstanceProperty(_context2 = this).call(_context2, false, false);
-	    }
-	  }, {
-	    key: "find",
-	    value: function find(skipCurrent, backwards) {
+	    key: "bindEvents",
+	    value: function bindEvents() {
 	      var _this2 = this;
-	      var scrollIntoView = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-	      var value = this.searchInput.value;
-	      var options = {
-	        skipCurrent: skipCurrent,
-	        backwards: backwards,
-	        regExp: this.regExpOption.checked,
-	        caseSensitive: this.caseSensitiveOption.checked,
-	        wholeWord: this.wholeWordOption.checked
-	      };
-	      this.$find(value, options, function (start, end) {
-	        _this2.cm.setSelection(start, end, {
-	          userEvent: 'search.select',
-	          scrollIntoView: scrollIntoView
-	        });
+	      this.input.addEventListener('input', function () {
+	        _this2.setQuery(_this2.input.value, true, false);
+	      });
+	      this.input.addEventListener('keydown', function (event) {
+	        var keyboardEvent = /** @type {KeyboardEvent} */event;
+	        if (keyboardEvent.key === 'Enter') {
+	          keyboardEvent.preventDefault();
+	          _this2.flushScheduledSearch(true);
+	          if (_this2.state.matches.length > 0) {
+	            _this2.navigate(keyboardEvent.shiftKey ? 'prev' : 'next');
+	          }
+	        } else if (keyboardEvent.key === 'Escape') {
+	          keyboardEvent.preventDefault();
+	          _this2.handleEscapeKey(_this2.input);
+	        }
+	      });
+	      if (this.replaceInput) {
+	        this.bindReplaceEvents();
+	      }
+	      this.clearButton.addEventListener('click', function (event) {
+	        event.stopPropagation();
+	        _this2.clearQuery();
+	      });
+	      this.caseToggle.addEventListener('click', function () {
+	        _this2.state.caseSensitive = !_this2.state.caseSensitive;
+	        _this2.caseToggle.setAttribute('aria-pressed', String(_this2.state.caseSensitive));
+	        _this2.caseToggle.classList.toggle('is-active', _this2.state.caseSensitive);
+	        _this2.runSearch();
+	      });
+	      this.wholeWordToggle.addEventListener('click', function () {
+	        _this2.state.wholeWord = !_this2.state.wholeWord;
+	        _this2.wholeWordToggle.setAttribute('aria-pressed', String(_this2.state.wholeWord));
+	        _this2.wholeWordToggle.classList.toggle('is-active', _this2.state.wholeWord);
+	        _this2.runSearch();
+	      });
+	      this.regexToggle.addEventListener('click', function () {
+	        _this2.state.useRegex = !_this2.state.useRegex;
+	        _this2.regexToggle.setAttribute('aria-pressed', String(_this2.state.useRegex));
+	        _this2.regexToggle.classList.toggle('is-active', _this2.state.useRegex);
+	        _this2.runSearch();
+	      });
+	      this.prevButton.addEventListener('click', function () {
+	        _this2.navigate('prev');
+	      });
+	      this.nextButton.addEventListener('click', function () {
+	        _this2.navigate('next');
+	      });
+	      this.dom.addEventListener('mousedown', function (event) {
+	        event.stopPropagation();
+	      });
+	      this.dom.addEventListener('keydown', this.handlePanelShortcutKey, true);
+	    }
+
+	    /**
+	     * 设置搜索词并触发搜索
+	     *
+	     * @param {string} query 搜索关键词
+	     * @param {boolean} [keepCurrentIndex=false] 为 true 时尽量保持当前匹配序号（文档变更刷新用）
+	     * @param {boolean} [immediate=true] 为 false 时对输入防抖，减少连续键入时的计算
+	     */
+	  }, {
+	    key: "setQuery",
+	    value: function setQuery(query) {
+	      var keepCurrentIndex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+	      var immediate = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+	      this.state.query = query;
+	      this.input.value = query;
+	      this.clearButton.classList.toggle('is-visible', query.length > 0);
+	      if (!query || immediate) {
+	        this.runSearch(keepCurrentIndex);
+	      } else {
+	        this.scheduleSearch(keepCurrentIndex);
+	      }
+	    }
+
+	    /** 清空搜索词并重新聚焦搜索输入框 */
+	  }, {
+	    key: "clearQuery",
+	    value: function clearQuery() {
+	      this.setQuery('');
+	      this.input.focus();
+	    }
+
+	    /** 清空替换为输入框 */
+	  }, {
+	    key: "clearReplaceText",
+	    value: function clearReplaceText() {
+	      if (!this.replaceInput) {
+	        return;
+	      }
+	      this.replaceInput.value = '';
+	      this.updateReplaceClearVisibility();
+	      this.updateReplaceButtonState();
+	      this.replaceInput.focus();
+	    }
+
+	    /** 同步替换输入框清空按钮可见性 */
+	  }, {
+	    key: "updateReplaceClearVisibility",
+	    value: function updateReplaceClearVisibility() {
+	      if (!this.replaceClearButton || !this.replaceInput) {
+	        return;
+	      }
+	      this.replaceClearButton.classList.toggle('is-visible', this.replaceInput.value.length > 0);
+	    }
+
+	    /**
+	     * 防抖调度搜索（输入或文档变更时使用）
+	     * @param {boolean} [keepActiveIndex=false]
+	     */
+	  }, {
+	    key: "scheduleSearch",
+	    value: function scheduleSearch() {
+	      var _this3 = this;
+	      var keepActiveIndex = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+	      this.pendingKeepActiveIndex = keepActiveIndex;
+	      this.cancelScheduledSearch();
+	      this.searchTimer = _setTimeout(function () {
+	        _this3.searchTimer = null;
+	        _this3.runSearch(_this3.pendingKeepActiveIndex);
+	      }, SEARCH_DEBOUNCE_MS);
+	    }
+
+	    /** 取消待执行的防抖搜索 */
+	  }, {
+	    key: "cancelScheduledSearch",
+	    value: function cancelScheduledSearch() {
+	      if (this.searchTimer) {
+	        clearTimeout(this.searchTimer);
+	        this.searchTimer = null;
+	      }
+	    }
+
+	    /**
+	     * 立即执行待定的防抖搜索
+	     * @param {boolean} [keepActiveIndex=true]
+	     */
+	  }, {
+	    key: "flushScheduledSearch",
+	    value: function flushScheduledSearch() {
+	      var keepActiveIndex = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+	      if (!this.searchTimer) {
+	        return;
+	      }
+	      this.cancelScheduledSearch();
+	      this.runSearch(keepActiveIndex);
+	    }
+
+	    /**
+	     * 同步匹配结果；面板隐藏时仅更新 state，不写入编辑器高亮
+	     *
+	     * @param {boolean} [keepActiveIndex=false]
+	     * @param {boolean} [applyToEditor=true]
+	     */
+	  }, {
+	    key: "syncMatches",
+	    value: function syncMatches() {
+	      var keepActiveIndex = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+	      var applyToEditor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+	      if (!this.editorAdapter) {
+	        return;
+	      }
+	      this.cancelScheduledSearch();
+	      var text = this.editorAdapter.getDocString();
+	      var _this$state = this.state,
+	        query = _this$state.query,
+	        caseSensitive = _this$state.caseSensitive,
+	        wholeWord = _this$state.wholeWord,
+	        useRegex = _this$state.useRegex;
+	      var regex = buildSearchRegex(query, caseSensitive, wholeWord, useRegex);
+	      var matches = regex ? collectMatches(text, regex) : [];
+	      this.state.matches = matches;
+	      if (!query) {
+	        this.state.activeMatchIndex = -1;
+	        if (applyToEditor) {
+	          this.clearHighlight();
+	        }
+	        this.updateCounter();
+	        return;
+	      }
+	      if (!(keepActiveIndex && this.state.activeMatchIndex >= 0 && this.state.activeMatchIndex < matches.length)) {
+	        var cursorPos = this.editorAdapter.getCursorHead();
+	        this.state.activeMatchIndex = findNearestMatchIndex(matches, cursorPos);
+	      }
+	      if (applyToEditor) {
+	        this.applyHighlight(regex);
+	        this.focusCurrentMatch();
+	      }
+	      this.updateCounter();
+	    }
+
+	    /**
+	     * 执行搜索：收集匹配、定位最近项、高亮并更新计数器
+	     *
+	     * @param {boolean} [keepActiveIndex=false] 为 true 且当前序号仍有效时，不根据光标重新定位匹配项
+	     */
+	  }, {
+	    key: "runSearch",
+	    value: function runSearch() {
+	      var keepActiveIndex = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+	      this.syncMatches(keepActiveIndex, true);
+	    }
+
+	    /**
+	     * 将当前搜索词同步到编辑器搜索高亮层
+	     *
+	     * @param {RegExp | null} [regex] 已构建的正则，省略时根据 state 重新构建
+	     */
+	  }, {
+	    key: "applyHighlight",
+	    value: function applyHighlight(regex) {
+	      if (!this.editorAdapter) {
+	        return;
+	      }
+	      var _this$state2 = this.state,
+	        query = _this$state2.query,
+	        caseSensitive = _this$state2.caseSensitive,
+	        wholeWord = _this$state2.wholeWord,
+	        useRegex = _this$state2.useRegex;
+	      if (!query) {
+	        this.clearHighlight();
+	        return;
+	      }
+	      var searchRegex = regex !== null && regex !== void 0 ? regex : buildSearchRegex(query, caseSensitive, wholeWord, useRegex);
+	      if (!searchRegex) {
+	        return;
+	      }
+
+	      // pattern 已由 buildSearchRegex 构建，宿主需按正则解析
+	      this.editorAdapter.setSearchQuery(searchRegex.source, caseSensitive, true);
+	    }
+
+	    /** 清除编辑器中的搜索高亮 */
+	  }, {
+	    key: "clearHighlight",
+	    value: function clearHighlight() {
+	      var _this$editorAdapter;
+	      (_this$editorAdapter = this.editorAdapter) === null || _this$editorAdapter === void 0 ? void 0 : _this$editorAdapter.clearSearchQuery();
+	    }
+
+	    /** 将编辑器选区移动到当前激活的匹配项并滚动到可见区域 */
+	  }, {
+	    key: "focusCurrentMatch",
+	    value: function focusCurrentMatch() {
+	      var match = this.state.matches[this.state.activeMatchIndex];
+	      if (!match || !this.editorAdapter) {
+	        return;
+	      }
+	      this.editorAdapter.setSelection(match.from, match.to, {
+	        userEvent: 'search.select',
+	        scrollIntoView: true
 	      });
 	    }
+
+	    /**
+	     * 在上/下一个匹配项之间循环导航
+	     *
+	     * @param {'prev' | 'next'} direction 导航方向
+	     */
 	  }, {
-	    key: "$find",
-	    value: function $find(value, options, callback) {
-	      var cm = this.cm;
-	      if (!value) {
-	        this.clearSearch(cm);
-	        this.updateCount();
+	    key: "navigate",
+	    value: function navigate(direction) {
+	      var matches = this.state.matches;
+	      if (matches.length === 0) {
 	        return;
 	      }
-	      var o = options;
-	      var caseSensitive = o.caseSensitive;
-	      var regExp = o.regExp;
-	      var wholeWord = o.wholeWord;
-	      var searchStr = value;
-	      if (!regExp) {
-	        searchStr = value.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
-	      }
-	      if (wholeWord) {
-	        searchStr = "\\b".concat(searchStr, "\\b");
-	      }
-	      this.clearSearch(cm);
-	      this.doSearch(cm, searchStr, caseSensitive);
-	      this.updateCount();
-	      var doc = cm.state.doc;
-	      var text = doc.toString();
-	      var flags = caseSensitive ? 'g' : 'gi';
-	      var searchRegex;
-	      try {
-	        searchRegex = new RegExp(searchStr, flags);
-	      } catch (e) {
-	        setCssClass$1(this.searchBox, 'ace_nomatch', true);
-	        return;
-	      }
-	      var startPos = o.skipCurrent ? cm.state.selection.main.head : cm.state.selection.main.anchor;
-	      var match;
-	      var found = false;
-	      searchRegex.lastIndex = 0;
-	      if (o.backwards) {
-	        // 反向搜索：查找光标之前的最后一个匹配项
-	        var beforeText = _sliceInstanceProperty(text).call(text, 0, startPos);
-	        var lastMatch = null;
-	        while ((match = searchRegex.exec(beforeText)) !== null) {
-	          lastMatch = match;
-	        }
-	        if (lastMatch) {
-	          var from = lastMatch.index;
-	          var to = from + lastMatch[0].length;
-	          callback(from, to);
-	          found = true;
-	        } else {
-	          // 未找到则从文档末尾开始搜索
-	          searchRegex.lastIndex = 0;
-	          lastMatch = null;
-	          while ((match = searchRegex.exec(text)) !== null) {
-	            lastMatch = match;
-	          }
-	          if (lastMatch) {
-	            var _from = lastMatch.index;
-	            var _to = _from + lastMatch[0].length;
-	            callback(_from, _to);
-	            found = true;
-	          }
-	        }
+	      var activeMatchIndex = this.state.activeMatchIndex;
+	      if (direction === 'next') {
+	        this.state.activeMatchIndex = activeMatchIndex >= matches.length - 1 ? 0 : activeMatchIndex + 1;
 	      } else {
-	        // 前向搜索
-	        var afterText = _sliceInstanceProperty(text).call(text, startPos);
-	        match = searchRegex.exec(afterText);
-	        if (match) {
-	          var _from2 = startPos + match.index;
-	          var _to2 = _from2 + match[0].length;
-	          callback(_from2, _to2);
-	          found = true;
-	        } else {
-	          // 未找到则从头开始
-	          searchRegex.lastIndex = 0;
-	          match = searchRegex.exec(text);
-	          if (match) {
-	            var _from3 = match.index;
-	            var _to3 = _from3 + match[0].length;
-	            callback(_from3, _to3);
-	            found = true;
-	          }
-	        }
+	        this.state.activeMatchIndex = activeMatchIndex <= 0 ? matches.length - 1 : activeMatchIndex - 1;
 	      }
-	      var noMatch = !found && this.searchInput.value;
-	      setCssClass$1(this.searchBox, 'ace_nomatch', noMatch);
+	      this.focusCurrentMatch();
+	      this.updateCounter();
 	    }
+
+	    /**
+	     * 展开或收起替换行
+	     * @param {boolean} expanded
+	     */
 	  }, {
-	    key: "findNext",
-	    value: function findNext() {
-	      var _context3;
-	      _findInstanceProperty(_context3 = this).call(_context3, true, false);
+	    key: "setReplaceExpanded",
+	    value: function setReplaceExpanded(expanded) {
+	      if (!this.enableReplace || !this.replaceRow) {
+	        return;
+	      }
+	      this.replaceExpanded = expanded;
+	      this.dom.classList.toggle('is-replace-expanded', expanded);
+	      this.replaceRow.classList.toggle('is-hidden', !expanded);
+	      if (this.expandButton) {
+	        this.expandButton.setAttribute('aria-expanded', String(expanded));
+	      }
 	    }
+
+	    /**
+	     * 编辑器是否只读
+	     * @returns {boolean}
+	     */
 	  }, {
-	    key: "findPrev",
-	    value: function findPrev() {
-	      var _context4;
-	      _findInstanceProperty(_context4 = this).call(_context4, true, true);
+	    key: "isReadOnly",
+	    value: function isReadOnly() {
+	      var _this$editorAdapter2;
+	      return Boolean((_this$editorAdapter2 = this.editorAdapter) === null || _this$editorAdapter2 === void 0 ? void 0 : _this$editorAdapter2.isReadOnly());
 	    }
+
+	    /**
+	     * 获取替换文本
+	     * @returns {string}
+	     */
 	  }, {
-	    key: "findAll",
-	    value: function findAll() {
-	      var value = this.searchInput.value;
-	      var hasMatches = value && this.searchInput.value;
-	      var noMatch = !hasMatches;
-	      setCssClass$1(this.searchBox, 'ace_nomatch', noMatch);
+	    key: "getReplacementText",
+	    value: function getReplacementText() {
+	      var _this$replaceInput$va, _this$replaceInput7;
+	      return (_this$replaceInput$va = (_this$replaceInput7 = this.replaceInput) === null || _this$replaceInput7 === void 0 ? void 0 : _this$replaceInput7.value) !== null && _this$replaceInput$va !== void 0 ? _this$replaceInput$va : '';
+	    }
+
+	    /**
+	     * 「替换为」输入框是否有有效内容
+	     * @returns {boolean}
+	     */
+	  }, {
+	    key: "hasReplacementText",
+	    value: function hasReplacementText() {
+	      var _context2;
+	      return _trimInstanceProperty(_context2 = this.getReplacementText()).call(_context2).length > 0;
+	    }
+
+	    /**
+	     * 是否满足执行替换的前置条件
+	     * @returns {boolean}
+	     */
+	  }, {
+	    key: "canPerformReplace",
+	    value: function canPerformReplace() {
+	      if (!this.enableReplace || this.isReadOnly()) {
+	        return false;
+	      }
+	      return this.state.matches.length > 0 && Boolean(this.state.query) && this.hasReplacementText();
+	    }
+
+	    /**
+	     * 替换完成后收回面板焦点，便于继续输入
+	     */
+	  }, {
+	    key: "refocusPanelInput",
+	    value: function refocusPanelInput() {
+	      if (this.replaceExpanded && this.replaceInput) {
+	        this.replaceInput.focus();
+	        return;
+	      }
+	      this.input.focus();
+	    }
+
+	    /**
+	     * 替换当前匹配项
+	     * @param {boolean} [keepIndex=false] - 为 true 时替换后仍停留在同序号匹配项
+	     * @returns {boolean} 是否成功替换
+	     */
+	  }, {
+	    key: "replaceCurrent",
+	    value: function replaceCurrent() {
+	      var keepIndex = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+	      var match = this.state.matches[this.state.activeMatchIndex];
+	      if (!match || !this.editorAdapter || !this.canPerformReplace()) {
+	        return false;
+	      }
+	      var indexBefore = this.state.activeMatchIndex;
+	      var replacement = this.getReplacementText();
+	      var anchor = match.from + replacement.length;
+	      this.editorAdapter.replaceRange(replacement, match.from, match.to);
+	      var text = this.editorAdapter.getDocString();
+	      var _this$state3 = this.state,
+	        query = _this$state3.query,
+	        caseSensitive = _this$state3.caseSensitive,
+	        wholeWord = _this$state3.wholeWord,
+	        useRegex = _this$state3.useRegex;
+	      var matches = findMatches(text, query, caseSensitive, wholeWord, useRegex);
+	      this.state.matches = matches;
+	      if (keepIndex && matches.length > 0) {
+	        this.state.activeMatchIndex = Math.min(indexBefore, matches.length - 1);
+	      } else {
+	        this.state.activeMatchIndex = findNearestMatchIndex(matches, anchor);
+	      }
+	      this.applyHighlight();
+	      this.focusCurrentMatch();
+	      this.updateCounter();
+	      this.refocusPanelInput();
+	      return true;
+	    }
+
+	    /**
+	     * 选中所有匹配项（多光标 / 多选区），随后关闭面板并清除搜索高亮
+	     */
+	  }, {
+	    key: "selectAllMatches",
+	    value: function selectAllMatches() {
+	      if (!this.editorAdapter || this.state.matches.length === 0) {
+	        return;
+	      }
+	      if (typeof this.editorAdapter.setSelections !== 'function') {
+	        return;
+	      }
 	      this.hide();
+	      // 再设置多光标 / 多选区：view.dispatch 会自动让 CodeMirror 视图获得焦点
+	      this.editorAdapter.setSelections(this.state.matches, {
+	        scrollIntoView: true
+	      });
 	    }
-	  }, {
-	    key: "replace",
-	    value: function replace() {
-	      var _cm$view, _cm$view$contentDOM;
-	      var cm = this.cm;
-	      var readOnly = cm.getOption ? cm.getOption('readOnly') : !((_cm$view = cm.view) !== null && _cm$view !== void 0 && (_cm$view$contentDOM = _cm$view.contentDOM) !== null && _cm$view$contentDOM !== void 0 && _cm$view$contentDOM.isContentEditable);
-	      var isSelection = !!cm.view.state.doc.sliceString(cm.state.selection.main.from, cm.state.selection.main.to);
-	      if (!readOnly && isSelection) cm.replaceSelection(this.replaceInput.value, 'start');
-	      this.updateCount();
-	    }
-	  }, {
-	    key: "replaceAndFindNext",
-	    value: function replaceAndFindNext() {
-	      var _cm$view2, _cm$view2$contentDOM;
-	      var cm = this.cm;
-	      var readOnly = cm.getOption ? cm.getOption('readOnly') : !((_cm$view2 = cm.view) !== null && _cm$view2 !== void 0 && (_cm$view2$contentDOM = _cm$view2.contentDOM) !== null && _cm$view2$contentDOM !== void 0 && _cm$view2$contentDOM.isContentEditable);
-	      if (!readOnly) {
-	        this.replace();
-	        this.findNext();
-	      }
-	    }
+
+	    /**
+	     * 批量替换所有匹配项（从后向前替换，避免区间偏移）
+	     */
 	  }, {
 	    key: "replaceAll",
 	    value: function replaceAll() {
-	      var _view$contentDOM;
-	      var cm = this.cm;
-	      var from = this.searchInput.value;
-	      var to = this.replaceInput.value;
-	      var reg;
-	      try {
-	        reg = RegExp(from, this.caseSensitiveOption.checked ? 'g' : 'gi');
-	        if (this.wholeWordOption.checked && !this.regExpOption.checked) {
-	          if (this.caseSensitiveOption.checked) {
-	            reg = RegExp("\\b".concat(from, "\\b"), 'g');
-	          } else {
-	            reg = RegExp("\\b".concat(from, "\\b"), 'gi');
-	          }
+	      if (!this.editorAdapter || !this.canPerformReplace()) {
+	        return;
+	      }
+	      var matches = this.state.matches;
+	      var replacement = this.getReplacementText();
+	      for (var i = matches.length - 1; i >= 0; i -= 1) {
+	        var _matches$i = matches[i],
+	          from = _matches$i.from,
+	          to = _matches$i.to;
+	        this.editorAdapter.replaceRange(replacement, from, to);
+	      }
+	      this.runSearch(true);
+	      this.refocusPanelInput();
+	    }
+
+	    /**
+	     * 更新匹配计数器 `当前/总数`，并同步导航与替换按钮的禁用状态
+	     */
+	  }, {
+	    key: "updateCounter",
+	    value: function updateCounter() {
+	      var _context3;
+	      var _this$state4 = this.state,
+	        matches = _this$state4.matches,
+	        activeMatchIndex = _this$state4.activeMatchIndex;
+	      if (matches.length === 0) {
+	        this.counter.textContent = '0/0';
+	        this.counter.classList.remove('is-active');
+	        this.prevButton.disabled = true;
+	        this.nextButton.disabled = true;
+	        this.updateReplaceButtonState();
+	        return;
+	      }
+	      this.counter.textContent = _concatInstanceProperty(_context3 = "".concat(activeMatchIndex + 1, "/")).call(_context3, matches.length);
+	      this.counter.classList.add('is-active');
+	      this.prevButton.disabled = false;
+	      this.nextButton.disabled = false;
+	      this.updateReplaceButtonState();
+	    }
+
+	    /**
+	     * 同步替换按钮状态（与 toggle 一致：默认可用 / hover / 不可操作 / 禁止）
+	     */
+	  }, {
+	    key: "updateReplaceButtonState",
+	    value: function updateReplaceButtonState() {
+	      var readOnly = this.isReadOnly();
+	      var canReplace = this.canPerformReplace();
+
+	      /** @type {(HTMLButtonElement | null)[]} */
+	      var replaceButtons = [this.replaceButton, this.replaceAllButton];
+	      _forEachInstanceProperty(replaceButtons).call(replaceButtons, function (button) {
+	        if (!button) {
+	          return;
 	        }
-	      } catch (e) {
-	        setCssClass$1(this.searchBox, 'ace_nomatch', true);
-	        return;
-	      }
-	      var view = cm.view;
-	      if (!view) return;
-	      var readOnly = cm.getOption ? cm.getOption('readOnly') : !((_view$contentDOM = view.contentDOM) !== null && _view$contentDOM !== void 0 && _view$contentDOM.isContentEditable);
-	      if (readOnly) {
-	        this.updateCount();
-	        return;
-	      }
-	      var text = view.state.doc.toString();
-	      var newText;
-	      try {
-	        newText = text.replace(reg, to);
-	      } catch (e) {
-	        console.warn('Replace all failed:', e);
-	        this.updateCount();
-	        return;
-	      }
-	      if (newText === text) {
-	        this.updateCount();
-	        return;
-	      }
-
-	      // 计算光标新位置 - 追踪光标之前所有匹配的位置变化
-	      var cursorPos = view.state.selection.main.head;
-	      var newCursorPos = cursorPos;
-	      var offset = 0;
-	      reg.lastIndex = 0;
-	      var match;
-	      var _loop = function _loop() {
-	          if (match[0].length === 0) {
-	            reg.lastIndex += 1;
-	            return 0; // continue
-	          }
-	          var matchStart = match.index;
-	          var matchEnd = matchStart + match[0].length;
-	          if (matchStart >= cursorPos) {
-	            return 1; // break
-	          }
-
-	          // 处理特殊替换标记：$$ (转义$), $& (整个匹配), $1-$9 (捕获组)
-	          var actualReplacement = to;
-	          if (_includesInstanceProperty(to).call(to, '$')) {
-	            var currentMatch = match;
-	            actualReplacement = to.replace(/\$\$/g, '\x00ESCAPED_DOLLAR\x00').replace(/\$&/g, currentMatch[0]).replace(/\$(\d)/g, function (_, num) {
-	              return currentMatch[_parseInt$3(num, 10)] || '';
-	            }).replace(/\$`/g, text.substring(0, matchStart)).replace(/\$'/g, text.substring(matchEnd)).replace(/\x00ESCAPED_DOLLAR\x00/g, '$');
-	          }
-	          var replacementLength = actualReplacement.length;
-	          var delta = replacementLength - match[0].length;
-	          offset += delta;
-	        },
-	        _ret;
-	      while ((match = reg.exec(text)) !== null) {
-	        _ret = _loop();
-	        if (_ret === 0) continue;
-	        if (_ret === 1) break;
-	      }
-	      newCursorPos = Math.max(0, Math.min(cursorPos + offset, newText.length));
-	      try {
-	        view.dispatch({
-	          changes: {
-	            from: 0,
-	            to: text.length,
-	            insert: newText
-	          },
-	          selection: {
-	            anchor: newCursorPos
-	          }
-	        });
-	      } catch (e) {
-	        console.error('Failed to dispatch replace all:', e);
-	        setCssClass$1(this.searchBox, 'ace_nomatch', true);
-	        this.updateCount();
-	        return;
-	      }
-	      this.updateCount();
-	    }
-	  }, {
-	    key: "toggleReplace",
-	    value: function toggleReplace() {
-	      var _cm$view3;
-	      var cm = this.cm;
-	      var cmEle = ((_cm$view3 = cm.view) === null || _cm$view3 === void 0 ? void 0 : _cm$view3.dom) || document.body;
-	      var parent = cmEle.parentElement || document.body;
-	      var toggleBtn = parent.querySelector('[action=toggleReplace]');
-	      if (!toggleBtn) return;
-	      if (toggleBtn.innerText === '+') {
-	        toggleBtn.innerText = '-';
-	        this.replaceBox.style.display = '';
-	        this.isReplace = true;
-	      } else {
-	        toggleBtn.innerText = '+';
-	        this.replaceBox.style.display = 'none';
-	        this.isReplace = false;
-	      }
-	    }
-	  }, {
-	    key: "hide",
-	    value: function hide() {
-	      var cm = this.cm;
-	      this.clearSearch(cm);
-	      // @ts-ignore
-	      this.element.style.display = 'none';
-	      cm.view.focus();
-	    }
-	  }, {
-	    key: "isVisible",
-	    value: function isVisible() {
-	      // @ts-ignore
-	      return this.element.style.display !== 'none';
-	    }
-	  }, {
-	    key: "show",
-	    value: function show(value, isReplace) {
-	      // @ts-ignore
-	      this.element.style.display = '';
-	      this.replaceBox.style.display = isReplace ? '' : 'none';
-	      this.isReplace = isReplace;
-	      if (value) {
-	        var _context5;
-	        this.searchInput.value = value;
-	        _findInstanceProperty(_context5 = this).call(_context5, false, false);
-	      }
-	      this.searchInput.focus();
-	      this.searchInput.select();
-	    }
-	  }, {
-	    key: "isFocused",
-	    value: function isFocused() {
-	      var el = document.activeElement;
-	      return el === this.searchInput || el === this.replaceInput;
-	    }
-	  }, {
-	    key: "doSearch",
-	    value: function doSearch(cm, value, caseSensitive) {
-	      var state = this.getSearchState(cm);
-	      var query = value;
-	      if (query && query !== state.queryText) {
-	        this.startSearch(cm, state, query, caseSensitive);
-	        state.posFrom = cm.view.state.selection.main.head;
-	        state.posTo = state.posFrom;
-	      }
-	    }
-	  }, {
-	    key: "parseString",
-	    value: function parseString(string) {
-	      return string.replace(/\\([nrt\\])/g, function (match, ch) {
-	        if (ch === 'n') return '\n';
-	        if (ch === 'r') return '\r';
-	        if (ch === 't') return '\t';
-	        if (ch === '\\') return '\\';
-	        return match;
+	        button.disabled = !canReplace;
+	        button.classList.remove('is-forbidden', 'is-unavailable');
+	        if (canReplace) {
+	          return;
+	        }
+	        button.classList.add(readOnly ? 'is-forbidden' : 'is-unavailable');
 	      });
-	    }
-	  }, {
-	    key: "parseQuery",
-	    value: function parseQuery(query) {
-	      var reStr = _typeof$2(query) === 'object' ? query.toString() : query;
-	      var isRE = reStr.match(/^\/(.*)\/([a-z]*)$/);
-	      var $query = query;
-	      if (isRE) {
-	        try {
-	          var _context6;
-	          $query = new RegExp(isRE[1], _indexOfInstanceProperty(_context6 = isRE[2]).call(_context6, 'i') === -1 ? '' : 'i');
-	        } catch (e) {} // Not a regular expression after all, do a string search
-	      } else {
-	        $query = this.parseString(query);
-	      }
-	      if (typeof $query === 'string' ? $query === '' : $query.test('')) $query = /x^/;
-	      return $query;
-	    }
-	  }, {
-	    key: "startSearch",
-	    value: function startSearch(cm, state, query, caseSensitive) {
-	      state.queryText = query;
-	      state.query = this.parseQuery(query);
-	      if (cm.setSearchQuery) {
-	        try {
-	          var _this$regExpOption;
-	          // 检查是否已包含正则特殊字符，避免重复转义
-	          var containsRegexChars = /\\[bBdDwWsStrnvf0.\\]/.test(query);
-	          var isRegex = ((_this$regExpOption = this.regExpOption) === null || _this$regExpOption === void 0 ? void 0 : _this$regExpOption.checked) || containsRegexChars;
-	          cm.setSearchQuery(query, caseSensitive, isRegex);
-	        } catch (e) {
-	          console.warn('setSearchQuery failed:', e);
+	      if (this.selectAllMatchesButton) {
+	        var canSelectAll = this.state.matches.length > 0;
+	        this.selectAllMatchesButton.disabled = !canSelectAll;
+	        this.selectAllMatchesButton.classList.remove('is-forbidden', 'is-unavailable');
+	        if (!canSelectAll) {
+	          this.selectAllMatchesButton.classList.add('is-unavailable');
 	        }
-	      }
-	    }
-	  }, {
-	    key: "queryCaseInsensitive",
-	    value: function queryCaseInsensitive(query, caseSensitive) {
-	      return typeof query === 'string' && !caseSensitive;
-	    }
-	  }, {
-	    key: "getSearchState",
-	    value: function getSearchState(cm) {
-	      return this.searchState;
-	    }
-	  }, {
-	    key: "clearSearch",
-	    value: function clearSearch(cm) {
-	      if (cm.clearSearchQuery) {
-	        try {
-	          cm.clearSearchQuery();
-	        } catch (e) {
-	          console.warn('clearSearchQuery failed:', e);
-	        }
-	      }
-	      var state = this.getSearchState(cm);
-	      state.lastQuery = state.query;
-	      if (!state.query) return;
-	      state.query = null;
-	      state.queryText = null;
-	      if (state.annotate) {
-	        state.annotate.clear();
-	        state.annotate = null;
-	      }
-	    }
-	  }, {
-	    key: "updateCount",
-	    value: function updateCount() {
-	      var _cm$view4;
-	      var cm = this.cm;
-	      var val = this.searchInput.value;
-	      var count = 0;
-	      if (val) {
-	        var searchVal = val;
-	        if (!this.regExpOption.checked) {
-	          searchVal = val.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
-	        }
-	        var reg;
-	        try {
-	          if (this.wholeWordOption.checked) {
-	            if (this.caseSensitiveOption.checked) {
-	              reg = RegExp("\\b".concat(searchVal, "\\b"), 'g');
-	            } else {
-	              reg = RegExp("\\b".concat(searchVal, "\\b"), 'gi');
-	            }
-	          } else {
-	            if (this.caseSensitiveOption.checked) {
-	              reg = RegExp(searchVal, 'g');
-	            } else {
-	              reg = RegExp(searchVal, 'gi');
-	            }
-	          }
-
-	          // 使用搜索游标迭代计数（对大文件性能更好）
-	          var cursor = cm.getSearchCursor(reg, 0, !this.caseSensitiveOption.checked);
-	          while (cursor.findNext()) {
-	            count += 1;
-	            if (count > 9999) {
-	              count = 10000;
-	              break;
-	            }
-	          }
-	        } catch (e) {
-	          count = 0;
-	        }
-	      }
-	      var cmEle = ((_cm$view4 = cm.view) === null || _cm$view4 === void 0 ? void 0 : _cm$view4.dom) || document.body;
-	      var parent = cmEle.parentElement || document.body;
-	      var countEle = parent.querySelector('.ace_search_counter');
-	      if (countEle) {
-	        var _context7;
-	        countEle.innerText = _concatInstanceProperty(_context7 = "".concat(count, " ")).call(_context7, this.$cherry.locale.matchesFoundText);
-	      }
-	      if (count === 0) {
-	        cm.setSelection(0, 0, {
-	          userEvent: 'search.select'
-	        });
 	      }
 	    }
 
-	    // 更新语言字符串
+	    /**
+	     * 根据 Cherry 全局 locale 刷新面板 placeholder、按钮 title 等文案
+	     *
+	     * @param {Record<string, string | undefined>} [hostLocale] Cherry.locale；传入时重新 pick，省略则使用已有 this.locale
+	     */
 	  }, {
 	    key: "updateLocaleStrings",
-	    value: function updateLocaleStrings() {
-	      var element = this.element,
-	        searchInput = this.searchInput,
-	        replaceInput = this.replaceInput;
-	      if (element) {
-	        var htmlElement = /** @type {HTMLElement} */element;
-	        searchInput.setAttribute('placeholder', this.$cherry.locale.searchFor);
-	        replaceInput.setAttribute('placeholder', this.$cherry.locale.replaceWith);
-	        htmlElement.querySelector('.ace_searchbtn_close').setAttribute('title', this.$cherry.locale.close);
-	        htmlElement.querySelector('[action="findNext"]').setAttribute('title', this.$cherry.locale.nextMatch);
-	        htmlElement.querySelector('[action="findPrev"]').setAttribute('title', this.$cherry.locale.previousMatch);
-	        htmlElement.querySelector('[action="replaceAndFindNext"]').setAttribute('title', this.$cherry.locale.replace);
-	        htmlElement.querySelector('[action="replaceAll"]').setAttribute('title', _replaceAllInstanceProperty(this.$cherry.locale));
-	        htmlElement.querySelector('[action="toggleReplace"]').setAttribute('title', this.$cherry.locale.toggleReplace);
-	        htmlElement.querySelector('[action="toggleRegexpMode"]').setAttribute('title', this.$cherry.locale.regExpSearch);
-	        htmlElement.querySelector('[action="toggleCaseSensitive"]').setAttribute('title', this.$cherry.locale.caseSensitiveSearch);
-	        htmlElement.querySelector('[action="toggleWholeWords"]').setAttribute('title', this.$cherry.locale.wholeWordSearch);
-	        this.updateCount();
+	    value: function updateLocaleStrings(hostLocale) {
+	      var _strings$searchFor, _strings$searchClear, _strings$caseSensitiv, _strings$wholeWordSea, _strings$regExpSearch, _strings$previousMatc, _strings$nextMatch;
+	      if (hostLocale) {
+	        this.locale = pickSearcherLocale(hostLocale);
+	      }
+	      var strings = this.locale;
+	      this.input.placeholder = (_strings$searchFor = strings.searchFor) !== null && _strings$searchFor !== void 0 ? _strings$searchFor : '';
+	      this.clearButton.title = (_strings$searchClear = strings.searchClear) !== null && _strings$searchClear !== void 0 ? _strings$searchClear : '';
+	      this.caseToggle.title = (_strings$caseSensitiv = strings.caseSensitiveSearch) !== null && _strings$caseSensitiv !== void 0 ? _strings$caseSensitiv : '';
+	      this.wholeWordToggle.title = (_strings$wholeWordSea = strings.wholeWordSearch) !== null && _strings$wholeWordSea !== void 0 ? _strings$wholeWordSea : '';
+	      this.regexToggle.title = (_strings$regExpSearch = strings.regExpSearch) !== null && _strings$regExpSearch !== void 0 ? _strings$regExpSearch : '';
+	      this.prevButton.title = (_strings$previousMatc = strings.previousMatch) !== null && _strings$previousMatc !== void 0 ? _strings$previousMatc : '';
+	      this.nextButton.title = (_strings$nextMatch = strings.nextMatch) !== null && _strings$nextMatch !== void 0 ? _strings$nextMatch : '';
+	      if (this.expandButton) {
+	        this.expandButton.title = strings.toggleReplace || strings.replace || '';
+	        this.expandButton.setAttribute('aria-label', strings.toggleReplace || strings.replace || '');
+	      }
+	      if (this.replaceInput) {
+	        var _strings$replaceWith;
+	        this.replaceInput.placeholder = (_strings$replaceWith = strings.replaceWith) !== null && _strings$replaceWith !== void 0 ? _strings$replaceWith : '';
+	      }
+	      if (this.replaceClearButton) {
+	        var _strings$searchClear2;
+	        this.replaceClearButton.title = (_strings$searchClear2 = strings.searchClear) !== null && _strings$searchClear2 !== void 0 ? _strings$searchClear2 : '';
+	      }
+	      if (this.replaceButton) {
+	        var _strings$replace, _strings$replace2;
+	        this.replaceButton.textContent = (_strings$replace = strings.replace) !== null && _strings$replace !== void 0 ? _strings$replace : '';
+	        this.replaceButton.title = (_strings$replace2 = strings.replace) !== null && _strings$replace2 !== void 0 ? _strings$replace2 : '';
+	      }
+	      if (this.replaceAllButton) {
+	        var _strings$replaceAll, _strings$replaceAll2;
+	        this.replaceAllButton.textContent = (_strings$replaceAll = _replaceAllInstanceProperty(strings)) !== null && _strings$replaceAll !== void 0 ? _strings$replaceAll : '';
+	        this.replaceAllButton.title = (_strings$replaceAll2 = _replaceAllInstanceProperty(strings)) !== null && _strings$replaceAll2 !== void 0 ? _strings$replaceAll2 : '';
+	      }
+	      if (this.selectAllMatchesButton) {
+	        var _strings$selectAllMat, _strings$selectAllMat2;
+	        this.selectAllMatchesButton.textContent = (_strings$selectAllMat = strings.selectAllMatches) !== null && _strings$selectAllMat !== void 0 ? _strings$selectAllMat : '';
+	        this.selectAllMatchesButton.title = (_strings$selectAllMat2 = strings.selectAllMatches) !== null && _strings$selectAllMat2 !== void 0 ? _strings$selectAllMat2 : '';
 	      }
 	    }
 	  }]);
 	}();
-	function setCssClass$1(el, className, condition) {
-	  var list = el.classList;
-	  list[condition ? 'add' : 'remove'](className);
+
+	function _createForOfIteratorHelper$19(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$19(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$19(r, a) { if (r) { var _context3; if ("string" == typeof r) return _arrayLikeToArray$19(r, a); var t = _sliceInstanceProperty(_context3 = {}.toString.call(r)).call(_context3, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$19(r, a) : void 0; } }
+	function _arrayLikeToArray$19(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+	/** 与 HookCenter、toolbars.* 配置项一致的 hook 名称 */
+	var SEARCH_HOOK_NAME = 'search';
+
+	/**
+	 * @typedef {object} SearcherCherryHost
+	 * @property {Record<string, string | undefined>} [locale]
+	 * @property {{ toolbars?: import('~types/cherry').CherryToolbarsOptions }} [options]
+	 * @property {object} [editor]
+	 * @property {HTMLElement} [wrapperDom]
+	 * @property {import('@/toolbars/Toolbar').default} [toolbar]
+	 * @property {import('@/toolbars/ToolbarRight').default} [toolbarRight]
+	 * @property {import('@/toolbars/Sidebar').default} [sidebar]
+	 * @property {import('@/toolbars/HiddenToolbar').default} [hiddenToolbar]
+	 * @property {import('@/toolbars/Bubble').default} [bubble]
+	 * @property {import('@/toolbars/FloatMenu').default} [floatMenu]
+	 * @property {import('@/Event').default} [$event]
+	 */
+
+	/**
+	 * @typedef {object} SearcherEditorAdapter
+	 * @property {() => string} getDocString
+	 * @property {() => { from: number; to: number }} getSelection
+	 * @property {() => string} getSelectedText
+	 * @property {() => number} getCursorHead
+	 * @property {(from: number, to: number, options?: object) => void} setSelection
+	 * @property {(ranges: Array<{ from: number; to: number }>, options?: object) => void} setSelections
+	 * @property {(text: string, from: number, to: number) => void} replaceRange
+	 * @property {(pattern: string, caseSensitive: boolean, asRegex: boolean) => void} setSearchQuery
+	 * @property {() => void} clearSearchQuery
+	 * @property {() => void} focus
+	 * @property {() => boolean} isReadOnly
+	 */
+
+	/**
+	 * Cherry 实例上已挂载的工具栏（与 isSearcherToolbarEnabled 检测范围对应）
+	 * @param {SearcherCherryHost | undefined} cherry
+	 * @returns {Array<{ menus?: { hooks?: Record<string, unknown> } }>}
+	 */
+	function getToolbarMenuInstances(cherry) {
+	  var _context;
+	  return _filterInstanceProperty(_context = [cherry === null || cherry === void 0 ? void 0 : cherry.toolbar, cherry === null || cherry === void 0 ? void 0 : cherry.toolbarRight, cherry === null || cherry === void 0 ? void 0 : cherry.sidebar, cherry === null || cherry === void 0 ? void 0 : cherry.hiddenToolbar, cherry === null || cherry === void 0 ? void 0 : cherry.bubble, cherry === null || cherry === void 0 ? void 0 : cherry.floatMenu]).call(_context, Boolean);
 	}
 
-	/* https://github.com/coderaiser/key */
-	function key(str, event) {
-	  var _context8;
-	  var KEY = {
-	    BACKSPACE: 8,
-	    TAB: 9,
-	    ENTER: 13,
-	    ESC: 27,
-	    SPACE: 32,
-	    PAGE_UP: 33,
-	    PAGE_DOWN: 34,
-	    END: 35,
-	    HOME: 36,
-	    UP: 38,
-	    DOWN: 40,
-	    INSERT: 45,
-	    DELETE: 46,
-	    INSERT_MAC: 96,
-	    ASTERISK: 106,
-	    PLUS: 107,
-	    MINUS: 109,
-	    F1: 112,
-	    F2: 113,
-	    F3: 114,
-	    F4: 115,
-	    F5: 116,
-	    F6: 117,
-	    F7: 118,
-	    F8: 119,
-	    F9: 120,
-	    F10: 121,
-	    SLASH: 191,
-	    TRA: 192 /* Typewritten Reverse Apostrophe (`) */,
-	    BACKSLASH: 220
-	  };
-	  var right = _someInstanceProperty(_context8 = str.split('|')).call(_context8, function (combination) {
-	    var _context9;
-	    var wrong = _someInstanceProperty(_context9 = combination.split('-')).call(_context9, function (key) {
-	      var _context0;
-	      var right;
-	      switch (key) {
-	        case 'Ctrl':
-	          right = event.ctrlKey;
-	          break;
-	        case 'Shift':
-	          right = event.shiftKey;
-	          break;
-	        case 'Alt':
-	          right = event.altKey;
-	          break;
-	        case 'Cmd':
-	          right = event.metaKey;
-	          break;
-	        default:
-	          if (key.length === 1) right = event.keyCode === key.charCodeAt(0);else _someInstanceProperty(_context0 = _Object$keys(KEY)).call(_context0, function (name) {
-	            var up = key.toUpperCase();
-	            if (up === name) right = event.keyCode === KEY[name];
-	            return name;
-	          });
-	          break;
-	      }
-	      return !right;
-	    });
-	    return !wrong;
+	/**
+	 * @param {import('~types/cherry').CherryToolbarsOptions | undefined} toolbars
+	 * @returns {boolean}
+	 */
+	function isSearcherToolbarEnabled(toolbars) {
+	  var _context2;
+	  if (!toolbars) {
+	    return false;
+	  }
+	  var lists = _filterInstanceProperty(_context2 = [toolbars.toolbar, toolbars.toolbarRight, toolbars.hiddenToolbar, toolbars.bubble, toolbars["float"], toolbars.sidebar]).call(_context2, _Array$isArray$1);
+	  return _someInstanceProperty(lists).call(lists, function (list) {
+	    return _includesInstanceProperty(list).call(list, SEARCH_HOOK_NAME);
 	  });
-	  return right;
+	}
+
+	/**
+	 * 获取 Search hook（任一已挂载工具栏均可；按钮态通过 DOM 选择器统一更新）
+	 * @param {SearcherCherryHost | undefined} cherry
+	 * @returns {import('@/toolbars/hooks/Search').default | undefined}
+	 */
+	function getSearchHook(cherry) {
+	  var _iterator = _createForOfIteratorHelper$19(getToolbarMenuInstances(cherry)),
+	    _step;
+	  try {
+	    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+	      var _bar$menus, _bar$menus$hooks;
+	      var bar = _step.value;
+	      var hook = /** @type {import('@/toolbars/hooks/Search').default | undefined} */(_bar$menus = bar.menus) === null || _bar$menus === void 0 ? void 0 : (_bar$menus$hooks = _bar$menus.hooks) === null || _bar$menus$hooks === void 0 ? void 0 : _bar$menus$hooks.search;
+	      if (hook) {
+	        return hook;
+	      }
+	    }
+	  } catch (err) {
+	    _iterator.e(err);
+	  } finally {
+	    _iterator.f();
+	  }
+	  return undefined;
+	}
+
+	/**
+	 * @param {SearcherCherryHost} cherry
+	 * @returns {SearcherEditorAdapter}
+	 */
+	function createEditorAdapter(cherry) {
+	  var _cherry$editor;
+	  var editor = (_cherry$editor = cherry.editor) === null || _cherry$editor === void 0 ? void 0 : _cherry$editor.editor;
+	  return {
+	    getDocString: function getDocString() {
+	      var _editor$view$state$do, _editor$view, _editor$view$state, _editor$view$state$do2;
+	      return (_editor$view$state$do = editor === null || editor === void 0 ? void 0 : (_editor$view = editor.view) === null || _editor$view === void 0 ? void 0 : (_editor$view$state = _editor$view.state) === null || _editor$view$state === void 0 ? void 0 : (_editor$view$state$do2 = _editor$view$state.doc) === null || _editor$view$state$do2 === void 0 ? void 0 : _editor$view$state$do2.toString()) !== null && _editor$view$state$do !== void 0 ? _editor$view$state$do : '';
+	    },
+	    getSelection: function getSelection() {
+	      var _editor$view2, _editor$view2$state, _editor$view2$state$s;
+	      var selection = editor === null || editor === void 0 ? void 0 : (_editor$view2 = editor.view) === null || _editor$view2 === void 0 ? void 0 : (_editor$view2$state = _editor$view2.state) === null || _editor$view2$state === void 0 ? void 0 : (_editor$view2$state$s = _editor$view2$state.selection) === null || _editor$view2$state$s === void 0 ? void 0 : _editor$view2$state$s.main;
+	      if (!selection) {
+	        return {
+	          from: 0,
+	          to: 0
+	        };
+	      }
+	      return {
+	        from: selection.from,
+	        to: selection.to
+	      };
+	    },
+	    getSelectedText: function getSelectedText() {
+	      var _this$getSelection = this.getSelection(),
+	        from = _this$getSelection.from,
+	        to = _this$getSelection.to;
+	      if (from === to || !editor) {
+	        return '';
+	      }
+	      return editor.view.state.doc.sliceString(from, to);
+	    },
+	    getCursorHead: function getCursorHead() {
+	      var _editor$view$state$se, _editor$view3, _editor$view3$state, _editor$view3$state$s, _editor$view3$state$s2;
+	      return (_editor$view$state$se = editor === null || editor === void 0 ? void 0 : (_editor$view3 = editor.view) === null || _editor$view3 === void 0 ? void 0 : (_editor$view3$state = _editor$view3.state) === null || _editor$view3$state === void 0 ? void 0 : (_editor$view3$state$s = _editor$view3$state.selection) === null || _editor$view3$state$s === void 0 ? void 0 : (_editor$view3$state$s2 = _editor$view3$state$s.main) === null || _editor$view3$state$s2 === void 0 ? void 0 : _editor$view3$state$s2.head) !== null && _editor$view$state$se !== void 0 ? _editor$view$state$se : 0;
+	    },
+	    setSelection: function setSelection(from, to, options) {
+	      editor === null || editor === void 0 ? void 0 : editor.setSelection(from, to, options);
+	    },
+	    setSelections: function setSelections(ranges) {
+	      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	      var view = editor === null || editor === void 0 ? void 0 : editor.view;
+	      if (!view || !_Array$isArray$1(ranges) || ranges.length === 0) {
+	        return;
+	      }
+	      var docLength = view.state.doc.length;
+	      var cmRanges = _mapInstanceProperty(ranges).call(ranges, function (_ref) {
+	        var from = _ref.from,
+	          to = _ref.to;
+	        var safeFrom = Math.max(0, Math.min(from, docLength));
+	        var safeTo = Math.max(safeFrom, Math.min(to, docLength));
+	        return EditorSelection.range(safeFrom, safeTo);
+	      });
+
+	      /** @type {{ selection: any; annotations?: any; effects?: any; scrollIntoView?: boolean }} */
+	      var dispatchOptions = {
+	        selection: EditorSelection.create(cmRanges)
+	      };
+	      if (options.scrollIntoView) {
+	        dispatchOptions.scrollIntoView = true;
+	      }
+	      view.dispatch(dispatchOptions);
+	    },
+	    replaceRange: function replaceRange(text, from, to) {
+	      editor === null || editor === void 0 ? void 0 : editor.replaceRange(text, from, to);
+	    },
+	    setSearchQuery: function setSearchQuery(pattern, caseSensitive, asRegex) {
+	      editor === null || editor === void 0 ? void 0 : editor.setSearchQuery(pattern, caseSensitive, asRegex);
+	    },
+	    clearSearchQuery: function clearSearchQuery() {
+	      editor === null || editor === void 0 ? void 0 : editor.clearSearchQuery();
+	    },
+	    focus: function focus() {
+	      var _editor$view4;
+	      editor === null || editor === void 0 ? void 0 : (_editor$view4 = editor.view) === null || _editor$view4 === void 0 ? void 0 : _editor$view4.focus();
+	    },
+	    isReadOnly: function isReadOnly() {
+	      var _editor$getOption;
+	      return Boolean(editor === null || editor === void 0 ? void 0 : (_editor$getOption = editor.getOption) === null || _editor$getOption === void 0 ? void 0 : _editor$getOption.call(editor, 'readOnly'));
+	    }
+	  };
+	}
+
+	/** @typedef {import('./bridge-utils').SearcherCherryHost} SearcherCherryHost */
+	/** @typedef {import('./config').SearcherConfig} SearcherConfig */
+
+	/** @type {WeakMap<SearcherCherryHost, SearcherBridge>} */
+	var bridges = new _WeakMap();
+	var SearcherBridge = /*#__PURE__*/function () {
+	  /**
+	   * @param {SearcherCherryHost} cherry
+	   */
+	  function SearcherBridge(cherry) {
+	    var _context,
+	      _context2,
+	      _context3,
+	      _context4,
+	      _cherry$editor,
+	      _cherry$editor$option,
+	      _cherry$editor2,
+	      _cherry$editor2$optio,
+	      _this = this;
+	    _classCallCheck$1(this, SearcherBridge);
+	    this.cherry = cherry;
+	    /** @type {SearcherConfig} 初始化时解析，运行期不随 options 变更 */
+	    this.config = resolveSearcherConfig(getSearcherToolbarConfig(cherry));
+	    this.handleLocaleChange = _bindInstanceProperty(_context = this.handleLocaleChange).call(_context, this);
+	    this.handleToolbarHide = _bindInstanceProperty(_context2 = this.handleToolbarHide).call(_context2, this);
+	    this.handleDocumentChange = _bindInstanceProperty(_context3 = this.handleDocumentChange).call(_context3, this);
+	    this.handlePreviewHidden = _bindInstanceProperty(_context4 = this.handlePreviewHidden).call(_context4, this);
+	    var editorDom = (_cherry$editor = cherry.editor) === null || _cherry$editor === void 0 ? void 0 : (_cherry$editor$option = _cherry$editor.options) === null || _cherry$editor$option === void 0 ? void 0 : _cherry$editor$option.editorDom;
+	    var mountTarget = editorDom || ((_cherry$editor2 = cherry.editor) === null || _cherry$editor2 === void 0 ? void 0 : (_cherry$editor2$optio = _cherry$editor2.options) === null || _cherry$editor2$optio === void 0 ? void 0 : _cherry$editor2$optio.wrapperDom) || cherry.wrapperDom;
+	    this.panel = new SearcherPanel({
+	      editorAdapter: createEditorAdapter(cherry),
+	      locale: pickSearcherLocale(cherry.locale),
+	      enableReplace: this.config.enableReplace,
+	      mountTarget: mountTarget,
+	      onVisibilityChange: function onVisibilityChange(visible) {
+	        return _this.syncToolbarActive(visible);
+	      }
+	    });
+	    this.bindEvents();
+	  }
+
+	  /** 编辑区可见时允许搜索（只读模式仍可使用查找） */
+	  return _createClass$1(SearcherBridge, [{
+	    key: "isSearchAvailable",
+	    value: function isSearchAvailable() {
+	      var _this$cherry$editor, _this$cherry$editor$o, _this$cherry$editor2;
+	      var editorDom = (_this$cherry$editor = this.cherry.editor) === null || _this$cherry$editor === void 0 ? void 0 : (_this$cherry$editor$o = _this$cherry$editor.options) === null || _this$cherry$editor$o === void 0 ? void 0 : _this$cherry$editor$o.editorDom;
+	      var editor = (_this$cherry$editor2 = this.cherry.editor) === null || _this$cherry$editor2 === void 0 ? void 0 : _this$cherry$editor2.editor;
+	      if (!editorDom || !editor) {
+	        return false;
+	      }
+	      return !editorDom.classList.contains('cherry-editor--hidden');
+	    }
+	  }, {
+	    key: "syncToolbarActive",
+	    value: function syncToolbarActive(active) {
+	      var _getSearchHook, _getSearchHook$setToo;
+	      (_getSearchHook = getSearchHook(this.cherry)) === null || _getSearchHook === void 0 ? void 0 : (_getSearchHook$setToo = _getSearchHook.setToolbarActive) === null || _getSearchHook$setToo === void 0 ? void 0 : _getSearchHook$setToo.call(_getSearchHook, active);
+	    }
+	  }, {
+	    key: "bindEvents",
+	    value: function bindEvents() {
+	      if (!this.cherry.$event) {
+	        return;
+	      }
+	      var Events = this.cherry.$event.Events;
+	      this.cherry.$event.on(Events.afterChangeLocale, this.handleLocaleChange);
+	      this.cherry.$event.on(Events.afterChange, this.handleDocumentChange);
+	      this.cherry.$event.on('toolbarHide', this.handleToolbarHide);
+	      this.cherry.$event.on('togglePreviewHidden', this.handlePreviewHidden);
+	    }
+
+	    /**
+	     * Mod+F / 搜索按钮：打开或关闭；Mod+H：打开并展开替换行（需 enableReplace）
+	     *
+	     * @param {string} [selection='']
+	     * @param {string} [aliasName=''] `'replace'` 为替换模式
+	     */
+	  }, {
+	    key: "handleTrigger",
+	    value: function handleTrigger() {
+	      var selection = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+	      var aliasName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+	      if (!this.isSearchAvailable()) {
+	        return;
+	      }
+	      var _this$config = this.config,
+	        enableReplace = _this$config.enableReplace,
+	        expandReplaceOnOpen = _this$config.expandReplaceOnOpen;
+	      var expandReplace = aliasName === 'replace' && enableReplace;
+	      if (this.panel.isVisible()) {
+	        if (expandReplace) {
+	          this.panel.setReplaceExpanded(true);
+	          this.panel.focusPanelInput({
+	            selectAll: true,
+	            replace: true
+	          });
+	        } else {
+	          this.panel.hide();
+	        }
+	        return;
+	      }
+	      var selectedText = selection || this.panel.editorAdapter.getSelectedText();
+	      var shouldExpandReplace = (expandReplace || expandReplaceOnOpen) && enableReplace;
+	      this.panel.show(selectedText, {
+	        expandReplace: shouldExpandReplace,
+	        selectAll: Boolean(selectedText)
+	      });
+	    }
+	  }, {
+	    key: "handlePreviewHidden",
+	    value: function handlePreviewHidden(state) {
+	      this.panel.dom.classList.toggle('is-preview-sidebar-offset', Boolean(state));
+	    }
+	  }, {
+	    key: "handleDocumentChange",
+	    value: function handleDocumentChange() {
+	      if (!this.panel.state.query) {
+	        return;
+	      }
+	      if (this.panel.isVisible()) {
+	        this.panel.scheduleSearch(true);
+	        return;
+	      }
+	      this.panel.syncMatches(true, false);
+	    }
+	  }, {
+	    key: "handleLocaleChange",
+	    value: function handleLocaleChange() {
+	      var _getSearchHook2, _getSearchHook2$syncT;
+	      this.panel.updateLocaleStrings(this.cherry.locale);
+	      (_getSearchHook2 = getSearchHook(this.cherry)) === null || _getSearchHook2 === void 0 ? void 0 : (_getSearchHook2$syncT = _getSearchHook2.syncToolbarLabel) === null || _getSearchHook2$syncT === void 0 ? void 0 : _getSearchHook2$syncT.call(_getSearchHook2);
+	    }
+	  }, {
+	    key: "handleToolbarHide",
+	    value: function handleToolbarHide() {
+	      this.panel.hide();
+	    }
+	  }, {
+	    key: "destroy",
+	    value: function destroy() {
+	      if (this.cherry.$event) {
+	        var Events = this.cherry.$event.Events;
+	        this.cherry.$event.off(Events.afterChangeLocale, this.handleLocaleChange);
+	        this.cherry.$event.off(Events.afterChange, this.handleDocumentChange);
+	        this.cherry.$event.off('toolbarHide', this.handleToolbarHide);
+	        this.cherry.$event.off('togglePreviewHidden', this.handlePreviewHidden);
+	      }
+	      this.panel.destroy();
+	    }
+	  }]);
+	}();
+	function getSearcherBridge(cherry) {
+	  return bridges.get(cherry);
+	}
+
+	/** @param {SearcherCherryHost} cherry */
+	function closeSearcherPanel(cherry) {
+	  var _bridges$get, _bridges$get$panel;
+	  (_bridges$get = bridges.get(cherry)) === null || _bridges$get === void 0 ? void 0 : (_bridges$get$panel = _bridges$get.panel) === null || _bridges$get$panel === void 0 ? void 0 : _bridges$get$panel.hide();
+	}
+
+	/** @param {SearcherCherryHost} cherry @param {string} [selection] @param {string} [aliasName] */
+	function triggerSearcher(cherry) {
+	  var _bridges$get2;
+	  var selection = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+	  var aliasName = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
+	  (_bridges$get2 = bridges.get(cherry)) === null || _bridges$get2 === void 0 ? void 0 : _bridges$get2.handleTrigger(selection, aliasName);
+	}
+
+	/** @param {SearcherCherryHost} cherry */
+	function initSearcherBridge(cherry) {
+	  var _cherry$options;
+	  if (!isSearcherToolbarEnabled((_cherry$options = cherry.options) === null || _cherry$options === void 0 ? void 0 : _cherry$options.toolbars) || bridges.has(cherry)) {
+	    return;
+	  }
+	  bridges.set(cherry, new SearcherBridge(cherry));
+	}
+
+	/** @param {SearcherCherryHost} cherry */
+	function destroySearcherBridge(cherry) {
+	  var _bridges$get3;
+	  (_bridges$get3 = bridges.get(cherry)) === null || _bridges$get3 === void 0 ? void 0 : _bridges$get3.destroy();
+	  bridges["delete"](cherry);
 	}
 
 	function _callSuper$a(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$a() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$a() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$a = function _isNativeReflectConstruct() { return !!t; })(); }
-	/**
-	 * 搜索功能
-	 */
+
+	/** 主工具栏与侧栏共用的搜索按钮选择器 */
+	var SEARCH_BUTTON_SELECTOR = '.cherry-toolbar-button.cherry-toolbar-search';
 	var Search = /*#__PURE__*/function (_MenuBase) {
+	  /**
+	   * @param {object} $cherry Cherry 实例
+	   *
+	   * Mod+H 仅在 `enableReplace !== false` 时注册（构造时读取配置，改配置需重新 new Cherry）。
+	   */
 	  function Search($cherry) {
 	    var _context;
 	    var _this;
@@ -117752,39 +115736,75 @@
 	    _this = _callSuper$a(this, Search, [$cherry]);
 	    _this.setName('search', 'search');
 	    _this.updateMarkdown = false;
-	    _this.shortcutKeyMap = _defineProperty$3({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('f')), {
+	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('f')), {
 	      hookName: _this.name,
 	      aliasName: _this.name
 	    });
-
-	    // 检查$cherry上是否已经存在searchBoxInstance实例和searchBoxInit
-	    if (!_this.$cherry.searchBoxInstance) {
-	      _this.$cherry.searchBoxInstance = new SearchBox(_this.$cherry);
-	      _this.$cherry.searchBoxInit = false;
+	    if (isSearcherReplaceEnabled($cherry)) {
+	      var _context2;
+	      _this.shortcutKeyMap[_concatInstanceProperty(_context2 = "".concat(getPlatformControlKey(), "-")).call(_context2, getKeyCode('h'))] = {
+	        hookName: _this.name,
+	        aliasName: 'replace'
+	      };
 	    }
 	    return _this;
 	  }
 
-	  /**
-	   * 响应点击事件
-	   * @param {string} selection 被用户选中的文本内容
-	   * @param {string} shortKey 快捷键参数，本函数不处理这个参数
-	   */
+	  /** 遍历所有搜索工具栏按钮（toolbar / sidebar 可能各有一个） */
 	  _inherits(Search, _MenuBase);
 	  return _createClass$1(Search, [{
+	    key: "forEachSearchButton",
+	    value: function forEachSearchButton(callback) {
+	      var _this$$cherry$wrapper, _context3;
+	      (_this$$cherry$wrapper = this.$cherry.wrapperDom) === null || _this$$cherry$wrapper === void 0 ? void 0 : _forEachInstanceProperty(_context3 = _this$$cherry$wrapper.querySelectorAll(SEARCH_BUTTON_SELECTOR)).call(_context3, callback);
+	    }
+
+	    /** 根据 enableReplace 同步 tooltip：「搜索」或「搜索/替换」 */
+	  }, {
+	    key: "syncToolbarLabel",
+	    value: function syncToolbarLabel() {
+	      var enableReplace = isSearcherReplaceEnabled(this.$cherry);
+	      var title = enableReplace ? this.locale.search || '搜索/替换' : this.locale.searchOnly || this.locale.searchFor || '搜索';
+	      this.forEachSearchButton(function (button) {
+	        button.setAttribute('title', title);
+	      });
+	    }
+
+	    /** @param {HTMLElement} btnDom */
+	  }, {
+	    key: "afterInit",
+	    value: function afterInit(btnDom) {
+	      this.syncToolbarLabel();
+	    }
+
+	    /** @param {boolean} active */
+	  }, {
+	    key: "setToolbarActive",
+	    value: function setToolbarActive(active) {
+	      this.forEachSearchButton(function (button) {
+	        button.classList.toggle('cherry-toolbar-button--active', active);
+	      });
+	    }
+
+	    /** 再次点击工具栏按钮时关闭面板 */
+	  }, {
+	    key: "toggleToolbarPanel",
+	    value: function toggleToolbarPanel() {
+	      var bridge = getSearcherBridge(this.$cherry);
+	      if (!(bridge !== null && bridge !== void 0 && bridge.panel.isVisible())) {
+	        return false;
+	      }
+	      bridge.panel.hide();
+	      return true;
+	    }
+
+	    /** @param {string} selection @param {string} [aliasName] */
+	  }, {
 	    key: "onClick",
 	    value: function onClick(selection) {
-	      var shortKey = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-	      // 控制$cherry上的searchBoxInstance实例
-	      if (!this.$cherry.searchBoxInit) {
-	        this.$cherry.searchBoxInit = true;
-	        this.$cherry.searchBoxInstance.init(this.$cherry.editor.editor);
-	      }
-	      if (this.$cherry.searchBoxInstance.isVisible()) {
-	        this.$cherry.searchBoxInstance.hide();
-	      } else {
-	        this.$cherry.searchBoxInstance.show(selection, true);
-	      }
+	      var aliasName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+	      var action = aliasName === 'replace' && !isSearcherReplaceEnabled(this.$cherry) ? this.name : aliasName;
+	      triggerSearcher(this.$cherry, selection, action);
 	    }
 	  }]);
 	}(MenuBase);
@@ -118009,7 +116029,7 @@
 	     * }} ToolbarHandlers
 	     * @type ToolbarHandlers 外部获取 toolbarHandlers 的部分功能
 	     */
-	    _defineProperty$3(this, "toolbarHandlers", {});
+	    _defineProperty$2(this, "toolbarHandlers", {});
 	    // 存储所有菜单的实例
 	    this.menus = {};
 	    // 存储所有快捷键的影射  {快捷键: 菜单名称}
@@ -118087,7 +116107,12 @@
 	        _this2 = this;
 	      var fragLeft = document.createDocumentFragment();
 	      _forEachInstanceProperty(_context = this.menus.level1MenusName).call(_context, function (name) {
-	        var btn = _this2.menus.hooks[name].createBtn();
+	        var hook = _this2.menus.hooks[name];
+	        if (!hook || typeof hook.createBtn !== 'function') {
+	          Logger.warn("[Cherry toolbar] \u8DF3\u8FC7\u672A\u6CE8\u518C\u7684\u83DC\u5355\u9879: ".concat(name));
+	          return;
+	        }
+	        var btn = hook.createBtn();
 	        if ((typeof window === "undefined" ? "undefined" : _typeof$2(window)) === 'object' && 'onpointerup' in window) {
 	          // 只有先down再up的才触发click逻辑，避免误触（尤其是float menu的场景）
 	          btn.addEventListener('pointerdown', function () {
@@ -118180,6 +116205,9 @@
 	      if (!menu) {
 	        return;
 	      }
+	      if (name !== 'search') {
+	        closeSearcherPanel(this.$cherry);
+	      }
 	      if (this.isHasSubMenu(name) && !focusEvent) {
 	        this.toggleSubMenu(name);
 	      } else {
@@ -118195,6 +116223,10 @@
 	          });
 	        } else {
 	          this.hideAllSubMenu();
+	        }
+	        // @ts-ignore 自定义浮层面板：已展开时再次点击工具栏按钮则收起（如搜索面板）
+	        if (typeof menu.toggleToolbarPanel === 'function' && menu.toggleToolbarPanel()) {
+	          return;
 	        }
 	        menu.fire(event, name);
 	      }
@@ -118436,17 +116468,29 @@
 	  }, {
 	    key: "fireShortcutKey",
 	    value: function fireShortcutKey(evt) {
-	      var _this$shortcutKeyMap$;
 	      // 如果禁用了快捷键，则不再触发快捷键事件
 	      if (!isEnableShortcutKey(this.$cherry.nameSpace)) {
 	        return false;
 	      }
 	      var onKeyStack = getAllowedShortcutKey(evt);
 	      var currentKey = keyStack2UniqueString(onKeyStack);
-	      var keyMap = (_this$shortcutKeyMap$ = this.shortcutKeyMap[currentKey]) === null || _this$shortcutKeyMap$ === void 0 ? void 0 : _this$shortcutKeyMap$.hookName;
-	      if (typeof keyMap === 'string' && keyMap) {
-	        var _this$menus$hooks$key;
-	        (_this$menus$hooks$key = this.menus.hooks[keyMap]) === null || _this$menus$hooks$key === void 0 ? void 0 : _this$menus$hooks$key.fire(evt, currentKey);
+	      var entry = this.shortcutKeyMap[currentKey];
+	      if (!entry) {
+	        return false;
+	      }
+	      var hookName;
+	      var aliasName = '';
+	      if (typeof entry === 'string') {
+	        hookName = entry;
+	        aliasName = currentKey;
+	      } else {
+	        var _entry$aliasName;
+	        hookName = entry.hookName;
+	        aliasName = (_entry$aliasName = entry.aliasName) !== null && _entry$aliasName !== void 0 ? _entry$aliasName : '';
+	      }
+	      if (typeof hookName === 'string' && hookName) {
+	        var _this$menus$hooks$hoo;
+	        (_this$menus$hooks$hoo = this.menus.hooks[hookName]) === null || _this$menus$hooks$hoo === void 0 ? void 0 : _this$menus$hooks$hoo.fire(evt, aliasName);
 	      }
 	      return true;
 	    }
@@ -118740,7 +116784,7 @@
 	/**
 	 * @type {'flex' | 'block'}
 	 */
-	_defineProperty$3(Bubble, "displayType", 'flex');
+	_defineProperty$2(Bubble, "displayType", 'flex');
 
 	function _callSuper$8(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$8() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$8() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$8 = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -118828,12 +116872,10 @@
 
 	    /**
 	     * 处理beforeSelectionChange事件
-	     * @param {Object} selection 选区对象
 	     */
 	  }, {
 	    key: "handleBeforeSelectionChange",
-	    value: function handleBeforeSelectionChange(_ref3) {
-	      var selection = _ref3.selection;
+	    value: function handleBeforeSelectionChange() {
 	      if (this.editor && this.editor.editor) {
 	        var compatCodeMirror = this.createCompatCodeMirror();
 	        this.cursorActivity(null, compatCodeMirror);
@@ -118867,7 +116909,7 @@
 	        getLine: function getLine(lineNum) {
 	          try {
 	            return state.doc.line(lineNum + 1).text;
-	          } catch (e) {
+	          } catch (_unused) {
 	            return '';
 	          }
 	        },
@@ -118901,7 +116943,7 @@
 	                  callback({
 	                    height: lineHeight
 	                  });
-	                } catch (e) {
+	                } catch (_unused2) {
 	                  break;
 	                }
 	              }
@@ -118912,7 +116954,7 @@
 	        coordsAtPos: function coordsAtPos(pos) {
 	          try {
 	            return view.coordsAtPos(pos);
-	          } catch (e) {
+	          } catch (_unused3) {
 	            return null;
 	          }
 	        }
@@ -119067,7 +117109,7 @@
 	            if (lineBlock) {
 	              return lineBlock.top;
 	            }
-	          } catch (blockError) {
+	          } catch (_unused4) {
 	            // 静默处理，降级到默认行高
 	          }
 	          return line * 20;
@@ -119289,8 +117331,7 @@
 	          var _this$tocListDom$getB = this.tocListDom.getBoundingClientRect(),
 	            height = _this$tocListDom$getB.height;
 	          var minHeight = Math.floor((height - list.length * 3) / list.length);
-	          // eslint-disable-next-line no-nested-ternary
-	          targetHeight = minHeight < 3 ? 3 : minHeight > 10 ? 10 : minHeight;
+	          targetHeight = Math.min(10, Math.max(3, minHeight));
 	        }
 	        for (var i = 0; i < list.length; i++) {
 	          // @ts-ignore
@@ -119515,1165 +117556,6 @@
 	  }]);
 	}(Toolbar);
 
-	/**
-	 * A specialized version of `_.forEach` for arrays without support for
-	 * iteratee shorthands.
-	 *
-	 * @private
-	 * @param {Array} [array] The array to iterate over.
-	 * @param {Function} iteratee The function invoked per iteration.
-	 * @returns {Array} Returns `array`.
-	 */
-
-	var _arrayEach;
-	var hasRequired_arrayEach;
-
-	function require_arrayEach () {
-		if (hasRequired_arrayEach) return _arrayEach;
-		hasRequired_arrayEach = 1;
-		function arrayEach(array, iteratee) {
-		  var index = -1,
-		      length = array == null ? 0 : array.length;
-
-		  while (++index < length) {
-		    if (iteratee(array[index], index, array) === false) {
-		      break;
-		    }
-		  }
-		  return array;
-		}
-
-		_arrayEach = arrayEach;
-		return _arrayEach;
-	}
-
-	var _nativeKeys;
-	var hasRequired_nativeKeys;
-
-	function require_nativeKeys () {
-		if (hasRequired_nativeKeys) return _nativeKeys;
-		hasRequired_nativeKeys = 1;
-		var overArg = require_overArg();
-
-		/* Built-in method references for those with the same name as other `lodash` methods. */
-		var nativeKeys = overArg(Object.keys, Object);
-
-		_nativeKeys = nativeKeys;
-		return _nativeKeys;
-	}
-
-	var _baseKeys;
-	var hasRequired_baseKeys;
-
-	function require_baseKeys () {
-		if (hasRequired_baseKeys) return _baseKeys;
-		hasRequired_baseKeys = 1;
-		var isPrototype = require_isPrototype(),
-		    nativeKeys = require_nativeKeys();
-
-		/** Used for built-in method references. */
-		var objectProto = Object.prototype;
-
-		/** Used to check objects for own properties. */
-		var hasOwnProperty = objectProto.hasOwnProperty;
-
-		/**
-		 * The base implementation of `_.keys` which doesn't treat sparse arrays as dense.
-		 *
-		 * @private
-		 * @param {Object} object The object to query.
-		 * @returns {Array} Returns the array of property names.
-		 */
-		function baseKeys(object) {
-		  if (!isPrototype(object)) {
-		    return nativeKeys(object);
-		  }
-		  var result = [];
-		  for (var key in Object(object)) {
-		    if (hasOwnProperty.call(object, key) && key != 'constructor') {
-		      result.push(key);
-		    }
-		  }
-		  return result;
-		}
-
-		_baseKeys = baseKeys;
-		return _baseKeys;
-	}
-
-	var keys_1;
-	var hasRequiredKeys;
-
-	function requireKeys () {
-		if (hasRequiredKeys) return keys_1;
-		hasRequiredKeys = 1;
-		var arrayLikeKeys = require_arrayLikeKeys(),
-		    baseKeys = require_baseKeys(),
-		    isArrayLike = requireIsArrayLike();
-
-		/**
-		 * Creates an array of the own enumerable property names of `object`.
-		 *
-		 * **Note:** Non-object values are coerced to objects. See the
-		 * [ES spec](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
-		 * for more details.
-		 *
-		 * @static
-		 * @since 0.1.0
-		 * @memberOf _
-		 * @category Object
-		 * @param {Object} object The object to query.
-		 * @returns {Array} Returns the array of property names.
-		 * @example
-		 *
-		 * function Foo() {
-		 *   this.a = 1;
-		 *   this.b = 2;
-		 * }
-		 *
-		 * Foo.prototype.c = 3;
-		 *
-		 * _.keys(new Foo);
-		 * // => ['a', 'b'] (iteration order is not guaranteed)
-		 *
-		 * _.keys('hi');
-		 * // => ['0', '1']
-		 */
-		function keys(object) {
-		  return isArrayLike(object) ? arrayLikeKeys(object) : baseKeys(object);
-		}
-
-		keys_1 = keys;
-		return keys_1;
-	}
-
-	var _baseAssign;
-	var hasRequired_baseAssign;
-
-	function require_baseAssign () {
-		if (hasRequired_baseAssign) return _baseAssign;
-		hasRequired_baseAssign = 1;
-		var copyObject = require_copyObject(),
-		    keys = requireKeys();
-
-		/**
-		 * The base implementation of `_.assign` without support for multiple sources
-		 * or `customizer` functions.
-		 *
-		 * @private
-		 * @param {Object} object The destination object.
-		 * @param {Object} source The source object.
-		 * @returns {Object} Returns `object`.
-		 */
-		function baseAssign(object, source) {
-		  return object && copyObject(source, keys(source), object);
-		}
-
-		_baseAssign = baseAssign;
-		return _baseAssign;
-	}
-
-	var _baseAssignIn;
-	var hasRequired_baseAssignIn;
-
-	function require_baseAssignIn () {
-		if (hasRequired_baseAssignIn) return _baseAssignIn;
-		hasRequired_baseAssignIn = 1;
-		var copyObject = require_copyObject(),
-		    keysIn = requireKeysIn();
-
-		/**
-		 * The base implementation of `_.assignIn` without support for multiple sources
-		 * or `customizer` functions.
-		 *
-		 * @private
-		 * @param {Object} object The destination object.
-		 * @param {Object} source The source object.
-		 * @returns {Object} Returns `object`.
-		 */
-		function baseAssignIn(object, source) {
-		  return object && copyObject(source, keysIn(source), object);
-		}
-
-		_baseAssignIn = baseAssignIn;
-		return _baseAssignIn;
-	}
-
-	/**
-	 * A specialized version of `_.filter` for arrays without support for
-	 * iteratee shorthands.
-	 *
-	 * @private
-	 * @param {Array} [array] The array to iterate over.
-	 * @param {Function} predicate The function invoked per iteration.
-	 * @returns {Array} Returns the new filtered array.
-	 */
-
-	var _arrayFilter;
-	var hasRequired_arrayFilter;
-
-	function require_arrayFilter () {
-		if (hasRequired_arrayFilter) return _arrayFilter;
-		hasRequired_arrayFilter = 1;
-		function arrayFilter(array, predicate) {
-		  var index = -1,
-		      length = array == null ? 0 : array.length,
-		      resIndex = 0,
-		      result = [];
-
-		  while (++index < length) {
-		    var value = array[index];
-		    if (predicate(value, index, array)) {
-		      result[resIndex++] = value;
-		    }
-		  }
-		  return result;
-		}
-
-		_arrayFilter = arrayFilter;
-		return _arrayFilter;
-	}
-
-	/**
-	 * This method returns a new empty array.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 4.13.0
-	 * @category Util
-	 * @returns {Array} Returns the new empty array.
-	 * @example
-	 *
-	 * var arrays = _.times(2, _.stubArray);
-	 *
-	 * console.log(arrays);
-	 * // => [[], []]
-	 *
-	 * console.log(arrays[0] === arrays[1]);
-	 * // => false
-	 */
-
-	var stubArray_1;
-	var hasRequiredStubArray;
-
-	function requireStubArray () {
-		if (hasRequiredStubArray) return stubArray_1;
-		hasRequiredStubArray = 1;
-		function stubArray() {
-		  return [];
-		}
-
-		stubArray_1 = stubArray;
-		return stubArray_1;
-	}
-
-	var _getSymbols;
-	var hasRequired_getSymbols;
-
-	function require_getSymbols () {
-		if (hasRequired_getSymbols) return _getSymbols;
-		hasRequired_getSymbols = 1;
-		var arrayFilter = require_arrayFilter(),
-		    stubArray = requireStubArray();
-
-		/** Used for built-in method references. */
-		var objectProto = Object.prototype;
-
-		/** Built-in value references. */
-		var propertyIsEnumerable = objectProto.propertyIsEnumerable;
-
-		/* Built-in method references for those with the same name as other `lodash` methods. */
-		var nativeGetSymbols = Object.getOwnPropertySymbols;
-
-		/**
-		 * Creates an array of the own enumerable symbols of `object`.
-		 *
-		 * @private
-		 * @param {Object} object The object to query.
-		 * @returns {Array} Returns the array of symbols.
-		 */
-		var getSymbols = !nativeGetSymbols ? stubArray : function(object) {
-		  if (object == null) {
-		    return [];
-		  }
-		  object = Object(object);
-		  return arrayFilter(nativeGetSymbols(object), function(symbol) {
-		    return propertyIsEnumerable.call(object, symbol);
-		  });
-		};
-
-		_getSymbols = getSymbols;
-		return _getSymbols;
-	}
-
-	var _copySymbols;
-	var hasRequired_copySymbols;
-
-	function require_copySymbols () {
-		if (hasRequired_copySymbols) return _copySymbols;
-		hasRequired_copySymbols = 1;
-		var copyObject = require_copyObject(),
-		    getSymbols = require_getSymbols();
-
-		/**
-		 * Copies own symbols of `source` to `object`.
-		 *
-		 * @private
-		 * @param {Object} source The object to copy symbols from.
-		 * @param {Object} [object={}] The object to copy symbols to.
-		 * @returns {Object} Returns `object`.
-		 */
-		function copySymbols(source, object) {
-		  return copyObject(source, getSymbols(source), object);
-		}
-
-		_copySymbols = copySymbols;
-		return _copySymbols;
-	}
-
-	/**
-	 * Appends the elements of `values` to `array`.
-	 *
-	 * @private
-	 * @param {Array} array The array to modify.
-	 * @param {Array} values The values to append.
-	 * @returns {Array} Returns `array`.
-	 */
-
-	var _arrayPush;
-	var hasRequired_arrayPush;
-
-	function require_arrayPush () {
-		if (hasRequired_arrayPush) return _arrayPush;
-		hasRequired_arrayPush = 1;
-		function arrayPush(array, values) {
-		  var index = -1,
-		      length = values.length,
-		      offset = array.length;
-
-		  while (++index < length) {
-		    array[offset + index] = values[index];
-		  }
-		  return array;
-		}
-
-		_arrayPush = arrayPush;
-		return _arrayPush;
-	}
-
-	var _getSymbolsIn;
-	var hasRequired_getSymbolsIn;
-
-	function require_getSymbolsIn () {
-		if (hasRequired_getSymbolsIn) return _getSymbolsIn;
-		hasRequired_getSymbolsIn = 1;
-		var arrayPush = require_arrayPush(),
-		    getPrototype = require_getPrototype(),
-		    getSymbols = require_getSymbols(),
-		    stubArray = requireStubArray();
-
-		/* Built-in method references for those with the same name as other `lodash` methods. */
-		var nativeGetSymbols = Object.getOwnPropertySymbols;
-
-		/**
-		 * Creates an array of the own and inherited enumerable symbols of `object`.
-		 *
-		 * @private
-		 * @param {Object} object The object to query.
-		 * @returns {Array} Returns the array of symbols.
-		 */
-		var getSymbolsIn = !nativeGetSymbols ? stubArray : function(object) {
-		  var result = [];
-		  while (object) {
-		    arrayPush(result, getSymbols(object));
-		    object = getPrototype(object);
-		  }
-		  return result;
-		};
-
-		_getSymbolsIn = getSymbolsIn;
-		return _getSymbolsIn;
-	}
-
-	var _copySymbolsIn;
-	var hasRequired_copySymbolsIn;
-
-	function require_copySymbolsIn () {
-		if (hasRequired_copySymbolsIn) return _copySymbolsIn;
-		hasRequired_copySymbolsIn = 1;
-		var copyObject = require_copyObject(),
-		    getSymbolsIn = require_getSymbolsIn();
-
-		/**
-		 * Copies own and inherited symbols of `source` to `object`.
-		 *
-		 * @private
-		 * @param {Object} source The object to copy symbols from.
-		 * @param {Object} [object={}] The object to copy symbols to.
-		 * @returns {Object} Returns `object`.
-		 */
-		function copySymbolsIn(source, object) {
-		  return copyObject(source, getSymbolsIn(source), object);
-		}
-
-		_copySymbolsIn = copySymbolsIn;
-		return _copySymbolsIn;
-	}
-
-	var _baseGetAllKeys;
-	var hasRequired_baseGetAllKeys;
-
-	function require_baseGetAllKeys () {
-		if (hasRequired_baseGetAllKeys) return _baseGetAllKeys;
-		hasRequired_baseGetAllKeys = 1;
-		var arrayPush = require_arrayPush(),
-		    isArray = requireIsArray$4();
-
-		/**
-		 * The base implementation of `getAllKeys` and `getAllKeysIn` which uses
-		 * `keysFunc` and `symbolsFunc` to get the enumerable property names and
-		 * symbols of `object`.
-		 *
-		 * @private
-		 * @param {Object} object The object to query.
-		 * @param {Function} keysFunc The function to get the keys of `object`.
-		 * @param {Function} symbolsFunc The function to get the symbols of `object`.
-		 * @returns {Array} Returns the array of property names and symbols.
-		 */
-		function baseGetAllKeys(object, keysFunc, symbolsFunc) {
-		  var result = keysFunc(object);
-		  return isArray(object) ? result : arrayPush(result, symbolsFunc(object));
-		}
-
-		_baseGetAllKeys = baseGetAllKeys;
-		return _baseGetAllKeys;
-	}
-
-	var _getAllKeys;
-	var hasRequired_getAllKeys;
-
-	function require_getAllKeys () {
-		if (hasRequired_getAllKeys) return _getAllKeys;
-		hasRequired_getAllKeys = 1;
-		var baseGetAllKeys = require_baseGetAllKeys(),
-		    getSymbols = require_getSymbols(),
-		    keys = requireKeys();
-
-		/**
-		 * Creates an array of own enumerable property names and symbols of `object`.
-		 *
-		 * @private
-		 * @param {Object} object The object to query.
-		 * @returns {Array} Returns the array of property names and symbols.
-		 */
-		function getAllKeys(object) {
-		  return baseGetAllKeys(object, keys, getSymbols);
-		}
-
-		_getAllKeys = getAllKeys;
-		return _getAllKeys;
-	}
-
-	var _getAllKeysIn;
-	var hasRequired_getAllKeysIn;
-
-	function require_getAllKeysIn () {
-		if (hasRequired_getAllKeysIn) return _getAllKeysIn;
-		hasRequired_getAllKeysIn = 1;
-		var baseGetAllKeys = require_baseGetAllKeys(),
-		    getSymbolsIn = require_getSymbolsIn(),
-		    keysIn = requireKeysIn();
-
-		/**
-		 * Creates an array of own and inherited enumerable property names and
-		 * symbols of `object`.
-		 *
-		 * @private
-		 * @param {Object} object The object to query.
-		 * @returns {Array} Returns the array of property names and symbols.
-		 */
-		function getAllKeysIn(object) {
-		  return baseGetAllKeys(object, keysIn, getSymbolsIn);
-		}
-
-		_getAllKeysIn = getAllKeysIn;
-		return _getAllKeysIn;
-	}
-
-	var _DataView;
-	var hasRequired_DataView;
-
-	function require_DataView () {
-		if (hasRequired_DataView) return _DataView;
-		hasRequired_DataView = 1;
-		var getNative = require_getNative$1(),
-		    root = require_root$1();
-
-		/* Built-in method references that are verified to be native. */
-		var DataView = getNative(root, 'DataView');
-
-		_DataView = DataView;
-		return _DataView;
-	}
-
-	var _Promise;
-	var hasRequired_Promise;
-
-	function require_Promise () {
-		if (hasRequired_Promise) return _Promise;
-		hasRequired_Promise = 1;
-		var getNative = require_getNative$1(),
-		    root = require_root$1();
-
-		/* Built-in method references that are verified to be native. */
-		var Promise = getNative(root, 'Promise');
-
-		_Promise = Promise;
-		return _Promise;
-	}
-
-	var _Set;
-	var hasRequired_Set;
-
-	function require_Set () {
-		if (hasRequired_Set) return _Set;
-		hasRequired_Set = 1;
-		var getNative = require_getNative$1(),
-		    root = require_root$1();
-
-		/* Built-in method references that are verified to be native. */
-		var Set = getNative(root, 'Set');
-
-		_Set = Set;
-		return _Set;
-	}
-
-	var _WeakMap;
-	var hasRequired_WeakMap;
-
-	function require_WeakMap () {
-		if (hasRequired_WeakMap) return _WeakMap;
-		hasRequired_WeakMap = 1;
-		var getNative = require_getNative$1(),
-		    root = require_root$1();
-
-		/* Built-in method references that are verified to be native. */
-		var WeakMap = getNative(root, 'WeakMap');
-
-		_WeakMap = WeakMap;
-		return _WeakMap;
-	}
-
-	var _getTag;
-	var hasRequired_getTag;
-
-	function require_getTag () {
-		if (hasRequired_getTag) return _getTag;
-		hasRequired_getTag = 1;
-		var DataView = require_DataView(),
-		    Map = require_Map$1(),
-		    Promise = require_Promise(),
-		    Set = require_Set(),
-		    WeakMap = require_WeakMap(),
-		    baseGetTag = require_baseGetTag$1(),
-		    toSource = require_toSource$1();
-
-		/** `Object#toString` result references. */
-		var mapTag = '[object Map]',
-		    objectTag = '[object Object]',
-		    promiseTag = '[object Promise]',
-		    setTag = '[object Set]',
-		    weakMapTag = '[object WeakMap]';
-
-		var dataViewTag = '[object DataView]';
-
-		/** Used to detect maps, sets, and weakmaps. */
-		var dataViewCtorString = toSource(DataView),
-		    mapCtorString = toSource(Map),
-		    promiseCtorString = toSource(Promise),
-		    setCtorString = toSource(Set),
-		    weakMapCtorString = toSource(WeakMap);
-
-		/**
-		 * Gets the `toStringTag` of `value`.
-		 *
-		 * @private
-		 * @param {*} value The value to query.
-		 * @returns {string} Returns the `toStringTag`.
-		 */
-		var getTag = baseGetTag;
-
-		// Fallback for data views, maps, sets, and weak maps in IE 11 and promises in Node.js < 6.
-		if ((DataView && getTag(new DataView(new ArrayBuffer(1))) != dataViewTag) ||
-		    (Map && getTag(new Map) != mapTag) ||
-		    (Promise && getTag(Promise.resolve()) != promiseTag) ||
-		    (Set && getTag(new Set) != setTag) ||
-		    (WeakMap && getTag(new WeakMap) != weakMapTag)) {
-		  getTag = function(value) {
-		    var result = baseGetTag(value),
-		        Ctor = result == objectTag ? value.constructor : undefined,
-		        ctorString = Ctor ? toSource(Ctor) : '';
-
-		    if (ctorString) {
-		      switch (ctorString) {
-		        case dataViewCtorString: return dataViewTag;
-		        case mapCtorString: return mapTag;
-		        case promiseCtorString: return promiseTag;
-		        case setCtorString: return setTag;
-		        case weakMapCtorString: return weakMapTag;
-		      }
-		    }
-		    return result;
-		  };
-		}
-
-		_getTag = getTag;
-		return _getTag;
-	}
-
-	/** Used for built-in method references. */
-
-	var _initCloneArray;
-	var hasRequired_initCloneArray;
-
-	function require_initCloneArray () {
-		if (hasRequired_initCloneArray) return _initCloneArray;
-		hasRequired_initCloneArray = 1;
-		var objectProto = Object.prototype;
-
-		/** Used to check objects for own properties. */
-		var hasOwnProperty = objectProto.hasOwnProperty;
-
-		/**
-		 * Initializes an array clone.
-		 *
-		 * @private
-		 * @param {Array} array The array to clone.
-		 * @returns {Array} Returns the initialized clone.
-		 */
-		function initCloneArray(array) {
-		  var length = array.length,
-		      result = new array.constructor(length);
-
-		  // Add properties assigned by `RegExp#exec`.
-		  if (length && typeof array[0] == 'string' && hasOwnProperty.call(array, 'index')) {
-		    result.index = array.index;
-		    result.input = array.input;
-		  }
-		  return result;
-		}
-
-		_initCloneArray = initCloneArray;
-		return _initCloneArray;
-	}
-
-	var _cloneDataView;
-	var hasRequired_cloneDataView;
-
-	function require_cloneDataView () {
-		if (hasRequired_cloneDataView) return _cloneDataView;
-		hasRequired_cloneDataView = 1;
-		var cloneArrayBuffer = require_cloneArrayBuffer();
-
-		/**
-		 * Creates a clone of `dataView`.
-		 *
-		 * @private
-		 * @param {Object} dataView The data view to clone.
-		 * @param {boolean} [isDeep] Specify a deep clone.
-		 * @returns {Object} Returns the cloned data view.
-		 */
-		function cloneDataView(dataView, isDeep) {
-		  var buffer = isDeep ? cloneArrayBuffer(dataView.buffer) : dataView.buffer;
-		  return new dataView.constructor(buffer, dataView.byteOffset, dataView.byteLength);
-		}
-
-		_cloneDataView = cloneDataView;
-		return _cloneDataView;
-	}
-
-	/** Used to match `RegExp` flags from their coerced string values. */
-
-	var _cloneRegExp;
-	var hasRequired_cloneRegExp;
-
-	function require_cloneRegExp () {
-		if (hasRequired_cloneRegExp) return _cloneRegExp;
-		hasRequired_cloneRegExp = 1;
-		var reFlags = /\w*$/;
-
-		/**
-		 * Creates a clone of `regexp`.
-		 *
-		 * @private
-		 * @param {Object} regexp The regexp to clone.
-		 * @returns {Object} Returns the cloned regexp.
-		 */
-		function cloneRegExp(regexp) {
-		  var result = new regexp.constructor(regexp.source, reFlags.exec(regexp));
-		  result.lastIndex = regexp.lastIndex;
-		  return result;
-		}
-
-		_cloneRegExp = cloneRegExp;
-		return _cloneRegExp;
-	}
-
-	var _cloneSymbol;
-	var hasRequired_cloneSymbol;
-
-	function require_cloneSymbol () {
-		if (hasRequired_cloneSymbol) return _cloneSymbol;
-		hasRequired_cloneSymbol = 1;
-		var Symbol = require_Symbol$1();
-
-		/** Used to convert symbols to primitives and strings. */
-		var symbolProto = Symbol ? Symbol.prototype : undefined,
-		    symbolValueOf = symbolProto ? symbolProto.valueOf : undefined;
-
-		/**
-		 * Creates a clone of the `symbol` object.
-		 *
-		 * @private
-		 * @param {Object} symbol The symbol object to clone.
-		 * @returns {Object} Returns the cloned symbol object.
-		 */
-		function cloneSymbol(symbol) {
-		  return symbolValueOf ? Object(symbolValueOf.call(symbol)) : {};
-		}
-
-		_cloneSymbol = cloneSymbol;
-		return _cloneSymbol;
-	}
-
-	var _initCloneByTag;
-	var hasRequired_initCloneByTag;
-
-	function require_initCloneByTag () {
-		if (hasRequired_initCloneByTag) return _initCloneByTag;
-		hasRequired_initCloneByTag = 1;
-		var cloneArrayBuffer = require_cloneArrayBuffer(),
-		    cloneDataView = require_cloneDataView(),
-		    cloneRegExp = require_cloneRegExp(),
-		    cloneSymbol = require_cloneSymbol(),
-		    cloneTypedArray = require_cloneTypedArray();
-
-		/** `Object#toString` result references. */
-		var boolTag = '[object Boolean]',
-		    dateTag = '[object Date]',
-		    mapTag = '[object Map]',
-		    numberTag = '[object Number]',
-		    regexpTag = '[object RegExp]',
-		    setTag = '[object Set]',
-		    stringTag = '[object String]',
-		    symbolTag = '[object Symbol]';
-
-		var arrayBufferTag = '[object ArrayBuffer]',
-		    dataViewTag = '[object DataView]',
-		    float32Tag = '[object Float32Array]',
-		    float64Tag = '[object Float64Array]',
-		    int8Tag = '[object Int8Array]',
-		    int16Tag = '[object Int16Array]',
-		    int32Tag = '[object Int32Array]',
-		    uint8Tag = '[object Uint8Array]',
-		    uint8ClampedTag = '[object Uint8ClampedArray]',
-		    uint16Tag = '[object Uint16Array]',
-		    uint32Tag = '[object Uint32Array]';
-
-		/**
-		 * Initializes an object clone based on its `toStringTag`.
-		 *
-		 * **Note:** This function only supports cloning values with tags of
-		 * `Boolean`, `Date`, `Error`, `Map`, `Number`, `RegExp`, `Set`, or `String`.
-		 *
-		 * @private
-		 * @param {Object} object The object to clone.
-		 * @param {string} tag The `toStringTag` of the object to clone.
-		 * @param {boolean} [isDeep] Specify a deep clone.
-		 * @returns {Object} Returns the initialized clone.
-		 */
-		function initCloneByTag(object, tag, isDeep) {
-		  var Ctor = object.constructor;
-		  switch (tag) {
-		    case arrayBufferTag:
-		      return cloneArrayBuffer(object);
-
-		    case boolTag:
-		    case dateTag:
-		      return new Ctor(+object);
-
-		    case dataViewTag:
-		      return cloneDataView(object, isDeep);
-
-		    case float32Tag: case float64Tag:
-		    case int8Tag: case int16Tag: case int32Tag:
-		    case uint8Tag: case uint8ClampedTag: case uint16Tag: case uint32Tag:
-		      return cloneTypedArray(object, isDeep);
-
-		    case mapTag:
-		      return new Ctor;
-
-		    case numberTag:
-		    case stringTag:
-		      return new Ctor(object);
-
-		    case regexpTag:
-		      return cloneRegExp(object);
-
-		    case setTag:
-		      return new Ctor;
-
-		    case symbolTag:
-		      return cloneSymbol(object);
-		  }
-		}
-
-		_initCloneByTag = initCloneByTag;
-		return _initCloneByTag;
-	}
-
-	var _baseIsMap;
-	var hasRequired_baseIsMap;
-
-	function require_baseIsMap () {
-		if (hasRequired_baseIsMap) return _baseIsMap;
-		hasRequired_baseIsMap = 1;
-		var getTag = require_getTag(),
-		    isObjectLike = requireIsObjectLike$1();
-
-		/** `Object#toString` result references. */
-		var mapTag = '[object Map]';
-
-		/**
-		 * The base implementation of `_.isMap` without Node.js optimizations.
-		 *
-		 * @private
-		 * @param {*} value The value to check.
-		 * @returns {boolean} Returns `true` if `value` is a map, else `false`.
-		 */
-		function baseIsMap(value) {
-		  return isObjectLike(value) && getTag(value) == mapTag;
-		}
-
-		_baseIsMap = baseIsMap;
-		return _baseIsMap;
-	}
-
-	var isMap_1;
-	var hasRequiredIsMap;
-
-	function requireIsMap () {
-		if (hasRequiredIsMap) return isMap_1;
-		hasRequiredIsMap = 1;
-		var baseIsMap = require_baseIsMap(),
-		    baseUnary = require_baseUnary(),
-		    nodeUtil = require_nodeUtil();
-
-		/* Node.js helper references. */
-		var nodeIsMap = nodeUtil && nodeUtil.isMap;
-
-		/**
-		 * Checks if `value` is classified as a `Map` object.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 4.3.0
-		 * @category Lang
-		 * @param {*} value The value to check.
-		 * @returns {boolean} Returns `true` if `value` is a map, else `false`.
-		 * @example
-		 *
-		 * _.isMap(new Map);
-		 * // => true
-		 *
-		 * _.isMap(new WeakMap);
-		 * // => false
-		 */
-		var isMap = nodeIsMap ? baseUnary(nodeIsMap) : baseIsMap;
-
-		isMap_1 = isMap;
-		return isMap_1;
-	}
-
-	var _baseIsSet;
-	var hasRequired_baseIsSet;
-
-	function require_baseIsSet () {
-		if (hasRequired_baseIsSet) return _baseIsSet;
-		hasRequired_baseIsSet = 1;
-		var getTag = require_getTag(),
-		    isObjectLike = requireIsObjectLike$1();
-
-		/** `Object#toString` result references. */
-		var setTag = '[object Set]';
-
-		/**
-		 * The base implementation of `_.isSet` without Node.js optimizations.
-		 *
-		 * @private
-		 * @param {*} value The value to check.
-		 * @returns {boolean} Returns `true` if `value` is a set, else `false`.
-		 */
-		function baseIsSet(value) {
-		  return isObjectLike(value) && getTag(value) == setTag;
-		}
-
-		_baseIsSet = baseIsSet;
-		return _baseIsSet;
-	}
-
-	var isSet_1;
-	var hasRequiredIsSet;
-
-	function requireIsSet () {
-		if (hasRequiredIsSet) return isSet_1;
-		hasRequiredIsSet = 1;
-		var baseIsSet = require_baseIsSet(),
-		    baseUnary = require_baseUnary(),
-		    nodeUtil = require_nodeUtil();
-
-		/* Node.js helper references. */
-		var nodeIsSet = nodeUtil && nodeUtil.isSet;
-
-		/**
-		 * Checks if `value` is classified as a `Set` object.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 4.3.0
-		 * @category Lang
-		 * @param {*} value The value to check.
-		 * @returns {boolean} Returns `true` if `value` is a set, else `false`.
-		 * @example
-		 *
-		 * _.isSet(new Set);
-		 * // => true
-		 *
-		 * _.isSet(new WeakSet);
-		 * // => false
-		 */
-		var isSet = nodeIsSet ? baseUnary(nodeIsSet) : baseIsSet;
-
-		isSet_1 = isSet;
-		return isSet_1;
-	}
-
-	var _baseClone;
-	var hasRequired_baseClone;
-
-	function require_baseClone () {
-		if (hasRequired_baseClone) return _baseClone;
-		hasRequired_baseClone = 1;
-		var Stack = require_Stack(),
-		    arrayEach = require_arrayEach(),
-		    assignValue = require_assignValue$1(),
-		    baseAssign = require_baseAssign(),
-		    baseAssignIn = require_baseAssignIn(),
-		    cloneBuffer = require_cloneBuffer(),
-		    copyArray = require_copyArray$1(),
-		    copySymbols = require_copySymbols(),
-		    copySymbolsIn = require_copySymbolsIn(),
-		    getAllKeys = require_getAllKeys(),
-		    getAllKeysIn = require_getAllKeysIn(),
-		    getTag = require_getTag(),
-		    initCloneArray = require_initCloneArray(),
-		    initCloneByTag = require_initCloneByTag(),
-		    initCloneObject = require_initCloneObject(),
-		    isArray = requireIsArray$4(),
-		    isBuffer = requireIsBuffer(),
-		    isMap = requireIsMap(),
-		    isObject = requireIsObject$2(),
-		    isSet = requireIsSet(),
-		    keys = requireKeys(),
-		    keysIn = requireKeysIn();
-
-		/** Used to compose bitmasks for cloning. */
-		var CLONE_DEEP_FLAG = 1,
-		    CLONE_FLAT_FLAG = 2,
-		    CLONE_SYMBOLS_FLAG = 4;
-
-		/** `Object#toString` result references. */
-		var argsTag = '[object Arguments]',
-		    arrayTag = '[object Array]',
-		    boolTag = '[object Boolean]',
-		    dateTag = '[object Date]',
-		    errorTag = '[object Error]',
-		    funcTag = '[object Function]',
-		    genTag = '[object GeneratorFunction]',
-		    mapTag = '[object Map]',
-		    numberTag = '[object Number]',
-		    objectTag = '[object Object]',
-		    regexpTag = '[object RegExp]',
-		    setTag = '[object Set]',
-		    stringTag = '[object String]',
-		    symbolTag = '[object Symbol]',
-		    weakMapTag = '[object WeakMap]';
-
-		var arrayBufferTag = '[object ArrayBuffer]',
-		    dataViewTag = '[object DataView]',
-		    float32Tag = '[object Float32Array]',
-		    float64Tag = '[object Float64Array]',
-		    int8Tag = '[object Int8Array]',
-		    int16Tag = '[object Int16Array]',
-		    int32Tag = '[object Int32Array]',
-		    uint8Tag = '[object Uint8Array]',
-		    uint8ClampedTag = '[object Uint8ClampedArray]',
-		    uint16Tag = '[object Uint16Array]',
-		    uint32Tag = '[object Uint32Array]';
-
-		/** Used to identify `toStringTag` values supported by `_.clone`. */
-		var cloneableTags = {};
-		cloneableTags[argsTag] = cloneableTags[arrayTag] =
-		cloneableTags[arrayBufferTag] = cloneableTags[dataViewTag] =
-		cloneableTags[boolTag] = cloneableTags[dateTag] =
-		cloneableTags[float32Tag] = cloneableTags[float64Tag] =
-		cloneableTags[int8Tag] = cloneableTags[int16Tag] =
-		cloneableTags[int32Tag] = cloneableTags[mapTag] =
-		cloneableTags[numberTag] = cloneableTags[objectTag] =
-		cloneableTags[regexpTag] = cloneableTags[setTag] =
-		cloneableTags[stringTag] = cloneableTags[symbolTag] =
-		cloneableTags[uint8Tag] = cloneableTags[uint8ClampedTag] =
-		cloneableTags[uint16Tag] = cloneableTags[uint32Tag] = true;
-		cloneableTags[errorTag] = cloneableTags[funcTag] =
-		cloneableTags[weakMapTag] = false;
-
-		/**
-		 * The base implementation of `_.clone` and `_.cloneDeep` which tracks
-		 * traversed objects.
-		 *
-		 * @private
-		 * @param {*} value The value to clone.
-		 * @param {boolean} bitmask The bitmask flags.
-		 *  1 - Deep clone
-		 *  2 - Flatten inherited properties
-		 *  4 - Clone symbols
-		 * @param {Function} [customizer] The function to customize cloning.
-		 * @param {string} [key] The key of `value`.
-		 * @param {Object} [object] The parent object of `value`.
-		 * @param {Object} [stack] Tracks traversed objects and their clone counterparts.
-		 * @returns {*} Returns the cloned value.
-		 */
-		function baseClone(value, bitmask, customizer, key, object, stack) {
-		  var result,
-		      isDeep = bitmask & CLONE_DEEP_FLAG,
-		      isFlat = bitmask & CLONE_FLAT_FLAG,
-		      isFull = bitmask & CLONE_SYMBOLS_FLAG;
-
-		  if (customizer) {
-		    result = object ? customizer(value, key, object, stack) : customizer(value);
-		  }
-		  if (result !== undefined) {
-		    return result;
-		  }
-		  if (!isObject(value)) {
-		    return value;
-		  }
-		  var isArr = isArray(value);
-		  if (isArr) {
-		    result = initCloneArray(value);
-		    if (!isDeep) {
-		      return copyArray(value, result);
-		    }
-		  } else {
-		    var tag = getTag(value),
-		        isFunc = tag == funcTag || tag == genTag;
-
-		    if (isBuffer(value)) {
-		      return cloneBuffer(value, isDeep);
-		    }
-		    if (tag == objectTag || tag == argsTag || (isFunc && !object)) {
-		      result = (isFlat || isFunc) ? {} : initCloneObject(value);
-		      if (!isDeep) {
-		        return isFlat
-		          ? copySymbolsIn(value, baseAssignIn(result, value))
-		          : copySymbols(value, baseAssign(result, value));
-		      }
-		    } else {
-		      if (!cloneableTags[tag]) {
-		        return object ? value : {};
-		      }
-		      result = initCloneByTag(value, tag, isDeep);
-		    }
-		  }
-		  // Check for circular references and return its corresponding clone.
-		  stack || (stack = new Stack);
-		  var stacked = stack.get(value);
-		  if (stacked) {
-		    return stacked;
-		  }
-		  stack.set(value, result);
-
-		  if (isSet(value)) {
-		    value.forEach(function(subValue) {
-		      result.add(baseClone(subValue, bitmask, customizer, subValue, value, stack));
-		    });
-		  } else if (isMap(value)) {
-		    value.forEach(function(subValue, key) {
-		      result.set(key, baseClone(subValue, bitmask, customizer, key, value, stack));
-		    });
-		  }
-
-		  var keysFunc = isFull
-		    ? (isFlat ? getAllKeysIn : getAllKeys)
-		    : (isFlat ? keysIn : keys);
-
-		  var props = isArr ? undefined : keysFunc(value);
-		  arrayEach(props || value, function(subValue, key) {
-		    if (props) {
-		      key = subValue;
-		      subValue = value[key];
-		    }
-		    // Recursively populate clone (susceptible to call stack limits).
-		    assignValue(result, key, baseClone(subValue, bitmask, customizer, key, value, stack));
-		  });
-		  return result;
-		}
-
-		_baseClone = baseClone;
-		return _baseClone;
-	}
-
-	var cloneDeep_1;
-	var hasRequiredCloneDeep;
-
-	function requireCloneDeep () {
-		if (hasRequiredCloneDeep) return cloneDeep_1;
-		hasRequiredCloneDeep = 1;
-		var baseClone = require_baseClone();
-
-		/** Used to compose bitmasks for cloning. */
-		var CLONE_DEEP_FLAG = 1,
-		    CLONE_SYMBOLS_FLAG = 4;
-
-		/**
-		 * This method is like `_.clone` except that it recursively clones `value`.
-		 *
-		 * @static
-		 * @memberOf _
-		 * @since 1.0.0
-		 * @category Lang
-		 * @param {*} value The value to recursively clone.
-		 * @returns {*} Returns the deep cloned value.
-		 * @see _.clone
-		 * @example
-		 *
-		 * var objects = [{ 'a': 1 }, { 'b': 2 }];
-		 *
-		 * var deep = _.cloneDeep(objects);
-		 * console.log(deep[0] === objects[0]);
-		 * // => false
-		 */
-		function cloneDeep(value) {
-		  return baseClone(value, CLONE_DEEP_FLAG | CLONE_SYMBOLS_FLAG);
-		}
-
-		cloneDeep_1 = cloneDeep;
-		return cloneDeep_1;
-	}
-
-	var cloneDeepExports = requireCloneDeep();
-	var cloneDeep$1 = /*@__PURE__*/getDefaultExportFromCjs$1(cloneDeepExports);
-
 	function _createForOfIteratorHelper$18(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$18(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 	function _unsupportedIterableToArray$18(r, a) { if (r) { var _context4; if ("string" == typeof r) return _arrayLikeToArray$18(r, a); var t = _sliceInstanceProperty(_context4 = {}.toString.call(r)).call(_context4, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$18(r, a) : void 0; } }
 	function _arrayLikeToArray$18(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
@@ -120726,7 +117608,7 @@
 	    try {
 	      var _loop = function _loop() {
 	        var file = _step.value;
-	        var promise = new _Promise$1(function (resolve) {
+	        var promise = new _Promise(function (resolve) {
 	          if (/video/i.test(fileType)) {
 	            resolve({
 	              url: 'images/demo-dog.png',
@@ -120785,7 +117667,7 @@
 	    } finally {
 	      _iterator.f();
 	    }
-	    _Promise$1.all(promises).then(function (results) {
+	    _Promise.all(promises).then(function (results) {
 	      callback(results);
 	    });
 	  },
@@ -121001,7 +117883,9 @@
 	        mermaid: {
 	          svg2img: false,
 	          // 是否将mermaid生成的画图变成img格式
-	          showSourceToolbar: false // 是否显示mermaid源码/预览切换工具栏
+	          showSourceToolbar: false,
+	          // 是否显示mermaid源码/预览切换工具栏
+	          src: ''
 	        },
 	        /**
 	         * indentedCodeBlock是缩进代码块是否启用的开关
@@ -121371,7 +118255,7 @@
 	    // 'justify', // 对齐方式，默认不推荐这么“复杂”的样式要求
 	    'detail', {
 	      insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'line-table', 'bar-table', 'pdf', 'word']
-	    }, 'graph', 'shortcutKey', 'togglePreview'],
+	    }, 'graph', 'shortcutKey', 'search', 'togglePreview'],
 	    toolbarRight: [],
 	    sidebar: false,
 	    bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'],
@@ -121436,7 +118320,17 @@
 	      }, {
 	        locale: 'ru_RU',
 	        name: 'Русский'
-	      }]
+	      }],
+	      /**
+	       * 搜索/替换面板（Cherry 内置）
+	       * - enableReplace: 是否显示替换区，默认 true
+	       * - expandReplaceOnOpen: 打开时是否展开替换行，默认 false
+	       * 配置仅在 new Cherry() 时生效
+	       */
+	      searcher: {
+	        enableReplace: true,
+	        expandReplaceOnOpen: false
+	      }
 	    }
 	  },
 	  // 打开draw.io编辑页的url，如果为空则drawio按钮失效
@@ -121625,7 +118519,7 @@
 	     * 事件列表
 	     * @property
 	     */
-	    _defineProperty$3(this, "Events", {
+	    _defineProperty$2(this, "Events", {
 	      previewerClose: 'previewerClose',
 	      previewerOpen: 'previewerOpen',
 	      editorClose: 'editorClose',
@@ -121657,7 +118551,7 @@
 	     * @private
 	     * @type {import('mitt').Emitter}
 	     */
-	    _defineProperty$3(this, "emitter", mitt());
+	    _defineProperty$2(this, "emitter", mitt());
 	    this.instanceId = instanceId;
 	  }
 	  return _createClass$1(Event, [{
@@ -122029,14 +118923,17 @@
 	  enableShortcut: '取消禁用快捷键',
 	  recoverShortcut: '恢复默认配置',
 	  search: '搜索/替换',
+	  searchOnly: '搜索',
 	  autoWrap: '自动换行',
 	  footnoteTitle: '脚注',
 	  searchFor: '查找',
+	  searchClear: '清空',
 	  replaceWith: '替换为',
 	  previousMatch: '查找上一个',
 	  nextMatch: '查找下一个',
 	  replace: '替换',
 	  replaceAll: '全部替换',
+	  selectAllMatches: '选中全部匹配',
 	  regExpSearch: '正则表达式搜索',
 	  caseSensitiveSearch: '区分大小写搜索',
 	  wholeWordSearch: '全字匹配搜索',
@@ -122246,14 +119143,17 @@
 	  enableShortcut: 'Enable all shortcuts',
 	  recoverShortcut: 'Restore default configuration',
 	  search: 'Search/Replace',
+	  searchOnly: 'Search',
 	  autoWrap: 'Auto Wrap',
 	  footnoteTitle: 'Footnote',
 	  searchFor: 'Search for',
+	  searchClear: 'Clear',
 	  replaceWith: 'Replace with',
 	  previousMatch: 'Previous Match',
 	  nextMatch: 'Next Match',
 	  replace: 'Replace',
 	  replaceAll: 'Replace All',
+	  selectAllMatches: 'Select All Matches',
 	  regExpSearch: 'RegExp Search',
 	  caseSensitiveSearch: 'CaseSensitive Search',
 	  wholeWordSearch: 'Whole Word Search',
@@ -122463,14 +119363,17 @@
 	  enableShortcut: 'Включить горячие клавиши',
 	  recoverShortcut: 'Восстановить конфигурацию по умолчанию',
 	  search: 'Поиск/Заменить',
+	  searchOnly: 'Поиск',
 	  autoWrap: 'Автоперенос строк',
 	  footnoteTitle: 'Сноска',
 	  searchFor: 'Найти',
+	  searchClear: 'Очистить',
 	  replaceWith: 'Заменить на',
 	  previousMatch: 'Предыдущее',
 	  nextMatch: 'Следующее',
 	  replace: 'Заменить',
 	  replaceAll: 'Заменить всё',
+	  selectAllMatches: 'Выделить все совпадения',
 	  regExpSearch: 'Регулярное выражение',
 	  caseSensitiveSearch: 'С учётом регистра',
 	  wholeWordSearch: 'Целое слово',
@@ -122667,7 +119570,7 @@
 	        return _superPropGet(CustomSyntax, "rule", this, 3)(args);
 	      }
 	    }]);
-	  }(BaseClass), _defineProperty$3(_CustomSyntax, "HOOK_NAME", name), _CustomSyntax;
+	  }(BaseClass), _defineProperty$2(_CustomSyntax, "HOOK_NAME", name), _CustomSyntax;
 	}
 	function createMenuHook(name, options) {
 	  var optionsWhiteList = ['subMenuConfig', 'onClick', 'shortcutKeys', 'iconName', 'icon', 'afterInit'];
@@ -122906,18 +119809,19 @@
 	  }, {
 	    key: "$setColMapVal",
 	    value: function $setColMapVal(map, key) {
-	      if (typeof map[key] === 'undefined') {
-	        map[key] = [1, 2];
-	        map[this.$nextTdKey(key)] = [1, -1];
-	        return map;
+	      var colMap = map;
+	      if (typeof colMap[key] === 'undefined') {
+	        colMap[key] = [1, 2];
+	        colMap[this.$nextTdKey(key)] = [1, -1];
+	        return colMap;
 	      }
-	      if (map[key][1] === -1) {
+	      if (colMap[key][1] === -1) {
 	        var preKey = this.$prevTdKey(key);
-	        map[this.$nextTdKey(key)] = [1, -1];
-	        return this.$setColMapVal(map, preKey);
+	        colMap[this.$nextTdKey(key)] = [1, -1];
+	        return this.$setColMapVal(colMap, preKey);
 	      }
-	      map[key][1] += 1;
-	      return map;
+	      colMap[key][1] += 1;
+	      return colMap;
 	    }
 
 	    /**
@@ -122929,28 +119833,29 @@
 	  }, {
 	    key: "$setRowMapVal",
 	    value: function $setRowMapVal(map, key) {
-	      if (typeof map[key] === 'undefined') {
-	        map[key] = [2, 1];
-	        map[this.$nextTrKey(key)] = [-1, 1];
-	        return map;
+	      var rowMap = map;
+	      if (typeof rowMap[key] === 'undefined') {
+	        rowMap[key] = [2, 1];
+	        rowMap[this.$nextTrKey(key)] = [-1, 1];
+	        return rowMap;
 	      }
 	      var nextTrkey = this.$nextTrKey(key);
-	      map[nextTrkey] = typeof map[nextTrkey] === 'undefined' ? [1, 1] : map[nextTrkey];
-	      if (map[key][1] !== map[nextTrkey][1]) {
-	        return map;
+	      rowMap[nextTrkey] = typeof rowMap[nextTrkey] === 'undefined' ? [1, 1] : rowMap[nextTrkey];
+	      if (rowMap[key][1] !== rowMap[nextTrkey][1]) {
+	        return rowMap;
 	      }
-	      if (map[key][0] === 1) {
-	        map[key][0] = 2;
-	        map[nextTrkey][0] = -1;
-	        return map;
+	      if (rowMap[key][0] === 1) {
+	        rowMap[key][0] = 2;
+	        rowMap[nextTrkey][0] = -1;
+	        return rowMap;
 	      }
-	      if (map[key][0] === -1) {
+	      if (rowMap[key][0] === -1) {
 	        var preKey = this.$prevTrKey(key);
-	        map[nextTrkey][0] = -1;
-	        return this.$setRowMapVal(map, preKey);
+	        rowMap[nextTrkey][0] = -1;
+	        return this.$setRowMapVal(rowMap, preKey);
 	      }
-	      map[key][0] += 1;
-	      return map;
+	      rowMap[key][0] += 1;
+	      return rowMap;
 	    }
 	  }, {
 	    key: "$dealColSpan",
@@ -123179,7 +120084,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(TapdTablePlugin, "HOOK_NAME", 'tapdTable');
+	_defineProperty$2(TapdTablePlugin, "HOOK_NAME", 'tapdTable');
 
 	function _callSuper$2(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$2() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$2() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$2 = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -123227,7 +120132,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(TapdHtmlTagPlugin, "HOOK_NAME", 'tapdHtmlTag');
+	_defineProperty$2(TapdHtmlTagPlugin, "HOOK_NAME", 'tapdHtmlTag');
 
 	function _callSuper$1(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1 = function _isNativeReflectConstruct() { return !!t; })(); }
@@ -123271,7 +120176,7 @@
 	    }
 	  }]);
 	}(ParagraphBase);
-	_defineProperty$3(TapdCheckListPlugin, "HOOK_NAME", 'tapdCheckList');
+	_defineProperty$2(TapdCheckListPlugin, "HOOK_NAME", 'tapdCheckList');
 
 	var dist$4 = {exports: {}};
 
@@ -125047,7 +121952,7 @@
 	  /**
 	   * 解析 ECharts option 字符串。
 	   * 优先使用 JSON5.parse（仅支持纯数据）。
-	   * 失败后 fallback 到 new Function 执行 JS 对象字面量（支持函数、正则等 JS 语法），
+	   * 失败后 fallback 到间接 Function 构造器执行 JS 对象字面量（支持函数、正则等 JS 语法），
 	   * @param {string} src 代码块源码
 	   * @returns {object} 解析后的 ECharts option 对象
 	   */
@@ -125062,9 +121967,8 @@
 	      try {
 	        return JSON5.parse(trimmed);
 	      } catch (e) {
-	        // eslint-disable-next-line no-new-func
-	        var fn = new Function("return (".concat(trimmed, ")"));
-	        var result = fn();
+	        var JsFunction = function () {}.constructor;
+	        var result = JsFunction("return (".concat(trimmed, ")"))();
 	        if (result && _typeof$2(result) === 'object') {
 	          return result;
 	        }
@@ -125157,56 +122061,60 @@
 	    delete plugins[key];
 	  });
 	}
-
-	// @ts-expect-error process.env from build env
 	var VERSION$2 = "0.11.3";
+
+	/**
+	 * @typedef {object} CherryPluginClass
+	 * @property {boolean} [$cherry$mounted]
+	 * @property {function(object, ...any[]): void} install
+	 */
+
 	var CherryStatic = /*#__PURE__*/function () {
-	  // for type check only
-	  // TODO: fix this error
-	  // eslint-disable-next-line no-useless-constructor
 	  function CherryStatic() {
 	    _classCallCheck$1(this, CherryStatic);
+	    // 基类仅挂载静态 API，禁止直接实例化
+	    if ((this instanceof CherryStatic ? this.constructor : void 0) === CherryStatic) {
+	      throw new Error('CherryStatic cannot be instantiated directly.');
+	    }
 	  }
 	  return _createClass$1(CherryStatic, null, [{
 	    key: "usePlugin",
 	    value:
 	    /**
 	     * @this {typeof import('./Cherry').default | typeof CherryStatic}
-	     * @param {{ install: (defaultConfig: any, ...args: any[]) => void }} PluginClass 插件Class
+	     * @param {CherryPluginClass} PluginClass 插件 Class
 	     * @param  {...any} args 初始化插件的参数
-	     * @returns
+	     * @returns {void}
 	     */
 	    function usePlugin(PluginClass) {
 	      var _context;
 	      if (this === CherryStatic) {
 	        throw new Error('`usePlugin` is not allowed to called through CherryStatic class.');
 	      }
-	      // @ts-ignore
+	      // @ts-expect-error 子类静态属性由 Cherry / CherryEngine 挂载
 	      if (this.initialized) {
 	        throw new Error('The function `usePlugin` should be called before Cherry is instantiated.');
 	      }
-	      // @ts-ignore
 	      if (PluginClass.$cherry$mounted === true) {
 	        return;
 	      }
-	      // @ts-ignore
+	      // @ts-expect-error 子类静态 config 由 Cherry / CherryEngine 挂载
 	      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
 	        args[_key - 1] = arguments[_key];
 	      }
 	      PluginClass.install.apply(PluginClass, _concatInstanceProperty(_context = [this.config.defaults]).call(_context, args));
-	      // @ts-ignore
 	      PluginClass.$cherry$mounted = true;
 	    }
 	  }]);
 	}();
-	_defineProperty$3(CherryStatic, "createSyntaxHook", createSyntaxHook);
-	_defineProperty$3(CherryStatic, "createMenuHook", createMenuHook);
-	_defineProperty$3(CherryStatic, "constants", constants$2);
-	_defineProperty$3(CherryStatic, "plugins", plugins);
-	_defineProperty$3(CherryStatic, "VERSION", VERSION$2);
+	_defineProperty$2(CherryStatic, "createSyntaxHook", createSyntaxHook);
+	_defineProperty$2(CherryStatic, "createMenuHook", createMenuHook);
+	_defineProperty$2(CherryStatic, "constants", constants$2);
+	_defineProperty$2(CherryStatic, "plugins", plugins);
+	_defineProperty$2(CherryStatic, "VERSION", VERSION$2);
 
 	function ownKeys$3(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$3(e) { for (var r = 1; r < arguments.length; r++) { var _context8, _context9; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context8 = ownKeys$3(Object(t), !0)).call(_context8, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context9 = ownKeys$3(Object(t))).call(_context9, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread$3(e) { for (var r = 1; r < arguments.length; r++) { var _context8, _context9; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context8 = ownKeys$3(Object(t), !0)).call(_context8, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context9 = ownKeys$3(Object(t))).call(_context9, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
 
@@ -125221,14 +122129,14 @@
 	    var _this;
 	    _classCallCheck$1(this, Cherry);
 	    _this = _callSuper(this, Cherry);
-	    _defineProperty$3(_this, "handleFloatPreviewerMouseDown", function (evt) {
+	    _defineProperty$2(_this, "handleFloatPreviewerMouseDown", function (evt) {
 	      if (evt.target !== _this.floatPreviewerHeaderDom) return;
 	      evt.preventDefault();
 	      _this.floatPreviewerInitOffsetX = evt.offsetX;
 	      _this.floatPreviewerInitOffsetY = evt.offsetY;
 	      _this.floatPreviewerWrapDom.classList.add('float-previewer-dragging');
 	    });
-	    _defineProperty$3(_this, "handleFloatPreviewerMouseMove", function (evt) {
+	    _defineProperty$2(_this, "handleFloatPreviewerMouseMove", function (evt) {
 	      if (!_this.floatPreviewerWrapDom.classList.contains('float-previewer-dragging')) return;
 	      evt.preventDefault();
 	      var clientX = evt.clientX,
@@ -125252,7 +122160,7 @@
 	        _this.floatPreviewerWrapDom.style.top = "".concat(newTop, "px");
 	      });
 	    });
-	    _defineProperty$3(_this, "handleFloatPreviewerMouseUp", function (evt) {
+	    _defineProperty$2(_this, "handleFloatPreviewerMouseUp", function (evt) {
 	      _this.floatPreviewerWrapDom.classList.remove('float-previewer-dragging');
 	    });
 	    Cherry.initialized = true;
@@ -125264,11 +122172,6 @@
 	     * @type {CherryOptions}
 	     */
 	    _this.options = mergeWith$1({}, defaultConfigCopy, options, customizer);
-
-	    /** @type {import('./utils/cm-search-replace').default} SearchBox 实例 */
-	    _this.searchBoxInstance = null;
-	    /** @type {boolean} 是否初始化SearchBox */
-	    _this.searchBoxInit = false;
 	    _this.storageFloatPreviewerWrapData = {
 	      x: 50,
 	      y: 58,
@@ -125458,7 +122361,10 @@
 	  }, {
 	    key: "destroy",
 	    value: function destroy() {
-	      // 先销毁编辑器实例（清理 EditorView 和资源）
+	      // 先销毁搜索面板桥接（解绑监听、清理面板 DOM）
+	      destroySearcherBridge(this);
+
+	      // 再销毁编辑器实例（清理 EditorView 和资源）
 	      if (this.editor) {
 	        this.editor.destroy();
 	      }
@@ -125540,7 +122446,7 @@
 	            location.hash = '';
 	            location.hash = hash;
 	          }
-	        } catch (error) {
+	        } catch (_unused) {
 	          // empty
 	        }
 	      }
@@ -126238,6 +123144,7 @@
 	          markdownText: markdownText,
 	          html: html
 	        });
+	        initSearcherBridge(this);
 	      } catch (e) {
 	        throw new NestedError(e);
 	      }
@@ -126245,18 +123152,18 @@
 
 	    /**
 	     * @private
-	     * @param {Event} _evt
+	     * @param {Event} evt
 	     * @param {import('@codemirror/view').EditorView} editorView
 	     */
 	    /**
 	     * 编辑器内容变更时触发,更新预览区内容
 	     * @private
-	     * @param {Event} _evt - 编辑事件对象(未使用)
+	     * @param {Event} evt - 编辑事件对象(未使用)
 	     * @param {import('@codemirror/view').EditorView | Object} editorView - 编辑器实例
 	     */
 	  }, {
 	    key: "editText",
-	    value: function editText(_evt, editorView) {
+	    value: function editText(evt, editorView) {
 	      var _this3 = this;
 	      try {
 	        // 兼容 CM6Adapter,如果传入的是 adapter,则获取其内部的 view
@@ -126443,7 +123350,6 @@
 	      this.locale = this.locales[locale];
 	      this.$event.emit('afterChangeLocale', locale);
 	      this.resetToolbar('toolbar', this.options.toolbars.toolbar || []);
-	      if (this.searchBoxInstance) this.searchBoxInstance.updateLocaleStrings();
 	      return true;
 	    }
 
@@ -126488,11 +123394,11 @@
 	/**
 	 * @protected
 	 */
-	_defineProperty$3(Cherry, "initialized", false);
+	_defineProperty$2(Cherry, "initialized", false);
 	/**
 	 * @readonly
 	 */
-	_defineProperty$3(Cherry, "config", {
+	_defineProperty$2(Cherry, "config", {
 	  /** @type {CherryOptions} */
 	  defaults: defaultConfig$4
 	});
@@ -126519,7 +123425,7 @@
 	}
 
 	function ownKeys$2(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$2(e) { for (var r = 1; r < arguments.length; r++) { var _context5, _context6; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context5 = ownKeys$2(Object(t), !0)).call(_context5, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context6 = ownKeys$2(Object(t))).call(_context6, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread$2(e) { for (var r = 1; r < arguments.length; r++) { var _context5, _context6; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context5 = ownKeys$2(Object(t), !0)).call(_context5, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context6 = ownKeys$2(Object(t))).call(_context6, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	var CHART_TYPES = ['flowchart', 'sequence', 'gantt', 'journey', 'timeline', 'class', 'state', 'er', 'pie', 'quadrantChart', 'xyChart', 'requirement', 'architecture', 'mindmap', 'kanban', 'gitGraph', 'c4', 'sankey', 'packet', 'block', 'radar'];
 	var DEFAULT_OPTIONS$1 = {
 	  // TODO: themes
@@ -126573,18 +123479,23 @@
 	  function MermaidCodeEngine() {
 	    var mermaidOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	    _classCallCheck$1(this, MermaidCodeEngine);
-	    _defineProperty$3(this, "mermaidAPIRefs", null);
-	    _defineProperty$3(this, "options", DEFAULT_OPTIONS$1);
-	    _defineProperty$3(this, "dom", null);
-	    _defineProperty$3(this, "mermaidCanvas", null);
+	    _defineProperty$2(this, "mermaidAPIRefs", null);
+	    _defineProperty$2(this, "options", DEFAULT_OPTIONS$1);
+	    _defineProperty$2(this, "dom", null);
+	    _defineProperty$2(this, "mermaidCanvas", null);
 	    // 上次渲染的代码
-	    _defineProperty$3(this, "lastRenderedCode", '');
-	    _defineProperty$3(this, "needReturnLastRenderedCode", false);
+	    _defineProperty$2(this, "lastRenderedCode", '');
+	    _defineProperty$2(this, "needReturnLastRenderedCode", false);
 	    /** 按 mermaid 源码内容缓存已渲染 HTML，布局参数变更时复用以避免闪回 codeBlock */
-	    _defineProperty$3(this, "contentRenderCache", new _Map$2());
-	    _defineProperty$3(this, "contentRenderCacheMax", 100);
+	    _defineProperty$2(this, "contentRenderCache", new _Map$2());
+	    _defineProperty$2(this, "contentRenderCacheMax", 100);
 	    var mermaid = mermaidOptions.mermaid,
 	      mermaidAPI = mermaidOptions.mermaidAPI;
+	    // 是否由用户显式传入了 mermaid / mermaidAPI 实例，用于判断是否需要通过 src 动态加载
+	    this.hasExplicitMermaid = Boolean(mermaid || mermaidAPI);
+	    // 动态加载 mermaid 脚本的状态，避免重复注入 <script>
+	    this.mermaidScriptLoading = false;
+	    this.mermaidScriptLoaded = false;
 	    // 兼容 v9（有 mermaidAPI 子对象）和 v10+（统一顶层对象）
 	    var browserMermaid = getExternal('mermaid');
 	    var browserMermaidAPI = getExternal('mermaidAPI');
@@ -126595,10 +123506,10 @@
 	    this.options = _objectSpread$2(_objectSpread$2({}, DEFAULT_OPTIONS$1), mermaidOptions);
 	    delete this.options.mermaid;
 	    delete this.options.mermaidAPI;
-	    if (!resolvedMermaid && !resolvedMermaidAPI) {
+	    if (!browserMermaid && !resolvedMermaidAPI) {
 	      // mermaid 可能是异步加载的，这里不直接抛错，留待异步渲染时重试获取
 	      // 注意：syncRender 路径无法等待异步加载，仍然会因 mermaidAPIRefs 为 null 而失败
-	      // eslint-disable-next-line no-console
+
 	      this.mermaidAPIRefs = null;
 	      return;
 	    }
@@ -126611,11 +123522,11 @@
 	      this.mermaidAPIRefs = resolvedMermaidAPI;
 	      if (this.isAsyncRenderVersion()) {
 	        // v9.x 中某些版本也有异步 render（参数长度为 3），此时使用 mermaid 主对象更可靠
-	        this.mermaidAPIRefs = resolvedMermaid || this.mermaidAPIRefs;
+	        this.mermaidAPIRefs = browserMermaid || this.mermaidAPIRefs;
 	      }
 	    } else {
 	      // v10+：无 mermaidAPI，统一使用 mermaid 主对象
-	      this.mermaidAPIRefs = resolvedMermaid;
+	      this.mermaidAPIRefs = browserMermaid;
 	    }
 	    this.mermaidAPIRefs.initialize(this.options);
 	  }
@@ -126729,7 +123640,7 @@
 	        } else {
 	          svgHtml = injectSvgFallback(svgCode);
 	        }
-	      } catch (e) {
+	      } catch (_unused) {
 	        svgHtml = injectSvgFallback(svgCode);
 	      }
 	      return svgHtml;
@@ -126814,30 +123725,66 @@
 	      }
 	      var browserMermaid = getExternal('mermaid');
 	      var browserMermaidAPI = getExternal('mermaidAPI');
-	      var resolvedMermaid = browserMermaid;
-	      var resolvedMermaidAPI = browserMermaidAPI || resolvedMermaid && resolvedMermaid.mermaidAPI || null;
-	      if (!resolvedMermaid && !resolvedMermaidAPI) {
+	      var resolvedMermaidAPI = browserMermaidAPI || browserMermaid && browserMermaid.mermaidAPI || null;
+	      if (!browserMermaid && !resolvedMermaidAPI) {
 	        return false;
 	      }
 	      if (resolvedMermaidAPI) {
 	        this.mermaidAPIRefs = resolvedMermaidAPI;
 	        if (this.isAsyncRenderVersion()) {
-	          this.mermaidAPIRefs = resolvedMermaid || this.mermaidAPIRefs;
+	          this.mermaidAPIRefs = browserMermaid || this.mermaidAPIRefs;
 	        }
 	      } else {
-	        this.mermaidAPIRefs = resolvedMermaid;
+	        this.mermaidAPIRefs = browserMermaid;
 	      }
 	      try {
 	        this.mermaidAPIRefs.initialize(this.options);
-	      } catch (e) {
+	      } catch (_unused2) {
 	        // 忽略重复初始化等异常
 	      }
+	      return true;
+	    }
+
+	    /**
+	     * 当用户没有显式传入 mermaid 实例，且在 engine.syntax.codeBlock.mermaid.src 中配置了脚本地址时，
+	     * 通过 utils/dom.js 中的 loadScript 动态加载 mermaid 脚本。
+	     * 加载完成后 tryResolveMermaidAPIRefs 会在异步渲染的重试逻辑中自动获取到 window.mermaid。
+	     * @param {Object} [props] render 传入的 props，其中 mermaidConfig 对应 engine.syntax.codeBlock.mermaid
+	     * @returns {boolean} 是否已发起（或已完成）脚本加载
+	     */
+	  }, {
+	    key: "ensureMermaidLoaded",
+	    value: function ensureMermaidLoaded(props) {
+	      var _props$mermaidConfig,
+	        _this2 = this;
+	      if (!isBrowser()) {
+	        return false;
+	      }
+	      if (this.hasExplicitMermaid || this.mermaidAPIRefs) {
+	        return false;
+	      }
+	      if (this.mermaidScriptLoading || this.mermaidScriptLoaded) {
+	        return true;
+	      }
+	      var src = props === null || props === void 0 ? void 0 : (_props$mermaidConfig = props.mermaidConfig) === null || _props$mermaidConfig === void 0 ? void 0 : _props$mermaidConfig.src;
+	      if (!src || typeof src !== 'string') {
+	        return false;
+	      }
+	      this.mermaidScriptLoading = true;
+	      loadScript(src, 'cherry-mermaid-external-script').then(function () {
+	        _this2.mermaidScriptLoaded = true;
+	        _this2.mermaidScriptLoading = false;
+	        // 触发一次解析，尽早绑定 mermaidAPIRefs（异步渲染的重试逻辑也会兜底）
+	        _this2.tryResolveMermaidAPIRefs();
+	      })["catch"](function () {
+	        _this2.mermaidScriptLoading = false;
+	      });
 	      return true;
 	    }
 	  }, {
 	    key: "asyncRender",
 	    value: function asyncRender(graphId, src, sign, $engine, props) {
-	      var _this2 = this;
+	      var _this3 = this;
 	      var retryCount = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
 	      var cachedHtml = retryCount === 0 ? this.$getCachedRenderHtml(src, $engine) : '';
 	      if (cachedHtml) {
@@ -126845,6 +123792,8 @@
 	      }
 	      // mermaid 可能是异步加载的，初次调用时 mermaidAPIRefs 可能为 null，这里做延迟重试
 	      if (!this.mermaidAPIRefs && !this.tryResolveMermaidAPIRefs()) {
+	        // 若用户未显式传入 mermaid 实例，但配置了 mermaid.src，则通过 loadScript 动态加载 mermaid
+	        this.ensureMermaidLoaded(props);
 	        var MAX_RETRY = 60; // 最多重试次数
 	        var RETRY_INTERVAL = 300; // 每次间隔 300ms
 	        if (retryCount === 0) {
@@ -126852,7 +123801,7 @@
 	        }
 	        if (retryCount < MAX_RETRY) {
 	          _setTimeout(function () {
-	            _this2.asyncRender(graphId, src, sign, $engine, props, retryCount + 1);
+	            _this3.asyncRender(graphId, src, sign, $engine, props, retryCount + 1);
 	          }, RETRY_INTERVAL);
 	        } else {
 	          // 超过最大重试次数，回退到源码并完成异步渲染流程
@@ -126868,10 +123817,10 @@
 	      this.mermaidAPIRefs.render(graphId, src, this.mermaidCanvas).then(function (_ref) {
 	        var svgCode = _ref.svg;
 	        // 渲染完成后，替换为渲染结果
-	        var html = _this2.processSvgCode(svgCode, graphId);
-	        _this2.lastRenderedCode = html;
-	        _this2.$setCachedRenderHtml(src, $engine, html);
-	        _this2.handleAsyncRenderDone(graphId, sign, $engine, props, html);
+	        var html = _this3.processSvgCode(svgCode, graphId);
+	        _this3.lastRenderedCode = html;
+	        _this3.$setCachedRenderHtml(src, $engine, html);
+	        _this3.handleAsyncRenderDone(graphId, sign, $engine, props, html);
 	      })["catch"](function () {
 	        /**
 	         * 如果开启了流式渲染，当前有上次渲染结果时，使用上次渲染结果
@@ -126880,13 +123829,13 @@
 	         *    1、只有一个mermaid代码块需要渲染
 	         *    2、纯预览模式，且流式输出场景，所有mermaid都正常输出
 	         */
-	        if ($engine.$cherry.options.engine.global.flowSessionContext && !!_this2.lastRenderedCode && $engine.$cherry.status.editor === 'hide') {
-	          _this2.needReturnLastRenderedCode = true;
+	        if ($engine.$cherry.options.engine.global.flowSessionContext && !!_this3.lastRenderedCode && $engine.$cherry.status.editor === 'hide') {
+	          _this3.needReturnLastRenderedCode = true;
 	        } else {
 	          // 渲染失败后，回退到源码
-	          _this2.needReturnLastRenderedCode = false;
+	          _this3.needReturnLastRenderedCode = false;
 	          var _html = props.fallback();
-	          _this2.handleAsyncRenderDone(graphId, sign, $engine, props, _html);
+	          _this3.handleAsyncRenderDone(graphId, sign, $engine, props, _html);
 	        }
 	      });
 	      if (this.needReturnLastRenderedCode) {
@@ -126898,7 +123847,7 @@
 	  }, {
 	    key: "render",
 	    value: function render(src, sign, $engine) {
-	      var _context4, _props$mermaidConfig$, _props$mermaidConfig;
+	      var _context4, _props$mermaidConfig$, _props$mermaidConfig2;
 	      var props = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 	      var $sign = sign;
 	      if (!$sign) {
@@ -126913,7 +123862,7 @@
 	      // 需要通过添加时间戳使得多次渲染相同内容的图像ID唯一
 	      // 图像渲染节流在CodeBlock Hook内部控制
 	      var graphId = _concatInstanceProperty(_context4 = "mermaid-".concat(sign, "-")).call(_context4, new Date().getTime());
-	      this.svg2img = (_props$mermaidConfig$ = (_props$mermaidConfig = props.mermaidConfig) === null || _props$mermaidConfig === void 0 ? void 0 : _props$mermaidConfig.svg2img) !== null && _props$mermaidConfig$ !== void 0 ? _props$mermaidConfig$ : false;
+	      this.svg2img = (_props$mermaidConfig$ = (_props$mermaidConfig2 = props.mermaidConfig) === null || _props$mermaidConfig2 === void 0 ? void 0 : _props$mermaidConfig2.svg2img) !== null && _props$mermaidConfig$ !== void 0 ? _props$mermaidConfig$ : false;
 	      return this.isAsyncRenderVersion() ? this.asyncRender(graphId, src, $sign, $engine, props) : this.syncRender(graphId, src, $sign, $engine);
 	    }
 	  }], [{
@@ -126936,7 +123885,7 @@
 	    }
 	  }]);
 	}();
-	_defineProperty$3(MermaidCodeEngine, "TYPE", 'figure');
+	_defineProperty$2(MermaidCodeEngine, "TYPE", 'figure');
 
 	// @ts-nocheck
 	/*
@@ -128469,7 +125418,7 @@
 	}();
 
 	function ownKeys$1(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$1(e) { for (var r = 1; r < arguments.length; r++) { var _context4, _context5; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context4 = ownKeys$1(Object(t), !0)).call(_context4, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context5 = ownKeys$1(Object(t))).call(_context5, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread$1(e) { for (var r = 1; r < arguments.length; r++) { var _context4, _context5; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context4 = ownKeys$1(Object(t), !0)).call(_context4, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context5 = ownKeys$1(Object(t))).call(_context5, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function encode64(data) {
 	  var r = '';
 	  for (var i = 0; i < data.length; i += 3) {
@@ -128639,7 +125588,7 @@
 	function _unsupportedIterableToArray$16(r, a) { if (r) { var _context63; if ("string" == typeof r) return _arrayLikeToArray$16(r, a); var t = _sliceInstanceProperty(_context63 = {}.toString.call(r)).call(_context63, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$16(r, a) : void 0; } }
 	function _arrayLikeToArray$16(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function ownKeys(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var _context61, _context62; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context61 = ownKeys(Object(t), !0)).call(_context61, function (r) { _defineProperty$3(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context62 = ownKeys(Object(t))).call(_context62, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var _context61, _context62; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context61 = ownKeys(Object(t), !0)).call(_context61, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context62 = ownKeys(Object(t))).call(_context62, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 
 	// 主题与常量集中管理
 	var THEME = {
@@ -128686,7 +125635,7 @@
 	    // 保存Cherry实例，用于事件监听及i18n
 	    this.cherry = cherry;
 	    // 统一管理实例
-	    this.instances = new _Set$1();
+	    this.instances = new _Set();
 	    // 主题监听器
 	    this.themeObservers = new _Map$2();
 	    // 运行时主题（根据CSS变量动态生成）
@@ -129016,7 +125965,7 @@
 	        var _context2;
 	        var v = _trimInstanceProperty(_context2 = getComputedStyle(el).getPropertyValue(name)).call(_context2);
 	        return v || fallback;
-	      } catch (e) {
+	      } catch (_unused) {
 	        return fallback;
 	      }
 	    }
@@ -129033,7 +125982,7 @@
 	          return _startsWithInstanceProperty(c).call(c, 'theme__');
 	        });
 	        return t ? t.replace('theme__', '') : 'default';
-	      } catch (e) {
+	      } catch (_unused2) {
 	        return 'default';
 	      }
 	    }
@@ -129407,22 +126356,22 @@
 	      var chartOptionsStr = container.getAttribute('data-chart-options');
 	      var chartId = container.getAttribute('id');
 	      var tableData = null;
-	      var chartOptions = {};
+	      var options = {};
 	      try {
 	        tableData = tableDataStr ? JSON.parse(tableDataStr) : null;
-	      } catch (e) {
+	      } catch (_unused3) {
 	        tableData = null;
 	      }
 	      try {
-	        chartOptions = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
-	      } catch (e) {
-	        chartOptions = {
+	        options = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
+	      } catch (_unused4) {
+	        options = {
 	          chartId: chartId
 	        };
 	      }
 	      if (!type || !tableData) return {};
-	      chartOptions.chartId = chartId;
-	      return this.$generateChartOptions(type, tableData, chartOptions);
+	      options.chartId = chartId;
+	      return this.$generateChartOptions(type, tableData, options);
 	    }
 
 	    /**
@@ -129454,7 +126403,7 @@
 	      if (!root) return;
 	      try {
 	        var _context4;
-	        var containersSet = new _Set$1();
+	        var containersSet = new _Set();
 	        var found = root.querySelectorAll('.cherry-echarts-wrapper');
 	        if (found && found.length) _forEachInstanceProperty(_context4 = _Array$from(found)).call(_context4, function (el) {
 	          return containersSet.add(el);
@@ -129516,6 +126465,7 @@
 
 	      // 生成唯一ID和简化的配置数据
 	      var chartId = _concatInstanceProperty(_context5 = "chart-".concat(_Date$now(), "-")).call(_context5, Math.random().toString(36).substr(2, 9));
+
 	      // 序列化数据用于存储
 	      var tableDataStr = _JSON$stringify(tableObject);
 	      var chartOptionsStr = _JSON$stringify(options);
@@ -130387,7 +127337,7 @@
 
 	    // 桑基图数据处理: | 源节点 | 目标节点 | 数值 |
 	    var links = [];
-	    var nodes = new _Set$1();
+	    var nodes = new _Set();
 	    _forEachInstanceProperty(_context51 = tableObject.rows).call(_context51, function (row) {
 	      var _context52, _context53;
 	      var source = _trimInstanceProperty(_context52 = String(row[0] || '')).call(_context52);
@@ -130751,12 +127701,12 @@
 	    if (tableDataStr && engine.echartsRef) {
 	      try {
 	        var tableData = JSON.parse(tableDataStr);
-	        var chartOptions = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
-	        chartOptions.engine = engine;
-	        deepMerge(chartOptions, {
+	        var options = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
+	        options.engine = engine;
+	        deepMerge(options, {
 	          mapDataSource: url
 	        });
-	        var chartOption = generateOptions(MapChartCompleteOptionsHandler, tableData, chartOptions);
+	        var chartOption = generateOptions(MapChartCompleteOptionsHandler, tableData, options);
 	        var existingChart = engine.echartsRef.getInstanceByDom(container);
 	        if (existingChart) {
 	          existingChart.clear();
@@ -130766,7 +127716,7 @@
 	          engine.createChart(container, chartOption, 'map');
 	        }
 	        container.setAttribute('data-map-status', 'success'); // 成功加载数据状态
-	      } catch (error) {
+	      } catch (_unused5) {
 	        // console.error('Failed to refresh map chart:', chartId, error);
 	      }
 	    }
@@ -139243,7 +136193,7 @@
 	function _arrayLikeToArray$H(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function superset$1(values, other) {
 	  var iterator = _getIterator(values),
-	    set = new _Set$1();
+	    set = new _Set();
 	  var _iterator = _createForOfIteratorHelper$H(other),
 	    _step;
 	  try {
@@ -140360,7 +137310,7 @@
 	function selection_selection() {
 	  return this;
 	}
-	Selection$1.prototype = selection.prototype = _defineProperty$3({
+	Selection$1.prototype = selection.prototype = _defineProperty$2({
 	  constructor: Selection$1,
 	  select: selection_select,
 	  selectAll: selection_selectAll,
@@ -142604,7 +139554,7 @@
 	    that = this,
 	    id = that._id,
 	    size = that.size();
-	  return new _Promise$1(function (resolve, reject) {
+	  return new _Promise(function (resolve, reject) {
 	    var cancel = {
 	        value: reject
 	      },
@@ -142648,7 +139598,7 @@
 	  return ++id$1;
 	}
 	var selection_prototype = selection.prototype;
-	Transition.prototype = transition.prototype = _defineProperty$3({
+	Transition.prototype = transition.prototype = _defineProperty$2({
 	  constructor: Transition,
 	  select: transition_select,
 	  selectAll: transition_selectAll,
@@ -143751,7 +140701,7 @@
 		var $ = /*@__PURE__*/ require_export();
 		var FREEZING = /*@__PURE__*/ requireFreezing();
 		var fails = /*@__PURE__*/ requireFails();
-		var isObject = /*@__PURE__*/ requireIsObject$3();
+		var isObject = /*@__PURE__*/ requireIsObject$2();
 		var onFreeze = /*@__PURE__*/ requireInternalMetadata().onFreeze;
 
 		// eslint-disable-next-line es/no-object-freeze -- safe
@@ -148886,7 +145836,7 @@
 	var tsv = dsvParse(tsvParse);
 
 	function image (input, init) {
-	  return new _Promise$1(function (resolve, reject) {
+	  return new _Promise(function (resolve, reject) {
 	    var image = new Image();
 	    for (var key in init) image[key] = init[key];
 	    image.onerror = reject;
@@ -153469,7 +150419,7 @@
 	  this.depth = this.height = 0;
 	  this.parent = null;
 	}
-	Node$2.prototype = hierarchy.prototype = _defineProperty$3({
+	Node$2.prototype = hierarchy.prototype = _defineProperty$2({
 	  constructor: Node$2,
 	  count: node_count,
 	  each: node_each,
@@ -153937,7 +150887,7 @@
 	        return normalize$3(path(d, i, data));
 	      });
 	      var P = _mapInstanceProperty(I).call(I, parentof);
-	      var S = new _Set$1(I).add("");
+	      var S = new _Set(I).add("");
 	      var _iterator = _createForOfIteratorHelper$x(P),
 	        _step;
 	      try {
@@ -163890,19 +160840,6 @@
 	    return result;
 	  };
 	}();
-
-	var getPrototypeOf;
-	var hasRequiredGetPrototypeOf;
-
-	function requireGetPrototypeOf () {
-		if (hasRequiredGetPrototypeOf) return getPrototypeOf;
-		hasRequiredGetPrototypeOf = 1;
-		getPrototypeOf = /*@__PURE__*/ requireGetPrototypeOf$4();
-		return getPrototypeOf;
-	}
-
-	var getPrototypeOfExports = requireGetPrototypeOf();
-	var _Object$getPrototypeOf = /*@__PURE__*/getDefaultExportFromCjs$1(getPrototypeOfExports);
 
 	/**
 	 * Creates a unary function that invokes `func` with its argument transformed.
@@ -330604,7 +327541,7 @@ g.stateGroup line {
 	function _unsupportedIterableToArray$5(r, a) { if (r) { var _context; if ("string" == typeof r) return _arrayLikeToArray$5(r, a); var t = _sliceInstanceProperty(_context = {}.toString.call(r)).call(_context, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$5(r, a) : void 0; } }
 	function _arrayLikeToArray$5(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function difference(values) {
-	  values = new _Set$1(values);
+	  values = new _Set(values);
 	  for (var _len = arguments.length, others = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
 	    others[_key - 1] = arguments[_key];
 	  }
@@ -330631,7 +327568,7 @@ g.stateGroup line {
 	function _arrayLikeToArray$4(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function disjoint(values, other) {
 	  var iterator = _getIterator(other),
-	    set = new _Set$1();
+	    set = new _Set();
 	  var _iterator = _createForOfIteratorHelper$4(values),
 	    _step;
 	  try {
@@ -330656,7 +327593,7 @@ g.stateGroup line {
 	}
 
 	function set(values) {
-	  return values instanceof _Set$1 ? values : new _Set$1(values);
+	  return values instanceof _Set ? values : new _Set(values);
 	}
 
 	function _createForOfIteratorHelper$3(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$3(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
@@ -330666,7 +327603,7 @@ g.stateGroup line {
 	  for (var _len = arguments.length, others = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
 	    others[_key - 1] = arguments[_key];
 	  }
-	  values = new _Set$1(values);
+	  values = new _Set(values);
 	  others = _mapInstanceProperty(others).call(others, set);
 	  var _iterator = _createForOfIteratorHelper$3(values),
 	    _step;
@@ -330702,7 +327639,7 @@ g.stateGroup line {
 	function _arrayLikeToArray$2(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function superset(values, other) {
 	  var iterator = _getIterator(values),
-	    set = new _Set$1();
+	    set = new _Set();
 	  var _iterator = _createForOfIteratorHelper$2(other),
 	    _step;
 	  try {
@@ -330734,7 +327671,7 @@ g.stateGroup line {
 	function _unsupportedIterableToArray$1(r, a) { if (r) { var _context; if ("string" == typeof r) return _arrayLikeToArray$1(r, a); var t = _sliceInstanceProperty(_context = {}.toString.call(r)).call(_context, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1(r, a) : void 0; } }
 	function _arrayLikeToArray$1(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function union() {
-	  var set = new _Set$1();
+	  var set = new _Set();
 	  for (var _len = arguments.length, others = new Array(_len), _key = 0; _key < _len; _key++) {
 	    others[_key] = arguments[_key];
 	  }
@@ -330992,8 +327929,8 @@ g.stateGroup line {
 	  function computeNodeDepths(_ref4) {
 	    var nodes = _ref4.nodes;
 	    var n = nodes.length;
-	    var current = new _Set$1(nodes);
-	    var next = new _Set$1();
+	    var current = new _Set(nodes);
+	    var next = new _Set();
 	    var x = 0;
 	    while (current.size) {
 	      var _iterator8 = _createForOfIteratorHelper(current),
@@ -331022,14 +327959,14 @@ g.stateGroup line {
 	      }
 	      if (++x > n) throw new Error("circular link");
 	      current = next;
-	      next = new _Set$1();
+	      next = new _Set();
 	    }
 	  }
 	  function computeNodeHeights(_ref5) {
 	    var nodes = _ref5.nodes;
 	    var n = nodes.length;
-	    var current = new _Set$1(nodes);
-	    var next = new _Set$1();
+	    var current = new _Set(nodes);
+	    var next = new _Set();
 	    var x = 0;
 	    while (current.size) {
 	      var _iterator0 = _createForOfIteratorHelper(current),
@@ -331058,7 +327995,7 @@ g.stateGroup line {
 	      }
 	      if (++x > n) throw new Error("circular link");
 	      current = next;
-	      next = new _Set$1();
+	      next = new _Set();
 	    }
 	  }
 	  function computeNodeLayers(_ref6) {

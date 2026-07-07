@@ -13,7 +13,7 @@ export default class Engine {
     hashStrMap: LRUCache;
     cachedBigData: {};
     urlProcessorMap: {};
-    markdownParams: Partial<Partial<import("../types/cherry")._CherryOptions<import("../types/cherry").CherryCustomOptions>>>;
+    markdownParams: Partial<Partial<import("../types/cherry").CherryOptionsBase<import("../types/cherry").CherryCustomOptions>>>;
     currentStrMd5: any[];
     globalConfig: {
         classicBr?: boolean;

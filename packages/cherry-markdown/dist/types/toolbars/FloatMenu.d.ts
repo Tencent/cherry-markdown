@@ -19,9 +19,8 @@ export default class FloatMenu extends Toolbar {
     handleContentChange(): void;
     /**
      * 处理beforeSelectionChange事件
-     * @param {Object} selection 选区对象
      */
-    handleBeforeSelectionChange({ selection }: any): void;
+    handleBeforeSelectionChange(): void;
     /**
      * 创建兼容的 CodeMirror 对象
      * @returns {Object} 兼容的 CodeMirror 对象

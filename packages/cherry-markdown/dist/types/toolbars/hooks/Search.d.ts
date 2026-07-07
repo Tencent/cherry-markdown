@@ -1,19 +1,27 @@
-/**
- * 搜索功能
- */
 export default class Search extends MenuBase {
-    constructor($cherry: any);
+    /**
+     * @param {object} $cherry Cherry 实例
+     *
+     * Mod+H 仅在 `enableReplace !== false` 时注册（构造时读取配置，改配置需重新 new Cherry）。
+     */
+    constructor($cherry: object);
     shortcutKeyMap: {
         [x: string]: {
             hookName: string;
             aliasName: string;
         };
     };
-    /**
-     * 响应点击事件
-     * @param {string} selection 被用户选中的文本内容
-     * @param {string} shortKey 快捷键参数，本函数不处理这个参数
-     */
-    onClick(selection: string, shortKey?: string): void;
+    /** 遍历所有搜索工具栏按钮（toolbar / sidebar 可能各有一个） */
+    forEachSearchButton(callback: any): void;
+    /** 根据 enableReplace 同步 tooltip：「搜索」或「搜索/替换」 */
+    syncToolbarLabel(): void;
+    /** @param {HTMLElement} btnDom */
+    afterInit(btnDom: HTMLElement): void;
+    /** @param {boolean} active */
+    setToolbarActive(active: boolean): void;
+    /** 再次点击工具栏按钮时关闭面板 */
+    toggleToolbarPanel(): boolean;
+    /** @param {string} selection @param {string} [aliasName] */
+    onClick(selection: string, aliasName?: string): void;
 }
 import MenuBase from '@/toolbars/MenuBase';

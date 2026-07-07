@@ -1,2 +1,2 @@
-declare const _default: any;
+declare const _default: Partial<Partial<import("../../types/cherry").CherryOptionsBase<import("../../types/cherry").CherryCustomOptions>>>;
 export default _default;

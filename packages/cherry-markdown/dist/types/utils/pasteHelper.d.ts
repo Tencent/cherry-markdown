@@ -29,15 +29,11 @@ declare namespace pasteHelper {
      */
     function setTypeToLocalStorage(type: any): void;
     /**
-     * 在编辑器中自动选中刚刚粘贴的内容
-     * CM6: currentCursor 和 getCursor() 都是文档偏移量
-     */
-    function setSelection(): void;
-    /**
      * 按粘贴区域替换内容，并同步更新区域终点
-     * @param {string} text - 替换文本
+     * @param {string} after - 替换后文本
+     * @param {string} before - 替换前文本
      */
-    function replacePasteContent(text: string): void;
+    function replacePasteContent(after: string, before: string): void;
     /**
      * 绑定事件
      * 当编辑器选中区域改变、内容改变时、滚动时处理气泡位置

@@ -35,7 +35,7 @@ export function createMenuHook(name: any, options: any): {
         getSubMenuConfig(): import("./toolbars/MenuBase").SubMenuConfigItem[];
         setName(name: string, iconName?: string): void;
         setCacheOnce(info: any): void;
-        getAndCleanCacheOnce(): boolean;
+        getAndCleanCacheOnce(): any;
         hasCacheOnce(): boolean;
         createIconFontIcon(iconName: string, options?: object): HTMLElement;
         createSvgIcon(options: import("../types/menus").CustomMenuIcon): Element;

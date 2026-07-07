@@ -1,7 +1,6 @@
 export default class Header extends ParagraphBase {
-    constructor({ externals, config, cherry }?: {
+    constructor({ config, cherry }?: {
         config: any;
-        externals: any;
         cherry: any;
     });
     strict: boolean;

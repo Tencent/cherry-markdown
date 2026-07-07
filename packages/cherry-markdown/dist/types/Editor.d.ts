@@ -163,10 +163,8 @@ export default class Editor {
      * @param {string} html - HTML 内容
      * @param {string} htmlText - 纯文本内容
      * @param {CM6AdapterType} editorView - CodeMirror 6 适配器
-     * @param {number} [overrideFrom] - 可选，覆盖插入起始位置（用于异步回调场景）
-     * @param {number} [overrideTo] - 可选，覆盖插入结束位置（用于异步回调场景）
      */
-    formatHtml2MdWhenPaste(event: ClipboardEvent | null, html: string, htmlText: string, editorView: CM6AdapterType, overrideFrom?: number, overrideTo?: number): void;
+    formatHtml2MdWhenPaste(event: ClipboardEvent | null, html: string, htmlText: string, editorView: CM6AdapterType): void;
     /**
      *
      * @param {EditorView} editorView

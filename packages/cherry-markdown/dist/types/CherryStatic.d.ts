@@ -1,3 +1,8 @@
+/**
+ * @typedef {object} CherryPluginClass
+ * @property {boolean} [$cherry$mounted]
+ * @property {function(object, ...any[]): void} install
+ */
 export class CherryStatic {
     static createSyntaxHook: typeof createSyntaxHook;
     static createMenuHook: typeof createMenuHook;
@@ -13,15 +18,17 @@ export class CherryStatic {
     static VERSION: string;
     /**
      * @this {typeof import('./Cherry').default | typeof CherryStatic}
-     * @param {{ install: (defaultConfig: any, ...args: any[]) => void }} PluginClass 插件Class
+     * @param {CherryPluginClass} PluginClass 插件 Class
      * @param  {...any} args 初始化插件的参数
-     * @returns
+     * @returns {void}
      */
-    static usePlugin(this: typeof CherryStatic | typeof import("./Cherry").default, PluginClass: {
-        install: (defaultConfig: any, ...args: any[]) => void;
-    }, ...args: any[]): void;
+    static usePlugin(this: typeof CherryStatic | typeof import("./Cherry").default, PluginClass: CherryPluginClass, ...args: any[]): void;
     constructor(...args: any[]);
 }
+export type CherryPluginClass = {
+    $cherry$mounted?: boolean;
+    install: (arg0: object, ...args: any[][]) => void;
+};
 import { createSyntaxHook } from './Factory';
 import { createMenuHook } from './Factory';
 import TapdTablePlugin from './addons/advance/cherry-tapd-table-plugin';

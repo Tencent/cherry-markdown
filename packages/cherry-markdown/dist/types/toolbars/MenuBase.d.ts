@@ -79,7 +79,15 @@ export default class MenuBase {
      * @param {*} info
      */
     setCacheOnce(info: any): void;
-    getAndCleanCacheOnce(): boolean;
+    /**
+     * 获取并清除缓存数据
+     * @returns {any} 缓存的数据，可以是任意类型（文件信息、DrawIo数据、表格/公式字符串等）
+     */
+    getAndCleanCacheOnce(): any;
+    /**
+     * 检查是否有缓存数据
+     * @returns {boolean}
+     */
     hasCacheOnce(): boolean;
     /**
      * 创建一个IconFont类型的图标

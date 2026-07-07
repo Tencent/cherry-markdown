@@ -125,12 +125,12 @@ export default class Previewer {
     $getAttrsForH(obj: any): {};
     $updateDom(newDom: any, oldDom: any): any;
     $testChild(dom: any): any;
-    _testMaxIndex(index: any, arr: any): boolean;
+    testMaxIndex(index: any, arr: any): boolean;
     $getSignData(list: any): {
         list: any[];
         signs: {};
     };
-    _hasNewSign(list: any, sign: any, signIndex: any): boolean;
+    hasNewSign(list: any, sign: any, signIndex: any): boolean;
     $dealWithMyersDiffResult(result: any, oldContent: any, newContent: any, domContainer: any): void;
     $dealUpdate(domContainer: any, oldHtmlList: any, newHtmlList: any): void;
     /**

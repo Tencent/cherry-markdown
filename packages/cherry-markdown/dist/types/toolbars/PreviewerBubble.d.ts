@@ -60,7 +60,10 @@ export default class PreviewerBubble {
     $bindedOnLayoutChange: () => void;
     $bindedOnAfterChange: () => void;
     $bindedOnAfterAsyncRender: () => void;
-    removeHoverBubble: any;
+    /** @type {(() => void) & { cancel?: () => void }} */
+    removeHoverBubble: (() => void) & {
+        cancel?: () => void;
+    };
     isDestroyed: boolean;
     /**
      * 判断是否为代码块

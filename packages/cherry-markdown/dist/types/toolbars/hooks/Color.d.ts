@@ -44,10 +44,7 @@ export default class Color extends MenuBase {
      */
     buildStyleString(textColor: string | null, bgColor: string | null, text: string): string;
     $testIsShortKey(shortKey: any): boolean;
-    $getTypeAndColor(shortKey: any): boolean | {
-        type: string;
-        color: any;
-    };
+    $getTypeAndColor(shortKey: any): any;
     hideOtherSubMenu(hideAllSubMenu: any): void;
 }
 import MenuBase from '@/toolbars/MenuBase';
