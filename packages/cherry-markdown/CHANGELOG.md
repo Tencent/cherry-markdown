@@ -1,5 +1,38 @@
 # Change Log
 
+## 0.11.4
+
+### Patch Changes
+
+- chore(workspace): 升级 ESLint 10 并统一 lint 工具链
+
+  - 合并为单文件 `eslint.config.mjs`，移除各包分散的 ESLint 配置
+  - Prettier 负责格式、ESLint 负责代码质量，`prettier` 配置块置于最后
+  - 简化 ignore 策略，仅排除构建产物与第三方依赖
+  - 接入 husky pre-commit 与 lint-staged，统一 `yarn lint` 入口 [@RSS1102](https://github.com/RSS1102)([#1785](https://github.com/Tencent/cherry-markdown/pull/1785))([`0be6950`](https://github.com/Tencent/cherry-markdown/commit/0be6950344cc45be9a54ac1f6b9d6b9baced77af))
+
+- fix(cherry-markdown): 移除 `es-toolkit`，内置工具函数并修复插件 install 深合并失效
+
+  - 新增 `mergeWith`、`cloneDeep`、`escapeRegExp`、`debounce`（`src/utils/toolkit/`）
+  - `mergeWith` 采用 lodash 兼容语义，修复 `usePlugin` 两参数调用不合并的问题
+  - 补充 toolkit 单测覆盖 [@RSS1102](https://github.com/RSS1102)([#1782](https://github.com/Tencent/cherry-markdown/pull/1782))([`d1191b6`](https://github.com/Tencent/cherry-markdown/commit/d1191b6f1316fcd4c3b32bbb7217004f96a4956a))
+
+- chore(cherry-markdown): 移除 lodash 运行时依赖并改用 es-toolkit，使用 fonteditor-core 生成 iconfont [@RSS1102](https://github.com/RSS1102)([#1775](https://github.com/Tencent/cherry-markdown/pull/1775))([`c4c8317`](https://github.com/Tencent/cherry-markdown/commit/c4c8317095759b41db45bf9b90d94592aff55b46))
+- feat: 搜索框增加“选中所有匹配项”按钮 [@sunsonliu](https://github.com/sunsonliu)([#1783](https://github.com/Tencent/cherry-markdown/pull/1783))([`cc0aee2`](https://github.com/Tencent/cherry-markdown/commit/cc0aee243b85744c4cae10f7e085300ac0c183a6))
+- feat(searcher): 内置搜索/替换面板，通过工具栏 `search` 启用
+
+  - 新增 `SearcherPanel`、`SearcherBridge` 及 `toolbars/searcher` 模块
+  - 工具栏 hook `search` 支持 Ctrl+F 查找、Ctrl+H 替换
+  - 补充搜索面板样式与中英文等多语言文案 [@RSS1102](https://github.com/RSS1102)([#1774](https://github.com/Tencent/cherry-markdown/pull/1774))([`aa27f66`](https://github.com/Tencent/cherry-markdown/commit/aa27f66a975f33fea81c6a1c06cfe364928572d6))
+
+- fix(engine): code fence inside HTML comment no longer swallows following content (#885) [@Jun025](https://github.com/Jun025)([#1773](https://github.com/Tencent/cherry-markdown/pull/1773))([`a0c2501`](https://github.com/Tencent/cherry-markdown/commit/a0c250198d56472a9c57c907052cec27720c1620))
+- fix(utils): 修复导出为HTML后在Safari/IE中打开乱码的问题 [@viotbery](https://github.com/viotbery)([#1778](https://github.com/Tencent/cherry-markdown/pull/1778))([`90c0100`](https://github.com/Tencent/cherry-markdown/commit/90c01005848c66207a9e5cde2be0df8c2f9e312b))
+- fix(editor): 修复从 VS Code 复制粘贴后光标停留在内容开头 [@Yong-yuan-X](https://github.com/Yong-yuan-X)([#1769](https://github.com/Tencent/cherry-markdown/pull/1769))([`9160828`](https://github.com/Tencent/cherry-markdown/commit/9160828eada628bd1de9eaaa9791f0a31f24f9e6))
+- fix: 优化粘贴逻辑 [@sunsonliu](https://github.com/sunsonliu)([#1771](https://github.com/Tencent/cherry-markdown/pull/1771))([`7651431`](https://github.com/Tencent/cherry-markdown/commit/7651431e198d4f69e13ad61cae85c7216ae4b918))
+- fix: #1776 修复未闭合标签被无脑转义导致引用语法失效的问题 [@sunsonliu](https://github.com/sunsonliu)([#1777](https://github.com/Tencent/cherry-markdown/pull/1777))([`8bbdbb3`](https://github.com/Tencent/cherry-markdown/commit/8bbdbb3b0406c0799337dd03b01d9f1bcff007d1))
+- feat: #1603 支持动态安装 mermaid [@sunsonliu](https://github.com/sunsonliu)([#1781](https://github.com/Tencent/cherry-markdown/pull/1781))([`f9213af`](https://github.com/Tencent/cherry-markdown/commit/f9213af11dae08e0b26fb8eb3b40d70a6486b3c9))
+- feat: 增加两列和三列布局语法 [@sunsonliu](https://github.com/sunsonliu)([#1784](https://github.com/Tencent/cherry-markdown/pull/1784))([`6f80297`](https://github.com/Tencent/cherry-markdown/commit/6f80297614f32812adb5706fe7c082bf86c020ed))
+
 ## 0.11.3
 
 ### Patch Changes
