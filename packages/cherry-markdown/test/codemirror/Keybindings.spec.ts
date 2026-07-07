@@ -89,8 +89,8 @@ describe('Sublime 风格快捷键行为验证', () => {
       const all = getAllSelections(view);
       // allowMultipleSelections 已开启，应有 2 个光标
       expect(all).toHaveLength(2);
-      expect(all[0].anchor).toBe(8);   // 第 1 行末尾（"line one" 后，不含 \n）
-      expect(all[1].anchor).toBe(17);  // 第 2 行末尾（"line two" 后，不含 \n）
+      expect(all[0].anchor).toBe(8); // 第 1 行末尾（"line one" 后，不含 \n）
+      expect(all[1].anchor).toBe(17); // 第 2 行末尾（"line two" 后，不含 \n）
     });
 
     it('单行选区应只产生 1 个光标', () => {
@@ -364,27 +364,21 @@ describe('Sublime 风格快捷键行为验证', () => {
   describe('searchKeymap 过滤逻辑验证', () => {
     it('Mod-f 应被过滤掉（由 Cherry 工具栏接管）', async () => {
       const { searchKeymap } = await import('@codemirror/search');
-      const filtered = searchKeymap.filter(
-        (binding) => binding.key !== 'Mod-f' && binding.key !== 'Mod-Shift-l',
-      );
+      const filtered = searchKeymap.filter((binding) => binding.key !== 'Mod-f' && binding.key !== 'Mod-Shift-l');
       const keys = filtered.map((b) => b.key);
       expect(keys).not.toContain('Mod-f');
     });
 
     it('Mod-Shift-l 应被过滤掉（与自定义 Ctrl-Shift-L 冲突）', async () => {
       const { searchKeymap } = await import('@codemirror/search');
-      const filtered = searchKeymap.filter(
-        (binding) => binding.key !== 'Mod-f' && binding.key !== 'Mod-Shift-l',
-      );
+      const filtered = searchKeymap.filter((binding) => binding.key !== 'Mod-f' && binding.key !== 'Mod-Shift-l');
       const keys = filtered.map((b) => b.key);
       expect(keys).not.toContain('Mod-Shift-l');
     });
 
     it('Mod-d (selectNextOccurrence) 应保留在 filteredSearchKeymap 中', async () => {
       const { searchKeymap } = await import('@codemirror/search');
-      const filtered = searchKeymap.filter(
-        (binding) => binding.key !== 'Mod-f' && binding.key !== 'Mod-Shift-l',
-      );
+      const filtered = searchKeymap.filter((binding) => binding.key !== 'Mod-f' && binding.key !== 'Mod-Shift-l');
       const keys = filtered.map((b) => b.key);
       expect(keys).toContain('Mod-d');
     });

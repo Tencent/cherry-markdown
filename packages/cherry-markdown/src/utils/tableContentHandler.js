@@ -144,18 +144,18 @@ export default class TableHandler {
     if (this.boundaryTableRef && this.boundaryMouseMoveHandlerRef) {
       try {
         this.boundaryTableRef.removeEventListener('mousemove', this.boundaryMouseMoveHandlerRef);
-      } catch (e) {}
+      } catch {}
     }
     if (this.boundaryGlobalMoveRef) {
       try {
         document.removeEventListener('mousemove', this.boundaryGlobalMoveRef, true);
-      } catch (e) {}
+      } catch {}
     }
     // 移除 添加行列符号
     if (this.tableEditor?.editorDom?.symbolContainer?.parentNode) {
       try {
         this.tableEditor.editorDom.symbolContainer.parentNode.removeChild(this.tableEditor.editorDom.symbolContainer);
-      } catch (e) {}
+      } catch {}
     }
     // 清空边界缓存
     this.boundaryCache = null;
@@ -946,7 +946,9 @@ export default class TableHandler {
       if (x < tableRect.left || x > tableRect.right || y < tableRect.top || y > tableRect.bottom) {
         if (!activeCol && !activeRow) {
           colSymbol.style.display = 'none';
-          rowSymbols.forEach((symbol) => (symbol.style.display = 'none'));
+          rowSymbols.forEach((rowSymbol) => {
+            rowSymbol.style.display = 'none';
+          });
           vLine.style.display = 'none';
           hLine.style.display = 'none';
         }
@@ -1024,7 +1026,9 @@ export default class TableHandler {
       const isAnySymbolSafe = inSafe(colSymbol) || rowSymbols.some((symbol) => inSafe(symbol));
       if (!isAnySymbolSafe) {
         colSymbol.style.display = 'none';
-        rowSymbols.forEach((symbol) => (symbol.style.display = 'none'));
+        rowSymbols.forEach((rowSymbol) => {
+          rowSymbol.style.display = 'none';
+        });
         vLine.style.display = 'none';
         hLine.style.display = 'none';
         activeCol = null;

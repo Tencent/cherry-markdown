@@ -247,11 +247,10 @@ export default class PreviewerBubble {
     }
     switch (target.tagName) {
       case 'TD':
-      case 'TH':
+      case 'TH': {
         if (!this.$isEnableBubbleAndEditorShow()) {
           return;
         }
-        // eslint-disable-next-line no-case-declarations
         const table = this.isCherryTable(e.target);
         if (false === table) {
           return;
@@ -261,20 +260,20 @@ export default class PreviewerBubble {
         // @ts-ignore
         this.$showTablePreviewerBubbles('hover', e.target, table);
         return;
+      }
       case 'PRE':
       case 'CODE':
       case 'SPAN':
-      case 'DIV':
-        // eslint-disable-next-line no-case-declarations
+      case 'DIV': {
         const codeBlock = this.isCherryCodeBlock(e.target);
         if (codeBlock === false) {
           return;
         }
         this.showCodeBlockPreviewerBubbles('hover', codeBlock);
         return;
-      case 'A':
+      }
+      case 'A': {
         // @ts-ignore
-        // eslint-disable-next-line no-case-declarations
         const bubbleCard = this.previewer?.$cherry?.options?.engine?.syntax?.footnote?.bubbleCard || false;
         if (bubbleCard !== false && /cherry-show-bubble-card/.test(e.target.className)) {
           this.removeHoverBubble.cancel();
@@ -282,6 +281,8 @@ export default class PreviewerBubble {
           this.$showFootNoteBubbleCardPreviewerBubbles('hover', e.target, bubbleCard);
           return;
         }
+        break;
+      }
     }
     this.removeHoverBubble();
   }
@@ -1202,7 +1203,7 @@ export default class PreviewerBubble {
       targetIndex: this.mermaidSession.previewIndex,
       ...handlerOptions,
     });
-    imgSizeHandler.bindChange((_htmlElement, style) => this.mermaidSession.changeSize(style));
+    imgSizeHandler.bindChange((htmlElement, style) => this.mermaidSession.changeSize(style));
     this.mermaidSession.bindPositionFollow();
 
     // 添加对齐工具面板（仅对齐按钮，不含装饰按钮）
@@ -1217,7 +1218,7 @@ export default class PreviewerBubble {
       this.previewer.$cherry.getLocales(),
       { isMermaid: true, targetIndex: this.mermaidSession.previewIndex, ...handlerOptions },
     );
-    imgToolHandler.bindChange((_htmlElement, type) => this.mermaidSession.changeAlign(type));
+    imgToolHandler.bindChange((htmlElement, type) => this.mermaidSession.changeAlign(type));
 
     const updateHandler = imgSizeHandler.updatePosition.bind(imgSizeHandler);
     this.$cherry.$event.on('editor.size.change', updateHandler);

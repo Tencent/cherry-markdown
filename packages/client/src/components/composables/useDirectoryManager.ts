@@ -195,7 +195,7 @@ export function useDirectoryManager(fileStore: FileStore) {
           updatableDir.expanded = savedState;
         }
         // 如果目录是展开的，加载文件列表
-        if (savedState && currentDir.children && currentDir.children.length === 0) {
+        if (savedState && currentDir.children?.length === 0) {
           loadDirectoryStructure(currentDir.path, 1, FULL_TREE_DEPTH).then((result) => {
             if (result.success && result.data) {
               const updatedDir = recentDirectories.value.find((d) => d.path === currentDir.path);

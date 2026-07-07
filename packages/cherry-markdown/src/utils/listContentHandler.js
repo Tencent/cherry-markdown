@@ -129,7 +129,7 @@ export default class ListHandler {
         const [, indent, identifier, checkbox, content] = regRes;
         if (contentsLiCount === targetLiIdx && indent !== undefined) {
           targetLine = lineIdx;
-          // eslint-disable-next-line prefer-destructuring
+
           targetContent.push(content); // 这里只取一个没必要解构
           targetCh = lineContent.indexOf(content);
           // 1. 这种需要特殊处理，需要跳过一个空格位，否则层级会错乱

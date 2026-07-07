@@ -97,7 +97,7 @@ const webviewConfig: Configuration = {
       'cherry-markdown-core$': path.resolve(__dirname, '../cherry-markdown/dist/cherry-markdown.esm.js'),
       'cherry-markdown-core/dist/cherry-markdown.min.css': path.resolve(
         __dirname,
-        '../cherry-markdown/dist/cherry-markdown.min.css'
+        '../cherry-markdown/dist/cherry-markdown.min.css',
       ),
     },
   },

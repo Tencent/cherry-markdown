@@ -36,8 +36,7 @@ export default class Publish extends MenuBase {
       if (!Object.prototype.hasOwnProperty.call(config, 'key')) {
         throw new Error('publish config must have key');
       }
-      // @ts-ignore
-      if (!supportPlatforms.includes(config.key)) {
+      if (!supportPlatforms.includes(/** @type {import('~types/cherry').SupportPlatform} */ (config.key))) {
         throw new Error(`publish config key must be one of ${supportPlatforms.join(',')}`);
       }
       return config.key;

@@ -831,9 +831,9 @@ const defaultConfig = {
     // 当编辑区内容有实际变化时触发
     afterChange: callbacks.afterChange,
     afterInit: callbacks.afterInit,
-    focus: ({ e, cherry }) => {},
-    blur: ({ e, cherry }) => {},
-    selectionChange: ({ selections, lastSelections, info }) => {},
+    focus: ({ e: e, cherry: cherry }) => {},
+    blur: ({ e: e, cherry: cherry }) => {},
+    selectionChange: ({ selections: selections, lastSelections: lastSelections, info: info }) => {},
     afterChangeLocale: (locale) => {},
     changeMainTheme: (theme) => {},
     changeCodeBlockTheme: (theme) => {},

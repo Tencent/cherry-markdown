@@ -42,8 +42,8 @@ export default class Insert extends MenuBase {
     input.style.display = 'none';
     // document.body.appendChild(input);
     input.addEventListener('change', (event) => {
-      // @ts-ignore
-      const [file] = event.target.files;
+      const { files } = /** @type {HTMLInputElement} */ (event.target);
+      const file = files?.[0];
       // 文件上传后的回调函数可以由调用方自己实现
       this.$cherry.options.callback.fileUpload(file, (url) => {
         // 文件上传的默认回调行数，调用方可以完全不使用该函数

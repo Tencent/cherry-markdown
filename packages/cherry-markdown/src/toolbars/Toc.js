@@ -162,8 +162,7 @@ export default class Toc {
       if (model === 'pure') {
         const { height } = this.tocListDom.getBoundingClientRect();
         const minHeight = Math.floor((height - list.length * 3) / list.length);
-        // eslint-disable-next-line no-nested-ternary
-        targetHeight = minHeight < 3 ? 3 : minHeight > 10 ? 10 : minHeight;
+        targetHeight = Math.min(10, Math.max(3, minHeight));
       }
       for (let i = 0; i < list.length; i++) {
         // @ts-ignore

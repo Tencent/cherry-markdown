@@ -132,9 +132,8 @@ export default class Settings extends MenuBase {
    * @returns
    */
   onClick(selection, shortKey = '', callback) {
-    // eslint-disable-next-line no-param-reassign
-    shortKey = this.matchShortcutKey(shortKey);
-    if (shortKey === 'classicBr') {
+    const resolvedShortKey = this.matchShortcutKey(shortKey);
+    if (resolvedShortKey === 'classicBr') {
       const targetIsClassicBr = !getIsClassicBrFromLocal();
       saveIsClassicBrToLocal(targetIsClassicBr);
       this.engine.$cherry.options.engine.global.classicBr = targetIsClassicBr;
@@ -153,7 +152,7 @@ export default class Settings extends MenuBase {
       }
       this.engine.$cherry.previewer.update('');
       this.engine.$cherry.initText(this.engine.$cherry.editor.editor);
-    } else if (shortKey === 'previewClose') {
+    } else if (resolvedShortKey === 'previewClose') {
       // 需要浮动预览
       if (this.editor.previewer.isPreviewerNeedFloat()) {
         // 正在浮动预览
@@ -169,9 +168,9 @@ export default class Settings extends MenuBase {
       } else {
         this.editor.previewer.editOnly(true);
       }
-    } else if (shortKey === 'toggleToolbar') {
+    } else if (resolvedShortKey === 'toggleToolbar') {
       this.toggleToolbar();
-    } else if (shortKey === 'shortcutKey') {
+    } else if (resolvedShortKey === 'shortcutKey') {
       if (!this.shortcutKeyConfigPanel) {
         this.shortcutKeyConfigPanel = new ShortcutKeyConfigPanel(this.engine.$cherry);
       }

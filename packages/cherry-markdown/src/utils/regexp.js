@@ -30,7 +30,7 @@ export function isLookbehindSupported() {
   try {
     new RegExp('(?<=.)');
     return true;
-  } catch (ignore) {}
+  } catch {}
   return false;
 }
 

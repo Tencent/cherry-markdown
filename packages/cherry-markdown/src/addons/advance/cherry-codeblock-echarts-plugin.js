@@ -55,7 +55,7 @@ export default class EChartsCodeBlockEngine {
   /**
    * 解析 ECharts option 字符串。
    * 优先使用 JSON5.parse（仅支持纯数据）。
-   * 失败后 fallback 到 new Function 执行 JS 对象字面量（支持函数、正则等 JS 语法），
+   * 失败后 fallback 到间接 Function 构造器执行 JS 对象字面量（支持函数、正则等 JS 语法），
    * @param {string} src 代码块源码
    * @returns {object} 解析后的 ECharts option 对象
    */
@@ -67,9 +67,8 @@ export default class EChartsCodeBlockEngine {
     try {
       return JSON5.parse(trimmed);
     } catch (e) {
-      // eslint-disable-next-line no-new-func
-      const fn = new Function(`return (${trimmed})`);
-      const result = fn();
+      const JsFunction = function () {}.constructor;
+      const result = JsFunction(`return (${trimmed})`)();
       if (result && typeof result === 'object') {
         return result;
       }

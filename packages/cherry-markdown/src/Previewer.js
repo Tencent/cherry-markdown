@@ -664,7 +664,7 @@ export default class Previewer {
     }
     return this.$testChild(dom.parentNode);
   }
-  _testMaxIndex(index, arr) {
+  testMaxIndex(index, arr) {
     if (!arr) {
       return false;
     }
@@ -692,7 +692,7 @@ export default class Previewer {
     return ret;
   }
 
-  _hasNewSign(list, sign, signIndex) {
+  hasNewSign(list, sign, signIndex) {
     if (list.length > 0) {
       let resSign;
       list.forEach((listItem, i) => {
@@ -768,7 +768,7 @@ export default class Previewer {
             if (!hasUpdate) {
               this.$updateDom(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
             }
-          } catch (e) {
+          } catch {
             domContainer.insertBefore(newContent[change.newIndex].dom, oldContent[change.oldIndex].dom);
             domContainer.removeChild(oldContent[change.oldIndex].dom);
           }

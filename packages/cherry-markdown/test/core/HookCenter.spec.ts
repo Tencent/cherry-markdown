@@ -3,6 +3,7 @@ import HookCenter from '../../src/core/HookCenter';
 import SyntaxBase from '../../src/core/SyntaxBase';
 import ParagraphBase from '../../src/core/ParagraphBase';
 import Logger from '@/Logger';
+import { assignHookClassProps } from '../helpers/hookClass';
 
 // 返回值常量
 const WARN_DUPLICATED = -1;
@@ -32,33 +33,37 @@ const createEditorConfig = (overrides = {}) => ({
 
 /** 创建 mock SyntaxBase hook 类 */
 const createMockHookClass = (hookName: string) => {
-  return class MockHook extends SyntaxBase {
-    static HOOK_NAME = hookName;
+  class MockHook extends SyntaxBase {
     rule() {
-      return { regex: new RegExp('') };
+      return { begin: '', end: '', content: '', reg: new RegExp('') };
     }
-  };
+  }
+  return assignHookClassProps(MockHook, { hookName });
 };
+
+/** 创建 mock SyntaxBase hook 实例（new 收敛在工厂内） */
+const createMockHookInstance = (hookName: string, overrides: object = {}) =>
+  new (createMockHookClass(hookName))({ config: {}, globalConfig: {}, ...overrides });
 
 /** 创建 mock ParagraphBase hook 类 */
 const createMockParagraphHook = (hookName: string) => {
-  return class MockHook extends ParagraphBase {
-    static HOOK_NAME = hookName;
+  class MockHook extends ParagraphBase {
     rule() {
-      return { regex: new RegExp('') };
+      return { begin: '', end: '', content: '', reg: new RegExp('') };
     }
-  };
+  }
+  return assignHookClassProps(MockHook, { hookName });
 };
 
 /** 为 Hook 类添加自定义标记 */
-const markAsCustomHook = (HookClass: any) => {
-  Object.defineProperty(HookClass, 'Cherry$$CUSTOM', {
+const markAsCustomHook = (hookClass: any) => {
+  Object.defineProperty(hookClass, 'Cherry$$CUSTOM', {
     value: true,
     writable: false,
     configurable: true,
     enumerable: false,
   });
-  return HookClass;
+  return hookClass;
 };
 
 /** 创建 HookCenter 实例 */
@@ -97,13 +102,13 @@ describe('core/HookCenter', () => {
     });
 
     it('应该同时注册内置 hooks 和自定义 hooks', () => {
-      const InternalHook = createMockHookClass('internalHook');
-      const CustomHook = createMockHookClass('customHook');
+      const internalHook = createMockHookClass('internalHook');
+      const customHook = createMockHookClass('customHook');
       const editorConfig = createEditorConfig({
-        customSyntax: { customHook: CustomHook },
+        customSyntax: { customHook },
       });
 
-      const hookCenter = createHookCenter([InternalHook], editorConfig);
+      const hookCenter = createHookCenter([internalHook], editorConfig);
 
       expect(hookCenter.getHookNameList().internalHook).toBeDefined();
       expect(hookCenter.getHookNameList().customHook).toBeDefined();
@@ -112,17 +117,17 @@ describe('core/HookCenter', () => {
 
   describe('registerInternalHooks', () => {
     it('应该按顺序注册所有内部 hooks', () => {
-      const Hook1 = createMockHookClass('hook1');
-      const Hook2 = createMockHookClass('hook2');
-      const hookCenter = createHookCenter([Hook1, Hook2]);
+      const hook1 = createMockHookClass('hook1');
+      const hook2 = createMockHookClass('hook2');
+      const hookCenter = createHookCenter([hook1, hook2]);
 
       expect(hookCenter.getHookNameList().hook1).toBeDefined();
       expect(hookCenter.getHookNameList().hook2).toBeDefined();
     });
 
     it('应该对重复的内部 hook 发出警告', () => {
-      const HookClass = createMockHookClass('duplicateHook');
-      createHookCenter([HookClass, HookClass]);
+      const hookClass = createMockHookClass('duplicateHook');
+      createHookCenter([hookClass, hookClass]);
 
       expect(Logger.warn).toHaveBeenCalledWith(expect.stringContaining('Duplicate hook name [duplicateHook]'));
     });
@@ -153,16 +158,16 @@ describe('core/HookCenter', () => {
 
     describe('直接注册 Hook 类', () => {
       it('应该直接注册 SyntaxBase 类型的自定义 hook', () => {
-        const CustomHook = createMockHookClass('customHook');
-        const editorConfig = createEditorConfig({ customSyntax: { customHook: CustomHook } });
+        const customHook = createMockHookClass('customHook');
+        const editorConfig = createEditorConfig({ customSyntax: { customHook } });
         const hookCenter = createHookCenter([], editorConfig);
 
         expect(hookCenter.getHookNameList().customHook).toBeDefined();
       });
 
       it('应该直接注册 ParagraphBase 类型的自定义 hook', () => {
-        const CustomHook = createMockParagraphHook('customParagraphHook');
-        const editorConfig = createEditorConfig({ customSyntax: { customParagraphHook: CustomHook } });
+        const customHook = createMockParagraphHook('customParagraphHook');
+        const editorConfig = createEditorConfig({ customSyntax: { customParagraphHook: customHook } });
         const hookCenter = createHookCenter([], editorConfig);
 
         expect(hookCenter.getHookNameList().customParagraphHook).toBeDefined();
@@ -181,12 +186,12 @@ describe('core/HookCenter', () => {
       });
 
       it('应该处理 before 配置：在指定 hook 之前插入', () => {
-        const BaseHook = createMockHookClass('baseHook');
-        const BeforeHook = createMockHookClass('beforeHook');
+        const baseHook = createMockHookClass('baseHook');
+        const beforeHook = createMockHookClass('beforeHook');
         const editorConfig = createEditorConfig({
-          customSyntax: { beforeHook: { syntaxClass: BeforeHook, before: 'baseHook' } },
+          customSyntax: { beforeHook: { syntaxClass: beforeHook, before: 'baseHook' } },
         });
-        const hookCenter = createHookCenter([BaseHook], editorConfig);
+        const hookCenter = createHookCenter([baseHook], editorConfig);
         const hooks = hookCenter.getHookList().sentence;
 
         expect(hooks[0].getName()).toBe('beforeHook');
@@ -194,12 +199,12 @@ describe('core/HookCenter', () => {
       });
 
       it('应该处理 after 配置：在指定 hook 之后插入', () => {
-        const BaseHook = createMockHookClass('baseHook');
-        const AfterHook = createMockHookClass('afterHook');
+        const baseHook = createMockHookClass('baseHook');
+        const afterHook = createMockHookClass('afterHook');
         const editorConfig = createEditorConfig({
-          customSyntax: { afterHook: { syntaxClass: AfterHook, after: 'baseHook' } },
+          customSyntax: { afterHook: { syntaxClass: afterHook, after: 'baseHook' } },
         });
-        const hookCenter = createHookCenter([BaseHook], editorConfig);
+        const hookCenter = createHookCenter([baseHook], editorConfig);
         const hooks = hookCenter.getHookList().sentence;
 
         expect(hooks[0].getName()).toBe('baseHook');
@@ -228,40 +233,39 @@ describe('core/HookCenter', () => {
   describe('register', () => {
     describe('有效 Hook 注册', () => {
       it('应该成功注册 SyntaxBase 类型的 hook', () => {
-        const HookClass = createMockHookClass('syntaxHook');
+        const hookClass = createMockHookClass('syntaxHook');
         const hookCenter = createHookCenter();
 
-        hookCenter.register(HookClass, createEditorConfig());
+        hookCenter.register(hookClass, createEditorConfig());
 
         expect(hookCenter.getHookNameList().syntaxHook).toBeDefined();
         expect(hookCenter.getHookList().sentence).toHaveLength(1);
       });
 
       it('应该成功注册 ParagraphBase 类型的 hook', () => {
-        const HookClass = createMockParagraphHook('paragraphHook');
+        const hookClass = createMockParagraphHook('paragraphHook');
         const hookCenter = createHookCenter();
 
-        hookCenter.register(HookClass, createEditorConfig());
+        hookCenter.register(hookClass, createEditorConfig());
 
         expect(hookCenter.getHookNameList().paragraphHook).toBeDefined();
         expect(hookCenter.getHookList().paragraph).toHaveLength(1);
       });
 
       it('应该成功注册函数式 hook（返回 Hook 实例的函数）', () => {
-        const HookClass = createMockHookClass('funcHook');
         const hookCenter = createHookCenter();
 
-        hookCenter.register(() => new HookClass({ config: {}, globalConfig: {} }), createEditorConfig());
+        hookCenter.register(() => createMockHookInstance('funcHook'), createEditorConfig());
 
         expect(hookCenter.getHookNameList().funcHook).toBeDefined();
       });
 
       it('应该使用 syntax 配置初始化 hook', () => {
-        const HookClass = createMockHookClass('configuredHook');
+        const hookClass = createMockHookClass('configuredHook');
         const editorConfig = createEditorConfig({ syntax: { configuredHook: { customOption: true } } });
         const hookCenter = createHookCenter([], editorConfig);
 
-        hookCenter.register(HookClass, editorConfig);
+        hookCenter.register(hookClass, editorConfig);
 
         expect(hookCenter.getHookNameList().configuredHook).toBeDefined();
       });
@@ -290,21 +294,21 @@ describe('core/HookCenter', () => {
 
     describe('禁用 Hook 处理', () => {
       it('应该跳过被禁用的内置 hook（syntax 配置为 false）', () => {
-        const HookClass = createMockHookClass('disabledHook');
+        const hookClass = createMockHookClass('disabledHook');
         const editorConfig = createEditorConfig({ syntax: { disabledHook: false } });
         const hookCenter = createHookCenter([], editorConfig);
 
-        hookCenter.register(HookClass, editorConfig);
+        hookCenter.register(hookClass, editorConfig);
 
         expect(hookCenter.getHookNameList().disabledHook).toBeUndefined();
       });
 
       it('应该允许被禁用的自定义 hook 注册（使用 force 选项）', () => {
-        const CustomHook = markAsCustomHook(createMockHookClass('disabledCustomHook'));
+        const customHook = markAsCustomHook(createMockHookClass('disabledCustomHook'));
         const editorConfig = createEditorConfig({ syntax: { disabledCustomHook: false } });
         const hookCenter = createHookCenter([], editorConfig);
 
-        hookCenter.register(CustomHook, createEditorConfig(), { force: true });
+        hookCenter.register(customHook, createEditorConfig(), { force: true });
 
         expect(hookCenter.getHookNameList().disabledCustomHook).toBeDefined();
       });
@@ -312,30 +316,30 @@ describe('core/HookCenter', () => {
 
     describe('重复 Hook 处理', () => {
       it('应该拒绝重复的内置 hook', () => {
-        const HookClass = createMockHookClass('duplicateHook');
+        const hookClass = createMockHookClass('duplicateHook');
         const hookCenter = createHookCenter();
 
-        hookCenter.register(HookClass, createEditorConfig());
-        const result = hookCenter.register(HookClass, createEditorConfig());
+        hookCenter.register(hookClass, createEditorConfig());
+        const result = hookCenter.register(hookClass, createEditorConfig());
 
         expect(result).toBe(WARN_DUPLICATED);
       });
 
       it('应该拒绝重复的自定义 hook（未设置 force）', () => {
-        const BaseHook = createMockHookClass('baseHook');
-        const CustomHook = markAsCustomHook(createMockHookClass('baseHook'));
-        const hookCenter = createHookCenter([BaseHook]);
+        const baseHook = createMockHookClass('baseHook');
+        const customHook = markAsCustomHook(createMockHookClass('baseHook'));
+        const hookCenter = createHookCenter([baseHook]);
 
-        expect(hookCenter.register(CustomHook, createEditorConfig(), { force: false })).toBe(WARN_DUPLICATED);
-        expect(hookCenter.register(CustomHook, createEditorConfig(), {})).toBe(WARN_DUPLICATED);
+        expect(hookCenter.register(customHook, createEditorConfig(), { force: false })).toBe(WARN_DUPLICATED);
+        expect(hookCenter.register(customHook, createEditorConfig(), {})).toBe(WARN_DUPLICATED);
       });
 
       it('应该允许自定义 hook 强制覆盖内置 hook（设置 force: true）', () => {
-        const BaseHook = createMockHookClass('baseHook');
-        const CustomHook = markAsCustomHook(createMockHookClass('baseHook'));
-        const hookCenter = createHookCenter([BaseHook]);
+        const baseHook = createMockHookClass('baseHook');
+        const customHook = markAsCustomHook(createMockHookClass('baseHook'));
+        const hookCenter = createHookCenter([baseHook]);
 
-        hookCenter.register(CustomHook, createEditorConfig(), { force: true });
+        hookCenter.register(customHook, createEditorConfig(), { force: true });
 
         const hooks = hookCenter.getHookList().sentence;
         expect(hooks).toHaveLength(1);
@@ -346,23 +350,23 @@ describe('core/HookCenter', () => {
     describe('Hook 插入位置', () => {
       describe('before 配置', () => {
         it('应该在指定 hook 之前插入', () => {
-          const Hook1 = createMockHookClass('hook1');
-          const Hook2 = createMockHookClass('hook2');
-          const Hook3 = markAsCustomHook(createMockHookClass('hook3'));
-          const hookCenter = createHookCenter([Hook1, Hook2]);
+          const hook1 = createMockHookClass('hook1');
+          const hook2 = createMockHookClass('hook2');
+          const hook3 = markAsCustomHook(createMockHookClass('hook3'));
+          const hookCenter = createHookCenter([hook1, hook2]);
 
-          hookCenter.register(Hook3, createEditorConfig(), { before: 'hook2' });
+          hookCenter.register(hook3, createEditorConfig(), { before: 'hook2' });
 
           const hooks = hookCenter.getHookList().sentence;
           expect(hooks.map((h) => h.getName())).toEqual(['hook1', 'hook3', 'hook2']);
         });
 
         it('应该在找不到目标 hook 时追加到末尾并发出警告', () => {
-          const Hook1 = createMockHookClass('hook1');
-          const Hook2 = markAsCustomHook(createMockHookClass('hook2'));
-          const hookCenter = createHookCenter([Hook1]);
+          const hook1 = createMockHookClass('hook1');
+          const hook2 = markAsCustomHook(createMockHookClass('hook2'));
+          const hookCenter = createHookCenter([hook1]);
 
-          hookCenter.register(Hook2, createEditorConfig(), { before: 'nonExistent' });
+          hookCenter.register(hook2, createEditorConfig(), { before: 'nonExistent' });
 
           const hooks = hookCenter.getHookList().sentence;
           expect(hooks.map((h) => h.getName())).toEqual(['hook1', 'hook2']);
@@ -372,34 +376,34 @@ describe('core/HookCenter', () => {
 
       describe('after 配置', () => {
         it('应该在指定 hook 之后插入', () => {
-          const Hook1 = createMockHookClass('hook1');
-          const Hook2 = createMockHookClass('hook2');
-          const Hook3 = markAsCustomHook(createMockHookClass('hook3'));
-          const hookCenter = createHookCenter([Hook1, Hook2]);
+          const hook1 = createMockHookClass('hook1');
+          const hook2 = createMockHookClass('hook2');
+          const hook3 = markAsCustomHook(createMockHookClass('hook3'));
+          const hookCenter = createHookCenter([hook1, hook2]);
 
-          hookCenter.register(Hook3, createEditorConfig(), { after: 'hook1' });
+          hookCenter.register(hook3, createEditorConfig(), { after: 'hook1' });
 
           const hooks = hookCenter.getHookList().sentence;
           expect(hooks.map((h) => h.getName())).toEqual(['hook1', 'hook3', 'hook2']);
         });
 
         it('应该在最后一个 hook 之后插入', () => {
-          const Hook1 = createMockHookClass('hook1');
-          const Hook2 = markAsCustomHook(createMockHookClass('hook2'));
-          const hookCenter = createHookCenter([Hook1]);
+          const hook1 = createMockHookClass('hook1');
+          const hook2 = markAsCustomHook(createMockHookClass('hook2'));
+          const hookCenter = createHookCenter([hook1]);
 
-          hookCenter.register(Hook2, createEditorConfig(), { after: 'hook1' });
+          hookCenter.register(hook2, createEditorConfig(), { after: 'hook1' });
 
           const hooks = hookCenter.getHookList().sentence;
           expect(hooks.map((h) => h.getName())).toEqual(['hook1', 'hook2']);
         });
 
         it('应该在找不到目标 hook 时追加到末尾并发出警告', () => {
-          const Hook1 = createMockHookClass('hook1');
-          const Hook2 = markAsCustomHook(createMockHookClass('hook2'));
-          const hookCenter = createHookCenter([Hook1]);
+          const hook1 = createMockHookClass('hook1');
+          const hook2 = markAsCustomHook(createMockHookClass('hook2'));
+          const hookCenter = createHookCenter([hook1]);
 
-          hookCenter.register(Hook2, createEditorConfig(), { after: 'nonExistent' });
+          hookCenter.register(hook2, createEditorConfig(), { after: 'nonExistent' });
 
           const hooks = hookCenter.getHookList().sentence;
           expect(hooks.map((h) => h.getName())).toEqual(['hook1', 'hook2']);
@@ -409,11 +413,11 @@ describe('core/HookCenter', () => {
 
       describe('无位置配置', () => {
         it('内置 hook 应该直接追加到末尾', () => {
-          const Hook1 = createMockHookClass('hook1');
-          const Hook2 = createMockHookClass('hook2');
-          const hookCenter = createHookCenter([Hook1]);
+          const hook1 = createMockHookClass('hook1');
+          const hook2 = createMockHookClass('hook2');
+          const hookCenter = createHookCenter([hook1]);
 
-          hookCenter.register(Hook2, createEditorConfig());
+          hookCenter.register(hook2, createEditorConfig());
 
           const hooks = hookCenter.getHookList().sentence;
           expect(hooks.map((h) => h.getName())).toEqual(['hook1', 'hook2']);
@@ -424,9 +428,9 @@ describe('core/HookCenter', () => {
 
   describe('getHookList / getHookNameList', () => {
     it('应该返回正确的 hook 列表和名称映射', () => {
-      const Hook1 = createMockHookClass('hook1');
-      const Hook2 = createMockParagraphHook('hook2');
-      const hookCenter = createHookCenter([Hook1, Hook2]);
+      const hook1 = createMockHookClass('hook1');
+      const hook2 = createMockParagraphHook('hook2');
+      const hookCenter = createHookCenter([hook1, hook2]);
 
       const hookList = hookCenter.getHookList();
       const hookNameList = hookCenter.getHookNameList();
@@ -443,8 +447,8 @@ describe('core/HookCenter', () => {
       [
         '重复 hook',
         () => {
-          const HookClass = createMockHookClass('duplicateHook');
-          createHookCenter([HookClass, HookClass]);
+          const hookClass = createMockHookClass('duplicateHook');
+          createHookCenter([hookClass, hookClass]);
         },
         'Duplicate hook name [duplicateHook]',
       ],
@@ -458,18 +462,18 @@ describe('core/HookCenter', () => {
       [
         'before 找不到目标 hook',
         () => {
-          const Hook = markAsCustomHook(createMockHookClass('testHook'));
+          const hook = markAsCustomHook(createMockHookClass('testHook'));
           const hookCenter = createHookCenter();
-          hookCenter.register(Hook, createEditorConfig(), { before: 'nonExistent' });
+          hookCenter.register(hook, createEditorConfig(), { before: 'nonExistent' });
         },
         'Cannot find hook named [nonExistent]',
       ],
       [
         'after 找不到目标 hook',
         () => {
-          const Hook = markAsCustomHook(createMockHookClass('testHook'));
+          const hook = markAsCustomHook(createMockHookClass('testHook'));
           const hookCenter = createHookCenter();
-          hookCenter.register(Hook, createEditorConfig(), { after: 'nonExistent' });
+          hookCenter.register(hook, createEditorConfig(), { after: 'nonExistent' });
         },
         'Cannot find hook named [nonExistent]',
       ],

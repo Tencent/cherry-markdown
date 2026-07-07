@@ -118,7 +118,7 @@ const options = {
     // TODO: 重构抽出为独立的插件
     {
       name: 'dist-types',
-      generateBundle(options, bundle, isWrite) {
+      generateBundle(options, bundle, _isWrite) {
         const bundles = Object.keys(bundle);
         bundles.forEach((fileName) => {
           if (!fileName.endsWith('.js')) {
@@ -164,10 +164,10 @@ const options = {
       const id = warning.id || warning.source || 'unknown';
       const importer = warning.importer || 'unknown';
       throw new Error(
-        `Unresolved import: ${id} (imported by ${importer})\n`
-        + 'This may be caused by incomplete dependency installation.\n'
-        + 'If this involves mermaid sub-dependencies (marked, langium, etc.),\n'
-        + 'ensure .yarnrc contains "--ignore-engines true" and run "yarn install" again.',
+        `Unresolved import: ${id} (imported by ${importer})\n` +
+          'This may be caused by incomplete dependency installation.\n' +
+          'If this involves mermaid sub-dependencies (marked, langium, etc.),\n' +
+          'ensure .yarnrc contains "--ignore-engines true" and run "yarn install" again.',
       );
     }
     // 忽略 juice 的 circular dependency
@@ -180,7 +180,7 @@ const options = {
       ) {
         return;
       }
-    } catch (e) {
+    } catch {
       // 如果 warning 对象结构异常，安全地回退到默认行为
     }
     warn(warning);

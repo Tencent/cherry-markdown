@@ -14,18 +14,32 @@
  * limitations under the License.
  */
 import SyntaxBase from '@/core/SyntaxBase';
-import { escapeHTMLSpecialChar as _e, isValidScheme, encodeURIOnce } from '@/utils/sanitize';
+import { escapeHTMLSpecialChar as e, isValidScheme, encodeURIOnce } from '@/utils/sanitize';
 import { compileRegExp, isLookbehindSupported, NOT_ALL_WHITE_SPACES_INLINE } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import UrlCache from '@/UrlCache';
+
+/**
+ * 根据链接配置生成 target 属性字符串
+ * @param {{ target?: string, openNewPage?: boolean }} config
+ * @returns {string}
+ */
+function resolveLinkTarget(config) {
+  if (config.target) {
+    return `target="${config.target}"`;
+  }
+  if (config.openNewPage) {
+    return 'target="_blank"';
+  }
+  return '';
+}
 
 export default class Link extends SyntaxBase {
   static HOOK_NAME = 'link';
 
   constructor({ config, globalConfig }) {
     super({ config });
-    // eslint-disable-next-line no-nested-ternary
-    this.target = config.target ? `target="${config.target}"` : !!config.openNewPage ? 'target="_blank"' : '';
+    this.target = resolveLinkTarget(config);
     this.rel = config.rel ? `rel="${config.rel}"` : '';
   }
 
@@ -81,7 +95,7 @@ export default class Link extends SyntaxBase {
     if (refType === 'url') {
       const { isValid, coreText, extraLeadingChar } = this.checkBrackets(text);
       if (!isValid) return match;
-      attrs = title && title.trim() !== '' ? ` title="${_e(title.replace(/["']/g, ''))}"` : '';
+      attrs = title && title.trim() !== '' ? ` title="${e(title.replace(/["']/g, ''))}"` : '';
       if (target) {
         attrs += ` target="${target.replace(/{target\s*=\s*(.*?)}/, '$1')}"`;
       } else if (this.target) {
@@ -151,7 +165,7 @@ export default class Link extends SyntaxBase {
           '\\[('
         }${NOT_ALL_WHITE_SPACES_INLINE})\\](?!\\s*\\()` + // ?<ref> global ref, exclude [text][ref](url) inline link pattern
           ')',
-        '(\\{target\\s*=\\s*(_blank|_parent|_self|_top)\\})?',
+        '(\\{target\\s*=\\s*(_blank|parent|self|top)\\})?',
       ].join(''),
       end: '',
     };

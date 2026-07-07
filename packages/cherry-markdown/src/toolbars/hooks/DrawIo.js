@@ -37,7 +37,6 @@ export default class DrawIo extends MenuBase {
       return selection;
     }
     if (this.hasCacheOnce()) {
-      // @ts-ignore
       const { xmlData, base64 } = this.getAndCleanCacheOnce();
       const begin = '![';
       const end = `](${base64}){data-type=drawio data-xml=${encodeURI(xmlData)}}`;

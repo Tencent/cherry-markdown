@@ -152,8 +152,8 @@ export default class ChatGpt extends MenuBase {
       return;
     }
     // 增加loading
-    // eslint-disable-next-line prefer-destructuring
-    this.button = this.$cherry.wrapperDom.getElementsByClassName('cherry-toolbar-chatgpt')[0];
+    const [chatGptButton] = this.$cherry.wrapperDom.getElementsByClassName('cherry-toolbar-chatgpt');
+    this.button = chatGptButton;
     if (/icon-loading loading/.test(this.button.className)) {
       return;
     }

@@ -48,8 +48,8 @@ jobs:
         uses: changesets/action@v1
         with:
           version: yarn changeset-version
-          title: "chore: release"
-          commit: "chore: release"
+          title: 'chore: release'
+          commit: 'chore: release'
           publish: yarn changeset tag
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}

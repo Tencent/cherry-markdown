@@ -53,7 +53,7 @@ class CherryEngine extends CherryStatic {
       opts.callback.urlProcessor = urlProcessorProxy(opts.callback.urlProcessor);
     }
 
-    // @ts-ignore hack Cherry Instance
+    // @ts-expect-error 构造器返回 Engine 实例以兼容历史 API
     return new Engine(opts, { options: opts });
   }
 }

@@ -104,10 +104,10 @@ export default class MenuBase {
      * @type {'absolute' | 'fixed' | 'sidebar'}
      */
     this.positionModel = 'absolute';
-    // eslint-disable-next-line no-underscore-dangle
+
     if (typeof this._onClick === 'function') {
       Logger.warn('`MenuBase._onClick` is deprecated. Override `fire` instead');
-      // eslint-disable-next-line no-underscore-dangle
+
       this.fire = this._onClick;
     }
     /**
@@ -150,6 +150,10 @@ export default class MenuBase {
     this.cacheOnce = info;
   }
 
+  /**
+   * 获取并清除缓存数据
+   * @returns {any} 缓存的数据，可以是任意类型（文件信息、DrawIo数据、表格/公式字符串等）
+   */
   getAndCleanCacheOnce() {
     this.updateMarkdown = true;
     const ret = this.cacheOnce;
@@ -157,6 +161,10 @@ export default class MenuBase {
     return ret;
   }
 
+  /**
+   * 检查是否有缓存数据
+   * @returns {boolean}
+   */
   hasCacheOnce() {
     return this.cacheOnce !== false;
   }

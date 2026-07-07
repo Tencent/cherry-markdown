@@ -41,7 +41,7 @@ Cherry Markdown Writer is a Javascript Markdown editor. It has the advantages su
 - [Utilize Your Own Mermaid.js](https://tencent.github.io/cherry-markdown/examples/mermaid.html)
 - [Custom Code Block Wrapper](https://tencent.github.io/cherry-markdown/examples/custom_codeblock_wrapper.html)
 
------
+---
 
 ### **Out-of-the-box**
 
@@ -54,6 +54,7 @@ When the syntax that Cherry Markdown writer support can not meet your needs, sec
 ### Incremental / Progressive / Streaming rendering
 
 After enabling streaming rendering, Cherry will automatically complete the following syntax elements to avoid exposing Markdown source code, ensuring stable output during the streaming process([demo](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)):
+
 - Headings
 - Bold and italic text
 - Hyperlinks
@@ -290,9 +291,9 @@ const cherryInstance = new Cherry({
 
 | Build  | File                        | Mermaid | CodeMirror | Use Case          |
 | ------ | --------------------------- | ------- | ---------- | ----------------- |
-| Full   | `cherry-markdown.js`        | ✅       | ✅          | General purpose   |
-| Core   | `cherry-markdown.core.js`   | ❌       | ✅          | Without Mermaid   |
-| Stream | `cherry-markdown.stream.js` | ❌       | ❌          | AI Chat streaming |
+| Full   | `cherry-markdown.js`        | ✅      | ✅         | General purpose   |
+| Core   | `cherry-markdown.core.js`   | ❌      | ✅         | Without Mermaid   |
+| Stream | `cherry-markdown.stream.js` | ❌      | ❌         | AI Chat streaming |
 
 > Note: MathJax/KaTeX are external dependencies loaded dynamically via CDN and are not included in any build package.
 

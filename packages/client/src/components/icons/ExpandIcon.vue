@@ -1,15 +1,18 @@
 <template>
   <svg :width="size" :height="size" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z" />
+    <path v-if="expanded" d="M19,13H5V11H19V13Z" />
+    <path v-else d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
   </svg>
 </template>
 
 <script setup lang="ts">
 interface Props {
   size?: number;
+  expanded?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
-  size: 16,
+  size: 14,
+  expanded: false,
 });
 </script>

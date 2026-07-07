@@ -124,18 +124,21 @@ export default class CodeBlock extends ParagraphBase {
     const previewText = locale.mermaidPreview || 'Preview';
     const sourceText = locale.mermaidSource || 'Source';
     // header 区域
-    const header = `<div class="cherry-mermaid-source-toolbar">`
-      + `<div class="cherry-mermaid-source-toolbar-switch">`
-      + `<div class="cherry-mermaid-source-toolbar-tab active" data-mode="preview">${previewText}</div>`
-      + `<div class="cherry-mermaid-source-toolbar-tab" data-mode="source">${sourceText}</div>`
-      + `<div class="cherry-mermaid-source-toolbar-slider"></div>`
-      + `</div>`
-      + `</div>`;
+    const header =
+      `<div class="cherry-mermaid-source-toolbar">` +
+      `<div class="cherry-mermaid-source-toolbar-switch">` +
+      `<div class="cherry-mermaid-source-toolbar-tab active" data-mode="preview">${previewText}</div>` +
+      `<div class="cherry-mermaid-source-toolbar-tab" data-mode="source">${sourceText}</div>` +
+      `<div class="cherry-mermaid-source-toolbar-slider"></div>` +
+      `</div>` +
+      `</div>`;
     // 内容区域：各面板通过 data-mode 与 tab 关联
-    const body = `<div class="cherry-mermaid-source-toolbar-panel active" data-mode="preview">${previewHtml}</div>`
-      + `<div class="cherry-mermaid-source-toolbar-panel" data-mode="source">${sourceCodeHtml}</div>`;
-    return `<${tag} data-sign="${props.sign}" data-type="${escapedLang}" data-lines="${props.lines}"${sizeStyle}${alignClass}>`
-      + header + body + `</${tag}>`;
+    const body =
+      `<div class="cherry-mermaid-source-toolbar-panel active" data-mode="preview">${previewHtml}</div>` +
+      `<div class="cherry-mermaid-source-toolbar-panel" data-mode="source">${sourceCodeHtml}</div>`;
+    return `<${tag} data-sign="${props.sign}" data-type="${escapedLang}" data-lines="${props.lines}"${sizeStyle}${alignClass}>${
+      header
+    }${body}</${tag}>`;
   }
 
   // 修复渲染行号时打散的标签
@@ -440,8 +443,7 @@ export default class CodeBlock extends ParagraphBase {
         if (leadingContentBlockQuote) {
           const regex = new RegExp(`^\n*`, '');
           const leadingNewline = result.match(regex)[0];
-          // eslint-disable-next-line no-param-reassign
-          result = leadingNewline + leadingContentBlockQuote + result.replace(regex, (_) => '');
+          return leadingNewline + leadingContentBlockQuote + result.replace(regex, (_) => '');
         }
         return result;
       }

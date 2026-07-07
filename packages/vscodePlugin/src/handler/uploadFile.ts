@@ -29,7 +29,7 @@ export const uploadFileHandler = async (fileInfo: FileInfo): Promise<UploadFileH
   switch (uploadType) {
     case 'CustomUploader': {
       const customUploader = vscode.workspace.getConfiguration('cherryMarkdown').get<CustomUploader>('CustomUploader');
-      if (!customUploader || customUploader.enable !== true) {
+      if (customUploader?.enable !== true) {
         vscode.window.showInformationMessage('请完善自定义上传配置');
         throw new Error('请完善自定义上传配置');
       }
@@ -62,7 +62,7 @@ export const uploadFileHandler = async (fileInfo: FileInfo): Promise<UploadFileH
           res.url = firstResult;
         } else if (data.data && typeof data.data === 'string') {
           res.url = data.data;
-        } else if (data.data && data.data.url) {
+        } else if (data.data?.url) {
           res.url = data.data.url;
         } else {
           const firstUrl = Object.values(data).find((v) => typeof v === 'string' && /^(http|data:image)/.test(v));

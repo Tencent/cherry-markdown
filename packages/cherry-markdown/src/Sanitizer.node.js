@@ -3,5 +3,4 @@ import { JSDOM } from 'jsdom';
 
 const { window } = new JSDOM('');
 
-// @ts-expect-error
-export const sanitizer = createDOMPurify(window);
+export const sanitizer = createDOMPurify(/** @type {Window} */ (window));

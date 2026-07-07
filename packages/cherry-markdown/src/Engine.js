@@ -126,7 +126,7 @@ export default class Engine {
           }
           $expectInstance(hook);
           hooksConfig.push(hook);
-        } catch (e) {
+        } catch {
           throw new Error('the hook does not correctly inherit');
         }
       }
@@ -184,7 +184,7 @@ export default class Engine {
 
   $afterMakeHtml(str) {
     let $str = this.$fireHookAction(str, 'paragraph', 'afterMakeHtml', this.$dealSentenceByCache.bind(this));
-    // str = this._fireHookAction(str, 'sentence', 'afterMakeHtml');
+    // str = this.fireHookAction(str, 'sentence', 'afterMakeHtml');
     $str = this.dealAfterMakeHtml($str);
     $str = UrlCache.restoreAll($str);
     $str = this.$decodeReservedKeywords($str);

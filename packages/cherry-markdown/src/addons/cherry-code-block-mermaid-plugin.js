@@ -177,10 +177,10 @@ export default class MermaidCodeEngine {
     delete this.options.mermaid;
     delete this.options.mermaidAPI;
 
-    if (!resolvedMermaid && !resolvedMermaidAPI) {
+    if (!browserMermaid && !resolvedMermaidAPI) {
       // mermaid 可能是异步加载的，这里不直接抛错，留待异步渲染时重试获取
       // 注意：syncRender 路径无法等待异步加载，仍然会因 mermaidAPIRefs 为 null 而失败
-      // eslint-disable-next-line no-console
+
       this.mermaidAPIRefs = null;
       return;
     }
@@ -193,11 +193,11 @@ export default class MermaidCodeEngine {
       this.mermaidAPIRefs = resolvedMermaidAPI;
       if (this.isAsyncRenderVersion()) {
         // v9.x 中某些版本也有异步 render（参数长度为 3），此时使用 mermaid 主对象更可靠
-        this.mermaidAPIRefs = resolvedMermaid || this.mermaidAPIRefs;
+        this.mermaidAPIRefs = browserMermaid || this.mermaidAPIRefs;
       }
     } else {
       // v10+：无 mermaidAPI，统一使用 mermaid 主对象
-      this.mermaidAPIRefs = resolvedMermaid;
+      this.mermaidAPIRefs = browserMermaid;
     }
     this.mermaidAPIRefs.initialize(this.options);
   }
@@ -257,7 +257,7 @@ export default class MermaidCodeEngine {
       } else {
         svgHtml = injectSvgFallback(svgCode);
       }
-    } catch (e) {
+    } catch {
       svgHtml = injectSvgFallback(svgCode);
     }
     return svgHtml;
@@ -345,22 +345,22 @@ export default class MermaidCodeEngine {
     }
     const browserMermaid = getExternal('mermaid');
     const browserMermaidAPI = getExternal('mermaidAPI');
-    const resolvedMermaid = browserMermaid;
-    const resolvedMermaidAPI = browserMermaidAPI || (resolvedMermaid && resolvedMermaid.mermaidAPI) || null;
-    if (!resolvedMermaid && !resolvedMermaidAPI) {
+
+    const resolvedMermaidAPI = browserMermaidAPI || (browserMermaid && browserMermaid.mermaidAPI) || null;
+    if (!browserMermaid && !resolvedMermaidAPI) {
       return false;
     }
     if (resolvedMermaidAPI) {
       this.mermaidAPIRefs = resolvedMermaidAPI;
       if (this.isAsyncRenderVersion()) {
-        this.mermaidAPIRefs = resolvedMermaid || this.mermaidAPIRefs;
+        this.mermaidAPIRefs = browserMermaid || this.mermaidAPIRefs;
       }
     } else {
-      this.mermaidAPIRefs = resolvedMermaid;
+      this.mermaidAPIRefs = browserMermaid;
     }
     try {
       this.mermaidAPIRefs.initialize(this.options);
-    } catch (e) {
+    } catch {
       // 忽略重复初始化等异常
     }
     return true;

@@ -4,7 +4,7 @@
     <div v-if="node.type === 'directory'" class="directory-item" :class="{ expanded: node.expanded }">
       <div class="directory-header" @click="toggleDirectory">
         <div class="directory-icon">
-          <FolderIcon :size="14" :expanded="node.expanded" />
+          <FolderIcon :size="14" />
         </div>
         <div class="directory-name">{{ node.name }}</div>
         <div class="directory-arrow">
@@ -123,11 +123,6 @@ const openFile = () => {
 .directory-arrow {
   flex-shrink: 0;
   color: #6c757d;
-  transition: transform 0.2s ease;
-}
-
-.directory-item.expanded .directory-arrow {
-  transform: rotate(90deg);
 }
 
 /* 目录子节点样式 */

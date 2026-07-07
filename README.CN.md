@@ -41,7 +41,7 @@ Cherry Markdown Writer 是一款 Javascript Markdown 编辑器，具有开箱即
 - [使用自带或自定义的 Mermaid.js](https://tencent.github.io/cherry-markdown/examples/mermaid.html)
 - [自定义代码块外层容器](https://tencent.github.io/cherry-markdown/examples/custom_codeblock_wrapper.html)
 
------
+---
 
 ### 开箱即用
 
@@ -290,9 +290,9 @@ const cherryInstance = new Cherry({
 
 | 构建包     | 文件                        | 包含 Mermaid | 包含 CodeMirror | 适用场景         |
 | ---------- | --------------------------- | ------------ | --------------- | ---------------- |
-| 完整包     | `cherry-markdown.js`        | ✅            | ✅               | 通用场景         |
-| 核心包     | `cherry-markdown.core.js`   | ❌            | ✅               | 不需要 Mermaid   |
-| 流式输出包 | `cherry-markdown.stream.js` | ❌            | ❌               | AI Chat 流式输出 |
+| 完整包     | `cherry-markdown.js`        | ✅           | ✅              | 通用场景         |
+| 核心包     | `cherry-markdown.core.js`   | ❌           | ✅              | 不需要 Mermaid   |
+| 流式输出包 | `cherry-markdown.stream.js` | ❌           | ❌              | AI Chat 流式输出 |
 
 > 注意：MathJax/KaTeX 为外部依赖，通过 CDN 动态加载，不包含在任何构建包中。
 

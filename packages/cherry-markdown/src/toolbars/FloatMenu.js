@@ -80,9 +80,8 @@ export default class FloatMenu extends Toolbar {
 
   /**
    * 处理beforeSelectionChange事件
-   * @param {Object} selection 选区对象
    */
-  handleBeforeSelectionChange({ selection }) {
+  handleBeforeSelectionChange() {
     if (this.editor && this.editor.editor) {
       const compatCodeMirror = this.createCompatCodeMirror();
       this.cursorActivity(null, compatCodeMirror);
@@ -112,7 +111,7 @@ export default class FloatMenu extends Toolbar {
       getLine: (lineNum) => {
         try {
           return state.doc.line(lineNum + 1).text;
-        } catch (e) {
+        } catch {
           return '';
         }
       },
@@ -140,7 +139,7 @@ export default class FloatMenu extends Toolbar {
                 console.warn('Failed to get coords for line height:', coordsError);
               }
               callback({ height: lineHeight });
-            } catch (e) {
+            } catch {
               break;
             }
           }
@@ -150,7 +149,7 @@ export default class FloatMenu extends Toolbar {
       coordsAtPos: (pos) => {
         try {
           return view.coordsAtPos(pos);
-        } catch (e) {
+        } catch {
           return null;
         }
       },
@@ -294,7 +293,7 @@ export default class FloatMenu extends Toolbar {
           if (lineBlock) {
             return lineBlock.top;
           }
-        } catch (blockError) {
+        } catch {
           // 静默处理，降级到默认行高
         }
         return line * 20;

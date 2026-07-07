@@ -27,6 +27,7 @@ export default class Word extends MenuBase {
   /**
    * 响应点击事件
    * @param {string} selection 被用户选中的文本内容
+   * @param {string} [shortKey] 快捷键参数，本 hook 不处理这个参数
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
@@ -34,10 +35,8 @@ export default class Word extends MenuBase {
     const multiple = this.$cherry?.options.multipleFileSelection?.word ?? false;
     if (multiple) {
       if (this.hasCacheOnce()) {
-        // @ts-ignore
         const arr = this.getAndCleanCacheOnce();
         let res = '';
-        // @ts-ignore
         for (const { url, params } of arr) {
           const begin = '[';
           const end = `](${url})`;
@@ -57,7 +56,6 @@ export default class Word extends MenuBase {
       return selection;
     }
     if (this.hasCacheOnce()) {
-      // @ts-ignore
       const { name, url, params } = this.getAndCleanCacheOnce();
       const begin = '[';
       const end = `](${url})`;

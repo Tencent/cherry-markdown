@@ -45,8 +45,8 @@ export default class Strikethrough extends MenuBase {
    */
   onClick(selection, shortKey = '') {
     let $selection = this.getSelection(selection) || this.locale.strikethrough;
-    // @ts-ignore
-    const needWhitespace = this.$cherry?.options?.engine?.syntax?.strikethrough?.needWhitespace;
+    const strikethroughConfig = this.$cherry?.options?.engine?.syntax?.strikethrough;
+    const needWhitespace = strikethroughConfig !== false && strikethroughConfig?.needWhitespace;
     const space = needWhitespace ? ' ' : '';
     // 如果被选中的文本中包含删除线语法，则去掉删除线语法
     if (!this.isSelections && !this.$testIsStrike($selection)) {

@@ -7,9 +7,7 @@ defineProps<{
   visible: boolean;
 }>();
 
-const emit = defineEmits<{
-  (_e: 'close', _result: UnsavedDialogResult): void;
-}>();
+const emit = defineEmits<(_e: 'close', _result: UnsavedDialogResult) => void>();
 
 const handleAction = (result: UnsavedDialogResult): void => {
   emit('close', result);

@@ -343,7 +343,7 @@ export default class EChartsTableEngine {
     try {
       const v = getComputedStyle(el).getPropertyValue(name).trim();
       return v || fallback;
-    } catch (e) {
+    } catch {
       return fallback;
     }
   }
@@ -356,7 +356,7 @@ export default class EChartsTableEngine {
       const arr = Array.from(classList || []);
       const t = arr.find((c) => c.startsWith('theme__'));
       return t ? t.replace('theme__', '') : 'default';
-    } catch (e) {
+    } catch {
       return 'default';
     }
   }
@@ -646,20 +646,20 @@ export default class EChartsTableEngine {
     const chartOptionsStr = container.getAttribute('data-chart-options');
     const chartId = container.getAttribute('id');
     let tableData = null;
-    let chartOptions = {};
+    let options = {};
     try {
       tableData = tableDataStr ? JSON.parse(tableDataStr) : null;
-    } catch (e) {
+    } catch {
       tableData = null;
     }
     try {
-      chartOptions = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
-    } catch (e) {
-      chartOptions = { chartId };
+      options = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
+    } catch {
+      options = { chartId };
     }
     if (!type || !tableData) return {};
-    chartOptions.chartId = chartId;
-    return this.$generateChartOptions(type, tableData, chartOptions);
+    options.chartId = chartId;
+    return this.$generateChartOptions(type, tableData, options);
   }
 
   /**
@@ -734,6 +734,7 @@ export default class EChartsTableEngine {
 
     // 生成唯一ID和简化的配置数据
     const chartId = `chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
     // 序列化数据用于存储
     const tableDataStr = JSON.stringify(tableObject);
     const chartOptionsStr = JSON.stringify(options);
@@ -1750,11 +1751,11 @@ const MapChartOptionsHandler = {
     if (tableDataStr && engine.echartsRef) {
       try {
         const tableData = JSON.parse(tableDataStr);
-        const chartOptions = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
-        chartOptions.engine = engine;
-        deepMerge(chartOptions, { mapDataSource: url });
+        const options = chartOptionsStr ? JSON.parse(chartOptionsStr) : {};
+        options.engine = engine;
+        deepMerge(options, { mapDataSource: url });
 
-        const chartOption = generateOptions(MapChartCompleteOptionsHandler, tableData, chartOptions);
+        const chartOption = generateOptions(MapChartCompleteOptionsHandler, tableData, options);
         const existingChart = engine.echartsRef.getInstanceByDom(container);
 
         if (existingChart) {
@@ -1765,7 +1766,7 @@ const MapChartOptionsHandler = {
           engine.createChart(container, chartOption, 'map');
         }
         container.setAttribute('data-map-status', 'success'); // 成功加载数据状态
-      } catch (error) {
+      } catch {
         // console.error('Failed to refresh map chart:', chartId, error);
       }
     }

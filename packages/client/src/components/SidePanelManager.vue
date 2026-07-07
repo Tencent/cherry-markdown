@@ -27,19 +27,26 @@
             v-if="activePanelId === 'explorer'"
             class="header-action"
             title="打开目录"
+            aria-label="打开目录"
             @click="triggerOpenDirectory"
           >
-            打开目录
+            <FolderIcon :size="16" />
           </button>
           <button
             v-if="activePanelId === 'recent'"
             class="header-action"
             title="打开文件"
+            aria-label="打开文件"
             @click="triggerOpenRecentFile"
           >
-            打开文件
+            <FileIcon :size="16" />
           </button>
-          <button class="header-toggle" :title="isCollapsed ? '展开侧边栏' : '折叠侧边栏'" @click="toggleCollapse">
+          <button
+            class="header-toggle"
+            :title="isCollapsed ? '展开侧边栏' : '折叠侧边栏'"
+            :aria-label="isCollapsed ? '展开侧边栏' : '折叠侧边栏'"
+            @click="toggleCollapse"
+          >
             <ArrowIcon :size="14" :direction="isCollapsed ? 'right' : 'left'" />
           </button>
         </div>
@@ -162,11 +169,18 @@ const triggerOpenRecentFile = (): void => {
   border-radius: 12px;
   background: transparent;
   color: inherit;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+.activity-btn :deep(svg) {
+  display: block;
+  flex-shrink: 0;
 }
 
 .activity-btn:hover {
@@ -233,14 +247,23 @@ const triggerOpenRecentFile = (): void => {
 }
 
 .header-action {
-  padding: 6px 10px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   border: 1px solid #e5e9f0;
   border-radius: 8px;
   background: #eef1f7;
   color: #1f2430;
   cursor: pointer;
-  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   transition: all 0.2s ease;
+}
+
+.header-action :deep(svg) {
+  display: block;
 }
 
 .header-action:hover {
@@ -250,6 +273,7 @@ const triggerOpenRecentFile = (): void => {
 .header-toggle {
   width: 32px;
   height: 32px;
+  padding: 0;
   border: 1px solid #e5e9f0;
   border-radius: 8px;
   background: #f7f9fc;
@@ -258,7 +282,12 @@ const triggerOpenRecentFile = (): void => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   transition: all 0.2s ease;
+}
+
+.header-toggle :deep(svg) {
+  display: block;
 }
 
 .header-toggle:hover {

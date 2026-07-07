@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* eslint-disable no-underscore-dangle */
+
 import ParagraphBase from '@/core/ParagraphBase';
 /**
  * [TAPD](https://tapd.cn)的简单表格语法
@@ -103,19 +103,20 @@ export default class TapdTablePlugin extends ParagraphBase {
    * @returns {Object} map
    */
   $setColMapVal(map, key) {
-    if (typeof map[key] === 'undefined') {
-      map[key] = [1, 2];
-      map[this.$nextTdKey(key)] = [1, -1];
-      return map;
+    const colMap = map;
+    if (typeof colMap[key] === 'undefined') {
+      colMap[key] = [1, 2];
+      colMap[this.$nextTdKey(key)] = [1, -1];
+      return colMap;
     }
-    if (map[key][1] === -1) {
+    if (colMap[key][1] === -1) {
       const preKey = this.$prevTdKey(key);
-      map[this.$nextTdKey(key)] = [1, -1];
-      return this.$setColMapVal(map, preKey);
+      colMap[this.$nextTdKey(key)] = [1, -1];
+      return this.$setColMapVal(colMap, preKey);
     }
-    map[key][1] += 1;
+    colMap[key][1] += 1;
 
-    return map;
+    return colMap;
   }
 
   /**
@@ -125,29 +126,30 @@ export default class TapdTablePlugin extends ParagraphBase {
    * @returns {Object} map
    */
   $setRowMapVal(map, key) {
-    if (typeof map[key] === 'undefined') {
-      map[key] = [2, 1];
-      map[this.$nextTrKey(key)] = [-1, 1];
-      return map;
+    const rowMap = map;
+    if (typeof rowMap[key] === 'undefined') {
+      rowMap[key] = [2, 1];
+      rowMap[this.$nextTrKey(key)] = [-1, 1];
+      return rowMap;
     }
     const nextTrkey = this.$nextTrKey(key);
-    map[nextTrkey] = typeof map[nextTrkey] === 'undefined' ? [1, 1] : map[nextTrkey];
-    if (map[key][1] !== map[nextTrkey][1]) {
-      return map;
+    rowMap[nextTrkey] = typeof rowMap[nextTrkey] === 'undefined' ? [1, 1] : rowMap[nextTrkey];
+    if (rowMap[key][1] !== rowMap[nextTrkey][1]) {
+      return rowMap;
     }
-    if (map[key][0] === 1) {
-      map[key][0] = 2;
-      map[nextTrkey][0] = -1;
-      return map;
+    if (rowMap[key][0] === 1) {
+      rowMap[key][0] = 2;
+      rowMap[nextTrkey][0] = -1;
+      return rowMap;
     }
-    if (map[key][0] === -1) {
+    if (rowMap[key][0] === -1) {
       const preKey = this.$prevTrKey(key);
-      map[nextTrkey][0] = -1;
-      return this.$setRowMapVal(map, preKey);
+      rowMap[nextTrkey][0] = -1;
+      return this.$setRowMapVal(rowMap, preKey);
     }
-    map[key][0] += 1;
+    rowMap[key][0] += 1;
 
-    return map;
+    return rowMap;
   }
 
   $dealColSpan(trIndex, tdIndex, tr, spanMap) {

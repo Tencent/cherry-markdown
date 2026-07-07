@@ -1,6 +1,27 @@
-# build/**
-dist/**
-node_modules/**
-src/libs/*.js
-examples/markdown/**
-packages/cherry-markdown/src/libs/*
+# Prettier：默认格式化仓库内可格式化的文件，仅忽略依赖、产物与不宜格式化的内容
+# （与 eslint.config.mjs 的 ignores 策略一致：只排除产物与第三方资源）
+
+# 依赖与锁文件
+**/node_modules/**
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+
+# 构建 / 测试产物
+**/dist/**
+**/out/**
+**/coverage/**
+
+# 第三方、示例站点与打包进来的静态资源
+examples/**
+packages/cherry-markdown/src/libs/*.js
+packages/cherry-markdown/src/addons/advance/maps/**
+packages/vscodePlugin/web-resources/**
+
+# 构建模板（含 handlebars 语法，Prettier 无法解析）
+packages/cherry-markdown/templates/**
+
+# 样式资源（由 sass / 设计流程维护，与 ESLint 一致排除）
+**/*.css
+**/*.scss
+**/src/sass/**

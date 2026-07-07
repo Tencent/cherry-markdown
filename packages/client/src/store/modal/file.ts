@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 
 import type { FileInfo } from '../../components/types';
 
-interface RecentFile extends FileInfo {}
+type RecentFile = FileInfo;
 
 interface FileState {
   currentFilePath: string | null;

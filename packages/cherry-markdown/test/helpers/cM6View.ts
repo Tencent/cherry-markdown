@@ -18,7 +18,7 @@ import { search } from '@codemirror/search';
 
 // ============ jsdom Polyfill（仅在此模块内生效）============
 
-let _polyfilled = false;
+let jsdomPolyfilled = false;
 
 /**
  * 注入 jsdom 环境缺失的浏览器 API。
@@ -29,27 +29,57 @@ let _polyfilled = false;
  * 该方法依赖 Range.getClientRects() 和 getBoundingClientRect()，
  * 但 jsdom 默认未实现这些 API。
  */
+/**
+ * 创建空 DOMRect，兼容 jsdom 未实现 DOMRect 构造器的场景
+ */
+function createEmptyDOMRect(): DOMRect {
+  if (typeof DOMRect !== 'undefined') {
+    return new DOMRect();
+  }
+  const rect: DOMRect = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    toJSON: () => ({}),
+  };
+  return rect;
+}
+
+/**
+ * 创建空 DOMRectList，兼容 jsdom 未实现 getClientRects 的场景
+ */
+function createEmptyDOMRectList(): DOMRectList {
+  const list: DOMRectList = {
+    length: 0,
+    item: () => null,
+    *[Symbol.iterator]() {},
+  };
+  return list;
+}
+
 function injectJsdomPolyfills(): void {
-  if (_polyfilled) return;
-  _polyfilled = true;
+  if (jsdomPolyfilled) return;
+  jsdomPolyfilled = true;
 
   // Range.getClientRects / getBoundingClientRect — CM6 DocView.measureTextSize 需要
   if (typeof Range !== 'undefined' && !Range.prototype.getClientRects) {
     Range.prototype.getClientRects = function (): DOMRectList {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const list = { length: 0, item: () => null } as unknown as DOMRectList;
-      return list;
+      return createEmptyDOMRectList();
     };
 
     Range.prototype.getBoundingClientRect = function (): DOMRect {
-      return new (DOMRect || function () {})();
+      return createEmptyDOMRect();
     };
   }
 
   // requestAnimationFrame — 确保 jsdom 中存在
   if (typeof requestAnimationFrame === 'undefined') {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).requestAnimationFrame = (cb: (time: number) => void) => setTimeout(cb, 16);
+    globalThis.requestAnimationFrame = (cb: (time: number) => void) => window.setTimeout(cb, 16);
   }
 }
 

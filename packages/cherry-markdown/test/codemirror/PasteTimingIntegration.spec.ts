@@ -28,15 +28,18 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // ============ Mock 类型 ============
 
-enum EventType {
-  BEFORE_CHANGE = 'beforeChange',
-  CHANGE = 'change',
-  PASTE = 'paste',
-  MARK_FIELD_UPDATE = 'markFieldUpdate',
-  DEAL_SPECIAL_WORDS = 'dealSpecialWords',
-  PASTE_HELPER_SHOW = 'pasteHelperShow',
-  PASTE_HELPER_HIDE = 'pasteHelperHide',
-}
+// 使用 const 对象替代 enum，避免 TS-ESLint project 解析 enum.members 异常
+const EventType = {
+  BEFORE_CHANGE: 'beforeChange',
+  CHANGE: 'change',
+  PASTE: 'paste',
+  MARK_FIELD_UPDATE: 'markFieldUpdate',
+  DEAL_SPECIAL_WORDS: 'dealSpecialWords',
+  PASTE_HELPER_SHOW: 'pasteHelperShow',
+  PASTE_HELPER_HIDE: 'pasteHelperHide',
+} as const;
+
+type EventType = (typeof EventType)[keyof typeof EventType];
 
 interface TimelineEvent {
   type: EventType;
@@ -266,7 +269,7 @@ describe('粘贴时序集成测试', () => {
 
       flow.recordEvent(EventType.DEAL_SPECIAL_WORDS); // 强制处理
 
-      const timeline = flow.timeline;
+      const { timeline } = flow;
       expect(timeline.length).toBeGreaterThan(0);
     });
 

@@ -26,7 +26,7 @@ const numeric = /[0-9]/;
 export default class Header extends ParagraphBase {
   static HOOK_NAME = 'header';
 
-  constructor({ externals, config, cherry } = { config: undefined, externals: undefined, cherry: undefined }) {
+  constructor({ config, cherry } = { config: undefined, cherry: undefined }) {
     super({ needCache: true });
     this.strict = config ? !!config.strict : true;
     this.RULE = this.rule();
@@ -68,7 +68,7 @@ export default class Header extends ParagraphBase {
         // unicode
         try {
           id += encodeURIComponent(c);
-        } catch (error) {
+        } catch {
           // empty
         }
       }

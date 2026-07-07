@@ -349,7 +349,7 @@ export default class Cherry extends CherryStatic {
           location.hash = '';
           location.hash = hash;
         }
-      } catch (error) {
+      } catch {
         // empty
       }
     }
@@ -1017,16 +1017,16 @@ export default class Cherry extends CherryStatic {
 
   /**
    * @private
-   * @param {Event} _evt
+   * @param {Event} evt
    * @param {import('@codemirror/view').EditorView} editorView
    */
   /**
    * 编辑器内容变更时触发,更新预览区内容
    * @private
-   * @param {Event} _evt - 编辑事件对象(未使用)
+   * @param {Event} evt - 编辑事件对象(未使用)
    * @param {import('@codemirror/view').EditorView | Object} editorView - 编辑器实例
    */
-  editText(_evt, editorView) {
+  editText(evt, editorView) {
     try {
       // 兼容 CM6Adapter,如果传入的是 adapter,则获取其内部的 view
       const view = editorView.view || editorView;

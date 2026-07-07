@@ -14,7 +14,8 @@ describe('utils/toolkit/cloneDeep', () => {
   });
 
   it('处理循环引用', () => {
-    const obj = { a: 1 };
+    type Cyclic = { a: number; self?: Cyclic };
+    const obj: Cyclic = { a: 1 };
     obj.self = obj;
     const cloned = cloneDeep(obj);
     expect(cloned.a).toBe(1);

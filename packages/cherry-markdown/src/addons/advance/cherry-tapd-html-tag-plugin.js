@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* eslint-disable no-underscore-dangle */
+
 import ParagraphBase from '@/core/ParagraphBase';
 /**
  * [TAPD](https://tapd.cn)的html块语法

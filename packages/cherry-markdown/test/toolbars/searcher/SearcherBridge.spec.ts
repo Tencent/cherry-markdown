@@ -4,32 +4,10 @@ import {
   getSearcherBridge,
   initSearcherBridge,
   resolveSearcherConfig,
+  type SearcherCherryHost,
 } from '@/toolbars/searcher/SearcherBridge';
 import Search from '@/toolbars/hooks/Search';
-
-/** Searcher 桥接测试用 Cherry 宿主形态 */
-type SearcherCherryHost = {
-  locale?: Record<string, string | undefined>;
-  options?: {
-    locale?: string;
-    toolbars?: {
-      toolbar?: Array<string | Record<string, unknown>>;
-      sidebar?: Array<string | Record<string, unknown>>;
-      config?: { searcher?: { enableReplace?: boolean; expandReplaceOnOpen?: boolean } };
-    };
-  };
-  editor?: {
-    editor: Record<string, unknown>;
-    options?: { editorDom?: HTMLElement; wrapperDom?: HTMLElement };
-  };
-  wrapperDom?: HTMLElement;
-  $event?: {
-    Events: { afterChangeLocale: string; afterChange: string };
-    on: ReturnType<typeof vi.fn>;
-    off: ReturnType<typeof vi.fn>;
-  };
-  $currentMenuOptions?: { name?: string; icon?: string };
-};
+import Event from '@/Event';
 
 function createMockCherry(overrides: Partial<SearcherCherryHost> = {}): SearcherCherryHost {
   const editorDom = document.createElement('div');
@@ -50,10 +28,9 @@ function createMockCherry(overrides: Partial<SearcherCherryHost> = {}): Searcher
     clearSearchQuery: vi.fn(),
   };
 
-  return {
+  const mockCherry: SearcherCherryHost = {
     locale: { searchFor: 'Search for' },
     options: {
-      locale: 'en_US',
       toolbars: {
         toolbar: ['search'],
       },
@@ -63,13 +40,10 @@ function createMockCherry(overrides: Partial<SearcherCherryHost> = {}): Searcher
       options: { editorDom, wrapperDom },
     },
     wrapperDom,
-    $event: {
-      Events: { afterChangeLocale: 'afterChangeLocale', afterChange: 'afterChange' },
-      on: vi.fn(),
-      off: vi.fn(),
-    },
+    $event: new Event('test'),
     ...overrides,
   };
+  return mockCherry;
 }
 
 describe('SearcherBridge', () => {
@@ -87,7 +61,7 @@ describe('SearcherBridge', () => {
 
   it('toolbar 未配置 search 时不初始化桥接层', () => {
     const cherry = createMockCherry({
-      options: { locale: 'en_US', toolbars: { toolbar: ['bold'] } },
+      options: { toolbars: { toolbar: ['bold'] } },
     });
     initSearcherBridge(cherry);
     expect(getSearcherBridge(cherry)).toBeUndefined();
@@ -95,7 +69,7 @@ describe('SearcherBridge', () => {
 
   it('仅 sidebar 配置 search 时也会初始化桥接层', () => {
     const cherry = createMockCherry({
-      options: { locale: 'en_US', toolbars: { sidebar: ['search'] } },
+      options: { toolbars: { sidebar: ['search'] } },
     });
     initSearcherBridge(cherry);
     expect(getSearcherBridge(cherry)).toBeDefined();
@@ -138,7 +112,6 @@ describe('SearcherBridge', () => {
     vi.useFakeTimers();
 
     let doc = 'foo bar foo';
-    const handlers: Record<string, (msg?: unknown) => void> = {};
     const cherry = createMockCherry({
       editor: {
         editor: {
@@ -159,13 +132,6 @@ describe('SearcherBridge', () => {
         },
         options: { editorDom: document.createElement('div'), wrapperDom: document.body },
       },
-      $event: {
-        Events: { afterChangeLocale: 'afterChangeLocale', afterChange: 'afterChange' },
-        on: (event: string, handler: (msg?: unknown) => void) => {
-          handlers[event] = handler;
-        },
-        off: vi.fn(),
-      },
     });
 
     initSearcherBridge(cherry);
@@ -174,7 +140,7 @@ describe('SearcherBridge', () => {
     bridge?.panel.hide();
 
     doc = 'foo';
-    handlers.afterChange?.({});
+    cherry.$event?.emit('afterChange', {});
     expect(bridge?.panel.state.matches).toHaveLength(1);
     vi.useRealTimers();
   });
@@ -187,7 +153,7 @@ describe('SearcherBridge', () => {
       throw new Error('searcher bridge is not initialized');
     }
 
-    cherry.$currentMenuOptions = { name: 'search', icon: 'search' };
+    Object.assign(cherry, { $currentMenuOptions: { name: 'search', icon: 'search' } });
     const searchMenu = new Search(cherry);
     searchMenu.dom = document.createElement('button');
     searchMenu.onClick('');
@@ -203,7 +169,7 @@ describe('SearcherBridge', () => {
       throw new Error('searcher bridge is not initialized');
     }
 
-    cherry.$currentMenuOptions = { name: 'search', icon: 'search' };
+    Object.assign(cherry, { $currentMenuOptions: { name: 'search', icon: 'search' } });
     const searchMenu = new Search(cherry);
     searchMenu.dom = document.createElement('button');
     searchMenu.onClick('');
@@ -231,7 +197,6 @@ describe('SearcherBridge', () => {
     const cherry = createMockCherry({
       locale: { searchFor: '查找' },
       options: {
-        locale: 'zh_CN',
         toolbars: { toolbar: ['search'] },
       },
     });
@@ -269,7 +234,8 @@ describe('SearcherBridge', () => {
 
   it('destroySearcherBridge 销毁 Bridge 并解绑 Cherry 事件', () => {
     const editorDom = document.createElement('div');
-    const off = vi.fn();
+    const $event = new Event('test');
+    const offSpy = vi.spyOn($event, 'off');
     const cherry = createMockCherry({
       editor: {
         editor: {
@@ -286,11 +252,7 @@ describe('SearcherBridge', () => {
         },
         options: { editorDom, wrapperDom: document.body },
       },
-      $event: {
-        Events: { afterChangeLocale: 'afterChangeLocale', afterChange: 'afterChange' },
-        on: vi.fn(),
-        off,
-      },
+      $event,
     });
 
     initSearcherBridge(cherry);
@@ -300,9 +262,9 @@ describe('SearcherBridge', () => {
     destroySearcherBridge(cherry);
 
     expect(destroySpy).toHaveBeenCalled();
-    expect(off).toHaveBeenCalledWith('afterChangeLocale', expect.any(Function));
-    expect(off).toHaveBeenCalledWith('afterChange', expect.any(Function));
-    expect(off).toHaveBeenCalledWith('toolbarHide', expect.any(Function));
+    expect(offSpy).toHaveBeenCalledWith('afterChangeLocale', expect.any(Function));
+    expect(offSpy).toHaveBeenCalledWith('afterChange', expect.any(Function));
+    expect(offSpy).toHaveBeenCalledWith('toolbarHide', expect.any(Function));
     expect(getSearcherBridge(cherry)).toBeUndefined();
   });
 
@@ -310,7 +272,6 @@ describe('SearcherBridge', () => {
     vi.useFakeTimers();
 
     let doc = 'foo bar foo';
-    const handlers: Record<string, (msg?: unknown) => void> = {};
     const cherry = createMockCherry({
       editor: {
         editor: {
@@ -331,13 +292,6 @@ describe('SearcherBridge', () => {
         },
         options: { editorDom: document.createElement('div'), wrapperDom: document.body },
       },
-      $event: {
-        Events: { afterChangeLocale: 'afterChangeLocale', afterChange: 'afterChange' },
-        on: (event: string, handler: (msg?: unknown) => void) => {
-          handlers[event] = handler;
-        },
-        off: vi.fn(),
-      },
     });
 
     initSearcherBridge(cherry);
@@ -346,7 +300,7 @@ describe('SearcherBridge', () => {
     expect(bridge?.panel.state.matches).toHaveLength(2);
 
     doc = 'foo';
-    handlers.afterChange?.({});
+    cherry.$event?.emit('afterChange', {});
     await vi.advanceTimersByTimeAsync(150);
     expect(bridge?.panel.state.matches).toHaveLength(1);
     vi.useRealTimers();

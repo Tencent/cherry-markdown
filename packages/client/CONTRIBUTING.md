@@ -21,6 +21,7 @@ The easiest way to contribute documentation to this project is to follow these s
 - And you need to [install node](https://nodejs.org/) too(It is recommended to use [nvm](https://github.com/nvm-sh/nvm) or [nvm-windows](https://github.com/coreybutler/nvm-windows) to install).
 
 ---
+
 This project uses [pnpm](https://pnpm.io/) to manage the dependencies, install it if you haven't via.
 
 ```shell
