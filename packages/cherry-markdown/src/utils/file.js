@@ -115,6 +115,24 @@ const handleType = (type, file, url) => {
 };
 
 /**
+ * 拖拽上传场景下，根据文件类型决定写入的 markdown 源码
+ *  - 图片文件（image/*）：返回图片语法 ![name](url)
+ *  - 其他文件：返回超链接语法 [name](url)
+ * （文本/Markdown 文件由调用方直接读取内容插入，不会走到此函数）
+ * @param {File} file 被拖拽的文件
+ * @param {string} url 上传后返回的文件地址
+ * @returns {string} 写入编辑器的 markdown 代码片段
+ */
+export const handleDropType = (file, url) => {
+  if (/^image\//i.test(file.type)) {
+    // 如果是图片，则返回固定的图片markdown源码
+    return `![${file.name}](${url})`;
+  }
+  // 其他文件返回超链接
+  return `[${file.name}](${url})`;
+};
+
+/**
  * 解析params参数
  * @param params?.isBorder 是否有边框样式（图片场景下生效）
  * @param params?.isShadow 是否有阴影样式（图片场景下生效）

@@ -26,6 +26,7 @@ import {
   highlightActiveLineGutter,
   ViewPlugin,
   rectangularSelection,
+  dropCursor,
 } from '@codemirror/view';
 import { EditorState, StateEffect, StateField, EditorSelection, Transaction, Compartment } from '@codemirror/state';
 import { markdown } from '@codemirror/lang-markdown';
@@ -45,7 +46,7 @@ import { syntaxHighlighting, defaultHighlightStyle, foldGutter, indentOnInput } 
 import htmlParser from '@/utils/htmlparser';
 import pasteHelper from '@/utils/pasteHelper';
 import Logger from '@/Logger';
-import { handleFileUploadCallback } from '@/utils/file';
+import { handleFileUploadCallback, handleDropType } from '@/utils/file';
 import { tagHighlighter, tags } from '@lezer/highlight';
 import { createElement } from './utils/dom';
 import { base64Reg, imgDrawioXmlReg, createUrlReg, getCodeBlockRule } from './utils/regexp';
@@ -1643,6 +1644,120 @@ export default class Editor {
   }
 
   /**
+   * 判断文件是否为"可直接读取文本内容插入"的类型（.txt/.md 等纯文本）
+   * @param {File} file 拖拽的文件
+   * @returns {boolean}
+   */
+  isTextContentFile(file) {
+    return /\.(txt|md|markdown|mdx)$/i.test(file.name) || /^text\//i.test(file.type);
+  }
+
+  /**
+   * 处理拖拽文件到编辑区的逻辑（支持批量拖拽）
+   * 规则：
+   *  - 图片文件（image/*）：按图片语法 ![name](url) 写入
+   *  - 纯文本/Markdown 文件（.txt/.md）：直接把文件内容读取并插入编辑器
+   *  - 其他文件：按超链接语法 [name](url) 写入
+   * 为保证多个文件按拖拽的原始顺序写入，会先并行收集所有片段，全部完成后统一插入。
+   * @param {DragEvent} event 拖拽事件
+   * @param {EditorView} editorView CodeMirror 6 视图实例
+   * @returns {boolean} 是否拦截并处理了本次 drop 事件
+   */
+  handleDrop(event, editorView) {
+    const { dataTransfer } = event;
+    if (!dataTransfer) {
+      return false;
+    }
+    const files = Array.from(dataTransfer.files || []);
+    if (files.length === 0) {
+      return false;
+    }
+    // 拖拽的是文件，阻止浏览器默认的"打开文件/文本拖入"行为
+    event.preventDefault();
+
+    // 拖放落点（没有有效落点时回退到当前光标位置）
+    let dropPos = editorView.state.selection.main.from;
+    try {
+      const pos = editorView.posAtCoords({ x: event.clientX, y: event.clientY });
+      if (typeof pos === 'number' && pos >= 0) {
+        dropPos = pos;
+      }
+    } catch {
+      // 忽略坐标换算失败，沿用当前光标位置
+    }
+
+    // 按原始拖拽顺序收集每个文件对应的片段
+    const orderedSegments = new Array(files.length);
+    // 需要走上传逻辑的文件（图片/其他），记录其原始下标以便回填
+    const uploadOrigIdx = [];
+    const uploadFiles = [];
+
+    // 1. 文本/Markdown 文件：读取内容（异步），按原始下标回填
+    const textPromises = [];
+    files.forEach((file, index) => {
+      if (this.isTextContentFile(file)) {
+        textPromises.push(
+          new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              let content = String(reader.result ?? '');
+              if (!content.endsWith('\n')) {
+                content += '\n';
+              }
+              orderedSegments[index] = content;
+              resolve();
+            };
+            reader.onerror = () => {
+              orderedSegments[index] = '';
+              resolve();
+            };
+            reader.readAsText(file);
+          }),
+        );
+      } else {
+        uploadOrigIdx.push(index);
+        uploadFiles.push(file);
+      }
+    });
+
+    // 2. 需要上传的文件：批量上传，回调中按原始下标回填对应 markdown 语法
+    const uploadPromise = new Promise((resolve) => {
+      if (uploadFiles.length === 0) {
+        resolve();
+        return;
+      }
+      this.$cherry.options.callback.fileUploadMulti(uploadFiles, (arr) => {
+        const list = (Array.isArray(arr) ? arr : []) || [];
+        list.forEach((item, k) => {
+          const { url } = item || {};
+          const file = item?.file || uploadFiles[k];
+          const origIdx = uploadOrigIdx[k];
+          if (typeof url === 'string' && url && file) {
+            orderedSegments[origIdx] = `${handleDropType(file, url)}\n`;
+          } else {
+            orderedSegments[origIdx] = '';
+          }
+        });
+        resolve();
+      });
+    });
+
+    // 3. 所有片段就绪后，按原始顺序统一插入一次，避免多次异步插入互相覆盖/错序
+    Promise.all([...textPromises, uploadPromise]).then(() => {
+      const insertText = orderedSegments.join('');
+      if (!insertText) {
+        return;
+      }
+      editorView.dispatch({
+        changes: { from: dropPos, to: dropPos, insert: insertText },
+        selection: { anchor: dropPos + insertText.length },
+      });
+    });
+
+    return true;
+  }
+
+  /**
    *
    * @param {EditorView} editorView
    */
@@ -1786,6 +1901,8 @@ export default class Editor {
         cursorBlinkRate: 1200,
         drawRangeCursor: false,
       }),
+      // 拖拽文件时实时显示插入位置光标
+      dropCursor(),
 
       searchHighlightField,
 
@@ -1949,9 +2066,17 @@ export default class Editor {
           if (this.editor) this.editor.emit('paste', e);
           return false;
         },
+        dragover: (e) => {
+          // 仅当拖拽内容为文件时才阻止默认行为，从而允许在编辑区内触发 drop
+          if (e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')) {
+            e.preventDefault();
+          }
+          return false;
+        },
         drop: (e) => {
           if (this.editor) this.editor.emit('drop', e);
-          return false;
+          // 如果存在拖拽文件，则拦截并由 handleDrop 统一处理（支持批量）
+          return this.handleDrop(/** @type {DragEvent} */ (e), this.editor.view);
         },
         focus: (e) => {
           if (this.editor) this.editor.emit('focus', e);
