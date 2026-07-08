@@ -58,21 +58,31 @@ const esmOutputConfig = {
   ],
 };
 
-const options = {
-  ...baseConfig,
-  // 禁用 tree-shaking，保持最大兼容性
-  treeshake: false,
-  input: 'src/index.stream.js',
-  output: [umdOutputConfig, esmOutputConfig],
-  plugins: baseConfig.plugins || [],
-};
-
-// 合并 external 配置：保留 baseConfig 的 external（jsdom），并添加 stream 特有的
-options.external = [
+const sharedExternal = [
   ...(Array.isArray(baseConfig.external) ? baseConfig.external : []),
   'mermaid',
   'codemirror',
   /^codemirror\/.*/, // 排除所有codemirror子模块
 ];
 
-export default options;
+const umdOptions = {
+  ...baseConfig,
+  // 禁用 tree-shaking，保持最大兼容性
+  treeshake: false,
+  input: 'src/index.stream.umd.js',
+  output: umdOutputConfig,
+  plugins: baseConfig.plugins || [],
+  external: sharedExternal,
+};
+
+const esmOptions = {
+  ...baseConfig,
+  // 禁用 tree-shaking，保持最大兼容性
+  treeshake: false,
+  input: 'src/index.stream.js',
+  output: esmOutputConfig,
+  plugins: baseConfig.plugins || [],
+  external: sharedExternal,
+};
+
+export default [umdOptions, esmOptions];

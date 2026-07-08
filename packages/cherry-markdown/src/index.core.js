@@ -17,12 +17,6 @@ import Cherry from './Cherry';
 
 import SyntaxHookBase from './core/SyntaxBase';
 import MenuHookBase from './toolbars/MenuBase';
-import { isBrowser } from './utils/env';
-
-// in browser
-if (isBrowser()) {
-  window.Cherry = Cherry;
-}
 
 export { SyntaxHookBase, MenuHookBase };
 

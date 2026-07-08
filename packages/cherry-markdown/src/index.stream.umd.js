@@ -13,9 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import CherryStream from './CherryStream';
+import CherryStream, { SyntaxHookBase } from './index.stream';
 
-import SyntaxHookBase from './core/SyntaxBase';
+import { isBrowser } from './utils/env';
+
+// in browser
+if (isBrowser()) {
+  window.Cherry = CherryStream;
+}
 
 export { SyntaxHookBase };
 export default CherryStream;
