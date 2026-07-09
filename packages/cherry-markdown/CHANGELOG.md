@@ -1,5 +1,15 @@
 # Change Log
 
+## 0.11.5
+
+### Patch Changes
+
+- fix: avoid `window.Cherry` side effects in ESM bundles
+
+拆分 full、core、stream 的 ESM 与 UMD/CDN 入口：ESM 产物不再挂载 `window.Cherry`，UMD/CDN 产物继续挂载并保持原 CDN 路径不变。 [@RSS1102](https://github.com/RSS1102)([#1789](https://github.com/Tencent/cherry-markdown/pull/1789))([`dfca358`](https://github.com/Tencent/cherry-markdown/commit/dfca358f5ce2f28b574056a4149aa186db971ea5))
+
+- feat: 支持拖拽插入文件 [@sunsonliu](https://github.com/sunsonliu)([#1787](https://github.com/Tencent/cherry-markdown/pull/1787))([`d1414cd`](https://github.com/Tencent/cherry-markdown/commit/d1414cd2cdb2a976dadcefd96fd1cd0989c16f3e))
+
 ## 0.11.4
 
 ### Patch Changes
