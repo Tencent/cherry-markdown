@@ -122220,7 +122220,7 @@
 	    delete plugins[key];
 	  });
 	}
-	var VERSION$2 = "0.11.4";
+	var VERSION$2 = "0.11.5";
 
 	/**
 	 * @typedef {object} CherryPluginClass
