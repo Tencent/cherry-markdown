@@ -28,35 +28,43 @@ const terserPlugin = (options = {}) =>
     ...options,
   });
 
-export default {
+const umdOptions = {
   ...baseConfig,
   // 禁用 tree-shaking，保持最大兼容性
   treeshake: false,
-  output: [
-    {
-      ...baseConfig.output,
-      exports: 'named',
-      file: 'dist/cherry-markdown.js',
-      format: 'umd',
-      name: 'Cherry',
-      sourcemap: true,
-      compact: false,
-      inlineDynamicImports: true, // 禁用代码分割，强制内联所有动态导入
-    },
-    {
-      exports: 'named',
-      file: 'dist/cherry-markdown.esm.js',
-      format: 'esm',
-      name: 'Cherry',
-      sourcemap: false,
-      compact: true,
-      inlineDynamicImports: true, // 禁用代码分割，强制内联所有动态导入
-      plugins: [
-        terserPlugin({
-          module: true,
-          ecma: 2015,
-        }),
-      ],
-    },
-  ],
+  input: 'src/index.umd.js',
+  output: {
+    ...baseConfig.output,
+    exports: 'named',
+    file: 'dist/cherry-markdown.js',
+    format: 'umd',
+    name: 'Cherry',
+    sourcemap: true,
+    compact: false,
+    inlineDynamicImports: true, // 禁用代码分割，强制内联所有动态导入
+  },
 };
+
+const esmOptions = {
+  ...baseConfig,
+  // 禁用 tree-shaking，保持最大兼容性
+  treeshake: false,
+  input: 'src/index.js',
+  output: {
+    exports: 'named',
+    file: 'dist/cherry-markdown.esm.js',
+    format: 'esm',
+    name: 'Cherry',
+    sourcemap: false,
+    compact: true,
+    inlineDynamicImports: true, // 禁用代码分割，强制内联所有动态导入
+    plugins: [
+      terserPlugin({
+        module: true,
+        ecma: 2015,
+      }),
+    ],
+  },
+};
+
+export default [umdOptions, esmOptions];

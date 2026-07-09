@@ -28,11 +28,17 @@ const terserPlugin = (options = {}) =>
     ...options,
   });
 
+const sharedExternal = [
+  ...(Array.isArray(baseConfig.external) ? baseConfig.external : []),
+  'mermaid',
+  '@replit/codemirror-vim', // 保持 vim 模块懒加载，避免 code-splitting
+];
+
 const options = {
   ...baseConfig,
   // 禁用 tree-shaking，保持最大兼容性
   treeshake: false,
-  input: 'src/index.core.js',
+  input: 'src/index.core.umd.js',
   output: {
     ...baseConfig.output,
     exports: 'named',
@@ -45,12 +51,7 @@ const options = {
     manualChunks: undefined, // UMD 单文件输出不需要代码分割
   },
   plugins: baseConfig.plugins || [],
+  external: sharedExternal,
 };
-
-if (!Array.isArray(options.external)) {
-  options.external = [];
-}
-options.external.push('mermaid');
-options.external.push('@replit/codemirror-vim'); // 保持 vim 模块懒加载，避免 code-splitting
 
 export default options;
