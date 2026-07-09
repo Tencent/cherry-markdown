@@ -8,7 +8,7 @@
 
 ## 介绍
 
-Cherry Markdown Writer 是一款 Javascript Markdown 编辑器，具有开箱即用、轻量简洁、易于扩展等特点。它可以运行在浏览器或服务端（NodeJs）。
+Cherry Markdown Writer 是一款 JavaScript Markdown 编辑器，具有开箱即用、轻量简洁、易于扩展等特点。它可以运行在浏览器或服务端（Node.js）。
 
 ### 文档
 
@@ -168,7 +168,8 @@ UMD/CDN 产物通过 `<script>` 加载后会暴露 `window.Cherry`。`cherry-mar
 ### Node
 
 ```javascript
-const { default: CherryEngine } = require('cherry-markdown/dist/cherry-markdown.engine.core.common');
+import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core.esm.js';
+
 const cherryEngineInstance = new CherryEngine();
 const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!');
 ```
@@ -177,7 +178,7 @@ const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!')
 
 由于 mermaid 库体积较大，cherry 提供了不内置 mermaid 的核心构建包，可按需引入。
 
-### 完整模式 (图形界面)
+### 核心包（图形界面）
 
 ```javascript
 import 'cherry-markdown/dist/cherry-markdown.css';
@@ -310,7 +311,7 @@ import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
 
 const registerPlugin = async () => {
   const [{ default: CherryMermaidPlugin }, mermaid] = await Promise.all([
-    import('cherry-markdown/src/addons/cherry-code-block-mermaid-plugin'),
+    import('cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin.esm.js'),
     import('mermaid'),
   ]);
   Cherry.usePlugin(CherryMermaidPlugin, {
