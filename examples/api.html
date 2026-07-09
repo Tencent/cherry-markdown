@@ -313,6 +313,125 @@ alert(cherryObj.getFirstLineText());</textarea>
         <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
       </div>
     </div>
+    <h1>事件监听</h1>
+    <div class="one-api">
+      <h2 class="one-api__name">on(eventName:string, callback:function)</h2>
+      <p class="one-api__desc">监听事件<br>eventName 事件名，见下表<br>callback 回调函数</p>
+      <p class="one-api__desc">
+        支持的事件名：
+        <table class="cherry-api-table">
+          <thead>
+            <tr>
+              <th style="width: 280px;">eventName</th>
+              <th>触发时机</th>
+              <th>callback 入参</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>afterInit</td>
+              <td>编辑器初始化完成</td>
+              <td>(markdownText, html)</td>
+            </tr>
+            <tr>
+              <td>afterChange</td>
+              <td>编辑器内容改变并完成渲染</td>
+              <td>(markdownText, html)</td>
+            </tr>
+            <tr>
+              <td>afterAsyncRender</td>
+              <td>编辑器完成所有异步渲染</td>
+              <td>(markdownText, html)</td>
+            </tr>
+            <tr>
+              <td>focus</td>
+              <td>编辑器获得焦点</td>
+              <td>({e, cherry})</td>
+            </tr>
+            <tr>
+              <td>blur</td>
+              <td>编辑器失去焦点</td>
+              <td>({e, cherry})</td>
+            </tr>
+            <tr>
+              <td>selectionChange</td>
+              <td>编辑器选区变化</td>
+              <td>({selections, lastSelections, info})</td>
+            </tr>
+            <tr>
+              <td>afterChangeLocale</td>
+              <td>变更语言</td>
+              <td>(locale)</td>
+            </tr>
+            <tr>
+              <td>changeMainTheme</td>
+              <td>变更主题</td>
+              <td>(theme)</td>
+            </tr>
+            <tr>
+              <td>changeCodeBlockTheme</td>
+              <td>变更代码块主题</td>
+              <td>(theme)</td>
+            </tr>
+            <tr>
+              <td>previewerClose</td>
+              <td>预览区关闭</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>previewerOpen</td>
+              <td>预览区打开</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>editorClose</td>
+              <td>编辑区关闭</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>editorOpen</td>
+              <td>编辑区打开</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>toolbarHide</td>
+              <td>工具栏隐藏</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>toolbarShow</td>
+              <td>工具栏显示</td>
+              <td>-</td>
+            </tr>
+          </tbody>
+        </table>
+      </p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="6">
+cherryObj.on('afterChange', (markdownText, html) => {
+  console.log('内容变化了', markdownText);
+});
+cherryObj.on('afterInit', (markdownText, html) => {
+  console.log('初始化完成', markdownText);
+});</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">off(eventName:string, callback:function)</h2>
+      <p class="one-api__desc">取消监听<br>eventName 要与 on 时一致<br>callback 要与 on 时传入的同一个函数引用</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="4">
+function onChange(markdownText, html) {
+  console.log('内容变化了', markdownText);
+}
+cherryObj.on('afterChange', onChange);
+// 取消监听
+cherryObj.off('afterChange', onChange);</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
 
     <br>
     <hr>

@@ -13422,6 +13422,136 @@
 	var sliceExports = requireSlice();
 	var _sliceInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(sliceExports);
 
+	var from$1;
+	var hasRequiredFrom;
+
+	function requireFrom () {
+		if (hasRequiredFrom) return from$1;
+		hasRequiredFrom = 1;
+		from$1 = /*@__PURE__*/ requireFrom$4();
+		return from$1;
+	}
+
+	var fromExports = requireFrom();
+	var _Array$from = /*@__PURE__*/getDefaultExportFromCjs$1(fromExports);
+
+	var promise$1;
+	var hasRequiredPromise;
+
+	function requirePromise () {
+		if (hasRequiredPromise) return promise$1;
+		hasRequiredPromise = 1;
+		promise$1 = /*@__PURE__*/ requirePromise$4();
+		return promise$1;
+	}
+
+	var promiseExports = requirePromise();
+	var _Promise = /*@__PURE__*/getDefaultExportFromCjs$1(promiseExports);
+
+	var es_string_endsWith = {};
+
+	var hasRequiredEs_string_endsWith;
+
+	function requireEs_string_endsWith () {
+		if (hasRequiredEs_string_endsWith) return es_string_endsWith;
+		hasRequiredEs_string_endsWith = 1;
+		'use strict';
+		var $ = /*@__PURE__*/ require_export();
+		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThisClause();
+		var getOwnPropertyDescriptor = /*@__PURE__*/ requireObjectGetOwnPropertyDescriptor().f;
+		var toLength = /*@__PURE__*/ requireToLength();
+		var toString = /*@__PURE__*/ requireToString$1();
+		var notARegExp = /*@__PURE__*/ requireNotARegexp();
+		var requireObjectCoercible = /*@__PURE__*/ requireRequireObjectCoercible();
+		var correctIsRegExpLogic = /*@__PURE__*/ requireCorrectIsRegexpLogic();
+		var IS_PURE = /*@__PURE__*/ requireIsPure();
+
+		var slice = uncurryThis(''.slice);
+		var min = Math.min;
+
+		var CORRECT_IS_REGEXP_LOGIC = correctIsRegExpLogic('endsWith');
+		// https://github.com/zloirock/core-js/pull/702
+		var MDN_POLYFILL_BUG = !IS_PURE && !CORRECT_IS_REGEXP_LOGIC && !!function () {
+		  var descriptor = getOwnPropertyDescriptor(String.prototype, 'endsWith');
+		  return descriptor && !descriptor.writable;
+		}();
+
+		// `String.prototype.endsWith` method
+		// https://tc39.es/ecma262/#sec-string.prototype.endswith
+		$({ target: 'String', proto: true, forced: !MDN_POLYFILL_BUG && !CORRECT_IS_REGEXP_LOGIC }, {
+		  endsWith: function endsWith(searchString /* , endPosition = @length */) {
+		    var that = toString(requireObjectCoercible(this));
+		    notARegExp(searchString);
+		    var search = toString(searchString);
+		    var endPosition = arguments.length > 1 ? arguments[1] : undefined;
+		    var len = that.length;
+		    var end = endPosition === undefined ? len : min(toLength(endPosition), len);
+		    return slice(that, end - search.length, end) === search;
+		  }
+		});
+		return es_string_endsWith;
+	}
+
+	var endsWith$5;
+	var hasRequiredEndsWith$3;
+
+	function requireEndsWith$3 () {
+		if (hasRequiredEndsWith$3) return endsWith$5;
+		hasRequiredEndsWith$3 = 1;
+		'use strict';
+		requireEs_string_endsWith();
+		var getBuiltInPrototypeMethod = /*@__PURE__*/ requireGetBuiltInPrototypeMethod();
+
+		endsWith$5 = getBuiltInPrototypeMethod('String', 'endsWith');
+		return endsWith$5;
+	}
+
+	var endsWith$4;
+	var hasRequiredEndsWith$2;
+
+	function requireEndsWith$2 () {
+		if (hasRequiredEndsWith$2) return endsWith$4;
+		hasRequiredEndsWith$2 = 1;
+		'use strict';
+		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
+		var method = /*@__PURE__*/ requireEndsWith$3();
+
+		var StringPrototype = String.prototype;
+
+		endsWith$4 = function (it) {
+		  var own = it.endsWith;
+		  return typeof it == 'string' || it === StringPrototype
+		    || (isPrototypeOf(StringPrototype, it) && own === StringPrototype.endsWith) ? method : own;
+		};
+		return endsWith$4;
+	}
+
+	var endsWith$3;
+	var hasRequiredEndsWith$1;
+
+	function requireEndsWith$1 () {
+		if (hasRequiredEndsWith$1) return endsWith$3;
+		hasRequiredEndsWith$1 = 1;
+		'use strict';
+		var parent = /*@__PURE__*/ requireEndsWith$2();
+
+		endsWith$3 = parent;
+		return endsWith$3;
+	}
+
+	var endsWith$2;
+	var hasRequiredEndsWith;
+
+	function requireEndsWith () {
+		if (hasRequiredEndsWith) return endsWith$2;
+		hasRequiredEndsWith = 1;
+		endsWith$2 = /*@__PURE__*/ requireEndsWith$1();
+		return endsWith$2;
+	}
+
+	var endsWithExports = requireEndsWith();
+	var _endsWithInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(endsWithExports);
+
 	var es_array_find = {};
 
 	var hasRequiredEs_array_find;
@@ -13512,19 +13642,6 @@
 
 	var findExports = requireFind();
 	var _findInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(findExports);
-
-	var from$1;
-	var hasRequiredFrom;
-
-	function requireFrom () {
-		if (hasRequiredFrom) return from$1;
-		hasRequiredFrom = 1;
-		from$1 = /*@__PURE__*/ requireFrom$4();
-		return from$1;
-	}
-
-	var fromExports = requireFrom();
-	var _Array$from = /*@__PURE__*/getDefaultExportFromCjs$1(fromExports);
 
 	// These are filled with ranges (rangeFrom[i] up to but not including
 	// rangeTo[i]) of code points that count as extending characters.
@@ -48605,19 +48722,6 @@
 	var _parseFloatExports$1 = require_parseFloat$3();
 	var _parseFloat$3 = /*@__PURE__*/getDefaultExportFromCjs$1(_parseFloatExports$1);
 
-	var promise$1;
-	var hasRequiredPromise;
-
-	function requirePromise () {
-		if (hasRequiredPromise) return promise$1;
-		hasRequiredPromise = 1;
-		promise$1 = /*@__PURE__*/ requirePromise$4();
-		return promise$1;
-	}
-
-	var promiseExports = requirePromise();
-	var _Promise = /*@__PURE__*/getDefaultExportFromCjs$1(promiseExports);
-
 	/**
 	 * Copyright (C) 2021 Tencent.
 	 *
@@ -49234,6 +49338,26 @@
 	};
 
 	/**
+	 * 拖拽上传场景下，根据文件类型决定写入的 markdown 源码
+	 *  - 图片文件（image/*）：返回图片语法 ![name](url)
+	 *  - 其他文件：返回超链接语法 [name](url)
+	 * （文本/Markdown 文件由调用方直接读取内容插入，不会走到此函数）
+	 * @param {File} file 被拖拽的文件
+	 * @param {string} url 上传后返回的文件地址
+	 * @returns {string} 写入编辑器的 markdown 代码片段
+	 */
+	var handleDropType = function handleDropType(file, url) {
+	  var _context6;
+	  if (/^image\//i.test(file.type)) {
+	    var _context5;
+	    // 如果是图片，则返回固定的图片markdown源码
+	    return _concatInstanceProperty(_context5 = "![".concat(file.name, "](")).call(_context5, url, ")");
+	  }
+	  // 其他文件返回超链接
+	  return _concatInstanceProperty(_context6 = "[".concat(file.name, "](")).call(_context6, url, ")");
+	};
+
+	/**
 	 * 解析params参数
 	 * @param params?.isBorder 是否有边框样式（图片场景下生效）
 	 * @param params?.isShadow 是否有阴影样式（图片场景下生效）
@@ -49264,7 +49388,7 @@
 	  return ret.join(' ');
 	}
 	function handleFileUploadCallback(url, params, file) {
-	  var _params$name, _context5, _context6, _context7, _context8, _context9, _context0;
+	  var _params$name, _context7, _context8, _context9, _context0, _context1, _context10;
 	  var name = (_params$name = params === null || params === void 0 ? void 0 : params.name) !== null && _params$name !== void 0 ? _params$name : file.name;
 	  var type = '';
 	  var poster = '';
@@ -49283,7 +49407,7 @@
 	    before = _params$before === void 0 ? '' : _params$before,
 	    _params$after = params.after,
 	    after = _params$after === void 0 ? '' : _params$after;
-	  return _concatInstanceProperty(_context5 = _concatInstanceProperty(_context6 = _concatInstanceProperty(_context7 = _concatInstanceProperty(_context8 = _concatInstanceProperty(_context9 = _concatInstanceProperty(_context0 = "".concat(before)).call(_context0, type, "[")).call(_context9, name)).call(_context8, style, "](")).call(_context7, url, ")")).call(_context6, poster)).call(_context5, after);
+	  return _concatInstanceProperty(_context7 = _concatInstanceProperty(_context8 = _concatInstanceProperty(_context9 = _concatInstanceProperty(_context0 = _concatInstanceProperty(_context1 = _concatInstanceProperty(_context10 = "".concat(before)).call(_context10, type, "[")).call(_context1, name)).call(_context0, style, "](")).call(_context9, url, ")")).call(_context8, poster)).call(_context7, after);
 	}
 
 	function ownKeys$h(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
@@ -50847,9 +50971,9 @@
 	function _callSuper$1H(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1I() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1I() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1I = function _isNativeReflectConstruct() { return !!t; })(); }
 	function ownKeys$g(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread$g(e) { for (var r = 1; r < arguments.length; r++) { var _context33, _context34; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context33 = ownKeys$g(Object(t), !0)).call(_context33, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context34 = ownKeys$g(Object(t))).call(_context34, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
+	function _objectSpread$g(e) { for (var r = 1; r < arguments.length; r++) { var _context35, _context36; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context35 = ownKeys$g(Object(t), !0)).call(_context35, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context36 = ownKeys$g(Object(t))).call(_context36, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _createForOfIteratorHelper$1m(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1m(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-	function _unsupportedIterableToArray$1m(r, a) { if (r) { var _context32; if ("string" == typeof r) return _arrayLikeToArray$1p(r, a); var t = _sliceInstanceProperty(_context32 = {}.toString.call(r)).call(_context32, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1p(r, a) : void 0; } }
+	function _unsupportedIterableToArray$1m(r, a) { if (r) { var _context34; if ("string" == typeof r) return _arrayLikeToArray$1p(r, a); var t = _sliceInstanceProperty(_context34 = {}.toString.call(r)).call(_context34, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1p(r, a) : void 0; } }
 	function _arrayLikeToArray$1p(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
 	/**
@@ -51093,49 +51217,49 @@
 	} // 缓存语法高亮扩展
 	function _loadVimModule() {
 	  _loadVimModule = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime.mark(function _callee3() {
-	    return _regeneratorRuntime.wrap(function (_context31) {
-	      while (1) switch (_context31.prev = _context31.next) {
+	    return _regeneratorRuntime.wrap(function (_context33) {
+	      while (1) switch (_context33.prev = _context33.next) {
 	        case 0:
 	          if (!vimModule) {
-	            _context31.next = 1;
+	            _context33.next = 1;
 	            break;
 	          }
-	          return _context31.abrupt("return", vimModule);
+	          return _context33.abrupt("return", vimModule);
 	        case 1:
 	          if (!vimModuleLoadPromise) {
-	            _context31.next = 2;
+	            _context33.next = 2;
 	            break;
 	          }
-	          return _context31.abrupt("return", vimModuleLoadPromise);
+	          return _context33.abrupt("return", vimModuleLoadPromise);
 	        case 2:
 	          vimModuleLoadPromise = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime.mark(function _callee2() {
 	            var mod, _t2;
-	            return _regeneratorRuntime.wrap(function (_context30) {
-	              while (1) switch (_context30.prev = _context30.next) {
+	            return _regeneratorRuntime.wrap(function (_context32) {
+	              while (1) switch (_context32.prev = _context32.next) {
 	                case 0:
-	                  _context30.prev = 0;
-	                  _context30.next = 1;
+	                  _context32.prev = 0;
+	                  _context32.next = 1;
 	                  return Promise.resolve().then(function () { return index$1; });
 	                case 1:
-	                  mod = _context30.sent;
+	                  mod = _context32.sent;
 	                  vimModule = mod;
-	                  return _context30.abrupt("return", mod);
+	                  return _context32.abrupt("return", mod);
 	                case 2:
-	                  _context30.prev = 2;
-	                  _t2 = _context30["catch"](0);
+	                  _context32.prev = 2;
+	                  _t2 = _context32["catch"](0);
 	                  vimModuleLoadPromise = null;
 	                  Logger.error('Failed to load @replit/codemirror-vim. Please install it: npm install @replit/codemirror-vim');
 	                  throw _t2;
 	                case 3:
 	                case "end":
-	                  return _context30.stop();
+	                  return _context32.stop();
 	              }
 	            }, _callee2, null, [[0, 2]]);
 	          }))();
-	          return _context31.abrupt("return", vimModuleLoadPromise);
+	          return _context33.abrupt("return", vimModuleLoadPromise);
 	        case 3:
 	        case "end":
-	          return _context31.stop();
+	          return _context33.stop();
 	      }
 	    }, _callee3);
 	  }));
@@ -52862,6 +52986,134 @@
 	      }
 	      divObj = null;
 	    }
+
+	    /**
+	     * 判断文件是否为"可直接读取文本内容插入"的类型（.txt/.md 等纯文本）
+	     * @param {File} file 拖拽的文件
+	     * @returns {boolean}
+	     */
+	  }, {
+	    key: "isTextContentFile",
+	    value: function isTextContentFile(file) {
+	      return /\.(txt|md|markdown|mdx)$/i.test(file.name) || /^text\//i.test(file.type);
+	    }
+
+	    /**
+	     * 处理拖拽文件到编辑区的逻辑（支持批量拖拽）
+	     * 规则：
+	     *  - 图片文件（image/*）：按图片语法 ![name](url) 写入
+	     *  - 纯文本/Markdown 文件（.txt/.md）：直接把文件内容读取并插入编辑器
+	     *  - 其他文件：按超链接语法 [name](url) 写入
+	     * 为保证多个文件按拖拽的原始顺序写入，会先并行收集所有片段，全部完成后统一插入。
+	     * @param {DragEvent} event 拖拽事件
+	     * @param {EditorView} editorView CodeMirror 6 视图实例
+	     * @returns {boolean} 是否拦截并处理了本次 drop 事件
+	     */
+	  }, {
+	    key: "handleDrop",
+	    value: function handleDrop(event, editorView) {
+	      var _this7 = this,
+	        _context15;
+	      var dataTransfer = event.dataTransfer;
+	      if (!dataTransfer) {
+	        return false;
+	      }
+	      var files = _Array$from(dataTransfer.files || []);
+	      if (files.length === 0) {
+	        return false;
+	      }
+	      // 拖拽的是文件，阻止浏览器默认的"打开文件/文本拖入"行为
+	      event.preventDefault();
+
+	      // 拖放落点（没有有效落点时回退到当前光标位置）
+	      var dropPos = editorView.state.selection.main.from;
+	      try {
+	        var pos = editorView.posAtCoords({
+	          x: event.clientX,
+	          y: event.clientY
+	        });
+	        if (typeof pos === 'number' && pos >= 0) {
+	          dropPos = pos;
+	        }
+	      } catch (_unused) {
+	        // 忽略坐标换算失败，沿用当前光标位置
+	      }
+
+	      // 按原始拖拽顺序收集每个文件对应的片段
+	      var orderedSegments = new Array(files.length);
+	      // 需要走上传逻辑的文件（图片/其他），记录其原始下标以便回填
+	      var uploadOrigIdx = [];
+	      var uploadFiles = [];
+
+	      // 1. 文本/Markdown 文件：读取内容（异步），按原始下标回填
+	      var textPromises = [];
+	      _forEachInstanceProperty(files).call(files, function (file, index) {
+	        if (_this7.isTextContentFile(file)) {
+	          textPromises.push(new _Promise(function (resolve) {
+	            var reader = new FileReader();
+	            reader.onload = function () {
+	              var _reader$result;
+	              var content = String((_reader$result = reader.result) !== null && _reader$result !== void 0 ? _reader$result : '');
+	              if (!_endsWithInstanceProperty(content).call(content, '\n')) {
+	                content += '\n';
+	              }
+	              orderedSegments[index] = content;
+	              resolve();
+	            };
+	            reader.onerror = function () {
+	              orderedSegments[index] = '';
+	              resolve();
+	            };
+	            reader.readAsText(file);
+	          }));
+	        } else {
+	          uploadOrigIdx.push(index);
+	          uploadFiles.push(file);
+	        }
+	      });
+
+	      // 2. 需要上传的文件：批量上传，回调中按原始下标回填对应 markdown 语法
+	      var uploadPromise = new _Promise(function (resolve) {
+	        if (uploadFiles.length === 0) {
+	          resolve();
+	          return;
+	        }
+	        _this7.$cherry.options.callback.fileUploadMulti(uploadFiles, function (arr) {
+	          var list = (_Array$isArray$1(arr) ? arr : []) || [];
+	          _forEachInstanceProperty(list).call(list, function (item, k) {
+	            var _ref3 = item || {},
+	              url = _ref3.url;
+	            var file = (item === null || item === void 0 ? void 0 : item.file) || uploadFiles[k];
+	            var origIdx = uploadOrigIdx[k];
+	            if (typeof url === 'string' && url && file) {
+	              orderedSegments[origIdx] = "".concat(handleDropType(file, url), "\n");
+	            } else {
+	              orderedSegments[origIdx] = '';
+	            }
+	          });
+	          resolve();
+	        });
+	      });
+
+	      // 3. 所有片段就绪后，按原始顺序统一插入一次，避免多次异步插入互相覆盖/错序
+	      _Promise.all(_concatInstanceProperty(_context15 = []).call(_context15, textPromises, [uploadPromise])).then(function () {
+	        var insertText = orderedSegments.join('');
+	        if (!insertText) {
+	          return;
+	        }
+	        editorView.dispatch({
+	          changes: {
+	            from: dropPos,
+	            to: dropPos,
+	            insert: insertText
+	          },
+	          selection: {
+	            anchor: dropPos + insertText.length
+	          }
+	        });
+	      });
+	      return true;
+	    }
 	  }, {
 	    key: "init",
 	    value:
@@ -52870,9 +53122,9 @@
 	     * @param {*} previewer
 	     */
 	    function init(previewer) {
-	      var _context15,
-	        _context16,
-	        _this7 = this;
+	      var _context16,
+	        _context17,
+	        _this8 = this;
 	      var textArea = this.options.editorDom.querySelector("#".concat(this.options.id));
 	      if (!(textArea instanceof HTMLTextAreaElement)) {
 	        throw new Error('The specific element is not a textarea.');
@@ -52884,7 +53136,7 @@
 	      var filteredSearchKeymap = _filterInstanceProperty(searchKeymap).call(searchKeymap, function (binding) {
 	        return binding.key !== 'Mod-f' && binding.key !== 'Mod-Shift-l';
 	      });
-	      this.defaultKeymap = _concatInstanceProperty(_context15 = [{
+	      this.defaultKeymap = _concatInstanceProperty(_context16 = [{
 	        key: 'ArrowUp',
 	        run: function run() {
 	          var _self$arrowKeyInterce;
@@ -52974,11 +53226,13 @@
 	        key: 'Ctrl-l',
 	        mac: 'Cmd-l',
 	        run: selectLine
-	      }]).call(_context15, _toConsumableArray$1(defaultKeymap), _toConsumableArray$1(historyKeymap), _toConsumableArray$1(closeBracketsKeymap), _toConsumableArray$1(filteredSearchKeymap), [indentWithTab]);
-	      var extensions = _concatInstanceProperty(_context16 = [cachedCherryHighlighting, markdown(), history(), search(), closeBrackets(), cachedDefaultHighlighting, drawSelection({
+	      }]).call(_context16, _toConsumableArray$1(defaultKeymap), _toConsumableArray$1(historyKeymap), _toConsumableArray$1(closeBracketsKeymap), _toConsumableArray$1(filteredSearchKeymap), [indentWithTab]);
+	      var extensions = _concatInstanceProperty(_context17 = [cachedCherryHighlighting, markdown(), history(), search(), closeBrackets(), cachedDefaultHighlighting, drawSelection({
 	        cursorBlinkRate: 1200,
 	        drawRangeCursor: false
-	      }), searchHighlightField, frontMatterDecorationPlugin, indentOnInput(), highlightActiveLine(), highlightActiveLineGutter(), rectangularSelection()]).call(_context16, _toConsumableArray$1(this.options.codemirror.lineNumbers ? [foldGutter()] : []), _toConsumableArray$1(this.options.codemirror.lineNumbers ? [lineNumbers()] : []), [this.keymapCompartment.of(keymap.of(this.defaultKeymap)), this.vimCompartment.of([]), EditorState.allowMultipleSelections.of(true), EditorView.lineWrapping], _toConsumableArray$1(this.options.codemirror.placeholder ? [placeholder(this.options.codemirror.placeholder)] : []), [markField, EditorState.changeFilter.of(function (tr) {
+	      }),
+	      // 拖拽文件时实时显示插入位置光标
+	      dropCursor(), searchHighlightField, frontMatterDecorationPlugin, indentOnInput(), highlightActiveLine(), highlightActiveLineGutter(), rectangularSelection()]).call(_context17, _toConsumableArray$1(this.options.codemirror.lineNumbers ? [foldGutter()] : []), _toConsumableArray$1(this.options.codemirror.lineNumbers ? [lineNumbers()] : []), [this.keymapCompartment.of(keymap.of(this.defaultKeymap)), this.vimCompartment.of([]), EditorState.allowMultipleSelections.of(true), EditorView.lineWrapping], _toConsumableArray$1(this.options.codemirror.placeholder ? [placeholder(this.options.codemirror.placeholder)] : []), [markField, EditorState.changeFilter.of(function (tr) {
 	        if (!tr.docChanged) return true;
 
 	        // 所有定义了atomic=true 的装饰器都被认为是原子装饰器，不允许局部修改和局部删除
@@ -53009,7 +53263,7 @@
 	          });
 	          if (blocked) return false;
 	        }
-	        var adapter = _this7.editor;
+	        var adapter = _this8.editor;
 	        if (adapter) {
 	          var shouldCancel = false;
 	          var eventObj = {
@@ -53025,7 +53279,7 @@
 	        }
 	        return true;
 	      }), EditorView.updateListener.of(function (update) {
-	        var adapter = _this7.editor;
+	        var adapter = _this8.editor;
 	        if (!adapter) return;
 	        if (update.docChanged) {
 	          var _iterator4 = _createForOfIteratorHelper$1m(update.transactions),
@@ -53074,12 +53328,12 @@
 	          }
 	        }
 	        if (update.selectionSet) {
-	          var _context17, _context18;
+	          var _context18, _context19;
 	          var selection = update.state.selection.main;
 	          var isUserInteraction = false;
-	          var userEventAnno = _findInstanceProperty(_context17 = _mapInstanceProperty(_context18 = update.transactions).call(_context18, function (tr) {
+	          var userEventAnno = _findInstanceProperty(_context18 = _mapInstanceProperty(_context19 = update.transactions).call(_context19, function (tr) {
 	            return tr.annotation(Transaction.userEvent);
-	          })).call(_context17, function (anno) {
+	          })).call(_context18, function (anno) {
 	            return anno !== null && anno !== undefined;
 	          });
 	          if (userEventAnno) {
@@ -53092,7 +53346,7 @@
 	              isUserInteraction = true;
 	            }
 	          }
-	          _this7.$cherry.$event.emit('beforeSelectionChange', {
+	          _this8.$cherry.$event.emit('beforeSelectionChange', {
 	            selection: {
 	              from: selection.from,
 	              to: selection.to
@@ -53103,41 +53357,50 @@
 	        }
 	      }), EditorView.domEventHandlers({
 	        keydown: function keydown(e) {
-	          if (_this7.editor) {
-	            _this7.editor.emit('keydown', e);
+	          if (_this8.editor) {
+	            _this8.editor.emit('keydown', e);
 	            if (e.defaultPrevented) {
 	              return true;
 	            }
 	          }
-	          _this7.options.onKeydown(/** @type {KeyboardEvent} */e, _this7.editor);
+	          _this8.options.onKeydown(/** @type {KeyboardEvent} */e, _this8.editor);
 	          return false;
 	        },
 	        keyup: function keyup(e) {
-	          if (_this7.editor) _this7.editor.emit('keyup', e);
+	          if (_this8.editor) _this8.editor.emit('keyup', e);
 	          return false;
 	        },
 	        mousedown: function mousedown(e) {
-	          if (_this7.editor) _this7.editor.emit('mousedown', e);
+	          if (_this8.editor) _this8.editor.emit('mousedown', e);
 	          return false;
 	        },
 	        paste: function paste(e) {
-	          if (_this7.editor) _this7.editor.emit('paste', e);
+	          if (_this8.editor) _this8.editor.emit('paste', e);
+	          return false;
+	        },
+	        dragover: function dragover(e) {
+	          var _context20;
+	          // 仅当拖拽内容为文件时才阻止默认行为，从而允许在编辑区内触发 drop
+	          if (e.dataTransfer && _includesInstanceProperty(_context20 = _Array$from(e.dataTransfer.types || [])).call(_context20, 'Files')) {
+	            e.preventDefault();
+	          }
 	          return false;
 	        },
 	        drop: function drop(e) {
-	          if (_this7.editor) _this7.editor.emit('drop', e);
-	          return false;
+	          if (_this8.editor) _this8.editor.emit('drop', e);
+	          // 如果存在拖拽文件，则拦截并由 handleDrop 统一处理（支持批量）
+	          return _this8.handleDrop(/** @type {DragEvent} */e, _this8.editor.view);
 	        },
 	        focus: function focus(e) {
-	          if (_this7.editor) _this7.editor.emit('focus', e);
+	          if (_this8.editor) _this8.editor.emit('focus', e);
 	          return false;
 	        },
 	        blur: function blur(e) {
-	          if (_this7.editor) _this7.editor.emit('blur', e);
+	          if (_this8.editor) _this8.editor.emit('blur', e);
 	          return false;
 	        },
 	        scroll: function scroll() {
-	          if (_this7.editor) _this7.editor.emit('scroll');
+	          if (_this8.editor) _this8.editor.emit('scroll');
 	          return false;
 	        }
 	      })]);
@@ -53160,46 +53423,46 @@
 
 	      // 绑定事件监听器
 	      editor.on('blur', function (cm, evt) {
-	        _this7.options.onBlur(/** @type {Event} */evt, editor);
-	        _this7.$cherry.$event.emit('blur', {
+	        _this8.options.onBlur(/** @type {Event} */evt, editor);
+	        _this8.$cherry.$event.emit('blur', {
 	          evt: evt,
-	          cherry: _this7.$cherry
+	          cherry: _this8.$cherry
 	        });
 	      });
 	      editor.on('focus', function (cm, evt) {
-	        _this7.options.onFocus(/** @type {Event} */evt, editor);
-	        _this7.$cherry.$event.emit('focus', {
+	        _this8.options.onFocus(/** @type {Event} */evt, editor);
+	        _this8.$cherry.$event.emit('focus', {
 	          evt: evt,
-	          cherry: _this7.$cherry
+	          cherry: _this8.$cherry
 	        });
 	      });
 	      editor.on('change', function () {
-	        _this7.options.onChange(null, editor);
-	        _this7.dealSpecialWords();
-	        if (_this7.options.autoSave2Textarea) {
+	        _this8.options.onChange(null, editor);
+	        _this8.dealSpecialWords();
+	        if (_this8.options.autoSave2Textarea) {
 	          textArea.value = editor.view.state.doc.toString();
 	        }
 	      });
 	      editor.on('scroll', function () {
-	        _this7.$cherry.$event.emit('onScroll');
-	        _this7.onScroll(editor.view);
+	        _this8.$cherry.$event.emit('onScroll');
+	        _this8.onScroll(editor.view);
 	      });
 	      editor.on('paste', function (cm, evt) {
-	        _this7.onPaste(/** @type {ClipboardEvent} */evt, editor);
+	        _this8.onPaste(/** @type {ClipboardEvent} */evt, editor);
 	      });
 	      editor.on('mousedown', function (cm, evt) {
-	        _this7.onMouseDown(view, /** @type {MouseEvent} */evt);
+	        _this8.onMouseDown(view, /** @type {MouseEvent} */evt);
 	      });
 	      editor.on('keyup', function (cm, evt) {
-	        _this7.onKeyup(/** @type {KeyboardEvent} */evt, view);
+	        _this8.onKeyup(/** @type {KeyboardEvent} */evt, view);
 	      });
 	      editor.on('cursorActivity', function () {
-	        _this7.onCursorActivity();
+	        _this8.onCursorActivity();
 	      });
 	      this.addTrackedEvent(this.getEditorDom(), 'wheel', function () {
-	        _this7.disableScrollListener = false;
-	        cancelAnimationFrame(_this7.animation.timer);
-	        _this7.animation.timer = 0;
+	        _this8.disableScrollListener = false;
+	        cancelAnimationFrame(_this8.animation.timer);
+	        _this8.animation.timer = 0;
 	      }, false);
 	      if (this.options.writingStyle !== 'normal') {
 	        this.initWritingStyle();
@@ -53222,7 +53485,7 @@
 	  }, {
 	    key: "jumpToLine",
 	    value: function jumpToLine(beginLine) {
-	      var _this8 = this;
+	      var _this9 = this;
 	      var endLine = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 	      var percent = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 	      if (!this.editor || !this.editor.view) return;
@@ -53250,33 +53513,33 @@
 	      }
 	      var _animationHandler = function animationHandler() {
 	        var currentTop = view.scrollDOM.scrollTop;
-	        var delta = _this8.animation.destinationTop - currentTop;
+	        var delta = _this9.animation.destinationTop - currentTop;
 	        // 100毫秒内完成动画
 	        var move = Math.ceil(Math.min(Math.abs(delta), Math.max(1, Math.abs(delta) / (100 / 16.7))));
 	        if (delta > 0) {
-	          if (currentTop >= _this8.animation.destinationTop) {
-	            _this8.animation.timer = 0;
+	          if (currentTop >= _this9.animation.destinationTop) {
+	            _this9.animation.timer = 0;
 	            return;
 	          }
-	          _this8.disableScrollListener = true;
+	          _this9.disableScrollListener = true;
 	          view.scrollDOM.scrollTop = currentTop + move;
 	        } else if (delta < 0) {
-	          if (currentTop <= _this8.animation.destinationTop || currentTop <= 0) {
-	            _this8.animation.timer = 0;
+	          if (currentTop <= _this9.animation.destinationTop || currentTop <= 0) {
+	            _this9.animation.timer = 0;
 	            return;
 	          }
-	          _this8.disableScrollListener = true;
+	          _this9.disableScrollListener = true;
 	          view.scrollDOM.scrollTop = currentTop - move;
 	        } else {
-	          _this8.animation.timer = 0;
+	          _this9.animation.timer = 0;
 	          return;
 	        }
 	        // 无法再继续滚动
 	        if (currentTop === view.scrollDOM.scrollTop || move >= Math.abs(delta)) {
-	          _this8.animation.timer = 0;
+	          _this9.animation.timer = 0;
 	          return;
 	        }
-	        _this8.animation.timer = requestAnimationFrame(_animationHandler);
+	        _this9.animation.timer = requestAnimationFrame(_animationHandler);
 	      };
 	      this.animation.timer = requestAnimationFrame(_animationHandler);
 	    }
@@ -53327,14 +53590,14 @@
 	  }, {
 	    key: "initWritingStyle",
 	    value: function initWritingStyle() {
-	      var _context19, _context20;
+	      var _context21, _context22;
 	      var writingStyle = this.options.writingStyle;
 	      var className = "cherry-editor-writing-style--".concat(writingStyle);
 	      var editorDom = this.getEditorDom();
 	      // 重置状态
-	      _forEachInstanceProperty(_context19 = _filterInstanceProperty(_context20 = _Array$from(editorDom.classList)).call(_context20, function (className) {
+	      _forEachInstanceProperty(_context21 = _filterInstanceProperty(_context22 = _Array$from(editorDom.classList)).call(_context22, function (className) {
 	        return _startsWithInstanceProperty(className).call(className, 'cherry-editor-writing-style--');
-	      })).call(_context19, function (className) {
+	      })).call(_context21, function (className) {
 	        return editorDom.classList.remove(className);
 	      });
 	      if (writingStyle === 'normal') {
@@ -53350,7 +53613,7 @@
 	  }, {
 	    key: "refreshWritingStatus",
 	    value: function refreshWritingStatus() {
-	      var _context21, _context22;
+	      var _context23, _context24;
 	      var writingStyle = this.options.writingStyle;
 	      if (writingStyle !== 'focus' && writingStyle !== 'typewriter') {
 	        return;
@@ -53361,15 +53624,15 @@
 	       */
 	      var style = document.querySelector('#cherry-editor-writing-style') || document.createElement('style');
 	      style.id = 'cherry-editor-writing-style';
-	      _findInstanceProperty(_context21 = _Array$from(document.head.childNodes)).call(_context21, function (node) {
+	      _findInstanceProperty(_context23 = _Array$from(document.head.childNodes)).call(_context23, function (node) {
 	        return node === style;
 	      }) || document.head.appendChild(style);
 	      var sheet = style.sheet;
-	      _forEachInstanceProperty(_context22 = _Array$from(Array(sheet.cssRules.length))).call(_context22, function () {
+	      _forEachInstanceProperty(_context24 = _Array$from(Array(sheet.cssRules.length))).call(_context24, function () {
 	        return sheet.deleteRule(0);
 	      });
 	      if (writingStyle === 'focus') {
-	        var _context23, _context24;
+	        var _context25, _context26;
 	        var editorDomRect = this.getEditorDom().getBoundingClientRect();
 	        var view = this.editor.view;
 	        var cursorPos = view.state.selection.main.head;
@@ -53380,14 +53643,14 @@
 	          topHeight = cursorCoords.top - editorDomRect.top;
 	          bottomHeight = editorDomRect.bottom - cursorCoords.bottom;
 	        }
-	        sheet.insertRule(_concatInstanceProperty(_context23 = ".".concat(className, "::before { height: ")).call(_context23, topHeight > 0 ? topHeight : 0, "px; }"), 0);
-	        sheet.insertRule(_concatInstanceProperty(_context24 = ".".concat(className, "::after { height: ")).call(_context24, bottomHeight > 0 ? bottomHeight : 0, "px; }"), 0);
+	        sheet.insertRule(_concatInstanceProperty(_context25 = ".".concat(className, "::before { height: ")).call(_context25, topHeight > 0 ? topHeight : 0, "px; }"), 0);
+	        sheet.insertRule(_concatInstanceProperty(_context26 = ".".concat(className, "::after { height: ")).call(_context26, bottomHeight > 0 ? bottomHeight : 0, "px; }"), 0);
 	      }
 	      if (writingStyle === 'typewriter') {
-	        var _context25, _context26;
+	        var _context27, _context28;
 	        var height = this.editor.scrollDOM.clientHeight / 2;
-	        sheet.insertRule(_concatInstanceProperty(_context25 = ".".concat(className, " .cm-editor .cm-scroller::before { height: ")).call(_context25, height, "px; }"), 0);
-	        sheet.insertRule(_concatInstanceProperty(_context26 = ".".concat(className, " .cm-editor .cm-scroller::after { height: ")).call(_context26, height, "px; }"), 0);
+	        sheet.insertRule(_concatInstanceProperty(_context27 = ".".concat(className, " .cm-editor .cm-scroller::before { height: ")).call(_context27, height, "px; }"), 0);
+	        sheet.insertRule(_concatInstanceProperty(_context28 = ".".concat(className, " .cm-editor .cm-scroller::after { height: ")).call(_context28, height, "px; }"), 0);
 	        this.editor.scrollDOM.scrollTop = height;
 	      }
 	    }
@@ -53590,10 +53853,10 @@
 	  }, {
 	    key: "getSelections",
 	    value: function getSelections() {
-	      var _context27;
+	      var _context29;
 	      if (!this.editor) return [];
 	      var view = this.editor.view;
-	      var selections = _mapInstanceProperty(_context27 = view.state.selection.ranges).call(_context27, function (range) {
+	      var selections = _mapInstanceProperty(_context29 = view.state.selection.ranges).call(_context29, function (range) {
 	        return view.state.doc.sliceString(range.from, range.to);
 	      });
 	      return selections;
@@ -53661,9 +53924,9 @@
 	          }
 	        case 2:
 	          {
-	            var _context28;
+	            var _context30;
 	            var codeBlockReg = getCodeBlockRule().reg;
-	            var paragraphs = _filterInstanceProperty(_context28 = markdown.split(/\n{2,}/)).call(_context28, function (line) {
+	            var paragraphs = _filterInstanceProperty(_context30 = markdown.split(/\n{2,}/)).call(_context30, function (line) {
 	              return _trimInstanceProperty(line).call(line) !== '';
 	            }).length;
 	            var codeblocks = (markdown.match(codeBlockReg) || []).length;
@@ -53710,12 +53973,12 @@
 	        this.animation.timer = 0;
 	      }
 	      if (this.domEventListeners && this.domEventListeners.length > 0) {
-	        var _context29;
-	        _forEachInstanceProperty(_context29 = this.domEventListeners).call(_context29, function (_ref3) {
-	          var elm = _ref3.elm,
-	            evType = _ref3.evType,
-	            fn = _ref3.fn,
-	            useCapture = _ref3.useCapture;
+	        var _context31;
+	        _forEachInstanceProperty(_context31 = this.domEventListeners).call(_context31, function (_ref4) {
+	          var elm = _ref4.elm,
+	            evType = _ref4.evType,
+	            fn = _ref4.fn,
+	            useCapture = _ref4.useCapture;
 	          removeEvent(elm, evType, fn, useCapture);
 	        });
 	        this.domEventListeners = [];
@@ -71904,110 +72167,6 @@
 	  }]);
 	}(ParagraphBase);
 	_defineProperty$2(Footnote, "HOOK_NAME", 'footnote');
-
-	var es_string_endsWith = {};
-
-	var hasRequiredEs_string_endsWith;
-
-	function requireEs_string_endsWith () {
-		if (hasRequiredEs_string_endsWith) return es_string_endsWith;
-		hasRequiredEs_string_endsWith = 1;
-		'use strict';
-		var $ = /*@__PURE__*/ require_export();
-		var uncurryThis = /*@__PURE__*/ requireFunctionUncurryThisClause();
-		var getOwnPropertyDescriptor = /*@__PURE__*/ requireObjectGetOwnPropertyDescriptor().f;
-		var toLength = /*@__PURE__*/ requireToLength();
-		var toString = /*@__PURE__*/ requireToString$1();
-		var notARegExp = /*@__PURE__*/ requireNotARegexp();
-		var requireObjectCoercible = /*@__PURE__*/ requireRequireObjectCoercible();
-		var correctIsRegExpLogic = /*@__PURE__*/ requireCorrectIsRegexpLogic();
-		var IS_PURE = /*@__PURE__*/ requireIsPure();
-
-		var slice = uncurryThis(''.slice);
-		var min = Math.min;
-
-		var CORRECT_IS_REGEXP_LOGIC = correctIsRegExpLogic('endsWith');
-		// https://github.com/zloirock/core-js/pull/702
-		var MDN_POLYFILL_BUG = !IS_PURE && !CORRECT_IS_REGEXP_LOGIC && !!function () {
-		  var descriptor = getOwnPropertyDescriptor(String.prototype, 'endsWith');
-		  return descriptor && !descriptor.writable;
-		}();
-
-		// `String.prototype.endsWith` method
-		// https://tc39.es/ecma262/#sec-string.prototype.endswith
-		$({ target: 'String', proto: true, forced: !MDN_POLYFILL_BUG && !CORRECT_IS_REGEXP_LOGIC }, {
-		  endsWith: function endsWith(searchString /* , endPosition = @length */) {
-		    var that = toString(requireObjectCoercible(this));
-		    notARegExp(searchString);
-		    var search = toString(searchString);
-		    var endPosition = arguments.length > 1 ? arguments[1] : undefined;
-		    var len = that.length;
-		    var end = endPosition === undefined ? len : min(toLength(endPosition), len);
-		    return slice(that, end - search.length, end) === search;
-		  }
-		});
-		return es_string_endsWith;
-	}
-
-	var endsWith$5;
-	var hasRequiredEndsWith$3;
-
-	function requireEndsWith$3 () {
-		if (hasRequiredEndsWith$3) return endsWith$5;
-		hasRequiredEndsWith$3 = 1;
-		'use strict';
-		requireEs_string_endsWith();
-		var getBuiltInPrototypeMethod = /*@__PURE__*/ requireGetBuiltInPrototypeMethod();
-
-		endsWith$5 = getBuiltInPrototypeMethod('String', 'endsWith');
-		return endsWith$5;
-	}
-
-	var endsWith$4;
-	var hasRequiredEndsWith$2;
-
-	function requireEndsWith$2 () {
-		if (hasRequiredEndsWith$2) return endsWith$4;
-		hasRequiredEndsWith$2 = 1;
-		'use strict';
-		var isPrototypeOf = /*@__PURE__*/ requireObjectIsPrototypeOf();
-		var method = /*@__PURE__*/ requireEndsWith$3();
-
-		var StringPrototype = String.prototype;
-
-		endsWith$4 = function (it) {
-		  var own = it.endsWith;
-		  return typeof it == 'string' || it === StringPrototype
-		    || (isPrototypeOf(StringPrototype, it) && own === StringPrototype.endsWith) ? method : own;
-		};
-		return endsWith$4;
-	}
-
-	var endsWith$3;
-	var hasRequiredEndsWith$1;
-
-	function requireEndsWith$1 () {
-		if (hasRequiredEndsWith$1) return endsWith$3;
-		hasRequiredEndsWith$1 = 1;
-		'use strict';
-		var parent = /*@__PURE__*/ requireEndsWith$2();
-
-		endsWith$3 = parent;
-		return endsWith$3;
-	}
-
-	var endsWith$2;
-	var hasRequiredEndsWith;
-
-	function requireEndsWith () {
-		if (hasRequiredEndsWith) return endsWith$2;
-		hasRequiredEndsWith = 1;
-		endsWith$2 = /*@__PURE__*/ requireEndsWith$1();
-		return endsWith$2;
-	}
-
-	var endsWithExports = requireEndsWith();
-	var _endsWithInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(endsWithExports);
 
 	function _arrayLikeToArray$1m(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function _callSuper$1g(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1g() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
@@ -123418,11 +123577,6 @@
 	 * See the License for the specific language governing permissions and
 	 * limitations under the License.
 	 */
-
-	// in browser
-	if (isBrowser()) {
-	  window.Cherry = Cherry;
-	}
 
 	function ownKeys$2(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 	function _objectSpread$2(e) { for (var r = 1; r < arguments.length; r++) { var _context5, _context6; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context5 = ownKeys$2(Object(t), !0)).call(_context5, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context6 = ownKeys$2(Object(t))).call(_context6, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
@@ -176351,6 +176505,27 @@ ${config.themeCSS}`;
 	});
 	Cherry.usePlugin(PlantUMLCodeEngine, {});
 	Cherry.usePlugin(EChartsTableEngine);
+
+	/**
+	 * Copyright (C) 2021 Tencent.
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License");
+	 * you may not use this file except in compliance with the License.
+	 * You may obtain a copy of the License at
+	 *
+	 *     http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software
+	 * distributed under the License is distributed on an "AS IS" BASIS,
+	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 * See the License for the specific language governing permissions and
+	 * limitations under the License.
+	 */
+
+	// in browser
+	if (isBrowser()) {
+	  window.Cherry = Cherry;
+	}
 
 	//@ts-check
 

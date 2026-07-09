@@ -166,6 +166,24 @@ export default class Editor {
      */
     formatHtml2MdWhenPaste(event: ClipboardEvent | null, html: string, htmlText: string, editorView: CM6AdapterType): void;
     /**
+     * 判断文件是否为"可直接读取文本内容插入"的类型（.txt/.md 等纯文本）
+     * @param {File} file 拖拽的文件
+     * @returns {boolean}
+     */
+    isTextContentFile(file: File): boolean;
+    /**
+     * 处理拖拽文件到编辑区的逻辑（支持批量拖拽）
+     * 规则：
+     *  - 图片文件（image/*）：按图片语法 ![name](url) 写入
+     *  - 纯文本/Markdown 文件（.txt/.md）：直接把文件内容读取并插入编辑器
+     *  - 其他文件：按超链接语法 [name](url) 写入
+     * 为保证多个文件按拖拽的原始顺序写入，会先并行收集所有片段，全部完成后统一插入。
+     * @param {DragEvent} event 拖拽事件
+     * @param {EditorView} editorView CodeMirror 6 视图实例
+     * @returns {boolean} 是否拦截并处理了本次 drop 事件
+     */
+    handleDrop(event: DragEvent, editorView: EditorView): boolean;
+    /**
      *
      * @param {EditorView} editorView
      */

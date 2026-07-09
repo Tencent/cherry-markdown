@@ -33,3 +33,4 @@ export function handleUpload(editor: any, type?: string, accept?: string, callba
  */
 export function handleParams(params: any): string;
 export function handleFileUploadCallback(url: any, params: any, file: any): string;
+export function handleDropType(file: File, url: string): string;
