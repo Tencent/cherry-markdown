@@ -337,6 +337,10 @@ see `/src/Cherry.config.js` or click [here](https://github.com/Tencent/cherry-ma
 
 Click [here](https://github.com/Tencent/cherry-markdown/wiki) for more examples.
 
+### Client
+
+Under development, please stay tuned or see `/packages/client/`
+
 ## Extension
 
 ### Customize Syntax
