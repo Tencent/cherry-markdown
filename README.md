@@ -292,13 +292,13 @@ const cherryInstance = new Cherry({
 
 #### Differences Between Builds
 
-| Build      | File                              | Format  | Global          | Built-in Mermaid | Built-in CodeMirror | Use Case          |
-| ---------- | --------------------------------- | ------- | --------------- | ---------------- | ------------------- | ----------------- |
-| Full       | `cherry-markdown.js`              | UMD/CDN | `window.Cherry` | ✅               | ✅                  | All scenarios     |
-| Full ESM   | `cherry-markdown.esm.js`          | ESM     | None            | ✅               | ✅                  | Module bundlers   |
-| Core       | `cherry-markdown.core.js`         | UMD/CDN | `window.Cherry` | ❌               | ✅                  | Without Mermaid   |
-| Stream     | `cherry-markdown.stream.js`       | UMD/CDN | `window.Cherry` | ❌               | ❌                  | AI Chat streaming |
-| Stream ESM | `cherry-markdown.stream.esm.js`   | ESM     | None            | ❌               | ❌                  | Module bundlers   |
+| Build      | File                            | Format  | Global          | Built-in Mermaid | Built-in CodeMirror | Use Case          |
+| ---------- | ------------------------------- | ------- | --------------- | ---------------- | ------------------- | ----------------- |
+| Full       | `cherry-markdown.js`            | UMD/CDN | `window.Cherry` | ✅               | ✅                  | All scenarios     |
+| Full ESM   | `cherry-markdown.esm.js`        | ESM     | None            | ✅               | ✅                  | Module bundlers   |
+| Core       | `cherry-markdown.core.js`       | UMD/CDN | `window.Cherry` | ❌               | ✅                  | Without Mermaid   |
+| Stream     | `cherry-markdown.stream.js`     | UMD/CDN | `window.Cherry` | ❌               | ❌                  | AI Chat streaming |
+| Stream ESM | `cherry-markdown.stream.esm.js` | ESM     | None            | ❌               | ❌                  | Module bundlers   |
 
 > Note: MathJax/KaTeX are external dependencies loaded dynamically via CDN and are not included in any build package.
 
