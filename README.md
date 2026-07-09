@@ -294,7 +294,7 @@ const cherryInstance = new Cherry({
 
 | Build      | File                              | Format  | Global          | Built-in Mermaid | Built-in CodeMirror | Use Case          |
 | ---------- | --------------------------------- | ------- | --------------- | ---------------- | ------------------- | ----------------- |
-| Full       | `cherry-markdown.js`              | UMD/CDN | `window.Cherry` | ✅               | ✅                  | General purpose   |
+| Full       | `cherry-markdown.js`              | UMD/CDN | `window.Cherry` | ✅               | ✅                  | All scenarios     |
 | Full ESM   | `cherry-markdown.esm.js`          | ESM     | None            | ✅               | ✅                  | Module bundlers   |
 | Core       | `cherry-markdown.core.js`         | UMD/CDN | `window.Cherry` | ❌               | ✅                  | Without Mermaid   |
 | Stream     | `cherry-markdown.stream.js`       | UMD/CDN | `window.Cherry` | ❌               | ❌                  | AI Chat streaming |

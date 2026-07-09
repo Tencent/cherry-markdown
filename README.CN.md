@@ -293,7 +293,7 @@ const cherryInstance = new Cherry({
 
 | 构建包         | 文件                              | 格式    | 全局变量        | 包含 Mermaid | 包含 CodeMirror | 适用场景         |
 | -------------- | --------------------------------- | ------- | --------------- | ------------ | --------------- | ---------------- |
-| 完整包         | `cherry-markdown.js`              | UMD/CDN | `window.Cherry` | ✅           | ✅              | 通用场景         |
+| 完整包         | `cherry-markdown.js`              | UMD/CDN | `window.Cherry` | ✅           | ✅              | 全部场景         |
 | 完整包 ESM     | `cherry-markdown.esm.js`          | ESM     | 无              | ✅           | ✅              | 模块化构建       |
 | 核心包         | `cherry-markdown.core.js`         | UMD/CDN | `window.Cherry` | ❌           | ✅              | 不需要 Mermaid   |
 | 流式输出包     | `cherry-markdown.stream.js`       | UMD/CDN | `window.Cherry` | ❌           | ❌              | AI Chat 流式输出 |
