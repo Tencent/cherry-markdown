@@ -141,9 +141,9 @@ Cherry Markdown has built-in mermaid, if you want to use a specified version of 
 #### UMD
 
 ```html
-<link href="cherry-editor.min.css" />
+<link rel="stylesheet" href="cherry-markdown.min.css" />
 <div id="markdown-container"></div>
-<script src="cherry-editor.min.js"></script>
+<script src="cherry-markdown.js"></script>
 <script>
   new Cherry({
     id: 'markdown-container',
@@ -162,6 +162,8 @@ const cherryInstance = new Cherry({
   value: '# welcome to cherry editor!',
 });
 ```
+
+UMD/CDN bundles expose `window.Cherry` after being loaded by a `<script>` tag. ESM entry points such as `cherry-markdown` and `cherry-markdown/dist/cherry-markdown.stream` do not write to `window.Cherry`; use the imported `Cherry` value instead.
 
 ### Node
 
@@ -287,13 +289,15 @@ const cherryInstance = new Cherry({
 });
 ```
 
-#### Differences Between Stream Build and Core Build
+#### Differences Between Builds
 
-| Build  | File                        | Mermaid | CodeMirror | Use Case          |
-| ------ | --------------------------- | ------- | ---------- | ----------------- |
-| Full   | `cherry-markdown.js`        | ✅      | ✅         | General purpose   |
-| Core   | `cherry-markdown.core.js`   | ❌      | ✅         | Without Mermaid   |
-| Stream | `cherry-markdown.stream.js` | ❌      | ❌         | AI Chat streaming |
+| Build      | File                              | Format  | Global          | Mermaid | CodeMirror | Use Case          |
+| ---------- | --------------------------------- | ------- | --------------- | ------- | ---------- | ----------------- |
+| Full       | `cherry-markdown.js`              | UMD/CDN | `window.Cherry` | ✅      | ✅         | General purpose   |
+| Full ESM   | `cherry-markdown.esm.js`          | ESM     | None            | ✅      | ✅         | Module bundlers   |
+| Core       | `cherry-markdown.core.js`         | UMD/CDN | `window.Cherry` | ❌      | ✅         | Without Mermaid   |
+| Stream     | `cherry-markdown.stream.js`       | UMD/CDN | `window.Cherry` | ❌      | ❌         | AI Chat streaming |
+| Stream ESM | `cherry-markdown.stream.esm.js`   | ESM     | None            | ❌      | ❌         | Module bundlers   |
 
 > Note: MathJax/KaTeX are external dependencies loaded dynamically via CDN and are not included in any build package.
 

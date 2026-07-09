@@ -141,9 +141,9 @@ Cherry Markdown 内置了 mermaid，如果希望使用指定版本的 mermaid，
 #### UMD
 
 ```html
-<link href="cherry-editor.min.css" />
+<link rel="stylesheet" href="cherry-markdown.min.css" />
 <div id="markdown-container"></div>
-<script src="cherry-editor.min.js"></script>
+<script src="cherry-markdown.js"></script>
 <script>
   new Cherry({
     id: 'markdown-container',
@@ -162,6 +162,8 @@ const cherryInstance = new Cherry({
   value: '# welcome to cherry editor!',
 });
 ```
+
+UMD/CDN 产物通过 `<script>` 加载后会暴露 `window.Cherry`。`cherry-markdown`、`cherry-markdown/dist/cherry-markdown.stream` 等 ESM 入口不会写入 `window.Cherry`，请使用 import 得到的 `Cherry`。
 
 ### Node
 
@@ -286,13 +288,15 @@ const cherryInstance = new Cherry({
 });
 ```
 
-#### 流式输出包与核心包的区别
+#### 构建包区别
 
-| 构建包     | 文件                        | 包含 Mermaid | 包含 CodeMirror | 适用场景         |
-| ---------- | --------------------------- | ------------ | --------------- | ---------------- |
-| 完整包     | `cherry-markdown.js`        | ✅           | ✅              | 通用场景         |
-| 核心包     | `cherry-markdown.core.js`   | ❌           | ✅              | 不需要 Mermaid   |
-| 流式输出包 | `cherry-markdown.stream.js` | ❌           | ❌              | AI Chat 流式输出 |
+| 构建包         | 文件                              | 格式    | 全局变量        | 包含 Mermaid | 包含 CodeMirror | 适用场景         |
+| -------------- | --------------------------------- | ------- | --------------- | ------------ | --------------- | ---------------- |
+| 完整包         | `cherry-markdown.js`              | UMD/CDN | `window.Cherry` | ✅           | ✅              | 通用场景         |
+| 完整包 ESM     | `cherry-markdown.esm.js`          | ESM     | 无              | ✅           | ✅              | 模块化构建       |
+| 核心包         | `cherry-markdown.core.js`         | UMD/CDN | `window.Cherry` | ❌           | ✅              | 不需要 Mermaid   |
+| 流式输出包     | `cherry-markdown.stream.js`       | UMD/CDN | `window.Cherry` | ❌           | ❌              | AI Chat 流式输出 |
+| 流式输出包 ESM | `cherry-markdown.stream.esm.js`   | ESM     | 无              | ❌           | ❌              | 模块化构建       |
 
 > 注意：MathJax/KaTeX 为外部依赖，通过 CDN 动态加载，不包含在任何构建包中。
 

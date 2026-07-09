@@ -1,8 +1,9 @@
 /**
- * 全局类型声明（随 npm 发布给用户）
+ * 面向 UMD/CDN script 用户的全局类型声明。
  *
- * 为通过 `<script>` 标签引入 cherry-markdown 的用户
- * 提供 `window` 上挂载对象的类型支持。
+ * 该声明为可选引入，不会被默认 ESM 类型入口包含。
+ * 仅在通过 `<script>` 加载 Cherry Markdown 并使用 `window.Cherry`
+ * 等全局变量时引入。
  *
  * @example
  * 在 tsconfig.json 中引入：
@@ -33,7 +34,7 @@ declare global {
     /**
      * Cherry Markdown 编辑器构造函数。
      *
-     * 根据引入的构建产物不同，类型有所区别：
+     * 通过 UMD/CDN 构建产物引入时，根据文件不同，类型有所区别：
      * - 完整版（cherry-markdown.js / cherry-markdown.core.js）→ `Cherry`
      * - 流式版（cherry-markdown.stream.js）→ `CherryStream`
      *
