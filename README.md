@@ -8,7 +8,7 @@ English | [简体中文](./README.CN.md)
 
 ## Introduction
 
-Cherry Markdown Writer is a Javascript Markdown editor. It has the advantages such as out-of-the-box, lightweight and easy to extend. It can run in browser or server(with NodeJs).
+Cherry Markdown Writer is a JavaScript Markdown editor. It has the advantages such as out-of-the-box, lightweight and easy to extend. It can run in browser or server(with Node.js).
 
 ### Document
 
@@ -25,7 +25,7 @@ Cherry Markdown Writer is a Javascript Markdown editor. It has the advantages su
 
 ### Demos
 
-- [Full Model](https://tencent.github.io/cherry-markdown/examples/index.html)
+- [Full Mode](https://tencent.github.io/cherry-markdown/examples/index.html)
 - [Basic](https://tencent.github.io/cherry-markdown/examples/basic.html)
 - [Mobile](https://tencent.github.io/cherry-markdown/examples/h5.html)
 - [Multiple Instances](https://tencent.github.io/cherry-markdown/examples/multiple.html)
@@ -141,9 +141,9 @@ Cherry Markdown has built-in mermaid, if you want to use a specified version of 
 #### UMD
 
 ```html
-<link href="cherry-editor.min.css" />
+<link rel="stylesheet" href="cherry-markdown.min.css" />
 <div id="markdown-container"></div>
-<script src="cherry-editor.min.js"></script>
+<script src="cherry-markdown.js"></script>
 <script>
   new Cherry({
     id: 'markdown-container',
@@ -163,10 +163,13 @@ const cherryInstance = new Cherry({
 });
 ```
 
+UMD/CDN bundles expose `window.Cherry` after being loaded by a `<script>` tag. ESM entry points such as `cherry-markdown` and `cherry-markdown/dist/cherry-markdown.stream` do not write to `window.Cherry`; use the imported `Cherry` value instead.
+
 ### Node
 
 ```javascript
-const { default: CherryEngine } = require('cherry-markdown/dist/cherry-markdown.engine.core.common');
+import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core.esm.js';
+
 const cherryEngineInstance = new CherryEngine();
 const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!');
 ```
@@ -175,7 +178,7 @@ const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!')
 
 Because the size of the mermaid library is very large, the cherry build product contains a core build package without built-in Mermaid. The core build can be imported in the following ways.
 
-### Full mode (With UI Interface)
+### Core Build With UI
 
 ```javascript
 import 'cherry-markdown/dist/cherry-markdown.css';
@@ -287,19 +290,21 @@ const cherryInstance = new Cherry({
 });
 ```
 
-#### Differences Between Stream Build and Core Build
+#### Differences Between Builds
 
-| Build  | File                        | Mermaid | CodeMirror | Use Case          |
-| ------ | --------------------------- | ------- | ---------- | ----------------- |
-| Full   | `cherry-markdown.js`        | ✅      | ✅         | General purpose   |
-| Core   | `cherry-markdown.core.js`   | ❌      | ✅         | Without Mermaid   |
-| Stream | `cherry-markdown.stream.js` | ❌      | ❌         | AI Chat streaming |
+| Build      | File                              | Format  | Global          | Built-in Mermaid | Built-in CodeMirror | Use Case          |
+| ---------- | --------------------------------- | ------- | --------------- | ---------------- | ------------------- | ----------------- |
+| Full       | `cherry-markdown.js`              | UMD/CDN | `window.Cherry` | ✅               | ✅                  | All scenarios     |
+| Full ESM   | `cherry-markdown.esm.js`          | ESM     | None            | ✅               | ✅                  | Module bundlers   |
+| Core       | `cherry-markdown.core.js`         | UMD/CDN | `window.Cherry` | ❌               | ✅                  | Without Mermaid   |
+| Stream     | `cherry-markdown.stream.js`       | UMD/CDN | `window.Cherry` | ❌               | ❌                  | AI Chat streaming |
+| Stream ESM | `cherry-markdown.stream.esm.js`   | ESM     | None            | ❌               | ❌                  | Module bundlers   |
 
 > Note: MathJax/KaTeX are external dependencies loaded dynamically via CDN and are not included in any build package.
 
 ### Dynamic import
 
-**recommend** Using Dynamic import, the following is an example of webpack Dynamic import.
+Dynamic import is recommended. The following is an example of webpack dynamic import.
 
 ```javascript
 import 'cherry-markdown/dist/cherry-markdown.css';
@@ -307,7 +312,7 @@ import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
 
 const registerPlugin = async () => {
   const [{ default: CherryMermaidPlugin }, mermaid] = await Promise.all([
-    import('cherry-markdown/src/addons/cherry-code-block-mermaid-plugin'),
+    import('cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin.esm.js'),
     import('mermaid'),
   ]);
   Cherry.usePlugin(CherryMermaidPlugin, {
