@@ -121,3 +121,32 @@ body {
 #markdown-editor .cherry .cherry-bubble .cherry-toolbar-button {
   align-items: center;
 }
+
+/* ==========================================================================
+   CodeMirror v6 baseTheme overrides (build-mode safety net)
+   --------------------------------------------------------------------------
+   CodeMirror 6 injects its default styles at runtime via `StyleModule`, which
+   appends a <style> tag to <head> AFTER our bundled CSS <link> in production
+   builds. That makes CM's baseTheme win the cascade, causing:
+     1. A dark focus outline around the editor when active.
+     2. Height / overflow rules that break flex layout and disable scrolling.
+   The rules below use `!important` to reliably override CM's runtime styles,
+   regardless of stylesheet insertion order.
+   ========================================================================== */
+
+#markdown-editor .cm-editor.cm-focused,
+#markdown-editor .cm-editor:focus,
+#markdown-editor .cm-editor:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Make the editor fill its flex parent and allow the inner scroller to scroll. */
+#markdown-editor .cm-editor {
+  height: 100% !important;
+  max-height: 100% !important;
+}
+
+#markdown-editor .cm-scroller {
+  overflow: auto !important;
+}

@@ -222,6 +222,37 @@ const dealAfterChange = (): void => {
 };
 
 // ========== 文件恢复功能 ==========
+/**
+ * 如果本次是由「双击 .md」或「右键 → 用 cherry-markdown 打开」这类文件关联
+ * 唤起的，Rust 端会把首个合法参数记录下来。这里主动去询问，命中即加载。
+ *
+ * 返回值：
+ *  - true  表示已成功加载启动文件，调用方应跳过恢复上次文件的逻辑；
+ *  - false 表示没有启动文件（或加载失败），调用方按原有逻辑继续。
+ */
+const tryLoadLaunchFile = async (): Promise<boolean> => {
+  try {
+    const rawPath = await invoke<string | null>('get_launch_file_path');
+    if (!rawPath) return false;
+
+    const normalizedPath = normalizePath(rawPath);
+    const markdown = await readTextFile(normalizedPath);
+
+    needDealAfterChange = false;
+    hasUnsavedChanges.value = false;
+    cherryMarkdown.setMarkdown(markdown);
+    fileStore.setCurrentFilePath(normalizedPath);
+    fileStore.addRecentFile(normalizedPath);
+    await updateTitle(normalizedPath, false);
+
+    console.log('已加载由系统传入的文件:', normalizedPath);
+    return true;
+  } catch (error) {
+    console.warn('加载启动文件失败:', error);
+    return false;
+  }
+};
+
 const restoreLastOpenedFile = async (): Promise<void> => {
   if (fileStore.currentFilePath) {
     try {
@@ -253,6 +284,7 @@ const handleOpenFileFromSidebar = async (event: OpenFileFromSidebarEvent): Promi
   needDealAfterChange = false;
   hasUnsavedChanges.value = false;
   cherryMarkdown.setMarkdown(content);
+  cherryMarkdown.previewer.scrollToTop(0, 'instant');
   const normalizedPath = normalizePath(filePath);
   fileStore.setCurrentFilePath(normalizedPath);
   await updateTitle(normalizedPath, false);
@@ -343,8 +375,12 @@ onMounted(async () => {
   // 注册保存快捷键（仅当前窗口聚焦时生效）
   registerSaveShortcut();
 
-  // 自动恢复上次打开的文件
-  await restoreLastOpenedFile();
+  // 优先加载「命令行/文件关联」传入的文件；
+  // 未命中时才回退到「恢复上次打开的文件」。
+  const loadedFromLaunch = await tryLoadLaunchFile();
+  if (!loadedFromLaunch) {
+    await restoreLastOpenedFile();
+  }
   cherryMarkdown.on('afterChange', dealAfterChange);
 });
 
