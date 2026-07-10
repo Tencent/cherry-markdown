@@ -27,22 +27,25 @@ const filePath = computed(() => props.file?.path ?? '');
 <style scoped>
 .menu-item {
   padding: 8px 12px;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
-  transition: background 0.2s ease;
-  color: #495057;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+  color: var(--color-text, #495057);
+  border-radius: var(--radius-sm, 6px);
 }
 
 .menu-item:hover {
-  background: #f8f9fa;
-  color: #007bff;
+  background: var(--color-accent-soft, #f8f9fa);
+  color: var(--color-accent-strong, #007bff);
 }
 
 .menu-item:first-child {
-  border-radius: 6px 6px 0 0;
+  border-radius: var(--radius-sm, 6px);
 }
 
 .menu-item:last-child {
-  border-radius: 0 0 6px 6px;
+  border-radius: var(--radius-sm, 6px);
 }
 </style>

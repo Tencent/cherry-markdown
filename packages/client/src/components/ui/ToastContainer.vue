@@ -29,11 +29,11 @@ const getTypeClass = (type: ToastItem['type']): string => {
 <style scoped>
 .toast-container {
   position: fixed;
-  top: 16px;
+  bottom: 32px;
   right: 16px;
   z-index: 10000;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   gap: 8px;
   max-width: 360px;
   pointer-events: none;
