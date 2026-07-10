@@ -134,9 +134,9 @@ const triggerOpenRecentFile = (): void => {
   display: flex;
   height: 100vh;
   width: 404px; /* 64 (bar) + 340 (panel) */
-  background: #f4f6fb;
-  border-right: 1px solid #dfe3ea;
-  transition: width 0.25s ease;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border-strong);
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .side-panel.collapsed {
@@ -145,28 +145,28 @@ const triggerOpenRecentFile = (): void => {
 
 .activity-bar {
   width: 64px;
-  background: #1f2430;
-  color: #c8ceda;
+  background: var(--color-bar-bg);
+  color: var(--color-bar-fg);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 12px 0;
+  padding: 14px 0 12px;
   justify-content: space-between;
 }
 
 .activity-buttons {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
 }
 
 .activity-btn {
+  position: relative;
   width: 44px;
   height: 44px;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: transparent;
   color: inherit;
   display: flex;
@@ -175,23 +175,43 @@ const triggerOpenRecentFile = (): void => {
   flex-shrink: 0;
   padding: 0;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.1s ease;
 }
 
 .activity-btn :deep(svg) {
   display: block;
   flex-shrink: 0;
+  transition: transform 0.18s ease;
 }
 
 .activity-btn:hover {
-  background: #2a3040;
-  color: #ffffff;
+  background: var(--color-bar-bg-hover);
+  color: var(--color-bar-fg-active);
+}
+
+.activity-btn:active {
+  transform: scale(0.94);
 }
 
 .activity-btn.active {
-  background: #2d3442;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: var(--color-bar-bg-active);
+  color: var(--color-bar-fg-active);
+}
+
+/* accent indicator bar (modern editor style) */
+.activity-btn.active::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 22px;
+  border-radius: 0 3px 3px 0;
+  background: var(--color-accent);
 }
 
 .version-info {
@@ -201,19 +221,19 @@ const triggerOpenRecentFile = (): void => {
 
 .version-text {
   font-size: 10px;
-  color: #7a8294;
+  color: #6b7384;
   letter-spacing: 0.5px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.2;
 }
 
 .panel-surface {
   flex: 1;
-  background: #fdfdfd;
+  background: var(--color-surface-panel);
   display: flex;
   flex-direction: column;
   min-width: 0;
-  border-left: 1px solid #dfe3ea;
+  border-left: 1px solid var(--color-border-strong);
 }
 
 .side-panel.collapsed .panel-surface {
@@ -221,12 +241,12 @@ const triggerOpenRecentFile = (): void => {
 }
 
 .panel-header {
-  height: 48px;
+  height: 52px;
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  border-bottom: 1px solid #e5e9f0;
-  color: #1f2430;
+  padding: 0 14px 0 18px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.2px;
@@ -243,23 +263,23 @@ const triggerOpenRecentFile = (): void => {
 .header-actions {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .header-action {
   width: 32px;
   height: 32px;
   padding: 0;
-  border: 1px solid #e5e9f0;
-  border-radius: 8px;
-  background: #eef1f7;
-  color: #1f2430;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
 }
 
 .header-action :deep(svg) {
@@ -267,23 +287,25 @@ const triggerOpenRecentFile = (): void => {
 }
 
 .header-action:hover {
-  background: #dfe4ee;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+  border-color: rgba(59, 130, 246, 0.25);
 }
 
 .header-toggle {
   width: 32px;
   height: 32px;
   padding: 0;
-  border: 1px solid #e5e9f0;
-  border-radius: 8px;
-  background: #f7f9fc;
-  color: #2d3442;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
 }
 
 .header-toggle :deep(svg) {
@@ -291,7 +313,8 @@ const triggerOpenRecentFile = (): void => {
 }
 
 .header-toggle:hover {
-  background: #e8ecf4;
+  background: var(--color-surface-hover);
+  color: var(--color-text);
 }
 
 .panel-content {

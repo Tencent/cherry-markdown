@@ -92,15 +92,15 @@ const openFile = () => {
 .directory-header {
   display: flex;
   align-items: center;
-  padding: 6px 12px;
+  padding: 7px 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.18s ease;
   gap: 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .directory-header:hover {
-  background: #f0f2f5;
+  background: var(--color-surface-hover);
 }
 
 .directory-icon {
@@ -114,7 +114,7 @@ const openFile = () => {
   flex: 1;
   font-size: 13px;
   font-weight: 500;
-  color: #495057;
+  color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -122,46 +122,64 @@ const openFile = () => {
 
 .directory-arrow {
   flex-shrink: 0;
-  color: #6c757d;
+  color: var(--color-text-muted);
+  transition: transform 0.18s ease;
+}
+
+.directory-item.expanded .directory-arrow {
+  color: var(--color-text-secondary);
 }
 
 /* 目录子节点样式 */
 .directory-children {
-  margin-left: 16px;
-  border-left: 1px solid #e9ecef;
-  padding-left: 8px;
+  margin-left: 18px;
+  border-left: 1px solid var(--color-border);
+  padding-left: 6px;
 }
 
 /* 文件项样式 */
 .file-item {
+  position: relative;
   display: flex;
   align-items: center;
-  padding: 4px 12px;
+  padding: 6px 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
   gap: 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   margin-left: 16px;
 }
 
 .file-item:hover {
-  background: #f0f2f5;
+  background: var(--color-surface-hover);
 }
 
 .file-item.active {
-  background: #007bff;
-  color: white;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+}
+
+.file-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 3px;
+  height: 18px;
+  border-radius: 0 3px 3px 0;
+  background: var(--color-accent);
 }
 
 .file-icon {
   flex-shrink: 0;
-  color: #6c757d;
+  color: var(--color-text-muted);
   display: flex;
   align-items: center;
 }
 
 .file-item.active .file-icon {
-  color: white;
+  color: var(--color-accent-strong);
 }
 
 .file-name {

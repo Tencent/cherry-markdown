@@ -32,11 +32,14 @@ defineEmits<{
 <style scoped>
 .context-menu {
   position: fixed;
-  background: white;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: var(--color-bg, #fff);
+  border: 1px solid var(--color-border, #e9ecef);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: var(--shadow-lg, 0 12px 32px rgba(0, 0, 0, 0.18));
   z-index: 1000;
-  min-width: 140px;
+  min-width: 160px;
+  padding: 6px;
+  overflow: hidden;
+  backdrop-filter: blur(6px);
 }
 </style>

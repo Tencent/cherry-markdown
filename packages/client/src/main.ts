@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 import App from './App.vue';
+import './styles/global.css';
 import 'cherry-markdown/dist/cherry-markdown.css';
 import { createPinia } from 'pinia';
 

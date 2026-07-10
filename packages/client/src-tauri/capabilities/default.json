@@ -63,6 +63,10 @@
       "identifier": "fs:allow-read-dir",
       "allow": [{ "path": "**" }, { "path": "**/*" }, { "path": "/**" }, { "path": "/**/*" }]
     },
+    {
+      "identifier": "fs:allow-stat",
+      "allow": [{ "path": "**" }, { "path": "**/*" }, { "path": "/**" }, { "path": "/**/*" }]
+    },
 
     "fs:read-dirs",
 

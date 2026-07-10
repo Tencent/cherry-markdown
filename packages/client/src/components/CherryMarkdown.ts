@@ -228,6 +228,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       { ol: ['ol', 'ul', 'checklist'] },
       'panel',
       'align',
+      'detail',
       '|',
       {
         insert: [
@@ -253,13 +254,13 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       'graph',
       'proTable',
       '|',
-      'shortcutKey',
       'search',
-      'togglePreview',
+      'shortcutKey',
     ],
-    toolbarRight: ['customSave', 'export', '|', 'wordCount'] as any[],
+    toolbarRight: ['customSave', 'export', '|', 'togglePreview'] as any[],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
     sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'theme'],
+    // hiddenToolbar: [''],
     // sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'theme', 'codeTheme'],
     toc: {
       updateLocationHash: false, // 要不要更新URL的hash

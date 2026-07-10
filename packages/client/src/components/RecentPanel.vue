@@ -82,7 +82,7 @@ defineExpose({ openRecentFile });
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: var(--color-bg);
   overflow: hidden;
 }
 
@@ -91,35 +91,48 @@ defineExpose({ openRecentFile });
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9aa3b5;
+  color: var(--color-text-muted);
   font-size: 13px;
 }
 
 .recent-list {
   list-style: none;
   margin: 0;
-  padding: 8px 12px 12px 12px;
+  padding: 8px 8px 12px 8px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   overflow-y: auto;
 }
 
 .recent-list li {
-  padding: 8px 10px;
-  border-radius: 8px;
+  position: relative;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 0.15s ease;
-  color: #1f2430;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+  color: var(--color-text);
 }
 
 .recent-list li:hover {
-  background: #f0f3f8;
+  background: var(--color-surface-hover);
 }
 
 .recent-list li.active {
-  background: #007bff;
-  color: #fff;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+}
+
+.recent-list li.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 3px;
+  height: 18px;
+  border-radius: 0 3px 3px 0;
+  background: var(--color-accent);
 }
 
 .file-row {
@@ -131,6 +144,7 @@ defineExpose({ openRecentFile });
 .file-name {
   display: inline-block;
   max-width: 100%;
+  font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -139,10 +153,10 @@ defineExpose({ openRecentFile });
 .file-time {
   margin-left: auto;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--color-text-muted);
 }
 
 .recent-list li.active .file-time {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--color-accent-strong);
 }
 </style>

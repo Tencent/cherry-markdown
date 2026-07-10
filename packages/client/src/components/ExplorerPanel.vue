@@ -107,16 +107,16 @@ void restore();
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: var(--color-bg);
   overflow: hidden;
 }
 
 .path-bar {
-  min-height: 36px;
-  padding: 8px 12px;
-  border-bottom: 1px solid #e5e9f0;
-  background: #f7f9fc;
-  color: #1f2430;
+  min-height: 38px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
   font-size: 12px;
   display: flex;
   align-items: center;
@@ -130,12 +130,14 @@ void restore();
 }
 
 .path-placeholder {
-  color: #9aa3b5;
+  color: var(--color-text-muted);
 }
 
 .tree-wrapper {
   flex: 1;
-  overflow: hidden;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: auto;
 }
 
 .empty-state {
@@ -143,7 +145,7 @@ void restore();
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9aa3b5;
+  color: var(--color-text-muted);
   font-size: 13px;
 }
 </style>

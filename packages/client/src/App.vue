@@ -7,6 +7,8 @@ import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { useFileStore } from './store';
 import { ref, onMounted, onUnmounted } from 'vue';
 import SidePanelManager from './components/SidePanelManager.vue';
+import StatusBar from './components/StatusBar.vue';
+import { setEditorInstance } from './components/composables/useEditor';
 import ToastContainer from './components/ui/ToastContainer.vue';
 import UnsavedChangesDialog, { type UnsavedDialogResult } from './components/ui/UnsavedChangesDialog.vue';
 import type { FileOperationResult } from './components/types';
@@ -20,7 +22,8 @@ let cherryMarkdown = cherryInstance();
 const fileStore = useFileStore();
 const appWindow = getCurrentWindow();
 let needDealAfterChange = false;
-let hasUnsavedChanges = false;
+const hasUnsavedChanges = ref(false);
+const toolbarVisible = ref(true);
 let unlistenCloseRequested: (() => void) | undefined;
 
 // 加载状态（防止重复点击）
@@ -35,7 +38,7 @@ const preventNativeContextMenu = (event: Event): void => {
 
 // 暴露未保存更改的检查函数供外部使用
 const checkUnsavedChanges = (): boolean => {
-  return hasUnsavedChanges;
+  return hasUnsavedChanges.value;
 };
 
 /**
@@ -62,7 +65,7 @@ const handleUnsavedDialogClose = (_result: UnsavedDialogResult): void => {
  * @returns true 表示可以继续操作，false 表示取消
  */
 const confirmProceedWhenUnsaved = async (): Promise<boolean> => {
-  if (!hasUnsavedChanges) return true;
+  if (!hasUnsavedChanges.value) return true;
 
   const result = await showUnsavedConfirmDialog();
 
@@ -85,10 +88,10 @@ const updateTitle = async (path: string | null, unsaved = false): Promise<void> 
   if (path) {
     // 从路径中提取文件名
     const pathParts = path.split(/[\\\\/]/);
-    fileName = pathParts[pathParts.length - 1];
+    fileName = pathParts[pathParts.length - 1].replace(/\.[^.]+$/, '');
   }
   const unsavedIndicator = unsaved ? '● ' : '';
-  const title = path ? `${unsavedIndicator}${fileName} - Cherry Markdown` : 'Cherry Markdown';
+  const title = path ? `${unsavedIndicator}${fileName}` : 'Cherry Markdown';
   await appWindow.setTitle(title);
 };
 
@@ -96,7 +99,7 @@ const updateTitle = async (path: string | null, unsaved = false): Promise<void> 
 const newFile = async (): Promise<void> => {
   if (!(await confirmProceedWhenUnsaved())) return;
   needDealAfterChange = false;
-  hasUnsavedChanges = false;
+  hasUnsavedChanges.value = false;
   cherryMarkdown.setMarkdown('');
   fileStore.setCurrentFilePath('');
   await updateTitle(null, false);
@@ -128,7 +131,7 @@ const openFile = async (): Promise<FileOperationResult> => {
     const normalizedPath = normalizePath(path);
     const markdown = await readTextFile(normalizedPath);
     needDealAfterChange = false;
-    hasUnsavedChanges = false;
+    hasUnsavedChanges.value = false;
     cherryMarkdown.setMarkdown(markdown);
     fileStore.setCurrentFilePath(normalizedPath);
 
@@ -169,7 +172,7 @@ const saveAsNewMarkdown = async (): Promise<FileOperationResult> => {
     fileStore.setCurrentFilePath(normalizedPath);
     fileStore.addRecentFile(normalizedPath);
     fileStore.markSaved(normalizedPath);
-    hasUnsavedChanges = false;
+    hasUnsavedChanges.value = false;
     await updateTitle(normalizedPath, false);
     notifySuccess(MESSAGES.FILE.SAVE_AS_SUCCESS);
 
@@ -194,7 +197,7 @@ const saveMarkdown = async (): Promise<FileOperationResult> => {
     const normalizedPath = normalizePath(fileStore.currentFilePath);
     await writeTextFile(normalizedPath, markdown);
     fileStore.markSaved(normalizedPath);
-    hasUnsavedChanges = false;
+    hasUnsavedChanges.value = false;
     await updateTitle(normalizedPath, false);
     notifySuccess(MESSAGES.FILE.SAVE_SUCCESS);
     return { success: true, path: normalizedPath };
@@ -212,7 +215,7 @@ const dealAfterChange = (): void => {
   }
 
   // 标记为有未保存的更改，不进行自动保存
-  hasUnsavedChanges = true;
+  hasUnsavedChanges.value = true;
   if (fileStore.currentFilePath) {
     void updateTitle(fileStore.currentFilePath, true);
   }
@@ -225,7 +228,7 @@ const restoreLastOpenedFile = async (): Promise<void> => {
       const normalizedPath = normalizePath(fileStore.currentFilePath);
       const markdown = await readTextFile(normalizedPath);
       needDealAfterChange = false;
-      hasUnsavedChanges = false;
+      hasUnsavedChanges.value = false;
       cherryMarkdown.setMarkdown(markdown);
       // 把归一化后的路径写回 store，避免历史数据残留反斜杠导致后续 markSaved 匹配不到
       if (normalizedPath !== fileStore.currentFilePath) {
@@ -248,7 +251,7 @@ const handleOpenFileFromSidebar = async (event: OpenFileFromSidebarEvent): Promi
   const { filePath, content } = event.detail;
   if (!(await confirmProceedWhenUnsaved())) return;
   needDealAfterChange = false;
-  hasUnsavedChanges = false;
+  hasUnsavedChanges.value = false;
   cherryMarkdown.setMarkdown(content);
   const normalizedPath = normalizePath(filePath);
   fileStore.setCurrentFilePath(normalizedPath);
@@ -267,6 +270,7 @@ const toggleToolbar = async (): Promise<void> => {
   const cherryNoToolbar = document.querySelector('.cherry--no-toolbar');
   await invoke('get_show_toolbar', { show: !!cherryNoToolbar });
   cherryMarkdown.toolbar.toolbarHandlers.settings('toggleToolbar');
+  toolbarVisible.value = !toolbarVisible.value;
 };
 
 // ========== 键盘快捷键处理 ==========
@@ -285,7 +289,7 @@ const handleSaveShortcut = (event: KeyboardEvent): void => {
   event.preventDefault();
   event.stopPropagation();
 
-  if (fileStore.currentFilePath || hasUnsavedChanges) {
+  if (fileStore.currentFilePath || hasUnsavedChanges.value) {
     void saveMarkdown();
   }
 };
@@ -321,8 +325,10 @@ onMounted(async () => {
 
   // 初始化工具栏状态
   const cherryNoToolbar = document.querySelector('.cherry--no-toolbar');
+  toolbarVisible.value = !cherryNoToolbar;
   await invoke('get_show_toolbar', { show: !cherryNoToolbar });
   cherryMarkdown = cherryInstance();
+  setEditorInstance(cherryMarkdown);
   appEvents.registerWindowEvents();
   await appEvents.registerTauriEvents();
 
@@ -359,6 +365,7 @@ onUnmounted(async () => {
     <SidePanelManager />
     <div class="editor-container">
       <div id="markdown-editor"></div>
+      <StatusBar :unsaved="hasUnsavedChanges" :toolbar-visible="toolbarVisible" @toggle-toolbar="toggleToolbar" />
     </div>
     <ToastContainer />
     <UnsavedChangesDialog :visible="showUnsavedDialog" @close="handleUnsavedDialogClose" />
@@ -385,6 +392,7 @@ onUnmounted(async () => {
   height: 100%;
   width: 100%;
   flex: 1;
+  min-height: 0;
 }
 
 #markdown-editor .cherry.cherry--no-toolbar .cherry-sidebar {

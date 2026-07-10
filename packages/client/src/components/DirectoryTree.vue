@@ -32,6 +32,7 @@ defineEmits<{
 <style scoped>
 .directory-tree {
   height: 100%;
+  padding: 6px 8px;
   overflow-y: auto;
 }
 </style>
