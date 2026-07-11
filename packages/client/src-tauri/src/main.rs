@@ -1,8 +1,6 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-// use utils::base::set_current_show_toolbar;
-
 mod implement;
 mod utils;
 
@@ -11,19 +9,19 @@ use std::sync::Mutex;
 use tauri::Manager;
 
 // The file path that is passed to the app by the OS when the user
-// double-clicks a `.md` file or picks "Open with Cherry Markdown".
+// double-clicks a markdown file or picks "Open with Cherry Markdown".
 // It is written once at startup (in `setup`) and read once from the
 // frontend via the `get_launch_file_path` command.
 struct LaunchFilePath(Mutex<Option<String>>);
 
-const SUPPORTED_EXTS: &[&str] = &["md", "markdown", "text"];
+const SUPPORTED_EXTS: &[&str] = &["md", "markdown", "txt", "text"];
 
 /// Parse `std::env::args()` and return the first argument that
 /// looks like an existing markdown file we should open on launch.
 ///
 /// The very first argv is the executable path itself, which is skipped.
 /// We only accept a candidate that:
-///   - has a supported extension (.md / .markdown / .text)
+///   - has a supported extension (.md / .markdown / .txt / .text)
 ///   - points to an existing file on disk
 ///
 /// Non-file arguments (like `--flag`, tauri devtools flags, etc.) are ignored.
@@ -51,13 +49,6 @@ fn detect_launch_file() -> Option<String> {
     None
 }
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn get_show_toolbar() -> Result<(), String> {
-    // todo show: bool 回显 是否显示工具栏 到 menu 菜单栏
-    Ok(())
-}
-
 /// Return the file path that the OS asked us to open on launch
 /// (double-click / "Open with" / command-line argument), if any.
 /// The value is consumed on first read to avoid re-opening the same
@@ -83,7 +74,7 @@ fn main() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_show_toolbar, get_launch_file_path])
+        .invoke_handler(tauri::generate_handler![get_launch_file_path])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

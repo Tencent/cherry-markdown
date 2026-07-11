@@ -1,0 +1,26 @@
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.editor-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  position: relative;
+}
+
+#markdown-editor {
+  height: 100%;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+#markdown-editor .cherry.cherry--no-toolbar .cherry-sidebar {
+  display: block;
+  height: auto;
+}

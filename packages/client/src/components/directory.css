@@ -1,0 +1,112 @@
+.directory-tree {
+  height: 100%;
+  padding: 6px 8px;
+  overflow-y: auto;
+}
+
+.directory-node {
+  margin-bottom: 2px;
+}
+
+.directory-node .directory-item {
+  margin-bottom: 2px;
+}
+
+.directory-node .directory-header {
+  display: flex;
+  align-items: center;
+  padding: 7px 10px;
+  cursor: pointer;
+  transition: background 0.18s ease;
+  gap: 8px;
+  border-radius: var(--radius-sm);
+}
+
+.directory-node .directory-header:hover {
+  background: var(--color-surface-hover);
+}
+
+.directory-node .directory-icon {
+  flex-shrink: 0;
+  color: #ffb74d;
+  display: flex;
+  align-items: center;
+}
+
+.directory-node .directory-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.directory-node .directory-arrow {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  transition: transform 0.18s ease;
+}
+
+.directory-node .directory-item.expanded .directory-arrow {
+  color: var(--color-text-secondary);
+}
+
+.directory-node .directory-children {
+  margin-left: 18px;
+  border-left: 1px solid var(--color-border);
+  padding-left: 6px;
+}
+
+.directory-node .file-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+  gap: 8px;
+  border-radius: var(--radius-sm);
+  margin-left: 16px;
+}
+
+.directory-node .file-item:hover {
+  background: var(--color-surface-hover);
+}
+
+.directory-node .file-item.active {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+}
+
+.directory-node .file-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 3px;
+  height: 18px;
+  border-radius: 0 3px 3px 0;
+  background: var(--color-accent);
+}
+
+.directory-node .file-icon {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+}
+
+.directory-node .file-item.active .file-icon {
+  color: var(--color-accent-strong);
+}
+
+.directory-node .file-name {
+  flex: 1;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

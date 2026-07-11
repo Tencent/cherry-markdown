@@ -1,0 +1,75 @@
+.status-bar {
+  height: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: var(--color-surface-panel);
+  border-top: 1px solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  user-select: none;
+}
+
+.status-left,
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.save-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+
+.save-dot.dirty {
+  background: var(--color-danger);
+}
+
+.status-bar .file-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  color: var(--color-text);
+  max-width: 320px;
+}
+
+.status-bar .file-name.clickable {
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+
+.status-bar .file-name.clickable:hover {
+  color: var(--color-accent-strong);
+  text-decoration: underline;
+}
+
+.status-bar .file-name.clickable:active {
+  opacity: 0.8;
+}
+
+.file-change-time {
+  white-space: nowrap;
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.status-item {
+  white-space: nowrap;
+  color: var(--color-text-secondary);
+}
+
+.status-sep {
+  width: 1px;
+  height: 12px;
+  background: var(--color-border-strong);
+}
