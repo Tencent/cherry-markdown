@@ -4,6 +4,7 @@ export { default as FolderIcon } from './FolderIcon';
 export { default as ExpandIcon } from './ExpandIcon';
 export { default as ArrowIcon } from './ArrowIcon';
 export { default as AddIcon } from './AddIcon';
+export { default as LocateIcon } from './LocateIcon';
 export { default as RefreshIcon } from './RefreshIcon';
 
 // 图标类型定义

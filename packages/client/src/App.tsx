@@ -56,6 +56,7 @@ export default defineComponent({
       tauriHandlers: {
         onNewFile: fileOperations.newFile,
         onOpenFile: fileOperations.openFile,
+        onOpenFilePath: fileOperations.openFilePath,
         onSave: fileOperations.saveMarkdown,
         onSaveAs: fileOperations.saveAsNewMarkdown,
         onToggleToolbar: editor.toggleToolbar,

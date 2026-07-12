@@ -18,6 +18,7 @@ export type RequestSaveEvent = CustomEvent<RequestSaveDetail>;
 interface TauriHandlers {
   onNewFile: () => any;
   onOpenFile: () => any;
+  onOpenFilePath: (filePath: string) => any;
   onSave: () => any;
   onSaveAs: () => any;
   onToggleToolbar: () => any;
@@ -47,6 +48,7 @@ export function useAppEvents({ onOpenFileFromSidebar, onRequestSave, tauriHandle
       const unlisteners = await Promise.all([
         listen(TAURI_EVENTS.NEW_FILE, tauriHandlers.onNewFile),
         listen(TAURI_EVENTS.OPEN_FILE, tauriHandlers.onOpenFile),
+        listen<string>(TAURI_EVENTS.OPEN_FILE_PATH, (event) => tauriHandlers.onOpenFilePath(event.payload)),
         listen(TAURI_EVENTS.SAVE, tauriHandlers.onSave),
         listen(TAURI_EVENTS.SAVE_AS, tauriHandlers.onSaveAs),
         listen(TAURI_EVENTS.TOGGLE_TOOLBAR, tauriHandlers.onToggleToolbar),

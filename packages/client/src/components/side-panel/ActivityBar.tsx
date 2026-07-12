@@ -1,5 +1,6 @@
 import { defineComponent, h, type PropType } from 'vue';
 import { ArrowIcon } from '../icons';
+import IconTooltip from './IconTooltip';
 import type { ActivityPanelDefinition } from './types';
 
 export default defineComponent({
@@ -34,28 +35,41 @@ export default defineComponent({
           { class: 'activity-buttons' },
           props.panels.map((panel) =>
             h(
-              'button',
+              IconTooltip,
+              { key: panel.id, label: panel.label, placement: 'right' },
               {
-                key: panel.id,
-                class: ['activity-btn', { active: panel.id === props.activePanelId }],
-                title: panel.label,
-                'aria-label': panel.label,
-                onClick: () => emit('selectPanel', panel.id),
+                default: () =>
+                  h(
+                    'button',
+                    {
+                      class: ['activity-btn', { active: panel.id === props.activePanelId }],
+                      title: panel.label,
+                      'aria-label': panel.label,
+                      onClick: () => emit('selectPanel', panel.id),
+                    },
+                    [h(panel.icon, { size: 18 })],
+                  ),
               },
-              [h(panel.icon, { size: 18 })],
             ),
           ),
         ),
         h('div', { class: 'activity-footer' }, [
           h(
-            'button',
+            IconTooltip,
+            { label: props.isCollapsed ? '展开侧边栏' : '折叠侧边栏', placement: 'right' },
             {
-              class: 'activity-btn compact',
-              title: props.isCollapsed ? '展开侧边栏' : '折叠侧边栏',
-              'aria-label': props.isCollapsed ? '展开侧边栏' : '折叠侧边栏',
-              onClick: () => emit('toggleCollapse'),
+              default: () =>
+                h(
+                  'button',
+                  {
+                    class: 'activity-btn compact',
+                    title: props.isCollapsed ? '展开侧边栏' : '折叠侧边栏',
+                    'aria-label': props.isCollapsed ? '展开侧边栏' : '折叠侧边栏',
+                    onClick: () => emit('toggleCollapse'),
+                  },
+                  [h(ArrowIcon, { size: 14, direction: props.isCollapsed ? 'right' : 'left' })],
+                ),
             },
-            [h(ArrowIcon, { size: 14, direction: props.isCollapsed ? 'right' : 'left' })],
           ),
           h('span', { class: 'version-text', title: '当前版本' }, `v${props.version}`),
         ]),

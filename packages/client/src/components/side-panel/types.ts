@@ -11,4 +11,5 @@ export interface PanelHeaderAction {
   label: string;
   icon: Component;
   disabled?: boolean;
+  disabledReason?: string;
 }

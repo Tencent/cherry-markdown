@@ -1,8 +1,9 @@
 import { computed, defineComponent, h, ref, shallowRef, type Component } from 'vue';
 import ExplorerPanel from './ExplorerPanel';
 import RecentPanel from './RecentPanel';
-import { ArrowIcon, FileIcon, FolderIcon, RefreshIcon } from './icons';
+import { FileIcon, FolderIcon, LocateIcon, RefreshIcon } from './icons';
 import { useSidePanelState } from './composables/useSidePanelState';
+import { useFileStore } from '../store';
 import ActivityBar from './side-panel/ActivityBar';
 import PanelHeader from './side-panel/PanelHeader';
 import type { ActivityPanelDefinition, PanelHeaderAction } from './side-panel/types';
@@ -34,6 +35,7 @@ export default defineComponent({
   name: 'SidePanelManager',
   setup() {
     const version = __APP_VERSION__;
+    const fileStore = useFileStore();
     const panels = shallowRef<PanelDefinition[]>([
       {
         id: 'explorer',
@@ -67,7 +69,13 @@ export default defineComponent({
         return [
           { id: 'open-directory', label: '打开目录', icon: FolderIcon },
           { id: 'refresh-directory', label: '刷新目录', icon: RefreshIcon },
-          { id: 'reveal-current', label: '定位当前文件', icon: ArrowIcon },
+          {
+            id: 'reveal-current',
+            label: '定位当前文件',
+            icon: LocateIcon,
+            disabled: !fileStore.currentFilePath,
+            disabledReason: '当前没有打开的文件',
+          },
         ];
       }
 

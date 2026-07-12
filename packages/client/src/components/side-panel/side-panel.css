@@ -97,6 +97,60 @@
   line-height: 1.2;
 }
 
+.icon-tooltip {
+  position: relative;
+  display: inline-flex;
+}
+
+.icon-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  z-index: 10020;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  white-space: nowrap;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  background: #1f2430;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.2;
+  box-shadow: var(--shadow-md);
+  transition:
+    opacity 0.12s ease,
+    transform 0.12s ease,
+    visibility 0.12s ease;
+}
+
+.icon-tooltip.placement-right::after {
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translate(-4px, -50%);
+}
+
+.icon-tooltip.placement-bottom::after {
+  left: 50%;
+  top: calc(100% + 8px);
+  transform: translate(-50%, -4px);
+}
+
+.icon-tooltip:hover::after,
+.icon-tooltip:focus-within::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+.icon-tooltip.placement-right:hover::after,
+.icon-tooltip.placement-right:focus-within::after {
+  transform: translate(0, -50%);
+}
+
+.icon-tooltip.placement-bottom:hover::after,
+.icon-tooltip.placement-bottom:focus-within::after {
+  transform: translate(-50%, 0);
+}
+
 .panel-surface {
   background: var(--color-surface-panel);
   display: flex;

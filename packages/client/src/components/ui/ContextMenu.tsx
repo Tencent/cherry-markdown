@@ -1,4 +1,4 @@
-import { defineComponent, h, type PropType } from 'vue';
+import { computed, defineComponent, h, type PropType } from 'vue';
 import type { FileInfo } from '../types';
 import ContextMenuList from './ContextMenuList';
 import './ui.css';
@@ -30,12 +30,25 @@ export default defineComponent({
     close: () => true,
   },
   setup(props, { emit }) {
+    const menuPosition = computed(() => {
+      const padding = 8;
+      const estimatedWidth = 180;
+      const estimatedHeight = props.menuType === 'recent' ? 116 : 82;
+      const maxLeft = Math.max(padding, window.innerWidth - estimatedWidth - padding);
+      const maxTop = Math.max(padding, window.innerHeight - estimatedHeight - padding);
+
+      return {
+        left: `${Math.min(Math.max(props.x, padding), maxLeft)}px`,
+        top: `${Math.min(Math.max(props.y, padding), maxTop)}px`,
+      };
+    });
+
     return () =>
       h(
         'div',
         {
           class: 'context-menu',
-          style: { left: `${props.x}px`, top: `${props.y}px` },
+          style: menuPosition.value,
           onClick: (event: MouseEvent) => event.stopPropagation(),
         },
         [

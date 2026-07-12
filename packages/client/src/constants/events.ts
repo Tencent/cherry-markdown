@@ -4,6 +4,7 @@ export const TAURI_EVENTS = {
   SAVE: 'save',
   SAVE_AS: 'save_as',
   TOGGLE_TOOLBAR: 'toggle_toolbar',
+  OPEN_FILE_PATH: 'open_file_path',
 } as const;
 
 export const WINDOW_EVENTS = {

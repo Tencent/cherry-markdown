@@ -138,18 +138,38 @@ export function useAppFileOperations({
     }
   };
 
-  const tryLoadLaunchFile = async (): Promise<boolean> => {
-    try {
-      const rawPath = await invoke<string | null>('get_launch_file_path');
-      if (!rawPath) return false;
+  const openFilePath = async (filePath: string): Promise<FileOperationResult> => {
+    if (isLoading.value) return { success: false, error: DIALOGS.CANCELLED_UNSAVED };
+    if (!(await canLeaveCurrentFile())) {
+      return { success: false, error: DIALOGS.CANCELLED_UNSAVED };
+    }
 
-      const normalizedPath = normalizePath(rawPath);
+    isLoading.value = true;
+    try {
+      const normalizedPath = normalizePath(filePath);
       const markdown = await readTextFile(normalizedPath);
       setMarkdown(markdown);
       fileStore.setCurrentFilePath(normalizedPath);
       fileStore.addRecentFile(normalizedPath);
       await markClean(normalizedPath);
-      return true;
+
+      return { success: true, path: normalizedPath };
+    } catch (error) {
+      const message = `${MESSAGES.FILE.OPEN_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`;
+      notifyError(message);
+      return { success: false, error: error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR };
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const tryLoadLaunchFile = async (): Promise<boolean> => {
+    try {
+      const rawPath = await invoke<string | null>('get_launch_file_path');
+      if (!rawPath) return false;
+
+      const result = await openFilePath(rawPath);
+      return result.success;
     } catch (error) {
       console.warn('加载启动文件失败:', error);
       return false;
@@ -203,6 +223,7 @@ export function useAppFileOperations({
   return {
     newFile,
     openFile,
+    openFilePath,
     saveMarkdown,
     saveAsNewMarkdown,
     handleOpenFileFromSidebar,

@@ -1,4 +1,5 @@
 import { defineComponent, h, type PropType } from 'vue';
+import IconTooltip from './IconTooltip';
 import type { PanelHeaderAction } from './types';
 
 export default defineComponent({
@@ -32,16 +33,26 @@ export default defineComponent({
           { class: 'header-actions' },
           props.actions.map((action) =>
             h(
-              'button',
+              IconTooltip,
               {
                 key: action.id,
-                class: 'header-action',
-                title: action.label,
-                'aria-label': action.label,
-                disabled: action.disabled,
-                onClick: () => emit('action', action.id),
+                label: action.disabled && action.disabledReason ? action.disabledReason : action.label,
+                placement: 'bottom',
               },
-              [h(action.icon, { size: 16 })],
+              {
+                default: () =>
+                  h(
+                    'button',
+                    {
+                      class: 'header-action',
+                      title: action.disabled && action.disabledReason ? action.disabledReason : action.label,
+                      'aria-label': action.label,
+                      disabled: action.disabled,
+                      onClick: () => emit('action', action.id),
+                    },
+                    [h(action.icon, { size: 16 })],
+                  ),
+              },
             ),
           ),
         ),

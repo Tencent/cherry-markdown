@@ -6,7 +6,7 @@ mod utils;
 
 use std::path::PathBuf;
 use std::sync::Mutex;
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 
 // The file path that is passed to the app by the OS when the user
 // double-clicks a markdown file or picks "Open with Cherry Markdown".
@@ -15,6 +15,23 @@ use tauri::Manager;
 struct LaunchFilePath(Mutex<Option<String>>);
 
 const SUPPORTED_EXTS: &[&str] = &["md", "markdown", "txt", "text"];
+const OPEN_FILE_PATH_EVENT: &str = "open_file_path";
+
+fn supported_file_path(path: PathBuf) -> Option<String> {
+    if !path.is_file() {
+        return None;
+    }
+    let ext_ok = path
+        .extension()
+        .and_then(|e| e.to_str())
+        .map(|e| SUPPORTED_EXTS.contains(&e.to_lowercase().as_str()))
+        .unwrap_or(false);
+    if !ext_ok {
+        return None;
+    }
+    let abs = std::fs::canonicalize(&path).unwrap_or(path);
+    Some(abs.to_string_lossy().to_string())
+}
 
 /// Parse `std::env::args()` and return the first argument that
 /// looks like an existing markdown file we should open on launch.
@@ -30,23 +47,25 @@ fn detect_launch_file() -> Option<String> {
         if arg.starts_with('-') {
             continue;
         }
-        let path = PathBuf::from(&arg);
-        if !path.is_file() {
-            continue;
+        if let Some(path) = supported_file_path(PathBuf::from(&arg)) {
+            return Some(path);
         }
-        let ext_ok = path
-            .extension()
-            .and_then(|e| e.to_str())
-            .map(|e| SUPPORTED_EXTS.contains(&e.to_lowercase().as_str()))
-            .unwrap_or(false);
-        if !ext_ok {
-            continue;
-        }
-        // Prefer absolute path so the frontend can read it regardless of CWD.
-        let abs = std::fs::canonicalize(&path).unwrap_or(path);
-        return Some(abs.to_string_lossy().to_string());
     }
     None
+}
+
+fn remember_launch_file(app: &tauri::AppHandle, path: String) {
+    if let Some(state) = app.try_state::<LaunchFilePath>() {
+        if let Ok(mut guard) = state.0.lock() {
+            *guard = Some(path.clone());
+        }
+    }
+
+    let _ = app.emit(OPEN_FILE_PATH_EVENT, path);
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.show();
+        let _ = window.set_focus();
+    }
 }
 
 /// Return the file path that the OS asked us to open on launch
@@ -75,6 +94,18 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![get_launch_file_path])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app, event| {
+            if let tauri::RunEvent::Opened { urls } = event {
+                for url in urls {
+                    if let Ok(path) = url.to_file_path() {
+                        if let Some(file_path) = supported_file_path(path) {
+                            remember_launch_file(app, file_path);
+                            break;
+                        }
+                    }
+                }
+            }
+        });
 }

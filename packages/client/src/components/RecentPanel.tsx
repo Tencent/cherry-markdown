@@ -1,4 +1,4 @@
-import { defineComponent, h, ref } from 'vue';
+import { computed, defineComponent, h, ref } from 'vue';
 import { useFileStore } from '../store';
 import ContextMenu from './ui/ContextMenu';
 import { useFileManager } from './composables/useFileManager';
@@ -8,11 +8,26 @@ import './panels.css';
 const formatTime = (time: FileInfo['lastAccessed']): string => {
   if (!time) return '';
   const date = new Date(time);
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+};
+
+const formatDateKey = (time: FileInfo['lastAccessed']): string => {
+  const date = new Date(time || 0);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};
+
+const formatDateLabel = (dateKey: string): string => {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
   const today = new Date();
-  const isSameDay = date.toDateString() === today.toDateString();
-  const timeText = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-  if (isSameDay) return timeText;
-  return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${timeText}`;
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString()) return '今天';
+  if (date.toDateString() === yesterday.toDateString()) return '昨天';
+
+  const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  return `${year}年${String(month).padStart(2, '0')}月${String(day).padStart(2, '0')}日 ${weekdays[date.getDay()]}`;
 };
 
 const formatDirectory = (path: string): string => {
@@ -42,6 +57,21 @@ export default defineComponent({
       hideContextMenu,
     } = useFileManager(fileStore, ref(null));
 
+    const groupedRecentFiles = computed(() => {
+      const groups = new Map<string, FileInfo[]>();
+      for (const file of sortedRecentFiles.value) {
+        const key = formatDateKey(file.lastAccessed);
+        const group = groups.get(key) || [];
+        group.push(file);
+        groups.set(key, group);
+      }
+      return Array.from(groups.entries()).map(([dateKey, files]) => ({
+        dateKey,
+        label: formatDateLabel(dateKey),
+        files,
+      }));
+    });
+
     const openRecentFile = async (): Promise<void> => {
       await openExistingFile();
     };
@@ -65,29 +95,40 @@ export default defineComponent({
               h('button', { type: 'button', onClick: openRecentFile }, '打开文件'),
             ])
           : h(
-              'ul',
+              'div',
               { class: 'recent-list' },
-              sortedRecentFiles.value.map((file) =>
-                h(
-                  'li',
-                  {
-                    key: file.path,
-                    class: { active: file.path === currentFilePath.value },
-                    title: file.path,
-                    onClick: () => openRecent(file.path),
-                    onContextmenu: (event: MouseEvent) => {
-                      event.preventDefault();
-                      showContextMenu(event, file);
-                    },
-                  },
-                  [
-                    h('div', { class: 'file-row' }, [
-                      h('span', { class: 'file-name' }, file.name),
-                      h('span', { class: 'file-time' }, formatTime(file.lastAccessed)),
-                    ]),
-                    h('div', { class: 'file-path' }, formatDirectory(file.path)),
-                  ],
-                ),
+              groupedRecentFiles.value.map((group) =>
+                h('section', { key: group.dateKey, class: 'recent-group' }, [
+                  h('div', { class: 'recent-group-title' }, [
+                    h('span', group.label),
+                    h('span', `${group.files.length} 个文件`),
+                  ]),
+                  h(
+                    'ul',
+                    group.files.map((file) =>
+                      h(
+                        'li',
+                        {
+                          key: file.path,
+                          class: { active: file.path === currentFilePath.value },
+                          title: file.path,
+                          onClick: () => openRecent(file.path),
+                          onContextmenu: (event: MouseEvent) => {
+                            event.preventDefault();
+                            showContextMenu(event, file);
+                          },
+                        },
+                        [
+                          h('div', { class: 'file-row' }, [
+                            h('span', { class: 'file-name' }, file.name),
+                            h('span', { class: 'file-time' }, formatTime(file.lastAccessed)),
+                          ]),
+                          h('div', { class: 'file-path' }, formatDirectory(file.path)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ]),
               ),
             ),
         contextMenu.value.visible
