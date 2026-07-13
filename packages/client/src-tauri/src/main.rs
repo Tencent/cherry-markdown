@@ -96,12 +96,13 @@ fn main() {
         .invoke_handler(tauri::generate_handler![get_launch_file_path])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
-        .run(|app, event| {
-            if let tauri::RunEvent::Opened { urls } = event {
+        .run(|_app, _event| {
+            #[cfg(target_os = "macos")]
+            if let tauri::RunEvent::Opened { urls } = _event {
                 for url in urls {
                     if let Ok(path) = url.to_file_path() {
                         if let Some(file_path) = supported_file_path(path) {
-                            remember_launch_file(app, file_path);
+                            remember_launch_file(_app, file_path);
                             break;
                         }
                     }
