@@ -211,6 +211,8 @@ export default class FloatMenu extends Toolbar {
     }
     this.options.dom.style.display = 'inline-block';
     this.options.dom.style.left = `${codeWrapPaddingLeft}px`;
+    this.options.dom.style.height = computedLinesStyle.lineHeight;
+    this.options.dom.style.lineHeight = computedLinesStyle.lineHeight;
 
     // 当配置 codemirror.placeholder 时，测量 placeholder 中文本的范围
     // 将浮动工具栏定位到 placeholder 文本后面

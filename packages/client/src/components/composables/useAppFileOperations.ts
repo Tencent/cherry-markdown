@@ -55,6 +55,7 @@ export function useAppFileOperations({
       const normalizedPath = normalizePath(path);
       await writeTextFile(normalizedPath, getMarkdown());
       fileStore.setCurrentFilePath(normalizedPath);
+      fileStore.clearUntitledDraft();
       fileStore.addRecentFile(normalizedPath);
       fileStore.markSaved(normalizedPath);
       await markClean(normalizedPath);
@@ -94,8 +95,9 @@ export function useAppFileOperations({
   const newFile = async (): Promise<void> => {
     if (!(await canLeaveCurrentFile())) return;
     setMarkdown('');
-    fileStore.setCurrentFilePath('');
-    await markClean(null);
+    fileStore.startUntitledDraft();
+    setUnsavedChanges(true);
+    await updateTitle(null, true);
   };
 
   const openFile = async (): Promise<FileOperationResult> => {
@@ -124,6 +126,7 @@ export function useAppFileOperations({
       const normalizedPath = normalizePath(path);
       const markdown = await readTextFile(normalizedPath);
       setMarkdown(markdown);
+      fileStore.clearUntitledDraft();
       fileStore.setCurrentFilePath(normalizedPath);
       fileStore.addRecentFile(normalizedPath);
       await markClean(normalizedPath);
@@ -149,6 +152,7 @@ export function useAppFileOperations({
       const normalizedPath = normalizePath(filePath);
       const markdown = await readTextFile(normalizedPath);
       setMarkdown(markdown);
+      fileStore.clearUntitledDraft();
       fileStore.setCurrentFilePath(normalizedPath);
       fileStore.addRecentFile(normalizedPath);
       await markClean(normalizedPath);
@@ -202,6 +206,7 @@ export function useAppFileOperations({
     const normalizedPath = normalizePath(filePath);
     setMarkdown(content);
     scrollPreviewToTop();
+    fileStore.clearUntitledDraft();
     fileStore.setCurrentFilePath(normalizedPath);
     await markClean(normalizedPath);
   };

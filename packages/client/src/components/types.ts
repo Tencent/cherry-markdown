@@ -7,6 +7,8 @@ export interface FileInfo {
   lastSaved?: number | null;
   size?: number;
   type?: string;
+  isDraft?: boolean;
+  unsaved?: boolean;
 }
 
 // 目录节点类型定义
@@ -48,10 +50,10 @@ export interface FileFilter {
 }
 
 // 文件操作结果类型
-export interface FileOperationResult {
+export interface FileOperationResult<T = unknown> {
   success: boolean;
   error?: string;
-  data?: any;
+  data?: T;
   path?: string;
 }
 
@@ -114,10 +116,10 @@ export interface FileStore {
 }
 
 // 工具函数返回类型
-export interface DirectoryStructureResult {
+export interface DirectoryStructureResult<T = DirectoryNode[]> {
   success: boolean;
   error?: string;
-  data?: DirectoryNode[];
+  data?: T;
 }
 
 // 常量定义统一从 constants 中导出

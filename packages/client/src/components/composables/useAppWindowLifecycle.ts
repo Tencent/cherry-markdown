@@ -33,9 +33,11 @@ export function useAppWindowLifecycle({
     if (path) {
       const pathParts = path.split(/[\\/]/);
       fileName = pathParts[pathParts.length - 1].replace(/\.[^.]+$/, '');
+    } else if (fileStore.untitledDraft) {
+      fileName = fileStore.untitledDraft.name.replace(/\.[^.]+$/, '');
     }
     const unsavedIndicator = unsaved ? '● ' : '';
-    const title = path ? `${unsavedIndicator}${fileName}` : 'Cherry Markdown';
+    const title = fileName ? `${unsavedIndicator}${fileName}` : 'Cherry Markdown';
     await appWindow.setTitle(title);
   };
 

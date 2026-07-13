@@ -14,14 +14,17 @@ export interface RequestSaveDetail {
 export type OpenFileFromSidebarEvent = CustomEvent<OpenFileFromSidebarDetail>;
 export type RequestSaveEvent = CustomEvent<RequestSaveDetail>;
 
+type AsyncVoidHandler = () => void | Promise<void>;
+type AsyncPathHandler = (filePath: string) => void | Promise<void>;
+
 // ========== Handler 类型定义 ==========
 interface TauriHandlers {
-  onNewFile: () => any;
-  onOpenFile: () => any;
-  onOpenFilePath: (filePath: string) => any;
-  onSave: () => any;
-  onSaveAs: () => any;
-  onToggleToolbar: () => any;
+  onNewFile: AsyncVoidHandler;
+  onOpenFile: AsyncVoidHandler;
+  onOpenFilePath: AsyncPathHandler;
+  onSave: AsyncVoidHandler;
+  onSaveAs: AsyncVoidHandler;
+  onToggleToolbar: AsyncVoidHandler;
 }
 
 interface AppEventHandlers {
@@ -32,26 +35,45 @@ interface AppEventHandlers {
 
 export function useAppEvents({ onOpenFileFromSidebar, onRequestSave, tauriHandlers }: AppEventHandlers) {
   const unlistenFns: UnlistenFn[] = [];
+  const handleOpenFileFromSidebarEvent = (event: Event): void => {
+    onOpenFileFromSidebar(event as OpenFileFromSidebarEvent);
+  };
+
+  const handleRequestSaveEvent = (event: Event): void => {
+    onRequestSave(event as RequestSaveEvent);
+  };
 
   const registerWindowEvents = (): void => {
-    window.addEventListener(WINDOW_EVENTS.OPEN_FILE_FROM_SIDEBAR, onOpenFileFromSidebar as (e: Event) => void);
-    window.addEventListener(WINDOW_EVENTS.REQUEST_SAVE, onRequestSave as (e: Event) => void);
+    window.addEventListener(WINDOW_EVENTS.OPEN_FILE_FROM_SIDEBAR, handleOpenFileFromSidebarEvent);
+    window.addEventListener(WINDOW_EVENTS.REQUEST_SAVE, handleRequestSaveEvent);
   };
 
   const unregisterWindowEvents = (): void => {
-    window.removeEventListener(WINDOW_EVENTS.OPEN_FILE_FROM_SIDEBAR, onOpenFileFromSidebar as (e: Event) => void);
-    window.removeEventListener(WINDOW_EVENTS.REQUEST_SAVE, onRequestSave as (e: Event) => void);
+    window.removeEventListener(WINDOW_EVENTS.OPEN_FILE_FROM_SIDEBAR, handleOpenFileFromSidebarEvent);
+    window.removeEventListener(WINDOW_EVENTS.REQUEST_SAVE, handleRequestSaveEvent);
   };
 
   const registerTauriEvents = async (): Promise<void> => {
     try {
       const unlisteners = await Promise.all([
-        listen(TAURI_EVENTS.NEW_FILE, tauriHandlers.onNewFile),
-        listen(TAURI_EVENTS.OPEN_FILE, tauriHandlers.onOpenFile),
-        listen<string>(TAURI_EVENTS.OPEN_FILE_PATH, (event) => tauriHandlers.onOpenFilePath(event.payload)),
-        listen(TAURI_EVENTS.SAVE, tauriHandlers.onSave),
-        listen(TAURI_EVENTS.SAVE_AS, tauriHandlers.onSaveAs),
-        listen(TAURI_EVENTS.TOGGLE_TOOLBAR, tauriHandlers.onToggleToolbar),
+        listen(TAURI_EVENTS.NEW_FILE, () => {
+          void tauriHandlers.onNewFile();
+        }),
+        listen(TAURI_EVENTS.OPEN_FILE, () => {
+          void tauriHandlers.onOpenFile();
+        }),
+        listen<string>(TAURI_EVENTS.OPEN_FILE_PATH, (event) => {
+          void tauriHandlers.onOpenFilePath(event.payload);
+        }),
+        listen(TAURI_EVENTS.SAVE, () => {
+          void tauriHandlers.onSave();
+        }),
+        listen(TAURI_EVENTS.SAVE_AS, () => {
+          void tauriHandlers.onSaveAs();
+        }),
+        listen(TAURI_EVENTS.TOGGLE_TOOLBAR, () => {
+          void tauriHandlers.onToggleToolbar();
+        }),
       ]);
       // 过滤掉可能的 null/undefined
       unlisteners.forEach((fn) => {
