@@ -1,10 +1,11 @@
 // 图标组件库索引文件
-export { default as FileIcon } from './FileIcon.vue';
-export { default as FolderIcon } from './FolderIcon.vue';
-export { default as ExpandIcon } from './ExpandIcon.vue';
-export { default as ArrowIcon } from './ArrowIcon.vue';
-export { default as AddIcon } from './AddIcon.vue';
-export { default as RefreshIcon } from './RefreshIcon.vue';
+export { default as FileIcon } from './FileIcon';
+export { default as FolderIcon } from './FolderIcon';
+export { default as ExpandIcon } from './ExpandIcon';
+export { default as ArrowIcon } from './ArrowIcon';
+export { default as AddIcon } from './AddIcon';
+export { default as LocateIcon } from './LocateIcon';
+export { default as RefreshIcon } from './RefreshIcon';
 
 // 图标类型定义
 export interface IconProps {
