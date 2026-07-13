@@ -78,6 +78,23 @@ fn get_launch_file_path(state: tauri::State<'_, LaunchFilePath>) -> Option<Strin
     guard.take()
 }
 
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+fn handle_opened_event(app: &tauri::AppHandle, event: tauri::RunEvent) {
+    if let tauri::RunEvent::Opened { urls } = event {
+        for url in urls {
+            if let Ok(path) = url.to_file_path() {
+                if let Some(file_path) = supported_file_path(path) {
+                    remember_launch_file(app, file_path);
+                    break;
+                }
+            }
+        }
+    }
+}
+
+#[cfg(not(any(target_os = "macos", target_os = "ios")))]
+fn handle_opened_event(_app: &tauri::AppHandle, _event: tauri::RunEvent) {}
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
@@ -97,15 +114,6 @@ fn main() {
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app, event| {
-            if let tauri::RunEvent::Opened { urls } = event {
-                for url in urls {
-                    if let Ok(path) = url.to_file_path() {
-                        if let Some(file_path) = supported_file_path(path) {
-                            remember_launch_file(app, file_path);
-                            break;
-                        }
-                    }
-                }
-            }
+            handle_opened_event(app, event);
         });
 }

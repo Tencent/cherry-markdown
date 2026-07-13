@@ -7,8 +7,11 @@ type RecentFile = FileInfo;
 interface FileState {
   currentFilePath: string | null;
   recentFiles: RecentFile[];
+  untitledDraft: RecentFile | null;
   sidebarCollapsed: boolean;
 }
+
+const UNTITLED_DRAFT_PATH = 'cherry://draft/untitled';
 
 // 持久化存储键名
 const STORAGE_KEYS = {
@@ -89,6 +92,7 @@ export const useFileStore = defineStore('file', {
     return {
       currentFilePath: normalizeStorePath(lastOpenedFile || savedState.currentFilePath || '') || null,
       recentFiles,
+      untitledDraft: null,
       sidebarCollapsed: savedState.sidebarCollapsed || false,
     };
   },
@@ -112,7 +116,35 @@ export const useFileStore = defineStore('file', {
   actions: {
     setCurrentFilePath(filePath: string | null) {
       this.currentFilePath = filePath ? normalizeStorePath(filePath) : filePath;
+      if (this.currentFilePath) {
+        this.untitledDraft = null;
+      }
       this.saveState();
+    },
+
+    startUntitledDraft() {
+      const now = Date.now();
+      this.currentFilePath = null;
+      this.untitledDraft = {
+        path: UNTITLED_DRAFT_PATH,
+        name: '未命名.md',
+        lastAccessed: now,
+        lastOpened: now,
+        lastSaved: null,
+        type: 'draft',
+        isDraft: true,
+        unsaved: true,
+      };
+    },
+
+    touchUntitledDraft() {
+      if (!this.untitledDraft) return;
+      this.untitledDraft.lastAccessed = Date.now();
+      this.untitledDraft.unsaved = true;
+    },
+
+    clearUntitledDraft() {
+      this.untitledDraft = null;
     },
 
     addRecentFile(filePath: string) {
@@ -184,6 +216,7 @@ export const useFileStore = defineStore('file', {
     clearAllFileMemory() {
       this.currentFilePath = null;
       this.recentFiles = [];
+      this.untitledDraft = null;
       localStorage.removeItem(STORAGE_KEYS.FILE_STATE);
       localStorage.removeItem(STORAGE_KEYS.LAST_OPENED_FILE);
     },

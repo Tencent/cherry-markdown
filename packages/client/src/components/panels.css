@@ -92,7 +92,13 @@
   gap: 2px;
 }
 
-.recent-panel .recent-group-title {
+.explorer-panel .draft-section {
+  padding: 8px 8px 6px 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.recent-panel .recent-group-title,
+.explorer-panel .recent-group-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -103,7 +109,8 @@
   font-weight: 600;
 }
 
-.recent-panel .recent-group ul {
+.recent-panel .recent-group ul,
+.explorer-panel .draft-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -112,7 +119,8 @@
   gap: 2px;
 }
 
-.recent-panel .recent-list li {
+.recent-panel .recent-list li,
+.explorer-panel .draft-file {
   position: relative;
   padding: 7px 10px;
   border-radius: var(--radius-sm);
@@ -127,12 +135,25 @@
   background: var(--color-surface-hover);
 }
 
-.recent-panel .recent-list li.active {
+.explorer-panel .draft-file {
+  color: var(--color-text);
+  cursor: default;
+}
+
+.recent-panel .recent-list li.draft,
+.explorer-panel .draft-file {
+  border: 1px dashed var(--color-border-strong);
+  background: var(--color-surface);
+}
+
+.recent-panel .recent-list li.active,
+.explorer-panel .draft-file.active {
   background: var(--color-accent-soft);
   color: var(--color-accent-strong);
 }
 
-.recent-panel .recent-list li.active::before {
+.recent-panel .recent-list li.active::before,
+.explorer-panel .draft-file.active::before {
   content: '';
   position: absolute;
   left: 0;
@@ -142,14 +163,16 @@
   background: var(--color-accent);
 }
 
-.recent-panel .file-row {
+.recent-panel .file-row,
+.explorer-panel .file-row {
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
 }
 
-.recent-panel .file-name {
+.recent-panel .file-name,
+.explorer-panel .file-name {
   display: inline-block;
   flex: 1;
   min-width: 0;
@@ -160,14 +183,16 @@
   white-space: nowrap;
 }
 
-.recent-panel .file-time {
+.recent-panel .file-time,
+.explorer-panel .file-time {
   margin-left: auto;
   font-size: 11px;
   color: var(--color-text-muted);
   flex-shrink: 0;
 }
 
-.recent-panel .file-path {
+.recent-panel .file-path,
+.explorer-panel .file-path {
   margin-top: 3px;
   font-size: 11px;
   color: var(--color-text-muted);
@@ -177,6 +202,8 @@
 }
 
 .recent-panel .recent-list li.active .file-time,
-.recent-panel .recent-list li.active .file-path {
+.recent-panel .recent-list li.active .file-path,
+.explorer-panel .draft-file.active .file-time,
+.explorer-panel .draft-file.active .file-path {
   color: var(--color-accent-strong);
 }

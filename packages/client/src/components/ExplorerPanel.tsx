@@ -140,6 +140,31 @@ export default defineComponent({
       }
     };
 
+    const renderDraftFile = () => {
+      const draft = fileStore.untitledDraft;
+      if (!draft) return null;
+
+      return h('section', { class: 'draft-section' }, [
+        h('div', { class: 'recent-group-title' }, [h('span', '临时文件'), h('span', '未保存')]),
+        h('ul', { class: 'draft-list' }, [
+          h(
+            'li',
+            {
+              class: ['draft-file', { active: !currentFilePath.value }],
+              title: '未保存的新建文件，保存后会写入磁盘',
+            },
+            [
+              h('div', { class: 'file-row' }, [
+                h('span', { class: 'file-name' }, draft.name),
+                h('span', { class: 'file-time' }, '未保存'),
+              ]),
+              h('div', { class: 'file-path' }, '临时文档 - 保存后写入磁盘'),
+            ],
+          ),
+        ]),
+      ]);
+    };
+
     expose({ openDirectory, refreshDirectory, revealCurrentFile });
     void restore();
 
@@ -148,21 +173,25 @@ export default defineComponent({
         return h('div', { class: 'empty-state' }, '加载中...');
       }
 
-      if (!nodes.value.length) {
+      if (!nodes.value.length && !fileStore.untitledDraft) {
         return h('div', { class: 'empty-state actionable' }, [
           h('p', currentDirPath.value ? '当前目录没有可编辑文件' : '请选择一个工作目录'),
           h('button', { type: 'button', onClick: openDirectory }, '打开目录'),
         ]);
       }
 
-      return h(DirectoryTree, {
-        class: 'tree-wrapper',
-        nodes: nodes.value,
-        currentFilePath: currentFilePath.value,
-        onToggleDirectory: toggleDirectory,
-        onOpenFile: openFile,
-        onContextMenu: showContextMenu,
-      });
+      return h('div', { class: 'tree-wrapper' }, [
+        renderDraftFile(),
+        nodes.value.length
+          ? h(DirectoryTree, {
+              nodes: nodes.value,
+              currentFilePath: currentFilePath.value,
+              onToggleDirectory: toggleDirectory,
+              onOpenFile: openFile,
+              onContextMenu: showContextMenu,
+            })
+          : null,
+      ]);
     };
 
     return () =>

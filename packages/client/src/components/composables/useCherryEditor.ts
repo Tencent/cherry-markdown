@@ -1,8 +1,7 @@
 import { ref } from 'vue';
 import { cherryInstance } from '../CherryMarkdown';
+import type { CherryEditorInstance } from '../editorTypes';
 import { setEditorInstance } from './useEditor';
-
-export type CherryEditorInstance = ReturnType<typeof cherryInstance>;
 
 interface UseCherryEditorOptions {
   onContentChanged: () => void;
@@ -30,9 +29,10 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
 
   const initEditor = (): void => {
     toolbarVisible.value = !document.querySelector('.cherry--no-toolbar');
-    editor = cherryInstance();
-    setEditorInstance(editor);
-    editor.on('afterChange', handleAfterChange);
+    const instance = cherryInstance();
+    editor = instance;
+    setEditorInstance(instance);
+    instance.on('afterChange', handleAfterChange);
   };
 
   const setMarkdown = (markdown: string): void => {
@@ -47,7 +47,10 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
   };
 
   const toggleToolbar = (): void => {
-    getEditor().toolbar.toolbarHandlers.settings('toggleToolbar');
+    const toggleHandler = getEditor().toolbar.toolbarHandlers.settings;
+    if (typeof toggleHandler === 'function') {
+      toggleHandler('toggleToolbar');
+    }
     toolbarVisible.value = !toolbarVisible.value;
   };
 

@@ -1,7 +1,7 @@
 import { computed, defineComponent, h, ref, shallowRef, type Component } from 'vue';
 import ExplorerPanel from './ExplorerPanel';
 import RecentPanel from './RecentPanel';
-import { FileIcon, FolderIcon, LocateIcon, RefreshIcon } from './icons';
+import { AddIcon, FileIcon, FolderIcon, LocateIcon, RefreshIcon } from './icons';
 import { useSidePanelState } from './composables/useSidePanelState';
 import { useFileStore } from '../store';
 import ActivityBar from './side-panel/ActivityBar';
@@ -33,7 +33,10 @@ const actionMap: Record<string, keyof PanelExposeApi> = {
 
 export default defineComponent({
   name: 'SidePanelManager',
-  setup() {
+  emits: {
+    newFile: () => true,
+  },
+  setup(_, { emit }) {
     const version = __APP_VERSION__;
     const fileStore = useFileStore();
     const panels = shallowRef<PanelDefinition[]>([
@@ -67,6 +70,7 @@ export default defineComponent({
     const activePanelActions = computed<PanelHeaderAction[]>(() => {
       if (activePanelId.value === 'explorer') {
         return [
+          { id: 'new-file', label: '新建文件', icon: AddIcon },
           { id: 'open-directory', label: '打开目录', icon: FolderIcon },
           { id: 'refresh-directory', label: '刷新目录', icon: RefreshIcon },
           {
@@ -79,10 +83,18 @@ export default defineComponent({
         ];
       }
 
-      return [{ id: 'open-file', label: '打开文件', icon: FileIcon }];
+      return [
+        { id: 'new-file', label: '新建文件', icon: AddIcon },
+        { id: 'open-file', label: '打开文件', icon: FileIcon },
+      ];
     });
 
     const handlePanelAction = (actionId: string): void => {
+      if (actionId === 'new-file') {
+        emit('newFile');
+        return;
+      }
+
       const panel = panelRef.value;
       if (!panel) return;
 

@@ -153,7 +153,7 @@ export const loadDirectoryStructure = async (
 };
 
 // 创建新文件
-export const createNewFile = async (): Promise<FileOperationResult> => {
+export const createNewFile = async (): Promise<FileOperationResult<string>> => {
   try {
     const selected = await save({
       filters: [
@@ -185,7 +185,7 @@ export const createNewFile = async (): Promise<FileOperationResult> => {
 };
 
 // 打开现有文件
-export const openExistingFile = async (): Promise<FileOperationResult> => {
+export const openExistingFile = async (): Promise<FileOperationResult<string>> => {
   try {
     const selected = await open({
       filters: [
@@ -214,7 +214,7 @@ export const openExistingFile = async (): Promise<FileOperationResult> => {
 };
 
 // 打开目录
-export const openDirectoryDialog = async (): Promise<FileOperationResult> => {
+export const openDirectoryDialog = async (): Promise<FileOperationResult<string>> => {
   try {
     const selected = await open({
       directory: true,
@@ -238,7 +238,7 @@ export const openDirectoryDialog = async (): Promise<FileOperationResult> => {
 };
 
 // 读取文件内容
-export const readFileContent = async (filePath: string): Promise<FileOperationResult> => {
+export const readFileContent = async (filePath: string): Promise<FileOperationResult<string>> => {
   try {
     const content = await readTextFile(normalizePath(filePath));
     return { success: true, data: content };
@@ -296,13 +296,13 @@ export const formatTimestamp = (timestamp: number): string => {
 };
 
 // 防抖函数
-export const debounce = <T extends (...args: any[]) => any>(
-  func: T,
+export const debounce = <TArgs extends unknown[], TResult>(
+  func: (...args: TArgs) => TResult,
   wait: number,
-): ((...args: Parameters<T>) => void) => {
+): ((...args: TArgs) => void) => {
   let timeout: ReturnType<typeof setTimeout>;
 
-  return (...args: Parameters<T>) => {
+  return (...args: TArgs) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };
