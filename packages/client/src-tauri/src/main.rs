@@ -6,7 +6,9 @@ mod utils;
 
 use std::path::PathBuf;
 use std::sync::Mutex;
-use tauri::{Emitter, Manager};
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+use tauri::Emitter;
+use tauri::Manager;
 
 // The file path that is passed to the app by the OS when the user
 // double-clicks a markdown file or picks "Open with Cherry Markdown".
@@ -15,6 +17,8 @@ use tauri::{Emitter, Manager};
 struct LaunchFilePath(Mutex<Option<String>>);
 
 const SUPPORTED_EXTS: &[&str] = &["md", "markdown", "txt", "text"];
+
+#[cfg(any(target_os = "macos", target_os = "ios"))]
 const OPEN_FILE_PATH_EVENT: &str = "open_file_path";
 
 fn supported_file_path(path: PathBuf) -> Option<String> {
@@ -54,6 +58,7 @@ fn detect_launch_file() -> Option<String> {
     None
 }
 
+#[cfg(any(target_os = "macos", target_os = "ios"))]
 fn remember_launch_file(app: &tauri::AppHandle, path: String) {
     if let Some(state) = app.try_state::<LaunchFilePath>() {
         if let Ok(mut guard) = state.0.lock() {
