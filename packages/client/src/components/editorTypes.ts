@@ -19,9 +19,9 @@ export interface CherryEditorInstance {
     };
   };
   status?: {
-    toolbar?: 'show' | 'hide';
-    previewer?: 'show' | 'hide';
-    editor?: 'show' | 'hide';
+    toolbar?: string;
+    previewer?: string;
+    editor?: string;
   };
   getMarkdown(): string;
   setMarkdown(markdown: string): void;

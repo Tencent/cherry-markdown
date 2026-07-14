@@ -30,8 +30,10 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
   const initEditor = (): void => {
     toolbarVisible.value = !document.querySelector('.cherry--no-toolbar');
     const instance = cherryInstance();
-    editor = instance;
-    setEditorInstance(instance);
+    // Cherry 官方类型的部分字段（如 status）被推断为宽泛类型，与内部收窄接口存在结构差异，
+    // 通过 unknown 显式桥接，避免 TS 结构兼容报错
+    editor = instance as unknown as CherryEditorInstance;
+    setEditorInstance(instance as unknown as CherryEditorInstance);
     instance.on('afterChange', handleAfterChange);
   };
 
