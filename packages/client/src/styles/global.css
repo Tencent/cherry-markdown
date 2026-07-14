@@ -150,3 +150,14 @@ body {
 #markdown-editor .cm-scroller {
   overflow: auto !important;
 }
+
+#markdown-editor .cherry-flex-toc .cherry-toc-list {
+  height: clac(100% - 70px);
+  margin-top: 15px;
+}
+
+#markdown-editor .cherry-previewer--full {
+  max-width: 1024px;
+  margin: 0 auto;
+  border-left: none;
+}
