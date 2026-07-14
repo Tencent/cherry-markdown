@@ -1,0 +1,518 @@
+/**
+ * Copyright (C) 2021 Tencent.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import * as htmlparser2 from 'htmlparser2';
+
+/**
+ * @typedef {{ type: 'text'; text: string }} MiniProgramText
+ * @typedef {{ type: 'break' }} MiniProgramBreak
+ * @typedef {{ type: 'cursor' }} MiniProgramCursor
+ * @typedef {{ type: 'strong' | 'em' | 'code' | 'span' | 'underline' | 'strikethrough' | 'sub' | 'sup'; attrs?: Record<string, string>; children: MiniProgramInline[] }} MiniProgramInlineWrapper
+ * @typedef {{ type: 'link'; href: string; title?: string; attrs?: Record<string, string>; children: MiniProgramInline[] }} MiniProgramLink
+ * @typedef {{ type: 'image'; src: string; alt?: string; title?: string; attrs?: Record<string, string> }} MiniProgramImage
+ * @typedef {MiniProgramText | MiniProgramBreak | MiniProgramCursor | MiniProgramInlineWrapper | MiniProgramLink | MiniProgramImage} MiniProgramInline
+ *
+ * @typedef {{ type: 'paragraph'; attrs?: Record<string, string>; children: MiniProgramInline[] }} MiniProgramParagraphBlock
+ * @typedef {{ type: 'heading'; level: number; attrs?: Record<string, string>; children: MiniProgramInline[] }} MiniProgramHeadingBlock
+ * @typedef {{ type: 'blockquote'; attrs?: Record<string, string>; children: MiniProgramBlock[] }} MiniProgramBlockquoteBlock
+ * @typedef {{ type: 'list_item'; attrs?: Record<string, string>; children: MiniProgramBlock[] }} MiniProgramListItem
+ * @typedef {{ type: 'list'; ordered: boolean; attrs?: Record<string, string>; children: MiniProgramListItem[] }} MiniProgramListBlock
+ * @typedef {{ type: 'code_block'; lang: string; text: string; attrs?: Record<string, string> }} MiniProgramCodeBlock
+ * @typedef {{ type: 'html'; nodes: MiniProgramRichTextNode[] }} MiniProgramHtmlBlock
+ * @typedef {MiniProgramParagraphBlock | MiniProgramHeadingBlock | MiniProgramBlockquoteBlock | MiniProgramListBlock | MiniProgramListItem | MiniProgramCodeBlock | MiniProgramImage | MiniProgramHtmlBlock} MiniProgramBlock
+ *
+ * @typedef {{ type: 'text'; text: string } | { name: string; attrs?: Record<string, string>; children?: MiniProgramRichTextNode[] }} MiniProgramRichTextNode
+ * @typedef {{ unknownTag?: 'html' | 'unwrap' | 'drop'; forceNoCursor?: boolean }} MiniProgramTransformOptions
+ */
+
+const BLOCK_TAGS = new Set([
+  'address',
+  'article',
+  'aside',
+  'blockquote',
+  'details',
+  'div',
+  'dl',
+  'fieldset',
+  'figcaption',
+  'figure',
+  'footer',
+  'form',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'header',
+  'hr',
+  'main',
+  'nav',
+  'ol',
+  'p',
+  'pre',
+  'section',
+  'table',
+  'ul',
+  'video',
+  'audio',
+]);
+
+const FALLBACK_TAGS = new Set(['table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'figure', 'video', 'audio']);
+const SKIP_TAGS = new Set(['script', 'style']);
+const INLINE_TAGS = new Set(['a', 'b', 'br', 'code', 'del', 'em', 'i', 's', 'span', 'strong', 'sub', 'sup', 'u']);
+
+/**
+ * @param {any} node
+ * @returns {node is { type: string; name: string; attribs?: Record<string, string>; children?: any[] }}
+ */
+function isTag(node) {
+  return node && (node.type === 'tag' || node.type === 'script' || node.type === 'style');
+}
+
+/**
+ * @param {any} node
+ * @returns {boolean}
+ */
+function isText(node) {
+  return node && node.type === 'text';
+}
+
+/**
+ * @param {any} node
+ * @returns {boolean}
+ */
+function isSkippableTag(node) {
+  return isTag(node) && SKIP_TAGS.has(String(node.name).toLowerCase());
+}
+
+/**
+ * @param {Record<string, string>} attrs
+ * @returns {Record<string, string>}
+ */
+function sanitizeAttrs(attrs = {}) {
+  /** @type {Record<string, string>} */
+  const safeAttrs = {};
+  Object.keys(attrs).forEach((key) => {
+    if (/^on/i.test(key)) {
+      return;
+    }
+    const value = attrs[key];
+    if ((key === 'href' || key === 'src') && /^\s*javascript:/i.test(String(value))) {
+      return;
+    }
+    safeAttrs[key] = value;
+  });
+  return safeAttrs;
+}
+
+/**
+ * @param {Record<string, string>} attrs
+ * @returns {boolean}
+ */
+function isCursorAttrs(attrs = {}) {
+  return /\bcherry-flow-session-cursor\b/.test(attrs.class || '');
+}
+
+/**
+ * @param {any} node
+ * @returns {string}
+ */
+function getText(node) {
+  if (!node) {
+    return '';
+  }
+  if (isText(node)) {
+    return node.data || '';
+  }
+  return (node.children || []).map(getText).join('');
+}
+
+/**
+ * @param {string | undefined} className
+ * @returns {string}
+ */
+function getLanguageFromClass(className = '') {
+  const match = String(className).match(/(?:^|\s)language-([^\s]+)/);
+  return match ? match[1] : '';
+}
+
+/**
+ * @param {any} node
+ * @param {(node: any) => boolean} predicate
+ * @returns {any}
+ */
+function findDescendant(node, predicate) {
+  if (!node) {
+    return null;
+  }
+  if (predicate(node)) {
+    return node;
+  }
+  const children = node.children || [];
+  for (let index = 0; index < children.length; index += 1) {
+    const found = findDescendant(children[index], predicate);
+    if (found) {
+      return found;
+    }
+  }
+  return null;
+}
+
+/**
+ * @param {any} node
+ * @returns {boolean}
+ */
+function isCodeBlockWrapper(node) {
+  if (!isTag(node)) {
+    return false;
+  }
+  const attrs = node.attribs || {};
+  return attrs['data-type'] === 'codeBlock' || /\bcherry-code-(?:expand|unExpand)\b/.test(attrs.class || '');
+}
+
+/**
+ * @param {any} node
+ * @returns {MiniProgramCodeBlock}
+ */
+function toCodeBlock(node) {
+  const pre = node.name === 'pre' ? node : findDescendant(node, (child) => isTag(child) && child.name === 'pre');
+  const code = findDescendant(pre, (child) => isTag(child) && child.name === 'code');
+  const wrapperAttrs = sanitizeAttrs(node.attribs || {});
+  const preAttrs = sanitizeAttrs(pre?.attribs || {});
+  const codeAttrs = sanitizeAttrs(code?.attribs || {});
+  const lang =
+    wrapperAttrs['data-lang'] ||
+    getLanguageFromClass(preAttrs.class) ||
+    getLanguageFromClass(codeAttrs.class) ||
+    '';
+  return {
+    type: 'code_block',
+    lang,
+    text: getText(code || pre || node),
+    attrs: wrapperAttrs,
+  };
+}
+
+/**
+ * @param {any} node
+ * @returns {MiniProgramImage}
+ */
+function toImage(node) {
+  const attrs = sanitizeAttrs(node.attribs || {});
+  return {
+    type: 'image',
+    src: attrs.src || '',
+    alt: attrs.alt || '',
+    title: attrs.title || '',
+    attrs,
+  };
+}
+
+/**
+ * @param {MiniProgramInline[]} children
+ * @returns {boolean}
+ */
+function hasVisibleInline(children) {
+  return children.some((child) => {
+    if (child.type === 'text') {
+      return child.text.trim() !== '';
+    }
+    return true;
+  });
+}
+
+/**
+ * @param {any[]} children
+ * @returns {any | null}
+ */
+function getOnlyImageChild(children = []) {
+  const meaningful = children.filter((child) => !(isText(child) && child.data.trim() === ''));
+  if (meaningful.length === 1 && isTag(meaningful[0]) && meaningful[0].name === 'img') {
+    return meaningful[0];
+  }
+  return null;
+}
+
+/**
+ * @param {any} node
+ * @returns {boolean}
+ */
+function isBlockLikeNode(node) {
+  if (!isTag(node)) {
+    return false;
+  }
+  const tagName = String(node.name).toLowerCase();
+  if (tagName === 'img') {
+    return true;
+  }
+  if (isCodeBlockWrapper(node)) {
+    return true;
+  }
+  return BLOCK_TAGS.has(tagName) || FALLBACK_TAGS.has(tagName) || !INLINE_TAGS.has(tagName);
+}
+
+/**
+ * @param {any[]} children
+ * @returns {boolean}
+ */
+function hasBlockChildren(children = []) {
+  return children.some((child) => isBlockLikeNode(child));
+}
+
+/**
+ * @param {any[]} children
+ * @param {MiniProgramTransformOptions} options
+ * @returns {MiniProgramBlock[]}
+ */
+function mixedChildrenToBlocks(children = [], options = {}) {
+  /** @type {MiniProgramBlock[]} */
+  const blocks = [];
+  /** @type {any[]} */
+  let inlineBuffer = [];
+  const flushInline = () => {
+    if (inlineBuffer.length === 0) {
+      return;
+    }
+    const inlineChildren = nodesToInline(inlineBuffer);
+    if (hasVisibleInline(inlineChildren)) {
+      blocks.push({ type: 'paragraph', children: inlineChildren });
+    }
+    inlineBuffer = [];
+  };
+  children.forEach((child) => {
+    if (isBlockLikeNode(child)) {
+      flushInline();
+      blocks.push(...nodeToBlocks(child, options));
+    } else {
+      inlineBuffer.push(child);
+    }
+  });
+  flushInline();
+  return blocks;
+}
+
+/**
+ * @param {any[]} nodes
+ * @returns {MiniProgramInline[]}
+ */
+function nodesToInline(nodes = []) {
+  return nodes.flatMap((node) => nodeToInline(node));
+}
+
+/**
+ * @param {any} node
+ * @returns {MiniProgramInline[]}
+ */
+function nodeToInline(node) {
+  if (!node || isSkippableTag(node)) {
+    return [];
+  }
+  if (isText(node)) {
+    return node.data ? [{ type: 'text', text: node.data }] : [];
+  }
+  if (!isTag(node)) {
+    return nodesToInline(node.children || []);
+  }
+  const tagName = String(node.name).toLowerCase();
+  const attrs = sanitizeAttrs(node.attribs || {});
+  if (tagName === 'br') {
+    return [{ type: 'break' }];
+  }
+  if (tagName === 'img') {
+    return [toImage(node)];
+  }
+  if (tagName === 'span' && isCursorAttrs(attrs)) {
+    return [{ type: 'cursor' }];
+  }
+  const children = nodesToInline(node.children || []);
+  switch (tagName) {
+    case 'a':
+      return [
+        {
+          type: 'link',
+          href: attrs.href || '',
+          ...(attrs.title ? { title: attrs.title } : {}),
+          attrs,
+          children,
+        },
+      ];
+    case 'strong':
+    case 'b':
+      return [{ type: 'strong', attrs, children }];
+    case 'em':
+    case 'i':
+      return [{ type: 'em', attrs, children }];
+    case 'code':
+      return [{ type: 'code', attrs, children }];
+    case 'u':
+      return [{ type: 'underline', attrs, children }];
+    case 's':
+    case 'del':
+      return [{ type: 'strikethrough', attrs, children }];
+    case 'sub':
+      return [{ type: 'sub', attrs, children }];
+    case 'sup':
+      return [{ type: 'sup', attrs, children }];
+    case 'span':
+      return Object.keys(attrs).length > 0 ? [{ type: 'span', attrs, children }] : children;
+    default:
+      return children;
+  }
+}
+
+/**
+ * @param {any} node
+ * @returns {MiniProgramRichTextNode[]}
+ */
+function nodeToRichTextNodes(node) {
+  if (!node || isSkippableTag(node)) {
+    return [];
+  }
+  if (isText(node)) {
+    return node.data ? [{ type: 'text', text: node.data }] : [];
+  }
+  if (!isTag(node)) {
+    return nodesToRichTextNodes(node.children || []);
+  }
+  const attrs = sanitizeAttrs(node.attribs || {});
+  const children = nodesToRichTextNodes(node.children || []);
+  return [
+    {
+      name: node.name,
+      attrs,
+      children,
+    },
+  ];
+}
+
+/**
+ * @param {any[]} nodes
+ * @returns {MiniProgramRichTextNode[]}
+ */
+function nodesToRichTextNodes(nodes = []) {
+  return nodes.flatMap((node) => nodeToRichTextNodes(node));
+}
+
+/**
+ * @param {any} node
+ * @returns {MiniProgramHtmlBlock[]}
+ */
+function toHtmlFallback(node) {
+  const nodes = nodeToRichTextNodes(node);
+  return nodes.length > 0 ? [{ type: 'html', nodes }] : [];
+}
+
+/**
+ * @param {any} node
+ * @param {MiniProgramTransformOptions} options
+ * @returns {MiniProgramBlock[]}
+ */
+function nodeToBlocks(node, options = {}) {
+  if (!node || isSkippableTag(node)) {
+    return [];
+  }
+  if (isText(node)) {
+    if (node.data.trim() === '') {
+      return [];
+    }
+    return [{ type: 'paragraph', children: [{ type: 'text', text: node.data }] }];
+  }
+  if (!isTag(node)) {
+    return mixedChildrenToBlocks(node.children || [], options);
+  }
+  const tagName = String(node.name).toLowerCase();
+  const attrs = sanitizeAttrs(node.attribs || {});
+  if (isCodeBlockWrapper(node) || tagName === 'pre') {
+    return [toCodeBlock(node)];
+  }
+  if (/^h[1-6]$/.test(tagName)) {
+    return [{ type: 'heading', level: Number(tagName[1]), attrs, children: nodesToInline(node.children || []) }];
+  }
+  if (tagName === 'img') {
+    return [toImage(node)];
+  }
+  if (tagName === 'blockquote') {
+    return [{ type: 'blockquote', attrs, children: mixedChildrenToBlocks(node.children || [], options) }];
+  }
+  if (tagName === 'ul' || tagName === 'ol') {
+    /** @type {MiniProgramListItem[]} */
+    const children = (node.children || [])
+      .filter((child) => isTag(child) && child.name === 'li')
+      .map((child) => ({
+        type: 'list_item',
+        attrs: sanitizeAttrs(child.attribs || {}),
+        children: mixedChildrenToBlocks(child.children || [], options),
+      }));
+    return [{ type: 'list', ordered: tagName === 'ol', attrs, children }];
+  }
+  if (tagName === 'li') {
+    return [{ type: 'list_item', attrs, children: mixedChildrenToBlocks(node.children || [], options) }];
+  }
+  if (tagName === 'p' || tagName === 'div') {
+    const onlyImage = getOnlyImageChild(node.children || []);
+    if (onlyImage) {
+      return [toImage(onlyImage)];
+    }
+    if (hasBlockChildren(node.children || [])) {
+      return mixedChildrenToBlocks(node.children || [], options);
+    }
+    const children = nodesToInline(node.children || []);
+    return hasVisibleInline(children) ? [{ type: 'paragraph', attrs, children }] : [];
+  }
+  if (FALLBACK_TAGS.has(tagName)) {
+    return toHtmlFallback(node);
+  }
+  switch (options.unknownTag || 'html') {
+    case 'unwrap':
+      return mixedChildrenToBlocks(node.children || [], options);
+    case 'drop':
+      return [];
+    case 'html':
+    default:
+      return toHtmlFallback(node);
+  }
+}
+
+/**
+ * Converts Cherry-rendered HTML into a MiniProgram-friendly block AST.
+ * @param {string} html HTML generated by Cherry.
+ * @param {MiniProgramTransformOptions} [options]
+ * @returns {MiniProgramBlock[]}
+ */
+export function htmlToMiniProgramBlocks(html, options = {}) {
+  if (typeof html !== 'string' || html.length === 0) {
+    return [];
+  }
+  const doc = htmlparser2.parseDocument(html, { decodeEntities: true });
+  return mixedChildrenToBlocks(doc.children || [], options);
+}
+
+/**
+ * Converts markdown through a Cherry engine instance and returns MiniProgram blocks.
+ * @param {{ makeHtml: (markdown: string, returnType?: string, forceNoCursor?: boolean) => string }} engine Cherry Engine instance.
+ * @param {string} markdown Markdown source.
+ * @param {MiniProgramTransformOptions} [options]
+ * @returns {MiniProgramBlock[]}
+ */
+export function markdownToMiniProgramBlocks(engine, markdown, options = {}) {
+  if (!engine || typeof engine.makeHtml !== 'function') {
+    throw new Error('markdownToMiniProgramBlocks requires a Cherry engine instance.');
+  }
+  const html = engine.makeHtml(markdown, 'string', !!options.forceNoCursor);
+  return htmlToMiniProgramBlocks(html, options);
+}
+
+export default htmlToMiniProgramBlocks;

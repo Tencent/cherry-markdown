@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "declaration": true,
+    "declarationDir": "dist/types",
+    "emitDeclarationOnly": true,
+    "outDir": "dist/types",
+    "rootDir": "./src",
+    "strict": false,
+    "paths": {
+      "@/*": ["../cherry-markdown/src/*"],
+      "~types/*": ["../cherry-markdown/types/*"]
+    }
+  },
+  "include": ["src/stream.js"],
+  "exclude": ["**/node_modules/**", "dist"]
+}
