@@ -18,7 +18,9 @@ describe('miniProgramTransform', () => {
   });
 
   it('extracts links and images for native interactions', () => {
-    expect(htmlToMiniProgramBlocks('<p><a href="https://example.com">link</a></p><img src="/a.png" alt="A" />')).toEqual([
+    expect(
+      htmlToMiniProgramBlocks('<p><a href="https://example.com">link</a></p><img src="/a.png" alt="A" />'),
+    ).toEqual([
       {
         type: 'paragraph',
         attrs: {},
@@ -43,7 +45,9 @@ describe('miniProgramTransform', () => {
 
   it('extracts copy-ready code block text', () => {
     expect(
-      htmlToMiniProgramBlocks('<pre class="language-js"><code class="language-js">const a = 1;\nconsole.log(a);</code></pre>'),
+      htmlToMiniProgramBlocks(
+        '<pre class="language-js"><code class="language-js">const a = 1;\nconsole.log(a);</code></pre>',
+      ),
     ).toEqual([
       {
         type: 'code_block',
@@ -55,13 +59,19 @@ describe('miniProgramTransform', () => {
   });
 
   it('converts ordered and unordered lists', () => {
-    expect(htmlToMiniProgramBlocks('<ul><li>One</li><li><strong>Two</strong></li></ul><ol><li>Three</li></ol>')).toEqual([
+    expect(
+      htmlToMiniProgramBlocks('<ul><li>One</li><li><strong>Two</strong></li></ul><ol><li>Three</li></ol>'),
+    ).toEqual([
       {
         type: 'list',
         ordered: false,
         attrs: {},
         children: [
-          { type: 'list_item', attrs: {}, children: [{ type: 'paragraph', children: [{ type: 'text', text: 'One' }] }] },
+          {
+            type: 'list_item',
+            attrs: {},
+            children: [{ type: 'paragraph', children: [{ type: 'text', text: 'One' }] }],
+          },
           {
             type: 'list_item',
             attrs: {},
@@ -79,14 +89,22 @@ describe('miniProgramTransform', () => {
         ordered: true,
         attrs: {},
         children: [
-          { type: 'list_item', attrs: {}, children: [{ type: 'paragraph', children: [{ type: 'text', text: 'Three' }] }] },
+          {
+            type: 'list_item',
+            attrs: {},
+            children: [{ type: 'paragraph', children: [{ type: 'text', text: 'Three' }] }],
+          },
         ],
       },
     ]);
   });
 
   it('falls back to sanitized rich-text nodes for unknown complex tags', () => {
-    expect(htmlToMiniProgramBlocks('<custom onclick="bad()"><script>bad()</script><span onmouseover="bad()">ok</span></custom>')).toEqual([
+    expect(
+      htmlToMiniProgramBlocks(
+        '<custom onclick="bad()"><script>bad()</script><span onmouseover="bad()">ok</span></custom>',
+      ),
+    ).toEqual([
       {
         type: 'html',
         nodes: [

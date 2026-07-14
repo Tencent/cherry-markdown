@@ -59,15 +59,15 @@ const sharedPlugins = [
     exportConditions: ['browser', 'import', 'default'],
   }),
   commonjs({
-    include: [/node_modules/, /packages[\/]cherry-markdown[\/]src[\/]libs/],
-    exclude: [/node_modules[\/](lodash-es|d3-.*[\/]src|d3[\/]src|dagre-d3-es)/],
+    include: [/node_modules/, /packages[/]cherry-markdown[/]src[/]libs/],
+    exclude: [/node_modules[/](lodash-es|d3-.*[/]src|d3[/]src|dagre-d3-es)/],
     extensions: ['.js'],
     ignoreGlobal: false,
     sourceMap: process.env.NODE_ENV !== 'production',
   }),
   babel({
     babelHelpers: 'runtime',
-    exclude: [/node_modules[\/](?!codemirror[\/]src[\/]|parse5|lodash-es|d3-.*[\/]src|d3[\/]src|dagre-d3-es)/],
+    exclude: [/node_modules[/](?!codemirror[/]src[/]|parse5|lodash-es|d3-.*[/]src|d3[/]src|dagre-d3-es)/],
     babelrc: false,
     configFile: false,
     presets: babelConfig.presets,

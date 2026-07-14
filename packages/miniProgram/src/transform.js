@@ -194,10 +194,7 @@ function toCodeBlock(node) {
   const preAttrs = sanitizeAttrs(pre?.attribs || {});
   const codeAttrs = sanitizeAttrs(code?.attribs || {});
   const lang =
-    wrapperAttrs['data-lang'] ||
-    getLanguageFromClass(preAttrs.class) ||
-    getLanguageFromClass(codeAttrs.class) ||
-    '';
+    wrapperAttrs['data-lang'] || getLanguageFromClass(preAttrs.class) || getLanguageFromClass(codeAttrs.class) || '';
   return {
     type: 'code_block',
     lang,
