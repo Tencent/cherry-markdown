@@ -6,6 +6,9 @@ export { default as ArrowIcon } from './ArrowIcon';
 export { default as AddIcon } from './AddIcon';
 export { default as LocateIcon } from './LocateIcon';
 export { default as RefreshIcon } from './RefreshIcon';
+export { default as NewFileIcon } from './NewFileIcon';
+export { default as OpenFileIcon } from './OpenFileIcon';
+export { default as OpenFolderIcon } from './OpenFolderIcon';
 
 // 图标类型定义
 export interface IconProps {

@@ -1,4 +1,4 @@
-export type CherryEditorMode = 'previewOnly' | 'edit&preview';
+export type CherryEditorMode = 'previewOnly' | 'edit&preview' | 'editOnly';
 
 export interface CherryEditorStats {
   characters?: number;
@@ -18,9 +18,14 @@ export interface CherryEditorInstance {
       [key: string]: unknown;
     };
   };
+  status?: {
+    toolbar?: 'show' | 'hide';
+    previewer?: 'show' | 'hide';
+    editor?: 'show' | 'hide';
+  };
   getMarkdown(): string;
   setMarkdown(markdown: string): void;
-  switchModel(mode: CherryEditorMode): void;
+  switchModel(mode: CherryEditorMode, needSyncToolbar?: boolean): void;
   on(event: 'afterChange', handler: () => void): void;
   off(event: 'afterChange', handler: () => void): void;
 }
