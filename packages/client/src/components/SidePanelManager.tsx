@@ -1,7 +1,7 @@
 import { computed, defineComponent, h, ref, shallowRef, type Component } from 'vue';
 import ExplorerPanel from './ExplorerPanel';
 import RecentPanel from './RecentPanel';
-import { AddIcon, FileIcon, FolderIcon, LocateIcon, RefreshIcon } from './icons';
+import { FileIcon, FolderIcon, LocateIcon, NewFileIcon, OpenFileIcon, OpenFolderIcon, RefreshIcon } from './icons';
 import { useSidePanelState } from './composables/useSidePanelState';
 import { useFileStore } from '../store';
 import ActivityBar from './side-panel/ActivityBar';
@@ -43,11 +43,11 @@ export default defineComponent({
       {
         id: 'explorer',
         label: '资源管理器',
-        subtitle: '目录与当前工作文件',
+        subtitle: '',
         icon: FolderIcon,
         component: ExplorerPanel,
       },
-      { id: 'recent', label: '最近文件', subtitle: '快速回到最近编辑', icon: FileIcon, component: RecentPanel },
+      { id: 'recent', label: '最近文件', subtitle: '', icon: FileIcon, component: RecentPanel },
     ]);
     const panelIds = computed(() => panels.value.map((panel) => panel.id));
     const panelRef = ref<PanelExposeApi | null>(null);
@@ -70,8 +70,8 @@ export default defineComponent({
     const activePanelActions = computed<PanelHeaderAction[]>(() => {
       if (activePanelId.value === 'explorer') {
         return [
-          { id: 'new-file', label: '新建文件', icon: AddIcon },
-          { id: 'open-directory', label: '打开目录', icon: FolderIcon },
+          { id: 'new-file', label: '新建文件', icon: NewFileIcon },
+          { id: 'open-directory', label: '打开目录', icon: OpenFolderIcon },
           { id: 'refresh-directory', label: '刷新目录', icon: RefreshIcon },
           {
             id: 'reveal-current',
@@ -84,8 +84,8 @@ export default defineComponent({
       }
 
       return [
-        { id: 'new-file', label: '新建文件', icon: AddIcon },
-        { id: 'open-file', label: '打开文件', icon: FileIcon },
+        { id: 'open-file', label: '打开文件', icon: OpenFileIcon },
+        { id: 'new-file', label: '新建文件', icon: NewFileIcon },
       ];
     });
 

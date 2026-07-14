@@ -1,7 +1,7 @@
 import { defineComponent, h } from 'vue';
 
 export default defineComponent({
-  name: 'FolderIcon',
+  name: 'OpenFolderIcon',
   props: {
     size: {
       type: Number,
@@ -23,8 +23,13 @@ export default defineComponent({
           'stroke-linejoin': 'round',
         },
         [
+          // Back panel of the folder (with left tab) — the "closed" outline behind
           h('path', {
-            d: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z',
+            d: 'M3 6a2 2 0 0 1 2-2h3.5l2 2H17a2 2 0 0 1 2 2v2',
+          }),
+          // Front flap of the opened folder — trapezoid suggesting the lid is tilted open
+          h('path', {
+            d: 'M3 10h16.5a1 1 0 0 1 .97 1.24l-1.6 6.4A2 2 0 0 1 16.93 19H5.5a2 2 0 0 1-1.95-1.55L2 10z',
           }),
         ],
       );
