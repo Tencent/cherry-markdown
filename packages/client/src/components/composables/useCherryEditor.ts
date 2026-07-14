@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import { cherryInstance } from '../CherryMarkdown';
 import type { CherryEditorInstance } from '../editorTypes';
 import { setEditorInstance } from './useEditor';
+import { useImageLightbox, setCurrentLightbox, getCurrentLightbox } from './useImageLightbox';
 
 interface UseCherryEditorOptions {
   onContentChanged: () => void;
@@ -20,6 +21,8 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
   };
 
   const handleAfterChange = (): void => {
+    // 内容变更后同步刷新大图预览的图片列表
+    getCurrentLightbox()?.refresh();
     if (skipNextChange) {
       skipNextChange = false;
       return;
@@ -32,9 +35,15 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
     const instance = cherryInstance();
     // Cherry 官方类型的部分字段（如 status）被推断为宽泛类型，与内部收窄接口存在结构差异，
     // 通过 unknown 显式桥接，避免 TS 结构兼容报错
-    editor = instance as unknown as CherryEditorInstance;
-    setEditorInstance(instance as unknown as CherryEditorInstance);
+    const editorInstance = instance as unknown as CherryEditorInstance;
+    editor = editorInstance;
+    setEditorInstance(editorInstance);
     instance.on('afterChange', handleAfterChange);
+    // 初始化图片大图预览（viewerjs），延迟到 DOM 就绪后创建
+    setTimeout(() => {
+      const lightbox = useImageLightbox(editorInstance);
+      setCurrentLightbox(lightbox);
+    }, 0);
   };
 
   const setMarkdown = (markdown: string): void => {
@@ -58,6 +67,8 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
 
   const disposeEditor = (): void => {
     editor?.off?.('afterChange', handleAfterChange);
+    getCurrentLightbox()?.destroy();
+    setCurrentLightbox(null);
     setEditorInstance(null);
     editor = null;
   };

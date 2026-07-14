@@ -12,6 +12,7 @@ export interface CherryEditorInstance {
   };
   previewer: {
     scrollToTop(offset: number, behavior?: ScrollBehavior | 'instant'): void;
+    getDomContainer?(): HTMLElement;
   };
   toolbar: {
     toolbarHandlers: {

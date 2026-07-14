@@ -15,6 +15,7 @@ import { WINDOW_EVENTS } from '../constants/events';
  */
 import * as echarts from 'echarts';
 import type { CherryEditorInstance } from './editorTypes';
+import { getCurrentLightbox } from './composables/useImageLightbox';
 
 /**
  * ECharts类型兼容性处理
@@ -362,6 +363,25 @@ const cherryConfig: CherryOptions<CustomConfig> = {
   callback: {
     // 把中文变成拼音的回调，当然也可以把中文变成英文、英文变成中文
     changeString2Pinyin: toPinyin,
+    /**
+     * 预览区点击回调
+     * - 仅在纯预览模式（status.editor !== 'show'）下接管图片点击，弹出 viewerjs 大图
+     * - 返回 false 会中断 cherry 内部后续处理（如图片编辑气泡），避免冲突
+     */
+    onClickPreview(e: MouseEvent) {
+      const { target } = e;
+      if (!(target instanceof HTMLImageElement)) {
+        return;
+      }
+      // 通过 lazy import 避免循环依赖
+      const lightbox = getCurrentLightbox();
+      if (!lightbox) {
+        return;
+      }
+      if (lightbox.open(target)) {
+        return false;
+      }
+    },
   },
   /** 定义cherry缓存的作用范围，相同nameSpace的实例共享localStorage缓存 */
   nameSpace: 'cherry',
