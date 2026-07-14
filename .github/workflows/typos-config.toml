@@ -14,5 +14,6 @@ extend-exclude = [
     'examples/assets',
     '__snapshots__',
     'Emoji.config.js',
-    'commonmark.spec.json'
+    'commonmark.spec.json',
+    '*.nsi'
 ]
