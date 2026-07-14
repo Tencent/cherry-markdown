@@ -14,6 +14,7 @@ import { WINDOW_EVENTS } from '../constants/events';
  * 3. 支持按需导入echarts功能
  */
 import * as echarts from 'echarts';
+import type { CherryEditorInstance } from './editorTypes';
 
 /**
  * ECharts类型兼容性处理
@@ -21,28 +22,40 @@ import * as echarts from 'echarts';
  * 这里定义兼容性接口确保类型安全
  */
 interface EChartsInstance {
-  init: (dom: HTMLElement, theme?: string, opts?: any) => any;
-  [key: string]: any;
+  init: typeof echarts.init;
 }
 
-// 确保echarts实例的类型兼容性
-const echartsInstance: EChartsInstance = echarts as any;
+const echartsInstance: EChartsInstance = echarts;
 
 const toPinyin = (text: string) => pinyin(text, { style: pinyin.STYLE_TONE, heteronym: false }).flat().join(' ');
+
+type CherryMenuHook = ReturnType<typeof Cherry.createMenuHook>;
+type ToolbarRightConfig = NonNullable<CherryOptions<CustomConfig>['toolbars']>['toolbarRight'];
+
+interface ToolbarMenuHookContext {
+  $cherry: Pick<CherryEditorInstance, 'getMarkdown' | 'switchModel'> & {
+    getStatus(): { editor: string };
+  };
+  updateMarkdown: boolean;
+}
 
 type CustomConfig = {
   CustomToolbar: {
     CustomMenuType: {
-      customMenu_fileUpload: any;
-      customMenuChangeModule: any;
-      customSave: any;
+      customMenu_fileUpload?: CherryMenuHook;
+      customMenuChangeModule: CherryMenuHook;
+      customSave: CherryMenuHook;
     };
   };
 };
 
+// Cherry upstream types do not include custom menu ids in toolbarRight,
+// but runtime supports them through customMenu registration.
+const toolbarRight = ['customSave', '|', 'export', 'togglePreview'] as unknown as ToolbarRightConfig;
+
 const customMenuChangeModule = Cherry.createMenuHook('编辑', {
-  iconName: 'pen',
-  onClick() {
+  iconName: 'pen' as const,
+  onClick(this: ToolbarMenuHookContext) {
     const { editor } = this.$cherry.getStatus();
     if (editor === 'show') {
       this.$cherry.switchModel('previewOnly');
@@ -58,7 +71,7 @@ const customSave = Cherry.createMenuHook('保存', {
     // iconStyle: 'width:16px;height:16px;',
     noIcon: true,
   },
-  onClick() {
+  onClick(this: ToolbarMenuHookContext) {
     this.updateMarkdown = false;
     if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
       const markdown = this.$cherry?.getMarkdown?.() ?? '';
@@ -256,7 +269,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       'search',
       'shortcutKey',
     ],
-    toolbarRight: ['customSave', '|', 'export', 'togglePreview'] as any[],
+    toolbarRight,
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
     sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'theme'],
     // hiddenToolbar: [''],

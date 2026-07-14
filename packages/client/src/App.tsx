@@ -22,6 +22,7 @@ export default defineComponent({
     const editor = useCherryEditor({
       onContentChanged: () => {
         unsavedGuard.setUnsavedChanges(true);
+        fileStore.touchUntitledDraft();
         updateEditorTitle(true);
       },
     });
@@ -54,11 +55,21 @@ export default defineComponent({
       onOpenFileFromSidebar: fileOperations.handleOpenFileFromSidebar,
       onRequestSave: fileOperations.handleSaveFromToolbar,
       tauriHandlers: {
-        onNewFile: fileOperations.newFile,
-        onOpenFile: fileOperations.openFile,
-        onOpenFilePath: fileOperations.openFilePath,
-        onSave: fileOperations.saveMarkdown,
-        onSaveAs: fileOperations.saveAsNewMarkdown,
+        onNewFile: async () => {
+          await fileOperations.newFile();
+        },
+        onOpenFile: async () => {
+          await fileOperations.openFile();
+        },
+        onOpenFilePath: async (filePath) => {
+          await fileOperations.openFilePath(filePath);
+        },
+        onSave: async () => {
+          await fileOperations.saveMarkdown();
+        },
+        onSaveAs: async () => {
+          await fileOperations.saveAsNewMarkdown();
+        },
         onToggleToolbar: editor.toggleToolbar,
       },
     });
@@ -79,7 +90,11 @@ export default defineComponent({
 
     return () =>
       h('div', { class: 'app-container' }, [
-        h(SidePanelManager),
+        h(SidePanelManager, {
+          onNewFile: async () => {
+            await fileOperations.newFile();
+          },
+        }),
         h('div', { class: 'editor-container' }, [
           h('div', { id: 'markdown-editor' }),
           h(StatusBar, {

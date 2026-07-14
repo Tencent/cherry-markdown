@@ -4,6 +4,7 @@ import { computed, defineComponent, h, onMounted, onUnmounted, ref, watch } from
 import { MESSAGES } from '../constants/i18n';
 import { useFileStore } from '../store';
 import { notifyError, notifyInfo } from '../utils/notifications';
+import type { CherryEditorInstance } from './editorTypes';
 import { getEditorInstance } from './composables/useEditor';
 import './status-bar.css';
 
@@ -50,6 +51,13 @@ export default defineComponent({
     });
 
     const filePath = computed(() => fileStore.currentFilePath ?? '');
+
+    const withEditor = (callback: (editor: CherryEditorInstance) => void): void => {
+      const editor = getEditorInstance();
+      if (editor) {
+        callback(editor);
+      }
+    };
 
     const refreshLastChangeTimeFromDisk = async (): Promise<void> => {
       const path = fileStore.currentFilePath;
@@ -114,21 +122,20 @@ export default defineComponent({
     };
 
     const updateStats = (): void => {
-      const editor = getEditorInstance() as any;
-      if (!editor) return;
-
-      const stats = editor.editor?.wordCount?.(1);
-      if (stats) {
-        wordCount.value = stats.characters ?? 0;
-        wordWords.value = stats.words ?? 0;
-        wordLine.value = stats.lines ?? 0;
-      }
+      withEditor((editor) => {
+        const stats = editor.editor?.wordCount?.(1);
+        if (stats) {
+          wordCount.value = stats.characters ?? 0;
+          wordWords.value = stats.words ?? 0;
+          wordLine.value = stats.lines ?? 0;
+        }
+      });
     };
 
     const onAfterChange = (): void => updateStats();
 
     const waitForEditor = (): void => {
-      const editor = getEditorInstance() as any;
+      const editor = getEditorInstance();
       if (editor) {
         editor.on?.('afterChange', onAfterChange);
       } else {
@@ -143,8 +150,7 @@ export default defineComponent({
 
     onUnmounted(() => {
       if (waitTimer) window.clearTimeout(waitTimer);
-      const editor = getEditorInstance() as any;
-      editor?.off?.('afterChange', onAfterChange);
+      getEditorInstance()?.off?.('afterChange', onAfterChange);
     });
 
     return () =>

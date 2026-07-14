@@ -59,6 +59,9 @@ export default defineComponent({
 
     const groupedRecentFiles = computed(() => {
       const groups = new Map<string, FileInfo[]>();
+      if (fileStore.untitledDraft) {
+        groups.set('draft', [fileStore.untitledDraft]);
+      }
       for (const file of sortedRecentFiles.value) {
         const key = formatDateKey(file.lastAccessed);
         const group = groups.get(key) || [];
@@ -67,7 +70,7 @@ export default defineComponent({
       }
       return Array.from(groups.entries()).map(([dateKey, files]) => ({
         dateKey,
-        label: formatDateLabel(dateKey),
+        label: dateKey === 'draft' ? '临时文件' : formatDateLabel(dateKey),
         files,
       }));
     });
@@ -80,6 +83,11 @@ export default defineComponent({
       await openFile(filePath, false, false);
     };
 
+    const isActiveFile = (file: FileInfo): boolean => {
+      if (file.isDraft) return !currentFilePath.value;
+      return file.path === currentFilePath.value;
+    };
+
     const remove = (filePath: string): void => {
       removeFromRecent(filePath);
       hideContextMenu();
@@ -89,7 +97,7 @@ export default defineComponent({
 
     return () =>
       h('div', { class: 'recent-panel' }, [
-        !sortedRecentFiles.value.length
+        !sortedRecentFiles.value.length && !fileStore.untitledDraft
           ? h('div', { class: 'empty' }, [
               h('p', '暂无最近访问文件'),
               h('button', { type: 'button', onClick: openRecentFile }, '打开文件'),
@@ -110,10 +118,13 @@ export default defineComponent({
                         'li',
                         {
                           key: file.path,
-                          class: { active: file.path === currentFilePath.value },
-                          title: file.path,
-                          onClick: () => openRecent(file.path),
+                          class: { active: isActiveFile(file), draft: file.isDraft },
+                          title: file.isDraft ? '未保存的新建文件，保存后会写入磁盘' : file.path,
+                          onClick: () => {
+                            if (!file.isDraft) void openRecent(file.path);
+                          },
                           onContextmenu: (event: MouseEvent) => {
+                            if (file.isDraft) return;
                             event.preventDefault();
                             showContextMenu(event, file);
                           },
@@ -121,9 +132,13 @@ export default defineComponent({
                         [
                           h('div', { class: 'file-row' }, [
                             h('span', { class: 'file-name' }, file.name),
-                            h('span', { class: 'file-time' }, formatTime(file.lastAccessed)),
+                            h('span', { class: 'file-time' }, file.isDraft ? '未保存' : formatTime(file.lastAccessed)),
                           ]),
-                          h('div', { class: 'file-path' }, formatDirectory(file.path)),
+                          h(
+                            'div',
+                            { class: 'file-path' },
+                            file.isDraft ? '临时文档 - 保存后写入磁盘' : formatDirectory(file.path),
+                          ),
                         ],
                       ),
                     ),

@@ -812,8 +812,8 @@ const htmlParser = {
         .replace(/[ \t]+/g, '')
         .replace(/~\|~\|/g, '~|')
         .replace(/~\|/g, '|')}\n`;
-      const headsCount = $str.match(/\|/g).length - 1;
-      return `${$str}|${':-:|'.repeat(headsCount)}\n`;
+      const headsCount = /\|/.test($str) ? $str.match(/\|/g).length - 1 : 0;
+      return headsCount > 0 ? `${$str}|${':-:|'.repeat(headsCount)}\n` : $str;
     },
     convertTable(str) {
       let ret = `\n${str

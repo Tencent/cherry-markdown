@@ -54,7 +54,7 @@
           font-size: 12px;
           transition: var(--shortcut-panel-transition);
           user-select: none;
-          background-color: var(--dropdown-item-hover-bg);
+          color: var(--shortcut-key-config-panel-text-color);
 
           &:hover {
             background-color: var(--dropdown-item-hover-bg);

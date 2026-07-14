@@ -22,7 +22,12 @@ const DEFAULT_DIRECTORY_MANAGER_EXPANDED = true;
  */
 type FileStoreInstance = ReturnType<typeof useFileStoreType>;
 
-export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: Ref<any>) {
+interface FolderManagerExposeApi {
+  openDirectory: () => void | Promise<void>;
+  refreshDirectories: () => void | Promise<void>;
+}
+
+export function useFileManager(fileStore: FileStoreInstance, folderManagerRef: Ref<FolderManagerExposeApi | null>) {
   // 响应式数据
   const sortedRecentFiles = computed(() => fileStore.sortedRecentFiles);
   const currentFilePath = computed(() => fileStore.currentFilePath);
