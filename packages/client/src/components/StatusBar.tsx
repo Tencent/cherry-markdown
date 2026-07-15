@@ -176,6 +176,7 @@ export default defineComponent({
       const editor = getEditorInstance();
       if (!editor) return;
 
+      editor.focusMode = !focusMode.value;
       if (!focusMode.value) {
         // 进入专注模式
         // 若 cherry 当前处于纯预览模式（editor === 'hide'），只隐藏侧栏，不改动编辑器 model
