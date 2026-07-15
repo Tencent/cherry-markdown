@@ -54,7 +54,21 @@ Cherry Markdown Writer 是一款 JavaScript Markdown 编辑器，具有开箱即
 
 更多特性演示见 [demo](https://tencent.github.io/cherry-markdown/examples/index.html)。
 
-## 安装
+## 下载与安装
+
+### 桌面客户端
+
+Cherry Markdown 提供基于 Tauri 构建的跨平台桌面客户端，支持 Windows、macOS 和 Linux。可直接打开、编辑本地的 `.md` / `.markdown` / `.txt` 文件，编辑体验与 Web 版一致。
+
+👉 **[点此下载最新版客户端](https://github.com/Tencent/cherry-markdown/releases?q=client&expanded=true)**
+
+### VSCode 插件
+
+习惯在 VSCode 里写 Markdown？Cherry Markdown 也提供了官方 VSCode 插件，带来与 Web 版一致的富编辑与预览体验。
+
+👉 **[前往 VSCode 应用市场安装](https://marketplace.visualstudio.com/items?itemName=cherryMarkdownPublisher.cherry-markdown)**
+
+### 安装组件
 
 通过 yarn
 

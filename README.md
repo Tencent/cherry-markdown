@@ -54,7 +54,21 @@ Cherry Markdown Writer is a JavaScript Markdown editor. It has the advantages su
 
 For a visual walkthrough, see the [demo](https://tencent.github.io/cherry-markdown/examples/index.html).
 
-## Install
+## Downloads
+
+### Desktop Client
+
+Cherry Markdown ships a cross-platform desktop client (built with Tauri) for Windows, macOS and Linux. It supports opening / editing local `.md` / `.markdown` / `.txt` files with the same editing experience as the web version.
+
+👉 **[Download the latest release](https://github.com/Tencent/cherry-markdown/releases?q=client&expanded=true)**
+
+### VSCode Extension
+
+Prefer editing Markdown right inside VSCode? Cherry Markdown also provides an official VSCode extension with the same rich editing & preview experience.
+
+👉 **[Install from VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=cherryMarkdownPublisher.cherry-markdown)**
+
+### Install as a package
 
 Via yarn
 
