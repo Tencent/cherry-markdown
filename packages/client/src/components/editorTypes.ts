@@ -7,6 +7,7 @@ export interface CherryEditorStats {
 }
 
 export interface CherryEditorInstance {
+  focusMode: boolean;
   editor?: {
     wordCount?: (mode: number) => CherryEditorStats | undefined;
   };

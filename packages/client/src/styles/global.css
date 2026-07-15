@@ -122,35 +122,25 @@ body {
   align-items: center;
 }
 
-#markdown-editor .cm-editor.cm-focused,
-#markdown-editor .cm-editor:focus,
-#markdown-editor .cm-editor:focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* Make the editor fill its flex parent and allow the inner scroller to scroll. */
-#markdown-editor .cm-editor {
-  height: 100% !important;
-  max-height: 100% !important;
-}
-
-#markdown-editor .cm-scroller {
-  overflow: auto !important;
-  height: 100% !important;
-}
-
-#markdown-editor .cherry-editor .cm-editor .cm-lineWrapping {
-  outline: none;
-}
-
 #markdown-editor .cherry-flex-toc .cherry-toc-list {
   height: calc(100% - 70px);
   margin-top: 15px;
 }
 
-#markdown-editor .cherry-previewer--full {
-  max-width: 1024px;
-  margin: 0 auto;
+#markdown-editor .cm-editor .cm-scroller {
+  padding: 0 35px;
+}
+
+#markdown-editor .cherry-previewer--full, #markdown-editor .cherry-editor--full .cm-editor .cm-scroller {
+  padding-left: max(20px, calc((100% - 800px) / 2));
+  padding-right: max(45px, calc((100% - 800px) / 2));
   border-left: none;
+}
+
+#markdown-editor .cm-editor .cm-scroller .cm-content {
+  padding: 15px 2px 15px 5px;
+}
+
+#markdown-editor .cherry-dropdown[name="theme"], #markdown-editor .cherry-dropdown[name="codeTheme"] {
+  margin-top: -45px;
 }

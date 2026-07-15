@@ -34,7 +34,7 @@ type CherryMenuHook = ReturnType<typeof Cherry.createMenuHook>;
 type ToolbarRightConfig = NonNullable<CherryOptions<CustomConfig>['toolbars']>['toolbarRight'];
 
 interface ToolbarMenuHookContext {
-  $cherry: Pick<CherryEditorInstance, 'getMarkdown' | 'switchModel'> & {
+  $cherry: Pick<CherryEditorInstance, 'getMarkdown' | 'switchModel' | 'focusMode'> & {
     getStatus(): { editor: string };
   };
   updateMarkdown: boolean;
@@ -61,7 +61,11 @@ const customMenuChangeModule = Cherry.createMenuHook('编辑', {
     if (editor === 'show') {
       this.$cherry.switchModel('previewOnly');
     } else {
-      this.$cherry.switchModel('edit&preview');
+      if (this.$cherry.focusMode) {
+        this.$cherry.switchModel('editOnly', false);
+      } else {
+        this.$cherry.switchModel('edit&preview');
+      }
     }
   },
 });
@@ -252,7 +256,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
           'hr',
           'br',
           'code',
-          // 'inlineCode',
+          'quote',
           // 'formula',
           'toc',
           'table',
@@ -272,7 +276,8 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     ],
     toolbarRight,
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
-    sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'theme'],
+    sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'theme', 'codeTheme'],
+    float: false,
     // hiddenToolbar: [''],
     // sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'theme', 'codeTheme'],
     toc: {
@@ -388,14 +393,14 @@ const cherryConfig: CherryOptions<CustomConfig> = {
   themeSettings: {
     // 主题列表，用于切换主题
     themeList: [
-      { className: 'default', label: '默认' }, // 曾用名：light 明亮
+      { className: 'default', label: '明亮' }, // 曾用名：light 明亮
       { className: 'dark', label: '暗黑' },
       { className: 'green', label: '清新' },
       { className: 'red', label: '热情' },
       { className: 'violet', label: '淡雅' },
       { className: 'blue', label: '清幽' },
     ],
-    mainTheme: 'default',
+    mainTheme: 'violet',
     codeBlockTheme: 'twilight',
     inlineCodeTheme: 'red', // red or black
   },
