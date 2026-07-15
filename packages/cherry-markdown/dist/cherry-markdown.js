@@ -48475,8 +48475,8 @@
 	    convertThead: function convertThead(str) {
 	      var _context19, _context20;
 	      var $str = "".concat(str.replace(/[ \t]+/g, '').replace(/~\|~\|/g, '~|').replace(/~\|/g, '|'), "\n");
-	      var headsCount = $str.match(/\|/g).length - 1;
-	      return _concatInstanceProperty(_context19 = "".concat($str, "|")).call(_context19, _repeatInstanceProperty(_context20 = ':-:|').call(_context20, headsCount), "\n");
+	      var headsCount = /\|/.test($str) ? $str.match(/\|/g).length - 1 : 0;
+	      return headsCount > 0 ? _concatInstanceProperty(_context19 = "".concat($str, "|")).call(_context19, _repeatInstanceProperty(_context20 = ':-:|').call(_context20, headsCount), "\n") : $str;
 	    },
 	    convertTable: function convertTable(str) {
 	      var ret = "\n".concat(str.replace(/[ \t]+/g, '').replace(/~\|~\|/g, '~|').replace(/~\|/g, '|'), "\n").replace(/\n{2,}/g, '\n').replace(/\n[ \t]+\n/g, '\n').replace(/~s~/g, ' ');
@@ -68702,49 +68702,38 @@
 	     * @param {string} match 匹配的完整字符串
 	     * @param {string} leadingChar 正则分组一：前置字符
 	     * @param {string} text 正则分组二：链接文字
-	     * @param {string|undefined} link 正则分组三：链接URL
+	     * @param {string} link 正则分组三：链接URL
 	     * @param {string|undefined} title 正则分组四：链接title
-	     * @param {string|undefined} ref 正则分组五：链接引用
-	     * @param {string|undefined} target 正则分组六：新窗口打开
+	     * @param {string|undefined} target 正则分组五：新窗口打开
 	     * @returns
 	     */
 	  }, {
 	    key: "toHtml",
-	    value: function toHtml(match, leadingChar, text, link, title, ref, target) {
-	      var refType = typeof link === 'undefined' ? 'ref' : 'url';
-	      var attrs = '';
-	      if (refType === 'ref') {
-	        // 全局引用，理应在CommentReference中被替换，没有被替换说明没有定义引用项
-	        return match;
+	    value: function toHtml(match, leadingChar, text, link, title, target) {
+	      var _context6;
+	      var _this$checkBrackets = this.checkBrackets(text),
+	        isValid = _this$checkBrackets.isValid,
+	        coreText = _this$checkBrackets.coreText,
+	        extraLeadingChar = _this$checkBrackets.extraLeadingChar;
+	      if (!isValid) return match;
+	      var attrs = title && _trimInstanceProperty(title).call(title) !== '' ? " title=\"".concat(escapeHTMLSpecialChar(title.replace(/["']/g, '')), "\"") : '';
+	      if (target) {
+	        attrs += " target=\"".concat(target.replace(/{target\s*=\s*(.*?)}/, '$1'), "\"");
+	      } else if (this.target) {
+	        attrs += " ".concat(this.target);
 	      }
-	      if (refType === 'url') {
-	        var _context6;
-	        var _this$checkBrackets = this.checkBrackets(text),
-	          isValid = _this$checkBrackets.isValid,
-	          coreText = _this$checkBrackets.coreText,
-	          extraLeadingChar = _this$checkBrackets.extraLeadingChar;
-	        if (!isValid) return match;
-	        attrs = title && _trimInstanceProperty(title).call(title) !== '' ? " title=\"".concat(escapeHTMLSpecialChar(title.replace(/["']/g, '')), "\"") : '';
-	        if (target) {
-	          attrs += " target=\"".concat(target.replace(/{target\s*=\s*(.*?)}/, '$1'), "\"");
-	        } else if (this.target) {
-	          attrs += " ".concat(this.target);
-	        }
-	        var processedURL = _trimInstanceProperty(link).call(link).replace(/~1D/g, '~D'); // 还原替换的$符号
-	        var processedText = coreText.replace(/~1D/g, '~D'); // 还原替换的$符号
-	        // text可能是html标签，依赖htmlBlock进行处理
-	        if (isValidScheme(processedURL)) {
-	          var _this$$engine$$cherry, _context, _context2, _context3, _context4, _context5;
-	          processedURL = this.$engine.urlProcessor(processedURL, 'link');
-	          processedURL = encodeURIOnce(processedURL);
-	          var customAttrs = // @ts-ignore
-	          (_this$$engine$$cherry = this.$engine.$cherry.options.engine.syntax.link.attrRender(processedText, processedURL)) !== null && _this$$engine$$cherry !== void 0 ? _this$$engine$$cherry : '';
-	          return _concatInstanceProperty(_context = _concatInstanceProperty(_context2 = _concatInstanceProperty(_context3 = _concatInstanceProperty(_context4 = _concatInstanceProperty(_context5 = "".concat(leadingChar + extraLeadingChar, "<a href=\"")).call(_context5, UrlCache.set(processedURL), "\" ")).call(_context4, typeof customAttrs === 'string' ? customAttrs : '', " ")).call(_context3, this.rel, " ")).call(_context2, attrs, ">")).call(_context, processedText, "</a>");
-	        }
-	        return _concatInstanceProperty(_context6 = "".concat(leadingChar + extraLeadingChar, "<span>")).call(_context6, text, "</span>");
+	      var processedURL = _trimInstanceProperty(link).call(link).replace(/~1D/g, '~D'); // 还原替换的$符号
+	      var processedText = coreText.replace(/~1D/g, '~D'); // 还原替换的$符号
+	      // text可能是html标签，依赖htmlBlock进行处理
+	      if (isValidScheme(processedURL)) {
+	        var _this$$engine$$cherry, _context, _context2, _context3, _context4, _context5;
+	        processedURL = this.$engine.urlProcessor(processedURL, 'link');
+	        processedURL = encodeURIOnce(processedURL);
+	        var customAttrs = // @ts-ignore
+	        (_this$$engine$$cherry = this.$engine.$cherry.options.engine.syntax.link.attrRender(processedText, processedURL)) !== null && _this$$engine$$cherry !== void 0 ? _this$$engine$$cherry : '';
+	        return _concatInstanceProperty(_context = _concatInstanceProperty(_context2 = _concatInstanceProperty(_context3 = _concatInstanceProperty(_context4 = _concatInstanceProperty(_context5 = "".concat(leadingChar + extraLeadingChar, "<a href=\"")).call(_context5, UrlCache.set(processedURL), "\" ")).call(_context4, typeof customAttrs === 'string' ? customAttrs : '', " ")).call(_context3, this.rel, " ")).call(_context2, attrs, ">")).call(_context, processedText, "</a>");
 	      }
-	      // should never happen
-	      return match;
+	      return _concatInstanceProperty(_context6 = "".concat(leadingChar + extraLeadingChar, "<span>")).call(_context6, text, "</span>");
 	    }
 	  }, {
 	    key: "toStdMarkdown",
@@ -68772,7 +68761,6 @@
 	  }, {
 	    key: "rule",
 	    value: function rule() {
-	      var _context9;
 	      // (?<protocol>\\w+:)\\/\\/
 	      var ret = {
 	        // lookbehind启用分组是为了和不兼容lookbehind的场景共用一个回调
@@ -68781,7 +68769,7 @@
 	        // ?<text>
 	        '[ \\t]*',
 	        // any spaces
-	        _concatInstanceProperty(_context9 = "".concat('(?:' + '\\(' +
+	        '\\(',
 	        /**
 	         * allow double quotes
 	         * e.g.
@@ -68790,15 +68778,11 @@
 	         * [link](()) ⭕️ valid
 	         * [link](" ") ❌ invalid
 	         */
-	        '((?:[^\\s()]*\\([^\\s()]*\\)[^\\s()]*)+|[^\\s)]+)' +
+	        '((?:[^\\s()]*\\([^\\s()]*\\)[^\\s()]*)+|[^\\s)]+)',
 	        // ?<link> url
-	        '(?:[ \\t]((?:".*?")|(?:\'.*?\')))?' +
+	        '(?:[ \\t]((?:".*?")|(?:\'.*?\')))?',
 	        // ?<title> optional
-	        '\\)' + '|' +
-	        // or
-	        '\\[(')).call(_context9, NOT_ALL_WHITE_SPACES_INLINE, ")\\](?!\\s*\\()") +
-	        // ?<ref> global ref, exclude [text][ref](url) inline link pattern
-	        ')', '(\\{target\\s*=\\s*(_blank|parent|self|top)\\})?'].join(''),
+	        '\\)', '(\\{target\\s*=\\s*(_blank|parent|self|top)\\})?'].join(''),
 	        end: ''
 	      };
 	      // let ret = {begin:'((^|[^\\\\])\\*\\*|([\\s]|^)__)',
@@ -117181,6 +117165,8 @@
 	      }
 	      this.options.dom.style.display = 'inline-block';
 	      this.options.dom.style.left = "".concat(codeWrapPaddingLeft, "px");
+	      this.options.dom.style.height = computedLinesStyle.lineHeight;
+	      this.options.dom.style.lineHeight = computedLinesStyle.lineHeight;
 
 	      // 当配置 codemirror.placeholder 时，测量 placeholder 中文本的范围
 	      // 将浮动工具栏定位到 placeholder 文本后面

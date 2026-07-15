@@ -4762,7 +4762,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   font-size: 12px;
   transition: var(--shortcut-panel-transition);
   user-select: none;
-  background-color: var(--dropdown-item-hover-bg);
+  color: var(--shortcut-key-config-panel-text-color);
 }
 .cherry .cherry-shortcut-key-config-panel-wrapper .cherry-shortcut-key-config-panel-inner .shortcut-tabs .shortcut-tab:hover {
   background-color: var(--dropdown-item-hover-bg);
@@ -5842,8 +5842,8 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   float: left;
   padding: 0 var(--spacing-sm);
   margin: 0;
-  height: var(--line-height-relaxed);
-  line-height: var(--line-height-relaxed);
+  height: 100%;
+  line-height: 100%;
   font-size: var(--toolbar-font-size);
   color: var(--toolbar-btn-color);
   background: var(--toolbar-btn-bg);
