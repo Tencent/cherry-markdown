@@ -276,7 +276,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     ],
     toolbarRight,
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
-    sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'theme', 'codeTheme'],
+    sidebar: ['customMenuChangeModule', 'mobilePreview', 'theme', 'codeTheme'],
     float: false,
     // hiddenToolbar: [''],
     // sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'theme', 'codeTheme'],

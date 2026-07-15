@@ -190,6 +190,7 @@ export default defineComponent({
         if (!isPreviewOnly) {
           try {
             editor.switchModel('editOnly', false);
+            setTimeout(() => editor.editor?.refresh?.(), 200);
           } catch {
             // 切换失败则回退侧栏隐藏
             document.body.classList.remove(FOCUS_MODE_CLASS);
@@ -203,6 +204,7 @@ export default defineComponent({
         if (!enteredInPreviewOnly.value) {
           try {
             editor.switchModel('edit&preview', true);
+            setTimeout(() => editor.editor?.refresh?.(), 200);
           } catch {
             // 忽略还原失败
           }

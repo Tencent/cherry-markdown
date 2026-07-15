@@ -10,6 +10,7 @@ export interface CherryEditorInstance {
   focusMode: boolean;
   editor?: {
     wordCount?: (mode: number) => CherryEditorStats | undefined;
+    refresh?: () => void;
   };
   previewer: {
     scrollToTop(offset: number, behavior?: ScrollBehavior | 'instant'): void;

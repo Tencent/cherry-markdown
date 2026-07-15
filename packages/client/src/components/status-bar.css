@@ -5,8 +5,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-  background: var(--color-surface-panel);
-  border-top: 1px solid var(--color-border-strong);
+  /* 主题联动：底色叠一层极淡的 accent-soft，让整条状态栏“呼吸”到当前主题 */
+  background:
+    linear-gradient(var(--color-accent-soft), var(--color-accent-soft)),
+    var(--color-surface-panel);
   color: var(--color-text-secondary);
   font-size: 12px;
   font-family: var(--font-sans);
@@ -84,7 +86,9 @@
 .status-sep {
   width: 1px;
   height: 12px;
-  background: var(--color-border-strong);
+  /* 主题联动：分隔线使用主题强调色，视觉比通用灰更贴主题 */
+  background: var(--color-accent);
+  opacity: 0.35;
 }
 
 .status-action {
@@ -132,19 +136,45 @@
   min-width: 76px;
   justify-content: center;
   font-weight: 600;
-  color: var(--color-text);
-  background: #FFF;
-  border: 1px solid var(--color-border-strong);
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  /* 主题联动：默认就使用当前主题色作为文字/边框，底色保持白面板 */
+  color: var(--color-accent-strong);
+  background: var(--color-bg);
+  border: 1px solid var(--color-accent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .status-action-primary:hover {
-  color: var(--color-accent-strong);
+  color: var(--color-accent-contrast, #ffffff);
+  background: var(--color-accent-strong);
   border-color: var(--color-accent-strong);
 }
 
 .status-action-primary.active {
-  background: var(--color-surface-hover, rgba(127, 127, 127, 0.1));
-  border: 1px solid var(--color-border-strong);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+  border: 1px solid var(--color-accent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) inset;
+}
+
+/* 暗色主题下状态栏主按钮：白底不合适，用面板色 + 主题色描边 */
+body[data-cherry-theme='dark'] .status-action-primary {
+  background: var(--color-surface);
+  color: var(--color-accent-strong);
+  border-color: var(--color-accent);
+}
+
+body[data-cherry-theme='dark'] .status-action-primary:hover {
+  background: var(--color-accent);
+  color: #ffffff;
+  border-color: var(--color-accent);
+}
+
+body[data-cherry-theme='dark'] .status-action-primary.active {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+  border-color: var(--color-accent);
+}
+
+body[data-cherry-theme='dark'] .status-bar {
+  background: var(--color-surface-panel);
 }
