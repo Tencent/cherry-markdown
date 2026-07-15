@@ -1,5 +1,27 @@
 # @cherry-markdown/client
 
+## 0.4.0
+
+### Minor Changes
+
+- refactor(client): 重构客户端 UI 并增强桌面端编辑体验。
+
+  - 将客户端 UI 组件从 Vue SFC 迁移为 TSX，保留原有文件、编辑器和状态栏行为。
+  - 优化左侧工作区，支持面板宽度拖拽、图标提示、当前文件定位、右键菜单视口避让和最近文件按日期分组。
+  - 支持在 macOS Finder 中通过文件关联打开 Markdown/Text 文件，并保留 Windows 双击打开文件能力。 [@sunsonliu](https://github.com/sunsonliu)([#1793](https://github.com/Tencent/cherry-markdown/pull/1793))([`a5f6841`](https://github.com/Tencent/cherry-markdown/commit/a5f684139c9d170187ff3c6078ebf1380fcaae31))
+
+### Patch Changes
+
+- feat(client): Windows 安装包新增：安装时注册系统自带的文本预览处理器，使资源管理器预览窗格可直接查看 `.md` / `.markdown` 源码
+  - 安装向导支持选择"为当前用户"或"为所有用户"安装，卸载时会一并清理
+  - 修复编辑区无法滚动的问题 [@sunsonliu](https://github.com/sunsonliu)([#1802](https://github.com/Tencent/cherry-markdown/pull/1802))([`01bfd3c`](https://github.com/Tencent/cherry-markdown/commit/01bfd3c7d8051bccbcd17cc4a26912331b0f0fc1))
+- feat(client): 客户端底部状态栏增加「专注模式」开关
+  - 在预览模式下支持点击图片查看大图
+  - 统一图标风格，优化悬浮目录样式
+  - 纯预览模式时，限制预览区的最大宽度为1024px [@sunsonliu](https://github.com/sunsonliu)([#1800](https://github.com/Tencent/cherry-markdown/pull/1800))([`9450c81`](https://github.com/Tencent/cherry-markdown/commit/9450c813fc289b9480f61bb560f6ede8767f2b83))
+- Updated dependencies [[`fd1e18d`](https://github.com/Tencent/cherry-markdown/commit/fd1e18d18f64e4c4cd7f2a98634ca3af2904fcd9)]:
+  - cherry-markdown@0.11.6
+
 ## 0.3.1
 
 ### Patch Changes
