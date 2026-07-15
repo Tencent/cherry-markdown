@@ -2,4 +2,5 @@
 'cherry-markdown': patch
 ---
 
-Fix inline links whose display text contains `][` bracket sequences (e.g. `[[a][b]c](url)`) being left unrendered. The reference-link alternative in the link rule short-circuited such text as an undefined reference before the real `](url)` was reached; it is now removed so the inline URL is matched correctly. Defined references are still handled upstream by `CommentReference`, and undefined references still render as literal text.
+fix: 修复链接文字中包含 `][` 时，行内链接无法正常渲染的问题。例如 `[[a][b]c](url)` 之前会被链接规则提前误判为未定义的引用式链接，导致还没匹配到后面的 `(url)` 就原样输出。
+    - 现在链接规则只负责匹配行内链接，因此可以正确识别这类 URL。已定义的引用式链接仍由上游的 `CommentReference` 处理，未定义的引用式链接也会继续保持原文本显示。
