@@ -10,7 +10,7 @@ English | [简体中文](./README.CN.md)
 
 Cherry Markdown Writer is a JavaScript Markdown editor. It has the advantages such as out-of-the-box, lightweight and easy to extend. It can run in browser or server(with Node.js).
 
-### Document
+## Document
 
 - [Getting Started with Cherry Markdown Editor](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)
 - [hello world](https://github.com/Tencent/cherry-markdown/wiki/hello-world)
@@ -21,9 +21,10 @@ Cherry Markdown Writer is a JavaScript Markdown editor. It has the advantages su
 - [Configuring Themes](https://github.com/Tencent/cherry-markdown/wiki/%E9%85%8D%E7%BD%AE%E4%B8%BB%E9%A2%98)
 - [Extending Code Block Syntax](https://github.com/Tencent/cherry-markdown/wiki/%E6%89%A9%E5%B1%95%E4%BB%A3%E7%A0%81%E5%9D%97%E8%AF%AD%E6%B3%95)
 - [Events & Callbacks](https://github.com/Tencent/cherry-markdown/wiki/%E4%BA%8B%E4%BB%B6&%E5%9B%9E%E8%B0%83)
+- [Build Artifacts (Full / Core / Stream / Engine)](https://github.com/Tencent/cherry-markdown/wiki/%E6%9E%84%E5%BB%BA%E4%BA%A7%E7%89%A9%E4%BB%8B%E7%BB%8D)
 - [API](https://tencent.github.io/cherry-markdown/examples/api.html)
 
-### Demos
+## Demos
 
 - [Full Mode](https://tencent.github.io/cherry-markdown/examples/index.html)
 - [Basic](https://tencent.github.io/cherry-markdown/examples/basic.html)
@@ -41,82 +42,33 @@ Cherry Markdown Writer is a JavaScript Markdown editor. It has the advantages su
 - [Utilize Your Own Mermaid.js](https://tencent.github.io/cherry-markdown/examples/mermaid.html)
 - [Custom Code Block Wrapper](https://tencent.github.io/cherry-markdown/examples/custom_codeblock_wrapper.html)
 
----
+## Features
 
-### **Out-of-the-box**
+- **Out-of-the-box** — Instantiate with a single call; most common Markdown syntax (headings, TOC, flowcharts, formulas, etc.) works by default.
+- **Easy to extend** — Pure JavaScript implementation, no framework dependency (Angular/Vue/React only serve as container environments). Custom syntax, toolbar buttons and themes are all supported.
+- **Streaming rendering** — Purpose-built for AI Chat scenarios. Auto-completes unfinished Markdown fragments during token streaming to prevent raw source flashing.
+- **Rich editing experience** — Multi-cursor editing, floating & bubble toolbars, floating TOC, input autocomplete, VIM mode, shortcut key customization, and theme switching.
+- **Powerful diagrams & media** — Mermaid diagrams (with drag-to-resize and alignment), math formulas, table-to-chart, image resize & alignment, audio/video embedding.
+- **Export & interoperability** — Paste from rich text as Markdown, export to Image / PDF, WYSIWYG editing for images and tables.
+- **High performance & secure** — Partial rendering & partial update; built-in whitelist filtering and DomPurify to prevent XSS.
 
-Developer can call and instantiate Cherry Markdown Editor in a very simple way. The instantiated Cherry Markdown Editor supports most commonly used markdown syntax (such as title, TOC, flowchart, formula, etc.) by default.
+For a visual walkthrough, see the [demo](https://tencent.github.io/cherry-markdown/examples/index.html).
 
-### **Easy to extend**
+## Downloads
 
-When the syntax that Cherry Markdown writer support can not meet your needs, secondary development or function extension can be carried out quickly. At the same time, Cherry Markdown writer should be implemented by pure JavaScript, and should not rely on framework technology such as angular, vue and react. Framework only provide a container environment.
+### Desktop Client
 
-### Incremental / Progressive / Streaming rendering
+Cherry Markdown ships a cross-platform desktop client (built with Tauri) for Windows, macOS and Linux. It supports opening / editing local `.md` / `.markdown` / `.txt` files with the same editing experience as the web version.
 
-After enabling streaming rendering, Cherry will automatically complete the following syntax elements to avoid exposing Markdown source code, ensuring stable output during the streaming process([demo](https://tencent.github.io/cherry-markdown/examples/ai_chat.html)):
+👉 **[Download the latest release](https://github.com/Tencent/cherry-markdown/releases?q=client&expanded=true)**
 
-- Headings
-- Bold and italic text
-- Hyperlinks
-- Images and audio/video
-- Inline code blocks
-- Block code blocks
-- Inline formulas
-- Block formulas
-- Unordered lists
-- Tables
-- Mermaid diagrams
-- Footnotes
+### VSCode Extension
 
-## Feature
+Prefer editing Markdown right inside VSCode? Cherry Markdown also provides an official VSCode extension with the same rich editing & preview experience.
 
-### Syntax Feature
+👉 **[Install from VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=cherryMarkdownPublisher.cherry-markdown)**
 
-1. Image zoom, alignment and reference
-2. Generate a chart based on table content
-3. Adjust font color and size
-4. Font background color, superscript and subscript
-5. Insert checklist
-6. Insert audio and video
-7. Mermaid diagrams and math formulas
-8. Info panels
-
-### Functional Feature
-
-1. Paste from rich text as markdown
-2. Classic & regular line break modes
-3. Multi-cursor editing
-4. Image size editing
-5. Mermaid diagram size editing and alignment (drag to resize, support center/left/right/float alignment)
-6. Table editing
-7. Table -> Chart (generate chart from table content)
-8. Export as image or PDF
-9. Floating toolbar: appears at the beginning of a new line
-10. Bubble toolbar: appears when text is selected
-11. Set shortcut keys
-12. Floating table of contents
-13. Theme switching
-14. Input suggestion (autocomplete)
-15. AI Chat scenario: stream-mode output supported
-
-### Performance Feature
-
-1. partial rendering
-2. partial update
-
-### Security
-
-Cherry Markdown has a built-in security Hook, by filtering the whitelist and DomPurify to do scan filter.
-
-### Style theme
-
-Cherry Markdown has a variety of style themes to choose from.
-
-### Features Showcase
-
-Click to view the features demonstration [Features demo](https://github.com/Tencent/cherry-markdown/wiki/%E7%89%B9%E6%80%A7%E5%B1%95%E7%A4%BA-features)
-
-## Install
+### Install as a package
 
 Via yarn
 
@@ -130,242 +82,14 @@ Via npm
 npm install cherry-markdown --save
 ```
 
-If you need to enable the functions of `mermaid` drawing and table-to-chart, you need to add `mermaid` and `echarts` packages at the same time.
-
-Cherry Markdown has built-in mermaid, if you want to use a specified version of mermaid, you can refer to [wiki](https://github.com/Tencent/cherry-markdown/wiki/%E6%9E%84%E5%BB%BA%E4%BA%A7%E7%89%A9%E4%BB%8B%E7%BB%8D)
-
-## Quick start
-
-### Browser
-
-#### UMD
-
-```html
-<link rel="stylesheet" href="cherry-markdown.min.css" />
-<div id="markdown-container"></div>
-<script src="cherry-markdown.js"></script>
-<script>
-  new Cherry({
-    id: 'markdown-container',
-    value: '# welcome to cherry editor!',
-  });
-</script>
-```
-
-#### ESM
-
-```javascript
-import 'cherry-markdown/dist/cherry-markdown.css';
-import Cherry from 'cherry-markdown';
-const cherryInstance = new Cherry({
-  id: 'markdown-container',
-  value: '# welcome to cherry editor!',
-});
-```
-
-UMD/CDN bundles expose `window.Cherry` after being loaded by a `<script>` tag. ESM entry points such as `cherry-markdown` and `cherry-markdown/dist/cherry-markdown.stream` do not write to `window.Cherry`; use the imported `Cherry` value instead.
-
-### Node
-
-```javascript
-import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core.esm.js';
-
-const cherryEngineInstance = new CherryEngine();
-const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!');
-```
-
-## Lite Version
-
-Because the size of the mermaid library is very large, the cherry build product contains a core build package without built-in Mermaid. The core build can be imported in the following ways.
-
-### Core Build With UI
-
-```javascript
-import 'cherry-markdown/dist/cherry-markdown.css';
-import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
-const cherryInstance = new Cherry({
-  id: 'markdown-container',
-  value: '# welcome to cherry editor!',
-});
-```
-
-### Engine Mode (Just Syntax Compile)
-
-```javascript
-// Import Cherry engine core construction
-// Engine configuration items are the same as Cherry configuration items, the following document content only introduces the Cherry core package
-import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core';
-const cherryEngineInstance = new CherryEngine();
-const htmlContent = cherryEngineInstance.makeHtml('# welcome to cherry editor!');
-
-// --> <h1>welcome to cherry editor!</h1>
-```
-
-### ⚠️ About mermaid
-
-The core build package does not contain mermaid dependency, should import related plug-ins manually.
-
-```javascript
-import 'cherry-markdown/dist/cherry-markdown.css';
-import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
-import CherryMermaidPlugin from 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin';
-import mermaid from 'mermaid';
-
-// Plug-in registration must be done before Cherry is instantiated
-Cherry.usePlugin(CherryMermaidPlugin, {
-  mermaid, // pass in mermaid object
-  // mermaidAPI: mermaid.mermaidAPI, // Can also be passed in mermaid API
-  // At the same time, you can configure mermaid's behavior here, please refer to the official mermaid document
-  // theme: 'neutral',
-  // sequence: { useMaxWidth: false, showSequenceNumbers: true }
-});
-
-const cherryInstance = new Cherry({
-  id: 'markdown-container',
-  value: '# welcome to cherry editor!',
-});
-```
-
-From mermaid v10.0.0, the rendering logic changed from synchronous to asynchronous. After `afterChange` or `afterInit` events, mermaid code blocks are rendered as placeholders first, then rendered asynchronously and replaced.
-
-If you need to get the content after asynchronous rendering is finished, you can use the following example:
-
-````js
-const cherryInstance = new Cherry({
-  id: 'markdown-container',
-  // Use a template string to include the mermaid code block directly
-  value: `
-    ```mermaid
-    graph LR
-        A[Company] -->| Off work | B(Market)
-        B --> C{See<br>melon seller}
-        C -->|Yes| D[Buy a bun]
-        C -->|No| E[Buy one pound of buns]
-    ```
-  `,
-  callback: {
-    afterAsyncRender: (md, html) => {
-      // md is the markdown source, html is the rendered result
-    }
-  }
-});
-````
-
-### Stream Build
-
-Cherry provides a build package optimized for streaming output scenarios. This package does not include large dependencies like mermaid or CodeMirror, enabling on-demand lazy loading. It is ideal for AI Chat and similar scenarios.
-
-```javascript
-import 'cherry-markdown/dist/cherry-markdown.css';
-import Cherry from 'cherry-markdown/dist/cherry-markdown.stream';
-
-// The stream build does not include the following dependencies by default,
-// which can be loaded on demand:
-// - mermaid (flowcharts)
-// - CodeMirror (code editor)
-
-const cherryInstance = new Cherry({
-  id: 'markdown-container',
-});
-
-cherryInstance.setMarkdown('# welcome to cherry editor!');
-```
-
-#### Loading Mermaid Plugin for Stream Build
-
-```javascript
-import 'cherry-markdown/dist/cherry-markdown.css';
-import Cherry from 'cherry-markdown/dist/cherry-markdown.stream';
-import CherryMermaidPlugin from 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin';
-import mermaid from 'mermaid';
-
-// Plugin registration must be done before Cherry is instantiated
-Cherry.usePlugin(CherryMermaidPlugin, {
-  mermaid,
-  mermaidAPI: mermaid,
-});
-
-const cherryInstance = new Cherry({
-  id: 'markdown-container',
-});
-```
-
-#### Differences Between Builds
-
-| Build      | File                            | Format  | Global          | Built-in Mermaid | Built-in CodeMirror | Use Case          |
-| ---------- | ------------------------------- | ------- | --------------- | ---------------- | ------------------- | ----------------- |
-| Full       | `cherry-markdown.js`            | UMD/CDN | `window.Cherry` | ✅               | ✅                  | All scenarios     |
-| Full ESM   | `cherry-markdown.esm.js`        | ESM     | None            | ✅               | ✅                  | Module bundlers   |
-| Core       | `cherry-markdown.core.js`       | UMD/CDN | `window.Cherry` | ❌               | ✅                  | Without Mermaid   |
-| Stream     | `cherry-markdown.stream.js`     | UMD/CDN | `window.Cherry` | ❌               | ❌                  | AI Chat streaming |
-| Stream ESM | `cherry-markdown.stream.esm.js` | ESM     | None            | ❌               | ❌                  | Module bundlers   |
-
-> Note: MathJax/KaTeX are external dependencies loaded dynamically via CDN and are not included in any build package.
-
-### Dynamic import
-
-Dynamic import is recommended. The following is an example of webpack dynamic import.
-
-```javascript
-import 'cherry-markdown/dist/cherry-markdown.css';
-import Cherry from 'cherry-markdown/dist/cherry-markdown.core';
-
-const registerPlugin = async () => {
-  const [{ default: CherryMermaidPlugin }, mermaid] = await Promise.all([
-    import('cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin.esm.js'),
-    import('mermaid'),
-  ]);
-  Cherry.usePlugin(CherryMermaidPlugin, {
-    mermaid, // pass in mermaid object
-  });
-};
-
-registerPlugin().then(() => {
-  //  Plug-in registration must be done before Cherry is instantiated
-  const cherryInstance = new Cherry({
-    id: 'markdown-container',
-    value: '# welcome to cherry editor!',
-  });
-});
-```
-
-## Configuration
-
-see `/src/Cherry.config.js` or click [here](https://github.com/Tencent/cherry-markdown/wiki/%E9%85%8D%E7%BD%AE%E9%A1%B9%E5%85%A8%E8%A7%A3)
-
-## Example
-
-Click [here](https://github.com/Tencent/cherry-markdown/wiki) for more examples.
-
-### Client
-
-Under development, please stay tuned or see `/packages/client/`
-
-## Extension
-
-### Customize Syntax
-
-See the custom syntax documentation: [Custom syntax docs](https://github.com/Tencent/cherry-markdown/wiki/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E6%B3%95)
-
-### Customize Toolbar
-
-Cherry supports five toolbar positions, each position can be extended with custom toolbar buttons. See the toolbar configuration documentation for details: [Customize toolbar buttons](https://github.com/Tencent/cherry-markdown/wiki/%E8%B0%83%E6%95%B4%E5%B7%A5%E5%85%B7%E6%A0%8F#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B7%A5%E5%85%B7%E6%A0%8F%E6%8C%89%E9%92%AE).
-
-## Unit Test
-
-`Vitest` has been added as a basic configuration, but the related test cases have not been fully tested. Welcome to submit rich test cases.
+Cherry provides multiple build artifacts (Full / Core / Stream / Engine) to fit different scenarios such as browser, Node.js, and AI Chat streaming. For usage examples, bundle differences, mermaid integration and dynamic import, please refer to **[Build Artifacts Guide](https://github.com/Tencent/cherry-markdown/wiki/%E6%9E%84%E5%BB%BA%E4%BA%A7%E7%89%A9%E4%BB%8B%E7%BB%8D)**.
 
 ## Contribution Guidelines
 
-Welcome to join us in building a powerful Markdown editor. You can also submit feature requests as issues. Before writing new features, you can learn about the [Introduction to cherry-markdown editor](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86-cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8). Please read the [Contribution Guidelines](https://github.com/Tencent/cherry-markdown/wiki/%E8%B4%A1%E7%8C%AE%E6%8C%87%E5%8D%97%20Contribution%20Guidelines) before making contributions.
+Welcome to join us in building a powerful Markdown editor. Before implementing new features or submitting a pull request, please read:
 
-<a href="https://openomy.com/Tencent/cherry-markdown" target="_blank" style="display: block; width: 100%;" align="center">
-  <img src="https://openomy.com/svg?repo=Tencent/cherry-markdown&chart=bubble&latestMonth=3" target="_blank" alt="Contribution Leaderboard" style="display: block; width: 100%;" />
-</a>
-
-## Stargazers over time
-
-[![Stargazers over time](https://starchart.cc/Tencent/cherry-markdown.svg)](https://starchart.cc/Tencent/cherry-markdown)
+- [Introduction to cherry-markdown editor](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86-cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)
+- [Contribution Guidelines](https://github.com/Tencent/cherry-markdown/wiki/%E8%B4%A1%E7%8C%AE%E6%8C%87%E5%8D%97%20Contribution%20Guidelines)
 
 ## License
 
