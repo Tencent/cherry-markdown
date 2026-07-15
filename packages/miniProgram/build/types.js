@@ -64,6 +64,7 @@ export type MiniProgramTransformOptions = {
 };
 
 export declare function htmlToMiniProgramBlocks(html: string, options?: MiniProgramTransformOptions): MiniProgramBlock[];
+export declare function markdownToHtml(markdown: string): string;
 export declare function markdownToMiniProgramBlocks(
   engine: { makeHtml(markdown: string, returnType?: string, forceNoCursor?: boolean): string },
   markdown: string,
@@ -76,7 +77,6 @@ export default class MiniProgramStream {
   static readonly config: { defaults: unknown };
   options: any;
   lastMarkdownText: string;
-  engine: { makeHtml(markdown: string, returnType?: string, forceNoCursor?: boolean): string };
   constructor(options?: Record<string, any>);
   makeHtml(markdown: string, forceNoCursor?: boolean): string;
   makeBlocks(markdown: string, options?: MiniProgramTransformOptions): MiniProgramBlock[];

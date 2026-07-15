@@ -37,7 +37,6 @@
     "typecheck": "tsc --project test/tsconfig.json --noEmit"
   },
   "dependencies": {
-    "cherry-markdown": "*",
     "htmlparser2": "^10.0.0"
   },
   "devDependencies": {

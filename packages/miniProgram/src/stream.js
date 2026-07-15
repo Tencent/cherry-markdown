@@ -13,14 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import mergeWith from '@/utils/toolkit/mergeWith';
-import cloneDeep from '@/utils/toolkit/cloneDeep';
-import Engine from '@/Engine';
-import defaultConfig from '@/Cherry.config';
-import { customizer } from '@/utils/config';
-import { urlProcessorProxy } from '@/UrlCache';
-import SyntaxHookBase from '@/core/SyntaxBase';
+import { markdownToHtml } from './miniMarkdown';
 import { htmlToMiniProgramBlocks, markdownToMiniProgramBlocks } from './transform';
+
+class SyntaxHookBase {}
 
 /**
  * MiniProgramStream - data-only Cherry stream renderer for MiniProgram native components.
@@ -30,32 +26,15 @@ export default class MiniProgramStream {
    * @readonly
    */
   static config = {
-    defaults: defaultConfig,
+    defaults: {},
   };
 
   /**
    * @param {Partial<import('~types/cherry').CherryOptions>} options
    */
   constructor(options = {}) {
-    const defaultConfigCopy = cloneDeep(MiniProgramStream.config.defaults);
-    this.options = mergeWith({}, defaultConfigCopy, options, customizer);
-    this.options.isPreviewOnly = true;
-    this.options.editor.defaultModel = 'previewOnly';
-    this.options.toolbars.showToolbar = false;
-    this.options.engine.global.flowSessionContext = this.options.engine.global.flowSessionContext !== false;
-    if (this.options.engine.global.flowSessionCursor === 'default') {
-      this.options.engine.global.flowSessionCursor = '<span class="cherry-flow-session-cursor"></span>';
-    }
-
-    if (typeof this.options.engine.global.urlProcessor === 'function') {
-      this.options.engine.global.urlProcessor = urlProcessorProxy(this.options.engine.global.urlProcessor);
-      this.options.callback.urlProcessor = this.options.engine.global.urlProcessor;
-    } else {
-      this.options.callback.urlProcessor = urlProcessorProxy(this.options.callback.urlProcessor);
-    }
-
+    this.options = options;
     this.lastMarkdownText = this.options.value || '';
-    this.engine = new Engine(this.options, /** @type {import('@/Cherry').default} */ (/** @type {*} */ (this)));
   }
 
   /**
@@ -64,7 +43,11 @@ export default class MiniProgramStream {
    * @returns {string}
    */
   makeHtml(markdown, forceNoCursor = false) {
-    return /** @type {string} */ (this.engine.makeHtml(markdown || '', 'string', forceNoCursor));
+    const html = markdownToHtml(markdown || '');
+    if (forceNoCursor) {
+      return html;
+    }
+    return html.replace(/<\/p>$/, '<span class="cherry-flow-session-cursor"></span></p>');
   }
 
   /**
@@ -73,7 +56,8 @@ export default class MiniProgramStream {
    * @returns {import('./transform').MiniProgramBlock[]}
    */
   makeBlocks(markdown, options = {}) {
-    return markdownToMiniProgramBlocks(this.engine, markdown || '', options);
+    const forceNoCursor = options.forceNoCursor !== false;
+    return htmlToMiniProgramBlocks(this.makeHtml(markdown || '', forceNoCursor), { ...options, forceNoCursor });
   }
 
   /**
@@ -99,4 +83,4 @@ export default class MiniProgramStream {
   clearFlowSessionCursor() {}
 }
 
-export { SyntaxHookBase, htmlToMiniProgramBlocks, markdownToMiniProgramBlocks };
+export { SyntaxHookBase, htmlToMiniProgramBlocks, markdownToHtml, markdownToMiniProgramBlocks };

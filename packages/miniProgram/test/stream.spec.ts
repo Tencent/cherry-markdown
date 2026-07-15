@@ -17,7 +17,7 @@ describe('@cherry-markdown/miniProgram stream', () => {
     expect(stream.makeBlocks('**hello**')).toEqual([
       {
         type: 'paragraph',
-        attrs: expect.objectContaining({ 'data-type': 'p' }),
+        attrs: {},
         children: [{ type: 'strong', attrs: {}, children: [{ type: 'text', text: 'hello' }] }],
       },
     ]);
@@ -62,5 +62,27 @@ describe('@cherry-markdown/miniProgram stream', () => {
         ],
       },
     ]);
+  });
+
+  it('runs without browser globals', () => {
+    const originalWindow = globalThis.window;
+    const originalSelf = globalThis.self;
+
+    try {
+      delete globalThis.window;
+      delete globalThis.self;
+
+      const stream = new MiniProgramStream();
+      expect(stream.setMarkdown('**hello**')).toEqual([
+        {
+          type: 'paragraph',
+          attrs: {},
+          children: [{ type: 'strong', attrs: {}, children: [{ type: 'text', text: 'hello' }] }],
+        },
+      ]);
+    } finally {
+      globalThis.window = originalWindow;
+      globalThis.self = originalSelf;
+    }
   });
 });
