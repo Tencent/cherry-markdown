@@ -1,3 +1,4 @@
+/* global globalThis */
 import { describe, expect, it, vi } from 'vitest';
 import MiniProgramStream, { htmlToMiniProgramBlocks } from '../src/stream';
 
