@@ -16,6 +16,7 @@ import { WINDOW_EVENTS } from '../constants/events';
 import * as echarts from 'echarts';
 import type { CherryEditorInstance } from './editorTypes';
 import { getCurrentLightbox } from './composables/useImageLightbox';
+import { usePreferencesStore, type EditorMode } from '../store';
 
 /**
  * ECharts类型兼容性处理
@@ -58,14 +59,21 @@ const customMenuChangeModule = Cherry.createMenuHook('编辑', {
   iconName: 'pen' as const,
   onClick(this: ToolbarMenuHookContext) {
     const { editor } = this.$cherry.getStatus();
+    let nextMode: EditorMode;
     if (editor === 'show') {
+      nextMode = 'previewOnly';
       this.$cherry.switchModel('previewOnly');
+    } else if (this.$cherry.focusMode) {
+      nextMode = 'editOnly';
+      this.$cherry.switchModel('editOnly', false);
     } else {
-      if (this.$cherry.focusMode) {
-        this.$cherry.switchModel('editOnly', false);
-      } else {
-        this.$cherry.switchModel('edit&preview');
-      }
+      nextMode = 'edit&preview';
+      this.$cherry.switchModel('edit&preview');
+    }
+    try {
+      usePreferencesStore().setEditorMode(nextMode);
+    } catch {
+      // pinia 未就绪时忽略，避免影响功能
     }
   },
 });
@@ -216,6 +224,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     // edit&preview: 双栏编辑预览模式
     // editOnly: 纯编辑模式（没有预览，可通过toolbar切换成双栏或预览模式）
     // previewOnly: 预览模式（没有编辑框，toolbar只显示“返回编辑”按钮，可通过toolbar切换成编辑模式）
+    // 该字段在 cherryInstance 工厂函数里会被 usePreferencesStore().editorMode 覆盖
     defaultModel: 'edit&preview',
     // 粘贴时是否自动将html转成markdown
     convertWhenPaste: true,
@@ -424,6 +433,15 @@ const cherryConfig: CherryOptions<CustomConfig> = {
  */
 export const cherryInstance = (() => {
   return () => {
+    // 使用持久化的编辑器模式作为初始 defaultModel（若 store 不可用则回退默认值）
+    try {
+      const prefs = usePreferencesStore();
+      if (cherryConfig.editor) {
+        cherryConfig.editor.defaultModel = prefs.editorMode;
+      }
+    } catch {
+      // pinia 未就绪时使用默认配置
+    }
     return new Cherry(cherryConfig);
   };
 })();

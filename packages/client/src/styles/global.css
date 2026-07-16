@@ -48,6 +48,14 @@
   /* Typography */
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', Roboto, Helvetica, Arial, sans-serif;
+
+  /* Monospace stack: prefers popular programming fonts if user has them installed,
+     then falls back to system monospace on macOS / Windows / Linux, and finally
+     to CJK fonts so mixed Chinese-English text still looks aligned. */
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code',
+    'SF Mono', Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New',
+    'PingFang SC', 'Microsoft YaHei', monospace;
 }
 
 * {
@@ -131,9 +139,29 @@ body {
   padding: 0 35px;
 }
 
-#markdown-editor .cherry-previewer--full, #markdown-editor .cherry-editor--full .cm-editor .cm-scroller {
+/* Monospace for CodeMirror editing area (content + line-number gutter). */
+#markdown-editor .cm-editor .cm-content,
+#markdown-editor .cm-editor .cm-gutters {
+  font-family: var(--font-mono) !important;
+}
+
+/* Monospace for code snippets in the Cherry preview pane. */
+#markdown-editor .cherry .cherry-previewer code,
+#markdown-editor .cherry .cherry-previewer pre,
+#markdown-editor .cherry .cherry-previewer kbd,
+#markdown-editor .cherry .cherry-previewer samp {
+  font-family: var(--font-mono) !important;
+}
+
+#markdown-editor.fixed-width .cherry-previewer--full, #markdown-editor.fixed-width .cherry-editor--full .cm-editor .cm-scroller {
   padding-left: max(20px, calc((100% - 800px) / 2));
   padding-right: max(45px, calc((100% - 800px) / 2));
+  border-left: none;
+}
+
+#markdown-editor.auto-width .cherry-previewer--full, #markdown-editor.auto-width .cherry-editor--full .cm-editor .cm-scroller {
+  padding-left: max(20px, 10%);
+  padding-right: max(45px, 10%);
   border-left: none;
 }
 
