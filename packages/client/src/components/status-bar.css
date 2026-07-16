@@ -34,6 +34,7 @@
   justify-content: center;
   flex: 0 0 auto;
   padding: 0 12px;
+  gap: 8px;
 }
 
 .save-dot {
@@ -177,4 +178,39 @@ body[data-cherry-theme='dark'] .status-action-primary.active {
 
 body[data-cherry-theme='dark'] .status-bar {
   background: var(--color-surface-panel);
+}
+
+/* 宽度切换按钮：次级样式，视觉上比"专注"主按钮更轻，紧贴在其右侧 */
+.status-action-width {
+  height: 22px;
+  padding: 0 10px;
+  min-width: 84px;
+  justify-content: center;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.status-action-width:hover {
+  color: var(--color-accent-strong);
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+}
+
+body[data-cherry-theme='dark'] .status-action-width {
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border-strong);
+}
+
+body[data-cherry-theme='dark'] .status-action-width:hover {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+  border-color: var(--color-accent);
 }

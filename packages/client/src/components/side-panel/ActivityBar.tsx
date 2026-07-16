@@ -2,6 +2,7 @@ import { defineComponent, h, type PropType } from 'vue';
 import { ArrowIcon } from '../icons';
 import type { ActivityPanelDefinition } from './types';
 
+// Left-side activity bar: top panel switcher + bottom collapse/settings/version.
 export default defineComponent({
   name: 'ActivityBar',
   props: {
@@ -25,6 +26,7 @@ export default defineComponent({
   emits: {
     selectPanel: (_panelId: string) => true,
     toggleCollapse: () => true,
+    openSettings: () => true,
   },
   setup(props, { emit }) {
     return () =>
@@ -57,6 +59,16 @@ export default defineComponent({
             },
             [h(ArrowIcon, { size: 14, direction: props.isCollapsed ? 'right' : 'left' })],
           ),
+          // h(
+          //   'button',
+          //   {
+          //     class: 'activity-btn compact',
+          //     title: '设置',
+          //     'aria-label': '设置',
+          //     onClick: () => emit('openSettings'),
+          //   },
+          //   [h(SettingsIcon, { size: 16 })],
+          // ),
           h('span', { class: 'version-text', title: '当前版本' }, `v${props.version}`),
         ]),
       ]);

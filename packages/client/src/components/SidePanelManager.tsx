@@ -35,6 +35,7 @@ export default defineComponent({
   name: 'SidePanelManager',
   emits: {
     newFile: () => true,
+    openSettings: () => true,
   },
   setup(_, { emit }) {
     const version = __APP_VERSION__;
@@ -120,6 +121,7 @@ export default defineComponent({
             version,
             onSelectPanel: selectPanel,
             onToggleCollapse: toggleCollapse,
+            onOpenSettings: () => emit('openSettings'),
           }),
           !isCollapsed.value
             ? h('section', { class: 'panel-surface', style: { width: `${panelWidth.value}px` } }, [
