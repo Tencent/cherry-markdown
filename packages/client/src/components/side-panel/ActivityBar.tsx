@@ -1,5 +1,5 @@
 import { defineComponent, h, type PropType } from 'vue';
-import { ArrowIcon, SettingsIcon } from '../icons';
+import { ArrowIcon } from '../icons';
 import type { ActivityPanelDefinition } from './types';
 
 // Left-side activity bar: top panel switcher + bottom collapse/settings/version.
