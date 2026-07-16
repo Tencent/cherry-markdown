@@ -25,6 +25,10 @@ fn main() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        // Persist window size / position / maximized state across launches.
+        // The plugin auto-attaches listeners to every window and stores state
+        // in `$APPCONFIG/.window-state.json`.
+        .plugin(tauri_plugin_window_state::Builder::new().build())
         .setup(|app| {
             // Capture the file (if any) that the OS launched us with.
             let launch_file = detect_launch_file();

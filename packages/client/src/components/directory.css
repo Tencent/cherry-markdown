@@ -71,6 +71,7 @@
   gap: 8px;
   border-radius: var(--radius-sm);
   margin-left: 16px;
+  color: var(--color-text);
 }
 
 .directory-node .file-item:hover {
