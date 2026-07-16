@@ -2,30 +2,12 @@ import { openPath, revealItemInDir } from '@tauri-apps/plugin-opener';
 import { stat } from '@tauri-apps/plugin-fs';
 import { computed, defineComponent, h, onMounted, onUnmounted, ref, watch } from 'vue';
 import { MESSAGES } from '../constants/i18n';
-import { useFileStore } from '../store';
+import { useFileStore, usePreferencesStore } from '../store';
 import { notifyError, notifyInfo } from '../utils/notifications';
 import type { CherryEditorInstance } from './editorTypes';
 import { getEditorInstance } from './composables/useEditor';
+import { AutoWidthIcon, FixedWidthIcon, FocusIcon } from './icons';
 import './status-bar.css';
-
-const FocusIcon = () =>
-  h(
-    'svg',
-    {
-      width: 14,
-      height: 14,
-      viewBox: '0 0 24 24',
-      fill: 'none',
-      stroke: 'currentColor',
-      'stroke-width': 2,
-      'stroke-linecap': 'round',
-      'stroke-linejoin': 'round',
-    },
-    [
-      h('circle', { cx: 12, cy: 12, r: 3 }),
-      h('path', { d: 'M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1' }),
-    ],
-  );
 
 const pad2 = (n: number): string => String(n).padStart(2, '0');
 
@@ -56,14 +38,49 @@ export default defineComponent({
   },
   setup(props) {
     const fileStore = useFileStore();
+    const preferences = usePreferencesStore();
     const wordCount = ref(0);
     const wordWords = ref(0);
     const wordLine = ref(0);
     const lastChangeTime = ref<number | null>(null);
-    const focusMode = ref(false);
+    // 从持久化存储初始化专注模式与宽度模式
+    const focusMode = ref<boolean>(preferences.focusMode);
     // 记录进入专注模式时 cherry 是否处于纯预览模式（此时不切换编辑器 model）
     const enteredInPreviewOnly = ref(false);
+    // 专注模式下的宽度模式：'fixed' → #markdown-editor.fixed-width；'auto' → #markdown-editor.auto-width
+    // 默认 fixed（限制正文宽度，阅读体验更好）
+    const widthMode = ref<'fixed' | 'auto'>(preferences.widthMode);
     let waitTimer: number | undefined;
+
+    const FOCUS_MODE_CLASS = 'cherry-focus-mode';
+    const WIDTH_CLASSES = ['fixed-width', 'auto-width'] as const;
+
+    // 若持久化的专注模式为 true，setup 阶段立即隐藏侧栏，避免首屏“侧栏闪现”
+    // 编辑器就绪后再由 enterFocusMode 完成 editor model 切换和宽度类应用
+    if (preferences.focusMode) {
+      document.body.classList.add(FOCUS_MODE_CLASS);
+    }
+
+    const applyWidthModeToDom = (mode: 'fixed' | 'auto'): void => {
+      const el = document.getElementById('markdown-editor');
+      if (!el) return;
+      el.classList.remove(...WIDTH_CLASSES);
+      el.classList.add(mode === 'fixed' ? 'fixed-width' : 'auto-width');
+    };
+
+    const clearWidthModeOnDom = (): void => {
+      const el = document.getElementById('markdown-editor');
+      if (!el) return;
+      el.classList.remove(...WIDTH_CLASSES);
+    };
+
+    const toggleWidthMode = (): void => {
+      widthMode.value = widthMode.value === 'fixed' ? 'auto' : 'fixed';
+      applyWidthModeToDom(widthMode.value);
+      preferences.setWidthMode(widthMode.value);
+      // 宽度变化后刷新 CodeMirror，避免测量残留
+      setTimeout(() => getEditorInstance()?.editor?.refresh?.(), 50);
+    };
 
     const fileName = computed(() => {
       const path = fileStore.currentFilePath;
@@ -160,6 +177,14 @@ export default defineComponent({
       const editor = getEditorInstance();
       if (editor) {
         editor.on?.('afterChange', onAfterChange);
+        // 如果持久化的专注模式为 true，则在编辑器就绪后自动恢复
+        // 注意此时 focusMode.value 已从持久化值初始化为 true，
+        // enterFocusMode 需要“幂等”——它会重新读取 focusMode 判断当前状态，
+        // 因此恢复时先将 focusMode 重置为 false 再进入，确保 DOM 副作用被正确执行
+        if (preferences.focusMode) {
+          focusMode.value = false;
+          enterFocusMode(false);
+        }
       } else {
         waitTimer = window.setTimeout(waitForEditor, 100);
       }
@@ -170,46 +195,68 @@ export default defineComponent({
       void refreshLastChangeTimeFromDisk();
     });
 
-    const FOCUS_MODE_CLASS = 'cherry-focus-mode';
-
-    const toggleFocusMode = (): void => {
+    /**
+     * 进入专注模式
+     * @param persist 是否写回持久化存储（自动恢复时为 false，避免多余写入）
+     */
+    const enterFocusMode = (persist = true): void => {
       const editor = getEditorInstance();
       if (!editor) return;
+      if (focusMode.value) return;
 
-      editor.focusMode = !focusMode.value;
-      if (!focusMode.value) {
-        // 进入专注模式
-        // 若 cherry 当前处于纯预览模式（editor === 'hide'），只隐藏侧栏，不改动编辑器 model
-        const isPreviewOnly = editor.status?.editor !== 'show';
-        enteredInPreviewOnly.value = isPreviewOnly;
+      editor.focusMode = true;
+      // 若 cherry 当前处于纯预览模式（editor === 'hide'），只隐藏侧栏，不改动编辑器 model
+      const isPreviewOnly = editor.status?.editor !== 'show';
+      enteredInPreviewOnly.value = isPreviewOnly;
 
-        // 通过 body class 彻底隐藏整个 .side-panel（含活动栏），
-        // 不修改 fileStore.sidebarCollapsed，避免污染持久化的折叠偏好
-        document.body.classList.add(FOCUS_MODE_CLASS);
+      // 通过 body class 彻底隐藏整个 .side-panel（含活动栏），
+      // 不修改 fileStore.sidebarCollapsed，避免污染持久化的折叠偏好
+      document.body.classList.add(FOCUS_MODE_CLASS);
 
-        if (!isPreviewOnly) {
-          try {
-            editor.switchModel('editOnly', false);
-            setTimeout(() => editor.editor?.refresh?.(), 200);
-          } catch {
-            // 切换失败则回退侧栏隐藏
-            document.body.classList.remove(FOCUS_MODE_CLASS);
-            return;
-          }
+      if (!isPreviewOnly) {
+        try {
+          editor.switchModel('editOnly', false);
+          setTimeout(() => editor.editor?.refresh?.(), 200);
+        } catch {
+          // 切换失败则回退侧栏隐藏
+          document.body.classList.remove(FOCUS_MODE_CLASS);
+          return;
         }
-        focusMode.value = true;
+      }
+      // 进入专注模式时应用当前宽度模式
+      applyWidthModeToDom(widthMode.value);
+      focusMode.value = true;
+      if (persist) preferences.setFocusMode(true);
+    };
+
+    const exitFocusMode = (persist = true): void => {
+      const editor = getEditorInstance();
+      if (!focusMode.value) return;
+
+      if (editor) {
+        editor.focusMode = false;
+      }
+      // 退出专注模式：恢复侧栏；若进入时非纯预览，则切回 edit&preview
+      document.body.classList.remove(FOCUS_MODE_CLASS);
+      if (editor && !enteredInPreviewOnly.value) {
+        try {
+          editor.switchModel('edit&preview', true);
+          setTimeout(() => editor.editor?.refresh?.(), 200);
+        } catch {
+          // 忽略还原失败
+        }
+      }
+      // 退出专注模式时清理宽度类，恢复默认布局
+      clearWidthModeOnDom();
+      focusMode.value = false;
+      if (persist) preferences.setFocusMode(false);
+    };
+
+    const toggleFocusMode = (): void => {
+      if (focusMode.value) {
+        exitFocusMode(true);
       } else {
-        // 退出专注模式：恢复侧栏；若进入时非纯预览，则切回 edit&preview
-        document.body.classList.remove(FOCUS_MODE_CLASS);
-        if (!enteredInPreviewOnly.value) {
-          try {
-            editor.switchModel('edit&preview', true);
-            setTimeout(() => editor.editor?.refresh?.(), 200);
-          } catch {
-            // 忽略还原失败
-          }
-        }
-        focusMode.value = false;
+        enterFocusMode(true);
       }
     };
 
@@ -218,6 +265,8 @@ export default defineComponent({
       getEditorInstance()?.off?.('afterChange', onAfterChange);
       // 组件卸载时若仍处于专注模式，清理 body class 避免副作用残留
       document.body.classList.remove(FOCUS_MODE_CLASS);
+      // 同时清理宽度模式类，避免残留影响
+      clearWidthModeOnDom();
     });
 
     return () =>
@@ -252,6 +301,24 @@ export default defineComponent({
             },
             [h(FocusIcon), h('span', { class: 'status-action-label' }, focusMode.value ? '专注中' : '专注')],
           ),
+          focusMode.value
+            ? h(
+                'button',
+                {
+                  type: 'button',
+                  class: ['status-action', 'status-action-width'],
+                  title:
+                    widthMode.value === 'fixed'
+                      ? '当前：固定宽度，点击切换为 100% 宽度'
+                      : '当前：100% 宽度，点击切换为固定宽度',
+                  onClick: toggleWidthMode,
+                },
+                [
+                  widthMode.value === 'fixed' ? h(FixedWidthIcon) : h(AutoWidthIcon),
+                  h('span', { class: 'status-action-label' }, widthMode.value === 'fixed' ? '固定宽度' : '100% 宽度'),
+                ],
+              )
+            : null,
         ]),
         h('div', { class: 'status-right' }, [
           h('span', { class: 'status-item' }, `${wordCount.value} 字`),
