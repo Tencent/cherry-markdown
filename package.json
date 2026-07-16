@@ -60,12 +60,10 @@
     "vue-tsc": "^3.2.2"
   },
   "lint-staged": {
-    "packages/{cherry-markdown/{src,test},client/src,vscodePlugin/src}/**/*.{js,ts,vue}": [
-      "eslint --fix",
-      "prettier --write"
+    "{packages/{cherry-markdown/{src,test},client/src,vscodePlugin/src}/**/*.{js,ts,vue},eslint.config.mjs,prettier.config.mjs}": [
+      "eslint --fix"
     ],
-    "{eslint.config.mjs,prettier.config.mjs}": [
-      "eslint --fix",
+    "**/*.{md,mdx}": [
       "prettier --write"
     ]
   },
