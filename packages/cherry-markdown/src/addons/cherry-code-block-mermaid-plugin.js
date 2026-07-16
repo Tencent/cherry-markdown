@@ -88,7 +88,7 @@ export default class MermaidCodeEngine {
   contentRenderCacheMax = 100;
 
   /** 异步渲染最大并发数：达到上限后新任务排队，避免大量 mermaid 并发共享 DOM 引起竞态与内存压力 */
-  maxConcurrentRender = 10;
+  maxConcurrentRender = 1;
 
   /** 当前正在异步渲染的任务数 */
   activeRenderCount = 0;
