@@ -16,6 +16,7 @@ import { WINDOW_EVENTS } from '../constants/events';
 import * as echarts from 'echarts';
 import type { CherryEditorInstance } from './editorTypes';
 import { getCurrentLightbox } from './composables/useImageLightbox';
+import { createImageBedFileUpload, createImageBedOnPaste } from './composables/useImageBedUploader';
 import { usePreferencesStore, type EditorMode } from '../store';
 
 /**
@@ -143,6 +144,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
         selfClosing: true, // 自动闭合，为true时，当md中有奇数个```时，会自动在md末尾追加一个```
         mermaid: {
           svg2img: false, // 是否将mermaid生成的画图变成img格式
+          showSourceToolbar: true,
         },
         /**
          * indentedCodeBlock是缩进代码块是否启用的开关
@@ -375,6 +377,18 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     },
   },
   callback: {
+    // 图床上传：根据用户在“设置”里选择的图床（none/picgo/custom）动态分发
+    fileUpload: createImageBedFileUpload(),
+    /**
+     * 粘贴回调：当剪贴板中含图片且已配置图床时，
+     * 先回显“正在上传图片…”语法糖占位，上传完成后自动替换为真实的 ![](url)。
+     * 其他情况（有文字 / 图床=none）返回 undefined 交给 Cherry 默认处理。
+     *
+     * 注：cherry-markdown 官方 d.ts 里 asyncCallback 的形参类型标注为 (text: string) => void，
+     * 但 Editor.js 运行时实际传递的是对象 { html, htmlText, mdText }，此处以运行时为准，
+     * 使用双重断言穿透类型系统。
+     */
+    onPaste: createImageBedOnPaste() as unknown as NonNullable<CherryOptions<CustomConfig>['callback']>['onPaste'],
     // 把中文变成拼音的回调，当然也可以把中文变成英文、英文变成中文
     changeString2Pinyin: toPinyin,
     /**

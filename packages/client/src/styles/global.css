@@ -173,6 +173,10 @@ body {
   margin-top: -45px;
 }
 
+#markdown-editor .cherry-previewer .cherry-echarts-wrapper {
+  box-sizing: content-box;
+}
+
 /* ------------------------------------------------------------------ */
 /* Cherry 主题联动                                                     */
 /* body[data-cherry-theme] 由 useCherryEditor 订阅 changeMainTheme     */
