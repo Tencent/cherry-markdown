@@ -1,5 +1,6 @@
-import { defineComponent, h, onMounted, onUnmounted } from 'vue';
+import { defineComponent, h, onMounted, onUnmounted, ref } from 'vue';
 import SidePanelManager from './components/SidePanelManager';
+import SettingsDialog from './components/ui/SettingsDialog';
 import StatusBar from './components/StatusBar';
 import { useAppEvents } from './components/composables/useAppEvents';
 import { useAppFileOperations } from './components/composables/useAppFileOperations';
@@ -51,6 +52,9 @@ export default defineComponent({
       }
     };
 
+    // 设置弹窗可见性（当前包含图床配置）
+    const settingsDialogVisible = ref(false);
+
     const appEvents = useAppEvents({
       onOpenFileFromSidebar: fileOperations.handleOpenFileFromSidebar,
       onRequestSave: fileOperations.handleSaveFromToolbar,
@@ -94,6 +98,9 @@ export default defineComponent({
           onNewFile: async () => {
             await fileOperations.newFile();
           },
+          onOpenSettings: () => {
+            settingsDialogVisible.value = true;
+          },
         }),
         h('div', { class: 'editor-container' }, [
           h('div', { id: 'markdown-editor' }),
@@ -104,6 +111,12 @@ export default defineComponent({
           }),
         ]),
         h(ToastContainer),
+        h(SettingsDialog, {
+          visible: settingsDialogVisible.value,
+          onClose: () => {
+            settingsDialogVisible.value = false;
+          },
+        }),
         h(UnsavedChangesDialog, {
           visible: unsavedGuard.showUnsavedDialog.value,
           onClose: unsavedGuard.handleUnsavedDialogClose,
