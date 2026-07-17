@@ -43,7 +43,13 @@ export type MiniProgramListBlock = {
   attrs?: Record<string, string>;
   children: MiniProgramListItem[];
 };
-export type MiniProgramCodeBlock = { type: 'code_block'; lang: string; text: string; attrs?: Record<string, string> };
+export type MiniProgramCodeBlock = {
+  type: 'code_block';
+  lang: string;
+  text: string;
+  nodes?: MiniProgramRichTextNode[];
+  attrs?: Record<string, string>;
+};
 export type MiniProgramRichTextNode =
   | { type: 'text'; text: string }
   | { name: string; attrs?: Record<string, string>; children?: MiniProgramRichTextNode[] };
@@ -63,24 +69,114 @@ export type MiniProgramTransformOptions = {
   forceNoCursor?: boolean;
 };
 
+export type MiniProgramViewOptions = {
+  inlineClassMap?: Record<string, string>;
+  deferImages?: boolean;
+  imagePlaceholderText?: string;
+};
+export type MiniProgramTextRun = { type: 'text' | 'link'; text: string; className?: string; href?: string };
+export type MiniProgramCursorRun = { type: 'cursor' };
+export type MiniProgramImageRun = { type: 'image'; src: string; pendingSrc?: string; alt?: string };
+export type MiniProgramImagePlaceholderRun = { type: 'image_placeholder'; src: string; alt?: string; text: string };
+export type MiniProgramInlineRun =
+  | MiniProgramTextRun
+  | MiniProgramCursorRun
+  | MiniProgramImageRun
+  | MiniProgramImagePlaceholderRun;
+export type MiniProgramParagraphViewBlock = { type: 'paragraph'; inlines: MiniProgramInlineRun[] };
+export type MiniProgramHeadingViewBlock = { type: 'heading'; level: number; inlines: MiniProgramInlineRun[] };
+export type MiniProgramBlockquoteViewBlock = { type: 'blockquote'; children: MiniProgramViewBlock[] };
+export type MiniProgramListViewBlock = {
+  type: 'list';
+  ordered: boolean;
+  children: Array<{ inlines: MiniProgramInlineRun[] }>;
+};
+export type MiniProgramCodeRun = { text: string; className: string };
+export type MiniProgramCodeViewBlock = { type: 'code_block'; lang: string; text: string; runs: MiniProgramCodeRun[] };
+export type MiniProgramViewBlock =
+  | MiniProgramParagraphViewBlock
+  | MiniProgramHeadingViewBlock
+  | MiniProgramBlockquoteViewBlock
+  | MiniProgramListViewBlock
+  | MiniProgramCodeViewBlock
+  | MiniProgramImageRun
+  | MiniProgramImagePlaceholderRun
+  | MiniProgramHtmlBlock;
+
+export type MiniProgramSseEvent = { data: string; event: string; id: string; retry?: number };
+export type MiniProgramSseParser = {
+  push(chunk: string | ArrayBuffer): void;
+  end(): void;
+  reset(): void;
+};
+export type MiniProgramStreamState = {
+  markdown: string;
+  blocks: MiniProgramViewBlock[];
+  streaming: boolean;
+  done: boolean;
+};
+export type MiniProgramStreamAdapterOptions = {
+  stream?: { setMarkdownView(markdown: string, options?: Record<string, any>): MiniProgramViewBlock[] };
+  value?: string;
+  viewOptions?: MiniProgramTransformOptions & MiniProgramViewOptions;
+  imagePlaceholderText?: string;
+};
+
 export declare function htmlToMiniProgramBlocks(html: string, options?: MiniProgramTransformOptions): MiniProgramBlock[];
-export declare function markdownToHtml(markdown: string): string;
+export declare function markdownToHtml(markdown: string, options?: Record<string, any>): string;
 export declare function markdownToMiniProgramBlocks(
   engine: { makeHtml(markdown: string, returnType?: string, forceNoCursor?: boolean): string },
   markdown: string,
   options?: MiniProgramTransformOptions,
 ): MiniProgramBlock[];
+export declare function blocksToMiniProgramView(
+  blocks: MiniProgramBlock[],
+  options?: MiniProgramViewOptions,
+): MiniProgramViewBlock[];
+export declare function resolvePendingImages(blocks: MiniProgramViewBlock[]): MiniProgramViewBlock[];
+export declare function createSseParser(options?: {
+  onMessage?: (event: MiniProgramSseEvent) => void;
+  onDone?: () => void;
+}): MiniProgramSseParser;
+export declare function createMiniProgramStreamAdapter(
+  options?: MiniProgramStreamAdapterOptions,
+): MiniProgramStreamAdapter;
+export declare function createMiniProgramEngine(options?: Record<string, any>): {
+  makeHtml(markdown: string, returnType?: string, forceNoCursor?: boolean): string;
+  getLocales(): Record<string, any>;
+};
 
 export declare class SyntaxHookBase {}
+
+export declare class MiniProgramStreamAdapter {
+  constructor(options?: MiniProgramStreamAdapterOptions);
+  setMarkdown(
+    markdown: string,
+    options?: MiniProgramTransformOptions & MiniProgramViewOptions,
+  ): MiniProgramStreamState;
+  append(chunk: string, options?: MiniProgramTransformOptions & MiniProgramViewOptions): MiniProgramStreamState;
+  appendSseEvent(
+    event: { data?: string },
+    options?: MiniProgramTransformOptions & MiniProgramViewOptions,
+  ): MiniProgramStreamState | null;
+  finish(options?: MiniProgramTransformOptions & MiniProgramViewOptions): MiniProgramStreamState;
+  reset(markdown?: string): MiniProgramStreamState;
+  getState(): MiniProgramStreamState;
+}
 
 export default class MiniProgramStream {
   static readonly config: { defaults: unknown };
   options: any;
   lastMarkdownText: string;
+  engine: {
+    makeHtml(markdown: string, returnType?: string, forceNoCursor?: boolean): string;
+  };
   constructor(options?: Record<string, any>);
-  makeHtml(markdown: string, forceNoCursor?: boolean): string;
+  makeHtml(markdown: string, returnType?: string, forceNoCursor?: boolean): any;
   makeBlocks(markdown: string, options?: MiniProgramTransformOptions): MiniProgramBlock[];
   setMarkdown(content: string, options?: MiniProgramTransformOptions): MiniProgramBlock[];
+  makeView(markdown: string, options?: MiniProgramTransformOptions & MiniProgramViewOptions): MiniProgramViewBlock[];
+  setMarkdownView(content: string, options?: MiniProgramTransformOptions & MiniProgramViewOptions): MiniProgramViewBlock[];
   getMarkdown(): string;
   clearFlowSessionCursor(): void;
 }

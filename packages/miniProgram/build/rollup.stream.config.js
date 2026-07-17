@@ -28,6 +28,7 @@ const currentDir = dirname(fileURLToPath(import.meta.url));
 const PACKAGE_ROOT = path.resolve(currentDir, '..');
 const REPO_ROOT = path.resolve(PACKAGE_ROOT, '../..');
 const CHERRY_SRC = path.resolve(REPO_ROOT, 'packages/cherry-markdown/src');
+const MINI_PROGRAM_SANITIZER = path.resolve(PACKAGE_ROOT, 'src/Sanitizer.miniProgram.js');
 
 const terserPlugin = (options = {}) =>
   terser({
@@ -49,6 +50,7 @@ const sharedPlugins = [
   }),
   alias({
     entries: [
+      { find: '@/Sanitizer', replacement: MINI_PROGRAM_SANITIZER },
       { find: '@', replacement: CHERRY_SRC },
       { find: '@cherry', replacement: CHERRY_SRC },
     ],

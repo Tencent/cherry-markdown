@@ -13,10 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { markdownToHtml } from './miniMarkdown';
+import { parseDocument } from 'htmlparser2';
+import { createMiniProgramEngine } from './engine';
+import { createSseParser } from './sse';
 import { htmlToMiniProgramBlocks, markdownToMiniProgramBlocks } from './transform';
+import { blocksToMiniProgramView, resolvePendingImages } from './view';
+import { MiniProgramStreamAdapter, createMiniProgramStreamAdapter } from './adapter';
 
 class SyntaxHookBase {}
+
+function markdownToHtml(markdown, options = {}) {
+  return createMiniProgramEngine({
+    ...options,
+    engine: {
+      ...(options.engine || {}),
+      global: {
+        ...(options.engine?.global || {}),
+        flowSessionContext: options.engine?.global?.flowSessionContext ?? true,
+      },
+    },
+  }).makeHtml(markdown || '', 'string', true);
+}
 
 /**
  * MiniProgramStream - data-only Cherry stream renderer for MiniProgram native components.
@@ -33,8 +50,18 @@ export default class MiniProgramStream {
    * @param {Partial<import('~types/cherry').CherryOptions>} options
    */
   constructor(options = {}) {
-    this.options = options;
+    this.options = {
+      ...options,
+      engine: {
+        ...(options.engine || {}),
+        global: {
+          ...(options.engine?.global || {}),
+          flowSessionContext: options.engine?.global?.flowSessionContext ?? true,
+        },
+      },
+    };
     this.lastMarkdownText = this.options.value || '';
+    this.engine = createMiniProgramEngine(this.options);
   }
 
   /**
@@ -42,12 +69,15 @@ export default class MiniProgramStream {
    * @param {boolean} [forceNoCursor]
    * @returns {string}
    */
-  makeHtml(markdown, forceNoCursor = false) {
-    const html = markdownToHtml(markdown || '');
-    if (forceNoCursor) {
-      return html;
+  makeHtml(markdown, returnType = 'string', forceNoCursor = true) {
+    const html = this.engine.makeHtml(markdown || '', 'string', true);
+    if (returnType === 'object') {
+      return parseDocument(html.replace(/\n/g, ''));
     }
-    return html.replace(/<\/p>$/, '<span class="cherry-flow-session-cursor"></span></p>');
+    if (returnType === 'miniProgramBlocks') {
+      return this.makeBlocks(markdown || '', { forceNoCursor });
+    }
+    return html;
   }
 
   /**
@@ -57,7 +87,7 @@ export default class MiniProgramStream {
    */
   makeBlocks(markdown, options = {}) {
     const forceNoCursor = options.forceNoCursor !== false;
-    return htmlToMiniProgramBlocks(this.makeHtml(markdown || '', forceNoCursor), { ...options, forceNoCursor });
+    return markdownToMiniProgramBlocks(this.engine, markdown || '', { ...options, forceNoCursor });
   }
 
   /**
@@ -68,6 +98,25 @@ export default class MiniProgramStream {
   setMarkdown(content, options = {}) {
     this.lastMarkdownText = content || '';
     return this.makeBlocks(this.lastMarkdownText, options);
+  }
+
+  /**
+   * @param {string} markdown
+   * @param {import('./transform').MiniProgramTransformOptions & import('./view').MiniProgramViewOptions} [options]
+   * @returns {import('./view').MiniProgramViewBlock[]}
+   */
+  makeView(markdown, options = {}) {
+    return blocksToMiniProgramView(this.makeBlocks(markdown || '', options), options);
+  }
+
+  /**
+   * @param {string} content
+   * @param {import('./transform').MiniProgramTransformOptions & import('./view').MiniProgramViewOptions} [options]
+   * @returns {import('./view').MiniProgramViewBlock[]}
+   */
+  setMarkdownView(content, options = {}) {
+    this.lastMarkdownText = content || '';
+    return this.makeView(this.lastMarkdownText, options);
   }
 
   /**
@@ -83,4 +132,15 @@ export default class MiniProgramStream {
   clearFlowSessionCursor() {}
 }
 
-export { SyntaxHookBase, htmlToMiniProgramBlocks, markdownToHtml, markdownToMiniProgramBlocks };
+export {
+  SyntaxHookBase,
+  createMiniProgramEngine,
+  MiniProgramStreamAdapter,
+  blocksToMiniProgramView,
+  createMiniProgramStreamAdapter,
+  createSseParser,
+  htmlToMiniProgramBlocks,
+  markdownToHtml,
+  markdownToMiniProgramBlocks,
+  resolvePendingImages,
+};

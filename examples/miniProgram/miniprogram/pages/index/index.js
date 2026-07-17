@@ -1,5 +1,5 @@
 const miniProgramModule = require('../../vendor/cherry-mini-program-stream');
-const MiniProgramStream = miniProgramModule.default || miniProgramModule;
+const { createMiniProgramStreamAdapter, createSseParser } = miniProgramModule;
 
 const DEMO_MARKDOWN = `# Cherry Markdown MiniProgram
 
@@ -18,294 +18,176 @@ const message = 'hello mini program';
 console.log(message);
 \`\`\`
 
-<table><tr><td>Unsupported HTML fallback</td></tr></table>
+## 更多基础语法
+
+1. 有序列表
+2. ~~删除线~~ 和 **加粗** 可以组合测试
+3. 表格会通过 rich-text fallback 渲染
+
+| 能力 | 渲染方式 | 交互 |
+| --- | --- | --- |
+| 链接 | 原生 text | 点击处理 |
+| 图片 | 原生 image | 点击预览 |
+| 代码块 | 原生 view/text | 点击复制 |
+| 表格 | rich-text fallback | 静态展示 |
 `;
 
-const STREAM_CHUNKS = [
-  '# Stream Demo\n\n',
-  '正在模拟流式输出：',
-  '**bold** ',
-  '*italic* ',
-  '[link](/pages/index/index)\n\n',
-  '```js\n',
-  'wx.setClipboardData({ data: code });\n',
-  '```\n\n',
-  '![preview](../../assets/logo-square.png)\n',
-  '\n图片之后继续输出，确认 stream 没有被 image 阻塞。',
-];
+const DEMO_STREAM_INTERVAL = 60;
 
-const DEMO_STREAM_INTERVAL = 160;
+function createStreamTokens(markdown) {
+  const tokens = [];
+  let index = 0;
 
-function scheduleNextFlush(callback) {
-  if (typeof wx !== 'undefined' && typeof wx.nextTick === 'function') {
-    wx.nextTick(callback);
-    return;
+  while (index < markdown.length) {
+    const rest = markdown.slice(index);
+    const image = rest.match(/^!\[[^\]]*\]\([^)]+\)/);
+    const link = rest.match(/^\[[^\]]+\]\([^)]+\)/);
+    const fence = rest.match(/^```/);
+    const token = image?.[0] || link?.[0] || fence?.[0];
+
+    if (token) {
+      tokens.push(token);
+      index += token.length;
+      continue;
+    }
+
+    const [char] = Array.from(rest);
+    tokens.push(char);
+    index += char.length;
   }
 
-  Promise.resolve().then(callback);
+  return tokens;
 }
 
-const INLINE_CLASS = {
-  strong: 'md-strong',
-  em: 'md-em',
-  code: 'md-inline-code',
-  underline: 'md-underline',
-  strikethrough: 'md-strike',
-  sub: 'md-sub',
-  sup: 'md-sup',
-};
-
-function joinClass(...classes) {
-  return classes.filter(Boolean).join(' ');
-}
-
-function flattenInlineNodes(nodes = [], className = '', href = '') {
-  return nodes.reduce((runs, node) => {
-    if (!node) {
-      return runs;
-    }
-
-    if (node.type === 'text') {
-      if (node.text) {
-        runs.push({ type: href ? 'link' : 'text', text: node.text, className, href });
-      }
-      return runs;
-    }
-
-    if (node.type === 'break') {
-      runs.push({ type: 'text', text: '\n', className, href });
-      return runs;
-    }
-
-    if (node.type === 'cursor') {
-      runs.push({ type: 'cursor' });
-      return runs;
-    }
-
-    if (node.type === 'image') {
-      runs.push({ type: 'image', src: '', pendingSrc: node.src, alt: node.alt || '' });
-      return runs;
-    }
-
-    if (node.type === 'link') {
-      return runs.concat(flattenInlineNodes(node.children || [], joinClass(className, 'md-link'), node.href || ''));
-    }
-
-    return runs.concat(flattenInlineNodes(node.children || [], joinClass(className, INLINE_CLASS[node.type]), href));
-  }, []);
-}
-
-function blocksToInlineRuns(blocks = []) {
-  return blocks.reduce((runs, block, index) => {
-    if (index > 0) {
-      runs.push({ type: 'text', text: '\n' });
-    }
-
-    if (block.type === 'paragraph' || block.type === 'heading') {
-      return runs.concat(flattenInlineNodes(block.children || []));
-    }
-
-    if (block.type === 'code_block') {
-      runs.push({ type: 'text', text: block.text || '', className: 'md-inline-code' });
-      return runs;
-    }
-
-    if (block.type === 'image') {
-      runs.push({ type: 'image', src: '', pendingSrc: block.src, alt: block.alt || '' });
-      return runs;
-    }
-
-    if (block.type === 'list') {
-      block.children.forEach((item, itemIndex) => {
-        if (runs.length > 0) {
-          runs.push({ type: 'text', text: '\n' });
-        }
-        runs.push({ type: 'text', text: `${block.ordered ? `${itemIndex + 1}.` : '•'} ` });
-        runs.push(...blocksToInlineRuns(item.children || []));
-      });
-    }
-
-    return runs;
-  }, []);
-}
-
-function toViewBlocks(blocks = []) {
-  return blocks.map((block) => {
-    if (block.type === 'paragraph') {
-      return { type: 'paragraph', inlines: flattenInlineNodes(block.children || []) };
-    }
-
-    if (block.type === 'heading') {
-      return { type: 'heading', level: block.level, inlines: flattenInlineNodes(block.children || []) };
-    }
-
-    if (block.type === 'blockquote') {
-      return { type: 'blockquote', children: toViewBlocks(block.children || []) };
-    }
-
-    if (block.type === 'list') {
-      return {
-        type: 'list',
-        ordered: block.ordered,
-        children: (block.children || []).map((item) => ({ inlines: blocksToInlineRuns(item.children || []) })),
-      };
-    }
-
-    if (block.type === 'code_block') {
-      return { type: 'code_block', lang: block.lang || 'text', text: block.text || '' };
-    }
-
-    if (block.type === 'image') {
-      return { type: 'image', src: '', pendingSrc: block.src, alt: block.alt || '' };
-    }
-
-    return block;
-  });
-}
+const STREAM_TOKENS = createStreamTokens(DEMO_MARKDOWN);
+const SSE_FRAMES = STREAM_TOKENS.map((content) => `data: ${JSON.stringify({ content })}\n\n`).concat(
+  'data: [DONE]\n\n',
+);
 
 Page({
   data: {
     markdown: DEMO_MARKDOWN,
     blocks: [],
     streaming: false,
+    streamButtonText: '重新流式渲染',
   },
 
   onLoad() {
-    this.stream = new MiniProgramStream({
-      engine: {
-        syntax: {
-          header: {
-            anchorStyle: 'none',
-          },
-        },
-      },
+    this.streamAdapter = createMiniProgramStreamAdapter({
+      imagePlaceholderText: '图片链接解析中',
+    });
+    this.sseParser = createSseParser({
+      onMessage: (event) => this.handleSseMessage(event),
+      onDone: () => this.finishStream(),
     });
     this.resetStreamPipeline();
-    this.renderMarkdown(DEMO_MARKDOWN);
+    this.autoStartStream();
   },
 
   onUnload() {
+    this.clearAutoStartTimer();
     this.resetStreamPipeline();
   },
 
-  renderMarkdown(markdown, callback) {
-    const blocks = toViewBlocks(this.stream.setMarkdown(markdown));
-    this.setData({
-      markdown,
-      blocks,
-    }, () => {
-      this.activatePendingImages(callback);
-    });
-  },
-
-  activatePendingImages(callback) {
-    const blocks = this.data.blocks || [];
-    const nextBlocks = this.resolvePendingImages(blocks);
-    if (nextBlocks === blocks) {
+  applyStreamState(state, callback) {
+    if (!state) {
       if (callback) callback();
       return;
     }
-
-    this.setData({ blocks: nextBlocks }, callback);
+    this.setData({
+      markdown: state.markdown,
+      blocks: state.blocks,
+      streaming: state.streaming,
+      streamButtonText: state.streaming ? '流式渲染中' : '重新流式渲染',
+    }, callback);
   },
 
-  resolvePendingImages(blocks = []) {
-    let changed = false;
-    const nextBlocks = blocks.map((block) => {
-      if (block.type === 'image' && !block.src && block.pendingSrc) {
-        changed = true;
-        return { ...block, src: block.pendingSrc };
-      }
-
-      if (block.inlines) {
-        let inlineChanged = false;
-        const inlines = block.inlines.map((item) => {
-          if (item.type === 'image' && !item.src && item.pendingSrc) {
-            changed = true;
-            inlineChanged = true;
-            return { ...item, src: item.pendingSrc };
-          }
-          return item;
-        });
-        return inlineChanged ? { ...block, inlines } : block;
-      }
-
-      if (block.children) {
-        const children = this.resolvePendingImages(block.children);
-        if (children !== block.children) {
-          changed = true;
-          return { ...block, children };
-        }
-      }
-
-      return block;
-    });
-
-    return changed ? nextBlocks : blocks;
+  renderMarkdown(markdown, callback) {
+    this.applyStreamState(this.streamAdapter.setMarkdown(markdown), callback);
   },
 
-  startStream() {
+  autoStartStream() {
+    this.clearAutoStartTimer();
+    this.autoStartTimer = setTimeout(() => {
+      this.autoStartTimer = null;
+      this.startOrNextStream();
+    }, 120);
+  },
+
+  startOrNextStream() {
+    if (this.data.streaming) {
+      return;
+    }
+
     this.resetStreamPipeline();
-    this.setData({ streaming: true, markdown: '', blocks: [] });
-
-    this.produceDemoChunk(0);
-  },
-
-  produceDemoChunk(index) {
-    const chunk = STREAM_CHUNKS[index];
-    if (!chunk) {
-      this.isProducingStream = false;
-      this.flushStreamQueue();
-      return;
-    }
-
-    this.isProducingStream = true;
-    this.enqueueStreamChunk(chunk);
-    this.demoStreamTimer = setTimeout(() => this.produceDemoChunk(index + 1), DEMO_STREAM_INTERVAL);
-  },
-
-  enqueueStreamChunk(chunk) {
-    this.streamQueue.push(chunk);
-    this.flushStreamQueue();
-  },
-
-  flushStreamQueue() {
-    if (this.isFlushingStream) {
-      return;
-    }
-
-    const chunk = this.streamQueue.shift();
-    if (!chunk) {
-      if (!this.isProducingStream) {
-        this.setData({ streaming: false });
-      }
-      return;
-    }
-
-    this.isFlushingStream = true;
-    this.streamMarkdown += chunk;
-
-    this.renderMarkdown(this.streamMarkdown, () => {
-      this.isFlushingStream = false;
-      scheduleNextFlush(() => this.flushStreamQueue());
+    this.setData({ streaming: true, streamButtonText: '流式渲染中', markdown: '', blocks: [] }, () => {
+      this.pushNextSseFrame();
     });
+  },
+
+  pushNextSseFrame() {
+    const frame = SSE_FRAMES[this.sseFrameIndex];
+    if (!frame) {
+      this.finishStream();
+      return;
+    }
+
+    this.sseFrameIndex += 1;
+    this.sseParser.push(frame);
+  },
+
+  handleSseMessage(event) {
+    this.applyStreamState(this.streamAdapter.appendSseEvent(event), () => {
+      this.scheduleNextSseFrame();
+    });
+  },
+
+  finishStream() {
+    this.clearStreamTimer();
+    this.applyStreamState(this.streamAdapter.finish());
+  },
+
+  scheduleNextSseFrame() {
+    this.clearStreamTimer();
+    if (!this.data.streaming) {
+      return;
+    }
+    this.streamTimer = setTimeout(() => {
+      this.streamTimer = null;
+      this.pushNextSseFrame();
+    }, DEMO_STREAM_INTERVAL);
+  },
+
+  clearStreamTimer() {
+    if (this.streamTimer) {
+      clearTimeout(this.streamTimer);
+      this.streamTimer = null;
+    }
+  },
+
+  clearAutoStartTimer() {
+    if (this.autoStartTimer) {
+      clearTimeout(this.autoStartTimer);
+      this.autoStartTimer = null;
+    }
   },
 
   resetStreamPipeline() {
-    if (this.demoStreamTimer) {
-      clearTimeout(this.demoStreamTimer);
-      this.demoStreamTimer = null;
+    this.clearStreamTimer();
+    this.sseFrameIndex = 0;
+    if (this.streamAdapter) {
+      this.streamAdapter.reset();
     }
-    this.streamQueue = [];
-    this.streamMarkdown = '';
-    this.isFlushingStream = false;
-    this.isProducingStream = false;
+    if (this.sseParser) {
+      this.sseParser.reset();
+    }
   },
 
   resetDemo() {
     this.resetStreamPipeline();
-    this.setData({ streaming: false });
-    this.renderMarkdown(DEMO_MARKDOWN);
+    this.setData({ markdown: '', blocks: [], streaming: false, streamButtonText: '重新流式渲染' }, () => {
+      this.autoStartStream();
+    });
   },
 
   copyCode(event) {
@@ -327,13 +209,9 @@ Page({
     });
   },
 
-  handleImageLoad(event) {
-    console.info('image loaded', event.currentTarget.dataset.src);
-  },
+  handleImageLoad() {},
 
-  handleImageError(event) {
-    console.warn('image load failed', event.currentTarget.dataset.src, event.detail);
-  },
+  handleImageError() {},
 
   handleLinkTap(event) {
     const { href = '' } = event.currentTarget.dataset;

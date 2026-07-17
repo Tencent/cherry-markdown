@@ -167,6 +167,31 @@
   white-space: pre-wrap;
 }
 
+.md-code-token {
+  color: #e2e8f0;
+}
+
+.md-code-comment {
+  color: #94a3b8;
+}
+
+.md-code-keyword {
+  color: #93c5fd;
+}
+
+.md-code-string {
+  color: #86efac;
+}
+
+.md-code-number {
+  color: #fbbf24;
+}
+
+.md-code-operator,
+.md-code-punctuation {
+  color: #c4b5fd;
+}
+
 .md-image,
 .md-inline-image {
   display: block;
@@ -180,10 +205,19 @@
   max-width: 240rpx;
 }
 
+.md-image-placeholder {
+  display: block;
+  margin: 18rpx 0;
+  padding: 20rpx;
+  border: 1rpx dashed #cbd5e1;
+  border-radius: 8rpx;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 26rpx;
+}
+
 .md-html {
   display: block;
   margin: 18rpx 0;
-  padding: 16rpx;
-  border-radius: 8rpx;
-  background: #fff7ed;
+  padding: 0;
 }

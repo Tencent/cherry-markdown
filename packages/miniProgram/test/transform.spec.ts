@@ -53,6 +53,7 @@ describe('miniProgramTransform', () => {
         type: 'code_block',
         lang: 'js',
         text: 'const a = 1;\nconsole.log(a);',
+        nodes: expect.any(Array),
         attrs: { class: 'language-js' },
       },
     ]);

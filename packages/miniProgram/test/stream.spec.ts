@@ -1,6 +1,13 @@
 /* global globalThis */
 import { describe, expect, it, vi } from 'vitest';
-import MiniProgramStream, { htmlToMiniProgramBlocks } from '../src/stream';
+import MiniProgramStream, {
+  blocksToMiniProgramView,
+  createMiniProgramStreamAdapter,
+  createSseParser,
+  htmlToMiniProgramBlocks,
+  markdownToHtml,
+  resolvePendingImages,
+} from '../src/stream';
 
 describe('@cherry-markdown/miniProgram stream', () => {
   it('returns MiniProgram block AST from the isolated stream entry', () => {
@@ -16,6 +23,13 @@ describe('@cherry-markdown/miniProgram stream', () => {
     });
 
     expect(stream.makeBlocks('**hello**')).toEqual([
+      {
+        type: 'paragraph',
+        attrs: {},
+        children: [{ type: 'strong', attrs: {}, children: [{ type: 'text', text: 'hello' }] }],
+      },
+    ]);
+    expect(stream.makeHtml('**hello**', 'miniProgramBlocks')).toEqual([
       {
         type: 'paragraph',
         attrs: {},
@@ -46,6 +60,157 @@ describe('@cherry-markdown/miniProgram stream', () => {
       },
     ]);
     expect(stream.getMarkdown()).toBe('![Alt](/img.png)');
+  });
+
+  it('returns WXML-friendly view blocks from setMarkdownView', () => {
+    const stream = new MiniProgramStream();
+
+    expect(stream.setMarkdownView('**hello** [go](/page)')).toEqual([
+      {
+        type: 'paragraph',
+        inlines: [
+          { type: 'text', text: 'hello', className: 'md-strong', href: '' },
+          { type: 'text', text: ' ', className: '', href: '' },
+          { type: 'link', text: 'go', className: 'md-link', href: '/page' },
+        ],
+      },
+    ]);
+  });
+
+  it('normalizes unfinished Markdown syntax during token streaming', () => {
+    const stream = new MiniProgramStream();
+
+    expect(stream.setMarkdownView('#')).toEqual([]);
+    expect(stream.setMarkdownView('# ')).toEqual([]);
+    expect(stream.setMarkdownView('# H')).toEqual([
+      {
+        type: 'heading',
+        level: 1,
+        inlines: [{ type: 'text', text: 'H', className: '', href: '' }],
+      },
+    ]);
+    expect(stream.setMarkdownView('**bo')).toEqual([
+      {
+        type: 'paragraph',
+        inlines: [{ type: 'text', text: 'bo', className: 'md-strong', href: '' }],
+      },
+    ]);
+  });
+
+  it('resolves deferred image src values for post-setData activation', () => {
+    const blocks = [{ type: 'image', src: '', pendingSrc: '/img.png', alt: 'A' }];
+
+    expect(resolvePendingImages(blocks)).toEqual([
+      { type: 'image', src: '/img.png', pendingSrc: '/img.png', alt: 'A' },
+    ]);
+  });
+
+  it('keeps deferred images as placeholders to avoid native image work during streaming', () => {
+    expect(blocksToMiniProgramView(htmlToMiniProgramBlocks('<img src="/img.png" alt="A" />'))).toEqual([
+      { type: 'image_placeholder', src: '/img.png', alt: 'A', text: 'A' },
+    ]);
+  });
+
+  it('renders basic pipe tables as rich-text fallback blocks', () => {
+    const html = markdownToHtml('| A | B |\n| --- | --- |\n| **x** | `y` |');
+    expect(html).toContain('<table');
+    const blocks = htmlToMiniProgramBlocks(html);
+    expect(blocks[0].type).toBe('html');
+    expect(blocks[0].nodes[0]).toEqual(
+      expect.objectContaining({
+        name: 'table',
+        attrs: expect.objectContaining({ style: expect.stringContaining('border-collapse:collapse') }),
+        children: expect.any(Array),
+      }),
+    );
+  });
+
+  it('returns highlighted code runs for native code block rendering', () => {
+    const stream = new MiniProgramStream();
+
+    expect(stream.setMarkdownView('```js\nconst message = "hello";\n```')[0]).toEqual({
+      type: 'code_block',
+      lang: 'js',
+      text: 'const message = "hello";',
+      runs: expect.arrayContaining([
+        { text: 'const', className: 'md-code-token md-code-keyword' },
+        { text: '"hello"', className: 'md-code-token md-code-string' },
+      ]),
+    });
+  });
+
+  it('adapts chunk streaming into CherryStream-like MiniProgram view states', () => {
+    const adapter = createMiniProgramStreamAdapter();
+
+    expect(adapter.append('#').blocks).toEqual([]);
+    expect(adapter.append(' H')).toEqual({
+      markdown: '# H',
+      blocks: [{ type: 'heading', level: 1, inlines: [{ type: 'text', text: 'H', className: '', href: '' }] }],
+      streaming: true,
+      done: false,
+    });
+
+    const textState = adapter.append('\n\nhello');
+    expect(textState.blocks[textState.blocks.length - 1]).toEqual({
+      type: 'paragraph',
+      inlines: [{ type: 'text', text: 'hello', className: '', href: '' }],
+    });
+  });
+
+  it('renders complete native images during streaming and keeps final output stable', () => {
+    const adapter = createMiniProgramStreamAdapter();
+
+    expect(adapter.append('![Alt](/img.png)').blocks).toEqual([
+      { type: 'image', src: '/img.png', alt: 'Alt' },
+    ]);
+    expect(adapter.finish()).toEqual({
+      markdown: '![Alt](/img.png)',
+      blocks: [{ type: 'image', src: '/img.png', alt: 'Alt' }],
+      streaming: false,
+      done: true,
+    });
+  });
+
+  it('does not mount native images for incomplete image markdown', () => {
+    const adapter = createMiniProgramStreamAdapter();
+
+    expect(adapter.append('![Alt](/img').blocks).toEqual([]);
+  });
+
+  it('parses chunked SSE data frames from the stream entry', () => {
+    const messages = [];
+    let done = false;
+    const parser = createSseParser({
+      onMessage: (event) => messages.push(event),
+      onDone: () => {
+        done = true;
+      },
+    });
+
+    parser.push('event: message\ndata: {"content":"hel');
+    parser.push('lo"}\n\ndata: [DONE]\n\n');
+
+    expect(messages).toEqual([{ data: '{"content":"hello"}', event: 'message', id: '', retry: undefined }]);
+    expect(done).toBe(true);
+  });
+
+  it('parses split utf-8 ArrayBuffer SSE chunks without TextDecoder', () => {
+    const originalTextDecoder = globalThis.TextDecoder;
+    const bytes = new Uint8Array([100, 97, 116, 97, 58, 32, 228, 189, 160, 229, 165, 189, 10, 10]);
+    const messages = [];
+
+    try {
+      delete globalThis.TextDecoder;
+      const parser = createSseParser({
+        onMessage: (event) => messages.push(event.data),
+      });
+      parser.push(bytes.slice(0, 8).buffer);
+      parser.push(bytes.slice(8).buffer);
+    } finally {
+      globalThis.TextDecoder = originalTextDecoder;
+    }
+
+    expect(messages).toEqual(['你好']);
   });
 
   it('exports html transform helper for future entry reuse', () => {

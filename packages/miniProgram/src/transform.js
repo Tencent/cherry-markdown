@@ -29,7 +29,7 @@ import * as htmlparser2 from 'htmlparser2';
  * @typedef {{ type: 'blockquote'; attrs?: Record<string, string>; children: MiniProgramBlock[] }} MiniProgramBlockquoteBlock
  * @typedef {{ type: 'list_item'; attrs?: Record<string, string>; children: MiniProgramBlock[] }} MiniProgramListItem
  * @typedef {{ type: 'list'; ordered: boolean; attrs?: Record<string, string>; children: MiniProgramListItem[] }} MiniProgramListBlock
- * @typedef {{ type: 'code_block'; lang: string; text: string; attrs?: Record<string, string> }} MiniProgramCodeBlock
+ * @typedef {{ type: 'code_block'; lang: string; text: string; nodes?: MiniProgramRichTextNode[]; attrs?: Record<string, string> }} MiniProgramCodeBlock
  * @typedef {{ type: 'html'; nodes: MiniProgramRichTextNode[] }} MiniProgramHtmlBlock
  * @typedef {MiniProgramParagraphBlock | MiniProgramHeadingBlock | MiniProgramBlockquoteBlock | MiniProgramListBlock | MiniProgramListItem | MiniProgramCodeBlock | MiniProgramImage | MiniProgramHtmlBlock} MiniProgramBlock
  *
@@ -74,6 +74,13 @@ const FALLBACK_TAGS = new Set(['table', 'thead', 'tbody', 'tfoot', 'tr', 'th', '
 const SKIP_TAGS = new Set(['script', 'style']);
 const INLINE_TAGS = new Set(['a', 'b', 'br', 'code', 'del', 'em', 'i', 's', 'span', 'strong', 'sub', 'sup', 'u']);
 
+const RICH_TEXT_TABLE_STYLE = {
+  table:
+    'width:100%;border-collapse:collapse;border-spacing:0;background:#fff;margin:8px 0;font-size:14px;line-height:1.6;',
+  th: 'border:1px solid #d0d7de;background:#f6f8fa;color:#24292f;font-weight:600;padding:6px 8px;text-align:left;',
+  td: 'border:1px solid #d0d7de;color:#24292f;padding:6px 8px;text-align:left;',
+};
+
 /**
  * @param {any} node
  * @returns {node is { type: string; name: string; attribs?: Record<string, string>; children?: any[] }}
@@ -109,6 +116,9 @@ function sanitizeAttrs(attrs = {}) {
     if (/^on/i.test(key)) {
       return;
     }
+    if (/^data-(sign|lines|type)$/i.test(key)) {
+      return;
+    }
     const value = attrs[key];
     if ((key === 'href' || key === 'src') && /^\s*javascript:/i.test(String(value))) {
       return;
@@ -116,6 +126,17 @@ function sanitizeAttrs(attrs = {}) {
     safeAttrs[key] = value;
   });
   return safeAttrs;
+}
+
+function withRichTextDefaultStyle(tagName, attrs = {}) {
+  const defaultStyle = RICH_TEXT_TABLE_STYLE[tagName];
+  if (!defaultStyle) {
+    return attrs;
+  }
+  return {
+    ...attrs,
+    style: attrs.style ? `${defaultStyle}${attrs.style}` : defaultStyle,
+  };
 }
 
 /**
@@ -199,6 +220,7 @@ function toCodeBlock(node) {
     type: 'code_block',
     lang,
     text: getText(code || pre || node),
+    nodes: nodesToRichTextNodes((code?.children || pre?.children || node.children || []).filter(Boolean)),
     attrs: wrapperAttrs,
   };
 }
@@ -329,7 +351,8 @@ function nodeToInline(node) {
     return [{ type: 'break' }];
   }
   if (tagName === 'img') {
-    return [toImage(node)];
+    const image = toImage(node);
+    return image.src ? [image] : [];
   }
   if (tagName === 'span' && isCursorAttrs(attrs)) {
     return [{ type: 'cursor' }];
@@ -384,7 +407,8 @@ function nodeToRichTextNodes(node) {
   if (!isTag(node)) {
     return nodesToRichTextNodes(node.children || []);
   }
-  const attrs = sanitizeAttrs(node.attribs || {});
+  const tagName = String(node.name).toLowerCase();
+  const attrs = withRichTextDefaultStyle(tagName, sanitizeAttrs(node.attribs || {}));
   const children = nodesToRichTextNodes(node.children || []);
   return [
     {
@@ -439,7 +463,8 @@ function nodeToBlocks(node, options = {}) {
     return [{ type: 'heading', level: Number(tagName[1]), attrs, children: nodesToInline(node.children || []) }];
   }
   if (tagName === 'img') {
-    return [toImage(node)];
+    const image = toImage(node);
+    return image.src ? [image] : [];
   }
   if (tagName === 'blockquote') {
     return [{ type: 'blockquote', attrs, children: mixedChildrenToBlocks(node.children || [], options) }];
@@ -461,7 +486,8 @@ function nodeToBlocks(node, options = {}) {
   if (tagName === 'p' || tagName === 'div') {
     const onlyImage = getOnlyImageChild(node.children || []);
     if (onlyImage) {
-      return [toImage(onlyImage)];
+      const image = toImage(onlyImage);
+      return image.src ? [image] : [];
     }
     if (hasBlockChildren(node.children || [])) {
       return mixedChildrenToBlocks(node.children || [], options);

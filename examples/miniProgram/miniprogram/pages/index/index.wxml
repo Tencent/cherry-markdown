@@ -3,6 +3,7 @@
     <text wx:if="{{item.type === 'text'}}" class="{{item.className}}">{{item.text}}</text>
     <text wx:elif="{{item.type === 'link'}}" class="{{item.className}}" data-href="{{item.href}}" bindtap="handleLinkTap">{{item.text}}</text>
     <text wx:elif="{{item.type === 'cursor'}}" class="md-cursor">|</text>
+    <text wx:elif="{{item.type === 'image_placeholder'}}" class="md-image-placeholder">{{item.text}}</text>
     <image
       wx:elif="{{item.type === 'image'}}"
       class="md-inline-image"
@@ -18,7 +19,7 @@
 
 <view class="page">
   <view class="toolbar">
-    <button class="action" bindtap="startStream" loading="{{streaming}}" disabled="{{streaming}}">流式渲染</button>
+    <button class="action" bindtap="startOrNextStream" disabled="{{streaming}}">{{streamButtonText}}</button>
     <button class="action secondary" bindtap="resetDemo">重置</button>
   </view>
 
@@ -50,12 +51,19 @@
             binderror="handleImageError"
             bindtap="previewImage"
           />
+          <view wx:elif="{{quoteBlock.type === 'image_placeholder'}}" class="md-image-placeholder">
+            <text>{{quoteBlock.text}}</text>
+          </view>
           <view wx:elif="{{quoteBlock.type === 'code_block'}}" class="md-code-card">
             <view class="md-code-head">
               <text>{{quoteBlock.lang || 'text'}}</text>
               <button class="md-copy" size="mini" data-text="{{quoteBlock.text}}" bindtap="copyCode">复制</button>
             </view>
-            <text class="md-code">{{quoteBlock.text}}</text>
+            <view class="md-code">
+              <block wx:for="{{quoteBlock.runs}}" wx:for-item="codeRun" wx:key="index">
+                <text class="{{codeRun.className}}" space="nbsp">{{codeRun.text}}</text>
+              </block>
+            </view>
           </view>
           <rich-text wx:elif="{{quoteBlock.type === 'html'}}" class="md-html" nodes="{{quoteBlock.nodes}}" />
         </block>
@@ -75,7 +83,11 @@
           <text>{{item.lang || 'text'}}</text>
           <button class="md-copy" size="mini" data-text="{{item.text}}" bindtap="copyCode">复制</button>
         </view>
-        <text class="md-code">{{item.text}}</text>
+        <view class="md-code">
+          <block wx:for="{{item.runs}}" wx:for-item="codeRun" wx:key="index">
+            <text class="{{codeRun.className}}" space="nbsp">{{codeRun.text}}</text>
+          </block>
+        </view>
       </view>
 
       <image
@@ -88,6 +100,10 @@
         binderror="handleImageError"
         bindtap="previewImage"
       />
+
+      <view wx:elif="{{item.type === 'image_placeholder'}}" class="md-image-placeholder">
+        <text>{{item.text}}</text>
+      </view>
 
       <rich-text wx:elif="{{item.type === 'html'}}" class="md-html" nodes="{{item.nodes}}" />
     </block>

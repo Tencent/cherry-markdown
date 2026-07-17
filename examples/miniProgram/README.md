@@ -1,6 +1,6 @@
 # Cherry Markdown MiniProgram Demo
 
-Minimal WeChat MiniProgram demo for rendering Cherry Markdown with `@cherry-markdown/miniProgram`.
+Minimal WeChat MiniProgram demo for stream rendering Markdown with `@cherry-markdown/miniProgram`.
 
 ## Run
 
@@ -15,7 +15,7 @@ Then open `examples/miniProgram` in WeChat DevTools. This demo uses a local vend
 
 The MiniProgram package entry is DOM-free; app pages do not need to add `window`, `self`, or `globalThis` shims.
 
-The demo avoids remote images and timer polling to keep DevTools from reporting unrelated internal timeout warnings during startup.
+The demo avoids remote images, view-query polling, and extra image activation updates. The stream button starts an automatic token-sized SSE simulation through `createMiniProgramStreamAdapter`, so users do not need to tap for each token.
 
 If DevTools still shows an old npm resolution error, clear cache or recompile after confirming `pages/index/index.js` requires:
 
@@ -25,14 +25,51 @@ require('../../vendor/cherry-mini-program-stream');
 
 ## What This Demo Covers
 
-- Basic Markdown to MiniProgram Block AST with `MiniProgramStream`.
+- Basic Markdown to WXML-friendly view blocks with `createMiniProgramStreamAdapter`.
 - Native WXML rendering for paragraph, heading, list, blockquote, code, image, and link nodes.
-- Stream updates with a chunk queue flushed by `setData` callbacks.
-- The demo uses a small timer only to simulate delayed chunk arrival; real SSE/WebSocket integrations can call `enqueueStreamChunk(chunk)` directly from message callbacks.
+- CherryStream-like flow rendering: chunks are accumulated as Markdown, incomplete syntax is normalized, images are deferred while streaming, and final render restores native images.
+- The direct render and stream render use the same Markdown source, so the final output can be compared directly.
+- The demo button starts an automatic token-sized SSE simulation; real SSE/WebSocket integrations can pass response chunks to `createSseParser` and then feed events into the adapter.
 - Native interactions:
   - code copy with `wx.setClipboardData`
   - image preview with `wx.previewImage`
   - link tap with page navigation or a modal fallback
-- Fallback `html` blocks rendered through `<rich-text>`.
 
-This is intentionally only a demo renderer, not a bundled component package.
+## SSE Request Shape
+
+```js
+const { createMiniProgramStreamAdapter, createSseParser } = require('../../vendor/cherry-mini-program-stream');
+
+const streamAdapter = createMiniProgramStreamAdapter();
+
+function applyStreamState(state) {
+  if (!state) return;
+  this.setData({
+    markdown: state.markdown,
+    blocks: state.blocks,
+    streaming: state.streaming,
+  });
+}
+
+const parser = createSseParser({
+  onMessage: (event) => {
+    applyStreamState.call(this, streamAdapter.appendSseEvent(event));
+  },
+  onDone: () => {
+    applyStreamState.call(this, streamAdapter.finish());
+  },
+});
+
+const requestTask = wx.request({
+  url: 'https://example.com/sse',
+  method: 'POST',
+  enableChunked: true,
+  responseType: 'arraybuffer',
+});
+
+requestTask.onChunkReceived((res) => {
+  parser.push(res.data);
+});
+```
+
+This is intentionally a minimal project demo, not a bundled component package.
