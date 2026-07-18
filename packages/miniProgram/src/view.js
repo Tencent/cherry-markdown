@@ -88,9 +88,7 @@ function joinNonEmptyClasses(...classes) {
 }
 
 function normalizeCodeClass(className = '') {
-  const classes = String(className)
-    .split(/\s+/)
-    .filter(Boolean);
+  const classes = String(className).split(/\s+/).filter(Boolean);
   if (classes.includes('code-line')) {
     return '';
   }

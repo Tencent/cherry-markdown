@@ -4,7 +4,21 @@ const hooks = {
   afterSanitizeAttributes: [],
 };
 
-const VOID_TAGS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);
+const VOID_TAGS = new Set([
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'source',
+  'track',
+  'wbr',
+]);
 
 const RAW_TEXT_TAGS = new Set(['script', 'style']);
 

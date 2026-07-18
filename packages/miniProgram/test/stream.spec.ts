@@ -160,9 +160,7 @@ describe('@cherry-markdown/miniProgram stream', () => {
   it('renders complete native images during streaming and keeps final output stable', () => {
     const adapter = createMiniProgramStreamAdapter();
 
-    expect(adapter.append('![Alt](/img.png)').blocks).toEqual([
-      { type: 'image', src: '/img.png', alt: 'Alt' },
-    ]);
+    expect(adapter.append('![Alt](/img.png)').blocks).toEqual([{ type: 'image', src: '/img.png', alt: 'Alt' }]);
     expect(adapter.finish()).toEqual({
       markdown: '![Alt](/img.png)',
       blocks: [{ type: 'image', src: '/img.png', alt: 'Alt' }],
