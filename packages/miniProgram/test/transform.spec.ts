@@ -100,6 +100,92 @@ describe('miniProgramTransform', () => {
     ]);
   });
 
+  it('converts Cherry checklist markers into task list items', () => {
+    expect(
+      htmlToMiniProgramBlocks(
+        '<ul class="cherry-list__default"><li class="cherry-list-item check-list-item"><p><span class="ch-icon ch-icon-check"></span> done</p></li><li class="cherry-list-item check-list-item"><p><span class="ch-icon ch-icon-square"></span> todo</p></li></ul>',
+      ),
+    ).toEqual([
+      {
+        type: 'list',
+        ordered: false,
+        attrs: { class: 'cherry-list__default' },
+        children: [
+          {
+            type: 'list_item',
+            attrs: { class: 'cherry-list-item check-list-item' },
+            checked: true,
+            children: [{ type: 'paragraph', attrs: {}, children: [{ type: 'text', text: 'done' }] }],
+          },
+          {
+            type: 'list_item',
+            attrs: { class: 'cherry-list-item check-list-item' },
+            checked: false,
+            children: [{ type: 'paragraph', attrs: {}, children: [{ type: 'text', text: 'todo' }] }],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('converts tables into native rows and cells with inline interaction nodes', () => {
+    expect(
+      htmlToMiniProgramBlocks(
+        '<div class="cherry-table-wrapper"><div class="cherry-table-container"><table class="cherry-table"><thead><th>A</th><th>B</th></thead><tr><td><a href="/p">link</a></td><td><img src="img.png" alt="alt"></td></tr></table></div></div>',
+      ),
+    ).toEqual([
+      {
+        type: 'table',
+        attrs: { class: 'cherry-table' },
+        header: [
+          {
+            type: 'table_row',
+            attrs: {},
+            children: [
+              { type: 'table_cell', header: true, attrs: {}, children: [{ type: 'text', text: 'A' }] },
+              { type: 'table_cell', header: true, attrs: {}, children: [{ type: 'text', text: 'B' }] },
+            ],
+          },
+        ],
+        rows: [
+          {
+            type: 'table_row',
+            attrs: {},
+            children: [
+              {
+                type: 'table_cell',
+                header: false,
+                attrs: {},
+                children: [
+                  {
+                    type: 'link',
+                    href: '/p',
+                    attrs: { href: '/p' },
+                    children: [{ type: 'text', text: 'link' }],
+                  },
+                ],
+              },
+              {
+                type: 'table_cell',
+                header: false,
+                attrs: {},
+                children: [
+                  {
+                    type: 'image',
+                    src: 'img.png',
+                    alt: 'alt',
+                    title: '',
+                    attrs: { src: 'img.png', alt: 'alt' },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
   it('falls back to sanitized rich-text nodes for unknown complex tags', () => {
     expect(
       htmlToMiniProgramBlocks(

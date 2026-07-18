@@ -22,14 +22,17 @@ console.log(message);
 
 1. 有序列表
 2. ~~删除线~~ 和 **加粗** 可以组合测试
-3. 表格会通过 rich-text fallback 渲染
+3. 任务列表和表格会转换为原生 view 渲染
+
+- [x] 已完成任务
+- [ ] 待处理任务
 
 | 能力 | 渲染方式 | 交互 |
 | --- | --- | --- |
-| 链接 | 原生 text | 点击处理 |
-| 图片 | 原生 image | 点击预览 |
+| 链接 | [原生 text](/pages/index/index) | 点击处理 |
+| 图片 | ![logo](../../assets/logo-square.png) | 点击预览 |
 | 代码块 | 原生 view/text | 点击复制 |
-| 表格 | rich-text fallback | 静态展示 |
+| 表格 | 原生 view | 单元格内链接/图片保留交互 |
 `;
 
 const DEMO_STREAM_INTERVAL = 60;

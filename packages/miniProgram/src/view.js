@@ -57,9 +57,12 @@ const PRISM_TOKEN_CLASS_MAP = {
  * @typedef {{ type: 'paragraph'; inlines: MiniProgramInlineRun[] }} MiniProgramParagraphViewBlock
  * @typedef {{ type: 'heading'; level: number; inlines: MiniProgramInlineRun[] }} MiniProgramHeadingViewBlock
  * @typedef {{ type: 'blockquote'; children: MiniProgramViewBlock[] }} MiniProgramBlockquoteViewBlock
- * @typedef {{ type: 'list'; ordered: boolean; children: Array<{ inlines: MiniProgramInlineRun[] }> }} MiniProgramListViewBlock
+ * @typedef {{ type: 'list'; ordered: boolean; children: Array<{ task: boolean; checked?: boolean; inlines: MiniProgramInlineRun[] }> }} MiniProgramListViewBlock
+ * @typedef {{ header: boolean; align?: 'left' | 'center' | 'right'; inlines: MiniProgramInlineRun[] }} MiniProgramTableCellView
+ * @typedef {{ cells: MiniProgramTableCellView[] }} MiniProgramTableRowView
+ * @typedef {{ type: 'table'; header: MiniProgramTableRowView[]; rows: MiniProgramTableRowView[] }} MiniProgramTableViewBlock
  * @typedef {{ type: 'code_block'; lang: string; text: string }} MiniProgramCodeViewBlock
- * @typedef {MiniProgramParagraphViewBlock | MiniProgramHeadingViewBlock | MiniProgramBlockquoteViewBlock | MiniProgramListViewBlock | MiniProgramCodeViewBlock | MiniProgramImageRun | MiniProgramImagePlaceholderRun | import('./transform').MiniProgramHtmlBlock} MiniProgramViewBlock
+ * @typedef {MiniProgramParagraphViewBlock | MiniProgramHeadingViewBlock | MiniProgramBlockquoteViewBlock | MiniProgramListViewBlock | MiniProgramTableViewBlock | MiniProgramCodeViewBlock | MiniProgramImageRun | MiniProgramImagePlaceholderRun | import('./transform').MiniProgramHtmlBlock} MiniProgramViewBlock
  */
 
 function joinClass(...classes) {
@@ -182,6 +185,28 @@ function codeNodesToRuns(nodes = [], inheritedClass = '') {
   return runs.length > 0 ? runs : codeToRuns('', '');
 }
 
+function taskMarkerText(item, list, itemIndex) {
+  if (typeof item.checked === 'boolean') {
+    return item.checked ? '\u2611 ' : '\u2610 ';
+  }
+  return `${list.ordered ? `${itemIndex + 1}.` : '\u2022'} `;
+}
+
+/**
+ * @param {import('./transform').MiniProgramTableRow} row
+ * @param {{ inlineClassMap?: Record<string, string>; deferImages?: boolean; imagePlaceholderText?: string }} [options]
+ * @returns {Record<string, any>}
+ */
+function tableRowToView(row, options = {}) {
+  return {
+    cells: (row.children || []).map((cell) => ({
+      header: cell.header,
+      align: cell.align || '',
+      inlines: inlineNodesToRuns(cell.children || [], options),
+    })),
+  };
+}
+
 /**
  * Flattens MiniProgram inline AST nodes into simple WXML-friendly runs.
  * @param {import('./transform').MiniProgramInline[]} nodes
@@ -260,7 +285,7 @@ export function blocksToInlineRuns(blocks = [], options = {}) {
         if (runs.length > 0) {
           runs.push({ type: 'text', text: '\n' });
         }
-        runs.push({ type: 'text', text: `${block.ordered ? `${itemIndex + 1}.` : '\u2022'} ` });
+        runs.push({ type: 'text', text: taskMarkerText(item, block, itemIndex) });
         runs.push(...blocksToInlineRuns(item.children || [], options));
       });
     }
@@ -293,7 +318,22 @@ export function blocksToMiniProgramView(blocks = [], options = {}) {
       return {
         type: 'list',
         ordered: block.ordered,
-        children: (block.children || []).map((item) => ({ inlines: blocksToInlineRuns(item.children || [], options) })),
+        children: (block.children || []).map((item) => {
+          const task = typeof item.checked === 'boolean';
+          return {
+            task,
+            ...(task ? { checked: item.checked } : {}),
+            inlines: blocksToInlineRuns(item.children || [], options),
+          };
+        }),
+      };
+    }
+
+    if (block.type === 'table') {
+      return {
+        type: 'table',
+        header: (block.header || []).map((row) => tableRowToView(row, options)),
+        rows: (block.rows || []).map((row) => tableRowToView(row, options)),
       };
     }
 
@@ -343,6 +383,30 @@ export function resolvePendingImages(blocks = []) {
       if (children !== block.children) {
         changed = true;
         return { ...block, children };
+      }
+    }
+
+    if (block.header || block.rows) {
+      let tableChanged = false;
+      const resolveRows = (rows = []) =>
+        rows.map((row) => {
+          let rowChanged = false;
+          const cells = (row.cells || []).map((cell) => {
+            const [{ inlines }] = resolvePendingImages([{ inlines: cell.inlines || [] }]);
+            if (inlines !== cell.inlines) {
+              rowChanged = true;
+              tableChanged = true;
+              return { ...cell, inlines };
+            }
+            return cell;
+          });
+          return rowChanged ? { ...row, cells } : row;
+        });
+      const header = resolveRows(block.header);
+      const rows = resolveRows(block.rows);
+      if (tableChanged) {
+        changed = true;
+        return { ...block, header, rows };
       }
     }
 

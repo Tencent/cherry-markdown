@@ -71,12 +71,46 @@
 
       <view wx:elif="{{item.type === 'list'}}" class="md-list">
         <view wx:for="{{item.children}}" wx:for-item="listItem" wx:for-index="listIndex" wx:key="index" class="md-list-item">
-          <text class="md-list-marker">{{item.ordered ? listIndex + 1 + '.' : '•'}}</text>
+          <text wx:if="{{listItem.task}}" class="md-list-marker md-task-marker {{listItem.checked ? 'md-task-checked' : 'md-task-unchecked'}}">
+            {{listItem.checked ? '☑' : '☐'}}
+          </text>
+          <text wx:else class="md-list-marker">{{item.ordered ? listIndex + 1 + '.' : '•'}}</text>
           <view class="md-list-body">
             <template is="inlineRuns" data="{{nodes: listItem.inlines}}" />
           </view>
         </view>
       </view>
+
+      <scroll-view wx:elif="{{item.type === 'table'}}" class="md-table-scroll" scroll-x>
+        <view class="md-table">
+          <block wx:for="{{item.header}}" wx:for-item="tableRow" wx:key="index">
+            <view class="md-table-row md-table-head">
+              <view
+                wx:for="{{tableRow.cells}}"
+                wx:for-item="tableCell"
+                wx:key="index"
+                class="md-table-cell md-table-th"
+                style="text-align: {{tableCell.align || 'left'}};"
+              >
+                <template is="inlineRuns" data="{{nodes: tableCell.inlines}}" />
+              </view>
+            </view>
+          </block>
+          <block wx:for="{{item.rows}}" wx:for-item="tableRow" wx:key="index">
+            <view class="md-table-row">
+              <view
+                wx:for="{{tableRow.cells}}"
+                wx:for-item="tableCell"
+                wx:key="index"
+                class="md-table-cell"
+                style="text-align: {{tableCell.align || 'left'}};"
+              >
+                <template is="inlineRuns" data="{{nodes: tableCell.inlines}}" />
+              </view>
+            </view>
+          </block>
+        </view>
+      </scroll-view>
 
       <view wx:elif="{{item.type === 'code_block'}}" class="md-code-card">
         <view class="md-code-head">

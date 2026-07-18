@@ -111,18 +111,78 @@ describe('@cherry-markdown/miniProgram stream', () => {
     ]);
   });
 
-  it('renders basic pipe tables as rich-text fallback blocks', () => {
-    const html = markdownToHtml('| A | B |\n| --- | --- |\n| **x** | `y` |');
+  it('renders basic pipe tables as native table view blocks', () => {
+    const html = markdownToHtml('| A | B |\n| --- | --- |\n| **x** | [go](/page) |');
     expect(html).toContain('<table');
     const blocks = htmlToMiniProgramBlocks(html);
-    expect(blocks[0].type).toBe('html');
-    expect(blocks[0].nodes[0]).toEqual(
+    expect(blocks[0].type).toBe('table');
+
+    const stream = new MiniProgramStream();
+    expect(stream.setMarkdownView('| A | B |\n| --- | --- |\n| **x** | [go](/page) |')).toEqual([
+      {
+        type: 'table',
+        header: [
+          {
+            cells: [
+              { header: true, align: '', inlines: [{ type: 'text', text: 'A', className: '', href: '' }] },
+              { header: true, align: '', inlines: [{ type: 'text', text: 'B', className: '', href: '' }] },
+            ],
+          },
+        ],
+        rows: [
+          {
+            cells: [
+              { header: false, align: '', inlines: [{ type: 'text', text: 'x', className: 'md-strong', href: '' }] },
+              {
+                header: false,
+                align: '',
+                inlines: [{ type: 'link', text: 'go', className: 'md-link', href: '/page' }],
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    expect(
+      createMiniProgramStreamAdapter().setMarkdown('| A | B |\n| --- | --- |\n| [go](/page) | ![alt](img.png) |')
+        .blocks[0],
+    ).toEqual(
       expect.objectContaining({
-        name: 'table',
-        attrs: expect.objectContaining({ style: expect.stringContaining('border-collapse:collapse') }),
-        children: expect.any(Array),
+        type: 'table',
+        rows: [
+          {
+            cells: [
+              {
+                header: false,
+                align: '',
+                inlines: [{ type: 'link', text: 'go', className: 'md-link', href: '/page' }],
+              },
+              {
+                header: false,
+                align: '',
+                inlines: [{ type: 'image', src: 'img.png', alt: 'alt' }],
+              },
+            ],
+          },
+        ],
       }),
     );
+  });
+
+  it('renders Cherry task lists as native checked list items', () => {
+    const stream = new MiniProgramStream();
+
+    expect(stream.setMarkdownView('- [x] done\n- [ ] todo')).toEqual([
+      {
+        type: 'list',
+        ordered: false,
+        children: [
+          { task: true, checked: true, inlines: [{ type: 'text', text: 'done', className: '', href: '' }] },
+          { task: true, checked: false, inlines: [{ type: 'text', text: 'todo', className: '', href: '' }] },
+        ],
+      },
+    ]);
   });
 
   it('returns highlighted code runs for native code block rendering', () => {

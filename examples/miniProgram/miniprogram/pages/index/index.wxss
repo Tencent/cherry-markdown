@@ -120,12 +120,56 @@
   line-height: 1.75;
 }
 
+.md-task-marker {
+  color: #1677ff;
+}
+
+.md-task-unchecked {
+  color: #94a3b8;
+}
+
 .md-list-body {
   flex: 1;
 }
 
 .md-list-body .md-p {
   margin-bottom: 6rpx;
+}
+
+.md-table-scroll {
+  width: 100%;
+  margin: 22rpx 0;
+}
+
+.md-table {
+  min-width: 100%;
+  border-top: 1rpx solid #d0d7de;
+  border-left: 1rpx solid #d0d7de;
+  background: #ffffff;
+}
+
+.md-table-row {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.md-table-head {
+  background: #f6f8fa;
+}
+
+.md-table-cell {
+  flex: 0 0 220rpx;
+  padding: 14rpx 16rpx;
+  border-right: 1rpx solid #d0d7de;
+  border-bottom: 1rpx solid #d0d7de;
+  color: #24292f;
+  font-size: 28rpx;
+  line-height: 1.6;
+  vertical-align: top;
+}
+
+.md-table-th {
+  font-weight: 700;
 }
 
 .md-code-card {

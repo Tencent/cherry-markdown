@@ -36,12 +36,31 @@ export type MiniProgramHeadingBlock = {
   children: MiniProgramInline[];
 };
 export type MiniProgramBlockquoteBlock = { type: 'blockquote'; attrs?: Record<string, string>; children: MiniProgramBlock[] };
-export type MiniProgramListItem = { type: 'list_item'; attrs?: Record<string, string>; children: MiniProgramBlock[] };
+export type MiniProgramListItem = {
+  type: 'list_item';
+  attrs?: Record<string, string>;
+  checked?: boolean;
+  children: MiniProgramBlock[];
+};
 export type MiniProgramListBlock = {
   type: 'list';
   ordered: boolean;
   attrs?: Record<string, string>;
   children: MiniProgramListItem[];
+};
+export type MiniProgramTableCell = {
+  type: 'table_cell';
+  header: boolean;
+  align?: 'left' | 'center' | 'right';
+  attrs?: Record<string, string>;
+  children: MiniProgramInline[];
+};
+export type MiniProgramTableRow = { type: 'table_row'; attrs?: Record<string, string>; children: MiniProgramTableCell[] };
+export type MiniProgramTableBlock = {
+  type: 'table';
+  attrs?: Record<string, string>;
+  header: MiniProgramTableRow[];
+  rows: MiniProgramTableRow[];
 };
 export type MiniProgramCodeBlock = {
   type: 'code_block';
@@ -60,6 +79,7 @@ export type MiniProgramBlock =
   | MiniProgramBlockquoteBlock
   | MiniProgramListBlock
   | MiniProgramListItem
+  | MiniProgramTableBlock
   | MiniProgramCodeBlock
   | MiniProgramImage
   | MiniProgramHtmlBlock;
@@ -89,7 +109,18 @@ export type MiniProgramBlockquoteViewBlock = { type: 'blockquote'; children: Min
 export type MiniProgramListViewBlock = {
   type: 'list';
   ordered: boolean;
-  children: Array<{ inlines: MiniProgramInlineRun[] }>;
+  children: Array<{ task: boolean; checked?: boolean; inlines: MiniProgramInlineRun[] }>;
+};
+export type MiniProgramTableCellView = {
+  header: boolean;
+  align?: 'left' | 'center' | 'right' | '';
+  inlines: MiniProgramInlineRun[];
+};
+export type MiniProgramTableRowView = { cells: MiniProgramTableCellView[] };
+export type MiniProgramTableViewBlock = {
+  type: 'table';
+  header: MiniProgramTableRowView[];
+  rows: MiniProgramTableRowView[];
 };
 export type MiniProgramCodeRun = { text: string; className: string };
 export type MiniProgramCodeViewBlock = { type: 'code_block'; lang: string; text: string; runs: MiniProgramCodeRun[] };
@@ -98,6 +129,7 @@ export type MiniProgramViewBlock =
   | MiniProgramHeadingViewBlock
   | MiniProgramBlockquoteViewBlock
   | MiniProgramListViewBlock
+  | MiniProgramTableViewBlock
   | MiniProgramCodeViewBlock
   | MiniProgramImageRun
   | MiniProgramImagePlaceholderRun

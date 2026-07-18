@@ -26,7 +26,7 @@ require('../../vendor/cherry-mini-program-stream');
 ## What This Demo Covers
 
 - Basic Markdown to WXML-friendly view blocks with `createMiniProgramStreamAdapter`.
-- Native WXML rendering for paragraph, heading, list, blockquote, code, image, and link nodes.
+- Native WXML rendering for paragraph, heading, list/task list, blockquote, table, code, image, and link nodes.
 - CherryStream-like flow rendering: chunks are accumulated as Markdown, incomplete syntax is normalized, images are deferred while streaming, and final render restores native images.
 - The direct render and stream render use the same Markdown source, so the final output can be compared directly.
 - The demo button starts an automatic token-sized SSE simulation; real SSE/WebSocket integrations can pass response chunks to `createSseParser` and then feed events into the adapter.
@@ -34,6 +34,7 @@ require('../../vendor/cherry-mini-program-stream');
   - code copy with `wx.setClipboardData`
   - image preview with `wx.previewImage`
   - link tap with page navigation or a modal fallback
+  - table cell links/images reuse the same native handlers
 
 ## SSE Request Shape
 

@@ -27,11 +27,14 @@ import * as htmlparser2 from 'htmlparser2';
  * @typedef {{ type: 'paragraph'; attrs?: Record<string, string>; children: MiniProgramInline[] }} MiniProgramParagraphBlock
  * @typedef {{ type: 'heading'; level: number; attrs?: Record<string, string>; children: MiniProgramInline[] }} MiniProgramHeadingBlock
  * @typedef {{ type: 'blockquote'; attrs?: Record<string, string>; children: MiniProgramBlock[] }} MiniProgramBlockquoteBlock
- * @typedef {{ type: 'list_item'; attrs?: Record<string, string>; children: MiniProgramBlock[] }} MiniProgramListItem
+ * @typedef {{ type: 'list_item'; attrs?: Record<string, string>; checked?: boolean; children: MiniProgramBlock[] }} MiniProgramListItem
  * @typedef {{ type: 'list'; ordered: boolean; attrs?: Record<string, string>; children: MiniProgramListItem[] }} MiniProgramListBlock
+ * @typedef {{ type: 'table_cell'; header: boolean; align?: 'left' | 'center' | 'right'; attrs?: Record<string, string>; children: MiniProgramInline[] }} MiniProgramTableCell
+ * @typedef {{ type: 'table_row'; attrs?: Record<string, string>; children: MiniProgramTableCell[] }} MiniProgramTableRow
+ * @typedef {{ type: 'table'; attrs?: Record<string, string>; header: MiniProgramTableRow[]; rows: MiniProgramTableRow[] }} MiniProgramTableBlock
  * @typedef {{ type: 'code_block'; lang: string; text: string; nodes?: MiniProgramRichTextNode[]; attrs?: Record<string, string> }} MiniProgramCodeBlock
  * @typedef {{ type: 'html'; nodes: MiniProgramRichTextNode[] }} MiniProgramHtmlBlock
- * @typedef {MiniProgramParagraphBlock | MiniProgramHeadingBlock | MiniProgramBlockquoteBlock | MiniProgramListBlock | MiniProgramListItem | MiniProgramCodeBlock | MiniProgramImage | MiniProgramHtmlBlock} MiniProgramBlock
+ * @typedef {MiniProgramParagraphBlock | MiniProgramHeadingBlock | MiniProgramBlockquoteBlock | MiniProgramListBlock | MiniProgramListItem | MiniProgramTableBlock | MiniProgramCodeBlock | MiniProgramImage | MiniProgramHtmlBlock} MiniProgramBlock
  *
  * @typedef {{ type: 'text'; text: string } | { name: string; attrs?: Record<string, string>; children?: MiniProgramRichTextNode[] }} MiniProgramRichTextNode
  * @typedef {{ unknownTag?: 'html' | 'unwrap' | 'drop'; forceNoCursor?: boolean }} MiniProgramTransformOptions
@@ -148,6 +151,22 @@ function isCursorAttrs(attrs = {}) {
 }
 
 /**
+ * @param {Record<string, string>} attrs
+ * @returns {boolean}
+ */
+function isTaskMarkerAttrs(attrs = {}) {
+  return /\bch-icon\b/.test(attrs.class || '') && /\bch-icon-(?:check|square)\b/.test(attrs.class || '');
+}
+
+/**
+ * @param {Record<string, string>} attrs
+ * @returns {boolean}
+ */
+function isCheckedTaskMarkerAttrs(attrs = {}) {
+  return /\bch-icon-check\b/.test(attrs.class || '');
+}
+
+/**
  * @param {any} node
  * @returns {string}
  */
@@ -190,6 +209,14 @@ function findDescendant(node, predicate) {
     }
   }
   return null;
+}
+
+/**
+ * @param {any} node
+ * @returns {any[]}
+ */
+function getElementChildren(node) {
+  return (node?.children || []).filter(isTag);
 }
 
 /**
@@ -238,6 +265,137 @@ function toImage(node) {
     title: attrs.title || '',
     attrs,
   };
+}
+
+/**
+ * @param {Record<string, string>} attrs
+ * @returns {'left' | 'center' | 'right' | undefined}
+ */
+function getTableCellAlign(attrs = {}) {
+  const align = String(attrs.align || '').toLowerCase();
+  if (align === 'left' || align === 'center' || align === 'right') {
+    return align;
+  }
+  const styleAlign = String(attrs.style || '').match(/text-align\s*:\s*(left|center|right)/i);
+  return styleAlign ? styleAlign[1].toLowerCase() : undefined;
+}
+
+/**
+ * @param {any} node
+ * @returns {MiniProgramTableCell}
+ */
+function toTableCell(node) {
+  const tagName = String(node.name).toLowerCase();
+  const attrs = sanitizeAttrs(node.attribs || {});
+  const align = getTableCellAlign(attrs);
+  return {
+    type: 'table_cell',
+    header: tagName === 'th',
+    ...(align ? { align } : {}),
+    attrs,
+    children: nodesToInline(node.children || []),
+  };
+}
+
+/**
+ * @param {any} node
+ * @returns {MiniProgramTableRow | null}
+ */
+function toTableRow(node) {
+  const attrs = sanitizeAttrs(node.attribs || {});
+  const cells = getElementChildren(node)
+    .filter((child) => child.name === 'th' || child.name === 'td')
+    .map(toTableCell);
+  return cells.length > 0 ? { type: 'table_row', attrs, children: cells } : null;
+}
+
+/**
+ * @param {any} section
+ * @returns {MiniProgramTableRow[]}
+ */
+function tableSectionToRows(section) {
+  const rows = getElementChildren(section)
+    .filter((child) => child.name === 'tr')
+    .map(toTableRow)
+    .filter(Boolean);
+  if (rows.length > 0) {
+    return rows;
+  }
+  const directCells = getElementChildren(section).filter((child) => child.name === 'th' || child.name === 'td');
+  return directCells.length > 0
+    ? [{ type: 'table_row', attrs: sanitizeAttrs(section.attribs || {}), children: directCells.map(toTableCell) }]
+    : [];
+}
+
+/**
+ * @param {any} node
+ * @returns {MiniProgramTableBlock}
+ */
+function toTable(node) {
+  const table = node.name === 'table' ? node : findDescendant(node, (child) => isTag(child) && child.name === 'table');
+  const attrs = sanitizeAttrs((table || node).attribs || {});
+  const sections = getElementChildren(table || node);
+  const header = sections.filter((child) => child.name === 'thead').flatMap(tableSectionToRows);
+  const bodyRows = sections
+    .filter((child) => child.name === 'tbody' || child.name === 'tfoot')
+    .flatMap(tableSectionToRows);
+  const directRows = sections
+    .filter((child) => child.name === 'tr')
+    .map(toTableRow)
+    .filter(Boolean);
+  const directCells = sections.filter((child) => child.name === 'th' || child.name === 'td');
+  const standaloneRow =
+    directCells.length > 0 ? [{ type: 'table_row', attrs: {}, children: directCells.map(toTableCell) }] : [];
+
+  return {
+    type: 'table',
+    attrs,
+    header,
+    rows: [...bodyRows, ...directRows, ...standaloneRow],
+  };
+}
+
+/**
+ * @param {any[]} children
+ * @returns {{ checked: boolean; children: any[] } | null}
+ */
+function extractTaskListInfo(children = []) {
+  const markerIndex = children.findIndex((child) => !(isText(child) && child.data.trim() === ''));
+  const markerParent = children[markerIndex];
+  if (!markerParent) {
+    return null;
+  }
+
+  const stripMarkerFromInlineChildren = (inlineChildren = []) => {
+    const inlineMarkerIndex = inlineChildren.findIndex((child) => !(isText(child) && child.data.trim() === ''));
+    const marker = inlineChildren[inlineMarkerIndex];
+    if (!isTag(marker) || marker.name !== 'span' || !isTaskMarkerAttrs(marker.attribs || {})) {
+      return null;
+    }
+    const nextChildren = inlineChildren.slice(0, inlineMarkerIndex).concat(inlineChildren.slice(inlineMarkerIndex + 1));
+    const nextTextIndex = nextChildren.findIndex((child) => !(isText(child) && child.data === ''));
+    const nextText = nextChildren[nextTextIndex];
+    if (isText(nextText)) {
+      nextChildren[nextTextIndex] = { ...nextText, data: nextText.data.replace(/^\s+/, '') };
+    }
+    return {
+      checked: isCheckedTaskMarkerAttrs(marker.attribs || {}),
+      children: nextChildren,
+    };
+  };
+
+  if (isTag(markerParent) && markerParent.name === 'p') {
+    const stripped = stripMarkerFromInlineChildren(markerParent.children || []);
+    if (!stripped) {
+      return null;
+    }
+    const nextChildren = children.slice();
+    nextChildren[markerIndex] = { ...markerParent, children: stripped.children };
+    return { checked: stripped.checked, children: nextChildren };
+  }
+
+  const stripped = stripMarkerFromInlineChildren(children);
+  return stripped ? { checked: stripped.checked, children: stripped.children } : null;
 }
 
 /**
@@ -469,19 +627,34 @@ function nodeToBlocks(node, options = {}) {
   if (tagName === 'blockquote') {
     return [{ type: 'blockquote', attrs, children: mixedChildrenToBlocks(node.children || [], options) }];
   }
+  if (tagName === 'table') {
+    return [toTable(node)];
+  }
   if (tagName === 'ul' || tagName === 'ol') {
     /** @type {MiniProgramListItem[]} */
     const children = (node.children || [])
       .filter((child) => isTag(child) && child.name === 'li')
-      .map((child) => ({
-        type: 'list_item',
-        attrs: sanitizeAttrs(child.attribs || {}),
-        children: mixedChildrenToBlocks(child.children || [], options),
-      }));
+      .map((child) => {
+        const taskListInfo = extractTaskListInfo(child.children || []);
+        return {
+          type: 'list_item',
+          attrs: sanitizeAttrs(child.attribs || {}),
+          ...(taskListInfo ? { checked: taskListInfo.checked } : {}),
+          children: mixedChildrenToBlocks(taskListInfo?.children || child.children || [], options),
+        };
+      });
     return [{ type: 'list', ordered: tagName === 'ol', attrs, children }];
   }
   if (tagName === 'li') {
-    return [{ type: 'list_item', attrs, children: mixedChildrenToBlocks(node.children || [], options) }];
+    const taskListInfo = extractTaskListInfo(node.children || []);
+    return [
+      {
+        type: 'list_item',
+        attrs,
+        ...(taskListInfo ? { checked: taskListInfo.checked } : {}),
+        children: mixedChildrenToBlocks(taskListInfo?.children || node.children || [], options),
+      },
+    ];
   }
   if (tagName === 'p' || tagName === 'div') {
     const onlyImage = getOnlyImageChild(node.children || []);
