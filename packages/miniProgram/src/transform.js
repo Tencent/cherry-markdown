@@ -22,7 +22,8 @@ import * as htmlparser2 from 'htmlparser2';
  * @typedef {{ type: 'strong' | 'em' | 'code' | 'span' | 'underline' | 'strikethrough' | 'sub' | 'sup'; attrs?: Record<string, string>; children: MiniProgramInline[] }} MiniProgramInlineWrapper
  * @typedef {{ type: 'link'; href: string; title?: string; attrs?: Record<string, string>; children: MiniProgramInline[] }} MiniProgramLink
  * @typedef {{ type: 'image'; src: string; alt?: string; title?: string; attrs?: Record<string, string> }} MiniProgramImage
- * @typedef {MiniProgramText | MiniProgramBreak | MiniProgramCursor | MiniProgramInlineWrapper | MiniProgramLink | MiniProgramImage} MiniProgramInline
+ * @typedef {{ type: 'math_inline'; text: string; attrs?: Record<string, string> }} MiniProgramMathInline
+ * @typedef {MiniProgramText | MiniProgramBreak | MiniProgramCursor | MiniProgramInlineWrapper | MiniProgramLink | MiniProgramImage | MiniProgramMathInline} MiniProgramInline
  *
  * @typedef {{ type: 'paragraph'; attrs?: Record<string, string>; children: MiniProgramInline[] }} MiniProgramParagraphBlock
  * @typedef {{ type: 'heading'; level: number; attrs?: Record<string, string>; children: MiniProgramInline[] }} MiniProgramHeadingBlock
@@ -33,8 +34,10 @@ import * as htmlparser2 from 'htmlparser2';
  * @typedef {{ type: 'table_row'; attrs?: Record<string, string>; children: MiniProgramTableCell[] }} MiniProgramTableRow
  * @typedef {{ type: 'table'; attrs?: Record<string, string>; header: MiniProgramTableRow[]; rows: MiniProgramTableRow[] }} MiniProgramTableBlock
  * @typedef {{ type: 'code_block'; lang: string; text: string; nodes?: MiniProgramRichTextNode[]; attrs?: Record<string, string> }} MiniProgramCodeBlock
+ * @typedef {{ type: 'math_block'; text: string; display: boolean; attrs?: Record<string, string> }} MiniProgramMathBlock
+ * @typedef {{ type: 'diagram'; kind: 'mermaid'; text: string; attrs?: Record<string, string> }} MiniProgramDiagramBlock
  * @typedef {{ type: 'html'; nodes: MiniProgramRichTextNode[] }} MiniProgramHtmlBlock
- * @typedef {MiniProgramParagraphBlock | MiniProgramHeadingBlock | MiniProgramBlockquoteBlock | MiniProgramListBlock | MiniProgramListItem | MiniProgramTableBlock | MiniProgramCodeBlock | MiniProgramImage | MiniProgramHtmlBlock} MiniProgramBlock
+ * @typedef {MiniProgramParagraphBlock | MiniProgramHeadingBlock | MiniProgramBlockquoteBlock | MiniProgramListBlock | MiniProgramListItem | MiniProgramTableBlock | MiniProgramCodeBlock | MiniProgramMathBlock | MiniProgramDiagramBlock | MiniProgramImage | MiniProgramHtmlBlock} MiniProgramBlock
  *
  * @typedef {{ type: 'text'; text: string } | { name: string; attrs?: Record<string, string>; children?: MiniProgramRichTextNode[] }} MiniProgramRichTextNode
  * @typedef {{ unknownTag?: 'html' | 'unwrap' | 'drop'; forceNoCursor?: boolean }} MiniProgramTransformOptions
@@ -167,6 +170,22 @@ function isCheckedTaskMarkerAttrs(attrs = {}) {
 }
 
 /**
+ * @param {Record<string, string>} attrs
+ * @returns {boolean}
+ */
+function isMathAttrs(attrs = {}) {
+  return attrs['data-type'] === 'mathBlock' || /\bCherry-(?:InlineMath|Math)\b/.test(attrs.class || '');
+}
+
+function safeDecodeURIComponent(value = '') {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+/**
  * @param {any} node
  * @returns {string}
  */
@@ -264,6 +283,61 @@ function toImage(node) {
     alt: attrs.alt || '',
     title: attrs.title || '',
     attrs,
+  };
+}
+
+/**
+ * @param {Record<string, string>} attrs
+ * @param {any} node
+ * @returns {string}
+ */
+function getMathText(attrs, node) {
+  if (attrs['data-formula-source']) {
+    return safeDecodeURIComponent(attrs['data-formula-source']);
+  }
+  if (attrs['data-content']) {
+    return safeDecodeURIComponent(attrs['data-content']);
+  }
+  return getText(node).replace(/^\${1,2}|\${1,2}$/g, '');
+}
+
+/**
+ * @param {any} node
+ * @returns {MiniProgramMathInline}
+ */
+function toMathInline(node) {
+  const attrs = sanitizeAttrs(node.attribs || {});
+  return {
+    type: 'math_inline',
+    text: getMathText(attrs, node),
+    attrs,
+  };
+}
+
+/**
+ * @param {any} node
+ * @returns {MiniProgramMathBlock}
+ */
+function toMathBlock(node) {
+  const attrs = sanitizeAttrs(node.attribs || {});
+  return {
+    type: 'math_block',
+    text: getMathText(attrs, node),
+    display: true,
+    attrs,
+  };
+}
+
+/**
+ * @param {MiniProgramCodeBlock} codeBlock
+ * @returns {MiniProgramDiagramBlock}
+ */
+function codeBlockToDiagram(codeBlock) {
+  return {
+    type: 'diagram',
+    kind: 'mermaid',
+    text: codeBlock.text || '',
+    attrs: codeBlock.attrs || {},
   };
 }
 
@@ -504,7 +578,8 @@ function nodeToInline(node) {
     return nodesToInline(node.children || []);
   }
   const tagName = String(node.name).toLowerCase();
-  const attrs = sanitizeAttrs(node.attribs || {});
+  const rawAttrs = node.attribs || {};
+  const attrs = sanitizeAttrs(rawAttrs);
   if (tagName === 'br') {
     return [{ type: 'break' }];
   }
@@ -514,6 +589,9 @@ function nodeToInline(node) {
   }
   if (tagName === 'span' && isCursorAttrs(attrs)) {
     return [{ type: 'cursor' }];
+  }
+  if (tagName === 'span' && isMathAttrs(rawAttrs)) {
+    return [toMathInline(node)];
   }
   const children = nodesToInline(node.children || []);
   switch (tagName) {
@@ -613,9 +691,14 @@ function nodeToBlocks(node, options = {}) {
     return mixedChildrenToBlocks(node.children || [], options);
   }
   const tagName = String(node.name).toLowerCase();
-  const attrs = sanitizeAttrs(node.attribs || {});
+  const rawAttrs = node.attribs || {};
+  const attrs = sanitizeAttrs(rawAttrs);
+  if (tagName === 'div' && isMathAttrs(rawAttrs)) {
+    return [toMathBlock(node)];
+  }
   if (isCodeBlockWrapper(node) || tagName === 'pre') {
-    return [toCodeBlock(node)];
+    const codeBlock = toCodeBlock(node);
+    return String(codeBlock.lang || '').toLowerCase() === 'mermaid' ? [codeBlockToDiagram(codeBlock)] : [codeBlock];
   }
   if (/^h[1-6]$/.test(tagName)) {
     return [{ type: 'heading', level: Number(tagName[1]), attrs, children: nodesToInline(node.children || []) }];

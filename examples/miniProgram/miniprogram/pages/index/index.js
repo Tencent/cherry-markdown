@@ -33,6 +33,21 @@ console.log(message);
 | 图片 | ![logo](../../assets/logo-square.png) | 点击预览 |
 | 代码块 | 原生 view/text | 点击复制 |
 | 表格 | 原生 view | 单元格内链接/图片保留交互 |
+
+## 公式与图表源码 fallback
+
+行内公式：$E=mc^2$ 会转换为 math_inline run。
+
+$$
+a^2 + b^2 = c^2
+$$
+
+\`\`\`mermaid
+graph TD;
+  A[Cherry Markdown] --> B[HTML];
+  B --> C[MiniProgram AST];
+  C --> D[Native View];
+\`\`\`
 `;
 
 const DEMO_STREAM_INTERVAL = 60;
@@ -43,10 +58,12 @@ function createStreamTokens(markdown) {
 
   while (index < markdown.length) {
     const rest = markdown.slice(index);
+    const fencedBlock = rest.match(/^```[\s\S]*?```/);
+    const mathBlock = rest.match(/^\$\$[\s\S]*?\$\$/);
     const image = rest.match(/^!\[[^\]]*\]\([^)]+\)/);
     const link = rest.match(/^\[[^\]]+\]\([^)]+\)/);
-    const fence = rest.match(/^```/);
-    const token = image?.[0] || link?.[0] || fence?.[0];
+    const inlineMath = rest.match(/^\$[^$\n]+\$/);
+    const token = fencedBlock?.[0] || mathBlock?.[0] || image?.[0] || link?.[0] || inlineMath?.[0];
 
     if (token) {
       tokens.push(token);

@@ -20,13 +20,15 @@ export type MiniProgramLink = {
   children: MiniProgramInline[];
 };
 export type MiniProgramImage = { type: 'image'; src: string; alt?: string; title?: string; attrs?: Record<string, string> };
+export type MiniProgramMathInline = { type: 'math_inline'; text: string; attrs?: Record<string, string> };
 export type MiniProgramInline =
   | MiniProgramText
   | MiniProgramBreak
   | MiniProgramCursor
   | MiniProgramInlineWrapper
   | MiniProgramLink
-  | MiniProgramImage;
+  | MiniProgramImage
+  | MiniProgramMathInline;
 
 export type MiniProgramParagraphBlock = { type: 'paragraph'; attrs?: Record<string, string>; children: MiniProgramInline[] };
 export type MiniProgramHeadingBlock = {
@@ -69,6 +71,18 @@ export type MiniProgramCodeBlock = {
   nodes?: MiniProgramRichTextNode[];
   attrs?: Record<string, string>;
 };
+export type MiniProgramMathBlock = {
+  type: 'math_block';
+  text: string;
+  display: boolean;
+  attrs?: Record<string, string>;
+};
+export type MiniProgramDiagramBlock = {
+  type: 'diagram';
+  kind: 'mermaid';
+  text: string;
+  attrs?: Record<string, string>;
+};
 export type MiniProgramRichTextNode =
   | { type: 'text'; text: string }
   | { name: string; attrs?: Record<string, string>; children?: MiniProgramRichTextNode[] };
@@ -81,6 +95,8 @@ export type MiniProgramBlock =
   | MiniProgramListItem
   | MiniProgramTableBlock
   | MiniProgramCodeBlock
+  | MiniProgramMathBlock
+  | MiniProgramDiagramBlock
   | MiniProgramImage
   | MiniProgramHtmlBlock;
 
@@ -95,11 +111,13 @@ export type MiniProgramViewOptions = {
   imagePlaceholderText?: string;
 };
 export type MiniProgramTextRun = { type: 'text' | 'link'; text: string; className?: string; href?: string };
+export type MiniProgramMathInlineRun = { type: 'math_inline'; text: string; source: string; className?: string };
 export type MiniProgramCursorRun = { type: 'cursor' };
 export type MiniProgramImageRun = { type: 'image'; src: string; pendingSrc?: string; alt?: string };
 export type MiniProgramImagePlaceholderRun = { type: 'image_placeholder'; src: string; alt?: string; text: string };
 export type MiniProgramInlineRun =
   | MiniProgramTextRun
+  | MiniProgramMathInlineRun
   | MiniProgramCursorRun
   | MiniProgramImageRun
   | MiniProgramImagePlaceholderRun;
@@ -124,6 +142,8 @@ export type MiniProgramTableViewBlock = {
 };
 export type MiniProgramCodeRun = { text: string; className: string };
 export type MiniProgramCodeViewBlock = { type: 'code_block'; lang: string; text: string; runs: MiniProgramCodeRun[] };
+export type MiniProgramMathViewBlock = { type: 'math_block'; text: string; source: string; display: boolean };
+export type MiniProgramDiagramViewBlock = { type: 'diagram'; kind: 'mermaid'; text: string };
 export type MiniProgramViewBlock =
   | MiniProgramParagraphViewBlock
   | MiniProgramHeadingViewBlock
@@ -131,6 +151,8 @@ export type MiniProgramViewBlock =
   | MiniProgramListViewBlock
   | MiniProgramTableViewBlock
   | MiniProgramCodeViewBlock
+  | MiniProgramMathViewBlock
+  | MiniProgramDiagramViewBlock
   | MiniProgramImageRun
   | MiniProgramImagePlaceholderRun
   | MiniProgramHtmlBlock;

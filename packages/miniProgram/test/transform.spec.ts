@@ -59,6 +59,48 @@ describe('miniProgramTransform', () => {
     ]);
   });
 
+  it('converts Cherry math HTML into typed math nodes', () => {
+    expect(
+      htmlToMiniProgramBlocks(
+        '<p>Inline <span class="Cherry-InlineMath" data-type="mathBlock" data-formula-source="E%3Dmc%5E2">$E=mc^2$</span></p><div class="Cherry-Math" data-type="mathBlock" data-formula-source="a%5E2%20%2B%20b%5E2%20%3D%20c%5E2">$$a^2 + b^2 = c^2$$</div>',
+      ),
+    ).toEqual([
+      {
+        type: 'paragraph',
+        attrs: {},
+        children: [
+          { type: 'text', text: 'Inline ' },
+          {
+            type: 'math_inline',
+            text: 'E=mc^2',
+            attrs: { class: 'Cherry-InlineMath', 'data-formula-source': 'E%3Dmc%5E2' },
+          },
+        ],
+      },
+      {
+        type: 'math_block',
+        text: 'a^2 + b^2 = c^2',
+        display: true,
+        attrs: { class: 'Cherry-Math', 'data-formula-source': 'a%5E2%20%2B%20b%5E2%20%3D%20c%5E2' },
+      },
+    ]);
+  });
+
+  it('converts Mermaid code blocks into diagram blocks', () => {
+    expect(
+      htmlToMiniProgramBlocks(
+        '<div data-type="codeBlock" data-lang="mermaid" class="cherry-code-expand"><pre class="language-mermaid"><code class="language-mermaid">graph TD;\n  A--&gt;B;</code></pre></div>',
+      ),
+    ).toEqual([
+      {
+        type: 'diagram',
+        kind: 'mermaid',
+        text: 'graph TD;\n  A-->B;',
+        attrs: { 'data-lang': 'mermaid', class: 'cherry-code-expand' },
+      },
+    ]);
+  });
+
   it('converts ordered and unordered lists', () => {
     expect(
       htmlToMiniProgramBlocks('<ul><li>One</li><li><strong>Two</strong></li></ul><ol><li>Three</li></ol>'),

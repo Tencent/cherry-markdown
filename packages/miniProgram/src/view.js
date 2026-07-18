@@ -22,6 +22,7 @@ const DEFAULT_INLINE_CLASS = {
   strikethrough: 'md-strike',
   sub: 'md-sub',
   sup: 'md-sup',
+  math_inline: 'md-math-inline',
 };
 
 const CODE_TOKEN_CLASS = {
@@ -50,10 +51,11 @@ const PRISM_TOKEN_CLASS_MAP = {
 /**
  * @typedef {{ inlineClassMap?: Record<string, string>; deferImages?: boolean; imagePlaceholderText?: string }} MiniProgramViewOptions
  * @typedef {{ type: 'text' | 'link'; text: string; className?: string; href?: string }} MiniProgramTextRun
+ * @typedef {{ type: 'math_inline'; text: string; source: string; className?: string }} MiniProgramMathInlineRun
  * @typedef {{ type: 'cursor' }} MiniProgramCursorRun
  * @typedef {{ type: 'image'; src: string; pendingSrc?: string; alt?: string }} MiniProgramImageRun
  * @typedef {{ type: 'image_placeholder'; src: string; alt?: string; text: string }} MiniProgramImagePlaceholderRun
- * @typedef {MiniProgramTextRun | MiniProgramCursorRun | MiniProgramImageRun | MiniProgramImagePlaceholderRun} MiniProgramInlineRun
+ * @typedef {MiniProgramTextRun | MiniProgramMathInlineRun | MiniProgramCursorRun | MiniProgramImageRun | MiniProgramImagePlaceholderRun} MiniProgramInlineRun
  * @typedef {{ type: 'paragraph'; inlines: MiniProgramInlineRun[] }} MiniProgramParagraphViewBlock
  * @typedef {{ type: 'heading'; level: number; inlines: MiniProgramInlineRun[] }} MiniProgramHeadingViewBlock
  * @typedef {{ type: 'blockquote'; children: MiniProgramViewBlock[] }} MiniProgramBlockquoteViewBlock
@@ -62,7 +64,9 @@ const PRISM_TOKEN_CLASS_MAP = {
  * @typedef {{ cells: MiniProgramTableCellView[] }} MiniProgramTableRowView
  * @typedef {{ type: 'table'; header: MiniProgramTableRowView[]; rows: MiniProgramTableRowView[] }} MiniProgramTableViewBlock
  * @typedef {{ type: 'code_block'; lang: string; text: string }} MiniProgramCodeViewBlock
- * @typedef {MiniProgramParagraphViewBlock | MiniProgramHeadingViewBlock | MiniProgramBlockquoteViewBlock | MiniProgramListViewBlock | MiniProgramTableViewBlock | MiniProgramCodeViewBlock | MiniProgramImageRun | MiniProgramImagePlaceholderRun | import('./transform').MiniProgramHtmlBlock} MiniProgramViewBlock
+ * @typedef {{ type: 'math_block'; text: string; source: string; display: boolean }} MiniProgramMathViewBlock
+ * @typedef {{ type: 'diagram'; kind: 'mermaid'; text: string }} MiniProgramDiagramViewBlock
+ * @typedef {MiniProgramParagraphViewBlock | MiniProgramHeadingViewBlock | MiniProgramBlockquoteViewBlock | MiniProgramListViewBlock | MiniProgramTableViewBlock | MiniProgramCodeViewBlock | MiniProgramMathViewBlock | MiniProgramDiagramViewBlock | MiniProgramImageRun | MiniProgramImagePlaceholderRun | import('./transform').MiniProgramHtmlBlock} MiniProgramViewBlock
  */
 
 function joinClass(...classes) {
@@ -83,6 +87,26 @@ function toImageRun(node, options = {}) {
     src,
     alt: node.alt || '',
     text: options.imagePlaceholderText || node.alt || '图片加载中',
+  };
+}
+
+function toMathInlineRun(node, className = '') {
+  const source = node.text || '';
+  return {
+    type: 'math_inline',
+    text: `$${source}$`,
+    source,
+    className,
+  };
+}
+
+function toMathBlockView(block) {
+  const source = block.text || '';
+  return {
+    type: 'math_block',
+    text: `$$\n${source}\n$$`,
+    source,
+    display: block.display !== false,
   };
 }
 
@@ -243,6 +267,11 @@ export function inlineNodesToRuns(nodes = [], options = {}, className = '', href
       return runs;
     }
 
+    if (node.type === 'math_inline') {
+      runs.push(toMathInlineRun(node, joinClass(className, getInlineClass('math_inline', options))));
+      return runs;
+    }
+
     if (node.type === 'link') {
       return runs.concat(
         inlineNodesToRuns(node.children || [], options, joinClass(className, 'md-link'), node.href || ''),
@@ -271,6 +300,21 @@ export function blocksToInlineRuns(blocks = [], options = {}) {
     }
 
     if (block.type === 'code_block') {
+      runs.push({ type: 'text', text: block.text || '', className: getInlineClass('code', options) });
+      return runs;
+    }
+
+    if (block.type === 'math_block') {
+      runs.push({
+        type: 'math_inline',
+        text: `$$${block.text || ''}$$`,
+        source: block.text || '',
+        className: 'md-math-inline',
+      });
+      return runs;
+    }
+
+    if (block.type === 'diagram') {
       runs.push({ type: 'text', text: block.text || '', className: getInlineClass('code', options) });
       return runs;
     }
@@ -342,6 +386,14 @@ export function blocksToMiniProgramView(blocks = [], options = {}) {
       const text = block.text || '';
       const runs = block.nodes && block.nodes.length > 0 ? codeNodesToRuns(block.nodes) : codeToRuns(text, lang);
       return { type: 'code_block', lang, text, runs };
+    }
+
+    if (block.type === 'math_block') {
+      return toMathBlockView(block);
+    }
+
+    if (block.type === 'diagram') {
+      return { type: 'diagram', kind: block.kind || 'mermaid', text: block.text || '' };
     }
 
     if (block.type === 'image') {

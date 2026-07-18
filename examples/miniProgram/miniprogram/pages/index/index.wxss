@@ -79,6 +79,14 @@
   font-family: Menlo, Monaco, Consolas, monospace;
 }
 
+.md-math-inline {
+  padding: 2rpx 8rpx;
+  border-radius: 6rpx;
+  background: #eef6ff;
+  color: #0f4c81;
+  font-family: Menlo, Monaco, Consolas, monospace;
+}
+
 .md-underline {
   text-decoration: underline;
 }
@@ -234,6 +242,48 @@
 .md-code-operator,
 .md-code-punctuation {
   color: #c4b5fd;
+}
+
+.md-math-block {
+  margin: 22rpx 0;
+  padding: 20rpx;
+  border: 1rpx solid #bfdbfe;
+  border-radius: 8rpx;
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-family: Menlo, Monaco, Consolas, monospace;
+  font-size: 28rpx;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.md-diagram-card {
+  overflow: hidden;
+  margin: 22rpx 0;
+  border: 1rpx solid #d8dee4;
+  border-radius: 8rpx;
+  background: #ffffff;
+}
+
+.md-diagram-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14rpx 18rpx;
+  border-bottom: 1rpx solid #d8dee4;
+  background: #f6f8fa;
+  color: #24292f;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.md-diagram-source {
+  padding: 20rpx;
+  color: #334155;
+  font-family: Menlo, Monaco, Consolas, monospace;
+  font-size: 26rpx;
+  line-height: 1.65;
+  white-space: pre-wrap;
 }
 
 .md-image,

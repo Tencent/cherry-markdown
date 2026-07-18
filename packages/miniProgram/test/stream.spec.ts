@@ -199,6 +199,32 @@ describe('@cherry-markdown/miniProgram stream', () => {
     });
   });
 
+  it('returns math and Mermaid view blocks from Cherry-rendered HTML', () => {
+    const stream = new MiniProgramStream();
+
+    expect(stream.setMarkdownView('Inline $E=mc^2$ test')[0]).toEqual({
+      type: 'paragraph',
+      inlines: [
+        { type: 'text', text: 'Inline ', className: '', href: '' },
+        { type: 'math_inline', text: '$E=mc^2$', source: 'E=mc^2', className: 'md-math-inline' },
+        { type: 'text', text: 'test', className: '', href: '' },
+      ],
+    });
+
+    expect(stream.setMarkdownView('$$\nE=mc^2\n$$')[0]).toEqual({
+      type: 'math_block',
+      text: '$$\nE=mc^2\n$$',
+      source: 'E=mc^2',
+      display: true,
+    });
+
+    expect(stream.setMarkdownView('```mermaid\ngraph TD;\n  A-->B;\n```')[0]).toEqual({
+      type: 'diagram',
+      kind: 'mermaid',
+      text: 'graph TD;\n  A-->B;',
+    });
+  });
+
   it('adapts chunk streaming into CherryStream-like MiniProgram view states', () => {
     const adapter = createMiniProgramStreamAdapter();
 

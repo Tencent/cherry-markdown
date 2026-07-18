@@ -2,6 +2,7 @@
   <block wx:for="{{nodes}}" wx:key="index">
     <text wx:if="{{item.type === 'text'}}" class="{{item.className}}">{{item.text}}</text>
     <text wx:elif="{{item.type === 'link'}}" class="{{item.className}}" data-href="{{item.href}}" bindtap="handleLinkTap">{{item.text}}</text>
+    <text wx:elif="{{item.type === 'math_inline'}}" class="{{item.className}}" space="nbsp">{{item.text}}</text>
     <text wx:elif="{{item.type === 'cursor'}}" class="md-cursor">|</text>
     <text wx:elif="{{item.type === 'image_placeholder'}}" class="md-image-placeholder">{{item.text}}</text>
     <image
@@ -65,6 +66,18 @@
               </block>
             </view>
           </view>
+          <view wx:elif="{{quoteBlock.type === 'math_block'}}" class="md-math-block">
+            <text space="nbsp" user-select>{{quoteBlock.text}}</text>
+          </view>
+          <view wx:elif="{{quoteBlock.type === 'diagram'}}" class="md-diagram-card">
+            <view class="md-diagram-head">
+              <text>{{quoteBlock.kind}}</text>
+              <button class="md-copy" size="mini" data-text="{{quoteBlock.text}}" bindtap="copyCode">复制源码</button>
+            </view>
+            <view class="md-diagram-source">
+              <text space="nbsp" user-select>{{quoteBlock.text}}</text>
+            </view>
+          </view>
           <rich-text wx:elif="{{quoteBlock.type === 'html'}}" class="md-html" nodes="{{quoteBlock.nodes}}" />
         </block>
       </view>
@@ -121,6 +134,20 @@
           <block wx:for="{{item.runs}}" wx:for-item="codeRun" wx:key="index">
             <text class="{{codeRun.className}}" space="nbsp">{{codeRun.text}}</text>
           </block>
+        </view>
+      </view>
+
+      <view wx:elif="{{item.type === 'math_block'}}" class="md-math-block">
+        <text space="nbsp" user-select>{{item.text}}</text>
+      </view>
+
+      <view wx:elif="{{item.type === 'diagram'}}" class="md-diagram-card">
+        <view class="md-diagram-head">
+          <text>{{item.kind}}</text>
+          <button class="md-copy" size="mini" data-text="{{item.text}}" bindtap="copyCode">复制源码</button>
+        </view>
+        <view class="md-diagram-source">
+          <text space="nbsp" user-select>{{item.text}}</text>
         </view>
       </view>
 
