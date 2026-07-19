@@ -1,5 +1,5 @@
 const miniProgramModule = require('../../vendor/cherry-mini-program-stream');
-const { createMiniProgramStreamAdapter, createSseParser } = miniProgramModule;
+const { createMiniProgramSseFrames, createMiniProgramStreamAdapter, createSseParser } = miniProgramModule;
 
 const DEMO_MARKDOWN = `# Cherry Markdown MiniProgram
 
@@ -51,38 +51,7 @@ graph TD;
 `;
 
 const DEMO_STREAM_INTERVAL = 60;
-
-function createStreamTokens(markdown) {
-  const tokens = [];
-  let index = 0;
-
-  while (index < markdown.length) {
-    const rest = markdown.slice(index);
-    const fencedBlock = rest.match(/^```[\s\S]*?```/);
-    const mathBlock = rest.match(/^\$\$[\s\S]*?\$\$/);
-    const image = rest.match(/^!\[[^\]]*\]\([^)]+\)/);
-    const link = rest.match(/^\[[^\]]+\]\([^)]+\)/);
-    const inlineMath = rest.match(/^\$[^$\n]+\$/);
-    const token = fencedBlock?.[0] || mathBlock?.[0] || image?.[0] || link?.[0] || inlineMath?.[0];
-
-    if (token) {
-      tokens.push(token);
-      index += token.length;
-      continue;
-    }
-
-    const [char] = Array.from(rest);
-    tokens.push(char);
-    index += char.length;
-  }
-
-  return tokens;
-}
-
-const STREAM_TOKENS = createStreamTokens(DEMO_MARKDOWN);
-const SSE_FRAMES = STREAM_TOKENS.map((content) => `data: ${JSON.stringify({ content })}\n\n`).concat(
-  'data: [DONE]\n\n',
-);
+const SSE_FRAMES = createMiniProgramSseFrames(DEMO_MARKDOWN);
 
 Page({
   data: {

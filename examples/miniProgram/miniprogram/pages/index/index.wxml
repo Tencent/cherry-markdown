@@ -84,10 +84,7 @@
 
       <view wx:elif="{{item.type === 'list'}}" class="md-list">
         <view wx:for="{{item.children}}" wx:for-item="listItem" wx:for-index="listIndex" wx:key="index" class="md-list-item">
-          <text wx:if="{{listItem.task}}" class="md-list-marker md-task-marker {{listItem.checked ? 'md-task-checked' : 'md-task-unchecked'}}">
-            {{listItem.checked ? '☑' : '☐'}}
-          </text>
-          <text wx:else class="md-list-marker">{{item.ordered ? listIndex + 1 + '.' : '•'}}</text>
+          <text class="md-list-marker {{listItem.task ? 'md-task-marker' : ''}} {{listItem.checked ? 'md-task-checked' : ''}} {{listItem.task && !listItem.checked ? 'md-task-unchecked' : ''}}">{{listItem.marker}}</text>
           <view class="md-list-body">
             <template is="inlineRuns" data="{{nodes: listItem.inlines}}" />
           </view>

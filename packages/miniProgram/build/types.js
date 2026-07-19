@@ -127,7 +127,7 @@ export type MiniProgramBlockquoteViewBlock = { type: 'blockquote'; children: Min
 export type MiniProgramListViewBlock = {
   type: 'list';
   ordered: boolean;
-  children: Array<{ task: boolean; checked?: boolean; inlines: MiniProgramInlineRun[] }>;
+  children: Array<{ task: boolean; marker: string; checked?: boolean; inlines: MiniProgramInlineRun[] }>;
 };
 export type MiniProgramTableCellView = {
   header: boolean;
@@ -192,6 +192,11 @@ export declare function createSseParser(options?: {
   onMessage?: (event: MiniProgramSseEvent) => void;
   onDone?: () => void;
 }): MiniProgramSseParser;
+export declare function createMiniProgramStreamChunks(markdown?: string): string[];
+export declare function createMiniProgramSseFrames(
+  markdown?: string,
+  options?: { field?: 'content' | 'delta' | 'text'; includeDone?: boolean },
+): string[];
 export declare function createMiniProgramStreamAdapter(
   options?: MiniProgramStreamAdapterOptions,
 ): MiniProgramStreamAdapter;

@@ -15,7 +15,7 @@
  */
 import { parseDocument } from 'htmlparser2';
 import { createMiniProgramEngine } from './engine';
-import { createSseParser } from './sse';
+import { createMiniProgramSseFrames, createMiniProgramStreamChunks, createSseParser } from './sse';
 import { htmlToMiniProgramBlocks, markdownToMiniProgramBlocks } from './transform';
 import { blocksToMiniProgramView, resolvePendingImages } from './view';
 import { MiniProgramStreamAdapter, createMiniProgramStreamAdapter } from './adapter';
@@ -138,6 +138,8 @@ export {
   MiniProgramStreamAdapter,
   blocksToMiniProgramView,
   createMiniProgramStreamAdapter,
+  createMiniProgramSseFrames,
+  createMiniProgramStreamChunks,
   createSseParser,
   htmlToMiniProgramBlocks,
   markdownToHtml,

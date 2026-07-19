@@ -2,7 +2,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import MiniProgramStream, {
   blocksToMiniProgramView,
+  createMiniProgramSseFrames,
   createMiniProgramStreamAdapter,
+  createMiniProgramStreamChunks,
   createSseParser,
   htmlToMiniProgramBlocks,
   markdownToHtml,
@@ -178,11 +180,43 @@ describe('@cherry-markdown/miniProgram stream', () => {
         type: 'list',
         ordered: false,
         children: [
-          { task: true, checked: true, inlines: [{ type: 'text', text: 'done', className: '', href: '' }] },
-          { task: true, checked: false, inlines: [{ type: 'text', text: 'todo', className: '', href: '' }] },
+          {
+            task: true,
+            marker: '☑',
+            checked: true,
+            inlines: [{ type: 'text', text: 'done', className: '', href: '' }],
+          },
+          {
+            task: true,
+            marker: '☐',
+            checked: false,
+            inlines: [{ type: 'text', text: 'todo', className: '', href: '' }],
+          },
         ],
       },
     ]);
+  });
+
+  it('returns list markers from the view model instead of requiring WXML marker logic', () => {
+    const stream = new MiniProgramStream();
+
+    expect(stream.setMarkdownView('- one\n- two')[0]).toEqual({
+      type: 'list',
+      ordered: false,
+      children: [
+        { task: false, marker: '•', inlines: [{ type: 'text', text: 'one', className: '', href: '' }] },
+        { task: false, marker: '•', inlines: [{ type: 'text', text: 'two', className: '', href: '' }] },
+      ],
+    });
+
+    expect(stream.setMarkdownView('1. one\n2. two')[0]).toEqual({
+      type: 'list',
+      ordered: true,
+      children: [
+        { task: false, marker: '1.', inlines: [{ type: 'text', text: 'one', className: '', href: '' }] },
+        { task: false, marker: '2.', inlines: [{ type: 'text', text: 'two', className: '', href: '' }] },
+      ],
+    });
   });
 
   it('returns highlighted code runs for native code block rendering', () => {
@@ -276,6 +310,17 @@ describe('@cherry-markdown/miniProgram stream', () => {
 
     expect(messages).toEqual([{ data: '{"content":"hello"}', event: 'message', id: '', retry: undefined }]);
     expect(done).toBe(true);
+  });
+
+  it('creates local SSE demo frames without page-level Markdown token logic', () => {
+    const chunks = createMiniProgramStreamChunks('A ![alt](img.png) `x` $E=mc^2$');
+
+    expect(chunks).toEqual(['A', ' ', '![alt](img.png)', ' ', '`', 'x', '`', ' ', '$E=mc^2$']);
+    expect(createMiniProgramSseFrames('hi', { field: 'delta' })).toEqual([
+      'data: {"delta":"h"}\n\n',
+      'data: {"delta":"i"}\n\n',
+      'data: [DONE]\n\n',
+    ]);
   });
 
   it('parses split utf-8 ArrayBuffer SSE chunks without TextDecoder', () => {

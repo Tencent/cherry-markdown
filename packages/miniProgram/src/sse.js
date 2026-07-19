@@ -135,6 +135,66 @@ function parseSseFrame(frame) {
   return event;
 }
 
+function normalizeSsePayloadField(field) {
+  return field === 'delta' || field === 'text' ? field : 'content';
+}
+
+/**
+ * Splits markdown into stream chunks for local MiniProgram demos and tests.
+ * This helper is not a Markdown parser; Cherry still owns all rendering semantics.
+ * It only keeps syntactic spans together when simulating SSE locally so demos do not
+ * need Markdown-aware regexes in page code.
+ * @param {string} markdown
+ * @returns {string[]}
+ */
+export function createMiniProgramStreamChunks(markdown = '') {
+  const source = String(markdown || '');
+  const chunks = [];
+  let index = 0;
+
+  while (index < source.length) {
+    const rest = source.slice(index);
+    const fencedBlock = rest.match(/^```[\s\S]*?```/);
+    const mathBlock = rest.match(/^\$\$[\s\S]*?\$\$/);
+    const image = rest.match(/^!\[[^\]]*\]\([^)]+\)/);
+    const link = rest.match(/^\[[^\]]+\]\([^)]+\)/);
+    const inlineMath = rest.match(/^\$[^$\n]+\$/);
+    const chunk = fencedBlock?.[0] || mathBlock?.[0] || image?.[0] || link?.[0] || inlineMath?.[0];
+
+    if (chunk) {
+      chunks.push(chunk);
+      index += chunk.length;
+      continue;
+    }
+
+    const [char] = Array.from(rest);
+    chunks.push(char);
+    index += char.length;
+  }
+
+  return chunks;
+}
+
+/**
+ * Creates text/event-stream frames for local demos from markdown chunks.
+ * @param {string} markdown
+ * @param {{ field?: 'content' | 'delta' | 'text'; includeDone?: boolean }} [options]
+ * @returns {string[]}
+ */
+export function createMiniProgramSseFrames(markdown = '', options = {}) {
+  const field = normalizeSsePayloadField(options.field);
+  const frames = createMiniProgramStreamChunks(markdown).map((chunk) => {
+    const payload = { [field]: chunk };
+    return `data: ${JSON.stringify(payload)}\n\n`;
+  });
+
+  if (options.includeDone !== false) {
+    frames.push('data: [DONE]\n\n');
+  }
+
+  return frames;
+}
+
 /**
  * @typedef {{ data: string; event: string; id: string; retry?: number }} MiniProgramSseEvent
  * @typedef {{ onMessage?: (event: MiniProgramSseEvent) => void; onDone?: () => void }} MiniProgramSseParserOptions

@@ -59,7 +59,7 @@ const PRISM_TOKEN_CLASS_MAP = {
  * @typedef {{ type: 'paragraph'; inlines: MiniProgramInlineRun[] }} MiniProgramParagraphViewBlock
  * @typedef {{ type: 'heading'; level: number; inlines: MiniProgramInlineRun[] }} MiniProgramHeadingViewBlock
  * @typedef {{ type: 'blockquote'; children: MiniProgramViewBlock[] }} MiniProgramBlockquoteViewBlock
- * @typedef {{ type: 'list'; ordered: boolean; children: Array<{ task: boolean; checked?: boolean; inlines: MiniProgramInlineRun[] }> }} MiniProgramListViewBlock
+ * @typedef {{ type: 'list'; ordered: boolean; children: Array<{ task: boolean; marker: string; checked?: boolean; inlines: MiniProgramInlineRun[] }> }} MiniProgramListViewBlock
  * @typedef {{ header: boolean; align?: 'left' | 'center' | 'right'; inlines: MiniProgramInlineRun[] }} MiniProgramTableCellView
  * @typedef {{ cells: MiniProgramTableCellView[] }} MiniProgramTableRowView
  * @typedef {{ type: 'table'; header: MiniProgramTableRowView[]; rows: MiniProgramTableRowView[] }} MiniProgramTableViewBlock
@@ -362,10 +362,12 @@ export function blocksToMiniProgramView(blocks = [], options = {}) {
       return {
         type: 'list',
         ordered: block.ordered,
-        children: (block.children || []).map((item) => {
+        children: (block.children || []).map((item, itemIndex) => {
           const task = typeof item.checked === 'boolean';
+          const marker = taskMarkerText(item, block, itemIndex).trim();
           return {
             task,
+            marker,
             ...(task ? { checked: item.checked } : {}),
             inlines: blocksToInlineRuns(item.children || [], options),
           };
