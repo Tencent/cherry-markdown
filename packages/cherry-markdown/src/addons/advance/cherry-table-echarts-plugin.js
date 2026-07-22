@@ -78,7 +78,7 @@ export default class EChartsTableEngine {
     if (!resolvedEcharts) {
       throw new Error('table-echarts-plugin[init]: Package echarts not found.');
     }
-    this.options = { ...DEFAULT_OPTIONS, ...(options || {}) };
+    this.options = { ...DEFAULT_OPTIONS, ...options };
     this.echartsRef = /** @type {*} */ (resolvedEcharts); // echarts引用
     this.dom = null;
 
@@ -788,7 +788,7 @@ export default class EChartsTableEngine {
           } else {
             container.innerHTML = `<div style="text-align: center; color: red; transform: translateY(125px);">
               <div style="font-size: ${this.$theme().fontSize.title}px; color: ${this.$theme().color.error};">${this.cherry.locale.chartRenderError}</div>
-              <div style="font-size: ${this.$theme().fontSize.base}px; color: ${this.$theme().color.text}; opacity: 0.7;">${error.message}</div>
+              <div style="font-size: ${this.$theme().fontSize.base}px; color: ${this.$theme().color.text}; opacity: 0.7;">${escapeAttr(error.message)}</div>
             </div>`;
           }
         }
@@ -1705,7 +1705,7 @@ const MapChartOptionsHandler = {
       })
       .catch((error) => {
         Logger.warn(`Map data loading failed (${url}):`, error.message);
-        this.$handleMapLoadFailure(options);
+        this.$tryLoadMapDataFromPaths(paths, index + 1, options);
       });
   },
   $handleMapLoadFailure(options) {

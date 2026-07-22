@@ -719,7 +719,7 @@ export default class BubbleFormula {
    * @returns {boolean}
    */
   isShow() {
-    return this.dom.style.display === 'block';
+    return this.dom.style.display !== 'none';
   }
 
   /**

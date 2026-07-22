@@ -118,7 +118,7 @@ export default class ParagraphBase extends SyntaxBase {
       let customTagWhiteList = this.$engine.htmlWhiteListAppend?.split('|') ?? [];
       customTagWhiteList = customTagWhiteList
         .map((tag) => {
-          if (/[a-z-]+/gi.test(tag)) {
+          if (/^[a-z][a-z0-9-]*$/i.test(tag)) {
             return tag;
           }
           return null;
@@ -165,12 +165,7 @@ export default class ParagraphBase extends SyntaxBase {
     return str;
   }
 
-  beforeMakeHtml(
-    str,
-    sentenceMakeFunc = (md) => {
-      return { sign: '', html: md };
-    },
-  ) {
+  beforeMakeHtml(str, sentenceMakeFunc = null) {
     return str;
   }
 
@@ -187,12 +182,7 @@ export default class ParagraphBase extends SyntaxBase {
     return sentenceMakeFunc(str).html;
   }
 
-  afterMakeHtml(
-    str,
-    sentenceMakeFunc = (md) => {
-      return { sign: '', html: md };
-    },
-  ) {
+  afterMakeHtml(str, sentenceMakeFunc = null) {
     return this.restoreCache(str);
   }
 

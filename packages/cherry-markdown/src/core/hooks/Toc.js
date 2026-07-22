@@ -26,6 +26,7 @@ const defaultOptions = {
   tocContainerClass: 'toc',
   tocTitleClass: 'toc-title',
   linkProcessor: defaultLinkProcessor,
+  allowMultiToc: false,
   showAutoNumber: false,
 };
 
@@ -262,6 +263,10 @@ export default class Toc extends ParagraphBase {
     // @ts-expect-error
     $str = $str.replace(this.RULE.extend.reg, (match, preLinesMatch) =>
       this.$makeToc(headerList, str2Hash, preLinesMatch),
+    );
+    // 扩展 TOC 被替换为 HTML 后，可能与前一个标准 TOC 紧邻，需要再次补充分隔换行。
+    $str = $str.replace(/(?:^|\n)(\[\[|\[|【【)(toc|TOC)(\]\]|\]|】】)([<~])/, (match) =>
+      match.replace(/(\]\]|\]|】】)([<~])/, '$1\n$2'),
     );
     // 处理标准语法
     // TODO: fix this error

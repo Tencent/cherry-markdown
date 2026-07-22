@@ -313,13 +313,13 @@ export default class Table extends ParagraphBase {
       .replace(/~CTHD\$/g, '</thead>')
       .replace(/~CTHD/g, '<thead>')
       .replace(/~CTBD\$/g, '</tbody>')
-      .replace(/~CTBD/g, '</tbody>')
+      .replace(/~CTBD/g, '<tbody>')
       .replace(/~CTR\$/g, '</tr>')
       .replace(/~CTR/g, '<tr>')
       .replace(/[ ]?~CTH\$/g, '</th>')
       .replace(/[ ]?~CTD\$/g, '</td>') // 在这里将加上的空格还原回来
       .replace(/~CT(D|H)(L|R|C|U)[ ]?/g, (match, type, align) => {
-        let tag = `<t${type}`;
+        let tag = `<t${type.toLowerCase()}`;
         if (align === 'U') {
           tag += '>';
         } else {

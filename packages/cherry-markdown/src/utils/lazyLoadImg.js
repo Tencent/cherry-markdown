@@ -155,6 +155,7 @@ export default class LazyLoadImg {
         // 如果已经加载过相同的图片，或者已经超过失败最大重试次数，则直接加载
         img.setAttribute('src', originSrc);
         img.removeAttribute('data-src');
+        continue;
       }
       // 如果当前src正在加载，则忽略这个src，继续找下个符合条件的src
       if (this.isLoading(originSrc)) {

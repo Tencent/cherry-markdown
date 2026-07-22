@@ -48,13 +48,13 @@ export default class Image extends MenuBase {
       if (this.hasCacheOnce()) {
         const arr = this.getAndCleanCacheOnce();
         let res = '';
-        for (const { url, params } of arr) {
+        for (const { url, params, file } of arr) {
           const begin = '![';
           const end = `](${url})`;
           this.registerAfterClickCb(() => {
             this.setLessSelection(begin, end);
           });
-          const finalName = params.name ? params.name : name;
+          const finalName = params?.name ?? file?.name ?? 'image';
           res += `${begin}${finalName}${handleParams(params)}${end}\n`;
         }
         return res;

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import mergeWith from '@/utils/toolkit/mergeWith';
 import { customizer } from '@/utils/config';
 
@@ -65,5 +65,48 @@ describe('utils/toolkit/mergeWith', () => {
     const target = { a: 1 };
     mergeWith(target, { a: undefined });
     expect(target.a).toBe(1);
+  });
+
+  it('忽略 null、undefined 与原始类型 source', () => {
+    const target = { a: 1 };
+
+    mergeWith(target, null, undefined, 2, 'text');
+
+    expect(target).toEqual({ a: 1 });
+  });
+
+  it('未提供 customizer 时按索引递归合并数组', () => {
+    const target = { items: [{ left: true }, 'keep'] };
+
+    mergeWith(target, { items: [{ right: true }] });
+
+    expect(target).toEqual({ items: [{ left: true, right: true }, 'keep'] });
+  });
+
+  it('customizer 返回 undefined 时回退到默认合并', () => {
+    const target = { nested: { left: true } };
+    const fallback = vi.fn(() => undefined);
+
+    mergeWith(target, { nested: { right: true } }, fallback);
+
+    expect(target).toEqual({ nested: { left: true, right: true } });
+    expect(fallback).toHaveBeenCalled();
+  });
+
+  it('目标值与 source 类型不同时使用 source 替换', () => {
+    const target: { first: unknown; second: unknown } = {
+      first: [],
+      second: {},
+    };
+
+    mergeWith(target, {
+      first: { replaced: true },
+      second: ['replaced'],
+    });
+
+    expect(target).toEqual({
+      first: { replaced: true },
+      second: ['replaced'],
+    });
   });
 });

@@ -34,6 +34,7 @@ function handleCherryList(cm) {
   // CodeMirror 6: 检查是否只读
   if (cm.getOption('readOnly')) return false;
   const ranges = cm.listSelections();
+  if (ranges.length === 0) return false;
   const { doc } = cm.state;
 
   // 先检查所有选区是否都符合条件
@@ -54,6 +55,7 @@ function handleCherryList(cm) {
   // 收集所有要替换的内容和范围，使用单一原子操作
   const changes = [];
   const newSelections = [];
+  let positionOffset = 0;
 
   for (let i = 0; i < ranges.length; i++) {
     const range = ranges[i];
@@ -67,21 +69,23 @@ function handleCherryList(cm) {
       // 删除从行首到光标位置的内容，然后插入换行
       changes.push({ from: lineObj.from, to: headPos, insert: '\n' });
       // 新光标位置在下一行开头
-      newSelections.push(EditorSelection.cursor(lineObj.from + 1));
+      newSelections.push(EditorSelection.cursor(lineObj.from + positionOffset + 1));
+      positionOffset += 1 - (headPos - lineObj.from);
     } else {
       const indent = match[1];
       const after = match[3];
       const insertText = `\n${indent}I.${after}`;
       changes.push({ from: headPos, to: headPos, insert: insertText });
       // 新光标位置在新行的内容之后
-      newSelections.push(EditorSelection.cursor(headPos + insertText.length));
+      newSelections.push(EditorSelection.cursor(headPos + positionOffset + insertText.length));
+      positionOffset += insertText.length;
     }
   }
 
   // 使用单一事务应用所有更改
   cm.dispatch({
     changes,
-    selection: EditorSelection.create(newSelections, ranges.length > 0 ? 0 : undefined),
+    selection: EditorSelection.create(newSelections, 0),
   });
 
   return true;

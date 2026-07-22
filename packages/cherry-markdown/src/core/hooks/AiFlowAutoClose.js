@@ -102,7 +102,7 @@ export default class AiFlowAutoClose extends ParagraphBase {
       let ret = '';
       const targetType = /(video|audio)/.test(type) ? type : 'img';
       if (typeof selfClosingRender === 'function') {
-        const urlFix = url ? url.replace(/^\(/, '') : '';
+        const urlFix = url ? url.replace(/^(\]\(|\])/, '') : '';
         ret = selfClosingRender(targetType, content, urlFix);
       }
       if (ret) {

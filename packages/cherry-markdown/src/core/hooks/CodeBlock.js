@@ -120,7 +120,7 @@ export default class CodeBlock extends ParagraphBase {
    */
   $buildMermaidSourceToolbarContainer(attrs, previewHtml, sourceCodeHtml) {
     const { tag, escapedLang, props, sizeStyle, alignClass } = attrs;
-    const locale = this.$cherry.getLocales();
+    const locale = this.$cherry.getLocales?.() ?? {};
     const previewText = locale.mermaidPreview || 'Preview';
     const sourceText = locale.mermaidSource || 'Source';
     // header 区域
@@ -490,12 +490,13 @@ export default class CodeBlock extends ParagraphBase {
       const $oldLang = $lang;
       $lang = this.formatLang($lang);
       if (this.isInternalCustomLangCovered($lang)) {
+        const customCode = leadingContentBlockQuote ? $code.replace(/\n(?:>[\t ]*)+$/, '') : $code;
         // echarts渲染的场景不再缓存，因为缓存后无法触发echarts渲染
         if (!/^\s*echarts\s*$/.test($lang)) {
           cacheCode = this.cacheAndGetData(
             sign,
             () =>
-              this.parseCustomLanguage($lang, $code, {
+              this.parseCustomLanguage($lang, customCode, {
                 lines,
                 sign,
                 match,
@@ -508,7 +509,7 @@ export default class CodeBlock extends ParagraphBase {
             -300,
           );
         } else {
-          cacheCode = this.parseCustomLanguage($lang, $code, {
+          cacheCode = this.parseCustomLanguage($lang, customCode, {
             lines,
             sign,
             match,

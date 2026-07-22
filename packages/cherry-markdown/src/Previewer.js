@@ -699,7 +699,7 @@ export default class Previewer {
         // hash精度校准
         if (listItem.sign.slice(0, 12) === sign.slice(0, 12) && i > signIndex) {
           resSign = {
-            index: i > signIndex ? i : signIndex,
+            index: i,
             sign,
           };
         }

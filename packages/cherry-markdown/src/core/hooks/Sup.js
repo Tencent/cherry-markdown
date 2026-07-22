@@ -37,7 +37,7 @@ export default class Sup extends SyntaxBase {
 
   rule() {
     const ret = {
-      begin: isLookbehindSupported() ? '((?<!\\\\))\\^' : '(^|[^\\\\])\\^',
+      begin: isLookbehindSupported() ? '((?<![\\\\^]))\\^(?![\\s\\^])' : '(^|[^\\\\^])\\^(?![\\s\\^])',
       end: '\\^',
       content: '([\\w\\W]+?)',
     };

@@ -26,10 +26,6 @@ import isPlainObject from './isPlainObject';
  * @param {MergeCustomizer} [customizer]
  */
 function mergeWithDeep(target, source, customizer) {
-  if (source === null || source === undefined || typeof source !== 'object') {
-    return;
-  }
-
   const keys = Object.keys(source);
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];

@@ -607,7 +607,7 @@ export default class MenuBase {
       return false;
     }
     if (options instanceof HTMLElement) {
-      options.classList.add(`ch-icon cherry-menu-${this.name}`);
+      options.classList.add('ch-icon', `cherry-menu-${this.name}`);
       this.dom.replaceChildren(options);
       this.iconType = 'element';
       return true;

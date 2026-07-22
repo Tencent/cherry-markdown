@@ -376,7 +376,7 @@ export default class Engine {
       }
       // 针对表格做特殊处理
       // 针对表格的第二行做特殊处理
-      if (/\|[\s-:]+\|*\n*$/.test(md)) {
+      if (/(?:^|\n)(?=[^\n]*\|)[| \t:-]+\n*$/.test(md)) {
         return md;
       }
       if (/\|\n*$/.test(md)) {

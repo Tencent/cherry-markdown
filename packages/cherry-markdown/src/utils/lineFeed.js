@@ -23,7 +23,7 @@ export function prependLineFeedForParagraph(match, processedContent, canNestedIn
     return processedContent;
   }
   if (canNestedInList) {
-    const leadingLinesCount = match.match(/^\n+/g)?.[0]?.length ?? 0;
+    const leadingLinesCount = match.match(/^\n+/g)[0].length;
     // 前置换行符数量大于2时，补充两个换行符，否则只补充一个
     if (leadingLinesCount > 1) {
       return `\n\n${processedContent}`;

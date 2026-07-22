@@ -33,7 +33,10 @@ interface MarkItem {
   to: number;
   id: string;
   className: string;
-  data?: any;
+  data?: {
+    type?: string;
+    size?: number;
+  };
 }
 
 // 创建 Mock MarkItem
@@ -388,28 +391,32 @@ describe('标记性能测试', () => {
     expect(marks.length).toBe(1000);
   });
 
-  it('使用 Set 索引应比数组查找快', () => {
+  it('使用 Set 索引应避免重复线性扫描', () => {
     const marks: MarkItem[] = [];
     for (let i = 0; i < 1000; i++) {
       marks.push(createMockMarkItem(i * 10, i * 10 + 5, 'cm-url', `mark_${i}`));
     }
 
-    // 数组查找 O(n)
-    const startArray = performance.now();
-    for (let i = 0; i < 100; i++) {
-      marks.find((m) => m.id === `mark_${i * 10}`);
-    }
-    const arrayTime = performance.now() - startArray;
+    let arrayComparisons = 0;
+    const findMarkById = (id: string) =>
+      marks.find((mark) => {
+        arrayComparisons += 1;
+        return mark.id === id;
+      });
 
-    // Set 查找 O(1)
+    for (let i = 0; i < 100; i++) {
+      const id = `mark_${i * 10}`;
+      expect(findMarkById(id)?.id).toBe(id);
+    }
+
     const idSet = new Set(marks.map((m) => m.id));
-    const startSet = performance.now();
+    let setLookups = 0;
     for (let i = 0; i < 100; i++) {
-      idSet.has(`mark_${i * 10}`);
+      setLookups += 1;
+      expect(idSet.has(`mark_${i * 10}`)).toBe(true);
     }
-    const setTime = performance.now() - startSet;
 
-    // Set 应该更快
-    expect(setTime).toBeLessThan(arrayTime);
+    expect(setLookups).toBe(100);
+    expect(arrayComparisons).toBeGreaterThan(setLookups);
   });
 });

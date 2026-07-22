@@ -155,6 +155,9 @@ export function createMenuHook(name, options) {
       if (filteredOptions.icon) {
         this.$currentMenuOptions.icon = filteredOptions.icon;
         this.name = name;
+        if (typeof filteredOptions.icon === 'string') {
+          this.iconName = filteredOptions.icon;
+        }
       } else {
         this.setName(name, filteredOptions.iconName);
       }

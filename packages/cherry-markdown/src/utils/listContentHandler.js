@@ -130,10 +130,12 @@ export default class ListHandler {
         if (contentsLiCount === targetLiIdx && indent !== undefined) {
           targetLine = lineIdx;
 
-          targetContent.push(content); // 这里只取一个没必要解构
+          const isOrderedMarker = identifier?.endsWith('.');
+          const listContent = isOrderedMarker ? content.replace(/^[ \t]/, '') : content;
+          targetContent.push(listContent); // 这里只取一个没必要解构
           targetCh = lineContent.indexOf(content);
           // 1. 这种需要特殊处理，需要跳过一个空格位，否则层级会错乱
-          if (identifier?.endsWith('.')) {
+          if (isOrderedMarker) {
             targetCh += 1;
           }
           // checkbox 编辑的元素内以选中的checkbox开头时需要去掉，否则会被解析
@@ -167,7 +169,8 @@ export default class ListHandler {
       return; // 结束行号超出范围
     }
 
-    const toPos = doc.line(toLineEnd).from + targetCh + (targetContent[targetContent.length - 1]?.length || 0);
+    const lastLineCh = targetContent.length === 1 ? targetCh : 0;
+    const toPos = doc.line(toLineEnd).from + lastLineCh + (targetContent[targetContent.length - 1]?.length || 0);
 
     this.editor.editor.view.dispatch({
       selection: { anchor: fromPos, head: toPos },
@@ -243,14 +246,21 @@ export default class ListHandler {
     const regRes = this.regList.exec(lineContent);
     let insertContent = '\n- ';
     if (regRes !== null) {
-      // 存在选中的checkbox则替换为未选中的checkbox，其他的保持原样
-      insertContent = `\n${regRes[1]}${regRes[2]?.replace('[x]', '[ ] ')}`;
+      // 新行保留当前列表类型，并将任务项重置为未完成状态
+      let marker = regRes[2] ?? '- ';
+      marker = marker.replace(/\[[ x]\]/, '[ ]');
+      if (!/[ \t]$/.test(marker)) {
+        marker += ' ';
+      }
+      insertContent = `\n${regRes[1]}${marker}`;
     }
     insertContent += after?.join('') ?? '';
 
     // 计算替换范围
     const lineStart = cursorLine.from;
-    const replaceFrom = lineStart + (regRes[2]?.length ?? 0);
+    const markerLength = regRes?.[2]?.length ?? 0;
+    const hasMarkerSeparator = markerLength > 0 && /[ \t]/.test(lineContent.charAt(markerLength));
+    const replaceFrom = lineStart + markerLength + (hasMarkerSeparator ? 1 : 0);
     const replaceTo = lineStart + lineContent.length;
 
     // 执行替换操作

@@ -154,7 +154,10 @@ export default class AutoLink extends SyntaxBase {
       }
       // not a valid address
       // 不被尖括号包裹，不带协议头，且不以www.开头的不识别
-      if (address.trim() === '' || (!isWrappedByBracket && $protocol === '' && !/www\./.test(address))) {
+      if (
+        address.trim() === '' ||
+        (!isWrappedByBracket && $protocol === '' && (EMAIL.test(address) || !/^www\./i.test(address)))
+      ) {
         return match;
       }
       switch ($protocol) {
@@ -162,20 +165,12 @@ export default class AutoLink extends SyntaxBase {
           return match;
         case 'mailto:': // email
           if (EMAIL.test(address)) {
-            return `${prefix}<a href="${encodeURIOnce(`${$protocol}${address}`)}" ${this.target} ${this.rel}>${$e(
-              address,
-            )}</a>${suffix}`;
+            return `${prefix}${this.renderEmail(address)}${suffix}`;
           }
           return match;
         case '': // 协议为空
           // 不被<>包裹或单边无效包裹，prefix === suffix 时都为空串
-          if (prefix === suffix || !isWrappedByBracket) {
-            // mailto
-            if (EMAIL.test(address)) {
-              return `${prefix}<a href="mailto:${encodeURIOnce(address)}" ${this.target} ${this.rel}>${$e(
-                address,
-              )}</a>${suffix}`;
-            }
+          if (!isWrappedByBracket) {
             // 不识别无协议头的URL，且开头不应该含有斜杠
             if (URL_NO_SLASH.test(address)) {
               return `${prefix}${this.renderLink(`//${address}`, address)}${suffix}`;
@@ -187,7 +182,7 @@ export default class AutoLink extends SyntaxBase {
           if (isWrappedByBracket) {
             // mailto
             if (EMAIL.test(address)) {
-              return `<a href="mailto:${encodeURIOnce(address)}" ${this.target} ${this.rel}>${$e(address)}</a>`;
+              return this.renderEmail(address);
             }
             // 可识别任意协议的URL，或不以斜杠开头的URL
             if (URL.test(address) || URL_NO_SLASH.test(address)) {
@@ -204,8 +199,6 @@ export default class AutoLink extends SyntaxBase {
           // TODO: Url Validator
           return `${prefix}${this.renderLink(`${$protocol}${address}`)}${suffix}`;
       }
-      // this should never happen
-      return match;
     });
   }
 
@@ -220,7 +213,7 @@ export default class AutoLink extends SyntaxBase {
         // '(?<slash>(?:\\/{2})?)',
         // ?<address>
         // '([^\\s\\x00-\\x1f"<>]+)',
-        `((?:${URL_INLINE.source})|(?:${EMAIL_INLINE.source}))`,
+        `((?:${URL_INLINE.source})|(?:${EMAIL_INLINE.source})|(?:${URL_INLINE_NO_SLASH.source}))`,
         // [
         //     `(?<url>${ URL_INLINE.source })`,
         //     `(?<email>${ EMAIL_INLINE.source })`, // email
@@ -260,5 +253,19 @@ export default class AutoLink extends SyntaxBase {
     return `<a href="${AutoLink.escapePreservedSymbol(safeUri)}" title="${AutoLink.escapePreservedSymbol($e(url))}" ${
       typeof customAttrs === 'string' ? customAttrs : ''
     }  ${additionalAttrs}>${AutoLink.escapePreservedSymbol(displayUri)}</a>`;
+  }
+
+  /**
+   * @param {string} address
+   * @returns {string}
+   */
+  renderEmail(address) {
+    const href = encodeURIOnce(`mailto:${address}`);
+    const customAttrs =
+      // @ts-ignore
+      this.$engine.$cherry.options.engine.syntax.autoLink.attrRender(address, href) ?? '';
+    return `<a href="${href}" ${this.target} ${this.rel} ${typeof customAttrs === 'string' ? customAttrs : ''}>${$e(
+      address,
+    )}</a>`;
   }
 }
