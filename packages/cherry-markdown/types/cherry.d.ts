@@ -532,6 +532,42 @@ export interface CherryEngineOptions {
                 render?: (refNum: number, refTitle: string, content: string) => string; // 自定义渲染卡片内容
               };
         };
+    /** FrontMatter 语法（文档头部元信息） */
+    frontMatter?: false | {};
+    /** AI 流式会话代码块自动闭合 */
+    aiFlowAutoClose?: false | {};
+    /** 评论引用语法 */
+    commentReference?: false | {};
+    /** 内部转义/转换处理 */
+    transfer?: false | {};
+    /** 换行语法 */
+    br?: false | {};
+    /** 引用块语法 */
+    blockquote?: false | {};
+    /** 分割线语法 */
+    hr?: false | {};
+    /** 折叠面板（<details>）语法 */
+    detail?: false | {};
+    /** 普通段落 */
+    normalParagraph?: false | {};
+    /** 背景色语法 */
+    bgColor?: false | {};
+    /** 字体颜色语法 */
+    fontColor?: false | {};
+    /** 字体大小语法 */
+    fontSize?: false | {};
+    /** 下标语法 */
+    sub?: false | {};
+    /** 上标语法 */
+    sup?: false | {};
+    /** 注音（ruby）语法 */
+    ruby?: false | {};
+    /** 下划线语法 */
+    underline?: false | {};
+    /** 高亮语法 */
+    highLight?: false | {};
+    /** 输入联想语法 */
+    suggester?: false | {};
   };
   /** 自定义语法 */
   customSyntax?: Record<string, CustomSyntaxRegConfig['syntaxClass'] | CustomSyntaxRegConfig>;

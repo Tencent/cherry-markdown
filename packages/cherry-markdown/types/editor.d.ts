@@ -128,6 +128,8 @@ export interface CM6Adapter {
   currentKeyMap: 'sublime' | 'vim';
   /** vim 模式的 Compartment（用于多实例隔离） */
   vimCompartment: import('@codemirror/state').Compartment | null;
+  /** 只读状态的 Compartment（用于动态切换只读） */
+  readOnlyCompartment: import('@codemirror/state').Compartment | null;
   /** 标记 ID 计数器（实例级别，用于多实例隔离） */
   markIdCounter: number;
 
@@ -185,11 +187,17 @@ export interface CM6Adapter {
   scrollIntoView(pos: number): void;
 
   // 选项操作（需要封装）
-  setOption(option: 'value' | 'keyMap' | string, value: string | boolean | object): void;
+  setOption(option: 'value' | 'keyMap' | 'readOnly' | 'disableInput' | string, value: string | boolean | object): void;
   getOption(option: 'readOnly' | 'disableInput' | 'value' | string): string | boolean | object | null;
 
   // 键盘映射
   setKeyMap(mode: 'sublime' | 'vim'): Promise<void>;
+
+  /**
+   * 动态设置编辑器的只读状态（开启后拒绝一切修改文档的事务，光标仍可移动，文本仍可选中、复制）
+   * @param readOnly 是否只读
+   */
+  setReadOnly(readOnly: boolean): void;
 
   // 搜索操作
   setSearchQuery(query: string, caseSensitive?: boolean, isRegex?: boolean): void;
