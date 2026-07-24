@@ -416,6 +416,10 @@ const defaultConfig = {
         enableAlign: true,
         // 是否支持信息面板语法
         enablePanel: true,
+        // 是否支持多列排版语法（::: cols / ::: 2cols / ::: 3cols）
+        enableCols: true,
+        // 是否支持选项卡语法（::: tabs）
+        enableTabs: true,
       },
       footnote: {
         /**
