@@ -175,7 +175,6 @@ export default {
   search: 'Поиск/Заменить',
   searchOnly: 'Поиск',
   autoWrap: 'Автоперенос строк',
-  footnoteTitle: 'Сноска',
   searchFor: 'Найти',
   searchClear: 'Очистить',
   replaceWith: 'Заменить на',

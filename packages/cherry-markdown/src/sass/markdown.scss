@@ -573,9 +573,11 @@
       border-radius: 3px;
       transition: background-color 0.15s ease, color 0.15s ease;
 
-      &:hover {
+      &:hover,
+      &:focus-visible {
         background-color: var(--md-inline-code-bg);
         text-decoration: none;
+        outline: none;
       }
     }
   }
@@ -586,8 +588,8 @@
     padding-top: 1.25em;
     border-top: 1px solid var(--md-hr-border);
     font-size: 0.9em;
-    color: var(--md-paragraph-color);
-    opacity: 0.92;
+    /* Chrome 86+：用次级文字色弱化正文，避免 color-mix / 容器 opacity 影响链接对比度 */
+    color: var(--base-sub-font-color);
 
     .footnote-title {
       display: block;
@@ -619,10 +621,16 @@
       padding: 0.55em 0 0.55em 0.25em;
       border-bottom: none;
       line-height: 1.65;
-      color: var(--md-paragraph-color);
+      color: inherit;
       word-break: break-word;
 
-      p, div {
+      p,
+      div,
+      blockquote,
+      pre,
+      table,
+      ul,
+      ol {
         margin: 0;
       }
 
@@ -643,10 +651,12 @@
         text-decoration: none;
         transition: background-color 0.15s ease, color 0.15s ease;
 
-        &:hover {
+        &:hover,
+        &:focus-visible {
           background-color: var(--md-link-color);
-          color: #fff;
+          color: var(--base-editor-bg);
           text-decoration: none;
+          outline: none;
         }
       }
     }

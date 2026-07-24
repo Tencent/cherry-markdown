@@ -509,7 +509,7 @@ export interface CherryEngineOptions {
                 appendClass?: string; // 添加到脚注列表的类名
                 title: {
                   appendClass?: string; // 添加到脚注列表标题的类名
-                  render?: () => string; // 标题的内容，为空则不渲染标题
+                  render?: () => string; // 标题内容；仅使用该返回值，空字符串则不渲染标题（不走 locale）
                 };
                 listItem?: {
                   appendClass?: string; // 添加到脚注列表单个脚注的类名
