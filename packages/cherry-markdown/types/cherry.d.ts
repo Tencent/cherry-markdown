@@ -484,6 +484,10 @@ export interface CherryEngineOptions {
           enableAlign?: boolean;
           // 是否支持信息面板语法
           enablePanel?: boolean;
+          /** 是否支持多列排版语法（::: cols / ::: 2cols / ::: 3cols） */
+          enableCols?: boolean;
+          /** 是否支持选项卡语法（::: tabs） */
+          enableTabs?: boolean;
         };
     footnote?:
       | false
@@ -509,7 +513,7 @@ export interface CherryEngineOptions {
                 appendClass?: string; // 添加到脚注列表的类名
                 title: {
                   appendClass?: string; // 添加到脚注列表标题的类名
-                  render?: () => string; // 标题的内容
+                  render?: () => string; // 标题内容；仅使用该返回值，空字符串则不渲染标题（不走 locale）
                 };
                 listItem?: {
                   appendClass?: string; // 添加到脚注列表单个脚注的类名

@@ -416,6 +416,10 @@ const defaultConfig = {
         enableAlign: true,
         // 是否支持信息面板语法
         enablePanel: true,
+        // 是否支持多列排版语法（::: cols / ::: 2cols / ::: 3cols）
+        enableCols: true,
+        // 是否支持选项卡语法（::: tabs）
+        enableTabs: true,
       },
       footnote: {
         /**
@@ -442,7 +446,7 @@ const defaultConfig = {
           appendClass: '',
           title: {
             appendClass: '', // 添加到脚注列表标题的类名
-            render: () => '', // 标题的内容，为空则渲染cherry默认的标题
+            render: () => '', // 标题内容；仅使用该返回值，空字符串则不渲染标题
           },
           listItem: {
             appendClass: '', // 添加到脚注列表单个脚注的类名

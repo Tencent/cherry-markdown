@@ -559,26 +559,105 @@
     }
   }
 
+  /* 正文内的脚注角标 [1] [2] ... */
+  sup.cherry-footnote-number {
+    a.footnote {
+      display: inline-block;
+      padding: 0 3px;
+      margin: 0 1px;
+      font-size: 0.75em;
+      font-weight: 500;
+      line-height: 1;
+      color: var(--md-link-color);
+      text-decoration: none;
+      border-radius: 3px;
+      transition: background-color 0.15s ease, color 0.15s ease;
+
+      &:hover,
+      &:focus-visible {
+        background-color: var(--md-inline-code-bg);
+        text-decoration: none;
+        outline: none;
+      }
+    }
+  }
+
+  /* 页面底部脚注区 */
   .footnote:not(a) {
+    margin-top: 1em;
+    padding-top: 1.25em;
+    border-top: 1px solid var(--md-hr-border);
+    font-size: 0.9em;
+    /* Chrome 86+：用次级文字色弱化正文，避免 color-mix / 容器 opacity 影响链接对比度 */
+    color: var(--base-sub-font-color);
+
     .footnote-title {
-      font-size: 20px;
-      margin-top: -38px;
-      background-color: var(--md-inline-code-bg);
-      width: 60px;
-      margin-bottom: var(--spacing-lg);
+      display: block;
+      width: auto;
+      margin: 0 0 1em 0;
+      padding: 0;
+      background: transparent;
+      font-size: 1em;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--md-paragraph-color);
+      text-transform: none;
+
+      &::before {
+        content: '';
+        display: inline-block;
+        width: 3px;
+        height: 0.9em;
+        margin-right: 8px;
+        vertical-align: -1px;
+        background-color: var(--md-link-color);
+        border-radius: 2px;
+      }
     }
 
-    padding-top: 20px;
-    border-top: 1px solid var(--md-hr-border);
-    margin-top: 50px;
-
     .one-footnote {
-      color: var(--md-paragraph-color);
-      margin-bottom: var(--spacing-lg);
-      border-bottom: 1px dotted var(--md-hr-border);
+      position: relative;
+      margin: 0;
+      padding: 0.55em 0 0.55em 0.25em;
+      border-bottom: none;
+      line-height: 1.65;
+      color: inherit;
+      word-break: break-word;
+
+      p,
+      div,
+      blockquote,
+      pre,
+      table,
+      ul,
+      ol {
+        margin: 0;
+      }
 
       a.footnote-ref {
-        padding: 5px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.6em;
+        height: 1.6em;
+        padding: 0 0.4em;
+        margin-right: 0.5em;
+        font-size: 0.78em;
+        font-weight: 500;
+        line-height: 1;
+        color: var(--md-link-color);
+        background-color: var(--md-inline-code-bg);
+        border-radius: 10px;
+        text-decoration: none;
+        transition: background-color 0.15s ease, color 0.15s ease;
+
+        &:hover,
+        &:focus-visible {
+          background-color: var(--md-link-color);
+          color: var(--base-editor-bg);
+          text-decoration: none;
+          outline: none;
+        }
       }
     }
   }
@@ -910,6 +989,8 @@ div[data-type='codeBlock'] {
   --panel-cols-gap: 32px;
   // 列间分隔线，可被主题覆盖（例如改为 dashed 或 none）
   --panel-cols-divider: 1px dotted var(--md-hr-border, rgba(0, 0, 0, 0.011));
+  // 单列最小宽度：列数过多时容器出现横向滚动条
+  --panel-col-min-width: 180px;
 
   display: grid;
   gap: 0; // 使用列内 padding + border-left 实现分隔线，不再依赖 grid gap
@@ -917,9 +998,11 @@ div[data-type='codeBlock'] {
   align-items: stretch;
   width: 100%;
   box-sizing: border-box;
+  // 列数超出容器可容纳范围时出现左右滚动条
+  overflow-x: auto;
 
   .cherry-panel--col {
-    min-width: 0; // 防止子元素（如 pre、table）撑破布局
+    min-width: var(--panel-col-min-width, 180px);
     box-sizing: border-box;
     padding: var(--panel-col-padding, 0);
     background: var(--panel-col-bg, transparent);
@@ -966,19 +1049,31 @@ div[data-type='codeBlock'] {
   }
 }
 
+// 通用 cols 语法：列数由 --cols CSS 变量驱动
+.cherry-panel-cols__cols {
+  grid-template-columns: repeat(var(--cols, 2), minmax(var(--panel-col-min-width, 180px), 1fr));
+}
+
+// 向后兼容旧语法的类名
 .cherry-panel-cols__2cols {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(var(--panel-col-min-width, 180px), 1fr));
 }
 
 .cherry-panel-cols__3cols {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(var(--panel-col-min-width, 180px), 1fr));
 }
 
 // 移动端/窄容器下自动堆叠为单列：分隔线由左侧竖线切换为顶部横线
 @media (max-width: 640px) {
+  .cherry-panel-cols__cols,
   .cherry-panel-cols__2cols,
   .cherry-panel-cols__3cols {
     grid-template-columns: minmax(0, 1fr);
+    overflow-x: visible;
+
+    .cherry-panel--col {
+      min-width: 0;
+    }
 
     .cherry-panel--col + .cherry-panel--col {
       border-left: none;
@@ -990,6 +1085,158 @@ div[data-type='codeBlock'] {
       padding-right: 0;
       padding-bottom: calc(var(--panel-cols-gap, 32px) / 2);
     }
+  }
+}
+
+// 选项卡语法（tabs）：CSS-only 实现，通过 radio + :checked 切换 panel
+// 结构：
+//   .cherry-tabs
+//     input.cherry-tabs--radio.cherry-tabs--radio__0 (visually hidden)
+//     label.cherry-tabs--label.cherry-tabs--label__0
+//     input.cherry-tabs--radio.cherry-tabs--radio__1
+//     label.cherry-tabs--label.cherry-tabs--label__1
+//     ...
+//     .cherry-tabs--labels（labels 与 radio 混合排列，用于顶部标签栏视觉分组）
+//     .cherry-tabs--panels
+//       .cherry-tabs--panel.cherry-tabs--panel__0
+//       .cherry-tabs--panel.cherry-tabs--panel__1
+.cherry-tabs {
+  --tabs-gap: var(--panel-cols-gap, 32px);
+  --tabs-label-color: var(--md-text-color, inherit);
+  --tabs-label-active-color: var(--md-link-color, #0d6dfe);
+  --tabs-label-active-border-color: var(--md-link-color, #0d6dfe);
+  --tabs-label-hover-bg: var(--panel-primary-bg, rgba(13, 109, 254, 0.06));
+  --tabs-border-color: var(--md-hr-border, rgba(0, 0, 0, 0.12));
+  --tabs-panel-padding: 12px 0;
+
+  display: block;
+  margin: var(--tabs-margin, 16px 0);
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+
+  // 隐藏 radio，仅用于承载 :checked 状态
+  .cherry-tabs--radio {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  // 标签栏
+  .cherry-tabs--labels {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    border-bottom: 1px solid var(--tabs-border-color);
+    margin: 0;
+    padding: 0;
+  }
+
+  .cherry-tabs--label {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 0;
+    cursor: pointer;
+    color: var(--tabs-label-color);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px; // 与 labels 底边线重叠，选中时下划线覆盖底边线
+    user-select: none;
+    transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+    line-height: 1.5;
+    font-weight: 500;
+
+    &:hover {
+      background: var(--tabs-label-hover-bg);
+    }
+  }
+
+  // 面板区域
+  .cherry-tabs--panels {
+    position: relative;
+    padding: var(--tabs-panel-padding);
+    // panel 内容对齐由行内 style="text-align:..." 提供，此处保持默认
+  }
+
+  .cherry-tabs--panel {
+    display: none;
+    line-height: 1.7;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+
+    > *:first-child {
+      margin-top: 0;
+    }
+    > *:last-child {
+      margin-bottom: 0;
+    }
+
+    img,
+    video,
+    iframe {
+      max-width: 100%;
+      height: auto;
+    }
+
+    pre,
+    table {
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      display: block;
+    }
+  }
+
+  // radio :checked → 对应索引的 label 高亮 + 对应索引的 panel 显示
+  // 由于 radio 与 label 在 .cherry-tabs--labels 内混排，label 使用相邻兄弟选择器命中
+  .cherry-tabs--radio__0:checked ~ .cherry-tabs--labels .cherry-tabs--label__0,
+  .cherry-tabs--radio__1:checked ~ .cherry-tabs--labels .cherry-tabs--label__1,
+  .cherry-tabs--radio__2:checked ~ .cherry-tabs--labels .cherry-tabs--label__2,
+  .cherry-tabs--radio__3:checked ~ .cherry-tabs--labels .cherry-tabs--label__3,
+  .cherry-tabs--radio__4:checked ~ .cherry-tabs--labels .cherry-tabs--label__4,
+  .cherry-tabs--radio__5:checked ~ .cherry-tabs--labels .cherry-tabs--label__5,
+  .cherry-tabs--radio__6:checked ~ .cherry-tabs--labels .cherry-tabs--label__6,
+  .cherry-tabs--radio__7:checked ~ .cherry-tabs--labels .cherry-tabs--label__7,
+  .cherry-tabs--radio__8:checked ~ .cherry-tabs--labels .cherry-tabs--label__8,
+  .cherry-tabs--radio__9:checked ~ .cherry-tabs--labels .cherry-tabs--label__9 {
+    color: var(--tabs-label-active-color);
+    border-bottom-color: var(--tabs-label-active-border-color);
+    background: transparent;
+  }
+
+  .cherry-tabs--radio__0:checked ~ .cherry-tabs--panels .cherry-tabs--panel__0,
+  .cherry-tabs--radio__1:checked ~ .cherry-tabs--panels .cherry-tabs--panel__1,
+  .cherry-tabs--radio__2:checked ~ .cherry-tabs--panels .cherry-tabs--panel__2,
+  .cherry-tabs--radio__3:checked ~ .cherry-tabs--panels .cherry-tabs--panel__3,
+  .cherry-tabs--radio__4:checked ~ .cherry-tabs--panels .cherry-tabs--panel__4,
+  .cherry-tabs--radio__5:checked ~ .cherry-tabs--panels .cherry-tabs--panel__5,
+  .cherry-tabs--radio__6:checked ~ .cherry-tabs--panels .cherry-tabs--panel__6,
+  .cherry-tabs--radio__7:checked ~ .cherry-tabs--panels .cherry-tabs--panel__7,
+  .cherry-tabs--radio__8:checked ~ .cherry-tabs--panels .cherry-tabs--panel__8,
+  .cherry-tabs--radio__9:checked ~ .cherry-tabs--panels .cherry-tabs--panel__9 {
+    display: block;
+  }
+
+  // 键盘可访问性：radio 聚焦时，通过 :checked 对应 label 给出轮廓
+  .cherry-tabs--radio__0:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__0,
+  .cherry-tabs--radio__1:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__1,
+  .cherry-tabs--radio__2:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__2,
+  .cherry-tabs--radio__3:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__3,
+  .cherry-tabs--radio__4:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__4,
+  .cherry-tabs--radio__5:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__5,
+  .cherry-tabs--radio__6:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__6,
+  .cherry-tabs--radio__7:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__7,
+  .cherry-tabs--radio__8:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__8,
+  .cherry-tabs--radio__9:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__9 {
+    outline: 2px solid var(--tabs-label-active-border-color);
+    outline-offset: -2px;
   }
 }
 
