@@ -1198,3 +1198,5 @@ title 饼图
 > CherryMarkdown利用virtual dom机制实现对预览区域需要变更的内容进行局部更新的功能，从而减少了浏览器Dom操作，提高了修改时预览内容更新的性能
 
 ![wysiwyg](assets/images/feature_vdom.gif)
+
+## 注释/说明

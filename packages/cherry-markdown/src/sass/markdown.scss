@@ -582,7 +582,7 @@
 
   /* 页面底部脚注区 */
   .footnote:not(a) {
-    margin-top: 3em;
+    margin-top: 1em;
     padding-top: 1.25em;
     border-top: 1px solid var(--md-hr-border);
     font-size: 0.9em;
@@ -624,10 +624,6 @@
 
       p, div {
         margin: 0;
-      }
-
-      & + .one-footnote {
-        border-top: 1px dashed var(--md-hr-border);
       }
 
       a.footnote-ref {
