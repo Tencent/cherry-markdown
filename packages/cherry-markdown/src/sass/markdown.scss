@@ -559,26 +559,105 @@
     }
   }
 
+  /* 正文内的脚注角标 [1] [2] ... */
+  sup.cherry-footnote-number {
+    a.footnote {
+      display: inline-block;
+      padding: 0 3px;
+      margin: 0 1px;
+      font-size: 0.75em;
+      font-weight: 500;
+      line-height: 1;
+      color: var(--md-link-color);
+      text-decoration: none;
+      border-radius: 3px;
+      transition: background-color 0.15s ease, color 0.15s ease;
+
+      &:hover,
+      &:focus-visible {
+        background-color: var(--md-inline-code-bg);
+        text-decoration: none;
+        outline: none;
+      }
+    }
+  }
+
+  /* 页面底部脚注区 */
   .footnote:not(a) {
+    margin-top: 1em;
+    padding-top: 1.25em;
+    border-top: 1px solid var(--md-hr-border);
+    font-size: 0.9em;
+    /* Chrome 86+：用次级文字色弱化正文，避免 color-mix / 容器 opacity 影响链接对比度 */
+    color: var(--base-sub-font-color);
+
     .footnote-title {
-      font-size: 20px;
-      margin-top: -38px;
-      background-color: var(--md-inline-code-bg);
-      width: 60px;
-      margin-bottom: var(--spacing-lg);
+      display: block;
+      width: auto;
+      margin: 0 0 1em 0;
+      padding: 0;
+      background: transparent;
+      font-size: 1em;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--md-paragraph-color);
+      text-transform: none;
+
+      &::before {
+        content: '';
+        display: inline-block;
+        width: 3px;
+        height: 0.9em;
+        margin-right: 8px;
+        vertical-align: -1px;
+        background-color: var(--md-link-color);
+        border-radius: 2px;
+      }
     }
 
-    padding-top: 20px;
-    border-top: 1px solid var(--md-hr-border);
-    margin-top: 50px;
-
     .one-footnote {
-      color: var(--md-paragraph-color);
-      margin-bottom: var(--spacing-lg);
-      border-bottom: 1px dotted var(--md-hr-border);
+      position: relative;
+      margin: 0;
+      padding: 0.55em 0 0.55em 0.25em;
+      border-bottom: none;
+      line-height: 1.65;
+      color: inherit;
+      word-break: break-word;
+
+      p,
+      div,
+      blockquote,
+      pre,
+      table,
+      ul,
+      ol {
+        margin: 0;
+      }
 
       a.footnote-ref {
-        padding: 5px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.6em;
+        height: 1.6em;
+        padding: 0 0.4em;
+        margin-right: 0.5em;
+        font-size: 0.78em;
+        font-weight: 500;
+        line-height: 1;
+        color: var(--md-link-color);
+        background-color: var(--md-inline-code-bg);
+        border-radius: 10px;
+        text-decoration: none;
+        transition: background-color 0.15s ease, color 0.15s ease;
+
+        &:hover,
+        &:focus-visible {
+          background-color: var(--md-link-color);
+          color: var(--base-editor-bg);
+          text-decoration: none;
+          outline: none;
+        }
       }
     }
   }

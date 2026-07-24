@@ -85,11 +85,13 @@ export default class Footnote extends ParagraphBase {
       )
       .join('');
     const sign = this.$engine.hash(html);
-    const title = this.config.refList?.title?.render() || (this.$engine?.$cherry?.locale?.footnoteTitle ?? 'title');
     const hiddenClass = this.config.refList ? '' : 'hidden';
     const footnoteClass = this.config.refList?.appendClass || '';
     const footnoteTitleClass = this.config.refList?.title?.appendClass || '';
-    html = `<div class="footnote ${footnoteClass} ${hiddenClass}" data-sign="${sign}" data-lines="0"><div class="footnote-title ${footnoteTitleClass}">${title}</div>${html}</div>`;
+    // 标题只看 title.render 返回值，不走 locale；空字符串/未配置则不展示标题
+    const titleText = String(this.config.refList?.title?.render?.() ?? '');
+    const footnoteTitle = titleText ? `<div class="footnote-title ${footnoteTitleClass}">${titleText}</div>` : '';
+    html = `<div class="footnote ${footnoteClass} ${hiddenClass}" data-sign="${sign}" data-lines="0">${footnoteTitle}${html}</div>`;
     return html;
   }
 

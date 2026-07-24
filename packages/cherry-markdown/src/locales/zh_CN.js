@@ -176,7 +176,6 @@ export default {
   search: '搜索/替换',
   searchOnly: '搜索',
   autoWrap: '自动换行',
-  footnoteTitle: '脚注',
   searchFor: '查找',
   searchClear: '清空',
   replaceWith: '替换为',
