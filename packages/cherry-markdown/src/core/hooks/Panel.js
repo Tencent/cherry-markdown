@@ -88,6 +88,14 @@ export default class Panel extends ParagraphBase {
     if (/(left|right|center|justify)/i.test(ret.type)) {
       ret.appendStyle = `style="text-align:${ret.type};"`;
     }
+    // 多列排版语法（2cols/3cols）支持在类型后追加对齐关键字（left|center|right|justify），默认左对齐
+    if (/(2cols|3cols)/i.test(ret.type)) {
+      const align = this.$getColsAlign(name);
+      if (align && align !== 'left') {
+        ret.className += ` cherry-text-align cherry-text-align__${align}`;
+        ret.appendStyle = `style="text-align:${align};"`;
+      }
+    }
     const paragraphProcessor = (str) => {
       if (str.trim() === '') {
         return '';
@@ -132,6 +140,38 @@ export default class Panel extends ParagraphBase {
     }
     ret.body = `<div class="cherry-panel--body">${$body}</div>`;
     return ret;
+  }
+
+  /**
+   * 从 name 中解析多列排版语法的对齐关键字
+   * 例如 name 为 "3cols center" 时返回 "center"
+   * @param {string} name panel 头部关键字（例如 "3cols center"）
+   * @returns {string} 对齐关键字（left|center|right|justify），未指定或非法时返回 'left'
+   */
+  $getColsAlign(name) {
+    const $name = String(name || '').trim();
+    if (!/\s/.test($name)) {
+      return 'left';
+    }
+    // 取第一个空格后的第一个词作为对齐关键字
+    const rest = $name.replace(/^\S+\s+/, '').trim();
+    const first = rest.split(/\s+/)[0].toLowerCase();
+    switch (first) {
+      case 'left':
+      case 'l':
+        return 'left';
+      case 'right':
+      case 'r':
+        return 'right';
+      case 'center':
+      case 'c':
+        return 'center';
+      case 'justify':
+      case 'j':
+        return 'justify';
+      default:
+        return 'left';
+    }
   }
 
   /**
