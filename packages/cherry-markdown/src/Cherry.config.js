@@ -420,6 +420,8 @@ const defaultConfig = {
         enableCols: true,
         // 是否支持选项卡语法（::: tabs）
         enableTabs: true,
+        // 是否支持时间线语法（::: timeline）
+        enableTimeline: true,
       },
       footnote: {
         /**

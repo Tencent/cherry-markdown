@@ -488,6 +488,8 @@ export interface CherryEngineOptions {
           enableCols?: boolean;
           /** 是否支持选项卡语法（::: tabs） */
           enableTabs?: boolean;
+          /** 是否支持时间线语法（::: timeline） */
+          enableTimeline?: boolean;
         };
     footnote?:
       | false

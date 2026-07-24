@@ -48,7 +48,6 @@ import HighLight from './hooks/HighLight';
 import Suggester from './hooks/Suggester';
 import Ruby from './hooks/Ruby';
 import Panel from './hooks/Panel';
-import Timeline from './hooks/Timeline';
 import Detail from './hooks/Detail';
 import FrontMatter from './hooks/FrontMatter';
 import Space from './hooks/Space';
@@ -82,7 +81,6 @@ const hooksConfig = [
   Blockquote,
   Header, // 处理标题, 传入strict属性严格要求ATX风格标题#后带空格
   Hr,
-  Timeline,
   List,
   Detail,
   Panel,

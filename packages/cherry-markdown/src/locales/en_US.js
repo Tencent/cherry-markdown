@@ -100,7 +100,7 @@ export default {
   timeline: 'Timeline',
   timelineTitle: 'Timeline',
   timelineDefaultContent:
-    '- [done] 2024-01-15 Project kickoff\n  Requirements review completed\n- [doing] 2024-03-20 Alpha release\n  Integration testing in progress\n- [todo] 2024-06-01 Go live\n- [error] 2024-07-01 Critical rollback event\n- [milestone] 2024-08-01 10K users',
+    ':: [done] 2024-01-15 Project kickoff\n  Requirements review completed\n:: [doing] 2024-03-20 Alpha release\n  Integration testing in progress\n:: [todo] 2024-06-01 Go live\n:: [error] 2024-07-01 Critical rollback event\n:: [milestone] 2024-08-01 10K users',
   timelineStatusDone: 'Done',
   timelineStatusDoing: 'Doing',
   timelineStatusTodo: 'Todo',

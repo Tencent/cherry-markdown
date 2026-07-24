@@ -42,11 +42,11 @@ export default class Timeline extends MenuBase {
     const { locale } = this.$cherry;
     const defaultContent =
       locale?.timelineDefaultContent ??
-      '- [done] 2024-01-15 项目立项\n  完成需求评审\n' +
-        '- [doing] 2024-03-20 Alpha 版本\n  正在联调\n' +
-        '- [todo] 2024-06-01 正式上线\n' +
-        '- [error] 2024-07-01 严重回滚事件\n' +
-        '- [milestone] 2024-08-01 用户破万';
+      ':: [done] 2024-01-15 项目立项\n  完成需求评审\n' +
+        ':: [doing] 2024-03-20 Alpha 版本\n  正在联调\n' +
+        ':: [todo] 2024-06-01 正式上线\n' +
+        ':: [error] 2024-07-01 严重回滚事件\n' +
+        ':: [milestone] 2024-08-01 用户破万';
     const $selection = this.getSelection(selection, 'line', true) || defaultContent;
     // 直接走父类逻辑，type 固定为 timeline
     this.registerAfterClickCb(() => {
@@ -56,8 +56,8 @@ export default class Timeline extends MenuBase {
     let body = $selection.replace(/^\n+/, '');
     if (/\n/.test(body)) {
       title = body.replace(/\n[\w\W]+$/, '');
-      // 如果首行不是 "- " 起始，则把它当标题
-      if (!/^\s*-\s+/.test(title)) {
+      // 如果首行不是 ":: " 起始，则把它当标题
+      if (!/^\s*::\s+/.test(title)) {
         body = body.replace(/^[^\n]+\n/, '');
       } else {
         title = this.$getTitle();

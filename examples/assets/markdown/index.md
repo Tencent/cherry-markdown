@@ -319,50 +319,6 @@
 
 ---
 
-## 时间线
-
-**说明**
-使用连续三个冒号`:::`加关键字`timeline`来声明一个时间线容器，内部使用`- [状态] 日期 内容`的格式书写每个节点。
-
-**注意**
-由于时间线的语法局限，时间线内!!red 不支持!!无序列表、检查清单、信息面板、手风琴等语法。
-
-支持的状态修饰符：
-
-- `[done]` 已完成（也可写作 `[x]`、`[✓]`）
-- `[doing]` 进行中（也可写作 `[~]`、`[…]`）
-- `[todo]` 待办（默认，也可写作 `[ ]`、`[]`）
-- `[milestone]` 里程碑（也可写作 `[*]`、`[★]`）
-- `[error]` 异常（也可写作 `[!]`、`[×]`）
-
-
-**效果**
-:::timeline Cherry Markdown 发展历程
-- [milestone] 2021-07 项目开源
-  Cherry Markdown 正式在 GitHub 开源，加入腾讯开源家族
-- [done] 2024-05 支持流式增量渲染
-  提供专为AI Chat流式输出渲染的[包](https://github.com/Tencent/cherry-markdown/wiki/%E6%9E%84%E5%BB%BA%E4%BA%A7%E7%89%A9%E4%BB%8B%E7%BB%8D){target=_blank}
-  可在流式输出过程中保持**稳定**、**流畅**、**高效**的增量渲染，可在[这里](https://tencent.github.io/cherry-markdown/examples/ai_chat.html){target=_blank}体验
-- [done] 2026-07 客户端[V0.4.0](https://github.com/Tencent/cherry-markdown/releases/tag/%40cherry-markdown%2Fclient%400.4.0){target=_blank}发布
-  增加专注模式
-  增加图片大图预览
-  支持图床配置
-- [doing] 持续迭代
-| 项目 | 核心目标 | 探索方向 |
-| ------ |:---:| ------ |
-| markdown编辑器 | 丰富语法生态<br>提升响应性能<br>持续修复社区反馈 | 探索WYSIWYG所见即所得模式 |
-| VSCode插件 | 对齐主仓语法能力<br>优化预览与编辑联动 | 支持工作区级配置同步 |
-| 客户端 | 完善历史版本管理<br>支持多标签页与配置<br>补齐导出功能 | 打通"发布到..."生态集成 |
-- [todo] 拥抱社区
-  欢迎贡献你的想法
-- [todo] 更多AI能力接入
-  探索AI辅助写作、智能语法补全、内容摘要生成等能力，让Markdown编辑更智能
-- [todo] 完善多端生态
-  持续优化VSCode插件、客户端、Web端体验
-:::
-
----
-
 ## 手风琴
 
 **说明**
@@ -499,26 +455,24 @@
 
 **选项卡（Tabs）**
 
-使用 `::: tabs` 可以生成一组选项卡，点击顶部标签即可切换到对应的面板。语法与 `cols` 类似：使用独占一行的 `::` 分隔每一个 tab，**每个 tab 的第一行作为标签标题**，其余行作为该 tab 面板的内容。默认展示第一个 tab。
+使用 `::: tabs` 可以生成一组选项卡，点击顶部标签即可切换到对应的面板。语法与 `timeline` 一致：使用行首的 `:: ` 作为每个 tab 的起始标记，**`:: ` 后同一行的内容作为标签标题**，其后（缩进）行作为该 tab 面板的内容。默认展示第一个 tab。
 
 在 `tabs` 后追加 `left/center/right/justify` 关键字（或简写 `l`/`c`/`r`/`j`）可以指定**面板内容**的对齐方式（标签栏始终按顺序左侧排布，不受此影响）。
 
 ````markdown
 ::: tabs
-说明
+:: 说明
 这是第一个选项卡，默认会被选中。
 - 支持任意 Markdown 语法
 - 例如列表、加粗、行内代码 `code` 等
 
-::
-用法
+:: 用法
 点击顶部的**标签**即可切换到当前 tab。
 
 ```javascript
 console.log('CSS-only tabs, 无需 JavaScript');
 ```
-::
-提示
+:: 提示
 在 `tabs` 后追加 `center` 可以让面板内容整体居中。
 :::
 ````
@@ -526,21 +480,71 @@ console.log('CSS-only tabs, 无需 JavaScript');
 **效果**
 
 ::: tabs
-说明
+:: 说明
 这是第一个选项卡，默认会被选中。
 - 支持任意 Markdown 语法
 - 例如列表、加粗、行内代码 `code` 等
 
-::
-用法
+:: 用法
 点击顶部的**标签**即可切换到当前 tab。
 
 ```javascript
 console.log('CSS-only tabs, 无需 JavaScript');
 ```
-::
-提示
+:: 提示
 在 `tabs` 后追加 `center` 可以让面板内容整体居中。
+:::
+
+---
+
+## 时间线
+
+**说明**
+使用连续三个冒号`:::`加关键字`timeline`来声明一个时间线容器，内部使用独占一行的`::`分隔每一个节点，每个节点的首行为`[状态] 日期 标题`，其后为描述内容。
+
+**注意**
+由于时间线的语法局限，时间线内!!red 不支持!!信息面板、手风琴等语法。
+
+支持的状态修饰符：
+
+- `[done]` 已完成（也可写作 `[x]`、`[✓]`）
+- `[doing]` 进行中（也可写作 `[~]`、`[…]`）
+- `[todo]` 待办（默认，也可写作 `[ ]`、`[]`）
+- `[milestone]` 里程碑（也可写作 `[*]`、`[★]`）
+- `[error]` 异常（也可写作 `[!]`、`[×]`）
+
+
+**效果**
+:::timeline Cherry Markdown 发展历程
+:: [milestone] 2021-07 项目开源
+  Cherry Markdown 正式在 GitHub 开源，加入腾讯开源家族
+:: [done] 2024-05 支持流式增量渲染
+  提供专为AI Chat流式输出渲染的[包](https://github.com/Tencent/cherry-markdown/wiki/%E6%9E%84%E5%BB%BA%E4%BA%A7%E7%89%A9%E4%BB%8B%E7%BB%8D){target=_blank}
+  可在流式输出过程中保持**稳定**、**流畅**、**高效**的增量渲染，可在[这里](https://tencent.github.io/cherry-markdown/examples/ai_chat.html){target=_blank}体验
+:: [done] 2026-07 客户端[V0.4.0](https://github.com/Tencent/cherry-markdown/releases/tag/%40cherry-markdown%2Fclient%400.4.0){target=_blank}发布
+  增加专注模式
+  增加图片大图预览
+  支持图床配置
+:: [doing] 持续迭代·markdown编辑器
+  - 丰富语法生态
+  - 持续修复社区反馈 
+  - 探索WYSIWYG所见即所得模式
+
+:: [doing] 持续迭代·客户端
+  - 完善历史版本管理
+  - 支持多标签页与配置
+  - 打通"发布到..."生态集成并完善导出功能
+
+:: [todo] VSCode插件
+  - 对齐主仓语法能力
+  - 优化预览与编辑联动
+
+:: [todo] 拥抱社区
+  欢迎贡献你的想法
+:: [todo] 更多AI能力接入
+  探索AI辅助写作、智能语法补全、内容摘要生成等能力，让Markdown编辑更智能
+:: [todo] 完善多端生态
+  持续优化VSCode插件、客户端、Web端体验
 :::
 
 ---
