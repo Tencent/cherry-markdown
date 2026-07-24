@@ -50,7 +50,7 @@ function createFootnoteHook(config: any = defaultConfig, cherryExtra: Record<str
     },
     ...cherryExtra,
   };
-  const hook = new Footnote({ config: cloneConfig(config), cherry }) as any;
+  const hook = new Footnote({ externals: {}, config: cloneConfig(config), cherry }) as any;
   hook.$engine = {
     hash: (str: string) => `sign-${str.length}`,
     makeHtmlForFootnote: (md: string) => md,
