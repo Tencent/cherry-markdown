@@ -75,6 +75,28 @@
   --mermaid-toolbar-slider-bg: rgba(255, 255, 255, 0.15);
   --mermaid-toolbar-tab-active-color: #fff;
 
+  /* ========== Timeline 时间线变量覆盖 ========== */
+  --timeline-header-color: var(--oc-gray-3);
+  --timeline-line-color: var(--oc-gray-6);
+  --timeline-node-bg: var(--oc-gray-8);
+  --timeline-node-color: var(--oc-gray-5);
+  --timeline-content-color: var(--oc-gray-4);
+  --timeline-time-color: var(--oc-gray-5);
+  --timeline-title-color: var(--oc-gray-3);
+  --timeline-desc-color: var(--oc-gray-5);
+
+  --timeline-done-color: var(--oc-green-5);
+  --timeline-doing-color: var(--oc-blue-5);
+  --timeline-doing-shadow-color: rgba(59, 130, 246, 0.25);
+  --timeline-doing-pulse-from: rgba(59, 130, 246, 0.4);
+  --timeline-doing-pulse-to: rgba(59, 130, 246, 0);
+  --timeline-todo-bg: var(--oc-gray-8);
+  --timeline-todo-color: var(--oc-gray-6);
+  --timeline-milestone-color: var(--oc-yellow-5);
+  --timeline-milestone-title-color: var(--oc-yellow-4);
+  --timeline-error-color: var(--oc-red-5);
+  --timeline-error-title-color: var(--oc-red-4);
+
   /* 目录区域样式 */
   .cherry-flex-toc {
 
