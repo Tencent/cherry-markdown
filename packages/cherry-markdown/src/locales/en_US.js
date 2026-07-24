@@ -178,7 +178,6 @@ export default {
   search: 'Search/Replace',
   searchOnly: 'Search',
   autoWrap: 'Auto Wrap',
-  footnoteTitle: 'Footnote',
   searchFor: 'Search for',
   searchClear: 'Clear',
   replaceWith: 'Replace with',
