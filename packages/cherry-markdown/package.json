@@ -54,7 +54,7 @@
   ],
   "author": "Cherry Oteam",
   "engines": {
-    "node": ">=24"
+    "node": ">=22"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.8.3",
