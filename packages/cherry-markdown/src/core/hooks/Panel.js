@@ -435,7 +435,8 @@ export default class Panel extends ParagraphBase {
     // 匹配可选的状态修饰符 [xxx]
     const statusMatch = firstLine.match(/^\s*\[([^\]]*)\]\s*/);
     if (statusMatch) {
-      status = this.$normalizeTimelineStatus(statusMatch[1]);
+      // 引擎在 makeHtml 前已将 ~ → ~T，需还原
+      status = this.$normalizeTimelineStatus(statusMatch[1].replace(/~T/g, '~'));
       firstLine = firstLine.slice(statusMatch[0].length);
     }
     // 首行 = 时间 + 标题（时间为首个空白分隔词组，形如 2024-01-15、2024/01、v1.0.0 等）
@@ -472,6 +473,7 @@ export default class Panel extends ParagraphBase {
       case 'doing':
       case '…':
       case '...':
+      case '~':
         return 'doing';
       case 'todo':
       case '':
@@ -483,6 +485,8 @@ export default class Panel extends ParagraphBase {
       case 'error':
       case 'err':
       case '✗':
+      case '×':
+      case '!':
         return 'error';
       default:
         return 'todo';
