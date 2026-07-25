@@ -86,11 +86,17 @@ export default class Panel extends MenuBase {
   onClick(selection, shortKey = '') {
     const threeCols = '第一列\n::\n第二列\n::\n第三列';
     const twoCols = '第一列\n::\n第二列';
+    // 行首 `:: ` 后的内容作为标签标题，后续行作为该 tab 面板的内容
+    const twoTabs = ':: 标签一\n第一个 tab 的内容\n:: 标签二\n第二个 tab 的内容';
     let defaultContent = '内容';
     if (shortKey === '3cols') {
       defaultContent = threeCols;
-    } else if (shortKey === '2cols') {
+    } else if (shortKey === '2cols' || shortKey === 'cols') {
+      // 新语法 cols 默认插入两列内容，用户可通过继续追加 :: 增加列数
       defaultContent = twoCols;
+    } else if (shortKey === 'tabs') {
+      // tabs 默认插入两个选项卡模板
+      defaultContent = twoTabs;
     }
     let $selection = this.getSelection(selection, 'line', true) || defaultContent;
     let currentName = this.$getNameFromStr($selection);

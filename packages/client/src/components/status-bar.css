@@ -5,8 +5,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-  background: var(--color-surface-panel);
-  border-top: 1px solid var(--color-border-strong);
+  /* 主题联动：底色叠一层极淡的 accent-soft，让整条状态栏“呼吸”到当前主题 */
+  background:
+    linear-gradient(var(--color-accent-soft), var(--color-accent-soft)),
+    var(--color-surface-panel);
   color: var(--color-text-secondary);
   font-size: 12px;
   font-family: var(--font-sans);
@@ -19,6 +21,20 @@
   align-items: center;
   gap: 8px;
   min-width: 0;
+  flex: 1 1 0;
+}
+
+.status-right {
+  justify-content: flex-end;
+}
+
+.status-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding: 0 12px;
+  gap: 8px;
 }
 
 .save-dot {
@@ -71,5 +87,130 @@
 .status-sep {
   width: 1px;
   height: 12px;
-  background: var(--color-border-strong);
+  /* 主题联动：分隔线使用主题强调色，视觉比通用灰更贴主题 */
+  background: var(--color-accent);
+  opacity: 0.35;
+}
+
+.status-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-family: inherit;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.status-action:hover {
+  background: var(--color-surface-hover, rgba(127, 127, 127, 0.12));
+  color: var(--color-text);
+}
+
+.status-action:focus-visible {
+  outline: 1px solid var(--color-accent-strong);
+  outline-offset: 1px;
+}
+
+.status-action svg {
+  flex-shrink: 0;
+}
+
+.status-action-label {
+  white-space: nowrap;
+}
+
+/* 中间显眼按钮：更强的对比与轻微高亮边框 */
+.status-action-primary {
+  height: 22px;
+  padding: 0 12px;
+  /* 固定宽度：避免 "专注" ↔ "专注中" 切换时按钮宽度变化导致位置漂移 */
+  min-width: 76px;
+  justify-content: center;
+  font-weight: 600;
+  /* 主题联动：默认就使用当前主题色作为文字/边框，底色保持白面板 */
+  color: var(--color-accent-strong);
+  background: var(--color-bg);
+  border: 1px solid var(--color-accent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.status-action-primary:hover {
+  color: var(--color-accent-contrast, #ffffff);
+  background: var(--color-accent-strong);
+  border-color: var(--color-accent-strong);
+}
+
+.status-action-primary.active {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+  border: 1px solid var(--color-accent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) inset;
+}
+
+/* 暗色主题下状态栏主按钮：白底不合适，用面板色 + 主题色描边 */
+body[data-cherry-theme='dark'] .status-action-primary {
+  background: var(--color-surface);
+  color: var(--color-accent-strong);
+  border-color: var(--color-accent);
+}
+
+body[data-cherry-theme='dark'] .status-action-primary:hover {
+  background: var(--color-accent);
+  color: #ffffff;
+  border-color: var(--color-accent);
+}
+
+body[data-cherry-theme='dark'] .status-action-primary.active {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+  border-color: var(--color-accent);
+}
+
+body[data-cherry-theme='dark'] .status-bar {
+  background: var(--color-surface-panel);
+}
+
+/* 宽度切换按钮：次级样式，视觉上比"专注"主按钮更轻，紧贴在其右侧 */
+.status-action-width {
+  height: 22px;
+  padding: 0 10px;
+  min-width: 84px;
+  justify-content: center;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.status-action-width:hover {
+  color: var(--color-accent-strong);
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+}
+
+body[data-cherry-theme='dark'] .status-action-width {
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border-strong);
+}
+
+body[data-cherry-theme='dark'] .status-action-width:hover {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+  border-color: var(--color-accent);
 }

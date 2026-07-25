@@ -484,6 +484,12 @@ export interface CherryEngineOptions {
           enableAlign?: boolean;
           // 是否支持信息面板语法
           enablePanel?: boolean;
+          /** 是否支持多列排版语法（::: cols / ::: 2cols / ::: 3cols） */
+          enableCols?: boolean;
+          /** 是否支持选项卡语法（::: tabs） */
+          enableTabs?: boolean;
+          /** 是否支持时间线语法（::: timeline） */
+          enableTimeline?: boolean;
         };
     footnote?:
       | false
@@ -509,7 +515,7 @@ export interface CherryEngineOptions {
                 appendClass?: string; // 添加到脚注列表的类名
                 title: {
                   appendClass?: string; // 添加到脚注列表标题的类名
-                  render?: () => string; // 标题的内容
+                  render?: () => string; // 标题内容；仅使用该返回值，空字符串则不渲染标题（不走 locale）
                 };
                 listItem?: {
                   appendClass?: string; // 添加到脚注列表单个脚注的类名
@@ -532,6 +538,42 @@ export interface CherryEngineOptions {
                 render?: (refNum: number, refTitle: string, content: string) => string; // 自定义渲染卡片内容
               };
         };
+    /** FrontMatter 语法（文档头部元信息） */
+    frontMatter?: false | {};
+    /** AI 流式会话代码块自动闭合 */
+    aiFlowAutoClose?: false | {};
+    /** 评论引用语法 */
+    commentReference?: false | {};
+    /** 内部转义/转换处理 */
+    transfer?: false | {};
+    /** 换行语法 */
+    br?: false | {};
+    /** 引用块语法 */
+    blockquote?: false | {};
+    /** 分割线语法 */
+    hr?: false | {};
+    /** 折叠面板（<details>）语法 */
+    detail?: false | {};
+    /** 普通段落 */
+    normalParagraph?: false | {};
+    /** 背景色语法 */
+    bgColor?: false | {};
+    /** 字体颜色语法 */
+    fontColor?: false | {};
+    /** 字体大小语法 */
+    fontSize?: false | {};
+    /** 下标语法 */
+    sub?: false | {};
+    /** 上标语法 */
+    sup?: false | {};
+    /** 注音（ruby）语法 */
+    ruby?: false | {};
+    /** 下划线语法 */
+    underline?: false | {};
+    /** 高亮语法 */
+    highLight?: false | {};
+    /** 输入联想语法 */
+    suggester?: false | {};
   };
   /** 自定义语法 */
   customSyntax?: Record<string, CustomSyntaxRegConfig['syntaxClass'] | CustomSyntaxRegConfig>;

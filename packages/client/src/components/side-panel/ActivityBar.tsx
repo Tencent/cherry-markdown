@@ -1,8 +1,8 @@
 import { defineComponent, h, type PropType } from 'vue';
-import { ArrowIcon } from '../icons';
-import IconTooltip from './IconTooltip';
+import { ArrowIcon, SettingsIcon } from '../icons';
 import type { ActivityPanelDefinition } from './types';
 
+// Left-side activity bar: top panel switcher + bottom collapse/settings/version.
 export default defineComponent({
   name: 'ActivityBar',
   props: {
@@ -26,6 +26,7 @@ export default defineComponent({
   emits: {
     selectPanel: (_panelId: string) => true,
     toggleCollapse: () => true,
+    openSettings: () => true,
   },
   setup(props, { emit }) {
     return () =>
@@ -35,41 +36,38 @@ export default defineComponent({
           { class: 'activity-buttons' },
           props.panels.map((panel) =>
             h(
-              IconTooltip,
-              { key: panel.id, label: panel.label, placement: 'right' },
+              'button',
               {
-                default: () =>
-                  h(
-                    'button',
-                    {
-                      class: ['activity-btn', { active: panel.id === props.activePanelId }],
-                      title: panel.label,
-                      'aria-label': panel.label,
-                      onClick: () => emit('selectPanel', panel.id),
-                    },
-                    [h(panel.icon, { size: 18 })],
-                  ),
+                key: panel.id,
+                class: ['activity-btn', { active: panel.id === props.activePanelId }],
+                title: panel.label,
+                'aria-label': panel.label,
+                onClick: () => emit('selectPanel', panel.id),
               },
+              [h(panel.icon, { size: 18 })],
             ),
           ),
         ),
         h('div', { class: 'activity-footer' }, [
           h(
-            IconTooltip,
-            { label: props.isCollapsed ? '展开侧边栏' : '折叠侧边栏', placement: 'right' },
+            'button',
             {
-              default: () =>
-                h(
-                  'button',
-                  {
-                    class: 'activity-btn compact',
-                    title: props.isCollapsed ? '展开侧边栏' : '折叠侧边栏',
-                    'aria-label': props.isCollapsed ? '展开侧边栏' : '折叠侧边栏',
-                    onClick: () => emit('toggleCollapse'),
-                  },
-                  [h(ArrowIcon, { size: 14, direction: props.isCollapsed ? 'right' : 'left' })],
-                ),
+              class: 'activity-btn compact',
+              title: props.isCollapsed ? '展开侧边栏' : '折叠侧边栏',
+              'aria-label': props.isCollapsed ? '展开侧边栏' : '折叠侧边栏',
+              onClick: () => emit('toggleCollapse'),
             },
+            [h(ArrowIcon, { size: 14, direction: props.isCollapsed ? 'right' : 'left' })],
+          ),
+          h(
+            'button',
+            {
+              class: 'activity-btn compact',
+              title: '设置',
+              'aria-label': '设置',
+              onClick: () => emit('openSettings'),
+            },
+            [h(SettingsIcon, { size: 16 })],
           ),
           h('span', { class: 'version-text', title: '当前版本' }, `v${props.version}`),
         ]),

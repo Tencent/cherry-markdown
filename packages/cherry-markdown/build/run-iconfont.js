@@ -45,27 +45,99 @@ function parseIconBasename(basename) {
 }
 
 /**
+ * 判断文件名是否已经带有 uXXXX- 前缀
+ * @param {string} basename
+ */
+function hasCodepointPrefix(basename) {
+  return /^u[0-9a-fA-F]{4,6}-.+$/i.test(basename);
+}
+
+/**
+ * 将 codepoint 格式化为 uXXXX 形式（至少 4 位，大写十六进制）
+ * @param {number} codepoint
+ */
+function formatCodepoint(codepoint) {
+  const hex = codepoint.toString(16).toUpperCase();
+  return `u${hex.padStart(4, '0')}`;
+}
+
+/**
+ * 在已占用码位集合中寻找下一个空闲码位（从 usedSet 中最大值 + 1 起找，兜底从 0xEA00 起找）
+ * @param {Set<number>} usedSet
+ */
+function pickNextCodepoint(usedSet) {
+  const baseline = 0xea00;
+  let candidate = baseline;
+  for (const cp of usedSet) {
+    if (cp >= candidate) {
+      candidate = cp + 1;
+    }
+  }
+  while (usedSet.has(candidate)) {
+    candidate += 1;
+  }
+  return candidate;
+}
+
+/**
  * 使用 fs 扫描 SVG 目录，避免 fantasticon/glob 在 Windows 下失效
+ * 对未带 uXXXX- 前缀的裸文件（例如 timeline.svg），自动分配下一个可用码位并在磁盘上重命名。
  * @returns {Array<{ iconName: string, codepoint: number, filePath: string }>}
  */
 function loadIconEntries() {
   /** @type {Array<{ iconName: string, codepoint: number, filePath: string }>} */
   const entries = [];
+  /** @type {string[]} */
+  const unnamedFiles = [];
+  /** @type {Set<number>} */
+  const usedCodepoints = new Set();
 
   for (const fileName of fs.readdirSync(iconsDir)) {
     if (!fileName.endsWith('.svg')) {
       continue;
     }
 
-    const { iconName, codepoint } = parseIconBasename(path.basename(fileName, '.svg'));
+    const basename = path.basename(fileName, '.svg');
+    if (!hasCodepointPrefix(basename)) {
+      unnamedFiles.push(fileName);
+      continue;
+    }
+
+    const { iconName, codepoint } = parseIconBasename(basename);
     if (entries.some((entry) => entry.iconName === iconName)) {
       throw new Error(`重复的图标名称: ${iconName}`);
     }
+    if (usedCodepoints.has(codepoint)) {
+      throw new Error(`重复的图标码位: ${formatCodepoint(codepoint)}`);
+    }
 
+    usedCodepoints.add(codepoint);
     entries.push({
       iconName,
       codepoint,
       filePath: path.join(iconsDir, fileName),
+    });
+  }
+
+  for (const fileName of unnamedFiles) {
+    const iconName = path.basename(fileName, '.svg');
+    if (entries.some((entry) => entry.iconName === iconName)) {
+      throw new Error(`重复的图标名称: ${iconName}（来自未编号文件 ${fileName}）`);
+    }
+
+    const codepoint = pickNextCodepoint(usedCodepoints);
+    usedCodepoints.add(codepoint);
+
+    const newFileName = `${formatCodepoint(codepoint)}-${iconName}.svg`;
+    const oldPath = path.join(iconsDir, fileName);
+    const newPath = path.join(iconsDir, newFileName);
+    fs.renameSync(oldPath, newPath);
+    console.log(`[iconfont] 重命名: ${fileName} -> ${newFileName}`);
+
+    entries.push({
+      iconName,
+      codepoint,
+      filePath: newPath,
     });
   }
 

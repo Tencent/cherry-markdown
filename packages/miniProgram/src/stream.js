@@ -15,14 +15,13 @@
  */
 import { parseDocument } from 'htmlparser2';
 import { createMiniProgramEngine } from './engine';
+import { markdownToMiniProgramView } from './renderer';
 import { createMiniProgramSseFrames, createMiniProgramStreamChunks, createSseParser } from './sse';
 import { htmlToMiniProgramBlocks, markdownToMiniProgramBlocks } from './transform';
 import { blocksToMiniProgramView, resolvePendingImages } from './view';
 import { MiniProgramStreamAdapter, createMiniProgramStreamAdapter } from './adapter';
 
-class SyntaxHookBase {}
-
-function markdownToHtml(markdown, options = {}) {
+export function markdownToHtml(markdown, options = {}) {
   return createMiniProgramEngine({
     ...options,
     engine: {
@@ -106,7 +105,7 @@ export default class MiniProgramStream {
    * @returns {import('./view').MiniProgramViewBlock[]}
    */
   makeView(markdown, options = {}) {
-    return blocksToMiniProgramView(this.makeBlocks(markdown || '', options), options);
+    return markdownToMiniProgramView(this.engine, markdown || '', options);
   }
 
   /**
@@ -133,7 +132,6 @@ export default class MiniProgramStream {
 }
 
 export {
-  SyntaxHookBase,
   createMiniProgramEngine,
   MiniProgramStreamAdapter,
   blocksToMiniProgramView,
@@ -142,7 +140,6 @@ export {
   createMiniProgramStreamChunks,
   createSseParser,
   htmlToMiniProgramBlocks,
-  markdownToHtml,
   markdownToMiniProgramBlocks,
   resolvePendingImages,
 };

@@ -15,6 +15,9 @@ import { WINDOW_EVENTS } from '../constants/events';
  */
 import * as echarts from 'echarts';
 import type { CherryEditorInstance } from './editorTypes';
+import { getCurrentLightbox } from './composables/useImageLightbox';
+import { createImageBedFileUpload, createImageBedOnPaste } from './composables/useImageBedUploader';
+import { usePreferencesStore, type EditorMode } from '../store';
 
 /**
  * ECharts类型兼容性处理
@@ -33,7 +36,7 @@ type CherryMenuHook = ReturnType<typeof Cherry.createMenuHook>;
 type ToolbarRightConfig = NonNullable<CherryOptions<CustomConfig>['toolbars']>['toolbarRight'];
 
 interface ToolbarMenuHookContext {
-  $cherry: Pick<CherryEditorInstance, 'getMarkdown' | 'switchModel'> & {
+  $cherry: Pick<CherryEditorInstance, 'getMarkdown' | 'switchModel' | 'focusMode'> & {
     getStatus(): { editor: string };
   };
   updateMarkdown: boolean;
@@ -57,10 +60,21 @@ const customMenuChangeModule = Cherry.createMenuHook('编辑', {
   iconName: 'pen' as const,
   onClick(this: ToolbarMenuHookContext) {
     const { editor } = this.$cherry.getStatus();
+    let nextMode: EditorMode;
     if (editor === 'show') {
+      nextMode = 'previewOnly';
       this.$cherry.switchModel('previewOnly');
+    } else if (this.$cherry.focusMode) {
+      nextMode = 'editOnly';
+      this.$cherry.switchModel('editOnly', false);
     } else {
+      nextMode = 'edit&preview';
       this.$cherry.switchModel('edit&preview');
+    }
+    try {
+      usePreferencesStore().setEditorMode(nextMode);
+    } catch {
+      // pinia 未就绪时忽略，避免影响功能
     }
   },
 });
@@ -130,6 +144,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
         selfClosing: true, // 自动闭合，为true时，当md中有奇数个```时，会自动在md末尾追加一个```
         mermaid: {
           svg2img: false, // 是否将mermaid生成的画图变成img格式
+          showSourceToolbar: true,
         },
         /**
          * indentedCodeBlock是缩进代码块是否启用的开关
@@ -211,6 +226,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     // edit&preview: 双栏编辑预览模式
     // editOnly: 纯编辑模式（没有预览，可通过toolbar切换成双栏或预览模式）
     // previewOnly: 预览模式（没有编辑框，toolbar只显示“返回编辑”按钮，可通过toolbar切换成编辑模式）
+    // 该字段在 cherryInstance 工厂函数里会被 usePreferencesStore().editorMode 覆盖
     defaultModel: 'edit&preview',
     // 粘贴时是否自动将html转成markdown
     convertWhenPaste: true,
@@ -251,7 +267,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
           'hr',
           'br',
           'code',
-          // 'inlineCode',
+          'quote',
           // 'formula',
           'toc',
           'table',
@@ -271,7 +287,8 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     ],
     toolbarRight,
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
-    sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'theme'],
+    sidebar: ['customMenuChangeModule', 'mobilePreview', 'theme', 'codeTheme'],
+    float: false,
     // hiddenToolbar: [''],
     // sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'theme', 'codeTheme'],
     toc: {
@@ -360,22 +377,53 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     },
   },
   callback: {
+    // 图床上传：根据用户在“设置”里选择的图床（none/picgo/custom）动态分发
+    fileUpload: createImageBedFileUpload(),
+    /**
+     * 粘贴回调：当剪贴板中含图片且已配置图床时，
+     * 先回显“正在上传图片…”语法糖占位，上传完成后自动替换为真实的 ![](url)。
+     * 其他情况（有文字 / 图床=none）返回 undefined 交给 Cherry 默认处理。
+     *
+     * 注：cherry-markdown 官方 d.ts 里 asyncCallback 的形参类型标注为 (text: string) => void，
+     * 但 Editor.js 运行时实际传递的是对象 { html, htmlText, mdText }，此处以运行时为准，
+     * 使用双重断言穿透类型系统。
+     */
+    onPaste: createImageBedOnPaste() as unknown as NonNullable<CherryOptions<CustomConfig>['callback']>['onPaste'],
     // 把中文变成拼音的回调，当然也可以把中文变成英文、英文变成中文
     changeString2Pinyin: toPinyin,
+    /**
+     * 预览区点击回调
+     * - 仅在纯预览模式（status.editor !== 'show'）下接管图片点击，弹出 viewerjs 大图
+     * - 返回 false 会中断 cherry 内部后续处理（如图片编辑气泡），避免冲突
+     */
+    onClickPreview(e: MouseEvent) {
+      const { target } = e;
+      if (!(target instanceof HTMLImageElement)) {
+        return;
+      }
+      // 通过 lazy import 避免循环依赖
+      const lightbox = getCurrentLightbox();
+      if (!lightbox) {
+        return;
+      }
+      if (lightbox.open(target)) {
+        return false;
+      }
+    },
   },
   /** 定义cherry缓存的作用范围，相同nameSpace的实例共享localStorage缓存 */
   nameSpace: 'cherry',
   themeSettings: {
     // 主题列表，用于切换主题
     themeList: [
-      { className: 'default', label: '默认' }, // 曾用名：light 明亮
+      { className: 'default', label: '明亮' }, // 曾用名：light 明亮
       { className: 'dark', label: '暗黑' },
       { className: 'green', label: '清新' },
       { className: 'red', label: '热情' },
       { className: 'violet', label: '淡雅' },
       { className: 'blue', label: '清幽' },
     ],
-    mainTheme: 'default',
+    mainTheme: 'violet',
     codeBlockTheme: 'twilight',
     inlineCodeTheme: 'red', // red or black
   },
@@ -399,6 +447,15 @@ const cherryConfig: CherryOptions<CustomConfig> = {
  */
 export const cherryInstance = (() => {
   return () => {
+    // 使用持久化的编辑器模式作为初始 defaultModel（若 store 不可用则回退默认值）
+    try {
+      const prefs = usePreferencesStore();
+      if (cherryConfig.editor) {
+        cherryConfig.editor.defaultModel = prefs.editorMode;
+      }
+    } catch {
+      // pinia 未就绪时使用默认配置
+    }
     return new Cherry(cherryConfig);
   };
 })();

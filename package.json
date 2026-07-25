@@ -66,17 +66,16 @@
     "vue-tsc": "^3.2.2"
   },
   "lint-staged": {
-    "packages/{cherry-markdown/{src,test},miniProgram/{src,test,build},client/src,vscodePlugin/src}/**/*.{js,ts,vue}": [
+    "{packages/{cherry-markdown/{src,test},miniProgram/{src,test,build},client/src,vscodePlugin/src}/**/*.{js,ts,vue},eslint.config.mjs,prettier.config.mjs}": [
       "eslint --fix",
       "prettier --write"
     ],
-    "{eslint.config.mjs,prettier.config.mjs}": [
-      "eslint --fix",
+    "**/*.{md,mdx}": [
       "prettier --write"
     ]
   },
   "engines": {
-    "node": ">=24",
+    "node": ">=22",
     "yarn": ">=1.22.18"
   },
   "resolutions": {

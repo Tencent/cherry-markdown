@@ -120,7 +120,7 @@ export default class SearcherBridge {
     }
 
     if (this.panel.isVisible()) {
-      this.panel.scheduleSearch(true);
+      this.panel.scheduleSearch(true, false);
       return;
     }
 

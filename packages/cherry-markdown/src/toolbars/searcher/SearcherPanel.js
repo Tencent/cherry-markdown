@@ -164,6 +164,8 @@ export default class SearcherPanel {
     this.searchTimer = null;
     /** @type {boolean} */
     this.pendingKeepActiveIndex = false;
+    /** @type {boolean} */
+    this.pendingScrollToMatch = true;
 
     this.handlePanelShortcutKey = this.handlePanelShortcutKey.bind(this);
 
@@ -508,12 +510,13 @@ export default class SearcherPanel {
    * 防抖调度搜索（输入或文档变更时使用）
    * @param {boolean} [keepActiveIndex=false]
    */
-  scheduleSearch(keepActiveIndex = false) {
+  scheduleSearch(keepActiveIndex = false, scrollToMatch = true) {
     this.pendingKeepActiveIndex = keepActiveIndex;
+    this.pendingScrollToMatch = scrollToMatch;
     this.cancelScheduledSearch();
     this.searchTimer = setTimeout(() => {
       this.searchTimer = null;
-      this.runSearch(this.pendingKeepActiveIndex);
+      this.runSearch(this.pendingKeepActiveIndex, this.pendingScrollToMatch);
     }, SEARCH_DEBOUNCE_MS);
   }
 
@@ -529,13 +532,13 @@ export default class SearcherPanel {
    * 立即执行待定的防抖搜索
    * @param {boolean} [keepActiveIndex=true]
    */
-  flushScheduledSearch(keepActiveIndex = true) {
+  flushScheduledSearch(keepActiveIndex = true, scrollToMatch = true) {
     if (!this.searchTimer) {
       return;
     }
 
     this.cancelScheduledSearch();
-    this.runSearch(keepActiveIndex);
+    this.runSearch(keepActiveIndex, scrollToMatch);
   }
 
   /**
@@ -544,7 +547,7 @@ export default class SearcherPanel {
    * @param {boolean} [keepActiveIndex=false]
    * @param {boolean} [applyToEditor=true]
    */
-  syncMatches(keepActiveIndex = false, applyToEditor = true) {
+  syncMatches(keepActiveIndex = false, applyToEditor = true, scrollToMatch = true) {
     if (!this.editorAdapter) {
       return;
     }
@@ -574,7 +577,9 @@ export default class SearcherPanel {
 
     if (applyToEditor) {
       this.applyHighlight(regex);
-      this.focusCurrentMatch();
+      if (scrollToMatch) {
+        this.focusCurrentMatch();
+      }
     }
 
     this.updateCounter();
@@ -585,8 +590,8 @@ export default class SearcherPanel {
    *
    * @param {boolean} [keepActiveIndex=false] 为 true 且当前序号仍有效时，不根据光标重新定位匹配项
    */
-  runSearch(keepActiveIndex = false) {
-    this.syncMatches(keepActiveIndex, true);
+  runSearch(keepActiveIndex = false, scrollToMatch = true) {
+    this.syncMatches(keepActiveIndex, true, scrollToMatch);
   }
 
   /**
@@ -736,6 +741,7 @@ export default class SearcherPanel {
     const anchor = match.from + replacement.length;
     this.editorAdapter.replaceRange(replacement, match.from, match.to);
 
+    this.cancelScheduledSearch();
     const text = this.editorAdapter.getDocString();
     const { query, caseSensitive, wholeWord, useRegex } = this.state;
     const matches = findMatches(text, query, caseSensitive, wholeWord, useRegex);
@@ -748,7 +754,6 @@ export default class SearcherPanel {
     }
 
     this.applyHighlight();
-    this.focusCurrentMatch();
     this.updateCounter();
     this.refocusPanelInput();
     return true;
@@ -787,7 +792,8 @@ export default class SearcherPanel {
       this.editorAdapter.replaceRange(replacement, from, to);
     }
 
-    this.runSearch(true);
+    this.cancelScheduledSearch();
+    this.syncMatches(true, true, false);
     this.refocusPanelInput();
   }
 

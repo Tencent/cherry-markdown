@@ -15,8 +15,7 @@
  */
 
 import { createMiniProgramEngine } from './engine';
-import { htmlToMiniProgramBlocks } from './transform';
-import { blocksToMiniProgramView } from './view';
+import { markdownToMiniProgramView } from './renderer';
 
 /**
  * @typedef {{ markdown: string; blocks: import('./view').MiniProgramViewBlock[]; streaming: boolean; done: boolean }} MiniProgramStreamState
@@ -46,13 +45,6 @@ function getPayloadContent(data) {
   } catch {
     return normalizeChunk(data);
   }
-}
-
-function markdownToMiniProgramView(engine, markdown, options = {}) {
-  const forceNoCursor = options.forceNoCursor !== false;
-  const html = engine.makeHtml(markdown || '', 'string', forceNoCursor);
-  const blocks = htmlToMiniProgramBlocks(html, { ...options, forceNoCursor });
-  return blocksToMiniProgramView(blocks, options);
 }
 
 /**

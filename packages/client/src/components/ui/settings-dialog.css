@@ -1,0 +1,196 @@
+/* Settings dialog: reuses .dialog-overlay / .dialog-content base from ui.css,
+   only defines the settings-specific inner layout so it stays themable via CSS vars. */
+
+.settings-dialog {
+  min-width: 480px;
+  max-width: 560px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.settings-section {
+  margin-bottom: 16px;
+}
+
+.settings-section-title {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text, #333);
+}
+
+.settings-section-desc {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--color-text-secondary, #888);
+}
+
+.settings-provider-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.settings-provider-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  background: var(--color-surface, transparent);
+}
+
+.settings-provider-item:hover {
+  border-color: var(--color-accent, #1890ff);
+}
+
+.settings-provider-item.active {
+  border-color: var(--color-accent, #1890ff);
+  background: var(--color-accent-soft, rgba(24, 144, 255, 0.08));
+}
+
+.settings-provider-item input[type='radio'] {
+  margin-top: 2px;
+  accent-color: var(--color-accent, #1890ff);
+  cursor: pointer;
+}
+
+.settings-provider-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-provider-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text, #333);
+}
+
+.settings-provider-hint {
+  font-size: 12px;
+  color: var(--color-text-secondary, #888);
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: 6px;
+  background: var(--color-surface, rgba(0, 0, 0, 0.02));
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text, #333);
+}
+
+.settings-field-hint {
+  font-size: 11px;
+  color: var(--color-text-muted, #999);
+  line-height: 1.4;
+}
+
+.settings-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border, #d9d9d9);
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--color-text, #333);
+  background: var(--color-bg, #fff);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.settings-input:focus {
+  border-color: var(--color-accent, #1890ff);
+  box-shadow: 0 0 0 2px var(--color-accent-soft, rgba(24, 144, 255, 0.16));
+}
+
+.settings-headers-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.settings-header-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.settings-btn-mini {
+  padding: 4px 10px;
+  font-size: 12px;
+  border: 1px solid var(--color-accent, #1890ff);
+  color: var(--color-accent-strong, #1890ff);
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  font-family: inherit;
+}
+
+.settings-btn-mini:hover {
+  background: var(--color-accent-soft, rgba(24, 144, 255, 0.1));
+}
+
+.settings-btn-mini.danger {
+  border-color: var(--color-danger, #ff4d4f);
+  color: var(--color-danger, #ff4d4f);
+}
+
+.settings-btn-mini.danger:hover {
+  background: rgba(255, 77, 79, 0.1);
+}
+
+.settings-test-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.settings-test-result {
+  font-size: 12px;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.settings-test-result.ok {
+  color: var(--color-success, #52c41a);
+}
+
+.settings-test-result.err {
+  color: var(--color-danger, #ff4d4f);
+}
+
+/* Dark mode via [data-cherry-theme]='dark' scope (aligns with existing global.css convention) */
+body[data-cherry-theme='dark'] .settings-provider-item,
+body[data-cherry-theme='dark'] .settings-form {
+  background: var(--color-surface, #2b2f3d);
+}
+
+body[data-cherry-theme='dark'] .settings-input {
+  background: var(--color-bg, #1a1e28);
+  color: var(--color-text, #e6e9f0);
+}

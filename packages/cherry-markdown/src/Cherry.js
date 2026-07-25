@@ -1173,6 +1173,103 @@ export default class Cherry extends CherryStatic {
   }
 
   /**
+   * 禁用/启用编辑器
+   * 开启禁用后：
+   *   - 编辑器切换为只读，禁止一切修改文档的操作
+   *   - 在编辑区上覆盖一个蒙层，展示 tips 文案，阻止鼠标交互
+   *   - tips 默认通过 sticky 停留在视窗中央；鼠标进入蒙层时 tips 跟随鼠标移动
+   * @public
+   * @param {boolean} isDisable 是否禁用编辑器
+   * @param {string} [tips=''] 禁用时显示在蒙层上的提示文案
+   * @returns {void}
+   */
+  setDisable(isDisable, tips = '') {
+    // 1. 切换 CodeMirror 只读状态
+    const cm6Adapter = this.editor && this.editor.editor;
+    if (cm6Adapter && typeof cm6Adapter.setReadOnly === 'function') {
+      cm6Adapter.setReadOnly(Boolean(isDisable));
+    }
+
+    // 2. 处理整体蒙层（覆盖工具栏 + 编辑区 + 预览区）
+    const rootDom = this.wrapperDom;
+    if (!rootDom) {
+      return;
+    }
+
+    if (isDisable) {
+      // 确保根容器为定位上下文，方便蒙层 absolute 覆盖整个 Cherry
+      const { position } = getComputedStyle(rootDom);
+      if (!position || position === 'static') {
+        rootDom.style.position = 'relative';
+      }
+
+      let maskDom = this.disableMaskDom;
+      if (!maskDom || !rootDom.contains(maskDom)) {
+        maskDom = createElement('div', 'cherry-editor-disable-mask');
+        const tipsDom = createElement('div', 'cherry-editor-disable-mask__tips');
+        maskDom.appendChild(tipsDom);
+        rootDom.appendChild(maskDom);
+        this.disableMaskDom = maskDom;
+        // 绑定鼠标事件，让 tips 跟随鼠标；离开时恢复 sticky 居中
+        this.bindDisableMaskFollow(maskDom, tipsDom);
+      }
+      // 更新提示文案（使用 textContent 避免 XSS）
+      const tipsDom = maskDom.querySelector('.cherry-editor-disable-mask__tips');
+      if (tipsDom) {
+        tipsDom.innerHTML = tips || '';
+        tipsDom.style.display = tips ? '' : 'none';
+      }
+      maskDom.classList.add('cherry-editor-disable-mask--show');
+    } else if (this.disableMaskDom) {
+      this.disableMaskDom.classList.remove('cherry-editor-disable-mask--show');
+      // 关闭禁用时同步关闭跟随态，避免下次开启时残留位置
+      this.disableMaskDom.classList.remove('cherry-editor-disable-mask--follow');
+    }
+  }
+
+  /**
+   * 绑定禁用蒙层的鼠标跟随行为
+   * - mouseenter：切换到跟随模式
+   * - mousemove：通过 CSS 变量更新 tips 位置（用 rAF 节流，避免抖动）
+   * - mouseleave：回到 sticky 居中模式
+   * @private
+   * @param {HTMLElement} maskDom 蒙层容器
+   * @param {HTMLElement} tipsDom tips 元素
+   */
+  bindDisableMaskFollow(maskDom, tipsDom) {
+    let rafId = 0;
+    let pendingX = 0;
+    let pendingY = 0;
+
+    const applyPosition = () => {
+      rafId = 0;
+      tipsDom.style.setProperty('--tips-x', `${pendingX}px`);
+      tipsDom.style.setProperty('--tips-y', `${pendingY}px`);
+    };
+
+    maskDom.addEventListener('mouseenter', () => {
+      maskDom.classList.add('cherry-editor-disable-mask--follow');
+    });
+
+    maskDom.addEventListener('mousemove', (evt) => {
+      const rect = maskDom.getBoundingClientRect();
+      pendingX = evt.clientX - rect.left;
+      pendingY = evt.clientY - rect.top;
+      if (!rafId) {
+        rafId = requestAnimationFrame(applyPosition);
+      }
+    });
+
+    maskDom.addEventListener('mouseleave', () => {
+      maskDom.classList.remove('cherry-editor-disable-mask--follow');
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = 0;
+      }
+    });
+  }
+
+  /**
    * 修改语言
    * @param {string} locale
    * @returns {boolean} false: 修改失败，因为没有对应的语言；true: 修改成功

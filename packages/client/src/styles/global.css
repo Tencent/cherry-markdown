@@ -48,6 +48,14 @@
   /* Typography */
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', Roboto, Helvetica, Arial, sans-serif;
+
+  /* Monospace stack: prefers popular programming fonts if user has them installed,
+     then falls back to system monospace on macOS / Windows / Linux, and finally
+     to CJK fonts so mixed Chinese-English text still looks aligned. */
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code',
+    'SF Mono', Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New',
+    'PingFang SC', 'Microsoft YaHei', monospace;
 }
 
 * {
@@ -102,7 +110,7 @@ body {
 }
 
 #markdown-editor .cherry .cherry-previewer img {
-  max-width: 100% !important;
+  max-width: 80%;
   height: auto;
 }
 
@@ -122,31 +130,136 @@ body {
   align-items: center;
 }
 
-/* ==========================================================================
-   CodeMirror v6 baseTheme overrides (build-mode safety net)
-   --------------------------------------------------------------------------
-   CodeMirror 6 injects its default styles at runtime via `StyleModule`, which
-   appends a <style> tag to <head> AFTER our bundled CSS <link> in production
-   builds. That makes CM's baseTheme win the cascade, causing:
-     1. A dark focus outline around the editor when active.
-     2. Height / overflow rules that break flex layout and disable scrolling.
-   The rules below use `!important` to reliably override CM's runtime styles,
-   regardless of stylesheet insertion order.
-   ========================================================================== */
-
-#markdown-editor .cm-editor.cm-focused,
-#markdown-editor .cm-editor:focus,
-#markdown-editor .cm-editor:focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
+#markdown-editor .cherry-flex-toc .cherry-toc-list {
+  height: calc(100% - 70px);
+  margin-top: 15px;
 }
 
-/* Make the editor fill its flex parent and allow the inner scroller to scroll. */
-#markdown-editor .cm-editor {
-  height: 100% !important;
-  max-height: 100% !important;
+#markdown-editor .cm-editor .cm-scroller {
+  padding: 0 35px;
 }
 
-#markdown-editor .cm-scroller {
-  overflow: auto !important;
+/* Monospace for CodeMirror editing area (content + line-number gutter). */
+#markdown-editor .cm-editor .cm-content,
+#markdown-editor .cm-editor .cm-gutters {
+  font-family: var(--font-mono) !important;
+}
+
+/* Monospace for code snippets in the Cherry preview pane. */
+#markdown-editor .cherry .cherry-previewer code,
+#markdown-editor .cherry .cherry-previewer pre,
+#markdown-editor .cherry .cherry-previewer kbd,
+#markdown-editor .cherry .cherry-previewer samp {
+  font-family: var(--font-mono) !important;
+}
+
+#markdown-editor.fixed-width .cherry-previewer--full, #markdown-editor.fixed-width .cherry-editor--full .cm-editor .cm-scroller {
+  padding-left: max(20px, calc((100% - 800px) / 2));
+  padding-right: max(45px, calc((100% - 800px) / 2));
+  border-left: none;
+}
+
+#markdown-editor.auto-width .cherry-previewer--full, #markdown-editor.auto-width .cherry-editor--full .cm-editor .cm-scroller {
+  padding-left: max(20px, 10%);
+  padding-right: max(45px, 10%);
+  border-left: none;
+}
+
+#markdown-editor .cm-editor .cm-scroller .cm-content {
+  padding: 15px 2px 15px 5px;
+}
+
+#markdown-editor .cherry-dropdown[name="theme"], #markdown-editor .cherry-dropdown[name="codeTheme"] {
+  margin-top: -45px;
+}
+
+#markdown-editor .cherry-previewer .cherry-echarts-wrapper {
+  box-sizing: content-box;
+}
+
+/* ------------------------------------------------------------------ */
+/* Cherry 主题联动                                                     */
+/* body[data-cherry-theme] 由 useCherryEditor 订阅 changeMainTheme     */
+/* 事件后写入，取值：default / dark / green / red / violet / blue。     */
+/*                                                                     */
+/* 策略：                                                              */
+/*  - 彩色主题（green/red/violet/blue）：只重定义 accent 三兄弟，       */
+/*    让侧栏激活项、hover 高亮、状态栏按钮边框都随之变化，但布局与     */
+/*    活动栏（左侧深色栏）保持原样，避免视觉太吵。                     */
+/*  - 暗色主题：整站深色，含活动栏、面板、状态栏。                     */
+/*  - default（明亮）：不覆盖，保持全局默认蓝。                        */
+/* ------------------------------------------------------------------ */
+
+/* 清新（绿） */
+body[data-cherry-theme='green'] {
+  --color-accent: #34a874;
+  --color-accent-strong: #2f9e6b;
+  --color-accent-soft: #e6f4ec;
+}
+
+/* 热情（红）—— 对齐 cherry red 主题：玫粉系（open-color pink-7） */
+body[data-cherry-theme='red'] {
+  --color-accent: #d6336c;
+  --color-accent-strong: #c2255c;
+  --color-accent-soft: #ffdeeb;
+}
+
+/* 淡雅（Bear 风）—— 对齐 cherry violet 主题：暖砖红 + 暖米色系 */
+body[data-cherry-theme='violet'] {
+  --color-accent: #c05040;
+  --color-accent-strong: #a03828;
+  --color-accent-soft: #f5efe7;
+}
+
+/* 清幽（蓝） */
+body[data-cherry-theme='blue'] {
+  --color-accent: #3d8bea;
+  --color-accent-strong: #2b7bd6;
+  --color-accent-soft: #e7f0fb;
+}
+
+/* 暗黑：整站深色 —— 对齐 cherry dark 主题：暖橘 accent（open-color orange-5） */
+body[data-cherry-theme='dark'] {
+  --color-accent: #ff922b;
+  --color-accent-strong: #ffa94d;
+  --color-accent-soft: rgba(255, 146, 43, 0.16);
+
+  /* 对齐 cherry dark 三级冷灰（open-color gray-9 / gray-8 / gray-7）：
+     - editor-bg (最深) = #212529 → --color-bg
+     - previewer-bg (中) = #343a40 → --color-surface
+     - toolbar-bg (最浅) = #495057 → --color-surface-panel（状态栏底色）
+     这样客户端与 cherry 预览区/工具栏色阶完全一致，无冷暖冲突 */
+  --color-bg: #212529;
+  --color-surface: #343a40;
+  --color-surface-hover: rgba(255, 255, 255, 0.08);
+  --color-surface-panel: #2a2f36;
+
+  /* 活动栏（左侧深色栏）：比编辑区再深一点，营造层次 */
+  --color-bar-bg: #191c20;
+  --color-bar-bg-hover: #2a2f36;
+  --color-bar-bg-active: #343a40;
+  --color-bar-fg: #adb5bd;
+  --color-bar-fg-active: #ffffff;
+
+  --color-border: #343a40;
+  --color-border-strong: #495057;
+
+  --color-text: #e9ecef;
+  --color-text-secondary: #adb5bd;
+  --color-text-muted: #6c757d;
+
+  background: var(--color-bg);
+}
+
+/* 暗色下：滚动条压深 */
+body[data-cherry-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #3a4152;
+  background-clip: padding-box;
+}
+body[data-cherry-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: #4a5265;
+  background-clip: padding-box;
+}
+body[data-cherry-theme='dark'] * {
+  scrollbar-color: #3a4152 transparent;
 }

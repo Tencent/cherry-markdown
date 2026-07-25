@@ -13,6 +13,15 @@
   user-select: none;
 }
 
+/* 专注模式：彻底隐藏整个侧栏（含活动栏），不仅仅是折叠 panel-surface */
+.cherry-focus-mode .side-panel {
+  width: 0 !important;
+  min-width: 0;
+  border-right: none;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 .activity-bar {
   width: 64px;
   background: var(--color-bar-bg);
@@ -136,18 +145,18 @@
 }
 
 .icon-tooltip:hover::after,
-.icon-tooltip:focus-within::after {
+.icon-tooltip:has(:focus-visible)::after {
   opacity: 1;
   visibility: visible;
 }
 
 .icon-tooltip.placement-right:hover::after,
-.icon-tooltip.placement-right:focus-within::after {
+.icon-tooltip.placement-right:has(:focus-visible)::after {
   transform: translate(0, -50%);
 }
 
 .icon-tooltip.placement-bottom:hover::after,
-.icon-tooltip.placement-bottom:focus-within::after {
+.icon-tooltip.placement-bottom:has(:focus-visible)::after {
   transform: translate(-50%, 0);
 }
 

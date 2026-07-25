@@ -96,6 +96,15 @@ export default {
   theme: '主题', // 导出长图
   panel: '面板', // 导出长图
   detail: '手风琴', // 手风琴
+  timeline: '时间线', // 时间线
+  timelineTitle: '时间线', // 时间线默认标题
+  timelineDefaultContent:
+    ':: [done] 2024-01-15 项目立项\n  完成需求评审\n:: [doing] 2024-03-20 Alpha 版本\n  正在联调\n:: [todo] 2024-06-01 正式上线\n:: [error] 2024-07-01 严重回滚事件\n:: [milestone] 2024-08-01 用户破万',
+  timelineStatusDone: '已完成',
+  timelineStatusDoing: '进行中',
+  timelineStatusTodo: '待办',
+  timelineStatusMilestone: '里程碑',
+  timelineStatusError: '异常',
   heading1: '一级标题',
   heading2: '二级标题',
   heading3: '三级标题',
@@ -110,6 +119,9 @@ export default {
   alignCenter: '居中',
   alignRight: '右对齐',
   alignJustify: '两端对齐',
+  align2Col: '两列排版',
+  alignCols: '多列排版',
+  alignTabs: '选项卡',
   alignFloatLeft: '左浮动',
   alignFloatRight: '右浮动',
   publish: '发布',
@@ -176,7 +188,6 @@ export default {
   search: '搜索/替换',
   searchOnly: '搜索',
   autoWrap: '自动换行',
-  footnoteTitle: '脚注',
   searchFor: '查找',
   searchClear: '清空',
   replaceWith: '替换为',

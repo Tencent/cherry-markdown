@@ -87,6 +87,15 @@ export default class MermaidCodeEngine {
 
   contentRenderCacheMax = 100;
 
+  /** 异步渲染最大并发数：达到上限后新任务排队，避免大量 mermaid 并发共享 DOM 引起竞态与内存压力 */
+  maxConcurrentRender = 1;
+
+  /** 当前正在异步渲染的任务数 */
+  activeRenderCount = 0;
+
+  /** 等待并发额度的任务队列，元素为 resolve 函数 */
+  pendingRenderQueue = [];
+
   /**
    * 生成 mermaid 源码内容缓存 key（与布局 sign 无关）
    * @param {string} src
@@ -220,12 +229,62 @@ export default class MermaidCodeEngine {
   }
 
   /**
+   * 为一次异步渲染创建独立的临时画布，避免多个 mermaid 代码块并发渲染时共享同一 DOM 导致的竞态。
+   * @param {import('../Engine').default} $engine
+   * @returns {HTMLDivElement}
+   */
+  createAsyncRenderCanvas($engine) {
+    const canvas = document.createElement('div');
+    canvas.style = 'width:1024px;opacity:0;position:fixed;top:100%;';
+    const container = this.options.mermaidCanvasAppendDom || $engine.$cherry.wrapperDom || document.body;
+    container.appendChild(canvas);
+    return canvas;
+  }
+
+  /**
+   * 移除异步渲染使用的临时画布
+   * @param {HTMLElement} canvas
+   */
+  destroyAsyncRenderCanvas(canvas) {
+    if (canvas && canvas.parentNode) {
+      canvas.parentNode.removeChild(canvas);
+    }
+  }
+
+  /**
+   * 获取一个异步渲染的并发额度，若已达上限则挂起等待，直到有其他任务释放。
+   * @returns {Promise<void>}
+   */
+  acquireRenderSlot() {
+    if (this.activeRenderCount < this.maxConcurrentRender) {
+      this.activeRenderCount += 1;
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => {
+      this.pendingRenderQueue.push(resolve);
+    });
+  }
+
+  /**
+   * 释放一个并发额度，若队列有等待任务则唤醒队首（注意：唤醒时不减不加，直接把额度移交给下一个任务）。
+   */
+  releaseRenderSlot() {
+    if (this.pendingRenderQueue.length > 0) {
+      const next = this.pendingRenderQueue.shift();
+      // 直接把额度交给下一个任务，activeRenderCount 保持不变
+      next();
+      return;
+    }
+    this.activeRenderCount = Math.max(0, this.activeRenderCount - 1);
+  }
+
+  /**
    * 转换svg为img，如果出错则直出svg
    * @param {string} svgCode
    * @param {string} graphId
    * @returns {string}
    */
-  convertMermaidSvgToImg(svgCode, graphId) {
+  convertMermaidSvgToImg(svgCode, graphId, svg2img = false) {
     const domParser = new DOMParser();
     let svgHtml;
     const injectSvgFallback = (svg) =>
@@ -250,7 +309,7 @@ export default class MermaidCodeEngine {
         // fix end
         svgHtml = svgDoc.documentElement.outerHTML;
         // 屏蔽转img标签功能，如需要转换为img解除屏蔽即可
-        if (this.svg2img) {
+        if (svg2img) {
           const dataUrl = `data:image/svg+xml,${encodeURIComponent(svgDoc.documentElement.outerHTML)}`;
           svgHtml = `<img class="svg-img" style="max-width:100%;height:auto;" src="${dataUrl}" alt="${graphId}" />`;
         }
@@ -263,23 +322,23 @@ export default class MermaidCodeEngine {
     return svgHtml;
   }
 
-  processSvgCode(svgCode, graphId) {
+  processSvgCode(svgCode, graphId, svg2img = false) {
     const fixedSvg = svgCode
       .replace(/\s*markerUnits="0"/g, '')
       .replace(/\s*x="NaN"/g, '')
       .replace(/<br>/g, '<br/>');
-    const html = this.convertMermaidSvgToImg(fixedSvg, graphId);
+    const html = this.convertMermaidSvgToImg(fixedSvg, graphId, svg2img);
     return html;
   }
 
-  syncRender(graphId, src, sign, $engine) {
+  syncRender(graphId, src, sign, $engine, svg2img = false) {
     let html;
     try {
       this.mermaidAPIRefs.render(
         graphId,
         src,
         (svgCode) => {
-          html = this.processSvgCode(svgCode, graphId);
+          html = this.processSvgCode(svgCode, graphId, svg2img);
         },
         this.mermaidCanvas,
       );
@@ -430,36 +489,46 @@ export default class MermaidCodeEngine {
     if (retryCount === 0) {
       $engine.asyncRenderHandler.add(graphId);
     }
-    this.mermaidAPIRefs
-      .render(graphId, src, this.mermaidCanvas)
-      .then(({ svg: svgCode }) => {
-        // 渲染完成后，替换为渲染结果
-        const html = this.processSvgCode(svgCode, graphId);
-        this.lastRenderedCode = html;
-        this.$setCachedRenderHtml(src, $engine, html);
-        this.handleAsyncRenderDone(graphId, sign, $engine, props, html);
-      })
-      .catch(() => {
-        /**
-         * 如果开启了流式渲染，当前有上次渲染结果时，使用上次渲染结果
-         * 这里有赌的成分,流式输出场景，只有最后一个mermaid代码块在流式输出，随着最后一个mermaid流式输出，mermaid的渲染有概率会失败
-         *  这里赌的是：
-         *    1、只有一个mermaid代码块需要渲染
-         *    2、纯预览模式，且流式输出场景，所有mermaid都正常输出
-         */
-        if (
-          $engine.$cherry.options.engine.global.flowSessionContext &&
-          !!this.lastRenderedCode &&
-          $engine.$cherry.status.editor === 'hide'
-        ) {
-          this.needReturnLastRenderedCode = true;
-        } else {
-          // 渲染失败后，回退到源码
-          this.needReturnLastRenderedCode = false;
-          const html = props.fallback();
+    const svg2img = props?.mermaidConfig?.svg2img ?? false;
+    // 通过并发闸门 + 独立临时画布，避免多个 mermaid 代码块共用同一 DOM 导致的竞态。
+    // 达到 maxConcurrentRender 上限后，超出的任务会在此挂起等待。
+    this.acquireRenderSlot().then(() => {
+      const canvas = this.createAsyncRenderCanvas($engine);
+      this.mermaidAPIRefs
+        .render(graphId, src, canvas)
+        .then(({ svg: svgCode }) => {
+          // 渲染完成后，替换为渲染结果
+          const html = this.processSvgCode(svgCode, graphId, svg2img);
+          this.lastRenderedCode = html;
+          this.$setCachedRenderHtml(src, $engine, html);
           this.handleAsyncRenderDone(graphId, sign, $engine, props, html);
-        }
-      });
+        })
+        .catch(() => {
+          /**
+           * 如果开启了流式渲染，当前有上次渲染结果时，使用上次渲染结果
+           * 这里有赌的成分,流式输出场景，只有最后一个mermaid代码块在流式输出，随着最后一个mermaid流式输出，mermaid的渲染有概率会失败
+           *  这里赌的是：
+           *    1、只有一个mermaid代码块需要渲染
+           *    2、纯预览模式，且流式输出场景，所有mermaid都正常输出
+           */
+          if (
+            $engine.$cherry.options.engine.global.flowSessionContext &&
+            !!this.lastRenderedCode &&
+            $engine.$cherry.status.editor === 'hide'
+          ) {
+            this.needReturnLastRenderedCode = true;
+          } else {
+            // 渲染失败后，回退到源码
+            this.needReturnLastRenderedCode = false;
+            const html = props.fallback();
+            this.handleAsyncRenderDone(graphId, sign, $engine, props, html);
+          }
+        })
+        .finally(() => {
+          this.destroyAsyncRenderCanvas(canvas);
+          this.releaseRenderSlot();
+        });
+    });
     if (this.needReturnLastRenderedCode) {
       return this.lastRenderedCode;
     }
@@ -476,14 +545,15 @@ export default class MermaidCodeEngine {
     if (cachedHtml) {
       return cachedHtml;
     }
+    // v9 同步渲染路径仍复用共享 canvas（syncRender 天然无并发），v10+ 异步路径会在 asyncRender 内为每个任务创建独立 canvas
     this.mountMermaidCanvas($engine);
     // 多实例的情况下相同的内容ID相同会导致mermaid渲染异常
     // 需要通过添加时间戳使得多次渲染相同内容的图像ID唯一
     // 图像渲染节流在CodeBlock Hook内部控制
     const graphId = `mermaid-${sign}-${new Date().getTime()}`;
-    this.svg2img = props.mermaidConfig?.svg2img ?? false;
+    const svg2img = props.mermaidConfig?.svg2img ?? false;
     return this.isAsyncRenderVersion()
       ? this.asyncRender(graphId, src, $sign, $engine, props)
-      : this.syncRender(graphId, src, $sign, $engine);
+      : this.syncRender(graphId, src, $sign, $engine, svg2img);
   }
 }

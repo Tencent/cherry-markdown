@@ -15,5 +15,6 @@ extend-exclude = [
     'examples/miniProgram/miniprogram/vendor/cherry-mini-program-stream.js',
     '__snapshots__',
     'Emoji.config.js',
-    'commonmark.spec.json'
+    'commonmark.spec.json',
+    '*.nsi'
 ]
