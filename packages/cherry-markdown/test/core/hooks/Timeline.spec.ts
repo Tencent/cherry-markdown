@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import CherryEngine from '../../../src/index.engine.core';
 
-function createEngine(overrides = {}) {
+function createEngine(overrides: Record<string, any> = {}): any {
   return new CherryEngine({
     engine: {
       global: { classicBr: false },
