@@ -96,6 +96,15 @@ export default {
   theme: '主题', // 导出长图
   panel: '面板', // 导出长图
   detail: '手风琴', // 手风琴
+  timeline: '时间线', // 时间线
+  timelineTitle: '时间线', // 时间线默认标题
+  timelineDefaultContent:
+    ':: [done] 2024-01-15 项目立项\n  完成需求评审\n:: [doing] 2024-03-20 Alpha 版本\n  正在联调\n:: [todo] 2024-06-01 正式上线\n:: [error] 2024-07-01 严重回滚事件\n:: [milestone] 2024-08-01 用户破万',
+  timelineStatusDone: '已完成',
+  timelineStatusDoing: '进行中',
+  timelineStatusTodo: '待办',
+  timelineStatusMilestone: '里程碑',
+  timelineStatusError: '异常',
   heading1: '一级标题',
   heading2: '二级标题',
   heading3: '三级标题',

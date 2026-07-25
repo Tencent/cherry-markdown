@@ -41,11 +41,13 @@ export default class Panel extends ParagraphBase {
       enablePanel = true,
       enableCols = true,
       enableTabs = true,
+      enableTimeline = true,
     } = options.config;
     this.enableAlign = enableJustify || enableAlign;
     this.enablePanel = enablePanel;
     this.enableCols = enableCols;
     this.enableTabs = enableTabs;
+    this.enableTimeline = enableTimeline;
     // 为每个 Panel 实例生成一个全局递增的 tabs 组序号，保证 radio name 在同页多个 tabs 之间互不干扰
     this.$tabsSeed = 0;
     this.initBrReg(options.globalConfig.classicBr);
@@ -65,6 +67,9 @@ export default class Panel extends ParagraphBase {
         return match;
       }
       if (!this.enableTabs && /^tabs$/i.test(type)) {
+        return match;
+      }
+      if (!this.enableTimeline && /^timeline$/i.test(type)) {
         return match;
       }
       const lineCount = this.getLineCount(match, preLines);
@@ -92,6 +97,9 @@ export default class Panel extends ParagraphBase {
     }
     if (/^tabs$/i.test(type)) {
       return `cherry-tabs`;
+    }
+    if (/^timeline$/i.test(type)) {
+      return `cherry-timeline cherry-timeline__vertical`;
     }
     return `cherry-panel cherry-panel__${type}`;
   }
@@ -157,12 +165,45 @@ export default class Panel extends ParagraphBase {
       ret.appendStyle = `style="--cols:${colCount};${colsAlignStyle}"`;
       return ret;
     }
-    // 选项卡语法（tabs）：使用独占一行的 :: 分隔每一个 tab
-    // 每个 tab 块的首行非空行作为标题，其余行作为 panel 内容
+    // 时间线语法（timeline）：使用行首的 `:: ` 作为节点起始标记（区别于 cols/tabs 的独占一行 `::`）
+    // 每个节点的首行为“:: [status] 时间 标题”，其后（缩进）行为描述
+    if (/^timeline$/i.test(ret.type)) {
+      // 标题走通用样式，包裹在 cherry-timeline--header 中
+      const headerTitle = ret.title ? `<div class="cherry-timeline--header">${ret.title}</div>` : '';
+      const rawItems = this.$splitItemsByColonMark(ret.body);
+      const itemsHtml = rawItems
+        .map(({ head, body }) => {
+          const { status, time, title, desc } = this.$parseTimelineItem(head, body);
+          const timeHtml = time ? `<div class="cherry-timeline--time">${sentenceMakeFunc(time).html}</div>` : '';
+          const titleHtml = title ? `<div class="cherry-timeline--title">${sentenceMakeFunc(title).html}</div>` : '';
+          let descHtml = '';
+          if (desc && desc.trim() !== '') {
+            if (this.isContainsCache(desc)) {
+              descHtml = this.makeExcludingCached(desc, paragraphProcessor);
+            } else {
+              descHtml = paragraphProcessor(desc);
+            }
+            descHtml = `<div class="cherry-timeline--desc">${descHtml}</div>`;
+          }
+          return (
+            `<div class="cherry-timeline--item cherry-timeline--item__${status}">` +
+            `<div class="cherry-timeline--node"></div>` +
+            `<div class="cherry-timeline--content">${timeHtml}${titleHtml}${descHtml}</div>` +
+            `</div>`
+          );
+        })
+        .join('');
+      ret.title = headerTitle;
+      ret.body = `<div class="cherry-timeline--body">${itemsHtml}</div>`;
+      ret.appendStyle = '';
+      return ret;
+    }
+    // 选项卡语法（tabs）：使用行首的 `:: ` 作为 tab 起始标记（与 timeline 一致）
+    // `::` 所在行的剩余内容作为标题，其后（缩进）行作为 panel 内容
     // 采用 CSS-only 方案（radio + :checked ~ panel），无需 JS 即可完成切换
     if (/^tabs$/i.test(ret.type)) {
       ret.title = '';
-      const rawTabs = this.$splitCols(ret.body, 0);
+      const rawTabs = this.$splitItemsByColonMark(ret.body);
       const tabCount = rawTabs.length || 1;
       // 同页多个 tabs 之间使用递增序号区隔 name，避免 radio 分组冲突
       this.$tabsSeed += 1;
@@ -170,8 +211,9 @@ export default class Panel extends ParagraphBase {
       const inputsHtml = [];
       const labelsHtml = [];
       const panelsHtml = [];
-      rawTabs.forEach((tabStr, idx) => {
-        const { title: tabTitle, body: tabBody } = this.$splitTabTitleAndBody(tabStr, idx);
+      rawTabs.forEach(({ head, body }, idx) => {
+        const tabTitle = head.trim() || `Tab ${idx + 1}`;
+        const tabBody = body;
         const inputId = `${groupName}-${idx}`;
         const checkedAttr = idx === 0 ? ' checked' : '';
         const titleHtml = sentenceMakeFunc(tabTitle).html;
@@ -262,35 +304,6 @@ export default class Panel extends ParagraphBase {
   }
 
   /**
-   * 从选项卡单块内容中拆分出标题与 body
-   * - 标题：块内首个非空行（去除头尾空白）；完全为空时退化为 `Tab N`
-   * - body：首行之后的任意内容
-   * @param {string} raw 单个 tab 的原始文本
-   * @param {number} idx tab 序号（从 0 开始），用于退化标题
-   * @returns {{title: string, body: string}}
-   */
-  $splitTabTitleAndBody(raw, idx) {
-    // 保留 body 内部缩进，仅 trim 块首尾多余的空白行
-    const trimmed = String(raw || '')
-      .replace(/^\s*\n/, '')
-      .replace(/\n\s*$/, '');
-    if (trimmed === '') {
-      return { title: `Tab ${idx + 1}`, body: '' };
-    }
-    const nlIdx = trimmed.indexOf('\n');
-    if (nlIdx < 0) {
-      // 只有一行：作为标题，body 为空
-      return { title: trimmed.trim() || `Tab ${idx + 1}`, body: '' };
-    }
-    const firstLine = trimmed.slice(0, nlIdx).trim();
-    const restBody = trimmed.slice(nlIdx + 1);
-    return {
-      title: firstLine || `Tab ${idx + 1}`,
-      body: restBody,
-    };
-  }
-
-  /**
    * 按 :: 分隔符拆分多列排版语法的内容
    * - 新语法（cols）：列数由分隔符数量自动推断，末尾空列会被 trim 掉
    * - 旧语法（2cols/3cols）：将结果补齐/截断到固定列数
@@ -365,8 +378,118 @@ export default class Panel extends ParagraphBase {
       case 'tabs':
       case 't':
         return 'tabs';
+      // 时间线语法
+      case 'timeline':
+        return 'timeline';
       default:
         return 'primary';
+    }
+  }
+
+  /**
+   * 按行首的 `::` 标记拆分各个节点（timeline/tabs 共用）
+   * 与 cols 不同，这里的 `::` 是行首标记（后面直接跟首行内容），并非独占一行的分隔符
+   * 例：
+   *   :: 标题/首行内容
+   *     后续行1
+   *     后续行2
+   *   :: 标题/首行内容2
+   *
+   * @param {string} str 原始 body 文本
+   * @returns {{head: string, body: string}[]} 每个节点的首行（`::` 所在行的剩余内容）与后续行
+   */
+  $splitItemsByColonMark(str) {
+    const source = String(str || '').replace(/\r\n/g, '\n');
+    const lines = source.split('\n');
+    const items = [];
+    let current = null;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(/^[ \t]*::[ \t]*(.*)$/);
+      if (match) {
+        if (current !== null) {
+          items.push(current);
+        }
+        current = { head: match[1], bodyLines: [] };
+      } else if (current !== null) {
+        current.bodyLines.push(line);
+      }
+      // current 为 null 时表示尚未遇到第一个 `::` 标记，忽略前置内容
+    }
+    if (current !== null) {
+      items.push(current);
+    }
+    return items.map(({ head, bodyLines }) => ({ head, body: bodyLines.join('\n') }));
+  }
+
+  /**
+   * 解析时间线单个节点，提取状态、时间、标题、描述
+   * 节点首行（head）形如：[done] 2024-01-15 项目立项
+   * @param {string} head 节点首行（`::` 所在行的剩余内容）
+   * @param {string} body 节点描述（后续多行）
+   * @returns {{status: string, time: string, title: string, desc: string}}
+   */
+  $parseTimelineItem(head, body) {
+    let firstLine = String(head || '');
+    let status = 'todo';
+    // 匹配可选的状态修饰符 [xxx]
+    const statusMatch = firstLine.match(/^\s*\[([^\]]*)\]\s*/);
+    if (statusMatch) {
+      // 引擎在 makeHtml 前已将 ~ → ~T，需还原
+      status = this.$normalizeTimelineStatus(statusMatch[1].replace(/~T/g, '~'));
+      firstLine = firstLine.slice(statusMatch[0].length);
+    }
+    // 首行 = 时间 + 标题（时间为首个空白分隔词组，形如 2024-01-15、2024/01、v1.0.0 等）
+    let time = '';
+    let title = firstLine.trim();
+    const timeMatch = firstLine.match(/^\s*(\S+)(?:\s+([\s\S]*))?$/);
+    if (timeMatch) {
+      const maybeTime = timeMatch[1];
+      // 只有看起来像"时间/版本号"才当作 time，否则整行都作为 title
+      if (/^[\d]/.test(maybeTime) || /^v\d/i.test(maybeTime)) {
+        time = maybeTime;
+        title = (timeMatch[2] || '').trim();
+      }
+    }
+    // 去掉 body 头尾多余空行，保留内部缩进
+    const desc = String(body || '')
+      .replace(/^\s*\n/, '')
+      .replace(/\n\s*$/, '');
+    return { status, time, title, desc };
+  }
+
+  /**
+   * 规范化时间线状态修饰符
+   * @param {string} raw 状态修饰符内容（不含中括号）
+   * @returns {string} 规范化后的状态
+   */
+  $normalizeTimelineStatus(raw) {
+    const key = (raw || '').trim().toLowerCase();
+    switch (key) {
+      case 'done':
+      case '✓':
+      case 'x':
+        return 'done';
+      case 'doing':
+      case '…':
+      case '...':
+      case '~':
+        return 'doing';
+      case 'todo':
+      case '':
+        return 'todo';
+      case 'milestone':
+      case '★':
+      case '*':
+        return 'milestone';
+      case 'error':
+      case 'err':
+      case '✗':
+      case '×':
+      case '!':
+        return 'error';
+      default:
+        return 'todo';
     }
   }
 

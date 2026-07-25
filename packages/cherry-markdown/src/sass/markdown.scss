@@ -1342,3 +1342,288 @@ div[data-type='codeBlock'] {
   --panel-body-border-radius: var(--panel-success-body-border-radius, 0);
   --panel-icon: var(--panel-success-icon, '\EA67');
 }
+
+/* ========== Timeline 时间线 ========== */
+.cherry-markdown .cherry-timeline {
+  margin: 20px 0;
+  padding: 4px 0;
+  color: var(--timeline-content-color, var(--base-font-color));
+}
+.cherry-markdown .cherry-timeline--header {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 0 0 14px 4px;
+  color: var(--timeline-header-color, var(--base-font-color));
+  letter-spacing: 0.2px;
+}
+.cherry-markdown .cherry-timeline--body {
+  position: relative;
+  padding-left: 24px;
+}
+/* 时间轴主干：由每个 item 各自绘制一段线，实现按状态分段的实线/虚线效果
+   - .cherry-timeline--item::before：贯穿当前 item 的一段线（从 item 顶部到底部）
+   - todo 状态：显示为虚线（表示尚未到达）
+   - 其它状态：显示为实线（表示已发生的进程）
+   相邻 item 之间无缝拼接，形成"从实到虚"的自然过渡 */
+.cherry-markdown .cherry-timeline--item {
+  position: relative;
+  padding: 2px 8px 14px 8px;
+  border-radius: var(--radius-md, 6px);
+  transition: background-color 0.2s ease;
+}
+/* 每个 item 自绘的时间线段（默认实线） */
+.cherry-markdown .cherry-timeline--item::before {
+  content: '';
+  position: absolute;
+  left: -18px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--timeline-line-color, var(--base-border-color));
+  z-index: 0;
+}
+/* 首个 item：从节点下方开始画线（避免线段延伸到 header 里） */
+.cherry-markdown .cherry-timeline--item:first-child::before {
+  top: 22px;
+}
+/* 末个 item：只画到节点上边缘（避免线段延伸到内容末尾之外） */
+.cherry-markdown .cherry-timeline--item:last-child::before {
+  bottom: auto;
+  height: 6px;
+}
+/* 只有一个 item 时（既是首个也是末个），仅显示节点周围极短一段就够了；
+   直接隐藏这条线更简洁 */
+.cherry-markdown .cherry-timeline--item:first-child:last-child::before {
+  display: none;
+}
+.cherry-markdown .cherry-timeline--item:last-child {
+  padding-bottom: 0;
+}
+/* todo 状态：线段改为虚线，颜色变浅，表示"尚未到达"
+   使用 background linear-gradient 实现可精确控制间距的虚线（比 border-style: dashed 更可控） */
+.cherry-markdown .cherry-timeline--item__todo::before {
+  background: linear-gradient(
+    to bottom,
+    var(--timeline-line-color, var(--base-border-color)) 0,
+    var(--timeline-line-color, var(--base-border-color)) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  background-size: 2px 8px;
+  background-repeat: repeat-y;
+  opacity: 0.7;
+}
+/* hover：淡背景高亮
+   注意：不使用 transform 位移整条 item，避免带动节点脱离时间轴主干；
+   节点自身的 scale 通过 transform-origin: center 就地放大，保持与主干对齐 */
+.cherry-markdown .cherry-timeline--item:hover {
+  background: var(--secondary-color, rgba(53, 130, 251, 0.04));
+}
+/* 内容区在 hover 时轻微右移，保留"响应式"的视觉反馈；节点保持不动 */
+.cherry-markdown .cherry-timeline--item:hover .cherry-timeline--content {
+  transform: translateX(2px);
+}
+/* 节点：外层白色描边环形 + 微阴影，营造浮起感
+   left 计算：body 的 padding-left 是 24px，主干中心线在 body 的 left:6px+width:1px = 7px；
+   节点宽 14px，节点左边缘需落在 body 左边距 7-7=0 处，
+   相对 item（其起点 = body 左边缘 + 24px 内边距）需要 -24px 才能对齐主干中心 */
+.cherry-markdown .cherry-timeline--node {
+  position: absolute;
+  left: -24px;
+  top: 6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--timeline-node-bg, var(--base-previewer-bg));
+  border: 2px solid var(--timeline-node-color, var(--oc-gray-5));
+  box-shadow: 0 0 0 3px var(--base-previewer-bg, #fff), 0 1px 2px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+  z-index: 1;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.cherry-markdown .cherry-timeline--item:hover .cherry-timeline--node {
+  transform: scale(1.15);
+  animation: cherry-timeline-glow 1.8s ease-in-out infinite;
+}
+.cherry-markdown .cherry-timeline--content {
+  line-height: 1.65;
+  transition: transform 0.2s ease;
+}
+/* 时间戳：pill 徽章风格 */
+.cherry-markdown .cherry-timeline--time {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--timeline-time-color, var(--base-sub-font-color));
+  background: var(--oc-gray-1, rgba(0, 0, 0, 0.04));
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  letter-spacing: 0.2px;
+}
+.cherry-markdown .cherry-timeline--title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--timeline-title-color, var(--md-heading-color));
+  margin-bottom: 4px;
+  line-height: 1.5;
+}
+.cherry-markdown .cherry-timeline--desc {
+  font-size: 13px;
+  color: var(--timeline-desc-color, var(--base-sub-font-color));
+  line-height: 1.6;
+}
+/* 修复描述段落多段时空隙断层 */
+.cherry-markdown .cherry-timeline--desc p {
+  margin: 2px 0;
+}
+.cherry-markdown .cherry-timeline--desc p:first-child {
+  margin-top: 0;
+}
+.cherry-markdown .cherry-timeline--desc p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- 状态：已完成 ---------- */
+.cherry-markdown .cherry-timeline--item__done .cherry-timeline--node {
+  --timeline-glow-color: rgba(64, 192, 87, 0.35);
+  --timeline-glow-color-fade: rgba(64, 192, 87, 0);
+  background: var(--timeline-done-color, var(--color-success));
+  border-color: var(--timeline-done-color, var(--color-success));
+}
+.cherry-markdown .cherry-timeline--item__done .cherry-timeline--time {
+  color: var(--timeline-done-color, var(--color-success));
+  background: rgba(64, 192, 87, 0.1);
+}
+
+/* ---------- 状态：进行中（hover 脉冲光晕） ---------- */
+.cherry-markdown .cherry-timeline--item__doing .cherry-timeline--node {
+  --timeline-glow-color: rgba(53, 130, 251, 0.35);
+  --timeline-glow-color-fade: rgba(53, 130, 251, 0);
+  background: var(--timeline-doing-color, var(--primary-color));
+  border-color: var(--timeline-doing-color, var(--primary-color));
+}
+.cherry-markdown .cherry-timeline--item__doing .cherry-timeline--time {
+  color: var(--timeline-doing-color, var(--primary-color));
+  background: var(--secondary-color, rgba(53, 130, 251, 0.1));
+}
+.cherry-markdown .cherry-timeline--item__doing .cherry-timeline--title {
+  color: var(--timeline-doing-color, var(--primary-color));
+}
+@keyframes cherry-timeline-glow {
+  0% {
+    box-shadow:
+      0 0 0 3px var(--base-previewer-bg, #fff),
+      0 0 0 3px var(--timeline-glow-color, rgba(53, 130, 251, 0.35));
+  }
+  70% {
+    box-shadow:
+      0 0 0 3px var(--base-previewer-bg, #fff),
+      0 0 0 10px var(--timeline-glow-color-fade, rgba(53, 130, 251, 0));
+  }
+  100% {
+    box-shadow:
+      0 0 0 3px var(--base-previewer-bg, #fff),
+      0 0 0 10px var(--timeline-glow-color-fade, rgba(53, 130, 251, 0));
+  }
+}
+
+/* ---------- 状态：待办 ---------- */
+.cherry-markdown .cherry-timeline--item__todo .cherry-timeline--node {
+  --timeline-glow-color: rgba(134, 142, 150, 0.25);
+  --timeline-glow-color-fade: rgba(134, 142, 150, 0);
+  background: var(--timeline-todo-bg, var(--base-previewer-bg));
+  border-color: var(--timeline-todo-color, var(--oc-gray-5));
+}
+
+/* ---------- 状态：里程碑（菱形） ---------- */
+.cherry-markdown .cherry-timeline--item__milestone .cherry-timeline--node {
+  --timeline-glow-color: rgba(250, 173, 20, 0.4);
+  --timeline-glow-color-fade: rgba(250, 173, 20, 0);
+  /* 与普通节点保持相同的 left 值，确保菱形中心与时间轴主干对齐 */
+  width: 14px;
+  height: 14px;
+  left: -24px;
+  top: 6px;
+  background: var(--timeline-milestone-color, var(--oc-yellow-6));
+  border-color: var(--timeline-milestone-color, var(--oc-yellow-6));
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+.cherry-markdown .cherry-timeline--item__milestone:hover .cherry-timeline--node {
+  transform: rotate(45deg) scale(1.15);
+}
+.cherry-markdown .cherry-timeline--item__milestone .cherry-timeline--title {
+  color: var(--timeline-milestone-title-color, var(--oc-yellow-8));
+  font-weight: 700;
+}
+.cherry-markdown .cherry-timeline--item__milestone .cherry-timeline--time {
+  color: var(--timeline-milestone-title-color, var(--oc-yellow-8));
+  background: rgba(250, 173, 20, 0.12);
+}
+
+/* ---------- 状态：异常 ---------- */
+.cherry-markdown .cherry-timeline--item__error .cherry-timeline--node {
+  --timeline-glow-color: rgba(255, 77, 79, 0.35);
+  --timeline-glow-color-fade: rgba(255, 77, 79, 0);
+  background: var(--timeline-error-color, var(--color-error));
+  border-color: var(--timeline-error-color, var(--color-error));
+}
+.cherry-markdown .cherry-timeline--item__error .cherry-timeline--title {
+  color: var(--timeline-error-title-color, var(--oc-red-7));
+}
+.cherry-markdown .cherry-timeline--item__error .cherry-timeline--time {
+  color: var(--timeline-error-title-color, var(--oc-red-7));
+  background: rgba(255, 77, 79, 0.1);
+}
+
+/* ---------- 无障碍：尊重用户的减少动效偏好 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .cherry-markdown .cherry-timeline--item,
+  .cherry-markdown .cherry-timeline--node,
+  .cherry-markdown .cherry-timeline--content {
+    transition: none;
+  }
+  .cherry-markdown .cherry-timeline--item:hover .cherry-timeline--content {
+    transform: none;
+  }
+  .cherry-markdown .cherry-timeline--item:hover .cherry-timeline--node,
+  .cherry-markdown .cherry-timeline--item__milestone:hover .cherry-timeline--node {
+    transform: none;
+  }
+  .cherry-markdown .cherry-timeline--item__milestone .cherry-timeline--node {
+    transform: rotate(45deg);
+  }
+  .cherry-markdown .cherry-timeline--item:hover .cherry-timeline--node {
+    animation: none;
+  }
+}
+
+/* ---------- 打印样式：去掉动画/hover 效果，保留结构 ---------- */
+@media print {
+  .cherry-markdown .cherry-timeline--item,
+  .cherry-markdown .cherry-timeline--node,
+  .cherry-markdown .cherry-timeline--content {
+    transition: none;
+  }
+  .cherry-markdown .cherry-timeline--item:hover {
+    background: transparent;
+  }
+  .cherry-markdown .cherry-timeline--item:hover .cherry-timeline--content {
+    transform: none;
+  }
+  .cherry-markdown .cherry-timeline--item:hover .cherry-timeline--node {
+    animation: none;
+  }
+  /* 打印时确保时间线段（每个 item 的 ::before）可见 */
+  .cherry-markdown .cherry-timeline--item::before {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .cherry-markdown .cherry-timeline--item__todo::before {
+    opacity: 1;
+  }
+}

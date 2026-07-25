@@ -86,8 +86,8 @@ export default class Panel extends MenuBase {
   onClick(selection, shortKey = '') {
     const threeCols = '第一列\n::\n第二列\n::\n第三列';
     const twoCols = '第一列\n::\n第二列';
-    // 每个 tab 分隔块的首行作为标题，后续行作为该 tab 面板的内容
-    const twoTabs = '标签一\n第一个 tab 的内容\n::\n标签二\n第二个 tab 的内容';
+    // 行首 `:: ` 后的内容作为标签标题，后续行作为该 tab 面板的内容
+    const twoTabs = ':: 标签一\n第一个 tab 的内容\n:: 标签二\n第二个 tab 的内容';
     let defaultContent = '内容';
     if (shortKey === '3cols') {
       defaultContent = threeCols;

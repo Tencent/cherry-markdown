@@ -1,6 +1,9 @@
 import { resolve } from 'path';
 import { defineConfig } from 'vitest/config';
 export default defineConfig({
+  define: {
+    BUILD_ENV: '"production"',
+  },
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),

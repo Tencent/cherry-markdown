@@ -380,6 +380,7 @@ const basicConfig = {
       'ul',
       'checklist',
       'panel',
+      'timeline',
       'align',
       'detail',
       '|',
