@@ -2,7 +2,7 @@ import { resolve } from 'path';
 import { defineConfig } from 'vitest/config';
 export default defineConfig({
   define: {
-    BUILD_ENV: "\"production\"",
+    BUILD_ENV: '"production"',
   },
   resolve: {
     alias: {
