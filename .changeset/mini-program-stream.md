@@ -2,4 +2,4 @@
 '@cherry-markdown/miniProgram': patch
 ---
 
-Add MiniProgram stream package for Cherry Markdown native rendering data.
+feat(cherry-markdown/miniProgram): 新增小程序原生渲染包，支持流式渲染
