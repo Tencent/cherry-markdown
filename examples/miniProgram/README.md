@@ -1,76 +1,83 @@
 # Cherry Markdown MiniProgram Demo
 
+> **Warning / 警告**
+>
+> This package is in early development. Stability and completeness have not yet reached production level. Use with caution in production environments.
+>
+> 该包仍在早期开发中，稳定性和完备性尚未达到生产可用水平，请谨慎在生产环境中使用。
+
+---
+
+English | [简体中文](#简体中文)
+
+## English
+
 Minimal WeChat MiniProgram demo for stream rendering Markdown with `@cherry-markdown/miniProgram`.
 
-## Run
-
-From the repository root:
+### Run
 
 ```sh
 yarn workspace @cherry-markdown/miniProgram build
 cp packages/miniProgram/dist/stream.js examples/miniProgram/miniprogram/vendor/cherry-mini-program-stream.js
 ```
 
-Then open `examples/miniProgram` in WeChat DevTools. This demo uses a local vendor bundle, so **Build npm is not required**.
+Open `examples/miniProgram` in WeChat DevTools. Build npm is **not** required — the demo uses a local vendor bundle.
 
-The MiniProgram package entry is DOM-free; app pages do not need to add `window`, `self`, or `globalThis` shims.
+### What's Covered
 
-The demo avoids remote images, view-query polling, and extra image activation updates. The stream button starts an automatic token-sized SSE simulation through `createMiniProgramStreamAdapter`, so users do not need to tap for each token.
+- Paragraph, heading, list/task list, blockquote, table, code block, image, link — all rendered as native WXML components
+- Streaming: chunks are accumulated, incomplete syntax normalized, images deferred until stream ends
+- SSE: `createSseParser` + `createMiniProgramStreamAdapter` for real-time streaming
+- Interactions: code copy, image preview, link tap
 
-If DevTools still shows an old npm resolution error, clear cache or recompile after confirming `pages/index/index.js` requires:
-
-```js
-require('../../vendor/cherry-mini-program-stream');
-```
-
-## What This Demo Covers
-
-- Basic Markdown to WXML-friendly view blocks with `createMiniProgramStreamAdapter`.
-- Native WXML rendering for paragraph, heading, list/task list, blockquote, table, code, image, and link nodes.
-- CherryStream-like flow rendering: chunks are accumulated as Markdown, incomplete syntax is normalized, images are deferred while streaming, and final render restores native images.
-- The direct render and stream render use the same Markdown source, so the final output can be compared directly.
-- The demo button starts an automatic token-sized SSE simulation; real SSE/WebSocket integrations can pass response chunks to `createSseParser` and then feed events into the adapter.
-- Native interactions:
-  - code copy with `wx.setClipboardData`
-  - image preview with `wx.previewImage`
-  - link tap with page navigation or a modal fallback
-  - table cell links/images reuse the same native handlers
-
-## SSE Request Shape
+### SSE Integration
 
 ```js
 const { createMiniProgramStreamAdapter, createSseParser } = require('../../vendor/cherry-mini-program-stream');
 
-const streamAdapter = createMiniProgramStreamAdapter();
-
-function applyStreamState(state) {
-  if (!state) return;
-  this.setData({
-    markdown: state.markdown,
-    blocks: state.blocks,
-    streaming: state.streaming,
-  });
-}
-
+const adapter = createMiniProgramStreamAdapter();
 const parser = createSseParser({
-  onMessage: (event) => {
-    applyStreamState.call(this, streamAdapter.appendSseEvent(event));
-  },
-  onDone: () => {
-    applyStreamState.call(this, streamAdapter.finish());
-  },
+  onMessage: (event) => this.setData(adapter.appendSseEvent(event)),
+  onDone: () => this.setData(adapter.finish()),
 });
 
-const requestTask = wx.request({
-  url: 'https://example.com/sse',
-  method: 'POST',
-  enableChunked: true,
-  responseType: 'arraybuffer',
-});
-
-requestTask.onChunkReceived((res) => {
-  parser.push(res.data);
-});
+const task = wx.request({ url: 'https://...', enableChunked: true, responseType: 'arraybuffer' });
+task.onChunkReceived((res) => parser.push(res.data));
 ```
 
-This is intentionally a minimal project demo, not a bundled component package.
+---
+
+## 简体中文
+
+使用 `@cherry-markdown/miniProgram` 在小程序中流式渲染 Markdown 的最小示例。
+
+### 运行
+
+```sh
+yarn workspace @cherry-markdown/miniProgram build
+cp packages/miniProgram/dist/stream.js examples/miniProgram/miniprogram/vendor/cherry-mini-program-stream.js
+```
+
+在微信开发者工具中打开 `examples/miniProgram`。Demo 使用本地 vendor 文件，**无需 Build npm**。
+
+### 覆盖能力
+
+- 段落、标题、列表/任务列表、引用、表格、代码块、图片、链接 — 全部原生 WXML 组件渲染
+- 流式：chunk 累积、不完整语法自动规整、流中图片延迟加载
+- SSE：`createSseParser` + `createMiniProgramStreamAdapter` 对接实时流
+- 交互：代码复制、图片预览、链接跳转
+
+### SSE 接入示例
+
+```js
+const { createMiniProgramStreamAdapter, createSseParser } = require('../../vendor/cherry-mini-program-stream');
+
+const adapter = createMiniProgramStreamAdapter();
+const parser = createSseParser({
+  onMessage: (event) => this.setData(adapter.appendSseEvent(event)),
+  onDone: () => this.setData(adapter.finish()),
+});
+
+const task = wx.request({ url: 'https://...', enableChunked: true, responseType: 'arraybuffer' });
+task.onChunkReceived((res) => parser.push(res.data));
+```
